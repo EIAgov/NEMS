@@ -1,0 +1,36 @@
+     Function: Fix level of submatrix rows or columns
+     Syntax:   FIX value [{ROW | COL} [conditional]]
+
+     If ROW | COL is absent, current setting of switch DISP_COL is used.
+     If conditional is absent, current submatrix is used.
+
+     Both bound values are changed to the specified value.  The solution
+     level is also changed if the solution status of the row or column
+     variable is nonbasic (otherwise, the solution level is not changed).
+     .----------------------------------------------------------------.
+     |  Since the solution can become corrupted, this command is not  |
+     |  recommended for interactive analysis.                         |
+     |________________________________________________________________|
+
+     The main reason for fixing a variable is to write a new matrix file
+     with this revision to see what happens to the solution.
+
+     If the original LP has no bound set, the bound set FIX_EDIT is
+     named.  This is what will appear in the matrix file of a subsequent
+     SUBMAT WRITE statement.
+
+     Examples:
+
+     FIX 0 COL
+     ...Fix all submatrix column levels = 0.
+
+     FIX 10 ROW S
+     ...Fix the levels of rows whose name begins with S to = 10.
+
+     FIX 0
+     ...Fix levels of rows or columns (according to switch DISP_COL) in the
+        submatrix to be zero.
+
+     FIX 100 C * L=1/100
+     ...Fix levels of columns whose lower bound is in the range,
+        1 to 100, to be 100.

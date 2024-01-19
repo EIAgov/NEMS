@@ -1,0 +1,48 @@
+!  $Header: m:/default/includes/RCS/efpout,v 1.5 2006/09/14 17:45:47 lc2 Exp $
+!  ELECTRICITY MARKET MODULE (EMM)--PRICING OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!   EFP OUTPUT VARIABLES
+      REAL PECASRLN(MNUMNR,MNUMYR) !  1 Competitive Reliability Comp. All by NERC
+      REAL PECASMEN(MNUMNR,MNUMYR) !  2 Competitive Energy Comp. All by NERC
+      REAL PECASTXN(MNUMNR,MNUMYR) !  3 Competitive Tax Comp. All by NERC
+      REAL PECASTDN(MNUMNR,MNUMYR) !  4 Competitive T&D Comp. All by NERC
+      REAL PECCMRLN(MNUMNR,MNUMYR) !  5 Competitive Reliability Comp. Com. by NERC
+      REAL PECCMMEN(MNUMNR,MNUMYR) !  6 Competitive Energy Comp. Com. by NERC
+      REAL PECCMTXN(MNUMNR,MNUMYR) !  7 Competitive Tax Comp. Com. by NERC
+      REAL PECCMTDN(MNUMNR,MNUMYR) !  8 Competitive T&D Comp. Com. by NERC
+      REAL PECINRLN(MNUMNR,MNUMYR) !  9 Competitive Reliability Comp. Ind. by NERC
+      REAL PECINMEN(MNUMNR,MNUMYR) ! 10 Competitive Energy Comp. Ind. by NERC
+      REAL PECINTXN(MNUMNR,MNUMYR) ! 11 Competitive Tax Comp. Ind. by NERC
+      REAL PECINTDN(MNUMNR,MNUMYR) ! 12 Competitive T&D Comp. Ind. by NERC
+      REAL PECRSRLN(MNUMNR,MNUMYR) ! 13 Competitive Reliability Comp. Res. by NERC
+      REAL PECRSMEN(MNUMNR,MNUMYR) ! 14 Competitive Energy Comp. Res. by NERC
+      REAL PECRSTXN(MNUMNR,MNUMYR) ! 15 Competitive Tax Comp. Res. by NERC
+      REAL PECRSTDN(MNUMNR,MNUMYR) ! 16 Competitive T&D Comp. Res. by NERC
+      REAL PELRSNR(MNUMNR,MNUMYR)  ! 17 Pur. Elec.  Res. by NERC
+      REAL PELCMNR(MNUMNR,MNUMYR)  ! 18 Pur. Elec.  Com. by NERC
+      REAL PELTRNR(MNUMNR,MNUMYR)  ! 19 Pur. Elec.  Trans. by NERC
+      REAL PELINNR(MNUMNR,MNUMYR)  ! 20 Pur. Elec.  Ind. by NERC
+      REAL PELASNR(MNUMNR,MNUMYR)  ! 21 Pur. Elec.  All Sectors by NERC
+      REAL PELCPNR(MNUMNR,MNUMYR)  ! 22 Capital Component by NERC
+      REAL PELFLNR(MNUMNR,MNUMYR)  ! 23 Fuel Component by NERC
+      REAL PELOMNR(MNUMNR,MNUMYR)  ! 24 O&M Component by NERC
+      REAL PELWHNR(MNUMNR,MNUMYR)  ! 25 WHOLESALE Component by NERC
+      REAL PELTLNR(MNUMNR,MNUMYR)  ! 26 Avg--All Components by NERC
+      REAL PECGENN(MNUMNR,MNUMYR)  ! 27 all sector - average generation price
+      REAL PECDISN(MNUMNR,MNUMYR)  ! 28 all sector - average distribution price
+      REAL PECTRNN(MNUMNR,MNUMYR)  ! 29 all sector - average transmission price
+      REAL EWSPRCN(MNUMNR,MNUMYR) ! 30 average wholesale price (time wtd energy + reliab)
+
+!   EFP OUTPUT COMMON BLOCK
+      COMMON/EFPOUT/PECASRLN,PECASMEN,PECASTXN,PECASTDN,PECCMRLN, &
+                    PECCMMEN,PECCMTXN,PECCMTDN,PECINRLN,PECINMEN, &
+                    PECINTXN,PECINTDN,PECRSRLN,PECRSMEN,PECRSTXN, &
+                    PECRSTDN,PELRSNR,PELCMNR,PELTRNR,PELINNR, &
+                    PELASNR,PELCPNR,PELFLNR,PELOMNR,PELWHNR, &
+                    PELTLNR,PECGENN,PECDISN,PECTRNN,EWSPRCN
+
+!   Equivalence for FILER used for data storage
+      REAL EFPDAT(MNUMYR*(30*MNUMNR))
+      EQUIVALENCE (EFPDAT,PECASRLN)

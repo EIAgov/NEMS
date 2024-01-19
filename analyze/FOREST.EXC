@@ -1,0 +1,16 @@
+$ FOREST.....an optimal forestry model.
+ SWITCH MSG=F
+ READ P FOREST5
+ READ S
+$    You now have an optimal model + the syntax file.  Analyze
+$    the properties, beginning with model attributes.  Use
+$    query commands and SYNTAX to help you.  Then, try using
+$    the TRACE and RATEOF commands.  Try to explain what you
+$    learn about the model, using the EXPLAIN and SYNTAX
+$    commands to put your explanation in English.  After this,
+$    there is an infeasible version of the same model, and you
+$    are to diagnose the problem.  When ready, READ P FOREST6
+$    This will load the infeasible version into memory.  To
+$    obtain the syntax (for EXPLAIN), READ S
+ SWITCH MSG=T
+ RETURN Q

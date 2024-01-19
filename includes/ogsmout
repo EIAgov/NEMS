@@ -1,0 +1,244 @@
+! $Header: M:/default/includes/RCS/ogsmout,v 1.37 2021/05/18 14:12:49 avk Exp $
+!  OIL & GAS SUPPLY MODULE (OGSM) COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!   OGSM output variables
+
+!  PARAMETERS
+      INTEGER MNOGDTP, MNFNGSS, SOPLAY, NUMCAN
+      PARAMETER(MNOGDTP=4)   ! DRILLING RGN (L48 ON,L48 OFF,AL,US)
+      PARAMETER(MNFNGSS=4)   ! IM/EX RGN (CAN,MEX,LNG,NET IMPORTS)
+      PARAMETER(SOPLAY=15)   ! Select shale oil plays
+      PARAMETER(NUMCAN=2)    ! Number of Canada regions (1=East; 2=West)
+
+      REAL OGRESNGON(17,MNUMYR)       ! NA dry gas reserves onshr (bcf)
+      REAL OGPRRNGON(17,MNUMYR)       ! NA dry gas p/r ratio onshr (frac)
+      REAL OGRADNGON(17,MNUMYR)       ! NA dry gas reserve additions onshr (bcf)
+      REAL OGRESNGOF(MNL48F,MNUMYR)   ! NA dry gas reserves offshr (bcf)
+      REAL OGPRRNGOF(MNL48F,MNUMYR)   ! NA dry gas p/r ratio offshr (frac)
+      REAL OGRADNGOF(MNL48F,MNUMYR)   ! NA dry gas reserve additions offshr (bcf)
+      REAL OGPRDAD(MNL48A,MNUMYR)     ! ASSOCIATED/DISSOLVED GAS PRODUCTION
+
+      REAL OGQNGEXP(MNUMBX,MNUMYR)    ! NG EXPORTS BY BORDER CROSSING
+      REAL OGQNGIMP(MNUMBX,MNUMYR)    ! NG IMPORTS BY BORDER CROSSING
+      REAL OGPNGEXP(MNUMBX,MNUMYR)    ! NG EXPORT PRICE BY BORDER
+      REAL OGPNGIMP(MNUMBX,MNUMYR)    ! NG IMPORT PRICE BY BORDER
+
+      REAL OGPCRWHP(MNUMYR)           ! CRUDE AVG WELLHEAD PRICE
+      REAL OGQCRREP(MNOGCRO,MNUMYR)   ! CRUDE PRODUCTION BY OIL CAT
+      REAL OGQCRRSV(MNUMYR)           ! CRUDE RESERVES
+
+      REAL OGPNGWHP(MNUMYR)           ! NG AVG WELLHEAD PRICE
+      REAL OGQNGREP(MNOGCAT,MNUMYR)   ! NG PRODUCTION BY GAS CAT
+      REAL OGQNGRSV(MNUMYR)           ! NG RESERVES
+      REAL OGNOWELL(MNUMYR)           ! WELLS COMPLETED
+
+! ****>  VARIABLES FOR RENEWABLES
+      REAL OGTECHON(3,6,MNUMYR)         ! TECH FACTORS BY COSTCAT/FUEL/YEAR
+
+! variables for AIMMS natural gas model
+      REAL CNENAGPRD(NUMCAN,MNUMYR)   ! Expected NA gas production in Canada  (1=east, 2=west)
+      REAL CNRNAGPRD(NUMCAN,MNUMYR)   ! Realized NA gas production in Canada (1=east, 2=west)
+      REAL CNADGPRD(NUMCAN,MNUMYR)    ! AD gas production in Canada (1=east, 2=west)
+
+! ****>  VARIABLES FOR Fortran natural gas model
+      REAL OGPRRCAN(NUMCAN,MNUMYR)         ! (OMEGA) GAS EXTRACTION RATE; P/R RATIOS.
+      REAL OGRESCAN(NUMCAN,MNUMYR)         ! (R) END-OF-YEAR RESERVES.
+      REAL OGCNQPRD(NUMCAN,MNUMYR)         ! CANADIAN PRODUCTION OF OIL & GAS
+      REAL OGCNPPRD(NUMCAN,MNUMYR)         ! CANADIAN PRICE OF OIL & GAS
+
+!****>     TO OTHERS NEMS MODULES
+
+      REAL OGCORSV(MNOGCRO,MNUMYR) ! CRUDE RESERVES BY OIL CATEGORY
+      REAL OGNGRSV(MNOGCAT,MNUMYR) ! NG RESERVES BY GAS CATEGORY
+      REAL OGCOPRD(MNL48T,MNUMYR) ! CRUDE PRODUCTION BY Lower 48 region
+      REAL OGCOWHP(MNL48T,MNUMYR) ! CRUDE WELLHEAD PRICE BY Lower 48 region
+
+      REAL OGNGPRD(MNL48T,MNUMYR) ! NG PRODUCTION BY GAS CATEGORY
+      REAL OGNGWHP(MNL48T,MNUMYR) ! NG WELLHEAD  PRICE BY GAS CATEGORY
+
+      REAL EXSPEND(MNOGDTP,MNUMYR) ! EXPLORATORY EXPENDITURES
+      REAL DVSPEND(MNOGDTP,MNUMYR) ! DEVELOPMENT EXPENDITURES
+      REAL EXOILFT(MNOGDTP,MNUMYR) ! OIL FOOTAGE (EXPL.)
+      REAL DVOILFT(MNOGDTP,MNUMYR) ! OIL FOOTAGE (DEV.)
+      REAL EXGASFT(MNOGDTP,MNUMYR) ! GAS FOOTAGE (EXPL.)
+      REAL DVGASFT(MNOGDTP,MNUMYR) ! GAS FOOTAGE (DEV.)
+      REAL EXDRYFT(MNOGDTP,MNUMYR) ! DRY FOOTAGE (EXPL.)
+      REAL DVDRYFT(MNOGDTP,MNUMYR) ! DRY FOOTAGE (DEV.)
+      REAL EXFTAGE(MNOGDTP,MNUMYR) ! TOTAL FOOTAGE (EXPL.)
+      REAL DVFTAGE(MNOGDTP,MNUMYR) ! TOTAL FOOTAGE (DEV.)
+
+!   OGSM TAX SIMULATION VARIABLE
+      REAL OGTAXPREM(2,MNUMYR)
+      REAL OGJOBS(MNUMYR)
+!
+      REAL OGPRDADON(17,MNUMYR) ! ONSHORE AD GAS PROD (BCF) NGTDM/OGSM REG
+      REAL OGPRDADOF(MNL48F,MNUMYR)  ! OFFSHORE AD GAS PROD (BCF)
+      REAL OGNGLAK(MNUMYR)  ! Natural Gas Liquids from Alaska (t BBL/day)
+
+      REAL OGWPTDM(20,MNUMYR) ! NG WELLHEAD PRICE BY OGSM/NGTDM REGS (87$/mcf)
+
+      REAL OGPRCEXP(MNUMYR) ! Adjust last yrs price to reflect diff expectation
+      REAL OGGROWFAC(MNUMYR) ! factor reflects expected future cons growth
+
+!  The following two variables are offshore production where (1, is shallow and (2, is deep water
+      REAL OGCOPRDGOM(2,MNUMYR)         !  Crude oil
+      REAL OGNGPRDGOM(2,MNUMYR)         !  Natural gas
+      REAL OGPRCOAK(MNALAS,MNUMYR)      ! ALASKA PRODUCTION BY REGION  dim based on AKRGN
+	  
+!  The following variables breakout the federal and non-federal gas and crude production
+      REAL OGCOPRD_FED(MNL48T, MNUMYR)         !  Crude oil federal
+      REAL OGCOPRD_NONFED(MNL48T, MNUMYR)      !  Crude oil non-federal
+	  REAL OGNGPRD_FED(MNL48T, MNUMYR)         !  Natural gas federal
+	  REAL OGNGPRD_NONFED(MNL48T, MNUMYR)      !  Natural gas  non-federal
+
+! variables for oil shale plants
+      REAL OGELSHALE(MNUMYR)         ! electricity consumed (trillion Btu)
+      REAL OGSHALENG(MNUMYR)         ! gas produced (goes to ngtdm to mingle with normal gas) (bcf)
+
+      REAL OGPRDUGR(MNL48N,3,MNUMYR)  ! Lower 48 unconventional natural gas production
+                                 ! (region;1=tight gas,2=shale gas,3=coalbed methane;year)
+
+!   Variables for Carbon dioxide enhanced oil recovery reporting
+      REAL OGEORPRD(MNLNP1,13,MNUMYR)     ! EOR production from CO2 projects (mbbl)
+      REAL OGCO2INJ(MNLNP1,13,MNUMYR)     ! CO2 injected (mmcf)
+      REAL OGCO2REC(MNLNP1,13,MNUMYR)     ! CO2 recycled (mmcf)
+      REAL OGCO2PUR(MNLNP1,13,MNUMYR)     ! CO2 purchased (mmcf) CO2 Purchased from Available Sources
+      REAL OGCO245Q(MNLNP1,13,MNUMYR)     ! CO2 purchased (mmcf) CO2 Purchased from Available Sources and recieved 45Q credit
+      REAL OGCO2PUR2(MNLNP1,13,MNUMYR)    ! CO2 purchased (mmcf) CO2 Purchased at the EOR sites
+      REAL OGCO2AVL(MNLNP1,13,MNUMYR)     ! CO2 available (mmcf) by bin
+      REAL OGCO2AVLs(MNLNP1,13,MNUMYR)    ! CO2 available (mmcf) by source
+      REAL OGCO2PRC(MNLNP1,13,MNUMYR)     ! CO2 price ($/mmcf)
+      REAL OGCO2PRCs(MNLNP1,13,MNUMYR)    ! CO2 price ($/mmcf) by source
+      REAL OGCO2PEM(MNLNP1,MNUMYR)        ! CO2 price from EMM ($/mmcf)
+      REAL OGCO2PLF(MNLNP1,MNUMYR)        ! CO2 price from LFMM ($/mmcf)
+      REAL OGCO2QEM(MNLNP1,MNUMYR)        ! CO2 quantity from EMM(mmcf)
+      REAL OGCO2QLF(MNLNP1,MNUMYR)        ! CO2 quantity from LFMM(mmcf)
+      REAL OGCO2TAR(MNLNP1,MNLNP1)        ! Transport price from OGSM ($/mmcf)
+      
+      REAL OGDNGPRD(OGDIST,GASTYPES,MNUMYR)  ! Dry natural gas production by state/district and gas type
+      REAL OGPRDOFF(6,2,MNUMYR)         ! Lower 48 offshore production split into Federal/State categories
+
+!  ****> End-of-year resource variables for ftab
+      REAL OGEOYURR(MNUMOR,2,MNUMYR)    ! Undiscovered technically recoverable oil and conventional NA gas resources
+      REAL OGEOYINF(MNUMOR,2,MNUMYR)    ! Inferred oil and conventional NA gas reserves
+      REAL OGEOYRSV(MNUMOR,2,MNUMYR)    ! Proved crude oil and natural gas reserves
+      REAL OGEOYUGR(MNL48N,3,MNUMYR)         ! Technically recoverable unconventional gas resources
+      REAL OGEOYAD(MNL48N,MNUMYR)            ! Unproved associated-dissolved gas resources
+      REAL OGEOYRSVON(MNL48N,5,MNUMYR)       ! Lower 48 onshore proved reserves by gas category
+
+! Crude oil by type info
+      REAL OGCRDPRD(MNUMOR,MNCRUD,MNUMYR) ! Crude oil production by OGSM region and type of crude
+      REAL OGCRDHEAT(MNCRUD,MNUMYR)     ! Heat rate by type of crude oil
+      REAL OGQSHLOIL(SOPLAY,MNUMYR)     ! Crude oil production from select shale oil plays
+      REAL OGQSHLGAS(SOPLAY,MNUMYR)     ! Natural gas production from select shale gas plays
+      REAL OGREGPRD(MNL48N,7,MNUMYR)    ! Regional crude oil and natural gas production by type of production
+      REAL OGNGPLPRD(OGDIST,MNUMYR)     ! Natural gas plant output by NGPL region
+
+! for industrial:
+      REAL OGSRL48(MNL48T,7,MNUMYR)     ! Lower 48 drilling success rates
+      REAL OGWELLSL48(MNL48T,7,MNUMYR)  ! Lower 48 successful and dry well counts
+
+!  crude oil production by refinery region for LFMM:
+      REAL OGCRUDEREF(MNUMPR,MNCRUD,MNUMYR)   ! Crude oil production by refinery region and crude type
+
+!  variables dimensioned over OGSM districts
+      REAL OGOGWELLS(OGDIST,WELLTYPES,MNUMYR)   ! oil and natural gas wells
+      REAL OGENAGPRD(OGDIST,GASTYPES,MNUMYR)    ! expected non-associated natural gas production
+      REAL OGRNAGPRD(OGDIST,GASTYPES,MNUMYR)    ! realized non-associated natural gas production
+      REAL OGOILPRD(OGDIST,OILTYPES,MNUMYR)     ! crude oil production
+      REAL OGADGPRD(OGDIST,OILTYPES,MNUMYR)     ! associated-dissolved natural gas production
+      REAL OGCRUDEPRD(OGDIST,MNCRUD,MNUMYR)     ! crude oil production
+!  natural gas plant liquid production streams
+      REAL OGNGPLET(OGDIST,MNUMYR)      ! Ethane production
+      REAL OGNGPLPR(OGDIST,MNUMYR)      ! Propane production
+      REAL OGNGPLBU(OGDIST,MNUMYR)      ! Butane production
+      REAL OGNGPLIS(OGDIST,MNUMYR)      ! Isobutane production
+      REAL OGNGPLPP(OGDIST,MNUMYR)      ! Pentanes plus production
+
+      INTEGER*4 NS_START(8,200)   ! Year Project selected 
+
+!   OGSM output common blocks
+      COMMON/OGSMOUT/OGRESNGON,OGPRRNGON,OGRESNGOF, &
+       OGPRRNGOF,OGPRDAD, &
+       OGQNGEXP,OGQNGIMP,OGPNGEXP,OGPNGIMP,OGPCRWHP,OGQCRREP, &
+       OGQCRRSV,OGPNGWHP,OGQNGREP,OGQNGRSV,OGNOWELL, &
+       OGTECHON,OGPRRCAN,OGRESCAN,OGCNQPRD,OGCNPPRD, &
+       OGCORSV,OGNGRSV,OGCOPRD,OGNGPRD, &
+       OGCOWHP,OGNGWHP,EXSPEND,DVSPEND,EXOILFT,DVOILFT, &
+       EXGASFT,DVGASFT,EXDRYFT,DVDRYFT,EXFTAGE,DVFTAGE, &
+       OGTAXPREM,OGJOBS,OGPRDADON,OGPRDADOF, &
+       OGNGLAK,OGWPTDM, &
+       OGPRCEXP,OGGROWFAC, &
+       OGRADNGON,OGRADNGOF,OGCOPRDGOM,OGNGPRDGOM,OGPRCOAK, &
+       OGELSHALE,OGSHALENG,OGPRDUGR, &
+       OGEORPRD, OGCO2INJ, OGCO2REC, OGCO2PUR, OGCO2AVL, &
+       OGDNGPRD, &
+       OGPRDOFF, OGEOYURR, OGEOYINF, OGEOYRSV, OGEOYUGR, OGEOYAD, OGEOYRSVON, &
+       OGCRDPRD, OGCRDHEAT, OGQSHLOIL, OGQSHLGAS, OGREGPRD, OGNGPLPRD, &
+       OGSRL48, OGWELLSL48, OGCO2PRC, OGCO2PEM, OGCO2PLF, OGCO2QEM, OGCO2QLF, OGCO2TAR, OGCO2PUR2, &
+       OGCRUDEREF, OGNGPLET, OGNGPLPR, OGNGPLBU, OGNGPLIS, OGNGPLPP, &
+       OGOGWELLS, OGENAGPRD, OGRNAGPRD, OGOILPRD, OGADGPRD, OGCRUDEPRD, OGCO2AVLs, OGCO2PRCs, &
+       CNENAGPRD, CNRNAGPRD, CNADGPRD, NS_START, OGCO245Q, & 
+	   OGCOPRD_FED, OGCOPRD_NONFED, OGNGPRD_FED, OGNGPRD_NONFED
+
+
+
+!   Equivalence for FILER used for data storage
+      REAL EQ_OGOUT(           &
+        MNL48A*MNUMYR        + &      !  OGPRDAD
+        3*6*MNUMYR           + &      !  OGTECHON
+        MNL48N*3*MNUMYR      + &      !  OGPRDUGR
+        MNL48F*MNUMYR * 4    + &      !  OGRESNGOF, OGPRRNGOF, OGRADNGOF, OGPRDADOF
+        MNALAS*MNUMYR        + &      !  OGPRCOAK
+        NUMCAN*MNUMYR * 4         + & !  OGPRRCAN, OGRESCAN, OGCNQPRD, OGCNPPRD
+        2*MNUMYR * 3         + &      !  OGTAXPREM, OGCOPRDGOM, OGNGPRDGOM
+        MNUMYR * 11          + &      !  OGPCRWHP, OGQCRRSV, OGPNGWHP, OGQNGRSV, OGNOWELL, OGJOBS, OGNGLAK, OGELSHALE, OGSHALENG, OGPRCEXP, OGGROWFAC
+        20*MNUMYR            + &      !  OGWPTDM
+        MNUMBX*MNUMYR * 4    + &      !  OGQNGEXP, OGQNGIMP, OGPNGEXP, OGPNGIMP
+        MNOGCRO*MNUMYR * 2   + &      !  OGQCRREP, OGCORSV
+        MNOGCAT*MNUMYR * 2   + &      !  OGQNGREP, OGNGRSV
+        17*MNUMYR * 4        + &      !  OGRESNGON, OGPRRNGON, OGRADNGON, OGPRDADON
+        MNOGDTP*MNUMYR * 10  + &      !  EXSPEND, DVSPEND, EXOILFT, DVOILFT, EXGASFT, DVGASFT, EXDRYFT, DVDRYFT, EXFTAGE, DVFTAGE
+        MNL48T*MNUMYR * 2    + &      !  OGCOPRD, OGCOWHP
+        MNL48T*MNUMYR * 2    + &      !  OGNGPRD, OGNGWHP
+		MNL48T*MNUMYR * 4    + &      !  OGCOPRD_FED, OGCOPRD_NONFED, OGNGPRD_FED, OGNGPRD_NONFED
+        6*2*MNUMYR           + &      !  OGPRDOFF
+        MNUMOR * 2 * MNUMYR  + &      !  OGEOYURR
+        MNUMOR * 2 * MNUMYR  + &      !  OGEOYINF
+        MNUMOR * 2 * MNUMYR  + &      !  OGEOYRSV
+        MNL48N * 3 * MNUMYR  + &      !  OGEOYUGR
+        MNL48N * MNUMYR      + &      !  OGEOYAD
+        MNL48N * 5 * MNUMYR  + &      !  OGEOYRSVON
+        MNUMOR * MNCRUD * MNUMYR  + & !  OGCRDPRD
+        MNCRUD * MNUMYR      + &      !  OGCRDHEAT
+        SOPLAY*MNUMYR * 2    + &      !  OGQSHLOIL and OGQSHLGAS
+        MNL48N*7*MNUMYR      + &      !  OGREGPRD
+        MNL48T*7*MNUMYR * 2  + &      !  OGSRL48 and OGWELLSL48
+        MNLNP1*MNUMYR * 4    + &      !  OGCO2PEM,OGCO2PLF,OGCO2QEM,OGCO2QLF
+        MNLNP1*MNLNP1        + &      !  OGCO2TAR
+        MNUMPR*MNCRUD*MNUMYR + &      !  OGCRUDEREF
+        OGDIST*MNUMYR        + &      !  OGNGPLPRD
+        OGDIST*MNUMYR * 5    + &      !  OGNGPLET, OGNGPLPR, OGNGPLBU, OGNGPLIS, OGNGPLPP
+        OGDIST*WELLTYPES*MNUMYR   + & !  OGOGWELLS
+        OGDIST*GASTYPES*MNUMYR*3  + & !  OGDNGPRD, OGENAGPRD, OGRNAGPRD
+        OGDIST*OILTYPES*MNUMYR*2  + & !  OGOILPRD and OGADGPRD
+        OGDIST*MNCRUD*MNUMYR      + & !  OGCRUDEPRD
+        MNLNP1*13*MNUMYR * 2      + & !  OGCO2AVLs and OGCO2PRCs
+        MNLNP1*13*MNUMYR * 8      + & !  OGEORPRD, OGCO2INJ, OGCO2REC, OGCO2PUR, OGCO2PUR2, OGCO2AVL, OGCO2PRC, OGCO245Q
+        NUMCAN*MNUMYR   * 3  +      & !  CNENAGPRD, CNRNAGPRD, CNADGPRD
+        8*200 +                     & ! NS_START
+        0)                            ! FIN
+
+      EQUIVALENCE (EQ_OGOUT,OGRESNGON)
+
+
+      REAL OGELSNGON(17,MNUMYR)       ! NA dry gas prod fcn param onshr   (scalar)
+      REAL OGELSNGOF(3,MNUMYR)        ! NA dry gas prod fcn param offshr  (scalar)
+      REAL OGQEORPR(MNL48N,MNUMYR)    ! OIL SUPPLY FROM EOR BY REGION
+      REAL OGELSCO(MNUMOR,MNUMYR)     ! OIL ELASTICITY
+      REAL OGPRRCO(MNUMOR,MNUMYR)     ! OIL P/R RATIO
+      REAL OGRESCO(MNUMOR,MNUMYR)     ! OIL RESERVES (MILLION BARRELS)
+
+      COMMON /OGINTRN/ OGELSNGON, OGELSNGOF, OGQEORPR, OGELSCO, OGPRRCO, OGRESCO

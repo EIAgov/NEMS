@@ -1,0 +1,61 @@
+! $Header: m:/default/includes/RCS/e111d,v 1.10 2015/10/21 10:16:59 XJ2 Exp $
+
+      REAL*4 SAVE111RES(MNUMCR,MNUMYR)                ! Residential sector savings in kilowatthours
+      REAL*4 COST111RES(MNUMCR,MNUMYR)                ! Residential costs
+      REAL*4 SAVE111COM(MNUMCR,MNUMYR)                ! Commercial sector savings in kilowatthours
+      REAL*4 COST111COM(MNUMCR,MNUMYR)                ! Commercial costs
+      REAL*4 SAVE111IND(MNUMCR,MNUMYR)                ! Industrial sector savings in kilowatthours
+      REAL*4 COST111IND(MNUMCR,MNUMYR)                ! Industrial costs
+      REAL*4 ECO2FRRT(EFD_D_MFRG + 1,MNUMYR)            ! CO2 Intensity Standard Target Rate by Fuel Region and Year
+      REAL*4 ECO2FRQY(EFD_D_MFRG + 1,MNUMYR)            ! CO2 Mass-Based Target by Fuel Region and Year
+      REAL*4 ECO2FRTL(EFD_D_MFRG + 1,MNUMYR)            ! CO2 Emissions by Fuel Region and Year
+      REAL*4 ECO2FRQF(EFD_D_MFRG + 1,MNUMYR)            ! CO2 Emissions From Affected Plant Types by Fuel Region and Year
+      REAL*4 EGENFRTL(EFD_D_MFRG + 1,MNUMYR)            ! Generation From All Plant Types by Fuel Region and Year
+      REAL*4 EGENFRQF(EFD_D_MFRG + 1,MNUMYR)            ! Generation From Affected Plant Types by Fuel Region and Year
+      REAL*4 ECO2FRPR(EFD_D_MFRG + 1,MNUMYR)            ! CO2 Intensity Standard Allowance Price by Fuel Region and Year - EFD
+      REAL*4 ECO2FRPP(EFD_D_MFRG + 1,MNUMYR)            ! CO2 Intensity Standard Allowance Price by Fuel Region and Year - ECP
+      REAL*4 ECAPFRHR(EFD_D_MFRG + 1,MNUMYR)            ! Capacity with Heat Rate Improvements by Fuel Region and Year
+      REAL*4 EGENFREE(EFD_D_MFRG + 1,MNUMYR)            ! Generation Savings from Energy Efficiency by Fuel Region and Year
+      REAL*4 ECSTFREE(EFD_D_MFRG + 1,MNUMYR)            ! Generation Savings Cost from Energy Efficiency by Fuel Region and Year
+      REAL*4 ECO2NRRT(MNUMNR,MNUMYR)                  ! CO2 Intensity Standard Target Rate by EMM  Region and Year
+      REAL*4 ECO2NRQY(MNUMNR,MNUMYR)                  ! CO2 Mass-Based Target by EMM  Region and Year
+      REAL*4 ECO2NRTL(MNUMNR,MNUMYR)                  ! CO2 Emissions by EMM  Region and Year
+      REAL*4 ECO2NRQF(MNUMNR,MNUMYR)                  ! CO2 Emissions From Affected Plant Types by EMM  Region and Year
+      REAL*4 EGENNRTL(MNUMNR,MNUMYR)                  ! Generation From All Plant Types by EMM  Region and Year
+      REAL*4 EGENNRQF(MNUMNR,MNUMYR)                  ! Generation From Affected Plant Types by EMM  Region and Year
+      REAL*4 ECO2NRPR(MNUMNR,MNUMYR)                  ! CO2 Intensity Standard Allowance Price by EMM  Region and Year - EFD
+      REAL*4 ECO2NRPP(MNUMNR,MNUMYR)                  ! CO2 Intensity Standard Allowance Price by EMM  Region and Year - ECP
+      REAL*4 ECAPNRHR(MNUMNR,MNUMYR)                  ! Capacity with Heat Rate Improvements by EMM  Region and Year
+      REAL*4 EGENNREE(MNUMNR,MNUMYR)                  ! Generation Savings from Energy Efficiency by EMM  Region and Year
+      REAL*4 ECSTNREE(MNUMNR,MNUMYR)                  ! Generation Savings Cost from Energy Efficiency by EMM  Region and Year
+      REAL*4 EERCNRQR(MNUMNR,MNUMNR,MNUMYR)           ! Emission Reduction Credits (ERC) Traded Between EMM Regions in Rate-base case (kwh)
+      REAL*4 EERCNRPR(MNUMNR,MNUMYR)                  ! EMission Reduction Credits (ERC) Marginal Cost by EMM  Region and Year in Rate Based case ($/Mwh)
+      REAL*4 EERCNRQM(MNUMNR,MNUMNR,MNUMYR)           ! Emission Reduction Credits (ERC) Traded Between EMM Regions in Mass-base case (million tonnes)
+      REAL*4 EERCNRPM(MNUMNR,MNUMYR)                  ! EMission Reduction Credits (ERC) Marginal Cost by EMM  Region and Year ($/MT)
+      REAL*4 ECO2ERRT(EPAREG,MNUMYR)                  ! CO2 Intensity Standard Target Rate by EPA  Region and Year
+      REAL*4 ECO2ERQY(EPAREG,MNUMYR)                  ! CO2 Mass-Based Target by EPA  Region and Year
+      REAL*4 ECO2ERTL(EPAREG,MNUMYR)                  ! CO2 Emissions by EPA  Region and Year
+      REAL*4 ECO2ERQF(EPAREG,MNUMYR)                  ! CO2 Emissions From Affected Plant Types by EPA  Region and Year
+      REAL*4 EGENERTL(EPAREG,MNUMYR)                  ! Generation From All Plant Types by EPA  Region and Year
+      REAL*4 EGENERQF(EPAREG,MNUMYR)                  ! Generation From Affected Plant Types by EPA  Region and Year
+      REAL*4 ECO2ERPR(EPAREG,MNUMYR)                  ! CO2 Intensity Standard Allowance Price by EPA  Region and Year - EFD
+      REAL*4 ECO2ERPP(EPAREG,MNUMYR)                  ! CO2 Intensity Standard Allowance Price by EPA  Region and Year - ECP
+      REAL*4 ECAPERHR(EPAREG,MNUMYR)                  ! Capacity with Heat Rate Improvements by EPA  Region and Year
+      REAL*4 EGENEREE(EPAREG,MNUMYR)                  ! Generation Savings from Energy Efficiency by EPA  Region and Year
+      REAL*4 ECSTEREE(EPAREG,MNUMYR)                  ! Generation Savings Cost from Energy Efficiency by EPA  Region and Year
+!
+      COMMON /E111D/ SAVE111RES, COST111RES, SAVE111COM, COST111COM, SAVE111IND, COST111IND, &
+                     ECO2FRRT,ECO2FRQY,ECO2FRTL,ECO2FRQF,EGENFRTL,EGENFRQF,ECO2FRPR,ECO2FRPP,ECAPFRHR,EGENFREE,ECSTFREE,  &
+                     ECO2NRRT,ECO2NRQY,ECO2NRTL,ECO2NRQF,EGENNRTL,EGENNRQF,ECO2NRPR,ECO2NRPP,ECAPNRHR,EGENNREE,ECSTNREE,EERCNRQR,EERCNRPR,EERCNRQM,EERCNRPM,  &
+                     ECO2ERRT,ECO2ERQY,ECO2ERTL,ECO2ERQF,EGENERTL,EGENERQF,ECO2ERPR,ECO2ERPP,ECAPERHR,EGENEREE,ECSTEREE
+
+      REAL EQ_E111D( 0 + &
+                     6 * MNUMCR * MNUMYR +            &     ! SAVE111RES, COST111RES, SAVE111COM, COST111COM, SAVE111IND, COST111IND
+                    11 * (EFD_D_MFRG + 1) * MNUMYR +    &     ! ECO2FRRT, ECO2FRQY, ECO2FRTL, ECO2FRQF, EGENFRTL, EGENFRQF, ECO2FRPR, ECO2FRPP, ECAPFRHR, EGENFREE, ECSTFREE
+                    11 * MNUMNR * MNUMYR +            &     ! ECO2NRRT, ECO2NRQY, ECO2FRTL, ECO2NRQF, EGENFRTL, EGENNRQF, ECO2NRPR, ECO2NRPP, ECAPNRHR, EGENNREE, ECSTNREE
+                     2 * MNUMNR * MNUMNR * MNUMYR +   &     ! EERCNRQR, EERCNRPR
+                     2 * MNUMNR * MNUMYR +            &     ! EERCNRQM, EERCNRPM
+                    11 * EPAREG * MNUMYR +            &     ! ECO2ERRT, ECO2ERQY, ECO2FRTL, ECO2ERQF, EGENFRTL, EGENERQF, ECO2ERPR, ECO2ERPP, ECAPERHR, EGENEREE, ECSTEREE
+                     0 )
+
+      EQUIVALENCE(EQ_E111D,SAVE111RES)

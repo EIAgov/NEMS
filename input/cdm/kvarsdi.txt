@@ -1,0 +1,117 @@
+FILE NAME:      KVARSDI
+
+DATE MODIFIED:  November 10, 1999
+
+CONTACT:        Kevin Jarzomski
+                NEMS Commercial Buildings Analyst
+                Kevin.Jarzomski@eia.gov
+                (202)586-3208
+
+USED BY:        Service Demand subroutine of the National Energy Modeling System
+                (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     SDI variation between old and new buildings.
+
+UNITS:          unitless
+
+DIMENSION:      Building type, end-use service
+
+SPECIAL CONSTRAINTS:
+
+                SDI were only allowed to vary for space heating, space cooling,
+		and lighting.  For the other three services (water heating, ventilation, and cooking)
+                a 1.00 is used as a place holder.
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+
+                Each block corresponds to a service in the following order:  Space Heating, Space
+                Cooling, Water Heating, Ventilation, Cooking, and Lighting.
+
+                The first row of each block corresponds to existing buildings while the second row of
+                each block corresponds to new buildings.
+
+                Each column corresponds to a building type in the following order:  Assembly, Education,
+                Food Sales, Food service, Health, Lodging, Large Office, Small Office, Merc/Service,
+                Warehouse, and Other.
+
+SOURCES:
+
+                U.S. Department of Energy, Energy Information Administration, "Commercial Building
+                  Energy Consumption and Expenditures 1992", Washington, DC, April 1995.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0.90	0.96	0.84	0.84	0.97	0.94	0.90	0.91	0.79	0.43	0.44
+0.96	0.96	0.90	0.92	0.98	0.98	0.88	0.97	0.90	0.51	0.41
+										
+0.64	0.52	0.79	0.76	0.90	0.71	0.87	0.82	0.55	0.14	0.26
+0.90	0.73	0.90	0.83	0.98	0.95	0.87	0.89	0.79	0.25	0.30
+										
+1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00
+1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00
+										
+1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00
+1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00
+										
+1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00
+1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00	1.00
+										
+0.73	0.96	0.92	0.84	0.96	0.89	0.92	0.89	0.88	0.73	0.53
+0.81	0.97	0.80	1.00	0.93	0.78	0.94	0.96	0.96	0.74	0.79

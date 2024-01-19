@@ -1,0 +1,9 @@
+!  $Header: N:/default/includes/RCS/emshrin,v 1.2 1999/12/19 20:14:36 DSA Exp $
+!
+!     EMSHRIN  CONTAINS THE INPUT DATA FOR THE
+!     MARKET-SHARING ALGORITHM OF THE ECP
+!
+      COMMON /EMSIN/ EPMSTOL,EPMSEXP                             ! REAL
+!
+      REAL*8    EPMSTOL           ! TOLERANCE LEVEL FOR COMPETITIVE TECH.
+      REAL*8    EPMSEXP           ! EXPONENT OF LOGIT FOR M-S ALGORITHM

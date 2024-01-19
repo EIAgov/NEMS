@@ -1,0 +1,69 @@
+*** NUMBER OF ALLOCATION TECHNIQUES
+9
+*** NAMES OF ALLOCATION TECHNIQUES (IN ORDER TOP-BOTTOM OF INPUT)
+SALES
+MARGINAL SALES
+EMBEDDED FUEL
+CUSTOMER
+COIN. PEAK
+PROB. COIN. PEAK
+NON-COIN. PEAK
+AED COIN. PEAK
+AED PROB. COIN. PEAK
+*** NUMBER OF COST CATEGORIES
+4
+*** NAMES OF COST CATEGORIES (IN ORDER LEFT-RIGHT OF INPUT)
+----------FUEL-----------
+------VARIABLE O&M-------
+--------FIXED O&M--------
+---------CAPITAL---------
+**************  GENERATION ALLOCATIONS TECHNIQUES  ***************
+******************************************************************
+*   ALLOCATION TECHNIQUE        FUEL   VAR OM   FIX OM   CAPITAL
+******************************************************************
+SALES                          100.0    100.0      0.0      0.0
+MARGINAL FUEL                    0.0      0.0      0.0      0.0
+EMBEDDED FUEL                    0.0      0.0      0.0      0.0
+CUSTOMER                         0.0      0.0      0.0      0.0
+CP                               0.0      0.0      0.0      0.0
+PCP                              0.0      0.0      0.0      0.0
+NCP                              0.0      0.0    100.0    100.0
+AED - CP                         0.0      0.0      0.0      0.0
+AED - PCP                        0.0      0.0      0.0      0.0
+*************  TRANSMISSION ALLOCATIONS TECHNIQUES  **************
+******************************************************************
+*   ALLOCATION TECHNIQUE        FUEL   VAR OM   FIX OM   CAPITAL
+******************************************************************
+SALES                            0.0    100.0      0.0      0.0
+MARGINAL FUEL                    0.0      0.0      0.0      0.0
+EMBEDDED FUEL                    0.0      0.0      0.0      0.0
+CUSTOMER                         0.0      0.0      0.0      0.0
+CP                               0.0      0.0      0.0      0.0
+PCP                              0.0      0.0      0.0      0.0
+NCP                              0.0      0.0     50.0     50.0
+AED - CP                         0.0      0.0      0.0      0.0
+AED - PCP                        0.0      0.0     50.0     50.0
+*************  DISTRIBUTION ALLOCATIONS TECHNIQUES  **************
+******************************************************************
+*   ALLOCATION TECHNIQUE        FUEL   VAR OM   FIX OM   CAPITAL
+******************************************************************
+SALES                          100.0     70.0      0.0      0.0
+MARGINAL FUEL                    0.0      0.0      0.0      0.0
+EMBEDDED FUEL                    0.0      0.0      0.0      0.0
+CUSTOMER                         0.0     30.0     30.0     30.0
+CP                               0.0      0.0      0.0      0.0
+PCP                              0.0      0.0      0.0      0.0
+NCP                              0.0      0.0     70.0     70.0
+AED - CP                         0.0      0.0      0.0      0.0
+AED - PCP                        0.0      0.0      0.0      0.0
+*************  DEMAND QUANTITIES                    **************
+******************************************************************
+*   CUSTOMER CLASS              RES    COMM     IND      TRANS
+******************************************************************
+MARGINAL FUEL  ($)             100.0    105.0     70.0      0.5
+EMBEDDED FUEL  ($)              50.0     50.0     30.0      0.3
+CUSTOMER   (CUSTOMERS)        1286.8    178.5      8.4      0.0
+CP  (MW)                        56.0     60.0     50.0      1.2
+PCP    (MW)                     55.0     50.0     50.0      1.3
+NCP    (MW)                     70.0     75.0     58.0      1.1
+SYSTEM LOAD FACTOR              65.0

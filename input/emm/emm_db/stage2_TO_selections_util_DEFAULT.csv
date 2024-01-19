@@ -1,0 +1,1436 @@
+UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
+213,Alaska Electric Light&Power Co,NA,AK,F861,ASCC,ASCC
+213,Alaska Electric Light&Power Co,,AK,F860,ASCC,ASCC
+219,Alaska Power and Telephone Co,NA,AK,F861,ASCC,ASCC
+219,Alaska Power and Telephone Co,,AK,F860,ASCC,ASCC
+221,"Alaska Village Elec Coop, Inc",,AK,F860,ASCC,ASCC
+221,"Alaska Village Elec Coop, Inc",NA,AK,F860,ASCC,ASCC
+599,Anchorage Municipal Light and Power,AMPL,AK,F861,ASCC,ASCC
+599,Anchorage Municipal Light and Power,,AK,F860,ASCC,ASCC
+1276,"Barrow Utils & Elec Coop, Inc",,AK,F860,ASCC,ASCC
+3522,Chugach Electric Assn Inc,CEA,AK,F861,ASCC,ASCC
+3522,Chugach Electric Assn Inc,,AK,F860,ASCC,ASCC
+4329,"Copper Valley Elec Assn, Inc",,AK,F860,ASCC,ASCC
+4959,Aniak Light & Power Co Inc,,AK,F860,ASCC,ASCC
+6915,Galena Electric Utility,,AK,F860,ASCC,ASCC
+7353,Golden Valley Elec Assn Inc,NA,AK,F861,ASCC,ASCC
+7353,Golden Valley Elec Assn Inc,,AK,F860,ASCC,ASCC
+7833,Gwitchyaa Zhee Utility Co,,AK,F860,ASCC,ASCC
+9188,"I-N-N Electric Coop, Inc",,AK,F860,ASCC,ASCC
+9897,City of King Cove,,AK,F860,ASCC,ASCC
+10210,Ketchikan Public Utilities,NA,AK,F861,ASCC,ASCC
+10210,Ketchikan Public Utilities,,AK,F860,ASCC,ASCC
+10433,Kodiak Electric Assn Inc,NA,AK,F861,ASCC,ASCC
+10433,Kodiak Electric Assn Inc,,AK,F860,ASCC,ASCC
+10451,Kotzebue Electric Assn Inc,,AK,F860,ASCC,ASCC
+11824,Matanuska Electric Assn Inc,NA,AK,F861,ASCC,ASCC
+11824,Matanuska Electric Assn Inc,,AK,F860,ASCC,ASCC
+12119,McGrath Light & Power Co,,AK,F860,ASCC,ASCC
+12385,Metlakatla Power & Light,,AK,F860,ASCC,ASCC
+13201,"Naknek Electric Assn, Inc",,AK,F860,ASCC,ASCC
+13642,Nome Joint Utility Systems,,AK,F860,ASCC,ASCC
+13870,"Nushagak Electric Coop, Inc",,AK,F860,ASCC,ASCC
+14856,Petersburg Borough - (AK),,AK,F860,ASCC,ASCC
+16955,City of Seward - (AK),,AK,F860,ASCC,ASCC
+17271,City & Borough of Sitka - (AK),,AK,F860,ASCC,ASCC
+18963,"Inside Passage Elec Coop, Inc",,AK,F860,ASCC,ASCC
+19277,TDX North Slope Generating Co,,AK,F860,ASCC,ASCC
+19454,City of Unalaska - (AK),,AK,F860,ASCC,ASCC
+19558,Homer Electric Assn Inc,NA,AK,F861,ASCC,ASCC
+19558,Homer Electric Assn Inc,,AK,F860,ASCC,ASCC
+21015,City of Wrangell - (AK),,AK,F860,ASCC,ASCC
+26616,North Slope Borough Power & Light,,AK,F860,ASCC,ASCC
+29297,Pelican Utility,,AK,F860,ASCC,ASCC
+30150,CBY DBA Yakutat Power,,AK,F860,ASCC,ASCC
+40215,"Cordova Electric Coop, Inc",,AK,F860,ASCC,ASCC
+40215,"Cordova Electric Coop, Inc",NA,AK,F860,ASCC,ASCC
+40548,Unalakleet Valley Elec Coop,,AK,F860,ASCC,ASCC
+49803,Alaska Electric & Energy Coop,,AK,F860,ASCC,ASCC
+60770,Southeast Alaska Power Agency,NA,AK,F860,ASCC,ASCC
+63560,"TDX Sand Point Generating, LLC",,AK,F860,ASCC,ASCC
+9739,Joe Wheeler Elec Member Corp,TVA,AL,F860,SRCE,SRCE
+16629,Sand Mountain Electric Coop,TVA,AL,F860,SRCE,SRCE
+18642,Tennessee Valley Authority,TVA,AL,F861,SRCE,SRCE
+189,PowerSouth Energy Cooperative,AEC,AL,F860,SRSE,SRSE
+195,Alabama Power Co,SOCO,AL,F861,SRSE,SRSE
+5309,City of Dothan - (AL),SOCO,AL,F860,SRSE,SRSE
+7140,Georgia Power Co,SOCO,AL,F860,SRSE,SRSE
+7197,Georgia Transmission Corp,SOCO,AL,F860,SRSE,SRSE
+807,Arkansas Electric Coop Corp,MISO,AR,F860,MISO,MISS
+814,Entergy Arkansas LLC,MISO,AR,F861,MISO,MISS
+817,Arkansas Valley Elec Coop Corp,MISO,AR,F860,MISO,MISS
+924,"Associated Electric Coop, Inc",AECI,AR,F860,MISO,SPPS
+6342,First Electric Coop Corp,MISO,AR,F860,MISO,MISS
+9879,City Water and Light Plant,MISO,AR,F861,MISO,MISS
+13718,City of North Little Rock - (AR),MISO,AR,F861,MISO,MISS
+3705,Clarksville Light & Water Co,SPA,AR,F860,SPP,SPPS
+3705,Clarksville Light & Water Co,SWPP,AR,F860,SPP,SPPS
+5860,Empire District Electric Co,SWPP,AR,F861,SPP,SPPS
+14063,Oklahoma Gas & Electric Co,SWPP,AR,F861,SPP,SPPS
+14238,Ouachita Electric Coop Corp,SPA,AR,F860,SPP,SPPS
+14289,Ozarks Electric Coop Corp - (AR),SWPP,AR,F860,SPP,SPPS
+14446,Paragould Light & Water Comm,SPA,AR,F861,SPP,SPPS
+14460,City of Paris - (AR),SWPP,AR,F860,SPP,SPPS
+17698,Southwestern Electric Power Co,SWPP,AR,F861,SPP,SPPS
+17716,Southwestern Power Administration,SPA,AR,F860,SPP,SPPS
+13314,Navajo Tribal Utility Authority,PACE,AZ,F861,BASN,BASN
+16572,Salt River Project,CISO,AZ,F860,CISO,CASO
+16609,San Diego Gas & Electric Co,CISO,AZ,F860,CISO,CASO
+17609,Southern California Edison Co,CISO,AZ,F860,CISO,CASO
+796,Arizona Electric Pwr Coop Inc,TEPC,AZ,F860,SRSG,SRSG
+796,Arizona Electric Pwr Coop Inc,WALC,AZ,F860,SRSG,SRSG
+803,Arizona Public Service Co,AZPS,AZ,F861,SRSG,SRSG
+803,Arizona Public Service Co,SRP,AZ,F860,SRSG,SRSG
+803,Arizona Public Service Co,TEPC,AZ,F860,SRSG,SRSG
+803,Arizona Public Service Co,WALC,AZ,F860,SRSG,SRSG
+3990,Colorado River Indian Irr Proj,WALC,AZ,F860,SRSG,SRSG
+5729,Electrical Dist No8 Maricopa,AZPS,AZ,F861,SRSG,SRSG
+6957,"Garkane Energy Coop, Inc",WALC,AZ,F860,SRSG,SRSG
+12351,City of Mesa - (AZ),WALC,AZ,F861,SRSG,SRSG
+13314,Navajo Tribal Utility Authority,WALC,AZ,F860,SRSG,SRSG
+13318,"Navopache Electric Coop, Inc",AZPS,AZ,F860,SRSG,SRSG
+15048,Electrical Dist No2 Pinal County,WALC,AZ,F861,SRSG,SRSG
+16572,Salt River Project,SRP,AZ,F861,SRSG,SRSG
+16572,Salt River Project,AZPS,AZ,F860,SRSG,SRSG
+16572,Salt River Project,DEAA,AZ,F860,SRSG,SRSG
+16572,Salt River Project,HGMA,AZ,F860,SRSG,SRSG
+18280,Sulphur Springs Valley E C Inc,WALC,AZ,F860,SRSG,SRSG
+19189,Trico Electric Cooperative Inc,WALC,AZ,F861,SRSG,SRSG
+19604,USBIA-San Carlos Project,WALC,AZ,F861,SRSG,SRSG
+19728,"UNS Electric, Inc",TEPC,AZ,F861,SRSG,SRSG
+19728,"UNS Electric, Inc",AZPS,AZ,F860,SRSG,SRSG
+21538,"Mohave Electric Cooperative, I",WALC,AZ,F860,SRSG,SRSG
+24211,Tucson Electric Power Co,TEPC,AZ,F861,SRSG,SRSG
+25866,Ak-Chin Electric Utility Authority,AZPS,AZ,F861,SRSG,SRSG
+27000,Western Area Power Administration,WALC,AZ,F861,SRSG,SRSG
+27000,Western Area Power Administration,GRIF,AZ,F860,SRSG,SRSG
+30518,Electrical Dist No3 Pinal County,AZPS,AZ,F861,SRSG,SRSG
+17166,Sierra Pacific Power Co,NEVP,CA,F860,BASN,BASN
+19840,"Valley Electric Assn, Inc",NEVP,CA,F861,BASN,BASN
+57483,Liberty Utilities,NEVP,CA,F860,BASN,BASN
+207,City of Alameda,CISO,CA,F860,CISO,CANO
+590,City of Anaheim - (CA),CISO,CA,F861,CISO,CASO
+694,Anza Electric Coop Inc,CISO,CA,F860,CISO,CASO
+796,Arizona Electric Pwr Coop Inc,CISO,CA,F861,CISO,CASO
+1050,City of Azusa,CISO,CA,F861,CISO,CASO
+2507,City of Burbank Water and Power,LDWP,CA,F861,CISO,CASO
+4003,City of Colton - (CA),CISO,CA,F861,CISO,CASO
+4390,City of Corona - (CA),CISO,CA,F861,CISO,CASO
+7294,City of Glendale - (CA),LDWP,CA,F861,CISO,CASO
+9216,Imperial Irrigation District,CISO,CA,F860,CISO,SRSG
+9216,Imperial Irrigation District,LDWP,CA,F860,CISO,SRSG
+10724,Lassen Municipal Utility District,CISO,CA,F860,CISO,CANO
+11124,City of Lodi - (CA),CISO,CA,F860,CISO,CANO
+11208,Los Angeles Department of Water & Power,LDWP,CA,F861,CISO,CASO
+11208,Los Angeles Department of Water & Power,CISO,CA,F860,CISO,CASO
+12312,Merced Irrigation District,CISO,CA,F861,CISO,CANO
+12745,Modesto Irrigation District,BANC,CA,F861,CISO,CANO
+12745,Modesto Irrigation District,CISO,CA,F860,CISO,CANO
+14328,Pacific Gas & Electric Co.,CISO,CA,F861,CISO,CANO
+14328,Pacific Gas & Electric Co.,BANC,CA,F860,CISO,CANO
+14401,City of Palo Alto - (CA),CISO,CA,F861,CISO,CANO
+14534,City of Pasadena - (CA),CISO,CA,F861,CISO,CASO
+15308,Plumas-Sierra Rural Elec Coop,CISO,CA,F860,CISO,CANO
+15783,City of Redding - (CA),BANC,CA,F861,CISO,CANO
+16088,City of Riverside - (CA),CISO,CA,F861,CISO,CASO
+16295,City of Roseville - (CA),BANC,CA,F860,CISO,CANO
+16534,Sacramento Municipal Util Dist,BANC,CA,F861,CISO,CANO
+16534,Sacramento Municipal Util Dist,CISO,CA,F860,CISO,CANO
+16609,San Diego Gas & Electric Co,CISO,CA,F861,CISO,CASO
+16612,City & County of San Francisco,CISO,CA,F861,CISO,CANO
+16655,City of Santa Clara - (CA),CISO,CA,F861,CISO,CANO
+16740,Scenic Rivers Energy Coop,BANC,CA,F860,CISO,CANO
+17609,Southern California Edison Co,CISO,CA,F861,CISO,CASO
+17609,Southern California Edison Co,LDWP,CA,F860,CISO,CASO
+17612,Bear Valley Electric Service,CISO,CA,F861,CISO,CANO
+19281,Turlock Irrigation District,TIDC,CA,F861,CISO,CANO
+19397,City of Ukiah - (CA),CISO,CA,F860,CISO,CANO
+19798,City of Vernon,CISO,CA,F860,CISO,CASO
+27000,Western Area Power Administration,BANC,CA,F860,CISO,CANO
+27000,Western Area Power Administration,CISO,CA,F860,CISO,CANO
+40576,Intermountain Power Agency,LDWP,CA,F860,CISO,CASO
+55787,City of Moreno Valley - (CA),CISO,CA,F861,CISO,CASO
+56224,Rancho Cucamonga Municipal Utility,CISO,CA,F860,CISO,CASO
+57483,Liberty Utilities,CISO,CA,F861,CISO,CANO
+58851,City of Cerritos - (CA),CISO,CA,F861,CISO,CASO
+64196,"4 Rivers Electric Cooperative, Inc.",BANC,CA,F860,CISO,CANO
+14328,Pacific Gas & Electric Co.,PACW,CA,F860,NWPP,NWPP
+14354,PacifiCorp,PACW,CA,F861,NWPP,NWPP
+9216,Imperial Irrigation District,IID,CA,F861,SRSG,SRSG
+27000,Western Area Power Administration,WALC,CA,F861,SRSG,SRSG
+56146,Black Hills/Colorado Elec.Util,PACE,CO,F860,BASN,BASN
+3227,City of Center - (CO),PSCO,CO,F860,RMRG,RMRG
+3989,Colorado Springs City of,PSCO,CO,F861,RMRG,RMRG
+3989,Colorado Springs City of,WACM,CO,F860,RMRG,RMRG
+5086,Delta Montrose Electric Assn,WACM,CO,F860,RMRG,RMRG
+6610,City of Fort Morgan,PSCO,CO,F860,RMRG,RMRG
+6638,City of Fountain,PSCO,CO,F861,RMRG,RMRG
+7570,Great River Energy,WACM,CO,F860,RMRG,RMRG
+8570,Highline Electric Assn,WACM,CO,F860,RMRG,RMRG
+8751,Town of Holly - (CO),WACM,CO,F860,RMRG,RMRG
+8773,"Holy Cross Electric Assn, Inc",PSCO,CO,F861,RMRG,RMRG
+9336,Intermountain Rural Elec Assn,PSCO,CO,F861,RMRG,RMRG
+9336,Intermountain Rural Elec Assn,WACM,CO,F860,RMRG,RMRG
+10539,"La Plata Electric Assn, Inc",WACM,CO,F860,RMRG,RMRG
+10633,City of Lamar - (CO),PSCO,CO,F860,RMRG,RMRG
+10730,City of Las Animas - (CO),WACM,CO,F860,RMRG,RMRG
+11256,City of Loveland - (CO),PSCO,CO,F861,RMRG,RMRG
+12866,Moon Lake Electric Assn Inc,WACM,CO,F860,RMRG,RMRG
+13050,"Mountain Parks Electric, Inc",PSCO,CO,F860,RMRG,RMRG
+13050,"Mountain Parks Electric, Inc",WACM,CO,F860,RMRG,RMRG
+13781,Northern States Power Co - Minnesota,PSCO,CO,F860,RMRG,RMRG
+14940,PECO Energy Co,PSCO,CO,F860,RMRG,RMRG
+15143,Platte River Power Authority,PSCO,CO,F860,RMRG,RMRG
+15257,"Poudre Valley REA, Inc",WACM,CO,F860,RMRG,RMRG
+15466,Public Service Co of Colorado,PSCO,CO,F861,RMRG,RMRG
+15466,Public Service Co of Colorado,WACM,CO,F860,RMRG,RMRG
+16603,"San Luis Valley R E C, Inc",PSCO,CO,F860,RMRG,RMRG
+16616,"San Isabel Electric Assn, Inc",WACM,CO,F860,RMRG,RMRG
+16622,"San Miguel Power Assn, Inc",PSCO,CO,F860,RMRG,RMRG
+17592,Southeast Colorado Power Assn,WACM,CO,F861,RMRG,RMRG
+17592,Southeast Colorado Power Assn,PSCO,CO,F860,RMRG,RMRG
+19499,"United Power, Inc",WACM,CO,F861,RMRG,RMRG
+19499,"United Power, Inc",PSCO,CO,F860,RMRG,RMRG
+19545,"Black Hills Power, Inc. d/b/a",WACM,CO,F860,RMRG,RMRG
+20576,"White River Electric Assn, Inc",WACM,CO,F861,RMRG,RMRG
+27000,Western Area Power Administration,WACM,CO,F861,RMRG,RMRG
+27000,Western Area Power Administration,PSCO,CO,F860,RMRG,RMRG
+30151,"Tri-State G & T Assn, Inc",PSCO,CO,F860,RMRG,RMRG
+30151,"Tri-State G & T Assn, Inc",WACM,CO,F860,RMRG,RMRG
+56146,Black Hills/Colorado Elec.Util,PSCO,CO,F861,RMRG,RMRG
+56146,Black Hills/Colorado Elec.Util,WACM,CO,F860,RMRG,RMRG
+15466,Public Service Co of Colorado,SWPP,CO,F860,SPP,SPPC
+19160,"Tri-County Electric Coop, Inc (OK)",SWPP,CO,F861,SPP,SPPC
+2089,Bozrah Light & Power Company,ISNE,CT,F860,ISNE,ISNE
+4176,Connecticut Light & Power Co,ISNE,CT,F861,ISNE,ISNE
+7716,Groton Dept of Utilities - (CT),ISNE,CT,F860,ISNE,ISNE
+9734,City of Jewett City - (CT),ISNE,CT,F860,ISNE,ISNE
+13831,City of Norwich - (CT),ISNE,CT,F861,ISNE,ISNE
+19497,United Illuminating Co,ISNE,CT,F861,ISNE,ISNE
+20038,Town of Wallingford - (CT),ISNE,CT,F861,ISNE,ISNE
+49826,Mohegan Tribal Utility Authority,ISNE,CT,F860,ISNE,ISNE
+54913,NSTAR Electric Company,ISNE,CT,F860,ISNE,ISNE
+59497,Eversource,ISNE,CT,F860,ISNE,ISNE
+14940,PECO Energy Co,PJM,DC,F860,PJM,PJME
+15270,Potomac Electric Power Co,PJM,DC,F861,PJM,PJME
+5027,Delmarva Power,PJM,DE,F861,PJM,PJME
+5070,Delaware Electric Cooperative,PJM,DE,F860,PJM,PJME
+5335,City of Dover - (DE),PJM,DE,F860,PJM,PJME
+10935,City of Lewes - (DE),PJM,DE,F860,PJM,PJME
+12540,City of Milford - (DE),PJM,DE,F860,PJM,PJME
+689,Connexus Energy,TAL,FL,F860,FRCC,FRCC
+3774,City of Clewiston,FPC,FL,F860,FRCC,FRCC
+4716,Dairyland Power Coop,FPL,FL,F860,FRCC,FRCC
+6443,"Florida Keys El Coop Assn, Inc",FPL,FL,F861,FRCC,FRCC
+6452,Florida Power & Light Co,FPL,FL,F861,FRCC,FRCC
+6452,Florida Power & Light Co,FMPP,FL,F860,FRCC,FRCC
+6455,"Duke Energy Florida, LLC",FPC,FL,F861,FRCC,FRCC
+6457,Florida Public Utilities Co,JEA,FL,F861,FRCC,FRCC
+6616,Fort Pierce Utilities Authority,FMPP,FL,F861,FRCC,FRCC
+6909,Gainesville Regional Utilities,GVL,FL,F861,FRCC,FRCC
+7264,"Glades Electric Coop, Inc",SEC,FL,F861,FRCC,FRCC
+8795,City of Homestead - (FL),HST,FL,F861,FRCC,FRCC
+9616,Beaches Energy Services,FPL,FL,F861,FRCC,FRCC
+9617,JEA,JEA,FL,F861,FRCC,FRCC
+10226,"Utility Board of the City of Key West, F",FMPP,FL,F861,FRCC,FRCC
+10376,Kissimmee Utility Authority,FMPP,FL,F861,FRCC,FRCC
+10620,City of Lake Worth - (FL),FMPP,FL,F860,FRCC,FRCC
+10623,City of Lakeland - (FL),FMPP,FL,F861,FRCC,FRCC
+10623,City of Lakeland - (FL),TEC,FL,F860,FRCC,FRCC
+10868,City of Leesburg - (FL),FPC,FL,F860,FRCC,FRCC
+13485,New Smyrna Beach City of,NSB,FL,F861,FRCC,FRCC
+14610,Orlando Utilities Comm,FMPP,FL,F861,FRCC,FRCC
+14610,Orlando Utilities Comm,FPC,FL,F860,FRCC,FRCC
+15776,Reedy Creek Improvement Dist,FPC,FL,F861,FRCC,FRCC
+18304,"Sumter Electric Coop, Inc",SEC,FL,F861,FRCC,FRCC
+18445,City of Tallahassee - (FL),TAL,FL,F861,FRCC,FRCC
+18454,Tampa Electric Co,TEC,FL,F861,FRCC,FRCC
+21093,3 Phases Renewables Inc,FPC,FL,F860,FRCC,FRCC
+21554,Seminole Electric Cooperative Inc,SEC,FL,F860,FRCC,FRCC
+58124,City of Winter Park - (FL),FPC,FL,F861,FRCC,FRCC
+7801,Gulf Power Co,SOCO,FL,F861,SRSE,SRSE
+20371,"West Florida El Coop Assn, Inc",AEC,FL,F860,SRSE,SRSE
+17539,South Carolina Electric&Gas Company,SCEG,GA,F860,SRCA,SRCA
+18642,Tennessee Valley Authority,TVA,GA,F860,SRCE,SRCE
+195,Alabama Power Co,SOCO,GA,F860,SRSE,SRSE
+3916,Cobb Electric Membership Corp,SOCO,GA,F861,SRSE,SRSE
+4432,Coweta-Fayette El Member Corp,SOCO,GA,F860,SRSE,SRSE
+4538,Crisp County Power Comm,SOCO,GA,F860,SRSE,SRSE
+4744,Dalton Utilities,SOCO,GA,F861,SRSE,SRSE
+5325,City of Douglas,SOCO,GA,F861,SRSE,SRSE
+5416,"Duke Energy Carolinas, LLC",SEPA,GA,F860,SRSE,SRSE
+6411,Flint Electric Membership Corp,SOCO,GA,F860,SRSE,SRSE
+6641,4-County Electric Power Assn,SOCO,GA,F860,SRSE,SRSE
+7140,Georgia Power Co,SOCO,GA,F861,SRSE,SRSE
+7140,Georgia Power Co,SEPA,GA,F860,SRSE,SRSE
+7197,Georgia Transmission Corp,SEPA,GA,F860,SRSE,SRSE
+7197,Georgia Transmission Corp,SOCO,GA,F860,SRSE,SRSE
+13962,Oconee Electric Member Corp,SOCO,GA,F860,SRSE,SRSE
+15257,"Poudre Valley REA, Inc",SOCO,GA,F860,SRSE,SRSE
+16674,Satilla Rural Elec Member Corporation,SOCO,GA,F860,SRSE,SRSE
+18956,Tri-County Elec Member Corp,SOCO,GA,F860,SRSE,SRSE
+20065,Walton Electric Member Corp,SOCO,GA,F860,SRSE,SRSE
+40212,Colquitt Electric Membership Corp,SOCO,GA,F860,SRSE,SRSE
+8287,Hawaii Electric Light Co Inc,NA,HI,F861,HECO,HECO
+8287,Hawaii Electric Light Co Inc,,HI,F860,HECO,HECO
+8287,Hawaii Electric Light Co Inc,HECO,HI,F860,HECO,HECO
+10071,Kauai Island Utility Cooperative,NA,HI,F861,HECO,HECO
+10071,Kauai Island Utility Cooperative,,HI,F860,HECO,HECO
+11843,Maui Electric Co Ltd,NA,HI,F861,HECO,HECO
+11843,Maui Electric Co Ltd,,HI,F860,HECO,HECO
+11843,Maui Electric Co Ltd,HECO,HI,F860,HECO,HECO
+19547,Hawaiian Electric Co Inc,HECO,HI,F861,HECO,HECO
+19547,Hawaiian Electric Co Inc,,HI,F860,HECO,HECO
+19547,Hawaiian Electric Co Inc,NA,HI,F860,HECO,HECO
+471,Amana Society Service Co,MISO,IA,F860,MISO,MISW
+554,City of Ames - (IA),MISO,IA,F861,MISO,MISW
+682,City of Anita - (IA),MISO,IA,F860,MISO,MISW
+965,Atlantic Municipal Utilities,MISO,IA,F860,MISO,MISW
+1172,Bancroft Municipal Utilities,MISO,IA,F860,MISO,MISW
+1869,City of Bloomfield - (IA),AECI,IA,F860,MISO,MISC
+1869,City of Bloomfield - (IA),MISO,IA,F860,MISO,MISW
+2287,City of Brooklyn - (IA),MISO,IA,F860,MISO,MISW
+3203,Cedar Falls Utilities,MISO,IA,F861,MISO,MISW
+3258,Central Iowa Power Cooperative,MISO,IA,F860,MISO,MISW
+3498,Chippewa Valley Electric Coop,MISO,IA,F860,MISO,MISW
+4363,Corn Belt Power Coop,MISO,IA,F860,MISO,MISW
+4375,City of Corning - (IA),MISO,IA,F860,MISO,MISW
+4716,Dairyland Power Coop,MISO,IA,F860,MISO,MISW
+4919,City of Dayton - (IA),MISO,IA,F860,MISO,MISW
+5529,City of Durant - (IA),MISO,IA,F860,MISO,MISW
+5563,City of Earlville - (IA),MISO,IA,F860,MISO,MISW
+5605,Eastern Iowa Light & Power Coop,MISO,IA,F860,MISO,MISW
+5998,City of Estherville - (IA),MISO,IA,F860,MISO,MISW
+6112,"Farmers Electric Coop, Inc - (IA)",MISO,IA,F860,MISO,MISW
+6501,City of Fontanelle - (IA),MISO,IA,F860,MISO,MISW
+6641,4-County Electric Power Assn,MISO,IA,F860,MISO,MISW
+7424,Gowrie Municipal Utilities,MISO,IA,F860,MISO,MISW
+7626,City of Greenfield - (IA),MISO,IA,F860,MISO,MISW
+7743,Grundy Center Mun Light & Power,MISO,IA,F860,MISO,MISW
+8122,Harlan Municipal Utilities - (IA),MISO,IA,F860,MISO,MISW
+8319,Heartland Power Coop,MISO,IA,F860,MISO,MISW
+8847,City of Hopkinton - (IA),MISO,IA,F860,MISO,MISW
+9230,City of Independence - (IA),MISO,IA,F860,MISO,MISW
+9417,Interstate Power and Light Co,MISO,IA,F861,MISO,MISW
+10606,City of Lake Mills,MISO,IA,F860,MISO,MISW
+10608,City of Lake Park - (IA),MISO,IA,F860,MISO,MISW
+10908,City of Lenox - (IA),MISO,IA,F860,MISO,MISW
+11053,Linn County REC,MISO,IA,F860,MISO,MISW
+11611,City of Maquoketa - (IA),MISO,IA,F860,MISO,MISW
+12341,MidAmerican Energy Co,MISO,IA,F861,MISO,MISW
+12839,City of Montezuma - (IA),MISO,IA,F860,MISO,MISW
+13143,Board of Water Electric & Communications,MISO,IA,F861,MISO,MISW
+13468,New London Municipal Utilities,MISO,IA,F860,MISO,MISW
+13738,Northeast Missouri El Pwr Coop,AECI,IA,F860,MISO,MISC
+14201,City of Osage - (IA),MISO,IA,F860,MISO,MISW
+14202,"Osceola Electric Coop, Inc",MISO,IA,F860,MISO,MISW
+14433,City of Panora - (IA),MISO,IA,F860,MISO,MISW
+14645,City of Pella - (IA),MISO,IA,F860,MISO,MISW
+15180,City of Pocahontas - (IA),MISO,IA,F860,MISO,MISW
+15349,City of Preston,MISO,IA,F860,MISO,MISW
+15377,City of Primghar - (IA),MISO,IA,F860,MISO,MISW
+16211,City of Rockford- (IA),MISO,IA,F860,MISO,MISW
+17783,City of Spencer - (IA),MISO,IA,F860,MISO,MISW
+18177,City of Story City - (IA),MISO,IA,F860,MISO,MISW
+18204,City of Strawberry Point,MISO,IA,F860,MISO,MISW
+18301,City of Sumner - (IA),MISO,IA,F860,MISO,MISW
+19062,City of Traer - (IA),MISO,IA,F860,MISO,MISW
+19436,Union Electric Co - (MO),MISO,IA,F860,MISO,MISW
+19843,City of Villisca - (IA),MISO,IA,F860,MISO,MISW
+20214,Waverly Municipal Elec Utility,MISO,IA,F860,MISO,MISW
+20259,City of Webster City - (IA),MISO,IA,F860,MISO,MISW
+20380,City of West Liberty - (IA),MISO,IA,F860,MISO,MISW
+20835,City of Winterset - (IA),MISO,IA,F860,MISO,MISW
+20847,Wisconsin Electric Power Co,MISO,IA,F860,MISO,MISW
+27000,Western Area Power Administration,MISO,IA,F860,MISO,MISW
+40580,Southern Minnesota Mun P Agny,MISO,IA,F860,MISO,MISW
+49986,Southwest Iowa Rural Elec Coop,MISO,IA,F860,MISO,MISW
+56068,International Transmission Company DBA I,MISO,IA,F860,MISO,MISW
+56161,ITC Midwest LLC,MISO,IA,F860,MISO,MISW
+56162,American Transmission Systems Inc,MISO,IA,F860,MISO,MISW
+309,City of Algona - (IA),SWPP,IA,F860,SPP,SPPN
+405,City of Alta - (IA),SWPP,IA,F860,SPP,SPPN
+4305,City of Coon Rapids,SWPP,IA,F860,SPP,SPPN
+4362,Corn Belt Energy Corporation,SWPP,IA,F860,SPP,SPPN
+4363,Corn Belt Power Coop,SWPP,IA,F860,SPP,SPPN
+5056,City of Denison - (IA),SWPP,IA,F860,SPP,SPPN
+9425,Iowa Lakes Electric Coop,SWPP,IA,F860,SPP,SPPN
+10769,City of Laurens - (IA),SWPP,IA,F860,SPP,SPPN
+11581,City of Manning,SWPP,IA,F860,SPP,SPPN
+14202,"Osceola Electric Coop, Inc",SWPP,IA,F860,SPP,SPPN
+16206,Rock Rapids Municipal Utility,SWPP,IA,F860,SPP,SPPN
+9187,City of Idaho Falls - (ID),PACE,ID,F860,BASN,BASN
+9191,Idaho Power Co,IPCO,ID,F861,BASN,BASN
+14354,PacifiCorp,PACE,ID,F861,BASN,BASN
+14711,Pennsylvania Electric Co,PACE,ID,F860,BASN,BASN
+1738,PacifiCorp,AVA,ID,F860,NWPP,NWPP
+1738,PacifiCorp,BPAT,ID,F860,NWPP,NWPP
+1956,City of Bonners Ferry,BPAT,ID,F860,NWPP,NWPP
+6022,City of Eugene - (OR),BPAT,ID,F860,NWPP,NWPP
+6169,Fall River Rural Elec Coop Inc,BPAT,ID,F861,NWPP,NWPP
+10454,Kootenai Electric Cooperative,AVA,ID,F861,NWPP,NWPP
+11273,Lower Valley Energy Inc,BPAT,ID,F861,NWPP,NWPP
+13758,"Northern Lights, Inc",BPAT,ID,F861,NWPP,NWPP
+20169,Avista Corp,AVA,ID,F861,NWPP,NWPP
+22814,Raft Rural Elec Coop Inc,BPAT,ID,F861,NWPP,NWPP
+97,Adams Electric Coop,MISO,IL,F860,MISO,MISC
+406,City of Altamont - (IL),MISO,IL,F860,MISO,MISC
+2188,City of Breese - (IL),MISO,IL,F860,MISO,MISC
+2634,City of Bushnell - (IL),MISO,IL,F860,MISO,MISC
+3037,City of Carlyle - (IL),MISO,IL,F860,MISO,MISC
+3153,City of Casey - (IL),MISO,IL,F860,MISO,MISC
+4110,Commonwealth Edison Co,MISO,IL,F860,MISO,MISC
+4362,Corn Belt Energy Corporation,MISO,IL,F861,MISO,MISC
+5748,Electric Energy Inc,EEI,IL,F860,MISO,MISC
+6192,City of Farmer City - (IL),MISO,IL,F860,MISO,MISC
+6417,City of Flora - (IL),MISO,IL,F860,MISO,MISC
+6764,Village of Freeburg - (IL),MISO,IL,F860,MISO,MISC
+7095,City of Geneseo - (IL),MISO,IL,F860,MISO,MISC
+8573,City of Highland,MISO,IL,F860,MISO,MISC
+9209,Illinois Rural Electric Coop,MISO,IL,F860,MISO,MISC
+9750,"Jo-Carroll Energy, Inc",MISO,IL,F860,MISO,MISC
+11736,City of Marshall - (IL),MISO,IL,F860,MISO,MISC
+12167,City of McLeansboro - (IL),MISO,IL,F860,MISO,MISC
+12341,MidAmerican Energy Co,MISO,IL,F861,MISO,MISC
+13032,Mt Carmel Public Utility Co,MISO,IL,F861,MISO,MISC
+14840,City of Peru - (IL),MISO,IL,F860,MISO,MISC
+15388,City of Princeton - (IL),MISO,IL,F860,MISO,MISC
+15772,City of Red Bud - (IL),MISO,IL,F860,MISO,MISC
+16198,City of Rock Falls - (IL),MISO,IL,F860,MISO,MISC
+17585,"Southeastern IL Elec Coop, Inc",MISO,IL,F860,MISO,MISC
+17697,Southwestern Electric Coop Inc - (IL),MISO,IL,F861,MISO,MISC
+17828,City of Springfield - (IL),MISO,IL,F861,MISO,MISC
+18277,City of Sullivan - (IL),MISO,IL,F860,MISO,MISC
+19436,Union Electric Co - (MO),MISO,IL,F860,MISO,MISC
+20180,City of Waterloo - (IL),MISO,IL,F860,MISO,MISC
+40307,"Prairie Power, Inc",MISO,IL,F860,MISO,MISC
+56697,Ameren Illinois Company,MISO,IL,F861,MISO,MISC
+56697,Ameren Illinois Company,EEI,IL,F860,MISO,MISC
+4110,Commonwealth Edison Co,PJM,IL,F861,PJM,PJMC
+6641,4-County Electric Power Assn,PJM,IL,F860,PJM,PJMC
+7096,City of Geneva- (IL),PJM,IL,F861,PJM,PJMC
+12341,MidAmerican Energy Co,PJM,IL,F860,PJM,PJMC
+13208,City of Naperville - (IL),PJM,IL,F861,PJM,PJMC
+16179,Rochelle Municipal Utilities,PJM,IL,F861,PJM,PJMC
+20824,Village of Winnetka - (IL),PJM,IL,F860,PJM,PJMC
+56697,Ameren Illinois Company,PJM,IL,F860,PJM,PJMC
+261,AGC Division of APG Inc,MISO,IN,F861,MISO,MISC
+4508,"Crawfordsville Elec, Lgt & Pwr",MISO,IN,F861,MISO,MISC
+4960,Decatur County Rural E M C,MISO,IN,F860,MISO,MISC
+5416,"Duke Energy Carolinas, LLC",MISO,IN,F860,MISO,MISC
+6993,City of Gas City - (IN),MISO,IN,F860,MISO,MISC
+8179,Harrison County Rural E M C,MISO,IN,F860,MISO,MISC
+8447,Hendricks County Rural E M C,MISO,IN,F860,MISO,MISC
+8466,Henry County Rural E M C,MISO,IN,F860,MISO,MISC
+9088,City of Huntingburg - (IN),MISO,IN,F860,MISO,MISC
+9234,Indiana Municipal Power Agency,MISO,IN,F860,MISO,MISC
+9267,"Hoosier Energy R E C, Inc",MISO,IN,F860,MISO,MISC
+9273,Indianapolis Power & Light Co,MISO,IN,F861,MISO,MISC
+9324,Indiana Michigan Power Co,MISO,IN,F860,MISO,MISC
+9576,Jackson County Rural E M C - (IN),MISO,IN,F860,MISO,MISC
+9665,Jasper County Rural E M C,MISO,IN,F860,MISO,MISC
+9666,Jay County Rural E M C,MISO,IN,F860,MISO,MISC
+9778,Johnson County Rural E M C,MISO,IN,F860,MISO,MISC
+11142,City of Logansport - (IN),MISO,IN,F860,MISO,MISC
+12377,Midwest Energy Cooperative,MISO,IN,F860,MISO,MISC
+12929,South Central Indiana REMC,MISO,IN,F860,MISO,MISC
+13756,Northern Indiana Pub Serv Co,MISO,IN,F861,MISO,MISC
+14160,Orange County Rural E M C,MISO,IN,F860,MISO,MISC
+14659,Town of Pendleton - (IN),MISO,IN,F860,MISO,MISC
+14839,City of Peru - (IN),MISO,IN,F860,MISO,MISC
+15470,"Duke Energy Indiana, LLC",MISO,IN,F861,MISO,MISC
+15860,City of Rensselaer - (IN),MISO,IN,F860,MISO,MISC
+16830,City of Scottsburg - (IN),MISO,IN,F860,MISO,MISC
+17633,Southern Indiana Gas & Elec Co,MISO,IN,F861,MISO,MISC
+18538,City of Tell City - (IN),MISO,IN,F860,MISO,MISC
+19445,"Southern Indiana R E C, Inc",MISO,IN,F860,MISO,MISC
+19667,Utilities Dist-Western IN REMC,MISO,IN,F860,MISO,MISC
+20139,City of Washington - (IN),MISO,IN,F860,MISO,MISC
+22822,Clark County Rural E M C - (IN),MISO,IN,F860,MISO,MISC
+27599,Carroll-White REMC,MISO,IN,F860,MISO,MISC
+636,City of Anderson - (IN),PJM,IN,F860,PJM,PJMW
+994,City of Auburn - (IN),PJM,IN,F861,PJM,PJMW
+3230,Town of Centerville - (IN),PJM,IN,F860,PJM,PJMW
+3278,AEP Texas Central Company,PJM,IN,F860,PJM,PJMW
+6735,Town of Frankton - (IN),PJM,IN,F860,PJM,PJMW
+7627,City of Greenfield - (IN),PJM,IN,F860,PJM,PJMW
+9269,Indiana-Kentucky Electric Corp,OVEC,IN,F860,PJM,PJMW
+9324,Indiana Michigan Power Co,PJM,IN,F861,PJM,PJMW
+15470,"Duke Energy Indiana, LLC",PJM,IN,F860,PJM,PJMW
+15989,City of Richmond - (IN),PJM,IN,F860,PJM,PJMW
+27000,Western Area Power Administration,WACM,KS,F861,RMRG,RMRG
+701,City of Anthony - (KS),SWPP,KS,F860,SPP,SPPC
+911,City of Ashland - (KS),SWPP,KS,F860,SPP,SPPC
+998,City of Augusta - (KS),SWPP,KS,F860,SPP,SPPC
+1512,City of Belleville - (KS),SWPP,KS,F860,SPP,SPPC
+1525,City of Beloit - (KS),SWPP,KS,F860,SPP,SPPC
+2641,"Butler Rural El Coop Assn, Inc - (KS)",SWPP,KS,F860,SPP,SPPC
+2774,CMS Electric Coop Inc,SWPP,KS,F860,SPP,SPPC
+3355,City of Chanute,SWPP,KS,F861,SPP,SPPC
+3892,City of Coffeyville - (KS),SWPP,KS,F861,SPP,SPPC
+5860,Empire District Electric Co,SWPP,KS,F861,SPP,SPPC
+5957,City of Erie - (KS),SWPP,KS,F860,SPP,SPPC
+6949,City of Gardner - (KS),SWPP,KS,F860,SPP,SPPC
+6965,City of Garnett - (KS),SWPP,KS,F860,SPP,SPPC
+8703,City of Hoisington - (KS),SWPP,KS,F860,SPP,SPPC
+9011,City of Hugoton - (KS),SWPP,KS,F860,SPP,SPPC
+9996,City of Kansas City - (KS),SWPP,KS,F861,SPP,SPPC
+10000,Evergy Metro,SWPP,KS,F861,SPP,SPPC
+10005,"Evergy Kansas South, Inc",SWPP,KS,F861,SPP,SPPC
+10321,City of Kingman - (KS),SWPP,KS,F860,SPP,SPPC
+10713,City of Larned - (KS),SWPP,KS,F860,SPP,SPPC
+11017,City of Lincoln Center - (KS),SWPP,KS,F860,SPP,SPPC
+11334,"Lyon-Coffey Electric Coop, Inc",SWPP,KS,F860,SPP,SPPC
+12208,City of McPherson - (KS),SWPP,KS,F861,SPP,SPPC
+12242,City of Meade - (KS),SWPP,KS,F860,SPP,SPPC
+12524,Midwest Energy Inc,SWPP,KS,F861,SPP,SPPC
+13095,City of Mulvane - (KS),SWPP,KS,F860,SPP,SPPC
+13799,Prairie Land Electric Coop Inc,SWPP,KS,F860,SPP,SPPC
+13948,City of Oberlin - (KS),SWPP,KS,F860,SPP,SPPC
+14203,City of Osawatomie - (KS),SWPP,KS,F860,SPP,SPPC
+14229,City of Ottawa - (KS),SWPP,KS,F860,SPP,SPPC
+14276,City of Oxford - (KS),SWPP,KS,F860,SPP,SPPC
+15073,"Pioneer Electric Coop, Inc - (KS)",SWPP,KS,F861,SPP,SPPC
+15291,Prairie Energy Coop,SWPP,KS,F860,SPP,SPPC
+15321,City of Pratt- (KS),SWPP,KS,F860,SPP,SPPC
+16988,City of Sharon Springs - (KS),SWPP,KS,F860,SPP,SPPC
+17718,Southwestern Public Service Co,SWPP,KS,F860,SPP,SPPC
+18315,Sunflower Electric Power Corp,SWPP,KS,F860,SPP,SPPC
+18642,Tennessee Valley Authority,SWPP,KS,F860,SPP,SPPC
+19160,"Tri-County Electric Coop, Inc (OK)",SWPP,KS,F861,SPP,SPPC
+19820,Victory Electric Coop Assn Inc,SWPP,KS,F860,SPP,SPPC
+20510,"Wheatland Electric Coop, Inc",SWPP,KS,F860,SPP,SPPC
+20813,City of Winfield - (KS),SWPP,KS,F861,SPP,SPPC
+21533,City of Minneapolis - (KS),SWPP,KS,F860,SPP,SPPC
+22500,Westar Energy Inc,SWPP,KS,F861,SPP,SPPC
+56526,"ITC Great Plains, LLC",SWPP,KS,F860,SPP,SPPC
+60839,Southern Pioneer Electric Company,SWPP,KS,F861,SPP,SPPC
+64196,"4 Rivers Electric Cooperative, Inc.",SWPP,KS,F860,SPP,SPPC
+1692,Big Rivers Electric Corp,MISO,KY,F860,MISO,MISC
+8449,Henderson City Utility Comm,MISO,KY,F861,MISO,MISC
+9964,Kenergy Corp,MISO,KY,F860,MISO,MISC
+17633,Southern Indiana Gas & Elec Co,MISO,KY,F860,MISO,MISC
+3542,Duke Energy Ohio Inc,PJM,KY,F860,PJM,PJMW
+5580,"East Kentucky Power Coop, Inc",PJM,KY,F860,PJM,PJMW
+9575,Jackson Energy Coop Corp - (KY),PJM,KY,F860,PJM,PJMW
+10171,Kentucky Utilities Co,PJM,KY,F860,PJM,PJMW
+18498,Taylor County Rural E C C,PJM,KY,F860,PJM,PJMW
+19446,Duke Energy Kentucky,PJM,KY,F861,PJM,PJMW
+22053,Kentucky Power Co,PJM,KY,F861,PJM,PJMW
+10171,Kentucky Utilities Co,LGEE,KY,F861,SRCE,SRCE
+11249,Louisville Gas & Electric Co,LGEE,KY,F861,SRCE,SRCE
+14268,City of Owensboro - (KY),LGEE,KY,F861,SRCE,SRCE
+14459,City of Paris - (KY),LGEE,KY,F860,SRCE,SRCE
+18642,Tennessee Valley Authority,TVA,KY,F861,SRCE,SRCE
+21093,3 Phases Renewables Inc,LGEE,KY,F860,SRCE,SRCE
+298,City of Alexandria - (LA),MISO,LA,F861,MISO,MISS
+3265,Cleco Power LLC,MISO,LA,F861,MISO,MISS
+4153,"Concordia Electric Coop, Inc",MISO,LA,F861,MISO,MISS
+8884,Terrebonne Parish Consol Gov't,MISO,LA,F861,MISO,MISS
+9096,City of Lafayette - (LA),MISO,LA,F861,MISO,MISS
+11241,Entergy Louisiana LLC,MISO,LA,F861,MISO,MISS
+12927,Morgan City - (LA),MISO,LA,F860,MISO,MISS
+13228,City of Natchitoches,MISO,LA,F861,MISO,MISS
+13478,"Entergy New Orleans, LLC",MISO,LA,F861,MISO,MISS
+13483,City of New Roads - (LA),MISO,LA,F860,MISO,MISS
+15175,Pointe Coupee Elec Member Corp,MISO,LA,F861,MISO,MISS
+15728,City of Rayne - (LA),MISO,LA,F860,MISO,MISS
+16463,City of Ruston - (LA),MISO,LA,F861,MISO,MISS
+17684,Southwest Louisiana E M C,MISO,LA,F861,MISO,MISS
+17698,Southwestern Electric Power Co,MISO,LA,F860,MISO,MISS
+55936,Entergy Gulf States - LA LLC,MISO,LA,F860,MISO,MISS
+17698,Southwestern Electric Power Co,SWPP,LA,F861,SPP,SPPS
+902,Town of Ashburnham - (MA),ISNE,MA,F860,ISNE,ISNE
+2144,Town of Braintree - (MA),ISNE,MA,F861,ISNE,ISNE
+3447,Town of Chester,ISNE,MA,F860,ISNE,ISNE
+3477,City of Chicopee - (MA),ISNE,MA,F861,ISNE,ISNE
+4147,Town of Concord - (MA),ISNE,MA,F860,ISNE,ISNE
+6374,Fitchburg Gas & Elec Light Co,ISNE,MA,F861,ISNE,ISNE
+6641,4-County Electric Power Assn,ISNE,MA,F860,ISNE,ISNE
+8774,City of Holyoke - (MA),ISNE,MA,F861,ISNE,ISNE
+8973,Town of Hudson - (MA),ISNE,MA,F861,ISNE,ISNE
+9442,Town of Ipswich - (MA),ISNE,MA,F860,ISNE,ISNE
+11085,Town of Littleton - (MA),ISNE,MA,F860,ISNE,ISNE
+11586,Town of Mansfield - (MA),ISNE,MA,F861,ISNE,ISNE
+11624,City of Marblehead - (MA),ISNE,MA,F860,ISNE,ISNE
+11804,Massachusetts Electric Co,ISNE,MA,F860,ISNE,ISNE
+12296,Town of Merrimac - (MA),ISNE,MA,F860,ISNE,ISNE
+12473,Town of Middleborough - (MA),ISNE,MA,F861,ISNE,ISNE
+12477,Town of Middleton,ISNE,MA,F860,ISNE,ISNE
+13206,Nantucket Electric Co,ISNE,MA,F860,ISNE,ISNE
+13433,New England Power Company,ISNE,MA,F860,ISNE,ISNE
+13511,New York State Elec & Gas Corp,ISNE,MA,F860,ISNE,ISNE
+13679,Town of North Attleborough - (MA),ISNE,MA,F861,ISNE,ISNE
+13839,City of Norwood - (MA),ISNE,MA,F861,ISNE,ISNE
+14605,City of Peabody - (MA),ISNE,MA,F861,ISNE,ISNE
+15371,Town of Princeton - (MA),ISNE,MA,F860,ISNE,ISNE
+15472,Public Service Co of NH,ISNE,MA,F860,ISNE,ISNE
+15748,Town of Reading - (MA),ISNE,MA,F860,ISNE,ISNE
+17127,Town of Shrewsbury - (MA),ISNE,MA,F860,ISNE,ISNE
+17609,Southern California Edison Co,ISNE,MA,F860,ISNE,ISNE
+18087,Town of Sterling - (MA),ISNE,MA,F860,ISNE,ISNE
+18488,City of Taunton,ISNE,MA,F861,ISNE,ISNE
+18546,Town of Templeton - (MA),ISNE,MA,F860,ISNE,ISNE
+20310,Town of Wellesley - (MA),ISNE,MA,F861,ISNE,ISNE
+20326,Town of West Boylston - (MA),ISNE,MA,F860,ISNE,ISNE
+20455,Western Massachusetts Electric Company,ISNE,MA,F860,ISNE,ISNE
+20481,City of Westfield - (MA),ISNE,MA,F861,ISNE,ISNE
+24590,Unitil Energy Systems,ISNE,MA,F860,ISNE,ISNE
+44388,New England Elec Transm'n Corp,ISNE,MA,F860,ISNE,ISNE
+49848,Massachusetts Bay Trans Authority,ISNE,MA,F861,ISNE,ISNE
+54913,NSTAR Electric Company,ISNE,MA,F861,ISNE,ISNE
+59497,Eversource,ISNE,MA,F860,ISNE,ISNE
+ ,,ISNE,MA,F860,ISNE,ISNE
+84,A & N Electric Coop,PJM,MD,F860,PJM,PJME
+332,Allegheny Electric Coop Inc,PJM,MD,F860,PJM,PJME
+1167,Baltimore Gas & Electric Co,PJM,MD,F861,PJM,PJME
+1615,Town of Berlin - (MD),PJM,MD,F860,PJM,PJME
+3503,"Choptank Electric Coop, Inc",PJM,MD,F860,PJM,PJME
+5027,Delmarva Power,PJM,MD,F861,PJM,PJME
+5625,Easton Utilities Comm,PJM,MD,F860,PJM,PJME
+14711,Pennsylvania Electric Co,PJM,MD,F860,PJM,PJME
+14940,PECO Energy Co,PJM,MD,F860,PJM,PJME
+15263,The Potomac Edison Company,PJM,MD,F861,PJM,PJMW
+15270,Potomac Electric Power Co,PJM,MD,F861,PJM,PJME
+15466,Public Service Co of Colorado,PJM,MD,F860,PJM,PJME
+17637,Southern Maryland Elec Coop Inc,PJM,MD,F861,PJM,PJME
+1179,Versant Power,ISNE,ME,F861,ISNE,ISNE
+1179,Versant Power,NBSO,ME,F861,ISNE,ISNE
+3266,Central Maine Power Co,ISNE,ME,F861,ISNE,ISNE
+5609,Eastern Maine Electric Coop,NBSO,ME,F861,ISNE,ISNE
+6641,4-County Electric Power Assn,NBSO,ME,F860,ISNE,ISNE
+8780,"Fox Islands Electric Coop, Inc",ISNE,ME,F860,ISNE,ISNE
+11477,Town of Madison - (ME),ISNE,ME,F860,ISNE,ISNE
+15472,Public Service Co of NH,ISNE,ME,F860,ISNE,ISNE
+392,Alpena Power Co,MISO,MI,F860,MISO,MISE
+659,American Transmission Co,MISO,MI,F860,MISO,MISW
+1366,City of Bay City - (MI),MISO,MI,F861,MISO,MISE
+3436,Cherryland Electric Coop Inc,MISO,MI,F860,MISO,MISE
+3828,Cloverland Electric Co-op,MISO,MI,F861,MISO,MISW
+3915,Coldwater Board of Public Util,MISO,MI,F860,MISO,MISE
+4254,Consumers Energy Co,MISO,MI,F861,MISO,MISE
+4562,City of Croswell - (MI),MISO,MI,F860,MISO,MISE
+4604,City of Crystal Falls,MISO,MI,F860,MISO,MISW
+5109,DTE Electric Company,MISO,MI,F861,MISO,MISE
+6641,4-County Electric Power Assn,MISO,MI,F860,MISO,MISE
+7483,City of Grand Haven - (MI),MISO,MI,F861,MISO,MISE
+8205,City of Hart Hydro - (MI),MISO,MI,F860,MISO,MISE
+8631,Hillsdale Board of Public Wks,MISO,MI,F860,MISO,MISE
+8723,City of Holland,MISO,MI,F861,MISO,MISE
+10704,City of Lansing - (MI),MISO,MI,F861,MISO,MISE
+11268,City of Lowell - (MI),MISO,MI,F860,MISO,MISE
+11701,City of Marquette - (MI),MISO,MI,F861,MISO,MISW
+11713,City of Marshall - (MI),MISO,MI,F860,MISO,MISE
+13525,Newberry Water & Light Board,MISO,MI,F860,MISO,MISE
+13780,Northern States Power Co,MISO,MI,F861,MISO,MISW
+13826,City of Norway,MISO,MI,F860,MISO,MISW
+15246,City of Portland - (MI),MISO,MI,F860,MISO,MISE
+15340,Presque Isle Elec & Gas Coop,MISO,MI,F860,MISO,MISE
+17886,City of St Louis - (MI),MISO,MI,F860,MISO,MISE
+18895,Thumb Electric Coop of Mich,MISO,MI,F860,MISO,MISE
+19125,City of Traverse City - (MI),MISO,MI,F860,MISO,MISE
+19578,Upper Peninsula Power Company,MISO,MI,F861,MISO,MISW
+20845,Wolverine Power Marketing Coop,MISO,MI,F861,MISO,MISE
+20847,Wisconsin Electric Power Co,MISO,MI,F861,MISO,MISW
+20860,Wisconsin Public Service Corp,MISO,MI,F860,MISO,MISW
+20910,Wolverine Power Supply Coop,MISO,MI,F860,MISO,MISE
+21048,Wyandotte Municipal Serv Comm,MISO,MI,F861,MISO,MISE
+21158,City of Zeeland - (MI),MISO,MI,F861,MISO,MISE
+38084,Great Lakes Energy Coop,MISO,MI,F860,MISO,MISE
+56068,International Transmission Company DBA I,MISO,MI,F860,MISO,MISE
+56161,ITC Midwest LLC,MISO,MI,F860,MISO,MISE
+56163,"Michigan Electric Transmission Company,",MISO,MI,F860,MISO,MISE
+60631,Upper Michigan Energy Resources Corp.,MISO,MI,F861,MISO,MISW
+60744,ITC Interconnection LLC,MISO,MI,F860,MISO,MISE
+9324,Indiana Michigan Power Co,PJM,MI,F861,PJM,PJMW
+18252,City of Sturgis,PJM,MI,F861,PJM,PJMW
+56068,International Transmission Company DBA I,PJM,MI,F860,PJM,PJMW
+155,Agralite Electric Coop,MISO,MN,F861,MISO,MISW
+295,City of Alexandria - (MN),MISO,MN,F861,MISO,MISW
+689,Connexus Energy,MISO,MN,F860,MISO,MISW
+1573,City of Benson - (MN),MISO,MN,F860,MISO,MISW
+1871,City of Blooming Prairie - (MN),MISO,MN,F860,MISO,MISW
+1883,Blue Earth Light & Water,MISO,MN,F860,MISO,MISW
+2138,Brainerd Public Utilities,MISO,MN,F860,MISO,MISW
+2485,City of Buffalo - (MN),MISO,MN,F860,MISO,MISW
+4716,Dairyland Power Coop,MISO,MN,F860,MISO,MISW
+5015,Delano Municipal Utilities,MISO,MN,F860,MISO,MISW
+5111,City of Detroit Lakes - (MN),MISO,MN,F860,MISO,MISW
+5575,City of East Grand Forks - (MN),MISO,MN,F860,MISO,MISW
+5773,City of Elk River,MISO,MN,F861,MISO,MISW
+5905,Excelsior Electric Member Corp,MISO,MN,F860,MISO,MISW
+6138,City of Fairfax - (MN),MISO,MN,F860,MISO,MISW
+6151,Fairmont Public Utilities Comm,MISO,MN,F860,MISO,MISW
+7292,Glencoe Light & Power Comm,MISO,MN,F860,MISO,MISW
+7487,City of Grand Marais - (MN),MISO,MN,F860,MISO,MISW
+7494,City of Granite Falls - (MN),MISO,MN,F860,MISO,MISW
+7570,Great River Energy,MISO,MN,F860,MISO,MISW
+7969,City of Halstad - (MN),MISO,MN,F860,MISO,MISW
+9130,Hutchinson Utilities Comm,MISO,MN,F861,MISO,MISW
+9417,Interstate Power and Light Co,MISO,MN,F860,MISO,MISW
+9650,City of Janesville - (MN),MISO,MN,F860,MISO,MISW
+10179,Kenyon Municipal Utilities,MISO,MN,F860,MISO,MISW
+10596,City of Lake Crystal - (MN),MISO,MN,F860,MISO,MISW
+10618,Lake Region Electric Cooperative - (MN),MISO,MN,F860,MISO,MISW
+10622,City of Lakefield - (MN),MISO,MN,F860,MISO,MISW
+10685,Lanesboro Public Utility Comm,MISO,MN,F860,MISO,MISW
+10814,City of Le Sueur - (MN),MISO,MN,F860,MISO,MISW
+11064,Litchfield Public Utilities,MISO,MN,F860,MISO,MISW
+11332,City of Luverne - (MN),MISO,MN,F860,MISO,MISW
+11731,City of Marshall - (MN),MISO,MN,F861,MISO,MISW
+12286,Melrose Public Utilities,MISO,MN,F860,MISO,MISW
+12647,"ALLETE, Inc.",MISO,MN,F861,MISO,MISW
+12897,Moose Lake Water & Light Comm,MISO,MN,F860,MISO,MISW
+12900,City of Mora - (MN),MISO,MN,F860,MISO,MISW
+13048,City of Mountain Lake - (MN),MISO,MN,F860,MISO,MISW
+13480,New Prague Utilities Comm,MISO,MN,F860,MISO,MISW
+13681,North Branch Water & Light Comm,MISO,MN,F860,MISO,MISW
+13684,Nobles Cooperative Electric,MISO,MN,F860,MISO,MISW
+13780,Northern States Power Co,MISO,MN,F860,MISO,MISW
+13781,Northern States Power Co - Minnesota,MISO,MN,F861,MISO,MISW
+13815,Northwestern Wisconsin Elec Co,MISO,MN,F861,MISO,MISW
+14232,Otter Tail Power Co,MISO,MN,F861,MISO,MISW
+14246,City of Owatonna - (MN),MISO,MN,F860,MISO,MISW
+14715,PPL Electric Utilities Corp,MISO,MN,F860,MISO,MISW
+14716,Pennsylvania Power Co,MISO,MN,F860,MISO,MISW
+15387,Princeton Public Utils Comm,MISO,MN,F860,MISO,MISW
+15793,Redwood Falls Public Util Comm,MISO,MN,F860,MISO,MISW
+15845,Renville-Sibley Coop Pwr Assn,MISO,MN,F860,MISO,MISW
+16181,Rochester Public Utilities,MISO,MN,F861,MISO,MISW
+16971,Shakopee Public Utilities Comm,MISO,MN,F860,MISO,MISW
+17267,Sioux Valley SW Elec Coop,MISO,MN,F860,MISO,MISW
+17550,South Central Electric Assn,MISO,MN,F860,MISO,MISW
+17824,Spring Valley Pub Utils Comm,MISO,MN,F860,MISO,MISW
+17836,Springfield Public Utils Comm - (MN),MISO,MN,F860,MISO,MISW
+17876,City of St James - (MN),MISO,MN,F860,MISO,MISW
+18820,City of Thief River Falls,MISO,MN,F860,MISO,MISW
+19237,Truman Public Utilities Comm,MISO,MN,F860,MISO,MISW
+19883,City of Virginia - (MN),MISO,MN,F860,MISO,MISW
+20430,City of Westbrook,MISO,MN,F860,MISO,MISW
+20737,Willmar Municipal Utilities,MISO,MN,F861,MISO,MISW
+20806,City of Windom,MISO,MN,F860,MISO,MISW
+20996,Wright-Hennepin Coop Elec Assn,MISO,MN,F860,MISO,MISW
+21013,City of Worthington - (MN),MISO,MN,F861,MISO,MISW
+25177,Dakota Electric Association,MISO,MN,F860,MISO,MISW
+29295,City of Wells - (MN),MISO,MN,F860,MISO,MISW
+29305,City of Madelia - (MN),MISO,MN,F860,MISO,MISW
+40580,Southern Minnesota Mun P Agny,MISO,MN,F860,MISO,MISW
+56068,International Transmission Company DBA I,MISO,MN,F860,MISO,MISW
+56161,ITC Midwest LLC,MISO,MN,F860,MISO,MISW
+150,Adrian Public Utilities Comm,SWPP,MN,F860,SPP,SPPN
+11332,City of Luverne - (MN),SWPP,MN,F860,SPP,SPPN
+12894,City of Moorhead - (MN),SWPP,MN,F861,SPP,SPPN
+27000,Western Area Power Administration,SWPP,MN,F861,SPP,SPPN
+924,"Associated Electric Coop, Inc",AECI,MO,F860,MISO,MISC
+3242,Central Electric Power Coop - (MO),AECI,MO,F860,MISO,MISC
+3600,Citizens Electric Corporation - (MO),MISO,MO,F861,MISO,MISC
+4045,City of Columbia - (MO),MISO,MO,F861,MISO,MISC
+5686,City of El Dorado Springs - (MO),AECI,MO,F860,MISO,MISC
+6205,City of Farmington - (MO),MISO,MO,F861,MISO,MISC
+6839,City of Fulton - (MO),AECI,MO,F860,MISO,MISC
+8055,City of Hannibal - (MO),MISO,MO,F861,MISO,MISC
+8055,City of Hannibal - (MO),AECI,MO,F860,MISO,MISC
+10603,"Laclede Electric Coop, Inc",AECI,MO,F860,MISO,MISC
+10832,City of Lebanon - (MO),AECI,MO,F861,MISO,MISC
+11626,City of Marceline - (MO),MISO,MO,F860,MISO,MISC
+12294,City of Memphis - (MO),AECI,MO,F860,MISO,MISC
+12341,MidAmerican Energy Co,MISO,MO,F860,MISO,MISC
+12802,City of Monroe City - (MO),AECI,MO,F860,MISO,MISC
+13190,"N W Electric Power Coop, Inc",AECI,MO,F860,MISO,MISC
+13738,Northeast Missouri El Pwr Coop,AECI,MO,F860,MISO,MISC
+16259,City of Rolla - (MO),MISO,MO,F861,MISO,MISC
+17106,Sho-Me Power Electric Coop,AECI,MO,F860,MISO,MISC
+17946,City of Stanberry - (MO),AECI,MO,F860,MISO,MISC
+19436,Union Electric Co - (MO),MISO,MO,F861,MISO,MISC
+19474,City of Unionville - (MO),AECI,MO,F860,MISO,MISC
+40382,City of Rockport - (MO),AECI,MO,F860,MISO,MISC
+56697,Ameren Illinois Company,MISO,MO,F860,MISO,MISC
+924,"Associated Electric Coop, Inc",SPA,MO,F860,SPP,SPPC
+2647,City of Butler - (MO),SWPP,MO,F860,SPP,SPPC
+3113,City of Carthage - (MO),SPA,MO,F861,SPP,SPPC
+3113,City of Carthage - (MO),SWPP,MO,F861,SPP,SPPC
+3486,Chillicothe Municipal Utils,SWPP,MO,F860,SPP,SPPC
+3634,City of Nixa - (MO),SWPP,MO,F860,SPP,SPPC
+5860,Empire District Electric Co,SWPP,MO,F861,SPP,SPPC
+6761,City of Fredericktown - (MO),SWPP,MO,F860,SPP,SPPC
+8567,City of Higginsville - (MO),SWPP,MO,F860,SPP,SPPC
+9231,City of Independence - (MO),SWPP,MO,F861,SPP,SPPC
+10000,Evergy Metro,SWPP,MO,F861,SPP,SPPC
+10152,City of Kennett - (MO),SWPP,MO,F860,SPP,SPPC
+10832,City of Lebanon - (MO),SWPP,MO,F860,SPP,SPPC
+11460,City of Macon - (MO),SWPP,MO,F860,SPP,SPPC
+11732,City of Marshall - (MO),SWPP,MO,F860,SPP,SPPC
+12698,Evergy Missouri West,SWPP,MO,F861,SPP,SPPC
+13738,Northeast Missouri El Pwr Coop,SWPP,MO,F860,SPP,SPPC
+15229,City of Poplar Bluff - (MO),SPA,MO,F861,SPP,SPPC
+15229,City of Poplar Bluff - (MO),SWPP,MO,F860,SPP,SPPC
+16259,City of Rolla - (MO),SWPP,MO,F860,SPP,SPPC
+17106,Sho-Me Power Electric Coop,SWPP,MO,F860,SPP,SPPC
+17177,City of Sikeston - (MO),SPA,MO,F861,SPP,SPPC
+17716,Southwestern Power Administration,SPA,MO,F860,SPP,SPPC
+17716,Southwestern Power Administration,SWPP,MO,F860,SPP,SPPC
+17833,City Utilities of Springfield - (MO),SWPP,MO,F861,SPP,SPPC
+19150,Trenton Municipal Utilities - (MO),SWPP,MO,F860,SPP,SPPC
+20224,City of Waynesville - (MO),SWPP,MO,F860,SPP,SPPC
+3702,Clarksdale Public Utilities,MISO,MS,F860,MISO,MISS
+11519,Magnolia Electric Power Assn,MISO,MS,F860,MISO,MISS
+12685,Entergy Mississippi LLC,MISO,MS,F861,MISO,MISS
+17568,South Mississippi El Pwr Assn,MISO,MS,F860,MISO,MISS
+17647,Southern Pine Elec Power Assn,MISO,MS,F860,MISO,MISS
+21095,Public Serv Comm of Yazoo City,MISO,MS,F860,MISO,MISS
+21114,Yazoo Valley Elec Power Assn,MISO,MS,F860,MISO,MISS
+13227,Natchez Trace Elec Power Assn,TVA,MS,F860,SRCE,SRCE
+18642,Tennessee Valley Authority,TVA,MS,F861,SRCE,SRCE
+12686,Mississippi Power Co,SOCO,MS,F861,SRSE,SRSE
+13227,Natchez Trace Elec Power Assn,SOCO,MS,F860,SRSE,SRSE
+17568,South Mississippi El Pwr Assn,SOCO,MS,F860,SRSE,SRSE
+17647,Southern Pine Elec Power Assn,SOCO,MS,F860,SRSE,SRSE
+14354,PacifiCorp,PACE,MT,F860,BASN,BASN
+12199,Montana-Dakota Utilities Co,MISO,MT,F860,MISO,MISW
+1738,PacifiCorp,BPAT,MT,F860,NWPP,NWPP
+6169,Fall River Rural Elec Coop Inc,BPAT,MT,F861,NWPP,NWPP
+6395,Flathead Electric Coop Inc,BPAT,MT,F861,NWPP,NWPP
+7262,"Glacier Electric Coop, Inc",GWA,MT,F860,NWPP,NWPP
+11643,Marias River Electric Coop Inc,WWA,MT,F860,NWPP,NWPP
+12199,Montana-Dakota Utilities Co,NWMT,MT,F860,NWPP,NWPP
+12825,NorthWestern Energy LLC - (MT),NWMT,MT,F861,NWPP,NWPP
+12825,NorthWestern Energy LLC - (MT),GWA,MT,F860,NWPP,NWPP
+13758,"Northern Lights, Inc",BPAT,MT,F861,NWPP,NWPP
+13809,NorthWestern Energy - (SD),NWMT,MT,F860,NWPP,NWPP
+18401,"Sun River Electric Coop, Inc",NWMT,MT,F860,NWPP,NWPP
+20169,Avista Corp,AVA,MT,F861,NWPP,NWPP
+21513,"Fergus Electric Coop, Inc",WAUW,MT,F861,NWPP,NWPP
+27000,Western Area Power Administration,WAUW,MT,F860,NWPP,NWPP
+19545,"Black Hills Power, Inc. d/b/a",WACM,MT,F861,RMRG,RMRG
+1307,Basin Electric Power Coop,SWPP,MT,F860,SPP,SPPN
+12199,Montana-Dakota Utilities Co,SWPP,MT,F861,SPP,SPPN
+12899,Mor-Gran-Sou Electric Coop Inc,SWPP,MT,F860,SPP,SPPN
+27000,Western Area Power Administration,SWPP,MT,F861,SPP,SPPN
+2982,Cape Hatteras Elec Member Corp,PJM,NC,F860,PJM,PJMD
+5416,"Duke Energy Carolinas, LLC",PJM,NC,F860,PJM,PJMD
+5656,Edgecombe-Martin County E M C,PJM,NC,F861,PJM,PJMD
+6710,Town of Edenton - (NC),PJM,NC,F860,PJM,PJMD
+16101,Roanoke Electric Member Corp,PJM,NC,F861,PJM,PJMD
+16788,Town of Scotland Neck - (NC),PJM,NC,F860,PJM,PJMD
+19108,Tideland Electric Member Corp,PJM,NC,F860,PJM,PJMD
+19876,Virginia Electric & Power Co,PJM,NC,F861,PJM,PJMD
+20811,Town of Windsor- (NC),PJM,NC,F860,PJM,PJMD
+21093,3 Phases Renewables Inc,PJM,NC,F860,PJM,PJMD
+232,City of Albemarle - (NC),DUK,NC,F860,SRCA,SRCA
+1889,Blue Ridge Elec Member Corp - (NC),DUK,NC,F860,SRCA,SRCA
+1891,Blue Ridge Mountain EMC - (GA),DUK,NC,F860,SRCA,SRCA
+1987,Town of Bostic - (NC),DUK,NC,F860,SRCA,SRCA
+3046,Duke Energy Progress - (NC),CPLE,NC,F861,SRCA,SRCA
+3046,Duke Energy Progress - (NC),CPLW,NC,F860,SRCA,SRCA
+3046,Duke Energy Progress - (NC),DUK,NC,F860,SRCA,SRCA
+3107,Carteret-Craven El Member Corp,CPLE,NC,F861,SRCA,SRCA
+3437,City of Cherryville - (NC),DUK,NC,F860,SRCA,SRCA
+4150,City of Concord - (NC),DUK,NC,F861,SRCA,SRCA
+4365,Town of Cornelius - (NC),DUK,NC,F860,SRCA,SRCA
+5372,Town of Drexel - (NC),DUK,NC,F860,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",DUK,NC,F861,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",CPLE,NC,F860,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",CPLW,NC,F860,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",YAD,NC,F860,SRCA,SRCA
+5760,City of Elizabeth City - (NC),CPLE,NC,F861,SRCA,SRCA
+6235,Fayetteville Public Works Commission,CPLE,NC,F861,SRCA,SRCA
+6640,Four County Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+6784,French Broad Elec Member Corp,CPLE,NC,F861,SRCA,SRCA
+7027,City of Gastonia - (NC),DUK,NC,F860,SRCA,SRCA
+7496,Town of Granite Falls - (NC),DUK,NC,F860,SRCA,SRCA
+7639,Greenville Utilities Comm,CPLE,NC,F861,SRCA,SRCA
+8571,Town of High Point,DUK,NC,F860,SRCA,SRCA
+9087,Town of Huntersville - (NC),DUK,NC,F860,SRCA,SRCA
+9837,Jones-Onslow Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+10345,City of Kinston - (NC),CPLE,NC,F860,SRCA,SRCA
+10669,Town of Landis - (NC),DUK,NC,F860,SRCA,SRCA
+10966,City of Lexington - (NC),DUK,NC,F860,SRCA,SRCA
+11035,City of Lincolnton - (NC),DUK,NC,F860,SRCA,SRCA
+11291,Lumbee River Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+11291,Lumbee River Elec Member Corp,DUK,NC,F860,SRCA,SRCA
+11515,Town of Maiden - (NC),DUK,NC,F860,SRCA,SRCA
+12801,City of Monroe - (NC),DUK,NC,F860,SRCA,SRCA
+12944,City of Morganton - (NC),DUK,NC,F860,SRCA,SRCA
+15062,Town of Pineville - (NC),DUK,NC,F860,SRCA,SRCA
+15371,Town of Princeton - (MA),CPLE,NC,F860,SRCA,SRCA
+15671,Randolph Electric Member Corp,CPLE,NC,F861,SRCA,SRCA
+15671,Randolph Electric Member Corp,DUK,NC,F860,SRCA,SRCA
+16496,Rutherford Elec Member Corp,DUK,NC,F861,SRCA,SRCA
+16914,Town of Selma - (NC),CPLE,NC,F860,SRCA,SRCA
+17037,City of Shelby - (NC),DUK,NC,F860,SRCA,SRCA
+17451,Town of Smithfield - (NC),CPLE,NC,F860,SRCA,SRCA
+17572,South River Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+18022,City of Statesville - (NC),DUK,NC,F860,SRCA,SRCA
+18956,Tri-County Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+18957,Tri-County Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+19435,Union Electric Membership Corp - (NC),DUK,NC,F860,SRCA,SRCA
+19876,Virginia Electric & Power Co,DUK,NC,F860,SRCA,SRCA
+19981,Wake Electric Membership Corp,CPLE,NC,F860,SRCA,SRCA
+20142,City of Washington - (NC),CPLE,NC,F860,SRCA,SRCA
+20785,City of Wilson,CPLE,NC,F860,SRCA,SRCA
+20785,City of Wilson,DUK,NC,F860,SRCA,SRCA
+21632,EnergyUnited Elec Member Corp,DUK,NC,F861,SRCA,SRCA
+24889,Brunswick Electric Member Corp,CPLE,NC,F860,SRCA,SRCA
+18642,Tennessee Valley Authority,TVA,NC,F861,SRCE,SRCE
+3046,Duke Energy Progress - (NC),SEPA,NC,F860,SRSE,SRSE
+14857,Pitt & Greene Elec Member Corp,SEPA,NC,F860,SRSE,SRSE
+1307,Basin Electric Power Coop,MISO,ND,F860,MISO,MISW
+3279,"Central Power Elec Coop, Inc",MISO,ND,F860,MISO,MISW
+7444,City of Grafton - (ND),MISO,ND,F860,MISO,MISW
+7570,Great River Energy,MISO,ND,F860,MISO,MISW
+8628,City of Hillsboro - (ND),MISO,ND,F860,MISO,MISW
+12199,Montana-Dakota Utilities Co,MISO,ND,F861,MISO,MISW
+12301,Nodak Electric Coop Inc,MISO,ND,F860,MISO,MISW
+12647,"ALLETE, Inc.",MISO,ND,F860,MISO,MISW
+12658,"Minnkota Power Coop, Inc",MISO,ND,F860,MISO,MISW
+13781,Northern States Power Co - Minnesota,MISO,ND,F861,MISO,MISW
+14232,Otter Tail Power Co,MISO,ND,F861,MISO,MISW
+1307,Basin Electric Power Coop,WACM,ND,F860,RMRG,RMRG
+1307,Basin Electric Power Coop,SWPP,ND,F861,SPP,SPPN
+2394,Burke-Divide Electric Coop Inc,SWPP,ND,F861,SPP,SPPN
+12087,McKenzie Electric Coop Inc,SWPP,ND,F860,SPP,SPPN
+12199,Montana-Dakota Utilities Co,SWPP,ND,F860,SPP,SPPN
+20413,Mountrail-Williams Elec Coop,SWPP,ND,F861,SPP,SPPN
+27000,Western Area Power Administration,SWPP,ND,F861,SPP,SPPN
+10260,City of Kimball - (NE),WACM,NE,F860,RMRG,RMRG
+27000,Western Area Power Administration,WACM,NE,F861,RMRG,RMRG
+1435,City of Beaver City - (NE),SWPP,NE,F860,SPP,SPPN
+2599,Burt County Public Power Dist,SWPP,NE,F860,SPP,SPPN
+2643,Butler Public Power District - (NE),SWPP,NE,F860,SPP,SPPN
+2931,Village of Campbell - (NE),SWPP,NE,F860,SPP,SPPN
+3205,Cedar-Knox Public Power Dist,SWPP,NE,F860,SPP,SPPN
+3373,City of Chappell - (NE),SWPP,NE,F860,SPP,SPPN
+4527,City of Crete,SWPP,NE,F860,SPP,SPPN
+4632,Cuming County Public Pwr Dist,SWPP,NE,F860,SPP,SPPN
+4661,City of Curtis - (NE),SWPP,NE,F860,SPP,SPPN
+4671,Custer Public Power District,SWPP,NE,F860,SPP,SPPN
+4911,Dawson Power District,SWPP,NE,F861,SPP,SPPN
+5850,City of Emerson - (NE),SWPP,NE,F860,SPP,SPPN
+6175,City of Falls City - (NE),SWPP,NE,F860,SPP,SPPN
+6723,City of Franklin - (NE),SWPP,NE,F860,SPP,SPPN
+6779,City of Fremont - (NE),SWPP,NE,F860,SPP,SPPN
+7801,Gulf Power Co,SWPP,NE,F860,SPP,SPPN
+8245,City of Hastings - (NE),SWPP,NE,F861,SPP,SPPN
+10967,City of Lexington - (NE),SWPP,NE,F860,SPP,SPPN
+11018,Lincoln Electric System,SWPP,NE,F861,SPP,SPPN
+11251,Loup River Public Power Dist,SWPP,NE,F861,SPP,SPPN
+11481,City of Madison - (NE),SWPP,NE,F860,SPP,SPPN
+13337,Nebraska Public Power District,SWPP,NE,F861,SPP,SPPN
+13664,Norris Public Power District,SWPP,NE,F860,SPP,SPPN
+13698,North Central Public Pwr Dist,SWPP,NE,F860,SPP,SPPN
+14127,Omaha Public Power District,SWPP,NE,F861,SPP,SPPN
+14172,City of Ord - (NE),SWPP,NE,F860,SPP,SPPN
+14656,City of Pender - (NE),SWPP,NE,F860,SPP,SPPN
+15188,Polk County Rural Pub Pwr Dist,SWPP,NE,F860,SPP,SPPN
+15773,City of Red Cloud - (NE),SWPP,NE,F860,SPP,SPPN
+16667,City of Sargent - (NE),SWPP,NE,F860,SPP,SPPN
+16953,City of Seward - (NE),SWPP,NE,F860,SPP,SPPN
+17642,Southern Public Power District,SWPP,NE,F861,SPP,SPPN
+17692,Southwest Public Power Dist,SWPP,NE,F860,SPP,SPPN
+17727,Village of Spalding - (NE),SWPP,NE,F860,SPP,SPPN
+18230,City of Stuart - (NE),SWPP,NE,F860,SPP,SPPN
+18525,City of Tecumseh,SWPP,NE,F860,SPP,SPPN
+19677,City of Valentine - (NE),SWPP,NE,F860,SPP,SPPN
+20219,City of Wayne,SWPP,NE,F860,SPP,SPPN
+20397,City of West Point - (NE),SWPP,NE,F860,SPP,SPPN
+20456,Twin Valleys Public Power Dist,SWPP,NE,F860,SPP,SPPN
+20880,City of Wisner,SWPP,NE,F860,SPP,SPPN
+21111,Perennial Public Power Dist,SWPP,NE,F861,SPP,SPPN
+27000,Western Area Power Administration,SWPP,NE,F860,SPP,SPPN
+40606,City of Grand Island - (NE),SWPP,NE,F861,SPP,SPPN
+ ,,SWPP,NE,F860,SPP,SPPN
+7601,Green Mountain Power Corp,ISNE,NH,F860,ISNE,ISNE
+11196,Town of Littleton - (NH),ISNE,NH,F860,ISNE,ISNE
+13441,New Hampshire Elec Coop Inc,ISNE,NH,F861,ISNE,ISNE
+15472,Public Service Co of NH,ISNE,NH,F861,ISNE,ISNE
+24590,Unitil Energy Systems,ISNE,NH,F861,ISNE,ISNE
+54913,NSTAR Electric Company,ISNE,NH,F860,ISNE,ISNE
+4226,Consolidated Edison Co-NY Inc,NYIS,NJ,F860,NYIS,NYCW
+16213,Rockland Electric Co,NYIS,NJ,F861,NYIS,NYCW
+963,Atlantic City Electric Co,PJM,NJ,F861,PJM,PJME
+6342,First Electric Coop Corp,PJM,NJ,F860,PJM,PJME
+9726,Jersey Central Power & Lt Co,PJM,NJ,F861,PJM,PJME
+13119,City of Murfreesboro,PJM,NJ,F860,PJM,PJME
+14154,Orange & Rockland Utils Inc,PJM,NJ,F860,PJM,PJME
+14328,Pacific Gas & Electric Co.,PJM,NJ,F860,PJM,PJME
+15387,Princeton Public Utils Comm,PJM,NJ,F860,PJM,PJME
+15477,Public Service Elec & Gas Co,PJM,NJ,F861,PJM,PJME
+16213,Rockland Electric Co,PJM,NJ,F861,PJM,PJME
+16864,Seaside Heights Municipal Utility,PJM,NJ,F860,PJM,PJME
+19856,City of Vineland - (NJ),PJM,NJ,F861,PJM,PJME
+55897,PSEG Energy Resources and Trade,PJM,NJ,F860,PJM,PJME
+13314,Navajo Tribal Utility Authority,PACE,NM,F861,BASN,BASN
+6204,City of Farmington - (NM),WACM,NM,F861,RMRG,RMRG
+9699,"Jemez Mountains Elec Coop, Inc",WACM,NM,F860,RMRG,RMRG
+13777,Northern Rio Arriba E Coop Inc,WACM,NM,F860,RMRG,RMRG
+17826,"Springer Electric Coop, Inc",WACM,NM,F860,RMRG,RMRG
+27000,Western Area Power Administration,WACM,NM,F860,RMRG,RMRG
+6198,"Farmers Electric Coop, Inc - (NM)",SWPP,NM,F860,SPP,SPPS
+10817,"Lea County Electric Coop, Inc",SWPP,NM,F860,SPP,SPPS
+17715,Southwestern Electric Coop Inc - (NM),SWPP,NM,F860,SPP,SPPS
+17718,Southwestern Public Service Co,SWPP,NM,F861,SPP,SPPS
+19160,"Tri-County Electric Coop, Inc (OK)",SWPP,NM,F861,SPP,SPPS
+22690,Roosevelt County Elec Coop Inc,SWPP,NM,F861,SPP,SPPS
+803,Arizona Public Service Co,AZPS,NM,F860,SRSG,SRSG
+4071,"Columbus Electric Coop, Inc",PNM,NM,F860,SRSG,SRSG
+4265,Continental Divide El Coop Inc,PNM,NM,F860,SRSG,SRSG
+5701,El Paso Electric Co,EPE,NM,F861,SRSG,SRSG
+5701,El Paso Electric Co,PNM,NM,F860,SRSG,SRSG
+9699,"Jemez Mountains Elec Coop, Inc",PNM,NM,F860,SRSG,SRSG
+10378,"Kit Carson Electric Coop, Inc",PNM,NM,F860,SRSG,SRSG
+11204,Los Alamos County,PNM,NM,F861,SRSG,SRSG
+12901,Mora-San Miguel Elec Coop,PNM,NM,F860,SRSG,SRSG
+15473,Public Service Co of NM,PNM,NM,F861,SRSG,SRSG
+15473,Public Service Co of NM,GRIS,NM,F860,SRSG,SRSG
+16057,"Rio Grande Electric Coop, Inc",EPE,NM,F861,SRSG,SRSG
+17826,"Springer Electric Coop, Inc",PNM,NM,F860,SRSG,SRSG
+19160,"Tri-County Electric Coop, Inc (OK)",PNM,NM,F860,SRSG,SRSG
+19246,City of Truth or Consequences - (NM),PNM,NM,F860,SRSG,SRSG
+27000,Western Area Power Administration,WALC,NM,F861,SRSG,SRSG
+30151,"Tri-State G & T Assn, Inc",PNM,NM,F860,SRSG,SRSG
+56526,"ITC Great Plains, LLC",EPE,NM,F860,SRSG,SRSG
+4356,Colorado River Comm of Nevada,NEVP,NV,F861,BASN,BASN
+13407,Nevada Power Co,NEVP,NV,F861,BASN,BASN
+17166,Sierra Pacific Power Co,NEVP,NV,F861,BASN,BASN
+19840,"Valley Electric Assn, Inc",NEVP,NV,F861,BASN,BASN
+11208,Los Angeles Department of Water & Power,LDWP,NV,F860,CISO,CASO
+16609,San Diego Gas & Electric Co,CISO,NV,F860,CISO,CASO
+17609,Southern California Edison Co,CISO,NV,F860,CISO,CASO
+19840,"Valley Electric Assn, Inc",CISO,NV,F860,CISO,CASO
+22814,Raft Rural Elec Coop Inc,BPAT,NV,F861,NWPP,NWPP
+27000,Western Area Power Administration,WALC,NV,F861,SRSG,SRSG
+3249,Central Hudson Gas & Elec Corp,ISNE,NY,F860,ISNE,ISNE
+6369,Fishers Island Utility Co Inc,ISNE,NY,F860,ISNE,ISNE
+7601,Green Mountain Power Corp,ISNE,NY,F860,ISNE,ISNE
+13573,Niagara Mohawk Power Corp.,ISNE,NY,F860,ISNE,ISNE
+14154,Orange & Rockland Utils Inc,ISNE,NY,F860,ISNE,ISNE
+122,Village of Arcade - (NY),NYIS,NY,F860,NYIS,NYUP
+1970,Village of Boonville - (NY),NYIS,NY,F860,NYIS,NYUP
+3249,Central Hudson Gas & Elec Corp,NYIS,NY,F861,NYIS,NYUP
+4226,Consolidated Edison Co-NY Inc,NYIS,NY,F861,NYIS,NYCW
+6775,Village of Freeport - (NY),NYIS,NY,F861,NYIS,NYCW
+7630,Village of Greenport - (NY),NYIS,NY,F860,NYIS,NYCW
+9645,Jamestown Board of Public Util,NYIS,NY,F861,NYIS,NYUP
+11171,Long Island Power Authority,NYIS,NY,F861,NYIS,NYCW
+11804,Massachusetts Electric Co,NYIS,NY,F860,NYIS,NYUP
+13511,New York State Elec & Gas Corp,NYIS,NY,F861,NYIS,NYUP
+13573,Niagara Mohawk Power Corp.,NYIS,NY,F861,NYIS,NYUP
+14154,Orange & Rockland Utils Inc,NYIS,NY,F860,NYIS,NYUP
+15296,New York Power Authority,NYIS,NY,F861,NYIS,NYUP
+15477,Public Service Elec & Gas Co,NYIS,NY,F860,NYIS,NYCW
+16183,Rochester Gas & Electric Corp,NYIS,NY,F861,NYIS,NYUP
+16217,Village of Rockville Centre - (NY),NYIS,NY,F860,NYIS,NYCW
+14711,Pennsylvania Electric Co,PJM,NY,F861,PJM,PJME
+659,American Transmission Co,PJM,OH,F860,PJM,PJMW
+733,Appalachian Power Co,PJM,OH,F860,PJM,PJMW
+768,City of Arcanum - (OH),PJM,OH,F860,PJM,PJMW
+2054,City of Bowling Green - (OH),PJM,OH,F860,PJM,PJMW
+2205,Village of Brewster - (OH),PJM,OH,F860,PJM,PJMW
+2439,City of Bryan - (OH),PJM,OH,F860,PJM,PJMW
+2502,"Buckeye Rural Elec Coop, Inc",PJM,OH,F861,PJM,PJMW
+3216,City of Celina - (OH),PJM,OH,F860,PJM,PJMW
+3542,Duke Energy Ohio Inc,PJM,OH,F861,PJM,PJMW
+3755,Cleveland Electric Illum Co,PJM,OH,F860,PJM,PJMW
+3762,City of Cleveland - (OH),PJM,OH,F861,PJM,PJMW
+3824,Clyde Light & Power,PJM,OH,F861,PJM,PJMW
+4065,City of Columbus - (OH),PJM,OH,F861,PJM,PJMW
+4683,City of Cuyahoga Falls - (OH),PJM,OH,F860,PJM,PJMW
+4922,Dayton Power & Light Co,PJM,OH,F861,PJM,PJMW
+5336,City of Dover - (OH),PJM,OH,F861,PJM,PJMW
+5580,"East Kentucky Power Coop, Inc",PJM,OH,F860,PJM,PJMW
+5653,Village of Edgerton - (OH),PJM,OH,F860,PJM,PJMW
+6914,City of Galion,PJM,OH,F860,PJM,PJMW
+7100,Village of Genoa - (OH),PJM,OH,F860,PJM,PJMW
+7977,City of Hamilton - (OH),PJM,OH,F861,PJM,PJMW
+9572,Village of Jackson Center - (OH),PJM,OH,F860,PJM,PJMW
+10668,Licking Rural Electric Inc,PJM,OH,F861,PJM,PJMW
+10830,City of Lebanon - (OH),PJM,OH,F861,PJM,PJMW
+11203,Logan County Coop Power & Light,PJM,OH,F860,PJM,PJMW
+12660,Village of Minster - (OH),PJM,OH,F860,PJM,PJMW
+12811,Village of Monroeville - (OH),PJM,OH,F860,PJM,PJMW
+12861,Village of Montpelier - (OH),PJM,OH,F860,PJM,PJMW
+13209,City of Napoleon - (OH),PJM,OH,F860,PJM,PJMW
+13464,Village of New Knoxville - (OH),PJM,OH,F860,PJM,PJMW
+13949,City of Oberlin - (OH),PJM,OH,F860,PJM,PJMW
+13998,Ohio Edison Co,PJM,OH,F860,PJM,PJMW
+14006,Ohio Power Co,PJM,OH,F861,PJM,PJMW
+14015,Ohio Valley Electric Corp,OVEC,OH,F860,PJM,PJMW
+14015,Ohio Valley Electric Corp,PJM,OH,F860,PJM,PJMW
+14194,City of Orrville - (OH),PJM,OH,F861,PJM,PJMW
+14381,City of Painesville,PJM,OH,F860,PJM,PJMW
+15095,City of Piqua - (OH),PJM,OH,F861,PJM,PJMW
+15432,Prospect Corporation,PJM,OH,F860,PJM,PJMW
+16951,Seville Board of Public Affairs,PJM,OH,F860,PJM,PJMW
+17043,City of Shelby - (OH),PJM,OH,F860,PJM,PJMW
+17891,City of St Marys - (OH),PJM,OH,F861,PJM,PJMW
+18997,The Toledo Edison Co,PJM,OH,F860,PJM,PJMW
+19805,Village of Versailles - (OH),PJM,OH,F860,PJM,PJMW
+19951,City of Wadsworth - (OH),PJM,OH,F860,PJM,PJMW
+20077,City of Wapakoneta - (OH),PJM,OH,F861,PJM,PJMW
+20313,Village of Wellington - (OH),PJM,OH,F860,PJM,PJMW
+20477,City of Westerville - (OH),PJM,OH,F861,PJM,PJMW
+56162,American Transmission Systems Inc,PJM,OH,F860,PJM,PJMW
+887,"Arrowhead Electric Coop, Inc",AECI,OK,F860,MISO,SPPS
+924,"Associated Electric Coop, Inc",AECI,OK,F860,MISO,SPPS
+3278,AEP Texas Central Company,SWPP,OK,F860,SPP,SPPS
+5860,Empire District Electric Co,SWPP,OK,F861,SPP,SPPS
+7490,Grand River Dam Authority,SWPP,OK,F861,SPP,SPPS
+10777,Town of Laverne - (OK),SWPP,OK,F860,SPP,SPPS
+11566,City of Mangum - (OK),SWPP,OK,F860,SPP,SPPS
+13807,Northwestern Electric Coop Inc - (OK),SWPP,OK,F860,SPP,SPPS
+14062,Oklahoma Electric Coop Inc,SWPP,OK,F860,SPP,SPPS
+14063,Oklahoma Gas & Electric Co,SWPP,OK,F861,SPP,SPPS
+14063,Oklahoma Gas & Electric Co,SPA,OK,F860,SPP,SPPS
+14775,People's Electric Cooperative,SWPP,OK,F861,SPP,SPPS
+15202,City of Ponca City - (OK),SWPP,OK,F860,SPP,SPPS
+15474,Public Service Co of Oklahoma,SWPP,OK,F861,SPP,SPPS
+17716,Southwestern Power Administration,SPA,OK,F860,SPP,SPPS
+17716,Southwestern Power Administration,SWPP,OK,F860,SPP,SPPS
+17718,Southwestern Public Service Co,SWPP,OK,F860,SPP,SPPS
+18125,Stillwater Utilities Authority,SWPP,OK,F860,SPP,SPPS
+19160,"Tri-County Electric Coop, Inc (OK)",SWPP,OK,F861,SPP,SPPS
+20404,AEP Texas North Company,SWPP,OK,F860,SPP,SPPS
+20447,"Western Farmers Elec Coop, Inc",SWPP,OK,F860,SPP,SPPS
+22500,Westar Energy Inc,SWPP,OK,F860,SPP,SPPS
+60482,CKenergy Electric Cooperative,SPA,OK,F860,SPP,SPPS
+44372,Oncor Electric Delivery Company LLC,ERCO,OK,F860,TRE,TRE
+9191,Idaho Power Co,IPCO,OR,F861,BASN,BASN
+1736,Blachly-Lane County Coop El Assn,BPAT,OR,F860,NWPP,NWPP
+1738,PacifiCorp,BPAT,OR,F861,NWPP,NWPP
+1738,PacifiCorp,AVRN,OR,F860,NWPP,NWPP
+1738,PacifiCorp,CSTO,OR,F860,NWPP,NWPP
+1738,PacifiCorp,PACW,OR,F860,NWPP,NWPP
+1738,PacifiCorp,PGE,OR,F860,NWPP,NWPP
+3264,Central Lincoln People's Ut Dt,BPAT,OR,F860,NWPP,NWPP
+4005,"Columbia Basin Elec Cooperative, Inc",BPAT,OR,F860,NWPP,NWPP
+6022,City of Eugene - (OR),BPAT,OR,F861,NWPP,NWPP
+6022,City of Eugene - (OR),PGE,OR,F860,NWPP,NWPP
+6582,City of Forest Grove,BPAT,OR,F861,NWPP,NWPP
+8830,Hood River Electric Coop,BPAT,OR,F860,NWPP,NWPP
+10393,PUD No 1 of Klickitat County,BPAT,OR,F860,NWPP,NWPP
+12187,City of McMinnville - (OR),BPAT,OR,F860,NWPP,NWPP
+12439,"Midstate Electric Coop, Inc",BPAT,OR,F860,NWPP,NWPP
+13788,Northern Wasco County PUD,BPAT,OR,F861,NWPP,NWPP
+14109,"Oregon Trail El Cons Coop, Inc",BPAT,OR,F861,NWPP,NWPP
+14354,PacifiCorp,PACW,OR,F861,NWPP,NWPP
+14354,PacifiCorp,AVRN,OR,F860,NWPP,NWPP
+14354,PacifiCorp,BPAT,OR,F860,NWPP,NWPP
+14356,Pacific Power & Light Co,PACW,OR,F860,NWPP,NWPP
+15248,Portland General Electric Co,PGE,OR,F861,NWPP,NWPP
+16555,Salem Electric - (OR),BPAT,OR,F861,NWPP,NWPP
+17839,City of Springfield - (OR),BPAT,OR,F861,NWPP,NWPP
+18260,Surprise Valley Electrification,PACW,OR,F860,NWPP,NWPP
+18917,Tillamook Peoples Utility Dist,BPAT,OR,F860,NWPP,NWPP
+19325,Umatilla Electric Coop Assn,BPAT,OR,F861,NWPP,NWPP
+20169,Avista Corp,BPAT,OR,F860,NWPP,NWPP
+28541,Clatskanie Peoples Util Dist,BPAT,OR,F861,NWPP,NWPP
+40437,Emerald People's Utility Dist,PACW,OR,F861,NWPP,NWPP
+40438,Columbia River Peoples Ut Dist,BPAT,OR,F861,NWPP,NWPP
+15045,Pike County Light & Power Co,NYIS,PA,F861,NYIS,NYUP
+3329,Borough of Chambersburg,PJM,PA,F860,PJM,PJMW
+3597,Citizens Electric Co - (PA),PJM,PA,F860,PJM,PJME
+5487,Duquesne Light Co,PJM,PA,F861,PJM,PJMW
+5935,Borough of Ephrata - (PA),PJM,PA,F860,PJM,PJME
+6342,First Electric Coop Corp,PJM,PA,F860,PJM,PJME
+12390,Metropolitan Edison Co,PJM,PA,F861,PJM,PJME
+13511,New York State Elec & Gas Corp,PJM,PA,F860,PJM,PJMW
+14711,Pennsylvania Electric Co,PJM,PA,F861,PJM,PJME
+14715,PPL Electric Utilities Corp,PJM,PA,F861,PJM,PJME
+14716,Pennsylvania Power Co,PJM,PA,F860,PJM,PJMW
+14940,PECO Energy Co,PJM,PA,F861,PJM,PJME
+15263,The Potomac Edison Company,PJM,PA,F860,PJM,PJMW
+15477,Public Service Elec & Gas Co,PJM,PA,F860,PJM,PJME
+19390,"UGI Utilities, Inc",PJM,PA,F861,PJM,PJME
+20387,West Penn Power Company,PJM,PA,F861,PJM,PJMW
+40167,"Somerset Rural Elec Coop, Inc",PJM,PA,F860,PJM,PJMW
+56162,American Transmission Systems Inc,PJM,PA,F860,PJM,PJME
+1857,Block Island Power Co,ISNE,RI,F860,ISNE,ISNE
+13100,Municipal Electric Authority,ISNE,RI,F860,ISNE,ISNE
+13206,Nantucket Electric Co,ISNE,RI,F860,ISNE,ISNE
+13214,The Narragansett Electric Co,ISNE,RI,F860,ISNE,ISNE
+13433,New England Power Company,ISNE,RI,F860,ISNE,ISNE
+34,City of Abbeville - (SC),DUK,SC,F860,SRCA,SRCA
+1613,Berkeley Electric Coop Inc,SC,SC,F860,SRCA,SRCA
+1890,Blue Ridge Electric Coop Inc - (SC),DUK,SC,F860,SRCA,SRCA
+2212,"Broad River Electric Coop, Inc",DUK,SC,F860,SRCA,SRCA
+3046,Duke Energy Progress - (NC),CPLE,SC,F861,SRCA,SRCA
+3046,Duke Energy Progress - (NC),SCEG,SC,F860,SRCA,SRCA
+3844,"Coastal Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",DUK,SC,F861,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",CPLE,SC,F860,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",SC,SC,F860,SRCA,SRCA
+6894,City of Gaffney - (SC),DUK,SC,F861,SRCA,SRCA
+8786,Horry Electric Coop Inc,SC,SC,F860,SRCA,SRCA
+11019,Little River Electric Coop Inc,DUK,SC,F860,SRCA,SRCA
+11118,Lockhart Power Co,DUK,SC,F860,SRCA,SRCA
+11693,"Marlboro Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
+14164,City of Orangeburg - (SC),SCEG,SC,F861,SRCA,SRCA
+14175,"Tri-County Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
+16606,"Santee Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
+16921,City of Seneca - (SC),DUK,SC,F860,SRCA,SRCA
+17539,South Carolina Electric&Gas Company,SCEG,SC,F861,SRCA,SRCA
+17543,South Carolina Public Service Authority,SC,SC,F861,SRCA,SRCA
+21002,York Electric Coop Inc,DUK,SC,F860,SRCA,SRCA
+5416,"Duke Energy Carolinas, LLC",SEPA,SC,F860,SRSE,SRSE
+1738,PacifiCorp,MISO,SD,F860,MISO,MISW
+12199,Montana-Dakota Utilities Co,MISO,SD,F861,MISO,MISW
+12341,MidAmerican Energy Co,MISO,SD,F861,MISO,MISW
+12710,Missouri Basin Muni Power Agny,MISO,SD,F860,MISO,MISW
+13781,Northern States Power Co - Minnesota,MISO,SD,F861,MISO,MISW
+14232,Otter Tail Power Co,MISO,SD,F861,MISO,MISW
+17585,"Southeastern IL Elec Coop, Inc",MISO,SD,F860,MISO,MISC
+27000,Western Area Power Administration,MISO,SD,F860,MISO,MISW
+1307,Basin Electric Power Coop,WACM,SD,F860,RMRG,RMRG
+19545,"Black Hills Power, Inc. d/b/a",WACM,SD,F861,RMRG,RMRG
+25177,Dakota Electric Association,WACM,SD,F860,RMRG,RMRG
+27000,Western Area Power Administration,WACM,SD,F861,RMRG,RMRG
+1307,Basin Electric Power Coop,SWPP,SD,F860,SPP,SPPN
+1769,"Black Hills Electric Coop, Inc",SWPP,SD,F861,SPP,SPPN
+5552,"East River Elec Pwr Coop, Inc",SWPP,SD,F860,SPP,SPPN
+6615,City of Fort Pierre - (SD),SWPP,SD,F860,SPP,SPPN
+13337,Nebraska Public Power District,SWPP,SD,F861,SPP,SPPN
+13809,NorthWestern Energy - (SD),SWPP,SD,F861,SPP,SPPN
+27000,Western Area Power Administration,SWPP,SD,F860,SPP,SPPN
+814,Entergy Arkansas LLC,MISO,TN,F861,MISO,MISS
+10331,Kingsport Power Co,PJM,TN,F861,PJM,PJMW
+6784,French Broad Elec Member Corp,CPLE,TN,F861,SRCA,SRCA
+1578,Benton County,TVA,TN,F860,SRCE,SRCE
+3408,City of Chattanooga - (TN),TVA,TN,F860,SRCE,SRCE
+4624,Cumberland Elec Member Corp,TVA,TN,F860,SRCE,SRCE
+10171,Kentucky Utilities Co,LGEE,TN,F861,SRCE,SRCE
+10421,Knoxville Utilities Board,TVA,TN,F860,SRCE,SRCE
+12293,City of Memphis - (TN),TVA,TN,F861,SRCE,SRCE
+13119,City of Murfreesboro,TVA,TN,F860,SRCE,SRCE
+13216,Nashville Electric Service,TVA,TN,F860,SRCE,SRCE
+15016,Pickwick Electric Coop,TVA,TN,F860,SRCE,SRCE
+15293,Powell Valley Electric Coop,TVA,TN,F860,SRCE,SRCE
+17694,Southwest Tennessee E M C,TVA,TN,F860,SRCE,SRCE
+18642,Tennessee Valley Authority,TVA,TN,F861,SRCE,SRCE
+18643,Tennessee Valley Electric Coop,TVA,TN,F860,SRCE,SRCE
+40166,"Chickasaw Electric Coop, Inc",TVA,TN,F860,SRCE,SRCE
+4975,Deep East Texas Elec Coop Inc,MISO,TX,F861,MISO,MISS
+8901,CenterPoint Energy,MISO,TX,F860,MISO,MISS
+9668,"Jasper-Newton Elec Coop, Inc",MISO,TX,F861,MISO,MISS
+16613,Sam Houston Electric Coop Inc,MISO,TX,F861,MISO,MISS
+55936,Entergy Gulf States - LA LLC,MISO,TX,F860,MISO,MISS
+55937,Entergy Texas Inc.,MISO,TX,F861,MISO,MISS
+2049,"Bowie-Cass Electric Coop, Inc",SWPP,TX,F861,SPP,SPPS
+11292,City of Lubbock - (TX),SWPP,TX,F861,SPP,SPPS
+13757,North Plains Electric Coop Inc,SWPP,TX,F861,SPP,SPPS
+14063,Oklahoma Gas & Electric Co,SWPP,TX,F860,SPP,SPPS
+16461,"Rusk County Electric Coop, Inc",SWPP,TX,F861,SPP,SPPS
+17561,South Plains Electric Coop Inc,SWPP,TX,F860,SPP,SPPS
+17698,Southwestern Electric Power Co,SWPP,TX,F861,SPP,SPPS
+17718,Southwestern Public Service Co,SWPP,TX,F861,SPP,SPPS
+19160,"Tri-County Electric Coop, Inc (OK)",SWPP,TX,F861,SPP,SPPS
+20404,AEP Texas North Company,SWPP,TX,F860,SPP,SPPS
+20927,"Wood County Electric Coop, Inc",SWPP,TX,F861,SPP,SPPS
+5701,El Paso Electric Co,EPE,TX,F861,SRSG,SRSG
+15473,Public Service Co of NM,PNM,TX,F860,SRSG,SRSG
+1015,Austin Energy,ERCO,TX,F861,TRE,TRE
+1175,"Bandera Electric Coop, Inc",ERCO,TX,F861,TRE,TRE
+1591,"Big Country Electric Coop, Inc",ERCO,TX,F860,TRE,TRE
+1892,"Bluebonnet Electric Coop, Inc",ERCO,TX,F861,TRE,TRE
+2172,Brazos Electric Power Coop Inc,ERCO,TX,F860,TRE,TRE
+2409,Brownsville Public Utilities Board,ERCO,TX,F861,TRE,TRE
+2442,City of Bryan - (TX),ERCO,TX,F861,TRE,TRE
+3278,AEP Texas Central Company,ERCO,TX,F860,TRE,TRE
+3940,City of College Station - (TX),ERCO,TX,F861,TRE,TRE
+4146,Concho Valley Elec Coop Inc,ERCO,TX,F861,TRE,TRE
+5063,City of Denton - (TX),ERCO,TX,F861,TRE,TRE
+5078,"Denton County Elec Coop, Inc",ERCO,TX,F860,TRE,TRE
+6427,City of Floresville,ERCO,TX,F861,TRE,TRE
+6958,City of Garland - (TX),ERCO,TX,F861,TRE,TRE
+7129,City of Georgetown - (TX),ERCO,TX,F861,TRE,TRE
+7370,City of Gonzales - (TX),ERCO,TX,F860,TRE,TRE
+7559,"Grayson-Collin Elec Coop, Inc",ERCO,TX,F861,TRE,TRE
+7634,City of Greenville - (TX),ERCO,TX,F861,TRE,TRE
+7752,Guadalupe Valley Elec Coop Inc,ERCO,TX,F861,TRE,TRE
+8898,Houston County Elec Coop Inc,ERCO,TX,F861,TRE,TRE
+8901,CenterPoint Energy,ERCO,TX,F860,TRE,TRE
+10649,Lamar County Elec Coop Assn,ERCO,TX,F861,TRE,TRE
+11269,Lower Colorado River Authority,ERCO,TX,F860,TRE,TRE
+13418,City of New Braunfels - (TX),ERCO,TX,F861,TRE,TRE
+14354,PacifiCorp,ERCO,TX,F860,TRE,TRE
+14626,"Pedernales Electric Coop, Inc",ERCO,TX,F861,TRE,TRE
+15473,Public Service Co of NM,ERCO,TX,F860,TRE,TRE
+16057,"Rio Grande Electric Coop, Inc",ERCO,TX,F861,TRE,TRE
+16604,City of San Antonio - (TX),ERCO,TX,F861,TRE,TRE
+16638,"San Bernard Electric Coop, Inc",ERCO,TX,F861,TRE,TRE
+16900,City of Seguin - (TX),ERCO,TX,F861,TRE,TRE
+17008,Sharyland Utilities LP,ERCO,TX,F860,TRE,TRE
+17583,"South Texas Electric Coop, Inc",ERCO,TX,F860,TRE,TRE
+17716,Southwestern Power Administration,ERCO,TX,F860,TRE,TRE
+17718,Southwestern Public Service Co,ERCO,TX,F860,TRE,TRE
+19490,United Electric Coop Service Inc - (TX),ERCO,TX,F860,TRE,TRE
+20404,AEP Texas North Company,ERCO,TX,F860,TRE,TRE
+20948,Wise Electric Coop Inc,ERCO,TX,F860,TRE,TRE
+28604,Kerrville Public Utility Board,ERCO,TX,F861,TRE,TRE
+39347,"East Texas Electric Coop, Inc",ERCO,TX,F860,TRE,TRE
+40051,Texas-New Mexico Power Co,ERCO,TX,F860,TRE,TRE
+44372,Oncor Electric Delivery Company LLC,ERCO,TX,F860,TRE,TRE
+50174,Electric Transmission Texas LLC,ERCO,TX,F860,TRE,TRE
+60065,Cross Texas Transmission,ERCO,TX,F860,TRE,TRE
+60066,Wind Energy Transmission Texas LLC,ERCO,TX,F860,TRE,TRE
+2010,City of Bountiful,PACE,UT,F860,BASN,BASN
+2220,Brigham City Corporation,PACE,UT,F860,BASN,BASN
+5932,City of Ephraim - (UT),PACE,UT,F860,BASN,BASN
+8366,Heber Light & Power Company,PACE,UT,F860,BASN,BASN
+9128,Hurricane City Power,PACE,UT,F860,BASN,BASN
+11135,City of Logan - (UT),PACE,UT,F861,BASN,BASN
+11588,City of Manti - (UT),PACE,UT,F860,BASN,BASN
+13037,City of Mt Pleasant - (UT),PACE,UT,F860,BASN,BASN
+13137,City of Murray - (UT),PACE,UT,F860,BASN,BASN
+13314,Navajo Tribal Utility Authority,PACE,UT,F861,BASN,BASN
+14354,PacifiCorp,PACE,UT,F861,BASN,BASN
+14600,Payson City Corporation,PACE,UT,F860,BASN,BASN
+17845,City of Springville - (UT),PACE,UT,F860,BASN,BASN
+17874,City of St George,PACE,UT,F861,BASN,BASN
+18205,Strawberry Water Users Assn,PACE,UT,F860,BASN,BASN
+18206,Strawberry Electric Serv Dist,PACE,UT,F861,BASN,BASN
+20135,City of Washington - (UT),PACE,UT,F860,BASN,BASN
+40165,"Dixie Escalante R E A, Inc",PACE,UT,F860,BASN,BASN
+40230,Deseret Generation & Tran Coop,PACE,UT,F860,BASN,BASN
+40575,Utah Associated Mun Power Sys,PACE,UT,F860,BASN,BASN
+11208,Los Angeles Department of Water & Power,LDWP,UT,F860,CISO,CASO
+40576,Intermountain Power Agency,LDWP,UT,F860,CISO,CASO
+22814,Raft Rural Elec Coop Inc,BPAT,UT,F861,NWPP,NWPP
+27000,Western Area Power Administration,WAUW,UT,F860,NWPP,NWPP
+6957,"Garkane Energy Coop, Inc",WACM,UT,F860,RMRG,RMRG
+12866,Moon Lake Electric Assn Inc,WACM,UT,F860,RMRG,RMRG
+14354,PacifiCorp,WACM,UT,F860,RMRG,RMRG
+27000,Western Area Power Administration,WALC,UT,F861,SRSG,SRSG
+84,A & N Electric Coop,PJM,VA,F860,PJM,PJME
+733,Appalachian Power Co,PJM,VA,F861,PJM,PJMW
+1456,Town of Bedford - (VA),PJM,VA,F861,PJM,PJMW
+3291,Central Virginia Electric Coop,PJM,VA,F860,PJM,PJMD
+4117,Community Electric Coop,PJM,VA,F860,PJM,PJMD
+4619,Town of Culpeper- (VA),PJM,VA,F860,PJM,PJMW
+4794,City of Danville - (VA),PJM,VA,F860,PJM,PJMW
+5027,Delmarva Power,PJM,VA,F860,PJM,PJME
+6715,City of Franklin - (VA),PJM,VA,F860,PJM,PJMD
+8198,City of Harrisonburg - (VA),PJM,VA,F860,PJM,PJMW
+11560,City of Manassas - (VA),PJM,VA,F860,PJM,PJMD
+11770,City of Martinsville - (VA),PJM,VA,F860,PJM,PJMW
+13640,Northern Virginia Elec Coop,PJM,VA,F860,PJM,PJMD
+15619,City of Radford - (VA),PJM,VA,F860,PJM,PJMW
+16558,City of Salem - (VA),PJM,VA,F861,PJM,PJMW
+17066,Shenandoah Valley Elec Coop,PJM,VA,F860,PJM,PJMW
+19876,Virginia Electric & Power Co,PJM,VA,F861,PJM,PJMD
+19882,Virginia Tech Electric Service,PJM,VA,F860,PJM,PJMW
+20387,West Penn Power Company,PJM,VA,F860,PJM,PJMW
+21244,"Southside Electric Coop, Inc",PJM,VA,F861,PJM,PJMD
+40228,Rappahannock Electric Coop,PJM,VA,F860,PJM,PJMD
+40229,Old Dominion Electric Coop,PJM,VA,F860,PJM,PJMD
+2248,Bristol Virginia Utilities,TVA,VA,F860,SRCE,SRCE
+10171,Kentucky Utilities Co,LGEE,VA,F861,SRCE,SRCE
+1299,"Barton Village, Inc",ISNE,VT,F860,ISNE,ISNE
+2548,City of Burlington Electric - (VT),ISNE,VT,F861,ISNE,ISNE
+7601,Green Mountain Power Corp,ISNE,VT,F861,ISNE,ISNE
+11359,Village of Lyndonville - (VT),ISNE,VT,F860,ISNE,ISNE
+12989,Village of Morrisville - (VT),ISNE,VT,F860,ISNE,ISNE
+13433,New England Power Company,ISNE,VT,F860,ISNE,ISNE
+15472,Public Service Co of NH,ISNE,VT,F860,ISNE,ISNE
+18371,Village of Swanton - (VT),ISNE,VT,F860,ISNE,ISNE
+19791,"Vermont Electric Cooperative, Inc",ISNE,VT,F861,ISNE,ISNE
+19792,"Vermont Electric Power Co, Inc",ISNE,VT,F860,ISNE,ISNE
+20151,Washington Electric Coop - (VT),ISNE,VT,F860,ISNE,ISNE
+27316,Town of Stowe- (VT),ISNE,VT,F860,ISNE,ISNE
+1579,PUD No 1 of Benton County,BPAT,WA,F861,NWPP,NWPP
+1625,Benton Rural Electric Assn,BPAT,WA,F861,NWPP,NWPP
+1625,Benton Rural Electric Assn,PACW,WA,F860,NWPP,NWPP
+1738,PacifiCorp,BPAT,WA,F861,NWPP,NWPP
+1738,PacifiCorp,AVRN,WA,F860,NWPP,NWPP
+1738,PacifiCorp,PGE,WA,F860,NWPP,NWPP
+1738,PacifiCorp,PSEI,WA,F860,NWPP,NWPP
+1738,PacifiCorp,SCL,WA,F860,NWPP,NWPP
+3295,City of Centralia - (WA),BPAT,WA,F861,NWPP,NWPP
+3413,PUD No 1 of Chelan County,CHPD,WA,F861,NWPP,NWPP
+3660,PUD No 1 of Clark County - (WA),BPAT,WA,F860,NWPP,NWPP
+4041,"Columbia Rural Elec Assn, Inc",BPAT,WA,F860,NWPP,NWPP
+4442,PUD No 1 of Cowlitz County,BPAT,WA,F860,NWPP,NWPP
+5326,PUD No 1 of Douglas County,DOPD,WA,F860,NWPP,NWPP
+6149,City of Ellensburg - (WA),BPAT,WA,F861,NWPP,NWPP
+6641,4-County Electric Power Assn,BPAT,WA,F860,NWPP,NWPP
+6716,PUD No 1 of Franklin County,BPAT,WA,F861,NWPP,NWPP
+7548,PUD No 1 of Grays Harbor County,BPAT,WA,F860,NWPP,NWPP
+10393,PUD No 1 of Klickitat County,BPAT,WA,F861,NWPP,NWPP
+10393,PUD No 1 of Klickitat County,PSEI,WA,F860,NWPP,NWPP
+10454,Kootenai Electric Cooperative,AVA,WA,F861,NWPP,NWPP
+10627,Lakeview Light & Power,BPAT,WA,F861,NWPP,NWPP
+10944,PUD No 1 of Lewis County,BPAT,WA,F861,NWPP,NWPP
+12744,Modern Electric Water Company,AVA,WA,F861,NWPP,NWPP
+13758,"Northern Lights, Inc",BPAT,WA,F861,NWPP,NWPP
+14055,PUD No 1 of Okanogan County,DOPD,WA,F861,NWPP,NWPP
+14354,PacifiCorp,PACW,WA,F861,NWPP,NWPP
+14624,PUD No 2 of Grant County,GCPD,WA,F861,NWPP,NWPP
+14653,PUD No 1 of Pend Oreille County,AVA,WA,F861,NWPP,NWPP
+14668,Peninsula Light Company,BPAT,WA,F861,NWPP,NWPP
+15419,PUD No 3 of Mason County,BPAT,WA,F861,NWPP,NWPP
+15500,Puget Sound Energy Inc,PSEI,WA,F861,NWPP,NWPP
+15979,City of Richland - (WA),BPAT,WA,F860,NWPP,NWPP
+16868,City of Seattle - (WA),SCL,WA,F861,NWPP,NWPP
+17470,PUD 1 of Snohomish County,BPAT,WA,F861,NWPP,NWPP
+18429,City of Tacoma - (WA),TPWR,WA,F861,NWPP,NWPP
+20169,Avista Corp,AVA,WA,F861,NWPP,NWPP
+22355,PUD No 1 of Mason County,BPAT,WA,F860,NWPP,NWPP
+40456,PUD No 1 of Whatcom County,BPAT,WA,F861,NWPP,NWPP
+59013,PUD No 1 of Jefferson County,BPAT,WA,F860,NWPP,NWPP
+108,Adams-Columbia Electric Coop,MISO,WI,F861,MISO,MISW
+659,American Transmission Co,MISO,WI,F860,MISO,MISW
+792,City of Argyle - (WI),MISO,WI,F860,MISO,MISW
+1251,Barron Electric Coop,MISO,WI,F860,MISO,MISW
+3156,Village of Cashton - (WI),MISO,WI,F860,MISO,MISW
+3498,Chippewa Valley Electric Coop,MISO,WI,F860,MISO,MISW
+4247,Consolidated Water Power Co,MISO,WI,F860,MISO,MISW
+4715,Dahlberg Light & Power Co,MISO,WI,F860,MISO,MISW
+4716,Dairyland Power Coop,MISO,WI,F860,MISO,MISW
+5417,Dunn County Electric Coop,MISO,WI,F860,MISO,MISW
+5632,Eau Claire Electric Coop,MISO,WI,F860,MISO,MISW
+6274,City of Fennimore - (WI),MISO,WI,F860,MISO,MISW
+9690,Jefferson Utilities,MISO,WI,F860,MISO,MISW
+9922,Jump River Electric Coop Inc,MISO,WI,F860,MISO,MISW
+10056,City of Kaukauna,MISO,WI,F860,MISO,MISW
+10525,La Farge Municipal Electric Co,MISO,WI,F860,MISO,MISW
+11479,Madison Gas & Electric Co,MISO,WI,F861,MISO,MISW
+11571,Manitowoc Public Utilities,MISO,WI,F861,MISO,MISW
+11740,City of Marshfield - (WI),MISO,WI,F861,MISO,MISW
+13466,City of New Lisbon,MISO,WI,F860,MISO,MISW
+13697,North Central Power Co Inc,MISO,WI,F861,MISO,MISW
+13780,Northern States Power Co,MISO,WI,F861,MISO,MISW
+13781,Northern States Power Co - Minnesota,MISO,WI,F860,MISO,MISW
+13815,Northwestern Wisconsin Elec Co,MISO,WI,F861,MISO,MISW
+13936,Oakdale Electric Coop,MISO,WI,F860,MISO,MISW
+13964,Oconto Electric Cooperative,MISO,WI,F860,MISO,MISW
+16740,Scenic Rivers Energy Coop,MISO,WI,F860,MISO,MISW
+17868,St Croix Electric Coop,MISO,WI,F860,MISO,MISW
+18383,Taylor Electric Coop - (WI),MISO,WI,F860,MISO,MISW
+19813,Vernon Electric Coop,MISO,WI,F860,MISO,MISW
+20213,Waupun Utilities,MISO,WI,F860,MISO,MISW
+20847,Wisconsin Electric Power Co,MISO,WI,F861,MISO,MISW
+20856,Wisconsin Power & Light Co,MISO,WI,F861,MISO,MISW
+20860,Wisconsin Public Service Corp,MISO,WI,F861,MISO,MISW
+56162,American Transmission Systems Inc,MISO,WI,F860,MISO,MISW
+733,Appalachian Power Co,PJM,WV,F861,PJM,PJMW
+12796,Monongahela Power Co,PJM,WV,F861,PJM,PJMW
+14006,Ohio Power Co,PJM,WV,F860,PJM,PJMW
+15263,The Potomac Edison Company,PJM,WV,F861,PJM,PJMW
+19876,Virginia Electric & Power Co,PJM,WV,F860,PJM,PJMD
+20387,West Penn Power Company,PJM,WV,F860,PJM,PJMW
+20521,Wheeling Power Co,PJM,WV,F861,PJM,PJMW
+56162,American Transmission Systems Inc,PJM,WV,F860,PJM,PJMW
+14354,PacifiCorp,PACE,WY,F861,BASN,BASN
+27000,Western Area Power Administration,PACE,WY,F860,BASN,BASN
+44372,Oncor Electric Delivery Company LLC,PACE,WY,F860,BASN,BASN
+6169,Fall River Rural Elec Coop Inc,BPAT,WY,F861,NWPP,NWPP
+11273,Lower Valley Energy Inc,BPAT,WY,F861,NWPP,NWPP
+12825,NorthWestern Energy LLC - (MT),NWMT,WY,F861,NWPP,NWPP
+27000,Western Area Power Administration,WAUW,WY,F860,NWPP,NWPP
+1307,Basin Electric Power Coop,WACM,WY,F861,RMRG,RMRG
+3461,Cheyenne Light Fuel & Power d/b/a Black,WACM,WY,F861,RMRG,RMRG
+8566,High Plains Power Inc,WACM,WY,F860,RMRG,RMRG
+12199,Montana-Dakota Utilities Co,WACM,WY,F861,RMRG,RMRG
+15143,Platte River Power Authority,WACM,WY,F860,RMRG,RMRG
+19156,Powder River Energy Corp,WACM,WY,F860,RMRG,RMRG
+19545,"Black Hills Power, Inc. d/b/a",WACM,WY,F861,RMRG,RMRG
+27000,Western Area Power Administration,WACM,WY,F861,RMRG,RMRG

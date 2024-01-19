@@ -1,0 +1,32 @@
+                SETUP ASSOCIATED WITH START-UP PROCESS
+
+ This is to explain the use of keyworded files for initializing the
+ session.  ANALYZE looks for the following files (in order).
+
+   SETUP.EXC
+      If this exists, it sets prefixes and suffixes for the intrinsic
+      filetypes given in _SETUP.
+
+                                 NOTE
+ All files below are sought with the default prefix and suffix, which
+ may have been changed by SETUP.EXC.
+
+   CREDITS.DOC
+      If this exists, it is printed before the sign-on.  You may delete
+      or rename it to suppress printing at every session.
+
+   RULBASE.RUL
+      If this exists, it defines the options in the INTERPRT command.
+      Each entry is a rule file name (1 line @), and the file's
+      existance is tested before it is added as an option.
+
+   ANALYZE.DIC
+      This loads the standard ANALYZE dictionary (see others, like KEYS).
+
+   ANALYZE.KEY
+      This loads the standard ANALYZE keywords (see KEYS.DIC).
+
+   PROFILE.EXC
+      If this exists, it executes the commands in it.  This is where one can
+      set strings (for simple abbreviations of common specifications), screen
+      width/length, readin an LP, give message to user, etc.

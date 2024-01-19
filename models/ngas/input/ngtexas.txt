@@ -1,0 +1,1281 @@
+!___________________________________________________________________________________________
+!
+!                               NGMM Texas Inputs
+!
+!___________________________________________________________________________________________
+!
+!       1.  Texas specific parameters
+!       2.  Texas subsets of data found in ngassumptions.txt
+!	3.  Texas subsets of data found in ngeia.txt
+!
+!___________________________________________________________________________________________
+!
+!	Identifiers/inputs in ngtexas.txt
+!
+!	TXRegion_West
+!	TXRegion_North
+!	TXReion_East
+!	TXRegion_
+!	TXBrderCrossings_
+!
+!	TexasConsShares
+!	TexasStorageShares
+!	TX_ExportShares
+!
+!	HistoricalFlowAnnual	(merged with data in ngeia via AIMMS)
+!	HistoricalExports	(merged with data in ngeia via AIMMS)
+!	HistoricalImports 	(merged with data in ngeia via AIMMS)
+!	HistoricalExportsPrice  (merged with data in ngeia via AIMMS)
+!	HistoricalImportsPrice  (merged with data in ngeia via AIMMS)
+!	PipeFuelLossFactorIN	(merged with data in ngassumptions via AIMMS)
+!	PipeFuelLossFactorOUT	(merged with data in ngassumptions via AIMMS)
+!	WeatherFactor1 		(merged with data in ngassumptions via AIMMS)
+!	HistoricalSpotPrice     (merged with data in ngsporprc via AIMMS)
+!
+!___________________________________________________________________________________________
+
+!Regional declarations
+!Probably move to ngsetmap.txt when ready
+TXRegion_West := 'TX_W';
+TXRegion_North := 'TX_N';
+TXRegion_East := 'TX_E';
+TXRegion_ := {TX_W, TX_N, TX_E};
+TXBorderCrossings_ := {TX_E-MX_NE, TX_W-MX_NE, TX_E-MX_SS};
+
+!Most of these outputs are copied/pasted information from this folder:
+!\\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\Texas_data\preprocessing\outputs
+
+! Residential, Commercial, Industrial, and Electric share splits by region
+Composite Table:
+state     	sec              TexasConsShares
+TX_W     	Residential      0.153358
+TX_N      	Residential      0.41801
+TX_E      	Residential      0.428205
+TX_W      	Commercial       0.167184
+TX_N     	Commercial       0.487569
+TX_E      	Commercial       0.344993
+TX_W		Electric	 0.088
+TX_N		Electric	 0.209
+TX_E		Electric	 0.703
+TX_W		Industrial	 0.0421
+TX_N		Industrial	 0.0666
+TX_E		Industrial	 0.8913
+;
+
+Composite Table:
+storage    TexasStorageShares
+TX_W       0.0197328
+TX_N       0.155965
+TX_E       0.824303
+;
+
+! 2011 regional shares to split pre-2011 history of Texas Trade. (Done in AIMMS)
+! From \\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\Texas_data\preprocessing\outputs\TX_Export_Shares.txt
+Composite Table:
+tx_bx		TX_ExportShares
+TX_E-MX_NE 	0.71
+TX_W-MX_NE 	0.29
+;
+
+! Historical Interstate/International Flows
+! Units: Bcf
+Composite Table:
+reg       reg1            year        HistoricalFlowAnnual
+AR        TX_E            1990        9.626
+AR        TX_E            1991        10.543
+AR        TX_E            1992        4.93
+AR        TX_E            1993        4.458
+AR        TX_E            1994        3.2
+AR        TX_E            1995        3.7
+AR        TX_E            1996        4.3
+AR        TX_E            1997        3.5
+AR        TX_E            1998        3.67
+AR        TX_E            1999        3.353
+AR        TX_E            2000        3.411
+AR        TX_E            2001        2.576
+AR        TX_E            2002        2.503
+AR        TX_E            2003        2.605
+AR        TX_E            2004        1.75
+AR        TX_E            2005        1.9
+AR        TX_E            2006        1.7
+AR        TX_E            2007        2.3
+AR        TX_E            2008        24
+AR        TX_E            2009        21.374
+AR        TX_E            2012        0
+AR        TX_E            2014        0
+AR        TX_E            2015        0
+AR        TX_E            2017        0
+AR        TX_E            2018        0
+AR        TX_E            2019        0
+AR        TX_E            2020        32.238
+LA        TX_E            1990        68.547
+LA        TX_E            1991        37.179
+LA        TX_E            1992        10.135
+LA        TX_E            1993        74.574
+LA        TX_E            1994        72.413
+LA        TX_E            1995        4.87
+LA        TX_E            1996        6.712
+LA        TX_E            1997        8.652
+LA        TX_E            1998        24.635
+LA        TX_E            1999        14.732
+LA        TX_E            2000        32.104
+LA        TX_E            2001        46.842
+LA        TX_E            2002        1.722
+LA        TX_E            2003        8.513
+LA        TX_E            2004        5.831
+LA        TX_E            2005        6.293
+LA        TX_E            2006        6.042
+LA        TX_E            2007        2
+LA        TX_E            2012        80.728
+LA        TX_E            2013        128.552
+LA        TX_E            2014        63.434
+LA        TX_E            2015        50.569
+LA        TX_E            2016        123.13
+LA        TX_E            2017        265.556
+LA        TX_E            2018        403.725
+LA        TX_E            2019        240.666
+LA        TX_E            2020        562.194
+NM        TX_W            1990        43.37
+NM        TX_W            1991        54.691
+NM        TX_W            1992        81.093
+NM        TX_W            1993        92.309
+NM        TX_W            1994        182.912
+NM        TX_W            1995        476.43
+NM        TX_W            1996        568.446
+NM        TX_W            1997        471.549
+NM        TX_W            1998        389.821
+NM        TX_W            1999        372.845
+NM        TX_W            2000        255.43
+NM        TX_W            2001        316.344
+NM        TX_W            2002        528.568
+NM        TX_W            2003        517.599
+NM        TX_W            2004        493.136
+NM        TX_W            2005        510.995
+NM        TX_W            2006        457.875
+NM        TX_W            2007        294.545
+NM        TX_W            2008        217.791
+NM        TX_W            2009        150.39
+NM        TX_W            2010        281.881
+NM        TX_W            2011        243.327
+NM        TX_W            2012        225.623
+NM        TX_W            2013        244.938
+NM        TX_W            2014        217.569
+NM        TX_W            2015        216.04
+NM        TX_W            2016        270.49
+NM        TX_W            2017        280.575
+NM        TX_W            2018        316.877
+NM        TX_W            2019        319.828
+NM        TX_W            2020        497.771
+OK        TX_N            1990        0
+OK        TX_N            1994        0
+OK        TX_N            1995        0
+OK        TX_N            1996        0
+OK        TX_N            1997        0
+OK        TX_N            1998        0
+OK        TX_N            1999        0
+OK        TX_N            2000        0
+OK        TX_N            2001        0
+OK        TX_N            2002        0
+OK        TX_N            2003        0
+OK        TX_N            2004        0
+OK        TX_N            2005        0
+OK        TX_N            2006        0
+OK        TX_N            2007        0
+OK        TX_N            2008        0
+OK        TX_N            2009        319.963
+OK        TX_N            2010        431.085
+OK        TX_N            2011        444.389
+OK        TX_N            2012        413.507
+OK        TX_N            2013        441.907
+OK        TX_N            2014        426.912
+OK        TX_N            2015        447.514
+OK        TX_N            2016        455.843
+OK        TX_N            2017        466.765
+OK        TX_N            2018        472.269
+OK        TX_N            2019        481.947
+OK        TX_N            2020        406.499
+OK        TX_W            1990        531.788
+OK        TX_W            1994        345.299
+OK        TX_W            1995        368.805
+OK        TX_W            1996        361.63
+OK        TX_W            1997        341.03
+OK        TX_W            1998        316.414
+OK        TX_W            1999        107.006
+OK        TX_W            2000        126.409
+OK        TX_W            2001        175.364
+OK        TX_W            2002        310.298
+OK        TX_W            2003        524.596
+OK        TX_W            2004        586.95
+OK        TX_W            2005        509.175
+OK        TX_W            2006        377.777
+OK        TX_W            2007        373.718
+OK        TX_W            2008        393.72
+OK        TX_W            2009        326.836
+OK        TX_W            2010        403.226
+OK        TX_W            2011        415.67
+OK        TX_W            2012        386.785
+OK        TX_W            2013        413.348
+OK        TX_W            2014        399.323
+OK        TX_W            2015        418.594
+OK        TX_W            2016        426.384
+OK        TX_W            2017        436.601
+OK        TX_W            2018        494.827
+OK        TX_W            2019        504.968
+OK        TX_W            2020        425.915
+TX_E      AR              1990        341.492
+TX_E      AR              1991        357.334
+TX_E      AR              1992        290.257
+TX_E      AR              1993        407.017
+TX_E      AR              1994        471.238
+TX_E      AR              1995        483.366
+TX_E      AR              1996        492.373
+TX_E      AR              1997        507.425
+TX_E      AR              1998        443.415
+TX_E      AR              1999        403.378
+TX_E      AR              2000        350.105
+TX_E      AR              2001        290.361
+TX_E      AR              2002        230.647
+TX_E      AR              2003        227.061
+TX_E      AR              2004        196.205
+TX_E      AR              2005        239.413
+TX_E      AR              2006        316.616
+TX_E      AR              2007        319.885
+TX_E      AR              2008        264.753
+TX_E      AR              2009        169.431
+TX_E      AR              2010        220.477
+TX_E      AR              2011        407.665
+TX_E      AR              2012        262.397
+TX_E      AR              2013        426.976
+TX_E      AR              2014        409.458
+TX_E      AR              2015        231.017
+TX_E      AR              2016        157.844
+TX_E      AR              2017        54.92
+TX_E      AR              2018        43.867
+TX_E      AR              2019        49.166
+TX_E      AR              2020        2.836
+TX_E      LA              1990        1681.66
+TX_E      LA              1991        1587.3
+TX_E      LA              1992        1732.78
+TX_E      LA              1993        1696.51
+TX_E      LA              1994        1732.44
+TX_E      LA              1995        2013.38
+TX_E      LA              1996        2174.96
+TX_E      LA              1997        1920.33
+TX_E      LA              1998        1515.81
+TX_E      LA              1999        1426.22
+TX_E      LA              2000        1465.93
+TX_E      LA              2001        1488.05
+TX_E      LA              2002        1532.76
+TX_E      LA              2003        1608.78
+TX_E      LA              2004        1697.33
+TX_E      LA              2005        1903
+TX_E      LA              2006        1945.83
+TX_E      LA              2007        2547.39
+TX_E      LA              2008        3051.97
+TX_E      LA              2009        3087.87
+TX_E      LA              2010        2825.25
+TX_E      LA              2011        2579.54
+TX_E      LA              2012        2663.82
+TX_E      LA              2013        2407.2
+TX_E      LA              2014        2311.94
+TX_E      LA              2015        2116.8
+TX_E      LA              2016        1746.47
+TX_E      LA              2017        1699.25
+TX_E      LA              2018        1761.83
+TX_E      LA              2019        1861.51
+TX_E      LA              2020        1755.76
+TX_E      TX_E-MX_NE      1996        0.942
+TX_E      TX_E-MX_NE      1997        1.26
+TX_E      TX_E-MX_NE      1998        1.471
+TX_E      TX_E-MX_NE      1999        1.99
+TX_E      TX_E-MX_NE      2000        6.405
+TX_E      TX_E-MX_NE      2001        47.373
+TX_E      TX_E-MX_NE      2002        78.259
+TX_E      TX_E-MX_NE      2003        124.43
+TX_E      TX_E-MX_NE      2004        165.978
+TX_E      TX_E-MX_NE      2005        107.14
+TX_E      TX_E-MX_NE      2006        101.657
+TX_E      TX_E-MX_NE      2007        84.191
+TX_E      TX_E-MX_NE      2008        93.419
+TX_E      TX_E-MX_NE      2009        88.572
+TX_E      TX_E-MX_NE      2010        122.145
+TX_E      TX_E-MX_NE      2011        199.549
+TX_E      TX_E-MX_NE      2012        280.545
+TX_E      TX_E-MX_NE      2013        297.516
+TX_E      TX_E-MX_NE      2014        322.191
+TX_E      TX_E-MX_NE      2015        626.841
+TX_E      TX_E-MX_NE      2016        861.172
+TX_E      TX_E-MX_NE      2017        1047.71
+TX_E      TX_E-MX_NE      2018        1082.2
+TX_E      TX_E-MX_NE      2019        1180.15
+TX_E      TX_E-MX_NE      2020        1277.48
+TX_E      TX_E-MX_NE      2021        1276.38
+TX_W      NM              1990        610.717
+TX_W      NM              1991        557.716
+TX_W      NM              1992        278.127
+TX_W      NM              1993        47.934
+TX_W      NM              1994        20.235
+TX_W      NM              1995        10.771
+TX_W      NM              1996        4.089
+TX_W      NM              1997        4.966
+TX_W      NM              1998        4.47
+TX_W      NM              1999        5.104
+TX_W      NM              2000        6.721
+TX_W      NM              2001        75.142
+TX_W      NM              2002        3.185
+TX_W      NM              2003        3.835
+TX_W      NM              2004        4.84
+TX_W      NM              2005        10.605
+TX_W      NM              2006        11.517
+TX_W      NM              2007        2.984
+TX_W      NM              2008        173.465
+TX_W      NM              2009        125.358
+TX_W      NM              2010        36.848
+TX_W      NM              2011        44.156
+TX_W      NM              2012        143.779
+TX_W      NM              2013        177.728
+TX_W      NM              2014        308.856
+TX_W      NM              2015        316.749
+TX_W      NM              2016        256.374
+TX_W      NM              2017        228.558
+TX_W      NM              2018        365.722
+TX_W      NM              2019        497.056
+TX_W      NM              2020        488.955
+TX_W      OK              1990        249.21
+TX_W      OK              1991        239.879
+TX_W      OK              1992        446.921
+TX_W      OK              1993        420.463
+TX_W      OK              1994        448.187
+TX_W      OK              1995        696.313
+TX_W      OK              1996        741.733
+TX_W      OK              1997        739.589
+TX_W      OK              1998        598.571
+TX_W      OK              1999        539.403
+TX_W      OK              2000        515.363
+TX_W      OK              2001        454.059
+TX_W      OK              2002        485.572
+TX_W      OK              2003        765.091
+TX_W      OK              2004        808.471
+TX_W      OK              2005        848.03
+TX_W      OK              2006        600.79
+TX_W      OK              2007        557.452
+TX_W      OK              2008        270.078
+TX_W      OK              2009        431.285
+TX_W      OK              2010        712.311
+TX_W      OK              2011        869.044
+TX_W      OK              2012        835.322
+TX_W      OK              2013        860.029
+TX_W      OK              2014        836.956
+TX_W      OK              2015        701.605
+TX_W      OK              2016        692.796
+TX_W      OK              2017        730.094
+TX_W      OK              2018        886.328
+TX_W      OK              2019        926.212
+TX_W      OK              2020        735.939
+TX_W      TX_W-MX_NE      1996        13.406
+TX_W      TX_W-MX_NE      1997        17.89
+TX_W      TX_W-MX_NE      1998        38.238
+TX_W      TX_W-MX_NE      1999        48.513
+TX_W      TX_W-MX_NE      2000        52.97
+TX_W      TX_W-MX_NE      2001        43.313
+TX_W      TX_W-MX_NE      2002        66.85
+TX_W      TX_W-MX_NE      2003        70.304
+TX_W      TX_W-MX_NE      2004        74.65
+TX_W      TX_W-MX_NE      2005        71.845
+TX_W      TX_W-MX_NE      2006        79.594
+TX_W      TX_W-MX_NE      2007        93.166
+TX_W      TX_W-MX_NE      2008        92.011
+TX_W      TX_W-MX_NE      2009        96.393
+TX_W      TX_W-MX_NE      2010        94.492
+TX_W      TX_W-MX_NE      2011        104.103
+TX_W      TX_W-MX_NE      2012        107.823
+TX_W      TX_W-MX_NE      2013        114.23
+TX_W      TX_W-MX_NE      2014        127.724
+TX_W      TX_W-MX_NE      2015        129.397
+TX_W      TX_W-MX_NE      2016        149.08
+TX_W      TX_W-MX_NE      2017        116.578
+TX_W      TX_W-MX_NE      2018        180.259
+TX_W      TX_W-MX_NE      2019        218.962
+TX_W      TX_W-MX_NE      2020        278.649
+TX_W      TX_W-MX_NE      2021        450.606
+;
+
+!First year for which TX regional export/import volumes are avilable.
+!Would like to eventually move this over to AIMMS code and have it done programatically.
+!TXTradeFirstYear := '2011';
+
+! Historical Export Volumes
+! NOTE: These values do not include prices for CNG & small LNG exports
+! Units: Bcf
+HistoricalExports := data table
+		       TX_E-MX_NE    TX_W-MX_NE
+(January, 2011)        21.096        9.046
+(February, 2011)       20.185        7.262
+(March, 2011)          23.574        7.805
+(April, 2011)          27.392        7.27
+(May, 2011)            23.935        9.339
+(June, 2011)           25.462        8.751
+(July, 2011)           23.363        8.895
+(August, 2011)         18.455        8.878
+(September, 2011)      16.462        8.847
+(October, 2011)        19.11         9.238
+(November, 2011)       16.764        8.912
+(December, 2011)       19.469        9.859
+(January, 2012)        21.857        9.242
+(February, 2012)       20.595        8.988
+(March, 2012)          23.839        9.426
+(April, 2012)          25.467        8.589
+(May, 2012)            30.718        9.192
+(June, 2012)           33.937        9.448
+(July, 2012)           32.901        9.716
+(August, 2012)         33.497        10.055
+(September, 2012)      33.554        9.356
+(October, 2012)        37.08         8.797
+(November, 2012)       29.868        7.569
+(December, 2012)       31.781        7.445
+(January, 2013)        33.586        9.767
+(February, 2013)       30.809        8.919
+(March, 2013)          33.678        9.165
+(April, 2013)          33.42         9.622
+(May, 2013)            37.009        9.803
+(June, 2013)           35.006        9.35
+(July, 2013)           36.045        8.988
+(August, 2013)         35.893        10.361
+(September, 2013)      28.562        9.527
+(October, 2013)        30.112        9.548
+(November, 2013)       28.211        8.789
+(December, 2013)       21.824        10.391
+(January, 2014)        29.071        10.038
+(February, 2014)       30.243        8.702
+(March, 2014)          34.933        9.598
+(April, 2014)          33.249        10.307
+(May, 2014)            36.549        11.103
+(June, 2014)           36.712        11.015
+(July, 2014)           37.649        11.218
+(August, 2014)         35.946        11.405
+(September, 2014)      35.266        11.406
+(October, 2014)        34.312        10.772
+(November, 2014)       33.434        11.903
+(December, 2014)       38.551        10.258
+(January, 2015)        42.677        10.434
+(February, 2015)       41.741        9.481
+(March, 2015)          49.817        10.181
+(April, 2015)          51.203        9.843
+(May, 2015)            58.518        11.377
+(June, 2015)           59.23         11.05
+(July, 2015)           67.848        11.623
+(August, 2015)         66.126        11.583
+(September, 2015)      65.319        11.967
+(October, 2015)        67.206        10.079
+(November, 2015)       63.923        10.708
+(December, 2015)       71.316        11.071
+(January, 2016)        68.704        11.273
+(February, 2016)       77.012        10.423
+(March, 2016)          75.708        10.158
+(April, 2016)          72.593        13.124
+(May, 2016)            80.937        14.401
+(June, 2016)           79.886        13.791
+(July, 2016)           83.639        13.97
+(August, 2016)         91.961        13.323
+(September, 2016)      87.927        12.963
+(October, 2016)        93.546        14.377
+(November, 2016)       90.748        10.403
+(December, 2016)       83.577        10.875
+(January, 2017)        91.572        10.594
+(February, 2017)       87.558        9.141
+(March, 2017)          98.96         10.669
+(April, 2017)          87.14         10.879
+(May, 2017)            98.466        11.324
+(June, 2017)           96.123        15.815
+(July, 2017)           98.058        9.805
+(August, 2017)         99.811        7.837
+(September, 2017)      93.787        9.453
+(October, 2017)        101.038       11.955
+(November, 2017)       103.419       12.78
+(December, 2017)       104.027       13.387
+(January, 2018)        105.386       13.778
+(February, 2018)       96.156        12.954
+(March, 2018)          99.922        14.373
+(April, 2018)          98.017        13.618
+(May, 2018)            104.465       12.538
+(June, 2018)           100.32        13.923
+(July, 2018)           107.635       16.156
+(August, 2018)         110.59        15.814
+(September, 2018)      105.485       17.71
+(October, 2018)        111.047       18.139
+(November, 2018)       104.594       15.016
+(December, 2018)       105.084       16.242
+(January, 2019)        113.484       18.238
+(February, 2019)       100.855       16.49
+(March, 2019)          113.316       16.727
+(April, 2019)          103.539       16.137
+(May, 2019)            115.536       18.618
+(June, 2019)           115.446       18.854
+(July, 2019)           124.213       17.898
+(August, 2019)         120.946       20.676
+(September, 2019)      118.847       19.33
+(October, 2019)        130.388       19.368
+(November, 2019)       120.863       17.679
+(December, 2019)       113.984       18.946
+(January, 2020)        123.089       19.934
+(February, 2020)       116.871       17.295
+(March, 2020)          129.569       19.754
+(April, 2020)          105.39        17.795
+(May, 2020)            108.802       17.965
+(June, 2020)           118.895       22.67
+(July, 2020)           132.627       24.696
+(August, 2020)         132.656       27.175
+(September, 2020)      131.159       25.654
+(October, 2020)        128.267       32.531
+(November, 2020)       120.641       25.55
+(December, 2020)       120.158       27.632
+(January, 2021)        122.508       33.362
+(February, 2021)       100.235       23.132
+(March, 2021)          129.887       34.132
+(April, 2021)          126.169       37.165
+(May, 2021)            132.8         40.619
+(June, 2021)           129.575       41.969
+(July, 2021)           130.103       42.759
+(August, 2021)         128.174       40.235
+(September, 2021)      115.701       39.609
+(October, 2021)        126.128       41.034
+(November, 2021)       113.854       36.347
+(December, 2021)       111.476       40.242
+(January, 2022)        115.828       41.919
+(February, 2022)       106.96        35.288
+(March, 2022)          116.861       37.29
+;
+
+! Historical Import Volumes
+! NOTE: These values do not include prices for CNG & small LNG exports
+! Units: Bcf
+HistoricalImports := data table
+		       TX_E-MX_NE
+(January, 2011)        0.012
+(February, 2011)       0.04
+(March, 2011)          0.077
+(April, 2011)          0.059
+(May, 2011)            0.055
+(June, 2011)           0.047
+(July, 2011)           0.043
+(August, 2011)         0.041
+(September, 2011)      0.029
+(October, 2011)        0.037
+(November, 2011)       0.023
+(December, 2011)       0.037
+(January, 2012)        0.031
+(February, 2012)       0.031
+(March, 2012)          0.037
+(April, 2012)          0.036
+(May, 2012)            0.03
+(June, 2012)           0.029
+(July, 2012)           0.017
+(August, 2012)         0.031
+(September, 2012)      0.002
+(October, 2012)        0.02
+(November, 2012)       0.028
+(December, 2012)       0.022
+(January, 2013)        0.019
+(February, 2013)       0.018
+(March, 2013)          0.02
+(April, 2013)          0.02
+(May, 2013)            0.014
+(June, 2013)           0.028
+(July, 2013)           0.182
+(August, 2013)         0.164
+(September, 2013)      0.148
+(October, 2013)        0.148
+(November, 2013)       0.136
+(December, 2013)       0.148
+(January, 2014)        0.137
+(February, 2014)       0.137
+(March, 2014)          0.125
+(April, 2014)          0.114
+(May, 2014)            0.128
+(June, 2014)           0.127
+(July, 2014)           0.121
+(August, 2014)         0.124
+(September, 2014)      0.113
+(October, 2014)        0.115
+(November, 2014)       0.095
+(December, 2014)       0.091
+(January, 2015)        0.085
+(February, 2015)       0.079
+(March, 2015)          0.077
+(April, 2015)          0.076
+(May, 2015)            0.078
+(June, 2015)           0.073
+(July, 2015)           0.08
+(August, 2015)         0.082
+(September, 2015)      0.083
+(October, 2015)        0.083
+(November, 2015)       0.072
+(December, 2015)       0.064
+(January, 2016)        0.059
+(February, 2016)       0.07
+(March, 2016)          0.069
+(April, 2016)          0.071
+(May, 2016)            0.072
+(June, 2016)           0.068
+(July, 2016)           0.062
+(August, 2016)         0.061
+(September, 2016)      0.054
+(October, 2016)        0.054
+(November, 2016)       0.054
+(December, 2016)       0.055
+(January, 2017)        0.053
+(February, 2017)       0.047
+(March, 2017)          0.053
+(April, 2017)          0.05
+(May, 2017)            0.048
+(June, 2017)           0.05
+(July, 2017)           0.05
+(August, 2017)         0.053
+(September, 2017)      0.04
+(October, 2017)        0.052
+(November, 2017)       0.048
+(December, 2017)       0.048
+(January, 2018)        0.044
+(February, 2018)       0.041
+(March, 2018)          0.045
+(April, 2018)          0.039
+(May, 2018)            0.045
+(June, 2018)           0.044
+(July, 2018)           0.042
+(August, 2018)         0.043
+(September, 2018)      0.041
+(October, 2018)        0.04
+(November, 2018)       0.039
+(December, 2018)       0.04
+(January, 2019)        0.038
+(February, 2019)       0.032
+(March, 2019)          0.035
+(April, 2019)          0.036
+(May, 2019)            0.036
+(June, 2019)           0.035
+(July, 2019)           0.032
+(August, 2019)         0.034
+(September, 2019)      0.034
+(October, 2019)        0.034
+(November, 2019)       0.034
+(December, 2019)       0.035
+(January, 2020)        0.036
+(February, 2020)       0.033
+(March, 2020)          0.032
+(April, 2020)          0.031
+(May, 2020)            0.033
+(June, 2020)           0.032
+(July, 2020)           0.031
+(August, 2020)         0.031
+(September, 2020)      0.029
+(October, 2020)        0.029
+(November, 2020)       0.028
+(December, 2020)       0.026
+(January, 2021)        0.027
+(February, 2021)       0.055
+(March, 2021)          0.026
+(April, 2021)          0.023
+(May, 2021)            0.026
+(June, 2021)           0.024
+(July, 2021)           0.025
+(August, 2021)         0.025
+(September, 2021)      0.025
+(October, 2021)        0.026
+(November, 2021)       0.024
+(December, 2021)       0.025
+(January, 2022)        0.024
+(February, 2022)       0.021
+(March, 2022)          0.025
+;
+
+
+! NOTE: These values do not include prices for CNG & small LNG exports
+! Units: Nominal USD / thousand cubic feet
+HistoricalExportsPrice := data table
+		       TX_E-MX_NE              TX_W-MX_NE
+(January, 2011)        4.51002                 4.52694
+(February, 2011)       4.32276                 4.6375
+(March, 2011)          3.99519                 4.11457
+(April, 2011)          4.3274                  4.50134
+(May, 2011)            4.41487                 4.50569
+(June, 2011)           4.5553                  4.7311
+(July, 2011)           4.5024                  4.68101
+(August, 2011)         4.34292                 4.56338
+(September, 2011)      3.97348                 4.20588
+(October, 2011)        3.70764                 3.87793
+(November, 2011)       3.3804                  3.69346
+(December, 2011)       3.32507                 3.65493
+(January, 2012)        2.93138                 3.3
+(February, 2012)       2.6541                  2.94568
+(March, 2012)          2.3544                  2.61106
+(April, 2012)          2.11038                 2.33824
+(May, 2012)            2.44312                 2.5762
+(June, 2012)           2.57093                 2.81497
+(July, 2012)           2.96235                 3.13193
+(August, 2012)         3.08191                 3.23097
+(September, 2012)      2.85393                 3.07327
+(October, 2012)        3.31096                 3.53279
+(November, 2012)       3.56162                 3.82349
+(December, 2012)       3.61706                 3.78493
+(January, 2013)        3.45724                 3.70825
+(February, 2013)       3.40952                 3.665
+(March, 2013)          3.84456                 4.02793
+(April, 2013)          4.25254                 4.332
+(May, 2013)            4.22709                 4.29596
+(June, 2013)           4.08177                 4.21081
+(July, 2013)           3.75742                 3.91456
+(August, 2013)         3.5671                  3.7887
+(September, 2013)      3.71777                 3.91966
+(October, 2013)        3.78476                 3.93231
+(November, 2013)       3.75191                 4.07771
+(December, 2013)       4.21364                 4.67501
+(January, 2014)        4.67238                 4.95949
+(February, 2014)       5.97061                 6.76944
+(March, 2014)          5.05123                 5.39343
+(April, 2014)          4.77054                 4.87286
+(May, 2014)            4.83459                 4.87106
+(June, 2014)           4.78261                 4.83153
+(July, 2014)           4.47028                 4.64647
+(August, 2014)         4.12241                 4.2008
+(September, 2014)      4.17715                 4.1818
+(October, 2014)        4.15682                 4.1316
+(November, 2014)       4.18567                 4.15269
+(December, 2014)       4.22213                 3.86095
+(January, 2015)        3.40549                 3.28437
+(February, 2015)       3.14715                 3.01217
+(March, 2015)          3.05938                 2.99026
+(April, 2015)          2.81782                 2.57703
+(May, 2015)            2.89727                 2.65559
+(June, 2015)           2.95743                 2.75277
+(July, 2015)           3.00258                 2.88078
+(August, 2015)         2.91826                 3.13614
+(September, 2015)      2.79299                 2.41496
+(October, 2015)        2.60078                 2.47072
+(November, 2015)       2.24134                 2.17134
+(December, 2015)       2.27343                 2.17896
+(January, 2016)        2.43493                 2.27721
+(February, 2016)       2.20009                 2.08
+(March, 2016)          1.9053                  1.70127
+(April, 2016)          2.08508                 1.79234
+(May, 2016)            2.10647                 1.85295
+(June, 2016)           2.45671                 2.32612
+(July, 2016)           2.82628                 2.44279
+(August, 2016)         2.93432                 2.73873
+(September, 2016)      3.10887                 2.86557
+(October, 2016)        3.24599                 2.86496
+(November, 2016)       2.78717                 2.61522
+(December, 2016)       3.47847                 3.43203
+(January, 2017)        3.66061                 3.52979
+(February, 2017)       3.28134                 3.02767
+(March, 2017)          2.97661                 2.75284
+(April, 2017)          3.36242                 2.9389
+(May, 2017)            3.25077                 2.93756
+(June, 2017)           3.21046                 2.79673
+(July, 2017)           3.32889                 2.8119
+(August, 2017)         3.39098                 2.89578
+(September, 2017)      3.40757                 2.84785
+(October, 2017)        3.42732                 2.67801
+(November, 2017)       3.3983                  2.76271
+(December, 2017)       3.41168                 2.77884
+(January, 2018)        3.7662                  3.15308
+(February, 2018)       3.60564                 2.49572
+(March, 2018)          3.23716                 2.05254
+(April, 2018)          3.31861                 1.94707
+(May, 2018)            3.35568                 2.2323
+(June, 2018)           3.29782                 2.09
+(July, 2018)           3.17547                 2.37077
+(August, 2018)         3.2928                  2.22436
+(September, 2018)      3.36563                 1.78236
+(October, 2018)        3.6778                  2.0072
+(November, 2018)       4.01568                 1.91337
+(December, 2018)       4.57652                 2.07435
+(January, 2019)        3.602                   2.21541
+(February, 2019)       3.13092                 1.71483
+(March, 2019)          3.06584                 1.00245
+(April, 2019)          2.89449                 0.290835
+(May, 2019)            2.79133                 0.220109
+(June, 2019)           2.65496                 0.548691
+(July, 2019)           2.5427                  0.803714
+(August, 2019)         2.37139                 1.15165
+(September, 2019)      2.59547                 1.71952
+(October, 2019)        2.51213                 1.38216
+(November, 2019)       2.72333                 1.74261
+(December, 2019)       2.47217                 1.65963
+(January, 2020)        2.18386                 1.1603
+(February, 2020)       2.09448                 0.995227
+(March, 2020)          1.94173                 0.593482
+(April, 2020)          1.88805                 0.54809
+(May, 2020)            2.14115                 1.61173
+(June, 2020)           1.83561                 1.54441
+(July, 2020)           1.9379                  1.49961
+(August, 2020)         2.33015                 1.46982
+(September, 2020)      2.41101                 1.54351
+(October, 2020)        2.5831                  0.872769
+(November, 2020)       2.96764                 2.21174
+(December, 2020)       2.91419                 2.54058
+(January, 2021)        2.86874                 2.67198
+(February, 2021)       29.4707                 21.9972
+(March, 2021)          2.98638                 2.64046
+(April, 2021)          2.82463                 2.58893
+(May, 2021)            3.1774                  2.8347
+(June, 2021)           3.35731                 3.06906
+(July, 2021)           3.93141                 3.67043
+(August, 2021)         4.22159                 3.95565
+(September, 2021)      4.9747                  4.50645
+(October, 2021)        5.73757                 5.16948
+(November, 2021)       5.57435                 5.11138
+(December, 2021)       4.53703                 4.06685
+(January, 2022)        4.52949                 4.35155
+(February, 2022)       5.4511                  4.56507
+(March, 2022)          4.71889                 4.20859
+;
+
+! NOTE: These values do not include prices for CNG & small LNG exports
+! Units: Nominal USD / thousand cubic feet
+HistoricalImportsPrice := data table
+datamon                TX_E-MX_NE
+(January, 2011)        3.27
+(February, 2011)       3.34
+(March, 2011)          2.85
+(April, 2011)          3.28
+(May, 2011)            3.41
+(June, 2011)           3.38
+(July, 2011)           3.44
+(August, 2011)         3.42
+(September, 2011)      2.94
+(October, 2011)        2.82
+(November, 2011)       2.55
+(December, 2011)       2.41
+(January, 2012)        2.17
+(February, 2012)       1.8
+(March, 2012)          1.56
+(April, 2012)          1.27
+(May, 2012)            1.15
+(June, 2012)           1.52
+(July, 2012)           1.86
+(August, 2012)         2.09
+(September, 2012)      1.76
+(October, 2012)        2.09
+(November, 2012)       2.8
+(December, 2012)       2.76
+(January, 2013)        2.42
+(February, 2013)       2.34
+(March, 2013)          2.53
+(April, 2013)          2.53
+(May, 2013)            3.21
+(June, 2013)           3.21
+(July, 2013)           2.77
+(August, 2013)         2.52
+(September, 2013)      2.61
+(October, 2013)        2.56
+(November, 2013)       2.56
+(December, 2013)       2.85
+(January, 2014)        3.41
+(February, 2014)       4.55
+(March, 2014)          3.79
+(April, 2014)          3.58
+(May, 2014)            3.77
+(June, 2014)           3.61
+(July, 2014)           3.41
+(August, 2014)         2.84
+(September, 2014)      3
+(October, 2014)        3.02
+(November, 2014)       2.74
+(December, 2014)       3.3
+(January, 2015)        2.24
+(February, 2015)       1.93
+(March, 2015)          1.93
+(April, 2015)          1.64
+(May, 2015)            1.58
+(June, 2015)           1.88
+(July, 2015)           1.83
+(August, 2015)         1.84
+(September, 2015)      1.65
+(October, 2015)        1.55
+(November, 2015)       1.08
+(December, 2015)       1.22
+(January, 2016)        1.5
+(February, 2016)       1.22
+(March, 2016)          0.82
+(April, 2016)          1.03
+(May, 2016)            1.1
+(June, 2016)           1.06
+(July, 2016)           1.98
+(August, 2016)         1.74
+(September, 2016)      1.92
+(October, 2016)        2.02
+(November, 2016)       1.83
+(December, 2016)       2.3
+(January, 2017)        2.63
+(February, 2017)       2.39
+(March, 2017)          1.68
+(April, 2017)          2.23
+(May, 2017)            2.18
+(June, 2017)           2.29
+(July, 2017)           2.12
+(August, 2017)         2.01
+(September, 2017)      2.01
+(October, 2017)        2.01
+(November, 2017)       1.81
+(December, 2017)       2.12
+(January, 2018)        1.82
+(February, 2018)       2.74
+(March, 2018)          2.74
+(April, 2018)          1.77
+(May, 2018)            1.9
+(June, 2018)           1.94
+(July, 2018)           2.09
+(August, 2018)         1.9
+(September, 2018)      1.99
+(October, 2018)        1.99
+(November, 2018)       2.25
+(December, 2018)       3.78
+(January, 2019)        2.71
+(February, 2019)       2
+(March, 2019)          1.95
+(April, 2019)          1.79
+(May, 2019)            1.64
+(June, 2019)           1.66
+(July, 2019)           1.35
+(August, 2019)         1.2
+(September, 2019)      1.32
+(October, 2019)        1.52
+(November, 2019)       1.65
+(December, 2019)       1.52
+(January, 2020)        1.22
+(February, 2020)       0.96
+(March, 2020)          0.92
+(April, 2020)          0.74
+(May, 2020)            0.91
+(June, 2020)           0.84
+(July, 2020)           0.63
+(August, 2020)         0.97
+(September, 2020)      1.68
+(October, 2020)        1.21
+(November, 2020)       2.08
+(December, 2020)       1.97
+(January, 2021)        1.58
+(February, 2021)       2.63
+(March, 2021)          1.94
+(April, 2021)          1.66
+(May, 2021)            2.05
+(June, 2021)           2.08
+(July, 2021)           2.72
+(August, 2021)         3.16
+(September, 2021)      3.47
+(October, 2021)        4.89
+(November, 2021)       5.17
+(December, 2021)       4.51
+(January, 2022)        3.16
+(February, 2022)       5.3
+(March, 2022)          3.61
+;
+
+!TX related pipeline fuel factors
+!	Interstate factors are in data/NGPipelineFuelFactors.txt
+!	Intrastate factors are the average of all factors.
+Composite table:
+    reg         reg1          PipeFuelLossFactorIN  PipeFuelLossFactorOUT
+!   --------    --------    --------------------  ---------------------
+    TX_W        TX_N                   4.510e-03              4.510e-03
+    TX_W        TX_E                   4.510e-03              4.510e-03
+    TX_N        TX_E                   4.510e-03              4.510e-03
+    TX_E        TX_N                   4.510e-03              4.510e-03
+    ;
+ 
+
+WeatherFactor1 := data table
+			TX_W	TX_N	TX_E                     
+(1, Residential)	1.31    1.31    1.31
+(1, Commercial)        1.297   1.297   1.297
+(1, Industrial)            1       1       1
+(1, Electric)              1       1       1
+(1, Transportation)        1       1       1
+(8, Residential)        1.18    1.18    1.18
+(8, Commercial)        1.305   1.305   1.305
+(8, Industrial)            1       1       1        
+(8, Electric)              1       1       1           
+(8, Transportation)        1       1       1    
+;
+
+
+HistoricalSpotPrice := data table 
+		TX_W	TX_N	TX_E
+January, 1994			2.118
+February, 1994			2.41
+March, 1994			2.033
+April, 1994			2.009
+May, 1994			1.816
+June, 1994			1.979
+July, 1994			1.83
+August, 1994			1.64
+September, 1994			1.481
+October, 1994			1.521
+November, 1994			1.542
+December, 1994			1.626
+January, 1995			1.43
+February, 1995			1.451
+March, 1995			1.495
+April, 1995	1.409		1.579
+May, 1995	1.403		1.628
+June, 1995	1.323		1.546
+July, 1995	1.299		1.412
+August, 1995	1.465		1.548
+September, 1995	1.515		1.592
+October, 1995	1.524		1.691
+November, 1995	1.694		1.874
+December, 1995	1.844		1.984
+January, 1996	1.933		1.947
+February, 1996	2.592		2.958
+March, 1996	2.425		2.508
+April, 1996	2.094		2.212
+May, 1996	2.038		2.227
+June, 1996	2.109	2.481	2.44
+July, 1996	2.184	2.416	2.46
+August, 1996	1.886	1.976	2.038
+September, 1996	1.706	1.784	1.831
+October, 1996	2.255	2.283	2.341
+November, 1996	2.909	2.917	2.998
+December, 1996	3.687	3.639	3.722
+January, 1997	3.337	3.321	3.462
+February, 1997	2.045	2.077	2.136
+March, 1997	1.799	1.836	1.899
+April, 1997	1.897	1.952	2.016
+May, 1997	2.072	2.143	2.213
+June, 1997	2.062	2.125	2.174
+July, 1997	2.129	2.135	2.181
+August, 1997	2.426	2.419	2.484
+September, 1997	2.812	2.792	2.884
+October, 1997	2.925	3.002	3.061
+November, 1997	2.836	2.889	2.963
+December, 1997	2.19	2.224	2.259
+January, 1998	1.975	2.027	2.062
+February, 1998	2.11	2.162	2.209
+March, 1998	2.182	2.184	2.244
+April, 1998	2.323	2.377	2.429
+May, 1998	2.048	2.11	2.15
+June, 1998	2.101	2.135	2.194
+July, 1998	2.137	2.145	2.195
+August, 1998	1.81	1.815	1.875
+September, 1998	1.918	1.965	2.027
+October, 1998	1.825	1.829	1.904
+November, 1998	2.034	2.051	2.104
+December, 1998	1.742	1.677	1.749
+January, 1999	1.773	1.796	1.844
+February, 1999	1.672	1.72	1.765
+March, 1999	1.68	1.736	1.78
+April, 1999	2.06	2.11	2.153
+May, 1999	2.164	2.218	2.266
+June, 1999	2.221	2.266	2.305
+July, 1999	2.26	2.285	2.328
+August, 1999	2.745	2.783	2.817
+September, 1999	2.461	2.477	2.54
+October, 1999	2.697	2.692	2.754
+November, 1999	2.252	2.278	2.341
+December, 1999	2.28	2.296	2.352
+January, 2000	2.324	2.353	2.402
+February, 2000	2.498	2.547	2.614
+March, 2000	2.732	2.751	2.814
+April, 2000	2.911	2.952	3.02
+May, 2000	3.456	3.519	3.581
+June, 2000	4.205	4.195	4.281
+July, 2000	3.982	3.902	4.017
+August, 2000	4.419	4.347	4.447
+September, 2000	5.012	4.999	5.074
+October, 2000	4.957	4.937	5.008
+November, 2000	5.508	5.387	5.51
+December, 2000	8.976	8.709	8.966
+January, 2001	8.089	8.023	8.191
+February, 2001	5.555	5.478	5.593
+March, 2001	5.125	5.108	5.185
+April, 2001	5.088	5.088	5.183
+May, 2001	4.096	4.116	4.222
+June, 2001	3.65	3.659	3.769
+July, 2001	3.11	3.056	3.179
+August, 2001	2.895	2.908	3.017
+September, 2001	2.02	2.127	2.062
+October, 2001	2.287	2.372	2.468
+November, 2001	2.239	2.272	2.393
+December, 2001	2.366	2.364	2.461
+January, 2002	2.121	2.186	2.255
+February, 2002	2.212	2.246	2.319
+March, 2002	2.909	2.948	3.027
+April, 2002	3.245	3.341	3.468
+May, 2002	3.163	3.395	3.507
+June, 2002	3.016	3.161	3.234
+July, 2002	2.872	2.945	3.021
+August, 2002	2.9	3.012	3.104
+September, 2002	3.319	3.451	3.534
+October, 2002	3.894	3.995	3.843
+November, 2002	3.805	3.865	3.908
+December, 2002	4.374	4.48	4.513
+January, 2003	5.068	5.22	5.247
+February, 2003	7.965	7.628	7.739
+March, 2003	5.658	5.726	5.764
+April, 2003	4.947	5.102	5.17
+May, 2003	5.509	5.687	5.791
+June, 2003	5.492	5.712	5.299
+July, 2003	4.921	4.976	4.721
+August, 2003	4.9	4.93	4.995
+September, 2003	4.358	4.523	4.498
+October, 2003	4.36	4.553	4.561
+November, 2003	4.263	4.372	4.414
+December, 2003	5.626	5.873	5.896
+January, 2004	5.558	5.697	5.735
+February, 2004	4.942	5.098	4.802
+March, 2004	4.921	5.227	5.382
+April, 2004	5.267	5.549	5.628
+May, 2004	5.88	6.182	6.255
+June, 2004	5.813	6.035	6.18
+July, 2004	5.681	5.772	5.866
+August, 2004	5.19	5.271	5.374
+September, 2004	4.643	4.847	5.028
+October, 2004	5.45	5.878	6.154
+November, 2004	5.844	5.96	5.737
+December, 2004	6.118	6.25	6.299
+January, 2005	5.547	5.728	5.746
+February, 2005	5.659	5.835	5.847
+March, 2005	6.4	6.683	6.724
+April, 2005	6.541	6.828	6.946
+May, 2005	5.849	6.154	6.371
+June, 2005	6.63	6.938	7.168
+July, 2005	7.103	7.397	7.502
+August, 2005	8.59	8.473	9.244
+September, 2005	10.022	9.567	10.634
+October, 2005	10.913	11.07	11.712
+November, 2005	7.596	7.873	7.816
+December, 2005	11.047	11.237	11.19
+January, 2006	7.379	7.689	7.577
+February, 2006	6.661	6.969	7.158
+March, 2006	5.853	5.975	6.516
+April, 2006	6.033	6.263	6.973
+May, 2006	5.476	5.852	6.069
+June, 2006	5.79	6.009	6.036
+July, 2006	5.949	6.048	5.941
+August, 2006	6.733	6.919	6.857
+September, 2006	4.536	4.722	4.782
+October, 2006	5.453	5.68	5.707
+November, 2006	6.369	6.893	6.75
+December, 2006	6.329	6.474	6.379
+January, 2007	6.419	6.42	6.449
+February, 2007	7.032	7.135	7.173
+March, 2007	6.175	6.467	6.57
+April, 2007	7.055	7.018	7.365
+May, 2007	7.237	7.351	7.477
+June, 2007	6.915	7.01	7.23
+July, 2007	5.876	5.941	5.93
+August, 2007	5.904	6.011	6.03
+September, 2007	5.48	5.728	6.093
+October, 2007	6.5	6.543	6.705
+November, 2007	5.906	6.132	6.312
+December, 2007	6.617	6.674	6.691
+January, 2008	7.58	7.722	7.762
+February, 2008	7.994	8.256	8.185
+March, 2008	8.708	9.242	9.112
+April, 2008	9.492	10.068	10.025
+May, 2008	9.85	10.954	11.016
+June, 2008	11.375	12.356	12.448
+July, 2008	9.919	10.705	10.82
+August, 2008	7.429	7.959	8.074
+September, 2008	5.429	6.19	6.811
+October, 2008	4.179	6.163	6.324
+November, 2008	4.708	5.971	6.243
+December, 2008	5.1	5.429	5.336
+January, 2009	4.11	4.67	4.532
+February, 2009	3.261	3.347	3.946
+March, 2009	2.906	3.059	3.621
+April, 2009	2.933	3.12	3.332
+May, 2009	3.391	3.628	3.702
+June, 2009	3.16	3.575	3.736
+July, 2009	3.244	3.007	3.341
+August, 2009	3.08	3.08	3.12
+September, 2009	3.006	2.918	3.002
+October, 2009	4.029	3.858	3.982
+November, 2009	3.641	3.571	3.671
+December, 2009	5.32	5.305	5.31
+January, 2010	5.726	5.695	5.736
+February, 2010	5.233	5.248	5.234
+March, 2010	4.22	4.209	4.3
+April, 2010	3.932	3.967	4.007
+May, 2010	3.978	4.054	4.091
+June, 2010	4.571	4.67	4.724
+July, 2010	4.313	4.435	4.535
+August, 2010	3.943	4.188	4.283
+September, 2010	3.769	3.781	3.934
+October, 2010	3.306	3.305	3.44
+November, 2010	3.667	3.628	3.702
+December, 2010	4.097	4.163	4.17
+January, 2011	4.364	4.409	4.374
+February, 2011	4.271	4.019	4.096
+March, 2011	3.874	3.847	3.92
+April, 2011	4.134	4.044	4.2
+May, 2011	4.204	4.196	4.254
+June, 2011	4.452	4.374	4.54
+July, 2011	4.347	4.288	4.409
+August, 2011	4.023	3.897	4.01
+September, 2011	3.781	3.744	3.844
+October, 2011	3.425	3.42	3.456
+November, 2011	3.195	3.141	3.207
+December, 2011	3.148	3.091	3.152
+January, 2012	2.628	2.61	2.647
+February, 2012	2.458	2.454	2.44
+March, 2012	2.082	2.091	2.096
+April, 2012	1.911	1.908	1.883
+May, 2012	2.386	2.367	2.384
+June, 2012	2.42	2.405	2.456
+July, 2012	2.87	2.899	2.921
+August, 2012	2.797	2.777	2.827
+September, 2012	2.803	2.787	2.852
+October, 2012	3.267	3.195	3.254
+November, 2012	3.471	3.492	3.479
+December, 2012	3.293	3.282	3.295
+January, 2013	3.297	3.278	3.264
+February, 2013	3.277	3.28	3.276
+March, 2013	3.704	3.743	3.764
+April, 2013	4.057	4.112	4.147
+May, 2013	3.965	3.999	4.057
+June, 2013	3.721	3.743	3.792
+July, 2013	3.547	3.547	3.598
+August, 2013	3.357	3.358	3.413
+September, 2013	3.573	3.562	3.628
+October, 2013	3.581	3.611	3.639
+November, 2013	3.502	3.521	3.54
+December, 2013	4.308	4.166	4.214
+January, 2014	4.601	4.603	4.621
+February, 2014	6.746	5.815	6.129
+March, 2014	4.748	4.81	4.831
+April, 2014	4.509	4.532	4.592
+May, 2014	4.407	4.445	4.465
+June, 2014	4.497	4.495	4.613
+July, 2014	3.945	3.935	4.02
+August, 2014	3.833	3.832	3.94
+September, 2014	3.843	3.843	3.928
+October, 2014	3.623	3.659	3.712
+November, 2014	4.019	4.014	4.052
+December, 2014	3.312	3.318	3.317
+January, 2015	2.824	2.885	2.898
+February, 2015	2.642	2.757	2.695
+March, 2015	2.627	2.727	2.705
+April, 2015	2.41	2.48	2.56
+May, 2015	2.666	2.768	2.798
+June, 2015	2.65	2.711	2.719
+July, 2015	2.763	2.774	2.824
+August, 2015	2.696	2.709	2.736
+September, 2015	2.547	2.568	2.606
+October, 2015	2.207	2.23	2.322
+November, 2015	1.996	1.998	2.058
+December, 2015	1.941	1.874	1.975
+January, 2016	2.188	2.214	2.202
+February, 2016	1.795	1.876	1.885
+March, 2016	1.59	1.657	1.687
+April, 2016	1.756	1.819	1.863
+May, 2016	1.781	1.841	1.872
+June, 2016	2.426	2.497	2.495
+July, 2016	2.665	2.726	2.71
+August, 2016	2.634	2.707	2.733
+September, 2016	2.803	2.898	2.948
+October, 2016	2.733	2.861	3.083
+November, 2016	2.328	2.396	2.521
+December, 2016	3.426	3.448	3.482
+;
+

@@ -1,0 +1,10 @@
+Inputs/
+Scripts/
+Tests/__pycache__/
+__pycache__/
+.idea/
+.pytest_cache/
+NEMSValidator.iml
+*.api.csv
+*.csv
+validator_report.csv

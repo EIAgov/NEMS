@@ -1,0 +1,23 @@
+C                       ::: DCSCRDAT 10-05-91 :::
+C
+C INCLUDE FILE FOR SCREEN (AFTER LOCAL DECLARATIONS)
+C
+C                        GRAPHIC    PRINTABL
+      DATA  HORLIN /   'Ä',       '-' /
+      DATA  VERLIN /   '³',       '|' /
+      DATA  NWCORN /   'Ú',       '.' /
+      DATA  NECORN /   '¿',       '.' /
+      DATA  SECORN /   'Ù',       ''''/
+      DATA  SWCORN /   'À',       '`' /
+      DATA  TEEUP  /   'Á',       '^' /
+      DATA  TEEDN  /   'Â',       '.' /
+      DATA  TEELFT /   '´',       '|' /
+      DATA  TEERGT /   'Ã',       '|' /
+      DATA  CROSS  /   'Å',       '+' /
+CLAHEY      DATA  ARIGHT /   '',       '>' /
+CLAHEY      DATA  ARLEFT /   '',       '<' /
+C
+      DATA  ARIGHT /   '>',       '>' /
+      DATA  ARLEFT /   '<',       '<' /
+C
+C                      ::: END OF DCSCRDAT :::

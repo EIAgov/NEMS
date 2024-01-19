@@ -1,0 +1,25 @@
+* BLRTFLOW.EXC
+ SW ECHO=T ;  REA P BLENDRT ;  REA S
+$ Proceeding with some price interpretations.
+ _PAUSE Output will go to BLRTFLOW.OUT
+ OUTPUT BLRTFLOW.OUT
+ SCR L 99999
+ SCH D T,D
+$$
+ SCH D E
+ INTERP STATS
+$$
+$$  Tracing flow to satisfy demand for unleaded regular (UR) in
+$$  Lousiana (Region 2) at 2nd time period (row BUR22).
+ PIC BUR22,* X GT L ;  TRACE ;  PIC ;  GRAPH SET *
+ GR D R ; GR D R //SYN ; GR D R //MAT ; GR D C ; GR D C //SYN ; GR SAV
+$$ Separate FORM, PLACE AND TIME
+ GR SET * //FORM ; PIC ; GR D R //SYN ; GR LOAD ; GR COPY
+ GR SET * //PLACE; PIC ; GR D R //SYN ; GR LOAD ; GR COPY
+ GR SET * //TIME ; PIC ; GR D R //SYN
+$$ Now for an automatic interpretation.
+ SUB ROW BUR22 ; INTERP TEST BLENDRT
+
+ OUTPUT * ; SW ECHO=F ; SCR W 79 L 23
+$ OUTPUT HAS GONE TO BLRTFLOW.OUT
+ RETURN Q

@@ -1,0 +1,31 @@
+                      ::: FLIP.LOG  8-15-95 :::
+
+    Earlier entries deleted
+      2-08-94, 3-05-94, 10-22-94, 12-08-94, 5-11-95, 7-05-95, 7-27-95
+      8-05-95, 8-10-95
+
+    The FLIP archive is a self-contained set of source codes, document
+    and help files.  This should be stored in a separate subdirectory.
+
+       BEGIN ANALYZE 12.2 & MODLER 7.2
+       > Increased SVALUE from 32 to 64 (string length)
+       > Fixed glitch in FR2C12 (changed E10 to E9)
+       > Changed FR2C12 (Again, 3-5-94) and again (3-21-94)
+       BEGIN ANALYZE 12.4
+       > Changed FOPTN (in FLPARSE.FOR)
+       > Changed FQUEST (in FLDICTRY) for sliding mask
+       BEGIN ANALYZE 12.5
+       > Changed FR2C12 (Again, 12-8-94)
+       > Changed FPURFY (in FLRAND.FOR)
+       > Enhanced !DOS to enter shell (FLCMND in FLIPMGT.FOR)
+       > Changed FMATCH to be case insensitive for keywords
+       > Corrected footnote after listing strings, in FSLIST
+       BEGIN ANALYZE 12.6 (8-4-95)
+       > Added FCLOCK and FLTIME (in FLSCREEN.FOR)
+       > Cosmetic change in FKDISP (in FLKEYWRD.FOR)
+       > Changed VINF in FLIPMGT
+       BEGIN ANALYZE 13.0
+       > Some cosmetic changes in FLKEYWRD.FOR
+
+                          ::: End of FLIP.LOG :::
+

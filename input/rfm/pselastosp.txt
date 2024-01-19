@@ -1,0 +1,15 @@
+                     OTHER SUPPLY RELATED ELASTICITIES
+--------------------------------------------------------------------------
+                     CORN   G.S.   OATS   BARL   WHT    SOYB   CTN    RICE
+--------------------------------------------------------------------------
+ACRGwrtPRIPAID      -0.00  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00
+YLDwrtOWNPRICE       0.01   0.01   0.01   0.01   0.01   0.01   0.01   0.01
+YLDwrtPRIPAID       -0.00  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00
+VAREXP/ACwrtOWNPRI   0.01   0.01   0.01   0.01   0.01   0.02   0.03   0.01
+VAREXP/ACwrtPRPAID  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00  -0.00
+ADJCOEFYIELDEQS      1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+ADJCOEFVAREXPACR     1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+-------------------------------------------------------------------------
+ADJUSTMENT COEFF. FOR CROP EQUATIONS (WILL BE CONVERTED TO 1 - ADJ LATER)
+(A ONE IN THIS TABLE MEANS LR = SR; .10 MEANS LR MUCH LARGER THAN SR;
+ I.E.THESE ARE COEF ON LAGGED DEP)

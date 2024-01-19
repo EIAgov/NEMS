@@ -1,0 +1,650 @@
+! $Header: m:/default/includes/RCS/dwpparm,v 1.59 2020/09/28 19:56:27 APR Exp $
+!  OFFSHORE PARAMETERS
+      INTEGER*4 minFSC
+      PARAMETER(minFSC=2)    ! minimum field size class
+      INTEGER*4 numFSC
+      PARAMETER(numFSC=16)   ! number of field size classes
+      INTEGER*4 nREG
+      PARAMETER(nREG=4)      ! REGION
+                             !   1: CENTRAL & WESTERN GOM
+                             !   2: EASTERN GOM
+                             !   3: ATLANTIC
+                             !   4: PACIFIC
+      INTEGER*4 nPA
+      PARAMETER(nPA=11)       ! PLANNING AREA
+                             !   1: WESTERN GOM
+                             !   2: CENTRAL GOM
+                             !   3: EASTERN GOM
+                             !   4: NORTH ATLANTIC
+                             !   5: MID ATLANTIC
+                             !   6: SOUTH ATLANTIC
+                             !   7: FLORIDA STRAITS
+                             !   8: PACIFIC NORTHWEST
+                             !   9: NORTH CALIFORNIA  
+                             !  10: CENTRAL CALIFORNIA
+                             !  11: SOUTH CALIFORNIA
+      INTEGER*4 ntEU
+      PARAMETER(ntEU=46)     ! TOTAL NUMBER OF EVALUATION UNITS
+      INTEGER nMaxEU                       ! Maximum number of EU in a PA
+      PARAMETER(nMaxEU=7)
+      INTEGER*4 TOTFLD
+      PARAMETER(TOTFLD=6500)  ! TOTAL NUMBER OF EVALUATION UNITS
+      INTEGER*4 nANN
+      PARAMETER(nANN=70)    ! TOTAL NUMBER OF ANNOUNCED DISCOVERIES
+      INTEGER*4 nPRD
+      PARAMETER(nPRD=1084)  ! TOTAL NUMBER OF PRODUCING FIELDS = total number of rows/2 because Gas and Oil
+      INTEGER*4 nRIGTYP
+      PARAMETER(nRIGTYP=8) ! RIG TYPE
+                           !   1: JACK-UP 0-1500
+                           !   2: JACK-UP 0-1500 (Deep Drilling)
+                           !   3: SUBMERSIBLE 0-1500
+                           !   4: SEMI-SUBMERSIBLE 1500-5000
+                           !   5: SEMI-SUBMERSIBLE 5000-7500
+                           !   6: SEMI-SUBMERSIBLE 7500-10000
+                           !   7: DRILL SHIP 5000-7500
+                           !   8: DRILL SHIP 7500-10000
+      INTEGER*4 nPFTYP
+      PARAMETER(nPFTYP=7) ! PRODUCTION FACILITY TYPE
+                           !   1: FIXED PLATFORM (FP)
+                           !   2: COMPLIANT TOWER (CT)
+                           !   3: TENSION LEG PLATFORM (TLP)
+                           !   4: FLOATING PRODUCTION SYSTEM (FPS)
+                           !   5: SPAR
+                           !   6: FLOATING PRODUCTION STORAGE & OFFLOADING (FPSO)
+                           !   7: SUBSEA SYSTEM (SS)
+      INTEGER*4 nPFWDR
+      PARAMETER(nPFWDR=5)  ! PRODUCTION FACILITY WATER DEPTH RANGE
+                           !   1: 0 - 656 FEET
+                           !   2: 656 - 2625 FEET
+                           !   3: 2625 - 5249 FEET
+                           !   4: 5249 - 7874 FEET
+                           !   5: 7874 - 9000 FEET
+      INTEGER*4 NSLTIdx
+      PARAMETER(NSLTIdx=8) ! NUMBER OF PLATFORM SLOT DATA POINTS
+      INTEGER*4 NPFWD
+      PARAMETER(NPFWD=15)  ! NUMBER OF PRODUCTION FACILITY WATER DEPTH DATA POINTS
+      INTEGER*4 NPLTDD
+      PARAMETER(NPLTDD=17)  ! NUMBER OF PLATFORM WATER DEPTH DATA POINTS
+      INTEGER*4 NOPFWD
+      PARAMETER(NOPFWD=11)  ! NUMBER OF OTHER PRODUCTION FACILITY WATER DEPTH DATA POINTS
+!     INTEGER*4 NCSTWD
+!     PARAMETER(NCSTWD=39)  ! NUMBER OF WATER DEPTH DATA POINTS FOR PRODUCTION FACILITY COSTS
+!     INTEGER*4 NDRLWD
+!     PARAMETER(NDRLWD=15)  ! NUMBER OF WATER DEPTH DATA POINTS FOR WELL COSTS
+!     INTEGER*4 NWLDEP
+!     PARAMETER(NWLDEP=30)  ! NUMBER OF WELL DEPTH DATA POINTS
+      INTEGER*4 TRNPPLNCSTNDIAM
+      PARAMETER(TRNPPLNCSTNDIAM=19)  ! NUMBER OF PIPELINE DIAMETER DATA POINTS
+      INTEGER*4 MAXNFIELDS
+      PARAMETER(MAXNFIELDS=10) ! MAXIMUM NUMBER OF FIELDS FOR A PROJECT/PROSPECT
+      INTEGER*4 nMAXPRJ
+      PARAMETER(nMAXPRJ=1000) ! MAXIMUM NUMBER OF PROJECTS TO EVALUATE
+      INTEGER*4 MAXEXPPRJ
+      PARAMETER(MAXEXPPRJ=100) ! MAXIMUM NUMBER OF POSSIBLE EXPLORATION PROJECTS
+      INTEGER*4 PRJLIFE
+      PARAMETER(PRJLIFE=10) ! MAXIMUM PROJECT LIFE IN YEARS
+
+      !  OFFSHORE GLOBAL VARIABLES
+      INTEGER nTFld                        ! Total number of fields
+
+      INTEGER toff                         ! Year index (t=1 for 2003)
+      INTEGER nTime                        ! Number of forecast years for projection
+      INTEGER nReportTime                  ! Number of forecast years for reporting
+      INTEGER yearOf(MNUMYR)               ! Forecast year by year index
+      INTEGER t0                           ! Year index for historical production
+      INTEGER nTime0                       ! Number of years for historical production
+      INTEGER yearOf0(MNUMYR)              ! Historical year by year index
+
+!     INTEGER fldID(0:2,nPA,nmaxEU,minFSC:minFSC+numFSC-1,105)  ! ID for field object by field category, PA, EU, FSC,
+      INTEGER fldID1(totfld)  ! ID for field object by field category, PA, EU, FSC,
+      INTEGER fldID2(totfld)  ! ID for field object by field category, PA, EU, FSC,
+      INTEGER fldID3(totfld)  ! ID for field object by field category, PA, EU, FSC,
+      INTEGER fldID4(totfld)  ! ID for field object by field category, PA, EU, FSC,
+      INTEGER fldID5(totfld)  ! ID for field object by field category, PA, EU, FSC,
+      INTEGER fldID6(totfld)  ! ID for field object by field category, PA, EU, FSC,
+                                           ! index of field
+      INTEGER nMaxFld                      ! Maximum number of fields in an FSC
+
+      INTEGER nPsbExpPrj                   ! Number of possible exploration projects
+
+      INTEGER nDevPrj                      ! Number of development projects
+
+      INTEGER iRnk(TOTFLD)                 ! ID array of ranked projects
+                                           ! (Ranked on FSC descending and NPV descending)
+
+      INTEGER nRigWlsCap(nRIGTYP)          ! Number of well drilling capacity (Wells/Rig)
+      INTEGER nRigWlsUtl(nRIGTYP)          ! Number of wells drilled (Wells/Rig)
+      INTEGER WLOFF                        ! INPUT FILE
+      INTEGER OFFOUT                       ! OUTPUT FILE
+      REAL*4 RigUtil(nRIGTYP)              ! Number of wells drilled (Wells/Rig)
+      REAL*4 OILPRICE(OFFRGN,MNUMYR)       ! OIL WELLHEAD PRICE
+      REAL*4 GASPRICE(OFFRGN,MNUMYR)       ! GAS WELLHEAD PRICE
+      REAL*4 OILPRICE_ANNDISC(OFFRGN,MNUMYR)       ! OIL WELLHEAD PRICE (FOR ANNOUNCED DISCOVERIES - separated so that it can
+      						   !   be defined differently from OILPRICE in code)  
+      REAL*4 GASPRICE_ANNDISC(OFFRGN,MNUMYR)       ! GAS WELLHEAD PRICE (FOR ANNOUNCED DISCOVERIES - separated so that it can
+      						   !   be defined differently from GASPRICE in code)
+      REAL*4 prod_asg(offrgn,MNUMYR)       ! AD GAS PRODUCTION
+      REAL*4 beg_rsva(offrgn,MNUMYR)       ! AD GAS RESERVES
+      REAL*4 PRDOFF(OFFrgn,OFFfuel)        ! EXPECTED PRODUCTION
+
+! DATABASE OBJECT VARIABLES - WAS NOT ABLE TO GET THESE ALLIGNED PROPERLY, SO CANNOT USE TYPE STATEMENT
+  INTEGER NRR(nPA,nMaxEU,minFSC:minFSC+numFSC-1)         ! Total number of fields by PA, EU, FSC
+  INTEGER CUMNFW(nPA,nMaxEU,MNUMYR)  ! Cumulative new field wildcats by PA, EU, FSC
+  INTEGER cumdisc(nPA,nMaxEU,minFSC:minFSC+numFSC-1)     ! Cumulative discoveries
+  INTEGER NLAGYRS(3,nMaxEU)       ! 
+  INTEGER TOTNFW(nPA,nMaxEU)       ! 
+  INTEGER uNRR(nPA,nMaxEU,minFSC:minFSC+numFSC-1)         ! Number of undiscovered fields by PA, EU, FSC
+  INTEGER uNRRavl(nPA,nMaxEU,minFSC:minFSC+numFSC-1)         ! Number of fields available by PA, EU, FSC
+  INTEGER yrBegForecast           ! Begin forecast year
+  INTEGER yrEndForecast           ! End forecast year
+  INTEGER yrBegPrdHis             ! Begin year data of historical production
+  INTEGER yrEndPrdHis             ! End year data of historical production
+                                  ! (% of Remaining Number of Fields/Year)
+  INTEGER yrCstTbl              ! Year of cost tables
+  INTEGER PAREG(nPA)              ! Planning area to region x-walk by PA
+  INTEGER EUPA(ntEU)              ! Evaluation unit to planning area x-walk by EU_Total
+  INTEGER REGID(ntEU)             ! REGION ID
+  INTEGER PAID(ntEU)              ! PLANNING AREA ID
+  INTEGER EUID(ntEU)              ! EVALUATION UNIT ID
+  INTEGER OGSMID(ntEU)            ! MAPPING FROM EVALUATION UNIT TO OGSM REGION
+  INTEGER OGSMREG(nPA,ntEU)       ! MAPPING FROM EVALUATION UNIT TO OGSM REGION
+  INTEGER nEU(nPA)                ! NUMBER OF EVALUATION UNITS IN EACH PA
+  INTEGER duNRR(nPA,nmaxEU,minFSC:minFSC+numFSC-1)        ! Number of discovered/undeveloped fields
+                                  ! (announced discovery) by PA, EU, FSC
+  INTEGER pre1990NRR(nPA,nmaxEU,minFSC:minFSC+numFSC-1)        ! Number of Developed fields before 1990 by PA, EU, FSC, 02/12/2020 apr
+  INTEGER post1990NRR(nPA,nmaxEU,minFSC:minFSC+numFSC-1)        ! Number of Developed fields after (and including) 1990 by PA, EU, FSC, 02/12/2020 apr
+  INTEGER ANN_FSC(NANN)           	! ANNOUNCED DISCOVERIES - FIELD SIZE CLASS
+  INTEGER ANN_WL(NANN)            	! ANNOUNCED DISCOVERIES - NUMBER OF WELLS
+  INTEGER ANN_YRDISC(NANN)        	! ANNOUNCED DISCOVERIES - YEAR OF DISCOVERY
+  INTEGER ANN_PRDSTYR(NANN)       	! ANNOUNCED DISCOVERIES - START YEAR OF PRODUCTION
+  
+  INTEGER ANN_IPRDOIL(NANN)		! ANNOUNCED DISCOVERIES - INITIAL OIL PRODUCTION RATE (BBL/D)
+  INTEGER ANN_IPRDGAS(NANN)		! ANNOUNCED DISCOVERIES - INITIAL GAS PRODUCTION RATE (MCF/D)
+  INTEGER ANN_PKPRDOIL(NANN)		! ANNOUNCED DISCOVERIES - PEAK OIL PRODUCTION RATE (BBL/D)
+  INTEGER ANN_PKPRDGAS(NANN)		! ANNOUNCED DISCOVERIES - PEAK GAS PRODUCTION RATE (MCF/D)
+  INTEGER ANN_RAMPUP			! ANNOUNCED DISCOVERIES - length of ramp up period of production profile (oil and gas fields)
+  INTEGER ANN_HYP			! ANNOUNCED DISCOVERIES - hyperbolic decline coefficient (oil and gas fields)
+  
+  INTEGER dNRR(nPA,nmaxEU,minFSC:minFSC+numFSC-1)          ! Number of discovered producing fields by PA, EU, FSC
+  INTEGER nRigs(nRIGTYP)          ! Number of rigs by rig type
+  INTEGER rigIncrMin(nRIGTYP)     ! Minimum Rig Increment by rig type
+  INTEGER yrAvl(nPA,nmaxEU)             ! Year lease available by PA, EU
+  INTEGER exp1stDly(nPA,nmaxEU)         ! Delay (Years) before commencing first exploration
+                                  ! by PA, EU
+  INTEGER exp2ndDly(nPA,nmaxEU)         ! Total time (Years) to explore and appraise a field
+                                  ! by PA, EU
+  INTEGER buffervol(nPA,nmaxEU)   ! percentage of resource within buffer zone
+  INTEGER exp1stDlyOrg(nPA,nmaxEU)      ! Original values of exp1stDly (for technology levers)
+  INTEGER exp2ndDlyOrg(nPA,nmaxEU)      ! Original values of exp2ndDly (for technology levers)
+  INTEGER nDelWls(nPA,nmaxEU,minFSC:minFSC+numFSC-1)      ! Number of delineation wells to justify a production
+                                  ! facility by PA, EU, FSC
+  INTEGER nDelWlsOrg(nPA,nmaxEU,minFSC:minFSC+numFSC-1)   ! Original values of nDelWls (for technology levers)
+
+  INTEGER nDevWls(nPA,nmaxEU,minFSC:minFSC+numFSC-1)           ! Maximum number of development wells by PA, EU, FSC
+
+  INTEGER platform(nPFTYP)             ! Flag for platform production facility
+  INTEGER pfTypFlg(NPFWDR,nPFTYP)      ! Production facility type flag by water depth range
+                                       ! index, PF type index
+  INTEGER pfMinNFld(2:3)               ! Minimum number of fields in a project by project
+                                       ! option
+  INTEGER pfMaxNFld(2:3)               ! Maximum number of fields in a project by project
+                                       ! option
+  INTEGER pfMaxNWls(2:3)               ! Maximum number of wells sharing a flowline by project
+                                       ! option
+  INTEGER nSlt(nSltIdx)                   ! Number of slots by # of slots index
+
+  INTEGER PRD_FSC(2,NPRD)          ! PRODUCING FIELDS - FIELD SIZE CLASS
+  INTEGER PRD_YRDISC(2,NPRD)       ! PRODUCING FIELDS - YEAR OF DISCOVERY
+  INTEGER PRD_DEPTH(2,NPRD)        ! PRODUCING FIELDS - TOTAL DEPTH
+  INTEGER PRD_FLAG(2,NPRD)         ! PRODUCING FIELDS - PRODUCTION DECLINE FLAG
+  INTEGER pfBldDly1(nPFWD,nPFTYP,0:nSltIdx) ! Delay for production faclity design, fabrication, and
+                                          ! installation (Years)by water depth index,
+                                          ! PF type index, # of slots index (0 for non platform)
+  INTEGER pfBldDly2(nPFWD)                ! Delay between production facility construction
+                                          ! (Years) by water depth index
+  INTEGER devDrlDly24(nPLTDD)         ! Maximum number of development wells drilled from a
+                                      ! 24-slot PF (Wells/PF/Year, 1 Rig) by drilling depth
+                                      ! index
+  INTEGER devDrlDlyOth(nPFTYP,nOPFWD) ! Maximum number of development wells drilled for other
+                                      ! PF (Wells/Field/Year) by PF type, water depth index
+  INTEGER prdDYrRampUpOil(nPA,nmaxEU,2)   ! Years to ramp up for oil production by PA, EU,
+                                       ! FSC range index
+  INTEGER prdDYrRampUpGas(nPA,nmaxEU,2)   ! Years to ramp up for gas production by PA, EU,
+                                       ! FSC range index
+  INTEGER prdDYrPeakOil(nPA,nmaxEU,2)     ! Years at peak production for oil by PA, EU, FSC
+                                       ! range index
+  INTEGER prdDYrPeakGas(nPA,nmaxEU,2)     ! Years at peak production for oil by PA, EU, FSC
+                                       ! range index
+  INTEGER pfwdmin(5)
+  INTEGER pfwdmax(5)
+  INTEGER pfnslot(5,minfsc:minfsc+numfsc-1)
+  INTEGER POWER_EDC(3)
+  INTEGER DEVMIN(nmaxEU)
+  INTEGER ROYENDYR(OFFRGN)
+
+! REAL TYPES
+  REAL*4 ALPHA_DW(nmaxEU), BETA_DW(nmaxEU)
+  REAL*4 ABANDONFAC(nPFTyp)            ! Abandonment costs as a function of the fraction of initial platform cost
+  REAL*4 ALPHA_OC    
+  REAL*4 BETA1_OC    
+  REAL*4 BETA2_OC    
+  REAL*4 COMPLCOST(2,3)
+  REAL*4 ALPHA_DDC(2)
+  REAL*4 BETA1_DDC(2)
+  REAL*4 BETA2_DDC(2)
+  REAL*4 GAMMA1_DDC(2)
+  REAL*4 GAMMA2_DDC(2)
+  REAL*4 ALPHA_EDC(3)
+  REAL*4 BETA1_EDC(3)
+  REAL*4 BETA2_EDC(3)
+  REAL*4 BETA3_EDC(3)
+  REAL*4 ALPHA_SC(3)       ! 
+  REAL*4 BETA1_SC(3)       ! 
+  REAL*4 BETA2_SC(3)       ! 
+  REAL*4 SC10(3,nMaxEU)       ! Search Coefficient of FSC 10
+  REAL*4 ALPHA1(3,nMaxEU)       ! 
+  REAL*4 ALPHA2(3,nMaxEU)       ! 
+  REAL*4 BETA(3,nMaxEU)       ! 
+  REAL*4 PROD(2,nPRD,MNUMYR) ! PRODUCING FIELDS - ANNUAL PRODUCTION
+  REAL*4 fldExpRate(nPA,nmaxEU,minFSC:minFSC+numFSC-1)      ! Maximum Field Exploration Rate
+  REAL*4 BOEtoMcf                   ! BOE to Mcf conversion (Mcf/BOE) (e.g. 5.61 Mcf/BOE)
+  REAL*4 cstCap                ! Cost of capital (%)
+  REAL*4 fedTaxRate            ! Federal Tax Rate (%)
+  REAL*4 stTaxRate(nPA,nmaxEU)         ! Federal Tax Rate (%), by PA, EU
+  REAL*4 oilSevTaxRate         ! Oil severance tax rate (%)
+  REAL*4 gasSevTaxRate         ! Gas severance tax rate (%)
+  REAL*4 oilSevTaxPrd          ! Oil production severance tax ($/Bbl)
+  REAL*4 gasSevTaxPrd          ! Gas production severance tax ($/Mcf)
+  REAL*4 expTangFrc            ! Exploration and Delineation Wells Tangible Fraction
+  REAL*4 pfTangFrc             ! Production Facility Tangible Fraction
+  REAL*4 devTangFrc            ! Development Wells Tangible Fraction
+  REAL*4 chgOpCstOil           ! Change of Operating Costs as a Function of Oil Prices
+                                  ! {C = C(@$30) * [1 + [(NCP/30) - 1] * F}
+  REAL*4 chgDrlCstOil          ! Change of Drilling Costs as a Function of Oil Prices
+                                  ! {C = C(@$30) * [1 + [(NCP/30) - 1] * F}
+  REAL*4 chgPFCstOil           ! Change of Production facility Costs as a Function of
+                                  ! Oil Prices
+                                  ! {C = C(@$30) * [1 + [(NCP/30) - 1] * F}
+  REAL*4 oilPrcCstTbl          ! Oil price for cost tables (1995$/Bbl)
+  REAL*4 deprSch(8)            ! Depreciation schedule (Fraction) by year index
+  REAL*4 oilPrc(MNUMYR)        ! Oil price forecast ($/Bbl) by year index
+  REAL*4 gasPrc(MNUMYR)        ! Gas price forecast ($/Mcf) by year index
+  REAL*4 cndPrc(MNUMYR)        ! Condensate price forecast ($/Bbl) by year index
+  REAL*4 royRateU(nPA,nmaxEU,minFSC:minFSC+numFSC-1)     ! Royalty rate for undiscovered fields (Fraction)
+                                  ! by PA, EU, FSC
+  REAL*4 royRateD(nPA,nmaxEU,minFSC:minFSC+numFSC-1)     ! Royalty rate for discovered fields (Fraction)
+                                  ! by PA, EU, FSC
+  REAL*4 royRate(nPA,nmaxEU,minFSC:minFSC+numFSC-1)     ! Royalty rate applied (Fraction)
+                                  ! by PA, EU, FSC
+
+  REAL*4 levExpSucRate(2)      ! Seismic technology (increase exploration success
+                                  ! rate)
+  REAL*4 levDelWls(2)          ! Exploration drilling technology (reduces number of
+                                  ! delineation wells to justify development)
+  REAL*4 levExpDly(2)          ! Pricing impact on drilling delays (reduces delays to
+                                  ! commence first exploration and between exploration)
+  REAL*4 levDrlCst(2)          ! Drilling costs R&D impact (reduces exploration and
+                                  ! development drilling costs)
+  REAL*4 levOprCst(2)          ! Operating costs R&D impact (reduces operating costs)
+  REAL*4 levPfDly(2)           ! Production facility design, fabrication and
+                                  ! installation technology (reduces time to construct
+                                  ! production facility)
+  REAL*4 levPfCst(2)           ! Production facility cost R&D impact (reduces
+                                  ! production facility construction costs)
+  REAL*4 levPrdPerf1(2)        ! Completion technology 1 (increases initial constant
+                                  ! production rate)
+  REAL*4 levPrdPerf2(2)        ! Completion technology 2 (reduces decile rates)
+
+
+  REAL*4 vMin(minFSC:minFSC+numFSC-1)               ! Minimum MMBOE of FSC
+  REAL*4 vMax(minFSC:minFSC+numFSC-1)               ! Maximum MMBOE of FSC
+  REAL*4 vMean(minFSC:minFSC+numFSC-1)              ! Geometric mean MMBOE of FSC
+
+  REAL*4 ANN_WD(NANN)			! ANNOUNCED DISCOVERIES - WATER DEPTH
+  
+  REAL*4 ANN_FRCOIL(NANN)		! ANNOUNCED DISCOVERIES - FRACTION OIL PRODUCED BEFORE DECLINE
+  REAL*4 ANN_FRCGAS(NANN)		! ANNOUNCED DISCOVERIES - FRACTION GAS PRODUCED BEFORE DECLINE
+  REAL*4 ANN_DECOIL(NANN)		! ANNOUNCED DISCOVERIES - OIL DECLINE RATE
+  REAL*4 ANN_DECGAS(NANN)		! ANNOUNCED DISCOVERIES - GAS DECLINE RATE
+
+  REAL*4 PRD_RES(2,NPRD)           ! PRODUCING FIELDS - CUMULATIVE PRODUCTION PLUS PROVED 
+                                   ! RESERVES AS OF 1/1/99
+  REAL*4 PRD_CUMPRD(2,NPRD)        ! PRODUCING FIELDS - CUMULATIVE PRODUCTION AS OF 1/1/2000
+  REAL*4 PRD_RSV(2,NPRD)           ! PRODUCING FIELDS - PROVED RESERVES AS OF 1/1/2000
+
+  REAL*4 oRGCGF(0:50)             ! Oil Cumulative Growth Factor (CGF) for oil reserve
+                                  ! growth calculation by year index
+  REAL*4 gRGCGF(0:50)             ! Gas Cumulative Growth Factor (CGF) for gas reserve
+                                  ! growth calculation by year index
+  REAL*4 GORCutOff                ! GOR cutoff for oil/gas field determination
+
+  REAL*4 GOprop(nPA,nmaxEU)             ! Gas proportion (Fraction) of hydrocarbon resource
+                                  ! by PA, EU
+  REAL*4 cndYld(nPA,nmaxEU)             ! Condensate yield (Bbl/MMcf) by PA, EU
+  REAL*4 GOR(nPA,nmaxEU)                ! Gas-to-Oil ratio (Scf/Bbl) by PA, EU
+
+  REAL*4 wDpth(nPA,nmaxEU,minFSC:minFSC+numFSC-1)         ! Water depth (Feet) by PA, EU, FSC
+
+  REAL*4 dDpth(nPA,nmaxEU,minFSC:minFSC+numFSC-1)         ! Drilling depth (Feet) by PA, EU, FSC
+
+  REAL*4 expDrlDays(nRIGTYP)      ! Drilling days/well by rig type
+  REAL*4 rigTypWDMin(nRIGTYP)     ! Water depth range minimum (Feet) by rig type
+  REAL*4 rigTypWDMax(nRIGTYP)     ! Water depth range maximum (Feet) by rig type
+  REAL*4 rigBldRatMax(nRIGTYP)    ! Maximum Rig Build Rate (%) by rig type
+  REAL*4 rigUtilTarget(nRIGTYP)   ! Target Rig Utilization (%) by rig type
+  REAL*4 DRILLCAP(nRIGTYP)        ! Drilling Capacity (wells/year/rig)
+
+
+  REAL*4 expSucRate(nPA,nmaxEU,minFSC:minFSC+numFSC-1)    ! Exploration success rate by PA, EU, FSC
+
+! REAL*4 expDrlCst(nREG,nDRLWD,nWLDEP) ! Mean Exploratory Well Costs in Million Dollars by
+!                                      ! region, water depth index, drilling depth index
+! REAL*4 expDrlCstWDpth(nDRLWD)   ! Water depth data by region, water depth index
+! REAL*4 expDrlCstDDpth(nWLDEP)   ! Drilling depth data by region, drilling depth index
+
+  REAL*4 pfTypWDpthMin(nPFWDR)         ! Water depth range (minimum) for production facility
+                                       ! type by depth range index
+  REAL*4 pfTypWDpthMax(nPFWDR)         ! Water depth range (maximum) for production facility
+                                       ! type by depth range index
+
+  REAL*4 pfBldDlyWDpth(nPFWD)             ! Water depth by water depth index
+  REAL*4 devDrlDly24DDpth(nPLTDD)     ! Drilling depth by drilling depth index
+  REAL*4 devDrlDlyOthWDpth(nOPFWD)    ! Water depth by water depth index
+
+  REAL*4 pfCstFrc(10,10)              ! Production facility cost fraction matrix by year
+                                      ! index, year index
+
+! REAL*4 pfCst(nREG,nPFTYP,nCSTWD,0:nSltIdx)   ! Mean Production Facility Costs in Million Dollars
+                                               ! by region, PF type, water depth index, # of slots
+                                               ! index (0 for non-platform)
+! REAL*4 pfCstWDpth(nCSTWD)               ! Water depth data by region, water depth index
+
+! REAL*4 devDrlCstWDpth(nDRLWD)        ! Water depth data by region, water depth index
+! REAL*4 devDrlCstDDpth(nWLDEP)        ! Drilling depth data by region, drilling depth index
+! REAL*4 devDrlCst(nREG,nDRLWD,nWLDEP) ! Mean development well drilling costs in Million
+                                       ! Dollars by region, water depth index, drilling depth
+                                       ! index
+! REAL*4 devCmplCst(nreg,2,2,nWLDEP)   ! Completion costs (MM$) by region, completion type
+                                       ! (1=Single, 2=Dual), water depth range (1=0-3000Ft,
+                                       ! 2=>3000Ft), drilling depth index
+! REAL*4 devOprCst(nREG,2,nWLDEP)      ! Operating costs ($/Well/Yr) by region, water depth
+                                       ! range (1=0-3000Ft, 2=>3000Ft), drilling depth index
+
+  REAL*4 prdOilFrc(nPA,nmaxEU)               ! Fraction of oil produced before decline by PA, EU
+  REAL*4 prdGasFrc(nPA,nmaxEU)               ! Fraction of gas produced before declone by PA, EU
+  REAL*4 prdOilRatei(nPA,nmaxEU)             ! Initial oil production (Bbl/Day/Well) by PA, EU
+  REAL*4 prdGasRatei(nPA,nmaxEU)             ! Initial gas production (Mcf/Day/Well) by PA, EU
+  REAL*4 prdOilDecRatei(nPA,nmaxEU)          ! Initial oil decline rate (Fraction/Yr) by PA, EU
+  REAL*4 prdGasDecRatei(nPA,nmaxEU)          ! Initial gas decline rate (Fraction/Yr) by PA, EU
+  REAL*4 prdOilHyp(nPA,nmaxEU)               ! Oil hyperbolic decline coefficient by PA, EU
+  REAL*4 prdGasHyp(nPA,nmaxEU)               ! Gas hyperbolic decline coefficient by PA, EU
+
+  REAL*4 prdDOilDecRatei(nPA,nmaxEU,2)    ! Initial oil decline rate (Fraction/Yr) by PA, EU,
+                                       ! FSC range index
+  REAL*4 prdDGasDecRatei(nPA,nmaxEU,2)    ! Initial gas decline rate (Fraction/Yr) by PA, EU,
+                                       ! FSC range index
+  REAL*4 prdDOilHyp(nPA,nmaxEU,2)         ! Oil hyperbolic decline coefficient by PA, EU,
+                                       ! FSC range index
+  REAL*4 prdDGasHyp(nPA,nmaxEU,2)         ! Gas hyperbolic decline coefficient by PA, EU,
+                                       ! FSC range index
+
+  REAL*4 trnFlowLineLen(nPA,nmaxEU)          ! Flowline length (Miles/Prospect) by PA, EU
+  REAL*4 trnPpDiam(nPA,nmaxEU)               ! Oil pipeline diameter (Inches) by PA, EU
+  REAL*4 trnTrfOil(nPA,nmaxEU)               ! Oil pipeline tariff ($/Bbl) by PA, EU
+  REAL*4 trnTrfGas(nPA,nmaxEU)               ! Gas pipeline tariff ($/Mcf) by PA, EU
+
+
+!CHARACTER TYPES
+  CHARACTER*2  PRD_OG(2,NPRD)     ! PRODUCING FIELDS - FUEL TYPE
+  CHARACTER*2  ANN_OG(NANN)       ! ANNOUNCED DISCOVERIES - FUEL TYPE 
+  CHARACTER*30  rigTypNm(nRIGTYP) ! Rig type name by rig type:
+                                  !   1=Jack-Up 0-1500
+                                  !   2=Jack-Up 0-1500 (Deep Drilling)
+                                  !   3=Submersible 0-1500
+                                  !   4=Semi-Submersible 1500-5000
+                                  !   5=Semi-Submersible 5000-7500
+                                  !   6=Semi-Submersible 7500-10000
+                                  !   7=Drill Ship 5000-7500
+                                  !   8=Drill Ship 7500-10000
+  CHARACTER*22  nmReg(nREG)       ! Names of regions by region
+  CHARACTER*22  nmPA(nPA)         ! Names of planning areas by PA
+  CHARACTER*22  PRD_FN(2,NPRD)    ! PRODUCING FIELDS - FIELD NAME
+  CHARACTER*22  Regname(ntEU)       ! Names of regions by region
+  CHARACTER*22  PAname(ntEU)        ! Names of planning areas by PA
+  CHARACTER*15  EUname(ntEU)        ! Names of evaluation units by PA
+  CHARACTER*15  nmEU(nPA,nmaxEU)        ! Names of evaluation units by PA
+  CHARACTER*30  ANN_NN(NANN)      ! ANNOUNCED DISCOVERIES - NICKNAME
+  CHARACTER*15  ANN_FN(NANN)      ! ANNOUNCED DISCOVERIES - FIELD NAME
+  CHARACTER*15 ANN_EU(NANN)       ! ANNOUNCED DISCOVERIES - EVALUATION UNIT NAME
+  CHARACTER*15 PRD_EU(2,NPRD)     ! PRODUCING FIELDS - EVALUATION UNIT NAME
+  CHARACTER*8  PRD_ID(2,NPRD)     ! PRODUCING FIELDS - MMS FIELD ID
+  CHARACTER*6  nmPF(nPFTYP)       ! Name of production facility and subsea-system by PF
+                                  ! type index
+  CHARACTER*6  pfOptFlg(nPFWDR,minFSC:minFSC+numFSC-1)   ! Production facility option flag by water depth range
+  CHARACTER*6  pfType(5,minFSC:minFSC+numFSC-1)   ! Production facility option flag by water depth range
+                                       ! index, FSC
+  CHARACTER*6  ANN_FAC(NANN)      ! ANNOUNCED DISCOVERIES - TYPE OF PRODUCTION FACILITY
+
+
+!  FIELD ARRAYS
+      TYPE FIELDOBJ
+        SEQUENCE
+        REAL*4 oilPrdHis(MNUMYR)    ! Historical oil production (Bbl) by time index
+        REAL*4 gasPrdHis(MNUMYR)    ! Historical gas production (Mcf) by time index
+        REAL*4 oilPrd(MNUMYR)             ! Oil production (Bbl) by time index
+        REAL*4 gasPrd(MNUMYR)             ! Non-associated Gas production (Mcf) by time index
+        REAL*4 cndPrd(MNUMYR)             ! Condensate production (Bbl) by time index
+        REAL*4 asgPrd(MNUMYR)             ! Associated gas production (Mcf) by time index
+        REAL*4 oilRGPrd(MNUMYR)           ! Reserve growth oil production (Bbl) by time index
+        REAL*4 gasRGPrd(MNUMYR)           ! Reserve growth non-associated Gas production (Mcf)
+                                        ! by time index
+        REAL*4 cndRGPrd(MNUMYR)           ! Reserve growth condensate production (Bbl)
+                                        ! by time index
+        REAL*4 asgRGPrd(MNUMYR)           ! Reserve growth associated gas production (Mcf)
+                                        ! by time index
+        REAL*4 oilKR                      ! Oil total recoverable reserves, MBbl
+        REAL*4 gasKR                      ! Gas total recoverable reserves, MMcf
+        REAL*4 wDpth                      ! Water depth (Feet)
+        REAL*4 dDpth                      ! Drilling depth from sea bed (Feet)
+        REAL*4 FrcprdOil		! Fraction of oil produced before decline for announced discoveries
+        REAL*4 FrcprdGas		! Fraction of nat gas produced before decline for announced discoveries
+        REAL*4 prdODec			! Oil decline rate for announced discoveries
+        REAL*4 prdGDec			! Nat gas decline rate for announced discoveries
+        INTEGER devDrlSch(MNUMYR)       ! Number of development wells  bby time index
+        INTEGER nOprWls(MNUMYR)         ! Number of operating wells by time index
+        INTEGER nOprWlsRG(MNUMYR)       ! Reserve growth number of operating wells
+                                        ! by time index
+        INTEGER pfTypFlg(nPFTYP)         ! Production facility type flag (TRUE/FALSE)
+                                        !   1=FP=Fixed Platform,
+                                        !   2=CT=Compliant Tower,
+                                        !   3=TLP=Tension Leg Platform,
+                                        !   4=FPS=Floating Production System
+                                        !   5=SPAR=SPAR Platform
+                                        !   6=FPSO=Floating Production Storage & Offloading
+                                        !   7=SS=Subsea-system
+        INTEGER prjID                   ! Project ID
+        INTEGER Reg                     ! Region ID
+        INTEGER PA                      ! Planning area ID
+        INTEGER EU                      ! Evaluation unit ID
+        INTEGER OGSM                    ! OGSM offshore region
+        INTEGER FSC                     ! FSC, 5 to 20
+        INTEGER initTyp                 ! Initial field category
+                                        !   0=Undiscovered,
+                                        !   1=Discovered/Undeveloped,
+                                        !   2=Discovered Producing
+        INTEGER curTyp                  ! Current field category
+                                        !   0=Undiscovered,
+                                        !   1=Discovered/Undeveloped,
+                                        !   2=Discovered Producing
+                                        !   3=Reserve Growth
+        INTEGER decTyp                  ! Type for production profile (for Discovered fields):
+                                        !   0=No production data
+                                        !     => Treat as discovered/undeveloped field with
+                                        !        start year of production of 2002
+                                        !   1=Declining production
+                                        !     => Use hyperbolic decline equation
+                                        !   2=Increasing production
+                                        !     => Hold production constant for the following
+                                        !        year then start declining. Use  2002
+                                        !        production data if it is available.
+        INTEGER rigTyp                  ! Rig type:
+                                        !   1=Jack-Up 0-1500
+                                        !   2=Jack-Up 0-1500 (Deep Drilling)
+                                        !   3=Submersible 0-1500
+                                        !   4=Semi-Submersible 1500-5000
+                                        !   5=Semi-Submersible 5000-7500
+                                        !   6=Semi-Submersible 7500-10000
+                                        !   7=Drill Ship 5000-7500
+                                        !   8=Drill Ship 7500-10000
+        INTEGER nPf                     ! Number of production facilities
+        INTEGER nDevWls                 ! Number of development wells
+        INTEGER yrDisc                  ! Year of discovery
+        INTEGER yrStPrd                 ! Start year of production
+        INTEGER yrExpStart              ! Start year index of exploration
+        INTEGER yrDevStart              ! Start year index of development
+        INTEGER iprdOrate		! Initial oil production rate (Bbl/d) for announced discoveries
+        INTEGER iprdGrate		! Initial nat gas production rate (Mcf/d) for announced discoveries
+    	INTEGER mprdOrate		! Max/peak oil production rate (Bbl/d) for announced discoveries
+    	INTEGER mprdGrate		! Max/peak nat gas production rate (Mcf/d) for announced discoveries
+        CHARACTER(15) nmEU              ! Evaluation unit name
+        CHARACTER(30) nickName          ! Field nick name
+        CHARACTER(15) nmID              ! Field name ID
+        CHARACTER(2) ogTyp              ! Oil/Gas type (O=Oil, G=Gas, OG=Oil and Gas)
+        CHARACTER(6) pfOptFlg           ! Production facility option:
+                                        !   SS=Subsea-system utilizing nearby PF
+                                        !   SS-PF=Subsea-system with own PF
+                                        !   PF=Production facility
+      END TYPE FIELDOBJ 
+
+      TYPE PROJECTOBJ
+        SEQUENCE
+        INTEGER fNwls(MNUMYR)  ! Number of wells by FSC, field counter, time index
+        REAL*4 oilPrd(MNUMYR)             ! Oil production (Bbl) by FSC, time index
+        REAL*4 gasPrd(MNUMYR)             ! Non-associated Gas production (Mcf) by FSC,
+                                        ! time index
+        REAL*4 cndPrd(MNUMYR)             ! Condensate production (Bbl) by FSC, time index
+        REAL*4 asgPrd(MNUMYR)             ! Associated gas production (Mcf) by FSC, time index
+        INTEGER devDrlSch(MNUMYR)       ! Development drilling schedule (number of wells/yr)
+                                        ! by FSC, time index
+        INTEGER nOprWls(MNUMYR)         ! Number of operating wells by FSC, time index
+        INTEGER f(minFSC:minFSC+numFSC-1,MaxNFields)             ! Field ID by FSC, field counter
+        REAL*4 expDrlCst(minFSC:minFSC+numFSC-1)            ! Exploration (+delineation) drilling cost (MM$) by FSC
+        REAL*4 delDrlCst(minFSC:minFSC+numFSC-1)            ! Delineation drilling cost (MM$) by FSC
+        INTEGER expDrlNWls(minFSC:minFSC+numFSC-1)        ! Number of exploration wells (+delineation) by FSC
+        INTEGER nFld(minFSC:minFSC+numFSC-1)              ! Number of fields by FSC
+        INTEGER expDryNWls(minFSC:minFSC+numFSC-1)        ! Number of dry exploration wells by FSC
+        INTEGER delDrlNWls(minFSC:minFSC+numFSC-1)        ! Number of delineation wells by FSC
+        INTEGER devWlsDrl(minFSC:minFSC+numFSC-1)         ! Total number of development wells to drill by FSC
+        INTEGER pfTyp(MAXnFIELDS)              ! Type of production facility:
+                                        !   1=FP=Fixed Platform,
+                                        !   2=CT=Compliant Tower,
+                                        !   3=TLP=Tension Leg Platform,
+                                        !   4=FPS=Floating Production System
+                                        !   5=SPAR=SPAR Platform
+                                        !   6=FPSO=Floating Production Storage & Offloading
+                                        !   7=SS=Subsea-system
+        INTEGER pfNWlsArr(MaxNFields)   ! Number of wells in each production facility
+        INTEGER nFlowline(MaxNFields)   ! Number of flowlines in each production facility
+        INTEGER pfTimeAvl(MaxNFields)   ! Index year when each production facility is available
+        REAL*4 expNPV                     ! Net present value for exploration project(MM$)
+        REAL*4 devNPV                     ! Net present value for development project(MM$)
+        REAL*4 PI                         ! Profitability index
+        REAL*4 wDpth                      ! Water depth (Feet) of the biggest field
+        REAL*4 dDpth                      ! Drilling depth (Feet) of the biggest field
+        REAL*4 FrcprdOil		! Fraction of oil produced before decline for announced discoveries econ calc
+	REAL*4 FrcprdGas		! Fraction of nat gas produced before decline for announced discoveries econ calc
+	REAL*4 prdODec			! Oil decline rate for announced discoveries econ calc
+        REAL*4 prdGDec			! Nat gas decline rate for announced discoveries econ calc
+        INTEGER Typ                     ! Project type:
+                                  	!   1=Single big field with its own production facility
+                                  	!   2=Multiple medium size fields sharing a production
+                                  	!     facility
+                                  	!   3=Multiple small fields utilizing nearby production
+                                  	!     facility
+        INTEGER Reg                     ! Region ID
+        INTEGER PA                      ! Planning area ID
+        INTEGER EU                      ! Evaluation unit ID
+        INTEGER biggestFSC              ! Biggest FSC in the project
+        INTEGER yrExpStart              ! Start year index of exploration
+        INTEGER yrDevStart              ! Start year index of development
+        INTEGER yrPrdStart		! Start year index of production for announced discoveries econ calc
+        INTEGER nPf                        ! Number of production facilities
+        INTEGER pfNWls                  ! Total number of wells/slots
+        INTEGER iprdOrate		! Initial oil production rate (Bbl/d) for announced discoveries econ calc
+	INTEGER iprdGrate		! Initial nat gas production rate (Mcf/d) for announced discoveries econ calc
+	INTEGER mprdOrate		! Max/peak oil production rate (Bbl/d) for announced discoveries econ calc
+    	INTEGER mprdGrate		! Max/peak nat gas production rate (Mcf/d) for announced discoveries econ calc
+    	CHARACTER(2) ogTyp              ! Oil/Gas type (O=Oil, G=Gas, OG=Oil and Gas)
+    	CHARACTER(2) prjdummy		! Added so that don't get compiler warning about structure length not being a multiple of its largest element
+      END TYPE PROJECTOBJ 
+
+      TYPE (FIELDOBJ) FLD(TOTFLD)
+      TYPE (PROJECTOBJ) psbExpPrj(MAXEXPPRJ)      ! Possible exploration project array
+      TYPE (PROJECTOBJ) devPrj(nMaxPrj)    ! Discovered/undeveloped project array
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!  SPECIFICATION BLOCK
+      COMMON/OGOFF1I1/ nTFld, nTime, nReportTime, yearOf, t0, &
+                       nTime0, yearOf0, fldID1, & 
+                       fldID2, fldID3, fldID4, fldID5, fldID6, nMaxFld, &
+                       nPsbExpPrj, nDevPrj, iRnk, &
+                       nRigWlsCap, nRigWlsUtl, WLOFF, OFFOUT, toff
+      COMMON/OGOFF1R/ RigUtil, OILPRICE, GASPRICE, OILPRICE_ANNDISC, GASPRICE_ANNDISC, PROD_ASG, beg_rsva, prdoff
+      COMMON/OGOFF2I/ PRD_FSC, PRD_YRDISC, PRD_DEPTH, PRD_FLAG, &
+                      pfBldDly1, uNRR, yrBegForecast, yrEndForecast, &
+                      yrBegPrdHis, yrEndPrdHis, yrCstTbl, PAREG, &
+                      EUPA, REGID, PAID, EUID, OGSMID, OGSMREG, nEU, &
+                      duNRR, ANN_FSC, ANN_WL, ANN_YRDISC, ANN_PRDSTYR, &
+                      ANN_IPRDOIL, ANN_IPRDGAS, ANN_PKPRDOIL, ANN_PKPRDGAS, ANN_RAMPUP, &
+                      ANN_HYP, dNRR, nRigs, rigIncrMin, yrAvl, exp1stDly, exp2ndDly, &
+                      exp1stDlyOrg, exp2ndDlyOrg, nDelWls, nDelWlsOrg, &
+                      nDevWls, platform, pfTypFlg, pfMinNFld, pfMaxNFld, &
+                      pfMaxNWls, nSlt, pfBldDly2, devDrlDly24, devDrlDlyOth, &
+                      prdDYrRampUpOil, prdDYrRampUpGas, prdDYrPeakOil, &
+                      prdDYrPeakGas, buffervol
+      COMMON/OGOFF2R/ PROD, fldExpRate, BOEtoMcf, cstCap, &
+!                     devDrlCst, &
+                      fedTaxRate, stTaxRate, oilSevTaxRate, gasSevTaxRate, &
+                      oilSevTaxPrd, gasSevTaxPrd, expTangFrc, pfTangFrc, &
+                      devTangFrc, chgOpCstOil, chgDrlCstOil, chgPFCstOil, &
+                      oilPrcCstTbl, deprSch, oilPrc, gasPrc, cndPrc, royrate, royRateU, &
+                      royRateD, levExpSucRate, levDelWls, levExpDly, levDrlCst, &
+                      levOprCst, levPfDly, levPfCst, levPrdPerf1, levPrdPerf2, &
+                      vMin, vMax, vMean, ANN_WD, PRD_RES, PRD_CUMPRD, PRD_RSV, &
+                      ANN_FRCOIL, ANN_FRCGAS, ANN_DECOIL, ANN_DECGAS, &
+                      oRGCGF, gRGCGF, &
+                      GORCutOff, GOprop, cndYld, GOR, wDpth, dDpth, expDrlDays, &
+                      rigBldRatMax, rigUtilTarget, DRILLCAP, expSucRate, &
+!                     expDrlCst, expDrlCstWDpth, expDrlCstDDpth, &
+                      pfTypWDpthMin, &
+                      pfTypWDpthMax, pfBldDlyWDpth, devDrlDly24DDpth, &
+                      devDrlDlyOthWDpth, pfCstFrc, &
+!                     pfCst, pfCstWDpth, &
+!                     devDrlCstWDpth, devDrlCstDDpth, devCmplCst, &
+!                     devOprCst, &
+                      prdOilFrc, prdGasFrc, prdOilRatei, &
+                      prdGasRatei, prdOilDecRatei, prdGasDecRatei, &
+                      prdOilHyp, prdGasHyp, prdDOilDecRatei, &
+                      prdDGasDecRatei, prdDOilHyp, prdDGasHyp, &
+                      trnFlowLineLen, trnPpDiam, trnTrfOil, trnTrfGas, &
+                      rigtypwdmin,rigtypwdmax
+
+      COMMON/OGOFF2C/ PRD_OG, ANN_OG, rigTypNm, nmReg, nmPA, PRD_FN, &
+                      nmEU, ANN_FN, ANN_EU, PRD_EU, PRD_ID, nmPF, &
+                      pfOptFlg, ANN_FAC, REGname, PAname, EUname, ANN_NN
+
+      COMMON/OGOFF3I/ NRR, CUMNFW, CUMDISC, NLAGYRS, TOTNFW, UNRRAVL, PFWDMIN, PFWDMAX, PFNSLOT, &
+                      POWER_EDC, DEVMIN, ROYENDYR
+      COMMON/OGOFF3R/ SC10, ALPHA_SC, BETA1_SC, BETA2_SC, ALPHA1, ALPHA2, BETA, &
+                      ALPHA_EDC, BETA1_EDC, BETA2_EDC, BETA3_EDC, &
+                      ALPHA_DDC, BETA1_DDC, BETA2_DDC, GAMMA1_DDC, GAMMA2_DDC, &
+                      COMPLCOST, ALPHA_OC, BETA1_OC, BETA2_OC, ABANDONFAC, &
+                      ALPHA_DW, BETA_DW
+      COMMON/OGOFF3C/ PFTYPE
+
+!  FIELD ARRAYS
+      COMMON/OGOFF3T1/ FLD
+      COMMON/OGOFF3T2/ PSBEXPPRJ
+      COMMON/OGOFF3T3/ DEVPRJ

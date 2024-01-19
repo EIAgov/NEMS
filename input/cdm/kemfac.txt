@@ -1,0 +1,111 @@
+FILE NAME:      KEMFAC
+
+DATE MODIFIED:  February 2, 1995
+
+CONTACT:        Kevin Jarzomski
+                NEMS Commercial Buildings Analyst
+                Kevin.Jarzomski@eia.gov
+                (202)586-3208
+
+USED BY:        Benchmarking subroutine of the National Energy Modeling System
+                (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     Airborne emission factors
+
+                The emission factor for emission e and fuel f when multiplied by
+                consumption level of fuel f gives the amount of emmited e
+                produced.
+
+UNITS:          lbs/MMBtu
+
+DIMENSION:      fuel, airborn emission constituent
+
+SPECIAL CONSTRAINTS:    None
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+
+                Each row corresponds to a fuel, in the following order:  Electricity,
+                Natural Gas, Distillate Fuel, Residual, LPG, Coal, Motor Gasoline,
+                Kerosene, Wood, MSW, Hydro.
+
+                Each column correspnds to a compound, in the following order:
+                Total Carbon, CO CO2, SOx, NOx VOC, Methane, Particulates
+
+SOURCES:
+
+                "Compilation of Air Pollution Emission Factors, Vol. 1 Stationary Point
+                  and Area Sources, Supplement A," U.S. Environment Protection Agency, October
+                  1986.
+
+                Decision Analysis Corporation of Virginia, "Airborne Emission Factors
+                  for the National Energy Modeling System (NEMS)," prepared for the Energy
+                  Information Administration, Contract no. DE-AC01-92EI21946, November 20,1992.
+
+                Decision Analysis Corporation of Virginia, "Emissions Estimates for
+                  1990," prepared for the Energy Information Administration, contract no. DE-
+                  AC01-92EI21946, December 4,1992.
+
+                Marland, G. and A. Pippin, 'United States Emissions of Carbon Dioxide to
+                  the Earth's Atmosphere by Economic Activity,' "Energy Systems and Policy
+                  (1990)," pp. 319-336.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00
+31.66	0.02	117.52	0.00	0.10	0.01	0.00	0.00
+43.49	0.04	161.38	0.26	0.16	0.00	0.00	0.02
+47.75	0.03	175.05	1.023	0.37	0.00	0.00	0.00
+37.60	0.02	139.31	0.00	0.10	0.01	0.00	0.00
+55.31	4.00	198.52	3.47	0.13	0.44	0.36	0.67
+42.81	0.00	156.97	0.00	0.00	0.00	0.00	0.00
+42.39	0.00	155.44	0.00	0.00	0.00	0.00	0.00
+0.02	0.04	0.07	0.35	0.15	0.01	0.01	0.02
+0.11	0.22	0.40	0.01	0.16	0.08	0.02	0.40
+0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00

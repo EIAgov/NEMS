@@ -1,0 +1,20 @@
+#!ksh
+# ORACLE_HOME=/usr/app/oracle/product/733
+# include $(ORACLE_HOME)/precomp/env_precomp.mk
+#FLAGS= -c -g -C -qcharlen=16384 -qmaxmem=-1 -qnoprint \
+#-qflttrap=zerodivide -qsave $(FCFLAGS) 
+#  include "/check:bounds" to do array subscript checking
+FLAGS=/compile_only /debug:full /optimize:0 /nopdbfile /free /traceback /assume:byterecl /assume:source_include /nolist /static /include:'.' /include:'n:\default\includes\' 
+  
+.SUFFIXES :	.f .pfo .obj
+
+.f.obj:
+	echo ${FLAGS}
+	f90 ${FLAGS} $<   2>&1  | tee ERROR
+	echo ${USER}  `date +"%H:%M:%S  %D"`  "${PWD}" "$<" > tmp.log 
+	awk '{ printf( " %-5s %-8s %-8s %-30s %-30s \n", $$1, $$2, $$3, $$4,$$5 ) }'  tmp.log >> ${NEMS}/logs/COMPLOG
+	rm tmp.log
+.pfo.f:
+	$(PROFOR) $(PCCFLAGS) iname=$*.pfo
+
+.SILENT: 

@@ -1,0 +1,2782 @@
+! $Header: m:/default/input/RCS/ngcanada.txt,v 1.6 2020/08/03 20:16:42 KDL Exp $
+!
+!
+! 8/14/18 KDL	Final update; all Canada data has been updated through 2017
+! 7/25/19 KDL	CANSIM code had issues with 2016+ files; all updates done
+! 7/15/20 KDL	updated storage injections/withdrawals using latest data from CANSIM 
+!		\\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\Input_Data\Canada\CANSIM_storage_May2020.xlsx
+! 7/7/21 SYK	update CANSIM data. 2019 electricity data was also revised to not be duplicate of 2018.
+!		latest files: \\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\AEO2022\Canada_Data
+!___________________________________________________________________________________________
+!
+!				NGMM Canada Input File
+!
+!___________________________________________________________________________________________
+!	1.  CANSIM data (procesed by python- ng_candata.txt) 
+!		Note:  10/13/17 KDL Manually put in Electric demands for 2016
+!	2.  NEB:  LNG Import Data (procesed by python- ng_candata.txt) 
+!	3.  EIA Flow Through Volumes for History
+!	4.  NEB:  Capacities and W-E flows (from CapacitiesNEB.txt in AIMMS)
+!___________________________________________________________________________________________
+!	
+!	Identifiers/inputs in nglngexp.txt:
+!	
+!	HistoricalDemand			HistoricalCNFlowThru
+!	HistoricalStorageWithdrawals
+!	HistoricalStorageInjections
+!						HistoricalCapacity
+!	HistoricalSupply			HistoricalFlowAnnual
+!___________________________________________________________________________________________
+!
+!				1.  CANSIM data
+!___________________________________________________________________________________________
+! Residential, Commercial, Industrial, Electric
+! monthly demand quantities in Billion cubic feet
+HistoricalDemand := data table
+                                      CN_E      CN_W   
+(January, 1990, Residential)           43.222    33.412
+(February, 1990, Residential)          35.815    32.694
+(March, 1990, Residential)             34.711    25.210
+(April, 1990, Residential)             25.369    17.261
+(May, 1990, Residential)               14.630    11.601
+(June, 1990, Residential)               8.834     6.897
+(July, 1990, Residential)               6.431     5.910
+(August, 1990, Residential)             6.185     6.179
+(September, 1990, Residential)          6.662     7.133
+(October, 1990, Residential)           12.526    18.049
+(November, 1990, Residential)          21.872    27.050
+(December, 1990, Residential)          31.298    38.339
+(January, 1991, Residential)           43.597    41.252
+(February, 1991, Residential)          37.230    25.525
+(March, 1991, Residential)             33.454    29.492
+(April, 1991, Residential)             24.186    16.530
+(May, 1991, Residential)               13.876    11.867
+(June, 1991, Residential)               7.372     7.145
+(July, 1991, Residential)               6.370     5.574
+(August, 1991, Residential)             6.205     5.617
+(September, 1991, Residential)          6.666     8.549
+(October, 1991, Residential)           13.134    20.188
+(November, 1991, Residential)          23.646    27.884
+(December, 1991, Residential)          34.153    32.387
+(January, 1992, Residential)           42.935    31.735
+(February, 1992, Residential)          42.041    27.954
+(March, 1992, Residential)             37.375    22.300
+(April, 1992, Residential)             30.144    17.823
+(May, 1992, Residential)               15.972    11.197
+(June, 1992, Residential)               8.441     7.143
+(July, 1992, Residential)               7.066     6.416
+(August, 1992, Residential)             6.858     7.173
+(September, 1992, Residential)          7.228    11.708
+(October, 1992, Residential)           15.182    18.197
+(November, 1992, Residential)          25.645    27.308
+(December, 1992, Residential)          34.030    40.849
+(January, 1993, Residential)           43.866    42.219
+(February, 1993, Residential)          45.552    33.268
+(March, 1993, Residential)             42.087    26.425
+(April, 1993, Residential)             27.762    18.217
+(May, 1993, Residential)               14.663     9.955
+(June, 1993, Residential)               9.423     7.765
+(July, 1993, Residential)               6.817     7.370
+(August, 1993, Residential)             6.433     6.915
+(September, 1993, Residential)          7.399    10.936
+(October, 1993, Residential)           17.411    16.758
+(November, 1993, Residential)          25.623    29.740
+(December, 1993, Residential)          35.091    33.140
+(January, 1994, Residential)           57.622    42.796
+(February, 1994, Residential)          51.605    40.272
+(March, 1994, Residential)             41.406    26.080
+(April, 1994, Residential)             28.480    17.978
+(May, 1994, Residential)               17.130    10.582
+(June, 1994, Residential)               9.444     8.334
+(July, 1994, Residential)               7.226     6.144
+(August, 1994, Residential)             7.028     6.856
+(September, 1994, Residential)          7.286     8.562
+(October, 1994, Residential)           13.399    18.248
+(November, 1994, Residential)          19.964    30.285
+(December, 1994, Residential)          34.214    38.063
+(January, 1995, Residential)           45.349    40.941
+(February, 1995, Residential)          46.897    34.093
+(March, 1995, Residential)             38.821    32.519
+(April, 1995, Residential)             29.850    21.571
+(May, 1995, Residential)               17.410    12.232
+(June, 1995, Residential)               8.471     7.210
+(July, 1995, Residential)               7.119     6.769
+(August, 1995, Residential)             6.534     7.601
+(September, 1995, Residential)          7.625     8.692
+(October, 1995, Residential)           12.803    19.262
+(November, 1995, Residential)          27.562    32.060
+(December, 1995, Residential)          45.055    42.240
+(January, 1996, Residential)           55.306    49.435
+(February, 1996, Residential)          49.004    36.787
+(March, 1996, Residential)             44.131    35.347
+(April, 1996, Residential)             34.106    21.209
+(May, 1996, Residential)               19.728    15.964
+(June, 1996, Residential)               9.327     8.132
+(July, 1996, Residential)               7.795     6.980
+(August, 1996, Residential)             7.228     6.903
+(September, 1996, Residential)          7.471    12.063
+(October, 1996, Residential)           15.131    21.003
+(November, 1996, Residential)          28.499    38.171
+(December, 1996, Residential)          39.484    47.615
+(January, 1997, Residential)           54.541    47.351
+(February, 1997, Residential)          48.993    33.895
+(March, 1997, Residential)             41.938    34.937
+(April, 1997, Residential)             34.892    23.521
+(May, 1997, Residential)               21.844    13.538
+(June, 1997, Residential)              10.680     8.635
+(July, 1997, Residential)               8.052     7.805
+(August, 1997, Residential)             7.492     7.483
+(September, 1997, Residential)          7.907     9.088
+(October, 1997, Residential)           14.334    20.423
+(November, 1997, Residential)          27.681    28.389
+(December, 1997, Residential)          36.673    32.653
+(January, 1998, Residential)           44.062    46.516
+(February, 1998, Residential)          39.361    29.615
+(March, 1998, Residential)             32.739    31.443
+(April, 1998, Residential)             23.696    18.170
+(May, 1998, Residential)               11.323    11.215
+(June, 1998, Residential)               7.684     9.060
+(July, 1998, Residential)               6.584     7.077
+(August, 1998, Residential)             6.122     6.470
+(September, 1998, Residential)          6.320     8.498
+(October, 1998, Residential)           13.064    17.330
+(November, 1998, Residential)          21.315    30.193
+(December, 1998, Residential)          28.950    41.329
+(January, 1999, Residential)           44.656    43.975
+(February, 1999, Residential)          37.399    34.549
+(March, 1999, Residential)             37.745    32.579
+(April, 1999, Residential)             22.119    22.428
+(May, 1999, Residential)               11.497    15.799
+(June, 1999, Residential)               7.508    10.448
+(July, 1999, Residential)               5.496     8.128
+(August, 1999, Residential)             5.817     6.908
+(September, 1999, Residential)          6.023    10.888
+(October, 1999, Residential)           13.270    18.843
+(November, 1999, Residential)          19.303    26.050
+(December, 1999, Residential)          30.206    34.388
+(January, 2000, Residential)           53.001    44.703
+(February, 2000, Residential)          53.776    37.243
+(March, 2000, Residential)             36.554    31.174
+(April, 2000, Residential)             30.361    24.068
+(May, 2000, Residential)               17.790    16.849
+(June, 2000, Residential)              10.688    11.503
+(July, 2000, Residential)               8.122     8.934
+(August, 2000, Residential)             8.378     8.023
+(September, 2000, Residential)          9.015    11.671
+(October, 2000, Residential)           15.741    19.726
+(November, 2000, Residential)          26.752    31.730
+(December, 2000, Residential)          50.687    42.679
+(January, 2001, Residential)           57.173    38.174
+(February, 2001, Residential)          47.957    38.138
+(March, 2001, Residential)             45.026    31.495
+(April, 2001, Residential)             30.108    22.278
+(May, 2001, Residential)               13.877    12.765
+(June, 2001, Residential)               9.973     8.919
+(July, 2001, Residential)               6.324     7.019
+(August, 2001, Residential)             7.545     6.819
+(September, 2001, Residential)          7.705     8.803
+(October, 2001, Residential)           14.828    18.986
+(November, 2001, Residential)          24.309    26.268
+(December, 2001, Residential)          35.073    37.976
+(January, 2002, Residential)           49.770    40.913
+(February, 2002, Residential)          45.704    33.520
+(March, 2002, Residential)             42.625    41.783
+(April, 2002, Residential)             33.244    26.631
+(May, 2002, Residential)               21.234    17.457
+(June, 2002, Residential)              11.604     8.593
+(July, 2002, Residential)               8.830     7.365
+(August, 2002, Residential)             7.504     7.946
+(September, 2002, Residential)          7.016    10.727
+(October, 2002, Residential)           15.621    22.993
+(November, 2002, Residential)          32.235    27.296
+(December, 2002, Residential)          45.174    34.651
+(January, 2003, Residential)           61.233    39.770
+(February, 2003, Residential)          58.580    36.153
+(March, 2003, Residential)             49.719    35.850
+(April, 2003, Residential)             34.041    25.701
+(May, 2003, Residential)               18.298    14.608
+(June, 2003, Residential)              10.188     8.527
+(July, 2003, Residential)               9.076     6.559
+(August, 2003, Residential)             8.352     6.379
+(September, 2003, Residential)          8.130    10.713
+(October, 2003, Residential)           17.586    17.320
+(November, 2003, Residential)          29.433    36.537
+(December, 2003, Residential)          43.937    38.743
+(January, 2004, Residential)           63.407    48.593
+(February, 2004, Residential)          55.866    36.446
+(March, 2004, Residential)             42.773    30.664
+(April, 2004, Residential)             32.763    18.885
+(May, 2004, Residential)               17.641    14.234
+(June, 2004, Residential)               9.938     8.403
+(July, 2004, Residential)               8.870     6.194
+(August, 2004, Residential)             8.180     7.498
+(September, 2004, Residential)          8.390    11.524
+(October, 2004, Residential)           13.873    21.213
+(November, 2004, Residential)          27.897    28.062
+(December, 2004, Residential)          45.123    40.468
+(January, 2005, Residential)           61.235    46.967
+(February, 2005, Residential)          54.377    34.409
+(March, 2005, Residential)             49.636    29.545
+(April, 2005, Residential)             30.905    18.368
+(May, 2005, Residential)               19.248    11.597
+(June, 2005, Residential)              10.245     8.324
+(July, 2005, Residential)               8.302     7.061
+(August, 2005, Residential)             7.666     7.789
+(September, 2005, Residential)          7.698    11.116
+(October, 2005, Residential)           12.516    19.398
+(November, 2005, Residential)          27.835    29.649
+(December, 2005, Residential)          49.582    38.978
+(January, 2006, Residential)           51.634    36.285
+(February, 2006, Residential)          49.391    36.804
+(March, 2006, Residential)             46.400    35.181
+(April, 2006, Residential)             29.800    18.251
+(May, 2006, Residential)               15.421    11.983
+(June, 2006, Residential)               9.747     6.972
+(July, 2006, Residential)               8.577     6.192
+(August, 2006, Residential)             7.200     6.781
+(September, 2006, Residential)          7.869     9.779
+(October, 2006, Residential)           17.453    21.100
+(November, 2006, Residential)          30.277    35.209
+(December, 2006, Residential)          39.112    37.165
+(January, 2007, Residential)           51.769    42.032
+(February, 2007, Residential)          61.377    38.646
+(March, 2007, Residential)             49.352    30.936
+(April, 2007, Residential)             36.380    26.639
+(May, 2007, Residential)               16.860    13.105
+(June, 2007, Residential)               9.709     7.633
+(July, 2007, Residential)               8.485     6.221
+(August, 2007, Residential)             7.956     7.226
+(September, 2007, Residential)          7.639    10.927
+(October, 2007, Residential)           11.247    18.383
+(November, 2007, Residential)          29.140    31.246
+(December, 2007, Residential)          50.759    44.320
+(January, 2008, Residential)           55.296    45.755
+(February, 2008, Residential)          53.690    39.120
+(March, 2008, Residential)             53.076    33.771
+(April, 2008, Residential)             28.827    24.647
+(May, 2008, Residential)               17.536    12.638
+(June, 2008, Residential)              10.411     8.808
+(July, 2008, Residential)               8.783     8.243
+(August, 2008, Residential)             7.954     7.619
+(September, 2008, Residential)          7.699     9.736
+(October, 2008, Residential)           15.844    18.880
+(November, 2008, Residential)          30.932    25.400
+(December, 2008, Residential)          50.837    48.672
+(January, 2009, Residential)           67.197    46.538
+(February, 2009, Residential)          55.155    38.504
+(March, 2009, Residential)             47.103    38.434
+(April, 2009, Residential)             31.582    21.699
+(May, 2009, Residential)               16.636    13.928
+(June, 2009, Residential)              10.534     7.424
+(July, 2009, Residential)               8.898     6.438
+(August, 2009, Residential)             8.555     6.640
+(September, 2009, Residential)          8.294     8.761
+(October, 2009, Residential)           18.089    23.257
+(November, 2009, Residential)          25.468    25.282
+(December, 2009, Residential)          41.607    50.626
+(January, 2010, Residential)           59.505    40.807
+(February, 2010, Residential)          53.796    34.227
+(March, 2010, Residential)             41.670    27.186
+(April, 2010, Residential)             25.123    19.935
+(May, 2010, Residential)               16.287    15.555
+(June, 2010, Residential)               9.890     8.737
+(July, 2010, Residential)               7.083     6.301
+(August, 2010, Residential)             6.979     7.359
+(September, 2010, Residential)          7.966    12.061
+(October, 2010, Residential)           14.597    15.139
+(November, 2010, Residential)          27.455    34.068
+(December, 2010, Residential)          50.039    43.859
+(January, 2011, Residential)           62.134    45.971
+(February, 2011, Residential)          57.287    41.931
+(March, 2011, Residential)             48.343    38.442
+(April, 2011, Residential)             31.320    25.161
+(May, 2011, Residential)               21.989    14.645
+(June, 2011, Residential)              10.845     7.866
+(July, 2011, Residential)               7.963     6.151
+(August, 2011, Residential)             7.244     6.162
+(September, 2011, Residential)          7.874     8.911
+(October, 2011, Residential)           13.135    18.804
+(November, 2011, Residential)          25.854    31.655
+(December, 2011, Residential)          39.587    36.620
+(January, 2012, Residential)           53.338    40.446
+(February, 2012, Residential)          48.865    36.515
+(March, 2012, Residential)             38.233    30.862
+(April, 2012, Residential)             27.915    20.534
+(May, 2012, Residential)               16.333    13.190
+(June, 2012, Residential)               9.399     8.815
+(July, 2012, Residential)               7.116     6.294
+(August, 2012, Residential)             7.159     6.336
+(September, 2012, Residential)          8.004     7.993
+(October, 2012, Residential)           15.307    22.749
+(November, 2012, Residential)          30.630    33.722
+(December, 2012, Residential)          40.115    45.753
+(January, 2013, Residential)           55.406    43.769
+(February, 2013, Residential)          56.520    34.039
+(March, 2013, Residential)             46.947    35.499
+(April, 2013, Residential)             36.060    24.444
+(May, 2013, Residential)               18.217    10.900
+(June, 2013, Residential)              11.227     7.875
+(July, 2013, Residential)               7.806     6.867
+(August, 2013, Residential)             7.653     5.705
+(September, 2013, Residential)          8.921     8.294
+(October, 2013, Residential)           13.399    19.781
+(November, 2013, Residential)          31.246    34.410
+(December, 2013, Residential)          50.121    47.935
+(January, 2014, Residential)           69.016    41.846
+(February, 2014, Residential)          62.434    45.365
+(March, 2014, Residential)             58.337    38.139
+(April, 2014, Residential)             38.379    23.088
+(May, 2014, Residential)               21.696    13.428
+(June, 2014, Residential)              10.419     7.709
+(July, 2014, Residential)               7.928     6.261
+(August, 2014, Residential)             8.316     6.515
+(September, 2014, Residential)          8.877     9.461
+(October, 2014, Residential)           14.530    16.205
+(November, 2014, Residential)          32.176    36.693
+(December, 2014, Residential)          46.505    39.662
+(January, 2015, Residential)           64.531    41.273
+(February, 2015, Residential)          65.544    40.137
+(March, 2015, Residential)             57.715    29.073
+(April, 2015, Residential)             35.660    19.480
+(May, 2015, Residential)               16.874    12.031
+(June, 2015, Residential)              10.526     6.526
+(July, 2015, Residential)               8.382     5.534
+(August, 2015, Residential)             7.770     6.245
+(September, 2015, Residential)          8.642    10.336
+(October, 2015, Residential)           14.408    16.082
+(November, 2015, Residential)          28.801    32.406
+(December, 2015, Residential)          41.763    40.871
+(January, 2016, Residential)	       55.703	 42.753
+(February, 2016, Residential)	       51.208	 32.988
+(March, 2016, Residential)	       45.085	 26.466
+(April, 2016, Residential)	       32.793	 18.238
+(May, 2016, Residential)	       19.929	  9.746
+(June, 2016, Residential)	       10.354	  6.549
+(July, 2016, Residential)	        7.810	  6.591
+(August, 2016, Residential)	        7.400	  5.632
+(September, 2016, Residential)      	7.501     8.023
+(October, 2016, Residential)	       12.731	 17.204
+(November, 2016, Residential)	       25.676	 25.153
+(December, 2016, Residential)	       42.908	 41.465
+(January, 2017, Residential)	       55.383	 47.528
+(February, 2017, Residential)	       48.321	 37.873
+(March, 2017, Residential)	       48.733	 34.930
+(April, 2017, Residential)	       32.460	 23.637
+(May, 2017, Residential)	       21.522	 14.863
+(June, 2017, Residential)	       11.430	  8.227
+(July, 2017, Residential)	        8.221	  6.333
+(August, 2017, Residential)	        7.714	  5.601
+(September, 2017, Residential)	        9.112	  7.654
+(October, 2017, Residential)	       12.735	 16.891
+(November, 2017, Residential)	       26.405	 31.602
+(December, 2017, Residential)	       49.599	 43.048
+(January, 2018, Residential)	       67.748	 45.423
+(February, 2018, Residential)	       58.407	 44.245
+(March, 2018, Residential)	       56.062	 37.619
+(April, 2018, Residential)	       42.029	 28.679
+(May, 2018, Residential)	       24.222	 11.181
+(June, 2018, Residential)	       13.149	  7.615
+(July, 2018, Residential)	        9.123	  6.533
+(August, 2018, Residential)	        9.046	  6.069
+(September, 2018, Residential)	       10.054	 10.660
+(October, 2018, Residential)	       14.899	 20.503
+(November, 2018, Residential)	       31.868	 28.744
+(December, 2018, Residential)	       53.042	 36.154
+(January, 2019, Residential)	       63.272	 42.228
+(February, 2019, Residential)	       47.611	 50.505
+(March, 2019, Residential)	       45.811	 39.057
+(April, 2019, Residential)	       28.273	 20.584
+(May, 2019, Residential)	       17.167	 14.750
+(June, 2019, Residential)	        9.199	  9.352
+(July, 2019, Residential)	        7.967	  6.612
+(August, 2019, Residential)	        6.405	  6.145
+(September, 2019, Residential)	        7.650     8.134
+(October, 2019, Residential)	       16.977	 20.120
+(November, 2019, Residential)	       36.364	 31.103
+(December, 2019, Residential)	       46.465	 38.553
+(January, 2020, Residential)	       47.828	 45.809
+(February, 2020, Residential)	       47.204	 39.592
+(March, 2020, Residential)	       37.502	 35.012
+(April, 2020, Residential)	       29.559	 28.645
+(May, 2020, Residential)	       18.457	 14.184
+(June, 2020, Residential)	        8.828	 10.613
+(July, 2020, Residential)	        7.636	  7.159
+(August, 2020, Residential)	        6.553	  6.100
+(September, 2020, Residential)	        9.892	  8.117
+(October, 2020, Residential)	       19.649	 18.146
+(November, 2020, Residential)	       27.749	 30.652
+(December, 2020, Residential)	       43.228	 36.576
+(January, 2021, Residential)	       50.312	 39.992
+(February, 2021, Residential)	       49.225	 45.051
+(March, 2021, Residential)	       35.761	 34.254
+(April, 2021, Residential)	       25.226	 23.476
+(May, 2021, Residential)	       16.477	 14.526
+(June, 2021, Residential)	       10.073	  8.814
+(July, 2021, Residential)	        8.169	  5.821
+(August, 2021, Residential)	        7.680	  5.650
+(September, 2021, Residential)	        8.140	  7.792
+(October, 2021, Residential)	       13.137	 15.895
+(November, 2021, Residential)	       26.877	 27.530
+(December, 2021, Residential)	       41.997	 42.784
+(January, 2022, Residential)	       61.219	 53.697
+(February, 2022, Residential)	       51.159	 38.006
+(March, 2022, Residential)	       37.577	 34.616
+(April, 2022, Residential)	       26.084	 25.221
+(January, 1990, Commercial)            34.218    27.842
+(February, 1990, Commercial)           29.923    26.096
+(March, 1990, Commercial)              27.864    20.993
+(April, 1990, Commercial)              20.693    16.666
+(May, 1990, Commercial)                11.512    10.066
+(June, 1990, Commercial)                6.778     6.201
+(July, 1990, Commercial)                5.038     5.522
+(August, 1990, Commercial)              5.576     5.305
+(September, 1990, Commercial)           6.193     6.254
+(October, 1990, Commercial)            11.344    14.197
+(November, 1990, Commercial)           19.218    21.387
+(December, 1990, Commercial)           26.460    30.198
+(January, 1991, Commercial)            35.288    32.619
+(February, 1991, Commercial)           31.129    21.363
+(March, 1991, Commercial)              28.134    23.335
+(April, 1991, Commercial)              20.327    13.841
+(May, 1991, Commercial)                11.510     9.634
+(June, 1991, Commercial)                5.790     6.213
+(July, 1991, Commercial)                5.666     5.070
+(August, 1991, Commercial)              5.682     4.826
+(September, 1991, Commercial)           6.472     7.833
+(October, 1991, Commercial)            12.131    15.293
+(November, 1991, Commercial)           19.679    22.578
+(December, 1991, Commercial)           28.068    25.114
+(January, 1992, Commercial)            34.878    25.586
+(February, 1992, Commercial)           34.059    22.833
+(March, 1992, Commercial)              30.959    17.957
+(April, 1992, Commercial)              23.554    15.303
+(May, 1992, Commercial)                12.597     9.340
+(June, 1992, Commercial)                6.280     5.896
+(July, 1992, Commercial)                5.411     5.315
+(August, 1992, Commercial)              5.743     5.853
+(September, 1992, Commercial)           6.627     9.195
+(October, 1992, Commercial)            12.444    14.184
+(November, 1992, Commercial)           21.327    21.099
+(December, 1992, Commercial)           27.635    30.478
+(January, 1993, Commercial)            34.379    32.184
+(February, 1993, Commercial)           35.781    25.421
+(March, 1993, Commercial)              32.449    20.994
+(April, 1993, Commercial)              21.484    14.643
+(May, 1993, Commercial)                11.043     8.410
+(June, 1993, Commercial)                6.979     6.070
+(July, 1993, Commercial)                5.378     5.957
+(August, 1993, Commercial)              5.406     5.648
+(September, 1993, Commercial)           6.706     7.684
+(October, 1993, Commercial)            13.754    12.692
+(November, 1993, Commercial)           21.444    21.274
+(December, 1993, Commercial)           27.430    24.145
+(January, 1994, Commercial)            43.423    29.927
+(February, 1994, Commercial)           38.290    27.611
+(March, 1994, Commercial)              32.227    19.951
+(April, 1994, Commercial)              21.949    12.934
+(May, 1994, Commercial)                13.000     8.333
+(June, 1994, Commercial)                7.311     5.917
+(July, 1994, Commercial)                5.438     5.044
+(August, 1994, Commercial)              6.010     5.539
+(September, 1994, Commercial)           6.820     6.219
+(October, 1994, Commercial)            10.990    12.384
+(November, 1994, Commercial)           16.347    20.681
+(December, 1994, Commercial)           25.885    25.077
+(January, 1995, Commercial)            34.549    27.622
+(February, 1995, Commercial)           35.332    23.193
+(March, 1995, Commercial)              29.772    22.489
+(April, 1995, Commercial)              22.612    15.586
+(May, 1995, Commercial)                13.168     8.746
+(June, 1995, Commercial)                6.343     5.515
+(July, 1995, Commercial)                5.574     5.330
+(August, 1995, Commercial)              5.834     5.414
+(September, 1995, Commercial)           6.677     6.461
+(October, 1995, Commercial)            10.965    13.380
+(November, 1995, Commercial)           21.063    21.732
+(December, 1995, Commercial)           33.258    28.400
+(January, 1996, Commercial)            40.686    33.111
+(February, 1996, Commercial)           35.152    25.120
+(March, 1996, Commercial)              32.528    24.484
+(April, 1996, Commercial)              25.065    15.133
+(May, 1996, Commercial)                14.521    11.124
+(June, 1996, Commercial)                6.678     6.095
+(July, 1996, Commercial)                5.917     4.999
+(August, 1996, Commercial)              6.027     5.581
+(September, 1996, Commercial)           6.908     8.246
+(October, 1996, Commercial)            11.857    14.401
+(November, 1996, Commercial)           21.592    26.313
+(December, 1996, Commercial)           29.139    32.816
+(January, 1997, Commercial)            37.062    32.673
+(February, 1997, Commercial)           34.325    24.021
+(March, 1997, Commercial)              31.338    24.353
+(April, 1997, Commercial)              25.337    16.687
+(May, 1997, Commercial)                15.767     9.663
+(June, 1997, Commercial)                7.687     6.378
+(July, 1997, Commercial)                5.735     5.536
+(August, 1997, Commercial)              5.881     5.320
+(September, 1997, Commercial)           6.857     6.451
+(October, 1997, Commercial)            10.836    14.307
+(November, 1997, Commercial)           18.798    19.659
+(December, 1997, Commercial)           23.638    22.624
+(January, 1998, Commercial)            28.710    30.507
+(February, 1998, Commercial)           24.096    20.014
+(March, 1998, Commercial)              22.721    22.093
+(April, 1998, Commercial)              15.074    12.551
+(May, 1998, Commercial)                 7.576     7.508
+(June, 1998, Commercial)                4.689     6.283
+(July, 1998, Commercial)                4.620     5.002
+(August, 1998, Commercial)              5.075     4.749
+(September, 1998, Commercial)           5.377     6.100
+(October, 1998, Commercial)            10.791    12.226
+(November, 1998, Commercial)           17.855    20.488
+(December, 1998, Commercial)           20.730    27.769
+(January, 1999, Commercial)            31.631    30.262
+(February, 1999, Commercial)           26.887    23.485
+(March, 1999, Commercial)              27.852    22.875
+(April, 1999, Commercial)              16.907    15.127
+(May, 1999, Commercial)                 8.524    10.876
+(June, 1999, Commercial)                4.756     7.305
+(July, 1999, Commercial)                4.692     6.020
+(August, 1999, Commercial)              4.978     5.079
+(September, 1999, Commercial)           6.585     7.858
+(October, 1999, Commercial)            10.195    13.130
+(November, 1999, Commercial)           15.913    17.195
+(December, 1999, Commercial)           21.326    22.667
+(January, 2000, Commercial)            41.388    30.122
+(February, 2000, Commercial)           40.061    24.966
+(March, 2000, Commercial)              32.063    21.247
+(April, 2000, Commercial)              22.030    15.782
+(May, 2000, Commercial)                14.033    10.709
+(June, 2000, Commercial)                8.827     7.189
+(July, 2000, Commercial)                8.435     5.773
+(August, 2000, Commercial)              8.465     6.077
+(September, 2000, Commercial)           8.690     7.245
+(October, 2000, Commercial)            14.704    12.625
+(November, 2000, Commercial)           24.183    21.130
+(December, 2000, Commercial)           40.287    29.455
+(January, 2001, Commercial)            44.220    25.765
+(February, 2001, Commercial)           38.954    26.325
+(March, 2001, Commercial)              37.148    21.754
+(April, 2001, Commercial)              24.269    15.380
+(May, 2001, Commercial)                12.747     8.977
+(June, 2001, Commercial)                8.592     6.839
+(July, 2001, Commercial)                7.646     5.571
+(August, 2001, Commercial)              8.002     5.272
+(September, 2001, Commercial)           8.824     6.261
+(October, 2001, Commercial)            15.639    13.236
+(November, 2001, Commercial)           21.750    17.934
+(December, 2001, Commercial)           29.847    24.866
+(January, 2002, Commercial)            38.626    27.050
+(February, 2002, Commercial)           37.551    23.496
+(March, 2002, Commercial)              35.847    27.662
+(April, 2002, Commercial)              25.193    18.461
+(May, 2002, Commercial)                17.244    12.241
+(June, 2002, Commercial)                9.803     6.484
+(July, 2002, Commercial)                8.298     4.694
+(August, 2002, Commercial)              7.602     5.432
+(September, 2002, Commercial)           8.431     8.173
+(October, 2002, Commercial)            11.996    16.832
+(November, 2002, Commercial)           28.445    20.250
+(December, 2002, Commercial)           37.464    25.257
+(January, 2003, Commercial)            47.414    31.196
+(February, 2003, Commercial)           43.794    25.587
+(March, 2003, Commercial)              37.416    25.251
+(April, 2003, Commercial)              26.162    19.414
+(May, 2003, Commercial)                13.918     9.696
+(June, 2003, Commercial)                8.447     6.140
+(July, 2003, Commercial)                7.833     5.220
+(August, 2003, Commercial)              7.621     4.866
+(September, 2003, Commercial)           8.351     7.769
+(October, 2003, Commercial)            16.455    12.350
+(November, 2003, Commercial)           24.107    24.418
+(December, 2003, Commercial)           35.882    26.373
+(January, 2004, Commercial)            46.477    33.178
+(February, 2004, Commercial)           41.654    25.529
+(March, 2004, Commercial)              33.029    21.251
+(April, 2004, Commercial)              23.638    13.432
+(May, 2004, Commercial)                14.109    10.331
+(June, 2004, Commercial)                8.744     6.372
+(July, 2004, Commercial)                7.496     5.367
+(August, 2004, Commercial)              7.765     5.098
+(September, 2004, Commercial)           8.249     7.719
+(October, 2004, Commercial)            14.043    14.084
+(November, 2004, Commercial)           23.880    18.216
+(December, 2004, Commercial)           35.721    25.391
+(January, 2005, Commercial)            45.455    30.825
+(February, 2005, Commercial)           40.464    23.480
+(March, 2005, Commercial)              38.011    20.531
+(April, 2005, Commercial)              22.574    12.932
+(May, 2005, Commercial)                15.114     8.591
+(June, 2005, Commercial)                8.605     6.452
+(July, 2005, Commercial)                7.261     5.047
+(August, 2005, Commercial)              7.023     5.093
+(September, 2005, Commercial)           7.643     7.584
+(October, 2005, Commercial)            11.763    12.539
+(November, 2005, Commercial)           23.250    19.169
+(December, 2005, Commercial)           37.405    24.911
+(January, 2006, Commercial)            36.997    23.279
+(February, 2006, Commercial)           36.995    24.763
+(March, 2006, Commercial)              36.313    22.447
+(April, 2006, Commercial)              20.927    12.816
+(May, 2006, Commercial)                12.524     8.417
+(June, 2006, Commercial)                8.497     5.682
+(July, 2006, Commercial)                8.289     4.854
+(August, 2006, Commercial)              8.577     4.762
+(September, 2006, Commercial)           8.677     6.900
+(October, 2006, Commercial)            16.910    14.176
+(November, 2006, Commercial)           23.700    22.781
+(December, 2006, Commercial)           29.382    24.405
+(January, 2007, Commercial)            39.232    27.334
+(February, 2007, Commercial)           44.465    26.126
+(March, 2007, Commercial)              36.763    21.150
+(April, 2007, Commercial)              26.293    18.437
+(May, 2007, Commercial)                13.254     8.323
+(June, 2007, Commercial)                7.911     5.774
+(July, 2007, Commercial)                7.462     4.671
+(August, 2007, Commercial)              8.057     4.813
+(September, 2007, Commercial)           6.826     7.221
+(October, 2007, Commercial)            11.667    12.016
+(November, 2007, Commercial)           24.412    20.067
+(December, 2007, Commercial)           38.520    25.368
+(January, 2008, Commercial)            40.341    29.314
+(February, 2008, Commercial)           42.975    25.040
+(March, 2008, Commercial)              39.751    22.770
+(April, 2008, Commercial)              22.415    17.546
+(May, 2008, Commercial)                14.105     9.961
+(June, 2008, Commercial)                8.721     6.391
+(July, 2008, Commercial)                6.961     6.069
+(August, 2008, Commercial)              6.322     5.684
+(September, 2008, Commercial)           7.274     6.707
+(October, 2008, Commercial)            16.035    12.743
+(November, 2008, Commercial)           24.949    16.674
+(December, 2008, Commercial)           38.158    33.616
+(January, 2009, Commercial)            48.521    30.576
+(February, 2009, Commercial)           40.302    25.615
+(March, 2009, Commercial)              35.306    25.402
+(April, 2009, Commercial)              23.772    15.275
+(May, 2009, Commercial)                14.299    10.121
+(June, 2009, Commercial)               11.056     5.425
+(July, 2009, Commercial)                8.384     4.699
+(August, 2009, Commercial)              8.271     4.932
+(September, 2009, Commercial)           8.805     5.812
+(October, 2009, Commercial)            15.797    15.199
+(November, 2009, Commercial)           25.200    16.910
+(December, 2009, Commercial)           35.992    32.229
+(January, 2010, Commercial)            43.131    27.288
+(February, 2010, Commercial)           39.548    23.806
+(March, 2010, Commercial)              33.405    18.439
+(April, 2010, Commercial)              20.153    13.568
+(May, 2010, Commercial)                13.338    10.757
+(June, 2010, Commercial)                8.706     5.678
+(July, 2010, Commercial)                8.078     4.713
+(August, 2010, Commercial)              7.990     5.334
+(September, 2010, Commercial)           9.472     7.927
+(October, 2010, Commercial)            15.029    10.498
+(November, 2010, Commercial)           23.221    21.658
+(December, 2010, Commercial)           38.018    28.852
+(January, 2011, Commercial)            43.695    30.069
+(February, 2011, Commercial)           43.466    26.838
+(March, 2011, Commercial)              40.415    26.839
+(April, 2011, Commercial)              24.584    16.872
+(May, 2011, Commercial)                17.397     9.351
+(June, 2011, Commercial)                9.997     5.809
+(July, 2011, Commercial)                7.707     4.911
+(August, 2011, Commercial)              7.662     4.693
+(September, 2011, Commercial)           9.175     5.890
+(October, 2011, Commercial)            13.654    11.977
+(November, 2011, Commercial)           22.524    19.528
+(December, 2011, Commercial)           31.467    23.138
+(January, 2012, Commercial)            41.251    26.238
+(February, 2012, Commercial)           38.377    23.978
+(March, 2012, Commercial)              31.241    19.507
+(April, 2012, Commercial)              21.262    14.003
+(May, 2012, Commercial)                13.029     9.279
+(June, 2012, Commercial)                7.342     6.479
+(July, 2012, Commercial)                6.157     4.601
+(August, 2012, Commercial)              6.721     4.660
+(September, 2012, Commercial)           7.523     5.920
+(October, 2012, Commercial)            12.988    14.272
+(November, 2012, Commercial)           24.747    22.448
+(December, 2012, Commercial)           31.161    29.322
+(January, 2013, Commercial)            40.269    27.296
+(February, 2013, Commercial)           41.021    22.682
+(March, 2013, Commercial)              35.721    23.811
+(April, 2013, Commercial)              27.252    17.039
+(May, 2013, Commercial)                14.158     8.328
+(June, 2013, Commercial)                8.597     6.016
+(July, 2013, Commercial)                6.643     4.719
+(August, 2013, Commercial)              6.929     4.359
+(September, 2013, Commercial)           7.880     5.708
+(October, 2013, Commercial)            12.197    12.978
+(November, 2013, Commercial)           25.164    22.540
+(December, 2013, Commercial)           39.548    30.671
+(January, 2014, Commercial)            48.683    27.414
+(February, 2014, Commercial)           46.301    28.452
+(March, 2014, Commercial)              44.105    26.046
+(April, 2014, Commercial)              29.148    16.851
+(May, 2014, Commercial)                16.465     9.275
+(June, 2014, Commercial)                8.907     5.717
+(July, 2014, Commercial)                6.731     4.387
+(August, 2014, Commercial)              7.601     4.500
+(September, 2014, Commercial)           8.343     6.855
+(October, 2014, Commercial)            13.369    11.100
+(November, 2014, Commercial)           26.078    23.879
+(December, 2014, Commercial)           36.951    26.302
+(January, 2015, Commercial)            47.226    27.589
+(February, 2015, Commercial)           50.486    27.149
+(March, 2015, Commercial)              45.294    19.325
+(April, 2015, Commercial)              27.752    13.323
+(May, 2015, Commercial)                14.939     8.671
+(June, 2015, Commercial)                8.330     4.917
+(July, 2015, Commercial)                7.412     4.469
+(August, 2015, Commercial)              7.551     4.449
+(September, 2015, Commercial)           7.903     6.925
+(October, 2015, Commercial)            13.729    10.843
+(November, 2015, Commercial)           23.334    20.708
+(December, 2015, Commercial)           32.264    26.101
+(January, 2016, Commercial)	       42.273	 29.775
+(February, 2016, Commercial)	       41.401	 24.837
+(March, 2016, Commercial)	       40.662	 22.068
+(April, 2016, Commercial)	       30.058	 17.374
+(May, 2016, Commercial)	               18.736	 10.162
+(June, 2016, Commercial)	       10.185	  6.293
+(July, 2016, Commercial)	        8.686	  6.267
+(August, 2016, Commercial)	        9.734	  5.264
+(September, 2016, Commercial)	        9.253     7.835
+(October, 2016, Commercial)	       15.647	 15.240
+(November, 2016, Commercial)	       24.756	 21.483
+(December, 2016, Commercial)	       36.112	 32.576
+(January, 2017, Commercial)	       44.433	 35.611
+(February, 2017, Commercial)	       41.369	 30.114
+(March, 2017, Commercial)	       41.749	 29.493
+(April, 2017, Commercial)	       28.789	 19.358
+(May, 2017, Commercial)	               19.114	 12.235
+(June, 2017, Commercial)	       11.418	  7.723
+(July, 2017, Commercial)	        9.655	  6.046
+(August, 2017, Commercial)	       10.175	  5.176
+(September, 2017, Commercial)	       10.026	  7.370
+(October, 2017, Commercial)	       15.422	 13.886
+(November, 2017, Commercial)	       26.566	 25.539
+(December, 2017, Commercial)	       42.981	 30.900
+(January, 2018, Commercial)	       52.250	 36.350
+(February, 2018, Commercial)	       44.235	 36.143
+(March, 2018, Commercial)	       43.616	 30.028
+(April, 2018, Commercial)	       32.687	 24.548
+(May, 2018, Commercial)	               14.834	 10.517
+(June, 2018, Commercial)	       9.541	  7.145
+(July, 2018, Commercial)	       8.642	  5.747
+(August, 2018, Commercial)	       7.699	  5.949
+(September, 2018, Commercial)	       10.712	  9.611
+(October, 2018, Commercial)            22.665	 17.036
+(November, 2018, Commercial)	       41.509	 24.338
+(December, 2018, Commercial)	       45.749	 28.048
+(January, 2019, Commercial)	       55.661	 35.053
+(February, 2019, Commercial)	       48.326	 40.771
+(March, 2019, Commercial)	       44.205	 32.421
+(April, 2019, Commercial)	       32.619	 16.972
+(May, 2019, Commercial)	               18.107	 14.982
+(June, 2019, Commercial)	       10.036	  8.472
+(July, 2019, Commercial)	        8.820	  6.609
+(August, 2019, Commercial)	        8.398	  5.538
+(September, 2019, Commercial)	       11.052	  7.691
+(October, 2019, Commercial)	       22.570	 17.004
+(November, 2019, Commercial)	       36.560	 25.658
+(December, 2019, Commercial)	       45.540	 31.273
+(January, 2020, Commercial)	       52.628  	 37.870
+(February, 2020, Commercial)	       52.743	 32.665
+(March, 2020, Commercial)	       43.284	 29.819
+(April, 2020, Commercial)	       32.099	 23.936
+(May, 2020, Commercial)	               20.221	 11.887
+(June, 2020, Commercial)	        9.997	  8.806
+(July, 2020, Commercial)	        8.778	  6.367
+(August, 2020, Commercial)	        9.172	  5.477
+(September, 2020, Commercial)	       11.997	  6.827
+(October, 2020, Commercial)	       24.112	 15.338
+(November, 2020, Commercial)	       32.300	 24.440
+(December, 2020, Commercial)	       45.766	 29.775
+(January, 2021, Commercial)	       54.585	 31.700
+(February, 2021, Commercial)	       52.542	 37.060
+(March, 2021, Commercial)	       40.670	 27.101
+(April, 2021, Commercial)	       29.388	 20.432
+(May, 2021, Commercial)	               19.760	 14.059
+(June, 2021, Commercial)	       12.623	  8.061
+(July, 2021, Commercial)	        9.243	  5.388
+(August, 2021, Commercial)	       10.645	  5.567
+(September, 2021, Commercial)	       11.457	  7.969
+(October, 2021, Commercial)	       18.473	 13.498
+(November, 2021, Commercial)	       30.588	 22.785
+(December, 2021, Commercial)	       44.629	 34.593
+(January, 2022, Commercial)	       66.133	 42.292
+(February, 2022, Commercial)	       54.111	 33.710
+(March, 2022, Commercial)	       42.757	 30.168
+(April, 2022, Commercial)	       32.807	 22.772
+(January, 1990, Industrial)            43.949    42.644
+(February, 1990, Industrial)           42.809    38.906
+(March, 1990, Industrial)              45.054    42.400
+(April, 1990, Industrial)              37.491    40.938
+(May, 1990, Industrial)                34.210    39.678
+(June, 1990, Industrial)               29.544    35.686
+(July, 1990, Industrial)               25.189    38.597
+(August, 1990, Industrial)             25.941    39.431
+(September, 1990, Industrial)          27.729    38.379
+(October, 1990, Industrial)            32.736    44.139
+(November, 1990, Industrial)           36.637    44.975
+(December, 1990, Industrial)           38.597    44.888
+(January, 1991, Industrial)            44.487    45.505
+(February, 1991, Industrial)           40.586    38.369
+(March, 1991, Industrial)              40.497    41.298
+(April, 1991, Industrial)              35.109    37.967
+(May, 1991, Industrial)                28.855    38.222
+(June, 1991, Industrial)               26.519    34.661
+(July, 1991, Industrial)               23.439    36.892
+(August, 1991, Industrial)             25.123    35.427
+(September, 1991, Industrial)          28.006    36.061
+(October, 1991, Industrial)            33.022    44.403
+(November, 1991, Industrial)           38.937    42.964
+(December, 1991, Industrial)           41.102    43.929
+(January, 1992, Industrial)            44.201    41.687
+(February, 1992, Industrial)           41.980    38.025
+(March, 1992, Industrial)              41.535    37.392
+(April, 1992, Industrial)              36.541    35.795
+(May, 1992, Industrial)                30.132    35.847
+(June, 1992, Industrial)               28.662    34.020
+(July, 1992, Industrial)               24.807    35.129
+(August, 1992, Industrial)             26.691    38.040
+(September, 1992, Industrial)          28.093    38.471
+(October, 1992, Industrial)            33.440    39.203
+(November, 1992, Industrial)           37.524    42.260
+(December, 1992, Industrial)           39.892    39.606
+(January, 1993, Industrial)            43.571    41.368
+(February, 1993, Industrial)           43.050    37.576
+(March, 1993, Industrial)              42.178    41.357
+(April, 1993, Industrial)              35.240    37.482
+(May, 1993, Industrial)                29.069    39.679
+(June, 1993, Industrial)               27.300    38.758
+(July, 1993, Industrial)               23.992    41.350
+(August, 1993, Industrial)             25.331    43.253
+(September, 1993, Industrial)          27.499    40.858
+(October, 1993, Industrial)            31.303    41.974
+(November, 1993, Industrial)           34.562    39.121
+(December, 1993, Industrial)           36.142    43.526
+(January, 1994, Industrial)            41.838    43.445
+(February, 1994, Industrial)           36.322    36.684
+(March, 1994, Industrial)              37.246    38.465
+(April, 1994, Industrial)              32.145    37.483
+(May, 1994, Industrial)                28.878    39.475
+(June, 1994, Industrial)               24.990    39.570
+(July, 1994, Industrial)               23.571    42.353
+(August, 1994, Industrial)             26.137    43.929
+(September, 1994, Industrial)          26.223    43.994
+(October, 1994, Industrial)            30.585    43.837
+(November, 1994, Industrial)           30.800    41.627
+(December, 1994, Industrial)           34.427    45.952
+(January, 1995, Industrial)            37.931    44.810
+(February, 1995, Industrial)           36.823    43.350
+(March, 1995, Industrial)              36.320    44.365
+(April, 1995, Industrial)              30.694    42.793
+(May, 1995, Industrial)                26.990    44.484
+(June, 1995, Industrial)               22.945    36.491
+(July, 1995, Industrial)               21.475    42.713
+(August, 1995, Industrial)             22.382    41.800
+(September, 1995, Industrial)          23.671    40.119
+(October, 1995, Industrial)            26.445    43.226
+(November, 1995, Industrial)           31.075    43.977
+(December, 1995, Industrial)           33.793    48.431
+(January, 1996, Industrial)            36.862    50.375
+(February, 1996, Industrial)           30.976    43.708
+(March, 1996, Industrial)              33.114    46.562
+(April, 1996, Industrial)              27.605    41.227
+(May, 1996, Industrial)                26.451    41.626
+(June, 1996, Industrial)               21.769    36.370
+(July, 1996, Industrial)               19.953    42.786
+(August, 1996, Industrial)             21.095    42.501
+(September, 1996, Industrial)          22.138    41.696
+(October, 1996, Industrial)            26.365    48.472
+(November, 1996, Industrial)           31.255    50.719
+(December, 1996, Industrial)           31.185    51.311
+(January, 1997, Industrial)            33.009    50.212
+(February, 1997, Industrial)           29.220    42.782
+(March, 1997, Industrial)              31.295    48.469
+(April, 1997, Industrial)              29.289    44.256
+(May, 1997, Industrial)                27.306    44.598
+(June, 1997, Industrial)               21.410    40.584
+(July, 1997, Industrial)               19.559    43.680
+(August, 1997, Industrial)             21.154    45.244
+(September, 1997, Industrial)          19.216    46.812
+(October, 1997, Industrial)            22.549    50.286
+(November, 1997, Industrial)           23.145    49.073
+(December, 1997, Industrial)           23.503    50.429
+(January, 1998, Industrial)            23.339    52.399
+(February, 1998, Industrial)           20.522    43.803
+(March, 1998, Industrial)              23.889    47.732
+(April, 1998, Industrial)              20.285    44.391
+(May, 1998, Industrial)                16.353    41.911
+(June, 1998, Industrial)               15.581    41.881
+(July, 1998, Industrial)               14.895    41.739
+(August, 1998, Industrial)             15.709    46.201
+(September, 1998, Industrial)          15.920    45.224
+(October, 1998, Industrial)            19.316    45.707
+(November, 1998, Industrial)           18.450    43.636
+(December, 1998, Industrial)           18.895    47.449
+(January, 1999, Industrial)            22.196    51.210
+(February, 1999, Industrial)           19.169    43.990
+(March, 1999, Industrial)              20.618    47.402
+(April, 1999, Industrial)              17.555    42.244
+(May, 1999, Industrial)                15.474    43.272
+(June, 1999, Industrial)               13.104    38.256
+(July, 1999, Industrial)               13.257    41.511
+(August, 1999, Industrial)             13.892    38.269
+(September, 1999, Industrial)          14.347    37.195
+(October, 1999, Industrial)            16.848    44.393
+(November, 1999, Industrial)           16.841    44.795
+(December, 1999, Industrial)           18.135    49.282
+(January, 2000, Industrial)            20.754    52.362
+(February, 2000, Industrial)           18.804    48.132
+(March, 2000, Industrial)              18.212    50.035
+(April, 2000, Industrial)              17.647    48.868
+(May, 2000, Industrial)                14.529    44.658
+(June, 2000, Industrial)               11.380    42.366
+(July, 2000, Industrial)               12.619    47.700
+(August, 2000, Industrial)             12.521    50.504
+(September, 2000, Industrial)          12.435    47.717
+(October, 2000, Industrial)            14.724    53.065
+(November, 2000, Industrial)           16.194    52.206
+(December, 2000, Industrial)           17.548    53.434
+(January, 2001, Industrial)            14.278    48.138
+(February, 2001, Industrial)           13.321    47.637
+(March, 2001, Industrial)              13.331    45.736
+(April, 2001, Industrial)              10.642    45.805
+(May, 2001, Industrial)                 9.001    47.798
+(June, 2001, Industrial)                8.654    36.570
+(July, 2001, Industrial)                8.362    42.885
+(August, 2001, Industrial)              9.522    39.552
+(September, 2001, Industrial)           9.976    37.822
+(October, 2001, Industrial)            12.342    46.620
+(November, 2001, Industrial)           12.077    44.907
+(December, 2001, Industrial)           13.024    46.480
+(January, 2002, Industrial)             9.144    49.007
+(February, 2002, Industrial)            9.166    43.498
+(March, 2002, Industrial)               8.535    48.090
+(April, 2002, Industrial)               7.050    43.740
+(May, 2002, Industrial)                 6.260    39.146
+(June, 2002, Industrial)                5.175    37.936
+(July, 2002, Industrial)                5.061    37.842
+(August, 2002, Industrial)              5.148    41.616
+(September, 2002, Industrial)           5.485    41.344
+(October, 2002, Industrial)             7.126    50.744
+(November, 2002, Industrial)            8.128    48.834
+(December, 2002, Industrial)            8.855    54.137
+(January, 2003, Industrial)            10.120    56.356
+(February, 2003, Industrial)            9.214    50.566
+(March, 2003, Industrial)               8.574    54.093
+(April, 2003, Industrial)               7.144    49.118
+(May, 2003, Industrial)                 5.842    47.583
+(June, 2003, Industrial)                4.192    43.021
+(July, 2003, Industrial)                4.787    44.618
+(August, 2003, Industrial)              4.651    50.115
+(September, 2003, Industrial)           4.554    49.358
+(October, 2003, Industrial)             6.834    52.507
+(November, 2003, Industrial)            8.193    53.000
+(December, 2003, Industrial)            8.804    55.180
+(January, 2004, Industrial)             8.622    58.975
+(February, 2004, Industrial)            8.796    52.136
+(March, 2004, Industrial)               8.432    52.339
+(April, 2004, Industrial)               6.499    47.361
+(May, 2004, Industrial)                 5.472    48.889
+(June, 2004, Industrial)                4.643    43.661
+(July, 2004, Industrial)                4.312    48.690
+(August, 2004, Industrial)              4.537    47.748
+(September, 2004, Industrial)           4.656    49.839
+(October, 2004, Industrial)             6.171    52.393
+(November, 2004, Industrial)            7.982    51.484
+(December, 2004, Industrial)            9.242    58.598
+(January, 2005, Industrial)            10.041    57.442
+(February, 2005, Industrial)            9.244    62.483
+(March, 2005, Industrial)               9.361    50.561
+(April, 2005, Industrial)               6.570    46.584
+(May, 2005, Industrial)                 5.874    50.230
+(June, 2005, Industrial)                4.221    42.456
+(July, 2005, Industrial)                3.926    45.320
+(August, 2005, Industrial)              4.124    46.856
+(September, 2005, Industrial)           3.871    39.454
+(October, 2005, Industrial)             6.001    44.521
+(November, 2005, Industrial)            7.387    48.992
+(December, 2005, Industrial)            9.164    52.077
+(January, 2006, Industrial)            10.115    49.824
+(February, 2006, Industrial)            7.779    48.523
+(March, 2006, Industrial)               8.776    54.900
+(April, 2006, Industrial)               7.099    48.333
+(May, 2006, Industrial)                 6.466    49.573
+(June, 2006, Industrial)                5.698    45.569
+(July, 2006, Industrial)                5.405    48.993
+(August, 2006, Industrial)              5.458    51.953
+(September, 2006, Industrial)           6.426    49.782
+(October, 2006, Industrial)             7.750    57.926
+(November, 2006, Industrial)            7.872    54.830
+(December, 2006, Industrial)            9.275    52.701
+(January, 2007, Industrial)            54.945    92.616
+(February, 2007, Industrial)           56.739    85.251
+(March, 2007, Industrial)              55.379    88.592
+(April, 2007, Industrial)              45.957    78.996
+(May, 2007, Industrial)                42.276    72.628
+(June, 2007, Industrial)               38.587    63.786
+(July, 2007, Industrial)               40.228    71.382
+(August, 2007, Industrial)             43.736    68.545
+(September, 2007, Industrial)          44.591    70.277
+(October, 2007, Industrial)            47.050    81.704
+(November, 2007, Industrial)           52.697    87.252
+(December, 2007, Industrial)           56.458    98.013
+(January, 2008, Industrial)            58.100    99.371
+(February, 2008, Industrial)           60.158    93.121
+(March, 2008, Industrial)              56.838    92.381
+(April, 2008, Industrial)              43.792    84.660
+(May, 2008, Industrial)                41.231    81.313
+(June, 2008, Industrial)               37.266    70.039
+(July, 2008, Industrial)               37.150    73.623
+(August, 2008, Industrial)             36.650    76.570
+(September, 2008, Industrial)          37.711    74.920
+(October, 2008, Industrial)            41.095    81.975
+(November, 2008, Industrial)           43.606    91.226
+(December, 2008, Industrial)           48.447   102.061
+(January, 2009, Industrial)            51.833   105.040
+(February, 2009, Industrial)           47.133    93.814
+(March, 2009, Industrial)              47.108    97.253
+(April, 2009, Industrial)              37.097    83.128
+(May, 2009, Industrial)                33.993    82.919
+(June, 2009, Industrial)               38.132    76.443
+(July, 2009, Industrial)               31.935    82.256
+(August, 2009, Industrial)             35.930    80.808
+(September, 2009, Industrial)          34.597    76.355
+(October, 2009, Industrial)            42.861    91.876
+(November, 2009, Industrial)           44.013    93.708
+(December, 2009, Industrial)           51.008   105.180
+(January, 2010, Industrial)            49.929   100.331
+(February, 2010, Industrial)           49.278    88.825
+(March, 2010, Industrial)              49.953    92.640
+(April, 2010, Industrial)              38.863    86.029
+(May, 2010, Industrial)                37.165    90.612
+(June, 2010, Industrial)               37.960    79.113
+(July, 2010, Industrial)               37.990    82.090
+(August, 2010, Industrial)             40.740    83.021
+(September, 2010, Industrial)          38.728    79.689
+(October, 2010, Industrial)            43.038    89.818
+(November, 2010, Industrial)           48.588   100.170
+(December, 2010, Industrial)           56.333   111.504
+(January, 2011, Industrial)            60.401   110.258
+(February, 2011, Industrial)           54.525    99.106
+(March, 2011, Industrial)              56.275   102.547
+(April, 2011, Industrial)              44.632    92.239
+(May, 2011, Industrial)                41.242    90.013
+(June, 2011, Industrial)               41.496    84.650
+(July, 2011, Industrial)               41.855    87.590
+(August, 2011, Industrial)             42.521    91.699
+(September, 2011, Industrial)          39.048    85.994
+(October, 2011, Industrial)            47.170    98.333
+(November, 2011, Industrial)           49.754   106.007
+(December, 2011, Industrial)           54.907   110.518
+(January, 2012, Industrial)            60.370   114.398
+(February, 2012, Industrial)           54.792   110.334
+(March, 2012, Industrial)              53.723   114.401
+(April, 2012, Industrial)              48.402   101.785
+(May, 2012, Industrial)                43.876    97.747
+(June, 2012, Industrial)               43.780    94.388
+(July, 2012, Industrial)               46.656    98.059
+(August, 2012, Industrial)             45.008    99.943
+(September, 2012, Industrial)          43.636    95.450
+(October, 2012, Industrial)            47.618   122.168
+(November, 2012, Industrial)           54.992   120.211
+(December, 2012, Industrial)           57.664   127.101
+(January, 2013, Industrial)            63.428   124.873
+(February, 2013, Industrial)           59.034   109.116
+(March, 2013, Industrial)              58.963   119.839
+(April, 2013, Industrial)              48.361   112.009
+(May, 2013, Industrial)                39.994   104.416
+(June, 2013, Industrial)               38.524    98.707
+(July, 2013, Industrial)               41.367   102.146
+(August, 2013, Industrial)             40.766   106.090
+(September, 2013, Industrial)          41.401    98.931
+(October, 2013, Industrial)            46.430   113.068
+(November, 2013, Industrial)           52.589   119.467
+(December, 2013, Industrial)           60.955   131.641
+(January, 2014, Industrial)            62.717   128.997
+(February, 2014, Industrial)           56.364   120.555
+(March, 2014, Industrial)              58.497   126.941
+(April, 2014, Industrial)              46.200   112.402
+(May, 2014, Industrial)                41.855   108.665
+(June, 2014, Industrial)               38.585   100.958
+(July, 2014, Industrial)               40.890   110.905
+(August, 2014, Industrial)             40.155   108.352
+(September, 2014, Industrial)          38.375   103.325
+(October, 2014, Industrial)            43.285   114.574
+(November, 2014, Industrial)           48.957   124.186
+(December, 2014, Industrial)           52.512   134.002
+(January, 2015, Industrial)            59.017   141.098
+(February, 2015, Industrial)           58.778   131.025
+(March, 2015, Industrial)              53.581   132.778
+(April, 2015, Industrial)              43.670   113.130
+(May, 2015, Industrial)                36.956   108.222
+(June, 2015, Industrial)               38.821   105.995
+(July, 2015, Industrial)               39.136   115.101
+(August, 2015, Industrial)             39.823   120.843
+(September, 2015, Industrial)          40.497   114.900
+(October, 2015, Industrial)            42.456   120.775
+(November, 2015, Industrial)           44.840   129.379
+(December, 2015, Industrial)           48.351   141.271
+(January, 2016, Industrial)            56.856	166.760
+(February, 2016, Industrial)	       49.941	151.609
+(March, 2016, Industrial)	       50.734	159.283
+(April, 2016, Industrial)	       39.170	149.557
+(May, 2016, Industrial)	               39.454	136.404
+(June, 2016, Industrial)	       35.803	190.021
+(July, 2016, Industrial)	       41.566	201.496
+(August, 2016, Industrial)	       46.136	197.565
+(September, 2016, Industrial)	       38.186	150.125
+(October, 2016, Industrial)	       39.147	162.460
+(November, 2016, Industrial)	       44.357	162.930
+(December, 2016, Industrial)	       50.959	178.597
+(January, 2017, Industrial)	       46.700	178.015
+(February, 2017, Industrial)	       43.648	159.510
+(March, 2017, Industrial)	       47.165	175.458
+(April, 2017, Industrial)	       35.828	163.986
+(May, 2017, Industrial)	               35.163	156.188
+(June, 2017, Industrial)	       31.619	181.816
+(July, 2017, Industrial)	       34.151	218.524
+(August, 2017, Industrial)	       35.095	222.451
+(September, 2017, Industrial)	       36.307	177.385
+(October, 2017, Industrial)	       36.328	179.094
+(November, 2017, Industrial)	       44.235	189.574
+(December, 2017, Industrial)	       52.667	200.156
+(January, 2018, Industrial)	       55.569	206.698
+(February, 2018, Industrial)	       46.817	184.608
+(March, 2018, Industrial)	       47.274	198.889
+(April, 2018, Industrial)	       42.934	181.014
+(May, 2018, Industrial)	               36.998	191.985
+(June, 2018, Industrial)	       38.007	183.797
+(July, 2018, Industrial)	       42.605	187.325
+(August, 2018, Industrial)	       43.729	189.300
+(September, 2018, Industrial)	       39.370	185.695
+(October, 2018, Industrial)	       34.113	201.573
+(November, 2018, Industrial)	       46.797	197.234
+(December, 2018, Industrial)	       51.584	200.329
+(January, 2019, Industrial)	       56.846	202.383
+(February, 2019, Industrial)	       55.253	190.069
+(March, 2019, Industrial)	       51.898	197.144
+(April, 2019, Industrial)	       39.809	179.497
+(May, 2019, Industrial)	               38.730	178.617
+(June, 2019, Industrial)	       39.501	185.781
+(July, 2019, Industrial)	       43.926	185.972
+(August, 2019, Industrial)	       41.709	191.395
+(September, 2019, Industrial)	       38.554	178.041
+(October, 2019, Industrial)	       42.749	182.101
+(November, 2019, Industrial)	       53.618	185.200
+(December, 2019, Industrial)	       54.711	197.732
+(January, 2020, Industrial)	       52.152	204.179
+(February, 2020, Industrial)	       51.276	189.224
+(March, 2020, Industrial)	       46.663	199.798
+(April, 2020, Industrial)	       37.947	178.347
+(May, 2020, Industrial)	               36.089	173.424
+(June, 2020, Industrial)	       38.614	170.809
+(July, 2020, Industrial)	       45.122	176.441
+(August, 2020, Industrial)	       42.189	166.407
+(September, 2020, Industrial)	       37.127	170.234
+(October, 2020, Industrial)	       46.046	186.559
+(November, 2020, Industrial)	       46.487	187.292
+(December, 2020, Industrial)	       57.409	200.908
+(January, 2021, Industrial)	       57.182	203.993
+(February, 2021, Industrial)	       59.326	188.219
+(March, 2021, Industrial)	       51.526	199.540
+(April, 2021, Industrial)	       36.453	179.332
+(May, 2021, Industrial)	               36.279	184.764
+(June, 2021, Industrial)	       41.414	186.629
+(July, 2021, Industrial)	       43.210	202.961
+(August, 2021, Industrial)	       55.751	198.144
+(September, 2021, Industrial)	       39.458	179.805
+(October, 2021, Industrial)	       45.555	199.195
+(November, 2021, Industrial)	       54.364	197.084
+(December, 2021, Industrial)	       60.925	218.185
+(January, 2022, Industrial)	       74.846	213.459
+(February, 2022, Industrial)	       65.002	192.529
+(March, 2022, Industrial)	       60.354	209.859
+(April, 2022, Industrial)	       46.983	192.368
+(January, 1990, Electric)               0.000     0.000
+(February, 1990, Electric)              0.000     0.000
+(March, 1990, Electric)                 0.000     0.000
+(April, 1990, Electric)                 0.000     0.000
+(May, 1990, Electric)                   0.000     0.000
+(June, 1990, Electric)                  0.000     0.000
+(July, 1990, Electric)                  0.000     0.000
+(August, 1990, Electric)                0.000     0.000
+(September, 1990, Electric)             0.000     0.000
+(October, 1990, Electric)               0.000     0.000
+(November, 1990, Electric)              0.000     0.000
+(December, 1990, Electric)              0.000     0.000
+(January, 1991, Electric)               0.000     0.000
+(February, 1991, Electric)              0.000     0.000
+(March, 1991, Electric)                 0.000     0.000
+(April, 1991, Electric)                 0.000     0.000
+(May, 1991, Electric)                   0.000     0.000
+(June, 1991, Electric)                  0.000     0.000
+(July, 1991, Electric)                  0.000     0.000
+(August, 1991, Electric)                0.000     0.000
+(September, 1991, Electric)             0.000     0.000
+(October, 1991, Electric)               0.000     0.000
+(November, 1991, Electric)              0.000     0.000
+(December, 1991, Electric)              0.000     0.000
+(January, 1992, Electric)               0.000     0.000
+(February, 1992, Electric)              0.000     0.000
+(March, 1992, Electric)                 0.000     0.000
+(April, 1992, Electric)                 0.000     0.000
+(May, 1992, Electric)                   0.000     0.000
+(June, 1992, Electric)                  0.000     0.000
+(July, 1992, Electric)                  0.000     0.000
+(August, 1992, Electric)                0.000     0.000
+(September, 1992, Electric)             0.000     0.000
+(October, 1992, Electric)               0.000     0.000
+(November, 1992, Electric)              0.000     0.000
+(December, 1992, Electric)              0.000     0.000
+(January, 1993, Electric)               0.000     0.000
+(February, 1993, Electric)              0.000     0.000
+(March, 1993, Electric)                 0.000     0.000
+(April, 1993, Electric)                 0.000     0.000
+(May, 1993, Electric)                   0.000     0.000
+(June, 1993, Electric)                  0.000     0.000
+(July, 1993, Electric)                  0.000     0.000
+(August, 1993, Electric)                0.000     0.000
+(September, 1993, Electric)             0.000     0.000
+(October, 1993, Electric)               0.000     0.000
+(November, 1993, Electric)              0.000     0.000
+(December, 1993, Electric)              0.000     0.000
+(January, 1994, Electric)               0.000     0.000
+(February, 1994, Electric)              0.000     0.000
+(March, 1994, Electric)                 0.000     0.000
+(April, 1994, Electric)                 0.000     0.000
+(May, 1994, Electric)                   0.000     0.000
+(June, 1994, Electric)                  0.000     0.000
+(July, 1994, Electric)                  0.000     0.000
+(August, 1994, Electric)                0.000     0.000
+(September, 1994, Electric)             0.000     0.000
+(October, 1994, Electric)               0.000     0.000
+(November, 1994, Electric)              0.000     0.000
+(December, 1994, Electric)              0.000     0.000
+(January, 1995, Electric)               0.000     0.000
+(February, 1995, Electric)              0.000     0.000
+(March, 1995, Electric)                 0.000     0.000
+(April, 1995, Electric)                 0.000     0.000
+(May, 1995, Electric)                   0.000     0.000
+(June, 1995, Electric)                  0.000     0.000
+(July, 1995, Electric)                  0.000     0.000
+(August, 1995, Electric)                0.000     0.000
+(September, 1995, Electric)             0.000     0.000
+(October, 1995, Electric)               0.000     0.000
+(November, 1995, Electric)              0.000     0.000
+(December, 1995, Electric)              0.000     0.000
+(January, 1996, Electric)               0.000     0.000
+(February, 1996, Electric)              0.000     0.000
+(March, 1996, Electric)                 0.000     0.000
+(April, 1996, Electric)                 0.000     0.000
+(May, 1996, Electric)                   0.000     0.000
+(June, 1996, Electric)                  0.000     0.000
+(July, 1996, Electric)                  0.000     0.000
+(August, 1996, Electric)                0.000     0.000
+(September, 1996, Electric)             0.000     0.000
+(October, 1996, Electric)               0.000     0.000
+(November, 1996, Electric)              0.000     0.000
+(December, 1996, Electric)              0.000     0.000
+(January, 1997, Electric)               0.000     0.000
+(February, 1997, Electric)              0.000     0.000
+(March, 1997, Electric)                 0.000     0.000
+(April, 1997, Electric)                 0.000     0.000
+(May, 1997, Electric)                   0.000     0.000
+(June, 1997, Electric)                  0.000     0.000
+(July, 1997, Electric)                  0.000     0.000
+(August, 1997, Electric)                0.000     0.000
+(September, 1997, Electric)             0.000     0.000
+(October, 1997, Electric)               0.000     0.000
+(November, 1997, Electric)              0.000     0.000
+(December, 1997, Electric)              0.000     0.000
+(January, 1998, Electric)               0.000     0.000
+(February, 1998, Electric)              0.000     0.000
+(March, 1998, Electric)                 0.000     0.000
+(April, 1998, Electric)                 0.000     0.000
+(May, 1998, Electric)                   0.000     0.000
+(June, 1998, Electric)                  0.000     0.000
+(July, 1998, Electric)                  0.000     0.000
+(August, 1998, Electric)                0.000     0.000
+(September, 1998, Electric)             0.000     0.000
+(October, 1998, Electric)               0.000     0.000
+(November, 1998, Electric)              0.000     0.000
+(December, 1998, Electric)              0.000     0.000
+(January, 1999, Electric)               0.000     0.000
+(February, 1999, Electric)              0.000     0.000
+(March, 1999, Electric)                 0.000     0.000
+(April, 1999, Electric)                 0.000     0.000
+(May, 1999, Electric)                   0.000     0.000
+(June, 1999, Electric)                  0.000     0.000
+(July, 1999, Electric)                  0.000     0.000
+(August, 1999, Electric)                0.000     0.000
+(September, 1999, Electric)             0.000     0.000
+(October, 1999, Electric)               0.000     0.000
+(November, 1999, Electric)              0.000     0.000
+(December, 1999, Electric)              0.000     0.000
+(January, 2000, Electric)               0.000     0.000
+(February, 2000, Electric)              0.000     0.000
+(March, 2000, Electric)                 0.000     0.000
+(April, 2000, Electric)                 0.000     0.000
+(May, 2000, Electric)                   0.000     0.000
+(June, 2000, Electric)                  0.000     0.000
+(July, 2000, Electric)                  0.000     0.000
+(August, 2000, Electric)                0.000     0.000
+(September, 2000, Electric)             0.000     0.000
+(October, 2000, Electric)               0.000     0.000
+(November, 2000, Electric)              0.000     0.000
+(December, 2000, Electric)              0.000     0.000
+(January, 2001, Electric)               0.000     0.000
+(February, 2001, Electric)              0.000     0.000
+(March, 2001, Electric)                 0.000     0.000
+(April, 2001, Electric)                 0.000     0.000
+(May, 2001, Electric)                   0.000     0.000
+(June, 2001, Electric)                  0.000     0.000
+(July, 2001, Electric)                  0.000     0.000
+(August, 2001, Electric)                0.000     0.000
+(September, 2001, Electric)             0.000     0.000
+(October, 2001, Electric)               0.000     0.000
+(November, 2001, Electric)              0.000     0.000
+(December, 2001, Electric)              0.000     0.000
+(January, 2002, Electric)               0.000     0.000
+(February, 2002, Electric)              0.000     0.000
+(March, 2002, Electric)                 0.000     0.000
+(April, 2002, Electric)                 0.000     0.000
+(May, 2002, Electric)                   0.000     0.000
+(June, 2002, Electric)                  0.000     0.000
+(July, 2002, Electric)                  0.000     0.000
+(August, 2002, Electric)                0.000     0.000
+(September, 2002, Electric)             0.000     0.000
+(October, 2002, Electric)               0.000     0.000
+(November, 2002, Electric)              0.000     0.000
+(December, 2002, Electric)              0.000     0.000
+(January, 2003, Electric)               0.000     0.000
+(February, 2003, Electric)              0.000     0.000
+(March, 2003, Electric)                 0.000     0.000
+(April, 2003, Electric)                 0.000     0.000
+(May, 2003, Electric)                   0.000     0.000
+(June, 2003, Electric)                  0.000     0.000
+(July, 2003, Electric)                  0.000     0.000
+(August, 2003, Electric)                0.000     0.000
+(September, 2003, Electric)             0.000     0.000
+(October, 2003, Electric)               0.000     0.000
+(November, 2003, Electric)              0.000     0.000
+(December, 2003, Electric)              0.000     0.000
+(January, 2004, Electric)               0.000     0.000
+(February, 2004, Electric)              0.000     0.000
+(March, 2004, Electric)                 0.000     0.000
+(April, 2004, Electric)                 0.000     0.000
+(May, 2004, Electric)                   0.000     0.000
+(June, 2004, Electric)                  0.000     0.000
+(July, 2004, Electric)                  0.000     0.000
+(August, 2004, Electric)                0.000     0.000
+(September, 2004, Electric)             0.000     0.000
+(October, 2004, Electric)               0.000     0.000
+(November, 2004, Electric)              0.000     0.000
+(December, 2004, Electric)              0.000     0.000
+(January, 2005, Electric)               9.625    14.502
+(February, 2005, Electric)              8.693    13.099
+(March, 2005, Electric)                 9.625    14.502
+(April, 2005, Electric)                 9.314    14.035
+(May, 2005, Electric)                   9.625    14.502
+(June, 2005, Electric)                  9.314    14.035
+(July, 2005, Electric)                  9.625    14.502
+(August, 2005, Electric)                9.625    14.502
+(September, 2005, Electric)             9.314    14.035
+(October, 2005, Electric)               9.625    14.502
+(November, 2005, Electric)              9.314    14.035
+(December, 2005, Electric)              9.625    14.502
+(January, 2006, Electric)              11.577    13.384
+(February, 2006, Electric)             10.457    12.088
+(March, 2006, Electric)                11.577    13.384
+(April, 2006, Electric)                11.203    12.952
+(May, 2006, Electric)                  11.577    13.384
+(June, 2006, Electric)                 11.203    12.952
+(July, 2006, Electric)                 11.577    13.384
+(August, 2006, Electric)               11.577    13.384
+(September, 2006, Electric)            11.203    12.952
+(October, 2006, Electric)              11.577    13.384
+(November, 2006, Electric)             11.203    12.952
+(December, 2006, Electric)             11.577    13.384
+(January, 2007, Electric)              12.835    11.316
+(February, 2007, Electric)             11.593    10.221
+(March, 2007, Electric)                12.835    11.316
+(April, 2007, Electric)                12.421    10.951
+(May, 2007, Electric)                  12.835    11.316
+(June, 2007, Electric)                 12.421    10.951
+(July, 2007, Electric)                 12.835    11.316
+(August, 2007, Electric)               12.835    11.316
+(September, 2007, Electric)            12.421    10.951
+(October, 2007, Electric)              12.835    11.316
+(November, 2007, Electric)             12.421    10.951
+(December, 2007, Electric)             12.835    11.316
+(January, 2008, Electric)              10.031    13.639
+(February, 2008, Electric)              9.384    12.759
+(March, 2008, Electric)                10.031    13.639
+(April, 2008, Electric)                 9.708    13.199
+(May, 2008, Electric)                  10.031    13.639
+(June, 2008, Electric)                  9.708    13.199
+(July, 2008, Electric)                 10.031    13.639
+(August, 2008, Electric)               10.031    13.639
+(September, 2008, Electric)             9.708    13.199
+(October, 2008, Electric)              10.031    13.639
+(November, 2008, Electric)              9.708    13.199
+(December, 2008, Electric)             10.031    13.639
+(January, 2009, Electric)              10.548    12.139
+(February, 2009, Electric)              9.528    10.964
+(March, 2009, Electric)                10.548    12.139
+(April, 2009, Electric)                10.208    11.747
+(May, 2009, Electric)                  10.548    12.139
+(June, 2009, Electric)                 10.208    11.747
+(July, 2009, Electric)                 10.548    12.139
+(August, 2009, Electric)               10.548    12.139
+(September, 2009, Electric)            10.208    11.747
+(October, 2009, Electric)              10.548    12.139
+(November, 2009, Electric)             10.208    11.747
+(December, 2009, Electric)             10.548    12.139
+(January, 2010, Electric)              15.229    13.399
+(February, 2010, Electric)             13.755    12.102
+(March, 2010, Electric)                15.229    13.399
+(April, 2010, Electric)                14.737    12.966
+(May, 2010, Electric)                  15.229    13.399
+(June, 2010, Electric)                 14.737    12.966
+(July, 2010, Electric)                 15.229    13.399
+(August, 2010, Electric)               15.229    13.399
+(September, 2010, Electric)            14.737    12.966
+(October, 2010, Electric)              15.229    13.399
+(November, 2010, Electric)             14.737    12.966
+(December, 2010, Electric)             15.229    13.399
+(January, 2011, Electric)              18.115    15.137
+(February, 2011, Electric)             16.362    13.672
+(March, 2011, Electric)                18.115    15.137
+(April, 2011, Electric)                17.530    14.648
+(May, 2011, Electric)                  18.115    15.137
+(June, 2011, Electric)                 17.530    14.648
+(July, 2011, Electric)                 18.115    15.137
+(August, 2011, Electric)               18.115    15.137
+(September, 2011, Electric)            17.530    14.648
+(October, 2011, Electric)              18.115    15.137
+(November, 2011, Electric)             17.530    14.648
+(December, 2011, Electric)             18.115    15.137
+(January, 2012, Electric)              17.275    15.635
+(February, 2012, Electric)             16.161    14.626
+(March, 2012, Electric)                17.275    15.635
+(April, 2012, Electric)                16.718    15.130
+(May, 2012, Electric)                  17.275    15.635
+(June, 2012, Electric)                 16.718    15.130
+(July, 2012, Electric)                 17.275    15.635
+(August, 2012, Electric)               17.275    15.635
+(September, 2012, Electric)            16.718    15.130
+(October, 2012, Electric)              17.275    15.635
+(November, 2012, Electric)             16.718    15.130
+(December, 2012, Electric)             17.275    15.635
+(January, 2013, Electric)              13.673    16.219
+(February, 2013, Electric)             12.349    14.650
+(March, 2013, Electric)                13.673    16.219
+(April, 2013, Electric)                13.232    15.696
+(May, 2013, Electric)                  13.673    16.219
+(June, 2013, Electric)                 13.232    15.696
+(July, 2013, Electric)                 13.673    16.219
+(August, 2013, Electric)               13.673    16.219
+(September, 2013, Electric)            13.232    15.696
+(October, 2013, Electric)              13.673    16.219
+(November, 2013, Electric)             13.232    15.696
+(December, 2013, Electric)             13.673    16.219
+(January, 2014, Electric)              12.435    16.312
+(February, 2014, Electric)             11.232    14.733
+(March, 2014, Electric)                12.435    16.312
+(April, 2014, Electric)                12.034    15.786
+(May, 2014, Electric)                  12.435    16.312
+(June, 2014, Electric)                 12.034    15.786
+(July, 2014, Electric)                 12.435    16.312
+(August, 2014, Electric)               12.435    16.312
+(September, 2014, Electric)            12.034    15.786
+(October, 2014, Electric)              12.435    16.312
+(November, 2014, Electric)             12.034    15.786
+(December, 2014, Electric)             12.435    16.312
+(January, 2015, Electric)              12.289    17.197
+(February, 2015, Electric)             11.100    15.533
+(March, 2015, Electric)                12.289    17.197
+(April, 2015, Electric)                11.893    16.642
+(May, 2015, Electric)                  12.289    17.197
+(June, 2015, Electric)                 11.893    16.642
+(July, 2015, Electric)                 12.289    17.197
+(August, 2015, Electric)               12.289    17.197
+(September, 2015, Electric)            11.893    16.642
+(October, 2015, Electric)              12.289    17.197
+(November, 2015, Electric)             11.893    16.642
+(December, 2015, Electric)             12.289    17.197
+(January, 2016, Electric)	       12.159	 18.889
+(February, 2016, Electric)	       11.002	 15.824
+(March, 2016, Electric)	               10.731	 16.838
+(April, 2016, Electric)	                9.413	 14.801
+(May, 2016, Electric)	                9.797	 13.974
+(June, 2016, Electric)	                9.126	 14.713
+(July, 2016, Electric)	               11.432	 16.417
+(August, 2016, Electric)	       13.462	 16.680
+(September, 2016, Electric)	        9.872	 15.354
+(October, 2016, Electric)	        9.016	 16.199
+(November, 2016, Electric)	       10.393	 16.203
+(December, 2016, Electric)	       12.327	 18.351
+(January, 2017, Electric)	        7.201	 20.377
+(February, 2017, Electric)	        6.288	 18.382
+(March, 2017, Electric)	                6.721	 19.090
+(April, 2017, Electric)	                5.200	 16.361
+(May, 2017, Electric)	                4.577	 16.151
+(June, 2017, Electric)	                4.066	 15.362
+(July, 2017, Electric)	                4.879	 18.666
+(August, 2017, Electric)	        5.573	 19.176
+(September, 2017, Electric)	        5.912	 17.170
+(October, 2017, Electric)	        4.219	 17.758
+(November, 2017, Electric)	        5.476	 19.948
+(December, 2017, Electric)	        7.581	 20.869
+(January, 2018, Electric)	       11.587	 24.728
+(February, 2018, Electric)	        8.546	 22.288
+(March, 2018, Electric)	                7.991	 23.386
+(April, 2018, Electric)	                7.339	 20.064
+(May, 2018, Electric)	                5.919	 19.433
+(June, 2018, Electric)	                6.137	 18.791
+(July, 2018, Electric)	               10.169	 22.815
+(August, 2018, Electric)	       10.731	 23.327
+(September, 2018, Electric)	        8.065	 22.321
+(October, 2018, Electric)	        5.915	 22.250
+(November, 2018, Electric)	        7.492	 23.624
+(December, 2018, Electric)	        9.232	 24.969
+(January, 2019, Electric)	       10.804	 26.838
+(February, 2019, Electric)	       10.743	 26.505
+(March, 2019, Electric)	               10.728	 27.411
+(April, 2019, Electric)	                6.022	 23.151
+(May, 2019, Electric)	                5.301	 22.611
+(June, 2019, Electric)	                4.069	 21.640
+(July, 2019, Electric)	               10.554    24.193
+(August, 2019, Electric)	        8.284	 24.020
+(September, 2019, Electric)	        6.286	 23.509
+(October, 2019, Electric)	        5.973	 24.827
+(November, 2019, Electric)	        8.435	 25.190
+(December, 2019, Electric)	        9.051	 26.402
+(January, 2020, Electric)	       10.985	 30.458
+(February, 2020, Electric)	       10.088	 27.849
+(March, 2020, Electric)	                8.795	 28.323
+(April, 2020, Electric)	                5.060	 25.263
+(May, 2020, Electric)	                5.380	 21.200
+(June, 2020, Electric)	                6.532	 22.237
+(July, 2020, Electric)	               11.761	 23.217
+(August, 2020, Electric)	       10.704	 25.615
+(September, 2020, Electric)	        7.442	 25.301
+(October, 2020, Electric)	        7.681	 26.774
+(November, 2020, Electric)	        7.584	 27.853
+(December, 2020, Electric)	       10.068	 28.797
+(January, 2021, Electric)	        9.860	 26.613
+(February, 2021, Electric)	        11.631	 26.267
+(March, 2021, Electric)	                8.069	 25.114
+(April, 2021, Electric)	                4.938	 23.634
+(May, 2021, Electric)	                4.758	 24.112
+(June, 2021, Electric)	                7.783	 25.422
+(July, 2021, Electric)	                7.529	 26.367
+(August, 2021, Electric)	       12.106	 27.189
+(September, 2021, Electric)	        6.271	 25.136
+(October, 2021, Electric)	        8.336	 26.751
+(November, 2021, Electric)	        9.776	 26.786
+(December, 2021, Electric)	       11.024	 29.496
+;
+
+! Data: Underground natural gas storage withdrawals
+! Units: Billion cubic feet
+HistoricalStorageWithdrawals := data table
+                       CN_E      CN_W   
+(January, 1990)         31.672    12.095
+(February, 1990)        32.845    11.683
+(March, 1990)           26.244     3.576
+(April, 1990)           10.899     0.983
+(May, 1990)              7.133     0.199
+(June, 1990)             7.401     0.143
+(July, 1990)             3.843     0.333
+(August, 1990)           2.083     1.433
+(September, 1990)        3.324     0.667
+(October, 1990)          4.577     4.249
+(November, 1990)        13.966     9.275
+(December, 1990)        25.525    16.596
+(January, 1991)         50.060    15.126
+(February, 1991)        37.893     6.354
+(March, 1991)           27.457     7.125
+(April, 1991)           14.927     0.367
+(May, 1991)              3.220     0.602
+(June, 1991)             4.267     0.718
+(July, 1991)             4.954     0.488
+(August, 1991)           4.651     1.863
+(September, 1991)        0.526     1.732
+(October, 1991)          2.977     4.897
+(November, 1991)        20.545    10.402
+(December, 1991)        36.488    13.485
+(January, 1992)         53.132    12.241
+(February, 1992)        50.759    12.319
+(March, 1992)           31.088     4.893
+(April, 1992)           19.255     1.548
+(May, 1992)              5.319     1.818
+(June, 1992)            14.558     0.624
+(July, 1992)             3.681     0.761
+(August, 1992)           0.000     2.073
+(September, 1992)        9.170     1.580
+(October, 1992)         22.156     3.371
+(November, 1992)        25.472    10.678
+(December, 1992)        42.828    23.185
+(January, 1993)         69.473    20.905
+(February, 1993)        57.428    15.438
+(March, 1993)           39.785     6.070
+(April, 1993)            7.217     1.328
+(May, 1993)              8.436     4.761
+(June, 1993)            20.261     3.756
+(July, 1993)             0.000     3.244
+(August, 1993)           1.998     2.948
+(September, 1993)        1.790     2.968
+(October, 1993)          2.603     2.140
+(November, 1993)        21.934    16.807
+(December, 1993)        48.827    15.901
+(January, 1994)         97.708    26.484
+(February, 1994)        58.761    23.718
+(March, 1994)           26.525    10.580
+(April, 1994)            9.752     2.947
+(May, 1994)             15.663     2.950
+(June, 1994)             8.327     6.943
+(July, 1994)             0.000     1.706
+(August, 1994)           0.000     1.108
+(September, 1994)        2.086     4.285
+(October, 1994)          2.897     2.687
+(November, 1994)        11.576    18.081
+(December, 1994)        41.265    21.469
+(January, 1995)         72.513    19.082
+(February, 1995)        80.243    19.244
+(March, 1995)           47.304    14.583
+(April, 1995)           21.087     4.526
+(May, 1995)             17.776     4.032
+(June, 1995)             4.615     4.990
+(July, 1995)             6.171     6.075
+(August, 1995)           9.862     4.459
+(September, 1995)       12.352     1.901
+(October, 1995)          2.584     4.440
+(November, 1995)        32.748    18.685
+(December, 1995)        72.393    23.753
+(January, 1996)         71.870    29.627
+(February, 1996)        72.042    20.452
+(March, 1996)           48.781    16.661
+(April, 1996)           25.127     2.877
+(May, 1996)              7.910     3.603
+(June, 1996)            22.799    10.017
+(July, 1996)             0.181     0.393
+(August, 1996)           4.261     5.280
+(September, 1996)        3.267     2.959
+(October, 1996)          5.753     4.966
+(November, 1996)        34.342    23.528
+(December, 1996)        50.501    26.479
+(January, 1997)         73.586    28.092
+(February, 1997)        53.016    16.032
+(March, 1997)           42.647    17.910
+(April, 1997)           15.684     5.242
+(May, 1997)              5.970     5.733
+(June, 1997)             9.078     5.162
+(July, 1997)             3.542     6.015
+(August, 1997)           0.096     5.483
+(September, 1997)        6.901     4.485
+(October, 1997)          7.238     5.216
+(November, 1997)        32.117    17.258
+(December, 1997)        37.477    23.039
+(January, 1998)         51.637    39.932
+(February, 1998)        36.931    23.201
+(March, 1998)           36.191    21.429
+(April, 1998)           18.607     8.786
+(May, 1998)             10.309     5.596
+(June, 1998)             9.439     6.132
+(July, 1998)            14.290     6.041
+(August, 1998)           3.033     6.090
+(September, 1998)       10.686     5.157
+(October, 1998)          8.153     4.666
+(November, 1998)         9.739    14.435
+(December, 1998)        28.820    32.145
+(January, 1999)         71.056    39.219
+(February, 1999)        54.591    34.939
+(March, 1999)           50.063    26.530
+(April, 1999)           15.477    10.953
+(May, 1999)              6.521    11.427
+(June, 1999)             9.256     7.695
+(July, 1999)             7.893     6.243
+(August, 1999)          10.874     7.686
+(September, 1999)       17.885     5.535
+(October, 1999)          5.572     8.531
+(November, 1999)        28.726    13.964
+(December, 1999)        49.250    24.488
+(January, 2000)         99.265    30.119
+(February, 2000)        94.066    28.850
+(March, 2000)           50.898    18.800
+(April, 2000)           36.768     5.873
+(May, 2000)              3.637    10.953
+(June, 2000)            14.126     9.524
+(July, 2000)             7.063    11.260
+(August, 2000)          15.019    11.798
+(September, 2000)        6.443    11.109
+(October, 2000)         15.820     7.930
+(November, 2000)        62.517    24.772
+(December, 2000)       123.328    32.138
+(January, 2001)        119.891    29.225
+(February, 2001)        95.254    28.039
+(March, 2001)           50.132    16.884
+(April, 2001)           42.803     8.795
+(May, 2001)             33.877     7.497
+(June, 2001)            27.690     5.844
+(July, 2001)            28.978     3.692
+(August, 2001)          35.037     2.633
+(September, 2001)       14.594     1.622
+(October, 2001)         20.219     3.233
+(November, 2001)        39.137     9.487
+(December, 2001)        41.566    17.193
+(January, 2002)        103.755    22.933
+(February, 2002)       101.472    18.650
+(March, 2002)           81.222    20.095
+(April, 2002)           36.794    16.539
+(May, 2002)             26.010    15.648
+(June, 2002)            21.007    18.664
+(July, 2002)            33.715    19.856
+(August, 2002)          26.075     3.657
+(September, 2002)       22.203    10.946
+(October, 2002)         46.214     7.420
+(November, 2002)        74.337    12.088
+(December, 2002)        85.270    23.409
+(January, 2003)        142.188    37.506
+(February, 2003)       125.030    30.672
+(March, 2003)          102.482    18.883
+(April, 2003)           50.924     9.599
+(May, 2003)             46.328     7.976
+(June, 2003)            45.867     7.403
+(July, 2003)            43.929     7.813
+(August, 2003)          37.374     7.769
+(September, 2003)       35.178     9.235
+(October, 2003)         40.508    14.199
+(November, 2003)        75.786    26.412
+(December, 2003)       117.182    27.195
+(January, 2004)        140.493    44.723
+(February, 2004)       101.727    28.226
+(March, 2004)           66.319    18.451
+(April, 2004)           39.113    10.374
+(May, 2004)              7.473    10.492
+(June, 2004)            22.033     9.863
+(July, 2004)            21.579    11.481
+(August, 2004)          25.092    10.001
+(September, 2004)       30.490    10.497
+(October, 2004)         28.861    13.912
+(November, 2004)        60.707    18.506
+(December, 2004)       112.903    37.329
+(January, 2005)        152.382    40.798
+(February, 2005)       107.442    25.756
+(March, 2005)          110.756    19.017
+(April, 2005)           59.288    12.270
+(May, 2005)             32.058    10.900
+(June, 2005)            22.193    10.297
+(July, 2005)            13.360    10.431
+(August, 2005)          35.580    12.017
+(September, 2005)       27.253    11.288
+(October, 2005)         23.839    14.297
+(November, 2005)        31.311    16.489
+(December, 2005)        90.203    33.560
+(January, 2006)         70.645     8.567
+(February, 2006)        69.667    15.091
+(March, 2006)           64.052     9.393
+(April, 2006)           21.782     0.531
+(May, 2006)             13.618     0.299
+(June, 2006)            25.578     0.107
+(July, 2006)            29.249     2.481
+(August, 2006)          24.745     0.321
+(September, 2006)       20.387     0.840
+(October, 2006)         49.665     3.826
+(November, 2006)        70.233    15.147
+(December, 2006)        92.814    18.615
+(January, 2007)        118.313    26.526
+(February, 2007)       138.413    22.478
+(March, 2007)          103.993     4.726
+(April, 2007)           63.131     1.008
+(May, 2007)             40.503     0.617
+(June, 2007)            35.666     0.193
+(July, 2007)            44.449     0.410
+(August, 2007)          49.577     0.011
+(September, 2007)       49.670     0.190
+(October, 2007)         56.117     0.601
+(November, 2007)        98.276     5.678
+(December, 2007)       150.769    22.496
+(January, 2008)        146.637    26.778
+(February, 2008)       154.408    21.635
+(March, 2008)          121.467    12.031
+(April, 2008)           64.957     2.730
+(May, 2008)             43.560     0.076
+(June, 2008)            30.492     0.058
+(July, 2008)            31.000     0.017
+(August, 2008)          31.835     0.072
+(September, 2008)       42.263     0.000
+(October, 2008)         58.612     0.424
+(November, 2008)        99.067     3.005
+(December, 2008)       134.556    22.072
+(January, 2009)        148.622    22.822
+(February, 2009)       135.925    20.854
+(March, 2009)          108.548    12.404
+(April, 2009)           76.690     0.351
+(May, 2009)             37.080     0.344
+(June, 2009)            26.362     0.007
+(July, 2009)            38.061     0.203
+(August, 2009)          61.331     0.012
+(September, 2009)       84.319     0.394
+(October, 2009)         73.875     1.277
+(November, 2009)        89.088     2.432
+(December, 2009)       149.695    22.951
+(January, 2010)        145.159    14.300
+(February, 2010)       131.462    12.551
+(March, 2010)           98.991     6.029
+(April, 2010)           60.671     3.032
+(May, 2010)             70.309     1.964
+(June, 2010)            60.100     0.273
+(July, 2010)            62.757     0.030
+(August, 2010)          77.843     0.171
+(September, 2010)       50.928     0.070
+(October, 2010)         71.818     1.708
+(November, 2010)       102.476    11.241
+(December, 2010)       147.714    23.021
+(January, 2011)        166.032    26.698
+(February, 2011)       144.181    21.187
+(March, 2011)          122.838     9.536
+(April, 2011)           84.007     1.176
+(May, 2011)             88.997     0.083
+(June, 2011)            80.299     0.639
+(July, 2011)            81.950     0.108
+(August, 2011)          85.109     0.015
+(September, 2011)       65.512     0.615
+(October, 2011)         76.379     0.261
+(November, 2011)        94.035     3.247
+(December, 2011)       120.257     5.201
+(January, 2012)        131.348     9.834
+(February, 2012)       117.768     4.267
+(March, 2012)           99.122     4.687
+(April, 2012)           97.763     0.566
+(May, 2012)             80.665     0.389
+(June, 2012)            83.281     0.071
+(July, 2012)            87.142     0.029
+(August, 2012)          85.695     0.089
+(September, 2012)       79.212     0.147
+(October, 2012)         98.702     1.659
+(November, 2012)       111.538     3.199
+(December, 2012)       114.715     9.150
+(January, 2013)        136.663    10.387
+(February, 2013)       152.601     7.505
+(March, 2013)          127.772     6.789
+(April, 2013)          104.859     4.063
+(May, 2013)             50.699     1.232
+(June, 2013)            69.350     1.288
+(July, 2013)            48.130     1.514
+(August, 2013)          68.861     0.420
+(September, 2013)       52.476     0.151
+(October, 2013)         52.110     1.707
+(November, 2013)       101.581     6.308
+(December, 2013)       137.045    13.652
+(January, 2014)        159.891    13.320
+(February, 2014)       128.407    17.008
+(March, 2014)          107.768     8.709
+(April, 2014)           69.091     4.814
+(May, 2014)             40.999     1.322
+(June, 2014)            34.472     0.968
+(July, 2014)            26.737     0.918
+(August, 2014)          24.597     0.977
+(September, 2014)       30.438     0.831
+(October, 2014)         34.863     3.659
+(November, 2014)        74.986     8.058
+(December, 2014)        97.473     6.643
+(January, 2015)        131.055     7.742
+(February, 2015)       152.127     7.690
+(March, 2015)          111.597     3.539
+(April, 2015)           56.626     1.434
+(May, 2015)             27.768     0.930
+(June, 2015)            25.691     1.013
+(July, 2015)            27.075     0.967
+(August, 2015)          25.195     0.806
+(September, 2015)       26.910     0.697
+(October, 2015)         42.271     1.103
+(November, 2015)        64.862     2.949
+(December, 2015)        77.439     6.115
+(January, 2016)		61.401	  60.194
+(February, 2016)	46.456	  22.258
+(March, 2016)		2.571	  12.925
+(April, 2016)		16.536	  8.827
+(May, 2016)		0.000	  8.540
+(June, 2016)		0.000	  0.888
+(July, 2016)		0.330	  4.889
+(August, 2016)		0.000	  1.442
+(September, 2016)	0.223	  7.344
+(October, 2016)		1.505	  14.855
+(November, 2016)	2.871	  17.182
+(December, 2016)	44.734	  57.345
+(January, 2017)		55.204	  57.469
+(February, 2017)	32.304	  37.796
+(March, 2017)		41.175	  33.928
+(April, 2017)		0.650	  8.476
+(May, 2017)		0.000	  7.033
+(June, 2017)		0.000	  6.535
+(July, 2017)		0.000	  3.964
+(August, 2017)		0.000	  5.692
+(September, 2017)	0.000	  4.309
+(October, 2017)		0.000	  4.430
+(November, 2017)	7.995	  31.191
+(December, 2017)	62.836	  41.105
+(January, 2018)		64.834	  60.393
+(February, 2018)	36.099	  61.630
+(March, 2018)		39.487	  38.806
+(April, 2018)		10.280	  8.233
+(May, 2018)		22.247	  2.696
+(June, 2018)		0.000	  1.276
+(July, 2018)		9.842	  1.476
+(August, 2018)		0.000	  0.995
+(September, 2018)	0.000	  2.472
+(October, 2018)		0.000	  3.553
+(November, 2018)	10.275	  11.636
+(December, 2018)	23.722	  20.952
+(January, 2019)		76.185	  56.674
+(February, 2019)	68.098	  72.849
+(March, 2019)		37.430	  35.484
+(April, 2019)		0.000	  1.927
+(May, 2019)		0.000	  2.672
+(June, 2019)		0.000	  0.216
+(July, 2019)		0.000	  1.425
+(August, 2019)		0.000	  2.600
+(September, 2019)	0.000	  0.247
+(October, 2019)		1.239	  2.850
+(November, 2019)	21.747	  22.906
+(December, 2019)	21.006	  38.279
+(January, 2020)		51.739	  57.572
+(February, 2020)	63.224	  35.851
+(March, 2020)		8.220	  27.130
+(April, 2020)	    	6.521	  2.145
+(May, 2020)	        0.000	  0.067
+(June, 2020)	    	0.116	  0.000
+(July, 2020)	   	 0.000	  0.744
+(August, 2020)	   	0.000	  0.004
+(September, 2020)	0.000	  0.081
+(October, 2020)	    	0.785	  5.324
+(November, 2020)	4.297	  24.671
+(December, 2020)	42.839	  68.500
+(January, 2021)	    	64.183	  83.284
+(February, 2021)	71.869	  92.342
+(March, 2021)	    	22.542	  32.451
+(April, 2021)	    	0.040	  8.426
+(May, 2021)	        0.019	  1.727
+(June, 2021)	    	0.000	  5.597
+(July, 2021)	   	 0.000	  3.862
+(August, 2021)	    	0.010	  0.878
+(September, 2021)	0.000	  0.908
+(October, 2021)	    	0.000	  10.266
+(November, 2021)	13.013	  27.237
+(December, 2021)	16.529	  75.669
+(January, 2022)	   	110.248	  79.726
+(February, 2022)	76.459	  67.064
+(March, 2022)	    	12.850	  38.249
+(April, 2022)	    	0.000	  12.088
+
+;
+
+
+! Data: Underground natural gas storage injections / additions
+! Units: Billion cubic feet
+HistoricalStorageInjections := data table
+                       CN_E      CN_W   
+(January, 1990)          6.580     0.981
+(February, 1990)         2.403     0.177
+(March, 1990)            2.531     0.954
+(April, 1990)           10.490    10.151
+(May, 1990)             29.896     9.594
+(June, 1990)            35.319     7.787
+(July, 1990)            47.339     7.846
+(August, 1990)          39.261     6.522
+(September, 1990)       28.143     5.448
+(October, 1990)         15.031     3.827
+(November, 1990)         7.393     2.086
+(December, 1990)         4.462     2.330
+(January, 1991)          1.406     1.751
+(February, 1991)         0.534     1.180
+(March, 1991)            0.887     1.069
+(April, 1991)            6.864    10.534
+(May, 1991)             30.083    12.441
+(June, 1991)            36.986     9.572
+(July, 1991)            34.754    10.961
+(August, 1991)          33.586     7.170
+(September, 1991)       17.003     7.729
+(October, 1991)          8.690     5.078
+(November, 1991)         3.761     2.029
+(December, 1991)         9.413     0.880
+(January, 1992)          4.218     0.825
+(February, 1992)         0.660     0.391
+(March, 1992)            2.476     1.717
+(April, 1992)            3.236     8.281
+(May, 1992)             22.193    12.372
+(June, 1992)            41.891    12.536
+(July, 1992)            45.077    10.940
+(August, 1992)          38.776     8.644
+(September, 1992)       41.420     4.727
+(October, 1992)         14.107     4.580
+(November, 1992)         5.303     1.838
+(December, 1992)         0.434     3.346
+(January, 1993)          0.117     1.162
+(February, 1993)         4.952     0.679
+(March, 1993)            6.846     2.633
+(April, 1993)           11.308    12.808
+(May, 1993)             38.128    22.372
+(June, 1993)            55.698    18.897
+(July, 1993)            45.629    20.346
+(August, 1993)          42.984    16.014
+(September, 1993)       27.715    14.379
+(October, 1993)         15.974     6.981
+(November, 1993)         9.599     2.384
+(December, 1993)        12.812     3.475
+(January, 1994)         22.834     0.804
+(February, 1994)         7.107     0.941
+(March, 1994)            7.515     3.009
+(April, 1994)           17.324    12.751
+(May, 1994)             42.753    18.580
+(June, 1994)            47.663    28.207
+(July, 1994)            42.149    22.664
+(August, 1994)          37.600    16.647
+(September, 1994)       24.439    16.415
+(October, 1994)         25.640     7.566
+(November, 1994)        13.307     5.750
+(December, 1994)        14.516     4.016
+(January, 1995)         13.729     2.888
+(February, 1995)        13.089     3.834
+(March, 1995)           15.250     5.954
+(April, 1995)           16.330    12.306
+(May, 1995)             45.777    20.449
+(June, 1995)            37.031    25.906
+(July, 1995)            36.019    25.522
+(August, 1995)          41.684    16.634
+(September, 1995)       38.963    12.056
+(October, 1995)         29.214     9.366
+(November, 1995)         8.757     7.388
+(December, 1995)        18.259     4.448
+(January, 1996)          7.375     2.923
+(February, 1996)        25.255     4.702
+(March, 1996)           15.413     5.564
+(April, 1996)           10.571    14.167
+(May, 1996)             22.652    27.016
+(June, 1996)            59.151    34.746
+(July, 1996)            48.571    29.860
+(August, 1996)          43.310    27.812
+(September, 1996)       33.817    17.262
+(October, 1996)         23.479     9.340
+(November, 1996)        18.860     2.908
+(December, 1996)        12.588     3.505
+(January, 1997)          3.738     7.528
+(February, 1997)         4.087     7.215
+(March, 1997)            4.019     5.370
+(April, 1997)            8.876    14.987
+(May, 1997)             28.898    25.694
+(June, 1997)            47.116    27.181
+(July, 1997)            39.378    30.017
+(August, 1997)          39.088    26.244
+(September, 1997)       39.075    19.449
+(October, 1997)         26.015    13.911
+(November, 1997)        19.046     4.073
+(December, 1997)        11.782     5.372
+(January, 1998)          3.941     4.223
+(February, 1998)        10.189     3.719
+(March, 1998)           16.750     4.195
+(April, 1998)           35.914    12.068
+(May, 1998)             39.503    20.090
+(June, 1998)            46.310    23.303
+(July, 1998)            44.034    22.674
+(August, 1998)          26.796    24.844
+(September, 1998)       27.927    27.746
+(October, 1998)         24.460    15.980
+(November, 1998)        16.229     3.156
+(December, 1998)         8.266     4.262
+(January, 1999)          5.195     3.142
+(February, 1999)         0.189     2.946
+(March, 1999)            4.096     3.963
+(April, 1999)           15.015    12.242
+(May, 1999)             22.251    22.333
+(June, 1999)            35.211    23.141
+(July, 1999)            35.793    25.135
+(August, 1999)          30.118    20.104
+(September, 1999)       30.608    18.173
+(October, 1999)         16.758     4.051
+(November, 1999)         3.889     5.016
+(December, 1999)         9.946     1.980
+(January, 2000)          6.145     1.064
+(February, 2000)         3.784     2.645
+(March, 2000)            2.771     3.575
+(April, 2000)            8.094    15.667
+(May, 2000)             13.556    21.055
+(June, 2000)            31.565    22.261
+(July, 2000)            28.778    18.105
+(August, 2000)          34.157    20.597
+(September, 2000)       28.400    13.895
+(October, 2000)         16.223     3.564
+(November, 2000)        16.543     6.463
+(December, 2000)        14.987     1.236
+(January, 2001)          2.950     1.324
+(February, 2001)         8.800     0.512
+(March, 2001)            8.215     4.355
+(April, 2001)           22.799    18.810
+(May, 2001)             56.017    31.398
+(June, 2001)            50.471    26.020
+(July, 2001)            43.439    26.340
+(August, 2001)          36.397    21.793
+(September, 2001)       33.033    19.751
+(October, 2001)         13.702     5.671
+(November, 2001)        15.644    10.191
+(December, 2001)         5.120    11.571
+(January, 2002)         46.306     0.857
+(February, 2002)        49.736     1.872
+(March, 2002)           52.446     1.479
+(April, 2002)           26.818    23.372
+(May, 2002)             41.833    37.875
+(June, 2002)            45.440    43.062
+(July, 2002)            53.688    39.302
+(August, 2002)          48.514    24.350
+(September, 2002)       52.664    16.092
+(October, 2002)         36.520     5.933
+(November, 2002)        44.276     5.507
+(December, 2002)        35.332     1.510
+(January, 2003)         65.401     0.572
+(February, 2003)        55.246     0.754
+(March, 2003)           57.804     2.856
+(April, 2003)           46.516     6.233
+(May, 2003)             77.905    21.724
+(June, 2003)           109.928    27.460
+(July, 2003)            87.011    16.359
+(August, 2003)          67.951    18.147
+(September, 2003)       68.064    16.978
+(October, 2003)         34.603     9.012
+(November, 2003)        52.535     4.827
+(December, 2003)        56.714     1.721
+(January, 2004)         37.920     0.014
+(February, 2004)        35.863     2.821
+(March, 2004)           43.283     8.658
+(April, 2004)           38.777    16.962
+(May, 2004)             52.420    15.560
+(June, 2004)            52.528    15.782
+(July, 2004)            61.466    15.851
+(August, 2004)          50.473    22.177
+(September, 2004)       56.872    17.015
+(October, 2004)         31.353    11.078
+(November, 2004)        55.042     1.722
+(December, 2004)        44.783     0.431
+(January, 2005)         39.831     1.268
+(February, 2005)        49.575     1.284
+(March, 2005)           62.423     5.692
+(April, 2005)           34.406    44.587
+(May, 2005)             31.761    42.282
+(June, 2005)            41.343    39.693
+(July, 2005)            31.774    13.499
+(August, 2005)          46.839     7.792
+(September, 2005)       42.244    15.452
+(October, 2005)         25.432     9.203
+(November, 2005)        34.117     4.850
+(December, 2005)        36.162     1.684
+(January, 2006)         32.335     1.082
+(February, 2006)        48.796     0.290
+(March, 2006)           44.314     1.550
+(April, 2006)           22.049    14.254
+(May, 2006)             38.729    21.969
+(June, 2006)            37.359    19.063
+(July, 2006)            44.089     7.306
+(August, 2006)          25.008    13.322
+(September, 2006)       28.453    16.308
+(October, 2006)         32.718    18.338
+(November, 2006)        49.526    21.883
+(December, 2006)        43.891    21.317
+(January, 2007)         36.492     1.321
+(February, 2007)        29.079     0.947
+(March, 2007)           48.646     5.772
+(April, 2007)           35.013    10.071
+(May, 2007)             67.807    19.334
+(June, 2007)            64.035    16.323
+(July, 2007)            54.847    20.726
+(August, 2007)          44.284    18.229
+(September, 2007)       43.455    11.117
+(October, 2007)         31.871    15.244
+(November, 2007)        71.453     3.183
+(December, 2007)        81.036     1.191
+(January, 2008)         62.334     0.883
+(February, 2008)        64.908     0.718
+(March, 2008)           64.470     0.754
+(April, 2008)           47.154     6.471
+(May, 2008)             62.423    23.821
+(June, 2008)            55.904    22.483
+(July, 2008)            45.759    19.764
+(August, 2008)          46.766    17.264
+(September, 2008)       47.916    14.009
+(October, 2008)         39.259     7.462
+(November, 2008)        60.684     6.984
+(December, 2008)        68.524     1.118
+(January, 2009)         77.658     2.184
+(February, 2009)        77.263     0.900
+(March, 2009)           76.622     0.586
+(April, 2009)           63.901    14.078
+(May, 2009)             74.072    20.912
+(June, 2009)            64.362    23.320
+(July, 2009)            58.076    18.540
+(August, 2009)          51.969    17.088
+(September, 2009)       64.487    20.484
+(October, 2009)         46.603    12.359
+(November, 2009)        66.021     4.061
+(December, 2009)        71.240     0.795
+(January, 2010)         62.486     1.005
+(February, 2010)        54.236     0.575
+(March, 2010)           76.373     2.787
+(April, 2010)           53.483     4.068
+(May, 2010)             65.100     7.504
+(June, 2010)            70.452     7.307
+(July, 2010)            67.297     5.502
+(August, 2010)          70.462     6.860
+(September, 2010)       64.143     8.679
+(October, 2010)         69.593     2.332
+(November, 2010)        83.013     3.472
+(December, 2010)        85.266     1.571
+(January, 2011)         85.212     0.059
+(February, 2011)        85.388     0.004
+(March, 2011)           98.178     1.281
+(April, 2011)           78.140    10.254
+(May, 2011)            109.117    19.625
+(June, 2011)           111.895     8.967
+(July, 2011)            88.056    12.919
+(August, 2011)         112.360    13.010
+(September, 2011)       92.919    10.763
+(October, 2011)         71.819     7.332
+(November, 2011)        89.148     1.659
+(December, 2011)        84.793     1.470
+(January, 2012)         80.248     2.436
+(February, 2012)        82.004     2.196
+(March, 2012)           95.314     3.960
+(April, 2012)           85.308     7.554
+(May, 2012)            103.386    10.884
+(June, 2012)            94.260    10.222
+(July, 2012)            90.178    11.382
+(August, 2012)         108.278    10.711
+(September, 2012)       99.618     8.814
+(October, 2012)         85.518     5.606
+(November, 2012)        86.895     1.236
+(December, 2012)        91.853     0.559
+(January, 2013)         81.479     0.510
+(February, 2013)        71.607     0.476
+(March, 2013)           82.904     0.561
+(April, 2013)           68.733     0.901
+(May, 2013)            100.571     6.122
+(June, 2013)            98.438    11.756
+(July, 2013)            91.187    14.975
+(August, 2013)         100.558    11.462
+(September, 2013)       82.635    10.535
+(October, 2013)         75.390     4.896
+(November, 2013)        55.757     1.260
+(December, 2013)        68.061     0.330
+(January, 2014)         80.217     1.428
+(February, 2014)        87.799     0.840
+(March, 2014)           92.959     1.924
+(April, 2014)           72.336     6.220
+(May, 2014)             72.342    10.463
+(June, 2014)            74.593    11.659
+(July, 2014)            81.510    13.263
+(August, 2014)          66.929    14.702
+(September, 2014)       73.443    11.889
+(October, 2014)         45.070     6.641
+(November, 2014)        67.168     1.221
+(December, 2014)        79.036     1.995
+(January, 2015)         91.637     0.708
+(February, 2015)        74.971     0.187
+(March, 2015)           96.797     2.291
+(April, 2015)           58.294     5.335
+(May, 2015)             64.128    11.351
+(June, 2015)            65.953     6.986
+(July, 2015)            61.165    10.640
+(August, 2015)          61.901    12.614
+(September, 2015)       76.662     6.719
+(October, 2015)         62.098     7.454
+(November, 2015)        62.318     2.107
+(December, 2015)        56.602     0.569
+(January, 2016)		0.248	   2.900
+(February, 2016)	0.000	   6.070
+(March, 2016)		5.809	  30.732
+(April, 2016)		0.276	  24.152
+(May, 2016)		27.451	  29.816
+(June, 2016)		28.393	  20.890
+(July, 2016)		18.250	  17.296
+(August, 2016)		18.862	  34.513
+(September, 2016)	40.330	  15.453
+(October, 2016)		1.453	  8.804
+(November, 2016)	0.110	  11.829
+(December, 2016)	0.000	  3.047
+(January, 2017)		0.000	  2.635
+(February, 2017)	0.000	  2.046
+(March, 2017)		0.000	  6.011
+(April, 2017)		19.476	  22.228
+(May, 2017)		18.154	  39.793
+(June, 2017)		33.980	  40.991
+(July, 2017)		28.284	  40.081
+(August, 2017)		32.124	  33.225
+(September, 2017)	36.861	  31.819
+(October, 2017)		14.525	  18.172
+(November, 2017)	1.897	  2.457
+(December, 2017)	0.000	  1.547
+(January, 2018)		0.000	  0.466
+(February, 2018)	0.000	  0.696
+(March, 2018)		0.000	  1.158
+(April, 2018)		13.952	  8.796
+(May, 2018)		28.452	  35.230
+(June, 2018)		28.972	  28.149
+(July, 2018)		42.864	  26.765
+(August, 2018)		45.820	  30.192
+(September, 2018)	51.427	  14.180
+(October, 2018)		8.052	  14.723
+(November, 2018)	0.351	  4.618
+(December, 2018)	0.000	  1.759
+(January, 2019)		0.196	  1.507
+(February, 2019)	0.419	  1.342
+(March, 2019)		0.409	  2.860
+(April, 2019)		4.012	  17.655
+(May, 2019)		37.367	  23.692
+(June, 2019)		47.978	  20.523
+(July, 2019)		32.611	  24.972
+(August, 2019)		51.335	  20.270
+(September, 2019)	50.841	  12.099
+(October, 2019)		12.350	  22.790
+(November, 2019)	0.210	  5.026
+(December, 2019)	0.225	  7.604
+(January, 2020)		0.234	  3.081
+(February, 2020)	0.324	  1.249
+(March, 2020)		0.472	  6.770
+(April, 2020)		1.047	  41.394
+(May, 2020)		28.166	  64.967
+(June, 2020)		39.715	  60.890
+(July, 2020)		36.668    49.136
+(August, 2020)	    	21.386	  48.872
+(September, 2020)	33.705	  43.976
+(October, 2020)	    	6.888	  22.350
+(November, 2020)	0.048	  2.878
+(December, 2020)	0.179	  0.232
+(January, 2021)	    	0.064	  0.009
+(February, 2021)	0.625	  0.448
+(March, 2021)	    	0.364	  3.914
+(April, 2021)	    	14.145	  20.644
+(May, 2021)	        36.251	  29.260
+(June, 2021)	   	39.008	  33.222
+(July, 2021)	    	33.709	  29.189
+(August, 2021)	    	22.330	  45.528
+(September, 2021)	49.588	  38.986
+(October, 2021)		13.316	  13.483
+(November, 2021)	0.024	  7.417
+(December, 2021)	0.106	  0.493
+(January, 2022)		0.062	  1.960
+(February, 2022)	0.637	  0.223
+(March, 2022)		0.597	  2.300
+(April, 2022)		4.882	  7.349
+
+
+;
+!___________________________________________________________________________________________
+!
+!				2.  NEB:  LNG Import Data
+!___________________________________________________________________________________________
+! LNG Imports via CAN National Energy Board
+! Marine only via Canaport, NB; both short and long term vessels/contracts
+! units of billion cubic feet
+! https: //apps.neb-one.gc.ca/CommodityStatistics/Statistics.aspx?language=english
+! Go to "LNG - Shipment Details"
+!7/14/20	KDL	Updated through March 2020 using NEB/CER Commodity Tracker
+!6/30/21	SYK	Updated through March 2021 using NEB/CER Commodity Tracker
+!7/15/21	SYK	Updated through Januaryy 2022 using NEB/CER Commodity Tracker
+
+HistoricalSupply := data table	
+			CN_E
+(July, 2009, LNG)	5.673
+(August, 2009, LNG)	5.661
+(September, 2009, LNG)	5.787
+(October, 2009, LNG)	5.680
+(November, 2009, LNG)	2.902
+(December, 2009, LNG)	10.221
+(January, 2010, LNG)	15.817
+(February, 2010, LNG)	7.254
+(March, 2010, LNG)	5.661
+(April, 2010, LNG)	5.696
+(May, 2010, LNG)	5.835
+(June, 2010, LNG)	4.920
+(July, 2010, LNG)	2.880
+(August, 2010, LNG)	5.680
+(September, 2010, LNG)	6.090
+(October, 2010, LNG)	5.680
+(November, 2010, LNG)	2.858
+(December, 2010, LNG)	8.459
+(January, 2011, LNG)	22.486
+(February, 2011, LNG)	14.028
+(March, 2011, LNG)	16.822
+(April, 2011, LNG)	5.627
+(May, 2011, LNG)	5.601
+(June, 2011, LNG)	8.403
+(July, 2011, LNG)	8.463
+(August, 2011, LNG)	2.815
+(September, 2011, LNG)	5.658
+(October, 2011, LNG)	8.337
+(November, 2011, LNG)	8.453
+(December, 2011, LNG)	11.596
+(January, 2012, LNG)	11.229
+(February, 2012, LNG)	8.338
+(March, 2012, LNG)	2.846
+(April, 2012, LNG)	7.053
+(May, 2012, LNG)	2.855
+(June, 2012, LNG)	2.804
+(August, 2012, LNG)	5.616
+(October, 2012, LNG)	2.867
+(November, 2012, LNG)	8.451
+(December, 2012, LNG)	8.449
+(January, 2013, LNG)	5.557
+(February, 2013, LNG)	8.437
+(March, 2013, LNG)	2.823
+(April, 2013, LNG)	5.554
+(May, 2013, LNG)	0.000
+(June, 2013, LNG)	5.538
+(July, 2013, LNG)	0.000
+(August, 2013, LNG)	0.000
+(September, 2013, LNG)	0.000
+(October, 2013, LNG)	0.000
+(November, 2013, LNG)	5.601
+(December, 2013, LNG)	2.830
+(January, 2014, LNG)	2.890
+(February, 2014, LNG)	2.735
+(March, 2014, LNG)	0.000
+(April, 2014, LNG)	2.697
+(May, 2014, LNG)	0.000
+(June, 2014, LNG)	5.623
+(July, 2014, LNG)	0.000
+(August, 2014, LNG)	0.000
+(September, 2014, LNG)	0.000
+(October, 2014, LNG)	2.672
+(November, 2014, LNG)	0.000
+(December, 2014, LNG)	2.975
+(January, 2015, LNG)	2.804
+(February, 2015, LNG)	7.361
+(March, 2015, LNG)	0.000
+(April, 2015, LNG)	2.866
+(May, 2015, LNG)	0.000
+(June, 2015, LNG)	2.790
+(July, 2015, LNG)	0.000
+(August, 2015, LNG)	0.000
+(September, 2015, LNG)	0.000
+(October, 2015, LNG)	2.683
+(November, 2015, LNG)	0.000
+(December, 2015, LNG)	2.839
+(January, 2016, LNG)	3.023
+(February, 2016, LNG)	2.955
+(June, 2016, LNG)	2.839
+(July, 2016, LNG)	2.783
+(October, 2016, LNG)	0.000
+(January, 2017, LNG)	2.289
+(February, 2017, LNG)	6.089
+(March, 2017, LNG)	0.000
+(April, 2017, LNG)	2.878
+(September, 2017, LNG)	2.903
+(January, 2018, LNG)	8.874
+(February, 2018, LNG)	2.876
+(May, 2018, LNG)	2.854
+(July, 2018, LNG)	2.995
+(December, 2018, LNG)	3.322		
+(January, 2019, LNG)	3.229
+(February, 2019, LNG)	6.422
+(March, 2019, LNG)	3.210
+(August, 2019, LNG)	2.732
+(September, 2019, LNG)	2.793
+(January, 2020, LNG)	13.033
+(March, 2020, LNG)	3.646
+(April, 2020, LNG)	2.827
+(July, 2020, LNG)	2.818
+(September, 2020, LNG)	2.882
+(October, 2020, LNG)	2.677
+(December, 2020, LNG)	2.875
+(January, 2021, LNG)	8.512
+(February, 2021, LNG)	6.538
+(March, 2021, LNG)	2.765
+(June, 2021, LNG)	2.772
+(October, 2021, LNG)	1.472
+(November, 2021, LNG)	2.628
+(January, 2022, LNG)	5.277
+
+;
+
+!___________________________________________________________________________________________
+!
+!			3.  Flow Through Volumes for History (DO NOT CHANGE)
+!___________________________________________________________________________________________
+!
+!  Flow through gas going into the U.S. from Canada and back into Canada but not exported/imported
+!  This is additional flow above the import/export volumes already included in the flows
+!  After 2011 the value is assumed to be zero
+!  Source:  Natural Gas Annual (intransit receipts for MN and intransit deliveries for MI)
+!  Units:   Bcf
+!  
+HistoricalCNFlowThru:= data table
+!       CN_W->MN     MI->CN_E
+        MN-CN_W      MI-CN_E
+1990    356.401      331.862
+1991    362.861      346.290
+1992    486.163      471.606
+1993    324.093      324.092
+1994    487.760      472.499
+1995    492.481      492.482
+1996    536.333      536.333
+1997    548.000      516.619
+1998    481.581      459.461
+1999    486.468      494.544
+2000    451.374      516.566
+2001    408.056      555.413
+2002    543.142      525.616
+2003    550.440      613.016
+2004    491.091      473.365
+2005    484.214      436.731
+2006    480.127      462.464
+2007    374.902      438.622
+2008    335.861      411.841
+2009    214.882      308.919
+2010    229.110      325.205
+2011    6.052        74.232
+;
+!___________________________________________________________________________________________
+!
+!	4.  NEB:  Capacities and W-E flows (from CapacitiesNEB.txt in AIMMS)
+!___________________________________________________________________________________________
+!Update information based on CER website:
+!https://www.cer-rec.gc.ca/en/data-analysis/facilities-we-regulate/pipeline-profiles/natural-gas/pipeline-profiles-transcanadas-canadian-mainline.html
+!https://www.cer-rec.gc.ca/open/energy/throughput-capacity/tcpl-mainline-throughput-and-capacity.csv
+!7/14/20	KDL	Update 2019 flows from CER/NEB website; use Northern Ontario Line
+!6/29/21	SYK	Update 2020 flows from CER/NEB website; use Northern Ontario Line
+!7/15/22	SYK	Update 2021 flows from CER/NEB website; use Northern Ontario Line
+
+
+! Average of flows at the Northern Ontario Line (MMcf/d)
+Composite table:
+    h         h1        datayear    HistoricalCapacity
+!   --------  --------  --------    ------------------
+!    VT-CN_E   VT        1990                   286.362
+!    VT-CN_E   VT        1991                   286.362
+!    VT-CN_E   VT        1992                   286.362
+!    VT-CN_E   VT        1993                   286.362
+!    VT-CN_E   VT        1994                   286.362
+!    VT-CN_E   VT        1995                   286.362
+!    VT-CN_E   VT        1996                   286.362
+!    VT-CN_E   VT        1997                   286.362
+!    VT-CN_E   VT        1998                   286.362
+!    VT-CN_E   VT        1999                   286.362
+!    VT-CN_E   VT        2000                   286.362
+!    VT-CN_E   VT        2001                   286.362
+!    VT-CN_E   VT        2002                   286.362
+!    VT-CN_E   VT        2003                   286.362
+!    VT-CN_E   VT        2004                   286.362
+!    VT-CN_E   VT        2005                   286.362
+!    VT-CN_E   VT        2006                   286.362
+!    VT-CN_E   VT        2007                   283.361
+!    VT-CN_E   VT        2008                   302.530
+!    VT-CN_E   VT        2009                   302.530
+!    VT-CN_E   VT        2010                   302.530
+!    VT-CN_E   VT        2011                   302.530
+!    VT-CN_E   VT        2012                   302.530
+!    VT-CN_E   VT        2013                   302.530
+!    VT-CN_E   VT        2014                   302.530
+!    VT-CN_E   VT        2015                   302.530
+!    VT-CN_E   VT        2016                   302.530
+!    VT-CN_E   VT        2017                   305.530
+!    MN-CN_W   MN        1990                  3652.947
+!    MN-CN_W   MN        1991                  3652.947
+!    MN-CN_W   MN        1992                  3652.947
+!    MN-CN_W   MN        1993                  3652.947
+!    MN-CN_W   MN        1994                  3652.947
+!    MN-CN_W   MN        1995                  3652.947
+!    MN-CN_W   MN        1996                  3652.947
+!    MN-CN_W   MN        1997                  3652.947
+!    MN-CN_W   MN        1998                  3652.947
+!    MN-CN_W   MN        1999                  3652.947
+!    MN-CN_W   MN        2000                  3652.947
+!    MN-CN_W   MN        2001                  3652.947
+!    MN-CN_W   MN        2002                  3652.947
+!    MN-CN_W   MN        2003                  3652.947
+!    MN-CN_W   MN        2004                  3652.947
+!    MN-CN_W   MN        2005                  3652.947
+!    MN-CN_W   MN        2006                  3652.947
+!    MN-CN_W   MN        2007                  3652.947
+!    MN-CN_W   MN        2008                  3652.947
+!    MN-CN_W   MN        2009                  3652.947
+!    MN-CN_W   MN        2010                  3652.947
+!    MN-CN_W   MN        2011                  3652.947
+!    MN-CN_W   MN        2012                  3652.947
+!    MN-CN_W   MN        2013                  3652.947
+!    MN-CN_W   MN        2014                  3652.947
+!    MN-CN_W   MN        2015                  3652.947
+!    MN-CN_W   MN        2016                  3652.947
+!    MN-CN_W   MN        2017                  3652.947
+!    ID-CN_W   ID        1990                  2922.334
+!    ID-CN_W   ID        1991                  2922.334
+!    ID-CN_W   ID        1992                  2922.334
+!    ID-CN_W   ID        1993                  2922.334
+!    ID-CN_W   ID        1994                  2922.334
+!    ID-CN_W   ID        1995                  2922.334
+!    ID-CN_W   ID        1996                  2922.334
+!    ID-CN_W   ID        1997                  2922.334
+!    ID-CN_W   ID        1998                  2922.334
+!    ID-CN_W   ID        1999                  2922.334
+!    ID-CN_W   ID        2000                  2922.334
+!    ID-CN_W   ID        2001                  2922.334
+!    ID-CN_W   ID        2002                  2922.334
+!    ID-CN_W   ID        2003                  2922.334
+!    ID-CN_W   ID        2004                  2922.334
+!    ID-CN_W   ID        2005                  2922.334
+!    ID-CN_W   ID        2006                  2922.334
+!    ID-CN_W   ID        2007                  2922.334
+!    ID-CN_W   ID        2008                  2922.334
+!    ID-CN_W   ID        2009                  2922.334
+!    ID-CN_W   ID        2010                  2921.987
+!    ID-CN_W   ID        2011                  2922.084
+!    ID-CN_W   ID        2012                  2922.184
+!    ID-CN_W   ID        2013                  2922.334
+!    ID-CN_W   ID        2014                  2922.334
+!    ID-CN_W   ID        2015                  2922.334
+!    ID-CN_W   ID        2016                  2922.334
+!    ID-CN_W   ID        2017                  2922.748
+!    CN_E      VT-CN_E   1990                   286.362
+!    CN_E      VT-CN_E   1991                   286.362
+!    CN_E      VT-CN_E   1992                   286.362
+!    CN_E      VT-CN_E   1993                   286.362
+!    CN_E      VT-CN_E   1994                   286.362
+!    CN_E      VT-CN_E   1995                   286.362
+!    CN_E      VT-CN_E   1996                   286.362
+!    CN_E      VT-CN_E   1997                   286.362
+!    CN_E      VT-CN_E   1998                   286.362
+!    CN_E      VT-CN_E   1999                   286.362
+!    CN_E      VT-CN_E   2000                   286.362
+!    CN_E      VT-CN_E   2001                   286.362
+!    CN_E      VT-CN_E   2002                   286.362
+!    CN_E      VT-CN_E   2003                   286.362
+!    CN_E      VT-CN_E   2004                   286.362
+!    CN_E      VT-CN_E   2005                   286.362
+!    CN_E      VT-CN_E   2006                   286.362
+!    CN_E      VT-CN_E   2007                   283.361
+!    CN_E      VT-CN_E   2008                   302.530
+!    CN_E      VT-CN_E   2009                   302.530
+!    CN_E      VT-CN_E   2010                   302.530
+!    CN_E      VT-CN_E   2011                   302.530
+!    CN_E      VT-CN_E   2012                   302.530
+!    CN_E      VT-CN_E   2013                   302.530
+!    CN_E      VT-CN_E   2014                   302.530
+!    CN_E      VT-CN_E   2015                   302.530
+!    CN_E      VT-CN_E   2016                   302.530
+!    CN_E      VT-CN_E   2017                   305.530
+!    CN_W      MN-CN_W   1990                  3652.947
+!    CN_W      MN-CN_W   1991                  3652.947
+!    CN_W      MN-CN_W   1992                  3652.947
+!    CN_W      MN-CN_W   1993                  3652.947
+!    CN_W      MN-CN_W   1994                  3652.947
+!    CN_W      MN-CN_W   1995                  3652.947
+!    CN_W      MN-CN_W   1996                  3652.947
+!    CN_W      MN-CN_W   1997                  3652.947
+!    CN_W      MN-CN_W   1998                  3652.947
+!    CN_W      MN-CN_W   1999                  3652.947
+!    CN_W      MN-CN_W   2000                  3652.947
+!    CN_W      MN-CN_W   2001                  3652.947
+!    CN_W      MN-CN_W   2002                  3652.947
+!    CN_W      MN-CN_W   2003                  3652.947
+!    CN_W      MN-CN_W   2004                  3652.947
+!    CN_W      MN-CN_W   2005                  3652.947
+!    CN_W      MN-CN_W   2006                  3652.947
+!    CN_W      MN-CN_W   2007                  3652.947
+!    CN_W      MN-CN_W   2008                  3652.947
+!    CN_W      MN-CN_W   2009                  3652.947
+!    CN_W      MN-CN_W   2010                  3652.947
+!    CN_W      MN-CN_W   2011                  3652.947
+!    CN_W      MN-CN_W   2012                  3652.947
+!    CN_W      MN-CN_W   2013                  3652.947
+!    CN_W      MN-CN_W   2014                  3652.947
+!    CN_W      MN-CN_W   2015                  3652.947
+!    CN_W      MN-CN_W   2016                  3652.947
+!    CN_W      MN-CN_W   2017                  3652.947
+!    CN_W      ID-CN_W   1990                  2922.334
+!    CN_W      ID-CN_W   1991                  2922.334
+!    CN_W      ID-CN_W   1992                  2922.334
+!    CN_W      ID-CN_W   1993                  2922.334
+!    CN_W      ID-CN_W   1994                  2922.334
+!    CN_W      ID-CN_W   1995                  2922.334
+!    CN_W      ID-CN_W   1996                  2922.334
+!    CN_W      ID-CN_W   1997                  2922.334
+!    CN_W      ID-CN_W   1998                  2922.334
+!    CN_W      ID-CN_W   1999                  2922.334
+!    CN_W      ID-CN_W   2000                  2922.334
+!    CN_W      ID-CN_W   2001                  2922.334
+!    CN_W      ID-CN_W   2002                  2922.334
+!    CN_W      ID-CN_W   2003                  2922.334
+!    CN_W      ID-CN_W   2004                  2922.334
+!    CN_W      ID-CN_W   2005                  2922.334
+!    CN_W      ID-CN_W   2006                  2922.334
+!    CN_W      ID-CN_W   2007                  2922.334
+!    CN_W      ID-CN_W   2008                  2922.334
+!    CN_W      ID-CN_W   2009                  2922.334
+!    CN_W      ID-CN_W   2010                  2921.987
+!    CN_W      ID-CN_W   2011                  2922.084
+!    CN_W      ID-CN_W   2012                  2922.184
+!    CN_W      ID-CN_W   2013                  2922.334
+!    CN_W      ID-CN_W   2014                  2922.334
+!    CN_W      ID-CN_W   2015                  2922.334
+!    CN_W      ID-CN_W   2016                  2922.334
+!    CN_W      ID-CN_W   2017                  2922.748
+    CN_W      CN_E      1990                  3857.495
+    CN_W      CN_E      1991                  3857.495
+    CN_W      CN_E      1992                  3857.495
+    CN_W      CN_E      1993                  3857.495
+    CN_W      CN_E      1994                  3857.495
+    CN_W      CN_E      1995                  3857.495
+    CN_W      CN_E      1996                  3857.495
+    CN_W      CN_E      1997                  3857.495
+    CN_W      CN_E      1998                  3857.495
+    CN_W      CN_E      1999                  3857.495
+    CN_W      CN_E      2000                  3857.495
+    CN_W      CN_E      2001                  3857.495
+    CN_W      CN_E      2002                  3857.495
+    CN_W      CN_E      2003                  3857.495
+    CN_W      CN_E      2004                  3857.495
+    CN_W      CN_E      2005                  3857.495
+    CN_W      CN_E      2006                  3857.495
+    CN_W      CN_E      2007                  3915.816
+    CN_W      CN_E      2008                  3866.848
+    CN_W      CN_E      2009                  3812.079
+    CN_W      CN_E      2010                  3823.619
+    CN_W      CN_E      2011                  3614.814
+    CN_W      CN_E      2012                  3478.525
+    CN_W      CN_E      2013                  3427.286
+    CN_W      CN_E      2014                  3427.286
+    CN_W      CN_E      2015                  3427.290
+    CN_W      CN_E      2016                  3427.296
+    CN_W      CN_E      2017                  3427.296
+    CN_W      CN_E      2018                  3427.296
+    CN_W      CN_E      2019                  3427.296
+    CN_W      CN_E      2020                  3428.459
+    CN_W      CN_E      2021                  3428.271
+    ;
+
+! Sum of flows at Northern Ontario Line (Bcf/yr)
+Composite table:
+    reg       reg1      datayear    HistoricalFlowAnnual
+!   --------  --------  --------    --------------------
+    CN_W      CN_E      2006                    1173.025
+    CN_W      CN_E      2007                    1082.894
+    CN_W      CN_E      2008                     964.564
+    CN_W      CN_E      2009                     769.128
+    CN_W      CN_E      2010                     449.388
+    CN_W      CN_E      2011                     507.590
+    CN_W      CN_E      2012                     470.862
+    CN_W      CN_E      2013                     542.536
+    CN_W      CN_E      2014                     763.555
+    CN_W      CN_E      2015                     788.316
+    CN_W      CN_E      2016                     675.926
+    CN_W      CN_E      2017                     417.245
+    CN_W      CN_E      2018                     485.45
+    CN_W      CN_E      2019                     478.15
+    CN_W      CN_E      2020                     473.336
+    CN_W      CN_E      2021                     480.356
+    ;
+ 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioUserFile ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{E7957D73-5C5C-4345-8723-5C43B4D67084}">
+	<Configurations>
+		<Configuration Name="Release|Win32" Command="l:\main\dsa\intel\ind\$(OUTDIR)\nems.exe"/>
+		<Configuration Name="Debug|Win32" Command="nems.exe" CommandArguments="&gt; l:/output/indnew/d031506a/nohup.out" WorkingDirectory="l:/output/indnew/d031506a"/></Configurations></VisualStudioUserFile>

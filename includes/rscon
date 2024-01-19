@@ -1,0 +1,34 @@
+!  $Header: m:/default/includes/RCS/rscon,v 1.8 2020/10/14 20:40:30 LC2 Exp $
+
+!FILE NAME:      RSCON
+!DATE MODIFIED:  September 28, 2020
+!USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
+!                Residential Demand Module (RDM)
+!DEFINITION:     Declaration of end-use consumption variables
+!UNITS:          MMBtu
+!DIMENSION:      Various
+!SPECIAL CONSTRAINTS:  None
+!ORGANIZATION OF DATA:  Not applicable
+!SOURCES:        Not applicable
+!COMMENT:        Removed unused "COOLCNwithDG" and APCONwithDG" variables; reorganized variables and comments for better alignment with other RDM files
+
+REAL*4 HTRCON(MNUMYR,8,MNUMCR-2) !Space Heating [NHTRFL=7 in resd.f]
+REAL*4 COOLCN(MNUMYR,3,MNUMCR-2) !Space Cooling (Air Conditioning) [NCLFL=3 in resd.f]
+REAL*4 CSWCON(MNUMYR,MNUMCR-2) !Clothes Washing [NCSWFL=1 in resd.f]
+REAL*4 DSWCON(MNUMYR,MNUMCR-2) !Dishwashing [NDSWFL=1 in resd.f]
+REAL*4 H2OCON(MNUMYR,5,MNUMCR-2) !Water Heating [NWHFL=5 in resd.f]
+REAL*4 CKCON(MNUMYR,3,MNUMCR-2) !Cooking [NSTVFL=3 in resd.f]
+REAL*4 DRYCON(MNUMYR,2,MNUMCR-2) !Clothes Drying [NDRYFL=2 in resd.f]
+REAL*4 REFCON(MNUMYR,MNUMCR-2) !Refrigeration [NREFFL=1 in resd.f]
+REAL*4 FRZCON(MNUMYR,MNUMCR-2) !Freezing [NFRZFL=1 in resd.f]
+REAL*4 LTCON(MNUMYR,MNUMCR-2) !Lighting
+REAL*4 TVRCON(MNUMYR,MNUMCR-2) !Televisions and Related Equipment
+REAL*4 PCRCON(MNUMYR,MNUMCR-2) !Computers and Related Equipment
+REAL*4 FANCON(MNUMYR,MNUMCR-2) !Furnace Fans and Boiler Circulation Pumps
+REAL*4 APCON(MNUMYR,MNUMCR-2) !Electric Appliances
+REAL*4 SHTCON(MNUMYR,7,MNUMCR-2) !Secondary Space Heating (see SHTSHR and NSHTSHR in RSMISC.txt)
+
+COMMON/RSCON/CKCON,COOLCN,CSWCON,DRYCON,DSWCON,FRZCON,HTRCON,H2OCON,REFCON,APCON,FANCON,LTCON,PCRCON,SHTCON,TVRCON
+
+REAL*4 EQ_RSCON(MNUMYR*(MNUMCR-2)*(2*3+2+5+7+8+9))  !not sure where/if this is still used
+EQUIVALENCE (EQ_RSCON,CKCON)

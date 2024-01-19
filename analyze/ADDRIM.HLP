@@ -1,0 +1,21 @@
+  Function: Add rim elements of rows or columns
+  Syntax:   ADDRIM [{ROW | COL} [conditional]]
+
+   If ROW | COL is absent, current setting of switch DISP_COL is used.
+   If conditional is absent, current submatrix is used.
+
+    Examples:
+
+    ADDRIM R *
+    ...Adds rim of all rows
+
+    ADDR   C P STAT=B
+    ...Adds rim of all columns whose name begins with P and whose
+       solution status (S) is Basic
+    ADD   C
+    ...Adds rim of columns in submatrix
+
+    ADDR  R *NE S=LU Y=0
+    ...Adds rim of rows whose name has NE in positions 2-3, whose
+       solution status is nobasic (at Lower bound or at Upper bound),
+       and whose level (Y) is zero

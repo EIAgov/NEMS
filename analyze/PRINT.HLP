@@ -1,0 +1,16 @@
+    Function: Print contents of a file (to OUTPUT)
+    Syntax:   PRINT filespec
+
+    ...See _SETUP for the default prefix and suffix used for file
+       specification (filespec).
+
+    Examples (assuming no prefix in _SETUP):
+
+    PRINT INPUT.DAT
+    ...prints file named INPUT.DAT
+
+    PRINT FILES
+    ...prints file named FILES.DOC
+
+    PRINT FILES.
+    ...prints file named FILES.

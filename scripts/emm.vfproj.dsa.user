@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioUserFile ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{E7957D73-5C5C-4345-8723-5C43B4D67084}">
+	<Configurations>
+		<Configuration Name="Release|Win32"/>
+		<Configuration Name="Debug|Win32"/>
+		<Configuration Name="Release|x64"/>
+		<Configuration Name="Debug|x64" WorkingDirectory="u:\output\dsa\emmnew\d042915c"/></Configurations></VisualStudioUserFile>

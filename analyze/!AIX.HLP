@@ -1,0 +1,11 @@
+    Function: Execute AIX command
+    Syntax:   !AIX command_string
+
+    Consult AIX manual.
+
+    Examples:
+      !AIX ls
+      ...lists default directory.
+
+      ! ls | more
+      ...lists default directory, using more for scrolling.

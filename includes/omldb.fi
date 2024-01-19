@@ -1,0 +1,924 @@
+! $Header: M:/default/includes/RCS/omldb.fi,v 1.1 2014/01/10 19:14:27 dsa Exp $
+
+!     FORTRAN include file omldb.fi
+!     This requires a prior inclusion of buildenv.fi
+
+!     User programs require only the following dummy "black box" types
+!       for the identifier structures used in database access.
+
+      integer(4)  OMLNR8DBF, OMLNR8DBP, OMLNR8DBT
+
+!dec$ if defined (_WIN64)
+      parameter ( OMLNR8DBF=17, OMLNR8DBP=14, OMLNR8DBT=8 )
+!dec$ else
+      parameter ( OMLNR8DBF=14, OMLNR8DBP=11, OMLNR8DBT=7 )
+!dec$ endif
+
+      type OMLDBFILE
+        sequence
+        real(8)  dummy(OMLNR8DBF)
+      end type OMLDBFILE
+
+      type OMLDBPROB
+        sequence
+        real(8)  dummy(OMLNR8DBP)
+      end type OMLDBPROB
+
+      type OMLDBTABLE
+        sequence
+        real(8)  dummy(OMLNR8DBT)
+      end type OMLDBTABLE
+
+
+      interface
+
+      integer(4) function dfopen(dbfile, actfile)
+      !dec$attributes stdcall, decorate,alias:'dcopen' :: dfopen
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBFILE) dbfile   [reference]
+      character(*)    actfile  [reference]   ! uses min(8,strlen)
+      end function
+
+      integer(4) function dfclose(dbfile)
+      !dec$attributes stdcall, decorate,alias:'dcclose' :: dfclose
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBFILE) dbfile  [reference]
+      end function
+
+      integer(4) function dfdel(dbfile)
+      !dec$attributes stdcall, decorate,alias:'dcdel' :: dfdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBFILE) dbfile  [reference]
+      end function
+
+      integer(4) function dflist(dbfile, mask, pname)
+      !dec$attributes stdcall, decorate,alias:'dclist' :: dflist
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBFILE) dbfile  [reference]
+      character(*)    mask    [reference]    ! 8 CHECK
+      character(*)    pname   [reference]    ! 8 CHECK
+      end function
+
+      integer(4) function dfreadonly(dbfile)
+      !dec$attributes stdcall, decorate,alias:'dcreadonly' :: dfreadonly
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBFILE) dbfile  [reference]
+      end function
+
+      integer(4) function dfpinit(dbprob, dbfile, actprob)
+      !dec$attributes stdcall, decorate,alias:'dcpinit' :: dfpinit
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob   [reference]
+      type(OMLDBFILE) dbfile   [reference]
+      character(*)    actprob  [reference]   ! 8 CHECK
+      end function
+
+      integer(4) function dfpdel(dbprob)
+      !dec$attributes stdcall, decorate,alias:'dcpdel' :: dfpdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      end function
+
+      integer(4) function dfpcpy(to, from)
+      !dec$attributes stdcall, decorate,alias:'dcpcpy' :: dfpcpy
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) to    [reference]
+      type(OMLDBPROB) from  [reference]
+      end function
+
+      integer(4) function dfplist(dbprob, mask, tname, type)
+      !dec$attributes stdcall, decorate,alias:'dcplist' :: dfplist
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      character(*)    mask    [reference]    ! 8 CHECK
+      character(*)    tname   [reference]    ! 8 CHECK
+      integer(4)      type
+      end function
+
+      integer(4) function dfptdel(dbprob)
+      !dec$attributes stdcall, decorate,alias:'dcptdel' :: dfptdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      end function
+
+      integer(4) function dfptcpy(to, from)
+      !dec$attributes stdcall, decorate,alias:'dcptcpy' :: dfptcpy
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) to    [reference]
+      type(OMLDBPROB) from  [reference]
+      end function
+
+      integer(4) function dfpmdel(dbprob)
+      !dec$attributes stdcall, decorate,alias:'dcpmdel' :: dfpmdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      end function
+
+      integer(4) function dfpmcpy(to, from)
+      !dec$attributes stdcall, decorate,alias:'dcpmcpy' :: dfpmcpy
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) to    [reference]
+      type(OMLDBPROB) from  [reference]
+      end function
+
+      integer(4) function dfpsdel(dbprob)
+      !dec$attributes stdcall, decorate,alias:'dcpsdel' :: dfpsdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      end function
+
+      integer(4) function dfpscpy(to, from)
+      !dec$attributes stdcall, decorate,alias:'dcpscpy' :: dfpscpy
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) to    [reference]
+      type(OMLDBPROB) from  [reference]
+      end function
+
+      integer(4) function dfsdel(dbprob, name)
+      !dec$attributes stdcall, decorate,alias:'dcsdel' :: dfsdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      character(*)    name    [reference]    ! OMLSETNAME
+      end function
+
+      integer(4) function dfprtbi(dbprob,filenam,decknam,prntsw,tablist)
+      !dec$attributes stdcall, decorate,alias:'dcprtbi' :: dfprtbi
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB)    dbprob   [reference]
+      character(*) filenam  [reference]      ! must be null-terminated
+      character(*) decknam  [reference]      ! 8 CHECK
+      integer(4)   prntsw
+      character(*) tablist  [reference]      ! 8 CHECK
+      end function
+
+      integer(4) function dftinit(table, dbprob, tabname, type)
+      !dec$attributes stdcall, decorate,alias:'dctinit' :: dftinit
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table    [reference]
+      type(OMLDBPROB)  dbprob   [reference]
+      character(*)     tabname  [reference]  ! uses min(8,strlen)
+      integer(4)       type
+      end function
+
+      integer(4) function dftnew(table, dbprob, tabname, type)
+      !dec$attributes stdcall, decorate,alias:'dctnew' :: dftnew
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table    [reference]
+      type(OMLDBPROB)  dbprob   [reference]
+      character(*)     tabname  [reference]  ! uses min(8,strlen)
+      integer(4)       type
+      end function
+
+      integer(4) function dftdim(table, nrows, ncols)
+      !dec$attributes stdcall, decorate,alias:'dctdim' :: dftdim
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       nrows  [reference]  ! out
+      integer(4)       ncols  [reference]  ! out
+      end function
+
+      integer(4) function dftdel(table)
+      !dec$attributes stdcall, decorate,alias:'dctdel' :: dftdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      end function
+
+      integer(4) function dftcpy(to, from)
+      !dec$attributes stdcall, decorate,alias:'dctcpy' :: dftcpy
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) to    [reference]
+      type(OMLDBTABLE) from  [reference]
+      end function
+
+      integer(4) function dftsndx(table, stub)
+      !dec$attributes stdcall, decorate,alias:'dctsndx' :: dftsndx
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      character(*)     stub   [reference]    ! 8 CHECK
+      end function
+
+      integer(4) function dfthndx(table, head)
+      !dec$attributes stdcall, decorate,alias:'dcthndx' :: dfthndx
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      character(*)     head   [reference]    ! 8 CHECK
+      end function
+
+      integer(4) function dftsmsk(table, start, mask)
+      !dec$attributes stdcall, decorate,alias:'dctsmsk' :: dftsmsk
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       start
+      character(*)     mask   [reference]    ! 8 CHECK
+      end function
+
+      integer(4) function dfthmsk(table, start, mask)
+      !dec$attributes stdcall, decorate,alias:'dcthmsk' :: dfthmsk
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       start
+      character(*)     mask   [reference]    ! 8 CHECK
+      end function
+
+      end interface
+
+
+      interface dftndx  ! generic function name
+
+      integer(4) function dftndxcid(table, row, col, value)
+      !dec$attributes stdcall, decorate,alias:'dctndx' :: dftndxcid
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      character(*)     row    [reference]    ! 8 CHECK
+      integer(4)       col    [reference]
+      real(8)          value  [reference]
+      end function
+
+      integer(4) function dftndxicd(table, row, col, value)
+      !dec$attributes stdcall, decorate,alias:'dctndx' :: dftndxicd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       row    [reference]
+      character(*)     col    [reference]    ! 8 CHECK
+      real(8)          value  [reference]
+      end function
+
+      integer(4) function dftndxiid(table, row, col, value)
+      !dec$attributes stdcall, decorate,alias:'dctndx' :: dftndxiid
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       row    [reference]
+      integer(4)       col    [reference]
+      real(8)          value  [reference]
+      end function
+
+      integer(4) function dftndxiic(table, row, col, value)
+      !dec$attributes stdcall, decorate,alias:'dctndx' :: dftndxiic
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       row    [reference]
+      integer(4)       col    [reference]
+      character(*)     value  [reference]    ! 8 CHECK
+      end function
+
+      end interface dftndx
+
+
+      interface dftget  ! generic function name
+
+      integer(4) function dftgetccd(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetccd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      character(*)     col     [reference]   ! 8 CHECK
+      real(8)          value   [reference]
+      integer(4)       count   ! ignored, but 1 is good for clarity
+      end function
+
+      integer(4) function dftgetcid(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetcid
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      real(8)          value   [reference]
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftgeticd(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgeticd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      real(8)          value   [reference]
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftgetiid(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetiid
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      real(8)          value   [reference]
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftgetccc(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetccc
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      character(*)     col     [reference]   ! 8 CHECK
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! ignored, but 1 is good for clarity
+      end function
+
+      integer(4) function dftgetcic(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetcic
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftgeticc(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgeticc
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftgetiic(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetiic
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftgetcidv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetcidv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      real(8)          value(1)      ! (*) produces incorrect decoration
+      integer(4)       count
+      end function
+
+      integer(4) function dftgeticdv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgeticdv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      real(8)          value(1)      ! (*) produces incorrect decoration
+      integer(4)       count
+      end function
+
+      integer(4) function dftgetiidv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetiidv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      real(8)          value(1)      ! (*) produces incorrect decoration
+      integer(4)       count
+      end function
+
+      integer(4) function dftgetcicv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetcicv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      character(*)     value(*)              ! 8 CHECK
+      integer(4)       count
+      end function
+
+      integer(4) function dftgeticcv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgeticcv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      character(*)     value(*)              ! 8 CHECK
+      integer(4)       count
+      end function
+
+      integer(4) function dftgetiicv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctget' :: dftgetiicv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      character(*)     value(*)              ! 8 CHECK
+      integer(4)       count
+      end function
+
+      end interface dftget
+
+
+      interface dftput  ! generic function name
+
+      integer(4) function dftputccd(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputccd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      character(*)     col     [reference]   ! 8 CHECK
+      real(8)          value   [reference]
+      integer(4)       count   ! ignored, but 1 is good for clarity
+      end function
+
+      integer(4) function dftputcid(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputcid
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      real(8)          value   [reference]
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftputicd(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputicd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      real(8)          value   [reference]
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftputiid(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputiid
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      real(8)          value   [reference]
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftputccc(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputccc
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      character(*)     col     [reference]   ! 8 CHECK
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! ignored, but 1 is good for clarity
+      end function
+
+      integer(4) function dftputcic(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputcic
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftputicc(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputicc
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftputiic(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputiic
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      character(*)     value   [reference]   ! 8 CHECK
+      integer(4)       count   ! should be 1
+      end function
+
+      integer(4) function dftputcidv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputcidv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      real(8)          value(1)      ! (*) produces incorrect decoration
+      integer(4)       count
+      end function
+
+      integer(4) function dftputicdv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputicdv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      real(8)          value(1)      ! (*) produces incorrect decoration
+      integer(4)       count
+      end function
+
+      integer(4) function dftputiidv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputiidv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      real(8)          value(1)      ! (*) produces incorrect decoration
+      integer(4)       count
+      end function
+
+      integer(4) function dftputcicv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputcicv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      character(*)     row     [reference]   ! 8 CHECK
+      integer(4)       col     [reference]
+      character(*)     value(*)              ! 8 CHECK
+      integer(4)       count
+      end function
+
+      integer(4) function dftputiccv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputiccv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      character(*)     col     [reference]   ! 8 CHECK
+      character(*)     value(*)              ! 8 CHECK
+      integer(4)       count
+      end function
+
+      integer(4) function dftputiicv(table, row, col, value, count)
+      !dec$attributes stdcall, decorate,alias:'dctput' :: dftputiicv
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table   [reference]
+      integer(4)       row     [reference]
+      integer(4)       col     [reference]
+      character(*)     value(*)              ! 8 CHECK
+      integer(4)       count
+      end function
+
+      end interface dftput
+
+      interface
+
+      integer(4) function dftsadd(table, index, stub)
+      !dec$attributes stdcall, decorate,alias:'dctsadd' :: dftsadd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       index
+      character(*)     stub   [reference]    ! 8 CHECK
+      end function
+
+      integer(4) function dfthadd(table, index, head)
+      !dec$attributes stdcall, decorate,alias:'dcthadd' :: dfthadd
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       index
+      character(*)     head   [reference]    ! 8 CHECK
+      end function
+
+      integer(4) function dftsdel(table, stub)
+      !dec$attributes stdcall, decorate,alias:'dctsdel' :: dftsdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       stub   [reference] ! but might be an 8-char name
+      end function
+
+      integer(4) function dfthdel(table, head)
+      !dec$attributes stdcall, decorate,alias:'dcthdel' :: dfthdel
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      integer(4)       head   [reference] ! but might be an 8-char name
+      end function
+
+      integer(4) function dftdisp(table)
+      !dec$attributes stdcall, decorate,alias:'dctdisp' :: dftdisp
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      end function
+
+      integer(4) function dfminit(dbprob, mode)
+      !dec$attributes stdcall, decorate,alias:'dcminit' :: dfminit
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      integer(4)      mode
+      end function
+
+      integer(4) function dfmend()
+      !dec$attributes stdcall, decorate,alias:'dcmend' :: dfmend
+      end function
+
+      integer(4) function dfmstat(stat)
+      !dec$attributes stdcall, decorate,alias:'dcmstat' :: dfmstat
+      integer(4) stat(9)
+      end function
+
+      integer(4) function dfmcrtp(rname, type)
+      !dec$attributes stdcall, decorate,alias:'dcmcrtp' :: dfmcrtp
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      character    type   [reference]
+      end function
+
+      integer(4) function dfmcrsc(rname, scale)
+      !dec$attributes stdcall, decorate,alias:'dcmcrsc' :: dfmcrsc
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      scale
+      end function
+
+      integer(4) function dfmccsc(cname, scale)
+      !dec$attributes stdcall, decorate,alias:'dcmccsc' :: dfmccsc
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      real(8)      scale
+      end function
+
+      integer(4) function dfmcval(cname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmcval' :: dfmcval
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      value
+      end function
+
+      integer(4) function dfmmval(cname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmmval' :: dfmmval
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      value
+      end function
+
+      integer(4) function dfmcclr(cname, flag)
+      !dec$attributes stdcall, decorate,alias:'dcmcclr' :: dfmcclr
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      integer(4)   flag
+      end function
+
+      integer(4) function dfmcrhs(cname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmcrhs' :: dfmcrhs
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      value
+      end function
+
+      integer(4) function dfmcrng(rngname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmcrng' :: dfmcrng
+      character(*) rngname  [reference]  ! OMLSETNAME but could be index
+      character(*) rname    [reference]  ! OMLMATNAME but could be index
+      real(8)      value
+      end function
+
+      integer(4) function dfmcbnd(bndname, cname, lvalue, uvalue)
+      !dec$attributes stdcall, decorate,alias:'dcmcbnd' :: dfmcbnd
+      character(*) bndname  [reference]  ! OMLSETNAME but could be index
+      character(*) cname    [reference]  ! OMLMATNAME but could be index
+      real(8)      lvalue
+      real(8)      uvalue
+      end function
+
+      integer(4) function dfmrrtp(rname, type)
+      !dec$attributes stdcall, decorate,alias:'dcmrrtp' :: dfmrrtp
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      character    type   [reference]
+      end function
+
+      integer(4) function dfmrrsc(rname, scale)
+      !dec$attributes stdcall, decorate,alias:'dcmrrsc' :: dfmrrsc
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      scale  [reference]
+      end function
+
+      integer(4) function dfmrcsc(cname, scale)
+      !dec$attributes stdcall, decorate,alias:'dcmrcsc' :: dfmrcsc
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      real(8)      scale  [reference]
+      end function
+
+      integer(4) function dfmrval(cname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmrval' :: dfmrval
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      value  [reference]
+      end function
+
+      integer(4) function dfmrrhs(cname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmrrhs' :: dfmrrhs
+      character(*) cname  [reference]    ! OMLMATNAME but could be index
+      character(*) rname  [reference]    ! OMLMATNAME but could be index
+      real(8)      value  [reference]
+      end function
+
+      integer(4) function dfmrrng(rngname, rname, value)
+      !dec$attributes stdcall, decorate,alias:'dcmrrng' :: dfmrrng
+      character(*) rngname  [reference]  ! OMLSETNAME but could be index
+      character(*) rname    [reference]  ! OMLMATNAME but could be index
+      real(8)      value    [reference]
+      end function
+
+      integer(4) function dfmrbnd(bndname, cname, lvalue, uvalue)
+      !dec$attributes stdcall, decorate,alias:'dcmrbnd' :: dfmrbnd
+      character(*) bndname  [reference]  ! OMLSETNAME but could be index
+      character(*) cname    [reference]  ! OMLMATNAME but could be index
+      real(8)      lvalue   [reference]
+      real(8)      uvalue   [reference]
+      end function
+
+      integer(4) function dfmirow(name)
+      !dec$attributes stdcall, decorate,alias:'dcmirow' :: dfmirow
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmicol(name)
+      !dec$attributes stdcall, decorate,alias:'dcmicol' :: dfmicol
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmirhs(name)
+      !dec$attributes stdcall, decorate,alias:'dcmirhs' :: dfmirhs
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmirng(name)
+      !dec$attributes stdcall, decorate,alias:'dcmirng' :: dfmirng
+      character(*) name  [reference]         ! OMLSETNAME
+      end function
+
+      integer(4) function dfmibnd(name)
+      !dec$attributes stdcall, decorate,alias:'dcmibnd' :: dfmibnd
+      character(*) name  [reference]         ! OMLSETNAME
+      end function
+
+      integer(4) function dfmnrow(index, name)
+      !dec$attributes stdcall, decorate,alias:'dcmnrow' :: dfmnrow
+      integer(4)   index
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmncol(index, name)
+      !dec$attributes stdcall, decorate,alias:'dcmncol' :: dfmncol
+      integer(4)   index
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmnrhs(index, name)
+      !dec$attributes stdcall, decorate,alias:'dcmnrhs' :: dfmnrhs
+      integer(4)   index
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmnrng(index, name)
+      !dec$attributes stdcall, decorate,alias:'dcmnrng' :: dfmnrng
+      integer(4)   index
+      character(*) name  [reference]         ! OMLSETNAME
+      end function
+
+      integer(4) function dfmnbnd(index, name)
+      !dec$attributes stdcall, decorate,alias:'dcmnbnd' :: dfmnbnd
+      integer(4)   index
+      character(*) name  [reference]         ! OMLSETNAME
+      end function
+
+      integer(4) function dfmlrow(mask, name)
+      !dec$attributes stdcall, decorate,alias:'dcmlrow' :: dfmlrow
+      character(*) mask  [reference]
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmlcol(mask, name)
+      !dec$attributes stdcall, decorate,alias:'dcmlcol' :: dfmlcol
+      character(*) mask  [reference]
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmlrhs(mask, name)
+      !dec$attributes stdcall, decorate,alias:'dcmlrhs' :: dfmlrhs
+      character(*) mask  [reference]
+      character(*) name  [reference]
+      end function
+
+      integer(4) function dfmlrng(mask, name)
+      !dec$attributes stdcall, decorate,alias:'dcmlrng' :: dfmlrng
+      character(*) mask  [reference]         ! OMLSETNAME
+      character(*) name  [reference]         ! OMLSETNAME
+      end function
+
+      integer(4) function dfmlbnd(mask, name)
+      !dec$attributes stdcall, decorate,alias:'dcmlbnd' :: dfmlbnd
+      character(*) mask  [reference]         ! OMLSETNAME
+      character(*) name  [reference]         ! OMLSETNAME
+      end function
+
+      end interface
+
+
+      interface dfmlval  ! generic function name
+
+      integer(4) function dfmlval(cname, start, index, value, count)
+      !dec$attributes stdcall, decorate,alias:'dcmlval' :: dfmlval
+      character(*) cname   [reference]   ! OMLMATNAME but could be index
+      integer(4)   start
+      integer(4)   index   [reference]
+      real(8)      value   [reference]
+      integer(4)   count   ! should be 1
+      end function
+
+      integer(4) function dfmlvalv(cname, start, index, value, count)
+      !dec$attributes stdcall, decorate,alias:'dcmlval' :: dfmlvalv
+      character(*) cname   [reference]   ! OMLMATNAME but could be index
+      integer(4)   start
+      integer(4)   index(1)          ! (*) produces incorrect decoration
+      real(8)      value(1)          ! (*) produces incorrect decoration
+      integer(4)   count
+      end function
+
+      end interface dfmlval
+
+
+      interface
+
+      integer(4) function dfmtab(table)
+      !dec$attributes stdcall, decorate,alias:'dcmtab' :: dfmtab
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBTABLE) table  [reference]
+      end function
+
+      integer(4) function dfsinit(dbprob, cname)
+      !dec$attributes stdcall, decorate,alias:'dcsinit' :: dfsinit
+      import                              OMLDBFILE,OMLDBPROB,OMLDBTABLE
+      type(OMLDBPROB) dbprob  [reference]
+      character(*)    cname   [reference]! OMLSETNAME but could be index
+      end function
+
+      integer(4) function dfsrow(name, select, stat, value)
+      !dec$attributes stdcall, decorate,alias:'dcsrow' :: dfsrow
+      character(*) name      [reference]  ! CHECK
+      character(*) select    [reference]  ! up to blank or min(5,strlen)
+      character(*) stat      [reference]  ! writes 2 chars
+      real(8)      value(5)               ! out (up to 5 retrieved)
+      end function
+
+      integer(4) function dfscol(name, select, stat, value)
+      !dec$attributes stdcall, decorate,alias:'dcscol' :: dfscol
+      character(*) name      [reference]  ! CHECK
+      character(*) select    [reference]  ! up to blank or min(5,strlen)
+      character(*) stat      [reference]  ! writes 2 chars
+      real(8)      value(5)               ! out (up to 5 retrieved)
+      end function
+
+      integer(4) function dfsend()
+      !dec$attributes stdcall, decorate,alias:'dcsend' :: dfsend
+      end function
+
+!     The dfn... functions operate on at most OMLMATNAME characters.
+!     In order to work properly with these functions, string entities:
+!       (a) **must** be initialized to the desired length with non-nulls
+!       (b) **must** be null-terminated if length is <  OMLMATNAME
+!       (c) need not be null-terminated if length is >= OMLMATNAME
+!     While some compilers may do the initialization to non-null, this
+!       behavior may be different for debug and non-debug builds.
+
+      subroutine dfncpy(to, from)
+      !dec$attributes stdcall, decorate,alias:'dcncpy' :: dfncpy
+      character(*) to    [reference]         ! see usage note
+      character(*) from  [reference]         ! see usage note
+      end subroutine
+
+      subroutine dfncat(name1, name2)
+      !dec$attributes stdcall, decorate,alias:'dcncat' :: dfncat
+      character(*) name1  [reference]        ! see usage note
+      character(*) name2  [reference]        ! see usage note
+      end subroutine
+
+      subroutine dfnfill(name1, name2)
+      !dec$attributes stdcall, decorate,alias:'dcnfill' :: dfnfill
+      character(*) name1  [reference]        ! see usage note
+      character(*) name2  [reference]        ! see usage note
+      end subroutine
+
+      subroutine dfnincr(name)
+      !dec$attributes stdcall, decorate,alias:'dcnincr' :: dfnincr
+      character(*) name  [reference]         ! see usage note
+      end subroutine
+
+      subroutine dfnmask(name1, name2)
+      !dec$attributes stdcall, decorate,alias:'dcnmask' :: dfnmask
+      character(*) name1  [reference]        ! see usage note
+      character(*) name2  [reference]        ! see usage note
+      end subroutine
+
+      subroutine dfnsqoz(name)
+      !dec$attributes stdcall, decorate,alias:'dcnsqoz' :: dfnsqoz
+      character(*) name  [reference]         ! see usage note
+      end subroutine
+
+      subroutine dfnshft(name, n)
+      !dec$attributes stdcall, decorate,alias:'dcnshft' :: dfnshft
+      character(*) name  [reference]         ! see usage note
+      integer(4)   n
+      end subroutine
+
+      integer(4) function dfncmp(name1, name2)
+      !dec$attributes stdcall, decorate,alias:'dcncmp' :: dfncmp
+      character(*) name1  [reference]        ! see usage note
+      character(*) name2  [reference]        ! see usage note
+      end function
+
+      integer(4) function dfnmcmp(mask, name)
+      !dec$attributes stdcall, decorate,alias:'dcnmcmp' :: dfnmcmp
+      character(*) mask  [reference]         ! see usage note
+      character(*) name  [reference]         ! see usage note
+      end function
+
+      end interface
+

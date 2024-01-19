@@ -1,0 +1,7 @@
+## ams_version=1.0
+
+Section NCHAR {
+    StringParameter NCHAR_SCEN;
+    StringParameter NCHAR_DATE;
+    StringParameter NCHAR_SCEN_DATE;
+}

@@ -1,0 +1,17 @@
+#  $Header: m:/default/scripts/RCS/submit_outmenu.txt,v 1.2 2019/12/06 20:58:00 pkc Exp $
+#  List of NEMS output folder for submit.sh (jognems) output menu. 
+#  The submit.sh script searches for "testing"  and "zzz"
+#  Omitting drives L and M with user folders to preserve space
+#  Omitting V: at least temporarily because we are letting WEPS use it in the near future
+#  2022/10/19 - remove t:/output/user from the list, to blind users to use T drive
+
+1, zzz/output/user     ,Store on the testing drive with most available space 
+2, other directory   ,you specify the location
+3, k:/output/user     ,for important runs; drive backed up
+4, n:/output/user     ,for important runs; drive backed up
+5, o:/output/user     ,for important runs; drive backed up
+6, p:/output/user     ,for important runs; drive backed up
+7, q:/output/user     ,for testing and other noncritical runs; drive not backed up
+8, r:/output/user     ,for testing and other noncritical runs; drive not backed up
+9, s:/output/user     ,for testing and other noncritical runs; drive not backed up
+10,u:/output/user     ,for testing and other noncritical runs; drive not backed up

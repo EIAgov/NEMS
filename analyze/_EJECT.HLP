@@ -1,0 +1,22 @@
+    Function: Eject page (or clear screen)
+    Syntax:   _EJECT [UNLESS number]
+
+    Generally, this is used from an EXECUTE file.  The
+    specification of UNLESS suppresses page ejection if the number
+    of lines printed since the last new page does not exceed the
+    number.
+
+    If the output file is the screen, it is simply cleared.  If the
+    output is a file, a new page is indicated by the Fortran
+    standard:  a 1 in column 1 and the rest of the line blank.  (The
+    utility HPAGER converts this to a page ejection character for
+    the Laser Jet printer.)
+
+    Examples:
+
+    _EJECT
+     ...Ejects new page or clears screen (unconditionally).
+
+    _EJECT UNLESS 50
+     ...Ejects unless the line count (ie, number of lines printed since the
+        last new page) is less than 50.

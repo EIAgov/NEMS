@@ -1,0 +1,24 @@
+                               ANALYZE SWITCHES
+
+    Use HELP SWITCH to see how to set or list the switch values.  You
+    can EXECUTE SWITCH0 to set the switches to their initial values
+    (and you can edit SWITCH0.EXC to have these values be whatever you
+    want, then INCLUDE SWITCH0.EXC in your PROFILE.EXC if you do change
+    the original settings.  Here are the switches:
+
+    ECHO_ON.....If on, echos commands on screen (useful when executing
+                commands from a file).
+    ERR_STOP....If on, aborts terminal I/O when encountering a fatal
+                error.
+    MSG_ON......If on, gives messages from various commands.
+
+    DISP_COL....If on, displays columns;  if off, displays rows.  This
+                switch value changes with a ROW | COL specification in
+                any of the DISPLAY command group (ADDRIM, EXPLAIN, RATEOF,
+                SHOW, TALLY).
+    OPT_MIN.....If on, the sense of optimization is minimization;  if
+                off, it is maximization.   This setting affects the
+                REDUCE command.
+    SYNTAX......If on, syntax is shown with DISPLAY and SHOW commands
+                (if available).
+

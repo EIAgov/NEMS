@@ -1,0 +1,225 @@
+APQ_INC=     qblk ampblk
+PQ_INC=      qblk mpblk
+QCENSUS_INC= qsblk
+XPQ_INC=     mxqblk mxpblk
+OMLALL_INC=  buildenv.fi omldb.fi omllib.fi omllp.fi omlxprs.fi xprsparms.fi wcr.fi
+
+CIO4WK1_INC  = none
+COMM_INC  = apq bldglrn cogen commrep comout comparm comvars e111d \
+      emission emmparm eusprc macout mxpblk ncntrl parametr qsblk steoblock \
+      uecpout uefpout \
+      $(APQ_INC)
+DUMMYX_INC  = none
+DUMPACK_INC  = none
+ECP_ROW_COL_INC  = none
+EFD_ROW_COL_INC  = none
+EPM_INC  = ab32 bifurc calshr cdsparms coalemm cogen control convfact \
+      ecpcntl emablk emeblk emission emmparm emoblk epmbank epmcntl epmmpblk \
+      epmngtdm ghgrep hmmblk indout lfmmout macout mpblk ncntrl ngtdmout \
+      parametr pmmftab pmmout pmmrpt qblk qsblk udatout uecpout uefdout \
+      uefpout uettout wrenew
+FILEMGR_INC  = fmgr
+FILER_INC  = ab32 acoalprc aeusprc ampblk angtdm aponroad bifurc \
+      bldglrn cdsparms coalemm coalout coalprc coalrep cogen commrep comparm \
+      continew converge convfact csapr dsmdimen dsmtfefp e111d efpout emablk \
+      emeblk emission emmparm epmbank eusprc fdict gamsglobalsf gdxiface \
+      ghgrep hmmblk indout indrep intout lfmmout macout mcdetail mpblk \
+      mxpblk mxqblk ncntrl ngrpt ngtdmout ngtdmrep ogsmout parametr pmmftab \
+      pmmout pmmrpt ponroad pqchar qblk qonroad qsblk resdrep rggi rscon \
+      rseff tcs45q tranrep udatout uecpout uefdout uefpout uettout uldsmout \
+      uso2grp wrenew aimms_c_face fdict ncntrl parametr
+FTAB_INC  = ab32 acoalprc aeusprc ampblk angtdm aponroad cdsparms \
+      coalemm coalout coalprc coalrep cogen commrep comout comparm converge \
+      convfact e111d efpout emablk emeblk emission emmparm epmbank epmmpblk \
+      eusprc ftable ghgrep hmmblk indout indrep intout lfmmout macout mcdetail \
+      mpblk ncntrl ngrpt ngtdmout ngtdmrep ogsmout parametr pmmftab pmmout \
+      pmmrpt ponroad pqchar qblk qonroad resdrep rggi rseff tranrep udatout \
+      uecpout uefdout uefpout uettout wrenew
+FTAB2_INC  = ftable ncntrl parametr
+FWK1IO_INC  = none
+GDXF9DEF_INC  = none
+GDXF9GLU_INC  = none
+HEM_INC  = none
+HMM_INC = aponroad cogen control ecpcntl emablk emeblk emission emmparm \
+      hmmblk macout mpblk ncntrl omlall.fi parametr pmmrpt qblk tranrep \
+      uefpout wrenew wwdcomon
+IND_INC  = ab32 bifurc cdsparms coalout coalrep cogen comparm convfact \
+      emeblk emission emmparm epmmpblk eusprc ghgrep indout indrep lfmmout \
+      macout mpblk ncntrl ngtdmrep ogsmout parametr pmmout pmmrpt qblk \
+      qsblk steoblock tranrep wrenew
+INTERCV_INC  = acoalprc ampblk angtdm cdsparms coalemm coalprc continew \
+      converge emission emmparm intout macout mpblk ncntrl ngtdmout ngtdmrep \
+      ogsmout parametr pmmout pmmrpt qblk uefdout uso2grp wrenew
+MAC_INC  = angtdm apq cdsparms coalout coalrep continew convfact \
+      emission emmparm ghgrep intout lfmmout macout macparm mcdetail mcinter2 \
+      ncntrl ngtdmrep ogsmout parametr pmmftab pmmout pmmrpt tranrep udatout \
+      uecpout uefdout uefpout uettout wrenew \
+      $(APQ_INC)
+MAIN_INC  = ab32 acoalprc ampblk angtdm apiblk aponroad bifurc calshr \
+      cdsparms coalemm coalout coalprc cogen continew control converge \
+      convfact ecpcntl efpout emablk emeblk emission emmparm emoblk epmbank \
+      epmclprc epmcntl epmeusprc epmmpblk epmngtdm epmonrd eusprc fdict \
+      fmgr ghgrep indout indrep intout lfmmout macout maindbg mpblk mxpblk \
+      mxqblk ncntrl ngrpt ngtdmout ngtdmrep ogsmout omlall.fi parametr \
+      pmmftab pmmout pmmrpt ponroad pqchar qblk qonroad qsblk steoblock \
+      tcs45q tranrep uecpout uefdout uso2grp wrenew xprsparm
+NEMSFUNCT_INC  = none
+NEMSWK1_INC  = wk1block       
+ORCLTABS_INC  = none
+REFCHG_INC  = none
+REFCO2_INC  = none
+REFETH_INC  = none
+REFINE_INC  = cdsparms cogen continew convfact emablk emission emmparm \
+      emoblk fdict gamsglobalsf gdxiface indrep intout lfmmout macout mpblk \
+      mxpblk mxqblk ncntrl ngtdmrep ogsmout parametr pmmftab pmmout pmmrpt \
+      ponroad pq qblk steoblock tranrep uso2grp wrenew \
+      $(PQ_INC)
+REFINTL_INC  = none
+REFRPT_INC  = none
+REFSLN_INC  = none
+RENEW_INC  = bildin bildout cdsparms coalemm cogen control dispett \
+      dispinyr dsmcaldr dsmdimen dsmtfecp ecp_coal ecpcntl efpgen efpint \
+      emmparm emshrin enewtech entcntl eusprc indout intout macout mpblk \
+      ncntrl parametr plntctl plntin qblk rencntl udatout uecpout uefdout \
+      uefpout uettout uldsmout uso2grp wflrinc wgechar wgedim wgekparm \
+      wgenum whyparm wmscomon wrenew wrenio wwdcomon wwind
+RESD_INC  = apq bldglrn cogen e111d emablk emission emmparm eusprc \
+      macout ncntrl parametr qsblk resdrep rscon rseff rtek steoblock uecpout \
+      uefpout \
+      $(APQ_INC)
+TFILER_INC  = aimms_c_face fdict ncntrl parametr
+TRAN_INC  = aeusprc angtdm aponroad apq cdsparms coalout convfact \
+      hmmblk intout macout ncntrl ngtdmout ngtdmrep parametr qsblk steoblock \
+      tranmain tranrep \
+      $(APQ_INC)
+TRANAIR_INC  = apq convfact intout macout ncntrl parametr tranmain \
+      tranrep \
+      $(APQ_INC)
+TRANFRT_INC  = ampblk angtdm cdsparms coalout convfact eusprc lfmmout \
+      macout ncntrl ngtdmout ngtdmrep ogsmout parametr pmmout pmmrpt qsblk \
+      tranmain tranrep
+UAIMMS_INC  = ab32 aimms_c_face angtdm bildin bildout cdsparms coalemm \
+      coalrep cogen control convfact csapr dispcrv dispett dispin dispinyr \
+      dispout dispuse dsmdimen dsmsectr dsmtfecp dsmtoefd e111d ecp_coal \
+      ecp_nuc ecpcntl edbdef efpgen elcntl elout emablk emeblk emission \
+      emmemis emmparm emoblk emshrin emshrout enewtech entcntl eusprc fuelin \
+      intout macout mxpblk ncntrl ngtdmrep ogsmout omlall.fi parametr plntctl \
+      plntin postpr qblk udatout uecpout uefdout uettout uso2grp wrenew \
+	  emm_aimms \
+      ecp_row_col.mod efd_row_col.mod
+UCAPE_INC  = bildin bildout bldglrn cdsparms control ecpcntl edbdef \
+      emmparm emshrin emshrout enewtech entcntl eusprc ncntrl omlall.fi \
+      parametr rencntl uecpout uefdout uso2grp wrenew wwdcomon ecp_row_col.mod      
+UDAF_INC  = bildin bildout buffer cdsparms coalemm control dispett \
+      dispin dispina dispout emmparm ncntrl parametr plntctl plntin uefdout   
+UDAT_INC  = acoalprc angtdm apq bildin bildout bldctl cdsparms coalemm \
+      cogen control csapr dispcrv dispett dispin dispinyr dispout dispuse \
+      dsmcaldr dsmdimen dsmnemsc dsmnercr dsmsectr dsmtfecp dsmtfefp dsmtoefd \
+      ecp_coal ecp_nuc ecpcntl edbdef efdin efpgen efpin efpint efpr elcntl \
+      elout elshrs emablk emeblk emission emmcnv emmemis emmparm emoblk \
+      emshrin enewtech entcntl epmbank eusprc fuelin macout mpblk mxpblk \
+      ncntrl parametr plntctl plntin rggi steoblock taxdat tcs45q udatout \
+      uecpout uefdout uefpout uettout uldsmout uso2grp wrenew wwdcomon \
+      wwind xpq emm_aimms \
+      $(APQ_INC) \
+      $(XPQ_INC)
+UECP_INC  = ab32 acoalprc angtdm bildin bildout cdsparms coalemm \
+      coalrep cogen continew control convfact csapr dispcrv dispett dispin \
+      dispinyr dispout dispuse dsmcaldr dsmdimen dsmsectr dsmtfecp dsmtoefd \
+      e111d ecp_coal ecp_nuc ecpcntl edbdef efpgen efpint efpout elcntl \
+      elout emablk emeblk emission emmcnv emmemis emmparm emoblk emshrout \
+      enewtech entcntl eusprc fuelin gamsglobalsf gdxiface intout macout \
+      mxpblk ncntrl ngtdmout ngtdmrep ogsmout omlall.fi parametr plntctl \
+      plntin pmmout postpr qblk taxdat tcs45q udatout uecpout uefdout uefpout \
+      uettout uso2grp wrenew wwdcomon wwind xprsparm emm_aimms \
+	  ecp_row_col.mod
+UEFD_INC  = ab32 acoalprc angtdm bildin bildout cdsparms coalemm \
+      coalprc coalrep cogen control convfact csapr dispcrv dispett dispin \
+      dispinyr dispout dispuse dsmcaldr dsmdimen dsmnercr dsmsectr dsmtfecp \
+      dsmtoefd dsmunits e111d ecp_coal ecp_nuc ecpcntl edbdef efdin efpint \
+      elcntl elout emablk emeblk emission emmemis emmparm emoblk entcntl \
+      epmbank eusprc fuelin intout macout ncntrl ngtdmrep ogsmout omlall.fi \
+      parametr plntctl postpr qblk tcs45q udatout uecpout uefdout uettout \
+      uso2grp wrenew wwdcomon xprsparm efd_row_col.mod
+UEFP_INC  = bildin bildout bldctl cdsparms cogen control csapr dispett \
+      dispin dispinyr dispout dsmdimen dsmhelm dsmnercr dsmsectr dsmtfefp \
+      dsmtoefd dsmunits e111d ecpcntl edbdef efpbld efpcntrl efpgen efpin \
+      efpint efple efpname efpnd efpout efpr efprc efprcy efprep efprp2 \
+      efptemp efpwrt elcntl elout elshrs emission emmemis emmparm eusprc \
+      ldsm macout mpblk ncntrl parametr phasin pq qblk salelb tax taxdat \
+      tranrep udatout uecpout uefdout uefpout uettout uldsmout emm_aimms \
+      $(PQ_INC)
+ULDSM_INC  = bildin bildout cogen comparm control dispett dispin \
+      dispinyr dispout dsmcaldr dsmdimen dsmfmgrd dsmhelm dsmnemsc dsmnercr \
+      dsmoptdb dsmrept dsmsectr dsmtfecp dsmtfefp dsmtoefd dsmunits ecpcntl \
+      edbdef efpint efpout efprcy efprp2 elcntl elout emmparm eusprc indout \
+      macout mxqblk ncntrl parametr qblk rscon tranrep udatout uefdout \
+      wrenew
+UNUGS_INC  = bildin cogen control dispett dispin dispinyr dispout \
+      dispuse dsmdimen dsmtfecp dsmtoefd ecpcntl efpout elcntl elout emmparm \
+      hmmblk macout ncntrl parametr postpr uecpout uefdout wrenew
+UREAD_INC  = cdsparms coalemm control csapr dsmdimen dsmtfecp dsmtoefd \
+      ecp_coal ecpcntl emission emmbuf emmemis emmparm ncntrl parametr \
+      taxdat uso2grp
+UTIL_INC  = ab32 acoalprc angtdm bildin bildout bldctl cdsparms coalemm \
+      coalout coalrep cogen control csapr dispcrv dispett dispin dispinyr \
+      dispout dispuse dsmdimen dsmfmgrd dsmhelm dsmnercr dsmsectr dsmtfecp \
+      dsmtoefd dsmunits e111d ecp_coal ecpcntl edbdef efpgen efpint efpout \
+      elcntl elout elshrs emission emmcnv emmemis emmparm emoblk entcntl \
+      epmbank eusprc fuelin macout mpblk mxqblk ncntrl parametr plntctl \
+      plntin postpr pq qblk rggi steoblock udatout uecpout uefdout uefpout \
+      uettout uldsmout uso2grp wrenew xpq \
+      $(PQ_INC) \
+      $(XPQ_INC)
+WELLAK_INC  = intout ncntrl ngtdmrep ogsmak ogsmbfw ogsml48 ogsmout \
+      ogsmparm parametr pmmout
+WELLCOST_INC  = ncntrl ogsmbfw ogsml48 ogsmout ogsmparm ogsmugr parametr \
+      pmmout
+WELLDCF_INC  = convfact lfmmout mpblk ncntrl ngtdmrep ogsmbfw ogsml48 \
+      ogsmout ogsmparm ogsmugr parametr pmmout
+WELLEOR_INC  = ncntrl ogsmbfw ogsml48 ogsmparm ogsmugr parametr
+WELLEXP_INC  = intout ncntrl ngtdmrep ogsmbfw ogsml48 ogsmparm ogsmugr \
+      parametr pmmout
+WELLIMP_INC  = intout macout ncntrl ngtdmrep ogsmbfw ogsmcan ogsmout \
+      ogsmparm parametr
+WELLOFF_INC  = dwpparm lfmmout macout ncntrl ngtdmout ngtdmrep ogsmbfw \
+      ogsml48 ogsmoff ogsmout ogsmparm parametr pmmout
+WELLOGS_INC  = cogen emission emmparm intout lfmmout macout mpblk \
+      mxpblk mxqblk ncntrl ngtdmout ngtdmrep ogsmak ogsmbfw ogsmcan ogsmeor \
+      ogsml48 ogsmlng ogsmoff ogsmout ogsmparm parametr pmmout qblk steoblock 
+WELLON_INC  = ecpcntl emission emmparm intout lfmmout macout ncntrl \
+      ngtdmrep ogsmbfw ogsmeor ogsml48 ogsmout ogsmparm ogsmugr parametr \
+      pmmout qblk tcs45q uecpout
+WELLREP_INC  = intout macout ncntrl ngtdmout ngtdmrep ogsmak ogsmbfw \
+      ogsmeor ogsml48 ogsmlng ogsmoff ogsmout ogsmparm ogsmugr parametr \
+      pmmout
+WELLUGR_INC  = none
+WORLD_INC  = intllocl intout lfmmout macout mxpblk ncntrl ngtdmrep \
+      ogsmout parametr pmmout pmmrpt
+PREPPLT_INC  = bildin control dispin ecpcntl elcntl elout emmparm \
+      ncntrl parametr plntctl plntin uefdout
+PREPETT_INC  = control dispett dsmdimen dsmnemsc dsmtfecp dsmtoefd \
+      dsmunits elcntl elout emmparm ncntrl parametr uefdout wrenew
+PREPDSMD_INC  = lsrcaldr lsrmgpar
+OMLANAL_INC  = dcflip dcgetmat ncntrl omlall.fi parametr
+PACK_ALL_INC  = omlall.fi
+
+
+
+SRC=  \
+     resd.f comm.f tran.f tranfrt.f tranair.f ind.f \
+     hem.f mac.f world.f \
+     main.f epm.f filemgr.f filer.f ftab.f ftab2.f \
+     refine.f refeth.f refrpt.f \
+     refchg.f refsln.f refintl.f refco2.f \
+     prepplt.f prepett.f prepdsmd.f \
+     renew.f \
+     hmm.f \
+     gdxf9glu.c gdxf9def.f \
+     udaf.f udat.f uread.f ucape.f uecp.f uesql.f90 fsqlite.f90  \
+     uefd.f uefp.f uldsm.f unugs.f util.f \
+     uaimms.f ecp_row_col.f90 efd_row_col.f90 \
+     wellak.f welleor.f wellimp.f wellon.f welloff.f wellogs.f \
+     wellcost.f welldcf.f wellexp.f wellrep.f wellugr.f \
+     tfiler.f intercv.f \
+     omlanal.f nemswk1.f fwk1io.f dumpack.f dummyx.f orcltabs.f

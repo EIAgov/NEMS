@@ -1,0 +1,249 @@
+
+                            The ANALYZE RULEBASE
+
+    The RULEBASE module of ANALYZE is in an experimental stage.  The goal
+    is to develop a capability whereby each modeling environment can
+    setup its own support for analysis, giving the user an INTERPRT
+    command.  To enable this command, there must exist a file (or DD name
+    under TSO) named RULBASE.RUL (use SETUP.EXC to change default prefix
+    and suffix ...see SETUP.DOC).
+
+    If RULBASE exists, it contains a list of filenames (or DD names).
+    Each file will be inquired; and, those that exist (and no error
+    results from the inquire) will be added to the "key" options for the
+    INTERPRT command.  If this results in any options, the INTERPRT
+    command is enabled, and the user sees them as options.  There is also
+    a documentation file, INTERPRT.DOC, that gives a summary of what each
+    option does.  This needs to be changed if the RULBASE list is
+    changed.
+
+    Each rule file contains text with possible references to keys,
+    indicated by a percent (%) sign and commands that must be on a
+    separate line with a dollar sign ($) in column 1.  All keys, commands
+    and keywords in general (that is, non-text) must be in CAPS.  Some
+    rule files are included in the test data, which should be studied.
+    In particular, look at MODEL.RUL and apply it to several of the
+    models during a session (i.e., INTERP MODEL after loading one of the
+    LP's).  Unlike the MODEL rule file, PRICE.RUL may call upon a
+    model-dependent rule file (hidden from the user).  It should be
+    informative to study this and apply it to WOODNET (for convenience,
+    you may EXEC WOODNET, which loads the packed LP file and the syntax
+    file).  Try interpreting prices of some Demand rows and some Supply
+    rows.
+
+    The following tables provide quick reference to keywords and
+    commands.  The Primer (Chapter 11) describes them more fully.
+
+                               Rule Keywords
+                               ~~~~~~~~~~~~~
+                            Integer-Valued Keys
+                            ===================
+         Key        Meaning
+         -------   ---------------------------------------------
+         NAMELN     length of row and column names (<= 16)
+         NCBLKS     number of column blocks
+         NCOLS      number of columns in submatrix
+         NCSYN      number of column classes in syntax
+         NESYN      number of entity sets in syntax
+         NONES      number of ones in submatrix
+         NONZERO    number of nonzeroes in submatrix
+         NRBLKS     number of row blocks
+         NROWS      number of rows in submatrix
+         NRSYN      number of row classes in syntax
+         NSTACK     max number in stacks 1 and 2
+         NSTACK1    number in stack 1
+         NSTACK2    number in stack 2
+         NTAB(i)    i-th tab setting (1 to 127) for i = 1 to 10
+         NVALUES    number of distinct nonzeroes in submatrix
+         NVECTOR    length of VECTOR (number of entries)
+         NZCOL      number of nonzeroes in column
+         NZCSUB     number of nonzeroes in column for submatrix rows
+         NZROW      number of nonzeroes in row
+         NZRSUB     number of nonzeroes in row for submatrix columns
+         ============================================================
+
+                   Character-Valued Keys (Max length=16)
+                   =====================
+          Key       Meaning
+         -------   ----------------------------------
+         BOUND      bound set name
+         COLST      current column status
+         COLUMN     current column name
+         OBJ        name of objective row
+         OPT        sense of optimization (MINIMIZE or MAXIMIZE)
+         PROBLEM    problem name
+         RANGE      range set name
+         RHS        right-hand side set name
+         ROW        current row name
+         ROWST      current row status
+         STATUS     solution status (overall)
+         _NAME(i)   name of i-th VECTOR entry
+         =============================================
+
+                      Real-Valued Keys (Single precision)
+                      ================
+          Key       Meaning
+         -------   -----------------------------------------
+         VCOLC      Objective value of current column
+         VCOLD      Reduced cost of current column
+         VCOLLO     Lower bound of current column
+         VCOLUP     Upper bound of current column
+         VCOLX      Level of current column
+         VDENSTY    Density in LP matrix
+         VECTOR(i)  i-th VECTOR value
+         VLOOK      Value from last LOOKUP
+         VROWC      Objective value of current row (0, except objective)
+         VROWLO     Lower bound of current row
+         VROWP      Price of current row
+         VROWUP     Upper bound of current row
+         VROWY      Level of current row
+         =======================================================
+
+                 Logical-Valued Keys (Switches are T or F)
+                 ===================
+          Key       Meaning if True
+         -------   -----------------------------------------
+         SWMSG      Message switch is on
+         SWOTFIL    Output is going to file
+         SWINFIL    Input is coming from file
+         SWRATE     Basis is setup (for RATEOF)
+         SWSYN      Syntax has been read in
+         ===================================================
+
+                  Rule Commands (start with $ in column 1)
+                  ~~~~~~~~~~~~~
+         Command    Syntax
+         --------  ------------------------------------------------------
+         ANALYZE    command spec
+         ASK        [{answer list}] [message]
+         CALC       param [=] value-expression
+         DEBUG      [comment]
+         ENDLOOP
+         ENTITY     member [set]
+         EXIT
+         FIND       object string
+         FORM       {ROW|COL} class set member
+         GOTO       label | TOP
+         IF         condition THEN command
+         INTERPRT   filespec
+         LOOKUP     key name(s)
+         LOOP
+         NEXT       [ROW] [COLUMN]
+         POP        {1 2} parameter
+         PUSH       {1 2} string
+         QUEUE      {1 2} string
+         SET        param = string
+         SKIP       number_of_lines | LOOP | ENDLOOP
+         STACK      [{1 2}]
+         TEXT       [number (of lines) [MARGIN=margin [indent] ]
+                    | CENTER | TAB {* | t1 [,...]} ]
+         VECTOR     {ADD name value | CLEAR | SET column
+                    |RATEOF [{ROW|COL} name]}
+         ================================================================
+
+    The INTERPRT command needs to be given, not ANALYZE INTERPRT, due to
+    the non-recursive nature of Fortran.
+
+    Branching.
+    A label is on a line by itself with a colon (:) in column 1.
+    Unconditional branches are GOTO and SKIP.  Conditional branch is IF
+    ...  THEN branch.  For example, IF %%N = 0 THEN SKIP LOOP tests if
+    the value of parameter N is 0; if so, SKIP LOOP is executed, which
+    goes to the end of the loop (NEXT or ENDLOOP command).
+
+    Warning: branching to a label requires each line to be read before
+             the parser knows to skip it.  This means all strings and
+             parameters referenced in the line must be defined to avoid
+             an error message.  The safe method is to define all strings
+             and parameters at the beginning (see TELLME.RUL).
+
+    String.
+    A string is a literal, a keyword reference, or a parameter reference.
+    A keyword reference is delimited by %, and a parameter is delimited
+    by %%.  For example, consider 3 ways to set parameter N:
+
+          1.  SET N = NROWS
+          2.  SET N = %NROWS
+          3.  SET N = %%NROWS
+
+    In 1 the value of N is NROWS (literally).  In 2 the value of N is the
+    number of rows in the submatrix (at the time of the setting).  In 3
+    the value of N is the value of parameter NROWS (not same as value of
+    keyword, NROWS).
+
+    Upon instantiating a rule file, user parameters 1,2,...,9 are
+    defined, as in a DOS bat file.  The user can pass these with the
+    INTERPRT command, and the rule file can test their value (which
+    defaults to a null string).  For example, INTERPRT PRICE DMOCH
+    instantiates the rule file PRICE.RUL and sets parameter 1 equal to
+    DMOCH (see the test in PRICE.RUL, which refers to this parameter as
+    %%1 and puts this row in the submatrix).
+
+    When you SET PARAM equal to a null string, it is deleted (if it exists).
+    However, if you SET PARAM = (note the equal sign), its value is the
+    null string, but the parameter still exists and can be referenced.
+
+    Keys.
+    For LOOKUP, the options are:
+
+           {X | D | C | XL | XU} column
+           {Y | P | S | YL | YU} row
+           NZ row, column
+           BLOCK {ROW | COL} block
+
+    The key value is returned in keyword, VLOOK.  For rim keys (first two
+    options), it is for the row or column named after the key.  For NZ,
+    VLOOK is the value of the coeficient in the LP matrix for the row and
+    column named.  For BLOCK it is the number in the block.
+
+    Loops.
+    To loop over rows in the submatrix,
+     $LOOP     <-------------------.
+     ...                           |
+     $NEXT ROW  ...advance %ROW ---'
+    To loop over columns, replace ROW with COL in the NEXT command.
+
+    Stacks.
+    There are 2 stacks.  Clear either or both of them with the STACK
+    command.  STACK 1 clears stack 1, STACK 2 clears stack 2, and STACK
+    clears both.  POP removes the top entry of the stack and puts it into
+    the value of the named parameter.  An empty stack returns a null
+    value.  PUSH enters the string at the top of the stack, and QUEUE
+    enters it at the bottom.
+
+    To loop over stack, use the following structure:
+     $LOOP
+     :LABEL
+     $POP 1,PARAM  <---------------------------------.
+     $IF @%%PARAM = @ THEN SKIP ENDLOOP ----.        |
+     ...                                    |        |
+     :GOTO LABEL   -------------------------+--------'
+     $ENDLOOP                               |
+                   <------------------------'
+
+    The FIND command has one of the following forms.
+    $FIND ROW    string
+      puts row classes whose meaning contains string into %%1,...,%%9
+    $FIND COLUMN string
+      puts col classes whose meaning contains string into %%1,...,%%9
+    $FIND SET string
+      puts sets whose meaning contains string into %%1,...,%%9
+    $FIND ELEMENT set string
+      puts elements of set whose meaning contains string into %%1,...,%%9
+
+    If string is not specified, all object classes are returned (first 9,
+    if there are more than 9 classes).  For example, FIND ROW will put
+    all row classes (1st 9) into the special parameters, %%1,...,%%9.
+
+    The FORM command forms a name mask for a ROW or COL class for the
+    specified set and member.  This is put into parameter %%1.
+    Example:  FORM ROW S MT PI  ...sets %%1 = SPI (in WOODNET).
+              FORM COL A AG .A  ...sets %%1 = A**.A (in REFINERY).
+
+    When setting up your own rulebase, be sure to see INTERPRT.DOC, which
+    you should modify if you add or change rule files.
+
+    The current rule files have been used to test the rulebase
+    capability, but further testing is in progress.  Please report
+    problems as early as possible.
+

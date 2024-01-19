@@ -1,0 +1,90 @@
+                          The Meaning of a Solution
+
+    A solution (x, y) is feasible if y=Ax and L <= (x,y) <= U, where L
+    and U are the explicit bounds.  We do not rule out the possibility of
+    no bound on some variable, so we allow U to be infinity (denoted by *
+    in ANALYZE displays), and L to be minus infinity (denoted by -*).
+
+    Associated with a solution (feasible or not) is a vector of dual
+    prices, (d, p), where d = c - pA.  The c vector is the objective
+    coefficients of x.  Note that d is the same dimension as x, which is
+    the number of columns of A, and p is the same dimension as y, which
+    is the number of rows of A.  This dual solution is feasible if the
+    following conditions are satisfied:
+
+                d(j) >= 0 for j such that L(j) is finite;
+                d(j) <= 0 for j such that U(j) is finite;
+                p(i) >= 0 for i such that L(i) is finite;
+                p(i) <= 0 for i such that U(i) is finite.
+
+    These feasibility conditions are for minimization.  If the LP is a
+    maximization, reverse the sign constraints on the dual variables.
+
+    A complete solution is all 4 vectors:  (x, y, d, p), which can be
+    expressed algebraically or combinatorially, as we describe below.
+    If the solution is optimal, this means both the primal and dual
+    solutions are feasible.  In this case, we also have:
+
+      x(j) > L(j) implies d(j) = 0  and  d(j) > 0 implies x(j) = L(j);
+      x(j) < U(j) implies d(j) = 0  and  d(j) < 0 implies x(j) = U(j);
+      y(i) > L(i) implies p(i) = 0  and  p(i) > 0 implies y(i) = L(i);
+      y(i) < U(i) implies p(i) = 0  and  p(i) < 0 implies y(i) = U(i).
+
+    In LP, these are called "complementary slackness conditions".
+
+    In general, it is possible to have both the level and price of a
+    complementary pair equal to their bound value.  For example, we could
+    have x(j)=L(j) and d(j)=0.  When this occurs, the solution is said to be
+    "degenerate".  It is primal degenerate if the primal level (x or y) is
+    at its bound value but basic.  It is dual degenerate if the dual price
+    (d or p) is zero but the primal variable is non-basic.  If no
+    complementary pair is degenerate, the solution is said to be "strictly
+    complementary."  In that case, either the primal level is strictly
+    between its bounds or the associated dual price is strictly positive.
+
+    Central to an LP solution is a combinatorial description, as follows.
+    Exactly m of the variables will be called basic, where m is the
+    number of equations (rows of A).  Each variable has a status value:
+
+                Basic and feasible, denoted by B
+                Basic and infeasible, denoted by I
+                Nonbasic at lower bound, denoted by L
+                Nonbasic at upper bound, denoted by U.
+
+    Suppose Y is the subvector of (x, y) composed of the m basic
+    variables, and X is the vector of nonbasic variables.  With some
+    arithmetic, the equations are equivalent to Y = Y0 - M X, where M is
+    a matrix derived from A for the particular basis and Y0 depends on
+    this basis and the bounds on the original y-variables.
+
+    Each nonbasic variable has its level equal to the specified bound, so
+    X is completely determined by its status (L or U).  Once X is fixed,
+    Y becomes fixed.  This means that the combinatorial description --
+    ie, the status of each variable -- is enough to determine the
+    solution values.  This applies to dual values as well.
+
+    It may be that x(j) = L(j), but the Status of x(j) is Basic.  This is
+    known as degeneracy, and it typically occurs.  In this case, knowing
+    the status is still enough to determine unique values, but not
+    conversely.  Knowing x(j)=L(j) does not imply with certainty that the
+    status of x(j) is L (nonbasic at lower bound); it could still be
+    basic.
+
+    In summary, each variable (y, or row variable, and x, or column
+    variable) has the following solution information associated with it.
+
+      Combinatorial:
+          Status.........B,I,L,U
+                         : : : :...Nonbasic at upper bound (Level=U)
+                         : : :...Nonbasic at lower bound (Level=L)
+                         : :...Basic and infeasible (violates a bound)
+                         :...Basic and feasible (within bounds)
+      Algebraic:
+          Level..........X for column, Y for row (Y = AX)
+          Price..........D for column, P for row (D = C - PA)
+                         :...sometimes called reduced cost
+
+    The combinatorial solution description uniquely determines the
+    algebraic values, but not necessarily conversely.
+
+    ...Also, see RATEOF.DOC and SOLVERS.DOC.

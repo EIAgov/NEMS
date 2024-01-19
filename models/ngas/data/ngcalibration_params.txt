@@ -1,0 +1,17 @@
+﻿! control variables
+!
+MaxCalibIter:= '200';
+!  factor from memo, used when controlling speed of inching forward for next iteration
+ScaleCalib:= '0.1';
+!  maximum absolute percentage difference of solved annual flow from historical annual flow
+ConvTolerCalib:= '0.05';
+
+!Start year to run historical QP
+FirstHQPYear:='2015';
+LastHQPYear:='2019';
+
+!Calibration switch 1: Iterative approach; 2: Cost factors
+!Calibration_Switch:='1'; moved to code
+
+!Slope for cost factors
+HSlope:=1;

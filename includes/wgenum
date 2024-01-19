@@ -1,0 +1,125 @@
+!  $Header: N:/default/includes/RCS/wgenum,v 1.2 1999/12/19 20:19:14 DSA Exp $
+!     RFM-GES SUBMODULE LOCAL NUMERIC BLOCK
+!
+!     This WGENUM block contains RFM-GES numeric internal data
+!
+!***********************************************************************
+!     Real variables
+!***********************************************************************
+!.....Site data other than costs and capacities
+      REAL    WGESPtl(MNUMGS)  !   Site potential capacity
+      REAL    WGESCFct(MNUMGS) !   Site capacity factor
+      REAL    WGESCO2R(MNUMGS) !   Site CO2 emission rate
+      REAL    WGESH2SR(MNUMGS) !   Site H2S emission rate
+      REAL    WGESHtRt(MNUMGS) !   Site heat rates
+!.....Site adjusted cost data for 50 mW plant for pertinent years
+!.....First dimension represents 1="this year",2="following year"
+!........Adjustments are for enthalpy decline, conversion to 87$ and
+!...........inclusion of supplementary well costs with field O&M
+      REAL    WGESFlOC(2,MNUMGS) !   Site field O&M cost
+      REAL    WGESPlOC(2,MNUMGS) !   Site plant O&M cost
+      REAL    WGESCCst(2,MNGECC,MNUMGS)   !   Site capital costs
+!                                         !    1 = Exploration
+!                                         !    2 = Confirmation dry hole
+!                                         !    3 = Confirmation producer
+!                                         !    4 = Construction dry hole
+!                                         !    5 = Construction producer
+!                                         !    6 = Construction Oth.Fld.
+!                                         !    7 = Power Plant
+!                                         !    8 = Transmission
+!                                         !    9 = Reservoir Insurance
+      REAL    WGESXCC(MNUMGS)    !   Fixed site exploration capital cost
+!.............Reflects R&D impacts as of first plant on site
+!.....Site capacity data
+      REAL    WGESICap(MNUMGS,MNUMYR+10) ! Site installed capacity
+      REAL    WGESPCap(MNUMGS,MNUMYR+10) ! Site planned new capacity
+      REAL    WGESUCap(MNUMGS,MNUMYR+10) ! Site unplanned new capacity
+!.....Region data
+      REAL    WGENICap(3,MNUMNR,MNUMYR+10) ! NERC region installed cap.
+      REAL    WGENUOC (MNUMNR,MNUMYR+10)   ! NERC unplanned O&M cost
+!.....Local ECP output variables for yr. of availability subscript
+      REAL WGEPMAXC(MNUMNR,MNUMYR+10) ! Maximum new capacity
+      REAL WGEPCC  (MNUMNR,MNUMYR+10) ! NC overnight construction cost
+      REAL WGEPFXOC(MNUMNR,MNUMYR+10) ! New capacity fixed O&M cost
+      REAL WGEPHTRT(MNUMNR,MNUMYR+10) ! New capacity heat rate
+      REAL WGEPCF (MNUMNR,MNUMYR+10)  ! NC capacity factor
+      REAL WGEPCO2R(MNUMNR,MNUMYR+10) ! NC emissions rates
+      REAL WGEPLC(MNUMNR,MNUMYR+10)   ! NC levelized cost for report
+!.....Local ECP input variable for yr. of availability subscript
+      REAL WGENNCSP(MNUMNR,MNUMYR+10) ! NC shadow price
+!.....Supply curve step data
+      REAL    WGEVNCCQ(MNUMSC,MNUMSS)   !   Step cumulative new capacity
+      REAL    WGEVOVCC(MNUMSC,MNUMSS)   !   Step overnight capital cost
+      REAL    WGEVFOC (MNUMSC,MNUMSS)   !   Step fixed O&M cost
+      REAL    WGEVHtRt(MNUMSC,MNUMSS)   !   Step heat rate
+      REAL    WGEVCFct(MNUMSC,MNUMSS)   !   Step capacity factor
+      REAL    WGEVCO2R(MNUMSC,MNUMSS)   !   Step CO2 emission rate
+      REAL    WGEULC(MNUMSC) ! (Last) step levelized cost
+!
+!.....Adjusted costs for site being processed
+      REAL    PQCAP      !   Capacity quantity used to adjust costs
+      REAL    LCOST      !   Levelized cost
+      REAL    WGEAdXCC   !   Adjusted exploration capital costs
+      REAL    WGEAdFCC   !   Adjusted confirmation capital costs
+      REAL    WGEAdSCC   !   Adjusted construction capital costs
+      REAL    WGEAdICC   !   Adjusted reservoir insurance capital costs
+      REAL    WGEAdOC    !   Adjusted total O&M costs
+!
+!.....Calculated plant capital cost learning curve factors
+      REAL   WGEPGPCT(2,MNUMYR+1)  !  Geo. plant cap. improvement factor
+!
+!.....Miscellaneous variables
+      REAL    DISC(MNUMNR)       ! Discount rate
+      REAL    TXCALC(MNUMNR)     ! Debt portion of discount rate
+      REAL    TAXRT(MNUMNR)      ! Combined Federal/local tax rate
+!***********************************************************************
+!     Integer variables
+!***********************************************************************
+!.....Site data
+      INTEGER WGESEIA(MNUMGS)  !  Site EIA ID number
+      INTEGER WGESNR(MNUMGS)   !  Site NERC region index
+      INTEGER WGESCR(MNUMGS)   !  Site Census region index
+      INTEGER WGESPTyp(MNUMGS) !  Site plant type
+!                              !     (1=Binary;2=Flash)
+      INTEGER WGESNCAv(MNUMGS,MNUMYR+10)   !  Site new cap. availability
+!                                               !   0 = none available
+!                                               !   1 = single plant
+!                                               !   2 = multi-plant
+!.....Supply curve parameter data
+      INTEGER WGEUNRgn(MNUMSC)          !   NERC region of curve
+      INTEGER WGEUNoSt(MNUMSC)          !   Number of steps in curve
+!
+!.....Supply curve step data
+      INTEGER WGEVSI(MNUMSC,MNUMSS)  !  Site index numbers in step order
+!
+!.....Internal parameters
+      INTEGER WGEINumS(MNUMNR) ! Number of sites in NERC region
+      INTEGER WGENumSC           ! Number of supply curves
+      INTEGER WGENumS            ! Number of sites
+!.....Error processing variables
+      INTEGER WGENo    !   RFM-GES error number
+      INTEGER WGERI    !   Related integer value describing error
+      INTEGER WGEAct   !  Code for action following error (<0 kills run)
+!.....Control parameters
+      INTEGER PLAT     !   Run platform (0=PC;1=Mainframe)
+      INTEGER MODE     !   Test/Run mode switch (0=Test;1=Run)
+      INTEGER Y        !   Local simulation year index
+      INTEGER LLOOP    !   Local looping switch
+      INTEGER PY       !   Index for year being processed
+      INTEGER PN       !   Index for the NERC region being processed
+      INTEGER PS       !   Index for the site being processed
+      INTEGER DBU      !   Unit number for debug output file
+!
+      COMMON /WGENUM/ WGESPtl, WGESCFct,WGESCO2R,WGESH2SR,WGESHtRt, &
+                      WGESFlOC,WGESPlOC,WGESCCst,WGESXCC ,WGESICap, &
+                      WGESPCap,WGESUCap,WGENICap,WGENUOC ,WGEPMAXC, &
+                      WGEPCC  ,WGEPFXOC,WGEPHTRT,WGEPCF  ,WGEPCO2R, &
+                      WGEPLC  ,WGENNCSP,WGEVNCCQ,WGEVOVCC,WGEVFOC , &
+                      WGEVHtRt,WGEVCFct,WGEVCO2R,WGEULC  ,PQCAP   , &
+                      LCOST   ,WGEAdXCC,WGEAdFCC,WGEAdSCC,WGEAdICC, &
+                      WGEAdOC ,WGEPGPCT,DISC    ,TXCALC  ,TAXRT   , &
+                      WGESEIA ,WGESNR  ,WGESCR  ,WGESPTyp,WGESNCAv, &
+                      WGEUNRgn,WGEUNoSt,WGEVSI  ,WGEINumS,WGENumSC, &
+                      WGENumS ,WGENo   ,WGERI   ,WGEAct  ,PLAT    , &
+                      MODE    ,Y       ,LLOOP   ,PY      ,  PN    , &
+                      PS      ,DBU

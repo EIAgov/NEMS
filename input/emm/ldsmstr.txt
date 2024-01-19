@@ -1,0 +1,689 @@
+** $Header: m:/default/input/RCS/ldsmstr.txt,v 1.32 2020/05/22 14:49:40 dgr Exp $
+***************************************
+* THIS IS THE STRUCTURE FILE FOR LDSM *
+***************************************
+***
+** DEFINE NUMBER OF COINCIDENT PEAK HOURS USED FOR CALCULATION OF
+** SECTORIAL AVERAGE LOAD FOR ECP FOR "PCP PURPOSES"
+   20 
+** DEFINE LDC FOR ECP MODUL
+**** NUMBER OF SEGMENTS (HOURLY GROUPS)
+     3
+**** DEFINE LDC SEGMENTS AS HOURLY GROUPS IN THE YEAR, USING THE CALENDAR FILE
+***** MONTH AND DAY-TYPE NAMES, AND HOURLY INTERVALS, THEN LDC BLOCKS AS
+***** PERCENTAGE OF HOURS IN A SEGMENT, AND TYPE OF BLOCK PEAK/NON-PEAK
+*                 MONTHS                       DAY-TYPES                          HOUR INTERVALS  BLOCK DEFINITION (P/N - PEAK/NON-PEAK)
+*# DESCRIPTION   # LIST OF MONTHS....         # LIST OF DAY-TYPES...              # F. L. F. L... # % P/N % P/N ...
+ 1 'WINTER      ' 4 'DEC' 'JAN' 'FEB' 'MARCH'  3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END' 1 1 24          3 1 'P' 49 'N' 50 'N'
+ 2 'SUMMER      ' 4 'JUNE' 'JULY' 'AUG' 'SEPT' 3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END' 1 1 24          3 1 'P' 49 'N' 50 'N'
+ 3 'SPRING/FALL ' 4 'APR' 'MAY' 'OCT' 'NOV'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END' 1 1 24          3 1 'P' 49 'N' 50 'N'
+**** DEFINE THE ECP SEASONS AS GROUPS OF CONTIGUOUS SEGMENTS
+**** NUMBER OF SEASONS
+     3
+* SEASON #     FIRST SEGMENT IN A SEASON        LAST SEGMENT IN A SEASON  NG SEASON(1=PEAK,2=OFFPEAK)
+     1             1                               1                                1
+     2             2                               2                                2
+     3             3                               3                                2
+** DEFINE LDCS FOR THE EFD MODULE
+**** NUMBER OF SEGMENTS (HOURLY GROUPS)
+      3
+**** DEFINE LDC SEGMENTS AS HOURLY GROUPS IN THE YEAR, USING THE CALENDAR FILE
+***** MONTH AND DAY-TYPE NAMES, AND HOURLY INTERVALS, THEN LDC BLOCKS AS
+***** PERCENTAGE OF HOURS IN A SEGMENT, AND TYPE OF BLOCK PEAK/NON-PEAK
+*# DESCRIPTION  # LIST OF MONTHS  # LIST OF DAY-TYPES...                    #   F. L.   F.  L...    # % P/N % P/N ...
+ 1 'WINTER      ' 4 'DEC' 'JAN' 'FEB' 'MARCH'  3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END' 1 1 24          3 1 'P' 49 'N' 50 'N'
+ 2 'SUMMER      ' 4 'JUNE' 'JULY' 'AUG' 'SEPT' 3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END' 1 1 24          3 1 'P' 49 'N' 50 'N'
+ 3 'SPRING/FALL ' 4 'APR' 'MAY' 'OCT' 'NOV'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END' 1 1 24          3 1 'P' 49 'N' 50 'N'
+**** DEFINE THE EFD SEASONS AS GROUPS OF CONTIGUOUS SEGMENTS
+**** NUMBER OF SEASONS
+     3
+* SEASON #     FIRST SEGMENT IN A SEASON        LAST SEGMENT IN A SEASON  NG SEASON(1=PEAK,2=OFFPEAK)
+     1             1                               1                                1
+     2             2                               2                                2
+     3             3                               3                                2
+*** END OF LDC DEFINITION
+** DEFINE LDCS FOR THE ETT MODULE
+**** NUMBER OF SEGMENTS (HOURLY GROUPS)
+     2
+**** DEFINE LDC SEGMENTS AS HOURLY GROUPS IN THE YEAR, USING THE CALENDAR FILE
+***** MONTH AND DAY-TYPE NAMES, AND HOURLY INTERVALS, THEN LDC BLOCKS AS
+***** PERCENTAGE OF HOURS IN A SEGMENT, AND TYPE OF BLOCK PEAK/NON-PEAK
+*# DESCRIPTION  # LIST OF MONTHS  # LIST OF DAY-TYPES...                                     #   F. L.   F.  L...    #  %  P/N
+ 1 'ALLDAY-WIN' 6 'OCT' 'NOV' 'DEC' 'JAN' 'FEB' 'MAR'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1  24               1 100 'N'
+ 2 'ALLDAY-SUM' 6 'APR' 'MAY' 'JUN' 'JUL' 'AUG' 'SEP'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1  24               1 100 'N'
+**** DEFINE THE EFD SEASONS AS GROUPS OF CONTIGUOUS SEGMENTS
+**** NUMBER OF SEASONS
+     2
+* SEASON #     FIRST SEGMENT IN A SEASON        LAST SEGMENT IN A SEASON  NG SEASON(1=PEAK,2=OFFPEAK)
+     1             1                               1                                1
+     2             2                               2                                2
+*** END OF LDC DEFINITION
+** DEFINE LDCS FOR THE ECI MODULE
+**** NUMBER OF SEGMENTS (HOURLY GROUPS)
+     18
+**** DEFINE LDC SEGMENTS AS HOURLY GROUPS IN THE YEAR, USING THE CALENDAR FILE
+***** MONTH AND DAY-TYPE NAMES, AND HOURLY INTERVALS, THEN LDC BLOCKS AS
+***** PERCENTAGE OF HOURS IN A SEGMENT, AND TYPE OF BLOCK PEAK/NON-PEAK
+*# DESCRIPTION  # LIST OF MONTHS  # LIST OF DAY-TYPES...              #   F. L.   F.  L...    # % P/N % P/N ...
+ 1 'MIDDAY    ' 2 'JAN' 'FEB'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   9  16               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 2 'MORN.EVEN.' 2 'JAN' 'FEB'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  2   6   8   17  24      6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 3 'NIGHT     ' 2 'JAN' 'FEB'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1   5               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 4 'MIDDAY    ' 2 'DEC' 'MARCH'   3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   9  16               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 5 'MORN.EVEN.' 2 'DEC' 'MARCH'   3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  2   6   8   17  24      6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 6 'NIGHT     ' 2 'DEC' 'MARCH'   3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1   5               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 7 'MIDDAY    ' 2 'APR' 'MAY'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   8  17               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 8 'MORN.EVEN.' 2 'APR' 'MAY'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  2   6   7   18  24      6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+ 9 'NIGHT     ' 2 'APR' 'MAY'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1   5               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+10 'MIDDAY    ' 2 'JUNE' 'SEPT'   3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   8  18               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+11 'MORN.EVEN.' 2 'JUNE' 'SEPT'   3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  2   6   7   19  24      6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+12 'NIGHT     ' 2 'JUNE' 'SEPT'   3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1   5               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+13 'MIDDAY    ' 2 'JULY' 'AUG'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   8  18               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+14 'MORN.EVEN.' 2 'JULY' 'AUG'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  2   6   7   19  24      6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+15 'NIGHT     ' 2 'JULY' 'AUG'    3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1   5               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+16 'MIDDAY    ' 2 'OCT' 'NOV'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   8  17               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+17 'MORN.EVEN.' 2 'OCT' 'NOV'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  2   6   7   18  24      6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+18 'NIGHT     ' 2 'OCT' 'NOV'     3 'WEEK-DAY' 'PEAK-DAY' 'WEEK-END'  1   1   5               6 1 'P' 3 'N' 9 'N' 29 'N' 29 'N' 29 'N'
+**** DEFINE THE ECI SEASONS AS GROUPS OF CONTIGUOUS SEGMENTS
+**** NUMBER OF SEASONS
+     6
+* SEASON #     FIRST SEGMENT IN A SEASON        LAST SEGMENT IN A SEASON  NG SEASON(1=PEAK,2=OFFPEAK)
+     1             1                               3                                1
+     2             4                               6                                1
+     3             7                               9                                2
+     4             10                             12                                2
+     5             13                             15                                2
+     6             16                             18                                2
+*** END OF LDC DEFINITION
+* Load  uncertainty SD as percent of load for efd
+7.5
+* Load  uncertainty SD as percent of load for ecp
+7.5
+* NET CONE       WEIGHT1        WEIGHT2        WEIGHT3        WEIGHT4
+  0.85           0.50           0.25           0.00           0.25
+* MAPPING MATRICES BETWEEN CENSUS DIVISIONS AND EMM REGONS
+* Define Payback-Acceptance Curves
+* Number of data rows, Number of Sectoral Curves
+          7                    3
+** Payback                  Sectors
+** (Years)   Residential    Commercial   Industrial
+      1         100          100            71
+      2         100          100            45
+      3          40           26            26
+      4          25           12            12
+      5          10            4             4
+      6          -1            2             2
+      7          -1            1             1
+*** -1 stands for data n/a (if reqested by the model data will be extrapolated)
+* Define DSM Options Data Base
+** Pay-back period for the options (years)
+   2
+** Define Residential DSM Programs
+** Number of Residential DSM Programs
+   6
+** # PROGRAM CODE   PROGRAM SPECIFICATION
+   1 'ResHtoHP'       switch from resistance heating+CAC to heat pumps
+   2 'HiEff_HP'       switch to higher efficicency heat pumps
+   3 'HiEffCAC'       improve CAC
+   4 'HiEffRAC'       improve RAC
+   5 'HeffRefr'       switch to higher efficiency refrigerators and freezers
+   6 'HiWaterH'       switch to higher efficiency water heaters
+** Define Commercial DSM Programs
+** Number of Commercial DSM Programs
+   6
+** # PROGRAM CODE   PROGRAM SPECIFICATION
+   1 'HiEffiHP'     switch to higher efficiency HP
+   2 'HiEffiAC'     switch to higher efficiency CAC
+   3 'HeChillr'     switch to higher efficiency chillers
+   4 'HeLights'     switch to higher efficiency lighting
+   5 'HeRefrig'     switch to higher efficiency refrigerators and freezers
+   6 'HeOthrEq'     swith to higher efficiency other quipment
+** Define residential sector technologies in DSM programs
+** Number of Technologies
+  21
+** Residential technologies have same LSR in every region, building type and
+** decision type
+** # Technology   Number of  Technology   Technology    LSR Code       Comment
+**   Code in      DEM.MOD.   Group Index  Index within
+**   DSM options  technol.                the Group
+   1 'HTPUMP1'        2          1 2        2 7          'RSFSHO67'    Electric Heat Pumps
+   2 'HTPUMP2'        2          1 2        3 8          'RSFSHO67'    ELectric Heat Pumps
+   3 'HTPUMP3'        2          1 2        4 9          'RSFSHO67'    Electric Heat Pumps
+   4 'ELFURN1'        1          1          1            'RSFEHO67'    Electric Furnace
+   5 'CENTAC1'        1          2          4            'RSFCAO67'    Central Air Conditioners
+   6 'CENTAC2'        1          2          5            'RSFCAO67'    Central Air Conditioners
+   7 'CENTAC3'        1          2          6            'RSFCAO67'    Central Air Conditioners
+   8 'ROOMAC1'        1          2          1            'RSFRAEW7'    Room Air Conditioners
+   9 'ROOMAC2'        1          2          2            'RSFRAEW7'    Room Air Conditioners
+  10 'ROOMAC3'        1          2          3            'RSFRAEW7'    Room Air Conditioners
+  11 'WATERH1'        1          3          4            'RSFWHAW7'    Electric Water Heaters
+  12 'WATERH2'        1          3          5            'RSFWHAW7'    Electric Water Heaters
+  13 'WATERH3'        1          3          6            'RSFWHAW7'    Electric Water Heaters
+  14 'REFRIG1'        1          6          1            'RSFRFEW7'    Refrigerators (top mount)
+  15 'REFRIG2'        1          6          2            'RSFRFEW7'    Refrigerators (top mount)
+  16 'REFRIG3'        1          6          3            'RSFRFEW7'    Refrigerators (top mount)
+  17 'REFRIG4'        1          6          4            'RSFRFEW7'    Refrigerators (top mount)
+  18 'FREEZR1'        1          7          1            'RSFFREW7'    Freezer
+  19 'FREEZR2'        1          7          2            'RSFFREW7'    Freezer
+  20 'FREEZR3'        1          7          3            'RSFFREW7'    Freezer
+  21 'FREEZR4'        1          7          4            'RSFFREW7'    Freezer
+** Define Groups of Regions used in Residential DSM definition
+** Number of groups
+   1
+** Define decision types descriptors used in Residential DSM option
+** defintion
+** Number of descriptors
+   2
+** Descriptor   Decision types #
+  'N'               1
+  'E'               2
+** Define building type descriptors used in residential DSM option defintion
+** Number of types
+   3
+** Descriptor   Building type #
+   'SF'         1
+   'MF'         2
+   'MH'         3
+* Number of RESIDENTIAL sector options
+71
+** It is assumed that an option applies to one building type and one decision
+** type
+'c13sN' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'N' 'SF' 2 'ELFURN1' 'CENTAC1' 1 'HTPUMP3'  0.0198 1  1995
+'c13sE' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'E' 'SF' 2 'ELFURN1' 'CENTAC1' 1 'HTPUMP3'  0.0198 1  1995
+'c13hN' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'N' 'MH' 2 'ELFURN1' 'CENTAC1' 1 'HTPUMP3'  0.0198 1  1995
+'c13hE' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'E' 'MH' 2 'ELFURN1' 'CENTAC1' 1 'HTPUMP3'  0.0198 1  1995
+'r13sN' 'ResHtoHP' 'A' 'Install              (if RAC exists)  ' 'N' 'SF' 2 'ELFURN1' 'ROOMAC1' 1 'HTPUMP3'  0.0198 1  1995
+'r13sE' 'ResHtoHP' 'A' 'Install              (if RAC exists)  ' 'E' 'SF' 2 'ELFURN1' 'ROOMAC1' 1 'HTPUMP3'  0.0198 1  1995
+'c23hN' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'N' 'MH' 2 'ELFURN1' 'CENTAC2' 1 'HTPUMP3'  0.0198 1  1995
+'c23hE' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'E' 'MH' 2 'ELFURN1' 'CENTAC2' 1 'HTPUMP3'  0.0198 1  1995
+'c33hE' 'ResHtoHP' 'A' 'Install              (if CAC exists)  ' 'E' 'MH' 2 'ELFURN1' 'CENTAC3' 1 'HTPUMP3'  0.0198 1  1995
+'r31hN' 'ResHtoHP' 'A' 'Install         (if RAC exists)       ' 'N' 'MH' 2 'ELFURN1' 'ROOMAC3' 1 'HTPUMP1'  0.0198 1  1995
+'r31hE' 'ResHtoHP' 'A' 'Install         (if RAC exists)       ' 'E' 'MH' 2 'ELFURN1' 'ROOMAC3' 1 'HTPUMP1'  0.0198 1  1995
+'r33hN' 'ResHtoHP' 'A' 'Install              (if RAC exists)  ' 'N' 'MH' 2 'ELFURN1' 'ROOMAC3' 1 'HTPUMP3'  0.0198 1  1995
+'r33hE' 'ResHtoHP' 'A' 'Install              (if RAC exists)  ' 'E' 'MH' 2 'ELFURN1' 'ROOMAC3' 1 'HTPUMP3'  0.0198 1  1995
+'H12sN' 'HiEff_HP' 'A' 'Improve HP                            ' 'N' 'SF' 1 'HTPUMP1'           1 'HTPUMP2'  0.0198 1  1995
+'H12sE' 'HiEff_HP' 'A' 'Improve HP                            ' 'E' 'SF' 1 'HTPUMP1'           1 'HTPUMP2'  0.0198 1  1995
+'H12mN' 'HiEff_HP' 'A' 'Improve HP                            ' 'N' 'MF' 1 'HTPUMP1'           1 'HTPUMP2'  0.0198 1  1995
+'H12mE' 'HiEff_HP' 'A' 'Improve HP                            ' 'E' 'MF' 1 'HTPUMP1'           1 'HTPUMP2'  0.0198 1  1995
+'H12hN' 'HiEff_HP' 'A' 'Improve HP                            ' 'N' 'MH' 1 'HTPUMP1'           1 'HTPUMP2'  0.0198 1  1995
+'H12hE' 'HiEff_HP' 'A' 'Improve HP                            ' 'E' 'MH' 1 'HTPUMP1'           1 'HTPUMP2'  0.0198 1  1995
+'H23sN' 'HiEff_HP' 'A' 'Improve HP                            ' 'N' 'SF' 1 'HTPUMP2'           1 'HTPUMP3'  0.0198 1  1995
+'H23sE' 'HiEff_HP' 'A' 'Improve HP                            ' 'E' 'SF' 1 'HTPUMP2'           1 'HTPUMP3'  0.0198 1  1995
+'H23mN' 'HiEff_HP' 'A' 'Improve HP                            ' 'N' 'MF' 1 'HTPUMP2'           1 'HTPUMP3'  0.0198 1  1995
+'H23mE' 'HiEff_HP' 'A' 'Improve HP                            ' 'E' 'MF' 1 'HTPUMP2'           1 'HTPUMP3'  0.0198 1  1995
+'H23hN' 'HiEff_HP' 'A' 'Improve HP                            ' 'N' 'MH' 1 'HTPUMP2'           1 'HTPUMP3'  0.0198 1  1995
+'H23hE' 'HiEff_HP' 'A' 'Improve HP                            ' 'E' 'MH' 1 'HTPUMP2'           1 'HTPUMP3'  0.0198 1  1995
+'C12sN' 'HiEffCAC' 'A' 'Improve CAC                           ' 'N' 'SF' 1 'CENTAC1'           1 'CENTAC2'  0.0198 1  1995
+'C12sE' 'HiEffCAC' 'A' 'Improve CAC                           ' 'E' 'SF' 1 'CENTAC1'           1 'CENTAC2'  0.0198 1  1995
+'C12mN' 'HiEffCAC' 'A' 'Improve CAC                           ' 'N' 'MF' 1 'CENTAC1'           1 'CENTAC2'  0.0198 1  1995
+'C12mE' 'HiEffCAC' 'A' 'Improve CAC                           ' 'E' 'MF' 1 'CENTAC1'           1 'CENTAC2'  0.0198 1  1995
+'C12hN' 'HiEffCAC' 'A' 'Improve CAC                           ' 'N' 'MH' 1 'CENTAC1'           1 'CENTAC2'  0.0198 1  1995
+'C12hE' 'HiEffCAC' 'A' 'Improve CAC                           ' 'E' 'MH' 1 'CENTAC1'           1 'CENTAC2'  0.0198 1  1995
+'C23sN' 'HiEffCAC' 'A' 'Improve CAC                           ' 'N' 'SF' 1 'CENTAC2'           1 'CENTAC3'  0.0198 1  1995
+'C23sE' 'HiEffCAC' 'A' 'Improve CAC                           ' 'E' 'SF' 1 'CENTAC2'           1 'CENTAC3'  0.0198 1  1995
+'C23mN' 'HiEffCAC' 'A' 'Improve CAC                           ' 'N' 'MF' 1 'CENTAC2'           1 'CENTAC3'  0.0198 1  1995
+'C23mE' 'HiEffCAC' 'A' 'Improve CAC                           ' 'E' 'MF' 1 'CENTAC2'           1 'CENTAC3'  0.0198 1  1995
+'C23hN' 'HiEffCAC' 'A' 'Improve CAC                           ' 'N' 'MH' 1 'CENTAC2'           1 'CENTAC3'  0.0198 1  1995
+'C23hE' 'HiEffCAC' 'A' 'Improve CAC                           ' 'E' 'MH' 1 'CENTAC2'           1 'CENTAC3'  0.0198 1  1995
+'R12sN' 'HiEffRAC' 'A' 'Improve RAC                           ' 'N' 'SF' 1 'ROOMAC1'           1 'ROOMAC2'  0.0198 1  1995
+'R12sE' 'HiEffRAC' 'A' 'Improve RAC                           ' 'E' 'SF' 1 'ROOMAC1'           1 'ROOMAC2'  0.0198 1  1995
+'R12mN' 'HiEffRAC' 'A' 'Improve RAC                           ' 'N' 'MF' 1 'ROOMAC1'           1 'ROOMAC2'  0.0198 1  1995
+'R12mE' 'HiEffRAC' 'A' 'Improve RAC                           ' 'E' 'MF' 1 'ROOMAC1'           1 'ROOMAC2'  0.0198 1  1995
+'R12hN' 'HiEffRAC' 'A' 'Improve RAC                           ' 'N' 'MH' 1 'ROOMAC1'           1 'ROOMAC2'  0.0198 1  1995
+'R12hE' 'HiEffRAC' 'A' 'Improve RAC                           ' 'E' 'MH' 1 'ROOMAC1'           1 'ROOMAC2'  0.0198 1  1995
+'R23sN' 'HiEffRAC' 'A' 'Improve RAC                           ' 'N' 'SF' 1 'ROOMAC2'           1 'ROOMAC3'  0.0198 1  1995
+'R23sE' 'HiEffRAC' 'A' 'Improve RAC                           ' 'E' 'SF' 1 'ROOMAC2'           1 'ROOMAC3'  0.0198 1  1995
+'R23mN' 'HiEffRAC' 'A' 'Improve RAC                           ' 'N' 'MF' 1 'ROOMAC2'           1 'ROOMAC3'  0.0198 1  1995
+'R23mE' 'HiEffRAC' 'A' 'Improve RAC                           ' 'E' 'MF' 1 'ROOMAC2'           1 'ROOMAC3'  0.0198 1  1995
+'R23hN' 'HiEffRAC' 'A' 'Improve RAC                           ' 'N' 'MH' 1 'ROOMAC2'           1 'ROOMAC3'  0.0198 1  1995
+'R23hE' 'HiEffRAC' 'A' 'Improve RAC                           ' 'E' 'MH' 1 'ROOMAC2'           1 'ROOMAC3'  0.0198 1  1995
+'f12sN' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'N' 'SF' 1 'FREEZR1'           1 'FREEZR2'  0.0061 1  1995
+'f12sE' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'E' 'SF' 1 'FREEZR1'           1 'FREEZR2'  0.0061 1  1995
+'f12mE' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'E' 'MF' 1 'FREEZR1'           1 'FREEZR2'  0.0061 1  1995
+'f12hN' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'N' 'MH' 1 'FREEZR1'           1 'FREEZR2'  0.0061 1  1995
+'f12hE' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'E' 'MH' 1 'FREEZR1'           1 'FREEZR2'  0.0061 1  1995
+'f23sN' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'N' 'SF' 1 'FREEZR2'           1 'FREEZR3'  0.0061 1  1995
+'f23sE' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'E' 'SF' 1 'FREEZR2'           1 'FREEZR3'  0.0061 1  1995
+'f23mE' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'E' 'MF' 1 'FREEZR2'           1 'FREEZR3'  0.0061 1  1995
+'f23hN' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'N' 'MH' 1 'FREEZR2'           1 'FREEZR3'  0.0061 1  1995
+'f23hE' 'HeffRefr' 'A' 'Efficient Freezer                     ' 'E' 'MH' 1 'FREEZR2'           1 'FREEZR3'  0.0061 1  1995
+'W13sN' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'N' 'SF' 1 'WATERH1'           1 'WATERH3'  0.0061 1  1995
+'W13sE' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'E' 'SF' 1 'WATERH1'           1 'WATERH3'  0.0061 1  1995
+'W13mN' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'N' 'MF' 1 'WATERH1'           1 'WATERH3'  0.0061 1  1995
+'W13mE' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'E' 'MF' 1 'WATERH1'           1 'WATERH3'  0.0061 1  1995
+'W13hN' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'N' 'MH' 1 'WATERH1'           1 'WATERH3'  0.0061 1  1995
+'W13hE' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'E' 'MH' 1 'WATERH1'           1 'WATERH3'  0.0061 1  1995
+'W23sN' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'N' 'SF' 1 'WATERH2'           1 'WATERH3'  0.0061 1  1995
+'W23sE' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'E' 'SF' 1 'WATERH2'           1 'WATERH3'  0.0061 1  1995
+'W23mN' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'N' 'MF' 1 'WATERH2'           1 'WATERH3'  0.0061 1  1995
+'W23mE' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'E' 'MF' 1 'WATERH2'           1 'WATERH3'  0.0061 1  1995
+'W23hN' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'N' 'MH' 1 'WATERH2'           1 'WATERH3'  0.0061 1  1995
+'W23hE' 'HiWaterH' 'A' 'Efficient W.H.                        ' 'E' 'MH' 1 'WATERH2'           1 'WATERH3'  0.0061 1  1995
+*CODE    PROGRAM   REG MEASURE                                  NER BTYPE  SWITCHING  FROM     SWITCHING TO PRCOST RMP STYR
+** Define Commercial sector technologies in DSM programs
+** Number of technologies
+  70
+** Commercial technologies have same LSR in every region and decision type;
+** different LSR for every building type.
+** # Techn.    LSR Code   LSR Code    LSR Code    LSR Code   LSR Code   LSR Code     LSR Code   LSR Code     LSR Code   LSR Code    LSR Code
+**   Code      'ASSEM'    'EDUCT'     'FOODS'     'HELTH'    'LODGI'    'OFFCL'      'SOFFC'    'FSERV       'RETAL'    'WARHO'     'OTHER'
+  1   6 2 25   'CSCLGB21' 'CSCLGB21'  'CGRLGB22'  'CHSLGB21' 'CHSLGB21' 'COCLGB21'   'COCLGB21' 'CRSLGB22'   'CLRLGB21' 'CWNLGB22'  'CHSLGB21'
+  2   6 3 25   'CSCLGB21' 'CSCLGB21'  'CGRLGB22'  'CHSLGB21' 'CHSLGB21' 'COCLGB21'   'COCLGB21' 'CRSLGB22'   'CLRLGB21' 'CWNLGB22'  'CHSLGB21'
+  3   6 4 25   'CSCLGB21' 'CSCLGB21'  'CGRLGB22'  'CHSLGB21' 'CHSLGB21' 'COCLGB21'   'COCLGB21' 'CRSLGB22'   'CLRLGB21' 'CWNLGB22'  'CHSLGB21'
+  4   2 1 13   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+  5   2 2 13   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+  6   2 3 13   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+  7   2 4 13   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+  8   2 5 13   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+  9   2 1 14   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+  0   2 2 14   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 11   2 3 14   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 12   2 4 14   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 13   2 5 14   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 14   2 2 10   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 15   2 3 10   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 16   2 4 10   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 17   2 5 10   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 18   2 6 10   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 19   2 7 10   'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 20   1 2 3    'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 21   1 3 3    'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 22   1 4 3    'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 23   1 5 3    'CSCCAB11' 'CSCCAB11'  'CGRCAB12'  'CHSCAB11' 'CHSCAB11' 'COCCAB11'   'COCCAB11' 'CRSCAB12'   'CLRCAB11' 'CWNCAB02'  'CHSCAB11'
+ 24   2 2 11   'CSCSHB61' 'CSCSHB61'  'CGRSHB62'  'CHSSHB01' 'CHSSHB01' 'COCSHB01'   'COCSHB01' 'CRSSHB02'   'CLRSHB61' 'CWNSHB62'  'CHSSHB01'
+ 25   2 3 11   'CSCSHB61' 'CSCSHB61'  'CGRSHB62'  'CHSSHB01' 'CHSSHB01' 'COCSHB01'   'COCSHB01' 'CRSSHB02'   'CLRSHB61' 'CWNSHB62'  'CHSSHB01'
+ 26   2 4 11   'CSCSHB61' 'CSCSHB61'  'CGRSHB62'  'CHSSHB01' 'CHSSHB01' 'COCSHB01'   'COCSHB01' 'CRSSHB02'   'CLRSHB61' 'CWNSHB62'  'CHSSHB01'
+ 27   2 5 11   'CSCSHB61' 'CSCSHB61'  'CGRSHB62'  'CHSSHB01' 'CHSSHB01' 'COCSHB01'   'COCSHB01' 'CRSSHB02'   'CLRSHB61' 'CWNSHB62'  'CHSSHB01'
+ 28   7 1 15   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 29   7 2 15   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 30   7 3 15   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 31   7 4 15   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 32   7 5 15   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 33   7 1 44   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 34   7 2 44   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 35   7 3 44   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 36   7 4 44   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 37   7 5 44   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 38   7 1 45   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 39   7 2 45   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 40   7 3 45   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 41   7 4 45   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 42   7 5 45   'CSCRFB01' 'CSCRFB01'  'CGRRFB02'  'CHSRFB01' 'CHSRFB01' 'COCRFB02'   'COCRFB02' 'CRSRFB02'   'CLRRFB02' 'COCRFB02'  'CHSRFB01'
+ 43   3 2 21   'CSCWHB01' 'CSCWHB01'  'CGRWHB02'  'CHSWHB02' 'CHSWHB02' 'COCWHB02'   'COCWHB02' 'CRSWHB02'   'CLRWHB02' 'CWNWHB02'  'CHSWHB02'
+ 44   3 3 21   'CSCWHB01' 'CSCWHB01'  'CGRWHB02'  'CHSWHB02' 'CHSWHB02' 'COCWHB02'   'COCWHB02' 'CRSWHB02'   'CLRWHB02' 'CWNWHB02'  'CHSWHB02'
+ 45   3 4 21   'CSCWHB01' 'CSCWHB01'  'CGRWHB02'  'CHSWHB02' 'CHSWHB02' 'COCWHB02'   'COCWHB02' 'CRSWHB02'   'CLRWHB02' 'CWNWHB02'  'CHSWHB02'
+ 46   3 5 21   'CSCWHB01' 'CSCWHB01'  'CGRWHB02'  'CHSWHB02' 'CHSWHB02' 'COCWHB02'   'COCWHB02' 'CRSWHB02'   'CLRWHB02' 'CWNWHB02'  'CHSWHB02'
+ 47   3 1 30   'CSCWHB01' 'CSCWHB01'  'CGRWHB02'  'CHSWHB02' 'CHSWHB02' 'COCWHB02'   'COCWHB02' 'CRSWHB02'   'CLRWHB02' 'CWNWHB02'  'CHSWHB02'
+ 48   3 2 30   'CSCWHB01' 'CSCWHB01'  'CGRWHB02'  'CHSWHB02' 'CHSWHB02' 'COCWHB02'   'COCWHB02' 'CRSWHB02'   'CLRWHB02' 'CWNWHB02'  'CHSWHB02'
+ 49   6 2 24   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 50   6 5 24   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 51   6 5 25   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 52   6 1 26   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 53   6 2 26   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 54   6 1 27   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 55   6 2 27   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 56   6 3 27   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 57   6 1 28   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 58   6 2 28   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 59   6 1 29   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 60   6 2 29   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 61   6 3 29   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 62   6 4 29   'CSCLGB01' 'CSCLGB01'  'CGRLGB02'  'CHSCAB01' 'CHSCAB01' 'COCLGB02'   'COCLGB02' 'CRSLGB02'   'CLRLGB02' 'CWNLGB02'  'CHSCAB01'
+ 63   5 1 34   'CSCCOB01' 'CSCCOB01'  'CGRCOB02'  'CHSCOB02' 'CHSCOB02' 'COCCOB02'   'COCCOB02' 'CRSCOB02'   'CLRCOB02' 'COCCOB02'  'CHSCOB02'
+ 64   5 2 34   'CSCCOB01' 'CSCCOB01'  'CGRCOB02'  'CHSCOB02' 'CHSCOB02' 'COCCOB02'   'COCCOB02' 'CRSCOB02'   'CLRCOB02' 'COCCOB02'  'CHSCOB02'
+ 65   5 1 40   'CSCCOB01' 'CSCCOB01'  'CGRCOB02'  'CHSCOB02' 'CHSCOB02' 'COCCOB02'   'COCCOB02' 'CRSCOB02'   'CLRCOB02' 'COCCOB02'  'CHSCOB02'
+ 66   5 2 40   'CSCCOB01' 'CSCCOB01'  'CGRCOB02'  'CHSCOB02' 'CHSCOB02' 'COCCOB02'   'COCCOB02' 'CRSCOB02'   'CLRCOB02' 'COCCOB02'  'CHSCOB02'
+ 67   4 1 31   'CSCVNB01' 'CSCVNB01'  'CGRVNB02'  'CHSVNB02' 'CHSVNB02' 'COCVNB02'   'COCVNB02' 'CRSVNB02'   'CLRVNB02' 'CWNVNB02'  'CHSVNB02'
+ 68   4 2 31   'CSCVNB01' 'CSCVNB01'  'CGRVNB02'  'CHSVNB02' 'CHSVNB02' 'COCVNB02'   'COCVNB02' 'CRSVNB02'   'CLRVNB02' 'CWNVNB02'  'CHSVNB02'
+ 69   4 1 33   'CSCVNB01' 'CSCVNB01'  'CGRVNB02'  'CHSVNB02' 'CHSVNB02' 'COCVNB02'   'COCVNB02' 'CRSVNB02'   'CLRVNB02' 'CWNVNB02'  'CHSVNB02'
+ 70   4 2 33   'CSCVNB01' 'CSCVNB01'  'CGRVNB02'  'CHSVNB02' 'CHSVNB02' 'COCVNB02'   'COCVNB02' 'CRSVNB02'   'CLRVNB02' 'CWNVNB02'  'CHSVNB02'
+** Define groups of regions used in Commercial DSM option definition
+** Number of groups
+   1
+** Define decision type descriptors
+** Number of decision types
+   2
+** Descriptor   Decision type #
+  'N'           1
+  'E'           2
+** Define building type descriptors
+** Number of types
+  11
+** In building descriptors only first 2 characters are significant
+** Descriptor  Building type #
+   'ASSEM'     1
+   'EDUCT'     2
+   'FOODS'     3
+   'HELTH'     4
+   'LODGI'     5
+   'OFFCL'     6
+   'SOFFC'     7
+   'FSERV'     8
+   'RETAL'     9
+   'WARHO'     10
+   'OTHER'     11
+* Number of COMMERCIAL DSM options
+280
+*CODE     PROGRAM   REG   MEASURE                                  NER  BTYPE   SWITCHING FROM (s,v,t)    SWITCHING TO (s,v,t)    PRCOST    RMP    STYR
+'7CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'SOFFC'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'7CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'SOFFC'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'7WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'SOFFC'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'7WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'SOFFC'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'7GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'SOFFC'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'7GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'SOFFC'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'7LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'SOFFC'    1     6 2 24             1  6 2 26              0.004      1     1995
+'7LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'SOFFC'    1     6 2 24             1  6 2 26              0.004      1     1995
+'7L4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'SOFFC'    1     6 3 25             1  6 5 25              0.004      1     2000
+'7L4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'SOFFC'    1     6 3 25             1  6 5 25              0.004      1     2000
+'7LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'SOFFC'    1     6 1 27             1  6 3 27              0.004      1     1995
+'7LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'SOFFC'    1     6 1 27             1  6 3 27              0.004      1     1995
+'7LHhsE' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'E'  'SOFFC'    1     6 1 28             1  6 2 28              0.004      1     2011
+'7LHhsN' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'N'  'SOFFC'    1     6 1 28             1  6 2 28              0.004      1     2011
+'7RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'SOFFC'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'7RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'SOFFC'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'7RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'SOFFC'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'7RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'SOFFC'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'1HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'ASSEM'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'1HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'ASSEM'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'1HPP2E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'E'  'ASSEM'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'1HPP2N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'N'  'ASSEM'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'1ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'ASSEM'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'1ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'ASSEM'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'1A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'ASSEM'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'1A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'ASSEM'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'1A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'ASSEM'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'1A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'ASSEM'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'1CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'ASSEM'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'1CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'ASSEM'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'1WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'ASSEM'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'1WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'ASSEM'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'1GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'ASSEM'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'1GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'ASSEM'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'1LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'ASSEM'    1     6 2 24             1  6 2 26              0.004      1     1995
+'1LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'ASSEM'    1     6 2 24             1  6 2 26              0.004      1     1995
+'1L4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'ASSEM'    1     6 3 25             1  6 5 25              0.004      1     2000
+'1L4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'ASSEM'    1     6 3 25             1  6 5 25              0.004      1     2000
+'1LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'ASSEM'    1     6 1 27             1  6 3 27              0.004      1     1995
+'1LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'ASSEM'    1     6 1 27             1  6 3 27              0.004      1     1995
+'1LHhsE' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'E'  'ASSEM'    1     6 1 28             1  6 2 28              0.004      1     2011
+'1LHhsN' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'N'  'ASSEM'    1     6 1 28             1  6 2 28              0.004      1     2011
+'1RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'ASSEM'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'1RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'ASSEM'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'1RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'ASSEM'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'1RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'ASSEM'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'3HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'FOODS'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'3HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'FOODS'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'3HPP2E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'E'  'FOODS'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'3HPP2N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'N'  'FOODS'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'3ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'FOODS'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'3ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'FOODS'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'3A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'FOODS'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'3A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'FOODS'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'3A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'FOODS'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'3A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'FOODS'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'3CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'FOODS'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'3CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'FOODS'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'3WRC-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO ELEC-CONV. HEATER'  'E'  'FOODS'    1     3 3 21             1  3 2 21              0.0095     1     1995
+'3WRC-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO ELEC-CONV. HEATER'  'N'  'FOODS'    1     3 3 21             1  3 2 21              0.0095     1     1995
+'3GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'FOODS'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'3GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'FOODS'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'3LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'FOODS'    1     6 2 24             1  6 2 26              0.004      1     1995
+'3LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'FOODS'    1     6 2 24             1  6 2 26              0.004      1     1995
+'3LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'FOODS'    1     6 1 27             1  6 3 27              0.004      1     1995
+'3LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'FOODS'    1     6 1 27             1  6 3 27              0.004      1     1995
+'3RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'FOODS'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'3RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'FOODS'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'3RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'FOODS'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'3RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'FOODS'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'4HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'HELTH'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'4HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'HELTH'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'4ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'HELTH'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'4ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'HELTH'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'4A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'HELTH'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'4A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'HELTH'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'4A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'HELTH'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'4A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'HELTH'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'4CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'HELTH'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'4CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'HELTH'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'4WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'HELTH'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'4WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'HELTH'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'4GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'HELTH'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'4GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'HELTH'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'4LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'HELTH'    1     6 2 24             1  6 2 26              0.004      1     1995
+'4LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'HELTH'    1     6 2 24             1  6 2 26              0.004      1     1995
+'4L4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'HELTH'    1     6 3 25             1  6 5 25              0.004      1     2000
+'4L4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'HELTH'    1     6 3 25             1  6 5 25              0.004      1     2000
+'4LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'HELTH'    1     6 1 27             1  6 3 27              0.004      1     1995
+'4LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'HELTH'    1     6 1 27             1  6 3 27              0.004      1     1995
+'4RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'HELTH'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'4RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'HELTH'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'4RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'HELTH'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'4RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'HELTH'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'5HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'LODGI'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'5HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'LODGI'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'5ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'LODGI'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'5ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'LODGI'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'5A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'LODGI'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'5A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'LODGI'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'5A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'LODGI'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'5A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'LODGI'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'5CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'LODGI'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'5CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'LODGI'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'5WRC-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO ELEC-CONV. HEATER'  'E'  'LODGI'    1     3 3 21             1  3 2 21              0.0095     1     1995
+'5WRC-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO ELEC-CONV. HEATER'  'N'  'LODGI'    1     3 3 21             1  3 2 21              0.0095     1     1995
+'5GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'LODGI'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'5GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'LODGI'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'5LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'LODGI'    1     6 2 24             1  6 2 26              0.004      1     1995
+'5LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'LODGI'    1     6 2 24             1  6 2 26              0.004      1     1995
+'5L4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'LODGI'    1     6 3 25             1  6 5 25              0.004      1     2000
+'5L4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'LODGI'    1     6 3 25             1  6 5 25              0.004      1     2000
+'5LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'LODGI'    1     6 1 27             1  6 3 27              0.004      1     1995
+'5LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'LODGI'    1     6 1 27             1  6 3 27              0.004      1     1995
+'5RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'LODGI'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'5RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'LODGI'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'5RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'LODGI'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'5RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'LODGI'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'8HPP2E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'E'  'FSERV'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'8HPP2N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'N'  'FSERV'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'8ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'FSERV'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'8ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'FSERV'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'8A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'FSERV'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'8A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'FSERV'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'8A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'FSERV'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'8A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'FSERV'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'8CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'FSERV'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'8CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'FSERV'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'8WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'FSERV'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'8WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'FSERV'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'8GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'FSERV'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'8GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'FSERV'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'8LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'FSERV'    1     6 2 24             1  6 2 26              0.004      1     1995
+'8LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'FSERV'    1     6 2 24             1  6 2 26              0.004      1     1995
+'8LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'FSERV'    1     6 1 27             1  6 3 27              0.004      1     1995
+'8LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'FSERV'    1     6 1 27             1  6 3 27              0.004      1     1995
+'8RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'FSERV'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'8RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'FSERV'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'8RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'FSERV'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'8RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'FSERV'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'9HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'RETAL'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'9HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'RETAL'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'9HPP2E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'E'  'RETAL'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'9HPP2N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'N'  'RETAL'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'9ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'RETAL'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'9ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'RETAL'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'9A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'RETAL'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'9A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'RETAL'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'9A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'RETAL'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'9A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'RETAL'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'9CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'RETAL'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'9CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'RETAL'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'9WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'RETAL'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'9WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'RETAL'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'9GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'RETAL'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'9GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'RETAL'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'9LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'RETAL'    1     6 2 24             1  6 2 26              0.004      1     1995
+'9LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'RETAL'    1     6 2 24             1  6 2 26              0.004      1     1995
+'9LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'RETAL'    1     6 1 27             1  6 3 27              0.004      1     1995
+'9LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'RETAL'    1     6 1 27             1  6 3 27              0.004      1     1995
+'9RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'RETAL'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'9RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'RETAL'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'9RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'RETAL'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'9RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'RETAL'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'0HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'WARHO'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'0HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'WARHO'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'0HPP2E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'E'  'WARHO'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'0HPP2N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'N'  'WARHO'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'0ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'WARHO'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'0ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'WARHO'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'0A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'WARHO'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'0A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'WARHO'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'0A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'WARHO'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'0A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'WARHO'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'0CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'WARHO'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'0CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'WARHO'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'0WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'WARHO'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'0WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'WARHO'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'0GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'WARHO'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'0GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'WARHO'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'0LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'WARHO'    1     6 2 24             1  6 2 26              0.004      1     1995
+'0LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'WARHO'    1     6 2 24             1  6 2 26              0.004      1     1995
+'0LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'WARHO'    1     6 1 27             1  6 3 27              0.004      1     1995
+'0LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'WARHO'    1     6 1 27             1  6 3 27              0.004      1     1995
+'0LHhsE' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'E'  'WARHO'    1     6 1 28             1  6 2 28              0.004      1     2011
+'0LHhsN' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'N'  'WARHO'    1     6 1 28             1  6 2 28              0.004      1     2011
+'0RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'WARHO'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'0RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'WARHO'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'0RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'WARHO'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'0RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'WARHO'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'AHPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'OTHER'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'AHPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'OTHER'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'AASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'OTHER'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'AASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'OTHER'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'AA58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'OTHER'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'AA58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'OTHER'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'AA81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'OTHER'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'AA81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'OTHER'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'ACHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'OTHER'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'ACHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'OTHER'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'AWRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'OTHER'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'AWRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'OTHER'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'AGRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'OTHER'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'AGRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'OTHER'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'ALIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'OTHER'    1     6 2 24             1  6 2 26              0.004      1     1995
+'ALIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'OTHER'    1     6 2 24             1  6 2 26              0.004      1     1995
+'AL4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'OTHER'    1     6 3 25             1  6 5 25              0.004      1     2000
+'AL4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'OTHER'    1     6 3 25             1  6 5 25              0.004      1     2000
+'ALHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'OTHER'    1     6 1 27             1  6 3 27              0.004      1     1995
+'ALHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'OTHER'    1     6 1 27             1  6 3 27              0.004      1     1995
+'ALHhsE' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'E'  'OTHER'    1     6 1 28             1  6 2 28              0.004      1     2011
+'ALHhsN' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'N'  'OTHER'    1     6 1 28             1  6 2 28              0.004      1     2011
+'ARVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'OTHER'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'ARVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'OTHER'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'ARM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'OTHER'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'ARM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'OTHER'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'2CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'EDUCT'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'2CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'EDUCT'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'2WRP-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'E'  'EDUCT'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'2WRP-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO HEAT PUMP HEATER '  'N'  'EDUCT'    1     3 3 21             1  3 1 30              0.0095     1     1995
+'2GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'EDUCT'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'2GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'EDUCT'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'2LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'EDUCT'    1     6 2 24             1  6 2 26              0.004      1     1995
+'2LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'EDUCT'    1     6 2 24             1  6 2 26              0.004      1     1995
+'2L4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'EDUCT'    1     6 3 25             1  6 5 25              0.004      1     2000
+'2L4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'EDUCT'    1     6 3 25             1  6 5 25              0.004      1     2000
+'2LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'EDUCT'    1     6 1 27             1  6 3 27              0.004      1     1995
+'2LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'EDUCT'    1     6 1 27             1  6 3 27              0.004      1     1995
+'2LHhsE' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'E'  'EDUCT'    1     6 1 28             1  6 2 28              0.004      1     2011
+'2LHhsN' 'HeLights' 'A'  'HALOGEN TO HID SODIUM HIGH PRESSURE  '  'N'  'EDUCT'    1     6 1 28             1  6 2 28              0.004      1     2011
+'2RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'EDUCT'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'2RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'EDUCT'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'2RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'EDUCT'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'2RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'EDUCT'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'6CHVcE' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'E'  'OFFCL'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'6CHVcN' 'HeChillr' 'A'  '2010 HIEF CENCHL TO 2010 VHEF CEN CHL'  'N'  'OFFCL'    1     2 3 14             1  2 4 14              0.0095     1     2011
+'6WRC-E' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO ELEC-CONV. HEATER'  'E'  'OFFCL'    1     3 3 21             1  3 2 21              0.0095     1     1995
+'6WRC-N' 'HeOthrEq' 'A'  'ELEC-RES. HEATER TO ELEC-CONV. HEATER'  'N'  'OFFCL'    1     3 3 21             1  3 2 21              0.0095     1     1995
+'6GRRhE' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'E'  'OFFCL'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'6GRRhN' 'HeOthrEq' 'A'  'ELECTRIC RANGE TO HI-EFF. ELEC. RANGE'  'N'  'OFFCL'    1     5 1 34             1  5 2 34              0.0095     1     1996
+'6LIF5E' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'E'  'OFFCL'    1     6 2 24             1  6 2 26              0.004      1     1995
+'6LIF5N' 'HeLights' 'A'  'INCANDESCENT TO 1995 COMP. FLUORESC. '  'N'  'OFFCL'    1     6 2 24             1  6 2 26              0.004      1     1995
+'6L4H0E' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'E'  'OFFCL'    1     6 3 25             1  6 5 25              0.004      1     2000
+'6L4H0N' 'HeLights' 'A'  '4 FT. FLUORESCENT: HIGH TO 2000 ELEC '  'N'  'OFFCL'    1     6 3 25             1  6 5 25              0.004      1     2000
+'6LHmsE' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'E'  'OFFCL'    1     6 1 27             1  6 3 27              0.004      1     1995
+'6LHmsN' 'HeLights' 'A'  'HID MERCURY VAPOR TO HID SODIUM      '  'N'  'OFFCL'    1     6 1 27             1  6 3 27              0.004      1     1995
+'6RVODE' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'E'  'OFFCL'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'6RVODN' 'HeRefrig' 'A'  'VERY LOW:OPEN CASE TO HOT GAS DEFROST'  'N'  'OFFCL'    1     7 1 15             1  7 4 15              0.0095     1     1995
+'6RM2SE' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'E'  'OFFCL'    1     7 4 45             1  7 5 45              0.0095     1     1995
+'6RM2SN' 'HeRefrig' 'A'  'MEDIUM: NON-CFC 2 TO MECH. SUBCOOLING'  'N'  'OFFCL'    1     7 4 45             1  7 5 45              0.0095    10     1995
+'7HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'SOFFC'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'7HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'SOFFC'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'7HPP3E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2010 AIR HEAT PUMP '  'E'  'SOFFC'    2     1 3 3     2 3 11   2  1 5 3     2 5 11    0.0095     1     2011
+'7HPP3N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2010 AIR HEAT PUMP '  'N'  'SOFFC'    2     1 3 3     2 3 11   2  1 5 3     2 5 11    0.0095     1     2011
+'7ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'SOFFC'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'7ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'SOFFC'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'7A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'SOFFC'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'7A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'SOFFC'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'7A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'SOFFC'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'7A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'SOFFC'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'2HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'EDUCT'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'2HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'EDUCT'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'2HPP2E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'E'  'EDUCT'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'2HPP2N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2000 AIR HEAT PUMP '  'N'  'EDUCT'    2     1 3 3     2 3 11   2  1 4 3     2 4 11    0.0095     1     2011
+'2ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'EDUCT'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'2ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'EDUCT'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'2A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'EDUCT'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'2A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'EDUCT'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'2A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'EDUCT'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'2A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'EDUCT'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'6HPP1E' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'E'  'OFFCL'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'6HPP1N' 'HiEffiHP' 'A'  'AIR HEAT PUMP TO 1995 AIR HEAT PUMP  '  'N'  'OFFCL'    2     1 2 3     2 2 11   2  1 3 3     2 3 11    0.0095     1     1995
+'6HPP3E' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2010 AIR HEAT PUMP '  'E'  'OFFCL'    2     1 3 3     2 3 11   2  1 5 3     2 5 11    0.0095     1     2011
+'6HPP3N' 'HiEffiHP' 'A'  '1995 HEAT PUMP TO 2010 AIR HEAT PUMP '  'N'  'OFFCL'    2     1 3 3     2 3 11   2  1 5 3     2 5 11    0.0095     1     2011
+'6ASE-E' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'E'  'OFFCL'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'6ASE-N' 'HiEffiAC' 'A'  'UNIT A/C TO HIGH EFFICIENCY UNIT A/C '  'N'  'OFFCL'    1     2 2 10             1  2 3 10              0.0095     1     1995
+'6A58-E' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'E'  'OFFCL'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'6A58-N' 'HiEffiAC' 'A'  '1995 UNIT A/C TO 1998 UNIT A/C       '  'N'  'OFFCL'    1     2 4 10             1  2 5 10              0.0095     1     2005
+'6A81-E' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'E'  'OFFCL'    1     2 5 10             1  2 6 10              0.0095     1     2011
+'6A81-N' 'HiEffiAC' 'A'  '1998 UNIT A/C TO 2010 UNIT A/C       '  'N'  'OFFCL'    1     2 5 10             1  2 6 10              0.0095     1     2011
+* SPECIFY A SURCHARGE FOR NON-REBATE DSM OPTIONS [$/KWH SAVED]
+     0.005
+* DEFINE REPORTS TO BE GENERATED
+** SPECIFY REPORTS TO BE GENERATED
+*Y/N  COMMENTS: #   SPECIFICATION
+*                  LOAD PORTION
+'Y'            1       ANNUAL LOAD RESULTS
+'N'            2       MONTHLY LOAD RESULTS
+'Y'            3       ECP LDC
+'Y'            4       EFD LDC
+*                  DSM PORTION
+**                   CREATING LDSM PROGRAMS
+'N'            5       ECP MARGINAL COST
+'N'            6       INPUTS FOR RESIDENTIAL DSM OPTIONS
+'N'            7       TRC RESULTS FOR RESIDENTIAL DSM OPTIONS
+'N'            8       POTENTIAL RESIDENTIAL DSM IMPACTS (UNITS)
+'N'            9       POTENTIAL RESIDENTAIL DSM IMPACTS (ELECTRIC LOAD)
+'N'           10       INPUTS FOR COMMERCIAL DSM OPTIONS
+'N'           11       TRC RESULTS FOR COMMERCIAL DSM OPTIONS
+'N'           12       POTENTIAL COMMERCIAL DSM IMPACTS (SERVICE DEMAND)
+'N'           13       POTENTIAL COMMERCIAL DSM IMPACTS (ELECTRIC LOAD)
+**                   ECP PROGRAM CHOICE
+'N'           14       ECP PROGRAM CHOICE (FRACTION OF POTENTIAL)
+'N'           15       RESIDENTAIL ECP PROGRAM CHOICE (DEMAND IMPACT)
+'N'           16       COMMERCIAL ECP PROGRAM CHOICE (DEMAND IMPACT)
+'N'           17       TOTAL ECP PROGRAM CHOICE (DEMAND IMPACT)
+'N'           18       RESIDENTAIL ECP EXPECTED PROGRAM IMPLEMENTATION
+'N'           19       COMMERCIAL ECP EXPECTED PROGRAM IMPLEMENTATION
+**                   DEMAND IMPLEMENTATION OF DSM
+'N'           20       RESIDENTIAL DEMAND MODEL PROGRAM IMPLEMENTATION
+'N'           21       COMMERCIAL DEMAND MODEL PROGRAM IMPLEMENTATIION
+'N'           22       CUMULATIVE RESIDENTIAL DSM IMPACTS
+'N'           23       CUMULATIVE COMMERCIAL DSM IMPACTS
+'N'           24       CUMULATIVE TOTAL DSM IMPACTS
+** SPECIFY EMM REGIONS THAT THE REPORTS ARE TO BE GENERATED FOR
+*** # OF REGIONS REGIONS...
+1  'ECAR'     
+** SPECIFY YEARS THAT THE REPORTS ARE TO BE GENERATED FOR
+*** # OF YEARS   YEARS...
+    1          2000                    
+** SPECIFY YEARS FOR TABLES WITH MORE THAN ONE YEAR OF DATA SHOWN ON ONE LINE
+*** # OF YEARS   YEARS ...
+    1  1               

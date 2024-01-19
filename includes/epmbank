@@ -1,0 +1,23 @@
+!  $Header: N:/default/includes/RCS/epmbank,v 1.2 2003/02/23 20:15:15 DSA Exp $ 
+!
+! Holds variables in 
+ 
+      REAL LOW_SUM    ! LOWER  SUM OF POLLUTANTS
+      real HIGH_SUM   ! HIGHER SUM OF POLLUTANTS
+      real LOW_TAX    ! TAX RATE FOR LOWER SUM OF POLLUTANTS
+      real HIGH_TAX   ! TAX RATE FOR HIGHER SUM OF POLLUTANTS
+      real slope
+      integer iter ! iteration count for the regula-falsi trials in the fee-banking case
+      integer bracket ! if 1 (true), then WE HAVE established the upper and lower BRACKETING points
+      integer bank_priceyr  ! year at which ghg pricing occurs
+      integer bank_startyr  ! year ghg banking and compliance begins
+      integer bank_endyr    ! year ghg banking ends and conversion to year-by-year compliance begins.
+      real newsum(100),newtax(100)  ! store new_sum, new_tax by iteration 
+      real balance(mnumyr)         ! cumulative balance of banked emissions allowances
+      real offset(5,mnumyr)        ! Emission offsets, up to 5 classes (2 used), 1:Other GHG, 2:Carbon Sequestration
+      common/epmbank/low_sum,High_sum, low_tax, high_tax, slope, &
+         iter,bracket,bank_startyr,bank_endyr,newsum,newtax,balance,offset,bank_priceyr
+
+! filer equivalence variable:
+      real eq_epmbank(10+200+6*mnumyr)
+      equivalence(eq_epmbank(1),low_sum)

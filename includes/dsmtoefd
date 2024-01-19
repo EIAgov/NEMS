@@ -1,0 +1,113 @@
+!  $Header: m:/default/includes/RCS/dsmtoefd,v 1.8 2018/08/06 20:26:38 rsc Exp $
+!================================ (DSMTOEFD) ===================================
+!        This INCLUDE file is used for communication with the EFD module
+!===============================================================================
+! USE INCLUDE's (DSMDIMEN) and (PARAMETR) with this file
+! EFDnS - EFD LDC number of seasons
+! EFDnumSg - Number of segments in LDC's for EFD module
+! EFDsgDblock(MAXEFDSG,MAXEFDB)- %% of hours allocated to blocks in each segment
+! EFDsgDbltyp(MAXEFDSG,MAXEFDB) - type peak/non-peak of a block
+! EFDsgDnB(MAXEFDSG) - Number of blocks in each of segments of EFD LDC
+! EFDSEDEF(MAXEFDS,2) - first, last LDC block in a season
+! ULHGHT(MAXEFDSS,MAXEFDS,MAXNRG) - height of blocks in EFD's LDC
+! ULWDTH(MAXEFDSS,MAXEFDS,MAXNRG) - width of blocks in EFD's LDC
+! ULPEAK(MAXEFDS,MAXNRG) - peak load in EFD's seasons
+! ULGRP(MAXEFDSS,MAXEFDS,MAXNRG) - number of hourly group for the LDC block
+! ULSEG(MAXEFDSS,MAXEFDS,MAXNRG) - number of %-group for the LDC block
+! ULSECP(MAXEFDSS) - maps efd seasons to ecp seasons
+! ULNVCT(MAXEFDS) - Number of Slices per Season
+! UNGSSN(MAXEFDS) - maps efd seasons to ng seasons (peak,offpeak)
+! EFD_Slice_ID(MAXEFDSG,MAXEFDB) - Maps Group and seggment to a slice ID - independent of slice Height
+!===============================================================================
+      REAL*4 ULHGHT(MAXEFDSS,MAXEFDS,MAXNRG)
+      REAL*4 ULWDTH(MAXEFDSS,MAXEFDS,MAXNRG)
+      REAL*4 ULPEAK(MAXEFDS,MAXNRG)
+      INTEGER*4  ULGRP(MAXEFDSS,MAXEFDS,MAXNRG)
+      INTEGER*4 ULSEG(MAXEFDSS,MAXEFDS,MAXNRG)
+      INTEGER*4 UNGSSN(MAXEFDS)
+      INTEGER*4 ULNVCT(MAXEFDS)
+      INTEGER*2 EFDnS
+      INTEGER*2 EFDnumSg
+      INTEGER*4 MAP_EFD_SP(MAXEFDSG)
+      INTEGER*4 EFD_Slice_ID(MAXEFDSG,MAXEFDB)
+      REAL*4 EFDsgDblock(MAXEFDSG,MAXEFDB)
+      CHARACTER*1 EFDsgDbltyp(MAXEFDSG,MAXEFDB)
+      INTEGER*2 EFDSEDEF(MAXEFDS,2)
+      INTEGER*2 EFDsgDnB(MAXEFDSG)
+      INTEGER*2 EFDSECP(MAXEFDS)
+      INTEGER*4 HRTOEFDSL(MAXNRG,MAXMON,MAXDTP,24)
+      INTEGER*4 HRTOEFDGP(MAXMON,MAXDTP,24)     
+      INTEGER*4 N_STO_INC
+      REAL*8 HREFDCF(0:MX_STO_INC,ECP_D_INT,EFD_D_SSZ,ELD_D_DAY,MNUMNR) ! NON-DSP PLT GRP CAPACITY FACTOR BY LOAD SEG       
+      COMMON /DSMFD1i/ULGRP, ULSEG, ULNVCT, UNGSSN, MAP_EFD_SP, EFD_Slice_ID, EFDnS, EFDnumSg, EFDsgDnB, EFDSEDEF
+      COMMON /DSMFD2r/EFDsgDblock,ULHGHT,ULWDTH,ULPEAK,HRTOEFDSL,HRTOEFDGP,HREFDCF,N_STO_INC
+      COMMON /DSMRD3c/EFDSECP,EFDsgDbltyp
+!
+!===============================================================================
+!        This INCLUDE file is used for communication with the ETT module
+!===============================================================================
+! USE INCLUDE's (DSMDIMEN) and (PARAMETR) with this file
+! ETTnS - ETT LDC number of seasons
+! ETTnumSg - Number of segments in LDC's for ETT module
+! ETTsgDblock(MAXETTSG,MAXETTB)- %% of hours allocated to blocks in each segment
+! ETTsgDbltyp(MAXETTSG,MAXETTB) - type peak/non-peak of a block
+! ETTsgDnB(MAXETTSG) - Number of blocks in each of segments of ETT LDC
+! ETTSEDEF(MAXETTS,2) - first, last LDC block in a season
+! ETTSEGDSC(MAXETTSG) - description of ett segments
+! UNGSSN_ETT(MAXETTS) - maps ETT seasons to ng seasons (peak,offpeak)
+!
+! MAXETTS - Maximum number of seasons used by ETT module
+! MAXETTB - Maximum number of blocks in one season LDC for ETT
+! MAXETTSG - Maximum of segments in all seasons in ETT LDCS
+!===============================================================================
+!
+      INTEGER*4 MAXETTS,MAXETTB,MAXETTSG,MAXETT_TB
+      PARAMETER(MAXETTS=2,MAXETTB=2,MAXETTSG=2,MAXETT_TB=2)
+!      
+      INTEGER*2 ETTnS
+      INTEGER*2 ETTnumSg
+      INTEGER*2 ETTSEDEF(MAXETTS,2)
+      INTEGER*2 ETTsgDnB(MAXETTSG)
+      INTEGER*2 ETTSETT(MAXETTS)
+      INTEGER*4 UNGSSN_ETT(MAXETTS)
+      INTEGER*4 MAP_ETT_SP(MAXETTSG)
+      REAL*4 ETTsgDblock(MAXETTSG,MAXETTB)
+      CHARACTER*1 ETTsgDbltyp(MAXETTSG,MAXETTB)
+      CHARACTER*10 ETTSEGDSC(MAXETTSG)
+      COMMON /DSMETT/ETTnS,ETTnumSg,ETTSEDEF,ETTsgDnB,ETTSETT,UNGSSN_ETT,MAP_ETT_SP,ETTsgDblock,  &
+                     ETTsgDbltyp,ETTSEGDSC
+!
+!===============================================================================
+!        This INCLUDE file is used for communication with the ECI module
+!===============================================================================
+! USE INCLUDE's (DSMDIMEN) and (PARAMETR) with this file
+! ECInS - ECI LDC number of seasons
+! ECInumSg - Number of segments in LDC's for ECI module
+! ECIsgDblock(MAXECISG,MAXECIB)- %% of hours allocated to blocks in each segment
+! ECIsgDbltyp(MAXECISG,MAXECIB) - type peak/non-peak of a block
+! ECIsgDnB(MAXECISG) - Number of blocks in each of segments of ECI LDC
+! ECISEDEF(MAXECIS,2) - first, last LDC block in a season
+! ECISEGDSC(MAXECISG) - description of ECI segments
+! UNGSSN_ECI(MAXECIS) - maps ECI seasons to ng seasons (peak,offpeak)
+!
+! MAXECIS - Maximum number of seasons used by ECI module
+! MAXECIB - Maximum number of blocks in one season LDC for ECI
+! MAXECISG - Maximum of segments in all seasons in ECI LDCS
+!===============================================================================
+!
+      INTEGER*2 MAXECIS,MAXECIB,MAXECISG,MAXECI_TB
+      PARAMETER(MAXECIS=6,MAXECIB=6,MAXECISG=18,MAXECI_TB=108)
+!      
+      INTEGER*4 UNGSSN_ECI(MAXECIS)
+      INTEGER*4 MAP_ECI_GRP(MAXECI_TB,MAXECIS)
+      INTEGER*4 MAP_ECI_SEG(MAXECI_TB,MAXECIS)
+      REAL*4 ECIsgDblock(MAXECISG,MAXECIB)
+      INTEGER*2 ECInS
+      INTEGER*2 ECInumSg
+      INTEGER*2 ECISEDEF(MAXECIS,2)
+      INTEGER*2 ECIsgDnB(MAXECISG)
+      INTEGER*2 ECISECI(MAXECIS)
+      CHARACTER*1 ECIsgDbltyp(MAXECISG,MAXECIB)
+      CHARACTER*10 ECISEGDSC(MAXECISG)
+      COMMON /DSMECI4/ECIsgDblock,UNGSSN_ECI,MAP_ECI_GRP,MAP_ECI_SEG
+      COMMON /DSMECI2/ECInS,ECInumSg,ECISEDEF,ECIsgDnB,ECISECI,ECIsgDbltyp,ECISEGDSC

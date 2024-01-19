@@ -1,0 +1,45 @@
+!  $Header: m:/default/includes/RCS/dsmcaldr,v 1.4 2011/08/08 13:08:43 LC2 Exp $
+! ====== (DSMCALDR) =====
+! MONTYP(MAXMON) - SEASON ASSIGNMENT OF MONTH
+! JDAYTP(MAXDAY,MAXMON) - DAY-TYPE ASSIGNMENT FOR EACH DAY
+! WEIGHT(MAXDAY,MAXMON) - WEIGHTS INDICATING NUMBER OF DAYS REPRESENTED !
+!                         BY EACH MODELLED DAY
+! HourlyWeights(MAXHOUR) - HOURLY WEIGHTS FOR CALENDAR HOURS
+! NODAYS(MAXMON) - NUMBER OF DAYS IN EACH MONTH                         !
+! NODAYT - NUMBER OF DAY-TYPES
+! NMONTH - NUMBER OF MONTHS                                             !
+! NOSEA - NUMBER OF SEASONS
+! MONAME(MAXMON) - MONTH NAMES
+! SENAME(MAXSEA) - SEASON NAMES
+! DTNAME(MAXDTP) - DAY-TYPE NAMES
+! IDAYTQ(MAXDAY,MAXMON) - NUMBER OF REAL DAYS WHICH ARE REPRESENTED
+!                         BY DAYTYPE J IN MONTH I.
+! nhour - total number of hours in the calendar year
+! nhouryr - toal number of hours in the real year
+! HourNumber(MAXHOUR) - indices of hours in the calendar year sorted for ECP
+! HourNumber3(MAXHOUR,MAXNRG) - indices of hours in the calendar year sorted
+!  for ECP, for the 3rd year of ECP time horizon from previous run year
+! BlockNum3(MAXECTB,MAXNRG,ECP_D_FPH,2) - order in which blocks are sorted in
+!  ECP LDC: 1 - previous run, 2 - current run
+!  for the 3rd year of ECP time horizon from previous run year
+! HourNumberEFD(MAXHOUR) - indices of hours in the calendar year sorted for EFD
+! HourlyWeights(MAXHOUR) - weights for hours in the calendar year
+! MON864(MAXHOUR) - month corresponding to calendar hour 
+! DAYT864(MAXHOUR) - daytype corresponding to calendar hour 
+! HR864(MAXHOUR) - hour corresponding to calendar hour
+       INTEGER*2 HourNumber3(MAXHOUR,MAXNRG)
+       INTEGER*2 BlockNum3(MAXECTB,MAXNRG,ECP_D_FPH,2)
+       INTEGER*2 HourlyWeights(MAXHOUR)
+       INTEGER*2 HourNumber(MAXHOUR)
+       INTEGER*2 HourNumberEFD(MAXHOUR)
+       INTEGER*2 nhour,nhouryr,MONTYP(MAXMON),JDAYTP(MAXDAY,MAXMON), &
+               WEIGHT(MAXDAY,MAXMON),NODAYS(MAXMON), &
+               NODAYT,NMONTH,NOSEA,IDAYTQ(MAXDTP,MAXMON)
+       INTEGER*2 MON864(MAXHOUR),DAYT864(MAXHOUR),HR864(MAXHOUR)
+       CHARACTER*12 MONAME(MAXMON)
+       CHARACTER*12 SENAME(MAXSEA)
+       CHARACTER*12 DTNAME(MAXDTP)
+       COMMON/DSMCLn/nhour,nhouryr,NOSEA,NMONTH,NODAYT,NODAYS,MONTYP, &
+       JDAYTP,WEIGHT,IDAYTQ,HourNumber,HourlyWeights,HourNumberEFD &
+       ,HourNumber3,BlockNum3,MON864,DAYT864,HR864
+       COMMON/DSMCLc/MONAME,SENAME,DTNAME

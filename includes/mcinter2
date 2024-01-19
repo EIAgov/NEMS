@@ -1,0 +1,117 @@
+! $Header: M:/default/includes/RCS/mcinter2,v 1.71 2019/07/25 17:53:43 RT2 Exp $
+!
+!                            COMMON MCINTER2
+!          Internal Variables for the Macroeconomic Submodel
+!
+
+!
+! Double Precision
+!
+
+      DOUBLE PRECISION DLINK(164,MNUMYR)    !Number of energy drivers, MNUMYR
+      DOUBLE PRECISION NLINK(362,MNUMYR)    !Number of NEMS energy variables, MNUMYR
+      DOUBLE PRECISION EPMAC(186,MNUMYR)    !Number of solution variables returned to nems from gi model,MNUMYR
+      DOUBLE PRECISION MCXTABS(158,MNUMYR)  !Number of solution variables returned for extra tables,MNUMYR
+      DOUBLE PRECISION MCGIXTAB(206,MNUMYR) !Number of GI solution variables returned for extra tables, MNUMYR
+
+!
+! Integers
+!
+
+      INTEGER MCNMSERV                   !Number of service industries
+      INTEGER NUMEMPL                    !Number of industrial employment categories
+      INTEGER NEMSENERGYNUM              !Number of exogenous variables (aggregates and components) read from nems
+      INTEGER SCENNUM                    !Number of driver variables passed to gi model from nems
+      INTEGER NUMEPMAC                   !Number of solution variables returned to nems from gi model
+      INTEGER NUMXTABS                   !Number of solution variables returned to nems from gi model for extra tables
+      INTEGER GISWITCH                   !GI scenario switch -1:OFF; 0="_0"; 1="_pes"; 2="_opt"; 3="_cyc"
+      INTEGER NUMGIXTAB                  !Number of solution variables returned to nems from gi model for extra tables
+
+      INTEGER MCNMNATREG                 !Number of regional macro variables from the nat model plus man and non-man wages
+      INTEGER TAXMODE                    !Presence and type of tax; NEMS parameter MACTAX
+      INTEGER CAFEMODE                   !Presence of CAFE; NEMS parameter CAFE
+      INTEGER TTECHMODE                  !Presence and type of technology assumptions; NEMS parameter TTECH
+      INTEGER MACMODE                    !Presence of macro scenario; NEMS parameter MMAC
+      INTEGER MAC111D                    !Presence of 111d scenario; NEMS parameter EPA111D
+      INTEGER OGTECHMODE                 !Presence of high resource case
+      INTEGER MAMLASTYR                  !MAM/EViews last year
+      INTEGER CONTROLTARGET              !Commercial add factor switch; 1 is on, 0 is off
+      INTEGER CFDIAGX                    !Commercial growth rate table switch; 1 is on, 0 is off
+      INTEGER CFLEVER                    !Switch for running the commercial floor space model 1:ON; 0=OFF
+      INTEGER LINKRUN                    !Switch for running the Linkage model; 1=ON 0=OFF
+      INTEGER LINKCYCLEMAX               !Number of max cycles to allow for Linkage model
+      INTEGER LINKREC                    !Switch for recording Linkage cycle results; 1=ON 0=OFF
+!
+! Reals
+!
+
+      REAL MAMENERGY(46,MNUMYR)          !Energy driver variables
+      REAL MAMINVEST(24,MNUMYR)          !Investment table variables
+      REAL MAMEMPLOY(36,MNUMYR)          !Employment variables
+      REAL ESMACREG(11,57,MNUMYR)        !Solution macro vars, regionalized
+      REAL ESEMP(11,43,MNUMYR)           !Employment solution
+      REAL ESMAC(75,MNUMYR)              !Solution macro variables, not regionalized      
+      REAL ESIND(11,55,MNUMYR)           !Industrial output forecast
+      REAL ESSERV(12,MNUMYR)             !Service output forecast
+      REAL MYINPUTS(197,MNUMYR)          !Direct link
+      REAL MY_DETAIL(113,MNUMYR)         !Number of solution variables returned to nems from gi model,MNUMYR
+      REAL MC_COMMFLR(280,MNUMYR)        !Commflr endogenous variables
+      REAL MC_REGMAC(260,MNUMYR)         !Regional model macro endogenous variables
+      REAL MC_REGIO(432,MNUMYR)          !Regional model IO endogenous variables
+      REAL MC_REGEMP(351,MNUMYR)         !Regional model EMPLOYMENT endogenous variables
+      REAL MC_ENGIMP(MNUMYR)             !Imports of all energy
+      REAL MC_ENGEXP(MNUMYR)             !Exports of all energy
+      REAL RMFFLEV                       !Lever for turning on Federal Reserve reaction function
+      REAL CORPREBATE                    !Read percent of no-cost allocation of permits to corporations
+                                         ! that are then rebated to consumers (revenue neutral).
+      REAL mc_engdompet(mnumyr)
+      REAL mc_engdomoo(mnumyr)
+      REAL mc_engdombio(mnumyr)
+      REAL mc_engdomcoal(mnumyr)
+      REAL mc_engdomng(mnumyr)
+      REAL mc_engimpbio(mnumyr)
+      REAL mc_engimpcoal(mnumyr)
+      REAL mc_engimpng(mnumyr)
+      REAL mc_engimpoo(mnumyr)
+      REAL mc_engimppet(mnumyr)
+      REAL mc_engexpbio(mnumyr)
+      REAL mc_engexpcoal(mnumyr)
+      REAL mc_engexpng(mnumyr)
+      REAL mc_engexppet(mnumyr)
+      REAL mc_engexpoo(mnumyr)
+      REAL mc_dallfuelsbio(mnumyr)
+      REAL mc_dallfuelscoal(mnumyr)
+      REAL mc_dallfuelsng(mnumyr)
+      REAL mc_dallfuelsoo(mnumyr)
+      REAL mc_dallfuelspet(mnumyr)
+      REAL mc_dendubio(mnumyr)
+
+!
+! Characters
+!
+
+      CHARACTER*25  DLVARS(164)          !Direct link
+      CHARACTER*100 MAMENERGYLABEL(46)   !Labels for MAM energy variables
+      CHARACTER*100 NEMSENERGYLABEL(362) !Labels for NEMS energy variables
+      CHARACTER*100 MAMINVESTLABEL(24)   !Labels for the investment variables
+      CHARACTER*100 MAMNATIONLABEL(62)   !Labels for the national variables
+      CHARACTER*100 MAMREGIONLABEL(117)  !Labels for the regional variables
+      CHARACTER*100 MAMCENSUSLABEL(11)   !Labels for the Census divisions
+      CHARACTER*100 MAMNONMANGOLABEL(11) !Labels for nonmanufacturing variables
+      CHARACTER*100 MAMEMPLOYLABEL(43)   !Labels for employment variables
+
+      COMMON/MACINTER/DLINK,            NLINK,             EPMAC,             MCXTABS,           MCGIXTAB,          &
+                      MCNMSERV,         NUMEMPL,           NEMSENERGYNUM,     SCENNUM,           NUMEPMAC,          &
+                      NUMXTABS,         GISWITCH,          NUMGIXTAB,         MCNMNATREG,        TAXMODE,           &
+                      CAFEMODE,         TTECHMODE,         MACMODE,           MAC111D,           OGTECHMODE,        &
+                      MAMLASTYR,        CONTROLTARGET,     CFDIAGX,           CFLEVER,           LINKRUN,           &
+                      LINKCYCLEMAX,     LINKREC,           MAMENERGY,         MAMINVEST,         MAMEMPLOY,         &
+                      ESMACREG,         ESEMP,             ESMAC,             ESIND,             ESSERV,            &
+                      MYINPUTS,         MY_DETAIL,         MC_COMMFLR,        MC_REGMAC,         MC_REGIO,          &
+                      MC_REGEMP,        RMFFLEV,           MC_ENGIMP,         MC_ENGEXP,         CORPREBATE,        &
+                      mc_engdompet,     mc_engdomoo,       mc_engdombio,      mc_engdomcoal,     mc_engdomng,       &
+                      mc_engimpbio,     mc_engimpcoal,     mc_engimpng,       mc_engimpoo,       mc_engimppet,      &
+                      mc_engexpbio,     mc_engexpcoal,     mc_engexpng,       mc_engexppet,      mc_engexpoo,       &
+                      mc_dallfuelsbio,  mc_dallfuelscoal,  mc_dallfuelsng,    mc_dallfuelsoo,    mc_dallfuelspet,   &
+                      mc_dendubio,      DLVARS,            MAMENERGYLABEL,    NEMSENERGYLABEL,   MAMINVESTLABEL,    &
+                      MAMNATIONLABEL,   MAMREGIONLABEL,    MAMCENSUSLABEL,    MAMNONMANGOLABEL,  MAMEMPLOYLABEL

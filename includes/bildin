@@ -1,0 +1,269 @@
+! $Header: m:/default/includes/RCS/bildin,v 1.24 2019/07/18 18:25:25 xj2 Exp $
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+! BILDIN:
+!   BILDIN Common:
+!     CONTAINS INPUT DATA FOR THE ECP THAT WILL CHANGE BY REGION AND
+!     OVER TIME. THIS COMMON IS STORED IN A DIRECT ACCESS FILE BY NERC REGION.
+!   CLEXPUT Common:
+!     Contains Data For Coal Price Expectation Equations.
+!
+! Note: COMMON ordering, size parameter calculation and declaration
+!       Sequencing all in same order to simplify debugging INCLUDE file
+!
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      COMMON /BILDIN/    EP$LF,   EPFPM,   EPHGHT,  EPPEAK,  EP_NET_PEAK, EPSPK,    & !REAL*8
+       EPWDTH,  EPNOX_G, &
+       EPECAP,  EPECAP_MR, EPNCAP, EPRGM, EPHTRT_AER, EPPHRT0, EPPHRTN, & !REAL*4
+       EPWDCOF, EPEXT, &
+       EPBLDBND,EPCH4RT, EPCO1RT, EPCO2RT, EPCRBRT, EPNOXRT, EPSOXRT, &
+       EPVOCRT, EPIROVR, EPIRFOM, EPIRVOM, EPIRCCR, EPIRCCS, EPCPADJ, EPBDSUP, &
+       EPCCSUP, EPFXSUP, EPVRSUP, &
+       EPIACF,  EPICFC,  UPICFC,  EPISCF,  EPIGCF,  EPRCFC,  EPFMAP,  EPFLRG,  EPCRMP,  &
+       EPSOVR,  EPSCAP,  EPALSO2, EPALNOX, EPALCO2, &
+       UPDNOXL, EOUNCP,  EOUCCP,  EPRPSRG, EPRPSTG, EPRPSRO, EPRPSTO, &
+       EPDSCRT, EPUTDSCRT,EPUROR,  EPUIRT,  EPUFDT,  EPUFPE,  EPUCRE, &
+       EPURORR, EPUIRTR, EPUFPER, EPUCRER, &
+       EPRTBS,  EPMRM,   EPACM,   EPXPRT,  EPCOVR,  EPRSCFC,  EPCRBPEN, &
+       EPCTRM,  EPCCRF,  EPCFOM,  EPTCST,  EPTCRF,  EPTLOSS, EPUPCLF, &
+       EPNPCLF, EPPCLRHS,EPUNIT,  EPFOM,   EPGFOM,  EPVOM,   EPGCAP, &
+       EPECFC,  EPESCFC, EPDPCT,  EPDAVD,  EP_SP_CAP_FAC, &
+       EORDER,  EPFRST,  EPGECP,  EPGETT,  EPLDGR,  EPGECPS, EPLDSG,  EPLMAP,    & !INT
+       EPNEXT,  EPNGRP,  EPNMSP,  EPNSPG,  EPNSTP,  EPSETT, &
+       EPNSCR,  EPSREC, &
+       EPTIRGN, EPCENSUS,EPNGRG,  EPCLRG,  EPCARG,  &
+       EPBNDTYP,EPLOVR                                                 !CHAR
+!
+      INTEGER ESIZ$BLD,EBLK$BLD,ELFT$BLD
+
+      PARAMETER( ESIZ$BLD =     & ! sorted in order of use in declarations
+       (24 * 4)  + &
+       ( 2 * 8 * ECP_D_XPH) + &
+       ( 2 * 8 * ECP_D_MSP * ECP_D_XPH) + &
+       ( 3 * 8 * ECP_D_VLS * ECP_D_XPH) + &
+       ( 5 * 4 * ECP_D_VLS * ECP_D_XPH) + &
+       ( 1 * 4 * ECP_D_MSP * ECP_D_XPH) + &
+       ( 2 * 4 * ECP_D_STP) + &
+       ( 1 * 4 * ECP_D_STP * ECP_D_SSZ * ECP_D_XPH) + &
+       ( 1 * 4 * ELD_D_DAY) + &
+       ( 8 * 4 * ECP_D_XPH) + &
+       ( 1 * 4 * ECP_D_MSP) + &
+       ( 2 * 4 * ECP_D_CAP * ECP_D_XPH) + &
+       ( 1 * 4 * ECP_D_MSP * ECP_D_CAP * ECP_D_XPH) + &
+       ( 2 * 4 * (EFD_D_MFRG + 1) * ECP_D_CAP * ECP_D_XPH) + &
+       ( 2 * 4 * ECP_D_DSP) + &
+       ( 1 * 4 * ECP_D_DSP * ECP_D_XPH) + &
+       (11 * 4 * ECP_D_CAP) + &
+       ( 1 * 8 * ECP_D_MSP * ECP_D_XPH * ECP_D_CAP * NOX_D_GRP) + &
+       ( 1 * 4 * ECP_D_CAP * ECP_D_RET) + &
+       ( 1 * 4 * (EFD_D_MFRG + 1) * ECP_D_CAP * ECP_D_RET) + &
+       ( 1 * 4 * ECP_D_CAP * (MNPOLLUT + 1)) + &
+       (12 * 4 * ECP_D_I_R) + &
+       ( 5 * 4 * ECP_D_I_R * 3) + &
+       ( 1 * 4 * ECP_D_I_R * ECP_D_XPH) + &
+       ( 1 * 4 * ECP_D_INT * ECP_D_VLS) + &
+       ( 1 * 4 * (MX_STO_INC + 1) * ECP_D_INT * ECP_D_STP * ECP_D_SSZ) + &
+       ( 1 * 4 * ECP_D_INT * ECP_D_MSP) + &
+       ( 1 * 4 * ECP_D_INT * ECP_D_STP) + &
+       ( 1 * 4 * ECP_D_RNW * ECP_D_VLS * 3) + &
+       ( 1 * 4 * ECP_D_INT) + &
+       ( 1 * 4 * ECP_D_RNW) + &
+       ( 2 * 4 * ECP_D_DGS) + &
+       ( 1 * 4 * EFD_D_NFL * ECP_D_NFL) + &
+       ( 1 * 4 * EFD_D_NFL * EFD_D_MFRG) + &
+       ( 1 * 4 * EFD_D_NFL * MNUMCR) + &
+       ( 1 * 4 * ECP_D_NFL) + &
+       ( 3 * 4 * ECP_D_DSP * ECP_D_SCR) + &
+       ( 1 * 4 * ECP_D_SGP * ECP_D_DSP * ECP_D_SCR) + &
+       ( 1 * 4 * MNUMYR) + &
+       ( 4 * 4 * MNUMNR * MNUMNR ) + &
+       ( 1 * 4 * ECP_D_MSP * ECP_D_CAP * ECP_D_XPH) + &
+       ( 1 * 1 * ECP_D_I_R))
+
+      PARAMETER (EBLK$BLD = ( (ESIZ$BLD - 1) / 16384) + 1)
+      PARAMETER (ELFT$BLD = EBLK$BLD * 16384 - ESIZ$BLD)
+!
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     VARIABLE DECLARATION AND DEFINITIONS
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!
+!     ECP LOAD DATA
+!
+      REAL*8    EP$LF(ECP_D_VLS,ECP_D_XPH)                  ! LOAD FOLLOWING FAC BY LOAD/YR
+      REAL*8    EPFPM(ECP_D_MSP,ECP_D_XPH)                  ! Preventive Maintenance Seasonal Factor
+      REAL*8    EPHGHT(ECP_D_VLS,ECP_D_XPH)                 ! HEIGHT OF VERTICAL LOAD SEGS
+      REAL*8    EPPEAK(ECP_D_XPH)                         ! PEAK LOAD
+      REAL*8    EP_NET_PEAK(ECP_D_XPH)                    ! NET PEAK LOAD
+      REAL*8    EPSPK(ECP_D_MSP,ECP_D_XPH)                  ! SEASONAL PEAK LOAD
+      REAL*8    EPWDTH(ECP_D_VLS,ECP_D_XPH)                 ! WIDTH OF VERTICAL LOAD SEGS
+      REAL*8    EPNOX_G(ECP_D_MSP,ECP_D_XPH,ECP_D_CAP,NOX_D_GRP)! Average NOX Emission Rate by Plant Type, Control Group and Season and Explicit Planning Year
+
+      INTEGER*4 EORDER(ECP_D_VLS,ECP_D_XPH)                 ! Order After Preventive Maintenance
+                                                        ! and interrregional transfers
+      INTEGER*4 EPFRST(ECP_D_MSP,ECP_D_XPH)                 ! FIRST VLS PER ECP SEASON
+      INTEGER*4 EPGECP(ECP_D_STP)                         ! LOAD GROUP TO ECP SEASON MAP
+      INTEGER*4 EPGETT(ECP_D_STP)                         ! LOAD GROUP TO ETT(EFD) SEASON MAP
+      INTEGER*4 EPLDGR(ECP_D_VLS,ECP_D_XPH)                 ! LOAD GROUP (E.G. SUMMER DAY)
+      INTEGER*4 EPGECPS(ECP_D_VLS,ECP_D_XPH)                ! SLICE GROUP TO ECP SEASON MAP
+      INTEGER*4 EPLDSG(ECP_D_VLS,ECP_D_XPH)                 ! LOAD SEGMENT(E.G. PEAK,OFFPK)
+      INTEGER*4 EPLMAP(ECP_D_STP,ECP_D_SSZ,ECP_D_XPH)         ! LOAD GROUP TO ECP STEP MAP
+      INTEGER*4 EPNEXT(ECP_D_VLS,ECP_D_XPH)                 ! NEXT VLS PER ECP SEASON
+      INTEGER*4 EPNGRP                                  ! NUMBER OF ECP GROUPS (<=ECP_D_STP)
+      INTEGER*4 EPNMSP                                  ! NUMBER OF ECP SEASONS (<=ECP_D_MSP)
+      INTEGER*4 EPNSPG(ELD_D_DAY)                         ! NUMBER OF STEPS PER GROUP
+      INTEGER*4 EPNSTP(ECP_D_XPH)                         ! NUMBER OF VERTICAL STEPS
+      INTEGER*4 EPSETT(ECP_D_MSP)                         ! ECP SEASON TO ETT(EFD) SEASON MAP
+!
+!     ALL ECP TECHNOLOGIES
+!
+      REAL*4    EPECAP(0:EFD_D_MFRG,ECP_D_CAP,ECP_D_XPH)        ! Existing Generation Capacity by Year (excludes epgcap) - All Capacity
+      REAL*4    EPECAP_MR(0:EFD_D_MFRG,ECP_D_CAP,ECP_D_XPH)     ! Existing Generation Capacity by Year (excludes epgcap) - Must Run Only
+      REAL*4    EPGCAP(0:EFD_D_MFRG,ECP_D_RET,ECP_D_CAP)        ! Existing Generation Capacity by Retirement Group
+      REAL*4    EP_SP_CAP_FAC(ECP_D_MSP,ECP_D_CAP,ECP_D_XPH)    ! Ratio of Average Seasonal Capacity to Summer Capacity
+      REAL*4    EPGFOM(ECP_D_RET,ECP_D_CAP)                   ! Fixed O&M by Retirement Group
+      REAL*4    EPFOM(ECP_D_CAP)                            ! Average Fixed O&M
+      REAL*4    EPVOM(ECP_D_CAP)                            ! Average Variable O&M
+      REAL*4    EPEXT(ECP_D_CAP,MNPOLLUT+1)                 ! Externality Costs
+      REAL*4    EPNCAP(ECP_D_CAP)                           ! New Capacity For New Technologies
+      REAL*4    EPRGM(ECP_D_CAP)                            ! Regional Cost Multipliers
+      REAL*4    EPACM(ECP_D_CAP)                            ! Regional Ambient Conditions Multipliers
+      REAL*4    EPHTRT_AER(ECP_D_CAP)                       ! AER Heat Rate from latest historical year
+      REAL*4    EPUNIT(ECP_D_CAP,ECP_D_XPH)                   ! Number of Units in Plant Category
+      REAL*4    EPECFC(ECP_D_CAP,ECP_D_XPH)                   ! Avg. Capacity Factor for Existing Plants
+      REAL*4    EPESCFC(ECP_D_MSP,ECP_D_CAP,ECP_D_XPH)          ! Avg. Seasonal Capacity Factor for Existing Plants
+!
+!     DISPATCHABLE CAPACITY
+!
+      REAL*4    EPPHRT0(ECP_D_DSP)                ! Initial Heat Rate
+      REAL*4    EPPHRTN(ECP_D_DSP)                ! Final Heat Rate
+      REAL*4    EPWDCOF(ECP_D_DSP,ECP_D_XPH)        ! Max biomass cofiring share
+!
+!     INTERMITTENT + DISPATCHABLE RENEWABLES CAPACITY
+!
+      REAL*4    EPBLDBND(ECP_D_I_R,ECP_D_XPH)      ! CAPACITY BUILD BOUND
+      REAL*4    EPCH4RT(ECP_D_I_R)               ! CH4 EMISSION RATE
+      REAL*4    EPCO1RT(ECP_D_I_R)               ! CO EMISSION RATE
+      REAL*4    EPCO2RT(ECP_D_I_R)               ! CO2 EMISSION RATE
+      REAL*4    EPCRBRT(ECP_D_I_R)               ! CARBON EMISSION RATE
+      REAL*4    EPNOXRT(ECP_D_I_R)               ! NOX EMISSION RATE
+      REAL*4    EPSOXRT(ECP_D_I_R)               ! SO2 EMISSION RATE
+      REAL*4    EPVOCRT(ECP_D_I_R)               ! VOC EMISSION RATE
+      REAL*4    EPIROVR(ECP_D_I_R)               ! REGIONAL OVERNIGHT CAPITAL COSTS ($/KW)
+      REAL*4    EPIRFOM(ECP_D_I_R)               ! REGIONAL FIXED O&M COSTS ($/KW)
+      REAL*4    EPIRVOM(ECP_D_I_R)               ! REGIONAL VARIABLE O&M COSTS (MILLS/KWH)
+      REAL*4    EPIRCCR(ECP_D_I_R)               ! CAPACITY CREDIT (FRACTION)
+      REAL*4    EPIRCCS(ECP_D_I_R,3)             ! CAPACITY CREDIT (FRACTION) BY SUPPLY STEP
+      REAL*4    EPCPADJ(ECP_D_I_R)               ! FRAC. CAP. ALLOWED FOR RPS
+      REAL*4    EPBDSUP(ECP_D_I_R,3)             ! SUPPLY CURVE BOUND ON REN. ADDS
+      REAL*4    EPCCSUP(ECP_D_I_R,3)             ! TECH. SUPP. CAP COST CURVE MULTIPLIER
+      REAL*4    EPFXSUP(ECP_D_I_R,3)             ! TECH. SUPP. FOM COST CURVE MULTIPLIER
+      REAL*4    EPVRSUP(ECP_D_I_R,3)             ! TECH. SUPP. VOM COST CURVE MULTIPLIER
+!
+!     INTERMITTENT CAPACITY
+!
+      REAL*4    EPIACF(ECP_D_INT)                ! AVERAGE CAPACITY FACTOR
+      REAL*4    EPICFC(ECP_D_INT,ECP_D_VLS)        ! Maximum Capacity Factor by load slice
+      REAL*4    UPICFC(0:MX_STO_INC,ECP_D_INT,ECP_D_STP,ECP_D_SSZ)        ! Maximum Capacity Factor by Load Group and Load Segment
+      REAL*4    EPISCF(ECP_D_INT,ECP_D_MSP)        ! AVERAGE CAPACITY FACTOR by season
+      REAL*4    EPIGCF(ECP_D_INT,ECP_D_STP)        ! AVERAGE CAPACITY FACTOR by load group
+!
+!     NON-INTERMITTENT RENEWABLE CAPACITY
+!
+      REAL*4    EPRCFC(ECP_D_RNW)                ! Maximum Capacity Factor
+      REAL*4    EPRSCFC(ECP_D_RNW,3,ECP_D_MSP)! Seasonal MCF mapped to season
+!
+!     FUEL CODES
+!
+      REAL*4    EPFMAP(ECP_D_NFL,EFD_D_NFL)         ! EFD TO ECP FUEL TYPES
+                                                ! (ECP TYPE-CAN MIX EFD TYPES)
+      REAL*4    EPFLRG(EFD_D_NFL,EFD_D_MFRG)        ! NERC REG MAP TO EACH FUEL REG
+      REAL*4    EPCRMP(EFD_D_NFL,MNUMCR)          ! NERC REG MAP TO CENSUS REG
+      REAL*4    EPCRBPEN(ECP_D_NFL)               ! CARBON PENALTY BY FUEL TYPE
+!
+!     RETROFITS
+!
+      REAL*4    EPSOVR(ECP_D_DSP,ECP_D_SCR)         ! OVERNIGHT CAP COST-RETROFIT
+      REAL*4    EPSCAP(ECP_D_DSP,ECP_D_SCR)         ! UPPER LIMIT-RETROFITS
+      INTEGER*4 EPNSCR(ECP_D_DSP,ECP_D_SCR)         ! # PLANTS IN A RETROFIT GROUP
+      INTEGER*4 EPSREC(ECP_D_SGP,ECP_D_DSP,ECP_D_SCR) ! REC. #/EACH PLANT IN A RET GRP
+!
+!     DISTRIBUTED GENERATION
+!
+      REAL*4    EPDPCT(ECP_D_DGS)                 ! DG--PCT AVOIDED TRANS BY STEP
+      REAL*4    EPDAVD(ECP_D_DGS)                 ! DG--AMT AVOIDED TRANS BY STEP
+!
+!     EMISSION ALLOWANCES
+!
+      REAL*4    EPALSO2(ECP_D_XPH)                ! SO2 EMISSIONS ALLOWANCES
+      REAL*4    EPALNOX(ECP_D_XPH)                ! NOX EMISSIONS ALLOWANCES
+      REAL*4    EPALCO2(ECP_D_XPH)                ! CO2 EMISSIONS ALLOWANCES
+      REAL*4	UPDNOXL(MNUMYR)                 ! NOX Emission Limits (lbs./mmBtu)
+!
+!     OWNUSE CAPACITY TO ADD TO DEMAND- IPPS AND NONTRAD COGEN
+!
+      REAL*4	EOUNCP				!  OWNUSE PORTION OF IPP CAP
+      REAL*4    EOUCCP				!  OWNUSE PORTION OF COGEN CAP
+!
+!     RPS AND TOT. GRID SALES AND OWN USE FOR RPS
+!
+      REAL*4 EPRPSRG                            ! REN. GRID SALES FOR RPS
+      REAL*4 EPRPSTG                            ! TOT. GRID SALES FOR RPS
+      REAL*4 EPRPSRO                            ! REN. OWN USE FOR RPS
+      REAL*4 EPRPSTO                            ! TOT. OWN USE FOR RPS
+!
+!     FINANCIAL PARAMETERS
+!
+      REAL*4    EPDSCRT                         ! NUG  DSC RT (NOM, TAX ADJ ROR)
+      REAL*4    EPUTDSCRT                       ! UTIL DSC RT (NOM, TAX ADJ ROR)
+      REAL*4    EPUROR                          ! UTIL ROR (WGT AVG CE,PE,DEBT)
+      REAL*4    EPUIRT                          ! UTIL INTEREST RATE
+      REAL*4    EPUFDT                          ! UTIL DEBT FRACTION
+      REAL*4    EPUFPE                          ! UTIL ((CE*FRAC+PE*FRAC)/ROR)
+      REAL*4    EPUCRE                          ! UTIL COMMON RETURN ON EQUITY
+      REAL*4    EPRTBS                          ! INITIAL RATE BASE
+      REAL*4    EPURORR                         ! UTIL ROR (WGT AVG CE,PE,DEBT) WITH RISK PREMIUM (COAL)
+      REAL*4    EPUIRTR                         ! UTIL INTEREST RATE WITH RISK PREMIUM (COAL)
+      REAL*4    EPUFPER                         ! UTIL ((CE*FRAC+PE*FRAC)/ROR) WITH RISK PREMIUM (COAL)
+      REAL*4    EPUCRER                         ! UTIL COMMON RETURN ON EQUITY WITH RISK PREMIUM (COAL)
+!
+      REAL*4    EPMRM                           ! MIN RESERVE MARGIN-PLANNING
+!
+!     INTER-REGIONAL TRADE
+!
+      REAL*4    EPXPRT(ECP_D_XPH)                 ! ELECTRICITY EXPORT LIMITS
+      REAL*4    EPCOVR(ECP_D_CAP)                 ! OVERNIGHT COST TRANSMISSION
+      REAL*4    EPCTRM(ECP_D_CAP)                 ! ADD ON TRANSMISSION COST
+      REAL*4    EPCCRF(ECP_D_CAP)                 ! FIXED CHARGE FACTOR TRANS.
+      REAL*4    EPCFOM(ECP_D_CAP)                 ! FIXED O&M TRANSMISSION
+      REAL*4    EPTCST(MNUMNR,MNUMNR)           ! TRANSM. COST FOR IRT BLDS
+      REAL*4    EPTCRF(MNUMNR,MNUMNR)           ! TRANSM. ANN. FACTOR-IRT BLDS
+      REAL*4    EPTLOSS(MNUMNR,MNUMNR)          ! TRANSM. LOSS FOR IRT BLDS
+      INTEGER*4 EPTIRGN(MNUMNR,MNUMNR)          ! TRANSM. IMPORT REG-IRT BLDS
+!
+!     PURCHASED POWER
+!
+      REAL*4    EPUPCLF(ECP_D_XPH)                ! PURCHASED CAP LIMIT FACT-UTIL
+      REAL*4    EPNPCLF(ECP_D_XPH)                ! PURCHASED CAP LIMIT FACT-NUG
+      REAL*4    EPPCLRHS(ECP_D_XPH)               ! PURCHASED CAP LIMIT RHS VALUE
+!
+!     REGIONAL MAPS (CENSUS MAP MAY BE DIFFERENT FOR DIFFERENT PLANT/FUELS)
+!
+      INTEGER*4 EPCENSUS(ECP_D_CAP)               ! CENSUS REGION BY PLANT TYPE
+      INTEGER*4 EPNGRG                          ! NATURAL GAS REGION
+      INTEGER*4 EPCLRG                          ! COAL REGION
+      INTEGER*4 EPCARG                          ! CARBON REGION
+!
+!     BUILD BOUND TYPE FOR NEW CAPACITY
+!
+      CHARACTER*1 EPBNDTYP(ECP_D_I_R)             ! BUILD BOUND TYPE-E,G,L-INT CAP
+      CHARACTER*1 EPLOVR(ELFT$BLD)              ! LFTOVR BYTES-END OF LAST BLOCK
+!
+      CHARACTER*16384 EBILDN(EBLK$BLD)
+!
+      EQUIVALENCE (EP$LF(1,1),EBILDN(1))
+!
+!     COMMON RPSTBND CONTAINS DEFINITIONAL DATA FOR RENEWABLE CAPACITY
+!     ADDITIONS FROM TECHNOLOGY SUPPLY CURVES
+!
+      COMMON /RPSTBND/ EPSWSUP,EPSTSUP
+      INTEGER*4 EPSWSUP(ECP_D_I_R)                ! ELASTICITY SWITCH FOR SUP CRV
+      INTEGER*4 EPSTSUP(ECP_D_I_R)                ! NUMBER OF STEPS IN SUP CRV

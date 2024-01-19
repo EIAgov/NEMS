@@ -1,0 +1,28 @@
+!  $Header: m:/default/includes/RCS/wgedim,v 1.4 2010/10/27 20:19:26 pkc Exp $
+!     RFM-GES SUBMODULE LOCAL DATA DIMENSION PARAMETERS
+!***********************************************************************
+!     These may at some point be consolidated into PARAMETR
+!     Currently, this a local "INCLUDE" -- WGEDIM
+!***********************************************************************
+      INTEGER MNUMGS, MNUMSS, MNUMSC, MNGECC
+      PARAMETER (MNUMGS=500)  !  Number of Geothermal Sites
+      PARAMETER (MNUMSS=25)  !  Number of supply steps(per tech/region)
+      PARAMETER (MNUMSC=7)   !  Number of supply curves
+!                            !  (only 7 technology/region combos w/sites
+      PARAMETER (MNGECC=9)   !  Number of site capital cost components
+!                                  1 = Exploration phase cost
+!                                  2 = Confirmation dry hole cost
+!                                  3 = Confirmation producer cost
+!                                  4 = Construction dry hole cost
+!                                  5 = Construction producer cost
+!                                  6 = Construction other field cost
+!                                  7 = power plant cost
+!                                  8 = (calculated) transmission
+!                                  9 = (calculated) insurance
+!***********************************************************************
+!     This should definitely be consolidated into PARAMETR
+!     It is a dimension for the global data structure
+!***********************************************************************
+      INTEGER MECPYR
+      PARAMETER(MECPYR=35)  !  No. of electricity capacity planning yrs
+!                           !      (1990-2024)

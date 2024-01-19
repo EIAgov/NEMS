@@ -1,0 +1,64 @@
+    Function: Display or obtain schema.
+
+    Syntax:   SCHEMA [{DISPLAY [options] | CLEAR | ERASE {ROW|COL} class
+                     |{LOAD | SAVE}  [filespec] }]
+
+    Without options, the schema is formed and its dimensions are given.
+
+    DISPLAY is to OUTPUT file.  Display options include TABLE, which is
+    the default.  For MODLER, this is the only option.
+
+    For ANALYZE, other DISPLAY options are DOMAINS and EQUATION.  The
+    DOMAINS display gives the meaning of each set referenced in the
+    domains of the row and column classes (for MODLER, use DISPLAY SET
+    or LIST SET).  The EQUATION display infers the algebraic model
+    description from the schema syntax.  Following the DISPLAY options
+    specification, you can specify //NOSUM to suppress the Sum
+    expression in the syntax.  For ANALYZE, you can specify //NOHEAD to
+    suppress the header (//NOHEAD,NOSUM suppresses both).
+
+    Any or all of the display options can be specified, but they
+    MUST BE SEPARATED BY COMMAS.  To specify all options, use *.
+    In ANALYZE, if no schema is in memory, the instance schema is
+    computed using the syntax, which requires that a syntax file has
+    been read in.
+
+    The CLEAR option clears the schema from memory.
+
+    The ERASE option removes a ROW or COL class (to fit on screen).
+
+    LOAD and SAVE use unformatted files.  The filespec uses the prefix
+    and suffix of the SCHEMA type in _SETUP.  The default file name is
+    the problem name.  No schema can be saved without having first been
+    formed.
+
+    See SCHEMA.DOC for other information.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Examples:  We assume that _SETUP SCHEMA has blank prefix and
+               suffix = .SCH
+
+    Suppose the LP Problem name is MYPROB
+    SCHEMA LOAD
+    ...Loads schema file named MYPROB.SCH
+
+    SCH L MYPROB
+    ...Same as above
+
+    SCH
+    ...Forms schema and displays its dimensions (1 line of output).
+
+    SCH D T
+    ...Displays schema table.
+
+    SCH D
+    ...Displays schema table (same as specifying TABLE).
+
+    SCH D *
+    ...Displays all there is to display (for MODLER, this is same as
+       above, because there are no other options)
+
+    SCH D EQ //NOSUM
+    ...Displays equations (ANALYZE only) without Sum expressions.
+
+    SCH SAVE MYSCHEMA.UNF
+    ...Saves schema file named MYSCHEMA.UNF

@@ -1,0 +1,84 @@
+*            ::: PRICED.RUL  7-26-90 :::
+
+* THIS ATTEMPTS TO INTERPRET PRICE OF A DEMAND ROW
+
+* ASSUMES VARIABLES:  ROW, PRICE AND SYNTAX D(MT,LO,...)
+
+$SET MT = %%ROW(2:3)
+$SET LO = %%ROW(4:5)
+$SET NS = 0
+$SET DEGEN = 0
+
+* LOOP TO GET NUMBER OF SUPPLIERS
+$LOOP
+$IF %COLUMN(1:3) <> T%%MT THEN SKIP LOOP
+$CALC NS = NS + 1
+$IF %VCOLX = 0 THEN CALC DEGEN = DEGEN + 1
+$NEXT C
+
+$SET RENT = 0
+$SET SOURCE
+ The consumers in
+$ENTITY %%LO DR
+receive
+$IF %%NS > 1 THEN SKIP 1
+all of their
+$ENTITY %%MT MT
+from
+$SET CONJUN = .
+$SET PLURAL =
+$SET NSPOS = %%NS
+$CALC NSPOS = NSPOS - %%DEGEN
+$IF %%NSPOS = 1 THEN SKIP 3
+$SET PLURAL = s
+%%NSPOS suppliers -- namely, from
+$SET CONJUN = ; and from
+$SET SOURCE = @
+* LOOP OVER SUBMATRIX TO GET DELIVERY PATHS AND COSTS
+
+$LOOP
+$IF %COLUMN(1:3) <> T%%MT THEN SKIP LOOP
+$IF %VCOLX = 0 THEN SKIP LOOP
+$CALC NSPOS = NSPOS - 1
+$SET DP = %VCOLC
+$LOOKUP C S%%MT%COLUMN(4:5)1
+$SET SCOST = %VLOOK
+$CALC DP = DP + %VLOOK
+$LOOKUP D S%%MT%COLUMN(4:5)1
+$CALC RENT = 0 - %VLOOK
+$SET ASUP = %COLUMN(4:5)
+$ENTITY %%ASUP SR
+with delivered cost = %%DP
+$IF %%RENT = 0 THEN SKIP 1
+(this supplier, however, has an economic rent of %%RENT )
+%%CONJUN
+
+$IF %%NSPOS = 1 THEN SET CONJUN = .
+$IF %%DP <> %%PRICE THEN SKIP LOOP
+$SET SOURCE = %COLUMN(4:5)
+$SET DTCOST = %VCOLC
+$SET DSCOST = %%SCOST
+$SET DSRENT = %%RENT
+$NEXT C
+
+$IF %%SOURCE <> @ THEN GOTO DC
+The marginal price (%%PRICE ) = delivered cost + rent.
+The rent for S%%MT%%ASUP is as follows.
+$SET 1=S%%MT%%ASUP
+$INTERPRT PRICE
+$EXIT
+
+:DC
+Thus, marginal price = delivered cost = %%PRICE
+(from
+$ENTITY %%SOURCE SR
+) = price of %%ROW
+= Supply cost (%%DSCOST ) + Transportation cost (%%DTCOST )
+$IF %%DSRENT <> 0 THEN SKIP 2
+.
+$EXIT
+
++ Supply rent (%%DSRENT ).
+$EXIT
+
+                ::: END PRICED.RUL :::

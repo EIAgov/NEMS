@@ -1,0 +1,171 @@
+FILE NAME:      KSTEO
+
+DATE MODIFIED:  November 15, 2022
+
+NOTE:           Updating to November 2022 STEO; 2022-2024 updated using unbenchmarked growth rates for all minor fuels, except CL and MG which use STEO rates
+
+CONTACT:        Courtney Sourmehi
+                NEMS Commercial Buildings Analyst
+                Courtney.Sourmehi@eia.gov
+                (202) 586-0022
+
+USED BY:        Consumption subroutine of the National Energy Modeling System
+                (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     MER and STEO commercial sector historical and forecasted fuel consumption for the years 2021 through 2024
+
+UNITS:          trillion Btu consumed
+
+DIMENSION:      fuel type, year, Census division
+
+SPECIAL CONSTRAINTS:    None
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+
+                Indicator for availability of regional data (post-SEDS years):
+                     1.0 = regional data available,
+                     0.0 = regional data not available
+
+                     Each column corresponds to a fuel, in the following order:  Distillate Fuel, 
+			Residual, LPG, Coal, Motor Gasoline, and Kerosene.
+
+                National estimates:
+
+                     Each row corresponds to a fuel, in the following order:
+                       Distillate Fuel, Residual, LPG, Coal, Motor Gasoline,
+                       and Kerosene.
+
+                     Each column corresponds to a year, from 2021 to 2024 reading left to right.
+
+                Regional estimates:
+
+                     Each block corresponds to a fuel, in the following order:  
+			Distillate Fuel, Residual, LPG, Coal, Motor Gasoline, and Kerosene.
+
+                     Each row corresponds to a Census Division, as follows:  New England,
+                     Middle Atlantic, East North Central, West North Central, South Atlantic,
+                     East South Central, West South Central, Mountain, and Pacific.
+
+                     Each column corresponds to a year, from 2021 to 2024 reading left to right.
+
+SOURCES:
+
+                2021 national values:  Monthly Energy Review Tables 2.3, 3.8a, 4.3, and A4, released October 26, 2022
+                  Online at http://www.eia.gov/totalenergy/data/monthly/index.cfm
+                  Accessed through EIA Excel API add-on tool:  http://www.eia.gov/opendata/excel/
+
+                2022 - 2024 national and all regional values:  Short Term Energy Outlook, November 8, 2022
+                  Online at http://www.eia.gov/forecasts/steo/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Regional STEO data indicator; 1=available, 0=not available
+0	0	0	0	0	0
+
+2021	2022	2023	2024
+
+286.74	296.21	291.79	280.12	DS		National
+3.62	2.06	3.72	3.02	RF	
+201.67	183.89	186.03	188.60	LG	
+14.91	15.71	19.21	19.47	CL	
+405.36	404.05	402.51	405.31	MG	
+1.34	1.32	1.47	1.06	KS		
+				
+					
+0	0	0	0	CD1	DS	Regional
+0	0	0	0	CD2	
+0	0	0	0	CD3	
+0	0	0	0	CD4	
+0	0	0	0	CD5	
+0	0	0	0	CD6	
+0	0	0	0	CD7	
+0	0	0	0	CD8	
+0	0	0	0	CD9	
+				
+0	0	0	0	CD1	RF	Regional
+0	0	0	0	CD2	
+0	0	0	0	CD3	
+0	0	0	0	CD4	
+0	0	0	0	CD5	
+0	0	0	0	CD6	
+0	0	0	0	CD7	
+0	0	0	0	CD8	
+0	0	0	0	CD9	
+				
+0	0	0	0	CD1	LG	Regional
+0	0	0	0	CD2	
+0	0	0	0	CD3	
+0	0	0	0	CD4	
+0	0	0	0	CD5	
+0	0	0	0	CD6	
+0	0	0	0	CD7	
+0	0	0	0	CD8	
+0	0	0	0	CD9	
+				
+0	0	0	0	CD1	CL	Regional
+0	0	0	0	CD2	
+0	0	0	0	CD3	
+0	0	0	0	CD4	
+0	0	0	0	CD5	
+0	0	0	0	CD6	
+0	0	0	0	CD7	
+0	0	0	0	CD8	
+0	0	0	0	CD9	
+				
+0	0	0	0	CD1	MG	Regional
+0	0	0	0	CD2	
+0	0	0	0	CD3	
+0	0	0	0	CD4	
+0	0	0	0	CD5	
+0	0	0	0	CD6	
+0	0	0	0	CD7	
+0	0	0	0	CD8	
+0	0	0	0	CD9	
+				
+0	0	0	0	CD1	KS	Regional
+0	0	0	0	CD2	
+0	0	0	0	CD3	
+0	0	0	0	CD4	
+0	0	0	0	CD5	
+0	0	0	0	CD6	
+0	0	0	0	CD7	
+0	0	0	0	CD8	
+0	0	0	0	CD9	

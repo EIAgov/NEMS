@@ -1,0 +1,51 @@
+!  $Header: m:/default/includes/RCS/epmngtdm,v 1.8 2017/06/16 19:32:32 pkc Exp $
+!
+!=============================
+!
+! MEMBER NAME:  epmngtdm version of ANGTDM  adjusted prices pw2
+!  purpose is to duplicate the ANGTDM common block with different variable
+!  names.  Note that NGTDMOUT and ANGTDM are difference common blocks with
+!  the same variable names.  One has the adjusted prices, and one with the
+!  unadjusted prices.  This version of ANGTDM is used the in case where
+!  the adjusted and unadjusted prices are used in the same subroutine, ie, in
+!  the routine to adjust the (unadjusted prices by adding carbon taxes).
+!
+!
+!   TO UTILITY:
+      REAL*4 AGFELGR(NNGEM,MNUMYR)        ! E UTIL FIRM NG PRICE (87$/MMBTU)
+      REAL*4 AGIELGR(NNGEM,MNUMYR)        ! E UTIL INTERRUPT NG PRC (87$/MMBTU)
+      REAL*4 AGCELGR(NNGEM,MNUMYR)        ! E UTIL COMPETITIVE NG PRICE (87$/MMBTU)
+!   TO COAL:
+!     REAL*4 ALSYNGWP(17,MNUMYR)       ! PRC SYN NG FROM COAL (87$/MMBTU)
+!   TO TRAN:
+      REAL*4 AGFTRFV(MNUMCR,MNUMYR)    ! PRICE COMPRESSED NG TO FLEET VEH (87$/MMBTU)
+      REAL*4 AGFTRPV(MNUMCR,MNUMYR)    ! PRICE COMPRESSED NG TO PERSONAL VEH (87$/MMBTU)
+      REAL*4 AGLTRFV(MNUMCR,MNUMYR)    ! PRICE LIQUEFIED NG TO FLEET VEH (87$/MMBTU)
+      REAL*4 AGLTRPV(MNUMCR,MNUMYR)    ! PRICE LIQUEFIED NG TO PERSONAL VEH (87$/MMBTU)
+
+!   TO UTILITY - SEASONAL:
+      REAL*4 ASPGFELGR(NNGEM,MNUMYR,2)  ! E UTIL SEASONAL FIRM NG PRICE (87$/MMBTU)
+      REAL*4 ASPGIELGR(NNGEM,MNUMYR,2)  ! E UTIL SEASONAL INTERRUPT NG PRC (87$/MMBTU)
+      REAL*4 APBAJA(MNUMYR)             ! Trigger price for LNG in Baja Mexico
+      REAL*4 AQBAJA(MNUMYR)             ! LNG quantity from Baja Mexico to US
+
+! for natural gas use by trains (1=freight; 2=intercity; 3=transit; 4=commuter)
+!                     and boats (1=domestic shipping; 2=international shipping; 3=recreational)
+      REAL*4 AGFTRRAIL(4,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Rail compressed natural gas
+      REAL*4 AGLTRRAIL(4,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Rail liquefied natural gas
+      REAL*4 AGFTRSHIP(3,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Shipping compressed natural gas
+      REAL*4 AGLTRSHIP(3,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Shipping liqeufied natural gas
+!  natural gas quantity and price - new variables for the new model
+      REAL ASPNGELGR(NNGEM,MNUMYR,3)
+      REAL APNGELGR(NNGEM,MNUMYR)
+
+      COMMON /ANGTDM/ AGFELGR, AGIELGR, AGCELGR, AGFTRFV, AGFTRPV, AGLTRFV, AGLTRPV, &
+         ASPGFELGR, ASPGIELGR, APBAJA, AQBAJA,       &
+         AGFTRRAIL, AGLTRRAIL, AGFTRSHIP, AGLTRSHIP, &
+         ASPNGELGR, APNGELGR
+
+!   Equivalence for MAIN to test convergence on natural gas to util
+      REAL AMUPRC(NNGEM,MNUMYR,3)
+      EQUIVALENCE(AMUPRC,AGFELGR)
+      REAL ASGASPRICE(NNGEM,MNUMYR,4)
+      EQUIVALENCE(ASGASPRICE,ASPNGELGR)

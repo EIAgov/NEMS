@@ -1,0 +1,51 @@
+  Function: List nonzeroes (in submatrix)
+  Syntax:   LIST [row_conditional [,column_conditional] ] [//form]
+
+     If conditionals are omitted, submatrix is used.
+
+     The forms are:  COLUMN | ROW | EQUATION | DUAL | TABLEAU [options]
+                     :        :     :          :      :...columns must fit
+                     :        :     :          :          on screen width
+                     :        :     :          :...dual equations
+                     :        :     :...primal equations
+                     :        :...tabular, sorted by rows
+                     :...tabular, sorted by columns
+
+     Default is EQUATION listing.
+
+     Options for TABLEAU form are:
+        OBJ {FIRST | LAST}      default is its name sort order
+            placement of objective row, if in the submatrix
+        WIDTH number            default is 12
+            width of tableau column
+            (actual width is greater of number and name length)
+
+   Examples:
+
+   LIST *,*
+   ...Lists all equations
+
+   LIST
+   ...Lists submatrix equations
+
+   LI //D
+   ...Lists submatrix dual equations
+
+   LI  *,P X GT L
+   ...Lists nonzeroes in all rows and in columns whose name begins with
+      P and whose level (X) is strictly greater than its Lower bound
+
+   L    * S I,* //C
+   ...Lists all rows whose solution Status is Infeasible and all columns,
+      in COLUMN tabular form
+
+   L  S //R
+   ...Lists nonzeroes of all rows whose name begins with S with columns
+      already in the submatrix...form is tabular, by rows
+
+   L   //T
+   ...Lists submatrix in tableau form
+
+   L   //T OBJ FIRST WIDTH=8
+   ...Lists submatrix in tableau form, putting objective row first and
+      setting column widths to 8 (or name length, whichever is greater)

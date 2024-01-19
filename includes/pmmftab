@@ -1,0 +1,117 @@
+! -*- f90 -*-
+! $Header: m:/default/includes/RCS/pmmftab,v 1.41 2014/10/23 21:50:10 pkc Exp $
+
+! Product supplied by sector
+      REAL RFQIN(MNUMYR)       ! Industrial
+      REAL RFQTR(MNUMYR)       ! Transportation
+      REAL RFQRC(MNUMYR)       ! Resid/Comm
+      REAL RFQEL(MNUMYR)       ! Electric Power
+      REAL RFQSECT(MNUMYR)     ! Total
+
+      REAL RFIMPEXPEND(MNUMYR)         ! Import expenditures
+      REAL CRNCAPCD(MNUMCR,MNUMYR)     ! Corn ethanol plant capacity
+      REAL CLLCAPCD(MNUMCR,MNUMYR)     ! Cellulosic ethanol plant capacity
+      REAL GRNCAPCD(MNUMCR,MNUMYR)     ! Non-corn non-advanced ethanol plant capacity
+      REAL ADVCAPCD(MNUMCR,MNUMYR)     ! Advanced ethanol plant capacity
+
+      REAL PALMG(MNUMCR,MNUMYR)
+      REAL PDS(MNUMCR,MNUMYR)
+      REAL PDSL(MNUMCR,MNUMYR)
+      REAL PJF(MNUMCR,MNUMYR)
+      REAL MGMUTR(MNUMCR,MNUMYR,2)
+      REAL DSMURS(MNUMCR,MNUMYR,2)
+      REAL DSMUTR(MNUMCR,MNUMYR,2)
+      REAL JFMUTR(MNUMCR,MNUMYR,2)
+      REAL RFENVFX(MNUMCR,MNUMYR,20)
+
+      REAL E85ICCREDIT(MNUMYR)     ! E85 infrastructure cost (1987 dollars per barrel)
+      REAL BANKUSED(MNUMYR)        ! Number of banked credits used
+      REAL BANKCRED(MNUMYR)        ! Number of credits in the ol' bank
+      REAL MINREN(MNUMYR)          ! Minimum renewable (biodiesel, ethanol, CTL) in gasoline & diesel
+      REAL RFQNGPF(MNUMCR,MNUMYR)  ! Consumption of natural gas feedstocks
+      REAL RFQSGPF(MNUMCR,MNUMYR)  ! Consumption of still gas feedstocks
+
+      REAL CONEFF(MNUMYR)          ! gallon ethanol per short ton cellulose
+      REAL PLMQTYCD(MNUMCR,MNUMYR)    ! New palm oil quantity
+      REAL SBOQTYCD(MNUMCR,MNUMYR)    ! New SBO seed oil quantity
+! Agriculture reporting variables
+      REAL SBO_PRICE(MNUMCR,MNUMYR)     ! Soybean oil price
+      REAL YGR_PRICE(MNUMCR,MNUMYR)     ! Yellow grease price
+      REAL WGR_PRICE(MNUMCR,MNUMYR)     ! Other feedstock (white grease?) price
+
+      REAL PALBOB(MNUMCR,MNUMYR)
+
+      REAL DSCSHR(MNUMCR,MNUMYR)       ! CARB diesel shr of total DSU
+      REAL PDSCRB(MNUMCR,MNUMYR)       ! CARB diesel price, 87$/bbl
+      REAL FUEL_CARB(34,MNUMYR)        ! Holds all _CARB variables by year (they were not dimensioned and double precision)
+
+
+      REAL*4     PDSU(MNUMCR,MNUMYR)           ! ULTRA LOW SULFUR DEISEL
+      REAL*4     PDSC(MNUMCR,MNUMYR)           ! AVG PR for DS for COM 87$/bbl
+      REAL*4     PDSI(MNUMCR,MNUMYR)           ! AVG PR for DS for IND 87$/bbl
+      REAL*4     PDST(MNUMCR,MNUMYR)           ! AVG PR for DS for TRN 87$/bbl
+
+      REAL CELLIMPFRAC(MNUMCR,MNUMYR)          ! fraction of ethanol imports that are cellulosic
+
+      REAL*4     CELLCD(MNUMCR,MNUMYR)         ! Cellulose used for ethanol & biomass-to-liquids
+
+! for PADD-level refinery balance table
+      REAL*4     RFHCXH2IN(MNUMPR,MNUMYR)      ! Hydrogen from natural gas input to refinery
+      REAL*4     SBO2GDTPD(MNUMPR,MNUMYR)      ! Seed oil to GDT unit
+	  REAL*4     SBO2SAFPD(MNUMPR,MNUMYR)      ! Seed oil to SAF unit
+      REAL*4     YGR2GDTPD(MNUMPR,MNUMYR)      ! Yellow grease to green diesel
+      REAL*4     WGR2GDTPD(MNUMPR,MNUMYR)      ! White grease to GDT unit
+	  REAL*4     WGR2SAFPD(MNUMPR,MNUMYR)      ! White grease to SAF unit
+
+! wholesale prices
+      REAL*4     WS_RBOB(MNUMCR,MNUMYR)        ! CTL liq directly to prod pool
+
+! **** EPA-LCFS study variables ****
+      REAL*4     LCFSSAFE(MNUMYR)              ! Safety valve for the Biofuels constraint in 1000 tons C
+      REAL*4     CBIODUAL(MNUMYR)              ! Dual price from the biofuels offset row (CTRNBIO)
+
+      REAL*4     UBAVOLDS(MNUMPR,MNUMYR)       ! pyrolysis liquid blended into diesel, Mbbl/cd
+      REAL*4     UBAVOLMG(MNUMPR,MNUMYR)       ! pyrolysis liquid blended into mogas, Mbbl/cd
+
+
+     REAL EQ_RFFTAB( &
+                2*MNUMYR + &                       ! LCFS updates
+                6*MNUMYR + &                       ! RFQIN thru RFIMPEXPEND
+                4*MNUMCR*MNUMYR + &                ! PALMG thru PJF
+                4*MNUMCR*MNUMYR*2 + &              ! MGMUTR thru JFMUTR
+                MNUMCR*MNUMYR*20 + &               ! RFENVFX
+                3*MNUMYR + &                       ! BANKUSED, BANKCRED, MINREN
+                2 * MNUMCR * MNUMYR + &            ! RFQNGPF and RFQSGPF
+                4*MNUMCR*MNUMYR + &                ! CRNCAPCD, CLLCAPCD, GRNCAPCD, and ADVCAPCD
+                MNUMYR + &                         ! CONEFF
+                2*MNUMCR * MNUMYR + &              ! PLMQTYCD, SBOQTYCD
+                3*MNUMCR*MNUMYR + &                ! SBO_PRICE, YGR_PRICE, WGR_PRICE
+                MNUMCR*MNUMYR+ &                   ! PALBOB
+                6*MNUMCR*MNUMYR + &                ! PDSU thru CELLCD
+                MNUMPR*MNUMYR * 6 + &              ! RFHCXH2IN thru WGR2SAFPD
+                MNUMYR + &                         ! E85ICCREDIT
+                2 * MNUMPR * MNUMYR + &            ! UBAVOLDS and UBAVOLMG
+                2 * MNUMCR * MNUMYR + &            ! PDSCRB and DSCSHR
+                34 * MNUMYR + &                    ! FUEL_CARB
+                MNUMCR*MNUMYR+ &                   ! WS_RBOB
+                0)                                 ! closing parenthesis
+
+
+      EQUIVALENCE(EQ_RFFTAB,RFQIN)
+
+      COMMON /PMMFTAB/  RFQIN, RFQTR, RFQRC, RFQEL, RFQSECT, &
+               RFIMPEXPEND, CRNCAPCD, CLLCAPCD, &
+               PALMG, PALBOB, PDS, PDSL, PJF, MGMUTR, DSMURS, DSMUTR, JFMUTR, RFENVFX, &
+               BANKUSED, BANKCRED, MINREN, &
+               RFQNGPF, RFQSGPF, &
+               CONEFF, PLMQTYCD, SBOQTYCD, &
+               SBO_PRICE, YGR_PRICE, &
+               PDSU, PDSC, PDSI, PDST, &
+               CELLIMPFRAC, &
+               CELLCD, &
+               RFHCXH2IN, SBO2GDTPD, SBO2SAFPD, YGR2GDTPD, WGR2GDTPD, WGR2SAFPD, &
+               WS_RBOB, &
+               LCFSSAFE, CBIODUAL, &
+               GRNCAPCD, ADVCAPCD, WGR_PRICE, &
+               E85ICCREDIT, UBAVOLDS, UBAVOLMG, &
+               DSCSHR, PDSCRB, FUEL_CARB

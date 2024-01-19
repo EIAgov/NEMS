@@ -1,0 +1,23 @@
+                    ::: VIEWS.LOG 10-22-94 :::
+
+       Last date:   2-18-92, 7-11-92, 3-19-93, 7-25-93, 8-13-93, 8-9-94
+       ...Previous log entries deleted
+
+       Since 2-18-92
+        > Removed SCHEMA GRAPH...affects subsequent distributions
+          of MODLER and ANALYZE.
+       Since 7-11-92
+        > Corrected bug in SCRPRT (VER was not declared integer).
+        > Same bug corrected in SCRTXT (3-9-93)
+        > Cosmetic change in SCHEQN (3-19-93)
+        > Enhanced SCRSTP (in SCRPLOTS.FOR) to allow last step to have
+          infinite width.
+        > Added step labels (SLABEL) in SCRPLT (SCRPLOTS.FOR).
+       Since 8-21-93
+        > Fixed bug in SCHEQN
+       BEGIN ANALYZE 12.4
+        > Added PRHEAD to SCHDSP
+        > Added SYNTAX and NOSORT options to TABLE
+       BEGIN ANALYZE 12.5
+        > Updated OBJs for DCGETMAT and DCANAL
+

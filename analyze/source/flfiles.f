@@ -1,0 +1,883 @@
+C                 ::: FLFILES.FOR  3-03-95 :::
+C
+C LAST DATE: earlier dates deleted
+C            5-08-94...Changed FILEINF in FLOPEN as per Dan Skelly's note
+C            8-09-94...Added FCLOSE
+C
+C This file contains the following FLIP routines.
+C
+C For file i/o.
+C ~~~~~~~~~~~~
+C    FLEXEC......executes EXECUTE command
+C    FPRINT......prints file
+C    FILEIN......parse for input file
+C    FILOUT......check file for output
+C    FINQUR......INQUIRE (TSO doesn't like intrinsic function)
+C    FLOPEN......open a file
+C    FCLOSE......close file
+C    FSET0.......initialize file prefixes/suffixes
+C    FSETUP......executes _SETUP command...file prefixes and suffixes
+C    FSETNM......completes file name with prefix and suffix from keyword
+C    FSETFN......strips prefix and suffix from file spec
+C    FLRDLN......read 1 line from a data file (see features)
+C    EIAED.......edit input line for EIA
+C
+      SUBROUTINE FLEXEC(CLIST,FIRST,LAST,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+      INCLUDE 'DCFLIP.'
+      INCLUDE 'DCFLCMND.'
+CITSO      INCLUDE (DCFLIP)
+CITSO      INCLUDE (DCFLCMND)
+CI$$INSERT DCFLIP
+CI$$INSERT DCFLCMND
+C
+C DCFLCMND NEEDED FOR SWMSG DEFINITION
+C
+C This executes the EXECUTE command.
+C     Syntax:  EXECUTE filespec [strings] [//number]
+C                                :...........:...switched these 5-3-93
+C
+      CHARACTER*128 CLIST
+C LOCAL
+      CHARACTER*16  STR16
+      CHARACTER*8   STR8
+      CHARACTER*1   CHAR
+C  :::::::::::::::::::::: BEGIN ::::::::::::::::::::
+C GET EXECUTE FILESPEC
+      CALL FILEIN(CLIST,FIRST,LAST,'EXECUTE ',EXEFIL,RCODE)
+      IF(RCODE.NE.0)RETURN
+C SEE IF NUMBER SPECIFIED (DEFAULT=1)
+      CALL FLOOK(CLIST,FIRST,LAST,'//',NUMBER)
+      IF( NUMBER.EQ.0 )THEN
+C NO...EXENUM = NUMBER OF REMAINING EXECUTIONS
+         EXENUM = 0
+      ELSE
+C YES
+         F = NUMBER + 2
+C GET LOOP NUMBER
+         CALL FTOKEN(CLIST,F,LAST,STR8,8,CHAR)
+         IF( STR8.EQ.' ' )THEN
+            IF(SWMSG)PRINT *,' ** NUMBER EXPECTED AFTER //...1 ASSUMED'
+            EXENUM = 0
+         ELSE
+            CALL FC2I(STR8,8,EXENUM,RCODE)
+            IF(RCODE.NE.0)RETURN
+            IF(EXENUM.LT.1)THEN
+               PRINT *,' ?'//STR8//'...NUMBER MUST BE AT LEAST 1'
+               RCODE = -1
+               RETURN
+            ENDIF
+            EXENUM = EXENUM-1
+         ENDIF
+         LAST = NUMBER - 1
+      ENDIF
+C SET STRINGS (INCLUDING NULL ONES)
+      DO 100 I=1,9
+         STR8 = CHRNUM(I)
+         CALL FTOKEN(CLIST,FIRST,LAST,STR16,16,CHAR)
+         CALL FSDEF(STR8,STR16,RCODE)
+         IF( RCODE.NE.0 )RETURN
+100   CONTINUE
+110   CONTINUE
+C OK, PREPARE TO EXECUTE
+      IF(INPUT.EQ.INPFIL)CLOSE(INPFIL)
+      CALL FLOPEN(INPFIL,EXEFIL,'FORMATTED','OLD',*1300)
+      INPUT = INPFIL
+      RETURN
+C
+1300  CONTINUE
+      RCODE = 1
+      RETURN
+C
+C ** FLEXEC ENDS HERE
+      END
+      SUBROUTINE FPRINT(LINE,*)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C WRITE FROM HLPFIL TO OUTPUT
+C ...USING SCREEN WIDTH (SCRWTH) AND LENGTH (SCRLEN) IN DCFLIP
+C ...ALTERNATE RETURN IS FOR ABORT FROM FPRMPT
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+C LOCAL
+      CHARACTER*128 CLIST
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+101   FORMAT(A127)
+      RECL = 127
+CITSO101   FORMAT(A80)
+CITSO      RECL = 80
+CITSO      CLIST = ' '
+      IF(OUTPUT.EQ.TTYOUT) RECL = SCRWTH
+CIEIA      IF( OUTPUT.EQ.TTYOUT )THEN
+CIEIA         CALL FCLRSC
+CIEIA         LINE = 1
+CIEIA      ENDIF
+C RECL = MAX LENGTH OF CLIST TO OUTPUT (CLIPPED AFTER RECL)
+C IF OUTPUT IS A FILE, RECL = 127 EXCEPT UNDER TSO AND CMS (RECL=80)
+C IF OUTPUT IS SCREEN, RECL = SCREEN WIDTH (SCRWTH)
+C
+200   READ(HLPFIL,101,END=991,ERR=1310)CLIST
+CIEIA        CALL EIAED(CLIST)
+        CALL FSLEN(CLIST,128,LENGTH)
+C TRUNCATE LINE IF EXCEEDS SCREEN WIDTH (SCRWTH)
+        IF(LENGTH.GT.RECL)THEN
+           LENGTH = RECL
+        ELSE IF(LENGTH.EQ.0)THEN
+           LENGTH = 1
+        ENDIF
+        CALL FPRMPT(LINE,*999)
+        IF(OUTPUT.EQ.TTYOUT)THEN
+C SCREEN OUTPUT...SKIP 1 SPACE
+           WRITE(OUTPUT,201,ERR=1320)(CLIST(I:I),I=1,LENGTH)
+201        FORMAT(1X,127A1)
+        ELSE
+C FILE OUTPUT...WRITE SAME AS INPUT
+           WRITE(OUTPUT,202,ERR=1320)(CLIST(I:I),I=1,LENGTH)
+202        FORMAT(127A1)
+CITSO202        FORMAT(79A1)
+        ENDIF
+      GOTO 200
+C
+C DONE (EOF REACHED ON INPUT FILE)
+991   CLOSE(UNIT=HLPFIL)
+      RETURN
+C ABORT (FROM FPRMPT) AND ERROR RETURNS COME HERE
+999   CLOSE(UNIT=HLPFIL)
+      RETURN 1
+C
+1310  PRINT *,' ** ERROR READING FROM INPUT'
+      GOTO 999
+1320  PRINT *,' ** ERROR WRITING TO OUTPUT'
+      GOTO 999
+C
+C ** FPRINT ENDS HERE
+      END
+      SUBROUTINE FILEIN(CLIST,FIRST,LAST,KEYWRD,FILNAM,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C PARSE CLIST FOR FILENAME AND CHECK EXISTENCE
+C  RCODE=0...ALL IS WELL
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+       CHARACTER*(*) CLIST
+       CHARACTER*8   KEYWRD
+       CHARACTER*64  FILNAM,FNTEMP
+       CHARACTER*1   CHAR
+       LOGICAL       EXIST
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+C PARSE FOR FILE NAME (FILNAM)
+      CALL FTOKEN(CLIST,FIRST,LAST,FILNAM,FLNLEN,CHAR)
+      IF(FILNAM.EQ.' ')THEN
+         PRINT *,' ** MISSING FILENAME'
+         RCODE = -1
+         RETURN
+      ENDIF
+C CHECK IF TERMINAL (*)
+      IF(FILNAM.EQ.'*')RETURN
+      CALL FSLEN(FILNAM,FLNLEN,LS)
+C
+C GET SETUP'S PREFIX AND SUFFIX
+      FNTEMP = FILNAM
+      CALL FSETNM(KEYWRD,FILNAM,BEGEXT,RCODE)
+      IF(RCODE.NE.0)RETURN
+C
+C  NOW FILNAM HAS PREFIX//USER FILENAME//SUFFIX (IF USER DID NOT QUALIFY)
+C  FOR CMS FILNAM IS FILENAME TYPE MODE (BLANKS BETWEEN)
+C
+C SEE IF FILE EXISTS
+      CALL FINQUR(FILNAM,IOSTAT,EXIST,*10)
+      ERR  = 0
+      GOTO 100
+10    CONTINUE
+C ERROR RETURN FROM INQUIRE COULD BE DUE TO ADDING PREFIX
+      ERR  = 1
+      EXIST=.FALSE.
+100   CONTINUE
+      IF(.NOT.EXIST .AND. FILNAM.NE.FNTEMP)THEN
+C TRY CURRENT PATH (NO PREFIX OR AUGMENTED SUFFIX)
+         CALL FINQUR(FNTEMP,IOSTAT,EXIST,*13)
+         IF(.NOT.EXIST)THEN
+C STILL DOES NOT EXIST...ISSUE ERROR MESSAGE ON PREFIXED FILE
+              CALL FSLEN(FILNAM,FLNLEN,LS)
+              PRINT *,' ** FILE '//FILNAM(:LS)//' DOES NOT EXIST'
+              PRINT *,' ...NOR DOES '//FNTEMP
+              RCODE=1
+              RETURN
+          ENDIF
+C OK, GO WITH UNAUGMENTED FILE NAME
+          FILNAM = FNTEMP
+      ENDIF
+C
+      IF(IOSTAT.GT.0)THEN
+         PRINT *,' ** ERROR STATUS ON '//FILNAM
+         RCODE=2
+         RETURN
+      ENDIF
+C
+      RCODE=0
+      RETURN
+C
+13    CONTINUE
+      PRINT *,' ** INQUIRE ERROR FOR '//FNTEMP
+      IF( ERR.GT.0 )THEN
+         PRINT *,'   AND FOR '//FILNAM
+      ELSE
+         PRINT *,' ...FILE '//FILNAM(:LS)//' DOES NOT EXIST'
+      ENDIF
+      RCODE = 13
+      RETURN
+C
+C ** FILEIN ENDS HERE
+      END
+      SUBROUTINE FILOUT(FILNAM,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C CHECK FILNAM TO USE FOR OUTPUT
+C RCODE=0...ALL IS WELL
+C      >0...FATAL ERROR
+C      <0...NONFATAL ERROR (USER CHANGED HIS MIND)
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+C LOCAL
+       CHARACTER*64  FILNAM
+       CHARACTER*1   CHAR
+       LOGICAL*4     EXIST
+       INTEGER*4     IOSTAT
+       PARAMETER (DUMMY=0)
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      CALL FINQUR(FILNAM,IOSTAT,EXIST,*13)
+      CALL FSLEN(FILNAM,FLNLEN,LS)
+      IF(.NOT.EXIST)GOTO 11
+C  FILE ALREADY EXISTS...PROMPT FOR REPLACEMENT
+C  (TSO BRANCHES AROUND REPLACEMENT PROMPT)
+CXTSO         IF(DUMMY.EQ.0)GOTO 11
+10       PRINT *,' '//FILNAM(:LS)//' exists...replace (Y/N)?'
+C CALL FGTCHR TO GET 1 CHAR RESPONSE FROM TERMINAL
+C     (CHAR = blank MEANS USER REFUSES TO GIVE RESPONSE)
+         CALL FGTCHR('YN',' ',CHAR)
+         IF(CHAR.EQ.'N'.OR.CHAR.EQ.' ')THEN
+            RCODE = -1
+            RETURN
+         ENDIF
+C OK, USER SAID WE CAN OVERWRITE EXISTING FILE
+11    CONTINUE
+      IF(IOSTAT.GT.0)THEN
+         PRINT *,' ** ERROR STATUS ON '//FILNAM(:LS)
+         RCODE = 3
+      ENDIF
+C
+      RETURN
+C
+13    PRINT *,' ** SYSERR FILOUT...'//FILNAM
+      RCODE = 13
+      RETURN
+C
+C ** FILOUT ENDS HERE
+      END
+      SUBROUTINE FINQUR(FILNAM,IOSTAT,EXIST,*)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C This just uses the intrinsic INQUIRE, but some systems (eg, TSO)
+C do not like it.
+C
+       CHARACTER*(*) FILNAM
+       INTEGER       IOSTAT
+       LOGICAL       EXIST
+C LOCAL
+       CHARACTER*64 STR64
+CXTSO       CHARACTER*7  DDNAME
+CICMS       CHARACTER*8  FNAME,FTYPE,FMODE
+CICMS       CHARACTER*1  CHAR
+      PARAMETER (DUMMY=0)
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+C COPY FILE NAME
+      STR64 = FILNAM
+CICMS       IF(DUMMY.EQ.0)THEN
+CICMS          FIRST = 1
+CICMS          CALL FSLEN(STR64,64,LAST)
+CICMS          CALL FTOKEN(STR64,FIRST,LAST,FNAME,8,CHAR)
+CICMS          CALL FTOKEN(STR64,FIRST,LAST,FTYPE,8,CHAR)
+CICMS          CALL FTOKEN(STR64,FIRST,LAST,FMODE,8,CHAR)
+CICMS          IF(FTYPE.EQ.' ')FTYPE = 'DATA    '
+CICMS          IF(FMODE.EQ.' ')FMODE = '*       '
+C
+CICMS          FILNAM      = FNAME
+CICMS          FILNAM(10:) = FTYPE
+CICMS          FILNAM(19:) = FMODE
+CICMS          STR64  = '/'//FILNAM
+CICMS       ENDIF
+CXTSO       IF(DUMMY.EQ.0)GOTO 100
+C
+C TSO DOES NOT GET HERE (EIA DOES)
+CIEIA       CALL FSLEN(STR64,64,LAST)
+CIEIA       CALL FLOOK(STR64,1,LAST,'.',I)
+CIEIA       IF( I.GT.0 .AND. STR64(1:1).NE.'/' )STR64 = '/'//FILNAM
+CIEIAC            THE LEADING SLASH (/) MEANS FILNAM IS A FILE NAME
+CIEIAC            (WITHOUT . IT IS A DDNAME)
+       INQUIRE(FILE=STR64,IOSTAT=IOSTAT,EXIST=EXIST,ERR=13)
+       RETURN
+13     RETURN 1
+C
+C TSO GETS HERE (NOT CMS OR EIA)
+CXTSO100    CONTINUE
+CXTSO       DDNAME = FILNAM(:7)
+CXTSO       OPEN(UNIT=1,ERR=1300,FILE=DDNAME,IOSTAT=IOSTAT)
+CXTSO       :...NOT USING FLOPEN BECAUSE THIS WORKS UNDER TSO
+CXTSO       CLOSE(UNIT=1)
+CXTSO       EXIST = .TRUE.
+CXTSO       RETURN
+CXTSO1300   CLOSE(UNIT=1)
+CXTSO       EXIST = .FALSE.
+CXTSO       RETURN 1
+C
+C ** FINQUR ENDS HERE
+      END
+      SUBROUTINE FLOPEN(UNIT,FILNAM,FORMAT,STATUS,*)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C This opens file UNIT with file name = FILNAM.  Parameters are
+C as in ordinary open statement, except for CMS, where it is
+C preceded by / (to distinguish from DD name).
+C ...Alternate return is error opening file (message given here)
+C
+C       FILNAM = file name (in TSO this is DD name, and
+C                           in CMS this includes file type and mode)
+C       FORMAT = FORMATTED | UNFORMATTED
+C       STATUS = OLD | NEW | UNKNOWN
+C
+C THIS DOES NOT APPLY TO SCRATCH FILES (EG, GETIOMAT OPENS ITS
+C OWN SCRATCH FILE).  WE CAN CHANGE THIS LATER IF NECESSARY.
+C
+C DO NOT INCLUDE DCFLIP BECAUSE UNIT MIGHT BE IN COMMON AND SOME
+C COMPILERS DO NOT LIKE THIS.
+C
+      INTEGER       UNIT
+      CHARACTER*(*) FORMAT,STATUS,FILNAM
+C LOCAL
+      CHARACTER*64 STR64
+CICMS      CHARACTER*8  FNAME,FTYPE,FMODE
+CICMS      CHARACTER*1  CHAR
+CIEIA      LOGICAL  EXIST
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+C CHECK STATUS (THIS CAN BE REMOVED LATER, AFTER CODE IS STABLE)
+      IF(   (FILNAM.EQ.' ')
+     S .OR. (STATUS.NE.'OLD' .AND. STATUS.NE.'UNKNOWN' .AND.
+     S       STATUS.NE.'NEW')
+     F .OR. (FORMAT.NE.'FORMATTED' .AND. FORMAT.NE.'UNFORMATTED')
+     X ) GOTO 1300
+C COPY FILE NAME
+      STR64 = FILNAM
+CICMSC MAKE SURE THERE ARE FILE TYPE AND MODE
+CICMS      IF(STR64(1:1).EQ.'/') STR64(1:1) = ' '
+CICMS      FIRST = 1
+CICMS      LAST  = 20
+CICMS      CALL FTOKEN(STR64,FIRST,LAST,FNAME,8,CHAR)
+CICMS      CALL FTOKEN(STR64,FIRST,LAST,FTYPE,8,CHAR)
+CICMS      CALL FTOKEN(STR64,FIRST,LAST,FMODE,8,CHAR)
+CICMS      IF(FTYPE.EQ.' ') FTYPE = 'DATA    '
+CICMS      IF(FMODE.EQ.' ') FMODE = '*       '
+CICMS      FILNAM = FNAME
+CICMS      FILNAM(10:) = FTYPE
+CICMS      FILNAM(19:) = FMODE
+CICMS      STR64 = '/'//FILNAM
+CICMSC NOTE THAT CALLER GETS BACK FILNAM = name type mode
+CICMSC                                     :    :    :...at 19:26
+CICMSC                                     :    :...at 10:17
+CICMSC                                     :...at 1:8
+C
+CIEIA      CALL FLOOK(FILNAM,1,64,'_',L)
+CIEIA      IF( L.EQ.1 )STR64 = FILNAM(2:)
+CIEIA      IF( L.GT.1 )STR64 = FILNAM(:L-1)//FILNAM(L+2:)
+CIEIA      CALL FLOOK(STR64,1,64,'.',L)
+CIEIA      IF( L.GT.0 .AND. STR64(1:1).NE.'/' )STR64 = '/'//FILNAM
+CIEIA      INQUIRE(FILE=STR64,IOSTAT=IOSTAT,EXIST=EXIST,ERR=1310)
+CIEIA      IF( .NOT.EXIST )THEN
+CIEIAC MUST DEFINE FILE
+CIEIA         IF( FORMAT.EQ.'FORMATTED' )THEN
+CIEIA            CALL FILEINF(RCODE,'TRK',50,'SECOND',100,'RECFM','FB',
+CCIEIA ADDED 8-9-94:                                      ===========
+CIEIA     1                   'LRECL',80,'BLKSIZE',7440)
+CIEIA         ELSE
+CIEIA            CALL FILEINF(RCODE,'TRK',50,'SECOND',100,'RECFM','VBS',
+CIEIA     1                   'LRECL',-1,'BLKSIZE',32760)
+CIEIA         ENDIF
+CIEIA         IF( RCODE.NE.0 )THEN
+CIEIA            PRINT *,' ** FILEINF ERROR IN FLOPEN'
+CIEIA            RETURN 1
+CIEIA         ENDIF
+CIEIA      ENDIF
+C
+      CLOSE(UNIT)
+      OPEN(UNIT,FILE=STR64,FORM=FORMAT,STATUS=STATUS,ERR=1300)
+C REWIND NOT NECESSARY, BUT DO IT ANYWAY
+      REWIND(UNIT)
+      RETURN
+C
+1300  CONTINUE
+      CALL FSLEN(STR64,64,L)
+      PRINT *,' ** I/O ERROR OPENING '//STR64(:L)
+      PRINT *,' ...UNIT =',UNIT,' FORM=',FORMAT,' STATUS=',STATUS
+      RETURN 1
+CIEIA1310  CONTINUE
+CIEIA      PRINT *,' ** ERROR INQUIRING ABOUT ',STR64
+CIEIA      RETURN 1
+C
+C ** FLOPEN ENDS HERE
+      END
+      SUBROUTINE FCLOSE(UNIT)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+C This closes file UNIT + include file (INCFIL).
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      CLOSE(UNIT)
+      IF( SWINCL )THEN
+         SWINCL = .FALSE.
+         CLOSE(INCFIL)
+         INPLIN = 0
+      ENDIF
+C
+C ** FCLOSE ENDS HERE
+      END
+      SUBROUTINE FSET0(KEYWRD,PREFIX,SUFFIX,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C This initializes the file prefix/suffix settings for  _SETUP command.
+C Note that FLIP calls this in FLIPMAIN for the HELP files.
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+      CHARACTER*8  KEYWRD
+      CHARACTER*48 PREFIX
+      CHARACTER*4  SUFFIX
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      IF(NFLSET.EQ.MXFSET)GOTO 1300
+C ADD TO SETUP LIST
+      NFLSET = NFLSET + 1
+      SETKEY(NFLSET) = KEYWRD
+      SETPRE(NFLSET) = PREFIX
+      SETSUF(NFLSET) = SUFFIX
+      RETURN
+C
+1300  PRINT *,' ** SYSERR IN FSET0...PLEASE REPORT...',NFLSET,MXFSET
+      RCODE = 13
+      RETURN
+C
+C ** FSET0 ENDS HERE
+      END
+      SUBROUTINE FSETUP(CLIST,FIRST,LAST,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C This executes _SETUP command, where user can set file prefixes/suffixes.
+C Syntax:  _SETUP [setting]
+C
+C    If setting is absent from CLIST, the stored settings are listed.
+C    A setting is of form:   keyword = prefix [suffix]
+C
+C    The keywords were entered into FSET0 during initialization. In
+C    particular, FLIPMAIN entered HELP files with default prefix null
+C    and suffix = EXTHLP.  The string can contain drive:path under DOS,
+C    or anything else, depending upon the operating system.
+C
+C    If only a suffix is to be set, the user entered prefix = *
+C    If a leading blank is needed, such as the suffix under cms, the
+C       double quote (") is used.
+C    Example:   _SETUP MATRIX * "BAS
+C               ...keeps prefix of MATRIX filetype and sets suffix
+C                  (CMS type) to  BAS (leading blank).
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+      CHARACTER*128 CLIST
+      CHARACTER*1   CHAR
+      CHARACTER*48  PREFIX
+      CHARACTER*4   SUFFIX
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      IF(CLIST(FIRST:).EQ.' ')GOTO 1000
+      IF(CLIST(FIRST:).EQ.'**')THEN
+C SET ALL PREFIXES TO BLANKS
+         DO 10 I=1,NFLSET
+10       SETPRE(I) = ' '
+         RETURN
+      ENDIF
+C SPECIFIC SETTING...PARSE KEYWORD AS OPTION
+      NUMBER = NFLSET
+      RCODE = 1
+      CALL FOPTN(CLIST,FIRST,LAST,SETKEY,NUMBER,RCODE)
+      IF(RCODE.NE.0)RETURN
+C
+C PARSE FOR PREFIX
+      CALL FTOKEN(CLIST,FIRST,LAST,PREFIX,PRELEN,CHAR)
+      IF(PREFIX.NE.'*')SETPRE(NUMBER) = PREFIX
+C PARSE FOR SUFFIX
+      CALL FTOKEN(CLIST,FIRST,LAST,SUFFIX,SUFLEN,CHAR)
+      IF(SUFFIX.NE.' ')THEN
+         IF(SUFFIX(1:1).EQ.'"')SUFFIX(1:1) = ' '
+         SETSUF(NUMBER) = SUFFIX
+      ENDIF
+      RETURN
+C
+1000  PRINT *,' '
+C  SHOW SETTINGS
+      CLIST = ' _SETUP Entered'
+      CALL FCENTR(CLIST,I1,I2)
+      WRITE(OUTPUT,1001,ERR=1300)(CLIST(I:I),I=1,I2)
+1001  FORMAT(1X,79A1)
+      CLIST = 'Keyword'
+      CLIST(15:) = 'Prefix'
+      CLIST(11+PRELEN:) = 'Suffix'
+      CALL FCENTR(CLIST,I1,I2)
+      WRITE(OUTPUT,1001,ERR=1300)(CLIST(I:I),I=1,I2)
+      DO 1100 I=I1,I2
+1100  CLIST(I:I) = '-'
+      WRITE(OUTPUT,1001,ERR=1300)(CLIST(I:I),I=1,I2)
+      LINE = 6
+C
+      DO 1200 K=1,NFLSET
+         CALL FPRMPT(LINE,*1290)
+         CLIST(I1:)           = SETKEY(K)
+         CLIST(I1+10:)        = SETPRE(K)
+         CLIST(I1+11+PRELEN:) = SETSUF(K)
+         WRITE(OUTPUT,1001,ERR=1300)(CLIST(I:I),I=1,I2)
+1200  CONTINUE
+C
+1290  RETURN
+C
+1300  RCODE = 2
+      RETURN
+C
+C ** FSETUP ENDS HERE
+      END
+      SUBROUTINE FSETNM(KEYWRD,FILNAM,BEGEXT,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C This returns full filespec (FILNAM) by augmenting prefix and
+C suffix for (KEYWRD) file type...FILNAM(BEGEXT:) begins the suffix.
+C ...RCODE > 0 if KEYWRD not found.
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+      CHARACTER*64  FILNAM
+      CHARACTER*(*) KEYWRD
+C LOCAL
+      CHARACTER*128 CLIST
+      CHARACTER*64  FNTEMP
+      CHARACTER*48  PREFIX
+      CHARACTER*4   SUFFIX
+CICMS       PARAMETER(DUMMY=0)
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      IF(NFLSET.LE.0 .OR. KEYWRD.EQ.' ')RETURN
+C FIRST, LOOKUP KEYWORD (KEYWRD)
+      NUMBER = NFLSET
+      CLIST = KEYWRD
+      FIRST = 1
+      LAST  = 8
+      RCODE = 1
+C GET KEYWORD (RCODE=1 MEANS MANDATORY)
+      CALL FOPTN(CLIST,FIRST,LAST,SETKEY,NUMBER,RCODE)
+      IF(RCODE.NE.0)RETURN
+C
+      PREFIX = SETPRE(NUMBER)
+CICMS      IF( PREFIX.NE.' ')THEN
+CICMS         PRINT *,' PREFIX IGNORED IN CMS'
+CICMS         PREFIX = ' '
+CICMS      ENDIF
+      SUFFIX = SETSUF(NUMBER)
+CICMS      IF(SUFFIX.EQ.' ')SUFFIX = 'DATA'
+      CALL FSLEN(FILNAM,FLNLEN,LS)
+C
+C CHECK IF USER SET A SUFFIX (OVERRIDES STORED ONE)
+C      FOR CMS, A SUFFIX IS SEPARATED FROM THE MAIN PART OF THE
+C      NAME BY BLANKS.  LOOK FOR THE FIRST NON-BLANK FOLLOWING
+C      A STRING OF BLANKS
+C
+C BEGIN CMS CODE
+CICMS      IF( SUFFIX(1:1).EQ.' ')THEN
+CICMS         BEGEXT = 9
+CICMS      ELSE
+CICMS         BEGEXT = 10
+CICMS      ENDIF
+CICMS      FILNAM(BEGEXT:) = SUFFIX
+CICMS      BEGEXT = 10
+CICMS      FILNAM(19:)= '*'
+CICMS      IF(DUMMY.EQ.0)RETURN
+C END CMS CODE
+C
+C FOR NON-CMS WE LOOK FOR .
+      CALL FLOOK(FILNAM,1,LS,'.',BEGEXT)
+      IF(BEGEXT.EQ.0)THEN
+C NO, SO ADD SUFFIX (QUALIFIER)
+         BEGEXT = LS + 1
+         FILNAM(BEGEXT:) = SUFFIX
+      ENDIF
+C OK, ADD PREFIX (IF ANY)
+120   CONTINUE
+      IF(PREFIX.NE.' ')THEN
+          CALL FSLEN(PREFIX,PRELEN,LS)
+          FNTEMP = PREFIX(:LS)//FILNAM
+CIEIA          IF( FILNAM(1:1).EQ.'_' )FNTEMP = PREFIX(:LS)//FILNAM(2:)
+          FILNAM = FNTEMP
+          BEGEXT = BEGEXT+LS
+      ENDIF
+125   CONTINUE
+C         FOR CMS, ALLOCATE THE FILE WITH FILENAME (FILNAM) AND
+C         SUFFIX = FILE TYPE
+C BEGIN CMS CODE
+C ...PUT FILE TYPE (SUFFIX(1:1) IS BLANK) AND MODE
+      RETURN
+C
+C ** FSETNM ENDS HERE
+      END
+      SUBROUTINE FSETFN(KEYWRD,FILNAM,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+C This strips prefix and suffix from FILNAM for type (KEYWRD).
+C ...RCODE > 0 if KEYWRD not found.
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+      CHARACTER*64  FILNAM,FNTEMP
+      CHARACTER*(*) KEYWRD
+      CHARACTER*48 PREFIX
+      CHARACTER*4  SUFFIX
+C ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      IF(NFLSET.LE.0 .OR. KEYWRD.EQ.' ')RETURN
+C
+      NUMBER = NFLSET
+      RCODE = 1
+      FNTEMP= KEYWRD
+      FIRST = 1
+      LAST  = 8
+C GET KEYWORD (MANDATORY)
+      CALL FOPTN(FNTEMP,FIRST,LAST,SETKEY,NUMBER,RCODE)
+      IF(RCODE.NE.0)RETURN
+      PREFIX = SETPRE(NUMBER)
+      SUFFIX = SETSUF(NUMBER)
+      CALL FSLEN(FILNAM,FLNLEN,LS)
+C LOOK FOR SUFFIX
+      CALL FLOOK(FILNAM,2,LS,SUFFIX,LOC)
+      IF(LOC.GT.0)THEN
+         LS = LOC-1
+         FNTEMP = FILNAM(:LS)
+      ELSE
+         FNTEMP = FILNAM
+      ENDIF
+C LOOK FOR PREFIX
+      CALL FLOOK(FNTEMP,1,LS,PREFIX,LOC)
+      IF(LOC.GT.0)THEN
+         CALL FSLEN(PREFIX,48,LS)
+         FILNAM = FNTEMP(LS+1:)
+      ELSE
+         FILNAM = FNTEMP
+      ENDIF
+C
+      RETURN
+C
+C ** FSETFN ENDS HERE
+      END
+      SUBROUTINE FLRDLN(CLIST,DATFIL,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U)
+C
+      INCLUDE 'DCFLIP.'
+CITSO      INCLUDE (DCFLIP)
+CI$$INSERT DCFLIP
+C
+C This reads line from either DATFIL or INCFIL, according to SWINCL,
+C skipping comments (* in column 1) and blank lines.
+C ...Keeps number of lines read from DATFIL current.
+C    LRECL = 80...ie, reading FORMAT(A80)
+C
+C INPUT:  DATFIL...master input file
+C
+C OUTPUT: CLIST....input line (not blank and not a comment)
+C         RCODE = return code = 0 iff all is well
+C               = -1 if EOF on DATFIL reached
+C               >  0 if fatal error
+C
+C A normal return gives CLIST to the caller.
+C
+C The "master" input file is DATFIL.  It may contain an INCLUDE
+C statement, which then causes input to come from INCFIL.  The caller
+C need not be concerned about this if FLRDLN is called repeatedly until
+C the returned CLIST is an end string (like ENDATA) and the caller stops
+C calling.  Thus, some care must be taken by the caller to make sure
+C the INCLUDE file (INCFIL) is not left open.  This routine closes
+C INCFIL when it reaches an eof.
+C
+C Strings are substituted before return.
+C
+      CHARACTER*128 CLIST
+C LOCAL
+      CHARACTER*64  FILNAM
+C ...SWINCL, INPLIN AND INCFIL ARE FROM DCFLIP
+C :::::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+      IF( SWFDBG )THEN
+         PRINT *,' ENTERED FLRDLN WITH DATFIL=',DATFIL,
+     1           ' INPLIN=',INPLIN
+         FLPAUS = FLPAUS-1
+         IF( FLPAUS.LE.0 )CALL FDEBUG
+      ENDIF
+      IF( SWINCL )THEN
+C INPUT FILE IS INCLUDE FILE
+         FILE = INCFIL
+      ELSE
+C INPUT FILE IS DATFIL
+         FILE = DATFIL
+      ENDIF
+C READ A LINE
+10    CLIST = ' '
+CICMS      IF(FILE.EQ.TTYIN)THEN
+CICMS         READ(FILE,1,ERR=1300,END=101) CLIST
+CICMS101      REWIND (UNIT=FILE)
+CICMS         GOTO 190
+CICMS      ENDIF
+      READ(FILE,1,ERR=1300,END=99)CLIST
+1     FORMAT(A80)
+      IF( SWFDBG )THEN
+         PRINT *,INPLIN,':',CLIST(:65)
+         FLPAUS = FLPAUS-1
+         IF( FLPAUS.LE.0 )CALL FDEBUG
+      ENDIF
+CIEIA        CALL EIAED(CLIST)
+C
+190   CONTINUE
+C CLIST IS LINE FROM INPUT FILE
+      IF( .NOT.SWINCL )INPLIN = INPLIN + 1
+C                      :...LINE # OF MAIN INPUT FILE
+      IF( CLIST(1:1).EQ.'*' .OR. CLIST.EQ.' ' )GOTO 10
+C LINE IS NOT COMMENT (* IN COL 1) AND NOT BLANK
+      CALL FSLEN(CLIST,128,LAST)
+C SUBSTITUTE STRINGS
+      CALL FSSUBS(CLIST,LAST,RCODE)
+      IF( RCODE.NE.0 )THEN
+         IF( SWFDBG )PRINT *,' FSSUBS RETURNED RCODE =',RCODE
+         GOTO 1300
+      ENDIF
+C
+      IF( .NOT.SWINCL )THEN
+C WE ARE READING FROM MAIN INPUT FILE (DATFIL)
+C ...SEE IF THIS IS AN INCLUDE STATEMENT
+         IF(CLIST(1:8).EQ.'INCLUDE ')THEN
+C ...IT IS, SO PREPARE TO OPEN INCLUDE FILE
+C ...GET FILESPEC
+            FIRST = 9
+            CALL FSLEN(CLIST,128,LAST)
+            CALL FILEIN(CLIST,FIRST,LAST,'INCLUDE ',FILNAM,RCODE)
+            IF( RCODE.NE.0 )THEN
+               IF( SWFDBG )PRINT *,' FILEIN RCODE =',RCODE
+               GOTO 1300
+            ENDIF
+            CALL FLOPEN(INCFIL,FILNAM,'FORMATTED','OLD',*1300)
+            SWINCL = .TRUE.
+            FILE = INCFIL
+            GOTO 10
+         ENDIF
+      ENDIF
+C AT THIS POINT CLIST IS AN ORDINARY INPUT LINE TO BE
+C RETURNED TO THE CALLER.
+      RCODE = 0
+      RETURN
+C
+C FATAL ERROR RETURN
+1300  CONTINUE
+      IF( INPLIN.GT.0 )THEN
+         IF( CLIST.NE.' ' )THEN
+            PRINT *,INPLIN,'...LAST LINE READ:'
+            CALL FSLEN(CLIST,128,LAST)
+            PRINT *,' ',CLIST(:LAST)
+         ELSE
+            PRINT *,INPLIN,'...LAST LINE READ IS NULL'
+         ENDIF
+      ELSE IF( SWFDBG )THEN
+         PRINT *,' INPLIN=0'
+      ENDIF
+      IF( DATFIL.NE.TTYIN )CLOSE(DATFIL)
+      IF( SWINCL )THEN
+         CLOSE(INCFIL)
+         SWINCL = .FALSE.
+      ENDIF
+      RCODE = 1
+      SWFDBG = .FALSE.
+      RETURN
+C
+C EOF REACHED
+99    CONTINUE
+      IF(SWINCL)THEN
+C END OF INCLUDE FILE...CLOSE AND RESUME WITH DATFIL
+         CLOSE(INCFIL)
+         SWINCL = .FALSE.
+         FILE = DATFIL
+         GOTO 10
+      ENDIF
+C EOF ON DATFIL...LET CALLER KNOW
+      RCODE = -1
+      CLOSE(DATFIL)
+      RETURN
+C
+C ** FLRDLN ENDS HERE ***
+      END
+CIEIA      SUBROUTINE EIAED(CLIST)
+CIEIAC     =================
+CIEIA      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+CIEIAC
+CIEIAC This edits CLIST for EIA
+CIEIAC
+CIEIA      CHARACTER*(*) CLIST
+CIEIAC LOCAL
+CIEIA      CHARACTER*128 CTEMP
+CIEIA      CHARACTER*1   CHAR,LBRACE,RBRACE,LBRACK,RBRACK
+CIEIA      DATA  LBRACE/'<'/,RBRACE/'>'/,LBRACK/'('/,RBRACK/')'/
+CIEIAC :::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+CIEIA      CTEMP = CLIST
+CIEIA      CALL FSLEN(CTEMP,128,LENGTH)
+CIEIA      IF( LENGTH.EQ.0 )RETURN
+CIEIA      DO 100 I=1,LENGTH
+CIEIA         CHAR = CTEMP(I:I)
+CIEIA         IF( CHAR.EQ.'{' )THEN
+CIEIA            CTEMP(I:I) = LBRACE
+CIEIA         ELSE IF( CHAR.EQ.'}' )THEN
+CIEIA            CTEMP(I:I) = RBRACE
+CIEIA         ELSE IF( CHAR.EQ.'[' )THEN
+CIEIA            CTEMP(I:I) = LBRACK
+CIEIA         ELSE IF( CHAR.EQ.']' )THEN
+CIEIA            CTEMP(I:I) = RBRACK
+CIEIA         ENDIF
+CIEIA100   CONTINUE
+CIEIAC
+CIEIA      CLIST = CTEMP
+CIEIA      RETURN
+CIEIAC
+CIEIAC ** EIAED ENDS HERE ***
+CIEIA      END

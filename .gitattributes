@@ -1,0 +1,15 @@
+# Denote all files that are truly binary and should not be modified.
+# -text means not text aka binary
+# to track in kornshell cd to repo directory and type < git lfs track *xls
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.dsn filter=lfs diff=lfs merge=lfs -text
+*.lib filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text
+*.xlsx filter=lfs diff=lfs merge=lfs -text
+*.xls filter=lfs diff=lfs merge=lfs -text
+*.wk1 filter=lfs diff=lfs merge=lfs -text
+*.xml filter=lfs diff=lfs merge=lfs -text
+*.gdx filter=lfs diff=lfs merge=lfs -text
+*.mdb filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.daf filter=lfs diff=lfs merge=lfs -text

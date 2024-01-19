@@ -1,0 +1,42 @@
+!  $Header: m:/default/includes/RCS/maindbg,v 1.6 2009/08/04 18:25:13 pkc Exp $
+! MAINDBG INCLUDE--CONTAINS VARIABLES USED IN MAIN TO STORE SUMMARY
+!                  STATISTICS ON CONVERGENCE
+      INTEGER      MNDBGVARS   ! NUMBER OF CONVERGENCE VARIABLES HELD FOR RPT
+      PARAMETER   (MNDBGVARS=50)
+      REAL         DTBAC(MNDBGVARS,3) ! Before (PRIOR), After (CURRENT) and fractional Change (B-A-C)
+      INTEGER      DTREG(MNDBGVARS)   ! CENSUS REGION INDEX OF VARIABLE
+      CHARACTER*9  DTVAR(MNDBGVARS)   ! NAME OF VARIABLE
+! the following variables are for storage/retrieval of a direct access
+! file to store convergence variable values by iterations.
+! The file has the following format:
+
+!  Cols  Width      Decription
+!  ----- ------  ---------------------
+!   1- 9      9  Variable name
+!  10-10      1  Region STRING (CHARACTER DIGITS 1-9,0 FOR 10, OR A FOR 11)
+!  11-12      2  Year Index (01-26)
+!  13-52     40  Ten real*4 Values containing values for each iteration
+!  HOWEVER, TO AVOID SIGNIFICANT WASTE ON MAINFRAME FILE STORAGE, BLOCKS
+!  OF 100 RECORDS ARE STORED AS A SINGLE DIRECT ACCESS RECORD.
+! Dimension parameters:
+      INTEGER      MNDBGITRS   ! NUMBER OF ITERATION VALUES STORED PER RECORD
+      INTEGER      MXDTNVAR    ! MAX NUMBER OF VARIABLES PER YEAR
+      PARAMETER(MNDBGITRS=10,MXDTNVAR=3000)
+!  FILE UNIT NUMBER, NAME FOR D/A FILE FROM FILEMGR
+      INTEGER   IMNPQIT
+      CHARACTER MNPQIT*18
+!  Variables to keep track of record numbers:
+      INTEGER    DTCURBLK        ! CURRENT BLOCK OF 100 RECORDS
+      INTEGER    DTSTART(MNUMYR) ! STARTING RECORD NUMBER FOR EACH YEAR
+      INTEGER    DTNVAR          ! NUMBER OF RECORDS PER YEAR
+      INTEGER    DTOFFSET(MXDTNVAR) ! RECORD NUMBER OFFSET W/I A YEAR GROUP
+      CHARACTER*12 DTKEYS(MXDTNVAR) ! RECORD IDS W/I A YEAR GROUP
+!  VARIABLE TO STORE A SINGLE RECORD:
+      CHARACTER*9  DTNAM            ! A key's VARIABLE NAME portion
+      CHARACTER*1  DTAREG           ! A key's REGION portion
+      CHARACTER*2  DTYEAR           ! A Key's year id portion
+      CHARACTER*12 DTKEY(100)       ! Key portion of record (var-reg-year)
+      REAL         DTPQIT(MNDBGITRS,100) !values for each iteration stored
+
+      COMMON/MAINDBG/DTBAC,DTREG,DTSTART,DTNVAR,DTOFFSET,DTPQIT,IMNPQIT,DTCURBLK
+      COMMON/MAINDBGC/DTVAR,DTKEYS,DTKEY,MNPQIT

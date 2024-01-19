@@ -1,0 +1,443 @@
+                           ANALYZE Error Messages
+
+      Error messages are given when ANALYZE cannot recognize what you
+      mean, or if some necessary condition is violated.  Syntax errors
+      are the most common cause, and I/O errors are the next most
+      common.  As in debugging a linear program, one takes information
+      and tries to diagnose the cause.  Because error messages are
+      imperfect in the information they provide, this list of error
+      message explanations is not a complete guide to debugging.
+      Further, ANALYZE is an imperfect language with some limitations
+      and quirks.
+
+      The list of error messages is given alphabetically to make its
+      lookup easy.
+
+
+      All rows in submatrix are already in some block
+        This occurs when attempting to create a new block when all
+        rows in the submatrix are already in a block.  Each row can be
+        in at most one block, so you might erase some blocks.
+
+      <something> ambiguous...could be <a> or <b>
+        This occurs if the specification is an abbreviation that
+        matches two (or more) possibilities, <a> or <b>.
+
+      Basis error...row <row> is dependent
+        This occurs when the BASIS command finds a basic row that
+        appears to be linearly dependent on the other basic columns.
+        This could be a system error and should be reported.
+
+      Basis has too many structural activities
+        This occurs when the optimizer specifies basic solution status
+        for more activities than there are (binding) rows.  If MINOS
+        is used, this could be due to 'superbasics' coming from a
+        nonlinear program.
+
+      Basis tolerance error...attempt to pivot on row ...
+        This occurs when the BASIS command runs into a problem with
+        the arithmetic.  This could be a system error and should be
+        reported.
+
+      BEGIN ROWS EXPECTED
+        This occurs when reading an IIS file that does not conform to
+        the expected format.  Please report this (and save the IIS
+        file).
+
+      BOUND type <chars> not recognized
+        This occurs when reading a matrix file.  The recognized bound
+        types are LO, UP, FX, MI, PL, FR, and BV.  They must be given
+        in columns 2-3 for each column in the BOUNDS section (see
+        Chapter 6 of Primer).
+
+      CANNOT PLOT DUE TO COLUMN WITH INFINITE RANGE...NAMELY <col>
+        The PLOT option of the SHOW command requires each submatrix
+        column to be explicitly bounded (see Primer, Chapter 12).
+
+      CANNOT RECURSE ON THE INTERPRT COMMAND
+        This occurs if you attempt to specify $ANALYZE INTERPRT in a
+        rule file.  Fortran is not recursive (or even re-entrant), so
+        you must specify $INTERPRT (without specifying ANALYZE).
+
+      CANNOT HAVE CHAR LENGTH=<integer>...MUST BE FROM 1 TO 10
+        This occurs when specifying a name length less than 1 or
+        greater than 10 in the READIN MATRIX option.  Use LPRENAME
+        to have row and column name lengths greater than 10 (see
+        Primer).
+
+      Cannot merge block into itself
+        This occurs when you specify BLOCK {ROW | COL} MERGE <b1> <b2>
+        with blocks b1 and b2 the same.  You might have meant these
+        blocks to be different, so check your spelling.
+
+      CANNOT RECOGNIZE something
+        This occurs when something is not recognized, such as when a
+        syntax file refers to a set in the domain of a row or column
+        class, but the set was not defined.  Print the syntax file and
+        report it to your model manager.
+
+      Column <column> is dependent
+        This occurs when the BASIS command finds a basic column that
+        appears to be linearly dependent on the other basic columns.
+        This could be a system error and should be reported.
+
+      COLUMN <name> EXCEEDS 10 CHARS
+        This occurs when attempting to write a dual matrix file
+        (SUBMAT WRITE [filespec] //DUAL).  The primal LP has a nonzero
+        (submatrix) column bound.  In forming the dual, the bound constraint
+        needs a dual column variable, whose name is the primal column name
+        plus a suffix (L or U).  The total name length must therefore exceed
+        10 characters, which cannot be in a matrix file.
+
+      COMMON SET NOT DEFINED...USE FOR
+        This occurs with the TABLE command when multiple classes are
+        specified without the FOR specification to define a common
+        set.  There is no unique choice of common set from the syntax,
+        so you must specify the common set with the FOR option.
+
+      DOMAIN OF {ROW | COL} <name> HAS < 2 SETS
+        This occurs with the TABLE command when one class, <name>,
+        is specified, whose domain is either null or has only one
+        set.
+
+      ENVIRONMENT CONFLICT <new> <old>
+        This occurs when attempting to read a formatted packed file
+        that was created in another computing environment, <old>,
+        that is incompatible with the <new> computing environment.
+
+      FIELD OUT OF RANGE...<integer>
+        This occurs when attempting to translate a row or column.  The
+        'field' is the substring in the row or column name that
+        contains the member of the set in its domain.  Its range is 1
+        to the length of a name, and this message says <integer>
+        violates this range.
+
+      FILE <filespec> DOES NOT EXIST
+        This occurs when attempting to open a file that you specified
+        that does not exist.  Check your default prefix and suffix
+        with the _SETUP command.
+
+      Filename missing
+        This occurs if a file is required and none is specified, such
+        as the EXECUTE command.  Use the _SETUP command to check
+        default prefixes and suffixes.
+
+      IO ERROR ...
+        This occurs when reading from or writing to a file.  It can
+        sometimes be the error message when the file does not exist.
+        Check your default prefix and suffix with the _SETUP command.
+        For PACKED files, the DOS Standard and Views Versions cannot
+        read a packed file created by the Full version, and conversely.
+
+      INCREMENT FAILED BECAUSE <char> IS NOT A DIGIT OR LETTER
+        This occurs with the STRING INCREMENT specification when the
+        last character, <char>, of the string is not a digit or
+        letter.  It cannot be a special character (like $ or .).
+
+      INVALID ZERO TOLERANCE = <value>...MUST >0 AND <1
+        This occurs when specifying a tolerance in the READIN MATRIX
+        option that is outside the interval, (0, 1).  This tolerance
+        is used to drop coefficients in the COLUMNS section of the
+        matrix file.  (It can also change absolute tolerance used for
+        other procedures, like BASIS and REDUCE.)
+
+      <number> is insufficient number of basic structurals
+        This occurs when the BASIS command does not find enough basic
+        columns in the solution file.  This could be due to reading
+        the wrong solution file.  Otherwise, it can be a problem with
+        the optimizer's output.
+
+      MATRIX FILE IS NOT IN MPS FORMAT...
+        This occurs when attempting to read a matrix file that does
+        not conform to the 'MPS standard'.  See Chapter 6 in the
+        Primer for a description.
+
+      MAX ITERATIONS CANNOT = <integer>
+        This occurs with the REDUCE and TRACE commands when specifying
+        a maximum number of iterations less than 1.
+
+      Max length (128) exceeded...
+        This occurs when the text of a row or column syntax exceeds
+        128 characters after substituting the meanings of the sets
+        referenced.
+
+      MAX LOOP <number>
+        This occurs if a rule file is instantiated that has a loop
+        with the number of lines in excess of the number printed.
+        You should report this to your model manager.
+
+      Missing block name (and new name)
+        This occurs when you attempt to rename a block and you did not
+        specify either the old block name or the new one (or both).
+
+      Missing block name to COPY {TO | FROM}
+        This occurs when you want to copy a block to or from the
+        submatrix, but you did not specify a block name.
+
+      Missing colon in set reference
+        This when reading a syntax file.  The use of the special
+        character & denotes the beginning of a set reference, which is
+        of the form, &set:num, where set = name of set in domain of
+        row or column and num = first field position.
+
+      Missing filename
+        This occurs if a file specification is required, such as when
+        reading a new linear program (matrix or packed file).
+
+      Missing new name of <block>
+        This occurs if you attempt to rename a block but omitted its
+        new name.
+
+      Missing query mask (use ?)
+        This occurs when a query mask is needed, such as with the
+        TALLY command.  The query character is the question mark (?).
+
+      Name expected after <option>
+        A name is expected, such as a row name after specifying
+        MINIMIZE or MAXIMIZE in a READIN MATRIX option.
+
+      NO ENTITY SETS (FOR DOMAINS) HAVE BEEN DEFINED
+        This occurs when attempting to display domain sets (with
+        SCHEMA command), but no sets have been defined in the
+        syntax file.  You can print the syntax file and report this
+        to your model manager.
+
+      No free row (N-type)...error assumed
+        This occurs when reading a matrix file if the ROWS section
+        does not have a free row.
+
+      NO GRAPH IS SET
+        This occurs if you attempt to use the GRAPH command before
+        using it to set a graph.
+
+      No non-free row...error assumed
+        This occurs when reading a matrix file if the ROWS section
+        does not have a non-free row (ie, type L, G or E).
+
+      NO ROW SYNTAX...see model manager
+        This occurs when the syntax file does not specify a row
+        syntax.  You should report this to your model manager.
+
+      No rows or columns in submatrix...REDUCE not executed
+        The submatrix is null.  You probably forgot to specify it,
+        such as SUB * to put all rows and columns into the submatrix.
+
+      No Rulebase...See Model Manager
+        This occurs if you attempt to use the INTERPRT command, but
+        no rulebase has been specified.  Use _SETUP to check your
+        default prefix and suffix for the RULEBASE file type.
+
+      NO SCHEMA HAS BEEN SET ...
+        This occurs when a command specification requires the schema
+        to have been set.  Use the SCHEMA command to do this.
+
+      No sets have been attributed
+        This occurs when you specify an attribute in the GRAPH SET
+        option, but no set has been attributed.  The problem is
+        probably an error in the syntax file, so you should report
+        this to your model manager.
+
+      NO SYNTAX HAS BEEN READIN
+        This occurs if you attempt to specify a command that requires
+        syntax before reading in a syntax file.
+
+      NULL COLUMN IN BASIS: <name>
+        This occurs when setting up the basis (as with BASIS command)
+        and a basic column has no nonzero coefficients in the non-
+        basic rows.  This means the `basis' is singular.
+
+      NULL ROW IN BASIS: <name>
+        This occurs when setting up the basis (as with BASIS command)
+        and a non-basic row has no nonzero coefficients in the basic
+        columns.  This means the `basis' is singular.
+
+      Number of row/column classes out of range
+        This occurs when attempting to form a schema with too many
+        row and/or column classes.
+
+      NUMERIC FORMAT ERROR
+        A numeric value is required in your specification, but it was
+        not of the required format.  It must be either simply a string
+        of digits (no commas), perhaps with a decimal point, or it can
+        be in scientific format:  <value>E[s]xx, where <value> is the
+        simple form and E[s]xx means exponential with sign s, if
+        specified, is + or -, and xx is a 1- or 2-digit number for the
+        exponent.
+
+      Objective row <name> not in matrix file
+        This occurs if you specified an objective row in the READIN
+        MATRIX command, and the matrix file does not have that row.
+
+      Option missing...specify 1 of:
+        The subsequent list of options describe what is required.
+
+      <...> OPTION NOT RECOGNIZED...<...>
+        The option you specified is not recognized...acceptable ones
+        are listed.
+
+      Premature end of file reached
+        This occurs when reading a file where more input is required.
+        For example, this error message is issued when reaching the
+        end of a matrix file before a required section (ROWS,
+        COLUMNS, RHS) has been read.
+
+      Rimkey expected...<keys listed>
+        A rimkey is expected in a conditional.  See CONDNL.DOC.
+
+      {ROW | COL} BLOCK <block> already exists
+        This occurs when attempting to create or rename a block with a
+        name of another block.
+
+      {ROW | COL} CLASS NAME EXPECTED
+        This occurs with the TABLE command.  You must specify a class
+        name even if the submatrix has only one class in it.
+
+      {ROW | COL} <name>        HAS NULL DOMAIN
+        This occurs with the TABLE command if the class <name> does
+        not have any sets in its domain.  This is required to form a
+        2-dimensional table.
+
+      Row <name> has second range
+        This occurs if, when reading the RANGE section of a matrix
+        file, a row is ranged twice.
+
+      ROW or COL expected after TABLE command
+        This is required as part of the syntax.  You must specify
+        either ROW or COL (which can be abbreviated R or C,
+        respectively)
+
+      Row type <char> not recognized
+        This occurs when reading a matrix file.  The recognized row
+        types are N, L, G and E.  They must be given in column 2 for
+        each row in the ROWS section (see Chapter 6 of Primer).
+
+      RULEBASE ERROR ...
+        This is an error in a rule file.  See Chapter 11 in the Primer
+        or report this to your model manager.
+
+      SCREEN DIMENSIONS OUT OF RANGE <width> <length>
+        The screen dimensions needed by the command specification is
+        given, <width> x <length>.  You must have the screen
+        dimensions at least as great as these.  Use the SCREEN command
+        to set its width and length.
+
+      SCREEN WIDTH TOO SMALL FOR DISPLAY...MUST BE AT LEAST <number>
+        This occurs if you (or the PROFILE) set the screen width less
+        than what is needed for the DISPLAY command.  What is needed
+        is given in the message.  A similar message appears with other
+        displays in the RATEOF command.
+
+      SEEMS LIKE FIRST COLUMN IS BLANK THROUGHOUT...PLEASE CORRECT
+        This occurs when attempting to read a matrix file and each
+        line has column blank.  In some computing environments, the
+        Fortran compiler puts a blank in the first column for an
+        output file (in order to reserve column 1 for carriage
+        control).  This This must be edited before ANALYZE can read
+        it.
+
+      SET EXPECTED AFTER FOR
+        This occurs with the TABLE command for multiple classes when
+        FOR is specified without a common set specification.
+
+      <set> IS NOT IN DOMAIN OF <class>
+        This occurs with the TABLE command for multiple classes when
+        the common set specified is not in the class.
+
+      something NOT RECOGNIZED
+        This occurs when something is not recognized, such as a
+        keyword or block name.  Try re-entering it (you might have
+        pressed a wrong key).
+
+      SUBMATRIX IS NULL...NO GRAPH IS SET
+        This occurs when attempting to set a graph when the submatrix
+        has no non-zeroes.
+
+      SUBMATRIX HAS NO {ROWS | COLUMNS}
+        This occurs when the submatrix needs to have rows and/or
+        columns for the command, such as for SUBMAT WRITE.
+
+      Syntax file not readin
+        This occurs when attempting to use model syntax, such as with
+        the EXPLAIN or SYNTAX command, but you have not read a syntax
+        file.  Use READIN SYN ... to read a syntax file for the LP.
+
+      SYNTAX FORMAT ERROR...see model manager
+        This occurs when there is a format error in the syntax file
+        specification.  A common cause is that the text of the meaning
+        is too long (cannot exceed 64 characters).
+
+      SYSERR ...
+        You found a system error.  Please report it with a description
+        of what you did (include relevant files).
+
+      TABLE HEAD TOO LARGE...MAX = <number>
+        This occurs with the TABLE command when there are too many
+        head set members.  The maximum allowed is given, <number>.
+
+      TABLE STUB TOO LARGE...MAX = <number>
+        This occurs with the TABLE command when there are too many
+        stub set members.  The maximum allowed is given, <number>.
+
+      TEXT ...? <text>
+        This is an error in a rule file, where the TEXT command has an
+        unrecognized specification.  You should report this to your
+        model manager.
+
+      There are <number> column(s) that cannot be in the basis...
+        This occurs when the BASIS command runs into a problem with
+        the arithmetic.  This could be a system error and should be
+        reported.
+
+      <something> too long to substitute
+        This occurs if sting variables are in a command specification,
+        and upon substituting the string values, the total length of
+        the specification exceeds 127 characters.
+
+      TOO MANY ACTIVITIES...MAX = <number>
+        This occurs if you attempt to use the PLOT option of the SHOW
+        command with too many columns in the submatrix.  The max
+        number is printed in the error message.
+
+      TOO MANY BASICS [or NONBASICS] IN SUBMATRIX...MAX = <number>
+        This occurs with the TABLEAU option of the RATEOF command.  The
+        number is the limit, which depends upon your screen length (or
+        width).  The tableau is formed with each basic variable on a
+        different line and each nonbasic variable defining a tableau
+        column.  The entire tableau must fit on your screen.  You can
+        increase the screen length, then spool the output to a file
+        and use the PRINT command, which has vertical scrolling.  There
+        is no horizontal scrolling, however, so the tableau format is
+        limited to only a few nonbasic variables.
+
+      TOO MANY ROW OR COLUMN BLOCKS (limits are <max_row> by <max_col>
+        This occurs if you try to create too many row or column
+        blocks.  The limits are printed.  You can erase some blocks to
+        make room for new ones.
+
+      TRACE ABORTED...Maximum size reached...<integer>
+        This occurs when the submatrix gets larger than the integer
+        printed.  The partial trace is the final submatrix reached.
+
+      Translation has too many characters to complete
+        This occurs when attempting to translate a row or column, but
+        the translation has too many characters after substituting the
+        meanings of sets that are referenced.  You should print the
+        syntax file and report this to your model manager.
+
+      UNABLE TO COMPLETE TRANSLATION
+        This follows some prior error message when attempting to
+        translate a row or column according to its syntax.
+
+      Value expected
+        This occurs when a value is expected in the command
+        specification, but nothing is specified.
+
+      : MISSING IN SYNTAX...see model manager
+        This occurs when reading a syntax file that has an error in
+        the specification, where the colon is required.
+
+      ? <number>...MUST BE AT LEAST 1
+        This occurs when specifying EXECUTE <file> <number>, and
+        <number> is less than 1.  You might have entered a minus sign
+        or decimal point by mistake.
+

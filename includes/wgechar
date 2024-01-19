@@ -1,0 +1,10 @@
+!  $Header: N:/default/includes/RCS/wgechar,v 1.2 1999/12/19 20:19:04 DSA Exp $
+!     RFM-GES SUBMODULE LOCAL CHARACTER DATA BLOCK
+!
+      CHARACTER*22 WGESName(MNUMGS)   !   Site name
+      CHARACTER*2  WGESSt(MNUMGS)     !   Site State code
+      CHARACTER*8  WGEESub  !  Subroutine name for error report
+      CHARACTER*16 WGEERC !  Character value for error report
+!
+      COMMON /WGESITC/ WGESName, WGESSt, WGEESub, WGEERC
+!

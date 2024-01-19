@@ -1,0 +1,225 @@
+NAME          WOODNET
+ROWS
+ N  COST
+ E  SPIDE
+ E  DPIDE
+ E  SPICH
+ E  DPICH
+ E  SPISF
+ E  DPISF
+ E  SPILA
+ E  DPILA
+ E  SPISE
+ E  DPISE
+ E  DWADE
+ E  SWACH
+ E  DWACH
+ E  SWASF
+ E  DWASF
+ E  DWALA
+ E  SWASE
+ E  DWASE
+ E  SOKDE
+ E  DOKDE
+ E  SOKCH
+ E  DOKCH
+ E  SOKSF
+ E  DOKSF
+ E  SOKLA
+ E  DOKLA
+ E  SOKSE
+ E  DOKSE
+ E  DMODE
+ E  DMOCH
+ E  SMOSF
+ E  DMOSF
+ E  DMOLA
+ E  SMOSE
+ E  DMOSE
+COLUMNS
+    SPIDE1    SPIDE      1.0           COST       10.
+    SPICH1    SPICH      1.0           COST       11.
+    SPISF1    SPISF      1.0           COST       12.
+    SPILA1    SPILA      1.0           COST       15.
+    SPISE1    SPISE      1.0           COST       11.
+    SPIDE2    SPIDE      1.0           COST       12.
+    SPICH2    SPICH      1.0           COST       15.
+    SPISF2    SPISF      1.0           COST       12.
+    SWACH1    SWACH      1.0           COST       50.
+    SWASF1    SWASF      1.0           COST       50.
+    SWASE1    SWASE      1.0           COST       60.
+    SOKDE1    SOKDE      1.0           COST       30.
+    SOKCH1    SOKCH      1.0           COST       35.
+    SOKSF1    SOKSF      1.0           COST       40.
+    SOKLA1    SOKLA      1.0           COST       40.
+    SOKSE1    SOKSE      1.0           COST       50.
+    SMOSF1    SMOSF      1.0           COST       45.
+    SMOSE1    SMOSE      1.0           COST       55.
+    DPIDE1    DPIDE     -1.0
+    DPICH1    DPICH     -1.0
+    DPISF1    DPISF     -1.0
+    DPILA1    DPILA     -1.0
+    DPISE1    DPISE     -1.0
+    DWADE1    DWADE     -1.0
+    DWACH1    DWACH     -1.0
+    DWASF1    DWASF     -1.0
+    DWALA1    DWALA     -1.0
+    DWASE1    DWASE     -1.0
+    DOKDE1    DOKDE     -1.0
+    DOKCH1    DOKCH     -1.0
+    DOKSF1    DOKSF     -1.0
+    DOKLA1    DOKLA     -1.0
+    DOKSE1    DOKSE     -1.0
+    DMODE1    DMODE     -1.0
+    DMOCH1    DMOCH     -1.0
+    DMOSF1    DMOSF     -1.0
+    DMOLA1    DMOLA     -1.0
+    DMOSE1    DMOSE     -1.0
+    TPIDECH   COST       10.
+    TPIDECH   SPIDE     -1.0           DPICH      1.0
+    TOKDECH   COST       10.
+    TOKDECH   SOKDE     -1.0           DOKCH      1.0
+    TPIDESF   COST       12.
+    TPIDESF   SPIDE     -1.0           DPISF      1.0
+    TOKDESF   COST       12.
+    TOKDESF   SOKDE     -1.0           DOKSF      1.0
+    TPIDELA   COST       12.
+    TPIDELA   SPIDE     -1.0           DPILA      1.0
+    TOKDELA   COST       12.
+    TOKDELA   SOKDE     -1.0           DOKLA      1.0
+    TPIDESE   COST       15.
+    TPIDESE   SPIDE     -1.0           DPISE      1.0
+    TOKDESE   COST       15.
+    TOKDESE   SOKDE     -1.0           DOKSE      1.0
+    TPICHDE   COST       11.
+    TPICHDE   SPICH     -1.0           DPIDE      1.0
+    TWACHDE   COST       11.
+    TWACHDE   SWACH     -1.0           DWADE      1.0
+    TOKCHDE   COST       11.
+    TOKCHDE   SOKCH     -1.0           DOKDE      1.0
+    TPICHSF   COST       15.
+    TPICHSF   SPICH     -1.0           DPISF      1.0
+    TWACHSF   COST       15.
+    TWACHSF   SWACH     -1.0           DWASF      1.0
+    TOKCHSF   COST       15.
+    TOKCHSF   SOKCH     -1.0           DOKSF      1.0
+    TPICHLA   COST       18.
+    TPICHLA   SPICH     -1.0           DPILA      1.0
+    TWACHLA   COST       18.
+    TWACHLA   SWACH     -1.0           DWALA      1.0
+    TOKCHLA   COST       18.
+    TOKCHLA   SOKCH     -1.0           DOKLA      1.0
+    TPISFDE   COST       12.
+    TPISFDE   SPISF     -1.0           DPIDE      1.0
+    TWASFDE   COST       12.
+    TWASFDE   SWASF     -1.0           DWADE      1.0
+    TOKSFDE   COST       12.
+    TOKSFDE   SOKSF     -1.0           DOKDE      1.0
+    TMOSFDE   COST       12.
+    TMOSFDE   SMOSF     -1.0           DMODE      1.0
+    TPISFCH   COST       15.
+    TPISFCH   SPISF     -1.0           DPICH      1.0
+    TWASFCH   COST       15.
+    TWASFCH   SWASF     -1.0           DWACH      1.0
+    TOKSFCH   COST       15.
+    TOKSFCH   SOKSF     -1.0           DOKCH      1.0
+    TMOSFCH   COST       15.
+    TMOSFCH   SMOSF     -1.0           DMOCH      1.0
+    TPISFLA   COST       5.
+    TPISFLA   SPISF     -1.0           DPILA      1.0
+    TWASFLA   COST       5.
+    TWASFLA   SWASF     -1.0           DWALA      1.0
+    TOKSFLA   COST       5.
+    TOKSFLA   SOKSF     -1.0           DOKLA      1.0
+    TMOSFLA   COST       5.
+    TMOSFLA   SMOSF     -1.0           DMOLA      1.0
+    TPISFSE   COST       8.
+    TPISFSE   SPISF     -1.0           DPISE      1.0
+    TWASFSE   COST       8.
+    TWASFSE   SWASF     -1.0           DWASE      1.0
+    TOKSFSE   COST       8.
+    TOKSFSE   SOKSF     -1.0           DOKSE      1.0
+    TMOSFSE   COST       8.
+    TMOSFSE   SMOSF     -1.0           DMOSE      1.0
+    TPILADE   COST       14.
+    TPILADE   SPILA     -1.0           DPIDE      1.0
+    TOKLADE   COST       14.
+    TOKLADE   SOKLA     -1.0           DOKDE      1.0
+    TPILACH   COST       16.
+    TPILACH   SPILA     -1.0           DPICH      1.0
+    TOKLACH   COST       16.
+    TOKLACH   SOKLA     -1.0           DOKCH      1.0
+    TPILASF   COST       5.
+    TPILASF   SPILA     -1.0           DPISF      1.0
+    TOKLASF   COST       5.
+    TOKLASF   SOKLA     -1.0           DOKSF      1.0
+    TPISEDE   COST       20.
+    TPISEDE   SPISE     -1.0           DPIDE      1.0
+    TWASEDE   COST       20.
+    TWASEDE   SWASE     -1.0           DWADE      1.0
+    TOKSEDE   COST       20.
+    TOKSEDE   SOKSE     -1.0           DOKDE      1.0
+    TMOSEDE   COST       20.
+    TMOSEDE   SMOSE     -1.0           DMODE      1.0
+    TPISECH   COST       18.
+    TPISECH   SPISE     -1.0           DPICH      1.0
+    TWASECH   COST       18.
+    TWASECH   SWASE     -1.0           DWACH      1.0
+    TOKSECH   COST       18.
+    TOKSECH   SOKSE     -1.0           DOKCH      1.0
+    TMOSECH   COST       18.
+    TMOSECH   SMOSE     -1.0           DMOCH      1.0
+    TPISESF   COST       10.
+    TPISESF   SPISE     -1.0           DPISF      1.0
+    TWASESF   COST       10.
+    TWASESF   SWASE     -1.0           DWASF      1.0
+    TOKSESF   COST       10.
+    TOKSESF   SOKSE     -1.0           DOKSF      1.0
+    TMOSESF   COST       10.
+    TMOSESF   SMOSE     -1.0           DMOSF      1.0
+    TPISELA   COST       15.
+    TPISELA   SPISE     -1.0           DPILA      1.0
+    TWASELA   COST       15.
+    TWASELA   SWASE     -1.0           DWALA      1.0
+    TOKSELA   COST       15.
+    TOKSELA   SOKSE     -1.0           DOKLA      1.0
+    TMOSELA   COST       15.
+    TMOSELA   SMOSE     -1.0           DMOLA      1.0
+RHS
+    HOMOGEN   COST      0
+BOUNDS
+ UP BNDSET    SPIDE1     100.
+ UP BNDSET    SPICH1     100.
+ UP BNDSET    SPISF1     90.
+ UP BNDSET    SPILA1     50.
+ UP BNDSET    SPISE1     10.
+ UP BNDSET    SPIDE2     200.
+ UP BNDSET    SPICH2     100.
+ UP BNDSET    SWACH1     25.
+ UP BNDSET    SWASF1     10.
+ UP BNDSET    SOKDE1     50.
+ UP BNDSET    SOKCH1     40.
+ UP BNDSET    SOKSF1     20.
+ UP BNDSET    SOKLA1     5.
+ UP BNDSET    SMOSF1     30.
+ FX BNDSET    DPIDE1     100.
+ FX BNDSET    DPICH1     100.
+ FX BNDSET    DPISF1     90.
+ FX BNDSET    DPILA1     50.
+ FX BNDSET    DPISE1     10.
+ FX BNDSET    DWADE1     20.
+ FX BNDSET    DWACH1     25.
+ FX BNDSET    DWASF1     10.
+ FX BNDSET    DWALA1     15.
+ FX BNDSET    DWASE1     5.
+ FX BNDSET    DOKDE1     50.
+ FX BNDSET    DOKCH1     40.
+ FX BNDSET    DOKSF1     20.
+ FX BNDSET    DOKLA1     5.
+ FX BNDSET    DOKSE1     15.
+ FX BNDSET    DMODE1     20.
+ FX BNDSET    DMOCH1     25.
+ FX BNDSET    DMOSF1     30.
+ FX BNDSET    DMOLA1     20.
+ FX BNDSET    DMOSE1     10.
+ENDATA

@@ -1,0 +1,21 @@
+!  $Header: N:/default/includes/RCS/whyparm,v 1.2 2004/08/13 15:18:31 CGA Exp $
+!     RFM-HYD SUBMODULE KEY PARAMETERS BLOCK
+!     (WHYPARM)
+!***********************************************************************
+      INTEGER NUMEXHY               !  Maximum number of hydro existing capacity records in the     
+                                    !  whydro input file (currently = 10).
+      INTEGER MNUMHS                !  Maximum number of hydro sites in hysite.txt input file.      
+      INTEGER MNUMSP                !  Maximum number of hydro site probability values              
+      PARAMETER (NUMEXHY = 10)
+      PARAMETER (MNUMHS = 2500)
+      PARAMETER (MNUMSP = 10)
+      INTEGER INPUT_DYEAR           !  Dollar Year of Hydro Site Input data              
+      INTEGER NUM_SITEPROB          !  actual number of site probability values               
+      REAL HYPROB_LIMIT             !  Hydro Site Probability Limit -  Sites with a lower site probability than
+                                    !  this limit will not be included in the supply curves.
+      REAL WHYPRICE_SEG(MSPTMX)     !  Ratio of Price Segmentation between lowest priced
+                                    !  site and highest priced site in the supply curve
+      REAL SPROB(MNUMSP)            !  Site Probability Value                            
+      REAL PUBACPCST(MNUMSP)        !  'public acceptance' cost by site probability (mills/kwh)
+                                    !  
+      COMMON/WHYPARM/ INPUT_DYEAR,NUM_SITEPROB,HYPROB_LIMIT,WHYPRICE_SEG,SPROB,PUBACPCST

@@ -1,0 +1,123 @@
+!  $Header: m:/default/includes/RCS/dsmtfecp,v 1.13 2020/11/06 20:41:16 LC2 Exp $
+!================================= (DSMTFECP) ==================================
+!         This INCLUDE file is used for communication with the ECP Module
+!===============================================================================
+! INCLUDE DSMDIMEN and PARAMETR with this file
+! ECPLDCBH(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB) - ECP LDC block heights
+! ECPLDCBS(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB) - ECP LDC block segment assignment
+! ECPLDCBW(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB) - ECP LDC block widths
+! ECPnumSg - Number of segments in LDC for ECP module
+! ECPsgDblock(MAXECPSG,MAXECPB) - %% of hours allocated to blocks in each segment
+! ECPsgDbltyp(MAXECPSG,MAXECPB) - type peak/non-peak of a block
+! ECPsgDnB(MAXECPSG) - Number of blocks in each of segments of ECP LDC
+! DSMPRCHOICE(MAXNRG,MAXDSMP) - choice of DSM programs made by ECP
+! BlockNum(MAXECTB) - order in which blocks are sorted in ECP LDC
+! HRTOECPSL(MNUMYR,MAXNRG,MAXMON,MAXDTP,24) - sorted ECP slice for each original calendar hour,
+!                                            by month, daytype and hour
+! UPPEAK(MAXECPS,ECP_D_FPH,MAXNRG) - seasonal peaks for ECP
+! ECPnS - number of seasons in ECP
+! ECPSEDEF(MAXECPS,2) - definition of seasons in ECP
+! UNGSSN_ECP(MAXECPSG) - maps ecp seasons to ng seasons, unused?
+!===============================================================================
+      INTEGER*2 ECPnS
+      INTEGER*2 ECPSEDEF(MAXECPS,2)
+      INTEGER*2 DSMFPH1
+      PARAMETER(DSMFPH1=ECP_D_FPH-1)
+      REAL*4 UPPEAK(MAXECPS,ECP_D_FPH,MAXNRG)
+      INTEGER*2 BlockNum(MAXECTB)
+      REAL*4 DSMPRCHOICE(MAXNRG,MAXDSMP)
+      CHARACTER*1 ECPsgDbltyp(MAXECPSG,MAXECPB)
+      INTEGER*2 ECPLDCBS(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB)
+      INTEGER*2 ECPnumSg
+      INTEGER*2 ECPsgDnB(MAXECPSG)
+      INTEGER*4 UNGSSN_ECP(MAXECPS)
+      INTEGER*4 MAP_ECP_SP(MAXECPSG)
+      INTEGER*4 HRTOECPSL(MNUMYR,MAXNRG,MAXMON,MAXDTP,24)
+      REAL*4 ECPLDCBH(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB)
+      REAL*4 ECPLDCBW(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB)
+      REAL*4 ECPsgDblock(MAXECPSG,MAXECPB)
+      COMMON /DSMECr/ECPLDCBH,ECPLDCBW,ECPsgDblock,DSMPRCHOICE,UPPEAK
+      COMMON /DSMECi/UNGSSN_ECP,MAP_ECP_SP,HRTOECPSL,ECPLDCBS,ECPnumSg,ECPsgDnB,BlockNum,ECPSEDEF,ECPnS
+      COMMON /DSMECc/ECPsgDbltyp
+
+      COMMON /DUCK_INFO/ DUCK_SYSTEM_LOAD
+
+      REAL*4    DUCK_SYSTEM_LOAD(12,3,24,MNUMNR,MNUMYR)     ! System Load by month, day type, hour, region, and year
+         
+      COMMON /STORAGE_INFO/ STORAGE_GEN, STORAGE_CAP, STORAGE_CST, STORAGE_PROFIT, STORAGE_PROFIT_EX, PT_STORAGE_PROFIT, &
+         NEW_LOAD_SHIFT, EX_LOAD_SHIFT, STORAGE_RGN, STORAGE_ECPn, STORAGE_ECPc, BATTERY_CAP_EX
+         
+      REAL*8 STORAGE_GEN(EMM_D_GRP,EFD_D_MSP)                                    
+      REAL*8 STORAGE_CAP(EMM_D_GRP,EFD_D_MSP)                   ! GW
+      REAL*8 STORAGE_CST(EMM_D_GRP,EFD_D_MSP)                   ! 87$ per MWH
+      REAL*8 STORAGE_PROFIT(MNUMNR,MNUMYR)                  ! Annual profit from battery load shifting in M 87$
+      REAL*8 STORAGE_PROFIT_EX(MNUMNR,MNUMYR)               ! Annual profit from battery load shifting in M 87$ Existing Capacity Only
+	  REAL*8 PT_STORAGE_PROFIT(MNUMNR,MNUMYR)               ! Annual profit from PT battery load shifting in M 87$ Existing Capacity Only
+      REAL*8 NEW_LOAD_SHIFT(12,3,24,MNUMNR,MNUMYR)          ! Load shifting from new battery increment in GW
+      REAL*8 EX_LOAD_SHIFT(12,3,24,MNUMNR,MNUMYR)           ! Load shifting from existing battery capacity in GW
+      REAL*8 BATTERY_CAP_EX(MNUMNR)                         ! Gigawatts of existing battery capacity
+      INTEGER*4 STORAGE_RGN(EMM_D_GRP)
+      INTEGER*4 STORAGE_ECPn(EMM_D_GRP)
+      CHARACTER*2 STORAGE_ECPc(EMM_D_GRP)      
+
+      COMMON /NET_STORAGE_INFO/ NET_STORAGE_CAP_EX, NET_STORAGE_LOAD_EX, NET_STORAGE_LOAD_EFD, NET_PT_STORAGE_LOAD_EX,     &
+             NET_STORAGE_LOAD_NW, &
+			 NET_STORAGE_SR_EFD, NET_STORAGE_SR_EX, NET_STORAGE_SR_NW,  NET_PT_STORAGE_SR_EFD, NET_PT_STORAGE_SR_EX
+      
+      REAL*8 NET_STORAGE_CAP_EX(ECP_D_MSP,MNUMNR,MNUMYR) 
+      REAL*8 NET_STORAGE_LOAD_EX(ECP_D_VLS,MAXECPB,MNUMNR,MNUMYR)
+	  REAL*8 NET_PT_STORAGE_LOAD_EX(ECP_D_VLS,MAXECPB,MNUMNR,MNUMYR)
+	  REAL*8 NET_STORAGE_SR_EX(ECP_D_VLS,MAXECPB,MNUMNR,MNUMYR)
+	  REAL*8 NET_PT_STORAGE_SR_EX(ECP_D_VLS,MAXECPB,MNUMNR,MNUMYR)
+      REAL*8 NET_STORAGE_LOAD_EFD(MAXEFDB,MAXEFDSG,MNUMNR,MNUMYR)
+	  REAL*8 NET_STORAGE_SR_EFD(MAXEFDB,MAXEFDSG,MNUMNR,MNUMYR)
+	  REAL*8 NET_PT_STORAGE_SR_EFD(MAXEFDB,MAXEFDSG,MNUMNR,MNUMYR)
+
+      REAL*8 NET_STORAGE_LOAD_NW(ECP_D_VLS,MAXECPB,MNUMNR,MNUMYR)
+	  REAL*8 NET_STORAGE_SR_NW(ECP_D_VLS,MAXECPB,MNUMNR,MNUMYR)
+
+
+      COMMON /CURTAILMENT_PV/ PV_CAP, PT_CAP, SO_CAP, WN_CAP, WF_CAP, WL_CAP, PV_NEW, &
+         PV_CAP_ADJ, PT_CAP_ADJ, SO_CAP_ADJ, WN_CAP_ADJ, WF_CAP_ADJ, WL_CAP_ADJ, PV_NEW_ADJ, AVG_PV_CF, AVG_PT_CF, AVG_SO_CF, AVG_WN_CF, AVG_WL_CF, AVG_WF_CF
+
+      REAL*8 PV_CAP(MNUMNR)                                 ! Cumulative PV capacity
+      REAL*8 PT_CAP(MNUMNR)                                 ! Cumulative PT capacity
+     
+      REAL*8 SO_CAP(MNUMNR)                                 ! Cumulative SO capacity
+      REAL*8 WN_CAP(MNUMNR)                                 ! Cumulative WN capacity
+      REAL*8 WL_CAP(MNUMNR)                                 ! Cumulative WN capacity
+      REAL*8 WF_CAP(MNUMNR)                                 ! Cumulative WF capacity
+      REAL*8 PV_NEW(MNUMNR)                                 ! New PV capacity
+      REAL*8 PV_CAP_ADJ(MNUMNR)                             ! Cumulative PV capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 PT_CAP_ADJ(MNUMNR)                             ! Cumulative PT capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 SO_CAP_ADJ(MNUMNR)                             ! Cumulative SO capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 WN_CAP_ADJ(MNUMNR)                             ! Cumulative WN capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 WF_CAP_ADJ(MNUMNR)                             ! Cumulative WF capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 WL_CAP_ADJ(MNUMNR)                             ! Cumulative WL capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 PV_NEW_ADJ(MNUMNR)                             ! Cumulative new PV capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 AVG_PV_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for PV
+      REAL*8 AVG_PT_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for PT
+	  REAL*8 AVG_PT_CF_NEW(MNUMNR,MNUMYR)                   ! Annual average capacity factor for PT (current year)
+      REAL*8 AVG_SO_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for SO
+      REAL*8 AVG_WN_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for WN
+      REAL*8 AVG_WL_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for WL
+      REAL*8 AVG_WF_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for WF
+
+      COMMON /CURTAILMENT_WN/ WN_NEW, WN_NEW_ADJ
+
+      REAL*8 WN_NEW(MNUMNR)                                 ! New WN capacity
+      REAL*8 WN_NEW_ADJ(MNUMNR)                             ! Cumulative new WN capacity adjusted to be consistent with hourly capacity factors
+
+
+      COMMON /STORAGE_SPECS/ Battery_Extra_Discount, Battery_Initial_Percent,      &
+                             Battery_Incremental_Percent, Battery_Maximum_Percent, &
+                             batteryEfficiency, HYCFMO_AV, hoursToBuy, hoursToSell
+
+      REAL*8    Battery_Extra_Discount          ! Used to further discount future arbitrage values
+      REAL*8    Battery_Initial_Percent         ! Used to set the initial new battery increment as a percent of the regions peak load
+      REAL*8    Battery_Incremental_Percent     ! Used to add to the initial battery increment each forecast year
+      REAL*8    Battery_Maximum_Percent         ! Used to limit the increase in the incremental battery size
+      REAL*8    batteryEfficiency               ! Battery efficiency factory
+      INTEGER*4 hoursToBuy                      ! Number of hours to charge
+      INTEGER*4 hoursToSell                     ! Number of hours to discharge
+      REAL*8    HYCFMO_AV(MNUMNR,12)                  

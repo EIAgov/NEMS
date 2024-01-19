@@ -1,0 +1,21 @@
+NAME          BLOCKNET
+ROWS
+ N  COST
+ E  R11
+ E  R12
+ E  R21
+ E  R22
+ E  R23
+COLUMNS
+    C11       R11        1.            R12        1.
+    C12       R11        1.            R12        1.
+    C21       R21        1.            R22        1.
+    C22       R22        1.            R23        1.
+    C23       R21        1.            R23        1.
+    N12       R11       -1.            R21        1.
+    N21       R12       -1.            R23        1.
+RHS
+    RHS       R11        0.0
+BOUNDS
+ PL BNDSET    C11
+ENDATA

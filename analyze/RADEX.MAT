@@ -1,0 +1,91 @@
+NAME          RADEX
+ROWS
+  E LABOR1
+  L PROD1
+  L OVERLIM1
+  E LABOR2
+  L PROD2
+  L OVERLIM2
+  E BALANCE2
+  E CUM2
+  E LABOR3
+  L PROD3
+  L OVERLIM3
+  E BALANCE3
+  E CUM3
+  L LABOR4
+  E BALANCE4
+  E CUM4
+  N COST
+COLUMNS
+    NEW1      COST       1060.
+    NEW1      LABOR2    -.95
+    NEW1      PROD1     -3.
+    EXP1      COST       860.
+    EXP1      LABOR2    -.95
+    EXP1      OVERLIM1  -35.
+    EXP1      PROD1     -4.
+    EXP1      LABOR1     1.
+    RADAR1    BALANCE2  -1.
+    RADAR1    PROD1      1.
+    OVER1     COST       7.5
+    OVER1     OVERLIM1   1.
+    OVER1     PROD1     -.023256
+    NEW2      COST       1060.
+    NEW2      LABOR3    -.95
+    NEW2      PROD2     -3.
+    EXP2      COST       860.
+    EXP2      LABOR3    -.95
+    EXP2      OVERLIM2  -35.
+    EXP2      PROD2     -4.
+    EXP2      LABOR2     1.
+    RADAR2    BALANCE3  -1.
+    RADAR2    PROD2      1.
+    OVER2     COST       7.5
+    OVER2     OVERLIM2   1.
+    OVER2     PROD2     -.023256
+    SHIP2     CUM4       1.
+    SHIP2     CUM3       1.
+    SHIP2     CUM2       1.
+    SHIP2     BALANCE2   1.
+    INVENT2   COST       10.
+    INVENT2   BALANCE3  -1.
+    INVENT2   BALANCE2   1.
+    LATE2     COST       50.
+    LATE2     CUM2       1.
+    NEW3      COST       1060.
+    NEW3      LABOR4     0.95
+    NEW3      PROD3     -3.
+    EXP3      COST       860.
+    EXP3      LABOR4     0.95
+    EXP3      OVERLIM3  -35.
+    EXP3      PROD3     -4.
+    EXP3      LABOR3     1.
+    RADAR3    BALANCE4  -1.
+    RADAR3    PROD3      1.
+    OVER3     COST       7.5
+    OVER3     OVERLIM3   1.
+    OVER3     PROD3     -.023256
+    SHIP3     CUM4       1.
+    SHIP3     CUM3       1.
+    SHIP3     BALANCE3   1.
+    INVENT3   COST       10.
+    INVENT3   BALANCE4  -1.
+    INVENT3   BALANCE3   1.
+    LATE3     COST       50.
+    LATE3     CUM3       1.
+    SHIP4     CUM4       1.
+    SHIP4     BALANCE4   1.
+RHS
+    RHS       LABOR1     90.
+    RHS       CUM2       300.
+    RHS       CUM3       700.
+    RHS       LABOR4     300.
+    RHS       CUM4       1000.
+RANGES
+    RANGES    LABOR4       100.00000
+BOUNDS
+ UP BOUNDS    NEW1       300.
+ UP BOUNDS    NEW2       300.
+ UP BOUNDS    NEW3       300.
+ENDATA

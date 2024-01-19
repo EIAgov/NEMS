@@ -1,0 +1,6 @@
+To load the aimmslink.dll only when needed, and to avoid AIMMS SDK version inconsistencies, I
+changed the nems link to add "/DELAYLOAD:"aimmslink.dll".  To use this option, it is necessary to
+link in a library delayimp.lib that is not provide with the visual studio that comes with fortran,
+but it is found in the visual studio that comes with C++.  So I copied the file delayimp.lib from
+a computer (a45589) that had visual studio 2008 installed to this folder.  That allows the 
+delayload function to work (and elminates some link errors when aimmslink.dll is not being called).

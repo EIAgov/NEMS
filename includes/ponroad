@@ -1,0 +1,13 @@
+!  $Header: N:/default/includes/RCS/ponroad,v 1.1 2004/06/17 18:38:31 PKC Exp $
+!  Common Block for on-road distillate price
+
+!  NEMS Price Common Block Parameters
+      INTEGER OPSIZE
+      PARAMETER(OPSIZE=MNUMCR*MNUMYR) ! Size of array
+
+      REAL PDSTRHWY(MNUMCR,MNUMYR)  ! On-road distillate price, transportation sector
+!  NEMS Price Common Block - just price so we don't have to carry quantity in adjusted price
+      COMMON /PONROAD/ PDSTRHWY
+
+      REAL OPARRY(OPSIZE)
+      EQUIVALENCE(OPARRY,PDSTRHWY)

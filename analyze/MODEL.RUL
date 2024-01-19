@@ -1,0 +1,93 @@
+*               ::: MODEL.RUL 10-26-91 :::
+*
+*  This is a "generic" model interpretation that is instantiated when the
+*  user issues the command INTERPRT MODEL
+*
+ Here is an interpretation of %PROBLEM.
+$ANALYZE SUB  *
+ There are %NROWS rows and %NCOLS columns and %NONZERO nonzeroes.
+$ANALYZE SUB R %OBJ
+$ANALYZE SUB SET
+$IF %NROWS = 1 THEN SKIP 2
+ The objective row, %OBJ , is null.
+ SKIP 1
+ The resident solution is %STATUS with %OBJ = %VROWY
+$TEXT 2
+
+$IF %SWSYN = F THEN SKIP 3
+$ANALYZE SCHEMA D T,D
+$IF %SWOTFIL = F THEN ANALYZE _PAUSE
+$ANALYZE SYNTAX R,C
+
+* The following extends MODEL interpretation by looking at network block.
+* Erase blocks (if any).
+
+$ANALYZE BLOCK R E *
+$ANALYZE BLOCK C E *
+$ANALYZE SUB  *
+$SET NC %NCOLS
+
+$ANALYZE BLOCK NET
+$IF %NCBLKS = 0 THEN EXIT
+
+$LOOKUP BLOCK COL NET.PROD
+$SET #PROD = %VLOOK
+$LOOKUP BLOCK COL NET.TRAN
+$SET #TRAN = %VLOOK
+$LOOKUP BLOCK COL NET.CONS
+$SET #CONS = %VLOOK
+$SET #COLS = 0
+$CALC #COLS = %%#PROD + %%#TRAN + %%#CONS
+
+* NOW %%#COLS = TOTAL NUMBER OF COLUMNS IN NETWORK
+*     %%#TRAN  = # TRANSFER COLUMNS
+*     %%#PROD  = # PRODUCTION COLUMNS
+*     %%#CONS  = # CONSUMPTION COLUMNS
+
+$IF %SWOTFIL = F THEN ANALYZE _PAUSE
+$IF %%#COLS < %%NC THEN GOTO NETWORK
+ %PROBLEM is a network model with %%#PROD production, %%#CONS consumption,
+ and %%#TRAN transfer activities.
+$TEXT
+$GOTO INTRPROB
+
+:NETWORK
+$TEXT
+ %PROBLEM has a network
+$SET CONJ = with
+$IF %%#PROD = 0 THEN SKIP 2
+ %%#PROD production
+$SET CONJ and
+$IF %%#CONS = 0 THEN SKIP 2
+ %%CONJ %%#CONS consumption
+$SET CONJ and
+$IF %%#TRAN = 0 THEN SKIP 1
+ %%CONJ %%#TRAN transfer
+ activities.
+
+*   TEST FOR COMPONENTS
+$ANALYZE SUB  R *
+$ANALYZE SUB  CO *
+$ANALYZE BLOCK R E *
+$ANALYZE BLOCK C E *
+$ANALYZE BLOCK
+$IF %NRBLKS <= 1 THEN GOTO INTRPROB
+ Note that the model is not linked...see model manager.
+$EXIT
+
+:INTRPROB
+* ERASE BLOCKS
+$ANALYZE BLOCK R E *
+$ANALYZE BLOCK C E *
+$EXIT
+                      COMMENTS (NOT EXECUTED)
+ THE FOLLOWING COULD CONTINUE MODEL INTERPRETATION, IF AVAILABLE
+
+$IF %PROBLEM(1:4) <> WOOD THEN EXIT
+$IF %SWOTFIL = F THEN ANALYZE _PAUSE
+$INTERPRT WOODNET
+*         :...Returns to terminal
+* Additional IF ... THEN INTERPRT ... can go here
+* FALL THRU IF NO ADDITIONAL INTERPRETATION IS AVAILABLE
+$EXIT
+                   ::: END MODEL.RUL :::

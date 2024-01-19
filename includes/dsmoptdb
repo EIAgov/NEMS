@@ -1,0 +1,172 @@
+! $Header: N:/default/includes/RCS/dsmoptdb,v 1.2 1999/12/19 20:12:02 DSA Exp $
+!================================= (DSMOPTDB) ==================================
+!   This INCLUDE file is used for definition of the DSM Options Data Base
+!===============================================================================
+! RprogCode(MAXDSMPR)- list of codes identifying Residential DSM programs
+! CprogCode(MAXDSMPC)- list of codes identifying Commercial DSM programs
+! RtechNumb - number of residential technologies potentially affected by DSM
+! CtechNumb - number of commercial technologies potentially affected by DSM
+! RtechCode(MAXRTECH) - list of residential technology codes
+! CtechCode(MAXCTECH,NUMCTCE) - list of commercial technology 3-element codes
+!                         1st element - SERVICE ,2nd - VINTAGE, 3rd - TECHNOLOGY
+! RtechDMtn(MAXRTECH) - number of DEMAND MODULE technologies represented by
+! RtechDMG(MAXRTECH,MAXDMT) - list of technology group indices
+! RtechDMT(MAXRTECH,MAXDMT) - list of technology indices within techn. groups
+! RtechLSR(MAXRTECH) - number of record on the DAF-LSR-DB with appropriate LSR
+! CtechLSR(MAXCTECH,MAXCBT) - number of record on the DAF-LSR-DB with appr.LSR
+! RtechRrc(MAXRTECH,MAXDMT,MAXNRG,MAXRBT) - Resid. RESTATR FILE record numbers
+! CtechRrc(MAXCTECH,MAXNRG,MAXCBT) - Commerercial RESTATC FILE record numbers
+! RRlistN - number of region groups use during residential DSM option definition
+! CRlistN - number of region groups use during commercial DSM option definition
+! RRlistID(MAXNLST) - list identifiers CHARACTER*1
+! CRlistID(MAXNLST) - list identifiers CHARACTER*1
+! RdecTYPn - number of decision types in residential sector
+! CdecTYPn - number of decision types in commercial sector
+! RdecTYPid(MAXDECT) - decision type identifiers in residential sector
+! CdecTYPid(MAXDECT) - decision type identifiers in commercial sector
+! RdecTYPix(MAXDECT) - decision type indices in residential sector
+! CdecTYPix(MAXDECT) - decision type indices in commercial sector
+! RbuildTn - number of building types in residential sector
+! CbuildTn - number of building types in commercial sector
+! RbuildTid(MAXRBT) - building types identifiers in residential sector
+! CbuildTid(MAXCBT) - building types identifiers in commercial sector
+! RbuildTix(MAXRBT) - building types indices in residential sector
+! CbuildTix(MAXCBT) - building types indices in commercial sector
+! RrLIST(MAXNLST,MAXRLST) - lists of regions to which residential options apply
+! attention: first item on the list is the number of region indices on the list
+! CrLIST(MAXNLST,MAXRLST) - lists of regions to which commercial options apply
+! attention: first item on the list is the number of region indices on the list
+! DSMROptionNumb - Number of DSM  options available for residential sector
+! DSMROptionCode(MAXRDSMO) - vector of residential sector DSMOption code names
+! DSMROptionRegion(MAXRDSMO) - # of list of regions to which the option applies
+! DSMROptionBuildT(MAXRDSMO) - # of building type to which the option applies
+! DSMROptionDecType(MAXRDSMO) - # of decision type to which the option applies
+! DSMROptionFromTnum(MAXRDSMO) - number of FROM technologies affected by option
+! DSMROptionFromTech(MAXRDSMO,MAXFRT) - indices of FROM technologies
+! DSMROptionToTnum(MAXRDSMO) - number of TO technologies affected by option
+! DSMROptionToTech(MAXRDSMO,MAXTOT) - indices of TO technologies
+! DSMROptionCost(MAXRDSMO) - Marketing/administrative costs of option /kWh saved
+! DSMROptionFyr(MAXRDSMO) - first year when the option is available (index)
+! DSMROptionRamp(MAXRDSMO) - number of ramp-up years for the option
+! DSMROptionRebate(MAXRDSMO,MAXNRG) - current rebate value for an option
+! NRPROG - number of residential DSM programs
+! RPROG(MAXRDSMO) - assignement of residential DSM options to programs
+! RRSTRN(MAXRTECH,MAXNRG) - RESTART file record numbers with data for the
+! technologies
+!
+! CrLIST(MAXNLST,MAXRLST) - lists of regions to which commercial options apply
+! DSMCOptionNumb - Number of DSM  options available for commercial sector
+! DSMCOptionCode(MAXCDSMO) - vector of commercial sector DSM option code names
+! DSMCOptionRegion(MAXCDSMO) - # of list of regions for the option
+! DSMCOptionBuildT(MAXCDSMO) - building type to which the option applies
+! DSMCOptionDecType(MAXCDSMO) - decision type to which the option applies
+! DSMCOptionFromTnum(MAXCDSMO) - number of FROM technologies affected by option
+! DSMCOptionFromTech(MAXCDSMO,MAXFRT) - indices of FROM technologies
+! DSMCOptionToTnum(MAXCDSMO) - number of TO technologies affected by option
+! DSMCOptionToTech(MAXCDSMO,MAXTOT) - indices of TO technologies
+! DSMCOptionCost(MAXCDSMO) - Marketing/administrative costs of the option
+! DSMCOptionFyr(MAXCDSMO) - first year when the option is available
+! DSMCOptionRamp(MAXCDSMO) - number of ramp-up years of the option
+! DSMCOptionRebate(MAXCDSMO,MAXNRG) - current rebates
+! NCPROG - number of commercial DSM programs
+! CPROG(MAXCDSMO) - assignement of commercial DSM options to programs
+! CRSTRN(MAXCTECH,MAXNRG) - RESTART file record numbers with data for the
+! technologies
+! PAYBACK - DSM option pay-back period
+! SURCHARGE -  surcharge added to adm.costs of non-rebate options
+! RANNDSMSAV(MAXRDSMO,MNUMNR) - annual energy savings for RES options
+! CANNDSMSAV(MAXCDSMO,MNUMNR) - annual energy savings for COMM options.
+! RINCROPTCOST(MAXRDSMO,MNUMNR) - incremental option cost RESD
+! CINCROPTCOST(MAXCDSMO,MNUMNR) - incremental option cost COMM
+! COMCOST(MAXCDSMO,MNUMNR) - incremental O&M costs COMM
+! below, same as above but saved for 2 and further iterations
+! RANNDSMSAV1(MAXRDSMO,MNUMNR) - annual energy savings for RES options,
+! CANNDSMSAV1(MAXCDSMO,MNUMNR) - annual energy savings for COMM options.
+! RINCROPTCOST1(MAXRDSMO,MNUMNR) - incremental option cost RESD
+! CINCROPTCOST1(MAXCDSMO,MNUMNR) - incremental option cost COMM
+! COMCOST1(MAXCDSMO,MNUMNR) - incremental O&M costs COMM
+      REAL*4 RANNDSMSAV(MAXRDSMO,MNUMNR)
+      REAL*4 CANNDSMSAV(MAXCDSMO,MNUMNR)
+      REAL*4 RINCROPTCOST(MAXRDSMO,MNUMNR)
+      REAL*4 CINCROPTCOST(MAXCDSMO,MNUMNR)
+      REAL*4 COMCOST(MAXCDSMO,MNUMNR)
+      REAL*4 RANNDSMSAV1(MAXRDSMO,MNUMNR)
+      REAL*4 CANNDSMSAV1(MAXCDSMO,MNUMNR)
+      REAL*4 RINCROPTCOST1(MAXRDSMO,MNUMNR)
+      REAL*4 CINCROPTCOST1(MAXCDSMO,MNUMNR)
+      REAL*4 COMCOST1(MAXCDSMO,MNUMNR)
+      REAL*4 SURCHARGE
+      INTEGER*2 RrLIST(MAXNLST,MAXRLST)
+      INTEGER*2 CrLIST(MAXNLST,MAXRLST)
+      INTEGER*2 DSMROptionFromTnum(MAXRDSMO)
+      INTEGER*2 DSMCOptionFromTnum(MAXCDSMO)
+      INTEGER*2 DSMCOptionToTnum(MAXCDSMO)
+       INTEGER*2 DSMROptionToTnum(MAXRDSMO)
+       INTEGER*2 PAYBACK
+       INTEGER*4 RRSTRN(MAXRTECH,MAXNRG),CRSTRN(MAXCTECH,MAXNRG)
+       INTEGER*2 NRPROG,RPROG(MAXRDSMO),NCPROG,CPROG(MAXCDSMO)
+       INTEGER*2    DSMROptionNumb
+       CHARACTER*6  DSMROptionCode(MAXRDSMO)
+       INTEGER*2  DSMROptionRegion(MAXRDSMO)
+       INTEGER*2    DSMROptionBuildT(MAXRDSMO)
+       INTEGER*2    DSMROptionDecType(MAXRDSMO)
+       INTEGER*2    DSMROptionFromTech(MAXRDSMO,MAXFRT)
+       INTEGER*2   DSMROptionToTech(MAXRDSMO,MAXTOT)
+       REAL*4       DSMROptionCost(MAXRDSMO)
+       INTEGER*2    DSMROptionFyr(MAXRDSMO)
+       INTEGER*2    DSMROptionRamp(MAXRDSMO)
+       INTEGER*2    DSMCOptionNumb
+       CHARACTER*6  DSMCOptionCode(MAXCDSMO)
+       INTEGER*2    DSMCOptionRegion(MAXCDSMO)
+       INTEGER*2    DSMCOptionBuildT(MAXCDSMO)
+       INTEGER*2    DSMCOptionDecType(MAXCDSMO)
+       INTEGER*2    DSMCOptionFromTech(MAXCDSMO,MAXFRT)
+       INTEGER*2    DSMCOptionToTech(MAXCDSMO,MAXTOT)
+       REAL*4       DSMCOptionCost(MAXCDSMO)
+       INTEGER*2    DSMCOptionFyr(MAXCDSMO)
+       INTEGER*2    DSMCOptionRamp(MAXCDSMO)
+       CHARACTER*7  RprogCode(MAXDSMPR)
+       CHARACTER*7  CprogCode(MAXDSMPC)
+       INTEGER*2    RtechNumb,CtechNumb
+       CHARACTER*7  RtechCode(MAXRTECH)
+       INTEGER*4    CtechCode(MAXCTECH,NUMCTCE)
+       INTEGER*2    RtechDMtn(MAXRTECH)
+       INTEGER*2    RtechDMG(MAXRTECH,MAXDMT)
+       INTEGER*2    RtechDMT(MAXRTECH,MAXDMT)
+       INTEGER*4    RtechLSR(MAXRTECH)
+       INTEGER*4    CtechLSR(MAXCTECH,MAXCBT)
+       INTEGER*4    RtechRrc(MAXRTECH,MAXDMT,MAXNRG,MAXRBT)
+       INTEGER*4    CtechRrc(MAXCTECH,MAXNRG,MAXCBT)
+       INTEGER*2    RRlistN,CRlistN
+       CHARACTER*1  RRlistID(MAXNLST),CRlistID(MAXNLST)
+       INTEGER*2    RdecTYPn,CdecTYPn
+       CHARACTER*1  RdecTYPid(MAXDECT),CdecTYPid(MAXDECT)
+       INTEGER*2    RdecTYPix(MAXDECT),CdecTYPix(MAXDECT)
+       INTEGER*2    RbuildTn,CbuildTn
+       CHARACTER*2  RbuildTid(MAXRBT),CbuildTid(MAXCBT)
+       INTEGER*2    RbuildTix(MAXCBT),CbuildTix(MAXCBT)
+       REAL*4       DSMROptionRebate(MAXRDSMO,MAXNRG)
+       REAL*4       DSMCOptionRebate(MAXCDSMO,MAXNRG)
+       COMMON /DSMOPi/RRSTRN,CRSTRN,CtechCode,RtechLSR,CtechLSR, &
+       RtechRrc,CtechRrc, &
+       DSMROptionNumb,DSMROptionRegion,DSMROptionBuildT, &
+       DSMROptionDecType,DSMROptionFyr,DSMROptionRamp,DSMCOptionNumb, &
+       DSMCOptionBuildT,DSMCOptionDecType,RrLIST,CrLIST, &
+       DSMCOptionFyr, &
+       DSMCOptionRamp,NRPROG,NCPROG,RPROG,CPROG, &
+       RtechNumb,RtechDMtn,RtechDMG,RtechDMT,RRlistN, &
+       CtechNumb,CRlistN, &
+       RdecTYPn,RdecTYPix,RbuildTn,RbuildTix,PAYBACK,DSMROptionToTech, &
+       CdecTYPn,CdecTYPix,CbuildTn,CbuildTix,DSMCOptionToTech, &
+       DSMROptionFromTnum,DSMROptionToTnum,DSMROptionFromTech, &
+       DSMCOptionFromTnum,DSMCOptionToTnum,DSMCOptionFromTech, &
+       DSMCOptionRegion
+       COMMON /DSMOPr/DSMROptionCost,DSMCOptionCost,DSMROptionRebate, &
+       DSMCOptionRebate,SURCHARGE,RANNDSMSAV,CANNDSMSAV, &
+       RINCROPTCOST,CINCROPTCOST,COMCOST, &
+       RANNDSMSAV1,CANNDSMSAV1, &
+       RINCROPTCOST1,CINCROPTCOST1,COMCOST1
+       COMMON /DSMOPc/DSMROptionCode, &
+       DSMCOptionCode, &
+       RprogCode,CprogCode,RtechCode,RRlistID,RdecTYPid,RbuildTid &
+       ,CRlistID,CdecTYPid,CbuildTid

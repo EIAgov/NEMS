@@ -1,0 +1,1048 @@
+COMPOSITE TABLE:
+Sreg                CSupplyRegionName
+01NA                "Northern Appalachia"
+02CA                "Central Appalachia"
+03SA                "Southern Appalachia"
+04EI                "East Interior"
+05WI                "West Interior"
+06GL                "Gulf Lignite"
+07DL                "Dakota Lignite"
+08WM                "Western Montana"
+09NW                "Wyoming Northern PRB"
+10SW                "Wyoming Southern PRB"
+11WW                "Western Wyoming"
+12RM                "Rocky Mountain"
+13ZN                "Arizona/New Mexico"
+14AW                "Alaska/Washington"
+;
+COMPOSITE TABLE:
+Sreg                ASReg               Map_SReg_ASReg
+01NA                1                   1
+04EI                2                   1
+07DL                3                   1
+02CA                1                   1
+03SA                1                   1
+05WI                2                   1
+06GL                2                   1
+08WM                3                   1
+09NW                3                   1
+10SW                3                   1
+11WW                3                   1
+12RM                3                   1
+13ZN                3                   1
+14AW                3                   1
+;
+COMPOSITE TABLE:
+ASReg               AggSupReg_Name
+1                   "Appalachia"
+2                   "Interior"
+3                   "West"
+;
+COMPOSITE TABLE:
+Sreg                EW                  Map_SReg_EW
+01NA                1                   1
+02CA                1                   1
+03SA                1                   1
+04EI                1                   1
+05WI                2                   1
+06GL                2                   1
+07DL                2                   1
+08WM                2                   1
+09NW                2                   1
+10SW                2                   1
+11WW                2                   1
+12RM                2                   1
+13ZN                2                   1
+14AW                2                   1
+;
+COMPOSITE TABLE:
+SReg                M14                 Map_SReg_M14
+01NA                1                   1
+02CA                2                   1
+03SA                3                   1
+04EI                4                   1
+05WI                5                   1
+06GL                6                   1
+07DL                7                   1
+08WM                8                   1
+09NW                9                   1
+10SW                10                  1
+11WW                11                  1
+12RM                12                  1
+13ZN                13                  1
+14AW                14                  1
+;
+COMPOSITE TABLE:
+Rank                M4                  Map_Rank_M4
+1B                  1                   1
+2S                  2                   1
+3L                  3                   1
+5G                  3                   1
+4P                  4                   1
+;
+COMPOSITE TABLE:
+Mtyp                M3                  Map_Mtyp_M3
+1S                  1                   1
+2D                  2                   1
+;
+COMPOSITE TABLE:
+Sulf                M3                  Map_Sulf_M3
+1C                  1                   1
+2M                  2                   1
+3H                  3                   1
+;
+COMPOSITE TABLE:
+SReg                Miners
+01NA                9614
+02CA                12138
+03SA                2530
+04EI                6060
+05WI                29
+06GL                1453
+07DL                1238
+08WM                1091
+09NW                1456
+10SW                2650
+11WW                761
+12RM                2505
+13ZN                832
+14AW                102
+;
+COMPOSITE TABLE:
+yr                  MC_WPI10_MULTIPLIER
+1990                1
+1991                1
+1992                1
+1993                1
+1994                1
+1995                1
+1996                1
+1997                1
+1998                1
+1999                1
+2000                1
+2001                1
+2002                1
+2003                1
+2004                1
+2005                1
+2006                1
+2007                1
+2008                1
+2009                1
+2010                1
+2011                1
+2012                1
+2013                1
+2014                1
+2015                1
+2016                1
+2017                1
+2018                1
+2019                1
+2020                1
+2021                1
+2022                1
+2023                1
+2024                1
+2025                1
+2026                1
+2027                1
+2028                1
+2029                1
+2030                1
+2031                1
+2032                1
+2033                1
+2034                1
+2035                1
+2036                1
+2037                1
+2038                1
+2039                1
+2040                1
+2041                1
+2042                1
+2043                1
+2044                1
+2045                1
+2046                1
+2047                1
+2048                1
+2049                1
+2050                1
+;
+COMPOSITE TABLE:
+nUS                 Map_intl_mxnci
+NI                  42
+NW                  43
+CL                  44
+VZ                  45
+PO                  46
+RE                  47
+RA                  48
+SF                  49
+IN                  50
+HI                  51
+AU                  52
+VT                  53
+;
+COMPOSITE TABLE:
+DReg                Subsec              Sreg                Sulf                Mtyp                Rank                CoalGroupFlag       CoalGroupOrd        SCurveEcho
+06OH                C1                  01NA                2M                  2D                  4P                  -1                  1                   3
+02YP                C2                  01NA                2M                  2D                  4P                  -1                  1                   3
+08KT                C2                  01NA                2M                  2D                  4P                  -1                  1                   3
+03S1                X1                  01NA                2M                  2D                  4P                  -1                  1                   3
+04S2                X1                  01NA                2M                  2D                  4P                  -1                  1                   3
+12WS                X1                  01NA                2M                  2D                  4P                  -1                  1                   3
+02YP                X2                  01NA                2M                  2D                  4P                  -1                  1                   3
+06OH                X2                  01NA                2M                  2D                  4P                  -1                  1                   3
+02YP                C1                  02CA                2M                  2D                  4P                  -1                  2                   9
+03S1                C1                  02CA                2M                  2D                  4P                  -1                  2                   9
+04S2                C1                  02CA                2M                  2D                  4P                  -1                  2                   9
+08KT                C1                  02CA                2M                  2D                  4P                  -1                  2                   9
+09AM                C1                  02CA                2M                  2D                  4P                  -1                  2                   9
+06OH                C2                  02CA                2M                  2D                  4P                  -1                  2                   9
+07EN                C2                  02CA                2M                  2D                  4P                  -1                  2                   9
+02YP                X1                  02CA                2M                  2D                  4P                  -1                  2                   9
+06OH                X1                  02CA                2M                  2D                  4P                  -1                  2                   9
+07EN                X1                  02CA                2M                  2D                  4P                  -1                  2                   9
+03S1                X2                  02CA                2M                  2D                  4P                  -1                  2                   9
+04S2                X2                  02CA                2M                  2D                  4P                  -1                  2                   9
+12WS                X2                  02CA                2M                  2D                  4P                  -1                  2                   9
+09AM                X3                  02CA                2M                  2D                  4P                  -1                  2                   9
+09AM                C2                  03SA                1C                  2D                  4P                  -1                  3                   14
+09AM                X1                  03SA                1C                  2D                  4P                  -1                  3                   14
+13MT                I1                  12RM                1C                  2D                  1B                  -1                  4                   35
+13MT                I2                  12RM                1C                  2D                  1B                  -1                  4                   35
+13MT                I3                  12RM                1C                  2D                  1B                  -1                  4                   35
+14CU                I1                  12RM                1C                  2D                  1B                  -1                  4                   35
+15ZN                I1                  12RM                1C                  2D                  1B                  -1                  4                   35
+12WS                I2                  12RM                1C                  2D                  1B                  -1                  4                   35
+16PC                I2                  12RM                1C                  2D                  1B                  -1                  4                   35
+07EN                I3                  12RM                1C                  2D                  1B                  -1                  4                   35
+14CU                R1                  12RM                1C                  2D                  1B                  -1                  4                   35
+15ZN                R1                  12RM                1C                  2D                  1B                  -1                  4                   35
+16PC                R1                  12RM                1C                  2D                  1B                  -1                  4                   35
+13MT                R2                  12RM                1C                  2D                  1B                  -1                  4                   35
+13MT                R2                  12RM                1C                  2D                  1B                  -1                  4                   35
+10C1                X1                  12RM                1C                  2D                  1B                  -1                  4                   35
+16PC                X1                  12RM                1C                  2D                  1B                  -1                  4                   35
+16PC                X2                  12RM                1C                  2D                  1B                  -1                  4                   35
+10C1                X4                  12RM                1C                  2D                  1B                  -1                  4                   35
+16PC                X4                  12RM                1C                  2D                  1B                  -1                  4                   35
+12WS                X6                  12RM                1C                  2D                  1B                  -1                  4                   35
+15ZN                I3                  13ZN                2M                  1S                  2S                  -1                  5                   40
+16PC                I3                  14AW                1C                  1S                  2S                  -1                  6                   41
+16PC                R2                  14AW                1C                  1S                  2S                  -1                  6                   41
+16PC                X5                  14AW                1C                  1S                  2S                  -1                  6                   41
+02YP                I2                  01NA                2M                  2D                  1B                  -1                  7                   1
+02YP                I2                  01NA                2M                  1S                  1B                  -1                  7                   4
+06OH                I2                  01NA                2M                  1S                  1B                  -1                  7                   4
+01NE                I3                  01NA                2M                  2D                  1B                  -1                  7                   1
+01NE                I3                  01NA                2M                  1S                  1B                  -1                  7                   4
+03S1                I3                  01NA                2M                  2D                  1B                  -1                  7                   1
+03S1                I3                  01NA                2M                  1S                  1B                  -1                  7                   4
+04S2                I3                  01NA                2M                  2D                  1B                  -1                  7                   1
+04S2                I3                  01NA                2M                  1S                  1B                  -1                  7                   4
+01NE                R2                  01NA                2M                  2D                  1B                  -1                  7                   1
+01NE                R2                  01NA                2M                  1S                  1B                  -1                  7                   4
+02YP                R1                  01NA                2M                  1S                  1B                  -1                  7                   4
+02YP                R2                  01NA                2M                  1S                  1B                  -1                  7                   4
+03S1                R2                  01NA                2M                  2D                  1B                  -1                  7                   1
+03S1                R2                  01NA                2M                  1S                  1B                  -1                  7                   4
+04S2                R2                  01NA                2M                  2D                  1B                  -1                  7                   1
+04S2                R2                  01NA                2M                  1S                  1B                  -1                  7                   4
+06OH                R2                  01NA                2M                  2D                  1B                  -1                  7                   1
+06OH                R2                  01NA                2M                  1S                  1B                  -1                  7                   4
+04S2                X4                  01NA                2M                  2D                  1B                  -1                  7                   1
+04S2                X4                  01NA                2M                  1S                  1B                  -1                  7                   4
+07EN                X4                  01NA                2M                  2D                  1B                  -1                  7                   1
+07EN                X4                  01NA                2M                  1S                  1B                  -1                  7                   4
+02YP                X5                  01NA                2M                  2D                  1B                  -1                  7                   1
+02YP                X5                  01NA                2M                  1S                  1B                  -1                  7                   4
+06OH                X5                  01NA                2M                  2D                  1B                  -1                  7                   1
+06OH                X5                  01NA                2M                  1S                  1B                  -1                  7                   4
+06OH                I2                  01NA                3H                  1S                  5G                  -1                  8                   6
+02YP                I3                  01NA                3H                  2D                  1B                  -1                  8                   2
+02YP                I3                  01NA                3H                  1S                  1B                  -1                  8                   5
+02YP                I3                  01NA                3H                  1S                  5G                  -1                  8                   6
+03S1                I3                  01NA                3H                  1S                  5G                  -1                  8                   6
+04S2                I3                  01NA                3H                  1S                  5G                  -1                  8                   6
+06OH                I3                  01NA                3H                  2D                  1B                  -1                  8                   2
+06OH                I3                  01NA                3H                  1S                  1B                  -1                  8                   5
+06OH                I3                  01NA                3H                  1S                  5G                  -1                  8                   6
+07EN                I3                  01NA                3H                  1S                  5G                  -1                  8                   6
+11C2                I3                  01NA                3H                  1S                  5G                  -1                  8                   6
+01NE                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+01NE                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+02YP                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+02YP                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+03S1                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+03S1                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+04S2                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+04S2                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+05GF                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+05GF                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+06OH                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+06OH                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+08KT                I1                  02CA                1C                  2D                  1B                  -1                  9                   7
+08KT                I1                  02CA                1C                  1S                  1B                  -1                  9                   10
+05GF                I2                  02CA                1C                  1S                  1B                  -1                  9                   10
+01NE                R1                  02CA                1C                  2D                  1B                  -1                  9                   7
+01NE                R1                  02CA                1C                  1S                  1B                  -1                  9                   10
+02YP                R1                  02CA                1C                  2D                  1B                  -1                  9                   7
+02YP                R1                  02CA                1C                  1S                  1B                  -1                  9                   10
+06OH                R1                  02CA                1C                  2D                  1B                  -1                  9                   7
+06OH                R1                  02CA                1C                  1S                  1B                  -1                  9                   10
+07EN                R1                  02CA                1C                  2D                  1B                  -1                  9                   7
+07EN                R1                  02CA                1C                  1S                  1B                  -1                  9                   10
+08KT                R1                  02CA                1C                  2D                  1B                  -1                  9                   7
+08KT                R1                  02CA                1C                  1S                  1B                  -1                  9                   10
+07EN                I1                  02CA                2M                  2D                  1B                  -1                  10                  8
+07EN                I1                  02CA                2M                  1S                  1B                  -1                  10                  11
+01NE                I2                  02CA                2M                  2D                  1B                  -1                  10                  8
+01NE                I2                  02CA                2M                  1S                  1B                  -1                  10                  11
+03S1                I2                  02CA                2M                  2D                  1B                  -1                  10                  8
+03S1                I2                  02CA                2M                  1S                  1B                  -1                  10                  11
+04S2                I2                  02CA                2M                  2D                  1B                  -1                  10                  8
+04S2                I2                  02CA                2M                  1S                  1B                  -1                  10                  11
+05GF                I2                  02CA                2M                  2D                  1B                  -1                  10                  8
+05GF                I2                  02CA                2M                  1S                  1B                  -1                  10                  11
+06OH                I2                  02CA                2M                  2D                  1B                  -1                  10                  8
+06OH                I2                  02CA                2M                  1S                  1B                  -1                  10                  11
+08KT                I2                  02CA                2M                  2D                  1B                  -1                  10                  8
+08KT                I2                  02CA                2M                  1S                  1B                  -1                  10                  11
+05GF                I3                  02CA                2M                  1S                  1B                  -1                  10                  11
+09AM                I3                  02CA                2M                  2D                  1B                  -1                  10                  8
+09AM                I3                  02CA                2M                  1S                  1B                  -1                  10                  11
+03S1                R1                  02CA                2M                  2D                  1B                  -1                  10                  8
+03S1                R1                  02CA                2M                  1S                  1B                  -1                  10                  11
+04S2                R1                  02CA                1C                  2D                  1B                  -1                  10                  7
+04S2                R1                  02CA                2M                  1S                  1B                  -1                  10                  11
+05GF                R1                  02CA                1C                  2D                  1B                  -1                  10                  7
+05GF                R1                  02CA                2M                  1S                  1B                  -1                  10                  11
+02YP                X4                  02CA                2M                  2D                  1B                  -1                  10                  8
+02YP                X4                  02CA                2M                  1S                  1B                  -1                  10                  11
+06OH                X4                  02CA                2M                  2D                  1B                  -1                  10                  8
+06OH                X4                  02CA                2M                  1S                  1B                  -1                  10                  11
+12WS                X4                  02CA                2M                  2D                  1B                  -1                  10                  8
+12WS                X4                  02CA                2M                  1S                  1B                  -1                  10                  11
+03S1                X5                  02CA                2M                  2D                  1B                  -1                  10                  8
+03S1                X5                  02CA                2M                  1S                  1B                  -1                  10                  11
+07EN                X6                  02CA                2M                  2D                  1B                  -1                  10                  8
+07EN                X6                  02CA                2M                  1S                  1B                  -1                  10                  11
+09AM                X6                  02CA                2M                  2D                  1B                  -1                  10                  8
+09AM                X6                  02CA                2M                  1S                  1B                  -1                  10                  11
+15ZN                I2                  12RM                1C                  2D                  1B                  -1                  4                   35
+15ZN                R2                  12RM                1C                  2D                  1B                  -1                  4                   35
+02YP                X3                  13ZN                1C                  1S                  1B                  -1                  11                  39
+03S1                X3                  13ZN                1C                  1S                  1B                  -1                  11                  39
+04S2                X3                  13ZN                1C                  1S                  1B                  -1                  11                  39
+06OH                X3                  13ZN                1C                  1S                  1B                  -1                  11                  39
+07EN                X3                  13ZN                1C                  1S                  1B                  -1                  11                  39
+10C1                X3                  13ZN                1C                  1S                  1B                  -1                  11                  39
+02YP                X6                  13ZN                1C                  1S                  1B                  -1                  11                  39
+04S2                X6                  13ZN                1C                  1S                  1B                  -1                  11                  39
+06OH                X6                  13ZN                1C                  1S                  1B                  -1                  11                  39
+09AM                I1                  03SA                1C                  2D                  1B                  -1                  12                  12
+05GF                R2                  03SA                1C                  2D                  1B                  -1                  12                  12
+09AM                I2                  03SA                2M                  2D                  1B                  -1                  13                  13
+09AM                I2                  03SA                2M                  1S                  1B                  -1                  13                  16
+05GF                I3                  03SA                2M                  2D                  1B                  -1                  13                  13
+05GF                I3                  03SA                2M                  1S                  1B                  -1                  13                  16
+09AM                R2                  03SA                2M                  2D                  1B                  -1                  13                  13
+09AM                R2                  03SA                2M                  1S                  1B                  -1                  13                  16
+09AM                X4                  03SA                2M                  2D                  1B                  -1                  13                  13
+09AM                X4                  03SA                2M                  1S                  1B                  -1                  13                  16
+08KT                I3                  04EI                2M                  2D                  1B                  -1                  14                  17
+08KT                I3                  04EI                2M                  1S                  1B                  -1                  14                  19
+07EN                R2                  04EI                2M                  2D                  1B                  -1                  14                  17
+07EN                R2                  04EI                2M                  1S                  1B                  -1                  14                  19
+07EN                X2                  04EI                2M                  2D                  1B                  -1                  14                  17
+07EN                X2                  04EI                2M                  1S                  1B                  -1                  14                  19
+09AM                X2                  04EI                2M                  2D                  1B                  -1                  14                  17
+09AM                X2                  04EI                2M                  1S                  1B                  -1                  14                  19
+10C1                X2                  04EI                2M                  2D                  1B                  -1                  14                  17
+10C1                X2                  04EI                2M                  1S                  1B                  -1                  14                  19
+11C2                R2                  04EI                3H                  2D                  1B                  -1                  15                  18
+11C2                R2                  04EI                3H                  1S                  1B                  -1                  15                  20
+12WS                I1                  05WI                3H                  1S                  1B                  -1                  16                  22
+10C1                I3                  07DL                2M                  1S                  3L                  -1                  18                  25
+14CU                C2                  12RM                1C                  2D                  4P                  -1                  19                  36
+15ZN                C2                  12RM                1C                  2D                  4P                  -1                  19                  36
+12WS                X3                  12RM                1C                  2D                  4P                  -1                  19                  36
+16PC                X3                  12RM                1C                  2D                  4P                  -1                  19                  36
+01NE                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+01NE                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+01NE                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+01NE                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+01NE                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+01NE                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+01NE                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+01NE                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+01NE                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+01NE                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+01NE                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+01NE                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+01NE                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+01NE                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+01NE                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+01NE                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+01NE                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+01NE                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+01NE                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+01NE                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+01NE                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+01NE                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+01NE                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+01NE                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+01NE                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+01NE                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+01NE                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+01NE                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+01NE                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+01NE                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+01NE                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+01NE                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+01NE                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+01NE                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+01NE                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+01NE                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+01NE                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+02YP                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+02YP                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+02YP                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+02YP                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+02YP                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+02YP                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+02YP                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+02YP                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+02YP                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+02YP                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+02YP                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+02YP                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+02YP                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+02YP                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+02YP                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+02YP                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+02YP                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+02YP                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+02YP                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+02YP                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+02YP                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+02YP                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+02YP                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+02YP                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+02YP                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+02YP                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+02YP                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+02YP                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+02YP                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+02YP                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+02YP                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+02YP                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+02YP                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+02YP                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+02YP                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+02YP                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+02YP                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+03S1                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+03S1                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+03S1                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+03S1                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+03S1                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+03S1                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+03S1                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+03S1                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+03S1                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+03S1                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+03S1                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+03S1                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+03S1                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+03S1                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+03S1                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+03S1                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+03S1                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+03S1                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+03S1                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+03S1                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+03S1                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+03S1                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+03S1                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+03S1                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+03S1                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+03S1                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+03S1                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+03S1                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+03S1                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+03S1                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+03S1                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+03S1                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+03S1                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+03S1                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+03S1                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+03S1                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+03S1                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+04S2                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+04S2                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+04S2                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+04S2                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+04S2                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+04S2                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+04S2                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+04S2                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+04S2                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+04S2                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+04S2                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+04S2                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+04S2                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+04S2                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+04S2                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+04S2                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+04S2                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+04S2                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+04S2                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+04S2                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+04S2                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+04S2                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+04S2                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+04S2                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+04S2                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+04S2                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+04S2                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+04S2                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+04S2                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+04S2                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+04S2                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+04S2                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+04S2                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+04S2                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+04S2                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+04S2                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+04S2                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+05GF                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+05GF                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+05GF                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+05GF                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+05GF                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+05GF                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+05GF                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+05GF                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+05GF                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+05GF                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+05GF                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+05GF                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+05GF                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+05GF                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+05GF                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+05GF                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+05GF                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+05GF                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+05GF                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+05GF                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+05GF                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+05GF                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+05GF                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+05GF                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+05GF                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+05GF                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+05GF                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+05GF                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+05GF                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+05GF                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+05GF                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+05GF                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+05GF                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+05GF                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+05GF                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+05GF                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+05GF                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+06OH                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+06OH                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+06OH                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+06OH                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+06OH                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+06OH                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+06OH                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+06OH                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+06OH                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+06OH                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+06OH                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+06OH                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+06OH                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+06OH                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+06OH                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+06OH                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+06OH                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+06OH                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+06OH                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+06OH                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+06OH                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+06OH                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+06OH                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+06OH                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+06OH                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+06OH                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+06OH                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+06OH                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+06OH                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+06OH                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+06OH                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+06OH                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+06OH                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+06OH                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+06OH                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+06OH                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+06OH                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+07EN                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+07EN                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+07EN                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+07EN                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+07EN                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+07EN                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+07EN                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+07EN                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+07EN                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+07EN                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+07EN                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+07EN                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+07EN                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+07EN                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+07EN                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+07EN                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+07EN                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+07EN                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+07EN                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+07EN                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+07EN                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+07EN                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+07EN                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+07EN                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+07EN                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+07EN                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+07EN                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+07EN                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+07EN                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+07EN                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+07EN                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+07EN                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+07EN                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+07EN                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+07EN                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+07EN                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+07EN                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+08KT                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+08KT                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+08KT                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+08KT                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+08KT                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+08KT                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+08KT                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+08KT                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+08KT                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+08KT                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+08KT                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+08KT                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+08KT                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+08KT                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+08KT                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+08KT                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+08KT                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+08KT                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+08KT                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+08KT                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+08KT                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+08KT                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+08KT                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+08KT                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+08KT                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+08KT                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+08KT                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+08KT                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+08KT                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+08KT                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+08KT                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+08KT                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+08KT                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+08KT                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+08KT                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+08KT                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+08KT                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+09AM                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+09AM                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+09AM                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+09AM                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+09AM                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+09AM                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+09AM                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+09AM                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+09AM                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+09AM                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+09AM                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+09AM                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+09AM                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+09AM                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+09AM                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+09AM                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+09AM                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+09AM                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+09AM                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+09AM                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+09AM                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+09AM                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+09AM                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+09AM                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+09AM                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+09AM                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+09AM                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+09AM                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+09AM                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+09AM                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+09AM                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+09AM                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+09AM                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+09AM                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+09AM                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+09AM                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+09AM                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+10C1                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+10C1                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+10C1                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+10C1                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+10C1                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+10C1                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+10C1                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+10C1                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+10C1                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+10C1                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+10C1                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+10C1                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+10C1                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+10C1                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+10C1                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+10C1                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+10C1                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+10C1                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+10C1                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+10C1                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+10C1                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+10C1                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+10C1                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+10C1                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+10C1                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+10C1                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+10C1                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+10C1                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+10C1                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+10C1                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+10C1                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+10C1                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+10C1                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+10C1                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+10C1                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+10C1                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+10C1                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+11C2                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+11C2                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+11C2                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+11C2                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+11C2                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+11C2                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+11C2                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+11C2                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+11C2                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+11C2                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+11C2                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+11C2                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+11C2                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+11C2                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+11C2                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+11C2                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+11C2                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+11C2                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+11C2                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+11C2                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+11C2                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+11C2                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+11C2                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+11C2                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+11C2                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+11C2                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+11C2                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+11C2                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+11C2                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+11C2                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+11C2                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+11C2                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+11C2                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+11C2                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+11C2                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+11C2                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+11C2                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+12WS                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+12WS                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+12WS                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+12WS                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+12WS                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+12WS                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+12WS                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+12WS                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+12WS                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+12WS                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+12WS                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+12WS                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+12WS                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+12WS                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+12WS                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+12WS                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+12WS                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+12WS                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+12WS                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+12WS                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+12WS                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+12WS                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+12WS                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+12WS                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+12WS                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+12WS                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+12WS                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+12WS                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+12WS                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+12WS                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+12WS                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+12WS                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+12WS                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+12WS                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+12WS                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+12WS                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+12WS                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+13MT                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+13MT                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+13MT                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+13MT                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+13MT                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+13MT                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+13MT                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+13MT                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+13MT                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+13MT                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+13MT                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+13MT                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+13MT                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+13MT                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+13MT                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+13MT                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+13MT                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+13MT                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+13MT                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+13MT                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+13MT                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+13MT                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+13MT                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+13MT                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+13MT                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+13MT                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+13MT                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+13MT                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+13MT                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+13MT                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+13MT                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+13MT                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+13MT                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+13MT                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+13MT                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+13MT                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+13MT                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+14CU                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+14CU                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+14CU                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+14CU                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+14CU                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+14CU                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+14CU                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+14CU                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+14CU                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+14CU                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+14CU                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+14CU                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+14CU                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+14CU                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+14CU                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+14CU                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+14CU                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+14CU                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+14CU                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+14CU                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+14CU                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+14CU                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+14CU                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+14CU                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+14CU                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+14CU                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+14CU                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+14CU                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+14CU                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+14CU                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+14CU                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+14CU                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+14CU                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+14CU                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+14CU                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+14CU                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+14CU                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+15ZN                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+15ZN                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+15ZN                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+15ZN                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+15ZN                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+15ZN                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+15ZN                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+15ZN                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+15ZN                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+15ZN                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+15ZN                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+15ZN                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+15ZN                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+15ZN                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+15ZN                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+15ZN                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+15ZN                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+15ZN                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+15ZN                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+15ZN                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+15ZN                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+15ZN                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+15ZN                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+15ZN                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+15ZN                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+15ZN                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+15ZN                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+15ZN                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+15ZN                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+15ZN                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+15ZN                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+15ZN                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+15ZN                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+15ZN                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+15ZN                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+15ZN                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+15ZN                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+16PC                L1                  01NA                2M                  2D                  1B                  -1                  22                  1
+16PC                L1                  01NA                3H                  2D                  1B                  -1                  22                  2
+16PC                L1                  01NA                2M                  1S                  1B                  -1                  22                  4
+16PC                L1                  01NA                3H                  1S                  1B                  -1                  22                  5
+16PC                L1                  01NA                3H                  1S                  5G                  -1                  22                  6
+16PC                L1                  02CA                1C                  2D                  1B                  -1                  22                  7
+16PC                L1                  02CA                2M                  2D                  1B                  -1                  22                  8
+16PC                L1                  02CA                1C                  1S                  1B                  -1                  22                  10
+16PC                L1                  02CA                2M                  1S                  1B                  -1                  22                  11
+16PC                L1                  03SA                1C                  2D                  1B                  -1                  22                  12
+16PC                L1                  03SA                2M                  2D                  1B                  -1                  22                  13
+16PC                L1                  03SA                1C                  1S                  1B                  -1                  22                  15
+16PC                L1                  03SA                2M                  1S                  1B                  -1                  22                  16
+16PC                L1                  04EI                2M                  2D                  1B                  -1                  22                  17
+16PC                L1                  04EI                3H                  2D                  1B                  -1                  22                  18
+16PC                L1                  04EI                2M                  1S                  1B                  -1                  22                  19
+16PC                L1                  04EI                3H                  1S                  1B                  -1                  22                  20
+16PC                L1                  04EI                2M                  1S                  3L                  -1                  22                  21
+16PC                L1                  05WI                3H                  1S                  1B                  -1                  22                  22
+16PC                L1                  06GL                2M                  1S                  3L                  -1                  22                  23
+16PC                L1                  06GL                3H                  1S                  3L                  -1                  22                  24
+16PC                L1                  07DL                2M                  1S                  3L                  -1                  22                  25
+16PC                L1                  08WM                1C                  2D                  2S                  -1                  22                  26
+16PC                L1                  08WM                1C                  1S                  2S                  -1                  22                  27
+16PC                L1                  08WM                2M                  1S                  2S                  -1                  22                  28
+16PC                L1                  09NW                1C                  1S                  2S                  -1                  22                  29
+16PC                L1                  09NW                2M                  1S                  2S                  -1                  22                  30
+16PC                L1                  10SW                1C                  1S                  2S                  -1                  22                  31
+16PC                L1                  11WW                1C                  2D                  2S                  -1                  22                  32
+16PC                L1                  11WW                1C                  1S                  2S                  -1                  22                  33
+16PC                L1                  11WW                2M                  1S                  2S                  -1                  22                  34
+16PC                L1                  12RM                1C                  2D                  1B                  -1                  22                  35
+16PC                L1                  12RM                1C                  1S                  2S                  -1                  22                  37
+16PC                L1                  13ZN                2M                  2D                  1B                  -1                  22                  38
+16PC                L1                  13ZN                1C                  1S                  1B                  -1                  22                  39
+16PC                L1                  13ZN                2M                  1S                  2S                  -1                  22                  40
+16PC                L1                  14AW                1C                  1S                  2S                  -1                  22                  41
+12WS                X6                  06GL                2M                  1S                  3L                  -1                  22                  23
+12WS                I3                  09NW                1C                  1S                  2S                  -1                  23                  29
+12WS                I3                  12RM                1C                  2D                  1B                  -1                  23                  35
+10C1                X6                  08WM                1C                  1S                  2S                  -1                  27                  27
+16PC                I1                  08WM                1C                  2D                  1B                  -1                  28                  26
+16PC                I1                  08WM                1C                  1S                  2S                  -1                  28                  27
+16PC                I1                  08WM                2M                  1S                  2S                  -1                  28                  28
+10C1                R1                  08WM                1C                  2D                  1B                  -1                  28                  26
+10C1                R1                  08WM                1C                  1S                  2S                  -1                  28                  27
+10C1                R1                  08WM                2M                  1S                  2S                  -1                  28                  28
+07EN                C1                  01NA                2M                  2D                  4P                  -1                  31                  3
+07EN                C1                  03SA                1C                  2D                  4P                  -1                  31                  14
+03S1                X4                  01NA                2M                  2D                  1B                  -1                  32                  1
+03S1                X4                  01NA                3H                  2D                  1B                  -1                  32                  2
+03S1                X4                  01NA                2M                  1S                  1B                  -1                  32                  4
+03S1                X4                  01NA                3H                  1S                  1B                  -1                  32                  5
+12WS                R2                  02CA                1C                  2D                  1B                  -1                  33                  7
+12WS                R2                  02CA                2M                  2D                  1B                  -1                  33                  8
+12WS                R2                  02CA                1C                  1S                  1B                  -1                  33                  10
+12WS                R2                  02CA                2M                  1S                  1B                  -1                  33                  11
+04S2                X5                  02CA                1C                  2D                  1B                  -1                  33                  7
+04S2                X5                  02CA                2M                  2D                  1B                  -1                  33                  8
+04S2                X5                  02CA                1C                  1S                  1B                  -1                  33                  10
+04S2                X5                  02CA                2M                  1S                  1B                  -1                  33                  11
+03S1                X6                  08WM                1C                  2D                  1B                  -1                  34                  26
+03S1                X6                  08WM                1C                  1S                  2S                  -1                  34                  27
+03S1                X6                  08WM                2M                  1S                  2S                  -1                  34                  28
+03S1                X6                  09NW                1C                  1S                  2S                  -1                  34                  29
+03S1                X6                  09NW                2M                  1S                  2S                  -1                  34                  30
+03S1                X6                  10SW                1C                  1S                  2S                  -1                  34                  31
+16PC                X6                  08WM                1C                  2D                  1B                  -1                  34                  26
+16PC                X6                  08WM                1C                  1S                  2S                  -1                  34                  27
+16PC                X6                  08WM                2M                  1S                  2S                  -1                  34                  28
+16PC                X6                  09NW                1C                  1S                  2S                  -1                  34                  29
+16PC                X6                  09NW                2M                  1S                  2S                  -1                  34                  30
+16PC                X6                  10SW                1C                  1S                  2S                  -1                  34                  31
+07EN                I2                  04EI                2M                  2D                  1B                  -1                  35                  17
+07EN                I2                  04EI                3H                  2D                  1B                  -1                  35                  18
+07EN                I2                  04EI                2M                  1S                  1B                  -1                  35                  19
+07EN                I2                  04EI                3H                  1S                  1B                  -1                  35                  20
+10C1                I2                  04EI                2M                  2D                  1B                  -1                  35                  17
+10C1                I2                  04EI                3H                  2D                  1B                  -1                  35                  18
+10C1                I2                  04EI                2M                  1S                  1B                  -1                  35                  19
+10C1                I2                  04EI                3H                  1S                  1B                  -1                  35                  20
+11C2                I2                  04EI                2M                  2D                  1B                  -1                  35                  17
+11C2                I2                  04EI                3H                  2D                  1B                  -1                  35                  18
+11C2                I2                  04EI                2M                  1S                  1B                  -1                  35                  19
+11C2                I2                  04EI                3H                  1S                  1B                  -1                  35                  20
+12WS                X5                  04EI                2M                  2D                  1B                  -1                  35                  17
+12WS                X5                  04EI                3H                  2D                  1B                  -1                  35                  18
+12WS                X5                  04EI                2M                  1S                  1B                  -1                  35                  19
+12WS                X5                  04EI                3H                  1S                  1B                  -1                  35                  20
+13MT                I2                  11WW                1C                  2D                  2S                  -1                  37                  32
+13MT                I2                  11WW                1C                  1S                  2S                  -1                  37                  33
+13MT                R1                  08WM                1C                  2D                  1B                  -1                  37                  26
+13MT                R2                  08WM                1C                  1S                  1B                  -1                  37                  27
+13MT                I3                  11WW                2M                  1S                  2S                  -1                  38                  34
+10C1                I1                  08WM                1C                  1S                  2S                  -1                  39                  27
+10C1                I1                  11WW                1C                  1S                  2S                  -1                  39                  33
+10C1                I1                  12RM                1C                  2D                  1B                  -1                  39                  35
+11C2                I1                  10SW                1C                  1S                  2S                  -1                  40                  31
+07EN                X5                  10SW                1C                  1S                  2S                  -1                  41                  31
+09AM                X5                  10SW                1C                  1S                  2S                  -1                  41                  31
+10C1                X5                  10SW                1C                  1S                  2S                  -1                  41                  31
+10C1                X4                  09NW                1C                  1S                  2S                  -1                  41                  29
+10C1                X5                  09NW                1C                  1S                  2S                  -1                  41                  29
+13MT                I1                  07DL                2M                  1S                  3L                  -1                  42                  25
+13MT                I2                  07DL                2M                  1S                  3L                  -1                  42                  25
+13MT                I3                  07DL                2M                  1S                  3L                  -1                  42                  25
+13MT                I1                  09NW                1C                  1S                  2S                  -1                  43                  29
+13MT                I2                  09NW                1C                  1S                  2S                  -1                  43                  29
+13MT                I3                  09NW                1C                  1S                  2S                  -1                  43                  29
+13MT                X4                  08WM                1C                  1S                  1B                  -1                  37                  27
+13MT                X5                  08WM                1C                  1S                  1B                  -1                  37                  27
+13MT                X4                  08WM                1C                  2D                  1B                  -1                  37                  26
+13MT                X5                  08WM                1C                  2D                  1B                  -1                  37                  26
+13MT                X4                  09NW                1C                  1S                  2S                  -1                  43                  29
+13MT                X5                  09NW                1C                  1S                  2S                  -1                  43                  29
+02YP                R1                  02CA                1C                  1S                  1B                  -1                  7                   10
+02YP                R2                  02CA                1C                  1S                  1B                  -1                  7                   10
+;

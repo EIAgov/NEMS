@@ -1,0 +1,10 @@
+!  $Header: N:/default/includes/RCS/xpq,v 1.2 1999/12/19 18:58:06 dsa Exp $
+! EXPECTED PRICES AND QUANTITIES.  MUST MATCH THE STANDARD PRICES AND
+!  QUANTITIES AND BE DECLARED AFTER THE PQ INCLUDE FILE
+!
+!  The dimension parameters &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  The following INCLUDE should be added only if there is no INCLUDE(PQ)
+!     INCLUDE(PARAMETR)
+!
+      INCLUDE 'MXQBLK'
+      INCLUDE 'MXPBLK'

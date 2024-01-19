@@ -1,0 +1,250 @@
+!  $Header: m:/default/includes/RCS/ogsmparm,v 1.59 2020/07/19 22:12:54 DH5 Exp $
+!  OGSM PARAMETERS                                                              
+      INTEGER AKWELL,AKRGN,AKFUEL,AKFLD,AKSIZE,AKRESRGN,AKRESTYPE       ! AKRESRGN,AKRESTYPE added 8-19-09        
+      INTEGER OFFWELL,OFFRGN,OFFFUEL,OFFNEMSRGN                         !        
+      INTEGER WELL_STATUS,DEPTH_CAT,INIT_YR, WELL_TYPE                  ! added WELL_TYPE (msc 5-29-13)
+      INTEGER L48WELL,L48RGN,L48FUEL                                    !        
+      INTEGER CONFUEL                                                   !        
+      INTEGER EORRGN,EORFUEL                                            !        
+      INTEGER COSTCAT,NGTDMRGN,PMMRGN                                   !        
+      INTEGER MAXPAIRS,MAXU,MAXW,STAGE,LNGYR,LSTAGE                     !        
+      INTEGER BUGOUT                                                    !        
+      INTEGER AKHYR                                                     !    
+      INTEGER DRLCOST
+      INTEGER L48HYR
+      INTEGER OFFHYR                                                    !                            
+
+!==========================> HSM Code Start <==========================
+      ! output switches
+      logical hsm_dcf_bool
+      logical hsm_restart_bool
+      logical hsm_offshore_bool
+      PARAMETER(hsm_dcf_bool      = .false. ) ! Set to true to print dcf outputs
+      PARAMETER(hsm_restart_bool  = .false.) ! Set to true to print restart outputs
+      PARAMETER(hsm_offshore_bool = .false. ) ! Set to true to print offshore outputs
+
+      ! output streams
+      INTEGER hsm_out
+      INTEGER hsm_dcf_off
+      INTEGER hsm_dcf_on
+      INTEGER hsm_dcf_ak
+      INTEGER hsm_dcf_opts
+      INTEGER hsm_disc_rate
+      INTEGER hsm_prices
+      INTEGER hsm_offshore_disc
+      INTEGER hsm_offshore_cumnfw
+      INTEGER hsm_offshore_prod
+      PARAMETER(hsm_out             = 450)
+      PARAMETER(hsm_dcf_off         = 451)
+      PARAMETER(hsm_dcf_on          = 452)
+      PARAMETER(hsm_dcf_ak          = 453)
+      PARAMETER(hsm_dcf_opts        = 454)
+      PARAMETER(hsm_disc_rate       = 455)
+      PARAMETER(hsm_prices          = 456)
+      PARAMETER(hsm_offshore_disc   = 457)
+      PARAMETER(hsm_offshore_cumnfw = 458)
+      PARAMETER(hsm_offshore_prod   = 459)
+!===========================> HSM Code End <===========================
+
+!  DEBUG OUTPUT UNIT NUMBER                                                     
+      PARAMETER(BUGOUT=19)   ! DEBUG FILE OGSMOUT  
+!  LOWER 48 SUBMODULE PARAMETERS                                                
+      PARAMETER(L48WELL=2)   ! LOWER 48 WELL CLASS (EXPLOR,DEVELOP)             
+      PARAMETER(L48RGN=7)    ! LOWER 48 REGIONS (1-EAST,2-GULF COAST,          
+!                            !                   3-MIDCONTINENT,4-SOUTHWEST,        
+!                            !                   5-ROCKY MT., 6-WEST COAST, 7-N. GREAT PLAINS)         
+      PARAMETER(L48FUEL=7)   ! LOWER 48 FUEL TYPES (1-PRIMARY CRUDE OIL, 2-EOR/ASR,
+!                            !                      3-not used, 4-CONV GAS,   
+!                            !                      5-TIGHT SANDS, 6-SHALE GAS,
+!                            !                      7-COALBED METHANE)      
+      PARAMETER(CONFUEL=4)   ! LOWER 48 CONVENTIONAL FUEL TYPES (1-PRIMARY OIL,
+!                            !                 2-EOR/ASR,3-not used,4-CONV GAS)              
+      PARAMETER(L48HYR=32)   ! NUMBER OF HISTORICAL YEARS (32=1990 through 2021)
+!
+!        
+!  ALASKA SUBMODULE PARAMETERS                                                  
+      PARAMETER(AKWELL=2)    ! ALASKA WELL CLASS (EXPLOR,DEVELOP)               
+      PARAMETER(AKRGN=3)     ! ALASKA REGIONS (OFFSHORE NORTH,ONSHORE NORTH,    
+!                            !  OTHER ALASKA) 
+!
+      PARAMETER(AKFUEL=2)    ! ALASKA FUEL TYPES (1=OIL,2=GAS)
+!        
+      PARAMETER(AKFLD=62)    ! ALASKA DISCOVERED AND UNDISCOVERED FIELDS (PRUDHOE BAY,           
+                             !             KUPARUK,LISBURNE,ENDICOTT,MILNE PT., 
+                             !             MILNE PT.,W. SAK/UGNU,PT. MICINTYRE  
+                             !             SEAL ISLAND,PT. THOMSON,NIAKUK,      
+                             !             COOK INLET, Etc.)
+                             ! ALSO INCLUDES ANWR - ADDED 3/2001.                          
+      PARAMETER(AKSIZE=20)   ! ALASKA UNDISCOVERED FIELD SIZES                 
+      PARAMETER(AKHYR=32)    ! NUMBER OF HISTORICAL YEARS (32=1990 through 2021)
+!
+      PARAMETER(AKRESRGN=3)  ! ALASKA RESOURCE CATEGORIES: 1=ONSHORE, 2=STATE OFFSHORE, 3=FEDERAL OFFSHORE, added 8-19-09
+      PARAMETER(AKRESTYPE=3) ! ALASKA RESOURCE TYPES: 1=RESERVES, 2=INFERRED RESOURCES, 3=UNDISCOVERED RESOURCES, added 8-19-09                                        
+!        
+!        
+!  OFFSHORE SUBMODULE PARAMETERS                                                
+      PARAMETER(OFFWELL=2)   ! OFFSHORE WELL CLASS (EXPLOR,DEVELOP)             
+      PARAMETER(OFFRGN=5)    ! OFFSHORE REGIONS (ATLANTIC,PACIFIC,
+!                            !                   SHALLOW GULF, DEEP GULF, EASTERN GULF)
+      PARAMETER(INIT_YR=2)   ! 1 =1989, 2=1990
+      PARAMETER(DEPTH_CAT=5) ! OFFSHORE WELL DEPTH CATEGORY
+      PARAMETER(WELL_STATUS=2)! OFFSHORE WELL STATUS,i.e. SUCC/DRY (OIL,GAS)
+! ----------------------------------------------------------------------------------------
+      PARAMETER(WELL_TYPE=3) ! Used in new D&C calculation for OIL, GAS, and DRY Wells
+! ---------------------------------------------------------------------------------------
+      PARAMETER(OFFNEMSRGN=3)! NEMS SYSTEM OFFSHORE REGIONS (ATL,PAC,GM)        
+      PARAMETER(OFFFUEL=2)   ! OFFSHORE FUEL TYPES (OIL,GAS)                    
+!    
+      PARAMETER(OFFHYR=32)    ! NUMBER OF HISTORICAL YEARS (32=1990 through 2021)
+                                                                        !        
+!  CANADIAN SUMODULE PARAMETERS                                                 
+      PARAMETER(COSTCAT=3)   ! COST CATEGORIZED BY FUNCTION (DRILLING,          
+!                            !                   LEASE, OPERATING COSTS)        
+                                                                        !        
+!  ENHANCED OIL RECOVERY PARAMETERS                                             
+      PARAMETER(EORRGN=6)    ! EOR REGIONS (NORTHEAST,GULF COAST,               
+!                            !               MIDCONTINENT,SOUTHWEST,            
+!                            !               ROCKY MT., WEST COAST)             
+      PARAMETER(EORFUEL=2)   ! EOR FUEL TYPES (THERMAL,OTHER EOR)               
+                                                                        !        
+!  NGTDM AND PMM PARAMETERS                                                     
+      PARAMETER(NGTDMRGN=17) ! NUMBER OF NGTDM REGIONS                          
+      PARAMETER(PMMRGN=7)    ! NUMBER OF PMM PMM REGIONS                        
+                                                                        !        
+! LNG SUBMODULE PARAMETERS                                                      
+                                                                        !        
+                                                                        !        
+      PARAMETER(LNGYR=22)     ! MAXIMUM LNG YEARS                               
+                                                                        !        
+      PARAMETER(MAXW=12)       ! USA DESTINATION ( 1-EVERETT, MA                 
+!                                                 2-LAKE CHARLES, LA            
+!                                                 3-COVE POINT, MD              
+!                                                 4-ELBA ISLAND, GA)            
+!                                                                               
+      PARAMETER(MAXU=14)       ! LNG SOURCE   (  1-ALGERIA                       
+!                                               2-NIGERIA                       
+!                                               3-NORWAY                        
+!                                               4-VENEZUELA/TRINIDAD)           
+!                                                                               
+      PARAMETER(MAXPAIRS=MAXU*MAXW)  ! USA DESTINATION * LNG SOURCE                    
+                                                                        !        
+      PARAMETER(STAGE=3)      ! REGASIFICATION STAGES                           
+!                                          (  1-REOPENING                       
+!                                             2-EXPANSION                       
+!                                             3-NEW CONSTRUCTION)               
+                                                                        !        
+      PARAMETER(LSTAGE=3)     ! LIQUEFACTION STAGES                             
+!                                          (  1-REOPENING                       
+!                                             2-EXPANSION                       
+!                                             3-NEW CONSTRUCTION)               
+! master_dimen.h
+          integer max_yr                                    !maximum number of years in analysis
+          integer max_eyr                                    !maximum number of years in analysis
+          integer max_reg                                   !maximum number of regions
+          integer max_src                                   !maximum number of CO2 sources
+                                                            !includes natural, existing industrial, and potential industrial
+
+          integer max_proc                                  !maximum number of processes evaluated by model
+          integer max_rdr                                   !maximum number of rig depth rating categories
+          integer max_dep                                   !maximum number of depth categories for cost equations
+          integer max_res                                   !maximum number of reservoirs
+          integer max_tech                                  !maximum number of technologies - base and advanced
+          integer max_st                                    !maximum number of states
+          integer max_qdyr                                  !maximum number of years in depreciation schedule
+          integer max_play                                  !maximum number of plays
+          integer max_play_reg                              !maximum number of plays in a region
+          integer max_accumrp                               !maximum number of accumulations in a play
+          INTEGER MAX_ACCUMRG                               !MAXIMUM NUMBER OF ACCUMULATIONS IN A REGION
+          integer max_uncon                                 !maximum number of unconventional reservoirs
+          INTEGER MAX_CSC                                   !MAXIMUM NUMBER OF CELL SIZE CLASSES  - UNCONVENTIONAL
+          integer max_pack                                  !maximum number of exploration drilling packages
+          integer max_class                                 !maximum number of well classes
+          integer max_fuel                                  !maximum number of fuel types
+          integer max_prov                                  !maximum number of provinces
+          integer max_acc                                   !maximum number of resource access categories
+          integer max_impct                                 !maximum number of technology impacts in the case
+          integer max_ngtdm                                 !maximum number of OGSM/NGTDM regins
+          integer max_und                                   !maximum number of undiscovered projects    mc change 5.19.09
+
+          parameter(max_yr=40)
+          parameter(max_eyr=44)
+          parameter(max_reg=8)
+          parameter(max_src=13)
+          parameter(max_proc=24)
+          parameter(max_rdr=9)
+          parameter(max_dep=4)
+          parameter(max_res=25000) !31500)   !90000         !MC CHANGE 5.19.09 31500 -> 25000
+                                                            !MC CHANGE 5.6.09  90000 -> 48000
+                                                            !MC CHANGE 5.8.09  48000 -> 31500
+
+          parameter(max_und=12500)                          !mc change 5.19.09 
+          parameter(max_tech=2)
+          parameter(max_st=49)
+          parameter(max_qdyr=8)
+          parameter(max_play=600)
+          parameter(max_play_reg=150)
+          PARAMETER (MAX_ACCUMRP = 2000)
+          PARAMETER (MAX_ACCUMRG = 5000)
+          parameter(max_uncon=10000)
+          PARAMETER (MAX_CSC=20)
+          parameter(max_pack=5000)
+          parameter(max_class=2)
+          parameter(max_fuel=7)
+          parameter(max_prov=69)
+          parameter(max_acc=10)                             !9 access categories and one year!!!!!!
+          parameter(max_impct=50)
+          parameter(max_ngtdm=17)
+
+
+!       WELL CLASS 1 = EXPLORATORY/UNDISCOVERED
+!       WELL CLASS 2 = DEVELOPMENTAL
+
+!       RESFLAG 0 = OTHER GAS & ALL OIL RESOURCES
+!       RESFLAG 1 = DRY COAL
+!       RESFLAG 2 = WET COAL
+!       RESFLAG 3 = WET SHALE
+!       RESFLAG 4 = DRY SHALE
+
+!       FUEL TYPE 1 = SHALLOW OIL (PROCESS CODES 00,01,03-10,17
+!       FUEL TYPE 2 = CO2 FLOODING (PROCESS CODE 02)
+!       FUEL TYPE 3 = SHALLOW GAS (PROCESS CODES 11,12,16, DEPTHS LT 10000 FT)
+!       FUEL TYPE 4 = DEEP GAS (PROCESS CODES 11,12,16, DEPTHS GE 10000 FT)
+!       FUEL TYPE 5 = TIGHT SANDS (PROCESS CODES 13,18)
+!       FUEL TYPE 6 = DEVONIAN SHALE (PROCESS CODES 14,15,19,20; RESFLAG = 3,4)
+!       FUEL TYPE 7 = COALBED METHANE (PROCESS CODES 14,15,19,20; RESFLAG = 1,2)
+
+!       RESOURCE ACCESS  1 No Leasing (Statutory/Executive Order) (NLS)
+!       RESOURCE ACCESS  2 No Leasing (Administrative) (NLA)
+!       RESOURCE ACCESS  3 No Leasing (Administrative) Pending Land Use Planning or NEPA Compliance (NLA/LUP)
+!       RESOURCE ACCESS  4 Leasing, No Surface Occupancy (NSO) (Net NSO for O&G Resources)
+!       RESOURCE ACCESS  5 Leasing, Cumulative Timing Limitations (TLs) of greater than 9 Months
+!       RESOURCE ACCESS  6 Leasing, Cumulative Timing Limitations (TLs) of greater than 6 to less than or equal to 9 Months
+!       RESOURCE ACCESS  7 Leasing, Cumulative Timing Limitations (TLs) of greater than 3 to less than or equal to 6 Months
+!       RESOURCE ACCESS  8 Leasing, Controlled Surface Use (CSU)
+!       RESOURCE ACCESS  9 Leasing, Standard Lease Terms (SLTs)
+!       RESOURCE ACCESS 10 Non-Federal Lands
+
+!       PROCESS  0:  DECLINE CURVE, OIL
+!       PROCESS  1:  PRIMARY, OIL
+!       PROCESS  2:  WATER FLOODING
+!       PROCESS  3:  CO2 FLOODING
+!       PROCESS  4:  STEAM FLOODING
+!       PROCESS  5:  POLYMER FLOODING
+!       PROCESS  6:  INFILL DRILLING
+!       PROCESS  7:  PROFILE MODIFICATION
+!       PROCESS  8:  HORIZONTAL CONTINUITY
+!       PROCESS  9:  HORIZONTAL PROFILE
+!       PROCESS 10:  UNDISCOVERED CONVENTIONAL OIL
+!       PROCESS 11:  CONVENTIONAL RADIAL FLOW GAS
+!       PROCESS 12:  WATER DRIVE
+!       PROCESS 13:  TIGHT SANDS
+!       PROCESS 14:  WET COAL/SHALE
+!       PROCESS 15:  DRY COAL/SHALE
+!       PROCESS 16:  UNDISCOVERED CONVENTIONAL GAS
+!       PROCESS 17:  UNDISCOVERED UNCONVENTIONAL OIL
+!       PROCESS 18:  UNDISCOVERED TIGHT GAS
+!       PROCESS 19:  UNDISCOVERED COALBED METHANE
+!       PROCESS 20:  UNDISCOVERED SHALE GAS
+!       PROCESS 21:  DEVELOPING SHALE GAS          - DISCOVERED BUT NOT DEVELOPED (UGRSS)
+!       PROCESS 22:  DEVELOPING TIGHT GAS          - DISCOVERED BUT NOT DEVELOPED (UGRSS)
+!       PROCESS 23:  DEVELOPING COALBED METHANE    - DISCOVERED BUT NOT DEVELOPED (UGRSS)

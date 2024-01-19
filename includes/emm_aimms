@@ -1,0 +1,84 @@
+! $Header: 
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     EMM_AIMMS:
+!     CONTAINS VARIABLES THAT NEED TO BE PASSED BETWEEM EMM AND AIMMS
+!     BUT NOT USED BY OTHER MODULES. PRIMARILY LINKED TO UDAT, UECP AND UEFD 
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+      COMMON /AIM_BLD/ BUILD_AVL
+      INTEGER*4 BUILD_AVL(ECP_D_CAP,ECP_D_XPH,MNUMNR,MNUMYR)
+
+      COMMON /EPO_ELAS/ ULEL, ULOV
+      INTEGER ULEL(MNUMYR,ECP_D_CAP)          ! 0/1 switch indicating if regional elasticity bound is binding
+      INTEGER ULOV(MNUMYR)                  ! 0/1 switch indicating if national overbuild bound is binding
+
+      COMMON /REVSYR/ EOTH_RYRS,ECL_RYRS,ENUC_RYRS
+      INTEGER EOTH_RYRS(WPLT_D_REC)               ! Non-Revenue Years by Oth  Group
+      INTEGER ECL_RYRS(MAX_CL)                  ! Non-Revenue Years by Coal  Group
+      INTEGER ENUC_RYRS(MAX_NUC)                ! Non-Revenue Years by Nuc  Group
+!
+      COMMON /ZEC_OUT/EPZECGEN,EPZECPRC,EPZECSUB
+      REAL*4 EPZECGEN(MNUMNR,MNUMYR)            ! ZEC Generation by Region and Year
+      REAL*4 EPZECPRC(MNUMNR,MNUMYR)            ! ZEC Credit Price by Region and Year
+      REAL*4 EPZECSUB(MNUMNR,MNUMYR)            ! ZEC Total Subsidy Amount by Region and Year
+
+      COMMON /CAPLIMS/ CAPSUB,LIMSUB
+      REAL*8 CAPSUB(ECP_D_CAP)                    ! capacity limit for subsidized builds
+      REAL*8 LIMSUB(ECP_D_CAP)                    ! indicator if capacity limit is in place for subsidy
+	  
+	  COMMON /GRDSRC/ GRD_CASN,GRD_SRCN,GRD_SRCC
+      INTEGER GRD_CASN                                       ! Number of grid resilience sources 
+      CHARACTER*15 GRD_SRCN(MX_GRDSRC)                       ! Grid resilience source names
+      CHARACTER*1  GRD_SRCC(MX_GRDSRC)                       ! Grid resilience source codes
+
+	  COMMON/CLCON/CLCONFC
+      REAL*4 CLCONFC(NDREG,MAXNFR + 1)
+
+	  COMMON /CAREMM/ CARSEC,CAROTH,ECPLIM,ECPCAR,ECPTAX,EFDLIM,EFDCAR,EFDTAX
+      REAL*4 CARSEC(MNUMYR)         ! Carbon Emissions -- Non Utility
+      REAL*4 CAROTH(MNUMYR)       ! Carbon Emissions -- Utility Geo/MSW
+      REAL*4 ECPLIM(MNUMYR)         ! ECP Carbon Limit
+      REAL*4 ECPCAR(MNUMYR)         ! ECP Carbon Emissions
+      REAL*4 ECPTAX(MNUMYR)         ! ECP Carbon Tax
+      REAL*4 EFDLIM(MNUMYR)         ! EFD Carbon Limit
+      REAL*4 EFDCAR(MNUMYR)         ! EFD Carbon Emissions
+      REAL*4 EFDTAX(MNUMYR)         ! EFD Carbon Tax
+
+	  COMMON /AB32OUT/ AB32UTIL,AB32BAVL,AB32BUSE,AB32BBNK,AB32OAVL,AB32OUSE,  &
+                       AB32RAVL,AB32RUSE,AB32RBNK,AB32ESCP
+      REAL*4 AB32UTIL                       ! Utility Covered Emissions
+      REAL*4 AB32BAVL                       ! Banked Allowances Available 
+      REAL*4 AB32BUSE                       ! Banked Allowances Used 
+      REAL*4 AB32BBNK                       ! Banked Allowances Added
+      REAL*4 AB32OAVL                       ! Offsets Available
+      REAL*4 AB32OUSE                       ! Offsets Used 
+      REAL*4 AB32RAVL                       ! Reserves Available
+      REAL*4 AB32RUSE                       ! Reserves Used 
+      REAL*4 AB32RBNK                       ! Reserves Banked
+      REAL*4 AB32ESCP                       ! Escape Vector Value (Shortage)
+!
+      COMMON /RGGIOUT/ RGGIUTIL,RGGIBAVL,RGGIBUSE,RGGIBBNK,RGGIOAVL,RGGIOUSE,  &
+                       RGGIRAVL,RGGIRUSE,RGGIRBNK,RGGIEAVL,RGGIEUSE,RGGIESCP
+      REAL*4 RGGIUTIL                       ! Utility Covered Emissions
+      REAL*4 RGGIBAVL                       ! Banked Allowances Available 
+      REAL*4 RGGIBUSE                       ! Banked Allowances Used 
+      REAL*4 RGGIBBNK                       ! Banked Allowances Added
+      REAL*4 RGGIOAVL                       ! Offsets Available
+      REAL*4 RGGIOUSE                       ! Offsets Used 
+      REAL*4 RGGIRAVL                       ! Cost Containment Reserves Available
+      REAL*4 RGGIRUSE                       ! Cost Containment Used 
+      REAL*4 RGGIRBNK                       ! Cost Containment Banked
+      REAL*4 RGGIEAVL                       ! Emissions Containment Reserves Available
+      REAL*4 RGGIEUSE                       ! Emissions Containment Reserves Used 
+      REAL*4 RGGIESCP                       ! Escape Vector Value (Shortage)
+
+	  COMMON /SR_RQMT/ SR_INT_REQ, SP_RES_REQ, SP_RES_DUAL, SP_RES_ACH, SP_ACHBYECP, SRPOOL
+      REAL*8 SR_INT_REQ(ELD_D_DAY,EFD_D_MVS,MNUMNR)
+      REAL*8 SP_RES_REQ(ELD_D_DAY,EFD_D_MVS,MNUMNR)
+      REAL*8 SP_RES_DUAL(ELD_D_DAY,EFD_D_MVS,MNUMNR)
+      REAL*8 SP_RES_ACH(ELD_D_DAY,EFD_D_MVS,MNUMNR)
+      REAL*8 SP_ACHBYECP(ELD_D_DAY,EFD_D_MVS,MNUMNR,ECP_D_CAP)
+	  REAL*8 SRPOOL(MNUMYR,MNUMNR)
+
+	  COMMON /TRADE_EFD/ NET_XPORT_EFD
+      REAL*8 NET_XPORT_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)

@@ -1,0 +1,6 @@
+6   14 nem1    Jerry
+1   10 nem2    Elaine
+1   10 nem3    George
+10  18 nem4    Kramer
+10  18 nem5    Newman
+6   14 nem6    Frank

@@ -1,0 +1,75 @@
+!  $Header: m:/default/includes/RCS/coalout,v 1.18 2016/02/21 00:47:59 DKE Exp $
+!  COAL MODULE OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!  NEMS COAL Common Block Parameter
+      INTEGER MCSIZE          ! Size of Eq COAL Array
+      PARAMETER(MCSIZE=MNUMYR*(1+17+4*3+(3*NEMSEC+1)*MNUMCR+MNUMPR*3)+ &
+                      (2*MNUMPR*MNUMYR)+  &   ! L_SO2P and L_HGP
+                      2*(MNUMCR*MNUMYR)+  &   ! QCLGAS and QCLGHP
+                      3*(MNUMCR*MNUMYR)+  &   ! IIMP_BTU, EIMP_BTU, and MIMP_BTU
+                      6*MNUMYR +          &   ! INDSTEAMBAL, INDCOKEBAL, ELECCOALBAL, APPSTOCKS, INTSTOCKS, WESTSTOCKS
+                      9*MNUMYR +          &   ! EASTTOEA,WESTSUP,EASTTOT,TTONMILE,ETONMILE,WTONMILE,TTON,ETON,WTON
+                      4)                      ! COALCODE
+
+!   Coal Module output variables
+      REAL CLSYNGQN(17,MNUMYR)          ! 11 Coal Syn NG quantity
+      REAL CQSBB(3,MNUMYR)              ! 12 Coal Prod (East,West Miss)
+      REAL CQSBT(3,MNUMYR)              ! 13 Coal Conv Factor for Prod
+      REAL CPSB(3,MNUMYR)               ! 14 Coal Minemouth Price ($/mmbtu)
+      REAL CPSBT(3,MNUMYR)              ! 15 Coal Conv Factor Minemouth Pric
+      REAL CQDBFT(MNUMCR,NEMSEC,MNUMYR) ! 16 Coal Conv Factor for Cons
+      REAL CPDBFT(MNUMCR,NEMSEC,MNUMYR) ! 17 Coal Conv Factor for Delivered prices
+      REAL CQDBFB(MNUMCR,NEMSEC,MNUMYR) ! 18 Imports, Exports, Stk  Chngs
+      REAL TOTMINERS(MNUMYR)            !number of miners by year
+      
+
+! for the Coal to Liquids:
+      REAL PCLRFPD(MNUMPR,MNUMYR)    ! Price of coal for CTL (1987 $ per million Btu)
+      REAL LIQUCARB(MNUMCR,MNUMYR)   ! Carbon content of coal to CTL (kilograms per million Btu)
+      REAL LCVBTU(MNUMPR,MNUMYR)     ! Coal supply curve heat content (million Btu per ton)
+      REAL LTRNTON(MNUMPR,MNUMYR)    ! Transportation rate (1987 $ per ton)
+      REAL L_SO2P(MNUMPR,MNUMYR)     ! Incremental cost of coal due to SO2 allowance price ($ per mmBtu of coal)
+      REAL L_HGP(MNUMPR,MNUMYR)      ! Incremental cost of coal due to Hg allowance price ($ per mmBtu of coal)
+
+      REAL IIMP_BTU(MNUMCR,MNUMYR)
+      REAL EIMP_BTU(MNUMCR,MNUMYR)
+      REAL MIMP_BTU(MNUMCR,MNUMYR)
+
+!  Quantities of coal to synthetic natural gas
+      REAL QCLGAS(MNUMCR,MNUMYR)     ! Total coal
+      REAL QCLGHP(MNUMCR,MNUMYR)     ! Coal assigned to heat and power
+                                     ! (difference between total coal quads and gas quads produced)
+!  Quantities for transportation escalator calculation
+     REAL EASTTOEA(MNUMYR)           !million short tons Eastern coal for eastern electr demand 
+     REAL WESTSUP(MNUMYR)            !million short tons Western coal for national electr demand
+     REAL EASTTOT(MNUMYR)            !million short tons Total eastern electr demand 
+     REAL TTONMILE(MNUMYR)            !million short tons Total eastern electr demand 
+     REAL ETONMILE(MNUMYR)            !million short tons Total eastern electr demand 
+     REAL WTONMILE(MNUMYR)            !million short tons Total eastern electr demand 
+     REAL TTON(MNUMYR)            !million short tons Total eastern electr demand 
+     REAL ETON(MNUMYR)            !million short tons Total eastern electr demand
+     REAL WTON(MNUMYR)            !million short tons Total eastern electr demand
+
+     REAL INDSTEAMBAL(MNUMYR)     ! million short tons For balancing industrial coal through STEO years
+     REAL INDCOKEBAL(MNUMYR)      ! million short tons For balancing metallurgical coal through STEO years
+     REAL ELECCOALBAL(MNUMYR)     ! million short tons For balancing electric power coal through STEO years
+     REAL APPSTOCKS(MNUMYR)      ! million short tons For balancing Appalachia production through STEO years
+     REAL INTSTOCKS(MNUMYR)      ! million short tons For balancing Interior production through STEO years
+     REAL WESTSTOCKS(MNUMYR)     ! million short tons For balancing West production STEO years
+     
+     
+
+     INTEGER*4 COALCODE                ! return code from AIMMS
+!   Coal Module output common block
+
+      COMMON/COALOUT/CLSYNGQN,CQSBB,CQSBT,CPSB,CPSBT,CQDBFT,CPDBFT,CQDBFB, &
+         PCLRFPD,LIQUCARB,LCVBTU,LTRNTON, &
+         TOTMINERS,L_SO2P,L_HGP,IIMP_BTU,EIMP_BTU,MIMP_BTU,QCLGAS,QCLGHP, &
+         EASTTOEA,WESTSUP,EASTTOT,TTONMILE,ETONMILE,WTONMILE,TTON,ETON,WTON, &
+         INDSTEAMBAL, INDCOKEBAL, ELECCOALBAL, APPSTOCKS, INTSTOCKS, WESTSTOCKS, COALCODE
+
+!  Equivalence for FILER used for data storage
+      REAL EQ_CLOUT(MCSIZE)
+          EQUIVALENCE (EQ_CLOUT,CLSYNGQN)

@@ -1,0 +1,66 @@
+   Function: Show syntax specifications
+   Syntax:   SYNTAX {SETS, ROWS, COLUMNS} [set mask]
+                    |GENERATE [filespec] [//USING filespec]
+
+   Any combination of SETS, ROWS, and COLUMNS may be given at once, but
+   they must be separated by commas (not blanks), in which case GENERATE
+   must not be specified and the syntax file must have already been read
+   in (use READIN SYNTAX [filespec]).  To see all sets, row classes and
+   column classes, you can specify SYNTAX * (GENERATE is excluded in this
+   case).
+
+   If GENERATE is specified, no syntax must already be resident.  Details
+   of how the generation is done are given in SYNGEN.DOC.  The filespec is
+   a SYNTAX file type, whose default suffix and prefix is determined by
+   _SETUP.  If absent, the problem name is used as the default root.  If
+   the USING option is specified, answers to the prompts are taken from
+   the filespec, which is a SYNTAX file type.  BE SURE TO INCLUDE A BLANK
+   LINE AFTER ROW AND COLUMN CLASSES ARE FINISHED.
+
+   If ROWS and/or COLUMNS is specified, all row and/or column classes are
+   given.  If SETS is specified, all sets and their members are given
+   unless the set mask is specified.  If a set mask is specified, those
+   sets whose names match the mask are given (with their members).  To
+   see sets without members, use the SCHEMA DISP DOMAIN command.
+
+   The SETS of a model, like regions, materials and time periods, are used
+   to define "domains" of rows and columns.  The name of a row or column
+   has fields that correspond to the sets, which may also be viewed as
+   "subscripts" in the algebraic form of the linear program.  (See also
+   the SCHEMA command to display only the names of the sets without
+   members.)
+
+   Examples:
+
+   SYNTAX R
+   ...shows row syntax
+
+   SYNTAX S,C
+   ...shows sets and column syntax
+
+   SYN R,C
+   ...shows row and column syntax
+
+   SYN S MT
+   ...shows set whose name matches MT
+
+   SYN S C
+   ...shows sets whose name begins with C
+
+   SYN S
+   ...shows all sets
+
+   SYN S *
+   ...shows all sets (same as previous since * matches all set names)
+
+   SYN *
+   ...shows row and column syntax and all sets
+
+   SYN GEN SKELETON
+   ...enters discourse for you to specify row and column classes, then
+      the syntax file SKELETON.SYN is generated (assuming default prefix
+      is null and suffix is .SYN)
+
+   SYN GEN SKELETON //USING RC
+   ...same as previous, except the answers for the prompts are taken from
+      RC.SYN.

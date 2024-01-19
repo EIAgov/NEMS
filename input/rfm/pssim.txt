@@ -1,0 +1,49 @@
+******************************************************************************
+***      POLYSYS SIMULATION SETTINGS DOE VERSION APRIL  2019                ***
+******************************************************************************
+INPUT FILES PATH NAME:
+  31<-NUMBER OF YEARS TO SIMULATE [INDEX(1)] !UP TO 31 YEARS  
+ EIA<-SIMULATION NUMBER PREFIX
+ 001<-SIMULATION NUMBER SUFFIX [39]                                            !000 reserved for 'baseline simulation'
+Scenario:  $80 biomass
+Baseline: USDA MARCH 2021
+   1<- 1 WRITE RESULTS AS SIMULATION VALUES; 3 DIFFERENCES [32]
+   3<- 1 NATIONAL BASELINE; 2 REGIONAL BASELINE; 3 SIMULATION [106]
+   0<- 0 IF DETERMINISTIC ANALYSIS; 1 IF STOCHASTIC  [99]                        # ALWAYS RUN THIS AS DETERMINISTIC DURING BASELINE RUNS #
+   0<- 1 IF LAND RENTAL RATES INCLUDED IN TOTAL COSTS; 0 OF NOT[102]             # MUST RERUN BASELINE #
+   1<- 0 TILLAGE PRACTICE FLEXIBILITY 0 TO 3; 0=LOW 3=HIGH [86]                  # MUST RERUN BASELINE #
+   0<- 0 IF USING BASE CASE YIELD GROWTH ASSUMPTIONS (for residues); 1 IF USING HIGH YIELD GROWTH ASSUMPTIONS [84]
+   0<- 1 IF READ BIOMASS INPUT FILES IN SIMULATION; 0 IF ONLY IN BASELINE[94]
+   1<-   0 'CROPLAND IN PASTURE' LP OFF; 1 ON  [73]                              # MUST RERUN BASELINE #
+   1<-   0 'PERMANENT PASTURE' LP OFF; 1 ON  [93]                                # MUST RERUN BASELINE #
+   0<-   0 'CRP' LP OFF; 1 ON [103]                                              # MUST RERUN BASELINE #
+   1<- 0 IF BIOENERGY DEMAND RUN; 1 IF SPECIFYING EXOGENOUS BIOENERGY PRICE [74]
+   1<- 0 IF NO CROP RESIDUES; 1 IF CROP RESIDUES [107]
+   1<- 0 IF NO SWITCHGRASS; 1 IF SWITCHGRASS [108]
+   0<- 0 IF NO POPLARS; 1 IF POPLARS [109]
+   0<- 0 IF NO WILLOWS; 1 IF WILLOWS [110]
+   0<- 0 IF NO SWEET SORGHUM; 1 IF SWEET SORGHUM[111]
+   0<- 0 IF NO MISCANTHUS; 1 IF MISCANTHUS [112]
+   0<- 0 IF NO ENERGY CANE; 1 IF ENERGY CANE [113]
+ 100<- SET RATIO OF 'AGGREGATE 'WOODY MATERIAL' SUPPLY CURVES [53]                {FOR EXAMPLE '25' LIMIT QUANT TO 25% OF SUPPLY CURVE}
+   2<- PICK FOREST USE INTENSITY;1=BASE,2=MEDIUM,3=HIGH [116]
+   1<-   0 IF NO REGIONAL OUTPUT; 1 TO PRINT REGIONAL CTYOUTa FILES [104]
+   1<-   0 IF NO LandUseChange FIGURING; 1 IF WANT TO FIGURE LUC [22]
+*******************************************************************************
+1.50<- SET RATIO OF 'PASTURE THAT MUST BE INTENSIFIED' PER ACRE OF PASTURE CONVERTED TO BIOMASS[]    # MUST RERUN BASELINE #
+*******************************************************************************
+ 150<- SET MAX BIOMASS PRICE FOR DEMAND RUNS (QUITS AFTER THIS PRICE AND GOES TO NEXT YEAR)
+  60<- RESET PRICE FOR DEMAND RUNS (STARTS AT THIS PRICE IF REACHED MAX PRICE IN PREVIOUS YEAR)
+  30<- BEGINNING PRICE OFFERED
+********************************************************************************
+2020<- Year Residues can enter (in demand runs)
+2020<- Year Herbacious Dedicated can enter (in demand runs)
+2020<- Year Woody Dedicated can enter (in demand runs)
+********************************************************************************
+   0<- 0 IF NON-INCREMENTAL PLANNING; 1 IF INCREMENTAL PLANNING (OF WILLOW AND POPLAR)[115]            # MUST RERUN BASELINE #  !plantings and harvest are ALWAYS incremental now
+   0<-   0 IF NO CHANGE FROM BASELNE; 1 IF ALLOW DOMESTIC CORN DEMAND FOR ETHANOL TO FALL UNDER HIGH PRICES,2 IF USE NEW BIOENERGY TRADE MODULE[101] # MUST RERUN BASELINE #
+   0<-   0 IF READ IN BASELINE EXPORTS/IMPORTS IN BIOTRADE MODULE; 1 IF ALLOW BIOTRADE MODULE TO COMPUTE[114]
+   0<-   0 IF NO REGIONAL DEMANDS; 1 IF SETTING REGIONAL DEMAND LEVELS IN WHATIF AND WHATIFCTY [119]
+   1<-   0 if 3109 region; 1 if 16 EIA COAL regions; 2 if 305 POLYSYS regions [117]                   # MUST RERUN BASELINE #
+   1<-   0 if use USDA NASS SURVEY ACREAGE DATA; 1 If use CROPLAND DATA LAYER ACREAGE DATA [121]
+62.3<-   Baseline first year brent crude oil price ($/barrel)	

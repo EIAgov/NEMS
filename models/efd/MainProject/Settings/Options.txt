@@ -1,0 +1,30 @@
+﻿* AIMMS
+always_store_constraint_levels 1
+always_store_marginals 1
+display_infeasibility_analysis 1
+eliminate_nonvar_columns 0
+infeasibility_finder on
+listing_number_precision 6
+listing_page_width 256
+row_range_violation_left_hand_side 0
+solver_column_row_mapping 3
+warning_duplicate_column off
+* AOA
+* CBC 2.9
+"CBC 2.9".LP_method 2
+* CPLEX 12.6.3
+"CPLEX 12.6.3".LP_method 4
+"CPLEX 12.6.3".MPS 2
+* IPOPT 3.11
+* CPLEX 12.6.2
+"CPLEX 12.6.2".LP_method 4
+"CPLEX 12.6.2".MPS 1
+"CPLEX 12.6.2".stealth_mode 1
+"CPLEX 12.6.2".presolve 0
+* NETSOL
+* Environment
+Startup_Procedure "ReadSetData"
+Startup_Page "MainEFD"
+Startup_Case "data\efd.data"
+Store_complete_solver_solution 1
+Object_for_1_Dimensional_Identifier 2

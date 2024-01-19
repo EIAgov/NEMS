@@ -1,0 +1,90 @@
+!  $Header: m:/default/includes/RCS/ngtdmrep,v 1.20 2017/09/01 15:37:10 pkc Exp $
+!
+!=============================
+!
+! MEMBER NAME:  NGTDMREP
+!  NG T & D (NGTDM) REPORT WRITER COMMON BLOCK
+!  THE DIMENSION PARAMETERS ARE in $NEMS/includes/parametr
+!  THE USER SHOULD ADD THE FOLLOWING INCLUDE STATEMENT
+!     include 'parametr'
+! NGTDM OUTPUTS
+
+      REAL*4 OGPRCNG(OGDIST,MNUMYR) ! Natural gas wellhead-type price at district level (1987 dollars per thousand cubic feet)
+      REAL*4 OGWPRNG(MNUMOR,MNUMYR) ! NG WELLHEAD PRICE ($87/MCF)
+      REAL*4 OGPRSUP(MNUMYR)        ! TOTAL SUPPLEMENTAL GAS (SYN+OTH) (BCF)
+      REAL*4 OGPRDNG(MNUMOR,MNUMYR) ! DOMESTIC DRY NG PROD (BCF)
+
+      REAL*4 NGSTRCAP(24,MNUMYR)   ! NG UNDERGND STORAGE CAPACITY (MCF)
+      REAL*4 NGPIPCAP(2,MNUMYR)    ! NG PIPELINE CAPACITY-NATIONAL (BCF)
+
+      REAL*4 GMD_ALB(MNUMYR)       ! gas flow from MacKenzie Delta to Alberta (bcf)
+      REAL*4 GAK_ALB(MNUMYR)       ! gas flow from Alaska to Alberta (bcf)
+
+! Natural gas supply curve information
+      REAL*4  NGSCRV_MIN(MNUMYR)   ! NG supply curve minimum quantity
+      REAL*4  NGSCRV_MAX(MNUMYR)   ! NG supply curve maximum quantity
+      REAL*4  NGSCRV_Q(MNUMYR)     ! NG supply curve solution quantity
+      REAL*4  NGSCRV_P(MNUMYR)     ! NG supply curve solution price
+      REAL*4  NGSCRV_Q0(MNUMYR)    ! NG supply curve base quantity
+      REAL*4  NGSCRV_P0(MNUMYR)    ! NG supply curve base price
+      REAL*4  NGSCRV_ELAS(5)       ! NG supply curve slope (q change / p change)
+      REAL*4  NGSCRV_PER(2)        ! NG supply curve segment percent deviation
+      REAL*4  OGCAPIMP(MNUMBX,MNUMYR) ! NG import cap, including LNG
+      REAL*4  CNLNGIMP(MNUMYR)        ! LNG imports into Canada
+
+      REAL*4 OGHHPRNG(MNUMYR)      ! price of natural gas at Henry Hub (1987 dollars per MMBtu)
+      REAL*4 NGSPOT_EMM(NNGEM,MNUMYR)   !  average natural gas spot price weighted on state level electric natural gas consumption
+      REAL*4 NGBAL(MNUMYR)         ! accounted for portion of natural gas unaccounted for (billion cubic feet)
+      REAL*4 EL_MRKUP_BETA(3)      ! seasonal coefficient on consumption variable for DTM for electric power sector
+      REAL*4 OGSUPGAS(2,MNUMCR,MNUMYR)     ! supplemental natural gas supplies (1 if from coal, 2 if from other)
+      REAL*4 ACGPR_RESCOM(12,MNUMYR)       ! average citygate price weighted by residential and commercial customers
+      REAL*4 UDTAR(NNGEM,MNUMYR)           ! distributor tariff for electric power sector
+      REAL*4 ARESCOM(12,MNUMYR)            ! weights for ACGPR_RESCOM
+      REAL*4 CNGAVAIL(MNUMCR,MNUMYR)       ! fraction of refueling stations offering compressed natural gas
+      REAL*4 NALNGEXP(NLNGTER,BASEYR:ENDYR)   ! LNG export volumes by terminal
+
+      REAL*4 PINTLNG(2,BASEYR:ENDYR)          !  foreign natural gas price, 1=Europe, 2=Japan
+      REAL*4 PUSNG(NLNGTER,BASEYR:ENDYR)      !  US price compared to foreign price for LNG exporting
+      REAL*4 PTRANSNG(2,NLNGTER,BASEYR:ENDYR) !  transportation adders for comparing PINTLNG and PUSNG
+
+
+      REAL*4 NGRNAGPRD(OGDIST,MNUMYR)      ! Realized na dry gas production (billion cubic feet)
+!  For these next four variables:  1-Canada;  2 = Mexico;  3 = LNG;  4 = Total
+      REAL*4 NGIMPVOL(4,MNUMYR)            ! Total import volumes (billion cubic feet)
+      REAL*4 NGEXPVOL(4,MNUMYR)            ! Total export volumes (billion cubic feet)
+      REAL*4 NGIMPPRC(4,MNUMYR)            ! Average import price (1987 dollars per thousand cubic feet)
+      REAL*4 NGEXPPRC(4,MNUMYR)            ! Average export price (1987 dollars per thousand cubic feet)
+
+
+      COMMON /NGTDMREP/ OGWPRNG, OGPRSUP, OGPRDNG, NGSTRCAP, NGPIPCAP, GMD_ALB, GAK_ALB, &
+        NGSCRV_MIN, NGSCRV_MAX, NGSCRV_Q, NGSCRV_P, NGSCRV_Q0, NGSCRV_P0, NGSCRV_ELAS, &
+        NGSCRV_PER, OGCAPIMP, CNLNGIMP, OGHHPRNG, NGBAL, EL_MRKUP_BETA, &
+        OGSUPGAS, ACGPR_RESCOM, UDTAR, ARESCOM, CNGAVAIL, NALNGEXP, &
+        PINTLNG, PUSNG, PTRANSNG, OGPRCNG,  &
+        NGRNAGPRD, NGIMPVOL, NGEXPVOL, NGIMPPRC, NGEXPPRC, &
+        NGSPOT_EMM
+
+!   Equivalence for/FILER used for data storage
+      REAL EQ_NTREP( &
+              2*MNUMOR*MNUMYR + &      !  OGWPRNG and OGPRDNG
+             24*MNUMYR + &             !  NGSTRCAP
+              2*MNUMYR + &             !  NGPIPCAP
+             12*MNUMYR + &             !  12 variables dimensioned by MNUMYR
+              5 + &                    !  NGSCRV_ELAS
+              MNUMBX * MNUMYR + &      !  OGCAPIMP
+              2 + 3 + &                !  NGSCRV_PER and EL_MRKUP_BETA
+              2 * MNUMCR * MNUMYR + &  !  OGSUPGAS
+              12 * MNUMYR + &          !  ACGPR_RESCOM
+              NNGEM * MNUMYR + &       !  UDTAR
+              12 * MNUMYR + &          !  ARESCOM
+              MNUMCR * MNUMYR + &      !  CNGAVAIL
+              NLNGTER * (ENDYR-BASEYR + 1) + &      !  NALNGEXP
+              2 * (ENDYR-BASEYR + 1) + &            !  PINTLNG
+              NLNGTER * (ENDYR-BASEYR + 1) + &      !  PUSNG
+              2 * NLNGTER * (ENDYR-BASEYR + 1) + &  !  PTRANSNG
+              OGDIST * MNUMYR + &      ! OGPRCNG
+              OGDIST * MNUMYR + &      ! NGRNAGPRD
+              4 * 4 * MNUMYR  + &      ! NGIMPVOL, NGEXPVOL, NGIMPPRC, NGEXPPRC
+              NNGEM * MNUMYR  + &      ! NGSPOT_EMM
+              0)                       ! fin
+      EQUIVALENCE (EQ_NTREP,OGWPRNG)

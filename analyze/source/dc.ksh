@@ -1,0 +1,10 @@
+mv  dcanal DCANAL.
+mv  dcflcmnd DCFLCMND.
+mv  dcflip DCFLIP.
+mv  dcgetmat DCGETMAT.
+mv  dcgraph DCGRAPH.
+mv  dcreduce DCREDUCE.
+mv  dcrule DCRULE.
+mv  dcschema DCSCHEMA.
+mv  dcscrdat DCSCRDAT.
+mv  dcscreen DCSCREEN.

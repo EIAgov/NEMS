@@ -1,0 +1,112 @@
+
+
+!FILE NAME:      RESDREP
+!DATE MODIFIED:  September 21, 2022
+!USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
+!                Residential Demand Module (RDM)
+!DEFINITION:     RDM parameters and COMMON blocks
+!UNITS:          Unitless
+!DIMENSION:      Various
+!SPECIAL CONSTRAINTS:  None
+!ORGANIZATION OF DATA:  Residential benchmarking controls listed first
+!SOURCES:        Not applicable
+
+!Set parameters
+  INTEGER RECSYear
+  PARAMETER (RECSYear=2015)
+  INTEGER NUMHDDYR,NUMCDDYR
+  PARAMETER (NUMHDDYR=ENDYR)
+  PARAMETER (NUMCDDYR=ENDYR)
+  INTEGER NTEK
+  PARAMETER (NTEK=3)
+
+!BENCHMARKING CONTROL-------------------------------------------------------------------------------------------------
+!Parameters for historical SEDS/MER, and short-term (STEO) benchmarking control
+  INTEGER LastSEDSyr                !Last year of SEDS data, when benchmarking we assume MER data shared to
+                                    ! census divisions is available for one additional year.
+                                    !Thus, SEDS/MER benchmarking is thru LastSEDSyr+1.
+                                    !If for some reason MER data are not available, LastSEDSyr could be set
+                                    ! to 1 less than its actual availability, which would then bench through SEDS
+                                    ! years only (not the additional MER year).
+
+  PARAMETER(LastSEDSyr=BaseYr-1+MSEDYR)  !(i.e., 1990-1 + the year index value)
+                                    !This is the last calendar year of data in the global SEDS common block.
+                                    !MER data are read from RSSTEO.txt for the next year out.
+                                    !Thus, historical SEDS/MER data go through LastSEDSyr+1.
+                                    !BaseYr set globally by NEMS (1990)
+                                    !MSEDYR set globally by NEMS (index, 1=1990)
+
+  INTEGER LastSTEOYr                !Last year for benchmarking to STEO, after which the STEO benchmarking for
+                                    ! fuels 1,2 (natural gas and electric) is discontinued. Other fuels get STEO adjustment.
+  PARAMETER (LastSTEOYr=2023)       !This year is often 1 less than what STEO projects.
+
+  INTEGER LastSTEOYrAvail           !Last projection year for STEO through which data will be read from RSSTEO.txt
+  PARAMETER (LastSTEOYrAvail=2024)  !The RSSTEO.txt input file is populated with STEO data through this year.
+
+  REAL*4 BENCHALLYRS                !With UEC adjustments for SEDS/MER, benchmarking of electric and gas matches
+                                    ! last MER historical year.
+                                    !Setting to 0.0 turns off post-STEO benching.
+                                    !Setting to 1.0 opens up the possibility of eliminating UEC adjustments by
+                                    ! maintaining benchmarking to SEDS/MER.
+
+  PARAMETER (BENCHALLYRS=1.0)       !BENCHALLYRS=1.0 is the implicit assumption.
+
+  INTEGER GLOBALBENCHON             !Setting this to 0.0 turns off ALL SEDS/MER/STEO benchmarking.
+                                    ! Intended to be used for testing only.
+  PARAMETER (GLOBALBENCHON=1)       ! =1 == benchmarking on == normal model usage
+!---------------------------------------------------------------------------------------------------------------------
+
+  REAL RSEH(MNUMYR,3)       !Existing Housing (single-family, multifamily, mobile)
+  REAL RSNH(MNUMYR,3)       !New Housing (single-family, multifamily, mobile)
+  REAL RSHSEADD(MNUMYR,3)   !Housing Starts (single-family, multifamily, mobile)
+  REAL RSHTRCON(MNUMYR,8)   !Space Heating Consumption (natural gas, electricity, distillate fuel oil, propane, kerosene, wood, geothermal, solar)
+  REAL RSCOOLCN(MNUMYR,3)   !Space Cooling Consumption (natural gas, electricity, geothermal)
+  REAL RSH2OCON(MNUMYR,5)   !Water Heating Consumption (natural gas, electricity, distillate fuel oil, propane, solar)
+  REAL RSCKCON(MNUMYR,3)    !Cooking Consumption (natural gas, electricity, propane)
+  REAL RSDRYCON(MNUMYR,2)   !Clothes Dryer Consumption (natural gas, electricity)
+  REAL RSREFCON(MNUMYR)     !Refrigerator Consumption
+  REAL RSFRZCON(MNUMYR)     !Standalone Freezer Consumption
+  REAL RSLTCON(MNUMYR)      !Lighting Consumption
+  REAL RSAPCON(MNUMYR,4)    !Appliance Consumption (natural gas, electricity, distillate fuel oil, propane)
+  REAL RSCSWCON(MNUMYR)     !Clothes Washer Consumption
+  REAL RSDSWCON(MNUMYR)     !Dishwasher Consumption
+  REAL RSTVRCON(MNUMYR)     !Television Consumption
+  REAL RSPCRCON(MNUMYR)     !PC Consumption
+  REAL RSFANCON(MNUMYR)     !Furnace Fan Consumption
+  REAL RSHTRS(MNUMYR,9)     !Space Heating Equipment (ELEC_RAD, ELEC_HP, NG_RAD, KERO_FA, LPG_FA, DIST_RAD, WOOD_HT, GEO_HP, NG_HP)
+  REAL RSCOOLERS(MNUMYR,5)  !Space Cooling Equipment (ROOM_AIR, CENT_AIR, ELEC_HP, GEO_HP, NG_HP)
+  REAL RSWATER(MNUMYR,5)    !Water Heating Equipment (NG_WH, ELEC_WH, DIST_WH, LPG_WH, SOLAR_WH)
+  REAL RSCOOK(MNUMYR,3)     !Cooking Equipment (NG_STV, LPG_STV, ELEC_STV)
+  REAL RSDRY(MNUMYR,2)      !Clothes Drying Equipment (NG_DRY, ELEC_DRY)
+  REAL RSREF(MNUMYR)        !Refrigerator Equipment
+  REAL RSFRZ(MNUMYR)        !Standalone Freezer Equipment
+  REAL RSEEFHT(MNUMYR,5)    !Space Heating Efficiency (ELEC_HP, NG_HP, GEO_HP, NG_FA, DIST_FA)
+  REAL RSEEFCL(MNUMYR,5)    !Space Cooling Efficiency (ELEC_HP, NG_HP, GEO_HP, NG_FA, DIST_FA)
+  REAL RSEEFHW(MNUMYR,4)    !Water Heating Efficiency (ELEC_WH, NG_WH, DIST_WH, LPG_WH)
+  REAL RSEEFRF(MNUMYR)      !Refrigerator Efficiency
+  REAL RSEEFFZ(MNUMYR)      !Standalone Freezer Efficiency
+  REAL RSNEFHT(MNUMYR,5)    !Space Heating Efficiency
+  REAL RSNEFCL(MNUMYR,5)    !Space Cooling Efficiency
+  REAL RSNEFHW(MNUMYR,4)    !Water Heating Efficiency
+  REAL RSNEFRF(MNUMYR)      !Refrigerator Efficiency
+  REAL RSNEFFZ(MNUMYR)      !Standalone Freezer Efficiency
+  REAL HSHELL1(MNUMYR)      !Heating Shell Efficiency: Existing construction
+  REAL HSHELL2(MNUMYR)      !Heating Shell Efficiency: New Construction
+  REAL HSHELL3(MNUMYR)      !Heating Shell Efficiency: Average
+  REAL CSHELL1(MNUMYR)      !Cooling Shell Efficiency: Existing Construction
+  REAL CSHELL2(MNUMYR)      !Cooling Shell Efficiency: New Construction
+  REAL CSHELL3(MNUMYR)      !Cooling Shell Efficiency: Average
+  REAL SQFTAVG(MNUMYR)      !Average U.S. floorspace (sqft)
+  REAL RSHOUSES(MNUMYR,MNUMCR-2) !Number of households
+  REAL RSGASCUST(BASEYR:ENDYR,MNUMCR-2)  !Proxy for number of natural gas customers (households)	!kj - change RECSYear to BaseYr so dict.txt doesn't need to be updated in the future?
+  REAL HDDADJ(BaseYr:ENDYR,MNUMCR)  !Heating Degree Days
+  REAL CDDADJ(BaseYr:ENDYR,MNUMCR)  !Cooling Degree Days
+
+  COMMON/RESDREP/ RSEH, RSNH, RSHSEADD, RSHTRCON, RSCOOLCN, RSH2OCON, RSCKCON, RSDRYCON, RSREFCON, RSFRZCON, &
+   RSLTCON, RSAPCON, RSHTRS, RSCOOLERS, RSWATER, RSCOOK, RSDRY, RSREF, RSFRZ, RSEEFHT, RSEEFCL, RSEEFHW, &
+   RSEEFRF, RSEEFFZ, RSNEFHT, RSNEFCL, RSNEFHW, RSNEFRF, RSNEFFZ, HSHELL1, HSHELL2, HSHELL3, CSHELL1, CSHELL2, &
+   CSHELL3, SQFTAVG, RSCSWCON, RSDSWCON, RSTVRCON, RSPCRCON, RSFANCON, RSHOUSES, RSGASCUST, HDDADJ, CDDADJ
+
+!EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+  REAL EQ_RSREP(MNUMYR*(21+9+8+7*5+3*4+6*3+2*2+MNUMCR-2)+(ENDYR-BASEYR)*MNUMCR*2+MNUMYR*(MNUMCR-2))  !Heating and cooling degree days
+  EQUIVALENCE (EQ_RSREP,RSEH)

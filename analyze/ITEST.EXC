@@ -1,0 +1,23 @@
+*                  ::: ITEST.EXC  7-5-93
+
+ SWITCH ECHO=T ; SCREEN L 9999
+ OUTPUT ITEST.OUT
+ REA P WOODNET; REA S
+ I TEST
+$$
+$$ We are back from ITEST...Go thru each rule in RULBASE.RUL
+$$
+ I D DMOCH SMO TMO
+ I F ROW supply
+ I F COL from
+ I F SET location
+ I F ELE * Denver
+ I F ELE DR San Francisco
+ I MOD
+ I P DMOCH
+ I OBJ
+ SUB ROW *SUB COL TWA;SUB ROW *;I RED
+ I STAT
+ READ P WOODINFE;I I
+ READ P WOODUNBD;I U
+ SW ECHO=F; OUTPUT * ; SCR L 23 W 79; RETURN QUIETLY

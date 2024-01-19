@@ -1,0 +1,146 @@
+﻿FILE NAME:     RSUECSHL
+DATE MODIFIED: July 23, 2018
+USED BY:       RSUECSHLREAD subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
+DEFINITION:    Shell-based modification to home UEC levels
+UNITS:         various
+DIMENSION:     housing type, census division, equipment type
+SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
+ORGANIZATION OF DATA:
+               Census divisions:  (1) New England, (2) Middle Atlantic, (3) East North Central, (4) West North Central, (5) South Atlantic, (6) East South Central, (7) West South Central, (8) Mountain, (9) Pacific
+               Columns represent housing type; 9 blocks of 11 heating technologies for each census division (followed by 1 block of central AC for each CD)
+               Next section is baseload for each of the 11 heating classes and 5 cooling classes (RTCLEQCL) in RSCLASS.TXT
+SOURCES:       Navigant Consulting, Fourth DRAFT EIA - Technology Forecast Updates – Residential and Commercial Building Technologies
+COMMENT:       Add census division labels to NEWHEATUEC/NEWCOOLUEC data and update equipment names to align with other input files (e.g., RSUEC, RSSTK, RSHTSHR)
+
+
+New Home service demand for tech choice computation by technolgy, census division, and housing type (NEWHEATUEC; NEWCOOLUEC)
+                                           |<--------------------- Comments --------------------->|
+Single-         Multi-          Mobile      Census      Equipment
+Family          family          Home        Division    Type
+--------        --------        --------    --------    ---------------------------
+70.20000	21.80000	104.40000	1	Electric Heating Other Than Heat Pumps
+70.20000	21.80000	104.40000	1	Air-Source Heat Pumps (heating)
+70.20000	21.80000	104.40000	1	Natural Gas Furnaces
+68.00000	20.20000	73.10000	1	Natural Gas Boilers & Other
+70.20000	21.80000	104.40000	1	Kerosene Furnaces (unused placeholder)
+70.20000	21.80000	104.40000	1	Propane Furnaces & Other
+70.20000	21.80000	104.40000	1	Distillate Fuel Oil & Kerosene Furnaces
+68.00000	20.20000	73.10000	1	Distillate Fuel Oil & Kerosene Boilers & Other
+115.0513	21.80000	49.75540	1	Wood Stoves & Other
+70.20000	21.80000	104.40000	1	Ground-Source Heat Pumps (heating)
+70.20000	21.80000	104.40000	1	Natural Gas Heat Pumps (heating)
+74.30000	15.30000	75.30000	2	Electric Heating Other Than Heat Pumps
+74.30000	15.30000	75.30000	2	Air-Source Heat Pumps (heating)
+74.30000	15.30000	75.30000	2	Natural Gas Furnaces
+72.10000	14.00000	52.70000	2	Natural Gas Boilers & Other
+74.30000	15.30000	75.30000	2	Kerosene Furnaces (unused placeholder)
+74.30000	15.30000	75.30000	2	Propane Furnaces & Other
+74.30000	15.30000	75.30000	2	Distillate Fuel Oil & Kerosene Furnaces
+72.10000	14.00000	52.70000	2	Distillate Fuel Oil & Kerosene Boilers & Other
+215.7139	215.7139	215.7139	2	Wood Stoves & Other
+74.30000	15.30000	75.30000	2	Ground-Source Heat Pumps (heating)
+74.30000	15.30000	75.30000	2	Natural Gas Heat Pumps (heating)
+78.80000	18.50000	86.40000	3	Electric Heating Other Than Heat Pumps
+78.80000	18.50000	86.40000	3	Air-Source Heat Pumps (heating)
+78.80000	18.50000	86.40000	3	Natural Gas Furnaces
+76.70000	17.20000	60.50000	3	Natural Gas Boilers & Other
+78.80000	18.50000	86.40000	3	Kerosene Furnaces (unused placeholder)
+78.80000	18.50000	86.40000	3	Propane Furnaces & Other
+78.80000	18.50000	86.40000	3	Distillate Fuel Oil & Kerosene Furnaces
+76.70000	17.20000	60.50000	3	Distillate Fuel Oil & Kerosene Boilers & Other
+146.4600	18.50000	104.6906	3	Wood Stoves & Other
+78.80000	18.50000	86.40000	3	Ground-Source Heat Pumps (heating)
+78.80000	18.50000	86.40000	3	Natural Gas Heat Pumps (heating)
+77.10000	20.40000	101.70000	4	Electric Heating Other Than Heat Pumps
+77.10000	20.40000	101.70000	4	Air-Source Heat Pumps (heating)
+77.10000	20.40000	101.70000	4	Natural Gas Furnaces
+74.70000	18.80000	71.20000	4	Natural Gas Boilers & Other
+77.10000	20.40000	101.70000	4	Kerosene Furnaces (unused placeholder)
+77.10000	20.40000	101.70000	4	Propane Furnaces & Other
+77.10000	20.40000	101.70000	4	Distillate Fuel Oil & Kerosene Furnaces
+74.70000	18.80000	71.20000	4	Distillate Fuel Oil & Kerosene Boilers & Other
+61.26360	20.40000	40.00000	4	Wood Stoves & Other
+74.70000	20.40000	101.70000	4	Ground-Source Heat Pumps (heating)
+74.70000	20.40000	101.70000	4	Natural Gas Heat Pumps (heating)
+31.70000	2.70000	30.10000	5	Electric Heating Other Than Heat Pumps
+31.70000	2.70000	30.10000	5	Air-Source Heat Pumps (heating)
+31.70000	2.70000	30.10000	5	Natural Gas Furnaces
+28.30000	3.40000	21.10000	5	Natural Gas Boilers & Other
+30.30000	2.70000	30.10000	5	Kerosene Furnaces (unused placeholder)
+31.70000	2.70000	30.10000	5	Propane Furnaces & Other
+30.30000	2.70000	30.10000	5	Distillate Fuel Oil & Kerosene Furnaces
+28.30000	3.40000	21.10000	5	Distillate Fuel Oil & Kerosene Boilers & Other
+53.67350	2.70000	20.00000	5	Wood Stoves & Other
+31.70000	2.70000	30.10000	5	Ground-Source Heat Pumps (heating)
+31.70000	2.70000	30.10000	5	Natural Gas Heat Pumps (heating)
+42.80000	5.60000	42.90000	6	Electric Heating Other Than Heat Pumps
+42.80000	5.60000	42.90000	6	Air-Source Heat Pumps (heating)
+42.80000	5.60000	42.90000	6	Natural Gas Furnaces
+38.00000	5.20000	30.00000	6	Natural Gas Boilers & Other
+42.80000	5.60000	42.90000	6	Kerosene Furnaces (unused placeholder)
+42.80000	5.60000	42.90000	6	Propane Furnaces & Other
+42.80000	5.60000	42.90000	6	Distillate Fuel Oil & Kerosene Furnaces
+38.00000	5.20000	30.00000	6	Distillate Fuel Oil & Kerosene Boilers & Other
+66.85900	5.60000	20.00000	6	Wood Stoves & Other
+42.80000	5.60000	42.90000	6	Ground-Source Heat Pumps (heating)
+42.80000	5.60000	42.90000	6	Natural Gas Heat Pumps (heating)
+33.90000	2.70000	25.60000	7	Electric Heating Other Than Heat Pumps
+33.90000	2.70000	25.60000	7	Air-Source Heat Pumps (heating)
+33.90000	2.70000	25.60000	7	Natural Gas Furnaces
+30.60000	2.50000	17.90000	7	Natural Gas Boilers & Other
+33.90000	2.70000	25.60000	7	Kerosene Furnaces (unused placeholder)
+33.90000	2.70000	25.60000	7	Propane Furnaces & Other
+33.90000	2.70000	25.60000	7	Distillate Fuel Oil & Kerosene Furnaces
+30.60000	2.50000	17.90000	7	Distillate Fuel Oil & Kerosene Boilers & Other
+68.43500	2.70000	20.00000	7	Wood Stoves & Other
+33.90000	2.70000	25.60000	7	Ground-Source Heat Pumps (heating)
+33.90000	2.70000	25.60000	7	Natural Gas Heat Pumps (heating)
+54.70000	12.90000	59.50000	8	Electric Heating Other Than Heat Pumps
+54.70000	12.90000	59.50000	8	Air-Source Heat Pumps (heating)
+54.70000	12.90000	58.00000	8	Natural Gas Furnaces
+47.90000	12.80000	40.00000	8	Natural Gas Boilers & Other
+54.70000	12.90000	58.00000	8	Kerosene Furnaces (unused placeholder)
+54.70000	12.90000	58.00000	8	Propane Furnaces & Other
+54.70000	12.90000	58.00000	8	Distillate Fuel Oil & Kerosene Furnaces
+47.90000	12.80000	40.00000	8	Distillate Fuel Oil & Kerosene Boilers & Other
+46.01040	12.90000	100.0000	8	Wood Stoves & Other
+54.70000	12.90000	59.50000	8	Ground-Source Heat Pumps (heating)
+54.70000	12.90000	59.50000	8	Natural Gas Heat Pumps (heating)
+31.90000	1.90000	29.20000	9	Electric Heating Other Than Heat Pumps
+31.90000	1.90000	29.20000	9	Air-Source Heat Pumps (heating)
+31.90000	1.90000	28.40000	9	Natural Gas Furnaces
+28.50000	1.70000	19.60000	9	Natural Gas Boilers & Other
+31.90000	1.90000	28.40000	9	Kerosene Furnaces (unused placeholder)
+31.90000	1.90000	28.40000	9	Propane Furnaces & Other
+31.90000	1.90000	28.40000	9	Distillate Fuel Oil & Kerosene Furnaces
+28.50000	1.70000	19.60000	9	Distillate Fuel Oil & Kerosene Boilers & Other
+70.51060	1.90000	20.00000	9	Wood Stoves & Other
+31.90000	1.90000	29.20000	9	Ground-Source Heat Pumps (heating)
+31.90000	1.90000	29.20000	9	Natural Gas Heat Pumps (heating)
+15.30000	12.10000	17.20000	1	Central Air Conditioners
+20.20000	14.20000	28.40000	2	Central Air Conditioners
+16.90000	15.30000	38.20000	3	Central Air Conditioners
+14.80000	13.60000	31.10000	4	Central Air Conditioners
+50.50000	26.30000	62.50000	5	Central Air Conditioners
+46.80000	25.10000	49.40000	6	Central Air Conditioners
+30.60000	30.40000	66.00000	7	Central Air Conditioners
+23.40000	18.90000	41.80000	8	Central Air Conditioners
+46.10000	19.70000	18.50000	9	Central Air Conditioners
+
+Baseload by 11 heating and 5 cooling equipment classes (BASELOAD)
+0.980	'ELEC_RAD'
+2.163	'ELEC_HP'
+0.800	'NG_FA'
+0.800	'NG_RAD'
+0.800	'KERO_FA'
+0.800	'LPG_FA'
+0.800	'DIST_FA'
+0.800	'DIST_RAD'
+0.650	'WOOD_HT'
+3.000	'GEO_HP'
+1.300	'NG_HP'
+2.719	'ROOM_AIR'
+3.332	'CENT_AIR'
+3.508	'ELEC_HP'
+12.30	'GEO_HP'
+0.600	'NG_HP'

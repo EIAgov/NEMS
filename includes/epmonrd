@@ -1,0 +1,13 @@
+!  $Header: N:/default/includes/RCS/epmonrd,v 1.1 2004/06/17 18:34:14 PKC Exp $
+!  epm Common Block for on-road distillate price for adjusting price
+
+!  NEMS Price Common Block Parameters
+      INTEGER AOPSIZE
+      PARAMETER(AOPSIZE=MNUMCR*MNUMYR) ! Size of array
+
+      REAL ADSTRHWY(MNUMCR,MNUMYR)  ! On-road distillate price, transportation sector
+!  NEMS Price Common Block - just price so we don't have to carry quantity in adjusted price
+      COMMON /APONROAD/ ADSTRHWY
+
+      REAL AOPARRY(AOPSIZE)
+      EQUIVALENCE(AOPARRY,ADSTRHWY)

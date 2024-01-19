@@ -1,0 +1,25 @@
+$$ This restores prefixes and suffixes to their original defaults
+_SETUP **
+*      :....CLEARS ALL PREFIXES TO BLANKS
+_SET DICTNARY * .DIC
+_SET EXECUTE  * .EXC
+_SET HELP     * .HLP
+_SET INCLUDE  * .INC
+_SET KEYWORD  * .KEY
+_SET OUTPUT   * .OUT
+_SET PRINT    * .DOC
+* The non-intrinsic ones go here
+_SET BLOCK    * .BLK
+_SET FORMAT   * .FPK
+_SET GRAPH    * .GPH
+_SET IIS      * .IIS
+_SET MATRIX   * .MAT
+_SET MINOS    * .MNS
+_SET MPS      * .MPS
+_SET OSL      * .OSL
+_SET PACKED   * .PCK
+_SET RULEBASE * .RUL
+_SET SCHEMA   * .SCH
+_SET SUBMAT   * .SUB
+_SET SYNTAX   * .SYN
+RETURN QUIETLY

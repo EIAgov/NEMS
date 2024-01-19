@@ -1,0 +1,52 @@
+* PRICER.RUL
+* INSTANTIATED FROM PRICE.RUL FOR REFINERY PROBLEM
+* AS INCLUDE FILE...LABELS EXIT, ENDREF AND RATE ARE IN PRICE.RUL
+* BRANCH ON ROW TYPE
+
+$SET MATL=%%ROW(2:3)
+$ANALYZE SUBMAT ROW %%ROW
+$ANALYZE SUBMAT COL * D=0
+$ANALYZE SUBMAT SET
+$ANALYZE SUBMAT ROW *
+$ANALYZE SUBMAT DEL ROW * P=0
+$ANALYZE SUBMAT SET
+$TEXT
+$GOTO %%ROW(1:1)
+
+:S
+$GOTO ENDREF
+
+:D
+$SET NC=0
+$LOOP
+$LOOKUP NZ %%ROW,%COLUMN
+$IF %VLOOK > 0 THEN CALC NC = NC + 1
+$NEXT COL
+
+$IF %%NC > 1 THEN SKIP 3
+There is 1 activity that produces
+$SET PL=
+$SKIP 2
+There are %%NC activitites that produce
+$SET PL=s
+
+$IF %SWSYN = F THEN SKIP 2
+$ENTITY %%MATL G
+$SKIP 1
+ %%MATL
+
+to satisfy the demand of
+$LOOKUP Y %%ROW
+ %VLOOK units, as follows (rows not shown have surplus or do not have
+ a nonzero in any of the %%NC column%%PL ).
+$TEXT 2
+
+$ANALYZE SHOW //ARRAY,SYNTAX
+$TEXT 1 MARGIN=2
+ (Use the EXPLAIN command to see the full meaning of each row.)
+$GOTO EXIT
+
+:V
+$GOTO ENDREF
+:O
+

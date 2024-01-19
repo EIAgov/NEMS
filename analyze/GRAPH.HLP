@@ -1,0 +1,92 @@
+    Function: Graph rows/columns in submatrix
+    Syntax:   GRAPH [{ SET [{ROW, COL}] [//{attributes}]
+                     | DISPLAY [{BIGRAPH, ROW, COL}] [//options]
+                     | COPY
+                     | {SAVE | LOAD} [filespec] }]
+
+     Without any spec, GRAPH gives a summary (to OUTPUT).
+
+     SET...........Set fundamental digraph and (optionally) its
+               Row and/or Column digraphs
+            attributes are defined by the syntax file
+     DISPLAY.......Display graph (to OUTPUT)
+            options := DIAGRAM [more]| MATRIX | SYNTAX [more]
+                       :...default format
+              If DIAGRAM is chosen, more options are:
+                  GRAPHIC | PRINTABL
+                  :...default
+              Graphic is nicer on the screen, but if you are filing
+              output for printing, use PRINTABL (try both)
+
+              If SYNTAX is chosen, more options are:
+                  HEADER | NOHEADER
+                  :...default
+              A header is formed when a domain set has a unique member
+              in each row and column in the submatrix.  This can be
+              suppressed by specifying SYNTAX NOHEADER.
+     COPY..........Copy graph to submatrix (merges)
+     SAVE | LOAD...Save/Load graph
+           ...filespec uses GRAPH type in _SETUP
+                default name = problem name
+
+    See GRAPH.DOC for definitions of these graphs.
+
+    Examples:
+
+    GRAPH
+    ...gives summary of resident graph
+
+    GRAPH SET *
+    ...sets fundamental digraph, row digraph and column digraph
+
+    GRA SET R
+    ...sets fundamental digraph and its row digraph
+
+    GRA DISP *
+    ...displays fundamental digraph, row digraph and column digraph
+       as diagrams
+
+    GRA D R //SYN
+    ...displays row digraph in syntax format
+
+    GRA D C //SYN NO
+    ...displays column digraph in syntax format with no header
+
+    GRA D C //MAT
+    ...displays incidence matrix of column digraph
+
+    GRA D R //DIAG GRAPHIC
+    ...displays diagram of row digraph with graphic characters
+       (may not be printable)
+
+    GRA D R //DIAG
+    ...same as previous case (GRAPHIC is default)
+
+    GRA D R
+    ...same as previous case (DIAGRAM is default)
+
+    GRA D R //DIAG PRINT
+    ...displays diagram of row digraph with printable characters
+
+    GRA S R //FORM
+    ...sets row digraph for submatrix, relative to activities that
+       are transformations of form
+
+    GRA S R //PLACE,TIME
+    ...sets row digraph for submatrix, relative to activities that
+       are transformations of place or time
+
+    GRA SAVE
+    ...saves the resident graph in file named by the problem name
+       (with default prefix and suffix according to _SETUP)
+
+    GRA LOAD
+    ...loads the saved graph in file named by the problem name
+       (with default prefix and suffix according to _SETUP)
+
+    GRA LOAD MYGRAPH
+    ...loads previously saved graph named MYGRAPH (with default prefix
+       and suffix)
+
+    GR COP
+    ...copies graph to submatrix (merges with current submatrix)

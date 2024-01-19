@@ -1,0 +1,19 @@
+!  $Header: N:/default/includes/RCS/uldsmout,v 1.2 1999/12/19 18:58:59 dsa Exp $
+!  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!     INCLUDE(EMM$PARM)
+!
+!   LDSM OUTPUT VARIABLES
+!
+      REAL UDSMNRG(MNUMNR,MNUMYR) !  1 DSM Energy Savings--Nerc (Mkwh)
+      REAL UDSMCAP(MNUMNR,MNUMYR) !  2 DSM Capacity Savings--Nerc (Mkwh)
+      REAL UDSMEXP(MNUMNR,MNUMYR) !  3 DSM Expenditures--Nerc (MM$)
+!
+!   LDSM output Common block
+!
+      COMMON/ULDSMOUT/UDSMNRG,UDSMCAP,UDSMEXP
+!   Equivalence for FILER used for data storage
+      REAL ULDSMDAT(MNUMYR*(3*MNUMNR))
+      EQUIVALENCE (ULDSMDAT,UDSMNRG)

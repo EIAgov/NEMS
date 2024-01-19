@@ -1,0 +1,80 @@
+!  $Header: m:/default/includes/RCS/indrep,v 1.11 2014/03/07 12:59:14 pkc Exp $
+!
+!                            COMMON INDREP
+!          Report Variables for the Industrial Module
+!
+!    Industrial Census regions (as opposed to the rest of NEMS which uses MNUMCR for Census divisions)
+      INTEGER MINDCR
+      PARAMETER(MINDCR=5)
+     
+! 18 fuels, 4 Census Regions (1:4) and US (5) 
+      REAL MANHP(18,MINDCR,MNUMYR)       !  1 MFG, HEAT & POWER
+      REAL NONHP(18,MINDCR,MNUMYR)       !  2 NON-MFG, HEAT & POWER
+      REAL FOODCON(18,MINDCR,MNUMYR)     !  3 FOOD INDUSTRY CONSUMPTION
+      REAL PAPERCON(18,MINDCR,MNUMYR)    !  4 PAPER INDUSTRY CONSUMPTION
+      REAL CHEMCON(18,MINDCR,MNUMYR)     !  5 CHEMICAL INDUSTRY CONSUMPTION
+      REAL GLASSCON(18,MINDCR,MNUMYR)    !  6 GLASS INDUSTRY CONSUMPTION
+      REAL CEMENTCON(18,MINDCR,MNUMYR)   !  7 CEMENT INDUSTRY CONSUMPTION
+      REAL STEELCON(18,MINDCR,MNUMYR)    !  8 STEEL INDUSTRY CONSUMPTION
+      REAL ALUMCON(18,MINDCR,MNUMYR)     !  9 ALUMINUM INDUSTRY CONSUMPTION
+      REAL REFCON(18,MINDCR,MNUMYR)      ! 10 REFINERY INDUSTRY CONSUMPTION
+      REAL AGCON(18,MINDCR,MNUMYR)       ! 11 Agriculture Ind Consumption
+      REAL CONSTCON(18,MINDCR,MNUMYR)    ! 12 Construction Ind Consumption
+      REAL MINECON(18,MINDCR,MNUMYR)     ! 13 Mining Industry Consumption
+      REAL FABMETALCON(18,MINDCR,MNUMYR) ! 14 fabricated metal products    
+      REAL MACHINECON(18,MINDCR,MNUMYR)  ! 15 machinery                
+      REAL COMPUTECON(18,MINDCR,MNUMYR)  ! 16 computer & electronics   
+      REAL TRANEQUIPCON(18,MINDCR,MNUMYR)! 17 transport equipment      
+      REAL ELECEQUIPON(18,MINDCR,MNUMYR) ! 18 electrical equipment    
+      REAL WOODPRODCON(18,MINDCR,MNUMYR) ! 19 BOM-wood products
+      REAL PLASTICCON(18,MINDCR,MNUMYR)  ! 20 BOM-plastics
+      REAL BOMOTHCON(18,MINDCR,MNUMYR)   ! 21 BOM-other
+
+!  mining subindustries:
+      REAL OILGASMINECON(18,MINDCR,MNUMYR)   !  oil and gas mining
+      REAL COALMINECON(18,MINDCR,MNUMYR)     !  coal mining
+      REAL OTHERMINECON(18,MINDCR,MNUMYR)    !  other mining
+!  iron and steel subcategories:
+      REAL BLASTFURNACECON(18,MINDCR,MNUMYR) !  blast furnace
+      REAL COKEOVENCON(18,MINDCR,MNUMYR)     !  coke oven
+
+! industrial process emissions by industry	
+	  REAL GHG_PROCESSIN(21,MNUMYR)
+	  
+      REAL CHPINDCAP(7,21,MNUMYR) ! 24 CHP Capacity,      GW    by 6 fuels and total, 21 industries
+      REAL CHPINDGEN(7,21,MNUMYR) ! 25 CHP Generation  ,  BKWH   by 6 fuels and total, 21 industries
+      REAL CHPINDCON(7,21,MNUMYR) ! 26 CHP Energy Input,  trBtu by 6 fuels and total, 21 industries
+      REAL CHPINDSTM(7,21,MNUMYR) ! 27 CHP Thermal output, trBtu by 6 fuels and total, 21 industries
+      REAL CHPGRDSHR(21,MNUMYR)   ! 28 Share of CHP Gen sold to the grid
+      REAL QCCRF(11,MNUMYR)       ! 29 Catalyst Coke used at refineries
+
+!  variables from chemical model representing specific chemical production (middle dimension is region)
+      REAL RepProdOrg(17,2002:ENDYR) 
+      REAL RepProdInorg(6,2002:ENDYR) 
+      REAL RepProdResins(6,2002:ENDYR) 
+      REAL RepProdAgriChem(3,2002:ENDYR)  
+
+      COMMON/INDREP/ MANHP, NONHP, FOODCON, PAPERCON, &
+         CHEMCON, GLASSCON, CEMENTCON, STEELCON, ALUMCON, REFCON, &
+         AGCON, CONSTCON, MINECON, &
+         FABMETALCON,  MACHINECON,  COMPUTECON,  TRANEQUIPCON, &
+         ELECEQUIPON ,  WOODPRODCON,  PLASTICCON,  BOMOTHCON, &
+         QCCRF, &
+         RepProdOrg, RepProdInorg, RepProdResins, RepProdAgriChem, &
+         OILGASMINECON, COALMINECON, OTHERMINECON, &
+         BLASTFURNACECON, COKEOVENCON, GHG_PROCESSIN
+! Separate for compatibility with AEO2002 database/reporting
+      COMMON/INDREP2/CHPINDCAP,CHPINDGEN,CHPINDCON,CHPINDSTM,CHPGRDSHR
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      REAL EQ_INREP(MNUMYR*(21*18*MINDCR) + &  ! 21 individual industry consumption variables
+             5 * MNUMYR * 18 * MINDCR + &      ! 5 new subindustry consumption variables
+             MNUMYR * 11 + &                   ! QCCRF
+             17*(ENDYR-2001) + &               ! RepProdOrg
+              6*(ENDYR-2001) + &               ! RepProdInorg
+              6*(ENDYR-2001) + &               ! RepProdResins
+              3*(ENDYR-2001) + &               ! RepProdAgriChem
+             0)                                ! the end
+      EQUIVALENCE (EQ_INREP,MANHP)
+      REAL EQ_INREP2(MNUMYR*( (7*21*4) +21) )
+      EQUIVALENCE (EQ_INREP2,CHPINDCAP)

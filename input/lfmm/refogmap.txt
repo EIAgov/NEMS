@@ -1,0 +1,88 @@
+This file maps the OGSM districts to the LFMM refinery regions.   Reading ends with a 9999 in column A.,,
+"It currently is expected to have three heading lines, so if you add more, you will need to change the read in refine.f",,
+OGDIST,RefReg,Words
+1,5,Alabama North
+2,4,Alabama South
+3,8,Alaska
+4,8,Arizona
+5,5,Arkansas
+6,7,California
+7,6,Colorado
+8,1,Connecticut
+9,1,Delaware
+10,1,Washington DC
+11,1,Florida
+12,1,Georgia
+13,8,Hawaii
+14,6,Idaho
+15,3,Illinois
+16,3,Indiana
+17,2,Iowa
+18,2,Kansas
+19,2,Kentucky
+20,5,Louisiana North
+21,4,Louisiana South
+22,1,Maine
+23,1,Maryland
+24,1,Massachusetts
+25,3,Michigan
+26,3,Minnesota
+27,5,Mississippi North
+28,4,Mississippi South
+29,2,Missouri
+30,6,Montana
+31,2,Nebraska
+32,8,Nevada
+33,1,New Hampshire
+34,1,New Jersey
+35,5,New Mexico East
+36,5,New Mexico West
+37,1,New York
+38,1,North Carolina
+39,2,North Dakota
+40,3,Ohio
+41,2,Oklahoma
+42,8,Oregon
+43,1,Pennsylvania
+44,1,Rhode Island
+45,1,South Carolina
+46,2,South Dakota
+47,2,Tennessee
+48,5,Texas RRC 1
+49,4,Texas RRC 2
+50,4,Texas RRC 3
+51,4,Texas RRC 4
+52,5,Texas RRC 5
+53,5,Texas RRC 6
+54,5,Texas RRC 7B
+55,5,Texas RRC 7C
+56,5,Texas RRC 8
+57,5,Texas RRC 8A
+58,5,Texas RRC 9
+59,5,Texas RRC 10
+60,6,Utah
+61,1,Vermont
+62,1,Virginia
+63,8,Washington
+64,1,West Virginia
+65,3,Wisconsin
+66,6,Wyoming
+67,1,North Atlantic State Offshore
+68,1,Mid Atlantic State Offshore
+69,1,South Atlantic State Offshore
+70,4,Alabama State Offshore
+71,4,Louisiana State Offshore
+72,4,Mississippi State Offshore
+73,7,California State Offshore
+74,8,Northern Pacific State Offshore
+75,8,Alaska State Offshore
+76,1,North Atlantic Federal Offshore
+77,1,Mid Atlantic Federal Offshore
+78,1,South Atlantic Federal Offshore
+79,4,Eastern GOM Federal Offshore
+80,4,Central GOM Federal Offshore
+81,4,Western GOM Federal Offshore
+82,7,California Federal Offshore
+83,8,Northern Pacific Federal Offshore
+84,8,Alaska Federal Offshore
+9999,0,Last line

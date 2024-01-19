@@ -1,0 +1,101 @@
+FILE NAME:      KDSEFF
+
+DATE MODIFIED:  July 17, 2018
+
+CONTACT:        Meera Fickling
+                NEMS Commercial Buildings Analyst
+                Meera.Fickling@eia.gov
+                (202)586-0765
+
+USED BY:        Service Demand subroutine of the National Energy Modeling System
+                (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     District Service system efficiencies
+
+                Efficiency of conversion of fuel f to steam energy by boilers used
+                to provide district services PLUS effect of distribution losses.
+                
+UNITS:          Btu delivered/Btu consumed
+
+DIMENSION:      fuel type
+
+SPECIAL CONSTRAINTS:    None
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+
+                Each column corresponds to a fuel, in the following order:
+                Electricity, Natural Gas, Distillate Fuel
+
+SOURCES:
+
+                "U.S. District Energy Services Market Characterization: Commercial Data 
+                Analysis for EIA's National Energy Modeling System (NEMS)," completed for
+		EIA by ICF International, January 2018
+       
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5.153	0.760	0.790

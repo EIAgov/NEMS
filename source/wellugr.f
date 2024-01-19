@@ -1,0 +1,10 @@
+! $Header: m:/default/source/RCS/wellugr.f,v 1.130 2009/07/25 05:56:18 dh5 Exp $
+
+      SUBROUTINE OGFOR_UGR
+      IMPLICIT NONE
+      
+! THIS FILE IS NO LONGER USED.  THE UGR PROJECTIONS ARE DETERMINED IN THE OLOGSS.
+
+      RETURN
+      END
+

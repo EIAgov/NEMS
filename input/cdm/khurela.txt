@@ -1,0 +1,198 @@
+FILE NAME:      KHURELA
+
+DATE MODIFIED:  June 11, 1998 - Version for all end-uses  Kyoto Analysis
+
+CONTACT:        Kevin Jarzomski
+                NEMS Commercial Buildings Analyst
+                Kevin.Jarzomski@eia.gov
+                (202)586-3208
+
+USED BY:        Technology Choice subroutine of the National Energy Modeling System
+                (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     Price elasticity of hurdle (implicit discount) rates
+
+                Hurdle elasticity, (percent change in hurdle rate as result of
+                percent change in energy price) by service demand s, for
+                the major fuels of electricity, natural gas, and distillate.
+             
+UNITS:          unitless
+
+DIMENSION:      Census division, end-use service, fuel type
+
+SPECIAL CONSTRAINTS:    None
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+
+                Each block corresponds to a Census Division, in the following order:
+                New England, Middle Atlantic, East North Central, West North Central,
+                South Atlantic, East South Central, West South Central, Mountain, and
+                Pacific.
+
+                Each row corresponds to a service, in the following order:  Space
+                Heating, Space Cooling, Water Heating, Ventilation, Cooking, Lighting,
+                Refrigeration, Office Equip: PCs, Office Equip: non-PCs, Other
+
+                Each column corresponds to a fuel, in the following order:  Electricity,
+                Natural Gas, Distillate Fuel
+
+SOURCES:
+
+                Al-Sahlawi, M.,'The Demand for Natural Gas: A Survey of Price and Income
+                  Elasticities,' "The Energy Journal," vol. 10, no. 1, January 1989.
+ 
+                Balestra, T. and M. Nerlove, 'Pooling Cross-Section and Time-Series Data
+                  in the Estimation of a Dynamic Model: The Demand for Natural Gas'
+                  "Econometrica", vol. 34, no. 3, July 1966.
+ 
+                Beierlin, J., J. Dunn, and J.McConnor,Jr.,'The Demand for Electricity
+                  and Natural Gas in the Northeastern United States,' "Review of Economics and
+                  Statistics", vol. 64, 1981.
+ 
+                Berndt, E. and G. Watkins,'Demand for Natural Gas: Residential and
+                  Commercial Markets in Ontario and British Columbia,' "Canadian Journal of
+                  Economics," vol. 10, February 1977.
+ 
+                Chern, W. and R. Just, 'Assessing the Need for Power: A Regional
+                  Econometric Model,' "Energy Economics", vol. 10, no. 3, 1982, pp. 232-239.
+ 
+                Federal Energy Administration, "1976 National Energy Outlook,"
+                  Washington, DC, 1976.
+ 
+                Griffin, J., "Energy Consumption in the OECD: 1880-2000," Cambridge,
+                  Mass., Ballinger Publishing Company, 1979.
+ 
+                Halvorsen, R., 'Demand for Electric Energy in the United States,'
+                  "Southern Economic Journal," vol. 42, no. 4, 1975, pp. 610-625.
+ 
+                Joskow,P. and M. Baughman,'The Future of the U.S. Nuclear Energy
+                  Industry,' "Bell Journal of Economics," vol. 7, Spring 1976.
+ 
+                McFadden, D. and C. Puig, "Economic Impact of Water Pollution Control on
+                  the Steam Electric Industry," Chapter 3, Report EED-12, Teknekron Inc.,
+                  Berkeley, California, 1975.
+ 
+                Mount,T., L. Chapman & T. Tyrrell, "Electricity Demand in the United
+                  States: An Econometric Analysis," National Technical Information Service No.
+                  ORNL-NSF-EP-49, Springfield, Virginia, 1973.
+ 
+                Murray, M., R. Spann, L. Pulley, & E. Beauvais, 'The Demand for
+                  Electricity in Virginia,' "The Review of Economics and Statistics," vol. 60,
+                  no. 4, 1976, pp. 585-660.
+ 
+                Nelson, J., 'The Demand for Space Heating Energy,' "Review of Economics
+                  and Statistics," November 1975, pp.508-512.
+ 
+                Uri, N., "A Dynamic Demand Analysis for Electrical Energy by Class of
+                  Consumer," Working Paper No. 34, Bureau of Labor Statistics, January 1975.
+ 
+                Westley, G., "The Demand for Electricity in Latin America: A Survey and
+                  Analysis," Economic and Social Development Department, Country Studies
+                  Division, Methodology Unit, Washington, DC, February 1989.
+
+
+
+
+
+
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50
+
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	-0.50	-0.50
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	0.00	0.00
+-0.50	-0.50	-0.50

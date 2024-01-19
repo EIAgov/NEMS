@@ -1,0 +1,24 @@
+Composite table:
+rank icmm_comm     map_ICMM_commodity 
+1B   Bituminous     1
+2S   Subbituminous  1
+3L   Lignite        1
+4P   Metallurgical  1
+;
+
+Composite table:
+tc   icmm_comm     map_ICMM_ThermalCoke
+2    Bituminous     1
+2    Subbituminous  1
+2    Lignite        1
+1    Metallurgical  1
+;
+
+Composite table:
+rank   tc      map_Rank_tc
+1B     2        1
+2S     2        1
+3L     2        1
+4P     1        1
+5G     2        1
+;

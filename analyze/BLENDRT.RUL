@@ -1,0 +1,28 @@
+* BLENDRT.RUL
+$IF %PROBLEM = BLENDRT THEN GOTO BEGIN
+   Sorry, this rule has been prepared only for the BLENDRT model.
+$EXIT
+
+:BEGIN
+$IF %NROWS = 1 THEN GOTO BEGIN
+$IF %NROWS > 1 THEN SKIP 2
+ The submatrix has no rows (must be 1).
+$EXIT
+ There must be exactly 1 row in submatrix.  Here are the submatrix rows:
+$ANALYZE D R
+$EXIT
+
+:BEGIN
+$SET MT=%ROW(2:3)
+$SET R=%ROW(4:4)
+$SET T=%ROW(5:5)
+$ANALYZE SUB COL * X GT L
+$ANALYZE TRACE
+$ANALYZE GRAPH SET *
+$ANALYZE GRAPH SAVE
+
+$STACK
+$QUEUE 1 %%MT
+$QUEUE 1 %%R
+$QUEUE 1 %%T
+$INTERPRT BLSTACK

@@ -1,0 +1,15 @@
+AEO Name,STEO Name,Energy Generation,Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
+PSD000:ba_TotalCrudeSup,coripus,Crude Oil Refinery Inputs (million b/d),3%,3%,1,1,
+PSD000:ca_RefineryProce,paglpus,Refinery Processing Gain (million b/d),2%,2%,1,1,
+PSD000:ba_NetImports,conipus,Crude Oil Net Imports (million b/d),3%,3%,1,1,
+PSD000:ca_UnfinishedOil - YSD000:ra_Exports,uonipus,Unfinished Oil net Imports (million b/d),2%,2%,1,1,"manual adjustments needed during benchmarking cycle, so this is ok"
+PSD000:tr_in_ngl_propan + PSD000:tr_in_ole_propy - PSD000:tr_ex_ngl_propan - PSD000:tr_ex_ole_propy ,PRNIPUS,Propane/Propylene Net Imports(million b/d),3%,3%,1,1,propane/propylene net imports are part of set of data that is only read through HISTLYR-2 (so for AEO2022 only read through 2020). Can remove validator for years past 2020
+YSD000:pa_ProductSuppli,artcpus,Asphalt and Road Oil Product Supplied(million b/d),2%,2%,1,1,
+YSD000:sa_ProductSuppli,fetcpus,Petrochemcial Feedstocks Product Supplied(million b/d),2%,2%,1,1,
+YSD000:oa_ProductSuppli,sgtcpus,Still Gas Product Supplied(million b/d),2%,2%,1,1,
+PSD000:ea_MotorGasoline,mgtcpus,"Motor Gasoline Consumption, mmb/d",2%,2%,1,1,
+PSD000:eb_DieselAllSect,dstcpus,Diesel fuel consumption (million b/d),2%,2%,1,1,
+PSD000:ca_NetProductImp,panipus,Product Net Imports (million b/d),2%,2%,1,1,"leave alone, this is another one of those we need to  manually adjust since AEO/STEO mismatch on gross imports/net imports calculation"
+PSD000:ca_EthanolImport,eonipus,Ethanol Net Imports (million b/d),2%,2%,1,1,
+AFT000:rd_Imports,RDNIPUS,Renewable Diesel Imports (million b/d),2%,2%,15.33000002,15.37199994,=1/{1000/42/(366 or 365)}
+AFT000:cd_Imports - AFT000:bd_Exports,bdnipus,Biodiesel Net Imports (million b/d),2%,2%,15.33000002,15.37199994,=1/{1000/42/(366 or 365)}

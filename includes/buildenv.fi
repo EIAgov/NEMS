@@ -1,0 +1,25 @@
+! $Header: M:/default/includes/RCS/buildenv.fi,v 1.1 2014/01/10 14:30:36 dsa Exp $
+
+!     FORTRAN include file buildenv.fi
+
+!     OMLMATNAME is the length of names for rows and columns in a model matrix.
+!     If the version of OML in use incorporates 8-character matrix names,
+!        define preprocessor symbol USEMATNAME8 when compiling.
+
+!DEC$ if defined (USEMATNAME8)
+      integer(4), parameter :: OMLMATNAME=8
+!DEC$ else
+      integer(4), parameter :: OMLMATNAME=16
+!DEC$ endif
+
+!     For transparency, define parameters for these invariant lengths...
+!     Length of names for sets used in a model definition:
+      integer(4), parameter :: OMLSETNAME=8
+!     Length of general character values in the CR:
+      integer(4), parameter :: OMLCRCPARM=8
+
+!     In sizing database memory to be allocated/declared, waste is avoided
+!        by doing so in multiples of the following block size.
+!     A minimum of 5 such blocks is required -- but provide more.
+      integer(4), parameter :: OMLDBBLOCK=32   ! in kilobytes
+

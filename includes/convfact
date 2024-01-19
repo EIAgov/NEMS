@@ -1,0 +1,219 @@
+!  $Header: m:/default/includes/RCS/convfact,v 1.28 2014/12/31 16:24:25 pkc Exp $
+!  NEMS Conversion Factor Common Block
+
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!
+      REAL CFASQ         !  1 Asphalt and Road Oil
+      REAL CFBUQ         !  2 Butane
+      REAL CFDSQ         !  3 Distillate
+      REAL CFETQ(MNUMYR) !  4 Ethanol including denaturant
+      REAL CFIBQ         !  5 Isobutane
+      REAL CFJFK         !  6 Jet Fuel - Kerosene
+      REAL CFJFN         !  7 Jet Fuel - Naphtha
+      REAL CFJFQ(MNUMYR) !  7.5   Total Jet Fuel
+      REAL CFKSQ         !  8 Kerosene
+      REAL CFLGQ(MNUMYR) !  9 Liquid Petroleum Gas
+      REAL CFMGQ(MNUMYR) ! 10 Total Motor Gasoline average
+      REAL CFOTQ(MNUMYR) ! 11 Other Petroleum   (lubes, av gas)
+      REAL CFTPQ(MNUMYR) ! 12 Total Petroleum
+      REAL CFPPQ         ! 13 Pentanes Plus
+      REAL CFPFQ(MNUMYR) ! 14 Petrochemical Feedstocks
+      REAL CFPCQ         ! 15 Petroleum Coke
+      REAL CFCCQ(MNUMYR) !    Catalytic coke
+      REAL CFPRQ         ! 16 Propane
+      REAL CFPGQ         ! 17 Pure Motor Gasoline
+      REAL CFRSQ         ! 18 Residual Fuel
+      REAL CFSGQ         ! 19 Still Gas
+      REAL CFOGQ         !    Motor Gasoline - Oxygenated
+      REAL CFDSLQ(MNUMYR) !   Low sulfur diesel
+      REAL CFDSUQ(MNUMYR) !   Ultra low sulfur diesel
+      REAL CFNPQ         !    Naphthas
+      REAL CFAVQ         !    Aviation Gasoline
+      REAL CFLUQ         !    Lubricants
+      REAL CFWXQ         !    Waxes
+      REAL CFMSQ         !    Miscellaneous
+      REAL CFEEQ         !    Ethane
+      REAL CFUSQ         !    Unfractionated Stream
+      REAL CFIMUO(MNUMYR)  !  Unfinished oil imports (weighted average of 4 streams)
+      REAL CFPET           !  Pure (undenatured) ethanol
+
+      REAL CFTGQ(MNUMYR)   ! 25 Traditional Motor Gasoline (TRG)
+      REAL CFRGQ(MNUMYR)   ! 26 Reformulated Motor Gasoline (RFG)
+      REAL CFINPOT(MNUMYR) ! 27 Other Inputs
+      REAL CFIMPRD(MNUMYR) ! 28 Refined Petroleum Product Imports
+      REAL CFEXPRD(MNUMYR) ! 29 Refined Petroleum Product Exports
+      REAL CFCRDDOM(MNUMYR) ! 30 Domestic Crude Production
+      REAL CFCRDIMP(MNUMYR) ! 31 Crude oil imports
+      REAL CFCRDEXP(MNUMYR) !    Crude oil exports
+
+      REAL CFCRDLTSWT(MNUMYR)     ! Crude oil, light sweet
+      REAL CFCRDLTSOUR(MNUMYR)    ! Crude oil, light sour
+      REAL CFCRDMD2SOUR(MNUMYR)  ! Crude oil, medium medium sour
+      REAL CFCRDMDSOUR(MNUMYR)    ! Crude oil, medium sour
+      REAL CFCRDHVSWT(MNUMYR)     ! Crude oil, heavy sweet
+      REAL CFCRDHVSOUR(MNUMYR)    ! Crude oil, heavy sour
+      REAL CFCRDCA(MNUMYR)        ! Crude oil, california
+      REAL CFCRDSYN(MNUMYR)       ! Crude oil, syncrude
+      REAL CFCRDDILBIT(MNUMYR)    ! Crude oil, dilbit
+      REAL CFCRDLT2SWT(MNUMYR)    ! Crude oil, light light sweet
+      REAL CFCRDLSCOND(MNUMYR)    ! Crude oil, lease condensate
+
+      REAL CFNGL(MNUMYR)   ! 32 Natural Gas Liquids
+      REAL CFMEQT          ! 33 Methanol
+      REAL CFE85Q(MNUMYR)  ! 34 E85 (weighted average of ethanol and pure motor gasoline)
+      REAL CFM85Q(MNUMYR)  ! 35 M85 (weighted average of methanol and pure motor gasoline)
+
+      REAL CFCTLLIQ(MNUMYR) ! 36 Liquids from Coal
+      REAL CFGTLLIQ(MNUMYR) !    Liquids from Gas
+      REAL CFBTLLIQ(MNUMYR) !    Liquids from Biomass
+      REAL CFCBTLLIQ(3,MNUMYR) !    Liquids from Coal and Biomass!  At the same time!
+      REAL CFCLSN(MNUMYR)   ! 37
+      REAL CFDSRS(MNUMYR)   ! 38 Residential distillate
+      REAL CFDSCM(MNUMYR)   ! 39 Commercial distillate
+      REAL CFDSTR(MNUMYR)   ! 40 Transportation distillate (diesel) (ulsd averaged in)
+      REAL CFDSIN(MNUMYR)   ! 41 Industrial distillate (diesel) (ulsd averaged in)
+      REAL CFDSEL(MNUMYR)   ! 42 Electric power distillate
+      REAL CFDSQT(MNUMYR)   ! 43 Total distillate
+
+      REAL CFCBQ(MNUMYR)    ! California Air Resource Board BOB
+      REAL CFDSCQ(MNUMYR)   ! California Air Resource Board diesel
+      REAL CFUBAQ(MNUMYR)   ! Liquids from pyrolysis
+      REAL CFAR3(MNUMYR)    ! AR3, or atmospheric residuum
+      REAL CFMN3(MNUMYR)    ! MN3, or medium naphtha
+      REAL CFGO3(MNUMYR)    ! GO3, or gas oil
+      REAL CFCBOB(MNUMYR)   ! Conventional gasoline before oxygenate blending
+      REAL CFRBOB(MNUMYR)   ! Reformulated gasoline before oxygenate blending
+!   1 = NL;  2 = NH;  3 = KE;  4 = DS:
+      REAL CFFTLIQ(4,MNUMYR)  ! Liquid streams from Fischer-Tropsch (feedstock-independent)
+
+      REAL CFNGU(MNUMYR)    ! 20 Natural Gas - Utility consumption
+      REAL CFNGN(MNUMYR)    ! 21 Natural Gas - Nonutility consumption
+      REAL CFNGC(MNUMYR)    ! 22 Natural Gas - Consumption
+      REAL CFNGP(MNUMYR)    ! 22 Natural Gas - Production
+      REAL CFNGI(MNUMYR)    ! 23 Natural Gas - Imports
+      REAL CFNGE(MNUMYR)    ! 24 Natural Gas - Exports
+      REAL CFCNGQ(MNUMYR)   ! Compressed Natural Gas
+      REAL CFNGCL(MNUMYR)   ! Natural Gas - Synthetic gas from coal
+
+      REAL CFCORN           ! 44 Corn (bushels to Btu)
+      REAL CFGRAIN(MNUMYR)  ! Grain (bushels to Btu) - this is complicated:  oats, wheat, rye?
+      REAL CFCELL           ! 45 Switchgrass (bushels to Btu)
+      REAL CFBMQ(MNUMYR)    ! 46 Biomass (cellulose) energy content (million Btu per ton)
+      REAL CFBIOD(MNUMYR)   ! 47 Biodiesel
+      REAL CFBIOBUTE(MNUMYR) !   Biobutanol
+      REAL CFVEGGIE(MNUMYR) ! 48 Convert biodiesel output to vegetable oil input
+                            !    CFVEGGIE should be about 1.02 times CFBIOD)
+      REAL CFETFAC(MNUMYR)  ! 49 Factor to arrive at feedstock input from ethanol output
+      REAL CFSRN(3,MNUMYR)  !    Straight-run naphtha used as denaturant:  1 is domestic ethanol production, 2 is ethanol imports, 3 is ethanol exports
+      REAL CFGOP(MNUMYR)    !    Gas oil exports (weighted average of GO1 and GO4)
+
+
+      REAL CFELQ            !    Electricity
+
+      REAL CFJOULE          ! Btu per joule
+
+!  variables for API gravities from LFMM, dimensioned by 2 for API and conversion factor translation:
+!  still haven't decided on:
+!     REAL CFLGQ(MNUMYR) !  9 Liquid Petroleum Gas
+!     REAL CFMGQ(MNUMYR) ! 10 Total Motor Gasoline average
+!     REAL CFOTQ(MNUMYR) ! 11 Other Petroleum   (lubes, av gas)
+!     REAL CFPGQ         ! 17 Pure Motor Gasoline
+!     REAL CFPET           !  Pure (undenatured) ethanol
+!     REAL CFOGQ         !    Motor Gasoline - Oxygenated
+      REAL APIDSU(2,MNUMYR)   !  Ultra low sulfur diesel
+      REAL APIDSL(2,MNUMYR)   !  Plain old low sulfur diesel
+      REAL APIDSC(2,MNUMYR)   !  California diesel
+      REAL APIN2H(2,MNUMYR)   !  Heating oil
+      REAL APIDS(2,MNUMYR)    !  Distillate total
+      REAL APIRSH(2,MNUMYR)   !  High sulfur residual (N6B)
+      REAL APIRSL(2,MNUMYR)   !  Low sulfur residual (N6I)
+      REAL APIJTA(2,MNUMYR)   !  Jet fuel
+      REAL APIPCF(2,MNUMYR)   !  Petrochemical feedstocks
+      REAL APIASPH(2,MNUMYR)  !  Asphalt
+      REAL APIRBOB(2,MNUMYR)  !  Reformulated motor gasoline blendstock
+      REAL APICBOB(2,MNUMYR)  !  Conventional motor gasoline blendstock
+      REAL APICABOB(2,MNUMYR) !  California motor gasoline blendstock
+      REAL APIRFG(2,MNUMYR)   !  Reformulated motor gasoline
+      REAL APICFG(2,MNUMYR)   !  Conventional motor gasoline
+      REAL APICAMG(2,MNUMYR)  !  Conventional motor gasoline
+      REAL APIMG(2,MNUMYR)    !  Total motor gasoline
+      REAL APILTSW(2,MNUMYR)  !  Light sweet crude oil
+      REAL APILTSO(2,MNUMYR)  !  Light sour crude oil
+      REAL APIMMSO(2,MNUMYR)  !  Medium medium sour crude oil
+      REAL APIMDSO(2,MNUMYR)  !  Medium sour crude oil
+      REAL APIHVSW(2,MNUMYR)  !  Heavy sweet crude oil
+      REAL APIHVSO(2,MNUMYR)  !  Heavy sour crude oil
+      REAL APICA(2,MNUMYR)    !  California crude oil
+      REAL APISYN(2,MNUMYR)   !  Syncrude
+      REAL APIDIL(2,MNUMYR)   !  Dilbit
+      REAL APILLSW(2,MNUMYR)  !  Light light sweet crude oil
+      REAL API50PL(2,MNUMYR)  !  API 50+ crude oil
+      REAL APICRDDOM(2,MNUMYR) !  domestic crude oil production
+      REAL APICRDIMP(2,MNUMYR) !  domestic crude oil production
+      REAL APICRDEXP(2,MNUMYR) !  domestic crude oil production
+      REAL APINGPL(2,MNUMYR)  !  domestic crude oil production
+      REAL APIAR3(2,MNUMYR)   !  Atmospheric residuum
+      REAL APIGO3(2,MNUMYR)   !  Gas oil
+      REAL APIMN3(2,MNUMYR)   !  Medium naphtha
+      REAL APIGOP(2,MNUMYR)   !  Gas oil (again)
+      REAL APICATC(2,MNUMYR)  !  Catalytic coke
+      REAL APIPYRO(2,MNUMYR)  !  Pyrolysis liquids
+      REAL APIFBD(2,MNUMYR)   !  FAME biodiesel
+      REAL APIFTNL(2,MNUMYR)  !  Fischer-Tropsch light naphthas
+      REAL APIFTNH(2,MNUMYR)  !  Fischer-Tropsch heavy naphthas
+      REAL APIFTKE(2,MNUMYR)  !  Fischer-Tropsch kerosenes
+      REAL APIFTDS(2,MNUMYR)  !  Fischer-Tropsch distillates
+      REAL APIUFO(2,MNUMYR)   !  Unfinished oils
+      REAL APIEOH(2,MNUMYR)   !  Ethanol excluding denaturant
+      REAL APIEWD(2,MNUMYR)   !  Ethanol including denaturant
+      REAL APIBBU(2,MNUMYR)   !  Biobutanol
+      REAL APIKER(2,MNUMYR)   !  Kerosene
+      REAL APIPETC(2,MNUMYR)  !  Petroleum Coke
+      REAL APIETH(2,MNUMYR)   !  Ethane
+      REAL APIPRO(2,MNUMYR)   !  Propane
+      REAL APIPRY(2,MNUMYR)   !  Propylene
+      REAL APIBUT(2,MNUMYR)   !  Butane
+      REAL APIISO(2,MNUMYR)   !  Isobutane
+      REAL APINAT(2,MNUMYR)   !  Pentanes Plus
+      REAL APIRS(2,MNUMYR)    !  Residual Fuel
+      REAL APISTG(2,MNUMYR)   !  Still Gas
+      REAL APIAVG(2,MNUMYR)   !  Aviation Gasoline
+      REAL APILUB(2,MNUMYR)   !  Lubricants
+      REAL APIWAX(2,MNUMYR)   !  Waxes
+
+!  NEMS CONVERSION FACTOR Common Block
+      COMMON/CONVFACT/CFASQ,CFBUQ,CFDSQ,CFETQ,CFIBQ,CFJFK, &
+       CFJFN,CFKSQ,CFLGQ,CFMGQ,CFOTQ,CFTPQ,CFPPQ,CFPFQ,CFPCQ, &
+       CFPRQ,CFPGQ,CFRSQ,CFSGQ,CFNGU,CFNGN,CFNGC,CFNGP,CFNGI,CFNGE, &
+       CFTGQ,CFRGQ,CFINPOT,CFIMPRD,CFEXPRD,CFCRDDOM,CFCRDIMP,CFNGL, &
+       CFMEQT,CFE85Q,CFM85Q,CFCTLLIQ,CFCLSN,CFDSRS,CFDSCM,CFDSTR,CFDSIN, &
+       CFDSEL,CFDSQT,CFCORN,CFCELL,CFBMQ,CFBIOD,CFVEGGIE,CFCNGQ,CFELQ, &
+       CFOGQ, CFEEQ, CFNPQ, CFAVQ, CFLUQ, CFWXQ, CFMSQ, CFUSQ, CFIMUO, &
+       CFNGCL, CFDSLQ, CFDSUQ, CFGTLLIQ, CFBTLLIQ, CFGRAIN, CFCBTLLIQ, &
+       CFJOULE, CFJFQ, CFETFAC, CFCBQ, CFDSCQ, CFUBAQ, CFFTLIQ, &
+       CFAR3, CFMN3, CFGO3, CFCBOB, CFRBOB, CFBIOBUTE, CFCCQ, CFSRN, &
+       CFPET, CFCRDEXP, &
+       CFCRDLTSWT, CFCRDLTSOUR, CFCRDMD2SOUR, CFCRDMDSOUR, CFCRDHVSWT, &
+       CFCRDHVSOUR, CFCRDCA, CFCRDSYN, CFCRDDILBIT, CFCRDLT2SWT, CFCRDLSCOND, &
+       CFGOP,   &
+       APIDSU, APIDSL, APIDSC, APIN2H, APIDS, APIRSH, APIRSL, APIJTA, APIPCF,  &
+       APIASPH, APIRBOB, APICBOB, APICABOB, APIRFG,  APICFG,  APICAMG, APIMG,  &
+       APILTSW, APILTSO, APIMMSO, APIMDSO,  APIHVSW, APIHVSO, APICA,  &
+       APISYN, APIDIL, APILLSW, API50PL,  &
+       APICRDDOM, APICRDIMP, APICRDEXP, APINGPL,  &
+       APIAR3, APIGO3, APIMN3,  APIGOP, APICATC, APIPYRO, APIFBD,  &
+       APIFTNL, APIFTNH, APIFTKE, APIFTDS, APIUFO,  &
+       APIEOH, APIEWD, APIBBU, APIKER, APIPETC, &
+       APIETH, APIPRO, APIPRY, APIBUT, APIISO, APINAT,  &
+       APIRS,  APISTG, APIAVG,  APILUB, APIWAX
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      REAL EQ_CFOUT(MNUMYR*66+27+3*MNUMYR+4*MNUMYR+3*MNUMYR+60*2*MNUMYR)
+      EQUIVALENCE (EQ_CFOUT,CFASQ)
+!  some stuff for main to open an output file
+      INTEGER ICNVRTOUT
+      CHARACTER*18 CNVRTOUT
+      COMMON /CONVERTOUTC/ CNVRTOUT
+      COMMON /CONVERTOUTI/ ICNVRTOUT

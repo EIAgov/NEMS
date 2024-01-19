@@ -1,0 +1,137 @@
+1
+ 
+          
+         ==============================
+         M I N O S    5.3    (Sep 1988)
+         ==============================
+
+ OPTIONS file
+ ------------
+      BEGIN
+      MINIMIZE                                                                
+      SCALE NO                                                                
+      ROWS       150                                                          
+      COLUMNS    350                                                          
+      ELEMENTS  1400                                                          
+      MPS FILE   11                                                           
+      END                                                                     
+
+ Reasonable WORKSPACE limits are         0 ...    8836
+ Actual     WORKSPACE limits are         0 ...   48300 ...   48300  words of  Z.
+1
+ MPS file
+ --------
+      1    NAME          BLENDINF
+      2    ROWS                  
+     19    COLUMNS               
+     84    RHS                   
+     96    RANGES                
+     97    BOUNDS                
+    103    ENDATA                
+
+
+
+ Names selected
+ --------------
+ OBJECTIVE      COST     (MIN)       1
+ RHS            RHSMODL             11
+ RANGES                              0
+ BOUNDS         BNDMODL              5
+
+ PARTIAL PRICE section size (A)            1
+ PARTIAL PRICE section size (I)            1
+
+ Nonzeros allowed for in LU factors    31930
+
+
+
+ Matrix statistics
+ -----------------
+               Total      Normal        Free       Fixed     Bounded
+ Rows             16          11           1           4           0
+ Columns          15          10           0           0           5
+
+ No. of matrix elements       64     Density      26.667
+ Biggest and smallest coeffs      1.0000E+00  1.0000E-01
+ (excluding free rows and RHS)
+1
+ 
+ Initial basis
+ -------------
+
+ No basis file supplied
+
+
+ CRASH option  1
+ Free rows     1     Free cols     0     Pass 2 (E rows)     3     Pass 3     5     Remainder     7
+
+
+
+ Iterations
+ ----------
+
+   Itn  Nopt  Ninf  Sinf,Objective     LU
+     1     1     3  5.21052632E+01     45
+ Itn    13 --      2  nonbasics set on bound, basics recomputed
+1
+ 
+ EXIT -- THE PROBLEM IS INFEASIBLE
+
+ No. of iterations                  13     Objective value      0.0000000000E+00
+
+ No. of infeasibilities              2     Sum of infeas        1.6406340058E+01
+
+ No. of degenerate steps             4     Percentage                      30.77
+
+ Norm of X                   4.123E+01     Norm of PI                  3.347E+00
+1
+ NAME           BLENDINF              Infeasibilities     2    1.6406E+01
+
+ Status         INFEASIBLE            Iteration   13     Superbasics    0
+
+ OBJECTIVE      COST     (MIN)
+ RHS            RHSMODL 
+ RANGES                 
+ BOUNDS         BNDMODL 
+ 
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+      16  COST        BS          .00000          .00000           NONE            NONE           .00000      1
+      17  SUPMC       UL        20.00000          .00000           NONE         20.00000        -1.01652      2
+      18  SUPHC       BS         6.97406        13.02594           NONE         20.00000          .00000      3
+      19  CAP01       BS         3.40058         6.59942           NONE         10.00000          .00000      4
+      20  CAP02       UL        10.00000          .00000           NONE         10.00000         -.33884      5
+      21  CAP03       UL        10.00000          .00000           NONE         10.00000         -.05213      6
+      22  CAP04    I  BS        24.87032       -14.87032           NONE         10.00000        -1.00000      7
+      23  CAP05       UL        10.00000          .00000           NONE         10.00000         -.10426      8
+      24  BALLN       EQ          .00000          .00000          .00000          .00000         -.49888      9
+      25  BALHN       EQ          .00000          .00000          .00000          .00000         2.49440     10
+      26  BALGO       EQ          .00000          .00000          .00000          .00000         2.34582     11
+      27  BALRS       EQ          .00000          .00000          .00000          .00000          .52129     12
+      28  DEMFO       LL        10.00000          .00000        10.00000           NONE           .52129     13
+      29  DEMRG       LL        15.00000          .00000        15.00000           NONE          3.49616     14
+      30  DEMPG    I  BS         8.46398         1.53602        10.00000           NONE          1.00000     15
+      31  DEMAV       BS        23.11527       -18.11527         5.00000           NONE           .00000     16
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  OP01MC      BS         3.40058          .00000          .00000           NONE           .00000     17
+       2  OP01HC   A  LL          .00000          .00000          .00000           NONE           .00000     18
+       3  OP02MC      BS        10.00000          .00000          .00000           NONE           .00000     19
+       4  OP02HC      LL          .00000          .00000          .00000           NONE           .33884     20
+       5  OP03MC      BS         6.59942          .00000          .00000           NONE           .00000     21
+       6  OP03HC      BS         3.40058          .00000          .00000           NONE           .00000     22
+       7  OP04MC      BS        24.87032          .00000          .00000           NONE           .00000     23
+       8  OP04HC      LL          .00000          .00000          .00000           NONE           .94787     24
+       9  OP05MC      BS         3.02594          .00000          .00000           NONE           .00000     25
+      10  OP05HC      BS         6.97406          .00000          .00000           NONE           .00000     26
+      11  OB01        UL        10.00000          .00000          .00000        10.00000         -.80554     27
+      12  OB02        BS         1.78674          .00000          .00000        15.00000          .00000     28
+      13  OB03        BS         7.31988          .00000          .00000        12.00000          .00000     29
+      14  OB04        UL        10.00000          .00000          .00000        10.00000         -.79108     30
+      15  OB05        BS          .33429          .00000          .00000        11.00000          .00000     31
+ ENDRUN

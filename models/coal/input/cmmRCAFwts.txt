@@ -1,0 +1,7 @@
+COMPOSITE TABLE:
+yr                  wt_Labor            wt_Fuel             wt_MaterialSup      wt_Equipment        wt_Depreciation     wt_Interest         wt_Other
+2018                0.33                0.159               0.051               0.053               0.15                0.021               0.236
+2019                0.326               0.142               0.049               0.052               0.159               0.025               0.247
+2020                0.324               0.097               0.045               0.052               0.185               0.027               0.27
+2021                0.314               0.142               0.045               0.049               0.175               0.024               0.251
+;

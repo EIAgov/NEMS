@@ -1,0 +1,124 @@
+!  $Header: m:/default/includes/RCS/emablk,v 1.7 2016/06/06 20:46:31 rsc Exp $
+!  NEMS PRICE ADJUSTMENTS
+!  NEEDS COALEMM block
+
+!  NEMS Price Common Block Parameters
+!     INTEGER MNUMP,MPSIZE
+!     PARAMETER(MNUMP=91)   ! NUMBER OF NEMS PRICE VARIABLES
+!     PARAMETER(MPSIZE=MNUMP*MNUMCR*MNUMYR) ! SIZE OF PRICE ARRAY
+      INTEGER NCLPR2
+      PARAMETER(NCLPR2=38)   ! NUMBER OF NEW PRICES
+! PRICES
+      REAL JGFRS(MNUMYR) ! 16 Natural Gas, Core - Residential
+      REAL JGFCM(MNUMYR) ! 17 Natural Gas, Core - Commercial
+      REAL JGFTR(MNUMYR) ! 18 Natural Gas, Core - Transportation
+      REAL JGFIN(MNUMYR) ! 19 Natural Gas, Core - Industrial
+      REAL JGFEL(MNUMYR) ! 20 Natural Gas, Core - Electric Power
+      REAL JGFHM(MNUMYR) ! 20 Natural Gas, Core - Hydrogen
+      REAL JGIRS(MNUMYR) ! 22 Natural Gas, Noncore - Residential
+      REAL JGICM(MNUMYR) ! 23 Natural Gas, Noncore - Commercial
+      REAL JGITR(MNUMYR) ! 24 Natural Gas, Noncore - Transportation
+      REAL JGIIN(MNUMYR) ! 25 Natural Gas, Noncore - Industrial
+      REAL JGIEL(MNUMYR) ! 26 Natural Gas, Noncore - Electric Power
+      REAL JGIHM(MNUMYR) ! 26 Natural Gas, Noncore - Hydrogen
+      REAL JNGRS(MNUMYR) ! 28 Natural Gas - Residential
+      REAL JNGCM(MNUMYR) ! 29 Natural Gas - Commercial
+      REAL JNGTR(MNUMYR) ! 30 Natural Gas - Transportation
+      REAL JNGIN(MNUMYR) ! 31 Natural Gas - Industrial
+      REAL JNGEL(MNUMYR) ! 32 Natural Gas - Electric Power
+      REAL JNGHM(MNUMYR) ! 32 Natural Gas - Hydrogen
+      REAL JNQNGPF(MNUMYR) ! Natural Gas Feedstock
+      REAL JGPTR(MNUMYR) ! 34 Natural Gas - Pipeline
+      REAL JLPIN(MNUMYR) ! 35 Lease and Plant Fuel
+      REAL JCLRS(MNUMYR) ! 36 Coal - Residential
+      REAL JCLCM(MNUMYR) ! 37 Coal - Commercial
+      REAL JCLIN(MNUMYR) ! 38 Coal - Industrial
+      REAL JCLEL(MNUMYR) ! 39 Coal - Electric Power
+      REAL JCLHM(MNUMYR) ! 39 Coal - Hydrogen
+      REAL JMCIN(MNUMYR) ! 42 Metallurgical Coal - Industrial
+      REAL JMGCM(MNUMYR) ! 43 Motor Gasoline - Commercial
+      REAL JMGTR(MNUMYR) ! 44 Motor Gasoline - Transportation
+      REAL JMGIN(MNUMYR) ! 45 Motor Gasoline - Industrial
+      REAL JJFTR(MNUMYR) ! 47 Jet Fuel - Transportation
+      REAL JDSRS(MNUMYR) ! 48 Distillate - Residential
+      REAL JDSCM(MNUMYR) ! 49 Distillate - Commercial
+      REAL JDSTR(MNUMYR) ! 50 Distillate - Transportation
+      REAL JDSIN(MNUMYR) ! 51 Distillate - Industrial
+      REAL JDSEL(MNUMYR) ! 52 Distillate - Electricity (+petroleum coke)
+      REAL JKSRS(MNUMYR) ! 54 Kerosene - Residential
+      REAL JKSCM(MNUMYR) ! 55 Kerosene - Commercial
+      REAL JKSIN(MNUMYR) ! 56 Kerosene - Industrial
+      REAL JLGRS(MNUMYR) ! 58 Liquid Petroleum Gases - Residential
+      REAL JLGCM(MNUMYR) ! 59 Liquid Petroleum Gases - Commercial
+      REAL JLGTR(MNUMYR) ! 60 Liquid Petroleum Gases - Transportation
+      REAL JLGIN(MNUMYR) ! 61 Liquid Petroleum Gases - Industrial
+      REAL JRLCM(MNUMYR) ! 63 Residual Fuel, Low Sulfur - Commercial
+      REAL JRLTR(MNUMYR) ! 64 Residual Fuel, Low Sulfur - Transportation
+      REAL JRLIN(MNUMYR) ! 65 Residual Fuel, Low Sulfur - Industrial
+      REAL JRLEL(MNUMYR) ! 66 Residual Fuel, Low Sulfur - Electricity
+      REAL JRHTR(MNUMYR) ! 68 Residual Fuel, High Sulfur - Transportation
+      REAL JRHEL(MNUMYR) ! 69 Residual Fuel, High Sulfur - Electricity
+      REAL JRSCM(MNUMYR) ! 71 Residual Fuel - Commercial
+      REAL JRSTR(MNUMYR) ! 72 Residual Fuel - Transportation
+      REAL JRSIN(MNUMYR) ! 73 Residual Fuel - Industrial
+      REAL JRSEL(MNUMYR) ! 74 Residual Fuel - Electricity
+      REAL JOTTR(MNUMYR) ! 78 Other Petroleum Transportation
+      REAL JMETR(MNUMYR) ! 88 Methanol - Transporation
+      REAL JETTR(MNUMYR) ! 89 Ethanol - Transporation
+      REAL JETHM(MNUMYR) ! 89 Ethanol - Electric Power
+
+
+      REAL JPFIN(MNUMYR) ! 88 PET   FEEDSTOCKS   IND
+      REAL JPCIN(MNUMYR) ! 88 PET COKE           IND
+      REAL JNQLGPF(MNUMYR) !  LIQUID PETROLEUM FEEDSTOCK IN
+      REAL JSGIN(MNUMYR) ! 88 STILL GAS          IND
+      REAL JOTIN(MNUMYR) ! 88 OTHER PET          IND
+      REAL JPCEL(MNUMYR) ! 88 PET COKE           ELECTRICITY
+
+      REAL JCLCLNR(MNUMYR,NCLPR2)
+      REAL JCLELCDR(MNUMYR,2)
+
+      REAL JGFELGR(MNUMYR)  ! E UTIL FIRM NG EMISSIONS (87$/MMBTU)
+      REAL JGIELGR(MNUMYR)  ! E UTIL INTER NG EMISSION (87$/MMBTU)
+      REAL JGCELGR(MNUMYR)  ! E UTIL COMPET NG EMISSION(87$/MMBTU)
+
+! LPG breakout:
+      REAL JPRRS(MNUMYR)   !  Propane - Residential
+      REAL JPRCM(MNUMYR)   !  Propane - Commercial
+      REAL JPRTR(MNUMYR)   !  Propane - Transportation
+      REAL JETIN(MNUMYR)   !  Ethane - Industrial
+      REAL JPRIN(MNUMYR)   !  Propane - Industrial
+      REAL JBUIN(MNUMYR)   !  Butane - Industrial
+      REAL JISIN(MNUMYR)   !  Isobutane - Industrial
+      REAL JETINPF(MNUMYR) !  Ethane feedstocks - Industrial
+      REAL JPRINPF(MNUMYR) !  Propane feedstocks - Industrial
+      REAL JBUINPF(MNUMYR) !  Butane feedstocks - Industrial
+      REAL JISINPF(MNUMYR) !  Isobutane feedstocks - Industrial
+! Other breakout:
+      REAL JPPIN(MNUMYR)   !  Pentanes plus - Industrial
+      REAL JPPINPF(MNUMYR) !  Pentanes plus feedstocks - Industrial
+      REAL JLUIN(MNUMYR)   !  Lubricants - Industrial
+      REAL JAGTR(MNUMYR)   !  Aviation gasoline - Transportation
+      REAL JLUTR(MNUMYR)   !  Lubricants - Transportation
+
+!  NEMS ADJUSTMENT COMMON BLOCK
+      COMMON/EMABLK/JGFRS,JGFCM,JGFTR,JGFIN,JGFEL,JGFHM, &
+       JGIRS,JGICM,JGITR,JGIIN,JGIEL,JGIHM, &
+       JNGRS,JNGCM,JNGTR,JNGIN,JNGEL,JNGHM,JNQNGPF,JGPTR,JLPIN, &
+       JCLRS,JCLCM,JCLIN,JCLEL,JCLHM,JMCIN, &
+       JMGCM,JMGTR,JMGIN,JJFTR, &
+       JDSRS,JDSCM,JDSTR,JDSIN,JDSEL,JKSRS,JKSCM,JKSIN, &
+       JLGRS,JLGCM,JLGTR,JLGIN, &
+       JRLCM,JRLTR,JRLIN,JRLEL,JRHTR,JRHEL,JRSCM,JRSTR,JRSIN,JRSEL, &
+       JOTTR,JMETR,JETTR,JETHM,JPFIN,JPCIN,JNQLGPF,JSGIN,JOTIN,JPCEL, &
+       JCLCLNR, JCLELCDR, &
+       JGFELGR, JGIELGR, JGCELGR, &
+       JPRRS, JPRCM, JPRTR, JETIN, JPRIN, JBUIN, JISIN,  &
+       JETINPF, JPRINPF, JBUINPF, JISINPF, JPPIN, JPPINPF,  &
+       JLUIN, JAGTR, JLUTR
+
+!   Equivalence for FILER used for data storage
+      REAL EQ_EAOUT(MNUMYR*(84+NCLPR2))
+      EQUIVALENCE (EQ_EAOUT,JGFRS)
+
+!  Equivalence for coal prices

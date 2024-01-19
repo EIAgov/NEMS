@@ -1,0 +1,76 @@
+    Solution Status Keys for Each Row and Column are:  B, L, U and I.  The
+    resident solution could be basic and/or strictly complementary.  We
+    first elabaroate on the keys when the solution is basic, then when it
+    is strictly complementary.
+
+    If the resident solution is basic, B=Basic and feasible; L=Nonbasic at
+    lower bound; U=Nonbasic at upper bound; I=Infeasible (and basic).  A
+    basic partition of y=Ax is as follows (dual prices assume minimum):
+
+      Stat of column j:     B         I          L      U
+                       -------------------------------------
+                       L<=X<=U    L>X  or X>U   X=L    X=U
+                          D=0    &D=-1   &D=1   D>=0   D<=0
+                       -------------------------------------
+    Stat of row i = L     ALB        ALI        ALL    ALU      Y=L,  P>=0
+    Stat of row i = U     AUB        AUI        AUL    AUU      Y=U,  P<=0
+    Stat of row i = B     ABB        ABI        ABL    ABU   L<=Y<=U, P =0
+    Stat of row i = I     AIB        AIB        AIL    AIU   L>Y  or Y>U
+                                                            &P=-1   &P=1
+                       -------------------------------------
+
+    The basis kernel is the submatrix:
+
+                          ALB  ALI
+                          AUB  AUI
+
+    which is used to give the rates of substitution (with the RATEOF
+    command).
+
+    If the resident solution is not basic, but it is strictly
+    complementary, then it is optimal.  In that case, the partition is as
+    follows (note the strict inequalities):
+
+      Stat of column j:    B         U        L
+                       --------------------------
+                       L < X < U   X = U    X = L
+                           D = 0   D < 0    D > 0
+                       --------------------------
+    Stat of row i = L     ALB       ALU      ALL      Y = L,  P > 0 \ Active
+    Stat of row i = U     AUB       AUU      AUL      Y = U,  P < 0 / Rows
+    Stat of row i = B     ABB       ABU      ABL  L < Y < U,  P = 0
+                       --------------------------
+                       <---- Active ---->
+                             Columns
+
+    This partition is unique (i.e., every strictly complementary solution
+    has the same partition into active and inactive rows and columns).
+    For notational simplicity in the use of an optimal partition for
+    postoptimal sensitivity analysis, array displays appear as follows:
+
+        B  N  <--- Active rows (Stat=L or U)
+        B* N* <--- Inactive rows (Stat=B)
+        |  |
+        |  `--- Inactive columns (Stat=L)
+        `-- Active columns (Stat=B or U)
+
+    The status keys are determined by the optimizer.
+
+    More generally, you can use the STRING command to define a partition
+    based on STATUS and solution values.  For example, you can specify the
+    following:
+
+    STRING EPS=.000001
+    STRING XB = STAT=B D=0
+    STRING XL = STAT=L D='EPS /*
+    STRING XU = STAT=U D=-*/-'EPS
+    STRING YB = STAT=B P=0
+    STRING YL = STAT=L P GT C
+    STRING YU = STAT=U P LT C
+
+    Then, if you want the submatrix composed of active columns and active
+    rows, you would specify:
+
+    SUBMAT COL 'XB ; SUBMAT ADD COL 'XU
+    SUBMAT ROW 'YL ; SUBMAT ADD ROW 'YU
+

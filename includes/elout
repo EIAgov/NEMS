@@ -1,0 +1,123 @@
+!  $Header: m:/default/includes/RCS/elout,v 1.9 2018/07/12 18:39:17 LC2 Exp $
+!
+!  Electricity Market Module (EMM) Output Common Block
+!
+!  The dimension parameters are in the common blocks parametr & emmparm.
+!
+!  The following INCLUDE statements access these common blocks:
+!     INCLUDE(PARAMETR)
+!     INCLUDE(EMMPARM)
+!
+!     EMM Output Variables by Plant Group
+!
+      REAL*4 ULCAPC(EMM_D_GRP)                  ! Summer Capacity by Plant Group
+      REAL*4 ULRETC(EMM_D_GRP)                  ! Retirements by Plant Group
+      REAL*4 ULCSTR(EFD_D_MSP,EMM_D_GRP)          ! Unit Cost by Plant Group and Seasonal Period
+      REAL*4 ULGENE(EFD_D_FPP,EMM_D_GRP)          ! Generation by Plant Group and Fuel Type
+      REAL*4 ULGENS(EFD_D_MSP,EMM_D_GRP)          ! Generation by Plant Group and Season   
+      REAL*4 ULBTUE(EFD_D_FPP,EMM_D_GRP)          ! Consumption by Plant Group and Fuel Type
+      REAL*4 ULFLCST(EFD_D_FPP,EMM_D_GRP)         ! Fuel Cost by Plant Group and Fuel Type
+      REAL*4 ULNOXW(EFD_D_FPP,EMM_D_GRP)          ! NOX Emissions by Plant Group and Fuel Type
+      REAL*4 ULSO2W(EFD_D_FPP,EMM_D_GRP)          ! SO2 Emissions by Plant Group and Fuel Type
+      REAL*4 ULCO2W(EFD_D_FPP,EMM_D_GRP)          ! CO2 Emissions by Plant Group and Fuel Type
+      REAL*4 ULCARW(EFD_D_FPP,EMM_D_GRP)          ! Carbon Emissions by Plant Group and Fuel Type
+      REAL*4 ULHGQ(EFD_D_FPP,EMM_D_GRP)           ! Mercury Emissions by Plant Group and Fuel Type
+!
+      REAL*8 ULREVS(EMM_D_GRP)                  ! Revenues by Plant Group
+      REAL*8 ULENGREVS(EMM_D_GRP)               ! Revenues by Plant Group from energy prices only
+      REAL*4 ULVCST(EMM_D_GRP)                  ! Variable Costs by Plant Group
+      REAL*4 ULFCST(EMM_D_GRP)                  ! Fixed Costs by Plant Group
+      REAL*4 ULSO2P(EMM_D_GRP)                  ! SO2 Penalty Cost by Plant Group
+      REAL*4 ULHGP(EMM_D_GRP)                   ! Mercury Penalty Cost by Plant Group
+      REAL*4 ULNOXP(EMM_D_GRP)                  ! NOX Penalty Cost by Plant Group
+      REAL*4 ULRPSP(EMM_D_GRP)                  ! RPS Penalty Cost/Revenue by Plant Group
+      REAL*4 ULCCST(EMM_D_GRP)                  ! Minimum Capacity Payment Desired
+      REAL*4 ULTGEN(EMM_D_GRP)                  ! Generation by Plant Group
+      REAL*4 ULTGEN_ECP(EMM_D_GRP,ECP_D_XPH)      ! Expected Generation by Plant Group and ECP Period
+      REAL*4 ELSO2P(EFD_D_MSP,EMM_D_GRP)          ! SO2 Penalty Cost by Plant Group
+      REAL*4 ELHGP(EFD_D_MSP,EMM_D_GRP)           ! Mercury Penalty Cost by Plant Group
+      REAL*4 ELNOXP(EFD_D_MSP,EMM_D_GRP)          ! NOX Penalty Cost by Plant Group
+      REAL*4 ELRPSP(EFD_D_MSP,EMM_D_GRP)          ! RPS Penalty Cost/Revenue by Plant Group
+      REAL*4 ELGENE(EFD_D_MVS,EFD_D_MSP,EMM_D_GRP)  ! Generation by Plant Group and Time Slice
+      REAL*4 ELGENP(EFD_D_MVS,EFD_D_MSP,MNUMNR)   ! Generation Price by Group and Time Slice
+      REAL*4 ELFLSH(EFD_D_MSP,EMM_D_GRP,EFD_D_FPP)  ! Fuel shares by Season and Group 
+
+      REAL*4 ULSCAP_ECP(EMM_D_GRP,ECP_D_XPH)      ! Average Annual Capacity by Plant Group and Explicit Planning Period
+      REAL*4 ULHTRT_ECP(EMM_D_GRP,ECP_D_XPH)      ! Average Annual Heatrate (Normalized) by Plant Group and Explicit Planning Period
+
+      REAL*4 ULSCAP_EFD(EMM_D_GRP,EFD_D_MSP)      ! Average EFD Seasonal Capacity by Plant Group
+      REAL*4 ULHTRT_EFD(EMM_D_GRP,EFD_D_MSP)      ! Average EFD Seasonal Heatrate (Normalized) by Plant Group
+!
+!     Trade Data
+!
+      REAL*4 ULFDXE(MNUMNR)             ! Firm Domestic Exports - Energy
+      REAL*4 ULFDXR(MNUMNR)             ! Firm Domestic Exports - Revenues
+      REAL*4 ULFDME(MNUMNR)             ! Firm Domestic Imports - Energy
+      REAL*4 ULFDMR(MNUMNR)             ! Firm Domestic Imports - Revenues
+      REAL*4 ULFIXE(MNUMNR)             ! Firm International Exports - Energy
+      REAL*4 ULFIXR(MNUMNR)             ! Firm International Exports - Revenues
+      REAL*4 ULFIME(MNUMNR)             ! Firm International Imports - Energy
+      REAL*4 ULFIMR(MNUMNR)             ! Firm International Imports - Revenues
+      REAL*4 ULEDXE(MNUMNR)             ! Economy Domestic Exports - Energy
+      REAL*4 ULEDXR(MNUMNR)             ! Economy Domestic Exports - Revenues
+      REAL*4 ULEDME(MNUMNR)             ! Economy Domestic Imports - Energy
+      REAL*4 ULEDMR(MNUMNR)             ! Economy Domestic Imports - Revenues
+      REAL*4 ULEIXE(MNUMNR)             ! Economy International Exports - Energy
+      REAL*4 ULEIXR(MNUMNR)             ! Economy International Exports - Revenues
+      REAL*4 ULEIME(MNUMNR)             ! Economy International Imports - Energy
+      REAL*4 ULEIMR(MNUMNR)             ! Economy International Imports - Revenues
+!
+!     Balance Data
+!
+      REAL*4 ULOWNE(EFD_D_OWN,MNUMNR)     ! Own Use by Ownership Type
+      REAL*4 ULNELD(MNUMNR)             ! Net Energy for Load
+      REAL*4 ULLOSE(MNUMNR)             ! Transmission and Distribution Losses
+      REAL*4 ULELRS(MNUMNR)             ! Residential Demand by EMM Region
+      REAL*4 ULELCM(MNUMNR)             ! Commercial Demand by EMM Region
+      REAL*4 ULELIN(MNUMNR)             ! Industrial Demand by EMM Region
+      REAL*4 ULELTR(MNUMNR)             ! Transportation Demand by EMM Region
+      REAL*4 ULEPRS(MNUMNR)             ! Residential Electricity Prices by EMM Region Record
+      REAL*4 ULEPCM(MNUMNR)             ! Commercial Electricity Prices by EMM Region Record
+      REAL*4 ULEPIN(MNUMNR)             ! Industrial Electricity Prices by EMM Region Record
+      REAL*4 ULEPTR(MNUMNR)             ! Transportation Electricity Prices by EMM Region Record
+      REAL*4 ULEPAS(MNUMNR)             ! Average Electricity Prices by EMM Region Record
+      REAL*4 ULEPCP(MNUMNR)             ! Capital Component of Prices by EMM Region Record
+      REAL*4 ULEPFL(MNUMNR)             ! Fuel Component of Prices by EMM Region Record
+      REAL*4 ULEPOM(MNUMNR)             ! O&M Component of Prices by EMM Region Record
+      REAL*4 ULEPWP(MNUMNR)             ! Wholesale Power Component of Prices by EMM Region Record
+!
+!     ELOUT Common Block
+!
+      COMMON /ELOUT/ ULCAPC, ULRETC, ULCSTR, ULGENE, ULGENS, ULBTUE, ULFLCST, ULNOXW, &
+             ULSO2W, ULCO2W, ULCARW, ULHGQ,  ULFDXE, ULFDXR, ULFDME, ULFDMR, &
+             ULFIXE, ULFIXR, ULFIME, ULFIMR, ULEDXE, ULEDXR, ULEDME, &
+             ULEDMR, ULEIXE, ULEIXR, ULEIME, ULEIMR, ULOWNE, ULNELD, &
+             ULLOSE, ULELRS, ULELCM, ULELIN, ULELTR, ULEPRS, ULEPCM, &
+             ULEPIN, ULEPTR, ULEPAS, ULEPCP, ULEPFL, ULEPOM, ULEPWP, &
+             ULREVS, ULENGREVS, ULVCST, ULFCST, ULSO2P, ULHGP,  ULCCST, ULTGEN, ELSO2P, ELHGP, &
+             ELGENE, ELGENP, ELFLSH, ULNOXP, ELNOXP, ULRPSP, ELRPSP, ULSCAP_ECP, ULHTRT_ECP, ULSCAP_EFD, ULHTRT_EFD, ULTGEN_ECP
+!
+!     Calculate Storage Requirement
+!
+      INTEGER*4 ULSIZE
+      PARAMETER (ULSIZE =  12 * 4 * EMM_D_GRP + &
+                            3 * 4 * EMM_D_GRP * ECP_D_XPH + &
+                            2 * 4 * EMM_D_GRP * EFD_D_MSP + &
+                            6 * 4 * EFD_D_MSP * EMM_D_GRP + &
+                            1 * 4 * EFD_D_MVS * EFD_D_MSP * EMM_D_GRP + &
+                            1 * 4 * EFD_D_MVS * EFD_D_MSP * MNUMNR + &
+                            8 * 4 * EFD_D_FPP * EMM_D_GRP + &
+                            1 * 4 * EFD_D_FPP * EMM_D_GRP * EFD_D_MSP + &
+                           31 * 4 * MNUMNR + &
+                            1 * 4 * EFD_D_OWN * MNUMNR)
+
+!     Heatrate Adjustment Factors
+
+      INTEGER*4 MAX_KNOTS
+      PARAMETER (MAX_KNOTS = 11)
+
+      REAL*8 FLRG_HR_EFF(EFD_D_MFRG,ECP_D_CAP,MAX_KNOTS)
+      REAL*8 FLRG_HR_LL(EFD_D_MFRG,ECP_D_CAP,MAX_KNOTS)
+      INTEGER*4 FLRG_HR_KNOTS(EFD_D_MFRG,ECP_D_CAP)
+
+      COMMON/FLRG_HR_ADJ/FLRG_HR_EFF, FLRG_HR_LL, FLRG_HR_KNOTS

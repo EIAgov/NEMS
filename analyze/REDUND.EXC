@@ -1,0 +1,38 @@
+$ This will look for redundancies, and if there are any, the
+$ ranges are shown (use RATEOF command to see rates as well).
+$ Afterwards, we INTERPRT REDUND to instantiate a rule file for the
+$ rates that determine the redundancies.
+$
+$        Note the following (and abort at the pause)
+$        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ SWITCH SYNTAX to see syntax with displays (after reading syntax file).
+$ This uses the RATEOF command, so you cannot have the Views version.
+$ Blocks will be erased.
+_PAUSE
+* CLEAR BLOCKS
+ BL C E *
+ BL R E *
+*  SET SUBMATRIX
+ SUB *
+ BAS RED
+ SUB CLEAR
+* PUT REDUNDANT COLUMNS INTO SUBMATRIX
+ BL C C F RED.LO
+ BL C C F RED.UP
+ BL C C F RED.FR
+$ Column redundancy...
+_PAUSE
+ D C //LEV,LO,UP
+ RAT //RANGE
+* PUT REDUNDANT ROWS INTO SUBMATRIX
+ BL R C F RED.LO
+ BL R C F RED.UP
+ BL R C F RED.FR
+_PAUSE
+$ Row redundancy...
+ D R //LEV,LO,UP
+ RAT //RANGE
+_PAUSE Ready to INTERPRT
+* SUBMATRIX CONTAINS ALL REDUNDANCIES
+ INTERP REDUND
+ RETURN QUIETLY

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="FTABDB">
+    <xs:complexType>
+     <xs:element name="Study" maxOccurs="unbounded">
+       <xs:complexType>
+         <xs:sequence>
+           <xs:element name="StudyID" type="xs:string"/>
+           <xs:element name="LongTitle" type="xs:string"/>
+           <xs:element name="Case" maxOccurs="unbounded">
+             <xs:complexType>
+               <xs:sequence>
+                 <xs:element name="StudyID"         type="xs:string"/>
+                 <xs:element name="CaseDescription" type="xs:string" minOccurs="0"/>
+                 <xs:element name="ScenLabel"       type="xs:string" minOccurs="0"/>
+                 <xs:element name="Scenario"        type="xs:string"/>
+                 <xs:element name="Run"             maxOccurs="unbounded">
+                   <xs:complexType>
+                     <xs:sequence>
+                        <xs:element name="StudyID"  type="xs:string"/>
+                        <xs:element name="Scenario" type="xs:string"/>
+                        <xs:element name="Datekey"  type="xs:string"/>
+                        <xs:element name="ScenDate" type="xs:string"/>
+                        <xs:element name="Table" maxOccurs="unbounded">
+                          <xs:complexType>
+                            <xs:sequence>
+                              <xs:element name="TabKey" type="xs:string"/>
+                              <xs:element name="Scenario" type="xs:string"/>
+                              <xs:element name="Datekey" type="xs:string"/>
+                              <xs:element name="TableNumber" type="xs:string"/>
+                              <xs:element name="Title" type="xs:string"/>
+                              <xs:element name="SubTitle" type="xs:string"/>
+                              <xs:element name="Stubhead" type="xs:string" minOccurs="0"/>
+                              <xs:element name="Region" type="xs:string" minOccurs="0"/>
+                              <xs:element name="RegionNum" type="xs:int" minOccurs="0"/>
+                              <xs:element name="Row" type="RowType" maxOccurs="unbounded"/>
+                              <xs:element name="Foot" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                  <xs:sequence>
+                                    <xs:element name="TabKey" type="xs:string"/>
+                                    <xs:element name="Scenario" type="xs:string"/>
+                                    <xs:element name="Datekey" type="xs:string"/>
+                                    <xs:element name="FootNum" type="xs:string"/>
+                                    <xs:element name="FootNote" type="xs:string"/>
+                                  </xs:sequence>
+                                </xs:complexType>
+                              </xs:element>
+                            </xs:sequence>
+                          </xs:complexType>
+                        </xs:element>
+                     </xs:sequence>
+                   </xs:complexType>
+                 </xs:element>
+               </xs:sequence>
+             </xs:complexType>
+           </xs:element>
+         </xs:sequence>
+       </xs:complexType>
+     </xs:element>
+     <xs:attribute name="version" type="xs:string"/>
+     <xs:attribute name="author" type="xs:string"/>
+   </xs:complexType>
+  </xs:element>
+  
+  <xs:complexType name="RowType">
+    <xs:sequence>
+      <xs:element name="TabKey" type="xs:string"/>
+      <xs:element name="Scenario" type="xs:string"/>
+      <xs:element name="Datekey" type="xs:string"/>
+      <xs:element name="RowNum" type="xs:string"/>
+      <xs:element name="ID"     type="xs:string"  minOccurs="0"/>
+      <xs:element name="Stub"   type="xs:string"  minOccurs="0"/>
+      <xs:element name="RowFmt" type="xs:int"     minOccurs="0"/>
+      <xs:element name="GLabel" type="xs:string"/>
+      <xs:element name="GUnits" type="xs:string"/>
+      <xs:element name="DaType" type="xs:string"/>
+      <xs:element name="Sector" type="xs:string"/>
+      <xs:element name="SubSec" type="xs:string"/>
+      <xs:element name="SubSub" type="xs:string"/>
+      <xs:element name="Source" type="xs:string"/>
+      <xs:element name="Geogra" type="xs:string"/>
+      <xs:element name="Y1990"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1991"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1992"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1993"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1994"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1995"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1996"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1997"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1998"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y1999"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2000"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2001"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2002"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2003"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2004"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2005"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2006"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2007"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2008"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2009"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2010"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2011"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2012"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2013"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2014"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2015"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2016"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2017"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2018"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2019"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2020"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2021"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2022"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2023"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2024"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2025"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2026"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2027"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2028"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2029"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2030"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2031"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2032"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2033"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2034"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2035"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2036"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2037"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2038"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2039"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2040"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2041"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2042"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2043"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2044"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2045"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2046"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2047"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2048"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2049"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Y2050"  type="xs:decimal" minOccurs="0"/>
+      <xs:element name="Growth" type="xs:decimal" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="Font">
+      <xs:simpleType>
+         <xs:restriction base="xs:string">
+            <xs:enumeration value="Plain"/>
+            <xs:enumeration value="Bold"/>
+            <xs:enumeration value="Italic"/>
+         </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+</xs:schema>

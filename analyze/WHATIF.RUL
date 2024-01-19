@@ -1,0 +1,173 @@
+* WHATIF.RUL
+$IF @%%1 = @ THEN GOTO HELP
+$IF @%%1 <> @WHATIF THEN GOTO SETPRM
+INCLUDE SHIFT.RUL
+:SETPRM
+$SET WHAT  = %%1
+$SET ROWCOL= %%2
+$SET NAME  = %%3
+$SET VALUE = %%4
+$SET BEGIN = Y
+
+$IF @%%WHAT   = @ THEN GOTO HELP
+$IF @%%ROWCOL = @ THEN GOTO HELP
+$IF %%ROWCOL(1:1) <> R THEN SKIP 2
+$SET ROWCOL = ROW
+$SKIP 2
+$IF %%ROWCOL(1:1) <> C THEN GOTO HELP
+$SET ROWCOL = COL
+
+$IF @%%NAME   = @ THEN GOTO HELP
+$IF @%%VALUE  = @ THEN GOTO HELP
+$SET B = %%VALUE
+$SET A = 0
+$IF @%%5 = @ THEN GOTO VSet
+$SET A = %%B
+$SET B = 0
+$IF %%A <> %%WHAT THEN SKIP 4
+$SET A = 1
+$SET OP= %%5
+$SET B = %%6
+$SKIP 2
+$SET OP= %%6
+$SET B = %%7
+
+$IF @%%OP = @- THEN CALC B = 0 - %%B
+:VSet
+* We have value = A * w + B  (w = L|U)
+* CHECK THAT A AND B ARE NUMERIC
+$CALC A = A + 0
+$CALC B = B + 0
+INCLUDE SETBASIS.RUL
+$VECTOR CLEAR
+$IF %%NAME = SUBMAT THEN SKIP 3
+$IF @%%NAME = @*    THEN SKIP 2
+$ANALYZE SUB %%ROWCOL %%NAME S=%%WHAT
+$GOTO SubSet
+* Use submatrix, but first remove those without status = what
+$ANALYZE SUB DEL %%ROWCOL * S=BI
+$IF %%WHAT = L THEN ANALYZE SUB DEL %%ROWCOL * S=U
+$IF %%WHAT = U THEN ANALYZE SUB DEL %%ROWCOL * S=L
+
+:SubSet
+$IF %%ROWCOL = ROW THEN ANALYZE SUB COL *
+$IF %%ROWCOL = COL THEN ANALYZE SUB ROW *
+$ANALYZE SUB SET
+* Submatrix is set.
+$SET V = %%B
+$CALC A = A - 1
+* NOW A w + B = CHANGE VALUE (HAVING SUBTRACTED w BY DECREMENTING A)
+$IF %%A <> 0 THEN GOTO %%ROWCOL
+  All nonbasic levels change by %%B .
+$TEXT
+$GOTO %%ROWCOL
+
+:COL
+$IF %NCOLS > 0 THEN SKIP 2
+  No columns in submatrix with STAT=%%WHAT .
+$EXIT
+
+$LOOP
+$IF %%A = 0 THEN SKIP 4
+$IF %%WHAT = L THEN SET W = %VCOLLO
+$IF %%WHAT = U THEN SET W = %VCOLUP
+$CALC W = W * %%A
+$CALC V = %%B + %%W
+$IF %%A = 0 THEN SKIP 2
+  Change in %%WHAT of %COLUMN = %%V .
+$TEXT
+$IF %%V <> 0 THEN VECTOR ADD COL %COLUMN * %%V
+$NEXT COL
+$GOTO RATE
+
+:ROW
+$IF %NROWS > 0 THEN SKIP 2
+  No rows in submatrix with STAT=%%WHAT .
+$EXIT
+
+$LOOP
+$IF %%WHAT = L THEN SET W = %VROWLO
+$IF %%WHAT = U THEN SET W = %VROWUP
+$CALC W = W * %%A
+$CALC V = %%B + %%W
+$IF %%A = 0 THEN SKIP 2
+  Change in %%WHAT of %ROW = %%V .
+$TEXT
+
+$IF %%V = 0 THEN SKIP LOOP
+* RATE = -UNIT VECTOR, SO
+$CALC V = 0 - %%V
+$VECTOR ADD %ROW = %%V
+$NEXT ROW
+
+:RATE
+* NOW VECTOR = CHANGE VEC
+$VECTOR RATE
+* NOW VECTOR = FTRAN(CHANGE VEC)
+$SET N=%NVECTOR
+$IF %%N > 0 THEN SKIP 2
+  No basic level is affected by the change.
+$EXIT
+
+  The change affects the levels of the following basic variables.
+$TEXT 1 M=3
+* SET TABS
+$SET T1 = %NAMELN
+$CALC T1 = T1 + 2
+$SET T2 = %%T1
+$CALC T2 = T2 + 14
+$SET T3 = %%T2
+$CALC T3 = T3 + 16
+$SET T4 = %%T3
+$CALC T4 = T4 + 2
+$SET T5 = %%T4
+$CALC T5 = T5 + 13
+$TEXT TAB = %%T1, %%T2, %%T3, %%T4, %%T5
+
+$LOOP
+:LOOP
+$ANALYZE SUB COL %_NAME(%%N)
+$IF %NCOLS = 0 THEN GOTO TRYROW
+$SET V = %VCOLX
+$SET VL= %VCOLLO
+$SET VU= %VCOLUP
+$GOTO GOTCHA
+:TRYROW
+$ANALYZE SUB ROW %_NAME(%%N)
+$SET V = %VROWY
+$SET VL= %VROWLO
+$SET VU= %VROWUP
+
+:GOTCHA
+$SET  VX = %VECTOR(%%N)
+$CALC VX = VX + %%V
+$IF %VECTOR(%%N) < 0 THEN GOTO VECNEG
+  %_NAME(%%N) %NTAB(1)= %%VX %NTAB(2)(= %%V %NTAB(3)+%NTAB(4) %VECTOR(%%N) )
+$GOTO VECEND
+:VECNEG
+* VECTOR < 0...SEPARATE SIGN
+$SET VEC = %VECTOR(%%N)
+$CALC VEC = 0 - %%VEC
+  %_NAME(%%N) %NTAB(1)= %%VX %NTAB(2)(= %%V %NTAB(3)-%NTAB(4) %%VEC )
+:VECEND
+
+* NOTE IF INFEASIBLE
+$IF %%VX >= %%VL THEN SKIP 2
+  %NTAB(5)  !INFEASIBLE...L = %%VL
+$GOTO NEXT
+$IF %%VX <= %%VU THEN GOTO NEXT
+  %NTAB(5)  !INFEASIBLE...U = %%VU
+:NEXT
+$TEXT
+$CALC N = N - 1
+$IF %%N > 0 THEN GOTO LOOP
+$ENDLOOP
+$EXIT
+
+:HELP
+ Syntax (after WHATIF) is:
+$TEXT
+ {L|U} {ROW|COL} {name|SUBMAT} = value [ {L|U} [+ value]]
+$TEXT
+ ...See WHATIF.DOC for examples.
+$EXIT

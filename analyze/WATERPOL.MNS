@@ -1,0 +1,154 @@
+ MINOS SOLUTION FILE FROM MINOS-OL
+ MATRIX FILE: F:WATERPOL.MAT                                                  
+ SPEC   FILE: DEFAULT.SPC                                                     
+1
+ 
+          
+         ==============================
+         M I N O S    5.3    (Oct 1990)
+         ==============================
+
+ OPTIONS file
+ ------------
+      BEGIN
+      MINIMIZE                                                                
+      ROWS       200                                                          
+      COLUMNS    400                                                          
+      ELEMENTS  2000                                                          
+      END                                                                     
+
+ Reasonable WORKSPACE limits are         0 ...   12220
+ Actual     WORKSPACE limits are         0 ...   21000 ...   21000  words of  Z.
+1
+ MPS file
+ --------
+      1    NAME          WATERPOL
+      2    ROWS                  
+     12    COLUMNS               
+     28    RHS                   
+     37    RANGES                
+     38    BOUNDS                
+     39    ENDATA                
+
+
+
+ Names selected
+ --------------
+ OBJECTIVE      COST     (MIN)       1
+ RHS            RHSMODL              8
+ RANGES                              0
+ BOUNDS                              0
+
+ PARTIAL PRICE section size (A)            1
+ PARTIAL PRICE section size (I)            0
+
+ Nonzeros allowed for in LU factors    13811
+
+
+
+ Matrix statistics
+ -----------------
+               Total      Normal        Free       Fixed     Bounded
+ Rows              9           3           1           5           0
+ Columns          15          15           0           0           0
+
+ No. of matrix elements                   30     Density      22.222
+ Biggest                          1.0000E+00  (excluding fixed columns,
+ Smallest                         1.1073E-04   free rows, and RHS)
+
+ No. of objective coefficients            10
+ Biggest                          1.3133E+03  (excluding fixed columns)
+ Smallest                         3.7522E+02
+1
+ 
+ Initial basis
+ -------------
+
+ No basis file supplied
+
+
+ Scaling
+ -------
+             Min elem    Max elem       Max col ratio
+ After  0    1.11E-04    1.00E+00             9030.98
+ After  1    1.00E+00    1.00E+00                1.00
+ After  2    1.00E+00    1.00E+00                1.00
+ After  3    1.00E+00    1.00E+00                1.00
+
+            Min scale                       Max scale      Between 0.5 and 2.0
+ Col      1   1.0E+00            Col      1   1.0E+00               15   100.0
+ Row      9   1.1E-04            Row      2   1.0E+00                5    55.6
+
+ Norm of fixed columns and slacks             1.0E+02
+ (before and after row scaling)               1.0E+02
+
+
+ CRASH option   1
+ Free rows        1    Free cols      0    Unit cols        5
+ Double cols      3    LG slacks      0    Triang cols      0    Pad         0
+
+
+
+ Iterations
+ ----------
+ 
+ Itn      0 -- Feasible solution.  Objective =   1.417777330E+05
+ 
+
+    Itn       DJ  Ninf      Sinf       Objective     LU
+      1  1.1E+05     0 0.000E+00  1.36599513E+05     17
+1
+ 
+ EXIT -- OPTIMAL SOLUTION FOUND
+
+ No. of iterations                   5     Objective value      5.2781328802E+03
+
+ No. of degenerate steps             0     Percentage                        .00
+
+ Norm of X                   1.817E+00     Norm of PI                  8.206E+04
+
+ Norm of X  (unscaled)       1.201E+03     Norm of PI (unscaled)       5.237E+05
+1
+ NAME           WATERPOL              Objective value       5.2781328802E+03
+
+ Status         OPTIMAL SOLN          Iteration      5    Superbasics      0
+
+ OBJECTIVE      COST     (MIN)
+ RHS            RHSMODL 
+ RANGES                 
+ BOUNDS                 
+ 
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+      16  COST        BS      5278.13288     -5278.13288           NONE            NONE         -1.00000      1
+      17  F1       A  EQ        19.70000          .00000        19.70000        19.70000          .00000      2
+      18  F2          EQ         6.10000          .00000         6.10000         6.10000       375.22000      3
+      19  F3          EQ       250.00000          .00000       250.00000       250.00000       375.22000      4
+      20  F4       A  EQ         4.60000          .00000         4.60000         4.60000          .00000      5
+      21  F5       A  EQ        22.40000          .00000        22.40000        22.40000          .00000      6
+      22  Q1          BS          .00647          .10642           NONE           .11289          .00000      7
+      23  Q2          UL          .05783          .00000           NONE           .05783  -1570418.11409      8
+      24  Q3          BS          .00299         1.03751           NONE          1.04050          .00000      9
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  D11         BS        19.70000          .00000          .00000           NONE           .00000     10
+       2  D12         LL          .00000       562.83000          .00000           NONE        562.83000     11
+       3  D13         LL          .00000       938.05000          .00000           NONE        938.05000     12
+       4  D21      A  LL          .00000       375.22000          .00000           NONE           .00000     13
+       5  D22         BS         6.10000          .00000          .00000           NONE           .00000     14
+       6  D23         LL          .00000       562.83000          .00000           NONE        187.61000     15
+       7  D31         BS        14.06677       375.22000          .00000           NONE           .00000     16
+       8  D32         BS       235.93323          .00000          .00000           NONE           .00000     17
+       9  D33         LL          .00000       562.83000          .00000           NONE        187.61000     18
+      10  D41         LL          .00000      1125.70000          .00000           NONE       1125.70000     19
+      11  D42         LL          .00000       562.83000          .00000           NONE        562.83000     20
+      12  D43         BS         4.60000          .00000          .00000           NONE           .00000     21
+      13  D51         LL          .00000      1313.30000          .00000           NONE       1313.30000     22
+      14  D52         LL          .00000       750.44000          .00000           NONE        750.44000     23
+      15  D53         BS        22.40000          .00000          .00000           NONE           .00000     24
+ ENDRUN

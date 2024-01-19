@@ -1,0 +1,1958 @@
+monitor.in.txt  : Wait                      05:3724.334 2016  1
+                : Opening Aimms Project     05:3724.334 2016  1
+monitor.in.txt  : MainExecution             05:3724.662
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2016;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2016,iteration 1 " ;          05:3727.222 2016  1
+monitor.in.txt  : Wait                      05:3727.222 2016  1
+monitor.in.txt  : Quit                      05:3727.378 2016  1
+monitor.out.txt :    sAction := "Exited" ;  05:3728.410 2016  1
+monitor.in.txt  : Wait                      05:3745.282 2016  2
+                : Opening Aimms Project     05:3745.282 2016  2
+monitor.in.txt  : MainExecution             05:3745.673
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2016;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2016,iteration 2 " ;          05:3748.237 2016  2
+monitor.in.txt  : Wait                      05:3748.237 2016  2
+monitor.in.txt  : Quit                      05:3748.378 2016  2
+monitor.out.txt :    sAction := "Exited" ;  05:3749.411 2016  2
+monitor.in.txt  : Wait                      05:3807.216 2016  3
+                : Opening Aimms Project     05:3807.216 2016  3
+monitor.in.txt  : MainExecution             05:3807.529
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2016;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2016,iteration 3 " ;          05:3810.099 2016  3
+monitor.in.txt  : Wait                      05:3810.099 2016  3
+monitor.in.txt  : Quit                      05:3810.255 2016  3
+monitor.out.txt :    sAction := "Exited" ;  05:3811.287 2016  3
+monitor.in.txt  : Wait                      05:3828.451 2016  4
+                : Opening Aimms Project     05:3828.451 2016  4
+monitor.in.txt  : MainExecution             05:3828.749
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2016;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2016,iteration 4 " ;          05:3831.328 2016  4
+monitor.in.txt  : Wait                      05:3831.328 2016  4
+monitor.in.txt  : Quit                      05:3831.486 2016  4
+monitor.out.txt :    sAction := "Exited" ;  05:3832.517 2016  4
+monitor.in.txt  : Wait                      05:3849.776 2016  5
+                : Opening Aimms Project     05:3849.776 2016  5
+monitor.in.txt  : MainExecution             05:3850.104
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2016;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2016,iteration 5 " ;          05:3853.183 2016  5
+monitor.in.txt  : Wait                      05:3853.183 2016  5
+monitor.in.txt  : Quit                      05:3853.340 2016  5
+monitor.out.txt :    sAction := "Exited" ;  05:3853.855 2016  5
+monitor.in.txt  : Wait                      05:3922.989 2016  6
+                : Opening Aimms Project     05:3922.989 2016  6
+monitor.in.txt  : MainExecution             05:3923.286
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2016;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2016,iteration 6 " ;          05:3925.865 2016  6
+monitor.in.txt  : Wait                      05:3925.865 2016  6
+monitor.in.txt  : Quit                      05:3926.005 2016  6
+monitor.out.txt :    sAction := "Exited" ;  05:3927.038 2016  6
+monitor.in.txt  : Wait                      05:3930.821 2017  1
+                : Opening Aimms Project     05:3930.837 2017  1
+monitor.in.txt  : MainExecution             05:3931.165
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2017;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2017,iteration 1 " ;          05:3934.260 2017  1
+monitor.in.txt  : Wait                      05:3934.260 2017  1
+monitor.in.txt  : Quit                      05:3934.417 2017  1
+monitor.out.txt :    sAction := "Exited" ;  05:3935.448 2017  1
+monitor.in.txt  : Wait                      05:3952.819 2017  2
+                : Opening Aimms Project     05:3952.819 2017  2
+monitor.in.txt  : MainExecution             05:3953.132
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2017;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2017,iteration 2 " ;          05:3956.212 2017  2
+monitor.in.txt  : Wait                      05:3956.212 2017  2
+monitor.in.txt  : Quit                      05:3956.353 2017  2
+monitor.out.txt :    sAction := "Exited" ;  05:3956.869 2017  2
+monitor.in.txt  : Wait                      05:4014.975 2017  3
+                : Opening Aimms Project     05:4014.975 2017  3
+monitor.in.txt  : MainExecution             05:4015.303
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2017;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2017,iteration 3 " ;          05:4018.383 2017  3
+monitor.in.txt  : Wait                      05:4018.383 2017  3
+monitor.in.txt  : Quit                      05:4018.523 2017  3
+monitor.out.txt :    sAction := "Exited" ;  05:4019.557 2017  3
+monitor.in.txt  : Wait                      05:4036.847 2017  4
+                : Opening Aimms Project     05:4036.847 2017  4
+monitor.in.txt  : MainExecution             05:4037.175
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2017;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2017,iteration 4 " ;          05:4040.254 2017  4
+monitor.in.txt  : Wait                      05:4040.254 2017  4
+monitor.in.txt  : Quit                      05:4040.411 2017  4
+monitor.out.txt :    sAction := "Exited" ;  05:4041.442 2017  4
+monitor.in.txt  : Wait                      05:4058.937 2017  5
+                : Opening Aimms Project     05:4058.937 2017  5
+monitor.in.txt  : MainExecution             05:4059.468
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2017;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2017,iteration 5 " ;          05:4103.063 2017  5
+monitor.in.txt  : Wait                      05:4103.063 2017  5
+monitor.in.txt  : Quit                      05:4103.220 2017  5
+monitor.out.txt :    sAction := "Exited" ;  05:4104.251 2017  5
+monitor.in.txt  : Wait                      05:4134.049 2017  6
+                : Opening Aimms Project     05:4134.049 2017  6
+monitor.in.txt  : MainExecution             05:4134.345
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2017;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2017,iteration 6 " ;          05:4137.425 2017  6
+monitor.in.txt  : Wait                      05:4137.425 2017  6
+monitor.in.txt  : Quit                      05:4137.581 2017  6
+monitor.out.txt :    sAction := "Exited" ;  05:4138.097 2017  6
+monitor.in.txt  : Wait                      05:4151.824 2018  1
+                : Opening Aimms Project     05:4151.824 2018  1
+monitor.in.txt  : MainExecution             05:4152.496
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2018;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2018,iteration 1 " ;          05:4155.074 2018  1
+monitor.in.txt  : Wait                      05:4155.074 2018  1
+monitor.in.txt  : Quit                      05:4155.215 2018  1
+monitor.out.txt :    sAction := "Exited" ;  05:4156.246 2018  1
+monitor.in.txt  : Wait                      05:4223.447 2018  2
+                : Opening Aimms Project     05:4223.447 2018  2
+monitor.in.txt  : MainExecution             05:4223.744
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2018;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2018,iteration 2 " ;          05:4226.826 2018  2
+monitor.in.txt  : Wait                      05:4226.826 2018  2
+monitor.in.txt  : Quit                      05:4226.982 2018  2
+monitor.out.txt :    sAction := "Exited" ;  05:4227.498 2018  2
+monitor.in.txt  : Wait                      05:4254.089 2018  3
+                : Opening Aimms Project     05:4254.089 2018  3
+monitor.in.txt  : MainExecution             05:4254.386
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2018;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2018,iteration 3 " ;          05:4256.950 2018  3
+monitor.in.txt  : Wait                      05:4256.950 2018  3
+monitor.in.txt  : Quit                      05:4257.107 2018  3
+monitor.out.txt :    sAction := "Exited" ;  05:4258.138 2018  3
+monitor.in.txt  : Wait                      05:4325.294 2018  4
+                : Opening Aimms Project     05:4325.294 2018  4
+monitor.in.txt  : MainExecution             05:4325.591
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2018;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2018,iteration 4 " ;          05:4328.670 2018  4
+monitor.in.txt  : Wait                      05:4328.671 2018  4
+monitor.in.txt  : Quit                      05:4328.812 2018  4
+monitor.out.txt :    sAction := "Exited" ;  05:4329.328 2018  4
+monitor.in.txt  : Wait                      05:4356.293 2018  5
+                : Opening Aimms Project     05:4356.293 2018  5
+monitor.in.txt  : MainExecution             05:4356.591
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2018;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2018,iteration 5 " ;          05:4359.672 2018  5
+monitor.in.txt  : Wait                      05:4359.672 2018  5
+monitor.in.txt  : Quit                      05:4359.813 2018  5
+monitor.out.txt :    sAction := "Exited" ;  05:4400.844 2018  5
+monitor.in.txt  : Wait                      05:4429.685 2018  6
+                : Opening Aimms Project     05:4429.685 2018  6
+monitor.in.txt  : MainExecution             05:4429.967
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2018;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2018,iteration 6 " ;          05:4432.530 2018  6
+monitor.in.txt  : Wait                      05:4432.530 2018  6
+monitor.in.txt  : Quit                      05:4432.687 2018  6
+monitor.out.txt :    sAction := "Exited" ;  05:4433.718 2018  6
+monitor.in.txt  : Wait                      05:4446.907 2019  1
+                : Opening Aimms Project     05:4446.907 2019  1
+monitor.in.txt  : MainExecution             05:4447.204
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2019;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2019,iteration 1 " ;          05:4450.269 2019  1
+monitor.in.txt  : Wait                      05:4450.269 2019  1
+monitor.in.txt  : Quit                      05:4450.425 2019  1
+monitor.out.txt :    sAction := "Exited" ;  05:4450.941 2019  1
+monitor.in.txt  : Wait                      05:4517.961 2019  2
+                : Opening Aimms Project     05:4517.961 2019  2
+monitor.in.txt  : MainExecution             05:4518.258
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2019;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2019,iteration 2 " ;          05:4521.338 2019  2
+monitor.in.txt  : Wait                      05:4521.338 2019  2
+monitor.in.txt  : Quit                      05:4521.479 2019  2
+monitor.out.txt :    sAction := "Exited" ;  05:4521.996 2019  2
+monitor.in.txt  : Wait                      05:4549.026 2019  3
+                : Opening Aimms Project     05:4549.042 2019  3
+monitor.in.txt  : MainExecution             05:4549.370
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2019;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2019,iteration 3 " ;          05:4551.934 2019  3
+monitor.in.txt  : Wait                      05:4551.934 2019  3
+monitor.in.txt  : Quit                      05:4552.074 2019  3
+monitor.out.txt :    sAction := "Exited" ;  05:4553.106 2019  3
+monitor.in.txt  : Wait                      05:4620.886 2019  4
+                : Opening Aimms Project     05:4620.886 2019  4
+monitor.in.txt  : MainExecution             05:4621.229
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2019;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2019,iteration 4 " ;          05:4623.809 2019  4
+monitor.in.txt  : Wait                      05:4623.809 2019  4
+monitor.in.txt  : Quit                      05:4623.965 2019  4
+monitor.out.txt :    sAction := "Exited" ;  05:4624.996 2019  4
+monitor.in.txt  : Wait                      05:4651.949 2019  5
+                : Opening Aimms Project     05:4651.949 2019  5
+monitor.in.txt  : MainExecution             05:4652.293
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2019;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2019,iteration 5 " ;          05:4654.871 2019  5
+monitor.in.txt  : Wait                      05:4654.871 2019  5
+monitor.in.txt  : Quit                      05:4655.012 2019  5
+monitor.out.txt :    sAction := "Exited" ;  05:4656.043 2019  5
+monitor.in.txt  : Wait                      05:4726.071 2019  6
+                : Opening Aimms Project     05:4726.071 2019  6
+monitor.in.txt  : MainExecution             05:4726.430
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2019;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2019,iteration 6 " ;          05:4728.996 2019  6
+monitor.in.txt  : Wait                      05:4728.996 2019  6
+monitor.in.txt  : Quit                      05:4729.137 2019  6
+monitor.out.txt :    sAction := "Exited" ;  05:4730.168 2019  6
+monitor.in.txt  : Wait                      05:4749.636 2020  1
+                : Opening Aimms Project     05:4749.636 2020  1
+monitor.in.txt  : MainExecution             05:4749.948
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2020;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2020,iteration 1 " ;          05:4805.346 2020  1
+monitor.in.txt  : Wait                      05:4805.346 2020  1
+monitor.in.txt  : Quit                      05:4805.486 2020  1
+monitor.out.txt :    sAction := "Exited" ;  05:4846.054 2020  1
+monitor.in.txt  : Wait                      05:4904.486 2020  2
+                : Opening Aimms Project     05:4904.486 2020  2
+monitor.in.txt  : MainExecution             05:4904.799
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2020;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2020,iteration 2 " ;          05:4920.191 2020  2
+monitor.in.txt  : Wait                      05:4920.191 2020  2
+monitor.in.txt  : Quit                      05:4920.331 2020  2
+monitor.out.txt :    sAction := "Exited" ;  05:5001.387 2020  2
+monitor.in.txt  : Wait                      05:5020.777 2020  3
+                : Opening Aimms Project     05:5020.777 2020  3
+monitor.in.txt  : MainExecution             05:5021.090
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2020;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2020,iteration 3 " ;          05:5036.488 2020  3
+monitor.in.txt  : Wait                      05:5036.488 2020  3
+monitor.in.txt  : Quit                      05:5036.644 2020  3
+monitor.out.txt :    sAction := "Exited" ;  05:5117.211 2020  3
+monitor.in.txt  : Wait                      05:5136.033 2020  4
+                : Opening Aimms Project     05:5136.033 2020  4
+monitor.in.txt  : MainExecution             05:5136.346
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2020;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2020,iteration 4 " ;          05:5223.056 2020  4
+monitor.in.txt  : Wait                      05:5223.056 2020  4
+monitor.in.txt  : Quit                      05:5223.197 2020  4
+monitor.out.txt :    sAction := "Exited" ;  05:5233.439 2020  4
+monitor.in.txt  : Wait                      05:5304.783 2020  5
+                : Opening Aimms Project     05:5304.783 2020  5
+monitor.in.txt  : MainExecution             05:5305.080
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2020;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2020,iteration 5 " ;          05:5353.308 2020  5
+monitor.in.txt  : Wait                      05:5353.308 2020  5
+monitor.in.txt  : Quit                      05:5353.449 2020  5
+monitor.out.txt :    sAction := "Exited" ;  05:5403.204 2020  5
+monitor.in.txt  : Wait                      05:5432.611 2020  6
+                : Opening Aimms Project     05:5432.611 2020  6
+monitor.in.txt  : MainExecution             05:5432.955
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2020;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2020,iteration 6 " ;          05:5512.005 2020  6
+monitor.in.txt  : Wait                      05:5512.005 2020  6
+monitor.in.txt  : Quit                      05:5512.131 2020  6
+monitor.out.txt :    sAction := "Exited" ;  05:5513.162 2020  6
+monitor.in.txt  : Wait                      05:5525.949 2021  1
+                : Opening Aimms Project     05:5525.949 2021  1
+monitor.in.txt  : MainExecution             05:5526.325
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2021;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2021,iteration 1 " ;          05:5537.097 2021  1
+monitor.in.txt  : Wait                      05:5537.112 2021  1
+monitor.in.txt  : Quit                      05:5537.128 2021  1
+monitor.out.txt :    sAction := "Exited" ;  05:5611.506 2021  1
+monitor.in.txt  : Wait                      05:5633.334 2021  2
+                : Opening Aimms Project     05:5633.334 2021  2
+monitor.in.txt  : MainExecution             05:5633.662
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2021;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2021,iteration 2 " ;          05:5645.984 2021  2
+monitor.in.txt  : Wait                      05:5645.984 2021  2
+monitor.in.txt  : Quit                      05:5645.984 2021  2
+monitor.out.txt :    sAction := "Exited" ;  05:5718.816 2021  2
+monitor.in.txt  : Wait                      05:5740.505 2021  3
+                : Opening Aimms Project     05:5740.505 2021  3
+monitor.in.txt  : MainExecution             05:5740.818
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2021;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2021,iteration 3 " ;          05:5824.434 2021  3
+monitor.in.txt  : Wait                      05:5824.434 2021  3
+monitor.in.txt  : Quit                      05:5824.434 2021  3
+monitor.out.txt :    sAction := "Exited" ;  05:5828.544 2021  3
+monitor.in.txt  : Wait                      05:5904.205 2021  4
+                : Opening Aimms Project     05:5904.205 2021  4
+monitor.in.txt  : MainExecution             05:5904.518
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2021;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2021,iteration 4 " ;          05:5915.820 2021  4
+monitor.in.txt  : Wait                      05:5915.820 2021  4
+monitor.in.txt  : Quit                      05:5915.820 2021  4
+monitor.out.txt :    sAction := "Exited" ;  05:5949.192 2021  4
+monitor.in.txt  : Wait                      06:0011.818 2021  5
+                : Opening Aimms Project     06:0011.818 2021  5
+monitor.in.txt  : MainExecution             06:0012.130
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2021;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2021,iteration 5 " ;          06:0055.887 2021  5
+monitor.in.txt  : Wait                      06:0055.887 2021  5
+monitor.in.txt  : Quit                      06:0055.887 2021  5
+monitor.out.txt :    sAction := "Exited" ;  06:0058.953 2021  5
+monitor.in.txt  : Wait                      06:0129.640 2021  6
+                : Opening Aimms Project     06:0129.640 2021  6
+monitor.in.txt  : MainExecution             06:0130.047
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2021;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2021,iteration 6 " ;          06:0207.017 2021  6
+monitor.in.txt  : Wait                      06:0207.017 2021  6
+monitor.in.txt  : Quit                      06:0207.017 2021  6
+monitor.out.txt :    sAction := "Exited" ;  06:0208.050 2021  6
+monitor.in.txt  : Wait                      06:0222.567 2022  1
+                : Opening Aimms Project     06:0222.567 2022  1
+monitor.in.txt  : MainExecution             06:0222.879
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2022;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2022,iteration 1 " ;          06:0229.036 2022  1
+monitor.in.txt  : Wait                      06:0229.036 2022  1
+monitor.in.txt  : Quit                      06:0229.036 2022  1
+monitor.out.txt :    sAction := "Exited" ;  06:0230.067 2022  1
+monitor.in.txt  : Wait                      06:0252.636 2022  2
+                : Opening Aimms Project     06:0252.636 2022  2
+monitor.in.txt  : MainExecution             06:0252.949
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2022;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2022,iteration 2 " ;          06:0259.109 2022  2
+monitor.in.txt  : Wait                      06:0259.109 2022  2
+monitor.in.txt  : Quit                      06:0259.109 2022  2
+monitor.out.txt :    sAction := "Exited" ;  06:0300.656 2022  2
+monitor.in.txt  : Wait                      06:0323.559 2022  3
+                : Opening Aimms Project     06:0323.559 2022  3
+monitor.in.txt  : MainExecution             06:0323.856
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2022;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2022,iteration 3 " ;          06:0402.360 2022  3
+monitor.in.txt  : Wait                      06:0402.360 2022  3
+monitor.in.txt  : Quit                      06:0402.360 2022  3
+monitor.out.txt :    sAction := "Exited" ;  06:0403.392 2022  3
+monitor.in.txt  : Wait                      06:0440.718 2022  4
+                : Opening Aimms Project     06:0440.718 2022  4
+monitor.in.txt  : MainExecution             06:0441.031
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2022;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2022,iteration 4 " ;          06:0447.204 2022  4
+monitor.in.txt  : Wait                      06:0447.204 2022  4
+monitor.in.txt  : Quit                      06:0447.220 2022  4
+monitor.out.txt :    sAction := "Exited" ;  06:0448.252 2022  4
+monitor.in.txt  : Wait                      06:0511.599 2022  5
+                : Opening Aimms Project     06:0511.599 2022  5
+monitor.in.txt  : MainExecution             06:0511.911
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2022;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2022,iteration 5 " ;          06:0550.917 2022  5
+monitor.in.txt  : Wait                      06:0550.917 2022  5
+monitor.in.txt  : Quit                      06:0550.917 2022  5
+monitor.out.txt :    sAction := "Exited" ;  06:0551.948 2022  5
+monitor.in.txt  : Wait                      06:0622.031 2022  6
+                : Opening Aimms Project     06:0622.031 2022  6
+monitor.in.txt  : MainExecution             06:0622.359
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2022;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2022,iteration 6 " ;          06:0659.853 2022  6
+monitor.in.txt  : Wait                      06:0659.853 2022  6
+monitor.in.txt  : Quit                      06:0659.853 2022  6
+monitor.out.txt :    sAction := "Exited" ;  06:0700.885 2022  6
+monitor.in.txt  : Wait                      06:0715.454 2023  1
+                : Opening Aimms Project     06:0715.454 2023  1
+monitor.in.txt  : MainExecution             06:0715.766
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2023;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2023,iteration 1 " ;          06:0721.395 2023  1
+monitor.in.txt  : Wait                      06:0721.395 2023  1
+monitor.in.txt  : Quit                      06:0721.395 2023  1
+monitor.out.txt :    sAction := "Exited" ;  06:0722.426 2023  1
+monitor.in.txt  : Wait                      06:0744.554 2023  2
+                : Opening Aimms Project     06:0744.554 2023  2
+monitor.in.txt  : MainExecution             06:0744.867
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2023;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2023,iteration 2 " ;          06:0750.511 2023  2
+monitor.in.txt  : Wait                      06:0750.511 2023  2
+monitor.in.txt  : Quit                      06:0750.511 2023  2
+monitor.out.txt :    sAction := "Exited" ;  06:0751.542 2023  2
+monitor.in.txt  : Wait                      06:0813.788 2023  3
+                : Opening Aimms Project     06:0813.788 2023  3
+monitor.in.txt  : MainExecution             06:0814.132
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2023;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2023,iteration 3 " ;          06:0851.604 2023  3
+monitor.in.txt  : Wait                      06:0851.604 2023  3
+monitor.in.txt  : Quit                      06:0851.604 2023  3
+monitor.out.txt :    sAction := "Exited" ;  06:0852.621 2023  3
+monitor.in.txt  : Wait                      06:0922.818 2023  4
+                : Opening Aimms Project     06:0922.818 2023  4
+monitor.in.txt  : MainExecution             06:0923.131
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2023;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2023,iteration 4 " ;          06:1002.130 2023  4
+monitor.in.txt  : Wait                      06:1002.130 2023  4
+monitor.in.txt  : Quit                      06:1002.130 2023  4
+monitor.out.txt :    sAction := "Exited" ;  06:1003.147 2023  4
+monitor.in.txt  : Wait                      06:1019.466 2024  1
+                : Opening Aimms Project     06:1019.466 2024  1
+monitor.in.txt  : MainExecution             06:1019.747
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2024;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2024,iteration 1 " ;          06:1025.405 2024  1
+monitor.in.txt  : Wait                      06:1025.405 2024  1
+monitor.in.txt  : Quit                      06:1025.405 2024  1
+monitor.out.txt :    sAction := "Exited" ;  06:1026.436 2024  1
+monitor.in.txt  : Wait                      06:1048.649 2024  2
+                : Opening Aimms Project     06:1048.649 2024  2
+monitor.in.txt  : MainExecution             06:1048.948
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2024;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2024,iteration 2 " ;          06:1056.153 2024  2
+monitor.in.txt  : Wait                      06:1056.153 2024  2
+monitor.in.txt  : Quit                      06:1056.153 2024  2
+monitor.out.txt :    sAction := "Exited" ;  06:1057.184 2024  2
+monitor.in.txt  : Wait                      06:1119.246 2024  3
+                : Opening Aimms Project     06:1119.246 2024  3
+monitor.in.txt  : MainExecution             06:1119.574
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2024;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2024,iteration 3 " ;          06:1125.232 2024  3
+monitor.in.txt  : Wait                      06:1125.232 2024  3
+monitor.in.txt  : Quit                      06:1125.232 2024  3
+monitor.out.txt :    sAction := "Exited" ;  06:1126.263 2024  3
+monitor.in.txt  : Wait                      06:1148.298 2024  4
+                : Opening Aimms Project     06:1148.298 2024  4
+monitor.in.txt  : MainExecution             06:1148.579
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2024;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2024,iteration 4 " ;          06:1154.755 2024  4
+monitor.in.txt  : Wait                      06:1154.755 2024  4
+monitor.in.txt  : Quit                      06:1154.755 2024  4
+monitor.out.txt :    sAction := "Exited" ;  06:1155.786 2024  4
+monitor.in.txt  : Wait                      06:1217.892 2024  5
+                : Opening Aimms Project     06:1217.892 2024  5
+monitor.in.txt  : MainExecution             06:1218.204
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2024;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2024,iteration 5 " ;          06:1256.184 2024  5
+monitor.in.txt  : Wait                      06:1256.184 2024  5
+monitor.in.txt  : Quit                      06:1256.184 2024  5
+monitor.out.txt :    sAction := "Exited" ;  06:1257.215 2024  5
+monitor.in.txt  : Wait                      06:1327.356 2024  6
+                : Opening Aimms Project     06:1327.356 2024  6
+monitor.in.txt  : MainExecution             06:1327.668
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2024;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2024,iteration 6 " ;          06:1405.642 2024  6
+monitor.in.txt  : Wait                      06:1405.642 2024  6
+monitor.in.txt  : Quit                      06:1405.642 2024  6
+monitor.out.txt :    sAction := "Exited" ;  06:1407.205 2024  6
+monitor.in.txt  : Wait                      06:1422.355 2025  1
+                : Opening Aimms Project     06:1422.355 2025  1
+monitor.in.txt  : MainExecution             06:1422.652
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2025;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2025,iteration 1 " ;          06:1428.812 2025  1
+monitor.in.txt  : Wait                      06:1428.812 2025  1
+monitor.in.txt  : Quit                      06:1428.828 2025  1
+monitor.out.txt :    sAction := "Exited" ;  06:1429.844 2025  1
+monitor.in.txt  : Wait                      06:1452.426 2025  2
+                : Opening Aimms Project     06:1452.426 2025  2
+monitor.in.txt  : MainExecution             06:1452.754
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2025;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2025,iteration 2 " ;          06:1458.886 2025  2
+monitor.in.txt  : Wait                      06:1458.886 2025  2
+monitor.in.txt  : Quit                      06:1458.886 2025  2
+monitor.out.txt :    sAction := "Exited" ;  06:1459.918 2025  2
+monitor.in.txt  : Wait                      06:1522.464 2025  3
+                : Opening Aimms Project     06:1522.464 2025  3
+monitor.in.txt  : MainExecution             06:1523.184
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2025;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2025,iteration 3 " ;          06:1528.827 2025  3
+monitor.in.txt  : Wait                      06:1528.827 2025  3
+monitor.in.txt  : Quit                      06:1528.827 2025  3
+monitor.out.txt :    sAction := "Exited" ;  06:1529.860 2025  3
+monitor.in.txt  : Wait                      06:1552.573 2025  4
+                : Opening Aimms Project     06:1552.573 2025  4
+monitor.in.txt  : MainExecution             06:1552.887
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2025;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2025,iteration 4 " ;          06:1559.047 2025  4
+monitor.in.txt  : Wait                      06:1559.047 2025  4
+monitor.in.txt  : Quit                      06:1559.047 2025  4
+monitor.out.txt :    sAction := "Exited" ;  06:1600.079 2025  4
+monitor.in.txt  : Wait                      06:1623.731 2025  5
+                : Opening Aimms Project     06:1623.731 2025  5
+monitor.in.txt  : MainExecution             06:1624.044
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2025;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2025,iteration 5 " ;          06:1702.040 2025  5
+monitor.in.txt  : Wait                      06:1702.040 2025  5
+monitor.in.txt  : Quit                      06:1702.040 2025  5
+monitor.out.txt :    sAction := "Exited" ;  06:1703.573 2025  5
+monitor.in.txt  : Wait                      06:1734.147 2025  6
+                : Opening Aimms Project     06:1734.147 2025  6
+monitor.in.txt  : MainExecution             06:1734.460
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2025;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2025,iteration 6 " ;          06:1813.475 2025  6
+monitor.in.txt  : Wait                      06:1813.475 2025  6
+monitor.in.txt  : Quit                      06:1813.475 2025  6
+monitor.out.txt :    sAction := "Exited" ;  06:1814.506 2025  6
+monitor.in.txt  : Wait                      06:1829.325 2026  1
+                : Opening Aimms Project     06:1829.325 2026  1
+monitor.in.txt  : MainExecution             06:1829.637
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2026;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2026,iteration 1 " ;          06:1835.811 2026  1
+monitor.in.txt  : Wait                      06:1835.811 2026  1
+monitor.in.txt  : Quit                      06:1835.811 2026  1
+monitor.out.txt :    sAction := "Exited" ;  06:1836.842 2026  1
+monitor.in.txt  : Wait                      06:1859.015 2026  2
+                : Opening Aimms Project     06:1859.015 2026  2
+monitor.in.txt  : MainExecution             06:1859.312
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2026;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2026,iteration 2 " ;          06:1905.486 2026  2
+monitor.in.txt  : Wait                      06:1905.486 2026  2
+monitor.in.txt  : Quit                      06:1905.486 2026  2
+monitor.out.txt :    sAction := "Exited" ;  06:1906.517 2026  2
+monitor.in.txt  : Wait                      06:1928.647 2026  3
+                : Opening Aimms Project     06:1928.647 2026  3
+monitor.in.txt  : MainExecution             06:1928.962
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2026;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2026,iteration 3 " ;          06:1935.136 2026  3
+monitor.in.txt  : Wait                      06:1935.136 2026  3
+monitor.in.txt  : Quit                      06:1935.136 2026  3
+monitor.out.txt :    sAction := "Exited" ;  06:1936.167 2026  3
+monitor.in.txt  : Wait                      06:1958.362 2026  4
+                : Opening Aimms Project     06:1958.362 2026  4
+monitor.in.txt  : MainExecution             06:1958.643
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2026;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2026,iteration 4 " ;          06:2004.819 2026  4
+monitor.in.txt  : Wait                      06:2004.819 2026  4
+monitor.in.txt  : Quit                      06:2004.819 2026  4
+monitor.out.txt :    sAction := "Exited" ;  06:2005.866 2026  4
+monitor.in.txt  : Wait                      06:2028.388 2026  5
+                : Opening Aimms Project     06:2028.388 2026  5
+monitor.in.txt  : MainExecution             06:2028.702
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2026;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2026,iteration 5 " ;          06:2108.771 2026  5
+monitor.in.txt  : Wait                      06:2108.775 2026  5
+monitor.in.txt  : Quit                      06:2108.785 2026  5
+monitor.out.txt :    sAction := "Exited" ;  06:2109.818 2026  5
+monitor.in.txt  : Wait                      06:2141.817 2026  6
+                : Opening Aimms Project     06:2141.817 2026  6
+monitor.in.txt  : MainExecution             06:2142.130
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2026;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2026,iteration 6 " ;          06:2221.643 2026  6
+monitor.in.txt  : Wait                      06:2221.659 2026  6
+monitor.in.txt  : Quit                      06:2221.659 2026  6
+monitor.out.txt :    sAction := "Exited" ;  06:2222.690 2026  6
+monitor.in.txt  : Wait                      06:2238.153 2027  1
+                : Opening Aimms Project     06:2238.153 2027  1
+monitor.in.txt  : MainExecution             06:2238.450
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2027;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2027,iteration 1 " ;          06:2244.616 2027  1
+monitor.in.txt  : Wait                      06:2244.616 2027  1
+monitor.in.txt  : Quit                      06:2244.616 2027  1
+monitor.out.txt :    sAction := "Exited" ;  06:2245.647 2027  1
+monitor.in.txt  : Wait                      06:2309.004 2027  2
+                : Opening Aimms Project     06:2309.004 2027  2
+monitor.in.txt  : MainExecution             06:2309.317
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2027;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2027,iteration 2 " ;          06:2315.491 2027  2
+monitor.in.txt  : Wait                      06:2315.491 2027  2
+monitor.in.txt  : Quit                      06:2315.506 2027  2
+monitor.out.txt :    sAction := "Exited" ;  06:2316.538 2027  2
+monitor.in.txt  : Wait                      06:2339.817 2027  3
+                : Opening Aimms Project     06:2339.817 2027  3
+monitor.in.txt  : MainExecution             06:2340.130
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2027;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2027,iteration 3 " ;          06:2420.183 2027  3
+monitor.in.txt  : Wait                      06:2420.183 2027  3
+monitor.in.txt  : Quit                      06:2420.183 2027  3
+monitor.out.txt :    sAction := "Exited" ;  06:2421.214 2027  3
+monitor.in.txt  : Wait                      06:2451.113 2027  4
+                : Opening Aimms Project     06:2451.113 2027  4
+monitor.in.txt  : MainExecution             06:2451.426
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2027;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2027,iteration 4 " ;          06:2531.984 2027  4
+monitor.in.txt  : Wait                      06:2531.984 2027  4
+monitor.in.txt  : Quit                      06:2531.984 2027  4
+monitor.out.txt :    sAction := "Exited" ;  06:2533.016 2027  4
+monitor.in.txt  : Wait                      06:2549.511 2028  1
+                : Opening Aimms Project     06:2549.511 2028  1
+monitor.in.txt  : MainExecution             06:2549.854
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2028;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2028,iteration 1 " ;          06:2556.028 2028  1
+monitor.in.txt  : Wait                      06:2556.028 2028  1
+monitor.in.txt  : Quit                      06:2556.028 2028  1
+monitor.out.txt :    sAction := "Exited" ;  06:2557.059 2028  1
+monitor.in.txt  : Wait                      06:2620.510 2028  2
+                : Opening Aimms Project     06:2620.510 2028  2
+monitor.in.txt  : MainExecution             06:2620.854
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2028;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2028,iteration 2 " ;          06:2627.028 2028  2
+monitor.in.txt  : Wait                      06:2627.028 2028  2
+monitor.in.txt  : Quit                      06:2627.028 2028  2
+monitor.out.txt :    sAction := "Exited" ;  06:2628.059 2028  2
+monitor.in.txt  : Wait                      06:2651.947 2028  3
+                : Opening Aimms Project     06:2651.947 2028  3
+monitor.in.txt  : MainExecution             06:2652.260
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2028;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2028,iteration 3 " ;          06:2732.334 2028  3
+monitor.in.txt  : Wait                      06:2732.334 2028  3
+monitor.in.txt  : Quit                      06:2732.334 2028  3
+monitor.out.txt :    sAction := "Exited" ;  06:2733.350 2028  3
+monitor.in.txt  : Wait                      06:2803.970 2028  4
+                : Opening Aimms Project     06:2803.970 2028  4
+monitor.in.txt  : MainExecution             06:2804.267
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2028;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2028,iteration 4 " ;          06:2844.851 2028  4
+monitor.in.txt  : Wait                      06:2844.851 2028  4
+monitor.in.txt  : Quit                      06:2844.851 2028  4
+monitor.out.txt :    sAction := "Exited" ;  06:2846.398 2028  4
+monitor.in.txt  : Wait                      06:2900.985 2029  1
+                : Opening Aimms Project     06:2900.985 2029  1
+monitor.in.txt  : MainExecution             06:2901.360
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2029;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2029,iteration 1 " ;          06:2907.533 2029  1
+monitor.in.txt  : Wait                      06:2907.533 2029  1
+monitor.in.txt  : Quit                      06:2907.533 2029  1
+monitor.out.txt :    sAction := "Exited" ;  06:2908.550 2029  1
+monitor.in.txt  : Wait                      06:2930.728 2029  2
+                : Opening Aimms Project     06:2930.728 2029  2
+monitor.in.txt  : MainExecution             06:2931.072
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2029;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2029,iteration 2 " ;          06:2937.245 2029  2
+monitor.in.txt  : Wait                      06:2937.245 2029  2
+monitor.in.txt  : Quit                      06:2937.245 2029  2
+monitor.out.txt :    sAction := "Exited" ;  06:2938.277 2029  2
+monitor.in.txt  : Wait                      06:3000.724 2029  3
+                : Opening Aimms Project     06:3000.724 2029  3
+monitor.in.txt  : MainExecution             06:3001.005
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2029;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2029,iteration 3 " ;          06:3007.179 2029  3
+monitor.in.txt  : Wait                      06:3007.179 2029  3
+monitor.in.txt  : Quit                      06:3007.194 2029  3
+monitor.out.txt :    sAction := "Exited" ;  06:3008.226 2029  3
+monitor.in.txt  : Wait                      06:3030.612 2029  4
+                : Opening Aimms Project     06:3030.612 2029  4
+monitor.in.txt  : MainExecution             06:3030.909
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2029;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2029,iteration 4 " ;          06:3037.083 2029  4
+monitor.in.txt  : Wait                      06:3037.083 2029  4
+monitor.in.txt  : Quit                      06:3037.083 2029  4
+monitor.out.txt :    sAction := "Exited" ;  06:3038.615 2029  4
+monitor.in.txt  : Wait                      06:3101.516 2029  5
+                : Opening Aimms Project     06:3101.516 2029  5
+monitor.in.txt  : MainExecution             06:3101.969
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2029;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2029,iteration 5 " ;          06:3141.546 2029  5
+monitor.in.txt  : Wait                      06:3141.546 2029  5
+monitor.in.txt  : Quit                      06:3141.546 2029  5
+monitor.out.txt :    sAction := "Exited" ;  06:3142.577 2029  5
+monitor.in.txt  : Wait                      06:3213.421 2029  6
+                : Opening Aimms Project     06:3213.421 2029  6
+monitor.in.txt  : MainExecution             06:3213.719
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2029;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2029,iteration 6 " ;          06:3254.334 2029  6
+monitor.in.txt  : Wait                      06:3254.334 2029  6
+monitor.in.txt  : Quit                      06:3254.334 2029  6
+monitor.out.txt :    sAction := "Exited" ;  06:3255.365 2029  6
+monitor.in.txt  : Wait                      06:3309.567 2030  1
+                : Opening Aimms Project     06:3309.567 2030  1
+monitor.in.txt  : MainExecution             06:3309.880
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2030;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2030,iteration 1 " ;          06:3316.054 2030  1
+monitor.in.txt  : Wait                      06:3316.054 2030  1
+monitor.in.txt  : Quit                      06:3316.054 2030  1
+monitor.out.txt :    sAction := "Exited" ;  06:3317.601 2030  1
+monitor.in.txt  : Wait                      06:3339.364 2030  2
+                : Opening Aimms Project     06:3339.364 2030  2
+monitor.in.txt  : MainExecution             06:3339.661
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2030;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2030,iteration 2 " ;          06:3345.834 2030  2
+monitor.in.txt  : Wait                      06:3345.834 2030  2
+monitor.in.txt  : Quit                      06:3345.834 2030  2
+monitor.out.txt :    sAction := "Exited" ;  06:3346.866 2030  2
+monitor.in.txt  : Wait                      06:3409.271 2030  3
+                : Opening Aimms Project     06:3409.271 2030  3
+monitor.in.txt  : MainExecution             06:3409.630
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2030;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2030,iteration 3 " ;          06:3449.226 2030  3
+monitor.in.txt  : Wait                      06:3449.226 2030  3
+monitor.in.txt  : Quit                      06:3449.226 2030  3
+monitor.out.txt :    sAction := "Exited" ;  06:3450.257 2030  3
+monitor.in.txt  : Wait                      06:3520.287 2030  4
+                : Opening Aimms Project     06:3520.287 2030  4
+monitor.in.txt  : MainExecution             06:3520.615
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2030;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2030,iteration 4 " ;          06:3602.779 2030  4
+monitor.in.txt  : Wait                      06:3602.779 2030  4
+monitor.in.txt  : Quit                      06:3602.779 2030  4
+monitor.out.txt :    sAction := "Exited" ;  06:3603.795 2030  4
+monitor.in.txt  : Wait                      06:3618.555 2031  1
+                : Opening Aimms Project     06:3618.555 2031  1
+monitor.in.txt  : MainExecution             06:3618.864
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2031;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2031,iteration 1 " ;          06:3625.554 2031  1
+monitor.in.txt  : Wait                      06:3625.554 2031  1
+monitor.in.txt  : Quit                      06:3625.569 2031  1
+monitor.out.txt :    sAction := "Exited" ;  06:3626.601 2031  1
+monitor.in.txt  : Wait                      06:3649.302 2031  2
+                : Opening Aimms Project     06:3649.302 2031  2
+monitor.in.txt  : MainExecution             06:3649.614
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2031;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2031,iteration 2 " ;          06:3656.303 2031  2
+monitor.in.txt  : Wait                      06:3656.303 2031  2
+monitor.in.txt  : Quit                      06:3656.303 2031  2
+monitor.out.txt :    sAction := "Exited" ;  06:3657.335 2031  2
+monitor.in.txt  : Wait                      06:3720.435 2031  3
+                : Opening Aimms Project     06:3720.435 2031  3
+monitor.in.txt  : MainExecution             06:3720.732
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2031;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2031,iteration 3 " ;          06:3800.847 2031  3
+monitor.in.txt  : Wait                      06:3800.847 2031  3
+monitor.in.txt  : Quit                      06:3800.847 2031  3
+monitor.out.txt :    sAction := "Exited" ;  06:3801.878 2031  3
+monitor.in.txt  : Wait                      06:3834.095 2031  4
+                : Opening Aimms Project     06:3834.095 2031  4
+monitor.in.txt  : MainExecution             06:3834.376
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2031;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2031,iteration 4 " ;          06:3915.516 2031  4
+monitor.in.txt  : Wait                      06:3915.516 2031  4
+monitor.in.txt  : Quit                      06:3915.516 2031  4
+monitor.out.txt :    sAction := "Exited" ;  06:3916.548 2031  4
+monitor.in.txt  : Wait                      06:3930.500 2032  1
+                : Opening Aimms Project     06:3930.500 2032  1
+monitor.in.txt  : MainExecution             06:3930.813
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2032;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2032,iteration 1 " ;          06:3937.502 2032  1
+monitor.in.txt  : Wait                      06:3937.502 2032  1
+monitor.in.txt  : Quit                      06:3937.502 2032  1
+monitor.out.txt :    sAction := "Exited" ;  06:3938.534 2032  1
+monitor.in.txt  : Wait                      06:4000.934 2032  2
+                : Opening Aimms Project     06:4000.934 2032  2
+monitor.in.txt  : MainExecution             06:4001.215
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2032;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2032,iteration 2 " ;          06:4007.905 2032  2
+monitor.in.txt  : Wait                      06:4007.905 2032  2
+monitor.in.txt  : Quit                      06:4007.905 2032  2
+monitor.out.txt :    sAction := "Exited" ;  06:4008.926 2032  2
+monitor.in.txt  : Wait                      06:4030.970 2032  3
+                : Opening Aimms Project     06:4030.970 2032  3
+monitor.in.txt  : MainExecution             06:4031.251
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2032;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2032,iteration 3 " ;          06:4037.940 2032  3
+monitor.in.txt  : Wait                      06:4037.940 2032  3
+monitor.in.txt  : Quit                      06:4037.940 2032  3
+monitor.out.txt :    sAction := "Exited" ;  06:4038.958 2032  3
+monitor.in.txt  : Wait                      06:4101.720 2032  4
+                : Opening Aimms Project     06:4101.720 2032  4
+monitor.in.txt  : MainExecution             06:4102.017
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2032;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2032,iteration 4 " ;          06:4108.693 2032  4
+monitor.in.txt  : Wait                      06:4108.693 2032  4
+monitor.in.txt  : Quit                      06:4108.693 2032  4
+monitor.out.txt :    sAction := "Exited" ;  06:4109.724 2032  4
+monitor.in.txt  : Wait                      06:4132.798 2032  5
+                : Opening Aimms Project     06:4132.798 2032  5
+monitor.in.txt  : MainExecution             06:4133.173
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2032;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2032,iteration 5 " ;          06:4213.844 2032  5
+monitor.in.txt  : Wait                      06:4213.844 2032  5
+monitor.in.txt  : Quit                      06:4213.844 2032  5
+monitor.out.txt :    sAction := "Exited" ;  06:4214.876 2032  5
+monitor.in.txt  : Wait                      06:4246.023 2032  6
+                : Opening Aimms Project     06:4246.023 2032  6
+monitor.in.txt  : MainExecution             06:4246.320
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2032;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2032,iteration 6 " ;          06:4328.451 2032  6
+monitor.in.txt  : Wait                      06:4328.451 2032  6
+monitor.in.txt  : Quit                      06:4328.451 2032  6
+monitor.out.txt :    sAction := "Exited" ;  06:4329.470 2032  6
+monitor.in.txt  : Wait                      06:4343.553 2033  1
+                : Opening Aimms Project     06:4343.553 2033  1
+monitor.in.txt  : MainExecution             06:4343.881
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2033;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2033,iteration 1 " ;          06:4350.558 2033  1
+monitor.in.txt  : Wait                      06:4350.558 2033  1
+monitor.in.txt  : Quit                      06:4350.558 2033  1
+monitor.out.txt :    sAction := "Exited" ;  06:4351.589 2033  1
+monitor.in.txt  : Wait                      06:4413.851 2033  2
+                : Opening Aimms Project     06:4413.851 2033  2
+monitor.in.txt  : MainExecution             06:4414.148
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2033;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2033,iteration 2 " ;          06:4420.825 2033  2
+monitor.in.txt  : Wait                      06:4420.825 2033  2
+monitor.in.txt  : Quit                      06:4420.825 2033  2
+monitor.out.txt :    sAction := "Exited" ;  06:4421.857 2033  2
+monitor.in.txt  : Wait                      06:4444.173 2033  3
+                : Opening Aimms Project     06:4444.173 2033  3
+monitor.in.txt  : MainExecution             06:4444.532
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2033;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2033,iteration 3 " ;          06:4524.560 2033  3
+monitor.in.txt  : Wait                      06:4524.560 2033  3
+monitor.in.txt  : Quit                      06:4524.560 2033  3
+monitor.out.txt :    sAction := "Exited" ;  06:4526.107 2033  3
+monitor.in.txt  : Wait                      06:4556.888 2033  4
+                : Opening Aimms Project     06:4556.888 2033  4
+monitor.in.txt  : MainExecution             06:4557.201
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2033;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2033,iteration 4 " ;          06:4640.343 2033  4
+monitor.in.txt  : Wait                      06:4640.343 2033  4
+monitor.in.txt  : Quit                      06:4640.343 2033  4
+monitor.out.txt :    sAction := "Exited" ;  06:4641.375 2033  4
+monitor.in.txt  : Wait                      06:4656.273 2034  1
+                : Opening Aimms Project     06:4656.273 2034  1
+monitor.in.txt  : MainExecution             06:4656.570
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2034;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2034,iteration 1 " ;          06:4703.762 2034  1
+monitor.in.txt  : Wait                      06:4703.762 2034  1
+monitor.in.txt  : Quit                      06:4703.762 2034  1
+monitor.out.txt :    sAction := "Exited" ;  06:4704.794 2034  1
+monitor.in.txt  : Wait                      06:4727.100 2034  2
+                : Opening Aimms Project     06:4727.100 2034  2
+monitor.in.txt  : MainExecution             06:4727.413
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2034;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2034,iteration 2 " ;          06:4735.632 2034  2
+monitor.in.txt  : Wait                      06:4735.632 2034  2
+monitor.in.txt  : Quit                      06:4735.632 2034  2
+monitor.out.txt :    sAction := "Exited" ;  06:4736.664 2034  2
+monitor.in.txt  : Wait                      06:4758.811 2034  3
+                : Opening Aimms Project     06:4758.811 2034  3
+monitor.in.txt  : MainExecution             06:4759.140
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2034;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2034,iteration 3 " ;          06:4840.725 2034  3
+monitor.in.txt  : Wait                      06:4840.725 2034  3
+monitor.in.txt  : Quit                      06:4840.725 2034  3
+monitor.out.txt :    sAction := "Exited" ;  06:4841.757 2034  3
+monitor.in.txt  : Wait                      06:4911.937 2034  4
+                : Opening Aimms Project     06:4911.937 2034  4
+monitor.in.txt  : MainExecution             06:4912.218
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2034;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2034,iteration 4 " ;          06:4955.335 2034  4
+monitor.in.txt  : Wait                      06:4955.335 2034  4
+monitor.in.txt  : Quit                      06:4955.335 2034  4
+monitor.out.txt :    sAction := "Exited" ;  06:4956.366 2034  4
+monitor.in.txt  : Wait                      06:5010.459 2035  1
+                : Opening Aimms Project     06:5010.459 2035  1
+monitor.in.txt  : MainExecution             06:5010.772
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2035;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2035,iteration 1 " ;          06:5017.977 2035  1
+monitor.in.txt  : Wait                      06:5017.993 2035  1
+monitor.in.txt  : Quit                      06:5017.993 2035  1
+monitor.out.txt :    sAction := "Exited" ;  06:5019.010 2035  1
+monitor.in.txt  : Wait                      06:5041.428 2035  2
+                : Opening Aimms Project     06:5041.428 2035  2
+monitor.in.txt  : MainExecution             06:5041.725
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2035;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2035,iteration 2 " ;          06:5048.414 2035  2
+monitor.in.txt  : Wait                      06:5048.414 2035  2
+monitor.in.txt  : Quit                      06:5048.414 2035  2
+monitor.out.txt :    sAction := "Exited" ;  06:5049.433 2035  2
+monitor.in.txt  : Wait                      06:5111.819 2035  3
+                : Opening Aimms Project     06:5111.819 2035  3
+monitor.in.txt  : MainExecution             06:5112.100
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2035;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2035,iteration 3 " ;          06:5119.276 2035  3
+monitor.in.txt  : Wait                      06:5119.276 2035  3
+monitor.in.txt  : Quit                      06:5119.276 2035  3
+monitor.out.txt :    sAction := "Exited" ;  06:5120.308 2035  3
+monitor.in.txt  : Wait                      06:5142.749 2035  4
+                : Opening Aimms Project     06:5142.749 2035  4
+monitor.in.txt  : MainExecution             06:5143.109
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2035;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2035,iteration 4 " ;          06:5150.286 2035  4
+monitor.in.txt  : Wait                      06:5150.286 2035  4
+monitor.in.txt  : Quit                      06:5150.286 2035  4
+monitor.out.txt :    sAction := "Exited" ;  06:5151.317 2035  4
+monitor.in.txt  : Wait                      06:5214.782 2035  5
+                : Opening Aimms Project     06:5214.782 2035  5
+monitor.in.txt  : MainExecution             06:5215.110
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2035;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2035,iteration 5 " ;          06:5257.716 2035  5
+monitor.in.txt  : Wait                      06:5257.716 2035  5
+monitor.in.txt  : Quit                      06:5257.716 2035  5
+monitor.out.txt :    sAction := "Exited" ;  06:5258.733 2035  5
+monitor.in.txt  : Wait                      06:5330.220 2035  6
+                : Opening Aimms Project     06:5330.220 2035  6
+monitor.in.txt  : MainExecution             06:5330.517
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2035;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2035,iteration 6 " ;          06:5414.664 2035  6
+monitor.in.txt  : Wait                      06:5414.664 2035  6
+monitor.in.txt  : Quit                      06:5414.664 2035  6
+monitor.out.txt :    sAction := "Exited" ;  06:5415.695 2035  6
+monitor.in.txt  : Wait                      06:5429.933 2036  1
+                : Opening Aimms Project     06:5429.933 2036  1
+monitor.in.txt  : MainExecution             06:5430.511
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2036;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2036,iteration 1 " ;          06:5437.716 2036  1
+monitor.in.txt  : Wait                      06:5437.716 2036  1
+monitor.in.txt  : Quit                      06:5437.716 2036  1
+monitor.out.txt :    sAction := "Exited" ;  06:5438.733 2036  1
+monitor.in.txt  : Wait                      06:5500.991 2036  2
+                : Opening Aimms Project     06:5500.991 2036  2
+monitor.in.txt  : MainExecution             06:5501.304
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2036;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2036,iteration 2 " ;          06:5507.993 2036  2
+monitor.in.txt  : Wait                      06:5507.993 2036  2
+monitor.in.txt  : Quit                      06:5507.993 2036  2
+monitor.out.txt :    sAction := "Exited" ;  06:5509.021 2036  2
+monitor.in.txt  : Wait                      06:5531.189 2036  3
+                : Opening Aimms Project     06:5531.189 2036  3
+monitor.in.txt  : MainExecution             06:5531.533
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2036;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2036,iteration 3 " ;          06:5612.600 2036  3
+monitor.in.txt  : Wait                      06:5612.600 2036  3
+monitor.in.txt  : Quit                      06:5612.600 2036  3
+monitor.out.txt :    sAction := "Exited" ;  06:5613.632 2036  3
+monitor.in.txt  : Wait                      06:5644.256 2036  4
+                : Opening Aimms Project     06:5644.256 2036  4
+monitor.in.txt  : MainExecution             06:5644.569
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2036;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2036,iteration 4 " ;          06:5728.713 2036  4
+monitor.in.txt  : Wait                      06:5728.713 2036  4
+monitor.in.txt  : Quit                      06:5728.713 2036  4
+monitor.out.txt :    sAction := "Exited" ;  06:5729.731 2036  4
+monitor.in.txt  : Wait                      06:5743.975 2037  1
+                : Opening Aimms Project     06:5743.975 2037  1
+monitor.in.txt  : MainExecution             06:5744.303
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2037;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2037,iteration 1 " ;          06:5751.496 2037  1
+monitor.in.txt  : Wait                      06:5751.496 2037  1
+monitor.in.txt  : Quit                      06:5751.496 2037  1
+monitor.out.txt :    sAction := "Exited" ;  06:5752.527 2037  1
+monitor.in.txt  : Wait                      06:5814.694 2037  2
+                : Opening Aimms Project     06:5814.694 2037  2
+monitor.in.txt  : MainExecution             06:5814.992
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2037;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2037,iteration 2 " ;          06:5822.699 2037  2
+monitor.in.txt  : Wait                      06:5822.699 2037  2
+monitor.in.txt  : Quit                      06:5822.699 2037  2
+monitor.out.txt :    sAction := "Exited" ;  06:5823.730 2037  2
+monitor.in.txt  : Wait                      06:5846.617 2037  3
+                : Opening Aimms Project     06:5846.617 2037  3
+monitor.in.txt  : MainExecution             06:5846.898
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2037;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2037,iteration 3 " ;          06:5928.476 2037  3
+monitor.in.txt  : Wait                      06:5928.476 2037  3
+monitor.in.txt  : Quit                      06:5928.492 2037  3
+monitor.out.txt :    sAction := "Exited" ;  06:5929.525 2037  3
+monitor.in.txt  : Wait                      07:0000.537 2037  4
+                : Opening Aimms Project     07:0000.537 2037  4
+monitor.in.txt  : MainExecution             07:0000.865
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2037;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2037,iteration 4 " ;          07:0045.040 2037  4
+monitor.in.txt  : Wait                      07:0045.055 2037  4
+monitor.in.txt  : Quit                      07:0045.071 2037  4
+monitor.out.txt :    sAction := "Exited" ;  07:0046.102 2037  4
+monitor.in.txt  : Wait                      07:0059.798 2038  1
+                : Opening Aimms Project     07:0059.798 2038  1
+monitor.in.txt  : MainExecution             07:0100.080
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2038;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2038,iteration 1 " ;          07:0107.285 2038  1
+monitor.in.txt  : Wait                      07:0107.285 2038  1
+monitor.in.txt  : Quit                      07:0107.285 2038  1
+monitor.out.txt :    sAction := "Exited" ;  07:0108.317 2038  1
+monitor.in.txt  : Wait                      07:0130.548 2038  2
+                : Opening Aimms Project     07:0130.548 2038  2
+monitor.in.txt  : MainExecution             07:0130.845
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2038;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2038,iteration 2 " ;          07:0137.534 2038  2
+monitor.in.txt  : Wait                      07:0137.534 2038  2
+monitor.in.txt  : Quit                      07:0137.534 2038  2
+monitor.out.txt :    sAction := "Exited" ;  07:0139.077 2038  2
+monitor.in.txt  : Wait                      07:0201.245 2038  3
+                : Opening Aimms Project     07:0201.245 2038  3
+monitor.in.txt  : MainExecution             07:0201.589
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2038;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2038,iteration 3 " ;          07:0208.779 2038  3
+monitor.in.txt  : Wait                      07:0208.783 2038  3
+monitor.in.txt  : Quit                      07:0208.792 2038  3
+monitor.out.txt :    sAction := "Exited" ;  07:0209.811 2038  3
+monitor.in.txt  : Wait                      07:0231.975 2038  4
+                : Opening Aimms Project     07:0231.975 2038  4
+monitor.in.txt  : MainExecution             07:0232.303
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2038;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2038,iteration 4 " ;          07:0239.505 2038  4
+monitor.in.txt  : Wait                      07:0239.505 2038  4
+monitor.in.txt  : Quit                      07:0239.505 2038  4
+monitor.out.txt :    sAction := "Exited" ;  07:0240.537 2038  4
+monitor.in.txt  : Wait                      07:0303.236 2038  5
+                : Opening Aimms Project     07:0303.236 2038  5
+monitor.in.txt  : MainExecution             07:0303.564
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2038;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2038,iteration 5 " ;          07:0345.774 2038  5
+monitor.in.txt  : Wait                      07:0345.836 2038  5
+monitor.in.txt  : Quit                      07:0345.852 2038  5
+monitor.out.txt :    sAction := "Exited" ;  07:0346.883 2038  5
+monitor.in.txt  : Wait                      07:0419.135 2038  6
+                : Opening Aimms Project     07:0419.135 2038  6
+monitor.in.txt  : MainExecution             07:0419.479
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2038;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2038,iteration 6 " ;          07:0505.680 2038  6
+monitor.in.txt  : Wait                      07:0505.695 2038  6
+monitor.in.txt  : Quit                      07:0505.711 2038  6
+monitor.out.txt :    sAction := "Exited" ;  07:0506.742 2038  6
+monitor.in.txt  : Wait                      07:0520.308 2039  1
+                : Opening Aimms Project     07:0520.308 2039  1
+monitor.in.txt  : MainExecution             07:0520.589
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2039;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2039,iteration 1 " ;          07:0527.794 2039  1
+monitor.in.txt  : Wait                      07:0527.794 2039  1
+monitor.in.txt  : Quit                      07:0527.810 2039  1
+monitor.out.txt :    sAction := "Exited" ;  07:0528.827 2039  1
+monitor.in.txt  : Wait                      07:0551.168 2039  2
+                : Opening Aimms Project     07:0551.168 2039  2
+monitor.in.txt  : MainExecution             07:0551.480
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2039;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2039,iteration 2 " ;          07:0558.671 2039  2
+monitor.in.txt  : Wait                      07:0558.671 2039  2
+monitor.in.txt  : Quit                      07:0558.671 2039  2
+monitor.out.txt :    sAction := "Exited" ;  07:0559.703 2039  2
+monitor.in.txt  : Wait                      07:0621.824 2039  3
+                : Opening Aimms Project     07:0621.824 2039  3
+monitor.in.txt  : MainExecution             07:0622.168
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2039;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2039,iteration 3 " ;          07:0704.278 2039  3
+monitor.in.txt  : Wait                      07:0704.278 2039  3
+monitor.in.txt  : Quit                      07:0704.278 2039  3
+monitor.out.txt :    sAction := "Exited" ;  07:0705.295 2039  3
+monitor.in.txt  : Wait                      07:0735.461 2039  4
+                : Opening Aimms Project     07:0735.461 2039  4
+monitor.in.txt  : MainExecution             07:0735.758
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2039;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2039,iteration 4 " ;          07:0821.464 2039  4
+monitor.in.txt  : Wait                      07:0821.464 2039  4
+monitor.in.txt  : Quit                      07:0821.464 2039  4
+monitor.out.txt :    sAction := "Exited" ;  07:0822.495 2039  4
+monitor.in.txt  : Wait                      07:0836.739 2040  1
+                : Opening Aimms Project     07:0836.739 2040  1
+monitor.in.txt  : MainExecution             07:0837.098
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2040;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2040,iteration 1 " ;          07:0844.303 2040  1
+monitor.in.txt  : Wait                      07:0844.460 2040  1
+monitor.in.txt  : Quit                      07:0844.475 2040  1
+monitor.out.txt :    sAction := "Exited" ;  07:0845.492 2040  1
+monitor.in.txt  : Wait                      07:0908.159 2040  2
+                : Opening Aimms Project     07:0908.159 2040  2
+monitor.in.txt  : MainExecution             07:0908.487
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2040;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2040,iteration 2 " ;          07:0916.195 2040  2
+monitor.in.txt  : Wait                      07:0916.195 2040  2
+monitor.in.txt  : Quit                      07:0916.195 2040  2
+monitor.out.txt :    sAction := "Exited" ;  07:0917.226 2040  2
+monitor.in.txt  : Wait                      07:0939.701 2040  3
+                : Opening Aimms Project     07:0939.701 2040  3
+monitor.in.txt  : MainExecution             07:0940.030
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2040;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2040,iteration 3 " ;          07:1023.668 2040  3
+monitor.in.txt  : Wait                      07:1023.668 2040  3
+monitor.in.txt  : Quit                      07:1023.683 2040  3
+monitor.out.txt :    sAction := "Exited" ;  07:1025.216 2040  3
+monitor.in.txt  : Wait                      07:1055.966 2040  4
+                : Opening Aimms Project     07:1055.966 2040  4
+monitor.in.txt  : MainExecution             07:1056.279
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2040;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2040,iteration 4 " ;          07:1142.484 2040  4
+monitor.in.txt  : Wait                      07:1142.484 2040  4
+monitor.in.txt  : Quit                      07:1142.484 2040  4
+monitor.out.txt :    sAction := "Exited" ;  07:1143.516 2040  4
+monitor.in.txt  : Wait                      07:1157.022 2041  1
+                : Opening Aimms Project     07:1157.022 2041  1
+monitor.in.txt  : MainExecution             07:1157.335
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2041;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2041,iteration 1 " ;          07:1205.042 2041  1
+monitor.in.txt  : Wait                      07:1205.042 2041  1
+monitor.in.txt  : Quit                      07:1205.042 2041  1
+monitor.out.txt :    sAction := "Exited" ;  07:1206.074 2041  1
+monitor.in.txt  : Wait                      07:1228.471 2041  2
+                : Opening Aimms Project     07:1228.471 2041  2
+monitor.in.txt  : MainExecution             07:1228.769
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2041;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2041,iteration 2 " ;          07:1236.476 2041  2
+monitor.in.txt  : Wait                      07:1236.476 2041  2
+monitor.in.txt  : Quit                      07:1236.476 2041  2
+monitor.out.txt :    sAction := "Exited" ;  07:1237.507 2041  2
+monitor.in.txt  : Wait                      07:1259.734 2041  3
+                : Opening Aimms Project     07:1259.734 2041  3
+monitor.in.txt  : MainExecution             07:1300.031
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2041;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2041,iteration 3 " ;          07:1307.237 2041  3
+monitor.in.txt  : Wait                      07:1307.237 2041  3
+monitor.in.txt  : Quit                      07:1307.237 2041  3
+monitor.out.txt :    sAction := "Exited" ;  07:1308.268 2041  3
+monitor.in.txt  : Wait                      07:1330.564 2041  4
+                : Opening Aimms Project     07:1330.564 2041  4
+monitor.in.txt  : MainExecution             07:1330.876
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2041;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2041,iteration 4 " ;          07:1338.597 2041  4
+monitor.in.txt  : Wait                      07:1338.597 2041  4
+monitor.in.txt  : Quit                      07:1338.597 2041  4
+monitor.out.txt :    sAction := "Exited" ;  07:1339.630 2041  4
+monitor.in.txt  : Wait                      07:1403.001 2041  5
+                : Opening Aimms Project     07:1403.001 2041  5
+monitor.in.txt  : MainExecution             07:1403.329
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2041;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2041,iteration 5 " ;          07:1445.938 2041  5
+monitor.in.txt  : Wait                      07:1445.938 2041  5
+monitor.in.txt  : Quit                      07:1445.938 2041  5
+monitor.out.txt :    sAction := "Exited" ;  07:1446.969 2041  5
+monitor.in.txt  : Wait                      07:1517.305 2041  6
+                : Opening Aimms Project     07:1517.305 2041  6
+monitor.in.txt  : MainExecution             07:1517.618
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2041;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2041,iteration 6 " ;          07:1603.298 2041  6
+monitor.in.txt  : Wait                      07:1603.298 2041  6
+monitor.in.txt  : Quit                      07:1603.298 2041  6
+monitor.out.txt :    sAction := "Exited" ;  07:1604.330 2041  6
+monitor.in.txt  : Wait                      07:1617.758 2042  1
+                : Opening Aimms Project     07:1617.758 2042  1
+monitor.in.txt  : MainExecution             07:1618.087
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2042;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2042,iteration 1 " ;          07:1625.278 2042  1
+monitor.in.txt  : Wait                      07:1625.278 2042  1
+monitor.in.txt  : Quit                      07:1625.278 2042  1
+monitor.out.txt :    sAction := "Exited" ;  07:1626.315 2042  1
+monitor.in.txt  : Wait                      07:1648.894 2042  2
+                : Opening Aimms Project     07:1648.894 2042  2
+monitor.in.txt  : MainExecution             07:1649.191
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2042;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2042,iteration 2 " ;          07:1656.381 2042  2
+monitor.in.txt  : Wait                      07:1656.381 2042  2
+monitor.in.txt  : Quit                      07:1656.381 2042  2
+monitor.out.txt :    sAction := "Exited" ;  07:1657.413 2042  2
+monitor.in.txt  : Wait                      07:1719.441 2042  3
+                : Opening Aimms Project     07:1719.441 2042  3
+monitor.in.txt  : MainExecution             07:1719.753
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2042;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2042,iteration 3 " ;          07:1727.446 2042  3
+monitor.in.txt  : Wait                      07:1727.446 2042  3
+monitor.in.txt  : Quit                      07:1727.446 2042  3
+monitor.out.txt :    sAction := "Exited" ;  07:1728.477 2042  3
+monitor.in.txt  : Wait                      07:1750.948 2042  4
+                : Opening Aimms Project     07:1750.948 2042  4
+monitor.in.txt  : MainExecution             07:1751.261
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2042;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2042,iteration 4 " ;          07:1758.466 2042  4
+monitor.in.txt  : Wait                      07:1758.466 2042  4
+monitor.in.txt  : Quit                      07:1758.466 2042  4
+monitor.out.txt :    sAction := "Exited" ;  07:1800.015 2042  4
+monitor.in.txt  : Wait                      07:1822.512 2042  5
+                : Opening Aimms Project     07:1822.512 2042  5
+monitor.in.txt  : MainExecution             07:1822.824
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2042;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2042,iteration 5 " ;          07:1906.456 2042  5
+monitor.in.txt  : Wait                      07:1906.456 2042  5
+monitor.in.txt  : Quit                      07:1906.456 2042  5
+monitor.out.txt :    sAction := "Exited" ;  07:1907.487 2042  5
+monitor.in.txt  : Wait                      07:1938.481 2042  6
+                : Opening Aimms Project     07:1938.481 2042  6
+monitor.in.txt  : MainExecution             07:1938.889
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2042;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2042,iteration 6 " ;          07:2025.606 2042  6
+monitor.in.txt  : Wait                      07:2025.609 2042  6
+monitor.in.txt  : Quit                      07:2025.618 2042  6
+monitor.out.txt :    sAction := "Exited" ;  07:2026.648 2042  6
+monitor.in.txt  : Wait                      07:2040.083 2043  1
+                : Opening Aimms Project     07:2040.083 2043  1
+monitor.in.txt  : MainExecution             07:2040.380
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2043;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2043,iteration 1 " ;          07:2047.586 2043  1
+monitor.in.txt  : Wait                      07:2047.586 2043  1
+monitor.in.txt  : Quit                      07:2047.586 2043  1
+monitor.out.txt :    sAction := "Exited" ;  07:2049.119 2043  1
+monitor.in.txt  : Wait                      07:2111.780 2043  2
+                : Opening Aimms Project     07:2111.780 2043  2
+monitor.in.txt  : MainExecution             07:2112.077
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2043;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2043,iteration 2 " ;          07:2119.769 2043  2
+monitor.in.txt  : Wait                      07:2119.769 2043  2
+monitor.in.txt  : Quit                      07:2119.769 2043  2
+monitor.out.txt :    sAction := "Exited" ;  07:2120.786 2043  2
+monitor.in.txt  : Wait                      07:2143.844 2043  3
+                : Opening Aimms Project     07:2143.844 2043  3
+monitor.in.txt  : MainExecution             07:2144.156
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2043;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2043,iteration 3 " ;          07:2152.349 2043  3
+monitor.in.txt  : Wait                      07:2152.349 2043  3
+monitor.in.txt  : Quit                      07:2152.349 2043  3
+monitor.out.txt :    sAction := "Exited" ;  07:2153.380 2043  3
+monitor.in.txt  : Wait                      07:2216.111 2043  4
+                : Opening Aimms Project     07:2216.111 2043  4
+monitor.in.txt  : MainExecution             07:2216.423
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2043;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2043,iteration 4 " ;          07:2224.140 2043  4
+monitor.in.txt  : Wait                      07:2224.140 2043  4
+monitor.in.txt  : Quit                      07:2224.140 2043  4
+monitor.out.txt :    sAction := "Exited" ;  07:2225.172 2043  4
+monitor.in.txt  : Wait                      07:2248.540 2043  5
+                : Opening Aimms Project     07:2248.540 2043  5
+monitor.in.txt  : MainExecution             07:2248.839
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2043;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2043,iteration 5 " ;          07:2332.486 2043  5
+monitor.in.txt  : Wait                      07:2332.486 2043  5
+monitor.in.txt  : Quit                      07:2332.486 2043  5
+monitor.out.txt :    sAction := "Exited" ;  07:2334.033 2043  5
+monitor.in.txt  : Wait                      07:2405.111 2043  6
+                : Opening Aimms Project     07:2405.111 2043  6
+monitor.in.txt  : MainExecution             07:2405.471
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2043;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2043,iteration 6 " ;          07:2452.193 2043  6
+monitor.in.txt  : Wait                      07:2452.193 2043  6
+monitor.in.txt  : Quit                      07:2452.193 2043  6
+monitor.out.txt :    sAction := "Exited" ;  07:2453.224 2043  6
+monitor.in.txt  : Wait                      07:2506.696 2044  1
+                : Opening Aimms Project     07:2506.696 2044  1
+monitor.in.txt  : MainExecution             07:2507.040
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2044;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2044,iteration 1 " ;          07:2515.272 2044  1
+monitor.in.txt  : Wait                      07:2515.272 2044  1
+monitor.in.txt  : Quit                      07:2515.288 2044  1
+monitor.out.txt :    sAction := "Exited" ;  07:2516.305 2044  1
+monitor.in.txt  : Wait                      07:2538.879 2044  2
+                : Opening Aimms Project     07:2538.879 2044  2
+monitor.in.txt  : MainExecution             07:2539.223
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2044;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2044,iteration 2 " ;          07:2546.929 2044  2
+monitor.in.txt  : Wait                      07:2546.945 2044  2
+monitor.in.txt  : Quit                      07:2546.961 2044  2
+monitor.out.txt :    sAction := "Exited" ;  07:2547.992 2044  2
+monitor.in.txt  : Wait                      07:2610.302 2044  3
+                : Opening Aimms Project     07:2610.302 2044  3
+monitor.in.txt  : MainExecution             07:2610.661
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2044;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2044,iteration 3 " ;          07:2654.308 2044  3
+monitor.in.txt  : Wait                      07:2654.308 2044  3
+monitor.in.txt  : Quit                      07:2654.308 2044  3
+monitor.out.txt :    sAction := "Exited" ;  07:2655.340 2044  3
+monitor.in.txt  : Wait                      07:2727.131 2044  4
+                : Opening Aimms Project     07:2727.131 2044  4
+monitor.in.txt  : MainExecution             07:2727.475
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2044;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2044,iteration 4 " ;          07:2815.210 2044  4
+monitor.in.txt  : Wait                      07:2815.210 2044  4
+monitor.in.txt  : Quit                      07:2815.210 2044  4
+monitor.out.txt :    sAction := "Exited" ;  07:2816.226 2044  4
+monitor.in.txt  : Wait                      07:2829.754 2045  1
+                : Opening Aimms Project     07:2829.754 2045  1
+monitor.in.txt  : MainExecution             07:2830.082
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2045;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2045,iteration 1 " ;          07:2838.304 2045  1
+monitor.in.txt  : Wait                      07:2838.304 2045  1
+monitor.in.txt  : Quit                      07:2838.304 2045  1
+monitor.out.txt :    sAction := "Exited" ;  07:2839.335 2045  1
+monitor.in.txt  : Wait                      07:2901.878 2045  2
+                : Opening Aimms Project     07:2901.878 2045  2
+monitor.in.txt  : MainExecution             07:2902.269
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2045;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2045,iteration 2 " ;          07:2910.498 2045  2
+monitor.in.txt  : Wait                      07:2910.498 2045  2
+monitor.in.txt  : Quit                      07:2910.498 2045  2
+monitor.out.txt :    sAction := "Exited" ;  07:2911.531 2045  2
+monitor.in.txt  : Wait                      07:2934.151 2045  3
+                : Opening Aimms Project     07:2934.151 2045  3
+monitor.in.txt  : MainExecution             07:2934.448
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2045;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2045,iteration 3 " ;          07:3018.601 2045  3
+monitor.in.txt  : Wait                      07:3018.601 2045  3
+monitor.in.txt  : Quit                      07:3018.601 2045  3
+monitor.out.txt :    sAction := "Exited" ;  07:3019.635 2045  3
+monitor.in.txt  : Wait                      07:3050.432 2045  4
+                : Opening Aimms Project     07:3050.432 2045  4
+monitor.in.txt  : MainExecution             07:3050.792
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2045;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2045,iteration 4 " ;          07:3140.599 2045  4
+monitor.in.txt  : Wait                      07:3140.614 2045  4
+monitor.in.txt  : Quit                      07:3140.630 2045  4
+monitor.out.txt :    sAction := "Exited" ;  07:3141.662 2045  4
+monitor.in.txt  : Wait                      07:3155.090 2046  1
+                : Opening Aimms Project     07:3155.090 2046  1
+monitor.in.txt  : MainExecution             07:3155.403
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2046;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2046,iteration 1 " ;          07:3203.095 2046  1
+monitor.in.txt  : Wait                      07:3203.095 2046  1
+monitor.in.txt  : Quit                      07:3203.095 2046  1
+monitor.out.txt :    sAction := "Exited" ;  07:3204.126 2046  1
+monitor.in.txt  : Wait                      07:3227.355 2046  2
+                : Opening Aimms Project     07:3227.355 2046  2
+monitor.in.txt  : MainExecution             07:3227.777
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2046;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2046,iteration 2 " ;          07:3235.468 2046  2
+monitor.in.txt  : Wait                      07:3235.468 2046  2
+monitor.in.txt  : Quit                      07:3235.468 2046  2
+monitor.out.txt :    sAction := "Exited" ;  07:3236.485 2046  2
+monitor.in.txt  : Wait                      07:3258.907 2046  3
+                : Opening Aimms Project     07:3258.907 2046  3
+monitor.in.txt  : MainExecution             07:3259.282
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2046;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2046,iteration 3 " ;          07:3306.988 2046  3
+monitor.in.txt  : Wait                      07:3306.988 2046  3
+monitor.in.txt  : Quit                      07:3306.988 2046  3
+monitor.out.txt :    sAction := "Exited" ;  07:3308.019 2046  3
+monitor.in.txt  : Wait                      07:3330.078 2046  4
+                : Opening Aimms Project     07:3330.078 2046  4
+monitor.in.txt  : MainExecution             07:3330.391
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2046;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2046,iteration 4 " ;          07:3338.097 2046  4
+monitor.in.txt  : Wait                      07:3338.097 2046  4
+monitor.in.txt  : Quit                      07:3338.097 2046  4
+monitor.out.txt :    sAction := "Exited" ;  07:3339.114 2046  4
+monitor.in.txt  : Wait                      07:3401.532 2046  5
+                : Opening Aimms Project     07:3401.532 2046  5
+monitor.in.txt  : MainExecution             07:3401.860
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2046;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2046,iteration 5 " ;          07:3446.047 2046  5
+monitor.in.txt  : Wait                      07:3446.047 2046  5
+monitor.in.txt  : Quit                      07:3446.047 2046  5
+monitor.out.txt :    sAction := "Exited" ;  07:3447.080 2046  5
+monitor.in.txt  : Wait                      07:3517.805 2046  6
+                : Opening Aimms Project     07:3517.805 2046  6
+monitor.in.txt  : MainExecution             07:3518.133
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2046;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2046,iteration 6 " ;          07:3606.377 2046  6
+monitor.in.txt  : Wait                      07:3606.377 2046  6
+monitor.in.txt  : Quit                      07:3606.377 2046  6
+monitor.out.txt :    sAction := "Exited" ;  07:3607.409 2046  6
+monitor.in.txt  : Wait                      07:3620.682 2047  1
+                : Opening Aimms Project     07:3620.682 2047  1
+monitor.in.txt  : MainExecution             07:3621.104
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2047;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2047,iteration 1 " ;          07:3629.311 2047  1
+monitor.in.txt  : Wait                      07:3629.311 2047  1
+monitor.in.txt  : Quit                      07:3629.311 2047  1
+monitor.out.txt :    sAction := "Exited" ;  07:3630.342 2047  1
+monitor.in.txt  : Wait                      07:3653.083 2047  2
+                : Opening Aimms Project     07:3653.083 2047  2
+monitor.in.txt  : MainExecution             07:3653.411
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2047;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2047,iteration 2 " ;          07:3701.118 2047  2
+monitor.in.txt  : Wait                      07:3701.118 2047  2
+monitor.in.txt  : Quit                      07:3701.118 2047  2
+monitor.out.txt :    sAction := "Exited" ;  07:3702.151 2047  2
+monitor.in.txt  : Wait                      07:3724.192 2047  3
+                : Opening Aimms Project     07:3724.192 2047  3
+monitor.in.txt  : MainExecution             07:3724.567
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2047;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2047,iteration 3 " ;          07:3732.762 2047  3
+monitor.in.txt  : Wait                      07:3732.762 2047  3
+monitor.in.txt  : Quit                      07:3732.762 2047  3
+monitor.out.txt :    sAction := "Exited" ;  07:3733.793 2047  3
+monitor.in.txt  : Wait                      07:3756.121 2047  4
+                : Opening Aimms Project     07:3756.121 2047  4
+monitor.in.txt  : MainExecution             07:3756.450
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2047;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2047,iteration 4 " ;          07:3804.157 2047  4
+monitor.in.txt  : Wait                      07:3804.157 2047  4
+monitor.in.txt  : Quit                      07:3804.157 2047  4
+monitor.out.txt :    sAction := "Exited" ;  07:3805.189 2047  4
+monitor.in.txt  : Wait                      07:3827.835 2047  5
+                : Opening Aimms Project     07:3827.835 2047  5
+monitor.in.txt  : MainExecution             07:3828.225
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2047;
+                        ncntrl_curitr('1')  := 5;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2047,iteration 5 " ;          07:3911.844 2047  5
+monitor.in.txt  : Wait                      07:3911.844 2047  5
+monitor.in.txt  : Quit                      07:3911.844 2047  5
+monitor.out.txt :    sAction := "Exited" ;  07:3913.391 2047  5
+monitor.in.txt  : Wait                      07:3944.047 2047  6
+                : Opening Aimms Project     07:3944.047 2047  6
+monitor.in.txt  : MainExecution             07:3944.343
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2047;
+                        ncntrl_curitr('1')  := 6;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2047,iteration 6 " ;          07:4033.602 2047  6
+monitor.in.txt  : Wait                      07:4033.602 2047  6
+monitor.in.txt  : Quit                      07:4033.602 2047  6
+monitor.out.txt :    sAction := "Exited" ;  07:4034.633 2047  6
+monitor.in.txt  : Wait                      07:4047.852 2048  1
+                : Opening Aimms Project     07:4047.852 2048  1
+monitor.in.txt  : MainExecution             07:4048.180
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2048;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2048,iteration 1 " ;          07:4055.887 2048  1
+monitor.in.txt  : Wait                      07:4055.887 2048  1
+monitor.in.txt  : Quit                      07:4055.887 2048  1
+monitor.out.txt :    sAction := "Exited" ;  07:4056.904 2048  1
+monitor.in.txt  : Wait                      07:4119.347 2048  2
+                : Opening Aimms Project     07:4119.347 2048  2
+monitor.in.txt  : MainExecution             07:4119.644
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2048;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2048,iteration 2 " ;          07:4127.865 2048  2
+monitor.in.txt  : Wait                      07:4127.865 2048  2
+monitor.in.txt  : Quit                      07:4127.865 2048  2
+monitor.out.txt :    sAction := "Exited" ;  07:4128.883 2048  2
+monitor.in.txt  : Wait                      07:4151.160 2048  3
+                : Opening Aimms Project     07:4151.160 2048  3
+monitor.in.txt  : MainExecution             07:4151.489
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2048;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2048,iteration 3 " ;          07:4235.625 2048  3
+monitor.in.txt  : Wait                      07:4235.625 2048  3
+monitor.in.txt  : Quit                      07:4235.625 2048  3
+monitor.out.txt :    sAction := "Exited" ;  07:4236.657 2048  3
+monitor.in.txt  : Wait                      07:4306.800 2048  4
+                : Opening Aimms Project     07:4306.800 2048  4
+monitor.in.txt  : MainExecution             07:4307.128
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2048;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2048,iteration 4 " ;          07:4356.919 2048  4
+monitor.in.txt  : Wait                      07:4356.919 2048  4
+monitor.in.txt  : Quit                      07:4356.919 2048  4
+monitor.out.txt :    sAction := "Exited" ;  07:4357.951 2048  4
+monitor.in.txt  : Wait                      07:4411.209 2049  1
+                : Opening Aimms Project     07:4411.209 2049  1
+monitor.in.txt  : MainExecution             07:4411.537
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2049;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2049,iteration 1 " ;          07:4419.229 2049  1
+monitor.in.txt  : Wait                      07:4419.229 2049  1
+monitor.in.txt  : Quit                      07:4419.229 2049  1
+monitor.out.txt :    sAction := "Exited" ;  07:4420.776 2049  1
+monitor.in.txt  : Wait                      07:4442.750 2049  2
+                : Opening Aimms Project     07:4442.750 2049  2
+monitor.in.txt  : MainExecution             07:4443.046
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2049;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2049,iteration 2 " ;          07:4450.738 2049  2
+monitor.in.txt  : Wait                      07:4450.738 2049  2
+monitor.in.txt  : Quit                      07:4450.738 2049  2
+monitor.out.txt :    sAction := "Exited" ;  07:4452.270 2049  2
+monitor.in.txt  : Wait                      07:4514.522 2049  3
+                : Opening Aimms Project     07:4514.522 2049  3
+monitor.in.txt  : MainExecution             07:4514.819
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2049;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2049,iteration 3 " ;          07:4559.969 2049  3
+monitor.in.txt  : Wait                      07:4559.969 2049  3
+monitor.in.txt  : Quit                      07:4559.969 2049  3
+monitor.out.txt :    sAction := "Exited" ;  07:4601.000 2049  3
+monitor.in.txt  : Wait                      07:4630.578 2049  4
+                : Opening Aimms Project     07:4630.578 2049  4
+monitor.in.txt  : MainExecution             07:4630.875
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2049;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2049,iteration 4 " ;          07:4723.255 2049  4
+monitor.in.txt  : Wait                      07:4723.255 2049  4
+monitor.in.txt  : Quit                      07:4723.255 2049  4
+monitor.out.txt :    sAction := "Exited" ;  07:4724.286 2049  4
+monitor.in.txt  : Wait                      07:4742.553 2050  1
+                : Opening Aimms Project     07:4742.553 2050  1
+monitor.in.txt  : MainExecution             07:4742.866
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2050;
+                        ncntrl_curitr('1')  := 1;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2050,iteration 1 " ;          07:4751.088 2050  1
+monitor.in.txt  : Wait                      07:4751.088 2050  1
+monitor.in.txt  : Quit                      07:4751.088 2050  1
+monitor.out.txt :    sAction := "Exited" ;  07:4752.105 2050  1
+monitor.in.txt  : Wait                      07:4819.135 2050  2
+                : Opening Aimms Project     07:4819.135 2050  2
+monitor.in.txt  : MainExecution             07:4819.495
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2050;
+                        ncntrl_curitr('1')  := 2;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2050,iteration 2 " ;          07:4827.202 2050  2
+monitor.in.txt  : Wait                      07:4827.202 2050  2
+monitor.in.txt  : Quit                      07:4827.202 2050  2
+monitor.out.txt :    sAction := "Exited" ;  07:4828.233 2050  2
+monitor.in.txt  : Wait                      07:4906.580 2050  3
+                : Opening Aimms Project     07:4906.580 2050  3
+monitor.in.txt  : MainExecution             07:4906.909
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2050;
+                        ncntrl_curitr('1')  := 3;
+                        ncntrl_ncrl('1')  := 0;
+monitor.out.txt  :    sAction := "Completed 2050,iteration 3 " ;          07:4951.566 2050  3
+monitor.in.txt  : Wait                      07:4951.566 2050  3
+monitor.in.txt  : Quit                      07:4951.566 2050  3
+monitor.out.txt :    sAction := "Exited" ;  07:4952.599 2050  3
+monitor.in.txt  : Wait                      07:5025.637 2050  4
+                : Opening Aimms Project     07:5025.637 2050  4
+monitor.in.txt  : MainExecution             07:5025.934
+                   Here is the monitor.in.txt file:
+                        ncntrl_curcalyr('1'):=2050;
+                        ncntrl_curitr('1')  := 4;
+                        ncntrl_ncrl('1')  := 1;
+monitor.out.txt  :    sAction := "Completed 2050,iteration 4 " ;          07:5125.467 2050  4
+monitor.in.txt  : Wait                      07:5125.467 2050  4
+monitor.in.txt  : Quit                      07:5125.467 2050  4
+monitor.out.txt :    sAction := "Exited" ;  07:5126.498 2050  4

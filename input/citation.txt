@@ -1,0 +1,33 @@
+"AEO_ID","AEO2023",AEO Identifier
+"m__m","2012",Macro base year dollars (GDP)
+"m==m","2012",Macro base year (Input/Output)
+"main_historical_year","2022",main historical year
+"auxiliary_historical_year","2021",auxiliary historical year
+"SEDS_citation","2019",State Energy Data System
+"NGA_citation","2020",Natural Gas Annual
+"CIA_citation","2013",Annual Coal Report
+"MER_citation","October 2022",Annual Energy Review
+"NGM_citation","July 2020",Natural Gas Monthly
+"PSA_citation","2020",Petroleum Supply Annual
+"PSM_citation","July 2020",Petroleum Supply Monthly
+"PMM_citation","July 2020",Petroleum Marketing Monthly
+"QCR_citation","October-December 2019",Quarterly Coal Report
+"EPA_citation_II","July 2019, Table 4.13.B",Electric Power Monthly (was EPA II)
+"EPA_citation","2018",Electric Power Annual
+"Res_citation","2014",U.S. Crude Oil, etc. Reserves
+"MECS_year","2018",Manufacturing Energy Consumption
+"DRI_citation","September 2022",DRI Simulation
+"DRI_I_citation","September 2022",DRI Simulation for industrial output
+"FHA_citation","2016",Federal Highway Statistics
+"TEDB_citation","36",Transportation Energy Data Book
+"FEP_citation","June 2015",Summary of Fuel Economy Perform.
+"HHV_citation","1994",Household Vehicle Energy Cons.
+"MAFV_citation","1996",Current & Potential Markets AFVs
+"ATT_citation","2009 (Part II - User and Fuel Data)",Alternatives to Trad Trans Fuels
+"FOK_citation","2017",Fuel Oil and Kerosene Sales
+"AIR_citation","December 2010/2009",Air Carrier Statistics Monthly
+"MMY_citation","2000",NHTSA Mid-Model Year Report
+"TIU_citation","EC02TV",Vehicle Inventory and Use Survey
+"PSAold_citation","2014",old Petroleum Supply Annual
+"IEA_citation","September 2014",International Energy Annual
+"STEO_citation","November 2022",Short-Term Energy Outlook

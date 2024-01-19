@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{0A942A92-4E12-48C8-9206-7224D3251177}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" F66Semantics="true" F77RuntimeCompatibility="true" F77IntegerConstants="true" Diagnostics="diagnosticsDisableAll" WarnUnalignedData="false" LocalSavedScalarsZero="true" InitArrays="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\abasis.f"/>
+		<File RelativePath=".\aedit.f"/>
+		<File RelativePath=".\analsys.f"/>
+		<File RelativePath=".\aquery1.f"/>
+		<File RelativePath=".\aquery2.f"/>
+		<File RelativePath=".\arate1.f"/>
+		<File RelativePath=".\arate2.f"/>
+		<File RelativePath=".\areadin.f"/>
+		<File RelativePath=".\aschema.f"/>
+		<File RelativePath=".\asensitv.f"/>
+		<File RelativePath=".\ashow.f"/>
+		<File RelativePath=".\asubmat.f"/>
+		<File RelativePath=".\blkfind.f"/>
+		<File RelativePath=".\blkio.f"/>
+		<File RelativePath=".\blkmgt.f"/>
+		<File RelativePath=".\blkplot.f"/>
+		<File RelativePath=".\DCANAL"/>
+		<File RelativePath=".\DCFLCMND"/>
+		<File RelativePath=".\DCFLIP"/>
+		<File RelativePath=".\DCGETMAT.PRIOR_TO_02152001"/>
+		<File RelativePath=".\DCGRAPH"/>
+		<File RelativePath=".\DCREDUCE"/>
+		<File RelativePath=".\DCRULE"/>
+		<File RelativePath=".\DCSCHEMA"/>
+		<File RelativePath=".\DCSCRDAT"/>
+		<File RelativePath=".\DCSCREEN"/>
+		<File RelativePath=".\explain.f"/>
+		<File RelativePath=".\fldictry.f"/>
+		<File RelativePath=".\flfiles.f"/>
+		<File RelativePath=".\flipmain.f"/>
+		<File RelativePath=".\flipmgt.f"/>
+		<File RelativePath=".\flkeywrd.f"/>
+		<File RelativePath=".\flparse.f"/>
+		<File RelativePath=".\flrand.f"/>
+		<File RelativePath=".\flscreen.f"/>
+		<File RelativePath=".\flstring.f"/>
+		<File RelativePath=".\gbagnda1.f"/>
+		<File RelativePath=".\gbagnda2.f"/>
+		<File RelativePath=".\gbrange.f"/>
+		<File RelativePath=".\gbrver.f"/>
+		<File RelativePath=".\getedit.f"/>
+		<File RelativePath=".\getiomat.f"/>
+		<File RelativePath=".\getiopck.f"/>
+		<File RelativePath=".\getiosol.f"/>
+		<File RelativePath=".\getiosub.f"/>
+		<File RelativePath=".\getlib.f"/>
+		<File RelativePath=".\getrans.f"/>
+		<File RelativePath=".\getset.f"/>
+		<File RelativePath=".\graphdo.f"/>
+		<File RelativePath=".\graphio.f"/>
+		<File RelativePath=".\graphsyn.f"/>
+		<File RelativePath=".\gredbin.f"/>
+		<File RelativePath=".\gredexp.f"/>
+		<File RelativePath=".\gredexp2.f"/>
+		<File RelativePath=".\gredmat.f"/>
+		<File RelativePath=".\gredtest.f"/>
+		<File RelativePath=".\greduce.f"/>
+		<File RelativePath=".\rbcmnd1.f"/>
+		<File RelativePath=".\rbcmnd2.f"/>
+		<File RelativePath=".\rbgenerl.f"/>
+		<File RelativePath=".\rbstacks.f"/>
+		<File RelativePath=".\schema.f"/>
+		<File RelativePath=".\scheqn.f"/>
+		<File RelativePath=".\screen.f"/>
+		<File RelativePath=".\scrplots.f"/>
+		<File RelativePath=".\table.f"/></Filter>
+		<File RelativePath=".\ReadMe.txt"/></Files>
+	<Globals/></VisualStudioProject>

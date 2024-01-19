@@ -1,0 +1,58 @@
+! $Header: m:/default/includes/RCS/rencntl,v 1.4 2017/05/19 19:29:04 rsc Exp $
+! .....................................................................
+!      C O M M O N   B L O C K
+!
+!     Integer:
+!        MLPTMX  : No. of steps in long term capital cost supply curve
+!     Real:
+!       USTTHR   : short term elasticity threshold above which elasticity apply
+!                : fraction of installed  national capacity of a technology
+!       USTICA   : fraction of increase national addition/national installed capacity
+!       USTICS   : fraction of increase in cost for every USTICA in capacity
+!       USTCAMX  : max. national capacity additions over one year
+!                  (i.e. max pt in supply curve) normalize by current capacity
+!
+!       UTCSFC   : Cost multiplier for step (i) in long term supply curve
+!       UTRSFC   : resource used normalized (i.e. current use/Total resource
+!       UTRSMX   : max. available resource by NERC regions and technology
+!       UTRSCU   : current available resource by NERC and technology
+!
+!       WOLDCN   : old constraints for reporting purpose
+!
+! .........COMMON BLOCK ...............................................
+
+      character *13 teclabel(WNTECH)   ! renewables technology label
+      data teclabel  /'Hydro       ', &
+                      'Geoth Plan  ', &
+                      'Geoth exist ', &
+                      'Geoth Pump  ', &
+                      'MSW         ', &
+                      'Biomass     ', &
+                      'Solar Therm ', &
+                      'PV          ', &
+                      'PV Tilt     ', &
+                      'Wind        ', &
+                      'OFS Wind    ', &    
+                      'ONS Wind    ', & 
+                      'Ethanol     '/
+
+!..... Short term capital cost elasticities
+      Real USTTHR(WNTECH)
+      Real USTICA(WNTECH)
+      Real USTICS(WNTECH)
+      Real USTCAMX(WNTECH)
+
+!..... Long term capital cost elasticities
+      Integer MLPTMX
+      PARAMETER(MLPTMX=5)        ! 5 steps in the long term supply curve
+      Real UTCSFC(MNUMNR,WNTECH,MLPTMX)
+      Real UTRSFC(MNUMNR,WNTECH,MLPTMX)
+      Real UTRSMX(MNUMNR,WNTECH)
+      Real UTRSCU(MNUMNR,WNTECH)
+
+! ..... Contraints
+      Real WOLDCN(MNUMNR,WNTECH)
+
+      Common /rencntl/ USTTHR,USTICA,USTICS,USTCAMX,UTCSFC,UTRSFC, &
+                       UTRSMX,UTRSCU,WOLDCN
+

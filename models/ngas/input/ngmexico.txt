@@ -1,0 +1,2511 @@
+! $Header: m:/default/input/RCS/ngmexico.txt,v 1.6 2020/08/06 13:15:11 KDL Exp $
+!___________________________________________________________________________________________
+!
+!				NGMM Mexico Declarations
+!			
+!___________________________________________________________________________________________
+
+!10/10/17	KDL	See NGMM shared drive or AEO-IEO Shared folder for most original data/input files
+!07/25/18	KDL	Updated using latest SIE date through 2017 (see NGMM Input folder for Mexico)
+!			Now copy and paste PEMEX historical production from data//ngmexico_add.txt to end of file
+!07/24/19	KDL	Updated all input data (Consumption only through Sept 2018)
+!08/05/20	KDL	Mary Lewis updated Consumption, Production, and Prices.  Together updated capacity and LNG
+!			imports
+!08/04/21	MYL	Updated input data with Katie Dyl (PEMEX production) and Stephen York (LNG Imports)
+
+!	1.1  SENER Demand data
+!	1.2  Intra-Mexico Pipeline Capacities 
+!	1.3  SIE/CFE Spot Price Data
+!		1.3.1  Old 2-price system through June 2017
+!		1.3.2	New Mexico Index and regional prices (later starting Feb 2018)
+!	1.4  IHS LNG Import Data
+!	1.5  PEMEX Historical Production
+!___________________________________________________________________________________________
+!	
+!	Identifiers/inputs in nglngexp.txt:
+!	
+!	HistoricalConsumptionSENER		HistoricalAnnualSupply	
+!						
+!	MexCapYear				HistoricalProductionPemex	
+!	HistoricalCapacity			HistoricalAnnualProductionPemex
+!	PlannedCapacity				HistoricalTotalAnnualProductionPemex
+!						
+!	HistoricalSpotPrice			
+!_____________________________________________________________________________________
+!___________________________________________________________________________________________
+!
+!				1.1  SENER Demand data
+!___________________________________________________________________________________________
+
+!Historical demand data by month from SENER
+!Sistema de Informacion Energetica- download from website
+!Instituto Mexicano del Petroleo
+!IMP: Demanda Interna de Gas Natural por Estado, Sectores Electrico Publico y Exportacion de Electricidad
+!IMP: Demanda Interna de Gas Natural por Estado, Sectores Industrial y Autogeneracion de Electricidad
+!IMP: Demanda Interna de Gas Natural por Estado, Sector Petrolero
+!IMP: Demanda Interna de Gas Natural por Estado (Secotres Residential, Commercial, and Transporte)
+!Units:  Bcf/d  Needs to be convented in AIMMS code
+!Initial data formatting and conversion to Bcf/d from Mcf/d in Excel file "Mex_AIMMS_Consumption" in NGMM shared drive
+
+!7/29/22	SYK	A few missing datapoints were filled in from last years's file.
+
+HistoricalConsumptionSENER := data table
+
+				MX_NW	MX_NE	MX_IW	MX_CE	MX_SS
+(January, 2000, Residential)	0.0023	0.0965	0.0014	0.0078	0.0002
+(February, 2000, Residential)	0.0020	0.0811	0.0011	0.0077	0.0003
+(March, 2000, Residential)	0.0020	0.0653	0.0013	0.0073	0.0003
+(April, 2000, Residential)	0.0014	0.0548	0.0014	0.0072	0.0003
+(May, 2000, Residential)	0.0011	0.0509	0.0014	0.0074	0.0003
+(June, 2000, Residential)	0.0011	0.0495	0.0012	0.0077	0.0003
+(July, 2000, Residential)	0.0011	0.0459	0.0012	0.0079	0.0003
+(August, 2000, Residential)	0.0010	0.0474	0.0014	0.0080	0.0003
+(September, 2000, Residential)	0.0011	0.0485	0.0015	0.0083	0.0003
+(October, 2000, Residential)	0.0014	0.0671	0.0015	0.0090	0.0003
+(November, 2000, Residential)	0.0022	0.0917	0.0015	0.0093	0.0003
+(December, 2000, Residential)	0.0023	0.1226	0.0015	0.0099	0.0002
+(January, 2001, Residential)	0.0031	0.1278	0.0017	0.0112	0.0002
+(February, 2001, Residential)	0.0028	0.1033	0.0018	0.0113	0.0002
+(March, 2001, Residential)	0.0023	0.0776	0.0016	0.0114	0.0003
+(April, 2001, Residential)	0.0018	0.0573	0.0014	0.0105	0.0003
+(May, 2001, Residential)	0.0015	0.0599	0.0015	0.0113	0.0003
+(June, 2001, Residential)	0.0013	0.0506	0.0015	0.0115	0.0003
+(July, 2001, Residential)	0.0011	0.0457	0.0015	0.0120	0.0003
+(August, 2001, Residential)	0.0012	0.0443	0.0017	0.0118	0.0003
+(September, 2001, Residential)	0.0013	0.0492	0.0019	0.0125	0.0003
+(October, 2001, Residential)	0.0018	0.0523	0.0020	0.0128	0.0003
+(November, 2001, Residential)	0.0017	0.0708	0.0022	0.0134	0.0003
+(December, 2001, Residential)	0.0031	0.1041	0.0021	0.0139	0.0002
+(January, 2002, Residential)	0.0035	0.1128	0.0027	0.0156	0.0002
+(February, 2002, Residential)	0.0033	0.1120	0.0023	0.0155	0.0002
+(March, 2002, Residential)	0.0026	0.0803	0.0021	0.0145	0.0003
+(April, 2002, Residential)	0.0019	0.0621	0.0028	0.0147	0.0004
+(May, 2002, Residential)	0.0017	0.0540	0.0026	0.0153	0.0004
+(June, 2002, Residential)	0.0010	0.0510	0.0028	0.0161	0.0004
+(July, 2002, Residential)	0.0011	0.0505	0.0029	0.0158	0.0004
+(August, 2002, Residential)	0.0009	0.0488	0.0032	0.0185	0.0004
+(September, 2002, Residential)	0.0007	0.0532	0.0032	0.0174	0.0004
+(October, 2002, Residential)	0.0010	0.0583	0.0032	0.0191	0.0004
+(November, 2002, Residential)	0.0030	0.0827	0.0040	0.0204	0.0003
+(December, 2002, Residential)	0.0026	0.1127	0.0041	0.0201	0.0003
+(January, 2003, Residential)	0.0029	0.1265	0.0040	0.0188	0.0003
+(February, 2003, Residential)	0.0026	0.1111	0.0045	0.0185	0.0003
+(March, 2003, Residential)	0.0008	0.0823	0.0041	0.0178	0.0004
+(April, 2003, Residential)	0.0023	0.0643	0.0037	0.0180	0.0004
+(May, 2003, Residential)	0.0018	0.0534	0.0034	0.0180	0.0004
+(June, 2003, Residential)	0.0014	0.0497	0.0039	0.0192	0.0004
+(July, 2003, Residential)	0.0010	0.0487	0.0044	0.0204	0.0004
+(August, 2003, Residential)	0.0010	0.0461	0.0043	0.0206	0.0004
+(September, 2003, Residential)	0.0011	0.0542	0.0044	0.0217	0.0004
+(October, 2003, Residential)	0.0015	0.0641	0.0050	0.0224	0.0003
+(November, 2003, Residential)	0.0021	0.0804	0.0053	0.0225	0.0003
+(December, 2003, Residential)	0.0030	0.1226	0.0059	0.0237	0.0002
+(January, 2004, Residential)	0.0027	0.1209	0.0068	0.0233	0.0002
+(February, 2004, Residential)	0.0029	0.1171	0.0067	0.0246	0.0002
+(March, 2004, Residential)	0.0023	0.0806	0.0059	0.0236	0.0003
+(April, 2004, Residential)	0.0018	0.0680	0.0061	0.0225	0.0003
+(May, 2004, Residential)	0.0013	0.0583	0.0061	0.0223	0.0002
+(June, 2004, Residential)	0.0012	0.0508	0.0061	0.0226	0.0002
+(July, 2004, Residential)	0.0010	0.0464	0.0061	0.0224	0.0003
+(August, 2004, Residential)	0.0009	0.0474	0.0063	0.0226	0.0002
+(September, 2004, Residential)	0.0010	0.0539	0.0065	0.0228	0.0003
+(October, 2004, Residential)	0.0012	0.0568	0.0067	0.0237	0.0003
+(November, 2004, Residential)	0.0021	0.0929	0.0081	0.0242	0.0002
+(December, 2004, Residential)	0.0026	0.1229	0.0080	0.0248	0.0001
+(January, 2005, Residential)	0.0032	0.1156	0.0071	0.0261	0.0002
+(February, 2005, Residential)	0.0030	0.1241	0.0077	0.0251	0.0002
+(March, 2005, Residential)	0.0022	0.0828	0.0068	0.0229	0.0002
+(April, 2005, Residential)	0.0018	0.0664	0.0064	0.0224	0.0002
+(May, 2005, Residential)	0.0014	0.0600	0.0059	0.0223	0.0002
+(June, 2005, Residential)	0.0010	0.0506	0.0055	0.0223	0.0002
+(July, 2005, Residential)	0.0008	0.0487	0.0063	0.0228	0.0002
+(August, 2005, Residential)	0.0008	0.0500	0.0065	0.0238	0.0002
+(September, 2005, Residential)	0.0010	0.0524	0.0068	0.0245	0.0002
+(October, 2005, Residential)	0.0013	0.0623	0.0069	0.0242	0.0002
+(November, 2005, Residential)	0.0018	0.0833	0.0072	0.0250	0.0001
+(December, 2005, Residential)	0.0026	0.1245	0.0070	0.0263	0.0001
+(January, 2006, Residential)	0.0021	0.1056	0.0084	0.0267	0.0001
+(February, 2006, Residential)	0.0023	0.0992	0.0076	0.0251	0.0001
+(March, 2006, Residential)	0.0021	0.0756	0.0068	0.0246	0.0002
+(April, 2006, Residential)	0.0017	0.0625	0.0066	0.0239	0.0002
+(May, 2006, Residential)	0.0013	0.0566	0.0068	0.0255	0.0002
+(June, 2006, Residential)	0.0011	0.0514	0.0070	0.0253	0.0002
+(July, 2006, Residential)	0.0009	0.0504	0.0072	0.0261	0.0002
+(August, 2006, Residential)	0.0010	0.0512	0.0072	0.0265	0.0002
+(September, 2006, Residential)	0.0011	0.0561	0.0072	0.0273	0.0002
+(October, 2006, Residential)	0.0015	0.0636	0.0083	0.0275	0.0002
+(November, 2006, Residential)	0.0020	0.0831	0.0087	0.0291	0.0002
+(December, 2006, Residential)	0.0026	0.1330	0.0096	0.0289	0.0001
+(January, 2007, Residential)	0.0028	0.1729	0.0079	0.0303	0.0002
+(February, 2007, Residential)	0.0026	0.1181	0.0081	0.0299	0.0002
+(March, 2007, Residential)	0.0024	0.0807	0.0073	0.0287	0.0002
+(April, 2007, Residential)	0.0016	0.0660	0.0069	0.0264	0.0002
+(May, 2007, Residential)	0.0013	0.0602	0.0058	0.0285	0.0002
+(June, 2007, Residential)	0.0010	0.0537	0.0066	0.0270	0.0002
+(July, 2007, Residential)	0.0008	0.0499	0.0065	0.0267	0.0002
+(August, 2007, Residential)	0.0011	0.0512	0.0069	0.0281	0.0002
+(September, 2007, Residential)	0.0012	0.0529	0.0069	0.0276	0.0002
+(October, 2007, Residential)	0.0013	0.0605	0.0070	0.0293	0.0002
+(November, 2007, Residential)	0.0017	0.0817	0.0071	0.0303	0.0002
+(December, 2007, Residential)	0.0024	0.0753	0.0081	0.0337	0.0002
+(January, 2008, Residential)	0.0025	0.1360	0.0084	0.0321	0.0001
+(February, 2008, Residential)	0.0025	0.1012	0.0085	0.0317	0.0001
+(March, 2008, Residential)	0.0013	0.0785	0.0072	0.0286	0.0001
+(April, 2008, Residential)	0.0011	0.0684	0.0069	0.0290	0.0001
+(May, 2008, Residential)	0.0009	0.0571	0.0060	0.0279	0.0002
+(June, 2008, Residential)	0.0008	0.0500	0.0068	0.0292	0.0002
+(July, 2008, Residential)	0.0007	0.0515	0.0068	0.0292	0.0002
+(August, 2008, Residential)	0.0007	0.0500	0.0070	0.0280	0.0002
+(September, 2008, Residential)	0.0006	0.0574	0.0076	0.0313	0.0001
+(October, 2008, Residential)	0.0008	0.0636	0.0075	0.0320	0.0001
+(November, 2008, Residential)	0.0010	0.0828	0.0075	0.0329	0.0001
+(December, 2008, Residential)	0.0013	0.1076	0.0076	0.0328	0.0001
+(January, 2009, Residential)	0.0014	0.1080	0.0081	0.0317	0.0001
+(February, 2009, Residential)	0.0015	0.0947	0.0085	0.0325	0.0001
+(March, 2009, Residential)	0.0012	0.0753	0.0070	0.0285	0.0002
+(April, 2009, Residential)	0.0011	0.0614	0.0081	0.0263	0.0002
+(May, 2009, Residential)	0.0009	0.0525	0.0070	0.0269	0.0002
+(June, 2009, Residential)	0.0007	0.0471	0.0076	0.0273	0.0002
+(July, 2009, Residential)	0.0006	0.0425	0.0077	0.0312	0.0002
+(August, 2009, Residential)	0.0006	0.0426	0.0072	0.0309	0.0002
+(September, 2009, Residential)	0.0006	0.0501	0.0079	0.0328	0.0002
+(October, 2009, Residential)	0.0008	0.0580	0.0077	0.0330	0.0002
+(November, 2009, Residential)	0.0010	0.0785	0.0087	0.0341	0.0001
+(December, 2009, Residential)	0.0013	0.1219	0.0083	0.0341	0.0001
+(January, 2010, Residential)	0.0015	0.1299	0.0101	0.0315	0.0001
+(February, 2010, Residential)	0.0015	0.1127	0.0108	0.0307	0.0001
+(March, 2010, Residential)	0.0013	0.0819	0.0088	0.0270	0.0001
+(April, 2010, Residential)	0.0012	0.0653	0.0110	0.0273	0.0002
+(May, 2010, Residential)	0.0010	0.0546	0.0104	0.0264	0.0002
+(June, 2010, Residential)	0.0008	0.0491	0.0106	0.0266	0.0002
+(July, 2010, Residential)	0.0006	0.0485	0.0107	0.0304	0.0002
+(August, 2010, Residential)	0.0006	0.0460	0.0105	0.0319	0.0002
+(September, 2010, Residential)	0.0007	0.0493	0.0109	0.0321	0.0002
+(October, 2010, Residential)	0.0009	0.0561	0.0096	0.0327	0.0002
+(November, 2010, Residential)	0.0011	0.0708	0.0101	0.0353	0.0002
+(December, 2010, Residential)	0.0015	0.0963	0.0106	0.0355	0.0001
+(January, 2011, Residential)	0.0014	0.1104	0.0099	0.0321	0.0001
+(February, 2011, Residential)	0.0017	0.1131	0.0086	0.0316	0.0001
+(March, 2011, Residential)	0.0015	0.0674	0.0079	0.0294	0.0002
+(April, 2011, Residential)	0.0015	0.0529	0.0068	0.0268	0.0002
+(May, 2011, Residential)	0.0012	0.0497	0.0065	0.0279	0.0002
+(June, 2011, Residential)	0.0011	0.0441	0.0067	0.0283	0.0002
+(July, 2011, Residential)	0.0010	0.0432	0.0071	0.0343	0.0002
+(August, 2011, Residential)	0.0008	0.0417	0.0070	0.0341	0.0002
+(September, 2011, Residential)	0.0008	0.0434	0.0074	0.0341	0.0002
+(October, 2011, Residential)	0.0010	0.0542	0.0078	0.0360	0.0002
+(November, 2011, Residential)	0.0013	0.0720	0.0083	0.0372	0.0001
+(December, 2011, Residential)	0.0018	0.1137	0.0085	0.0366	0.0001
+(January, 2012, Residential)	0.0018	0.1161	0.0085	0.0351	0.0001
+(February, 2012, Residential)	0.0019	0.1072	0.0085	0.0339	0.0002
+(March, 2012, Residential)	0.0017	0.0838	0.0079	0.0319	0.0002
+(April, 2012, Residential)	0.0015	0.0607	0.0069	0.0291	0.0002
+(May, 2012, Residential)	0.0012	0.0558	0.0071	0.0294	0.0002
+(June, 2012, Residential)	0.0011	0.0493	0.0071	0.0310	0.0002
+(July, 2012, Residential)	0.0011	0.0465	0.0078	0.0316	0.0002
+(August, 2012, Residential)	0.0011	0.0465	0.0080	0.0332	0.0002
+(September, 2012, Residential)	0.0010	0.0509	0.0084	0.0330	0.0002
+(October, 2012, Residential)	0.0011	0.0607	0.0081	0.0304	0.0002
+(November, 2012, Residential)	0.0014	0.0767	0.0086	0.0315	0.0002
+(December, 2012, Residential)	0.0019	0.1008	0.0086	0.0357	0.0001
+(January, 2013, Residential)	0.0019	0.1311	0.0097	0.0356	0.0004
+(February, 2013, Residential)	0.0020	0.1038	0.0096	0.0351	0.0004
+(March, 2013, Residential)	0.0017	0.0774	0.0084	0.0316	0.0005
+(April, 2013, Residential)	0.0015	0.0619	0.0079	0.0303	0.0005
+(May, 2013, Residential)	0.0014	0.0569	0.0076	0.0309	0.0004
+(June, 2013, Residential)	0.0012	0.0488	0.0074	0.0311	0.0004
+(July, 2013, Residential)	0.0010	0.0452	0.0079	0.0309	0.0005
+(August, 2013, Residential)	0.0010	0.0456	0.0088	0.0331	0.0004
+(September, 2013, Residential)	0.0012	0.0521	0.0099	0.0345	0.0005
+(October, 2013, Residential)	0.0012	0.0623	0.0091	0.0350	0.0005
+(November, 2013, Residential)	0.0017	0.0892	0.0099	0.0352	0.0004
+(December, 2013, Residential)	0.0020	0.1105	0.0097	0.0346	0.0004
+(January, 2014, Residential)	0.0023	0.1328	0.0106	0.0405	0.0004
+(February, 2014, Residential)	0.0022	0.1061	0.0107	0.0377	0.0005
+(March, 2014, Residential)	0.0019	0.0847	0.0087	0.0328	0.0005
+(April, 2014, Residential)	0.0016	0.0619	0.0087	0.0321	0.0005
+(May, 2014, Residential)	0.0016	0.0555	0.0087	0.0338	0.0005
+(June, 2014, Residential)	0.0012	0.0476	0.0085	0.0338	0.0005
+(July, 2014, Residential)	0.0009	0.0445	0.0089	0.0341	0.0006
+(August, 2014, Residential)	0.0010	0.0432	0.0101	0.0327	0.0005
+(September, 2014, Residential)	0.0012	0.0506	0.0124	0.0353	0.0005
+(October, 2014, Residential)	0.0012	0.0572	0.0124	0.0356	0.0005
+(November, 2014, Residential)	0.0017	0.0868	0.0136	0.0355	0.0006
+(December, 2014, Residential)	0.0024	0.1010	0.0134	0.0343	0.0003
+(January, 2015, Residential)	0.0025	0.1425	0.0132	0.0366	0.0004
+(February, 2015, Residential)	0.0024	0.1129	0.0131	0.0353	0.0004
+(March, 2015, Residential)	0.0021	0.0950	0.0126	0.0331	0.0003
+(April, 2015, Residential)	0.0022	0.0797	0.0114	0.0322	0.0003
+(May, 2015, Residential)	0.0017	0.0675	0.0114	0.0331	0.0003
+(June, 2015, Residential)	0.0016	0.0601	0.0119	0.0342	0.0003
+(July, 2015, Residential)	0.0013	0.0534	0.0122	0.0346	0.0003
+(August, 2015, Residential)	0.0014	0.0507	0.0125	0.0340	0.0003
+(September, 2015, Residential)	0.0017	0.0577	0.0130	0.0341	0.0003
+(October, 2015, Residential)	0.0015	0.0633	0.0100	0.0318	0.0003
+(November, 2015, Residential)	0.0021	0.0872	0.0114	0.0366	0.0003
+(December, 2015, Residential)	0.0027	0.1160	0.0123	0.0372	0.0003
+(January, 2016, Residential)	0.0027	0.1403	0.0161	0.0398	0.0002
+(February, 2016, Residential)	0.0018	0.1118	0.0163	0.0392	0.0002
+(March, 2016, Residential)	0.0018	0.0797	0.0143	0.0369	0.0002
+(April, 2016, Residential)	0.0017	0.0732	0.0132	0.0358	0.0002
+(May, 2016, Residential)	0.0015	0.0656	0.0124	0.0348	0.0002
+(June, 2016, Residential)	0.0013	0.0597	0.0125	0.0361	0.0002
+(July, 2016, Residential)	0.0012	0.0540	0.0128	0.0369	0.0002
+(August, 2016, Residential)	0.0011	0.0571	0.0133	0.0374	0.0002
+(September, 2016, Residential)	0.0012	0.0601	0.0135	0.0376	0.0002
+(October, 2016, Residential)	0.0015	0.0652	0.0147	0.0385	0.0002
+(November, 2016, Residential)	0.0016	0.0839	0.0166	0.0402	0.0002
+(December, 2016, Residential)	0.0022	0.1145	0.0160	0.0377	0.0002
+(January, 2017, Residential)	0.0025	0.1127	0.0133	0.0424	0.0002
+(February, 2017, Residential)	0.0021	0.0913	0.0131	0.0417	0.0002
+(March, 2017, Residential)	0.0020	0.0712	0.0122	0.0411	0.0002
+(April, 2017, Residential)	0.0018	0.0721	0.0111	0.0381	0.0003
+(May, 2017, Residential)	0.0017	0.0649	0.0109	0.0376	0.0002
+(June, 2017, Residential)	0.0015	0.0548	0.0135	0.0386	0.0002
+(July, 2017, Residential)	0.0014	0.0679	0.0124	0.0426	0.0004
+(August, 2017, Residential)	0.0011	0.0659	0.0123	0.0416	0.0005
+(September, 2017, Residential)	0.0012	0.0627	0.0119	0.0412	0.0005
+(October, 2017, Residential)	0.0014	0.0756	0.0121	0.0404	0.0005
+(November, 2017, Residential)	0.0017	0.0793	0.0138	0.0428	0.0004
+(December, 2017, Residential)	0.0022	0.0879	0.0141	0.0428	0.0004
+(January, 2018, Residential)	0.0019	0.1033	0.0152	0.0438	0.0004
+(February, 2018, Residential)	0.0019	0.0926	0.0171	0.0430	0.0004
+(March, 2018, Residential)	0.0016	0.0741	0.0166	0.0457	0.0006
+(April, 2018, Residential)	0.0015	0.0807	0.0157	0.0468	0.0005
+(May, 2018, Residential)	0.0013	0.0796	0.0150	0.0452	0.0005
+(June, 2018, Residential)	0.0012	0.0744	0.0165	0.0459	0.0006
+(July, 2018, Residential)	0.0013	0.0905	0.0150	0.0369	0.0005
+(August, 2018, Residential)	0.0011	0.0858	0.0150	0.0314	0.0006
+(September, 2018, Residential)	0.0011	0.0884	0.0151	0.0330	0.0005
+(October, 2018, Residential)	0.0015	0.0815	0.0151	0.0323	0.0004
+(November, 2018, Residential)	0.0015	0.0835	0.0152	0.0346	0.0004
+(December, 2018, Residential)	0.0017	0.0786	0.0155	0.0350	0.0003
+(January, 2019, Residential)	0.0020	0.1080	0.0158	0.0458	0.0004
+(February, 2019, Residential)	0.0020	0.0968	0.0178	0.0450	0.0004
+(March, 2019, Residential)	0.0017	0.0770	0.0172	0.0474	0.0006
+(April, 2019, Residential)	0.0016	0.0843	0.0163	0.0488	0.0005
+(May, 2019, Residential)	0.0014	0.0831	0.0155	0.0471	0.0005
+(June, 2019, Residential)	0.0013	0.0773	0.0171	0.0476	0.0006
+(July, 2019, Residential)	0.0014	0.0938	0.0155	0.0384	0.0005
+(August, 2019, Residential)	0.0011	0.0892	0.0155	0.0327	0.0006
+(September, 2019, Residential)	0.0012	0.0914	0.0157	0.0343	0.0005
+(October, 2019, Residential)	0.0016	0.0852	0.0157	0.0336	0.0004
+(November, 2019, Residential)	0.0015	0.0874	0.0157	0.0361	0.0004
+(December, 2019, Residential)	0.0018	0.0823	0.0161	0.0366	0.0004
+(January, 2020, Residential)	0.0024	0.1030	0.0155	0.0406	0.0004
+(February, 2020, Residential)	0.0023	0.0878	0.0160	0.0378	0.0004
+(March, 2020, Residential)	0.0020	0.0688	0.0163	0.0434	0.0006
+(April, 2020, Residential)	0.0019	0.0778	0.0144	0.0439	0.0005
+(May, 2020, Residential)	0.0014	0.0293	0.0053	0.0184	0.0005
+(June, 2020, Residential)	0.0013	0.0300	0.0064	0.0183	0.0006
+(July, 2020, Residential)	0.0014	0.0147	0.0040	0.0122	0.0005
+(August, 2020, Residential)	0.0011	0.0142	0.0038	0.0080	0.0006
+(September, 2020, Residential)	0.0012	0.0245	0.0039	0.0080	0.0005
+(October, 2020, Residential)	0.0019	0.0959	0.0154	0.0347	0.0004
+(November, 2020, Residential)	0.0018	0.0989	0.0156	0.0367	0.0004
+(December, 2020, Residential)	0.0021	0.0932	0.0159	0.0375	0.0004
+(January, 2021, Residential)	0.0020	0.0847	0.0138	0.0356	0.0003
+(February, 2021, Residential)	0.0020	0.0737	0.0142	0.0339	0.0003
+(March, 2021, Residential)	0.0017	0.0597	0.0144	0.0415	0.0005
+(April, 2021, Residential)	0.0019	0.0797	0.0154	0.0494	0.0004
+(May, 2021, Residential)	0.0017	0.0780	0.0147	0.0477	0.0004
+(June, 2021, Residential)	0.0015	0.0698	0.0155	0.0487	0.0005
+(July, 2021, Residential)	0.0013	0.0869	0.0130	0.0355	0.0004
+(August, 2021, Residential)	0.0010	0.0782	0.0115	0.0294	0.0003
+(September, 2021, Residential)	0.0011	0.0733	0.0122	0.0301	0.0002
+(January, 2000, Industrial)	0.0227	0.5217	0.2921	0.2362	0.1009
+(February, 2000, Industrial)	0.0236	0.5500	0.3043	0.2616	0.0800
+(March, 2000, Industrial)	0.0231	0.5477	0.2947	0.2526	0.0948
+(April, 2000, Industrial)	0.0218	0.5523	0.2889	0.2372	0.1181
+(May, 2000, Industrial)		0.0221	0.5156	0.2985	0.2411	0.0849
+(June, 2000, Industrial)	0.0204	0.5002	0.2815	0.2245	0.0938
+(July, 2000, Industrial)	0.0178	0.4642	0.2855	0.2465	0.0812
+(August, 2000, Industrial)	0.0235	0.4819	0.2903	0.2482	0.0895
+(September, 2000, Industrial)	0.0211	0.4574	0.2806	0.2210	0.0807
+(October, 2000, Industrial)	0.0180	0.4415	0.2539	0.2429	0.0855
+(November, 2000, Industrial)	0.0206	0.5148	0.2491	0.2558	0.2085
+(December, 2000, Industrial)	0.0139	0.3891	0.2262	0.2286	0.0690
+(January, 2001, Industrial)	0.0099	0.3139	0.1909	0.2187	0.0897
+(February, 2001, Industrial)	0.0128	0.3372	0.2140	0.2176	0.0806
+(March, 2001, Industrial)	0.0138	0.3651	0.2169	0.2247	0.0911
+(April, 2001, Industrial)	0.0130	0.3368	0.2029	0.2029	0.0922
+(May, 2001, Industrial)		0.0106	0.3355	0.2213	0.2180	0.0861
+(June, 2001, Industrial)	0.0121	0.3340	0.2263	0.2315	0.0848
+(July, 2001, Industrial)	0.0133	0.3628	0.2337	0.2361	0.0902
+(August, 2001, Industrial)	0.0172	0.3738	0.2438	0.2319	0.0835
+(September, 2001, Industrial)	0.0179	0.4414	0.2266	0.2300	0.0912
+(October, 2001, Industrial)	0.0227	0.4885	0.2195	0.2485	0.0994
+(November, 2001, Industrial)	0.0231	0.4210	0.1946	0.2448	0.0810
+(December, 2001, Industrial)	0.0207	0.3971	0.1756	0.2221	0.0609
+(January, 2002, Industrial)	0.0224	0.4027	0.1512	0.2464	0.0889
+(February, 2002, Industrial)	0.0253	0.4273	0.2153	0.2428	0.0894
+(March, 2002, Industrial)	0.0246	0.4303	0.2502	0.2367	0.0976
+(April, 2002, Industrial)	0.0172	0.4572	0.2578	0.2450	0.1010
+(May, 2002, Industrial)		0.0216	0.4668	0.2808	0.2509	0.1101
+(June, 2002, Industrial)	0.0217	0.4550	0.3073	0.2464	0.1039
+(July, 2002, Industrial)	0.0203	0.4573	0.3148	0.2578	0.1023
+(August, 2002, Industrial)	0.0178	0.4728	0.3066	0.2595	0.1006
+(September, 2002, Industrial)	0.0168	0.4625	0.2775	0.2484	0.0989
+(October, 2002, Industrial)	0.0221	0.4681	0.2976	0.2578	0.0996
+(November, 2002, Industrial)	0.0231	0.4840	0.2349	0.2597	0.1041
+(December, 2002, Industrial)	0.0212	0.4677	0.2769	0.2318	0.0873
+(January, 2003, Industrial)	0.0193	0.4550	0.2701	0.2434	0.0987
+(February, 2003, Industrial)	0.0183	0.4567	0.2828	0.2514	0.1002
+(March, 2003, Industrial)	0.0138	0.3886	0.2894	0.2465	0.0827
+(April, 2003, Industrial)	0.0196	0.4540	0.2730	0.2383	0.0820
+(May, 2003, Industrial)		0.0163	0.4694	0.2484	0.2408	0.0827
+(June, 2003, Industrial)	0.0164	0.4887	0.2601	0.2363	0.0821
+(July, 2003, Industrial)	0.0164	0.5008	0.2723	0.2570	0.0829
+(August, 2003, Industrial)	0.0154	0.5138	0.2539	0.2607	0.0880
+(September, 2003, Industrial)	0.0155	0.5138	0.3001	0.2523	0.0826
+(October, 2003, Industrial)	0.0180	0.5383	0.2971	0.2642	0.0842
+(November, 2003, Industrial)	0.0197	0.5469	0.3050	0.2556	0.0853
+(December, 2003, Industrial)	0.0193	0.5056	0.2886	0.2345	0.0795
+(January, 2004, Industrial)	0.0213	0.5225	0.2879	0.2493	0.0797
+(February, 2004, Industrial)	0.0218	0.5299	0.2985	0.2573	0.0781
+(March, 2004, Industrial)	0.0220	0.5397	0.2946	0.2621	0.0790
+(April, 2004, Industrial)	0.0213	0.5219	0.2695	0.2406	0.0768
+(May, 2004, Industrial)		0.0209	0.5162	0.2957	0.2564	0.0703
+(June, 2004, Industrial)	0.0202	0.5277	0.2870	0.2676	0.0761
+(July, 2004, Industrial)	0.0177	0.5335	0.2776	0.2677	0.0778
+(August, 2004, Industrial)	0.0206	0.5303	0.3045	0.2670	0.0751
+(September, 2004, Industrial)	0.0218	0.5279	0.3021	0.2692	0.0725
+(October, 2004, Industrial)	0.0198	0.5232	0.3046	0.2727	0.0811
+(November, 2004, Industrial)	0.0235	0.5336	0.3019	0.2718	0.0788
+(December, 2004, Industrial)	0.0242	0.5233	0.2944	0.2452	0.0769
+(January, 2005, Industrial)	0.0243	0.5013	0.3002	0.2650	0.0737
+(February, 2005, Industrial)	0.0253	0.5188	0.3069	0.2594	0.0774
+(March, 2005, Industrial)	0.0224	0.5086	0.2759	0.2389	0.0752
+(April, 2005, Industrial)	0.0245	0.5275	0.2919	0.2675	0.0751
+(May, 2005, Industrial)		0.0240	0.5088	0.2626	0.2639	0.0739
+(June, 2005, Industrial)	0.0237	0.5140	0.3034	0.2575	0.0846
+(July, 2005, Industrial)	0.0213	0.4828	0.2938	0.2508	0.0779
+(August, 2005, Industrial)	0.0231	0.5057	0.3098	0.2611	0.0747
+(September, 2005, Industrial)	0.0223	0.5254	0.2688	0.2479	0.0668
+(October, 2005, Industrial)	0.0232	0.5160	0.2631	0.2538	0.0711
+(November, 2005, Industrial)	0.0268	0.5354	0.2692	0.2650	0.0775
+(December, 2005, Industrial)	0.0247	0.5306	0.2536	0.2339	0.0740
+(January, 2006, Industrial)	0.0261	0.5201	0.3020	0.2523	0.0778
+(February, 2006, Industrial)	0.0275	0.4986	0.3193	0.2493	0.0952
+(March, 2006, Industrial)	0.0271	0.5191	0.2930	0.2706	0.0863
+(April, 2006, Industrial)	0.0233	0.5384	0.2547	0.2535	0.0807
+(May, 2006, Industrial)		0.0256	0.5570	0.3322	0.2768	0.0805
+(June, 2006, Industrial)	0.0271	0.5688	0.3254	0.2824	0.0854
+(July, 2006, Industrial)	0.0255	0.5695	0.3055	0.2806	0.0879
+(August, 2006, Industrial)	0.0265	0.5671	0.3301	0.2835	0.0852
+(September, 2006, Industrial)	0.0293	0.5720	0.3295	0.2692	0.0840
+(October, 2006, Industrial)	0.0338	0.5894	0.3442	0.2863	0.0892
+(November, 2006, Industrial)	0.0315	0.5705	0.3286	0.2732	0.0848
+(December, 2006, Industrial)	0.0294	0.5473	0.3050	0.2434	0.0796
+(January, 2007, Industrial)	0.0315	0.5942	0.3402	0.2618	0.0843
+(February, 2007, Industrial)	0.0294	0.5595	0.3324	0.2769	0.0833
+(March, 2007, Industrial)	0.0302	0.5594	0.3255	0.2785	0.0841
+(April, 2007, Industrial)	0.0297	0.5676	0.3060	0.2632	0.0863
+(May, 2007, Industrial)		0.0304	0.5851	0.3311	0.2761	0.0859
+(June, 2007, Industrial)	0.0257	0.5745	0.3435	0.2719	0.0769
+(July, 2007, Industrial)	0.0292	0.5758	0.2861	0.2836	0.0801
+(August, 2007, Industrial)	0.0314	0.5871	0.3372	0.2845	0.0887
+(September, 2007, Industrial)	0.0305	0.5750	0.2554	0.2178	0.0877
+(October, 2007, Industrial)	0.0297	0.5737	0.3713	0.2961	0.0891
+(November, 2007, Industrial)	0.0315	0.5758	0.3567	0.2816	0.0851
+(December, 2007, Industrial)	0.0305	0.5483	0.3307	0.2640	0.0828
+(January, 2008, Industrial)	0.0295	0.6069	0.3638	0.2819	0.0839
+(February, 2008, Industrial)	0.0289	0.5764	0.3415	0.2738	0.0853
+(March, 2008, Industrial)	0.0314	0.5648	0.3495	0.2336	0.0936
+(April, 2008, Industrial)	0.0326	0.5931	0.3348	0.2785	0.0936
+(May, 2008, Industrial)		0.0335	0.5607	0.3421	0.2702	0.0885
+(June, 2008, Industrial)	0.0285	0.5709	0.3204	0.2773	0.0853
+(July, 2008, Industrial)	0.0282	0.5753	0.3484	0.2686	0.0921
+(August, 2008, Industrial)	0.0330	0.5688	0.3523	0.2624	0.0883
+(September, 2008, Industrial)	0.0332	0.5505	0.3645	0.2674	0.0873
+(October, 2008, Industrial)	0.0347	0.5695	0.2882	0.2555	0.0928
+(November, 2008, Industrial)	0.0340	0.5520	0.2818	0.2547	0.0855
+(December, 2008, Industrial)	0.0278	0.4730	0.2346	0.2153	0.0764
+(January, 2009, Industrial)	0.0267	0.4884	0.2119	0.2313	0.0806
+(February, 2009, Industrial)	0.0310	0.4906	0.2556	0.2665	0.0905
+(March, 2009, Industrial)	0.0291	0.4791	0.2469	0.2672	0.0871
+(April, 2009, Industrial)	0.0295	0.4923	0.2378	0.2349	0.0870
+(May, 2009, Industrial)		0.0314	0.5164	0.2567	0.2544	0.0831
+(June, 2009, Industrial)	0.0330	0.5261	0.2641	0.2592	0.0842
+(July, 2009, Industrial)	0.0323	0.5202	0.2603	0.2623	0.0794
+(August, 2009, Industrial)	0.0317	0.5465	0.2105	0.2654	0.0806
+(September, 2009, Industrial)	0.0290	0.5558	0.2514	0.2648	0.0819
+(October, 2009, Industrial)	0.0304	0.5653	0.3050	0.2801	0.0884
+(November, 2009, Industrial)	0.0316	0.5715	0.3246	0.2776	0.0870
+(December, 2009, Industrial)	0.0279	0.5724	0.2845	0.2423	0.0839
+(January, 2010, Industrial)	0.0349	0.6040	0.3224	0.2747	0.0864
+(February, 2010, Industrial)	0.0351	0.6133	0.3310	0.2927	0.0865
+(March, 2010, Industrial)	0.0348	0.5890	0.3309	0.2841	0.0908
+(April, 2010, Industrial)	0.0324	0.5739	0.3108	0.2735	0.0889
+(May, 2010, Industrial)		0.0376	0.5825	0.3230	0.2624	0.0887
+(June, 2010, Industrial)	0.0376	0.5782	0.2834	0.3002	0.0929
+(July, 2010, Industrial)	0.0352	0.5568	0.3113	0.2923	0.0923
+(August, 2010, Industrial)	0.0343	0.5639	0.3147	0.2966	0.0941
+(September, 2010, Industrial)	0.0323	0.5895	0.3246	0.2896	0.0983
+(October, 2010, Industrial)	0.0330	0.6044	0.3135	0.3017	0.0938
+(November, 2010, Industrial)	0.0347	0.6054	0.3400	0.2966	0.0942
+(December, 2010, Industrial)	0.0313	0.5952	0.3163	0.2865	0.0927
+(January, 2011, Industrial)	0.0370	0.6160	0.3578	0.2984	0.0987
+(February, 2011, Industrial)	0.0377	0.6138	0.3577	0.3165	0.0995
+(March, 2011, Industrial)	0.0391	0.5745	0.3496	0.3110	0.1042
+(April, 2011, Industrial)	0.0374	0.6032	0.3544	0.2937	0.0954
+(May, 2011, Industrial)		0.0403	0.6123	0.3291	0.3108	0.0922
+(June, 2011, Industrial)	0.0396	0.6197	0.3338	0.3111	0.0913
+(July, 2011, Industrial)	0.0371	0.6245	0.3134	0.2931	0.0918
+(August, 2011, Industrial)	0.0392	0.6301	0.3445	0.3077	0.0925
+(September, 2011, Industrial)	0.0383	0.6271	0.3377	0.2988	0.0945
+(October, 2011, Industrial)	0.0410	0.6150	0.3481	0.3181	0.0948
+(November, 2011, Industrial)	0.0432	0.6284	0.3391	0.3102	0.0933
+(December, 2011, Industrial)	0.0420	0.6128	0.3296	0.2844	0.0952
+(January, 2012, Industrial)	0.0439	0.6099	0.3058	0.3180	0.1041
+(February, 2012, Industrial)	0.0452	0.6214	0.3056	0.3176	0.1095
+(March, 2012, Industrial)	0.0437	0.5832	0.3584	0.3219	0.1036
+(April, 2012, Industrial)	0.0425	0.6129	0.3482	0.2947	0.1064
+(May, 2012, Industrial)		0.0427	0.6194	0.3568	0.3060	0.1041
+(June, 2012, Industrial)	0.0413	0.6206	0.3669	0.3250	0.1053
+(July, 2012, Industrial)	0.0412	0.6326	0.3459	0.3245	0.0999
+(August, 2012, Industrial)	0.0421	0.6531	0.3628	0.3264	0.1037
+(September, 2012, Industrial)	0.0429	0.6528	0.3747	0.3057	0.0910
+(October, 2012, Industrial)	0.0436	0.6568	0.3638	0.3314	0.1013
+(November, 2012, Industrial)	0.0452	0.6783	0.3768	0.3322	0.1007
+(December, 2012, Industrial)	0.0434	0.6510	0.3534	0.2992	0.0995
+(January, 2013, Industrial)	0.0483	0.7021	0.3664	0.3203	0.1040
+(February, 2013, Industrial)	0.0486	0.7038	0.3649	0.3317	0.1061
+(March, 2013, Industrial)	0.0484	0.7058	0.3573	0.3286	0.1025
+(April, 2013, Industrial)	0.0478	0.6814	0.3396	0.3410	0.1155
+(May, 2013, Industrial)		0.0481	0.6794	0.3342	0.3294	0.1160
+(June, 2013, Industrial)	0.0447	0.6625	0.3525	0.3130	0.1136
+(July, 2013, Industrial)	0.0447	0.6987	0.3815	0.3455	0.1190
+(August, 2013, Industrial)	0.0454	0.6904	0.3879	0.3325	0.1125
+(September, 2013, Industrial)	0.0476	0.6907	0.3780	0.3179	0.1061
+(October, 2013, Industrial)	0.0468	0.7044	0.3779	0.3377	0.1070
+(November, 2013, Industrial)	0.0491	0.7231	0.3637	0.3327	0.1079
+(December, 2013, Industrial)	0.0461	0.6958	0.3419	0.3032	0.1109
+(January, 2014, Industrial)	0.0533	0.7007	0.4021	0.3256	0.1408
+(February, 2014, Industrial)	0.0538	0.7260	0.4044	0.3289	0.1432
+(March, 2014, Industrial)	0.0533	0.7262	0.4065	0.3345	0.1476
+(April, 2014, Industrial)	0.0867	0.7046	0.3740	0.3232	0.1538
+(May, 2014, Industrial)		0.0880	0.6761	0.4002	0.3343	0.1553
+(June, 2014, Industrial)	0.0830	0.6755	0.4097	0.3393	0.1509
+(July, 2014, Industrial)	0.0858	0.7152	0.3847	0.3362	0.1601
+(August, 2014, Industrial)	0.0882	0.7225	0.3983	0.3397	0.1231
+(September, 2014, Industrial)	0.0889	0.7115	0.4033	0.3399	0.1226
+(October, 2014, Industrial)	0.0915	0.7380	0.4116	0.3503	0.1377
+(November, 2014, Industrial)	0.0936	0.7531	0.3982	0.3463	0.1596
+(December, 2014, Industrial)	0.0898	0.7104	0.4043	0.3186	0.1567
+(January, 2015, Industrial)	0.1174	0.7245	0.4314	0.3494	0.1544
+(February, 2015, Industrial)	0.1205	0.7340	0.4340	0.3573	0.1608
+(March, 2015, Industrial)	0.1217	0.7203	0.3976	0.3530	0.1563
+(April, 2015, Industrial)	0.0914	0.6732	0.4086	0.3540	0.1537
+(May, 2015, Industrial)		0.0936	0.7366	0.4349	0.3426	0.1371
+(June, 2015, Industrial)	0.0873	0.7475	0.4528	0.3573	0.1504
+(July, 2015, Industrial)	0.1173	0.7366	0.4595	0.3711	0.1598
+(August, 2015, Industrial)	0.1146	0.7554	0.4845	0.3637	0.1639
+(September, 2015, Industrial)	0.1277	0.7711	0.4897	0.3674	0.1677
+(October, 2015, Industrial)	0.0891	0.7932	0.4379	0.3805	0.1830
+(November, 2015, Industrial)	0.0909	0.7511	0.4336	0.3756	0.1707
+(December, 2015, Industrial)	0.0869	0.7623	0.4232	0.3413	0.1662
+(January, 2016, Industrial)	0.1069	0.8381	0.4580	0.3681	0.1701
+(February, 2016, Industrial)	0.1039	0.8250	0.5237	0.3698	0.1871
+(March, 2016, Industrial)	0.1030	0.8308	0.4513	0.3620	0.2043
+(April, 2016, Industrial)	0.1054	0.8222	0.5157	0.3812	0.2213
+(May, 2016, Industrial)		0.1057	0.8443	0.5200	0.3970	0.1805
+(June, 2016, Industrial)	0.1044	0.8456	0.5369	0.3830	0.1952
+(July, 2016, Industrial)	0.1031	0.9027	0.4891	0.3714	0.1894
+(August, 2016, Industrial)	0.1037	0.9064	0.5044	0.3748	0.1955
+(September, 2016, Industrial)	0.1018	0.8997	0.5086	0.3713	0.1899
+(October, 2016, Industrial)	0.1058	1.0185	0.5308	0.3859	0.1979
+(November, 2016, Industrial)	0.1052	1.0326	0.5491	0.3847	0.2263
+(December, 2016, Industrial)	0.1089	0.9810	0.4933	0.3453	0.2069
+(January, 2017, Industrial)	0.1847	1.0287	0.5198	0.3448	0.2070
+(February, 2017, Industrial)	0.1850	1.0029	0.5277	0.3528	0.2234
+(March, 2017, Industrial)	0.1835	0.9779	0.5432	0.3620	0.2370
+(April, 2017, Industrial)	0.1883	0.9360	0.5007	0.3385	0.2289
+(May, 2017, Industrial)		0.1893	0.9656	0.5177	0.3460	0.2303
+(June, 2017, Industrial)	0.1879	0.9867	0.5264	0.3586	0.2409
+(July, 2017, Industrial)	0.1819	1.0475	0.4927	0.3535	0.4331
+(August, 2017, Industrial)	0.1814	1.0321	0.4951	0.3457	0.4139
+(September, 2017, Industrial)	0.1799	1.0222	0.5040	0.3518	0.4175
+(October, 2017, Industrial)	0.1829	1.0026	0.4830	0.3525	0.4370
+(November, 2017, Industrial)	0.1833	1.0491	0.4969	0.3592	0.4244
+(December, 2017, Industrial)	0.1872	1.0521	0.4656	0.3325	0.4262
+(January, 2018, Industrial)	0.2301	1.1079	0.5440	0.4212	0.3554
+(February, 2018, Industrial)	0.2293	1.0568	0.5455	0.4338	0.3616
+(March, 2018, Industrial)	0.2344	1.1191	0.5536	0.4128	0.4044
+(April, 2018, Industrial)	0.2629	1.0449	0.5122	0.4185	0.3276
+(May, 2018, Industrial)		0.2589	0.9989	0.5385	0.4086	0.3417
+(June, 2018, Industrial)	0.2710	1.0358	0.5532	0.4145	0.3919
+(July, 2018, Industrial)	0.2652	1.0247	0.5610	0.3785	0.3521
+(August, 2018, Industrial)	0.2645	0.9511	0.5478	0.3776	0.5430
+(September, 2018, Industrial)	0.2700	0.9945	0.5927	0.3861	0.3789
+(October, 2018, Industrial)	0.2568	0.9067	0.5573	0.3895	0.3038
+(November, 2018, Industrial)	0.2577	0.9567	0.5628	0.3806	0.2890
+(December, 2018, Industrial)	0.2491	0.8901	0.5083	0.3654	0.2470
+(January, 2019, Industrial)	0.2471	0.9042	0.4747	0.4390	0.3444
+(February, 2019, Industrial)	0.2467	0.8989	0.4858	0.4479	0.3457
+(March, 2019, Industrial)	0.2512	0.8912	0.4732	0.4151	0.3553
+(April, 2019, Industrial)	0.2862	0.8203	0.4496	0.4292	0.3124
+(May, 2019, Industrial)		0.2825	0.8135	0.4957	0.4382	0.3126
+(June, 2019, Industrial)	0.2922	0.8240	0.4942	0.4386	0.3262
+(July, 2019, Industrial)	0.2913	0.9651	0.5519	0.4108	0.3431
+(August, 2019, Industrial)	0.2885	0.9698	0.5651	0.4213	0.3982
+(September, 2019, Industrial)	0.2938	0.9962	0.5905	0.4255	0.3574
+(October, 2019, Industrial)	0.2092	0.9028	0.5567	0.3832	0.2736
+(November, 2019, Industrial)	0.2107	0.9062	0.5748	0.3935	0.2931
+(December, 2019, Industrial)	0.2025	0.8553	0.5569	0.3798	0.2472
+(January, 2020, Industrial)	0.1917	0.9625	0.3449	0.5453	0.3595
+(February, 2020, Industrial)	0.2047	0.8525	0.3239	0.3662	0.2385
+(March, 2020, Industrial)	0.2286	0.8637	0.4113	0.4407	0.2444
+(April, 2020, Industrial)	0.2487	0.6435	0.2506	0.2961	0.2681
+(May, 2020, Industrial)		0.2547	0.6304	0.2530	0.2984	0.2495
+(June, 2020, Industrial)	0.2772	0.7452	0.2643	0.3341	0.2471
+(July, 2020, Industrial)	0.2732	0.9491	1.0885	1.0807	0.3603
+(August, 2020, Industrial)	0.2456	0.7696	0.3171	0.4680	0.2505
+(September, 2020, Industrial)	0.4011	1.1828	0.4324	0.6482	0.2868
+(October, 2020, Industrial)	0.1779	0.6271	0.1953	0.2266	0.2038
+(November, 2020, Industrial)	0.1780	0.6426	0.1988	0.2215	0.1805
+(December, 2020, Industrial)	0.1779	0.6008	0.1864	0.2144	0.1732
+(January, 2021, Industrial)	0.2059	0.5851	0.1879	0.2375	0.2116
+(February, 2021, Industrial)	0.2179	0.5943	0.1896	0.2330	0.1905
+(March, 2021, Industrial)	0.1881	0.5715	0.1901	0.2366	0.1906
+(April, 2021, Industrial)	0.2779	0.6535	0.4067	0.5416	0.3277
+(May, 2021, Industrial)		0.2763	0.5898	0.2397	0.3454	0.2179
+(June, 2021, Industrial)	0.3500	0.7162	0.3061	0.5539	0.2186
+(July, 2021, Industrial)	0.2402	0.5743	0.5030	0.5373	0.2607
+(August, 2021, Industrial)	0.2596	0.5958	0.2471	0.4098	0.2197
+(September, 2021, Industrial)	0.2754	0.6428	0.2158	0.3353	0.2328
+(January, 2000, Electric)	0.0061	0.2991	0.0585	0.2755	0.0643
+(February, 2000, Electric)	0.0068	0.4221	0.0644	0.3416	0.0644
+(March, 2000, Electric)		0.0001	0.4298	0.0692	0.3105	0.0626
+(April, 2000, Electric)		0.0004	0.4025	0.0576	0.1933	0.0717
+(May, 2000, Electric)		0.0184	0.4587	0.0685	0.2480	0.0895
+(June, 2000, Electric)		0.0257	0.4376	0.0631	0.2263	0.1221
+(July, 2000, Electric)		0.0727	0.4486	0.0729	0.2443	0.1039
+(August, 2000, Electric)	0.0931	0.4663	0.0733	0.2304	0.1255
+(September, 2000, Electric)	0.0890	0.5238	0.0665	0.2578	0.1359
+(October, 2000, Electric)	0.0654	0.4909	0.0651	0.2248	0.1476
+(November, 2000, Electric)	0.0347	0.3872	0.0730	0.2755	0.1583
+(December, 2000, Electric)	0.0434	0.3558	0.0513	0.2769	0.1505
+(January, 2001, Electric)	0.0342	0.4125	0.0813	0.2934	0.1587
+(February, 2001, Electric)	0.0368	0.3720	0.1025	0.3119	0.1699
+(March, 2001, Electric)		0.0391	0.3852	0.0772	0.3151	0.1279
+(April, 2001, Electric)		0.0464	0.4182	0.0961	0.3047	0.1628
+(May, 2001, Electric)		0.0831	0.4227	0.0781	0.3402	0.1995
+(June, 2001, Electric)		0.0826	0.3921	0.0791	0.2568	0.1553
+(July, 2001, Electric)		0.1286	0.5181	0.0935	0.3081	0.1760
+(August, 2001, Electric)	0.1274	0.5246	0.0971	0.2931	0.1909
+(September, 2001, Electric)	0.1185	0.4718	0.0877	0.2925	0.1953
+(October, 2001, Electric)	0.0986	0.4405	0.0744	0.2584	0.2167
+(November, 2001, Electric)	0.0869	0.4370	0.0890	0.2783	0.2238
+(December, 2001, Electric)	0.0663	0.4039	0.0746	0.2599	0.2438
+(January, 2002, Electric)	0.0840	0.4852	0.0812	0.3186	0.2524
+(February, 2002, Electric)	0.0848	0.4580	0.0800	0.2671	0.2728
+(March, 2002, Electric)		0.1039	0.4972	0.1465	0.2699	0.2584
+(April, 2002, Electric)		0.0700	0.5489	0.1490	0.2705	0.2639
+(May, 2002, Electric)		0.0917	0.6307	0.1449	0.2663	0.2546
+(June, 2002, Electric)		0.1326	0.6336	0.1864	0.2669	0.2395
+(July, 2002, Electric)		0.1958	0.6330	0.1823	0.2627	0.2390
+(August, 2002, Electric)	0.2030	0.7250	0.1650	0.2824	0.2400
+(September, 2002, Electric)	0.1945	0.6759	0.1512	0.2827	0.2528
+(October, 2002, Electric)	0.1500	0.6177	0.1760	0.2683	0.1996
+(November, 2002, Electric)	0.1207	0.5408	0.1832	0.2401	0.1619
+(December, 2002, Electric)	0.1290	0.5297	0.2186	0.2563	0.2467
+(January, 2003, Electric)	0.1112	0.5676	0.1964	0.3072	0.2793
+(February, 2003, Electric)	0.1100	0.5710	0.2140	0.2841	0.3251
+(March, 2003, Electric)		0.1239	0.5566	0.1818	0.2759	0.2465
+(April, 2003, Electric)		0.1617	0.4925	0.1910	0.2701	0.2544
+(May, 2003, Electric)		0.1827	0.6384	0.1334	0.2967	0.3979
+(June, 2003, Electric)		0.2276	0.6231	0.0944	0.3167	0.4399
+(July, 2003, Electric)		0.3275	0.6042	0.1680	0.2641	0.4332
+(August, 2003, Electric)	0.3383	0.6782	0.1576	0.2495	0.3742
+(September, 2003, Electric)	0.3160	0.6779	0.1328	0.2550	0.3484
+(October, 2003, Electric)	0.2859	0.6215	0.1386	0.2646	0.3894
+(November, 2003, Electric)	0.2542	0.6015	0.1753	0.2785	0.4185
+(December, 2003, Electric)	0.3912	0.5560	0.1938	0.3229	0.4110
+(January, 2004, Electric)	0.2372	0.5443	0.1809	0.2918	0.4088
+(February, 2004, Electric)	0.2094	0.5530	0.2042	0.2932	0.4032
+(March, 2004, Electric)		0.2344	0.6270	0.1932	0.2932	0.4228
+(April, 2004, Electric)		0.2385	0.6342	0.1656	0.2510	0.3848
+(May, 2004, Electric)		0.2823	0.6968	0.1673	0.2932	0.4145
+(June, 2004, Electric)		0.3388	0.8078	0.1692	0.2599	0.3980
+(July, 2004, Electric)		0.3853	0.7951	0.1671	0.2400	0.4206
+(August, 2004, Electric)	0.3921	0.7462	0.1753	0.2685	0.4053
+(September, 2004, Electric)	0.3594	0.7851	0.1736	0.2552	0.4040
+(October, 2004, Electric)	0.2809	0.7221	0.1815	0.2531	0.3911
+(November, 2004, Electric)	0.2569	0.6436	0.1811	0.2589	0.4171
+(December, 2004, Electric)	0.2415	0.5840	0.1848	0.3287	0.4247
+(January, 2005, Electric)	0.2433	0.6439	0.1874	0.3424	0.4027
+(February, 2005, Electric)	0.2339	0.7387	0.2138	0.2952	0.4137
+(March, 2005, Electric)		0.2445	0.6666	0.1898	0.2650	0.4000
+(April, 2005, Electric)		0.2553	0.5975	0.1616	0.1968	0.4316
+(May, 2005, Electric)		0.2787	0.8057	0.1409	0.2558	0.4144
+(June, 2005, Electric)		0.3175	0.8926	0.1639	0.2882	0.3896
+(July, 2005, Electric)		0.4161	0.8003	0.1714	0.2328	0.3415
+(August, 2005, Electric)	0.4209	0.7605	0.1728	0.2252	0.3102
+(September, 2005, Electric)	0.3844	0.6638	0.1691	0.1954	0.3263
+(October, 2005, Electric)	0.2961	0.6591	0.1576	0.2610	0.3221
+(November, 2005, Electric)	0.3186	0.6656	0.1109	0.2552	0.2987
+(December, 2005, Electric)	0.2866	0.5394	0.1607	0.2590	0.3153
+(January, 2006, Electric)	0.2425	0.6228	0.1248	0.2396	0.3808
+(February, 2006, Electric)	0.3142	0.7036	0.1632	0.2402	0.3850
+(March, 2006, Electric)		0.2868	0.8264	0.1694	0.3209	0.4034
+(April, 2006, Electric)		0.3258	0.8280	0.1997	0.3365	0.4184
+(May, 2006, Electric)		0.3199	1.0054	0.2137	0.3168	0.4431
+(June, 2006, Electric)		0.4204	1.0119	0.1936	0.2721	0.5009
+(July, 2006, Electric)		0.4964	0.9875	0.1963	0.2627	0.5377
+(August, 2006, Electric)	0.4655	1.0187	0.1818	0.2275	0.5195
+(September, 2006, Electric)	0.4097	0.9682	0.1555	0.2228	0.5423
+(October, 2006, Electric)	0.3741	0.9400	0.1801	0.2860	0.4937
+(November, 2006, Electric)	0.3440	0.8303	0.1629	0.2841	0.5132
+(December, 2006, Electric)	0.3327	0.7695	0.1523	0.2852	0.4863
+(January, 2007, Electric)	0.3171	0.7909	0.1627	0.2835	0.5546
+(February, 2007, Electric)	0.3364	0.7261	0.1578	0.3104	0.4762
+(March, 2007, Electric)		0.3063	0.9563	0.1672	0.2885	0.5407
+(April, 2007, Electric)		0.2363	0.8372	0.1998	0.2534	0.5099
+(May, 2007, Electric)		0.3144	1.0569	0.2091	0.2541	0.5272
+(June, 2007, Electric)		0.3517	1.1100	0.2632	0.2705	0.5718
+(July, 2007, Electric)		0.4489	1.0485	0.2820	0.2365	0.6026
+(August, 2007, Electric)	0.4662	1.0546	0.2971	0.2547	0.5068
+(September, 2007, Electric)	0.4163	1.0776	0.2594	0.1988	0.5548
+(October, 2007, Electric)	0.3353	1.1234	0.3263	0.2762	0.5960
+(November, 2007, Electric)	0.2940	1.0433	0.2948	0.3485	0.5974
+(December, 2007, Electric)	0.3009	0.9763	0.2812	0.3356	0.5953
+(January, 2008, Electric)	0.3561	0.9713	0.2934	0.3473	0.5802
+(February, 2008, Electric)	0.3745	1.0892	0.3115	0.3235	0.5957
+(March, 2008, Electric)		0.3582	1.0263	0.3237	0.2879	0.5796
+(April, 2008, Electric)		0.3310	1.0686	0.3664	0.2601	0.5740
+(May, 2008, Electric)		0.3423	1.0649	0.3463	0.2323	0.5771
+(June, 2008, Electric)		0.4035	1.1286	0.3140	0.2919	0.5516
+(July, 2008, Electric)		0.4784	1.1052	0.2838	0.2513	0.4798
+(August, 2008, Electric)	0.4728	1.0887	0.2668	0.2287	0.5049
+(September, 2008, Electric)	0.4495	0.9546	0.2595	0.2183	0.5230
+(October, 2008, Electric)	0.4124	0.9962	0.2956	0.2639	0.5357
+(November, 2008, Electric)	0.3866	0.9603	0.3086	0.2883	0.5392
+(December, 2008, Electric)	0.3789	0.8772	0.3033	0.2651	0.5593
+(January, 2009, Electric)	0.3325	0.8921	0.3120	0.2495	0.5780
+(February, 2009, Electric)	0.2970	0.9583	0.3127	0.2684	0.5408
+(March, 2009, Electric)		0.3369	0.9944	0.3526	0.2899	0.5628
+(April, 2009, Electric)		0.3175	1.0095	0.3614	0.3345	0.5624
+(May, 2009, Electric)		0.3482	1.1787	0.3392	0.3096	0.6065
+(June, 2009, Electric)		0.3482	1.2494	0.3441	0.2822	0.5628
+(July, 2009, Electric)		0.4643	1.2371	0.3276	0.2979	0.5390
+(August, 2009, Electric)	0.4740	1.2614	0.3850	0.2728	0.5458
+(September, 2009, Electric)	0.4634	1.1970	0.3998	0.2704	0.6125
+(October, 2009, Electric)	0.3835	1.1738	0.3277	0.2829	0.5656
+(November, 2009, Electric)	0.3715	1.0904	0.3183	0.2897	0.6091
+(December, 2009, Electric)	0.3691	1.0327	0.3026	0.3235	0.5875
+(January, 2010, Electric)	0.2720	0.9421	0.2972	0.3200	0.6208
+(February, 2010, Electric)	0.2502	0.9284	0.3001	0.3237	0.6129
+(March, 2010, Electric)		0.2931	0.9850	0.2983	0.3109	0.5729
+(April, 2010, Electric)		0.2589	1.1123	0.3238	0.3316	0.6173
+(May, 2010, Electric)		0.2683	1.2820	0.3442	0.3389	0.6309
+(June, 2010, Electric)		0.3157	1.3880	0.3540	0.3394	0.5946
+(July, 2010, Electric)		0.4464	1.2962	0.3235	0.2911	0.5600
+(August, 2010, Electric)	0.4513	1.2513	0.3206	0.2860	0.5374
+(September, 2010, Electric)	0.4155	1.1301	0.2969	0.2210	0.4773
+(October, 2010, Electric)	0.3937	1.1310	0.3331	0.2296	0.4645
+(November, 2010, Electric)	0.3866	1.1893	0.2725	0.3388	0.4681
+(December, 2010, Electric)	0.3627	1.2362	0.2480	0.3446	0.4987
+(January, 2011, Electric)	0.3041	1.1641	0.3256	0.3543	0.5147
+(February, 2011, Electric)	0.3062	1.2502	0.3380	0.3429	0.5040
+(March, 2011, Electric)		0.2901	1.3560	0.3271	0.3328	0.4968
+(April, 2011, Electric)		0.2452	1.3948	0.3272	0.3126	0.5080
+(May, 2011, Electric)		0.3096	1.4625	0.3296	0.3262	0.5369
+(June, 2011, Electric)		0.3704	1.5468	0.3292	0.3101	0.5175
+(July, 2011, Electric)		0.4366	1.4594	0.3077	0.3384	0.5236
+(August, 2011, Electric)	0.4294	1.4671	0.3241	0.2970	0.4985
+(September, 2011, Electric)	0.4263	1.3462	0.3115	0.2685	0.4698
+(October, 2011, Electric)	0.3952	1.2896	0.3258	0.2584	0.4019
+(November, 2011, Electric)	0.3927	1.2754	0.3184	0.3102	0.2948
+(December, 2011, Electric)	0.3832	1.2592	0.3113	0.2910	0.4208
+(January, 2012, Electric)	0.3676	1.2621	0.3264	0.3135	0.4628
+(February, 2012, Electric)	0.3813	1.2971	0.3168	0.3062	0.4109
+(March, 2012, Electric)		0.3539	1.3446	0.3173	0.2638	0.4933
+(April, 2012, Electric)		0.3403	1.2649	0.3352	0.2265	0.4525
+(May, 2012, Electric)		0.3792	1.3315	0.4700	0.2831	0.4921
+(June, 2012, Electric)		0.4578	1.4370	0.4265	0.3057	0.4918
+(July, 2012, Electric)		0.4570	1.4014	0.4280	0.2801	0.4687
+(August, 2012, Electric)	0.5036	1.4419	0.4193	0.3044	0.4379
+(September, 2012, Electric)	0.4856	1.4254	0.4286	0.3164	0.3814
+(October, 2012, Electric)	0.4009	1.2400	0.3775	0.3096	0.4386
+(November, 2012, Electric)	0.3156	1.2066	0.3192	0.3509	0.4894
+(December, 2012, Electric)	0.3529	1.2098	0.2342	0.3630	0.4428
+(January, 2013, Electric)	0.3520	1.2643	0.2958	0.3938	0.5176
+(February, 2013, Electric)	0.2833	1.3635	0.3525	0.3913	0.4744
+(March, 2013, Electric)		0.3704	1.2085	0.3206	0.3756	0.4863
+(April, 2013, Electric)		0.3491	1.2728	0.3790	0.3967	0.4954
+(May, 2013, Electric)		0.4025	1.4336	0.4318	0.3888	0.4563
+(June, 2013, Electric)		0.4082	1.4682	0.4567	0.4084	0.5174
+(July, 2013, Electric)		0.4769	1.4047	0.4237	0.3900	0.5434
+(August, 2013, Electric)	0.4662	1.3477	0.5091	0.3805	0.6119
+(September, 2013, Electric)	0.4164	1.3722	0.6141	0.2844	0.6185
+(October, 2013, Electric)	0.3847	1.3110	0.5361	0.2864	0.5612
+(November, 2013, Electric)	0.3913	1.1426	0.4946	0.2926	0.5044
+(December, 2013, Electric)	0.3469	1.1325	0.5322	0.2480	0.4994
+(January, 2014, Electric)	0.3566	1.0780	0.5921	0.2899	0.5203
+(February, 2014, Electric)	0.3695	1.1382	0.5890	0.3238	0.5127
+(March, 2014, Electric)		0.3748	1.2307	0.5137	0.3068	0.5714
+(April, 2014, Electric)		0.3636	1.3455	0.6145	0.2973	0.5611
+(May, 2014, Electric)		0.3571	1.4533	0.6075	0.2691	0.5142
+(June, 2014, Electric)		0.4569	1.4914	0.5995	0.1906	0.5100
+(July, 2014, Electric)		0.4641	1.4290	0.5134	0.2203	0.4374
+(August, 2014, Electric)	0.4488	1.4541	0.6277	0.3030	0.5366
+(September, 2014, Electric)	0.6085	1.5112	0.6055	0.3069	0.5150
+(October, 2014, Electric)	0.4030	1.4273	0.7138	0.2693	0.4709
+(November, 2014, Electric)	0.3909	1.3099	0.5504	0.3158	0.5060
+(December, 2014, Electric)	0.3795	1.2833	0.4392	0.3733	0.4651
+(January, 2015, Electric)	0.3946	1.2790	0.6543	0.4464	0.4398
+(February, 2015, Electric)	0.3766	1.3786	0.6716	0.3975	0.4861
+(March, 2015, Electric)		0.3669	1.3701	0.7316	0.3921	0.4360
+(April, 2015, Electric)		0.4059	1.4378	0.6252	0.3455	0.2953
+(May, 2015, Electric)		0.4794	1.4805	0.5811	0.4011	0.3116
+(June, 2015, Electric)		0.6200	1.3999	0.6328	0.3782	0.3276
+(July, 2015, Electric)		0.6245	1.5090	0.6837	0.4409	0.4003
+(August, 2015, Electric)	0.6773	1.4797	0.4828	0.3972	0.3953
+(September, 2015, Electric)	0.6515	1.4600	0.6056	0.3537	0.4437
+(October, 2015, Electric)	0.5122	1.3583	0.5762	0.4244	0.5463
+(November, 2015, Electric)	0.3979	1.3647	0.5688	0.4535	0.5393
+(December, 2015, Electric)	0.4664	1.3513	0.6841	0.4943	0.4941
+(January, 2016, Electric)	0.4223	1.1936	0.6437	0.3838	0.4997
+(February, 2016, Electric)	0.4228	1.3163	0.4985	0.3596	0.4396
+(March, 2016, Electric)		0.4547	1.3367	0.6088	0.3548	0.3958
+(April, 2016, Electric)		0.4782	1.3462	0.6932	0.3475	0.4175
+(May, 2016, Electric)		0.4797	1.3114	0.5661	0.3435	0.4297
+(June, 2016, Electric)		0.5875	1.4460	0.6814	0.3840	0.4765
+(July, 2016, Electric)		0.6215	1.3348	0.6822	0.4737	0.5022
+(August, 2016, Electric)	0.6004	1.3201	0.6704	0.5048	0.4805
+(September, 2016, Electric)	0.5392	1.3740	0.6471	0.4439	0.4609
+(October, 2016, Electric)	0.5059	1.3224	0.6335	0.4092	0.5105
+(November, 2016, Electric)	0.4565	1.2554	0.6051	0.3558	0.4945
+(December, 2016, Electric)	0.4357	1.1625	0.5731	0.2964	0.4122
+(January, 2017, Electric)	0.3851	1.0621	0.5403	0.3095	0.3940
+(February, 2017, Electric)	0.3906	1.1121	0.6125	0.3571	0.3431
+(March, 2017, Electric)		0.4045	1.1991	0.5844	0.2956	0.3547
+(April, 2017, Electric)		0.4151	1.1957	0.6556	0.3059	0.3417
+(May, 2017, Electric)		0.4412	1.2616	0.7304	0.3016	0.3843
+(June, 2017, Electric)		0.5031	1.2175	0.7597	0.3481	0.4256
+(July, 2017, Electric)		0.5687	1.2966	0.8114	0.3768	0.4377
+(August, 2017, Electric)	0.5730	1.2945	0.8238	0.3814	0.4191
+(September, 2017, Electric)	0.5278	1.3192	0.7041	0.3430	0.4455
+(October, 2017, Electric)	0.4004	1.2493	0.6300	0.3522	0.3853
+(November, 2017, Electric)	0.4134	1.3596	0.5969	0.3771	0.3884
+(December, 2017, Electric)	0.4064	1.1274	0.6848	0.3363	0.4286
+(January, 2018, Electric)	0.4195	1.1810	0.6420	0.3474	0.4515
+(February, 2018, Electric)	0.4273	1.2834	0.6483	0.3770	0.4509
+(March, 2018, Electric)		0.4250	1.2983	0.6410	0.3709	0.4681
+(April, 2018, Electric)		0.4634	1.2588	0.7482	0.3665	0.3856
+(May, 2018, Electric)		0.4915	1.2174	0.7625	0.4143	0.3847
+(June, 2018, Electric)		0.6074	1.3264	0.8303	0.3376	0.3779
+(July, 2018, Electric)		0.7278	1.3411	0.8279	0.4156	0.4388
+(August, 2018, Electric)	0.7621	1.2568	0.8505	0.3240	0.4273
+(September, 2018, Electric)	0.8115	1.3075	0.7645	0.3391	0.4418
+(October, 2018, Electric)	0.6428	1.4582	0.7164	0.4853	0.4630
+(November, 2018, Electric)	0.6604	1.4306	0.7461	0.4999	0.4352
+(December, 2018, Electric)	0.6417	1.4238	0.7407	0.4369	0.4333
+(January, 2019, Electric)	0.4940	1.3721	0.7447	0.4023	0.4868
+(February, 2019, Electric)	0.5026	1.4736	0.7532	0.4410	0.4773
+(March, 2019, Electric)		0.5006	1.5807	0.7423	0.4253	0.5588
+(April, 2019, Electric)		0.5461	1.4741	0.8702	0.4201	0.4400
+(May, 2019, Electric)		0.5790	1.4699	0.8873	0.4840	0.4563
+(June, 2019, Electric)		0.7152	1.6568	0.9667	0.3853	0.4608
+(July, 2019, Electric)		0.8591	1.5619	0.9650	0.4749	0.5011
+(August, 2019, Electric)	0.8968	1.5529	0.9932	0.3615	0.5392
+(September, 2019, Electric)	0.9553	1.6911	0.8900	0.3728	0.5361
+(October, 2019, Electric)	0.4995	1.2715	0.5156	0.3372	0.4137
+(November, 2019, Electric)	0.5156	1.2579	0.5375	0.3498	0.4159
+(December, 2019, Electric)	0.4993	1.2131	0.5329	0.3171	0.3847
+(January, 2020, Electric)	0.5581	1.2362	0.8297	0.4016	0.3768
+(February, 2020, Electric)	0.5481	1.3493	0.8120	0.4246	0.3784
+(March, 2020, Electric)		0.5655	1.4468	0.8272	0.4183	0.5615
+(April, 2020, Electric)		0.7193	1.4816	1.1354	0.4671	0.4318
+(May, 2020, Electric)		0.7848	1.4445	1.1893	0.5345	0.4348
+(June, 2020, Electric)		1.0528	1.7252	1.4078	0.4249	0.5576
+(July, 2020, Electric)		1.0105	1.5275	1.1233	0.4935	0.4273
+(August, 2020, Electric)	0.9234	1.4024	1.0118	0.3891	0.4371
+(September, 2020, Electric)	1.0476	1.4627	0.9637	0.4353	0.5423
+(October, 2020, Electric)	0.7915	1.4642	0.8055	0.5427	0.2658
+(November, 2020, Electric)	0.8170	1.5271	0.8398	0.5487	0.2636
+(December, 2020, Electric)	0.7912	1.5177	0.8338	0.5214	0.2770
+(January, 2021, Electric)	0.6841	1.5756	1.0171	0.4820	0.5257
+(February, 2021, Electric)	0.7356	1.8105	1.0896	0.5476	0.5391
+(March, 2021, Electric)		0.6298	1.7384	0.9214	0.4618	0.6580
+(April, 2021, Electric)		0.7278	1.6859	1.1487	0.4820	0.5058
+(May, 2021, Electric)		0.7384	1.5576	1.1190	0.5232	0.4821
+(June, 2021, Electric)		0.8752	1.7245	1.1702	0.3785	0.5167
+(July, 2021, Electric)		0.9756	1.5934	1.0845	0.4730	0.4886
+(August, 2021, Electric)	1.0168	1.5551	1.1142	0.3797	0.5096
+(September, 2021, Electric)	1.0878	1.6258	1.0008	0.3888	0.5809
+(January, 2000, PEMEX)		0.0000	0.0472	0.0482	0.1013	1.5744
+(February, 2000, PEMEX)		0.0000	0.0394	0.0403	0.0991	1.5339
+(March, 2000, PEMEX)		0.0000	0.0404	0.0402	0.1037	1.6080
+(April, 2000, PEMEX)		0.0000	0.0280	0.0437	0.1116	1.5679
+(May, 2000, PEMEX)		0.0000	0.0559	0.0484	0.1056	1.5482
+(June, 2000, PEMEX)		0.0000	0.0647	0.0421	0.1161	1.6445
+(July, 2000, PEMEX)		0.0000	0.0604	0.0470	0.1055	1.5655
+(August, 2000, PEMEX)		0.0000	0.0690	0.0537	0.0890	1.5800
+(September, 2000, PEMEX)	0.0000	0.0693	0.0461	0.0795	1.5933
+(October, 2000, PEMEX)		0.0000	0.0884	0.0404	0.0886	1.5058
+(November, 2000, PEMEX)		0.0000	0.1029	0.0410	0.1066	1.5149
+(December, 2000, PEMEX)		0.0000	0.0971	0.0415	0.1006	1.5969
+(January, 2001, PEMEX)		0.0000	0.0858	0.0411	0.0912	1.6312
+(February, 2001, PEMEX)		0.0000	0.0662	0.0480	0.0738	1.6450
+(March, 2001, PEMEX)		0.0000	0.0732	0.0438	0.0761	1.6728
+(April, 2001, PEMEX)		0.0000	0.0884	0.0437	0.0901	1.6107
+(May, 2001, PEMEX)		0.0001	0.1047	0.0403	0.0852	1.5908
+(June, 2001, PEMEX)		0.0001	0.0943	0.0430	0.0722	1.5702
+(July, 2001, PEMEX)		0.0001	0.0929	0.0433	0.0890	1.5591
+(August, 2001, PEMEX)		0.0001	0.0997	0.0397	0.0858	1.5787
+(September, 2001, PEMEX)	0.0000	0.0976	0.0514	0.0735	1.5436
+(October, 2001, PEMEX)		0.0006	0.0951	0.0432	0.0751	1.5421
+(November, 2001, PEMEX)		0.0000	0.0928	0.0348	0.0886	1.6704
+(December, 2001, PEMEX)		0.0004	0.0781	0.0502	0.0951	1.7770
+(January, 2002, PEMEX)		0.0000	0.0840	0.0484	0.0687	1.7028
+(February, 2002, PEMEX)		0.0004	0.0802	0.0473	0.0647	1.6085
+(March, 2002, PEMEX)		0.0004	0.0743	0.0443	0.0665	1.6915
+(April, 2002, PEMEX)		0.0001	0.0728	0.0484	0.0548	1.7524
+(May, 2002, PEMEX)		0.0004	0.0809	0.0462	0.0604	1.6916
+(June, 2002, PEMEX)		0.0003	0.0925	0.0438	0.0414	1.6845
+(July, 2002, PEMEX)		0.0006	0.0787	0.0481	0.0601	1.6907
+(August, 2002, PEMEX)		0.0009	0.0916	0.0439	0.0769	1.6474
+(September, 2002, PEMEX)	0.0010	0.0815	0.0430	0.0803	1.6513
+(October, 2002, PEMEX)		0.0011	0.0828	0.0474	0.0783	1.6418
+(November, 2002, PEMEX)		0.0009	0.1043	0.0590	0.0816	1.6484
+(December, 2002, PEMEX)		0.0004	0.0792	0.0626	0.0818	1.6456
+(January, 2003, PEMEX)		0.0004	0.0960	0.0614	0.0764	1.7448
+(February, 2003, PEMEX)		0.0003	0.1008	0.0577	0.0764	1.7401
+(March, 2003, PEMEX)		0.0007	0.1090	0.0476	0.0655	1.7049
+(April, 2003, PEMEX)		0.0008	0.1208	0.0460	0.1066	1.7016
+(May, 2003, PEMEX)		0.0008	0.1233	0.0495	0.1075	1.7023
+(June, 2003, PEMEX)		0.0009	0.1093	0.0584	0.1103	1.6835
+(July, 2003, PEMEX)		0.0009	0.1139	0.0694	0.1152	1.7345
+(August, 2003, PEMEX)		0.0010	0.1040	0.0581	0.1140	1.7302
+(September, 2003, PEMEX)	0.0009	0.1033	0.0465	0.1079	1.7316
+(October, 2003, PEMEX)		0.0010	0.1047	0.0424	0.1038	1.7681
+(November, 2003, PEMEX)		0.0005	0.1026	0.0367	0.1104	1.7758
+(December, 2003, PEMEX)		0.0004	0.1044	0.0390	0.1195	1.8282
+(January, 2004, PEMEX)		0.0004	0.1167	0.0402	0.1054	1.8085
+(February, 2004, PEMEX)		0.0004	0.1082	0.0319	0.0701	1.7364
+(March, 2004, PEMEX)		0.0005	0.1235	0.0352	0.1018	1.7451
+(April, 2004, PEMEX)		0.0003	0.1220	0.0338	0.0634	1.8199
+(May, 2004, PEMEX)		0.0005	0.1214	0.0349	0.0864	1.7829
+(June, 2004, PEMEX)		0.0006	0.1223	0.0391	0.0952	1.8136
+(July, 2004, PEMEX)		0.0006	0.1210	0.0371	0.0909	1.7592
+(August, 2004, PEMEX)		0.0006	0.0991	0.0454	0.0961	1.7631
+(September, 2004, PEMEX)	0.0009	0.1245	0.0525	0.0903	1.8454
+(October, 2004, PEMEX)		0.0003	0.1178	0.0477	0.0938	1.8681
+(November, 2004, PEMEX)		0.0003	0.1240	0.0500	0.0981	1.8778
+(December, 2004, PEMEX)		0.0001	0.1259	0.0521	0.0662	1.8193
+(January, 2005, PEMEX)		0.0001	0.1305	0.0524	0.0806	1.7763
+(February, 2005, PEMEX)		0.0002	0.1251	0.0675	0.0646	1.7579
+(March, 2005, PEMEX)		0.0002	0.1059	0.0598	0.0471	1.7565
+(April, 2005, PEMEX)		0.0004	0.1217	0.0630	0.0625	1.7606
+(May, 2005, PEMEX)		0.0004	0.1346	0.0635	0.0677	1.7756
+(June, 2005, PEMEX)		0.0005	0.1467	0.0633	0.0816	1.7977
+(July, 2005, PEMEX)		0.0004	0.1260	0.0604	0.0733	1.7021
+(August, 2005, PEMEX)		0.0006	0.1290	0.0527	0.0735	1.8147
+(September, 2005, PEMEX)	0.0004	0.1232	0.0569	0.0670	1.8333
+(October, 2005, PEMEX)		0.0006	0.1187	0.0583	0.0676	1.8053
+(November, 2005, PEMEX)		0.0004	0.1119	0.0642	0.0686	1.7260
+(December, 2005, PEMEX)		0.0006	0.1305	0.0807	0.0710	1.7768
+(January, 2006, PEMEX)		0.0003	0.1091	0.0821	0.0877	1.8824
+(February, 2006, PEMEX)		0.0007	0.1355	0.0717	0.0922	1.8786
+(March, 2006, PEMEX)		0.0008	0.1175	0.0623	0.0737	1.8633
+(April, 2006, PEMEX)		0.0009	0.1326	0.0699	0.0769	1.8849
+(May, 2006, PEMEX)		0.0010	0.1239	0.0674	0.0961	1.8537
+(June, 2006, PEMEX)		0.0010	0.1400	0.0699	0.0897	1.8801
+(July, 2006, PEMEX)		0.0010	0.1337	0.0725	0.0694	1.9145
+(August, 2006, PEMEX)		0.0010	0.1391	0.0598	0.0682	1.9250
+(September, 2006, PEMEX)	0.0010	0.1328	0.0610	0.0538	1.9148
+(October, 2006, PEMEX)		0.0010	0.1403	0.0609	0.0581	1.8897
+(November, 2006, PEMEX)		0.0010	0.1326	0.0707	0.0636	1.8236
+(December, 2006, PEMEX)		0.0010	0.1393	0.0744	0.0476	1.9186
+(January, 2007, PEMEX)		0.0007	0.1442	0.0555	0.0672	1.8987
+(February, 2007, PEMEX)		0.0009	0.1487	0.0522	0.0628	1.9125
+(March, 2007, PEMEX)		0.0005	0.1417	0.0713	0.0625	1.8680
+(April, 2007, PEMEX)		0.0005	0.1509	0.0759	0.0610	1.9170
+(May, 2007, PEMEX)		0.0008	0.1623	0.0783	0.0708	1.9359
+(June, 2007, PEMEX)		0.0010	0.1587	0.0681	0.0674	1.8966
+(July, 2007, PEMEX)		0.0010	0.1669	0.0421	0.0577	1.8114
+(August, 2007, PEMEX)		0.0010	0.1441	0.0577	0.0452	1.7430
+(September, 2007, PEMEX)	0.0010	0.1508	0.0428	0.0300	1.8188
+(October, 2007, PEMEX)		0.0004	0.1441	0.0556	0.0667	1.8121
+(November, 2007, PEMEX)		0.0004	0.1299	0.0603	0.0724	1.7585
+(December, 2007, PEMEX)		0.0006	0.1669	0.0780	0.0913	1.8248
+(January, 2008, PEMEX)		0.0008	0.1629	0.0689	0.1052	1.9246
+(February, 2008, PEMEX)		0.0009	0.1556	0.0664	0.0999	1.9013
+(March, 2008, PEMEX)		0.0009	0.1518	0.0689	0.0936	1.8892
+(April, 2008, PEMEX)		0.0009	0.1424	0.0838	0.0812	1.8462
+(May, 2008, PEMEX)		0.0009	0.1470	0.0575	0.0873	1.9047
+(June, 2008, PEMEX)		0.0010	0.1466	0.0524	0.0939	1.8375
+(July, 2008, PEMEX)		0.0010	0.1422	0.0630	0.0933	1.8860
+(August, 2008, PEMEX)		0.0009	0.1338	0.0624	0.0986	1.9061
+(September, 2008, PEMEX)	0.0008	0.1422	0.0659	0.0781	1.8682
+(October, 2008, PEMEX)		0.0008	0.1338	0.0639	0.0821	1.8624
+(November, 2008, PEMEX)		0.0009	0.1158	0.0610	0.0904	1.7896
+(December, 2008, PEMEX)		0.0008	0.1288	0.0657	0.1071	1.8762
+(January, 2009, PEMEX)		0.0006	0.1353	0.0632	0.0964	1.8977
+(February, 2009, PEMEX)		0.0007	0.1280	0.0629	0.0960	1.8822
+(March, 2009, PEMEX)		0.0009	0.1303	0.0601	0.1021	1.9472
+(April, 2009, PEMEX)		0.0009	0.1211	0.0606	0.0927	1.9133
+(May, 2009, PEMEX)		0.0009	0.1103	0.0609	0.0949	1.8000
+(June, 2009, PEMEX)		0.0009	0.1126	0.0531	0.0981	1.9816
+(July, 2009, PEMEX)		0.0009	0.1254	0.0624	0.1018	1.9278
+(August, 2009, PEMEX)		0.0010	0.1327	0.0512	0.0942	1.9089
+(September, 2009, PEMEX)	0.0010	0.1265	0.0458	0.0860	1.8838
+(October, 2009, PEMEX)		0.0009	0.1413	0.0544	0.0838	1.6587
+(November, 2009, PEMEX)		0.0010	0.1454	0.0657	0.0969	1.7396
+(December, 2009, PEMEX)		0.0009	0.1539	0.0682	0.0849	1.8456
+(January, 2010, PEMEX)		0.0008	0.1612	0.0593	0.0808	1.9801
+(February, 2010, PEMEX)		0.0007	0.1609	0.0660	0.0942	1.9302
+(March, 2010, PEMEX)		0.0009	0.1588	0.0657	0.0967	1.9634
+(April, 2010, PEMEX)		0.0009	0.1528	0.0710	0.0985	1.9772
+(May, 2010, PEMEX)		0.0009	0.1525	0.0653	0.0911	1.9676
+(June, 2010, PEMEX)		0.0010	0.1521	0.0746	0.0840	1.9559
+(July, 2010, PEMEX)		0.0008	0.1314	0.0682	0.0758	1.9557
+(August, 2010, PEMEX)		0.0010	0.1493	0.0700	0.0893	1.9104
+(September, 2010, PEMEX)	0.0009	0.1507	0.0674	0.0903	1.9370
+(October, 2010, PEMEX)		0.0010	0.1463	0.0738	0.0810	1.9025
+(November, 2010, PEMEX)		0.0009	0.1425	0.0511	0.0697	1.8674
+(December, 2010, PEMEX)		0.0009	0.1294	0.0510	0.1029	1.8566
+(January, 2011, PEMEX)		0.0007	0.1838	0.0497	0.0963	1.8715
+(February, 2011, PEMEX)		0.0006	0.1877	0.0567	0.1140	1.8422
+(March, 2011, PEMEX)		0.0007	0.1874	0.0495	0.1201	1.8618
+(April, 2011, PEMEX)		0.0007	0.1903	0.0580	0.1218	1.8715
+(May, 2011, PEMEX)		0.0008	0.1742	0.0621	0.0913	1.8822
+(June, 2011, PEMEX)		0.0010	0.1806	0.0628	0.1049	1.8400
+(July, 2011, PEMEX)		0.0011	0.1889	0.0618	0.0995	1.8040
+(August, 2011, PEMEX)		0.0011	0.1943	0.0518	0.0922	1.7294
+(September, 2011, PEMEX)	0.0011	0.1845	0.0646	0.0926	1.7869
+(October, 2011, PEMEX)		0.0010	0.1695	0.0600	0.1027	1.9107
+(November, 2011, PEMEX)		0.0011	0.1423	0.0522	0.1015	1.8889
+(December, 2011, PEMEX)		0.0010	0.1908	0.0578	0.1103	1.8275
+(January, 2012, PEMEX)		0.0010	0.1936	0.0647	0.0869	1.9458
+(February, 2012, PEMEX)		0.0010	0.2002	0.0540	0.0936	1.8943
+(March, 2012, PEMEX)		0.0009	0.1809	0.0565	0.1115	1.9186
+(April, 2012, PEMEX)		0.0007	0.2027	0.0665	0.1091	1.9504
+(May, 2012, PEMEX)		0.0009	0.1973	0.0684	0.1148	1.9260
+(June, 2012, PEMEX)		0.0011	0.1874	0.0517	0.1194	1.9069
+(July, 2012, PEMEX)		0.0011	0.2062	0.0718	0.1047	1.8797
+(August, 2012, PEMEX)		0.0011	0.1811	0.0727	0.1264	1.9430
+(September, 2012, PEMEX)	0.0011	0.1746	0.0643	0.0991	1.9351
+(October, 2012, PEMEX)		0.0011	0.1713	0.0556	0.0841	1.9164
+(November, 2012, PEMEX)		0.0010	0.2032	0.0638	0.1057	1.9227
+(December, 2012, PEMEX)		0.0011	0.1984	0.0658	0.0816	1.8367
+(January, 2013, PEMEX)		0.0009	0.1824	0.0638	0.1039	1.9273
+(February, 2013, PEMEX)		0.0007	0.1918	0.0663	0.1091	1.8687
+(March, 2013, PEMEX)		0.0009	0.1961	0.0651	0.1036	1.9362
+(April, 2013, PEMEX)		0.0010	0.1829	0.0622	0.1122	1.8955
+(May, 2013, PEMEX)		0.0010	0.1878	0.0647	0.0969	1.8542
+(June, 2013, PEMEX)		0.0008	0.1778	0.0632	0.0930	1.9037
+(July, 2013, PEMEX)		0.0011	0.1788	0.0658	0.1131	1.9767
+(August, 2013, PEMEX)		0.0011	0.1887	0.0623	0.1136	1.9850
+(September, 2013, PEMEX)	0.0010	0.1861	0.0601	0.0940	1.9253
+(October, 2013, PEMEX)		0.0009	0.1796	0.0618	0.1082	1.9432
+(November, 2013, PEMEX)		0.0011	0.1817	0.0622	0.1007	1.9313
+(December, 2013, PEMEX)		0.0010	0.1883	0.0643	0.1029	1.8682
+(January, 2014, PEMEX)		0.0010	0.1920	0.0616	0.0998	1.9488
+(February, 2014, PEMEX)		0.0009	0.1965	0.0618	0.0959	1.9209
+(March, 2014, PEMEX)		0.0011	0.2128	0.0629	0.1010	1.9328
+(April, 2014, PEMEX)		0.0010	0.2140	0.0689	0.0977	1.8998
+(May, 2014, PEMEX)		0.0007	0.2228	0.0628	0.0979	1.8847
+(June, 2014, PEMEX)		0.0011	0.2323	0.0602	0.1165	1.9047
+(July, 2014, PEMEX)		0.0010	0.2270	0.0622	0.1142	1.9113
+(August, 2014, PEMEX)		0.0010	0.2410	0.0681	0.1092	1.8718
+(September, 2014, PEMEX)	0.0010	0.2225	0.0591	0.1215	1.8708
+(October, 2014, PEMEX)		0.0008	0.2242	0.0595	0.1196	1.9241
+(November, 2014, PEMEX)		0.0006	0.1996	0.0631	0.1030	1.7859
+(December, 2014, PEMEX)		0.0009	0.2220	0.0649	0.1287	1.7712
+(January, 2015, PEMEX)		0.0009	0.2341	0.0524	0.1267	1.8317
+(February, 2015, PEMEX)		0.0009	0.2369	0.0523	0.1268	1.8511
+(March, 2015, PEMEX)		0.0011	0.2365	0.0581	0.1350	1.8007
+(April, 2015, PEMEX)		0.0011	0.2382	0.0555	0.1062	1.6976
+(May, 2015, PEMEX)		0.0010	0.2260	0.0581	0.1057	1.8152
+(June, 2015, PEMEX)		0.0010	0.2245	0.0528	0.1138	1.8343
+(July, 2015, PEMEX)		0.0011	0.2346	0.0616	0.1171	1.8407
+(August, 2015, PEMEX)		0.0010	0.2438	0.0655	0.1069	1.8165
+(September, 2015, PEMEX)	0.0010	0.2325	0.0608	0.1141	1.8003
+(October, 2015, PEMEX)		0.0010	0.2332	0.0658	0.1239	1.7594
+(November, 2015, PEMEX)		0.0007	0.2422	0.0457	0.0924	1.6770
+(December, 2015, PEMEX)		0.0007	0.2257	0.0579	0.1092	1.7916
+(January, 2016, PEMEX)		0.0009	0.2267	0.0562	0.0826	1.7557
+(February, 2016, PEMEX)		0.0009	0.2210	0.0562	0.0974	1.7313
+(March, 2016, PEMEX)		0.0010	0.2128	0.0479	0.1026	1.7996
+(April, 2016, PEMEX)		0.0010	0.1973	0.0568	0.0977	1.7201
+(May, 2016, PEMEX)		0.0009	0.2115	0.0550	0.1008	1.7365
+(June, 2016, PEMEX)		0.0010	0.2217	0.0707	0.0989	1.7664
+(July, 2016, PEMEX)		0.0011	0.2139	0.0598	0.0903	1.8162
+(August, 2016, PEMEX)		0.0011	0.2239	0.0520	0.0796	1.8720
+(September, 2016, PEMEX)	0.0010	0.2164	0.0589	0.0783	1.7985
+(October, 2016, PEMEX)		0.0010	0.2110	0.0595	0.0756	1.7968
+(November, 2016, PEMEX)		0.0010	0.1984	0.0586	0.0522	1.6926
+(December, 2016, PEMEX)		0.0010	0.2114	0.0505	0.0615	1.6968
+(January, 2017, PEMEX)		0.0010	0.1957	0.0631	0.0812	1.7130
+(February, 2017, PEMEX)		0.0010	0.2004	0.0571	0.0788	1.8315
+(March, 2017, PEMEX)		0.0009	0.2185	0.0472	0.0759	1.7328
+(April, 2017, PEMEX)		0.0007	0.2149	0.0276	0.0599	1.7099
+(May, 2017, PEMEX)		0.0009	0.2278	0.0272	0.0847	1.7604
+(June, 2017, PEMEX)		0.0010	0.2335	0.0208	0.0658	1.7201
+(July, 2017, PEMEX)		0.0008	0.1993	0.0311	0.0963	1.8068
+(August, 2017, PEMEX)		0.0007	0.1954	0.0202	0.0812	1.7388
+(September, 2017, PEMEX)	0.0007	0.1665	0.0273	0.0654	1.6233
+(October, 2017, PEMEX)		0.0009	0.1572	0.0196	0.0754	1.6217
+(November, 2017, PEMEX)		0.0009	0.1158	0.0223	0.0693	1.5973
+(December, 2017, PEMEX)		0.0009	0.1570	0.0223	0.0808	1.7019
+(January, 2018, PEMEX)		0.0000	0.1469	0.0284	0.0781	1.4640
+(February, 2018, PEMEX)		0.0000	0.1526	0.0279	0.0755	1.4686
+(March, 2018, PEMEX)		0.0000	0.1303	0.0433	0.0931	1.4719
+(April, 2018, PEMEX)		0.0000	0.1317	0.0474	0.1000	1.4890
+(May, 2018, PEMEX)		0.0000	0.1365	0.0483	0.1150	1.5402
+(June, 2018, PEMEX)		0.0000	0.1286	0.0477	0.0827	1.4504
+(July, 2018, PEMEX)		0.0000	0.1224	0.0489	0.0867	1.5212
+(August, 2018, PEMEX)		0.0000	0.1424	0.0418	0.0928	1.5176
+(September, 2018, PEMEX)	0.0000	0.1564	0.0467	0.0879	1.4617
+(October, 2018, PEMEX)		0.0000	0.1381	0.0505	0.0996	1.4216
+(November, 2018, PEMEX)		0.0000	0.1502	0.0299	0.0529	1.4323
+(December, 2018, PEMEX)		0.0000	0.1547	0.0245	0.0718	1.5754
+(January, 2019, PEMEX)		0.0000	0.1847	0.0171	0.0739	1.5081
+(February, 2019, PEMEX)		0.0000	0.2001	0.0261	0.0725	1.5496
+(March, 2019, PEMEX)		0.0000	0.1664	0.0316	0.0722	1.5212
+(April, 2019, PEMEX)		0.0000	0.1575	0.0322	0.0622	1.5655
+(May, 2019, PEMEX)		0.0000	0.1781	0.0278	0.0719	1.5536
+(June, 2019, PEMEX)		0.0000	0.2093	0.0296	0.0698	1.5789
+(July, 2019, PEMEX)		0.0000	0.1916	0.0367	0.0746	1.5815
+(August, 2019, PEMEX)		0.0000	0.1832	0.0340	0.0702	1.4859
+(September, 2019, PEMEX)	0.0000	0.1704	0.0207	0.0742	1.5098
+(October, 2019, PEMEX)		0.0000	0.1407	0.0220	0.0661	1.5384
+(November, 2019, PEMEX)		0.0000	0.1519	0.0243	0.0729	1.5320
+(December, 2019, PEMEX)		0.0000	0.1849	0.0229	0.0785	1.5183
+(January, 2020, PEMEX)		0.0000	0.1949	0.0309	0.0624	1.5608
+(February, 2020, PEMEX)		0.0000	0.1712	0.0320	0.0679	1.3070
+(March, 2020, PEMEX)		0.0000	0.1697	0.0326	0.0756	1.5100
+(April, 2020, PEMEX)		0.0000	0.1493	0.0294	0.0711	1.5852
+(May, 2020, PEMEX)		0.0000	0.1613	0.0343	0.0705	1.5654
+(June, 2020, PEMEX)		0.0000	0.1458	0.0277	0.0696	1.5316
+(July, 2020, PEMEX)		0.0000	0.1669	0.0310	0.0728	1.6422
+(August, 2020, PEMEX)		0.0000	0.1498	0.0296	0.0612	1.5774
+(September, 2020, PEMEX)	0.0000	0.1379	0.0245	0.0689	1.5962
+(October, 2020, PEMEX)		0.0000	0.1310	0.0184	0.0815	1.5808
+(November, 2020, PEMEX)		0.0000	0.1114	0.0201	0.0655	1.6130
+(December, 2020, PEMEX)		0.0000	0.1308	0.0306	0.0955	1.5312
+(January, 2021, PEMEX)		0.0000	0.1234	0.0334	0.0970	1.5744
+(February, 2021, PEMEX)		0.0000	0.1309	0.0382	0.0770	1.5173
+(March, 2021, PEMEX)		0.0000	0.1307	0.0318	0.1037	1.4619
+(April, 2021, PEMEX)		0.0000	0.1298	0.0213	0.0966	1.4042
+(May, 2021, PEMEX)		0.0000	0.1283	0.0318	0.0990	1.5115
+(June, 2021, PEMEX)		0.0000	0.1173	0.0286	0.0895	1.6231
+(July, 2021, PEMEX)		0.0000	0.1247	0.0328	0.0997	1.6271
+(August, 2021, PEMEX)		0.0000	0.1228	0.0389	0.0856	1.6747
+(September, 2021, PEMEX)	0.0000	0.1309	0.0345	0.0631	1.7252
+;
+!___________________________________________________________________________________________
+!
+!				1.2  Intra-Mexico Pipeline Capacities
+!___________________________________________________________________________________________
+
+!Historical Pipeline Capacities for Mexico - do not change/only add to them
+!Originally in PipelineCapacityByArc.txt
+!Added by KDL on 10/18/16
+!7/25/18 Updated KDL Now include 2016, 2017 historical data (code change to allow this)
+!7/23/19 Updated capacity for 2018; moved El Encino-Topolobampo to HistoricalCapacity from Projects
+!8/2/2021 Updated MYL. Ramones-Cempoala Compressor capacity addition of 2000 not included.
+
+!Note only for one year- may need to be revised/changed to multiple years
+!All historical years are assigned the same value in the code
+
+MexCapYear:='2015';
+
+! From    To_Hub         Year  Capacity     Border Hub Needs Arc?
+Composite table:
+h         h1              Year     HistoricalCapacity
+MX_NE     MX_SS           2015       850     !PEMEX SNG (National Gas System)
+MX_SS     MX_NE           2015      4224     !PEMEX SNG (National Gas System)
+MX_SS     MX_IW           2015      1122     !PEMEX SNG (National Gas System)
+MX_SS     MX_CE           2015      4000     !PEMEX SNG (National Gas System)
+MX_IW     MX_CE           2015       800     !PEMEX SNG (National Gas System)
+MX_NE     MX_SS           2016       850     
+MX_NE     MX_IW           2016      1400     !Los Ramones Phase II (North and South)
+MX_SS     MX_NE           2016      4224     
+MX_SS     MX_IW           2016      1122     
+MX_SS     MX_CE           2016      4000     
+MX_IW     MX_CE           2016       800     
+MX_NE     MX_SS           2017       850     
+MX_NE     MX_IW           2017      1400 
+MX_SS     MX_NE           2017      4224     
+MX_SS     MX_IW           2017      1122     
+MX_SS     MX_CE           2017      4000     
+MX_IW     MX_CE           2017       800     
+MX_NE     MX_SS           2018       850     
+MX_NE	  MX_NW		  2018	     670      !El-Encino Topolobambo online
+MX_NE     MX_IW           2018      1400 
+MX_SS     MX_NE           2018      4224     
+MX_SS     MX_IW           2018      1122     
+MX_SS     MX_CE           2018      4000     
+MX_IW     MX_CE           2018       800     
+MX_NE     MX_SS           2019       850     
+MX_NE	  MX_NW		  2019	     670      
+MX_NE     MX_IW           2019      1400 
+MX_SS     MX_NE           2019      4224     
+MX_SS     MX_IW           2019      1122     
+MX_SS     MX_CE           2019      4000     
+MX_IW     MX_CE           2019       800
+MX_NE     MX_SS           2020       850     
+MX_NE	  MX_NW		  2020	     670      
+MX_NE     MX_IW           2020      2590      !Villa de Reye - Aguacalientes - Guadalajara
+MX_SS     MX_NE           2020      4224     
+MX_SS     MX_IW           2020      1122     
+MX_SS     MX_CE           2020      4000     
+MX_IW     MX_CE           2020       800     
+MX_NE     MX_SS           2021       850     
+MX_NE	  MX_NW		  2021	    1142	!+472 from  Samalayuca-Sasabe Gas
+MX_NE     MX_IW           2021      2590	
+MX_SS     MX_NE           2021      4224     
+MX_SS     MX_IW           2021      1122     
+MX_SS     MX_CE           2021      4000     
+MX_IW     MX_CE           2021       800     
+;
+
+!Pipeline Capacity Additions
+!Input by KDL on 9/27/16
+!Taken from ICF Mexico report 
+!Updated on 7/25/18 KDL using latest data, Genscape Weekly Update on Mexico
+!Updated on 7/23/19 KDL Moved all projects back two years
+!7/29/22	SYK	Adjusted planned capacity based on latest update from IHS Pipeline Tracker.
+!			Tula-Villa de Reyes delayed to 2023 based on latest TC Energy estimates
+!			Tuxpan-Tula moved to 2024 based on Genscape Mexico weekly estimate.
+
+! Arc Region to Region Capacity (MMcfd)
+!Only put intra-Mexico projects here (not from border).  All border crossings dealt with in ngcapacity.txt
+!
+! From    To_Hub         Year  Capacity     Border Hub Needs Arc?
+Composite table:
+h         h1              year     PlannedCapacity
+MX_SS     MX_CE           2024       886     !+Tuxpan-Tula Gas Pipeline
+MX_CE     MX_IW           2023       886     !+Tula-Villa de Reyes Gas Pipeline	
+;
+
+!___________________________________________________________________________________________
+!
+!				1.3  SIE/CFE Spot Price Data
+!___________________________________________________________________________________________
+
+!Data also from SIE- website- downloaded
+!All unit and currency conversions, details in Excel sheet Mex_AIMMS_Consumption (same as above)
+
+HistoricalSpotPrice := data table		
+		
+			MX_NE	MX_SS
+(January, 2000)		0.0000	0.0000
+(February, 2000)	0.0000	0.0000
+(March, 2000)		0.0000	0.0000
+(April, 2000)		0.0000	0.0000
+(May, 2000)		2.9803	2.5305
+(June, 2000)		4.0975	3.6567
+(July, 2000)		4.4029	3.9274
+(August, 2000)		3.6763	3.2181
+(September, 2000)	4.4152	3.9678
+(October, 2000)		4.9946	4.5471
+(November, 2000)	4.3872	3.9295
+(December, 2000)	5.7910	5.3391
+(January, 2001)		9.2784	8.8367
+(February, 2001)	6.0665	5.6086
+(March, 2001)		4.9269	4.4681
+(April, 2001)		5.2788	4.8144
+(May, 2001)		4.7078	4.2501
+(June, 2001)		3.6026	3.1521
+(July, 2001)		3.0481	2.5994
+(August, 2001)		3.1142	2.6604
+(September, 2001)	2.2336	1.7935
+(October, 2001)		1.8673	1.4078
+(November, 2001)	3.0440	2.5899
+(December, 2001)	1.9818	1.5268
+(January, 2002)		2.5463	2.0948
+(February, 2002)	2.0138	1.5584
+(March, 2002)		2.3500	1.8960
+(April, 2002)		3.2733	2.8251
+(May, 2002)		3.1844	2.7434
+(June, 2002)		3.0780	2.6360
+(July, 2002)		3.1813	2.7273
+(August, 2002)		2.8365	2.3901
+(September, 2002)	3.1194	2.6756
+(October, 2002)		3.6265	3.1720
+(November, 2002)	3.9304	3.4855
+(December, 2002)	3.9831	3.5324
+(January, 2003)		4.5041	4.0680
+(February, 2003)	5.3558	4.9119
+(March, 2003)		8.7566	8.3031
+(April, 2003)		4.9285	4.4652
+(May, 2003)		5.0898	4.6239
+(June, 2003)		5.5316	5.0874
+(July, 2003)		5.1491	4.6935
+(August, 2003)		4.3829	3.9438
+(September, 2003)	4.7330	4.2832
+(October, 2003)		4.1952	3.7533
+(November, 2003)	4.2567	3.8017
+(December, 2003)	4.4388	3.9860
+(January, 2004)		5.6270	5.1599
+(February, 2004)	5.5294	5.0805
+(March, 2004)		4.9608	4.5086
+(April, 2004)		5.0418	4.5984
+(May, 2004)		5.4619	5.0166
+(June, 2004)		6.4163	5.9571
+(July, 2004)		5.8636	5.4149
+(August, 2004)		5.7394	5.2836
+(September, 2004)	4.8627	4.4141
+(October, 2004)		5.4224	4.9663
+(November, 2004)	7.3008	6.8436
+(December, 2004)	5.2913	4.8328
+(January, 2005)		5.9713	5.5206
+(February, 2005)	5.9874	5.5292
+(March, 2005)		5.8710	5.4178
+(April, 2005)		6.8587	6.4012
+(May, 2005)		6.5943	6.1366
+(June, 2005)		5.9896	5.5304
+(July, 2005)		6.7994	6.3411
+(August, 2005)		7.1750	6.7238
+(September, 2005)	10.0563	9.6044
+(October, 2005)		11.1261	10.6724
+(November, 2005)	11.6927	11.1875
+(December, 2005)	8.1848	7.6892
+(January, 2006)		8.6121	8.1097
+(February, 2006)	7.3484	6.8932
+(March, 2006)		6.7121	6.2699
+(April, 2006)		6.7773	6.3348
+(May, 2006)		6.9504	6.4981
+(June, 2006)		5.6212	5.1762
+(July, 2006)		5.9199	5.4483
+(August, 2006)		6.6013	6.1458
+(September, 2006)	6.4475	5.9999
+(October, 2006)		4.1191	3.6616
+(November, 2006)	6.8336	6.3851
+(December, 2006)	6.8175	6.3185
+(January, 2007)		5.1731	4.6830
+(February, 2007)	6.4471	5.9536
+(March, 2007)		6.8143	6.3250
+(April, 2007)		6.6008	6.1012
+(May, 2007)		7.3026	6.8428
+(June, 2007)		7.2422	6.7905
+(July, 2007)		6.3826	5.8865
+(August, 2007)		5.2965	4.8117
+(September, 2007)	5.2903	4.8334
+(October, 2007)		6.1693	5.7087
+(November, 2007)	6.2592	5.8088
+(December, 2007)	7.0285	6.5709
+(January, 2008)		6.6303	6.4212
+(February, 2008)	7.7653	7.5534
+(March, 2008)		8.6423	8.4298
+(April, 2008)		9.0497	8.8328
+(May, 2008)		10.3066	10.0880
+(June, 2008)		11.2878	11.0669
+(July, 2008)		12.3911	12.1678
+(August, 2008)		8.6492	8.4235
+(September, 2008)	7.1921	6.9778
+(October, 2008)		5.7520	5.5716
+(November, 2008)	5.8709	5.6934
+(December, 2008)	6.0043	5.8308
+(January, 2009)		4.8991	4.7318
+(February, 2009)	3.8024	3.6431
+(March, 2009)		3.5749	3.4159
+(April, 2009)		3.5540	3.3804
+(May, 2009)		3.0411	2.8646
+(June, 2009)		3.1468	2.9722
+(July, 2009)		3.5022	3.3280
+(August, 2009)		3.3659	3.1869
+(September, 2009)	2.5702	2.3763
+(October, 2009)		3.4290	3.2324
+(November, 2009)	4.0682	3.8700
+(December, 2009)	3.3779	3.1758
+(January, 2010)		5.5444	5.3416
+(February, 2010)	5.2210	5.0104
+(March, 2010)		4.7050	4.4982
+(April, 2010)		3.5088	3.2967
+(May, 2010)		3.8376	3.6335
+(June, 2010)		4.0155	3.8106
+(July, 2010)		4.4473	4.2440
+(August, 2010)		4.5157	4.3125
+(September, 2010)	3.4996	3.2966
+(October, 2010)		3.7637	3.5514
+(November, 2010)	3.1726	2.9584
+(December, 2010)	3.7600	3.5467
+(January, 2011)		4.0331	3.7898
+(February, 2011)	4.1378	3.8934
+(March, 2011)		3.6680	3.4223
+(April, 2011)		4.1747	3.9227
+(May, 2011)		4.1921	3.9391
+(June, 2011)		4.0968	3.8470
+(July, 2011)		4.2391	3.9865
+(August, 2011)		3.9935	3.7525
+(September, 2011)	3.4841	3.2583
+(October, 2011)		3.5823	3.3629
+(November, 2011)	3.3025	3.0873
+(December, 2011)	3.2470	3.0328
+(January, 2012)		3.0641	2.8394
+(February, 2012)	2.6786	2.4428
+(March, 2012)		2.3451	2.1087
+(April, 2012)		2.0775	1.8468
+(May, 2012)		1.9124	1.6914
+(June, 2012)		2.3375	2.1209
+(July, 2012)		2.7700	2.5445
+(August, 2012)		2.9360	2.7074
+(September, 2012)	2.5872	2.3543
+(October, 2012)		2.9472	2.7135
+(November, 2012)	3.2933	3.0628
+(December, 2012)	3.6261	3.3919
+(January, 2013)		3.2603	3.0172
+(February, 2013)	3.0926	2.8499
+(March, 2013)		3.3558	3.1088
+(April, 2013)		3.8691	3.6163
+(May, 2013)		3.9581	3.7074
+(June, 2013)		3.8018	3.5635
+(July, 2013)		3.6535	3.4116
+(August, 2013)		3.2349	2.9961
+(September, 2013)	3.4332	3.1971
+(October, 2013)		3.3445	3.1069
+(November, 2013)	3.3110	3.0748
+(December, 2013)	3.6775	3.4401
+(January, 2014)		4.1584	4.0662
+(February, 2014)	5.3593	5.2676
+(March, 2014)		4.6852	4.5929
+(April, 2014)		4.4415	4.3483
+(May, 2014)		4.6662	4.5720
+(June, 2014)		4.4088	4.3151
+(July, 2014)		4.2473	4.1522
+(August, 2014)		3.6147	3.5210
+(September, 2014)	3.7940	3.7009
+(October, 2014)		3.8309	3.7394
+(November, 2014)	3.6094	3.5190
+(December, 2014)	3.8657	3.7810
+(January, 2015)		3.0793	2.9757
+(February, 2015)	2.7302	2.6282
+(March, 2015)		2.7571	2.6573
+(April, 2015)		2.5324	2.4324
+(May, 2015)		2.4698	2.3700
+(June, 2015)		2.6850	2.5869
+(July, 2015)		2.5944	2.4989
+(August, 2015)		2.7118	2.6197
+(September, 2015)	2.5453	2.4549
+(October, 2015)		2.5272	2.4354
+(November, 2015)	1.9718	1.8803
+(December, 2015)	2.0983	2.0091
+(January, 2016)		2.2032	2.1132
+(February, 2016)	2.1230	2.0350
+(March, 2016)		2.5265	2.7115
+(April, 2016)		1.9461	2.1333
+(May, 2016)		1.9809	2.2557
+(June, 2016)		2.1135	2.3811
+(July, 2016)		2.1269	2.3952
+(August, 2016)		2.8830	3.1528
+(September, 2016)	2.7566	3.0174
+(October, 2016)		3.0915	3.3554
+(November, 2016)	2.9099	3.1589
+(December, 2016)	2.9233	3.1662
+(January, 2017)		3.0895	3.3504
+(February, 2017)	4.0713	4.3458
+(March, 2017)		3.7165	4.0051
+(April, 2017)		2.9105	3.2063
+(May, 2017)		3.2568	3.5527
+(June, 2017)		3.3732	3.6797
+ ;
+
+!7/25/18  KDL 	New National index (IPGN) being used; from July 2017-January 2018,
+!		estimating NE and SS prices off of this one index using assumed basis
+!		Using regional prices as of February 2018
+!		\\Fs-f3\oea\PNGBA\_NGMT\NGMM\shared\Input_Data\Mexico\MX_AIMMS_NewPrices_2017_present.xlsx
+!7/24/19  KDL 	Updated using only regional price indices
+!8/4/21   MYL 	Updated using only regional price indices. Note, Polar Vortex occurred in Texas in February 2021.
+
+HistoricalSpotPrice := data table
+
+			MX_NE	MX_SS
+(July, 2017)		3.8548	4.4048
+(August, 2017)		4.0641	4.6141
+(September, 2017)	3.8413	4.3913
+(October, 2017)		3.7177	4.2677
+(November, 2017)	3.9373	4.4873
+(December, 2017)	3.8029	4.3529
+(January, 2018)		4.0879	4.6379
+(January, 2018)		4.0879	4.6379
+(January, 2018)		4.0879	4.6379
+(February, 2018)	4.3067	4.8567
+(March, 2018)		3.6382	4.1882
+(April, 2018)		3.8821	4.4321
+(May, 2018)		3.7728	4.3228
+(June, 2018)		3.6324	4.1824
+(July, 2018)		3.8401	4.3901
+(August, 2018)		3.8836	4.4336
+(September, 2018)	4.0792	4.6292
+(October, 2018)		3.409	3.959
+(November, 2018)	3.6366	4.1866
+(December, 2018)	4.3505	4.9005
+(January, 2019)		4.1249	4.6749
+(February, 2019)	3.5704	4.1204
+(March, 2019)		2.8969	3.4469
+(April, 2019)		2.6306	3.1806
+(May, 2019)		2.7514	3.3014
+(June, 2019)		2.5325	3.0825
+(July, 2019)		2.3736	2.9236
+(August, 2019)		2.6005	3.1505
+(September, 2019)	2.9925	3.5425
+(October, 2019)		2.9077	3.4577
+(November, 2019)	2.9035	3.4535
+(December, 2019)	2.9398	3.4898
+(January, 2020)		2.6703	3.2203
+(February, 2020)	2.4631	3.0131
+(March, 2020)		1.9693	2.5193
+(April, 2020)		1.8799	2.4299
+(May, 2020)		2.1234	2.6734
+(June, 2020)		2.0781	2.6281
+(July, 2020)		2.037	2.587
+(August, 2020)		2.4361	2.9861
+(September, 2020)	2.6061	3.1561
+(October, 2020)		2.8545	3.4045
+(November, 2020)	3.2034	3.7534
+(December, 2020)	3.3858	3.9358
+(January, 2021)		3.1408	3.6908
+(February, 2021)	21.1217	21.6717
+(March, 2021)		3.3629	3.9129
+(April, 2021)		3.1266	3.6766
+(May, 2021)		3.4931	4.0431
+
+;
+HistoricalSpotPrice := data table
+
+			MX_NW	MX_NE	MX_IW	MX_CE	MX_SS
+(February, 2018)	6.0582	4.2475	5.1927	5.0425	4.8858
+(March, 2018)		5.6809	3.5369	4.2578	4.459	4.2078
+(April, 2018)		4.7772	3.9874	4.4202	4.6142	4.4216
+(May, 2018)		4.6665	3.8721	4.3818	4.4686	4.2946
+(June, 2018)		4.2985	3.9296	4.5066	4.322	4.4046
+(July, 2018)		6.4064	3.8983	4.3688	4.4279	3.7221
+(August, 2018)		5.732	4.2392	4.4415	4.1245	3.6712
+(September, 2018)	4.5797	3.9229	4.781	4.1251	4.052
+(October, 2018)		2.3231	3.9002	5.853	4.2864	4.9267
+(November, 2018)	2.4758	4.2398	5.1114	4.4809	4.1293
+(December, 2018)	2.265	4.4347	6.0514	5.254	6.0128
+(January, 2019)		3.0356	5.0178	4.7124	4.9815	5.7251
+(February, 2019)	3.7377	4.4664	5.805	4.1361	3.6392
+(March, 2019)		1.9217	3.5525	4.3578	3.8128	3.0375
+(April, 2019)		1.2696	3.6624	4.8405	3.7071	3.2643
+(May, 2019)		1.0538	3.566	4.4368	3.6692	2.9323
+(June, 2019)		0.8948	3.2496	4.0723	3.4821	3.0264
+(July, 2019)		1.4362	2.959	3.8475	3.1105	2.4389
+(August, 2019)		1.7632	2.8529	3.4815	3.6761	3.1416
+(September, 2019)	2.3097	3.0421	3.63	3.6027	3.6616
+(October, 2019)		1.8947	2.8686	3.7318	3.4469	2.9352
+(November, 2019)	2.2948	3.2572	4.4187	3.6873	3.5792
+(December, 2019)	2.6862	2.6812	3.946	3.6245	3.3725
+(January, 2020)		2.1422	2.7364	3.9966	3.5494	2.4649
+(February, 2020)	1.5452	2.5189	3.967	3.4778	2.3631
+(March, 2020)		1.169	2.2767	3.3495	3.0982	2.0313
+(April, 2020)		1.0462	2.2667	3.2263	2.8367	1.9196
+(May, 2020)		1.8113	2.19	3.2752	3.0188	2.4559
+(June, 2020)		1.7129	2.1607	3.1946	3.1912	2.0693
+(July, 2020)		1.7149	2.2515	3.0916	2.8534	2.1613
+(August, 2020)		2.3106	2.6502	3.3844	3.2742	2.8584
+(September, 2020)	2.2366	2.7633	3.8962	3.6415	2.4755
+(October, 2020)		1.7644	2.8215	3.9163	3.5049	2.9297
+(November, 2020)	2.825	3.1692	4.5812	3.9437	3.3074
+(December, 2020)	3.6634	3.3297	4.0949	3.9829	3.1875
+(January, 2021)		3.1073	3.1812	3.4875	3.8563	3.5668
+(February, 2021)	35.7544	19.6261	12.7988	14.8782	25.3068
+(March, 2021)		3.1488	3.3228	4.1433	3.8642	3.5691
+(April, 2021)		3.0589	3.1812	3.956	3.7759	3.2472
+(May, 2021)		3.1252	3.5359	4.2145	4.16	3.7408
+;
+
+!___________________________________________________________________________________________
+!
+!				1.4  IHS LNG Import Data
+!___________________________________________________________________________________________
+
+!LNG data before 2014 is historical/from SENER reports 
+!LNG data from 2014-present from IHS Waterborne Data as of 10/10/17 (KDL)
+!7/25/18 	Updated KDL through 2017 from IHS Waterborne Data
+!		All original data, formatting, etc. in Mex_AIMMS_Consumption in NGMM shared drive (same as others)
+!7/24/19 	Updated KDL through 2018 from IHS Waterborne Data
+!8/5/20 	Updated KDL through 2019 from IHS Waterborne Data
+!8/3/21		Updated MYL thought 2020 from IHS Waterborne Data (SYK provided data from IHS)
+!7/29/22	Update LNG import data
+
+!Altamira - MX_NE
+!Manzanillo - MX_IW
+!Costa Azul - MX_NW
+!La Paz - MX_NW
+
+! Data in Bcf
+HistoricalAnnualSupply := data table			
+			
+	(LNG, MX_NE)	(LNG, MX_IW)	(LNG, MX_NW)
+2006	28.762		0		0
+2007	91.104		0		0
+2008	120.9996	0		9.1866
+2009	121.91		0		2.482
+2010	128.115		0		71.5765
+2011	134.539		0		8.979
+2012	120.5604	34.8432		12.1878
+2013	130.232		135.1595	12.41
+2014	144.2763758	173.900073	11.9877736
+2015	89.81143974	144.6450143	8.961306462
+2016	22.50		165.88		9.51
+2017	93.17		133.51		9.55
+2018	119.24		121.83		6.35
+2019	87.69		135.77		9.58
+2020	3.15		74.58		12.67
+2021	6.26		6.85		18.85
+;
+
+!___________________________________________________________________________________________
+!
+!				1.5  PEMEX Historical Production
+!___________________________________________________________________________________________
+
+!Data is processed in NGMM/AIMMS offline using Excel file PEMEXHistoricalProduction.xlsx
+!File copied over into this file for version control
+!Look in NGMM code, section "Offline Processing" for specifics
+!7/24/19 	Updated KDL using AIMMS code, PEMEX data
+!8/3/21 	Updated KDL/MYL. AIMMS code required updating. PEMEX data updated
+!8/1/22		MYL updated ngmexico_add.txt.
+
+Composite table:
+mon                suptype    mx       HistoricalProductionPemex
+!----------------  ---------  -----    -------------------------
+'January, 2000'    NA         MX_NE                       31.517
+'January, 2000'    NA         MX_SS                        5.131
+'January, 2000'    AD         MX_SS                       47.564
+'February, 2000'   NA         MX_NE                       29.396
+'February, 2000'   NA         MX_SS                        5.012
+'February, 2000'   AD         MX_SS                       44.986
+'March, 2000'      NA         MX_NE                       31.338
+'March, 2000'      NA         MX_SS                        5.323
+'March, 2000'      AD         MX_SS                       46.881
+'April, 2000'      NA         MX_NE                       27.209
+'April, 2000'      NA         MX_SS                        4.636
+'April, 2000'      AD         MX_SS                       43.948
+'May, 2000'        NA         MX_NE                       31.056
+'May, 2000'        NA         MX_SS                        4.928
+'May, 2000'        AD         MX_SS                       45.641
+'June, 2000'       NA         MX_NE                       30.313
+'June, 2000'       NA         MX_SS                        4.854
+'June, 2000'       AD         MX_SS                       47.022
+'July, 2000'       NA         MX_NE                       31.556
+'July, 2000'       NA         MX_SS                        4.936
+'July, 2000'       AD         MX_SS                       45.887
+'August, 2000'     NA         MX_NE                       31.380
+'August, 2000'     NA         MX_SS                        4.942
+'August, 2000'     AD         MX_SS                       48.110
+'September, 2000'  NA         MX_NE                       30.135
+'September, 2000'  NA         MX_SS                        4.646
+'September, 2000'  AD         MX_SS                       49.949
+'October, 2000'    NA         MX_NE                       31.350
+'October, 2000'    NA         MX_SS                        5.051
+'October, 2000'    AD         MX_SS                       46.952
+'November, 2000'   NA         MX_NE                       30.487
+'November, 2000'   NA         MX_SS                        4.795
+'November, 2000'   AD         MX_SS                       46.010
+'December, 2000'   NA         MX_NE                       31.406
+'December, 2000'   NA         MX_SS                        5.006
+'December, 2000'   AD         MX_SS                       51.657
+'January, 2001'    NA         MX_NE                       31.039
+'January, 2001'    NA         MX_SS                        5.115
+'January, 2001'    AD         MX_SS                       53.242
+'February, 2001'   NA         MX_NE                       28.124
+'February, 2001'   NA         MX_SS                        3.599
+'February, 2001'   AD         MX_SS                       46.432
+'March, 2001'      NA         MX_NE                       31.289
+'March, 2001'      NA         MX_SS                        5.007
+'March, 2001'      AD         MX_SS                       50.861
+'April, 2001'      NA         MX_NE                       29.977
+'April, 2001'      NA         MX_SS                        4.779
+'April, 2001'      AD         MX_SS                       49.633
+'May, 2001'        NA         MX_NE                       30.985
+'May, 2001'        NA         MX_SS                        4.849
+'May, 2001'        AD         MX_SS                       49.680
+'June, 2001'       NA         MX_NE                       29.890
+'June, 2001'       NA         MX_SS                        4.721
+'June, 2001'       AD         MX_SS                       48.153
+'July, 2001'       NA         MX_NE                       30.950
+'July, 2001'       NA         MX_SS                        4.810
+'July, 2001'       AD         MX_SS                       47.512
+'August, 2001'     NA         MX_NE                       31.208
+'August, 2001'     NA         MX_SS                        4.376
+'August, 2001'     AD         MX_SS                       48.169
+'September, 2001'  NA         MX_NE                       26.457
+'September, 2001'  NA         MX_SS                        3.542
+'September, 2001'  AD         MX_SS                       47.723
+'October, 2001'    NA         MX_NE                       29.376
+'October, 2001'    NA         MX_SS                        4.836
+'October, 2001'    AD         MX_SS                       46.313
+'November, 2001'   NA         MX_NE                       30.543
+'November, 2001'   NA         MX_SS                        4.620
+'November, 2001'   AD         MX_SS                       45.763
+'December, 2001'   NA         MX_NE                       31.387
+'December, 2001'   NA         MX_SS                        4.736
+'December, 2001'   AD         MX_SS                       55.795
+'January, 2002'    NA         MX_NE                       31.223
+'January, 2002'    NA         MX_SS                        4.697
+'January, 2002'    AD         MX_SS                       55.367
+'February, 2002'   NA         MX_NE                       28.773
+'February, 2002'   NA         MX_SS                        4.338
+'February, 2002'   AD         MX_SS                       47.208
+'March, 2002'      NA         MX_NE                       31.294
+'March, 2002'      NA         MX_SS                        4.986
+'March, 2002'      AD         MX_SS                       52.676
+'April, 2002'      NA         MX_NE                       30.664
+'April, 2002'      NA         MX_SS                        5.001
+'April, 2002'      AD         MX_SS                       51.768
+'May, 2002'        NA         MX_NE                       31.878
+'May, 2002'        NA         MX_SS                        5.143
+'May, 2002'        AD         MX_SS                       52.617
+'June, 2002'       NA         MX_NE                       30.351
+'June, 2002'       NA         MX_SS                        5.170
+'June, 2002'       AD         MX_SS                       50.347
+'July, 2002'       NA         MX_NE                       31.278
+'July, 2002'       NA         MX_SS                        4.977
+'July, 2002'       AD         MX_SS                       52.517
+'August, 2002'     NA         MX_NE                       31.204
+'August, 2002'     NA         MX_SS                        6.053
+'August, 2002'     AD         MX_SS                       52.110
+'September, 2002'  NA         MX_NE                       29.118
+'September, 2002'  NA         MX_SS                        5.953
+'September, 2002'  AD         MX_SS                       48.179
+'October, 2002'    NA         MX_NE                       30.528
+'October, 2002'    NA         MX_SS                        6.097
+'October, 2002'    AD         MX_SS                       48.888
+'November, 2002'   NA         MX_NE                       29.601
+'November, 2002'   NA         MX_SS                        5.830
+'November, 2002'   AD         MX_SS                       48.328
+'December, 2002'   NA         MX_NE                       31.607
+'December, 2002'   NA         MX_SS                        6.316
+'December, 2002'   AD         MX_SS                       51.425
+'January, 2003'    NA         MX_NE                       31.740
+'January, 2003'    NA         MX_SS                        6.178
+'January, 2003'    AD         MX_SS                       54.446
+'February, 2003'   NA         MX_NE                       28.405
+'February, 2003'   NA         MX_SS                        5.549
+'February, 2003'   AD         MX_SS                       50.963
+'March, 2003'      NA         MX_NE                       31.843
+'March, 2003'      NA         MX_SS                        6.074
+'March, 2003'      AD         MX_SS                       56.047
+'April, 2003'      NA         MX_NE                       30.586
+'April, 2003'      NA         MX_SS                        5.589
+'April, 2003'      AD         MX_SS                       52.414
+'May, 2003'        NA         MX_NE                       31.466
+'May, 2003'        NA         MX_SS                        6.425
+'May, 2003'        AD         MX_SS                       54.169
+'June, 2003'       NA         MX_NE                       30.961
+'June, 2003'       NA         MX_SS                        4.914
+'June, 2003'       AD         MX_SS                       53.793
+'July, 2003'       NA         MX_NE                       32.251
+'July, 2003'       NA         MX_SS                        7.645
+'July, 2003'       AD         MX_SS                       56.777
+'August, 2003'     NA         MX_NE                       32.006
+'August, 2003'     NA         MX_SS                        8.073
+'August, 2003'     AD         MX_SS                       56.101
+'September, 2003'  NA         MX_NE                       31.163
+'September, 2003'  NA         MX_SS                        7.616
+'September, 2003'  AD         MX_SS                       53.071
+'October, 2003'    NA         MX_NE                       32.610
+'October, 2003'    NA         MX_SS                        7.931
+'October, 2003'    AD         MX_SS                       57.212
+'November, 2003'   NA         MX_NE                       30.242
+'November, 2003'   NA         MX_SS                        8.884
+'November, 2003'   AD         MX_SS                       54.171
+'December, 2003'   NA         MX_NE                       32.928
+'December, 2003'   NA         MX_SS                        9.751
+'December, 2003'   AD         MX_SS                       58.460
+'January, 2004'    NA         MX_NE                       33.042
+'January, 2004'    NA         MX_SS                        9.815
+'January, 2004'    AD         MX_SS                       58.317
+'February, 2004'   NA         MX_NE                       30.592
+'February, 2004'   NA         MX_SS                        9.137
+'February, 2004'   AD         MX_SS                       54.212
+'March, 2004'      NA         MX_NE                       33.354
+'March, 2004'      NA         MX_SS                        9.683
+'March, 2004'      AD         MX_SS                       59.870
+'April, 2004'      NA         MX_NE                       32.714
+'April, 2004'      NA         MX_SS                        9.564
+'April, 2004'      AD         MX_SS                       59.873
+'May, 2004'        NA         MX_NE                       33.904
+'May, 2004'        NA         MX_SS                       10.508
+'May, 2004'        AD         MX_SS                       59.097
+'June, 2004'       NA         MX_NE                       32.368
+'June, 2004'       NA         MX_SS                        8.874
+'June, 2004'       AD         MX_SS                       58.444
+'July, 2004'       NA         MX_NE                       34.304
+'July, 2004'       NA         MX_SS                       10.097
+'July, 2004'       AD         MX_SS                       57.144
+'August, 2004'     NA         MX_NE                       34.503
+'August, 2004'     NA         MX_SS                       10.354
+'August, 2004'     AD         MX_SS                       57.070
+'September, 2004'  NA         MX_NE                       33.445
+'September, 2004'  NA         MX_SS                       10.611
+'September, 2004'  AD         MX_SS                       56.604
+'October, 2004'    NA         MX_NE                       34.490
+'October, 2004'    NA         MX_SS                       11.475
+'October, 2004'    AD         MX_SS                       58.658
+'November, 2004'   NA         MX_NE                       33.432
+'November, 2004'   NA         MX_SS                       11.078
+'November, 2004'   AD         MX_SS                       56.884
+'December, 2004'   NA         MX_NE                       34.441
+'December, 2004'   NA         MX_SS                       12.165
+'December, 2004'   AD         MX_SS                       59.685
+'January, 2005'    NA         MX_NE                       34.942
+'January, 2005'    NA         MX_SS                       13.032
+'January, 2005'    AD         MX_SS                       58.503
+'February, 2005'   NA         MX_NE                       32.111
+'February, 2005'   NA         MX_SS                       13.057
+'February, 2005'   AD         MX_SS                       51.905
+'March, 2005'      NA         MX_NE                       36.153
+'March, 2005'      NA         MX_SS                       15.209
+'March, 2005'      AD         MX_SS                       55.855
+'April, 2005'      NA         MX_NE                       35.512
+'April, 2005'      NA         MX_SS                       15.355
+'April, 2005'      AD         MX_SS                       56.124
+'May, 2005'        NA         MX_NE                       37.472
+'May, 2005'        NA         MX_SS                       16.810
+'May, 2005'        AD         MX_SS                       58.841
+'June, 2005'       NA         MX_NE                       36.504
+'June, 2005'       NA         MX_SS                       16.355
+'June, 2005'       AD         MX_SS                       58.369
+'July, 2005'       NA         MX_NE                       37.895
+'July, 2005'       NA         MX_SS                       16.458
+'July, 2005'       AD         MX_SS                       53.871
+'August, 2005'     NA         MX_NE                       38.449
+'August, 2005'     NA         MX_SS                       16.989
+'August, 2005'     AD         MX_SS                       59.423
+'September, 2005'  NA         MX_NE                       37.603
+'September, 2005'  NA         MX_SS                       15.734
+'September, 2005'  AD         MX_SS                       57.996
+'October, 2005'    NA         MX_NE                       39.363
+'October, 2005'    NA         MX_SS                       16.488
+'October, 2005'    AD         MX_SS                       60.332
+'November, 2005'   NA         MX_NE                       38.217
+'November, 2005'   NA         MX_SS                       16.632
+'November, 2005'   AD         MX_SS                       57.341
+'December, 2005'   NA         MX_NE                       40.076
+'December, 2005'   NA         MX_SS                       17.752
+'December, 2005'   AD         MX_SS                       61.120
+'January, 2006'    NA         MX_NE                       40.181
+'January, 2006'    NA         MX_SS                       19.176
+'January, 2006'    AD         MX_SS                       63.947
+'February, 2006'   NA         MX_NE                       36.459
+'February, 2006'   NA         MX_SS                       17.347
+'February, 2006'   AD         MX_SS                       58.236
+'March, 2006'      NA         MX_NE                       40.635
+'March, 2006'      NA         MX_SS                       21.234
+'March, 2006'      AD         MX_SS                       63.764
+'April, 2006'      NA         MX_NE                       39.276
+'April, 2006'      NA         MX_SS                       23.030
+'April, 2006'      AD         MX_SS                       62.078
+'May, 2006'        NA         MX_NE                       41.077
+'May, 2006'        NA         MX_SS                       23.408
+'May, 2006'        AD         MX_SS                       63.375
+'June, 2006'       NA         MX_NE                       40.168
+'June, 2006'       NA         MX_SS                       22.774
+'June, 2006'       AD         MX_SS                       61.586
+'July, 2006'       NA         MX_NE                       41.336
+'July, 2006'       NA         MX_SS                       23.890
+'July, 2006'       AD         MX_SS                       65.854
+'August, 2006'     NA         MX_NE                       41.588
+'August, 2006'     NA         MX_SS                       26.661
+'August, 2006'     AD         MX_SS                       63.801
+'September, 2006'  NA         MX_NE                       40.348
+'September, 2006'  NA         MX_SS                       26.379
+'September, 2006'  AD         MX_SS                       60.085
+'October, 2006'    NA         MX_NE                       41.729
+'October, 2006'    NA         MX_SS                       27.260
+'October, 2006'    AD         MX_SS                       60.115
+'November, 2006'   NA         MX_NE                       40.521
+'November, 2006'   NA         MX_SS                       26.172
+'November, 2006'   AD         MX_SS                       53.060
+'December, 2006'   NA         MX_NE                       42.232
+'December, 2006'   NA         MX_SS                       28.408
+'December, 2006'   AD         MX_SS                       57.909
+'January, 2007'    NA         MX_NE                       42.618
+'January, 2007'    NA         MX_SS                       29.075
+'January, 2007'    AD         MX_SS                       61.891
+'February, 2007'   NA         MX_NE                       38.295
+'February, 2007'   NA         MX_SS                       27.021
+'February, 2007'   AD         MX_SS                       57.395
+'March, 2007'      NA         MX_NE                       43.300
+'March, 2007'      NA         MX_SS                       31.156
+'March, 2007'      AD         MX_SS                       64.528
+'April, 2007'      NA         MX_NE                       42.481
+'April, 2007'      NA         MX_SS                       30.042
+'April, 2007'      AD         MX_SS                       63.820
+'May, 2007'        NA         MX_NE                       44.269
+'May, 2007'        NA         MX_SS                       31.302
+'May, 2007'        AD         MX_SS                       62.851
+'June, 2007'       NA         MX_NE                       42.822
+'June, 2007'       NA         MX_SS                       31.560
+'June, 2007'       AD         MX_SS                       62.015
+'July, 2007'       NA         MX_NE                       44.201
+'July, 2007'       NA         MX_SS                       33.630
+'July, 2007'       AD         MX_SS                       59.901
+'August, 2007'     NA         MX_NE                       44.329
+'August, 2007'     NA         MX_SS                       33.689
+'August, 2007'     AD         MX_SS                       55.656
+'September, 2007'  NA         MX_NE                       42.913
+'September, 2007'  NA         MX_SS                       25.168
+'September, 2007'  AD         MX_SS                       53.988
+'October, 2007'    NA         MX_NE                       44.115
+'October, 2007'    NA         MX_SS                       33.281
+'October, 2007'    AD         MX_SS                       60.490
+'November, 2007'   NA         MX_NE                       42.739
+'November, 2007'   NA         MX_SS                       32.171
+'November, 2007'   AD         MX_SS                       62.900
+'December, 2007'   NA         MX_NE                       43.216
+'December, 2007'   NA         MX_SS                       33.499
+'December, 2007'   AD         MX_SS                       65.687
+'January, 2008'    NA         MX_NE                       42.993
+'January, 2008'    NA         MX_SS                       33.265
+'January, 2008'    AD         MX_SS                       59.127
+'February, 2008'   NA         MX_NE                       40.217
+'February, 2008'   NA         MX_SS                       30.750
+'February, 2008'   AD         MX_SS                       53.799
+'March, 2008'      NA         MX_NE                       43.271
+'March, 2008'      NA         MX_SS                       32.963
+'March, 2008'      AD         MX_SS                       60.757
+'April, 2008'      NA         MX_NE                       42.481
+'April, 2008'      NA         MX_SS                       31.806
+'April, 2008'      AD         MX_SS                       57.890
+'May, 2008'        NA         MX_NE                       42.966
+'May, 2008'        NA         MX_SS                       32.519
+'May, 2008'        AD         MX_SS                       62.475
+'June, 2008'       NA         MX_NE                       41.257
+'June, 2008'       NA         MX_SS                       31.191
+'June, 2008'       AD         MX_SS                       58.191
+'July, 2008'       NA         MX_NE                       42.210
+'July, 2008'       NA         MX_SS                       31.965
+'July, 2008'       AD         MX_SS                       60.966
+'August, 2008'     NA         MX_NE                       42.377
+'August, 2008'     NA         MX_SS                       31.723
+'August, 2008'     AD         MX_SS                       59.758
+'September, 2008'  NA         MX_NE                       40.537
+'September, 2008'  NA         MX_SS                       30.337
+'September, 2008'  AD         MX_SS                       58.380
+'October, 2008'    NA         MX_NE                       42.475
+'October, 2008'    NA         MX_SS                       29.950
+'October, 2008'    AD         MX_SS                       63.415
+'November, 2008'   NA         MX_NE                       41.966
+'November, 2008'   NA         MX_SS                       29.150
+'November, 2008'   AD         MX_SS                       58.972
+'December, 2008'   NA         MX_NE                       43.307
+'December, 2008'   NA         MX_SS                       29.764
+'December, 2008'   AD         MX_SS                       60.580
+'January, 2009'    NA         MX_NE                       43.846
+'January, 2009'    NA         MX_SS                       29.222
+'January, 2009'    AD         MX_SS                       61.455
+'February, 2009'   NA         MX_NE                       39.615
+'February, 2009'   NA         MX_SS                       25.419
+'February, 2009'   AD         MX_SS                       55.362
+'March, 2009'      NA         MX_NE                       44.804
+'March, 2009'      NA         MX_SS                       27.888
+'March, 2009'      AD         MX_SS                       63.687
+'April, 2009'      NA         MX_NE                       44.150
+'April, 2009'      NA         MX_SS                       26.162
+'April, 2009'      AD         MX_SS                       61.086
+'May, 2009'        NA         MX_NE                       46.780
+'May, 2009'        NA         MX_SS                       26.547
+'May, 2009'        AD         MX_SS                       62.809
+'June, 2009'       NA         MX_NE                       45.630
+'June, 2009'       NA         MX_SS                       25.059
+'June, 2009'       AD         MX_SS                       61.383
+'July, 2009'       NA         MX_NE                       47.509
+'July, 2009'       NA         MX_SS                       25.884
+'July, 2009'       AD         MX_SS                       63.342
+'August, 2009'     NA         MX_NE                       47.714
+'August, 2009'     NA         MX_SS                       25.968
+'August, 2009'     AD         MX_SS                       61.252
+'September, 2009'  NA         MX_NE                       45.996
+'September, 2009'  NA         MX_SS                       25.083
+'September, 2009'  AD         MX_SS                       57.609
+'October, 2009'    NA         MX_NE                       49.293
+'October, 2009'    NA         MX_SS                       25.575
+'October, 2009'    AD         MX_SS                       62.088
+'November, 2009'   NA         MX_NE                       48.156
+'November, 2009'   NA         MX_SS                       24.422
+'November, 2009'   AD         MX_SS                       58.457
+'December, 2009'   NA         MX_NE                       49.563
+'December, 2009'   NA         MX_SS                       25.691
+'December, 2009'   AD         MX_SS                       64.191
+'January, 2010'    NA         MX_NE                       49.581
+'January, 2010'    NA         MX_SS                       31.931
+'January, 2010'    AD         MX_SS                       77.418
+'February, 2010'   NA         MX_NE                       44.714
+'February, 2010'   NA         MX_SS                       29.299
+'February, 2010'   AD         MX_NE                        0.350
+'February, 2010'   AD         MX_SS                       69.564
+'March, 2010'      NA         MX_NE                       48.659
+'March, 2010'      NA         MX_SS                       31.801
+'March, 2010'      AD         MX_NE                        0.456
+'March, 2010'      AD         MX_SS                       78.255
+'April, 2010'      NA         MX_NE                       46.511
+'April, 2010'      NA         MX_SS                       30.703
+'April, 2010'      AD         MX_NE                        0.611
+'April, 2010'      AD         MX_SS                       75.716
+'May, 2010'        NA         MX_NE                       46.651
+'May, 2010'        NA         MX_SS                       32.291
+'May, 2010'        AD         MX_NE                        0.757
+'May, 2010'        AD         MX_SS                       78.007
+'June, 2010'       NA         MX_NE                       43.494
+'June, 2010'       NA         MX_SS                       30.687
+'June, 2010'       AD         MX_NE                        0.712
+'June, 2010'       AD         MX_SS                       75.344
+'July, 2010'       NA         MX_NE                       42.258
+'July, 2010'       NA         MX_SS                       31.042
+'July, 2010'       AD         MX_NE                        0.735
+'July, 2010'       AD         MX_SS                       77.826
+'August, 2010'     NA         MX_NE                       42.961
+'August, 2010'     NA         MX_SS                       31.502
+'August, 2010'     AD         MX_NE                        0.817
+'August, 2010'     AD         MX_SS                       78.622
+'September, 2010'  NA         MX_NE                       41.229
+'September, 2010'  NA         MX_SS                       30.061
+'September, 2010'  AD         MX_NE                        0.707
+'September, 2010'  AD         MX_SS                       75.767
+'October, 2010'    NA         MX_NE                       42.487
+'October, 2010'    NA         MX_SS                       29.627
+'October, 2010'    AD         MX_NE                        0.685
+'October, 2010'    AD         MX_SS                       78.807
+'November, 2010'   NA         MX_NE                       41.266
+'November, 2010'   NA         MX_SS                       26.852
+'November, 2010'   AD         MX_NE                        0.611
+'November, 2010'   AD         MX_SS                       76.964
+'December, 2010'   NA         MX_NE                       42.720
+'December, 2010'   NA         MX_SS                       28.875
+'December, 2010'   AD         MX_NE                        0.633
+'December, 2010'   AD         MX_SS                       79.890
+'January, 2011'    NA         MX_NE                       42.354
+'January, 2011'    NA         MX_SS                       29.315
+'January, 2011'    AD         MX_NE                        0.660
+'January, 2011'    AD         MX_SS                       82.125
+'February, 2011'   NA         MX_NE                       37.419
+'February, 2011'   NA         MX_SS                       26.148
+'February, 2011'   AD         MX_NE                        0.614
+'February, 2011'   AD         MX_SS                       73.084
+'March, 2011'      NA         MX_NE                       41.017
+'March, 2011'      NA         MX_SS                       28.433
+'March, 2011'      AD         MX_NE                        1.090
+'March, 2011'      AD         MX_SS                       80.861
+'April, 2011'      NA         MX_NE                       39.241
+'April, 2011'      NA         MX_SS                       26.776
+'April, 2011'      AD         MX_NE                        0.935
+'April, 2011'      AD         MX_SS                       78.414
+'May, 2011'        NA         MX_NE                       40.179
+'May, 2011'        NA         MX_SS                       27.323
+'May, 2011'        AD         MX_NE                        0.735
+'May, 2011'        AD         MX_SS                       81.821
+'June, 2011'       NA         MX_NE                       38.831
+'June, 2011'       NA         MX_SS                       26.155
+'June, 2011'       AD         MX_NE                        0.882
+'June, 2011'       AD         MX_SS                       78.777
+'July, 2011'       NA         MX_NE                       39.947
+'July, 2011'       NA         MX_SS                       26.322
+'July, 2011'       AD         MX_NE                        1.097
+'July, 2011'       AD         MX_SS                       79.662
+'August, 2011'     NA         MX_NE                       41.137
+'August, 2011'     NA         MX_SS                       26.253
+'August, 2011'     AD         MX_NE                        1.059
+'August, 2011'     AD         MX_SS                       81.973
+'September, 2011'  NA         MX_NE                       39.177
+'September, 2011'  NA         MX_SS                       24.471
+'September, 2011'  AD         MX_NE                        1.230
+'September, 2011'  AD         MX_SS                       77.687
+'October, 2011'    NA         MX_NE                       40.367
+'October, 2011'    NA         MX_SS                       24.881
+'October, 2011'    AD         MX_NE                        1.427
+'October, 2011'    AD         MX_SS                       80.415
+'November, 2011'   NA         MX_NE                       38.905
+'November, 2011'   NA         MX_SS                       23.814
+'November, 2011'   AD         MX_NE                        1.233
+'November, 2011'   AD         MX_SS                       76.162
+'December, 2011'   NA         MX_NE                       39.750
+'December, 2011'   NA         MX_SS                       24.186
+'December, 2011'   AD         MX_NE                        1.311
+'December, 2011'   AD         MX_SS                       80.998
+'January, 2012'    NA         MX_NE                       39.351
+'January, 2012'    NA         MX_SS                       23.745
+'January, 2012'    AD         MX_NE                        1.431
+'January, 2012'    AD         MX_SS                       82.577
+'February, 2012'   NA         MX_NE                       36.730
+'February, 2012'   NA         MX_SS                       22.170
+'February, 2012'   AD         MX_NE                        1.445
+'February, 2012'   AD         MX_SS                       75.639
+'March, 2012'      NA         MX_NE                       39.184
+'March, 2012'      NA         MX_SS                       22.939
+'March, 2012'      AD         MX_NE                        1.373
+'March, 2012'      AD         MX_SS                       81.588
+'April, 2012'      NA         MX_NE                       37.675
+'April, 2012'      NA         MX_SS                       21.599
+'April, 2012'      AD         MX_NE                        1.624
+'April, 2012'      AD         MX_SS                       80.157
+'May, 2012'        NA         MX_NE                       39.086
+'May, 2012'        NA         MX_SS                       22.043
+'May, 2012'        AD         MX_NE                        1.892
+'May, 2012'        AD         MX_SS                       81.277
+'June, 2012'       NA         MX_NE                       37.525
+'June, 2012'       NA         MX_SS                       20.744
+'June, 2012'       AD         MX_NE                        1.769
+'June, 2012'       AD         MX_SS                       78.496
+'July, 2012'       NA         MX_NE                       38.740
+'July, 2012'       NA         MX_SS                       21.453
+'July, 2012'       AD         MX_NE                        2.063
+'July, 2012'       AD         MX_SS                       79.075
+'August, 2012'     NA         MX_NE                       39.635
+'August, 2012'     NA         MX_SS                       20.870
+'August, 2012'     AD         MX_NE                        2.037
+'August, 2012'     AD         MX_SS                       81.480
+'September, 2012'  NA         MX_NE                       29.806
+'September, 2012'  NA         MX_SS                       20.305
+'September, 2012'  AD         MX_NE                        2.042
+'September, 2012'  AD         MX_SS                       81.052
+'October, 2012'    NA         MX_NE                       23.602
+'October, 2012'    NA         MX_SS                       21.251
+'October, 2012'    AD         MX_NE                        2.298
+'October, 2012'    AD         MX_SS                       85.236
+'November, 2012'   NA         MX_NE                       39.765
+'November, 2012'   NA         MX_SS                       20.141
+'November, 2012'   AD         MX_NE                        2.440
+'November, 2012'   AD         MX_SS                       79.608
+'December, 2012'   NA         MX_NE                       40.120
+'December, 2012'   NA         MX_SS                       20.521
+'December, 2012'   AD         MX_NE                        2.915
+'December, 2012'   AD         MX_SS                       76.201
+'January, 2013'    NA         MX_NE                       39.427
+'January, 2013'    NA         MX_SS                       20.205
+'January, 2013'    AD         MX_NE                        3.106
+'January, 2013'    AD         MX_SS                       81.100
+'February, 2013'   NA         MX_NE                       36.124
+'February, 2013'   NA         MX_SS                       17.943
+'February, 2013'   AD         MX_NE                        2.916
+'February, 2013'   AD         MX_SS                       71.864
+'March, 2013'      NA         MX_NE                       39.188
+'March, 2013'      NA         MX_SS                       19.398
+'March, 2013'      AD         MX_NE                        3.211
+'March, 2013'      AD         MX_SS                       80.978
+'April, 2013'      NA         MX_NE                       37.222
+'April, 2013'      NA         MX_SS                       17.786
+'April, 2013'      AD         MX_NE                        3.038
+'April, 2013'      AD         MX_SS                       74.466
+'May, 2013'        NA         MX_NE                       37.224
+'May, 2013'        NA         MX_SS                       17.896
+'May, 2013'        AD         MX_NE                        3.157
+'May, 2013'        AD         MX_SS                       75.068
+'June, 2013'       NA         MX_NE                       35.202
+'June, 2013'       NA         MX_SS                       16.997
+'June, 2013'       AD         MX_NE                        3.281
+'June, 2013'       AD         MX_SS                       78.242
+'July, 2013'       NA         MX_NE                       36.240
+'July, 2013'       NA         MX_SS                       17.816
+'July, 2013'       AD         MX_NE                        3.529
+'July, 2013'       AD         MX_SS                       82.515
+'August, 2013'     NA         MX_NE                       35.671
+'August, 2013'     NA         MX_SS                       17.667
+'August, 2013'     AD         MX_NE                        3.557
+'August, 2013'     AD         MX_SS                       85.560
+'September, 2013'  NA         MX_NE                       33.650
+'September, 2013'  NA         MX_SS                       16.882
+'September, 2013'  AD         MX_NE                        3.606
+'September, 2013'  AD         MX_SS                       82.621
+'October, 2013'    NA         MX_NE                       33.388
+'October, 2013'    NA         MX_SS                       17.392
+'October, 2013'    AD         MX_NE                        3.504
+'October, 2013'    AD         MX_SS                       82.821
+'November, 2013'   NA         MX_NE                       32.742
+'November, 2013'   NA         MX_SS                       16.623
+'November, 2013'   AD         MX_NE                        3.540
+'November, 2013'   AD         MX_SS                       79.632
+'December, 2013'   NA         MX_NE                       33.248
+'December, 2013'   NA         MX_SS                       17.420
+'December, 2013'   AD         MX_NE                        3.849
+'December, 2013'   AD         MX_SS                       81.220
+'January, 2014'    NA         MX_NE                       32.635
+'January, 2014'    NA         MX_SS                       17.213
+'January, 2014'    AD         MX_NE                        3.857
+'January, 2014'    AD         MX_SS                       81.753
+'February, 2014'   NA         MX_NE                       29.850
+'February, 2014'   NA         MX_SS                       15.414
+'February, 2014'   AD         MX_NE                        3.731
+'February, 2014'   AD         MX_SS                       73.199
+'March, 2014'      NA         MX_NE                       32.865
+'March, 2014'      NA         MX_SS                       17.082
+'March, 2014'      AD         MX_NE                        4.230
+'March, 2014'      AD         MX_SS                       83.663
+'April, 2014'      NA         MX_NE                       31.781
+'April, 2014'      NA         MX_SS                       16.664
+'April, 2014'      AD         MX_NE                        4.149
+'April, 2014'      AD         MX_SS                       77.660
+'May, 2014'        NA         MX_NE                       33.006
+'May, 2014'        NA         MX_SS                       17.101
+'May, 2014'        AD         MX_NE                        4.322
+'May, 2014'        AD         MX_SS                       79.419
+'June, 2014'       NA         MX_NE                       32.170
+'June, 2014'       NA         MX_SS                       17.094
+'June, 2014'       AD         MX_NE                        4.250
+'June, 2014'       AD         MX_SS                       76.812
+'July, 2014'       NA         MX_NE                       37.883
+'July, 2014'       NA         MX_SS                       17.940
+'July, 2014'       AD         MX_SS                       79.487
+'August, 2014'     NA         MX_NE                       38.224
+'August, 2014'     NA         MX_SS                       17.685
+'August, 2014'     AD         MX_SS                       81.191
+'September, 2014'  NA         MX_NE                       36.943
+'September, 2014'  NA         MX_SS                       17.229
+'September, 2014'  AD         MX_SS                       79.266
+'October, 2014'    NA         MX_NE                       39.140
+'October, 2014'    NA         MX_SS                       17.700
+'October, 2014'    AD         MX_SS                       83.903
+'November, 2014'   NA         MX_NE                       37.816
+'November, 2014'   NA         MX_SS                       16.233
+'November, 2014'   AD         MX_SS                       77.829
+'December, 2014'   NA         MX_NE                       38.804
+'December, 2014'   NA         MX_SS                       16.403
+'December, 2014'   AD         MX_SS                       79.795
+'January, 2015'    NA         MX_NE                       38.114
+'January, 2015'    NA         MX_SS                       16.431
+'January, 2015'    AD         MX_SS                       81.782
+'February, 2015'   NA         MX_NE                       34.342
+'February, 2015'   NA         MX_SS                       14.620
+'February, 2015'   AD         MX_SS                       73.050
+'March, 2015'      NA         MX_NE                       37.504
+'March, 2015'      NA         MX_SS                       15.533
+'March, 2015'      AD         MX_SS                       76.654
+'April, 2015'      NA         MX_NE                       35.307
+'April, 2015'      NA         MX_SS                       14.687
+'April, 2015'      AD         MX_SS                       66.758
+'May, 2015'        NA         MX_NE                       33.590
+'May, 2015'        NA         MX_SS                       15.024
+'May, 2015'        AD         MX_SS                       75.107
+'June, 2015'       NA         MX_NE                       33.405
+'June, 2015'       NA         MX_SS                       14.423
+'June, 2015'       AD         MX_SS                       71.394
+'July, 2015'       NA         MX_NE                       33.175
+'July, 2015'       NA         MX_SS                       14.807
+'July, 2015'       AD         MX_SS                       76.039
+'August, 2015'     NA         MX_NE                       32.039
+'August, 2015'     NA         MX_SS                       13.421
+'August, 2015'     AD         MX_SS                       77.107
+'September, 2015'  NA         MX_NE                       30.768
+'September, 2015'  NA         MX_SS                       13.741
+'September, 2015'  AD         MX_SS                       76.215
+'October, 2015'    NA         MX_NE                       31.420
+'October, 2015'    NA         MX_SS                       14.201
+'October, 2015'    AD         MX_SS                       82.055
+'November, 2015'   NA         MX_NE                       30.137
+'November, 2015'   NA         MX_SS                       13.437
+'November, 2015'   AD         MX_SS                       75.847
+'December, 2015'   NA         MX_NE                       31.320
+'December, 2015'   NA         MX_SS                       13.528
+'December, 2015'   AD         MX_SS                       77.407
+'January, 2016'    NA         MX_NE                       31.112
+'January, 2016'    NA         MX_SS                       13.362
+'January, 2016'    AD         MX_SS                       79.637
+'February, 2016'   NA         MX_NE                       28.971
+'February, 2016'   NA         MX_SS                       12.404
+'February, 2016'   AD         MX_SS                       68.709
+'March, 2016'      NA         MX_NE                       30.279
+'March, 2016'      NA         MX_SS                       12.614
+'March, 2016'      AD         MX_SS                       73.083
+'April, 2016'      NA         MX_NE                       28.761
+'April, 2016'      NA         MX_SS                       11.976
+'April, 2016'      AD         MX_SS                       68.970
+'May, 2016'        NA         MX_NE                       28.259
+'May, 2016'        NA         MX_SS                       12.189
+'May, 2016'        AD         MX_SS                       71.027
+'June, 2016'       NA         MX_NE                       26.491
+'June, 2016'       NA         MX_SS                       11.541
+'June, 2016'       AD         MX_SS                       71.315
+'July, 2016'       NA         MX_NE                       26.205
+'July, 2016'       NA         MX_SS                       11.752
+'July, 2016'       AD         MX_SS                       72.965
+'August, 2016'     NA         MX_NE                       25.027
+'August, 2016'     NA         MX_SS                       11.798
+'August, 2016'     AD         MX_SS                       71.783
+'September, 2016'  NA         MX_NE                       23.367
+'September, 2016'  NA         MX_SS                       11.174
+'September, 2016'  AD         MX_SS                       67.821
+'October, 2016'    NA         MX_NE                       23.601
+'October, 2016'    NA         MX_SS                       11.241
+'October, 2016'    AD         MX_SS                       72.095
+'November, 2016'   NA         MX_NE                       22.105
+'November, 2016'   NA         MX_SS                       10.666
+'November, 2016'   AD         MX_SS                       65.264
+'December, 2016'   NA         MX_NE                       22.276
+'December, 2016'   NA         MX_SS                       10.923
+'December, 2016'   AD         MX_SS                       65.169
+'January, 2017'    NA         MX_NE                       21.860
+'January, 2017'    NA         MX_SS                       10.753
+'January, 2017'    AD         MX_SS                       65.360
+'February, 2017'   NA         MX_NE                       19.551
+'February, 2017'   NA         MX_SS                        9.312
+'February, 2017'   AD         MX_SS                       61.646
+'March, 2017'      NA         MX_NE                       21.512
+'March, 2017'      NA         MX_SS                       10.293
+'March, 2017'      AD         MX_SS                       67.530
+'April, 2017'      NA         MX_NE                       20.951
+'April, 2017'      NA         MX_SS                        9.975
+'April, 2017'      AD         MX_SS                       65.602
+'May, 2017'        NA         MX_NE                       21.519
+'May, 2017'        NA         MX_SS                       10.198
+'May, 2017'        AD         MX_SS                       66.477
+'June, 2017'       NA         MX_NE                       21.189
+'June, 2017'       NA         MX_SS                        9.726
+'June, 2017'       AD         MX_SS                       64.039
+'July, 2017'       NA         MX_NE                       21.715
+'July, 2017'       NA         MX_SS                        9.747
+'July, 2017'       AD         MX_SS                       65.733
+'August, 2017'     NA         MX_NE                       21.730
+'August, 2017'     NA         MX_SS                        9.437
+'August, 2017'     AD         MX_SS                       64.217
+'September, 2017'  NA         MX_NE                       21.057
+'September, 2017'  NA         MX_SS                        8.737
+'September, 2017'  AD         MX_SS                       59.415
+'October, 2017'    NA         MX_NE                       21.776
+'October, 2017'    NA         MX_SS                        8.819
+'October, 2017'    AD         MX_SS                       59.478
+'November, 2017'   NA         MX_NE                       21.060
+'November, 2017'   NA         MX_SS                        8.311
+'November, 2017'   AD         MX_SS                       53.016
+'December, 2017'   NA         MX_NE                       21.292
+'December, 2017'   NA         MX_SS                        8.417
+'December, 2017'   AD         MX_SS                       53.321
+'January, 2018'    NA         MX_NE                       20.899
+'January, 2018'    NA         MX_SS                        9.242
+'January, 2018'    AD         MX_SS                       54.219
+'February, 2018'   NA         MX_NE                       18.683
+'February, 2018'   NA         MX_SS                        8.165
+'February, 2018'   AD         MX_SS                       47.700
+'March, 2018'      NA         MX_NE                       20.546
+'March, 2018'      NA         MX_SS                        9.125
+'March, 2018'      AD         MX_SS                       55.428
+'April, 2018'      NA         MX_NE                       19.554
+'April, 2018'      NA         MX_SS                        8.728
+'April, 2018'      AD         MX_SS                       52.364
+'May, 2018'        NA         MX_NE                       19.929
+'May, 2018'        NA         MX_SS                        8.865
+'May, 2018'        AD         MX_SS                       54.324
+'June, 2018'       NA         MX_NE                       18.764
+'June, 2018'       NA         MX_SS                        8.206
+'June, 2018'       AD         MX_SS                       53.405
+'July, 2018'       NA         MX_NE                       18.955
+'July, 2018'       NA         MX_SS                        7.950
+'July, 2018'       AD         MX_SS                       55.378
+'August, 2018'     NA         MX_NE                       18.775
+'August, 2018'     NA         MX_SS                        8.033
+'August, 2018'     AD         MX_SS                       53.668
+'September, 2018'  NA         MX_NE                       18.077
+'September, 2018'  NA         MX_SS                        7.824
+'September, 2018'  AD         MX_SS                       52.813
+'October, 2018'    NA         MX_NE                       18.816
+'October, 2018'    NA         MX_SS                        7.856
+'October, 2018'    AD         MX_SS                       53.515
+'November, 2018'   NA         MX_NE                       18.280
+'November, 2018'   NA         MX_SS                        7.267
+'November, 2018'   AD         MX_SS                       49.337
+'December, 2018'   NA         MX_NE                       18.966
+'December, 2018'   NA         MX_SS                        7.058
+'December, 2018'   AD         MX_SS                       50.516
+'January, 2019'    NA         MX_NE                       18.911
+'January, 2019'    NA         MX_SS                        7.229
+'January, 2019'    AD         MX_SS                       52.595
+'February, 2019'   NA         MX_NE                       16.920
+'February, 2019'   NA         MX_SS                        6.696
+'February, 2019'   AD         MX_SS                       45.669
+'March, 2019'      NA         MX_NE                       18.670
+'March, 2019'      NA         MX_SS                        6.952
+'March, 2019'      AD         MX_SS                       49.533
+'April, 2019'      NA         MX_NE                       17.839
+'April, 2019'      NA         MX_SS                        6.480
+'April, 2019'      AD         MX_SS                       47.377
+'May, 2019'        NA         MX_NE                       18.583
+'May, 2019'        NA         MX_SS                        6.677
+'May, 2019'        AD         MX_SS                       47.731
+'June, 2019'       NA         MX_NE                        0.112
+'June, 2019'       NA         MX_SS                       24.821
+'June, 2019'       AD         MX_SS                       47.433
+'July, 2019'       NA         MX_NE                        0.238
+'July, 2019'       NA         MX_SS                       27.036
+'July, 2019'       AD         MX_SS                       51.561
+'August, 2019'     NA         MX_NE                        0.236
+'August, 2019'     NA         MX_SS                       27.332
+'August, 2019'     AD         MX_SS                       51.323
+'September, 2019'  NA         MX_NE                        0.142
+'September, 2019'  NA         MX_SS                       26.482
+'September, 2019'  AD         MX_SS                       48.877
+'October, 2019'    NA         MX_NE                        0.044
+'October, 2019'    NA         MX_SS                       27.630
+'October, 2019'    AD         MX_SS                       48.276
+'November, 2019'   NA         MX_NE                        0.050
+'November, 2019'   NA         MX_SS                       26.776
+'November, 2019'   AD         MX_SS                       48.833
+'December, 2019'   NA         MX_NE                        0.082
+'December, 2019'   NA         MX_SS                       27.238
+'December, 2019'   AD         MX_SS                       47.924
+'January, 2020'    NA         MX_NE                       19.765
+'January, 2020'    NA         MX_SS                        7.321
+'January, 2020'    AD         MX_SS                       47.174
+'February, 2020'   NA         MX_NE                       18.378
+'February, 2020'   NA         MX_SS                        6.838
+'February, 2020'   AD         MX_SS                       41.867
+'March, 2020'      NA         MX_NE                       19.623
+'March, 2020'      NA         MX_SS                        7.011
+'March, 2020'      AD         MX_SS                       46.995
+'April, 2020'      NA         MX_NE                       18.810
+'April, 2020'      NA         MX_SS                        9.436
+'April, 2020'      AD         MX_SS                       44.256
+'May, 2020'        NA         MX_NE                       19.287
+'May, 2020'        NA         MX_SS                        9.368
+'May, 2020'        AD         MX_SS                       44.425
+'June, 2020'       NA         MX_NE                       18.269
+'June, 2020'       NA         MX_SS                       10.274
+'June, 2020'       AD         MX_SS                       42.129
+'July, 2020'       NA         MX_NE                       17.966
+'July, 2020'       NA         MX_SS                       11.261
+'July, 2020'       AD         MX_SS                       45.621
+'August, 2020'     NA         MX_NE                       17.479
+'August, 2020'     NA         MX_SS                       11.828
+'August, 2020'     AD         MX_SS                       46.221
+'September, 2020'  NA         MX_NE                       16.826
+'September, 2020'  NA         MX_SS                       11.206
+'September, 2020'  AD         MX_SS                       43.063
+'October, 2020'    NA         MX_NE                       17.317
+'October, 2020'    NA         MX_SS                       11.221
+'October, 2020'    AD         MX_SS                       41.789
+'November, 2020'   NA         MX_NE                       14.924
+'November, 2020'   NA         MX_SS                       11.440
+'November, 2020'   AD         MX_SS                       40.652
+'December, 2020'   NA         MX_NE                       15.320
+'December, 2020'   NA         MX_SS                       13.190
+'December, 2020'   AD         MX_SS                       39.147
+'January, 2021'    NA         MX_NE                       15.589
+'January, 2021'    NA         MX_SS                       13.618
+'January, 2021'    AD         MX_SS                       37.945
+'February, 2021'   NA         MX_NE                       14.082
+'February, 2021'   NA         MX_SS                       12.551
+'February, 2021'   AD         MX_SS                       32.409
+'March, 2021'      NA         MX_NE                       16.006
+'March, 2021'      NA         MX_SS                       13.376
+'March, 2021'      AD         MX_SS                       35.080
+'April, 2021'      NA         MX_NE                       15.228
+'April, 2021'      NA         MX_SS                       12.311
+'April, 2021'      AD         MX_SS                       33.411
+'May, 2021'        NA         MX_NE                       15.240
+'May, 2021'        NA         MX_SS                       12.852
+'May, 2021'        AD         MX_SS                       37.646
+'June, 2021'       NA         MX_NE                       14.563
+'June, 2021'       NA         MX_SS                       12.639
+'June, 2021'       AD         MX_SS                       38.719
+'July, 2021'       NA         MX_NE                       14.926
+'July, 2021'       NA         MX_SS                       12.945
+'July, 2021'       AD         MX_SS                       40.137
+'August, 2021'     NA         MX_NE                       15.066
+'August, 2021'     NA         MX_SS                       12.879
+'August, 2021'     AD         MX_SS                       43.145
+'September, 2021'  NA         MX_NE                       14.895
+'September, 2021'  NA         MX_SS                       12.583
+'September, 2021'  AD         MX_SS                       42.724
+'October, 2021'    NA         MX_NE                       15.215
+'October, 2021'    NA         MX_SS                       14.027
+'October, 2021'    AD         MX_SS                       40.299
+'November, 2021'   NA         MX_NE                       14.765
+'November, 2021'   NA         MX_SS                       13.719
+'November, 2021'   AD         MX_SS                       38.800
+'December, 2021'   NA         MX_NE                       15.059
+'December, 2021'   NA         MX_SS                       14.597
+'December, 2021'   AD         MX_SS                       41.882
+'January, 2022'    NA         MX_NE                       14.927
+'January, 2022'    NA         MX_SS                       14.742
+'January, 2022'    AD         MX_SS                       47.838
+'February, 2022'   NA         MX_NE                       13.340
+'February, 2022'   NA         MX_SS                       13.472
+'February, 2022'   AD         MX_SS                       42.764
+'March, 2022'      NA         MX_NE                       14.685
+'March, 2022'      NA         MX_SS                       15.369
+'March, 2022'      AD         MX_SS                       50.054
+'April, 2022'      NA         MX_NE                       13.956
+'April, 2022'      NA         MX_SS                       14.795
+'April, 2022'      AD         MX_SS                       45.762
+'May, 2022'        NA         MX_NE                       14.457
+'May, 2022'        NA         MX_SS                       15.178
+'May, 2022'        AD         MX_SS                       48.201
+'June, 2022'       NA         MX_NE                       14.104
+'June, 2022'       NA         MX_SS                       14.793
+'June, 2022'       AD         MX_SS                       47.757
+    ;
+ 
+Composite table:
+    year  mx       HistoricalAnnualProductionPemex
+!   ----  -----    -------------------------------
+    2000  MX_NE                            367.143
+    2000  MX_SS                            623.867
+    2001  MX_NE                            361.226
+    2001  MX_SS                            644.264
+    2002  MX_NE                            367.520
+    2002  MX_SS                            675.990
+    2003  MX_NE                            376.202
+    2003  MX_SS                            742.254
+    2004  MX_NE                            400.588
+    2004  MX_SS                            819.219
+    2005  MX_NE                            444.297
+    2005  MX_SS                            879.551
+    2006  MX_NE                            485.549
+    2006  MX_SS                           1019.550
+    2007  MX_NE                            515.298
+    2007  MX_SS                           1102.715
+    2008  MX_NE                            506.057
+    2008  MX_SS                           1089.693
+    2009  MX_NE                            553.055
+    2009  MX_SS                           1045.641
+    2010  MX_NE                            539.604
+    2010  MX_SS                           1286.853
+    2011  MX_NE                            490.597
+    2011  MX_SS                           1266.056
+    2012  MX_NE                            464.548
+    2012  MX_SS                           1220.168
+    2013  MX_NE                            469.620
+    2013  MX_SS                           1170.115
+    2014  MX_NE                            445.657
+    2014  MX_SS                           1157.732
+    2015  MX_NE                            401.120
+    2015  MX_SS                           1083.268
+    2016  MX_NE                            316.453
+    2016  MX_SS                            989.475
+    2017  MX_NE                            255.212
+    2017  MX_SS                            859.555
+    2018  MX_NE                            230.244
+    2018  MX_SS                            933.408
+    2019  MX_NE                             91.826
+    2019  MX_SS                            808.481
+    2020  MX_NE                            213.965
+    2020  MX_SS                            643.733
+    2021  MX_NE                            180.634
+    2021  MX_SS                            620.292
+    ;
+ 
+Composite table:
+    year    HistoricalTotalAnnualProductionPemex
+!   ----    ------------------------------------
+    2000                                 991.010
+    2001                                1005.490
+    2002                                1043.510
+    2003                                1118.456
+    2004                                1219.807
+    2005                                1323.847
+    2006                                1505.099
+    2007                                1618.013
+    2008                                1595.750
+    2009                                1598.696
+    2010                                1826.456
+    2011                                1756.653
+    2012                                1684.717
+    2013                                1639.735
+    2014                                1603.388
+    2015                                1484.388
+    2016                                1305.929
+    2017                                1114.767
+    2018                                 961.229
+    2019                                 900.307
+    2020                                 857.698
+    2021                                 800.926
+    ;
+

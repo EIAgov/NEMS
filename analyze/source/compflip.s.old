@@ -1,0 +1,4 @@
+# script to compile FLIP under AIX
+
+f90 -c flipmain.f flipmgt.f  fldictry.f  flfiles.f flkeywrd.f  \
+       flparse.f  flrand.f   flscreen.f  flstring.f

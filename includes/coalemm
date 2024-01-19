@@ -1,0 +1,788 @@
+!     $Header: m:/default/includes/RCS/coalemm,v 1.17 2017/06/16 19:31:09 pkc Exp $
+!
+!     Coal / EMM Module Data Transfers
+!
+      INTEGER NDRGG
+      PARAMETER(NDRGG = 16)
+      INTEGER NCLUT1
+      PARAMETER(NCLUT1 = 38)
+      INTEGER MX_UNITS
+      PARAMETER(MX_UNITS = 1800)
+      INTEGER MX_PRF
+      PARAMETER(MX_PRF = 500)
+      INTEGER MX_SUPPLY_CURVES
+      PARAMETER(MX_SUPPLY_CURVES = 41)
+      INTEGER MX_INTL_CURVES
+ 	   PARAMETER(MX_INTL_CURVES = 12)
+      INTEGER MX_CPS_CTYPES
+      PARAMETER(MX_CPS_CTYPES = 15)
+      INTEGER NRANK
+      PARAMETER(NRANK = MX_RANK)
+      INTEGER NPLNT
+      PARAMETER(NPLNT = ECP_D_DSP)
+      INTEGER NSTEP
+      PARAMETER(NSTEP = MX_ACI+1)
+      INTEGER MAX_SO2
+      PARAMETER(MAX_SO2 = 2)
+      INTEGER EMMCLSZ
+      PARAMETER(EMMCLSZ = MNUMYR * NDRGG  * NCLUT1 * 12          + &
+                          NSTEP * NRANK * NCLUT1 * MNUMYR * 1    + &
+                          NSTEP * NRANK * NCLUT1 * 3             + &
+                          MX_ACSS * 2                            + &
+                          MNUMYR                                 + &
+                          MNUMYR                                 + & 
+                          MNUMYR                                 + &
+                          MNUMYR                                 + &                          
+                          MNUMYR * MAX_SO2                       + &
+                          6 * MX_UNITS                           + &
+                          (MX_SUPPLY_CURVES + MX_INTL_CURVES) * MX_UNITS            + &
+                          (MX_SUPPLY_CURVES + MX_INTL_CURVES) * MX_UNITS            + &
+                          (MX_SUPPLY_CURVES + MX_INTL_CURVES) * MX_UNITS            + &
+                          MX_UNITS                               + &
+                          MX_UNITS                               + &
+                          MX_UNITS                               + &  
+                          MX_UNITS                               + &
+                          MX_UNITS                               + &                
+                          MX_UNITS                               + &                        
+                          7 * 1000                               + &
+                          NDRGG * 2                              + &
+                          MX_PRF * MNUMYR                        + &
+                          MX_PRF * MNUMYR                        + &
+                          MX_PRF * MNUMYR                        + &
+                          MX_PRF * MNUMYR                        + &
+                          MX_UNITS * MNUMYR                      + &
+                          MX_UNITS * MNUMYR                      + &
+                          MX_UNITS * MNUMYR                      + &
+                          NCOALTYP * NSREG                       + &
+                          MX_CPS_CTYPES * NSREG                  + &
+                          MX_SUPPLY_CURVES                       + &
+                          MX_SUPPLY_CURVES                       + &
+                          MX_SUPPLY_CURVES                       + &
+                          ECP_D_CAP * NRANK                        + &
+                          ECP_D_CAP * NRANK                        + &
+                          ECP_D_CAP * NRANK                        + & 
+                          ECP_D_CAP * NRANK                        + & 
+                          ECP_D_CAP                                + &
+                          ECP_D_CAP                                + &
+                          ECP_D_CAP                                + &
+                          NCLUT1 * NRANK                         + &
+                          NCLUT1 * NRANK                         + &
+                          NCLUT1 * NRANK                         + &
+                          NCLUT1 * NRANK                         + &
+                          NCLUT1 * NRANK                         + &
+                          NCLUT1 * NRANK                         + &
+                          10                                     + &
+                          MX_UNITS                               + & ! E_PTP                          
+                          2000                                   + & ! EG_RY
+                          2000                                   + & ! EG_IGRP
+                          1                                      + & ! EG_PLTS
+                          2000                                   + & ! EG_RG
+                          2000                                     ) ! EG_PTP
+
+
+
+!
+!     Information to Connect EMM Plant File and CMM Contract File via Coal Units
+!
+      CHARACTER*10 EMM_CL_UNITS(MX_UNITS)                 ! Plant ID and Unit ID Combination From EMM
+      CHARACTER*10 CMM_CL_UNITS(MX_UNITS)                 ! Plant ID and Unit ID Combination From CMM
+      REAL*4       R_CL_UNITS(5*MX_UNITS)                 ! Equivalence For Storage in Restart File
+
+!
+      EQUIVALENCE(R_CL_UNITS,EMM_CL_UNITS)
+!
+      REAL*4       CMM_CL_BTUS((MX_SUPPLY_CURVES + MX_INTL_CURVES),MX_UNITS)    ! Historical Coal Demands for Each Existing Coal Unit and Supply Curve (domestic & int'l)
+      INTEGER*4    CMM_CONT_INDX((MX_SUPPLY_CURVES  + MX_INTL_CURVES),MX_UNITS)  ! Identify Contract Profile Associated with Each Coal Units and Supply Curve (domestic & int'l)
+      INTEGER*4    CMM_TRANS_INDX((MX_SUPPLY_CURVES  + MX_INTL_CURVES),MX_UNITS) ! Identify Transportation Profile Associated with Each Coal Units and Supply Surve
+      INTEGER*4    CMM_SDV_INDX(MX_UNITS)                    ! Identify Subbitminous Diversity Profile Associated with Each Coal Units
+      INTEGER*4    CMM_LDV_INDX(MX_UNITS)                    ! Identify Lignite Diversity Profile Associated with Each Coal Units
+      INTEGER*4    NEW_SDV_INDX(NDRGG)                       ! Identify Subbitminous Diversity Profile Associated with New or Unidentified Coal Units 
+      INTEGER*4    NEW_LDV_INDX(NDRGG)                       ! Identify Lignite Diversity Profile Associated with New or Unidentified Coal Units
+      REAL*4       CMM_CONT_PRF(MX_PRF,MNUMYR)               ! Identify Contract Profile Associated with Each Coal Units
+      REAL*4       CMM_TRANS_PRF(MX_PRF,MNUMYR)              ! Identify Transportation Profile Associated with Each Coal Units
+      REAL*4       CMM_SDV_PRF(MX_PRF,MNUMYR)                ! Identify Subbitminous Diversity Profile Associated with Each Coal Units
+      REAL*4       CMM_LDV_PRF(MX_PRF,MNUMYR)                ! Identify Lignite Diversity Profile Associated with Each Coal Units
+      INTEGER*4    EMM_CL_ECPT(MX_UNITS,MNUMYR)              ! ECP Type for Each Coal Unit in Each Forecast Year
+      INTEGER*4    EMM_CL_CLRG(MX_UNITS)                     ! Coal Region for Each Coal Unit
+      REAL*4       EMM_CL_BTUs(MX_UNITS,MNUMYR)              ! BTUs of Demand for Each Coal Unit in Each Forecast Year
+      REAL*4       EMM_CL_CF(MX_UNITS,MNUMYR)                ! Capacity Factors for Each Coal Unit in Each Forecast Year
+      INTEGER*4    NUM_CMM_UNITS                             ! Number of Coal Units
+      INTEGER*4    NUM_CONT_PRF                              ! Number of Contract Profiles
+      INTEGER*4    NUM_TRANS_PRF                             ! Number of Transportation Profiles
+      INTEGER*4    NUM_SDV_PRF                               ! Number of Subbitminous Diversity Profiles
+      INTEGER*4    NUM_LDV_PRF                               ! Number of Lignite Diversity Profiles
+!
+!     MAP CDS Types or CPS Coal Types and Supply Region to Supply Curve and viceversa
+!
+      INTEGER*4 NUM_SC                                       ! Number of Supply Curves
+      INTEGER*4 MAP_CDS_SR_SC(NCOALTYP,NSREG)                ! Map CDS Coal Type and Supply Region to Supply Curve
+      INTEGER*4 MAP_CPS_SR_SC(MX_CPS_CTYPES,NSREG)           ! Map CPS Coal Type and Supply Region to Supply Curve
+      INTEGER*4 MAP_SC_SR(MX_SUPPLY_CURVES)                  ! Map Supply Curve to Supply Region
+      INTEGER*4 MAP_SC_CDS(MX_SUPPLY_CURVES)                 ! Map Supply Curve to CDS Coal Type
+      INTEGER*4 MAP_SC_CPS(MX_SUPPLY_CURVES)                 ! Map Supply Curve to CPS Coal Type
+
+! Retrofits collected from ECP to pass to CTS
+      REAL*4 E_RY(MX_UNITS)                  ! Year plant retrofitted in ECP
+      REAL*4 E_IGRP(MX_UNITS)                ! W_IGRP index for plant retrofitted in ECP
+      INTEGER*4 E_PLTS                       ! Number of retrofitted plants from ECP
+      REAL*4 E_PTP(MX_UNITS)                 ! Plant type of coal retrofit
+
+! Gas Retrofits collected from ECP to pass to CTS
+      REAL*4 EG_RY(2000)                    ! Year plant retrofitted in ECP      
+      REAL*4 EG_IGRP(2000)                  ! W_IGRP index for plant retrofitted in ECP
+      REAL*4 EG_PLTS                        ! Number of retrofitted plants from ECP           
+      REAL*4 EG_RG(2000)                    ! Fuel region of plant retrofitted in ECP
+      REAL*4 EG_PTP(2000)                   ! Plant type of gas retrofit
+
+! Retirements collected from ECP to pass to CTS
+      REAL*4 R_RY(MX_UNITS)                  ! Year coal plant retired in ECP
+      REAL*4 R_IGRP(MX_UNITS)                ! W_IGRP index for coal plant retired in ECP
+      INTEGER*4 R_PLTS                        ! Number of retired coal plants from ECP     
+
+! New CCS builds collected from ECP to pass to CTS
+      REAL*4 N_RY(1000)                    ! Year plant built in ECP
+      REAL*4 N_IGRP(1000)                  ! W_IGRP index for plant bult in ECP
+      INTEGER*4 N_PLTS                        ! Number of new builds from ECP
+      REAL*4 N_RG(1000)                    ! Region (NEMS or Fuel region?) of new build in ECP
+      REAL*4 N_HRAT(1000)                      ! Heatrate of new CCS build
+      REAL*4 N_CPTY(1000)                     ! Capacity  of new CCS build
+      REAL*4 N_CFR(1000)                      ! Capacity Factor of new CCS build
+      REAL*4 N_PTP(1000)                     ! Plant type of new CCS build     
+      REAL*4 C_DR(MNUMYR)                    ! Discount Rate - Capture
+      REAL*4 T_DR(MNUMYR)                    ! Discount Rate - Transport
+      REAL*4 S_DR(MNUMYR)                    ! Discount Rate - Storage
+      
+      
+!
+!     Coal Demand at Coal Demand Regions by ECP Plant Type (Trillions of Btu)
+!
+      REAL QCLB1NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL QCLB2NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL QCLB3NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL QCLB4NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL QCLB5NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL QCLB6NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL QCLB7NR(NDRGG,MNUMYR) ! Demand for Coal at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL QCLB8NR(NDRGG,MNUMYR) ! Demand for Coal at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL QCLC1NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL QCLC2NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL QCLC3NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL QCLC4NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL QCLC5NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL QCLC6NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL QCLC7NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL QCLC8NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL QCLC9NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL QCLCXNR(NDRGG,MNUMYR) ! Demand for Coal at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL QCLCYNR(NDRGG,MNUMYR) ! Demand for Coal at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL QCLCZNR(NDRGG,MNUMYR) ! Demand for Coal at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL QCLH1NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL QCLH2NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL QCLH3NR(NDRGG,MNUMYR) ! Demand for Coal at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL QCLH4NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL QCLH5NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL QCLH6NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL QCLH7NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL QCLH8NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL QCLH9NR(NDRGG,MNUMYR) ! Demand for Coal at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL QCLHANR(NDRGG,MNUMYR) ! Demand for Coal at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL QCLHBNR(NDRGG,MNUMYR) ! Demand for Coal at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL QCLHCNR(NDRGG,MNUMYR) ! Demand for Coal at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL QCLPCNR(NDRGG,MNUMYR) ! Demand for Coal at New Pulverized Coal Generator       - ECP Code PC
+      REAL QCLOCNR(NDRGG,MNUMYR) ! Demand for Coal at Other New Coal Generator            - ECP Code OC
+      REAL QCLIGNR(NDRGG,MNUMYR) ! Demand for Coal at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL QCLI2NR(NDRGG,MNUMYR) ! Demand for Coal at IGCC with NG-Cofiring               - ECP Code I2
+      REAL QCLPQNR(NDRGG,MNUMYR) ! Demand for Coal at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL QCLISNR(NDRGG,MNUMYR) ! Demand for Coal at IGCC w/Sequestration                - ECP Code IS
+!
+!     Percent Removal of SO2 at Coal Demand Regions by ECP Plant Type
+!
+      REAL RCLB1NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL RCLB2NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL RCLB3NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL RCLB4NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL RCLB5NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL RCLB6NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL RCLB7NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL RCLB8NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL RCLC1NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL RCLC2NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL RCLC3NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL RCLC4NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL RCLC5NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL RCLC6NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL RCLC7NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL RCLC8NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL RCLC9NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL RCLCXNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL RCLCYNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL RCLCZNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL RCLH1NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL RCLH2NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL RCLH3NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL RCLH4NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL RCLH5NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL RCLH6NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL RCLH7NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL RCLH8NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL RCLH9NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL RCLHANR(NDRGG,MNUMYR) ! Percent Removal of SO2 at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL RCLHBNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL RCLHCNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL RCLPCNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at New Pulverized Coal Generator       - ECP Code PC
+      REAL RCLOCNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Other New Coal Generator            - ECP Code OC
+      REAL RCLIGNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL RCLI2NR(NDRGG,MNUMYR) ! Percent Removal of SO2 at IGCC with NG-Cofiring               - ECP Code I2
+      REAL RCLPQNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL RCLISNR(NDRGG,MNUMYR) ! Percent Removal of SO2 at IGCC w/Sequestration                - ECP Code IS
+!
+!     Average SO2 Content of Coal at Coal Demand Regions by ECP Plant Type (lbs/MMBtu)
+!
+      REAL SCLB1NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL SCLB2NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL SCLB3NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL SCLB4NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL SCLB5NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL SCLB6NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL SCLB7NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL SCLB8NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL SCLC1NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL SCLC2NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL SCLC3NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL SCLC4NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL SCLC5NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL SCLC6NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL SCLC7NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL SCLC8NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL SCLC9NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL SCLCXNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL SCLCYNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL SCLCZNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL SCLH1NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL SCLH2NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL SCLH3NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL SCLH4NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL SCLH5NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL SCLH6NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL SCLH7NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL SCLH8NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL SCLH9NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL SCLHANR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL SCLHBNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL SCLHCNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL SCLPCNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to New Pulverized Coal Generator       - ECP Code PC
+      REAL SCLOCNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Other New Coal Generator            - ECP Code OC
+      REAL SCLIGNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to Integrated Gas Comb Cycle           - ECP Code IG
+      REAL SCLI2NR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to IGCC with NG-Cofiring               - ECP Code I2
+      REAL SCLPQNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to IGCC with Partial Seequestration    - ECP Code PQ
+      REAL SCLISNR(NDRGG,MNUMYR) ! Average SO2 Content of Coal to IGCC w/Sequestration                - ECP Code IS
+!
+!     Average Carbon Content of Coal at Coal Demand Regions by ECP Plant Type (MMTC/QUAD)
+!
+      REAL CCLB1NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL CCLB2NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL CCLB3NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL CCLB4NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL CCLB5NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL CCLB6NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL CCLB7NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL CCLB8NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL CCLC1NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL CCLC2NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL CCLC3NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL CCLC4NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL CCLC5NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL CCLC6NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL CCLC7NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL CCLC8NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL CCLC9NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL CCLCXNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL CCLCYNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL CCLCZNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL CCLH1NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL CCLH2NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL CCLH3NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL CCLH4NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL CCLH5NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL CCLH6NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL CCLH7NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL CCLH8NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL CCLH9NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL CCLHANR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL CCLHBNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL CCLHCNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL CCLPCNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to New Pulverized Coal Generator       - ECP Code PC
+      REAL CCLOCNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Other New Coal Generator            - ECP Code OC
+      REAL CCLIGNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to Integrated Gas Comb Cycle           - ECP Code IG
+      REAL CCLI2NR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to IGCC with NG-Cofiring               - ECP Code I2
+      REAL CCLPQNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to IGCC with Partial Seequestration    - ECP Code PQ
+      REAL CCLISNR(NDRGG,MNUMYR) ! Average Carbon Content of Coal to IGCC w/Sequestration                - ECP Code IS
+!
+!     Percent Removal of Carbon at Coal Demand Regions by Plant Type
+!
+      REAL XCLB1NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL XCLB2NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL XCLB3NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL XCLB4NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL XCLB5NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL XCLB6NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL XCLB7NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL XCLB8NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL XCLC1NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL XCLC2NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL XCLC3NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL XCLC4NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL XCLC5NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL XCLC6NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL XCLC7NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL XCLC8NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL XCLC9NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL XCLCXNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL XCLCYNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL XCLCZNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL XCLH1NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL XCLH2NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL XCLH3NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL XCLH4NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL XCLH5NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL XCLH6NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL XCLH7NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL XCLH8NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL XCLH9NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL XCLHANR(NDRGG,MNUMYR) ! Percent Removal of Carbon at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL XCLHBNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL XCLHCNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL XCLPCNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at New Pulverized Coal Generator       - ECP Code PC
+      REAL XCLOCNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Other New Coal Generator            - ECP Code OC
+      REAL XCLIGNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL XCLI2NR(NDRGG,MNUMYR) ! Percent Removal of Carbon at IGCC with NG-Cofiring               - ECP Code I2
+      REAL XCLPQNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL XCLISNR(NDRGG,MNUMYR) ! Percent Removal of Carbon at IGCC w/Sequestration                - ECP Code IS
+!
+!     Average Btu Content of Coal at Coal Demand Regions by ECP Plant Type (MMBtu/Short Ton)
+!
+      REAL BCLB1NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL BCLB2NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL BCLB3NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL BCLB4NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL BCLB5NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL BCLB6NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL BCLB7NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL BCLB8NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL BCLC1NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL BCLC2NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL BCLC3NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL BCLC4NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL BCLC5NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL BCLC6NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL BCLC7NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL BCLC8NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL BCLC9NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL BCLCXNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL BCLCYNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL BCLCZNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL BCLH1NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL BCLH2NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL BCLH3NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL BCLH4NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL BCLH5NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL BCLH6NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL BCLH7NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL BCLH8NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL BCLH9NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL BCLHANR(NDRGG,MNUMYR) ! Average Btu Content of Coal to D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL BCLHBNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL BCLHCNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL BCLPCNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to New Pulverized Coal Generator       - ECP Code PC
+      REAL BCLOCNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Other New Coal Generator            - ECP Code OC
+      REAL BCLIGNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to Integrated Gas Comb Cycle           - ECP Code IG
+      REAL BCLI2NR(NDRGG,MNUMYR) ! Average Btu Content of Coal to IGCC with NG-Cofiring               - ECP Code I2
+      REAL BCLPQNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to IGCC with Partial Seequestration    - ECP Code PQ
+      REAL BCLISNR(NDRGG,MNUMYR) ! Average Btu Content of Coal to IGCC w/Sequestration                - ECP Code IS
+
+!     SO2 Emissions from Non-Coal Generators (Millions of Tons of SO2)
+
+      REAL SO2OTHER(MNUMYR,MAX_SO2) ! Other SO2 Emissions
+
+!     Mercury Emission from Non-Coal Fired Units
+
+      REAL HGOTHER(MNUMYR)
+
+!     Average Mercury Content by Sector and Coal Rank
+
+      REAL HCLB1NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL HCLB2NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL HCLB3NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL HCLB4NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL HCLB5NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL HCLB6NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL HCLB7NR(NDRGG,MNUMYR) ! Mercury Content to Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL HCLB8NR(NDRGG,MNUMYR) ! Mercury Content to Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL HCLC1NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL HCLC2NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL HCLC3NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL HCLC4NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL HCLC5NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL HCLC6NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL HCLC7NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL HCLC8NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL HCLC9NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL HCLCXNR(NDRGG,MNUMYR) ! Mercury Content to D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL HCLCYNR(NDRGG,MNUMYR) ! Mercury Content to D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL HCLCZNR(NDRGG,MNUMYR) ! Mercury Content to D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL HCLH1NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL HCLH2NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL HCLH3NR(NDRGG,MNUMYR) ! Mercury Content to Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL HCLH4NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL HCLH5NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL HCLH6NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL HCLH7NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL HCLH8NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL HCLH9NR(NDRGG,MNUMYR) ! Mercury Content to W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL HCLHANR(NDRGG,MNUMYR) ! Mercury Content to D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL HCLHBNR(NDRGG,MNUMYR) ! Mercury Content to D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL HCLHCNR(NDRGG,MNUMYR) ! Mercury Content to D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL HCLPCNR(NDRGG,MNUMYR) ! Mercury Content to New Pulverized Coal Generator       - ECP Code PC
+      REAL HCLOCNR(NDRGG,MNUMYR) ! Mercury Content to Other New Coal Generator            - ECP Code OC
+      REAL HCLIGNR(NDRGG,MNUMYR) ! Mercury Content to Integrated Gas Comb Cycle           - ECP Code IG
+      REAL HCLI2NR(NDRGG,MNUMYR) ! Mercury Content to IGCC with NG-Cofiring               - ECP Code I2
+      REAL HCLPQNR(NDRGG,MNUMYR) ! Mercury Content to IGCC with Partial Seequestration    - ECP Code PQ
+      REAL HCLISNR(NDRGG,MNUMYR) ! Mercury Content to IGCC w/Sequestration                - ECP Code IS
+
+!     Average Mercury Removal Rate by Sector and Coal Rank
+
+      REAL GCLB1NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL GCLB2NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL GCLB3NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL GCLB4NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL GCLB5NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL GCLB6NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL GCLB7NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL GCLB8NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL GCLC1NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL GCLC2NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL GCLC3NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL GCLC4NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL GCLC5NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL GCLC6NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL GCLC7NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL GCLC8NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL GCLC9NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL GCLCXNR(NDRGG,MNUMYR) ! Mercury Removal Rate at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL GCLCYNR(NDRGG,MNUMYR) ! Mercury Removal Rate at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL GCLCZNR(NDRGG,MNUMYR) ! Mercury Removal Rate at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL GCLH1NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL GCLH2NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL GCLH3NR(NDRGG,MNUMYR) ! Mercury Removal Rate at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL GCLH4NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL GCLH5NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL GCLH6NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL GCLH7NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL GCLH8NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL GCLH9NR(NDRGG,MNUMYR) ! Mercury Removal Rate at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL GCLHANR(NDRGG,MNUMYR) ! Mercury Removal Rate at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL GCLHBNR(NDRGG,MNUMYR) ! Mercury Removal Rate at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL GCLHCNR(NDRGG,MNUMYR) ! Mercury Removal Rate at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL GCLPCNR(NDRGG,MNUMYR) ! Mercury Removal Rate at New Pulverized Coal Generator       - ECP Code PC
+      REAL GCLOCNR(NDRGG,MNUMYR) ! Mercury Removal Rate at Other New Coal Generator            - ECP Code OC
+      REAL GCLIGNR(NDRGG,MNUMYR) ! Mercury Removal Rate at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL GCLI2NR(NDRGG,MNUMYR) ! Mercury Removal Rate at IGCC with NG-Cofiring               - ECP Code I2
+      REAL GCLPQNR(NDRGG,MNUMYR) ! Mercury Removal Rate at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL GCLISNR(NDRGG,MNUMYR) ! Mercury Removal Rate at IGCC w/Sequestration                - ECP Code IS
+
+!     Price Component for SO2 Compliance
+
+      REAL PSLB1NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL PSLB2NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL PSLB3NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL PSLB4NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL PSLB5NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL PSLB6NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL PSLB7NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL PSLB8NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL PSLC1NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL PSLC2NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL PSLC3NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL PSLC4NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL PSLC5NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL PSLC6NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL PSLC7NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL PSLC8NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL PSLC9NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL PSLCXNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL PSLCYNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL PSLCZNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL PSLH1NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL PSLH2NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL PSLH3NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL PSLH4NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL PSLH5NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL PSLH6NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL PSLH7NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL PSLH8NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL PSLH9NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL PSLHANR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL PSLHBNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL PSLHCNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL PSLPCNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at New Pulverized Coal Generator       - ECP Code PC
+      REAL PSLOCNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Other New Coal Generator            - ECP Code OC
+      REAL PSLIGNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL PSLI2NR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at IGCC with NG-Cofiring               - ECP Code I2
+      REAL PSLPQNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL PSLISNR(NDRGG,MNUMYR) ! Price Component for SO2 Compliance at IGCC w/Sequestration                - ECP Code IS
+
+!     Price Component for Mercury Compliance
+
+      REAL PHGB1NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL PHGB2NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL PHGB3NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL PHGB4NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL PHGB5NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL PHGB6NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL PHGB7NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL PHGB8NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL PHGC1NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL PHGC2NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL PHGC3NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL PHGC4NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL PHGC5NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL PHGC6NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL PHGC7NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL PHGC8NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL PHGC9NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL PHGCXNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL PHGCYNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL PHGCZNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL PHGH1NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL PHGH2NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL PHGH3NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL PHGH4NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL PHGH5NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL PHGH6NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL PHGH7NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL PHGH8NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL PHGH9NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL PHGHANR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL PHGHBNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL PHGHCNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL PHGPCNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at New Pulverized Coal Generator       - ECP Code PC
+      REAL PHGOCNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Other New Coal Generator            - ECP Code OC
+      REAL PHGIGNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL PHGI2NR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at IGCC with NG-Cofiring               - ECP Code I2
+      REAL PHGPQNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL PHGISNR(NDRGG,MNUMYR) ! Price Component for Mercury Compliance at IGCC w/Sequestration                - ECP Code IS
+
+!     Price Component for Carbon Compliance
+
+      REAL PCAB1NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL PCAB2NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL PCAB3NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL PCAB4NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL PCAB5NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL PCAB6NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL PCAB7NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL PCAB8NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL PCAC1NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL PCAC2NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL PCAC3NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL PCAC4NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL PCAC5NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL PCAC6NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL PCAC7NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL PCAC8NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL PCAC9NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL PCACXNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL PCACYNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL PCACZNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL PCAH1NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL PCAH2NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL PCAH3NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL PCAH4NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL PCAH5NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL PCAH6NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL PCAH7NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL PCAH8NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL PCAH9NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL PCAHANR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL PCAHBNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL PCAHCNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL PCAPCNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at New Pulverized Coal Generator       - ECP Code PC
+      REAL PCAOCNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Other New Coal Generator            - ECP Code OC
+      REAL PCAIGNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at Integrated Gas Comb Cycle           - ECP Code IG
+      REAL PCAI2NR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at IGCC with NG-Cofiring               - ECP Code I2
+      REAL PCAPQNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at IGCC with Partial Seequestration    - ECP Code PQ
+      REAL PCAISNR(NDRGG,MNUMYR) ! Price Component for Carbon Compliance at IGCC w/Sequestration                - ECP Code IS
+
+!     Average Heatrates by ECP Plant Type
+
+      REAL HRTB1NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-BH -Any-      Coal Generators - ECP Code B1
+      REAL HRTB2NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+      REAL HRTB3NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-BH -   -      Coal Generators - ECP Code B3
+      REAL HRTB4NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-BH -   -SC    Coal Generators - ECP Code B4
+      REAL HRTB5NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-BH -SCR-      Coal Generators - ECP Code B5
+      REAL HRTB6NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+      REAL HRTB7NR(NDRGG,MNUMYR) ! Average Heatrate for Dry  -BH -Any-      Coal Generators - ECP Code B7
+      REAL HRTB8NR(NDRGG,MNUMYR) ! Average Heatrate for Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+      REAL HRTC1NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-CSE-Any-      Coal Generators - ECP Code C1
+      REAL HRTC2NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+      REAL HRTC3NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+      REAL HRTC4NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-CSE-   -      Coal Generators - ECP Code C4
+      REAL HRTC5NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+      REAL HRTC6NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+      REAL HRTC7NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+      REAL HRTC8NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+      REAL HRTC9NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+      REAL HRTCXNR(NDRGG,MNUMYR) ! Average Heatrate for D_scb-CSE-   -      Coal Generators - ECP Code CX
+      REAL HRTCYNR(NDRGG,MNUMYR) ! Average Heatrate for D_scb-CSE-   -   FF Coal Generators - ECP Code CY
+      REAL HRTCZNR(NDRGG,MNUMYR) ! Average Heatrate for D_scb-CSE-SCR-SC/FF Coal Generators - ECP Code CZ
+      REAL HRTH1NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-O/N-Any-      Coal Generators - ECP Code H1
+      REAL HRTH2NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-O/N-Any-   FF Coal Generators - ECP Code H2
+      REAL HRTH3NR(NDRGG,MNUMYR) ! Average Heatrate for Unscb-O/N-Any-SC/FF Coal Generators - ECP Code H3
+      REAL HRTH4NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-O/N-   -      Coal Generators - ECP Code H4
+      REAL HRTH5NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-O/N-   -   FF Coal Generators - ECP Code H5
+      REAL HRTH6NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-O/N-   -SC/FF Coal Generators - ECP Code H6
+      REAL HRTH7NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-O/N-SCR-      Coal Generators - ECP Code H7
+      REAL HRTH8NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-O/N-SCR-   FF Coal Generators - ECP Code H8
+      REAL HRTH9NR(NDRGG,MNUMYR) ! Average Heatrate for W_scb-O/N-SCR-SC/FF Coal Generators - ECP Code H9
+      REAL HRTHANR(NDRGG,MNUMYR) ! Average Heatrate for D_scb-O/N-Any-      Coal Generators - ECP Code HA
+      REAL HRTHBNR(NDRGG,MNUMYR) ! Average Heatrate for D_scb-O/N-Any-   FF Coal Generators - ECP Code HB
+      REAL HRTHCNR(NDRGG,MNUMYR) ! Average Heatrate for D_scb-O/N-Any-SC/FF Coal Generators - ECP Code HC
+      REAL HRTPCNR(NDRGG,MNUMYR) ! Average Heatrate for New Pulverized Coal Generator       - ECP Code PC
+      REAL HRTOCNR(NDRGG,MNUMYR) ! Average Heatrate for Other New Coal Generator            - ECP Code OC
+      REAL HRTIGNR(NDRGG,MNUMYR) ! Average Heatrate for Integrated Gas Comb Cycle           - ECP Code IG
+      REAL HRTI2NR(NDRGG,MNUMYR) ! Average Heatrate for IGCC with NG-Cofiring               - ECP Code I2
+      REAL HRTPQNR(NDRGG,MNUMYR) ! Average Heatrate for IGCC with Partial Seequestration    - ECP Code PQ
+      REAL HRTISNR(NDRGG,MNUMYR) ! Average Heatrate for IGCC w/Sequestration                - ECP Code IS
+
+!     Mercury Data for Activated Carbon Supply Curve
+
+      REAL    EMM_MEF(NSTEP,NRANK,NCLUT1)            ! Mercury Emission Factor by Plant Type, Coal Rank and Activated Carbon Step(1=>No ACI)
+      REAL    ACI_CST(NSTEP,NRANK,NCLUT1)            ! Equipment Cost per Trillion Btu of Coal for Activated Carbon Injection
+      REAL    ACI_QAC(NSTEP,NRANK,NCLUT1)            ! Activated Carbon Requirement per Trillion Btu of Coal for Activated Carbon Injection
+      REAL    P_AC_SC(MX_ACSS)                       ! Activated Carbon Cost $ per pound for each supply step
+      REAL    Q_AC_SC(MX_ACSS)                       ! Activated Carbon Supply pounds per supply step
+      INTEGER N_AC_SC                                ! Number of Activated Carbon Supply Steps
+      INTEGER ACI_OPT(NSTEP,NRANK,NCLUT1,MNUMYR)     ! Allowed ACI Options (0 => No , 1 => Yes)
+
+!     Mercury Emission Factors and Parameters Required to Calculate Activated Carbon Requirements
+
+      REAL    PLNT_EMF(ECP_D_CAP,NRANK)                ! Emission Modification Factor by Plant Type and Coal Rank
+      REAL    MIN_EMF(ECP_D_CAP,NRANK)                 ! Minimum Achievable Emission Modification Factor using ACI
+      REAL    ACI_OandM(ECP_D_CAP,NRANK)               ! Incremental O&M for ACI (87$/MWh)
+      INTEGER ACI_STEPS(ECP_D_CAP,NRANK)               ! Number of ACI Steps to Create
+      INTEGER HG_CHOICE(ECP_D_CAP)                     ! Choice of Input or Output Mercury Standard: 0=>None, 1=>Input Only, 2=>Output Only, 3=>Input or Output
+      INTEGER HG_CLASS(ECP_D_CAP)                      ! Mecury Compliance Class : 0=>NA, 1=>Existing Coal, 2=>New Conventional Coal, 3=>New IGCC and Other Coal
+      INTEGER ACI_FOM_SW(ECP_D_CAP)                    ! 2=> Include Capital Costs and Fixed O&M in Operates 1=> Just Variable Costs in Operates
+
+      REAL    FGD_FCTR(NCLUT1,NRANK)                 ! FGD Emission Factor
+      REAL    SCR_FCTR(NCLUT1,NRANK)                 ! SCR Emission Factor
+      REAL    PARM_A(NCLUT1,NRANK)                   ! PARAMETER A in ACI Calculation
+      REAL    PARM_B(NCLUT1,NRANK)                   ! PARAMETER B in ACI Calculation
+      REAL    PARM_C(NCLUT1,NRANK)                   ! PARAMETER C in ACI Calculation
+      REAL    PARM_D(NCLUT1,NRANK)                   ! PARAMETER D in ACI Calculation
+
+!     Coal EMM Common Block Declaration
+
+      COMMON/COALEMM/ QCLB1NR, QCLB2NR, QCLB3NR, QCLB4NR, QCLB5NR, QCLB6NR, QCLB7NR, QCLB8NR,                            &
+             QCLC1NR, QCLC2NR, QCLC3NR, QCLC4NR, QCLC5NR, QCLC6NR, QCLC7NR, QCLC8NR, QCLC9NR, QCLCXNR, QCLCYNR, QCLCZNR, &
+             QCLH1NR, QCLH2NR, QCLH3NR, QCLH4NR, QCLH5NR, QCLH6NR, QCLH7NR, QCLH8NR, QCLH9NR, QCLHANR, QCLHBNR, QCLHCNR, &
+             QCLPCNR, QCLOCNR, QCLIGNR, QCLI2NR, QCLPQNR, QCLISNR,                                                                                  &
+             RCLB1NR, RCLB2NR, RCLB3NR, RCLB4NR, RCLB5NR, RCLB6NR, RCLB7NR, RCLB8NR,                                     &
+             RCLC1NR, RCLC2NR, RCLC3NR, RCLC4NR, RCLC5NR, RCLC6NR, RCLC7NR, RCLC8NR, RCLC9NR, RCLCXNR, RCLCYNR, RCLCZNR, &
+             RCLH1NR, RCLH2NR, RCLH3NR, RCLH4NR, RCLH5NR, RCLH6NR, RCLH7NR, RCLH8NR, RCLH9NR, RCLHANR, RCLHBNR, RCLHCNR, &
+             RCLPCNR, RCLOCNR, RCLIGNR, RCLI2NR, RCLPQNR, RCLISNR,                                                                                  &
+             SCLB1NR, SCLB2NR, SCLB3NR, SCLB4NR, SCLB5NR, SCLB6NR, SCLB7NR, SCLB8NR,                                     &
+             SCLC1NR, SCLC2NR, SCLC3NR, SCLC4NR, SCLC5NR, SCLC6NR, SCLC7NR, SCLC8NR, SCLC9NR, SCLCXNR, SCLCYNR, SCLCZNR, &
+             SCLH1NR, SCLH2NR, SCLH3NR, SCLH4NR, SCLH5NR, SCLH6NR, SCLH7NR, SCLH8NR, SCLH9NR, SCLHANR, SCLHBNR, SCLHCNR, &
+             SCLPCNR, SCLOCNR, SCLIGNR, SCLI2NR, SCLPQNR, SCLISNR,                                                                                  &
+             CCLB1NR, CCLB2NR, CCLB3NR, CCLB4NR, CCLB5NR, CCLB6NR, CCLB7NR, CCLB8NR,                                     &
+             CCLC1NR, CCLC2NR, CCLC3NR, CCLC4NR, CCLC5NR, CCLC6NR, CCLC7NR, CCLC8NR, CCLC9NR, CCLCXNR, CCLCYNR, CCLCZNR, &
+             CCLH1NR, CCLH2NR, CCLH3NR, CCLH4NR, CCLH5NR, CCLH6NR, CCLH7NR, CCLH8NR, CCLH9NR, CCLHANR, CCLHBNR, CCLHCNR, &
+             CCLPCNR, CCLOCNR, CCLIGNR, CCLI2NR, CCLPQNR, CCLISNR,                                                                                  &
+             BCLB1NR, BCLB2NR, BCLB3NR, BCLB4NR, BCLB5NR, BCLB6NR, BCLB7NR, BCLB8NR,                                     &
+             BCLC1NR, BCLC2NR, BCLC3NR, BCLC4NR, BCLC5NR, BCLC6NR, BCLC7NR, BCLC8NR, BCLC9NR, BCLCXNR, BCLCYNR, BCLCZNR, &
+             BCLH1NR, BCLH2NR, BCLH3NR, BCLH4NR, BCLH5NR, BCLH6NR, BCLH7NR, BCLH8NR, BCLH9NR, BCLHANR, BCLHBNR, BCLHCNR, &
+             BCLPCNR, BCLOCNR, BCLIGNR, BCLI2NR, BCLPQNR, BCLISNR,                                                                                  &
+             XCLB1NR, XCLB2NR, XCLB3NR, XCLB4NR, XCLB5NR, XCLB6NR, XCLB7NR, XCLB8NR,                                     &
+             XCLC1NR, XCLC2NR, XCLC3NR, XCLC4NR, XCLC5NR, XCLC6NR, XCLC7NR, XCLC8NR, XCLC9NR, XCLCXNR, XCLCYNR, XCLCZNR, &
+             XCLH1NR, XCLH2NR, XCLH3NR, XCLH4NR, XCLH5NR, XCLH6NR, XCLH7NR, XCLH8NR, XCLH9NR, XCLHANR, XCLHBNR, XCLHCNR, &
+             XCLPCNR, XCLOCNR, XCLIGNR, XCLI2NR, XCLPQNR, XCLISNR,                                                                                  &
+             SO2OTHER,HGOTHER,                                                                                           &  
+             GCLB1NR, GCLB2NR, GCLB3NR, GCLB4NR, GCLB5NR, GCLB6NR, GCLB7NR, GCLB8NR,                                     &
+             GCLC1NR, GCLC2NR, GCLC3NR, GCLC4NR, GCLC5NR, GCLC6NR, GCLC7NR, GCLC8NR, GCLC9NR, GCLCXNR, GCLCYNR, GCLCZNR, &
+             GCLH1NR, GCLH2NR, GCLH3NR, GCLH4NR, GCLH5NR, GCLH6NR, GCLH7NR, GCLH8NR, GCLH9NR, GCLHANR, GCLHBNR, GCLHCNR, &
+             GCLPCNR, GCLOCNR, GCLIGNR, GCLI2NR, GCLPQNR, GCLISNR,                                                                                  &
+             PSLB1NR, PSLB2NR, PSLB3NR, PSLB4NR, PSLB5NR, PSLB6NR, PSLB7NR, PSLB8NR,                                     &
+             PSLC1NR, PSLC2NR, PSLC3NR, PSLC4NR, PSLC5NR, PSLC6NR, PSLC7NR, PSLC8NR, PSLC9NR, PSLCXNR, PSLCYNR, PSLCZNR, &
+             PSLH1NR, PSLH2NR, PSLH3NR, PSLH4NR, PSLH5NR, PSLH6NR, PSLH7NR, PSLH8NR, PSLH9NR, PSLHANR, PSLHBNR, PSLHCNR, &
+             PSLPCNR, PSLOCNR, PSLIGNR, PSLI2NR, PSLPQNR, PSLISNR,                                                                                  &
+             PHGB1NR, PHGB2NR, PHGB3NR, PHGB4NR, PHGB5NR, PHGB6NR, PHGB7NR, PHGB8NR,                                     &
+             PHGC1NR, PHGC2NR, PHGC3NR, PHGC4NR, PHGC5NR, PHGC6NR, PHGC7NR, PHGC8NR, PHGC9NR, PHGCXNR, PHGCYNR, PHGCZNR, &
+             PHGH1NR, PHGH2NR, PHGH3NR, PHGH4NR, PHGH5NR, PHGH6NR, PHGH7NR, PHGH8NR, PHGH9NR, PHGHANR, PHGHBNR, PHGHCNR, &
+             PHGPCNR, PHGOCNR, PHGIGNR, PHGI2NR, PHGPQNR, PHGISNR,                                                                                  &
+             PCAB1NR, PCAB2NR, PCAB3NR, PCAB4NR, PCAB5NR, PCAB6NR, PCAB7NR, PCAB8NR,                                     &
+             PCAC1NR, PCAC2NR, PCAC3NR, PCAC4NR, PCAC5NR, PCAC6NR, PCAC7NR, PCAC8NR, PCAC9NR, PCACXNR, PCACYNR, PCACZNR, &
+             PCAH1NR, PCAH2NR, PCAH3NR, PCAH4NR, PCAH5NR, PCAH6NR, PCAH7NR, PCAH8NR, PCAH9NR, PCAHANR, PCAHBNR, PCAHCNR, &
+             PCAPCNR, PCAOCNR, PCAIGNR, PCAI2NR, PCAPQNR, PCAISNR,                                                                                  &
+             HRTB1NR, HRTB2NR, HRTB3NR, HRTB4NR, HRTB5NR, HRTB6NR, HRTB7NR, HRTB8NR,                                     &
+             HRTC1NR, HRTC2NR, HRTC3NR, HRTC4NR, HRTC5NR, HRTC6NR, HRTC7NR, HRTC8NR, HRTC9NR, HRTCXNR, HRTCYNR, HRTCZNR, &
+             HRTH1NR, HRTH2NR, HRTH3NR, HRTH4NR, HRTH5NR, HRTH6NR, HRTH7NR, HRTH8NR, HRTH9NR, HRTHANR, HRTHBNR, HRTHCNR, &
+             HRTPCNR, HRTOCNR, HRTIGNR, HRTI2NR, HRTPQNR, HRTISNR,                                                                                  &
+             HCLB1NR, HCLB2NR, HCLB3NR, HCLB4NR, HCLB5NR, HCLB6NR, HCLB7NR, HCLB8NR,                                     & 
+             HCLC1NR, HCLC2NR, HCLC3NR, HCLC4NR, HCLC5NR, HCLC6NR, HCLC7NR, HCLC8NR, HCLC9NR, HCLCXNR, HCLCYNR, HCLCZNR, &
+             HCLH1NR, HCLH2NR, HCLH3NR, HCLH4NR, HCLH5NR, HCLH6NR, HCLH7NR, HCLH8NR, HCLH9NR, HCLHANR, HCLHBNR, HCLHCNR, &
+             HCLPCNR, HCLOCNR, HCLIGNR, HCLI2NR, HCLPQNR, HCLISNR,                                                                                  &
+             EMM_MEF, ACI_CST, ACI_QAC, P_AC_SC, Q_AC_SC, N_AC_SC, ACI_OPT, CMM_CL_BTUS, CMM_CONT_INDX,                  &
+             CMM_TRANS_INDX, CMM_SDV_INDX, CMM_LDV_INDX, NEW_SDV_INDX, NEW_LDV_INDX, CMM_CONT_PRF, CMM_TRANS_PRF, CMM_SDV_PRF,  &
+             E_RY, E_IGRP, E_PLTS,R_RY, R_IGRP, R_PLTS,  N_RY, N_IGRP, N_PLTS, N_RG, N_HRAT, N_CPTY, N_CFR, N_PTP,  &
+             C_DR, T_DR, S_DR,  &             
+             CMM_LDV_PRF, EMM_CL_ECPT, EMM_CL_BTUs, NUM_CMM_UNITS, NUM_CONT_PRF, NUM_TRANS_PRF, NUM_SDV_PRF,             &
+             NUM_LDV_PRF, MAP_CDS_SR_SC, MAP_CPS_SR_SC, MAP_SC_SR, MAP_SC_CDS, MAP_SC_CPS, NUM_SC, EMM_CL_CLRG,          &
+             EMM_CL_UNITS, CMM_CL_UNITS,                                                                                 &
+             PLNT_EMF, MIN_EMF, ACI_OandM, ACI_STEPS, HG_CHOICE, HG_CLASS, ACI_FOM_SW, FGD_FCTR, SCR_FCTR,               &
+             PARM_A, PARM_B, PARM_C, PARM_D, EMM_CL_CF, E_PTP, EG_RY, EG_IGRP, EG_PLTS, EG_RG, EG_PTP
+
+!     Equivalence for FILER
+
+      REAL EMMCLOUT(EMMCLSZ)
+      EQUIVALENCE (EMMCLOUT,QCLB1NR)
+
+!     Equivalence for MAIN to test for Convergence
+
+      REAL QCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Demands for Coal by ECP Plant Type
+      EQUIVALENCE(QCLCLNR,QCLB1NR)
+
+      REAL HCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Mercury Content for Coal by ECP Plant Type and Coal Rank
+      EQUIVALENCE(HCLCLNR,HCLB1NR)
+
+      REAL GCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Mercury Removal Rates for Coal by ECP Plant Type and Coal Rank
+      EQUIVALENCE(GCLCLNR,GCLB1NR)
+
+      REAL PSLCLNR(NDRGG,MNUMYR,NCLUT1) ! Price Component for SO2 Compliance
+      EQUIVALENCE(PSLCLNR,PSLB1NR)
+
+      REAL PHGCLNR(NDRGG,MNUMYR,NCLUT1) ! Price Component for Mercury Compliance
+      EQUIVALENCE(PHGCLNR,PHGB1NR)
+
+      REAL PCACLNR(NDRGG,MNUMYR,NCLUT1) ! Price Component for Carbon Compliance
+      EQUIVALENCE(PCACLNR,PCAB1NR)
+
+      REAL HRTCLNR(NDRGG,MNUMYR,NCLUT1) ! Average Heatrate
+      EQUIVALENCE(HRTCLNR,HRTB1NR)
+
+!     Equivalence to make it easier to work with arrays
+
+      REAL RCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Percent Removal by ECP Plant Type
+      EQUIVALENCE(RCLCLNR,RCLB1NR)
+
+      REAL SCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Average SO2 Content by ECP Plant Type
+      EQUIVALENCE(SCLCLNR,SCLB1NR)
+
+      REAL BCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Average Btu Content by ECP Plant Type
+      EQUIVALENCE(BCLCLNR,BCLB1NR)
+
+      REAL CCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Average carbon Content by ECP Plant Type
+      EQUIVALENCE(CCLCLNR,CCLB1NR)
+
+      REAL XCLCLNR(NDRGG,MNUMYR,NCLUT1) ! Combined Pct Carbon Removal by ECP Plant Type
+      EQUIVALENCE(XCLCLNR,XCLB1NR)

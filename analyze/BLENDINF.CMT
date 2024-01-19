@@ -1,0 +1,471 @@
+                                 BLENDINF.CMT
+
+        Comments on the Infeasible Blending Instances (A Case study)
+
+    This annotates the results from BLENDINF.EXC that are in BLENDINF.RPT
+    (see also the Laboratory Manual for Teaching LP with MODLER and
+    ANALYZE).  The objective of the case study is to understand how to
+    form a diagnosis.  A first step is to obtain an "isolation" of the
+    linear program.  This is a portion that reveals a causal structure,
+    such as an imbalance of supply and demand, inadvertant omission of
+    activities, or other causes.  The second step is to explain the
+    isolation, preferably in English.  We thus have:
+
+                     Diagnosis = Isolation + Explanation
+
+    Our intention is to move some of the art of analysis into the realm
+    of science.  Once we can understand the analysis process and how to
+    use information that can be obtained from ANALYZE, we can develop
+    rule files to do the same things.
+
+    The execution file, BLENDINF.EXC, simply executes very basic commands
+    to obtain information.  Each scenario begins with a display of its
+    schema table.  This can sometimes reveal the error, such as when an
+    entire class of activities was omitted from the instance (this will
+    appear with blank cells in the schema).
+
+    Method 0 begins merely by displaying infeasibilities.  There can be a
+    situation where this is enough, such as when a single row has all
+    non-negative coefficients, but its level is required to be positive
+    (and all activities have non-negative lower bounds).  Usually,
+    however, the problem is not so simple.  The rates of substitution are
+    shown, and this does give useful information in the scenarios below.
+
+    Method 1 uses the AGGREGAT command.  Method 2 uses successive bound
+    reduction with the REDUCE command.  Method 3 reads an IIS and lists
+    its constraints.  These are methods of isolation, and each requires
+    some additional analysis to form a diagnosis.  The quality of
+    information in each case is what is at issue, and we shall see how
+    each method helps.  The relevant reading is chapters 5 and 7 in the
+    ANALYZE Primer.  This particular case study is part of a larger one,
+    which is in the following.
+
+      H.J. Greenberg, 1992.  "An Empirical Analysis of Infeasibility
+          Diagnosis for Instances of Linear Programming Blending
+          Models," IMA Journal on Mathematics in Business, vol. 4.
+
+    Before discussing each scenario separately, here is a table of
+    results.
+
+                        ======== Method =========
+             Scenario   0       1       2       3
+             ========   =========================
+             BLENDCAP   M       I       F       M
+             BLENDDEM   M       F       F       M
+             BLENDINF   M       I      I-M      I
+             BLENDOMT   I       F       I       I
+             BLENDREV   I       F       I       I
+             BLENDSUP   I       F       F       I
+                        =========================
+                Legend: F = fails to give useful info
+                        M = gives useful info, but more analysis is
+                            needed to form diagnosis
+                        I = gives enough info to form a diagnosis with
+                            little or no additional analysis effort
+                       I-M = not quite as easy as I, but not as much
+                             effort as other M entries
+
+    One of the things this says is that the IIS approach (Method 3) never
+    fails. This is for two reasons.  First, it is a mathematical fact
+    that some constraint in the IIS must change (a bound or an equation)
+    because the subsystem is infeasible, itself.  Second, it is an
+    isolation in terms of original information (Method 1, for example,
+    gives an aggregate, so the coefficients are not original data.)
+
+    The IIS approach has an advantage over the IS approach, which is in
+    the execution file, FORMIS.EXC (you might try it on these LP's).  An
+    IS is simply an infeasible subsystem.  One can easily be obtained
+    from a Phase I solution associated with nonzero dual prices.  There
+    can be many IIS's, some disjoint from each other (eg, see WOODINFE,
+    described in Chapter 5 of the ANALYZE Primer).  The IS obtained from
+    FROMIS.EXC can contain the union of all IIS's, so it is typically worse
+    than the IIS approach when there are disjoint ones.  If you try it on
+    these problems, you will find that each IS is not only an IIS, but also
+    it is the same one that was obtained (and read with READIN IIS).  There
+    are other problems (see above reference), where the IIS obtained is a
+    smaller subsystem and hence a more localized isolation from which to
+    form a diagnosis.
+
+    A second message is that Method 1 often fails, and Method 2 is
+    erratic.  When Method 2 succeeds, however, it often provides the most
+    useful diagnosis because its causal chain answers the question, Why
+    does the infeasibility follow from original data in the constraints?
+    (This will become clear with the specific scenarios.)
+
+    Another message from the above table is that each method can
+    contribute useful information for some problems.  This suggests all
+    methods should be available for getting information from which
+    reasoning follows.  If a method fails, another method can be applied.
+    The order in which to try the methods depends on experiences and, to
+    a lesser extent, on computational effort.
+
+                            Scenario 1.  BLENDCAP
+
+    Method 0 shows one row is infeasible in the solution basis, namely
+    INFEAS01, and no column is infeasible.  Upon displaying the columns
+    listed in this row, we find that they have no explicit bounds.  Thus,
+    the displays, themselves, offer no information.  Now look at the rates
+    of substitution.  The balance rows are fixed at zero, so they cannot
+    change their level to decrease the level of row INFEAS01 (towards its
+    upper bound of -101).  The capacity rows have negative rates of
+    substitution, so they would have to increase their levels to decrease
+    the level of INFEAS01.  If you display them, you will find they are at
+    their upper bounds.  The same applies to row SUPMC, which appears next.
+    The rate of substitution for the operation of blend unit 02 (activity
+    OB02) is positive, and you can verify that it is already at its lower
+    bound of zero, so it cannot help.  The other two blend units have
+    negative rates of substitution and they are at their upper bounds, so
+    their levels cannot be increased.  Finally, the three primary unit
+    operation activities have positive rates of substitution, and they are
+    at their lower bounds of zero.
+
+    The information obtained from the rates of substitution is as follows.
+    First, the range of INFEAS01, given at the bottom of the rate table,
+    says that INFEAS01 >= -72.84, so it cannot satisfy its bound, INFEAS01
+    <= -101.  This is useful information, but to form a diagnosis, we must
+    focus on the 'Least Term' column of the rate table to answer why its
+    inferred lower bound is -72.84.
+
+    We suppose non-negativity constraints are not causal, as they are
+    logical constraints on the meanings of the variables.  We are left with
+    focusing on rows CAP01, CAP03, CAP04 and SUPMC plus activities OB03 and
+    OB04.  The DISPLAY command reveals they are at their upper bounds,
+    which happens to be 20 in each case.  Infeasibility is improved if any
+    of their upper bounds is increased, but we cannot guarantee feasibility
+    if this is done.  In general, the rates of substitution offer
+    information about marginal changes.  The most we can say from the
+    information is the following.
+
+       The lower bound on equation INFEAS01 cannot be achieved.  Only
+       -72.841 of the required -101 is achieved.  The following upper
+       bounds are preventing further decreases.
+
+       Row CAP01 limits capacity of 1st primary unit <= 20
+       Row CAP03 limits capacity of 1st primary unit <= 20
+       Row CAP04 limits capacity of 1st primary unit <= 20
+       Row SUPMC limits use of medium crude <= 20
+       Column OB03 operates 3rd blend unit <= 20
+       Column OB03 operates 4th blend unit <= 20
+
+    The English translations are obtained from the EXPLAIN command.  You
+    might also try the syntax format of the RATEOF command (enter
+    RAT R INFEAS //SYN).
+
+    Method 1 provides slightly better information to form a diagnosis.
+    The aggregate constraint requires at least 65.147, but the myopic
+    range is at most 36.988.  This is not really new information (see
+    chapter 7 in the ANALYZE Primer).  The real information is with the
+    nonzeroes that account for the myopic range.  Putting non-negativity
+    aside, the information can be used for the following diagnosis.
+
+       The constraints imply the following requirement for operating
+       blend units 03 and 04:
+                      1.272 OB03 + .5767 OB04 >= 65.147.
+       However, these activity levels are bounded by 20, so the left side
+       cannot exceed 36.988.
+
+    Method 2 detects infeasibility with the myopic range test, which is
+    based on the rate table used in Method 0.  The information is the same,
+    so a diagnosis would be something like the following:
+
+       The equations imply INFEAS01 equals
+
+      - 1.27 OB03 - .577 OB04 - .364 CAP01 - .182 CAP03 - 1.16 CAP04
+      - .091 SUPMC
+
+       Each of these activities has an upper bound of 20, so the least
+       value of INFEAS01 is -72.84 (approximately).  This violates the
+       upper bound:  INFEAS01 <= -101.
+
+    Method 3 gives a subsystem of the constraints that are infeasible
+    (and dropping any one of the constraints results in a feasible
+    subsystem).  If we focus on the upper bounds of the two activities,
+    OB03 and OB04, we can form a diagnosis as follows.
+
+       Blend units 03 and 04 have capacity limits of 20 each, which is
+       not enough to satisfy the following constraints.
+
+       Row BALGO balances gas oil.
+       Row BALHN balances heavy naphtha.
+       Row BALLN balances light naphtha.
+       Row CAP01 limits capacity of 1st primary unit <= 20
+       Row CAP03 limits capacity of 3rd primary unit <= 20
+       Row CAP04 limits capacity of 4th primary unit <= 20
+       Row INFEAS01 is a special row <= -101
+       Row SUPMC limits use of medium crude <= 20
+
+    The first sentence is formed from the upper bounds in the IIS, and
+    the rest is obtained from the EXPLAIN command for the IIS rows.
+
+                            Scenario 2.  BLENDDEM
+
+    Method 0 shows an infeasible row, namely DEMRG, and no infeasible
+    columns.  Upon listing this row, we find it has four blend unit
+    operation activities with upper bounds of 20 each and coefficient
+    values great enough to be feasible by itself.  So, more analysis is
+    needed to see why these activities cannot operate at great enough
+    levels to satisfy this demand (use DISPLAY and EXPLAIN to see info
+    about row DEMRG).  If you LIST DEMRG,* ; DISP C, you see the following.
+
+    15     <= DEMRG   =   0.6 OB01 +  0.6 OB02 +  0.4 OB03 +  0.5 OB04
+    COL      STAT  LEVEL (X)    LO_BOUND     UP_BOUND     PRICE (D)
+    -----------------------------------------------------------------
+    OB01      L         0            0           20.000   0.0823700
+    OB02      L         0            0           20.000   0.0996100
+    OB03      B        16.115        0           20.000        0
+    OB04      B        11.847        0           20.000        0
+
+    This is a good clue, for the problem seems to be that these operation
+    activities are implicitly constrained by constraints that are
+    stronger than these upper bounds.  In fact, the first two activity
+    levels are zero, which must mean that it is not feasible for them to
+    be positive.
+
+    Pursuing this with more analysis, we look at the rates of
+    substitution.  If we form a diagnosis by the same reasoning as
+    scenario 1, we would stop with the following.
+
+       The lower bound on DEMRG cannot be achieved.  Only 12.369
+       of the required 15 is achieved.  The following bounds are
+       preventing further increases.
+
+       Row CAP01 limits capacity of 1st primary unit <= 20
+       Row DEMFO demands fuel oil >= 10
+       Row DEMPG demands premium gasoline >= 10
+       Row INFEAS01 is a special row <= 489
+
+    Method 1 fails if we agree to ignore non-negativity constraints as
+    causal (as before).  The display says that the disjointedness of the
+    myopic range from the aggregate row range is that the maximum
+    achievable is 0, while the minimum required is 2.632.  The blockage
+    in the myopic range comes from the non-negativity on the variables
+    shown, so this reasoning comes to a halt.
+
+    Method 2 fails to detect infeasibility.
+
+    Method 3 gives approximately the same information as Method 0, and
+    the form of diagnosis is similar to that of scenario 1.
+
+                            Scenario 3.  BLENDINF
+
+    Method 0 shows 2 infeasible rows (CAP04 and DEMPG) and no infeasible
+    columns.  As before, the displays, themselves, do not reveal much.
+    They focus our attention, however, on these two rows, as we ask why
+    the capacity cannot be decreased from 24.87 to its limit of 10, and
+    why the demand requirement cannot be increased from 8.463 to its
+    required level of 10.
+
+    Looking at the rates of substitution for the capacity row, we find
+    some connections.  The capacity level can be decreased by any of the
+    following.
+
+        Increase level of row BALLN (currently = 0)
+        Decrease level of row DEMFO (currently = 10 = L)
+        Increase level of column OB01 (currently = 10 = U)
+        Increase level of column OB04 (currently = 10 = U)
+        Increase level of column OP04HC (currently = 0 = L).
+
+    The first effect says that we can decrease the capacity level by
+    increasing the level of the balance of light naphtha (use EXPLAIN
+    command to see what the rows and columns mean).  This balance row is
+    fixed at 0 by the model's logic, so it is discarded as containing
+    causal information.
+
+    The second effect suggests decreasing the demand for fuel oil, and
+    this is a candidate on which to focus.
+
+    The third effect suggests increasing the level of operating blend
+    unit 01.  This may seem surprising, but the capacity level we're
+    seeking to decrease applies to limiting operations of primary units
+    (04).  By increasing the blend unit operations, we can displace some
+    levels of operating primary units that produce the same product.  It
+    is not a good candidate to follow up, because if we assume row CAP04
+    is involved in the probable cause, we already know we can decrease
+    its level by displacing operation of primary unit 04.
+
+    The fourth effect follows the same reasoning as the third, so we do
+    not explore it.
+
+    The fifth effect is the most revealing.  Operation activity OP04HC
+    has zero level, so we might ask why it cannot increase (clearly, to
+    do so would cause other infeasibilities).  Picture this column, then
+    add its adjacent columns (by entering PIC *,OP04HC ; SUB COL * ; PIC).
+    Nothing seems wrong, so we must go much further.  Look at its rates of
+    substitution by entering RAT C OP04HC (maybe followed by //X to see
+    basic levels).  The result gives more information from which a
+    diagnosis can be formed.  In particular, note that it cannot exceed
+    .0966 due to the level of activity OB05.  This begins a chain that
+    leads to a diagnosis similar to what we find with the other methods
+    below (but with more effort).
+
+    Method 1 narrows things down to two activities:  OB01 and OB04.  The
+    diagnosis is now similar to scenario 1, and it is immediate from the
+    information given.  The diagnosis is:
+
+       The constraints imply the following requirement for operating
+       blend units 01 and 04:
+                       .806 OB01 + .791 OB04 >= 32.372.
+       However, these activity levels are bounded by 10, so the left side
+       cannot exceed 15.97.
+
+    Method 2 detects infeasibility with row BALHN.  Begin by listing the
+    row (L BALHN,*).  The computed range, given by the REDUCE output, is
+    negative, so we focus on the questions:  Why must activities OB01,
+    OB02 and OB04 operate at such high levels?  Why must activities
+    OP04MC and OP05MC operate at such low levels?  Using the REDUCE
+    output, which contains a log of the reductions, we can form the
+    following diagnosis.
+
+       Balance for light naphtha cannot be achieved due to the following.
+
+       1. Row CAP04 <= 10 implies Col OP04MC <= 10.
+       2. Row DEMPG >= 10, Col OB01 <= 10, Col OB03 <=12 and OB04 <= 10
+          imply Col OB02 >= .667.
+       3. Row BALHN = 0, Col OB01 <= 10, Col OB02 <= 15 and
+          Col OB04 <= 10 imply Col OP05MC <= 8.
+       4. Row BALHN = 0, Col OP05MC <= 8 and OP04MC <= 10 imply
+          Col OB01 <= 6.19 and Col OB02 <= 6.86.
+       5. Row BALHN = 0, Col OB01 <= 6.19, Col OB02 <= 6.86 and
+          Col OB04 <= 10 imply Col OP05MC <= 5.71.
+       6. DEMRG >= 15, Col OB02 <= 6.86, Col OB03 <= 12 and
+          Col OB04 <= 10 imply Col OB01 >= 1.81.
+
+       Here is a summary of the range analysis of row BALLN after
+       inferring bounds implied on its activities.
+
+                                 Relevant       Value of Term
+        Activity   Coefficient   Bound          (Coef * Bound)
+        OB01          -.70000    L= 1.8095        -1.2667
+        OB02          -.70000    L= 3.2063        -2.2444
+        OB04          -.20000    L= 6.3492        -1.2698
+        OP04MC         .40000    U= 10.000         4.0000
+        OP05MC         .10000    U= 5.7143         .57143
+                                           SUM =  -.20952
+
+    The table at the end of the diagnosis is what REDUCE produced,
+    and the causal chain is obtained from the log of reductions.
+
+    These statements could be replaced with English sentences, using the
+    EXPLAIN command, and a diaglog could commence to step through the
+    causal chain.  One starts with the final tables, and asks for an
+    explanation of the bounds.  The bound on OP04MC is the simplest to
+    explain because it comes immediately from its associated capacity limit
+    (row CAP04).  Each bound can be considered at a 'lowest level' (ie,
+    closest to the conclusion).  As other bounds enter the chain (eg, OB01
+    <= 6.19 is pertinent to the reduction of the bound on OP05MC because
+    they are both adjacent to row BALLN.
+
+    The causal chain could, in this case, be viewed graphically, as
+    follows.
+
+           (DEMPG > 10)---.
+                          |===>[OB02 > .67 ]--.
+           [OB*]----------'                   |
+                                              |
+           (DEMRG > 15)---.                   |
+                          |===>[OB01 > 1.8]---|
+           [OB*]----------'                   |===>[BALHN < -.2]===>INFEAS
+                                              |
+           (CAP04 < 10)=======>[OP*]----------|
+                                              |
+                          .==>[OP05MC < 5.7]--'
+        (OB04 < 10)----.  |
+        (BALHN = 0)----|--'
+    .-->[OB01 < 6.19]--|
+    |-->[OB02 < 6.86]--'
+    |
+    |---[OP*]
+    |---[OP05MC < 8]<==.--(BALHN = 0)
+    |                  `---[OB*]
+    `---(BALHN = 0)
+
+        OB* = (OB01 < 10) & (OB02 < 15) & (OB03 < 12) & (OB04 < 10)
+        OP* = [OP04MC < 10]<---(CAP04 < 10)
+
+       Legend:  (original bound) | [inferred bound]
+
+    The causal chain in the above diagnosis is its strength.  When this
+    method works, it gives a diagnosis, rather than just an isolation.
+
+    Method 3 gives the same activity upper bounds as Method 1 (OB01 and
+    OB04).  The IIS rows show the inconsistency in algebraic form.  A
+    diagnosis can be formed as in the other scenarios.  The diagnosis is
+    a bit different from Method 1.  They both focus on the blend unit
+    capacities, but Method 1 gives only the aggregate constraint implied
+    by the system, while Method 3 breaks it down into just those
+    constraints that are relevant.  If one is satisfied with this break
+    down, the diagnosis is immediate.  If not, more analysis is needed to
+    answer the question, Why are these bounds inconsistent with the
+    equations (and their bounds)?
+
+                            Scenario 4.  BLENDOMT
+
+    Even before Method 0, the schema reveals the (inadvertant) omission
+    of all activities that operate primary blend units (note the blanks
+    in the cells, indicating all zero coefficients).  Method 0 reveals
+    that demands cannot be satisfied.  Inspection of the equations also
+    reveals that there are no OP activities.  Without some knowledge that
+    these activities are necessary to provide blend stocks used by the
+    blend units (hence forcing their levels to zero to satisfy the
+    balance equations), the diagnosis is immediate.  On the other hand,
+    if this knowledge is not used, a bit more analysis is needed to
+    discover this.
+
+    Method 1 is of little use.  It merely says that the total system
+    requires:
+
+                        -.352 OB04 - 1.667 OB05 >= 35,
+
+    which is inconsistent with non-negativity.  If we use the same
+    'rules' for reasoning as before, the method fails.
+
+    Method 2 detects infeasibility with demand row DEMFO in only 2
+    passes.  The causal chain is short.  Note that in pass 1, the blend
+    units are forced to zero level simply by the balance rows.
+    Inspection of any of these immediately reveals the error.
+
+    Method 3 finds a null demand row:  DEMAV, which is demand for aviation
+    fuel.  It happens, in this case, that this product cannot be produced
+    by blend units, so the omission of the OP activities causes this.  This
+    is even better than the other diagnoses (if this row had not been null,
+    the IIS would provide similar information as Method 0).
+
+                            Scenario 5.  BLENDREV
+
+    Again the schema reveals the problem by looking at the balance rows,
+    if we assume knowledge of the model's structure.  That is, the
+    nonzero coefficients are all negative, so the only way to balance is
+    to have all adjacent activities at zero level.  Method 0 also reveals
+    this, similar to scenario 4.
+
+    Method 1 fails for the same reasons as in scenario 4.
+
+    Method 2 succeeds in similar manner, detecting infeasibility with row
+    DEMAV.
+
+    Method 3 is right on target.  It says that the demand for fuel oil
+    (row DEMFO) is inconsistent with the 4 relevant balance equations.
+
+                            Scenario 6.  BLENDSUP
+
+    Method 0 gives a good starting point.  The displays just tell us that
+    row INFEAS01 is infeasible.  Its rates of substitution tell us that
+    the only non-basic variables that could decrease this (ie, move
+    towards feasibility) are rows SUPHC and SUPMC.  If you list these
+    equations, you find they must each be no more than 20, so they cannot
+    feasibly increase their levels.  Only a little more analysis is
+    needed to understand why.
+
+    Method 1 fails because all coefficients in the aggregate constraint
+    are zero, so no new information is obtained.
+
+    Method 2 detects infeasibility for row INFEAS01 with the myopic range
+    test.  This is the same as the rate analysis in Method 0.
+
+    Method 3 finds three inconsistent equations, even if the variables
+    are allowed to be negative.  This alone is just the same information
+    we have with Method 0, but the IIS gives a bit more to form the
+    diagnosis.  Notice the simple implication:
+
+                   -40 <= -[SUPHC + SUPMC] = INFEAS01 <= -41
+

@@ -1,0 +1,9 @@
+!  $Header: N:/default/includes/RCS/emmout,v 1.3 2002/02/20 19:44:03 RSC Exp $
+!  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK - Removed Nested Includes from code
+!     INCLUDE'UEFPOUT'     ! UEFP output variables
+!     INCLUDE'UEFDOUT'     ! EFD output variables
+!     INCLUDE'UDATOUT'     ! UDAT output variables
+!     INCLUDE'UECPOUT'     ! UECP output variables
+!     INCLUDE'ULDSMOUT'    ! LDSM output variables
+!     INCLUDE'UETTOUT'     ! UETT output variables
+!     INCLUDE'UGOILOUT'    ! Reuse for Resource Cost Data

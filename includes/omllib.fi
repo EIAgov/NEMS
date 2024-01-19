@@ -1,0 +1,167 @@
+! $Header: M:/default/includes/RCS/omllib.fi,v 1.1 2014/01/10 19:21:54 dsa Exp $
+
+!     FORTRAN include file omllib.fi
+!     This requires a prior inclusion of buildenv.fi
+      !dec$ fixedformlinesize:132
+
+      interface
+
+      integer(4) function lfrtbin(actfile, actprob, filename, deckname, printsw, idetail, tabname)
+      !dec$attributes stdcall, decorate, alias:'lcrtbin' :: lfrtbin
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLCRCPARM) actfile   [reference]  ! blank-padded
+      character(OMLCRCPARM) actprob   [reference]  ! blank-padded
+      character(*)          filename  [reference]  ! null-terminated
+      character(8)          deckname  [reference]  ! blank-padded
+      integer(4)            printsw
+      integer(4)            idetail
+      character(8)          tabname   [reference]  ! blank-padded
+      end function
+
+      integer(4) function lfmpsin(actfile, actprob, filename, deckname, mpsnamelen, printsw, revise)
+      !dec$attributes stdcall, decorate, alias:'lcmpsin' :: lfmpsin
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLCRCPARM) actfile   [reference]  ! blank-padded
+      character(OMLCRCPARM) actprob   [reference]  ! blank-padded
+      character(*)          filename  [reference]  ! null-terminated
+      character(8)          deckname  [reference]  ! blank-padded
+      integer(4)            mpsnamelen
+      integer(4)            printsw
+      integer(4)            revise
+      end function
+
+      integer(4) function lfmpsout(actfile, actprob, filename, deckname, onecoef)
+      !dec$attributes stdcall, decorate, alias:'lcmpsout' :: lfmpsout
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLCRCPARM) actfile   [reference]  ! blank-padded
+      character(OMLCRCPARM) actprob   [reference]  ! blank-padded
+      character(*)          filename  [reference]  ! null-terminated
+      character(8)          deckname  [reference]  ! blank-padded
+      integer(4)            onecoef
+      end function
+
+      integer(4) function lfgetinifile(curinifile, maxlen)
+      !dec$attributes stdcall, decorate, alias:'lcgetinifile' :: lfgetinifile
+      character(*) curinifile  [reference]  ! out
+      integer(4)   maxlen                   ! max number of chars to retrieve
+      end function
+
+      integer(4) function lfsetinifile(newinifile)
+      !dec$attributes stdcall, decorate, alias:'lcsetinifile' :: lfsetinifile
+      character(*) newinifile  [reference]  ! null-terminated
+      end function
+
+      integer(4) function lfreadcr(crfile)
+      !dec$attributes stdcall, decorate, alias:'lcreadcr' :: lfreadcr
+      character(*) crfile  [reference]  ! null-terminated
+      end function
+
+      integer(4) function lfwritecr(crfile)
+      !dec$attributes stdcall, decorate, alias:'lcwritecr' :: lfwritecr
+      character(*) crfile  [reference]  ! null-terminated
+      end function
+
+      end interface
+
+      interface lfcrget  ! generic function name
+
+      integer(4) function lfcrgetc(name, value, maxlen, retlen)
+      !dec$attributes stdcall, decorate, alias:'lccrget' :: lfcrgetc
+      character(*) name    [reference]  ! in:  blank-pad 8 or null-term
+      character(*) value   [reference]  ! out
+      integer(4)   maxlen  [reference]  ! in:  max number of bytes to retrieve
+      integer(4)   retlen  [reference]  ! out: number of bytes retrieved
+      end function
+
+      integer(4) function lfcrgetd(name, value, maxlen, retlen)
+      !dec$attributes stdcall, decorate, alias:'lccrget' :: lfcrgetd
+      character(*) name    [reference]  ! in:  blank-pad 8 or null-term
+      real(8)      value   [reference]  ! out
+      integer(4)   maxlen  [reference]  ! in:  max number of bytes to retrieve
+      integer(4)   retlen  [reference]  ! out: number of bytes retrieved
+      end function
+
+      integer(4) function lfcrgetr(name, value, maxlen, retlen)
+      !dec$attributes stdcall, decorate, alias:'lccrget' :: lfcrgetr
+      character(*) name    [reference]  ! in:  blank-pad 8 or null-term
+      real(4)      value   [reference]  ! out
+      integer(4)   maxlen  [reference]  ! in:  max number of bytes to retrieve
+      integer(4)   retlen  [reference]  ! out: number of bytes retrieved
+      end function
+
+      integer(4) function lfcrgeti(name, value, maxlen, retlen)
+      !dec$attributes stdcall, decorate, alias:'lccrget' :: lfcrgeti
+      character(*) name    [reference]  ! in:  blank-pad 8 or null-term
+      integer(4)   value   [reference]  ! out
+      integer(4)   maxlen  [reference]  ! in:  max number of bytes to retrieve
+      integer(4)   retlen  [reference]  ! out: number of bytes retrieved
+      end function
+
+      end interface lfcrget
+
+      interface lfcrput  ! generic function name
+
+      integer(4) function lfcrputc(command,name,value,length,verbose)
+      !dec$attributes stdcall, decorate, alias:'lccrput' :: lfcrputc
+      character(1) command  [reference]  ! in: see OML library doc
+      character(*) name     [reference]  ! in: blank-pad 8 or null-term
+      character(*) value    [reference]  ! in: to be stored
+      integer(4)   length                ! number of chars in value
+      integer(4)   verbose
+      end function
+
+      integer(4) function lfcrputd(command,name,value,check,verbose)
+      !dec$attributes stdcall, decorate, alias:'lccrput' :: lfcrputd
+      character(1) command  [reference]  ! in: see OML library doc
+      character(*) name     [reference]  ! in: blank-pad 8 or null-term
+      real(8)      value    [reference]  ! in: to be stored
+      integer(4)   check    ! if > 0, check if value is valid numeric
+      integer(4)   verbose
+      end function
+
+      integer(4) function lfcrputr(command,name,value,check,verbose)
+      !dec$attributes stdcall, decorate, alias:'lccrput' :: lfcrputr
+      character(1) command  [reference]  ! in: see OML library doc
+      character(*) name     [reference]  ! in: blank-pad 8 or null-term
+      real(4)      value    [reference]  ! in: to be stored
+      integer(4)   check    ! if > 0, check if value is valid numeric
+      integer(4)   verbose
+      end function
+
+      integer(4) function lfcrputi(command,name,value,check,verbose)
+      !dec$attributes stdcall, decorate, alias:'lccrput' :: lfcrputi
+      character(1) command  [reference]  ! in: see OML library doc
+      character(*) name     [reference]  ! in: blank-pad 8 or null-term
+      integer(4)   value    [reference]  ! in: to be stored
+      integer(4)   check    ! if > 0, check if value is valid numeric
+      integer(4)   verbose
+      end function
+
+      end interface lfcrput
+
+      interface
+
+      subroutine lfomlprtcn(message, msglen)
+      !dec$attributes stdcall, decorate,alias:'lcomlprtcn' :: lfomlprtcn
+      character(*) message  [reference]  ! may be null-terminated
+      integer(4)   msglen                ! number of chars to print
+      end subroutine
+
+      subroutine lfomlprtnt(message)
+      !dec$attributes stdcall, decorate,alias:'lcomlprtnt' :: lfomlprtnt
+      character(*) message  [reference]  ! must be null-terminated
+      end subroutine
+
+      integer(4) function lfgettitle(curtitle, maxlen)
+      !dec$attributes stdcall, decorate, alias:'lcgettitle' :: lfgettitle
+      character(*) curtitle  [reference]  ! out
+      integer(4)   maxlen                 ! max number of chars to retrieve
+      end function
+
+      integer(4) function lfsettitle(newtitle)
+      !dec$attributes stdcall, decorate, alias:'lcsettitle' :: lfsettitle
+      character(*) newtitle  [reference]  ! null-terminated
+      end function
+
+      end interface
+

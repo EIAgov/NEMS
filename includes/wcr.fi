@@ -1,0 +1,135 @@
+! $Header: M:/default/includes/RCS/wcr.fi,v 1.1 2014/01/10 19:33:51 dsa Exp $
+
+!     FORTRAN include file wcr.fi (included by omllp.fi)
+!     This requires a prior inclusion of buildenv.fi
+
+      type FWCR
+      sequence
+
+      character(OMLCRCPARM)    xactcase
+      character(OMLCRCPARM)    xactfile
+      character(OMLCRCPARM)    xactprob
+      character(OMLSETNAME)    xbound
+      character(OMLMATNAME)    xchobj
+      character(OMLMATNAME)    xchrhs
+      character(OMLCRCPARM)    xcmask
+      character(OMLCRCPARM)    xdata
+      character(OMLCRCPARM)    xinsert
+      character(OMLCRCPARM)    xloadb
+      character(OMLCRCPARM)    xminmax
+      character(OMLMATNAME)    xobj
+      character(OMLCRCPARM)    xpunch
+      character(OMLSETNAME)    xrange
+      character(OMLMATNAME)    xrhs
+      character(OMLCRCPARM)    xrmask
+      character(OMLCRCPARM)    xrngfile
+      character(OMLCRCPARM)    xrngprnt
+      character(OMLCRCPARM)    xsaveb
+      character(OMLCRCPARM)    xsolfile
+      character(OMLCRCPARM)    xsolprnt
+      character(OMLCRCPARM)    xsolstat
+      character(OMLCRCPARM)    xtabcase
+
+      real(8)     xeps
+      real(8)     xfunct
+      real(8)     xintgoal
+      real(8)     xmaxvar
+      real(8)     xparam
+      real(8)     xpencost
+      real(8)     xphi
+      real(8)     xrstop
+      real(8)     xsif
+      real(8)     xsscale
+      real(8)     xtheta
+      real(8)     xtolchk
+      real(8)     xtolchzr
+      real(8)     xtolckrw
+      real(8)     xtolclrt
+      real(8)     xtoldj
+      real(8)     xtolerr
+      real(8)     xtolfstm
+      real(8)     xtolinv
+      real(8)     xtollmax
+      real(8)     xtolnorm
+      real(8)     xtolpert
+      real(8)     xtolpiv
+      real(8)     xtolrel
+      real(8)     xtolrmax
+      real(8)     xtolrwrt
+      real(8)     xtolurel
+      real(8)     xtolv
+      real(8)     xtolze
+      real(8)     xzero
+
+      integer(4)  xchecksw
+      integer(4)  xclocksw
+      integer(4)  xcomperr
+      integer(4)  xcompsw
+      integer(4)  xcrashsw
+      integer(4)  xcyclesw
+      integer(4)  xdegend
+      integer(4)  xdegmax
+      integer(4)  xdemand
+      integer(4)  xdetail
+      integer(4)  xdoattn
+      integer(4)  xdodeltm
+      integer(4)  xdofeas
+      integer(4)  xdofreq1
+      integer(4)  xdonfs
+      integer(4)  xdounb
+      integer(4)  xdual
+      integer(4)  xequil
+      integer(4)  xfeas
+      integer(4)  xfreqinv
+      integer(4)  xfreqlog
+      integer(4)  xfreqsav
+      integer(4)  xfreqsum
+      integer(4)  xinvert
+      integer(4)  xiterno
+      integer(4)  xj
+      integer(4)  xludense
+      integer(4)  xlufill
+      integer(4)  xluinv
+      integer(4)  xm
+      integer(4)  xmajerr
+      integer(4)  xmaxiter
+      integer(4)  xmaxpass
+      integer(4)  xmaxtime
+      integer(4)  xminerr
+      integer(4)  xnegdj
+      integer(4)  xnet
+      integer(4)  xnif
+      integer(4)  xnowt
+      integer(4)  xprice
+      integer(4)  xrunmode
+      integer(4)  xryanosb
+      integer(4)  xscalesw
+      integer(4)  xscrnsw
+      integer(4)  xslpnz
+      integer(4)  xssparse
+      integer(4)  xsteep
+      integer(4)  xsteepck
+      integer(4)  xsteepnc
+      integer(4)  xsteeprf
+      integer(4)  xtimesav
+      integer(4)  xtrace
+      integer(4)  xtran
+      integer(4)  xunbdndx
+      integer(4)  xuniques
+      integer(4)  xusefree
+
+      end type FWCR
+
+      type(FWCR), pointer :: OML
+      common /WCRaccess/ OML
+
+      interface getwcr  ! original function name as generic interface
+
+      subroutine wfgetpwcr(pwcr)
+      !dec$attributes stdcall, decorate, alias:'wcgetpwcr' :: wfgetpwcr
+      import  FWCR
+      type(FWCR), pointer :: pwcr  [reference]
+      end subroutine
+
+      end interface getwcr
+

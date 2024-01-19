@@ -1,0 +1,2303 @@
+'************************************************
+'* Create workfile and read data from worksheet *
+'************************************************
+
+'INSERT_1 creates in the input directory the drvdata workfile containing
+' annual NEMS energy price and quantity assumptions from 1997 to end of
+' forecast period and models altmod and ratiomod. It reads in alternative
+' energy price and quantity NEMS assumptions from worksheet altdata
+' contained in the output directory.
+INSERT_1
+
+'Read present working directory
+%wfpathpwd = @wfpath
+
+'*****************************************************
+'* Create series objects                             *
+'*****************************************************
+'Average price, light-duty vehicles, thousands of dollars
+'Source: AEO2017 Reference Case
+'        K:/output/aeo2017/ref2017/d111716a/p1/altdata.csv; tranprice_avgvehicle_a; column BF
+'        tranprice_avgvehicle is in 2009 dollars. Change from the reference is computed
+'        and applied to the US model baseline.
+genr tranprice_avgvehicle_b = 0
+tranprice_avgvehicle_b.fill(o=1997)     25.97715, 26.20119, 26.23552, 26.46087, _
+26.11119, 26.75731, 27.25772, 27.62491, 26.32755, 25.85471, 25.78251, 25.70568, _
+27.70827, 26.52019, 28.71980, 28.05136, 28.87776, 27.35262, 28.05526, 28.47905, _
+28.65938, 28.93062, 29.13349, 29.40245, 29.71007, 29.91471, 30.17553, 30.42945, _
+30.67107, 30.65593, 30.62499, 30.59089, 30.55972, 30.55099, 30.52461, 30.49036, _
+30.49508, 30.49048, 30.49255, 30.47115, 30.47561, 30.47502, 30.47941, 30.48712, _
+30.49692, 30.51047, 30.52596, 30.53794, 30.54411, 30.55755, 30.57087, 30.58894, _
+30.59422, 30.60208
+
+
+'reference and side cases baseline investment except low and high macro
+if (mac111d = 1 and macmode = 2)then
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Installed Capacity
+'Billions of 2009 Dollars
+'Source: No ABCPP Reference Case
+'        //nem1/Q/output/aeo2017/ref_no_abcpp/d111616a
+genr elsec_instcap_b = 0
+elsec_instcap_b.fill(o=1997)      0.000000,  0.000000,  0.000000,  0.000000,  0.000000, _
+ 0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000, _
+ 0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000, 66.502930, 40.055000, _
+14.203466, 26.520622, 52.263237, 32.591045, 20.189800,  3.285453,  5.127619,  6.054205, _
+ 7.985078,  6.915232, 15.077737, 13.766582, 14.227000, 14.951482, 10.307487, 12.026816, _
+14.961078, 13.517105, 15.909302, 13.055498, 10.309064, 10.287686, 10.296397, 18.595566, _
+16.973913, 14.672043, 15.895393, 17.781700, 18.740870, 19.837994, 19.558395, 21.337004, _
+24.309908
+
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Transmission
+'Billions of 2009 Dollars
+'Source: No ABCPP Reference Case
+'        //nem1/Q/output/aeo2017/ref_no_abcpp/d111616a
+genr elsec_tran_b = 0
+elsec_tran_b.fill(o=1997)     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 3.184161, 2.620721, _
+0.906890, 0.738230, 2.150491, 1.997307, 1.341384, 0.207604, 0.368992, 0.442114, _
+0.603295, 0.486329, 0.968609, 0.932988, 0.971197, 1.011904, 0.702819, 0.846205, _
+1.131122, 0.971061, 1.140380, 0.955463, 0.825312, 0.802407, 0.838486, 1.381992, _
+1.311816, 1.114227, 1.192271, 1.430821, 1.537479, 1.541986, 1.579782, 1.748815, _
+2.161597
+
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Retrofits
+'Billions of 2009 Dollars
+'Source: No ABCPP Reference Case
+'        //nem1/Q/output/aeo2017/ref_no_abcpp/d111616a
+genr elsec_retro_b = 0
+elsec_retro_b.fill(o=1997)    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 2.788217, 0.384887, _
+0.519337, 1.131820, 1.276367, 0.026212, 0.031933, 0.200608, 0.000000, 0.000000, _
+0.000000, 0.020358, 0.206805, 0.665648, 0.407531, 0.035087, 0.070758, 0.000000, _
+0.099342, 0.000000, 0.000000, 0.043804, 0.000000, 0.145086, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.091429, _
+0.000000
+
+
+endif
+
+
+'low macro investment baseline
+if (mac111d = 1 and macmode = 4)then
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Installed Capacity
+'Billions of 2009 Dollars
+'Source: No CPP Reference Case
+'        //nem1/Q/output/aeo2017/lm_no_abcpp/d111816a
+genr elsec_instcap_b = 0
+elsec_instcap_b.fill(o=1997)      0.000000,  0.000000,  0.000000,  0.000000,  0.000000, _
+ 0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000, _
+ 0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000, 66.502930, 40.106995, _
+13.792732, 29.788864, 54.189587, 33.170811,  8.969301,  2.535049,  3.676453,  3.944578, _
+ 4.555389,  4.271817,  9.060807,  8.323685,  8.714393,  8.688277,  9.655673, 10.629487, _
+14.412014, 10.167546, 13.340382,  9.654643,  9.319817,  7.433548,  6.554801, 10.561786, _
+11.702043,  8.530060,  9.742535, 11.233026, 11.987369, 12.438950,  9.350551,  9.409238, _
+11.145323
+
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Transmission
+'Billions of 2009 Dollars
+'Source: No CPP Reference Case
+'        //nem1/Q/output/aeo2017/lm_no_abcpp/d111816a
+genr elsec_tran_b = 0
+elsec_tran_b.fill(o=1997)     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 3.184161, 2.620072, _
+0.880459, 0.851667, 2.190274, 2.007892, 0.630809, 0.145502, 0.255019, 0.297919, _
+0.354603, 0.285814, 0.610350, 0.545654, 0.618244, 0.566217, 0.694687, 0.787148, _
+1.047419, 0.762114, 1.008985, 0.753100, 0.699641, 0.628458, 0.563181, 0.763220, _
+0.853651, 0.689322, 0.795411, 0.903932, 1.005450, 1.052581, 0.789706, 0.882186, _
+0.951635
+
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Retrofits
+'Billions of 2009 Dollars
+'Source: No CPP Reference Case
+'        //nem1/Q/output/aeo2017/lm_no_abcpp/d111816a
+genr elsec_retro_b = 0
+elsec_retro_b.fill(o=1997)    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 2.788217, 0.384887, _
+0.710558, 1.105558, 0.044084, 0.000000, 0.000000, 0.178723, 0.000000, 0.000000, _
+0.036609, 0.008259, 0.000000, 0.072477, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.061708, 0.047217, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000
+
+
+endif
+
+
+'high macro investment baseline
+if (mac111d = 1 and macmode = 5)then
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Installed Capacity
+'Billions of 2009 Dollars
+'Source: No CPP Reference Case
+'        //nem1/Q/output/aeo2017/hm_no_abcpp/d111816a
+genr elsec_instcap_b = 0
+elsec_instcap_b.fill(o=1997)      0.000000,  0.000000,  0.000000,  0.000000,  0.000000, _
+ 0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000, _
+ 0.000000,  0.000000,  0.000000,  0.000000,  0.000000,  0.000000, 66.502930, 39.984417, _
+14.070284, 27.170923, 52.746704, 32.684429, 28.532202,  5.062190,  5.179525,  7.718199, _
+12.864685, 15.480722, 18.686621, 20.481327, 22.853148, 11.810833, 12.828535, 14.035525, _
+23.610512, 13.223314, 19.237085, 25.331446, 25.879190, 21.905247, 23.439098, 26.627699, _
+17.713999, 17.419289, 21.420237, 29.637550, 24.785795, 29.137861, 22.352791, 23.204943, _
+17.523144
+
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Transmission
+'Billions of 2009 Dollars
+'Source: No CPP Reference Case
+'        //nem1/Q/output/aeo2017/hm_no_abcpp/d111816a
+
+genr elsec_tran_b = 0
+elsec_tran_b.fill(o=1997)     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 3.184161, 2.614362, _
+0.895928, 0.776642, 2.176778, 2.025618, 1.764665, 0.330457, 0.401614, 0.534561, _
+0.922066, 0.965095, 1.262528, 1.298888, 1.477757, 0.881228, 0.832817, 0.995845, _
+1.684204, 1.022674, 1.325638, 1.741969, 1.857022, 1.625608, 1.602535, 1.967241, _
+1.429716, 1.423734, 1.718901, 2.238693, 1.957875, 2.430469, 2.100100, 1.830780, _
+1.452288
+
+
+'Annual Expense and Capital Commitment, Electric Sector, Total Resource Costs
+'Retrofits
+'Billions of 2009 Dollars
+'Source: No CPP Reference Case
+'        //nem1/Q/output/aeo2017/hm_no_abcpp/d111816a
+genr elsec_retro_b = 0
+elsec_retro_b.fill(o=1997)    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 2.788217, 0.384887, _
+0.754495, 1.119881, 0.985467, 0.049630, 0.044029, 0.178723, 0.008469, 0.036819, _
+0.000000, 0.714409, 0.617255, 0.000000, 0.101329, 0.000000, 0.000000, 0.034995, _
+0.000000, 0.000000, 0.097762, 0.010425, 0.000000, 0.000000, 0.000000, 0.000000, _
+0.000000, 0.069716, 0.000000, 0.000000, 0.093017, 0.000000, 0.028163, 0.000000, _
+0.037853
+
+
+endif
+
+
+'*****************************************************
+'* Create model objects altmod and ratiomod          *
+'*****************************************************
+
+'Construct model altmod of alternative NEMS energy price and consumption assumptions.
+model altmod
+
+'append identities (text objects) to model object
+'domestic production of energy from petroleum
+altmod.append @identity engdompet_a = prod_crudeoil_a+prod_naturalgas_a
+'domestic production of energy from other energy
+altmod.append @identity engdomoo_a = prod_nuclear_a + prod_hydro_a + prod_othrenew_a + prod_other_a
+'domestic production of energy from biomass
+altmod.append @identity engdombio_a = prod_biomass_a
+'domestic production of energy from coal
+altmod.append @identity engdomcoal_a = prod_coal_a
+'domestic production of energy from natural gas
+altmod.append @identity engdomng_a = prod_naturalgas_a + prod_drynaturalgas_a
+'imports of biofuels
+altmod.append @identity engimpbio_a = import_biofuels_a
+'imports of coal
+altmod.append @identity engimpcoal_a = import_coal_a
+'imports of natural gas
+altmod.append @identity engimpng_a = import_natgas_a
+'imports of other fuels
+altmod.append @identity engimpoo_a = import_other_a
+'imports of petroleum
+altmod.append @identity engimppet_a = import_petroleum_a
+'imports of energy
+altmod.append @identity engimp_a = import_biofuels_a + import_coal_a + import_natgas_a _
+                                 + import_other_a + import_petroleum_a
+'exports of biofuels
+altmod.append @identity engexpbio_a = export_biofuels_a
+'exports of coal
+altmod.append @identity engexpcoal_a = export_coal_a
+'exports of natural gas
+altmod.append @identity engexpng_a = export_natgas_a
+'exports of other fuels
+altmod.append @identity engexpoo_a = export_other_a
+'exports of petroleum
+altmod.append @identity engexppet_a = export_petroleum_a
+'export of energy
+altmod.append @identity engexp_a = export_biofuels_a + export_coal_a + export_natgas_a _
+                                 + export_other_a + export_petroleum_a
+'total demand for biofuels
+altmod.append @identity dallfuelsbio_a = cons_biomass_a
+'total demand for coal
+altmod.append @identity dallfuelscoal_a = cons_coal_a
+'total demand for natural gas
+altmod.append @identity dallfuelsng_a = cons_natgas_a
+'total demand for other fuels
+altmod.append @identity dallfuelsoo_a = cons_nuclear_a + cons_hydro_a + cons_othrenew_a _
+                                      + cons_other_a
+'total demand for petroleum
+altmod.append @identity dallfuelspet_a = cons_petroleum_a
+'total demand for all fuels
+altmod.append @identity dallfuels_a = cons_biomass_a + cons_coal_a + cons_natgas_a    _
+                                    + cons_nuclear_a + cons_hydro_a + cons_othrenew_a _
+                                    + cons_other_a + cons_petroleum_a
+'demand/supply discrepency
+altmod.append @identity engresidual_a   = prod_crudeoil_a + prod_naturalgas_a + prod_drynaturalgas_a _
+                                        + prod_coal_a + prod_nuclear_a + prod_hydro_a                _
+                                        + prod_biomass_a + prod_othrenew_a + prod_other_a            _
+                                        + import_petroleum_a + import_natgas_a + import_biofuels_a   _
+                                        + import_coal_a + import_other_a                             _
+                                        - (export_fuels_a + export_petroleum_a + export_natgas_a     _
+                                           + export_coal_a + export_biofuels_a + export_other_a)     _
+                                        - (cons_petroleum_a + cons_natgas_a + cons_coal_a            _
+                                           + cons_nuclear_a + cons_hydro_a + cons_biomass_a          _
+                                           + cons_othrenew_a + cons_other_a)
+'demand/supply discrepency for petroleum
+altmod.append @identity engresidualpet_a   = cons_petroleum_a + export_petroleum_a                   _
+                                           - (prod_crudeoil_a + prod_naturalgas_a)                   _
+                                           - import_petroleum_a
+'end-use demand for coal (exclude electricity generation)
+altmod.append @identity denducoal_a  = deleng_coal_a
+'sales of electricity to ultimate consumers
+altmod.append @identity denduelc_a   = deleng_electricity_a
+'end-use demand for natural gas
+altmod.append @identity dendung_a    = deleng_naturalgas_a
+'end-use demand for petroleum
+altmod.append @identity dendupet_a   = deleng_petroleum_a
+'end-use demand for biofuels
+altmod.append @identity dendubio_a   = deleng_bio_a
+'industrial production index - coal mining
+altmod.append @identity ipsn2121_a     = prod_coal_a
+'industrial production index - oil and gas extraction
+altmod.append @identity ipsg211a3_a    = prod_crudeoil_a + prod_naturalgas_a + prod_drynaturalgas_a
+'highway consumption of gasoline and special fuels
+altmod.append @identity qgasasf_a      = trancon_distillate_a + trancon_motorgas_a + trancon_ethanol_a
+'real consumer spending on fuel oil and coal
+altmod.append @identity cnefaor_a      = rescon_petroleum_a
+'real consumer spending on natural gas
+altmod.append @identity csvugr_a       = rescon_naturalgas_a
+'real consumer spending on electricity
+altmod.append @identity csvuer_a       = rescon_electricity_a*resprice_electricity_a
+'consumer spending on gasoline and motor oil
+altmod.append @identity cnegaor_a      = trancon_distillate_a + trancon_motorgas_a + trancon_ethanol_a
+'chained price index - consumer fuel oil and coal
+altmod.append @identity jpcnefao_a     = resprice_petroleum_a * jpgdp_a
+'chained price index - household electricity
+altmod.append @identity jpcsvue_a      = resprice_electricity_a * jpgdp_a
+'chained price index - household natural gas
+altmod.append @identity jpcsvug_a      = resprice_naturalgas_a * jpgdp_a
+'chained price index - consumer gasoline and oil
+altmod.append @identity jpcnegao_a     = ((((tranprice_motorgas_a*jpgdp_a)*trancon_motorgas_a)   _
+                                       + ((tranprice_distillate_a*jpgdp_a)*trancon_distillate_a) _
+                                       + ((tranprice_ethanol_a*jpgdp_a)*trancon_ethanol_a))      _
+                                       / (trancon_distillate_a + trancon_motorgas_a + trancon_ethanol_a))
+'producer price index - coal
+altmod.append @identity wpi051_a       = indprice_steamcoal_a * jpgdp_a
+'producer price index - gas fuels
+altmod.append @identity wpi053_a       = indprice_naturalgas_a * jpgdp_a
+'average wellhead price of natural gas
+'altmod.append @identity pngwl_a        = gaswellheadprice_a * jpgdp_a
+'henry hub cash market price of natural gas
+altmod.append @identity pnghh_a        = henryhubprice_a * jpgdp_a
+'producer price index - electric power
+genr seccon_electricity_a = rescon_electricity_a+comcon_electricity_a+indcon_electricity_a+trancon_electricity_a
+altmod.append @identity wpi054_a       = ((resprice_electricity_a *(rescon_electricity_a /seccon_electricity_a))  _
+                                       +  (comprice_electricity_a *(comcon_electricity_a /seccon_electricity_a))  _
+                                       +  (indprice_electricity_a *(indcon_electricity_a /seccon_electricity_a))  _
+                                       +  (tranprice_electricity_a*(trancon_electricity_a/seccon_electricity_a))) _
+                                       * jpgdp_a
+'producer price index - utility natural gas
+genr seccon_naturalgas_a = rescon_naturalgas_a +comcon_naturalgas_a+indcon_naturalgas_a _
+                         + trancon_naturalgas_a+elgencon_naturalgas_a
+altmod.append @identity wpi055_a       = ((resprice_naturalgas_a  *(rescon_naturalgas_a  /seccon_naturalgas_a))  _
+                                       +  (comprice_naturalgas_a  *(comcon_naturalgas_a  /seccon_naturalgas_a))  _
+                                       +  (indprice_naturalgas_a  *(indcon_naturalgas_a  /seccon_naturalgas_a))  _
+                                       +  (tranprice_naturalgas_a *(trancon_naturalgas_a /seccon_naturalgas_a))  _
+                                       +  (elgenprice_naturalgas_a*(elgencon_naturalgas_a/seccon_naturalgas_a))) _
+                                       * jpgdp_a
+'producer price index - crude petroleum
+altmod.append @identity wpi0561_a      = worldoilprice_a * jpgdp_a
+'producer price index - refined petroleum products
+genr seccon_refpetroprod_a = rescon_petroleum_a   +comcon_distillate_a  +comcon_residualfuel_a+indcon_distillate_a _
+                           + indcon_residualfuel_a+trancon_distillate_a +trancon_jetfuel_a    +trancon_motorgas_a  _
+                           + trancon_residualfuel_a
+altmod.append @identity wpi057_a       = ((resprice_petroleum_a    *(rescon_petroleum_a    /seccon_refpetroprod_a))  _
+                                       +  (comprice_distillate_a   *(comcon_distillate_a   /seccon_refpetroprod_a))  _
+                                       +  (comprice_residualfuel_a *(comcon_residualfuel_a /seccon_refpetroprod_a))  _
+                                       +  (indprice_distillate_a   *(indcon_distillate_a   /seccon_refpetroprod_a))  _
+                                       +  (indprice_residualfuel_a *(indcon_residualfuel_a /seccon_refpetroprod_a))  _
+                                       +  (tranprice_distillate_a  *(trancon_distillate_a  /seccon_refpetroprod_a))  _
+                                       +  (tranprice_jetfuel_a     *(trancon_jetfuel_a     /seccon_refpetroprod_a))  _
+                                       +  (tranprice_motorgas_a    *(trancon_motorgas_a    /seccon_refpetroprod_a))  _
+                                       +  (tranprice_residualfuel_a*(trancon_residualfuel_a/seccon_refpetroprod_a))) _
+                                       * jpgdp_a
+'producer price index - residual petroleum fuels
+genr seccon_respetrofuels_a = comcon_residualfuel_a+indcon_residualfuel_a+trancon_residualfuel_a
+altmod.append @identity wpi0574_a      = ((comprice_residualfuel_a *(comcon_residualfuel_a /seccon_respetrofuels_a))  _
+                                       +  (indprice_residualfuel_a *(indcon_residualfuel_a /seccon_respetrofuels_a))  _
+                                       +  (tranprice_residualfuel_a*(trancon_residualfuel_a/seccon_respetrofuels_a))) _
+                                       * jpgdp_a
+'average price, light-duty vehicles
+altmod.append @identity plvavg_a       = tranprice_avgvehicle_a/tranprice_avgvehicle_b
+'steam coal share in electrical generation
+altmod.append @identity endusepccoal_a = (elgencon_steamcoal_a/(elgencon_elecpowertot_a-elgencon_elecimports_a))
+'natural gas share in electrical generation
+altmod.append @identity endusepcng_a   = (elgencon_naturalgas_a/(elgencon_elecpowertot_a-elgencon_elecimports_a))
+'distillate and residual fuel oil share in electrical generation
+altmod.append @identity endusepcpet_a  = (elgencon_fuelOil_a/(elgencon_elecpowertot_a-elgencon_elecimports_a))
+
+
+'  NEMS Industrial Output 25: Petroleum Refining (NAICS 32411)
+altmod.append @identity macio25_petrorefine_a  = macio25_petrorefine_a
+'  NEMS Industrial Output 45: Coal Mining (NAICS 2121), manufacturing
+altmod.append @identity macio45_coalmine_a     = macio45_coalmine_a
+'  NEMS Industrial Output 46: Oil & Gas Extraction (NAICS 211, 213)
+altmod.append @identity macio46_oilgasxtract_a = macio46_oilgasxtract_a
+'  NEMS Industrial Output 51: Electric Utilities (NAICS 2211), services
+altmod.append @identity macio51_elecutil_a     = macio51_elecutil_a
+'  NEMS Industrial Output 52: Gas Utilities (NAICS 2212), services
+altmod.append @identity macio52_gasutil_a      = macio52_gasutil_a
+
+
+'Federal excise tax accruals other than for a VAT.
+'taxmode=0 no tax; default energy price and quantity sim
+'taxmode=1 returns tax collections to consumers, revenue neutral
+'taxmode=2 returns tax collections to business, revenue neutral
+'taxmode=3 deficit reduction
+'taxmode=4 returns tax collections to consumers, deficit neutral
+'taxmode=5 returns tax collections to business, deficit neutral
+'taxmode=6 deficit reduction using RIN revenues
+if (taxmode <= 5) then
+  altmod.append @identity tximgfoth_a  = (emisrev_total_a + emisrev_cover_a) * jpgdp_a
+endif
+if (taxmode = 6) then
+  altmod.append @identity tximgfoth_a  = rinrevenue_a * jpgdp_a
+endif
+
+if (mac111d = 1) then
+  '  ElSec_InstCap, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Installed Capacity in Billion 2012 Dollars
+  altmod.append @identity elsec_instcap_a  = elsec_instcap_a
+  altmod.append @identity elsec_instcap_b  = elsec_instcap_b_0
+  '  ElSec_Tran, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Transmission in Billion 2012 Dollars
+  altmod.append @identity elsec_tran_a     = elsec_tran_a
+  altmod.append @identity elsec_tran_b     = elsec_tran_b_0
+  '  ElSec_Retro, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Retrofits in Billion 2012 Dollars
+  altmod.append @identity elsec_retro_a    = elsec_retro_a
+  altmod.append @identity elsec_retro_b    = elsec_retro_b_0
+
+endif
+
+'Real imports of services
+altmod.append @identity msvxtour_a     = emisrev_intl_a
+'Weighted average price of imported crude received in refinery inventories
+altmod.append @identity poilimp_a      = worldoilprice_a * jpgdp_a
+'West Texas Intermediate
+altmod.append @identity poilwti_a      = westtexasoilprice_a * jpgdp_a
+'LPG Feedstock Price
+altmod.append @identity plginpf_a      = lpgfeedstockprice_a * jpgdp_a
+'Naphtha Price
+altmod.append @identity ppfin_a        = naphthaprice_a * jpgdp_a
+'Ethane Price
+altmod.append @identity petin_a        = ethaneprice_a * jpgdp_a
+'Ethane Production/Availability
+altmod.append @identity rfqngpl_1_a    = ethaneproduction_a
+'Propane Production/Availability
+altmod.append @identity rfqngpl_2_a    = propaneproduction_a
+
+
+'Value of Ethanol production
+altmod.append @identity ethanol_ip_a        = ethanol_ip_a
+
+
+'regional producer price indexes
+altmod.append @identity wpi051_neng_a  = wpi051_neng_cd1_a  * jpgdp_a
+altmod.append @identity wpi053_neng_a  = wpi053_neng_cd1_a  * jpgdp_a
+altmod.append @identity wpi054_neng_a  = wpi054_neng_cd1_a  * jpgdp_a
+altmod.append @identity wpi055_neng_a  = wpi055_neng_cd1_a  * jpgdp_a
+altmod.append @identity wpi057_neng_a  = wpi057_neng_cd1_a  * jpgdp_a
+altmod.append @identity wpi0574_neng_a = wpi0574_neng_cd1_a * jpgdp_a
+altmod.append @identity wpi051_matl_a  = wpi051_matl_cd2_a  * jpgdp_a
+altmod.append @identity wpi053_matl_a  = wpi053_matl_cd2_a  * jpgdp_a
+altmod.append @identity wpi054_matl_a  = wpi054_matl_cd2_a  * jpgdp_a
+altmod.append @identity wpi055_matl_a  = wpi055_matl_cd2_a  * jpgdp_a
+altmod.append @identity wpi057_matl_a  = wpi057_matl_cd2_a  * jpgdp_a
+altmod.append @identity wpi0574_matl_a = wpi0574_matl_cd2_a * jpgdp_a
+altmod.append @identity wpi051_enc_a   = wpi051_enc_cd3_a   * jpgdp_a
+altmod.append @identity wpi053_enc_a   = wpi053_enc_cd3_a   * jpgdp_a
+altmod.append @identity wpi054_enc_a   = wpi054_enc_cd3_a   * jpgdp_a
+altmod.append @identity wpi055_enc_a   = wpi055_enc_cd3_a   * jpgdp_a
+altmod.append @identity wpi057_enc_a   = wpi057_enc_cd3_a   * jpgdp_a
+altmod.append @identity wpi0574_enc_a  = wpi0574_enc_cd3_a  * jpgdp_a
+altmod.append @identity wpi051_wnc_a   = wpi051_wnc_cd4_a   * jpgdp_a
+altmod.append @identity wpi053_wnc_a   = wpi053_wnc_cd4_a   * jpgdp_a
+altmod.append @identity wpi054_wnc_a   = wpi054_wnc_cd4_a   * jpgdp_a
+altmod.append @identity wpi055_wnc_a   = wpi055_wnc_cd4_a   * jpgdp_a
+altmod.append @identity wpi057_wnc_a   = wpi057_wnc_cd4_a   * jpgdp_a
+altmod.append @identity wpi0574_wnc_a  = wpi0574_wnc_cd4_a  * jpgdp_a
+altmod.append @identity wpi051_satl_a  = wpi051_satl_cd5_a  * jpgdp_a
+altmod.append @identity wpi053_satl_a  = wpi053_satl_cd5_a  * jpgdp_a
+altmod.append @identity wpi054_satl_a  = wpi054_satl_cd5_a  * jpgdp_a
+altmod.append @identity wpi055_satl_a  = wpi055_satl_cd5_a  * jpgdp_a
+altmod.append @identity wpi057_satl_a  = wpi057_satl_cd5_a  * jpgdp_a
+altmod.append @identity wpi0574_satl_a = wpi0574_satl_cd5_a * jpgdp_a
+altmod.append @identity wpi051_esc_a   = wpi051_esc_cd6_a   * jpgdp_a
+altmod.append @identity wpi053_esc_a   = wpi053_esc_cd6_a   * jpgdp_a
+altmod.append @identity wpi054_esc_a   = wpi054_esc_cd6_a   * jpgdp_a
+altmod.append @identity wpi055_esc_a   = wpi055_esc_cd6_a   * jpgdp_a
+altmod.append @identity wpi057_esc_a   = wpi057_esc_cd6_a   * jpgdp_a
+altmod.append @identity wpi0574_esc_a  = wpi0574_esc_cd6_a  * jpgdp_a
+altmod.append @identity wpi051_wsc_a   = wpi051_wsc_cd7_a   * jpgdp_a
+altmod.append @identity wpi053_wsc_a   = wpi053_wsc_cd7_a   * jpgdp_a
+altmod.append @identity wpi054_wsc_a   = wpi054_wsc_cd7_a   * jpgdp_a
+altmod.append @identity wpi055_wsc_a   = wpi055_wsc_cd7_a   * jpgdp_a
+altmod.append @identity wpi057_wsc_a   = wpi057_wsc_cd7_a   * jpgdp_a
+altmod.append @identity wpi0574_wsc_a  = wpi0574_wsc_cd7_a  * jpgdp_a
+altmod.append @identity wpi051_mtn_a   = wpi051_mtn_cd8_a   * jpgdp_a
+altmod.append @identity wpi053_mtn_a   = wpi053_mtn_cd8_a   * jpgdp_a
+altmod.append @identity wpi054_mtn_a   = wpi054_mtn_cd8_a   * jpgdp_a
+altmod.append @identity wpi055_mtn_a   = wpi055_mtn_cd8_a   * jpgdp_a
+altmod.append @identity wpi057_mtn_a   = wpi057_mtn_cd8_a   * jpgdp_a
+altmod.append @identity wpi0574_mtn_a  = wpi0574_mtn_cd8_a  * jpgdp_a
+altmod.append @identity wpi051_pac_a   = wpi051_pac_cd9_a   * jpgdp_a
+altmod.append @identity wpi053_pac_a   = wpi053_pac_cd9_a   * jpgdp_a
+altmod.append @identity wpi054_pac_a   = wpi054_pac_cd9_a   * jpgdp_a
+altmod.append @identity wpi055_pac_a   = wpi055_pac_cd9_a   * jpgdp_a
+altmod.append @identity wpi057_pac_a   = wpi057_pac_cd9_a   * jpgdp_a
+altmod.append @identity wpi0574_pac_a  = wpi0574_pac_cd9_a  * jpgdp_a
+
+
+'Solve model altmod of alternative NEMS energy price and quantity assumptions.
+altmod.solve
+
+
+'Construct model ratiomod of change from NEMS base for energy price and quantity assumptions.
+model ratiomod
+
+'append identities (text objects) to model object
+'domestic production of energy from petroleum
+ratiomod.append @identity engdompet_r = engdompet_a_0/@elem(engdompet_a_0,2022)
+'domestic production of energy from other energy
+ratiomod.append @identity engdomoo_r = engdomoo_a_0/@elem(engdomoo_a_0,2022)
+'domestic production of energy from biomass
+ratiomod.append @identity engdombio_r = engdombio_a_0/@elem(engdombio_a_0,2022)
+'domestic production of energy from coal
+ratiomod.append @identity engdomcoal_r = engdomcoal_a_0/@elem(engdomcoal_a_0,2022)
+'domestic production of energy from natural gas
+ratiomod.append @identity engdomng_r = engdomng_a_0/@elem(engdomng_a_0,2022)
+'imports of biofuels
+ratiomod.append @identity engimpbio_r = engimpbio_a_0/@elem(engimpbio_a_0,2022)
+'imports of coal
+ratiomod.append @identity engimpcoal_r = engimpcoal_a_0/@elem(engimpcoal_a_0,2022)
+'imports of natural gas
+ratiomod.append @identity engimpng_r = engimpng_a_0/@elem(engimpng_a_0,2022)
+'imports of other fuels
+ratiomod.append @identity engimpoo_r = engimpoo_a_0/@elem(engimpoo_a_0,2022)
+'imports of petroleum
+ratiomod.append @identity engimppet_r = engimppet_a_0/@elem(engimppet_a_0,2022)
+'imports of energy
+ratiomod.append @identity engimp_r = engimp_a_0/@elem(engimp_a_0,2022)
+'exports of biofuels
+ratiomod.append @identity engexpbio_r = engexpbio_a_0/@elem(engexpbio_a_0,2022)
+'exports of coal
+ratiomod.append @identity engexpcoal_r = engexpcoal_a_0/@elem(engexpcoal_a_0,2022)
+'exports of natural gas
+ratiomod.append @identity engexpng_r = engexpng_a_0/@elem(engexpng_a_0,2022)
+'exports of other fuels
+ratiomod.append @identity engexpoo_r = 0
+'exports of petroleum
+ratiomod.append @identity engexppet_r = engexppet_a_0/@elem(engexppet_a_0,2022)
+'export of energy
+ratiomod.append @identity engexp_r = engexp_a_0/@elem(engexp_a_0,2022)
+'total demand for biofuels
+ratiomod.append @identity dallfuelsbio_r = dallfuelsbio_a_0/@elem(dallfuelsbio_a_0,2022)
+'total demand for coal
+ratiomod.append @identity dallfuelscoal_r = dallfuelscoal_a_0/@elem(dallfuelscoal_a_0,2022)
+'total demand for natural gas
+ratiomod.append @identity dallfuelsng_r = dallfuelsng_a_0/@elem(dallfuelsng_a_0,2022)
+'total demand for other fuels
+ratiomod.append @identity dallfuelsoo_r = dallfuelsoo_a_0/@elem(dallfuelsoo_a_0,2022)
+'total demand for petroleum
+ratiomod.append @identity dallfuelspet_r = dallfuelspet_a_0/@elem(dallfuelspet_a_0,2022)
+'total demand for all fuels
+ratiomod.append @identity dallfuels_r = dallfuels_a_0/@elem(dallfuels_a_0,2022)
+'difference between total energy supply and demand
+ratiomod.append @identity engresidual_r = engresidual_a_0/@elem(engresidual_a_0,2022)
+'difference between total petroleum supply and demand
+ratiomod.append @identity engresidualpet_r = engresidualpet_a_0/@elem(engresidualpet_a_0,2022)
+'End-use demand for coal (exclude electricity generation)
+ratiomod.append @identity denducoal_r    = denducoal_a_0/@elem(denducoal_a_0,2022)
+'Sales of electricity to ultimate consumers
+ratiomod.append @identity denduelc_r     = denduelc_a_0/@elem(denduelc_a_0,2022)
+'End-use demand for natural gas
+ratiomod.append @identity dendung_r      = dendung_a_0/@elem(dendung_a_0,2022)
+'End-use demand for petroleum
+ratiomod.append @identity dendupet_r     = dendupet_a_0/@elem(dendupet_a_0,2022)
+'end-use demand for biofuels
+ratiomod.append @identity dendubio_r = dendubio_a_0/@elem(dendubio_a_0,2022)
+'Industrial production index - coal mining
+ratiomod.append @identity ipsn2121_r       = ipsn2121_a_0/@elem(ipsn2121_a_0,2022)
+'Industrial production index - oil and gas extraction
+ratiomod.append @identity ipsg211a3_r      = ipsg211a3_a_0/@elem(ipsg211a3_a_0,2022)
+'Highway consumption of gasoline and special fuels
+ratiomod.append @identity qgasasf_r        = qgasasf_a_0/@elem(qgasasf_a_0,2022)
+'Real consumer spending on fuel oil and coal
+ratiomod.append @identity cnefaor_r        = cnefaor_a_0/@elem(cnefaor_a_0,2022)
+'Real consumer spending on natural gas
+ratiomod.append @identity csvugr_r         = csvugr_a_0/@elem(csvugr_a_0,2022)
+'Real consumer spending on electricity
+ratiomod.append @identity csvuer_r         = csvuer_a_0/@elem(csvuer_a_0,2022)
+'Consumer spending on gasoline and motor oil
+ratiomod.append @identity cnegaor_r        = cnegaor_a_0/@elem(cnegaor_a_0,2022)
+'Chained price index - consumer fuel oil and coal
+ratiomod.append @identity jpcnefao_r       = jpcnefao_a_0/@elem(jpcnefao_a_0,2022)
+'Chained price index - household electricity
+ratiomod.append @identity jpcsvue_r        = jpcsvue_a_0/@elem(jpcsvue_a_0,2022)
+'Chained price index - household natural gas
+ratiomod.append @identity jpcsvug_r        = jpcsvug_a_0/@elem(jpcsvug_a_0,2022)
+'Chained price index - consumer gasoline and oil
+ratiomod.append @identity jpcnegao_r       = jpcnegao_a_0/@elem(jpcnegao_a_0,2022)
+'Producer price index - coal
+ratiomod.append @identity wpi051_r         = wpi051_a_0/@elem(wpi051_a_0,2022)
+'Producer price index - gas fuels
+ratiomod.append @identity wpi053_r         = wpi053_a_0/@elem(wpi053_a_0,2022)
+'Henry Hub cash market price of natural gas
+ratiomod.append @identity pnghh_r          = pnghh_a_0/@elem(pnghh_a_0,2022)
+'Producer price index - electric power
+ratiomod.append @identity wpi054_r         = wpi054_a_0/@elem(wpi054_a_0,2022)
+'Producer price index - utility natural gas
+ratiomod.append @identity wpi055_r         = wpi055_a_0/@elem(wpi055_a_0,2022)
+'Producer price index - crude petroleum
+ratiomod.append @identity wpi0561_r        = wpi0561_a_0/@elem(wpi0561_a_0,2022)
+'Producer price index - refined petroleum products
+ratiomod.append @identity wpi057_r         = wpi057_a_0/@elem(wpi057_a_0,2022)
+'Producer price index - residual petroleum fuels
+ratiomod.append @identity wpi0574_r        = wpi0574_a_0/@elem(wpi0574_a_0,2022)
+'Average price, light-duty vehicles
+ratiomod.append @identity plvavg_r         = plvavg_a_0
+'steam coal share in electrical generation
+ratiomod.append @identity endusepccoal_r   = endusepccoal_a_0/@elem(endusepccoal_a_0,2022)
+'natural gas share in electrical generation
+ratiomod.append @identity endusepcng_r     = endusepcng_a_0/@elem(endusepcng_a_0,2022)
+'distillate and residual fuel oil share in electrical generation
+ratiomod.append @identity endusepcpet_r    = endusepcpet_a_0/@elem(endusepcpet_a_0,2022)
+
+
+'  NEMS Industrial Output 25: Petroleum Refining (NAICS 32411), manufacturing
+ratiomod.append @identity macio25_petrorefine_r  = macio25_petrorefine_a_0/@elem(macio25_petrorefine_a_0,2022)
+'  NEMS Industrial Output 45: Coal Mining (NAICS 2121), non-manufacturing
+ratiomod.append @identity macio45_coalmine_r     = macio45_coalmine_a_0/@elem(macio45_coalmine_a_0,2022)
+'  NEMS Industrial Output 46: Oil and Gas Extraction and Support Activities (NAICS 211, 213), non-manufacturing
+ratiomod.append @identity macio46_oilgasxtract_r = macio46_oilgasxtract_a_0/@elem(macio46_oilgasxtract_a_0,2022)
+'  NEMS Industrial Output 51: Electric Power Generation and Distribution (NAICS 2211), services
+ratiomod.append @identity macio51_elecutil_r     = macio51_elecutil_a_0/@elem(macio51_elecutil_a_0,2022)
+'  NEMS Industrial Output 52: Natural Gas Distribution (NAICS 2212), services
+ratiomod.append @identity macio52_gasutil_r      = macio52_gasutil_a_0/@elem(macio52_gasutil_a_0,2022)
+
+
+'Federal excise tax accruals other than for a VAT.
+'taxmode=0 no tax; default energy price and quantity sim
+'taxmode=1 returns tax collections to consumers, revenue neutral
+'taxmode=2 returns tax collections to business, revenue neutral
+'taxmode=3 deficit reduction
+'taxmode=4 returns tax collections to consumers, deficit neutral
+'taxmode=5 returns tax collections to business, deficit neutral
+'taxmode=6 deficit reduction using RIN revenues
+if (taxmode <> 0) then
+  ratiomod.append @identity tximgfoth_r      = tximgfoth_a_0
+'Dummy variable for tximgfoth_r. Quadratic match average makes a mess of year
+' prior to revenue collection. The dummy variable corrects for this.
+  ratiomod.append @identity tximgfoth_dmy_r  = tximgfoth_r>0
+endif
+
+if (mac111d = 1) then
+  '  ElSec_InstCap, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Installed Capacity in Billion 2012 Dollars
+  ratiomod.append @identity elsec_instcap_r  = elsec_instcap_a_0-elsec_instcap_b_0
+  '  ElSec_Tran, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Transmission in Billion 2012 Dollars
+  ratiomod.append @identity elsec_tran_r     = elsec_tran_a_0-elsec_tran_b_0
+  '  ElSec_Retro, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Retrofits in Billion 2012 Dollars
+  ratiomod.append @identity elsec_retro_r    = elsec_retro_a_0-elsec_retro_b_0
+
+  'Dummy variable for total resource costs. Quadratic match average makes a mess of year
+  ' prior to revenue collection. The dummy variable corrects for this.
+  ratiomod.append @identity elsec_dmy_r      = (elsec_instcap_b_0+elsec_tran_b_0+elsec_retro_b_0)>0
+
+endif
+
+'Real imports of services
+ratiomod.append @identity msvxtour_r       = msvxtour_a_0
+'MAM alternative GDP price deflator
+ratiomod.append @identity jpgdp_r          = jpgdp_a
+'Weighted average price of imported crude received in refinery inventories
+ratiomod.append @identity poilimp_r        = poilimp_a_0/@elem(poilimp_a_0,2022)
+'ratiomod.append @identity poilimp_r        = poilimp_a_0/@elem(poilimp_a_0,2020)
+'West Texas Intermediate
+ratiomod.append @identity poilwti_r        = poilwti_a_0/@elem(poilwti_a_0,2022)
+'LPG Feedstock Price
+ratiomod.append @identity plginpf_r        = plginpf_a_0/@elem(plginpf_a_0,2022)
+'Naphtha Price
+ratiomod.append @identity ppfin_r          = ppfin_a_0/@elem(ppfin_a_0,2022)
+'Ethane Price
+ratiomod.append @identity petin_r          = petin_a_0/@elem(petin_a_0,2022)
+'Ethane Production/Availability
+ratiomod.append @identity rfqngpl_1_r      = rfqngpl_1_a_0/@elem(rfqngpl_1_a_0,2022)
+'Propane Production/Availability
+ratiomod.append @identity rfqngpl_2_r      = rfqngpl_2_a_0/@elem(rfqngpl_2_a_0,2022)
+
+
+'Value of Ethanol production
+ratiomod.append @identity ethanol_ip_r        = ethanol_ip_a_0
+
+
+'regional producer price indexes
+ratiomod.append @identity wpi051_neng_r  = wpi051_neng_a_0  / @elem(wpi051_neng_a_0, 2022)
+ratiomod.append @identity wpi053_neng_r  = wpi053_neng_a_0  / @elem(wpi053_neng_a_0, 2022)
+ratiomod.append @identity wpi054_neng_r  = wpi054_neng_a_0  / @elem(wpi054_neng_a_0, 2022)
+ratiomod.append @identity wpi055_neng_r  = wpi055_neng_a_0  / @elem(wpi055_neng_a_0, 2022)
+ratiomod.append @identity wpi057_neng_r  = wpi057_neng_a_0  / @elem(wpi057_neng_a_0, 2022)
+ratiomod.append @identity wpi0574_neng_r = wpi0574_neng_a_0 / @elem(wpi0574_neng_a_0,2022)
+ratiomod.append @identity wpi051_matl_r  = wpi051_matl_a_0  / @elem(wpi051_matl_a_0, 2022)
+ratiomod.append @identity wpi053_matl_r  = wpi053_matl_a_0  / @elem(wpi053_matl_a_0, 2022)
+ratiomod.append @identity wpi054_matl_r  = wpi054_matl_a_0  / @elem(wpi054_matl_a_0, 2022)
+ratiomod.append @identity wpi055_matl_r  = wpi055_matl_a_0  / @elem(wpi055_matl_a_0, 2022)
+ratiomod.append @identity wpi057_matl_r  = wpi057_matl_a_0  / @elem(wpi057_matl_a_0, 2022)
+ratiomod.append @identity wpi0574_matl_r = wpi0574_matl_a_0 / @elem(wpi0574_matl_a_0,2022)
+ratiomod.append @identity wpi051_enc_r   = wpi051_enc_a_0   / @elem(wpi051_enc_a_0,  2022)
+ratiomod.append @identity wpi053_enc_r   = wpi053_enc_a_0   / @elem(wpi053_enc_a_0,  2022)
+ratiomod.append @identity wpi054_enc_r   = wpi054_enc_a_0   / @elem(wpi054_enc_a_0,  2022)
+ratiomod.append @identity wpi055_enc_r   = wpi055_enc_a_0   / @elem(wpi055_enc_a_0,  2022)
+ratiomod.append @identity wpi057_enc_r   = wpi057_enc_a_0   / @elem(wpi057_enc_a_0,  2022)
+ratiomod.append @identity wpi0574_enc_r  = wpi0574_enc_a_0  / @elem(wpi0574_enc_a_0, 2022)
+ratiomod.append @identity wpi051_wnc_r   = wpi051_wnc_a_0   / @elem(wpi051_wnc_a_0,  2022)
+ratiomod.append @identity wpi053_wnc_r   = wpi053_wnc_a_0   / @elem(wpi053_wnc_a_0,  2022)
+ratiomod.append @identity wpi054_wnc_r   = wpi054_wnc_a_0   / @elem(wpi054_wnc_a_0,  2022)
+ratiomod.append @identity wpi055_wnc_r   = wpi055_wnc_a_0   / @elem(wpi055_wnc_a_0,  2022)
+ratiomod.append @identity wpi057_wnc_r   = wpi057_wnc_a_0   / @elem(wpi057_wnc_a_0,  2022)
+ratiomod.append @identity wpi0574_wnc_r  = wpi0574_wnc_a_0  / @elem(wpi0574_wnc_a_0, 2022)
+ratiomod.append @identity wpi051_satl_r  = wpi051_satl_a_0  / @elem(wpi051_satl_a_0, 2022)
+ratiomod.append @identity wpi053_satl_r  = wpi053_satl_a_0  / @elem(wpi053_satl_a_0, 2022)
+ratiomod.append @identity wpi054_satl_r  = wpi054_satl_a_0  / @elem(wpi054_satl_a_0, 2022)
+ratiomod.append @identity wpi055_satl_r  = wpi055_satl_a_0  / @elem(wpi055_satl_a_0, 2022)
+ratiomod.append @identity wpi057_satl_r  = wpi057_satl_a_0  / @elem(wpi057_satl_a_0, 2022)
+ratiomod.append @identity wpi0574_satl_r = wpi0574_satl_a_0 / @elem(wpi0574_satl_a_0,2022)
+ratiomod.append @identity wpi051_esc_r   = wpi051_esc_a_0   / @elem(wpi051_esc_a_0,  2022)
+ratiomod.append @identity wpi053_esc_r   = wpi053_esc_a_0   / @elem(wpi053_esc_a_0,  2022)
+ratiomod.append @identity wpi054_esc_r   = wpi054_esc_a_0   / @elem(wpi054_esc_a_0,  2022)
+ratiomod.append @identity wpi055_esc_r   = wpi055_esc_a_0   / @elem(wpi055_esc_a_0,  2022)
+ratiomod.append @identity wpi057_esc_r   = wpi057_esc_a_0   / @elem(wpi057_esc_a_0,  2022)
+ratiomod.append @identity wpi0574_esc_r  = wpi0574_esc_a_0  / @elem(wpi0574_esc_a_0, 2022)
+ratiomod.append @identity wpi051_wsc_r   = wpi051_wsc_a_0   / @elem(wpi051_wsc_a_0,  2022)
+ratiomod.append @identity wpi053_wsc_r   = wpi053_wsc_a_0   / @elem(wpi053_wsc_a_0,  2022)
+ratiomod.append @identity wpi054_wsc_r   = wpi054_wsc_a_0   / @elem(wpi054_wsc_a_0,  2022)
+ratiomod.append @identity wpi055_wsc_r   = wpi055_wsc_a_0   / @elem(wpi055_wsc_a_0,  2022)
+ratiomod.append @identity wpi057_wsc_r   = wpi057_wsc_a_0   / @elem(wpi057_wsc_a_0,  2022)
+ratiomod.append @identity wpi0574_wsc_r  = wpi0574_wsc_a_0  / @elem(wpi0574_wsc_a_0, 2022)
+ratiomod.append @identity wpi051_mtn_r   = wpi051_mtn_a_0   / @elem(wpi051_mtn_a_0,  2022)
+ratiomod.append @identity wpi053_mtn_r   = wpi053_mtn_a_0   / @elem(wpi053_mtn_a_0,  2022)
+ratiomod.append @identity wpi054_mtn_r   = wpi054_mtn_a_0   / @elem(wpi054_mtn_a_0,  2022)
+ratiomod.append @identity wpi055_mtn_r   = wpi055_mtn_a_0   / @elem(wpi055_mtn_a_0,  2022)
+ratiomod.append @identity wpi057_mtn_r   = wpi057_mtn_a_0   / @elem(wpi057_mtn_a_0,  2022)
+ratiomod.append @identity wpi0574_mtn_r  = wpi0574_mtn_a_0  / @elem(wpi0574_mtn_a_0, 2022)
+ratiomod.append @identity wpi051_pac_r   = wpi051_pac_a_0   / @elem(wpi051_pac_a_0,  2022)
+ratiomod.append @identity wpi053_pac_r   = wpi053_pac_a_0   / @elem(wpi053_pac_a_0,  2022)
+ratiomod.append @identity wpi054_pac_r   = wpi054_pac_a_0   / @elem(wpi054_pac_a_0,  2022)
+ratiomod.append @identity wpi055_pac_r   = wpi055_pac_a_0   / @elem(wpi055_pac_a_0,  2022)
+ratiomod.append @identity wpi057_pac_r   = wpi057_pac_a_0   / @elem(wpi057_pac_a_0,  2022)
+ratiomod.append @identity wpi0574_pac_r  = wpi0574_pac_a_0  / @elem(wpi0574_pac_a_0, 2022)
+
+
+'Solve model ratiomod of change from NEMS base for energy price and quantity assumptions.
+ratiomod.solve
+
+if (mac111d = 1) then
+  'This removes values in 2022.
+  '  ElSec_InstCap, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Installed Capacity in Billion 2012 Dollars
+  elsec_instcap_r_0  = elsec_instcap_r_0*elsec_dmy_r_0
+  '  ElSec_Tran, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Transmission in Billion 2012 Dollars
+  elsec_tran_r_0     = elsec_tran_r_0*elsec_dmy_r_0
+  '  ElSec_Retro, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Retrofits in Billion 2012 Dollars
+  elsec_retro_r_0    = elsec_retro_r_0*elsec_dmy_r_0
+  
+  elsec_dmy_r_0.setconvert r
+
+endif
+
+
+'Save workfile drvdata to the input directory containing annual data of
+' NEMS assumptions about energy prices and quantities and three models;
+' altmod and ratiomod.
+INSERT_1A
+
+'INSERT_2 creates database eviewsdb that will hold results of model
+' ratiomod; the change from NEMS base for energy price and quantity
+' assumptions.
+INSERT_2
+
+'Federal excise tax accruals other than for a VAT.
+'taxmode=0 no tax; default energy price and quantity sim
+'taxmode=1 returns tax collections to consumers, revenue neutral
+'taxmode=2 returns tax collections to business, revenue neutral
+'taxmode=3 deficit reduction
+'taxmode=4 returns tax collections to consumers, deficit neutral
+'taxmode=5 returns tax collections to business, deficit neutral
+'taxmode=6 deficit reduction using RIN revenues
+'Dummy variable for txgfoth_r. Quadratic match average makes a mess of year
+' prior to revenue collection. The dummy variable corrects for this. The setconvert
+' prevents the quadratic match average from making a mess of the dummy variable.
+if (taxmode <> 0) then
+  TXIMGFOTH_dmy_r_0.setconvert r
+endif
+
+
+'Create group ratio containing change from NEMS base for energy price and
+' quantity assumptions.
+group ratio *_r_0 mac* prod_naturalgas_a plginpf_a_0 ppfin_a_0 petin_a_0 ethanol_ip_a
+
+group jonshr js_*
+
+'Set frequency conversion from low to high for jon shares to constant
+' match average from EViews default
+for !i = 1 to jonshr.@count
+   %jsers = jonshr.@seriesname(!i)
+   {%jsers}.setconvert q
+next
+
+'INSERT_3 stores in database eviewsdb the energy price and quantity
+' series that are a change from NEMS base included in group ratio. It then
+' loads workfile mcevwork contained in the input directory.
+INSERT_3
+
+'Execute transportation subroutine
+call TRAN
+
+'INSERT_4 sets series to hold energy price quantity assumptions equal to GI base
+' over historical and forecast period.
+INSERT_4
+
+'domestic production of energy from petroleum
+ genr engdompet = engdompet_0
+'domestic production of energy from other energy
+ genr engdomoo = engdomoo_0
+'domestic production of energy from biomass
+ genr engdombio = engdombio_0
+'domestic production of energy from coal
+ genr engdomcoal = engdomcoal_0
+'domestic production of energy from natural gas
+ genr engdomng = engdomng_0
+'imports of biofuels
+ genr engimpbio_1 = engimpbio
+'imports of coal
+ genr engimpcoal = engimpcoal_0
+'imports of natural gas
+ genr engimpng = engimpng_0
+'imports of other fuels
+ genr engimpoo_1 = engimpoo
+'imports of petroleum
+ genr engimppet = engimppet_0
+'exports of biofuels
+ genr engexpbio_1 = engexpbio
+'exports of coal
+ genr engexpcoal = engexpcoal_0
+'exports of natural gas
+ genr engexpng_1 = engexpng
+'exports of other fuels
+ genr engexpoo_1 = engexpoo
+'exports of petroleum
+ genr engexppet = engexppet_0
+'total demand for biofuels
+ genr dallfuelsbio = dallfuelsbio_0
+'total demand for coal
+ genr dallfuelscoal = dallfuelscoal_0
+'total demand for natural gas
+ genr dallfuelsng = dallfuelsng_0
+'total demand for other fuels
+ genr dallfuelsoo = dallfuelsoo_0
+'total demand for petroleum
+ genr dallfuelspet = dallfuelspet_0
+'Difference between total energy supply and demand
+ genr engresidual     = engresidual_0
+'Difference between total petroleum supply and demand
+ genr engresidualpet_1     = engresidualpet
+'end-use demand for coal (exclude electricity generation)
+ genr denducoal  = denducoal_0
+'sales of electricity to ultimate consumers
+ genr denduelc   = denduelc_0
+'end-use demand for natural gas
+ genr dendung    = dendung_0
+'end-use demand for petroleum
+ genr dendupet   = dendupet_0
+'end-use demand for biofuels
+ genr dendubio = dendubio_0
+'Industrial production index - coal mining
+ genr ipsn2121       = ipsn2121_0
+'Industrial production index - oil and gas extraction
+ genr ipsg211a3      = ipsg211a3_0
+'Highway consumption of gasoline and special fuels
+ genr qgasasf        = qgasasf_0
+'Real consumer spending on fuel oil and coal
+ genr cnefaor        = cnefaor_0
+'Real consumer spending on natural gas
+ genr csvugr         = csvugr_0
+'Real consumer spending on electricity
+ genr csvuer         = csvuer_0
+'Consumer spending on gasoline and motor oil
+ genr cnegaor        = cnegaor_0
+'Chained price index - consumer fuel oil and coal
+ genr jpcnefao       = jpcnefao_0
+'Chained price index - household electricity
+ genr jpcsvue        = jpcsvue_0
+'Chained price index - household natural gas
+ genr jpcsvug        = jpcsvug_0
+'Chained price index - consumer gasoline and oil
+ genr jpcnegao       = jpcnegao_0
+'Producer price index - coal
+ genr wpi051         = wpi051_0
+'Producer price index - gas fuels
+ genr wpi053         = wpi053_0
+'Henry Hub cash market price of natural gas
+ genr pnghh          = pnghh_0
+'Producer price index - electric power
+ genr wpi054         = wpi054_0
+'Producer price index - utility natural gas
+ genr wpi055         = wpi055_0
+'Producer price index - crude petroleum
+ genr wpi0561        = wpi0561_0
+'Producer price index - refined petroleum products
+ genr wpi057         = wpi057_0
+'Producer price index - residual petroleum fuels
+ genr wpi0574        = wpi0574_0
+'Steam coal share in electrical generation
+ genr endusepccoal_1 = endusepccoal
+'Natural gas share in electrical generation
+ genr endusepcng_1   = endusepcng
+'Distillate and residual fuel oil share in electrical generation
+ genr endusepcpet_1  = endusepcpet
+'Industrial production--Crude oil and natural gas plant liquids
+ genr ipsg211o       = ipsg211o_0
+
+
+'Regional producer price indexes
+call REGWPIPT1
+
+
+'CAFE
+'cafe=1 Exogenize PLVAVG, Average price of a new light vehicle (thousands of dollars)
+if (cafemode <> 0) then
+  genr plvavg = plvavg_0
+endif
+
+
+'Federal excise tax accruals other than for a VAT.
+'taxmode=0 no tax; default energy price and quantity sim
+'taxmode=1 returns tax collections to consumers, revenue neutral
+'taxmode=2 returns tax collections to business, revenue neutral
+'taxmode=3 deficit reduction
+'taxmode=4 returns tax collections to consumers, deficit neutral
+'taxmode=5 returns tax collections to business, deficit neutral
+'taxmode=6 deficit reduction using RIN revenues
+ if (taxmode <> 0) then
+   genr tximgfoth_a_1  = tximgfoth_a
+ endif
+ if (taxmode = 1 or taxmode = 4) then
+   genr txpgf_a        = 0.
+   genr txpgf_a_1      = txpgf_a
+ endif
+ if (taxmode = 2 or taxmode = 5) then
+   genr txcorpgf_a     = 0.
+   genr txcorpgf_a_1   = txcorpgf_a
+ endif
+ if (taxmode = 4 or taxmode = 5) then
+   genr netsavgffe     = netsavgffe_0
+ endif
+
+
+ '111_d code
+ if (mac111d = 1) then
+     genr tfptrend_1     = tfptrend
+ endif 
+
+
+'Weighted average price of imported crude received in refinery inventories
+ genr poilimp        = poilimp_0
+'West Texas Intermediate
+ genr poilwti        = poilwti_0
+'US dollar trade-wtd. exchange rate with developing countries
+ genr jexchoitp      = jexchoitp_0
+'US dollar trade-wtd. exchange rate with industrial countries
+ genr jexchmtp       = jexchmtp_0
+'Real trade-wtd. GDP in rest-of-world developing countries
+ genr jgdpoitpr      = jgdpoitprb
+'Real trade-wtd. GDP in rest-of-world industrial countries
+ genr jgdpmtpr       = jgdpmtprb
+'Leather and allied products
+ genr ipsg316        = ipsg316_0
+'Lever for turning on Federal Reserve reaction function
+ genr rmfflev        = 0 
+ genr rmfflev_1      = rmfflev
+'Real nonresidential investment-computer equipment
+ genr ifnreeipccr    = ifnreeipccr_0
+'Electronic components and accessories
+ genr go367          = go367_0
+'Price weight for industrial production
+ genr pj228a9        = pj228a9_0
+ genr pj221_4        = pj221_4_0
+'Coal Employment and production
+' genr enrm2121_1     = enrm2121
+ genr ipsg33612      = ipsg33612_0
+ 
+
+' Test for and remove forecast range if present
+if @isobject("s_fcst") then
+  delete s_fcst
+
+endif
+
+
+'INSERT_5 defines a sample range object for applying energy price and quantity shocks to quarterly
+' forecast range set by NEMS.
+INSERT_5
+
+'INSERT_5A defines a sample range object for applying energy price and quantity shocks to quarterly
+' forecast range set by NEMS.
+INSERT_5A
+
+'domestic production of energy from petroleum
+ genr engdompet       = @mean(engdompet,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engdompet_r_0
+'Industrial production--Crude oil and natural gas plant liquids
+ genr ipsg211o        = @mean(ipsg211o,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engdompet_r_0
+'domestic production of energy from other energy
+ genr engdomoo        = @mean(engdomoo,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engdomoo_r_0
+'domestic production of energy from biomass
+ genr engdombio       = @mean(engdombio,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engdombio_r_0
+'domestic production of energy from coal
+ genr engdomcoal      = @mean(engdomcoal,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engdomcoal_r_0
+'domestic production of energy from natural gas
+ genr engdomng        = @mean(engdomng,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engdomng_r_0
+'imports of biofuels
+ genr engimpbio_1     = @mean(engimpbio_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engimpbio_r_0
+'imports of coal
+ genr engimpcoal      = @mean(engimpcoal,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engimpcoal_r_0
+'imports of natural gas
+ genr engimpng        = @mean(engimpng,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engimpng_r_0
+'imports of other fuels
+ genr engimpoo_1      = @mean(engimpoo_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engimpoo_r_0
+'imports of petroleum
+ genr engimppet       = @mean(engimppet,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engimppet_r_0
+'exports of biofuels
+ genr engexpbio_1     = @mean(engexpbio_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engexpbio_r_0
+'exports of coal
+ genr engexpcoal      = @mean(engexpcoal,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engexpcoal_r_0
+'exports of natural gas
+ genr engexpng_1      = @mean(engexpng_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engexpng_r_0
+'exports of other fuels
+ genr engexpoo_1      = @mean(engexpoo_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engexpoo_r_0
+'exports of petroleum
+ genr engexppet       = @mean(engexppet,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engexppet_r_0
+'total demand for biofuels
+ genr dallfuelsbio    = @mean(dallfuelsbio,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dallfuelsbio_r_0
+'total demand for coal
+ genr dallfuelscoal   = @mean(dallfuelscoal,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dallfuelscoal_r_0
+'total demand for natural gas
+ genr dallfuelsng     = @mean(dallfuelsng,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dallfuelsng_r_0
+'total demand for other fuels
+ genr dallfuelsoo     = @mean(dallfuelsoo,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dallfuelsoo_r_0
+'total demand for petroleum
+ genr dallfuelspet    = @mean(dallfuelspet,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dallfuelspet_r_0
+'difference between total energy supply and demand
+ genr engresidual     = (engdompet     + engdomng     + engdomcoal     + engdombio     + engdomoo)   _
+                      + (engimppet     + engimpng     + engimpcoal     + engimpbio_1   + engimpoo_1) _
+                      - (engexppet     + engexpng_1   + engexpcoal     + engexpbio_1   + engexpoo_1) _
+                      - (dallfuelspet  + dallfuelsng  + dallfuelscoal  + dallfuelsbio  + dallfuelsoo)
+'difference between total petroleum supply and demand
+ genr engresidualpet_1  = dallfuelspet + engexppet - engdompet - engimppet
+'difference between total natural gas supply and demand
+ genr engresidualng_1  = dallfuelsng + engexpng_1 - engdomng - engimpng
+'difference between total coal supply and demand
+ genr engresidualcoal  = dallfuelscoal + engexpcoal - engdomcoal - engimpcoal
+'difference between total biomass supply and demand
+ genr engresidualbio_1  = dallfuelsbio + engexpbio_1 - engdombio - engimpbio_1
+'difference between other supply and demand
+ genr engresidualoo_1  = dallfuelsoo + engexpoo_1 - engdomoo - engimpoo_1
+'end-use demand for coal (exclude electricity generation)
+ genr denducoal     = @mean(denducoal,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::denducoal_r_0
+'sales of electricity to ultimate consumers
+ genr denduelc      = @mean(denduelc,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::denduelc_r_0
+'end-use demand for natural gas
+ genr dendung       = @mean(dendung,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dendung_r_0
+'end-use demand for petroleum
+ genr dendupet      = @mean(dendupet,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dendupet_r_0
+'end-use demand for biofuels
+ genr dendubio        = @mean(dendubio,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::dendubio_r_0
+'Industrial production index - coal mining
+ genr ipsn2121       = @mean(ipsn2121,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::ipsn2121_r_0
+'Industrial production index - oil and gas extraction
+ genr ipsg211a3      = @mean(ipsg211a3,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::ipsg211a3_r_0
+'Highway consumption of gasoline and special fuels
+ genr qgasasf        = @mean(qgasasf,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::qgasasf_r_0
+'Real consumer spending on fuel oil and coal
+ genr cnefaor        = @mean(cnefaor,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::cnefaor_r_0
+'Real consumer spending on natural gas
+ genr csvugr         = @mean(csvugr,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::csvugr_r_0
+'Real consumer spending on electricity
+ genr csvuer         = @mean(csvuer,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::csvuer_r_0
+'Consumer spending on gasoline and motor oil
+ genr cnegaor        = @mean(cnegaor,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::cnegaor_r_0
+'Chained price index - consumer fuel oil and coal
+ genr jpcnefao       = @mean(jpcnefao,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::jpcnefao_r_0
+'Chained price index - household electricity
+ genr jpcsvue        = @mean(jpcsvue,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::jpcsvue_r_0
+'Chained price index - household natural gas
+ genr jpcsvug        = @mean(jpcsvug,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::jpcsvug_r_0
+'Chained price index - consumer gasoline and oil
+ genr jpcnegao       = @mean(jpcnegao,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::jpcnegao_r_0
+'Producer price index - coal
+ genr wpi051         = @mean(wpi051,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi051_r_0
+'Producer price index - gas fuels
+ genr wpi053         = @mean(wpi053,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi053_r_0
+'Henry Hub cash market price of natural gas
+ genr pnghh          = @mean(pnghh,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::pnghh_r_0
+'Producer price index - electric power
+ genr wpi054         = @mean(wpi054,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi054_r_0
+'Producer price index - utility natural gas
+ genr wpi055         = @mean(wpi055,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi055_r_0
+'Producer price index - crude petroleum
+ genr wpi0561        = @mean(wpi0561,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi0561_r_0
+'Producer price index - refined petroleum products
+ genr wpi057         = @mean(wpi057,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi057_r_0
+'Producer price index - residual petroleum fuels
+ genr wpi0574        = @mean(wpi0574,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::wpi0574_r_0
+'Steam coal share in electrical generation
+ genr endusepccoal_1 = @mean(endusepccoal_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::endusepccoal_r_0
+'Natural gas share in electrical generation
+ genr endusepcng_1   = @mean(endusepcng_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::endusepcng_r_0
+'Distillate and residual fuel oil share in electrical generation
+ genr endusepcpet_1  = @mean(endusepcpet_1,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::endusepcpet_r_0
+'Value of Ethanol Industrial Production
+ copy eviewsdb::ethanol_ip_a ethanol_ip
+ copy ethanol_ip rr325193
+ 
+ 
+ '  NEMS Industrial Output 25: Petroleum Refining (NAICS 32411)
+ copy eviewsdb::macio25_petrorefine_a macio25_petrorefine_a
+ '  NEMS Industrial Output 45: Coal Mining (NAICS 2121), manufacturing
+ copy eviewsdb::macio45_coalmine_a macio45_coalmine_a
+ '  NEMS Industrial Output 46: Oil & Gas Extraction (NAICS 211, 213)
+ copy eviewsdb::macio46_oilgasxtract_a macio46_oilgasxtract_a
+ '  NEMS Industrial Output 51: Electric Utilities (NAICS 2211), services
+ copy eviewsdb::macio51_elecutil_a macio51_elecutil_a
+ '  NEMS Industrial Output 52: Gas Utilities (NAICS 2212), services
+ copy eviewsdb::macio52_gasutil_a macio52_gasutil_a
+
+
+'Low Price and Low Oil and Gas scenarios
+'if (wwopmode = 1) then
+'   copy csvfinfree_0 csvfinfree
+'   copy ipsg316_0 ipsg316
+'  copy csvfinfree_lp csvfinfree
+'  copy ipsg316_a_lp ipsg316_a
+'
+'endif
+
+'High Price scenario
+'if (wwopmode = 3) then
+'  copy tjwpi03_0 tjwpi03
+'  copy ipsg3256_0 ipsg3256
+'
+'endif
+
+
+
+
+'High Price scenario
+'if (wwopmode = 3) then
+'  copy go281a6_0 go281a6
+'  copy xxjqind361a2_0 xxjqind361a2
+'  copy xxjqind369_0 xxjqind369
+'  copy ipsg33612_0 ipsg33612
+'  copy pj228a9_0 pj228a9
+'  copy xxjqind365_0 xxjqind365
+'  copy suvtham_0 suvtham
+'  copy csvfinfree_0 csvfinfree
+  
+
+'  copy GO367_0 go367
+'  copy IPSG3362_0 ipsg3362
+'  copy PJ221_4_0 pj221_4
+'  copy PJ228A9_0 pj228a9
+  
+  
+  'copy pj228a9_0 pj228a9
+  'copy pj221_4_0 pj221_4
+  'copy ipsg33612_0 ipsg33612
+  'copy iirt441r_0 iirt441r
+  'copy suvtham_0 suvtham
+  'copy txbasef_0 txbasef
+  'copy go369_0 go369
+  'copy pj252_9_0 pj252_9
+  'copy ipsg3122_0 ipsg3122
+  'copy go366_0 go366
+  'copy go367_0 go367
+
+
+
+
+   'copy IPSG3342_0 IPSG3342 
+   'copy IPSG33612_0 IPSG33612
+   'copy PJ221_4_0 PJ221_4
+   'copy PJ228A9_0   PJ228A9 
+   
+'endif
+
+
+'if (wwopmode = 3) then
+'   copy IPSG3221_A_HIGHPRICE    IPSG3221_A_1 
+'   copy IPSG32511A9_A_HIGHPRICE IPSG32511A9_A_1
+'   copy IPSG32512T8_A_HIGHPRICE IPSG32512T8_A_1
+'   copy IPSG3252_A_HIGHPRICE    IPSG3252_A_1 
+'   copy IPSG3253_A_HIGHPRICE    IPSG3253_A_1
+'   copy IPSG3254_A_HIGHPRICE    IPSG3254_A_1
+'   copy IPSG3256_A_HIGHPRICE    IPSG3256_A_1
+'   copy IPSG3311A2_A_HIGHPRICE  IPSG3311A2_A_1
+'   copy IPSG3313_A_HIGHPRICE    IPSG3313_A_1
+'   
+'endif
+
+
+'Regional producer price indexes
+call REGWPIPT2
+
+
+'Federal excise tax accruals other than for a VAT.
+'taxmode=0 no tax; default energy price and quantity sim
+'taxmode=1 returns tax collections to consumers, revenue neutral
+'taxmode=2 returns tax collections to business, revenue neutral
+'taxmode=3 deficit reduction
+'taxmode=4 returns tax collections to consumers, deficit neutral
+'taxmode=5 returns tax collections to business, deficit neutral
+'taxmode=6 deficit reduction using RIN revenues
+ if (taxmode <> 0) then
+   tximgfoth_a_1 = tximgfoth_a + ({%wfpathpwd}eviewsdb::tximgfoth_dmy_r_0*{%wfpathpwd}eviewsdb::tximgfoth_r_0)
+ endif
+ if (taxmode = 1 or taxmode = 4) then
+   txpgf_a_1     = txpgf_a     - ({%wfpathpwd}eviewsdb::tximgfoth_dmy_r_0*{%wfpathpwd}eviewsdb::tximgfoth_r_0)
+ endif
+ if (taxmode = 2 or taxmode = 5) then
+   txcorpgf_a_1  = txcorpgf_a  - ({%wfpathpwd}eviewsdb::tximgfoth_dmy_r_0*{%wfpathpwd}eviewsdb::tximgfoth_r_0)
+ endif
+
+
+'Weighted average price of imported crude received in refinery inventories
+ genr poilimp       = @mean(poilimp_0,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::poilimp_r_0
+ 'smpl 2021 2050
+ 'genr poilimp       = @mean(poilimp_0,"2020:1 2020:4")*{%wfpathpwd}eviewsdb::poilimp_r_0
+ 'smpl s_fcst
+'West Texas Intermediate
+ genr poilwti       = @mean(poilwti_0,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::poilwti_r_0
+'Real trade-wtd. GDP in rest-of-world developing countries
+' genr jgdpoitpr     = jgdpoitprb*(1.0-(((poilimp/poilimp_0)-1.0)*0.02))
+'Real trade-wtd. GDP in rest-of-world industrial countries
+' genr jgdpmtpr      = jgdpmtprb*(1.0-(((poilimp/poilimp_0)-1.0)*0.02))
+'Lever for turning on Federal Reserve reaction function
+ genr rmfflev_1     = 1.0
+
+'Lever for turning on oil price effect for advanced foreign economies
+genr opmtplev_1 = 1.0
+'Lever for turning on oil price effect for emerging market economies
+genr opoitplev_1 = 1.0
+'Lever to link advanced foreign economies GDP growth to US GDP growth
+genr jgdpmtprlev_1 = 0.5
+'Lever to link emerging market economies GDP growth to US GDP growth
+genr jgdpoitprlev_1 = 0.5
+
+'Generated output related variables
+genr MGKOR  = mgkor_0
+genr XGKOR  = xgkor_0
+genr XXJQIND361A2 = XXJQIND361A2_0
+genr XXJQIND357 = XXJQIND357_0
+genr XXJQIND365 = XXJQIND365_0
+genr XXJQIND366 = XXJQIND366_0
+genr XXJQIND371 = XXJQIND371_0
+genr PJ366 = PJ366_0
+genr XXJQIND3714 = XXJQIND3714_0
+genr PJ369 = PJ369_0
+genr XXJQIND371BAC = XXJQIND371BAC_0
+genr rmcorpaaa = rmcorpaaa_0
+
+
+'if (wwopmode <> 2 or ogtechmode <> 1) then
+' genr rmfflev_1     = 0.9
+' genr rmfflev       = 0.9
+'endif
+
+'if (wwopmode <> 2) then
+'  genr rmfflev_1     = 0.9
+'endif
+
+' if (wwopmode = 1) then
+'   genr csvfinfree_a   = csvfinfree_a_lp
+'   genr csvfinfree_a_1 = csvfinfree_a_lp
+' endif
+
+
+'Technology cases.
+'ttechmode=1 low technology assumptions
+'ttechmode=2 no technology assumptions; default energy price and quantity sim
+'ttechmode=3 high technology assumptions
+ if (ttechmode <> 2 and macmode = 2) then
+
+' domestic energy demand index used for AEO technology cases
+' source: \\nem4\t\output\aeo2023\ref2023\d111422c\p1\mcevwork.wf1; qeng_1 from 2023q1 to 2050q4
+  qeng.fill(s=s_fcst) 1.062996, 1.062659, 1.061887, 1.060681, 1.056913, 1.055689, 1.054882, 1.054492, _
+1.055587, 1.055602, 1.055607, 1.0556, 1.055677, 1.055612, 1.055497, 1.055334, 1.054773, 1.054653, _
+1.054625, 1.054688, 1.055053, 1.055215, 1.055385, 1.055563, 1.055785, 1.055963, 1.056135, 1.056299, _
+1.056516, 1.056643, 1.05674, 1.056805, 1.05664, 1.056725, 1.056859, 1.057042, 1.057511, 1.057699, _
+1.057843, 1.057942, 1.05772, 1.057841, 1.058029, 1.058283, 1.058762, 1.059085, 1.059411, 1.05974, _
+1.059943, 1.060328, 1.060767, 1.06126, 1.061983, 1.062514, 1.063029, 1.063527, 1.063908, 1.064415, _
+1.064948, 1.065505, 1.066135, 1.066722, 1.067315, 1.067913, 1.068408, 1.06906, 1.069762, 1.070512, _
+1.071296, 1.072151, 1.07306, 1.074025, 1.075171, 1.076195, 1.077223, 1.078255, 1.079189, 1.080271, _
+1.081398, 1.08257, 1.083761, 1.085035, 1.086364, 1.087749, 1.089217, 1.090704, 1.092235, 1.093812, _
+1.095524, 1.097155, 1.098794, 1.100443, 1.102017, 1.103716, 1.105457, 1.10724, 1.109167, 1.110993, _
+1.11282, 1.114647, 1.116565, 1.118359, 1.120118, 1.121843, 1.123172, 1.124972, 1.126882, 1.128902, _
+1.131033, 1.133273, 1.135623, 1.138083
+
+ endif
+
+ if (ttechmode <> 2 and macmode = 4) then
+
+' domestic energy demand index used for AEO technology cases
+' source: \\nem5\u:\output\rt2\lowmacro\d111422b\p1\mcevwork.wf1; qeng_1 from 2023q1 to 2050q4
+  qeng.fill(s=s_fcst) 1.056183, 1.054396, 1.051901, 1.048698, 1.041249, 1.038045, 1.035549, 1.033759, _
+1.034424, 1.03335, 1.032285, 1.031229, 1.030129, 1.029112, 1.028123, 1.027165, 1.025953, 1.025166, _
+1.024523, 1.024022, 1.024101, 1.023712, 1.02329, 1.022837, 1.022229, 1.021762, 1.021312, 1.020879, _
+1.020506, 1.020092, 1.019678, 1.019265, 1.018644, 1.018316, 1.018071, 1.017911, 1.018071, 1.017984, _
+1.017886, 1.017778, 1.017698, 1.017554, 1.017383, 1.017187, 1.016898, 1.016676, 1.016454, 1.016233, _
+1.016003, 1.015787, 1.015576, 1.01537, 1.015064, 1.014909, 1.014801, 1.014739, 1.014691, 1.014734, _
+1.014837, 1.015, 1.0153, 1.01555, 1.015828, 1.016134, 1.016555, 1.016883, 1.017204, 1.017519, _
+1.017674, 1.018037, 1.018455, 1.018927, 1.019496, 1.020062, 1.020666, 1.021309, 1.022108, 1.022781, _
+1.023444, 1.024098, 1.0246, 1.025294, 1.026036, 1.026826, 1.027751, 1.028604, 1.029471, 1.030352, _
+1.03127, 1.03217, 1.033075, 1.033986, 1.034798, 1.03576, 1.036768, 1.037823, 1.038948, 1.040087, _
+1.041263, 1.042477, 1.043585, 1.04493, 1.046369, 1.047902, 1.049688, 1.051346, 1.053035, 1.054755, _
+1.056506, 1.058287, 1.0601, 1.061944
+
+ endif
+
+ if (ttechmode <> 2 and macmode = 5) then
+
+' domestic energy demand index used for AEO technology cases
+' source: \\nem5\u:\output\rt2\highmacro\d111422a\p1\mcevwork.wf1; qeng_1 from 2023q1 to 2050q4
+  qeng.fill(s=s_fcst) 1.072681, 1.0742, 1.075381, 1.076225, 1.07518, 1.075967, 1.077037, 1.078388, _
+1.08106, 1.082561, 1.083928, 1.085162, 1.086174, 1.087177, 1.088083, 1.088891, 1.089198, 1.089971, _
+1.090808, 1.091709, 1.092937, 1.09386, 1.09474, 1.095578, 1.096207, 1.097027, 1.097873, 1.098743, _
+1.099644, 1.100561, 1.1015, 1.102461, 1.10353, 1.104501, 1.105459, 1.106405, 1.107394, 1.108294, _
+1.109159, 1.10999, 1.110615, 1.111447, 1.112313, 1.113215, 1.114077, 1.115078, 1.116142, 1.117271, _
+1.118381, 1.119671, 1.121057, 1.122541, 1.124147, 1.125814, 1.127568, 1.129408, 1.131386, 1.13338, _
+1.13544, 1.137566, 1.140029, 1.14218, 1.144289, 1.146356, 1.14814, 1.15022, 1.152356, 1.154548, _
+1.156746, 1.159066, 1.161461, 1.16393, 1.166543, 1.169133, 1.17177, 1.174453, 1.17741, 1.180097, _
+1.18274, 1.18534, 1.187619, 1.190243, 1.192935, 1.195694, 1.198471, 1.201386, 1.204387, 1.207477, _
+1.210989, 1.214119, 1.217202, 1.220238, 1.222806, 1.225916, 1.229149, 1.232503, 1.236343, 1.239794, _
+1.243222, 1.246626, 1.24962, 1.253131, 1.256771, 1.260542, 1.26482, 1.268701, 1.272562, 1.276402, _
+1.280222, 1.284022, 1.287801, 1.29156
+
+ endif
+
+
+'overrides for aeo2022
+copy gslcwssr_0 gslcwssr
+copy jexchmtp_0 jexchmtp
+copy jexchoitp_0 jexchoitp
+'copy csvfinfree_0 csvfinfree
+
+'copy MGAUTOR_0 mgautor
+'copy MGCR_0 mgcr
+'copy MGINAPETR_0 mginapetr
+'copy MGOR_0 mgor
+
+copy plvavg_0 plvavg
+copy rmtcm10y_0 rmtcm10y
+copy rmcorppuaa_0 rmcorppuaa
+
+'copy ruc_0 ruc
+'copy XXPJ314_0 XXPJ314 
+'copy IPSG314_0 IPSG314
+'copy XXJQIND22X7_0 XXJQIND22X7
+'copy PJ228A9_0 PJ228A9
+
+copy hu1nsold_0 hu1nsold
+copy husps2a_0 husps2a
+
+copy cdmvnr_0 cdmvnr
+copy ifnreetlvadjr_0 ifnreetlvadjr
+copy ifmvpunar_0 ifmvpunar
+
+
+'CDMVNR, IFNREETLVADJR, used vehicle sales by business (IFMVPUNAR or IFMVPUNLR) or average transaction prices PLVAVG
+
+'INSERT_5A sets sample range for simulating the model
+INSERT_5A
+
+
+'Declare model m_us2021a solution as Scenario 1.
+ m_us2021a.scenario(n) "Scenario 1"
+
+' m_us2021a.exclude(m) poilimp
+
+' m_us2021a.exclude(m) PNGHH POILIMP  _
+' dallfuelspet  engdompet engimppet _
+' dallfuelsng engdomng engimpng _
+' dallfuelscoal engexpcoal engdomcoal engimpcoal engresidualcoal _
+' rr325193 _
+' engdombio dallfuelsbio dendubio _
+' engdomoo dallfuelsoo dendupet dendung denduelc denducoal _
+' JEXCHMTP JEXCHOITP _
+' wpi051 wpi054 wpi055
+
+ m_us2021a.exclude(m) PNGHH POILIMP  _
+   engdompet  _
+ dallfuelsng engdomng engimpng _
+ dallfuelscoal engexpcoal engdomcoal engimpcoal engresidualcoal _
+ rr325193 _
+ engdombio dallfuelsbio dendubio _
+ engdomoo dallfuelsoo dendupet dendung denduelc denducoal _
+ JEXCHMTP JEXCHOITP _
+ wpi051 wpi054 wpi055 ipsg316 _
+ jpcsvue jpcsvug
+
+ m_us2021a.override engresidualpet engresidualng engexpbio engimpbio engresidualbio _
+ engexpoo engimpoo engresidualoo engexpng opmtplev opoitplev jgdpmtprlev jgdpoitprlev
+
+
+
+' m_us2021a.exclude(m) PNGHH POILIMP  _
+' dallfuelspet  engdompet engimppet _
+' dallfuelsng engdomng engimpng _
+' dallfuelscoal engexpcoal engdomcoal engimpcoal engresidualcoal _
+' rr325193 _
+' engdombio dallfuelsbio dendubio _
+' engdomoo dallfuelsoo dendupet dendung denduelc denducoal _
+' gslcwssr JEXCHMTP JEXCHOITP RMTCM10Y RMCORPPUAA _
+' HU1NSOLD HUSPS2A CDMVNR IFNREETLVADJR IFMVPUNAR
+'
+' m_us2021a.override engresidualpet engresidualng engexpbio engimpbio engresidualbio _
+' engexpoo engimpoo engresidualoo engexpng opmtplev opoitplev jgdpmtprlev jgdpoitprlev _
+' ruc_a suvgov
+
+
+
+ 'm_us2021a.exclude(m) PNGHH POILIMP  _
+ 'dallfuelspet  engdompet engimppet _
+ 'dallfuelsng engdomng engimpng _
+ 'dallfuelscoal engexpcoal engdomcoal engimpcoal engresidualcoal _
+ 'rr325193 _
+ 'engdombio dallfuelsbio dendubio _
+ 'engdomoo dallfuelsoo dendupet dendung denduelc denducoal _
+ 'MGKOR XGKOR XXJQIND361A2 XXJQIND357 XXJQIND365 XXJQIND366 XXJQIND371 PJ366 XXJQIND3714 PJ369 XXJQIND371BAC
+
+
+
+
+
+'low macro
+if (macmode = 4) then
+'  copy pj252_9_0 pj252_9
+'  copy csvfinfree_0 csvfinfree
+'  m_us2021a.exclude(m) pj252_9 csvfinfree
+
+  copy tefin52_0 tefin52
+  copy tefin53_0 tefin53
+  m_us2021a.exclude(m) tefin52 tefin53
+
+endif
+
+
+
+
+'high macro
+'if (macmode = 5) then
+'
+'
+'for %x IPSG32511A9 IPSG32512T8 IPSG3252 IPSG3253 IPSG3272 IPSG3313 _
+'IPSG3256 CSVOCTR CSVFINFREE CSVFINFEER IPSG2122 IPSG2123 RUC RMTCM10Y _
+'RMCORPPUAA TEMD321 TEMN322 TEMD332 TEMD334 TEMD335 TEMD336 TEMD339 
+'
+'copy {%x}_0 {%x}
+'next
+'
+'m_us2021a.override ENRM2121
+'
+'
+'m_us2021a.exclude(m)  IPSG32511A9 IPSG32512T8 IPSG3252 IPSG3253 IPSG3272 _
+'IPSG3313 IPSG3256 CSVOCTR CSVFINFREE CSVFINFEER IPSG2122 IPSG2123 RUC RMTCM10Y _
+'RMCORPPUAA TEMD321 TEMN322 TEMD332 TEMD334 TEMD335 TEMD336 TEMD339 
+'
+'
+'m_us2021a.override ENRM2121 IPSG3149_A TEMD321_A TEMN322_A TEMD332_A TEMD334_A _
+'TEMD335_A TEMD336_A TEMD339_A IPSG3221_A IPSG32511A9_A IPSG32512T8_A IPSG3252_A _
+'IPSG3253_A IPSG3272_A IPSG3311A2_A IPSG3313_A IPSG3256_A IPSG321_A IPSG337_A _
+'CDMVNR_A CSVOCTR_A CSVFINFREE_A CSVOOR_A CSVFINFEER_A CSVRECR_A HUSPS1_A HUSPS2A_A _
+'IFMVPUNAR_A IFNREETLVADJR_A IPSG2122_A IPSG2123_A RUFE RMTCM10Y_A RMCORPPUAA_A _
+'TEINFO_A
+'
+'
+'endif
+
+
+'low macro
+'if (macmode = 4) then
+'
+'
+'for %x IPSG3221 IPSG323 IPSG32511A9 IPSG32512T8 IPSG3252 IPSG3253 IPSG3255A9 _
+'IPSG3272 IPSG3311A2 IPSG3313 IPSG3256 IPSN32731 IPSG321 IPSG339 IPSG332 IPSG334 _
+'IPSG335 CSVOOR CSVRECR IPSG2122 IPSG2123 RUC RMTCM10Y RMCORPPUAA TEMN311 TEMN314 _
+'TEMN323 TEMD327 TEMD331 TEMD333 TEMD337 TEMD339
+'
+'  copy {%x}_0 {%x}
+'
+'next
+'
+'
+'m_us2021a.override ENRM2121
+'
+'m_us2021a.exclude(m) IPSG3221 IPSG323 IPSG32511A9 IPSG32512T8 IPSG3252 IPSG3253 IPSG3255A9 _
+'IPSG3272 IPSG3311A2 IPSG3313 IPSG3256 IPSN32731 IPSG321 IPSG339 IPSG332 IPSG334 _
+'IPSG335 CSVOOR CSVRECR IPSG2122 IPSG2123 RUC RMTCM10Y RMCORPPUAA TEMN311 TEMN314 _
+'TEMN323 TEMD327 TEMD331 TEMD333 TEMD337 TEMD339
+'
+'
+'m_us2021a.override ENRM2121 IPSG3221_A IPSG323_A IPSG32511A9_A IPSG32512T8_A _
+'IPSG3252_A IPSG3253_A IPSG3255A9_A IPSG3272_A IPSG3311A2_A IPSG3313_A IPSG3256_A _
+'IPSN32731_A IPSG321_A IPSG339_A IPSG332_A IPSG334_A IPSG335_A CSVOOR_A CSVRECR_A _
+'IPSG2122_A IPSG2123_A RUFE RMTCM10Y_A RMCORPPUAA_A TEMN311_A TEMN314_A TEMN323_A _
+'TEMD327_A TEMD331_A TEMD333_A TEMD337_A TEMD339_A 
+'
+'
+'endif
+
+
+'WWOP
+'if (wwopmode <> 2) then
+'
+'  m_us2021a.override(m) rmfflev
+'  
+'endif
+
+
+'Low Price
+'if (wwopmode = 1) then
+'
+'  m_us2021a.exclude(m) WPI051 WPI053 WPI054 WPI055
+'
+'endif
+
+
+'Low Price
+'if (wwopmode = 1) then
+'
+  'copy RMTCM10Y_A_LP RMTCM10Y_A
+  'copy RMCORPPUAA_A_LP RMCORPPUAA_A
+  'copy RR2122_Q_FIB_A_LP RR2122_Q_FIB_A
+  'copy RR2123_Q_FIB_A_LP RR2123_Q_FIB_A
+  'copy RR3221_Q_FIB_A_LP RR3221_Q_FIB_A
+  'copy RR32511A9_Q_FIB_A_LP RR32511A9_Q_FIB_A
+  'copy RR32512T8_Q_FIB_A_LP RR32512T8_Q_FIB_A
+  'copy RR3252_Q_FIB_A_LP RR3252_Q_FIB_A
+  'copy RR3256_Q_FIB_A_LP RR3256_Q_FIB_A
+  'copy RR3311A2_Q_FIB_A_LP RR3311A2_Q_FIB_A
+'
+  'm_us2021a.exclude(m) csvfinfree ipsg316
+  'm_us2021a.override(m)rmfflev
+'  
+'endif
+
+
+'High Price
+'if (wwopmode = 3) then
+'
+ 'copy ruc_a_hp ruc_a
+ 'copy rmtcm10y_a_hp rmtcm10y_a
+ 'copy rmcorppuaa_a_hp rmcorppuaa_a
+ '
+ '
+ 'copy RR3221_Q_FIB_A_HP RR3221_Q_FIB_A
+ 'copy RR323_Q_FIB_A_HP RR323_Q_FIB_A
+ 'copy RR32511A9_Q_FIB_A_HP RR32511A9_Q_FIB_A
+ 'copy RR32512T8_Q_FIB_A_HP RR32512T8_Q_FIB_A
+ 'copy RR3252_Q_FIB_A_HP RR3252_Q_FIB_A
+ 'copy RR3254_Q_FIB_A_HP RR3254_Q_FIB_A
+ 'copy RR3256_Q_FIB_A_HP RR3256_Q_FIB_A
+ 'copy RR333_Q_FIB_A_HP RR333_Q_FIB_A
+ 'copy RR334_Q_FIB_A_HP RR334_Q_FIB_A
+ 'copy RR335_Q_FIB_A_HP  RR335_Q_FIB_A
+ '
+ 'copy MC_EMPIND15_A_HP MC_EMPIND15_A
+ 'copy MC_EMPIND18_A_HP MC_EMPIND18_A
+ 'copy MC_EMPIND5_A_HP MC_EMPIND5_A
+ 'copy MC_EMPIND6_A_HP MC_EMPIND6_A
+ 'copy MC_EMPIND8_A_HP MC_EMPIND8_A
+ 'copy MC_EMPIND9_A_HP MC_EMPIND9_A
+ '
+ '
+ 'm_us2021a.exclude(m) tjwpi03 ipsg3256
+    
+'endif
+
+
+'High Price
+'if (wwopmode = 3) then
+'
+'  m_us2021a.exclude(m) engexppet go281a6 xxjqind361a2 xxjqind369 ipsg33612 pj228a9 xxjqind365 suvtham _
+'  csvfinfree
+'
+'   m_us2021a.exclude(m) IPSG3362 PJ221_4 PJ228A9 ENGEXPPET
+'   m_us2021a.exclude(m) WPI051 WPI053 WPI054 WPI055 IPSG3362 PJ221_4 PJ228A9 ENGEXPPET
+'  m_us2021a.exclude(m) WPI051 WPI055 GO367 PJ228A9 IPSG3362 PJ221_4
+'  
+'  m_us2021a.exclude(m) pj228a9 pj221_4 ipsg33612 iirt441r suvtham txbasef go369 pj252_9 ipsg3122 go366 go367
+'  m_us2021a.exclude(m) IPSG3342 IPSG33612 PJ221_4 PJ228A9
+'  
+'endif
+
+
+'High Price
+'if (wwopmode = 3) then
+'  m_us2021a.override(m) IPSG3221_A IPSG32511A9_A IPSG32512T8_A IPSG3252_A _
+'  IPSG3253_A IPSG3254_A IPSG3256_A IPSG3311A2_A IPSG3313_A 
+'  
+'endif
+  
+  
+'WWOP
+'wwop<>2 Exogenize IFNREEIPCR, Real nonresidential investment-computer equipment
+' if (wwopmode <> 2) then
+'
+'   genr rmfflev_1     = 0.9
+'   m_us2021a.override(m) rmfflev
+'   m_us2021a.exclude(m) JEXCHOITP JEXCHMTP ENGIMPPET GO367 PJ228A9 PJ221_4
+'   m_us2021a.exclude(m) ENGIMPPET GO367 PJ228A9 PJ221_4
+'   m_us2021a.exclude(m)  GO367 PJ228A9 PJ221_4 ipsg33612
+'
+'   if (wwopmode = 1) then
+'     genr csvfinfree_a   = csvfinfree_a_lp
+'     genr csvfinfree_a_1 = csvfinfree_a_lp
+'   endif
+'
+' endif
+
+
+
+'Low Price
+if (wwopmode = 1) then
+
+  copy xginnpetr_0 xginnpetr
+  xginnpetr = ENGEXPPET*XGINNPETR_0/ENGEXPPET_0
+  copy mgpetr_0 mgpetr
+  mgpetr = engimppet*mgpetr_0/engimppet_0
+
+
+  copy TEFIN52_A_lp TEFIN52_A
+  copy TEFIN53_A_lp TEFIN53_A
+  copy PJ252_9_A_lp PJ252_9_A
+  copy CSVOCTR_A_lp CSVOCTR_A
+  copy CSVOOR_A_lp CSVOOR_A
+  copy CSVFINFEER_A_lp CSVFINFEER_A
+  copy CSVRECR_A_lp CSVRECR_A
+  copy XGCR_A_lp XGCR_A
+  copy GSLCWSSR_A_lp GSLCWSSR_A
+  copy IFMVPUNTLR_A_lp IFMVPUNTLR_A
+  copy IFNREETACR_A_lp IFNREETACR_A
+  copy IFNREETLVADJR_A_lp IFNREETLVADJR_A
+  copy IFNREETOR_A_lp IFNREETOR_A
+  copy XGKCAEPR_A_lp XGKCAEPR_A
+  copy XGKCPPR_A_lp XGKCPPR_A
+  copy XGKOR_A_lp XGKOR_A
+  copy RUC_A_lp RUC_A
+  copy RMTCM10Y_A_lp RMTCM10Y_A
+  copy RMCORPPUAA_A_lp RMCORPPUAA_A
+  copy CSVFINFREE_A_lp CSVFINFREE_A
+  
+  
+  copy RR2122_Q_FIB_A_lp RR2122_Q_FIB_A
+  copy RR2123_Q_FIB_A_lp RR2123_Q_FIB_A
+  copy RR312_Q_FIB_A_lp RR312_Q_FIB_A
+  copy RR313T316_A_lp RR313T316_A  
+  copy RR3221_Q_FIB_A_lp RR3221_Q_FIB_A
+  copy RR32221_Q_FIB_A_lp RR32221_Q_FIB_A
+  copy RR322o_Q_FIB_A_lp RR322o_Q_FIB_A
+  copy RR323_Q_FIB_A_lp RR323_Q_FIB_A
+  copy RR32411_Q_FIB_A_lp RR32411_Q_FIB_A
+  copy RR324O_Q_FIB_A_lp RR324O_Q_FIB_A
+  copy RR32511A9_Q_FIB_A_lp RR32511A9_Q_FIB_A
+  copy RR32512T8_Q_FIB_A_lp RR32512T8_Q_FIB_A
+  copy RR3252_Q_FIB_A_lp RR3252_Q_FIB_A
+  copy RR3253_Q_FIB_A_lp RR3253_Q_FIB_A
+  copy RR3254_Q_FIB_A_lp RR3254_Q_FIB_A
+  copy RR3255_Q_FIB_A_lp RR3255_Q_FIB_A
+  copy RR3256_Q_FIB_A_lp RR3256_Q_FIB_A
+  copy RR325O_Q_FIB_A_lp RR325O_Q_FIB_A
+  copy RR326_Q_FIB_A_lp RR326_Q_FIB_A
+  copy RR3272_Q_FIB_A_lp RR3272_Q_FIB_A
+  copy RR32731_Q_FIB_A_lp RR32731_Q_FIB_A
+  copy RR3274_Q_FIB_A_lp RR3274_Q_FIB_A
+  copy RR327o_Q_FIB_A_lp RR327o_Q_FIB_A
+  copy RR3311A2_Q_FIB_A_lp RR3311A2_Q_FIB_A
+  copy RR332_Q_FIB_A_lp RR332_Q_FIB_A
+  copy RR333_Q_FIB_A_lp RR333_Q_FIB_A
+  copy RR334_Q_FIB_A_lp RR334_Q_FIB_A
+  copy RR335_Q_FIB_A_lp RR335_Q_FIB_A
+  copy RR336_Q_FIB_A_lp RR336_Q_FIB_A
+  copy RR337_Q_FIB_A_lp RR337_Q_FIB_A
+  copy RR339_Q_FIB_A_lp RR339_Q_FIB_A
+
+
+  m_us2021a.exclude(m) engexppet xginnpetr engimppet mgpetr 
+  
+
+'  genr rmfflev_1 = 0.9
+'  m_us2021a.override(m) rmfflev
+
+endif
+
+
+'High Price
+if (wwopmode = 3) then
+
+  copy xginnpetr_0 xginnpetr
+  xginnpetr = engexppet*xginnpetr_0/engexppet_0
+  copy mgpetr_0 mgpetr
+  mgpetr = engimppet*mgpetr_0/engimppet_0
+
+  copy ipsg3141_0 ipsg3141
+  copy ipsg3256_0 ipsg3256
+  copy pj228a9_0 pj228a9
+
+
+  copy csvfinfeer_a_hp csvfinfeer_a
+  copy csvfinfree_a_hp csvfinfree_a
+  copy csvoctr_a_hp csvoctr_a
+  copy gslcwssr_a_hp gslcwssr_a
+  copy ifmvpuntlr_a_hp ifmvpuntlr_a
+  copy ifnreetacr_a_hp ifnreetacr_a
+  copy ifnreetlvadjr_a_hp ifnreetlvadjr_a
+  copy ifnreetor_a_hp ifnreetor_a
+  copy pj252_9_a_hp pj252_9_a
+  copy rmcorppuaa_a_hp rmcorppuaa_a
+  copy rmtcm10y_a_hp rmtcm10y_a
+
+    
+  copy RR111_Q_FIB_A_hp RR111_Q_FIB_A
+  copy RR112_Q_FIB_A_hp RR112_Q_FIB_A
+  copy rr2122_q_fib_a_hp rr2122_q_fib_a
+  copy rr2123_q_fib_a_hp rr2123_q_fib_a
+  copy RR3112_Q_FIB_A_hp RR3112_Q_FIB_A
+  copy RR3115_Q_FIB_A_hp RR3115_Q_FIB_A
+  copy RR3116A7_Q_FIB_A_hp RR3116A7_Q_FIB_A
+  copy RR312_Q_FIB_A_hp RR312_Q_FIB_A
+  copy rr321_q_fib_a_hp rr321_q_fib_a
+  copy rr3221_q_fib_a_hp rr3221_q_fib_a
+  copy rr32221_q_fib_a_hp rr32221_q_fib_a
+  copy rr322o_q_fib_a_hp rr322o_q_fib_a
+  copy rr323_q_fib_a_hp rr323_q_fib_a
+  copy rr32411_q_fib_a_hp rr32411_q_fib_a
+  copy rr324o_q_fib_a_hp rr324o_q_fib_a
+  copy rr32511a9_q_fib_a_hp rr32511a9_q_fib_a
+  copy rr32512t8_q_fib_a_hp rr32512t8_q_fib_a
+  copy rr3252_q_fib_a_hp rr3252_q_fib_a
+  copy rr3253_q_fib_a_hp rr3253_q_fib_a
+  copy rr3254_q_fib_a_hp rr3254_q_fib_a
+  copy rr3256_q_fib_a_hp rr3256_q_fib_a
+  copy rr326_q_fib_a_hp rr326_q_fib_a
+  copy rr327211_q_fib_a_hp rr327211_q_fib_a
+  copy rr3272_q_fib_a_hp rr3272_q_fib_a
+  copy rr32731_q_fib_a_hp rr32731_q_fib_a
+  copy rr3274_q_fib_a_hp rr3274_q_fib_a
+  copy rr327o_q_fib_a_hp rr327o_q_fib_a
+  copy rr3311a2_q_fib_a_hp rr3311a2_q_fib_a
+  copy rr3313_q_fib_a_hp rr3313_q_fib_a
+  copy rr3314a5_q_fib_a_hp rr3314a5_q_fib_a
+  copy rr332_q_fib_a_hp rr332_q_fib_a
+  copy rr333_q_fib_a_hp rr333_q_fib_a
+  copy rr334_q_fib_a_hp rr334_q_fib_a
+  copy rr335_q_fib_a_hp rr335_q_fib_a
+  copy rr336_q_fib_a_hp rr336_q_fib_a
+  copy rr339_q_fib_a_hp rr339_q_fib_a
+  copy ruc_a_hp ruc_a
+
+'  genr rmfflev_1 = 0.9
+'  m_us2021a.override(m) rmfflev
+
+
+  m_us2021a.exclude(m) engexppet xginnpetr engimppet mgpetr 
+
+endif
+
+
+
+
+
+'Low Resource scenario
+if (ogtechmode = 23) then
+  copy xginnpetr_0 xginnpetr
+  xginnpetr = engexppet*xginnpetr_0/engexppet_0
+  copy mgpetr_0 mgpetr
+  mgpetr = engimppet*mgpetr_0/engimppet_0
+
+  copy tefin52_0 tefin52
+  copy tefin53_0 tefin53
+  copy csvoctr_0 csvoctr
+  copy csvoor_0 csvoor
+  copy csvrecr_0 csvrecr
+  copy csvfinfeer_0 csvfinfeer
+  copy gslcwssr_0 gslcwssr
+  copy ruc_lgtarget ruc
+  copy rmtcm10y_lgtarget rmtcm10y
+  copy rmcorppuaa_lgtarget rmcorppuaa
+
+
+  copy rr2122_q_fib_a_lg rr2122_q_fib_a
+  copy rr2123_q_fib_a_lg rr2123_q_fib_a
+  copy rr3112_q_fib_a_lg rr3112_q_fib_a
+  copy rr3115_q_fib_a_lg rr3115_q_fib_a
+  copy rr3116a7_q_fib_a_lg rr3116a7_q_fib_a
+  copy rr312_q_fib_a_lg rr312_q_fib_a
+  copy rr313t316_a_lg rr313t316_a
+  copy rr3221_q_fib_a_lg rr3221_q_fib_a
+  copy rr32221_q_fib_a_lg rr32221_q_fib_a
+  copy rr322o_q_fib_a_lg rr322o_q_fib_a
+  copy rr32511a9_q_fib_a_lg rr32511a9_q_fib_a
+  copy rr32512t8_q_fib_a_lg rr32512t8_q_fib_a
+  copy rr3252_q_fib_a_lg rr3252_q_fib_a
+  copy rr3253_q_fib_a_lg rr3253_q_fib_a
+  copy rr3254_q_fib_a_lg rr3254_q_fib_a
+  copy rr3255_q_fib_a_lg rr3255_q_fib_a
+  copy rr3256_q_fib_a_lg rr3256_q_fib_a
+  copy rr325o_q_fib_a_lg rr325o_q_fib_a
+  copy rr326_q_fib_a_lg rr326_q_fib_a
+  copy rr327211_q_fib_a_lg rr327211_q_fib_a
+  copy rr3272_q_fib_a_lg rr3272_q_fib_a
+  copy rr3311a2_q_fib_a_lg rr3311a2_q_fib_a
+  copy rr3313_q_fib_a_lg rr3313_q_fib_a
+  copy rr332_q_fib_a_lg rr332_q_fib_a
+  copy rr333_q_fib_a_lg rr333_q_fib_a
+  copy rr334_q_fib_a_lg rr334_q_fib_a
+  copy rr335_q_fib_a_lg rr335_q_fib_a
+  copy rr336_q_fib_a_lg rr336_q_fib_a
+  copy rrserv_a_lg rrserv_a
+
+
+  copy MC_EMPIND12_A_lg MC_EMPIND12_A
+  copy MC_EMPIND13_A_lg MC_EMPIND13_A
+  copy MC_EMPIND14_A_lg MC_EMPIND14_A
+  copy MC_EMPIND15_A_lg MC_EMPIND15_A
+  copy MC_EMPIND16_A_lg MC_EMPIND16_A
+  copy MC_EMPIND17_A_lg MC_EMPIND17_A
+  copy MC_EMPIND18_A_lg MC_EMPIND18_A
+  copy MC_EMPIND19_A_lg MC_EMPIND19_A
+  copy MC_EMPIND4_A_lg MC_EMPIND4_A
+  copy MC_EMPIND5_A_lg MC_EMPIND5_A
+  copy MC_EMPIND6_A_lg MC_EMPIND6_A
+  copy MC_EMPIND8_A_lg MC_EMPIND8_A
+  copy MC_EMPIND9_A_lg MC_EMPIND9_A
+
+
+  m_us2021a.exclude(m) engexppet xginnpetr engimppet mgpetr _
+  tefin52 tefin53 gslcwssr csvoctr csvoor csvrecr csvfinfeer _
+  ruc rmtcm10y rmcorppuaa
+
+
+
+
+
+'   copy xginnpetr_0 xginnpetr
+'   xginnpetr  = @mean(xginnpetr,"2022:1 2022:4")*{%wfpathpwd}eviewsdb::engexppet_r_0
+'   copy CSVFINFREE_0 csvfinfree
+'   copy WPIWMTP_0    wpiwmtp
+'   copy WPISOP3500_0 wpisop3500
+
+
+'   copy RMCORPPUAA_A_LOGS RMCORPPUAA_A
+'   copy RMTCM10Y_A_LOGS RMTCM10Y_A
+'   copy RR2122_Q_FIB_A_LOGS RR2122_Q_FIB_A
+'   copy RR2123_Q_FIB_A_LOGS RR2123_Q_FIB_A
+'   copy RR3221_Q_FIB_A_LOGS RR3221_Q_FIB_A
+'   copy RR32511A9_Q_FIB_A_LOGS RR32511A9_Q_FIB_A
+'   copy RR3252_Q_FIB_A_LOGS RR3252_Q_FIB_A
+'   copy RR3256_Q_FIB_A_LOGS RR3256_Q_FIB_A
+'   copy RUC_A_LOGS RUC_A
+'   copy RR32512T8_Q_FIB_A_LOGS RR32512T8_Q_FIB_A
+'   copy RR3311A2_Q_FIB_A_LOGS RR3311A2_Q_FIB_A
+
+'   copy IPSG3221_A_LOGS    IPSG3221_A_1 
+'   copy IPSG32511A9_A_LOGS IPSG32511A9_A_1
+'   copy IPSG32512T8_A_LOGS IPSG32512T8_A_1
+'   copy IPSG3252_A_LOGS    IPSG3252_A_1 
+'   copy IPSG3253_A_LOGS    IPSG3253_A_1
+'   copy IPSG3256_A_LOGS    IPSG3256_A_1
+'   copy IPSG3313_A_LOGS    IPSG3313_A_1
+'   copy IPSG339_A_LOGS     IPSG339_A_1
+'   copy RMCORPPUAA_A_LOGS  RMCORPPUAA_A_1
+'   copy RMTCM10Y_A_LOGS    RMTCM10Y_A_1
+
+endif
+
+
+'High Resource scenario
+if (ogtechmode = 30) then
+  copy rmcorppuaa_hgtarget rmcorppuaa
+  copy rmtcm10y_hgtarget rmtcm10y
+  copy ruc_hgtarget ruc
+
+
+  m_us2021a.exclude(m) rmcorppuaa rmtcm10y ruc
+
+
+
+
+
+'    copy RMCORPPUAA_A_HOGS RMCORPPUAA_A
+'    copy RMTCM10Y_A_HOGS RMTCM10Y_A
+'    copy RR3256_Q_FIB_A_HOGS RR3256_Q_FIB_A
+'    copy RUC_A_HOGS RUC_A
+
+
+'   copy IPSG3221_A_HOGS    IPSG3221_A_1 
+'   copy IPSG32511A9_A_HOGS IPSG32511A9_A_1
+'   copy IPSG32512T8_A_HOGS IPSG32512T8_A_1
+'   copy IPSG3252_A_HOGS    IPSG3252_A_1 
+'   copy IPSG3253_A_HOGS    IPSG3253_A_1
+'   copy IPSG3256_A_HOGS    IPSG3256_A_1
+'   copy IPSG3311A2_A_HOGS  IPSG3311A2_A_1
+'   copy IPSG3313_A_HOGS    IPSG3313_A_1
+'   copy IPSG339_A_HOGS     IPSG339_A_1
+'   copy RMCORPPUAA_A_HOGS  RMCORPPUAA_A_1
+'   copy RMTCM10Y_A_HOGS    RMTCM10Y_A_1
+
+
+endif
+
+
+
+
+
+'Oil and Gas Resource Scenerios
+' if (ogtechmode = 23 or wwopmode = 1) then
+'   m_us2021a.exclude(m) ENGEXPPET XGINNPETR
+' endif
+
+
+'Low Resource
+' if (ogtechmode = 23) then
+'   m_us2021a.override(m) IPSG3221_A IPSG32511A9_A IPSG32512T8_A IPSG3252_A _
+'   IPSG3253_A IPSG3256_A IPSG3313_A IPSG339_A RMCORPPUAA_A RMTCM10Y_A
+'   
+'   m_us2021a.exclude(m) go367
+'   
+' endif
+'
+'High Resource
+' if (ogtechmode = 30) then
+'   m_us2021a.override(m) IPSG3221_A IPSG32511A9_A IPSG32512T8_A IPSG3252_A _
+'   IPSG3253_A IPSG3256_A IPSG3311A2_A IPSG3313_A IPSG339_A RMCORPPUAA_A RMTCM10Y_A
+'
+'   m_us2021a.exclude(m) go367
+'   
+' endif
+
+
+' if (ogtechmode <> 1) then
+'   m_us2021a.exclude  JPCNEFAO PNGHH POILIMP POILWTI _
+' WPI051 WPI053 WPI054 WPI055 WPI0561 WPI057 WPI0574    _
+' engexppet csvuer csvugr engdomng engdompet ipsg211o _
+' cnefaor cnegaor jexchoitp jexchmtp engimppet
+' jexchoitp jexchmtp engimppet ruc
+'   m_us2021a.override RMFFLEV
+' endif
+
+
+''Low Resource
+' if (ogtechmode = 23) then
+'   
+'   m_us2021a.exclude(m) engexppet xginnpetr csvfinfree wpiwmtp wpisop3500
+'   
+' endif
+
+
+'CAFE
+'cafe=1 Exogenize PLVAVG, Average price of a new light vehicle (thousands of dollars)
+ if (cafemode <> 0) then
+   m_us2021a.exclude(m) PLVAVG
+   m_us2021a.override(m) RMFFLEV
+ endif
+
+
+'Federal excise tax accruals other than for a VAT.
+'taxmode=0 no tax; default energy price and quantity sim
+'taxmode=1 returns tax collections to consumers, revenue neutral
+'taxmode=2 returns tax collections to business, revenue neutral
+'taxmode=3 deficit reduction
+'taxmode=4 returns tax collections to consumers, deficit neutral
+'taxmode=5 returns tax collections to business, deficit neutral
+'taxmode=6 deficit reduction using RIN revenues
+ if (taxmode = 1 or taxmode = 4) then
+   genr rmfflev_1     = 0.9
+   m_us2021a.override(m)  rmfflev TXIMGFOTH_A TXPGF_A
+   m_us2021a.addassign(v) TXPGF
+ endif
+ if (taxmode = 4) then
+   m_us2021a.exclude(m)  ipsg316 wpi053
+   m_us2021a.control      TXPGF_A NETSAVGFFE NETSAVGFFE
+ endif
+ if (taxmode = 2 or taxmode = 5) then
+   m_us2021a.override(m)  TXIMGFOTH_A TXCORPGF_A
+   m_us2021a.addassign(v) TXCORPGF
+ endif
+ if (taxmode = 5) then
+   m_us2021a.control      TXCORPGF_A NETSAVGFFE NETSAVGFFE
+ endif
+ if (taxmode = 3 or taxmode = 6) then
+   m_us2021a.override(m)  TXIMGFOTH_A
+ endif
+
+
+'Technology(cost) cases.
+'ttechmode=1 low technology(high cost) assumptions
+'ttechmode=2 no technology assumptions; default energy price and quantity sim
+'ttechmode=3 high technology(low cost) assumptions
+ if (ttechmode <> 2) then
+   m_us2021a.exclude(m) qeng
+ endif
+
+
+ show m_us2021a
+ m_us2021a.solve
+
+
+ if (mac111d = 1) then
+   genr deltamac = ({%wfpathpwd}eviewsdb::elsec_dmy_r_0*({%wfpathpwd}eviewsdb::elsec_instcap_r_0 _
+                                                        +{%wfpathpwd}eviewsdb::elsec_tran_r_0    _
+                                                        +{%wfpathpwd}eviewsdb::elsec_retro_r_0))
+
+   genr qnhngaefer_target = qnhngaefer_1-deltamac
+
+   m_us2021a.override(m) tfptrend
+   m_us2021a.control tfptrend qnhngaefer qnhngaefer_target
+
+   m_us2021a.solve
+
+ endif
+
+
+'Create group epmac containing change from GI base.
+ group epmac   gdpr_1         gdpfer_1      consr_1        ir_1          _
+xr_1           mr_1           gr_1          cdr_1          cnr_1         _
+csvr_1         ifnresr_1      ifresr_1      ifnreer_1      ifreer_1      _
+ifxr_1         ifnrer_1       ifrer_1       xgffbr_1       xginr_1       _
+xgkr_1         xgautor_1      xgcr_1        xgr_1          xsvtotr_1     _
+mgffbr_1       mginapetr_1    mgkr_1        mgautor_1      mgcr_1        _
+msvtotr_1      iir_1          gfmlr_1       gdp_1          cons_1        _
+i_1            gnpr_1         jpgdp_1       rmtb3m_1       rmmtg30con_1  _
+rmcorppuaa_1   rmgblusreal_1  jeciwsp_1     suva_1         suvlv_1       _
+suvtl_1        suvtham_1      ruc_1         wpi_1          wpi11_1       _
+wpi14_1        nlfc_1         rmff_1        wpi05_1        rmtcm10y_1    _
+rmcorpbaa_1    cpie_1         np65a         jqpcmhnf_1     wpisop3200_1  _
+wpi10_1        gslgisnhwyr_1  cdmvr_1       cdfher_1       cdrecipr_1    _
+cdrecor_1      cdoor_1        cdotaer_1     ifnreetlvr_1   ifnreeipctr_1 _
+ifnreeipccr_1  ifnreipsr_1    ifnreemiscr_1 ifnresbaor_1   ifnresmir_1   _
+ifnrespur_1    cpi_1          ypdr_1        ypcompwsd_1    yp_1          _
+husmfg_1       husps1_1       husps2a_1     khumfg_1       khups1_1      _
+khups2a_1      np             np16a
+
+
+'Create group mc_vehicles containing US model solution for vehicle size class.
+ group mc_vehicles TranC1_1 TranC2_1 TranC3_1 TranLt_1
+
+
+'Create groups mc_detail and mc_detail2 containing US model solution for supplemental NEMS table.
+ group mc_detail  cdr_1          cdrecippcr_1   cdfher_1       cdrecor_1      _
+cdmvnr_1          cdmvr_1        cdmvxnr_1      cdotaer_1      cdoor_1        _
+cdrecipcsr_1      cnr_1          cncsr_1        cnopmpr_1      cnfr_1         _
+cnefaor_1         cnegaor_1      cnor_1         cnotobr_1      consr_1        _
+cpi_1             cpixfae_1      cpicxfae_1     cpice_1        cpicf_1        _
+cpie_1            cpisvxe_1      cpisve_1       csvr_1         csvuer_1       _
+csvugr_1          csvoctr_1      csvhr_1        csvhcr_1       csvfinfreer_1  _
+csvoor_1          csvfainsr_1    csvfinr_1      csvrecr_1      csvtsr_1       _
+csvtsmvolsr_1     csvtsmvxlsr_1  jecibp_1       jeciwsp_1      jeciwssp_1     _
+xr_1              xgxcppr_1      gr_1           gdpr_1         gdpfer_1       _
+gdprchr_1         gfr_1          gfmlr_1        gfmlcr_1       gfmlckfr_1     _
+gfmlcor           gfmlgir        gfmlcwssr      gfor_1         gfocr_1        _
+gfockfr_1         gfogir         gfocintnccr    gfocwssr       gslr_1         _
+gslcr_1           gslckfr_1      gslcor_1       gslgir_1       gslgier_1      _
+gslgisr_1         gslcwssr_1     ifnresr_1      ifnresbaor_1   ifnresmir_1    _
+ifnrespur_1       ifresr_1       ifxr_1         ifnrer_1       ifrer_1        _
+ifnreer_1         ifnreeipctr_1  ifnreetlvr_1   ifnreeipccr_1  ifnreemiscr_1  _
+ifnreipsr_1       ifreer_1       jqpcmhfe_1     jqpcmhnf_1     jwssnf_1       _
+julcnf_1          mr_1           mgnpetxcppr_1  ruc_1          tjulcnf_1
+
+
+group mc_detail2  minwage jexchoitpreal_1  jexchmtpreal_1  utlb00004_1 pgoag_1
+
+
+group mc_xtabs bopcrntac_1  cd_1        cdfhe_1      cdmv_1          cdo_1         _
+cdor_1         cdrec_1      cdrecr_1    cgoods_1     cgoodsr_1       ckf_1         _
+ckfadjcorp_1   ckfcorp_1    ckfcorpbk_1 cn_1         cncs_1          cncsr_1       _
+cnefao_1       cnegao_1     cnf_1       cnfr_1       cnoo_1          cnoor_1       _
+cnopmp_1       cnopmpr_1    cnotob_1    cnotobr_1    cpixfae_1       csv_1         _
+csvac_1        csvacr_1     csvf_1      csvfin_1     csvfinr_1       csvfr_1       _
+csvh_1         csvhc_1      csvhcr_1    csvhh_1      csvhhr_1        csvhr_1       _
+csvins_1       csvinsr_1    csvnpish_1  csvnpishr_1  csvo_1          csvor_1       _
+csvrec_1       csvrecr_1    csvts_1     csvtsr_1     csvu_1          csvur_1       _
+eea_1          g_1          gf_1        gfml_1       gfo_1           gfor_1        _
+gfr_1          gnp_1        gsl_1       gslr_1       huesold_1       husps_1       _
+i_1            ifnre_1      ifnree_1    ifnreeind_1  ifnreeindr_1    ifnreeip_1    _
+ifnreeipr_1    ifnreeo_1    ifnreeor_1  ifnreetac_1  ifnreetacr_1    ifnreetlv_1   _
+ifnreeto_1     ifnreetor_1  ifnreetr_1  ifnres_1     ifnresc_1       ifnrescr_1    _
+ifnresmfg_1    ifnresmfgr_1 ifnresmi_1  ifnreso_1    ifnresor_1      ifnresp_1     _
+ifnrespc_1     ifnrespcr_1  ifnrespp_1  ifnresppr_1  ifnrespr_1      ifre_1        _
+ifree_1        ifres_1      ii_1        iicmiu_1     iicmiur_1       iif_1         _
+iifr_1         iim_1        iimr_1      iinf_1       iinfr_1         iirt_1        _
+iirtr_1        iiw_1        iiwr_1      intnetbus_1  ipsb50001_1     ivacorp_1     _
+jcsmich_1      jeciwssp_1   jexchmtp_1  m_1          mfy_1           mg_1          _
+mgr_1          msvtot_1     netcaptrf   netcfiva_1   netsavgfunify_1 nnp_1         _
+savprate_1     sfdprodr_1   sp500_1     stat         sublsurpgf_1    sublsurpgsl_1 _
+trfbus_1       txcorp_1     txcorpgf_1  txcorpgsl_1  txcorprw        txim_1        _
+utlb00004_1    wpisop3000_1 x_1         xfy_1        xg_1            xsvtot_1      _
+yn_1           ypcomp_1     ypd_1       yppropadjf_1 yppropadjnf_1   yprentadj_1   _
+za_1           zadiv_1      zar_1       zare_1       zb_1            zbecon_1      _
+zbivadfin521   zbivarw_1    wpiind_05_1
+
+
+'Store quarterly macro data in the mcevwork workfile to  eviewsdb database.
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::epmac
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::mc_vehicles
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::mc_detail
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::mc_detail2
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::macmode
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::mc_xtabs
+
+ 'copy target_r325193r target_r325193r_1 
+
+'Create group dbmacrob containing Scenario 0 and 1 forecasts for use in IO, employment
+' and commercial floorspace models.
+' add price variables for Linkage Model
+group dbmacrob  cdrecip_?       cdrecippc_?      cdrecippcr_?    cdfher_?         cdrecor_?        _
+cdrecr_?        cdrecipr_?      cdmvnr_?         cdmvnar_?       cdmvntl_?        cdmvntlr_?       _
+cdmvpunar_?     cdmvr_?         cdmvpar_?        cdor_?          cdr_?            cncsr_?          _
+cnefaor_?       cnegaor_?       csvfr_?          cnfr_?          cnoor_?          cnopmpr_?        _
+cnor_?          cnotobr_?       cnr_?            cons_?          consr_?          costefxnre_?     _
+costefxnrexe_?  cpi_?           cpicxfae_?       cpie_?          csvuer_?         csvugr_?         _
+csvoctr_?       csvuwasr_?      csvhhr_?         csvhr_?         csvhc_?          csvhcr_?         _
+csvoo_?         csvoor_?        csvfains_?       csvfainsr_?     csvfaacr_?       csvfinr_?        _
+csvor_?         csvr_?          csvrecr_?        csvtspubr_?     csvtspubor_?     csvtspublr_?     _
+csvtsr_?        csvtsmvxlsr_?   csvtsmvolsr_?    csvur_?         denducoal_?      denduelc_?       _
+dendung_?       dendupet_?      devcdd           devhdd          eea_?            eg91_?           _
+egsl_?          engdomoo        engdompet_?      edrsre          gdp_?            gdpnhngr_?       _
+gdpr_?          gfinfrar_?      gfmlckf_?        gfmlckfr_?      gfmlco_?         gfmlcr_?         _
+gfmlcwssr       gfmlgir         gfmlr_?          gfockf_?        gfockfr_?        gfoco_?          _
+gfocor          gfocr_?         gfocwssr         gfogir          gfor_?           gfr_?            _
+goag_?          go21_?          go23_?           go325_?         gslckf_?         gslckfr_?        _
+gslco_?         gslcor_?        gslcr_?          gslcwssr_?      gslgir_?         gslgisnhwyr_?    _
+gslgisr_?       gslinfrar_?     gslr_?           hhao_?          hhnetw_?         hhnetwr_?        _
+hpmd_?          hpmf_?          hpmn_?           hrnfpri_?       hus_?            husmfg_?         _
+husps_?         husps1_?        husps2a_?        ifmvnatlr_?     ifnre_?          ifnree_?         _
+ifnreeindr_?    ifnreeipcc_?    ifnreeipccr_?    ifnreipsr_?     ifnreeipctr_?    ifnreeipor_?     _
+ifnreeipr_?     ifnreeor_?      ifnreer_?        ifnreetacr_?    ifnreetlvr_?     ifnreetor_?      _
+ifnreetr_?      ifnrer_?        ifnres_?         ifnresbaor_?    ifnrescml_?      ifnrescmlr_?     _
+ifnrescr_?      ifnresr_?       ifrer_?          ifresr_?        ifsr_?           iir_?            _
+invr_?          invwr_?         jcsmich_?        jeciwsp_?       jexchmtpb        jexchmtp_?       _
+jexchmtpreal_?  jexchoitp_?     jexchoitpreal_?  jpc_?           jpcdmvntl_?      jpcnegao_?       _
+jpcsvue_?       jpcsvug_?       jpcsvoct_?       jpcsvuwas_?     jpcsvoo_?        jpcsvfains_?     _
+jpcsvtspubl_?   jpcsvtsmvxls_?  jpcsvtsmvols_?   jpgdp_?         jpgfmlckf_?      jpgfmlco_?       _
+jpgfockf_?      jpgfoco_?       jpgslckf_?       jpgslco_?       jpi_?            jpifnreet_?      _
+jpifnresc_?     jqpcmhfe_?      jqpcmhm_?        jqpcmhmd_?      jqpcmhmn_?       jqpcmhnf_?       _
+jpm_?           jwssnf_?        khups1_?         khups2a_?       khumfg_?         knefxnrer_?      _
+knifnresmir_?   kregcars_?      mgautor_?        mgcr_?          mgffbr_?         mginr_?          _
+mgkcaepr_?      mgkcpp_?        mgkcppr_?        mgkor_?         mgor_?           mgpetr_?         _
+mhrsnfp_?       mr_?            msvtotr_?        netsavgf_?      netsavgsl_?      netx_?           _
+nlfcfe          np              np16a            np5t21          np65a            pnghh_?          _
+poilrap_?       rmcorpaaa_?     rmmtg30con_?     rmprime_?       rmtb3m_?         rmtcm10y_?       _
+rmcorpaaa_?     rmcorpbaa_?     rtxpmarg_?       ruc_?           savprate_?       sp500_?          _
+time            utlb00004_?     wpi_?            wpi01_?         wpi02_?          wpi03_?          _
+wpi05_?         wpi051_?        wpi053_?         wpi054_?        wpi0561_?        wpi057_?         _
+wpi0574_?       wpi05_?         wpi06_?          wpi08_?         wpi09_?          wpi10_?          _
+wpi11_?         wpi12_?         wpi_?            wpiind_?        wpiind_05_?      wpiind_?         _
+wpisop1000_?    wpisop3000_?    wpisop3500_?     xgautor_?       xgcr_?           xgffbr_?         _
+xginr_?         xgkcaepr_?      xgkcpp_?         xgkcppr_?       xgkor_?          xgor_?           _
+xr_?            xsvtotr_?       yp_?             ypcompwsd_?     ypcompwsdg_?     ypcompwsdp_?     _
+ypd_?           ypdr_?          yptrfgf_?        yptrfgsl_?      wpi05_*_?        wpi057_*         _
+wpi0574_*       engdombio_?     engdomcoal_?     engdomng_?      engimpcoal_?     engimpng_?       _
+engimppet_?     engimpbio       engimpoo         engexpcoal_?    engexppet_?      engexpbio        _
+engexpng        engexpoo        dallfuelsbio_?   dallfuelscoal_? dallfuelsng_?    dallfuelsoo_?    _
+dallfuelspet_?  JPCNCS_?        JPCDFHE_?        JPCDMVPA_?      JPCDOO_?         JPCDOTAE_?       _
+JPCNOO_?        JPCDRECIPPC_?   JPCNF_?          JPCSVF_?        JPCNOTOB_?       JPCNOPMP_?       _
+JPCSVAC_?       JPCSVFINFEE_?   JPCSVINS_?       JPCSVH_?        JPCSVHC_?        JPCSVTSPUBO_?    _
+JPCSVREC_?      JPIFNREEIPCT_?  JPIFMVPUNA_?     JPIFMVPUNTL_?   JPIFNREETO_?     JPGFMLGI_?       _
+JPGFOGI_?       JPGSLGIE_?      JPGSLGIS_?       JPGFMLCWSS_?    JPGFOCWSS_?      JPGSLCWSS_?      _
+JPMGFFB_?       JPMGKCAEP_?     JPMGKO_?         JPMGAUTO_?      JPMGC_?          JPMGO_?          _
+JPMSVTOT_?                      EMN*_?           EMD*_?          ECON*_?          ENRM*_?          _
+EWST42_?        ERET_?          ETAW_?           EINF511_?       EFIN*_?          EINF*_?          _
+EUTI*_?         EOTS_?          EEHS*_?          ELHS*_?         EPBS*_?          ESERVO_?         _
+EMF_?
+
+
+'Store quarterly data in the mcevwork workfile to dbmacrob database for use by IO model.
+store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::dbmacrob
+
+
+
+
+
+'Create group epio containing US Industrial Shipments projection.
+ group epio  mc_revind1_1   mc_revind2_1  mc_revind3_1   mc_revind4_1  mc_revind5_1   _
+             mc_revind6_1   mc_revind7_1  mc_revind8_1   mc_revind9_1  mc_revind10_1  _
+             mc_revind11_1  mc_revind12_1 mc_revind13_1  mc_revind14_1 mc_revind15_1  _
+             mc_revind16_1  mc_revind17_1 mc_revind18_1  mc_revind19_1 mc_revind20_1  _
+             mc_revind21_1  mc_revind22_1 mc_revind23_1  mc_revind24_1 mc_revind25_1  _
+             mc_revind26_1  mc_revind27_1 mc_revind28_1  mc_revind29_1 mc_revind30_1  _
+             mc_revind31_1  mc_revind32_1 mc_revind33_1  mc_revind34_1 mc_revind35_1  _
+             mc_revind36_1  mc_revind37_1 mc_revind38_1  mc_revind39_1 mc_revind40_1  _
+             mc_revind41_1  mc_revind42_1 mc_revind43_1  mc_revind44_1 mc_revind45_1  _
+             mc_revind46_1  mc_revind47_1 mc_revind48_1  mc_revser1_1  mc_revser2_1   _
+             mc_revser3_1   mc_revser4_1  mc_revser5_1   mc_revser6_1  mc_revser7_1   _
+             mc_revser8_1   mc_revser9_1  mc_revser10_1
+
+'Store quarterly data in the workfile to database eviewsdb.
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::epio
+
+'Create group epep containing change from GI IO base.
+ group epep  mc_empind1_1      mc_empind2_1     mc_empind3_1      mc_empind4_1     mc_empind5_1   _
+             mc_empind6_1      mc_empind7_1     mc_empind8_1      mc_empind9_1     mc_empind10_1  _
+             mc_empind11_1     mc_empind12_1    mc_empind13_1     mc_empind14_1    mc_empind15_1  _
+             mc_empind16_1     mc_empind17_1    mc_empind18_1     mc_empind19_1    mc_empind20_1  _
+             mc_empind21_1     mc_empind22_1    mc_empind23_1     mc_empind24_1    mc_empind25_1  _
+             mc_empind26_1     mc_empind27_1                                                      _
+             mc_empser1_1      mc_empser2_1     mc_empser3_1      mc_empser4_1     mc_empser5_1   _
+             mc_empser6_1      mc_empser7_1     mc_empser8_1      mc_empser9_1     mc_empser10_1  _
+             mc_empser11_1     mc_empser12_1    eg91_1            egsl_1
+
+'Store results in the workfile to database eviewsdb.
+ store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::epep
+
+
+'run the regional io projections
+call io_regional
+
+'run the regional employment projections
+call emp_regional
+
+'return to the US Macro model
+pageselect t300522
+
+
+%indbase="yes"
+if %indbase="yes" then group dbmacroc JQPCMHM_? JQPCMHMD_? JQPCMHMN_? HPMD_? HPMF_? HPMN_?
+store(d={%wfpathpwd}eviewsdb) {%wfpathpwd}eviewsdb::dbmacroc
+endif
+
+'INSERT_6 writes to the output directory the resulting mcevwork workfile.
+INSERT_6
+
+
+'END OF GI US MODEL
+
+
+'START OF EIA REGIONAL MACRO MODEL
+
+'INSERT_6A creates REGIONAL output workfile and reads data from commercial
+' floorspace input spreadsheet
+INSERT_6A
+
+'Execute REGIONAL subroutine
+call REGIONAL
+
+'INSERT_6B saves the resulting REGIONAL model forecast to workfile mccomflr
+' which resides in the NEMS output directory.
+INSERT_6B
+
+'END OF EIA REGIONAL MACRO MODEL
+
+
+'START OF EIA COMMERCIAL FLOORSPACE MODEL
+
+'INSERT_13C creates commercial floorspace output workfile and reads data from commercial
+' floorspace input spreadsheet
+INSERT_13C
+
+'Execute commercial floorspace subroutine
+'call COMMFLR
+call QUARTERLY
+
+'INSERT_13D saves the resulting COMMERCIAL FLOORSPACE model forecast to workfile mccomflr
+' which resides in the NEMS output directory.
+INSERT_13D
+
+'END OF EIA COMMERCIAL FLOORSPACE MODEL
+
+
+'# ==========================================
+'INSERT_14 reads EViews subroutines from the mcevsubs program file residing in
+' NEMS input directory.
+INSERT_14
+'# ==========================================
+
+
+'Select drvdata workfile for fetch of quarterly data from eviewsdb database.
+ wfselect drvdata
+
+'INSERT_15 sets sample range for change from base data from 2022 to end of forecast period.
+INSERT_15
+
+'Fetch groups from database eviewsdb doing frequency conversion in the process.
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::epmac
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::rwm_ave_1
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::rwnm_ave_1
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::epio
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::epep
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::mc_xtabs
+
+ genr rwm  = rwm_ave_1
+ genr rwnm = rwnm_ave_1
+
+'INSERT_16 writes to the output directory the spreadsheet EPMAC containing the change
+' from base of national and regionalized variables, employment, manufacturing and
+' non-manufacturing (services) gross outputs and industrial outputs; change from base
+' for industrial and employment model results.
+INSERT_16
+
+'INSERT_17 creates in the input directory the mc_detail workfile containing
+' annual US model forecast from 1990 to end of forecast period.  This data
+' is used in a NEMS supplemental table.
+INSERT_17
+
+'Select drvdata workfile for fetch of quarterly data from eviewsdb database.
+ wfselect mc_detail
+
+'Fetch group epmac from database eviewsdb doing frequency conversion in the process.
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::mc_vehicles
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::mc_detail
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::mc_detail2
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::gcommflr
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::gregmac2
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::gregio
+ fetch(d={%wfpathpwd}eviewsdb,c=q,c=a) {%wfpathpwd}eviewsdb::gregemp
+
+'Create GDP gap for solution. This is reported out in the macro supplemental table.
+ genr gdpgap = ((gdpr_1/gdpfer_1)-1)*100
+
+'INSERT_18 sets the sample range for data used in the supplemental table from 1990 to end
+' of the forecast period. It then writes to the output directory the spreadsheet MC_DETAIL
+' containing the US model solutions for the supplemental table.
+INSERT_18
+
+
+
+'Exit from EViews and return to calling program, DRTLINK subroutine of MAM within NEMS.
+exit

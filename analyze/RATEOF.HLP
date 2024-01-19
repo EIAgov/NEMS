@@ -1,0 +1,244 @@
+    Function: Show rates of substitution between levels
+    Syntax:   RATEOF [{ROW | COL} [conditional]] [//options]
+
+    The options (after //) are print options, where you may select any
+    one of the following to be displayed for each impulse variable.
+
+             EQUATION ...form is:  Basic = Level + Rate x Nonbasic
+             OBJECTIV ...tabular with objective coefficient
+             C ..........same as OBJECTIVE
+             D ..........column reduced cost factors
+             LEVEL ......tabular with level
+             P ..........row price factors
+             X or Y .....same as LEVEL (X for column, Y for row)
+             SYNTAX .....syntactic translation
+             RANGE ......range only (no rates)
+             TABLEAU.....tableau format
+
+    If one of the options, except RANGE, is selected, you can further
+    specify ROWS or COLUMNS to see only rates of substitution for row
+    or column responses, respectively.  If EQUATION is specified, an
+    additional option is OBJECTIV, which includes the rate of objective
+    value changes with each response variable.
+
+    In tabular form (the default), specifying OBJECTIV, C, LEVEL, X or
+    Y adds a column to the table.  In the equation format, specifying
+    OBJECTIV puts the net rates of substitution with respect to the
+    objective row.  Suppose, for example, we have the equation,
+    A = 10 + 2 B.  Then, the rate of substitution of A with respect to
+    B is 2 (ie, if B is increased slightly, A is increased by 2 times
+    the increase in B).  If A is a basic column variable (rather than
+    a row variable), and its cost is C, the increase in B causes an
+    increase in total cost by 2 C (due to the increase in A).
+
+    The D option gives the rates at which basic activities (columns)
+    change with respect to a change in a non-basic activity bound value.
+    The P option gives the rates at which basic activities (columns)
+    change with respect to a change in a non-basic row bound value.
+    WHEN THE D OR P OPTION IS SPECIFIED, BASIC COLUMNS (S=BI) ARE REMOVED
+    FROM THE SUBMATRIX.
+
+    The TABLEAU option is a tabular format: basic x nonbasic. The basic
+    and nonbasic variables are those (rows and columns) in the submatrix.
+    The table entries are rates of substitution of the basic variable with
+    respect to the nonbasic variable.  (The usual tableau contains minus
+    the rate.)
+
+                        Nonbasic columns           Nonbasic rows
+                        ================           =============
+       Basic column      Rate                       Rate
+        ...
+       Basic row         Rate                       Rate
+        ...
+                        =========================================
+
+    The TABLEAU option can be used in combination with OBJECTIV (or C) to
+    show objective coefficients, say costs, with basics and nonbasics.
+    It can also be used with LEVEL (or X or Y).  Each of these additional
+    options creates an extra row at top that gives the costs of the
+    nonbasic columns (if any), and an extra tableau column at the left that
+    gives basic column costs (if any).  The screen must be big enough to
+    fit the tableau;  otherwise, an error message is given.  You can use the
+    WIDTH option to reduce the column widths (default=12);  the actual width
+    is set to the greater of your specification and the name length.
+
+    The TABLEAU option is useful to see more than one nonbasic column,
+    beside each other;  and, it allows you to specify which basic rates
+    you want to see (even if it's for one nonbasic column).  The other
+    options show all rates for each submatrix row or column (which can be
+    specified by the conditional), except for the ROW or COL delineation.
+
+    Unlike the other options, which apply to rows or columns, the TABLEAU
+    option can change the submatrix.  If a basic variable (row or column)
+    has all zero rates across the tableau, it is deleted from the submatrix.
+
+    Conceptual explanation of rates of substitution (i.e., what the
+    output means) is in RATEOF.DOC (you may PRINT RATEOF).
+
+    Examples:  The following are from  WOODNET.
+
+    RATEOF C DMOCH1
+     ...display the rates of substitution between each (basic) variable
+        and the (nonbasic) variable named DMOCH1.  The output will be as
+        follows.
+
+       Rates of substitution for COL DMOCH1
+       ...Status=L Level=25  Price=73
+      Basic       Rate of       Least        Greatest
+      Variable  Substitution    Change       Change
+      =================================================
+      COST               73           -*            *
+      TMOSECH             1          -25            *
+      SMOSE1              1          -75            *
+      -------------------------------------------------
+            DMOCH1   Range:            0            *
+            Blockage:           TMOSECH     (no block)
+
+    Line 1 gives a header for this nonbasic variable, showing its
+    solution Status, its Level, and its Price.
+
+    The tabular output shown is the default.  In all cases the objective
+    row variable (COST in this case) is basic, so it is shown.  Note
+    that its rate of substitution is precisely the reduced cost of the
+    nonbasic activity (=73.).  Also, the objective row is an
+    unrestricted variable, so it does not block the nonbasic variable.
+    This is why infinities (*) are shown in the last 2 columns of the
+    table.  The basic variable TMOSECH has a rate = 1.0, which means if
+    we change the level of DMOCH1, this causes TMOSECH to change by the
+    same amount in order to satisfy the equations of WOODNET.  If we
+    increase the nonbasic level (from its current value of 25) all basic
+    activities change according to their rates of substitution and,
+    because no basic variable with positive rate has no upper bound, the
+    nonbasic level is not blocked from above.  If, however, we try to
+    decrease the level of DMOCH1, it drives the basic variable TMOSECH
+    to 0.  This threshold appears as the first Range value.
+
+    RATE //LEVEL
+    ...This displays the rates of substitution as above, but the table
+       now includes the level of each basic variable.  The value of adding
+       this is to see where the blockages are (besides the one shown below
+       the table).
+
+       Rates of substitution for COL DMOCH1
+       ...Status=L Level=25  Price=73
+      Basic        Basic       Rate of       Least        Greatest
+      Variable     Level     Substitution    Change       Change
+      ==============================================================
+      COST            25135           73           -*            *
+      TMOSECH            25            1          -25            *
+      SMOSE1             75            1          -75            *
+      --------------------------------------------------------------
+                         DMOCH1   Range:            0            *
+                         Blockage:           TMOSECH     (no block)
+
+    RAT //X
+    ...This displays the same as above, where X means LEVEL.
+
+    RAT //OBJ
+    ...This displays the same as above, except column 2 is now the
+       objective coefficients of the associated basic variables.  The
+       value of this is to see the prices.  The COST coeff.  of the
+       objective row is -1.0 to indicate minimization (+1 would appear
+       for maximization).
+
+       Rates of substitution for COL DMOCH1
+       ...Status=L Level=25  Price=73
+      Basic       COST         Rate of       Least        Greatest
+      Variable  Coefficient  Substitution    Change       Change
+      ==============================================================
+      COST               -1           73           -*            *
+      TMOSECH            18            1          -25            *
+      SMOSE1             55            1          -75            *
+      --------------------------------------------------------------
+                         DMOCH1   Range:            0            *
+                         Blockage:           TMOSECH     (no block)
+
+    If we add the COST coefficients of the other two basic variables
+    (18 + 55), we obtain precisely 73.  This reflects the economic
+    equilibrium property of an optimal solution.  That is, the sum of
+    the objective coefficient times associated rate of substitution
+    equals 0.  Roughly, what this means is that the nonbasic activity
+    is composed of inputs and outputs.  Each input has a cost and each
+    output gives a revenue.  Its nonbasic status reflects the economic
+    preference:  If its reduced cost is positive, its optimal status is
+    L, and if its reduced cost is negative, its optimal status is U.  In
+    the former case (S=L), the activity's total input costs exceed its
+    total output revenues;  in the latter case the reverse is true.  By
+    seeing the objective (COST) coefficients next to the rates of
+    substitution you can see the economic balance in terms of original
+    costs.  (The SHOWCOL command gives a complementary view, showing
+    computed prices of the rows and original coefficients instead of
+    original costs of basic activities and computed rates of
+    substitution.)
+
+    RAT //C
+    ...This is the same as the above, where C means the same as OBJECTIV.
+
+    RAT //EQUATION
+    ...This changes the form of the output to equation as:
+
+       Rates of substitution for COL DMOCH1
+       ...Status=L Level=25  Price=73
+      COST     = 25135         +           73 x DMOCH1
+      TMOSECH  = 25            +            1 x DMOCH1
+      SMOSE1   = 75            +            1 x DMOCH1
+      -------------------------------------------------
+            DMOCH1   Range:            0            *
+            Blockage:           TMOSECH     (no block)
+
+    RAT //E
+    ...This is the same as above, where E abbreviates EQUATION.
+
+    RAT //E OBJ
+    ...This is the equation format, but net rates of objective values
+       are included in the output (see NET RATE in dictionary).
+
+    RAT //E OBJ COL
+    ...This is the same as above, but only column variables are included
+       in the output.  In the above example, the output would appear as:
+
+        Rates of substitution for COL DMOCH1
+        ...Status=L Level=25  Price=73                  Rate of COST
+       TMOSECH  = 25            +            1 x DMOCH1           18
+       SMOSE1   = 75            +            1 x DMOCH1           55
+       ---------------------------------------- Total =           73
+
+      This helps to interpret the reduced cost, 73.  If demand is increased
+      (ie, the fixed value of DMOCH1 is increased), basic activities SMOSE1
+      (supply) and TMOSECH (transportation) increase by the same amount.
+      Their costs are 18 and 55, respectively, so the total increase in
+      total cost to accommodate the increased demand is 73.  Further, this
+      is the least-costly change to satisfy the new demand.
+
+    RAT //D
+    ...This gives the same information as the above, but with objective
+       coefficients rather than rates, in a tabular format as in the
+       previous format.
+
+    RAT //RANGE
+    ...Gives only range and blockage.
+
+    RAT //RANGE,TABLE
+    ...Gives only range, with levels, in tabular form
+
+    RAT //SYN
+    ...Gives syntax form (ie, translations of output variables).
+
+    RAT //SYN,COL
+    ...Same as above, but only column variables are included in the output.
+
+    RAT //TABLEAU
+    ...Gives tableau format for basic and nonbasic variables in the
+       submatrix.
+
+    RAT //TAB,W=8
+    ...Gives the tableau with column width = 8.
+
+    RAT //T,C
+    ...Gives the tableau with cost coefficients.
+
+    RAT //T,L
+    ...Gives the tableau with levels.
+
+    RAT //T,L,C
+    ...Gives the tableau with cost coefficients and levels.

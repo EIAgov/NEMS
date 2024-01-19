@@ -1,0 +1,165 @@
+!  $Header: m:/default/includes/RCS/plntin,v 1.10 2016/08/09 15:31:11 xj2 Exp $
+!
+!     PLNTIN CONTAINS THE UNIT LEVEL DATA FROM A COMBINATION OF THE F860,
+!     F767, F867, F423 AND THE F759. TO THIS DATA FILE IS ADDED NEW UNITS
+!     AS DETERMINED BY THE ECP MODULE. THIS IS THE SOURCE OF EFD AND ECP
+!     CAPACITY DATA AND NOX EMISSIONS DATA. IT IS STORED IN A DIRECT
+!     ACCESS FILE (DAF) WHICH IS PROCESSED AT THE BEGINNING OF EACH
+!     FORECAST YEAR.
+!
+      COMMON /PLNTIN/ WC_NP,WC_SUM,WC_WIN,WHRATE,WNOX_R,WNOX_B4,            & ! REAL*8
+         WSCBEF,W_CF,WSCBCST,W_FSHR,WCF_M,WCOUNT,                           &
+         W_GRID,W_VOM,W_FOM,W_GA,W_CAPAD,                                   &
+         WSEQEF,WCOMB_O,WCOMB_F,WCOMB_V,WCOMB_R,WSNCR_O,WSNCR_F,WSNCR_V,    &
+         WSNCR_R,WSCR_O,WSCR_F,WSCR_V,WSCR_R,                               &
+         CCSROV,CCSF,CCSV,CCSHR,CCSCAPA,W_LONG,W_LAT,                       &
+         W_DSIOV, W_DSIR, W_DSIV, W_DSIF, W_FFOV, W_FFF, W_FFV, W_ESPU,     &
+         W_CFBU, W_CFBUV, W_CFBUF, NG_COST, NG_TRAN,                        &
+         WHR_O,WHR_F,WHR_V,WHR_IMP,                                         &
+         WASVL,WBCWP,WRCWP,WPCST,WNUCA_O,                                   & ! REAL*4
+         W_IGRP,W_GRP,W_GRP2,WVIN,W_SYR,W_SMO,W_RYR,W_RMO,                  & ! INTEGER
+         W_OSYR,W_OSMO,W_ISYR,W_ISMO,                                       &
+         WSCBYR,WSCBGRP,WRFURB,W_COMB,W_POST,CCS_LOC,W_COOL,WHR_QT,         &
+         WFL,WEFDT,WNOPER,WNOWN,W_CR,W_GR,W_CLRG,W_CAR,WEFPT,               & ! CHAR
+         WECPT,WFOWN,W_MRUN,WSTATE,                                         &
+         WSCBT,WPART,W_ACI,                                                 &
+         W_SPACE
+!
+      INTEGER ESIZ$PLT,EBLK$PLT,ELFT$PLT
+      PARAMETER (ESIZ$PLT =  52 * 8 + &
+                             36 * 4  + &
+                              1 * 2  + &
+                              3 * 1  + &
+                              1 * 8  * 12 + &
+                              1 * 8  * EFD_D_FPP + &
+                              1 * 4  * EFD_D_FPP)
+      PARAMETER (EBLK$PLT = ( (ESIZ$PLT - 1) / 512) + 1)
+      PARAMETER (ELFT$PLT = EBLK$PLT * 512 - ESIZ$PLT)
+!
+!     PLNTIN - VARIABLE DECLARATION AND DEFINITIONS
+!
+      REAL*8 WC_NP              ! Name Plate Actually Owned By Identified Co.
+      REAL*8 WC_SUM             ! Summer Capacity Owned
+      REAL*8 WC_WIN             ! Winter Capacity Owned
+      REAL*8 WHRATE             ! Average Heatrate
+      REAL*8 W_GRID             ! Percent Sold to Grid
+      REAL*8 W_VOM              ! Variable O&M Cost (87$/MWH)
+      REAL*8 W_FOM              ! Fixed O&M Cost (87$/MW)
+      REAL*8 W_GA               ! General and Administrative Expenses (87$/MW)
+      REAL*8 W_CAPAD            ! Annual Investment in Capital Additions (87$/MW)
+      REAL*8 WSCBEF             ! Scrubber Efficiency in Removing SO2
+      REAL*8 W_CF               ! Average Capacity Factor
+      REAL*8 WSCBCST            ! Cost per KW for Retrofit of Scrubber
+      REAL*8 WSEQEF             ! Sequestration Efficiency in Removing CO2
+      REAL*8 W_FSHR(EFD_D_FPP)    ! Fuel Shares
+      REAL*8 WCF_M(12)          ! Monthly Capacity Factors
+      REAL*8 WCOUNT             ! Number of Units in Plant Record
+      REAL*8 WNOX_R             ! NOX Emission Rate lbs/MMBtu
+      REAL*8 WNOX_B4            ! NOX Emission Rate lbs/MMBtu before OTR Retrofits
+      REAL*8 WCOMB_O            ! NOX Combustion Controls - Overnight Cost
+      REAL*8 WCOMB_F            ! NOX Combustion Controls - Fixed O&M
+      REAL*8 WCOMB_V            ! NOX Combustion Controls - Variable O&M
+      REAL*8 WCOMB_R            ! NOX Combustion Controls - Reduction Factor
+      REAL*8 WSNCR_O            ! NOX SNCR Controls - Overnight Cost
+      REAL*8 WSNCR_F            ! NOX SNCR Controls - Fixed O&M
+      REAL*8 WSNCR_V            ! NOX SNCR Controls - Variable O&M
+      REAL*8 WSNCR_R            ! NOX SNCR Controls - Reduction Factor
+      REAL*8 WSCR_O             ! NOX SCR Controls - Overnight Cost
+      REAL*8 WSCR_F             ! NOX SCR Controls - Fixed O&M
+      REAL*8 WSCR_V             ! NOX SCR Controls - Variable O&M
+      REAL*8 WSCR_R             ! NOX SCR Controls - Reduction Factor
+      REAL*8 CCSROV             ! CCS Retrofit overnight cost
+      REAL*8 CCSF               ! CCS Retrofit fixed O&M
+      REAL*8 CCSV               ! CCS Retrofit variable O&M
+      REAL*8 CCSHR              ! CCS Retrofit adjusted heatrate
+      REAL*8 CCSCAPA            ! CCS Retrofit capacity penalty
+      REAL*8 W_LONG             ! Longitude of plant
+      REAL*8 W_LAT              ! Latitude of plant
+      REAL*8 W_DSIOV		! DSI overnight capital cost
+      REAL*8 W_DSIR		! DSI removal rate
+      REAL*8 W_DSIV		! DSI variable O&M
+      REAL*8 W_DSIF		! DSI fixed O&M
+      REAL*8 W_FFOV		! Fabric filter overnight capital cost
+      REAL*8 W_FFF		! Fabric filter fixed O&M cost
+      REAL*8 W_FFV		! Fabric filter variable O&M cost
+      REAL*8 W_ESPU		! ESP upgrade capital cost
+      REAL*8 W_CFBU		! CFB upgrade capital cost
+      REAL*8 W_CFBUV		! CFB upgrade variable O&M
+      REAL*8 W_CFBUF		! CFB upgrade fixed O&M
+      REAL*8 NG_COST            ! CL to NG Conversion Costs 87$/KW
+      REAL*8 NG_TRAN            ! NG Hookup Costs 87$/KW - for CL to NG conversions
+      REAL*8 WHR_O              ! Heatrate Improvement Retrofit - Overnight cost
+      REAL*8 WHR_F              ! Heatrate Improvement Retrofit - Fixed O&M adder
+      REAL*8 WHR_V              ! Heatrate Improvement Retrofit - Variable O&M adder
+      REAL*8 WHR_IMP            ! Heatrate Improvement Retrofit - Amount improvement (BTU/kwh)
+      REAL*4 WASVL              ! Asset Value
+      REAL*4 WBCWP              ! Book CWIP
+      REAL*4 WRCWP              ! ???? CWIP
+      REAL*4 WPCST              ! Plant Cost
+      REAL*4 WNUCA_O            ! Nuclear Aging Retrofit Capital Cost
+      INTEGER*4 W_IGRP          ! Initial Plant Group
+      INTEGER*4 W_GRP           ! Plant Group
+      INTEGER*4 W_GRP2          ! Plant Subgroup
+      INTEGER*4 W_SYR           ! On-Line Year (9999 If Not Specified)
+      INTEGER*4 W_SMO           ! On-Line Month (12 If Not Specified)
+      INTEGER*4 W_RYR           ! Retire Year (9999 If Not Specified)
+      INTEGER*4 W_RMO           ! Retire Month (12 If Not Specified)
+      INTEGER*4 W_OSYR          ! Out-of-Service Year (9999 If Not Specified)
+      INTEGER*4 W_OSMO          ! Out-of-Service Month (12 If Not Specified)
+      INTEGER*4 W_ISYR          ! In Service Year (9999 If Not Specified)
+      INTEGER*4 W_ISMO          ! In Service Month (12 If Not Specified)
+      INTEGER*4 WSCBYR          ! Scrubber On-Line Year
+      INTEGER*4 WSCBGRP         ! Scrubber Group
+      INTEGER*4 WRFURB          ! Refurbishment Date
+      INTEGER*4 WVIN            ! Plant Vintage 0 = Cancelled or Retired <1990
+                                !               1 = On Line by or before 1990
+                                !               2 = Planned Additions
+                                !               3 = Unplanned Additions
+                                !               4 = Repowering (Before)
+                                !               5 = Repowering (After)
+                                !               6 = Planned Retrofit (Before)
+                                !               7 = Planned Retrofit (After)
+                                !               8 = Unplanned Retrofit (Before)
+                                !               9 = Unplanned Retrofit (After)
+      INTEGER*4 WFL(EFD_D_FPP)    ! NEMS Fuel Codes
+      INTEGER*4 WEFDT           ! EFD Plant Type Code
+      INTEGER*4 WNOPER          ! NEMS Region Code for Location of Plant
+      INTEGER*4 WNOWN           ! NEMS Region Code for Unit Owner
+      INTEGER*4 W_CR            ! Census Region Number
+      INTEGER*4 W_GR            ! Natural Region Number
+      INTEGER*4 W_CLRG          ! Coal Region Number
+      INTEGER*4 W_CAR           ! Carbon Region Number
+      INTEGER*4 WEFPT           ! Financial Type Number for EFP
+      INTEGER*4 WECPT           ! Plant Type Number for ECP
+      INTEGER*4 WFOWN           ! Ownership Type 1=Private, 2=Public, 3=NUG
+      INTEGER*4 W_MRUN          ! Must Run Code 1 = Yes, 0 = No
+      INTEGER*4 W_COMB          ! NOX Combustion Controls      ( 0 = None,
+                                !                                1 = Existing,
+                                !                                2 = CAA,
+                                !                                3 = OTAG,
+                                !                                4 = New )
+      INTEGER*4 W_POST          ! NOX Post Combustion Controls ( 0 = None,
+                                !                                1 = Existing SNCR
+                                !                                2 = Existing SCR
+                                !                                3 = CAA SNCR
+                                !                                4 = CAA SCR
+                                !                                5 = OTAG SNCR
+                                !                                6 = OTAG SCR
+                                !                                7 = New           )
+      INTEGER*4 CCS_LOC         ! CCS Location factor (Urban / Rural)
+      INTEGER*4 W_COOL          ! Cooling System in place (0 = No, 1 = Yes)
+      INTEGER*4 WHR_QT          ! Heatrate improvement retrofit - quartile 
+      CHARACTER*2 WSTATE        ! 2-Digit State Abbreviation for Plant Location
+      CHARACTER*1 WSCBT         ! Scrubber Type   W - Wet
+                                !                 D - Dry
+                                !                 N - None
+      CHARACTER*1 WPART         ! Particulate Control  E - Cold Side ESP
+                                !                      B - Bag House
+                                !                      N - None / Other
+      CHARACTER*1 W_ACI         ! Activated Carbon Injection A - Activated Carbon Injection
+                                !                            P - ACI  + Spray Cooling + Fabric Filter
+                                !                            N - None
+
+      CHARACTER*1 W_SPACE(ELFT$PLT)
+      CHARACTER*1024 WPLANT
+      EQUIVALENCE (WC_NP,WPLANT)

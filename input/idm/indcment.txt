@@ -1,0 +1,478 @@
+## COAL INDUSTRY ##################################################################################################
+#
+#**** Data for weighting relative influence on TPC ****
+#
+#  Index weighting factors for Grinding Lighting and Ventilation (must add to 1.0)
+#  Data Elec_Weight(1:4,1:3) 
+#  G     L     V
+0.20  0.20  0.60                 
+0.20  0.20  0.60 
+0.20  0.20  0.60                 
+0.20  0.20  0.60                 
+#
+# Allocation of influence between non-vehicles and vehicles
+# Non-electric equipment only (ift=2-5)
+#  Data NonEl_Weight(2:6,1:2) 
+#  NG    DS    GS    CL    RS
+0.80 0.70 0.00 1.00 1.00
+0.20 0.30 1.00 0.00 0.00   
+#
+# Factor indicating the degree of influence that Equipment efficiency has on the TPC
+#  Data TPC_Weight(1:4,1,1:6) 
+#  EL    NG    DS    GS    CL   RS 
+0.70 0.85 0.90 1.00 0.70 0.90   
+0.70 0.85 0.90 1.00 0.70 0.90   
+0.70 0.85 0.90 1.00 0.70 0.90   
+0.70 0.85 0.90 1.00 0.70 0.90   
+#
+#  The following Labor Productivity indices are derived from the Coal module's CLUSER file  and are therefore invariant.  (Years = 2005-2050)
+#
+#  Underground:
+#  Data CL_L_Prod(1:4,1,16:mnumyr)
+1.0000 0.9867 0.9778 0.9719 0.9600 0.9590 0.9579 0.9569 0.9559 0.9550 0.9531 0.9513 0.9494 0.9476 0.9458 0.9441 0.9414 0.9388 0.9362 0.9336 0.9310 0.9284 0.9258 0.9233 0.9208 
+0.9183 0.9158 0.9133 0.9108 0.9084 0.9060 0.9035 0.9011 0.8987 0.8964 0.8940 0.8916 0.8893 0.8870 0.8847 0.8824 0.8801 0.8778 0.8755 0.8733 0.8711 
+1.0000 0.9681 0.9468 0.9326 0.9043 0.8927 0.8813 0.8700 0.8588 0.8479 0.8370 0.8263 0.8158 0.8054 0.7951 0.7850 0.7750 0.7651 0.7553 0.7457 0.7363 0.7269 0.7177 0.7085 0.6996 
+0.6907 0.6819 0.6733 0.6647 0.6563 0.6480 0.6398 0.6317 0.6238 0.6159 0.6081 0.6004 0.5929 0.5854 0.5780 0.5707 0.5636 0.5565 0.5495 0.5426 0.5357 
+1.0000 0.9900 0.9833 0.9789 0.9700 0.9700 0.9700 0.9700 0.9690 0.9681 0.9671 0.9661 0.9652 0.9642 0.9632 0.9613 0.9594 0.9575 0.9555 0.9536 0.9517 0.9498 0.9479 0.9460 0.9441 
+0.9422 0.9404 0.9385 0.9366 0.9347 0.9329 0.9310 0.9291 0.9273 0.9254 0.9236 0.9217 0.9199 0.9180 0.9162 0.9144 0.9125 0.9107 0.9089 0.9071 0.9053 
+1.0000 0.9741 0.9568 0.9453 0.9223 0.9113 0.9130 0.9147 0.9165 0.9182 0.9200 0.9218 0.9228 0.9238 0.9248 0.9259 0.9269 0.9280 0.9283 0.9286 0.9289 0.9292 0.9295 0.9299 0.9302 
+0.9306 0.9309 0.9313 0.9317 0.9320 0.9324 0.9328 0.9332 0.9337 0.9341 0.9345 0.9350 0.9354 0.9359 0.9363 0.9368 0.9373 0.9378 0.9383 0.9388 0.9393 
+#  Surface:
+#  Data CL_L_Prod(1:4,2,16:mnumyr)	
+1.0000 0.9908 0.9847 0.9806 0.9724 0.9691 0.9658 0.9626 0.9593 0.9561 0.9528 0.9496 0.9464 0.9433 0.9401 0.9370 0.9338 0.9307 0.9276 0.9245 0.9215 0.9184 0.9154 0.9123 0.9093 
+0.9063 0.9034 0.9004 0.8975 0.8945  0.8916 0.8887 0.8858 0.8829 0.8801 0.8772 0.8744 0.8716 0.8688 0.8660 0.8632 0.8605 0.8577 0.8550 0.8523 0.8496 
+1.0000 0.9675 0.9459 0.9314 0.9026 0.8949 0.8895 0.8841 0.8788 0.8734 0.8682 0.8629 0.8577 0.8525 0.8474 0.8423 0.8372 0.8321 0.8271 0.8221 0.8172 0.8123 0.8074 0.8025 0.7977 
+0.7929 0.7882 0.7835 0.7788 0.7741  0.7695 0.7649 0.7603 0.7557 0.7512 0.7467 0.7423 0.7379 0.7335 0.7291 0.7248 0.7204 0.7162 0.7119 0.7077 0.7035 
+1.0000 0.9854 0.9757 0.9693 0.9563 0.9577 0.9610 0.9643 0.9677 0.9710 0.9744 0.9777 0.9811 0.9845 0.9880 0.9914 0.9949 0.9984 1.0018 1.0054 1.0089 1.0124 1.0160 1.0196 1.0232 
+1.0268 1.0305 1.0341 1.0378 1.0415  1.0452 1.0489 1.0527 1.0564 1.0602 1.0640 1.0679 1.0717 1.0756 1.0794 1.0833 1.0873 1.0912 1.0952 1.0992 1.1032 
+1.0000 0.9826 0.9709 0.9632 0.9477 0.9389 0.9349 0.9309 0.9269 0.9229 0.9189 0.9150 0.9111 0.9072 0.9033 0.8995 0.8956 0.8918 0.8880 0.8843 0.8805 0.8768 0.8731 0.8694 0.8657 
+0.8621 0.8585 0.8549 0.8513 0.8477  0.8442 0.8407 0.8372 0.8337 0.8303 0.8268 0.8234 0.8200 0.8167 0.8133 0.8100 0.8067 0.8034 0.8001 0.7968 0.7936 			  																																				
+#
+# Coal Mining
+#
+# Metal Mining Index weighting factors for Grinding, Lighting, and Ventilation (must add to 1.0)
+# Elec_Met_Wt(1:4,1:3) 
+0.20 0.20 0.60 
+0.20 0.20 0.60 
+0.20 0.20 0.60 
+0.20 0.20 0.60 
+# Non-Metal Mining Index weighting factors for Grinding, Lighting, and Ventilation (must add to 1.0)	
+# Elec_NM_Wt(1:4,1:3)
+0.60 0.20 0.20
+0.60 0.20 0.20
+0.60 0.20 0.20
+0.60 0.20 0.20
+#
+# Metal Mining: Allocation of influence between non-vehicles and vehicles  
+# Non-electric equipment only (ift=2-6)
+# NonEl_Met_Wt(2:6,1:2) 
+# NG  DS   GS    CL   RS
+0.80 0.70 0.00 1.00 1.00         
+0.20 0.30 1.00 0.00 0.00
+# 
+# Non-Metal Mining: Allocation of influence between non-vehicles and vehicles 
+# Non-electric equipment only (ift=2-5) 
+# NonEl_NM_Wt(2:6,1:2)  
+# NG  DS   GS   CL   RS
+0.80 0.70 0.00 1.00 1.00
+0.20 0.30 1.00 0.00 0.00 
+#      
+# Metals: Factor indicating the degree of influence that Equipment efficiency 
+# has on Metal Mining TPC.  The remainder is attributed to  
+# labor productivity, and calculated subsequently.     
+# TPC_Met_Wt(1:4,1,1:5) 
+# EL  NG    DS  GS    CL   RS
+0.70 0.85 0.90 1.00 0.70 0.90  
+0.70 0.85 0.90 1.00 0.70 0.90
+0.70 0.85 0.90 1.00 0.70 0.90
+0.70 0.85 0.90 1.00 0.70 0.90
+#
+# Non-Metals: Factor indicating the degree of influence that Equipment efficiency
+# has on Non-Metal Mining TPC.  The remainder is attributed to  
+#labor productivity, and calculated subsequently.  
+# TPC_NM_Wt(1:4,1,1:5)
+# EL  NG   DS   GS   CL   RS
+0.70 0.85 0.90 1.00 0.70 0.90
+0.70 0.85 0.90 1.00 0.70 0.90
+0.70 0.85 0.90 1.00 0.70 0.90
+0.70 0.85 0.90 1.00 0.70 0.90   
+# Normalized allocation of metal mining share across regions
+# Reg_MetlShr(1:4) 
+0.0000	0.2101	0.0201	0.7698
+# 			  																																				
+##########                    Glass Industry              ####################################
+### subroutine name
+## description
+# variable name
+#
+###GL_FlatCap
+## flat glass calibration
+#fgl_calib
+11.0
+## flat glass lifespan
+# fgl_lifespan
+30.0
+## flat glass baseline capacity lifetime
+#  fgl_base_caplife
+20.0
+#  prodfgl_IBYR
+6030.0
+###GL_FlatTemp
+#CalibCoeffGL
+-0.000005  -0.0003  -0.005
+#waccGL
+0.10
+#lifetimeGL
+30.0
+#capcost  !O9 -O10
+100585.0  999000.0 
+##O&M ($/1000 Tonnes) O14-P14
+#glOM 
+3808.0  3808.0  
+#ng_usegl
+4.648 4.648
+#co2EmissGl
+231.0  231.0
+#alpha_ft
+0.00  -9.21024036697596
+#alpha_decay
+#0.5  5.0
+###GL_FlatForm
+##!J7-L7
+#techshareg
+0.80 0.20  0.01 
+#CalibCoeffGLff
+-0.000005  -0.0003  -0.005
+# waccGLff
+0.10 
+#lifetimeGLff
+30.0
+# capcostff
+60351.0  72421.0  72421.0
+##!O&M ($/1000 Tonnes) U16
+#glOMff
+2285.0  2741.0  2741.0  
+##NG  Use (GJ/Tonne)  (S17-U17)
+#ng_useglff
+0.673  1.013  0.838
+##Flat Form Elec Use (GJ/Tonne) (S18-U18)
+#elec_usegl
+0.225  0.203  0.203
+#co2EmissGlff
+50.0  33.0  42.0
+#alpha_ff
+0.00  -2.05319313194287   -9.38513787505296
+#alpha_decayff
+#0.5  5.0 
+###GL_FlatFurnace
+## Z3
+#CalibCoeffGLa
+-0.0005  -0.0003  -0.005
+# waccGLa
+0.10
+#lifetimeGLa
+30.0
+#capcosta
+201169.939583333  205193.338400488 241403.9275 245427.324023199 287745.46725 
+## !O&M ($/1000 Tonnes) 
+#glOMa
+7615.2   7767.50440781441 9138.24   9290.54542735037  9899.75999999993  
+#ng_usegla
+8.715 7.553 7.553 6.74 3.486 
+#elec_usegla
+0.129 0.919 0.129 0.801 0.077
+#co2EmissGla
+434.0  376.0  376.0 335.0 174.0 
+#alpha_ffa
+0.00  -6.52901972692693 -8.2050  -5.5959  -12.2662
+#alpha_decaya
+#0.5  5.0 
+###GL_FlatPrep
+#CalibCoeffGLd
+-0.000005  -0.0005  -0.005
+#waccGLd
+0.10
+# lifetimeGLd
+30.0
+#capcostd
+40234.0 48281.0
+##!O&M ($/1000 Tonnes) 
+#glOMd
+1523.0  1828.0
+#elec_usegld
+0.0698  0.0629
+#co2EmissGld
+0.0  0.0
+#alpha_ftd
+0.00   -9.24212493185445 
+#alpha_decayd
+#0.5  5.0 
+### GL_ContCap
+#cgl_calib
+11.0
+#cgl_lifespan
+30.0
+#cgl_base_caplife
+20.0
+#prodcgl_IBYR
+10700.0   
+###GL_ContForm
+#techsharegc
+0.50  0.0001  0.4900 
+#CalibCoefcgl
+-0.000005  -0.0003  -0.005 
+# waccGLc
+0.10
+#lifetimeGLc
+30.0 
+#capcostc
+66670.0   80004.0  80004.0 
+## !O&M ($/1000 Tonnes) S16
+#glOMc
+ 2285.0  2741.0  2741.0 
+# ng_useglc
+1.975  2.640  2.139 
+#elec_useglc
+0.437  0.394  0.394
+#co2EmissGlc
+131.0   98.0  106.0
+# alpha_cff
+0.00   -9.82728535394832   -1.0435 
+# alpha_decayc
+#0.5  5.0 
+### GL_ContFurnace
+#techsharegcf
+0.1998 0.2998  0.4997  0.01  0.01  0.01   0.01  0.01  0.01 0.01
+# CalibCoefcgl
+-0.000005  -0.0003  -0.005 
+#waccGLcf
+0.10 
+#lifetimeGLcf
+30.0 
+#capcostcf
+222232.88  226677.54  266679.46  272013.07   287745.47  241806.82  222232.88    230815.62   290168.21  266679.46 
+## !O&M ($/1000 Tonnes) AO16
+# glOMcf
+ 7615.2  7767.50440781441  9138.24  9321.0  9899.75999999993  8376.72  7615.2  7995.96   10052.07328   9138.24 
+#ng_useglcf
+5.81  5.229  4.648  5.578  3.486  9.877  0.0   11.039  8.715  0.0 
+#elec_useglcf
+0.129  0.524  0.129  0.406  0.077  0.129  4.080  0.129  0.072  3.628
+#co2EmissGlcf
+289.0  260.0  231.0  278.0  174.0 492.0  0.0  549.0  434.0 0.0 
+#alpha_cf
+0.00  1.60656521339098  -0.9407  -6.4391  11.6157  -0.9667 4.3643  0.9162  -3.1328 1.9450
+#alpha_decaycf
+#0.5  5.0 
+### GL_ContPrep
+# CalibCoefcp
+-0.000005  -0.0003  -0.005 
+#waccGLcp
+0.10 
+#lifetimeGLcp
+30.0 
+#capcostcp
+44447.0  53336.0 
+## !O&M ($/1000 Tonnes) AO16
+# glOMcp
+ 1523.0  1828.0
+#elec_useglcp
+0.137  0.123
+#co2EmissGlcp
+0.0  0.0
+#alpha_cp
+0.00  -9.27826058847112
+#alpha_decaycp
+#0.5  5.0 
+###GL_BlownCap
+## blown glass calibration
+#bgl_calib
+11.0
+## blown glass lifespan
+# bgl_lifespan
+30.0
+## blown glass baseline capacity lifetime
+#  bgl_base_caplife
+20.0
+## D17
+# prodbgl_IBYR
+1935.0
+###GL_BlownPolish
+#basesharebp
+1.0
+# CalibCoefbp
+-0.000005  -0.0003  -0.005 
+#wacbglbp 
+0.10 
+#lifetimeGlbp
+30.0 
+#capcostbp
+131169.0  999000.0 
+## !O&M ($/1000 Tonnes) AO16
+# glOMbp
+3808.0  3808.0 
+#ng_useglbp
+1.162  1.162
+#elec_useGbp
+0.06  0.06
+#co2EmissGlbp
+58.0  58.0
+#alpha_bp
+0.00  -8.74998302606859
+#alpha_decaybp
+#0.5  5.0 
+###GL_BlownForm
+#techsharegbff
+0.9998   0.0001  0.0001
+#CalibCoefglbff
+-0.000005  -0.0003  -0.005 
+# waccGLbff
+0.10
+#lifetimeGLbff
+30.0 
+#capcostbff
+78701.0   94442.0  94442.0
+## !O&M ($/1000 Tonnes) S16
+#glOMbff
+ 2285.0  2741.0  2741.0 
+# ng_useglbff
+2.640  1.975  2.139
+#elec_useglbff
+0.597  0.537  0.537
+#co2EmissGlbff
+131.0   98.0  106.0
+# alpha_bff
+0.00   -10.604787629399   -10.337957053714
+# alpha_decaybff
+#0.5  5.0 
+###GL_BlownFurnace
+#techsharegbf
+0.6998  0.05   0.25 0.0001 0.0001 
+#CalibCoefglbf
+-0.000005  -0.0003  -0.005 
+# waccGLbf
+0.10
+#lifetimeGLbf
+30.0 
+#capcostbf
+219824.37306  288572.05694 263789.25694 346286.46833 287745.46725
+## !O&M ($/1000 Tonnes) S16
+#glOMbf
+7615.2   8376.72  9138.24 10052.07328 9899.76
+# ng_useglbf
+11.155   0.0  9.993  0.0  3.486 
+#elec_useglbf
+0.129  3.843  0.129   3.448  0.077
+#co2EmissGlbf
+555.0  0.0  497.0  0.0  174.0
+# alpha_bf
+0.00   -0.617223567192801  -2.88899195271357  -8.9338  -21.5662873100834
+# alpha_decaybf
+#0.3  10.0 
+### GL_BlownPrep
+# CalibCoefbpr
+-0.000005  -0.0003  -0.005 
+#waccGLbpr
+0.10 
+#lifetimeGLbpr
+30.0 
+#capcostbpr
+52468.0  62961.0  
+## !O&M ($/1000 Tonnes) AO16
+# glOMbp
+ 1523.0  1828.0
+#elec_useglbpr
+0.197  0.177
+#co2EmissGlbpr
+0.0  0.0
+#alpha_bpr
+0.00  -9.3097
+#alpha_decaybpr
+#0.5  5.0 
+### GL_FiberCap
+#fbgl_calib
+11.0
+#fbgl_lifespan
+30.0
+#fbgl_base_caplife
+20.0
+#prodfbgl_IBYR
+911.0   
+###GL_FiberForm
+#techshareg_12
+0.9999 0.9999   
+#CalibCoef_12
+-0.000005  -0.0003  -0.005 
+# waccgl_12
+0.10
+#lifetimeGL_12
+30.0 
+#capcost_12
+61676.0   9999000.0
+## !O&M ($/1000 Tonnes) S16
+#glOM_12
+ 2285.0  2285.0
+# ng_usegl_12
+2.861  2.861
+#elec_usegl_12
+0.94  0.94
+#co2EmissGl_12
+142.0  142.0
+# alpha_12
+0.00   -12.8155
+# alpha_decay_12
+#0.5  5.0 
+### GL_FiberFurnace
+#techshareg_13
+0.83 0.07 0.10 0.0
+# CalibCoef_13
+-0.000005  -0.0003  -0.005 
+#waccGL_13
+0.10 
+#lifetimeGL_13
+30.0 
+#capcost_13
+74011.3105  205586.99217  226145.66633  246704.36833
+## !O&M ($/1000 Tonnes) AO16
+# glOM_13
+ 2741.472  7615.2   8376.72  9138.24
+#ng_usegl_13
+2.316    9.761   0.0  7.553
+#elec_usegl_13
+0.84575  0.15515  3.79015  0.12929
+#co2EmissGl_13
+115.28181  485.86604   0.0  375.96007 
+#alpha_13
+0.00  5.99114874043245  10.1836762605314  4.8441
+#alpha_decay_13
+#0.2  10.0 
+### GL_FiberPrep
+# CalibCoef_14
+-0.000005  -0.0003  -0.005 
+#waccGL_14
+0.10 
+#lifetimeGL_14
+30.0 
+#capcost_14
+41117.0   49341.0  
+## !O&M ($/1000 Tonnes) AO16
+# glOM_14
+ 1523.0  1828.0
+#elec_usegl_14
+0.297  0.268
+#co2EmissGl_14
+0.0  0.0
+#alpha__14
+0.00  -9.3654
+#alpha_decay_14
+#0.5  5.0 
+#gl_oxyimpact 
+-0.45 -0.47 -0.35 -0.47
+#gl_oxyreq 
+0.5 0.3 0.35 0.5
+## Oxy Share Factors; 1- Base 2- Max 3-Trigger 4-k
+#OxyShrFac
+0.2 0.75 0.1 120.0
+##MECS Adjustment for 1-NG and 2-Elec
+#gl_mecs_adj
+1.04  1.33

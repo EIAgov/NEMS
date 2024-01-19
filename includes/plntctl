@@ -1,0 +1,77 @@
+!  $Header: N:/default/includes/RCS/plntctl,v 1.4 2004/06/09 19:48:53 RSC Exp $
+!
+!  PLNTCTL: Control Variables For EFD Module
+!
+      COMMON /PLNTCTL/  WMXCP,WPMR,WFOR,WGHR,WLOWER,WUPPER, &
+         WSO2F,WCMFSH,WHYCF,SCAP_BY_COAL_UNIT,NUM_CL_UNIT,MAP_TO_WIGRP_FRST, &
+         MAP_TO_WIGRP_NEXT,MAP_TO_COAL_ID,WFLTP,WASTS,WHYTP,WREC_INT, &
+         WREC_NXT,WGRP_INT,WGRP_NXT,W_NXT,WO_RYR,WO_RMO,WO_VIN,W_INT, &
+         WNGRPS,WNPIPE,WTYPE,WNEWGRP,WNXT_SGRP,WNAME,COAL_UNIT_ID, &
+         COAL_REGION, INITIAL_ECP_TYPE, &
+         W_LFT
+!
+      INTEGER ESIZ$PCTL,EBLK$PCTL,ELFT$PCTL
+      PARAMETER (ESIZ$PCTL =  5 *  4 + &
+         1 *  4 * 12 * WPLT_D_RGN + &
+         1 * 24 * EFD_D_CAP + &
+         5 *  8 * EFD_D_CAP + &
+         1 *  8 * EFD_D_BTP + &
+         2 *  4 * EFD_D_CAP + &
+         1 *  8 * EFD_D_CAP * EFD_D_FPP + &
+         2 *  4 * EFD_D_CAP * EFD_D_FPP + &
+         4 *  2 * WPLT_D_REC + &
+         2 *  2 * WPLT_D_RGN + &
+         1 *  2 * WPLT_D_RGN * WPLT_D_GRP + &
+         1 * 10 * MX_CL_UNIT + &
+         4 *  4 * MX_CL_UNIT + &
+         2 *  4 * EMM_D_GRP + &
+         2 *  2 * EMM_D_GRP + &
+         1 *  2 * WPLT_D_RGN * EFD_D_CAP * EFD_D_OWN * (EFD_D_MFRG+1) )
+      PARAMETER (EBLK$PCTL = ( (ESIZ$PCTL - 1) / 16384) + 1)
+      PARAMETER (ELFT$PCTL = EBLK$PCTL * 16384 - ESIZ$PCTL)
+!
+!     LOADIN - VARIABLE DECLARATION AND DEFINITIONS
+!
+      REAL*8 WMXCP(EFD_D_CAP)                                  ! MAXIMUM CAPACITY FACTOR
+      REAL*8 WPMR(EFD_D_CAP)                                   ! PLANNED MAINTENANCE RATE
+      REAL*8 WFOR(EFD_D_CAP)                                   ! FORCED OUTAGE RATE
+      REAL*8 WGHR(EFD_D_CAP,EFD_D_FPP)                           ! AVERAGE HEATRATES
+      REAL*8 WLOWER(EFD_D_CAP)                                 ! CAPACITY FAC LOWER BOUND
+      REAL*8 WUPPER(EFD_D_CAP)                                 ! CAPACITY FAC UPPER BOUND
+      REAL*8 WSO2F(EFD_D_BTP)                                  ! SO2 FACTOR (NOT USED)
+      REAL*4 WHYCF(12,WPLT_D_RGN)                              ! MONTHLY HDRO CAPACITY FACTORS
+      REAL*4 WCMFSH(EFD_D_CAP,EFD_D_FPP)                         ! MAXIMUM FUEL SHARES
+!
+      INTEGER*4    NUM_CL_UNIT                               ! Number of Coal Units
+      CHARACTER*10 COAL_UNIT_ID(MX_CL_UNIT)                  ! Plant and Unit ID for all coal units
+      INTEGER*4    MAP_TO_WIGRP_FRST(MX_CL_UNIT)             ! Map Coal Unit to First W_IGRP
+      INTEGER*4    MAP_TO_WIGRP_NEXT(EMM_D_GRP)                ! Map Coal Unit to Next W_IGRP
+      INTEGER*4    COAL_REGION(MX_CL_UNIT)                   ! Identify Coal Region for Each Coal Unit 
+      INTEGER*4    INITIAL_ECP_TYPE(MX_CL_UNIT)              ! Identify Initial ECP Type for Each Coal Unit
+      REAL*4       SCAP_BY_COAL_UNIT(MX_CL_UNIT)             ! Summer Capacity by Coal Unit
+      INTEGER*4    MAP_TO_COAL_ID(EMM_D_GRP)                   ! Map Coal Units WIGRP to Coal Unit Index
+!
+      INTEGER*4 WFLTP(EFD_D_CAP,EFD_D_FPP)                       ! EFD Fuel Types for new unplanned capacity
+      INTEGER*4 WASTS(EFD_D_CAP)                               ! EFD CAPACITY TYPE
+      INTEGER*4 WHYTP(EFD_D_CAP)                               ! RENEWABLE EFD CAPACITY TYPE
+      INTEGER*4 WREC_INT                                     ! INITIAL RECORD COUNTER
+      INTEGER*4 WREC_NXT                                     ! NEXT RECORD COUNTER
+      INTEGER*4 WGRP_INT                                     ! INITIAL GROUP COUNTER
+      INTEGER*4 WGRP_NXT                                     ! NEXT GROUP COUNTER
+      INTEGER*2 W_NXT(WPLT_D_REC)                              ! RECORD NUMBER OF NEXT RECORD
+      INTEGER*2 WO_RYR(WPLT_D_REC)                             ! OLD PLANT RETIREMENT YEAR
+      INTEGER*2 WO_RMO(WPLT_D_REC)                             ! OLD PLANT RETIREMENT MONTH
+      INTEGER*2 WO_VIN(WPLT_D_REC)                             ! OLD PLANT VINTAGE
+      INTEGER*2 WNGRPS(WPLT_D_RGN)                             ! Total Number Of Plant Groups Per Region
+      INTEGER*2 WNPIPE(WPLT_D_RGN)                             ! Number Of Plnt Grps Currently In Pipeline
+                                                             ! In Plnt Rgn
+      INTEGER*2 W_INT(WPLT_D_RGN,WPLT_D_GRP)                     ! 1st Plant Record For Plant Group in Region
+      INTEGER*2 WTYPE(EMM_D_GRP)                               ! Map W_GRP to Regional Group Number
+      INTEGER*2 WNEWGRP(WPLT_D_RGN,EFD_D_CAP,EFD_D_OWN,EFD_D_MFRG+1) ! Group Number to assign new Plant Groups (0 implies no new groups)
+      INTEGER*2 WNXT_SGRP(EMM_D_GRP)                           ! Next Unused Subgroup Number for each Group
+!           
+      CHARACTER*24 WNAME(EFD_D_CAP)                            ! Plant Type Names
+      CHARACTER*1 W_LFT(ELFT$PCTL)                           ! Bytes left in block
+      CHARACTER*16384 WPCNTL(EBLK$PCTL)                      ! Plant File Control DAF Record block
+!
+      EQUIVALENCE (WMXCP(1),WPCNTL(1))

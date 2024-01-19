@@ -1,0 +1,62 @@
+!  $Header: N:/default/includes/RCS/wgekparm,v 1.3 2000/08/07 02:18:20 CGA Exp $
+!     RFM-GES SUBMODULE KEY PARAMETERS BLOCK
+!     (WGEKPARM)
+!***********************************************************************
+      REAL   WGEPRICE_SEG(MSPTMX)   !  Ratio of Price Segmentation between lowest priced
+                                    !  site and highest priced site in the supply curve
+      INTEGER NUMEXGS               !  Maximum number of geothermal existing capacity records in the     
+                                    !  wgeparm input file (currently = 47).
+      PARAMETER (NUMEXGS = 75)
+!THE REST OF THE DECLARES ARE USED IN THE OLD GEOTHERMAL MODEL
+      REAL   WGEPPctX(MNGECC)  !  Fraction of capital cost comp expensed
+      REAL   WGEPDpA(MNUMYR)   !  Depletion allowance(percentage)
+      REAL   WGEPROY(MNUMYR)   !  Royalty rate
+      REAL   WGEPSEV(MNUMYR)   !  Severance tax rate
+      REAL   WGEPGDCT(MNUMYR)  !  Geo. drilling cap. improvement factor
+      REAL   WGEPGFCT(MNUMYR)  !  Geo. field cap. improvement factor
+      REAL   WGEPGFOT(MNUMYR)  !  Geo. field O&M. improvement factor
+      REAL   WGEPGPOT(2,MNUMYR)  !  Geo. plant O&M improvement factor
+      REAL   WGEPSUB(MNUMYR)   !  EPAC subsidy
+      REAL   WGEPITC(MNUMYR)   !  Investment tax credit
+      REAL   WGECCDST(8)  ! Distribution of overnight CC over lead time
+      REAL   WGEPLCDF(2)  ! Capital cost learning curve doubling factor
+      REAL   WGEPLCCO(2)  ! Capital cost learning curve computed coeff.
+      REAL   WGEPLCNC(2)  ! Capital cost learning curve 'n'th capacity
+      REAL   WGEPHPWt  !   Weight given to high potential site capacity
+      REAL   WGEPUTrC  !   Unit transmission capital cost(per mile)
+      REAL   WGEPFPTI  !   Profit margin used in levelizing
+      Real   UTCCFC(2) !   Capital cost adjustment factor
+!.....Variables for data on The Geysers
+      REAL    WGEGICAP(MNUMYR) ! Geysers installed capacity
+      REAL    WGEGOC   !   Geysers 1990$ O*M cost (M$/mW/Yr)
+      REAL    WGEGH2SR !   Geysers H2S emissions rate
+      REAL    WGEGCO2R !   Geysers CO2 emissions rate
+      REAL    WGEGHtRt !   Geysers heat rate
+      REAL    WGEGCFct(MNUMYR) ! Geysers capacity factors
+!
+      INTEGER WGEAVL   !   Initial year of availability
+      INTEGER WGETSW   !   Field technology improvements switch
+!                      !   (1=use O&G module factors; 2=use GES factors)
+      INTEGER WGEPSNom !   Nominal geothermal plant size
+      INTEGER WGEPLIFE !   Geothermal plant life
+      INTEGER WGEPTLIF !   Geothermal plant tax life
+      INTEGER WGEPLEAD !   Lead time for new capacity
+      INTEGER WGEPXDur !   Duration of exploration
+      INTEGER WGEPFDur !   Duration of confirmation
+      INTEGER WGEPNDur !   Duration of construction
+      INTEGER WGEWADur(2) !   Waiting period between projects
+!                             (1: after small builds, 2: after large builds)
+      INTEGER WGENPnum(2) !   New projects after builds
+!                             (1: after small builds, 2: after large builds)
+!.....Variables for data on The Geysers
+      INTEGER WGEGEIA  !   Geysers EIA ID number
+      INTEGER WGEGNR   !   Geysers NERC region index
+      INTEGER WGEGCR   !   Geysers Census region index
+      COMMON /WGEKPARM/ WGEPRICE_SEG,WGEPPctX,WGEPDpA ,WGEPROY ,WGEPSEV ,WGEPGDCT, &
+                        WGEPGFCT,WGEPGFOT,WGEPGPOT,WGEPSUB ,WGEPITC , &
+                        WGECCDST,WGEPHPWt,WGEPUTrC,WGEPLCDF,WGEPLCCO, &
+                        WGEPLCNC,WGEPFPTI,WGEGICAP,WGEGOC  ,WGEGH2SR, &
+                        WGEGCO2R,WGEGHtRt,WGEGCFct,WGEAVL  ,WGETSW  , &
+                        WGEPSNom,WGEPLIFE,WGEPTLIF,WGEPLEAD,WGEPXDur, &
+                        WGEPFDur,WGEPNDur,WGEWADur,WGENPnum,WGEGEIA , &
+                        WGEGNR  ,WGEGCR  ,UTCCFC

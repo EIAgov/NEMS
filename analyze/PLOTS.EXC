@@ -1,0 +1,73 @@
+ READ P WOODNET
+ REA S
+ OUT PLOTS.DOC
+ _TYP WOODNET (see WOODNET.RPT) //C
+ SCR W=73 L=20
+ L COST,SPI X GT L
+ SH P //NOSORT
+ SH P //NOSORT,PRINTABL
+ _TYP Pine Supply Function (over regions) //C
+ SH P
+ SUB COL SPI X GT L
+ BL C S SPI??
+ BL C D
+SW ERR=F MSG=F
+ BL C REN SYN.SF SanFran
+ BL C REN SYN.SE Seattle
+ BL C REN SYN.LA LA
+ BL C REN SYN.DE Denver
+ BL C REN SYN.CH Chicago
+SW ERR=T MSG=T
+ _TYP  Distribution of Pine Supply Activities with Positive Levels //C
+ BL C P
+
+ READ P LANDUSE
+ READ S
+ SCR W 79
+ _TYP Landuse Model //C
+ SCH D *
+ SCH D EQ //NOSUM
+ SCR W 73
+ SUB *
+ SUB D R COST
+ BL R S
+ BL R D
+SW ERR=F MSG=F
+ BL R REN SYN.B Balances
+ BL R REN SYN.L Limits
+ BL R REN SYN.D Demands
+SW ERR=T MSG=T
+ _TYPE       Distribution of Row Classes
+ _TYP
+ BL R P
+ BL R E *
+ BL C E *
+ BL C S
+ BL C D
+SW ERR=F MSG=F
+ BL C REN SYN.P Allocate
+ BL C REN SYN.R Receive
+ BL C REN SYN.X Wht-Feed
+ BL C REN SYN.T Transprt
+SW ERR=T MSG=T
+ _TYP       Distribution of Activity Classes
+ _TYP
+ BL C P
+ BL C E *
+ SUB COL * X GT L
+ BL C S
+ BL C D
+SW ERR=F MSG=F
+ BL C REN SYN.P Allocate
+ BL C REN SYN.R Receive
+ BL C REN SYN.X Wht-Feed
+ BL C REN SYN.T Transprt
+SW ERR=T MSG=T
+ _TYP Distribution of Activity Classes with Positive Levels //C
+ _TYP
+ BL C P
+ BL C E *
+ OUT *
+ SCR W 79  L 23
+$ OUTPUT HAS GONE TO PLOTS.DOC
+ RETURN

@@ -1,0 +1,408 @@
+! $Header: m:/default/includes/RCS/ogsmugr,v 1.55 2018/06/18 12:43:26 dh5 Exp $
+! Resource Variables:
+      CHARACTER*11 ARESID(MAX_RES)           ! RESERVOIR ID
+      CHARACTER*11 DRESID(MAX_RES)           ! DECLINE RESERVOIR ID - MC CHANGE 5.8.09
+      CHARACTER*2 AState(MAX_RES)            ! STATE ID
+      CHARACTER*1 ARES_TYPE(MAX_RES)         ! RESOURCE TYPE (O/G)
+      character*3 rnkval
+      INTEGER AREGION(MAX_RES)               ! OGSM REGION
+      INTEGER APADD(MAX_RES)                 ! PADD REGION
+      INTEGER APCODE(MAX_RES)                ! PROCESS CODE
+      INTEGER APLAY_CDE(MAX_RES)             ! USGS PLAY CODE
+      INTEGER ARESFLAG(MAX_RES)              ! RESOURCE FLAG
+      integer asc(max_res)                   ! reservoir size class
+      integer aprov(max_res)                 ! province number
+      integer aresacc(max_res)               ! resource access category
+      integer acrdtype(max_res)              ! crude type (1=FLL; 2=FMH; 3=FHH; 4=FHL; 5=FHV)
+
+      INTEGER ALIFE(MAX_RES,MAX_TECH)                 ! THE ECONOMIC LIMIT OF THE CORRESPONDING DECLINE RESERVOIR - MC CHANGE 5.8.09
+      INTEGER DLIFE(MAX_RES)                          ! MC CHANGE 5.8.09
+      INTEGER DPCODE(MAX_RES)                         ! MC CHANGE 5.8.09
+      INTEGER LDEC2                                   ! MC CHANGE 5.8.09
+
+      COMMON / ECOCOM1 / aresid,astate,ares_type,aregion,apcode, &
+         aplay_cde,aresflag,asc,aprov,aresacc, acrdtype, &
+         DRESID,ALIFE,DLIFE,LDEC2,             &      ! MC CHANGE 5.8.09
+         DPCODE,apadd                                 ! MC CHANGE 5.8.09
+
+!
+
+      real apresin(max_res)                  ! initial pressure (psia)
+      real ARRC(MAX_RES)                     ! RAILROAD COMMISION DISTRICT
+      REAL APAY(MAX_RES)                     ! NET PAY (Feet)
+      REAL ADEPTH(MAX_RES)                   ! DEPTH   (Feet)
+      REAL AAPI(MAX_RES)                     ! API GRAVITY
+      REAL AGAS_GRAV(MAX_RES)                ! GAS GRAVITY
+      REAL ABTU(MAX_RES)                     ! BTU CONTENT
+      REAL ANWELLOIL(MAX_RES)                ! NUMBER OF OIL WELLS
+      REAL ANWELLGAS(MAX_RES)                ! NUMBER OF GAS WELLS
+      REAL ATOTINJ(MAX_RES,MAX_TECH)                  ! NUMBER OF NEW INJECTORS PER PATTERN
+      REAL APATSIZ(MAX_RES)                  ! PATTERN SIZE (Acres) - WLSPC
+      REAL ALATNUM(MAX_RES,MAX_TECH)                  ! NUMBER OF LATERALS
+      REAL ALATLEN(MAX_RES,MAX_TECH)                  ! LATERAL LENGTH (Feet)
+      REAL ATOTPAT(MAX_RES,MAX_TECH)                  ! TOTAL NUMBER OF PATTERNS
+      REAL ATOTPROD(MAX_RES,MAX_TECH)                 ! NUMBER OF NEW PRODUCERS PER PATTERN
+      REAL ATEMP(MAX_RES)                    ! RESERVOIR TEMPERATURE (Degrees F)
+      REAL AHEATVAL(MAX_RES)                 ! HEAT CONTENT OF GAS (btu/Cf)
+      REAL APHI(MAX_RES)                     ! POROSITY
+      REAL ASOI(MAX_RES)                     ! INITIAL OIL SATURATION
+      REAL ASOC(MAX_RES)                     ! CURRENT OIL SATURATION
+      REAL ASOR(MAX_RES)                     ! RESIDUAL OIL SATURATION
+      REAL AGOR(MAX_RES)                     ! GAS OIL RATIO (mcf/bbl)
+      REAL AWOR(MAX_RES)                     ! WATER OIL RATIO (BBL/BBL)
+      REAL ANGL(MAX_RES)                     ! NGL (BBL/MMCF)
+      REAL ANGPLET(MAX_RES)                  ! PERCENT OF NGPL THAT IS ETHANE
+      REAL ANGPLPR(MAX_RES)                  ! PERCENT OF NGPL THAT IS PROPANE
+      REAL ANGPLBU(MAX_RES)                  ! PERCENT OF NGPL THAT IS BUTANE
+      REAL ANGPLIS(MAX_RES)                  ! PERCENT OF NGPL THAT IS ISOBUTANE
+      REAL ANGPLPP(MAX_RES)                  ! PERCENT OF NGPL THAT IS PENTANES PLUS
+      REAL ABOI(MAX_RES)                     ! INITIAL FORMATION VOLUME FACTOR (BBL/STB)
+      REAL APERM(MAX_RES)                    ! PERMEABILITY (MD)
+      REAL AOILVIS(MAX_RES)                  ! OIL VISCOSITY (CP)
+      REAL AVDP(MAX_RES)                     ! DYKSTRA PARSONS COEFICIENT
+      REAL ACO2CONT(MAX_RES)                 ! CO2 IMPURITY CONTENT (PERCENTAGE)
+      REAL AN2CONT(MAX_RES)                  ! N2 IMPURITY CONTENT  (PERCENTAGE)
+      REAL AH2SCONT(MAX_RES)                 ! H2S IMPURITY CONTENT (PERCENTAGE)
+      REAL ASULFOIL(MAX_RES)                 ! SULFUR CONTENT OF OIL (pERCENT)
+      REAL AOOIP(MAX_RES)                    ! OOIP (MMBBl)
+      REAL ACHOILPROD(MAX_RES)               ! CUMULATIVE HISTORICAL OIL PRODUCTION (MBbl)
+      REAL ACHGASPROD(MAX_RES)               ! CUMULATIVE HISTORICAL GAS PRODUCTION (MMcf)
+      REAL ABO(MAX_RES)                      ! CURRENT FORMATION VOLUME FACTOR (BBL/STB)
+      real aswi(max_res)
+      real aorgooip(max_res)
+      real anwellinj(max_res)
+      real alyroil(max_res)                  ! LAST YEAR OF HISTORICAL OIL PRODUCTION (MBBL)
+      REAL ALYRGAS(MAX_RES)                  ! LAST YEAR OF HISTORICAL GAS PRODUCTION (MMCF)
+      real ahcpv(max_res)
+      real aflp(max_res)                     ! portion of reservoir on federal lands - fraction  - MC change 4.29.09
+      real anumacc(max_res)                  ! number of accumulations (duplicate conventinal exploration projects) mc change 5.19.09
+      real acrdheat(max_res)                 ! crude heat content
+      real aflen(max_res)                    ! hydraulic fracture length (ft)
+
+      COMMON / ECOCOM2 / arrc,apay,adepth,aapi,agas_Grav,abtu, &
+        anwelloil,anwellgas,atotinj,apatsiz,alatnum,alatlen,atotpat, &
+        atotprod,atemp,aheatval,aphi,asoi,asor,agor,awor,angl,aboi, &
+        aperm,aoilvis,avdp,aco2cont,an2cont,ah2scont,asulfoil,aooip, &
+        achoilprod,achgasprod,asoc,abo,aswi,aorgooip,apresin, &
+        anwellinj,alyroil,alyrgas,ahcpv,aflp,anumacc,acrdheat,aflen, &
+        angplet,angplpr,angplbu,angplis,angplpp
+
+      REAL ATOTCONV(MAX_RES,MAX_TECH)                 ! NUMBER OF CONVERSIONS PER PATTERN
+      REAL ATOTPS(MAX_RES,MAX_TECH)                   ! NUMBER OF PRIMARY TO SECONDARY PRODUCERS PER PATTERN
+      REAL AOGIP(MAX_RES)                    ! OGIP (BCF)
+      REAL ATOTACRES(MAX_RES)                ! TOTAL AREA/ACRES
+      REAL ASGI(MAX_RES)                     ! GAS SATURATION
+
+      COMMON/ECOCOM3/ATOTCONV,ATOTPS,AOGIP,ATOTACRES,ASGI
+
+      REAL PATDEV(MAX_RES,MAX_YR+10,MAX_TECH)                            !annual number of patterns developed for base and advanced technology
+      REAL APRODOIL(MAX_RES,MAX_YR,MAX_TECH)                            ! ANNUAL OIL PRODUCTION (MBBL)
+      REAL APRODGAS(MAX_RES,MAX_YR,MAX_TECH)                            ! ANNUAL GAS PRODUCTION (MMCF)
+      REAL APRODNGL(MAX_RES,MAX_YR,MAX_TECH)                            ! ANNUAL NGL PRODUCTION (MBBL)
+      REAL APRODWAT(MAX_RES,MAX_YR,MAX_TECH)                            ! ANNUAL WATER PRODUCTION (MBBL)
+      real aprodco2(max_res,max_yr,max_tech)                            ! annual CO2 production (MMCF)
+      REAL AWATINJ(MAX_RES,MAX_YR,MAX_TECH)                             ! ANNUAL WATER INJECTED (MBBL)
+      REAL AINJINJ(MAX_RES,MAX_YR,MAX_TECH)                             ! ANNUAL INJECTANT INJECTED (MBBL-MCF-LBS)
+      REAL AINJRECY(MAX_RES,MAX_YR,MAX_TECH)                            ! ANNUAL INJECTANT RECYCLED (MBBL-MCF)
+
+      real aresvoil(max_res,max_yr,max_tech)                            ! end of year proven oil reserves (MBbl)   !mc change ver 7
+      real aresvgas(max_res,max_yr,max_tech)                            ! end of year proven gas reserves (MMcf)   !mc change ver 7
+      real airsvoil(max_res,max_yr,max_tech)                            ! end of year inferred oil reserves (MBbl) !mc change ver 7
+      real airsvgas(max_res,max_yr,max_tech)                            ! end of year inferred gas reservse (MMcf) !mc change ver 7
+
+
+      common/ecocom4/patdev,aprodoil,aprodgas,aprodngl,aprodwat, &
+          awatinj,ainjinj,ainjrecy,aprodco2,aresvoil,aresvgas,airsvoil,airsvgas                                    !mc change ver 7
+
+      real epackdist(max_res,max_tech,21)    ! size class distribution for undiscovered unconventional reservoirs
+
+      common/ecocom9/epackdist
+!  end Resource Variables
+
+!
+!   VARIABLES PASSED AS OUTPUT FROM ECONOMICS ROUTINE
+!
+      REAL EPRODOIL(MAX_RES,MAX_YR)         ! ECONOMIC OIL PRODUCTION (MBBL)
+      REAL EPRODGAS(MAX_RES,MAX_YR)         ! ECONOMIC GAS PRODUCTION (MMCF)
+      REAL EPRODWAT(MAX_RES,MAX_YR)         ! ECONOMIC WATER PRODUCTION (MBBL)
+      REAL EWATINJ(MAX_RES,MAX_YR)          ! ECONOMIC WATER INJECTED (MBBL)
+      REAL ECO2POL(MAX_RES,MAX_YR)
+      REAL ESURFVOL(MAX_RES,MAX_YR)
+      REAL ECO2INJ(MAX_RES,MAX_YR)
+      REAL ECO2RCY(MAX_RES,MAX_YR)          ! CO2 RECYCLED
+      REAL ETOC(MAX_RES,MAX_YR)             ! TOTAL OPERATING COST
+      REAL EII(MAX_RES,MAX_YR)              ! INTAGIBLE INVESTEMENT
+      REAL ETI(MAX_RES,MAX_YR)              ! TANGIBLE INVESTMENT
+      REAL ELA(MAX_RES,MAX_YR)
+      real eremres(max_res,max_yr)          ! remaining proven oil reserves     !mc change ver 7
+      real egremres(max_res,max_yr)         ! remaining proven gas reserves     !mc change ver 7
+      real eiremres(max_res,max_yr)         ! remaining inferred oil reserves   !mc change ver 7
+      real eigremres(max_res,max_yr)        ! remaining inferred gas reserves   !mc change ver 7 
+      real esump(max_res,max_yr)            ! number of patterns
+      real expatn(max_res,max_yr)           ! number of active patterns
+      REAL*4 LEASCST(max_res,max_yr)        ! LEASE COST BY PROJECT
+      REAL*4 DRILLCST(max_res,max_yr)       ! DRILL COST BY PROJECT
+      REAL*4 DRYCST(max_res,max_yr)         ! DRY HOLE COST BY PROJECT
+      REAL*4 PATNDCF(max_res,max_yr)        ! DCF BY PROJECT
+      REAL*4 OPCOST(max_res,max_yr)         ! AOAM BY PROJECT
+
+      REAL EINVEFF(MAX_RES)                 ! INVESTMENT EFFICIENCY
+      REAL EROR(MAX_RES)                    ! RATE OF RETURN
+      REAL ENPV(MAX_RES)                    ! NET PRESENT VALUE
+      real elyroil(max_res)
+      real elyrgas(max_res)
+      REAL ECO2RANKVAL(MAX_RES,MAX_SRC,max_reg-1)     ! SOURCE SPECIFIC RANKING VALUE FOR CO2EOR PROJECTS     - MC CHANGE 5.6.09
+      INTEGER ECO2LIM(MAX_RES,MAX_SRC,max_reg-1)      ! SOURCE SPECIFIC PROJECT LIFE FOR CO2EOR PROJECTS - MC CHANGE 5.6.09
+      INTEGER ENYRSI(MAX_RES)               ! NUMBER OF YEARS PROJECT IS ECONOMIC
+      integer eco2code(max_res)             ! CO2 source code
+
+      COMMON /ECOOUT/EPRODOIL,EPRODGAS,EPRODWAT,EWATINJ, &
+       ECO2POL,ESURFVOL,ECO2INJ,ECO2RCY,ETOC,EII,ETI,ELA, &
+       eremres,egremres,esump,expatn,LEASCST,DRILLCST,PATNDCF,OPCOST, &
+       DRYCST,einveff,eror,enpv,elyroil,elyrgas,enyrsi,eco2code, &
+       ECO2RANKVAL,ECO2LIM,eiremres,eigremres                                             !MC CHANGE ver 7
+
+!
+!   VARIABLES ADDED TO PASS ACTIVE AND NEW WELLS DRILLED
+!
+      REAL EINJDR(MAX_RES,MAX_YR)
+      REAL EPRODDR(MAX_RES,MAX_YR)
+      REAL ESHUTIN(MAX_RES,MAX_YR)
+      REAL EPRODWELL(MAX_RES,MAX_YR)
+      REAL EINJWELL(MAX_RES,MAX_YR)
+      real edryhole(max_res,max_yr)
+!
+      COMMON /ECOOUT2/ EINJDR,EPRODDR,ESHUTIN,EPRODWELL,EINJWELL, &
+                edryhole
+
+!
+!   DCF VARIABLES
+!
+      REAL EROY(max_eyr)             ! ROYALTY
+      REAL EFEDROY(max_eyr)          ! FEDRAL ROYALTY
+      REAL ESEV(max_eyr)             ! SEVERANCE TAX
+      REAL ESTTAX(max_eyr)           ! STATE TAX
+      REAL EFEDTAX(max_eyr)          ! FEDERAL TAX
+      REAL EFEDCR(max_eyr)           ! FEDERAL TAX CREDITS
+      REAL EGROSSREV(max_eyr)        ! GROSS REVENUES
+      REAL EGRAVADJ(max_eyr)         ! GRAVITY ADJUSTMENT
+      REAL EGAEXP(max_eyr)           ! G&A EXPENSED
+      REAL EGACAP(max_eyr)           ! G&A CAPITALIZED
+      REAL EIIDRL(MAX_RES,MAX_YR)           ! INTANGIBLE INVESTMENT DRILLING
+      REAL EICAP2(max_eyr)
+      REAL EINTCAP(MAX_EYR)
+      REAL ETIDRL(MAX_RES,MAX_YR)           ! TANGIBLE INVESTMENT DRILLING
+      REAL EOTC(max_eyr)             ! OTHER TANGIBLE CAPITAL
+      REAL ETCI(max_eyr)
+      REAL EDEPR(max_eyr)            ! DEPRECIATION
+      REAL EAMOR(max_eyr)            ! AMORTIZATION
+      REAL ENETREV(max_eyr)          ! NET REVENUES
+      REAL EDEPLET(max_eyr)
+      REAL ETAXINC(max_eyr)
+      REAL EOAM(max_eyr)             ! VARIABLE OPERATING AND MAINTENANCE
+      REAL EAOAM(max_eyr)            ! FIXED ANNUAL OPERATING COST
+      REAL EGG(max_eyr)
+      REAL EEGGLA(max_eyr)
+      REAL EATCF(max_eyr)            ! AFTER TAX CASH FLOW
+      REAL EDATCF(max_eyr)           ! DISCOUNTED AFTER TAX CASHFLOW
+      REAL EBO(max_eyr)
+      real eoilprice2(max_eyr)       ! oil price used in the economics
+      real egasprice2(max_eyr)       ! gas price used in the economics
+      real adoilprice(max_eyr)       ! adjusted oil price - takng into account api adjustment
+      real eadjgross(max_eyr)        ! adjusted revenue
+      real einjcost(max_eyr)         ! co2/polymer cost
+      real etorecy(max_res,max_eyr)          ! co2/surf/steam recycling volume
+      real etorecy_cst(max_eyr)      ! co2/surf/steam recycling cost
+      real efoam(max_eyr)            ! co2 foam cost
+      real eigen(max_eyr)            ! number of steam generators
+      real eproc_oam(max_eyr)        ! gas processing cost
+      real estim(max_eyr)            ! stimulation cost
+      real eexist_eoam(max_eyr)      ! environmental existing O&M costs
+      real enew_eoam(max_eyr)        ! environmental new O&M costs
+      real eexist_ecap(max_eyr)      ! environmental existing capital
+      real enew_ecap(max_eyr)        ! environmental new capital
+      real ecomp(max_eyr)            ! compressor tangible capital
+      real etciadj(max_eyr)          ! adjustment for federal tax credit
+      real ecap_base(max_eyr)        ! depreciable/capitalize base
+      real edepggla(max_eyr)         ! depletable G&G/lease costs
+      real edep_crd(max_eyr)         ! adjustment to depreciation base for federal tax credits
+      real eadggla(max_eyr)          ! adjustment to depletion base
+      real edggla(max_eyr)           ! depletion base
+      real expla(max_eyr)            ! expensed lease purchase costs
+      real expgg(max_eyr)            ! expensed G&G costs
+      real eeortca(max_eyr)          ! tax credit addback
+      real eintadd(max_eyr)          ! intangible addback
+      real egglaadd(max_eyr)         ! G&G/lease addback
+      real enibt(max_eyr)            ! net income before taxes
+      real eamint(max_eyr)           ! alternative minimum tax
+      real eniat(max_eyr)            ! net income after taxes
+      real etcadd(max_eyr)           ! tax credit addbacks taken from the niat
+      real ecatcf(max_eyr)           ! cumulative discounted after tax cashflow
+      real eco2cost(max_eyr)         ! co2 cost ($/mcf)
+
+      logical emarg(max_res,max_eyr)         ! the year in which the project becomes marginal
+      
+      COMMON /ECOCOM5/ EROY, EFEDROY, ESEV, ESTTAX, EFEDTAX, &
+       EFEDCR, EGROSSREV, EGRAVADJ, EGAEXP, EGACAP, &
+       EIIDRL, EICAP2, EINTCAP, ETIDRL, EOTC, &
+       ETCI, EDEPR, EAMOR, ENETREV, &
+       EDEPLET, ETAXINC, EOAM, EAOAM, EGG, &
+       EEGGLA, EATCF, EDATCF, EBO
+
+      COMMON /ECOCOM5a/ eoilprice2, egasprice2, adoilprice, &
+       eadjgross, einjcost, etorecy, etorecy_cst, efoam, eigen,  &
+       eproc_oam, estim, eexist_eoam, enew_eoam, eexist_ecap, &
+       enew_ecap, ecomp, etciadj, ecap_base, edepggla, &
+       edep_crd, eadggla, edggla, expla, expgg, &
+       eeortca, eintadd, egglaadd, enibt, eamint, &
+       eniat, etcadd, ecatcf, eco2cost,emarg
+
+!
+!   VARIABLE TO TELL THE TIMING MODEL THAT PATTERN LIFE IS 1 YEAR
+!
+      LOGICAL ONEYEAR(MAX_RES)
+!
+      COMMON /UNECON/ ONEYEAR
+!
+! PROJECT NPV
+!
+      REAL PROJECT_NPV(MAX_RES)
+      REAL RANKING_VAL(MAX_RES)
+
+
+      COMMON / PROJECTNPV / PROJECT_NPV,RANKING_VAL,rnkval
+
+      LOGICAL TIMED(MAX_RES)                          ! TIMED FLAG
+      LOGICAL DTIMED(MAX_RES)                         ! DECLINE RESERVOIR TIMED FLAG  !MC CHANGE 5.8.09
+      LOGICAL ELIGIBLE(MAX_RES)                       ! ELIGIBLILITY FLAG
+      LOGICAL BANKED(MAX_RES)                         ! BANKED FLAG FOR EXPLORATION
+      LOGICAL AGGREGATED(MAX_RES)                     ! AGGREGATION FLAG
+      logical industrial(max_res)                     ! natural or industrial CO2 source
+      logical frac(max_res)                           ! eligible for hydraulic fracturing
+      INTEGER SORTIRES(MAX_RES)                       ! SORT POINTER for EOR projects
+      INTEGER SORTIRES2(MAX_RES)                      ! SORT POINTER for EOR projects
+      INTEGER SORTIRES3(MAX_RES)                      ! SORT POINTER for UGR projects
+      INTEGER LAST_DEC(MAX_RES)                       ! LAST YEAR A DECLINE RESERVOIR WILL BE CONSIDERED FOR EOR
+      INTEGER FIRST_DEC(MAX_RES)                      ! FIRST YEAR A DECLINE RESERVOIR WILL BE CONSIDERED FOR EOR
+      integer first_asr(max_res)                      ! first year a decline reservoir will be considered for ASR
+      integer last_asr(max_res)                       ! last year a decline reservoir will be considered for ASR
+      INTEGER FDEC                                    ! FIRST DECLINE RESERVOIR
+      INTEGER LDEC                                    ! LAST DECLINE RESERVOIR
+      INTEGER FGAS                                    ! FIRST GAS EXISTING RESERVOIR
+      INTEGER LGAS                                    ! LAST EXISTING GAS RESERVOIR
+      INTEGER AECON_LIFE(MAX_RES)
+      integer timedyr(max_res)                        ! year in which the project is timed
+      INTEGER EXPLSORTIRES(MAX_RES)                   ! sort pointer for exploration
+      INTEGER EXPLSORTIRES2(MAX_RES)                  ! sort pointer for exploration
+      INTEGER EXPLSORTIRES3(MAX_RES)                  ! sort pointer for exploration
+      integer syr(max_res)                            !mc change 11.10
+      INTEGER SORTISRC2(MAX_RES)                      ! SORT POINTER FOR EOR PROJECTS - CO2 SOURCES    MC CHANGE 5.6.09
+      INTEGER SORTISRC3(MAX_RES)                      ! SORT POINTER FOR UGR PROJECTS
+      INTEGER SORTIREG2(MAX_RES)                      ! SORT POINTER FOR EOR PROJECTS - CO2 SOURCES    MC CHANGE 5.6.09
+      INTEGER SORTIREG3(MAX_RES)                      ! SORT POINTER FOR UGR PROJECTS
+
+      COMMON / ECOCOM6 / TIMED, ELIGIBLE, BANKED, AGGREGATED,industrial &
+                         ,DTIMED,FRAC,syr
+
+      COMMON / ECOCOM6A/ SORTIRES, SORTIRES2, LAST_DEC, FIRST_DEC, &
+                         first_asr,last_asr, &
+                         FDEC, LDEC, FGAS, LGAS, AECON_LIFE,timedyr, &
+                         explsortires,explsortires2,SORTISRC2,SORTIREG2,  &                           !MC CHANGE 5.6.09
+                         sortires3,explsortires3,SORTISRC3,SORTIREG3
+
+      REAL SUM_DRY(MAX_RES,MAX_YR)                    ! DEVELOPMENT DRY HOLES DRILLED
+      REAL SUM_DRY2(MAX_RES,MAX_YR)                   ! EXPLORATORY DRY HOLES DRILLED
+      REAL SUM_DRY3(MAX_RES,MAX_YR)                   ! EXPLORATORY HOLES DRILLED
+
+      common/ecocom7/sum_dry,sum_dry2,sum_dry3
+
+!  these variables apply to the exploration of conventional reservoirs
+
+       INTEGER TM_DISC(MAX_RES)   ! DISCOVERY SEQUENCE               output to exploration model
+       INTEGER TM_AVAIL(MAX_RES)  ! CORESPONDS TO TIMED, FLAG        output to exploration model
+
+       common/ecocom8/tm_disc,tm_avail
+
+       CHARACTER*11 TM_RESID(MAX_RES)  ! OUTPUT RESID - CREATED TO TRACK PROJECTS
+       INTEGER TM_TIMED(MAX_RES)       ! SELECTED FLAG
+
+       COMMON / TM_UNCON / TM_RESID, TM_TIMED
+
+!  these variables are related to the play/basin mapping
+       integer bas_play(max_play)
+       integer playnum(max_play)
+       integer nplay                                               !number of plays in mapping file
+
+       common/mapping/bas_play,playnum,nplay
+
+
+!  these variables are related to the discovery order list for undiscovered projects            !mc change 5.19.09
+       character*11 und_resid(max_und)                                                          !mc change 5.19.09
+       integer      und_play(max_und)                                                           !mc change 5.19.09
+       integer      und_item(max_und)                                                           !mc change 5.19.09
+       integer      und_counter(max_und)                                                        !mc change 5.19.09
+       integer      numdisc                                                                     !mc change 5.19.09
+                                                                                                !mc change 5.19.09
+       common/disclist/und_resid,und_play,und_item,und_counter,numdisc                          !mc change 5.19.09
+
+      integer eco2reg(max_res)             ! CO2 source region
+      integer co2reg(max_res,max_src)             ! CO2 source region
+       common/eco2outa/eco2reg,co2reg
+
+! Variables for CO2 costs
+        real reg_costco2(max_reg-1,max_reg-1,max_src,max_yr)
+        real co2cost_max(max_res)
+        real s_cost(max_reg,31,max_yr)
+        real co2cst_min(max_reg-1,max_src)
+        real co2_share(max_reg-1,max_src,max_yr)
+        integer co2reg_min(max_reg-1,max_src)
+        integer co2src_min(max_reg-1,max_reg-1)
+        integer s_reg(max_reg,31,max_yr)
+        integer s_src(max_reg,31,max_yr)
+        integer s_num(max_reg,max_yr)
+        integer res_num(max_res,max_yr)
+
+        common/co2cost1/reg_costco2,co2cost_max,s_cost,co2_share
+        common/co2cost2/s_reg,s_src,s_num,res_num
+        common/co2cost3/co2cst_min
+        common/co2cost4/co2reg_min,co2src_min
+
+! VARIABLES TO SAVE FROM DCF CALCULATION
+      REAL ETAXES(MAX_RES,max_eyr)   ! TAXES AND ROYALTIES
+      REAL N_CSTPERMCF(MNUMYR)
+        common/ecocom10/etaxes,n_cstpermcf
+
+!  CO2 EOR 
+      INTEGER CO2LAG
+       common/co2lag1/co2lag
+
+! PRESERVES INFORMATION OF DECLING PROJECTS
+        INTEGER DREGION(MAX_RES)               ! OGSM REGION
+        INTEGER DPADD(MAX_RES)                 ! PADD REGION
+        INTEGER DCRDTYPE(MAX_RES)              ! CRUDE TYPE
+        INTEGER DPLAY_CDE(MAX_RES)             ! USGS PLAY CODE
+        INTEGER DRESFLAG(MAX_RES)              ! RESOURCE FLAG
+        integer DRRC(MAX_RES)
+        integer dprov(max_res)                 ! province number
+        integer dresacc(max_res)               ! resource access category
+        real*4 DPRODGAS(MAX_RES,1:MAX_YR)           ! realized production
+        real*4 DPRODOIL(MAX_RES,1:MAX_YR)           ! realized production
+        real*4 DDEPTH(MAX_RES)           ! realized production
+        REAL*4 DNGL(MAX_RES)                  ! NGL
+        REAL*4 DNGPLET(MAX_RES)               ! NGL
+        REAL*4 DNGPLPR(MAX_RES)               ! NGL
+        REAL*4 DNGPLBU(MAX_RES)               ! NGL
+        REAL*4 DNGPLIS(MAX_RES)               ! NGL
+        REAL*4 DNGPLPP(MAX_RES)               ! NGL
+
+        common/rtemp/DPRODGAS,DPRODOIL,DDEPTH,dngl,dngplet,dngplpr,dngplbu,dngplis,dngplpp
+        common/itemp/dregion,dplay_cde,dresflag,drrc,dprov,dresacc,dpadd,dcrdtype
+        
+ !Number of EOR Projects
+ 
+        Integer EProj_Syr     !Start Year
+        Integer EProj_Step    !Annual Step increase
+        Real    EProj_Amt     !Starting Amount
+        Real    EProj_Max     !Maximum number of projects
+        
+        common/projs/EProj_Syr,EProj_Step,EProj_Amt,EProj_Max

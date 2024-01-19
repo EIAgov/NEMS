@@ -1,0 +1,145 @@
+                                 GETBASIS.DOC
+
+  Algorithms for the BASIS command, plus related ANALYZE commands, like
+  RATEOF, are given in GALGRTHM.DOC.  This describes the data structure for
+  the alpha region (which was revised 8-4-92 to suppress extra storage of
+  non-spikes, speedup the algorithm, reduce fill-in, and improve stability).
+  Each alpha vector is the FTRAN of the basic column (up to its position in
+  the agenda).  If the column is non-spike, the transformed vector, called
+  alpha, is the same as the orginal column vector.  If it is spike, it has
+  been transformed, typically (but not necessarily) with fill-in (ie,
+  non-zeroes in row positions that are originally zeroes).
+
+  Basis stats and pointers are stored in BASIS, 50/65 (see GETDATA.DOC for
+  dictionary).
+
+                  Final Data Structure After Basis is Setup
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  The following describes the alpha region after the basis has been setup
+  (temporary lists used during basis construction and basis stats stored in
+  BASE are not described here).
+
+  The BASE contains pointers, IPIVOT, IRBLST and IVBLST.  The IPIVOT pointer
+  is to a list in INDEX of length = NROWS, where:
+
+      INDEX(IPIVOT+i) = j > 0 means (basic) column j pivots on row i;
+                      =-i < 0 means (basic) row i pivots on itself.
+
+  The pointers IRBLST and IVBLST point to INDEX and VALUE, respectively,
+  which form 2 parallel lists of row index and alpha value for each member
+  of the alpha region.  The length of these parallel lists is NBLST (stored
+  in BASE).
+
+  A new alpha vector is tagged by the sign bit on its pivot row index, which
+  is the first row listed (FTRAN needs pivot first, and BTRAN needs it last;
+  hence, the names Forward Transformation and Backward Transformation,
+  respectively).  The list structure differs (as of 8-4-92) for non-spikes
+  vs.  spikes, as follows.
+
+  Non-spike (alpha = original column vector):
+
+       INDEX                VALUE
+       ==============       ===========
+       -pivot row             0          <---- First entry
+       -column number       pivot value      (beginning of alpha vector)
+       ==============       ===========
+
+  Thus, 2 list entries are used per non-spike.  The 0 for the value parallel
+  to the pivot row tags this as non-spike, and the second list pair gives
+  the pivot column number and the pivot value.  The negative sign on the
+  column pointer is needed to tag this non-spike when traversing the alpha
+  region backward (ie, in BTRAN).  Dummy values, INDEX(IRBLST) = 0 and
+  VALUE(IVBLST) = VINF (infinity) are also needed for the BTRAN logic.
+
+  Spike:
+
+        INDEX            VALUE
+        ==========       ===========
+        -pivot row       pivot value  <---- First entry
+                                           (beginning of alpha vector)
+         row             alpha value
+         ...             ...          <---- Last entry
+        ==========       ===========       (end of alpha vector)
+
+  The spike's alpha values are stored in-line (with pivot entry first).
+
+  The storage-saving structure for non-spikes requires additional logic in
+  the FTRAN and BTRAN routines, but this need not take longer.  For example,
+  as told to me by James E.  Kalan, the storage savings can cause less I/O
+  in a virtual memory environment, especially since it becomes possible for
+  the entire alpha region to fit in real memory.
+
+                   Data Structures During Agenda Algorithm
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Each basic row variable is put immediately into the basis (pivoting on
+  itself) at the rear of the agenda, and the number of basic structurals is
+  set (NBPOSN).  An error return is given if the number of basic column
+  variables does not equal the number of nonbasic row variables
+  (NROWS-NBLGL).
+
+  During the agenda algorithm, the following lists are used.
+
+       INDEX(IRSTAT+i) > 0 ===> row i is not assigned
+                       < 0 ===> row i is assigned
+                   (magnitude = row status:  B, I, L or U)
+
+       INDEX(IPIVOT+i) = k > 0 ===> count of row i, if not assigned
+                                    pivot column, if row i is assigned
+                        -i < 0 ===> row i is basic and pivots on itself,
+                                    if assigned
+                                    earliest insertion, if not assigned
+                                    (applies only after all columns are
+                                    assigned, at which point all
+                                    unassigned rows have zero counts)
+
+       INDEX(BUCKET+b) = 0 if no unassigned row has count = b > 0
+                       = row with count = b
+       INDEX(BLPRED+i) = bucket predecssor link for row i
+       INDEX(BLSUCC+i) = bucket successor  link for row i
+
+       INDEX(BCPOSN+i) = column in position i
+
+       INDEX(BCSTAT+i) depends on phase:
+                 During agenda creation:
+                     count of column in position i,     if unassigned
+                     pivot row of column in position i, if assigned
+                  After agenda (during alpha creation):
+                     earliest insertion position, if not inserted
+                     pivot row of spike column,   if inserted
+
+                              Space Requirements
+                              ~~~~~~~~~~~~~~~~~~
+  The length of the first 2 lists (IRSTAT and IPIVOT) is the number of rows
+  (NROWS).  The status list is already permanent, and the second list
+  becomes permanent after basis is setup.  The length of the BUCKET list is
+  NBUCKT (set in BASET), and the length of the BLPRED and BLSUCC lists is
+  NROWS.  The length of the last two lists is the number of basic columns
+  (NBPOSN), which is at most the number of rows.  Thus, a maximum of
+  5*NROWS+NBUCKT additional INDEX spaces are needed to complete the agenda
+  algorithm.  The value of NBUCKT must be at least 1 and, if there is enough
+  space, NBUCKT is set equal to the greatest (nonbasic) row count (over
+  columns in the basis).  This could be as much as NROWS, but it cannot be
+  more than the length of the longest row in the basis, which is computed
+  during the row counts (before buckets are allocated).
+
+  After the agenda algorithm is complete, the needed, but temporary, lists
+  are re-located to make room for the alpha region (see above).  The alpha
+  region needs 2 spaces per non-spike plus an unpredictable number of spaces
+  for spikes.  A rule of thumb is to suppose spike fill-in at most
+  multiplies the column density by 10.  Using the length of the longest
+  column, M, as a conservative bound, assume each spike needs at most 10M
+  storage.  Another rule of thumb is that the number of spikes is less than
+  10% of the number of basic columns, say NB.  Then, the max alpha region
+  estimate is:
+
+                    2*(.9*NB) + 10M(.1*NB) = (1.8 + M)*NB
+                       =====        =====
+                    Nonspikes      Spikes
+
+  Yet another rule of thumb is that NB <= .7*NROWS (ie, about 30% of basics
+  are logicals) and M < 100.  These rules, which are very uncertain, lead to
+  an estimate of about 70*NROWS spaces in the alpha region.  For example, an
+  LP with about 5000 rows (not a network, which triangularizes) needs about
+  350,000 INDEX and VALUE entries for the alpha region.
+
+

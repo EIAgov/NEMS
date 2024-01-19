@@ -1,0 +1,87 @@
+!  $Header: m:/default/includes/RCS/coalrep,v 1.16 2017/08/04 11:38:34 pkc Exp $
+!  COAL MODULE REPORT COMMON BLOCK
+!  The dimension params - &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!
+      REAL COALPROD(MNUMCR,MNUMLR,MNUMYR) ! CL DISTRIBUTION (MILL ST)
+      REAL COALPROD2(MNUMCR,MNUMLR,MNUMYR) !CL DISTRIBUTION INCL EXP
+      REAL COALPRICE(MNUMLR,MNUMYR) ! COAL PRICE (1991 $/SHORT TON)
+      REAL WC_DIST_ST(MNUMCR,MNUMLR,MNUMYR) ! WC DISTRIBUTION (MILL ST)
+      REAL WC_PROD_ST(MNUMCR,MNUMLR,MNUMYR) ! WC DISTRIBUTION INCL EXP (MILL ST)
+      REAL WC_PROD_BTU(MNUMCR,MNUMLR,MNUMYR) ! WC DISTRIBUTION INCL EXP (TRILL BTU)
+      REAL ABSULF(4,MNUMYR) ! Appalachia Bituminous Coal
+      REAL ALSULF(4,MNUMYR) ! Appalachia Lignite Coal
+      REAL IBSULF(4,MNUMYR) ! Interior Bituminous Coal
+      REAL ILSULF(4,MNUMYR) ! Interior Lignite Coal
+      REAL WBSULF(4,MNUMYR) ! West Bituminous Coal
+      REAL WSSULF(4,MNUMYR) ! West Sub-Bituminous Coal
+      REAL WLSULF(4,MNUMYR) ! West Lignite Coal
+      REAL WSCF(4,11,MNUMYR) ! STEAM COAL WORLD FLOWS
+      REAL WMCF(4,11,MNUMYR) ! METALLURGICAL COAL WORLD FLOWS
+      REAL WTCF(4,11,MNUMYR) ! TOTAL COAL WORLD FLOWS
+      REAL PCLEX(MNUMCR,MNUMYR) ! Coal Export Price (1987 $/MMBTU)
+      REAL CLSULF(NSREG,4,3,MNUMYR) ! Coal Production by Reg (mSTONS)
+      REAL PCLSULF(NSREG,4,3,MNUMYR) ! Coal Price by Reg ($/TON)
+      REAL PABSULF(4,MNUMYR)      ! Price of App Bit coal
+      REAL PALSULF(4,MNUMYR)      ! Price of App Lig coal
+      REAL PIBSULF(4,MNUMYR)      ! Price of Int Bit coal
+      REAL PILSULF(4,MNUMYR)      ! Price of Int Lig coal
+      REAL PWBSULF(4,MNUMYR)      ! Price of Wes Bit coal
+      REAL PWSSULF(4,MNUMYR)      ! Price of Wes Sub coal
+      REAL PWLSULF(4,MNUMYR)      ! Price of Wes Lig coal
+      REAL APSULF(4,MNUMYR)       ! App Premium coal
+      REAL PAPSULF(4,MNUMYR)      ! Price App Premium coal
+      REAL ABSULF_BTU(4,MNUMYR) ! Appalachia Bituminous Coal (TRILL BTU)
+      REAL ALSULF_BTU(4,MNUMYR) ! Appalachia Lignite Coal (TRILL BTU)
+      REAL IBSULF_BTU(4,MNUMYR) ! Interior Bituminous Coal (TRILL BTU)
+      REAL ILSULF_BTU(4,MNUMYR) ! Interior Lignite Coal (TRILL BTU)
+      REAL WBSULF_BTU(4,MNUMYR) ! West Bituminous Coal (TRILL BTU)
+      REAL WSSULF_BTU(4,MNUMYR) ! West Sub-Bituminous Coal (TRILL BTU)
+      REAL WLSULF_BTU(4,MNUMYR) ! West Lignite Coal (TRILL BTU)
+      REAL CLSULF_BTU(NSREG,4,3,MNUMYR) ! Coal Production by Reg (TRILL BTU)
+      REAL APSULF_BTU(4,MNUMYR)       ! App Premium coal (TRILL BTU) 
+      REAL PMTD(NSREG,MNUMYR) ! UNDERGROUND COAL PRODUCTION (MILL ST)
+      REAL PMTS(NSREG,MNUMYR) ! SURFACE COAL PRODUCTION (MILL ST)
+      REAL PMTD_BTU(NSREG,MNUMYR) ! UNDERGROUND COAL PRODUCTION (TRILL BTU)
+      REAL PMTS_BTU(NSREG,MNUMYR) ! SURFACE COAL PRODUCTION (TRILL BTU)
+      REAL PMTDP(NSREG,MNUMYR) ! PRICE OF UNDERGROUND COAL PRODUCTION
+      REAL PMTSP(NSREG,MNUMYR) ! PRICE OF SURFACE COAL PRODUCTION
+      REAL UTCONS(NUTSEC,MNUMYR)  ! Utility Coal consumption 
+      REAL UTPSO2(NUTSEC,MNUMYR)  ! Utility potential SO2 emissions
+      REAL UTTSO2(NUTSEC,MNUMYR)  ! Utility total SO2 emissions
+      REAL UCSO2(NUTSEC,MNUMYR)   ! Uncontrolled SO2 emissions
+      REAL UCMERC(NUTSEC,MNUMYR)  ! Uncontrolled Hg emissions
+      REAL ACMERC(MNUMYR)         ! Hg emissions removal-activated carbon
+      REAL HGEM95(31,MNUMYR)      !Hg emissions corresponding to Table 95 groupings (31)
+      REAL TOTLABPROD(MNUMYR)        !total labor productivity in a given forecast year; used in Tab144
+      REAL WAGEPHOUR(MNUMYR)         !total wage per hour by year; used for Tab144
+      REAL WAGEGROWTH(MNUMYR)        !growth in wages from 1997; used for Tab144
+      REAL LABPRODGROWTH(MNUMYR)     !growth in labor productivity from 1997; used for Tab144
+      REAL TSPMBTU(MNUMYR)        !Average SO2 Emissions in tons of SO2 per million Btu
+      REAL TMPMBTU(MNUMYR)        !Average mercury emissions in tons of hg per million Btu (for stock adjustment)
+      REAL COAL2GAS(MNUMCR,MNUMYR)   ! coal to gas (mainly Great Plains plant) in Btus
+      REAL WPSULF(4,MNUMYR)       ! West Premium coal
+      REAL PWPSULF(4,MNUMYR)      ! Price West Premium coal
+      REAL WPSULF_BTU(4,MNUMYR)   ! West Premium coal (TRILL BTU) 
+!  imports and exports by rank (premium (coking), bituminous, subbituminous, lignite)
+      REAL CLIMPRANK(5,MNUMYR)    ! imports by rank
+      REAL CLEXPRANK(5,MNUMYR)    ! exports by rank
+!   Coal Module Report common block
+      COMMON/COALREP/COALPROD, COALPROD2, COALPRICE, &
+       WC_DIST_ST, WC_PROD_ST, WC_PROD_BTU, &
+       ABSULF, ALSULF, IBSULF, ILSULF, WBSULF, WSSULF, WLSULF, &
+       WSCF, WMCF, WTCF, PCLEX, CLSULF, PCLSULF, PABSULF, &
+       PALSULF, PIBSULF, PILSULF, PWBSULF, PWSSULF, PWLSULF, APSULF_BTU, &
+       ABSULF_BTU, ALSULF_BTU, IBSULF_BTU, ILSULF_BTU, WBSULF_BTU, WSSULF_BTU, WLSULF_BTU, &
+       CLSULF_BTU, PMTD, PMTS, PMTD_BTU, PMTS_BTU, PMTDP, PMTSP, &
+       APSULF, PAPSULF, UTCONS, UTPSO2, UTTSO2, &  
+       UCSO2, UCMERC, ACMERC, HGEM95, TSPMBTU, TMPMBTU, &
+       TOTLABPROD, WAGEPHOUR, WAGEGROWTH, LABPRODGROWTH, COAL2GAS, WPSULF, PWPSULF, WPSULF_BTU, &
+       CLIMPRANK, CLEXPRANK
+!   Equivalence for FILER used for data storage
+      REAL EQ_CLREP(MNUMYR*(7+31+MNUMCR*(2+2*MNUMLR)+MNUMLR+27*4+ &
+       3*4*11+3*NSREG*4*3+5*NUTSEC+3*MNUMCR*MNUMLR+6*NSREG)+ &
+       2*5*MNUMYR + &              ! CLIMPRANK, CLEXPRANK
+       0)
+          EQUIVALENCE (EQ_CLREP,COALPROD)

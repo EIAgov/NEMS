@@ -1,0 +1,875 @@
+! $Header: m:/default/includes/RCS/ecpcntl,v 1.124 2021/03/04 15:56:32 LC2 Exp $
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     ECPCNTL:
+!     CONTAINS INITIAL INPUT DATA FOR THE LP MODEL THAT
+!     ARE NOT MODIFIED THROUGHOUT THE MODEL.  IT PRIMARILY CONSISTS OF
+!     CHARACTER VARIABLES THAT ARE USED TO GENERATE ROW AND COLUMN NAMES
+!     AND INDEX ARRAYS, SWITCH ARRAYS AND ARRAY MAXIMUMS.
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+       COMMON /ECP_D_CNTL/   UPCAPD,   UPGNPD,   UPTCRT,                    & !REAL*4
+       UPNIRTE,  UPNRRTE,  UPNIPRM,  UPNRPRM,  UPNFDT,   UPRSKSW, UPBETA, UTBETA,     &
+       UPNIRTEA, UPNRRTEA, UPNFDTA,  UPNIRTEY, UPNRRTEY, UPNFDTY, &
+       UPTXRT,   UPOVRBLD, UPOVBDRT, UPP2LIM,  UPCCR,    UPMCF,  &
+       UPCPRO,   UPCSB,    UPCSBYR,  UPFOM,    UPFORT,   UPOVR,    UPPMRT,  &
+       UPRSK,    UPVOM,    UPVSB,    UPHTRT,   UPCTRM,   UPPCFB,  &
+       UPPSEF,   UPPSRT,   UPDCFB,   UPDSEF,   UPDSRT,   UPDCEF,   &
+       UPPHRT0,  UPPHRTN,  UPICCF,   UPINTLOW, UPINTEXP, UPGSUB, UPGSUBYR, UPGSMX,  &
+       UPIBND,   UPINTZ,   UECP_HTRT_ADJ,      UECP_CPEN_ADJ, ALT_UECP_CPEN_ADJ,    UPSCPR,   UPSHPEN, UPSCPEN,  UPSRSK, &
+       UPSQMAX,  UPSRMAX,  UPCFCPR,  UPCFHPEN, UPCFCPEN, UPNCPR,  LEVRMD, LEVRMD2, LEVRMD2C, LEVRMC, ECP_PCT,  &
+       UPCALPHA, UPCARBND, UPCO2EOR, UPSO2PRC, &
+       UPRNWBND, UPRNWSHR, UPRNWCAP, UPRNWEXG, UPRNWBNDR, UPRNWSHRR, UPRNWCAPR, UPRNWEXGR, &
+       UPRNWBAS, UPRNWBASR,CES_DCR,  CES_SMOOTH_TGT,CES_SMOOTH_DUAL,  &
+       ST_RNW_BND, ST_RNW_SHR, &
+       UPCAPBND, UPCAPSHR, UPSUBLIM, &
+       UPCCSADJ, UPSEQBYR, UPSEQBLM, &
+       FR_OR_TRANCOSTG,  &   
+       TCCV_GL, TCCF_GL, TTCV_GL, TTCF_GL, TICV_GL, TICF_GL, HTRT_GL, &        
+       UPBLDREG, UPXCLGRW, UPXCLFLR, UPDGAVR,  UPDGFPR,  &
+       UPNGGRWT, UPNGGRWE, UPCRVSIZ, UPCRVELA, UPCARGRW, UPNUCGRW, &
+       UPCFLEV,  UPCFSTEP, UPCFBTU,  UPCFCST,  UPCFFOM,  UPCFVOM,  UPCFGEN,  UPBQMAX,  UPBRMAX, &
+       CL_CNXT_CST, FL_CNXT_CST, FRG_EMM_MAP, EMM_CNXT_CST, EMM_CNDC_CST, CTL_CD_NR,  &
+       UPOVCC,   UPOVHR,   UPOVFX,   UPOVVR,   UPRETRAT, UPRETFHU,  &
+       UPRETNHU, UPRETRT0, UPRETRTL, UPRETCHG, &
+       UPINTBND, UPINTBD0, RET_PCT,  RET_VAL,  RET_CAP,  RET_FOM,  &
+       RET_AVG,  UPPCEF,   UPPCEF_MIN, NOXBYST,  NOXBYGRP, NOX_HRS,  NOX_ECP,   &
+       NOX_EFD,  NOX_NEW,  &
+       TNOXBYST, TNOXBYGRP,TNOX_HRS, TNOX_ECP, TNOX_EFD, &
+       CO2_GEO,  CO2_MSW,  CO2_DGN,   &
+       CO2BYST,  CO2BYGRP, CO2FLGRP, CO2RQGRP, CO2RPGRP, CO2OQGRP, CO2OPGRP, CO2ESGRP, &
+       CO2EQGRP, CO2EPGRP, CO2BQGRP, CO2NJEXC, CO2VAEXC, &
+       UPXTRA,   DEM_GRW,  DEM_WGHT, UPWDCOF,  UPWDCFR,  &
+       ESTYRADD, ESTYRPLN, ESTMNADD, ESTCSINC, ESTCPINC, ESTCPADD, ESTCPSTP,  &
+       ESTCPCSM, ESTCPCST, ESTCPLIM, &
+       UPPFL,    UPPFLN,   UPCRB,    UPCRBN,   UCSPVSHR, UCWNDSHR, UPCAPFLR, &
+       UPCQMAX,  UPCRMAX,  UPCCSCAP, UPCCSHRT, &
+       UPDSICAP, UPDSIOVR, UPDSIFOM, UPDSIVOM, UPDSISEF,  &       
+       UPAVLOV,  UPAVLYR,  UPCLYR,   UPPLYR,   UPECLF,   UPNCLF,   UPNLLF,   UPTXLF,   & !INT*4
+       UPUCLF,   ESTSWTCH, ESTSWCSM,   &
+       UPGSUBPT, UPGSY1,   UPGSYL,   UPGSYR,   UPGSTY,   UPGSYD,   UPFLTP,   UDFLTP, UPSELF, &
+       USW_CLGRP,USW_RTRSK,USW_HG,   USW_MACT, UMACT_YR, USW_BACT, UBACT_YR, USW_DSI,  UDSI_YR,  &
+       USW_WACC, USW_DIGIT,UREV_NYR, UREV_NYRN,PCAP_SO2, PCAP_NOX, PCAP_CAR, PCAP_HG, &
+       UPSGRP,   UPSCLT,   UPSTXVN,  UPSTXYR,  UPSTXLF,  UPSCR2,   UPSCSCR,  &
+       UPCFELF,  UPCFCLT,  UPNASW,   UPNAYR,   UPNELF,   UPNCLT,   ECPCAPM,  ECPDSPM,  &
+       ECPINTM,  ECPRNWM,  ECPSTOM,  ECPI_RM,  ECP_D_DRTE, ECP_D_IDSM,  &
+       ECP_D_INIT, ECP_D_LFCC, ECP_D_LFHR, ECP_D_OVCC, ECP_D_OVHR, ECP_D_OVFX,  &
+       ECP_D_OVVR, ECP_D_PACK, ECP_D_MODE, ECP_D_MSHR, ECP_D_PRNT, ECP_D_RSK,  &
+       ECP_D_AMB,  EFP_D_SCR,  EFP_D_TRN,  UCPDSPIS, UCPINTIS, UCPRNWIS, &
+       UCPDGNIS, UCPSTOIS, UCPFTABI, UCPVSTOR,  UCPDSPI,  UCPINTI,  UCPRNWI,  UCPDGNI,  &
+       UCPSTOI,  UPFNUC,   UPFCOL,   UPFGAS,   UPFRES,   UPFDIS,   UFL_D_ECP,  &
+       UIRINTI,  UIRRNWI,  UIRSTOI,  UNFPH,    UNXPH,    UNAPH,    UPCENSUS, UPCIMP,  &
+       UPCLRG,   UPETTSW,  UPGTRN,   UPLNTIDX, UPMSHSW,  &
+       UPNGRG,   UPCARG,   UPNUGSW,  UPTOPR,   UPTMRM,   UPEFDT,   UPCPTRSW,  &
+       UPTTYP,   WPTTYP,   UPVTYP,   UPXRGN,   ECP_BBN,  UPSCRFRM, UPOVBDSW,  &
+       UPOVBDSY, UPCRVSW,  UPCRVSTP, UPRNWREG, UPRNWCAS, UPRNWRGN, UPRNWCOG, UPRNWIMP, UPRNWSUN, UPRNWCRD,  &
+       UPRNWLEV, UPRNWRPS, UPRNWBNK, UPRNWCASR,UPRNWCOGR,UPRNWSUNR,UPRNWRPSR,UPRNWBNKR, UPCAPCAS, UPSUBCAS, UPSUBFCF, &
+       UPSEQCAS, UPSEQCAR, UPSEQNYR, UPSEQLIM, &
+       UPNIRTES, UPNIRTEL, UPNRRTES, UPNRRTEL, UPNFDTS,  UPNFDTL,   &
+       WIB1,     WIB2,      &
+       WIB3,     WIB4,     WIB5,     WIB6,     WIB7,     WIB8,                &
+       WIC1,     WIC2,     WIC3,     WIC4,     WIC5,     WIC6,                &
+       WIC7,     WIC8,     WIC9,     WICX,     WICY,     WICZ,                &
+       WIH1,     WIH2,     WIH3,     WIH4,     WIH5,     WIH6,                &
+       WIH7,     WIH8,     WIH9,     WIHA,     WIHB,     WIHC,                &
+       WIPC,     WIOC,     WIIG,     WII2,     WIPQ,     WIIS,     WING,      &
+       WIST,     WIET,     WIIC,     WICT,     WIT2,     WIAT,     WIEC,      &
+       WICC,     WIAC,     WIA2,     WICS,     WIFC,     WICN,     WIAN,      & 
+       WISM,     WIGN,     WIWD,     WIBI,     WIGT,     WIAG,     WIMS,      & 
+       WIHY,     WIHO,     WIHI,     WITI,     WIPS,     WIP2,     WISQ,      & 
+       WIDS,     WIOS,     WIWN,     WIWL,     WIWF,     WISO,     WISS,      & 
+       WIS2,     WIPV,     WIPT,     WIIN,     WIDB,     WIDP,                &
+       WIEXC,    WIPVC,    WIEXS,    WICCT,    WIACT,    WISCC,               &
+       WIGSF,    WISEQ,    WIBIG,    WIBCT,    WIBCC,    WIFLC,               &
+       WICNU,    WIANU,    WIWDP,    WIGTH,    WIMSW,    WIHYD,               &
+       WIHPS,    WIHP2,    WIWND,    WIWFS,    WISTH,    WIPVM,               &
+       WIPVB,    WIDGB,    WIDGP,                                             &
+       RET_GRP,  RET_FRST, RET_NEXT, RET_FRG, UPRTLT,   UPINTSW,   &
+       NOX_NST,  NOX_GRP,  NOX_TRDYR,  &
+       TNOX_NST, TNOX_GRP, TNOX_TRDYR,  &
+       TSO2_NST,TSO2_YR_BY_ST,TSO2_VR_BY_ST,TSO2_CL_BY_ST,TSO2_OL_BY_ST,  &
+       TSO2_TR_BY_ST,  &
+       CO2_NST,  CO2_GRP,  NumStoGrp, MaxNumbins, MaxPtypes, &
+       GRW_XYR,  ECP_FYR,  UPRELSW,  UPBLDTYP, UPCFNSTP, NUM_864_TYPES, NUM_STEPS_PER_TYPE,Sto_Cap_indx, &
+       SR_CREDIT, SR_TRAN_CREDIT, SR_MIN_CF, SR_RQMT_HGHT, SR_RQMT_DIFF, SR_INT, SR_MAX_LF, SR_MIN_LF, NO_CCS_PLNT_NDX, &
+       UPEFPT,   NOX_RGN,  NOX_PTYP, NOX_LT,   ECPACT,          & !INT*2
+       ECPBASIS, UCPDSPS,  UCPINTS,  UCPRNWS,  UCPDGNS,  UCPSTOS,         & !LOGICAL
+       UIRINTS,  UIRRNWS,  UIRSTOS,  UPLTSW, &
+       ECP_D_FILE, ECP_D_FILEB,UPLNAME,  StorageNames, StorageCodes, ECP_D_DBNM, ECP_D_DECK, ECP_D_DECKB,       & !CHAR
+       ECP_D_PROB, UPBND,    UPNAME,   UPOBJ,    UPRHS,    &
+       UPDMCD,   UPFLCD,   UPLNTCD,  &
+       UPLDCD,   UPMDCD,   ECP_FTP,  ECP_NCT,  NOX_ST,   NOX_RG,   &
+       TNOX_ST,  TNOX_RG,   &
+       CO2_ST,   CO2_RG,   &
+       UPOWNCD,  UPRGCD,   UPSCCD,   UPYRCD,   ECP_BTM, NO_CCS_PLNTCD
+!
+      INTEGER*4 NOX_NST(NOX_D_GRP)                      ! Number of States with NOX Caps
+      CHARACTER*2 NOX_ST(NOX_D_MST,NOX_D_GRP)             ! State code for states with NOX Caps
+      CHARACTER*2 NOX_RG(NOX_D_GRP)                     ! Region codes for states with NOX Caps
+      REAL*4 NOXBYST(NOX_D_MST,NOX_D_GRP,MNUMYR+ECP_D_XPH)  ! NOX Caps by State and year
+      INTEGER*4 NOX_LT                                ! NOX Control Retrofit Leadtime
+      INTEGER*4 NOX_GRP                               ! Number of NOX Cap Groups
+      INTEGER*4 NOX_TRDYR                             ! Year to Allow Regional Trading, if Any
+      INTEGER*4 NOX_RGN(MNUMNR,NOX_D_GRP)               ! Assign NOX Group to Each NEMS Region
+      INTEGER*4 NOX_PTYP(ECP_D_CAP)                     ! Assign ECP Type to NOX Plant Type
+      REAL*4 NOXBYGRP(NOX_D_GRP,MNUMYR)                 ! NOX Caps by NOX Control Groups
+      REAL*4 NOX_HRS(12,NOX_D_GRP)                      ! Number Hours per month in each NOX Control
+      REAL*4 NOX_ECP(ECP_D_MSP,NOX_D_GRP)                 ! Number Hours per ECP Season in each NOX Control
+      REAL*4 NOX_EFD(EFD_D_MSP,NOX_D_GRP)                 ! Number Hours per EFD Season in each NOX Control
+!
+      INTEGER*4 TSO2_NST                              ! Number of States with Limits in EPA Transport Rule
+      INTEGER*4 TSO2_YR_BY_ST                         ! Year to Begin State Limits in EPA Transport Rule
+      INTEGER*4 TSO2_VR_BY_ST                         ! Type of Variability from State Cap (0=none,1=1yr,3=3yr)
+      INTEGER*4 TSO2_CL_BY_ST(NOX_D_MST)                ! Coal Region Containing State
+      INTEGER*4 TSO2_OL_BY_ST(NOX_D_MST)                ! Oil Region Containing State
+      INTEGER*4 TSO2_TR_BY_ST(NOX_D_MST)                ! Transport Region Containing State
+      INTEGER*4 TNOX_NST(NOX_D_GRP)                     ! Number of States with NOX Caps
+      CHARACTER*2 TNOX_ST(NOX_D_MST,NOX_D_GRP)            ! State code for states with NOX Caps
+      CHARACTER*2 TNOX_RG(NOX_D_GRP)                    ! Region codes for states with NOX Caps
+      REAL*4 TNOXBYST(NOX_D_MST,NOX_D_GRP,MNUMYR+ECP_D_XPH) ! NOX Caps by State and year
+      INTEGER*4 TNOX_GRP                              ! Number of NOX Cap Groups
+      INTEGER*4 TNOX_TRDYR                            ! Year to Allow Regional Trading, if Any
+      REAL*4 TNOXBYGRP(NOX_D_GRP,MNUMYR)                ! NOX Caps by NOX Control Groups
+      REAL*4 TNOX_HRS(12,NOX_D_GRP)                     ! Number Hours per month in each NOX Control
+      REAL*4 TNOX_ECP(ECP_D_MSP,NOX_D_GRP)                ! Number Hours per ECP Season in each NOX Control
+      REAL*4 TNOX_EFD(EFD_D_MSP,NOX_D_GRP)                ! Number Hours per EFD Season in each NOX Control
+!
+      INTEGER*4 CO2_NST(CO2_D_GRP)                      ! Number of States with CO2 Caps
+      CHARACTER*2 CO2_ST(CO2_D_MST,CO2_D_GRP)             ! State code for states with CO2 Caps
+      CHARACTER*2 CO2_RG(CO2_D_GRP)                     ! Region codes for states with CO2 Caps
+      REAL*4 CO2BYST(CO2_D_MST,CO2_D_GRP,MNUMYR+ECP_D_XPH)  ! CO2 Caps by State and year
+      INTEGER*4 CO2_GRP                               ! Number of CO2 Cap Groups
+!     INTEGER*4 CO2_RGN(MNUMNR,CO2_D_GRP)               ! Assign CO2 Group to Each NEMS Region
+      REAL*4 CO2_GEO(CO2_D_GRP,MNUMNR)                  ! CO2 EMISSIONS -- GRP SHARE OF EMM  REGION For Geothermal
+      REAL*4 CO2_MSW(CO2_D_GRP,MNUMNR)                  ! CO2 EMISSIONS -- GRP SHARE OF EMM  REGION For MSW
+      REAL*4 CO2_DGN(CO2_D_GRP,MNUMNR)                  ! CO2 EMISSIONS -- GRP SHARE OF EMM  REGION For Dist Gen
+      REAL*4 CO2BYGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Caps by CO2 Control Groups
+      REAL*4 CO2FLGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Price Floors (If Any) by CO2 Control Groups
+      REAL*4 CO2RQGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Reserve Qty  (If Any) by CO2 Control Groups
+      REAL*4 CO2RPGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Reserve Prc  (If Any) by CO2 Control Groups
+      REAL*4 CO2OQGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Offset  Qty  (If Any) by CO2 Control Groups
+      REAL*4 CO2OPGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Offset  Prc  (If Any) by CO2 Control Groups
+      REAL*4 CO2ESGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Escape Vector or Max Prc  (If Any) by CO2 Control Groups
+      REAL*4 CO2EQGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Emission Containment Reserve Qty  (If Any) by CO2 Control Groups
+      REAL*4 CO2EPGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Emission Containment Reserve Prc  (If Any) by CO2 Control Groups
+      REAL*4 CO2BQGRP(CO2_D_GRP,MNUMYR)                 ! CO2 Allowance Bank Adjustment Qty  (If Any) by CO2 Control Groups
+      REAL*4 CO2NJEXC(CO2_D_GRP,MNUMYR)                 ! CO2 Emissions to Exclude when NJ had left (If Any) by CO2 Control Groups (RGGI Only-Frac of NY/NJ)
+      REAL*4 CO2VAEXC(CO2_D_GRP,MNUMYR)                 ! CO2 Emissions to Exclude when VA was not part of RGGI CO2 Control Groups (VA frac of fuel region (1.0))
+!
+      REAL*4 UPCAPD(MNUMYR+ECP_D_XPH,ECP_D_CAP)   ! REAL CAPITAL COST DEFLATOR
+      REAL*4 UPGNPD(MNUMYR+ECP_D_FPH)           ! GNP DEFLATOR
+      REAL*4 UPTCRT                           ! TARGET COV RATIO-PUR. CONSTRAINT
+      REAL*4 UPTXRT                           ! NET TAX RATE
+      REAL*4 UPNIRTE                          ! NUG INTEREST RATE, IF USED
+      REAL*4 UPNRRTE                          ! NUG RETURN ON EQUITY RATE, IF USED
+      REAL*4 UPNIPRM                          ! NUG INTEREST PREMIUM, IF USED
+      REAL*4 UPNRPRM                          ! NUG RETURN ON EQUITY PREMIUM, IF USED
+      REAL*4 UPNFDT                           ! NUG DEBT FRACTION
+      REAL*4 UPBETA                           ! BETA FOR COST OF CAPITAL - EWG BUILDS
+      REAL*4 UTBETA                           ! BETA FOR COST OF CAPITAL - REGULATED PRICING
+      REAL*4 UPNIRTEA(ECP_D_CAP)                ! NUG INTEREST RATE ADJUSTMENT BY PLT, IF USED - CAPACITY LIMITED
+      REAL*4 UPNRRTEA(ECP_D_CAP)                ! ROE INTEREST RATE ADJUSTMENT BY PLT, IF USED - CAPACITY LIMITED
+      REAL*4 UPNFDTA(ECP_D_CAP)                 ! NUG DEBT FRACTION ADJUSTMENT BY PLT, IF USED - CAPACITY LIMITED
+      REAL*4 UPNIRTEY(ECP_D_CAP)                ! NUG INTEREST RATE ADJUSTMENT BY PLT, IF USED - ONLINE YR LIMITED
+      REAL*4 UPNRRTEY(ECP_D_CAP)                ! ROE INTEREST RATE ADJUSTMENT BY PLT, IF USED - ONLINE YR LIMITED
+      REAL*4 UPNFDTY(ECP_D_CAP)                 ! NUG DEBT FRACTION ADJUSTMENT BY PLT, IF USED - ONLINE YR LIMITED
+      REAL*4 UPRSKSW(ECP_D_CAP)                 ! SWITCH FOR USING GLOBAL RISK PREMIUM VARIABLE
+      REAL*4 UPOVRBLD(MNUMYR+ECP_D_XPH)         ! FRAC OVRBD FOR EC. RETS. BY YR
+      REAL*4 UPOVBDRT                         ! MAX ANN INC IN FRAC OVRBLD
+      REAL*4 UPP2LIM(MNUMYR+ECP_D_FPH,MNUMNR)   ! FRAC OF PEAK DEMAND TO LIMIT P2 CAPACITY
+      REAL*4 UPCALPHA                         ! RELAX PAR. FOR ADJ. CAR TAX EXP
+      REAL*4 UPCARBND(MNUMYR+ECP_D_XPH)         ! UPPER BOUND,IF ANY, FOR CARBON
+      REAL*4 UPCO2EOR(MNUMYR+ECP_D_XPH)         ! CREDIT FOR CAPTURED CO2
+      REAL*4 UPSO2PRC(MNUMYR,EFD_D_SO2)         ! HISTORICAL (NOMINAL) SO2 ALLOWANCE PRICE BEFORE ECP SOLVES
+      REAL*4 UPRNWBND(MNUMYR+ECP_D_XPH)         ! LOWER BOUND OF GEN BY RNW PLTS
+      REAL*4 UPRNWSHR(ECP_D_CAP)                ! SHR OF GEN INCL. IN RNW BND ROW
+      REAL*4 UPRNWCAP                         ! CAP ON RPS CREDIT PRICE
+      REAL*4 UPRNWEXG(ECP_D_CAP)                ! FRACTION OF EXISTING GENERATION EXCLUDED FROM RPS, IF ANY
+      REAL*4 UPRNWBAS(ECP_D_CAP)                ! FRACTION OF EXISTING GENERATION EXCLUDED FROM BASELINE GEN, IF ANY
+      REAL*4 CES_DCR                          ! REAL DISCOUNT RATE FOR CES/RPS CREDIT PRICE
+      REAL*4 CES_SMOOTH_TGT                   ! SMOOTHING FACTOR FOR CES/RPS CREDIT PRICE TARGET
+      REAL*4 CES_SMOOTH_DUAL                  ! SMOOTHING FACTOR FOR CES/RPS CREDIT PRICE DUALS
+      REAL*4 UPRNWBNDR(MNUMYR+ECP_D_XPH,MNUMNR) ! REGIONAL LOWER BOUND OF GEN BY RNW PLTS
+      REAL*4 UPRNWSHRR(ECP_D_CAP,MNUMNR)        ! REGIONAL SHR OF GEN INCL. IN RNW BND ROW
+      REAL*4 ST_RNW_BND(MNUMYR,MNUMNR)        ! RESULTING REGIONAL RPS DEMAND SHARES FROM STATE RPS CONSTRAINTS
+      REAL*4 ST_RNW_SHR(ECP_D_CAP,MNUMNR,MNUMYR)! RESULTING REGIONAL RPS CAPACITY SHARES BY ECP TYPE FROM STATE RPS CONSTRAINTS
+      REAL*4 UPRNWCAPR(MNUMNR)                ! REGIONAL CAP ON RPS CREDIT PRICE
+      REAL*4 UPRNWEXGR(ECP_D_CAP,MNUMNR)        ! FRACTION OF EXISTING GENERATION EXCLUDED FROM RPS, IF ANY
+      REAL*4 UPRNWBASR(ECP_D_CAP,MNUMNR)        ! FRACTION OF EXISTING GENERATION EXCLUDED FROM BASELINE GEN, IF ANY
+      REAL*4 UPCAPBND(MNUMYR+ECP_D_XPH)         ! LOWER BOUND OF CAP ADDS BY SPECIFIED PLTS
+      REAL*4 UPCAPSHR(ECP_D_CAP)                ! SHR OF CAP INCL. IN CAP BND ROW
+      REAL*4 UPSUBLIM(ECP_D_CAP)                ! LIMIT ON CAPACITY ADDITIONS WITH SUBSIDY, IF ANY
+      REAL*4 UPCCSADJ(MNUMYR)                 ! ADJUSTMENT FACTOR FOR CCS RETROFIT CAPITAL COST
+      REAL*4 UPSEQBYR(MNUMYR)                 ! SEQUESTRATION BONUS ALLOWANCE FACTOR (RATE)
+      REAL*4 UPSEQBLM(MNUMYR)                 ! SEQUESTRATION BONUS ALLOWANCE LIMIT (MMTONS)
+      REAL*4 UPBLDREG(ECP_D_CAP,MNUMNR)         ! REGIONAL BUILDS BY PLANT TYPE, IF ANY
+      REAL*4 UPXCLGRW                         ! PCT. INCR/DECR. IN CL EXPECT.
+      REAL*4 UPXCLFLR                         ! CL EXP FLOOR--FRAC OF CUR PRC
+      REAL*4 UPINTBND                         ! BOUND ON INT GEN OR CAP (MAXIMUM)
+      REAL*4 UPINTBD0                         ! BOUND ON INT GEN OR CAP (INITIAL)
+      REAL*4 UPINTZ                           ! Z Statistic for intermittency calcs
+      REAL*4 UPDGAVR                          ! RATE (FRAC) OF DG AVOIDED T&D
+      REAL*4 UPDGFPR                          ! DG FUEL PRICE PREMIUM
+      REAL*4 UPNGGRWT                         ! EXPECTED ANNUAL GROWTH IN NG PRODUCTION
+      REAL*4 UPNGGRWE                         ! EXPECTED GROWTH IN UTIL NG CONS
+      REAL*4 UPCRVSIZ                         ! SIZE (FRAC) OF NG SUP CRV STEPS
+      REAL*4 UPCRVELA                         ! ELASTICITY FOR NG SUP CRV STEPS
+      REAL*4 UPCARGRW                         ! POST-"UNYEAR" GROWTH RATE FOR CARBON FEE
+      REAL*4 UPNUCGRW                         ! POST-"UNYEAR" GROWTH RATE FOR NUCLEAR FUEL PRICE
+      REAL*4 UPCFLEV(ECP_D_RCF,ECP_D_CFS)         ! COFIRING RETROFIT LEVEL
+      REAL*4 UPCFSTEP(ECP_D_RCF,ECP_D_CFS)        ! COFIRING RETROFIT EXTRA TRANSPORTATION COSTS
+      REAL*4 UPCFBTU(ECP_D_RCF,NDREG)           ! AVERAGE BTU CONSUMPTION
+      REAL*4 UPCFCST(ECP_D_RCF)                 ! COFIRING RETROFIT CAPITAL COST
+      REAL*4 UPCFFOM(ECP_D_RCF)                 ! COFIRING RETROFIT FOM
+      REAL*4 UPCFVOM(ECP_D_RCF)                 ! COFIRING RETROFIT VOM
+      REAL*4 UPCFGEN(MNUMYR,MNUMNR)           ! MINIMUM COFIRING GENERATION REQUIREMENT, IF ANY
+      REAL*4 UPBQMAX                          ! MAX ANNUAL COFIRING RETROFITS
+      REAL*4 UPBRMAX                          ! MAX ANNUAL INCREASE (%) -- COFIRING RETROFITS
+      REAL*4 CL_CNXT_CST(MNUMNR,NDREG)        ! Transmission Connect Cost for New Coal Units
+      REAL*4 FL_CNXT_CST(MNUMNR,MAXNFR)       ! Transmission Connect Cost for New Units from Fuel Region to EMM Region; 0 => Connection Not Allowed
+      REAL*4 FRG_EMM_MAP(MNUMNR,MAXNFR)       ! Add capacity by fuel region and EMM region and add 1 for allowed new connections; 0 => Connection Not Allowed and Does Not Exist
+      REAL*4 EMM_CNXT_CST(MNUMNR,MNUMNR)      ! Transmission Connect Cost for New Transmission Capacity between EMM Regions
+	  REAL*4 EMM_CNDC_CST(MNUMNR,MNUMNR)      ! Transmission Connect Cost dedicated HVDC Transmission Capacity b/w EMM Regions
+      REAL*4 CTL_CD_NR(MNUMCR,MNUMNR)         ! CTL Mapping from Census Divisions to EMM Regions
+      REAL*4 UPPFL(ECP_D_NFL,MNUMNR,ECP_D_XPH)    ! PV OF NOMINAL ECP FUEL PRICES
+      REAL*4 UPPFLN(ECP_D_NFL,MNUMNR,ECP_D_XPH)   ! PV OF NOM ECP PRICES--NEW PLTS
+      REAL*4 UPCRB(ECP_D_NFL,MAXNFR,ECP_D_XPH)    ! PV OF NOMINAL CARBON TAX
+      REAL*4 UPCRBN(ECP_D_NFL,MAXNFR,ECP_D_XPH)   ! PV OF NOMINAL CARBON TAX FOR FUEL USED IN NEW PLANTS
+      REAL*4 UCSPVSHR(MNUMNR)                 ! RATIO OF RPS CREDITS / KWH OF GENERATION FROM PV COGEN
+      REAL*4 UCWNDSHR(MNUMNR)                 ! RATIO OF RPS CREDITS / KWH OF GENERATION FROM WIND COGEN
+      REAL*4 UPCAPFLR(ECP_D_CAP,MNUMYR)         ! WFLOORS ADDITIONS TO ADJUST ECP ELASTICITY BOUNDS
+      REAL*4 UPCQMAX                          ! MAX ANNUAL CCS RETROFITS
+      REAL*4 UPCRMAX                          ! MAX ANNUAL INCREASE (%) -- CCS RETROFITS
+      REAL*4 UPCCSCAP                         ! CAPACITY THRESHOLD FOR UNIT TO RETROFIT WITH CCS (IF ANY)
+      REAL*4 UPCCSHRT                         ! HEATRATE THRESHOLD FOR UNIT TO RETROFIT WITH CCS (IF ANY)
+      REAL*4 UPDSICAP(2,7)                    ! DSI SIZE CATEGORY
+      REAL*4 UPDSIOVR(2,7)                    ! DSI OVERNIGHT CAPITAL COST BY TYPE (FF,ESP) AND SIZE CATEGORY
+      REAL*4 UPDSIFOM(2,7)                    ! DSI FIXED O&M COST BY TYPE (FF,ESP) AND SIZE CATEGORY
+      REAL*4 UPDSIVOM(2)                      ! DSI VARIABLE O&M COST BY TYPE (FF,ESP)
+      REAL*4 UPDSISEF(2)                      ! DSI SO2 REMOVAL RATE BY TYPE (FF,ESP)
+
+      INTEGER*4 UPCFNSTP(ECP_D_RCF)             ! Number of COFIRING RETROFIT Steps
+      INTEGER*4 UPCRVSW                       ! NG SUPPLY CURVE SW (1=ADAP. EXP, 2=INPUT GRW)
+      INTEGER*4 UPCRVSTP                      ! NUMBER OF SUP STEPS ABV/BLW MIDPOINT
+      INTEGER*4 UPRNWREG                      ! RPS CASE - IDENTIFIES NATIONAL/REGIONAL/BOTH
+      INTEGER*4 UPRNWCAS                      ! RPS CASE (IDENTIFIES BILL)
+      INTEGER*4 UPRNWRGN(MNUMNR)              ! RPS REGION MAPPING 
+      INTEGER*4 UPSUBCAS(ECP_D_CAP)             ! SUBSIDY CASE (IDENTIFIES TYPE OF SUBSIDY)
+      INTEGER*4 UPSUBFCF(ECP_D_CAP)             ! SUBSIDY LIMITS FIRST COME FIRST SERVE (0 = YES, 1 = NO)
+      INTEGER*4 UPNIRTES(ECP_D_CAP)             ! COST OF DEBT ADJUSTMENT - INITIAL ONLINE YEAR
+      INTEGER*4 UPNIRTEL(ECP_D_CAP)             ! COST OF DEBT ADJUSTMENT - FINAL   ONLINE YEAR
+      INTEGER*4 UPNRRTES(ECP_D_CAP)             ! COST OF EQUITY ADJUSTMENT - INITIAL ONLINE YEAR
+      INTEGER*4 UPNRRTEL(ECP_D_CAP)             ! COST OF EQUITY ADJUSTMENT - FINAL   ONLINE YEAR
+      INTEGER*4 UPNFDTS(ECP_D_CAP)              ! FRAC OF DEBT ADJUSTMENT - INITIAL ONLINE YEAR
+      INTEGER*4 UPNFDTL(ECP_D_CAP)              ! FRAC OF DEBT ADJUSTMENT - FINAL   ONLINE YEAR
+      INTEGER*4 UPSEQCAS                      ! SEQUESTRATION CASE (I.E., BILL-1766, 2191)
+      INTEGER*4 UPSEQCAR                      ! SEQUESTRATION CASE - ALLOWANCE TYPE (1=CAR,2=CO2)
+      INTEGER*4 UPSEQNYR                      ! SEQUESTRATION CASE -- YEARS TO RECEIVE BONUS ALLOWANCES
+      INTEGER*4 UPSEQLIM                      ! SEQUESTRATION CASE -- BONUS ALLOWANCES LIMITED (0=NO,1=YES)
+      INTEGER*4 UPRNWCOG                      ! INDEX TO INCLUDE COGEN IN RPS
+      INTEGER*4 UPRNWIMP                      ! INDEX TO INCLUDE IMPORTS IN RPS
+      INTEGER*4 UPRNWSUN                      ! Year, If Any, For Sunset
+      INTEGER*4 UPRNWLEV                      ! USE LEVELIZED ECP RPS CREDIT PRICE (0=no--use 1-year, 1=Yes)
+      INTEGER*4 UPRNWRPS                      ! RENEWABLES EXCLUDED FROM NEEDING RPS CREDITS (0=no, 1=Yes)
+      INTEGER*4 UPRNWBNK                      ! BANK YEARS FOR RPS CREDITS (0=no, 99 = forever)
+      INTEGER*4 UPRNWCASR(MNUMNR)             ! REGIONAL RPS CASE (IDENTIFIES BILL)
+      INTEGER*4 UPRNWCOGR(MNUMNR)             ! INDEX TO INCLUDE COGEN IN REGIONAL RPS
+      INTEGER*4 UPRNWSUNR(MNUMNR)             ! Year, If Any, For Sunset (REGIONAL RPS)
+      INTEGER*4 UPRNWRPSR(MNUMNR)             ! RENEWABLES EXCLUDED FROM NEEDING REGIONAL RPS CREDITS (0=no, 1=Yes)
+      INTEGER*4 UPRNWBNKR(MNUMNR)             ! BANK YEARS FOR REGIONAL RPS CREDITS (0=no, 99 = forever)
+      INTEGER*4 UPCAPCAS                      ! CPS CASE (0=no, 1=Yes)
+      INTEGER*4 UPRNWCRD                      ! SWITCH for Credit Prices (1=roll. avg, 2=cur yr)
+      INTEGER*4 UPOVBDSW                      ! SWITCH--TYPE OF OVERBUILD LIMIT
+      INTEGER*4 UPOVBDSY                      ! START YR--ANN INC IN FRAC OVRBLD
+      INTEGER*4 UPINTSW                       ! SWITCH TO BOUND INTERMITTENTS
+                                              ! 0=NO,1=% PEAK,2=%GEN,3=%TOTCAP
+      INTEGER*4 NumStoGrp                     ! Number of Storage Groups
+      INTEGER*4 MaxPtypes                     ! Maximum number of ReStore Plant Types
+      INTEGER*4 MaxNumBins                    ! Maximum number of bins per Storage Group 
+
+      INTEGER*4 MaxPtypesP                    ! Maximum number of ReStore Plant Types PARAMETER
+      PARAMETER(MaxPtypesP = 23)
+      INTEGER*4 MaxNumBinsP                   ! Maximum number of bins per Storage Group PARAMETER
+      PARAMETER(MaxNumBinsP = 4)
+
+      INTEGER*4 GRW_XYR                       ! START YEAR FOR DEMAND EXP
+      INTEGER*4 ECP_FYR                       ! FIRST YEAR TO START ECP DECISIONS (BUILDS/RETROFITS, ETC)
+      INTEGER*4 UPRELSW                       ! SWITCH TO DETERMINE REL PRC/RSV MRG METHOD (0=INPUT RM,1=SEARCH RM)
+      INTEGER*4 UPBLDTYP(MNUMNR)              ! SWITCH TO SET BLD TYPE BY REG (OWNER: 1 = UTL, 2 = NUG)
+      REAL*4 DEM_GRW(5,MNUMCR)                ! EXP DEMAND GROWTH RATE
+      REAL*4 DEM_WGHT(5,MNUMCR)               ! WEIGHT ON NEW OBSERVED DEMAND GROWTH
+      REAL*4 UPWDCOF(ECP_D_DSP,ECP_D_FPH,NDREG)   ! Maximum Cofire Share by Coal Demand Region
+      REAL*4 UPWDCFR(ECP_D_DSP,NDREG)           ! ECP Determined Cofire Share by Coal Demand Region
+!
+! Plant data moved from ECPDAT
+!
+!     ALL ECP TECHNOLOGIES
+!
+      REAL*4    UPCCR(ECP_D_CAP)                 ! Capacity Credit
+      REAL*4    UPMCF(ECP_D_CAP)                 ! Maximum Capacity Factor
+      REAL*4    UPCPRO(ECP_D_CAP,ECP_D_LCP)        ! Construction Profile
+      REAL*4    UPCSB(ECP_D_CAP)                 ! Capital Cost Credit
+      REAL*4    UPCSBYR(ECP_D_CAP,MNUMYR)        ! Capital Cost Credit (annual override if > = 0)
+      REAL*4    UPFOM(ECP_D_CAP)                 ! Fixed O & M Cost
+      REAL*4    UPFORT(ECP_D_CAP)                ! Forced Outage Rate
+      REAL*4    UPOVR(ECP_D_CAP)                 ! Overnight Capital Cost
+      REAL*4    UPPMRT(ECP_D_CAP)                ! Planned Maintenance Outage Rate
+      REAL*4    UPRSK(ECP_D_CAP)                 ! Regional Risk Factors
+      REAL*4    UPVOM(ECP_D_CAP)                 ! Variable O & M Cost
+      REAL*4    UPVSB(ECP_D_CAP)                 ! O & M Cost Credit
+      REAL*4    UPHTRT(ECP_D_CAP)                ! Current Heat Rate
+      REAL*4    UPCTRM(ECP_D_CAP)                ! Add on transmission cost
+      REAL*4    UPOVCC(ECP_D_CAP,MNUMYR)         ! CapCost Overwrites by year
+      REAL*4    UPOVHR(ECP_D_CAP,MNUMYR)         ! Heatrate Overwrites by year
+      REAL*4    UPOVFX(ECP_D_CAP,MNUMYR)         ! FOM Cost Overwrites by year
+      REAL*4    UPOVVR(ECP_D_CAP,MNUMYR)         ! VOM Cost Overwrites by year
+      REAL*4    UPXTRA(MNUMYR+ECP_D_FPH,ECP_D_CAP) ! Extra Fixed O&M - Age Dependent
+      REAL*4    ESTYRADD(ECP_D_CAP,MNUMYR)       ! ANNUAL HISTORICAL CAPACITY ADDITIONS
+      REAL*4    ESTYRPLN(ECP_D_CAP,MNUMYR)       ! ANNUAL PLANNED CAPACITY ADDITIONS
+      REAL*4    ESTMNADD(ECP_D_CAP)              ! MINIMUM CAPACITY ADDITION IN 1ST STEP
+      REAL*4    ESTCSINC(ECP_D_CAP)              ! INCREASE IN COST / INCREASE IN CAP
+      REAL*4    ESTCPINC(ECP_D_CAP)              ! INCREASE IN CAPACITY
+      REAL*4    ESTCPADD(ECP_D_CAP)              ! MAX PREVIOUS INCREASE IN CAPACITY
+      REAL*4    ESTCPSTP(ECP_D_CAP,ECP_D_SSTP)     ! FRAC ABOVE PREV MAX CAPACITY FOR ST ELAS STEP
+      REAL*4    ESTCPCSM(ECP_D_CAP,ECP_D_SSTP)     ! COST INCREASE FOR ST ELAS STEP - DIRECT INPUT
+      REAL*4    ESTCPCST(ECP_D_CAP,ECP_D_SSTP)     ! COST INCREASE FOR ST ELAS STEP
+      REAL*4    ESTCPLIM(ECP_D_CAP,ECP_D_SSTP)     ! CAPACITY LIMIT FOR ST ELAS STEP
+      INTEGER*4 UPAVLOV(ECP_D_CAP)               ! Calendar Yr Of 1st Comm Operation - Overwrites UPAVLYR
+      INTEGER*4 UPAVLYR(ECP_D_CAP)               ! Calendar Yr Of 1st Comm Operation
+      INTEGER*4 UPCLYR(ECP_D_CAP)                ! Construction Leadtime - Actual (Years)
+      INTEGER*4 UPPLYR(ECP_D_CAP)                ! Construction Leadtime - Planning (Years)
+      INTEGER*4 UPECLF(ECP_D_CAP)                ! Economic Life (Years)
+      INTEGER*4 UPNCLF(ECP_D_CAP)                ! NUG Contract Life (Years)
+      INTEGER*4 UPNLLF(ECP_D_CAP)                ! NUG Loan Life (Years)
+      INTEGER*4 UPTXLF(ECP_D_CAP)                ! Tax Life (Years)
+      INTEGER*4 UPUCLF(ECP_D_CAP)                ! Utility Contract Life (Years)
+      INTEGER*4 ESTSWTCH(ECP_D_CAP)              ! SWITCH TO USE ST ELAS (0=No, 1=Yes)
+      INTEGER*4 ESTSWCSM                       ! SWITCH FOR COST MULT(1=Cst/Cap Ratio, 2=Direct Input)
+!
+!     RETIREMENT GROUPS
+!
+      REAL*4    UPRETRAT                          ! Max Amt. Cap Ret/year (if any)
+      REAL*4    UPRETFHU                          ! Fossil hurdle rate for retirements
+      REAL*4    UPRETNHU                          ! Nuclear hurdle rate for retirements
+      REAL*4    UPRETRT0                          ! Initial Max Retirement Rate (if > 0 then use instead of UPRETRAT)
+      REAL*4    UPRETRTL                          ! Last    Max Retirement Rate (if > 0 then use instead of UPRETRAT)
+      REAL*4    UPRETCHG                          ! % Chg/yr in Max Retirement Rate (from Initial to Last)
+      REAL*4    RET_PCT(ECP_D_CAP,ECP_D_RET)          ! Percent of Capacity in Each Retirement Group
+      REAL*4    RET_VAL(WPLT_D_REC)                 ! Profit from Each Retirement Group
+      REAL*4    RET_CAP(WPLT_D_REC)                 ! Capacity in Each Retirement Group
+      REAL*4    RET_FOM(WPLT_D_REC)                 ! Fixed O&M and Cap Adds in Each Retirement Group
+      REAL*4    RET_AVG(ECP_D_CAP,MNUMNR)           ! First Plant Record in Each Retirement Group
+
+      INTEGER*4 RET_FRST(ECP_D_RET,ECP_D_CAP,MNUMNR)  ! First Plant Record in Each Retirement Group
+      INTEGER*4 RET_NEXT(WPLT_D_REC)                ! Next Plant Record in Each Retirement Group
+      INTEGER*4 RET_GRP(ECP_D_CAP)                  ! Number of Retirement Groups
+      INTEGER*4 RET_FRG(WPLT_D_REC)                 ! Fuel Region in each Retirement Group
+      INTEGER*4 UPRTLT                            ! Lead Time for Retirements
+!
+!     DISPATCHABLE NON-RENEWABLE TECHNOLOGIES
+!
+      REAL*4      UPPCFB(ECP_D_DSP,2)               ! Minimum/Maximum Capacity Factor
+      REAL*4      UPPSEF(ECP_D_DSP)                 ! Scrubber Efficiency
+      REAL*4      UPPSRT(ECP_D_DSP)                 ! SO2 Scrubber Emissions Rate
+      REAL*4      UPPCEF(ECP_D_CAP)                 ! Carbon Sequestration Efficiency
+      REAL*4      UPPCEF_MIN(ECP_D_CAP)             ! Minimum Carbon Sequestration Efficiency
+      REAL*4      UPPHRT0(ECP_D_DSP)                ! Initial Heat Rate
+      REAL*4      UPPHRTN(ECP_D_DSP)                ! Final Heat Rate
+      REAL*4      ECP_PCT(ECP_D_BTP,ECP_D_CAP)        ! Boiler Type Share
+      INTEGER*4   ECP_BBN(ECP_D_CAP)                ! Number of Boiler Types Per Plant Type
+      REAL*4      NOX_NEW(ECP_D_BTP,ECP_D_CAP)        ! NOX Emission Rate
+      CHARACTER*2 ECP_FTP(ECP_D_BTP,ECP_D_CAP)        ! Fire Type Code
+      CHARACTER*2 ECP_NCT(ECP_D_BTP,ECP_D_CAP)        ! NOX Control Type Code
+      CHARACTER*1 ECP_BTM(ECP_D_BTP,ECP_D_CAP)        ! Bottom Type Code
+!
+!     INTERMITTENT TECHNOLOGIES
+!
+      REAL*4    UPICCF(ECP_D_INT)                   ! Intermittent capacity credit scaling factor
+!                                                 !  % of peak capacity factor
+      REAL*4    UPIBND(ECP_D_INT)                   ! Frac. of peak allowed for blds
+      REAL*4    UPINTLOW(ECP_D_INT)                 ! Frac. of int. gen to start adjusting UPICCF
+      REAL*4    UPINTEXP(ECP_D_INT)                 ! "half" value for intermittency cap credit decay
+!
+!     INTERMITTENT + DISPATCHABLE RENEWABLE TECHNOLOGIES
+!
+      REAL*4    UPGSUB(ECP_D_CAP)                   ! Generation Subsidies (mills/kwh) -- constant
+      REAL*4    UPGSUBYR(ECP_D_CAP,MNUMYR)          ! Generation Subsidies (mills/kwh) -- annual
+      REAL*4    UPGSMX(ECP_D_CAP)                   ! Max Annual Generation Subsidies (million $ - 0 = none)
+      INTEGER*4 UPGSUBPT(ECP_D_CAP)                 ! Index to use annual PTC values (0 = no,1 = yes)
+      INTEGER*4 UPGSY1(ECP_D_CAP)                   ! start year of generation subsidies
+      INTEGER*4 UPGSYL(ECP_D_CAP)                   ! last year of generation subsidies
+      INTEGER*4 UPGSYR(ECP_D_CAP)                   ! number of years from online year that
+!                                                 !   generation subsidies are in affect.
+      INTEGER*4 UPGSTY(ECP_D_CAP)                   ! real (=0) or nominal (~= 0) subsidy
+      INTEGER*4 UPGSYD(ECP_D_CAP)                   ! Year $ Specified for Subsidy
+!
+      INTEGER*4 UPFLTP(ECP_D_DSP,ECP_D_FPP)           ! ECP Fuel Types
+!
+!     DISTRIBUTED GENERATION TECHNOLOGIES
+!
+      REAL*4      UPDCFB(ECP_D_DGN,2)               ! Minimum/Maximum Capacity Factor
+      REAL*4      UPDSEF(ECP_D_DGN)                 ! Scrubber Efficiency
+      REAL*4      UPDSRT(ECP_D_DGN)                 ! SO2 Scrubber Emissions Rate
+      REAL*4      UPDCEF(ECP_D_DGN)                 ! Carbon Sequestration Efficiency
+      INTEGER*4   UDFLTP(ECP_D_DSP,ECP_D_FPP)         ! ECP Fuel Types
+
+!     ECP Heatrate Adjustment Factor - For Existing Coal Adjusts Heatrate to Unscrubbed Equivalent for Creating Group Averages - All Others = 1.0
+
+      REAL*4    UECP_HTRT_ADJ(ECP_D_CAP)            ! Heatrate Adjustment Factor
+      REAL*4    UECP_CPEN_ADJ(ECP_D_CAP)            ! Capacity Derate Adjustment Factor
+      REAL*4    ALT_UECP_CPEN_ADJ(ECP_D_CAP)        ! Minimum Capacity Derate Adjustment Factor
+      CHARACTER*2 NO_CCS_PLNTCD(ECP_D_CAP)          ! For units with carbon capture identify plant code for associated plants without capture
+      INTEGER*4 NO_CCS_PLNT_NDX(ECP_D_CAP)          ! For units with carbon capture identify plant index for associated plants without capture
+
+!
+!     SCRUBBER RETROFITS
+!
+      REAL*4    UPSCPR(ECP_D_LCP)                   ! CONS. PROFILE--RETROFITS
+      REAL*4    UPSHPEN(ECP_D_DSP,ECP_D_SCR)          ! HEAT RATE PEN. (%)-RETROFIT
+      REAL*4    UPSCPEN(ECP_D_DSP,ECP_D_SCR)          ! CAPACITY PEN. (%)-RETROFIT
+      REAL*4    UPSQMAX                           ! MAX ANNUAL RETROFITS
+      REAL*4    UPSRMAX                           ! MAX ANNUAL INCREASE (%) --RETROFITS
+      REAL*4    UPSRSK                            ! RISK PREMIUM--RETROFIT
+
+      INTEGER*4 UPSGRP                            ! NUMBER OF SCRUBBER RETROFIT GROUPS
+      INTEGER*4 UPSELF                            ! ECONOMIC LIFE--SCRUBBER RETRO.
+      INTEGER*4 UPSCLT                            ! CONSTRUCTION LEADTIME--RETRO.
+      INTEGER*4 UPSTXVN                           ! NUMBER OF TAX VINTAGES--RETRO.
+      INTEGER*4 UPSTXYR                           ! YEAR OF TAX VINTAGE--RETRO.
+      INTEGER*4 UPSTXLF(2)                        ! TAX LIFE BY VINTAGE--RETRO.
+      INTEGER*4 UPSCR2(ECP_D_DSP)                   ! ECP CAPACITY TYPE CONVERTED TO
+      INTEGER*4 UPSCSCR(ECP_D_DSP,ECP_D_CSC)          ! SCRUBBER CAPACITY TYPE CONVERTED TO
+      INTEGER*4 UPSCRFRM(ECP_D_DSP,ECP_D_CSC)         ! PLANTS SCRUBBED FROM
+!
+      INTEGER*4 USW_CLGRP                         ! Switch to Create ECP Supergroups for Coal 0=> Group ; 1=> Don't Group
+      INTEGER*4 USW_RTRSK                         ! Switch to Apply Risk Premium to Retrofits 0=> No ; 1=> Yes
+      INTEGER*4 USW_HG                            ! Mercury Switch 0=> No Limit ; 1=> Mercury Emission Limit
+      INTEGER*4 USW_MACT                          ! Maximum Available Control Technology Switch for Mercury 0=>No, 1=>Yes
+      INTEGER*4 UMACT_YR                          ! If Mercury MACT - Start Year
+      INTEGER*4 USW_BACT                          ! Best Available Control Technology Switch 0=>No, 1=>Yes
+      INTEGER*4 UBACT_YR                          ! If BACT - Start Year
+      INTEGER*4 USW_DSI                           ! DSI Policy Switch 0=>No, 1=>Yes
+      INTEGER*4 UDSI_YR                           ! If DSI Policy - Start Year
+      INTEGER*4 USW_WACC                          ! Switch to Adjust WACC when Tax Credits Phase Down or Out 0=>No, 1=>Yes
+      INTEGER*4 USW_DIGIT                         ! Switch to Use DIGITS2 Function to limit Significant Digits 0=>No, 1=>Yes
+      INTEGER*4 UREV_NYR                          ! Number of Years of Negative Revenues to Allow Retirements (Nonnuclear)
+      INTEGER*4 UREV_NYRN                         ! Number of Years of Negative Revenues to Allow Retirements (Nuclear)
+      INTEGER*4 PCAP_SO2                          ! SO2 Type of Cap and Trade System 0=>Auctioned Allowances 1=>Grandfathered Allowances
+      INTEGER*4 PCAP_NOX                          ! NOX Type of Cap and Trade System 0=>Auctioned Allowances 1=>Grandfathered Allowances
+      INTEGER*4 PCAP_CAR                          ! Carbon Type of Cap and Trade System 0=>Auctioned Allowances 1=>Grandfathered Allowances
+      INTEGER*4 PCAP_HG                           ! Mercury Type of Cap and Trade System 0=>Auctioned Allowances 1=>Grandfathered Allowances
+!
+!     COFIRING RETROFITS
+!
+      REAL*4    UPCFCPR(ECP_D_LCP)                ! CONS. PROFILE--CF RETROFITS
+      REAL*4    UPCFHPEN(ECP_D_RCF)               ! HEAT RATE PEN. (%)-CF RETROFIT
+      REAL*4    UPCFCPEN(ECP_D_RCF)               ! CAPACITY PEN. (%)-CF RETROFIT
+      
+      REAL*4   LEVRMD(MNUMYR,MNUMNR)            ! DISCOUNTED PRESENT VALUE OF RESERVE MARGIN DUALS (PERIODS 2 AND 3)
+      REAL*4   LEVRMD2(MNUMYR,MNUMNR)           ! DISCOUNTED PRESENT VALUE OF RESERVE MARGIN DUALS (PERIOD 2)
+      REAL*4   LEVRMD2C(MNUMYR,MNUMNR)          ! DISCOUNTED PRESENT VALUE OF RESERVE MARGIN DUALS (PERIOD 2 CAPPED)      
+      REAL*4   LEVRMC(MNUMYR,MNUMNR)            ! DISCOUNTED PRESENT VALUE OF KW COMMITS (PERIODS 2 AND 3)
+
+      INTEGER*4 UPCFELF                         ! ECONOMIC LIFE--CF SCRUBBER RETRO.
+      INTEGER*4 UPCFCLT                         ! CONSTRUCTION LEADTIME--CF RETRO.
+!
+!     NUCLEAR AGING RETROFITS
+!
+      REAL*4    UPNCPR(ECP_D_LCP)                 ! CONS. PROFILE--NUC RETROFITS
+
+      INTEGER*4 UPNASW                          ! SWITCH TO INCLUDE AGING RETROFIT COSTS (RETIREMENT VS. 2ND LIFE EXTENSION) 
+      INTEGER*4 UPNAYR                          ! AGE FOR 2ND LIFE EXTENSION OR RETIREMENT
+      INTEGER*4 UPNELF                          ! ECONOMIC LIFE--NUC RETROFITS
+      INTEGER*4 UPNCLT                          ! CONSTRUCTION LEADTIME--NUC RETROFITS
+!
+! End of ECPDAT Plant Data
+!
+!      ECP Index mapping for all plant types
+!
+      INTEGER*4 WIB1                          ! Index for Coal - Unscb - BH  - Any -
+      INTEGER*4 WIB2                          ! Index for Coal - Unscb - BH  - Any - SC
+      INTEGER*4 WIB3                          ! Index for Coal - W_scb - BH  -     -
+      INTEGER*4 WIB4                          ! Index for Coal - W_scb - BH  -     - SC
+      INTEGER*4 WIB5                          ! Index for Coal - W_scb - BH  - SCR -
+      INTEGER*4 WIB6                          ! Index for Coal - W_scb - BH  - SCR - SC
+      INTEGER*4 WIB7                          ! Index for Coal - Dry   - BH  - Any -
+      INTEGER*4 WIB8                          ! Index for Coal - Dry   - BH  - Any - SC
+      INTEGER*4 WIC1                          ! Index for Coal - Unscb - CSE - Any -
+      INTEGER*4 WIC2                          ! Index for Coal - Unscb - CSE - Any -    FF
+      INTEGER*4 WIC3                          ! Index for Coal - Unscb - CSE - Any - SC/FF
+      INTEGER*4 WIC4                          ! Index for Coal - W_scb - CSE -     -
+      INTEGER*4 WIC5                          ! Index for Coal - W_scb - CSE -     -    FF
+      INTEGER*4 WIC6                          ! Index for Coal - W_scb - CSE -     - SC/FF
+      INTEGER*4 WIC7                          ! Index for Coal - W_scb - CSE - SCR -
+      INTEGER*4 WIC8                          ! Index for Coal - W_scb - CSE - SCR -    FF
+      INTEGER*4 WIC9                          ! Index for Coal - W_scb - CSE - SCR - SC/FF
+      INTEGER*4 WICX                          ! Index for Coal - D_scb - CSE -     -
+      INTEGER*4 WICY                          ! Index for Coal - D_scb - CSE -     -    FF
+      INTEGER*4 WICZ                          ! Index for Coal - D_scb - CSE - SCR - SC/FF
+      INTEGER*4 WIH1                          ! Index for Coal - Unscb - O/N - Any -
+      INTEGER*4 WIH2                          ! Index for Coal - Unscb - O/N - Any -    FF
+      INTEGER*4 WIH3                          ! Index for Coal - Unscb - O/N - Any - SC/FF
+      INTEGER*4 WIH4                          ! Index for Coal - W_scb - O/N -     -
+      INTEGER*4 WIH5                          ! Index for Coal - W_scb - O/N -     -    FF
+      INTEGER*4 WIH6                          ! Index for Coal - W_scb - O/N -     - SC/FF
+      INTEGER*4 WIH7                          ! Index for Coal - W_scb - O/N - SCR -
+      INTEGER*4 WIH8                          ! Index for Coal - W_scb - O/N - SCR -    FF
+      INTEGER*4 WIH9                          ! Index for Coal - W_scb - O/N - SCR - SC/FF
+      INTEGER*4 WIHA                          ! Index for Coal - D_scb - O/N - Any -
+      INTEGER*4 WIHB                          ! Index for Coal - D_scb - O/N - Any -    FF
+      INTEGER*4 WIHC                          ! Index for Coal - D_scb - O/N - Any - SC/FF
+      INTEGER*4 WIPC                          ! Index for Pulverised Coal
+      INTEGER*4 WIOC                          ! Index for Other New Coal
+      INTEGER*4 WIIG                          ! Index for Integrated Gas Combined Cycle
+      INTEGER*4 WII2                          ! Index for IGCC with NG-cofiring
+      INTEGER*4 WIPQ                          ! Index for IGCC w/Partial Sequestration
+      INTEGER*4 WIIS                          ! Index for Integrated Gas Combined Cycle W/Seq.
+      INTEGER*4 WING                          ! Index for coal steam converted to gas STeam
+      INTEGER*4 WIST                          ! Index for oil and gas STeam
+      INTEGER*4 WIET                          ! Index for Existing Conventional Turbine
+      INTEGER*4 WIIC                          ! Index for Internal Combustion Engine
+      INTEGER*4 WICT                          ! Index for New Conventional Turbine
+      INTEGER*4 WIT2                          ! Index for Aeroderivative Turbine
+      INTEGER*4 WIAT                          ! Index for Advanced Turbine
+      INTEGER*4 WIEC                          ! Index for Existing Conventional Combined cycle
+      INTEGER*4 WICC                          ! Index for New Conventional Combined cycle
+      INTEGER*4 WIAC                          ! Index for Advanced Combined cycle
+      INTEGER*4 WIA2                          ! Index for New Advanced Comb Cycle
+      INTEGER*4 WICS                          ! Index for Advanced Combined cycle W/Seq.
+      INTEGER*4 WIFC                          ! Index for Fuel Cell
+      INTEGER*4 WICN                          ! Index for Conventional Nuclear
+      INTEGER*4 WIAN                          ! Index for Advanced Nuclear
+      INTEGER*4 WISM                          ! Index for SMR Nuclear
+      INTEGER*4 WIGN                          ! Index for Greenfield Nuclear
+      INTEGER*4 WIWD                          ! Index for Biomass (Wood)
+      INTEGER*4 WIBI                          ! Index for Biomass IGCC (Wood)
+      INTEGER*4 WIGT                          ! Index for Geothermal
+      INTEGER*4 WIAG                          ! Index for Advanced Geothermal
+      INTEGER*4 WIMS                          ! Index for Municipal Solid Waste
+      INTEGER*4 WIHY                          ! Index for Conventional Hydroelectric
+      INTEGER*4 WIHO                          ! Index for Advanced Hydroelectric
+      INTEGER*4 WIHI                          ! Index for In Stream Hydroelectric
+      INTEGER*4 WITI                          ! Index for Tidal Hydroelectric
+      INTEGER*4 WIPS                          ! Index for Reversible Hydroelectric
+      INTEGER*4 WIP2                          ! Index for Other Storage
+      INTEGER*4 WISQ                          ! Index for Quick Storage
+      INTEGER*4 WIDS                          ! Index for Diurnal Storage
+      INTEGER*4 WIOS                          ! Index for Other Storage
+      INTEGER*4 WIWN                          ! Index for Wind
+      INTEGER*4 WIWL                          ! Index for Wind Low Speed
+      INTEGER*4 WIWF                          ! Index for OFS Wind
+      INTEGER*4 WISO                          ! Index for Solar Thermal
+      INTEGER*4 WISS                          ! Index for Solar Thermal w/Storage
+      INTEGER*4 WIS2                          ! Index for Solar Thermal w/Storage 2
+      INTEGER*4 WIPV                          ! Index for Solar Photovoltaic
+      INTEGER*4 WIPT                          ! Index for Photovoltaic w/axis tracking
+      INTEGER*4 WIIN                          ! Index for Other Intermittent
+      INTEGER*4 WIDB                          ! Index for Distributed Generation-Base
+      INTEGER*4 WIDP                          ! Index for Distributed Generation-Peak
+!
+!      ECP Index mapping for all component types
+!
+      INTEGER*4 WIEXC                         ! Index for Exis Coal Component
+      INTEGER*4 WIPVC                         ! Pulv Coal New Component      
+      INTEGER*4 WIEXS                         ! Exis Steam Component       
+      INTEGER*4 WICCT                         ! Comb Turbine Component    
+      INTEGER*4 WIACT                         ! Comb Turbine Adv Component
+      INTEGER*4 WISCC                         ! Steam Comb Cyc Component
+      INTEGER*4 WIGSF                         ! Gasifier-coal/wd Component
+      INTEGER*4 WISEQ                         ! Sequestration Component  
+      INTEGER*4 WIBIG                         ! Balance - IGCC Component 
+      INTEGER*4 WIBCT                         ! Balance - TurbineComponent
+      INTEGER*4 WIBCC                         ! Balance - CC Component      
+      INTEGER*4 WIFLC                         ! Fuel Cell Component        
+      INTEGER*4 WICNU                         ! Conv Nuclear Component    
+      INTEGER*4 WIANU                         ! Adv Nuclear Component    
+      INTEGER*4 WIWDP                         ! Wood prep - bio Component 
+      INTEGER*4 WIGTH                         ! Geothermal Component      
+      INTEGER*4 WIMSW                         ! Mun Solid Waste Component 
+      INTEGER*4 WIHYD                         ! Conv Hydro Component      
+      INTEGER*4 WIHPS                         ! Hyd Pump Storage Component
+      INTEGER*4 WIHP2                         ! Other Storage Component   
+      INTEGER*4 WIWND                         ! Wind Component            
+      INTEGER*4 WIWFS                         ! Wind Offshore Component   
+      INTEGER*4 WISTH                         ! Solar Thermal Component   
+      INTEGER*4 WIPVM                         ! Solar PV - Mod Component  
+      INTEGER*4 WIPVB                         ! Solar PV - BOS Component  
+      INTEGER*4 WIDGB                         ! Dist Gen - Base Component 
+      INTEGER*4 WIDGP                         ! Dist Gen - Peak Component 
+!
+      INTEGER*4 ECPCAPM                       ! Max value for ECP tech (<=ECP_D_CAP)
+      INTEGER*4 ECPDSPM                       ! Max value for ECP DSP tech (<=ECP_D_CAP)
+      INTEGER*4 ECPINTM                       ! Max value for ECP INT tech (<=ECP_D_INT)
+      INTEGER*4 ECPI_RM                       ! Max value for ECP I_R tech (<=ECP_D_I_R)
+      INTEGER*4 ECPRNWM                       ! Max value for ECP RNW tech (<=ECP_D_RNW)
+      INTEGER*4 ECPDGNM                       ! Max value for ECP DGN tech (<=ECP_D_CAP)
+      INTEGER*4 ECPSTOM                       ! Max value for ECP STO tech (<=ECP_D_STO)
+      INTEGER*4 ECP_D_DRTE                      ! REVISE DERATES - 0=NO,Y=YES
+      INTEGER*4 ECP_D_IDSM                      ! INCLUDE DSM - 0=NO,1=YES
+      INTEGER*4 ECP_D_INIT                      ! RINITIALIZE MATRIX 1=YES, 0=NO
+      INTEGER*4 ECP_D_LFCC                      ! CAP COST LRN/OPT - 0=NO,1=YES
+      INTEGER*4 ECP_D_LFHR                      ! HTRATE LRNING - 0=NO,1=YES
+      INTEGER*4 ECP_D_OVCC(ECP_D_CAP)             ! Ovrwrt Tech Capcost - 0=NO,1=YES
+      INTEGER*4 ECP_D_OVHR(ECP_D_CAP)             ! Ovrwrt Tech Heatrate - 0=NO,1=YES
+      INTEGER*4 ECP_D_OVFX(ECP_D_CAP)             ! Ovrwrt Tech FOM cost - 0=NO,1=YES
+      INTEGER*4 ECP_D_OVVR(ECP_D_CAP)             ! Ovrwrt Tech VOM cost - 0=NO,1=YES
+      INTEGER*4 ECP_D_PACK(MNUMYR)              ! Pack ECP Solution Matrix  - 0=NO,1=YES
+      INTEGER*4 ECP_D_MODE                      ! REVISE MODE 0 - CREATE MATRIX
+                                              !             1 - REVISE EX. MTX.
+      INTEGER*4 ECP_D_MSHR                      ! INCLUDE MKT/SHR - 0=NO,1=YES
+      INTEGER*4 ECP_D_PRNT                      ! PRINT MODE 0 - NO MPS REC. PRINT
+                                              !            1 - PRINT MPS RECORDS
+      INTEGER*4 ECP_D_RSK                       ! USE RISK PREM. - 0=NO,1=YES
+      INTEGER*4 ECP_D_AMB                       ! USE AMBIENT CONDITIONS MULTIPLIER - 0=NO,1=YES
+      INTEGER*4 EFP_D_SCR                       ! EFP TYPE RETROFIT = 13
+      INTEGER*4 EFP_D_TRN                       ! EFP TYPE TRANSMISSION = 14
+      INTEGER*4 UCPDSPIS(ECP_D_CAP)             ! Map of CAP to DSP technology indices
+      INTEGER*4 UCPINTIS(ECP_D_CAP)             ! Map of CAP to INT technology indices
+      INTEGER*4 UCPRNWIS(ECP_D_CAP)             ! Map of CAP to RNW  technology indices
+      INTEGER*4 UCPDGNIS(ECP_D_CAP)             ! Map of CAP to DGN technology indices
+      INTEGER*4 UCPSTOIS(ECP_D_CAP)             ! Map of CAP to STO  technology indices
+      INTEGER*4 UCPFTABI(ECP_D_CAP)             ! Map to FTAB Table 9 Capacity Categories
+      INTEGER*4 UCPVSTOR(ECP_D_CAP)             ! Map to Value of Stroage Categories      
+      INTEGER*4 NUM_864_TYPES                 ! Number of Plant Types Consdered by the 864 Model
+      INTEGER*4 NUM_STEPS_PER_TYPE(ECP_D_CAP)   ! Number of Price Bins per 864 Plant Typep
+      INTEGER*4 Sto_Cap_Indx(ECP_D_CAP)         ! Value of Storage Index      
+      INTEGER*4 UCPDSPI(ECP_D_DSP)              ! Map of DSP to CAP technology indices
+      INTEGER*4 UCPINTI(ECP_D_INT)              ! Map of INT to CAP technology indices
+      INTEGER*4 UCPRNWI(ECP_D_RNW)              ! Map of RNW to CAP technology indices
+      INTEGER*4 UCPDGNI(ECP_D_DGN)              ! Map of DGN to CAP technology indices
+      INTEGER*4 UCPSTOI(ECP_D_STO)              ! Map of STO to CAP technology indices
+      INTEGER*4 UFL_D_ECP(EFD_D_NFL,ECP_D_FPP)      ! EFD TO ECP FUEL MAPPING
+      INTEGER*4 UIRINTI(ECP_D_INT)              ! Map of INT to I_R technology indices
+      INTEGER*4 UIRRNWI(ECP_D_RNW)              ! Map of RNW to I_R technology ind
+      INTEGER*4 UIRSTOI(ECP_D_STO)              ! Map of STO to I_R technology ind
+      INTEGER*4 UPFNUC(ECP_D_NFL)               ! Map of ECP Fuel Type to Nuclear     (0 = no, 1 = primary, 2 = secondary)
+      INTEGER*4 UPFCOL(ECP_D_NFL)               ! Map of ECP Fuel Type to Coal        (0 = no, 1 = primary, 2 = secondary)
+      INTEGER*4 UPFGAS(ECP_D_NFL)               ! Map of ECP Fuel Type to Gas         (0 = no, 1 = primary, 2 = secondary)
+      INTEGER*4 UPFRES(ECP_D_NFL)               ! Map of ECP Fuel Type to Resid       (0 = no, 1 = primary, 2 = secondary)
+      INTEGER*4 UPFDIS(ECP_D_NFL)               ! Map of ECP Fuel Type to Distillate  (0 = no, 1 = primary, 2 = secondary)
+      INTEGER*4 UNFPH                         ! LENGTH OF FULL PLANNING HORIZON
+      INTEGER*4 UNXPH                         ! LENGTH OF EXPL. PLANNING HORIZON
+      INTEGER*4 UNAPH                         ! NUMBER OF YEARS FOR ANNUAL ADJUSTMENT COMPOUNDING IN LAST ECP YEAR
+      INTEGER*4 UPCENSUS(ECP_D_CAP,MNUMNR)      ! CENSUS REGION BY PLANT TYPE
+      INTEGER*4 UPCIMP(MNUMNR)                ! CANADIAN IMPORTS RG 0=NO 1=YES
+      INTEGER*4 UPCLRG(MNUMNR)                ! COAL REGION
+      INTEGER*4 UPETTSW(ECP_D_CAP)              ! IRT BLD SW 0=NOT 1=ALLOWED - INT
+      INTEGER*4 UPGTRN(MNUMNR)                ! REGIONAL TRNSFERS 0=NO 1=YES
+      INTEGER*4 UPLNTIDX(ECP_D_I_R)             ! RENEW PLT TYPE INDEX
+                                              ! FOR ECP RENEWABLE PLT INDICES
+      INTEGER*4 UPMSHSW(ECP_D_CAP)              ! ALLOW DSP IN MKT/SHR--0=NO,1=YES
+      INTEGER*4 UPNGRG(MNUMNR)                ! NATURAL GAS REGION
+      INTEGER*4 UPCARG(MNUMNR)                ! CARBON REGION
+      INTEGER*4 UPNUGSW(ECP_D_CAP)              ! NUG BLD SW 0=NOT 1=ALLOWED - DSP
+      INTEGER*4 UPTOPR(ECP_D_CAP)               ! OPERATE TYPE SWITCH
+      INTEGER*4 UPTMRM(ECP_D_CAP)               ! RES. MRG. SWITCH (0=CAP,1=OPR)
+      INTEGER*4 UPEFDT(ECP_D_CAP)               ! EFD PLANT TYPE
+      INTEGER*4 UPCPTRSW(ECP_D_CAP)             ! CAP TRNSFERS 0=NOT 1=ALLOWED-DSP
+      INTEGER*4 UPTTYP(ECP_D_CAP)               ! PLANT TYPE
+      INTEGER*4 WPTTYP(ECP_D_CAP,MNUMNR)        ! Create ECP Structure by plant type and region, 0=>No 1=>Yes
+      INTEGER*4 UPVTYP(ECP_D_CAP)               ! VINT. TYPE 0=EX. 1=NEW--ECP CAP
+      INTEGER*4 UPXRGN(MNUMNR,MNUMNR)         ! EXPORT TO IMPORT REGION MAP
+      INTEGER*4 UPEFPT(ECP_D_CAP)               ! EFP TYPE
+
+      INTEGER*2 ECPACT                        ! YEAR TO WRITE ACTFILE
+                                              !     0 = WRITE FIRST YEAR
+      INTEGER*2 ECPBASIS                      !BASIS MODE 0-FROM PREVIOUS YEAR
+                                              !           1-FROM INPUT FILE
+
+      LOGICAL*1 UCPDSPS(ECP_D_CAP)              ! Mask of DSP to CAP technology indices
+      LOGICAL*1 UCPINTS(ECP_D_CAP)              ! Mask of INT to CAP technology indices
+      LOGICAL*1 UCPRNWS(ECP_D_CAP)              ! Mask of RNW to CAP technology indices
+      LOGICAL*1 UCPDGNS(ECP_D_CAP)              ! Mask of DGN to CAP technology indices
+      LOGICAL*1 UCPSTOS(ECP_D_CAP)              ! Mask of STO to CAP technology indices
+      LOGICAL*1 UPLTSW(ECP_D_CAP)               ! Mask of ECP Plant Types Included In Current Model Run
+      LOGICAL*1 UIRINTS(ECP_D_I_R)              ! Mask of INT to I_R technology indices
+      LOGICAL*1 UIRRNWS(ECP_D_I_R)              ! Mask of RNW to I_R technology indices
+      LOGICAL*1 UIRSTOS(ECP_D_I_R)              ! Mask of STO to I_R technology indices
+
+      CHARACTER*80 ECP_D_FILE                   ! MPS FORMAT INPUT FILE NAME&PATH
+      CHARACTER*80 ECP_D_FILEB                  ! EMM BASIS FILE NAM
+      CHARACTER*40 UPLNAME(ECP_D_CAP)           ! ECP Technology Long Name
+      CHARACTER*40 StorageNames(ECP_D_CAP)      ! Technology Long Name for Storage Plant Types
+      CHARACTER*2  StorageCodes(ECP_D_CAP)      ! Technology Codes for Storage Plant Types
+
+      CHARACTER*8 ECP_D_DBNM                    ! DATABASE NAME
+      CHARACTER*8 ECP_D_DECK                    ! DECK NAME
+      CHARACTER*8 ECP_D_DECKB(MNUMYR)           ! BASIS FILE DECK NAME
+      CHARACTER*8 ECP_D_PROB                    ! PROBLEM NAME
+      CHARACTER*8 UPBND                       ! BOUND ROW NAME
+      CHARACTER*8 UPNAME(ECP_D_CAP,3)           ! ECP Technology Name For Reports
+      CHARACTER*16 UPOBJ                      ! OBJECTIVE FUNCTION NAME
+      CHARACTER*16 UPRHS                      ! RIGHT HAND SIDE NAME
+
+      CHARACTER*2 UPDMCD(ECP_D_DSM)             ! DSM GROUP CODES
+      CHARACTER*2 UPFLCD(ECP_D_NFL)             ! FUEL CODES
+      CHARACTER*2 UPLNTCD(ECP_D_CAP)            ! PLANT CODES
+
+      CHARACTER*1 UPLDCD(ECP_D_VLS)             ! LOAD SEGMENT CODES
+      CHARACTER*1 UPMDCD(ECP_D_VLS)             ! MODE OF OPERATION CODES
+      CHARACTER*1 UPOWNCD(ECP_D_OWN)            ! OWNERSHIP CODES
+      CHARACTER*1 UPRGCD(MNUMNR)              ! REGION CODES
+      CHARACTER*1 UPSCCD(ECP_D_SCR)             ! RETROFIT CLUSTER CODE
+      CHARACTER*1 UPYRCD(ECP_D_FPH)             ! YEAR CODES
+
+      REAL*4 FR_OR_TRANCOSTG(MAXNFR,8,MNUMYR)   ! Unit Co2 trsnport costs from each fuel region to each OGSM region - default values
+!NETL PROGRAM GOALS
+       REAL*4 TCCV_GL(MNUMYR,4)                     ! Total_Capture_Costs-Variable 
+       REAL*4 TCCF_GL(MNUMYR,4)                     ! Total_Capture_Costs-Fixed 
+       REAL*4 TTCV_GL(MNUMYR,4)                     ! Total_Transport_Costs-Variable 
+       REAL*4 TTCF_GL(MNUMYR,4)                     ! Total_Transport_Costs-Fixed 
+       REAL*4 TICV_GL(MNUMYR,4)                     ! Total_Injection_Costs-Variable 
+       REAL*4 TICF_GL(MNUMYR,4)                     ! Total_Injection_Costs-Fixed      
+       REAL*4 HTRT_GL(MNUMYR,4)                     ! Heatrate goal
+
+!      SPINNING RESERVE INFORMATION
+
+       REAL*4 SR_CREDIT(ECP_D_CAP)        ! Percent of excess capacity commited to load that is credited against spinning reserve requirement
+       REAL*4 SR_TRAN_CREDIT            ! Percent of excess transmission capacity that is credited against spinning reserve requirement
+       REAL*4 SR_MIN_CF(ECP_D_CAP)        ! Minimum Capacity Factor Allowed for Determining Split between Generation and Spinning Reserve
+       REAL*4 SR_RQMT_HGHT(MNUMNR)      ! Percent of Load Height Required for Spinning Reserve
+       REAL*4 SR_RQMT_DIFF(MNUMNR)      ! Percent of Difference between Seasonal Peak and Load Height Required for Spinning Reserve
+       REAL*4 SR_INT(ECP_D_CAP,MNUMNR)    ! Percent of derated intermitten capacity that must be matched with spinning reserves
+       REAL*4 SR_MIN_LF(ECP_D_CAP)        ! Derate for min el and max sr mode = (1 - sr_min_lf) * sr_min_cf * (ld / min_ld) + sr_min_lf * sr_min_cf
+       REAL*4 SR_MAX_LF(ECP_D_CAP)        ! Derate for max el and min sr mode = (1 - sr_max_lf) * (1 - for) * (ld / max_ld) + sr_min_lf * (1 - for)
+       
+ !     Variables needed for heatrate improvement
+ 
+       REAL*4 HTRT_OVR_CST(ECP_D_CAP)   ! Heatrate improvement cost MM$/unit
+       REAL*4 HTRT_REDUCTION(ECP_D_CAP) ! Heatrate improvement Percent Reduction
+       REAL*4 HTRT_FLOOR(ECP_D_CAP)     ! Minimum heatrate allowed after improvement
+       REAL*4 HTRT_MIN_CAP(ECP_D_CAP)   ! Minimum size unit to which improvement is allowed / required
+       REAL*4 HTRT_OVRQ(ECP_D_CAP,4)    ! Heatrate improvement cost by Quartile MM$/unit
+       REAL*4 HTRT_REDQ(ECP_D_CAP,4)    ! Heatrate improvement Reduction by Quartile (Fraction)
+       INTEGER*4 HTRT_YEAR
+       INTEGER*4 HTRT_DOLLAR_YEAR
+ 
+       COMMON /HTRT_IMPROVEMENT/ HTRT_OVR_CST, HTRT_REDUCTION, HTRT_FLOOR, HTRT_MIN_CAP, HTRT_OVRQ, HTRT_REDQ,  &
+          HTRT_YEAR, HTRT_DOLLAR_YEAR
+ 
+ !     Keep Track of Units that have choosen the heatrate improvement
+ 
+       REAL*8 HTRT_CAP(MNUMNR,ECP_D_DSP,MAXNFR)
+       REAL*8 HTRT_CAP_MR(MNUMNR,ECP_D_DSP,MAXNFR)
+       REAL*8 HTRT_EPGCAP(0:EFD_D_MFRG,ECP_D_RET,ECP_D_CAP,MNUMNR)       
+       INTEGER*4 HTRT_RESULTS(EMM_D_GRP) ! 0 if option has not been selected - otherwise year selected    
+       INTEGER*4 HTRT_FRST(ECP_D_RET,ECP_D_CAP,MNUMNR)
+       INTEGER*4 HTRT_NEXT(WPLT_D_REC)
+       INTEGER*4 HTRT_IGRP(WPLT_D_REC)
+       INTEGER*4 HTRT_UNITS(ECP_D_RET,ECP_D_CAP,MNUMNR)
+        
+       COMMON /HTRT_OUT/ HTRT_CAP, HTRT_CAP_MR, HTRT_EPGCAP, HTRT_RESULTS, HTRT_FRST, HTRT_NEXT, HTRT_IGRP, HTRT_UNITS        
+        
+!     ARRAYS NEEDED TO SET UP STATE RPS TRANCHES
+
+      INTEGER*4 NM_ST_CODES                              ! Number of state codes - matching parameter is MX_ST_CODES
+      CHARACTER*2 ST_CODES(0:MX_ST_CODES)                ! State codes
+      INTEGER*4 NM_UT_TYPES                              ! Number utility sector types
+      CHARACTER*4 UT_TYPE_CODES(MX_TYPE)                 ! Utility sector type codes
+      INTEGER*4 ST_RPS_SW                                ! State RPS switch 0=>Off 1=>On
+      INTEGER*4 NM_ST_RPS                                ! Number state RPS tranches - matching parameter is MX_ST_RPS
+      CHARACTER*2 ST_RPS_STcd(MX_ST_RPS)                 ! State code associated with each state RPS tranche
+      CHARACTER*1 ST_RPS_ID(MX_ST_RPS)                   ! Tranche ID associated with each state RPS tranche
+      INTEGER*4 ST_RPS_STnm(MX_ST_RPS)                   ! State index associated with each state RPS tranche
+      INTEGER*4 ST_RPS_SYR(MX_ST_RPS)                    ! Start year of state RPS tranche
+      INTEGER*4 ST_RPS_EYR(MX_ST_RPS)                    ! End year of state RPS tranche - 9999 if no explicit year is specified
+      INTEGER*4 ST_RPS_POST(MX_ST_RPS)                   ! Switch to control expectations after state RPS has ended 0=> Terminates 1=> Continues at same rate as last year
+      INTEGER*4 ST_RPS_PCAP_YR(MX_ST_RPS)                ! Identifies dollar year if 'Alternative Compliance Paymenr', If none value is 0
+      INTEGER*4 ST_RPS_PCAP_TYP(MX_ST_RPS)               ! Switch to identify whether 'Alternative Compliance Payments' are expresses as 0=> No Payment, 1=> Real, 2=> Nominal
+      INTEGER*4 ST_RPS_UT_NM(MX_ST_RPS)                  ! Number of utility sector specific state RPS requirment profiles
+      INTEGER*4 ST_RPS_UT_TYPE(MX_TYPE,MX_ST_RPS)        ! Index identifying utility sector for each state RPS requirment profile
+      REAL*8 ST_RPS_UT_PCNT(MX_TYPE,MX_ST_RPS)           ! For each utiltity type percent of total sales subject to RPS requirement
+      REAL*8 ST_RPS_PCAP_87(MX_ST_RPS,MNUMYR+ECP_D_FPH)    ! Alternative Compliance Payments converted to real 87 dollars over the forecast horizon
+      CHARACTER*40 ST_RPS_TITLE(MX_ST_RPS)               ! Title to identify / describe state RPS tranche - Used for reporting / debug
+      INTEGER*4 ST_RPS_IMPORTS(MX_ST_RPS)                ! Switch to determine if RPS credits can be importd 0=>No, 1=>Yes
+      REAL*8 ST_RPS_CHP(TC_FUELS,MX_ST_RPS)              ! CHP / Traditional Cogen multipliers to relate qualified generation to RPS credits - 0.0=> Technology does not qualify
+      INTEGER*4 ST_RPS_CHP_SW(MX_ST_RPS)                 ! Switch to determine if all CHP generation qualifies or only what is sent to the grid 0=>sales to grid 1=>all generation
+      REAL*8 ST_RPS_DG(TC_FUELS,MX_ST_RPS)               ! DG / Traditional Cogen multipliers to relate qualified generation to RPS credits - 0.0=> Technology does not qualify
+      INTEGER*4 ST_RPS_DG_SW(MX_ST_RPS)                  ! Switch to determine if all DG generation qualifies or only what is sent to the grid 0=>sales to grid 1=>all generation
+      REAL*8 ST_RPS_COFIRE(MX_ST_RPS)                    ! Multiplier to relate co-fire generation to RPS credits, 0.0=>co-fire generation does not qualify
+      REAL*8 ST_RPS_ECP_EX(ECP_D_CAP,MX_ST_RPS)            ! Multiplier to relate ECP technology generation from existing units to RPS credits, 0.0=>gen from existing units and/or specified ECP type does not qualify
+      REAL*8 ST_RPS_ECP_NW(ECP_D_CAP,MX_ST_RPS)            ! Multiplier to relate ECP technology generation from new units to RPS credits, 0.0=>generation from specified ECP type does not qualify
+      REAL*8 H_SALES(0:MX_ST_CODES,0:MX_TYPE,MNUMNR)     ! Historical electriciy sales by state, EMM region and utility type
+      REAL*8 ST_RPS_REQ(MNUMNR,MX_ST_RPS,MNUMYR+ECP_D_FPH) ! Share of total sales from each EMM region needed to comply with state RPS requirements for each tranche
+      INTEGER*4 ST_RPS_EMM_MAP(MNUMNR,MX_ST_RPS)         ! Switch to determine if state / EMM region combination is allowed for new RPS qualified units
+      REAL*8 ST_RPS_TOLERANCE                            ! Minimum percent of EMM region to state sales to allow new builds to qualify for the state RPS compliance
+      INTEGER*4 ST_RPS_TRD(MNUMNR,MNUMNR,ECP_D_XPH)        ! Identifies state RPS trade partners - 0=> no, 1=> yes
+
+
+      COMMON /STATE_RPS/ ST_RPS_UT_PCNT, ST_RPS_PCAP_87, ST_RPS_CHP, ST_RPS_DG, ST_RPS_COFIRE, ST_RPS_ECP_EX, ST_RPS_ECP_NW, H_SALES, ST_RPS_REQ, ST_RPS_TOLERANCE, &
+         NM_ST_CODES, NM_UT_TYPES, ST_RPS_SW, NM_ST_RPS, ST_RPS_STnm, ST_RPS_SYR, ST_RPS_EYR, ST_RPS_POST, ST_RPS_PCAP_YR, ST_RPS_PCAP_TYP, ST_RPS_IMPORTS, &
+         ST_RPS_CHP_SW, ST_RPS_DG_SW, ST_RPS_EMM_MAP, ST_RPS_TRD, ST_RPS_UT_NM, ST_RPS_UT_TYPE, & 
+         ST_RPS_TITLE, UT_TYPE_CODES, ST_CODES, ST_RPS_STcd, ST_RPS_ID
+
+      REAL*8 CG_GEN_I(MNUMNR,TC_FUELS),CG_GEN_C(MNUMNR,TC_FUELS),CG_GEN_R(MNUMNR,TC_FUELS), &
+             CG_GEN_O(MNUMNR,TC_FUELS),CG_GEN_F(MNUMNR,TC_FUELS)
+
+      INTEGER*4 F_CL                 !  1 - Coal
+      INTEGER*4 F_OL                 !  2 - Oil
+      INTEGER*4 F_OG                 !  3 - Other Gaesous Fuels
+      INTEGER*4 F_NG                 !  4 - Natural Gas
+      INTEGER*4 F_HY                 !  5 - Hydro
+      INTEGER*4 F_GT                 !  6 - Geothermal
+      INTEGER*4 F_MS                 !  7 - MSW
+      INTEGER*4 F_WD                 !  8 - Biomass
+      INTEGER*4 F_SO                 !  9 - Solar Thermal
+      INTEGER*4 F_PV                 ! 10 - Solar PV
+      INTEGER*4 F_OT                 ! 11 - Other
+      INTEGER*4 F_WN                 ! 12 - Wind 
+
+      CHARACTER*2 TC_FUEL_CODES(TC_FUELS)
+
+      COMMON /CGGEN/ CG_GEN_I, CG_GEN_C, CG_GEN_R, CG_GEN_O, CG_GEN_F, F_CL, F_OL, F_OG, F_NG, F_HY, F_GT, F_MS, F_WD, F_SO, F_PV, F_OT, F_WN, TC_FUEL_CODES
+
+      REAL*8 HY_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR)
+      REAL*8 HY_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)
+      COMMON /HY_CF_FROM_M864/ HY_CF_ECP, HY_CF_EFD
+
+      REAL*8 NUC_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR),FOS_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR)
+      REAL*8 NUC_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR),FOS_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)
+      COMMON /BASE_CF_FROM_M864/ NUC_CF_ECP, FOS_CF_ECP, NUC_CF_EFD, FOS_CF_EFD
+
+      COMMON /INTGEN/ UPINTLAG,UPINTINC,UPINTMAX,ITOTGEN,IRNWGEN,IRNWPCT,IRNWACT
+      REAL*4 UPINTLAG
+      REAL*4 UPINTINC
+      REAL*4 UPINTMAX(MNUMNR)
+      REAL*4 ITOTGEN(MNUMNR,ECP_D_XPH)
+      REAL*4 IRNWGEN(MNUMNR,ECP_D_XPH)
+      REAL*4 IRNWPCT(MNUMNR,ECP_D_XPH)
+      REAL*4 IRNWACT(MNUMNR,ECP_D_XPH)
+
+      COMMON/RPS_INPUTS/FIRST_RPS_YR,FIRST_RPS_YEAR,UPRNWCGR,RPSCAPYR
+      INTEGER*4 FIRST_RPS_YR,FIRST_RPS_YEAR
+      REAL*4 UPRNWCGR
+      REAL*4 RPSCAPYR(MNUMYR+ECP_D_FPH)
+! 
+      COMMON/SHOURS/SHOURS_SSN
+      REAL*8 SHOURS_SSN(MNUMNR,ECP_D_XPH,ECP_D_MSP)
+!
+      COMMON /AVDSCRT/ AVGDCR, AVGUDCR
+      REAL*4 AVGDCR                             ! National average IPP discount rate
+      REAL*4 AVGUDCR                            ! National average utility discount rate
+
+      COMMON /AIM_GRP/ AIMMS_GRP
+      INTEGER*4 AIMMS_GRP(ECP_D_CAP)
+
+      COMMON /AIM_IND/ AICL,AIST,AICC,AICT,AIFC,AINU,AIWD,AIRN,AIHY,AIPS,AIP2,AISG,AIWN,AISO,AIPV,AIIN,AIDG
+      INTEGER*4 AICL            ! COAL
+      INTEGER*4 AIST            ! GAS/OIL STM
+      INTEGER*4 AICC            ! CC
+      INTEGER*4 AICT            ! CT
+      INTEGER*4 AIFC            ! FUEL CELLS
+      INTEGER*4 AINU            ! NUCLEAR
+      INTEGER*4 AIWD            ! BIOMASS
+      INTEGER*4 AIRN            ! OTHER RENEWABLES
+      INTEGER*4 AIHY            ! HYDRO
+      INTEGER*4 AIPS            ! PUMP STG
+      INTEGER*4 AIP2            ! DEMAND RESPONSE
+      INTEGER*4 AISG            ! STORAGE
+      INTEGER*4 AIWN            ! WIND
+      INTEGER*4 AISO            ! SOLAR THERMAL
+      INTEGER*4 AIPV            ! PV
+      INTEGER*4 AIIN            ! OTHER INTERMITTENTS
+      INTEGER*4 AIDG            ! DISTRIBUTED GENERATION
+
+      COMMON /STORAGE_CAP_CREDIT/ DINURAL_STORAGE_CAPACITY_CREDIT, PT_STORAGE_CAPACITY_CREDIT
+      REAL DINURAL_STORAGE_CAPACITY_CREDIT(MNUMYR, MNUMNR), PT_STORAGE_CAPACITY_CREDIT(MNUMYR, MNUMNR)

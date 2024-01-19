@@ -1,0 +1,9 @@
+AEO Name,STEO Name,Electricity Generation (billion kwh),Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
+NGS000:ea_Residential,NGRCPUS,Natural gas residential consumption (tcf),2%,5%,0.365,0.366,
+QUA000:ca_NaturalGas,NGRCBUS,Natural gas residential consumption (quads),2%,5%,1,1,
+ESD000:ia_Residential,exrcpus,Residential Sales (bkwh),2%,5%,365,366,
+NGS000:ea_Commercial,NGCCPUS,Natural gas commercial consumption (tcf),2%,5%,0.365,0.366,
+QUA000:da_NaturalGas,NGCCBUS,Natural gas commercial consumption (quads),2%,5%,1,1,
+ESD000:ia_Commercial,exccpus,Electricity commercial sales (bkwh),2%,5%,365,366,
+CKI000:hdd_UnitedStates,ZWHDPUS,U.S. Heating Degree Days,2%,5%,1,1,
+CKI000:cdd_UnitedStates,ZWCDPUS,U.S. Cooling Degree Days,2%,5%,1,1,

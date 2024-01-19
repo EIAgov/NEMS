@@ -1,0 +1,215 @@
+!  $Header: m:/default/includes/RCS/dispuse,v 1.15 2019/07/23 15:28:34 rsc Exp $
+
+!
+!     THIS IS A WORKING COMMON FOR THE EFD THIS SPACE IS REUSED FOR EVERY
+!     REGION, ITERATION AND YEAR, NOTHING IS SAVED.
+!
+      COMMON /DISPUSE/ ESLCUT,ETHGHT,ETWDTH, &
+        ETAREA,EQLOAD,BGENOWN,BTRDOWN,BFIRM,BTCOGEN,BMEXICAN,BNTCOWN, &
+        BNUGOWN,BGENREQ,BEC_IMP,BNW_IMP,ECACAP,ECFOR,ECPMR,ECLFR,ECFSHR, &
+        ECVCST,ECDSPC,ECDSPE,ECDSPE_ALT,ECDSPF,ECDSPF_ALT,ECDSPP, FAC ,  &
+        PKADJPP, ETDMDERG,ETDMMERG, ETDIMERG, &
+        UQFUEL,SQFUEL,URFUEL,UXFUEL, &
+        UQBIOM,URBIOM,UQFCONN,UQFGENN,UQPGENN,  &
+        UGNRPSN,UGNCHPN,UGNPTCN,UPYPTCN,UQFGENC,UQPGENC, &
+        UQFSO2,UTSO2C,UTNOXC,UTCO2C,UTCO1C,UTCARC,UTVOCC,UTHGC, &
+        UTSO2N,UTNOXN,UTCO2N,UTCARN,UTCO1N,UTVOCN,UTHGN, &
+        URPSCRD,URPSPCT,URPSRGN,URPSTGN,URPSRGL,URPSTGL,MUSTRUN, &
+        ETNVCT,EIDCHK,EIDCH2,ECDSPNMX, &
+        ECTYP,ECDSPT
+!
+!     DISPUSE - VARIABLE DECLARATION AND DEFINITIONS
+!
+      REAL*8    ESLCUT(2,EFD_D_MVS)                ! Y-INT&SLOPE CURRENT CUT LINE
+      REAL*8    ETHGHT(EFD_D_MVS,EFD_D_MSP,MNUMNR)   ! HEIGHT OF SEASONAL LOAD CURVE
+      REAL*8    ETWDTH(EFD_D_MVS,EFD_D_MSP,MNUMNR)   ! WIDTH OF SEASONAL LOAD CURVE
+      REAL*8    FAC(EFD_D_MVS,EFD_D_MSP,MNUMNR)      ! LOAD FOLLOWING FACTOR
+      REAL*8    PKADJPP(MNUMNR)                    ! REGIONAL PEAK ADJUSTMENTS for Planning Purposes
+      REAL*8    ETAREA(EFD_D_MVS)                  ! AREA IN EACH VERTICAL SLICE
+      REAL*8    EQLOAD(2)                        ! TOT LOAD&CUM AREA UND CUT LNE
+      REAL*8    BGENOWN(MNUMNR,EFD_D_OWN)          ! GENERATION BY OWNER
+      REAL*8    BTRDOWN(MNUMNR,EFD_D_OWN)          ! ECONOMY TRADE BY OWNER
+      REAL*8    BFIRM(MNUMNR)                    ! FIRM TRADES
+      REAL*8    BTCOGEN(MNUMNR)                  ! TRADITIONAL COGEN TO GRID
+      REAL*8    BMEXICAN(MNUMNR)                 ! MEXICAN TRADE
+      REAL*8    BNTCOWN(MNUMNR)                  ! NON TRADITIONAL COGEN OWN USE
+      REAL*8    BNUGOWN(MNUMNR)                  ! NUGS OWN USE
+      REAL*8    BGENREQ(MNUMNR)                  ! GENERATION REQUIREMENTS
+      REAL*8    BEC_IMP(MNUMNR)                  ! ECONOMY IMPORTS
+      REAL*8    BNW_IMP(MNUMNR)                  ! NEW FIRM CANADIAN IMPORTS
+      REAL*4    ECACAP(EFD_D_MPG)                  ! AVL CAP/SSNAL PER NET OFPMR
+      REAL*4    ECFOR(EMM_D_GRP)                   ! Forced Outage RATES
+      REAL*4    ECPMR(EMM_D_GRP)                   ! Planned Maintenance RATES
+      REAL*4    ECLFR(EMM_D_GRP)                   ! LOAD FOLLOWING RATES
+      REAL*4    ECFSHR(EMM_D_GRP,EFD_D_FPP)          ! FUEL SHARES
+      REAL*4    ECVCST(EFD_D_MPG)                  ! VARIABLE O&M COST
+      REAL*4    ECDSPC(EMM_D_GRP,EFD_D_MSP)          ! CAP IN EACH SEASON
+      REAL*4    ECDSPE(EMM_D_GRP,EFD_D_MSP)          ! ENERGY IN EACH SEASON
+      REAL*4    ECDSPE_ALT(EMM_D_GRP,EFD_D_MSP)      ! ENERGY IN EACH SEASON wo/capture
+      REAL*4    ECDSPF(EMM_D_GRP,EFD_D_MSP)          ! FUEL CONSUMPTION IN EACH SEASON
+      REAL*4    ECDSPF_ALT(EMM_D_GRP,EFD_D_MSP)      ! FUEL CONSUMPTION IN EACH SEASON wo/capture
+      REAL*4    ECDSPP(EFD_D_MHS,2)                ! CUT LINE DEFINING HOR SLICE
+      REAL*4    UQFUEL(EFD_D_NFL,EFD_D_MFRG,EFD_D_OWN) ! FUEL CONS IN FUEL REGIONS
+      REAL*4    SQFUEL(EFD_D_NFL,EFD_D_MFRG,EFD_D_MSP) ! SSN FUEL CONS IN FUEL REGIONS
+      REAL*4    URFUEL(EFD_D_NFL,EFD_D_MFRG)         ! PERCENT REMOVAL OF SO2
+      REAL*4    UXFUEL(EFD_D_NFL,EFD_D_MFRG)         ! PERCENT REMOVAL OF Carbon
+      REAL*4    UQBIOM(MNUMCR,EFD_D_OWN)           ! BIOMASS FUEL USE BY CENSUS/OWN
+      REAL*4    URBIOM(MNUMCR,EFD_D_OWN)           ! BIOMASS FUEL REVS BY CENSUS/OWN
+      REAL*4    UQFCONN(EFD_D_NFL,MNUMNR,EFD_D_OWN)  ! FUEL CONS BY NERC/OWNER
+      REAL*4    UQFGENN(EFD_D_NFL,MNUMNR,EFD_D_OWN)  ! GEN/FUEL TYPE IN NERC REGS
+      REAL*4    UQPGENN(EFD_D_CAP,MNUMNR,EFD_D_OWN)  ! GEN/DSP CAP IN NERC REGS
+      REAL*4    UGNRPSN(EFD_D_CAP,MNUMNR)          ! RPS GEN/TYP IN NERC REGS
+      REAL*4    UGNCHPN(4,MNUMNR)                ! RPS GEN/CHP IN NERC REGS (1=RS,2=CM,3=IN,4=RF)
+      REAL*4    UGNPTCN(EFD_D_CAP,MNUMNR)          ! PTC GEN/TYP IN NERC REGS
+      REAL*4    UPYPTCN(EFD_D_CAP,MNUMNR)          ! PTC PMT/TYP IN NERC REGS
+      REAL*4    UQFGENC(EFD_D_NFL,MNUMCR)          ! GEN/FUEL TYPE IN CENSUS REGS
+      REAL*4    UQPGENC(EFD_D_CAP,MNUMCR)          ! GEN/DSP CAP IN CENSUS REGS
+      REAL*4    UQFSO2(EFD_D_NFL,MNUMNR)           ! SO2 Content by Fuel Type
+      REAL*4    UTSO2C(EFD_D_NFL,MNUMCR)           ! SO2 Emissions by Fuel/Census
+      REAL*4    UTNOXC(EFD_D_NFL,MNUMCR)           ! NOX Emissions by Fuel/Census
+      REAL*4    UTCO2C(EFD_D_NFL,MNUMCR)           ! CO2 Emissions by Fuel/Census
+      REAL*4    UTCARC(EFD_D_NFL,MNUMCR)           ! Car Emissions by Fuel/Census
+      REAL*4    UTCO1C(EFD_D_NFL,MNUMCR)           ! CO  Emissions by Fuel/Census
+      REAL*4    UTVOCC(EFD_D_NFL,MNUMCR)           ! VOC Emissions by Fuel/Census
+      REAL*4    UTHGC(EFD_D_NFL,MNUMCR)            ! HG  Emissions by Fuel/Census
+      REAL*4    UTSO2N(EFD_D_NFL,MNUMNR)           ! SO2 EMISSIONS BY Fuel/NERC
+      REAL*4    UTNOXN(EFD_D_NFL,MNUMNR)           ! NOX EMISSIONS BY Fuel/NERC
+      REAL*4    UTCO2N(EFD_D_NFL,MNUMNR)           ! CO2 EMISSIONS BY Fuel/NERC
+      REAL*4    UTCARN(EFD_D_NFL,MNUMNR)           ! CAR EMISSIONS BY Fuel/NERC
+      REAL*4    UTCO1N(EFD_D_NFL,MNUMNR)           ! CO  EMISSIONS BY Fuel/NERC
+      REAL*4    UTVOCN(EFD_D_NFL,MNUMNR)           ! VOC EMISSIONS BY Fuel/
+      REAL*4    UTHGN(EFD_D_NFL,MNUMNR)            ! HG  Emissions by Fuel/NERC
+      REAL*4    URPSCRD(MNUMNR)                  ! RENEWABLE CREDITS SOLD/BOUGHT
+      REAL*4    URPSPCT(MNUMNR)                  ! PCT RENEWABLE GEN FOR RPS
+      REAL*4    URPSRGN(MNUMNR)                  ! REN GEN FOR RPS IN CURRENT YEAR
+      REAL*4    URPSTGN(MNUMNR)                  ! TOT GEN FOR RPS IN CURRENT YEAR
+      REAL*4    URPSRGL(MNUMNR)                  ! REN GEN FOR RPS IN LAG YEAR
+      REAL*4    URPSTGL(MNUMNR)                  ! TOT GEN FOR RPS IN LAG YEAR
+      REAL*4    MUSTRUN(ECP_D_CAP,MNUMNR)          ! DERATED MUST RUN CAPACITY
+
+      REAL*4    ETDMDERG(MNUMNR)                 ! REGIONAL DOMESTIC ECONOMY SALES (MM$)
+      REAL*4    ETDMMERG(MNUMNR)                 ! REGIONAL DOMESTIC ECONOMY SALES (MWH)
+      REAL*4    ETDIMERG(MNUMNR)                 ! REGIONAL INTERNATIONAL ECONOMY SALES (MWH)
+
+      INTEGER*4  ETNVCT                          ! # POINTS DEFINING LOAD CURVE
+      INTEGER*4  EIDCHK                          ! TEST VAR(LOAD MET=1,ELSE=0)
+      INTEGER*4  EIDCH2                          ! TEST VAR(LOAD MET=1,ELSE=0)
+      INTEGER*4  ECDSPNMX(MNUMNR)                ! # HOR SLICES REQ TO MEETLOAD
+      INTEGER*2  ECTYP(MNUMNR,EFD_D_MPG)           ! MERIT ORD MAP by region (1=MOST ECON)
+      INTEGER*2  ECDSPT(EFD_D_MHS)                 ! PLT TYPE/EACH HOR SLICE
+!
+!     THIS CONTAINS TEMPORARY VARIABLES FOR CONVERGENCE THAT ARE REUSED
+!     IN EVERY REGION, ITERATION AND YEAR.  LIKE THE VARIABLES IN
+!     DISPUSE, NOTHING WILL BE SAVED.
+!
+      COMMON /DISPOGS/ &
+        TQDFRLG,TQDFRHG,TSGCMIN,TRGCMIN,TSGCMAX,TRGCMAX,TSGCPAR,TRGCPAR, &
+        USGCMIN,URGCMIN,USGCMAX,URGCMAX,USGCPAR,URGCPAR
+      REAL*4    TQDFRLG(NNGEM)                   ! DUAL-FIRED RL USE--GAS REGS
+      REAL*4    TQDFRHG(NNGEM)                   ! DUAL-FIRED RH USE--GAS REGS
+      REAL*4    TSGCMIN(NNGEM)                   ! TEMP TOTAL FOR MIN GAS SHR
+      REAL*4    TRGCMIN(NNGEM)                   ! TEMP TOTAL FOR MIN G/O RAT
+      REAL*4    TSGCMAX(NNGEM)                   ! TEMP TOTAL FOR MAX GAS SHR
+      REAL*4    TRGCMAX(NNGEM)                   ! TEMP TOTAL FOR MAX G/O RAT
+      REAL*4    TSGCPAR(NNGEM)                   ! TEMP TOTAL FOR PAR GAS SHR
+      REAL*4    TRGCPAR(NNGEM)                   ! TEMP TOTAL FOR PAR G/O RAT
+      REAL*4    USGCMIN(EFD_D_MPG)                 ! MIN GAS SHR--DF PLANTS
+      REAL*4    URGCMIN(EFD_D_MPG)                 ! G/O PRC RAT--MIN GAS USE
+      REAL*4    USGCMAX(EFD_D_MPG)                 ! MAX GAS SHR--DF PLANTS
+      REAL*4    URGCMAX(EFD_D_MPG)                 ! G/O PRC RAT--MAX GAS USE
+      REAL*4    USGCPAR(EFD_D_MPG)                 ! MAX GAS SHR--DF PLANTS
+      REAL*4    URGCPAR(EFD_D_MPG)                 ! G/O PRC RAT--MAX GAS USE
+!     REAL*4    UPSRLEL(MNUMCR)                  ! AVG SULFUR PENALTY--RL
+!     REAL*4    UPSRHEL(MNUMCR)                  ! AVG SULFUR PENALTY--RH
+      INTEGER   NDRAT                            ! number of slices averaged to create drat
+      PARAMETER (NDRAT = 3)
+!
+!     Define Parameter for Maximum Number of EFD Super Groups
+!
+      INTEGER*4 M_EFD_GRPS                              ! Maximum Number of EFD Super Groups
+      PARAMETER (M_EFD_GRPS = EMM_D_GRP)
+!
+!     Define Cooresponding Variable for Actual Number of EFD Super Groups
+!
+      INTEGER*4 N_EFD_GRPS                              ! Number of EFD Super Groups
+!
+!     Create mapping fron ECNTP, EHNTP and EDNTP to EFD Super Group Numbers
+!
+      INTEGER*4 MAP_ECNTP_EFD_GRPS(EFD_D_MPG,MNUMNR)      ! Map ECNTP to EFD Super Group Number
+      INTEGER*4 MAP_EHNTP_EFD_GRPS(EFD_D_MHG,MNUMNR)      ! Map EHNTP to EFD Super Group Number
+      INTEGER*4 MAP_EDNTP_EFD_GRPS(EFD_D_MDG,MNUMNR)      ! Map EDNTP to EFD Super Group Number
+!
+!     Create Linked List to Identify EMM Groups in each EFD Super Group
+!
+      INTEGER*4 EFD_GRPS_F(M_EFD_GRPS)                  ! First EMM Group in EFD Super Group
+      INTEGER*4 EFD_GRPS_N(EMM_D_GRP)                     ! Next EMM Group in EFD Super Group
+!
+!     Create Data Structure for EFD Super Groups
+!
+      REAL*4    UG_CAP(0:EFD_D_MSP,M_EFD_GRPS)            ! EFD Super Group Capacity by Season
+      REAL*4    UG_GEN(0:EFD_D_MSP,M_EFD_GRPS)            ! EFD Super Group Historical Generation by Season
+      REAL*4    UG_OMR(M_EFD_GRPS)                      ! EFD Super Group Variable O&M Cost
+      REAL*4    UG_GSUB(M_EFD_GRPS)                     ! EFD Super Group Generation Subsisy
+      REAL*4    UG_HTRT(EFD_D_MSP,M_EFD_GRPS)             ! EFD Super Group Average Heatrate
+      REAL*4    UG_ACF(M_EFD_GRPS)                      ! EFD Super Group Maximum Capacity Factor
+      REAL*4    UG_SCF(EFD_D_MSP,M_EFD_GRPS)              ! EFD Super Group Seasonal Capacity Factor
+      REAL*4    UG_GCF(EFD_D_SSZ,ELD_D_DAY,M_EFD_GRPS)      ! EFD Super Group Time Slice Capacity Factor
+      REAL*4    UG_FOR(M_EFD_GRPS)                      ! EFD Super Group Forced Outage Rate
+      REAL*4    UG_PMR(M_EFD_GRPS)                      ! EFD Super Group Planned Maintenance Rate
+      REAL*4    UG_LFR(M_EFD_GRPS)                      ! EFD Super Group Load Following Rate
+      REAL*4    UG_NOXC(EFD_D_MSP,NOX_D_GRP,M_EFD_GRPS)     ! EFD Super Group NOX Emission Rate
+      REAL*4    UGNOCCS(M_EFD_GRPS)                     ! EFD Super Group Adjustment factor to remove CCS penalty
+      INTEGER*4 UG_EMM_RG(M_EFD_GRPS)                   ! EFD Super Group EMM Region
+      INTEGER*4 UG_FL_RG(M_EFD_GRPS)                    ! EFD Super Group Fuel Region
+      INTEGER*4 UG_STATE(M_EFD_GRPS)                    ! EFD Super Group State
+      INTEGER*4 UG_VIN(M_EFD_GRPS)                      ! EFD Super Group Vintage
+      INTEGER*4 UG_ECPt(M_EFD_GRPS)                     ! EFD Super Group ECP Type
+      INTEGER*4 UG_EFDt(M_EFD_GRPS)                     ! EFD Super Group EFD Type
+      INTEGER*4 UG_MRUN(M_EFD_GRPS)                     ! EFD Super Group Must Run Status (0=>No 1=>Yes)
+      INTEGER*4 UG_45Q(EMM_D_GRP)                         ! EFD Super Group 45Q Status (0=>No_Tax_Credit 1=>Yes_Tax_Credit
+!
+      COMMON /EFD_GRPS/ N_EFD_GRPS, MAP_ECNTP_EFD_GRPS, MAP_EHNTP_EFD_GRPS, MAP_EDNTP_EFD_GRPS, &
+         EFD_GRPS_F, EFD_GRPS_N, UGNOCCS, UG_CAP, UG_GEN, UG_OMR, UG_GSUB, UG_HTRT, UG_ACF, UG_SCF,      &
+         UG_GCF, UG_FOR, UG_PMR, UG_LFR, UG_NOXC, UG_EMM_RG, UG_FL_RG, UG_STATE, UG_VIN, UG_ECPt, UG_EFDt, UG_MRUN, UG_45Q
+!
+!     Store Cooresponding Data for Plant Groups
+!
+      REAL*4    UP_CAP(0:EFD_D_MSP,EMM_D_GRP)            ! Plant Group Capacity by Season
+      REAL*4    UP_GEN(0:EFD_D_MSP,EMM_D_GRP)            ! Plant Group Historical Generation by Season
+      REAL*4    UP_OMR(EMM_D_GRP)                      ! Plant Group Variable O&M Cost
+      REAL*4    UP_GSUB(EMM_D_GRP)                     ! Plant Group Generation Subsisy
+      REAL*4    UP_HTRT(EFD_D_MSP,EMM_D_GRP)             ! Plant Group Average Heatrate
+      REAL*4    UP_ACF(EMM_D_GRP)                      ! Plant Group Maximum Capacity Factor
+      REAL*4    UP_SCF(EFD_D_MSP,EMM_D_GRP)              ! Plant Group Seasonal Capacity Factor
+      REAL*4    UP_GCF(EFD_D_SSZ,ELD_D_DAY,EMM_D_GRP)      ! Plant Group Time Slice Capacity Factor
+      REAL*4    UP_FOR(EMM_D_GRP)                      ! Plant Group Forced Outage Rate
+      REAL*4    UP_PMR(EMM_D_GRP)                      ! Plant Group Planned Maintenance Rate
+      REAL*4    UP_LFR(EMM_D_GRP)                      ! Plant Group Load Following Rate
+      REAL*4    UP_NOXC(EFD_D_MSP,NOX_D_GRP,EMM_D_GRP)     ! Plant Group NOX Emission Rate
+      REAL*4    UPNOCCS(EMM_D_GRP)                     ! Plant Group Adjustment factor to remove CCS penalty
+      INTEGER*4 UP_EMM_RG(EMM_D_GRP)                   ! Plant Group EMM Region
+      INTEGER*4 UP_FL_RG(EMM_D_GRP)                    ! Plant Group Fuel Region
+      INTEGER*4 UP_STATE(EMM_D_GRP)                    ! Plant Group State
+      INTEGER*4 UP_VIN(EMM_D_GRP)                      ! Plant Group Vintage
+      INTEGER*4 UP_ECPt(EMM_D_GRP)                     ! Plant Group ECP Type
+      INTEGER*4 UP_EFDt(EMM_D_GRP)                     ! Plant Group EFD Type
+      INTEGER*4 UP_MRUN(EMM_D_GRP)                     ! Plant Group Must Run Status (0=>No 1=>Yes)
+      INTEGER*4 UP_45Q(EMM_D_GRP)                      ! Plant Group 45Q Status (0=>No_Tax_Credit 1=>Yes_Tax_Credit
+!
+      COMMON /PLT_GRPS/ UP_CAP, UP_GEN, UPNOCCS, UP_OMR, UP_GSUB, UP_HTRT, UP_ACF, UP_SCF,      &
+         UP_GCF, UP_FOR, UP_PMR, UP_LFR, UP_NOXC, UP_EMM_RG, UP_FL_RG, UP_STATE, UP_VIN, UP_ECPt, UP_EFDt, UP_MRUN, UP_45Q
+!
+      REAL*4    TOL_OMR(ECP_D_CAP)                      ! Tolerances - Variable O&M Cost
+      REAL*4    TOL_GSUB(ECP_D_CAP)                     ! Tolerances - Generation Subsisy
+      REAL*4    TOL_HTRT(ECP_D_CAP)                     ! Tolerances - Average Heatrate
+      REAL*4    TOL_ACF(ECP_D_CAP)                      ! Tolerances - Maximum Capacity Factor
+      REAL*4    TOL_SCF(ECP_D_CAP)                      ! Tolerances - Seasonal Capacity Factor
+      REAL*4    TOL_GCF(ECP_D_CAP)                      ! Tolerances - Time Slice Capacity Factor
+      REAL*4    TOL_FOR(ECP_D_CAP)                      ! Tolerances - Forced Outage Rate
+      REAL*4    TOL_PMR(ECP_D_CAP)                      ! Tolerances - Planned Maintenance Rate
+      REAL*4    TOL_LFR(ECP_D_CAP)                      ! Tolerances - Load Following Rate
+      REAL*4    TOL_NOXC(ECP_D_CAP)                     ! Tolerances - NOX Emission Rate
+!
+      COMMON /TOL_EFD_GRPS/ TOL_OMR, TOL_GSUB, TOL_HTRT, TOL_ACF, TOL_SCF, TOL_GCF, TOL_FOR, &
+         TOL_PMR, TOL_LFR, TOL_NOXC
+!

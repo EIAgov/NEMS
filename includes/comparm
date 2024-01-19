@@ -1,0 +1,93 @@
+!FILE NAME:      COMPARM
+!DATE MODIFIED:  November 30, 2022
+!USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
+!                  Commercial Demand Module (CDM)
+!                  Industrial Demand Module (IDM)
+!                  Integrating Module (IM, via FILER)
+!                  NEMS output tables (FTAB)
+!                  Electricity Finance & Pricing Model (EFP)
+!                  Former Demand-Side Management Module (LDSM)
+!DEFINITION:     CDM parameters and COMMON blocks
+!UNITS:          unitless
+!DIMENSION:      various
+!SPECIAL CONSTRAINTS:  IF CHANGES ARE MADE, YOU WILL NEED TO RECOMPILE ALL MODULES ABOVE AND UPDATE DICT.TXT
+!ORGANIZATION OF DATA:  Primary CDM variables listed for reference
+!  Census Divisions:  New England, Middle Atlantic, East North Central, West North Central, South Atlantic,
+!                     East South Central, West South Central, Mountain,Pacific, California, United States
+!  Building Types:    Assembly, Education, Food Sales, Food Service, Health, Lodging, Office - Large,
+!                     Office - Small, Mercantile & Service, Warehouse, and Other
+!  Services:          Heating, Cooling, Hot Water Heating, Ventilation, Cooking, Lighting, Refrigeration,
+!                     Office Equip-PCs, Office Equip-NonPCs, MELs
+!  Major Fuels:       Electricity, Natural Gas, Distillate Oil
+!  Minor Fuels:       Residual Oil, LPG, Steam Coal, Motor Gasoline, Kerosene
+!SOURCES:        Not applicable
+
+INTEGER*4 CMnumMajFl, CMnumMinFl, CMnumServ, CMnumBldg, CMnumTechs, CMnumAllFl, CMnumVintage, CMDecision, CMnumEqVint, KTMAX, CNumMELs
+
+PARAMETER (CMnumMajFl=3)          ! Number of commercial major fuels
+PARAMETER (CMnumMinFl=5)          ! Number of commercial minor fuels
+PARAMETER (CMnumAllFl=8)          ! Number of (non-renewable) commercial fuels
+PARAMETER (CMnumServ=10)          ! Number of commercial end-use services
+PARAMETER (CMnumBldg=11)          ! Number of commercial building types
+PARAMETER (CMnumTechs=60)         ! Number of commercial technologies
+PARAMETER (CMnumVintage=10)       ! Number of commercial building vintages
+PARAMETER (CMDecision=3)          ! Number of commercial decision types
+PARAMETER (CMnumEqVint=52)        ! Number of commercial equipment vintages
+
+PARAMETER (KTMAX=5420)            ! Maximum number of data rows in KTEK
+
+INTEGER*4 CMOldestBldgVint
+PARAMETER (CMOldestBldgVint = 1831)
+
+REAL*4 EndUseConsump(CMnumMajFl,CMnumServ,CMnumBldg,MNUMCR,MNUMYR)
+
+!Capacity factors by region, building type, and service from file KCAPFAC
+REAL*4 CapacityFactor (MNUMCR-2,CMnumBldg,CMnumServ)
+
+!Efficiencies of specific equipment, with allowance for regional variation, and equipment use for multiple services
+REAL*4 TechEff (MNUMCR,CMnumServ,CMnumTechs,CMnumEqVint)
+
+REAL*4 TechCost (MNUMCR,CMnumTechs,CMnumEqVint,4)
+!For equipment of technology t and vintage v in region r:
+!TechCost(r,t,v,1) = unit installed capital cost of equipment
+!TechCost(r,t,v,2) = annual O&M cost per unit service demand
+!TechCost(r,t,v,3) = subsidy cost per unit service demand
+!TechCost(r,t,v,4) = 111d subsidy cost per unit service demand
+
+!Average life expectancy of equipment in years
+REAL*4 TechLife (CMnumTechs,CMnumEqVint)
+
+!Variables for industrial model to ponder energy consumption in agricultural buildings
+REAL WHSE_SHELLINDEX(4,MNUMYR)
+REAL WHSE_LIGHTINDEX(4,MNUMYR)
+REAL WHSE_VENTINDEX(4,MNUMYR)
+REAL WHSE_HEATINDEX(4,5,MNUMYR)
+
+REAL*4 EUCONWITHDG(CMnumMajFl,CMnumServ,CMnumBldg,MNUMCR,MNUMYR)
+
+COMMON /COMPARM/ EndUseConsump,    & ! End-use consumption
+                 CapacityFactor,   & ! bluilding capacity factors by r,b,s
+                 TechEff,          & ! equipment efficiency by r,s,t,v
+                 TechCost,         & ! capital, O&M, and subsidy costs by t,v
+                 TechLife,         & ! average equipment lifetime (yrs) by t,v
+                 WHSE_SHELLINDEX, WHSE_LIGHTINDEX, WHSE_VENTINDEX, WHSE_HEATINDEX,  &
+                 EUCONWITHDG         ! End-use consumption including load met by DG
+
+!Equivalence for FILER used for data storage
+
+INTEGER SIZE_COMPARM
+
+PARAMETER (SIZE_COMPARM = &
+    CMnumMajFl*CMnumServ*CMnumBldg*MNUMCR*MNUMYR     + &  ! EndUseConsump
+    (MNUMCR-2)*CMnumBldg*CMnumServ                   + &  ! CapacityFactor
+    MNUMCR*CMnumServ*CMnumTechs*CMnumEqVint          + &  ! TechEff
+    MNUMCR*CMnumTechs*CMnumEqVint*4                  + &  ! TechCost
+    4*MNUMYR*3                                       + &  ! WHSE_SHELLINDEX, WHSE_LIGHTINDEX, WHSE_VENTINDEX
+    4*5*MNUMYR                                       + &  ! WHSE_HEATINDEX
+    CMnumMajFl*CMnumServ*CMnumBldg*MNUMCR*MNUMYR     + &  ! EUCONWITHDG
+    CMnumTechs*CMnumEqVint)                               ! TechLife
+
+REAL EQ_CMPRM(SIZE_COMPARM)
+EQUIVALENCE (EQ_CMPRM,EndUseConsump)
+
+PARAMETER (CNUMMELS=21)          ! Number of commercial miscellaneous electric loads in KMELS.txt (MELs)

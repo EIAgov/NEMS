@@ -1,0 +1,167 @@
+!  $Header: m:/default/includes/RCS/dispout,v 1.14 2019/07/23 15:28:26 rsc Exp $
+!
+!     DISPOUT STORES EMM OUTPUT INFORMATION. THIS COMMON BLOCK IS CAPTURED
+!     FOR EACH REGION AND FOR EACH YEAR ON A DIRECT ACCESS FILE (DAF) AND
+!     SAVED FOR POST-RUN  PROCESSING.
+!
+      COMMON/DISPOUT/MARCST,MARCST2,MARTYP,ERTOM,ERTOMF,ERTOMX,ERTGSUB,EEMRM,ERTFL, &
+        ERTSO2,ERTHG,ERTNOX,ETALLW,ETSO2,ETNOX,ETCO2, &
+        ETCAR,ETCO1,ETVOC,ETHG,EWGFIX, &
+        ETGEN,EWGOWN,EWGREV,EWGRRC,EWGRCC,EWGRIC,EWGRNW,EGALLW,EGPSO2, &
+        EGSO2,ECSCAP,ECSADD,ECSRET,ERPOM,ERPFL,EQPGN,EQPGN_ALT,EQPFLGN,EQPCP, &
+        EQPFL,EQPFLCN,EQPSO2,EQPNOX,EQPCO2,EQPHG,ERFFL,ERFFC,EQFGN,EQFFL, &
+        EQFSO2,EQFNOX,EQFCO2,EQFHG,EPFUEL,EPFLPR,EFRSO2,EFRNOX,EFRCO2,EFRHG, &
+        EFHCNT,EHSCAP,EHSADD,EHSCAPP2,EHSADDP2,EHSRET,EQHGN,ERHOM,EQHCP,  &
+        EDSCAP,EDSADD,EDSRET,EQDGN,ERDOM,ERDFL,EQDCP,EQDFL,EQDSO2,EQDNOX,EQDCO2,  &
+        EQDHG,EGENPS,EAVLPS,ECAPPS,EGENHS,ECAPHS,EGENDS,EAVLDS,ECAPDS, &
+        EPEAK,ETDMMF,ETDMME,ETDMDF,ETDMDE,ETIMPF,ETIMPE, &
+        ETIMPD,ETEXPF,ETEXPE,ETDMPE,ETEXPD,EWGRXO,EWGRYO, &
+        PPCAP,PPOM,PPFUEL,ERSO2,ERRPS,ERDSCAR,ECSCAPSQ,EQPGNSQ,EQPGNSQ_ALT,ENSO2,ENFLTP,ENMFL,LFTOUT
+!
+      INTEGER ESIZ$OUT,EBLK$OUT,ELFT$OUT
+      PARAMETER (ESIZ$OUT = 40 *  4 + &
+                             3 *  8 * EFD_D_MSP * EFD_D_MVS + &
+                             7 *  4 * EFD_D_OWN + &
+                             3 *  4 * EFD_D_SO2 + &
+                             2 *  4 * EFD_D_DSP * EFD_D_VIN * EFD_D_OWN + &
+                             5 *  4 * EFD_D_DSP * EFD_D_OWN + &
+                             2 *  4 * EFD_D_CAP * EFD_D_OWN + &
+                             6 *  4 * EFD_D_DSP + &
+                             2 *  4 * EFD_D_CAP * EFD_D_OWN * EFD_D_NFL + &
+                             2 *  4 * EFD_D_NFL * EFD_D_OWN + &
+                            13 *  4 * EFD_D_NFL + &
+                             1 * 32 * EFD_D_NFL + &
+                             2 *  4 * EFD_D_RNW * EFD_D_VIN * EFD_D_OWN + &
+                             2 *  4 * EFD_D_VIN + &
+                             3 *  4 * EFD_D_RNW * EFD_D_OWN + &
+                             1 *  4 * EFD_D_RNW + &
+                             2 *  4 * EFD_D_DGN * EFD_D_VIN * EFD_D_OWN + &
+                             4 *  4 * EFD_D_DGN * EFD_D_OWN + &
+                             6 *  4 * EFD_D_DGN + &
+                             3 *  4 * EFD_D_DSP * EFD_D_MSP + &
+                             2 *  4 * EFD_D_RNW * EFD_D_MSP + &
+                             3 *  4 * EFD_D_DGN * EFD_D_MSP + &
+                             1 *  4 * EFD_D_MSP )
+      PARAMETER (EBLK$OUT = ( (ESIZ$OUT - 1) / 8192) + 1)
+      PARAMETER (ELFT$OUT = EBLK$OUT * 8192 - ESIZ$OUT)
+!
+!     DISPOUT - VARIABLE DECLARATION AND DEFINITIONS
+!
+      REAL*8 MARCST(EFD_D_MSP,EFD_D_MVS)            ! Marginal Cost by s,v-slice3-23
+      REAL*8 MARCST2(EFD_D_MSP,EFD_D_MVS)           ! Marginal Cost showing last dispatched
+      REAL*8 MARTYP(EFD_D_MSP,EFD_D_MVS)    ! Plant type that generated marginal cost (by slice)
+      REAL*4 ERTOM(EFD_D_OWN)                     ! Variable O&M by Company Type
+      REAL*4 ERTGSUB(EFD_D_OWN)                   ! Generation subsidy  by Company Type
+      REAL*4 ERTOMF(EFD_D_CAP,EFD_D_OWN)            ! Fixed O&M by Company Type  and Plant Type
+      REAL*4 ERTOMX(EFD_D_CAP,EFD_D_OWN)            ! Extra Aging costs by Company Type  and Plant Type
+      REAL*4 EEMRM                              ! Reserve Margin Achieved
+      REAL*4 ERTFL(EFD_D_OWN)                     ! Total Fuel Cost by Co. Type
+      REAL*4 ERTSO2(EFD_D_OWN)                    ! Total SO2 Allowance Cost by Owner Type
+      REAL*4 ERTHG(EFD_D_OWN)                     ! Total Mercury Allowance Cost by Owner Type
+      REAL*4 ERTNOX(EFD_D_OWN)                    ! Total NOX Allowance Cost by Owner Type
+      REAL*4 ETALLW                             ! Total SO2 Allowances
+      REAL*4 ETSO2                              ! Total SO2 Emissions
+      REAL*4 ETNOX                              ! Total NOX Emissions
+      REAL*4 ETCO2                              ! Total CO2 Emissions
+      REAL*4 ETCAR                              ! Total Car Emissions
+      REAL*4 ETCO1                              ! Total CO1 Emissions
+      REAL*4 ETVOC                              ! Total VOC Emissions
+      REAL*4 ETHG                               ! Total HG  Emissions
+      REAL*4 ETGEN                              ! Total Generation
+      REAL*4 EWGOWN                             ! Generation by NUGS for Own Use
+      REAL*4 EWGREV                             ! EWG              - Rev. fr Utl
+      REAL*4 EWGFIX                             ! EWG FIXED $ COMPONT
+      REAL*4 EWGRRC                             ! Residential Cogen - Rev. fr Utl
+      REAL*4 EWGRCC                             ! Commercial Cogen - Rev. fr Utl
+      REAL*4 EWGRIC                             ! Industrial Cogen - Rev. fr Utl
+      REAL*4 EWGRNW                             ! NUGS/Renewables  - Rev. fr Utl
+      REAL*4 EGALLW(EFD_D_SO2)                    ! SO2 Allowances by Compl. Grp
+      REAL*4 EGPSO2(EFD_D_SO2)                    ! SO2 Penalty Cost by Compl. Grp
+      REAL*4 EGSO2(EFD_D_SO2)                     ! SO2 Emissions by Compl. Grp
+      REAL*4 ECSCAP(EFD_D_DSP,EFD_D_VIN,EFD_D_OWN)    ! Summer Capacity (End-Year)
+      REAL*4 ECSADD(EFD_D_DSP,EFD_D_VIN,EFD_D_OWN)    ! Cum. Capacity Additions (End-Year)
+      REAL*4 ECSRET(EFD_D_DSP,EFD_D_OWN)            ! Cum. Retirements (End-Year)
+      REAL*4 ERPOM(EFD_D_DSP,EFD_D_OWN)             ! Variable O&M by Plant Type
+      REAL*4 ERPFL(EFD_D_DSP,EFD_D_OWN)             ! Fuel Cost by Plant Type
+      REAL*4 EQPGN(EFD_D_DSP,EFD_D_OWN)             ! Generation by Plant Type
+      REAL*4 EQPGN_ALT(EFD_D_DSP,EFD_D_OWN)         ! Generation by Plant Type - Without Carbon Capture
+      REAL*4 EQPFLGN(EFD_D_CAP,EFD_D_OWN,EFD_D_NFL)   ! Generation by Plant Type, Owner and Fuel
+      REAL*4 EQPCP(EFD_D_DSP)                     ! Avg. Annual Cap. by Plant Type
+      REAL*4 EQPFL(EFD_D_DSP)                     ! Fuel Consumption by Plant Type
+      REAL*4 EQPFLCN(EFD_D_CAP,EFD_D_OWN,EFD_D_NFL)   ! Fuel Consumption by Plant Type, Owner and Fuel
+      REAL*4 EQPSO2(EFD_D_DSP)                    ! SO2 Emissions by Plant Type
+      REAL*4 EQPNOX(EFD_D_DSP)                    ! NOX Emissions by Plant Type
+      REAL*4 EQPCO2(EFD_D_DSP)                    ! CO2 Emissions by Plant Type
+      REAL*4 EQPHG(EFD_D_DSP)                     ! Hg  Emissions by Plant Type
+      REAL*4 ERFFL(EFD_D_NFL)                     ! Fuel Cost by Fuel Type (Includes ACI)
+      REAL*4 ERFFC(EFD_D_NFL)                     ! Fuel Cost by Fuel Type
+      REAL*4 EQFGN(EFD_D_NFL,EFD_D_OWN)             ! Generation by Fuel Type
+      REAL*4 EQFFL(EFD_D_NFL,EFD_D_OWN)             ! Fuel Consumption by Fuel Type
+      REAL*4 EQFSO2(EFD_D_NFL)                    ! SO2 Emissions by Fuel Type
+      REAL*4 EQFNOX(EFD_D_NFL)                    ! NOX Emissions by Fuel Type
+      REAL*4 EQFCO2(EFD_D_NFL)                    ! CO2 Emissions by Fuel Type
+      REAL*4 EQFHG(EFD_D_NFL)                     ! Hg Emissions by Fuel Type
+      REAL*4 EPFUEL(EFD_D_NFL)                    ! Avg. Fuel Price by Fuel Type (Includes ACI)
+      REAL*4 EPFLPR(EFD_D_NFL)                    ! Avg. Fuel Price by Fuel Type
+      REAL*4 EFRSO2(EFD_D_NFL)                    ! Avg. SO2 Content by Fuel Type
+      REAL*4 EFRNOX(EFD_D_NFL)                    ! Avg. NOX Content by Fuel Type
+      REAL*4 EFRCO2(EFD_D_NFL)                    ! Avg. CO2 Content by Fuel Type
+      REAL*4 EFRHG(EFD_D_NFL)                     ! Avg. Hg Content by Fuel Type
+      REAL*4 EFHCNT(EFD_D_NFL)                    ! Avg. Btu Content by Fuel Type
+      REAL*4 EHSCAP(EFD_D_RNW,EFD_D_VIN,EFD_D_OWN)    ! Summer Capacity (End-Year)
+      REAL*4 EHSADD(EFD_D_RNW,EFD_D_VIN,EFD_D_OWN)    ! Summer Capacity (End-Year)
+      REAL*4 EHSCAPP2(EFD_D_VIN)                  ! Summer Capacity (End-Year) - P2 technology 
+      REAL*4 EHSADDP2(EFD_D_VIN)                  ! Summer Capacity (End-Year) - P2 technology 
+      REAL*4 EHSRET(EFD_D_RNW,EFD_D_OWN)            ! Cum. Retirements (End-Year)
+      REAL*4 EQHGN(EFD_D_RNW,EFD_D_OWN)             ! Generation by Ren. Technology
+      REAL*4 ERHOM(EFD_D_RNW,EFD_D_OWN)             ! Var. O&M by Ren. Tech, OWN
+      REAL*4 EQHCP(EFD_D_RNW)                     ! Avg. Annual Cap. by Ren. Tech
+      REAL*4 EDSCAP(EFD_D_DGN,EFD_D_VIN,EFD_D_OWN)    ! Dgen Summer Capacity (End-Year)
+      REAL*4 EDSADD(EFD_D_DGN,EFD_D_VIN,EFD_D_OWN)    ! Dgen Summer Capacity (End-Year)
+      REAL*4 EDSRET(EFD_D_DGN,EFD_D_OWN)            ! Dgen Cum. Retirements (End-Year)
+      REAL*4 EQDGN(EFD_D_DGN,EFD_D_OWN)             ! Dgen Generation by Technology
+      REAL*4 ERDOM(EFD_D_DGN,EFD_D_OWN)             ! Dgen Var. O&M by Tech, OWN
+      REAL*4 ERDFL(EFD_D_DGN,EFD_D_OWN)             ! Fuel Cost by Plant Type
+      REAL*4 EQDCP(EFD_D_DGN)                     ! Dgen Avg. Annual Cap. by Ren. Tech
+      REAL*4 EQDFL(EFD_D_DGN)                     ! Fuel Consumption by Plant Type
+      REAL*4 EQDSO2(EFD_D_DGN)                    ! SO2 Emissions by Plant Type
+      REAL*4 EQDNOX(EFD_D_DGN)                    ! NOX Emissions by Plant Type
+      REAL*4 EQDCO2(EFD_D_DGN)                    ! CO2 Emissions by Plant Type
+      REAL*4 EQDHG(EFD_D_DGN)                     ! Hg Emissions by Plant Type
+      REAL*4 EGENPS(EFD_D_DSP,EFD_D_MSP)            ! Gen. by Plant Type and Season
+      REAL*4 EAVLPS(EFD_D_DSP,EFD_D_MSP)            ! Cap. Req. by Plant Type&Season
+      REAL*4 ECAPPS(EFD_D_DSP,EFD_D_MSP)            ! Cap. Avail. by Plant Type&Ssn
+      REAL*4 EGENHS(EFD_D_RNW,EFD_D_MSP)            ! Gen. by Ren. Technology&Season
+      REAL*4 ECAPHS(EFD_D_RNW,EFD_D_MSP)            ! Cap. by Ren. Technology&Season
+      REAL*4 EGENDS(EFD_D_DGN,EFD_D_MSP)            ! Gen. by Dgen. Technology&Season
+      REAL*4 EAVLDS(EFD_D_DGN,EFD_D_MSP)            ! Cap. Req. by Plant Type&Season
+      REAL*4 ECAPDS(EFD_D_DGN,EFD_D_MSP)            ! Cap. by Dgen. Technology&Season
+      REAL*4 EPEAK(EFD_D_MSP)                     ! Peak Requirement by Season
+      REAL*4 ETDMMF                             ! Domestic Firm Pwr Sales (MWH)
+      REAL*4 ETDMME                             ! Domestic Economy Sales (MWH)
+      REAL*4 ETDMDF                             ! Domestic Firm Pwr Sales (MM$)
+      REAL*4 ETDMDE                             ! Domestic Economy Sales (MM$)
+      REAL*4 ETIMPF                             ! Imports - Firm (MWH)
+      REAL*4 ETIMPE                             ! Imports - Economy (MWH)
+      REAL*4 ETIMPD                             ! Import Revenues (MM$)
+      REAL*4 ETEXPF                             ! Exports - Firm (MWH)
+      REAL*4 ETEXPE                             ! Exports - Economy(MWH)
+      REAL*4 ETDMPE                             ! Dom. - Econ. Trade Profit(MM$)
+      REAL*4 ETEXPD                             ! Exports - Revenues (MM$)
+      REAL*4 EWGRXO                             !Cogen other capacity cost
+      REAL*4 EWGRYO                             !Cogen other fuel cost
+      REAL*4 PPCAP                              !purch pwr costs-fixed cap
+      REAL*4 PPOM                               !purch pwr costs-var o m
+      REAL*4 PPFUEL                             !purch pwr costs-var fuel
+      REAL*4 ERSO2                              ! SO2 allowance cost
+      REAL*4 ERRPS                              ! Ren. Portfolio Standard Cost
+      REAL*4 ERDSCAR                            ! Value of Carbon allowances allocated to load entities
+      REAL*4 ECSCAPSQ(EFD_D_OWN)                  ! Existing Capacity Retrofitted with CCS
+      REAL*4 EQPGNSQ                            ! Generation from Existing Capacity Retrofitted with CCS
+      REAL*4 EQPGNSQ_ALT                        ! Generation from Existing Capacity Retrofitted with CCS w/o Capture
+      INTEGER*4 ENSO2                           ! Number of Compliance Groups
+      INTEGER*4 ENFLTP                          ! Number of Fuel Types
+      CHARACTER*32 ENMFL(EFD_D_NFL)               ! Name for Each Fuel Type
+      CHARACTER*1 LFTOUT(ELFT$OUT+1)            ! Leftover Bytes (ELFT$OUT may be 0)
+      CHARACTER*8192 EOUT(EBLK$OUT)
+      EQUIVALENCE (MARCST(1,1),EOUT(1))

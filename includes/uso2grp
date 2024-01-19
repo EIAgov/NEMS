@@ -1,0 +1,132 @@
+!  $Header: m:/default/includes/RCS/uso2grp,v 1.28 2018/06/19 12:29:09 pkc Exp $
+
+      INTEGER MX_SO2       ! Maximum Number of SO2 Compliance Groups
+      PARAMETER (MX_SO2 = EFD_D_SO2)
+      INTEGER SO2GRP_SIZE
+      PARAMETER (SO2GRP_SIZE = 9 + (MNUMYR * MX_SO2) + (MX_NCOALS * 2 * (ECP_D_FPH + 1) * MNUMYR) +                            &
+         NUTSEC + ( 2 * NDREG * 2) + (MX_NCOALS * NDREG * (ECP_D_FPH + 1) * MNUMYR * 2) +                                                  &
+         (MX_NCOALS * 11 * (ECP_D_FPH + 1) * MNUMYR) + 11 + ((MX_NCOALS + MX_ISCV)* MNUMYR) + (MX_NCOALS * NDREG) +                       &
+         MX_NCOALS + (NDREG * MNUMYR) + MNUMYR + MX_NCOALS + MX_NCOALS + MX_NCOALS + (NUTSEC * NDREG * MNUMYR) +             &
+         (NUTSEC * (NDREG+1)) + (MNUMNR * NDREG) + 2 * (ECP_D_RCF * NDREG * (MNUMYR + ECP_D_XPH)) +                              &
+         (MX_NCOALS * NDREG) + (MX_NCOALS * MNUMYR) + MX_NCOALS + (4*MX_ISCV) + MX_NCOALS + (MX_NCOALS * MNUMYR) + (MX_NCOALS * MNUMYR) +  &
+         (MX_NCOALS * (ECP_D_FPH + 1) * MNUMYR) +  1 + MNUMYR + 1 + 1 + 1 + 1 + (MX_NCOALS * NDREG * NUTSEC) + ((MX_NCOALS + MX_ISCV) * NDREG * NUTSEC) + &
+         (2 * MX_NCOALS * MX_ISCV) + 2 * (NDREG * NUTSEC) + (MX_NCOALS * NDREG * MNUMYR) + ((MX_NCOALS + MX_ISCV) * NDREG * 2 * MNUMYR) +            &
+         (2 * MX_ISCV * 10 * MNUMYR) + (MX_IMPCOAL) + (4*MNUMYR*NDREG) + &
+         (4 * MX_ISCV * NDREG) + (MX_ISCV * NDREG) + &
+         (MX_NCOALS * NDREG) + (MX_NCOALS * MNUMYR) + (MX_NCOALS * MNUMYR) + &
+          MX_NCOALS + NDREG + 1 + (NDREG * REFREG)+ (NUTSEC*MX_NCOALS*NDREG) + &
+NDREG*MNUMYR + &
+MX_NCOALS*NDREG*MNUMYR + &
+NDREG*NUTSEC*MNUMYR + &
+NDREG*NUTSEC*MNUMYR + &
+MX_NCOALS*NDREG*2*MNUMYR + &
+(MX_NCOALS + MX_ISCV)*MNUMYR + &
+(MX_NCOALS + MX_ISCV)*MNUMYR + &
+(MX_NCOALS + MX_ISCV)*MNUMYR + &
+MX_NCOALS*MNUMYR + &
+(MX_NCOALS + MX_ISCV)*MNUMYR + &
+MX_NCOALS*NDREG*MNUMYR + &
+MX_NCOALS*NDREG*MNUMYR + &
+4*MX_ISCV*NDREG*MNUMYR + &
+NUTSEC*MNUMYR + &
+          0)
+
+      COMMON /USO2GRP/ UPTPSO2, UPSXSMTH, UPSUPFCTR, UPSLWFCTR, CL_GROW, CL_SCST, UPSYEAR, UPEBYR, NUM_RANK,     &
+         DV_SUB, DV_LIG, XCL_QECP, XCL_PECP, XCL_STEPS, XCL_OTHER, XCL_TRATE, XCL_TYPE, XCL_IMPORT, XCL_STOCK,   &
+         XCL_SO2, XCL_HG, XCL_CAR, UQCOAL, C_ECP_CDS, C_EMM_CDS, C_ECP_SCRUB, UCF_TCAP, UCF_RCAP,                &
+         ECP_QECP, ECP_PECP, XCL_TRAT1, XCL_PCAP, XCL_PCAP_LIMIT, XCL_MX_PCAP, XCL_BTU, XCL_PLIM, XCL_1TESC,XCL_2TESC,    &
+         HG_FCTR, NOX_FCTR, BNK_TO_CMM_HG, EFD_PROD, CL_CRV_PROD, EFD_TIER1, EFD_CONT, EFD_DVSB, EFD_DVLG,                    &
+         EFD_SC_DR_PT, EFD_RANK, HG_BYR, HG_SYR, NOX_BYR, NOX_SYR, CTLBTU, XCL_PIMP, XCL_QIMP, XCL_ISC, XCL_TESCI, &
+         XCL_TRATI1, XCL_TRATI2, CTL_TRATE, CTL_OTHER, CTL_TYPE, CTL_CLDR, CTL_CL_SECTOR, CTL_CDSL1,XCL_TRNINDX, &
+         CTL_DEM, CTL_TR_CTL, EFD_LG_DVLIM, EFD_SB_DVLIM, EFD_TIER1_LIM, &
+         XCL_BTU_YR, XCL_CAR_YR, XCL_HG_YR, XCL_MAX_INCR, XCL_SO2_YR, &
+         XCL_TR_T1, XCL_TR_T2, XCL_TR_IN, ECP_SCRUB
+
+      REAL*4    UPTPSO2(MNUMYR,MX_SO2)                      ! Target SO2 Penalty Price
+      REAL*4    UPSXSMTH                                    ! Expontial Smoothing Factor (Percent of New Year Value)
+      REAL*4    CL_GROW                                     ! Limit on Growth of Low Sulfur Coal Demand in ECP
+      REAL*4    CL_SCST                                     ! Surge Cost to Allow ECP to Exceed Low Sulfur Coal Limit
+      REAL*4    UPSUPFCTR                                   ! SO2 Penalty Price Upper Bound Factor
+      REAL*4    UPSLWFCTR                                   ! SO2 Penalty Price Lower Bound Factor
+      REAL*4    XCL_QECP(MX_NCOALS,0:ECP_D_FPH,MNUMYR)        ! Expected Coal Supply Quantities
+      REAL*4    XCL_PECP(MX_NCOALS,11,0:ECP_D_FPH,MNUMYR)     ! Expected Coal Supply Prices by Supply Step - Lower to Upper
+      REAL*4    XCL_STEPS(11)                               ! Expected Coal Supply Step Def. - Lower to Upper Must Have 0.0 Step (ie ... -0.01 0.0 0.01 ...)
+      REAL*4    XCL_OTHER(MX_NCOALS + MX_ISCV,MNUMYR)       ! Expected Coal Supply Demand for Non-Utility Coal
+      REAL*4    XCL_TRAT1(MX_NCOALS,NDREG)                  ! Expected Coal Tier 1 Base Transportation Rates
+      REAL*4    XCL_TRATE(MX_NCOALS,NDREG)                  ! Expected Coal Tier 2 Base Transportation Rates
+      REAL*4    XCL_1TESC(MX_NCOALS,0:ECP_D_FPH,MNUMYR,NDREG)  ! Expected Coal Transportation Escalation Factors
+      REAL*4    XCL_2TESC(MX_NCOALS,0:ECP_D_FPH,MNUMYR,NDREG)  ! Expected Coal Transportation Escalation Factors 
+      REAL*4    XCL_IMPORT(NDREG,MNUMYR)                    ! Expected Coal Imports 
+      REAL*4    XCL_STOCK(MNUMYR)                           ! Expected Coal Stock Changes
+      REAL*4    XCL_SO2(MX_NCOALS + MX_ISCV)                ! SO2 Content by Supply Curve
+      REAL*4    XCL_BTU(MX_NCOALS + MX_ISCV)                ! BTU Content by Supply Curve
+      REAL*4    XCL_HG(MX_NCOALS + MX_ISCV)                 ! Mercury Content by Supply Curve
+      REAL*4    XCL_CAR(MX_NCOALS + MX_ISCV)                ! Carbon Content by Supply Curve
+      REAL*4    UQCOAL(NUTSEC,NDREG,MNUMYR)                 ! EMM Coal Consumption by ECP Type and Coal Demand Region
+      REAL*4    UCF_TCAP(ECP_D_RCF,NDREG,MNUMYR+ECP_D_XPH)      ! Total Coal Capacity by Cofiring Group, CDS Demand Region and Model Year
+      REAL*4    UCF_RCAP(ECP_D_RCF,NDREG,MNUMYR+ECP_D_XPH)      ! Cofire Retrofitted Coal Capacity by Cofiring Group, CDS Demand Region and Model Year
+      REAL*4    ECP_QECP(MX_NCOALS,0:ECP_D_XPH,MNUMYR)        ! ECP Coal Supply Quantities
+      REAL*4    ECP_PECP(MX_NCOALS,0:ECP_D_XPH,MNUMYR)        ! ECP Coal Supply Prices
+      REAL*4    XCL_PCAP(MX_NCOALS,MNUMYR)                  ! Current Year Coal Supply Production Capacity
+      REAL*4    XCL_PCAP_LIMIT(MX_NCOALS,MNUMYR)            ! Maximum Coal Supply Production Capacity
+      REAL*4    XCL_MX_PCAP(MX_NCOALS)                      ! Maximum Rate of Increase in Production Capacity
+      REAL*4    XCL_PLIM(MX_NCOALS,MNUMYR)                  ! Coal Supply Production Capacity Maximum Limits by Year
+      REAL*4    HG_FCTR                                     ! Mercury Early Banking Factor; Ratio of Banks out to Banks in
+      REAL*4    NOX_FCTR                                    ! NOX Early Banking Factor; Ratio of Banks out to Banks in
+      REAL*4    BNK_TO_CMM_HG(MNUMYR)                       ! Mercury Bank Adjustments Determined in ECP sent to CMM (- => Create Banks, + => Use Banks
+      REAL*4    EFD_PROD(MX_NCOALS)                         ! EFD Coal Production Capacity for Coal Supply Curves
+      REAL*4    CL_CRV_PROD(MX_NCOALS,MNUMYR)               ! EFD Coal Production Capacity for Coal Supply Curves
+      REAL*4    EFD_TIER1(MX_NCOALS,NDREG,NUTSEC)           ! EFD Coal Tier 1 Transportation Limits
+      REAL*4    EFD_CONT(MX_NCOALS+MX_ISCV,NDREG,2,MNUMYR)  ! EFD Coal Contracts (1 = scr, 2 = unscr); expand to include international
+      REAL*4    EFD_DVSB(NDREG,NUTSEC)                      ! EFD Diversity Limits for Subbituminous
+      REAL*4    EFD_DVLG(NDREG,NUTSEC)                      ! EFD Diversity Limits for Lignite
+      INTEGER   EFD_SC_DR_PT(MX_NCOALS+MX_ISCV,NDREG,NUTSEC)! EFD Supply Curve/Demand Region/Plant Type Link Index
+      INTEGER   EFD_RANK(MX_NCOALS+MX_ISCV)                 ! EFD Coal Rank Indicator
+      INTEGER*4 XCL_TYPE(MX_NCOALS+MX_ISCV)                 ! ECP Coal Type by Coal Supply Curve
+      INTEGER*4 DV_SUB(NDREG,2)                             ! Subbitmunous Diversity Indicator
+      INTEGER*4 DV_LIG(NDREG,2)                             ! Lignite Diversity Indicator
+      INTEGER*4 UPSYEAR                                     ! Year to start creating SO2 Penalty Price Bounds
+      INTEGER*4 UPEBYR                                      ! End Banking YeaR (Year Banked Allowance Cannot be used)
+      INTEGER*4 C_ECP_CDS(NUTSEC,NDREG+1)                   ! Allowed ECP Plant Type and Coal Demand Region Combinations
+      INTEGER*4 C_EMM_CDS(MNUMNR,NDREG)                     ! Allowed EMM Regions Seviced by a Coal Demand Region
+      INTEGER*4 C_ECP_SCRUB(NUTSEC)                         ! Scrubber Code by Coal Sector / ECP Type (2 -> Unscrubbed ; 1 -> Scrubbed)
+      INTEGER*4 NUM_RANK                                    ! Number of Coal Ranks
+      INTEGER*4 HG_BYR                                      ! Start Year for Early Mercury Banks
+      INTEGER*4 HG_SYR                                      ! End Year for Early Mercury Banks, Start of Mecury Cap
+      INTEGER*4 NOX_BYR                                     ! Start Year for Early NOX Banks
+      INTEGER*4 NOX_SYR                                     ! End Year for Early NOX Banks, Start of NOX Cap
+      REAL*4    CTLBTU(MX_NCOALS,NDREG,MNUMYR)              ! Coal-to-liquid (CTL) trillion Btus
+      REAL*4    XCL_PIMP(MX_ISCV,10,MNUMYR)                 ! Coal import prices for supply curve step combos (thermal only)
+      REAL*4    XCL_QIMP(MX_ISCV,10,MNUMYR)                 ! Coal import quantities for supply curve and step combos (thermal only)
+      INTEGER*4 XCL_ISC(MX_IMPCOAL)                         ! Supply curve number by record # and max # of steps
+      REAL*4    XCL_TESCI(4,MNUMYR,NDREG)                         ! Coal Transportation Escalation Factors for Inland Imports
+      REAL*4    XCL_TRATI1(4,MX_ISCV,NDREG)                 ! Coal Imports Inland Transportation Rate
+      REAL*4    XCL_TRATI2(MX_ISCV,NDREG)                   ! Coal Imports Freight Rate
+      REAL*4    CTL_TRATE(MX_NCOALS,NDREG)                  ! Expected Coal Transportation Rates for Coal to Liquids
+      REAL*4    CTL_OTHER(MX_NCOALS,MNUMYR)                 ! Expected Coal Supply Demand for Non-Coal To Liquids Coal
+      REAL*4    CTL_CDSL1(NDREG,REFREG)                     ! Maps Coal Demand Regions to Refiery PADDs
+      INTEGER*4 CTL_TYPE(MX_NCOALS)                         ! CTL Coal Type by Coal Supply Curve
+      INTEGER*4 CTL_CLDR(NDREG)                             ! CTL Coal Demand Regions (0 => No CTL Demand in the Coal Demand Region, 1 => CTL Demand)
+      INTEGER*4 CTL_CL_SECTOR                               ! Index identifying the CTL Coal Demand Sector
+      INTEGER*4 XCL_TRNINDX(NUTSEC,MX_NCOALS,NDREG)         ! Index identifying whether the coal transp rate is feasible
+
+!  New variables with year dimension for better coal/EFD relations
+      INTEGER*4 CTL_DEM(NDREG,MNUMYR)                      ! CTL demand in coal region (0 = No, 1 = Yes)
+      REAL*4  CTL_TR_CTL(MX_NCOALS,NDREG,MNUMYR)           ! Expected coal transportation rates for CTL
+      REAL*4  EFD_LG_DVLIM(NDREG,NUTSEC,MNUMYR)            ! EFD diversity limits for lignite
+      REAL*4  EFD_SB_DVLIM(NDREG,NUTSEC,MNUMYR)            ! EFD diversity limits for subbituminous
+      REAL*4  EFD_TIER1_LIM(MX_NCOALS,NDREG,2,MNUMYR)      ! EFD coal tier 1 transportation limits for scrubbed (1) and unscrubbed (2)
+      REAL*4  XCL_BTU_YR(MX_NCOALS + MX_ISCV,MNUMYR)       ! BTU content by supply curve
+      REAL*4  XCL_CAR_YR(MX_NCOALS + MX_ISCV,MNUMYR)       ! Carbon content by supply curve
+      REAL*4  XCL_HG_YR(MX_NCOALS + MX_ISCV,MNUMYR)        ! Mercury content by supply curve
+      REAL*4  XCL_MAX_INCR(MX_NCOALS,MNUMYR)               ! Maximum production capacity rate of increase
+      REAL*4  XCL_SO2_YR(MX_NCOALS + MX_ISCV,MNUMYR)       ! SO2 content by supply curve
+      REAL*4  XCL_TR_T1(MX_NCOALS,NDREG,MNUMYR)            ! Expected coal tier 1 transportation rate
+      REAL*4  XCL_TR_T2(MX_NCOALS,NDREG,MNUMYR)            ! Expected coal tier 2 transportation rate
+      REAL*4  XCL_TR_IN(4,MX_ISCV,NDREG,MNUMYR)            ! Coal imports inland transportation rate
+      INTEGER*4 ECP_SCRUB(NUTSEC,MNUMYR)                   ! Scrub code by coal sector (2 = unscrubbed; 1 = scrubbed)
+
+!     Equivalence for filer
+
+      REAL*4 EQ_SO2GRP(SO2GRP_SIZE)
+      EQUIVALENCE (EQ_SO2GRP,UPTPSO2)

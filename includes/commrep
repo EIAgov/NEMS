@@ -1,0 +1,66 @@
+!  $Header: m:/default/includes/RCS/commrep,v 1.7 2020/10/14 20:41:26 LC2 Exp $
+!
+!                            COMMON COMMREP
+!          Report Variables for the Commercial Module
+!
+      REAL CMUSSurvFloorTot(MNUMYR) ! 1 Surviving Floorspace
+      REAL CMUSNewFloorTot(MNUMYR)  ! 2 Floorspace - New Additions
+      REAL CMUSConsumption(11,3,MNUMYR) ! 3 Consumption-by End-Use
+           ! (SpHt,Cl,WtHt,Vent,Cook,Lgt,Refr,Off-PC,Off-Oth,Other)
+           ! by fuel (EL,NG,DS)
+      REAL CMSurvFloorTot(11,MNUMYR) ! 4 Survival Flrspc-Bldg Type
+      REAL CMNewFlrSpace(11,MNUMYR) ! 5 New Floorspace by Bld Type
+      REAL CMFinalEndUseCon(11,MNUMYR) ! 6 Consumption by Bldg Type
+      REAL CMUSAvgEff(9,3,MNUMYR) ! 7 Avg Tech Eff by End Use, Fuel
+      REAL CMUSCogen(4,MNUMYR) ! 8 Consumption for cogeneration
+           ! (Steam Coal, DS&RS, NG, Biomass)
+      REAL CMUSDistServ(3,3,MNUMYR) ! 9 Consumption for Dist. Serv.
+           ! (SpHt,Cl,WtHt) by fuel (EL,NG,DS)
+      REAL*4 DistServSteam(MNUMYR)
+           ! DistServSteam (y) is the steam energy produced by boilers
+           ! during the year y to provide district services.
+           ! Calculated.
+      REAL CMUSPurchEff(9,3,MNUMYR)
+           !  Avg Purchased Tech Eff by End Use, Fuel
+      Real*4     CMEffInd (3,10,11,9,MNUMYR),CEffGrowth(10)                  !Efficiency Index
+
+      REAL*4 TMPYR (MNUMYR)
+      ! TMPYR is a temporary variable used to skip the year row header in KDEGDAY.
+
+      REAL*4 DegreeDays (2,MNUMCR,MNUMYR)
+      ! DegreeDays (1,r,y) is the number of heating degree days and
+      ! DegreeDays (2,r,y) is the number of cooling degree days in
+      ! Census Division r during year y, where y=1 corresponds to
+      ! the calendar year 1990.  Data is input from file KDEGDAY,
+      ! and is available from 1990 through the last forecast year
+      ! used by NEMS, with the year index MNUMYR.  Data for the year
+      ! with index KSTEOYR and beyond provide the average heating
+      ! and cooling degree days for normal years, including projected
+      ! shifts in population within the US.  The data is used
+      ! to perform a weather adjustment to the consumption forecast
+      ! in the Consumption subroutine.
+
+!  variables needed for commercial floorspace workaround:
+      REAL*4 SurvFloorTotal (MNUMCR,CMnumBldg,MNUMYR)
+      REAL*4        AgedNew (MNUMCR,CMnumBldg,MNUMYR)
+      REAL*4 CMNewFloorSpace(MNUMCR,CMnumBldg,CMOldestBldgVint-1989 : MNUMYR)
+      REAL*4   CMTotalFlspc (MNUMCR,CMnumBldg+1,MNUMYR)
+      ! Total Commercial floorspace in million sq feet by r, b, y
+      ! y = 14 corresponds with CBECS year of 2003.
+      ! CMnumBldg+1 corresponds with sum across buildings
+
+      REAL*4 CMNonBldgUse (CMnumAllFl,MNUMCR,MNUMYR)
+
+      COMMON/COMMREP/ CMUSSurvFloorTot, CMUSNewFloorTot, &
+        CMUSConsumption, CMSurvFloorTot, CMNewFlrSpace, &
+        CMFinalEndUseCon, CMUSAvgEff, CMUSCogen, CMUSDistServ, &
+        DistServSteam, CMUSPurchEff, CMEffInd, CeffGrowth, &
+        DegreeDays, &
+        SurvFloorTotal, AgedNew, CMNewFloorSpace, CMTotalFlspc, CMNonBldgUse
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      REAL EQ_CMREP(MNUMYR*(3+9*3+11*3+3*11+4+3*3+9*3+(3*10*11*9))+10+2*MNUMCR*MNUMYR + &
+             MNUMCR*CMnumBldg*MNUMYR + MNUMCR*CMnumBldg*MNUMYR + &
+             MNUMCR*CMnumBldg*(MNUMYR-(CMOldestBldgVint-1989+1)) + &
+             MNUMCR*(CMnumBldg+1)*MNUMYR + CMnumAllFl*MNUMCR*MNUMYR)
+      EQUIVALENCE (EQ_CMREP,CMUSSurvFloorTot)

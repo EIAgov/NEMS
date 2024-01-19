@@ -1,0 +1,90 @@
+!  $Header: m:/default/includes/RCS/mxqblk,v 1.14 2013/06/18 18:59:21 pkc Exp $
+! EXPECTED QUANTITIES.
+      INTEGER MNUMQX
+      PARAMETER(MNUMQX=40)   ! No. of quantity expectation variables
+!
+      REAL XQELRS(MNUMCR,MNXYR)
+      REAL XQELCM(MNUMCR,MNXYR)
+      REAL XQELTR(MNUMCR,MNXYR)
+      REAL XQELIN(MNUMCR,MNXYR)
+      REAL XQELAS(MNUMCR,MNXYR)
+      REAL XQGFRS(MNUMCR,MNXYR)
+      REAL XQGFCM(MNUMCR,MNXYR)
+      REAL XQGFTR(MNUMCR,MNXYR)
+      REAL XQGFIN(MNUMCR,MNXYR)
+      REAL XQGFEL(MNUMCR,MNXYR)
+      REAL XQGIRS(MNUMCR,MNXYR)
+      REAL XQGICM(MNUMCR,MNXYR)
+      REAL XQGITR(MNUMCR,MNXYR)
+      REAL XQGIIN(MNUMCR,MNXYR)
+      REAL XQGIEL(MNUMCR,MNXYR)
+      REAL XQMGAS(MNUMCR,MNXYR) ! 46 Motor Gasoline - All Sectors
+      REAL XQJFTR(MNUMCR,MNXYR) ! 47 Jet Fuel - Transportation
+      REAL XQDSRS(MNUMCR,MNXYR) ! 48 Distillate - Residential
+      REAL XQDSCM(MNUMCR,MNXYR) ! 49 Distillate - Commercial
+      REAL XQDSTR(MNUMCR,MNXYR) ! 50 Distillate - Transportation
+      REAL XQDSIN(MNUMCR,MNXYR) ! 51 Distillate - Industrial
+      REAL XQDSEL(MNUMCR,MNXYR) ! 53 Distillate - Electricity (+petroleum coke)
+      REAL XQKSAS(MNUMCR,MNXYR) ! 58 Kerosene - All Sectors
+      REAL XQLGRF(MNUMCR,MNXYR) ! 63 Liquid Petroleum Gases - Refinery
+      REAL XQLGAS(MNUMCR,MNXYR) ! 64 Liquid Petroleum Gases - All Sectors
+      REAL XQRLRF(MNUMCR,MNXYR) ! 68 Residual Fuel, Low Sulfur - Refinery
+      REAL XQRLEL(MNUMCR,MNXYR) ! 69 Residual Fuel, Low Sulfur - Electricity
+      REAL XQRLAS(MNUMCR,MNXYR) ! 70 Residual Fuel, Low Sulfur - All Sectors
+      REAL XQRHEL(MNUMCR,MNXYR) ! 72 Residual Fuel, High Sulfur - Electricity
+      REAL XQRHAS(MNUMCR,MNXYR) ! 73 Residual Fuel, High Sulfur - All Sectors
+      REAL XQPFIN(MNUMCR,MNXYR) ! 80 Petrochemical Feedstocks - Industrial
+      REAL XQSGIN(MNUMCR,MNXYR) ! 81 Still Gas - Industrial
+      REAL XQSGRF(MNUMCR,MNXYR) ! 82 Still Gas - Refinery
+      REAL XQPCRF(MNUMCR,MNXYR) ! 84 Petroleum Coke - Refinery
+      REAL XQPCAS(MNUMCR,MNXYR) ! 86 Petroleum Coke - All Sectors
+      REAL XQASIN(MNUMCR,MNXYR) ! 87 Asphalt and Road Oil - Industrial
+      REAL XQOTRF(MNUMCR,MNXYR) ! 90 Other Petroleum - Refinery
+      REAL XQOTAS(MNUMCR,MNXYR) ! 91 Other Petroleum - All Sectors
+      REAL XQMETR(MNUMCR,MNXYR) ! 99 Methanol - Transporation
+      REAL XQETTR(MNUMCR,MNXYR) !100 Ethanol - Transporation
+      REAL XQOTTR(MNUMCR,MNXYR) !    Other - Transporation
+      REAL XQOTIN(MNUMCR,MNXYR) !    Other - Industrial
+      REAL XQNGTR(MNUMCR,MNXYR) !    Natural Gas - Transportation
+      REAL XQLGTR(MNUMCR,MNXYR) !    Liquid Petroleum Gases - Transportation
+      REAL XQLUIN(MNUMCR,MNXYR) !    Lubricants - Industrial
+      REAL XQNGELFN(NNGEM,MNXYR)
+      REAL XQNGELIN(NNGEM,MNXYR)
+      REAL XQNGELCN(NNGEM,MNXYR)
+      REAL XRFQTDCRD(MNUMOR,MNXYR)
+      REAL XWQETOH(MNCROP,MNUMCR,MNXYR,MNETOH)
+      REAL XPRDDMDME(MNXYR)
+      REAL XRFQEXCRD(MNUMPR,MNXYR)
+      REAL XRFSPRFR(MNXYR)
+      REAL XPRDEXPTOT(MNXYR)
+      REAL XPRNG_PAD(MNUMPR,MNXYR)
+      REAL XUSSUPPLY(MNXYR)                  ! U.S. petroleum supply for international model
+      REAL XUSDEMAND(MNXYR)                  ! U.S. petroleum demand for international model
+      REAL XRFSMANDATES(4,MNXYR)             ! RFS mandates by category
+      REAL XRFSREVMANDATE(4,MNXYR)           ! RFS revised mandates by category
+      REAL XQCCRF(MNUMCR,MNXYR)              ! the catalytic part of petroleum coke
+      REAL XOGCNPPRD(2,MNXYR)                ! Price of oil & gas in Canada
+
+
+      COMMON/MXQBLK/XQELRS,XQELCM,XQELTR,XQELIN,XQELAS, &
+       XQGFRS,XQGFCM,XQGFTR,XQGFIN,XQGFEL, &
+       XQGIRS,XQGICM,XQGITR,XQGIIN,XQGIEL, &
+       XQMGAS, XQJFTR, XQDSRS, XQDSCM, XQDSTR, &
+       XQDSIN, XQDSEL, XQKSAS, XQLGRF, XQLGAS, &
+       XQRLRF, XQRLEL, XQRLAS, XQRHEL, XQRHAS, &
+       XQPFIN, XQSGIN, XQSGRF, XQPCRF, XQPCAS, &
+       XQASIN, XQOTRF, XQOTAS, XQMETR, XQETTR, XQOTTR, &
+       XQOTIN, XQNGTR, XQLGTR, XQLUIN, &
+       XQNGELFN,XQNGELIN,XQNGELCN,XRFQTDCRD, &
+       XWQETOH,XPRDDMDME, &
+       XRFQEXCRD,XRFSPRFR,XPRDEXPTOT,XPRNG_PAD, &
+       XUSSUPPLY, XUSDEMAND, &
+       XRFSMANDATES, XRFSREVMANDATE, XQCCRF, XOGCNPPRD
+
+      REAL MXQTY(MNUMCR,MNXYR,MNUMQX)
+      EQUIVALENCE(MXQTY,XQELRS)
+! ARRAYS FOR FILER
+      REAL MXQARRY(MNXYR*(MNUMCR*(MNUMQX+MNCROP*MNETOH+6) + &
+        NNGEM*3 + MNUMPR + 5 + MNUMOR + MNUMPR + &
+        4 + 4 + 2))
+      EQUIVALENCE(MXQARRY,XQELRS)

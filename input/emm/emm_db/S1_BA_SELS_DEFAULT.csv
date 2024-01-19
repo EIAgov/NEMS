@@ -1,0 +1,74 @@
+index,BA_CD,BA_ID,BA_NM,ENTER STAGE1_RGN
+0,AEC,189.0,PowerSouth Energy Cooperative,SRSE
+1,AECI,924.0,"Associated Electric Cooperative, Inc.",MISO
+2,AVA,20169.0,Avista Corporation,NWPP
+3,AVRN,15399.0,Avangrid Renewables LLC,NWPP
+4,AZPS,803.0,Arizona Public Service Company,SRSG
+5,BANC,16534.0,Balancing Authority of Northern California,CISO
+6,BPAT,1738.0,Bonneville Power Administration,NWPP
+7,CHPD,3413.0,Public Utility District No. 1 of Chelan County,NWPP
+8,CISO,2775.0,California Independent System Operator,CISO
+9,CPLE,3046.0,Duke Energy Progress East,SRCA
+10,CPLW,58786.0,Duke Energy Progress West,SRCA
+11,CSTO,,,NWPP
+12,DEAA,56812.0,"Arlington Valley, LLC - AVBA",SRSG
+13,DOPD,5326.0,PUD No. 1 of Douglas County,NWPP
+14,DUK,5416.0,Duke Energy Carolinas,SRCA
+15,EEI,5748.0,"Electric Energy, Inc.",MISO
+16,EPE,5701.0,El Paso Electric Company,SRSG
+17,ERCO,5723.0,"Electric Reliability Council of Texas, Inc.",TRE
+18,FMPP,14610.0,Florida Municipal Power Pool,FRCC
+19,FPC,6455.0,Duke Energy Florida Inc,FRCC
+20,FPL,6452.0,Florida Power & Light Company,FRCC
+21,GCPD,14624.0,"Public Utility District No. 2 of Grant County, Washington",NWPP
+22,GRID,58790.0,"Gridforce Energy Management, LLC",NWPP
+23,GRIF,56090.0,"Griffith Energy, LLC",SRSG
+24,GRIS,56545.0,Gridforce South,SRSG
+25,GRMA,14412.0,"Gila River Power, LLC",SRSG
+26,GVL,6909.0,Gainesville Regional Utilities,FRCC
+27,GWA,56365.0,"NaturEner Power Watch, LLC (GWA)",NWPP
+28,HGMA,32790.0,"New Harquahala Generating Company, LLC - HGBA",SRSG
+29,HST,8795.0,City of Homestead,FRCC
+30,IID,9216.0,Imperial Irrigation District,SRSG
+31,IPCO,9191.0,Idaho Power Company,BASN
+32,ISNE,13434.0,ISO New England Inc.,ISNE
+33,JEA,9617.0,JEA,FRCC
+34,LDWP,11208.0,Los Angeles Department of Water and Power,CISO
+35,LGEE,11249.0,Louisville Gas and Electric Company and Kentucky Utilities Company,SRCE
+36,MISO,56669.0,"Midcontinent Independent Transmission System Operator, Inc..",MISO
+37,NBSO,1.0,New Brunswick System Operator,ISNE
+38,NEVP,13407.0,Nevada Power Company,BASN
+39,NSB,13485.0,"New Smyrna Beach, Utilities Commission of",FRCC
+40,NWMT,12825.0,NorthWestern Energy (NWMT),NWPP
+41,NYIS,13501.0,New York Independent System Operator,NYIS
+42,OVEC,14015.0,Ohio Valley Electric Corporation,PJM
+43,PACE,14379.0,PacifiCorp - East,BASN
+44,PACW,14378.0,PacifiCorp - West,NWPP
+45,PGE,15248.0,Portland General Electric Company,NWPP
+46,PJM,14725.0,"PJM Interconnection, LLC",PJM
+47,PNM,15473.0,Public Service Company of New Mexico,SRSG
+48,PSCO,15466.0,Public Service Company of Colorado,RMRG
+49,PSEI,15500.0,Puget Sound Energy,NWPP
+50,SC,17543.0,South Carolina Public Service Authority,SRCA
+51,SCEG,17539.0,South Carolina Electric & Gas Company,SRCA
+52,SCL,16868.0,Seattle City Light,NWPP
+53,SEC,21554.0,Seminole Electric Cooperative,FRCC
+54,SEPA,29304.0,Southeastern Power Administration,SRSE
+55,SOCO,18195.0,"Southern Company Services, Inc. - Trans",SRSE
+56,SPA,17716.0,Southwestern Power Administration,SPP
+57,SRP,16572.0,Salt River Project,SRSG
+58,SWPP,59504.0,Southwest Power Pool,SPP
+59,TAL,18445.0,City of Tallahassee,FRCC
+60,TEC,18454.0,Tampa Electric Company,FRCC
+61,TEPC,24211.0,Tucson Electric Power Company,SRSG
+62,TIDC,19281.0,Turlock Irrigation District,CISO
+63,TPWR,18429.0,"City of Tacoma, Department of Public Utilities, Light Division",NWPP
+64,TVA,18642.0,Tennessee Valley Authority,SRCE
+65,WACM,28503.0,Western Area Power Administration - Rocky Mountain Region,RMRG
+66,WALC,25471.0,Western Area Power Administration - Desert Southwest Region,SRSG
+67,WAUW,19610.0,Western Area Power Administration UGP West,NWPP
+68,WWA,58791.0,"NaturEner Wind Watch, LLC",NWPP
+69,YAD,317.0,"Alcoa Power Generating, Inc. - Yadkin Division",SRCA
+70,AMPL,599.0,Anchorage Municipal Light & Power,ASCC
+71,CEA,3522.0,Chugach Electric Assn Inc,ASCC
+72,HECO,19547.0,Hawaiian Electric Co Inc,HECO

@@ -1,0 +1,6 @@
+Dictionary '/default/?DICTN@?DICTD@'
+Restarti   '/default/?RESTARTN@?RESTARTD@'
+Varlist    '/default/?VARLISTN@?VARLISTD@'
+Restarto   '?OUTDIR@/?SCEN@/?DATE@/@.restart'
+Format     1
+

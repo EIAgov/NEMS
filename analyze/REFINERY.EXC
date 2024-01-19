@@ -1,0 +1,17 @@
+* PACKED FILE WAS CREATED BY ATEST.EXC
+SW MSG=F ; READ P REFINERY ; READ SYN
+* For long screens (as in IBM RS/6000), add SCREEN specs
+* ...also might replace some _PAUSE with _TYPE below
+SW MSG=T ; _EJECT
+PR REFINERY.EXP
+_TYPE ; _PAUSE Ready to show LP model structure with block schema
+SCH D T,D //NOHEAD
+_TYPE ; _PAUSE Ready to show syntax
+SYN *
+_TYPE ; _PAUSE Ready to list the equations
+L *,* //T,W=5
+_TYPE ; _PAUSE Ready to show allocation levels and prices (reduced costs)
+DISP C A //X,SYN ; _TYPE ; TABLE C A D //SYN
+_TYPE ; _PAUSE Ready to show demand and attribute prices
+TABLE R D,V,O P //SYN
+RETURN Q

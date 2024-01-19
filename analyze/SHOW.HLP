@@ -1,0 +1,100 @@
+    Function: Show rim, solution and nonzeroes
+    Syntax:   SHOW [{ {ROW | COLUMN} [conditional]
+                     | PLOT [row]}   [//options]
+
+    Form 1:  SHOW {ROW | COLUMN} [conditional]
+      If conditional is absent, current submatrix is used.
+
+      options (following //) are:
+         SYNTAX | NOSYNTAX
+         The SYNTAX specification causes syntax to be included in the
+         output for each row or column (default is set by SYNTAX switch).
+         If no syntax is available, the specification is ignored (no
+         error message is given).  The NOSYNTAX specification suppresses
+         syntax in the output.  Specifying SYNTAX or NOSYNTAX over-rides
+         the SYNTAX switch but does not change it.
+
+         The IO option affects the order of the tabular output by showing
+         inputs first, then outputs.  See SHOWIO.DOC for definitions.
+
+      option for SHOW COLUMN includes ARRAY
+         This changes the format of the output to be an array form (similar
+         to TRANCOL output in some optimizers, like MPSX and MPSIII).  This
+         can be used in combination with SYNTAX | NOSYNTAX.
+
+    Form 2:  SHOW PLOT [row] [//options]
+         This does not change the submatrix.  If row is specified, this
+         defines the vertical axis (regardless of whether this row is in
+         the submatrix).  If this row is not specified, the objective row
+         is the vertical axis.
+
+         If the vertical axis is the objective row, the step height is the
+         objective coefficient + price factors of other submatrix rows (to
+         have only the objective coefficients, first remove all rows from
+         the submatrix, as SUBMAT DEL ROW *).
+
+       options (following //) are:
+         BY row .....restrict submatrix columns to have a positive
+                     coefficient in the named row and define step width
+                     = column range = (LO-UP)*coefficient
+         LABEL set...use the syntax of the specified set in activity
+                     domains for step labels (default is activity names)
+                     Note:  syntax truncated to 16 chars, and more by
+                     step width;  NOSORT takes precedence over LABEL (no
+                     labels are included);  if an activity does not have
+                     the set in its domain, the activity name is the label.
+         NOSORT .....do not sort steps by height (default is sorted)
+         NOLABEL.....do not put labels on steps (default is activity names)
+         PRINTABL ...use printable characters (default is graphic)
+
+         See also GRAPHICS.DOC.
+
+   Examples:
+
+   SHOW COL * S I
+   ...Shows all columns whose solution Status is Infeasible
+
+   SHOW C P L EQ U D NE C
+   ...Shows all columns whose name begins with P, whose bounds (L,U)
+      are equal, and whose reduced cost (D) is not equal to its
+      objective coefficient (C)
+
+   SHOW
+   ...Shows rows or columns (according to SWITCH DISP_COL) in the
+      current submatrix
+
+   SHOW //SYN
+   ...Same as above, but the syntax is also shown (if available)
+
+   SHOW ROW S P NE C
+   ...Shows all rows whose name begins with S and whose price (P)
+      does not equal its cost (C), which is 0
+
+   SHO R "PI
+   ...Shows all rows whose name contains PI (in any position)
+
+   SHO C //ARRAY
+   ...Shows submatrix columns in array format (syntax is shown if
+      SWSYN=T)
+
+   SHO C //A,S
+   ...Shows submatrix columns in array format with syntax (if available)
+
+   SHO C //A,N
+   ...Shows submatrix columns in array format without syntax
+
+   SHO PLOT
+   ...Show plot of steps for columns submatrix over objective row (step
+      height = objective coefficient + price factors of submatrix rows).
+
+   SHO P  //PRINT
+   ...Same as above, but with printable characters
+
+   SUB DEL ROW * ; SHO PLOT
+   ...Show plot of steps for columns submatrix over objective row.
+
+   SHO P COST //BY DEL
+   ...Show plot of steps for submatrix columns having positive coefficient
+      in row DEL;  the width of each step = column bound times coef.;  the
+      height of each step = COST coef. (if COST is the objective row, the
+      price factors of other submatrix rows are added to the height).

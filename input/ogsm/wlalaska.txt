@@ -1,0 +1,805 @@
+***    wlakaska.txt
+***    modified:
+***      8/2/02 with historic oil production by field, variable: HISTPRDCO
+***      8/6/02 ANGTS reserves increased from 26 Tcf to 35 Tcf, variable: ANGTSRES
+***     10/10/02 Increased onshore North Slope drilling, operation and facility costs by 30
+***            to reflect the higher costs associated with NPRA E&P due to the Sec. Babbitt
+***            order (under Clinton) which banned roads in NPRA.
+***             30 percent figure from Emil Attanasi of USGS
+***      4/04/03 Reconfigured existing field data structure for field parameters
+***                associated with existing fields.
+***     9/02/03 - Increased Prudhoe Bay field and satellite reserves based on
+***               Alaska Dept. of Resources 2002 Report (Table III.1, page 2-2)
+***             - Reduced Prudhoe Bay Unit depletion rates to be consistent with
+***               AK Dept. of Natural Resources
+***             - Moved up the development of NPRA "hardwired fields" by three years and
+***               slightly increased the reserves associated with these fields to
+***               reflect higher UGSA NPRA resource estimates
+***             - "Speculative" fileds are restricted to less than 200 MMB; added a number
+***            speculative fields with resources of less than 75 MMB
+***             - Added 2002 oil & ngl production data
+***
+***     8/26/04 - Point Thomson comes on-line in 2018, based on the expected on-line date for
+***                  the Alaska gas Pipeline
+***             - Updated historic oil production to include 2003 data
+***             - Updated 2004 & 2005 STEO years with High, Low, Reference WOP case field production
+***
+***     8/23/05 - STEO numbers incorporated 2004 historical and 2005 & 2006 STEO
+***             - Badami Max. production was zereoed out
+***             _ NANUQ + FIORD Fields added and specified to come on-line in 2007
+***     9/22/05 - Put in 999.0 Max Production Rate so Young & Hauser production profile
+***                 is not constrained by Max. Prod. Rate
+***     5/30/06 - Added historical series of AK NGL production, so main program no projects future
+***                 AK NGL production
+***     7/27/06 - Added Oooguruk Oil Field being developed by Pioneer Natural Resources
+***             - Removed hard-wired NPRA fields and replaced with undiscovered onshore/offshore fields
+***             - Used USGS field distribution for State Lands to revise undiscovered field sizes (assumed one-third of undiscovered fields are economic)
+***             - Used MMS field distribution for Beaufort and Cook Inlet (assumed one-third of the MMS number)
+***     8/24/06 - Added 2005 field production data from the Dallas Field Office
+***             - Nanuq & Fiord oil reserves increased from 90 MMB to 112.5 MMB
+***             - Input STEO AK projections for 2006 & 2007 (high and low price cases same as the base case)
+***             - Calculated AK NGL Production and input the 2005 figure into this database.
+***     9/5/07  - Input historical 2006 field production plus 2007/2008 STEO projections
+***             - Raised well drilling costs by 50 percent; raised field equipment costs by 25 percent.
+***             - Calculated 2006 AK NGL production and put in input.
+***             - Oooguruk Field updated; reserves increased from 70MMB to 80MMB; online date increased from 2008 to 2009; production lowered from 20MBD to 17.5 MBD.
+***   12/19/07    - State Production Tax Rate increased from 9.4% to 25% as per the passage of a new Alaska State production tax law.
+***    1/07/08  - updated ANWR access assumptions (correction made on 1-11-08)
+***    1/28/08  - Moved the Pt. Thomson field oil production date to 2020 to be consistent with AK gas pipeline start-up date.
+***    7/25/09  - Added 3 new fields - Nikaitchuq, Liberty, and Qannik
+***             - Extended field list from 50 to 60, reoganized field groupings, added 2 new ANWR fields with 180 MMB each based on USGS
+***                  field size estimates.
+***             - Added historical field production levels and STEO projected field production levels
+***             - Rescaled Field Reserves to be consistent with AK DNR 2007 Annual Report (end of 2006)
+***    8/13/09  - Input historical 2008 oil field production, input 2009 and 2010 STEO projections, adjusted new field start-up dates.
+***             - Existing Field Reserves Remaining and Field Decline Rates updated 8-19-09
+***             - Specified whether field was onshore, offshore State, and offshore Federal.
+***    9/15/09  - Program now tracks production, reserves, inferred resources, and undiscovered resources by the following 3 regions
+***                   1) onshore, 2) State offshore, and 3) Federal Offshore.  Historical field reserve/resource data was input 
+***                   into wlalaska.txt along with data on the extent to which the existing and undiscovered fields belong to the 3 regions.
+***             - Decided not to change Pt Thomson oil production date because 1) the oil is of more value than the gas, 2) Exxon has made
+***                   a commitment to produce Pt Thomson condensate (on an experimental basis), and 3) to maximize condensate production
+***                   all the produced nat gas would have to be reinjected into this retrograde condensate reservoir.
+***   June 2010 - Updated:
+***            2009 Oil Production by field
+***            Field Decline rates
+***            2009 NGL Production
+***            Oil Reserves by region
+***            Gas reserves by region
+***                     Modified Undiscovered Onshore/Offshore North Slope Oil Field Sizes
+***                     Removed extraneous data not used by model
+***                     Reconfigured Onshore, State Offshore, and Federal Offshore production and reserves based on AK Dept of Nat Resources data
+***
+***   July thru Sept. 2011
+***             - TAPS operational variables added: TAPSFLAG and TAPSMINIMUM
+***             - Pt Thomson condensate field production begins 2016
+***             - ANWR Field start dates updated
+***             - 2010 NGL Production updated
+***             - 2010 Production & STEO projections (Qannik Field???)
+***             - increased North Slope onshore and offshore oil transportation rates by ~$1/bbl
+***             - updated oil & gas reserves by onshore, State offshore, & Federal offshore categories
+***             - Qannik folded into Alpine
+***             - Removed Liberty offshore field from coming online based on email from Petroleum News publisher (8-22-11)
+***                   that BP is trying to sell the field
+***
+***    1/08/12  - Lowered TAPSMINOILREV revenue level to $5 billion
+***
+***   2014, 2015    Updated: existing field descriptions, historical production,
+***            historical oil/gas reserves, historical inferred oil/gas resources, historical undiscovered oil/gas resources,
+***            STEO oil production, historical and STEO NGL production; Decreased field production decline rates by 7%
+***            to match with STEO; Lowered largest field size in offshore North Slope to reflect Shell's disappointing results,
+***	       BOEM canceling upcoming Arctic lease sales, and Repsol deferring exploration
+***
+***   2016	Updated: existing field descriptions, historical production, historical oil/gas reserves, 
+***             historical inferred oil/gas resources, historical undiscovered oil/gas resources,
+***             STEO oil production, historical and STEO NGL production
+***
+*** START YEAR FOR AK MODULE (AKBYR) (update 9/2001 - ANWRFLAG at EOF)
+*** wellak.f variable: AKBYR, used throughout wellak.f
+***
+     2000     ! (i.e., 7=1996) note: AKBYR <= AKHYR (9/2001 - Added PHB EXP)
+***
+*** STATE TAX RATE
+*** wellak.f variable: STTXAK, used in DCF_AK()
+***
+     0.25
+***
+*** SEVERANCE TAX RATE (BY REGION/FUEL) 
+*** - SOURCE: ARI Report, CONTRACT # DE-AC01-99FE65607, updated 8/12/02
+*** wellak.f variable: SEVTXAK, used in OGSEVR_AK()
+***
+     0.1225       ! FOR THE FIRST 5 YEARS OF PRODUCTION
+     0.15         ! FOR YEARS 6 AND BEYOND
+***
+*** PERCENT DEPRECIABLE TANGIBLE DRILLING COSTS BY WELL TYPE
+*** wellak.f variable: KAPFRCAK, used in DCF_AK()
+***
+     0.10   0.30
+***
+*** INTANGIBLE DRILL COSTS THAT MUST BE DEPRECIATED-FOR MAJORS ONLY
+*** wellak.f variable: XDCKAPAK, used in DCF_AK()
+***
+     0.0
+***
+*** PROJECT LIFE (YEARS) BY FUEL
+*** wellak.f variable: PRJAK, used in OGSUP_AK()
+***
+     25     25
+***
+*** RECOVERY PERIOD OF INTANGIBLE (M=1) & TANGIBLE (M=2) DRILL COST
+*** wellak.f variable: RCPRDAK, used in DCF_AK()
+***
+      6      8
+***
+*** TECHNOLOGY ADJUSTMENT FACTORS BY COST CATEGORY
+*** wellak.f variable: TECHAK, used in OGCOST_AK()
+*** 
+     0.01   0.01   0.01
+***
+*** OIL FIELD SIZE DISTRIBUTIONS BY REGION (MMB) - UPDATE, 3/8/2001
+*** wellak.f variable: FSZCOAK, used in OGONCE_AK(), OGNEW_AK
+*** 1st col=Offshore North; 2nd col=Onshore North; 3rd col=South Alaska
+*** 6-15-10 Assumed that only 1 in 5 of potential fields posited by MMS for the
+***         offshore federal areas in the Chukchi and Beaufort Seas is "discoverable." (AKRGN = 1)
+***         Made same assumption with USGS Assessment for NPRA, Central NS and West NS. (AKRGN = 2)
+***         South Alaska field sizes unchanged from prior years.  (AKRGN = 3)
+*** 2015    To reflect Shell's 2015 failed attempt to find anything awesome in the Chukchi, BOEM canceling 
+***	    upcoming Arctic lease sales, and Repsol deferring exploration, lowered largest field size
+***	    in the offshore North from 700 to 500
+***
+      700.      350.       65.
+      350.      350.       38.
+      350.      180.       21.
+      180.      180.       21.
+      180.      180.        0.
+      180.      180.        0.
+       90.      180.        0.
+       90.       90.        0.
+       90.       90.        0.
+       90.       90.        0.
+       45.       90.        0.
+       45.       90.        0.
+       45.       90.        0.
+       45.       45.        0.
+       25.       45.        0.
+       25.       45.        0.
+       25.       45.        0.
+       25.       45.        0.
+       12.       45.        0.
+       12.       45.        0.
+***
+*** GAS FIELD SIZE DISTRIBUTIONS BY REGION (BCF)   
+*** wellak.f variable: FSZNGAK, used in OGONCE_AK(), OGNEW_AK
+*** 1st col=Offshore North; 2nd col=Onshore North; 3rd col=South Alaska
+***
+     8260.     2283.      200.
+     6330       800.      200.
+      670.      624.      200.
+      370.      488.      200.
+      260.      395.      200.
+      230.      387.      200.
+      190.      342.        0.
+        0.      309.        0.
+        0.      248.        0.
+        0.      105.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+        0.        0.        0.
+***
+*** SUCCESS RATES BY CLASS(EXP&DEV)/REGION/FUEL\
+*** wellak.f variable: SRAK, used in DCF_AK(), OGDCF_AK(), OGNEW_AK()
+*** SRAK(2,3,2) = SRAK(WELLTYPE, AKRGN, AKFUEL)--> Welltype 1 = Exploratory, Welltype 2 = Developmental
+*** updated 8/13/02, based on ARI report, Contract# DE-AC01-99FE65607, Appendix I
+*** updated June 2010, based on AOGCC well data, exploration success rates based on
+***     Number of New Fields Found Divided by Total "Exploratory" Wells Drilled
+***       Data in Excel spreadsheet entitled: "AK_OGC_Well Completion Data_with mods (June 2010).xls"
+***
+      0.060   0.060  !0.166    !  Unchanged due to no data on offshore NS             !  0.1666 0.1666    prior database values
+      0.060   0.060            !  Oil based on 1990-2009 AOGCC Data, Gas Unchanged    !  0.1666 0.3182
+      0.033   0.033            !  Based on 1990 - 2009 AOGCC Data                     !  0.1250 0.3333
+      0.961   0.961                                                                   !  0.9760 0.8333
+      0.961   0.961                                                                   !  0.9760 0.9512
+      0.961   0.961                                                                   !  0.9220 0.3056    <-- seems very low for dev wells
+***
+*** TRANSPORTATION COST (1990 $) BY REGION/FUEL >>>>>>>> TEMPORARY
+*** wellak.f variable: TRANSAK, used in DCF_AK()
+*** reviewed oil transport rates for AEO2012, raised North Slope onshore rate from 4.20/bbl to $5.50/bbl to take into account 
+***    feeder pipeline costs and the offshore NS from $6/bbl to $7.00/bbl to account for the long-distance and expensive offshore feeder line costs
+***
+     7.000  3.000  
+     5.500  3.000
+     2.000  3.000
+***
+*** NEW FIELD WILDCAT DRILL COST (1990 $) BY REGION/FUEL
+*** wellak.f variable: DRLNFWAK, used in DCF_AK(), OGCOST_AK()
+***   unchanged; appear consistent with ARI Report, Contract# DE-AC01-99FE65607
+***   based on 3 dry holes costing $118.76 MM with a off/on ratio = 1.51
+***
+***    Onshore North Slope costs increased by 30 percent 10/10/02
+***
+***     AK well costs increased based on 2007 JAS Drilling Cost Data (6-20-10)
+***       see "AK 2007 Drilling Costs (June 2010).xls"
+***       Assumed new field wildcats were twice as expensive as delineation exploratory wells
+***
+       240000000.0 140000000.0   ! 762000000.  762000000.          ! 40000000. 40000000.
+       202000000.0 102000000.0   ! 476000000.  476000000.          ! 32500000. 32500000.             ! 25000000. 25000000.
+       100000000.0  50000000.0   ! 100000000.  100000000.          ! 99999999. 99999999.
+***
+*** DRILL COST (1990 $) BY EXPLOR&DEVELOP/REGION/FUEL
+*** wellak.f variable: DRILLAK, used in DCF_AK(), OGCOST_AK(), OGDCF_AK()
+***   revised 8/13/02 based on ARI Report, Contract# DE-AC01-99FE65607
+***   ARI report results:   Exploratory Wells = $3.22 MM  ratio of exp/dev = 1.34
+***                         Development Wells = $2.40 MM
+***                         Offshore Wells    = $3.68 MM  ratio of off/on = 1.51
+***                         Onshore Wells     = $2.44 MM
+***
+***    Onshore North Slope costs increased by 30 percent 10/10/02
+***     All drilling costs increased by 50 percent on 9/5/07
+***
+***     AK well costs increased based on 2007 JAS Drilling Cost Data (6-20-10)
+***       see "AK 2007 Drilling Costs (June 2010).xls"
+***       based on AOGCC Average Values, South AK based on lower cost than calculated
+***
+***                                   prior to June 2010             prior to 9/5/07        prior to 10/10/02
+***
+       25000000.0 10450000.0     ! 8520000.0   8520000.0        ! 5680000.  5680000.    ! 6000000.  6000000.   prior values
+       15300000.0  5100000.0     ! 4160000.0   4160000.0        ! 3200000.  3200000.    ! 3500000.  3500000.
+       12000000.0  4000000.0     ! 3200000.0   3200000.0        ! 3500000.  3500000.
+       20010000.0  6670000.0     ! 5400000.0   5400000.0        ! 3600000.  3600000.    ! 2000000.  2000000.
+       11550000.0  3850000.0     ! 3120000.0   3120000.0        ! 2400000.  2400000.    ! 1860000.  1860000.
+        7500000.0  2500000.0     ! 2400000.0   2400000.0        ! 1860000.  1860000.
+***
+*** FACILITY & OOPERATING COST BY OIL FIELD SIZE ('90$/BBL) - INCL. LEASE EQUIPMENT
+*** wellak.f variable: FACILAK, used in OGFAC_AK()
+***
+*** Facility costs increased by 30% on 10/10/02
+*** Facility costs increased by 25% on 9/5/07
+***              upto 9/5/07   up to 10/10/02
+       12.38       ! 9.90       ! 7.63 (prior)! ULTIMATE RECOVERY: 64 MMB    prior cost structure based on
+       11.88       ! 9.50       ! 7.29        ! ULTIMATE RECOVERY: 94 MMB    ARI REPORT
+       11.38       ! 9.10       ! 7.01        ! ULTIMATE RECOVERY: 128 MMB   CONTRACT # DE-AC01-99FE65607
+       10.75       ! 8.60       ! 6.61        ! ULTIMATE RECOVERY: 192 MMB            updated 8/12/02
+       10.19       ! 8.15       ! 6.28        ! ULTIMATE RECOVERY: 256 MMB
+        9.38       ! 7.50       ! 5.74        ! ULTIMATE RECOVERY: 384 MMB
+        8.56       ! 6.85       ! 5.28        ! ULTIMATE RECOVERY: 512 MMB
+        8.19       ! 6.55       ! 5.04        ! ULTIMATE RECOVERY: 768 MMB
+        7.88       ! 6.30       ! 4.86        ! ULTIMATE RECOVERY: 1024 MMB
+***
+*** OPERATION COST (1990 $) BY FLWCAT/FIXVAR (OIL) - SOURCE: USGS
+*** not used in wellak.f but in welldcf.f; called by function OGOPER_AK(), 8/12/02
+***
+*** costs increased by 30% to reflect road building prohibition in NPRA 10/10/02
+***
+    62855000.        0.         ! 48350000.        0. (prior) ! AGGREGATE FLOW: 0-50 MB/D
+    53014000.   211900.      ! 40780000.   163000.         ! AGGREGATE FLOW: 50-160 MB/D
+    42406000.   273000.      ! 32620000.   210000.         ! AGGREGATE FLOW: 160-300 MB/D
+    31811000.   302900.      ! 24470000.   233000.         ! AGGREGATE FLOW: > 300 MB/D
+***
+*** SCHEDULE FOR DRILLING SUCCESSFUL EXPLORATORY WELLS BY REGION
+*** wellak.f variable: EXP_AK, used in OGDEV_AK(), OGSUP_AK()
+***
+     1 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+     1 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+     1 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+***
+*** SCHEDULE FOR DRILLING SUCCESSFUL DEVELOPMENTAL WELLS BY REGION
+*** wellak.f variable: DEV_AK, used in OGDEV_AK(), OGSUP_AK()
+***
+     0 0 0 8 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+     0 0 0 8 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+     0 0 0 8 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+***
+*** EXISTING FIELD DESCRIPTIONS, BY COLUMN:
+***  !!Note: if add or remove fields, need to change AKFLD in ogsmparm to reflect new number of fields
+***
+*** 1) MAPPING FIELDS TO REGIONS (updated 3/01 to add ANWR)
+***    wellak.f variable: FLDREG, used in OGINIT_AK(), OGONCE_AK(), OGNEW_AK(),
+***                          OGDEV_AK() & in main body of wellak.f
+***			  Believe Region 1 = Offshore North; 2 = Onshore North; 3 = South Alaska
+***
+*** 2) START YEAR - KNOWN FIELDS (CRUDE OIL)
+***    wellak.f variable: PROYR, used in OGONCE_AK(), OGNEW_AK(), OGDEV_AK(), OGPRO_AK()
+***
+*** 3) RECOVERABLE CRUDE OIL RESOURCES (MMB) Based on AK DNR 2007 Annual Report.
+***    Recoverable Resources as of 12/31/2007 (using 2007 production levels).
+***    wellak.f variable: RECRES, used in OGFAC_AK(), OGFSC_AK(), OGDEV_AK(), OGPRO_AK(),
+***                                   & OGINIT_AK(), OGONCE_AK(), OGNEW_AK()
+***			  August 2016 - added additional resources (55.706 MMB) to Colville (for CD5 project)
+***
+*** 4) CRUDE OIL DECLINE RATES
+***    wellak.f variable: DECLPRO, used in OGPRO_AK(); based on 2006 and 2007 decline rates
+***         and projected 2008 and 2009 production levels                                          
+***
+*** 5) MAXIMUM CO PRODUCTION PER DAY - MB/D
+***    wellak.f variable: MAXPRO, used in OGONCE_AK(), OGDEV_AK(), OGPRO_AK()
+***    New Fields set to 999.0 so that the Young & Hauser production profile works
+***    Updated 10-15-19
+***    
+***    Reg    Year    Resource    Prod Rate    Max Prod    Onshore%    OffSTAT%    OffFED%            
+    2    2011    80    0.010   30    0.5    0.5    0    !    1    BADAMI
+    2    2000    442.6    0.141    125    0.85    0.15    0    !    2    COLVILLE=ALPINE+NANUQ+FIORD+QANNIK (6-25-13)
+    1    1987    110.6    0.030    115    0    1    0    !    3    DUCK ISLAND UNIT (ENDICOTT) (8-19-09)
+    2    2540    900    0.9    50    1    0    0    !    4    NORTH SLOPE PROJECT REPRESENTING ADDITIONAL FIELDS THAT COULD BE BROUGHT ONLINE WITH ALL THE DEVELOPMENT DRILLING/EXPANSION PROGRAMS HAPPENING
+    2    1981    716.9    0.072    325    0.95    0.05    0    !    5    KUPARUK (8-19-09)
+    2    1997    390.3    0.016    20    0.95    0.05    0    !    6    W. SAK (8-19-09)
+    2    1998    5.8    0.13    10    0.95    0.05    0    !    7    TABASCO (8-19-09)
+    2    1998    49.5    0.147    30    0.95    0.05    0    !    8    TARN (8-19-09)
+    2    2001    20    0.087    10    0.95    0.05    0    !    9    KRU-SAT=Meltwater (8-19-09)
+    2    1985    386.9    0.034    60    0.4    0.6    0    !    10    MILNE PT (8-19-09)
+    2    1990    88.3    0.014   20    1    0    0    !    11    SCHRADER BLUFF=Polaris (8-19-09)
+    1    2001    71.7    0.021    72    0    0.6    0.4    !    12    N. STAR (8-19-09)
+    2    1977    2049.1    0.054    220    1    0    0    !    13    PRUDHOE=PB+PB/C (i.e., rim and cap) (8-19-09)
+    2    2001    383.5    0.018   85    0.96    0.04    0    !    14    PBU-SAT=Aurora+Borealis+MidnightSun+Orion (8-19-09)
+    2    1986    219.5    0.018   40    1    0    0    !    15    LISBURNE=PB/L (8-19-09)
+    1    1994    11.7    0.112    30    0    1    0    !    16    NIAKUK (8-19-09)
+    1    1993    145.7    0.054    160    0    1    0    !    17    MCINTYRE(8-19-09)
+    1    2030    2000    0.12  70    0.4    0.6    0    !    18    PT. THOMSON
+    1    2009    125    0.12   10    0    1    0    !    19    OOOGURUK 
+    1    2011    320    0.12   5     0    1    0    !    20    NIKAITCHUQ - Modified 9-14-12 w.r.t. resources & max prod increased based on Petro News article of 2-13-11
+    1    2530    150    0.12   65    0    0    1    !    21    LIBERTY OFFSHORE - Hilcorp purchased 50% interest from BP, filed new development plan with BOEM Jan 2015, haven't decided whether to proceed with development
+    2    2024    75     0.12   20    1    0    0    !    22    NUNA
+    3    1959    255    0.10    43    0.5    0.5    0    !    23    COOK=South Alaska 
+    2    2018    190    0.12   25    1    0    0    !    24    GREATER MOOSES TOOTH-1
+    2    2023    40     0.12   25    1    0    0    !    25    GREATER MOOSES TOOTH-2
+    2    2025    400    0.12   70    0.8    0.2    0    !    26    PIKKA Early (Nanushuk) (added Oct 2019)
+    2    2032    145    0.12   30    1    0    0    !    27    UMIAT (added Aug 2016)
+    2    2531    20     0.12   6     1    0    0    !    28    QUGRUK (added Aug 2016)
+    1    2535    200    0.12   20    0    1    0    !    29    SMITH BAY (added Oct 2016)
+    2    2027    580    0.12   140   1    0    0    !    30    WILLOW (NPRA) (added Sep 2018)
+    2    2032    90     0.12   15    0.8    0.2    0    !    31    HORSESHOE (Nanushuk) (added Jul 2019)
+    2    2526    170    0.11   35    1    0    0    !    32    PUTU/STONY HILL (added Jul 2019)
+    2    2024    350    0.12   45    0.8    0.2    0    !    33    PIKKA Full (Nanushuk) (added Aug 2016)
+    2    2021    20     0.12   6     1    0    0    !    34    MUSTANG (added Oct 2019)
+    2    2035    20     0.12   6     1    0    0    !    35    KOLOA #2 (added Oct 2019)
+    2    2024    95     0.12   15    1    0    0    !    36    AlKaid/Phecda (added Oct 2019)
+    1    2534    30     0.12   15    0    1    0    !    37    Tyonek Deep (added Oct 2019)
+    3    9999    -999    -999    -999    0.5  0.5  0    !    38    SoAK
+    3    9999    -999    -999    -999    0.5  0.5  0    !    39    SoAK
+    3    9999    -999    -999    -999    0.5  0.5  0    !    40    SoAK
+    2    2032    300    0.12      35     1    0    0    !    41    MITQUA (Nanushuk development) (added Aug 2021)
+    2    2033    190    0.12      12     1    0    0    !    42    STIRRUP (Nanushuk development) (added Aug 2021)
+    2    9999    -999    -999    -999    1    0    0    !    43    OnNorth
+    2    9999    -999    -999    -999    1    0    0    !    44    OnNorth
+    2    9999    -999    -999    -999    1    0    0    !    45    OnNorth
+    1    9999    -999    -999    -999    0    0    1    !    46    OfNorth
+    1    9999    -999    -999    -999    0    0    1    !    47    OfNorth
+    1    9999    -999    -999    -999    0    0    1    !    48    OfNorth
+    1    9999    -999    -999    -999    0    0    1    !    49    OfNorth
+    1    9999    -999    -999    -999    0    0    1    !    50    OfNorth
+    2    2036   1370    0.08   250    0.74    0.26    0    !    51    ANWR-1  Updated 2-22-18 for AEO2018
+    2    2038    700    0.08   125    0.74    0.26    0    !    52    ANWR-2
+    2    2040    700    0.08   125    0.74    0.26    0    !    53    ANWR-3
+    2    2042    700    0.08   125    0.74    0.26    0    !    54    ANWR-4
+    2    2044    360    0.1     60    0.74    0.26    0    !    55    ANWR-5
+    2    2046    360    0.1     60    0.74    0.26    0    !    56    ANWR-6
+    2    2048    360    0.1     60    0.74    0.26    0    !    57    ANWR-7
+    2    2050    360    0.1     60    0.74    0.26    0    !    58    ANWR-8
+    2    2052    360    0.1     60    0.74    0.26    0    !    59    ANWR-9  Added to list 7-29-08
+    2    2054    360    0.1     60    0.74    0.26    0    !    60    ANWR-10 Added to list 7-29-08
+    2    2056    360    0.1     60    0.74    0.26    0    !    61    ANWR-11 Added to list 9-10-12
+    2    2058    360    0.1     60    0.74    0.26    0    !    62    ANWR-12 Added to list 9-10-12
+***
+*** HISTORICAL CRUDE OIL PRODUCTION - MB/D
+*** wellak.f variable: HISTPRDCO, used in OGINIT_AK() and body of wellak.f
+*** Updated 2020 - See \\fs-f3\OEA\PNGBA\_E&PT\Albert\notebooks\AlaskaHistoryUpdate2020\
+*** Historic data from Alaska Oil and Gas Conservation Commission Monthly Production Reports
+***    
+***1990	1991	1992	1993	1994	1995	1996	1997	1998	1999	2000	2001	2002	2003	2004	2005	2006	2007	2008	2009	2010	2011	2012	2013	2014	2015	2016	2017	2018	2019	2020	2021	Comment	map	Field
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	2.002	3.151	2.549	1.849	1.587	0.771	0.000	0.416	1.316	0.600	0.000	0.000	0.221	1.204	1.308	1.244	1.071	0.951	0.995	0.848	1.433	1.637	0.862	1.182	!   1   BADAMI
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	6.112	87.545	96.003	97.486	98.890	120.035	121.225	124.571	109.052	102.527	90.095	79.492	70.830	62.039	51.051	48.488	58.832	62.901	58.402	53.234	45.691	40.988	!	2	COLVILLE=Alpine+Nanuq+Fiord+Qannik
+103.350	113.163	113.986	107.381	93.930	91.049	73.011	58.565	47.570	39.213	32.926	28.600	24.866	25.857	20.583	17.732	14.193	12.644	12.967	11.534	11.461	8.910	8.648	7.527	7.353	7.109	6.588	6.881	6.487	6.339	6.208	5.559	!	3	DUCK
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	4	Empty
+293.716	311.153	324.674	315.523	306.288	293.148	272.447	262.954	251.234	225.735	203.105	187.027	161.378	160.353	145.795	138.197	124.665	117.929	107.420	104.067	95.763	91.391	87.886	85.791	83.376	78.652	78.446	84.545	79.449	73.719	63.594	63.642	!	5	KUPARUK
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.002	1.544	3.253	4.163	5.474	6.774	7.804	11.728	11.437	18.128	17.576	16.964	18.900	15.700	15.718	14.224	15.766	16.245	13.865	13.738	14.350	22.681	22.570	20.489	20.372	!	6	W. SAK
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	1.322	5.261	5.234	3.610	2.984	4.228	4.029	4.194	3.885	2.913	3.178	1.934	2.070	1.608	1.079	1.711	1.549	1.619	1.434	1.380	1.194	1.387	1.110	0.972	!	7	TABASCO
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	9.683	26.139	24.018	22.061	32.908	33.842	28.321	22.152	20.698	15.881	15.292	14.098	11.705	10.464	7.133	5.638	7.744	9.326	8.356	7.843	6.886	6.553	5.922	4.881	!	8	TARN
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.408	7.950	5.826	6.788	5.762	3.808	2.988	2.356	2.744	2.758	2.671	2.726	1.971	1.439	1.569	1.329	0.947	0.684	0.451	0.287	0.111	!	9	KRU-SAT=Meltwater
+18.159	20.432	19.031	18.531	18.294	23.811	38.631	51.927	55.942	53.929	52.244	52.983	51.131	51.246	51.334	43.846	36.394	33.559	32.316	28.919	26.646	21.915	17.440	18.556	19.392	18.724	19.583	19.459	20.840	25.479	33.088	35.525	!	10	MILNE
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.075	1.135	1.148	2.098	2.514	2.725	3.418	2.251	2.517	4.765	3.854	4.386	4.625	5.336	4.233	3.771	4.372	4.404	3.790	4.132	3.570	6.210	7.852	!	11	SCHRADER=Polaris
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.011	0.000	0.000	0.000	0.132	1.195	0.940	1.179	1.684	1.313	1.426	2.825	3.696	3.195	2.118	1.618	!	12	N. STAR
+1288.055	1275.067	1185.171	1057.016	962.995	859.257	772.768	691.656	607.620	532.434	512.481	456.762	413.631	387.128	349.115	324.524	250.292	261.590	262.574	249.985	243.351	230.317	225.343	217.498	202.746	196.129	198.179	186.766	173.978	164.715	166.797 161.164	!	13	PRUDHOE=PB+PB/C
+0.000	0.000	0.000	3.131	3.395	2.370	1.645	0.874	1.312	6.152	5.770	12.505	38.613	48.411	44.265	43.626	40.773	37.341	33.746	35.272	29.814	26.866	25.437	23.817	20.050	21.428	17.704	18.212	17.898	16.586	16.445	20.459	!	14	PBU-SAT=Aurora+Borealis+MidnightSun+Orion
+40.189	36.482	34.294	23.212	18.756	14.943	12.232	8.225	6.763	6.037	8.775	8.366	8.398	9.138	9.041	8.356	8.833	10.222	7.526	7.302	5.800	6.361	5.786	5.286	4.566	4.297	8.180	12.532	10.363	9.573	10.140	9.249	!	15	LISBURNE=PB/L
+0.000	0.000	0.000	0.000	9.269	19.298	29.964	28.123	28.372	26.898	20.099	18.939	15.929	12.601	10.420	7.182	4.594	4.610	4.294	4.178	2.960	3.107	2.700	2.837	1.136	1.082	1.175	1.245	1.218	0.877	0.805	0.987	!	16	NIAKUK
+0.000	0.000	0.000	20.666	103.244	137.601	158.702	160.176	130.282	91.671	65.034	49.572	40.395	36.493	36.499	32.299	21.193	24.181	25.939	23.132	19.541	18.799	16.619	16.799	14.885	15.035	11.911	12.784	15.461	13.307	14.114	14.911	!	17	PT MCINTYRE
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	18	THOMSON
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	3.467	49.048	62.937	68.708	61.429	51.718	38.020	33.183	29.277	26.720	19.821	13.698	14.515	18.234	16.403	18.563	17.263	15.096	12.469	11.694	9.604	!	19	OOOGURUK+Raven+PUTR
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	20	NIKAITCHUQ
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	21	LIBERTY
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.370	0.467	0.537	0.514	0.264	0.069	0.079	0.062	0.125	0.229	0.016	0.013	!	22	Nuna (part of OOOGURUK, Torak reservoir)
+30.541	42.027	41.587	37.954	42.636	42.505	39.962	33.270	32.333	29.912	29.365	31.499	30.914	27.619	22.526	19.383	17.065	15.023	13.061	7.509	10.170	16.245	19.455	27.915	39.658	42.354	40.373	39.817	35.668	38.063	38.078	34.341	!	23	COOK=South
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	2.315	10.187	3.708	2.427	!	24	GREATER MOOSES TOOTH 1
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	25	GREATER MOOSES TOOTH 2
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	26	PIKKA EARLY
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	27	UMIAT
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	28	QUGRUK
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	29	SMITH BAY
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	30	WILLOW
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	31	HORSESHOE
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	32	PUTU/STONY HILL
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	33	PIKKA FULL
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	34	MUSTANG
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	35	KOLOA #2
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	36	ALCAID/PHECDA
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	37	TYONEK DEEP
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	38	SoAK
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	39	OfNorth1
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	40	OfNorth2
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	41	OfNorth3
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	42	OfNorth4
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	43	OfNorth5
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	44	OfNorth6
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	45	OfNorth7
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	46	OfNorth8
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	47	OfNorth9
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	48	OfNorth10
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	49	OfNorth11
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	50	OfNorth12
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	51	ANWR-1
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	52	ANWR-2
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	53	ANWR-3
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	54	ANWR-4
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	55	ANWR-5
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	56	ANWR-6
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	57	ANWR-7
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	58	ANWR-8
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	59	ANWR-9
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	60	ANWR-10
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	61	ANWR-11
+0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	!	62	ANWR-12
+***
+***
+*** HISTORICAL OIL RESERVES BY RESOURCE REGION (MMB YEAR-END) 
+*** COLUMN 1 = ONSHORE; COLUMN 2 = STATE OFFSHORE; COLUMN 3 = FEDERAL OFFSHORE
+*** Updated Aug 2016, quick and dirty approach using ratios from previous year's estimates ha... assuming they're somewhat "right"...
+*** Based on EIA U.S. Crude Oil and Natural Gas Proved Reserves released December 2015
+***    and on "AK Prod-Reserve-Resources Accounting_JULY 2015 tey.xlsx" // AK DNR Oil and Gas Reserves worksheet
+***    and "Alaska_Reserves_2013-14.xlsx"
+***
+    6138.    386.      0.  !  1990
+    5692.    391.      0.  !  1991
+    5613.    409.      0.  !  1992
+    5323.    452.      0.  !  1993
+    5117.    650.      0.  !  1994
+    4806.    774.      0.  !  1995
+    4475.    799.      0.  !  1996
+    4380.    781.      0.  !  1997
+    4345.    707.      0.  !  1998
+    4301.    599.      0.  !  1999
+    4354.    507.      0.  !  2000
+    4420.    424.      7.  !  2001
+    4105.    477.     96.  !  2002
+    3859.    471.    116.  !  2003
+    3720.    473.    134.  !  2004
+    3630.    420.    121.  !  2005
+    3418.    351.    111.  !  2006
+    3733.    341.     90.  !  2007
+    3158.    283.     66.  !  2008
+    3265.    252.     49.  !  2009
+    3381.    318.     23.  !  2010 See "AK Prod-Reserves Update (9-21-12).xls" In AK AEO2013 file
+    3514.    318.     20.  !  2011 See latest version of above spreadsheet
+    3024.    305.     23.  !  2012
+    2068.    635.    194.  !  2013
+    2039.    626.    191.  !  2014 See "Alaska_Reserves_2013-14.xlsx"
+    2039.    626.    191.  !  2015 See "Alaska_Reserves_2013-14.xlsx"
+    2039.    626.    191.  !  2016 See "Alaska_Reserves_2013-14.xlsx"
+    2039.    626.    191.  !  2017 See "Alaska_Reserves_2013-14.xlsx"
+    2039.    626.    191.  !  2018 See "Alaska_Reserves_2013-14.xlsx"
+    2039.    626.    191.  !  2019 See "Alaska_Reserves_2013-14.xlsx"
+	2039.    626.    191.  !  2020 See "Alaska_Reserves_2013-14.xlsx"
+***
+***
+***
+*** HISTORICAL NATURAL GAS RESERVES BY RESOURCE REGION (BCF YEAR-END) 
+*** COLUMN 1 = ONSHORE; COLUMN 2 = STATE OFFSHORE; COLUMN 3 = FEDERAL OFFSHORE
+*** Updated Aug 2016, quick and dirty approach using ratios from previous year's estimates ha... assuming they're somewhat "right"...
+*** Based on EIA U.S. Crude Oil and Natural Gas Proved Reserves released November/December 2015
+***    and on "AK Prod-Reserve-Resources Accounting (Aug 2014 tey).xlsx" // AK DNR Oil and Gas Reserves worksheet
+***    and "Alaska_Reserves_2013-14.xlsx"
+***
+    7030.    2270.     0.  !  1990
+    7154.    2399.     0.  !  1991
+    7051.    2587.     0.  !  1992
+    7225.    2682.     0.  !  1993
+    7356.    2377.     0.  !  1994
+    7223.    2274.     0.  !  1995
+    6872.    2422.     0.  !  1996
+    7785.    2777.     0.  !  1997
+    7133.    2794.     0.  !  1998
+    7046.    2688.     0.  !  1999
+    6757.    2480.     0.  !  2000
+    6653.    2147.     0.  !  2001
+    6584.    1884.     0.  !  2002
+    6916.    1369.     0.  !  2003
+    7226.    1181.     0.  !  2004
+    6967.    1204.     0.  !  2005
+    8892.    1353.     0.  !  2006
+   10523.    1394.     0.  !  2007
+    6748.     951.     0.  !  2008
+    7977.    1124.     0.  !  2009  Based on 2008 Production Ratios
+    7742.    1095.     0.  !  2010  Ditto
+    8332.    1179.     0.  !  2011    "
+    9126.    541.      0.  !  2012
+    5885.    1464.    34.  !  2013
+    5424.    1349.    31.  !  2014  See "Alaska_Reserves_2013-14.xlsx"
+    5424.    1349.    31.  !  2015  See "Alaska_Reserves_2013-14.xlsx"
+    5424.    1349.    31.  !  2016  See "Alaska_Reserves_2013-14.xlsx"
+    5424.    1349.    31.  !  2017  See "Alaska_Reserves_2013-14.xlsx"
+    5424.    1349.    31.  !  2018  See "Alaska_Reserves_2013-14.xlsx"
+    5424.    1349.    31.  !  2019  See "Alaska_Reserves_2013-14.xlsx"
+	5424.    1349.    31.  !  2020  See "Alaska_Reserves_2013-14.xlsx"
+***
+***
+***
+*** HISTORICAL INFERRED OIL RESOURCES BY RESOURCE REGION (MMB YEAR-END)
+*** COLUMN 1 = ONSHORE; COLUMN 2 = STATE OFFSHORE; COLUMN 3 = FEDERAL OFFSHORE
+*** "Updated" 2015, 2016 - just carried same numbers through; need to do a closer look for AEO2018
+*** BASED ON THE DIFFERENCE BETWEEN AK DNR RESERVES AND EIA RESERVES
+***
+    1758.    199.    146.  !  1990
+    1758.    199.    146.  !  1991
+    1758.    199.    146.  !  1992
+    1758.    199.    146.  !  1993
+    1758.    199.    146.  !  1994
+    1758.    199.    146.  !  1995
+    1758.    199.    146.  !  1996
+    1758.    199.    146.  !  1997
+    1758.    199.    146.  !  1998
+    1758.    199.    146.  !  1999
+    1758.    199.    146.  !  2000
+    1758.    199.    146.  !  2001
+    1758.    199.    146.  !  2002
+    1758.    199.    146.  !  2003
+    1758.    199.    146.  !  2004
+    1758.    199.    146.  !  2005
+    1758.    199.    146.  !  2006
+    1758.    199.    146.  !  2007
+    1758.    199.    146.  !  2008
+    1758.    199.    146.  !  2009
+    1758.    199.    146.  !  2010
+    1758.    199.    146.  !  2011
+    1758.    199.    146.  !  2012
+    1758.    199.    146.  !  2013
+    1758.    199.    146.  !  2014
+    1758.    199.    146.  !  2015
+    1758.    199.    146.  !  2016
+    1758.    199.    146.  !  2017
+    1758.    199.    146.  !  2018
+    1758.    199.    146.  !  2019
+	1758.    199.    146.  !  2020
+***
+***
+*** HISTORICAL INFERRED NATURAL GAS RESOURCES BY RESOURCE REGION (BCF YEAR-END)
+*** COLUMN 1 = ONSHORE; COLUMN 2 = STATE OFFSHORE; COLUMN 3 = FEDERAL OFFSHORE
+*** "Updated" 2015, 2016 - just carried same numbers through; need to do a closer look for AEO2018
+*** BASED ON THE DIFFERENCE BETWEEN AK DNR RESERVES AND EIA RESERVES
+***
+    20423.   4220.   126.  !  1990
+    20423.   4220.   126.  !  1991
+    20423.   4220.   126.  !  1992
+    20423.   4220.   126.  !  1993
+    20423.   4220.   126.  !  1994
+    20423.   4220.   126.  !  1995
+    20423.   4220.   126.  !  1996
+    20423.   4220.   126.  !  1997
+    20423.   4220.   126.  !  1998
+    20423.   4220.   126.  !  1999
+    20423.   4220.   126.  !  2000
+    20423.   4220.   126.  !  2001
+    20423.   4220.   126.  !  2002
+    20423.   4220.   126.  !  2003
+    20423.   4220.   126.  !  2004
+    20423.   4220.   126.  !  2005
+    20423.   4220.   126.  !  2006
+    20423.   4220.   126.  !  2007
+    20423.   4220.   126.  !  2008
+    20423.   4220.   126.  !  2009
+    20423.   4220.   126.  !  2010
+    20423.   4220.   126.  !  2011
+    20423.   4220.   126.  !  2012
+    20423.   4220.   126.  !  2013
+    20423.   4220.   126.  !  2014
+    20423.   4220.   126.  !  2015
+    20423.   4220.   126.  !  2016
+    20423.   4220.   126.  !  2017
+    20423.   4220.   126.  !  2018
+    20423.   4220.   126.  !  2019
+	20423.   4220.   126.  !  2020
+***
+***
+*** HISTORICAL UNDISCOVERED OIL RESOURCES BY RESOURCE REGION, INCLUDES NGL (MMB YEAR-END)
+*** COLUMN 1 = ONSHORE; COLUMN 2 = STATE OFFSHORE; COLUMN 3 = FEDERAL OFFSHORE
+*** "Updated" 2015, 2016 - didn't reevaluate information, just accounted for discoveries (none in 2014, 2015); need to do a closer look for AEO2018
+*** Based on "Alaska Resource Endowment (rev 7-9-13).xls"
+***
+    20692.    5849.    26722.  !  1990
+    20692.    5849.    26722.  !  1991
+    20689.    5846.    26722.  !  1992
+    20688.    5846.    26722.  !  1993
+    20687.    5846.    26722.  !  1994
+    20687.    5846.    26722.  !  1995
+    20677.    5846.    26722.  !  1996
+    20569.    5827.    26722.  !  1997
+    20452.    5827.    26722.  !  1998
+    20404.    5779.    26722.  !  1999
+    20325.    5779.    26722.  !  2000
+    20246.    5765.    26722.  !  2001
+    20246.    5597.    26610.  !  2002
+    20238.    5597.    26610.  !  2003
+    20238.    5597.    26610.  !  2004
+    20238.    5539.    26610.  !  2005
+    20238.    5539.    26610.  !  2006
+    20238.    5494.    26610.  !  2007
+    20237.    5494.    26610.  !  2008
+    20237.    4448.    26610.  !  2009
+    12475.    3661.    26610.  !  2010 Resources in 2011 BOEM Assessment Unchanged, includes ANWR and reduced NPRA resources, ANWR split based on Federal vs. Total
+    12475.    3661.    26610.  !  2011     Qannik and NIKAITCHUQ Discoveries taken into consideration in both 2010 & 2011
+    12347.    3654.    26610.  !  2012 Nuna discovery (Ooguruk field)
+    12347.    3654.    26610.  !  2013
+    12347.    3654.    26610.  !  2014     
+    12347.    3654.    26610.  !  2015     
+    12347.    3654.    26610.  !  2016     
+    12347.    3654.    26610.  !  2017     
+    12347.    3654.    26610.  !  2018     
+    12347.    3654.    26610.  !  2019
+	12347.    3654.    26610.  !  2020	
+***
+***
+***
+*** HISTORICAL UNDISCOVERED NATURAL GAS RESOURCES BY RESOURCE REGION (BCF YEAR-END)
+*** COLUMN 1 = ONSHORE; COLUMN 2 = STATE OFFSHORE; COLUMN 3 = FEDERAL OFFSHORE
+*** "Updated" 2015, 2016 - didn't reevaluate information, just accounted for discoveries (none in 2014, 2015); need to do a closer look for AEO2018
+*** Based on "Alaska Resource Endowment (rev 7-9-13).xls"
+***
+    120667.    13752.    132060. !  1990
+    120647.    13732.    132060. !  1991
+    120647.    13732.    132060. !  1992
+    120643.    13728.    132060. !  1993
+    120643.    13728.    132060. !  1994
+    120643.    13728.    132060. !  1995
+    120612.    13697.    132060. !  1996
+    120612.    13697.    132060. !  1997
+    120610.    13695.    132060. !  1998
+    120571.    13656.    132060. !  1999
+    120564.    13649.    132060. !  2000
+    120525.    13610.    132060. !  2001
+    120521.    13606.    132060. !  2002
+    120511.    13596.    132060. !  2003
+    120493.    13578.    132060. !  2004
+    120477.    13562.    132060. !  2005
+    120476.    13561.    132060. !  2006
+    120476.    13561.    132060. !  2007
+    120476.    13561.    132060. !  2008
+    110942.    12518.    132060. !  2009
+    110942.    12518.    131450. !  2010 Incorporated 2011 BOEM Assessment, w/ ANWR & w/ lower USGS NPRA
+    110942.    12518.    131450. !  2011
+    110942.    12518.    131450. !  2012
+    110942.    12518.    131450. !  2013
+    110942.    12518.    131450. !  2014
+    110942.    12518.    131450. !  2015
+    110942.    12518.    131450. !  2016
+    110942.    12518.    131450. !  2017
+    110942.    12518.    131450. !  2018
+    110942.    12518.    131450. !  2019
+	110942.    12518.    131450. !  2020
+*** 
+***
+*** RESERVE TECHNOLOGY FACTORS
+*** wellak.f variable: RTECHAK, used in OGDEV_AK(), OGPRO_AK
+***
+     0.0300 0.0300
+***
+*** RECOVERABLE RESOURCE ADJUSTMENT FACTOR
+*** wellak.f variable: RECADJAK, used in OGONCE_AK()
+***
+     0.00
+***
+*** STEO OIL PRODUCTION - 2 YRS (COLS: 1-2=LWOP, 3-4=Reference, 5-6=HWOP)
+*** wellak.f variable: STEO, used in main body of wellak.f
+*** Updated 8/17/16 with August 2016 STEO
+*** 
+***    LW2018    LW2019    BS2018    BS2019    HW2018    HW2019    !    Updated    2016 (August 2016 STEO numbers)
+ 	1.1	1.1	1.1	1.1	1.1	1.1	!	1	BADAMI
+ 	64.4	64.7	64.4	64.7	64.4	64.7	!	2	COLVILLE=Alpine+Nanuq+Fiord+Qannik
+ 	7.6	7.7	7.6	7.7	7.6	7.7	!	3	DUCK
+ 	0.0	0.0	0.0	0.0	0.0	0.0	!	4	Empty
+ 	78.0	78.2	78.0	78.2	78.0	78.2	!	5	KUPARUK
+ 	14.7	14.8	14.7	14.8	14.7	14.8	!	6	W.
+ 	1.0	0.9	1.0	0.9	1.0	0.9	!	7	TABASCO
+ 	6.3	5.3	6.3	5.3	6.3	5.3	!	8	TARN
+ 	2.5	3.5	2.5	3.5	2.5	3.5	!	9	KRU-SAT=Meltwater
+ 	15.5	15.6	15.5	15.6	15.5	15.6	!	10	MILNE
+ 	3.7	2.8	3.7	2.8	3.7	2.8	!	11	SCHRADER=Polaris
+ 	7.3	7.4	7.3	7.4	7.3	7.4	!	12	N.
+ 	210.2	202.7	210.2	202.7	210.2	202.7	!	13	PRUDHOE=PB+PB/C
+ 	21.9	22.0	21.9	22.0	21.9	22.0	!	14	PBU-SAT=Aurora+Borealis+MidnightSun+Orion
+ 	16.3	21.1	16.3	21.1	16.3	21.1	!	15	LISBURNE=PB/L
+ 	1.0	0.7	1.0	0.7	1.0	0.7	!	16	NIAKUK
+ 	12.7	11.8	12.7	11.8	12.7	11.8	!	17	PT
+ 	7.17	8.60	7.17	8.60	7.17	8.60	!	18	THOMSON
+ 	11.0	10.1	11.0	10.1	11.0	10.1	!	19	OOOGURUK+Raven+PUTR
+ 	20.3	20.5	20.3	20.5	20.3	20.5	!	20	NIKAITCHUQ
+ 	0.0	0.0	0.0	0.0	0.0	0.0	!	21	LIBERTY
+ 	0.05	0.05	0.05	0.05	0.05	0.0	5!	22	QANNIK
+ 	12.8	10.7	12.8	10.7	12.8	10.7	!	23	COOK=South
+          0.         0.      0.      0.      0.      0.      ! 24. OnNorth1
+          0.         0.      0.      0.      0.      0.      ! 25. OnNorth2
+          0.         0.      0.      0.      0.      0.      ! 26. OnNorth3
+          0.         0.      0.      0.      0.      0.      ! 27. OnNorth4
+          0.         0.      0.      0.      0.      0.      ! 28. OnNorth5
+          0.         0.      0.      0.      0.      0.      ! 29. OnNorth6
+          0.         0.      0.      0.      0.      0.      ! 30. OnNorth7
+          0.         0.      0.      0.      0.      0.      ! 31. OnNorth8
+          0.         0.      0.      0.      0.      0.      ! 32. OnNorth9
+          0.         0.      0.      0.      0.      0.      ! 33. OnNorth10
+          0.         0.      0.      0.      0.      0.      ! 34. OnNorth11
+          0.         0.      0.      0.      0.      0.      ! 35. SoAk1
+          0.         0.      0.      0.      0.      0.      ! 36. SoAk2
+          0.         0.      0.      0.      0.      0.      ! 37. SoAk3
+          0.         0.      0.      0.      0.      0.      ! 38. SoAk4
+          0.         0.      0.      0.      0.      0.      ! 39. OfNorth1
+          0.         0.      0.      0.      0.      0.      ! 40. OfNorth2
+          0.         0.      0.      0.      0.      0.      ! 41. OfNorth3
+          0.         0.      0.      0.      0.      0.      ! 42. OfNorth4
+          0.         0.      0.      0.      0.      0.      ! 43. OfNorth5
+          0.         0.      0.      0.      0.      0.      ! 44. OfNorth6
+          0.         0.      0.      0.      0.      0.      ! 45. OfNorth7
+          0.         0.      0.      0.      0.      0.      ! 46. OfNorth8
+          0.         0.      0.      0.      0.      0.      ! 47. OfNorth9
+          0.         0.      0.      0.      0.      0.      ! 48. OfNorth10
+          0.         0.      0.      0.      0.      0.      ! 49. OfNorth11
+          0.         0.      0.      0.      0.      0.      ! 50. OfNorth12
+          0.         0.      0.      0.      0.      0.      ! 51. ANWR-1
+          0.         0.      0.      0.      0.      0.      ! 52. ANWR-2
+          0.         0.      0.      0.      0.      0.      ! 53. ANWR-3
+          0.         0.      0.      0.      0.      0.      ! 54. ANWR-4
+          0.         0.      0.      0.      0.      0.      ! 55. ANWR-5
+          0.         0.      0.      0.      0.      0.      ! 56. ANWR-6
+          0.         0.      0.      0.      0.      0.      ! 57. ANWR-7
+          0.         0.      0.      0.      0.      0.      ! 58. ANWR-8
+          0.         0.      0.      0.      0.      0.      ! 59. ANWR-9
+          0.         0.      0.      0.      0.      0.      ! 60. ANWR-10
+          0.         0.      0.      0.      0.      0.      ! 61. ANWR-11
+          0.         0.      0.      0.      0.      0.      ! 62. ANWR-12
+***
+*** ANWR FLAG (1 is on, 0 is off)
+*** wellak.f variable: ANWRFLAG, used in OGINIT_AK()
+***
+     1
+***
+***
+*** Alaska oil pipeline status (TAPSFLAG) regarding operational status (1 is operational, 0 is non-operational), AOGSS turns variable to 0
+***        when North Slope production is equal to or less than TAPSMINIMUM; should always be "1" at the beginning of the run
+***
+     1  
+***
+***
+*** Alaska oil pipeline minimum throughput volume in 1,000 bbls per day (TAPSMINIMUM)
+***
+***     350.0
+	200.0
+***
+***
+*** Alaska North Slope Minimum Oil Production Revenue Level in 2010 dollars (TAPSMINOILREV)
+***
+     5000000000.0
+***
+***
+*** AK HISTORICAL AND STEO NGL PRODUCTION ==> OGNGLAK MB/D (updated Aug 2016)
+***
+*** 1990   1991   1992   1993   1994   1995   1996   1997   1998   1999   2000   2001   2002   2003   2004   2005   2006   2007  2008  2009  2010  2011  2012  2013  2014  2015	2016 2017 2018 2019 2020 2021
+    43.4   56.9   64.3   64.6   65.4   80.5   78.7   70.9   62.7   57.5   59.6   62.4   47.8   45.0   48.2   66.1   57.2   61.2  56.7  53.5  48.8  50.2  49.9  48.4  43.0  44.8	44.8 43.0 43.0 43.0 43.0 43.0
+***
+***
+*** FRACTION OF NORTH ALASKA NEW FIELD WILDCAT WELLS DRILLED IN THE OFFSHORE FEDERAL REGION
+***    Used by variable: NS_OFF_NFW(T-AKHYR) in OGNEW_AK
+***    Developed in June 2010 for AEO2011
+*** 1   2     3    4     5    6     7    8     9    10    11   12    13   14    15   16    17   18    19   20    21    22    23    24    25    26   27    28    29    30    31    32    33     34    35    36    37    38    39    40    41  42
+   0.0 0.0  0.05 0.075  0.1  0.125 0.15 0.175 0.2  0.225 0.25 0.275 0.3  0.325 0.35 0.375 0.4  0.425 0.45 0.475 0.5   0.5   0.5   0.5   0.5   0.5  0.5   0.5   0.5   0.5   0.5   0.5   0.5    0.5   0.5   0.5   0.5   0.5   0.5   0.5   0.5  0.5

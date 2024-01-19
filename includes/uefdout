@@ -1,0 +1,342 @@
+! -*- f90 -*-
+! $Header: m:/default/includes/RCS/uefdout,v 1.38 2019/08/13 22:02:51 rsc Exp $
+!
+!     ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
+!
+!     The user should add the following INCLUDE statement:
+!        INCLUDE(PARAMETR)
+!        INCLUDE(EMMPARM)
+!
+!     EFD OUTPUT VARIABLES
+
+!     Nerc Region; !  Ownership type 1 => Utility, 2 => Nonutility
+
+      REAL UGNCLNR(2,MNUMNR,MNUMYR) !  1 Coal Gen by Ownership Type/NERC
+      REAL UGNGFNR(2,MNUMNR,MNUMYR) !  2 Gas (Firm) Gen by Ownership Type/NERC
+      REAL UGNGINR(2,MNUMNR,MNUMYR) !  3 Gas (Int.) Gen by Ownership Type/NERC
+      REAL UGNGCNR(2,MNUMNR,MNUMYR) !  4 Gas (Comp.) Gen by Ownership Type/NERC
+      REAL UGNDSNR(2,MNUMNR,MNUMYR) !  5 DS   Gen by Ownership type/NERC
+      REAL UGNRLNR(2,MNUMNR,MNUMYR) !  6 RL   Gen by Ownership type/NERC
+      REAL UGNRHNR(2,MNUMNR,MNUMYR) !  7 RH   Gen by Ownership type/NERC
+      REAL UGNURNR(2,MNUMNR,MNUMYR) !  8 Nuc  Gen by Ownership type/NERC
+      REAL UGNPSNR(2,MNUMNR,MNUMYR) !  9 PS   Gen by Ownership type/NERC
+      REAL UGNHYNR(2,MNUMNR,MNUMYR) ! 10 Conv Hyd (Not PS) Gen by Ownership type/NERC
+      REAL UGNGENR(2,MNUMNR,MNUMYR) ! 11 Geothermal Gen by Ownership type/NERC
+      REAL UGNMSNR(2,MNUMNR,MNUMYR) ! 12 MSW Gen by Ownership type/NERC
+      REAL UGNWDNR(2,MNUMNR,MNUMYR) ! 13 Wood Total Gen by Ownership type/NERC
+      REAL UGNCFNR(2,MNUMNR,MNUMYR) ! 14 Wood Cofiring by Ownership type/NERC
+      REAL UGNSONR(2,MNUMNR,MNUMYR) ! 15 Solar thermal Gen by Ownership type/NERC
+      REAL UGNPVNR(2,MNUMNR,MNUMYR) ! 16 Photovoltaic axis tracking Gen by Ownership type/NERC
+      REAL UGNSDNR(2,MNUMNR,MNUMYR) ! 62 Diurnal storage Gen by Ownership type/NERC
+      REAL UGNPTNR(2,MNUMNR,MNUMYR) ! 17 Photovoltaic fixed tilt Gen by Ownership type/NERC
+      REAL UGNWNNR(2,MNUMNR,MNUMYR) ! 18 Wind Gen by Ownership type/NERC
+      REAL UGNWLNR(2,MNUMNR,MNUMYR) ! 19 Low speed Wind Gen by Ownership type/NERC
+      REAL UGNWFNR(2,MNUMNR,MNUMYR) ! 20 Offshore Wind Gen by Ownership type/NERC
+      REAL UGNHONR(2,MNUMNR,MNUMYR) ! 21 Hyd/Oth  Gen by Ownership type/NERC
+      REAL UGNDGNR(2,MNUMNR,MNUMYR) ! 22 Dist Gen Gas by Ownership Type/NERC
+      REAL UGNDDNR(2,MNUMNR,MNUMYR) ! 23 Dist Gen Distillate by Ownership Type/NERC
+      REAL UGNTLNR(2,MNUMNR,MNUMYR) ! 24 Tot. Gen by Ownership Type/NERC
+      REAL UFLCLNR(2,MNUMNR,MNUMYR) ! 25 COAL CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLGFNR(2,MNUMNR,MNUMYR) ! 26 GAS (FIRM) CONS BY OWNERSHIP Type/NERC
+      REAL UFLGINR(2,MNUMNR,MNUMYR) ! 27 GAS (INT.) CONS BY OWNERSHIP Type/NERC
+      REAL UFLGCNR(2,MNUMNR,MNUMYR) ! 28 GAS (COMP.) CONS BY OWNERSHIp Type/NERC
+      REAL UFLDSNR(2,MNUMNR,MNUMYR) ! 29 DS   CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLRLNR(2,MNUMNR,MNUMYR) ! 30 RL   CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLRHNR(2,MNUMNR,MNUMYR) ! 31 RH   CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLURNR(2,MNUMNR,MNUMYR) ! 32 NUC  CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLPSNR(2,MNUMNR,MNUMYR) ! 33 PS CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLHYNR(2,MNUMNR,MNUMYR) ! 34 HYD(NOT PS) CONS BY OWNERSHIp Type/NERC
+      REAL UFLOTNR(2,MNUMNR,MNUMYR) ! 35 OTH. CONS BY OWNERSHIP TYPE/NERC
+      REAL UFLDGNR(2,MNUMNR,MNUMYR) ! 36 DGen CONS Gas by Ownership Type/NERC
+      REAL UFLDDNR(2,MNUMNR,MNUMYR) ! 37 DGen CONS Distillate by Ownership Type/NERC
+      REAL UFLGTNR(2,MNUMNR,MNUMYR) ! 38 Geothermal CONS by ownership Type/NERC
+      REAL UFLWDNR(2,MNUMNR,MNUMYR) ! 39 Wood CONS by ownership Type/NERC
+      REAL UFLMSNR(2,MNUMNR,MNUMYR) ! 40 MSW  CONS by ownership Type/NERC
+      REAL UFLSONR(2,MNUMNR,MNUMYR) ! 41 Solar Thermal CONS by ownership Type/NERC
+      REAL UFLPVNR(2,MNUMNR,MNUMYR) ! 42 Solar PV CONS by ownership Type/NERC
+      REAL UFLWNNR(2,MNUMNR,MNUMYR) ! 43 Wind Onshore CONS by ownership Type/NERC
+      REAL UFLWFNR(2,MNUMNR,MNUMYR) ! 44 Wind Offshore CONS by ownership Type/NERC
+      REAL UFLTLNR(2,MNUMNR,MNUMYR) ! 45 TOT  CONS BY OWNERSHIP TYPE/NERC
+      REAL UCRCLNR(2,MNUMNR,MNUMYR) ! 46 Coal (Seq) RPS/CPS Gen/Crd by NERC
+      REAL UCRNGNR(2,MNUMNR,MNUMYR) ! 47 Natural Gas (Seq) RPS/CPS Gen/Crd by NERC
+      REAL UCRNUNR(2,MNUMNR,MNUMYR) ! 48 Nuclear RPS/CPS Gen/Crd by NERC
+      REAL UCRHYNR(2,MNUMNR,MNUMYR) ! 49 Conv Hydro (Not PS) RPS/CPS Gen/Crd by NERC
+      REAL UCRGENR(2,MNUMNR,MNUMYR) ! 50 Geothermal RPS/CPS Gen/Crd by NERC
+      REAL UCRMSNR(2,MNUMNR,MNUMYR) ! 51 MSW RPS/CPS Gen/Crd by NERC
+      REAL UCRWDNR(2,MNUMNR,MNUMYR) ! 52 Wood Total RPS/CPS Gen/Crd by NERC
+      REAL UCRCFNR(2,MNUMNR,MNUMYR) ! 53 Wood Cofiring RPS/CPS Gen/Crd by NERC
+      REAL UCRSONR(2,MNUMNR,MNUMYR) ! 54 Solar thermal RPS/CPS Gen/Crd by NERC
+      REAL UCRPVNR(2,MNUMNR,MNUMYR) ! 55 Photovoltaic axis tracking RPS/CPS Gen/Crd by NERC
+      REAL UCRPTNR(2,MNUMNR,MNUMYR) ! 56 Photovoltaic fixed tilt RPS/CPS Gen/Crd by NERC
+      REAL UCRWNNR(2,MNUMNR,MNUMYR) ! 57 Wind RPS/CPS Gen/Crd by NERC
+      REAL UCRWFNR(2,MNUMNR,MNUMYR) ! 58 OFS Wind RPS Gen/Crd by NERC
+      REAL UCRWLNR(2,MNUMNR,MNUMYR) ! 59 Low speed Wind RPS Gen/Crd by NERC
+      REAL UCRTLNR(2,MNUMNR,MNUMYR) ! 60 Total RPS/CPS Gen/Crd by NERC
+      REAL UCROTNR(2,MNUMNR,MNUMYR) ! 61 Other NG/Oil Dispatchable RPS/CPS Gen/Crd by NERC
+
+      REAL UCRCHNR(4,MNUMNR,MNUMYR) !  1 Total RPS/CPS CHP Crd by NERC (1=RS,2=CM,3=IN,4=RF)
+
+      REAL UCRPNNR(MNUMNR,MNUMYR)   !  1 Total RPS/CPS Pen/Crd by NERC
+      REAL UCRBKNR(MNUMNR,MNUMYR)   !  2 Total RPS/CPS Bnk/Crd by NERC
+      REAL UCRBSNR(MNUMNR,MNUMYR)   !  3 Total RPS/CPS Crd Baseline by NERC
+
+      REAL URPSPRC(MNUMYR)          !  1 RPS Credit Price -- National
+
+      REAL URPSCST(MNUMNR,MNUMYR)   !  1 RPS Credit Payments -- National
+      REAL URPSPEN(MNUMNR,MNUMYR)   !  2 RPS Penalty Payments -- National
+
+      REAL URPSPRCR(MNUMNR,MNUMYR)  !  3 RPS Credit Price -- Regional
+      REAL URPSCSTR(MNUMNR,MNUMYR)  !  4 RPS Credit Payments -- Regional
+      REAL URPSPENR(MNUMNR,MNUMYR)  !  5 RPS Penalty Payments -- Regional
+      REAL URPSCGG(MNUMNR,MNUMYR)   !  6 RPS Cogen Sale to Grid -- Regional
+      REAL URPSCGO(MNUMNR,MNUMYR)   !  7 RPS Cogen Own Use      -- Regional
+      REAL UPTCLNR(MNUMNR,MNUMYR)   !  8 Coal PTC Gen/Crd by NERC
+      REAL UPTNGNR(MNUMNR,MNUMYR)   !  9 Coal PTC Gen/Crd by NERC
+      REAL UPTNUNR(MNUMNR,MNUMYR)   ! 10 Coal PTC Gen/Crd by NERC
+      REAL UPTHYNR(MNUMNR,MNUMYR)   ! 11 Coal PTC Gen/Crd by NERC
+      REAL UPTGENR(MNUMNR,MNUMYR)   ! 12 Coal PTC Gen/Crd by NERC
+      REAL UPTMSNR(MNUMNR,MNUMYR)   ! 13 Coal PTC Gen/Crd by NERC
+      REAL UPTWDNR(MNUMNR,MNUMYR)   ! 14 Coal PTC Gen/Crd by NERC
+      REAL UPTCFNR(MNUMNR,MNUMYR)   ! 15 Coal PTC Gen/Crd by NERC
+      REAL UPTSONR(MNUMNR,MNUMYR)   ! 16 Coal PTC Gen/Crd by NERC
+      REAL UPTPVNR(MNUMNR,MNUMYR)   ! 17 Coal PTC Gen/Crd by NERC
+      REAL UPTPTNR(MNUMNR,MNUMYR)   ! 34 Coal PTC Gen/Crd by NERC
+      REAL UPTWNNR(MNUMNR,MNUMYR)   ! 18 Coal PTC Gen/Crd by NERC
+      REAL UPTWFNR(MNUMNR,MNUMYR)   ! 19 Coal PTC Gen/Crd by NERC
+      REAL UPTWLNR(MNUMNR,MNUMYR)   ! 35 Coal PTC Gen/Crd by NERC      
+      REAL UPTTLNR(MNUMNR,MNUMYR)   ! 20 Coal PTC Gen/Crd by NERC
+      REAL UPTCCST(MNUMNR,MNUMYR)   ! 21 PTC Payments
+      REAL UPRCLNR(MNUMNR,MNUMYR)   ! 22 Coal Price by NERC
+      REAL UPRNGNR(MNUMNR,MNUMYR)   ! 23 Gas (Avg.) Price by NERC
+      REAL UPRDSNR(MNUMNR,MNUMYR)   ! 24 DS   Price by NERC
+      REAL UPRRSNR(MNUMNR,MNUMYR)   ! 25 RS   Price by NERC
+      REAL UPRWDNR(MNUMNR,MNUMYR)   ! 26 Bio. Price by NERC
+      REAL UTSO2(MNUMNR,MNUMYR)     ! 27 Total SO2 Emissions by NERC
+      REAL UTNOX(MNUMNR,MNUMYR)     ! 28 Total NOX Emissions by NERC
+      REAL UTCO2(MNUMNR,MNUMYR)     ! 29 Total CO2 Emissions by NERC
+      REAL UTCO1(MNUMNR,MNUMYR)     ! 30 Total CO1 Emissions by NERC
+      REAL UTCAR(MNUMNR,MNUMYR)     ! 31 Total CAR Emissions by NERC
+      REAL UTHG(MNUMNR,MNUMYR)      ! 32 Total MER Emissions by NERC
+      REAL URETTLU(MNUMNR,MNUMYR)   ! 33 Util Total Retirements by Nerc
+
+!     Census Divisions
+
+      REAL UPRWDCR(MNUMCR,MNUMYR)   !  1 Bio. Price by Census
+
+!     Carbon Removal Rates
+
+      REAL XDSEL(MNUMCR,MNUMYR)     !  2 Dist. Carbon Removal Rate
+      REAL XRLEL(MNUMCR,MNUMYR)     !  3 LS Resid Carbon Removal Rate
+      REAL XRHEL(MNUMCR,MNUMYR)     !  4 HS Resid Carbon Removal Rate
+
+!     Biomass in Coal Demand Regions
+
+      REAL QBMELCL(NDREG,MNUMYR)    !  1 Biomass consumption by Coal Demand Reg
+
+!     COAL BY RANK CONVERGENCE FLAG 0 - NON CONVERGED 1 - CONVERGED
+
+      INTEGER FLAGSO2               !  1 Penalty Cost Flag 0 - Not 1 - Converged
+      REAL COSTSO2                  !  2 PENALTY COST $/TON OF SO2
+
+      REAL UCARPRC(CO2_D_GRP,MNUMYR)  !  1 Car Allowance Price -- Regional
+
+!     NGTDM Regions
+
+      REAL QGFELGR(NNGEM,MNUMYR)       !  1 NG "firm" consumption by NGTDM
+      REAL QGIELGR(NNGEM,MNUMYR)       !  2 NG "inter" consumption by NGTDM
+      REAL QGCELGR(NNGEM,MNUMYR)       !  3 NG "compet" consumption by NGTDM
+      REAL EQGFELGR(NNGEM,MNUMYR)      !  4 NG "firm" cons by NGTDM (no hist)
+      REAL EQGIELGR(NNGEM,MNUMYR)      !  5 NG "inter" cons by NGTDM (no hist)
+      REAL EQGCELGR(NNGEM,MNUMYR)      !  6 NG "compet" cons by NGTDM (no hist)
+
+!     Carbon Removal Rates
+
+      REAL XQGFELGR(NNGEM,MNUMYR)      !  7 NG "firm" rate by NGTDM
+      REAL XQGIELGR(NNGEM,MNUMYR)      !  8 NG "inter" rate by NGTDM
+      REAL XQGCELGR(NNGEM,MNUMYR)      !  9 NG "compet" rate by NGTDM
+
+!     SHARES OF COGEN CAPACITY AND GENERATION BY FUEL TYPE FOR FTABLE
+
+      REAL COALGEN(MNUMNR)       !  1 COAL COGEN SHARE BY NERC REGION
+      REAL OILGEN(MNUMNR)        !  2 OIL COGEN SHARE BY NERC REGION
+      REAL GASGEN(MNUMNR)        !  3 GAS COGEN SHARE BY NERC REGION
+      REAL RNWGEN(MNUMNR)        !  4 RENEWABLE COGEN SHARE BY NERC
+      REAL OTHGEN(MNUMNR)        !  5 OTHER COGEN SHARE BY NERC
+
+      REAL COALCAP(MNUMNR)       !  6 COAL COGEN SHARE BY NERC REGION
+      REAL OILCAP(MNUMNR)        !  7 OIL COGEN SHARE BY NERC REGION
+      REAL GASCAP(MNUMNR)        !  8 GAS COGEN SHARE BY NERC REGION
+      REAL RNWCAP(MNUMNR)        !  9 RENEWABLE COGEN SHARE BY NERC
+      REAL OTHCAP(MNUMNR)        ! 10 OTHER COGEN SHARE BY NERC
+      REAL TOTCAP(MNUMNR)        ! 11 TOTAL COGEN SHARE BY NERC
+
+      REAL CTLGEN(MNUMNR,MNUMYR)        !  1 CTL   COGEN SHARE BY NERC
+      REAL CTLCAP(MNUMNR,MNUMYR)        !  2 CTL   COGEN SHARE BY NERC
+
+!     REPORT WRITER VARIABLES FOR REGIONAL MAPPINGS
+
+      REAL UGNINR(MNUMNR,MNUMYR)        !  3 GENERATION IN PHYSICAL REGION
+      REAL UGNOTR(MNUMNR,MNUMYR)        !  4 GENERATION NOT IN REGION
+      REAL UGNSRV(MNUMNR,MNUMYR)        !  5 GENERATION IN REGION TO SERVE OTHER
+      REAL UFLINR(MNUMNR,MNUMYR)        !  6 FUEL CONSUMPTION IN PHYSICAL REGION
+      REAL UFLOTR(MNUMNR,MNUMYR)        !  7 FUEL CONSUMPTION NOT IN REGION
+      REAL UFLSRV(MNUMNR,MNUMYR)        !  8 FUEL CONSUMPTION IN REGION FOR OTHERS
+      REAL USO2INR(MNUMNR,MNUMYR)       !  9 SO2 EMISSIONS IN PHYSICAL REGION
+      REAL USO2OTR(MNUMNR,MNUMYR)       ! 10 SO2 EMISSION NOT IN PHYSICAL REGION
+      REAL UCO2INR(MNUMNR,MNUMYR)       ! 11 CARBON DIOXIDE EMISSIONS IN REGION
+      REAL UCO2OTR(MNUMNR,MNUMYR)       ! 12 CARBON DIOXIDE EMSSIONS NOT IN REGION
+      REAL UCARINR(MNUMNR,MNUMYR)       ! 13 CARBON EMISSION IN REGION
+      REAL UCAROTR(MNUMNR,MNUMYR)       ! 14 CARBON EMISSIONS NOT IN REGION
+      REAL UNOXINR(MNUMNR,MNUMYR)       ! 15 NOX EMISSION IN PHYSICAL REGIONS
+      REAL UNOXOTR(MNUMNR,MNUMYR)       ! 16 NOX EMISSION NOT IN REGIONS
+      REAL UHGINR(MNUMNR,MNUMYR)        ! 17 HG  EMISSION IN PHYSICAL REGIONS
+      REAL UHGOTR(MNUMNR,MNUMYR)        ! 18 HG  EMISSION NOT IN REGIONS
+
+      REAL UPCOALAVG(MNUMNR,MNUMYR)     !  1 Average coal price by NERC region
+
+      REAL SQGFELGR(NNGEM,MNUMYR,2)     !  1 SEASONAL UTIL FIRM NG CONSUMPTION
+      REAL SQGIELGR(NNGEM,MNUMYR,2)     !  2 SEASONAL UTIL INTER NG CONSUMPTION
+
+      REAL SQNGELGR(NNGEM,MNUMYR,3)     !  1 SEASONS, NO FIRM/INTERRUPT NG CONSUMPTION
+      REAL QNGELGR(NNGEM,MNUMYR)        !  the sum across the three seasons of SQNGELGR(NNGEM,MNUMYR,3)
+
+!     ARRAYS TO STORE ECP FUEL PRICE INFO
+
+      REAL UPMXGAS(ECP_D_DSP,MAXNFR,MNUMYR)    !  1 MAX GAS SHARE BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UPMXOIL(ECP_D_DSP,MAXNFR,MNUMYR)    !  2 MAX OIL SHARE BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UPMXCOL(ECP_D_DSP,MAXNFR,MNUMYR)    !  3 MAX COAL SHARE BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UPMXGAS_MR(ECP_D_DSP,MAXNFR,MNUMYR) !  4 MAX GAS SHARE BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UPMXOIL_MR(ECP_D_DSP,MAXNFR,MNUMYR) !  5 MAX OIL SHARE BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UPMXCOL_MR(ECP_D_DSP,MAXNFR,MNUMYR) !  6 MAX COAL SHARE BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+
+      REAL UPGASPRC(MNUMNR,MNUMYR)           !  1 AVERAGE NATURAL GAS PRICE BY EMM REGION AND YEAR
+      REAL UPDISPRC(MNUMNR,MNUMYR)           !  2 AVERAGE DISTILLATE FUEL OIL PRICE BY EMM REGION AND YEAR
+      REAL UPRESPRC(MNUMNR,MNUMYR)           !  3 AVERAGE RESIDUAL FUEL OIL PRICE BY EMM REGION AND YEAR
+      REAL UPCOLPRC(MNUMNR,MNUMYR)           !  4 AVERAGE COAL PRICE BY EMM REGION AND YEAR
+      REAL UPNUCPRC(MNUMNR,MNUMYR)           !  5 AVERAGE COAL PRICE BY EMM REGION AND YEAR
+
+      REAL UPMAXCF(ECP_D_DSP,MNUMNR,MNUMYR)    !  1 MAX CAPACITY FACTOR BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UP_XFOR(ECP_D_DSP,MNUMNR,MNUMYR)    !  2 Forced Outage Rate BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+      REAL UP_XPMR(ECP_D_DSP,MNUMNR,MNUMYR)    !  3 Planned Maintenance Rate BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
+
+!     ARRAYS TO STORE OWN USE DEMAND FOR EWG's and Non_Traditional Cogen
+
+      REAL UOUNCP(MNUMNR,MNUMYR)          !  1 EWG Own Use
+      REAL UOUCCP(MNUMNR,MNUMYR)          !  2 Non_Traditional Cogen Own Use
+
+!     ARRAYS TO STORE EMISSIONS FROM CTL FOR PMM, BY CMM REGION AND YEAR
+
+      REAL CTLNOXEM(NDREG,MNUMYR)         !  2 NOX emissions from CTL, thousand tons
+      REAL CTLSO2EM(NDREG,MNUMYR)         !  3 SO2 emissions from CTL, thousand tons
+      REAL CTLHGEM(NDREG,MNUMYR)          !  4 Mercury emissions from CTL, tons
+
+!     ARRAYS TO STORE GENERATION AND CAPACITY BY CMM REGION FOR CMM
+
+      REAL UEFD_CAP(ECP_D_DSP,NDREG,MNUMYR)  ! 1
+      REAL UEFD_GEN(ECP_D_DSP,NDREG,MNUMYR)  ! 2
+
+!     ARRAYS TO STORE GRID RESILIENCY OUTPUT
+
+      REAL UGRD_STC(MX_GRDSRC,MNUMNR,MNUMYR)    !  1 Grid Resiliency Standard (Capacity) by Source, Region, and Year
+      REAL UGRD_RTC(MX_GRDSRC,MNUMNR,MNUMYR)    !  2 Grid Resiliency Rating (Capacity) by Source, Region, and Year
+      REAL UGRD_PRC(MX_GRDSRC,MNUMNR,MNUMYR)    !  3 Grid Resiliency Price (Capacity) by Source, Region, and Year
+      REAL UGRD_CAP(MX_GRDSRC,MNUMNR,MNUMYR)    !  4 Grid Resiliency Qualifying Capacity by Source, Region, and Year
+      REAL UGRD_STG(MX_GRDSRC,MNUMNR,MNUMYR)    !  5 Grid Resiliency Standard (Generation) by Source, Region, and Year
+      REAL UGRD_RTG(MX_GRDSRC,MNUMNR,MNUMYR)    !  6 Grid Resiliency Rating (Generation) by Source, Region, and Year
+      REAL UGRD_PRG(MX_GRDSRC,MNUMNR,MNUMYR)    !  7 Grid Resiliency Price (Generation) by Source, Region, and Year
+      REAL UGRD_GEN(MX_GRDSRC,MNUMNR,MNUMYR)    !  8 Grid Resiliency Qualifying Generation by Source, Region, and Year
+      
+      INTEGER*4 UNRGNS          ! # NERC REGIONS IN EMM (.LE. MNUMNR)
+      INTEGER*4 IJUMPEMRGN      ! # NERC REGIONS TO READ IN FROM EMM INPUT FILES    
+
+!     Capture Sequestered CO2 by Coal vs Natural Gas, New vs Existing, EOR vs Saline, by Fuel Region and OGSM plus Total Saline
+!     Two Arrays
+
+!    Captured CO2 by Fuel region, 0 is national total, by OGSM region -1 is Saline, 0 is Total, by 45Q credit 0 is Total, 1 is no credit, 2 is with credit and by NEMS Year
+
+      REAL CO2_CCS(0:MAXNFR,-1:MNLNP1,0:2,MNUMYR)
+
+!     BTUs for Plants with Captures, BTUs scaled by removal rate, by plant type 0 is Total, 1 is New Coal, 2 is Existing Coal, 3 is New NG, 4 is Existing NG, by fuel region 0 is Total
+!        by 45Q Credit 0 is Total 1 is No credit, 2 is with Credit and by NEMS Year
+
+      REAL BTU_CCS(0:4,0:MAXNFR,0:2,MNUMYR)
+      
+!     EFD output Common block
+
+      COMMON/UEFDOUT/UGNCLNR, UGNGFNR, UGNGINR, UGNGCNR, UGNDSNR, UGNRLNR,  &
+         UGNRHNR, UGNURNR, UGNPSNR, UGNHYNR, UGNGENR, UGNMSNR,  &
+         UGNWDNR, UGNCFNR, UGNSONR, UGNPVNR, UGNWNNR, UGNWFNR, UGNHONR,  &
+         UGNDGNR, UGNDDNR,  &
+         UGNTLNR, UFLCLNR, UFLGFNR, UFLGINR, UFLGCNR, UFLDSNR,  &
+         UFLRLNR, UFLRHNR, UFLURNR, UFLPSNR, UFLHYNR, UFLOTNR,  &
+         UFLDGNR, UFLDDNR, UFLGTNR, UFLWDNR, UFLMSNR, UFLSONR,  &
+         UFLPVNR, UFLWNNR, UFLWFNR, UFLTLNR,  &
+         UCRCLNR, UCRNGNR, UCRNUNR,  &
+         UCRHYNR, UCRGENR, UCRMSNR, UCRWDNR, UCRCFNR, UCRSONR, UCRPVNR, &
+         UCRWNNR, UCRWFNR, UCRTLNR, UCRCHNR, UCRPNNR, UCRBKNR, UCRBSNR, &
+         URPSPRC, URPSCST, URPSPEN, URPSPRCR, URPSCSTR, URPSPENR, URPSCGG, URPSCGO,  &
+         UPTCLNR, UPTNGNR, UPTNUNR,  &
+         UPTHYNR, UPTGENR, UPTMSNR, UPTWDNR, UPTCFNR, UPTSONR, UPTPVNR, &
+         UPTWNNR, UPTWFNR, UPTTLNR, UPTCCST,  &
+         UPRCLNR, UPRNGNR, UPRDSNR, UPRRSNR, UPRWDNR,   &
+         UTSO2, UTNOX, UTCO2, UTCO1, UTCAR, UTHG, URETTLU,  &
+         UPRWDCR, XDSEL, XRLEL, XRHEL,  &
+         FLAGSO2, COSTSO2, UCARPRC,  &
+         QGFELGR, QGIELGR, QGCELGR,  &
+         EQGFELGR, EQGIELGR, EQGCELGR, XQGFELGR, XQGIELGR, XQGCELGR, &
+         COALGEN, OILGEN, GASGEN, RNWGEN, OTHGEN,  &
+         COALCAP, OILCAP, GASCAP, RNWCAP, OTHCAP, TOTCAP,  &
+         CTLGEN,  CTLCAP,  &
+         UGNINR, UGNOTR, UGNSRV, UFLINR, UFLOTR, UFLSRV, USO2INR,  &
+         USO2OTR, UCO2INR, UCO2OTR, UCARINR, UCAROTR, UNOXINR,  &
+         UNOXOTR, UHGINR, UHGOTR, SQGFELGR, SQGIELGR, SQNGELGR, QNGELGR, &
+         QBMELCL,  &
+         UPMXGAS, UPMXOIL, UPMXCOL, UPMXGAS_MR, UPMXOIL_MR, UPMXCOL_MR, &
+         UPGASPRC, UPDISPRC, UPRESPRC, UPCOLPRC, UPNUCPRC, UPMAXCF, UP_XFOR, &
+         UP_XPMR, UOUNCP, UOUCCP, CTLNOXEM, &
+         CTLSO2EM, CTLHGEM, UPCOALAVG, UCROTNR, UEFD_CAP, UEFD_GEN, &
+         UGRD_STC, UGRD_RTC, UGRD_PRC, UGRD_CAP, UGRD_STG, UGRD_RTG, UGRD_PRG, UGRD_GEN, &
+         UGNSDNR, UGNPTNR, UGNWLNR, UCRPTNR, UCRWLNR, UPTPTNR, UPTWLNR,IJUMPEMRGN,UNRGNS, CO2_CCS, BTU_CCS
+
+!     Equivalence for FILER used for data storage
+
+      EQUIVALENCE (UEFDDAT,UGNCLNR)
+
+REAL UEFDDAT(   &
+          62   *    2*MNUMNR*MNUMYR +   &                    !  UGNCLNR through UCROTNR
+          1    *    4*MNUMNR*MNUMYR +   &                    !  UCRCHNR
+          3    *    MNUMNR*MNUMYR +   &                      !  UCRPNNR through UCRBSNR    3
+          35   *    MNUMNR*MNUMYR +   &                      !  URPSCST through URETTLU   38
+          18   *    MNUMNR*MNUMYR       +  &                 !  CTLGEN through UHGOTR     56
+          1    *    MNUMNR*MNUMYR +  &                       !  UPCOALAVG                 57
+          5    *    MNUMNR*MNUMYR            +  &            !  UPGASPRC through UPNUCPRC 62
+          2    *    MNUMNR*MNUMYR            +  &            !  UOUNCP through UOUCCP     64
+          1    *    MNUMYR +  &                              !  URPSPRC                    1
+          11   *    MNUMNR         +  &                      !  COALGEN through TOTCAP    12
+          4    *    MNUMCR*MNUMYR +  &                       !  UPRWDCR through XRHEL
+          1    *    NDREG*MNUMYR +  &                        !  QBMELCL                    1
+          3    *    NDREG*MNUMYR  +  &                       !  CTLNOXEM through CTLHGEM   4
+                    1 + 1 + (1 * CO2_D_GRP * MNUMYR) + &       !  FLAGSO2, COSTSO2, UCARPRC
+          9    *    NNGEM*MNUMYR  +  &                       !  QGFELGR through XQGCELGR
+          2    *    2*NNGEM*MNUMYR          +  &             !  SQGFELGR,SQGIELGR
+          1    *    3*NNGEM*MNUMYR           +  &            !  SQNGELGR
+          1    *    NNGEM*MNUMYR             +  &            !  QNGELGR
+          6    *    ECP_D_DSP*MAXNFR*MNUMYR   +  &             !  UPMXGAS through UPMXCOL_MR
+          3    *    ECP_D_DSP*MNUMNR*MNUMYR     +  &           !  UPMAXCF through UP_XPMR
+          8    *    MX_GRDSRC*MNUMNR*MNUMYR  +  &            !  UGRD_STC through UGRD_GEN
+          2    *    ECP_D_DSP*NDREG*MNUMYR   + &               !  UEFD_CAP through UEFD_GEN
+          1    *    (1+MAXNFR)*(2+MNLNP1)*3*MNUMYR + &       !  CO2_CCS
+          1    *    5*(1+MAXNFR)*3*MNUMYR   + &             !  BTU_CCS
+          2      )                                           !  IJUMPEMRGN, UNRGNS
+          
+!     Equivalence for MAIN to test convergence on natural gas to util
+
+      REAL MUQTY(NNGEM,MNUMYR,3)
+      EQUIVALENCE(MUQTY,QGFELGR)
+
+!     Equivalence for MAIN to test conv on seasonal natural gas to util
+
+      REAL SMUQTY(NNGEM,MNUMYR,4)
+      EQUIVALENCE(SMUQTY,SQGFELGR)
+      REAL SGASQUANT(NNGEM,MNUMYR,4)
+      EQUIVALENCE(SGASQUANT,SQNGELGR)

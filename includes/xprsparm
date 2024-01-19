@@ -1,0 +1,28 @@
+! $Header: m:/default/includes/RCS/xprsparm,v 1.2 2007/05/11 12:04:05 pkc Exp $
+
+! Barrier control parameters.
+
+      integer n_numthreads    ! number of process threads. default if licensed (which it's not), =NUMPROCESSOR (4 for a dual processor, multithreader)
+      integer n_barorder      ! ordering algorithm for Cholesky factorization. 0: automatic, 1: min deg, 2: min local fill, or 3: nested dissection
+      integer n_baroutput     ! level of output: 0 no output, 1: at each iteration
+      integer n_densecollimit ! Columns with more than this are considered dense and handled specially in Cholesky factorization
+      real*8 r8_barprimalstop ! tolerance for primal infeasibilities
+      real*8 r8_bardualstop   ! tolerance for dual infeasibilities
+      real*8 r8_barstepstop   ! minimum step size
+      real*8 r8_bargapstop    ! tolerance for the duality gap (primal - dual objective)
+
+! not licensed:       n_numthreads    = 1  ! default is NUMPROCESSOR environment variable
+! default value:      n_barorder      = 0
+! default value:      n_baroutput     = 1
+! default value:      n_densecollimit = 0
+! default value:      r8_barprimalstop= 1.0D-8
+! default value:      r8_bardualstop  = 1.0D-8
+! default value:      r8_barstepstop  = 1.0D-10
+! default value:      r8_bargapstop   = 1.0D-8
+
+
+      COMMON/XPRSPARM/ n_numthreads, n_barorder, n_baroutput, n_densecollimit, &
+                       r8_barprimalstop, r8_bardualstop, r8_barstepstop, r8_bargapstop
+
+      INTEGER XPRESSSW                     ! Run XPRESS + OML
+      COMMON /XPRESSINFO/ XPRESSSW

@@ -1,0 +1,17 @@
+ IIS-OL FILES:
+ MATRIX  : F:BLENDOMT.MAT                                                  
+ SPEC    : DEFAULT.SPC                                                     
+ SOLUTION: F:BLENDOMT.MNS                                                  
+ SPI     : DEFAULT.SPI                                                     
+LP NAME:
+SPECIFICATIONS:
+IIS METHOD: REVERSE DEL/SENS
+NUMBER OF COLUMNS IN IIS:
+NUMBER OF ROWS IN IIS:
+BEGIN IIS
+BEGIN COLUMNS
+END COLUMNS
+BEGIN ROWS
+DEMAV    lower bound
+END ROWS
+END IIS

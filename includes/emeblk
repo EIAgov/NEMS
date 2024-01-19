@@ -1,0 +1,121 @@
+!  $Header: m:/default/includes/RCS/emeblk,v 1.7 2012/08/30 16:20:26 pkc Exp $
+!   Carbon Emissions Factors (million metric ton Carbon per quad Btu) (grams-C/thousand Btu)
+
+      REAL EGFRS(MNUMYR)   !  1 Natural Gas, Core - Residential
+      REAL EGFCM(MNUMYR)   !  2 Natural Gas, Core - Commercial
+      REAL EGFTR(MNUMYR)   !  3 Natural Gas, Core - Transportation
+      REAL EGFIN(MNUMYR)   !  4 Natural Gas, Core - Industrial
+      REAL EGFEL(MNUMYR)   !  5 Natural Gas, Core - Electric Power
+      REAL EGFHM(MNUMYR)   !  6 Natural Gas, Core - Hydrogen
+      REAL EGIRS(MNUMYR)   !  7 Natural Gas, Noncore - Residential
+      REAL EGICM(MNUMYR)   !  8 Natural Gas, Noncore - Commercial
+      REAL EGITR(MNUMYR)   !  9 Natural Gas, Noncore - Transportation
+      REAL EGIIN(MNUMYR)   ! 10 Natural Gas, Noncore - Industrial
+      REAL EGIEL(MNUMYR)   ! 11 Natural Gas, Noncore - Electric Power
+      REAL EGIHM(MNUMYR)   ! 12 Natural Gas, Noncore - Hydrogen
+      REAL ENGRS(MNUMYR)   ! 13 Natural Gas - Residential
+      REAL ENGCM(MNUMYR)   ! 14 Natural Gas - Commercial
+      REAL ENGTR(MNUMYR)   ! 15 Natural Gas - Transportation
+      REAL ENGIN(MNUMYR)   ! 16 Natural Gas - Industrial
+      REAL ENGEL(MNUMYR)   ! 17 Natural Gas - Electric Power
+      REAL ENGHM(MNUMYR)   ! 18 Natural Gas - Hydrogen
+      REAL ENQNGPF(MNUMYR) ! 19 Natural gas feedstocks
+      REAL EGPTR(MNUMYR)   ! 20 Natural Gas - Pipeline
+      REAL ELPIN(MNUMYR)   ! 21 Lease and Plant Fuel
+      REAL ECLRS(MNUMYR)   ! 22 Coal - Residential
+      REAL ECLCM(MNUMYR)   ! 23 Coal - Commercial
+      REAL ECLIN(MNUMYR)   ! 24 Coal - Industrial
+      REAL ECLEL(MNUMYR)   ! 25 Coal - Electric Power
+      REAL ECLHM(MNUMYR)   ! 26 Coal - Hydrogen
+      REAL EMCIN(MNUMYR)   ! 27 Metallurgical Coal - Industrial
+      REAL EMGCM(MNUMYR)   ! 28 Motor Gasoline - Commercial
+      REAL EMGTR(MNUMYR)   ! 29 Motor Gasoline - Transportation
+      REAL EMGIN(MNUMYR)   ! 30 Motor Gasoline - Industrial
+      REAL EJFTR(MNUMYR)   ! 31 Jet Fuel - Transportation
+      REAL EDSRS(MNUMYR)   ! 32 Distillate - Residential
+      REAL EDSCM(MNUMYR)   ! 33 Distillate - Commercial
+      REAL EDSTR(MNUMYR)   ! 34 Distillate - Transportation
+      REAL EDSIN(MNUMYR)   ! 35 Distillate - Industrial
+      REAL EDSEL(MNUMYR)   ! 36 Distillate - Electricity (+petroleum coke)
+      REAL EKSRS(MNUMYR)   ! 37 Kerosene - Residential
+      REAL EKSCM(MNUMYR)   ! 38 Kerosene - Commercial
+      REAL EKSIN(MNUMYR)   ! 39 Kerosene - Industrial
+      REAL ELGRS(MNUMYR)   ! 40 Liquid Petroleum Gases - Residential
+      REAL ELGCM(MNUMYR)   ! 41 Liquid Petroleum Gases - Commercial
+      REAL ELGTR(MNUMYR)   ! 42 Liquid Petroleum Gases - Transportation
+      REAL ELGIN(MNUMYR)   ! 43 Liquid Petroleum Gases - Industrial
+      REAL ERLCM(MNUMYR)   ! 44 Residual Fuel, Low Sulfur - Commercial
+      REAL ERLTR(MNUMYR)   ! 45 Residual Fuel, Low Sulfur - Transportation
+      REAL ERLIN(MNUMYR)   ! 46 Residual Fuel, Low Sulfur - Industrial
+      REAL ERLEL(MNUMYR)   ! 47 Residual Fuel, Low Sulfur - Electricity
+      REAL ERHTR(MNUMYR)   ! 48 Residual Fuel, High Sulfur - Transportation
+      REAL ERHEL(MNUMYR)   ! 49 Residual Fuel, High Sulfur - Electricity
+      REAL ERSCM(MNUMYR)   ! 50 Residual Fuel - Commercial
+      REAL ERSTR(MNUMYR)   ! 51 Residual Fuel - Transportation
+      REAL ERSIN(MNUMYR)   ! 52 Residual Fuel - Industrial
+      REAL ERSEL(MNUMYR)   ! 53 Residual Fuel - Electricity
+      REAL EOTTR(MNUMYR)   ! 54 Other Petroleum - Transportation
+      REAL EPFIN(MNUMYR)   ! 55 Petrochemical feedstocks - industrial
+      REAL EPCIN(MNUMYR)   ! 56 Petroleum coke
+      REAL ENQLGPF(MNUMYR) ! 57 Liquid Petroleum Gas Feedstocks - Industrial
+      REAL ESGIN(MNUMYR)   ! 58 Still gas  - Industrial
+      REAL EOTIN(MNUMYR)   ! 59 Other petroleum - Industrial
+      REAL EPCEL(MNUMYR)   ! 60 Petroleum coke   - Electricity
+      REAL EMETR(MNUMYR)   ! 61 Methanol - Transporation
+      REAL EETTR(MNUMYR)   ! 62 Ethanol - Transporation
+      REAL EETHM(MNUMYR)   ! 63 Ethanol - Hydrogen
+      REAL EMSEL(MNUMYR)   ! 64 Municipal Solid Waste - Electric Power
+      REAL EGFELGR(MNUMYR) ! 65 Natural gas, electric power firm
+      REAL EGIELGR(MNUMYR) ! 66 Natural gas, electric power interruptible
+      REAL EGCELGR(MNUMYR) ! 67 Natural gas, electric power competitive
+      REAL ECIIN(MNUMYR)   ! 68 Coke (for Net Coal Coke Imports, Industrial)
+      REAL EBMHM(MNUMYR)   ! 69 Biomass with Seq - Hydrogen
+! LPG breakout:
+      REAL EPRRS(MNUMYR)   ! 70 Propane - Residential
+      REAL EPRCM(MNUMYR)   ! 71 Propane - Commercial
+      REAL EPRTR(MNUMYR)   ! 72 Propane - Transportation
+      REAL EETIN(MNUMYR)   ! 73 Ethane - Industrial
+      REAL EPRIN(MNUMYR)   ! 74 Propane - Industrial
+      REAL EBUIN(MNUMYR)   ! 75 Butane - Industrial
+      REAL EISIN(MNUMYR)   ! 76 Isobutane - Industrial
+      REAL EETINPF(MNUMYR) ! 77 Ethane feedstocks - Industrial
+      REAL EPRINPF(MNUMYR) ! 78 Propane feedstocks - Industrial
+      REAL EBUINPF(MNUMYR) ! 79 Butane feedstocks - Industrial
+      REAL EISINPF(MNUMYR) ! 80 Isobutane feedstocks - Industrial
+! Other breakout:
+      REAL EPPIN(MNUMYR)   ! 81 Pentanes plus - Industrial
+      REAL EPPINPF(MNUMYR) ! 82 Pentanes plus feedstocks - Industrial
+      REAL ELUIN(MNUMYR)   ! 83 Lubricants - Industrial
+      REAL EAGTR(MNUMYR)   ! 84 Aviation gasoline - Transportation
+      REAL ELUTR(MNUMYR)   ! 85 Lubricants - Transportation
+
+!   
+      COMMON/EMEBLK/ &
+       EGFRS,EGFCM,EGFTR,EGFIN,EGFEL,EGFHM, &
+       EGIRS,EGICM,EGITR,EGIIN,EGIEL,EGIHM, &
+       ENGRS,ENGCM,ENGTR,ENGIN,ENGEL,ENGHM,ENQNGPF,EGPTR,ELPIN, &
+       ECLRS,ECLCM,ECLIN,ECLEL,ECLHM,EMCIN, &
+       EMGCM,EMGTR,EMGIN,EJFTR, &
+       EDSRS,EDSCM,EDSTR,EDSIN,EDSEL,EKSRS,EKSCM,EKSIN, &
+       ELGRS,ELGCM,ELGTR,ELGIN, &
+       ERLCM,ERLTR,ERLIN,ERLEL,ERHTR,ERHEL,ERSCM,ERSTR,ERSIN,ERSEL, &
+       EOTTR,EPFIN,EPCIN,ENQLGPF,ESGIN,EOTIN,EPCEL, &
+       EMETR,EETTR,EETHM,EMSEL, &
+       EGFELGR, EGIELGR, EGCELGR, ECIIN, EBMHM, &
+       EPRRS, EPRCM, EPRTR, EETIN, EPRIN, EBUIN, EISIN, &
+       EETINPF, EPRINPF, EBUINPF, EISINPF, &
+       EPPIN, EPPINPF, ELUIN, EAGTR, ELUTR
+
+      integer emeblk_size
+      parameter(emeblk_size=85*MNUMYR)
+      real eq_emeblk(emeblk_size)
+      equivalence(EGFRS,eq_emeblk)
+
+!  Mercury emission factors for oil and gas--not needed in restart file
+
+      REAL HGDSEL       ! 1 Distillate
+      REAL HGRLEL       ! 2 Low sulfur resid
+      REAL HGRHEL       ! 3 Hi  sulfur resid
+      REAL HGNGEL       ! 4 Natural gas
+
+      COMMON/HGEBLK/HGDSEL,HGRLEL,HGRHEL,HGNGEL

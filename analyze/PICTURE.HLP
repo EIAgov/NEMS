@@ -1,0 +1,24 @@
+  Function: Picture rows, columns and nonzeroes (in submatrix)
+  Syntax:   PICTURE [row_conditional] [,column_conditional]
+
+     If conditionals are omitted, submatrix is used.
+
+    Examples:
+
+    PICTURE *,*
+    ...Pictures all rows and columns
+
+    PICTUR  *,P X GT L
+    ...Pictures all rows and columns whose name begins with P and whose
+       level (X) is strictly greater than its Lower bound
+
+    PICTU   * S I,*
+    ...Pictures all rows whose solution Status is Infeasible and all
+       columns
+
+    PICT   *
+    ...Pictures all rows and the columns in the submatrix
+
+    PIC   S, * X EQ U
+    ...Pictures all rows whose name begins with S and all columns whose
+       activity level (X) equals its upper bound (U).

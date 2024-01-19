@@ -1,0 +1,299 @@
+#EMM DATABASE DEFINITION TABLES FOR DESCRIPTIONS WITH NO EMM VARIABLE ASSOCIATED WITH THEM
+%ECP PYEAR  % 
+# ECP Planning Year Definition Table
+  '1'  'First Year of ECP Planning Horizon '
+  '2'  'Second Year of ECP Planning Horizon'
+  '3'  'Third Year of ECP Planning Horizon '
+  '4'  'Fourth Year of ECP Planning Horizon  '
+  '5'  'Fifth Year of ECP Planning Horizon '
+  '6'  'Sixth Year of ECP Planning Horizon '
+  '7'  'Seventh Year of ECP Planning Horizon '
+  '8'  'Eighth Year of ECP Planning Horizon '
+  '9'  'Ninth Year of ECP Planning Horizon '
+  'L'  'Last Year of ECP Planning Horizon '
+%EFD DOWN   % 
+# EFD Owner Definition Table
+  '1'  'Private              ' 1
+  '2'  'Public               ' 1
+  '3'  'Non-Utility          ' 1
+  '4'  'Non-Traditional Cogen' 2
+  '5'  'Traditional Cogen    ' 3
+%EFD DWFOWN % 
+# EFD Financial Owner Definition Table
+  '1'  'Private              '
+  '2'  'Public               '
+  '3'  'Non-Utility          '
+  '4'  'Non-Traditional Cogen'
+  '5'  'Traditional Cogen    '
+%EFD DCAPFL % 
+# EFD Plant Fuel Use Definition Table
+  '1'  'Primary Fuel  '
+  '2'  'Secondary Fuel'
+  '3'  'Third Fuel    '
+%EFD DWFVIN % 
+# EFD Plant File Vintage Table
+  0  'Cancelled/Retire Pre-1990'
+  1  'On Line by or before 1990'
+  2  'Planned Additions        '
+  3  'Unplanned Additions      '
+  4  'Repowering - Before      '
+  5  'Repowering - After       '
+  6  'Planned Retrofit - Before'
+  7  'Planned Retrofit - After '
+  8  'Unplanned Retrofit-Before'
+  9  'Unplanned Retrofit-After '
+ 10  'Renewable Set-Asides     '
+ 11  'Renewable Set-Asides     '
+ 12  'Renewable Set-Asides     '
+%EFD DVIN   % 
+# EFD Vintage Table
+  '1'  'Existing'
+  '2'  'Pipeline'
+  '3'  'New     '
+%NEMS ITER  % 
+# NEMS Iteration Definition Table
+  '1'  'Nems Iteration 1 '
+  '2'  'Nems Iteration 2 '
+  '3'  'Nems Iteration 3 '
+  '4'  'Nems Iteration 4 '
+  '5'  'Nems Iteration 5 '
+  '6'  'Nems Iteration 6 '
+  '7'  'Nems Iteration 7 '
+  '8'  'Nems Iteration 8 '
+  '9'  'Nems Iteration 9 '
+ '10'  'Nems Iteration 10'
+%EFD ITER   % 
+# EFD Iteration Definition Table
+  '1'  'EFD Iteration 1 '
+  '2'  'EFD Iteration 2 '
+  '3'  'EFD Iteration 3 '
+  '4'  'EFD Iteration 4 '
+  '5'  'EFD Iteration 5 '
+  '6'  'EFD Iteration 6 '
+  '7'  'EFD Iteration 7 '
+  '8'  'EFD Iteration 8 '
+  '9'  'EFD Iteration 9 '
+ '10'  'EFD Iteration 10'
+%EFD EFP PT %
+####  EFDEFPT EFD Type to EFP Type Mapping
+ '01 - Coal Steam pre-  1965            '    1
+ '02 - Coal Steam post- 1965            '    1
+ '03 - Coal Steam with Scrubber         '    1
+ '04 - New Coal Steam                   '    1
+ '05 - Other New Coal Steam             '    1
+ '06 - New Advanced Coal                '    1
+ '07 - IGCC with NG Cofiring            '    1
+ '08 - New Coal w/Partial Sequestration '    1
+ '09 - New Adv. Coal with Sequestration '    1
+ '10 - Coal to Gas Retrofit             '    3
+ '11 - Oil Steam                        '    3
+ '12 - Gas Steam                        '    3
+ '13 - Oil/Gas Steam                    '    3
+ '14 - Internal Combustion Engine       '    9
+ '15 - Oil Turbine                      '    9
+ '16 - Gas Turbine                      '    9
+ '17 - Oil/Gas Turbine                  '    9
+ '18 - Aeroderivative Turbine           '    9
+ '19 - Advanced Turbine                 '    9
+ '20 - Oil Combined Cycle               '    5
+ '21 - Gas Combined Cycle               '    5
+ '22 - Oil/Gas Combined Cycle           '    5
+ '23 - Advanced Combined Cycle          '    5
+ '24 - New Advanced Combined Cycle      '    5
+ '25 - Adv. Combined Cyc w/Sequestration'    5
+ '26 - Fuel Cell                        '    5
+ '27 - Conventional Nuclear             '   10
+ '28 - Advanced Nuclear                 '   10
+ '29 - SMR Advanced Nuclear             '   10
+ '30 - Greenfield Nuclear               '   10
+ '31 - Wood/Biomass                     '    4
+ '32 - Biomass IGCC                     '    4
+ '33 - Geothermal                       '    4
+ '34 - Advanced Geothermal              '    4
+ '35 - Municipal Solid Waste            '    4
+ '36 - Conventional Hydroelectric       '   12
+ '37 - Advanced Hydroelectric           '   12
+ '38 - Hydroelectric in Stream          '   12
+ '39 - Hydroelectric Tidal              '   12
+ '40 - Reversible Hydroelectric         '   11
+ '41 - Quick Response Storage           '   11
+ '42 - Diurnal Storage                  '   11
+ '43 - Other Storage                    '   11
+ '44 - Wind                             '    4
+ '45 - Wind Low Speed                   '    4
+ '46 - Wind  OffShore                   '    4
+ '47 - Solar Thermal                    '    4
+ '48 - Solar Thermal w/Storage          '    4
+ '49 - Solar Thermal w/Storage 2        '    4
+ '50 - Solar Photovoltaic               '    4
+ '51 - Solar Photovoltaic w/Axis Track  '    4
+ '52 - Other Intermittent               '    4
+ '53 - Distributed Generation-Base      '    5
+ '54 - Distributed Generation-Peak      '    9
+%CENSUS REG % 
+# Census Region Definition Table
+  '1' 'New England       '
+  '2' 'Middle Atlantic   '
+  '3' 'East North Central'
+  '4' 'West North Central'
+  '5' 'South Atlantic    '
+  '6' 'East South Central'
+  '7' 'West South Central'
+  '8' 'Mountain          '
+  '9' 'Pacific           '
+ '10' 'California        '
+ '11' 'Total US          '
+%SO2 CMPGRP % 
+# SO2 Compliance Group Definition Table
+  '1' 'National/East SO2 Constraint'
+  '2' 'West SO2 Constraint'
+%EFP EUSE   %
+# EFP End Use Definition Table 
+  '1'  'Residential - Space Heating     '
+  '2'  'Residential - Cooling           '
+  '3'  'Residential - Water Heating     '
+  '4'  'Residential - Cooking           '
+  '5'  'Residential - Clothes Dryers    '
+  '6'  'Residential - Refrigeration     '
+  '7'  'Residential - Freezers          '
+  '8'  'Residential - Lighting          '
+  '9'  'Residential - Appliances/Other  '
+ '10'  'Residential - Secondary Heating '
+ '11'  'Commercial - Space Heating      '
+ '12'  'Commercial - Space Cooling      '
+ '13'  'Commercial - Water Heating      '
+ '14'  'Commercial - Ventilation        '
+ '15'  'Commercial - Cooking            '
+ '16'  'Commercial - Lighting           '
+ '17'  'Commercial - Refrigeration      '
+ '18'  'Commercial - Office Equip, PC   '
+ '19'  'Commercial - Office Equip, NonPC'
+ '20'  'Commercial - Other              '
+ '21'  'Industrial - Primary            '
+ '22'  'Industrial - Shift              '
+ '23'  'Industrial - Miscellaneous      '
+ '24'  'Transportation - Light Trains   '
+ '25'  'Transportation - Vehicle        '
+%EFP DSECT  %
+# EFP Demand Sector Index
+  '1'  'Residential   '
+  '2'  'Commercial    '
+  '3'  'Industrial    '
+  '4'  'Transportation'
+  '5'  'All Sectors   '
+%EFP SPROD  %
+# EFP Stage of Production Index
+  '1'  'Production  '
+  '2'  'Transmission'
+  '3'  'Distribution'
+  '4'  'Average all functions'
+%EFP OWNER  %
+# EFP Owner Index
+  '1'  'Private'
+  '2'  'Public '
+  '3'  'All Owners'
+%EFP PTYPE  %
+# EFP Plant Type Index
+  '1'  'All Coal                    '
+  '2'  'Equivalent Regulatory Assets'
+  '3'  'Oil/Gas Steam               '
+  '4'  'Renewables                  '
+  '5'  'Combined Cycle              '
+  '6'  'Cancelled Plant             '
+  '7'  'Miscellaneous               '
+  '8'  'Scrubbed/Retrofitted        '
+  '9'  'Turbines                    '  
+ '10'  'Nuclear                     '
+ '11'  'Pumped Storage              '
+ '12'  'Conventional Hydro          '
+ '13'  'Transmission                '
+ '14'  'Distribution                '
+%EMM FTABCAP%
+# EMM FTAB Capacity Type Index
+  '1'  'Coal Steam               '
+  '2'  'Other Fossil Steam       '
+  '3'  'Combined Cycle           '
+  '4'  'Combustion Turbine/Diesel'
+  '5'  'Nuclear Power            '
+  '6'  'Pumped Storage           '
+  '7'  'Fuel Cells               '
+  '8'  'Renewable Sources        '
+  '9'  'Distributed Gen (Nat Gas)'
+%EMM FTABFUL%
+# EMM FTAB Fuel Type Index    
+  '1'  'Coal                     '
+  '2'  'Petroleum                '
+  '3'  'Natural Gas              '
+  '4'  'Nuclear Power            '
+  '5'  'Pumped Storage/Other     '
+  '6'  'Renewable Sources        '
+  '7'  'Distributed Gen (Nat Gas)'
+%EMM FTABOWN%
+# EMM FTAB Own Type Index    
+  '1'  'Electric Power Sector    ' 'EPS'
+  '2'  'Combined Heat and Power  ' 'CHP'
+  '3'  'Traditional Cogen        ' 'COGEN'
+%IEA CAPCAT %
+  '1'  'Coal'
+  '2'  'Oil'
+  '3'  'Gas'
+  '4'  'Nuclear'
+  '5'  'Hydro'   
+  '6'  'Geothermal'
+  '7'  'Wind/Solar'
+  '8'  'Combust' 
+%IEADCAPMAP %
+  '1'   1
+  '2'   1
+  '3'   1
+  '4'   1
+  '5'   1
+  '6'   1
+  '7'   1
+  '8'   1
+  '9'   1
+  '10'  3
+  '11'  2
+  '12'  3
+  '13'  3
+  '14'  3
+  '15'  2
+  '16'  3
+  '17'  3
+  '18'  3
+  '19'  3
+  '20'  3
+  '21'  3
+  '22'  3
+  '23'  3
+  '24'  3
+  '25'  3
+  '26'  3
+  '27'  4
+  '28'  4
+  '29'  4
+  '30'  4
+  '31'  8
+  '32'  8
+  '33'  6
+  '34'  6
+  '35'  8
+  '36'  5
+  '37'  5
+  '38'  5
+  '39'  5
+  '40'  5
+  '41'  7
+  '42'  7
+  '43'  7
+  '44'  7
+  '45'  7
+  '46'  7
+  '47'  7
+  '48'  7
+  '49'  7
+  '50'  7
+  '51'  7
+  '52'  7
+  '53'  2
+  '54'  3

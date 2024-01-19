@@ -1,0 +1,23 @@
+* DISTRIB.RUL is a rule file for FOREST LP to experiment with
+* different views of distribution (D1, D2, D3).
+
+$IF %PROBLEM = FOREST THEN GOTO BEGIN
+Sorry, distribution analysis has been prepared for only the
+FOREST model.
+$EXIT
+
+:BEGIN
+$IF %SWSYN = F THEN ANALYZE READ SYN
+$IF @%%2 = @ THEN SET 2=1
+$ANALYZE STRING D=D%%2
+INCLUDE BLKSAVE
+INCLUDE 'D
+* THE INCLUDE FILE MUST GOTO EXIT FOR A NORMAL RETURN;  ELSE,
+* FALL THRU TO ERROR STATEMENT BEFORE EXIT.
+
+:ERR
+ Sorry, there seems to be an error in the model syntax.
+:EXIT
+* RESTORE BLOCKS, IF THERE WERE ANY
+$IF %%BLOCKS > 0 THEN ANALYZE BL LOAD
+$EXIT

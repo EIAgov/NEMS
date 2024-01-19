@@ -1,0 +1,83 @@
+
+               M I N O S    ---    VERSION  5.0    SEP  1985
+               = = = = =
+
+
+ SPECS FILE
+ ----------
+            BEGIN
+            MINIMIZE
+            ROWS 500
+            SOLUTION FILE       108
+            END
+1
+ MPS FILE
+ --------
+      1    NAME          RATETST
+      2    ROWS
+      6    COLUMNS
+     10    RHS
+     12    ENDATA
+
+
+
+ NAMES SELECTED
+ --------------
+ OBJECTIVE      OBJ      (MIN)       1
+ RHS            RHS                  2
+ RANGES                              0
+ BOUNDS                              0
+
+
+
+ MATRIX STATISTICS
+ -----------------
+               TOTAL      NORMAL        FREE       FIXED     BOUNDED
+ ROWS              3           0           1           0           2
+ COLUMNS           2           2           0           0           0
+
+ NO. OF MATRIX ELEMENTS        5     DENSITY      83.333
+ NO. OF REJECTED COEFFS        0      AIJTOL 1.00000E-10
+ BIGGEST AND SMALLEST COEFFS   2.00000E+00   1.00000E+00  (EXCLUDING OBJ AND RHS)
+
+ LENGTH OF ROW-NAME HASH TABLE          1009
+ COLLISIONS DURING TABLE LOOKUP            0
+
+ NONZEROS ALLOWED FOR IN LU FACTORS    19947
+1
+ INITIAL BASIS
+ -------------
+
+
+ CRASH OPTION  1
+ FREE ROWS     1     FREE COLS     0     PASS2 (E ROWS)     0     PASS3     1  
+   REMAINDER     1
+
+
+ SOLUTION  SAVED ON FILE 108
+1
+ PROBLEM NAME   RATETST               OBJECTIVE VALUE   -5.0000000000E+00
+
+ STATUS         OPTIMAL SOLN          ITERATION    1     SUPERBASICS    0
+
+ OBJECTIVE      OBJ      (MIN)
+ RHS            RHS
+ RANGES
+ BOUNDS
+
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+       3  OBJ         BS        -5.00000         5.00000           NONE            NONE         -1.00000      1
+       4  R1          UL        15.00000         0.00000           NONE         15.00000        -0.66667      2
+       5  R2          LL        15.00000         0.00000        15.00000           NONE          0.33333      3
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  X1          BS         5.00000        -1.00000         0.00000           NONE          0.00000      4
+       2  X2          BS         5.00000         0.00000         0.00000           NONE          0.00000      5
+
+ ENDRUN

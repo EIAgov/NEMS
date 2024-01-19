@@ -1,0 +1,39 @@
+! $Header: M:/default/includes/RCS/bifurc,v 1.3 2011/10/07 13:37:07 dsa Exp $
+! bifurc  -- global data to store fossil energy use by covered and uncovered entities in
+!            the commercial and industrial sectors.  Covered entities would be those
+!            subject to a carbon allowance requirement and react to the opportunity cost incentives from
+!            carbon allowance trading.
+!
+    REAL*4 QE2NGCM(MNUMCR,MNUMYR,2) ! Natural Gas     - Commercial by 1: covered and 2: uncovered entities
+    REAL*4 QE2CLCM(MNUMCR,MNUMYR,2) ! Coal            - Commercial by 1: covered and 2: uncovered entities
+    REAL*4 QE2MGCM(MNUMCR,MNUMYR,2) ! Motor Gasoline  - Commercial by 1: covered and 2: uncovered entities
+    REAL*4 QE2DSCM(MNUMCR,MNUMYR,2) ! Distillate      - Commercial by 1: covered and 2: uncovered entities
+    REAL*4 QE2KSCM(MNUMCR,MNUMYR,2) ! Kerosene        - Commercial by 1: covered and 2: uncovered entities
+    REAL*4 QE2LGCM(MNUMCR,MNUMYR,2) ! Liquid Pet.Gases- Commercial by 1: covered and 2: uncovered entities
+    REAL*4 QE2RSCM(MNUMCR,MNUMYR,2) ! Residual Fuel   - Commercial by 1: covered and 2: uncovered entities
+
+    REAL*4 QE2NGIN(MNUMCR,MNUMYR,2) ! Natural Gas.  Industrial
+    REAL*4 QE2LPIN(MNUMCR,MNUMYR,2) ! Lease and Plant Fuel
+    REAL*4 QE2CLIN(MNUMCR,MNUMYR,2) ! Coal.  Industrial
+    REAL*4 QE2MCIN(MNUMCR,MNUMYR,2) ! Metallurgical Coal.  Industrial
+    REAL*4 QE2MGIN(MNUMCR,MNUMYR,2) ! Motor Gasoline.  Industrial
+    REAL*4 QE2DSIN(MNUMCR,MNUMYR,2) ! Distillate.  Industrial
+    REAL*4 QE2KSIN(MNUMCR,MNUMYR,2) ! Kerosene.  Industrial
+    REAL*4 QE2LGIN(MNUMCR,MNUMYR,2) ! Liquid Petroleum Gases.  Industrial
+    REAL*4 QE2RSIN(MNUMCR,MNUMYR,2) ! Residual Fuel.  Industrial
+    REAL*4 QE2PFIN(MNUMCR,MNUMYR,2) ! Petrochemical Feedstocks.  Industrial
+    REAL*4 QE2SGIN(MNUMCR,MNUMYR,2) ! Still Gas.  Industrial
+    REAL*4 QE2PCIN(MNUMCR,MNUMYR,2) ! Petroleum Coke.  Industrial
+    REAL*4 QE2ASIN(MNUMCR,MNUMYR,2) ! Asphalt and Road Oil.  Industrial
+    REAL*4 QE2OTIN(MNUMCR,MNUMYR,2) ! Other Petroleum.  Industrial
+    REAL*4 QE2CIIN(MNUMCR,MNUMYR,2) ! Net Coal Coke Imports.  Industrial
+
+    COMMON/BIFURC/ QE2NGCM,QE2CLCM,QE2MGCM,QE2DSCM,QE2KSCM,QE2LGCM, &
+                   QE2RSCM,QE2NGIN,QE2LPIN,QE2CLIN,QE2MCIN,QE2MGIN, &
+                   QE2DSIN,QE2KSIN,QE2LGIN,QE2RSIN,QE2PFIN,QE2SGIN, &
+                   QE2PCIN,QE2ASIN,QE2OTIN,QE2CIIN
+
+
+    real*4 EQ_BIFURC(MNUMCR*MNUMYR*44) ! equivalence for filer and restart file
+    equivalence(EQ_BIFURC(1),QE2NGCM(1,1,1))
+      

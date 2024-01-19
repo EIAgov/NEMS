@@ -1,0 +1,616 @@
+!     $Header: M:/default/includes/RCS/wrenew,v 1.38 2019/02/23 17:42:23 dgr Exp $
+!
+!     Renewables COMMON Block
+
+      INTEGER MNUMSO    ! TOTAL NUMBER OF SOLAR SUBPERIODS
+      INTEGER MNUMWI    ! TOTAL NUMBER OF WIND SUBPERIODS
+      INTEGER MNUMCL    ! TOTAL NUMBER OF WIND CLASSES
+      INTEGER MNUMSL    ! TOTAL NUMBER OF Solar CLASSES
+      INTEGER WNTECH    ! NUMBER OF RENEWABLE TECHNOLOGIES
+                        ! 1)HYDRO, 2)GEOTH FLASH, 3)GEOTH BINARY,
+                        ! 4) GEOTH PUMP, 5) MSW; 6) WOOD; 7) SOLAR TH
+                        ! 8) PHOTOV; 9) WIND  10) OFFShore Wind 11) ONShore Wind
+      INTEGER MSPTMX    ! Max. number supply step in supply function
+      INTEGER FSTPMX    ! Number of Sectors using Biomass
+      INTEGER WRSIZE    ! TOTAL NUMBER OF WORDS IN THIS COMMON BLOCK
+
+      PARAMETER (MNUMSO=9)
+      PARAMETER (MNUMWI=9)
+      PARAMETER (MNUMCL=4)
+      PARAMETER (MNUMSL=6)
+      PARAMETER (WNTECH=13)     ! OFS
+      PARAMETER (MSPTMX=3)
+      PARAMETER (FSTPMX=6)
+
+      INTEGER NUMETHQ             ! Number of ethanol steps PMM passes to RFM
+      INTEGER MIDETHQ             ! The actual (middle) step containing current demand
+      Parameter (NUMETHQ=6)
+      Parameter (MIDETHQ=3)
+
+      Integer NWDSUPQ,NWDSUPP,MNUMFS
+      Parameter(NWDSUPQ=50,NWDSUPP=50,MNUMFS=4)        ! moved from wwdcomon
+
+      PARAMETER (WRSIZE =                                        &
+         (MNUMNR * MNUMYR)                                  +    & ! WCAHYEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRHYEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCCHYEL
+         (MNUMNR * MNUMYR)                                  +    & ! WOCHYEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCFHYEL
+         (MNUMNR * MNUMYR)                                  +    & ! WVCHYEL
+         (MNUMNR * MSPTMX * 12 * MNUMYR)                    +    & ! WMFHYEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCAGPEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCCGPEL
+         (MNUMNR * MNUMYR)                                  +    & ! WOCGPEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCFGPEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRGPEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCAMSEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCFMSEL
+         (MNUMNR * MNUMYR)                                  +    & ! WVCMSEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRMSEL
+         (MNUMYR * MNUMNR)                                  +    & ! WNGMSEL
+         (MNUMYR * MNUMCR)                                  +    & ! WNGMSELC
+         (MNUMYR * MNUMCR)                                  +    & ! WNCMSEL
+         (MNUMYR * MNUMNR)                                  +    & ! WNCMSELN
+         (MNUMNR * MNUMYR)                                  +    & ! WCABMEL
+         (MNUMYR)                                           +    & ! WVCBMEL
+         (NDREG * MNUMYR)                                   +    & ! WFPBMEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRBMEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCASTEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRSTEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCAPVEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRPVEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCAWIEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRWIEL
+         (MNUMNR * MNUMYR)                                  +    & ! WCAWFEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRWFEL
+         (MNCROP * MNUMCR * MNUMYR * MNETOH)                +    & ! WPETOH
+         (MNCROP * MNUMCR * MNUMYR * MNETOH)                +    & ! WQETOH
+         (NDREG * MNUMYR)                                   +    & ! WPSBMEL
+         (NDREG * FSTPMX)                                   +    & ! WQSBMEL
+         (1)                                                +    & ! WSTBMEL
+         (MNPOLLUT * MNUMYR)                                +    & ! WEMMSEL
+         (MNPOLLUT * MNUMNR * MNUMYR)                       +    & ! WEMGPEL
+         (MNUMNR * MNUMYR * MNUMCL * MNUMWI)                +    & ! WSFWIEL
+         (MNUMNR * MNUMYR)                                  +    & ! WWNTD
+         (MNUMNR * MNUMYR * MNUMCL * MNUMWI)                +    & ! WSFWFEL
+         (MNUMNR * MNUMYR)                                  +    & ! WWFTD
+         (MNUMNR * MNUMYR * MNUMSO)                         +    & ! WSSSTEL
+         (MNUMNR * MNUMYR * MNUMSO)                         +    & ! WSSPVEL
+         (WNTECH * MNUMNR)                                  +    & ! WBTECH
+         (MNUMNR * WNTECH * MSPTMX)                         +    & ! UTCSFN
+         (WNTECH * MSPTMX)                                  +    & ! UTCAFN
+         (WNTECH)                                           +    & ! UTCSSW
+         (MNUMCR * MNUMYR * NUMETHQ)                        +    & ! QBMET
+         (MNUMCR * MNUMYR * NUMETHQ)                        +    & ! PBMET
+         (MNUMCR * MNUMYR)                                  +    & ! PMMBMDUAL
+         (MNUMYR)                                           +    & ! EFFMULST
+         (MNUMYR)                                           +    & ! EFFMULPV
+         (MNUMYR * MNUMCR)                                  +    & ! QNGETH
+         (MNUMYR * MNUMCR)                                  +    & ! QCLETH
+         (MNUMYR * MNUMCR)                                  +    & ! QELETH
+         (NDREG * FSTPMX * MNUMYR)                          +    & ! XQSBMEL
+         (MNUMCR * (MNUMYR + 5) * NWDSUPQ)                  +    & ! WDPMMCURVQ
+         (MNUMCR * (MNUMYR + 5) * NWDSUPP)                  +    & ! WDPMMCURVP
+         (MNUMYR * NDREG * NUMETHQ)                         +    & ! CLPriceET
+         (MNUMYR * NDREG)                                   +    & ! CLPricePW
+         (MNUMYR * NDREG * NUMETHQ)                         +    & ! WDQCLETGLOB
+         (NDREG * MNUMYR)                                   +    & ! EMMBMDUAL
+         (NDREG * MNUMYR)                                   +    & ! PWRFRAC
+         (NDREG * (MNUMYR + ECP_D_FPH) * NWDSUPQ)             +    & ! WDSUPQW
+         (NDREG * (MNUMYR + ECP_D_FPH) * NWDSUPP)             +    & ! WDSUPPW
+         (MNUMYR)                                           +    & ! WDCFSUB
+         (MNUMYR)                                           +    & ! WDCFHUR
+         (NWDSUPQ * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_Q_UM
+         (NWDSUPQ * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_Q_FR
+         (NWDSUPQ * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_Q_AG
+         (NWDSUPQ * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_Q_EC
+         (NWDSUPP * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_P_UM
+         (NWDSUPP * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_P_FR
+         (NWDSUPP * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_P_AG
+         (NWDSUPP * NDREG * (MNUMYR + ECP_D_FPH))             +    & ! WDSUP_P_EC
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMASCL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMRSCL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMCMCL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMINCL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMH2CL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMPWCL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMETCL
+         ((MNUMFS + 1) * (NDREG + 1) * (MNUMYR + ECP_D_FPH))  +    & ! QBMBTCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMASCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMRSCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMCMCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMINCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMH2CL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMPWCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMETCL
+         ((MNUMFS + 1) * (NDREG + 1) * MNUMYR)              +    & ! PBMBTCL
+         (MNUMCR * MNUMYR)                                  +    & ! QBMRFET
+         (MNUMCR * MNUMYR)                                  +    & ! PBMRFET
+         (MNUMCR * MNUMYR)                                  +    & ! QBMRFBT
+         (MNUMCR * MNUMYR)                                  +    & ! PBMRFBT
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! CRNSUP_TOT_Q
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! CRNSUP_ETH_Q
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! CRNSUP_P
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! SOYOILSUP_TOT_Q
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! SOYOILSUP_BIOD_Q
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! SOYOILSUP_P
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! SOYSUP_TOT_Q   
+         (10 * (NDREG + 1) * (MNUMYR + ECP_D_FPH))            +    & ! SOYSUP_P   
+         (1)                                                +    & ! SM_BM_RS
+         (1)                                                +    & ! SM_BM_CM
+         (1)                                                +    & ! SM_BM_IN
+         (1)                                                +    & ! SM_BM_H2
+         (1)                                                +    & ! SM_BM_PW
+         (1)                                                +    & ! SM_BM_ET
+         (1)                                                +    & ! SM_BM_BT
+         (MNUMFS)                                           +    & ! MP_BM_RS
+         (MNUMFS)                                           +    & ! MP_BM_CM
+         (MNUMFS)                                           +    & ! MP_BM_IN
+         (MNUMFS)                                           +    & ! MP_BM_H2
+         (MNUMFS)                                           +    & ! MP_BM_PW
+         (MNUMFS)                                           +    & ! MP_BM_ET
+         (MNUMFS)                                           +    & ! MP_BM_BT
+         (MNUMFS)                                           +    & ! WDSUP_AVL
+         (1)                                                +    & ! BM_FS_SW
+         (1)                                                +    & ! NM_BM_SUP_STP
+         (NDREG * MNUMCR)                                   +    & ! MAP_CD_TO_CL
+         (MNUMNR * WNTECH * MSPTMX)                         +    & ! UTCAFNR
+         (MNUMNR * WNTECH * MSPTMX)                         +    & ! UTFXFN
+         (MNUMNR * WNTECH * MSPTMX)                         +    & ! UTVRFN
+         (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSSSTEL_CF
+         (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSSPVEL_CF
+         (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSFWIEL_CF
+         (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSFWFEL_CF
+         (12 * 3 * 24)                                      +    & ! HrToECPgrp
+         (MNUMNR * MNUMYR)                                  +    & ! WCAWLEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRWLEL
+         (MNUMNR * MNUMYR * MNUMCL * MNUMWI)                +    & ! WSFWLEL
+         (MNUMNR * MNUMYR * MNUMSO)                         +    & ! WSSPTEL
+         (MNUMYR)                                           +    & ! EFFMULPT
+         (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSSPTEL_CF
+		 (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSSPTEL_CF_CLIP
+         (MNUMNR * MNUMYR * 3 * 12 * 24)                    +    & ! WSFWLEL_CF
+         (MNUMNR * MNUMYR)                                  +    & ! WCAPTEL
+         (MNUMNR * MNUMYR)                                  +    & ! WHRPTEL
+         (MNUMNR * MNUMYR)                                  +    & ! WWLTD
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURCL_WN
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURBF_WN
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURCL_WL
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURBF_WL
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURCL_SO
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURCL_PV
+         (MNUMNR * MNUMYR)                                  +    & ! EPCURCL_PT         
+         (ECP_D_INT * MNUMNR * MNUMYR)                        )      ! CURTAIL
+
+!     Hydroelectricity
+
+      REAL*4 WCAHYEL(MNUMNR,MNUMYR)            ! UTIL HYDRO GENER CAPACITY MW
+      REAL*4 WHRHYEL(MNUMNR,MNUMYR)            ! UTIL HYDRO HEAT RATE BTU/KWH
+      REAL*4 WCCHYEL(MNUMNR,MNUMYR)            ! UTIL HYDRO CAPITAL COST $/KW
+      REAL*4 WOCHYEL(MNUMNR,MNUMYR)            ! UTIL HYDRO FIXED OP COST mills/Kw
+      REAL*4 WCFHYEL(MNUMNR,MNUMYR)            ! UTIL HYDRO CAPACITY FACTOR FRACT
+      REAL*4 WVCHYEL(MNUMNR,MNUMYR)            ! UTIL HYDRO VAR OP COST mills/Kwh
+      REAL*4 WMFHYEL(MNUMNR,MSPTMX,12,MNUMYR)  ! UTIL HYDRO MONTHLY CAPACITY FACTORS FRACT
+
+!     NEW geothermal  capacity
+
+      REAL*4 WCAGPEL(MNUMNR,MNUMYR)            ! New Capacity GEOTH GENER CAPACITY MW
+      REAL*4 WCCGPEL(MNUMNR,MNUMYR)            ! New Capacity GEOTH CAPITAL COST $/KW
+      REAL*4 WOCGPEL(MNUMNR,MNUMYR)            ! New Capacity GEOTH FIXED OP COST mills/Kw
+      REAL*4 WCFGPEL(MNUMNR,MNUMYR)            ! New Capacity GEOTH CAPACITY FACTOR FRACT
+      REAL*4 WHRGPEL(MNUMNR,MNUMYR)            ! New Capacity GEOTH HEAT RATE BTU/KWH
+
+!     Electricity from municipal solid waste at utilities
+
+      REAL*4 WCAMSEL(MNUMNR,MNUMYR)            ! UTIL MSW GENER CAPACITY MW
+      REAL*4 WCFMSEL(MNUMNR,MNUMYR)            ! UTIL MSW CAPACITY FACTOR FRACT
+      REAL*4 WVCMSEL(MNUMNR,MNUMYR)            ! UTIL MSW VAR OP COST mills/Kwh
+      REAL*4 WHRMSEL(MNUMNR,MNUMYR)            ! UTIL MSW HEAT RATE BTU/KWH
+      REAL*4 WNGMSEL(MNUMYR,MNUMNR)            ! UTIL MSW NON-BIO generation to be subtracted from msw gen, BKWH - by EMM region
+      REAL*4 WNGMSELC(MNUMYR,MNUMCR)           ! UTIL MSW NON-BIO generation to be subtracted from msw gen, BKWH - by Census
+      REAL*4 WNCMSEL(MNUMYR,MNUMCR)            ! UTIL MSW NON-BIO consumption to be subtracted from msw con, QUAD - by Census
+      REAL*4 WNCMSELN(MNUMYR,MNUMNR)           ! UTIL MSW NON-BIO consumption to be subtracted from msw con, QUAD - by EMM region
+
+!     Electricity from wood and other biomass
+
+      REAL*4 WCABMEL(MNUMNR,MNUMYR)            ! UTIL WOOD GENER CAPACITY MW
+      REAL*4 WVCBMEL(MNUMYR)                   ! UTIL WOOD VAR OP COST mills/Kwh
+      REAL*4 WFPBMEL(NDREG,MNUMYR)             ! UTIL WOOD FUEL PRICE $/MMBTU
+      REAL*4 WHRBMEL(MNUMNR,MNUMYR)            ! UTIL WOOD HEAT RATE BTU/KWH
+
+!     Electricity from solar thermal at utilities
+
+      REAL*4 WCASTEL(MNUMNR,MNUMYR)            ! UTIL SOLAR TH GENER CAPACITY MW
+      REAL*4 WHRSTEL(MNUMNR,MNUMYR)            ! UTIL SOLAR TH HEAT RATE BTU/KWH
+
+!     Electricity from photovoltaic at utilities
+
+      REAL*4 WCAPVEL(MNUMNR,MNUMYR)            ! UTIL PHOTOV GENER CAPACITY MW
+      REAL*4 WHRPVEL(MNUMNR,MNUMYR)            ! UTIL PHOTOV HEAT RATE BTU/KWH
+
+!     Electricity from photovoltaic fixed axis at utilities
+
+      REAL*4 WCAPTEL(MNUMNR,MNUMYR)            ! UTIL PHOTOV TILT GENER CAPACITY MW
+      REAL*4 WHRPTEL(MNUMNR,MNUMYR)            ! UTIL PHOTOV TILT HEAT RATE BTU/KWH
+      
+!     Electricity from wind
+
+      REAL*4 WCAWIEL(MNUMNR,MNUMYR)            ! UTIL WIND GENER CAPACITY MW
+      REAL*4 WHRWIEL(MNUMNR,MNUMYR)            ! UTIL WIND HEAT RATE BTU/KWH
+      INTEGER EPCURCL_WN(MNUMNR,MNUMYR)
+      INTEGER EPCURBF_WN(MNUMNR,MNUMYR)
+!
+!     Electricity from Onshore wind
+!
+      REAL*4 WCAWLEL(MNUMNR,MNUMYR)               ! UTIL ONS WIND GENER CAPACITY MW
+      REAL*4 WHRWLEL(MNUMNR,MNUMYR)               ! UTIL ONS WIND HEAT RATE BTU/KWH
+      INTEGER EPCURCL_WL(MNUMNR,MNUMYR)
+      INTEGER EPCURBF_WL(MNUMNR,MNUMYR)
+!
+!     Electricity from Offshore wind
+!
+      REAL*4 WCAWFEL(MNUMNR,MNUMYR)               ! UTIL OFS WIND GENER CAPACITY MW
+      REAL*4 WHRWFEL(MNUMNR,MNUMYR)               ! UTIL OFS WIND HEAT RATE BTU/KWH
+
+!     Ethanol supply curves:
+
+      REAL*4 WPETOH(MNCROP,MNUMCR,MNUMYR,MNETOH)  ! ETHANOL PRICE/STEP ($/BBL)
+      REAL*4 WQETOH(MNCROP,MNUMCR,MNUMYR,MNETOH)  ! ETHANOL QTY/STEP (1000 BBL/DY)
+
+!     Energy consumed to produce ethanol:
+
+      REAL QNGETH(MNUMYR,MNUMCR)               ! NATURAL GAS TOTAL BY CD, MMBTU
+      REAL QCLETH(MNUMYR,MNUMCR)               ! COAL TOTAL BY CD, MMBTU
+      REAL QELETH(MNUMYR,MNUMCR)               ! ELECTRICITY TOTAL BY CD, MMBTU
+
+!     Biomass Consumption and Prices at Coal Demand Regions
+
+      REAL*4 WPSBMEL(NDREG,MNUMYR)             ! $/MMBTU for Deliverd Biomass Utility, Ethanol and Ind. Sectors
+      REAL*4 WQSBMEL(NDREG,FSTPMX)             ! Quantity of Biomass Used in Each of 6 Sectors: 1-IN,2-ET,3-EL,4-RS,5-CM,6-H2
+      INTEGER*4 WSTBMEL                        ! Number of Supply Steps for WD
+
+!     Demand for Biomass from other sectors to use in ECP
+
+      REAL*4 XQSBMEL(NDREG,FSTPMX,MNUMYR)      ! Biomass Demand by Coal Demand Region By 6 Sectors: 1-IN,2-ET,3-EL,4-RS,5-CM,6-H2
+
+!     Emissions rates
+
+      REAL*4 WEMMSEL(MNPOLLUT,MNUMYR)          ! UTIL EMISSIONS FROM MSW LBS/MMBTU
+      REAL*4 WEMGPEL(MNPOLLUT,MNUMNR,MNUMYR)   !  EMISS FROM GEOTH  LBS/MMBTU
+
+!     Wind technology characteristics
+
+      REAL*4 WSFWIEL(MNUMNR,MNUMYR,MNUMCL,MNUMWI) ! Wind Cap Factor (DEC)
+      REAL*4 WWNTD(MNUMNR,MNUMYR)                 ! T&D cost for Wind farms
+
+!
+
+!     OFFshore Wind technology characteristics
+!
+!     REAL*4 WSCWFEL(MNUMNR,MNUMYR,MNUMCL)        ! Avail OfsWind Capacity (MW)
+
+      REAL*4 WSFWFEL(MNUMNR,MNUMYR,MNUMCL,MNUMWI) ! OfsWind Cap Factor (DEC)
+      REAL*4 WWFTD(MNUMNR,MNUMYR)                 ! T&D cost for OFSWind farms
+      
+!     ONshore Wind technology characteristics
+!
+!     REAL*4 WSCWLEL(MNUMNR,MNUMYR,MNUMCL)        ! Avail OnsWind Capacity (MW)
+
+      REAL*4 WSFWLEL(MNUMNR,MNUMYR,MNUMCL,MNUMWI) ! OnsWind Cap Factor (DEC)
+      REAL*4 WWLTD(MNUMNR,MNUMYR)                 ! T&D cost for ONSWind farms
+      
+
+!     Solar electric technology characteristics
+
+      REAL*4 WSSSTEL(MNUMNR,MNUMYR,MNUMSO)        ! Solar Thermal Supply Shape (by time pd)
+      REAL*4 WSSPVEL(MNUMNR,MNUMYR,MNUMSO)        ! Photovoltaics Supply Shape (by time pd)
+      REAL*4 WSSPTEL(MNUMNR,MNUMYR,MNUMSO)        ! Photovoltaics w/ Storage Supply Shape (by time pd)
+      INTEGER EPCURCL_SO(MNUMNR,MNUMYR)
+      INTEGER EPCURCL_PV(MNUMNR,MNUMYR)
+      INTEGER EPCURCL_PT(MNUMNR,MNUMYR)
+
+!     Capture Curtailments for intermittent capacity
+
+      REAL*4 CURTAIL(ECP_D_INT,MNUMNR,MNUMYR)
+
+!     ECP Bound Type Code for all Renewables
+
+      INTEGER*4 WBTECH(WNTECH,MNUMNR)             ! BOUND TYPE IDENTIFIER
+
+!     Supply curve for renewable energy technologies. Applied to the capital cost of the technology
+
+      REAL*4 UTCSFN(MNUMNR,WNTECH,MSPTMX)         ! Cost multiplier applied to the current capital cost for capacity addition (i)
+      REAL*4 UTCAFN(WNTECH,MSPTMX)                ! Capacity addition at cost (i) in [MW]
+      INTEGER*4 UTCSSW(WNTECH)                    ! Switch for turning on/off the capital cost supply
+                                                  ! 0 : off
+                                                  ! 1 : short turn elasticities applied
+                                                  ! 2 : long term elasticities applied
+                                                  ! 3 : both short + long term elast. applied
+                                                  ! 4 : use regional supply curves
+
+!     New variables to pass from EMM to PMM and back to account for biomass used to make ethanol
+
+      REAL*4 QBMET(MNUMCR,MNUMYR,NUMETHQ)         ! Quantity
+      REAL*4 PBMET(MNUMCR,MNUMYR,NUMETHQ)         ! Price
+      REAL*4 PMMBMDUAL(MNUMCR,MNUMYR)             ! Dual on BIOMASS row in PMM (Max willingness to pay)
+      REAL*4 EMMBMDUAL(NDREG,MNUMYR)              ! Dual on BIOMASS row in EMM (Max willingness to pay)
+      REAL*4 PWRFRAC(NDREG,MNUMYR)                ! Share of combined biomass curve to allocate to EMM
+
+!     More - Solar electric technology characteristics
+
+      REAL*4 EFFMULST(MNUMYR)                     ! Efficiency multiplier Solar Thermal
+      REAL*4 EFFMULPV(MNUMYR)                     ! Efficiency multiplier PV
+      REAL*4 EFFMULPT(MNUMYR)                     ! Efficiency multiplier PV Tilt
+
+
+
+      
+      REAL*4 WDPMMCURVQ(MNUMCR,MNUMYR+5,NWDSUPQ)  ! Wood supply curve quantities for PMM
+      REAL*4 WDPMMCURVP(MNUMCR,MNUMYR+5,NWDSUPP)  ! Wood supply curve prices for PMM
+
+      REAL CLPriceET(MNUMYR,NDREG,NUMETHQ)   ! Biomass price to ethanol by Coal Demand Region  1987$/mmbtu
+      REAL CLPricePW(MNUMYR,NDREG)           ! Biomass price to electric power sector by Coal Demand Region  1987$/mbtu
+      REAL WDQCLETGLOB(MNUMYR,NDREG,NUMETHQ) ! Biomass used by PMM fro ethanol by Coal Demand Region
+! moving these from wwdcomon - used in uefd to set up matrix
+      REAL WDSUPQW(NDREG,MNUMYR+ECP_D_FPH,NWDSUPQ)    ! holds the combined power supply quantities
+      REAL WDSUPPW(NDREG,MNUMYR+ECP_D_FPH,NWDSUPP)    ! holds the combined power supply prices
+      REAL WDCFSUB(MNUMYR)
+      REAL WDCFHUR(MNUMYR)
+
+!     Store Wood Supply Curves by Source of Supply
+!     UM=urban wood waste, FR=forestry residue, AG=agicultural residue, EC=energy crops
+
+      REAL*4 WDSUP_Q_UM(NWDSUPQ,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Quantities - Urban Wood Waste
+      REAL*4 WDSUP_P_UM(NWDSUPP,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Prices - Urban Wood Waste
+      REAL*4 WDSUP_Q_FR(NWDSUPQ,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Quantities - Forestry Residue
+      REAL*4 WDSUP_P_FR(NWDSUPP,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Prices - Forestry Residue
+      REAL*4 WDSUP_Q_AG(NWDSUPQ,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Quantities - Agricultural Waste
+      REAL*4 WDSUP_P_AG(NWDSUPP,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Prices - Agricultural Waste
+      REAL*4 WDSUP_Q_EC(NWDSUPQ,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Quantities - Energy Crops
+      REAL*4 WDSUP_P_EC(NWDSUPP,NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Supply Prices - Energy Crops
+
+!     Wood Supply Curve Availability - Logical Variable to indicate whether supply is available
+!        (i.e. if AG and EC are combined nto AG, EC can be turned off)
+
+      INTEGER*4 WDSUP_AVL(MNUMFS)
+
+!     Switch to Indicate Whether Expectations are Previous Cycle Data (BM_FS_SW = 0) or Current Cycle Data Only (BM_FS_SW = 1)
+
+      INTEGER*4 BM_FS_SW
+
+!     Biomass Demand by End-Use (Mostly Sector, but Cellolisic Ethanol and Liquids from Biomass are Seperate End-Uses)
+!        Demands are by Supply Curve Type (UM,FR,AG,EC) and by Coal Region - 0 indexes are for Totals
+
+      REAL*4 QBMASCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in All Sectors
+      REAL*4 QBMRSCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Residential Sector
+      REAL*4 QBMCMCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Commercial Sector
+      REAL*4 QBMINCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Non-Refinery Industrial Sector
+      REAL*4 QBMH2CL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Hydrogen Production Sector
+      REAL*4 QBMPWCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Electric Power Sector
+      REAL*4 QBMETCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Cellulosic Ethanol Demand
+      REAL*4 QBMBTCL(0:MNUMFS,0:NDREG,MNUMYR+ECP_D_FPH)    ! Biomass Demand in Biomass to Liquids Demand
+
+!     Equilibrium Prices by End-Use
+
+      REAL*4 PBMASCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to All Sectors
+      REAL*4 PBMRSCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Residential Sector
+      REAL*4 PBMCMCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Commercial Sector
+      REAL*4 PBMINCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Non-Refinery Industrial Sector
+      REAL*4 PBMH2CL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Hydrogen Production Sector
+      REAL*4 PBMPWCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Electric Power Sector
+      REAL*4 PBMETCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Cellulosic Ethanol Demand
+      REAL*4 PBMBTCL(0:MNUMFS,0:NDREG,MNUMYR)            ! Biomass Price to Biomass to Liquids Demand
+
+!     Census Region Values for Refinery Use ET - Ethanol and BT - Biomass to Liquids
+
+      REAL*4 QBMRFET(MNUMCR,MNUMYR)                      ! Biomass Demand in Cellulosic Ethanol Demand
+      REAL*4 PBMRFET(MNUMCR,MNUMYR)                      ! Biomass Price to Cellulosic Ethanol Demand
+
+      REAL*4 QBMRFBT(MNUMCR,MNUMYR)                      ! Biomass Demand in Biomass to Liquids Demand
+      REAL*4 PBMRFBT(MNUMCR,MNUMYR)                      ! Biomass Price to Biomass to Liquids Demand
+
+!     Corn and Soy Polysys Quantities and Prices for LFMM Use: currently only filled for 5 points.
+
+      REAL*4 CRNSUP_TOT_Q(10,NDREG+1,MNUMYR+ECP_D_FPH)          ! Polysys Total Corn Supply MMBushels
+      REAL*4 CRNSUP_ETH_Q(10,NDREG+1,MNUMYR+ECP_D_FPH)          ! Polysys Corn Supply Used for Ethanol MMBushels
+      REAL*4 CRNSUP_P(10,NDREG+1,MNUMYR+ECP_D_FPH)              ! Polysys Corn Price  1987$/Bushel            
+      REAL*4 SOYOILSUP_TOT_Q(10,NDREG+1,MNUMYR+ECP_D_FPH)       ! Polysys Total Soybean Oil Supply MMLBS  
+      REAL*4 SOYOILSUP_BIOD_Q(10,NDREG+1,MNUMYR+ECP_D_FPH)      ! Polysys Soybean Oil Supply used for Biodiesel MMLBS    
+      REAL*4 SOYOILSUP_P(10,NDREG+1,MNUMYR+ECP_D_FPH)           ! Polysys Soybean Oil Price  1987$/LB       
+      REAL*4 SOYSUP_TOT_Q(10,NDREG+1,MNUMYR+ECP_D_FPH)          ! Polysys Total Soybean Supply MMBushels
+      REAL*4 SOYSUP_P(10,NDREG+1,MNUMYR+ECP_D_FPH)              ! Polysys Soybean Price  1987$/Bushel            
+
+!     Smoothing Constant to Aid in the Search for Convergence
+
+      REAL*4 SM_BM_RS                                    ! Smoothing Constant for Biomass to the Residential Sector
+      REAL*4 SM_BM_CM                                    ! Smoothing Constant for Biomass to the Commercial Sector
+      REAL*4 SM_BM_IN                                    ! Smoothing Constant for Biomass to the Non-Refinery Industrial Sector
+      REAL*4 SM_BM_H2                                    ! Smoothing Constant for Biomass to the Hydrogen Production Sector
+      REAL*4 SM_BM_PW                                    ! Smoothing Constant for Biomass to the Electric Power Sector
+      REAL*4 SM_BM_ET                                    ! Smoothing Constant for Biomass to the Cellulosic Ethanol Sector
+      REAL*4 SM_BM_BT                                    ! Smoothing Constant for Biomass to the Biomass to Liquids Sector
+
+!     Biomass Supply Type Codes - This Array is needed by EMM and PMM to define the supply surves the various biomass techonolgies can use
+!                                 It is not in the restart being character data and all.
+!                                 (We could trick filer but the values are not likely to change)
+!                                 So for now these codes are hard wired in this include - Note the array is not in a common block
+
+      CHARACTER*2 BM_TYP_CD(MNUMFS)
+      DATA BM_TYP_CD/'UM','FR','AG','EC'/
+
+!     Map Sector / End Use to Supply Curve Type - 1 => End Use can use Biomass from Specified Supply Type; 0 => Cannot Use Supply Type
+!        For Now a default setting will be set in this include.
+!        The various sectors can respecify these settings, perhaps using the codes defined above.
+!        This mapping will be in the Restart File so that the information will be available to all modules
+
+      REAL*4 MP_BM_RS(MNUMFS)                            ! Map Applicable Supply Types for Residential Sector
+      REAL*4 MP_BM_CM(MNUMFS)                            ! Map Applicable Supply Types for Commercial Sector
+      REAL*4 MP_BM_IN(MNUMFS)                            ! Map Applicable Supply Types for Non-Refinery Industrial Sector
+      REAL*4 MP_BM_H2(MNUMFS)                            ! Map Applicable Supply Types for Hydrogen Production Sector
+      REAL*4 MP_BM_PW(MNUMFS)                            ! Map Applicable Supply Types for Electric Power Sector
+      REAL*4 MP_BM_ET(MNUMFS)                            ! Map Applicable Supply Types for Cellulosic Ethanol Sector
+      REAL*4 MP_BM_BT(MNUMFS)                            ! Map Applicable Supply Types for Biomass to Liquids Sector
+
+      INTEGER*4 NM_BM_SUP_STP                            ! Number of Biomass Supply Steps
+
+      REAL*4 MAP_CD_TO_CL(NDREG,MNUMCR)                  ! Map Census Divisions to Coal Regions
+
+!     New variables for regional supply curves
+      REAL*4 UTCAFNR(MNUMNR,WNTECH,MSPTMX)       ! Regional Capacity addition by Step in MW
+      REAL*4 UTFXFN(MNUMNR,WNTECH,MSPTMX)        ! Fixed O&M Cost Multiplier by Step
+      REAL*4 UTVRFN(MNUMNR,WNTECH,MSPTMX)        ! Variable O&M Cost Multiplier by Step
+
+      ! CAPACITY FACTORS
+      REAL*4 WSSSTEL_CF(mnumnr,mnumyr,3,12,24)   ! read in in new solarin file - solar thermal
+      REAL*4 WSSPVEL_CF(mnumnr,mnumyr,3,12,24)   ! read in in new solarin fle - PV
+      REAL*4 WSSPTEL_CF(mnumnr,mnumyr,3,12,24)   ! read in in new solarin fle - PT - PV w/ storage
+	  REAL*4 WSSPTEL_CF_CLIP(mnumnr,mnumyr,3,12,24)   ! read in in new solarin fle - PT - PV w/ storage -> amount of inverter clipped energy
+      REAL*4 WSFWIEL_CF(mnumnr,mnumyr,3,12,24)   ! read in in new wesarea file - Wind
+      REAL*4 WSFWFEL_CF(mnumnr,mnumyr,3,12,24)   ! read in in new wesarea file - Off Shore Wind
+      REAL*4 WSFWLEL_CF(mnumnr,mnumyr,3,12,24)   ! read in in new wesarea file - Low Speed Wind
+
+      INTEGER*4  HrToECPgrp(12,3,24)
+
+      COMMON  /WRENEW/                                                           &
+         WCAHYEL, WHRHYEL, WCCHYEL, WOCHYEL, WCFHYEL, WVCHYEL, WMFHYEL,          &
+         WCAGPEL, WCCGPEL, WOCGPEL, WCFGPEL, WHRGPEL,                            &
+         WCAMSEL, WCFMSEL, WVCMSEL, WHRMSEL, WNGMSEL, WNGMSELC, WNCMSEL, WNCMSELN,   &
+         WCABMEL, WVCBMEL, WFPBMEL, WHRBMEL,                                     &
+         WCASTEL, WHRSTEL,                                                       &
+         WCAPVEL, WHRPVEL,                                                       &
+         WCAWIEL, WHRWIEL, WCAWFEL, WHRWFEL,                                     &
+         WPETOH,  WQETOH,  WPSBMEL, WQSBMEL, WSTBMEL,                            &
+         WEMMSEL, WEMGPEL,                                                       &
+         WSFWIEL, WWNTD, WSFWFEL, WWFTD,                                         &
+         WSSSTEL, WSSPVEL,                                                       &
+         WBTECH,                                                                 &
+         UTCSFN,  UTCAFN, UTCSSW,                                                &
+         QBMET,   PBMET,   PMMBMDUAL,                                            &
+         EFFMULST,EFFMULPV,                                                      &
+         QNGETH, QCLETH, QELETH, XQSBMEL,                                        &
+         WDPMMCURVQ, WDPMMCURVP,                                                 &
+         CLPRICEET, CLPRICEPW, WDQCLETGLOB, EMMBMDUAL, PWRFRAC,                  &
+         WDSUPQW, WDSUPPW, WDCFSUB, WDCFHUR,                                     &
+         WDSUP_Q_UM, WDSUP_Q_FR, WDSUP_Q_AG, WDSUP_Q_EC,                         &
+         WDSUP_P_UM, WDSUP_P_FR, WDSUP_P_AG, WDSUP_P_EC,                         &
+         QBMASCL, QBMRSCL, QBMCMCL, QBMINCL, QBMH2CL, QBMPWCL, QBMETCL, QBMBTCL, &
+         PBMASCL, PBMRSCL, PBMCMCL, PBMINCL, PBMH2CL, PBMPWCL, PBMETCL, PBMBTCL, &
+         QBMRFET, PBMRFET, QBMRFBT, PBMRFBT, CRNSUP_TOT_Q,CRNSUP_ETH_Q,CRNSUP_P, &
+         SOYOILSUP_TOT_Q,SOYOILSUP_BIOD_Q,SOYOILSUP_P,SOYSUP_TOT_Q,SOYSUP_P,     &
+         SM_BM_RS, SM_BM_CM, SM_BM_IN, SM_BM_H2, SM_BM_PW, SM_BM_ET, SM_BM_BT,   &
+         MP_BM_RS, MP_BM_CM, MP_BM_IN, MP_BM_H2, MP_BM_PW, MP_BM_ET, MP_BM_BT,   &
+         WDSUP_AVL, BM_FS_SW, NM_BM_SUP_STP, MAP_CD_TO_CL,                       &
+         UTCAFNR, UTFXFN, UTVRFN,                                                &
+         WSSSTEL_CF, WSSPVEL_CF, WSFWIEL_CF, WSFWFEL_CF, &
+         HrToECPgrp, WCAWLEL, WHRWLEL, WSFWLEL, WSSPTEL, EFFMULPT,               &
+         WSSPTEL_CF, WSSPTEL_CF_CLIP, WSFWLEL_CF, WCAPTEL, WHRPTEL, WWLTD, EPCURCL_WN,            &
+         EPCURBF_WN, EPCURCL_WL, EPCURBF_WL, EPCURCL_SO,EPCURCL_PV,EPCURCL_PT,   &
+         CURTAIL
+
+!     Use Equivalence to combine Quantity and Price Arrays so that they can be accessed with a supply type index or by name
+
+      REAL*4 WDSUP_Q(NWDSUPQ,NDREG,MNUMYR+ECP_D_FPH,MNUMFS)    ! Biomass Supply Quantities - All Sources
+      REAL*4 WDSUP_P(NWDSUPP,NDREG,MNUMYR+ECP_D_FPH,MNUMFS)    ! Biomass Supply Prices - All Sources
+
+      EQUIVALENCE (WDSUP_Q,WDSUP_Q_UM)
+      EQUIVALENCE (WDSUP_P,WDSUP_P_UM)
+
+!     Single huge array for FILER:
+
+      REAL*4 WRARRY(WRSIZE)
+      EQUIVALENCE (WRARRY,WCAHYEL)
+
+      REAL*4 WVCGPEL(MNUMNR,MNUMYR)   ! New Capacity GEOTH VAR OP COST mills/Kwh
+      REAL*4 WLIGPEL                  ! New Capacity GEOTH UNIT LIFE YRS
+      REAL*4 WCFGIEL(MNUMNR,MNUMYR)   ! All Capacity GEOTH CAPACITY FACTOR FRACT
+      REAL*4 WOCGIEL(MNUMNR,MNUMYR)   ! All Capacity GEOTH FIXED OP COST mills/Kw
+      REAL*4 WVCGIEL(MNUMNR,MNUMYR)   ! All Capacity GEOTH VAR OP COST mills/Kwh
+      REAL*4 WNRGIEL(MNUMNR,MNUMYR)   ! All Capacity Tot. installed Cap [Mw] NERC
+      REAL*4 WCRGIEL(MNUMCR,MNUMYR)   ! All Capacity Tot. installed Cap [Mw] CENSUS
+      REAL*4 WCFBMEL(MNUMNR,MNUMYR)   ! UTIL WOOD CAPACITY FACTOR FRACT
+      REAL*4 WVCSTEL(MNUMNR,MNUMYR)   ! UTIL SOLAR TH VAR OP COST mills/Kwh
+      REAL*4 WVCPVEL(MNUMNR,MNUMYR)   ! UTIL PHOTOV VAR OP COST mills/Kwh
+      REAL*4 WVCPTEL(MNUMNR,MNUMYR)   ! UTIL PHOTOV FIXED AXIS VAR OP COST mills/Kwh
+      REAL*4 WCFWIEL(MNUMNR,MNUMYR)   ! UTIL WIND CAPACITY FACTOR FRACT
+      REAL*4 WVCWIEL(MNUMNR,MNUMYR)   ! UTIL WIND VAR OP COST mills/Kwh
+      REAL*4 WVCWLEL(MNUMNR,MNUMYR)   ! UTIL WIND VAR OP COST mills/Kwh - Low Wind Speed
+
+!     Miscellaneous national technology characteristics
+
+      REAL*4 WCAV(WNTECH)             ! Year Available
+      REAL*4 WCSU(WNTECH,MNUMYR)      ! Subsidy (mills/Kwh)
+      REAL*4 WCSI(WNTECH,MNUMYR)      ! Subsidy ($/$ invested)
+      REAL*4 WCLT(WNTECH)             ! Construction Lead Time (yr)
+      REAL*4 WCPC(WNTECH,8)           ! Percent Constucted (fract)
+
+!
+
+      REAL*4 SoPower(MNUMNR,MNUMYR,MNUMSL)
+      REAL*4 PwrDen_PT
+      REAL*4 PwrDen_PV
+      REAL*4 PwrDen_ST
+      REAL*4 PT_CapF(MNUMSL)
+      REAL*4 PV_CapF(MNUMSL)
+      REAL*4 ST_CapF(MNUMSL)
+
+      COMMON/RNWINTRN/ WVCGPEL, WLIGPEL, WCFGIEL, &
+                       WOCGIEL, WVCGIEL, WNRGIEL, WCRGIEL,          &
+                       WCFBMEL, WVCSTEL, WVCPVEL, WVCPTEL, WCFWIEL, WVCWIEL, WVCWLEL, &
+                       WCAV,    WCSU,    WCSI,    WCLT,    WCPC,    &
+                       SoPower, PwrDen_PT, PwrDen_PV, PwrDen_ST, PT_CapF, PV_CapF, ST_CapF
+
+
+! New variables for Ethanol Plant Fuel Consumption supply curves
+
+      REAL ETHNG(MNUMYR,MNETOH)                   ! NATURAL GAS BY STEP, MMBTU/GAL
+      REAL ETHCL(MNUMYR,MNETOH)                   ! COAL BY STEP, MMBTU/GAL
+      REAL ETHEL(MNUMYR,MNETOH)                   ! ELECTRICITY BY STEP, MMBTU/GAL
+      REAL*4 WQTOT(MNUMCR,MNETOH)                 ! INCREMENTAL ETHANOL QTY/STEP
+
+      COMMON/ETHSUPCV/ ETHNG, ETHCL, ETHEL, WQTOT
+!
+! New variables to map 864 hours (12 months X 24 hrs X 3 daytypes)
+!     to Group Number (from ldsm structure file), season
+!
+      INTEGER*2  HrToEFDgrp(12,3,24)
+      INTEGER*2  HrToECPseas(12,3,24)
+      INTEGER*2  HrToEFDseas(12,3,24)
+      INTEGER*2  HrToETTgrp(12,3,24)
+      INTEGER*2  HrToETTseas(12,3,24)
+      INTEGER*2  HrToECIgrp(12,3,24)
+      INTEGER*2  HrToECIseas(12,3,24)
+
+      INTEGER  HrsInEcpEfdGrps(0:ECP_D_STP,0:ELD_D_DAY)
+      INTEGER  HrsInEttEcpGrps(0:ETT_D_GRP,0:ECP_D_STP)
+      INTEGER  HrsInEttEfdGrps(0:ETT_D_GRP,0:ELD_D_DAY)
+      INTEGER  HrsInECIEcpGrps(0:ECI_D_GRP,0:ECP_D_STP)
+      INTEGER  HrsInECIEfdGrps(0:ECI_D_GRP,0:ELD_D_DAY)
+!
+      REAL*4 HrsInECIEcpSegs(0:ECI_D_GRP,0:ECI_D_SEG,0:ECP_D_STP,0:ECP_D_SSZ)
+      REAL*4 HrsInECIEfdSegs(0:ECI_D_GRP,0:ECI_D_SEG,0:ELD_D_DAY,0:EFD_D_SSZ)
+
+      REAL*4 HrsInETTEcpSPs(0:ETT_D_MSP,0:ECP_D_MSP)
+      REAL*4 HrsInETTEfdSPs(0:ETT_D_MSP,0:EFD_D_MSP)
+
+      COMMON/HRMAPS/ HrToEFDgrp, HrToECPseas, HrToEFDseas, HrToETTgrp, HrToETTseas, HrsInEcpEfdGrps, HrsInEttEcpGrps, &
+         HrsInEttEfdGrps, HrsInECIEcpSegs, HrsInECIEfdSegs, HrsInETTEcpSPs, HrsInETTEfdSPs
+!
+! New capacity factor variables
+!
+      REAL*8 CFecpGRP(ECP_D_INT,ECP_D_VLS)      !ECP_D_VLS = #ecp slices 
+      REAL*8 CFefdGRP(ECP_D_INT,ELD_D_DAY)      !ELD_D_DAY = #efd groups
+      REAL*8 CFecpSEA(ECP_D_INT,ECP_D_MSP)      !ECP_D_MSP = #ecp seasons
+      REAL*8 CFefdSEA(ECP_D_INT,EFD_D_MSP)      !EFD_D_MSP = #efd seasons
+      REAL*8 STO_CFefdSEA(ECP_D_INT,EFD_D_MSP,MNUMNR)      !EFD_D_MSP = #efd seasons
+      REAL*8 CFmonth(ECP_D_INT,12,MNUMNR)     !Average monthly capacity factors for intermittent capacity
+      
+      character *12 reglabel(mnumnr-3) 
+
+      COMMON /newCF/CFecpGRP,CFefdGRP,CFecpSEA,CFefdSEA, STO_CFefdSEA, CFmonth,reglabel
+
+! storage capacity block
+      REAL*8 STOLEVEL(2,MNUMNR,ECP_D_CAP,12,3,24), ENERGY_STORED(3,MNUMNR), ENERGY_STORED_HOURLY(MNUMNR,ECP_D_CAP,12,3,24 )
+
+      COMMON /STOLVL_BLK/STOLEVEL,ENERGY_STORED, ENERGY_STORED_HOURLY
+
+

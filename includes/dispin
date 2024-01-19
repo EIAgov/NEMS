@@ -1,0 +1,197 @@
+!  $Header: m:/default/includes/RCS/dispin,v 1.19 2019/07/23 15:28:16 rsc Exp $
+
+!
+!  DISPIN: Input parameters to the EFD by EMM region
+!
+      COMMON /DISPIN/        ELHGHT,   ELWDTH,   ELPEAK,   EETIME,              & ! REAL
+         EFACTR,   EHCAP,    EHVOMR,   EHGSUB,   EQEL,     EQTDLS,    &
+         EEITAJ,   ECCAP,    ECCOPM,   ECOMR,    ECGSUB,              &
+         ECALLW,   ECMFSH,   ECCFBD,   EDCFBD,   EPSO2,    TRNCSTEX, TRNCSTIM,  &
+         EOUIPP,   EOUNT,                                                       & 
+         EDRPSRG,  EDRPSTG,  EDRPSRO,  EDRPSTO,  ECRPSRG,  ECRPSRO,             &
+         ECUNIT,   EHUNIT,   EHMFSH,   ECSEQS,   ECFNOX,   ECFNOXC,             &    
+         EHFNOX,   EHFNOXC,  ECNOCCS,                                           &
+         EDCAP,    EDVOMR,   EDUNIT,   EDMFSH,   EDFNOX,   EDFNOXC,   &
+         EHNTP,    EDNTP,    EENSP,    ELNVCT,   ECNTP,    EIPGRP,   EIHGRP, EC_45Q,  & ! INT
+         EIDGRP,   EIFPLT,   EIMCG,    ELGRP,    ELSEG,    ELMAPS,   ELMAPV,    &
+         EHHYCF,   EHLDCF,   ECNMR,    EDNMR,    EHHYTP,   EHTECP,   EHDBID,    &
+         ECFLTP,   EHFLTP,   ECFLRG,   EHFLRG,   ECMXCP,   TCPMR,    TCFOR,     &
+         EDFLTP,   EDFLRG,   EDMRUN,   EDMXCP,   EDPMR,    EDFOR,    EDASTS,    &
+         EDTECP,   EDFOWN,   EDCR,     EDNR,     EDGR,     EDLR,     EDAR,     EDST,     EDDBID,    &
+         ECASTS,   ECTECP,   ECSCRB,   EISO2,    ECFOWN,   ECCR,     ECNR,      &
+         ECGR,     ECLR,     ECAR,     ECST,     ECDBID,   EHFOWN,   EHCR,     EHGR, EHLR, EHAR, EHST, EHVIN,  &
+         ECMRUN,   ECOPR,    ECVIN,    ECBTP,    ECNCT,    ECPHS1,               &
+         EHNR,     ENPGRP,   ENHGRP,   ENDGRP,   ELNMGRP,  ELCDGS, LFTOVR         ! CHAR
+!
+      INTEGER ESIZ$IN,EBLK$IN,ELFT$IN
+      PARAMETER (ESIZ$IN = 20 *  4 + &
+            1 *  4             * EFD_D_DSP * 2 + &
+            1 *  4             * EFD_D_DGN * 2 + &
+            1 * 32             * EFD_D_DSP + &
+            2 *  4             * ECP_D_CAP + &
+          ( 2 *  8 +  2 *  4 ) * EFD_D_MVS * EFD_D_MSP + &
+          ( 2 *  8 +  4 *  4 ) * EFD_D_MSP + &
+          ( 3 *  4 + 11 *  2 ) * EFD_D_MHG + &
+          ( 2 *  4 +  1 *  2 ) * EFD_D_MHG * EFD_D_MSP + &
+            1 *  2             * EFD_D_MHG * EFD_D_SSZ * ELD_D_DAY + &
+            1 *  4             * NOX_D_GRP * EFD_D_MHG * EFD_D_MSP + &
+          ( 6 *  4 + 20 *  2 ) * EFD_D_MPG + &
+            3 *  4             * EFD_D_MPG * EFD_D_MSP + &
+            1 *  4             * NOX_D_GRP * EFD_D_MPG * EFD_D_MSP + &
+          ( 2 *  4 +  1 *  2 ) * EFD_D_MPG * EFD_D_FPP + &
+            1 *  2             * EFD_D_MPG * EFD_D_CGP + &
+            1 *  2             * EFD_D_MPG * EFD_D_FPP * EFD_D_FRG + &
+          ( 1 *  4 +  1 *  2 ) * EFD_D_MHG * EFD_D_FPP + &
+            1 *  2             * EFD_D_MHG * EFD_D_FPP * EFD_D_FRG + &
+          ( 1 *  4 + 14 *  2 ) * EFD_D_MDG + &
+            2 *  4             * EFD_D_MDG * EFD_D_MSP + &
+            1 *  4             * NOX_D_GRP * EFD_D_MDG * EFD_D_MSP + &
+          ( 2 *  4 +  1 *  2 ) * EFD_D_MDG * EFD_D_FPP + &
+            1 *  2             * EFD_D_MDG * EFD_D_FPP * EFD_D_FRG + &
+          ( 1 *  4 +  1 * 1)   * EFD_D_MSP * EFD_D_STP * EFD_D_SSZ + &
+            1 *  4             * EFD_D_SO2 + &
+            1 * 32             * ELD_D_DAY + &
+            2 *  4             * EFD_D_SSZ * ELD_D_DAY + &
+            1 * 32             * EFD_D_RNW + &
+            1 * 32             * EFD_D_DGN )
+      PARAMETER (EBLK$IN = ( (ESIZ$IN - 1) / 16384) + 1)
+      PARAMETER (ELFT$IN = EBLK$IN * 16384 - ESIZ$IN)
+!
+!     DISPIN - VARIABLE DECLARATION AND DEFINITIONS
+!
+      REAL*8 ELHGHT(EFD_D_MVS,EFD_D_MSP)            ! HEIGHT OF VERTICAL LOAD SEG
+      REAL*8 ELWDTH(EFD_D_MVS,EFD_D_MSP)            ! WIDTH OF VERTICAL LOAD SEG
+      REAL*8 ELPEAK(EFD_D_MSP)                    ! SEASONAL PEAK
+      REAL*8 EETIME(EFD_D_MSP)                    ! NUMBER OF HOURS PER SEASON
+!
+      REAL*4 EEITAJ(EFD_D_MSP)                    ! NET IMPORTS/EXPORTS?
+      REAL*4 TRNCSTEX(EFD_D_MSP)                  ! EXPORT TRANSM. CONSTRAINT
+      REAL*4 TRNCSTIM(EFD_D_MSP)                  ! IMPORT TRANSM. CONSTRAINT
+      REAL*4 ECCFBD(EFD_D_DSP,2)                  ! CAPACITY FACTOR BOUNDS - DSP
+      REAL*4 EDCFBD(EFD_D_DGN,2)                  ! CAPACITY FACTOR BOUNDS - DGN
+      REAL*4 EPSO2(EFD_D_SO2)                     ! SO2 PENALTY COST
+!
+      REAL*4 ECCAP(EFD_D_MPG,EFD_D_MSP)             ! DISPATCHABLE (DSP) CAPACITY
+      REAL*4 ECCOPM(EFD_D_MPG,EFD_D_MSP)            ! DSP CAP NET OF PLANNED MNT.
+      REAL*4 ECOMR(EFD_D_MPG,EFD_D_FPP)             ! DSP VARIABLE O&M
+      REAL*4 ECGSUB(EFD_D_MPG)                    ! DSP GENERATION SUBSIDY
+      REAL*4 ECALLW(EFD_D_MPG)                    ! DSP SO2 ALLOWANCES
+      REAL*4 ECMFSH(EFD_D_MPG,EFD_D_FPP)            ! MAXIMUM FUEL SHARES
+      REAL*4 ECUNIT(EFD_D_MPG)                    ! NUMBER OF UNITS IN PLANT GROUP
+      REAL*4 ECSEQS(EFD_D_MPG)                    ! DSP PLT GRP SEQUEST. EFFCY GRP
+      REAL*4 ECFNOX(EFD_D_MPG,EFD_D_MSP)            ! NOX EMISSION RATE
+      REAL*4 ECFNOXC(NOX_D_GRP,EFD_D_MPG,EFD_D_MSP)   ! NOX EMISSION RATE-COUNT IN CAP
+      REAL*4 ECNOCCS(EFD_D_MPG)                   ! Capacity adjustment factor to use capacity without CO2 capture
+!
+      REAL*4 EHCAP(EFD_D_MHG,EFD_D_MSP)             ! NON-DSP PLANT GROUP CAPACITY
+      REAL*4 EHVOMR(EFD_D_MHG)                    ! NON-DSP PLANT GROUP VAR O&M
+      REAL*4 EHGSUB(EFD_D_MHG)                    ! NON-DSP PLANT GROUP GENERATION SUBSIDY
+      REAL*4 EHUNIT(EFD_D_MHG)                    ! NUMBER OF UNITS IN PLANT GROUP
+      REAL*4 EHMFSH(EFD_D_MHG,EFD_D_FPP)            ! NON-DSP FUEL SHARES
+      REAL*4 EHFNOX(EFD_D_MHG,EFD_D_MSP)            ! NOX EMISSION RATE
+      REAL*4 EHFNOXC(NOX_D_GRP,EFD_D_MHG,EFD_D_MSP)   ! NOX EMISSION RATE - COUNT IN CAP
+!
+      REAL*4 EDCAP(EFD_D_MDG,EFD_D_MSP)             ! DIST GENERATION PLANT GROUP CAPACITY
+      REAL*4 EDVOMR(EFD_D_MDG,EFD_D_FPP)            ! DIST GENERATION PLANT GROUP VAR O&M
+      REAL*4 EDUNIT(EFD_D_MDG)                    ! DIST GENERATION NUMBER OF UNITS IN PLANT GROUP
+      REAL*4 EDMFSH(EFD_D_MDG,EFD_D_FPP)            ! DIST GENERATION NON-DSP FUEL SHARES
+      REAL*4 EDFNOX(EFD_D_MDG,EFD_D_MSP)            ! DIST GENERATION NOX EMISSION RATE
+      REAL*4 EDFNOXC(NOX_D_GRP,EFD_D_MDG,EFD_D_MSP)   ! DIST GENERATION NOX EMISSION RATE - COUNT IN CAP
+!
+      REAL*4 EFACTR                             ! CONVERTS I2 TO R4(IE. * .001>
+      REAL*4 EQEL                               ! TOTAL ELECTRICITY DEMAND
+      REAL*4 EOUIPP				! TOTAL IPP CAP - OWN USE
+      REAL*4 EOUNT				! TOTAL NONTRAD CAP - OWN
+      REAL*4 EDRPSRG                            ! REN. GRID SALES FOR RPS
+      REAL*4 EDRPSTG                            ! TOT. GRID SALES FOR RPS
+      REAL*4 EDRPSRO                            ! REN. OWN USE FOR RPS
+      REAL*4 EDRPSTO                            ! TOT. OWN USE FOR RPS
+      REAL*4 ECRPSRG(ECP_D_CAP)                   ! REN. GRID SALES/PLT FOR RPS
+      REAL*4 ECRPSRO(ECP_D_CAP)                   ! REN. OWN USE/PLT FOR RPS
+      REAL*4 EQTDLS                             ! T&D LOSS FACTOR
+!
+      INTEGER*4 EHNTP                           ! NUMBER OF RENEWABLE GROUPS
+      INTEGER*4 EDNTP                           ! NUMBER OF DIST GEN GROUPS
+      INTEGER*4 EENSP                           ! NUMBER OF SEASONAL PERIODS
+      INTEGER*4 ECNTP                           ! NUMBER OF CAPACITY GROUPS
+      INTEGER*4 ECNMR                           ! NUMBER OF DSP MUST RUN GROUPS
+      INTEGER*4 EDNMR                           ! NUMBER OF DGEN MUST RUN GROUPS
+      INTEGER*4 EIPGRP                          ! NUMBER OF DSP. PLANT TYPE GRPS
+      INTEGER*4 EIHGRP                          ! NUMBER OF REN. PLANT TYPE GRPS
+      INTEGER*4 EIDGRP                          ! NUMBER OF DGEN PLANT TYPE GRPS
+      INTEGER*4 EIFPLT                          ! NUMBER OF FUELS PER PLANT
+      INTEGER*4 EIMCG                           ! NUMBER COMPLIANCE GROUPS
+      INTEGER*4 ELNVCT(EFD_D_MSP)                 ! NUMBER OF POINTS IN LOAD CRV
+      INTEGER*4 ELGRP(EFD_D_MVS,EFD_D_MSP)          ! TIME OF DAY/SEASON GROUP INDEX
+      INTEGER*4 ELSEG(EFD_D_MVS,EFD_D_MSP)          ! TIME OF DAY/SEASON SEG. INDEX
+!
+      INTEGER*4 ELMAPS(EFD_D_SSZ,ELD_D_DAY)         ! MAPS GRP / SEG TO SEASON
+      INTEGER*4 ELMAPV(EFD_D_SSZ,ELD_D_DAY)         ! MAPS GRP / SEG TO VLS
+      INTEGER*4 EC_45Q(EFD_D_MPG)                 ! Unit recieves 45Q subsidy in current year 0=>No 1=>Yes
+!
+      INTEGER*2 ECFLTP(EFD_D_MPG,EFD_D_FPP)         ! DSP PLT GRP FUEL TYPES
+      INTEGER*2 ECFLRG(EFD_D_MPG,EFD_D_FPP,EFD_D_FRG) ! DSP PLT GRP SUP./RPT. REG FUEL
+      INTEGER*2 ECMRUN(EFD_D_MPG)                 ! DSP PLT GRP MUST RUN INDICATOR
+      INTEGER*2 ECMXCP(EFD_D_MPG)                 ! DSP PLT GRP MAX CAP FACTOR
+      INTEGER*2 TCPMR(EFD_D_MPG)                  ! DSP PLT GRP PLANNED MAINT RATE
+      INTEGER*2 TCFOR(EFD_D_MPG)                  ! DSP PLT GRP FORCED OUTAGE RATE
+      INTEGER*2 ECASTS(EFD_D_MPG)                 ! DSP PLT GRP EFD CAPACITY TYPE
+      INTEGER*2 ECTECP(EFD_D_MPG)                 ! DSP PLT GRP ECP CAPACITY TYPE
+      INTEGER*2 ECSCRB(EFD_D_MPG)                 ! DSP PLT GRP SCRUBBER EFFCY GRP
+      INTEGER*2 EISO2(EFD_D_MPG,EFD_D_CGP)          ! DSP PLT GRP COMPLIANCE GRP
+      INTEGER*2 ECFOWN(EFD_D_MPG)                 ! DSP PLT GRP OWNERSHIP TYPE
+      INTEGER*2 ECCR(EFD_D_MPG)                   ! DSP PLT GRP CENSUS REGION
+      INTEGER*2 ECNR(EFD_D_MPG)                   ! DSP PLT GRP OWNERS NERC REGION
+      INTEGER*2 ECGR(EFD_D_MPG)                   ! DSP PLT GRP GAS REGION
+      INTEGER*2 ECLR(EFD_D_MPG)                   ! DSP PLT GRP COAL REGION
+      INTEGER*2 ECAR(EFD_D_MPG)                   ! DSP PLT GRP CARB REGION
+      INTEGER*2 ECST(EFD_D_MPG)                   ! DSP PLT GRP STATE
+      INTEGER*2 ECDBID(EFD_D_MPG)                 ! DSP PLT GRP DB ID
+      INTEGER*2 ECBTP(EFD_D_MPG)                  ! DSP PLT GRP BOILER TYPE
+      INTEGER*2 ECNCT(EFD_D_MPG)                  ! DSP PLT GRP NOX CONTROL TYPE
+      INTEGER*2 ECPHS1(EFD_D_MPG)                 ! DSP PLT GRP = 1 => PHASE 1 UNIT
+!
+      INTEGER*2 EHFLTP(EFD_D_MHG,EFD_D_FPP)         ! NON-DSP PLT GRP FUEL TYPES
+      INTEGER*2 EHFLRG(EFD_D_MHG,EFD_D_FPP,EFD_D_FRG) ! NON-DSP PLT GRP SUP./RPT. REG FUEL
+      INTEGER*2 EHHYCF(EFD_D_MHG,EFD_D_MSP)         ! NON-DSP PLT GRP CAPACITY FACTOR BY SEASON
+      INTEGER*2 EHLDCF(EFD_D_MHG,EFD_D_SSZ,ELD_D_DAY) ! NON-DSP PLT GRP CAPACITY FACTOR BY LOAD SEG
+      INTEGER*2 EHHYTP(EFD_D_MHG)                 ! NON-DSP PLT GRP EFD CAP TYPE
+      INTEGER*2 EHTECP(EFD_D_MHG)                 ! NON-DSP PLT GRP ECP CAP TYPE
+      INTEGER*2 EHFOWN(EFD_D_MHG)                 ! NON-DSP PLT GRP OWNER TYPE
+      INTEGER*2 EHCR(EFD_D_MHG)                   ! NON-DSP PLT GRP CENSUS REGION
+      INTEGER*2 EHNR(EFD_D_MHG)                   ! NON-DSP PLT GRP NERC REGION
+      INTEGER*2 EHGR(EFD_D_MHG)                   ! NON-DSP PLT GRP GAS REGION
+      INTEGER*2 EHLR(EFD_D_MHG)                   ! NON-DSP PLT GRP COAL REGION
+      INTEGER*2 EHAR(EFD_D_MHG)                   ! NON-DSP PLT GRP CARB REGION
+      INTEGER*2 EHST(EFD_D_MHG)                   ! NON-DSP PLT GRP STATE
+      INTEGER*2 EHVIN(EFD_D_MHG)                  ! NON-DSP PLT GRP VINTAGE
+      INTEGER*2 EHDBID(EFD_D_MHG)                 ! NON-DSP PLT GRP DB ID
+!
+      INTEGER*2 EDFLTP(EFD_D_MDG,EFD_D_FPP)         ! DIST GEN PLT GRP FUEL TYPES
+      INTEGER*2 EDFLRG(EFD_D_MDG,EFD_D_FPP,EFD_D_FRG) ! DIST GEN PLT GRP SUP./RPT. REG FUEL
+      INTEGER*2 EDMRUN(EFD_D_MDG)                 ! DIST GEN PLT GRP MUST RUN INDICATOR
+      INTEGER*2 EDMXCP(EFD_D_MDG)                 ! DIST GEN PLT GRP MAX CAP FACTOR
+      INTEGER*2 EDPMR(EFD_D_MDG)                  ! DIST GEN PLT GRP PLANNED MAINT RATE
+      INTEGER*2 EDFOR(EFD_D_MDG)                  ! DIST GEN PLT GRP FORCED OUTAGE RATE
+      INTEGER*2 EDASTS(EFD_D_MDG)                 ! DIST GEN PLT GRP EFD CAP TYPE
+      INTEGER*2 EDTECP(EFD_D_MDG)                 ! DIST GEN PLT GRP ECP CAP TYPE
+      INTEGER*2 EDFOWN(EFD_D_MDG)                 ! DIST GEN PLT GRP OWNER TYPE
+      INTEGER*2 EDGR(EFD_D_MDG)                   ! DIST GEN PLT GRP GAS REGION
+      INTEGER*2 EDCR(EFD_D_MDG)                   ! DIST GEN PLT GRP CENSUS REGION
+      INTEGER*2 EDLR(EFD_D_MDG)                   ! DIST GEN PLT GRP COAL REGION
+      INTEGER*2 EDAR(EFD_D_MDG)                   ! DIST GEN PLT GRP CARB REGION
+      INTEGER*2 EDNR(EFD_D_MDG)                   ! DIST GEN PLT GRP NERC REGION
+      INTEGER*2 EDST(EFD_D_MDG)                   ! DIST GEN PLT GRP STATE
+      INTEGER*2 EDDBID(EFD_D_MDG)                 ! DIST GEN PLT GRP DB ID
+!
+      INTEGER*2 ECOPR(EFD_D_MPG)                  ! DSP PLT GRP PHYSICAL NERC RGN
+      INTEGER*2 ECVIN(EFD_D_MPG)                  ! DSP PLT GRP VINTAGE
+!
+      CHARACTER*32 ENPGRP(EFD_D_DSP)              ! NAME OF PLANT TYPES
+      CHARACTER*32 ENHGRP(EFD_D_RNW)              ! NAME OF RENEWABLE PLANT TYPES
+      CHARACTER*32 ENDGRP(EFD_D_DGN)              ! NAME OF DIST GEN PLANT TYPES
+      CHARACTER*32 ELNMGRP(ELD_D_DAY)             ! NAME OF TIME OF DAY/SSN GRPS
+      CHARACTER*1  ELCDGS(EFD_D_MSP,EFD_D_STP,EFD_D_SSZ)  ! slice code for mapping to group and segment
+      CHARACTER*1 LFTOVR(ELFT$IN)               ! LEFTOVER BYTES
+      CHARACTER*16384 EINPUT(EBLK$IN)
+      EQUIVALENCE (ELHGHT(1,1),EINPUT(1))

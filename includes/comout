@@ -1,0 +1,22 @@
+!  $Header: N:/default/includes/RCS/comout,v 1.2 1999/12/19 19:56:10 DSA Exp $
+! COMOUT
+! The varaiables are defined as follows:
+!   CMnuGen                   Nonutility generation of electricity
+!   CMnuGrid                  Nonutility electricity sales to the grid
+!   CMnuCap                   Nonutility capacity
+!   CMnuConNG                 Nonutility consumption: NG
+!   CMnuConSC                 Nonutility consumption: Steam Coal
+!   CMnuConRS                 Nonutility consumption: Residual oil
+!   CMnuConBio                Nonutility consumption: Biomass
+!   CMrwConBio                Consumption of renewables: Biomass
+!   CMrwConHyd                Consumption of renewables: Hydro
+!   CMrwConSol                Consumption of renewables: Solar
+!   CMrwConWind               Consumption of renewables: Wind
+!   CMrwConGeo                Consumption of renewables: Geothermal
+!   CMrwConOth                Consumption of renewables: Other
+!   CMnuConDS                 Nonutility Consumption of Distillate
+
+      COMMON /COMOUT/ CMnuGen, CMnuGrid, CMrwConBio
+
+      REAL*4 CMnuGen(MNUMCR,MNUMYR), CMnuGrid(MNUMCR,MNUMYR), &
+             CMrwConBio(MNUMCR,MNUMYR)

@@ -1,0 +1,54 @@
+!  $Header: N:/default/includes/RCS/loadin,v 1.2 1999/12/19 20:16:14 DSA Exp $
+
+!
+!     LOADIN COMMON CONTAINS THE LOAD SHAPE INFORMATION REQUIRED TO CREATE
+!     BOTH ECP AND EFD LOAD REPRESENTATIONS AND IS STORED BY NEMS UTILITY
+!     REGION.
+!
+      COMMON /LOADIN/ ULOAD,UG_MAX,UG_MIN,UTIME,EFDSTSZ, &
+         ECPSTSZ,UGROUPS,UNGRPS,EFDNSP2,EFDGRP,EFDNUM, &
+         EFDMAP,ECPGRP,ECPNUM,ECPMAP,EFDSTEP,ECPSTEP, &
+         EFDTYPE,ECPTYPE,LFT_LD
+!
+      INTEGER ESIZ$LD,EBLK$LD,ELFT$LD
+      PARAMETER (ESIZ$LD =  3 * 4 + &
+                            1 * 8 * ELD_D_HRS * ELD_D_DAY + &
+                            3 * 8 * ELD_D_DAY + &
+                            1 * 8 * EFD_D_STP * EFD_D_SSZ * EFD_D_MSP + &
+                            1 * 8 * ECP_D_STP * ECP_D_SSZ + &
+                            1 * 4 * ELD_D_DAY + &
+                            1 * 4 * EFD_D_MSP + &
+                            2 * 4 * EFD_D_STP * EFD_D_MSP + &
+                            1 * 4 * EFD_D_LDG * EFD_D_STP * EFD_D_MSP + &
+                            2 * 4 * ECP_D_STP + &
+                            1 * 4 * ECP_D_STP * ECP_D_LDG + &
+                            1 * 1 * EFD_D_STP * EFD_D_MSP + &
+                            1 * 1 * ELD_D_DAY )
+      PARAMETER (EBLK$LD = ( (ESIZ$LD - 1) / 8192) + 1)
+      PARAMETER (ELFT$LD = EBLK$LD * 8192 - ESIZ$LD)
+!
+!     LOADIN - VARIABLE DECLARATION AND DEFINITIONS
+!
+!
+      REAL*8 ULOAD(ELD_D_HRS,ELD_D_DAY)
+      REAL*8 UG_MAX(ELD_D_DAY)
+      REAL*8 UG_MIN(ELD_D_DAY)
+      REAL*8 UTIME(ELD_D_DAY)
+      REAL*8 EFDSTSZ(EFD_D_SSZ,EFD_D_STP,EFD_D_MSP)
+      REAL*8 ECPSTSZ(ECP_D_SSZ,ECP_D_STP)
+      INTEGER*4 UGROUPS
+      INTEGER*4 UNGRPS(ELD_D_DAY)
+      INTEGER*4 EFDNSP2
+      INTEGER*4 EFDGRP(EFD_D_MSP)
+      INTEGER*4 EFDNUM(EFD_D_STP,EFD_D_MSP)
+      INTEGER*4 EFDMAP(EFD_D_LDG,EFD_D_STP,EFD_D_MSP)
+      INTEGER*4 EFDSTEP(EFD_D_STP,EFD_D_MSP)
+      INTEGER*4 ECPGRP
+      INTEGER*4 ECPNUM(ECP_D_STP)
+      INTEGER*4 ECPMAP(ECP_D_LDG,ECP_D_STP)
+      INTEGER*4 ECPSTEP(ECP_D_STP)
+      CHARACTER*1 EFDTYPE(EFD_D_STP,EFD_D_MSP)
+      CHARACTER*1 ECPTYPE(ELD_D_DAY)
+      CHARACTER*1 LFT_LD(ELFT$LD)
+      CHARACTER*8192 UCLOAD(EBLK$LD)
+      EQUIVALENCE (ULOAD(1,1),UCLOAD(1))

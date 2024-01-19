@@ -1,0 +1,1134 @@
+C                  ::: RBCMND1.FOR 12-09-94 :::
+C
+C LAST DATE:  Earlier dates deleted
+C             4-25-93...Added $ASK command
+C             6-20-93...Added $VECTOR command and RULVEC
+C             6-28-93...RULDBG VECTOR(-1:0)
+C             4-15-94...Extended VECTOR (RULVEC) to add COL [* value]
+C                       Added NTAB display in RULDBG
+C             4-24-94...Added SWRATE check for RATEOF option in RULVEC
+C
+C This contains the following subroutines for the RULEBASE module of ANALYZE
+C
+C   RULEIN.....parses   INTERPRT command (link with outside world)
+C   RINTRP.....executes INTERPRT command
+C   RULENT.....executes ENTITY   command
+C   RULVEC.....executes VECTOR   command
+C   RULDBG.....debug routine
+C
+C ROUTINES THAT READ RULFIL USE DCFLIP AND CALL FLRDLN (FOR INCLUDE)
+C
+      SUBROUTINE RULEIN(CLIST,FIRST,LAST,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCRULE.'
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCRULE)
+CI$$INSERT DCANAL
+CI$$INSERT DCRULE
+C
+C This parses INTRPRT command
+C
+C SYNTAX:  INTERPRT [key] [params]
+C
+      CHARACTER*(*) CLIST
+C LOCAL
+      CHARACTER*64  FILNAM
+      CHARACTER*16  RNAME
+      CHARACTER*9   STRNUM
+      CHARACTER*1   CHAR
+      LOGICAL*1     SW
+      LOGICAL       EXIST
+C
+      DATA SW/.FALSE./
+      DATA STRNUM/'123456789'/
+C :::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      IF( NRULES.EQ.0 )THEN
+C RE-INITIALIZE (SETUP.EXC MAY HAVE CHANGED RULEBASE SPEC)
+         CALL RUINIT
+         IF(NRULES.EQ.0)THEN
+            PRINT *,' No Rulebase...See Model Manager'
+            RCODE = 1
+            RETURN
+         ENDIF
+      ELSE
+         NVECTR = 0
+      ENDIF
+C PARSE OPTION (key)
+      NUMBER = NRULES
+      CALL FOPTN(CLIST,FIRST,LAST,RULNAM,NUMBER,RCODE)
+      IF(RCODE.NE.0)RETURN
+C INITIALIZE LINE NUMBER, MARGIN AND TEXT
+      LINE   = 0
+      MARGIN = 0
+      INDENT = 0
+C
+      IF(NUMBER.EQ.0)THEN
+C NO OPTION (NUMBER=0) MEANS GIVE USER THE OPTIONS.
+         CLIST = ' INTERPRT options are as follows.'
+         CALL FSLEN(CLIST,80,LAST)
+         CALL FTEXT(CLIST,LAST,MARGIN,INDENT,LINE,'CLEAR',*900)
+C
+         R1 = 1
+100      N = R1 + 7
+         IF(N.GT.NRULES)N = NRULES
+         L = 2
+         CLIST = ' '
+         DO 150 R=R1,N
+            CLIST(L:) = RULNAM(R)
+            L = L+10
+150      CONTINUE
+         LAST = 80
+         CALL FTEXT(CLIST,LAST,MARGIN,INDENT,LINE,'CLEAR',*900)
+         IF(N.EQ.NRULES)RETURN
+         R1 = N+1
+         GOTO 100
+      ENDIF
+C ========================================================
+C           PREPARE TO INSTANTIATE RULE FILE
+C           ================================
+C INITIALIZE RULEBASE PARAMETERS (SET SPECIAL PARAMS AS IN DOS)
+      DO 500 NRUPRM=1,9
+         CALL FTOKEN(CLIST,FIRST,LAST,RNAME,16,CHAR)
+         RUPNAM(NRUPRM) = STRNUM(NRUPRM:NRUPRM)
+         RUPVAL(NRUPRM) = RNAME
+500   CONTINUE
+      NRUPRM = 9
+C SET SUBMATRIX ROW/COL
+      IF(NRCSUB(1).EQ.0)THEN
+         RULROW = 0
+      ELSE
+         RULROW = RCSUB1(1)
+      ENDIF
+      IF(NRCSUB(2).EQ.0)THEN
+         RULCOL = 0
+      ELSE
+         RULCOL = RCSUB1(2)
+      ENDIF
+C INITIALIZE STACKS
+      RSTCK1 = 0
+      RSTCK2 = MAXRST + 1
+      IF(SWMSG)THEN
+C TURN OFF MESSAGE SWITCH FOR INTERPRETATION
+         SW = .TRUE.
+         CLIST = ' SWITCH MSG'
+         FIRST = 2
+         LAST  = 11
+         RC = 0
+         CALL FLCMN0(CLIST,FIRST,LAST,RC)
+C             ====== COPY OF FLCMND TO AVOID RE-ENTRANCE
+         IF(RC.NE.0)THEN
+            PRINT *,' ** SYSERR...RULEIN...',CLIST(:LAST)
+            RCODE = 13
+            GOTO 900
+         ENDIF
+      ENDIF
+C OPTION (NUMBER) SPECIFIED
+      FILNAM = RULNAM(NUMBER)
+      CALL FSETNM('RULEBASE',FILNAM,BEGEXT,RCODE)
+      IF(RCODE.NE.0)GOTO 1390
+      CALL FINQUR(FILNAM,IOSTAT,EXIST,*1310)
+      IF(.NOT.EXIST .OR. IOSTAT.NE.0)GOTO 1310
+C ...OPEN RULE FILE
+      CALL FLOPEN(RULFIL,FILNAM,'FORMATTED','OLD',*1390)
+      SWRULE = .TRUE.
+C NOW EXECUTE INTERPRET COMMAND
+      CALL RINTRP(LINE,RCODE)
+C
+900   CONTINUE
+      IF(SW)THEN
+C RESTORE MESSAGE SWITCH
+         CLIST = ' SWITCH MSG'
+         FIRST = 2
+         LAST  = 11
+         RC = 0
+         CALL FLCMN0(CLIST,FIRST,LAST,RC)
+         SW = .FALSE.
+         IF(RC.NE.0)RCODE = 13
+      ENDIF
+      RETURN
+C
+1310  CONTINUE
+      PRINT *,' ** ERROR INQUIRING ABOUT ',FILNAM
+1390  IF(RCODE.EQ.0) RCODE = 1
+      GOTO 900
+C
+C ** RULEIN ENDS HERE
+      END
+      SUBROUTINE RINTRP(LINE,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      INCLUDE 'DCFLIP.'
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCRULE.'
+CITSO      INCLUDE (DCFLIP)
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCRULE)
+CI$$INSERT DCFLIP
+CI$$INSERT DCANAL
+CI$$INSERT DCRULE
+C
+C This executes the INTERPRT command...input is from RULFIL
+C
+      PARAMETER   (UABORT=10)
+C                         :...RETURN CODE FOR USER ABORT (_PAUSE)
+C LOCAL
+      CHARACTER*128 CLIST
+      CHARACTER*64  FILNAM
+      CHARACTER*16  RNAME
+      CHARACTER*1   CHAR
+      LOGICAL*1     SW,SWRC
+      LOGICAL       EXIST
+C :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::
+C INITIALIZE
+      RULTXT = ' '
+      ENDTXT = 0
+      SWRDBG = .FALSE.
+C  BEGIN INTERPRT COMMAND (NO LOOP)
+5     SWLOOP = .FALSE.
+      SWRC   = .FALSE.
+C     :...MARKS IF THE SUBMATRIX CHANGES AFTER COMMAND IS EXECUTED
+C  INITIALIZE INCLUDE
+      SWINCL = .FALSE.
+      INPLIN = 0
+C
+C  ::: TOP OF LOOP TO PARSE LINE OF RULE FILE :::
+C
+10    CONTINUE
+      IF(SWLOOP)THEN
+C NEXT LINE IS FROM LOOP
+         IF(ILOOP.EQ.NRLOOP)ILOOP=0
+         ILOOP = ILOOP+1
+         CLIST = RULOOP(ILOOP)
+         CALL FSLEN(CLIST,80,LAST)
+         CALL FSSUBS(CLIST,LAST,RCODE)
+         IF( RCODE.NE.0 )GOTO 1300
+      ELSE
+C NEXT LINE IS FROM RULE FILE
+15       CALL FLRDLN(CLIST,RULFIL,RCODE)
+         IF(RCODE)9000,16,1300
+16       CONTINUE
+      ENDIF
+C
+      FIRST = 1
+      CALL FSLEN(CLIST,127,LAST)
+C TRANSLATE (SUBSTITUTE KEY REFERENCES)
+      CALL RUTRAN(CLIST,FIRST,LAST,RCODE)
+      IF(RCODE.NE.0)GOTO 1300
+C
+C SEE IF LABEL (IF SO, SKIP TO NEXT LINE)
+      IF(CLIST(1:1).EQ.':')GOTO 10
+C NOW CLIST IS NEW LINE TO BE PROCESSED
+C
+C DO WE HAVE A NEW COMMAND?
+40    IF(CLIST(1:1).NE.'$')THEN
+C -NO...ADD CLIST TO RULTXT
+         CALL RULATX(CLIST,LINE,*9000)
+         IF(ENDTXT.GE.SCRWTH)
+     1      CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP ',*9000)
+         GOTO 10
+      ENDIF
+C -YES...PARSE COMMAND NAME (RNAME)
+      FIRST = 2
+50    CALL FTOKEN(CLIST,FIRST,LAST,RNAME,10,CHAR)
+C
+      IF(RNAME.EQ.'ANALYZE')THEN
+C $ANALYZE ...CLEAR TEXT FIRST
+         IF(ENDTXT.GT.0)CALL FTEXT
+     1      (RULTXT,ENDTXT,MARGIN,INDENT,LINE,'CLEAR ',*9000)
+         CALL FLCMN0(CLIST,FIRST,LAST,RCODE)
+         SWRC = .FALSE.
+         GOTO 1000
+      ENDIF
+C
+C SPECIAL RULE FILE COMMANDS (CONTROL)
+      IF(RNAME.EQ.'IF ')THEN
+C $IF condition THEN command
+         CALL RULEIF(CLIST,FIRST,LAST,SW,RCODE)
+         IF( RCODE.NE.0 )GOTO 1300
+         IF( SW )GOTO 50
+      ELSE IF(RNAME.EQ.'SKIP')THEN
+C $SKIP number_of_lines| TOP | LOOP | ENDLOOP
+         CALL RUSKIP(CLIST,FIRST,LAST,RCODE,*9000)
+      ELSE IF(RNAME.EQ.'GOTO')THEN
+C $GOTO label
+         CALL RUGOTO(CLIST,FIRST,LAST,RCODE,*9000)
+      ELSE IF(RNAME.EQ.'SET')THEN
+C $SET parameter = string
+         CALL RUPUTP(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'LOOKUP')THEN
+C $LOOKUP
+         CALL RULOOK(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'ENTITY'.OR.RNAME.EQ.'SET ')THEN
+C $ENTITY SET MEMBER
+         CALL RULENT(CLIST,FIRST,LAST,LINE,*9000)
+      ELSE IF(RNAME.EQ.'NEXT')THEN
+C $NEXT [ROW COLUMN]
+         CALL RULNXT(CLIST,FIRST,LAST,RCODE)
+         SWLOOP = SWLOOP.AND.(RULROW.GT.0).AND.(RULCOL.GT.0)
+         SWRC   = (RULROW.EQ.0) .OR. (RULCOL.EQ.0)
+C  ...POINT TO TOP OF LOOP (IF THERE IS ONE)
+         ILOOP = 0
+      ELSE IF(RNAME.EQ.'ENDLOOP')THEN
+C $ENDLOOP
+         SWLOOP = .FALSE.
+      ELSE IF(RNAME.EQ.'LOOP')THEN
+C $LOOP
+         NRLOOP = 0
+C  ...READ FILE UNTIL $NEXT OR $ENDLOOP IS REACHED, SAVING LINES (RULOOP)
+500      CALL FLRDLN(CLIST,RULFIL,RCODE)
+         IF(RCODE)590,501,1300
+C
+501      CONTINUE
+         IF(NRLOOP.EQ.PMXRLP)THEN
+            PRINT *,' MAX LOOP',PMXRLP
+            GOTO 1300
+         ENDIF
+         NRLOOP = NRLOOP + 1
+         RULOOP(NRLOOP) = CLIST
+         IF(CLIST(1:6).NE.'$NEXT '.AND.CLIST.NE.'$ENDLOOP')GOTO 500
+C  ...TERMINATE LOOP (BY $NEXT OR $ENDLOOP)
+590      SWLOOP = (NRLOOP.GT.0)
+         ILOOP  = 0
+C THE FOLLOWING SWITCH CAUSES CURRENT ROW/COL POINTERS TO BE SET
+         SWRC = SWLOOP
+      ELSE IF(RNAME.EQ.'CALC')THEN
+C $CALC
+         CALL RUCALC(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'STACK')THEN
+C $STACK
+         CALL RSTACK(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'POP')THEN
+C $POP
+         CALL RSPOP(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'PUSH')THEN
+C $PUSH
+         CALL RSPUSH(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'QUEUE')THEN
+C $QUEUE
+         CALL RSQUEU(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'TEXT ')THEN
+C $TEXT [number [MARGIN=margin [indent] ]|CENTER|TAB = {t1 [,...]|* ]
+         LENGTH = 8
+         CALL FTOKEN(CLIST,FIRST,LAST,RNAME,LENGTH,CHAR)
+         IF( RNAME.NE.' ' )CALL FMATCH(RNAME,'CENTER',' ',SW)
+         IF( RNAME.NE.' '.AND.SW )THEN
+C    CENTER (WHATEVER IS IN RULE TEXT BUFFER...SHOULD BE 1 LINE)
+            CALL FCENTR(RULTXT,F,ENDTXT)
+            CALL FTEXT(RULTXT,ENDTXT,1,0,LINE,'CLEAR ',*9000)
+         ELSE
+            IF( RNAME.NE.' ' )CALL FMATCH(RNAME,'TAB',' ',SW)
+            IF( RNAME.NE.' ' .AND. SW )THEN
+C    TAB
+               DO 650 I=1,NTABS
+                  CALL FVRNG(CLIST,FIRST,LAST,VL,VU,VINF,CHAR,RCODE)
+                  IF( RCODE.NE.0 )RETURN
+                  IF( VL.GE.VINF )THEN
+C       * MEANS RESET TO ORIGINAL (DEFAULT) VALUES
+                     DO 625 K=1,NTABS
+625                  NTAB(K) = 10*K
+                     GOTO 659
+                  ENDIF
+                  IF( VL.LT.1 )VL = 1
+                  IF( VL.GT.127 )VL = 127
+                  NTAB(I) = VL + .1
+                  IF( CHAR.NE.',' )GOTO 659
+650            CONTINUE
+659            CONTINUE
+            ELSE
+C    CLEAR RULE TEXT BUFFER (USING OLD MARGIN)
+               CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'CLEAR ',
+     1                    *9000)
+               IF(RNAME.NE.' ')THEN
+C      GET NUMBER OF LINES TO SKIP BEFORE BEGINNING NEW TEXT
+                  CALL FC2I(RNAME,LENGTH,NUMBER,RCODE)
+                  IF(RCODE.NE.0)GOTO 1300
+                  NUMBER = NUMBER-1
+                  IF(NUMBER.GT.0)THEN
+C      SKIP (NUMBER) MORE LINES
+                     IF(NUMBER.GT.SCRLEN-LINE)THEN
+                        CALL FEJECT(CLIST,FIRST,LAST,LINE,RCODE)
+                     ELSE
+                        DO 880 I=1,NUMBER
+880                     CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,
+     1                            'CLEAR ',*9000)
+                     ENDIF
+                  ENDIF
+               ENDIF
+               CALL FTOKEN(CLIST,FIRST,LAST,RNAME,8,CHAR)
+               IF(RNAME.NE.' ')THEN
+                  CALL FMATCH(RNAME,'MARGIN',' ',SW)
+                  IF(SW)THEN
+C         MARGIN SPECIFIED
+                     CALL FTOKEN(CLIST,FIRST,LAST,RNAME,8,CHAR)
+                     CALL FC2I(RNAME,8,MARGIN,RCODE)
+                     IF(RCODE.NE.0)GOTO 1300
+                     IF(MARGIN.GT.SCRWTH)MARGIN=SCRWTH-10
+                     IF(MARGIN.LT.1)MARGIN=1
+                  ELSE
+                     PRINT *,' TEXT ...? ',RNAME
+                     RCODE = 1
+                     GOTO 1300
+                  ENDIF
+                  CALL FTOKEN(CLIST,FIRST,LAST,RNAME,8,CHAR)
+                  IF(RNAME.NE.' ')THEN
+C         INDENT SPECIFIED
+                     CALL FC2I(RNAME,8,INDENT,RCODE)
+                     IF(RCODE.NE.0)GOTO 1300
+                     IF(MARGIN+INDENT.GT.SCRWTH)INDENT=SCRWTH-MARGIN
+                     IF(MARGIN+INDENT.LT.0)INDENT = -MARGIN
+                  ENDIF
+               ENDIF
+            ENDIF
+         ENDIF
+      ELSE IF(RNAME.EQ.'INTERPRT')THEN
+C $INTERPRT [key]
+         CALL FTOKEN(CLIST,FIRST,LAST,RNAME,8,CHAR)
+         IF(RNAME.EQ.' ')THEN
+C  ...JUST GIVE RULE OPTIONS
+            CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'CLEAR',*9000)
+            ENDTXT = 2
+            DO 950 R=1,NRULES
+               RULTXT(ENDTXT:) = RULNAM(R)
+               ENDTXT = ENDTXT + 10
+               IF(ENDTXT+8.GT.SCRWTH)THEN
+                  CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,
+     1                      'KEEP',*9000)
+                  IF(ENDTXT.LT.2)ENDTXT = 2
+               ENDIF
+950         CONTINUE
+            CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP',*9000)
+            GOTO 10
+         ENDIF
+C  ...TRANSFER TO ANOTHER RULE FILE
+         CLOSE(RULFIL,ERR=1300)
+         IF(SWINCL)THEN
+            SWINCL = .FALSE.
+            CLOSE(INCFIL)
+         ENDIF
+         FILNAM = RNAME
+         CALL FSETNM('RULEBASE',FILNAM,BEGEXT,RCODE)
+         IF(RCODE.NE.0)THEN
+            RCODE = 0
+            RULTXT(ENDTXT+1:) = ' ...That is all.'
+            GOTO 8000
+         ENDIF
+C
+         CALL FINQUR(FILNAM,IOSTAT,EXIST,*1300)
+         IF(.NOT.EXIST)THEN
+            RULTXT(ENDTXT+1:) = '...Sorry, I cannot say more.'
+            GOTO 8000
+         ENDIF
+         CALL FLOPEN(RULFIL,FILNAM,'FORMATTED','OLD',*1300)
+         GOTO 5
+      ELSE IF(RNAME.EQ.'FIND')THEN
+C $FIND
+         CALL RUFIND(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'FORM')THEN
+C $FORM
+         CALL RUFORM(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'ASK')THEN
+C $ASK
+         CALL RULASK(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'VECTOR')THEN
+C $VECTOR
+         CALL RULVEC(CLIST,FIRST,LAST,RCODE)
+      ELSE IF(RNAME.EQ.'EXIT')THEN
+C $EXIT
+         GOTO 8000
+      ELSE IF(RNAME.EQ.'DEBUG')THEN
+C $DEBUG [comment] [,]
+         PRINT *,' ',CLIST(:LAST)
+         IF(CLIST(LAST:).EQ.',')CALL SYSDBG
+         GOTO 10
+      ELSE
+         PRINT *,' ** ',RNAME,' NOT RECOGNIZED...'
+         GOTO 1300
+      ENDIF
+C
+C ::: END OF COMMAND PARSE :::
+C
+1000  CONTINUE
+C CHECK FOR ERROR
+      IF(RCODE.NE.0)GOTO 1300
+C OK, SEE IF SUBMATRIX HAS CHANGED
+      IF( SWRC )THEN
+C INITIALIZE CURRENT SUBMATRIX ROW AND COLUMN
+         RULROW = RCSUB1(1)
+         RULCOL = RCSUB1(2)
+         SWRC = .FALSE.
+      ENDIF
+C GOTO TOP OF COMMAND LOOP
+C ========================
+      GOTO 10
+C
+C ...FROM $EXIT...CLEAR TEXT
+8000  CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'CLEAR ',*9000)
+C
+C  ALL RETURNS COME HERE
+9000  CONTINUE
+      IF( SWRULE )THEN
+C RULE FILE IS OPEN...CLOSE IT
+         CLOSE(RULFIL)
+         SWRULE = .FALSE.
+         IF(SWINCL)THEN
+C INCLUDE FILE IS OPEN...CLOSE IT
+            SWINCL = .FALSE.
+            CLOSE(INCFIL)
+         ENDIF
+      ENDIF
+      IF(SWDBG .OR. SWRDBG)PRINT *,' RCODE =',RCODE
+      IF(RCODE.LT.0)RCODE=0
+C        :...NON-FATAL...SIMPLY EOF ON RULE FILE
+      RETURN
+C
+C  ALL ERROR RETURNS COME HERE
+1300  CONTINUE
+      IF(RCODE.EQ.UABORT)GOTO 9000
+      PRINT *,' ...SEE MODEL MANAGER TO CORRECT RULEBASE'
+      IF(RCODE.LE.0)RCODE=13
+      GOTO 9000
+C
+C ** RINTRP ENDS HERE
+      END
+      SUBROUTINE RULENT(CLIST,FIRST,LAST,LINE,*)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      INCLUDE 'DCFLIP.'
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCRULE.'
+CITSO      INCLUDE (DCFLIP)
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCRULE)
+CI$$INSERT DCFLIP
+CI$$INSERT DCANAL
+CI$$INSERT DCRULE
+C
+C This executes ENTITY command.
+C      Syntax:  ENTITY member [set]
+C ...If set is not specified, each matching member in all sets is given.
+C
+      CHARACTER*(*) CLIST
+C LOCAL
+      CHARACTER*16  RNAME,CNAME
+      CHARACTER*1   CHAR
+C  ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      IF(NENTY.EQ.0)RETURN
+C GET MEMBER KEY TO TRANSLATE
+      CALL FTOKEN(CLIST,FIRST,LAST,RNAME,4,CHAR)
+      IF(RNAME.EQ.' ')RETURN
+      CALL FSLEN(RNAME,4,LR)
+C PRINT TEXT IF NECESSARY TO HAVE ROOM ON SCREEN
+      IF(ENDTXT.GE.SCRWTH)
+     1   CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP',*9000)
+C SEE IF SET IS SPECIFIED
+      CALL FTOKEN(CLIST,FIRST,LAST,CNAME,4,CHAR)
+      IF(CNAME.EQ.' ')GOTO 500
+      CALL FSLEN(CNAME,4,LC)
+C YES, LOOKUP SET
+      DO 100 E=1,NENTY
+         E1 = EXINDX(E-1) + 1
+         IF(CNAME(:LC).EQ.EXKEY(E1)(:LC))GOTO 110
+100   CONTINUE
+C ...SET NOT RECOGNIZED
+C ? (INSERT QUESTION MARK)
+      RULTXT(ENDTXT+2:) = '?'//CNAME
+113   CALL FSLEN(RULTXT,128,ENDTXT)
+      RETURN
+C
+110   CONTINUE
+C MEMBER IS IN SET NUMBER E  (EXINDX POINTS TO ITS LAST MEMBER)
+      E2 =EXINDX(E)
+      E1 = E1 + 1
+      IF(E1.GT.E2)GOTO 113
+      DO 200 M=E1,E2
+         IF(RNAME(:LR).EQ.EXKEY(M)(:LR))GOTO 210
+200   CONTINUE
+      RULTXT(ENDTXT+2:) = '?'//RNAME
+      GOTO 113
+210   CONTINUE
+C BINGO.
+      RULTXT(ENDTXT+2:) = EXTABL(M)
+      CALL FSLEN(RULTXT,128,ENDTXT)
+      IF(ENDTXT.GE.SCRWTH)
+     1   CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP',*9000)
+      RETURN
+C
+500   CONTINUE
+C ::: MEMBER CAN BE IN ANY SET (GIVE CONJUNCTION) :::
+      E1 = 1
+      DO 900 E=1,NENTY
+         E2 = EXINDX(E)
+         IF(E1.GE.E2)GOTO 800
+         E1 = E1 + 1
+C
+         DO 700 M=E1,E2
+            IF(EXKEY(M)(:LR).NE.RNAME(:LR))GOTO 700
+C MEMBER (RNAME) IN SET NUMBER E (MEANING IN EXTABL(E1-1))
+            RULTXT(ENDTXT+2:) = CNAME
+            CNAME = 'or '
+            CALL FSLEN(RULTXT,128,ENDTXT)
+            IF(ENDTXT.GE.SCRWTH)
+     1       CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP',*9000)
+            RULTXT(ENDTXT+2:) = EXTABL(M)
+            CALL FSLEN(RULTXT,128,ENDTXT)
+            IF(ENDTXT.GE.SCRWTH)
+     1       CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP',*9000)
+            RULTXT(ENDTXT+2:) = '('//EXTABL(M)
+            CALL FSLEN(RULTXT,128,ENDTXT)
+            ENDTXT = ENDTXT + 1
+            RULTXT(ENDTXT:) = ')'
+            IF(ENDTXT.GE.SCRWTH)
+     1       CALL FTEXT(RULTXT,ENDTXT,MARGIN,INDENT,LINE,'KEEP',*9000)
+            GOTO 800
+700      CONTINUE
+C PREPARE FOR NEXT SET
+800      E1 = E2 + 1
+900   CONTINUE
+C
+      RETURN
+C
+9000  RETURN 1
+C
+C ** RULENT ENDS HERE ****
+      END
+      SUBROUTINE RULVEC(CLIST,FIRST,LAST,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCRULE.'
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCRULE)
+CI$$INSERT DCANAL
+CI$$INSERT DCRULE
+C
+C This executes VECTOR command.
+C      Syntax:  VECTOR {ADD {name value | COL name [* value]}
+C                     | CLEAR | SET column
+C                     | RATEOF [{ROW|COL} name] }
+C                       :...THIS CLEARS VECTOR BEFORE PUTTING RATES
+      CHARACTER*(*) CLIST
+C LOCAL
+      CHARACTER*1  CHAR
+      CHARACTER*4  ROWCOL
+      CHARACTER*16 RNAME,STRVAL
+      CHARACTER*8  OPTION(4)
+C  ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      OPTION(1) = 'ADD'
+      OPTION(2) = 'CLEAR'
+      OPTION(3) = 'SET'
+      OPTION(4) = 'RATEOF'
+      NUMBER = 4
+      RCODE = 1
+      CALL FOPTN(CLIST,FIRST,LAST,OPTION,NUMBER,RCODE)
+      IF( RCODE.NE.0 )RETURN
+      VECTOR(-1) = -VINF
+      VECTOR( 0) =  VINF
+      VECNAM(-1) = '*'
+      VECNAM( 0) = '*'
+      GOTO (100,1000,2000,3000), NUMBER
+100   CONTINUE
+C ADD {name value | COL name [* value]}
+      CALL FTOKEN(CLIST,FIRST,LAST,RNAME,16,CHAR)
+      IF( RNAME(1:4).EQ.'COL ' )GOTO 200
+C FORM 1:  name value
+      CALL FTOKEN(CLIST,FIRST,LAST,STRVAL,16,CHAR)
+      CALL FC2R(STRVAL,V,RCODE)
+      IF( RCODE.NE.0 )RETURN
+C SEE IF RNAME ALREADY IN VECTOR (IF SO, ADD VALUE)
+      IF( NVECTR.GT.0 )THEN
+         DO 150 I=1,NVECTR
+            IF( VECNAM(I).EQ.RNAME )THEN
+               VECTOR(I) = VECTOR(I) + V
+               RETURN
+            ENDIF
+150      CONTINUE
+      ENDIF
+C ...RNAME NOT ALREADY IN VECTOR...ADD IT IF ENOUGH ROOM
+      IF( NVECTR.GT.NROWS )GOTO 1300
+      NVECTR = NVECTR+1
+      VECNAM(NVECTR) = RNAME
+      VECTOR(NVECTR) = V
+      RETURN
+C
+200   CONTINUE
+C FORM 2:  COL name [[*] value]
+      CALL FTOKEN(CLIST,FIRST,LAST,RNAME,16,CHAR)
+      IF( RNAME.EQ.' ' )THEN
+         PRINT *,' ** MISSING COL NAME IN VECTOR'
+         RCODE = 1
+         RETURN
+      ENDIF
+      CALL GETNUM('COL ',RNAME,COL)
+      IF( COL.EQ.0 )THEN
+         PRINT *,' ** COL ',RNAME(:NAMELN),' NOT FOUND'
+         RCODE = 1
+         RETURN
+      ENDIF
+      CALL FTOKEN(CLIST,FIRST,LAST,STRVAL,16,CHAR)
+      IF( STRVAL(1:1).EQ.'*' )STRVAL(1:1) = ' '
+      IF( STRVAL.EQ.' ' )CALL FTOKEN(CLIST,FIRST,LAST,STRVAL,16,CHAR)
+      CALL FC2R(STRVAL,V,RCODE)
+      IF( RCODE.NE.0 )RETURN
+C ADD COL * V TO VECTOR
+      CALL GETCOL(COL,NZ,MAXLST,ROWLST,VALLST)
+      IF( NZ.EQ.0 )RETURN
+      NVEC0 = NVECTR
+      DO 390 L=1,NZ
+         ROW = ROWLST(L)
+         CALL GETNAM('ROW ',ROW,RNAME)
+C   ADD ROW COEF*V TO VECTOR
+         VADD = V*VALLST(L)
+         IF( NVEC0.GT.0 )THEN
+            DO 350 I=1,NVEC0
+               IF( VECNAM(I).EQ.RNAME )THEN
+                   VECTOR(I) = VECTOR(I) + VADD
+                   GOTO 390
+               ENDIF
+350         CONTINUE
+         ENDIF
+C ...RNAME NOT ALREADY IN VECTOR...ADD IT IF ENOUGH ROOM
+         IF( NVECTR.GT.NROWS )GOTO 1300
+         NVECTR = NVECTR+1
+         VECNAM(NVECTR) = RNAME
+         VECTOR(NVECTR) = VADD
+390   CONTINUE
+      RETURN
+C
+1000  CONTINUE
+C CLEAR
+      NVECTR = 0
+      RETURN
+C
+2000  CONTINUE
+C SET column
+      CALL FTOKEN(CLIST,FIRST,LAST,STRVAL,16,CHAR)
+      IF( STRVAL.EQ.' ' )THEN
+         PRINT *,' ** MISSING COLUMN NAME'
+         RCODE = 1
+         RETURN
+      ENDIF
+      CALL GETNUM('COL ',STRVAL,NUMBER)
+      CALL GETCOL(NUMBER,NVECTR,MAXLST,ROWLST,VECTOR)
+      IF( NVECTR.EQ.0 )RETURN
+C COPY ROW NAMES TO VECNAM
+      DO 2500 I=1,NVECTR
+2500  CALL GETNAM('ROW ',ROWLST(I),VECNAM(I))
+      RETURN
+C
+3000  CONTINUE
+C RATEOF [{ROW|COL} name]
+      IF( .NOT.SWRATE )THEN
+         PRINT *,' ** BASIS NOT SETUP...'
+         GOTO 1390
+      ENDIF
+      OPTION(1) = 'ROW '
+      OPTION(2) = 'COLUMN'
+      NUMBER = 2
+      RCODE = 0
+      CALL FOPTN(CLIST,FIRST,LAST,OPTION,NUMBER,RCODE)
+      IF( RCODE.NE.0 )RETURN
+      IF( NUMBER.EQ.0 )GOTO 3500
+C ROW | COL
+      ROWCOL = OPTION(NUMBER)(1:3)
+      CALL FTOKEN(CLIST,FIRST,LAST,STRVAL,16,CHAR)
+      IF( STRVAL.EQ.' ' )THEN
+         PRINT *,' ** MISSING ',ROWCOL,' NAME'
+         RCODE = 1
+         RETURN
+      ENDIF
+      CALL GETNUM(ROWCOL,STRVAL,NUMBER)
+      IF( NUMBER.EQ.0 )THEN
+         PRINT *,' ** ',ROWCOL,STRVAL(:NAMELN),' NOT RECOGNIZED'
+         RCODE = 1
+         RETURN
+      ENDIF
+      CALL GETSOL(ROWCOL,NUMBER,VX,VP,CHAR,DUMMY)
+      IF( CHAR.EQ.'L' .OR. CHAR.EQ.'U' )THEN
+C ROWCOL NUMBER IS NOT BASIC...FTRAN ROWCOL NUMBER
+         CALL AFTRAN(ROWCOL,NUMBER)
+         GOTO 3800
+      ENDIF
+C
+C ROWCOL IS BASIC
+      CALL GETPIV(ROW,ROWCOL,NUMBER)
+      CALL GALPHA('ROW ',ROW,ZVALUE,NROWS)
+      CALL GBTRAN(ZVALUE,NROWS)
+C ...NOW ZVALUE = BTRAN(E), WHERE E IS ROW-TH UNIT VECTOR
+      NVECTR = 0
+C INITIALIZE RANGE = CURRENT LEVEL (= SUM AT END)
+      VECTOR(-1) = VX
+      VECTOR( 0) = VX
+      VECNAM(-1) = 'LO'
+      VECNAM( 0) = 'UP'
+C  ::: LOOP OVER ROWS :::
+      DO 3200 ROW=1,NROWS
+C FIRST, XFER ZVALUE TO SINGLE PRECISION (TO CALL GPRDCT LATER)
+         VALLST(ROW) = ZVALUE(ROW)
+         CALL GETST('ROW ',ROW,CHAR,DUMMY)
+         IF( CHAR.EQ.'B' .OR. CHAR.EQ.'I' )GOTO 3200
+C ROW IS NOT BASIC
+         VRATE = -ZVALUE(ROW)
+         IF( ABS(VRATE).LE.VTOLAB )GOTO 3200
+C ADD ROW TO VECTOR
+         NVECTR = NVECTR + 1
+         VECTOR(NVECTR) = VRATE
+         CALL GETNAM('ROW ',ROW,VECNAM(NVECTR))
+C ...UPDATE RANGE
+         CALL GETBND('ROW ',ROW,VL,VU)
+         IF( CHAR.EQ.'L' )THEN
+C ROW CAN INCREASE ITS LEVEL
+            IF( VU.LT.VINF )VU = VU - VL
+            VL = 0
+         ELSE
+C ROW CAN DECREASE ITS LEVEL
+            IF( VL.LE.-VINF )VL = VL - VU
+            VU = 0
+         ENDIF
+C NOW RANGE OF ROW'S CHANGE IS [VL, VU]
+         IF( VECTOR(-1).GT.-VINF )THEN
+            IF( VRATE.GT.0 )THEN
+               IF( VL.GT.-VINF )THEN
+                  VECTOR(-1) = VECTOR(-1) + VRATE*VL
+               ELSE
+                  VECTOR(-1) = -VINF
+               ENDIF
+            ELSE
+               IF( VU.LT.VINF )THEN
+                  VECTOR(-1) = VECTOR(-1) + VRATE*VU
+               ELSE
+                  VECTOR(-1) = -VINF
+               ENDIF
+            ENDIF
+         ENDIF
+         IF( VECTOR(0).LT.VINF )THEN
+            IF( VRATE.GT.0 )THEN
+               IF( VU.LT.VINF )THEN
+                  VECTOR(0) = VECTOR(0) + VRATE*VU
+               ELSE
+                  VECTOR(0) = VINF
+               ENDIF
+            ELSE
+               IF( VL.GT.-VINF )THEN
+                  VECTOR(0) = VECTOR(0) + VRATE*VL
+               ELSE
+                  VECTOR(0) = VINF
+               ENDIF
+            ENDIF
+         ENDIF
+3200  CONTINUE
+C
+C  ::: LOOP OVER COLUMNS :::
+      DO 3300 COL=1,NCOLS
+         CALL GETST('COL ',COL,CHAR,DUMMY)
+         IF( CHAR.EQ.'B' .OR. CHAR.EQ.'I' )GOTO 3300
+C COL IS NOT BASIC...RATE = BTRAN(E)*A(COL) = VALLST*A(COL)
+         CALL GPRDCT(VALLST,COL,VRATE)
+         IF( ABS(VRATE).LE.VTOLAB )GOTO 3300
+         IF( NVECTR.GE.PMXROW )GOTO 1300
+C ADD COL TO VECTOR
+         NVECTR = NVECTR + 1
+         VECTOR(NVECTR) = VRATE
+         CALL GETNAM('COL ',COL,VECNAM(NVECTR))
+C UPDATE RANGE
+         CALL GETBND('COL ',COL,VL,VU)
+         IF( CHAR.EQ.'L' )THEN
+C COL CAN INCREASE ITS LEVEL
+            IF( VU.LT.VINF )VU = VU-VL
+            VL = 0
+         ELSE
+C COL CAN DECREASE ITS LEVEL
+            IF( VL.LE.-VINF )VL = VL-VU
+            VU = 0
+         ENDIF
+C NOW RANGE OF COL'S CHANGE IS [VL, VU]
+         IF( VECTOR(-1).GT.-VINF )THEN
+            IF( VRATE.GT.0. )THEN
+               IF( VL.GT.-VINF )THEN
+                  VECTOR(-1) = VECTOR(-1) + VRATE*VL
+               ELSE
+                  VECTOR(-1) = -VINF
+               ENDIF
+            ELSE
+               IF( VU.LT.VINF )THEN
+                  VECTOR(-1) = VECTOR(-1) + VRATE*VU
+               ELSE
+                  VECTOR(-1) = -VINF
+               ENDIF
+            ENDIF
+         ENDIF
+         IF( VECTOR(0).LT.VINF )THEN
+            IF( VRATE.GT.0. )THEN
+               IF( VU.LT.VINF )THEN
+                  VECTOR(0) = VECTOR(0) + VRATE*VU
+               ELSE
+                  VECTOR(0) = VINF
+               ENDIF
+            ELSE
+               IF( VL.GT.-VINF )THEN
+                  VECTOR(0) = VECTOR(0) + VRATE*VL
+               ELSE
+                  VECTOR(0) = VINF
+               ENDIF
+            ENDIF
+         ENDIF
+3300  CONTINUE
+      RETURN
+C     ======
+3500  CONTINUE
+C NO OPTION MEANS FTRAN VECTOR
+C ...NAMES MUST BE ROW NAMES AND WILL BE REPLACED BY PIVOTS
+      IF( NVECTR.EQ.0 )RETURN
+      DO 3550 I=1,NROWS
+3550  ZVALUE(I) = 0.0
+C
+      DO 3600 I=1,NVECTR
+         CALL GETNUM('ROW ',VECNAM(I),NUMBER)
+         IF( NUMBER.EQ.0 )THEN
+            PRINT *,' ** ROW ',VECNAM(I)(:NAMELN),' NOT RECOGNIZED'
+            RCODE = 1
+            RETURN
+         ENDIF
+         ZVALUE(NUMBER) = VECTOR(I)
+3600  CONTINUE
+C ZVALUE IS SET...FTRAN IT
+      CALL GFTRAN(ZVALUE,NROWS)
+C COPY RESULT BACK TO CREATE RATE VECTOR
+C
+3800  CONTINUE
+C CLEAR VECTOR
+      NVECTR = 0
+C
+C ::: LOOP TO XFER NONZEROES TO VECTOR AND BASIC ROW|COL TO VECNAM :::
+C     (RANGE BY MIN RATIO)
+C
+      DO 3900 I=1,NROWS
+         VRATE = ZVALUE(I)
+         IF( ABS(VRATE).LE.VTOLAB )GOTO 3900
+         NVECTR = NVECTR + 1
+         VECTOR(NVECTR) = VRATE
+C PUT NAME OF BASIC VAR PIVOTING ON ROW I
+         CALL GETBVP(I,ROWCOL,NUMBER)
+         CALL GETNAM(ROWCOL,NUMBER,VECNAM(NVECTR))
+C VECTOR AND VECNAM ARE SET...UPDATE RANGE
+         CALL GETSOL(ROWCOL,NUMBER,VX,VP,CHAR,DUMMY)
+         IF( CHAR.EQ.'I' )GOTO 3900
+         CALL GETBND(ROWCOL,NUMBER,VL,VU)
+C BASIC VAR (ROWCOL NUMBER) IS FEASIBLE, SO IT CAN BLOCK:
+C     VL-VX <= VRATE*VTHETA <= VU-VX
+         IF( VRATE.LT.0. )THEN
+C (VL-VX)/VRATE >= VTHETA >= (VU-VX)/VRATE
+            IF( VU.LT.VINF )THEN
+               V = (VU - VX)/VRATE
+               IF( VECTOR(-1).LT.V )THEN
+                  VECTOR(-1) = V
+                  VECNAM(-1) = VECNAM(NVECTR)
+               ENDIF
+            ENDIF
+            IF( VL.GT.-VINF )THEN
+               V = (VL - VX)/VRATE
+               IF( VECTOR(0).GT.V )THEN
+                  VECTOR(0) = V
+                  VECNAM(0) = VECNAM(NVECTR)
+               ENDIF
+            ENDIF
+         ELSE
+C (VL-VX)/VRATE <= VTHETA <= (VU-VX)/VRATE
+            IF( VL.GT.-VINF )THEN
+               V = (VL - VX)/VRATE
+               IF( VECTOR(-1).LT.V )THEN
+                  VECTOR(-1) = V
+                  VECNAM(-1) = VECNAM(NVECTR)
+               ENDIF
+            ENDIF
+            IF( VU.LT.VINF )THEN
+               V = (VU - VX)/VRATE
+               IF( VECTOR(0).GT.V )THEN
+                  VECTOR(0) = V
+                  VECNAM(0) = VECNAM(NVECTR)
+               ENDIF
+            ENDIF
+         ENDIF
+3900  CONTINUE
+C
+      RETURN
+C
+1300  CONTINUE
+      PRINT *,' ** VECTOR FULL...MAX =',NROWS,' = NUMBER OF ROWS'
+1390  RCODE = 1
+      RETURN
+C
+C ** RULVEC ENDS HERE ****
+      END
+      SUBROUTINE RULDBG
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCRULE.'
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCRULE)
+CI$$INSERT DCANAL
+CI$$INSERT DCRULE
+C
+C This is DEBUG ROUTINE FOR RULEBASE...called by SYSDBG
+C
+C LOCAL
+      CHARACTER*128 CLIST
+      CHARACTER*16  RNAME,CNAME
+      CHARACTER*1   CHAR
+C ::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      IF(RPAUSE.LT.0)READ(*,1)CHAR
+      PRINT *,' RULDBG ENTERED...RULROW=',RULROW,' RULCOL=',RULCOL,
+     1        ' SWRULE=',SWRULE
+      RPAUSE = RPAUS0
+C
+5     PRINT *,' Rule, Param, Text, Int, Chr, Val',
+     1        ' vEctor, sW, Loop, Stack, Debug '
+      READ(*,1)CHAR
+1     FORMAT(A1)
+      IF(CHAR.EQ.' ')RETURN
+      I1 = 1
+      IF(CHAR.EQ.'D')THEN
+          PRINT *,' Currently, SWRDBG=',SWRDBG
+          CALL FPAUSE(RPAUS0)
+          RPAUSE = RPAUS0
+          SWRDBG = RPAUS0.GT.0
+          PRINT *,' Now SWRDBG=',SWRDBG
+          IF(.NOT.SWRDBG)RPAUSE = -RPAUS0
+          RETURN
+      ENDIF
+      IF(CHAR.EQ.'R')THEN
+         RNAME = 'RULES'
+         NUMBER   = NRULES
+         BRANCH = 1
+      ELSE IF(CHAR.EQ.'P')THEN
+         RNAME = 'PARAMS'
+         NUMBER   = NRUPRM
+         BRANCH = 2
+      ELSE IF(CHAR.EQ.'I')THEN
+         RNAME = 'INTKEY'
+         NUMBER = NRUINT
+         BRANCH = 3
+      ELSE IF(CHAR.EQ.'C')THEN
+         RNAME = 'CHRKEY'
+         NUMBER = NRUCHR-1
+         BRANCH = 4
+      ELSE IF(CHAR.EQ.'V')THEN
+         RNAME = 'VALKEY'
+         NUMBER = NRUVAL-1
+         BRANCH = 5
+      ELSE IF(CHAR.EQ.'W')THEN
+         RNAME = 'SWKEY'
+         NUMBER = NRUSWK
+         BRANCH = 8
+      ELSE IF(CHAR.EQ.'L')THEN
+         RNAME = 'LOOP'
+         NUMBER = NRLOOP
+         BRANCH = 6
+         PRINT *,' SWLOOP=',SWLOOP
+      ELSE IF(CHAR.EQ.'S')THEN
+         RNAME = 'STACK'
+         NUMBER = MAXRST
+         BRANCH = 7
+      ELSE IF(CHAR.EQ.'E')THEN
+         RNAME = 'VECTOR'
+         NUMBER = NVECTR
+         BRANCH = 9
+         I1 = -1
+      ELSE IF(CHAR.EQ.'T')THEN
+         PRINT *,' ENDTXT = ',ENDTXT
+         PRINT *,' RULTXT(:64)=',RULTXT(:64)
+         PRINT *,' RULTXT(64:)=',RULTXT(64:)
+         GOTO 5
+      ELSE
+         PRINT *,' ?',CHAR
+         GOTO 5
+      ENDIF
+C
+      PRINT *,' ',RNAME,' NUMBER = ',NUMBER
+      LINE = 4
+      IF(NUMBER.LE.0)GOTO 5
+      IF(BRANCH.EQ.7)GOTO 700
+C
+      DO 99 I=I1,NUMBER
+         CALL FPRMPT(LINE,*5)
+         GOTO (10,20,30,40,50,60,80,80,90),BRANCH
+C                                :...NOT USED (SEE ABOVE)
+10       PRINT *,' ',RULNAM(I)
+         GOTO 99
+20       PRINT *,' ',RUPNAM(I),'=',RUPVAL(I)
+         GOTO 99
+30       CNAME = RULINT(I)
+         IF( CNAME.EQ.'NTAB ' )THEN
+            PRINT *,NTABS,' TABS'
+            DO 35 ITAB=1,NTABS
+               RCODE = ITAB
+               CALL RUGETN(CNAME,N,RCODE)
+               PRINT *,' NTAB(',ITAB,')=',N,'...RCODE=',RCODE
+               CALL FPRMPT(LINE,*5)
+35          CONTINUE
+         ELSE
+            CALL RUGETN(CNAME,N,RCODE)
+            PRINT *,' ',CNAME,'=',N,'...RCODE=',RCODE
+         ENDIF
+         GOTO 99
+40       CNAME = RULCHR(I)
+         CALL RUGETC(CNAME,CLIST,RCODE)
+         PRINT *,' ',CNAME,'=',CLIST(:16),'...RCODE=',RCODE
+         GOTO 99
+50       CNAME = RULVAL(I)
+         CALL RUGETV(CNAME,CLIST,RCODE)
+         PRINT *,' ',CNAME,'=',CLIST(:16),'...RCODE=',RCODE
+         GOTO 99
+60       IF(ILOOP.EQ.I)THEN
+            CLIST = RULOOP(I)(:64)
+            CLIST(66:) = '<<== ILOOP'
+         ELSE
+            CLIST = RULOOP(I)
+         ENDIF
+         PRINT *,' ',CLIST(1:75)
+         GOTO 99
+80       CNAME = RULSWK(I)
+         CALL RUGETS(CNAME,CLIST,RCODE)
+         PRINT *,' ',CNAME,'=',CLIST(:2),'...RCODE=',RCODE
+         GOTO 99
+90       PRINT *,I,':',VECNAM(I),VECTOR(I)
+99    CONTINUE
+      GOTO 5
+C
+700   CONTINUE
+C STACKS
+      PRINT *,' RSTCK1=',RSTCK1,' RSTCK2=',RSTCK2
+      LINE = LINE + 1
+      IF(RSTCK1.GT.0)THEN
+         DO 710 I=1,RSTCK1
+            CALL FPRMPT(LINE,*5)
+710      PRINT *,I,'=',RBSTAK(I)
+      ENDIF
+      IF(RSTCK2.LE.MAXRST)THEN
+         DO 720 I=RSTCK2,MAXRST
+            CALL FPRMPT(LINE,*5)
+720      PRINT *,I,'=',RBSTAK(I)
+      ENDIF
+C
+750   PRINT *,' FOR MORE, ENTER B (BOTTOM) OR T (TOP):'
+      READ(*,1)CHAR
+      IF(CHAR.EQ.'T')THEN
+         I1 = 1
+         I2 = RSTCK2
+         BRANCH = 1
+      ELSE IF(CHAR.EQ.'B')THEN
+         I1 = MAXRST
+         I2 = RSTCK1
+         BRANCH = -1
+      ELSE
+         GOTO 5
+      ENDIF
+      DO 760 I=I1,I2,BRANCH
+         CALL FPRMPT(LINE,*5)
+760   PRINT *,I,'=',RBSTAK(I)
+      GOTO 750
+C
+C ** RULDBG ENDS HERE
+      END

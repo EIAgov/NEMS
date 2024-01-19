@@ -1,0 +1,46 @@
+FILE NAME:      RSSTEO
+DATE MODIFIED:  November 15, 2022
+DEFINITION:     SEDS and STEO residential sector historical and forecasted fuel consumption for the years 2016 through 2024 (STEOCN)  
+UNITS:          trillion Btu consumed
+DIMENSION:      fuel type, year, census division
+SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
+ORGANIZATION OF DATA: Each block of data by fuel includes 9 U.S. census divisions
+SOURCES:        2022-2024: Short-Term Energy Outlook (STEO), November 8, 2022
+                  Online at http://www.eia.gov/forecasts/steo/
+                2021: Monthly Energy Review Tables 2.3, 3.8a, 4.3, and A4, released October 26, 2022
+                  Online at http://www.eia.gov/totalenergy/data/monthly/index.cfm
+                2016-2020: State Energy Data System (SEDS), June 24, 2022
+                  Accessed through EIA Excel API add-on tool:  http://www.eia.gov/opendata/excel/
+COMMENT:        Update historical and forecasted DS and LG data; electricity and natural gas multiplicative factors set to 1.01.
+
+
+
+
+
+Benchmark multiplicative tweaking factor for natural gas (STEObenchNG); set to 1.0 unless needed for 2% STEO benchmarking
+1.01
+
+Benchmark multiplicative tweaking factor for electricity (STEObenchEL); set to 1.0 unless needed for 2% STEO benchmarking
+1.01
+
+2016	2017	2018	2019	2020	2021	2022	2023	2024
+Distillate Fuel Oil
+185.030	193.890	215.993	209.859	190.998	193.549	184.247	187.586	165.374
+186.076	176.790	221.622	200.781	160.974	163.124	179.256	175.212	154.264
+16.410	16.181	18.549	18.604	16.083	16.298	15.042	14.730	14.254
+6.841	6.058	6.601	5.745	5.125	5.193	5.285	4.948	4.676
+35.953	28.420	37.058	30.135	29.164	29.554	34.557	33.857	26.802
+1.274	1.104	0.976	1.062	0.960	0.973	1.208	1.080	0.816
+0.161	0.123	0.081	0.066	0.332	0.336	0.212	0.194	0.182
+1.712	1.718	1.511	1.517	1.604	1.625	1.251	1.251	1.251
+13.730	15.386	12.268	12.591	12.932	13.105	11.439	12.359	10.984
+Propane
+37.916	40.948	45.060	46.282	40.868	41.002	42.181	42.405	39.142
+42.129	43.856	52.958	56.835	48.043	48.200	50.503	49.176	44.899
+103.432	103.229	121.790	139.607	122.797	123.199	116.505	112.307	106.759
+70.997	71.575	93.337	107.068	91.168	91.467	85.594	81.187	77.605
+53.927	51.937	63.306	62.199	61.050	61.250	64.333	63.277	56.784
+21.868	19.494	23.838	27.412	22.639	22.713	23.770	22.559	20.282
+30.876	27.597	30.330	36.006	30.238	30.337	33.889	30.513	28.267
+35.524	37.929	39.423	46.962	41.715	41.852	39.108	38.381	37.168
+33.220	34.137	36.504	41.031	36.417	36.536	35.202	36.467	33.853

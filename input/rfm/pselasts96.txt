@@ -1,0 +1,78 @@
+1996 REGIONAL ACREAGE ELASTICITIES == Adjusted by Young & Westcott                                                                      
+==========================================================================
+ACREAGE\PRICE->CORN    G.S.   OATS    BARLY  WHEAT   SOYBN   COTTN   RICE
+==========================================================================
+NORTHEAST                                                                       
+CORN            0.43    0       0       0       -0.02   -0.21   0       0
+GRAINSORGHUM    0       0       0       0       0       0       0       0
+OATS            0       0       0       0       0       0       0       0
+BARLEY          0       0       0       0       0       0       0       0
+WHEAT           -0.23   0       0       0       0.5     -0.15   0       0
+SOYBEANS        -0.44   0       0       0       0.136   0.67    0       0
+COTTON          0       0       0       0       0       0       0       0
+RICE            0       0       0       0       0       0       0       0
+ADJCOEF         0       0       0       0       0       0       0       0
+SOUTHEAST                                                                       
+CORN            0.397   0       0       0       -0.071  -0.082  -0.091  0
+GRAINSORGHUM    0       0.406   0       0       0       -0.263  0       0
+OATS            0       0       0       0       0       0       0       0
+BARLEY          0       0       0       0       0       0       0       0
+WHEAT           -0.097  0       0       0       0.267   0.082   0       0
+SOYBEANS        -0.044  0       0       0       -0.004  0.221   -0.048  0
+COTTON          -0.077  0       0       0       -0.068  -0.092  0.435   0
+RICE            0       0       0       0       0       0       0       0
+ADJCOEF         0       0       0       0       0       0       0       0
+DELTA                                                                   
+CORN            0.397   0       0       0       -0.071  -0.082  -0.091  0
+GRAINSORGHUM    0       0.406   0       0       0       -0.263  0       0
+OATS            0       0       0       0       0       0       0       0
+BARLEY          0       0       0       0       0       0       0       0
+WHEAT           -0.097  0       0       0       0.267   0.082   0       0
+SOYBEANS        -0.044  0       0       0       -0.004  0.221   -0.048  0
+COTTON          -0.077  0       0       0       -0.068  -0.092  0.435   0
+RICE            0       0       0       0       0       -0.33   0       0.62
+ADJCOEF         0       0       0       0       0       0       0       0
+NORTHCENTRAL                                                                    
+CORN            0.293   0       0       0       -0.018  -0.203  0       0
+GRAINSORGHUM    0       0       0       0       0       0       0       0
+OATS            0       0       0.46    0       -0.017  0       0       0
+BARLEY          0       0       0       0       0       0       0       0
+WHEAT           0       0       -0.098  0       0.586   -0.149  0       0
+SOYBEANS        -0.261  0       0       0       0.004   0.348   0       0
+COTTON          0       0       0       0       0       0       0       0
+RICE            0       0       0       0       0       0       0       0
+ADJCOEF         0       0       0       0       0       0       0       0
+NORTHERNPLAIN                                                                   
+CORN            0.221   -0.079  0       0       -0.038  -0.055  0       0
+GRAINSORGHUM   -0.217   0.446   0       0       -0.121  0       0       0
+OATS            0       0       0       0       0       0       0       0
+BARLEY          -0.062  -0.07   0       0.206   0       0       0       0
+WHEAT           0       -0.214  0       0       0.267   0       0       0
+SOYBEANS       -0.230   0       0       0       -0.042  0.213   0       0
+COTTON          0       0       0       0       0       0       0       0
+RICE            0       0       0       0       0       0       0       0
+ADJCOEF         0       0       0       0       0       0       0       0
+SOUTHERNPLAIN                                                                   
+CORN            0.402   -0.047  0       0       0       0       -0.049  0
+GRAINSORGHUM    -0.217  0.728   0       0       -0.121  0       -0.45   0
+OATS            0       0       0       0       0       0       0       0
+BARLEY          0       0       0       0       0       0       0       0
+WHEAT           -0.087  -0.166  0       0       0.393   0       -0.073  0
+SOYBEANS        0       0       0       0       0       0       0       0
+COTTON          0       -0.231  0       0       0       0       0.48    0
+RICE            0       0       0       0       0       0       0       0.62
+ADJCOEF         0       0       0       0       0       0       0       0
+FARWEST                                                                 
+CORN            0.4     0       0       0       0       0       -0.05   0
+GRAINSORGHUM    0       0       0       0       0       0       0       0
+OATS            0       0       0       0       0       0       0       0
+BARLEY          0       0       0       0.44    -0.19   0       0       0
+WHEAT           0       0       0       -0.63   0.76    0       0       0
+SOYBEANS        0       0       0       0       0       0       0       0
+COTTON          0       0       0       0       -0.12   0       0.57    0
+RICE            0       0       0       0       0       0       0       0.79
+ADJCOEF         0       0       0       0       0       0       0       0
+============================================================================
+ADJUSTMENT COEF. FOR  CROP EQUATIONS (WILL BE CONVERTED TO 1 - ADJ LATER)
+(A ONE IN THIS TABLE MEANS LR = SR;.10 MEANS LR MUCH LARGER THAN SR;
+I.E.THESE ARE COEF ON LAGGED  

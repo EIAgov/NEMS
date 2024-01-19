@@ -1,0 +1,234 @@
+!report identifiers/variables for EMM/NGMM convergence
+
+GenerationTypes_ := data{coal, natgas, nuclear, renew, oil};
+GenType_Coal := 'coal';
+GenType_NatGas := 'natgas';
+GenType_Nuclear := 'nuclear';
+GenType_Renew := 'renew';
+GenType_Oil := 'oil';
+
+!Start Year for Graphs
+DisplayedEMMStartYear := '2010';
+
+composite table:
+
+MNUMNR	NNGEMM	map_MNUMNR_NNGEMM
+1	11	1		
+2	8	1		
+3	4	1		
+4	5	1		
+5	1	1		
+6	2	1		
+7	2	1		
+8	2	1		
+9	2	1		
+10	4	1		
+11	3	1		
+12	11	1		
+13	5	1		
+14	7	1		
+15	9	1		
+16	6	1		
+17	5	1		
+18	11	1		
+19	14	1		
+20	16	1		
+21	15	1		
+22	13	1		
+23	17	1		
+24	20	1		
+;
+
+composite table:
+
+MNUMNR	NERC_name  	map_MNUMNR_NERCname_New
+1	ERCOT	   	1
+2	FRCC	   	1
+3	MISO_W	    	1
+4	MISO_C	   	1
+5	MISO_E	    	1
+6	MISO_S	    	1
+7	ISONE	    	1
+8	NYCW	    	1
+9	NYUP	    	1
+10	PJM_E	    	1
+11	PJM_W	    	1
+12	PJM_COMED   	1
+13	PJM_DOM	    	1
+14	SRC_CAR	    	1
+15	SRC_SE	    	1
+16	SRC_CE	    	1
+17	SPP_S	    	1
+18	SPP_C	    	1
+19	SPP_N	    	1
+20	WECC_SW    	1
+21	CA_N	    	1
+22	CA_S	    	1
+23	WECC_NW	    	1
+24	WECC_ROCK	1
+25	WECC_BASIN	1
+;
+
+composite table:
+
+MNUMNR	NERC_old  map_MNUMNR_NERCname_Old
+1	ERCT	    1
+2	FRCC	    1
+3	MROE	    1
+4	MROW	    1
+5	NEWE	    1
+6	NYCW	    1
+7	NYLI	    1
+8	NYUP	    1
+9	RFCE	    1
+10	RFCM	    1
+11	RFCW	    1
+12	SRDA	    1
+13	SRGW	    1
+14	SRSE	    1
+15	SRCE	    1
+16	SRVC	    1
+17	SPNO	    1
+18	SPSO	    1
+19	AZNM	    1
+20	CAMX	    1
+21	NWPP	    1
+22	RMPA	    1
+23	AK	    1
+24	HI	    1
+;
+
+composite table:
+
+ba	NERC_name  	map_ba_NERC_name
+AEC	SRC_SE		1
+AECI	MISO_C		1
+AVA	WECC_NW		1
+AVRN	WECC_NW		1
+AZPS   	WECC_SW 	1
+BANC   	CA_N		1
+BPAT	WECC_NW	 	1
+CHPD	WECC_NW	 	1
+CISO	CA_S		1
+CPLE	SRC_CAR		1
+CPLW	SRC_CAR		1
+CSTO	WECC_NW	 	1
+DEAA	WECC_SW 	1
+DOPD	WECC_NW	   	1			!DCPD
+DUK	SRC_CAR		1
+EEI	MISO_W		1
+EPE	WECC_SW 	1
+ERCO	ERCOT		1
+FMPP	FRCC		1
+FPC	FRCC		1
+FPL	FRCC		1
+GCPD	WECC_NW	 	1
+GRIF	WECC_SW 	1
+GRIS	WECC_SW		1
+GRMA	WECC_SW 	1
+GVL	FRCC		1
+GWA	WECC_NW		1
+HGMA	WECC_SW 	1
+HST	FRCC		1
+IID	WECC_SW 	1
+IPCO	WECC_BASIN	1
+ISNE   	ISONE		1
+JEA	FRCC		1
+LDWP	CA_S		1
+LGEE	SRC_CE		1
+NBSO	ISONE		1
+NEVP	WECC_SW 	1
+NSB	FRCC		1
+NWMT	WECC_NW		1
+NYIS	NYUP		1
+OVEC	PJM_W		1
+PACE	WECC_BASIN	1
+PACW	WECC_NW	 	1
+PGE	WECC_NW	 	1
+PNM    	WECC_SW 	1
+PSCO	WECC_ROCK	1
+PSEI   	WECC_NW	 	1
+SC	SRC_CAR		1
+SCEG	SRC_CAR		1
+SCL	WECC_NW	 	1
+SEC	FRCC		1
+SEPA  	SRC_SE		1
+SOCO	SRC_SE		1
+SPA	SPP_S		1
+SRP	WECC_SW 	1
+TAL	FRCC		1
+TEC	FRCC		1
+TEPC	WECC_SW 	1
+TIDC	CA_N		1
+TPWR	WECC_NW	 	1
+TVA	SRC_CE		1
+WACM	WECC_ROCK	1
+WALC	WECC_SW 	1
+WAUW	WECC_ROCK 	1			!Might be NW
+WWA	WECC_NW		1
+YAD	SRC_CAR		1
+;
+
+!Element Parameters for NERC region EIA data
+
+NYISO:= 'NYIS';
+SPP :=	  'SWPP';
+PJM :=	 'PJM';
+MISO :=	  'MISO';
+CAISO :=  'CISO';
+
+composite table:
+
+nerc_name	ba	map_NERC_name_ba	
+MISO_W	  	MISO	1			
+MISO_C	  	MISO	1			
+MISO_E	  	MISO	1			
+MISO_S		MISO 	1				
+NYCW	 	NYIS 	1
+NYUP	  	NYIS	1
+PJM_E	  	PJM	1
+PJM_W	  	PJM	1
+PJM_COMED	PJM	1
+PJM_DOM	  	PJM	1
+SPP_S	  	SWPP	1
+SPP_C	  	SWPP	1
+SPP_N	  	SWPP	1
+CA_N	  	CISO	1
+CA_S	  	CISO	1
+;
+
+composite table:
+ba	state	nerc_name	map_ba_state_nerc_name
+PJM	MI	PJM_W		 1
+PJM	WI	PJM_W		 1
+PJM	OH	PJM_W		 1
+PJM	WV	PJM_W		 1
+PJM	VA	PJM_DOM		 1
+PJM	MD	PJM_E		 1
+PJM	NJ	PJM_E		 1
+PJM	PA	PJM_E		 1
+PJM	IL	PJM_COMED	 1
+MISO	MT	MISO_W		 1
+MISO	ND	MISO_W		 1
+MISO	MN	MISO_W		 1
+MISO	WI	MISO_W		 1
+MISO	MI	MISO_E		 1
+MISO	IA	MISO_W		 1
+MISO	IL	MISO_C		 1
+MISO	IN	MISO_C		 1
+MISO	MO	MISO_C		 1
+MISO	KY	MISO_C		 1
+MISO	AR	MISO_S		 1
+MISO	MS	MISO_S		 1
+MISO	LA	MISO_S		 1
+MISO	TX	MISO_S		 1
+SWPP	SD	SPP_N		 1
+SWPP	NE	SPP_N		 1
+SWPP	KS	SPP_C		 1
+SWPP	MO 	SPP_C		 1
+SWPP	NM 	SPP_S		 1
+SWPP	TX 	SPP_S		 1
+SWPP	OK 	SPP_S		 1
+SWPP	AR 	SPP_S		 1
+SWPP	LA 	SPP_S		 1
+;

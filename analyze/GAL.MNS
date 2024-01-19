@@ -1,0 +1,115 @@
+1
+ 
+          
+         ==============================
+         M I N O S    5.3    (Sep 1988)
+         ==============================
+
+ OPTIONS file
+ ------------
+      BEGIN
+      MINIMIZE                                                                
+      SCALE NO                                                                
+      ROWS       500                                                          
+      COLUMNS    900                                                          
+      ELEMENTS  3000                                                          
+      MPS FILE   11                                                           
+      END                                                                     
+
+ Reasonable WORKSPACE limits are         0 ...   26145
+ Actual     WORKSPACE limits are         0 ...   48300 ...   48300  words of  Z.
+1
+ MPS file
+ --------
+      1    NAME          GAL     
+      2    ROWS                  
+      8    COLUMNS               
+     15    RHS                   
+     20    ENDATA                
+
+
+
+ Names selected
+ --------------
+ OBJECTIVE      OBJECTIV (MIN)       1
+ RHS            RHS                  4
+ RANGES                              0
+ BOUNDS                              0
+
+ PARTIAL PRICE section size (A)            1
+ PARTIAL PRICE section size (I)            2
+
+ Nonzeros allowed for in LU factors    32118
+
+
+
+ Matrix statistics
+ -----------------
+               Total      Normal        Free       Fixed     Bounded
+ Rows              5           4           1           0           0
+ Columns           2           2           0           0           0
+
+ No. of matrix elements       10     Density     100.000
+ Biggest and smallest coeffs      9.0000E+00  1.0000E+00
+ (excluding free rows and RHS)
+1
+ 
+ Initial basis
+ -------------
+
+ No basis file supplied
+
+
+ CRASH option  1
+ Free rows     1     Free cols     0     Pass 2 (E rows)     0     Pass 3     1     Remainder     3
+
+
+
+ Iterations
+ ----------
+ 
+ Itn     0 -- Feasible solution.  Objective =   0.000000000E+00
+ 
+
+   Itn  Nopt  Ninf  Sinf,Objective     LU
+     1     1     0 -4.90000010E-11      9
+ Itn     1 --      1  nonbasics set on bound, basics recomputed
+ 
+ Itn     1 -- Feasible solution.  Objective =   0.000000000E+00
+ 
+1
+ 
+ EXIT -- OPTIMAL SOLUTION FOUND
+
+ No. of iterations                   1     Objective value      0.0000000000E+00
+
+ No. of degenerate steps             1     Percentage                     100.00
+
+ Norm of X                   0.000E+00     Norm of PI                  1.000E+00
+1
+ NAME           GAL                   Objective value    0.0000000000E+00
+
+ Status         OPTIMAL SOLN          Iteration    1     Superbasics    0
+
+ OBJECTIVE      OBJECTIV (MIN)
+ RHS            RHS     
+ RANGES                 
+ BOUNDS                 
+ 
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+       3  OBJECTIV    BS          .00000          .00000           NONE            NONE         -1.00000      1
+       4  R1          BS          .00000         8.00000           NONE          8.00000          .00000      2
+       5  R2          BS          .00000        10.00000           NONE         10.00000          .00000      3
+       6  R3          BS          .00000        20.00000           NONE         20.00000          .00000      4
+       7  R4          BS          .00000        56.00000           NONE         56.00000          .00000      5
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  X1          LL          .00000         1.00000          .00000           NONE          1.00000      6
+       2  X2          LL          .00000         1.00000          .00000           NONE          1.00000      7
+ ENDRUN

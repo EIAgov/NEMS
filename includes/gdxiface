@@ -1,0 +1,818 @@
+! $Header: M:/default/includes/RCS/gdxiface,v 1.2 2011/02/23 19:33:55 dsa Exp $
+! ?header?
+! Interface blocks for "GDX" routines (stored in gdxf9def.f).  Invoking some of these functions 
+! requires an explicit interface because of the dimension passing or assumed-size array passing.  This file 
+! should be referenced with an include statement in routines invoking the GDX routines.  
+! This is being done in lieu of implementing gdxf9def routines in a module ("use <module>") for
+! compatibility with configuration management procedures used here.
+
+interface
+
+  LOGICAL FUNCTION gdxCreate(pgdx, errMsg)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxCreate
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxCreate
+    INTEGER(KIND=8), INTENT(OUT) :: pgdx
+    CHARACTER(LEN=*), INTENT(OUT) :: errMsg
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxCreate
+  END FUNCTION gdxCreate
+
+  LOGICAL FUNCTION gdxCreateD(pgdx, dirName, errMsg)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxCreateD
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxCreateD
+    INTEGER(KIND=8), INTENT(OUT) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: dirName
+    CHARACTER(LEN=*), INTENT(OUT) :: errMsg
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxCreateD
+  END FUNCTION gdxCreateD
+
+  LOGICAL FUNCTION gdxCreateL(pgdx, libName, errMsg)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxCreateL
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxCreateL
+    INTEGER(KIND=8), INTENT(OUT) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: libName
+    CHARACTER(LEN=*), INTENT(OUT) :: errMsg
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxCreateL
+  END FUNCTION gdxCreateL
+
+  LOGICAL FUNCTION gdxGetReady(errMsg)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetReady
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetReady
+    CHARACTER(LEN=*), INTENT(OUT) :: errMsg
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxGetReady
+  END FUNCTION gdxGetReady
+
+  LOGICAL FUNCTION gdxGetReadyD(dirName, errMsg)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetReadyD
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetReadyD
+    CHARACTER(LEN=*), INTENT(IN) :: dirName
+    CHARACTER(LEN=*), INTENT(OUT) :: errMsg
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxGetReadyD
+  END FUNCTION gdxGetReadyD
+
+  LOGICAL FUNCTION gdxGetReadyL(libName, errMsg)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetReadyL
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetReadyL
+    CHARACTER(LEN=*), INTENT(IN) :: libName
+    CHARACTER(LEN=*), INTENT(OUT) :: errMsg
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxGetReadyL
+  END FUNCTION gdxGetReadyL
+
+  SUBROUTINE gdxExit(i)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxExit
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxExit
+    INTEGER(KIND=4), INTENT(IN) :: i
+  END SUBROUTINE gdxExit
+
+  LOGICAL FUNCTION gdxFree(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFree
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFree
+    INTEGER(KIND=8), INTENT(OUT) :: pgdx
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxFree
+  END FUNCTION gdxFree
+
+  LOGICAL FUNCTION gdxGetScreenIndicator()
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetScreenIndicator
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetScreenIndicator
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxGetScreenIndicator
+  END FUNCTION gdxGetScreenIndicator
+
+  SUBROUTINE gdxSetScreenIndicator(scrInd)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetScreenIndicator
+    INTEGER(KIND=4), INTENT(IN) :: scrInd
+    EXTERNAL c_gdxSetScreenIndicator
+  END SUBROUTINE gdxSetScreenIndicator
+
+  LOGICAL FUNCTION gdxGetExitIndicator()
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetExitIndicator
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetExitIndicator
+    LOGICAL(KIND=4), EXTERNAL :: c_gdxGetExitIndicator
+  END FUNCTION gdxGetExitIndicator
+
+  SUBROUTINE gdxSetExitIndicator(extInd)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetExitIndicator
+    INTEGER(KIND=4), INTENT(IN) :: extInd
+    EXTERNAL c_gdxSetExitIndicator
+  END SUBROUTINE gdxSetExitIndicator
+
+  SUBROUTINE gdxSetErrorCallback(cbFunc)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetErrorCallback
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSetErrorCallback
+    INTEGER(KIND=4), EXTERNAL :: cbFunc
+  END SUBROUTINE gdxSetErrorCallback
+
+  INTEGER FUNCTION gdxGetAPIErrorCount()
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetAPIErrorCount
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetAPIErrorCount
+   INTEGER(KIND=4), EXTERNAL :: c_gdxGetAPIErrorCount
+  END FUNCTION gdxGetAPIErrorCount
+
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymAdd(pgdx,AName,AText,Indx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymAdd
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymAdd
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: AName
+    CHARACTER(LEN=*), INTENT(IN) :: AText
+    INTEGER(KIND=4), INTENT(IN) :: Indx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymAdd
+  END FUNCTION gdxAcronymAdd
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymCount(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymCount
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymCount
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymCount
+
+  END FUNCTION gdxAcronymCount
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymGetInfo(pgdx,N,AName,AText,Indx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymGetInfo
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymGetInfo
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(OUT) :: AName
+    CHARACTER(LEN=*), INTENT(OUT) :: AText
+    INTEGER(KIND=4), INTENT(IN OUT) :: Indx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymGetInfo
+  END FUNCTION gdxAcronymGetInfo
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymGetMapping(pgdx,N,orgIndx,newIndx, &
+         autoIndex)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymGetMapping
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymGetMapping
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    INTEGER(KIND=4), INTENT(IN OUT) :: orgIndx
+    INTEGER(KIND=4), INTENT(IN OUT) :: newIndx
+    INTEGER(KIND=4), INTENT(IN OUT) :: autoIndex
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymGetMapping
+  END FUNCTION gdxAcronymGetMapping
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymIndex(pgdx,V)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymIndex
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymIndex
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    REAL(KIND=8), INTENT(IN) :: V
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymIndex
+  END FUNCTION gdxAcronymIndex
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymName(pgdx,V,AName)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymName
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymName
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    REAL(KIND=8), INTENT(IN) :: V
+    CHARACTER(LEN=*), INTENT(OUT) :: AName
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymName
+  END FUNCTION gdxAcronymName
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymNextNr(pgdx,NV)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymNextNr
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymNextNr
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: NV
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymNextNr
+  END FUNCTION gdxAcronymNextNr
+
+  INTEGER(KIND=4) FUNCTION gdxAcronymSetInfo(pgdx,N,AName,AText,Indx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymSetInfo
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymSetInfo
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(IN) :: AName
+    CHARACTER(LEN=*), INTENT(IN) :: AText
+    INTEGER(KIND=4), INTENT(IN) :: Indx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAcronymSetInfo
+  END FUNCTION gdxAcronymSetInfo
+
+  REAL(KIND=8) FUNCTION gdxAcronymValue(pgdx,Indx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAcronymValue
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAcronymValue
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: Indx
+    REAL(KIND=8), EXTERNAL :: c_gdxAcronymValue
+  END FUNCTION gdxAcronymValue
+
+  INTEGER(KIND=4) FUNCTION gdxAddAlias(pgdx,AName1,AName2)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAddAlias
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAddAlias
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: AName1
+    CHARACTER(LEN=*), INTENT(IN) :: AName2
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAddAlias
+  END FUNCTION gdxAddAlias
+
+  INTEGER(KIND=4) FUNCTION gdxAddSetText(pgdx,s,N)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAddSetText
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAddSetText
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: s
+    INTEGER(KIND=4), INTENT(IN OUT) :: N
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAddSetText
+  END FUNCTION gdxAddSetText
+
+  INTEGER(KIND=4) FUNCTION gdxAutoConvert(pgdx,NV)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxAutoConvert
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxAutoConvert
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: NV
+    INTEGER(KIND=4), EXTERNAL :: c_gdxAutoConvert
+  END FUNCTION gdxAutoConvert
+
+  INTEGER(KIND=4) FUNCTION gdxClose(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxClose
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxClose
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxClose
+  END FUNCTION gdxClose
+
+  INTEGER(KIND=4) FUNCTION gdxDataErrorCount(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataErrorCount
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataErrorCount
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataErrorCount
+  END FUNCTION gdxDataErrorCount
+
+  INTEGER(KIND=4) FUNCTION gdxDataErrorRecord(pgdx,Rn,AElements,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataErrorRecord
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataErrorRecord
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: Rn
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN OUT) :: AElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN OUT) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataErrorRecord
+  END FUNCTION gdxDataErrorRecord
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadDone(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadDone
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadDone
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadDone
+  END FUNCTION gdxDataReadDone
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadFilteredStart(pgdx,SyNr,ADomainNrs, &
+         NrRecs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadFilteredStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadFilteredStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN) :: ADomainNrs
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrRecs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadFilteredStart
+  END FUNCTION gdxDataReadFilteredStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadMap(pgdx,Rn,AElements,AVals, &
+         AFDim)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadMap
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadMap
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: Rn
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN OUT) :: AElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN OUT) :: AVals
+    INTEGER(KIND=4), INTENT(IN OUT) :: AFDim
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadMap
+
+  END FUNCTION gdxDataReadMap
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadMapStart(pgdx,SyNr,NrRecs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadMapStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadMapStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrRecs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadMapStart
+
+  END FUNCTION gdxDataReadMapStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadRaw(pgdx,AElements,AVals,AFDim)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadRaw
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadRaw
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN OUT) :: AElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN OUT) :: AVals
+    INTEGER(KIND=4), INTENT(IN OUT) :: AFDim
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadRaw
+  END FUNCTION gdxDataReadRaw
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadRawStart(pgdx,SyNr,NrRecs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadRawStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadRawStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrRecs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadRawStart
+
+  END FUNCTION gdxDataReadRawStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadSlice(pgdx,AFiltElements,ADim, &
+         DP)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadSlice
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadSlice
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: AFiltElements
+    INTEGER(KIND=4), INTENT(IN OUT) :: ADim
+    EXTERNAL DP
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadSlice
+  END FUNCTION gdxDataReadSlice
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadSliceStart(pgdx,ASyNr,ANrElems)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadSliceStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadSliceStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: ASyNr
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN OUT) :: ANrElems
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadSliceStart
+  END FUNCTION gdxDataReadSliceStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataReadStr(pgdx,AStrElements,AVals, &
+         AFDim)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadStr
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadStr
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), DIMENSION(:), INTENT(OUT) :: AStrElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN OUT) :: AVals
+    INTEGER(KIND=4), INTENT(IN OUT) :: AFDim
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadStr
+  END FUNCTION gdxDataReadStr
+  INTEGER(KIND=4) FUNCTION gdxDataReadStrStart(pgdx,SyNr,NrRecs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataReadStrStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataReadStrStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrRecs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataReadStrStart
+  END FUNCTION gdxDataReadStrStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataSliceUELS(pgdx,AIndx,AUELs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataSliceUELS
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataSliceUELS
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN) :: AIndx
+    CHARACTER(LEN=*), DIMENSION(:), INTENT(OUT) :: AUELs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataSliceUELS
+  END FUNCTION gdxDataSliceUELS
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteDone(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteDone
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteDone
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteDone
+  END FUNCTION gdxDataWriteDone
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteMap(pgdx,AElements,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteMap
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteMap
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN) :: AElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteMap
+  END FUNCTION gdxDataWriteMap
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteMapStart(pgdx,AName,AText, &
+         ADim,AType,AUserInfo)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteMapStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteMapStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: AName
+    CHARACTER(LEN=*), INTENT(IN) :: AText
+    INTEGER(KIND=4), INTENT(IN) :: ADim
+    INTEGER(KIND=4), INTENT(IN) :: AType
+    INTEGER(KIND=4), INTENT(IN) :: AUserInfo
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteMapStart
+  END FUNCTION gdxDataWriteMapStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteRaw(pgdx,AElements,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteRaw
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteRaw
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN) :: AElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteRaw
+  END FUNCTION gdxDataWriteRaw
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteRawStart(pgdx,AName,AText, &
+         ADim,AType,AUserInfo)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteRawStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteRawStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: AName
+    CHARACTER(LEN=*), INTENT(IN) :: AText
+    INTEGER(KIND=4), INTENT(IN) :: ADim
+    INTEGER(KIND=4), INTENT(IN) :: AType
+    INTEGER(KIND=4), INTENT(IN) :: AUserInfo
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteRawStart
+  END FUNCTION gdxDataWriteRawStart
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteStr(pgdx,AStrElements,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteStr
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteStr
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: AStrElements
+    REAL(KIND=8), DIMENSION(:), INTENT(IN) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteStr
+  END FUNCTION gdxDataWriteStr
+
+  INTEGER(KIND=4) FUNCTION gdxDataWriteStrStart(pgdx,AName,AText, &
+         ADim,AType,AUserInfo)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxDataWriteStrStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxDataWriteStrStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: AName
+    CHARACTER(LEN=*), INTENT(IN) :: AText
+    INTEGER(KIND=4), INTENT(IN) :: ADim
+    INTEGER(KIND=4), INTENT(IN) :: AType
+    INTEGER(KIND=4), INTENT(IN) :: AUserInfo
+    INTEGER(KIND=4), EXTERNAL :: c_gdxDataWriteStrStart
+  END FUNCTION gdxDataWriteStrStart
+
+  INTEGER(KIND=4) FUNCTION gdxGetDLLVersion(pgdx,V)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetDLLVersion
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetDLLVersion
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(OUT) :: V
+    INTEGER(KIND=4), EXTERNAL :: c_gdxGetDLLVersion
+  END FUNCTION gdxGetDLLVersion
+
+  INTEGER(KIND=4) FUNCTION gdxErrorCount(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxErrorCount
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxErrorCount
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxErrorCount
+
+  END FUNCTION gdxErrorCount
+
+  INTEGER(KIND=4) FUNCTION gdxErrorStr(pgdx,N,s)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxErrorStr
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxErrorStr
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(OUT) :: s
+    INTEGER(KIND=4), EXTERNAL :: c_gdxErrorStr
+  END FUNCTION gdxErrorStr
+
+  INTEGER(KIND=4) FUNCTION gdxFileInfo(pgdx,FileVer,ComprLev)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFileInfo
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFileInfo
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN OUT) :: FileVer
+    INTEGER(KIND=4), INTENT(IN OUT) :: ComprLev
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFileInfo
+  END FUNCTION gdxFileInfo
+
+  INTEGER(KIND=4) FUNCTION gdxFileVersion(pgdx,FileStr,ProduceStr)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFileVersion
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFileVersion
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(OUT) :: FileStr
+    CHARACTER(LEN=*), INTENT(OUT) :: ProduceStr
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFileVersion
+  END FUNCTION gdxFileVersion
+
+  INTEGER(KIND=4) FUNCTION gdxFilterExists(pgdx,N)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFilterExists
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFilterExists
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFilterExists
+  END FUNCTION gdxFilterExists
+
+  INTEGER(KIND=4) FUNCTION gdxFilterRegister(pgdx,V)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFilterRegister
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFilterRegister
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: V
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFilterRegister
+  END FUNCTION gdxFilterRegister
+
+  INTEGER(KIND=4) FUNCTION gdxFilterRegisterDone(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFilterRegisterDone
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFilterRegisterDone
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFilterRegisterDone
+  END FUNCTION gdxFilterRegisterDone
+
+  INTEGER(KIND=4) FUNCTION gdxFilterRegisterStart(pgdx,Nr)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFilterRegisterStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFilterRegisterStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: Nr
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFilterRegisterStart
+  END FUNCTION gdxFilterRegisterStart
+
+  INTEGER(KIND=4) FUNCTION gdxFindSymbol(pgdx,AName,AIx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxFindSymbol
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxFindSymbol
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: AName
+    INTEGER(KIND=4), INTENT(IN OUT) :: AIx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxFindSymbol
+  END FUNCTION gdxFindSymbol
+
+  INTEGER(KIND=4) FUNCTION gdxGetElemText(pgdx,N,s,Node)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetElemText
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetElemText
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(OUT) :: s
+    INTEGER(KIND=4), INTENT(IN OUT) :: Node
+    INTEGER(KIND=4), EXTERNAL :: c_gdxGetElemText
+  END FUNCTION gdxGetElemText
+
+  INTEGER(KIND=4) FUNCTION gdxGetLastError(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetLastError
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetLastError
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxGetLastError
+  END FUNCTION gdxGetLastError
+
+  INTEGER(KIND=4) FUNCTION gdxGetSpecialValues(pgdx,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetSpecialValues
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetSpecialValues
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    REAL(KIND=8), DIMENSION(:), INTENT(IN OUT) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxGetSpecialValues
+  END FUNCTION gdxGetSpecialValues
+
+  INTEGER(KIND=4) FUNCTION gdxGetUEL(pgdx,UelNr,s)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxGetUEL
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxGetUEL
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: UelNr
+    CHARACTER(LEN=*), INTENT(OUT) :: s
+    INTEGER(KIND=4), EXTERNAL :: c_gdxGetUEL
+  END FUNCTION gdxGetUEL
+
+  INTEGER(KIND=4) FUNCTION gdxMapValue(pgdx,D,sv)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxMapValue
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxMapValue
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    REAL(KIND=8), INTENT(IN) :: D
+    INTEGER(KIND=4), INTENT(IN OUT) :: sv
+    INTEGER(KIND=4), EXTERNAL :: c_gdxMapValue
+  END FUNCTION gdxMapValue
+
+  INTEGER(KIND=4) FUNCTION gdxOpenRead(pgdx,Afn,ErrNr)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxOpenRead
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxOpenRead
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: Afn
+    INTEGER(KIND=4), INTENT(IN OUT) :: ErrNr
+    INTEGER(KIND=4), EXTERNAL :: c_gdxOpenRead
+  END FUNCTION gdxOpenRead
+
+  INTEGER(KIND=4) FUNCTION gdxOpenWrite(pgdx,Afn,AProducer,ErrNr)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxOpenWrite
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxOpenWrite
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: Afn
+    CHARACTER(LEN=*), INTENT(IN) :: AProducer
+    INTEGER(KIND=4), INTENT(IN OUT) :: ErrNr
+    INTEGER(KIND=4), EXTERNAL :: c_gdxOpenWrite
+  END FUNCTION gdxOpenWrite
+
+  INTEGER(KIND=4) FUNCTION gdxOpenWriteEx(pgdx,Afn,AProducer,Compr, &
+         ErrNr)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxOpenWriteEx
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxOpenWriteEx
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: Afn
+    CHARACTER(LEN=*), INTENT(IN) :: AProducer
+    INTEGER(KIND=4), INTENT(IN) :: Compr
+    INTEGER(KIND=4), INTENT(IN OUT) :: ErrNr
+    INTEGER(KIND=4), EXTERNAL :: c_gdxOpenWriteEx
+  END FUNCTION gdxOpenWriteEx
+
+  INTEGER(KIND=4) FUNCTION gdxResetSpecialValues(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxResetSpecialValues
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxResetSpecialValues
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxResetSpecialValues
+  END FUNCTION gdxResetSpecialValues
+
+  INTEGER(KIND=4) FUNCTION gdxSetHasText(pgdx,N)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetHasText
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSetHasText
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSetHasText
+  END FUNCTION gdxSetHasText
+
+  INTEGER(KIND=4) FUNCTION gdxSetReadSpecialValues(pgdx,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetReadSpecialValues
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSetReadSpecialValues
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    REAL(KIND=8), DIMENSION(:), INTENT(IN) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSetReadSpecialValues
+  END FUNCTION gdxSetReadSpecialValues
+
+  INTEGER(KIND=4) FUNCTION gdxSetSpecialValues(pgdx,AVals)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetSpecialValues
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSetSpecialValues
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    REAL(KIND=8), DIMENSION(:), INTENT(IN) :: AVals
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSetSpecialValues
+  END FUNCTION gdxSetSpecialValues
+
+  INTEGER(KIND=4) FUNCTION gdxSetTextNodeNr(pgdx,N,Node)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetTextNodeNr
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSetTextNodeNr
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    INTEGER(KIND=4), INTENT(IN) :: Node
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSetTextNodeNr
+  END FUNCTION gdxSetTextNodeNr
+
+  INTEGER(KIND=4) FUNCTION gdxSetTraceLevel(pgdx,N,s)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSetTraceLevel
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSetTraceLevel
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(IN) :: s
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSetTraceLevel
+
+  END FUNCTION gdxSetTraceLevel
+
+  INTEGER(KIND=4) FUNCTION gdxSymbIndxMaxLength(pgdx,SyNr,DimInfo)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbIndxMaxLength
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbIndxMaxLength
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN OUT) :: DimInfo
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbIndxMaxLength
+  END FUNCTION gdxSymbIndxMaxLength
+
+  INTEGER(KIND=4) FUNCTION gdxSymbMaxLength(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbMaxLength
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbMaxLength
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbMaxLength
+  END FUNCTION gdxSymbMaxLength
+
+  INTEGER(KIND=4) FUNCTION gdxSymbolAddComment(pgdx,SyNr,s)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbolAddComment
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbolAddComment
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    CHARACTER(LEN=*), INTENT(IN) :: s
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbolAddComment
+  END FUNCTION gdxSymbolAddComment
+
+  INTEGER(KIND=4) FUNCTION gdxSymbolGetComment(pgdx,SyNr,N,s)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbolGetComment
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbolGetComment
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(OUT) :: s
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbolGetComment
+
+  END FUNCTION gdxSymbolGetComment
+
+  INTEGER(KIND=4) FUNCTION gdxSymbolGetDomain(pgdx,SyNr,DomainIDs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbolGetDomain
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbolGetDomain
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), DIMENSION(:), INTENT(IN OUT) :: DomainIDs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbolGetDomain
+  END FUNCTION gdxSymbolGetDomain
+
+  INTEGER(KIND=4) FUNCTION gdxSymbolInfo(pgdx,SyNr,AName,ADim,ATyp)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbolInfo
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbolInfo
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    CHARACTER(LEN=*), INTENT(OUT) :: AName
+    INTEGER(KIND=4), INTENT(IN OUT) :: ADim
+    INTEGER(KIND=4), INTENT(IN OUT) :: ATyp
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbolInfo
+  END FUNCTION gdxSymbolInfo
+
+  INTEGER(KIND=4) FUNCTION gdxSymbolInfoX(pgdx,SyNr,ACount,AUserInfo, &
+         AExplTxt)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbolInfoX
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbolInfoX
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: SyNr
+    INTEGER(KIND=4), INTENT(IN OUT) :: ACount
+    INTEGER(KIND=4), INTENT(IN OUT) :: AUserInfo
+    CHARACTER(LEN=*), INTENT(OUT) :: AExplTxt
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbolInfoX
+  END FUNCTION gdxSymbolInfoX
+
+  INTEGER(KIND=4) FUNCTION gdxSymbolSetDomain(pgdx,DomainIDs)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSymbolSetDomain
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSymbolSetDomain
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: DomainIDs
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSymbolSetDomain
+  END FUNCTION gdxSymbolSetDomain
+
+  INTEGER(KIND=4) FUNCTION gdxSystemInfo(pgdx,NrSy,NrUel)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxSystemInfo
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxSystemInfo
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrSy
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrUel
+    INTEGER(KIND=4), EXTERNAL :: c_gdxSystemInfo
+  END FUNCTION gdxSystemInfo
+
+  INTEGER(KIND=4) FUNCTION gdxUELMaxLength(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELMaxLength
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELMaxLength
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELMaxLength
+
+  END FUNCTION gdxUELMaxLength
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterDone(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterDone
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterDone
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterDone
+  END FUNCTION gdxUELRegisterDone
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterMap(pgdx,UelNr,Elem)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterMap
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterMap
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: UelNr
+    CHARACTER(LEN=*), INTENT(IN) :: Elem
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterMap
+  END FUNCTION gdxUELRegisterMap
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterMapStart(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterMapStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterMapStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterMapStart
+  END FUNCTION gdxUELRegisterMapStart
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterRaw(pgdx,Elem)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterRaw
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterRaw
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: Elem
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterRaw
+  END FUNCTION gdxUELRegisterRaw
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterRawStart(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterRawStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterRawStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterRawStart
+  END FUNCTION gdxUELRegisterRawStart
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterStr(pgdx,Elem,UelNr)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterStr
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterStr
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: Elem
+    INTEGER(KIND=4), INTENT(IN OUT) :: UelNr
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterStr
+  END FUNCTION gdxUELRegisterStr
+
+  INTEGER(KIND=4) FUNCTION gdxUELRegisterStrStart(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUELRegisterStrStart
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUELRegisterStrStart
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUELRegisterStrStart
+  END FUNCTION gdxUELRegisterStrStart
+
+  INTEGER(KIND=4) FUNCTION gdxUMFindUEL(pgdx,s,EN,UMap)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUMFindUEL
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUMFindUEL
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    CHARACTER(LEN=*), INTENT(IN) :: s
+    INTEGER(KIND=4), INTENT(IN OUT) :: EN
+    INTEGER(KIND=4), INTENT(IN OUT) :: UMap
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUMFindUEL
+  END FUNCTION gdxUMFindUEL
+
+  INTEGER(KIND=4) FUNCTION gdxUMUelGet(pgdx,N,s,UMap)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUMUelGet
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUMUelGet
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN) :: N
+    CHARACTER(LEN=*), INTENT(OUT) :: s
+    INTEGER(KIND=4), INTENT(IN OUT) :: UMap
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUMUelGet
+  END FUNCTION gdxUMUelGet
+
+  INTEGER(KIND=4) FUNCTION gdxUMUelInfo(pgdx,NrElem,HighMap)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxUMUelInfo
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxUMUelInfo
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), INTENT(IN OUT) :: NrElem
+    INTEGER(KIND=4), INTENT(IN OUT) :: HighMap
+    INTEGER(KIND=4), EXTERNAL :: c_gdxUMUelInfo
+  END FUNCTION gdxUMUelInfo
+
+  INTEGER(KIND=4) FUNCTION gdxCurrentDim(pgdx)
+    !DEC$ ATTRIBUTES STDCALL :: c_gdxCurrentDim
+    !DEC$ ATTRIBUTES REFERENCE :: c_gdxCurrentDim
+    INTEGER(KIND=8), INTENT(IN) :: pgdx
+    INTEGER(KIND=4), EXTERNAL :: c_gdxCurrentDim
+  END FUNCTION gdxCurrentDim
+
+END INTERFACE
+

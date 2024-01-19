@@ -1,0 +1,63 @@
+    Function: Verfify solution values
+    Syntax:   VERIFY [BASE | VALUES] [//[FREQ=number] [TIME=seconds]]
+
+    Notes:  This does not require the solution to be basic.  (When the
+           (solution is basic, use BASIS REFRESH to complement VERIFY.)
+           THE SUBMATRIX IS CLEARED FIRST.
+
+    The BASE contains the objective name, solution status, and other
+    things reported by the SUMMARY command.  This is verified if BASE
+    is specified.  The VALUES are primal levels and dual prices, where
+
+    Y = row level, should = AX, where X = resident column levels,
+    D = column price (reduced cost), should = C-PA (if feasible),
+        where P = resident row prices, and C = objective values.
+
+    The computed row levels (AX) could cause the solution status to
+    become infeasible, and the computed column prices (C-PA) could cause
+    the status to become feasible (but not optimal).  No change is made
+    to the resident solution, but a message is given if the solution
+    status should change.
+
+    If BASE is specified, the values are not verified;  and, if VALUES
+    is specified, the BASE is not verified.  If neither is specified,
+    both BASE and VALUES are verified.
+
+    The difference between the computed value and the resident value is
+    the "discrepancy":  AX - Y and (C-P*A) - D, respectively.  Rows and
+    columns with significant discrepancies are put into the submatrix, and
+    the worst (ie, with greatest magnitude) is reported, along with the new
+    solution status.
+
+    The FREQ option prints some discrepancies to the output file.  (Worst
+    discrepancies are printed in any case.)
+
+    The TIME  option interrupts the verification after the number of
+    seconds specified.  (This is not available for some environments.)
+    The default is the key value.  Use the _KEYWORD command to display
+    or change it.  (If TIME is specified here, it does not change the
+    keyword value.)
+
+    Examples:
+
+      VERIFY
+      ...verifies base and solution values.
+
+      VERIFY BASE
+      ...verifies just the base.
+
+      VER VALUES //TIME=30
+      ...verifies solution values (not the base), giving an interrupt for
+         continuation every 30 seconds (approximately).
+
+      VER VAL //FREQ=*, TIME=* ; OUTPUT MYPROB.VER ; D R ; D C ; OUTPUT *
+      ...verifies solution values with no time interrupt, and none of the
+         discrepancies are shown (except the worst) by having set FREQ=*.
+         Then, the rows and columns with significant discrepancies are
+         displayed to the output file, MYPROB.VER, and control returns to
+         the terminal.
+
+      OUTPUT MYPROB.VER ; VER VAL //FREQ=1, TIME=* ; OUTPUT *
+      ...as previous case, except every discrepancy is printed to the output
+         file (they are not displayed).
+

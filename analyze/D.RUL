@@ -1,0 +1,69 @@
+* D.RUL - INTERPRT D (REDUCED COST)
+
+* SEE IF COL IS PASSED AS PARAM (%%1)
+$IF @%%1 = @ THEN GOTO BEGIN
+$ANALYZE SUBMAT COL %%1
+$ANALYZE STRING K=2
+$LOOP
+:LOOP
+$IF @%%''K = @ THEN ENDLOOP
+$ANALYZE SUB AD COL %%''K
+$ANALYZE STRING INCREMENT K
+$GOTO LOOP
+$ENDLOOP
+
+:BEGIN
+* CHECK THAT A COL WAS SET
+$IF %NCOLS > 0 THEN SKIP 2
+ No activity was specified (set submatrix, or pass name directly).
+$EXIT
+
+$IF %STATUS(1:6) <> INFEAS THEN GOTO SET
+$ANALYZE STRING OBJ = the sum of infeasibilites
+$ANALYZE STRING OBCOEF = infeasibility coefficient (0, 1 or -1)
+$GOTO INTRO
+
+:SET
+$ANALYZE STRING OBJ = %OBJ
+$ANALYZE STRING OBCOEF = %OBJ coefficient
+$IF %STATUS = OPTIMAL THEN ANALYZE STRING OBJ = %OPT(1:3) %OBJ
+:INTRO
+  Each activity has a "reduced cost", denoted by D, which is the
+  rate at which 'OBJ changes with respect to a change in the activity
+  bound value (if the basis remains optimal).  The dual prices reflect
+  the marginal value of each input and output of the activity, and the
+  following tables give the break down into factors.
+$TEXT 2
+$ANALYZE STRING OBJ
+$ANALYZE STRING OBCOEF
+
+$ANALYZE SUBMAT DEL COL * S=BI
+$ANALYZE SUBMAT ROW *
+$ANALYZE SUBMAT SET
+$IF %NCOLS > 0 THEN GOTO DOIT
+ The submatrix has no nonbasic variable, so there is no reduced cost
+ to interpret.  Either set the submatrix to the nonbasics whose reduced
+ cost you want to interpret, or pass a name mask, as INTERP D *.
+$EXIT
+
+:DOIT
+$STACK
+$LOOP
+$QUEUE 1 %COLUMN
+$NEXT COL
+
+$IF %SWSYN = F THEN ANALYZE READ SYN
+$LOOP
+:LOOP
+$POP 1 COL
+$IF @%%COL = @ THEN GOTO DONE
+$IF %SWOTFIL = F THEN ANALYZE _PAUSE
+$ANALYZE SUBMAT COL %%COL
+$ANALYZE SUBMAT ROW *
+$IF %SWSYN = T THEN ANALYZE EXPLAIN COL
+$ANALYZE SHOW COL
+$GOTO LOOP
+$ENDLOOP
+
+:DONE
+$EXIT

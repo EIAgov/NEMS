@@ -1,0 +1,78 @@
+!  $Header: m:/default/includes/RCS/pmmout,v 1.36 2014/07/22 12:31:58 pkc Exp $
+!     REFINERY MODULE OUTPUT COMMON BLOCK
+!     THE DIMENSION PARAMETERS ARE &6005PRJ.NEMS.COMMON.PDS.DATECODE:PARAMETR
+!     THE USER SHOULD ADD THE FOLLOWING INCLUDE STATEMENT
+!     INCLUDE (PARAMETR)
+!     REFINERY MODULE OUTPUT VARIABLES
+       REAL  RFQPRDT(MNUMCR, MNUMYR)    ! TOTAL PRODUCT SUPPLIED
+       REAL  RFQDCRD(MNUMOR+2,MNUMYR)   ! DOMESTIC TOTAL CRUDE MMBBL/
+       REAL  RFSPRFR(MNUMYR)            ! RF SPR FILL RATE
+       REAL  RFSPRIM(MNUMYR)            ! SPR IMPORTS
+                                        !
+       REAL  RFPQNGL(MNUMPR,MNUMYR,6,2) ! PRC/QUAN OF NGL BY PADD-6 N
+                                                  !
+       REAL  RFQPRCG(MNUMPR,MNUMYR)     ! QUANT. OF PROCESSING GAINS
+                                                  !
+       REAL  DCRDWHP(MNUMOR,MNUMYR)     ! DOM CRUDE WELLHEAD PRICE
+       REAL  XDCRDWHP(MNUMOR,MNXYR)  ! EXPECTED DOM CRUDE WELLHD PRC
+       REAL  XRFQDCRD(MNUMOR,MNUMYR) ! EXPECTED DOM CRUDE PRODUCTION
+                                     ! REFINERY MODULE OUTPUT COMMON
+       REAL  RFQTDCRD(MNUMOR+2,MNUMYR) ! DOM TOTAL CRUDE (INCL EOR)
+
+!  two variables in the coal-to-liquids scheme:
+       REAL QCLRFPD(MNUMPR,MNUMYR)    ! Quantity of coal for CTL (trillion Btu)
+!  Percentage ethanol in E85
+      REAL  ETHNE85                   ! % ETHANOL IN E85 (as frac)
+      REAL  TRGNE85                   ! % TRG     IN E85 (as frac)
+
+      REAL CRNPRICE(MNUMCR,MNUMYR)    ! Price of corn, 1987 dollars per bushel
+!  biomass to liquids input variable
+       REAL QBMRFBTL(MNUMCR,MNUMYR)    ! Quantity of biomass for BTL (trillion Btu)
+       REAL GLBCRDDMD(MNUMYR)          ! World crude oil dmd, PMM results (thousand barrels per day)
+       REAL RFQNGPFCD(MNUMCR,MNUMYR)   ! NG to H2 sent to ngtdm, trilBTU/yr
+
+      REAL*4      QCRDRF(MNUMPR,MNUMYR,6,4)     ! Quantity of crude input to refinery, domestic & import
+
+      REAL CTLFRAC(4,MNUMPR,MNUMYR)   ! quantity CTL liquid component produced by type in mmbd
+      REAL GTLFRAC(4,MNUMPR,MNUMYR)   ! quantity GTL liquid component produced by type in mmbd
+      REAL BTLFRAC(4,MNUMPR,MNUMYR)   ! quantity BTL liquid component produced by type in mmbd
+      REAL CBTLFRAC(2,4,MNUMPR,MNUMYR)  ! liquids produced from coal/biomass combo plant (1 if by coal, 2 if by biomass)
+
+      REAL QMERF(MNUMCR,MNUMYR)       ! quantity of methanol consumed by refineries purchased priceless from the industrial model
+      REAL*4 UBAVOL(MNUMPR,MNUMYR)    ! Upgraded Bio-Oil A (pyrolysis) volume
+      REAL*4 PRDSTKWDR(MNUMPR,MNUMYR) ! Product stock withdrawal
+
+      REAL*4 XTL_CO2AVAIL(MNUMPR,MNUMYR) ! CO2 prod by xTL (less 15% to atm) avail for seq, MM metric tons/yr
+      
+      REAL OS_WOP(MNUMYR)             ! Oil Shale Price Paid by refiners
+      REAL RFQNGPL(MNUMPR,MNUMYR,6)   ! Quantity of streams from natural gas processing plants
+
+
+      COMMON/PMMOUT/RFQPRDT, RFQDCRD, RFSPRFR, RFSPRIM, &
+       RFPQNGL, RFQPRCG, &
+       DCRDWHP, XDCRDWHP, XRFQDCRD, RFQTDCRD, &
+       QCLRFPD, &
+       ETHNE85, TRGNE85, CRNPRICE, QBMRFBTL, &
+       GLBCRDDMD, RFQNGPFCD, QCRDRF, CTLFRAC, GTLFRAC, BTLFRAC, CBTLFRAC, &
+       QMERF, UBAVOL, PRDSTKWDR, &
+       XTL_CO2AVAIL, OS_WOP, RFQNGPL
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      REAL EQ_RFOUT(MNUMYR * 3 + &               ! 3 dimensioned by MNUMYR
+                    MNUMCR * MNUMYR * 3 + &      ! 3 dimensioned by MNUMCR,MNUMYR
+                    MNUMPR*6*2 * MNUMYR + &      ! RFPQNGL
+                    MNUMPR * MNUMYR * 2 + &      ! 3 dimensioned MNUMPR,MNUMYR
+                    2*(MNUMOR+2) * MNUMYR + &    ! RFQDCRD and RFQTDCRD
+                    MNUMOR * MNUMYR * 2 + &      ! DCRDWHP and XRFQDCRD
+                    MNUMOR * MNXYR + &           ! XDCRDWHP
+                    2 + &                        ! ETHNE85 and TRGNE85
+                    MNUMPR * MNUMYR * 6 * 4 + &  ! QCRDRF
+                    3 * 4 * MNUMPR * MNUMYR + &  ! CTLFRAC and GTLFRAC and BTLFRAC
+                    2 * 4 * MNUMPR * MNUMYR + &  ! CBTLFRAC
+                    MNUMCR * MNUMYR + &          ! QMERF
+                    MNUMPR * MNUMYR * 3 + &      ! UBAVOL,PRDSTKWDR,XTL_CO2AVAIL
+                    MNUMCR * MNUMYR  + &         ! 1 more dimensioned by MNUMCR,MNUMYR
+                    MNUMPR * MNUMYR * 6 + &      ! RFQNGPL
+                    MNUMYR          )            ! OS_WOP
+                    
+      EQUIVALENCE (EQ_RFOUT,RFQPRDT)

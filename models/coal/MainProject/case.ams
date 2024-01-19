@@ -1,0 +1,44 @@
+## ams_version=1.0
+
+Section Case_Management {
+    Set Report_Identifiers_ {
+        SubsetOf: AllIdentifiers;
+        Definition: {
+            Global_Identifiers_ + RestartData_Identifiers+Standalone_Reports;
+        }
+    }
+    Set Comparison_Identifiers {
+        SubsetOf: AllIdentifiers;
+        Definition: 'AnnualCoalProduction_supcrv2_tons';
+    }
+    Parameter TempCycle;
+    Procedure ReportDataSave {
+        Arguments: (CaseName);
+        Body: {
+            CaseFileSave(
+            url: FormatString("cases\\%s.data",CaseName) ,
+            contents: Report_Identifiers_ );
+        }
+        StringParameter CaseName {
+            Property: Input;
+        }
+    }
+    Procedure CreateCasesForComparison {
+        Body: {
+            TempCycle:=1;
+            while TempCycle<=3 do
+            !   empty CycleDataIdentifiers;
+               RestartDataLoad(FormatString("cases\\cycle%i", TempCycle));
+               Calculate_report_totals;
+               CaseName:=FormatString("rep%i", TempCycle);
+               CaseFileSave(
+            	url: FormatString("cases\\%s.data",CaseName) ,
+            	contents: Report_Identifiers_ );
+               TempCycle+=1;
+            endwhile;
+        }
+        StringParameter CaseName {
+            Property: Input;
+        }
+    }
+}

@@ -1,0 +1,27 @@
+$ This presumes you have read a syntax file in memory.
+$ Output will go to OVERVIEW.DOC (which you can PRINT).
+$ Also, note the following screen settings.
+ SCREEN
+ _PAUSE
+
+ OUTPUT OVERVIEW.DOC
+   SUMMARY
+$$
+$$      ROW RIM
+   ADDRIM R *
+$$
+$$      COLUMN RIM
+   ADDRIM C *
+$$
+   SCHEMA DISP T,D
+   SYNTAX ROW,COL
+$$
+$$      SETS (FOR THIS INSTANCE)
+   SYNTAX SET
+$$
+$$         ::: END OF OVERVIEW :::
+ OUTPUT *
+$ OVERVIEW WRITTEN TO OVERVIEW.DOC
+* RESTORE SCREEN TO ORIGINAL DEFAULTS
+ SCR W 79 L 23
+ RETURN QUIETLY

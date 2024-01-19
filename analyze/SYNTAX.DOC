@@ -1,0 +1,122 @@
+
+                          Model Syntax for ANALYZE
+
+    This explains the syntactic discourse support in the EXPLAIN module
+    of ANALYZE.
+
+    The syntax of a row or column is a map from its name to a sentence,
+    using entities (eg, regions, materials, time periods), which are read
+    from a syntax file (using the READIN command).  The form of a "syntax
+    map" for a row or column is a mixture of literals and "entity
+    references." Each entity reference is designated by a special
+    character (&) followed by the 2-character code of the entity and 2
+    digits that determine the substring position in the name to be
+    translated.  For example,
+
+                     P  produces &MT:2 in &LO:4 by &M:6
+
+    is an activity syntax map that says each column whose name begins
+    with P translates according to the following steps.
+
+        1.  Begin string with literal portion of P (ie, until the first
+            entity reference).  In this case the string becomes:
+
+                produces
+
+            and we reach the entity reference &MT:2.
+
+        2.  Lookup the entity and use the name substring determined by the
+            digits of the entity reference as a key into the entity table
+            from which the translation is substituted into the main string.
+            In our example, we lookup the entity MT, which we may suppose is
+            a material, and we use characters 2 and 3 from the column name
+            as a key.  In particular, suppose we have a column named POLSW2.
+            Then, we lookup OL in table MT, which suppose has the entry:
+
+                MT material
+                  OL crude oil
+
+            Our string then becomes:
+
+                produces crude oil
+
+    Returning to step 1, we add the literal (in) and reach the next
+    entity reference (&LO:4).  There must be an entity table named LO,
+    which we may suppose means regional location.  In particular, suppose
+    we have:
+
+                LO location
+                  SW Southwest
+
+    Then, the translation string becomes:
+
+        produces crude oil in Southwest
+
+    Again, returning to step 1, we reach the last entity reference
+    (&M:6), which refers to entity table M, say mode, and determines that
+    the key is the 6-th character of the row name.  In particular,
+    suppose we have:
+
+                M mode
+                  2 secondary drilling
+
+    Then, the final translation is:
+
+        produces crude oil in Southwest by secondary drilling
+
+    The EXPLAIN command of analyze uses this in the sentence syntax:
+
+        Column <name> &ct.
+
+    where 'Column ' is literal, up to <name>, which is the name of the
+    column that is substituted; and, finally, &ct is the column
+    translation rule just described (followed by period).  The response
+    for our example is thus:
+
+        Column POLSW2 produces crude oil in Southwest by secondary
+        drilling.
+
+    Each column and row can be translated in the same way using the
+    syntax described by the syntax file.  The SYNTAX command also uses
+    the syntax maps, but with 'some' substituted for specific entity
+    lookup.  Here the algorithm is as follows.
+
+       1.  Begin the translation with 'A column that begins with ' <char>,
+           substituting for <char> the character of the column class.
+           (Rows proceed similarly.) Then, substitute the literals in the
+           syntax map until the first entity reference.  In our example, we
+           would have:
+
+                A column that begins with P produces
+
+       2.  Continue the main string with ' some ', followed by the
+           translation of the entity, which is given in the table.  In our
+           example, this becomes:
+
+                A column that begins with P produces some material
+
+    Returning to 1, we continue to form a "class translation." Our
+    example becomes:
+
+    A column that begins with P produces some material in some location
+    by some mode.
+
+    The "template" for class translation is:
+
+        A column that begins with <char> &CT
+
+    where &CT is the class translation rule.  This proceeds to bring in
+    the literals of the syntax map until an entity reference is reached,
+    say &EN:i.  Now the digit (i) is ignored, and the string continues
+    with ' some ', followed by the lookup of entity EN in the table.
+
+    Further examples appear in:
+
+        H.J. Greenberg, 1987.  "A Natural Language Discourse Model
+           to Explain Linear Programs," Decision Support Systems 33,
+           pp. 333-342.
+
+    One caution:  although the basic idea has not changed, the particular
+    structure of the syntax file has.  See FILESYN.DOC for more
+    information about the file structure.
+

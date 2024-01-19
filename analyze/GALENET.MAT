@@ -1,0 +1,37 @@
+NAME          GALENET
+ROWS
+ L  S1
+ L  S2
+ L  S3
+ E  NODE4
+ E  NODE5
+ G  D6
+ G  D7
+ G  D8
+ N  COST
+COLUMNS
+    T14       S1         1.0000        NODE4       1.0000
+    T24       S2         1.0000        NODE4       1.0000
+    T25       S2         1.0000        NODE5       1.0000
+    T35       S3         1.0000        NODE5       1.0000
+    T46       D6         1.0000        NODE4      -1.0000
+    T47       D7         1.0000        NODE4      -1.0000
+    T57       D7         1.0000        NODE5      -1.0000
+    T58       D8         1.0000        NODE5      -1.0000
+RHS
+    RHS       S1         20.000
+    RHS       S2         20.000
+    RHS       S3         20.000
+    RHS       D6         10.000
+    RHS       D7         20.000
+    RHS       D8         30.000
+BOUNDS
+ UP BND       T14        30.000
+ UP BND       T24        20.000
+ UP BND       T25        10.000
+ UP BND       T35        10.000
+ UP BND       T46        10.000
+ UP BND       T47         2.000
+ UP BND       T57        20.000
+ UP BND       T58        30.000
+ENDATA

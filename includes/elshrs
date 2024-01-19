@@ -1,0 +1,3 @@
+!  $Header: N:/default/includes/RCS/elshrs,v 1.2 1999/12/19 20:14:20 DSA Exp $
+      COMMON /EL$SHRS/ ELGNNRCR
+      REAL*8 ELGNNRCR(MNUMNR,MNUMCR)

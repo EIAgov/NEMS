@@ -1,0 +1,68 @@
+#                R E N D A T
+#
+# Renewable energy technology input file. Input file contains:
+#  1. capital cost supply elasticities
+#  2. ECP build bounds
+#  3. Number of Biomass Supply Steps
+#
+#
+# ---------------------------------------------------------------------
+#  Capitial cost supply elasticities
+#
+#
+# Capital Cost supply elasticity switch
+#
+# 0 : off
+# 1 : short term elasticity
+# 2 : long term elasticity
+# 3 : both short and long term
+# 4 : use regional supply curves instead
+#
+%COSTSWITCH%
+#
+# technology    Switch
+#
+ 'HYDRO   '       4
+ 'GEO PL  '       4
+ 'GEO EX  '       0
+ 'GEO PUMP'       0
+ 'MSW     '       4
+ 'BIOMASS '       3
+ 'SOLAR TH'       1
+ 'PV      '       1
+ 'PV Tilt '       1
+ 'WIND    '       2
+ 'WIND_ons'       2
+ 'WIND_ofs'       2
+ 'ETHANOL '       0
+#
+#
+# Short term elasticities
+#
+# USTTHR   : short term elasticity threshold above which elasticity apply
+#          : fraction of installed  national capacity of a technology
+# USTICA   : fraction of increase in installed capacity
+# USTICS   : fraction of increase in cost for every USTICA in capacity
+# USTCAMX  : max. national capacity additions over one year
+#            (i.e. max pt in supply curve) in [-] normalize by installed capcity
+#
+%SHORTTERM EL%
+# technology    USTTHR    USTICA   USTICS     USTCAMX
+ 'HYDRO   '       0.       0.0      0.0          0.
+ 'GEO PL  '       0.50     0.01     0.010        3.
+ 'GEO EX  '       0.       0.0      0.0          0.
+ 'GEO PUMP'       0.       0.0      0.0          0.
+ 'MSW     '       0.       0.0      0.0          0.
+ 'BIOMASS '       0.50     0.01     0.0033       4.
+ 'SOLAR TH'       0.50     0.01     0.010        3.
+ 'PV      '       0.50     0.01     0.010        3.
+ 'PV Tilt '       0.50     0.01     0.010        3.
+ 'WIND    '       0.50     0.01     0.005        1.1
+ 'WIND_ons'       0.50     0.01     0.005        1.1
+ 'WIND_ofs'       0.50     0.01     0.005        1.1
+ 'ETHANOL '       0.       0.0      0.0          0.
+%WSTBMEL   %
+#
+# Number of Biomass Supply steps for ECP--Step 1 for existing, rest for new
+#
+ 'Biomass '   11

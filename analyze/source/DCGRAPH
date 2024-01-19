@@ -1,0 +1,30 @@
+C                ::: DCGRAPH 12-08-90 :::
+C
+C            THIS IS INCLUDE FOR GRAPH MODULE OF ANALYZE
+C
+      PARAMETER (PBGROW=20,PBGCOL=30)
+C                :         :...MAX NUMBER OF COLUMNS IN GRAPH
+C                :...MAX NUMBER OF ROWS IN GRAPH
+C
+      INTEGER*2    ROWNOD(PBGROW),COLNOD(PBGCOL)
+      COMMON/GRVALS/BGROWS,BGCOLS,RGNODE,CGNODE,
+     1              ROWNOD,COLNOD
+      CHARACTER*4   VERGPH
+      CHARACTER*1   BGMAT(PBGROW,PBGCOL),
+     1              RGMAT(PBGROW,PBGROW),CGMAT(PBGCOL,PBGCOL)
+      COMMON/GRCHRS/VERGPH,BGMAT,RGMAT,CGMAT
+C
+C                        DICTIONARY
+C                        ~~~~~~~~~~
+C   BGCOLS    = Number of columns in Bigraph
+C   BGROWS    = Number of rows in Bigraph
+C   BGMAT     = Adjacency matrix of Bigraph
+C   CGMAT     = Adjacency matrix of Column Graph
+C   CGNODE    = BGCOLS if column graph has been generated (else, 0)
+C   COLNOD(j) = j-th column node in Bigraph
+C   RGMAT     = Adjacency matrix of Row Graph
+C   RGNODE    = RGCOLS if row graph has been generated (else, 0)
+C   ROWNOD(i) = i-th row node in Bigraph
+C   VERGPH    = Version of GRAPH Module
+C
+C                   ::: END DCGRAPH :::

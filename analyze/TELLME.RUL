@@ -1,0 +1,145 @@
+* TELLME.RUL
+* This is an experimental rule file, using the FIND command to
+* give answers from English phrases.  It applies to any LP with
+* a syntax file.  If not already in memory, the problem name is
+* used as a default syntax file name in the following.
+
+$IF %SWSYN = F THEN ANALYZE READIN SYNTAX
+$IF %SWSYN = F THEN GOTO NOSYN
+
+* %%2 = set string, %%3 %%4 %%5 = member string
+* If this is made into a regular rule file (ie, put into RULBASE.RUL),
+* decrease entering params by 1 (eg, %1 = set string).
+
+$IF %%1 <> TELLME THEN SKIP 3
+* (COMING FROM TEST, SO SHIFT STRINGS)
+$SET SETSTR = %%2
+$SET MEMSTR = %%3 %%4 %%5
+$SKIP 2
+* REAL RULE FILE (NOT COMING FROM TEST)
+$SET SETSTR = %%1
+$SET MEMSTR = %%2 %%3 %%4
+* WE MUST SET ALL STRINGS AND PARAMS HERE EVEN IF WE BRANCH PAST ITS USE
+* (BECAUSE INPUT READER TRIES TO SUBSTITUTE AS WE LOOK FOR LABEL)
+$ANALYZE STR K=1
+$ANALYZE STR INCFIL=DONOTHIN
+$SET SET=
+$SET NSET=0
+$SET MEM=
+*       :...NOTE = IS NECESSARY TO DEFINE (NULL) PARAM
+* NOW %%1, ..., %%9 ARE FREE (NEEDED FOR FIND COMMAND).
+
+$IF @%%SETSTR = @ THEN GOTO ERR
+* THE FOLLOWING 2 LINES ARE USED WHEN DEBUGGING
+* Looking for set(s) whose meaning contains %%SETSTR .
+*$TEXT
+$FIND SET %%SETSTR
+$IF @%%1 = @ THEN GOTO NOSET
+
+* COLLECT SETS...PUT ONTO STACK 1
+$STACK
+$LOOP
+:NEXTSET
+$IF @%%''K = @ THEN ENDLOOP
+*      :...NOTE THE DOUBLE QUOTE FOR STRING VARIABLE K TO BE 'K IN LOOP
+$SET SET = %%''K
+$QUEUE 1 %%SET
+$QUEUE 2 %%SET
+$ANALYZE STR INCREMENT K
+$IF ''K < 9 THEN GOTO NEXTSET
+$ENDLOOP
+
+$SET NSET = 'K
+*           :...NOTE THE SINGLE QUOTE OUTSIDE OF LOOP
+$CALC NSET = NSET - 1
+* Now NSET params are in stack 1 (queued, so top is 1st found).
+
+$IF @%%MEMSTR <> @ THEN GOTO MEMBER
+$IF %%NSET = 1 THEN SKIP 3
+ Sets containing %%SETSTR are:
+$TEXT 1 MARGIN=3
+$GOTO LISTSET
+
+ Set containing %%SETSTR is %%SET .
+$TEXT
+$ANALYZE SYNTAX SET %%SET
+$EXIT
+
+
+:MEMBER
+* MEMBER STRING SPECIFIED...FIND SET WITH MEMBER
+$LOOP
+:NEXTSET
+$POP 1 SET
+$IF @%%SET = @ THEN ENDLOOP
+$FIND ELEMENT %%SET %%MEMSTR
+$IF @%%1 <> @ THEN GOTO GOTMEM
+$GOTO NEXTSET
+$ENDLOOP
+
+* MEMBER NOT FOUND
+$IF %%NSET > 1 THEN SKIP 2
+ Member %%MEMSTR of %%SETSTR (set %%SET ) not found.
+$EXIT
+ Member %%MEMSTR not found among the following sets (whose meanings
+ contain %%SETSTR ).
+$TEXT 1 MARGIN=3
+$GOTO LISTSET
+
+:GOTMEM
+$SET MEM=%%1
+* MAKE SURE SCHEMA IS SET
+$ANALYZE SCHEMA
+* CLEAR SUBMATRIX
+$ANALYZE SUBMAT CLEAR
+
+$ANALYZE STR INCFIL=%PROBLEM
+$IF %PROBLEM = WOODNET  THEN GOTO CONTINUE
+$IF %PROBLEM = FOREST   THEN GOTO CONTINUE
+$IF %PROBLEM = REFINERY THEN GOTO CONTINUE
+$ANALYZE STR INCFIL=UNKNOWN
+
+:CONTINUE
+* NOW USER'S STRING IS MEMBER %%MEM OF SET %%SET (IF MORE THAN ONE
+* SET,MEMBER MATCHES, THE 1ST ONE WILL BE USED BY THE INCLUDE FILE.
+
+INCLUDE 'INCFIL' .TEL
+:ENDINC
+* MUST HAVE THE ABOVE LABEL (SO INCLUDE FILES CAN BRANCH TO IT)
+* REMOVE STRINGS
+$ANALYZE STR INCFIL
+$ANALYZE STR K
+$EXIT
+
+:NOSYN
+ No syntax ... use READIN SYNTAX command.
+$EXIT
+:NOSET
+ No set has %%SETSTR in its meaning.
+$ANALYZE SCHEMA DISP DOM
+$EXIT
+:NOMEM
+$IF %%NSET > 1 THEN SKIP 2
+ No member of %%SETSTR (set %%SET ) contains %%MEMSTR in its meaning.
+$TEXT
+$ANALYZE _PAUSE
+$ANALYZE SYNTAX SET %%SET
+$EXIT
+
+ No member of the following sets contain a member with %%MEMSTR in
+ its meaning.
+:LISTSET
+$LOOP
+:NEXTSET
+$POP 2 SET
+$IF @%%SET = @ THEN ENDLOOP
+ %%SET
+$GOTO NEXTSET
+$ENDLOOP
+$TEXT 1 MARGIN=1
+ Use the SYNTAX SET command to see their members.
+$EXIT
+
+:ERR
+ You must specify set string [and member string].
+$EXIT

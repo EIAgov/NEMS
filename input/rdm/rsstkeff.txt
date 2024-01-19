@@ -1,0 +1,83 @@
+FILE NAME:     RSTKEFF
+DATE MODIFIED: August 21, 2018
+USED BY:       RDSTEFF subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
+DEFINITION:    Average efficiencies of existing RECS-year equipment surviving from the initial RECS stock in each projection year
+UNITS:         Same units as shown in RSCLASS tab of RSMESS.xlsx
+DIMENSION:     year, equipment class (same as those listed in RSCLASS)
+SPECIAL CONSTRAINTS:  non-negative values
+ORGANIZATION OF DATA:
+               Data starts on row 21 of this file as per RDM convention
+               First data year is RECSYEAR
+               Variable: STKEFF (same as xlRTBASEFF in RSMESS)
+SOURCES:       Navigant Consulting, Final EIA - Technology Forecast Updates – Residential and Commercial Building Technologies – Reference Case, April, 2018
+COMMENT:       Updated for 2015 RECS and latest technology report
+
+
+
+
+
+
+2015	2016	2017	2018	2019	2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040	2041	2042	2043	2044	2045	2046	2047	2048	2049	2050
+36*0.98
+36*2.32
+36*0.80
+36*0.82
+36*0.83
+36*0.80
+36*0.83
+36*0.84
+36*0.63
+36*3.10
+36*1.30
+36*3.19
+36*3.66
+36*3.84
+36*13.30
+36*0.60
+36*0.25
+36*0.62
+36*0.58
+36*0.88
+36*0.51
+36*0.58
+36*1.00
+36*0.40
+36*0.40
+36*228
+36*3.18
+36*3.59
+36*668
+36*483
+
+
+==========ROWS CORRESPOND TO TECHNOLOGIES LISTED BELOW==========
+Electric Heating Other Than Heat Pumps
+Air-Source Heat Pumps (heating)
+Natural Gas Furnaces
+Natural Gas Boilers & Other
+Kerosene Furnaces (unused placeholder)
+Propane Furnaces & Other
+Distillate Fuel Oil & Kerosene Furnaces
+Distillate Fuel Oil & Kerosene Boilers & Other
+Wood Stoves & Other
+Ground-Source Heat Pumps (heating)
+Natural Gas Heat Pumps (heating)
+Room/Window/Wall Air Conditioners (excludes portable ACs)
+Central Air Conditioners
+Air-Source Heat Pumps (cooling)
+Ground-Source Heat Pumps (cooling)
+Natural Gas Heat Pumps (cooling)
+Clothes Washers
+Dishwashers
+Natural Gas water heaters (storage & tankless)
+Electric water heaters (storage & tankless)
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)
+Propane water heaters (storage & tankless)
+Solar water heaters (storage & tankless)
+Natural Gas Cooking Ranges/Cooktops/Ovens
+Propane Cooking Ranges/Cooktops/Ovens
+Electric Cooking Ranges/Cooktops/Ovens
+Natural Gas Clothes Dryers
+Electric Clothes Dryers
+Refrigerators
+Standalone Freezers

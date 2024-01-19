@@ -1,0 +1,25 @@
+* File:   FORESOLN.RUL
+* Date:   12-25-91
+* Author: Harvey J. Greenberg
+
+* This uses the TABLE command to give solution report for
+* optimal instances of FOREST.
+
+$ANALYZE SYN SET AR
+$TEXT
+$ANALYZE TABL C H X
+$TEXT
+$ANALYZE TABL C I X
+$TEXT
+$ANALYZE TABL C W X
+$TEXT
+
+$ANALYZE TABL R W,D,B P
+
+$ANALYZE OUTPUT *
+$ANALYZE SCREEN L 23
+ The solution report has been written to 'OUTPUT (use the
+ PRINT command to see it).
+$TEXT
+$IF 'OUTPUT = FOREST.RPT THEN ANALYZE STR OUTPUT=
+$EXIT

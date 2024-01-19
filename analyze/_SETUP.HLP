@@ -1,0 +1,49 @@
+     Function: List or change file prefixes and suffixes
+     Syntax:   _SETUP [key = {prefix | *} [suffix | "] | **]
+
+     Generally, this is used from an EXECUTE file with one of the
+     special keywords, like EXECUTE.  By itself _SETUP will list the
+     prefixes and suffixes currently in effect for the types
+     (indicated by "keys").  Whenever a command using one of
+     these types is given, the prefix and (if needed) the suffix are
+     added.  For example, EXECUTE COMFILE will use a file named
+     prefixCOMFILEsuffix.
+
+     Special settings.
+
+     _SETUP **
+     ...sets all prefixes to blanks
+
+     _SETUP key = * suffix
+     ...keeps prefix of key and changes suffix
+
+     _SETUP key = prefix "
+     ...changes prefix (unless prefix is *) and changes suffix to blank
+        (" indicates blank suffix)
+
+     Examples:
+
+     _SETUP EXEC = \MYAPPL\   .EX
+     ...Changes prefix for EXECUTE to \MYAPPL\ and the suffix to .EX
+        Then, EXEC COMFILE will execute commands from \MYAPPL\COMFILE.EX
+
+     _SETUP EXEC = \MYAPPL\
+     ...Changes prefix as above, but suffix is unchanged.
+
+     _SETUP EXEC = * .EX
+     ...Changes suffix to .EX, but leaves prefix unchanged (note *).
+
+     _SETUP EXEC = * "EX
+     ...Changes suffix to  EX (with leading blank, indicated by "), but
+        leaves prefix unchanged (note *).
+
+     _SET EXEC
+     ...Clears prefix of EXEC files (sets blank).
+
+     _SET **
+     ...Clears prefix of all files (sets blank).
+
+
+     Note:  If a qualifier (ie, suffix) is specified in a command, it
+            overrides the type.  Thus, EXEC COMFILE.E will execute
+            prefixCOMFILE.E (not add the suffix .EX).

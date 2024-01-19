@@ -1,0 +1,144 @@
+!  $Header: m:/default/includes/RCS/mpblk,v 1.8 2012/08/30 16:20:39 pkc Exp $
+!  NEMS Price Common Block
+
+!  NEMS Price Common Block Parameters
+      INTEGER MNUMP,MPSIZE,PMSIZE
+      PARAMETER(MNUMP=84)   ! Number of NEMS price variables
+      PARAMETER(MPSIZE=MNUMP*MNUMCR*MNUMYR) ! Size of price array
+      PARAMETER(PMSIZE=MNUMCR*MNUMYR*19)    ! Size of more prices array:  19 dimensioned MNUMCRxMNUMYR
+! PRICES
+      REAL PELRS(MNUMCR,MNUMYR) !  1 Purchased Electricity - Residential
+      REAL PELCM(MNUMCR,MNUMYR) !  2 Purchased Electricity - Commercial
+      REAL PELTR(MNUMCR,MNUMYR) !  3 Purchased Electricity - Transportation
+      REAL PELIN(MNUMCR,MNUMYR) !  4 Purchased Electricity - Industrial
+      REAL PELAS(MNUMCR,MNUMYR) !  5 Purchased Electricity - All Sectors
+      REAL PGFRS(MNUMCR,MNUMYR) !  6 Natural Gas, Core - Residential
+      REAL PGFCM(MNUMCR,MNUMYR) !  7 Natural Gas, Core - Commercial
+      REAL PGFTR(MNUMCR,MNUMYR) !  8 Natural Gas, Core - Transportation
+      REAL PGFIN(MNUMCR,MNUMYR) !  9 Natural Gas, Core - Industrial
+      REAL PGFEL(MNUMCR,MNUMYR) ! 10 Natural Gas, Core - Electricity
+      REAL PGFAS(MNUMCR,MNUMYR) ! 11 Natural Gas, Core - All Sectors
+      REAL PGIRS(MNUMCR,MNUMYR) ! 12 Natural Gas, Noncore - Residential
+      REAL PGICM(MNUMCR,MNUMYR) ! 13 Natural Gas, Noncore - Commercial
+      REAL PGITR(MNUMCR,MNUMYR) ! 14 Natural Gas, Noncore - Transportation
+      REAL PGIIN(MNUMCR,MNUMYR) ! 15 Natural Gas, Noncore - Industrial
+      REAL PGIEL(MNUMCR,MNUMYR) ! 16 Natural Gas, Noncore - Electricity
+      REAL PGIAS(MNUMCR,MNUMYR) ! 17 Natural Gas, Noncore - All Sectors
+      REAL PNGRS(MNUMCR,MNUMYR) ! 18 Natural Gas - Residential
+      REAL PNGCM(MNUMCR,MNUMYR) ! 19 Natural Gas - Commercial
+      REAL PNGTR(MNUMCR,MNUMYR) ! 20 Natural Gas - Transportation
+      REAL PNGIN(MNUMCR,MNUMYR) ! 21 Natural Gas - Industrial
+      REAL PNGEL(MNUMCR,MNUMYR) ! 22 Natural Gas - Electricity
+      REAL PNGAS(MNUMCR,MNUMYR) ! 23 Natural Gas - All Sectors
+      REAL PGPTR(MNUMCR,MNUMYR) ! 24 Natural Gas - Pipeline
+      REAL PLPIN(MNUMCR,MNUMYR) ! 25 Natural Gas Lease and Plant Fuel
+      REAL PCLRS(MNUMCR,MNUMYR) ! 26 Coal - Residential
+      REAL PCLCM(MNUMCR,MNUMYR) ! 27 Coal - Commercial
+      REAL PCLIN(MNUMCR,MNUMYR) ! 28 Coal - Industrial
+      REAL PCLEL(MNUMCR,MNUMYR) ! 29 Coal - Electricity
+      REAL PCLSN(MNUMCR,MNUMYR) ! 30 Coal - Synthetics
+      REAL PCLAS(MNUMCR,MNUMYR) ! 31 Coal - All Sectors
+      REAL PMCIN(MNUMCR,MNUMYR) ! 32 Metallurgical Coal - Industrial
+      REAL PMGCM(MNUMCR,MNUMYR) ! 33 Motor Gasoline - Commercial
+      REAL PMGTR(MNUMCR,MNUMYR) ! 34 Motor Gasoline - Transportation
+      REAL PMGIN(MNUMCR,MNUMYR) ! 35 Motor Gasoline - Industrial
+      REAL PMGAS(MNUMCR,MNUMYR) ! 36 Motor Gasoline - All Sectors
+      REAL PJFTR(MNUMCR,MNUMYR) ! 37 Jet Fuel - Transportation
+      REAL PDSRS(MNUMCR,MNUMYR) ! 38 Distillate - Residential
+      REAL PDSCM(MNUMCR,MNUMYR) ! 39 Distillate - Commercial
+      REAL PDSTR(MNUMCR,MNUMYR) ! 40 Distillate - Transportation
+      REAL PDSIN(MNUMCR,MNUMYR) ! 41 Distillate - Industrial
+      REAL PDSEL(MNUMCR,MNUMYR) ! 42 Distillate - Electricity (+petroleum coke)
+      REAL PDSAS(MNUMCR,MNUMYR) ! 43 Distillate - All Sectors
+      REAL PKSRS(MNUMCR,MNUMYR) ! 44 Kerosene - Residential
+      REAL PKSCM(MNUMCR,MNUMYR) ! 45 Kerosene - Commercial
+      REAL PKSIN(MNUMCR,MNUMYR) ! 46 Kerosene - Industrial
+      REAL PKSAS(MNUMCR,MNUMYR) ! 47 Kerosene - All Sectors
+      REAL PLGRS(MNUMCR,MNUMYR) ! 48 Liquid Petroleum Gases - Residential
+      REAL PLGCM(MNUMCR,MNUMYR) ! 49 Liquid Petroleum Gases - Commercial
+      REAL PLGTR(MNUMCR,MNUMYR) ! 50 Liquid Petroleum Gases - Transportation
+      REAL PLGIN(MNUMCR,MNUMYR) ! 51 Liquid Petroleum Gases - Industrial
+      REAL PLGAS(MNUMCR,MNUMYR) ! 52 Liquid Petroleum Gases - All Sectors
+      REAL PRLCM(MNUMCR,MNUMYR) ! 53 Residual Fuel, Low Sulfur - Commercial
+      REAL PRLTR(MNUMCR,MNUMYR) ! 54 Residual Fuel, Low Sulfur - Transportation
+      REAL PRLIN(MNUMCR,MNUMYR) ! 55 Residual Fuel, Low Sulfur - Industrial
+      REAL PRLEL(MNUMCR,MNUMYR) ! 56 Residual Fuel, Low Sulfur - Electricity
+      REAL PRLAS(MNUMCR,MNUMYR) ! 57 Residual Fuel, Low Sulfur - All Sectors
+      REAL PRHTR(MNUMCR,MNUMYR) ! 58 Residual Fuel, High Sulfur - Transportation
+      REAL PRHEL(MNUMCR,MNUMYR) ! 59 Residual Fuel, High Sulfur - Electricity
+      REAL PRHAS(MNUMCR,MNUMYR) ! 60 Residual Fuel, High Sulfur - All Sectors
+      REAL PRSCM(MNUMCR,MNUMYR) ! 61 Residual Fuel - Commercial
+      REAL PRSTR(MNUMCR,MNUMYR) ! 62 Residual Fuel - Transportation
+      REAL PRSIN(MNUMCR,MNUMYR) ! 63 Residual Fuel - Industrial
+      REAL PRSEL(MNUMCR,MNUMYR) ! 64 Residual Fuel - Electricity
+      REAL PRSAS(MNUMCR,MNUMYR) ! 65 Residual Fuel - All Sectors
+      REAL PPFIN(MNUMCR,MNUMYR) ! 66 Petrochemical Feedstocks - Industrial
+      REAL PASIN(MNUMCR,MNUMYR) ! 67 Asphalt, Road Oil - Industrial
+      REAL POTTR(MNUMCR,MNUMYR) ! 68 Other Petroleum- Transportation
+      REAL POTIN(MNUMCR,MNUMYR) ! 69 Other Petroleum- Industrial
+      REAL POTAS(MNUMCR,MNUMYR) ! 70 Other Petroleum- Industrial
+      REAL PTPRS(MNUMCR,MNUMYR) ! 71 Total Petroleum - Residential
+      REAL PTPCM(MNUMCR,MNUMYR) ! 72 Total Petroleum - Commercial
+      REAL PTPTR(MNUMCR,MNUMYR) ! 73 Total Petroleum - Transportation
+      REAL PTPIN(MNUMCR,MNUMYR) ! 74 Total Petroleum - Industrial
+      REAL PTPRF(MNUMCR,MNUMYR) ! 75 Total Petroleum - Refinery
+      REAL PTPEL(MNUMCR,MNUMYR) ! 76 Total Petroleum - Electricity
+      REAL PTPAS(MNUMCR,MNUMYR) ! 77 Total Petroleum - All Sectors
+      REAL PMETR(MNUMCR,MNUMYR) ! 78 Methanol - Transporation
+      REAL PETTR(MNUMCR,MNUMYR) ! 79 Ethanol - Transporation
+      REAL PHYTR(MNUMCR,MNUMYR) ! 80 Liquid Hydrogen - Transporation
+      REAL PUREL(MNUMCR,MNUMYR) ! 81 Uranium - Electricity
+      REAL PH1TR(MNUMCR,MNUMYR) ! 82 Large Cities Hydrogen - Transportation
+      REAL PH2TR(MNUMCR,MNUMYR) ! 83 Small Cities Hydrogen - Transportation
+      REAL PH3TR(MNUMCR,MNUMYR) ! 84 Rural Hydrogen - Transportation
+!  NEMS Price Common Block
+      COMMON/MPBLK/ &
+       PELRS,PELCM,PELTR,PELIN,PELAS, &
+       PGFRS,PGFCM,PGFTR,PGFIN,PGFEL,PGFAS, &
+       PGIRS,PGICM,PGITR,PGIIN,PGIEL,PGIAS, &
+       PNGRS,PNGCM,PNGTR,PNGIN,PNGEL,PNGAS, &
+       PGPTR,PLPIN, &
+       PCLRS,PCLCM,PCLIN,PCLEL,PCLSN,PCLAS,PMCIN, &
+       PMGCM,PMGTR,PMGIN,PMGAS,PJFTR, &
+       PDSRS,PDSCM,PDSTR,PDSIN,PDSEL,PDSAS,PKSRS,PKSCM,PKSIN,PKSAS, &
+       PLGRS,PLGCM,PLGTR,PLGIN,PLGAS, &
+       PRLCM,PRLTR,PRLIN,PRLEL,PRLAS,PRHTR,PRHEL,PRHAS,PRSCM,PRSTR,PRSIN,PRSEL,PRSAS, &
+       PPFIN,PASIN,POTTR,POTIN,POTAS,PTPRS,PTPCM,PTPTR,PTPIN,PTPRF,PTPEL,PTPAS, &
+       PMETR,PETTR,PHYTR,PUREL,PH1TR,PH2TR,PH3TR
+
+      REAL MPRC(MNUMCR,MNUMYR,MNUMP)
+      EQUIVALENCE(MPRC,PELRS)
+      REAL MPARRY(MPSIZE)
+      EQUIVALENCE(MPARRY,PELRS)
+
+! Tacking on a common block for more prices to avoid changing mpblk
+
+      REAL PLGINPF(MNUMCR,MNUMYR)   !  Industrial LPG feedstock
+      REAL PCLGAS(MNUMCR,MNUMYR)    !  Price of coal to synthetic natural gas producers
+      REAL PPRRS(MNUMCR,MNUMYR)              !  Residential propane
+      REAL PPRCM(MNUMCR,MNUMYR)              !  Commercial propane
+      REAL PPPIN(MNUMCR,MNUMYR)              !  Industrial pentanes plus
+      REAL PETIN(MNUMCR,MNUMYR)              !  Industrial ethane
+      REAL PBUIN(MNUMCR,MNUMYR)              !  Industrial butane
+      REAL PPRIN(MNUMCR,MNUMYR)              !  Industrial propane
+      REAL PISIN(MNUMCR,MNUMYR)              !  Industrial isobutane
+      REAL PLUIN(MNUMCR,MNUMYR)              !  Industrial lubricants
+      REAL PPRTR(MNUMCR,MNUMYR)              !  Transportation propane
+      REAL PPROLENERF(MNUMCR,MNUMYR)         !  Refinery production of propylene
+      REAL PSULFURIN(MNUMCR,MNUMYR)          !  Industrial sulfur price
+      REAL PPPINPF(MNUMCR,MNUMYR)            !  Industrial pentanes plus feedstock
+      REAL PETINPF(MNUMCR,MNUMYR)            !  Industrial ethane feedstock
+      REAL PBUINPF(MNUMCR,MNUMYR)            !  Industrial butane feedstock
+      REAL PPRINPF(MNUMCR,MNUMYR)            !  Industrial propane feedstock
+      REAL PISINPF(MNUMCR,MNUMYR)            !  Industrial isobutane feedstock
+      REAL PPCIN(MNUMCR,MNUMYR)              !  Industrial petroleum coke
+
+      COMMON /PMORE/ PLGINPF, PCLGAS, &
+                     PPRRS, PPRCM, PPPIN, PETIN, PBUIN, &
+                     PPRIN, PISIN, PLUIN, PPRTR, &
+                     PPROLENERF, PSULFURIN, &
+                     PPPINPF, PETINPF, PBUINPF, PPRINPF, PISINPF, &
+                     PPCIN
+
+      REAL PMOREQ(PMSIZE)
+      EQUIVALENCE(PMOREQ,PLGINPF)

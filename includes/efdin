@@ -1,0 +1,18 @@
+!  $Header: N:/default/includes/RCS/efdin,v 1.2 2003/08/22 17:49:33 RSC Exp $
+!
+!  Electricity Fuel Dispatch Module Input Common Block
+!
+!  The dimension parameters are in the common blocks parametr & emmparm.
+!
+!     EFD Input Variables by Plant Group
+!
+      INTEGER*4 ULHGGP(EMM_D_GRP)          ! Mercury Cap and Trade group by Plant Group
+!
+!     EFDIN Common Block
+!
+      COMMON /EFDIN/ ULHGGP
+!
+!     Calculate Storage Requirement
+!
+      INTEGER*4 EFDSIZE
+      PARAMETER (EFDSIZE =  4 * EMM_D_GRP )

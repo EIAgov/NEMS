@@ -1,0 +1,7 @@
+! $Header: m:/default/includes/RCS/apiblk,v 1.1 2014/12/09 17:41:04 pkc Exp $
+!  for function that converts API gravity to Btu conversion factor via old table
+      INTEGER MAX_API_LINES
+      PARAMETER(MAX_API_LINES=100)
+      REAL API_GRAV(MAX_API_LINES), BTU_PER_GAL(MAX_API_LINES), MM_BTU_PER_BBL
+      INTEGER API_COUNT
+      COMMON /API_BLOCK/ API_GRAV, BTU_PER_GAL, API_COUNT

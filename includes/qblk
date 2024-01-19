@@ -1,0 +1,239 @@
+!  $Header: m:/default/includes/RCS/qblk,v 1.12 2015/12/17 13:50:15 pkc Exp $
+!  NEMS Quantity Common Block
+
+!  NEMS Quantity Common Block Parameters
+      INTEGER MNUMQ,MQSIZE,QMSIZE
+      PARAMETER(MNUMQ=157)  ! Number of NEMS quantity variables
+      PARAMETER(MQSIZE=MNUMQ*MNUMCR*MNUMYR) ! Size of quantity array
+      PARAMETER(QMSIZE=MNUMCR*MNUMYR*29)    ! Size of more quantities array
+!  NEMS Quantity varaiables
+      REAL QELRS(MNUMCR,MNUMYR) !  1 Purchased Electricity - Residential
+      REAL QELCM(MNUMCR,MNUMYR) !  2 Purchased Electricity - Commercial
+      REAL QELTR(MNUMCR,MNUMYR) !  3 Purchased Electricity - Transportation
+      REAL QELIN(MNUMCR,MNUMYR) !  4 Purchased Electricity - Industrial
+      REAL QELRF(MNUMCR,MNUMYR) !  5 Purchased Electricity - Refinery
+      REAL QELHM(MNUMCR,MNUMYR) !  6 Purchased Electricity - Hydrogen
+      REAL QELAS(MNUMCR,MNUMYR) !  7 Purchased Electricity - All Sectors
+      REAL QGFRS(MNUMCR,MNUMYR) !  8 Natural Gas, Core - Residential
+      REAL QGFCM(MNUMCR,MNUMYR) !  9 Natural Gas, Core - Commercial
+      REAL QGFTR(MNUMCR,MNUMYR) ! 10 Natural Gas, Core - Transportation
+      REAL QGFIN(MNUMCR,MNUMYR) ! 11 Natural Gas, Core - Industrial
+      REAL QGFRF(MNUMCR,MNUMYR) ! 12 Natural Gas, Core - Refinery
+      REAL QGFEL(MNUMCR,MNUMYR) ! 13 Natural Gas, Core - Electricity
+      REAL QGFHM(MNUMCR,MNUMYR) ! 14 Natural Gas, Core - Hydrogen
+      REAL QGFAS(MNUMCR,MNUMYR) ! 15 Natural Gas, Core - All Sectors
+      REAL QGIRS(MNUMCR,MNUMYR) ! 16 Natural Gas, Noncore - Residential
+      REAL QGICM(MNUMCR,MNUMYR) ! 17 Natural Gas, Noncore - Commercial
+      REAL QGITR(MNUMCR,MNUMYR) ! 18 Natural Gas, Noncore - Transportation
+      REAL QGIIN(MNUMCR,MNUMYR) ! 19 Natural Gas, Noncore - Industrial
+      REAL QGIRF(MNUMCR,MNUMYR) ! 20 Natural Gas, Noncore - Refinery
+      REAL QGIEL(MNUMCR,MNUMYR) ! 21 Natural Gas, Noncore - Electricity
+      REAL QGIHM(MNUMCR,MNUMYR) ! 22 Natural Gas, Noncore - Hydrogen
+      REAL QGIAS(MNUMCR,MNUMYR) ! 23 Natural Gas, Noncore - All Sectors
+      REAL QNGRS(MNUMCR,MNUMYR) ! 24 Natural Gas - Residential
+      REAL QNGCM(MNUMCR,MNUMYR) ! 25 Natural Gas - Commercial
+      REAL QNGTR(MNUMCR,MNUMYR) ! 26 Natural Gas - Transportation
+      REAL QNGIN(MNUMCR,MNUMYR) ! 27 Natural Gas - Industrial
+      REAL QNGRF(MNUMCR,MNUMYR) ! 28 Natural Gas - Refinery
+      REAL QNGEL(MNUMCR,MNUMYR) ! 29 Natural Gas - Electricity
+      REAL QNGHM(MNUMCR,MNUMYR) ! 30 Natural Gas - Hydrogen
+      REAL QNGAS(MNUMCR,MNUMYR) ! 31 Natural Gas - All Sectors
+      REAL QGPTR(MNUMCR,MNUMYR) ! 32 Natural Gas - Pipeline
+      REAL QLPIN(MNUMCR,MNUMYR) ! 33 Natural Gas - Lease and Plant Fuel
+      REAL QCLRS(MNUMCR,MNUMYR) ! 34 Coal - Residential
+      REAL QCLCM(MNUMCR,MNUMYR) ! 35 Coal - Commercial
+      REAL QCLIN(MNUMCR,MNUMYR) ! 36 Coal - Industrial
+      REAL QCLRF(MNUMCR,MNUMYR) ! 37 Coal - Refinery
+      REAL QCLEL(MNUMCR,MNUMYR) ! 38 Coal - Electricity
+      REAL QCLSN(MNUMCR,MNUMYR) ! 39 Coal - Synthetics
+      REAL QCLHM(MNUMCR,MNUMYR) ! 40 Coal - Hydrogen
+      REAL QCLAS(MNUMCR,MNUMYR) ! 41 Coal - All Sectors
+      REAL QMCIN(MNUMCR,MNUMYR) ! 42 Metallurgical Coal - Industrial
+      REAL QMGCM(MNUMCR,MNUMYR) ! 43 Motor Gasoline - Commercial
+      REAL QMGTR(MNUMCR,MNUMYR) ! 44 Motor Gasoline - Transportation
+      REAL QMGIN(MNUMCR,MNUMYR) ! 45 Motor Gasoline - Industrial
+      REAL QMGAS(MNUMCR,MNUMYR) ! 46 Motor Gasoline - All Sectors
+      REAL QJFTR(MNUMCR,MNUMYR) ! 47 Jet Fuel - Transportation
+      REAL QDSRS(MNUMCR,MNUMYR) ! 48 Distillate - Residential
+      REAL QDSCM(MNUMCR,MNUMYR) ! 49 Distillate - Commercial
+      REAL QDSTR(MNUMCR,MNUMYR) ! 50 Distillate - Transportation
+      REAL QDSIN(MNUMCR,MNUMYR) ! 51 Distillate - Industrial
+      REAL QDSRF(MNUMCR,MNUMYR) ! 52 Distillate - Refinery
+      REAL QDSEL(MNUMCR,MNUMYR) ! 53 Distillate - Electricity (+petroleum coke)
+      REAL QDSAS(MNUMCR,MNUMYR) ! 54 Distillate - All Sectors
+      REAL QKSRS(MNUMCR,MNUMYR) ! 55 Kerosene - Residential
+      REAL QKSCM(MNUMCR,MNUMYR) ! 56 Kerosene - Commercial
+      REAL QKSIN(MNUMCR,MNUMYR) ! 57 Kerosene - Industrial
+      REAL QKSAS(MNUMCR,MNUMYR) ! 58 Kerosene - All Sectors
+      REAL QLGRS(MNUMCR,MNUMYR) ! 59 Liquid Petroleum Gases - Residential
+      REAL QLGCM(MNUMCR,MNUMYR) ! 60 Liquid Petroleum Gases - Commercial
+      REAL QLGTR(MNUMCR,MNUMYR) ! 61 Liquid Petroleum Gases - Transportation
+      REAL QLGIN(MNUMCR,MNUMYR) ! 62 Liquid Petroleum Gases - Industrial
+      REAL QLGRF(MNUMCR,MNUMYR) ! 63 Liquid Petroleum Gases - Refinery
+      REAL QLGAS(MNUMCR,MNUMYR) ! 64 Liquid Petroleum Gases - All Sectors
+      REAL QRLCM(MNUMCR,MNUMYR) ! 65 Residual Fuel, Low Sulfur - Commercial
+      REAL QRLTR(MNUMCR,MNUMYR) ! 66 Residual Fuel, Low Sulfur - Transportation
+      REAL QRLIN(MNUMCR,MNUMYR) ! 67 Residual Fuel, Low Sulfur - Industrial
+      REAL QRLRF(MNUMCR,MNUMYR) ! 68 Residual Fuel, Low Sulfur - Refinery
+      REAL QRLEL(MNUMCR,MNUMYR) ! 69 Residual Fuel, Low Sulfur - Electricity
+      REAL QRLAS(MNUMCR,MNUMYR) ! 70 Residual Fuel, Low Sulfur - All Sectors
+      REAL QRHTR(MNUMCR,MNUMYR) ! 71 Residual Fuel, High Sulfur - Transportation
+      REAL QRHEL(MNUMCR,MNUMYR) ! 72 Residual Fuel, High Sulfur - Electricity
+      REAL QRHAS(MNUMCR,MNUMYR) ! 73 Residual Fuel, High Sulfur - All Sectors
+      REAL QRSCM(MNUMCR,MNUMYR) ! 74 Residual Fuel - Commercial
+      REAL QRSTR(MNUMCR,MNUMYR) ! 75 Residual Fuel - Transportation
+      REAL QRSIN(MNUMCR,MNUMYR) ! 76 Residual Fuel - Industrial
+      REAL QRSRF(MNUMCR,MNUMYR) ! 77 Residual Fuel - Refinery
+      REAL QRSEL(MNUMCR,MNUMYR) ! 78 Residual Fuel - Electricity
+      REAL QRSAS(MNUMCR,MNUMYR) ! 79 Residual Fuel - All Sectors
+      REAL QPFIN(MNUMCR,MNUMYR) ! 80 Petrochemical Feedstocks - Industrial
+      REAL QSGIN(MNUMCR,MNUMYR) ! 81 Still Gas - Industrial
+      REAL QSGRF(MNUMCR,MNUMYR) ! 82 Still Gas - Refinery
+      REAL QPCIN(MNUMCR,MNUMYR) ! 83 Petroleum Coke - Industrial
+      REAL QPCRF(MNUMCR,MNUMYR) ! 84 Petroleum Coke - Refinery
+      REAL QPCEL(MNUMCR,MNUMYR) ! 85 Petroleum Coke - Electricity
+      REAL QPCAS(MNUMCR,MNUMYR) ! 86 Petroleum Coke - All Sectors
+      REAL QASIN(MNUMCR,MNUMYR) ! 87 Asphalt and Road Oil - Industrial
+      REAL QOTTR(MNUMCR,MNUMYR) ! 88 Other Petroleum - Transportation
+      REAL QOTIN(MNUMCR,MNUMYR) ! 89 Other Petroleum - Industrial
+      REAL QOTRF(MNUMCR,MNUMYR) ! 90 Other Petroleum - Refinery
+      REAL QOTAS(MNUMCR,MNUMYR) ! 91 Other Petroleum - All Sectors
+      REAL QTPRS(MNUMCR,MNUMYR) ! 92 Total Petroleum - Residential
+      REAL QTPCM(MNUMCR,MNUMYR) ! 93 Total Petroleum - Commercial
+      REAL QTPTR(MNUMCR,MNUMYR) ! 94 Total Petroleum - Transportation
+      REAL QTPIN(MNUMCR,MNUMYR) ! 95 Total Petroleum - Industrial
+      REAL QTPRF(MNUMCR,MNUMYR) ! 96 Total Petroleum - Refinery
+      REAL QTPEL(MNUMCR,MNUMYR) ! 97 Total Petroleum - Electricity
+      REAL QTPAS(MNUMCR,MNUMYR) ! 98 Total Petroleum - All Sectors
+      REAL QMETR(MNUMCR,MNUMYR) ! 99 Methanol - Transporation
+      REAL QETTR(MNUMCR,MNUMYR) !100 Ethanol - Transporation
+      REAL QETHM(MNUMCR,MNUMYR) !101 Ethanol - Hydrogen
+      REAL QHYTR(MNUMCR,MNUMYR) !102 Liquid Hydrogen - Transportation
+      REAL QUREL(MNUMCR,MNUMYR) !103 Uranium - Electricity
+      REAL QURHM(MNUMCR,MNUMYR) !104 Uranium - Hydrogen
+      REAL QHOIN(MNUMCR,MNUMYR) !105 Hydropower - Industrial
+      REAL QHOEL(MNUMCR,MNUMYR) !106 Hydropower - Electricity
+      REAL QHOAS(MNUMCR,MNUMYR) !107 Hydropower - All Sectors
+      REAL QGERS(MNUMCR,MNUMYR) !108 Geothermal - Residential
+      REAL QGEIN(MNUMCR,MNUMYR) !109 Geothermal - Industrial
+      REAL QGEEL(MNUMCR,MNUMYR) !110 Geothermal - Electricity
+      REAL QGEAS(MNUMCR,MNUMYR) !111 Geothermal - All Sectors
+      REAL QBMRS(MNUMCR,MNUMYR) !112 Biomass - Residential
+      REAL QBMCM(MNUMCR,MNUMYR) !113 Biomass - Commercial
+      REAL QBMIN(MNUMCR,MNUMYR) !114 Biomass - Industrial
+      REAL QBMRF(MNUMCR,MNUMYR) !115 Biomass - Refinery
+      REAL QBMEL(MNUMCR,MNUMYR) !116 Biomass - Electricity
+      REAL QBMSN(MNUMCR,MNUMYR) !117 Biomass - Synthetics
+      REAL QBMHM(MNUMCR,MNUMYR) !118 Biomass - Hydrogen
+      REAL QBMAS(MNUMCR,MNUMYR) !119 Biomass - All Sectors
+      REAL QMSIN(MNUMCR,MNUMYR) !120 Municipal Solid Waste - Industrial
+      REAL QMSEL(MNUMCR,MNUMYR) !121 Municipal Solid Waste - Electricity
+      REAL QMSAS(MNUMCR,MNUMYR) !122 Municipal Solid Waste - All Sectors
+      REAL QSTRS(MNUMCR,MNUMYR) !123 Solar Thermal - Residential
+      REAL QSTCM(MNUMCR,MNUMYR) !124 Solar Thermal - Commercial
+      REAL QSTIN(MNUMCR,MNUMYR) !125 Solar Thermal - Industrial
+      REAL QSTEL(MNUMCR,MNUMYR) !126 Solar Thermal - Electricity
+      REAL QSTAS(MNUMCR,MNUMYR) !127 Solar Thermal - All Sectors
+      REAL QPVRS(MNUMCR,MNUMYR) !128 Photovoltaic - Residential
+      REAL QPVCM(MNUMCR,MNUMYR) !129 Photovoltaic - Commercial
+      REAL QPVIN(MNUMCR,MNUMYR) !130 Photovoltaic - Industrial
+      REAL QPVEL(MNUMCR,MNUMYR) !131 Photovoltaic - Electricity
+      REAL QPVAS(MNUMCR,MNUMYR) !132 Photovoltaic - All Sectors
+      REAL QWIIN(MNUMCR,MNUMYR) !133 Wind - Industrial
+      REAL QWIEL(MNUMCR,MNUMYR) !134 Wind - Electricity
+      REAL QWIAS(MNUMCR,MNUMYR) !135 Wind - All Sectors
+      REAL QTRRS(MNUMCR,MNUMYR) !136 Total Renewables - Residential
+      REAL QTRCM(MNUMCR,MNUMYR) !137 Total Renewables - Commercial
+      REAL QTRTR(MNUMCR,MNUMYR) !138 Total Renewables - Transportation
+      REAL QTRIN(MNUMCR,MNUMYR) !139 Total Renewables - Industrial
+      REAL QTREL(MNUMCR,MNUMYR) !140 Total Renewables - Electricity
+      REAL QTRSN(MNUMCR,MNUMYR) !141 Total Renewables - Synthetics
+      REAL QTRHM(MNUMCR,MNUMYR) !142 Total Renewables - Hydrogen
+      REAL QTRAS(MNUMCR,MNUMYR) !143 Total Renewables - All Sectors
+      REAL QEIEL(MNUMCR,MNUMYR) !144 Net Electricity Imports - Electricity
+      REAL QCIIN(MNUMCR,MNUMYR) !145 Net Coal Coke Imports - Industrial
+      REAL QTSRS(MNUMCR,MNUMYR) !146 Total Energy Consumption - Residential
+      REAL QTSCM(MNUMCR,MNUMYR) !147 Total Energy Consumption - Commercial
+      REAL QTSTR(MNUMCR,MNUMYR) !148 Total Energy Consumption - Transportation
+      REAL QTSIN(MNUMCR,MNUMYR) !149 Total Energy Consumption - Industrial
+      REAL QTSRF(MNUMCR,MNUMYR) !150 Total Energy Consumption - Refinery
+      REAL QTSEL(MNUMCR,MNUMYR) !151 Total Energy Consumption - Electricity
+      REAL QTSSN(MNUMCR,MNUMYR) !152 Total Energy Consumption - Synthetics
+      REAL QTSHM(MNUMCR,MNUMYR) !153 Total Energy Consumption - Hydrogen
+      REAL QTSAS(MNUMCR,MNUMYR) !154 Total Energy Consumption - All Sectors
+      REAL QH1TR(MNUMCR,MNUMYR) !155 Hydrogen, Large Citites - Transportation
+      REAL QH2TR(MNUMCR,MNUMYR) !156 Hydrogen, Small Citites - Transportation
+      REAL QH3TR(MNUMCR,MNUMYR) !157 Hydrogen, Rural - Transportation
+!  NEMS Price Quantity Common Block
+      COMMON/QBLK/ &
+       QELRS,QELCM,QELTR,QELIN,QELRF,QELHM,QELAS, &
+       QGFRS,QGFCM,QGFTR,QGFIN,QGFRF,QGFEL,QGFHM,QGFAS, &
+       QGIRS,QGICM,QGITR,QGIIN,QGIRF,QGIEL,QGIHM,QGIAS, &
+       QNGRS,QNGCM,QNGTR,QNGIN,QNGRF,QNGEL,QNGHM,QNGAS, &
+       QGPTR,QLPIN, &
+       QCLRS,QCLCM,QCLIN,QCLRF,QCLEL,QCLSN,QCLHM,QCLAS, &
+       QMCIN,QMGCM,QMGTR,QMGIN,QMGAS,QJFTR,QDSRS,QDSCM,QDSTR, &
+       QDSIN,QDSRF,QDSEL,QDSAS,QKSRS,QKSCM,QKSIN,QKSAS,QLGRS, &
+       QLGCM,QLGTR,QLGIN,QLGRF,QLGAS,QRLCM,QRLTR,QRLIN,QRLRF, &
+       QRLEL,QRLAS,QRHTR,QRHEL,QRHAS,QRSCM,QRSTR,QRSIN,QRSRF, &
+       QRSEL,QRSAS,QPFIN,QSGIN,QSGRF,QPCIN,QPCRF,QPCEL,QPCAS,QASIN, &
+       QOTTR,QOTIN,QOTRF,QOTAS,QTPRS,QTPCM,QTPTR,QTPIN,QTPRF, &
+       QTPEL,QTPAS,QMETR,QETTR,QETHM,QHYTR,QUREL,QURHM, &
+       QHOIN,QHOEL,QHOAS,QGERS,QGEIN,QGEEL,QGEAS, &
+       QBMRS,QBMCM,QBMIN,QBMRF,QBMEL,QBMSN,QBMHM,QBMAS, &
+       QMSIN,QMSEL,QMSAS, &
+       QSTRS,QSTCM,QSTIN,QSTEL,QSTAS, &
+       QPVRS,QPVCM,QPVIN,QPVEL,QPVAS, &
+       QWIIN,QWIEL,QWIAS, &
+       QTRRS,QTRCM,QTRTR,QTRIN,QTREL,QTRSN,QTRHM,QTRAS, &
+       QEIEL,QCIIN, &
+       QTSRS,QTSCM,QTSTR,QTSIN,QTSRF,QTSEL,QTSSN,QTSHM,QTSAS, &
+       QH1TR,QH2TR,QH3TR
+
+      REAL MQTY(MNUMCR,MNUMYR,MNUMQ)
+      EQUIVALENCE(MQTY,QELRS)
+      REAL MQARRY(MQSIZE)
+      EQUIVALENCE(MQARRY,QELRS)
+
+! Tacking on a common block for more quantities to avoid changing qblk
+
+      REAL QPRRS(MNUMCR,MNUMYR)              !  Residential propane
+      REAL QPRCM(MNUMCR,MNUMYR)              !  Commercial propane
+      REAL QPPIN(MNUMCR,MNUMYR)              !  Industrial pentanes plus
+      REAL QETIN(MNUMCR,MNUMYR)              !  Industrial ethane
+      REAL QBUIN(MNUMCR,MNUMYR)              !  Industrial butane
+      REAL QPRIN(MNUMCR,MNUMYR)              !  Industrial propane
+      REAL QISIN(MNUMCR,MNUMYR)              !  Industrial isobutane
+      REAL QLUIN(MNUMCR,MNUMYR)              !  Industrial lubricants
+      REAL QPRTR(MNUMCR,MNUMYR)              !  Transportation propane
+      REAL QPROLENERF(MNUMCR,MNUMYR)         !  Refinery production of propylene
+      REAL QSULFURIN(MNUMCR,MNUMYR)          !  Industrial sulfur demand
+      REAL QPPINPF(MNUMCR,MNUMYR)            !  Industrial pentanes plus feedstock
+      REAL QETINPF(MNUMCR,MNUMYR)            !  Industrial ethane feedstock
+      REAL QBUINPF(MNUMCR,MNUMYR)            !  Industrial butane feedstock
+      REAL QPRINPF(MNUMCR,MNUMYR)            !  Industrial propane feedstock
+      REAL QISINPF(MNUMCR,MNUMYR)            !  Industrial isobutane feedstock
+      REAL QCTLRF(MNUMCR,MNUMYR)             !  Coal not going to liquids
+      REAL QGTLRF(MNUMCR,MNUMYR)             !  Natural gas not going to liquids
+      REAL QGTLSN(MNUMCR,MNUMYR)             !  All natural gas into GTL process
+      REAL QPPRF(MNUMCR,MNUMYR)              !  Refinery pentanes plus
+      REAL QETRF(MNUMCR,MNUMYR)              !  Refinery ethane
+      REAL QPRRF(MNUMCR,MNUMYR)              !  Refinery propane
+      REAL QPYRF(MNUMCR,MNUMYR)              !  Refinery propylene
+      REAL QBURF(MNUMCR,MNUMYR)              !  Refinery butane
+      REAL QISRF(MNUMCR,MNUMYR)              !  Refinery isobutane
+      REAL QMGBS(MNUMCR,MNUMYR)              !  Motor gasoline, unspecified (balance) sector
+      REAL QDSBS(MNUMCR,MNUMYR)              !  Distillate, unspecified (balance) sector
+      REAL QJFBS(MNUMCR,MNUMYR)              !  Jet fuel, unspecified (balance) sector
+      REAL QNGLQ(MNUMCR,MNUMYR)              !  Natural gas used for liquefaction, such as for exporting natural gas in liquid form
+
+      COMMON /QMORE/ QPRRS, QPRCM, QPPIN, QETIN, QBUIN, &
+                     QPRIN, QISIN, QLUIN, QPRTR, &
+                     QPROLENERF, QSULFURIN, &
+                     QPPINPF, QETINPF, QBUINPF, QPRINPF, QISINPF, &
+                     QCTLRF, QGTLRF, QGTLSN, &
+                     QPPRF, QETRF, QPRRF, QBURF, QISRF, QPYRF, &
+                     QMGBS, QDSBS, QJFBS, QNGLQ
+
+      REAL QMOREQ(QMSIZE)
+      EQUIVALENCE(QMOREQ,QPRRS)

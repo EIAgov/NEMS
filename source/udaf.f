@@ -1,0 +1,455 @@
+! $Header: m:/default/source/RCS/udaf.f,v 1.14 2019/02/25 17:06:04 pkc Exp $
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STRIN
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STRIN(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES DISPATCH DATA IN MEMORY
+!     MEMORY=VARIABLE INCLUDED DEFINED IN dispina INCLUDE FILE
+
+      include'parametr'
+      include'emmparm'
+      include'dispin'
+      include'control'
+      include'dispina'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     STORE DISPATCH DATA IN DAF    ON PC
+!
+!
+!     STORE DISPATCH DATA IN MEMORY ON MF
+!
+      DO J = 1 , EBLK$IN
+         EDISPA(J,IRG) = EINPUT(J)
+      END DO
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETIN
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE GETIN(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES DISPATCH DATA FROM MEMORY
+!     MEMORY=VARIABLE INCLUDED DEFINED IN dispina INCLUDE FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'dispin'
+      include'dispina'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     GET DISPATCH DATA FROM DAF ON PC
+!
+!
+!     GET DISPATCH DATA FROM MEMORY ON MF
+!
+      DO J = 1 , EBLK$IN
+         EINPUT(J) = EDISPA(J,IRG)
+      END DO
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STROUT
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STROUT(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES DISPATCH DATA IN THE OUTDAF.daf DIRECT ACCESS FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'dispout'
+      include'ncntrl'
+      include'uefdout'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = (IRG + ijumpemrgn * (IYR - 1)) * EBLK$OUT - ( EBLK$OUT - 1 )
+      DO 10 J = 1 ,EBLK$OUT
+         WRITE (UF_OUT,REC = J + IRECL - 1) EOUT(J)
+   10 CONTINUE
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETOUT
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE GETOUT(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES DISPATCH DATA FROM THE OUTDAF.daf DIRECT ACCESS FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'dispout'
+      include'ncntrl'
+      include'uefdout'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = (IRG + ijumpemrgn * (IYR - 1)) * EBLK$OUT - ( EBLK$OUT - 1 )
+      DO 10 J = 1 ,EBLK$OUT
+         READ (UF_OUT,REC = J + IRECL - 1) EOUT(J)
+   10 CONTINUE
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STREIJ
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STREIJ(IYR)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES TRANSMISSION AND TRADE DATA IN THE ETTTMP.daf DIRECT ACCESS FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'dispett'
+!
+      INTEGER IYR,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = IYR * EBLK$ET3 - ( EBLK$ET3 - 1 )
+      DO 10 J = 1 ,EBLK$ET3
+         WRITE (UF_ETDM,REC = J + IRECL - 1) ETTTRN(J)
+   10 CONTINUE
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETEIJ
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE GETEIJ(IYR)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES TRANSMISSION AND TRADE DATA FROM THE ETTTMP.daf DIRECT ACCESS FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'dispett'
+!
+      INTEGER IYR,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = IYR * EBLK$ET3 - ( EBLK$ET3 - 1 )
+      DO 10 J = 1 ,EBLK$ET3
+         READ (UF_ETDM,REC = J + IRECL - 1) ETTTRN(J)
+   10 CONTINUE
+      RETURN
+      END
+!
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STRPLT
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STRPLT(IRECL)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES PLANT DATA IN THE PLNTTMP.daf DIRECT ACCESS FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'plntin'
+      include'plntctl'
+      include'buffer'
+!
+      INTEGER IRECL,IBLOCK,JRECL
+!
+!     STORE CURRENT BLOCK WHEN IRECL = 0, AS REQUIRED (SAVED = 1 ), THEN RETURN
+!
+      IF (IRECL .EQ. 0) THEN
+         IF (SAVED .EQ. 1) THEN
+            WRITE (UF_PLT, REC = BLOCK + EBLK$PCTL) BUFFER
+         END IF
+         RETURN
+      END IF
+!
+      IBLOCK = 1 + ((IRECL - 1) / 16 )
+!
+!     IF NEW BLOCK SAVE CURRENT BLOCK IF NEEDED AND RETRIEVE NEW BLOCK IF NEEDED
+!
+      IF (IBLOCK .NE. BLOCK) THEN
+         IF (SAVED .EQ. 1) THEN
+            WRITE (UF_PLT, REC = BLOCK + EBLK$PCTL) BUFFER
+         END IF
+!
+         BLOCK = IBLOCK
+         IF (BLOCK .LE. LAST) THEN
+            READ (UF_PLT, REC = BLOCK + EBLK$PCTL) BUFFER
+         ELSE
+            LAST = BLOCK
+         END IF
+      END IF
+!
+      JRECL = IRECL - ( ( BLOCK - 1 ) * 16 )
+      P_RECS(JRECL) = WPLANT
+      SAVED = 1
+!
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETPLT
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE GETPLT(IRECL)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES PLANT DATA FROM THE PLNTTMP.daf DIRECT ACCESS FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'plntin'
+      include'plntctl'
+      include'buffer'
+!
+      INTEGER IRECL,JRECL,IBLOCK
+!
+      IBLOCK = 1 + ((IRECL - 1) / 16 )
+!
+!     IF NEW BLOCK SAVE CURRENT BLOCK IF NEEDED AND RETRIEVE NEW BLOCK
+!
+      IF (IBLOCK .NE. BLOCK) THEN
+         IF (SAVED .EQ. 1) THEN
+            WRITE (UF_PLT, REC = BLOCK + EBLK$PCTL) BUFFER
+         END IF
+!
+         BLOCK = IBLOCK
+         READ (UF_PLT, REC = BLOCK + EBLK$PCTL) BUFFER
+      END IF
+!
+      JRECL = IRECL - ( ( BLOCK - 1 ) * 16 )
+      WPLANT = P_RECS(JRECL)
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STRPCNTL
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STRPCNTL
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES PLNTCTL IN PLNTTMP.daf DIRECT ACCESS FILE AT THE END OF A RUN
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'plntctl'
+!
+      INTEGER IRECL
+!
+      DO 10 IRECL = 1 , EBLK$PCTL
+         WRITE (UF_PLT,REC = IRECL) WPCNTL(IRECL)
+   10 CONTINUE
+!
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETPCNTL: Retrieve PLNTCTL Common From DAF at beginning of UTIL
+!     and Initialize Index Arrays For ECP Builds
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCLLL
+      SUBROUTINE GETPCNTL
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES PLNTCTL FROM PLNTTMP.daf DIRECT ACCESS FILE AT THE BEGINNING OF A RUN
+
+      include'parametr'
+      include'emmparm'
+      include'ncntrl'
+      include'control'
+      include'plntctl'
+      include'plntin'
+      include'buffer'
+      include'cdsparms'
+      include'coalemm'
+!
+      INTEGER IRECL,JRG,IGRP,ITMP,IOWN,IBBN,ICL,XYR        ! Indices
+!
+      DO IRECL = 1 , EBLK$PCTL
+         READ (UF_PLT,REC = IRECL) WPCNTL(IRECL)
+      END DO
+!
+!     IF ECP used in this run
+!
+      IF (ECPSTART .GT. 0) THEN
+         WREC_NXT = WREC_INT
+         WGRP_NXT = WGRP_INT
+         DO IGRP = WGRP_INT + 1 , EMM_D_GRP
+            WNXT_SGRP(IGRP) = 0
+         END DO
+         DO JRG = 1 , WPLT_D_RGN
+            DO IGRP = WNPIPE(JRG) + 1 , WPLT_D_GRP
+               W_INT(JRG,IGRP) = 0
+            END DO
+!
+!           Set Initial Rec to 0 and Set Indices for New Build Plnt Grps
+!
+            DO IGRP = 1 , EFD_D_CAP
+               DO IOWN = 1 , USW_OWN
+                  DO IBBN = 1 , EFD_D_MFRG
+                     WNEWGRP(JRG,IGRP,IOWN,IBBN) = 0
+                  END DO
+               END DO
+            END DO
+         END DO
+!
+!        Initialize Next Record Counter For Unused Records
+!
+         DO IRECL = WREC_NXT + 1 , WPLT_D_REC
+            W_NXT(IRECL) = 0
+         END DO
+!
+!        Reset Plant retirements for plants already in file
+!        to stored retirement YYMM
+!
+         DO IRECL = 1 , WREC_NXT
+            IF (WO_RYR(IRECL) .GT. 0) THEN
+               CALL GETPLT(IRECL)
+               W_RYR = WO_RYR(IRECL)
+               W_RMO = WO_RMO(IRECL)
+               WVIN = WO_VIN(IRECL)
+               CALL STRPLT(IRECL)
+            END IF
+         END DO
+      END IF
+!
+!     For Coal Units Move PID-UID Strings and Mapping to WIGRP to Restart File
+!
+      EMM_CL_UNITS = "          "
+      NUM_CMM_UNITS = NUM_CL_UNIT
+      DO ICL = 1 , NUM_CMM_UNITS
+         EMM_CL_UNITS(ICL) = COAL_UNIT_ID(ICL)
+         EMM_CL_CLRG(ICL) = COAL_REGION(ICL)
+         DO XYR = 1 , MNUMYR
+            EMM_CL_ECPt(ICL,XYR) = INITIAL_ECP_TYPE(ICL)
+         END DO
+         WRITE(18,2317) CURIYR+UHBSYR,ICL,EMM_CL_UNITS(ICL),EMM_CL_CLRG(ICL),INITIAL_ECP_TYPE(ICL)
+ 2317    FORMAT(1X,"EMM_PID_UID",2(":",I4),":",A10,2(":",I4))
+      END DO
+!
+      BLOCK = 0
+      SAVED = 0
+      LAST = 1 + ((WREC_NXT - 1) / 16 )
+!
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STRBLD
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STRBLD(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES ECP DATA THAT VARY BY REGION AND YEAR IN ECPIDAF.daf DIRECT ACCESS FILE
+!     VARIABLES INCLUDED ARE DEFINED IN THE bildin INCLUDE FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'bildin'
+      include'ncntrl'
+      include'uefdout'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = (IRG + ijumpemrgn * (IYR - 1)) * EBLK$BLD - ( EBLK$BLD - 1 )
+      DO 10 J = 1 ,EBLK$BLD
+         WRITE (UF_BLD,REC = J + IRECL - 1) EBILDN(J)
+   10 CONTINUE
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETBLD
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE GETBLD(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES ECP DATA THAT VARY BY REGION AND YEAR FROM ECPIDAF.daf DIRECT ACCESS FILE
+!     VARIABLES INCLUDED ARE DEFINED IN THE bildin INCLUDE FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'bildin'
+      include'ncntrl'
+      include'uefdout'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = (IRG + ijumpemrgn * (IYR - 1)) * EBLK$BLD - ( EBLK$BLD - 1 )
+      DO 10 J = 1 ,EBLK$BLD
+         READ (UF_BLD,REC = J + IRECL - 1) EBILDN(J)
+   10 CONTINUE
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     STRBOUT
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE STRBOUT(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE STORES SELECTED ECP SOLUTION MATRIX VALUES IN ECPODAF.daf DIRECT ACCESS FILE
+!     VARIABLES INCLUDED ARE DEFINED IN THE bildout INCLUDE FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'bildout'
+      include'ncntrl'
+      include'uefdout'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = (IRG + ijumpemrgn * (IYR - 1)) * EBLK$BOUT - ( EBLK$BOUT - 1)
+      DO 10 J = 1 ,EBLK$BOUT
+         WRITE (UF_BOUT,REC = J + IRECL - 1) EBILDOUT(J)
+   10 CONTINUE
+      RETURN
+      END
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     GETBOUT
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+      SUBROUTINE GETBOUT(IYR,IRG)
+!
+      IMPLICIT NONE
+
+!     THIS SUBROUTINE RETRIEVES SELECTED ECP SOLUTION MATRIX VALUES FROM ECPODAF.daf DIRECT ACCESS FILE
+!     VARIABLES INCLUDED ARE DEFINED IN THE bildout INCLUDE FILE
+
+      include'parametr'
+      include'emmparm'
+      include'control'
+      include'bildout'
+      include'ncntrl'
+      include'uefdout'
+!
+      INTEGER IYR,IRG,IRECL,J
+!
+!     DETERMINE RECORD NUMBER
+      IRECL = (IRG + ijumpemrgn * (IYR - 1)) * EBLK$BOUT - ( EBLK$BOUT - 1)
+      DO 10 J = 1 ,EBLK$BOUT
+         READ (UF_BOUT,REC = J + IRECL - 1) EBILDOUT(J)
+   10 CONTINUE
+      RETURN
+      END

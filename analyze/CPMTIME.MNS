@@ -1,0 +1,146 @@
+1
+ 
+          
+         ==============================
+         M I N O S    5.3    (Sep 1988)
+         ==============================
+
+ OPTIONS file
+ ------------
+      BEGIN
+      MINIMIZE                                                                
+      SCALE NO                                                                
+      ROWS       150                                                          
+      COLUMNS    360                                                          
+      ELEMENTS  1400                                                          
+      MPS FILE   11                                                           
+      END                                                                     
+
+ Reasonable WORKSPACE limits are         0 ...    8883
+ Actual     WORKSPACE limits are         0 ...   48300 ...   48300  words of  Z.
+1
+ MPS file
+ --------
+      1    NAME          CRITPATH
+      2    ROWS                  
+     30    COLUMNS               
+     60    RHS                   
+     86    RANGES                
+     87    BOUNDS                
+     89    ENDATA                
+
+
+
+ Names selected
+ --------------
+ OBJECTIVE      TIME     (MIN)       1
+ RHS            RHSMODL             25
+ RANGES                              0
+ BOUNDS         BNDMODL              1
+
+ PARTIAL PRICE section size (A)            1
+ PARTIAL PRICE section size (I)            2
+
+ Nonzeros allowed for in LU factors    31830
+
+
+
+ Matrix statistics
+ -----------------
+               Total      Normal        Free       Fixed     Bounded
+ Rows             27          25           2           0           0
+ Columns          13          12           0           0           1
+
+ No. of matrix elements       51     Density      14.530
+ Biggest and smallest coeffs      1.0000E+00  1.0000E+00
+ (excluding free rows and RHS)
+1
+ 
+ Initial basis
+ -------------
+
+ No basis file supplied
+
+
+ CRASH option  1
+ Free rows     2     Free cols     0     Pass 2 (E rows)     0     Pass 3    12     Remainder    13
+
+
+
+ Iterations
+ ----------
+
+   Itn  Nopt  Ninf  Sinf,Objective     LU
+     1     1    13  9.60000000E+01     53
+ 
+ Itn     2 -- Feasible solution.  Objective =   1.700000000E+01
+ 
+1
+ 
+ EXIT -- OPTIMAL SOLUTION FOUND
+
+ No. of iterations                   2     Objective value      1.7000000000E+01
+
+ No. of degenerate steps             0     Percentage                        .00
+
+ Norm of X                   4.285E+01     Norm of PI                  1.540E+00
+1
+ NAME           CRITPATH              Objective value    1.7000000000E+01
+
+ Status         OPTIMAL SOLN          Iteration    2     Superbasics    0
+
+ OBJECTIVE      TIME     (MIN)
+ RHS            RHSMODL 
+ RANGES                 
+ BOUNDS         BNDMODL 
+ 
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+      14  TIME        BS        17.00000       -17.00000           NONE            NONE         -1.00000      1
+      15  PFNSP       LL         2.00000          .00000         2.00000           NONE          1.00000      2
+      16  PBSFN       LL         4.00000          .00000         4.00000           NONE          1.00000      3
+      17  PDEBS       LL         2.00000          .00000         2.00000           NONE          1.00000      4
+      18  PFSDE       LL         2.00000          .00000         2.00000           NONE          1.00000      5
+      19  PFRFN       BS         6.00000        -2.00000         4.00000           NONE           .00000      6
+      20  PEWFR       BS         3.00000        -1.00000         2.00000           NONE           .00000      7
+      21  PRFFR    A  LL         2.00000          .00000         2.00000           NONE           .00000      8
+      22  PMERF    A  LL         2.00000          .00000         2.00000           NONE           .00000      9
+      23  PCLFS       LL         3.00000          .00000         3.00000           NONE          1.00000     10
+      24  PCLEW    A  LL         2.00000          .00000         2.00000           NONE           .00000     11
+      25  PCLME    A  LL         1.00000          .00000         1.00000           NONE           .00000     12
+      26  PIFCL       LL         1.00000          .00000         1.00000           NONE          1.00000     13
+      27  PEFEW       BS         3.00000        -1.00000         2.00000           NONE           .00000     14
+      28  FSP         BS        17.00000       -15.00000         2.00000           NONE           .00000     15
+      29  FFN         BS        15.00000       -11.00000         4.00000           NONE           .00000     16
+      30  FBS         BS        11.00000        -9.00000         2.00000           NONE           .00000     17
+      31  FDE         BS         9.00000        -7.00000         2.00000           NONE           .00000     18
+      32  FFS         BS         7.00000        -4.00000         3.00000           NONE           .00000     19
+      33  FFR         BS         9.00000        -7.00000         2.00000           NONE           .00000     20
+      34  FEW         BS         6.00000        -4.00000         2.00000           NONE           .00000     21
+      35  FRF         BS         7.00000        -5.00000         2.00000           NONE           .00000     22
+      36  FME         BS         5.00000        -4.00000         1.00000           NONE           .00000     23
+      37  FCL         BS         4.00000        -3.00000         1.00000           NONE           .00000     24
+      38  FIF         LL         3.00000          .00000         3.00000           NONE          1.00000     25
+      39  FEF      A  LL         3.00000          .00000         3.00000           NONE           .00000     26
+      40  COST        BS          .00000          .00000           NONE            NONE           .00000     27
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  SSP         LL          .00000          .00000          .00000           NONE          1.00000     28
+       2  SFN         BS         2.00000          .00000          .00000           NONE           .00000     29
+       3  SBS         BS         6.00000          .00000          .00000           NONE           .00000     30
+       4  SDE         BS         8.00000          .00000          .00000           NONE           .00000     31
+       5  SFS         BS        10.00000          .00000          .00000           NONE           .00000     32
+       6  SFR         BS         8.00000          .00000          .00000           NONE           .00000     33
+       7  SEW         BS        11.00000          .00000          .00000           NONE           .00000     34
+       8  SRF         BS        10.00000          .00000          .00000           NONE           .00000     35
+       9  SME         BS        12.00000          .00000          .00000           NONE           .00000     36
+      10  SCL         BS        13.00000          .00000          .00000           NONE           .00000     37
+      11  SIF         BS        14.00000          .00000          .00000           NONE           .00000     38
+      12  SEF         BS        14.00000          .00000          .00000           NONE           .00000     39
+      13  Finish      BS        17.00000         1.00000          .00000       999.00000          .00000     40
+ ENDRUN

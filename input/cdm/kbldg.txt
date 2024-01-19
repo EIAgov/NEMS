@@ -1,0 +1,103 @@
+FILE NAME:      KBLDG
+
+DATE MODIFIED:  July 18, 2017
+
+CONTACT:        Kimmie Klaiman
+                NEMS Commercial Buildings Analyst
+                Kimberly.klaiman@eia.gov
+                (202)586-1678
+
+USED BY:        COMFloorspace subroutine of the National Energy Modeling System
+                (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     Building survival parameters
+
+                The median lifetimes and gammas (logistic function parameters)
+                used to determine proportion of original stock of a particular
+                building type that still exists after a given number of years.
+
+UNITS:          unitless
+
+DIMENSION:      function of time for each building type
+
+SPECIAL CONSTRAINTS:    None
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+                
+                The first row of data contains values for median building
+		lifetimes, and the second row of data contains values for
+		the corresponding gammas.  Values within each row are in order
+		of building type, in the following order:  Assembly, Education,
+		Food Sales, Food Service, Health Care, Lodging, Large Office,
+                Small Office, Merc/Service, Warehouse, and Other.
+
+SOURCES:
+
+                U.S. Department of Energy, Energy Information Administration, 2012 Commercial
+                  Buildings Energy Consumption Survey, Public Use Data, available July 2012 at
+                  http://www.eia.gov/emeu/cbecs/cbecs2003/public_use_20012/cbecs_pudata2003.html.
+
+                Also public use and table data from NBECS 1983, NBECS 1986, CBECS 1989,
+                  CBECS 1992, CBECS 1995, and CBECS 1999.
+     
+                Journal of Business & Economic Statistics, April 1986, Vol 4, No. 2.
+
+                MHC Construction Start Data.
+
+                Publicly available information on demolition of sports stadiums.
+
+                Northwest Energy Efficiency Alliance, "Assessment of the Commercial 
+                  Building Stock in the Pacific Northwest," prepared by KEMA-XENERGY, Inc.,
+                  March 2004.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+55	62	55	50	55	53	65	58	50	58	60
+
+1.21	1.38	1.02	1.43	1.39	1.40	1.98	1.45	1.26	1.31	1.29

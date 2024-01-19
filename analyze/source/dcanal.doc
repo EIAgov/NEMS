@@ -1,0 +1,146 @@
+                   ::: DCANAL.DOC  8-10-95 :::
+
+  This documents the variables in DCANAL.
+
+ Switches: SWDBG = Debug (for debugging)
+           SWEXPL = TRUE iff syntax read into memory
+           SWSBNZ = TRUE iff submatrix nonzeroes correct
+           SWRATE = TRUE iff basis setup to support RATEOF command
+           SWRULE = TRUE iff rule file active
+           SWMSG, SWDISP, and SWSYN are user-controlled (passed by FLIP)
+
+ Values (real): VINF   = infinity
+                VTOLAB = absolute tolerance
+                VTOLRE = relative tolerance
+
+ KEYS: See KEYS.DIC and ANALYZE.KEYS
+
+ LP Statistics:  NROWS = Number of rows
+                 NCOLS = Number of columns
+                 NRFREE= Number of free rows
+                 NCFIX = Number of fixed columns
+                 NONZER= Number of nonzeroes
+                 NVALS = Number of distinct values (size of value pool)
+                 NONES = Number of 1's (+/-)
+                 MAXRLN= Maximum row length (ie, number of nonzeroes)
+                 MAXCLN= Maximum column length
+                 OBJNUM= Objective row number
+                 NAMELN= Maximum number of characters in row/col names
+
+SUBMATRIX DICTIONARY (initialized by ASUBMAT...called by SYSIN)
+
+ For conditional parsing....
+    RIMKEY(1,.) = L, U, C, Y, P   (for ROWS)
+    RIMKEY(2,.) = L, U, C, X, D   (for COLS)
+    OPLIST = LE, LT, EQ, NE, GT, GE
+    KEY1 OPKEY KEY2  is relational condition (up to 8 in one conditional)
+
+    NOPKEY  = number of relational conditions (<= MAXOPS)
+    MAXOPS  = max number of relational conditions = 8
+    NKEYS   = number of rim keys = 5
+    NOPLST  = number of relational operators = 6
+
+    NZLO    = lower value of number of nonzeroes
+    NZUP    = upper value of number of nonzeroes
+    VLO     = lower value of rim values in conditional
+    VUP     = upper value of rim values in conditional
+
+    SOLMAP = solution status map to delineate LUBI
+
+    SWSBNZ = switch to tell if nonzeroes have been tallied
+
+ Submatrix statistics...
+    NZSUB  = number of nonzeroes
+    NRCSUB = number of rows/columns
+
+    VSUMSB = sum of rim values for row/column (* excluded)
+    VMINSB = min of rim values for row/column (* excluded)
+    VMAXSB = max of rim values for row/column (* excluded)
+    VAVGSB = average of rim values for row/column (* excluded)
+
+Submatrix Ordering (for PICTURE and rulebase)...not presently used.
+
+ ORDER holds row+column indexes
+ ...MAXORD MUST BE AT LEAST THE NUMBER OF ROWS + COLUMNS IN SUBMATRIX
+    ORDKEY = 0 means unordered
+           = 1 means LOWER triangular-seeking
+           = 2 means UPPER triangular-seeking
+           = 3 means SYNTAX match-seeking
+
+Files:  DATFIL = Unit number for data (card image)
+        PCKFIL = Unit number for packed file (unformatted)
+        NAMLEN = Max number of characters in name of file
+
+ Array ZVALUE is needed for ftran, etc.
+ Arrays ROWLST||VALLST hold sparse column (retrieved from GETCOL)
+ Array SCRIND/SCRVAL is scratch (multi-purpose), and its length must be at
+ least equal to the number of rows.
+
+ TRPOS and TRNEG are for the trace routine;  they hold number of positive and
+ number of negative coefficients in each row.
+
+                               Block Dictionary
+                               ~~~~~~~~~~~~~~~~
+    BNAME (I) = name of block I
+    BMASK (I) = mask of names in block I
+    BNUMBR(I) = number of rows/columns in block I
+    BINDEX(K) = block number of row/col (K=1,...,NROWS+NCOLS)
+                ...= 0 if K is not in any block
+    NRBLKS    = number of row blocks
+    NCBLKS    = number of column blocks
+    MAXBLK    = max number of blocks                \
+    MXBIND    = length of BINDEX (>= NROWS + NCOLS) /   (set in BLINIT
+
+ DATA STRUCTURE HAS POOLED LISTS (BNAME,BMASK,BNUMBR), GROWING
+   TOWARDS EACH OTHER...ROWS GO FROM 1 TO NRBLKS AND COLS GO FROM
+   MAXBLK TO MAXBLK - NCBLKS + 1
+
+                        Declarations for EXPLAIN module
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EXTABL holds entity and syntax tables
+    EXKEY  holds 8-character key (translation of EXKEY(I) is EXTABL(I))
+    EXCHAR is special character for "wildcard" translation (set in EXPINT)
+    EXINDX holds pointers for tables
+    MAXENT = max number of entities (dimension of EXINDX)
+    MAXTBL = dimension of EXTABL and EXINDX
+    NENTY  = number of entities
+    NRSYN  = number of row syntax maps
+    NCSYN  = number of column syntax maps
+    IRSYN  = base pointer into EXKEY|EXTABL for row syntax maps
+    ICSYN  = base pointer into EXKEY|EXTABL for column syntax maps
+
+                       Declarations for RULEBASE module
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RULTXT = is a mini buffer
+    RULOOP = holds command list of a loop
+    RUPNAM = name of parameter
+    RUPVAL = value of parameter
+    RULINT = integer array
+    RULCHR = character array
+    RULNAM = name array
+    RBSTAK = stacks
+
+    SWLOOP = TRUE iff current command is within loop
+
+    VLOOK = value returned by LOOK command
+    MAXRUL = max number of rules
+    MAXRUP = max
+    MAXRST = max stack size
+    ILOOP = pointer to current statement in loop
+    NRLOOP = number of lines in loop
+    NRULES = Number of rules
+    NRUINT = Number of RULINT used
+    NRUCHR = Number of RULCHR used
+    NRUCOM = Number of commands
+    NRUPRM = Number of parameters
+    NRUVAL = Number of RULVAL used
+    ENDTXT = pointer to end of text in CLIST
+    RULROW = active row
+    RULCOL = active column
+    ROWORD = row ordering
+    COLORD = column ordering
+    RSTCK1 = pointer to stack 1
+    RSTCK2 = pointer to stack 2
+
+                     ::: END DCANAL.DOC :::
+

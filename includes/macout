@@ -1,0 +1,372 @@
+! $Header: M:/default/includes/RCS/macout,v 1.27 2019/07/25 17:53:20 RT2 Exp $
+!  MACROECONOMIC MODULE OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!   Macroeconomic module output variables
+
+      REAL MC_BOPCRNTAC(MNUMYR)       !Current account balance
+      REAL MC_CD(MNUMYR)              !Consumer expenditures - Consumer durables
+      REAL MC_CDFHE(MNUMYR)           !Consumer expenditures - Furniture
+      REAL MC_CDFHER(MNUMYR)          !Real Consumer Spending -Furnishings and durable household equipment; BEA; Billion 2012 dollars annual rate
+      REAL MC_CDMV(MNUMYR)            !Consumer expenditures - Motor vehicles and parts
+      REAL MC_CDMVR(MNUMYR)           !Real Consumer Spending -Motor vehicles and parts; BEA; Billion 2012 dollars annual rate
+      REAL MC_CDO(MNUMYR)             !Consumer expenditures - Other durables
+      REAL MC_CDOOR(MNUMYR)           !Real Consumer Spending -Other other; IHS Global Insight; Billion 2012 dollars annual rate
+      REAL MC_CDOR(MNUMYR)            !Real consumer spending - Other durables
+      REAL MC_CDOTAER(MNUMYR)         !Real Consumer Spending -Therapeutic appliances and equipment; BEA; Billion 2012 dollars annual rate
+      REAL MC_CDR(MNUMYR)             !Real Consumer Spending -Durables; BEA; Billion 2012 dollars annual rate
+      REAL MC_CDREC(MNUMYR)           !Consumer expenditures - Recreation
+      REAL MC_CDRECIPR(MNUMYR)        !Real Consumer Spending -Information Processing Equipment; BEA; Billion 2012 dollars annual rate
+      REAL MC_CDRECOR(MNUMYR)         !Real Consumer Spending -Other recreational goods and vehicles; IHS Global Insight; Billion 2012 dollars annual rate
+      REAL MC_CDRECR(MNUMYR)          !Real consumer spending - Recreation
+      REAL MC_CGOODS(MNUMYR)          !Consumer expenditures - Goods
+      REAL MC_CGOODSR(MNUMYR)         !Real consumer spending - Goods
+      REAL MC_CKF(MNUMYR)             !Economic depreciation of capital
+      REAL MC_CKFADJCORP(MNUMYR)      !Difference between book and economic depreciation
+      REAL MC_CKFCORP(MNUMYR)         !Economic depreciation of corporate capital
+      REAL MC_CKFCORPBK(MNUMYR)       !Book value of depreciation
+      REAL MC_CN(MNUMYR)              !Consumer expenditures - Total nondurables
+      REAL MC_CNCS(MNUMYR)            !Consumer expenditures - Clothing and shoes
+      REAL MC_CNCSR(MNUMYR)           !Real consumer spending - Clothing and shoes
+      REAL MC_CNEFAO(MNUMYR)          !Consumer expenditures - Fuel oil and miscellaneous fuels
+      REAL MC_CNEFAOR(MNUMYR)         !Real Consumer Spending -Fuel oil and other fuels; BEA; Billion 2012 dollars annual rate
+      REAL MC_CNEGAO(MNUMYR)          !Consumer expenditures - Motor vehicle fuel - gasoline
+      REAL MC_CNEGAOR(MNUMYR)         !Real Consumer Spending -Motor vehicle fuels, lubricants, and fluids; BEA; Billion 2012 dollars annual rate
+      REAL MC_CNF(MNUMYR)             !Consumer expenditures - Food at home
+      REAL MC_CNFR(MNUMYR)            !Real consumer spending - Food at home
+      REAL MC_CNOO(MNUMYR)            !Consumer expenditures - Miscellaneous nondurables
+      REAL MC_CNOOR(MNUMYR)           !Real consumer spending - Miscellaneous nondurables
+      REAL MC_CNOPMP(MNUMYR)          !Consumer expenditures - Drugs
+      REAL MC_CNOPMPR(MNUMYR)         !Real consumer spending - Drugs
+      REAL MC_CNOTOB(MNUMYR)          !Consumer expenditures - Tobacco
+      REAL MC_CNOTOBR(MNUMYR)         !Real consumer spending - Tobacco
+      REAL MC_CNR(MNUMYR)             !Real Consumer Spending -Nondurables; BEA; Billion 2012 dollars annual rate
+      REAL MC_COMMFLSP(MNUMCR,14,MNUMYR)    !REGIONAL COMMERCIAL FLOORSPACE; Thousands Square Feet
+      REAL MC_CONS(MNUMYR)            !Consumer Spending -Total personal consumption expenditures; BEA; billions of dollars- annual rate
+      REAL MC_CONSR(MNUMYR)           !Real Consumer Spending -Total personal consumption expenditures; BEA; Billion 2012 dollars annual rate
+      REAL MC_CPI(MNUMCR,MNUMYR)      !Consumer price index, all-urban; BLS; - 1982-84=1.00
+      REAL MC_CPIE(MNUMYR)            !Consumer price index for energy; BLS; - 1982-84=1.00
+      REAL MC_CPIXFAE(MNUMYR)         !Core CPI
+      REAL MC_CSV(MNUMYR)             !Services
+      REAL MC_CSVAC(MNUMYR)           !Consumer expenditures - Accomodations
+      REAL MC_CSVACR(MNUMYR)          !Real consumer spending - Accomodations
+      REAL MC_CSVF(MNUMYR)            !Consumer expenditures - Food services (away)
+      REAL MC_CSVFIN(MNUMYR)          !Consumer expenditures - Finance
+      REAL MC_CSVFINR(MNUMYR)         !Real consumer spending - Finance
+      REAL MC_CSVFR(MNUMYR)           !Real consumer spending - Food services (away)
+      REAL MC_CSVH(MNUMYR)            !Consumer expenditures - Housing
+      REAL MC_CSVHC(MNUMYR)           !Consumer expenditures - Health care, medical
+      REAL MC_CSVHCR(MNUMYR)          !Real consumer spending - Health care, medical
+      REAL MC_CSVHH(MNUMYR)           !Consumer expenditures - Services to households
+      REAL MC_CSVHHR(MNUMYR)          !Real consumer spending - Services to households
+      REAL MC_CSVHR(MNUMYR)           !Real consumer spending - Housing
+      REAL MC_CSVINS(MNUMYR)          !Consumer expenditures - Insurance
+      REAL MC_CSVINSR(MNUMYR)         !Real consumer spending - Insurance
+      REAL MC_CSVNPISH(MNUMYR)        !Consumer expenditures - Services to households provided by nonprofits
+      REAL MC_CSVNPISHR(MNUMYR)       !Real consumer spending - Services to households provided by nonprofits
+      REAL MC_CSVO(MNUMYR)            !Consumer expenditures - Other services
+      REAL MC_CSVOR(MNUMYR)           !Real consumer spending - Other services
+      REAL MC_CSVR(MNUMYR)            !Real Consumer Spending -Services; BEA; Billion 2012 dollars annual rate
+      REAL MC_CSVREC(MNUMYR)          !Consumer expenditures - Recreation
+      REAL MC_CSVRECR(MNUMYR)         !Real consumer spending - Recreation
+      REAL MC_CSVTS(MNUMYR)           !Consumer expenditures - Transportation
+      REAL MC_CSVTSR(MNUMYR)          !Real consumer spending - Transportation
+      REAL MC_CSVU(MNUMYR)            !Consumer expenditures - Electricity
+      REAL MC_CSVUER(MNUMYR)          !Real Consumer Spending -Electricity; BEA; Billion 2012 dollars annual rate
+      REAL MC_CSVUGR(MNUMYR)          !Real Consumer Spending -Natural Gas; BEA; Billion 2012 dollars annual rate
+      REAL MC_CSVUR(MNUMYR)           !Real consumer spending - Electricity
+      REAL MC_DALLFUELS(MNUMYR)       !Demand for all fuels; DOE; quadrillion btus-
+      REAL MC_DENDUCOAL(MNUMYR)       !End-use demand for coal (excludes electricity generation); DOE; quadrillion btus-
+      REAL MC_DENDUELC(MNUMYR)        !Sales of electricity to ultimate consumers; DOE; quadrillion btus-
+      REAL MC_DENDUNG(MNUMYR)         !End-use demand for natural gas; DOE; quadrillion btus-
+      REAL MC_DENDUPET(MNUMYR)        !End-use demand for petroleum; DOE; quadrillion btus-
+      REAL MC_EEA(MNUMYR)             !Payroll employment
+      REAL MC_EMPNA(MNUMCR,MNSICM,MNUMYR) !REGIONAL EMPLOYMENT; Millions of Persons
+      REAL MC_ENGDOMO(MNUMYR)         !Domestic production of energy excl. petroleum & natural gas; IHS Global Insight; - quadrillion btus
+      REAL MC_ENGDOMPETANG(MNUMYR)    !Domestic production of petroleum & natural gas; IHS Global Insight; - quadrillion btus
+      REAL MC_G(MNUMYR)               !Government purchases
+      REAL MC_GDP(MNUMYR)             !Gross domestic product; BEA; billions of dollars- annual rate
+      REAL MC_GDPFER(MNUMYR)          !Smoothed value of full-employment real GDP; IHS Global Insight; billions of chained 2012 dollars- annual rate
+      REAL MC_GDPR(MNUMYR)            !Real gross domestic product; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_GF(MNUMYR)              !Federal government purchases
+      REAL MC_GFML(MNUMYR)            !Federal defense purchases
+      REAL MC_GFMLR(MNUMYR)           !Real federal defense purchases of goods & services; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_GFO(MNUMYR)             !Federal nondefense purchases
+      REAL MC_GFOR(MNUMYR)            !Real Federal nondefense purchases
+      REAL MC_GFR(MNUMYR)             !Real Federal government purchases
+      REAL MC_GNP(MNUMYR)             !Gross national product
+      REAL MC_GNPR(MNUMYR)            !Real gross national product; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_GR(MNUMYR)              !Real government purchases of goods & services; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_GSL(MNUMYR)             !State and local purchases
+      REAL MC_GSLGISNHWYR(MNUMYR)     ! State and local government real gross investment in highways and streets
+      REAL MC_GSLR(MNUMYR)            !Real state and local purchases
+      REAL MC_HUESOLD(MNUMYR)         !Total existing home sales
+      REAL MC_HUSMFG(MNUMCR,MNUMYR)   !Shipments of mobile homes; Census; millions- annual rate
+      REAL MC_HUSPS(MNUMYR)           !Housing starts
+      REAL MC_HUSPS1(MNUMCR,MNUMYR)   !Single-family housing starts; Census; millions- annual rate
+      REAL MC_HUSPS2A(MNUMCR,MNUMYR)  !Multi-family housing starts; IHS Global Insight; millions- annual rate
+      REAL MC_I(MNUMYR)               !Gross private domestic investment; BEA; billions of dollars- annual rate
+      REAL MC_IFNRE(MNUMYR)           !Fixed nonresidential investment
+      REAL MC_IFNREE(MNUMYR)          !Equipment investment
+      REAL MC_IFNREEIND(MNUMYR)       !Investment in industrial equipment
+      REAL MC_IFNREEINDR(MNUMYR)      !Real investment in industrial equipment
+      REAL MC_IFNREEIP(MNUMYR)        !Investment in information equipment
+      REAL MC_IFNREEIPCCR(MNUMYR)     !Real nonresidential investment-computer equipment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNREEIPCSR(MNUMYR)     !Real nonresidential investment-software; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNREEIPCTR(MNUMYR)     !Real nonres.investment-communications equipment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNREEIPR(MNUMYR)       !Real investment in information equipment
+      REAL MC_IFNREEMISCR(MNUMYR)     !Real nonresidential investment-other equipment; IHS Global Insight; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNREEO(MNUMYR)         !Investment in other equipment
+      REAL MC_IFNREEOR(MNUMYR)        !Real investment in other equipment
+      REAL MC_IFNREER(MNUMYR)         !Real nonresidential investment-equipment & software; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNREETAC(MNUMYR)       !Investment in aircraft
+      REAL MC_IFNREETACR(MNUMYR)      !Real investment in aircraft
+      REAL MC_IFNREETLV(MNUMYR)       !Net investment in light vehicles
+      REAL MC_IFNREETLVR(MNUMYR)      !Real nonresidential investment-light vehicles; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNREETO(MNUMYR)        !Investment in other transportation equipment
+      REAL MC_IFNREETOR(MNUMYR)       !Real investment in other transportation equipment
+      REAL MC_IFNREETR(MNUMYR)        !Real investment in transportation equipment
+      REAL MC_IFNRER(MNUMYR)          !Real private fixed nonresidential investment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNRES(MNUMYR)          !Nonresidential construction
+      REAL MC_IFNRESBAOR(MNUMYR)      !Real gross private investment in nonresidential construction Building & Other; IHS Global Insight combination (Total-mining and utilities); billions of chained 2012 dollars- annual rate
+      REAL MC_IFNRESC(MNUMYR)         !Nonresidential construction - Commercial and health care
+      REAL MC_IFNRESCR(MNUMYR)        !Real nonresidential construction - Commercial and health care
+      REAL MC_IFNRESMFG(MNUMYR)       !Nonresidential construction - Industrial
+      REAL MC_IFNRESMFGR(MNUMYR)      !Real nonresidential construction - Industrial
+      REAL MC_IFNRESMI(MNUMYR)        !Investment in mines and wells
+      REAL MC_IFNRESMIR(MNUMYR)       !Real private investment-mines & wells; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNRESO(MNUMYR)         !Nonresidential construction - Other
+      REAL MC_IFNRESOR(MNUMYR)        !Real nonresidential construction - Other
+      REAL MC_IFNRESP(MNUMYR)         !Nonresidential construction - Electric power and telecom
+      REAL MC_IFNRESPC(MNUMYR)        !Nonresidential construction - Telecom infrastructure
+      REAL MC_IFNRESPCR(MNUMYR)       !Real nonresidential construction - Telecom infrastructure
+      REAL MC_IFNRESPP(MNUMYR)        !Nonresidential construction - Power plant
+      REAL MC_IFNRESPPR(MNUMYR)       !Real nonresidential construction - Power plant
+      REAL MC_IFNRESPR(MNUMYR)        !Real nonresidential construction - Power and telecom
+      REAL MC_IFNRESPUR(MNUMYR)       !Real private investment-public utilities; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFNRESR(MNUMYR)         !Real private investment-nonresidential structures including mines; BEA; billions of chained 2012 dollars-
+      REAL MC_IFRE(MNUMYR)            !Fixed residential investment
+      REAL MC_IFREE(MNUMYR)           !Residential equipment investment
+      REAL MC_IFREER(MNUMYR)          !Real residential investment in equipment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFRER(MNUMYR)           !Real private fixed residential investment-equipment and structures; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFRES(MNUMYR)           !Residential construction - Structures
+      REAL MC_IFRESR(MNUMYR)          !Real residential investment -structures; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IFXR(MNUMYR)            !Real private fixed investment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_II(MNUMYR)              !Change in inventories
+      REAL MC_IICMIU(MNUMYR)          !Change in construction inventories
+      REAL MC_IICMIUR(MNUMYR)         !Real change in construction inventories
+      REAL MC_IIF(MNUMYR)             !Change in private farm inventories
+      REAL MC_IIFR(MNUMYR)            !Real change in private farm inventories
+      REAL MC_IIM(MNUMYR)             !Change in manufacturing inventories
+      REAL MC_IIMR(MNUMYR)            !Real change in manufacturing inventories
+      REAL MC_IINF(MNUMYR)            !Change in nonfarm inventories
+      REAL MC_IINFR(MNUMYR)           !Real change in nonfarm inventories
+      REAL MC_IIR(MNUMYR)             !Real change in stock of business inventories; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IIRT(MNUMYR)            !Change in retail inventories
+      REAL MC_IIRTR(MNUMYR)           !Real change in retail inventories
+      REAL MC_IIW(MNUMYR)             !Change in wholesaler inventories
+      REAL MC_IIWR(MNUMYR)            !Real change in wholesaler inventories
+      REAL MC_INTNETBUS(MNUMYR)       !Business interest payments
+      REAL MC_IPSB50001(MNUMYR)       !Total industrial production
+      REAL MC_IR(MNUMYR)              !Real gross private domestic investment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_IVACORP(MNUMYR)         !Corporate inventory valuation adjustment
+      REAL MC_JCSMICH(MNUMYR)         !Consumer sentiment
+      REAL MC_JECIWSP(MNUMYR)         !Employment cost index--private-sector wages & salaries; BLS; December 2012=1.0
+      REAL MC_JECIWSSP(MNUMYR)        !Employment cost index
+      REAL MC_JEXCHMTP(MNUMYR)        !Exchange rate with major currency trading partners
+      REAL MC_JPCNEFAO(MNUMYR)        !Chained Price Index-Fuel oil and other fuels; BEA; Index 2012=100
+      REAL MC_JPCNEGAO(MNUMYR)        !Chained Price Index-Motor vehicle fuels, lubricants, and fluids; BEA; Index 2012=100
+      REAL MC_JPCSVUE(MNUMYR)         !Chained Price Index-Electricity; BEA; Index 2012=100
+      REAL MC_JPCSVUG(MNUMYR)         !Chained Price Index-Natural Gas; BEA; Index 2012=100
+      REAL MC_JPGDP(-2:MNUMYR)        !Chained price index--gross domestic product; BEA; index- 2012=100.0
+      REAL MC_JQIND12(MNUMYR)         !INDUSTRIAL PRODUCTION INDEX-COAL MINING; 1996=1.0
+      REAL MC_JQIND13(MNUMYR)         !INDUSTRIAL PRODUCTION INDEX-OIL & GAS EXTRACTION; 1996=1.0
+      REAL MC_JQPCMHNF(MNUMYR)        !Index of output per hour in nonfarm business; BLS; index- 1992=1.0
+      REAL MC_KHUPS1(MNUMCR,MNUMYR)   !STOCK OF SINGLE-FAMILY HOUSING UNITS; Millions of Units
+      REAL MC_KHUPS2A(MNUMCR,MNUMYR)  !STOCK OF MULTI-FAMILY HOUSING UNITS; Millions of Units
+      REAL MC_KHUMFG(MNUMCR,MNUMYR)   !STOCK OF MOBILE HOMES; Millions of Units
+      REAL MC_M(MNUMYR)               !Imports
+      REAL MC_MFGWGRT(MNUMCR,MNUMYR)  !MANUFACTURING WAGE RATE; Dollars per Hour
+      REAL MC_MFY(MNUMYR)             !Factor service imports
+      REAL MC_MG(MNUMYR)              !Imports of goods
+      REAL MC_MGAUTOR(MNUMYR)         !Real imports of motor vehicles & parts; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_MGCR(MNUMYR)            !Real imports of non-automotive consumer goods; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_MGFFBR(MNUMYR)          !Real imports of foods, feeds & beverages; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_MGINAPETR(MNUMYR)       !Real imports of industrial supplies; IHS Global Insight; billions of chained 2012 dollars- annual rate
+      REAL MC_MGKR(MNUMYR)            !Real imports of capital equipment; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_MGR(MNUMYR)             !Real imports of goods
+      REAL MC_MR(MNUMYR)              !Real imports of goods & services; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_MSVTOT(MNUMYR)          !Imports of services
+      REAL MC_MSVTOTR(MNUMYR)         !Real imports of services; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_NETCAPTRF(MNUMYR)       !Net transactions capital account
+      REAL MC_NETCFIVA(MNUMYR)        !Corporate cashflow with inventory valuation adjustment and dividends
+      REAL MC_NETSAVGFUNIFY(MNUMYR)   !Fiscal year unified Federal budget surplus
+      REAL MC_NLFC(MNUMYR)            !Civilian labor force with adjustment for 2000 census; BLS; - millions
+      REAL MC_NMFGWGRT(MNUMCR,MNUMYR) !NON-MANUFACTURING WAGE RATE; Dollars per Hour
+      REAL MC_NNP(MNUMYR)             !Net national product
+      REAL MC_NP(MNUMCR,MNUMYR)       !Total population, including armed forces overseas; Census; millions- end of period
+      REAL MC_NP16A(MNUMCR,MNUMYR)    !Population aged 16 & over; Census; millions- end of period
+      REAL MC_NP65A(MNUMYR)           !Population aged 65 and over; Census; millions- end of period
+      REAL MC_POILIMP(MNUMYR)         !Weighted average price of imported crude received in refinery inventories; DOE; $ per barrel- not seas. adjusted
+      REAL MC_POILWTI(MNUMYR)         !West Texas Intermediate crude oil price
+      REAL MC_QGASASF(MNUMYR)         !Highway consumption of gasoline & special fuels; DOE; billions of gallons- annual rate
+      REAL MC_REVIND(MNUMCR,MNSICM,MNUMYR)  !Manufacturing and nonmanufacturing output; Millions of Fixed 1992 Dollars
+      REAL MC_REVSER(MNUMCR,MNSICNM,MNUMYR) !Services; Millions of Fixed 1992 Dollars
+      REAL MC_RLRMCORPPUAA(MNUMYR)    !Real rate on AA-rated public utility bonds; Percent per Annum
+      REAL MC_RMCORPAAA(MNUMYR)       !Yield on AAA-rated corporate bonds; FRB; - percent per annum
+      REAL MC_RMCORPBAA(MNUMYR)       !Yield on BAA-rated corporate bonds; FRB; - percent per annum
+      REAL MC_RMCORPPUAA(MNUMYR)      !Rate on AA-rated public utility bonds; Moodys; - percent per annum
+      REAL MC_RMFF(MNUMYR)            !Effective rate on federal funds; FRB; - percent per annum
+      REAL MC_RMGBLUSREAL(MNUMYR)     !Real yield on US Treasury long-term bonds; IHS Global Insight - percent per annum
+      REAL MC_RMMTG30CON(MNUMYR)      !Commitment rate on conventional 30-year mortgage--all lenders; Freddie Mac; - percent per annum
+      REAL MC_RMTB3M(MNUMYR)          !Discount rate on 3-month Treasury bills; FRB; - percent per annum
+      REAL MC_RMTCM10Y(MNUMYR)        !Yield on 10-year Treasury notes; FRB; - percent per annum
+      REAL MC_RUC(MNUMYR)             !Civilian unemployment rate; BLS; - percent
+      REAL MC_SAVPRATE(MNUMYR)        !Household saving rate
+      REAL MC_SFDPRODR(MNUMYR)        !Real final sales - Domestic product
+      REAL MC_SP500(MNUMYR)           !S&P 500 common stock index
+      REAL MC_STAT(MNUMYR)            !Statistical discrepancy
+      REAL MC_SUBLSURPGF(MNUMYR)      !Net Federal subsidies
+      REAL MC_SUBLSURPGSL(MNUMYR)     !Net state & local subsidies
+      REAL MC_SUVA(MNUMYR)            !Unit sales of new automobiles; BEA; millions- annual rate
+      REAL MC_SUVLV(MNUMYR)           !Unit sales of new light vehicles; BEA; millions- annual rate
+      REAL MC_SUVTHAM(MNUMYR)         !Sales of new heavy & medium trucks; BEA; millions- annual rate
+      REAL MC_SUVTL(MNUMYR)           !Unit sales of new light trucks; BEA; millions- annual rate
+      REAL MC_TRFBUS(MNUMYR)          !Transfers by business
+      REAL MC_TXCORP(MNUMYR)          !All corporate tax payments
+      REAL MC_TXCORPGF(MNUMYR)        !Federal corporate tax receipts
+      REAL MC_TXCORPGSL(MNUMYR)       !State and local corporate tax receipts
+      REAL MC_TXCORPRW(MNUMYR)        !Rest of world corporate tax receipts
+      REAL MC_TXIM(MNUMYR)            !Total excise tax receipts
+      REAL MC_UTLB00004(MNUMYR)       !Manufacturing capacity utilization - SIC basis
+      REAL MC_VEHICLES(26,MNUMYR)     !Vehicle sales & price by size class (gross vehicle weight rating)
+      REAL MC_WPI(MNUMYR)             !Producer price index--all commodities; BLS; index- 1982=1.0
+      REAL MC_WPI05(MNUMYR)           !Producer price index-fuels, related products & power; 1982=1
+      REAL MC_WPI051(MNUMYR)          !Producer price index--coal; BLS; index- 1982=1.0
+      REAL MC_WPI053(MNUMYR)          !Producer price index--gas fuels; BLS; index- 1982=1.0
+      REAL MC_WPI054(MNUMYR)          !Producer price index--electric power; BLS; index- 1982=1.0
+      REAL MC_WPI055(MNUMYR)          !Producer price index--utility natural gas; BLS; index- 1982=1.0
+      REAL MC_WPI0561(MNUMYR)         !Producer price index--crude petroleum; BLS; index- 1982=1.0
+      REAL MC_WPI057(MNUMYR)          !Producer price index--refined petroleum products; BLS; index- 1982=1.0
+      REAL MC_WPI0574(MNUMYR)         !Producer price index--residual petroleum fuels; BLS; index- 1982=1.0
+      REAL MC_WPI10(MNUMYR)           !Producer price index--metals & metal products; BLS; index- 1982=1.0
+      REAL MC_WPI11(MNUMYR)           !Producer price index--machinery & equipment; BLS; index- 1982=1.0
+      REAL MC_WPI14(MNUMYR)           !Producer price index--transportation equipment; BLS; index- 1982=1.0
+      REAL MC_WPIIND05(MNUMYR)        !Producer price index - Industrial commodities excluding energy
+      REAL MC_WPISOP3000(MNUMYR)      !Producer price index - Finished goods
+      REAL MC_WPISOP3200(MNUMYR)      !Producer price index--finished producer goods; BLS; index- 1982=1.0
+      REAL MC_X(MNUMYR)               !Total exports
+      REAL MC_XFY(MNUMYR)             !Exports of factor services
+      REAL MC_XG(MNUMYR)              !Exports of goods
+      REAL MC_XGAUTOR(MNUMYR)         !Real exports of motor vehicles & parts; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XGCR(MNUMYR)            !Real exports of non-automotive consumer goods; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XGFFBR(MNUMYR)          !Real exports of foods, feeds & beverages; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XGINR(MNUMYR)           !Real exports of industrial materials & supplies; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XGKR(MNUMYR)            !Real exports of capital goods exc. motor vehicles; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XGR(MNUMYR)             !Real exports of goods; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XR(MNUMYR)              !Real exports of goods & services; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_XSVTOT(MNUMYR)          !Exports of services
+      REAL MC_XSVTOTR(MNUMYR)         !Real exports of services; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_YN(MNUMYR)              !National income
+      REAL MC_YP(MNUMCR,MNUMYR)       !Personal income
+      REAL MC_YPCOMP(MNUMYR)          !Total labor compensation
+      REAL MC_YPD(MNUMYR)             !Disposable income
+      REAL MC_YPDR(MNUMCR,MNUMYR)     !Real disposable income; BEA; billions of chained 2012 dollars- annual rate
+      REAL MC_YPPROPADJF(MNUMYR)      !Farm income
+      REAL MC_YPPROPADJNF(MNUMYR)     !Nonfarm proprietors income
+      REAL MC_YPRENTADJ(MNUMYR)       !Adjusted rental income
+      REAL MC_ZA(MNUMYR)              !Profits after taxes
+      REAL MC_ZADIV(MNUMYR)           !Dividend payments
+      REAL MC_ZAR(MNUMYR)             !Real profits after taxes
+      REAL MC_ZARE(MNUMYR)            !Retained earnings
+      REAL MC_ZB(MNUMYR)              !Book profits before taxes
+      REAL MC_ZBECON(MNUMYR)          !Corporate profits before taxes
+      REAL MC_ZBIVADFIN521(MNUMYR)    !Profits of Federal Reserve System
+      REAL MC_ZBIVARW(MNUMYR)         !Rest of world corporate profits with inventory valuation adjustment
+
+      INTEGER MC_EV_SUCCESS           !Control variable to tell folks if Eviews wait failed (0=success; 1=wait failed)
+
+
+!   Macroeconomic module output common block
+      COMMON /MACOUT/  &
+         MC_BOPCRNTAC    , MC_CD           , MC_CDFHE        , MC_CDFHER       , MC_CDMV         , &
+         MC_CDMVR        , MC_CDO          , MC_CDOOR        , MC_CDOR         , MC_CDOTAER      , &
+         MC_CDR          , MC_CDREC        , MC_CDRECIPR     , MC_CDRECOR      , MC_CDRECR       , &
+         MC_CGOODS       , MC_CGOODSR      , MC_CKF          , MC_CKFADJCORP   , MC_CKFCORP      , &
+         MC_CKFCORPBK    , MC_CN           , MC_CNCS         , MC_CNCSR        , MC_CNEFAO       , &
+         MC_CNEFAOR      , MC_CNEGAO       , MC_CNEGAOR      , MC_CNF          , MC_CNFR         , &
+         MC_CNOO         , MC_CNOOR        , MC_CNOPMP       , MC_CNOPMPR      , MC_CNOTOB       , &
+         MC_CNOTOBR      , MC_CNR          , MC_COMMFLSP     , MC_CONS         , MC_CONSR        , &
+         MC_CPI          , MC_CPIE         , MC_CPIXFAE      , MC_CSV          , MC_CSVAC        , &
+         MC_CSVACR       , MC_CSVF         , MC_CSVFIN       , MC_CSVFINR      , MC_CSVFR        , &
+         MC_CSVH         , MC_CSVHC        , MC_CSVHCR       , MC_CSVHH        , MC_CSVHHR       , &
+         MC_CSVHR        , MC_CSVINS       , MC_CSVINSR      , MC_CSVNPISH     , MC_CSVNPISHR    , &
+         MC_CSVO         , MC_CSVOR        , MC_CSVR         , MC_CSVREC       , MC_CSVRECR      , &
+         MC_CSVTS        , MC_CSVTSR       , MC_CSVU         , MC_CSVUER       , MC_CSVUGR       , &
+         MC_CSVUR        , MC_DALLFUELS    , MC_DENDUCOAL    , MC_DENDUELC     , MC_DENDUNG      , &
+         MC_DENDUPET     , MC_EEA          , MC_EMPNA        , MC_ENGDOMO      , MC_ENGDOMPETANG , &
+         MC_G            , MC_GDP          , MC_GDPFER       , MC_GDPR         , MC_GF           , &
+         MC_GFML         , MC_GFMLR        , MC_GFO          , MC_GFOR         , MC_GFR          , &
+         MC_GNP          , MC_GNPR         , MC_GR           , MC_GSL          , &
+         MC_GSLGISNHWYR  , MC_GSLR         , &
+         MC_HUESOLD      , MC_HUSMFG       , MC_HUSPS        , MC_HUSPS1       , MC_HUSPS2A      , &
+         MC_I            , MC_IFNRE        , MC_IFNREE       , MC_IFNREEIND    , MC_IFNREEINDR   , &
+         MC_IFNREEIP     , MC_IFNREEIPCCR  , MC_IFNREEIPCSR  , MC_IFNREEIPCTR  , MC_IFNREEIPR    , &
+         MC_IFNREEMISCR  , MC_IFNREEO      , MC_IFNREEOR     , MC_IFNREER      , MC_IFNREETAC    , &
+         MC_IFNREETACR   , MC_IFNREETLV    , MC_IFNREETLVR   , MC_IFNREETO     , MC_IFNREETOR    , &
+         MC_IFNREETR     , MC_IFNRER       , MC_IFNRES       , MC_IFNRESBAOR   , MC_IFNRESC      , &
+         MC_IFNRESCR     , MC_IFNRESMFG    , MC_IFNRESMFGR   , MC_IFNRESMI     , MC_IFNRESMIR    , &
+         MC_IFNRESO      , MC_IFNRESOR     , MC_IFNRESP      , MC_IFNRESPC     , MC_IFNRESPCR    , &
+         MC_IFNRESPP     , MC_IFNRESPPR    , MC_IFNRESPR     , MC_IFNRESPUR    , MC_IFNRESR      , &
+         MC_IFRE         , MC_IFREE        , MC_IFREER       , MC_IFRER        , MC_IFRES        , &
+         MC_IFRESR       , MC_IFXR         , MC_II           , MC_IICMIU       , MC_IICMIUR      , &
+         MC_IIF          , MC_IIFR         , MC_IIM          , MC_IIMR         , MC_IINF         , &
+         MC_IINFR        , MC_IIR          , MC_IIRT         , MC_IIRTR        , MC_IIW          , &
+         MC_IIWR         , MC_INTNETBUS    , MC_IPSB50001    , MC_IR           , MC_IVACORP      , &
+         MC_JCSMICH      , MC_JECIWSP      , MC_JECIWSSP     , MC_JEXCHMTP     , MC_JPCNEFAO     , &
+         MC_JPCNEGAO     , MC_JPCSVUE      , MC_JPCSVUG      , MC_JPGDP        , MC_JQIND12      , &
+         MC_JQIND13      , MC_JQPCMHNF     , MC_KHUPS1       , MC_KHUPS2A      , MC_KHUMFG       , &
+         MC_M            , MC_MFGWGRT      , MC_MFY          , &
+         MC_MG           , MC_MGAUTOR      , MC_MGCR         , MC_MGFFBR       , MC_MGINAPETR    , &
+         MC_MGKR         , MC_MGR          , MC_MR           , MC_MSVTOT       , MC_MSVTOTR      , &
+         MC_NETCAPTRF    , MC_NETCFIVA     , MC_NETSAVGFUNIFY, MC_NLFC         , MC_NMFGWGRT     , &
+         MC_NNP          , MC_NP           , MC_NP16A        , MC_NP65A        , MC_POILIMP      , &
+         MC_POILWTI      , &
+         MC_QGASASF      , MC_REVIND       , MC_REVSER       , MC_RLRMCORPPUAA , MC_RMCORPAAA    , &
+         MC_RMCORPBAA    , MC_RMCORPPUAA   , MC_RMFF         , MC_RMGBLUSREAL  , MC_RMMTG30CON   , &
+         MC_RMTB3M       , MC_RMTCM10Y     , MC_RUC          , MC_SAVPRATE     , MC_SFDPRODR     , &
+         MC_SP500        , MC_STAT         , MC_SUBLSURPGF   , MC_SUBLSURPGSL  , MC_SUVA         , &
+         MC_SUVLV        , MC_SUVTHAM      , MC_SUVTL        , MC_TRFBUS       , MC_TXCORP       , &
+         MC_TXCORPGF     , MC_TXCORPGSL    , MC_TXCORPRW     , MC_TXIM         , MC_UTLB00004    , &
+         MC_VEHICLES     , MC_WPI          , MC_WPI05        , MC_WPI051       , MC_WPI053       , &
+         MC_WPI054       , MC_WPI055       , MC_WPI0561      , MC_WPI057       , MC_WPI0574      , &
+         MC_WPI10        , MC_WPI11        , MC_WPI14        , MC_WPIIND05     , MC_WPISOP3000   , &
+         MC_WPISOP3200   , MC_X            , MC_XFY          , MC_XG           , MC_XGAUTOR      , &
+         MC_XGCR         , MC_XGFFBR       , MC_XGINR        , MC_XGKR         , MC_XGR          , &
+         MC_XR           , MC_XSVTOT       , MC_XSVTOTR      , MC_YN           , &
+         MC_YP           , MC_YPCOMP       , &
+         MC_YPD          , MC_YPDR         , MC_YPPROPADJF   , MC_YPPROPADJNF  , MC_YPRENTADJ    , &
+         MC_ZA           , MC_ZADIV        , MC_ZAR          , MC_ZARE         , MC_ZB           , &
+         MC_ZBECON       , MC_ZBIVADFIN521 , MC_ZBIVARW      , MC_EV_SUCCESS
+
+
+!   Equivalence for FILER used for data storage
+
+      REAL EQ_MCOUT(MNUMYR+3       &  ! MC_JPGDP(-2:MNUMYR)
+      +260*MNUMYR                  &  ! arrays dimensioned (mnumyr)
+      +13*MNUMYR*MNUMCR            &  ! arrays dimensioned (mnumcr,mnumyr)
+      +26*MNUMYR                   &  ! MC_VEHICLES
+      +14*MNUMYR*MNUMCR            &  ! MC_COMMFLSP
+      +MNUMCR*MNSICM*MNUMYR        &  ! MC_EMPNA
+      +MNUMCR*MNSICM*MNUMYR        &  ! MC_REVIND
+      +MNUMCR*MNSICNM*MNUMYR       &  ! MC_REVSER
+      +1)                             ! MC_EV_SUCCESS
+
+      EQUIVALENCE (EQ_MCOUT,MC_BOPCRNTAC)
+
+!  Splitting out the variables referenced only by mac.f
+
+      REAL MC_YPCOMPWSD(MNUMCR,MNUMYR)         !WAGE & SALARY DISBURSEMENTS; Billions of Dollars
+
+      COMMON/MACINTRN/MC_YPCOMPWSD

@@ -1,0 +1,26 @@
+OUTPUT TRANSRW.RPT
+REA P TRANSRW1
+SUM
+D R *
+D C *
+L
+$$ :::::::::: END TRANSRW1 :::::::::::::
+REA P TRANSRW2
+SUM
+D R *
+D C *
+L
+$$ :::::::::: END TRANSRW2 :::::::::::::
+REA P TRANSRW3
+SUM
+D R *
+D C *
+L
+$$ :::::::::: END TRANSRW3 :::::::::::::
+REA P TRANSRW4
+SUM
+D R *
+D C *
+L
+$$ :::::::::: END TRANSRW4 :::::::::::::
+OUTPUT *

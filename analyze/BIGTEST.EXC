@@ -1,0 +1,122 @@
+$ This conducts more tests, assuming ATEST has been executed (so
+$ PCK files exist).  This will take about 2 minutes (on a 386).
+_PAUSE Output will go to ATEST.OUT
+ SCREEN L=99999 ; OUTPUT ATEST.OUT
+$$
+$$   Here are your initial switch values.
+$$
+ SWITCH
+$$ Turning ECHO switch on.
+ SWITCH ECHO=T
+* Test ejection (should NOT eject).
+ _EJECT UNLESS 20
+$$
+$$   This is your initial setup (file prefixes and suffixes)
+$$
+ _SETUP
+ _EJECT UNLESS 20
+$$
+$$   These are your initial key settings
+$$
+ _KEY
+*  Test some string settings
+
+ STRING DR DISPLAY ROW *
+ STRING DC DISPLAY COL *
+ STRING R READIN
+ STRING
+ _EJECT
+$ ...Reading PACKED files and testing query
+ 'R P BLEND; SUM; 'DR ; 'DC ;PIC
+ 'R P BLENDRT; 'DR ; 'DC
+ READ P FOREST5; SUB ROW * S=LU;SUB COL * S=B;PIC
+ READ P FOREST6; SUB *;ADD;SW DISP;ADD
+ READ P LANDUSE; COUNT *,*
+ READ P PRSUB;   L *,*; L //RO; L //CO
+ READ P RATETST; L *,* //TAB ; RAT C ; RAT R ; RAT //EQ
+ READ P REFINERY;SUB ROW *;SHO COL ACCB //IO;RAT ;RAT //X;RAT //D;RAT //C
+ READ P WOODNET; PIC * S=LU,* X GT L;TALLY ? R *;TAL ? C *
+ READ P WOODINFE;SUM;D R * S=I;D C * S=I;AGG R *
+ READ P WOODUNBD;SUB COL * S=L D=-*/-.1;SUB A C * S=U D=.1/*;D C
+
+ READ M NETRANGE; SUM; SUB R S; SUB CO *
+ BL R COPY TO SUP; BL R D; ADD R *
+ SUB CO S1; BL C COPY TO S1; BL C D; BL P
+ BL SAVE NETSUP; BL R E *; BL C E *; BL R D; BL C D
+ BL LOAD NETSUP; BL P
+_TYPE ========= END QUERY AND BLOCKING ========== //RIGHT
+
+$$ Testing redundancy
+ READ M GAL; BAS; SUB *
+$$ THERE IS NO REDUNDANCY USING LOGICAL BASIS
+ BASIS REDUND; SOL MI; BAS; PI *,*
+$$ THERE IS A REDUNDANT ROW USING SOLUTION BASIS (ROW R4 IN BLOCK RED.FR)
+ BAS RED; BLOC R D; BLOC C D
+$$ Testing REDUCE
+ REA M REDTEST L=4 ; L *,* //T,W=8 ; REDUCE
+ REA M LGLTEST; L *,* //T ; RED *,* //L, B=X, I=I
+
+$$ Testing SCHEMA command
+ REA P WOODNET; REA SYN; SCHEMA DISPLAY *; SCH SAV
+ REA P WOODNET; SCH LO;SCH D T,D;SCH D E //NOSUM
+
+$$ Testing IIS
+ REA P WOODINFE;REA I WOODINFE;BL R D;BL C D;BL P
+ REA P FOREST6; REA I FOREST6; BL R D;BL C D;BL P
+
+$$ Testing long names
+ READ MAT NAME10 LEN=10; LIST *,*; D R; TAL ***???; TAL ******????
+ D C; TAL ***???; TAL ******????
+INCLUDE NAME16.EXC
+
+$ Testing GRAPH
+ REA P WOODNET; REA S; PIC *MO,* X=1/*; GRAPH SET *; GRAPH DISP ROW
+ GR D R //DIAGRAM PRINT; GR D R //MATRIX; GR D R //SYNTAX
+ GR D C; GR D C //DIAG PR; GR D C //MAT; GR D C //SYN
+
+ REA P BLENDRT; REA S; PI BUR,* X GT L; GR SET *
+ GR D R; GR D R //S; TRACE; GR SET *
+ GR D R //D P; GR D R //S; GR D R //S NOHEAD; GR SAVE
+ GR SET * //FORM; GR D R; GR D R //D P; GR D R //M; GR D R //S
+ GR D C; GR D C //D P; GR D C //M; GR D C //S
+ GR LOAD; GR COPY; GR SET * //PLACE
+ GR D R //S; PIC B*,I S=B; SUB COL *; PIC; GR SET * //TIME
+ GR D R //S; GR D R //S N
+_TYPE ============= End GRAPH Test ======================= //C
+
+READ P WOODNET;READ S;L COST,S X GT L  U=1/9999
+SCR L 23;SHO P //PRINT;SHO P //NOSORT
+SCR L 15;SHO P;SUB *;SUB D R COST
+BL R S;BL C S;BL P;BL R D;BL C D;BL R P;BL C P
+SCR L 23;BL R P //PRINT;BL C P //PRINT
+SCR L=9999 W=79
+
+_TYPE :::::::::: SYNTAX ::::::::::::::::: //LEFT
+ READ P WOODNET; READ S ; SCH D * ; SYN *
+ SUB COL T**SF;TABL C T X;SUB *;TAB C T D;TAB ROW S,D P
+ PIC DMOCH,* S=B;TRACE;PIC;EXP R;EXP C; DISP //LEV,P,SYN; SHO //SYN
+
+READ P WOODNET;SYN GEN GENTEST //USING RCPROMPT;REA S GENTEST;SCH D
+_TYPE ::::::  TABLEAU FORMS OF RATES :::::: //C
+READ P REFINERY;READ SYN;SUB *;SHO //ARR,SYN ; SHO //IO
+SUB D R * S=LU;RAT //T;RAT //T,L;RAT //T,C;RAT //T,L,C,W=9
+$$ :::::: PIVOTING :::::::
+BAS PIV COL ACCB FOR COL ACCA
+RAT //T,L;D R;D C
+BAS PIV HIST;BAS PIV UNDO
+RAT //T,L;D R;D C
+
+$$ TESTING RULEBASE
+I TEST
+$$ Testing case and VERIFY
+ read p WOODNET; _k set TIME=9999; verify; basis refresh; _k set TIME=*
+
+**************************** DONE **********************************
+INCLUDE SWITCH0.EXC
+_TYPE ORIGINAL SWITCH SETTINGS SHOULD APPEAR:
+ SWITCH
+ OUTPUT *
+* Restore screen Length and Width.
+ SCR L 23 W 79
+ PRINT ATEST.OK
+ RETURN QUIETLY

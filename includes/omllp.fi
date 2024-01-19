@@ -1,0 +1,319 @@
+! $Header: M:/default/includes/RCS/omllp.fi,v 1.1 2014/01/10 19:23:44 dsa Exp $
+
+!     FORTRAN include file omllp.fi
+!     This requires a prior inclusion of buildenv.fi
+      !dec$ fixedformlinesize:80
+
+      include 'wcr.fi'
+
+      interface wfinit    ! generic function name
+
+      integer(4) function wfinit_dyn(title, dbmemptr, dbmemKB)
+      !dec$attributes stdcall, decorate, alias:'wcinit' :: wfinit_dyn
+      character(*)        title     [reference]   ! null-terminated
+      real(8), pointer :: dbmemptr  [allow_null]  ! not returned
+      integer(4)          dbmemKB
+      end function
+
+      integer(4) function wfinit_pre(title, dbmemarray, dbmemKB)
+      !dec$attributes stdcall, decorate, alias:'wcinit' :: wfinit_pre
+      character(*)        title     [reference]   ! null-terminated
+      real(8)             dbmemarray(1)  ! (*) produces incorrect decoration
+      integer(4)          dbmemKB
+      end function
+
+      end interface wfinit
+
+      interface wfdef     ! generic function name
+
+      integer(4) function wfdef_dyn(modelptr, modelKB, modelname)
+      !dec$attributes stdcall, decorate, alias:'wcdef' :: wfdef_dyn
+      real(8), pointer :: modelptr   [reference]  ! returned
+      integer(4)          modelKB
+      character(*)        modelname  [reference]  ! blank-pad 8 or null-term
+      end function
+
+      integer(4) function wfdef_pre(modelarray, modelKB, modelname)
+      !dec$attributes stdcall, decorate, alias:'wcdef_pre' :: wfdef_pre
+      real(8)             modelarray(1)  ! (*) produces incorrect decoration
+      integer(4)          modelKB
+      character(*)        modelname  [reference]  ! blank-pad 8 or null-term
+      end function
+
+      end interface wfdef
+
+      interface
+
+      integer(4) function wfactive()
+      !dec$attributes stdcall, decorate, alias:'wcactive' :: wfactive
+      end function
+
+      subroutine wfend()
+      !dec$attributes stdcall, decorate, alias:'wcend' :: wfend
+      end subroutine
+
+      integer(4) function wfendrc(rc)
+      !dec$attributes stdcall, decorate, alias:'wcendrc' :: wfendrc
+      integer(4)          rc
+      end function
+
+      integer(4) function wfset(model)
+      !dec$attributes stdcall, decorate, alias:'wcset' :: wfset
+      real(8), pointer :: model
+      end function
+
+      integer(4) function wfborwwiz(borwptr)
+      !dec$attributes stdcall, decorate, alias:'wcborwwiz' :: wfborwwiz
+      real(8), pointer :: borwptr  [reference]
+      end function
+
+      integer(4) function wfborwwrk(borwptr)
+      !dec$attributes stdcall, decorate, alias:'wcborwwrk' :: wfborwwrk
+      real(8), pointer :: borwptr  [reference]
+      end function
+
+      integer(4) function wfborweta(borwptr)
+      !dec$attributes stdcall, decorate, alias:'wcborweta' :: wfborweta
+      real(8), pointer :: borwptr  [reference]
+      end function
+
+      integer(4) function wffreemodel(modelptr)
+      !dec$attributes stdcall, decorate, alias:'wcfreemodel' :: wffreemodel
+      real(8), pointer :: modelptr  [reference]
+      end function
+
+      subroutine wffreeall()
+      !dec$attributes stdcall, decorate, alias:'wcfreeall' :: wffreeall
+      end subroutine
+
+      integer(4) function wfload(actfile, actprob)
+      !dec$attributes stdcall, decorate, alias:'wcload' :: wfload
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLCRCPARM) actfile   [reference]  ! blank-padded
+      character(OMLCRCPARM) actprob   [reference]  ! blank-padded
+      end function
+
+      integer(4) function wfopt()
+      !dec$attributes stdcall, decorate, alias:'wcopt' :: wfopt
+      end function
+
+      integer(4) function wfcval(colname, rowname, value)
+      !dec$attributes stdcall, decorate, alias:'wccval' :: wfcval
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) colname   [reference]  ! blank-padded
+      character(OMLMATNAME) rowname   [reference]  ! blank-padded
+      real(8)               value
+      end function
+
+      integer(4) function wfcrhs(rowname, value)
+      !dec$attributes stdcall, decorate, alias:'wccrhs' :: wfcrhs
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) rowname   [reference]  ! blank-padded
+      real(8)               value
+      end function
+
+      integer(4) function wfcrng(rowname, value)
+      !dec$attributes stdcall, decorate, alias:'wccrng' :: wfcrng
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) rowname   [reference]  ! blank-padded
+      real(8)               value
+      end function
+
+      integer(4) function wfcbnd(colname, lobound, upbound)
+      !dec$attributes stdcall, decorate, alias:'wccbnd' :: wfcbnd
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) colname   [reference]  ! blank-padded
+      real(8)               lobound
+      real(8)               upbound
+      end function
+
+      integer(4) function wfrval(colname, rowname, value)
+      !dec$attributes stdcall, decorate, alias:'wcrval' :: wfrval
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) colname   [reference]  ! blank-padded
+      character(OMLMATNAME) rowname   [reference]  ! blank-padded
+      real(8)               value     [reference]  ! out
+      end function
+
+      integer(4) function wfrrhs(rowname, value)
+      !dec$attributes stdcall, decorate, alias:'wcrrhs' :: wfrrhs
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) rowname   [reference]  ! blank-padded
+      real(8)               value     [reference]  ! out
+      end function
+
+      integer(4) function wfrrng(rowname, value)
+      !dec$attributes stdcall, decorate, alias:'wcrrng' :: wfrrng
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) rowname   [reference]  ! blank-padded
+      real(8)               value     [reference]  ! out
+      end function
+
+      integer(4) function wfrbnd(colname, lobound, upbound)
+      !dec$attributes stdcall, decorate, alias:'wcrbnd' :: wfrbnd
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) colname   [reference]  ! blank-padded
+      real(8)               lobound   [reference]  ! out
+      real(8)               upbound   [reference]  ! out
+      end function
+
+      integer(4) function wfrlval(colname, start, index, value, count)
+      !dec$attributes stdcall, decorate, alias:'wcrlval' :: wfrlval
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) colname  [reference]  ! blank-padded
+      integer(4)            start
+      integer(4)            count
+      integer(4)            index(count)  ! out
+      real(8)               value(count)  ! out
+      end function
+
+      integer(4) function wfm2act(actfile, actprob)
+      !dec$attributes stdcall, decorate, alias:'wcm2act' :: wfm2act
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLCRCPARM) actfile  [reference]  ! blank-padded
+      character(OMLCRCPARM) actprob  [reference]  ! blank-padded
+      end function
+
+      integer(4) function wfrname(index, rowname)
+      !dec$attributes stdcall, decorate, alias:'wcrname' :: wfrname
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      integer(4)            index
+      character(OMLMATNAME) rowname   [reference]  ! out
+      end function
+
+      integer(4) function wfcname(index, colname)
+      !dec$attributes stdcall, decorate, alias:'wccname' :: wfcname
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      integer(4)            index
+      character(OMLMATNAME) colname   [reference]  ! out
+      end function
+
+      integer(4) function wfrmask(mask, name)
+      !dec$attributes stdcall, decorate, alias:'wcrmask' :: wfrmask
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) mask      [reference]  ! blank-padded
+      character(OMLMATNAME) name      [reference]  ! out
+      end function
+
+      integer(4) function wfcmask(mask, name)
+      !dec$attributes stdcall, decorate, alias:'wccmask' :: wfcmask
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) mask      [reference]  ! blank-padded
+      character(OMLMATNAME) name      [reference]  ! out
+      end function
+
+      integer(4) function wfsrow(name, select, stat, solval)
+      !dec$attributes stdcall, decorate, alias:'wcsrow' :: wfsrow
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) name   [reference]  ! blank-padded
+      character(*)      select     [reference]  ! blank-pad 5 or null-term
+      character(2)      stat       [reference]  ! out
+      real(8)           solval(1)               ! out (select says how many)
+      end function
+
+      integer(4) function wfscol(name, select, stat, solval)
+      !dec$attributes stdcall, decorate, alias:'wcscol' :: wfscol
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) name   [reference]  ! blank-padded
+      character(*)      select     [reference]  ! blank-pad 5 or null-term
+      character(2)      stat       [reference]  ! out
+      real(8)           solval(1)               ! out (select says how many)
+      end function
+
+      integer(4) function wfrrow(name, select, stat, solval)
+      !dec$attributes stdcall, decorate, alias:'wcrrow' :: wfrrow
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) name   [reference]  ! blank-padded
+      character(*)    select       [reference]  ! blank-pad 4*2 or null-term
+      character(2)      stat       [reference]  ! out
+      real(8)           solval(1)               ! out  (select says how many)
+      end function
+
+      integer(4) function wfrcol(name, select, stat, solval)
+      !dec$attributes stdcall, decorate, alias:'wcrcol' :: wfrcol
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLMATNAME) name   [reference]  ! blank-padded
+      character(*)    select       [reference]  ! blank-pad 4*2 or null-term
+      character(2)      stat       [reference]  ! out
+      real(8)           solval(1)               ! out (select says how many)
+      end function
+
+      integer(4) function wfrlist(list, count)
+      !dec$attributes stdcall, decorate, alias:'wcrlist' :: wfrlist
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      integer(4)            count
+      character(OMLMATNAME) list(count)  ! blank-padded
+      end function
+
+      integer(4) function wfclist(list, count)
+      !dec$attributes stdcall, decorate, alias:'wcclist' :: wfclist
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      integer(4)            count
+      character(OMLMATNAME) list(count)  ! blank-padded
+      end function
+
+      integer(4) function wfsprt(active)
+      !dec$attributes stdcall, decorate, alias:'wcsprt' :: wfsprt
+      integer(4) active
+      end function
+
+      integer(4) function wfsfile(filename, active)
+      !dec$attributes stdcall, decorate, alias:'wcsfile' :: wfsfile
+      character(*) filename  [reference]  ! null-terminated
+      integer(4)   active
+      end function
+
+      integer(4) function wfrcord(actfile, actprob, casename, active)
+      !dec$attributes stdcall, decorate, alias:'wcrcord' :: wfrcord
+      import                            OMLMATNAME,OMLSETNAME,OMLCRCPARM
+      character(OMLCRCPARM) actfile   [reference]  ! blank-padded
+      character(OMLCRCPARM) actprob   [reference]  ! blank-padded
+      character(OMLSETNAME) casename  [reference]  ! blank-padded
+      integer(4)            active
+      end function
+
+      integer(4) function wfrprt()
+      !dec$attributes stdcall, decorate, alias:'wcrprt' :: wfrprt
+      end function
+
+      integer(4) function wfrfile(filename)
+      !dec$attributes stdcall, decorate, alias:'wcrfile' :: wfrfile
+      character(*) filename  [reference]  ! null-terminated
+      end function
+
+      integer(4) function wfsaveb(filename)
+      !dec$attributes stdcall, decorate, alias:'wcsaveb' :: wfsaveb
+      character(*) filename  [reference]  ! null-terminated
+      end function
+
+      integer(4) function wfloadb(filename)
+      !dec$attributes stdcall, decorate, alias:'wcloadb' :: wfloadb
+      character(*) filename  [reference]  ! null-terminated
+      end function
+
+      integer(4) function wfpunch(filename, deckname)
+      !dec$attributes stdcall, decorate, alias:'wcpunch' :: wfpunch
+      character(*) filename  [reference]  ! null-terminated
+      character(8) deckname  [reference]  ! blank-padded
+      end function
+
+      integer(4) function wfinsrt(filename, deckname)
+      !dec$attributes stdcall, decorate, alias:'wcinsrt' :: wfinsrt
+      character(*) filename  [reference]  ! null-terminated
+      character(8) deckname  [reference]  ! blank-padded
+      end function
+
+      integer(4) function wfinitwcr()
+      !dec$attributes stdcall, decorate, alias:'wcinitwcr' :: wfinitwcr
+      end function
+
+      integer(4) function wfloadwcr()
+      !dec$attributes stdcall, decorate, alias:'wcloadwcr' :: wfloadwcr
+      end function
+
+      integer(4) function wfsavewcr()
+      !dec$attributes stdcall, decorate, alias:'wcsavewcr' :: wfsavewcr
+      end function
+
+      end interface
+

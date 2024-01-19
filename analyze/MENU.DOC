@@ -1,0 +1,21 @@
+                      ANALYZE Command Menu
+     ษอออออออออออออออออออออออออออออออออออออออออออออออออออออออป
+     บ Control    I/O        Edit    Analysis     Assistance บ
+     ฬอออออออออออออออออออออออออออออออออออออออออออออออออออออออน
+     บ QUIT       EXECUTE    FIX     AGGREGAT     HELP       บ
+     บ RECAP      OUTPUT     FREE    BASIS        INTERPRT   บ
+     บ SCREEN     PRINT      RENAME  BLOCK        ?          บ
+     บ STRING     READIN     ROUND   RATEOF                  บ
+     บ SWITCH     SOLUTION           REDUCE                  บ
+     บ _DICTNRY   WRITEOUT           TRACE                   บ
+     บ _KEYWORD                      VERIFY                  บ
+     บ _SETUP                                                บ
+     ฬออออออออออออออออออออออออ Query ออออออออออออออออออออออออน
+     บ ROW or COL   ROW and COL            Syntax    Special บ
+     ฬอออออออออออออออออออออออออออออออออออออออออออออออออออออออน
+     บ ADDRIM       COUNT                  EXPLAIN   GRAPH   บ
+     บ DISPLAY      LIST                   SCHEMA    SUBMAT  บ
+     บ SHOW         PICTURE                SYNTAX    SUMMARY บ
+     บ TALLY        SHOW //ARRAY           TABLE             บ
+     ศอออออออออออออออออออออออออออออออออออออออออออออออออออออออผ
+                          See also QUICKREF.DOC.

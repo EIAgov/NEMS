@@ -1,0 +1,81 @@
+!  $Header: m:/default/includes/RCS/ogsmcan,v 1.7 2018/09/05 19:01:13 dh5 Exp $
+!  CANADA SUPPLY VARIABLES
+!  PARAMETER
+      INTEGER CNREGION,CNTYPE,CNHISTYR,CNAREA,CNPRDCAT,CNRESCAT,CNWELCAT
+      PARAMETER(CNREGION=2) 			! Canada region (1=east, 2=west)
+      PARAMETER(CNTYPE=2) 			! Canada production category (1=fixed/AD; 2=variable/NA)
+      PARAMETER(CNHISTYR=2005) 			! First historical production year
+      PARAMETER(CNAREA=4) 			! Canada Subregions (Alberta, British Columbia, Saskatchewan, Other)
+      PARAMETER(CNPRDCAT=17) 			! Production category:  1. Alberta AD_Conv
+						!			2. Alberta NA_Conv
+						!			3. Alberta Tight
+						!			4. Alberta Shale
+						!			5. Alberta CBM
+						!			6. British Columbia AD_Conv
+						!			7. British Columbia NA_Conv
+						!			8. British Columbia Tight
+						!			9. British Columbia Shale
+						!			10. Saskatchewan AD_Conv
+						!			11. Saskatchewan NA_Conv
+						!			12. Saskatchewan Tight
+						!			13. Nova Scotia NA_Conv
+						!			14. New Brunswick NA_Conv
+						!			15. Ontario NA_Conv
+						!			16. Yukon NA_Conv
+						!			17. Northwest Territories NA_Conv
+     PARAMETER(CNRESCAT=13)                     ! Resource category:    1. WCSB Conventional
+						!			2. WCSB Tight-Other
+						!			3. WCSB Tight-Montney
+						!			4. WCSB CBM
+						!			5. WCSB Shale-Other
+						!			6. WCSB Shale-Horn River
+						!			7. Ontario
+						!			8. Quebec
+						!			9. Maritimes Basin
+						!			10. NS and NL
+						!			11. Mackenzie - Beaufort
+						!			12. Arctic Islands
+						!			13. West Coast Offshore
+     PARAMETER(CNWELCAT=10)                     ! Drilling category:    1. Alberta NA_Conv	
+						!			2. Alberta Tight 	
+						!			3. Alberta Shale 	
+						!			4. Alberta CBM	
+						!			5. British Columbia NA_Conv	
+						!			6. British Columbia Tight 	
+						!			7. British Columbia Shale 	
+						!			8. British Columbia CBM	
+						!			9. Saskatchewan NA_Conv	
+						!			10. Saskatchewan Tight 	
+!  INTEGER
+      INTEGER CNBASEYR				! Canada base year
+      INTEGER CNRMAP(CNPRDCAT)   	 	! Mapping to region
+      INTEGER CNTMAP(CNPRDCAT) 	 		! Mapping to type
+      INTEGER CNAMAP(CNPRDCAT) 	 		! Mapping to area
+!  REAL
+      REAL*8 CNTRR(CNRESCAT)				! Technically recoverable natural gas resources	(tcf)
+      REAL*8 CNBASEWOP(CNHISTYR:ENDYR)		! Benchmark Brent Price
+      REAL*8 CNBASEHH(CNHISTYR:ENDYR)		! Benchmark Henry Hub Price
+      REAL*8 CNBASEPRD(CNPRDCAT,CNHISTYR:ENDYR)	! Benchmark natural gas production by area & fuel category (bcf/yr)
+      REAL*8 CNDRL_SCALAR(CNWELCAT)       	! Drilling equation parameter
+      REAL*8 CNDRL_A4(CNWELCAT)       		! Drilling equation parameter
+      REAL*8 CNDRL_A3(CNWELCAT)       		! Drilling equation parameter
+	  REAL*8 CNDRL_A2(CNWELCAT)       		! Drilling equation parameter
+      REAL*8 CNDRL_A1(CNWELCAT)       		! Drilling equation parameter
+      REAL*8 CNDRL_A0(CNWELCAT)       		! Drilling equation parameter
+      REAL*8 CNDRL_OPRCH(CNWELCAT)    		! Drilling equation parameter
+      REAL*8 CNDRL_OPRCL(CNWELCAT)    		! Drilling equation parameter
+      REAL*8 CNPRD_Q0(CNWELCAT)       		! Well-level production profile parameters
+      REAL*8 CNPRD_DI(CNWELCAT)       		! Well-level production profile parameters
+      REAL*8 CNPRD_B(CNWELCAT)       		! Well-level production profile parameters
+	  REAL*8 CNDRL_C(CNWELCAT)       		! Drilling equation parameter
+      REAL*8 CNPRD_TEC(CNWELCAT)       		! Well-level production technological improvement
+      REAL*8 CNADGEL(2,CNAREA,CNHISTYR:ENDYR)	! Elasticity for AD gas production
+      REAL*8 CNBASELNG(CNHISTYR:ENDYR)		! Benchline natural gas production used for LNG exports
+      REAL*4 CNPRCDIFF(CNREGION)		! Canadian wellhead to Henry Hub price differential
+      REAL*8 sCNADGPRD(CNREGION)                ! Fixed AD gas production by region for l48hyr+1 (bcf/yr)
+      REAL*8 sCNNAGPRD(CNREGION)                ! Fixed NA gas production by region for l48hyr+1 (bcf/yr)
+!
+      COMMON/OGcan1/CNBASEYR,CNRMAP,CNTMAP,CNAMAP
+      COMMON/OGcan2/CNTRR,CNBASEWOP,CNBASEHH,CNBASEPRD,CNDRL_SCALAR,CNDRL_A4,CNDRL_A3,CNDRL_A2,CNDRL_A1,CNDRL_A0,  &
+                    CNDRL_OPRCH,CNDRL_OPRCL,CNPRD_Q0,CNPRD_DI,CNPRD_B,CNDRL_C,CNADGEL,CNBASELNG,CNPRCDIFF,CNPRD_TEC
+      COMMON/OGcan3/sCNADGPRD,sCNNAGPRD

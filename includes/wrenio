@@ -1,0 +1,11 @@
+! $Header: N:/default/includes/RCS/wrenio,v 1.2 1999/12/19 20:19:24 DSA Exp $
+! *********************************************************************
+! COMMON WRENIO
+!
+! Includes the FORTRAN unit no. for the RFM output files
+! ---------------------------------------------------------------------
+      INTEGER IORNREPT   ! Unit No. output file for RENEW report
+      INTEGER IOGES      ! Unit No. output file for GES summary
+      INTEGER IORNDUMP   ! Unit No. output file for all RFM debug output
+
+      COMMON /WRENIO/IORNREPT,IOGES,IORNDUMP

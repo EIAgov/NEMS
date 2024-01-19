@@ -1,0 +1,2369 @@
+!  $Header: m:/default/includes/RCS/ogsml48,v 1.56 2019/07/23 15:29:07 rsc Exp $
+!  LOWER 48 ONSHORE BASE YEAR
+      INTEGER L48BYR
+
+      COMMON/OGL480/L48BYR
+
+!  LOWER 48 ONSHORE CONVENTIONAL & UNCONVENTIONAL VARIABLE DECLARATIONS
+      REAL DPTHL48(L48RGN,CONFUEL)   ! AVERAGE WELL DEPTH
+      REAL SRL48(L48WELL,L48RGN,L48FUEL)  ! SUCCESS RATE
+      REAL HISTSRL48(L48WELL,L48RGN,L48FUEL,MNUMYR)  ! SUCCESS RATE
+      REAL WELLSL48(L48WELL,L48RGN,L48FUEL)    ! NUM WELLS DRILLED
+      REAL HISTWELL48(L48WELL,L48RGN,L48FUEL,-1:MNUMYR) ! HIST WELLS DRILLED
+      REAL HISTNFWL48(L48RGN,L48FUEL,MNUMYR) ! HIST NEW FIELD WILDCATS
+      REAL INFFACL48(L48FUEL) ! INFERRED RESERVES ADJUSTMENT FACTOR
+      REAL URRFACL48(L48FUEL) ! U.E.R.R. ADJUSTMENT FACTOR
+
+      COMMON/OGL481/ &
+         DPTHL48, &
+         SRL48,HISTSRL48,WELLSL48, &
+         HISTWELL48,HISTNFWL48,INFFACL48,URRFACL48
+
+!  RESERVE ADDITION ACCOUNTING INPUT VARIABLES
+      INTEGER LFMMMAP(MNUMOR-1)   ! MAPPING FOR LFMM->OGSM REGIONS
+      INTEGER DISTMAP(OGDIST,7) ! MAPPING FOR OGSM DISTRICTS
+      REAL PMMRSV(7)       ! BASE YR OIL RSVS AT 7 (1A,1B) OG RGN
+      REAL PMMSHARE(PMMRGN)   ! SHARE OF PMM RGN IN OGSM REGIONS
+      REAL RESNGL48(L48RGN)     ! BOY NG RESORUCES IN L48
+      REAL RESCOL48(L48RGN)     ! BOY CO RESORUCES IN L48
+      REAL RESNGAK(AKRGN)       ! BOY NG RESOURCES IN AK
+      REAL RESCOAK(AKRGN)       ! BOY CO RESOURCES IN AK
+      REAL RESNGOF(OFFRGN)      ! BOY NG RESOURCES IN OFF
+      REAL RESCOOF(OFFRGN)      ! BOY CO RESOURCES IN OFF
+      REAL RESBOYL48(L48RGN,L48FUEL)   ! BOY RESERVES
+      REAL HISTADL48(MNUMYR) ! HISTORICAL BOY AD GAS (REPLACED W/REG BELOW)
+      REAL EOYADRES(L48RGN+OFFNEMSRGN,MNUMYR)  ! EOY AD GAS RESERVES OGSM REGIONS
+      REAL ADRESAD(L48RGN+OFFNEMSRGN,MNUMYR)   ! AD GAS RESERVE ADDITIONS OGSM REGIONS
+      REAL HISTADPRD(L48RGN+OFFNEMSRGN,MNUMYR) ! HISTORICAL AD GAS PRODUCTION
+      REAL HISTRESL48(L48RGN,L48FUEL,MNUMYR) ! HISTORICAL BOY RESERVES
+      REAL HISTPRRL48(L48RGN,L48FUEL,MNUMYR) ! HISTORICAL P/R RATIO
+      REAL HISTPRDL48(L48RGN,L48FUEL,MNUMYR) ! HISTORICAL PRODUCTION
+      REAL HISTNRDL48(L48RGN,L48FUEL,MNUMYR) ! HISTORICAL NEW FIELD DISC
+      REAL HISTREVL48(L48RGN,L48FUEL,MNUMYR) ! HISTORICAL REVISIONS
+      REAL HISTEXTL48(L48RGN,L48FUEL,MNUMYR) ! HISTORICAL EXT.& NEW POOLS
+      REAL DELAYEDL48(L48RGN,L48FUEL,MNUMYR) ! DELAYED PRODUCTION   
+      REAL PRRATL48(L48RGN,L48FUEL)    ! P/R RATIO
+      REAL ELASTL48(L48RGN,L48FUEL)    ! ELASTICITY
+      REAL CURRESL48(L48RGN,L48FUEL)   ! LAG (T-1) RESERVES
+      REAL CURPRRL48(L48RGN,L48FUEL)   ! LAG (T-1) P/R RATIO
+
+      COMMON /OGL482I/DISTMAP, LFMMMAP
+      COMMON /OGL482R/PMMRSV, &
+        PMMSHARE, RESNGL48, RESCOL48, RESNGAK, RESCOAK, RESNGOF, &
+        RESCOOF, RESBOYL48, HISTADL48, &
+        EOYADRES, ADRESAD, HISTADPRD, HISTRESL48, &
+        HISTPRRL48, HISTPRDL48, HISTNRDL48, HISTREVL48, HISTEXTL48, &
+        PRRATL48, ELASTL48, CURRESL48, CURPRRL48, &
+        DELAYEDL48
+
+!  COST VARIABLES
+
+! ---- (NEW) ------------------------------------------------------------------------------
+
+! (new) for new D&C cost equations
+   
+      INTEGER WELL_COUNTER  		        ! Counter variable used in WELLON
+      INTEGER COEF			        ! Counter Variable for DNCC_COEF array
+      REAL DNCC_COEF(WELL_TYPE,L48RGN+2,6)	! New D&C Cost Coefficients
+      REAL COST_OUT_DEBUG, COST_OUT_DEBUG_DRY	! Debug variable for finding errors
+
+      COMMON/DNC/WELL_COUNTER, COEF             			! new common block
+      COMMON/DNC2/DNCC_COEF, COST_OUT_DEBUG, COST_OUT_DEBUG_DRY   	! new common block
+! -----------------------------------------------------------------------------------------
+
+
+      REAL DRILLL48(L48WELL,L48RGN,L48FUEL)   ! COST OF DRILLING WELL
+      REAL LEASL48(L48WELL,L48RGN,L48FUEL)    ! LEASE EQUIPMENT COST
+      REAL OPERL48(L48WELL,L48RGN,L48FUEL)    ! OPERATING COST
+      REAL DRYL48(L48WELL,L48RGN,L48FUEL)     ! DRY HOLE COSTS
+      REAL DCFL48(L48WELL,L48RGN,L48FUEL)     ! DCF DRY WELL
+      REAL COSTL48(L48WELL,L48RGN,L48FUEL)    ! CAPITAL COSTS
+      REAL SUCWELLL48(L48WELL,L48RGN,L48FUEL) ! SUCCESSFUL NEW WELLS
+      REAL DRYWELLL48(L48WELL,L48RGN,L48FUEL) ! DRY NEW WELLS
+      REAL WELLSL48LAG                   ! TOTAL WELLS DRILLED 1989
+      REAL WELLSL48LAG2                  ! TOTAL WELLS DRILLED 1988
+      REAL WELLSSUCLAG                   ! TOTAL WELLS DRILLED 1989
+      REAL WELLSSUCLAG2                  ! TOTAL WELLS DRILLED 1988
+      REAL DPTHL48LAG(L48RGN,CONFUEL)  ! AVERAGE WELL DEPTH-- '90
+      REAL DPTHL48LAG2(L48RGN,CONFUEL)  ! AVERAGE WELL DEPTH -- '89
+      REAL DRYDPTHL48(L48RGN,CONFUEL)    ! AVERAGE DRY WELL DEPTHS
+      REAL DRYDPTHLAG(L48RGN,CONFUEL)    ! DRY WELL DEPTHS 1990
+      REAL DRYDPTHLAG2(L48RGN,CONFUEL)   ! DRY WELL DEPTHS 1989
+      REAL DRILLLAGL48(L48RGN,CONFUEL)   ! 1989 DRILL COST
+      REAL DRYL48LAG(L48RGN,CONFUEL)     ! 1989 AVE DRY COST
+      REAL LEASELAGL48(L48RGN,CONFUEL)   ! 1989 DRILL COST
+      REAL OPRLAGL48(L48RGN,CONFUEL)     ! 1989 DRILL COST
+!     REAL DRILFACTR(L48RGN,L48FUEL)     ! DRILL FACTOR
+!     REAL DRYFACTR(L48RGN,L48FUEL)      ! DRILL FACTOR
+      REAL HISTDRILL48(L48WELL,L48RGN,L48FUEL,MNUMYR) ! DRILL COST
+      REAL HISTDRYL48(L48WELL,L48RGN,L48FUEL,MNUMYR)  ! DRY COST
+      REAL HISTLEASL48(L48RGN,L48FUEL,MNUMYR) ! LEASE COST
+      REAL HISTOPERL48(L48RGN,L48FUEL,MNUMYR) ! OPERATING COST
+
+      COMMON /OGL483/DRILLL48,LEASL48,OPERL48,DRYL48,DCFL48, &
+        COSTL48, SUCWELLL48, DRYWELLL48, DRYDPTHL48, HISTDRILL48, &
+        WELLSL48LAG, WELLSL48LAG2, WELLSSUCLAG, WELLSSUCLAG2, &
+        DRILLLAGL48, DRYL48LAG, LEASELAGL48, OPRLAGL48, &
+        DPTHL48LAG,DRYDPTHLAG, DPTHL48LAG2,DRYDPTHLAG2, &
+        HISTDRYL48, HISTLEASL48, HISTOPERL48
+
+!  LOWER 48 EXPLORATION AND DEVELOPMENT EXPENDITURES
+      REAL ESTWELLSL48
+      REAL RIGSL48
+      REAL*8 SPENDIR_L48(L48WELL,L48RGN)  ! L48 ON EXPL EXP (I,R)
+      REAL*8 SPENDIRK_L48(L48WELL,L48RGN,L48FUEL)  ! L48ON EXPL EXP
+      REAL PROFIRK_L48(L48WELL,L48RGN,L48FUEL)  ! PROF. BY WELL/RGN/FUEL
+      REAL US_ED, US_ED_LAG
+
+      COMMON /OGL484/SPENDIR_L48, SPENDIRK_L48, PROFIRK_L48, &
+        US_ED, US_ED_LAG, ESTWELLSL48, RIGSL48
+
+!  LOWER 48 RESERVE ADDITION VARIABLES
+      REAL RESADL48(L48RGN,L48FUEL) ! RES. ADD. BY RGN/FUEL TYPE
+      REAL FR1L48(L48RGN,L48FUEL)       ! FINDING RATES NFW
+      REAL FR2L48(L48RGN,L48FUEL)       ! FINDING RATES DEV
+      REAL FR3L48(L48RGN,L48FUEL)       ! FINDING RATES OEXP
+      REAL RSVGRL48(L48RGN,L48FUEL)     ! RESERVES GROWTH FACTOR
+      REAL RSVGRL48B(L48RGN,L48FUEL)     ! RESERVES GROWTH FACTOR
+      REAL INFRSVL48(L48RGN,L48FUEL)  ! INFERRED RESERVES
+      REAL R_INFRSVL48(L48RGN,L48FUEL) ! REMAINING INFERRED RESERVES
+      REAL NFWL48(L48RGN,L48FUEL) ! NO. OF SUC. NEW FIELD WILDCAT WELLS
+      REAL OEXPL48(L48RGN,L48FUEL)   ! NO. OF SUC. OTHER EXPL. WELLS
+      REAL DEVL48(L48RGN,L48FUEL)    ! NO. OF SUC. DEV. WELLS
+      REAL NRDL48(L48RGN,L48FUEL)     ! NEW RESERVE DISCOVERIES
+      REAL NDIRL48(L48RGN,L48FUEL)    ! NEW DISCOVERY INFERRED RESERVES
+      REAL REVL48(L48RGN,L48FUEL)   ! RESERVE REVISIONS
+      REAL EXTL48(L48RGN,L48FUEL)   ! RESERVE EXTENSIONS
+      REAL FRMINL48(L48RGN,L48FUEL)   ! MINIMUM ECONOMIC FINDING RATE
+      REAL CUMR1L48(L48RGN,L48FUEL)  ! CUMULATIVE RESERVE DISCOVERIES
+      REAL CUMR2L48(L48RGN,L48FUEL)  ! CUMULATIVE RESERVE DISCOVERIES
+      REAL CUMR3L48(L48RGN,L48FUEL)  ! CUMULATIVE RESERVE DISCOVERIES
+      REAL DELTA1L48(L48RGN,L48FUEL) ! FINDING RATE DECLINE PARM NFW
+      REAL DELTA2L48(L48RGN,L48FUEL) ! FINDING RATE DECLINE PARM DEV
+      REAL DELTA3L48(L48RGN,L48FUEL) ! FINDING RATE DECLINE PARM OEXP
+
+      COMMON /OGL485/RESADL48, FR1L48, FR2L48, FR3L48, RSVGRL48, &
+        RSVGRL48B, INFRSVL48, R_INFRSVL48, NFWL48, OEXPL48, DEVL48, &
+        NRDL48, NDIRL48, REVL48, EXTL48, FRMINL48, CUMR1L48, &
+        CUMR2L48, CUMR3L48, DELTA1L48, DELTA2L48, DELTA3L48
+
+!  PRODUCTION VARIABLES 
+      REAL URRCRDL48(L48RGN,2)       ! UNDISCOV. REC. RES. L48
+      REAL URRL48(L48RGN,L48FUEL)    ! UNDISCOV. REC. RES. L48
+      REAL R_URRL48(L48RGN,L48FUEL) ! REMAINING U.E.R.R.'s
+      REAL PRDOGSM(L48RGN)           ! PRODUCTION AT OGSM LEVEL
+      REAL PRDL48(L48RGN,L48FUEL)   ! PRODUCTION AT OGSM/FUEL LEVEL
+      REAL EXPRDL48(L48RGN,L48FUEL)   ! EXPECTED PRODUCTION
+      REAL REPPRDL48(L48RGN,L48FUEL,MNUMYR) ! PROD REPORT VARIABLE
+      REAL REPEORL48(L48RGN,MAX_PROC,MNUMYR) ! EOR PROD REPORT VARIABLE
+      REAL REPRSVL48(L48RGN,L48FUEL,MNUMYR) ! RSVS REPORT VARIABLE
+      REAL REPRADL48(L48RGN,L48FUEL,MNUMYR) ! RSVADD REPORT VARIABLE
+      REAL REPPRDAD(L48RGN,2,MNUMYR) ! AD GAS PRODUCTION (1:TIGHT OIL PLAYS; 2:ALL OTHER)
+      REAL DRILLTOTL48(L48RGN,L48FUEL+3,MNUMYR) ! REPORT VARIABLE
+      REAL TOTCRDPRD(L48RGN,MNUMYR)    !regional onshore crude production for crude quality calculation
+      REAL TOTCRDPRD_PADD(MNUMPR,MNUMYR) !PADDs onshore crude production for crude quality calculation
+      REAL APIVOL(MNCRUD,MNUMYR)     ! volume weighted API gravity for average heat content
+      
+      COMMON /OGL486/URRCRDL48, URRL48, R_URRL48, &
+        PRDOGSM, PRDL48, EXPRDL48, &
+        REPPRDL48, REPEORL48, &
+        REPRSVL48, REPRADL48, DRILLTOTL48, &
+        TOTCRDPRD, TOTCRDPRD_PADD, APIVOL, REPPRDAD
+
+! STANDARD ERROR VARIABLES FOR TECHNOLOGY CASES
+      REAL TECHADJ_ON(L48FUEL,5)
+      REAL tOGTECHON(10,l48fuel)
+      REAL TECHADJ_AK(AKFUEL,5)
+      REAL TECHADJ_CAN
+
+      COMMON /OGL487/TECHADJ_ON, TECHADJ_AK, TECHADJ_CAN, tOGTECHON
+
+!  ACCESS VARIABLES
+      INTEGER ACCESS,ACCESS_YR
+      REAL LST_CONV(L48WELL,CONFUEL)
+      REAL STL_CONV(L48WELL,CONFUEL)
+      REAL NAC_CONV(L48WELL,CONFUEL)
+
+      COMMON/ACCESS/ACCESS,ACCESS_YR,LST_CONV,STL_CONV,NAC_CONV
+
+!***************************************************************
+!from ogsml48
+
+!      !!!TEMP VARIABLES; DELETE ??? OR NEED FOR STAND-ALONE???!!!!
+      REAL*4 L48OIL(50)
+      REAL*4 EORPRD(50)
+      REAL*4 OILSHL(50)
+      REAL*4 RPT_OGCOPRD(10,50)
+
+        COMMON/OUTPUT1/L48OIL,EORPRD,OILSHL,RPT_OGCOPRD
+
+
+!     REAL*4 EXFTAGE(1,50)     !TOT EXP WELLS DRILLED
+!     REAL*4 EXOILFT(1,50)     !EXP OIL WELLS
+!     REAL*4 EXGASFT(1,50)     !EXP GAS WELLS
+!     REAL*4 EXDRYFT(1,50)     !EXP DRY HOLES
+!     REAL*4 DVFTAGE(1,50)     !TOT DEV WELLS DRILLED
+!     REAL*4 DVOILFT(1,50)     !DEV OIL WELLS
+!     REAL*4 DVGASFT(1,50)     !DEV GAS WELLS
+!     REAL*4 DVDRYFT(1,50)     !DEV DRY HOLES
+      REAL*4 TOTWELLS(50)      !TOT EXP & DEV
+      REAL*4 NEMS_TOTOIL(50)   !TOT OIL WELLS
+      REAL*4 NEMS_TOTGAS(50)   !TOT GAS WELLS
+      REAL*4 NEMS_TOTDRY(50)   !TOT DRY HOLES
+
+!       COMMON/OUTPUT5/EXFTAGE,EXOILFT,EXGASFT,EXDRYFT,DVFTAGE,DVOILFT,DVGASFT,DVDRYFT
+        COMMON/OUTPUT6/TOTWELLS,NEMS_TOTOIL,NEMS_TOTDRY
+        COMMON/OUTPUT7/NEMS_TOTGAS
+
+
+!  This will need to be merged into ogsml48
+
+!  variables for regional source specific aggregation of CO2 EOR production
+!  tracking of industrial and natural sources
+
+          real scrg_eprodoil(max_src,max_reg,max_yr)                    !MBbl/Yr - Oil production from CO2 EOR
+          real scrg_eprodgas(max_src,max_reg,max_yr)                    !MMcf/Yr - Gas production from CO2 EOR
+          real scrg_eprodngl(max_src,max_reg,max_yr)                    !MBO/Yr  - NGL production from CO2 EOR
+          real scrg_einjcco2(max_src,max_reg,max_yr)                    !MMcf/Yr - CO2 injection  for CO2 EOR
+          real scrg_erecyco2(max_src,max_reg,max_yr)                    !MMcf/Yr - CO2 recycled   from CO2 EOR
+          real scrg_eavilco2(max_src,max_reg,max_yr)                    !MMcf/Yr - CO2 available  for CO2 EOR
+          real scrg_eprchco2(max_src,max_reg,max_yr)                    !MMcf/Yr - CO2 purchased  for CO2 EOR
+
+          common/scrg_co2/scrg_eprodoil,scrg_eprodgas,scrg_eprodngl, &
+            scrg_einjcco2,scrg_erecyco2,scrg_eavilco2,scrg_eprchco2
+
+          INTEGER  ITIMEYR 
+          INTEGER  LOW48                           ! INPUT FILE NUMBER
+          INTEGER  NJRES                           ! NUMBER OF TIMED RESERVOIRS
+
+          COMMON/IO/LOW48,ITIMEYR,NJRES
+
+          REAL*4   PMMDG(OGDIST,MAX_FUEL,MNUMYR)
+
+          COMMON/FOR_PMM/PMMDG
+
+          REAL*4   REPSUCWLL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPDRYWLL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPPRDWLL48(MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPNFWL48(MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPNRDL48(MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPREVL48(MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPEXTL48(MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPNDIRL48(MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPOPERL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPLEASL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPDRILLL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPDRYL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+          REAL*4   REPDCFL48(MAX_CLASS,MAX_REG,MAX_FUEL,19:MNUMYR)
+
+          COMMON/OGWELLL48/REPSUCWLL48,REPDRYWLL48,REPNFWL48,REPNRDL48, &
+                        REPREVL48,REPNDIRL48,REPEXTL48,REPPRDWLL48
+          COMMON/OGCOST/REPOPERL48,REPLEASL48,REPDRILLL48,REPDRYL48,REPDCFL48
+
+
+!!!These were from aggregation.h
+!!!AGGREGATED LAST YEAR OF HISTORICAL PRODUCTION
+!
+          REAL *4  NAT_HOIL                                       !ANNUAL CRUDE OIL & LEASE CONDENSATES (MBBL)   - BASED ON LAST YEAR OF HISTORY
+          REAL *4  NAT_HGAS                                       !ANNUAL DRY GAS (MMCF)                         - BASED ON LAST YEAR OF HISTORY
+          REAL *4  ADJOIL,ADJGAS                                  !NATIONAL LEVEL OIL/GAS ADJUSTMENT FACTORS
+          real *4  REG_HOIL(L48RGN)                               !REGIONAL CRUDE OIL & LEASE CONDENSATES (MBBL) - BASED ON LAST YEAR OF HISTORY
+          real *4  REG_HEOIL(L48RGN)                              !REGIONAL CRUDE OIL & LEASE CONDENSATES (MBBL) - BASED ON LAST YEAR OF HISTORY - CONTINUING EOR
+          REAL *4  REG_HGAS(L48RGN)                               !REGIONAL DRY GAS (MMCF)                       - BASED ON LAST YEAR OF HISTORY
+          REAL *4  REG_ADJOIL(L48RGN),REG_ADJGAS(L48RGN)               !REGIONAL LEVEL OIL/GAS ADJUSTMENT FACTORS
+
+          real*4 reg_hcbm(L48RGN)                                 !mc change 6.11.09 reg hist CBM prod (mmcf) - based on last year of history
+          real*4 reg_hcnv(L48RGN)                                 !mc change 6.11.09 reg hist conv gas prod (mmcf) - based on last year of history
+          real*4 reg_hshl(L48RGN)                                 !mc change 6.11.09 reg hist shale gas prod (mmcf) - based on last year of history
+          real*4 reg_htht(L48RGN)                                 !mc change 6.11.09 reg hist tight gas prod (mmcf) - based on last year of history
+          real*4 reg_hadg(L48RGN)                                 !reg hist ad gas prod
+
+          real*4 reg_adjcbm(L48RGN)                               !mc change 6.11.09 reg level CBM adj factor
+          real*4 reg_adjcnv(L48RGN)                               !mc change 6.11.09 reg level conv gas adj factor
+          real*4 reg_adjshl(L48RGN)                               !mc change 6.11.09 reg level shale gas adj factor
+          real*4 reg_adjtht(L48RGN)                               !mc change 6.11.09 reg level tight gas adj factor
+          real*4 reg_adjadg(L48RGN)                               !reg level ad gas adj factor
+          REAL*4 regscale_cnv(L48RGN)
+          REAL*4 regscale_cbm(L48RGN)
+          REAL*4 regscale_shl(L48RGN)
+          REAL*4 regscale_tht(L48RGN)
+          real*4 dist_hoil(ogdist,2)                              !district hist oil prod (mb) - based on last year of history
+          real*4 dist_hadg(ogdist,2)                              !district hist AD gas prod (mmcf) - based on last year of history
+          real*4 dist_hgas(ogdist,4)                              !district hist gas prod (mmcf) - based on last year of history
+          real*4 dist_adjoil(ogdist,2)                            !district level oil adj factors
+          real*4 dist_adjadg(ogdist,2)                            !district level AD gas adj factors
+          real*4 dist_adjgas(ogdist,4)                            !district level gas adj factors
+
+          COMMON/SCALE4/regscale_cnv,regscale_cbm,regscale_shl,regscale_tht
+
+          common/scale2/reg_hcbm,reg_hcnv,reg_hshl,reg_htht       !mc change 6.11.09
+
+          common/scale3/reg_adjcbm,reg_adjcnv,reg_adjtht,reg_adjshl    !mc change 6.11.09
+          common/scale4/reg_adjadg,reg_hadg
+          common/scale5/dist_adjoil,dist_adjgas,dist_hoil,dist_hgas, &
+                        dist_hadg,dist_adjadg
+
+          COMMON/SCALES/NAT_HOIL,NAT_HGAS,REG_HOIL,REG_HGAS, &
+             ADJOIL,ADJGAS,REG_ADJOIL,REG_ADJGAS,REG_HEOIL
+
+!  Annual project count.  This counts the number of projects timed in each particular year by process
+          integer timed_proc(max_proc,max_yr)
+          integer ntimed
+
+          common/prj_agg/timed_proc,ntimed
+
+!  annual reservoir counts
+          integer potential(max_proc,max_yr)                            !the number of reservoirs in the resource file
+          integer candidate(max_proc,max_yr)                            !the number of reservoirs eligible for timing
+          integer viable(max_proc,max_yr)                               !the number of reservoirs economically viable
+
+          common/res_count/potential,candidate,viable
+
+!  Aggregation of discovered wells - this applies only to unconventional undiscovered.
+!  This is used to adjust the undiscovered size class distributions.
+
+          real   well_disc1(max_play,max_proc,21)                           !the aggregation for unconventional resources - 1995 assessments
+          integer  playlist(max_play)                                              !play identifiers
+          integer  playmax                                                         !number of distinct plays
+          real   well_disc2(1000,max_proc,21)                               !the aggregation for unconventional resources - 2002 updates
+          integer  provmax
+          integer  provlist(1000)
+          common/aggwell/well_disc1,well_disc2,playlist,playmax,provmax &
+            ,provlist
+
+!  annual TECHNICAL production
+          real tech_oil(max_proc,max_yr)
+          real tech_gas(max_proc,max_yr)
+          real tech_ngl(max_proc,max_yr)
+
+          common/tech_prod/tech_oil,tech_gas,tech_ngl
+
+!  annual technical and economic production for coal and shale resources
+          real tech_shale(max_reg,2,max_yr)
+          real tech_coal(max_reg,2,max_yr)
+          real tech_tight(max_reg,2,max_yr)
+          real econ_coal(max_reg,2,max_yr)
+          real econ_shale(max_reg,2,max_yr)
+          real econ_tight(max_reg,2,max_yr)
+          real tech_ugshale(max_reg,2,max_yr)
+          real tech_ugcoal(max_reg,2,max_yr)
+          real tech_ugtight(max_reg,2,max_yr)
+          real econ_ugcoal(max_reg,2,max_yr)
+          real econ_ugshale(max_reg,2,max_yr)
+          real econ_ugtight(max_reg,2,max_yr)
+
+          real tech_radial(max_reg,2,max_yr)
+          real tech_water(max_reg,2,max_yr)
+          real tech_tightg(max_reg,2,max_yr)
+          real econ_radial(max_reg,2,max_yr)
+          real econ_water(max_reg,2,max_yr)
+          real econ_tightg(max_reg,2,max_yr)
+
+          real tech_uconvg(max_reg,2,max_yr)
+          real tech_uconto(max_reg,2,max_yr)
+          real tech_utight(max_reg,2,max_yr)
+          real tech_ushale(max_reg,2,max_yr)
+          real tech_ucoalb(max_reg,2,max_yr)
+          real tech_uconvo(max_reg,2,max_yr)
+
+          real econ_uconvg(max_reg,2,max_yr)
+          real econ_uconto(max_reg,2,max_yr)
+          real econ_utight(max_reg,2,max_yr)
+          real econ_ushale(max_reg,2,max_yr)
+          real econ_ucoalb(max_reg,2,max_yr)
+          real econ_uconvo(max_reg,2,max_yr)
+
+          real tech_decline(max_reg,2,max_yr)
+          real tech_primary(max_reg,2,max_yr)
+          real tech_wtrfld(max_reg,2,max_yr)
+          real tech_co2fld(max_reg,2,max_yr)
+          real tech_stmfld(max_reg,2,max_yr)
+          real tech_plyfld(max_reg,2,max_yr)
+          real tech_infill(max_reg,2,max_yr)
+          real tech_prfmod(max_reg,2,max_yr)
+          real tech_horcon(max_reg,2,max_yr)
+          real tech_horprf(max_reg,2,max_yr)
+
+          real econ_decline(max_reg,2,max_yr)
+          real econ_primary(max_reg,2,max_yr)
+          real econ_wtrfld(max_reg,2,max_yr)
+          real econ_co2fld(max_reg,2,max_yr)
+          real econ_stmfld(max_reg,2,max_yr)
+          real econ_plyfld(max_reg,2,max_yr)
+          real econ_infill(max_reg,2,max_yr)
+          real econ_prfmod(max_reg,2,max_yr)
+          real econ_horcon(max_reg,2,max_yr)
+          real econ_horprf(max_reg,2,max_yr)
+
+          common/coal_shale/tech_shale,tech_coal,econ_coal,econ_shale, &
+             tech_tight,econ_tight
+          common/coal_ugshale/tech_ugshale,tech_ugcoal,econ_ugcoal, &
+             econ_ugshale,tech_ugtight,econ_ugtight
+
+          common/disc_gas/tech_radial,tech_water,tech_tightg &
+             ,econ_radial,econ_water,econ_tightg
+
+          common/undisc_res/tech_uconvg,tech_uconto,tech_utight, &
+             tech_ushale,tech_ucoalb,tech_uconvo,econ_uconvg, &
+             econ_uconto,econ_utight,econ_ushale,econ_ucoalb, &
+             econ_uconvo
+
+          common/econ_oil2/econ_decline,econ_primary,econ_wtrfld, &
+             econ_co2fld,econ_stmfld,econ_plyfld,econ_infill, &
+             econ_prfmod,econ_horcon,econ_horprf
+
+          common/tech_oil2/tech_decline,tech_primary,tech_wtrfld, &
+             tech_co2fld,tech_stmfld,tech_plyfld,tech_infill, &
+             tech_prfmod,tech_horcon,tech_horprf
+
+          REAL*4   PC_EPRODOIL(MAX_CLASS,MAX_FUEL,MAX_PROC,MAX_YR)
+          real*4   pc_eprodoilco2(max_class,max_fuel,max_proc,max_yr)
+          real*4   pc_eprodoileor(max_class,max_fuel,max_proc,max_yr)
+          REAL*4   PC_EPRODGAS(MAX_CLASS,MAX_FUEL,MAX_PROC,MAX_YR)
+          REAL*4   PC_EPRODNGL(MAX_CLASS,MAX_FUEL,MAX_PROC,MAX_YR)
+          real*4   pc_eprodcon(max_class,max_fuel,max_proc,max_yr)
+          real*4   pc_eprodadd(max_Class,max_fuel,max_proc,max_yr)
+          real*4   pc_addprodoil(max_class,max_fuel,max_proc,max_yr)     !the cumulative production timed in a particular year
+          real*4   pc_addprodgas(max_class,max_fuel,max_proc,max_yr)     !the cumulative production timed in a particular year
+
+          COMMON/PC_AGG/pc_eprodoilco2,pc_eprodoileor,PC_EPRODOIL, &
+                  PC_EPRODGAS,PC_EPRODNGL,pc_eprodcon,pc_eprodadd, &
+                  pc_addprodoil,pc_addprodgas
+!***************************************************************
+!from cashflow.h
+!---------------------------------------------------------------------
+! This file contains the variables used in the cashflow analysis
+!---------------------------------------------------------------------
+
+        real fact                       ! price adjustment factor
+
+        real ti_drl(MAX_YR)              ! Tangible Drilling Cost
+        real otc(MAX_YR)                 ! Other tangible costs
+        real ti(MAX_YR)                  ! Tangible cost
+
+        real ii_drl(MAX_YR)              ! intangible Drilling Cost
+        real icap(MAX_YR)                ! Other intangible costs
+        real ICST(MAX_YR)                ! Intangible Cost
+        real intcap(MAX_YR)              ! Intangibal to be capatalized
+        real eicap(MAX_YR)               ! environmental intangible Capital
+
+
+        real gross_rev(MAX_YR)           ! Gross revenue
+        real gravpen(MAX_YR)             ! Gravity Penalty
+        real adjgross(MAX_YR)            ! Adjusted Gross revenue
+        real royalty(MAX_YR)             ! Royalty
+        real net_rev(MAX_YR)             ! Net Revenue
+        real sev_tax(MAX_YR)             ! Severance tax
+        real cap_base(MAX_YR)            ! Depreciation Capital
+        real rem_base(MAX_YR)            ! Remaining Depreciation Base
+        real rem_amor(MAX_YR)            ! Remaining Amortization Base
+        real amor_base(MAX_YR)           ! Amortization base
+        real depr(MAX_YR)                ! depreciation amount
+        real amor(MAX_YR)                ! intang investment depr amount
+        real ga_exp(MAX_YR)              ! G&A on expenses
+        real ga_cap(MAX_YR)              ! G&A on capital
+
+        real toc(MAX_YR)                 ! Total Operating Costs
+
+        real noi(MAX_YR)                 ! Net operating Income
+        real nibta(MAX_YR)               ! net operating income after adjustments befor addback
+        real nibt(MAX_YR)                ! Net Operating income after addback
+        real state_tax(MAX_YR)           ! State Tax
+        real amint(MAX_YR)               ! Alternative minimum Income tax
+        real sfit(MAX_YR)
+        real fit(MAX_YR)
+        real fedtax(MAX_YR)              !Federal Tax
+        real fedtax_cr(MAX_YR)           !Federal Tax credits
+        real atcf(MAX_YR)                ! After Tax cashflow
+        real datcf(MAX_YR)               ! discounted cashflow after taxes
+        real catcf(MAX_YR)               ! Cumulative discounte cashflow
+
+        common/cash1/ ti_drl,otc,ti,ii_drl,icap,ICST,intcap &
+         ,gross_rev,gravpen,adjgross,royalty,net_rev,sev_tax,cap_base &
+         ,depr,ga_exp,ga_cap,toc,fit,amor,amor_base &
+         ,noi,nibta,nibt,state_tax,amint,sfit,fedtax,atcf,datcf,catcf &
+         ,fedtax_cr,fact
+
+
+
+! New variables added
+        real tci(MAX_YR)                 ! Total Capital Investment
+        real tciadj(MAX_YR)              ! Adjusted capitl invetment
+        real la(MAX_YR)                  ! Lease Aq. cost
+        real gg(MAX_YR)                  ! G&G cost
+        real eggla(MAX_YR)               ! Expensed G&G and Lease Aq. Cost
+        real dggla(MAX_YR)               ! Depletion base(G&G and Lease Aq.Cost)
+        real adggla(MAX_YR)              ! Depletable items in year(G&G and Lease Aq.Cos
+        real dep_crd(MAX_YR)             ! Depletion credit
+        real tgglcd(MAX_YR)              ! Total ggcost
+        real nilb(MAX_YR)                ! Net income depletable base
+        real apd(MAX_YR)                 !
+        real deplet(MAX_YR)              ! depletion allowance
+
+! addbacks
+        real idca(MAX_YR)                ! Intangible Drilling capital addback
+        real oia(MAX_YR)                 ! Other Intangible capital addback
+        real ggla(MAX_YR)                ! G&G and Lease AQ. Addback
+        real eortca(MAX_YR)              ! EOR tax credit addback
+        real intadd(MAX_YR)              ! Total Intangible addback
+        real niat(MAX_YR)                ! net income after taxes
+        real tanadd(MAX_YR)              ! Total Tangible Addback
+        real eia(MAX_YR)                 ! Environmental Intangible addback
+        real eoca(MAX_YR)                ! Environmental Operating cost addback
+        real xcapbase(MAX_YR)            ! cum cap stream
+
+        real finding(max_yr)
+
+
+
+        common/cash2/ tci,tciadj,la,gg,eggla,dggla,dep_crd,tgglcd, &
+         nilb,apd,deplet,idca,oia,ggla,eortca,intadd,niat,tanadd &
+          , eia,eoca,adggla,rem_base,rem_amor,eicap,finding
+! Depreciation and Intang Drilling Schedules
+
+        real deprschl(MAX_qdyr),amorschl(MAX_qdyr)
+        integer idepryr,iamoryr
+        common/cashdepr/deprschl,amorschl,idepryr,iamoryr
+
+! Discounted cashflow items for timing model
+
+        real disc_inv(MAX_YR)
+        real disc_drl(MAX_YR)
+        real disc_ndrl(MAX_YR)
+        real disc_oam(MAX_YR)
+        real disc_fed(MAX_YR)
+        real disc_st(MAX_YR)
+        real disc_roy(MAX_YR)
+        real disc_oil(MAX_YR)
+        real disc_gas(MAX_YR)
+
+        common/discitem/disc_inv,disc_drl,disc_ndrl,disc_oam, &
+         disc_fed, disc_st,disc_roy,disc_oil,disc_gas
+
+
+        real totdrl,totndrl,totinv,totoam,totfed,totst &
+        ,totroy,totoil,totgas,minctcf,maxctcf
+
+       common/totreal/totdrl,totndrl,totinv,totoam,totfed,totst &
+        ,totroy,totoil,totgas,minctcf,maxctcf
+
+!
+! ADD ROR INFO HERE
+!
+        real ror
+        common/ror8/ror
+
+!
+! LEVERS FOR SALES OF OIL AND OR GAS
+!
+       LOGICAL OIL_SALES(MAX_PROC)
+       LOGICAL GAS_SALES(MAX_PROC)
+
+       COMMON/OGSALES/ OIL_SALES, GAS_SALES
+!***************************************************************
+!from GAS_IMPURITIES.h
+!
+!
+!
+
+        INTEGER IMP_REG(MAX_REG)
+        REAL IMP_CAPST(MAX_REG)
+        REAL IMP_CAPCR(MAX_REG)
+        REAL IMP_CAPTE(MAX_REG)
+        REAL IMP_CAPSU(MAX_REG)
+        REAL IMP_THRU(MAX_REG)
+        REAL IMP_OP_FAC(MAX_REG)
+
+        COMMON /GAS_IMPURTITIES/ IMP_REG,IMP_CAPST,IMP_CAPCR,IMP_CAPTE, &
+         IMP_CAPSU,IMP_THRU,IMP_OP_FAC
+
+        REAL imp_dis_rate
+        REAL imp_plt_lfe
+        REAL imp_n2_lim
+        REAL imp_co2_lim
+        REAL imp_h2o_lim
+        REAL imp_h2s_lim
+        REAL imp_ngl_lim
+
+        COMMON /GAS_IMPURITIES1/imp_dis_rate,imp_plt_lfe,imp_n2_lim, &
+         imp_co2_lim,imp_h2o_lim,imp_h2s_lim,imp_ngl_lim
+!***************************************************************
+!from Marginal.h
+!
+! THIS INCLUDE FILES HAS THE NEEDED VALUES FOR THE MARGINAL WELL
+! CREDIT.
+!
+!
+
+        REAL  MARGAMT            ! TAX CREDIT AMOUNT ($/bBL)
+        REAL  MAXBBL             ! QUALIFYING RATE (BBL/DAY)
+        REAL  BBLCRD             ! BARRELS OF OIL PRODUCTION THAT RECEIVE CREDIT
+        REAL  MAR_MIN            ! MINIMUM PRICE PHASE OUT PERIOD (AM)
+        REAL  MAR_MAX            ! MAXIMUM PRICE PHASE OUT PERIOD (BM)
+        REAL  MAR_CM             ! USED TO DETRMINE SLIDING SCALE BETWEEN MIN MAX
+        REAL  MAR_DM             ! USED TO DETRMINE SLIDING SCALE BETWEEN MIN MAX
+        REAL  FP
+        REAL  PLOW
+
+        REAL FPP(MAX_YR)         ! FIRST PURCHASE PRICE ($/BBL)
+
+        COMMON/MARGCRED1/MARGAMT,MAXBBL,MAR_MIN,MAR_MAX,MAR_CM,MAR_DM, &
+         FP,PLOW,BBLCRD,FPP
+
+
+!***************************************************************
+!from RES_POINTER.h
+!
+! THESE ARE THE POINTERS FOR FIRST AND NUMBER OF RESERVOIRS
+! IN THE LIST OF RESERVOIRS
+!
+!
+       INTEGER EX_CONRES                ! NUMBER OF CONVENTIONAL RESERVOIRS
+       INTEGER EX_FCRES                 ! FIRST CONVENTIONAL EXPLORATION RESERVOIR
+       COMMON / RES_CONV / EX_CONRES, EX_FCRES
+
+
+
+       INTEGER EX_UNCONRES              ! NUMBER OF UNCONVENTIONAL ENTRIES TO ANALYZE
+       INTEGER EX_FURES                 ! FIRST UNCONVENTIONAL EXPLORATION RESERVOIR
+       COMMON / RES_UNCON / EX_UNCONRES, EX_FURES
+
+
+       INTEGER NRES                     ! TOTAL NUMBER OF RESERVOIRS
+       INTEGER NEW_NRES                 ! NEW TOTAL NUMBER OF RESERVOIRS - UNCONVENTIONAL EXPLORATION IS ADDED BY THIS
+       INTEGER EX_UNPLAYS               ! TOTAL NUMBER OF PLAYS AVAILABLE FOR DISCOVERY, ADDED TO NRES
+
+       COMMON / RES_ALL / NRES,NEW_NRES,EX_UNPLAYS
+
+       integer ecount
+
+       common/expl_mc/ecount
+
+!***************************************************************
+!from Sevt.h
+!
+! SEVERANCE TAX CALCULATIONS FROM SEVTX.DAT
+!
+        integer  stl(MAX_ST)
+        INTEGER  totstate
+        integer  sev_proc(MAX_ST,MAX_PROC)
+        common / sev22 / stl, sev_proc, totstate
+
+!***************************************************************
+!from USGS_BASIN_VAR.h
+!
+! USGS REGION/PLAY/BASIN/PROVINCE MAPPING VARIABLES
+!
+
+        CHARACTER*60 USGS_NAME(600)   ! USGS PLAY NAME
+        INTEGER USGS_REGION(600)      ! USGS REGION
+        INTEGER USGS_PROV(600)        ! USGS PROVINCE NUMBER
+        INTEGER USGS_PLAY(600)        ! USGS PLAY NUMBER
+        INTEGER USGS_IDENT(600)       ! UNIQUE IDENIFIER
+        INTEGER USGS_IDENT2(9999)       ! UNIQUE IDENIFIER
+        INTEGER USGS_IDENT3(600)
+        INTEGER USGS_NUM                ! NUMBER OF ENTRIES IN FILE
+        INTEGER USGS_MAX                ! MAX NUMBER OF IDS
+
+
+        COMMON /USGS_BSN/ USGS_NAME, USGS_REGION, USGS_PROV, &
+         USGS_PLAY, USGS_IDENT,USGS_IDENT2,USGS_IDENT3, USGS_NUM, &
+         USGS_MAX
+
+
+
+
+!***************************************************************
+!from access.h
+!  ACCESS VARIABLE FILE
+
+       INTEGER PROVACC(MAX_PROV,MAX_ACC)                        ! YEAR FILE FOR RESOURCE ACCESS.  THIS IS THE YEAR
+                                                                ! IN WHICH THE RESOURCE ACCESS CATEGORY FOR THE PROVINCE
+                                                                ! BECOMES AVAILABLE.  IF THE YEAR IS 9999, THE RESOURCE
+                                                                ! NEVER BECOMES AVAILABLE.  SEE MASTER_DIMEN.H FOR THE
+                                                                ! RESOURCE ACCESS CATEGORIES
+       INTEGER PROVNUM(MAX_PROV)                                ! PROVINCE NUMBER '50xx'
+
+       COMMON/ACC/PROVACC,PROVNUM
+
+!***************************************************************
+!from constraints.h
+! constraint variables
+
+!
+! RIG DEPTH RATINGS
+!
+!   1. FIRST ELEMENT WILL STORE MAX DEPTH FOR INTERVAL I.E. 5000, ETC
+!   2. SECOND ELEMENT WILL STORE FRACTION OF FOOTAGE FOR THAT INTERVAL
+!        ARRAY          BIN SPEC
+!        RDR(X, 1)           0- 5000
+!        RDR(X, 2)        5001-10000
+!        RDR(X, 3)       10001-15000
+!        RDR(X, 4)       15001-20000
+!        RDR(X, 5)       20001+
+
+         REAL RDR(2,0:max_reg,MAX_RDR)               ! % OF TOTAL, AND DEPTH INTERVAL
+         REAL RDR_FOOTAGE(MAX_RDR,MAX_YR)  ! FOOTAGE AVAILABLE IN THIS INTERVAL (Feet*1000)
+         REAL RDR_FT(MAX_RDR,MAX_YR)     ! RUNNING TOTAL OF FOOTAGE USED IN THIS BIN
+
+         COMMON /RIGDEPTH/ RDR, RDR_FOOTAGE, RDR_FT
+
+! DRILLING CONSTRAINT CONTROL OPTIONS
+
+         CHARACTER*1 REG_NAT    ! REGION OR NATION
+         CHARACTER*1 HOR_VERT   ! SPLIT BTWN HORIZONTAL & VERTICAL
+         CHARACTER*1 RESP       ! RESPONSE TO Y/N
+          &
+ !!!C ANGED THESE FROM LOGICALS TO CHARACTERS PER MARSHALL CAROLUS         
+         CHARACTER*1 USE_RDR     ! USE RIG DEPTH RATING
+         CHARACTER*1 SPLIT_OG    ! SPLIT OIL AND GAS CONSTRAINTS
+         CHARACTER*1 SPLIT_ED    ! SPLIT EXPLORATION AND DEVLOPMENT
+         CHARACTER*1 DET_DRILLING ! detailed drilling constraint file
+         CHARACTER*1 NAT_SRCC02  ! USE NATURAL SOURCE OF CO2?
+         CHARACTER*1 IND_SRCC02  ! USE INDUSTRIAL SOURCE OF CO2?       
+         
+         COMMON/DRILL_OPT/ USE_RDR, SPLIT_OG, SPLIT_ED, &
+                           DET_DRILLING, REG_NAT, RESP, &
+                           NAT_SRCC02, IND_SRCC02, HOR_VERT
+
+         REAL*4  EXPL_FRAC    ! % OF EXPLORATION DRILLING FOR CONVENTIONAL (oil)
+         real*4  expl_fracg   ! % of exploration drilling for conventional gas       !mc change ver 8
+         REAL*4  DRILL_TRANS  ! % OF DRILLING CONST TRANSFER BTWN REGIONS
+         REAL*4  DRILL_OVER   ! % OF DRILLING CONST AVAIL FOR FOOTAGE OVERRUN
+         real*4  drill_res    ! % of development drilling constraint available for transfer between oil and gas
+         REAL*4  H_PERCENT    ! % OIL CONSTRAINT AVAIL FOR HORIZONTAL DRILLING
+         REAL*4  RGR          ! ANNUAL DRILLING GROWTH RATE
+         REAL*4  RRR          ! ANNUAL DRILLING RETIREMENT RATE
+         REAL*4  CAPMUL       ! CAPITAL CONSTRAINT MULTIPLIER
+         REAL*4  EXPMUL       ! EXPLORATION CONSTRAINT MULTIPLIER
+         REAL*4  TOTMUL       ! TOTAL DRILL CONSTRAINT MULTIPLIER
+         REAL*4  HORMUL       ! HORIZ DRILL CONSTRAINT MULTIPLIER
+         REAL*4  CO2MUL       ! CO2 AVAIL CONSTRAINT MULTIPLIER
+         REAL*4  H_GROWTH     ! HORIZONTAL GROWTH RATE
+
+         COMMON/CONSTRAINTS/ DRILL_TRANS, DRILL_OVER, drill_res, RGR, &
+                           RRR, CAPMUL, EXPMUL, &
+                           TOTMUL, HORMUL, CO2MUL, &
+                           H_PERCENT, EXPL_FRAC, H_GROWTH,expl_fracg               !mc change ver 8
+                          
+         REAL*4  OILA0        ! OIL FOOTAGE A0
+         REAL*4  OILA1        ! OIL FOOTAGE A1
+         REAL*4  OILA2        ! OIL FOOTAGE A1
+         REAL*4  OILA3        ! OIL FOOTAGE A1
+         REAL*4  OILA4        ! OIL FOOTAGE A1
+         REAL*4  OILD0       ! OIL DRYWELL FOOTAGE A0
+         REAL*4  OILD1       ! OIL DRYWELL FOOTAGE A1
+         REAL*4  OILD2       ! OIL DRYWELL FOOTAGE A1
+         REAL*4  OILD3       ! OIL DRYWELL FOOTAGE A1
+         REAL*4  OILD4       ! OIL DRYWELL FOOTAGE A1
+         REAL*4  GASA0        ! GAS FOOTAGE A0
+         REAL*4  GASA1        ! GAS FOOTAGE A1
+         REAL*4  GASA2        ! GAS FOOTAGE A1
+         REAL*4  GASA3        ! GAS FOOTAGE A1
+         REAL*4  GASA4        ! GAS FOOTAGE A1
+         REAL*4  GASD0       ! GAS DRYWELL FOOTAGE A0
+         REAL*4  GASD1       ! GAS DRYWELL FOOTAGE A1
+         REAL*4  GASD2       ! GAS DRYWELL FOOTAGE A1
+         REAL*4  GASD3       ! GAS DRYWELL FOOTAGE A1
+         REAL*4  GASD4       ! GAS DRYWELL FOOTAGE A1
+         REAL*4  EXPA0        ! EXPLORATION WELL FOOTAGE A0  (Oil)  !mc change ver 8
+         REAL*4  EXPA1        ! EXPLORATION WELL FOOTAGE A1  (Oil)  !mc change ver 8
+         REAL*4  EXPA2        ! EXPLORATION WELL FOOTAGE A1  (Oil)  !mc change ver 8
+         REAL*4  EXPA3        ! EXPLORATION WELL FOOTAGE A1  (Oil)  !mc change ver 8
+         REAL*4  EXPA4        ! EXPLORATION WELL FOOTAGE A1  (Oil)  !mc change ver 8
+         real*4  expag0       ! exploration well footage A0  (Gas)  !mc change ver 8
+         real*4  expag1       ! exploration well footage A1  (Gas)  !mc change ver 8
+         real*4  expag2       ! exploration well footage A1  (Gas)  !mc change ver 8
+         real*4  expag3       ! exploration well footage A1  (Gas)  !mc change ver 8
+         real*4  expag4       ! exploration well footage A1  (Gas)  !mc change ver 8
+         REAL*4  EXPD0        ! EXPLORATION WELL FOOTAGE A0  (Dry)  !mc change ver 8
+         REAL*4  EXPD1        ! EXPLORATION WELL FOOTAGE A1  (Dry)  !mc change ver 8
+         REAL*4  EXPD2        ! EXPLORATION WELL FOOTAGE A1  (Dry)  !mc change ver 8
+         REAL*4  EXPD3        ! EXPLORATION WELL FOOTAGE A1  (Dry)  !mc change ver 8
+         REAL*4  EXPD4        ! EXPLORATION WELL FOOTAGE A1  (Dry)  !mc change ver 8
+
+         common/const_eq/oila0,oila1,oila2,oila3,oila4,oild0,oild1,oild2,oild3,oild4,  &
+           gasa0,gasa1,gasa2,gasa3,gasa4,gasd0,gasd1,gasd2,gasd3,gasd4,  &
+           expa0,expa1,expa2,expa3,expa4,expag0,expag1,expag2,expag3,expag4, &
+           expd0,expd1,expd2,expd3,expd4
+
+      REAL*4 PRO_REGOIL(max_reg)   ! REGIONAL Oil Well Drilling Footage Constraint (DEV) (Feet*1000)
+      REAL*4 PRO_REGGAS(max_reg)   ! REGIONAL GAS Well Drilling Footage Constraint (DEV) (Feet*1000)
+      REAL*4 PRO_REGEXP(max_reg)   ! REGIONAL EXP Well Drilling Footage Constraint (DEV) (Feet*1000)
+      real*4 pro_regexpg(max_reg)  ! regional exploration well drilling footage constraint (Feet*1000)   !mc change ver 8
+      real*4 pro_regexpd(max_reg)  ! regional exploration well drilling footage constraint (Feet*1000)   !mc change ver 8
+      REAL*4 SUCEXP(max_reg)       ! Expl Well dryhole Rate by REGION (PERCENT) - undiscovered exploration MC 4.16.09
+      real*4 suco(max_reg)         ! initial developmental oil well success rate by region - before levers (fraction)
+      real*4 sucg(max_reg)         ! initial developmental gas well success rate by region - before levers (fraction)
+      real*4 sucdevo(max_reg)      ! final developmental oil well success rate by region (fraction)
+      real*4 sucdevg(max_reg)      ! final developmental gas well success rate by region (fraction)
+
+      real*4 sucexpd(max_reg)      ! expl well dryhole rate by region (PERCENT) - undiscovered development MC 4.16.09
+      real*4 sucdeve(max_reg)      ! developmental well dryhole rate by region (PERCENT) - existing development MC 4.16.09
+
+
+      REAL*4 H_SUCCESS             ! Horizontal Development Well Success Rate by Region (PERCENT)
+
+
+      COMMON/DRILL/PRO_REGOIL,PRO_REGGAS,PRO_REGEXP,SUCEXP,H_SUCCESS, &
+         sucdevo,sucdevg,suco,sucg,sucexpd,sucdeve,pro_regexpg,pro_regexpd
+          
+      REAL*4  CO2BASE(max_reg,MAX_SRC)    ! EXISTING SOURCES OF CO2 
+      REAL*4  AARP(40,max_src)        ! CO2 SOURCE ACCEPTANCE RATE
+      REAL*4  UMPCO2(max_src)          ! CO2 ULTIMATE MARKET ACCEPTANCE
+      INTEGER YRDT(max_src)           ! YRS TO DEVELOP TECHNOLOGY
+      INTEGER YRDI(max_src)           ! YRS TO DEVELOP INFRASTRUCTURE
+      INTEGER YRMA(max_src)           ! YRS TO REACH FULL CAPACITY
+
+      INTEGER*4 MAX_IND_CO2
+      PARAMETER(MAX_IND_CO2 = 200)                                          
+      REAL*8 BIN_DOLAMT(8)                      ! UPPER BOUND DOLLAR AMOUNT FOR BIN BREAKPOIINTS
+      INTEGER*4 NS_PRC_NDX(max_reg,MAX_IND_CO2,MNUMYR) ! INDEX FOR SORTED PRICES
+      INTEGER*4 NS_ID(max_reg,MAX_IND_CO2)    ! ID FOR NEW SOURCES OF CO2
+      INTEGER*4 NS_SRC(max_reg,MAX_IND_CO2)   ! SOURCES FOR EACH RECORD
+      REAL*8    NS_PRICE(max_reg,MAX_IND_CO2,MNUMYR) ! PRICE FOR NEW SOURCES OF CO2
+      REAL*8    NS_QUANT(max_reg,MAX_IND_CO2) ! QUANTITY FOR NEW SOURCES OF CO2
+      INTEGER*4 NS_BIN(max_reg,MAX_IND_CO2,MNUMYR)   ! BIN FOR NEW SOURCES OF CO2
+      INTEGER*4 NS_SYR(max_reg,MAX_IND_CO2)   ! Start Year for Each Record
+
+      INTEGER*4 N_NS_RECS(max_reg)            ! Number of Records per Region
+      INTEGER*4 MAP_BINS_TO_SRC_INDEX(max_src)
+      INTEGER*4 MAP_SRC_INDEX_TO_BINS(max_src)
+
+      COMMON/CO2SOURCES/ CO2BASE, &
+         AARP, UMPCO2, YRDT, BIN_DOLAMT, NS_PRICE, NS_QUANT, &
+         YRDI, YRMA, NS_ID, NS_PRC_NDX, NS_BIN, NS_SRC, N_NS_RECS, NS_SYR, MAP_BINS_TO_SRC_INDEX, MAP_SRC_INDEX_TO_BINS
+
+
+!  these are the constraint values after application of the model levers
+        REAL INVCAP(MAX_YR)              ! Annual Total Capital Investment Constraint - used for constraining projects (MM$)
+        real usecap(max_yr)              ! annual total capital investment constraint - used by projects (MM$)
+        real bascap(max_yr)              ! annual total capital investment constraint - initial capital available (MM$)
+
+        REAL DRCAP_O(MAX_REG,MAX_YR)     ! REGIONAL Oil Well Drilling Footage Constraint (DEV) (Feet*1000)
+        REAL DRCAP_G(MAX_REG,MAX_YR)     ! REGIONAL Gas Well Drilling Footage Constraint (DEV) (Feet*1000)
+        REAL NAT_DRCAP_O(MAX_YR)         ! NATIONAL Oil Well Drilling Footage Constraint (DEV) (Feet*1000)
+        REAL NAT_DRCAP_G(MAX_YR)         ! NATIONAL Gas Well Drilling Footage Constraint (DEV) (Feet*1000)
+
+
+        REAL EXPCDRCAP(MAX_REG,MAX_YR)   ! REGIONAL CONVENTIONAL Expl Drilling Footage Constraint (Feet*1000)
+        REAL EXPUDRCAP(MAX_REG,MAX_YR)   ! REGIONAL UNCONVENTIONAL Expl Drilling Footage Constraint (Feet*1000)
+        REAL NAT_EXPCDRCAP(MAX_YR)       ! NATIONAL CONVENTIONAL Expl Drilling Footage Constraint (Feet*1000)
+        REAL NAT_EXPUDRCAP(MAX_YR)       ! NATIONAL UNCONVENTIONAL Expl Drilling Footage Constraint (Feet*1000)
+
+        real expcdrcapg(max_reg,max_yr)  ! regional conventional gas exploration drilling footage constraint (Feet*1000) !mc change ver 8
+        real expudrcapg(max_reg,max_yr)  ! regional unconventional gas exploration drilling footage constraint (Feet*1000) !mc change ver 8
+        real nat_expcdrcapg(max_yr)      ! national conventional gas exploration drilling footage constraint (Feet*1000) !mc change ver 8
+        real nat_expudrcapg(max_yr)      ! national unconventional gas exploration drilling footage constraint (Feet*1000) !mc change ver 8
+
+        REAL SUCCDEVO(MAX_REG)           ! Development Oil Well Success Rate BY REGION (Fraction)
+        REAL SUCCDEVG(MAX_REG)           ! Development Gas Well Success Rate BY REGION (Fraction)
+        REAL SUCCEXP(MAX_REG)            ! Expl Well Success Rate by REGION (FRACTION)
+        REAL TOTHWCAP(MAX_YR)            ! Total Horizontal Drilling Footage Constraint (Feet*1000)
+        REAL SUCCHDEV                    ! Horizontal Development Well Success Rate by Region (FRACTION)
+
+        COMMON /CONSTR/ INVCAP, DRCAP_O, DRCAP_G, EXPCDRCAP, EXPUDRCAP, &
+                        NAT_DRCAP_O, NAT_DRCAP_G, NAT_EXPCDRCAP, &
+                        NAT_EXPUDRCAP, expcdrcapg, expudrcapg, nat_expcdrcapg, nat_expudrcapg, & !mc change ver 8
+                        SUCCDEVO,SUCCDEVG,SUCCEXP,TOTHWCAP, &
+                        SUCCHDEV,usecap,bascap
+
+        real nat_dual(max_yr)                !national dual use drilling footage (both oil and gas development)
+        real reg_dual(max_reg,max_yr)        !regional dual use drilling footage (both oil and gas development)
+        real nat_drcap_d(max_yr)             !national dual use drilling footage (both oil and gas development)
+        real drcap_d(max_reg,max_yr)         !regional dual use drilling footage (both oil and gas development)
+
+        common/drill2/nat_dual,reg_dual,nat_drcap_d,drcap_d !mc change 6.19.09
+
+!  these are the constraint values as determined by the constraints.dat file (levers not applied)
+        REAL NAT_INVCAP(MAX_YR)              ! Annual Total Capital Investment Constraint (MM$)
+        REAL NAT_OIL(MAX_YR)                 ! NATIONAL OIL DRILLING CONSTRAINT
+        REAL NAT_ODR(MAX_YR)                 ! NATIONAL OIL DRY DRILLING FOOTAGE
+        REAL NAT_GAS(MAX_YR)                 ! NATIONAL GAS DRILLING CONSTRAINT
+        REAL NAT_GDR(MAX_YR)                 ! NATIONAL GAS DRY DRILLING FOOTAGE
+        REAL NAT_EXP(MAX_YR)                 ! NATIONAL EXPLORATORY DRILLING CONSTRAINT
+        real nat_expg(max_yr)                ! national gas exploration drilling constraint !mc change ver 8
+        real nat_expd(max_yr)                ! national dry exploration drilling constraint !mc change ver 8
+        REAL NAT_EXPU(MAX_YR)                ! NATIONAL UNCONVENTIONAL EXPLORATORY DRILLING oil CONSTRAINT  !mc change ver 8
+        REAL NAT_EXPC(MAX_YR)                ! NATIONAL CONVENTIONAL EXPLORATORY DRILLING oil CONSTRAINT    !mc change ver 8
+        real nat_expug(max_yr)               ! national unconventional exploratory drilling gas constraint  !mc change ver 8
+        real nat_expcg(max_yr)               ! national conventional exploratory drilling gas constraint    !mc change ver 8
+        REAL NAT_TOT(MAX_YR)                 ! TOTAL NATIONAL FOOTAGE
+        REAL REG_OIL(MAX_REG,MAX_YR)         ! REGIONAL OIL DRILLING CONSTRAINT
+        REAL REG_GAS(MAX_REG,MAX_YR)         ! REGIONAL GAS DRILLING CONSTRAINT
+        REAL REG_EXP(MAX_REG,MAX_YR)         ! REGIONAL EXPLORATORY DRILLING CONSTRAINT
+        real reg_expg(max_reg,max_yr)        ! regional exploratory drilling constraint  !mc change ver 8
+        real reg_expd(max_reg,max_yr)        ! regional exploratory drilling constraint  !mc change ver 8
+        REAL REG_EXPC(MAX_REG,MAX_YR)        ! REGIONAL CONVENTIONAL oil EXPLORATORY DRILLING CONSTRAINT
+        REAL REG_EXPU(MAX_REG,MAX_YR)        ! REGIONAL UNCONVENTIONAL oil EXPLORATORY DRILLING CONSTRAINT
+        real reg_expug(max_reg,max_yr)       ! regional unconventional gas exploratory drilling constraint  !mc change ver 8
+        real reg_expcg(max_reg,max_yr)       ! regional conventional gas exploratory drilling constraint    !mc change ver 8
+        REAL NAT_HOR(MAX_YR)                 ! HORIZONTAL DRILLING CONSTRAINT
+        real bse_availco2(max_reg,max_src,max_yr)    ! base annual volume of CO2 available by region (BCF) and price bin
+        real src_availco2(max_reg,max_src,max_yr)    ! base annual volume of CO2 available by region (BCF) and source
+        real use_availco2(max_reg,max_src,max_yr)    ! used annual volume of CO2 by region (BCF)
+        real pur_co2_at_eor(max_reg,max_src,max_yr)  ! purchased annual volume of CO2 by EOR site region (BCF)
+        real co2_recycle(max_reg,max_src,max_yr)     ! recycled annual volume of CO2 by EOR site region (BCF)
+        real co2_inject(max_reg,max_src,max_yr)      ! injected annual volume of CO2 by EOR site region (BCF)
+        real eor_oil_prod(max_reg,max_src,max_yr)    ! Oil Production from EOR project by region and CO2 source (MBBL) ?
+        real eor_gas_prod(max_reg,max_src,max_yr)    ! Gas Production from EOR project by region and CO2 source (MBCF) ?
+        real co2avail(max_reg,max_yr)                ! total CO2 available in a region across all sources (BCF)
+        real basavail(max_reg,max_yr)                ! base annual CO2 available in a region across all sources (BCF)
+        real useavail(max_reg,max_yr)                ! used annual CO2 volume by region across all sources (BCF)        
+
+        COMMON /DRILL_CONST/ NAT_INVCAP, NAT_OIL, NAT_ODR, NAT_GAS, &
+                             NAT_GDR, nat_expg, nat_expd, nat_expug,nat_expcg, &                          !mc change ver 8
+                             NAT_EXP, NAT_EXPU, NAT_EXPC, NAT_TOT, &
+                             REG_OIL, REG_GAS, REG_EXP, reg_expg, reg_expd, REG_EXPC, &   !mc change ver 8
+                             REG_EXPU, reg_expug, reg_expcg, NAT_HOR, &
+                             bse_availco2,use_availco2,co2avail, &
+                             basavail,useavail, pur_co2_at_eor, co2_recycle, co2_inject, eor_oil_prod, eor_gas_prod, src_availco2
+
+        real nat_dmdgas(max_reg,max_yr)      ! annual gas demand in region (Bcf/yr)
+        integer cotype(max_src)                      ! industrial/natural code for co2 source (0 - industrial, 1 - natural)
+                                                     ! this is used for economic calculations
+        real basnat_dmdgas(max_reg,max_yr)   ! initial annual gas demand in region (Bcf/yr) - for reporting purposes
+
+        common/demand_const/nat_dmdgas,basnat_dmdgas,cotype
+
+        real oil_adj(max_yr)                 ! fraction of annual oil drilling which is made available
+        real gas_adj(max_yr)                 ! fraction of annual gas drilling which is made available
+        real exp_adj(max_yr)                 ! fraction of annual oil exploration drilling which is made available
+        real exp_adjg(max_yr)                ! fraction of annual gas exploration drilling which is made available !mc change ver 8
+        real hor_adj(max_yr)                 ! fraction of annual horizontal drilling which is made available
+
+        common/drill_adjust/oil_adj,gas_adj,exp_adj,hor_adj,exp_adjg  !mc change ver 8
+
+!
+! SUMMARY DRILLING REPORT DATA
+!
+       REAL SUM_OIL_CONV(MAX_REG,MAX_YR)      ! CONVENTIONAL OIL DRILLING
+       REAL SUM_OIL_UNCONV(MAX_REG,MAX_YR)    ! UNCONVENTIONAL OIL DRILLING
+       REAL SUM_GAS_CONV(MAX_REG,MAX_YR)      ! CONVENTIONAL GAS DRILLING
+       REAL SUM_GAS_UNCONV(MAX_REG,MAX_YR)    ! UNCONVENTIONAL GAS DRILLING
+
+       COMMON/CONSTR_SUMMARY/SUM_OIL_CONV,SUM_OIL_UNCONV,SUM_GAS_CONV, &
+        SUM_GAS_UNCONV
+!***************************************************************
+!from cost.h
+!  cost variables
+!  contains the cost parameters read from 'cost.dat', the unit costs, and the final costs for the project
+
+
+
+
+
+!  cost parameters - capital
+!  Note: East coast (region 1) has been split into two sections: 1a - Appalachian, 1 - Non-Appalachian
+
+        real OIL_DWCM(max_reg+1,max_dep)           ! minimum depth range for oil well drilling cost equation
+        real oil_dwcD(max_reg+1,MAX_DEP)           ! maximum DEPTH RANGE for oil well drilling cost equation
+        real oil_dwck(max_reg+1,MAX_DEP)           ! constant for oil well drilling cost equation
+        real oil_dwca(max_reg+1,MAX_DEP)           ! a       "
+        real oil_dwcb(max_reg+1,MAX_DEP)           ! b       "
+        real oil_dwcc(max_reg+1,MAX_DEP)           ! c       "
+        real gas_dwcm(max_reg+1,max_dep)           ! minimum depth range for gas well drilling cost equation
+        real GAS_dwcD(max_reg+1,MAX_DEP)           ! maximum DEPTH RANGE for GAS well drilling cost equation
+        real gas_dwck(max_reg+1,MAX_DEP)           ! constant for gas well drilling cost equation
+        real gas_dwca(max_reg+1,MAX_DEP)           ! a       "
+        real gas_dwcb(max_reg+1,MAX_DEP)           ! b       "
+        real gas_dwcc(max_reg+1,MAX_DEP)           ! c       "
+        real dry_dwcm(max_reg+1,max_dep)           ! minimum depth range for dry well drilling cost equation
+        real DRY_dwcD(max_reg+1,MAX_DEP)           ! maximum DEPTH RANGE for DRY well drilling cost equation
+        real dry_dwck(max_reg+1,MAX_DEP)           ! constant for dryhole drilling cost equation
+        real dry_dwca(max_reg+1,MAX_DEP)           ! a       "
+        real dry_dwcb(max_reg+1,MAX_DEP)           ! b       "
+        real dry_dwcc(max_reg+1,MAX_DEP)           ! c       "
+        real nprm(max_reg+1,max_dep)               ! minimum DEPTH RANGE for NEW PRODUER EQ
+        real MPRD(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for NEW PRODUER EQ
+        real nprk(max_reg+1,MAX_DEP)               ! constant for New producer equipment
+        real npra(max_reg+1,MAX_DEP)               ! a       "
+        real nprb(max_reg+1,MAX_DEP)               ! b       "
+        real nprc(max_reg+1,MAX_DEP)               ! c       "
+        real wrkm(max_reg+1,max_dep)               ! minimum depth range for workover cost
+        real WRKD(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for workover cost                  - this will have to change in the read
+        real WRKK(max_reg+1,MAX_DEP)               ! constant for workover cost                             - this will have to change in the read
+        real WRKA(max_reg+1,MAX_DEP)               ! a       "                                              - this will have to change in the read
+        real WRKB(max_reg+1,MAX_DEP)               ! b       "                                              - this will have to change in the read
+        real WRKC(max_reg+1,MAX_DEP)               ! c       "                                              - this will have to change in the read
+        real pswm(max_reg+1,max_dep)               ! minimum depth range for producer to injector
+        real pswD(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for producer to injector
+        real pswk(max_reg+1,MAX_DEP)               ! constant for primary to secondary
+        real pswa(max_reg+1,MAX_DEP)               ! a       "
+        real pswb(max_reg+1,MAX_DEP)               ! b       "
+        real pswc(max_reg+1,MAX_DEP)               ! c       "
+        real psim(max_reg+1,max_dep)               ! minimum depth range for producer to injector
+        real psiD(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for producer to injector
+        real psik(max_reg+1,MAX_DEP)               ! constant for producer to injector
+        real psia(max_reg+1,MAX_DEP)               ! a       "
+        real psib(max_reg+1,MAX_DEP)               ! b       "
+        real psic(max_reg+1,MAX_DEP)               ! c       "
+
+        REAL FACUPM(MAX_REG+1,MAX_DEP)             ! minimum depth range for facilities upgrade costs
+        real facupd(max_reg+1,max_dep)             ! maximum depth range for facilities upgrade costs
+        real facupk(max_reg+1,max_dep)             ! constant for facilities upgrade costs
+        real facupa(max_reg+1,max_dep)             ! a       "
+        real facupb(max_reg+1,max_dep)             ! b       "
+        real facupc(max_reg+1,max_dep)             ! c       "
+
+        REAL FACgM(MAX_REG+1,MAX_DEP)             ! minimum depth range for gas facilities costs
+        real facgd(max_reg+1,max_dep)             ! maximum depth range for gas facilities costs
+        real facgk(max_reg+1,max_dep)             ! constant for gas facilities costs
+        real facga(max_reg+1,max_dep)             ! a       "
+        real facgb(max_reg+1,max_dep)             ! b       "
+        real facgc(max_reg+1,max_dep)             ! c       "
+
+        real pwhp                                  ! produced water handling plant multiplier - cost(K$) = (pwhp*(rmax/365))*1000.0
+        real plypk                                 ! polymer handling plant constant
+        real plypa                                 ! polymer handling plant a
+        real chmk                                  ! chemical handling plant constant
+        real chma                                  ! chemical handling plant a
+        real chmb                                  ! chemical handling plant b
+        real co2rk,co2rb                           ! Co2 recycling plant cost
+        real stmma                                 ! steam manifold/pipeline multiplier
+        real stmga                                 ! steam generator cost multiplier
+
+
+        common/cost_param/oil_dwcd,oil_dwck,oil_dwca,oil_dwcb,oil_dwcc, &
+          gas_dwcd,gas_dwck,gas_dwca,gas_dwcb,gas_dwcc,dry_dwck, &
+          dry_dwca,dry_dwcb,dry_dwcc,dry_dwcd,nprk,npra,nprb,nprc,mprd &
+          ,wrkd,wrkk,wrka,wrkb,wrkc,pswk,pswa,pswb,pswc,pswd,psid,psia, &
+          psib,psic,psik,pwhp,plypk,plypa,chmk,chma,chmb,co2rk,co2rb, &
+          stmma,stmga,oil_dwcm,gas_dwcm,dry_dwcm,nprm,wrkm,pswm,psim, &
+          facupm,facupd,facupk,facupa,facupb,facupc,facgm,facgd,facgk, &
+          facgb,facgc,facga
+
+!  cost parameters - operating
+        real omom(max_reg+1,max_dep)               ! minimum depth range for fixed annual operating cost for oil
+        real omoD(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for fixed annual operating cost for oil
+        real omok(max_reg+1,MAX_DEP)               ! constant for fixed annual operating cost for oil
+        real omoa(max_reg+1,MAX_DEP)               ! a       "
+        real omob(max_reg+1,MAX_DEP)               ! b       "
+        real omoc(max_reg+1,MAX_DEP)               ! c       "
+        real omlm(max_reg+1,max_dep)               ! minimum depth range for annual operating cost for oil
+        real omlD(max_reg+1,MAX_DEP)               ! DEPTH RANGE for fixed annual operating cost for oil
+        real omlk(max_reg+1,MAX_DEP)               ! constant for fixed annual operating cost for oil
+        real omla(max_reg+1,MAX_DEP)               ! a       "
+        real omlb(max_reg+1,MAX_DEP)               ! b       "
+        real omlc(max_reg+1,MAX_DEP)               ! c       "
+        real omgm(max_reg+1,max_dep)               ! minimum depth range for fixed annual O&M cost gas
+        real OMGD(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for fixed annual O&M Cost Gas
+        real OMGK(max_reg+1,MAX_DEP)               ! constant for fixed annual O&M Cost Gas
+        real OMGA(max_reg+1,MAX_DEP)               ! a       "
+        real OMGB(max_reg+1,MAX_DEP)               ! b       "
+        real OMGC(max_reg+1,MAX_DEP)               ! c       "
+        real opsecm(max_reg+1,max_dep)             ! minimum depth range for fixed annual operating cost for secondary operations
+        real opsecD(max_reg+1,MAX_DEP)             ! maximum DEPTH RANGE for fixed annual operating cost for secondary operations
+        real opseck(max_reg+1,MAX_DEP)             ! constant for fixed annual operating cost for secondary operations
+        real opseca(max_reg+1,MAX_DEP)             ! a       "
+        real opsecb(max_reg+1,MAX_DEP)             ! b       "
+        real opsecc(max_reg+1,MAX_DEP)             ! c       "
+        real opinjm(max_reg+1,max_dep)             ! minimum depth range for variable annual operating cost for injection
+        real opinjD(max_reg+1,MAX_DEP)             ! maximum DEPTH RANGE for variable annual operating cost for injection
+        real opinjk(max_reg+1,MAX_DEP)             ! constant for variables annual operating cost for injection
+        real opinja(max_reg+1,MAX_DEP)             ! a       "
+        real opinjb(max_reg+1,MAX_DEP)             ! b       "
+        real opinjc(max_reg+1,MAX_DEP)             ! c       "
+        real omlftm(max_reg+1,max_dep)             ! minimum depth range for lifting costs
+        real omlftD(max_reg+1,MAX_DEP)             ! maximum DEPTH RANGE for lifting costs
+        real omlftk(max_reg+1,MAX_DEP)             ! constant for lifting costs
+        real omlfta(max_reg+1,MAX_DEP)             ! a       "
+        real omlftb(max_reg+1,MAX_DEP)             ! b       "
+        real omlftc(max_reg+1,MAX_DEP)             ! c       "
+
+        real omswrm(max_reg+1,max_dep)             ! minimum depth range for variable operating cost for secondary workover
+        real omswrd(max_reg+1,max_dep)             ! maximum depth range for variable operating cost for secondary workover
+        real omswrk(max_reg+1,max_dep)             ! constant for variable operating cost for secondary workover
+        real omswra(max_reg+1,max_dep)             ! a       "
+        real omswrb(max_reg+1,max_dep)             ! b       "
+        real omswrc(max_reg+1,max_dep)             ! c       "
+
+        real comp_vc                               ! compressor O&M costs
+
+        real oil_oam(max_proc)                     ! $/Bbl process specific operating cost for oil production
+        real gas_oam(max_proc)                     ! $/Mcf process specific operating cost for gas production
+        real wat_oam(max_proc)                     ! $/Bbl process specific operating cost for water production
+        real inj_oam(max_proc)                     ! $/Bbl process specific operating cost for injection
+
+        common/cost_param2/omod,omok,omoa,omob,omoc,omgd,omgk, &
+          omga,omgb,omgc,opsecd,opseck,opseca,opsecb,opsecc,omld,omlm, &
+          omlk,omla,omlb,omlc,opinjd,opinjk,opinja,opinjb,opinjc, &
+          comp_vc,omom,omgm,opsecm,opinjm,omlftm,omlftd,omlftk, &
+          omlfta,omlftb,omlftc,oil_oam,gas_oam,wat_oam,inj_oam, &
+          omswrm,omswrd,omswrk,omswra,omswrb,omswrc
+
+!  cost parameters - injection
+        real polycost,poly                         ! polymer cost ($/Lb)
+        real co2k,co2b                             ! constant and coefficient for natural CO2 cost equation - West Texas
+        real co2pr(L48RGN)                         ! state/regional multipliers for natural CO2 cost
+        real cregpr(max_reg,max_src)               ! the CO2 price by region and source ($/Mcf)
+        real cregpryr(max_reg,max_src,max_yr)      ! the CO2 price by region, step and year ($/Mcf)
+        real cregpryrS(max_reg,max_src,max_yr)     ! the CO2 price by region, source and year ($/Mcf)
+        real co2om20                               ! the O&M cost for CO2 injection - >20Mmcf
+        real co2om_20                              ! the O&M cost for CO2 injection - <20Mmcf
+        real stimfac                               ! stimulation efficiency factor
+        real stim_a,stim_b                         ! coefficients for gas/oil stimulation cost
+        integer stim_yr                            ! number of years between stimulations of gas/oil wells
+        real cost_bhp
+        real comp_oam
+        real co2cost                               ! final cost for CO2 ($/Mcf)
+
+        integer co2st(L48RGN)                      ! state code for natural CO2 costs - corresponds with co2pr
+
+        common/cost_param3/polycost,co2k,co2b,co2pr,cregpr,co2om20, &
+          co2om_20,stimfac,stim_a,stim_b,cost_bhp,comp_oam,co2st, &
+          co2cost,poly,stim_yr, cregpryr, cregpryrS
+
+
+
+        real tang_m(MAX_YR)                        ! tangible cost multiplier
+        real intang_m(MAX_YR)                      ! intangible cost multiplier
+        real oam_m(MAX_YR)                         ! O&M cost multiplier
+        real env_fac                               ! environmental capital cost multiplier
+        real envop_fac                             ! environmental operating cost multiplier
+        real baseoil                               ! base oil price used for normalization of capital and operating costs
+        real cutoil                                ! cutoff oil price for the adjustment term of price normalizatio
+        real basegas                               ! base gas price used for normalization of capital and operating costs
+        real fply                                  ! cost multiplier for polymer
+        real fco2                                  ! cost multiplier for CO2 (natural)
+        real co2oam                                ! co2oam
+        real recy_oil                              ! produced water recycling cost - oil factor (applied to steamflood)
+        real recy_wat                              ! produced water recycling cost - water factor (applied to steamflood)
+
+        real Omult_tang                            ! oil price adjustment factor - tangible costs
+        real Omult_int                             ! oil price adjustment factor - intangible costs
+        real Omult_oam                             ! oil price adjustment factor - O & M
+        real Gmult_tang                            ! gas price adjustment factor - tangible costs
+        real Gmult_int                             ! gas price adjustment factor - intangible costs
+        real Gmult_oam                             ! gas price adjustment factor - O & M
+
+        common/cost_m/tang_m,intang_m,oam_m,baseoil,cutoil,fply,fco2, &
+          co2oam,basegas,env_fac,envop_fac,omult_tang,omult_int, &
+          omult_oam,gmult_tang,gmult_int,gmult_oam,recy_oil,recy_wat
+
+!  unit costs - capital
+
+! --(NEW)-----------------------------------------------------------------------------------------
+!
+        REAL DNC_COST 	   	! New Oil or Gas Well D&C Cost Estimate variable used in WELLCOST
+	REAL DNC_COST_DRY	! New Dry Well Drilling Cost Estimate variable used in WELLCOST
+!
+! ------------------------------------------------------------------------------------------------
+
+        real dwc_w                                 ! cost to drill and complete an oil well (K$)
+        REAL DRY_W                                 ! COST TO DRILL A DRY WELL (K$)
+        real npr_w                                 ! cost to equip a new producer (K$)
+        real wrk_w                                 ! cost for well workover (K$)
+        real psw_w                                 ! cost to convert a primary well to a secondary well (K$)
+        real psi_w                                 ! cost to convert a primary well to an injection well (K$)
+
+        real pwp_f                                 ! cost for produced water handling plant (K$)
+        real ply_f                                 ! cost for polymer handling plant (K$)
+        real chm_f                                 ! cost for chemical handling plant (K$)
+        real co2_f                                 ! cost for CO2 recycling/injection plant (K$)
+        real stmm_f                                ! cost for steam manifolds and generation (K$)
+        real stmg_f                                ! cost for steam generation (K$)
+        real fwc_w                                 ! cost for gas facilities cost (K$)
+
+        common/cost_unit/dwc_w,dry_w,npr_w,wrk_w,psw_w,psi_w,pwp_f, &
+          ply_f,chm_f,co2_f,stmm_f,stmg_f,fwc_w
+
+!  unit costs - operating
+        real omo_w                                 ! fixed annual operating cost for oil
+        real opsec_w                               ! fixed annual operating cost for secondary operations
+        real omg_w                                 ! fixed annual operating cost for gas
+        real oml_w                                 ! variable annual operating cost for lifting
+        real opinj_w                               ! variable annual operating cost for injection
+        real foamg_1                               ! fixed annual operating cost for gas 1
+        real foamg_2                               ! fixed annual operating cost for gas 2
+        real stim_w                                ! gas well stimulation cost
+        real comp_w                                ! compression cost to bring gas up to pipeline pressure
+        real foamg_w                               ! fixed operating cost for gas wells
+        real fac_w                                 ! facilities upgrade cost
+        real swk_w                                 ! secondary workover cost
+        real frac_w                                ! hydraulic fracturing cost
+
+        real gna_cap2,gna_cap3                     ! G&A capital multiplier
+        real gna_exp2,gna_exp3                     ! G&A expense multiplier
+        real gg_fac2,gg_fac                        ! &G Factor (Portion of EWC that is G&G costs)
+        real gna_exp(MAX_TECH)                     ! G&A Expense Multiplier
+        real gna_cap(MAX_TECH)                     ! G&A Expense Multiplier
+
+
+        common/cost_unit2/omo_w,omg_w,opsec_w,oml_w,opinj_w,foamg_1, &
+          foamg_2,stim_w,comp_w,gna_cap2,gna_cap3,gna_exp2,gna_exp3, &
+          gg_fac2,gg_fac,foamg_w,gna_cap,gna_exp,fac_w,swk_w,frac_w
+
+
+!  project level costs
+
+
+        real  oilprod(MAX_YR)            ! Annual oil production MBBl
+        real  gasprod(MAX_YR)            ! Annual gas production MMCF
+        real  NGLprod(MAX_YR)            ! Annual NGL production MBBL
+        real  watprod(MAX_YR)            ! Annual wat production MBBL
+        real  watinj(MAX_YR)             ! Annual wat injection  MBBL
+        real  totinj(MAX_YR)             ! Annual wat injection  MBBL
+        real  torecy(MAX_YR)             ! Annual wat injection  MBBL
+        real  remres(MAX_YR)             ! Remaining Proven oil Reserves  MBBL   !mc change ver 7
+        real  gremres(max_yr)            ! remaining proven gas reserves  MMcf   !mc change ver 7
+        real  iremres(max_yr)            ! remaining inferred oil reserves MBbl  !mc change ver 7
+        real  igremres(max_yr)           ! remaining inferred gas reserves MMcf  !mc change ver 7
+        real  xcumprod(MAX_YR)             ! cumulative production  MBBL
+
+        common/pre1/oilprod,gasprod,NGLPROD,watprod,watinj,remres, &
+         torecy,totinj, xcumprod,gremres,iremres,igremres
+
+        real   sump(MAX_YR)               ! Total patterns(cumulative)
+        real   patn(MAX_YR)               ! Pattern initiated each year
+        real   patn1(MAX_YR)              ! Pattern initiated each year, from file
+        real   xpatn(MAX_YR)              ! Active pattern each year
+        common/pre2/sump,patn,xpatn,patn1
+
+!-------------------------------------------------------------------------
+
+        real drl_cst2(MAX_YR)            ! Drilling cost
+        real drl_cst(MAX_YR)            ! Drilling cost
+        REAL*4 DRY_CST(MAX_YR)          ! DRY HOLE Drilling cost
+        real faccost(MAX_YR)            ! Facilities cost/well
+        real inj(MAX_YR)                ! injectant cost
+        real fraccst(max_yr)            ! hydraulic fracturing cost
+        real aoam(MAX_YR)               ! Annual Fixed O&M cost
+        real oam(MAX_YR)                ! Variable O&M cost
+        real foam(MAX_YR)               ! co2 foamcost
+        REAL CO2OAM2
+        real torecy_cst(MAX_YR)
+        REAL COMP(MAX_YR)               ! COMPRESSOR COST
+        REAL STIM(MAX_YR)               ! STIMULATION COST
+        REAL OAM_COMP(MAX_YR)           ! COMPRESSION O&M
+        REAL PROC_OAM(MAX_YR)           ! PROCESSING AND TREATING COST
+
+        common/cost2/ &
+           drl_cst,faccost,inj,aoam,oam,drl_cst2,DRY_CST,co2oam2,foam, &
+           torecy_cst, COMP, STIM, OAM_COMP, PROC_OAM,fraccst
+
+
+        real xpp1,xpp2,xpp3,xpp4
+        common/cost44/ xpp1,xpp2,xpp3,xpp4
+
+        real pattoc_shut
+        common/pattertoc/pattoc_shut
+
+
+
+        real exist_eoam(MAX_YR)                    ! Existing Evironmental O&M cost
+        real new_eoam(MAX_YR)                      ! New Environmental O&M cost
+        real exist_ecap(MAX_YR)                    ! Existing Evironmental capital cost
+        real new_ecap(MAX_YR)                      ! New Environmental capital cost
+        common/envparam1/exist_eoam,exist_ecap,new_eoam,new_ecap
+
+        real exist_intan(MAX_ST,MAX_YR)               ! Exiting well intangible capital cost
+        real exist_oam(MAX_st,MAX_YR)                 ! Exiting well O&M cost
+        real new_intan(MAX_st,MAX_YR)                 ! New well intangible capital cost
+        real new_oam(MAX_st,MAX_YR)                   ! New well O&M cost
+        common/envparam2/exist_intan,exist_oam,new_intan,new_oam
+
+        REAL FRAC_CO2   ! FRACTION OF CO2
+        REAL FRAC_N2    ! FRACTION OF NITROGEN
+        REAL FRAC_H2S   ! FRACTION OF HYDROGEN SULFIDE
+        REAL FRAC_NGL   ! NGL YIELD
+        REAL PROC_CST   ! PROCESSING COST $/MCF
+
+        COMMON/IMPURITY_CST/FRAC_CO2,FRAC_N2,FRAC_H2S,FRAC_NGL,PROC_CST
+
+        real tang_rate                   ! tangible capital drilling
+        real tang_fac_rate               ! tangible capital well
+        real lbc_frac                    ! Lease bonus Fraction
+        real pggc                        ! Percent of G&G Depleted
+        real plac                        ! Percent Lease Acquisition Cost Capitalized
+
+        common/cost3/tang_rate,lbc_frac,tang_fac_rate,pggc,plac
+!
+! NEW VARIABLES DISCOUNT RATE
+!
+        REAL DISCOUNT_RT(MAX_PROC)
+
+        COMMON/DISCOUNTRATE/DISCOUNT_RT
+
+!
+!  regional dryhole rates
+!
+        real regdry(max_reg)
+        real regdrye(max_reg)      !4.15.09 exploration regional dryhole rate
+        real regdryo(max_reg)      !4.15.09 development oil regional dryhole rate
+        real regdryg(max_reg)      !4.15.09 development gas regional dryhole rate
+        real regdryh(max_reg)      !4.15.09 horizontal regional dryhole rate
+        REAL REGDRYUE(MAX_REG)     !4.16.09 REGIONAL DRYHOLE RATE FOR UNDISCOVERED EXPLORATION
+        REAL REGDRYUD(MAX_REG)     !4.16.09 REGIONAL DRYHOLE RATE FOR UNDISCOVERED DEVELOPMENT
+        REAL REGDRYKD(MAX_REG)     !4.16.09 REGIONAL DRYHOLE RATE FOR   DISCOVERED DEVELOPMENT
+
+
+        common/dryhole/regdry,regdrye,regdryo,regdryg,regdryh, &
+           REGDRYUE,REGDRYUD,REGDRYKD
+
+!***************************************************************
+!from cpi.h
+!**
+!**  VARIABLE FOR THE CPI INDEX
+!**
+
+       INTEGER CPI_YEAR(20)
+       INTEGER N_CPI
+       INTEGER NOM_YEAR
+       REAL CPI_AVG(1990:2010)
+       REAL CPI_FACTOR(1990:2010)
+       REAL CPI_2005
+       REAL CPI_2003
+
+       COMMON/CPI_METH/CPI_YEAR,N_CPI,NOM_YEAR,CPI_AVG,CPI_FACTOR, &
+       CPI_2005, CPI_2003
+!***************************************************************
+!from depreciation.h
+!
+!
+!  depreciation and amortization schedules for each process.  These variables
+!  are transferred into the cashflow through econ_main.
+!
+!
+       real*4 depr_sch(max_proc,max_qdyr)                  !the process specific depreciation schedules
+       integer depr_yrs(max_proc)
+
+       common/dep/depr_sch,depr_yrs
+
+
+!***************************************************************
+!from patterns.h
+!
+! THIS FILE HOUSES THE PATTERN INITIATION, AND NUMBER OF PATTERNS
+! FOR USE IN THE ECONOMIC PACKAGE.
+!
+
+        INTEGER startpr               !startpr is the first year a pattern is initiated
+
+        real patterns(MAX_YR)            !Shifted pattern initiation
+
+        COMMON / GLOBAL3 / startpr, patterns
+
+!
+! PATTERN DEVELOPMENT SCHEDULE
+!
+        REAL PATT_DEV(MAX_PROC)
+        REAL PATT_DEV_MAX(MAX_PROC)
+        REAL PATT_DEV_MIN(MAX_PROC)
+
+        COMMON / PATTDEV / PATT_DEV, PATT_DEV_MAX, PATT_DEV_MIN
+!***************************************************************
+!from prices.h
+
+          real oilpriceo(max_yr)                                !annual oil prices - used by the model
+          real gaspriceo(max_yr)                                !annual gas prices - used by the model
+
+          real oilpricec(max_yr)                                 !annual oil prices used in the cashflow
+          real gaspricec(max_yr)                                 !annual gas prices used in the cashflow
+
+          real oilpriced(max_yr)                                !annual oil prices used in drilling constraints - 5 year rolling average
+          real gaspriced(max_yr)                                !annual gas prices used in drilling constraints - 5 year rolling average
+
+          real  oilprice2(MAX_YR)                               !oilprice Dummy to shift price track
+          real  gasprice2(MAX_YR)                               !gasprice Dummy to shift price track
+          REAL  RINFL(2*MAX_YR)                                 ! INFLATION - REMOVED FORM THIS FILE SET TO 0.0
+
+          REAL*4  CO2PRICE                                      ! CO2 PRICE ($/MCF)
+          REAL*4  H2SPRICE                                      ! H2S PRICE ($/METRIC TON)
+          REAL*4  NGLPRICE                                      ! NGL PRICE ($/GAL)
+          REAL*4  N2PRICE                                       ! N2 PRICE ($/MCF)
+
+          real*4  inflac                                        !inflation rate (percent)
+          real    oilco2                                        !fixed oil price used for economic prescreening of industrial CO2 projects
+
+          integer priceyr                                       !first year of prices in price track
+
+          common/prices1/oilpriceo,gaspriceo,oilpricec,gaspricec, &
+             oilprice2,gasprice2,rinfl,co2price,nglprice,h2sprice, &
+             n2price,inflac,oilco2,priceyr,oilpriced,gaspriced
+!***************************************************************
+!from resprod.h
+        character*11 resid
+        character*2 state
+        character*1 resource
+
+        integer iregion,regnum
+        integer procde
+
+        integer ilife
+        integer ilifex2
+        integer ipumpyr
+        integer lasteyr
+        integer econ_OPTYPE
+        INTEGER ECON_REGION
+        integer ECON_LIFE
+        integer stnum
+        integer play
+
+        real presin
+        real rrc
+        real soi
+        real sor
+        real pay
+        real depth
+        real api
+        real gorl48
+        real por
+        real area
+        real patsze
+        real totpat
+        real wpp1
+        real wpp2
+        real wpp3
+        real wpp4
+        real nlat
+        real latlen
+        real gas_grav
+        real btu
+        real nwelloil
+        real nwellgas
+        real nwellinj
+
+        real totprod
+        real tempr
+        real heatval
+        real phi
+        real soc
+        real wor
+        real boi
+        real bo
+        real perm
+        real vdp
+        real sulfoil
+        real choilprod
+        real chgasprod
+        real orgooip
+
+        real lyroil
+        real lyrgas
+
+        common/respro4/gas_grav,btu,nwelloil,nwellgas,totprod,nwellinj, &
+           tempr,heatval,phi,soc,wor,boi,bo,perm,vdp,sulfoil,choilprod, &
+           chgasprod,orgooip,presin,lyroil,lyrgas
+
+        REAL XOOIP
+        real oprod(MAX_YR)
+        real gprod(MAX_YR)
+        real wprod(MAX_YR)
+        real oinj(MAX_YR)
+        real winj(MAX_YR)
+        real orecy(MAX_YR)
+        REAL NPROD(MAX_YR)
+
+        common/resprod1x/ resid,state,resource
+
+        common/resprod2x/RRC,procde,ilife,ilifex2,IPUMPYR,lasteyr, &
+         econ_OPTYPE, ECON_REGION, ECON_LIFE,iregion,regnum,stnum, &
+         play
+
+
+        common/resprod3x/soi,sor,pay,depth,api,gorl48,por,area,patsze, &
+                   totpat,wpp1,wpp2,wpp3,wpp4,nlat,latlen,XOOIP, &
+                   oprod,gprod,wprod,oinj,winj,orecy,NPROD
+!***************************************************************
+!from run_options.h
+
+       integer runtype                 !resources run by model
+                                       !Oil Only       = 1
+                                       !Gas Only       = 2
+                                       !Oil and Gas    = 3
+
+       integer pshut                   !number of years prior to economic life in which EOR can be considered
+       integer nshut                   !number of years after economic life in which EOR can be considered
+
+       integer asr_st                  !number of years prior to economic life in which ASR processes can be considered
+       integer asr_ed                  !number of years after economic life in which ASR processes can be considered
+
+       integer expl_model              !exploration model control
+                                       !NONE           = 0
+                                       !CONVENTIONAL   = 1
+                                       !UNCONVENTIONAL = 2
+                                       !BOTH           = 3
+
+       integer nwell                   !number of wells in unconventional exploration drilling package
+       integer numpack                 !number of packages per play per year
+
+       LOGICAL ECON_RPT                ! IF TRUE WRITE MONTE CARLO CASHFLOW
+       logical ndet                    ! detailed economics report
+       logical opt_dbg                 ! print the optional debug files
+       logical opt_dbg2                ! print the resource debug file
+       integer opt_rpt                 ! print the outputs at the wells class and fuel type levels
+
+       common/options/runtype,pshut,nshut,asr_st,asr_ed,expl_model, &
+          nwell,econ_rpt,ndet,opt_dbg,opt_rpt,numpack,opt_dbg2
+
+
+       integer L48B4YR                 ! first year of analysis
+       integer icount2                 ! RUNNing count of created unconventional undiscovered projects
+       integer ipack2                  ! running count of created unconventional packages
+
+       integer years_study             ! number of years of analysis
+       integer ex_prof                 ! write detailed exploration probability reports (1: yes, 0: no)
+       integer maxwell                 ! maximum number of dryholes per play per year (unconventional exploration)
+       integer disclag                 ! number of years between discovery and first production
+
+       real    veorcp                  ! Volumetric EOR Cutoff Percent (if (SOC-SORW)<VEORCP, Project is Eligible for EOR)
+
+       real    scale_oil               ! historical daily oil production (Mbbl) for last year of history
+       real    scale_gas               ! historical daily gas production (Bcf) for last year of history
+       real    scale_day               ! number of days in last year of history
+
+       real    regscale_oil(L48RGN)    ! regional historical daily production (Mbbl) for last year of history
+       real    regscale_gas(L48RGN)    ! regional historical daily production (Bcf)  for last year of history
+
+       real    resv_oil                ! historical crude oil and lease condensate reserves (Bbbl)
+       real    resv_drygas             ! historical dry gas reserves (Tcf)
+       real    resv_adgas              ! historical ad gas reserves (Tcf)
+       real    resv_convgas            ! historical conventional dry gas reserves (Tcf)
+       real    resv_uncongas           ! historical unconventional dry gas reserves (Tcf)
+       real    resv_shl                ! historical shale gas reserves (Tcf)                     !mc change 6.24.09
+       real    resv_tht                ! historical tight gas reserves (Tcf)                     !mc change 6.24.09
+       real    resv_cbm                ! historical coalbed methane reserves (Tcf)               !mc change 6.24.09
+
+       common/resv2/resv_shl, resv_tht,resv_cbm                                                  !mc change 6.24.09
+
+       common/tempopt/L48B4YR,icount2,ipack2,years_study,ex_prof, &
+          maxwell,disclag,veorcp,scale_oil,scale_gas,scale_day, &
+          regscale_oil,regscale_gas,resv_oil,resv_drygas,resv_adgas, &
+          resv_convgas,resv_uncongas
+
+
+!***************************************************************
+!from scenario.h
+!  these are the scenario variables for the technology levers
+
+!  filter levers
+       logical region_filter(max_reg,max_impct)                      !filter for OLOGSS region
+       logical state_filter(max_st,max_impct)                        !filter for onshore lower 48 states
+       logical process_filter(max_proc,max_impct)                    !filter for oil & gas processes
+       logical oil_filter(max_impct)                                 !filter for all oil processes
+       logical gas_filter(max_impct)                                 !filter for all gas processes
+
+       real    min_depth(max_impct)
+       real    max_depth(max_impct)
+       real    min_api(max_impct)
+       real    max_api(max_impct)
+       real    min_perm(max_impct)
+       real    max_perm(max_impct)
+       real    min_rate(max_impct)
+       real    max_rate(max_impct)
+
+       common/lever_filter/region_filter,state_filter,process_filter, &
+         oil_filter,gas_filter,min_depth,max_depth,min_api,max_api, &
+         min_perm,max_perm,min_rate,max_rate
+
+!  technology penetration curve levers
+       integer firstcom(max_impct)                                   !first year of commercialization for technology
+       integer comyear(max_impct)                                    !number of years of technology commercialization
+       integer tech_curve(max_impct)                                 !technology commercialization curve type
+       real    mark_pen(max_impct)                                   !ultimate market penetration
+       real    prob_rd(max_impct)                                    !probability of successful R&D
+       real    prob_imp(max_impct)                                   !probability of industrial implementation
+
+!  technology impact levers
+       real    drill_chg(max_impct)
+       real    explr_chg(max_impct)
+       real    paycont_chg(max_impct)
+       real    skin_chg(max_impct)
+       real    contin_chg(max_impct)
+       real    prod_ind_chg(max_impct)
+       real    rec_eff_chg(max_impct)
+       real    vol_swp_chg(max_impct)
+       real    inj_rate_chg(max_impct)
+       real    mob_rat_chg(max_impct)
+       real    co2_rat_chg(max_impct)
+       real    oil_rat_chg(max_impct)
+       real    res_chr_chg(max_impct)                                    !mc change ver 11
+
+       real    tech01_chg(max_impct)                                     !mc change ver 9
+       real    tech02_chg(max_impct)                                     !mc change ver 9
+       real    tech03_chg(max_impct)                                     !mc change ver 9
+       real    tech04_chg(max_impct)                                     !mc change ver 9
+       real    tech05_chg(max_impct)                                     !mc change ver 9 
+       
+
+       common/lever_tech/firstcom,comyear,tech_curve,mark_pen,prob_rd, &
+         prob_imp,drill_chg,explr_chg,paycont_chg,skin_chg,contin_chg, &
+         prod_ind_chg,rec_eff_chg,vol_swp_chg,inj_rate_chg,mob_rat_chg, &
+         co2_rat_chg,oil_rat_chg,tech01_chg,tech02_chg,tech03_chg,tech04_chg,&
+         tech05_chg,res_chr_chg              !mc change ver 9
+
+!  economic cost change levers.  Note: ALL OF THESE LEVERS ARE FRACTIONS!!!!
+       real    chg_drl_cst(max_impct)                                !change in drilling cost
+       real    chg_stm_cst(max_impct)                                !change in stimulation cost
+       real    chg_comp_cst(max_impct)                               !change in completion cost
+       real    chg_fac_cst(max_impct)                                !change in facilities cost
+       real    chg_secconv_cst(max_impct)                            !change in secondary conversion cost
+       real    chg_injconv_cst(max_impct)                            !change in injector conversion cost
+       real    chg_facupg_cst(max_impct)                             !change in facilities upgrade cost
+       real    chg_wrk_cst(max_impct)                                !change in workover cost
+       real    chg_prdwat_cst(max_impct)                             !change in produced water handling plant cost
+       real    chg_chmpnt_cst(max_impct)                             !change in chemical handling plant cost
+       real    chg_plypnt_cst(max_impct)                             !change in polymer handling plant cost
+       real    chg_co2pnt_cst(max_impct)                             !change in CO2 injection/recycling plant cost
+       real    chg_stmgen_cst(max_impct)                             !change in steam generation and distribution cost
+       real    chg_foam_cst(max_impct)                               !change in fixed annual O & M cost
+       real    chg_voam_cst(max_impct)                               !change in variable annual O & M cost
+       real    chg_gna_cst(max_impct)                                !change in G & A cost
+       real    chg_annsec_cst(max_impct)                             !change in annual secondary operating cost
+       real    chg_lft_cst(max_impct)                                !change in lifting cost
+       real    chg_secwrk_cst(max_impct)                             !change in secondary workover cost
+       real    chg_injc_cst(max_impct)                               !change in injection cost
+       real    chg_injt_cst(max_impct)                               !change in injectant cost
+       real    chg_cmp_cst(max_impct)                                !change in compression cost
+
+!  economic cost to apply levers.  Note: ALL OF THESE LEVERS ARE K$ !!!!!!
+       real    chg_ooil_cst(max_impct)                               !change in oil O&M cost           !mc change ver 11
+       real    chg_ogas_cst(max_impct)                               !change in gas O&M cost           !mc change ver 11
+       real    chg_owat_cst(max_impct)                               !change in water O&M cost         !mc change ver 11
+       real    chg_oinj_cst(max_impct)                               !change in injection O&M cost     !mc change ver 11
+
+!  WELL LEVEL economic cost to apply levers.  Note: ALL OF THESE LEVERS ARE K$ !!!!!!
+       real    cst_drl_cst(max_impct)                                !WELL LEVEL cost to apply drilling technology
+         !MC CHANGE VER 11
+       real    cst_stm_cst(max_impct)                                !WELL LEVEL cost to apply stimulation technology
+         !MC CHANGE VER 11
+       real    cst_comp_cst(max_impct)                               !WELL LEVEL cost to apply completion technology
+         !MC CHANGE VER 11
+       real    cst_fac_cst(max_impct)                                !WELL LEVEL cost to apply facilities technology
+         !MC CHANGE VER 11
+       real    cst_secconv_cst(max_impct)                            !WELL LEVEL cost to apply secondary conversion tech
+         !MC CHANGE VER 11
+       real    cst_injconv_cst(max_impct)                            !WELL LEVEL cost to apply injector conversion techn
+         !MC CHANGE VER 11
+       real    cst_facupg_cst(max_impct)                             !WELL LEVEL cost to apply facilities upgrade techno
+         !MC CHANGE VER 11
+       real    cst_wrk_cst(max_impct)                                !WELL LEVEL cost to apply workover technology
+         !MC CHANGE VER 11
+       real    cst_foam_cst(max_impct)                               !WELL LEVEL cost to apply fixed annual O & M techno
+         !MC CHANGE VER 11
+       real    cst_voam_cst(max_impct)                               !WELL LEVEL cost to apply variable annual O & M tec
+         !MC CHANGE VER 11
+       real    cst_gna_cst(max_impct)                                !WELL LEVEL cost to apply G & A technology
+         !MC CHANGE VER 11
+       real    cst_annsec_cst(max_impct)                             !WELL LEVEL cost to apply secondary producer techno
+         !MC CHANGE VER 11
+       real    cst_lft_cst(max_impct)                                !WELL LEVEL cost to apply lifting technology
+         !MC CHANGE VER 11
+       real    cst_secwrk_cst(max_impct)                             !WELL LEVEL cost to apply secondary workover techno
+         !MC CHANGE VER 11
+       real    cst_injc_cst(max_impct)                               !WELL LEVEL cost to apply injection technology
+         !MC CHANGE VER 11
+       real    cst_cmp_cst(max_impct)                                !WELL LEVEL cost to apply compression technology
+         !MC CHANGE VER 11
+
+!  PROJECT LEVEL ECONOMIC COST TO APPLY LEVERS.  NOTE: ALL OF THESE LEVERS ARE K$ !!!!!!
+       real    cst_drl_cstp(max_impct)                               !PROJECT LEVEL cost to apply drilling technology
+            !MC CHANGE VER 11
+       real    cst_stm_cstp(max_impct)                               !PROJECT LEVEL cost to apply stimulation technology
+            !MC CHANGE VER 11
+       real    cst_comp_cstp(max_impct)                              !PROJECT LEVEL cost to apply completion technology
+            !MC CHANGE VER 11
+       real    cst_fac_cstp(max_impct)                               !PROJECT LEVEL cost to apply facilities technology
+            !MC CHANGE VER 11
+       real    cst_secconv_cstp(max_impct)                           !PROJECT LEVEL cost to apply secondary conversion t
+            !MC CHANGE VER 11
+       real    cst_injconv_cstp(max_impct)                           !PROJECT LEVEL cost to apply injector conversion te
+            !MC CHANGE VER 11
+       real    cst_facupg_cstp(max_impct)                            !PROJECT LEVEL cost to apply facilities upgrade tec
+            !MC CHANGE VER 11
+       real    cst_wrk_cstp(max_impct)                               !PROJECT LEVEL cost to apply workover technology
+            !MC CHANGE VER 11
+       real    cst_foam_cstp(max_impct)                              !PROJECT LEVEL cost to apply fixed annual O & M tec
+            !MC CHANGE VER 11
+       real    cst_voam_cstp(max_impct)                              !PROJECT LEVEL cost to apply variable annual O & M
+            !MC CHANGE VER 11
+       real    cst_gna_cstp(max_impct)                               !PROJECT LEVEL cost to apply G & A technology
+            !MC CHANGE VER 11
+       real    cst_annsec_cstp(max_impct)                            !PROJECT LEVEL cost to apply secondary producer tec
+            !MC CHANGE VER 11
+       real    cst_lft_cstp(max_impct)                               !PROJECT LEVEL cost to apply lifting technology
+            !MC CHANGE VER 11
+       real    cst_secwrk_cstp(max_impct)                            !PROJECT LEVEL cost to apply secondary workover tec
+            !MC CHANGE VER 11
+       real    cst_injc_cstp(max_impct)                              !PROJECT LEVEL cost to apply injection technology
+            !MC CHANGE VER 11
+       real    cst_cmp_cstp(max_impct)                               !PROJECT LEVEL cost to apply compression technology
+            !MC CHANGE VER 11
+
+       common/lever_econ/chg_drl_cst,chg_stm_cst,chg_comp_cst, &
+         chg_secconv_cst,chg_injconv_cst,chg_facupg_cst,chg_wrk_cst, &
+         chg_prdwat_cst,chg_chmpnt_cst,chg_plypnt_cst,chg_co2pnt_cst, &
+         chg_stmgen_cst,chg_foam_cst,chg_voam_cst,chg_gna_cst, &
+         chg_annsec_cst,chg_lft_cst,chg_secwrk_cst,chg_injc_cst, &
+         chg_injt_cst,chg_cmp_cst,cst_drl_cst,cst_stm_cst,cst_comp_cst, &
+         cst_secconv_cst,cst_injconv_cst,cst_facupg_cst,cst_wrk_cst, &
+         cst_foam_cst,cst_voam_cst,cst_gna_cst,cst_annsec_cst, &
+         cst_lft_cst,cst_secwrk_cst,cst_injc_cst,cst_cmp_cst, &
+         chg_fac_cst,cst_fac_cst,  cst_drl_cstp,cst_stm_cstp,cst_comp_cstp, &        !MC CHANGE VER 11
+         cst_fac_cstp,cst_secconv_cstp,cst_injconv_cstp,cst_facupg_cstp, &           !MC CHANGE VER 11
+         cst_wrk_cstp,cst_foam_cstp,cst_voam_cstp,cst_gna_cstp,cst_annsec_cstp, &    !MC CHANGE VER 11
+         cst_lft_cstp,cst_secwrk_cstp,cst_injc_cstp,cst_cmp_cstp,chg_ooil_cst, &     !MC CHANGE VER 11
+         chg_ogas_cst,chg_owat_cst,chg_oinj_cst                                      !mc change ver 11
+
+       real    techa_var(5)                                         !mc change ver 9
+       real    techb_var(5)                                         !mc change ver 9
+       real    techc_var(5)                                         !mc change ver 9
+       real    techd_var(5)                                         !mc change ver 9
+       real    teche_var(5)                                         !mc change ver 9
+       real    techf_var(5)                                         !mc change ver 9
+       real    techg_var(5)                                         !mc change ver 9
+       real    techh_var(5)                                         !mc change ver 9
+       real    tech1_var(5)                                         !mc change ver 9
+       real    tech2_var(5)                                         !mc change ver 9
+       real    tech3_var(5)                                         !mc change ver 9
+       real    tech4_var(5)                                         !mc change ver 9
+       real    tech5_var(5)                                         !mc change ver 9
+       real    tech6_var(5)                                         !mc change ver 9
+       real    tech7_var(5)                                         !mc change ver 9
+       real    tech8_var(5)                                         !mc change ver 9
+       real    tech9_var(5)                                         !mc change ver 9
+       real    tech10_var(5)                                        !mc change ver 9
+       
+       real    tech11_var(5)                                        !mc change ver 9
+       real    tech12_var(5)                                        !mc change ver 9
+       real    tech13_var(5)                                        !mc change ver 9
+       real    tech14_var(5)                                        !mc change ver 9
+       real    tech15_var(5)                                        !mc change ver 9
+       real    tech16_var(5)                                        !mc change ver 9
+       real    tech17_var(5)                                        !mc change ver 9
+       real    tech18_var(5)                                        !mc change ver 9
+       real    tech19_var(5)                                        !mc change ver 9
+       real    tech20_var(5)                                        !mc change ver 9
+       real    tech21_var(5)                                        !mc change ver 9
+       real    tech22_var(5)                                        !mc change ver 9
+       real    tech23_var(5)                                        !mc change ver 9
+       real    tech24_var(5)                                        !mc change ver 9
+       real    tech25_var(5)                                        !mc change ver 9
+       real    tech26_var(5)                                        !mc change ver 9
+       real    tech27_var(5)                                        !mc change ver 9
+       real    tech28_var(5)                                        !mc change ver 9
+       real    tech29_var(5)                                        !mc change ver 9
+       real    tech30_var(5)                                        !mc change ver 9
+       real    tech31_var(5)                                        !mc change ver 9
+       real    tech32_var(5)                                        !mc change ver 9
+       real    tech33_var(5)                                        !mc change ver 9
+       
+
+       common/techvar/techa_var,techb_var,techc_var,techd_var,teche_var,techf_var,techg_var,techh_var, &    !mc change ver 9
+          tech1_var,tech2_var,tech3_var,tech4_var,tech5_var,tech6_var,tech7_var,tech8_var,tech9_var,   &    !mc change ver 9
+          tech10_var,tech11_var,tech12_var,tech13_var,tech14_var,tech15_var,tech16_var,tech17_var,     &    !mc change ver 9
+          tech18_var,tech19_var,tech20_var,tech21_var,tech22_var,tech23_var,tech24_var,tech25_var,     &    !mc change ver 9
+          tech26_var,tech27_var,tech28_var,tech29_var,tech30_Var,tech31_var,tech32_var,tech33_var           !mc change ver 9
+
+!  number of impacts in the case
+       integer impacts
+
+       common/lever_count/impacts
+
+!***************************************************************
+!from taxes.h
+!  taxes header file
+      real xroy               !federal royalty rate
+
+      real fedrate            !federal income tax rate
+      real ipdr               !Independent Producer Depletion Rate
+      logical cidc            !Capitalize Intangible Drilling Cost?
+      logical coi             !Capitalize Other Intangibles?
+      logical envscn          !flag for environmental scenario
+      logical ce              !Capitalize Environmentals?
+      logical amt             !Alternative Minimum Tax?
+      logical eortc           !EOR TAX CREDIT ?
+      logical credamt         !Flag that allows AMT to be credited in future years
+      real smar               !Six Month Amortization Rate (%)
+      real ipd                !Intangible drilling cost Preference Deduction
+      real acer               !ACE Rate
+      real ira                !max alt. min. tax reduction for independents
+      real amtrate            !Altermative Minimum Tax RATE
+      logical eec             !Expense Environomental Costs?
+      logical nil             !Net Income Limitations?
+      real nill               !Net Income Limitation Limit
+      real pdr                !Percent Depletion Rate (%)
+      real piic               !Percent of Intan. Inv. to Capitalize
+      real eortcr             !EOR Tax Credit Rate
+      real eortcab            !EOR Tax Credit Rate addback %
+      real eortcrp(MAX_YR)    !EOR Tax Credit Applied by yr%
+      real eortcp             !EOR Tax Credit phase out oil price
+      logical ggctc           !G&G Tangible Tax Credit (Depleted)
+      real ggctcr             !G&G Tangible Tax Credit Rate (Depleted)
+      real ggctcab            !G&G Tangible Tax Credit Rate addback %
+      logical ggetc           !G&G Intangible Tax Credit (Expensed)
+      real ggetcr             !G&G Intangible Tax Credit Rate (Expensed)
+      real ggetcab            !G&G Intangible Tax Credit Rate addback %
+      logical lactc           !Lease Acq. Tangible Tax Credit (Depleted)
+      real lactcr             !Lease Acq. Tangible Tax Credit Rate (Depleted)
+      real lactcab            !Lease Acq. Tangible Tax Credit Rate addback %
+      logical laetc           !Lease Acq. Intangible Tax Credit (Expensed)
+      real laetcr             !Lease Acq. Intangible Tax Credit Rate (Expensed)
+      real laetcab            !Lease Acq. Intangible Tax Credit Rate addback %
+      logical tdtc            !Tangible Development Tax Credit?
+      real tdtcr              !Tangible Development Tax Credit Rate
+      real tdtcab             !Tangible Development Tax Credit Rate addback%
+      logical idctc           !Intangible Drilling Cost Tax Credit
+      real idctcr             !Intangible Drilling Cost Tax Credit Rate
+      real idctcab            !Intangible Drilling Cost Tax Credit Rate addback %
+      logical oitc            !Other Intangible Tax Credit?
+      real oitcr              !Other Intangible Tax Credit Rate
+      real oitcab             !Other Intangible Tax Credit Rate addback %
+      logical ettc            !Environmental Tangible Tax Credit?
+      real ettcr              !Environmental Tangible Tax Credit Rate
+      real ettcab             !Environmental Tangible Tax Credit Rate addback %
+      logical eitc            !Environmental Intangible Tax Credit?
+      real eitcr              !Environmental Intangible Tax Credit Rate
+      real eitcab             !Environmental Intangible Tax Credit Rate addback %
+      logical eoctc           !Environmental Operating Cost Tax Credit?
+      real eoctcr             !Environmental Operating Cost Tax Credit Rate
+      real eoctcab            !Environmental Operating Cost Tax Credit Rate addback %
+      logical tcoti           !Tax Credit On Tangible Investments
+      integer yr1             !number of years for tcoti
+      logical tcoii           !Tax Credit On Intangible Investments
+      integer yr2             !number of years for tcoii
+
+      common/fed_tax/ &
+       fedrate,ipdr,smar,ipd,acer,ira,amtrate,nill,pdr,piic, &
+       oitcr,ettcr,eitcr,eoctcr, &
+       eortcr,ggctcr,ggetcr,lactcr,laetcr,tdtcr,idctcr, &
+       oitcab,ettcab,eitcab,eoctcab, &
+       eortcab,ggctcab,ggetcab,lactcab,laetcab,tdtcab,idctcab, &
+       eortcrp,eortcp
+
+       common/fed_ltax/cidc,coi,envscn,ce,amt,credamt, &
+       eec,nil,ggctc,ggetc,lactc,laetc,tdtc,idctc, &
+       oitc,ettc,eitc,eoctc,tcoti,tcoii,eortc
+
+       common/fed_itax/yr1,yr2
+
+!
+! ADDED ECONOMIC LEVERS
+!
+       REAL SD_RR_CHG      ! SCENARIO DEF ROYALTY RATE CHANGE
+       REAL SD_ST_CHG      ! SCENARIO DEF SEVERANCE TAX CHANGE
+
+       COMMON /SD_CHG/ SD_RR_CHG, SD_ST_CHG
+
+
+
+
+          common/taxes1/xroy 
+
+!***************************************************************
+!from technology.h
+!  these are the technology variables for the base and advanced cases
+!  filter levers
+       logical region_case(max_reg,max_tech)                      !filter for OLOGSS region
+       logical state_case(max_st,max_tech)                        !filter for onshore lower 48 states
+       logical process_case(max_proc,max_tech)                    !filter for oil & gas processes
+       logical oil_case(max_tech)                                 !filter for all oil processes
+       logical gas_case(max_tech)                                 !filter for all gas processes
+
+       real    min_depth_case(max_tech)
+       real    max_depth_case(max_tech)
+       real    min_api_case(max_tech)
+       real    max_api_case(max_tech)
+       real    min_perm_case(max_tech)
+       real    max_perm_case(max_tech)
+       real    min_rate_case(max_tech)
+       real    max_rate_case(max_tech)
+
+       common/lever_filter_case/region_case,state_case,process_case, &
+         oil_case,gas_case,min_depth_case,max_depth_case,min_api_case, &
+         max_api_case,min_perm_case,max_perm_case,min_rate_case, &
+         max_rate_case
+
+
+!  technology penetration curve levers
+       integer firstcom_fac(max_tech)                                   !first year of commercialization for technology
+       integer comyear_fac(max_tech)                                    !number of years of technology commercialization
+       integer tech_curve_fac(max_tech)                                 !technology commercialization curve type
+       real    mark_pen_fac(max_tech)                                   !ultimate market penetration
+       real    prob_rd_fac(max_tech)                                    !probability of successful R&D
+       real    prob_imp_fac(max_tech)                                   !probability of industrial implementation
+
+!  technology impact levers
+       real    drill_fac(max_tech)
+       real    explr_fac(max_tech)
+       real    paycont_fac(max_tech)
+       real    skin_fac(max_tech)
+       real    contin_fac(max_tech)
+       real    prod_ind_fac(max_tech)
+       real    rec_eff_fac(max_tech)
+       real    vol_swp_fac(max_tech)
+       real    inj_rate_fac(max_tech)
+       real    mob_rat_fac(max_tech)
+       real    co2_rat_fac(max_tech)
+       real    oil_rat_fac(max_tech)
+       real    res_chr_fac(max_tech)                                !mc change ver 11
+       
+       real    tech01_fac(max_tech)                                 !technology lever one   - mc change ver 9
+       real    tech02_fac(max_tech)                                 !technology lever two   - mc change ver 9
+       real    tech03_fac(max_tech)                                 !technology lever three   - mc change ver 9
+       real    tech04_fac(max_tech)                                 !technology lever four   - mc change ver 9
+       real    tech05_fac(max_tech)                                 !technology lever five   - mc change ver 9
+
+       common/lever_tech_case/firstcom_fac,comyear_fac,tech_curve_fac, &
+         mark_pen_fac,prob_rd_fac,prob_imp_fac,drill_fac,explr_fac, &
+         paycont_fac,skin_fac,contin_fac,prod_ind_fac,rec_eff_fac, &
+         vol_swp_fac,inj_rate_fac,mob_rat_fac,co2_rat_fac,oil_rat_fac,tech01_fac,&
+         tech02_fac,tech03_fac,tech04_fac,tech05_fac,res_chr_fac    !mc change ver 9
+
+!  economic cost change levers.  Note: ALL OF THESE LEVERS ARE FRACTIONS!!!!
+       real    chg_drl_fac(max_tech)                                !change in drilling cost
+       real    chg_stm_fac(max_tech)                                !change in stimulation cost
+       real    chg_comp_fac(max_tech)                               !change in completion cost
+       real    chg_fac_fac(max_tech)                                !change in facilities cost (both oil and gas)
+       real    chg_secconv_fac(max_tech)                            !change in secondary conversion cost
+       real    chg_injconv_fac(max_tech)                            !change in injector conversion cost
+       real    chg_facupg_fac(max_tech)                             !change in facilities upgrade cost
+       real    chg_wrk_fac(max_tech)                                !change in workover cost
+       real    chg_prdwat_fac(max_tech)                             !change in produced water handling plant cost
+       real    chg_chmpnt_fac(max_tech)                             !change in chemical handling plant cost
+       real    chg_plypnt_fac(max_tech)                             !change in polymer handling plant cost
+       real    chg_co2pnt_fac(max_tech)                             !change in CO2 injection/recycling plant cost
+       real    chg_stmgen_fac(max_tech)                             !change in steam generation and distribution cost
+       real    chg_foam_fac(max_tech)                               !change in fixed annual O & M cost
+       real    chg_voam_fac(max_tech)                               !change in variable annual O & M cost
+       real    chg_gna_fac(max_tech)                                !change in G & A cost
+       real    chg_annsec_fac(max_tech)                             !change in annual secondary operating cost
+       real    chg_lft_fac(max_tech)                                !change in lifting cost
+       real    chg_secwrk_fac(max_tech)                             !change in secondary workover cost
+       real    chg_injc_fac(max_tech)                               !change in injection cost
+       real    chg_injt_fac(max_tech)                               !change in injectant cost
+       real    chg_cmp_fac(max_tech)                                !change in compression cost
+
+!  economic cost to apply levers.  Note: ALL OF THESE LEVERS ARE K$ !!!!!!
+       real    chg_ooil_fac(max_tech)                               !change in oil O&M cost           !mc change ver 11
+       real    chg_ogas_fac(max_tech)                               !change in gas O&M cost           !mc change ver 11
+       real    chg_owat_fac(max_tech)                               !change in water O&M cost         !mc change ver 11
+       real    chg_oinj_fac(max_tech)                               !change in injection O&M cost     !mc change ver 11
+
+!  WELL LEVEL economic cost to apply levers.  Note: ALL OF THESE LEVERS ARE K$ !!!!!!
+       real    cst_drl_fac(max_tech)                                !WELL LEVEL cost to apply drilling technology
+       real    cst_stm_fac(max_tech)                                !WELL LEVEL cost to apply stimulation technology
+       real    cst_comp_fac(max_tech)                               !WELL LEVEL cost to apply completion technology
+       real    cst_fac_fac(max_tech)                                !WELL LEVEL cost to apply facilities technology(O&G)
+       real    cst_secconv_fac(max_tech)                            !WELL LEVEL cost to apply secondary conversion techn
+       real    cst_injconv_fac(max_tech)                            !WELL LEVEL cost to apply injector conversion techno
+       real    cst_facupg_fac(max_tech)                             !WELL LEVEL cost to apply facilities upgrade technol
+       real    cst_wrk_fac(max_tech)                                !WELL LEVEL cost to apply workover technology
+       real    cst_foam_fac(max_tech)                               !WELL LEVEL cost to apply fixed annual O & M technol
+       real    cst_voam_fac(max_tech)                               !WELL LEVEL cost to apply variable annual O & M tech
+       real    cst_gna_fac(max_tech)                                !WELL LEVEL cost to apply G & A technology
+       real    cst_annsec_fac(max_tech)                             !WELL LEVEL cost to apply secondary producer technol
+       real    cst_lft_fac(max_tech)                                !WELL LEVEL cost to apply lifting technology
+       real    cst_secwrk_fac(max_tech)                             !WELL LEVEL cost to apply secondary workover technol
+       real    cst_injc_fac(max_tech)                               !WELL LEVEL cost to apply injection technology
+       real    cst_cmp_fac(max_tech)                                !WELL LEVEL cost to apply compression technology
+
+!  PROJECT LEVEL economic cost to apply levers.  Note: ALL OF THESE LEVERS ARE K$ !!!!!!
+                   !MC CHANGE VER 11
+       real    cstp_drl_fac(max_tech)                               !PROJECT LEVEL cost to apply drilling technology
+                   !MC CHANGE VER 11
+       real    cstp_stm_fac(max_tech)                               !PROJECT LEVEL cost to apply stimulation technology
+                   !MC CHANGE VER 11
+       real    cstp_comp_fac(max_tech)                              !PROJECT LEVEL cost to apply completion technology
+                   !MC CHANGE VER 11
+       real    cstp_fac_fac(max_tech)                               !PROJECT LEVEL cost to apply facilities technology (
+                   !MC CHANGE VER 11
+       real    cstp_secconv_fac(max_tech)                           !PROJECT LEVEL cost to apply secondary conversion te
+                   !MC CHANGE VER 11
+       real    cstp_injconv_fac(max_tech)                           !PROJECT LEVEL cost to apply injector conversion tec
+                   !MC CHANGE VER 11
+       real    cstp_facupg_fac(max_tech)                            !PROJECT LEVEL cost to apply facilities upgrade tech
+                   !MC CHANGE VER 11
+       real    cstp_wrk_fac(max_tech)                               !PROJECT LEVEL cost to apply workover technology
+                   !MC CHANGE VER 11
+       real    cstp_foam_fac(max_tech)                              !PROJECT LEVEL cost to apply fixed annual O & M tech
+                   !MC CHANGE VER 11
+       real    cstp_voam_fac(max_tech)                              !PROJECT LEVEL cost to apply variable annual O & M t
+                   !MC CHANGE VER 11
+       real    cstp_gna_fac(max_tech)                               !PROJECT LEVEL cost to apply G & A technology
+                   !MC CHANGE VER 11
+       real    cstp_annsec_fac(max_tech)                            !PROJECT LEVEL cost to apply secondary producer tech
+                   !MC CHANGE VER 11
+       real    cstp_lft_fac(max_tech)                               !PROJECT LEVEL cost to apply lifting technology
+                   !MC CHANGE VER 11
+       real    cstp_secwrk_fac(max_tech)                            !PROJECT LEVEL cost to apply secondary workover tech
+                   !MC CHANGE VER 11
+       real    cstp_injc_fac(max_tech)                              !PROJECT LEVEL cost to apply injection technology
+                   !MC CHANGE VER 11
+       real    cstp_cmp_fac(max_tech)                               !PROJECT LEVEL cost to apply compression technology
+                   !MC CHANGE VER 11
+
+
+
+       common/lever_econ_case/chg_drl_fac,chg_stm_fac,chg_comp_fac, &
+         chg_secconv_fac,chg_injconv_fac,chg_facupg_fac,chg_wrk_fac, &
+         chg_prdwat_fac,chg_chmpnt_fac,chg_plypnt_fac,chg_co2pnt_fac, &
+         chg_stmgen_fac,chg_foam_fac,chg_voam_fac,chg_gna_fac, &
+         chg_annsec_fac,chg_lft_fac,chg_secwrk_fac,chg_injc_fac, &
+         chg_injt_fac,chg_cmp_fac,cst_drl_fac,cst_stm_fac,cst_comp_fac, &
+         cst_secconv_fac,cst_injconv_fac,cst_facupg_fac,cst_wrk_fac, &
+         cst_foam_fac,cst_voam_fac,cst_gna_fac,cst_annsec_fac, &
+         cst_lft_fac,cst_secwrk_fac,cst_injc_fac,cst_cmp_fac, &
+         chg_fac_fac,cst_fac_fac,   cstp_drl_fac,cstp_stm_fac,cstp_comp_fac,    &  !MC CHANGE VER 11
+         cstp_fac_fac,cstp_secconv_fac,cstp_injconv_fac,cstp_facupg_fac,        &  !MC CHANGE VER 11
+         cstp_wrk_fac,cstp_foam_fac,cstp_voam_fac,cstp_gna_fac,cstp_annsec_fac, &  !MC CHANGE VER 11
+         cstp_lft_fac,cstp_secwrk_fac,cstp_injc_fac,cstp_cmp_fac,chg_ooil_fac,  &  !MC CHANGE VER 11
+         chg_ogas_fac,chg_owat_fac,chg_oinj_fac                                               !mc change ver 11
+
+
+!  fraction of the patterns to be developed using advanced technology
+       REAL advanced(max_yr)
+
+       common/patt/advanced
+
+
+!  related to the resource table                                                                                 !mc change ver 7
+!    inferred reserves
+       character*9 rname(20000)                                     !reservoir identifier                        !mc change ver 7
+       integer     rproc(20000)                                     !reservoir process                           !mc change ver 7
+       integer     rreg(20000)                                      !reservoir region                            !mc change ver 7
+       real        rvalue(20000)                                    !reservoir technical production - oil        !mc change ver 7
+       real        rvalue2(20000)                                   !reservoir technical production - gas        !mc change ver 7
+       real        rdepth(20000)                                    !reservoir depth                             !mc change ver 7
+       integer     rcnt
+       common/rtable/rname,rproc,rreg,rvalue,rvalue2,rcnt,rdepth                                                 !mc change ver 7
+
+!    undiscovered resource
+       character*11 uname(20000)                                    !reservoir identifier                        !mc change ver 7
+       integer      ureg(20000)                                     !reservoir region                            !mc change ver 7
+       real         uvalue(20000)                                   !reservoir undiscovered resource - oil       !mc change ver 7
+       real         uvalue2(20000)                                  !reservoir undiscovered resource - gas       !mc change ver 7
+       real         udepth(20000)                                   !reservoir depth                             !mc change ver 7
+       integer      ucnt                                            !number of reservoirs                        !mc change ver 7
+       
+       common/utable/uname,ureg,uvalue,uvalue2,udepth,ucnt                                                       !mc change ver 7
+       
+       real  infresv(max_fuel,max_reg,max_yr)                       !inferred reserves (oil - mmbbl, gas - bcf)  !mc change ver 7
+       real  infarsv(max_fuel,max_reg,max_yr)                       !inferred AD Gas reserves                    !mc change ver 7
+       real   undres(max_fuel,max_reg,max_yr)                       !undiscovered resource (oil - mmbbl, gas - bcf) !mc change ver 7
+       real  undares(max_fuel,max_reg,max_yr)                       !undiscovered resource (AD gas - bcf, Lease condensates - mmbbl) !mc change ver 7
+       
+       real  iinfresv(max_fuel,max_reg)                             !initial inferred reserves                   !mc change ver 7
+       real  iinfarsv(max_fuel,max_reg)                             !initial inferred ad gas reserves            !mc change ver 7
+       real   iundres(max_fuel,max_reg)                             !initial undiscovered resource               !mc change ver 7
+       real  iundares(max_fuel,max_reg)                             !initial undiscovered resource               !mc change ver 7
+       common/rtable2/infresv,infarsv,undres,undares,iinfresv,iinfarsv,iundres,iundares                          !mc change ver 7
+
+!  inferred reserve adjustment factors
+       real infr_oil(L48RGN)                                        !adjustment factor for inferred reserves - oil -  BBbl  !mc change ver 7
+       real infr_adg(L48RGN)                                        !adjustment factor for inferred ad gas reserves - Tcf   !mc change ver 7
+       real infr_snag(L48RGN)                                       !adjustment factor for inferred shallow non-associated gas reserves - Tcf !mc change ver 7
+       real infr_dnag(L48RGN)                                       !adjustment factor for inferred deep non-associated gas reserves - Tcf    !mc change ver 7
+       real infr_tht(L48RGN)                                        !adjustment factor for inferred tight gas reserve - Tcf !mc change ver 7
+       real infr_cbm(L48RGN)                                        !adjustment factor for inferred coalbed methane reserve - Tcf !mc change ver 7
+       real infr_shl(L48RGN)                                        !adjustment factor for inferred shale gas reserves - Tcf !mc change ver 7
+       
+       common/infr_fac/infr_oil,infr_adg,infr_snag,infr_dnag,infr_tht,infr_cbm,infr_shl  !mc change ver 7
+
+!  marginal tax credit variables
+       logical marginal                                             !indicates if marginal well credit is applied
+       real m_oil1                                                  !bopd cutoff for marginal well status
+       real m_gas1                                                  !mcfd cutoff for marginal well status
+       real m_oil2                                                  !2nd bopd cutoff for marginal well status (involves
+       real m_wat                                                   !water cut for 2nd marginal well status (%)
+       real m_api                                                   !api gravity cutoff for heavy oil
+       real m_amt_oil,m_amt_gas                                     !respectively the oil and gas credit $/bbl, $/mcf
+       real m_vol_oil,m_vol_gas                                     !respectively the oil/gas volume (bopd/mcfd) to get
+       real marg_oil_min,marg_oil_max,marg_gas_min,marg_gas_max     !upper and lower oil/gas prices at which the credits
+
+       common/marg/marginal,m_oil1,m_gas1,m_oil2,m_wat,m_amt_oil,m_amt_gas,m_vol_oil,m_vol_gas
+       common/marg2/marg_oil_min,marg_oil_max,marg_gas_min,marg_gas_max,m_api
+
+
+!  Variables for hydraulic fracturing
+       logical fracture                                             !indicates if hydraulic fracturing is applied
+       logical hfrac_region(7)                                      !rgn controls for application of hydraulic frac
+       logical hfrac_proc(2)                                        !resource cntrl for application of hydraulic frac
+
+       real hfp_app                                                 !fraction of wells being hydraulically fractured
+       real hfp_cut                                                 !perm cutoff for application of "high perm" frac
+       real fw_low,fw_high                                          !fracture width (ft) - high and low
+       real fc_low,fc_high                                          !fracture conductivity (dimensionless) - high/low
+       real kf_low,kf_high                                          !fracture permeability (md) - high and low
+       real mxf_low,mxf_high                                        !maximum fracture length (ft) - high and low
+       real min_fd(2),max_fd(2),k_fd(2),a_fd(2),b_fd(2),c_fd(2)     !depth range and cost equation parameters
+       real chg_frac_fac(2)                                         !H-1 change in fracture cost (fr)
+       real cst_frac_fac(2)                                         !H-2 cost to apply fracture cost tech H-1 (K$)
+       real chg_fraclen_fac(2)                                      !H-3 change in fracture length (fr)
+       real cst_fraclen_fac(2)                                      !H-4 cost to apply frac length change tech (K$)
+       real hfrac_perm                                              !maximum applicable permeability (md)
+       real hfrac_api                                               !maximum applicable API gravity
+       real hfrac_depth                                             !maximum applicable depth (ft)
+
+       common/frac1/fracture,hfrac_region,hfrac_proc,hfp_app,hfp_cut,fw_low,fw_high,fc_low, &
+                    fc_high,kf_low,kf_high,mxf_low,mxf_high
+       common/frac2/min_fd,max_fd,k_fd,a_fd,b_fd,c_fd,chg_frac_fac,cst_frac_fac,chg_fraclen_fac, &
+                    cst_fraclen_fac,hfrac_perm
+       common/frac3/hfrac_api,hfrac_depth
+
+        LOGICAL IMARG(MAX_YR)
+
+! common block to transfer the marginal well status of the project - into arrayshift
+       common/test_marg2/imarg
+
+        REAL WATCRED(MAX_YR)
+! temporary common block for testing of the marginal well tax credit.  This variable is passed to the proforma.
+       common/test_marg/watcred
+!**************************************************
+!  cost adjustment parameters - capital
+!  Note: East coast (region 1) has been split into two sections: 1a - Appalachian, 1 - Non-Appalachian
+
+        real OIL_DWCM_F(max_reg+1,max_dep)           ! minimum depth range for oil well drilling cost equation
+        real oil_dwcD_F(max_reg+1,MAX_DEP)           ! maximum DEPTH RANGE for oil well drilling cost equation
+        real oil_dwck_F(max_reg+1,MAX_DEP)           ! constant for oil well drilling cost equation
+        real oil_dwca_F(max_reg+1,MAX_DEP)           ! a       "
+        real oil_dwcb_F(max_reg+1,MAX_DEP)           ! b       "
+        real oil_dwcc_F(max_reg+1,MAX_DEP)           ! c       "
+        real gas_dwcm_F(max_reg+1,max_dep)           ! minimum depth range for gas well drilling cost equation
+        real GAS_dwcD_F(max_reg+1,MAX_DEP)           ! maximum DEPTH RANGE for GAS well drilling cost equation
+        real gas_dwck_F(max_reg+1,MAX_DEP)           ! constant for gas well drilling cost equation
+        real gas_dwca_F(max_reg+1,MAX_DEP)           ! a       "
+        real gas_dwcb_F(max_reg+1,MAX_DEP)           ! b       "
+        real gas_dwcc_F(max_reg+1,MAX_DEP)           ! c       "
+        real dry_dwcm_F(max_reg+1,max_dep)           ! minimum depth range for dry well drilling cost equation
+        real DRY_dwcD_F(max_reg+1,MAX_DEP)           ! maximum DEPTH RANGE for DRY well drilling cost equation
+        real dry_dwck_F(max_reg+1,MAX_DEP)           ! constant for dryhole drilling cost equation
+        real dry_dwca_F(max_reg+1,MAX_DEP)           ! a       "
+        real dry_dwcb_F(max_reg+1,MAX_DEP)           ! b       "
+        real dry_dwcc_F(max_reg+1,MAX_DEP)           ! c       "
+        real nprm_F(max_reg+1,max_dep)               ! minimum DEPTH RANGE for NEW PRODUER EQ
+        real MPRD_F(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for NEW PRODUER EQ
+        real nprk_F(max_reg+1,MAX_DEP)               ! constant for New producer equipment
+        real npra_F(max_reg+1,MAX_DEP)               ! a       "
+        real nprb_F(max_reg+1,MAX_DEP)               ! b       "
+        real nprc_F(max_reg+1,MAX_DEP)               ! c       "
+        real wrkm_F(max_reg+1,max_dep)               ! minimum depth range for workover cost
+        real WRKD_F(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for workover cost    
+        real WRKK_F(max_reg+1,MAX_DEP)               ! constant for workover cost 
+        real WRKA_F(max_reg+1,MAX_DEP)               ! a       "                
+        real WRKB_F(max_reg+1,MAX_DEP)               ! b       "                 
+        real WRKC_F(max_reg+1,MAX_DEP)               ! c       "                  
+        real pswm_F(max_reg+1,max_dep)               ! minimum depth range for producer to injector
+        real pswD_F(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for producer to injector
+        real pswk_F(max_reg+1,MAX_DEP)               ! constant for primary to secondary
+        real pswa_F(max_reg+1,MAX_DEP)               ! a       "
+        real pswb_F(max_reg+1,MAX_DEP)               ! b       "
+        real pswc_F(max_reg+1,MAX_DEP)               ! c       "
+        real psim_F(max_reg+1,max_dep)               ! minimum depth range for producer to injector
+        real psiD_F(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for producer to injector
+        real psik_F(max_reg+1,MAX_DEP)               ! constant for producer to injector
+        real psia_F(max_reg+1,MAX_DEP)               ! a       "
+        real psib_F(max_reg+1,MAX_DEP)               ! b       "
+        real psic_F(max_reg+1,MAX_DEP)               ! c       "
+
+        REAL FACUPM_F(MAX_REG+1,MAX_DEP)             ! minimum depth range for facilities upgrade costs
+        real facupd_F(max_reg+1,max_dep)             ! maximum depth range for facilities upgrade costs
+        real facupk_F(max_reg+1,max_dep)             ! constant for facilities upgrade costs
+        real facupa_F(max_reg+1,max_dep)             ! a       "
+        real facupb_F(max_reg+1,max_dep)             ! b       "
+        real facupc_F(max_reg+1,max_dep)             ! c       "
+
+        REAL FACgM_F(MAX_REG+1,MAX_DEP)             ! minimum depth range for gas facilities costs
+        real facgd_F(max_reg+1,max_dep)             ! maximum depth range for gas facilities costs
+        real facgk_F(max_reg+1,max_dep)             ! constant for gas facilities costs
+        real facga_F(max_reg+1,max_dep)             ! a       "
+        real facgb_F(max_reg+1,max_dep)             ! b       "
+        real facgc_F(max_reg+1,max_dep)             ! c       "
+
+!  cost parameters - operating
+        real omom_F(max_reg+1,max_dep)               ! minimum depth range for fixed annual operating cost for oil
+        real omoD_F(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for fixed annual operating cost for oil
+        real omok_F(max_reg+1,MAX_DEP)               ! constant for fixed annual operating cost for oil
+        real omoa_F(max_reg+1,MAX_DEP)               ! a       "
+        real omob_F(max_reg+1,MAX_DEP)               ! b       "
+        real omoc_F(max_reg+1,MAX_DEP)               ! c       "
+        real omlm_F(max_reg+1,max_dep)               ! minimum depth range for annual operating cost for oil
+        real omlD_F(max_reg+1,MAX_DEP)               ! DEPTH RANGE for fixed annual operating cost for oil
+        real omlk_F(max_reg+1,MAX_DEP)               ! constant for fixed annual operating cost for oil
+        real omla_F(max_reg+1,MAX_DEP)               ! a       "
+        real omlb_F(max_reg+1,MAX_DEP)               ! b       "
+        real omlc_F(max_reg+1,MAX_DEP)               ! c       "
+        real omgm_F(max_reg+1,max_dep)               ! minimum depth range for fixed annual O&M cost gas
+        real OMGD_F(max_reg+1,MAX_DEP)               ! maximum DEPTH RANGE for fixed annual O&M Cost Gas
+        real OMGK_F(max_reg+1,MAX_DEP)               ! constant for fixed annual O&M Cost Gas
+        real OMGA_F(max_reg+1,MAX_DEP)               ! a       "
+        real OMGB_F(max_reg+1,MAX_DEP)               ! b       "
+        real OMGC_F(max_reg+1,MAX_DEP)               ! c       "
+        real opsecm_F(max_reg+1,max_dep)             ! minimum depth range for fixed annual operating cost for secondary operations
+        real opsecD_F(max_reg+1,MAX_DEP)             ! maximum DEPTH RANGE for fixed annual operating cost for secondary operations
+        real opseck_F(max_reg+1,MAX_DEP)             ! constant for fixed annual operating cost for secondary operations
+        real opseca_F(max_reg+1,MAX_DEP)             ! a       "
+        real opsecb_F(max_reg+1,MAX_DEP)             ! b       "
+        real opsecc_F(max_reg+1,MAX_DEP)             ! c       "
+        real opinjm_F(max_reg+1,max_dep)             ! minimum depth range for variable annual operating cost for injection
+        real opinjD_F(max_reg+1,MAX_DEP)             ! maximum DEPTH RANGE for variable annual operating cost for injection
+        real opinjk_F(max_reg+1,MAX_DEP)             ! constant for variables annual operating cost for injection
+        real opinja_F(max_reg+1,MAX_DEP)             ! a       "
+        real opinjb_F(max_reg+1,MAX_DEP)             ! b       "
+        real opinjc_F(max_reg+1,MAX_DEP)             ! c       "
+        real omlftm_F(max_reg+1,max_dep)             ! minimum depth range for lifting costs
+        real omlftD_F(max_reg+1,MAX_DEP)             ! maximum DEPTH RANGE for lifting costs
+        real omlftk_F(max_reg+1,MAX_DEP)             ! constant for lifting costs
+        real omlfta_F(max_reg+1,MAX_DEP)             ! a       "
+        real omlftb_F(max_reg+1,MAX_DEP)             ! b       "
+        real omlftc_F(max_reg+1,MAX_DEP)             ! c       "
+
+        real omswrm_F(max_reg+1,max_dep)             ! minimum depth range for variable operating cost for secondary workover
+        real omswrd_F(max_reg+1,max_dep)             ! maximum depth range for variable operating cost for secondary workover
+        real omswrk_F(max_reg+1,max_dep)             ! constant for variable operating cost for secondary workover
+        real omswra_F(max_reg+1,max_dep)             ! a       "
+        real omswrb_F(max_reg+1,max_dep)             ! b       "
+        real omswrc_F(max_reg+1,max_dep)             ! c       "
+
+
+        common/costadj_param/oil_dwcd_F,oil_dwck_F,oil_dwca_F,oil_dwcb_F,oil_dwcc_F, &
+          gas_dwcd_F,gas_dwck_F,gas_dwca_F,gas_dwcb_F,gas_dwcc_F,dry_dwck_F, &
+          dry_dwca_F,dry_dwcb_F,dry_dwcc_F,dry_dwcd_F,nprk_F,npra_F,nprb_F,nprc_F,mprd_F &
+          ,wrkd_F,wrkk_F,wrka_F,wrkb_F,wrkc_F,pswk_F,pswa_F,pswb_F,pswc_F,pswd_F,psid_F,psia_F, &
+          psib_F,psic_F,psik_F,nprm_F,wrkm_F,pswm_F,psim_F, &
+          facupm_F,facupd_F,facupk_F,facupa_F,facupb_F,facupc_F,facgm_F,facgd_F,facgk_F, &
+          facgb_F,facgc_F,facga_F
+
+        common/costadj_param2/omod_F,omok_F,omoa_F,omob_F,omoc_F,omgd_F,omgk_F, &
+          omga_F,omgb_F,omgc_F,opsecd_F,opseck_F,opseca_F,opsecb_F,opsecc_F,omld_F,omlm_F, &
+          omlk_F,omla_F,omlb_F,omlc_F,opinjd_F,opinjk_F,opinja_F,opinjb_F,opinjc_F, &
+          omom_F,omgm_F,opsecm_F,opinjm_F,omlftm_F,omlftd_F,omlftk_F, &
+          omlfta_F,omlftb_F,omlftc_F,omswrm_F,omswrd_F,omswrk_F,omswra_F,omswrb_F,omswrc_F
+
+        real fac_m(MAX_YR)
+        real dry_m(MAX_YR)
+        real npr_m(MAX_YR)
+        real wrk_m(MAX_YR)
+        real psw_m(MAX_YR)
+        real psi_m(MAX_YR)
+        real omo_m(MAX_YR)
+        real opsec_m(MAX_YR)
+        real oml_m(MAX_YR)
+        real swk_m(MAX_YR)
+
+        common/costadj_param3/fac_m,dry_m,npr_m,wrk_m,psw_m,psi_m,omo_m,opsec_m,oml_m,swk_m
+
+        REAL LF_APIVOL(MNCRUD,MNUMYR)     ! volume weighted API gravity for average heat content
+        REAL LF_CRDVOL(MNCRUD,MNUMYR)     ! volume weighted API gravity for average heat content
+        REAL MissedCRDPRD(MNUMOR,MNCRUD,MNUMYR) !
+        REAL LF_CRDPRD(MNUMOR,MNCRUD,MNUMYR) !
+        REAL LF_CRDPRD_PADD(MNUMPR,MNCRUD,MNUMYR) ! added for totaling by PADDs using MNUMPR
+        REAL NGPL16(16,MNUMYR)            ! Natural gas plant output by 16 regions -- total
+        REAL ETHANE16(16,MNUMYR)          ! Natural gas plant output by 16 regions -- ethane
+        REAL PROPANE16(16,MNUMYR)         ! Natural gas plant output by 16 regions -- propane
+        REAL BUTANE16(16,MNUMYR)          ! Natural gas plant output by 16 regions -- butane
+        REAL ISOBUTANE16(16,MNUMYR)       ! Natural gas plant output by 16 regions -- isobutane
+        REAL PENTANES16(16,MNUMYR)        ! Natural gas plant output by 16 regions -- pentanes plus
+        REAL NGPLPRD(OGDIST,MNUMYR)       ! Natural gas plant output by NGPL region
+        REAL NGPLPRDET(OGDIST,MNUMYR)     ! Ethane output by NGPL region
+        REAL NGPLPRDPR(OGDIST,MNUMYR)     ! Propane output by NGPL region
+        REAL NGPLPRDBU(OGDIST,MNUMYR)     ! Butane output by NGPL region
+        REAL NGPLPRDIS(OGDIST,MNUMYR)     ! Isobutane output by NGPL region
+        REAL NGPLPRDPP(OGDIST,MNUMYR)     ! Propane Plus output by NGPL region
+        REAL ETREJFAC(max_reg,MNUMYR)     ! Percent of ethane rejected by OGSM region
+        REAL ETHANEMAX(max_reg,MNUMYR)    ! Maximum volume of ethane recovered (mb/d)
+        REAL ETHANEREJ(max_reg,MNUMYR)    ! Volume of ethane rejected by OGSM region
+        REAL ETHANEREC(max_reg,MNUMYR)    ! Volume of ethane recovered by OGSM region
+
+        common /oglfmm/   LF_APIVOL, MissedCRDPRD, LF_crdvol, LF_crdprd, LF_CRDPRD_PADD, ngplprd, &
+                          ngplprdet, ngplprdpr, ngplprdbu, ngplprdis, ngplprdpp, ethanerej, ethanemax, &
+                          etrejfac, ethanerec, ngpl16, ethane16, propane16, butane16, isobutane16, pentanes16
+
+! variables for the rig equations
+       integer dreg(7)                            !region number for rig equations                               !mc change 11.10
+       real drega(7)                              !coefficient for rig equations                                 !mc change 11.10
+       real dregb(7)                              !coefficient for rig equations                                 !mc change 11.10
+       real dreg_util                             !rig utilization (fr)                                          !mc change 11.10
+       real dreg_rate                             !average penetration rate for rig                              !mc change 11.10
+       real rigs_reg(7)                           !regional number of rigs available                             !mc change 11.10
+       real rigs_year(7,max_yr)
+       real rigs_drill(7,max_rdr)                 !cum regional ftg available (ft) by depth class (1-max_rdr)    !mc change 11.10
+       real rigs_class(7,max_rdr)                 !regional footage available (ft) by depth class                !mc change 11.10
+       real rigs_used(7,max_rdr)                  !regional footage used by depth class                          !mc change 11.10
+       real rigs_acct(7,max_rdr,max_yr)           !archived/reportable footage used by depth class (ft/class/yr) !mc change 11.10
+       real rigs_conc(max_rdr)                    !percentage of rigs dedicated to a single play in a depth class!mc change 11.10
+       real rigs_frac(7,max_yr)                   !regional fraction of footage which is applied to gas wells - based off of constraints !mc change 11.10
+       logical single(max_res)                    !on/off switch for evaluating one or more wells in a project   !mc change 11.10
+       real wltrack(max_res,max_yr)               !mc change 11.10
+       character*11 wltrack_n(max_res)            !mc change 11.10
+
+       common/rigeq/dreg,drega,dregb,dreg_util,dreg_rate,rigs_reg,rigs_drill,rigs_class,rigs_used,rigs_acct,  &
+                    single,rigs_conc,wltrack,wltrack_n,rigs_year !mc change 11.10
+       common/rigeq2/rigs_frac
+       
+!********************************************************
+! OIL SHALE (OGFOR_OS) VARIABLE DECLARATIONS
+! Moved from wellogs.f 07/17/14
+
+	REAL OS_GALLON_TON                        ! Oil Shale Per Ton
+  	REAL OS_PRJ_SIZE                          ! Oil Shale Plant Size (barrels/day)
+  	REAL OS_CONV_EFF                          ! Oil Shale Conversion Efficiency (Percent of oil recovered from rock)
+  	REAL OS_MINE_CST_TON                      ! Oil Shale underground mining costs, 2004 dollars per ton of Rock
+  	REAL OS_PLANT_INVEST                      ! Oil Shale Retorting and Upgrading Plant Costs, 2004 dollars
+  	REAL OS_PLANT_OPER_CST                    ! Oil Shale Plant Operating Costs, 2004 dollars
+  	REAL OS_CAP_FACTOR                        ! Oil Shale Plant Capacity Factor (Percent Operating Per Year)
+  	REAL OS_TECH_RATE                         ! Oil Shale Project Technological Progress Rate
+  	REAL OS_ROYAL_RATE                        ! Oil Shale Royalty Rate (Percent of revenues per year)
+  	REAL OS_CORP_TAX_RATE                     ! Oil Shale Corp. Tax Rate, 35% Federal, 3% State
+  	REAL OS_EQUITY_SHARE                      ! Oil Shale Equity Percent of Total Capital Structure, Debt Share = 1 - Equity
+  	REAL OS_EQUITY_VOL                        ! Oil Shale Equity Volatility Beta
+  	REAL OS_EQUITY_PREMIUM                    ! Oil Shale Equity Market Risk Premium (percent)
+  	REAL OS_DEBT_PREMIUM                      ! Oil Shale Debt Risk Premium (percent)
+  	REAL OS_DISCOUNT_RATE                     ! Oil Shale Discount Rate (Real)
+  	REAL OS_MAX_PROD                          ! Oil Shale maximum production (bbls per day)
+  	REAL OS_GAS_PRICE                         ! Oil Shale Natural Gas Price for Production, used in DCF Calc
+  	REAL OS_GAS_PROD                          ! Oil Shale Gas Production (Mcf per Year at 50,000 bpd)
+  	REAL OS_ELEC_PRICE                        ! Oil Shale Electricity Price for Consumption, used in DCF Calc
+  	REAL OS_ELEC_CONSUMP                      ! Oil Shale Electricity Consumption Per Year, used in DCF Calc (Kwh per Year at 50,000 bpd)
+  	REAL OS_EMETAX                            ! Oil Shale CO2 emissions tax in 2004 dollars per metric ton of CO2, used in DCF Calc
+  	REAL OS_CO2EMISS                          ! Oil Shale CO2 emissions (Metric tonnes per day at 50,000 bpd)
+  	REAL OS_PENETRATE_YR                      ! Minimum number of years to reach full penetration, used in penetration algorithm (July 2010)
+  	REAL OS_EXTRARISK                         ! Risk Premium due to possible carbon legislation
+
+  	INTEGER OS_PRJ_LIFE                       ! Oil Shale Project Life
+  	INTEGER OS_PRJ_CONST                      ! Oil Shale Project Construction Period
+  	INTEGER OS_START_YR                       ! Earliest calendar year oil shale project can be built
+  	INTEGER OS_PLANTS                         ! Number of Oil Shale Plants in Operation and under Construction (July 2010)
+  	INTEGER OS_PLANTS_NEW                     ! Number of New Plants being built in single year
+  	INTEGER OS_PLANTS_CONST                   ! Number of Oil Shale Plants That Have Gone Into Construction
+  	INTEGER OS_MAX_BLD                        ! Maximum number of Oil Shale Plants That can go Into Construction
+
+  	REAL OS_MINE_CST                 	  ! Initial annual mining cost per barrel (2004 $), unaffected by tech progress
+  	REAL OS_MINE_CST_BBL(MNUMYR+5)         	  ! Oil shale mining cost per bbl, with technological progress, (2004 $/bbl)
+  	REAL OS_INVEST(MNUMYR+5)               	  ! Oil Shale Retorting and Upgrading Investment Cost For Plant Initiated in Year "T", with tech progress
+  	REAL OS_OPER_CST(MNUMYR+5)             	  ! Oil Shale Plant Operating Costs for Plant Initiated in Year "T", with tech progress
+  	REAL OS_PROJ_OPROD(MNUMYR-10,MNUMYR+5)    ! Oil Shale project production with 25 rows for each year from 2005 through 2030
+  	                                                       !             66 columns (to 2055) to permit examination of production past 2030
+  	REAL OS_PROJ_GPROD(MNUMYR-10,MNUMYR+5)    ! Oil Shale project natural gas production with 25 rows for each year from 2005 through 2030
+  	                                                       !             66 columns (to 2055) to permit examination of production past 2030
+  	REAL OS_PROJ_ELCONS(MNUMYR-10,MNUMYR+5)   ! Oil Shale project electricity consumption with 25 rows for each year from 2005 through 2030
+  	                                                       !             66 columns (to 2055) to permit examination of production past 2030
+  	REAL DCF                         	  ! Net discounted cash flow of project considered in year "TM1"
+  	REAL OS_OPROD                    	  ! Total projected Oil Shale production in the current model year
+  	REAL OS_GPROD                    	  ! Total projected Natural Gas production in the current model year
+  	REAL OS_ELCONS                   	  ! Total projected Electricity consumption in the current model year (kwh per year)
+  	REAL OS_DCF                      	  ! Discounted cash flow
+  	REAL OS_PROFIT                   	  ! Relative Profitability = OS_DCF/OS_PLANT_INVEST; determines rate of market penetration (July 2010)
+  	REAL MAX_PROD                    	  ! Temporary variable based on OS_MAX_PROD and modulated by OS_PROFIT (July 2010)
+  	REAL MAX_PROD1                   	  ! Temporary market penetration variable 
+	
+  	INTEGER OS_YEARS(MNUMYR+5)          	  ! Matrix with years running from 1990 to 2055
+  	INTEGER TM1                         	  ! Local year counter set to CURIYR (current year being run), Values = 1,2,3,etc.
+  	INTEGER TM2                         	  ! Local year counter which runs through some or all years.
+  	INTEGER ROW                         	  ! Number of matrix rows
+  	INTEGER COL                         	  ! Number of matrix columns
+  	INTEGER OS_WRITE                    	  ! Report writer variable, ON=1, OFF=0
+  	
+  	COMMON/os1/OS_GALLON_TON,OS_PRJ_SIZE,OS_CONV_EFF,OS_MINE_CST_TON,OS_PLANT_INVEST,OS_PLANT_OPER_CST,OS_CAP_FACTOR, &
+  			OS_TECH_RATE,OS_ROYAL_RATE,OS_CORP_TAX_RATE,OS_EQUITY_SHARE,OS_EQUITY_VOL,OS_EQUITY_PREMIUM, &
+  			OS_DEBT_PREMIUM,OS_DISCOUNT_RATE,OS_MAX_PROD,OS_GAS_PRICE,OS_GAS_PROD,OS_ELEC_PRICE,OS_ELEC_CONSUMP
+  	
+  	COMMON/os2/OS_EMETAX,OS_CO2EMISS,OS_PENETRATE_YR,OS_EXTRARISK
+  			
+  	COMMON/os3/OS_PRJ_LIFE,OS_PRJ_CONST,OS_START_YR,OS_PLANTS,OS_PLANTS_NEW,OS_PLANTS_CONST,OS_MAX_BLD
+  	
+  	COMMON/os4/OS_MINE_CST,OS_MINE_CST_BBL,OS_INVEST,OS_OPER_CST,OS_PROJ_OPROD,OS_PROJ_GPROD, &
+  			OS_PROJ_ELCONS,DCF,OS_OPROD,OS_GPROD,OS_ELCONS,OS_PROFIT,MAX_PROD,MAX_PROD1
+  			
+  	COMMON/os5/OS_YEARS,TM1,TM2,ROW,COL,OS_WRITE

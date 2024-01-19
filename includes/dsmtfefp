@@ -1,0 +1,32 @@
+!  $Header: N:/default/includes/RCS/dsmtfefp,v 1.2 1999/12/19 20:12:26 DSA Exp $
+!================================ (DSMTFEFP) ===================================
+!        This INCLUDE file is used for communication with the EFP module
+!===============================================================================
+! SecLoad(MNUMNR,MAXSEC) - Total sectoral load for current year, by NERC reg
+! SecMonLdPeak(MNUMNR,MAXSEC,MAXMON,2) - Coincident/Noncoincident sectoral
+!                             monthly peaks for a current year by NERC regions
+! SecAnnulPeak(MNUMNR,MAXSEC,2) - Coincident/Noncoincident sectoral annual peak
+!                             for current year by NERC regions
+! SecAnnPeaAvPCP(MNUMNR,MAXSEC) - Avereges of sectorial loads from top NpeakH
+!                 system peak (real) hours (coincident peaks) for "PCP purposes"
+! SystemLF(MNUMNR) - system load factor for CURIYR and each NERC region
+! NpeakH - number of hours used for calculation of SecAnnPeakAvPCP values
+! SysPeakHour(MAXPCPH) - NpeakH system peak load hours in descending order
+! DSMAnnualCost(MNUMNR,MAXSEC) - Annual DSM costs by sector
+! SECTLDCBLEN(MAXEFDSS,MAXEFDS,MAXNRG,MAXSEC) - Sectorial LDC Block Energy
+!            dimensions: block in season, season, EMM region, sector
+      REAL*4 DSMAnnualCost(MNUMNR,4)
+      REAL*4 TotSecLoad(MNUMNR,4),SystemLF(MNUMNR)
+      REAL*4 SecMonLdPeak(MNUMNR,4,12,2)
+      REAL*4 SecAnnualPeak(MNUMNR,4,2)
+      REAL*4 SecAnnPeaAvPCP(MNUMNR,4)
+      INTEGER*2 SysPeakHour(20)
+      INTEGER*2 NpeakH
+      REAL*4 SECTLDCBLEN(MAXEFDSS,MAXEFDS,MAXNRG,MAXSEC)
+      COMMON/DSMTFEFP/TotSecLoad,SystemLF,SecMonLdPeak, &
+      SecAnnualPeak,SecAnnPeaAvPCP,SysPeakHour,NpeakH
+      COMMON/DSMTFEFr/DSMAnnualCost
+      COMMON/DSMTFEFs/SECTLDCBLEN
+!   Equivalence for FILER used for data storage
+      REAL DSMEFDAT(MNUMNR*(4*2+1+4*12*2+4*2)+20+1)
+      EQUIVALENCE (DSMEFDAT,TotSecLoad)

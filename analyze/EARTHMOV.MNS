@@ -1,0 +1,140 @@
+1
+ 
+          
+         ==============================
+         M I N O S    5.3    (Sep 1988)
+         ==============================
+
+ OPTIONS file
+ ------------
+      BEGIN
+      MINIMIZE                                                                
+      SCALE NO                                                                
+      ROWS       150                                                          
+      COLUMNS    360                                                          
+      ELEMENTS  1400                                                          
+      MPS FILE   11                                                           
+      END                                                                     
+
+ Reasonable WORKSPACE limits are         0 ...    8883
+ Actual     WORKSPACE limits are         0 ...   48300 ...   48300  words of  Z.
+1
+ MPS file
+ --------
+      1    NAME          EARTHMOV
+      2    ROWS                  
+     13    COLUMNS               
+     54    RHS                   
+     64    RANGES                
+     65    BOUNDS                
+     66    ENDATA                
+
+
+
+ Names selected
+ --------------
+ OBJECTIVE      COST     (MIN)       1
+ RHS            RHSMODL              9
+ RANGES                              0
+ BOUNDS                              0
+
+ PARTIAL PRICE section size (A)            2
+ PARTIAL PRICE section size (I)            1
+
+ Nonzeros allowed for in LU factors    31980
+
+
+
+ Matrix statistics
+ -----------------
+               Total      Normal        Free       Fixed     Bounded
+ Rows             10           0           1           9           0
+ Columns          20          20           0           0           0
+
+ No. of matrix elements       60     Density      30.000
+ Biggest and smallest coeffs      1.0000E+00  1.0000E+00
+ (excluding free rows and RHS)
+1
+ 
+ Initial basis
+ -------------
+
+ No basis file supplied
+
+
+ CRASH option  1
+ Free rows     1     Free cols     0     Pass 2 (E rows)     8     Pass 3     0     Remainder     1
+
+
+
+ Iterations
+ ----------
+
+   Itn  Nopt  Ninf  Sinf,Objective     LU
+     1     1     1  3.00000000E+01     26
+ 
+ Itn     3 -- Feasible solution.  Objective =   1.530000000E+05
+ 
+ Itn    11 --      1  nonbasics set on bound, basics recomputed
+ 
+ Itn    11 -- Feasible solution.  Objective =   1.310000000E+05
+ 
+1
+ 
+ EXIT -- OPTIMAL SOLUTION FOUND
+
+ No. of iterations                  11     Objective value      1.3100000000E+05
+
+ No. of degenerate steps             2     Percentage                      18.18
+
+ Norm of X                   2.396E+04     Norm of PI                  2.562E+03
+1
+ NAME           EARTHMOV              Objective value    1.3100000000E+05
+
+ Status         OPTIMAL SOLN          Iteration   11     Superbasics    0
+
+ OBJECTIVE      COST     (MIN)
+ RHS            RHSMODL 
+ RANGES                 
+ BOUNDS                 
+ 
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+      21  COST        BS    131000.00000   -131000.00000           NONE            NONE         -1.00000      1
+      22  F2          EQ        30.00000          .00000        30.00000        30.00000      1600.00000      2
+      23  F4          EQ        20.00000          .00000        20.00000        20.00000      1600.00000      3
+      24  F5          EQ        10.00000          .00000        10.00000        10.00000      1500.00000      4
+      25  F8          EQ        10.00000          .00000        10.00000        10.00000      1600.00000      5
+      26  F9          EQ        10.00000          .00000        10.00000        10.00000      1700.00000      6
+      27  C1       D  BS        20.00000          .00000        20.00000        20.00000          .00000      7
+      28  C3       A  EQ        20.00000          .00000        20.00000        20.00000          .00000      8
+      29  C6          EQ        30.00000          .00000        30.00000        30.00000       100.00000      9
+      30  C7       A  EQ        10.00000          .00000        10.00000        10.00000          .00000     10
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  H12         BS        20.00000      1600.00000          .00000           NONE           .00000     11
+       2  H14         LL          .00000      1800.00000          .00000           NONE        200.00000     12
+       3  H15         LL          .00000      1900.00000          .00000           NONE        400.00000     13
+       4  H18         LL          .00000      2200.00000          .00000           NONE        600.00000     14
+       5  H19         LL          .00000      2300.00000          .00000           NONE        600.00000     15
+       6  H32         BS        10.00000      1600.00000          .00000           NONE           .00000     16
+       7  H34         BS        10.00000      1600.00000          .00000           NONE           .00000     17
+       8  H35         LL          .00000      1700.00000          .00000           NONE        200.00000     18
+       9  H38         LL          .00000      2000.00000          .00000           NONE        400.00000     19
+      10  H39         LL          .00000      2100.00000          .00000           NONE        400.00000     20
+      11  H62         LL          .00000      1900.00000          .00000           NONE        200.00000     21
+      12  H64         BS        10.00000      1700.00000          .00000           NONE           .00000     22
+      13  H65         BS        10.00000      1600.00000          .00000           NONE           .00000     23
+      14  H68      A  LL          .00000      1700.00000          .00000           NONE           .00000     24
+      15  H69         BS        10.00000      1800.00000          .00000           NONE           .00000     25
+      16  H72         LL          .00000      2000.00000          .00000           NONE        400.00000     26
+      17  H74         LL          .00000      1800.00000          .00000           NONE        200.00000     27
+      18  H75         LL          .00000      1700.00000          .00000           NONE        200.00000     28
+      19  H78         BS        10.00000      1600.00000          .00000           NONE           .00000     29
+      20  H79      D  BS          .00000      1700.00000          .00000           NONE           .00000     30
+ ENDRUN

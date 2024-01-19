@@ -1,0 +1,443 @@
+!  $Header: m:/default/includes/RCS/uecpout,v 1.36 2018/06/18 12:53:43 dh5 Exp $
+!  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!     INCLUDE(EMM$PARM)
+!
+!  UECP  OUTPUT VARIABLES
+
+!      In 1st index of capacity additions, 1=planned, 2=unplanned
+
+      REAL UADDCSU(2,MNUMNR,MNUMYR) !  1 Util Coal Steam Additions by Nerc
+      REAL UADDIGU(2,MNUMNR,MNUMYR) !  2 Util Advanced Coal Steam Additions by Nerc
+      REAL UADDISU(2,MNUMNR,MNUMYR) !  3 Util Advanced Coal Steam Additions by Nerc
+      REAL UADDOSU(2,MNUMNR,MNUMYR) !  4 Util Other Steam Additions by Nerc
+      REAL UADDCCU(2,MNUMNR,MNUMYR) !  5 Util Combined Cycle Additions by Nerc
+      REAL UADDACU(2,MNUMNR,MNUMYR) !  6 Util Advanced Combined Cycle Additions by Nerc
+      REAL UADDASU(2,MNUMNR,MNUMYR) !  7 Util Advanced Combined Cycle Additions by Nerc
+      REAL UADDCTU(2,MNUMNR,MNUMYR) !  8 Util Comb. Turb. Additions by Nerc
+      REAL UADDATU(2,MNUMNR,MNUMYR) !  9 Util Advanced Comb. Turb. Additions by Nerc
+      REAL UADDNUU(2,MNUMNR,MNUMYR) ! 10 Util Nuclear Additions by Nerc
+      REAL UADDFCU(2,MNUMNR,MNUMYR) ! 11 Util Fuel Cell Addts by NERC
+      REAL UADDRNU(2,MNUMNR,MNUMYR) ! 12 Util Renew Additions (ex PS) by Nerc
+      REAL UADDPSU(2,MNUMNR,MNUMYR) ! 13 Util Pump Storage Additions by Nerc
+      REAL UADDDBU(2,MNUMNR,MNUMYR) ! 14 Util DGEN <Base> Additions by Nerc
+      REAL UADDDPU(2,MNUMNR,MNUMYR) ! 15 Util DGEN <Peak> Additions by Nerc
+      REAL UADDTLU(2,MNUMNR,MNUMYR) ! 16 Util Total Additions by Nerc
+      REAL UADDCSN(2,MNUMNR,MNUMYR) ! 17 NonUtil Coal Steam Addts by Nerc
+      REAL UADDIGN(2,MNUMNR,MNUMYR) ! 18 NonUtil Advanced Coal Steam Addts by Nerc
+      REAL UADDISN(2,MNUMNR,MNUMYR) ! 19 NonUtil Advanced Coal Steam Addts by Nerc
+      REAL UADDOSN(2,MNUMNR,MNUMYR) ! 20 NonUtil Other Steam Addts by Nerc
+      REAL UADDCCN(2,MNUMNR,MNUMYR) ! 21 NonUtil Combined Cycle Addts      by Nerc
+      REAL UADDACN(2,MNUMNR,MNUMYR) ! 22 NonUtil Advanced Combined Cycle Addts      by Nerc
+      REAL UADDASN(2,MNUMNR,MNUMYR) ! 23 NonUtil Advanced Combined Cycle Addts      by Nerc
+      REAL UADDFCN(2,MNUMNR,MNUMYR) ! 24 NonUtil Fuel Cell Addts by NERC
+      REAL UADDCTN(2,MNUMNR,MNUMYR) ! 25 NonUtil Comb. Turb. Addts by Nerc
+      REAL UADDATN(2,MNUMNR,MNUMYR) ! 26 NonUtil Advanced Comb. Turb. Addts by Nerc
+      REAL UADDNUN(2,MNUMNR,MNUMYR) ! 27 NonUtil Nuclear Addts by Nerc
+      REAL UADDRNN(2,MNUMNR,MNUMYR) ! 28 NonUtil Renew Addts by Nerc
+      REAL UADDPSN(2,MNUMNR,MNUMYR) ! 29 NonUtil Pump Storage Addts by Nerc
+      REAL UADDDBN(2,MNUMNR,MNUMYR) ! 30 NonUtil DGEN <Base> Addts by Nerc
+      REAL UADDDPN(2,MNUMNR,MNUMYR) ! 31 NonUtil DGEN <Peak> Addts by Nerc
+      REAL UADDTLN(2,MNUMNR,MNUMYR) ! 32 NonUtil Total Addts by Nerc
+      REAL UADDP2(2,MNUMNR,MNUMYR)  ! 33 Total P2 Addts by Nerc
+
+!  Outputs to renewables modules
+
+      REAL UADDHYT(MNUMNR,MNUMYR+ECP_D_XPH) !  1 Total hydro additions by Nerc
+      REAL UADDGET(MNUMNR,MNUMYR+ECP_D_XPH) !  2 Tot Geoth. Additions by Nerc
+      REAL UADDMST(MNUMNR,MNUMYR+ECP_D_XPH) !  3 Tot MSW additions by Nerc
+      REAL UADDWDT(MNUMNR,MNUMYR+ECP_D_XPH) !  4 Tot wood additions by Nerc
+      REAL UADDSTT(MNUMNR,MNUMYR+ECP_D_XPH) !  5 Tot solar th. additions by Nerc
+      REAL UADDPVT(MNUMNR,MNUMYR+ECP_D_XPH) !  6 Tot PV additions by Nerc
+      REAL UADDPTT(MNUMNR,MNUMYR+ECP_D_XPH) !  7 Tot PV tilt additions by Nerc
+      REAL UADDWNT(MNUMNR,MNUMYR+ECP_D_XPH) !  8 Tot wind additions by Nerc
+      REAL UADDWFT(MNUMNR,MNUMYR+ECP_D_XPH) !  9 Tot Offshore wind additions by Nerc
+      REAL UADDWLT(MNUMNR,MNUMYR+ECP_D_XPH) !  10 Tot Onshore wind additions by Nerc
+      REAL UADDPST(MNUMNR,MNUMYR+ECP_D_XPH) !  11 Tot pump stor. additions by Nerc
+
+!  Outputs to coal supply module
+
+      REAL UADDCST(NDREG,MNUMYR+ECP_D_XPH)  !  1 Tot coal-fired additions by Coal Reg.
+
+!  Outputs to renewables modules for decrementing supply curves 
+
+      REAL UADDHYD(MNUMNR,MNUMYR+ECP_D_XPH) !  1 Total hydro additions by Nerc for decr
+      REAL UADDGED(MNUMNR,MNUMYR+ECP_D_XPH) !  2 Tot Geoth. Additions by Nerc for decr
+      REAL UADDMSD(MNUMNR,MNUMYR+ECP_D_XPH) !  3 Tot MSW additions by Nerc for decr
+      REAL UADDWDD(MNUMNR,MNUMYR+ECP_D_XPH) !  4 Tot wood additions by Nerc for decr
+      REAL UADDSTD(MNUMNR,MNUMYR+ECP_D_XPH) !  5 Tot solar th. additions by Nerc for decr
+      REAL UADDPVD(MNUMNR,MNUMYR+ECP_D_XPH) !  6 Tot PV additions by Nerc for decr
+      REAL UADDPTD(MNUMNR,MNUMYR+ECP_D_XPH) !  7 Tot PV tilt additions by Nerc for decr
+      REAL UADDWND(MNUMNR,MNUMYR+ECP_D_XPH) !  8 Tot wind additions by Nerc for decr
+      REAL UADDWFD(MNUMNR,MNUMYR+ECP_D_XPH) !  9 Tot offshore wind additions by Nerc for decr
+      REAL UADDWLD(MNUMNR,MNUMYR+ECP_D_XPH) !  10 Tot onshore wind additions by Nerc for decr
+      REAL UADDPSD(MNUMNR,MNUMYR+ECP_D_XPH) !  11 Tot pump stor. additions by Nerc for decr
+
+!       FTABLE VARIABLES FOR REGIONAL MAPPING OF CAPACITY FOR TABLE 62
+
+      REAL UADDINR(2,MNUMNR,MNUMYR)  !1 Additions in Physical region by NERC
+      REAL UADDOTR(2,MNUMNR,MNUMYR)  !2 Additions not in Physical region
+      REAL UADDSRV(2,MNUMNR,MNUMYR)  !3 Additions in region to serve others
+      REAL UCAPINR(MNUMNR,MNUMYR)    !4 Capability in physical region
+      REAL UCAPOTR(MNUMNR,MNUMYR)    !5 Capability not in physical region
+      REAL UCAPSRV(MNUMNR,MNUMYR)    !6 Capability in region to serve others
+
+!  ECP ALLOWANCE/CREDIT PRICES
+
+      REAL EPNOXPR(NOX_D_GRP , MNUMYR + ECP_D_XPH) ! ECP NOX Allowance Price
+      REAL EPCARPR(CO2_D_GRP , MNUMYR + ECP_D_XPH) ! ECP CAR Allowance Price
+
+!  ECP allowance/credit prices; RPS results
+
+      REAL EPRPSTGT(MNUMYR+ECP_D_XPH)          ! ECP RPS Credit Price
+
+      REAL EPRPSPR(MNUMYR+ECP_D_XPH)           ! ECP RPS Credit Price
+      REAL EPRPSLM(MNUMYR+ECP_D_XPH)           ! RPS Requirement (FRAC)
+      REAL EPRPSCP(MNUMYR+ECP_D_XPH)           ! RPS Price Cap, If Any (Mills)
+      REAL EPRPSCR(MNUMYR+ECP_D_XPH)           ! RPS Credit Purchases (Bkwh)
+      REAL EPRPSBK(MNUMYR+ECP_D_XPH)           ! RPS Credit Banks     (Bkwh)
+      REAL EPRPSPRR(MNUMNR,MNUMYR+ECP_D_XPH)   ! ECP RPS Credit Price
+      REAL EPRPSLMR(MNUMNR,MNUMYR+ECP_D_XPH)   ! Regional RPS Requirement (FRAC)
+      REAL EPRPSCPR(MNUMNR,MNUMYR+ECP_D_XPH)   ! Regional RPS Price Cap, If Any (Mills)
+      REAL EPRPSCRR(MNUMNR,MNUMYR+ECP_D_XPH)   ! Regional RPS Credit Purchases (Bkwh)
+      REAL EPRPSBKR(MNUMNR,MNUMYR+ECP_D_XPH)   ! Regional RPS Bank Credits (Bkwh)
+
+!       FTABLE VARIABLES FOR OVERNIGHT CAPITAL COSTS BY TECHNOLOGY TYPE
+
+      REAL UPPCCCST(MNUMNR,MNUMYR)  ! 1 Conventional Coal
+      REAL UPIGCCST(MNUMNR,MNUMYR)  ! 2 Advanced Coal
+      REAL UPISCCST(MNUMNR,MNUMYR)  ! 3 Advanced Coal w/CCS
+      REAL UPCTCCST(MNUMNR,MNUMYR)  ! 4 Conventional CT
+      REAL UPATCCST(MNUMNR,MNUMYR)  ! 5 Advanced CT
+      REAL UPCCCCST(MNUMNR,MNUMYR)  ! 6 Conventional CC
+      REAL UPACCCST(MNUMNR,MNUMYR)  ! 7 Advanced CC
+      REAL UPCSCCST(MNUMNR,MNUMYR)  ! 8 Advanced CC w/CCS
+      REAL UPFCCCST(MNUMNR,MNUMYR)  ! 9 Fuel Cells
+      REAL UPANCCST(MNUMNR,MNUMYR)  !10 Advanced Nuclear
+      REAL UPWDCCST(MNUMNR,MNUMYR)  !11 Biomass
+      REAL UPGTCCST(MNUMNR,MNUMYR)  !12 Geothermal
+      REAL UPMSCCST(MNUMNR,MNUMYR)  !13 MSW
+      REAL UPHYCCST(MNUMNR,MNUMYR)  !14 Hydroelectric
+      REAL UPWNCCST(MNUMNR,MNUMYR)  !15 Wind
+      REAL UPWFCCST(MNUMNR,MNUMYR)  !16 Wind - Offshore
+    
+      REAL UPSOCCST(MNUMNR,MNUMYR)  !17 Solar Thermal
+      REAL UPPVCCST(MNUMNR,MNUMYR)  !18 Solar PV
+      REAL UPDBCCST(MNUMNR,MNUMYR)  !19 Distributed Gen - Base
+      REAL UPDPCCST(MNUMNR,MNUMYR)  !20 Distributed Gen - Peak
+!
+      REAL*4 CP_ADD(MNUMNR,MNUMYR)
+      REAL*4 Carbon_Rev(MNUMNR,MNUMYR)
+      REAL*4 Ret_Cst(MNUMNR,MNUMYR)
+      REAL*4 Total_Vcst(MNUMNR,MNUMYR)
+      REAL*4 Total_RCC(MNUMNR,MNUMYR)
+      REAL*4 Total_RIC(MNUMNR,MNUMYR)
+      REAL*4 Total_RPS(MNUMNR,MNUMYR)
+      REAL*4 Fuel_VOM(MNUMNR,MNUMYR)
+      REAL*4 Non_Fuel_VOM(MNUMNR,MNUMYR)
+      REAL*4 Total_FOM(MNUMNR,MNUMYR)
+      REAL*4 Total_VOM(MNUMNR,MNUMYR)
+      REAL*4 T_DomEcon(MNUMNR,MNUMYR)
+      REAL*4 T_DomFirm(MNUMNR,MNUMYR)
+      REAL*4 T_IntExp(MNUMNR,MNUMYR)
+      REAL*4 T_IntImp(MNUMNR,MNUMYR)
+      REAL*4 RET_INV(MNUMNR,MNUMYR)
+      REAL*4 NEW_CAP_EL(MNUMNR,MNUMYR)
+      REAL*4 G_INST_ALL(MNUMNR,MNUMYR)
+      REAL*4 T_OVR(MNUMNR,MNUMYR)
+      REAL*4 G_ANN(MNUMNR,MNUMYR)
+      REAL*4 T_ANN(MNUMNR,MNUMYR)
+
+      REAL*4 TRCTLOVR(MNUMNR)           !Transmission overnight cost, stored for CTL decision
+      REAL*4 TRCTLFCF(MNUMNR)           !Transmission FCF, stored for CTL decision in PMM
+!
+      REAL*4 URELTGT(MNUMNR)            !Reliability Price Target
+      REAL*4 URELRSV(3,MNUMNR)          !Low/High Reliability Reserve Margins 
+      REAL*4 URELPRC(3,MNUMNR)          !Low/High Reliability Price
+!
+      REAL*4 UCAPADJ(MNUMNR,MNUMYR)     !Capacity Adjustments for Trade/Cogen
+     
+!CCS VARIABLES FOR FTAB    
+      REAL*4 CAPCCS(4,MAXNFR,MNUMYR)
+      REAL*4 COPCCS(MAXNFR,MNUMYR)
+      REAL*4 TFCCS(MAXNFR,MNUMYR)
+      REAL*4 TVCCS(MAXNFR,MNUMYR)
+      REAL*4 IFCCS(MAXNFR,MNUMYR)
+      REAL*4 IVCCS(MAXNFR,MNUMYR) 
+      
+      REAL*4 RMPOOL(MNUMYR,MNUMNR)      ! Capacity Payment Pool of Dollars 
+      REAL*4 RMAVG(MNUMYR,MNUMNR)       ! Average Capacity Payment ($/kw)      
+
+      REAL CES_DUALS(MNUMYR,ECP_D_XPH)           ! ECP RPS Duals Price
+      
+      REAL*4 FR_OR_TRANCOST(MAXNFR,8,MNUMYR)    ! Unit Co2 trsnport costs from each fuel region to each OGSM region
+      REAL*4 TnS_Costs(0:MAXNFR,MNUMYR)         ! Unit Co2 trsnport and storage costs in each fuel region for non-EOR CO2
+      
+  ! Retrofit information collected from default gdx to initialize ECP
+      REAL*4 G_SCAP(MAX_CL)                ! Summer capacity from gdx file
+      REAL*4 G_TCCV(MAX_CL)                ! Total_Capture_Costs-Variable from gdx file
+      REAL*4 G_TCCF(MAX_CL)                ! Total_Capture_Costs-Fixed from gdx file
+      REAL*4 G_TTCV(MAX_CL)                ! Total_Transport_Costs-Variable from gdx file
+      REAL*4 G_TTCF(MAX_CL)                ! Total_Transport_Costs-Fixed from gdx file
+      REAL*4 G_TICV(MAX_CL)                ! Total_Injection_Costs-Variable from gdx file
+      REAL*4 G_TICF(MAX_CL)                ! Total_Injection_Costs-Fixed from gdx file
+      INTEGER*4 G_IGRP(MAX_CL)             ! W_IGRP index from gdx file
+      INTEGER*4 G_PLTS                     ! Number of plants in gdx file
+      REAL*4 G_AVGCF(MAXNFR)               ! Average Total Capture Costs Fixed by NEMS region
+      REAL*4 G_AVGTF(MAXNFR)               ! Average Total Transport costs Fixed by NEMS region
+      REAL*4 G_AVGIF(MAXNFR)               ! Average total Injection Costs Fixed by NEMS region
+      REAL*4 G_AVGCV(MAXNFR)               ! Average Total Capture Costs Variable by NEMS region
+      REAL*4 G_AVGTV(MAXNFR)               ! Average Total Transport costs Variable by NEMS region
+      REAL*4 G_AVGIV(MAXNFR)               ! Average total Injection Costs Variable by NEMS region
+  ! Retrofit information collected from CTS gdx to pass to ECP
+      REAL*4 C_SCAP(MAX_CL)                ! Summer capacity from gdx file
+      REAL*4 C_TCCV(MAX_CL)                ! Total_Capture_Costs-Variable from gdx file
+      REAL*4 C_TCCF(MAX_CL)                ! Total_Capture_Costs-Fixed from gdx file
+      REAL*4 C_TTCV(MAX_CL)                ! Total_Transport_Costs-Variable from gdx file
+      REAL*4 C_TTCF(MAX_CL)                ! Total_Transport_Costs-Fixed from gdx file
+      REAL*4 C_TICV(MAX_CL)                ! Total_Injection_Costs-Variable from gdx file
+      REAL*4 C_TICF(MAX_CL)                ! Total_Injection_Costs-Fixed from gdx file
+      REAL*4 C_AVGTF(MAXNFR,MNUMYR)        ! Average Total Transport costs Fixed by NEMS region
+      REAL*4 C_AVGIF(MAXNFR,MNUMYR)        ! Average total Injection Costs Fixed by NEMS region
+      INTEGER*4 C_RY(MAX_CL)               ! Retrofit_Year from gdx file
+      INTEGER*4 C_IGRP(MAX_CL)             ! W_IGRP index from gdx file
+      INTEGER*4 C_PLTS                     ! Number of plants in gdx file
+
+!     PUT THIS ARRAY IN THE RESTART FILE SO THAT IT CAN BE SHARED WITH LFMM EVEN WITH EMM TURNED OFF
+
+      INTEGER*4 MUST_STORE(MAXNFR,MNUMYR+ECP_D_FPH)   ! Indicates that captured CO2 must be stored in saline or EOR sites      
+
+!   Capacity addition variables for individual renewables planned and unplanned:
+
+      REAL*4   UADDHYU(2,MNUMNR,MNUMYR)     !   Util hydro additions by Nerc
+      REAL*4   UADDGEU(2,MNUMNR,MNUMYR)     !   Util geothermal additions by Nerc
+      REAL*4   UADDMSU(2,MNUMNR,MNUMYR)     !   Util waste additions by Nerc
+      REAL*4   UADDWDU(2,MNUMNR,MNUMYR)     !   Util biomass additions by Nerc
+      REAL*4   UADDSTU(2,MNUMNR,MNUMYR)     !   Util solar thermal additions by Nerc
+      REAL*4   UADDPVU(2,MNUMNR,MNUMYR)     !   Util photovoltaic additions by Nerc
+      REAL*4   UADDWNU(2,MNUMNR,MNUMYR)     !   Util wind additions by Nerc
+      REAL*4   UADDWFU(2,MNUMNR,MNUMYR)     !   Util offshore wind additions by Nerc
+     
+      REAL*4   UADDHYN(2,MNUMNR,MNUMYR)     !   NonUtil hydro additions by Nerc
+      REAL*4   UADDGEN(2,MNUMNR,MNUMYR)     !   NonUtil geothermal additions by Nerc
+      REAL*4   UADDMSN(2,MNUMNR,MNUMYR)     !   NonUtil waste additions by Nerc
+      REAL*4   UADDWDN(2,MNUMNR,MNUMYR)     !   NonUtil biomass additions by Nerc
+      REAL*4   UADDSTN(2,MNUMNR,MNUMYR)     !   NonUtil solar thermal additions by Nerc
+      REAL*4   UADDPVN(2,MNUMNR,MNUMYR)     !   NonUtil photovoltaic additions by Nerc
+      REAL*4   UADDWNN(2,MNUMNR,MNUMYR)     !   NonUtil wind additions by Nerc
+      REAL*4   UADDWFN(2,MNUMNR,MNUMYR)     !   NonUtil offshore wind additions by Nerc
+      
+
+!     Add new arrays for new technology slots
+!     UADD(PT)U and UADD(PT)N - In 1st index of capacity additions, 1=planned, 2=unplanned
+!     UP(PT)CCST - FTABLE VARIABLES FOR OVERNIGHT CAPITAL COSTS BY TECHNOLOGY TYPE
+
+      REAL UADDOCU(2,MNUMNR,MNUMYR) ! Util Other New Coal Additions by Nerc
+      REAL UADDOCN(2,MNUMNR,MNUMYR) ! NonUtil Other New Coal Additions by Nerc
+      REAL UPOCCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Other New Coal 
+
+      REAL UADDI2U(2,MNUMNR,MNUMYR) ! Util IGCC with NG-Cofiring Additions by Nerc
+      REAL UADDI2N(2,MNUMNR,MNUMYR) ! NonUtil IGCC with NG-Cofiring Additions by Nerc
+      REAL UPI2CCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for IGCC with NG-Cofiring
+
+      REAL UADDPQU(2,MNUMNR,MNUMYR) ! Util IGCC w/Partial Seq Additions by Nerc
+      REAL UADDPQN(2,MNUMNR,MNUMYR) ! NonUtil IGCC w/Partial Seq Additions by Nerc
+      REAL UPPQCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for IGCC w/Partial Seq
+
+      REAL UADDNGU(2,MNUMNR,MNUMYR) ! Util Coal to NG Additions by Nerc
+      REAL UADDNGN(2,MNUMNR,MNUMYR) ! NonUtil Coal to NG Additions by Nerc
+      REAL UPNGCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Coal to NG 
+
+      REAL UADDICU(2,MNUMNR,MNUMYR) ! Util Int Comb Eng Additions by Nerc
+      REAL UADDICN(2,MNUMNR,MNUMYR) ! NonUtil Int Comb Eng Additions by Nerc
+      REAL UPICCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Int Comb Eng  
+
+      REAL UADDT2U(2,MNUMNR,MNUMYR) ! Util Aeoderivative Turbine Additions by Nerc
+      REAL UADDT2N(2,MNUMNR,MNUMYR) ! NonUtil Aeoderivative Turbine Additions by Nerc
+      REAL UPT2CCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Aeoderivative Turbine 
+
+      REAL UADDA2U(2,MNUMNR,MNUMYR) ! Util New Advanced CC Additions by Nerc
+      REAL UADDA2N(2,MNUMNR,MNUMYR) ! NonUtil New Advanced CC Additions by Nerc
+      REAL UPA2CCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for New Advanced CC 
+
+      REAL UADDSMU(2,MNUMNR,MNUMYR) ! Util SMR Nuclear Additions by Nerc
+      REAL UADDSMN(2,MNUMNR,MNUMYR) ! NonUtil SMR Nuclear Additions by Nerc
+      REAL UPSMCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for SMR Nuclear 
+
+      REAL UADDGNU(2,MNUMNR,MNUMYR) ! Util Greenfield Nuclear Additions by Nerc
+      REAL UADDGNN(2,MNUMNR,MNUMYR) ! NonUtil Greenfield Nuclear Additions by Nerc
+      REAL UPGNCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Greenfield Nuclear 
+
+      REAL UADDBIU(2,MNUMNR,MNUMYR) ! Util Biomass IGCC Additions by Nerc
+      REAL UADDBIN(2,MNUMNR,MNUMYR) ! NonUtil Biomass IGCC Additions by Nerc
+      REAL UPBICCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Biomass IGCC 
+
+      REAL UADDAGU(2,MNUMNR,MNUMYR) ! Util Adv Geothermal Additions by Nerc
+      REAL UADDAGN(2,MNUMNR,MNUMYR) ! NonUtil Adv Geothermal Additions by Nerc
+      REAL UPAGCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Adv Geothermal 
+
+      REAL UADDHOU(2,MNUMNR,MNUMYR) ! Util Adv Hydro Additions by Nerc
+      REAL UADDHON(2,MNUMNR,MNUMYR) ! NonUtil Adv Hydro Additions by Nerc
+      REAL UPHOCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Adv Hydro 
+
+      REAL UADDHIU(2,MNUMNR,MNUMYR) ! Util In Stream Hydro Additions by Nerc
+      REAL UADDHIN(2,MNUMNR,MNUMYR) ! NonUtil In Stream Hydro Additions by Nerc
+      REAL UPHICCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for In Stream Hydro 
+
+      REAL UADDTIU(2,MNUMNR,MNUMYR) ! Util Tidal Hydro Additions by Nerc
+      REAL UADDTIN(2,MNUMNR,MNUMYR) ! NonUtil Tidal Hydro Additions by Nerc
+      REAL UPTICCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Tidal Hydro 
+
+      REAL UADDSQU(2,MNUMNR,MNUMYR) ! Util Quick Storage Additions by Nerc
+      REAL UADDSQN(2,MNUMNR,MNUMYR) ! NonUtil Quick Storage Additions by Nerc
+      REAL UPSQCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Quick Storage 
+
+      REAL UADDDSU(2,MNUMNR,MNUMYR) ! Util Diurnal Storage Additions by Nerc
+      REAL UADDDSN(2,MNUMNR,MNUMYR) ! NonUtil Diurnal Storage Additions by Nerc
+      REAL UPDSCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Diurnal Storage 
+
+      REAL UADDZSU(2,MNUMNR,MNUMYR) ! Util Other Storage Additions by Nerc
+      REAL UADDZSN(2,MNUMNR,MNUMYR) ! NonUtil Other Storage Additions by Nerc
+      REAL UPZSCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Other Storage 
+
+      REAL UADDWLU(2,MNUMNR,MNUMYR) ! Util Wind Low Speed Additions by Nerc
+      REAL UADDWLN(2,MNUMNR,MNUMYR) ! NonUtil Wind Low Speed Additions by Nerc
+      REAL UPWLCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Wind Low Speed 
+
+      REAL UADDSSU(2,MNUMNR,MNUMYR) ! Util Solar Thermal w/Storage Additions by Nerc
+      REAL UADDSSN(2,MNUMNR,MNUMYR) ! NonUtil Solar Thermal w/Storage Additions by Nerc
+      REAL UPSSCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Solar Thermal w/Storage 
+
+      REAL UADDS2U(2,MNUMNR,MNUMYR) ! Util Solar Thermal w/Storage2 Additions by Nerc
+      REAL UADDS2N(2,MNUMNR,MNUMYR) ! NonUtil Solar Thermal w/Storage2 Additions by Nerc
+      REAL UPS2CCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Solar Thermal w/Storage2 
+
+      REAL UADDPTU(2,MNUMNR,MNUMYR) ! Util PV w/axis tracking Additions by Nerc
+      REAL UADDPTN(2,MNUMNR,MNUMYR) ! NonUtil PV w/axis tracking Additions by Nerc
+      REAL UPPTCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for PV w/axis tracking 
+
+      REAL UADDINU(2,MNUMNR,MNUMYR) ! Util Other Intermittent Additions by Nerc
+      REAL UADDINN(2,MNUMNR,MNUMYR) ! NonUtil Other Intermittent Additions by Nerc
+      REAL UPINCCST(MNUMNR,MNUMYR)  ! Overnight Capital Costs for Other Intermittent 
+
+!     Marginal CO2 Price in OGSM Region as detemined in ECP and Quantity of CO2 available from EFD for use in EOR
+
+      REAL*4 UTCO2PEM(MNLNP1,MNUMYR)           ! CO2 price from EMM ($/mmcf)
+      REAL*4 UTCO2QEM(MNLNP1,MNUMYR)           ! CO2 quantity from EMM(mmcf)      
+
+!     State RPS Outputs
+
+      REAL*4 ST_RPS_EMM_Q(MNUMNR,MNUMYR+ECP_D_XPH)               ! Generation used to satisfy state RPS requirments
+      REAL*4 ST_RPS_EMM_P(MNUMNR,MNUMYR+ECP_D_XPH)               ! Average marginal value of generation used to satisfy state RPS requirments
+      REAL*4 ST_RPS_DUALS(MX_ST_RPS,ECP_D_XPH+1,MNUMYR)          ! State RPS constraint duals - nominal prices
+      REAL*4 ST_RPS_PRC_87(MX_ST_RPS,MNUMYR+ECP_D_XPH)           ! State RPS marginal compliance cost - real 1987 dollars
+      REAL*4 ST_RPS_EX_GEN(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Generation from existing units used to satisfy state RPS requirements
+      REAL*4 ST_RPS_NW_GEN(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Generation from new units used to satisfy state RPS requirements
+      REAL*4 ST_RPS_XP_GEN(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Generation exported and used to satisfy state RPS requirements associated with the import region
+      REAL*4 ST_RPS_EX_CRD(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Credits from existing units used to satisfy state RPS requirements
+      REAL*4 ST_RPS_NW_CRD(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Credits from new units used to satisfy state RPS requirements
+      REAL*4 ST_RPS_XP_CRD(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Credits exported and used to satisfy state RPS requirements associated with the import region
+
+!   UECP OUTPUT COMMON BLOCK
+
+      COMMON/UECPOUT/UADDCSU,UADDIGU,UADDISU,UADDOSU,UADDCCU,UADDACU,UADDASU,UADDCTU,   &
+                     UADDATU,UADDNUU,UADDFCU,UADDRNU,UADDPSU,UADDDBU,UADDDPU,UADDTLU,   &
+
+! this set is in a slightly different order:
+
+                     UADDCSN,UADDIGN,UADDISN,UADDOSN,UADDCCN,UADDACN,UADDASN,           &
+                     UADDFCN,UADDCTN,UADDATN,UADDNUN,        UADDRNN,UADDPSN,UADDDBN,UADDDPN,UADDTLN,   &
+                     UADDP2,                                                            &
+                     UADDHYT,UADDGET,UADDMST,UADDWDT,UADDSTT,UADDPVT,UADDWNT,UADDWFT,UADDPST, &
+                     UADDCST,                                                           &
+                     UADDHYD,UADDGED,UADDMSD,UADDWDD,UADDSTD,UADDPVD,UADDWND,UADDWFD,UADDPSD, &
+                     UADDINR,UADDOTR,UADDSRV,                                           &
+                     UCAPINR,UCAPOTR,UCAPSRV,                                           &
+                     EPNOXPR,EPCARPR,EPRPSTGT,                                          &
+                     EPRPSPR, EPRPSLM, EPRPSCP, EPRPSCR, EPRPSBK,                       &
+                     EPRPSPRR,EPRPSLMR,EPRPSCPR,EPRPSCRR,EPRPSBKR,                      &
+                     UPPCCCST,UPIGCCST,UPISCCST,UPCTCCST,UPATCCST,UPCCCCST,UPACCCST,    &
+                     UPCSCCST,UPFCCCST,UPANCCST,UPWDCCST,UPGTCCST,UPMSCCST,UPHYCCST,    &
+                     UPWNCCST,UPWFCCST,UPSOCCST,UPPVCCST,UPDBCCST,UPDPCCST,             &
+                     CP_ADD,Carbon_Rev,Ret_Cst,Total_Vcst,Total_RCC,                    &
+                     Total_RIC,Total_RPS,Fuel_VOM,Non_Fuel_VOM,Total_FOM,               &
+                     Total_VOM,T_DomEcon,T_DomFirm,T_IntExp,T_IntImp,                   &
+                     RET_INV,NEW_CAP_EL,G_INST_ALL,T_OVR,G_ANN,T_ANN,                   &
+                     TRCTLOVR,TRCTLFCF,URELTGT,URELRSV,URELPRC,UCAPADJ,                 &
+                     CAPCCS,COPCCS,TFCCS,TVCCS,IFCCS,IVCCS,RMPOOL, RMAVG,CES_DUALS,     &
+                     G_SCAP, G_TCCV, G_TCCF, G_TTCV, G_TTCF, G_TICV, G_TICF,            &
+                     C_SCAP, C_TCCV, C_TCCF, C_TTCV, C_TTCF, C_TICV, C_TICF,            &
+                     G_AVGCF, G_AVGTF, G_AVGIF, G_AVGCV, G_AVGTV, G_AVGIV,              &
+                     FR_OR_TRANCOST, TnS_Costs,                                         &                       
+                     C_AVGTF, C_AVGIF, C_RY,                                            &
+                     G_IGRP, C_IGRP, G_PLTS, C_PLTS, MUST_STORE,                        &
+                     UADDHYU, UADDGEU, UADDMSU, UADDWDU, UADDSTU, UADDPVU, UADDWNU, UADDWFU,  &
+                     UADDHYN, UADDGEN, UADDMSN, UADDWDN, UADDSTN, UADDPVN, UADDWNN, UADDWFN, &
+                     UADDOCU, UADDOCN, UPOCCCST, UADDI2U, UADDI2N, UPI2CCST, &
+                     UADDPQU, UADDPQN, UPPQCCST, UADDNGU, UADDNGN, UPNGCCST, &
+                     UADDICU, UADDICN, UPICCCST, UADDT2U, UADDT2N, UPT2CCST, &
+                     UADDA2U, UADDA2N, UPA2CCST, UADDSMU, UADDSMN, UPSMCCST, &
+                     UADDGNU, UADDGNN, UPGNCCST, UADDBIU, UADDBIN, UPBICCST, &
+                     UADDAGU, UADDAGN, UPAGCCST, UADDHOU, UADDHON, UPHOCCST, &
+                     UADDHIU, UADDHIN, UPHICCST, UADDTIU, UADDTIN, UPTICCST, &
+                     UADDSQU, UADDSQN, UPSQCCST, UADDDSU, UADDDSN, UPDSCCST, &
+                     UADDZSU, UADDZSN, UPZSCCST, UADDWLU, UADDWLN, UPWLCCST, &
+                     UADDSSU, UADDSSN, UPSSCCST, UADDS2U, UADDS2N, UPS2CCST, &
+                     UADDPTU, UADDPTN, UPPTCCST, UADDINU, UADDINN, UPINCCST, UTCO2PEM, UTCO2QEM, &
+                     UADDWLT, UADDPTT, UADDWLD, UADDPTD, &
+                     ST_RPS_EMM_Q, ST_RPS_EMM_P, ST_RPS_DUALS, ST_RPS_PRC_87, ST_RPS_EX_GEN, ST_RPS_NW_GEN, ST_RPS_XP_GEN, ST_RPS_EX_CRD, ST_RPS_NW_CRD, ST_RPS_XP_CRD
+
+!   Equivalence for FILER used for data storage
+
+      REAL UECPDAT (   &
+          33   *    2*MNUMNR*MNUMYR +   &                    !  UADDCSU through UADDP2
+          8    *    2*MNUMNR*MNUMYR +   &                    !  UADDHYU through UADDWFU
+          8    *    2*MNUMNR*MNUMYR +   &                    !  UADDHYN through UADDWFN
+          8    *    2*MNUMNR*MNUMYR +   &                    !  UADDWLU through UADDPTD
+          11   *    MNUMNR*(MNUMYR+ECP_D_XPH) +  &             !  UADDHYT through UADDPST
+                    NDREG*(MNUMYR+ECP_D_XPH) +   &             !  UADDCST
+          11   *    MNUMNR*(MNUMYR+ECP_D_XPH) +  &             !  UADDHYD through UADDPSD
+          3    *    2*MNUMNR*MNUMYR +   &                    !  UADDINR, UADDOTR, UADDSRV
+          3    *    MNUMNR*MNUMYR +     &                    !  UCAPINR, UCAPOTR, UCAPSRV
+                    NOX_D_GRP*(MNUMYR+ECP_D_XPH) + &             !  EPNOXPR
+                    CO2_D_GRP*(MNUMYR+ECP_D_XPH) + &             !  EPCARPR
+          2    *   (MNUMYR+ECP_D_XPH) +   &                    !  EPRPSTGT and EPRPSPR
+                    MNUMNR*(MNUMYR+ECP_D_XPH) +  &             !  EPRPSPRR
+          4    *   (MNUMYR+ECP_D_XPH) +   &                    !  EPRPSLM,  EPRPSCP,  EPRPSCR,  EPRPSBK
+          4    *    MNUMNR*(MNUMYR+ECP_D_XPH) +  &             !  EPRPSLMR, EPRPSCPR, EPRPSCPR, EPRPSBKR
+          20   *    MNUMNR*MNUMYR +     &                    !  UPPCCCST through UPDPCCST
+          21   *    MNUMNR*MNUMYR +     &                    !  CP_ADD through T_ANN
+          3    *    MNUMNR +            &                    !  TRCTLOVR, TRCTLFCF, URELTGT
+          2    *    3*MNUMNR +          &                    !  URELRSV, URELPRC
+                    MNUMNR*MNUMYR +     &                    !  UCAPADJ
+                    4*MAXNFR*MNUMYR +   &                    !  CAPCCS
+          5    *    MAXNFR*MNUMYR +     &                    !  COPCCS through IVCCS
+          2    *    MNUMYR *MNUMNR +    &                    !  RMPOOL  and RMAVG         
+                    MNUMYR*ECP_D_XPH +    &                    !  CESDUALS
+          7    *    MAX_CL +            &                    !  G_SCAP through G_TICF
+          7    *    MAX_CL +            &                    !  C_SCAP through C_TICF
+          6    *    MAXNFR +            &                    !  G_AVGCF through G_AVGIV
+          2    *    MAXNFR*MNUMYR +     &                    !  C_AVGTF and C_AVGIF
+                    MAX_CL +            &                    !  C_RY
+          2    *    MAX_CL +            &                    !  G_IGRP, C_IGRP
+                    MAXNFR*8*MNUMYR   + &                    !  FR_OR_TRANCOST
+                    (MAXNFR+1)*MNUMYR + &                    !  TnS_Costs                   
+                    1 +                 &                    !  G_PLTS
+                    1 +                 &                    !  C_PLTS
+                    MAXNFR * (MNUMYR+ECP_D_FPH) +            & !  MUST_STORE
+                    2 * (MNLNP1 * MNUMYR)  +               & !  Utco2pem, Utco2qem  
+                    (22 * (2 + 2 + 1) * MNUMNR * MNUMYR) + & !  22 New ECP Technologies
+                    (MNUMNR * (MNUMYR+ECP_D_XPH)) +           & ! ST_RPS_EMM_Q
+                    (MNUMNR * (MNUMYR+ECP_D_XPH)) +           & ! ST_RPS_EMM_P
+                    (MX_ST_RPS * (ECP_D_XPH+1) * MNUMYR) +    & ! ST_RPS_DUALS
+                    (MX_ST_RPS * (MNUMYR+ECP_D_XPH)) +        & ! ST_RPS_PRC_87
+                    (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_EX_GEN
+                    (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_NW_GEN
+                    (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_XP_GEN
+                    (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_EX_CRD
+                    (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_NW_CRD
+                    (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_XP_CRD
+                    0 )                                      !  the end
+      EQUIVALENCE (UECPDAT,UADDCSU)

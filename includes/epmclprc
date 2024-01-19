@@ -1,0 +1,11 @@
+! $Header: m:/default/includes/RCS/epmclprc,v 1.6 2013/05/08 14:46:35 pkc Exp $
+!
+!     NDRG2 is set as an integer in coalprc (and acoalprc), which is included where epmclprc is
+
+!  for first dimension:  1=scrubbed    2=unscrubbed
+      REAL APCLELCDR(2,NDRG2,MNUMYR)    ! coal prices at the coal demand region for EMM to NERCify
+
+      COMMON /ACOALPRC/ APCLELCDR
+
+      REAL ALPRCOUT(2*NDRG2*MNUMYR)
+      EQUIVALENCE(ALPRCOUT,APCLELCDR)

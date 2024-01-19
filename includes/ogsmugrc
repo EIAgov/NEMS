@@ -1,0 +1,233 @@
+! $Header: m:/default/includes/RCS/ogsmugrc,v 1.4 2008/05/16 21:15:23 RSC Exp $
+! Maple-C: n:/default/includes/RCS/ogsmugrc,v 1.2 2005/08/17 02:09:39 Tracy Exp Tracy $
+! variables used in all three ugr modules are dim'ed 3
+! 1-cbm 2-tgs 3-gas shale
+
+      integer NMOD
+      integer ugrmod
+      integer UGRSTYR
+      integer ndrdepth
+      integer ugron   !temp switch for ugr module 1=on
+      integer MNBASIN
+      integer NBASINcbm
+      integer NBASINTGS
+      integer NBASINgsm
+      PARAMETER (MNBASIN=42)
+      PARAMETER (NBASINTGS=42)
+      PARAMETER (NBASINcbm=14)
+      PARAMETER (NBASINgsm=10)
+      parameter (ugron=1)
+      parameter (ndrdepth=7)
+      parameter(NMOD=3) !3 modules,cbm,tgs,shale
+      parameter(UGRSTYR=15)
+      common/ugrmod1c/ugrmod
+
+      REAL TECH_PROG_SCHED_EX(3,7,8)
+      REAL TECH_PROG_SCHED_DR(3,7,8)
+      REAL TECH_PROG_SCHED_PT(3,5,8)
+      common/techprogc/tech_prog_sched_ex,tech_prog_sched_dr, &
+                      tech_prog_sched_pt
+
+! FINANCE SHEET
+
+      INTEGER FINFAC(NMOD,MNUMYR)
+      REAL FINANCE_DATA(NMOD,15)
+      REAL CASH_FLOW(NMOD,20)
+      REAL RES_GRTH_DEC(NMOD,MNUMYR)
+      REAL DECLINE_FACTOR(NMOD)
+      REAL DISC_RATE(NMOD)
+      REAL NET_PRES_VAL(NMOD)
+
+
+
+! ALL BASINS SHEET
+
+! cbm
+! 14 Basin Locations - NBASINcbm
+! Each Basin is shared into 3 areas 1-Best,Average,Below Average
+
+      INTEGER CBMMAP(NBASINcbm)
+      INTEGER TGSMAP(NBASINtgs)
+      INTEGER GSMMAP(NBASINgsm)
+      INTEGER DRMAPTG(NBASINTGS)
+      INTEGER DRMAPGS(NBASINGSM)
+      COMMON/UGRMAPc/CBMMAP,TGSMAP,DRMAPTG,DRMAPGS,GSMMAP
+      REAL DRILLRULES(NMOD,4,2)
+      REAL*8 DISCFAC(NMOD)
+      REAL*8 DISCFACB(NMOD)
+      REAL WELLPR(NMOD)
+      REAL DCCOSTLT(NMOD)
+      REAL DCCOSTGT(NMOD)
+      REAL LANDGGH2O(NMOD,3)
+      REAL*8 FIXOMCOST(NMOD,MNBASIN,4)
+      COMMON/UGR0c/DISCFAC,DISCFACB,FIXOMCOST
+      COMMON/UGR1c/LANDGGH2O,DRILLRULES,WELLPR,DCCOSTLT,DCCOSTGT
+      INTEGER LANDGG(NMOD)
+      INTEGER STIMCSTBASE(NMOD)
+      INTEGER PMPSFEQBASE(NMOD)
+      COMMON/UGR2c/LANDGG,STIMCSTBASE,PMPSFEQBASE
+      REAL RESGRWRT(NMOD)
+      REAL ENVIRONREG(NMOD)
+      REAL OPCOSTH2O(NMOD,2)
+      REAL OPCSTH2ODISP(NMOD)
+      REAL OPCSTOMS(NMOD)
+      REAL OPCSTGASTRT(NMOD)
+      REAL BNSH(NMOD,MNBASIN,3)
+      REAL STIMUL(NMOD,MNBASIN,4)
+      REAL H2ODISP(NMOD,MNBASIN,4)
+      REAL UNDEV_WELLS(NMOD,MNBASIN,4)
+      REAL NYR_UNDEVWELLS(NMOD,MNBASIN,4)
+      COMMON/UGR3c/ENVIRONREG,OPCOSTH2O,OPCSTH2ODISP,OPCSTOMS, &
+                  UNDEV_WELLS,OPCSTGASTRT,BNSH,STIMUL,H2ODISP, &
+                  NYR_UNDEVWELLS,RESGRWRT
+      INTEGER BNAREA(NMOD,MNBASIN,4)
+      INTEGER LSEQBASE(NMOD,3)
+      INTEGER H2OBASE(NMOD,3)
+      INTEGER DEVCELLS(NMOD,MNBASIN,4)
+      INTEGER WELLSP(NMOD,MNBASIN,4,2)  !1-w/mi2 CT Spc 2-w/mi2 AT Spc
+      INTEGER NEWADVWELL(NMOD)
+      INTEGER NEWADVWELLLAG(NMOD)
+      INTEGER ADVWELLYR(NMOD)
+      COMMON/UGR4c/BNAREA,LSEQBASE,H2OBASE,DEVCELLS,WELLSP, &
+                  NEWADVWELL,NEWADVWELLLAG,ADVWELLYR
+
+      INTEGER HYPOYR(NMOD)
+      INTEGER ADVRECYR(NMOD)
+
+      INTEGER ENVPIPREG(NMOD,MNBASIN,4)
+      INTEGER HYPPLAYS(NMOD,MNBASIN,4)
+      integer hypplayslag(nmod,mnbasin,4)
+      integer hypplayslag2(nmod,mnbasin,4)
+      INTEGER EMERGBAS(NMOD,MNBASIN,4)
+      INTEGER RESGRWTH(NMOD,MNBASIN,4)
+      INTEGER AVDEPTH(NMOD,MNBASIN,4)
+      INTEGER CTUNDRLOC(NMOD,MNBASIN,4)
+      INTEGER ATUNDRLOC(NMOD,MNBASIN,4)
+      INTEGER ADVREC(NMOD)
+      COMMON/UGR5c/HYPOYR,ADVRECYR,ENVPIPREG,ADVREC, &
+                  HYPPLAYS,EMERGBAS,RESGRWTH,AVDEPTH, &
+                  CTUNDRLOC,ATUNDRLOC,hypplayslag,hypplayslag2 
+      REAL EMBASINYRS(NMOD)
+      REAL ADVRECCST(NMOD)
+      REAL TECHRECWELL(NMOD,MNBASIN,4)
+      REAL UNDEVRES(NMOD,MNBASIN,4)
+      REAL RESWELLBCF(NMOD,4,MNBASIN)
+      REAL RESWELLBCFB(NMOD,4,MNBASIN)
+      REAL RESWELLFAC(NMOD,4)
+      REAL TOTMEAN(NMOD,MNBASIN)  ! top level meaneur for each basin
+      REAL MEANEUR(NMOD,MNBASIN,4)
+      REAL MEANEURB(NMOD,MNBASIN,4)
+      REAL SUCRATE(NMOD,MNBASIN,4)
+      REAL SUCRATEB(NMOD,MNBASIN,4) ! BASE YEAR SUCCESS RATE
+      REAL SUCRATLAG(NMOD,MNBASIN,4)
+      REAL PLAYPROB(NMOD,MNBASIN,4)
+      REAL PLAYPROBBASE(NMOD,MNBASIN,4)
+      REAL ULTRECV(NMOD,MNBASIN,4)
+      REAL RSVPRD(NMOD,MNBASIN,4)
+      REAL DISCRES(NMOD,MNBASIN,4)
+      REAL WHGASPR(NMOD,MNBASIN,4)
+      REAL BASINDIFF(NMOD,MNBASIN,4)
+      REAL UGRCURRESL48(NMOD,6)
+      COMMON/UGR6c/RESWELLBCF,RESWELLFAC,UNDEVRES,TOTMEAN, &
+                  MEANEURB,MEANEUR,SUCRATE,PLAYPROB,ULTRECV,RSVPRD, &
+                  DISCRES,WHGASPR,BASINDIFF,PLAYPROBBASE, &
+                  EMBASINYRS,UGRCURRESL48,SUCRATLAG, &
+                  TECHRECWELL,RESWELLBCFB,SUCRATEB,ADVRECCST
+      REAL EXNPVREV(NMOD,MNBASIN,4)
+      REAL STIMCOST(NMOD,MNBASIN,4)
+      REAL STIMCOSTB(NMOD,MNBASIN,4)
+      REAL PMPSURFEQ(NMOD,MNBASIN,4)
+      REAL LEASEQUIP(NMOD,MNBASIN,4)
+      REAL GA10(NMOD,MNBASIN,4)
+      COMMON/UGR7c/EXNPVREV,STIMCOSTB,STIMCOST,PMPSURFEQ, &
+                  LEASEQUIP,GA10
+      REAL GABASE(NMOD)
+      REAL DCCOST(NMOD,MNBASIN,4)
+      REAL DCCOSTB(NMOD,MNBASIN,4)
+      REAL ROYSEVTAX(NMOD)
+      REAL CAPCSTDH(NMOD,MNBASIN,4)
+      REAL VAROPCOST(NMOD,MNBASIN,4)
+      REAL OPERCOST(NMOD,MNBASIN,4)
+      REAL TOTCOST(NMOD,MNBASIN,4)
+      REAL NETPR(NMOD,MNBASIN,4)
+      REAL NETPROFIT(NMOD,MNBASIN,4)
+      REAL NETPROFITS2(NMOD,MNBASIN,4)
+      COMMON/UGR8c/DCCOSTB,DCCOST,ROYSEVTAX, &
+                  CAPCSTDH,VAROPCOST,OPERCOST, &
+                  GABASE,TOTCOST,NETPR,NETPROFIT,NETPROFITS2
+      REAL TOTCAPCOST(NMOD,MNBASIN,4)
+      REAL DRYHOLECOST(NMOD,MNBASIN,4)
+      REAL ECUNDEVRES(NMOD,MNBASIN,4)
+      COMMON/UGR9c/TOTCAPCOST,DRYHOLECOST,ECUNDEVRES
+      REAL MEANEUR2(NMOD,MNBASIN,4)
+      REAL RP(NMOD,MNBASIN,4)
+      REAL PROVRESV(NMOD,MNBASIN,4)
+      REAL PROVRESVL(NMOD,MNBASIN,4)
+      REAL PROVRESVB(NMOD,MNBASIN,4)
+      REAL PROD(NMOD,MNBASIN,4)
+      REAL PRODLAG(NMOD,MNBASIN,4)
+      REAL PRbasin(NMOD,MNBASIN,4)
+      REAL DRILLSCHED(NMOD,MNBASIN,4)
+      REAL NEWWELLS(NMOD,MNBASIN,4)
+      REAL DRRESADDS(NMOD,MNBASIN,4)
+      REAL RESGRADDS(NMOD,MNBASIN,4)
+      REAL RESADDS(NMOD,MNBASIN,4)
+      COMMON/UGR10c/PROVRESVL,PROVRESV,PROVRESVB,PROD,RP,MEANEUR2, &
+                   DRRESADDS,NEWWELLS,DRILLSCHED,PRODLAG, &
+                   RESGRADDS,RESADDS,PRbasin
+
+      COMMON/UGR11c/bdata
+      integer bdata
+      integer rgnmap(14)
+      data rgnmap/1,8,9,9,9,9,9,9,9,9,9,10,10,10/
+
+! tgs vars
+
+      real vardrcst(nbasintgs,ndrdepth)
+      real fixdrcst(nbasintgs,ndrdepth)
+      real drdepth(13,ndrdepth)
+      real proprp
+      common/tgs1c/drdepth,vardrcst,fixdrcst,proprp
+
+! gas shale vars
+! none so far
+
+! NGTDM/OGSM array variables
+
+       real totpass(9)
+       real totwells(nmod,MNBASIN,4)
+       real newwells_ng(17,7)
+       real totwells_ng(17,7)
+       real newwells_og(11,7)
+       real totwells_og(11,7)
+       real undevres_ng(17,7)
+       real undevres_og(11,7)
+       real emergbas_ng(17,7)
+       real emergbas_og(11,7)
+       real hypotbas_ng(17,7)
+       real hypotbas_og(11,7)
+       real emergbsx(nmod,mnbasin,4)
+       real hypotbas(nmod,mnbasin,4)
+
+      common/ugr12c/totpass,totwells,newwells_ng,totwells_ng, &
+        newwells_og,totwells_og,undevres_ng,undevres_og, &
+        emergbas_ng,emergbas_og,hypotbas_ng,hypotbas_og, &
+        emergbsx,hypotbas
+
+      real exp_prod(nmod,mnbasin,4)
+      real act_prod(nmod,mnbasin,4)
+
+      common/ugr13c/prodl48,prodtdm
+
+      real prodl48(6,7)
+      real prodtdm(17,7)
+
+      common/ugr14c/provresv_his,rp_his,prod_his,ugrhistyr
+
+      real provresv_his(nmod,mnbasin,4,5)
+      real rp_his(nmod,mnbasin,4,5)
+      real prod_his(nmod,mnbasin,4,5)
+      integer ugrhistyr
+
+      real encbm_shr
+      common/ugr15c/encbm_shr

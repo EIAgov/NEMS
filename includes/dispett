@@ -1,0 +1,134 @@
+!   $Header: m:/default/includes/RCS/dispett,v 1.11 2017/02/24 21:50:29 CGA Exp $
+!                                                                               
+!     DISPET2 IS USED TO PROCESS DATA ON IMPORT/EXPORT OPPORTUNITIES            
+!                                                                               
+      COMMON /DISPET2/ EXPCI,MAPEXPCI
+!                                                                               
+      REAL*8 EXPCI(MNUMYR,MNUMNR)                                       !        
+      REAL*8 MAPEXPCI(MNUMNR,EFD_D_PROV)                                       !        
+!                                                                              
+!                                                                               
+!     DISPET3 CONTAINS INTEREGIONAL TRADE / PURCHASED POWER CONTRACT DATA       
+!                                                                               
+      COMMON /DISPET3/UEITAJ, URNCSTEX, URNCSTIM, UEITAJ_EFD, URNCSTEX_EFD, URNCSTIM_EFD, UEITAJ_ECP, URNCSTEX_ECP, & 
+         URNCSTIM_ECP, UTFIRM, UTECON, UTSALES, UCANBLD, UQTDLS,   &  
+         ZTDMMF, ZTDMDF, ZTIMPF, ZTIMPD, ZTEXPD, ZTEXPF, ZTEXDF, ZTEXMF, FTDMDF, FTIMPD, FTEXPD, CTDMDF, CTIMPD, &
+         CTEXPD, UCI$FMW, UCI$PMW, UCI$CF, UCI$CST, ULOSSADJ,    &
+         UCI$CAP, UCI$MWH, UCI$DMW, UCI$CFC, UCI$FOR, UCI$RGN, UCI$RGS, &
+         MODYR, PROJYR, LEAD, UCI$CRG, PNAME, PROVINCE, LEFTV                             
+!                                                                               
+      INTEGER ESIZ$ET3,EBLK$ET3,ELFT$ET3                                !        
+      INTEGER ECP$CS2,ECP$CS3
+      PARAMETER (ECP$CS2 = 100)
+      PARAMETER (ECP$CS3 = 5)
+      PARAMETER (ESIZ$ET3 = ( 3 * 4 * MNUMNR * ETT_D_MSP) +       & ! 04/27/2006      
+                            ( 3 * 4 * MNUMNR * EFD_D_MSP) +       & ! 04/27/2006      
+                            ( 3 * 4 * MNUMNR * ECP_D_MSP) +       & ! 04/27/2006      
+                            (16 * 4 * MNUMNR)           +       & ! 07/12/95        
+                            ( 5 * 4 * ECP_D_CIS * MNUMNR) +                & !        
+                            (1 * 4 * ECP$CS2 * ECP$CS3) + &
+                            (1 * 4 * MNUMYR)            + &
+                            (9 * 4 * ECP$CS2)           + &
+                            (26 * ECP$CS2)              +  &
+                            (18 * ECP$CS2)              +  &
+                            ( 3 * 4 * (MNUMNR+EFD_D_PROV) * (MNUMNR + EFD_D_PROV) ) )
+      PARAMETER (EBLK$ET3 = ( (ESIZ$ET3 - 1) / 4096) + 1)               !        
+      PARAMETER (ELFT$ET3 = EBLK$ET3 * 4096 - ESIZ$ET3)                 !        
+!                                                                              
+!     DISPET3 - VARIABLE DECLARATION AND DEFINITIONS                            
+!                                                                               
+!                                                                               
+       REAL*4 ULOSSADJ(MNUMYR)
+       REAL*4 UEITAJ(ETT_D_MSP,MNUMNR)     !                                      
+       REAL*4 URNCSTEX(ETT_D_MSP,MNUMNR)     ! EXPORT CAPABILITY                  
+       REAL*4 URNCSTIM(ETT_D_MSP,MNUMNR)     ! IMPORT CAPABILITY                  
+       REAL*4 UEITAJ_EFD(EFD_D_MSP,MNUMNR)     !                                      
+       REAL*4 URNCSTEX_EFD(EFD_D_MSP,MNUMNR)     ! EXPORT CAPABILITY                  
+       REAL*4 URNCSTIM_EFD(EFD_D_MSP,MNUMNR)     ! IMPORT CAPABILITY                  
+       REAL*4 UEITAJ_ECP(ECP_D_MSP,MNUMNR)     !                                      
+       REAL*4 URNCSTEX_ECP(ECP_D_MSP,MNUMNR)     ! EXPORT CAPABILITY                  
+       REAL*4 URNCSTIM_ECP(ECP_D_MSP,MNUMNR)     ! IMPORT CAPABILITY                  
+       REAL*4 UTFIRM(MNUMNR+EFD_D_PROV,MNUMNR+EFD_D_PROV)     ! detailed firm trade
+       REAL*4 UTECON(MNUMNR+EFD_D_PROV,MNUMNR+EFD_D_PROV)     !detailed economy trade
+       REAL*4 UTSALES(MNUMNR+EFD_D_PROV,MNUMNR+EFD_D_PROV)     ! detailed trade sales $
+       REAL*4 UCANBLD(MNUMNR)            !                                      
+       REAL*4 UQTDLS(MNUMNR)             !                                      
+       REAL*4 ZTDMMF(MNUMNR)             !                                      
+       REAL*4 ZTEXMF(MNUMNR)             !                                      
+       REAL*4 ZTDMDF(MNUMNR)             !                                      
+       REAL*4 ZTEXDF(MNUMNR)             !                                      
+       REAL*4 ZTIMPF(MNUMNR)             !                                      
+       REAL*4 ZTIMPD(MNUMNR)             !                                      
+       REAL*4 ZTEXPD(MNUMNR)             !                                      
+       REAL*4 ZTEXPF(MNUMNR)             !                                      
+       REAL*4 FTDMDF(MNUMNR)             ! purch pwr costs-var fuel domestic
+       REAL*4 FTIMPD(MNUMNR)             ! purch pwr costs-var fuel intntl imp
+       REAL*4 FTEXPD(MNUMNR)             ! purch pwr costs-var fuel intntl exp
+       REAL*4 CTDMDF(MNUMNR)             ! purch pwr costs-fixed cap domestic
+       REAL*4 CTIMPD(MNUMNR)             ! purch pwr costs-fixed cap intntl imp
+       REAL*4 CTEXPD(MNUMNR)             ! purch pwr costs-fixed cap intntl exp
+       REAL*4 UCI$FMW(ECP_D_CIS,MNUMNR)    ! FIRM MW AVAIALABLE                   
+       REAL*4 UCI$PMW(ECP_D_CIS,MNUMNR)    ! PEAK MW AVAILABLE                    
+       REAL*4 UCI$CF(ECP_D_CIS,MNUMNR)     ! CAPACITY FACTOR                      
+       REAL*4 UCI$CST(ECP_D_CIS,MNUMNR)    ! COST MILLS/KWH                       
+       INTEGER*4 UCI$CRG(ECP_D_CIS,MNUMNR) ! CANADIAN EXPORT REGION NUMBER        
+       REAL*4 UCI$CAP(ECP$CS2)         ! SUMMER CAPABILITY (ex. 500.5)
+       REAL*4 UCI$MWH(ECP$CS2)         ! $/MWH in 1990 $ (ex. 35.75)
+       REAL*4 UCI$DMW(ECP$CS2)         ! $/MW in 1990 $ (ex. 2500.0)
+       REAL*4 UCI$CFC(ECP$CS2)         ! CAP FACTOR (ex. 0.653)
+       REAL*4 UCI$FOR(ECP$CS2)         !FORCED OUTAGE (ex. 0.055)
+       INTEGER*4 UCI$RGN(ECP$CS2)      ! NO. REGIONS TIED TO (ex. 3)
+       INTEGER*4 UCI$RGS(ECP$CS2,ECP$CS3) ! REGIONS TIED TO (ex. (1,1)=5
+                                     ! (1,2)=6 (1,3)=7 (1,4)=0 (1,5)=0     
+       INTEGER*4 MODYR(ECP$CS2)        ! MODEL YEAR (ex.  1995)
+       INTEGER*4 PROJYR(ECP$CS2)       ! PROJECT YEAR (ex. 1995)
+       INTEGER*4 LEAD(ECP$CS2)         ! LEAD TIME (ex. 2)
+       CHARACTER*26 PNAME(ECP$CS2)     ! PROJECT NAME
+       CHARACTER*18 PROVINCE(ECP$CS2)  ! CANADIAN PROVINCE (ex. QUEBEC)
+       CHARACTER*1 LEFTV(ELFT$ET3)       !                                      
+       CHARACTER*4096 ETTTRN(EBLK$ET3)                                  !        
+       EQUIVALENCE (UEITAJ(1,1),ETTTRN(1))                              !        
+
+!     DISPET4 IS USED GATHER EFD SUPPLY DATA AND ECP SUPPLY DATA
+!
+      COMMON /DISPET4/EXGW,CAN_CST,ECP_GW,EFD_GW
+
+      REAL*8 EXGW(ECI_D_SEG,ECI_D_GRP,EFD_D_CSS,EFD_D_PROV,MNUMYR)
+      REAL*8 EFD_GW(EFD_D_SSZ,ELD_D_DAY,EFD_D_CSS,EFD_D_PROV,MNUMYR)
+      REAL*8 ECP_GW(ECP_D_SSZ,ECP_D_STP,EFD_D_CSS,EFD_D_PROV,MNUMYR)
+      REAL*8 CAN_CST(EFD_D_CSS,MNUMNR,MNUMYR)
+!
+!     DISPET7 IS USED GATHER ETT TRANSACTIONAL MARGINAL COSTS
+!
+      COMMON /DISPET7/NMARCST,NMARTYP,UTECONSL,UTCNSTSL,CNSTRNTS_PREFIRM,NMARREG,LEFTMR
+
+!
+      INTEGER ESIZ$ET7,EBLK$ET7,ELFT$ET7
+      PARAMETER (ESIZ$ET7 = ( (2 * 8 * EFD_D_MSP * EFD_D_MVS + &
+                               1 * 4 * EFD_D_MSP * EFD_D_MVS )  &
+                             *(MNUMNR+EFD_D_PROV) * MNUMYR  ) +  &
+                            ( 2 * 4 * (MNUMNR+EFD_D_PROV) * (MNUMNR + EFD_D_PROV) * EFD_D_MSP * EFD_D_MVS) + &
+                            ( 1 * 4 * (MNUMNR+EFD_D_PROV) * (MNUMNR + EFD_D_PROV) * ETT_D_MSP * MNUMYR) )
+      PARAMETER (EBLK$ET7 = ( (ESIZ$ET7 - 1) / 16384) + 1)
+      PARAMETER (ELFT$ET7 = EBLK$ET7 * 16384 - ESIZ$ET7)
+!
+!     DISPET7 - VARIABLE DECLARATION AND DEFINITIONS
+!
+      REAL*8  NMARCST(MNUMNR+EFD_D_PROV,EFD_D_MSP,EFD_D_MVS,MNUMYR)               ! after trade marginal cost
+      REAL*8  NMARTYP(MNUMNR+EFD_D_PROV,EFD_D_MSP,EFD_D_MVS,MNUMYR)               ! after trade marginal unit type
+      REAL*4  UTECONSL(EFD_D_MSP,EFD_D_MVS,MNUMNR+EFD_D_PROV,MNUMNR+EFD_D_PROV)     !detailed economy trade by season & slice
+      REAL*4  UTCNSTSL(EFD_D_MSP,EFD_D_MVS,MNUMNR+EFD_D_PROV,MNUMNR+EFD_D_PROV)     !transmission constraint by season & slice
+      REAL*4  CNSTRNTS_PREFIRM(ETT_D_MSP,MNUMYR,MNUMNR+EFD_D_PROV,MNUMNR+EFD_D_PROV) !transmission constraint by season before firm
+!                                                                                  subtraction.
+      INTEGER*4 NMARREG(MNUMNR+EFD_D_PROV,EFD_D_MSP,EFD_D_MVS,MNUMYR)             ! region marginal trade is from 
+      CHARACTER*1 LEFTMR(ELFT$ET7)               !
+      CHARACTER*16384 MRCS(EBLK$ET7)
+      EQUIVALENCE (NMARCST(1,1,1,1),MRCS(1))
+!
+!     COAL UTILIZATION DATA
+!
+      COMMON /UCOALCF/ UECP_CAP,UECP_GEN,CNFG_CAP,CNFG_GEN,UCL_CGRP2
+!
+      REAL*8 UECP_CAP(ECP_D_XPH,ECP_D_DSP,NDREG),UECP_GEN(ECP_D_XPH,ECP_D_DSP,NDREG)
+      REAL*8 CNFG_CAP(MX_CNFG,NDREG),CNFG_GEN(MX_CNFG,NDREG)
+      INTEGER*4 UCL_CGRP2(EMM_D_GRP)

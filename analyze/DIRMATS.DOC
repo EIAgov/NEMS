@@ -1,0 +1,23 @@
+                    ANALYZE Matrix files
+
+     BLEND   .....Simple blending model.
+     BLENDRT .....Regional blending model.
+     BLOCKNET.....Blocked network model (see BLOCK.HLP).
+     FOREST5 .....Foresty model with 5 time periods.
+     FOREST6 .....Infeasible forestry model 6 time periods.
+     GAL     .....Redundancy example.
+     LANDUSE .....Agricultural planning.
+     LGLTEST .....Logical variables and constraints.
+     NAME10  .....10-character names.
+     NETRANGE.....Ranged rows.
+     POOLING .....Pooling problem.
+     PRSUB   .....Price substitution model.
+     PUM1SOS .....IP with small coefficient values.
+     RATETST .....Simple test for RATEOF.
+     REDTEST .....Simple test for REDUCE.
+     REFINERY.....Small refinery problem...see REFINERY.EXP
+     WOODINFE.....Infeasible variation of WOODNET.
+     WOODNET .....Network distribution model.
+     WOODUNBD.....Unbounded variation of WOODNET.
+
+     See, also, MOREDATA.DOC.

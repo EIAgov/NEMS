@@ -1,0 +1,1540 @@
+0000000001111111111222222222233333333334444444444555555555566
+1234567890123456789012345678901234567890123456789012345678901
+|        Label       ||M|b|J||   Scale    |
+Cols.|Description
+ 1-22|Label (Blank Lines Print as Blank Lines)
+23-25|Matrix To Be Printed From (Right Justified)
+   26|Blank
+27-29|"J" Index to be Printed [Integer] 
+   30|Blank
+   31|Number of Digits to the Right of the Decimal [Integer {0,1,2}]
+   32|Blank
+33-42|Scale [Real, usually 1.0]
+   43|Blank
+   44|K Index [Livestock Only]
+                             CORN SUPPLY AND USE
+65
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                             
+Base/Contract                X 006 1 1.0            
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(Bu/Ac)                 C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bu)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Bu)                                             
+                                             
+Feed                         C 010 0 1.0
+Food,Seed & Industial        X 002 0 1.0
+  for industrial             C 040 0 1.0
+  for domestic ethanol       X 005 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil Bu)                                             
+                                             
+Total                        C 014 0 1.0
+ Energy Reserve              C 036 0 1.0
+ Food Reserve                C 037 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                  
+                                             
+PRICES ($/Bu)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Yr Cash Rec.        C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  Storage Pmts               C 021 0 1.0
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+CORN STOVER (MIL TON)       EN 001 0 1.0
+                    GRAIN SORGHUM SUPPLY AND USE  
+60
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0       
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(Bu/Ac)                 C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bu)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Bu)                                             
+                                             
+Feed                         C 010 0 1.0
+Food,Seed & Industial        X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil Bu)                                             
+                                             
+Total                        C 014 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                           
+                                             
+PRICES ($/Bu)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                            
+  F-O-R Storage Pmts         C 021 0 1.0                                                         
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                             OATS SUPPLY AND USE
+60
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0       
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(Bu/Ac)                 C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bu)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Bu)                                             
+                                             
+Feed                         C 010 0 1.0
+Food,Seed & Industial        X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil Bu)                                             
+                                             
+Total                        C 014 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                          
+                                             
+PRICES ($/Bu)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  F-O-R Storage Pmts         C 021 0 1.0                                                    
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                           BARLEY SUPPLY AND USE
+60
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0       
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(Bu/Ac)                 C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bu)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Bu)                                             
+                                             
+Feed                         C 010 0 1.0
+Food,Seed & Industial        X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil Bu)                                             
+                                             
+Total                        C 014 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                           
+                                             
+PRICES ($/Bu)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  F-O-R Storage Pmts         C 021 0 1.0                                                    
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                            WHEAT SUPPLY AND USE
+63
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0       
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(Bu/Ac)                 C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bu)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Bu)                                             
+                                             
+Feed                         C 010 0 1.0
+Food                         C 011 0 1.0
+Seed & Industial             X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil Bu)                                             
+                                             
+Total                        C 014 0 1.0
+ Energy Reserve              C 036 0 1.0
+ Food Reserve                C 037 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                          
+                                             
+PRICES ($/Bu)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  F-O-R Storage Pmts         C 021 0 1.0                                                    
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                         SOYBEANS SUPPLY AND USE
+59
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0
+  
+Yield(Bu/Ac)                 C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bu)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Bu)                                             
+                                             
+Crush                        C 010 0 1.0
+Feed,Seed & Industial        X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil Bu)                                             
+                                             
+Total                        C 014 0 1.0
+ Food Reserve                C 037 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                          
+                                             
+PRICES ($/Bu)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  F-O-R Storage Pmts         C 021 0 1.0                                                    
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                          COTTON SUPPLY AND USE
+60
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0       
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(LBS/Ac)                C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil Bales)                                             
+                                             
+Beginning Stocks             C 025 2 1.0
+Production                   C 003 2 1.0
+Imports                      X 001 2 1.0
+  Total Supply               C 007 2 1.0
+                                               
+USE (Mil Bales)                                             
+                                             
+Feed                         C 010 2 1.0
+Food,Seed & Industial        X 002 2 1.0
+Exports                      C 004 2 1.0
+  Total Use                  C 013 2 1.0
+                                               
+ENDING STOCKS (Mil Bales)                                             
+                                             
+Total                        C 014 2 1.0
+ FOR Reserve                 C 015 2 1.0
+ CCC Inventory               C 016 2 1.0
+ Commercial                  C 017 2 1.0
+Stocks/use                   C 991 2 1.0                          
+                                             
+PRICES (¢/Lb)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  F-O-R Storage Pmts         C 021 0 1.0
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                            RICE SUPPLY AND USE
+62
+ACREAGE (Mil Ac)                                                     
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Base/Contract                X 006 1 1.0       
+Acreage Information
+  Paid Diversion             X 004 1 1.0
+  
+Yield(Lbs/Ac)                C 002 1 1.0
+Program Yield                X 007 1 1.0
+                                             
+SUPPLY (Mil cwt)                                             
+                                             
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil cwt)                                             
+                                             
+Brewery                      C 010 0 1.0
+Food                         C 011 0 1.0
+Seed & Residual              X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0
+                                               
+ENDING STOCKS (Mil cwt)                                             
+                                             
+Total                        C 014 0 1.0
+ Food Reserve                C 037 0 1.0
+ FOR Reserve                 C 015 0 1.0
+ CCC Inventory               C 016 0 1.0
+ Commercial                  C 017 0 1.0
+Stocks/use                   C 991 2 1.0                          
+                                             
+PRICES ($/cwt)                                             
+                                             
+ Target Price                X 010 2 1.0
+ Loan Rate                   X 011 2 1.0
+ Season Average Price        C 009 2 1.0
+ Counter Cyc Rate            X 032 2 1.0
+                                              
+INCOME (Mil $)                                             
+                                             
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0
+
+Gov't Payments
+  Loan Deficiency(FY)        C 041 0 1.0
+  Loan Deficiency(CRY)       C 020 0 1.0
+  Counter Cycl(FY)           C 042 0 1.0
+  Counter Cycl(CRY)          C 032 0 1.0
+  Contract Payments          X 034 0 1.0
+  Diversion                  C 022 0 1.0                                                       
+  F-O-R Storage Pmts         C 021 0 1.0                                                    
+  0/92 50/92                 C 030 0 1.0
+  Total Payments(CRY)        C 024 0 1.0
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                     SWITCHGRASS SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                      C 034 2 1.0
+Harvested                    C 001 2 1.0 
+Yield(Tons/Ac)               C 002 1 1.0
+                                             
+SUPPLY (Mil Bu)                                                                                          
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Tons)                                             
+  Total Use                  C 013 0 1.0
+
+PRICES ($/ton)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0
+
+                        POPLARS SUPPLY AND USE
+18                            
+ACREAGE (Mil Ac)                                                                                                             
+Planted                      C 034 2 1.0
+Harvested                    C 001 2 1.0
+Yield(Tons/Ac)               C 002 1 1.0
+                                             
+SUPPLY (Mil Tons)
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+                                                                                      
+PRICES ($/Tons)                                             
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0
+
+                        WILLOWS SUPPLY AND USE
+20                            
+ACREAGE (Mil Ac)                                                                                                             
+Planted                      C 034 2 1.0
+Harvested                    C 001 2 1.0
+Yield(Tons/Ac)               C 002 1 1.0
+                                            
+SUPPLY (Mil Tons)                                             
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Tons)                                             
+  Total Use                  C 013 0 1.0                                                                                       
+
+PRICES ($/Ton)                                             
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                         
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0
+
+                       HAY OTHER SUPPLY AND USE
+30                            
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                      C 034 1 1.0
+Harvested                    C 001 1 1.0                                        
+Yield(Tons/Ac)               C 002 1 1.0
+                                            
+SUPPLY (Mil Tons)                                            
+Beginning Stocks             C 025 0 1.0
+Production                   C 003 0 1.0
+Imports                      X 001 0 1.0
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Tons)                                             
+Feed                         C 010 0 1.0
+Food                         C 011 0 1.0
+Seed & Industial             X 002 0 1.0
+Exports                      C 004 0 1.0
+  Total Use                  C 013 0 1.0                                                                   
+
+PRICES ($/Ton)                                             
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+
+Calendar Cash Receipts       C 019 0 1.0                                              
+                                              
+VALUE OF EXPTS (Mil $)       C 029 0 1.0
+                     ALGAE SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                      C 034 2 1.0
+Harvested                    C 001 2 1.0 
+Yield(Tons/Ac)               C 002 1 1.0
+                                             
+SUPPLY (Mil Bu)                                                                                          
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Tons)                                             
+  Total Use                  C 013 0 1.0
+
+PRICES ($/ton)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0
+
+                     MISCANTHUS SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                      C 034 2 1.0
+Harvested                    C 001 2 1.0 
+Yield(Tons/Ac)               C 002 1 1.0
+                                             
+SUPPLY (Mil Bu)                                                                                          
+  Total Supply               C 007 0 1.0
+                                               
+USE (Mil Tons)                                             
+  Total Use                  C 013 0 1.0
+
+PRICES ($/ton)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0
+
+                     Energy Cane SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(Tons/Ac)              CB 003 1 1.0
+                                             
+SUPPLY (Mil Bu)                                                                                          
+  Total Supply              CB 004 0 1.0
+                                               
+USE (Mil Tons)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/ton)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0
+
+                     PENNYCRESS/COTTON/SOY SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(lbs/Ac)               CB 003 1 1.0
+                                             
+SUPPLY (Mil lbs)                                                                                          
+  Total Production          CB 004 0 1.0
+                                               
+USE (Mil lbs)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/lb)
+ Season Average Price       CB 005 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0  
+
+                     CAMELINA/COTTON/SOY SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(lbs/Ac)               CB 003 1 1.0
+                                             
+SUPPLY (Mil lbs)                                                                                          
+  Total Production          CB 004 0 1.0
+                                               
+USE (Mil lbs)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/lb)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0  
+
+                     CARINATA/COTTON/SOY SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(lbs/Ac)               CB 003 1 1.0
+                                             
+SUPPLY (Mil lbs)                                                                                          
+  Total Production          CB 004 0 1.0
+                                               
+USE (Mil lbs)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/lb)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0 
+
+                       PENNYCRESS/CORN/SOY SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(lbs/Ac)               CB 003 1 1.0
+                                             
+SUPPLY (Mil lbs)                                                                                          
+  Total Production          CB 004 0 1.0
+                                               
+USE (Mil lbs)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/lb)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0  
+
+                     CAMELINA/CORN/SOY SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(lbs/Ac)               CB 003 1 1.0
+                                             
+SUPPLY (Mil lbs)                                                                                          
+  Total Production          CB 004 0 1.0
+                                               
+USE (Mil lbs)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/lb)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0  
+
+                     CARINATA/CORN/SOY SUPPLY AND USE
+21
+ACREAGE (Mil Ac)                                                      
+                                                       
+Planted                     CB 001 2 1.0
+Harvested                   CB 002 2 1.0 
+Yield(lbs/Ac)               CB 003 1 1.0
+                                             
+SUPPLY (Mil lbs)                                                                                          
+  Total Production          CB 004 0 1.0
+                                               
+USE (Mil lbs)                                             
+  Total Use                 CB 004 0 1.0
+
+PRICES ($/lb)
+ Season Average Price        C 009 2 1.0
+                                              
+INCOME (Mil $)                                                                                          
+Value Production             C 026 0 1.0
+Variable Expenses            C 006 0 1.0
+Net Retns(Value-Expns)       C 028 0 1.0
+Wghted Avg Grower Pymt       C 050 0 1.0 
+
+                   SOYBEAN PRODUCTS SUPPLY & USE
+39
+SOYBEAN OIL (Mil lb)
+
+Beginning Stocks       PC 007 0 1.0        1
+Production             PC 001 0 1.0        1
+Imports                PX 002 0 1.0        1
+  Total Supply         PC 005 0 1.0        1
+
+Domestic               PC 002 0 1.0        1
+Other Domestic         PX 001 0 1.0        1
+Exports                PC 003 0 1.0        1
+  Total Use            PC 006 0 1.0        1
+
+Ending Stocks          PC 008 0 1.0        1
+Stocks/use             PC 991 2 1.0        1
+
+Season Average Price   PC 004 3 1.0        1
+
+SOYBEAN MEAL (Th ton)
+
+Beginning Stocks       PC 007 0 1.0        2
+Production             PC 001 0 1.0        2
+Imports                PX 002 0 1.0        2
+  Total Supply         PC 005 0 1.0        2
+
+Domestic               PC 002 0 1.0        2
+Other Domestic         PX 001 0 1.0        2
+Exports                PC 003 0 1.0        2
+  Total Use            PC 006 0 1.0        2
+
+Ending Stocks          PC 008 0 1.0        2
+Stocks/use             PC 991 2 1.0        2
+
+Season Average Price   PC 004 1 1.0        2
+
+CRUSHING YIELDS
+Soybean Oil   (lb/bu)  PX 003 2 1.0        1
+Soybean Meal  (lb/bu)  PX 003 2 1.0        2
+Gross Margin   ($/bu)  PX 991 2 1.0
+Net Margin     ($/bu)  PX 992 2 1.0
+152
+LIVESTOCK PRODUCTION, PRICE, DISAPPEARANCE & RECEIPTS
+-----CATTLE-----
+
+SUPPLY (Mil lbs)
+Beginning stocks            XS 010 0 1.0        1
+Beef-Cow slaughter           S 025 0 1.0        1
+Bull slaughter               S 026 0 1.0        1
+Heifer slaughter             S 027 0 1.0        1
+Steer slaughter              S 028 0 1.0        1
+Commercial Production        S 024 0 1.0        1
+Total Production             S 044 0 1.0        1
+Imports                     XS 012 0 1.0        1
+Total Supply                 S 045 0 1.0        1
+Exports                     XS 013 0 1.0        1
+Ending Stocks               XS 011 0 1.0        1
+Total Consumption            S 047 0 1.0        1
+
+CONSUMPTION (lbs)
+Per Cap Carcass Wgt          S 048 2 1.0        1
+Per Cap Retail Wgt           S 049 2 1.0        1
+
+PRICES ($/cwt)
+Beef Cattle Farms            S 050 2 1.0        1
+Calves Farm                  S 051 2 1.0        1
+Choice Steers Nebraska       S 061 2 1.0        1
+  Deflated Price             S 006 2 1.0        1
+Yrlg Steers Okla City        S 062 2 1.0        1
+  Deflated Price             S 005 2 1.0        1
+
+COSTS & RETURNS($/cow):
+
+Variable expenses            S 060 2 1.0        1
+  Feed expenses              S 041 2 1.0        1
+  Other Variable exp        XS 032 2 1.0        1
+Fixed expenses              XS 033 2 1.0        1
+Total cash expenses          S 042 2 1.0        1
+Net Returns                  S 036 2 1.0        1
+Cash Receipts($MIL)          S 058 0 1.0        1
+
+INVENTORIES(1000 hd)
+Beef Cow                     S 015 0 1.0        1
+Bull                         S 016 0 1.0        1
+Beef heifer                  S 017 0 1.0        1
+Heifer>500#                  S 018 0 1.0        1
+Other Heifer                 S 019 0 1.0        1
+Steer inventory>500#         S 020 0 1.0        1
+Calf crop                    S 023 0 1.0        1
+All Cattle                   S 021 0 1.0        1
+
+LIVESTOCK PRODUCTION, PRICE, DISAPPEARANCE & RECEIPTS (CONT.)
+---Hog Sector---
+
+SUPPLY (mil lbs)
+Beginning stocks            XS 010 0 1.0        2
+Boar Slaughter               S 026 0 1.0        2
+Sow Slaughter                S 027 0 1.0        2
+B&G slaughter                S 028 0 1.0        2
+Commercial Production        S 024 0 1.0        2
+Total Production             S 044 0 1.0        2
+Imports                     XS 012 0 1.0        2
+Total Supply                 S 046 0 1.0        2
+Exports                     XS 013 0 1.0        2
+Ending Stocks               XS 011 0 1.0        2
+Total Consumption            S 047 0 1.0        2
+
+CONSUMPTION (lbs)
+Per Cap Carcass Wgt          S 048 2 1.0        2
+Per Cap Retail Wgt           S 049 2 1.0        2
+
+PRICES($/cwt)
+Hogs Farm                    S 050 2 1.0        2
+Iowa SoMinn Market           S 061 2 1.0        2
+  Deflated Price             S 001 2 1.0        2
+
+COSTS & RETURNS($/cwt):
+
+Variable expenses            S 060 2 1.0        2
+  Feed expenses              S 041 2 1.0        2
+  Other Variable exp        XS 032 2 1.0        2
+Fixed expenses              XS 033 2 1.0        2
+Total cash expenses          S 042 2 1.0        2
+Net Returns                  S 036 2 1.0        2
+Cash Receipts($MIL)          S 058 0 1.0        2
+
+INVENTORY(1000 hd)
+Pig Crop(jun/july)           S 023 0 1.0        2
+
+LIVESTOCK PRODUCTION, PRICE, DISAPPEARANCE & RECEIPTS (CONT.)
+---Chicken Sector---
+
+SUPPLY (mil lbs)
+Beginning stocks            XS 010 0 1.0        4
+FI Slaughter                 S 024 0 1.0        4
+Production                   S 044 0 1.0        4
+Total Supply                 S 046 0 1.0        4
+Exports                      S 039 0 1.0        4
+Ending Stocks               XS 011 0 1.0        4
+Consumption                  S 047 0 1.0        4
+
+CONSUMPTION (lbs)
+Per Cap Carcass Wgt          S 048 2 1.0        4
+Per Cap Retail Wgt           S 049 2 1.0        4
+
+PRICES (cents/lb)
+Broilers Farm                S 050 2 1.0        4
+12 City Market               S 061 2 1.0        4
+  Deflated Wholesale         S 001 2 1.0        4
+CompRetail Broiler           S 053 2 1.0        4
+
+COSTS & RETURNS
+  (cents/lb):
+Total Costs                  S 042 2 1.0        4
+Net Returns                  S 036 2 1.0        4
+Cash Receipts($MIL)          S 058 0 1.0        4
+
+---Turkey Sector---
+
+SUPPLY (mil lbs)
+Beginning stocks            XS 010 0 1.0        5
+FI Slaughter                 S 024 0 1.0        5
+Total Production             S 044 0 1.0        5
+Total Supply                 S 046 0 1.0        5
+Exports                     XS 013 0 1.0        5
+Ending Stocks               XS 011 0 1.0        5
+Consumption                  S 047 0 1.0        5
+
+PER CAP CONS (lbs)
+Carcass Wgt                  S 048 2 1.0        5
+
+PRICES (cents/lb)
+Turkey Farm                  S 050 2 1.0        5
+Hen Trky Whlesle East        S 061 2 1.0        5
+ Defltd Hen Trky Price       S 052 2 1.0        5
+Retail Frozen Turkey         S 007 2 1.0        5
+
+INDEX (82-84=100)
+Retail Poultry               S 053 2 1.0        5
+
+COSTS & RETURNS
+ (cents/lb):
+Total Costs                  S 042 2 1.0        5
+Net Returns                  S 036 2 1.0        5
+Cash Receipts($MIL)          S 058 0 1.0        5
+LIVESTOCK PRODUCTION, PRICE, DISAPPEARANCE & RECEIPTS (CONT.)
+---ANIMAL UNIT DEMAND---
+Grain Con An Units         SAU 013 1 1.0        1
+Hgh protn Con An Unts      SAU 013 1 1.0        2
+Roughage Con An Units      SAU 013 1 1.0        3
+
+LVSTK CROP DEMAND
+Corn (mil bu)                C 010 1 1.0        1
+Soybean                      C 010 1 1.0        6
+Grain sorghum                C 010 1 1.0        2
+Barley                       C 010 1 1.0        4
+Oats                         C 010 1 1.0        3
+Wheat                        C 010 1 1.0        5
+66
+   ACREAGE and PRICE SUMMARY
+PLANTED AC (Mil Ac)
+ Corn                        C 034  1 2 1.0 0
+ Grain Sorghum               C 034  2 2 1.0 0
+ Oats                        C 034  3 2 1.0 0
+ Barley                      C 034  4 2 1.0 0
+ Wheat                       C 034  5 2 1.0 0
+ Soybeans                    C 034  6 2 1.0 0
+ Cotton                      C 034  7 2 1.0 0
+ Rice                        C 034  8 2 1.0 0
+ Switchgrass                 C 034  9 2 1.0 0
+ Poplar                      C 034 10 2 1.0 0
+ Willow                      C 034 11 2 1.0 0
+ Hay                         C 034 12 2 1.0 0
+ Algae                       C 034 13 2 1.0 0
+ MiG                         C 034 14 2 1.0 0
+ Miscanthus                  C 034 16 2 1.0 0
+ EnergyCane                  C 034 17 2 1.0 0 
+ Pennycress/CT/SY           CB 001 15 2 1.0 1
+ Camelina/CT/SY             CB 001 15 2 1.0 2
+ Carinata/CT/SY             CB 001 15 2 1.0 3
+ Pennycress/CN/SY           CB 001 18 2 1.0 1
+ Camelina/CN/SY             CB 001 18 2 1.0 2
+ Carinata/CN/SY             CB 001 18 2 1.0 3
+   Total All Crops           A 025  2 2 1.0
+
+HARVESTED AC (Mil Ac)
+ Corn                        C 001  1 2 1.0
+ Grain Sorghum               C 001  2 2 1.0
+ Oats                        C 001  3 2 1.0
+ Barley                      C 001  4 2 1.0
+ Wheat                       C 001  5 2 1.0
+ Soybeans                    C 001  6 2 1.0
+ Cotton                      C 001  7 2 1.0
+ Rice                        C 001  8 2 1.0
+ Switchgrass                 C 001  9 2 1.0
+ Poplar                      C 001 10 2 1.0
+ Willow                      C 001 11 2 1.0
+ Hay                         C 001 12 2 1.0
+ Algae                       C 001 13 2 1.0
+ MiG                         C 001 14 2 1.0
+ Sweet Sorghum               C 001 15 2 1.0
+ Miscanthus                  C 001 16 2 1.0
+ EnergyCane                  C 001 17 2 1.0 
+ Pennycress/CT/SY           CB 002 15 2 1.0 1
+ Camelina/CT/SY             CB 002 15 2 1.0 2
+ Carinata/CT/SY             CB 002 15 2 1.0 3
+ Pennycress/CN/SY           CB 002 18 2 1.0 1
+ Camelina/CN/SY             CB 002 18 2 1.0 2
+ Carinata/CN/SY             CB 002 18 2 1.0 3
+   Total Eight Crops         A 029  2 2 1.0
+
+PRICE ($/bu)
+ Corn                        C 009  1 2 1.0
+ Grain Sorghum               C 009  2 2 1.0
+ Oats                        C 009  3 2 1.0
+ Barley                      C 009  4 2 1.0
+ Wheat                       C 009  5 2 1.0
+ Soybeans                    C 009  6 2 1.0
+ Cotton ($/lb)               C 009  7 3 1.0
+ Rice ($/cwt)                C 009  8 2 1.0
+ Hay                         C 009 12 2 1.0
+ Pennycress($/lb)           CB 001 15 2 1.0 1
+ Camelina($/lb)             CB 001 15 2 1.0 2
+ Carinata($/lb)             CB 001 15 2 1.0 3
+ Biomass ($/dt)              C 009  9 2 1.0
+
+116
+BIOPRODUCTS SUMMARY
+------Prices--------
+
+Biomass ($/dt)              EN 003 2 1.0        1
+Wood Price ($/dt)           WD 000 2 1.0        0
+Corn ($/bu)                  C 009 2 1.0        1
+Soybeans($/bu)               C 009 2 1.0        6
+Soybean Oil($/lb)           PC 004 2 1.0        1
+Soybean Meal($/ton)         PC 004 2 1.0        2
+
+Feedstock Production
+
+Stover(mil.dt)              EN 001 1 1.0        1
+Straw(mil.dt)               EN 001 1 1.0        5
+Switchgrass(mil.dt)          C 003 1 1.0        9
+Miscanthus (mil.dt)          C 003 1 1.0        16
+Poplars (mil.dt)             C 003 1 1.0        10
+Willows (mil.dt)             C 003 1 1.0        11
+SweetSorgh(mil.dt)           C 003 1 1.0        15
+E.Cane(mil.dt)               C 003 1 1.0        17
+Algae (mil.dt)               C 003 1 1.0        13
+CRP Harvest(mil.dt)         FS 011 1 1.0        8
+Wood Resid (mil.dt)         FS 006 1 1.0        8
+
+TOT BIOMASS(mil.dt)         BS 000 1 1.0        7
+
+Corn Grain(Mil.bu)          FS 004 0 1.0        8
+
+----Spare Supply-----
+
+Corn Stover(mil.dt)         CN 000 1 1.0        0
+Wheat Straw(mil.dt)         WH 000 1 1.0        0
+Switchgrass(mil.dt)         SW 000 1 1.0        0
+Miscanthus (mil.dt)         MS 000 1 1.0        0
+Poplars (mil.dt)            PL 000 1 1.0        0
+Willows (mil.dt)            WL 000 1 1.0        0
+SweetSorgh(mil.dt)          SS 000 1 1.0        0
+E.Cane(mil.dt)              EC 000 1 1.0        0     
+Wood Resid (mil.dt)         WR 001 1 1.0        0
+CRP Harvest(mil.dt)        CRP 001 1 1.0        0
+
+-----Electricity-----
+
+Demand(bil kwh)             BD 000 0 1.0        1
+Supply(bil kwh)             BS 000 0 1.0        1
+MANURE KWH
+Beef                        PO 000 0 1.0        1
+Dairy                       PO 000 0 1.0        2
+Hogs                        PO 000 0 1.0        3
+Broilers                    PO 000 0 1.0        4
+Total                       PO 000 0 1.0        5
+FEEDSTOCKS
+Corn Stover(mil.dt)         FS 001 1 1.0        1
+Wheat Straw(mil.dt)         FS 002 1 1.0        1
+Switchgrass(mil.dt)         FS 003 1 1.0        1
+Miscanthus(mil.dt)          FS 012 1 1.0        1
+Poplars(mil.dt)             FS 008 1 1.0        1
+Willows(mil.dt)             FS 009 1 1.0        1
+SweetSorgh(mil.dt)          FS 010 1 1.0        1
+E.Cane(mil.dt)              FS 013 1 1.0        1
+CRP Harvest(mil.dt)         FS 011 1 1.0        1
+Wood Resid (mil.dt)         FS 006 1 1.0        1
+COSTS
+Feedstock Cost(mil$)        BC 001 0 1.0        1
+Conversion Cost(mil$)       BC 002 0 1.0        1
+Total Cost(mil$)            BC 003 0 1.0        1
+Cost per kwh                BC 004 3 1.0        1
+
+-----Ethanol------
+
+Demand(bil gal)             BD 000 2 1.0        2
+Supply(bil gal)             BS 000 2 1.0        2
+FEEDSTOCKS
+Corn Stover(mil.dt)         FS 001 1 1.0        2
+Wheat Straw(mil.dt)         FS 002 1 1.0        2
+Switchgrass(mil.dt)         FS 003 1 1.0        2
+Miscanthus(mil.dt)          FS 012 1 1.0        2
+Poplars(mil.dt)             FS 008 1 1.0        2
+Willows(mil.dt)             FS 009 1 1.0        2
+SweetSorgh(mil.dt)          FS 010 1 1.0        2
+E.Cane(mil.dt)              FS 013 1 1.0        2
+CRP Harvest(mil.dt)         FS 011 1 1.0        2
+Wood Resid (mil.dt)         FS 006 1 1.0        2
+Corn(mil bu)                FS 004 0 1.0        2
+COSTS
+Feedstock Cost(mil$)        BC 001 0 1.0        2
+Conversion Cost(mil$)       BC 002 0 1.0        2
+Total Cost(mil$)            BC 003 0 1.0        2
+Cost per gal                BC 004 2 1.0        2
+SIM+BASELINE ETHANOL
+Domestic corn(mil bu)        X 005 1 1.0        1 
+Prod for Domestic(bil gal)   X 046 2 1.0        1
+Exported eth(bil gal)        X 050 3 1.0        1
+Imported eth(bil gal)        X 047 3 1.0        1
+Dom eth Demand(bil gal)      X 049 2 1.0        1
+Total eth Prod(bil gal)      X 048 2 1.0        1
+
+
+----Bio-Diesel----
+
+Demand(bil gal)             BD 000 2 1.0        3
+Supply(bil gal)             BS 000 2 1.0        3
+FEEDSTOCKS
+Soybeans(mil bu)            FS 005 0 1.0        3
+COSTS
+Feedstock Cost(mil$)        BC 001 0 1.0        3
+Conversion Cost(mil$)       BC 002 0 1.0        3
+Total Cost(mil$)            BC 003 0 1.0        3
+Cost per gal                BC 004 2 1.0        3
+SIM+BASELINE BIODIESEL
+Domestic soy(mil bu)         X 005 1 1.0        6 
+Prod for Domestic(bil gal)   X 046 2 1.0        6
+Exported biod(bil gal)       X 050 3 1.0        6
+Imported biod(bil gal)       X 047 3 1.0        6
+Dom biod Demand(bil gal)     X 049 2 1.0        6
+Total biod Prod(bil gal)     X 048 2 1.0        6
+
+30
+CROP RESIDUE PRODUCTION FOR ENERGY
+-----STOVER AND STRAW-----
+
+SUPPLY (MIL TONS)
+Corn Stover                 EN 001 2 1.0        1
+Wheat Straw                 EN 001 2 1.0        5
+Sorghum Resid               EN 001 2 1.0        2
+Oat Resid                   EN 001 2 1.0        3
+Barley Resid                EN 001 2 1.0        4
+
+HARVESTED (MIL ACRES)
+Corn Stover                 EN 008 2 1.0        1
+Wheat Straw                 EN 008 2 1.0        5
+Sorghum Resid               EN 008 2 1.0        2
+Oat Resid                   EN 008 2 1.0        3
+Barley Resid                EN 008 2 1.0        4
+
+NET RETURNS (MIL $)
+Corn Stover                 EN 010 1 1.0        1
+Wheat Straw                 EN 010 1 1.0        5
+Sorghum Resid               EN 010 1 1.0        2
+Oat Resid                   EN 010 1 1.0        3
+Barley Resid                EN 010 1 1.0        4
+
+GROWER PYMNT ($ DT)
+Corn Stover                 EN 020 2 1.0        1
+Wheat Straw                 EN 020 2 1.0        5
+Sorghum Resid               EN 020 2 1.0        2
+Oat Resid                   EN 020 2 1.0        3
+Barley Resid                EN 020 2 1.0        4
+
+214
+
+TILLAGE ACRES
+CORN CONVENT                CB 001 2 1.0         1 1
+CORN REDUCED                CB 001 2 1.0         1 2
+CORN NOTILL                 CB 001 2 1.0         1 3
+
+SORG CONVENT                CB 001 2 1.0         2 1
+SORG REDUCED                CB 001 2 1.0         2 2
+SORG NOTILL                 CB 001 2 1.0         2 3
+
+OATS CONVENT                CB 001 2 1.0         3 1
+OATS REDUCED                CB 001 2 1.0         3 2
+OATS NOTILL                 CB 001 2 1.0         3 3
+
+BARL CONVENT                CB 001 2 1.0         4 1
+BARL REDUCED                CB 001 2 1.0         4 2
+BARL NOTILL                 CB 001 2 1.0         4 3
+
+WHEAT CONVENT               CB 001 2 1.0         5 1
+WHEAT REDUCED               CB 001 2 1.0         5 2
+WHEAT NOTILL                CB 001 2 1.0         5 3
+
+SOY CONVENT                 CB 001 2 1.0         6 1
+SOY REDUCED                 CB 001 2 1.0         6 2
+SOY NOTILL                  CB 001 2 1.0         6 3
+
+COTT CONVENT                CB 001 2 1.0         7 1
+COTT REDUCED                CB 001 2 1.0         7 2
+COTT NOTILL                 CB 001 2 1.0         7 3
+
+RICE CONVENT                CB 001 2 1.0         8 1
+RICE REDUCED                CB 001 2 1.0         8 2
+RICE NOTILL                 CB 001 2 1.0         8 3
+
+HAY  CONVENT                CB 001 2 1.0        12 1
+HAY  NOTILL                 CB 001 2 1.0        12 3
+
+INTENSIFIED PAST            PT 001 2 1.0        28 1 
+
+SWTCH ON CROPLND            CB 001 2 1.0         9 1
+SWTCH ON   CPAST            CB 001 2 1.0         9 2
+SWTCH ON   PPAST            CB 001 2 1.0         9 3
+SWTCH ON   CRP             CRP 001 1 1.0        19 0
+
+POPLR ON CROPLND            CB 001 2 1.0        10 1
+POPLR ON   CPAST            CB 001 2 1.0        10 2
+POPLR ON   PPAST            CB 001 2 1.0        10 3
+POPLR ON   CRP             CRP 001 1 1.0        20 0
+
+WILLW ON CROPLND            CB 001 2 1.0        11 1
+WILLW ON   CPAST            CB 001 2 1.0        11 2
+WILLW ON   PPAST            CB 001 2 1.0        11 3
+WILLW ON   CRP             CRP 001 1 1.0        21 0
+
+MISCAN ON CROPLAND          CB 001 2 1.0        16 1
+MISCAN ON CPAST             CB 001 2 1.0        16 2
+MISCAN ON PPAST             CB 001 2 1.0        16 3
+
+Ecane ON CROPLAND           CB 001 2 1.0        17 1
+Ecane ON CPAST              CB 001 2 1.0        17 2
+Ecane ON PPAST              CB 001 2 1.0        17 3
+
+CRPLND TO PASTURE           CB 001 2 1.0        14 1
+
+PENNYCR/CT/SY CRPLND        CB 001 2 1.0        15 1
+Camelina/CT/SY CRPLND       CB 001 2 1.0        15 2
+Carinata/CT/SY CRPLND       CB 001 2 1.0        15 3
+
+PENNYCR/CN/SY CRPLND        CB 001 2 1.0        18 1
+Camelina/CN/SY CRPLND       CB 001 2 1.0        18 2
+Carinata/CN/SY CRPLND       CB 001 2 1.0        18 3
+
+ALGAE ON CPAST              CB 001 2 1.0        13 2
+ALGAE ON PPAST              CB 001 2 1.0        13 3
+
+CARB EMISSIONS MMtC
+CORN CONVENT                CB 021 2 1.0         1 1
+CPRM REDUCED                CB 021 2 1.0         1 2
+CORN NOTILL                 CB 021 2 1.0         1 3
+
+SORG CONVENT                CB 021 2 1.0         2 1
+SORG REDUCED                CB 021 2 1.0         2 2
+SORG NOTILL                 CB 021 2 1.0         2 3
+
+OATS CONVENT                CB 021 2 1.0         3 1
+OATS REDUCED                CB 021 2 1.0         3 2
+OATS NOTILL                 CB 021 2 1.0         3 3
+
+BARL CONVENT                CB 021 2 1.0         4 1
+BARL REDUCED                CB 021 2 1.0         4 2
+BARL NOTILL                 CB 021 2 1.0         4 3
+
+WHEAT CONVENT               CB 021 2 1.0         5 1
+WHEAT REDUCED               CB 021 2 1.0         5 2
+WHEAT NOTILL                CB 021 2 1.0         5 3
+
+SOY CONVENT                 CB 021 2 1.0         6 1
+SOY REDUCED                 CB 021 2 1.0         6 2
+SOY NOTILL                  CB 021 2 1.0         6 3
+
+COTT CONVENT                CB 021 2 1.0         7 1
+COTT REDUCED                CB 021 2 1.0         7 2
+COTT NOTILL                 CB 021 2 1.0         7 3
+
+RICE CONVENT                CB 021 2 1.0         8 1
+RICE REDUCED                CB 021 2 1.0         8 2
+RICE NOTILL                 CB 021 2 1.0         8 3
+
+HAY  CONVENT                CB 021 2 1.0        12 1
+HAY  NOTILL                 CB 021 2 1.0        12 3
+
+INTENSIFIED PAST            CB 021 2 1.0        12 2
+
+SWTCH ON CROPLND            CB 021 2 1.0         9 1
+SWTCH FROM CPAST            CB 021 2 1.0         9 2
+SWTCH FROM PPAST            CB 021 2 1.0         9 3
+
+POPLR ON CROPLND            CB 021 2 1.0        10 1
+POPLR FROM CPAST            CB 021 2 1.0        10 2
+POPLR FROM PPAST            CB 021 2 1.0        10 3
+
+WILLW ON CROPLND            CB 021 2 1.0        11 1
+WILLW FROM CPAST            CB 021 2 1.0        11 2
+WILLW FROM PPAST            CB 021 2 1.0        11 3
+
+CRPLND TO PASTURE           CB 021 2 1.0        14 1
+
+PENNYCR/CT/SY CRPLND        CB 021 2 1.0        15 1
+Camilina/CT/SY CRPLND       CB 021 2 1.0        15 2
+Carinata/CT/SY CRPLND       CB 021 2 1.0        15 3
+
+PENNYCR/CN/SY CRPLND        CB 021 2 1.0        18 1
+Camelina/CN/SY CRPLND       CB 021 2 1.0        18 2
+Carinata/CN/SY CRPLND       CB 021 2 1.0        18 3
+
+CORN RESIDUES               EN 018 2 1.0        01 4
+WHEAT RESIDUES              EN 018 2 1.0        05 4
+
+SOIL CARB GAIN MMtC
+CORN CONVENT                CB 025 2 1.0         1 1
+CORN REDUCED                CB 025 2 1.0         1 2
+CORN NOTILL                 CB 025 2 1.0         1 3
+
+SORG CONVENT                CB 025 2 1.0         2 1
+SORG REDUCED                CB 025 2 1.0         2 2
+SORG NOTILL                 CB 025 2 1.0         2 3
+
+OATS CONVENT                CB 025 2 1.0         3 1
+OATS REDUCED                CB 025 2 1.0         3 2
+OATS NOTILL                 CB 025 2 1.0         3 3
+
+BARL CONVENT                CB 025 2 1.0         4 1
+BARL REDUCED                CB 025 2 1.0         4 2
+BARL NOTILL                 CB 025 2 1.0         4 3
+
+WHEAT CONVENT               CB 025 2 1.0         5 1
+WHEAT REDUCED               CB 025 2 1.0         5 2
+WHEAT NOTILL                CB 025 2 1.0         5 3
+
+SOY CONVENT                 CB 025 2 1.0         6 1
+SOY REDUCED                 CB 025 2 1.0         6 2
+SOY NOTILL                  CB 025 2 1.0         6 3
+
+COTT CONVENT                CB 025 2 1.0         7 1
+COTT REDUCED                CB 025 2 1.0         7 2
+COTT NOTILL                 CB 025 2 1.0         7 3
+
+RICE CONVENT                CB 025 2 1.0         8 1
+RICE REDUCED                CB 025 2 1.0         8 2
+RICE NOTILL                 CB 025 2 1.0         8 3
+
+HAY  CONVENT                CB 025 2 1.0        12 1
+HAY  NOTILL                 CB 025 2 1.0        12 3
+
+INTENSIFIED PAST            CB 025 2 1.0        12 2
+
+SWTCH ON CROPLND            CB 025 2 1.0         9 1
+SWTCH FROM CPAST            CB 025 2 1.0         9 2
+SWTCH FROM PPAST            CB 025 2 1.0         9 3
+
+POPLR ON CROPLND            CB 025 2 1.0        10 1
+POPLR FROM CPAST            CB 025 2 1.0        10 2
+POPLR FROM PPAST            CB 025 2 1.0        10 3
+
+WILLW ON CROPLND            CB 025 2 1.0        11 1
+WILLW FROM CPAST            CB 025 2 1.0        11 2
+WILLW FROM PPAST            CB 025 2 1.0        11 3
+
+CRPLND TO PASTURE           CB 025 2 1.0        14 1
+
+SWSORG ON CROPLND           CB 025 2 1.0        15 1
+
+PENNYCR/CN/SY CRPLND        CB 025 2 1.0        18 1
+Camelina/CN/SY CRPLND       CB 025 2 1.0        19 1
+Carinata/CN/SY CRPLND       CB 025 2 1.0        20 1
+
+TOTAL CARBON MMtC
+
+SOIL C                      CT 025 2 1.0         0 0
+TOTL C                      CT 021 2 1.0         0 0
+DRCT C                      CT 011 2 1.0         0 0
+FERT C                      CT 013 2 1.0         0 0
+CHEM C                      CT 015 2 1.0         0 0
+SEED C                      CT 017 2 1.0         0 0
+NITR C                      CT 018 2 1.0         0 0
+LIME C                      CT 019 2 1.0         0 0
+
+TOTAL ENERGY QUADS
+
+TOTL E                      CT 020 2 1.0         0 0
+DRCT E                      CT 010 2 1.0         0 0
+FERT E                      CT 012 2 1.0         0 0
+CHEM E                      CT 014 2 1.0         0 0
+SEED E                      CT 016 2 1.0         0 0
+
+21
+
+CRP ACREAGE
+CRP NOT EXPIRED            CRP 001 2 1.0        26 0
+CRP RE-ENROLLED            CRP 001 2 1.0        23 0
+CRP TO CORN                CRP 001 2 1.0        11 0
+CRP TO SORG                CRP 001 2 1.0        12 0
+CRP TO OATS                CRP 001 2 1.0        13 0
+CRP TO BARLEY              CRP 001 2 1.0        14 0
+CRP TO WHEAT               CRP 001 2 1.0        15 0
+CRP TO SOY                 CRP 001 2 1.0        16 0
+CRP TO COTT                CRP 001 2 1.0        17 0
+CRP TO RICE                CRP 001 2 1.0        18 0
+CRP TO SWITCHGRASS         CRP 001 2 1.0        19 0
+CRP TO POPLARS             CRP 001 2 1.0        20 0
+CRP TO WILLOWS             CRP 001 2 1.0        21 0
+CRP TO HAY                 CRP 001 2 1.0        22 0
+CRP TO PASTURE             CRP 001 2 1.0        24 0
+CRP BIOMASS HARV           CRP 001 2 1.0        25 0    
+
+INFLATION INDEX            INF 001 2 1.0        01 01
+
+
+57
+    EIGHT CROP TOTALS AND FARM INCOME INDICATORS
+Million Dollars
+
+EIGHT CROPS
+
+Acreage (Mil. Ac.)           A 025 1 1.0
+
+Set Aside Ac. (Mil. Ac.)
+ Total Acres in V-SA        XA 009 1 1.0
+ Voluntary Set Aside        XA 003 1 1.0
+ Total Set Aside            XA 002 1 1.0
+ Paid Land Diversion        XA 010 1 1.0
+
+Value of Production          A 006 0 1.0  
+Loan Def. Payments           A 017 0 1.0
+Contract Payments           XA 005 0 1.0
+CounterCyclical Pymnts       A 018 0 1.0
+Crop Variable Expense        A 001 0 1.0  
+  Value+Pymts-Expenses       A 028 0 1.0
+  
+Value of Exports             A 013 0 1.0 
+
+CROP CASH RECEIPTS
+                                                                                              
+Eight Model Crops            A 003 0 1.0
+Other Crops                 XA 001 0 1.0
+ Total Crops                 A 002 0 1.0
+                                                                              
+LIVESTOCK CASH RECPTS                   
+                                       
+Seven Model Lvsk             A 010 0 1.0
+Other                       XA 004 0 1.0
+ Total Livestock             A 009 0 1.0
+                                                                                 
+TOTAL MARKETINGS             A 015 0 1.0      
+                                          
+GOVNMNT PAYMENTS(CRY)
+                                        
+Loan Deficiency              A 017 0 1.0
+Contract                    XA 005 0 1.0
+CounterCyclical              A 018 0 1.0
+Diversion                    A 019 0 1.0
+0/50/92 Payments             A 027 0 1.0                                                        
+Other                       XA 007 0 1.0
+ Total Payments              A 020 0 1.0
+                                        
+OTHER CASH INCOME           XA 008 0 1.0 
+NON-MONEY INCOME             A 016 0 1.0
+                                        
+REALIZED GROSS INCOME        A 022 0 1.0
+                                        
+Lvstck Feed Expenses         A 007 0 1.0
+COMPUTED FEED EXPENS         A 030 0 1.0
+TOTAL PRODUCTION COSTS       A 012 0 1.0                             
+
+BIOMASS ANNUITIES            A 039 0 1.0
+                                        
+REALIZED NET INCOME          A 023 0 1.0
+
+
+            

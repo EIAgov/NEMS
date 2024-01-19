@@ -1,0 +1,29 @@
+AEO Name,STEO Name,Nat Gas Volumes (bcf),FTAB Table,Benchmarked to STEO?,Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
+NGS000:ba_DryGasProduct,NGPRPUS,Dry Natural Gas Production,13,Yes,2%,2%,0.365,0.366,
+NGS000:ba_SupplementalN,NGSFPUS,Supplemental Natural Gas,13,Yes,2%,2%,0.365,0.366,
+NGI000:ca_LiquefiedNatu,NGIMPUS_LNG,Liquefied Natural Gas Imports,76,Yes,2%,2%,0.365,0.366,Historical data in NGMM does not include re-exports of LNG
+NGI000:da_LiquefiedNatu,NGEXPUS_LNG,Liquefied Natural Gas Exports,76,Yes,2%,2%,0.365,0.366,
+NGI000:ba_PipelineImpor,NGIMPUS_PIPE,Gross pipeline imports,76,Yes,2%,2%,0.365,0.366,NGMM assumes all imports are from Canada
+NGI000:ca_PipelineExpor + NGI000:da_PipelineExpor,NGEXPUS_PIPE,Gross pipeline exports,76,Yes,2%,2%,0.365,0.366,
+NGS000:ea_PipelineFuel + NGS000:ea_liquefactexp,ngacpus,Pipeline Fuel Consumption (inc. Liquefaction),13,Yes,2%,2%,0.365,0.366,"STEO includes liquefaction volumes in its pipeline and distribution use volumes where liquefaction is a seperate series in the NGMM. NGMM assumes a certain percentage of natural gas is consumed during LNG liquefaction, subtracts those volumes out of STEO's ""Pipeline and Distribution Use"" and assigns it to industrial consumption. After the liquefaction volumes are subtracted out, the series is benchmarked."
+NGS000:ea_LeaseandPlant,nglppus,Lease and Plant Fuel Consumption,13,Yes,2%,2%,0.365,0.366,
+NGS000:nom_HenryHub,nghhuus,"Henry Hub Spot Price, $/mmBtu",13,Yes,2%,2%,1,1,Shadow price of the hub mass balance constaint
+PRC000:nom_E_NaturalGas,ngeudus,"Electric Power Price, $/mmBtu",13,Yes,2%,2%,1,1,
+PRC001:nom_R_NaturalGas,NGRCU_NEC,New England Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC002:nom_R_NaturalGas,NGRCU_MAC,Middle Atlantic Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC003:nom_R_NaturalGas,NGRCU_ENC,E. N. Central Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC004:nom_R_NaturalGas,NGRCU_WNC,W. N. Central Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC005:nom_R_NaturalGas,NGRCU_SAC,S. Atlantic Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC006:nom_R_NaturalGas,NGRCU_ESC,E. S. Central Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC007:nom_R_NaturalGas,NGRCU_WSC,W. S. Central Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC008:nom_R_NaturalGas,NGRCU_MTN,Mountain Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC009:nom_R_NaturalGas,NGRCU_PAC,Pacific Residential Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC001:nom_C_NaturalGas,NGCCU_NEC,New England Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC002:nom_C_NaturalGas,NGCCU_MAC,Middle Atlantic Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC003:nom_C_NaturalGas,NGCCU_ENC, E. N. Central Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC004:nom_C_NaturalGas,NGCCU_WNC,W. N. Central Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC005:nom_C_NaturalGas,NGCCU_SAC,S. Atlantic Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC006:nom_C_NaturalGas,NGCCU_ESC,E. S. Central Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC007:nom_C_NaturalGas,NGCCU_WSC,W. S. Central Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC008:nom_C_NaturalGas,NGCCU_MTN,Mountain Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,
+PRC009:nom_C_NaturalGas,NGCCU_PAC,Pacific Commercial Retail Price ($/Mcf),78,Yes,2%,2%,1,1,

@@ -1,0 +1,5 @@
+     Function: Return to terminal (see EXECUTE command)
+     Syntax:   RETURN [QUIETLY]
+
+     If QUIETLY is specified, the "RETURN to terminal" message
+     is suppressed.

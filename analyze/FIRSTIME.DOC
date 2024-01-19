@@ -1,0 +1,20 @@
+ This is your PROFILE, which is set now just to give you these messages.
+ You should change PROFILE.EXC to set parameters, like SCREEN, or to
+ execute commands for some particular exercises.
+
+ You may peruse *.EXC files to see some ANALYZE execution files.  In
+ particular, you can obtain filed documentation (for printing as hard copy)
+ by typing:  EXEC DOCANAL (and you might change this to suit your needs).
+ Be sure to EXEC ATEST before setting up your own PROFILE.
+
+ Also, you might create SETUP.EXC, which sets default prefixes and suffixes
+ for files (as with the _SETUP command), even before the PROFILE is
+ executed.  You, or your constituents, might also EXEC SETUP0 to restore file
+ default specs, so please look at that file too.
+
+ See the User Guide for other special files that initialize the session
+ environment.
+
+ This file is FIRSTIME.DOC, which was PRINTed from PROFILE.EXC, which
+ was installed.  You should now delete (or edit) PROFILE.EXC to avoid this
+ message in the future.

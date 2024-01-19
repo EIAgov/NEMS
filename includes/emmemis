@@ -1,0 +1,112 @@
+! $Header: m:/default/includes/RCS/emmemis,v 1.6 2019/07/23 15:28:58 rsc Exp $
+! miscellaneous emm common block declarations moved from in-line code to an include file.
+! much of these pertain to emission regulations, such as the transport rule and cpp.
+
+! for epa$transt_efd and epa$tranrg_efd
+      INTEGER*4  TST_NOX(ECP_D_CAP+1,NOX_D_GRP)
+      INTEGER*4  TST_HG(NUTSEC+3,MX_HG_GRP)
+      INTEGER*4  TST_SO2(ECP_D_CAP+1,MX_SO2_GRP)
+      REAL*8     EFD_MIN
+      COMMON /TST_EMS/ EFD_MIN,TST_NOX,TST_HG,TST_SO2
+!
+      COMMON /TRANEMIS/ TSO2_LM1_BY_ST,TSO2_LIM_BY_ST,  &
+                        TSO2_VR1_BY_ST,TSO2_VR3_BY_ST,  &
+                        TSO2_CSH_BY_ST,TSO2_OSH_BY_ST,  &
+                        TSO2_OSH_BY_CLRG,TNOX_SHR_BY_CLRG,  &
+                        TSO2_ST
+      REAL*4 TSO2_LM1_BY_ST(NOX_D_MST) ! SO2 limit by state, Phase 1 (transport rule/csapr) 
+      REAL*4 TSO2_LIM_BY_ST(NOX_D_MST) ! SO2 limit by state, Phase 2 (transport rule/csapr)
+      REAL*4 TSO2_VR1_BY_ST(NOX_D_MST) ! SO2 1-Year Variability Allowance by State (transport rule/csapr)
+      REAL*4 TSO2_VR3_BY_ST(NOX_D_MST) ! SO2 3-Year Variability Allowance by State (transport rule/csapr)
+      REAL*4 TSO2_CSH_BY_ST(NOX_D_MST) ! SO2 Coal SO2 Share of Coal Region by State (transport rule/csapr)
+      REAL*4 TSO2_OSH_BY_ST(NOX_D_MST) ! SO2 Oil  SO2 Share of Oil  Region by State (transport rule/csapr)
+      REAL*4 TSO2_OSH_BY_CLRG(NDREG) ! SO2 Coal SO2 Share by coal region (transport rule/csapr)
+      REAL*4 TNOX_SHR_BY_CLRG(NDREG,NOX_D_GRP) ! NOX Compliance Groups by Coal Demand Region (transport rule/csapr)
+      CHARACTER*2 TSO2_ST(NOX_D_MST) ! nox compliance state codes
+!
+      COMMON /TEMPEMIS/ TBTU_SHR_BY_CLRG,TBTU_SHR_BY_ST
+      REAL*4 TBTU_SHR_BY_CLRG(NDREG,ECP_D_DSP+1,MX_SO2_TRAN)
+      REAL*4 TBTU_SHR_BY_ST(NOX_D_MST,ECP_D_DSP+1)
+
+! for subroutine elcost
+
+      COMMON /COFSHRN/ UDTLGNN,UPCFGNN,UPWDCFN
+      REAL*4 UDTLGNN(ECP_D_CAP,MNUMNR)
+      REAL*4 UPCFGNN(ECP_D_CAP,MNUMNR)
+      REAL*4 UPWDCFN(ECP_D_CAP,MNUMNR)
+
+      COMMON /FUEL_RG_VALUE/ FLRG_VALUE, FLRG_VAL_45Q
+      REAL*8 FLRG_VALUE(MAXNFR,MNUMYR)
+      REAL*8 FLRG_VAL_45Q(MAXNFR,MNUMYR)
+
+      COMMON/ACIEFD/ ACICST,ACIOAM,ACITOTB
+      REAL*4  ACICST(MNUMYR)
+      REAL*4  ACIOAM(MNUMYR)
+      REAL*4  ACITOTB(MNUMNR,MNUMYR)
+
+      COMMON/GPSCST/ ULCO2CST,ULGHG
+      REAL*8 ULCO2CST(MNUMNR,MNUMYR)
+      REAL*8 ULGHG(EMM_D_GRP)
+
+      COMMON/GPSGEN/ NWGPSGEN
+      REAL*8 NWGPSGEN(ECP_D_CAP,MNUMNR,MNUMYR)
+
+! for  ed$rps
+      COMMON/EGEN/EXSGEN
+      REAL*4 EXSGEN(ECP_D_CAP,MNUMNR)
+!
+      COMMON/EXGEN/EXDGEN,EXPGEN
+      REAL*4 EXDGEN(EFD_D_CAP,MNUMNR)
+      REAL*4 EXPGEN(ECP_D_CAP,MNUMNR)
+!
+      COMMON /RPSOUT/UPRNWNR,UPRNWNP
+      REAL*4 UPRNWNR(MNUMNR,MNUMYR)
+      REAL*4 UPRNWNP(ECP_D_CAP+1,MNUMYR)
+
+! for ed$op
+      COMMON /MRCF/ ECMRUNCF
+      REAL*8 ECMRUNCF(EMM_D_GRP)
+! for ed$cpp2
+      COMMON/BLDGEN/ EPBLDGEN(ECP_D_CAP,MNUMNR,MNUMYR)
+      REAL*8 EPBLDGEN
+
+      COMMON/ERCOUT/ERCQAVLN(MNUMNR,MNUMYR)
+      REAL*4 ERCQAVLN
+
+      COMMON /NUC111D/ NUCPLNF,NUCPLNN
+      REAL*4 NUCPLNF(MAXNFR,MNUMYR + ECP_D_XPH)
+      REAL*4 NUCPLNN(MNUMNR,MNUMYR + ECP_D_XPH)
+ 
+      COMMON/EESAVE/ EERF,EERN,EECF,EECN,EEIF,EEIN
+      REAL*4 EERF(EFD_D_MFRG + 1,MNUMYR)
+      REAL*4 EERN(MNUMNR,MNUMYR)
+      REAL*4 EECF(EFD_D_MFRG + 1,MNUMYR)
+      REAL*4 EECN(MNUMNR,MNUMYR)
+      REAL*4 EEIF(EFD_D_MFRG + 1,MNUMYR)
+      REAL*4 EEIN(MNUMNR,MNUMYR)
+! for ed$cpp
+      COMMON /PRC111D/ EFDPRCNL,ECPPRCNL,EFDPRCFL,ECPPRCFL
+      REAL*4 EFDPRCNL(MNUMNR,MNUMYR)
+      REAL*4 ECPPRCNL(MNUMNR,MNUMYR)
+      REAL*4 EFDPRCFL(MAXNFR,MNUMYR)
+      REAL*4 ECPPRCFL(MAXNFR,MNUMYR)
+! for edo$op
+!     COMMON /COFSHRN/ UDTLGNN,UPCFGNN,UPWDCFN
+!     REAL*4 UDTLGNN(ECP_D_CAP,MNUMNR)
+!     REAL*4 UPCFGNN(ECP_D_CAP,MNUMNR)
+!     REAL*4 UPWDCFN(ECP_D_CAP,MNUMNR)
+! for edo$bench
+      COMMON /BMCST/ ULBMCST        !cost associated with STEO benchmarking constraints for marginal price adder
+      REAL*8 ULBMCST
+! for edo$mrun      
+      COMMON /MRCST/ ULMRCST
+      REAL*8 ULMRCST(MNUMNR)
+
+
+
+! for edo$col
+      COMMON /CLTRAN/ CLSCPLDR,UFRSO2R,UFRSO2Q
+      INTEGER*4 CLSCPLDR(MX_NCOALS+MX_ISCV,NUTSEC,NDREG)
+      REAL*4 UFRSO2R(EFD_D_NFL,EFD_D_MFRG)
+      REAL*4 UFRSO2Q(EFD_D_NFL,EFD_D_MFRG)
+

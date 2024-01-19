@@ -1,0 +1,310 @@
+!  $Header: m:/default/includes/RCS/efpint,v 1.10 2016/10/07 20:14:33 LC2 Exp $
+! INTERNAL EFP VARIABLES.
+! Requires EUSPRC first
+! Requires EMMPARM first
+!...+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+      COMMON/EFPINT/ERTOMD,ERTOMT,EQTLSL,EFPFL,EFPOM,EFPNUC, &
+                    ESAFDC,ESWACD,ERBCWP,ERRCWP,EROFFS,ERFDCE, &
+                    ERFDCD,ERSLTX,ERPRTX,ERYCWP,ERDLRB,ERAFDL, &
+                    ERFFDC,ERXFDC,ERCIDC,EPGW,EPCGW,EPYCWP,EPAFDC, &
+                    EPONLN,ERTDW1,ERBDE1,ERBDE2,ERBTIR,ERCNAD, &
+                    ERCNBV,ERTDE1,ERTDE2,ERATSF,ERATSD,ERTDW2, &
+                    ERAITC,ERFITC,ERNITC,ERAFDC,BLKSUM, &
+                    EREDTF,UREDTF,ERBDED,EPIND,EPIDEF,EPIRET, &
+                    EDISNT,EDISYR,ESLPRC,ESLLP,ESLAGN,ESLNDG, &
+                    ERAMD,ERBOND,EROB,ESEMDT,ERPF,ESEMPS,ERLIEX, &
+                    ERSIEX,ERTIEX,ERPSDV,ERAVCE,ERRB,ERRBRR,ESRR, &
+                    ERRVRQ,ERRVLG,ERABDE,ERPRDF,ERTOMN,ERBDE,ERTDWO, &
+                    ERTFLN,ERFDC,ERBL,ERTUP,ERTDE,ERTDRG,ERNFSN, &
+                    ERWC,ERPREF,OVERPR,OVERTR,OVERDS,OMDCON,OMDSLP,OMDSLP2, &
+                    OMTCON,OMTSLP,OMTSLP2,ESRTDL,ESRTCL,ESRTSL,ESRTPL,ESRTDA, &
+                    ERNDFPMT, ERNDMON, ERERTSPLIT, ERCUPSPLIT, &
+                    SUBPCT,CAPTAL,EPISOC,EPADOC,GAADJ,CAPADJ,RORADJ, &
+                    OMADJ,SUBPRFRC,HISINDRAT,OMADJTR,OMADJDS,  &
+                    CAPTSCALE,CAPDSCALE,CPTADDER,OMTSCALE,OMDSCALE,OMTADDER
+      REAL*4 BLKSUM                    ! WHOLESALE POWER EXPENSE
+      REAL*4 CAPTAL(2,3)               ! TOTAL CAPITALIZATION BY OWNERSHIP AND FUNCTION
+      REAL*4 ERTOMD                    ! NOT USED
+      REAL*4 ERTOMT                    ! TOTAL O&M EXPENSE FOR TRANSMISSION PLANT
+      REAL*4 EQTLSL(2)                 ! TOTAL SALES TO ULTIMATE
+      REAL*4 EFPFL                     ! TOTAL FUEL COSTS (REAL $)
+      REAL*4 EFPOM                     ! TOTAL O&M COSTS
+      REAL*4 EFPNUC                    ! NUCLEAR FUEL EXPENSE (REAL $)
+      REAL*4 ESAFDC(2)                 ! AFUDC RATE
+      REAL*4 ESWACD(2)                 ! DEBT FRACTION OF AFUDC
+      REAL*4 ERBCWP(2)                 ! TOTAL BOOKED CWIP
+      REAL*4 ERRCWP(2)                 ! CWIP IN RATE BASE
+      REAL*4 EROFFS(2)                 ! AFUDC OFFSET
+      REAL*4 ERFDCE(2)                 ! EQUITY PORTION OF AFUDC
+      REAL*4 ERFDCD(2)                 ! DEBT PORTION OF AFUDC
+      REAL*4 ERSLTX(2)                 ! SALES TAX EXPENSE
+      REAL*4 ERPRTX(2)                 ! PROPERTY TAX EXPENSE
+      REAL*4 ERYCWP(2)                 ! DIRECT CONSTRUCTION EXPENDITURES FOR YEAR (NO AFUDC)
+      REAL*4 ERDLRB(2)                 ! CHANGE IN RATE BASE FROM END OF LAST YEAR TO
+                                       ! BEGINNING OF NEXT YEAR
+      REAL*4 ERAFDL(2)                 ! RATE BASE ADJUSTMENT FOR PLANTS COMING ON MID-YEAR
+      REAL*4 ERFFDC(2)                 ! AFUDC DEBT TAX SAVINGS FLOWED THROUGH
+      REAL*4 ERXFDC(2)                 ! AFUDC DEBT TAX SAVINGS GENERATED IN CURRENT YEAR
+      REAL*4 ERCIDC(2)                 ! CAPITALIZED INTEREST DURING CONSTRUCTION
+      REAL*4 EPGW(16,2)                ! CAPACITY UNDER CONSTRUCTION (GW)
+      REAL*4 EPCGW(16,2)               ! CAPACITY COMPLETED IN CURRENT YEAR (GW)
+      REAL*4 EPYCWP(16,2,2)            ! DIRECT CONSTRUCTION EXPENDITURES FOR YEAR (NO AFDC)
+      REAL*4 EPISOC(16,2)              ! ELECTRIC PLANT IN SERVICE - ORIGINAL COST (NO AFDC)
+      REAL*4 EPADOC(16,2)              ! ACCUMULATED DEPRECIATION - ORIGINAL COST
+      REAL*4 EPAFDC(16,2)              ! BOOKED AFUDC - CURRENT YEAR
+      REAL*4 EPONLN(16,2)              ! BOOK VALUE OF CAPACITY COMPLETED IN CURRENT YEAR
+      REAL*4 ERTDW1(2)                 ! TAX DEPRECIATION W/O ACCELARATION FOR EXISTING ASSETS
+      REAL*4 ERBDE1(2)                 ! BOOK DEPRECIATION FOR EXISTING ASSETS
+      REAL*4 ERBDE2(2)                 ! BOOK DEPRECIATION FOR NEW ASSETS
+      REAL*4 ERBTIR(2)                 ! BOOK RETIREMENTS IN CURRENT YEAR
+      REAL*4 ERCNAD(2)                 ! ACCUMULATED AMORTIZATION FOR CANCELLED PLANT
+      REAL*4 ERCNBV(2)                 ! BOOK VALUE OF CANCELLED PLANT
+      REAL*4 ERTDE1(2)                 ! ACCELARATED TAX DEPRECIATION FOR EXISTING ASSETS
+      REAL*4 ERTDE2(2)                 ! ACCELARATED TAX DEPRECIATION FOR NEW ASSETS
+      REAL*4 ERATSF(2)                 ! ACCELERATED DEPRECIATION TAX SAVINGS - FLOWED THROUGH
+      REAL*4 ERATSD(2)                 ! ACCELERATED DEPRECIATION TAX SAVINGS - NORMALIZED
+      REAL*4 ERTDW2(2)                 ! TAX DEPRECIATION W/O ACCELARATION FOR NEW ASSETS
+      REAL*4 ERAITC(2)                 ! AMORTIZATION OF INVESTMENT TAX CREDIT
+      REAL*4 ERFITC(2)                 ! ITC FLOWED THROUGH FOR RATEMAKING
+      REAL*4 ERNITC(2)                 ! NET CHANGE IN DEFERRED ITC - CURRENT YEAR
+      REAL*4 ERAFDC(2)                 ! AMORTIZATION OF AFUDC DEBT TAX SAVINGS
+      REAL*4 EREDTF(2)                 ! EXCESS DEFERRED TAXES FLOWED THROUGH THIS YEAR
+      REAL*4 ERBDED(2)                 ! DEPRECIATION EXPENSE FOR DISALLOWED PLANT
+      REAL*4 EPIND(2)                  ! DEFERRED PHASE-IN REVENUES FOR YEAR - NET
+      REAL*4 EPIDEF(2)                 ! TOTAL CUMULATIVE DEFERRED PHASE-IN REVENUES
+      REAL*4 EPIRET(2)                 ! CAPITALIZED RETURN ON DEFERRED PHASE-IN REVENUES
+      REAL*4 EDISNT(2)                 ! NET DISALLOWED PLANT
+      REAL*4 EDISYR(2)                 ! GROSS PLANT DISALLOWED IN THIS YEAR
+      REAL*4 ESLPRC(2)                 ! NET OF TAX PROCEEDS FROM SALE/LEASE - CURRENT YEAR
+      REAL*4 ESLLP(2)                  ! TOTAL REGIONAL LEASE PAYMENT - CURRENT YEAR
+      REAL*4 ESLAGN(2)                 ! TOTAL REGIONAL AMORTIZATION OF GAIN FROM SALE/LEASE
+      REAL*4 ESLNDG(2)                 ! TOTAL REGIONAL NET DEFERRED GAIN FROM SALE/LEASE
+      REAL*4 ERAMD(2)                  ! ASSETS MINUS DEFERRALS (=AMOUNT TO BE FINANCED)
+      REAL*4 ERBOND(2)                 ! TOTAL LONG TERM DEBT - CURRENT YEAR
+      REAL*4 EROB(2)                   ! OUTSTANDING LONG TERM DEBT ISSUED BEFORE BASE YEAR
+      REAL*4 ESEMDT(2)                 ! EMBEDDED COST OF LONG TERM DEBT - CURRENT YEAR
+      REAL*4 ERPF(2)                   ! OUTSTANDING PREFERRED STOCK ISSUED BEFORE BASE YEAR
+      REAL*4 ESEMPS(2)                 ! EMBEDDED COST OF PREFERRED STOCK - CURRENT YEAR
+      REAL*4 ERLIEX(2)                 ! TOTAL INTEREST EXPENSE FROM LONG TERM DEBT
+      REAL*4 ERSIEX(2)                 ! TOTAL INTEREST EXPENSE FROM SHORT TERM DEBT
+      REAL*4 ERTIEX(2)                 ! TOTAL INTEREST EXPENSE FROM ALL DEBT - CURRENT YEAR
+      REAL*4 ERPSDV(2)                 ! TOTAL PREFERRED STOCK DIVIDENDS - CURRENT YEAR
+      REAL*4 ERAVCE(2)                 ! AVERAGE YEAR COMMON EQUITY BALANCE - CURRENT YEAR
+      REAL*4 ERRB(2)                   ! RATE BASE BEFORE ADJUSTMENTS
+      REAL*4 ERRBRR(2)                 ! ACTUAL RATE BASE USED FOR SETTING REV REQUIREMENTS
+      REAL*4 ESRR(2)                   ! ALLOWED RETURN ON RATE BASE
+      REAL*4 ERRVRQ(2)                 ! REVENUE REQUIREMENT - CURRENT YEAR
+      REAL*4 ERRVLG(2)                 ! ELECTRIC REVENUES - CURRENT YEAR
+      REAL*4 ERABDE(2)                 ! TOTAL ACCUMULATED BOOK DEPRECIATION - CURRENT YEAR
+      REAL*4 ERPRDF(2)                 ! DEFERRED INCOME TAXES - CURRENT YEAR
+      REAL*4 ERTOMN(2)                 ! TOTAL O&M EXPENSES - NOMINAL DOLLARS
+      REAL*4 ERBDE(2)                  ! BOOK DEPRECIATON EXPENSE - CURRENT YEAR
+      REAL*4 ERTDWO(2)                 ! TOTAL STRAIGHT-LINE TAX DEPRECIATION - CURRENT YEAR
+      REAL*4 ERTFLN(2)                 ! TOTAL FUEL EXPENSES - NOMINAL DOLLARS
+      REAL*4 ERFDC(2)                  ! TOTAL BOOKED AFUDC
+      REAL*4 ERBL(4,2)                 ! ELECTRIC PLANT IN SERVICE BY CATEGORY (P,T,D,O)
+      REAL*4 ERTUP(2)                  ! TOTAL ELECTRIC PLANT IN SERVICE
+      REAL*4 ERTDE(2)                  ! TOTAL ACCELERATED TAX DEPRECIATION
+      REAL*4 ERNFSN(2)                 ! NUCLEAR FUEL STOCK - NOMINAL DOLLARS
+      REAL*4 ERWC(2)                   ! WORKING CAPITAL - CURRENT YEAR
+      REAL*4 ERPREF(2)                 ! TOTAL PREFERRED STOCK - CURRENT YEAR
+      REAL*4 ERTDRG(2)                 ! TAX DEPRECIATION EXPENSE FOR REGULATORY PURPOSES
+      REAL*4 ESRTDL(2,MNUMNR,3)        ! LAST ITERATION'S COST OF NEW UTILITY LONG TERM DEBT
+      REAL*4 ESRTCL(2,MNUMNR,3)        ! LAST ITERATION'S ALLOWED RETURN ON COMMON EQUITY
+      REAL*4 ESRTSL(2,MNUMNR,3)        ! LAST ITERATION'S COST OF SHORT TERM DEBT
+      REAL*4 ESRTPL(2,MNUMNR,3)        ! LAST ITERATION'S COST OF NEW UTILITY PREF STOCK
+      REAL*4 ESRTDA(3)                 ! NATIONAL AVERAGE COST OF ALL NEW LT UTILITY DEBT
+      REAL*4 ERNDFPMT(2)               ! ND fund payment (in ELND), reduced to ratepayers share outside ELND
+      REAL*4 ERNDMON(2)                ! Monitoring cost
+      REAL*4 ERERTSPLIT(2,3)           ! Excess payment split at and after retirement
+      REAL*4 ERCUPSPLIT(2,3)           ! Excess payment split in catch up period
+      REAL*4 OMDCON(MNUMNR)            ! Constant for modeling distribution O&M expenses
+      REAL*4 OMDSLP(MNUMNR)            ! Slope for modeling distribution O&M expenses
+      REAL*4 OMDSLP2(MNUMNR)           ! 2nd Slope for modeling distribution O&M expenses
+      REAL*4 OMTCON(MNUMNR)            ! Constant for modeling transmission O&M expenses
+      REAL*4 OMTSLP(MNUMNR)            ! Slope for modeling transmission O&M expenses
+      REAL*4 OMTSLP2(MNUMNR)           ! 2nd Slope for modeling transmission O&M expenses
+      REAL*4 OVERDS(MNUMNR)            ! Other O&M allocated to distribut. (real mills/kWh)
+      REAL*4 OVERPR(MNUMNR)            ! Other O&M allocated to production (real mills/kWh)
+      REAL*4 OVERTR(MNUMNR)            ! Other O&M allocated to transmiss. (real mills/kWh)
+      REAL*4 SUBPCT(3,MNUMNR,MNUMYR+1) ! CLASS SUBSIDY ADJUSTMENT - PERCENT OF TOTAL REVS
+      REAL*4 SUBPRFRC(4,MNUMNR) ! CLASS SUBSIDY ADJUSTMENT percent of class that is moved pw2
+      REAL*4 HISINDRAT(MNUMNR) !  Model industrial fraction of total load for 1996
+      REAL*4 UREDTF(MNUMNR,MNUMYR+1)   ! EXCESS DEFERRED TAXES FLOWED THROUGH IN EACH YEAR
+      REAL*4 GAADJ(3,MNUMNR,MNUMYR)    !ADJUSTMENT TO G&A COSTS IN COMPETITION CASE
+!                          !VARIES BY STAGE OF PRODUCTION, REGION, AND YEAR
+      REAL*4 RORADJ                    ! ADJUSTMENT TO COST OF CAPITAL FOR CALIBRATION PURPOSES
+      REAL*4 CAPADJ                    ! ADJUSTMENT TO COST OF CAPITAL IN COMP. CASE
+      REAL*4 OMADJ(EFD_D_CAP,MNUMYR)     ! ADJUSTMENT TO O&M COSTS BY EFD PLANT TYPE AND YEAR
+      REAL*4 OMADJTR(MNUMYR)           ! ADJUSTMENT TO O&M COSTS FOR TRANSMISSION BY YEAR
+      REAL*4 OMADJDS(MNUMYR)           ! ADJUSTMENT TO O&M COSTS FOR DISTRIBUTION BY YEAR
+      REAL*4 CAPTSCALE(MNUMNR,MNUMYR)     ! ADJUSTMENT for Capital Costs of Transmission
+      REAL*4 CAPDSCALE(MNUMNR,MNUMYR)     ! ADJUSTMENT for Capital Costs of Distribution   
+      REAL*4 CPTADDER(MNUMNR,MNUMYR)     ! ADDER to capital Costs of Transmission, currently used for smart grid   
+      REAL*4 OMTSCALE(MNUMNR,MNUMYR)     ! ADJUSTMENT for O&M Costs of Transmission
+      REAL*4 OMDSCALE(MNUMNR,MNUMYR)     ! ADJUSTMENT for O&M Costs of Distribution   
+      REAL*4 OMTADDER(MNUMNR,MNUMYR)     ! ADDER to O&M Costs of Transmission, currently holds add on cost for 
+                                    ! implementing smart grid
+      COMMON/CA/TECFAC,NTECH,NCLASS,NCOST,DEMFAC, &
+                ECOST,TECNAM,CCATNAM
+      REAL*4 TECFAC(10,4,3)   ! PERCENT OF EACH COST POOL (E.G., FUEL,VAR OM,FIX
+                              ! OM,CAPITAL) TO BE ALLOCATED BY EACH ALLOCATION
+                              ! TECHNIQUE (THESE VARY BY FUNCTION (P,T,D))
+      REAL*4 DEMFAC(10,4)     ! FACTORS FOR SECTOR SPLITS BY ALLOCATION TECHNIQUE
+      REAL*4 ECOST(3,MNUMNR)  ! COMPONENTS OF COST (1=FUEL,2=OM,3=WHOLESALE)
+      INTEGER NTECH           ! NUMBER OF ALLOCATION TECHNIQUES
+      INTEGER NCOST           ! NUMBER OF COST POOLS (FUEL,VAR OM,FIX OM,CAPITAL)
+      INTEGER NCLASS          ! NUMBER OF RATE CLASSES
+      CHARACTER*25 TECNAM(10) ! ALLOCATION TECHNIQUE NAMES
+      CHARACTER*25 CCATNAM(4) ! COST POOL NAMES
+!
+      COMMON/COCAP/TMSINT,TRNPCT,DSTPCT,BLDRAT,NTUTPL,RESPCT,COMPCT, &
+                   INDPCT,CSTCON,ERBTXIT,XINTCH,TRNPL,DSTPL,TUTPL, &
+                   CWIPINT,INFRAT,TBILL,NUCPCT,INTBETA,INTROEM, &
+                   INTROEU,INTRFRT,NCAPEX,SCAPEX,N_PIS,S_PIS, &
+                   NC_IND,CL_IND,OG_IND
+      REAL*4 TMSINT(MNUMNR)     ! TIMES INTEREST
+      REAL*4 TRNPCT(MNUMNR)     ! TRANSMISSION PERCENTAGE
+      REAL*4 DSTPCT(MNUMNR)     ! DISTRIBUTION PERCENTAGE
+      REAL*4 BLDRAT(MNUMNR)     ! BUILD RATIO
+      REAL*4 NTUTPL(MNUMNR,4)   ! NET UTILITY PLANT
+      REAL*4 RESPCT(MNUMNR)     ! PERCENT OF ULTIMATE SALES FROM RESID
+      REAL*4 COMPCT(MNUMNR)     ! PERCENT OF ULT. SALES FROM COMMERCIAL
+      REAL*4 INDPCT(MNUMNR)     ! PERCENT OF ULT. SALES FROM INDUSTRIAL
+      REAL*4 CSTCON(MNUMNR)     ! MAXIMUM OF ABOVE PERCENTAGES
+      REAL*4 ERBTXIT(MNUMNR,4)  ! EARNINGS BEFORE TAX & INTEREST
+      REAL*4 XINTCH(MNUMNR,4)   ! TOTAL INTEREST CHARGES
+      REAL*4 TRNPL(MNUMNR,4)    ! TRANSMISSION PLANT
+      REAL*4 DSTPL(MNUMNR,4)    ! DISTRIBUTION PLANT
+      REAL*4 TUTPL(MNUMNR,4)    ! TOTAL UTILITY PLANT
+      REAL*4 CWIPINT(MNUMNR,4)  ! CWIP
+      REAL*4 INFRAT             ! INFLATION RATE
+      REAL*4 TBILL              ! REAL T-BILL RATE
+      REAL*4 NUCPCT(MNUMNR)     ! PERCENT NUCLEAR OF STEAM
+      REAL*4 INTBETA            ! BETA FOR COST OF CAPITAL REGRESSION
+      REAL*4 INTROEM            ! RETURN ON EQUITY FOR MARKET
+      REAL*4 INTROEU            ! RETURN ON EQUITY FOR UTILITIES
+      REAL*4 INTRFRT            ! RISK FREE RATE
+      REAL*4 NCAPEX(MNUMNR)     ! NUCLEAR CAPITAL EXPENDITURES (CUMUL)
+      REAL*4 SCAPEX(MNUMNR)     ! STEAM CAPITAL EXPENDITURES (CUMUL)
+      REAL*4 N_PIS(MNUMNR)      ! NUCLEAR PLANT IN SERVICE
+      REAL*4 S_PIS(MNUMNR)      ! STEAM PLANT IN SERVICE
+      INTEGER NC_IND            ! NUCLEAR INDEX (IN EFPCNTL)
+      INTEGER CL_IND            ! COAL INDEX (IN EFPCNTL)
+      INTEGER OG_IND            ! OIL AND GAS INDEX (IN EFPCNTL)
+
+      COMMON/VALINT/ ERRELC,ERMECC,ERFXGNAC,ERITAXC,EROTAXC,ERSLCPRC, &
+           FRMARG,COMPRM,SCSPRC,SCSANN,SCSREC,ERMECLAG
+
+      REAL*4 ERRELC(MNUMYR,MNUMNR,EFD_D_MSP,EFD_D_MVS)  !reliability component by slice
+      REAL*4 ERMECC(MNUMYR,MNUMNR,EFD_D_MSP,EFD_D_MVS)  !marginal energy component
+      REAL*4 ERFXGNAC(MNUMYR,MNUMNR,2)          !fixed om/gna component by pub/priv
+      REAL*4 ERITAXC(MNUMYR,MNUMNR,3)     !income tax component by slice & pub/priv
+      REAL*4 EROTAXC(MNUMYR,MNUMNR,3)     !other tax component by slice & pub/priv
+      REAL*4 ERSLCPRC(MNUMYR,MNUMNR,EFD_D_MSP,EFD_D_MVS,3)!final price by slice & pub/priv
+      REAL*4 FRMARG(MNUMYR,MNUMNR)        !fraction of region at marginal pricing, by year
+      INTEGER COMPRM(MNUMYR,MNUMNR)       !reserve margin--regulated (1); competitive (2)
+      REAL*4 SCSPRC(MNUMYR,MNUMNR,3)      !stranded cost price component
+      REAL*4 SCSANN(MNUMYR,MNUMNR,3)      !annual stranded costs
+      REAL*4 SCSREC(MNUMYR,MNUMNR)        !stranded cost recovery factor by region and year
+      REAL*4 ERMECLAG(MNUMYR,MNUMNR)      !assumed lag in energy component for competitive price
+
+
+
+      COMMON/EFPRC3/ EPRIC2
+      REAL*4 EPRIC2(MNEUGRP,MNUMNR)  !COMP ELEC PRICE BY SERVICE,REGION (Only gener)
+
+
+!c put competitive pricing variables here - eventually move to efpout and in restart!
+
+      REAL PECRSNR(MNUMNR,MNUMYR) !    competitive Res. by NERC
+      REAL PECCMNR(MNUMNR,MNUMYR) !    competitive Com. by NERC
+      REAL PECTRNR(MNUMNR,MNUMYR) !    competitive Trans. by NERC
+      REAL PECINNR(MNUMNR,MNUMYR) !    competitive Ind. by NERC
+      REAL PECASNR(MNUMNR,MNUMYR) !    competitive All Sectors by NERC
+      REAL PECRLNR(MNUMNR,MNUMYR) !    competitive reliability comp. by NERC
+      REAL PECMENR(MNUMNR,MNUMYR) !    competitive energy component by NERC
+      REAL PECFXNR(MNUMNR,MNUMYR) !    competitive fixed cost component by NERC
+      REAL PECTXNR(MNUMNR,MNUMYR) !    competitive tax component by NERC
+      REAL PECTLNR(MNUMNR,MNUMYR) !    Avg--All Components by NERC
+      REAL PELSHRSN(MNUMNR,MNUMYR) !   space heating RS
+      REAL PELCLRSN(MNUMNR,MNUMYR) !   cooling RS
+      REAL PELWHRSN(MNUMNR,MNUMYR) !   water heating RS
+      REAL PELCKRSN(MNUMNR,MNUMYR) !   cooking RS
+      REAL PELCDRSN(MNUMNR,MNUMYR) !   clothes dryers RS
+      REAL PELRFRSN(MNUMNR,MNUMYR) !   refrigeration RS
+      REAL PELFZRSN(MNUMNR,MNUMYR) !   freezers RS
+      REAL PELLTRSN(MNUMNR,MNUMYR) !   lighting RS
+      REAL PELOTRSN(MNUMNR,MNUMYR) !   other RS
+      REAL PELH2RSN(MNUMNR,MNUMYR) !   secondary heating RS
+      REAL PELSHCMN(MNUMNR,MNUMYR) !   space heating CM
+      REAL PELSCCMN(MNUMNR,MNUMYR) !   space cooling CM
+      REAL PELWHCMN(MNUMNR,MNUMYR) !   water heating CM
+      REAL PELVTCMN(MNUMNR,MNUMYR) !   ventilation CM
+      REAL PELCKCMN(MNUMNR,MNUMYR) !   cooking CM
+      REAL PELLTCMN(MNUMNR,MNUMYR) !   lighting CM
+      REAL PELRFCMN(MNUMNR,MNUMYR) !   refrigeration CM
+      REAL PELOPCMN(MNUMNR,MNUMYR) !   office equipment PCs CM
+      REAL PELONCMN(MNUMNR,MNUMYR) !   office equipment, nonPCs CM8
+      REAL PELOTCMN(MNUMNR,MNUMYR) !   other commercial
+      REAL PELINPN(MNUMNR,MNUMYR) !   industrial primary
+      REAL PELINSN(MNUMNR,MNUMYR) !   industrial shift
+      REAL PELINMN(MNUMNR,MNUMYR) !   industrial miscellaneous
+      REAL PELVHTRN(MNUMNR,MNUMYR) !   vehicle TR
+      REAL PELLTTRN(MNUMNR,MNUMYR) !   light trains TR
+
+! temporary - average competitive prices by census region - not in restart right now!
+      REAL PECRS(MNUMCR,MNUMYR)   !   average competitive residential
+      REAL PECCM(MNUMCR,MNUMYR)   !   average competitive commercial
+      REAL PECIN(MNUMCR,MNUMYR)   !   average competitive industrial
+      REAL PECTR(MNUMCR,MNUMYR)   !   average competitive transportation
+      REAL PECAS(MNUMCR,MNUMYR)   !   average competitive
+
+      COMMON/EFPOUT2/ &
+        PELSHRSN,PELCLRSN,PELWHRSN,PELCKRSN,PELCDRSN,PELRFRSN, &
+        PELFZRSN,PELLTRSN,PELOTRSN,PELH2RSN,PELSHCMN,PELSCCMN, &
+        PELWHCMN,PELVTCMN,PELCKCMN,PELLTCMN,PELRFCMN,PELOPCMN, &
+        PELONCMN,PELOTCMN,PELINPN,PELINSN,PELINMN,PELLTTRN,PELVHTRN, &
+        PECRSNR,PECCMNR,PECTRNR,PECINNR,PECASNR,PECRLNR, &
+        PECMENR,PECFXNR,PECTXNR,PECTLNR, &
+        PECRS,PECCM,PECTR,PECIN,PECAS
+
+      REAL PELOUTN(MNUMNR,MNUMYR,MNEUGRP)          ! equivalenced nerc enduse prices
+      EQUIVALENCE(PELOUTN(1,1,1),PELSHRSN(1,1))
+      real ERNKOMF
+      real COMPCOMP(5,MNEUGRP,MNUMNR)
+      real dgapold(MNUMNR)
+!
+!
+!     components of competitive price
+!     Fixed O&M
+      REAL COMPEX(MNUMNR,MNUMYR)   ! expenses less generation under comp
+      REAL COMPCAP(MNUMNR,MNUMYR)  ! capital additions under comp
+      REAL CREDCOST(MNUMYR)  !       credit cost in dollars for rps coases
+      REAL RENEWCR(MNUMYR)   !       credit cost per kwh of renewable generation - national
+      REAL RENEWCRR(MNUMNR,MNUMYR) ! credit cost per kwh of renewable generation - regional
+      REAL EFPTOTLOLP(MNUMNR) ! efp annual lolp
+      real PECASFXN(MNUMNR,MNUMYR)
+      REAL RPSGOAL(MNUMYR)     ! million kwh renewable needed to meet rps limit
+      REAL RPSACHV(MNUMYR)     ! million kwh renewable generated in EFD toward rps limit
+
+      COMMON /margcomp/dgapold,  COMPCOMP,ERNKOMF,PECASFXN,COMPEX, &
+       COMPCAP,CREDCOST,RENEWCR,RENEWCRR,EFPTOTLOLP,RPSGOAL,RPSACHV
+
+! T&D competitive pricing variables
+      REAL EPS(3)              !sector elasticity
+      REAL SD(3)               !sector ability to bypass (2020 endpoint)
+      INTEGER SDMidYr(3)       !year to reach midpoint of 2020 bypass
+      REAL NU(3)               !sector elasticity to bypass
+      REAL THETA(3,MNUMNR)     !sector preferences - resid, comm, ind
+      REAL TDMRG(3,MNUMNR,2)   !historical marginal T&D costs, by region and sector
+      REAL REGSD(3,MNUMNR,MNUMYR)  !regional sectoral bypass shares, by year
+      REAL NATSD(3,MNUMYR)     !national sectoral bypass shares, by year
+
+      COMMON /margtd/ EPS,SD,SDMidYr,NU,THETA,TDMRG,REGSD,NATSD
+
+      REAL*4 TOTREVNW(MNUMYR,MNUMNR - 2)
+      COMMON /U_EFPTOTREV/TOTREVNW
+
+!     COMMON /nkfom/ ERNKOMF
+!      COMMON /exmuegap/PECASRLN,dgapold

@@ -1,0 +1,98 @@
+!  $Header: m:/default/includes/RCS/cdsparms,v 1.30 2016/06/06 20:46:14 rsc Exp $
+!
+! DECLARATION PARAMETER LIST FOR CDS
+!
+!---- PARAMETER NDREG IS DEFINED IN GLOBAL COMMON BLOCK PARAMETR
+!
+      INTEGER NCOALTYP
+      INTEGER NCSET
+      INTEGER CNCSET
+      INTEGER NCUTSET
+      INTEGER NFYRS
+      INTEGER MX_NCOALS
+      INTEGER MX_IMPCOAL
+      INTEGER MX_ISCV
+      INTEGER MX_ISCST
+      INTEGER NMAXCTRK
+      INTEGER NMAXCURV
+      INTEGER NMAXDJOB
+      INTEGER NMAXEXPT
+      INTEGER NMAXPART
+      INTEGER NMAXSTEP
+      INTEGER NSREG
+      INTEGER NTOTDREG
+!
+!     INTEGER MNUMPR                     ! COAL TO LIQUIDS 
+!
+      INTEGER NTOTSECT
+      INTEGER NUTSEC
+      INTEGER NOTSEC
+      INTEGER NXPSEC
+      INTEGER NONUTIL
+      INTEGER EMISS
+      INTEGER APPCDS
+      INTEGER INTCDS
+      INTEGER FRCSTYR
+      INTEGER NUMPTYPE
+      INTEGER NUMSTYPE
+      INTEGER NUMSULFLVL
+      INTEGER IMPSEC
+      INTEGER INTLSR
+      INTEGER USINTLDR
+      INTEGER NEMSEC
+      INTEGER USPLIT
+      INTEGER ISCRUB
+      INTEGER STARTYR
+      REAL*4  PREMBTU
+      CHARACTER*1 SCRUB
+      REAL*4 SO2_PCB
+      REAL*4 SO2_PCS
+      REAL*4 SO2_PCL
+      INTEGER SC_STEPS
+!
+      PARAMETER (STARTYR=14)               ! START YEAR OF COAL MODEL 11 = 2000
+      PARAMETER (NCOALTYP=8)              ! NUMBER OF COAL TYPES
+      PARAMETER (NCSET=41)                ! NUMBER OF COAL SETS AVAILABLE
+      PARAMETER (CNCSET=10)               ! NUMBER OF COALS AVAILABLE W/IN SET
+      PARAMETER (NCUTSET=12)              ! NUMBER OF COAL UTILITY SETS
+      PARAMETER (NFYRS=MNUMYR)           ! NUMBER OF FORCASTED YEARS
+      PARAMETER (MX_NCOALS=41)            ! Maximum Number U.S. Coal Supply Curves
+      PARAMETER (MX_IMPCOAL=35)           ! Maximum Number Coal Import Supply Curve/Step Combinations for Thermal Coal
+      PARAMETER (MX_ISCV=12)              ! Maximum Number Coal Import Supply Curves for Thermal 
+      PARAMETER (MX_ISCST=58)             ! Total Supply Curve/step combinations for Import Supply Curves (clexsup)
+      PARAMETER (NEMSEC=7)                ! NUMBER OF NONUTIL NEMS SECTORS (FTAB)
+!
+!     PARAMETER (MNUMPR=3)                ! COAL TO LIQUIDS NUMB OF PMM REGIONS
+!
+      PARAMETER (IMPSEC=3)                ! NUMBER OF IMPORT SECTORS-UTIL, MET, IND
+      PARAMETER (INTLSR=15)               ! INTERNATIONAL SUPPLY REGIONS PROVIDING COAL TO U.S.
+      PARAMETER (USINTLDR=4)              ! INTERNATIONAL U.S. DEMAND REGIONS (UI,UE,UG,UN)
+      PARAMETER (NMAXCTRK=800)            ! MAXIMUM NUMBER OF CONTRACTS
+      PARAMETER (NMAXCURV=300)            ! MAXIMUM NUMBER OF SUPPLY CURVES
+      PARAMETER (NMAXDJOB=900)            ! MAXIMUM NUMBER OF DEMAND JOBS
+      PARAMETER (NMAXEXPT=50)             ! MAXIMUM NUMBER OF EXPORTS
+      PARAMETER (NMAXPART=20)             ! MAXIMUM NUMBER OF PARTICIPANTS
+      PARAMETER (NMAXSTEP=4000)           !
+      PARAMETER (NSREG=14)                ! NUMBER OF COAL SUPPLY REGIONS
+      PARAMETER (NTOTDREG=16)             ! TOTAL NUMBER OF DEMAND REGIONS
+      PARAMETER (NUTSEC=38)               ! NUMBER OF UTILITY SECTORS
+      PARAMETER (NOTSEC=8)                ! NUMBER R/C,IND,MET, & COAL-TO-LIQUID SECTORS
+      PARAMETER (NXPSEC=6)                ! NUMBER EXPORT SECTORS
+      PARAMETER (NONUTIL=NOTSEC+NXPSEC)   ! NUMBER NONUTILITY SECTORS
+      PARAMETER (NTOTSECT=NUTSEC+NONUTIL) ! TOTAL NUMBER OF DEMAND SECTORS
+      PARAMETER (EMISS=4)                 ! NUMBER OF SUPPLY REGIONS E of MISSISSIPPI
+      PARAMETER (FRCSTYR=2)               ! NUMBER OF LOOK-AHEAD YRS for cap exp
+      PARAMETER (NUMPTYPE=3)              ! NUMBER OF PLANT TYPES (old new scrubbed)
+      PARAMETER (NUMSTYPE=3)              ! NUMBER OF SIP TYPES (L M H)
+      PARAMETER (APPCDS=3)                ! NUMBER OF SUPPLY REGIONS in APPALACHIA
+      PARAMETER (INTCDS=6)                ! END OF REGIONS BELONGING TO APP and INT
+      PARAMETER (USPLIT=6)                ! Utility coal types for reporting (old new  scrubbed low med hi sulfur
+      PARAMETER (NUMSULFLVL=3)            ! compliance mid and high
+      PARAMETER (SCRUB='7')               ! SCRUBBED SECTOR
+      PARAMETER (ISCRUB=7)                ! INTEGER VERSION
+      PARAMETER (PREMBTU= 26.27)          ! Premium coal btu content
+      PARAMETER (SO2_PCB = 0.980)         ! fraction sulfur left in ash bit
+      PARAMETER (SO2_PCS = 0.940)         ! fraction sulfur left in ash sub
+      PARAMETER (SO2_PCL = 0.960)         ! fraction sulfur left in ash lig
+      PARAMETER (SC_STEPS = 11)           ! Number of Supply Curve Steps
+

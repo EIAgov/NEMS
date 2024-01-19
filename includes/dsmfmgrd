@@ -1,0 +1,7 @@
+!  $Header: N:/default/includes/RCS/dsmfmgrd,v 1.2 1999/12/19 20:11:50 DSA Exp $
+! ===== DSMFMGRD    =====
+!*** Declarations of variables used with FILE_MGR
+      LOGICAL NEW ! File new or old?
+      CHARACTER*40 fname        ! filename for calling FILE_MGR
+      EXTERNAL FILE_MGR
+      INTEGER*4 FILE_MGR ! FILE_MGR name declaration

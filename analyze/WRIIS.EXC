@@ -1,0 +1,50 @@
+* WRIIS.EXC     WRITE IIS MATRIX FILE
+
+$ This presumes you have an infeasible LP and its IIS (see READIN).
+$ Further, this assumes there are no other blocks, except the IIS blocks.
+$ This frees bounds and limits not in IIS and writes the IIS submatrix,
+$ called IIS.MAT (you might want to change the MATRIX prefix to have this
+$ go to another subdirectory).
+ _PAUSE
+
+ SUBMAT CLEAR
+* TURN OFF ERROR SWITCH BECAUSE SOME IIS BLOCKS MAY NOT EXIST
+ SW ERR=OFF
+
+ BLOCK ROW COPY FROM IIS.LO
+ FREE UPPER ROW
+ SUBMAT DEL ROW *
+ BLOCK ROW COPY FROM IIS.UP
+ FREE LOWER ROW
+
+ BLOCK ROW COPY FROM IIS.LU
+ BLOCK ROW COPY FROM IIS.LO
+$ SUBMATRIX NOW HAS IIS ROWS
+
+ BLOCK COL COPY FROM IIS.LO
+ FREE UPPER COL
+ SUBMAT DEL COL *
+ BLOCK COL COPY FROM IIS.UP
+* Insert the following if you want to keep non-negativity.
+* SUBMAT DEL COL * L=0
+ FREE LOWER COL
+
+* TURN ERROR SWITCH BACK ON
+ SW ERR=ON
+
+ SUBMAT COL *
+ BLOCK COL COPY TO FREE
+*                  :...CONTAINS ALL COLUMNS NOT IN AN IIS BLOCK
+ SUBMAT DEL COL *
+ BLOCK COL COPY FROM FREE
+ FREE * COL
+$ BOUNDS HAVE BEEN REMOVED THAT ARE NOT IN IIS (INCLUDING LO=0)
+ BLOCK COL ERASE FREE
+ SUBMAT COL *
+ SUBMAT SET
+*       :...This removes null rows and columns from submatrix.
+$ SUBMATRIX NOW = IIS ROWS x ALL COLUMNS
+$                           THAT HAVE A NONZERO IN SOME IIS ROW
+$ THIS SUBMATRIX, WITH THE FREED BOUNDS AND LIMITS, IS THE IIS
+ SUBMAT WRITE IIS.MAT
+* NO RETURN, SO THIS CAN BE AN INCLUDE FILE

@@ -1,0 +1,25 @@
+! $Header: m:/default/includes/RCS/wflrinc,v 1.9 2020/08/28 18:52:25 TDM Exp $
+! =====================================================================
+! Include: WFLOORS
+!
+! ---------------------------------------------------------------------
+      integer MNUMFL           ! NO of technologies for establishing floors
+      parameter (MNUMFL=4500)
+
+      integer idummy(MNUMFL)    ! dummy
+      integer WNERC(MNUMFL)    ! Nerc region
+      integer WECPTYP(MNUMFL)  ! ECP type
+      integer WEFDTYP(MNUMFL)  ! EFD type
+      integer WOLYR(MNUMFL)    ! Online year (1990-2040)
+      integer WOLMO(MNUMFL)    ! Online month(1-12)
+      integer WRTYR(MNUMFL)    ! Retire year (1990-2040)
+      integer WRTMO(MNUMFL)    ! Retire month(1-12)
+      integer WOWNTYP(MNUMFL)  ! Ownertype (1=util, 2=NonUtil)
+      integer WVINTYP(MNUMFL)  ! Vintage type (1=existing (uprates), 2=planned, 3=unplanned)
+      real    WCAP(MNUMFL)     ! Capacity in [MW]
+      real    WHR(MNUMFL)      ! Heat Rate in [BTU/kWh]
+      real    WCAPF(MNUMFL)    ! Capacity factor
+
+      common /wfloors/WNERC,WECPTYP,WEFDTYP,WOLYR,WOLMO,WRTYR,WRTMO,WOWNTYP, &
+                      WVINTYP,WCAP,WHR,WCAPF
+

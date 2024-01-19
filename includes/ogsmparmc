@@ -1,0 +1,105 @@
+!  $Header: N:/default/includes/RCS/ogsmparmc,v 1.1 2004/04/29 17:11:01 PKC Exp $
+!  OGSM PARAMETERS                                                              
+      INTEGER AKWELL,AKRGN,AKFUEL,AKFLD,AKSIZE                          !        
+      INTEGER OFFWELL,OFFRGN,OFFFUEL,OFFNEMSRGN                         !        
+      INTEGER WELL_STATUS,DEPTH_CAT,INIT_YR
+      INTEGER L48WELL,L48FUEL,L48RGN                                    !        
+      INTEGER CONFUEL                                                   !        
+      integer NBYPROD
+        INTEGER CANFUEL
+      INTEGER EORRGN,EORFUEL                                            !        
+      INTEGER COSTCAT,NGTDMRGN,PMMRGN                                   !        
+      INTEGER MAXPAIRS,MAXU,MAXW,STAGE,LNGYR,LSTAGE                     !        
+      INTEGER BUGOUT                                                    !        
+      INTEGER AKHYR                                                     !        
+      INTEGER L48HYR
+      INTEGER CANHYR
+      INTEGER OFFHYR                                                    !                            
+!  DEBUG OUTPUT UNIT NUMBER                                                     
+      PARAMETER(BUGOUT=19)   ! DEBUG FILE OGSMOUT                               
+!  LOWER 48 SUBMODULE PARAMETERS    
+      PARAMETER(L48RGN=6)                                            
+      PARAMETER(L48WELL=2)   ! LOWER 48 WELL CLASS (EXPLOR,DEVELOP)             
+!                            !                   MIDCONTINENT,SOUTHWEST,        
+!                            !                   ROCKY MT., WEST COAST)         
+      PARAMETER(L48FUEL=7)   ! LOWER 48 FUEL TYPES (SHLLOW OIL, DEEP OIL,
+!                            !                      SHLLOW GAS, DEEP GAS,   
+!                            !                      TIGHT SANDS,DEVONIAN        
+!                            !                      SHALE,COALBED METHANE)      
+      PARAMETER(CANFUEL=4)   ! Canada FUEL TYPES (Heavy OIL,
+!                            !                 Light OIL,SHALLOW GAS,DEEP GAS)              
+      PARAMETER(CONFUEL=4)   ! LOWER 48 CONVENTIONAL FUEL TYPES (SHALLOW OIL,
+      PARAMETER(NBYPROD=5)   ! number of byproducts 
+!                            !                 DEEP OIL,SHALLOW GAS,DEEP GAS)              
+      PARAMETER(L48HYR=8)    ! NUMBER OF HISTORICAL YEARS                                                                                
+      PARAMETER(CANHYR=11)    ! NUMBER OF HISTORICAL YEARS                                                                                
+
+                                                                        !        
+!  ALASKA SUBMODULE PARAMETERS                                                  
+      PARAMETER(AKWELL=2)    ! ALASKA WELL CLASS (EXPLOR,DEVELOP)               
+      PARAMETER(AKRGN=3)     ! ALASKA REGIONS (OFFSHORE NORTH,ONSHORE NORTH,    
+!                            !                 OTHER ALASKA)                    
+      PARAMETER(AKFUEL=2)    ! ALASKA FUEL TYPES (OIL,GAS)                      
+                                                                        !        
+      PARAMETER(AKFLD=20)    ! ALASKA DISCOVERED FIELDS (PRUDHOE BAY,           
+                             !             KUPARUK,LISBURNE,ENDICOTT,MILNE PT., 
+                             !             MILNE PT.,W. SAK/UGNU,PT. MICINTYRE  
+                             !             SEAL ISLAND,PT. THOMSON,NIAKUK,      
+                             !             COOK INLET)                          
+      PARAMETER(AKSIZE=20)    ! ALASKA UNDISCOVERED FIELD SIZES                 
+      PARAMETER(AKHYR=10)      ! NUMBER OF HISTORICAL YEARS                      
+                                                                        !        
+                                                                        !        
+!  OFFSHORE SUBMODULE PARAMETERS                                                
+      PARAMETER(OFFWELL=2)   ! OFFSHORE WELL CLASS (EXPLOR,DEVELOP)             
+      PARAMETER(OFFRGN=4)    ! OFFSHORE REGIONS (ATLANTIC,PACIFIC,
+!                            !                   SHALLOW GULF, DEEP GULF)
+      PARAMETER(INIT_YR=2)   ! 1 =1989, 2=1990
+      PARAMETER(DEPTH_CAT=5) ! OFFSHORE WELL DEPTH CATEGORY
+      PARAMETER(WELL_STATUS=2)! OFFSHORE WELL STATUS,i.e. SUCC/DRY (OIL,GAS)
+      PARAMETER(OFFNEMSRGN=3)! NEMS SYSTEM OFFSHORE REGIONS (ATL,PAC,GM)        
+      PARAMETER(OFFFUEL=2)   ! OFFSHORE FUEL TYPES (OIL,GAS)                    
+!    
+      PARAMETER(OFFHYR=6)    ! NUMBER OF HISTORICAL YEARS                                                                                
+                                                                        !        
+!  CANADIAN SUMODULE PARAMETERS                                                 
+!     PARAMETER(CANFUEL=2)   ! CANADIAN FUEL TYPES (OIL,GAS)                    
+      PARAMETER(COSTCAT=3)   ! COST CATEGORIZED BY FUNCTION (DRILLING,          
+!                            !                   LEASE, OPERATING COSTS)        
+                                                                        !        
+!  ENHANCED OIL RECOVERY PARAMETERS                                             
+      PARAMETER(EORRGN=6)    ! EOR REGIONS (NORTHEAST,GULF COAST,               
+!                            !               MIDCONTINENT,SOUTHWEST,            
+!                            !               ROCKY MT., WEST COAST)             
+      PARAMETER(EORFUEL=2)   ! EOR FUEL TYPES (THERMAL,OTHER EOR)               
+                                                                        !        
+! LNG SUBMODULE PARAMETERS                                                      
+                                                                        !        
+                                                                        !        
+      PARAMETER(LNGYR=22)     ! MAXIMUM LNG YEARS                               
+                                                                        !        
+      PARAMETER(MAXW=4)       ! USA DESTINATION ( 1-EVERETT, MA                 
+!                                                 2-LAKE CHARLES, LA            
+!                                                 3-COVE POINT, MD              
+!                                                 4-ELBA ISLAND, GA)            
+!                                                                               
+      PARAMETER(MAXU=4)       ! LNG SOURCE   (  1-ALGERIA                       
+!                                               2-NIGERIA                       
+!                                               3-NORWAY                        
+!                                               4-VENEZUELA/TRINIDAD)           
+!                                                                               
+      PARAMETER(MAXPAIRS=16)  ! USA DESTINATION * LNG SOURCE                    
+                                                                        !        
+      PARAMETER(STAGE=3)      ! REGASIFICATION STAGES                           
+!                                          (  1-REOPENING                       
+!                                             2-EXPANSION                       
+!                                             3-NEW CONSTRUCTION)               
+                                                                        !        
+      PARAMETER(LSTAGE=3)     ! LIQUEFACTION STAGES                             
+!                                          (  1-REOPENING                       
+!                                             2-EXPANSION                       
+!                                             3-NEW CONSTRUCTION)    
+
+!  NGTDM AND PMM PARAMETERS                                                     
+      PARAMETER(NGTDMRGN=17) ! NUMBER OF NGTDM REGIONS                          
+      PARAMETER(PMMRGN=7)    ! NUMBER OF PMM PMM REGIONS                                   

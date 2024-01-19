@@ -1,0 +1,26 @@
+!  $Header: m:/default/includes/RCS/indout,v 1.6 2013/06/18 19:00:17 pkc Exp $
+!  INDUSTRIAL MODULE OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!   Industrial Module output variables
+      REAL INQNGPF(MNUMCR,MNUMYR)   !   Consumption of NG feedstocks
+      REAL INQLGPF(MNUMCR,MNUMYR)   !   Consumption of LPG feedstocks
+      REAL QELINP(MNUMCR,MNUMYR)    !   Industrial primary electricity
+      REAL QELINS(MNUMCR,MNUMYR)    !   Industrial shift electricity
+      REAL QELINM(MNUMCR,MNUMYR)    !   Industrial miscellaneous electricity
+      REAL MWIN(4,MNUMYR)           !   Waste from mills
+      REAL INQLGHP(MNUMCR,MNUMYR)   !   Consumption of LPG for heat and power (excludes refining use)
+      REAL LIMEOUTPUT(MNUMYR)       !   Lime industry output
+      REAL HYDROGEN2REF(MNUMYR)     !   Hydrogen sent to refineries
+!   Industrial Module output Common block
+      COMMON/INDOUT/INQNGPF,INQLGPF,QELINP,QELINS,QELINM,MWIN,INQLGHP, LIMEOUTPUT, HYDROGEN2REF
+!   Equivalence for FILER used for data storage
+      REAL EQ_INOUT(6*MNUMCR*MNUMYR + &   ! INQNGPF, INQLGPF, QELINP, QELINS, QELINM, and INQLGHP
+                    4*MNUMYR + &    ! MWIN
+                    2*MNUMYR + &    ! LIMEOUTPUT and HYDROGEN2REF
+                    0)
+      EQUIVALENCE (EQ_INOUT,INQNGPF)
+!   Equivalence for uldsm
+      REAL QELINOUT(MNUMCR,MNUMYR,3)
+      EQUIVALENCE (QELINOUT,QELINP)

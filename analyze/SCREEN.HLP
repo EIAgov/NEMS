@@ -1,0 +1,16 @@
+    Function: Set screen width and length
+    Syntax:   SCREEN [WIDTH = width] [LENGTH = length]
+
+    ...If neither WIDTH nor LENGTH is specified, you will see current
+       settings.
+
+    Examples:
+
+    SCREEN  W = 80  L=22
+    ...sets screen width to 80 columns and length to 22 lines
+
+    SCREEN  W 40
+    ...sets screen width to 40 columns
+
+    SCREEN
+    ...displays Width and Length settings

@@ -1,0 +1,25 @@
+ IISOL FILES:
+ MATRIX  : F:REFINFEA.MAT                                                  
+ SPEC    : DEFAULT.SPC                                                     
+ SOLUTION: F:REFINFEA.MNS                                                  
+ SPI     : DEFAULT.SPI                                                     
+LP NAME:
+SPECIFICATIONS:
+IIS METHOD: REVERSE DEL/SENS
+NUMBER OF COLUMNS IN IIS:
+NUMBER OF ROWS IN IIS:
+BEGIN IIS
+BEGIN COLUMNS
+ACCB     lower bound
+END COLUMNS
+BEGIN ROWS
+SAL      upper bound
+SCC      upper bound
+DA       fixed value
+DB       fixed value
+VA       upper bound
+VB       upper bound
+OA       lower bound
+OB       lower bound
+END ROWS
+END IIS

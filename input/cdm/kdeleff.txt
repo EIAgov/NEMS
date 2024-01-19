@@ -1,0 +1,101 @@
+FILE NAME:   KDELEFF             August 31, 2005 - Version for AEO06, improvement now incorporated in koffpen trend
+
+CONTACT:     Erin Boedecker(DOE/EIA) (202) 586-4791
+             NEMS Commercial Sector Analyst
+
+USED BY:     Technology Choice subroutine of the National Energy Modeling
+             System (NEMS) Commercial Sector Demand Module
+
+DEFINITION:  Annual efficiency improvement for minor services
+
+             Proportional annual efficiency improvement applied to the previous
+             year's average efficiency starting in 1990 for the minor services:
+             Office Equipment - PC, Office Equipment - NonPC, Other
+
+UNITS:       unitless
+
+SPECIAL CONSTRAINTS:  None
+
+DIMENSION:   by service
+
+ORGANIZATION OF DATA:
+
+     Each column corresponds to a service, in the following order:  Space
+     Heating, Space Cooling, Water Heating, Ventilation, Cooking, Lighting,
+     Refrigeration, Office Equipment - PCs, Office Equipment - NonPCs, other.
+     Columns corresponding to major services are used only as place holders.
+
+
+     Data starts on row 101 of this file as per CSDM convention.
+
+SOURCES:
+
+Decision Focus, Inc.,"TAG Technical Assessment Guide, Vol. 2:
+  Electricity End Use: Part 2:  Commercial Electricity Use -- 1988," Palo Alto,
+  CA, Electric Power Research Institute, October 1988, pp. 5-48 to 5-84, 6-33,
+  6-40.
+Arthur D. Little, Inc.,"Technical Memorandum for Technology Advances and
+  Forecasts - Residential/Commercial End-Use Equipment," ADL ref. 64460-09,
+  prepared for U.S. Department of Energy, Contract No. DE-AC-21-88, April 1990,
+  pp. 4-3, 8-4, 8-5, 10-5.
+Gas Research Institute, "Baseline Projection Data Book: GRI Baseline
+  Projection of U.S. Energy Supply and Demand to 2010," 1992 edition, Vol. I,
+  pp. 156-158.
+Geller, Howard S., "Commercial Building Equipment Efficiency: A State-
+  of-the-Art Review," report prepared for the U.S. Congress, Office of
+ Technology Assessment, Energy & Materials Program by The American Council for
+  an Energy-Efficient Economy, Washington, DC, May 1988.
+Mahoney, Daniel D., "Phase I of a Project to Enhance the Commercial
+  Section Analysis of the GRI Baseline Modeling System; Topical Report #1: Data
+  Enhancements," prepared for the Gas Research Institute under Contract No.
+  5085-800-1175, DRI Energy Division, Lexington, MA, July 1987, pp.4, 59, 139-
+  140.
+U.S. Congress, Office of Technology Assessment, "Building Energy
+  Efficiency," OTA-E-518, Washington, DC, U.S. Government Printing Office
+  February 1991,p.122.
+U.S. Department of Energy, Energy Information Administration, "Lighting
+  in Commercial Buildings," EIA, Washington, DC, March 1992, p. 41.
+U.S. Department of Energy, Energy Information Administration, "Energy
+  Consumption and Conservation Potential: Supporting Analysis for the National
+  Energy Strategy," EIA, Washington, DC, December 1990, p.52.
+U.S. Department of Energy, Energy Information Administration, "PC-AEO
+  Forecasting Model for the Annual Energy Outlook: Model Documentation," EIA,
+  Washington, DC, March 1990, p.III-37 to III-39.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.00

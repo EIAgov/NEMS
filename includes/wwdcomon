@@ -1,0 +1,89 @@
+! $Header: m:/default/includes/RCS/wwdcomon,v 1.12 2014/10/15 21:21:59 tdm Exp $
+! .....................................................................
+!      C O M M O N   B L O C K
+!
+!     Integer:
+!       NWDSUPQ       : max. Number of data in Supply array for Quantity
+!       NWDSUPP       : max. Number of data in Supply array for Price
+!       WDNOTBLDT     : duration during which no new builds are allowed
+!       WOODSW1       : Switch for fuel cost adjustment for Transportation comp
+!                     : 0 : no adjustment
+!                     : 1 : adjustment
+!       WDCFPHS       : End of Phase-in Period for Biomass Cofiring
+!       MNUMFS	      : Max number of different feedstocks in bio supply curve
+!
+!     Real:
+!       WDVCADD       : Variable Cost additive
+!       NoCapIN       : Fraction for Non-Captive wood Markets in Ind. Sec.
+!       CDTOCL        : Mapping matrix to map from CENSUS to Coal Demand regions
+!       WDSUPQ        : Wood supply array for Quantity in [TBTU] for MNUMYR+5
+!       WDSUPP        : Wood supply array for Price in [$/MMBTU] for MNUMYR+5
+!       CumWdBld      : Cumulative Builds in [MW]
+!       WDCAP         : Constraint on yearly capacit by regions
+!       WDTHRES       : Threshold for suppressing new builds [MW]
+!       WHRIGCC       : Heat rate for Biomass IGCC [BTU/kWh] by years
+!       WFUELAdj      : Fuel adjustment constant [MMBTU diesel/MMBTU wood]
+!       WDCFSUB       : Production Cost Credit for Biomass Cofiring (mills/kwh)
+!       WDCFHUR       : Hurdle Rate for Biomass Cofiring
+!       WDSUPQW       : Wood supply curve array for electricity applications (TBTU)
+!       WDSUPPW       : Wood supply curve prices for electricity applictions ($/mmBtu)
+!       USEFSTOCK     : Fraction of each biomass feedstock each end-use can use
+!     Logical:
+!       WDNEWBLD      : flag specifying if new builds are allowed
+!                       (MNUMNR,MNUMYR)
+! .........COMMON BLOCK ...............................................
+!      MAXPOLYPT  ! Maximum number of polysys supply curve points derived from polysys runs.
+      Integer MAXPOLYPT
+      Parameter(MAXPOLYPT=10)
+
+      Integer WOODSW1,WDNOTBLDT
+      Real WDVCADD(MNUMYR)
+      Real NoCapIN,WDTHRES
+      Real CDTOCL(NDREG,MNUMCR)
+      Real WDSUPQ(NDREG,MNUMYR+ECP_D_FPH,NWDSUPQ,MNUMFS),WDSUPP(MNUMYR+ECP_D_FPH,NWDSUPP,MNUMFS)
+      Real CumWdBld(MNUMNR,MNUMYR)
+      Real WDCAP(MNUMNR,MNUMYR)
+      Real WHRIGCC(MNUMYR)
+      Real WFUELAdj
+      Real USEFSTOCK(MNUMFS,2) !For now, there are only two applications, power and ethanol
+
+      REAL*4 WDSUP_QR(NWDSUPQ,NDREG,MNUMYR+ECP_D_FPH,MNUMFS)    ! Biomass Supply Quantities - All Sources
+      REAL*4 WDSUP_PR(NWDSUPP,NDREG,MNUMYR+ECP_D_FPH,MNUMFS)    ! Biomass Supply Prices - All Sources
+
+      Integer WDCFPHS
+      Logical WDNEWBLD(MNUMNR,MNUMYR)
+      Common /wwood/ WDVCADD,NoCapIN,CDTOCL,WDSUPQ,WDSUPP,CumWdBld, &
+                     WHRIGCC,WDTHRES,WDNOTBLDT,WDNEWBLD, &
+                     WDCAP,WFUELAdj,WOODSW1,WDCFPHS,USEFSTOCK,wdsup_qr,wdsup_pr
+
+! ------------------ POLYSYS Common Block
+!     Integer:
+!      WDPOLYSW   ! Run Polysys? 0 = use wodsupp file, 1 = run polysys (production mode), 2 = run polysys (testing mode)
+!      WDPOLYYR   ! Year to start running polysys
+!      WDRDWDSUP  ! Readin in woodsup ag values (0) or use polysys values from restart file (1)
+!                 ! This switch automatically set to 1 in second cycle of run.  
+!      WDPOLYPT   ! Number of times to run polysys to create supply curve points, currently 3 or 5.            
+!      POLYRET    ! Polysys return code
+!      WDPSCCALC   ! How to calculate the above supply curve points from the initial polsys point.  
+!                      0 = percentage increase or decrease, 1 = actual increase or decrease
+!      NM_POLY_SUP_STP    ! Number of polysys supply steps after interpolations              
+
+
+      Integer POLYRET,WDPOLYSW,WDRDWDSUP,WDPOLYYR,WDPOLYPT,WDPSCCALC,NM_POLY_SUP_STP
+      Real*4  WDPSCCVAL(MAXPOLYPT)                 ! values to increase or decrease demandper wdpsccalc switch
+      Real*4  POLYPTQ(MAXPOLYPT,0:NDREG,MNUMYR)    ! demand quantities sent to polysys for price calculations midpoint from     
+                                                   ! nems run, other points calculated based on user parameters
+      Real*4  POLYPTP(MAXPOLYPT,0:NDREG,MNUMYR)   ! average prices sent to polysys for demand calculations midpoint from
+                                                   ! nems run, other points calculated based on user parameters
+      Real*4  POLYPTPFIX(MAXPOLYPT,0:NDREG,MNUMYR) !original prices sent to polysys
+      Real*4  POLYPRMULT(0:NDREG)              ! regional price multipliers to be used in polysys, applied to each of the above price points sent to polysys
+      Real*4  PLYSUP_Q_AG(NWDSUPQ,0:NDREG,MNUMYR+ECP_D_FPH)    ! Full Polysys Supply Curve Quantities - AG Only    
+      Real*4  PLYSUP_P_AG(NWDSUPQ,0:NDREG,MNUMYR+ECP_D_FPH)    ! Full Polysys Supply Curve Prices     - AG Only    
+      Real*4  PLYSUPQ_PT(MAXPOLYPT,0:NDREG,MNUMYR)    ! Polysys Supply Quantities from supply points
+      Real*4  PLYSUPP_PT(MAXPOLYPT,0:NDREG,MNUMYR)    ! Polysys Supply Prices from supply points
+      Real*4  WDPYRGLIM(NDREG)                 ! Regional Percentage Limit of polsys supply quantities by coal region
+      Real*4  WDTRANSADD(MNUMYR)               ! transportation adder                                                 
+ 
+      Common /wpoly/ POLYRET, WDPOLYSW, WDRDWDSUP, WDPOLYYR, WDPOLYPT, WDPSCCALC, WDPSCCVAL,NM_POLY_SUP_STP,    &
+                     PLYSUP_Q_AG,PLYSUP_P_AG,PLYSUPQ_PT,PLYSUPP_PT,POLYPTQ,POLYPTP,POLYPTPFIX,POLYPRMULT,WDPYRGLIM,WDTRANSADD
+

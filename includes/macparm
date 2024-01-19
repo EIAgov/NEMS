@@ -1,0 +1,20 @@
+!  $Header: M:/default/includes/RCS/macparm,v 1.6 2017/08/02 14:35:45 RT2 Exp $
+!
+!                            COMMON MACPARM
+!               Scalar Constants for the Macro Submodel
+!
+      INTEGER MCNMMAC       ! 1   NUMBER OF MACRO VARIABLES, NOT REGIONALIZED
+      INTEGER MCNMIND       ! 2   # OF FORECASTED INDUSTRY SECTORS IN BASELINE
+      INTEGER MCLHISYR      ! 3   LAST HISTORICAL YEAR
+      INTEGER MCNMMACREG    ! 5   NUM OF MACRO VARIABLES, REGIONALIZED
+      INTEGER MCNUMMNF      ! 7   # OF MANUFACTURING VARIABLES IN BASELINE
+      INTEGER MCNUMREGS     ! 8   NUMBER OF REGIONS
+      INTEGER MCNMFLTYPE    ! 10  NUMBER OF FLOORSPACE TYPES
+!
+      COMMON /MACPARMS/ MCNMMAC,    MCNMIND,  MCLHISYR,  &
+                        MCNMMACREG, MCNUMMNF, MCNUMREGS, &
+                        MCNMFLTYPE
+!
+!   Equivalence for FILER used for data storage
+      REAL EQ_MCPRM(32+17*MNUMYR)
+      EQUIVALENCE (EQ_MCPRM,MCNMMAC)

@@ -1,0 +1,61 @@
+!  $Header: m:/default/includes/RCS/angtdm,v 1.9 2017/06/16 19:28:41 pkc Exp $
+!
+!=============================
+!
+! MEMBER NAME:  NGTDMOUT  adjusted prices pw2
+!  NG T & D (NGTDM) OUTPUT COMMON BLOCK
+!  THE DIMENSION PARAMETERS ARE &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  THE USER SHOULD ADD THE FOLLOWING INCLUDE STATEMENT
+!     INCLUDE(PARAMETR)
+! NGTDM OUTPUTS
+!
+!   TO UTILITY:
+!
+      REAL*4 PGFELGR(NNGEM,MNUMYR)        ! E UTIL FIRM NG PRICE (87$/MMBTU)
+      REAL*4 PGIELGR(NNGEM,MNUMYR)        ! E UTIL INTERRUPT NG PRC (87$/MMBTU)
+      REAL*4 PGCELGR(NNGEM,MNUMYR)        ! E UTIL COMPETITIVE NG PRICE (87$/MMBTU)
+!   TO COAL:
+!     REAL*4 CLSYNGWP(17,MNUMYR)       ! PRC SYN NG FROM COAL (87$/MMBTU)
+!   TO TRAN:
+      REAL*4 PGFTRFV(MNUMCR,MNUMYR)    ! PRICE COMPRESSED NG TO FLEET VEH (87$/MMBTU)
+      REAL*4 PGFTRPV(MNUMCR,MNUMYR)    ! PRICE COMPRESSED NG TO PERSONAL VEH (87$/MMBTU)
+      REAL*4 PGLTRFV(MNUMCR,MNUMYR)    ! PRICE LIQUEFIED NG TO FLEET VEH (87$/MMBTU)
+      REAL*4 PGLTRPV(MNUMCR,MNUMYR)    ! PRICE LIQUEFIED NG TO PERSONAL VEH (87$/MMBTU)
+!   TO UTILITY - SEASONAL:
+      REAL*4 SPGFELGR(NNGEM,MNUMYR,2)  ! E UTIL SEASONAL FIRM NG PRICE (87$/MMBTU)
+      REAL*4 SPGIELGR(NNGEM,MNUMYR,2)  ! E UTIL SEASONAL INTERRUPT NG PRICE
+      REAL*4 PBAJA(MNUMYR)             ! Trigger price for LNG in Baja Mexico
+      REAL*4 QBAJA(MNUMYR)             ! LNG quantity from Baja Mexico to US
+
+! for natural gas use by trains (1=freight; 2=intercity; 3=transit; 4=commuter)
+!                     and boats (1=domestic shipping; 2=international shipping; 3=recreational)
+      REAL*4 PGFTRRAIL(4,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Rail compressed natural gas
+      REAL*4 PGLTRRAIL(4,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Rail liquefied natural gas
+      REAL*4 PGFTRSHIP(3,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Shipping compressed natural gas
+      REAL*4 PGLTRSHIP(3,MNUMCR,MNUMYR)  ! PRICE  87$BTU  Shipping liqeufied natural gas
+!  natural gas quantity and price - new variables for the new model
+      REAL SPNGELGR(NNGEM,MNUMYR,3)
+      REAL PNGELGR(NNGEM,MNUMYR)
+!
+      COMMON /ANGTDM/ PGFELGR, PGIELGR, PGCELGR, &
+         PGFTRFV, PGFTRPV, &
+         PGLTRFV, PGLTRPV, &
+         SPGFELGR, SPGIELGR, PBAJA, QBAJA, &
+         PGFTRRAIL, PGLTRRAIL, PGFTRSHIP, PGLTRSHIP, &
+         SPNGELGR, PNGELGR
+!   Equivalence for FILER used for data storage
+      REAL EQ_NTOUT(MNUMYR*(7*NNGEM+2*MNUMCR+2*MNUMCR+2) + &
+                2 * 4 * MNUMCR * MNUMYR + &     ! two rail variables
+                2 * 3 * MNUMCR * MNUMYR + &     ! two rail variables
+                NNGEM * MNUMYR * 3      + &     ! SPNGELGR
+                NNGEM * MNUMYR          + &     ! PNGELGR
+                0 )                             ! the end
+      EQUIVALENCE (EQ_NTOUT,PGFELGR)
+!   Equivalence for MAIN to test convergence on natural gas to util
+      REAL MUPRC(NNGEM,MNUMYR,3)
+      EQUIVALENCE(MUPRC,PGFELGR)
+!   Equivalence for MAIN to test convergence on seasonal natural gas to util
+      REAL SMUPRC(NNGEM,MNUMYR,4)
+      EQUIVALENCE(SMUPRC,SPGFELGR)
+      REAL SGASPRICE(NNGEM,MNUMYR,4)
+      EQUIVALENCE(SGASPRICE,SPNGELGR)

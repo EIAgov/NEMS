@@ -1,0 +1,18 @@
+$ This checks and cleans basis and solution values.
+$ First, get summary info about resident solution.
+ _KEY SET TIME=20 ; _KEY SET FREQ=1 ; SW ECHO=F, MSG=T
+_PAUSE Output will go to CLEANUP.OUT
+ SCR L 99999 ; OUTPUT CLEANUP.OUT
+ _KEY
+ VERIFY ; BASIS REFRESH ; BASIS ADD SPIKE ; BASIS CHECK
+_PAUSE Ready to fix basis and replace solution values...
+ _KEY SET TIME = * ; _KEY SET FREQ=0 ; _KEY
+$$ CHECKING BASIS AGAIN (WILL FIX)
+ BAS CH //FIX
+$$ REFRESHING BASIS
+ BAS REF
+$$ VERIFYING
+ VER
+$$ DONE
+ OUT *
+ SCR L 23

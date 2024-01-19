@@ -1,0 +1,126 @@
+!  $Header: N:/default/includes/RCS/dsmnemsc,v 1.3 2006/05/23 18:02:26 RSC Exp $
+! ===== (DSMNEMSC) =====
+! USE INCLUDE's (DSMDIMEN) and (PARAMETR) with this file
+! This COMMON BLOCK IS DESIGNED TO PASS RESULTS FROM LDSM TO THE REST OF NEMS
+! ECPnumBl - Number of blocks in entire ECP LDC
+!                                of ECP LDC
+! EFDnumBl - Number of blocks in entire ECP LDC
+!                                of ECP LDC
+! ECPblockx(MAXECPSG,MAXECPB) - x coordinates defining blocks in ECP LDC when
+!                  hours are sorted by segment and by load
+! EFDblockx(MAXEFDSG,MAXEFDB) - x coordinates defining blocks in ECP LDC when
+!                  hours are sorted by segment and by load
+! ECPblWidth(MAXECTB) - widths of the blocks
+! EFDblWidth(MAXEFTB) - widths of the blocks
+! SumSegWidth - sum of segment widths
+! BlockHeight(MAXECTB) ! heights of the blocks during ECP LDC computations
+! ECPblSeg(MAXECTB) - segment to which the block belongs to
+! EFDblSeg(MAXEFTB) - segment to which the block belongs to
+! EFDblSlc(MAXEFTB) - ordinal number of a block in the LDC
+! ECPsgNum(MAXHOUR) - ECP LDC segment number for each hour of calendar year
+! ECPsgFh(MAXECPSG) ! first hour of segment
+! ECPsgLh(MAXECPSG) ! last hour of segment
+! EFDsgFh(MAXEFDSG) ! first hour of segment
+! EFDsgLh(MAXEFDSG) ! last hour of segment
+! EFDsgNum(MAXHOUR) - Segment indices for all calendar hours
+! PREVIOUSYR - previous run year !DEBUG~ONLY
+! PREVIOUSITR - previous run iteration !DEBUG~ONLY
+! PREVIOUSMODE - previous run mode of LDSM !DEBUG~ONLY
+! ECPLastYearIndex - index of last year of time horizon for ECP
+! NhourInRealSeason(MAXEFDS) - number of real hours in each EFD season
+! NhourInRealSegment(TNSEEFD) - number of real hours in each EFD LDC segment
+! numSEFD - total number of segments in the entire EFD LDC
+! nLastCalHinSeg(TNSEEFD) - last calendar hour in each segment of EFD LDC
+! nFirstCalHinSeg(TNSEEFD) - first calendar hour in each segment of EFD LDC
+! nLastHinSeg(TNSEEFD) - last real hour in each segment of EFD LDC
+! nFirstHinSeg(TNSEEFD) - first calendar hour in each segment of EFD LDC
+! nLastBlockInSeason(MAXEFDS) - last block in each season of EFD LDC
+! nFirstBlockInSeason(MAXEFDS) - first block in each season of EFD LDC
+! NumberOfBlocksInSeg(TNSEEFD) - number of blocks in each segment of EFD LDC
+      INTEGER*2 NumberOfBlocksInSeg(TNSEEFD)
+      INTEGER*2 nLastCalHinSeg(TNSEEFD)
+      INTEGER*2 nFirstCalHinSeg(TNSEEFD)
+      INTEGER*2 nLastHinSeg(TNSEEFD)
+      INTEGER*2 nFirstHinSeg(TNSEEFD)
+      INTEGER*2 nLastBlockInSeason(MAXEFDS)
+      INTEGER*2 nFirstBlockInSeason(MAXEFDS)
+      INTEGER*2 numSEFD
+      INTEGER*2 NhourInRealSeason(MAXEFDS)
+      INTEGER*2 NhourInRealSegment(TNSEEFD)
+      REAL*4 BlockHeight(MAXECTB)
+      INTEGER*4 ECPLastYearIndex
+      INTEGER*2 PREVIOUSMODE
+      INTEGER*2 PREVIOUSYR
+      INTEGER*2 PREVIOUSITR
+      REAL*4    ECPblWidth(MAXECTB)
+      REAL*4    EFDblWidth(MAXEFTB)
+      REAL*4    ECPblockx(MAXECPSG,MAXECPB)
+      REAL*4    EFDblockx(MAXEFDSG,MAXEFDB)
+      INTEGER*2 SumSegWidth
+      INTEGER*2 ECPblSeg(MAXECTB)
+      INTEGER*2 EFDblSeg(MAXEFTB),EFDblSlc(MAXEFTB)
+      INTEGER*2 ECPsgNum(MAXHOUR)
+      INTEGER*2 ECPsgFh(MAXECPSG)
+      INTEGER*2 ECPsgLh(MAXECPSG)
+      INTEGER*2 EFDsgFh(MAXEFDSG)
+      INTEGER*2 EFDsgLh(MAXEFDSG)
+      INTEGER*2 ECPnumBl
+      INTEGER*2 EFDnumBl
+      INTEGER*2 EFDsgNum(MAXHOUR)
+      COMMON/DSMNMi/ECPLastYearIndex,ECPnumBl,ECPsgNum,SumSegWidth, &
+      ECPblSeg,ECPsgFh,ECPsgLh,EFDsgFh,EFDsgLh,PREVIOUSYR,PREVIOUSITR &
+      ,EFDsgNum,numSEFD,NhourInRealSeason,EFDblSeg,EFDnumBl,EFDblSlc &
+      ,NhourInRealSegment,nLastCalHinSeg,nFirstCalHinSeg &
+      ,nLastHinSeg,nFirstHinSeg,nFirstBlockInSeason,nLastBlockinSeason &
+      ,NumberOfBlocksInSeg
+      COMMON/DSMNMr/ECPblWidth,ECPblockx,BlockHeight, &
+      EFDblockx,EFDblWidth
+!
+! ===== (DSMNEMS_ETT and DSMNEMS_ECI) =====
+! USE INCLUDE's (DSMDIMEN) and (PARAMETR) with this file
+! This COMMON BLOCK IS DESIGNED TO PASS RESULTS FROM LDSM TO THE REST OF NEMS
+! ECInumBl - Number of blocks in entire ECI LDC
+! ETTnumBl - Number of blocks in entire ECI LDC
+! ETTblockx(MAXETTSG,MAXETTB) - x coordinates defining blocks in ECI LDC when
+!                  hours are sorted by segment and by load
+! ECIblockx(MAXECISG,MAXECIB) - x coordinates defining blocks in ECI LDC when
+!                  hours are sorted by segment and by load
+! ETTblWidth(MAXETT_TB) - widths of the blocks
+! ECIblWidth(MAXECI_TB) - widths of the blocks
+! BlockHeightETT(MAXETT_TB) ! heights of the blocks during ETT LDC computations
+! BlockHeightECI(MAXECI_TB) ! heights of the blocks during ECI LDC computations
+! ECIblSeg(MAXECI_TB) - segment to which the block belongs to
+! ETTblSeg(MAXETT_TB) - segment to which the block belongs to
+! ECIblSlc(MAXECI_TB) - ordinal number of a block in the LDC
+! ETTblSlc(MAXETT_TB) - ordinal number of a block in the LDC
+! ECIsgNum(MAXHOUR) - ECI LDC segment number for each hour of calendar year
+! ECIsgFh(MAXECISG) ! first hour of segment
+! ECIsgLh(MAXECISG) ! last hour of segment
+! ETTsgFh(MAXETTSG) ! first hour of segment
+! ETTsgLh(MAXETTSG) ! last hour of segment
+! ETTsgNum(MAXHOUR) - Segment indices for all calendar hours
+      REAL*4 BlockHeightETT(MAXETT_TB)
+      REAL*4 BlockHeightECI(MAXECI_TB)
+      REAL*4    ETTblWidth(MAXETT_TB)
+      REAL*4    ECIblWidth(MAXECI_TB)
+      REAL*4    ETTblockx(MAXETTSG,MAXETTB)
+      REAL*4    ECIblockx(MAXECISG,MAXECIB)
+      INTEGER*2 ETTblSeg(MAXETT_TB)
+      INTEGER*2 ECIblSeg(MAXECI_TB)
+      INTEGER*2 ETTblSlc(MAXETT_TB)
+      INTEGER*2 ECIblSlc(MAXECI_TB)
+      INTEGER*2 ETTsgNum(MAXHOUR)
+      INTEGER*2 ECIsgNum(MAXHOUR)
+      INTEGER*2 ETTsgFh(MAXETTSG)
+      INTEGER*2 ETTsgLh(MAXETTSG)
+      INTEGER*2 ECIsgFh(MAXECISG)
+      INTEGER*2 ECIsgLh(MAXECISG)
+      INTEGER*2 ETTnumBl
+      INTEGER*2 ECInumBl
+      INTEGER*2 HourNumberETT(MAXHOUR)
+      INTEGER*2 HourNumberECI(MAXHOUR)
+      CHARACTER*38 SEASONETT(MAXETTS)
+      CHARACTER*38 SEASONECI(MAXECIS)
+
+      COMMON/DSMNM_ETT/ BlockHeightETT, ETTblWidth, ETTblockx, ETTblSeg, ETTblSlc, ETTsgNum, ETTsgFh, ETTsgLh, ETTnumBl, HourNumberETT, SEASONETT
+      COMMON/DSMNM_ECI/ BlockHeightECI, ECIblWidth, ECIblockx, ECIblSeg, ECIblSlc, ECIsgNum, ECIsgFh, ECIsgLh, ECInumBl, HourNumberECI, SEASONECI

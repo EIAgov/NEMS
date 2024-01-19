@@ -1,0 +1,605 @@
+FILE NAME:     RSSTK
+DATE MODIFIED: August 11, 2021
+USED BY:       RDHTREQC subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
+DEFINITION:    Physical number of equipment stock for all residential equipment classes (29 major and the rest minor classes)
+UNITS:         Number of equipment/appliances/devices in the base year
+DIMENSION:     housing type, U.S. Census division, equipment class
+SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
+ORGANIZATION OF DATA:
+               Variables: EQCESE (for major end uses in RSCLASS),FANEQP,TVSEQP,STBEQP,HTSEQP,OTTEQP,VGCEQP,DPCEQP,LPCEQP,MONEQP,NETEQP,BATEQP,
+                CFNEQP,COFEQP,DEHEQP,MCOEQP,PHPEQP,SECEQP,SPAEQP,WCLEQP,SPKEQP,PHNQP,TABEQP,KITEQP,EAEQP,SHTEQP,APPEQP
+SOURCES:       2015 RECS microdata (https://www.eia.gov/consumption/residential/data/2015/index.php?view=microdata)
+               "Analysis and Representation of Miscellaneous Electric Loads in NEMS": https://www.eia.gov/analysis/studies/demand/miscelectric/
+               U.S. Census Bureau Characteristics of New Housing: https://www.census.gov/construction/chars/historical_data/
+COMMENT:       Added new MELs (smart speakers, smartphones, tablets, small kitchen appliances); replace DVD players with Over-the-top (OTT) streaming devices; disaggregate pool pumps and heaters; updated MELs using final Guidehouse/Leidos report
+
+
+
+
+
+SF	MF	MOBILE	EQUIPMENT_CLASS	CD
+37594	368540	0	Electric Heating Other Than Heat Pumps	1
+464402	1232882	46167	Electric Heating Other Than Heat Pumps	2
+1089945	1700942	242644	Electric Heating Other Than Heat Pumps	3
+575784	814308	127083	Electric Heating Other Than Heat Pumps	4
+3812797	2547629	1135759	Electric Heating Other Than Heat Pumps	5
+1558434	775569	459408	Electric Heating Other Than Heat Pumps	6
+3155809	2485554	536360	Electric Heating Other Than Heat Pumps	7
+749853	674734	132469	Electric Heating Other Than Heat Pumps	8
+2195449	1943017	263435	Electric Heating Other Than Heat Pumps	9
+28323	22111	0	Air-Source Heat Pumps (heating)	1
+338390	113587	0	Air-Source Heat Pumps (heating)	2
+413011	82407	0	Air-Source Heat Pumps (heating)	3
+187490	25796	0	Air-Source Heat Pumps (heating)	4
+4442084	688861	393372	Air-Source Heat Pumps (heating)	5
+1313456	206507	145989	Air-Source Heat Pumps (heating)	6
+943820	94974	59268	Air-Source Heat Pumps (heating)	7
+608336	84414	0	Air-Source Heat Pumps (heating)	8
+896913	170137	37922	Air-Source Heat Pumps (heating)	9
+656460	496239	58660	Natural Gas Furnaces	1
+4157034	1290664	139383	Natural Gas Furnaces	2
+9874663	1727172	301896	Natural Gas Furnaces	3
+4327106	360483	45843	Natural Gas Furnaces	4
+4539167	581152	109054	Natural Gas Furnaces	5
+1330120	195363	14105	Natural Gas Furnaces	6
+4262308	258082	202015	Natural Gas Furnaces	7
+3715223	772214	97253	Natural Gas Furnaces	8
+5759782	1011989	265160	Natural Gas Furnaces	9
+309092	583305	0	Natural Gas Boilers & Other	1
+1583008	2127516	0	Natural Gas Boilers & Other	2
+577439	738892	25978	Natural Gas Boilers & Other	3
+312075	394957	11610	Natural Gas Boilers & Other	4
+654818	559877	0	Natural Gas Boilers & Other	5
+447359	13385	0	Natural Gas Boilers & Other	6
+465734	0	43928	Natural Gas Boilers & Other	7
+525104	170604	50003	Natural Gas Boilers & Other	8
+888390	579196	56627	Natural Gas Boilers & Other	9
+0	0	0	Kerosene Furnaces (unused placeholder)	1
+0	0	0	Kerosene Furnaces (unused placeholder)	2
+0	0	0	Kerosene Furnaces (unused placeholder)	3
+0	0	0	Kerosene Furnaces (unused placeholder)	4
+0	0	0	Kerosene Furnaces (unused placeholder)	5
+0	0	0	Kerosene Furnaces (unused placeholder)	6
+0	0	0	Kerosene Furnaces (unused placeholder)	7
+0	0	0	Kerosene Furnaces (unused placeholder)	8
+0	0	0	Kerosene Furnaces (unused placeholder)	9
+328759	111403	0	Propane Furnaces & Other	1
+346316	82222	0	Propane Furnaces & Other	2
+781528	22593	59109	Propane Furnaces & Other	3
+611648	25233	32169	Propane Furnaces & Other	4
+675545	0	149991	Propane Furnaces & Other	5
+358807	0	147910	Propane Furnaces & Other	6
+399360	0	125899	Propane Furnaces & Other	7
+160426	29270	192864	Propane Furnaces & Other	8
+357998	0	11566	Propane Furnaces & Other	9
+1252089	217034	69941	Distillate Fuel Oil & Kerosene Furnaces	1
+1014521	102264	133334	Distillate Fuel Oil & Kerosene Furnaces	2
+52907	0	0	Distillate Fuel Oil & Kerosene Furnaces	3
+21237	0	0	Distillate Fuel Oil & Kerosene Furnaces	4
+452841	70984	0	Distillate Fuel Oil & Kerosene Furnaces	5
+24592	0	0	Distillate Fuel Oil & Kerosene Furnaces	6
+0	0	0	Distillate Fuel Oil & Kerosene Furnaces	7
+0	0	0	Distillate Fuel Oil & Kerosene Furnaces	8
+66585	0	0	Distillate Fuel Oil & Kerosene Furnaces	9
+472436	160778	0	Distillate Fuel Oil & Kerosene Boilers & Other	1
+485929	806741	42622	Distillate Fuel Oil & Kerosene Boilers & Other	2
+0	0	0	Distillate Fuel Oil & Kerosene Boilers & Other	3
+8650	11569	0	Distillate Fuel Oil & Kerosene Boilers & Other	4
+241304	0	25512	Distillate Fuel Oil & Kerosene Boilers & Other	5
+0	9397	0	Distillate Fuel Oil & Kerosene Boilers & Other	6
+0	0	0	Distillate Fuel Oil & Kerosene Boilers & Other	7
+0	0	0	Distillate Fuel Oil & Kerosene Boilers & Other	8
+37948	23809	0	Distillate Fuel Oil & Kerosene Boilers & Other	9
+389800	41572	0	Wood Stoves & Other	1
+551808	28237	0	Wood Stoves & Other	2
+282353	0	0	Wood Stoves & Other	3
+173058	0	134003	Wood Stoves & Other	4
+442285	0	24853	Wood Stoves & Other	5
+120380	0	32303	Wood Stoves & Other	6
+222119	0	20049	Wood Stoves & Other	7
+167637	0	178587	Wood Stoves & Other	8
+581094	0	72105	Wood Stoves & Other	9
+9441	3159	0	Ground-Source Heat Pumps (heating)	1
+112797	16227	0	Ground-Source Heat Pumps (heating)	2
+103253	17659	0	Ground-Source Heat Pumps (heating)	3
+46873	5528	0	Ground-Source Heat Pumps (heating)	4
+61130	6820	0	Ground-Source Heat Pumps (heating)	5
+18075	2045	0	Ground-Source Heat Pumps (heating)	6
+12988	940	0	Ground-Source Heat Pumps (heating)	7
+32018	4020	0	Ground-Source Heat Pumps (heating)	8
+47206	8102	0	Ground-Source Heat Pumps (heating)	9
+11015	0	0	Natural Gas Heat Pumps (heating)	1
+74638	39086	0	Natural Gas Heat Pumps (heating)	2
+12965	12424	0	Natural Gas Heat Pumps (heating)	3
+78882	0	0	Natural Gas Heat Pumps (heating)	4
+367238	110698	0	Natural Gas Heat Pumps (heating)	5
+175483	13385	0	Natural Gas Heat Pumps (heating)	6
+111371	0	0	Natural Gas Heat Pumps (heating)	7
+86360	34039	0	Natural Gas Heat Pumps (heating)	8
+133656	19970	18688	Natural Gas Heat Pumps (heating)	9
+3717509	1662866	17045	Room/Window/Wall Air Conditioners (excludes portable ACs)	1
+9402200	7746171	305134	Room/Window/Wall Air Conditioners (excludes portable ACs)	2
+5136228	2402832	739260	Room/Window/Wall Air Conditioners (excludes portable ACs)	3
+1668268	646280	294666	Room/Window/Wall Air Conditioners (excludes portable ACs)	4
+4402458	1818778	1793240	Room/Window/Wall Air Conditioners (excludes portable ACs)	5
+2148931	287489	750353	Room/Window/Wall Air Conditioners (excludes portable ACs)	6
+4379276	444402	1086329	Room/Window/Wall Air Conditioners (excludes portable ACs)	7
+992564	421807	188408	Room/Window/Wall Air Conditioners (excludes portable ACs)	8
+3399254	1873132	358961	Room/Window/Wall Air Conditioners (excludes portable ACs)	9
+891930	197289	85516	Central Air Conditioners	1
+4050183	490885	45612	Central Air Conditioners	2
+8986106	1962311	218723	Central Air Conditioners	3
+4624019	740689	73374	Central Air Conditioners	4
+7005356	2487194	680825	Central Air Conditioners	5
+2251606	454233	209791	Central Air Conditioners	6
+6298875	2311032	698181	Central Air Conditioners	7
+3199206	1071885	281924	Central Air Conditioners	8
+4478957	1450826	186814	Central Air Conditioners	9
+28323	22111	0	Air-Source Heat Pumps (cooling)	1
+338390	113587	0	Air-Source Heat Pumps (cooling)	2
+413011	82407	0	Air-Source Heat Pumps (cooling)	3
+187490	25796	0	Air-Source Heat Pumps (cooling)	4
+4442084	688861	393372	Air-Source Heat Pumps (cooling)	5
+1313456	206507	145989	Air-Source Heat Pumps (cooling)	6
+943820	94974	59268	Air-Source Heat Pumps (cooling)	7
+608336	84414	0	Air-Source Heat Pumps (cooling)	8
+896913	170137	37922	Air-Source Heat Pumps (cooling)	9
+9441	3159	0	Ground-Source Heat Pumps (cooling)	1
+112797	16227	0	Ground-Source Heat Pumps (cooling)	2
+103253	17659	0	Ground-Source Heat Pumps (cooling)	3
+46873	5528	0	Ground-Source Heat Pumps (cooling)	4
+61130	6820	0	Ground-Source Heat Pumps (cooling)	5
+18075	2045	0	Ground-Source Heat Pumps (cooling)	6
+12988	940	0	Ground-Source Heat Pumps (cooling)	7
+32018	4020	0	Ground-Source Heat Pumps (cooling)	8
+47206	8102	0	Ground-Source Heat Pumps (cooling)	9
+11015	0	0	Natural Gas Heat Pumps (cooling)	1
+74638	39086	0	Natural Gas Heat Pumps (cooling)	2
+12965	12424	0	Natural Gas Heat Pumps (cooling)	3
+78882	0	0	Natural Gas Heat Pumps (cooling)	4
+367238	110698	0	Natural Gas Heat Pumps (cooling)	5
+175483	13385	0	Natural Gas Heat Pumps (cooling)	6
+111371	0	0	Natural Gas Heat Pumps (cooling)	7
+86360	34039	0	Natural Gas Heat Pumps (cooling)	8
+133656	19970	18688	Natural Gas Heat Pumps (cooling)	9
+3366325	623057	128601	Clothes Washers	1
+8789644	1707243	330070	Clothes Washers	2
+12745139	1640295	584084	Clothes Washers	3
+6149663	588834	321163	Clothes Washers	4
+15460012	3509618	1883179	Clothes Washers	5
+4977796	398947	695337	Clothes Washers	6
+9336928	1792519	1007118	Clothes Washers	7
+5917709	1037554	651176	Clothes Washers	8
+11341329	1785887	591919	Clothes Washers	9
+2537177	552929	58660	Dishwashers	1
+6766390	1988601	92750	Dishwashers	2
+8719224	2295056	181230	Dishwashers	3
+4939902	877138	73374	Dishwashers	4
+12300295	3867170	556190	Dishwashers	5
+3215902	729790	336039	Dishwashers	6
+6846184	2296836	666300	Dishwashers	7
+5143408	1159777	355107	Dishwashers	8
+9498669	3201204	397862	Dishwashers	9
+1052213	1014108	0	Natural Gas water heaters (storage & tankless)	1
+5389023	3309673	25539	Natural Gas water heaters (storage & tankless)	2
+9010801	2300006	122328	Natural Gas water heaters (storage & tankless)	3
+4016907	860765	42100	Natural Gas water heaters (storage & tankless)	4
+4683177	1342699	52845	Natural Gas water heaters (storage & tankless)	5
+1434434	92960	0	Natural Gas water heaters (storage & tankless)	6
+5500559	536927	154306	Natural Gas water heaters (storage & tankless)	7
+4312847	1100269	133910	Natural Gas water heaters (storage & tankless)	8
+7582801	3566216	385170	Natural Gas water heaters (storage & tankless)	9
+1268954	657393	107961	Electric water heaters (storage & tankless)	1
+2792835	1864664	313953	Electric water heaters (storage & tankless)	2
+3798265	1955250	480749	Electric water heaters (storage & tankless)	3
+2186564	811894	308608	Electric water heaters (storage & tankless)	4
+11533046	4004719	1978876	Electric water heaters (storage & tankless)	5
+3822417	1093701	799716	Electric water heaters (storage & tankless)	6
+4917301	2489706	917687	Electric water heaters (storage & tankless)	7
+1719140	716820	167102	Electric water heaters (storage & tankless)	8
+4083597	1693158	367537	Electric water heaters (storage & tankless)	9
+960239	211502	20640	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	1
+737847	650015	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	2
+0	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	3
+0	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	4
+160629	70984	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	5
+0	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	6
+0	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	7
+0	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	8
+32116	23809	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	9
+322095	121137	0	Propane water heaters (storage & tankless)	1
+406081	78473	22014	Propane water heaters (storage & tankless)	2
+617161	34410	26550	Propane water heaters (storage & tankless)	3
+290809	24842	0	Propane water heaters (storage & tankless)	4
+433670	71992	23949	Propane water heaters (storage & tankless)	5
+181981	15605	0	Propane water heaters (storage & tankless)	6
+532221	0	60962	Propane water heaters (storage & tankless)	7
+187136	0	360455	Propane water heaters (storage & tankless)	8
+573639	56873	30776	Propane water heaters (storage & tankless)	9
+0	0	0	Solar water heaters (storage & tankless)	1
+0	0	0	Solar water heaters (storage & tankless)	2
+13460	0	0	Solar water heaters (storage & tankless)	3
+0	0	0	Solar water heaters (storage & tankless)	4
+14834	0	0	Solar water heaters (storage & tankless)	5
+0	0	0	Solar water heaters (storage & tankless)	6
+0	0	0	Solar water heaters (storage & tankless)	7
+23171	0	0	Solar water heaters (storage & tankless)	8
+121335	0	0	Solar water heaters (storage & tankless)	9
+1180649	619770	58660	Natural Gas Cooking Ranges/Cooktops/Ovens	1
+5311499	4151280	89541	Natural Gas Cooking Ranges/Cooktops/Ovens	2
+6807296	1480018	270974	Natural Gas Cooking Ranges/Cooktops/Ovens	3
+1769419	73176	69062	Natural Gas Cooking Ranges/Cooktops/Ovens	4
+3866610	863743	124083	Natural Gas Cooking Ranges/Cooktops/Ovens	5
+1476912	115712	29625	Natural Gas Cooking Ranges/Cooktops/Ovens	6
+4124857	345309	355842	Natural Gas Cooking Ranges/Cooktops/Ovens	7
+2218010	442358	117888	Natural Gas Cooking Ranges/Cooktops/Ovens	8
+7286093	2250904	449825	Natural Gas Cooking Ranges/Cooktops/Ovens	9
+898974	134964	5400	Propane Cooking Ranges/Cooktops/Ovens	1
+735418	0	86418	Propane Cooking Ranges/Cooktops/Ovens	2
+405477	0	137383	Propane Cooking Ranges/Cooktops/Ovens	3
+402100	0	98565	Propane Cooking Ranges/Cooktops/Ovens	4
+1125684	27855	220173	Propane Cooking Ranges/Cooktops/Ovens	5
+242430	0	212152	Propane Cooking Ranges/Cooktops/Ovens	6
+668159	0	169145	Propane Cooking Ranges/Cooktops/Ovens	7
+224077	0	370745	Propane Cooking Ranges/Cooktops/Ovens	8
+712993	138901	90543	Propane Cooking Ranges/Cooktops/Ovens	9
+2559159	1365064	91397	Electric Cooking Ranges/Cooktops/Ovens	1
+5561801	2336278	185547	Electric Cooking Ranges/Cooktops/Ovens	2
+8598148	2894597	254062	Electric Cooking Ranges/Cooktops/Ovens	3
+5748233	1693076	165146	Electric Cooking Ranges/Cooktops/Ovens	4
+15564632	4895386	1760127	Electric Cooking Ranges/Cooktops/Ovens	5
+5074166	1329809	650676	Electric Cooking Ranges/Cooktops/Ovens	6
+9724318	2839020	787394	Electric Cooking Ranges/Cooktops/Ovens	7
+5538620	1520083	182901	Electric Cooking Ranges/Cooktops/Ovens	8
+8162243	3583253	350042	Electric Cooking Ranges/Cooktops/Ovens	9
+387052	93105	0	Natural Gas Clothes Dryers	1
+2799170	385128	25539	Natural Gas Clothes Dryers	2
+4874758	431257	74500	Natural Gas Clothes Dryers	3
+864140	13262	10281	Natural Gas Clothes Dryers	4
+868269	139418	0	Natural Gas Clothes Dryers	5
+257640	0	0	Natural Gas Clothes Dryers	6
+1047275	0	41365	Natural Gas Clothes Dryers	7
+1029167	209401	53760	Natural Gas Clothes Dryers	8
+3761301	348364	147223	Natural Gas Clothes Dryers	9
+2678383	487916	123201	Electric Clothes Dryers	1
+5712907	856610	304531	Electric Clothes Dryers	2
+7541198	1181821	509584	Electric Clothes Dryers	3
+5198307	575573	310882	Electric Clothes Dryers	4
+13932397	3215531	1744501	Electric Clothes Dryers	5
+4547291	385337	702287	Electric Clothes Dryers	6
+7939554	1792519	904252	Electric Clothes Dryers	7
+4742277	828153	433232	Electric Clothes Dryers	8
+7203967	1486999	415596	Electric Clothes Dryers	9
+5211705	2126388	157931	Refrigerators	1
+14545398	6281326	429953	Refrigerators	2
+19819016	4663224	629627	Refrigerators	3
+9902888	1883813	435379	Refrigerators	4
+23047387	5787017	2157586	Refrigerators	5
+7030430	1273059	1043569	Refrigerators	6
+14073684	3037324	1511615	Refrigerators	7
+9026565	1839501	793942	Refrigerators	8
+17440655	5798998	899689	Refrigerators	9
+1408712	184771	26040	Standalone Freezers	1
+4270400	734949	177435	Standalone Freezers	2
+6322276	519040	144766	Standalone Freezers	3
+4119124	248712	101125	Standalone Freezers	4
+6252688	297974	671447	Standalone Freezers	5
+2799829	237694	457349	Standalone Freezers	6
+4674419	102159	730373	Standalone Freezers	7
+2751117	105896	497178	Standalone Freezers	8
+4314594	320890	252978	Standalone Freezers	9
+3112876	1655356	128601	Furnace Fans & Boiler Pumps	1
+8392803	4699694	331399	Furnace Fans & Boiler Pumps	2
+12610221	3312634	539107	Furnace Fans & Boiler Pumps	3
+6011299	1335432	180739	Furnace Fans & Boiler Pumps	4
+14662148	4711054	1525217	Furnace Fans & Boiler Pumps	5
+4587876	1022981	519403	Furnace Fans & Boiler Pumps	6
+8448996	2749502	810031	Furnace Fans & Boiler Pumps	7
+5611238	1670865	459243	Furnace Fans & Boiler Pumps	8
+9167332	2604905	504524	Furnace Fans & Boiler Pumps	9
+8603665	3771441	345673	Televisions	1
+24875663	10231050	864357	Televisions	2
+33063932	7406347	1348795	Televisions	3
+16670136	2545271	691443	Televisions	4
+42424983	9275151	4682295	Televisions	5
+13299961	2020734	1795761	Televisions	6
+26209006	5121646	2595820	Televisions	7
+15000694	3019353	1371368	Televisions	8
+27655523	8844162	1668536	Televisions	9
+8828305	3935176	547297	Set-top Boxes	1
+25261621	7992617	897371	Set-top Boxes	2
+25366737	5068487	421789	Set-top Boxes	3
+12138810	1398603	395399	Set-top Boxes	4
+38015729	8087602	3423366	Set-top Boxes	5
+12190278	1957440	2036236	Set-top Boxes	6
+21340858	3296087	1750151	Set-top Boxes	7
+10645503	2430153	773983	Set-top Boxes	8
+20462204	6629166	1437034	Set-top Boxes	9
+2876573	1648996	105812	Home Audio Equipment	1
+7548917	4806318	297445	Home Audio Equipment	2
+10840397	3529512	518054	Home Audio Equipment	3
+5153919	1368072	288561	Home Audio Equipment	4
+13265682	4406897	1642395	Home Audio Equipment	5
+4274587	989218	658002	Home Audio Equipment	6
+7945884	2490296	893643	Home Audio Equipment	7
+4974188	1495091	535784	Home Audio Equipment	8
+9668424	4393767	644645	Home Audio Equipment	9
+1918220	489654	79300	OTT Streaming Devices	1
+3985236	1937513	250133	OTT Streaming Devices	2
+5304450	1395576	26887	OTT Streaming Devices	3
+2505017	559812	263239	OTT Streaming Devices	4
+7886867	1358770	410015	OTT Streaming Devices	5
+1835833	356862	341554	OTT Streaming Devices	6
+3929565	746926	485466	OTT Streaming Devices	7
+2862463	597661	51222	OTT Streaming Devices	8
+5518721	1986059	272630	OTT Streaming Devices	9
+1919355	890795	64541	Video Game Consoles	1
+6136478	2495543	146786	Video Game Consoles	2
+8044988	2437950	315291	Video Game Consoles	3
+4794174	980329	378421	Video Game Consoles	4
+9636226	2045476	914725	Video Game Consoles	5
+2501515	956907	368348	Video Game Consoles	6
+4856238	1416435	694423	Video Game Consoles	7
+3247321	944527	150111	Video Game Consoles	8
+6240492	2557241	401802	Video Game Consoles	9
+1724745	548458	67015	Desktop PCs	1
+6350487	2245272	240709	Desktop PCs	2
+7690645	738661	227243	Desktop PCs	3
+3702612	263065	147843	Desktop PCs	4
+9709806	1416410	828047	Desktop PCs	5
+2241951	335284	200947	Desktop PCs	6
+5045051	747792	403493	Desktop PCs	7
+3924280	774681	235406	Desktop PCs	8
+7468909	1554317	267247	Desktop PCs	9
+4090882	1306015	58660	Laptop PCs	1
+10544999	5673531	379036	Laptop PCs	2
+13866442	4207696	436658	Laptop PCs	3
+6334621	1611691	299292	Laptop PCs	4
+19300720	4498820	1289083	Laptop PCs	5
+4371307	982192	677421	Laptop PCs	6
+9401509	2015219	1100583	Laptop PCs	7
+6472162	1313473	313720	Laptop PCs	8
+13997935	4666677	556172	Laptop PCs	9
+2359705	751186	75796	Monitors	1
+7972649	3127002	298921	Monitors	2
+9828800	1399668	294689	Monitors	3
+4677941	516406	194132	Monitors	4
+12693513	2118360	1025954	Monitors	5
+2917386	488336	306739	Monitors	6
+6496023	1061360	574781	Monitors	7
+4919705	976860	283311	Monitors	8
+9629592	2281807	353322	Monitors	9
+4364106	2267098	132939	Network Equipment	1
+11872664	6631355	498814	Network Equipment	2
+16110058	4752073	670245	Network Equipment	3
+7835456	1717100	301720	Network Equipment	4
+19518311	5865571	2008175	Network Equipment	5
+5567397	1154026	777673	Network Equipment	6
+11083371	3019490	1151292	Network Equipment	7
+7555969	1784767	575316	Network Equipment	8
+14902249	6147296	735470	Network Equipment	9
+25617473	8274440	1525115	Non-PC Rechargables	1
+56036334	37992695	2845680	Non-PC Rechargables	2
+102546384	20644600	6705052	Non-PC Rechargables	3
+41523964	7449224	2006118	Non-PC Rechargables	4
+118529418	32515038	18401456	Non-PC Rechargables	5
+43524046	8733063	10027011	Non-PC Rechargables	6
+68768846	16334288	5850603	Non-PC Rechargables	7
+45347304	16641509	6818545	Non-PC Rechargables	8
+82697687	36022100	8805867	Non-PC Rechargables	9
+5670118	1196725	322601	Ceiling Fans	1
+20978435	2773401	413115	Ceiling Fans	2
+31908614	4446781	529627	Ceiling Fans	3
+17635655	1672878	296692	Ceiling Fans	4
+50333219	5663209	3546010	Ceiling Fans	5
+15986329	911687	1321850	Ceiling Fans	6
+36929887	4986623	3011710	Ceiling Fans	7
+16630115	1824358	1453483	Ceiling Fans	8
+21545661	3036069	703534	Ceiling Fans	9
+2591541	1033963	128601	Coffee Makers	1
+6593176	2920654	296082	Coffee Makers	2
+9736629	2061013	402707	Coffee Makers	3
+4305866	878161	249771	Coffee Makers	4
+11346580	3108075	1212777	Coffee Makers	5
+3262930	603672	487898	Coffee Makers	6
+6870928	1261802	745470	Coffee Makers	7
+3924486	732083	501127	Coffee Makers	8
+7702351	2441409	514648	Coffee Makers	9
+1559529	177391	0	Dehumidifiers	1
+3735952	398408	34387	Dehumidifiers	2
+5357235	172135	0	Dehumidifiers	3
+2010698	38659	9997	Dehumidifiers	4
+2638499	143730	59164	Dehumidifiers	5
+455556	0	84997	Dehumidifiers	6
+355130	0	38434	Dehumidifiers	7
+109699	0	99208	Dehumidifiers	8
+548058	210752	19180	Dehumidifiers	9
+3750311	1866026	128601	Microwave Ovens	1
+9369883	5041223	361506	Microwave Ovens	2
+13884991	4114767	683561	Microwave Ovens	3
+6611676	1584711	350708	Microwave Ovens	4
+16358472	5046407	1966136	Microwave Ovens	5
+5540866	1171304	809300	Microwave Ovens	6
+9764816	2675397	1152892	Microwave Ovens	7
+6335382	1668651	590490	Microwave Ovens	8
+12039001	5016781	745112	Microwave Ovens	9
+541892	0	0	Pool Pump	1
+1240186	0	0	Pool Pump	2
+1035485	0	0	Pool Pump	3
+150049	0	0	Pool Pump	4
+2188926	0	62379	Pool Pump	5
+443995	0	0	Pool Pump	6
+1040242	0	27582	Pool Pump	7
+519889	0	0	Pool Pump	8
+1048959	0	19832	Pool Pump	9
+46592	0	0	Pool Heaters	1
+58610	0	0	Pool Heaters	2
+32717	0	0	Pool Heaters	3
+0	0	0	Pool Heaters	4
+303801	0	0	Pool Heaters	5
+59627	0	0	Pool Heaters	6
+45280	0	0	Pool Heaters	7
+38731	0	0	Pool Heaters	8
+102279	0	0	Pool Heaters	9
+952116	131406	8432	Residential Security Systems	1
+2498613	383008	23703	Residential Security Systems	2
+3588059	281261	41283	Residential Security Systems	3
+1705894	109020	22995	Residential Security Systems	4
+4390804	351179	130880	Residential Security Systems	5
+1414844	78829	52435	Residential Security Systems	6
+2630005	198448	71213	Residential Security Systems	7
+1646405	119141	42696	Residential Security Systems	8
+3200148	350132	51371	Residential Security Systems	9
+268059	0	0	Portable Electric Spas	1
+467975	68434	0	Portable Electric Spas	2
+626266	29931	0	Portable Electric Spas	3
+260118	0	0	Portable Electric Spas	4
+573285	0	46104	Portable Electric Spas	5
+95144	0	0	Portable Electric Spas	6
+301137	0	0	Portable Electric Spas	7
+250965	34683	71241	Portable Electric Spas	8
+830487	76934	0	Portable Electric Spas	9
+631777	69810	13586	Miscellaneous Refrigeration Products	1
+2023710	210044	31705	Miscellaneous Refrigeration Products	2
+2595705	98782	0	Miscellaneous Refrigeration Products	3
+1302725	66174	31046	Miscellaneous Refrigeration Products	4
+2599684	183977	86306	Miscellaneous Refrigeration Products	5
+708845	23171	92525	Miscellaneous Refrigeration Products	6
+1578221	63213	211641	Miscellaneous Refrigeration Products	7
+1121928	10382	44952	Miscellaneous Refrigeration Products	8
+2191856	184167	61467	Miscellaneous Refrigeration Products	9
+101983	44391	2723	Smart Speakers	1
+271941	144376	11629	Smart Speakers	2
+360544	98133	13043	Smart Speakers	3
+173976	38543	5571	Smart Speakers	4
+432504	119183	33163	Smart Speakers	5
+113454	21716	15142	Smart Speakers	6
+240548	58398	24344	Smart Speakers	7
+164791	33245	8854	Smart Speakers	8
+328857	123954	14996	Smart Speakers	9
+6158701	2608343	170697	Smartphones	1
+16916970	8668336	522403	Smartphones	2
+21879091	5823860	433927	Smartphones	3
+9781757	2064690	613604	Smartphones	4
+27215731	7007180	2554249	Smartphones	5
+7905989	1404699	814119	Smartphones	6
+16466137	3960890	1998418	Smartphones	7
+10549904	2318611	622860	Smartphones	8
+21844346	8040102	990929	Smartphones	9
+3854999	1202072	41281	Tablets	1
+10933389	4773845	311000	Tablets	2
+13859562	2814622	424943	Tablets	3
+7210412	826055	167936	Tablets	4
+17262613	3717632	1375868	Tablets	5
+4496022	732539	445223	Tablets	6
+9966145	1775194	772857	Tablets	7
+6795374	1316945	403064	Tablets	8
+13893471	3621153	574254	Tablets	9
+5892754	2925870	205427	Small Kitchen Appliances	1
+16357477	9238415	448157	Small Kitchen Appliances	2
+20549178	6975315	944968	Small Kitchen Appliances	3
+9641098	2429552	551992	Small Kitchen Appliances	4
+27216343	6905345	2924304	Small Kitchen Appliances	5
+8016448	1306826	1289259	Small Kitchen Appliances	6
+16164160	3877590	1983667	Small Kitchen Appliances	7
+11854134	2576541	936611	Small Kitchen Appliances	8
+22302838	8316024	1441307	Small Kitchen Appliances	9
+3496102	2004141	128601	Electric Other	1
+9174731	5841457	361506	Electric Other	2
+13175099	4289665	629627	Electric Other	3
+6263921	1662715	350708	Electric Other	4
+16122720	5356013	1996118	Electric Other	5
+5195207	1202266	799716	Electric Other	6
+9657193	3026633	1086108	Electric Other	7
+6045482	1817089	651176	Electric Other	8
+11750718	5340055	783483	Electric Other	9
+195767	21712	29330	Natural Gas Secondary Heating	1
+826656	136447	0	Natural Gas Secondary Heating	2
+1243428	100571	0	Natural Gas Secondary Heating	3
+777008	0	20749	Natural Gas Secondary Heating	4
+1199514	115567	0	Natural Gas Secondary Heating	5
+374098	0	22019	Natural Gas Secondary Heating	6
+632035	0	41365	Natural Gas Secondary Heating	7
+678191	0	0	Natural Gas Secondary Heating	8
+1030444	69200	0	Natural Gas Secondary Heating	9
+954888	294204	29330	Electric Secondary Heating	1
+2468043	755981	45612	Electric Secondary Heating	2
+2803540	692888	232816	Electric Secondary Heating	3
+1734405	281247	102992	Electric Secondary Heating	4
+3303538	607406	362675	Electric Secondary Heating	5
+1224942	177341	187282	Electric Secondary Heating	6
+1926373	186815	159686	Electric Secondary Heating	7
+1039194	109687	82159	Electric Secondary Heating	8
+2384295	589205	216736	Electric Secondary Heating	9
+78729	28463	0	Distillate Fuel Oil & Kerosene Secondary Heating	1
+305077	29834	0	Distillate Fuel Oil & Kerosene Secondary Heating	2
+69883	0	25978	Distillate Fuel Oil & Kerosene Secondary Heating	3
+0	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	4
+205233	0	12974	Distillate Fuel Oil & Kerosene Secondary Heating	5
+29953	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	6
+20313	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	7
+0	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	8
+45289	0	11736	Distillate Fuel Oil & Kerosene Secondary Heating	9
+160738	0	20640	Propane Secondary Heating	1
+382801	0	42906	Propane Secondary Heating	2
+225304	0	0	Propane Secondary Heating	3
+205581	0	0	Propane Secondary Heating	4
+824741	0	23305	Propane Secondary Heating	5
+377502	16392	16659	Propane Secondary Heating	6
+125925	0	42903	Propane Secondary Heating	7
+100723	0	70535	Propane Secondary Heating	8
+260345	0	8986	Propane Secondary Heating	9
+0	0	0	Kerosene Secondary Heating (unused placeholder)	1
+0	0	0	Kerosene Secondary Heating (unused placeholder)	2
+0	0	0	Kerosene Secondary Heating (unused placeholder)	3
+0	0	0	Kerosene Secondary Heating (unused placeholder)	4
+0	0	0	Kerosene Secondary Heating (unused placeholder)	5
+0	0	0	Kerosene Secondary Heating (unused placeholder)	6
+0	0	0	Kerosene Secondary Heating (unused placeholder)	7
+0	0	0	Kerosene Secondary Heating (unused placeholder)	8
+0	0	0	Kerosene Secondary Heating (unused placeholder)	9
+0	0	0	Coal Secondary Heating (unused placeholder)	1
+0	0	0	Coal Secondary Heating (unused placeholder)	2
+0	0	0	Coal Secondary Heating (unused placeholder)	3
+0	0	0	Coal Secondary Heating (unused placeholder)	4
+0	0	0	Coal Secondary Heating (unused placeholder)	5
+0	0	0	Coal Secondary Heating (unused placeholder)	6
+0	0	0	Coal Secondary Heating (unused placeholder)	7
+0	0	0	Coal Secondary Heating (unused placeholder)	8
+0	0	0	Coal Secondary Heating (unused placeholder)	9
+833745	0	5400	Wood Secondary Heating	1
+757711	56655	22014	Wood Secondary Heating	2
+1181023	132049	0	Wood Secondary Heating	3
+482829	0	29352	Wood Secondary Heating	4
+1831619	34274	85589	Wood Secondary Heating	5
+376385	0	64206	Wood Secondary Heating	6
+893483	202619	129599	Wood Secondary Heating	7
+400096	0	173369	Wood Secondary Heating	8
+1383190	57551	38953	Wood Secondary Heating	9
+215606	100207	0	Natural Gas Other	1
+1254235	354055	58105	Natural Gas Other	2
+1237738	103121	0	Natural Gas Other	3
+521101	57127	9139	Natural Gas Other	4
+1258127	143107	23172	Natural Gas Other	5
+395729	77042	15520	Natural Gas Other	6
+1150668	38319	115966	Natural Gas Other	7
+812319	42863	35432	Natural Gas Other	8
+2148634	450828	0	Natural Gas Other	9
+263296	0	0	Propane Other	1
+405333	0	0	Propane Other	2
+308626	0	0	Propane Other	3
+126578	0	0	Propane Other	4
+419422	0	0	Propane Other	5
+53495	0	0	Propane Other	6
+208871	0	53348	Propane Other	7
+44804	0	142950	Propane Other	8
+307495	0	11566	Propane Other	9
+98810	0	17045	Distillate Fuel Oil & Kerosene Other	1
+66432	0	0	Distillate Fuel Oil & Kerosene Other	2
+43856	0	0	Distillate Fuel Oil & Kerosene Other	3
+0	0	0	Distillate Fuel Oil & Kerosene Other	4
+80066	0	0	Distillate Fuel Oil & Kerosene Other	5
+0	0	0	Distillate Fuel Oil & Kerosene Other	6
+0	0	0	Distillate Fuel Oil & Kerosene Other	7
+0	0	0	Distillate Fuel Oil & Kerosene Other	8
+16023	0	0	Distillate Fuel Oil & Kerosene Other	9

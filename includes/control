@@ -1,0 +1,737 @@
+! $Header: m:/default/includes/RCS/control,v 1.89 2019/09/18 17:23:33 xj2 Exp $
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!  CONTROL FILE:
+!   SWITCHES AND CONTROL VARIABLES FOR EMM
+!   ECONTROL Common: EMM User Inputs
+!   SCONTROL Common: Sensitivity Case Control Variables
+!   EMMINDEX Common: Fuel Index Variables
+!   EMMNOX Common: NOX Emissions Accounting Variables WAYNE
+!   EMM_EMS Common: SOX and NOX Emissions Accounting Variables
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!
+!  ECONTROL : EMM USER INPUTS
+!
+        COMMON /ECONTROL/ ECP_MIN,UFPTOL,EFD$NERC,EFD$CENSUS,ECP$NERC,   & !REAL
+        ECP$CENSUS,URFURB,UFACPS,UFACP2,BARRIER, &
+        USO2_BA_CRD,USO2_BA_WGT,UCAR_AL_QTY,UCAR_AL_RTE,UCAR_LDAL_QTY,URG_ZECMAX, &
+        UFLSTITR,USYEAR,UNYEAR,UNSTAS,UF_IN,UF_OUT,USW_OWN,EFDMAT,  & !INT
+        UF_PLT,UF_CRV,UF_DBG,UF_SO2,UZ_PLT,LAST_STEO_YR,NW_COAL,EX_COAL,UF_LD,UF_TMP, &
+        UF_RP2,UF_RPT,UF_DBS,UF_DBPGRP,UF_FL,UNFUELS,URGNUM,UNFLRG,USW_ECP, &
+        UHBSYR,UISTYR,UESTYR,ULSTYR,UDSTYR,UPSTYR,ULRSYR,UFSTYR,FLBASE,EFPSYR, &
+        FLLAST,UNFLRGS,UIFPLT,USW_NERC,USW_CENS,USW_GASR,USW_CLRG, &
+        UF_MC,UF_ETT,UF_ETTIN,UF_ETTDF,UF_BLD,UF_BOUT,UF_CNCT,UF_ETDM, &
+        USW_XP,USW_CANACC,USW_ETT,UZ_ETT,USW_UCAPE,USW_CAR,UYR_CAR,USW_CAREMM,USW_RNW,USW_LDC, &
+        USW_DISP,USW_BILD,USW_EIJ,USW_ETTDF, USW_OVER, USW_LRN, &
+        UMP_GASR,UMP_COLR,UF_EFD,UF_CN2,UF_TRAN,UF_MSG,ULCVSW,USW_DBS, &
+        USW_TRPT,USW_PM,USW_ERET,USW_NRET,USW_ECPCF,USW_EFDRPS,USW_DBGRP,US_GRPS,DIGITS_PARM, &
+        UCAR_AL_YR,UYR_NOCAIR,UYR_RSCAIR,UPHMRY,UPHRNQRT,UPHRIMPQ,  &
+        USW_ZECREV,USW_ZECNET,USW_ZECSUB,URG_ZEC,UY1_ZEC,UYR_ZEC,URG_ZECYRD,UYR_ZECRNW,URG_ZECPRC,  &
+        USW_NRVTYP,USW_NRVREV,  &
+        USW_ACE,UYR_ACE,  &
+        URGNME,URGNCD,USTNME,USTACD,UNMFL,UCYEAR,UF_SCEN,UCDFLRG,UPFLRG,  &            ! CHAR
+        EFDOBJ,EFDRHS,EFDBND,EFD$DBNM,EFD$PROB
+!
+      REAL*8 ECP_MIN                    ! MINIMUM VALUE FOR ECP COEFFICIENTS
+      REAL*4 ECP$CENSUS(MNUMCR,ECP_D_FPH) !
+      REAL*4 ECP$NERC(MNUMNR,ECP_D_FPH)   !
+      REAL*4 EFD$CENSUS(MNUMCR)         !
+      REAL*4 EFD$NERC(MNUMNR)           !
+      REAL*4 UFPTOL                     ! FUEL PRICE TOLERANCE
+      REAL*4 URFURB                     ! HEATRATE IMPROVEMENT FACTOR FOR REFURBISHMENT
+      REAL*4 UFACPS
+      REAL*4 UFACP2
+      REAL*4 BARRIER(MNUMYR)            ! ALLOW TRADE
+      REAL*4 USO2_BA_CRD(MNUMYR)        ! SO2 Banked Allowance Credits (# of Currently Banked Allowance Required to Equal 1 Credit in Forecast Year
+      REAL*4 USO2_BA_WGT(MNUMYR)        ! SO2 Banked Allowance Weights (Like BA_CRD except used as weights for future banking decisions)
+      REAL*4 UCAR_AL_QTY(MNUMYR)        ! Carbon Allowances Allocated by Year (McCain/Lieberman) -- MM Metric Tons
+      REAL*4 UCAR_AL_RTE                ! Carbon Allowances Allocated to Ratepayers (McCain/Lieberman) -- Fraction
+      REAL*4 UCAR_LDAL_QTY(MNUMYR)      ! Carbon Allowances Allocated by Year to Load-serving entities -- MM Metric Tons
+      REAL*4 URG_ZECMAX(49)     ! Maximum annual subsidy for Zero-emission State/Region combination (0=none)
+
+      INTEGER*4 UHBSYR          ! HISTORICAL BASE YEAR FOR EMM
+      INTEGER*4 UISTYR          ! INITIAL INPUT YEAR FOR EMM DATA
+      INTEGER*4 UESTYR          ! INITIAL EXECUTION YEAR FOR EMM (DATA)
+      INTEGER*4 ULSTYR          ! INITIAL EXECUTION YEAR FOR LDSM
+      INTEGER*4 UDSTYR          ! INITIAL EXECUTION YEAR FOR EFD
+      INTEGER*4 UPSTYR          ! INITIAL EXECUTION YEAR FOR ECP
+      INTEGER*4 ULRSYR          ! INITIAL YEAR TO START LEARNING
+      INTEGER*4 UFSTYR          ! INITIAL EXECUTION YEAR FOR EFP
+      INTEGER*4 FLBASE          ! FIRST YR OF EFP FUEL PRICING
+      INTEGER*4 FLLAST          ! LAST YR OF EFP FUEL PRICING (NOT USED)
+      INTEGER*4 UFLSTITR        ! START ITERATION FOR FUEL PRICE REVISIONS
+      INTEGER*4 UF_BLD          ! FILE UN # FOR ?
+      INTEGER*4 UF_BOUT         ! FILE UN # FOR ?
+      INTEGER*4 UF_CN2          ! CANADIAN SPLY FILE
+      INTEGER*4 UF_CNCT         ! FILE UN # FOR ETCNCT CONTRACTS FILE
+      INTEGER*4 UF_CRV          ! FILE UN # FOR LOAD CURVE FILE
+      INTEGER*4 UF_DBG          ! FILE UN # FOR EMM DEBUG
+      INTEGER*4 UF_EFD          ! EFD SPLY FILE
+      INTEGER*4 UF_ETDM         ! FILE UN # FOR ETTDEM FILE
+      INTEGER*4 UF_ETT          ! FILE UN # FOR ETTDBUG FILE
+      INTEGER*4 UF_ETTDF        ! FILE UN # FOR ETT DAF
+      INTEGER*4 UF_ETTIN        ! FILE UN # FOR ETTIN FILE
+      INTEGER*4 UF_FL           ! FILE UN # FOR FUEL DAF FILE
+      INTEGER*4 UF_IN           ! FILE UN # FOR INPTDAF
+      INTEGER*4 UF_LD           ! FILE UN # FOR LOAD DAF FILE
+      INTEGER*4 UF_MC           ! FILE UN # FOR ?
+      INTEGER*4 UF_MSG          ! FILE UN # FOR ROUTINE MESSAGES
+      INTEGER*4 UF_OUT          ! FILE UN # FOR OUTDAF
+      INTEGER*4 UF_PLT          ! FILE UN # FOR PLANT DAF
+      INTEGER*4 UF_RP2          ! FILE UN # FOR 2ND REPORT FILE
+      INTEGER*4 UF_RPT          ! FILE UN # FOR 1ST REPORT FILE
+      INTEGER*4 UF_DBS          ! FILE UN # FOR EMM DATABASE OUTPUT FILE
+      INTEGER*4 UF_DBPGRP       ! FILE UN # FOR EMM DATABASE PLANT GROUP OUTPUT TEXT FILE
+      INTEGER*4 UF_SO2          ! FILE UN # FOR SO2 CONTROL FILE
+      INTEGER*4 UF_TMP          ! FILE UN # FOR TEMP FILE
+      INTEGER*4 UF_TRAN         ! ETT TRANS FILE
+      INTEGER*4 UIFPLT          ! NUMBER OF FUELS PER PLANT GROUP
+      INTEGER*4 ULCVSW          ! USER SWITCH TO OUTPUT EFD LOAD CURVES TO EMMPRNT
+      INTEGER*4 USW_DBS         ! USER SWITCH TO DETERMINE LEVEL OF OUTPUT TO EMMDBASE FILE
+                                ! 0 = NO EMMDBASE OUTPUT
+                                ! 1 = DEFAULT EMMDBASE OUTPUT - DLOAD/DOSPTS TABLES FOR 1ST & LST YR ONLY     
+                                ! 2 = ALL TABLES OUTPUT TO EMMDBASE - DLOAD AND DOSPTS FOR ALL YEARS
+      INTEGER*4 UMP_COLR(EFD_D_MFRG,2) ! MAP OF COAL REGS TO CENSUS&EMM REGS
+      INTEGER*4 UMP_GASR(EFD_D_MFRG,2) ! MAP OF GAS REGS TO CENSUS&EMM REGS
+      INTEGER*4 UNFLRG(EFD_D_NFL) ! EFD FUEL INDEX NUMBER
+      INTEGER*4 UNFLRGS         ! EFD FUEL INDEX BOUND
+      INTEGER*4 UNFUELS         ! # FUEL TYPES IN EFP
+      INTEGER*4 UNSTAS          ! # STATES                               
+      INTEGER*4 UNYEAR          ! # YRS IN MODEL HORIZON (.LE. MNUMYR)
+      INTEGER*4 URGNUM(MNUMNR)  ! NERC REGION NUMERIC CODE
+      INTEGER*4 USW_BILD        ! USER SWITCH (NOT USED NOW)
+      INTEGER*4 USW_CENS        ! USER SWITCH ?
+      INTEGER*4 USW_CLRG        ! USER SWITCH ?
+      INTEGER*4 USW_DISP        ! USER SWITCH TO READ INPTDAF FILE
+      INTEGER*4 USW_ECP         ! USER SWITCH FOR CAPACITY EXPANSION LP
+      INTEGER*4 EFPSYR          ! efp start year
+      INTEGER*4 USW_EIJ         ! USER SWITCH (NOT USED NOW)
+      INTEGER*4 USW_ETT         ! USER SWITCH TO USE ETT
+      INTEGER*4 USW_ETTDF       ! USER SWITCH (NOT USED NOW)
+      INTEGER*4 USW_GASR        ! USER SWITCH ?
+      INTEGER*4 USW_LDC         ! USER SWITCH FOR LOAD CURVES
+                                ! =1 LDSM, =0 NERC
+      INTEGER*4 USW_LRN         ! USER SWITCH FOR LEARNING
+      INTEGER*4 USW_NERC        ! USER SWITCH ?
+      INTEGER*4 USW_OVER        ! USER SWITCH FOR HIST/STEO OVERRIDES
+      INTEGER*4 USW_OWN         ! USER SWITCH OWNERSHIP
+      INTEGER*4 USW_RNW         ! SWITCH FROM EMMRENEW RUN OPTION
+                                ! .EQ. 0: NO INTEGRATION WITH RENEW MODULE
+                                ! .GE. 1: OVERWRITE ECP INPUT VALUES AND
+                                !    INT CAP FACTORS WITH RENEW
+                                ! .EQ. 2: OVERWRITE RENEW WITH EMM FORECASTS
+      INTEGER*4 USW_UCAPE       ! USER SWITCH FOR CAPACITY EXPANSION
+      INTEGER*4 USW_CAR         ! USER SWITCH TO IMPOSE EMM CARBON CONSTRAINT(0=No,1=ECP,2=EFD,3=ECP/EFD)
+      INTEGER*4 UYR_CAR         ! YEAR TO IMPOSE EMM CARBON CONSTRAINT(0=None)
+      INTEGER*4 USW_CAREMM      ! USER SWITCH TO USE EMM CARBON PRICE (0=No,1=ECP,2=EFD)
+      INTEGER*4 USW_XP          ! USER SWITCH FOR CANADIAN RUNS
+      INTEGER*4 USW_CANACC      ! ALLOW ACCELERATION OF CANADIAN PROJECTS (0=No,1=Yes)
+      INTEGER*4 USW_TRPT        ! USER SWITCH FOR TRADE SUMMARY REPORTS
+      INTEGER*4 USW_PM          ! USER SWITCH FOR PLANNED MAINTENANCE
+                                ! (0=USE EFD METHOD, 1=USE ECP RESULTS IN EFD)
+      INTEGER*4 USW_ERET        ! USER SWITCH FOR ECONOMIC RETIREMENTS (0=Yes,1=No)
+      INTEGER*4 USW_NRET        ! USER SWITCH FOR ECON NUC RETIREMENTS (0=Yes,1=No)
+      INTEGER*4 USW_ECPCF       ! USER SWITCH TO USE ECP COFIRING SHARES (0=No,1=Yes)
+      INTEGER*4 USW_EFDRPS      ! USER SWITCH TO USE EFD RPS/CES CONSTRAINT (0=No,1=Yes)
+      INTEGER*4 USW_DBGRP(MNUMYR)  ! USER SWITCH TO PRINT EFD PLANT GROUP DATA TO DATABASE (1=Yes,0=No)
+      INTEGER*4 USYEAR(MNUMYR)  ! MODEL YEAR CODES (E.G., 1998)
+      INTEGER*4 US_GRPS(MNUMYR) ! GROUP ASSIGNMENT CONTROL FOR NEW UNITS - 0=>Add-on,1=>Start New Groups
+      INTEGER*4 EX_COAL         ! Last Existing Coal Plant Type Index
+      INTEGER*4 UZ_ETT          ! # BLOCKS IN ETT DAF (NOT USED)
+      INTEGER*4 LAST_STEO_YR    ! Last STEO Year
+      INTEGER*4 NW_COAL         ! Last New  Coal Plant Type Index
+      INTEGER*4 UZ_PLT          ! # BLOCKS IN PLANT DAF (NOT USED)
+      INTEGER*4 DIGITS_PARM     ! Maximum Number of Decimal Places for ECP Coefficients
+      INTEGER*4 UCAR_AL_YR      ! Base Year for Allocation of Carbon Allowances
+      INTEGER*4 UYR_NOCAIR      ! Year to turn off CAIR (0 = None, or CAIR left in)
+      INTEGER*4 UYR_RSCAIR      ! Year to resume CAIR (0 = None)
+      INTEGER*4 UPHMRY(4)       ! Year to phase out must-runs for different modes (MRUN = 1, 2, 3, 4)
+      INTEGER*4 UPHRNQRT        ! Number of quartiles for HR Improvement
+      INTEGER*4 UPHRIMPQ(4)     ! Switch to allow HR Improvement by quartile (0=yes, 1=no)
+      INTEGER*4 USW_ZECREV      ! Switch to include Zero-emission credits (0=no,1=negative revs only,2=all)
+      INTEGER*4 USW_ZECNET      ! Switch to include capacity payments for Zero-emission credits (1=yes,2=no)
+      INTEGER*4 USW_ZECSUB      ! Switch to determine subsidy for Zero-emission credits (1=ECP/EFD,2=ECP only,3=EFD only)
+      INTEGER*4 URG_ZEC(49)     ! Zero-emission State/Region combination (0=all regions with state)
+      INTEGER*4 UY1_ZEC(49)     ! Zero-emission State Start Year for Subsidy
+      INTEGER*4 UYR_ZEC(49)     ! Zero-emission State End Year for Subsidy
+      INTEGER*4 URG_ZECYRD(49)  ! Year $, if any, for maximum annual subsidy for Zero-emission State/Region combination (0=NA)
+      INTEGER*4 UYR_ZECRNW(49)  ! Number of years to renew ZEC program (if any)
+      INTEGER*4 URG_ZECPRC(49)  ! Switch to pass through calculated ZEC subsidy to prices, 0=no (federal infrastructure bill), 1=yes (state program)
+      INTEGER*4 USW_ACE         ! Switch to include Affordable Clean Energy (0=no,1=use ecpdaty inputs, 3=use ecpdaty incremental inputs)
+      INTEGER*4 UYR_ACE(49)     ! Year to Impose Affordable Clean Energy, if any
+      INTEGER*4 USW_NRVTYP      ! Switch to determine type of negative revenue calculation (1=current year, 2=lag year)
+      INTEGER*4 USW_NRVREV      ! Switch to include capacity payments for negative revenue calculation (1=yes, 2=no)
+
+      CHARACTER*32 UNMFL(EFD_D_NFL) ! Fuel Names
+      CHARACTER*32 URGNME(MNUMNR) ! REGION NAME
+      CHARACTER*1 URGNCD(MNUMNR+EFD_D_PROV) ! region code, including Canadian provinces
+      CHARACTER*2 USTNME(49)      ! STATE ABBREVIATION
+      CHARACTER*1 USTACD(49)      ! state  code
+
+      CHARACTER*4 UCYEAR(MNUMYR)  ! MODEL YEAR CODES (E.G., '1998')
+      CHARACTER*4 UF_SCEN         ! SCENARIO NAME
+
+      CHARACTER*2 UCDFLRG(EFD_D_NFL,EFD_D_MFRG) ! FUEL REGION CODES BY FUEL TYPE
+      CHARACTER*2 UPFLRG(EFD_D_MFRG) !
+
+      CHARACTER*16 EFDOBJ          ! LP OBJ FUNCTION NAME
+      CHARACTER*16 EFDRHS          ! LP RIGHT HAND SIDE NAME
+      CHARACTER*8 EFDBND           ! LP BOUND NAME
+      CHARACTER*8 EFD$DBNM         ! LP DATABASE NAME
+      CHARACTER*8 EFD$PROB         ! LP PROBLEM NAME
+      INTEGER*4   EFDMAT           ! LP SWITCH - CREATE = 0, REVISE = 1
+!
+!  ENUCCFC : INPUT VARIABLES FOR ENDOGENOUS CALCULATION OF NUCLEAR
+!            CAPACITY FACTORS (INCREASE OVER PHASE 1, LEVEL OVER
+!            PHASE 2, DECREASE OVER PHASE 3)
+!
+      COMMON /ENUCCFC/ UNCFRI1,UNCFRI2,UNCFRD1,UNCFRD2,UNCFMAX,     & ! REAL
+                       UNCFVYR,UNCFBYR,                             & ! INT
+                       UNCFEI1,UNCFEI2,UNCFEL1,UNCFEL2
+!
+      REAL UNCFRI1              ! ANNUAL INCREASE IN PHASE 1, VINTAGE 1 
+      REAL UNCFRI2              ! ANNUAL INCREASE IN PHASE 1, VINTAGE 2 
+      REAL UNCFRD1              ! ANNUAL DECREASE IN PHASE 3, VINTAGE 1 
+      REAL UNCFRD2              ! ANNUAL DECREASE IN PHASE 3, VINTAGE 2
+      REAL UNCFMAX              ! MAXIMUM CAPACITY FACTOR ALLOWED
+      INTEGER UNCFVYR           ! VINTAGE YEAR (VINT 1 <=, VINT 2 >) 
+      INTEGER UNCFBYR           ! BASE YEAR FOR CAPACITY FACTOR IN PLANT FILE
+      INTEGER UNCFEI1           ! AGE TO END CAPFAC INCREASE, VINTAGE 1
+      INTEGER UNCFEI2           ! AGE TO END CAPFAC INCREASE, VINTAGE 2
+      INTEGER UNCFEL1           ! AGE TO END CAPFAC LEVEL, VINTAGE 1
+      INTEGER UNCFEL2           ! AGE TO END CAPFAC LEVEL, VINTAGE 2
+!
+!  ENUCDRAT : INPUT VARIBLES FOR DERATING OF EXISTING NUCLEAR FOR GENERIC RETIREMENTS
+!
+      COMMON / ENUCDRAT/ NUCDRAT,NUCDRPT
+      
+      REAL NUCDRAT(MNUMYR,MNUMNR)   ! ANNUAL MULTIPLIER TO DERATE NUCLEAR CAPACITY
+      INTEGER NUCDRPT               ! SWITCH TO REPORT DERATES AS RETIREMENTS IN FTAB (0=NO, 1= YES)
+!
+!  SCONTROL: SWITCHES AND CONTROL VARIABLES FOR EMM SENSITIVITY CASES
+!
+      COMMON /SCONTROL/ UQELFAC,UQELPCT,UPFLPCT,UPCEPCT,UPOMPCT,       & ! REAL
+                        UPXPFL,UQHYFAC,URCCLSUB,URCARWT,UHR_TRGT, &
+                        UHR_PROF,UOM_TRGT,UOM_PROF,UFOM_CFC,UFOM_PCT, &
+                        QELRSDSM,QELCMDSM,QELINDSM,QELTRDSM, &
+                        DGCOMGNG,DGCOMGDS,DGCOMGRS,DGCOMGLP, &
+                        DGCOMGCL,DGCOMGMS,DGINDGSG,DGINDGOU, &
+                        URWDCFST,URWDCFRG,USGTDIMP,USGTCAPIMP,USGTDOMIMP, &
+                        USGRELIMP,UDMLOSSTOL,UDMLOSSADJ,ULABASEDMD,USGCOST,     &
+                        USW_CEL,USW_MDR,USW_POL,USW_HYD,USW_CARCL,     & ! INT
+                        UYR_CARWS,UYR_CARWE,USW_HRP,USW_OMP,USW_FOM, &
+                        USW_DSM,USW_CDG,USW_IDG,USW_BMYR,USW_CFSH, &
+                        UYR_CFRG,USW_SGRID,USW_DMLSADJ,UYR_SGREL,UNYRSGREL,   &
+                        UYR_SGRID,UYR_DMLSADJ
+!
+!  AEO95 SENSITIVITY USING HIGHER DEMANDS
+!
+      REAL*4    UQELFAC(MNUMYR)   ! MULTIPLIER FOR DEMAND FOR AEO95 SENS.
+      INTEGER*4 USW_CEL           ! SWITCH TO IMPLEMENT DEMAND MULT. CASE
+!
+!  MDR CASES (0=NONE,1=BASE,2=DEMAND,3=FUEL PRC,4=ROE,5=%EQUITY,6=ICR,7=TECHCST)
+!
+      REAL*4    UQELPCT         ! % CHANGE IN DEMAND FOR MDR CASES
+      REAL*4    UPFLPCT         ! % CHANGE IN COAL/GAS PRICES FOR MDR
+      REAL*4    UPCEPCT         ! PCT POINT CHANGE IN COST EQUITY FOR MDR
+      INTEGER*4 USW_MDR         ! SWITCH TO MDR CASES
+!
+!  RESTRUCTURING CASES FOR POLICY
+!
+      REAL*4    UPOMPCT       ! % MULTIPLIER FOR O*M COSTS
+      INTEGER*4 USW_POL       ! SWITCH TO IMPLEMENT POLICY RESTRUCTUR.
+!
+!  CECA CASES FOR POLICY
+!
+      REAL*4    UHR_TRGT(EFD_D_DSP)          ! TARGET HEATRATES FOR IMPROVEMENTS
+      REAL*4    UHR_PROF(MNUMYR,EFD_D_DSP)   ! HEATRATE IMPROVEMENT PROFILES
+      REAL*4    UOM_TRGT(EFD_D_DSP)          ! TARGET O&M RATES FOR IMPROVEMENTS
+      REAL*4    UOM_PROF(MNUMYR,EFD_D_DSP)   ! O&M IMPROVEMENT PROFILES
+      REAL*4    UFOM_CFC(EFD_D_CAP)          ! CAPACITY FACTOR FOR FOM CONVERSION
+      REAL*4    UFOM_PCT(EFD_D_CAP)          ! PCT FOM IN MARGINAL PRICE
+      REAL*4    QELRSDSM(MNUMYR)           ! RESIDENTIAL DEMAND REDUCTIONS FROM DSM
+      REAL*4    QELCMDSM(MNUMYR)           ! COMMERCIAL DEMAND REDUCTIONS FROM DSM
+      REAL*4    QELINDSM(MNUMYR)           ! INDUSTRIAL DEMAND REDUCTIONS FROM DSM
+      REAL*4    QELTRDSM(MNUMYR)           ! TRANSPORTATION DEMAND REDUCTIONS FROM DSM
+      REAL*4    DGCOMGNG(MNUMYR)           ! NG COMMERCIAL DISTRIBUTED GENERATION 
+      REAL*4    DGCOMGDS(MNUMYR)           ! DS COMMERCIAL DISTRIBUTED GENERATION 
+      REAL*4    DGCOMGRS(MNUMYR)           ! RS COMMERCIAL DISTRIBUTED GENERATION 
+      REAL*4    DGCOMGLP(MNUMYR)           ! LPG COMMERCIAL DISTRIBUTED GENERATION 
+      REAL*4    DGCOMGCL(MNUMYR)           ! CL COMMERCIAL DISTRIBUTED GENERATION 
+      REAL*4    DGCOMGMS(MNUMYR)           ! MSW COMMERCIAL DISTRIBUTED GENERATION 
+      REAL*4    DGINDGSG(MNUMYR)           ! INDUSTRIAL DISTRIBUTED GENERATION--GRID 
+      REAL*4    DGINDGOU(MNUMYR)           ! INDUSTRIAL DISTRIBUTED GENERATION--OWN 
+      REAL*4    URWDCFST(MNUMNR)           ! STATE MAX BIOMASS COFIRING SHARES
+      REAL*4    URWDCFRG(MNUMNR)           ! REG MAX BIOMASS COFIRING SHARES
+      INTEGER*4 USW_HRP         ! USER SWITCH FOR HR IMPROVEMENT PROFILES(0=No,1=Yes)
+      INTEGER*4 USW_OMP         ! USER SWITCH FOR OM IMPROVEMENT PROFILES(0=No,1=Yes)
+      INTEGER*4 USW_FOM         ! USER SWITCH TO INCLUDE FOM IN MARG PRC(0=No,1=Yes)
+      INTEGER*4 USW_DSM         ! USER SWITCH FOR DSM DEMAND REDUCTIONS(0=No,1=Yes)
+      INTEGER*4 USW_CDG         ! USER SWITCH FOR COM DISTRIBUTED GEN(0=No,1=Yes)
+      INTEGER*4 USW_IDG         ! USER SWITCH FOR IND DISTRIBUTED GEN(0=No,1=Yes)
+      INTEGER*4 USW_BMYR        ! USER SWITCH TO MAKE BIOMASS PLANTS MUST RUN
+      INTEGER*4 USW_CFSH        ! USER SWITCH TO OVERWRITE PLANT FILE COFIRING SHARES
+      INTEGER*4 UYR_CFRG        ! YR TO SWITCH TO REGIONAL COFIRING SHRS, IF ANY
+!
+!  SENSITIVITIES TO ADJUST EXPECTED FUEL PRICES
+!
+      REAL*4    UPXPFL(ECP_D_NFL)          ! MULTIPLIER FOR EXPECTATIONS      
+!
+!  AEO95 SENSITIVITY USING HIGHER DEMANDS
+!
+      REAL*4    UQHYFAC(MNUMYR,MNUMNR)   ! ADJ FAC FOR HYD GEN FOR CARBON CASES
+      INTEGER*4 USW_HYD                  ! YEAR TO REVISE HYDRO GENERATION
+!
+!  CARBON STABILIZATION SENSITIVITIES
+!
+      REAL*4 URCCLSUB           ! RATE OF COAL CARBON SUBSIDY
+      INTEGER*4 USW_CARCL       ! USER SWITCH TO IMPOSE COAL CARBON SUBSIDY
+!
+      REAL*4 URCARWT            ! MAX VALUE OF WAITING ADJUSTMENT FOR CARBON
+      INTEGER*4 UYR_CARWS       ! YEAR TO START VALUE OF WAITING ADJUSTMENT
+      INTEGER*4 UYR_CARWE       ! YEAR TO END VALUE OF WAITING ADJUSTMENT
+!
+!  SMART GRID CASE                   
+!
+      INTEGER*4 USW_SGRID       ! USER SWITCH TO TURN ON SMART GRID CASE  (0=no,1=yes) 
+      INTEGER*4 USW_DMLSADJ     ! USER SWITCH FOR LOSS ADJUSTMENTS TIED TO CHANGES IN DEMAND
+!                               !       (0=no,1=demd decreases only,2=decr and incr)
+      INTEGER*4 UYR_SGREL       ! YEAR TO START SMART GRID RELIABILITY IMPROVEMENTS
+      INTEGER*4 UNYRSGREL       ! NUMBER OF YEARS FOR SMART GRID RELIABILITY IMPROVEMENTS
+      INTEGER*4 UYR_SGRID       ! START YEAR FOR SMART GRID IMPROVEMENT 
+      INTEGER*4 UYR_DMLSADJ      ! START YEAR FOR LOSS ADJUSTMENTS TIED TO CHANGES IN DEMAND
+
+!
+      REAL*4 USGTDIMP           ! T&D % EFFICIENCY IMPROVEMENT DUE TO SMART GRID       
+      REAL*4 USGTCAPIMP         ! % IMPROVEMENT TO TRANSMISSION CAPACITY DUE TO SMART GRID
+      REAL*4 USGTDOMIMP         ! % IMPROVEMENT TO T&D O&M COSTS DUE TO SMART GRID
+      REAL*4 USGRELIMP          ! % ANNUAL IMPROVEMENT TO RELIABILITY DUE TO SMART GRID
+      REAL*4 UDMLOSSTOL         ! Tolerance level for demand change loss adjustments   
+      REAL*4 UDMLOSSADJ(MNUMNR) ! Change in regional loss factors for every % change in demand
+      REAL*4 ULABASEDMD(MNUMYR,MNUMNR) ! Base demand for calculating loss adjustments for changes in demand (bkwh)   
+      REAL*4 USGCOST(MNUMYR,MNUMNR) ! Cost of smart grid improvement  (million $)                       
+      
+!
+!  EMMINDEX: INDEXES AND FUEL CODES
+!
+      COMMON /EMMINDEX/ UIB1,UIB2,UIB3,UIB4,UIB5,UIB6,UIB7,UIB8,UIC1,UIC2,UIC3,UIC4,UIC5, &
+         UIC6,UIC7,UIC8,UIC9,UICX,UICY,UICZ,UIH1,UIH2,UIH3,UIH4,UIH5,UIH6,UIH7,UIH8,UIH9, &
+         UIHA,UIHB,UIHC,UIPC,UIIG,UIIS,UIDS,UIRL,UIRH,UIGF,UIGI,UIGC,UIUF,UIOG,UIWD,UISW, &
+         UIWA,UIPS,UIWN,UIWL, UIWF,UIGT,UISO,UIPV,UIPT,UIDD,UIDG,UIOC,UII2,UIPQ,UITI,                &
+         UICOU, UICSU, UICSC, UICNC, UICAV, UICON, UICNG, UICOQ, UICAS, UICTN, UISTO, &
+         UISTG, UISTX, UIICE, UICTO, UICTG, UICTX, UICTA, UIACT, UICCO, UICCG, UICCX, &
+         UIACC, UIAC2, UIACS, UIFCG, UICNU, UIANC, UISMR, UIGFN, UIBMS, UIBIG, UIGTH, &
+         UIAGT, UIMSW, UIHYC, UIHYA, UIHYI, UIHYT, UIHYR, UIQST, UIDST, UIOST, UIWND, &
+         UIWNL, UIWFS, UISTH, UISTS, UIST2, UISPV, UIPVT, UIOIN, UIDGB, UIDGP, UFLCODE, EPPLCD
+!
+      INTEGER*4 UIB1  ! Index: Coal for units characterized as B100 Unscb-BH -Any-     
+      INTEGER*4 UIB2  ! Index: Coal for units characterized as B100 Unscb-BH -Any-SC   
+      INTEGER*4 UIB3  ! Index: Coal for units characterized as B100 W_scb-BH -   -     
+      INTEGER*4 UIB4  ! Index: Coal for units characterized as B100 W_scb-BH -   -SC   
+      INTEGER*4 UIB5  ! Index: Coal for units characterized as B100 W_scb-BH -SCR-     
+      INTEGER*4 UIB6  ! Index: Coal for units characterized as B100 W_scb-BH -SCR-SC   
+      INTEGER*4 UIB7  ! Index: Coal for units characterized as B100 Dry  -BH -Any-     
+      INTEGER*4 UIB8  ! Index: Coal for units characterized as B100 Dry  -BH -Any-SC   
+      INTEGER*4 UIC1  ! Index: Coal for units characterized as B100 Unscb-CSE-Any-     
+      INTEGER*4 UIC2  ! Index: Coal for units characterized as B100 Unscb-CSE-Any-   FF
+      INTEGER*4 UIC3  ! Index: Coal for units characterized as B100 Unscb-CSE-Any-SC/FF
+      INTEGER*4 UIC4  ! Index: Coal for units characterized as B100 W_scb-CSE-   -     
+      INTEGER*4 UIC5  ! Index: Coal for units characterized as B100 W_scb-CSE-   -   FF
+      INTEGER*4 UIC6  ! Index: Coal for units characterized as B100 W_scb-CSE-   -SC/FF
+      INTEGER*4 UIC7  ! Index: Coal for units characterized as B100 W_scb-CSE-SCR-     
+      INTEGER*4 UIC8  ! Index: Coal for units characterized as B100 W_scb-CSE-SCR-   FF
+      INTEGER*4 UIC9  ! Index: Coal for units characterized as B100 W_scb-CSE-SCR-SC/FF
+      INTEGER*4 UICX  ! Index: Coal for units characterized as B100 D_scb-CSE-   -     
+      INTEGER*4 UICY  ! Index: Coal for units characterized as B100 D_scb-CSE-   -   FF
+      INTEGER*4 UICZ  ! Index: Coal for units characterized as B100 D_scb-CSE-SCR-SC/FF
+      INTEGER*4 UIH1  ! Index: Coal for units characterized as B100 Unscb-O/N-Any-     
+      INTEGER*4 UIH2  ! Index: Coal for units characterized as B100 Unscb-O/N-Any-   FF
+      INTEGER*4 UIH3  ! Index: Coal for units characterized as B100 Unscb-O/N-Any-SC/FF
+      INTEGER*4 UIH4  ! Index: Coal for units characterized as B100 W_scb-O/N-   -     
+      INTEGER*4 UIH5  ! Index: Coal for units characterized as B100 W_scb-O/N-   -   FF
+      INTEGER*4 UIH6  ! Index: Coal for units characterized as B100 W_scb-O/N-   -SC/FF
+      INTEGER*4 UIH7  ! Index: Coal for units characterized as B100 W_scb-O/N-SCR-     
+      INTEGER*4 UIH8  ! Index: Coal for units characterized as B100 W_scb-O/N-SCR-   FF
+      INTEGER*4 UIH9  ! Index: Coal for units characterized as B100 W_scb-O/N-SCR-SC/FF
+      INTEGER*4 UIHA  ! Index: Coal for units characterized as B100 D_scb-O/N-Any-     
+      INTEGER*4 UIHB  ! Index: Coal for units characterized as B100 D_scb-O/N-Any-   FF
+      INTEGER*4 UIHC  ! Index: Coal for units characterized as B100 D_scb-O/N-Any-SC/FF
+      INTEGER*4 UIPC  ! Index: Coal for units characterized as Scrubbed Coal New
+      INTEGER*4 UIOC  ! Index: Coal for units characterized as Other New Coal
+      INTEGER*4 UIIG  ! Index: Coal for units characterized as Integrated Gas Comb Cycle
+      INTEGER*4 UII2  ! Index: Coal for units characterized as IGCC w/NG Cofiring
+      INTEGER*4 UIPQ  ! Index: Coal for units characterized as IGCC w/Partial Seq
+      INTEGER*4 UIIS  ! Index: Coal for units characterized as IGCC w/Sequestration     
+      INTEGER*4 UIDS  ! Index: Distillate Fuel Oil
+      INTEGER*4 UIRL  ! Index: Residual Fuel Oil Low Sulfur
+      INTEGER*4 UIRH  ! Index: Residual Fuel Oil High Sulfur
+      INTEGER*4 UIGF  ! Index: Natural Gas Firm
+      INTEGER*4 UIGI  ! Index: Natural Gas Interruptable
+      INTEGER*4 UIGC  ! Index: Natural Gas Competitive
+      INTEGER*4 UIUF  ! Index: Uranium Fuel
+      INTEGER*4 UIOG  ! Index: Other Gaseous Fuels
+      INTEGER*4 UIWD  ! Index: Biomass (Wood) Energy
+      INTEGER*4 UISW  ! Index: Solid Waste Energy
+      INTEGER*4 UIWA  ! Index: Hydro Electric Energy (Water)
+      INTEGER*4 UITI  ! Index: Tidal Hydro Electric Energy (Water)
+      INTEGER*4 UIPS  ! Index: Pump Storage Energy
+      INTEGER*4 UIWN  ! Index: Wind Energy
+      INTEGER*4 UIWF  ! Index: OFS Wind Energy   
+      INTEGER*4 UIWL  ! Index: ONS Wind Energy Low Speed
+      INTEGER*4 UIGT  ! Index: Geothermal Energy
+      INTEGER*4 UISO  ! Index: Solar Thermal Energy
+      INTEGER*4 UIPV  ! Index: Solar PV Energy - Tilt Axis
+      INTEGER*4 UIPT  ! Index: Solar PV Energy - Fixed Axis
+      INTEGER*4 UIDD  ! Index: Distributed Generation Distillate
+      INTEGER*4 UIDG  ! Index: Distributed Generation Natural
+
+      INTEGER*4 UICOU           ! EFD Type Index: Coal Steam pre-  1965       
+      INTEGER*4 UICSU           ! EFD Type Index: Coal Steam post- 1965       
+      INTEGER*4 UICSC           ! EFD Type Index: Coal Steam with Scrubber    
+      INTEGER*4 UICNC           ! EFD Type Index: New Coal Steam              
+      INTEGER*4 UICAV           ! EFD Type Index: New Advanced Coal           
+      INTEGER*4 UICON           ! EFD Type Index: Other New Advanced Coal
+      INTEGER*4 UICNG           ! EFD Type Index: IGCC with NG Cofiring
+      INTEGER*4 UICOQ           ! EFD Type Index: New Coal w/Partial Sequestration
+      INTEGER*4 UICAS           ! EFD Type Index: New Advanced Coal W/SEQ.          
+      INTEGER*4 UICTN           ! EFD Type Index: Coal to Gas Retrofit             
+      INTEGER*4 UISTO           ! EFD Type Index: Oil Steam                   
+      INTEGER*4 UISTG           ! EFD Type Index: Gas Steam                   
+      INTEGER*4 UISTX           ! EFD Type Index: Oil/Gas Steam               
+      INTEGER*4 UIICE           ! EFD Type Index: Internal Combustion Engine       
+      INTEGER*4 UICTO           ! EFD Type Index: Oil Turbine                 
+      INTEGER*4 UICTG           ! EFD Type Index: Gas Turbine                 
+      INTEGER*4 UICTX           ! EFD Type Index: Oil/Gas Turbine             
+      INTEGER*4 UICTA           ! EFD Type Index: Aeroderivative Turbine           
+      INTEGER*4 UIACT           ! EFD Type Index: Advanced Turbine            
+      INTEGER*4 UICCO           ! EFD Type Index: Oil Combined Cycle          
+      INTEGER*4 UICCG           ! EFD Type Index: Gas Combined Cycle          
+      INTEGER*4 UICCX           ! EFD Type Index: Oil/Gas Combined Cycle      
+      INTEGER*4 UIACC           ! EFD Type Index: Advanced Combined Cycle     
+      INTEGER*4 UIAC2           ! EFD Type Index: New Advanced Combined Cycle      
+      INTEGER*4 UIACS           ! EFD Type Index: Advanced Combined Cycle W/SEQ.    
+      INTEGER*4 UIFCG           ! EFD Type Index: Fuel Cell                   
+      INTEGER*4 UICNU           ! EFD Type Index: Conventional Nuclear        
+      INTEGER*4 UIANC           ! EFD Type Index: Advanced Nuclear            
+      INTEGER*4 UISMR           ! EFD Type Index: SMR Advanced Nuclear             
+      INTEGER*4 UIGFN           ! EFD Type Index: Greenfield Nuclear               
+      INTEGER*4 UIBMS           ! EFD Type Index: Wood/Biomass                
+      INTEGER*4 UIBIG           ! EFD Type Index: Biomass IGCC                     
+      INTEGER*4 UIGTH           ! EFD Type Index: Geothermal                  
+      INTEGER*4 UIAGT           ! EFD Type Index: Advanced Geothermal              
+      INTEGER*4 UIMSW           ! EFD Type Index: Municipal Solid Waste            
+      INTEGER*4 UIHYC           ! EFD Type Index: Conventional Hydroelectric  
+      INTEGER*4 UIHYA           ! EFD Type Index: Advanced Hydroelectric           
+      INTEGER*4 UIHYI           ! EFD Type Index: Hydroelectric in Stream          
+      INTEGER*4 UIHYT           ! EFD Type Index: Hydroelectric Tidal              
+      INTEGER*4 UIHYR           ! EFD Type Index: Reversible Hydroelectric    
+      INTEGER*4 UIQST           ! EFD Type Index: Quick Response Storage           
+      INTEGER*4 UIDST           ! EFD Type Index: Diurnal Storage                  
+      INTEGER*4 UIOST           ! EFD Type Index: Other Storage                    
+      INTEGER*4 UIWND           ! EFD Type Index: Wind                        
+      INTEGER*4 UIWNL           ! EFD Type Index: Wind Low Speed                   
+      INTEGER*4 UIWFS           ! EFD Type Index: OFS Wind
+      INTEGER*4 UISTH           ! EFD Type Index: Solar Thermal               
+      INTEGER*4 UISTS           ! EFD Type Index: Solar Thermal w/Storage          
+      INTEGER*4 UIST2           ! EFD Type Index: Solar Thermal w/Storage 2        
+      INTEGER*4 UISPV           ! EFD Type Index: Solar Photovoltaic w/Axis Track            
+      INTEGER*4 UIPVT           ! EFD Type Index: Solar Photovoltaic Fixed Axis
+      INTEGER*4 UIOIN           ! EFD Type Index: Other Intermittent               
+      INTEGER*4 UIDGB           ! EFD Type Index: Distributed Generation-Base 
+      INTEGER*4 UIDGP           ! EFD Type Index: Distributed Generation-Peak
+      CHARACTER*2 UFLCODE(EFD_D_NFL)  ! EFD FUEL CODES
+      CHARACTER*3 EPPLCD(EFD_D_CAP)   ! EFD PLANT TYPE CODES
+!
+!     EMM_EMS: EMM SOX and NOX EMISSION CALCULATION PARAMETERS
+!
+      COMMON /EMM_EMS/ NOX_EMF,NOX_STD,NOX_CTL,SO2_EMF,SO2_MAX, &
+         SO2_PCT,CNV_FAC,                                               & ! REAL
+         NUM_NCT,NUM_BTP,NUM_EMF,NOX_PH1,NOX_PH2,                       & ! INTEGER
+         NCT_NAME,BTP_NAME,EMS_FUEL,EMS_UNIT,CNV_UNIT, &
+         BTP_FTCD,NCT_CODE,BTP_BTCD                                    ! CHARACTER
+!
+      REAL*4 NOX_EMF(EMM_D_BTP,EMS_D_NFL) ! NOX Emission Factors (lbs / Standard Unit)
+      REAL*4 NOX_STD(EMM_D_BTP,2)       ! NOX Emission Standards (lbs / MMbtu)
+      REAL*4 NOX_CTL(EMM_D_NCT)         ! NOX Reduction Factor (Percent Reduction)
+      REAL*4 SO2_EMF(EMS_D_NFL)         ! SO2 Emission Factors (lbs / Standard Unit)
+      REAL*4 SO2_MAX(EMS_D_NFL)         ! SO2 Maximum Emission Factor (lbs / Standard Unit)
+      REAL*4 SO2_PCT(EMS_D_NFL)         ! SO2 Emission Factor (Percent of SO2 in Fuel)
+      REAL*4 CNV_FAC(EMS_D_NFL)         ! Convert Standard unit to Alternate Standard Unit
+      INTEGER*4 NUM_NCT               ! Number NOX Control Technologies
+      INTEGER*4 NUM_BTP               ! Number of Boiler Types ; Fire Type / Bottom Type Combinations
+      INTEGER*4 NUM_EMF               ! Number of Fuel Types for use in Specifing Emission Factors
+      INTEGER*4 NOX_PH1(EMM_D_BTP)      ! Year Phase 1 plants must comply
+      INTEGER*4 NOX_PH2(EMM_D_BTP)      ! Year Phase 2 plants must comply
+      CHARACTER*40 NCT_NAME(EMM_D_NCT)  ! NOX Control Technologies Names
+      CHARACTER*24 BTP_NAME(EMM_D_BTP)  ! Boiler Type Names
+      CHARACTER*16 EMS_FUEL(EMS_D_NFL)  ! Emission Fuel Type Names
+      CHARACTER*16 EMS_UNIT(EMS_D_NFL)  ! Standard Units for Emission Fuels
+      CHARACTER*16 CNV_UNIT(EMS_D_NFL)  ! Conversion Unit Labels from Standard to Standard Units
+      CHARACTER*2 BTP_FTCD(EMM_D_BTP)   ! Boiler Type - Fire Type Codes
+      CHARACTER*2 NCT_CODE(EMM_D_BTP)   ! NOX Control Technologies Codes
+      CHARACTER*1 BTP_BTCD(EMM_D_BTP)   ! Boiler Type - Bottom Type Codes
+!
+!     EMM_EFD: EFD LP variables for annual LP
+!
+      COMMON /EMM_EFD/ EPPOPR,EPPOPM,EPNFLRG,UNFRGN, &
+                       EPFLTP,EPGSMP,EPCSMP,EPCLMP,EPCAMP,EPFTABI,EFLFTABI, &
+                                   CPFLRG,CPFLEFD,CPFLECP,EPFLCD
+!
+      INTEGER*4 EPPOPR(EFD_D_CAP)                   ! operate switch by EFD plant type
+                                                  ! 1 = baseload dispatchable
+                                                  ! 2 = slice independent (peak)
+                                                  ! 3 = baseload renewable (constant across slices)
+                                                  ! 4 = hydro (energy constrained)
+                                                  ! 5 = intermittent (slice-specific CF)
+      INTEGER*4 EPPOPM(EFD_D_CAP)                   ! planned main switch by EFD plant type
+                                                  ! 1 = do PM by individual plant group
+                                                  ! 2 = do PM by plant type
+                                                  ! 0 = don't do PM
+      INTEGER*4 EPNFLRG(MNUMCR,EFD_D_MFRG,EFD_D_MFRG,CO2_D_GRP)  ! fuel region code - combination of census, coal and gas regions
+      INTEGER*4 UNFRGN                            ! number of fuel regions
+      REAL*4    CPFLRG(MNUMCR,EFD_D_MFRG,EFD_D_MFRG)  ! capacity in combined fuel region (to track combinations)
+      REAL*4    CPFLEFD(EFD_D_CAP,MNUMCR,EFD_D_MFRG,EFD_D_MFRG)  ! capacity in combined fuel region by EFD type
+      REAL*4    CPFLECP(ECP_D_CAP,MNUMCR,EFD_D_MFRG,EFD_D_MFRG)  ! capacity in combined fuel region by ECP type
+      INTEGER*4 EPFLTP(EFD_D_CAP,ECP_D_FPP)           ! fuel operate options by EFD plant type - uses ECP fuel types
+      CHARACTER*1 EPFLCD(MNUMNR)                  ! one char fuel region code 
+      INTEGER*4 EPGSMP(MNUMNR)                    ! gas region associated with a given combined region
+      INTEGER*4 EPCSMP(MNUMNR)                    ! census region associated with a given combined region
+      INTEGER*4 EPCLMP(MNUMNR)                    ! coal region associated with a given combined region
+      INTEGER*4 EPCAMP(MNUMNR)                    ! carbon region associated with a given combined region
+      INTEGER*4 EPFTABI(EFD_D_CAP)                  ! EFD plant mapping to FTAB capacity categories in Table 9                 
+      INTEGER*4 EFLFTABI(EFD_D_NFL)                 ! EFD fuel mapping to FTAB fuel categories in Table 8                 
+!     GPSALLOC: Factors for allocating allowances based on GPS
+!
+      COMMON /GPSALLOC/GPSSYR,GPSCSW,GPSSSW,GPSNSW,GPSHSW,GPSCSUB,GPSSSUB,GPSNSUB,GPSHSUB, &
+                       BASECAR,BASESO2,BASENOX,BASEHG
+      INTEGER*4 GPSSYR                            ! initial year for GPS 
+      INTEGER*4 GPSCSW(EFD_D_CAP)                   ! carbon GPS allocation switch 
+      INTEGER*4 GPSSSW(EFD_D_CAP)                   ! SO2 GPS allocation switch
+      INTEGER*4 GPSNSW(EFD_D_CAP)                   ! NOX GPS allocation switch 
+      INTEGER*4 GPSHSW(EFD_D_CAP)                   ! mercury GPS allocation switch
+      REAL      GPSCSUB(EFD_D_CAP,MNUMNR)           ! carbon GPS subsidy, by plant type and region
+      REAL      GPSSSUB(EFD_D_CAP,MNUMNR)           ! SO2 GPS subsidy, by plant type and region
+      REAL      GPSNSUB(EFD_D_CAP,MNUMNR)           ! NOX GPS subsidy, by plant type and region
+      REAL      GPSHSUB(EFD_D_CAP,MNUMNR)           ! mercury GPS subsidy, by plant type and region
+      REAL      BASECAR(MNUMNR)                   ! base generation for carbon GPS allocation
+      REAL      BASESO2(MNUMNR,2)                 ! base generation for SO2 GPS allocation
+      REAL      BASENOX(MNUMNR)                   ! base generation for NOX GPS allocation
+      REAL      BASEHG(MNUMNR)                    ! base generation for mercury GPS allocation
+!
+!     MAXFLSH: Variables to calc. max gas and oil shares by plt type and fuel region for new LP
+!
+      COMMON /MAXFLSH/UIGAS,UIDIS,UIRES,EDMXGS,EDMXRS,EDMXDS,FSCAPWT,FCLSH,FGSSH,FOLSH,FWDSH,UICOL,UINUC
+      INTEGER*4 UIGAS(EFD_D_NFL)                    ! index to indicate if fuel type is gas
+      INTEGER*4 UIRES(EFD_D_NFL)                    ! index to indicate if fuel type is resid
+      INTEGER*4 UIDIS(EFD_D_NFL)                    ! index to indicate if fuel type is distillate
+      INTEGER*4 UICOL(EFD_D_NFL)                    ! index to indicate if fuel type is coal
+      INTEGER*4 UINUC(EFD_D_NFL)                    ! index to indicate if fuel type is nuclear
+      REAL      EDMXGS(2,ECP_D_CAP,MAXNFR)            ! avg max gas share by plt type and fuel region
+      REAL      EDMXRS(2,ECP_D_CAP,MAXNFR)            ! avg max resid share by plt type and fuel region
+      REAL      EDMXDS(2,ECP_D_CAP,MAXNFR)            ! avg max dist share by plt type and fuel region
+      REAL      FSCAPWT(2,ECP_D_CAP,MAXNFR)           ! total capacity by plt type and fuel region
+      REAL      FCLSH(2,ECP_D_CAP,MAXNFR)             ! final coal share by plt type and fuel region
+      REAL      FGSSH(2,ECP_D_CAP,MAXNFR)             ! final gas  share by plt type and fuel region
+      REAL      FOLSH(2,ECP_D_CAP,MAXNFR)             ! final oil  share by plt type and fuel region
+      REAL      FWDSH(2,ECP_D_CAP,MAXNFR)             ! final biomass share by plt type and fuel region
+!
+!     Store Temporary ECP Maximum Shares and Average Fuel Prices
+!
+      COMMON /ECP_FUELS/ TPMXGAS, TPMXOIL, TPMXCOL, TPMXWGT, TPGASPRC, TPGASWGT, TPDISPRC, TPDISWGT, TPRESPRC, TPRESWGT, TPCOLPRC, TPCOLPRA, TPCOLWGT, TPNUCPRC, TPNUCWGT, &
+         TPMXGAS_MR, TPMXOIL_MR, TPMXCOL_MR, TPMXWGT_MR
+
+      REAL*8 TPMXGAS(ECP_D_DSP,MAXNFR)     ! Max Gas Shares - Non - Must Run
+      REAL*8 TPMXOIL(ECP_D_DSP,MAXNFR)     ! Max Oil Shares - Non - Must Run
+      REAL*8 TPMXCOL(ECP_D_DSP,MAXNFR)     ! Max Coal Shares - Non - Must Run
+      REAL*8 TPMXWGT(ECP_D_DSP,MAXNFR)     ! Capacity Weight for Determining Max Shares - Non - Must Run
+      REAL*8 TPGASPRC(MNUMNR)            ! Average Gas Price
+      REAL*8 TPGASWGT(MNUMNR)            ! Total Gas Btu's
+      REAL*8 TPDISPRC(MNUMNR)            ! Average Distillate Price
+      REAL*8 TPDISWGT(MNUMNR)            ! Total Distillate Btu's
+      REAL*8 TPRESPRC(MNUMNR)            ! Average Resid Price
+      REAL*8 TPRESWGT(MNUMNR)            ! Total Resid Btu's
+      REAL*8 TPCOLPRC(MNUMNR)            ! Marginal Coal Price
+      REAL*8 TPCOLPRA(MNUMNR)            ! Average Coal Price
+      REAL*8 TPCOLWGT(MNUMNR)            ! Total Coal Btu's
+      REAL*8 TPNUCPRC(MNUMNR)            ! Average Nuclear Price
+      REAL*8 TPNUCWGT(MNUMNR)            ! Total Nuclear Btu's
+      REAL*8 TPMXGAS_MR(ECP_D_DSP,MAXNFR)  ! Max Gas Shares - Must Run Only
+      REAL*8 TPMXOIL_MR(ECP_D_DSP,MAXNFR)  ! Max Oil Shares - Must Run Only
+      REAL*8 TPMXCOL_MR(ECP_D_DSP,MAXNFR)  ! Max Coal Shares - Must Run Only
+      REAL*8 TPMXWGT_MR(ECP_D_DSP,MAXNFR)  ! Capacity Weight for Determining Max Shares - Must Run Only
+!
+!     INPUTS FOR REGIONAL CARBON LIMITS
+!
+      COMMON /CARREG/ CARGRP_RG,CARGRP_MW,CARGRP_CA,CARGRP_OT,CARTGT,CAREFD,CARECP
+      INTEGER*4 CARGRP_RG                   ! Carbon Group Index For RGGI
+      INTEGER*4 CARGRP_MW                   ! Carbon Group Index For Midwest
+      INTEGER*4 CARGRP_CA                   ! Carbon Group Index For California
+      INTEGER*4 CARGRP_OT                   ! Carbon Group Index For Rest of States
+      REAL*4 CARTGT(CO2_D_GRP,MNUMYR)         ! Carbon Emissions Limits by Grp 
+      REAL*4 CAREFD(CO2_D_GRP,MNUMYR)         ! Carbon Emissions by Grp -- EFD
+      REAL*4 CARECP(CO2_D_GRP,MNUMYR)         ! Carbon Emissions by Grp -- EFD
+!
+!     MORE INPUTS FOR REGIONAL CARBON LIMITS
+!
+      COMMON /CO2BYREG/ CO2_CL_BY_FL,CO2_OG_BY_FL,CO2_IM_BY_RG,CO2_DF_BY_RG,CO2_DE_BY_RG,  &
+                        CO2_OS_BY_RG,KWH_IM_BY_RG,KWH_DM_BY_RG,  &
+                        CO2_IM_BY_CA,CO2_DF_BY_CA,CO2_DE_BY_CA,CO2_OS_BY_CA
+      REAL CO2_CL_BY_FL(MAXNFR,CO2_D_GRP)    ! FRAC OF COAL CO2 EMISSIONS BY FUEL/CO2 REGION
+      REAL CO2_OG_BY_FL(MAXNFR,CO2_D_GRP)    ! FRAC OF O/G CO2 EMISSIONS BY FUEL/CO2 REGION
+      REAL CO2_IM_BY_RG(MNUMNR,CO2_D_GRP)    ! CO2 EMISSION RATE FOR INTERNATIONAL IMPORTS BY EMM/CO2 REGION
+      REAL CO2_DF_BY_RG(MNUMNR,CO2_D_GRP)    ! CO2 EMISSION RATE FOR DOMESTIC FIRM IMPORTS BY IMPORT EMM/CO2 REGION
+      REAL CO2_DE_BY_RG(MNUMNR,CO2_D_GRP)    ! CO2 EMISSION RATE FOR DOMESTIC ECONOMY IMPORTS BY EXPORT EMM/CO2 REGION
+      REAL CO2_OS_BY_RG(MNUMNR,CO2_D_GRP)    ! CO2 EMISSION RATE FOR OUT/ST GEN BY EMM/CO2 REGION
+      REAL KWH_IM_BY_RG(MNUMNR,MNUMYR)     ! KWH INTERNATIONAL FIRM/ECON IMPORTS BY REGION AND YEAR
+      REAL KWH_DM_BY_RG(MNUMNR,MNUMYR)     ! KWH DOMESTIC FIRM IMPORTS BY REGION AND YEAR
+      REAL CO2_IM_BY_CA(MNUMYR)            ! CO2 EMISSION RATE FOR INTERNATIONAL IMPORTS TO CALIFORNIA BY YEAR
+      REAL CO2_DF_BY_CA(MNUMYR)            ! CO2 EMISSION RATE FOR DOMESTIC FIRM IMPORTS TO CALIFORNIA BY YEAR
+      REAL CO2_DE_BY_CA(MNUMYR)            ! CO2 EMISSION RATE FOR DOMESTIC ECONOMY IMPORTS TO CALIFORNIA BY YEAR
+      REAL CO2_OS_BY_CA(MNUMYR)            ! CO2 EMISSION RATE FOR OUT/ST GEN TO CALIFORNIA BY YEAR
+!
+!     INPUTS FOR CO2 INTENSITY STANDARD
+!
+      COMMON /CO2STDI/ CO2_GENHS,CO2_DEMHS,CO2_GENSN,CO2_GENQF,CO2_GENQN,CO2_GENTL,CO2_GENTN,CO2_STDRS,CO2_STDRF,CO2_STDRN,CO2_STDRE,  &
+                       CO2_STDQS,CO2_STDQF,CO2_STDQN,CO2_STDQE,EMAP_STFR,CO2_PLTRG,CO2_PLTSW,CO2_INCSW,CO2_EMSWD,CO2_ADJNT,CO2_PHS40,CO2_PHSNY,CO2_EMSET,CO2_THRET,  &
+                       CO2_QALLGEN,CO2_QALLLD,CO2_QALLAUC,    &
+                       CO2_STDTF,CO2_STDTN,CO2_STDSW,CO2_HRTSW,CO2_EFFSW,CO2_STDWT,CO2_STDBY,CO2_STDY1,CO2_STDYN,CO2_STDPH,CO2_STDQT,CO2_EORSW,  &
+                       CO2_PRCSW,CO2_ECPSW,CO2_TRDSW,CO2_ERCSW,CO2_ERCPR,CO2_ERCFR,CO2_ERCNR,CO2_STDGR,CO2_STDGF,CO2_STDGN,CO2_AFFYR,CO2_ENDCG,EST_FRG
+      REAL*4 CO2_GENHS(EMM_D_ST)                  ! Historical Generation by State -- for aggregation if needed
+      REAL*4 CO2_DEMHS(EMM_D_ST)                  ! Historical Demand by State -- for aggregation if needed
+      REAL*4 CO2_GENSN(EMM_D_ST+1,MNUMNR)         ! Historical Generation by State and EMM Region -- for aggregation if needed
+      REAL*4 CO2_GENQF(EMM_D_ST)                  ! EMM Aff Plt Generation by State -- for aggregation if needed
+      REAL*4 CO2_GENQN(MNUMNR,EMM_D_ST)           ! EMM Aff Plt Generation by EMM/State -- for aggregation if needed
+      REAL*4 CO2_GENTL(EMM_D_ST)                  ! EMM Tot Plt Generation by State -- for aggregation if needed
+      REAL*4 CO2_GENTN(MNUMNR,EMM_D_ST)           ! EMM Tot Plt Generation by EMM/State -- for aggregation if needed
+      REAL*4 CO2_STDRS(EMM_D_ST,MNUMYR+ECP_D_FPH)   ! CO2 Generation Intensity Rate Standard by State and Year
+      REAL*4 CO2_STDRF(EFD_D_MFRG,MNUMYR+ECP_D_FPH) ! CO2 Generation Intensity Rate Standard by Fuel Region and Year
+      REAL*4 CO2_STDRN(MNUMNR,MNUMYR+ECP_D_FPH)   ! CO2 Generation Intensity Rate Standard by EMM  Region and Year
+      REAL*4 CO2_STDRE(EPAREG,MNUMYR+ECP_D_FPH)   ! CO2 Generation Intensity Rate Standard by EPA  Region and Year
+      REAL*4 CO2_STDQS(EMM_D_ST,MNUMYR+ECP_D_FPH)   ! CO2 Generation Mass-Based Standard by State and Year
+      REAL*4 CO2_STDQF(EFD_D_MFRG,MNUMYR+ECP_D_FPH) ! CO2 Generation Mass-Based Standard by Fuel Region and Year
+      REAL*4 CO2_STDQN(MNUMNR,MNUMYR+ECP_D_FPH)   ! CO2 Generation Mass-Based Standard by EMM  Region and Year
+      REAL*4 CO2_STDQE(EPAREG,MNUMYR+ECP_D_FPH)   ! CO2 Generation Mass-Based Standard by EPA  Region and Year
+      REAL*4 EMAP_STFR(EFD_D_MFRG,EMM_D_ST+1)       ! Matrix Identifying States in Each Fuel Region
+      REAL*4 CO2_PLTRG(ECP_D_CAP,MNUMNR)          ! Fraction of plant generation by region (i.e., mass or rate) that is covered by Standards
+      REAL*4 CO2_PLTSW(ECP_D_CAP)                 ! Fraction of plant generation that is covered by Standards
+      REAL*4 CO2_INCSW(ECP_D_CAP)                 ! Fraction of incremental plant generation that is covered by Standards
+      REAL*4 CO2_EMSWD                          ! EPA Emission Rate for Biomass Cofiring
+      REAL*4 CO2_ADJNT                          ! EPA Emission Adjustment for NT Cogen
+      REAL*4 CO2_PHS40                          ! Additonal reduction, if any, between 2030 and 2040 (Fraction)
+      REAL*4 CO2_PHSNY                          ! Additonal reduction, if any, between 2030 and 2040 For NY (Fraction)
+      REAL*4 CO2_EMSET(MNUMNR)                  ! Existing CT generation to include in intensity standard (Bkwh)
+      REAL*4 CO2_THRET                          ! CF Threshold for Existing CT
+      REAL*4 CO2_QALLGEN(MNUMNR,MNUMYR)         ! Share of allowances allocated to generators by EMM region and year
+      REAL*4 CO2_QALLLD(MNUMNR,MNUMYR)          ! Share of allowances allocated to load entities by EMM region and year
+      REAL*4 CO2_QALLAUC(MNUMNR,MNUMYR)         ! Share of allowances auctioned off by EMM region and year (sum of shares must equal 1.0)
+      INTEGER CO2_STDTF(EFD_D_MFRG)               ! Switch to indicate 111d standard type (1=rate,2=mass) -- Fuel Region
+      INTEGER CO2_STDTN(MNUMNR)                 ! Switch to indicate 111d standard type (1=rate,2=mass) -- EMM  Region
+      INTEGER CO2_STDSW                         ! Switch to indicate aggregation of State Standards, if any
+      INTEGER CO2_HRTSW                         ! Switch to include HR improvements (0=No, 1 = Yes)
+      INTEGER CO2_EFFSW                         ! Switch to include Efficiency improvements (0=No, 1 = Yes)
+      INTEGER CO2_STDWT                         ! Switch to indicate weight for grouping State Standards, if any
+      INTEGER CO2_STDBY                         ! Base Year to use weights for grouping State Standards
+      INTEGER CO2_STDY1                         ! First Year of intensity standards
+      INTEGER CO2_STDYN                         ! Last Year of intensity standards inputs (i.e., constant thereafter)
+      INTEGER CO2_STDPH                         ! Switch to phase in intensity standards for 1st few years, if any
+      INTEGER CO2_STDQT                         ! Switch to indicate quantity limit type (0 = existing, 1 = existing/new)
+      INTEGER CO2_EORSW                         ! Switch to turn off CO2 for EOR (0 = no, 1 = yes)
+      INTEGER CO2_PRCSW                         ! Switch to indicate pricing methodology (0=no marg prc adj, 1=use EFD dual, 2=use ECP, 3=use difference (ECP-EFD) 
+      INTEGER CO2_ECPSW                         ! Switch to indicate which ECP dual to use (1 = year 2, 2 = levelized)
+      INTEGER CO2_TRDSW                         ! Switch to include interregional trade in intensity standard (0 = No, 1 = Yes)
+      INTEGER CO2_ERCSW                         ! Switch to include ERC trade in standard (0 = No, 1 = Rate-based, 2 = Mass-based)
+      INTEGER CO2_ERCPR                         ! Switch for CPP ERC pricing (0=None, 1=EFD, 2=ECP 1yr, 3=ECP lev)
+      INTEGER CO2_ERCFR(EFD_D_MFRG)               ! Switch to include ERC trade partners in standard (0 = No, > 0 = Yes) - EMM Regions
+      INTEGER CO2_ERCNR(MNUMNR)                 ! Switch to include ERC trade partners in standard (0 = No, > 0 = Yes) - EMM Regions
+      INTEGER CO2_STDGR(EMM_D_ST)                 ! CO2 group of States, if any (if not fuel regions)
+      INTEGER CO2_STDGF(EFD_D_MFRG,EFD_D_MFRG)      ! CO2 group of Fuel Regions, if any
+      INTEGER CO2_STDGN(MNUMNR,MNUMNR)          ! CO2 group of EMM  Regions, if any
+      INTEGER CO2_AFFYR                         ! CO2 affected year (i.e., >) for final rule
+      INTEGER CO2_ENDCG                         ! Switch to include incremental end-use rnw cogen (hydro, geo, solar, wind) for compliance
+      INTEGER EST_FRG(EMM_D_ST)                   ! Fuel Region Corresponding to State
+!
+!     OUTPUTS USED IN CO2 INTENSITY STANDARD
+!
+      COMMON /CO2STDO/ EGEN_NRST,EGEN_NRFR,EGEN_FRST,  &
+                       PCARCLS,PCAROGS,PCARCLF,PCAROGF,ECARCLS,ECAROGS,ECARCLF,ECAROGF
+      REAL*4 EGEN_NRST(ECP_D_CAP+2,MNUMNR,EMM_D_ST+1)      ! Generation by EMM Region/State -- Current
+      REAL*4 EGEN_NRFR(ECP_D_CAP+2,MNUMNR,EFD_D_MFRG+1)    ! Generation by EMM Region/Fuel Region -- Current
+      REAL*4 EGEN_FRST(ECP_D_CAP+2,EFD_D_MFRG+1,EMM_D_ST+1)  ! Generation by EMM Region/State -- Current
+      REAL*4 PCARCLS(EMM_D_ST+1,MNUMYR)                  ! Carbon Emissions from Coal by State -- ECP
+      REAL*4 PCAROGS(EMM_D_ST+1,MNUMYR)                  ! Carbon Emissions from Oil/Gas by State  -- ECP
+      REAL*4 PCARCLF(EFD_D_MFRG+1,MNUMYR)                ! Carbon Emissions from Coal by Fuel Region -- ECP
+      REAL*4 PCAROGF(EFD_D_MFRG+1,MNUMYR)                ! Carbon Emissions from Oil/Gas by Fuel Region -- ECP
+      REAL*4 ECARCLS(EMM_D_ST+1,MNUMYR)                  ! Carbon Emissions from Coal by State -- EFD
+      REAL*4 ECAROGS(EMM_D_ST+1,MNUMYR)                  ! Carbon Emissions from Oil/Gas by State  -- EFD
+      REAL*4 ECARCLF(EFD_D_MFRG+1,MNUMYR)                ! Carbon Emissions from Coal by Fuel Region -- EFD
+      REAL*4 ECAROGF(EFD_D_MFRG+1,MNUMYR)                ! Carbon Emissions from Oil/Gas by Fuel Region -- EFD
+
+      COMMON /SETASIDE/ CO2_STDSA,CO2_PLTSA,CO2_STPSA,CO2_PCTSA,CPPALLOW
+      INTEGER CO2_STDSA
+      INTEGER*4 CO2_PLTSA(ECP_D_CAP)
+      REAL*4 CO2_STPSA(ECP_D_CAP,ECP_D_DGS)
+      REAL*4 CO2_PCTSA
+      REAL*4 CPPALLOW(MNUMYR)
+!
+!
+!     INPUTS USED IN STEO BENCHMARKING
+!
+      COMMON /BENCH/ BMCLGEN,BMNGGEN,BMOLGEN,BMNCGEN,BMHYGEN,BMSOGEN,BMPVGEN,BMPTGEN,BMWNGEN,BMWLGEN,BMGTGEN,BMCLCON,BMNGCON,BMOLCON,BMNETIMP,BMELPRC, &
+                     BMCLTOL,BMNGTOL,BMOLTOL,BMIMPTOL,URHYCFA,URNCCFA,URSOCFA,URPVCFA,URWNCFA,URPTCFA,URWLCFA,URGTCFA,URNGCRV,BMPHSCRV, &
+                     BMPHSNC,BMPHSHY,BMPHSSO,BMPHSWN,BMPHSGT
+      REAL*4 BMCLGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH CL GEN
+      REAL*4 BMNGGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH NG GEN
+      REAL*4 BMOLGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH OL GEN
+      REAL*4 BMNCGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH NUC GEN
+      REAL*4 BMHYGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH HYD GEN
+      REAL*4 BMSOGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH SOL TH GEN
+      REAL*4 BMPVGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH SOL PV GEN
+      REAL*4 BMPTGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH SOL PT GEN
+      REAL*4 BMWNGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH WND GEN
+      REAL*4 BMWLGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH WND GEN - SLOW SPEED
+      REAL*4 BMGTGEN(MNUMYR)                           ! STEO BENCHMARKING SWITCH GEO GEN
+      REAL*4 BMCLCON(MNUMYR)                           ! STEO BENCHMARKING SWITCH CL CON
+      REAL*4 BMNGCON(MNUMYR)                           ! STEO BENCHMARKING SWITCH NG CON
+      REAL*4 BMOLCON(MNUMYR)                           ! STEO BENCHMARKING SWITCH OL CON
+      REAL*4 BMNETIMP(MNUMYR)                          ! STEO BENCHMARKING SWITCH NET IMPORTS
+      REAL*4 BMELPRC(MNUMYR)                           ! STEO BENCHMARKING SWITCH ELEC PRICE
+      REAL*4 BMCLTOL                                   ! STEO BENCHMARKING TOLERANCE -- CL     
+      REAL*4 BMNGTOL                                   ! STEO BENCHMARKING TOLERANCE -- NG     
+      REAL*4 BMOLTOL                                   ! STEO BENCHMARKING TOLERANCE -- OL     
+      REAL*4 BMIMPTOL                                   ! STEO BENCHMARKING TOLERANCE -- OL     
+      REAL*4 URHYCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR HYDRO CAPACITY FACTORS - STEO
+      REAL*4 URNCCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR NUCLEAR CAPACITY FACTORS - STEO
+      REAL*4 URSOCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR SOLAR TH CAPACITY FACTORS - STEO
+      REAL*4 URPVCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR SOLAR PV CAPACITY FACTORS - STEO
+      REAL*4 URPTCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR SOLAR PV CAPACITY FACTORS - STEO - FIXED AXIS
+      REAL*4 URWNCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR WIND CAPACITY FACTORS - STEO
+      REAL*4 URWLCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR WIND CAPACITY FACTORS - STEO - LOW SPEED
+      REAL*4 URGTCFA(MNUMYR)            ! ADJUSTMENT FACTOR FOR GEOTH CAPACITY FACTORS - STEO
+      REAL*4 URNGCRV(MNUMYR)            ! ADJUSTMENT FACTOR FOR WELLHEAD SUPPLY CURVE - STEO
+      INTEGER BMPHSCRV                                 ! NUMBER OF YEARS TO PHASE OUT WELLHEAD ADJ FACTOR FOR BENCHMARKING (99=DON'T PHASE OUT)
+      INTEGER BMPHSNC                                  ! NUMBER OF YEARS TO PHASE OUT CAPACITY FACTOR ADJ FOR BENCHMARKING NUCLEAR
+      INTEGER BMPHSHY                                  ! NUMBER OF YEARS TO PHASE OUT CAPACITY FACTOR ADJ FOR BENCHMARKING HYDRO
+      INTEGER BMPHSSO                                  ! NUMBER OF YEARS TO PHASE OUT CAPACITY FACTOR ADJ FOR BENCHMARKING SOLAR (all combined)
+      INTEGER BMPHSWN                                  ! NUMBER OF YEARS TO PHASE OUT CAPACITY FACTOR ADJ FOR BENCHMARKING WIND
+      INTEGER BMPHSGT                                  ! NUMBER OF YEARS TO PHASE OUT CAPACITY FACTOR ADJ FOR BENCHMARKING GEOTHERMAL
+!
+!     INPUTS USED IN HAWAII OUTPUTS
+!
+      COMMON /FIVEO/ HIRPSSW,HIRPSRT
+      INTEGER HIRPSSW                                  ! RPS SWITCH FOR HAWAII (0=NO,1=YES)
+      REAL*4 HIRPSRT(MNUMYR)                           ! RPS RATES (FRACTION) FOR HAWAII
+!
+      COMMON/GRIDRES/GRD_RATSA,GRD_RATS,GRD_TGTS,GRD_NRYR,USW_GRD,GRD_TYP,GRD_SRCI
+      REAL*4  GRD_RATSA(ECP_D_CAP,MNUMNR,MX_GRDSRC)      ! GRID RESILIENCE RATINGS FOR ALL SOURCES
+      REAL*4  GRD_RATS(ECP_D_CAP,MNUMNR)                 ! GRID RESILIENCE RATINGS FOR SELECTED SOURCE
+      REAL*4  GRD_TGTS(MNUMYR,MNUMNR)                  ! GRID RESILIENCE TARGETS FOR SELECTED SOURCE
+      REAL*8  GRD_NRYR(MNUMNR,ECP_D_XPH)                 ! GRID RESILIENCE TARGET BY REGION AND ECP PLANNING YEAR
+      INTEGER USW_GRD                                  ! SWITCH TO TURN ON GRID RESILIENCY TARGETS
+      INTEGER GRD_TYP                                  ! TYPE OF GRID RESILIENCY TARGETS (1=generation, 2=capacity)
+      INTEGER GRD_SRCI                                 ! Index of grid resilience source used
+!
+      COMMON /DPV/ DPVDISPATCH, DPVTOTCAPNR, DPVTOTGENNR, DPVCOMMGEN, DPVRESGEN 
+      LOGICAL DPVDISPATCH               !FLAG for Distributed Solar PV Adjustment
+      REAL DPVTOTCAPNR(MNUMNR,MNUMYR)
+      REAL DPVTOTGENNR(MNUMNR,MNUMYR)
+      REAL DPVCOMMGEN(MNUMCR,MNUMYR)
+      REAL DPVRESGEN(MNUMCR,MNUMYR)

@@ -1,0 +1,1094 @@
+! $Header: m:/default/input/RCS/ngassumptions.txt,v 1.30 2020/10/19 17:49:52 KDL Exp $
+
+!___________________________________________________________________________________________
+!
+!                               NGMM Assumptions
+!
+!___________________________________________________________________________________________
+
+!       1.  Main Model Assumptions/Parameters
+!       2.  STEO Parameters
+!       3.  Supply Assumptions & Curve Parameters (inc. LNG exports)
+!       4.  Weather, Loss, and NGPL Factors
+!       5.  IEO Data Assumptions
+!       6.  AK Assumptions
+!       7.  Mexico Assumptions (Production)
+!
+!___________________________________________________________________________________________
+!
+!	Identifiers/inputs in ngassumptions.txt:
+!	
+!	LastDataYear
+!	LastNGAYear					WeatherFactor1	      	     
+!	SaveEachIteration_Switch			WeatherFactor2    	     
+!	SaveEachCycle_Switch 				StorageLossFactor  
+!	Calibration_Option				DistributionLossFactor
+!	OilSands_Switch	
+!	NoBuildYear					PercentOfProductionMovedForPlantFuel
+!	NumberOfYearsForAverage_Demand_		     	  	   
+!	NumberOfYearsForAverage_Storage_ 		IEO_LastHistoricalYear
+!	NumberOfYearsForAverage_LeaseFuel_ 		IEO_CN_Consumption
+!	NumberOfYearsForAverage_PlantFuel_ 		IEO_MX_Consumption
+!	NumberOfYearsForAverage_GOMprod_		IEO_MX_Production
+!	NumberOfYearsForAverage_Discrepancy_		IEO_LNGExport
+!	NumberOfYearsForAverage_Discrepancy_CN_		IEO_CN_Bitumun		                  
+!	NumberOfYearsForAverage_SNG_ 			 					
+!	NumberOfYearsForAverage_LNG_ 			AK_ANGTS_Min_WHPrice 
+!	NumberOfYearsForAverage_Trans_ 			Pct_Liquifaction_Fuel
+!	NumberOfYearsForLookAhead_LNG_ 	    		Population
+!	Error_PriceCheck				AK_Cons_Industrial	
+!	FlowsZeroOut	
+!	QP_SlackVar_Value
+!	HQP_SlackVar_Value 
+!	CE_SlackVar_Value  				x_AK_Cons_Commercial1
+!							x_AK_Cons_Commercial2
+!	NumberOfSTEOYears				x_AK_Cons_Commercial3
+!	NumberOfSTEOPhaseOutYears			x_AK_Cons_Residential1
+!	MaxSteoIter					x_AK_Cons_Residential2
+!	STEOScaleNG					x_AK_Cons_Residential3 		    		
+!	STEONGIND					AK_PLT_Percent
+!	STEOCNExportPercent				AK_LSE_Percent					     
+!	STEOCNImportPercent
+!	STEOMXExportsPhaseOutFlag 			AK_PIP_Percent 				     
+!	STEOPipelineImportPhaseOutFlag
+!							x_AK_N_LAP1         
+!	OilSandsProduction_Fixed			x_AK_N_LAP2
+!	Parameter_SupCrv				x_AK_N_LAP3
+!	Parameter_SupElasticity				x_AK_Citygate1
+!	Parameter_PrcElasticity   			x_AK_Citygate2
+!	Param_SupCrv  					PriceMarkup
+!	Param_SupElas   				
+!	map_SupCrvOption				x_MX_AD_Prod1	 
+!	Parameter_LNGExpQty     			x_MX_AD_WOP2 	 
+!	Parameter_LNGExpPrc   				x_MX_AD_C 		
+!	GatheringCharge   				MX_FirstShaleYear	   
+!	GatherCharge_Add   				x_MX_NA_HH1_1					   
+!	PriceSpot_Add  					x_MX_NA_Prod1_1 			   
+!							x_MX_NA_HH1_2 					   
+!							x_MX_NA_Prod1_2
+!							QP_SlackVar_Value 			   
+!										   
+!___________________________________________________________________________________________	     
+!												     
+												     
+!___________________________________________________________________________________________	     
+!
+!                               1.  Main Model Assumptions/Parameters
+!___________________________________________________________________________________________
+
+!Last data year for any data and last year of full data (aka NGA year)
+LastDataYear:='2022'; 
+!LastNGAYear:= '2020';
+
+!Swtiches
+SaveEachIteration_Switch := 0;  !0=Do not save case file after every iteration, 1= Do (for debugging)
+SaveEachCycle_Switch := 1;  !0=Do not save case file for every cycle, 1= Do (for debugging)
+OilSands_Switch :=0; !0=Do no calculate additional natural gas consumed in oil sands production in CN_W, 1=Calculate
+
+!Option to use calibration factors: 1-all factors; 2-pipeline fuel factors only; 0-none;
+Calibration_Option:=2;
+
+!Year after which capacity builds are allowed
+NoBuildYear := '2024';
+
+!Number of years used to calculate averages/historical shares
+NumberOfYearsForAverage_Demand_ := data {1..5};
+NumberOfYearsForAverage_Storage_ := data {1..5};
+NumberOfYearsForAverage_LeaseFuel_ := data {1..5};
+NumberOfYearsForAverage_PlantFuel_ := data {1};
+!The GoM production shares are averaged over the same number of years as the balancing item to be 
+!consistent in the forecast, but it might need to be re-considered in the future
+NumberOfYearsForAverage_GOMprod_ := data {1..7};  
+NumberOfYearsForAverage_Discrepancy_ := data {1..10};
+NumberOfYearsForAverage_Discrepancy_CN_ := data {1..7};
+NumberOfYearsForAverage_SNG_ := data {1..5};
+NumberOfYearsForAverage_LNG_ := data {1..5};
+NumberOfYearsForAverage_Trans_ := data {1..2};
+NumberOfYearsForLookAhead_LNG_ := data{1..20};
+
+!Assumptions for error checking prices
+Error_PriceCheck := 10;
+
+!Flows to zero out
+composite table:
+h    h1    FlowsZeroOut
+MA   CT    1
+DE   MD    1
+VA   TN    1
+SD   WY    1
+ID   SD    1
+;
+
+! SlackVar values (goes into main objective function)
+QP_SlackVar_Value := 1000000000;
+HQP_SlackVar_Value := 1000000000;
+CE_SlackVar_Value := 1000000000000;
+
+!___________________________________________________________________________________________
+!
+!                               2.  STEO Parameters
+!___________________________________________________________________________________________
+
+
+NumberOfSTEOYears := 3;
+NumberOfSTEOPhaseOutYears := 5;
+MaxSteoIter:= '20';
+!Option to read and set the STEO scaling factors exogenously: 0 - calculate; 1 - read;
+STEOScaleNG := 0;
+!Steo benchmarking switch to overwrite industrial price 1=on, 0=off
+STEONGIND :=0;
+!Percentage of total pipeline exports attributed to Canada for STEO
+STEOCNExportPercent:=	DATA{	2016    :0.3589,
+				2017	:0.3728,
+                                2018    :0.331,		!0.2914 from AEO2019
+                                2019	:0.342,
+                                2020	:0.311,	
+                                2021	:0.3031,
+                                2022	:0.3031,
+                                2023	:0.3031,
+                                2024	:0.3031,
+                                2025	:0.3031	};
+                                
+                                
+!Percentage of total pipeline imports attributed to Canada for STEO
+!NGMM does not currently benchmark to Mexico imports; until code change, this factor must remain 1
+STEOCNImportPercent:= DATA{	2016    :1,
+				2017	:1,
+                                2018    :1,
+                                2019	:1,
+                                2020	:1,
+                                2021	:1,
+                                2022	:1,	
+                                2023	:1,
+                                2024	:1,
+                                2025	:1};
+
+! Flags to indicate whether to phaseout STEO benchmarking factors for certain variables
+STEOMXExportsPhaseOutFlag := 0;
+STEOPipelineImportPhaseOutFlag := 1;
+
+
+!___________________________________________________________________________________________
+!
+!               3.  Supply Assumptions & Curve Parameters (inc. LNG exports)
+!___________________________________________________________________________________________
+
+!Canada assumed supply from bitument production
+!Comes from AER Alberta Energy outlook, which shows relatively flat gas produced from oil
+!	sands between 1-1.1 Bcf/d
+
+OilSandsProduction_Fixed := 400;
+
+!Parameters and Elastisities to define curves
+Parameter_SupCrv := data table
+               1       2      3   
+(NA, step1)  -0.03   -0.09  -0.80
+(NA, step2)  -0.03   -0.09   0.00
+(NA, step3)  -0.03    0.00   0.00
+(NA, step4)   0.03    0.00   0.00
+(NA, step5)   0.03    0.09   0.00
+(NA, step6)   0.03    0.09   3.00;
+
+Parameter_SupElasticity := data table
+              1       2      3   
+(NA, step1)   0.5    0.7   0.8
+(NA, step2)   0.5    0.7   1.0
+(NA, step3)   0.5    1.0   1.0
+(NA, step4)   0.5    1.0   1.0
+(NA, step5)   0.5    0.3   1.0
+(NA, step6)   0.5    0.3   0.2;
+
+Parameter_PrcElasticity := data table
+               1       2      3   
+(NA, step1)  -0.03   -0.09  -0.80
+(NA, step2)  -0.03   -0.09   0.00
+(NA, step3)  -0.03    0.00   0.00
+(NA, step4)   0.03    0.00   0.00
+(NA, step5)   0.03    0.09   0.00
+(NA, step6)   0.03    0.09   3.00;
+
+Composite table:
+suptype  step   n  Parameter_SupCrv  Parameter_PrcElasticity
+AD       step1  1      -1                 -1
+AD       step2  1      -1                 -1
+AD       step3  1      -1                 -1
+AD       step4  1      -1                 -1
+AD       step5  1      -1                 -1
+AD       step6  1       0                 -1;
+
+Parameter_SupElasticity := data table
+              1    2    3   
+(AD, step1)   1    1    1
+(AD, step2)   1    1    1
+(AD, step3)   1    1    1
+(AD, step4)   1    1    1
+(AD, step5)   1    1    1
+(AD, step6)   1    1    1;
+
+
+Param_SupCrv := data table
+!                 MaxQ
+       1     2     3    
+!opt    option 1 is reserved for fixed supply
+  2  0.03  0.09    3
+  3  0.06  0.18    3
+  4  0.01  0.03    3
+;
+
+Param_SupElas := data table
+      1    2    3    4    5
+!opt   option 1 is reserved for fixed supply
+  2  0.8  0.7  0.5  0.3  0.2
+  3  1.25 1.0  1.0  0.8  0.5
+  4  0.7  0.5  0.1  0.05 0.05
+;
+
+! Select supply curve option for each supply region and supply type
+map_SupCrvOption := data table
+              NA      AD      LNG   SNG_coal  SNG_liq SNG_other  
+AL                             1       1        1         1        
+AZ             2       1               1        1         1
+AR             4       1               1        1         1
+CA             2       1       1       1        1         1
+CO             2       1               1        1         1
+CT             2       1       1       1        1         1
+DE             2       1       1       1        1         1
+DC             2       1               1        1         1
+FL             2       1       1       1        1         1
+GA             2       1       1       1        1         1
+ID             2       1               1        1         1
+IL             2       1               1        1         1
+IN             2       1               1        1         1
+IA             2       1               1        1         1
+KS             2       1               1        1         1
+KY             2       1               1        1         1
+LA                             1       1        1         1
+ME             2       1       1       1        1         1
+MD             2       1       1       1        1         1
+MA             2       1       1       1        1         1
+MI             2       1               1        1         1
+MN             2       1               1        1         1
+MS                             1       1        1         1
+MO             2       1               1        1         1
+MT             2       1               1        1         1
+NE             2       1               1        1         1
+NV             2       1               1        1         1
+NH             2       1       1       1        1         1
+NJ             2       1       1       1        1         1
+NM                                     1        1         1
+NY             2       1       1       1        1         1
+NC             2       1       1       1        1         1
+ND             2       1               1        1         1
+OH             3       1               1        1         1
+OK             2       1               1        1         1
+OR             2       1       1       1        1         1
+PA             3       1       1       1        1         1
+RI             2       1       1       1        1         1
+SC             2       1       1       1        1         1
+SD             2       1               1        1         1
+TN             2       1               1        1         1
+TX                             1       1        1         1
+UT             2       1               1        1         1
+VT             2       1               1        1         1
+VA             2       1       1       1        1         1
+WA             2       1       1       1        1         1
+WV             3       1               1        1         1
+WI             2       1               1        1         1
+WY             2       1               1        1         1
+CN_E           2       1       1                          	          
+CN_W           2       1       1                          	          
+MX_NE          2       1       1                                          
+MX_NW          2       1       1                                          
+MX_IW          2       1       1                                          
+MX_CE          2       1       1                                          
+MX_SS          2       1       1                                          
+TX_1           2       1
+TX_2           2       1
+TX_3           2       1
+TX_4           2       1
+TX_5           2       1
+TX_6           2       1
+TX_7B          2       1
+TX_7C          2       1
+TX_8           3       1
+TX_8A          2       1
+TX_9           2       1
+TX_10          2       1
+NM_E           3       1
+NM_W           2       1
+LA_N           2       1
+LA_S           2       1
+AL_N           2       1
+AL_S           2       1
+MS_N           2       1
+MS_S           2       1
+MA_ST          2       1
+VA_ST          2       1
+GA_ST          2       1
+AL_ST          2       1
+LA_ST          2       1
+TX_ST          2       1
+CA_ST          2       1
+OR_ST          2       1
+MA_FD          2       1
+VA_FD          2       1
+GA_FD          2       1
+AL_FD          2       1
+LA_FD          2       1
+MS_FD          2       1
+TX_FD          2       1
+CA_FD          2       1
+OR_FD          2       1
+;
+
+Composite table:
+step      Parameter_LNGExpQty  Parameter_LNGExpPrc 
+step1               0                     1   
+step2               1                     1  
+step3               1                     1 
+;
+
+
+Composite table:
+reg    GatheringCharge  GatherCharge_Add   PriceSpot_Add
+AL       0.15
+AZ       0.15
+AR       0.15              
+CA       0.15
+CO       0.15
+CT       0.15
+DE       0.15
+DC       0.15
+FL       0.15
+GA       0.15
+ID       0.15
+IL       0.15
+IN       0.15
+IA       0.15
+KS       0.15
+KY       0.15
+LA       0.15
+ME       0.15
+MD       0.15
+MA       0.15
+MI       0.15
+MN       0.15
+MS       0.15
+MO       0.15
+MT       0.15
+NE       0.15
+NV       0.15
+NH       0.15
+NJ       0.15
+NM       0.15
+NY       0.15
+NC       0.15
+ND       0.15
+OH       0.15
+OK       0.15
+OR       0.15
+PA       0.15
+RI       0.15
+SC       0.15
+SD       0.15
+TN       0.15
+TX       0.15
+UT       0.15
+VT       0.15
+VA       0.15
+WA       0.15
+WV       0.15
+WI       0.15
+WY       0.15
+CN_E     0.15
+CN_W     0.15
+MX_NE    0.15
+MX_NW    0.15
+MX_IW    0.15
+MX_CE    0.15
+MX_SS    0.15
+TX_1     0.15
+TX_2     0.15
+TX_3     0.15
+TX_4     0.15
+TX_5     0.15
+TX_6     0.15
+TX_7B    0.15
+TX_7C    0.15
+TX_8     0.15
+TX_8A    0.15
+TX_9     0.15
+TX_10    0.15
+NM_E     0.15
+NM_W     0.15
+LA_N     0.15
+LA_S     0.15
+AL_N     0.15
+AL_S     0.15
+MS_N     0.15
+MS_S     0.15
+MA_ST    0.15
+VA_ST    0.15
+GA_ST    0.15
+AL_ST    0.15
+LA_ST    0.15
+TX_ST    0.15
+CA_ST    0.15
+OR_ST    0.15
+MA_FD    0.15
+VA_FD    0.15
+GA_FD    0.15
+AL_FD    0.15
+LA_FD    0.15
+MS_FD    0.15
+TX_FD    0.15
+CA_FD    0.15
+OR_FD    0.15
+;
+!___________________________________________________________________________________________
+!
+!               4.  Weather, Loss, and NGPL Factors
+!___________________________________________________________________________________________
+
+
+!Weather state/sector specific and sector specific factors to calculate the projected month consumption levels for January-1 and August-8.
+!
+WeatherFactor1 := data table
+                      AL      AK      AZ      AR      CA      CO      CT      DE      DC      FL      GA      HI      ID      IL      IN      IA      KS      KY      LA      ME      MD      MA      MI      MN      MS      MO      MT      NE      NV      NH      NJ      NM      NY      NC      ND      OH      OK      OR      PA      RI      SC      SD      TN      TX      UT      VT      VA      WA      WV      WI      WY
+(1, Residential)    1.501   1.248   1.214   1.333   1.176   1.288   1.175    1.25   1.261   1.372   1.287   1.141   1.172   1.223   1.191   1.203   1.233   1.272   1.415   1.451   1.294   1.223   1.175   1.168   1.493   1.241    1.19   1.251   1.183   1.169   1.258   1.313   1.184   1.252   1.172   1.217   1.251   1.142    1.21   1.143   1.432   1.251   1.453    1.31   1.263   1.167   1.261   1.189   1.197   1.169   1.153
+(1, Commercial)     1.372   1.377   1.123    1.29   1.277   1.244   1.198   1.242    1.13   1.153   1.265    1.18    1.22   1.257   1.197   1.192   1.232   1.265   1.358   1.551   1.192   1.453   1.173   1.147    1.38   1.215   1.326   1.259   1.134    1.34    1.26   1.179   1.369   1.236   1.221   1.268   1.236   1.148   1.177   1.294   1.249   1.225    1.37   1.297   1.169   1.462   1.156   1.202   1.237   1.185   1.153
+(1, Industrial)         1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1
+(1, Electric)           1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1
+(1, Transportation)     1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1
+(8, Residential)    1.084   1.272   1.131   1.253   1.182    1.23   1.144   1.161   1.228   1.077   1.197   1.172   1.151   1.112   1.128   1.104   1.118   1.127   1.163   1.275    1.17   1.408   1.141   1.299   1.116    1.12   1.225   1.255   1.124   1.201   1.108   1.184   1.125   1.122   1.413   1.159   1.114   1.146   1.146   1.136   1.115   1.188   1.097    1.18   1.173   1.123   1.224   1.321   1.203   1.121   1.188
+(8, Commercial)     2.149   1.373   1.096   1.362   1.453    1.27   1.491   1.612   1.209   1.183   1.289   1.144   1.179   1.252   1.223   1.234    1.17   1.147    1.15   1.984   1.428   1.949   1.195   1.358   1.292   1.473   1.261    1.17   1.255   1.299   2.055   1.396   1.776   1.247   1.184   1.137   1.293   1.119   1.162   1.367   1.069   1.209   1.141   1.305   1.263   2.153   1.152   1.355   1.245    1.39   1.535
+(8, Industrial)         1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1
+(8, Electric)           1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1
+(8, Transportation)     1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1       1
+;
+WeatherFactor2 := data table
+        Residential Commercial  Industrial  Electric    Transportation
+1       1           1           1.1         1.1         1
+8       1           1           1.1         1.1         1
+;
+
+! Fractions of gas used- used to calculate pipeline fuel loss factors
+COMPOSITE TABLE:
+reg   StorageLossFactor       DistributionLossFactor  
+AK    0.0036                  0.0092                  
+AL    0.0036                  0.0298                  
+AR    0.0036                  0.0293                  
+AZ    0.0036                  0.0062                  
+CA    0.0036                  0.0346                  
+CO    0.0036                  0.0053                  
+CT    0.0036                  0.0144                  
+DC    0.0036                  0.0411                  
+DE    0.0036                  0.0445                  
+FL    0.0036                  0.0059                  
+GA    0.0036                  0.0033                  
+HI                                                    
+IA    0.0036                  0.0093                  
+ID    0.0036                  0.0116                  
+IL    0.0036                  0.0253                  
+IN    0.0036                  0.0103                  
+KS    0.0036                  0.0149                  
+KY    0.0036                  0.0464                  
+LA    0.0036                  0.0171                  
+MA    0.0036                  0.0256                  
+MD    0.0036                  0.0166                  
+ME    0.0036                  0.0202                  
+MI    0.0036                  0.0132                  
+MN    0.0036                  0.0030                  
+MO    0.0036                  0.0054                  
+MS    0.0036                  0.0154                  
+MT    0.0036                  0.0133                  
+NC    0.0036                  0.0143                  
+ND    0.0036                  0.0039                  
+NE    0.0036                  0.0242                  
+NH    0.0036                  0.0037                  
+NJ    0.0036                  0.0082                  
+NM    0.0036                  0.0110                  
+NV    0.0036                  0.0096                  
+NY    0.0036                  0.0183                  
+OH    0.0036                  0.0135                  
+OK    0.0036                  0.0339                  
+OR    0.0036                  0.0065                  
+PA    0.0036                  0.0171                  
+RI    0.0036                  0.0617                  
+SC    0.0036                  0.0059                  
+SD    0.0036                  0.0076                  
+TN    0.0036                  0.0098                  
+TX    0.0036                  0.0285                  
+UT    0.0036                  0.0274                  
+VA    0.0036                  0.0230                  
+VT    0.0036                  0.0144                  
+WA    0.0036                  0.0130                  
+WI    0.0036                  0.0102                  
+WV    0.0036                  0.0341                  
+WY    0.0036                  0.0211                  
+;
+
+
+! % of NGPLs originating from region <reg> processed in region <reg1>
+
+!7/18/2022	SYK	Adjusted to add TX sub-regions.
+
+COMPOSITE TABLE:
+reg       reg1      PercentOfProductionMovedForPlantFuel
+AL        AL        1.00
+AL_ST     AL        1.00
+AL_FD     AL        1.00
+AK        AK        1.00
+AK_ST     AK        1.00
+AK_FD     AK        1.00
+AR        AR        1.00
+CA        CA        1.00
+CA_ST     CA        1.00
+CA_FD     CA        1.00
+CO        CO        0.999448
+CO        KS        0.000153
+CO        UT        0.000399
+FL        FL        1.00
+GA_ST     GA        1.00
+GA_FD     GA        1.00
+IL        IL        1.00
+KS        KS        0.998850
+KS        OK        0.000424
+KS        TX_W      0.000726
+KY        KY        0.7736
+KY        WV        0.2264
+LA_ST     LA        1.00
+LA_FD     LA        1.00
+LA        LA        0.99046
+LA        TX_E      0.00954
+MI        MI        1.00
+MS        MS        1.00
+MT        MT        0.8024
+MT        ND        0.1814
+MT        WY        0.0162
+NM        NM        0.9915
+NM        TX_W      0.0085
+ND        IL        0.0412
+ND        ND        0.9588
+OH        OH        1.00
+OK        KS        0.003856
+OK        OK        0.981815
+OK        TX_W      0.014329
+PA        OH        0.00865
+PA        PA        0.63288
+PA        WV        0.35847
+SD        ND        1.00
+TN        TN        1.00
+TX_W      KS        0.00912
+TX_W      OK        0.01081
+TX_W      TX_W      0.98007
+TX_E      TX_E      0.98007
+TX_N      TX_N      0.98007
+TX_ST     TX_E      1.00
+TX_FD     TX_E      1.00
+UT        UT        0.974855
+UT        WY        0.025145
+VA_ST     VA        1.00
+VA_FD     VA        1.00
+WV        WV        1.00
+WY        CO        0.208856
+WY        WY        0.791144
+;
+
+
+!___________________________________________________________________________________________
+!
+!                               5.  IEO Data
+!___________________________________________________________________________________________
+
+
+!IEO 2017 WEPS outputs with corrections for Mexico/Chile, Mexico production and demand
+!In units of quad; need to convert to Bcf in code
+!Started 9/14/17 KDL
+!9/19		KDL	Replaced with NEB projections for demand instead of IEO projections
+
+!Last Historical Year for IEO
+IEO_LastHistoricalYear := '2019';
+
+!BTU to cubic feet conversion factor 
+btu_to_cuft_factor := 0.00096432;
+
+! Switch to determine whether or not to use IEO industrial projections (IEO_MX_Consumption) for Mexico
+! 1 = use IEO projections for Mexico industrial consumption.
+mx_ieo_industrial_switch := 1;
+
+!8/13		SYK	CER data for Canada
+
+IEO_CN_Consumption := data table                                        
+        Residential     Commercial      Industrial      Transportation  Electric
+2010	0.568		0.568		2.003		0.002		0.492
+2011	0.590		0.590		2.188		0.002		0.558
+2012	0.556		0.556		2.342		0.002		0.585
+2013	0.601		0.601		2.454		0.001		0.552
+2014	0.660		0.660		2.497		0.004		0.493
+2015	0.639		0.639		2.531		0.004		0.609
+2016	0.630		0.630		2.459		0.004		0.602
+2017	0.648		0.648		2.565		0.004		0.548
+2018	0.690		0.690		2.759		0.004		0.585
+2019	0.722		0.722		2.774		0.006		0.669
+2020	0.595		0.595		2.700		0.006		0.697
+2021	0.668		0.668		2.840		0.008		0.839
+2022	0.664		0.664		2.863		0.012		0.932
+2023	0.662		0.662		2.884		0.013		0.966
+2024	0.661		0.661		2.884		0.014		0.970
+2025	0.660		0.660		2.890		0.016		1.058
+2026	0.661		0.661		2.924		0.017		1.008
+2027	0.662		0.662		2.944		0.019		1.033
+2028	0.660		0.660		2.945		0.022		1.090
+2029	0.659		0.659		2.936		0.024		1.166
+2030	0.661		0.661		2.952		0.026		1.123
+2031	0.667		0.667		2.998		0.028		1.198
+2032	0.672		0.672		3.015		0.034		1.171
+2033	0.677		0.677		3.021		0.036		1.188
+2034	0.680		0.680		3.035		0.038		1.159
+2035	0.684		0.684		3.058		0.040		1.180
+2036	0.688		0.688		3.060		0.047		1.191
+2037	0.691		0.691		3.065		0.049		1.203
+2038	0.696		0.696		3.085		0.052		1.213
+2039	0.704		0.704		3.116		0.054		1.231
+2040	0.711		0.711		3.121		0.057		1.239
+2041	0.715		0.715		3.121		0.061		1.255
+2042	0.719		0.719		3.115		0.064		1.271
+2043	0.727		0.727		3.132		0.068		1.286
+2044	0.737		0.737		3.169		0.072		1.298
+2045	0.744		0.744		3.180		0.076		1.314
+2046	0.749		0.749		3.178		0.080		1.322
+2047	0.754		0.754		3.178		0.085		1.342
+2048	0.760		0.760		3.179		0.089		1.352
+2049	0.766		0.766		3.186		0.095		1.369
+2050	0.772		0.772		3.183		0.100		1.378
+
+
+
+
+
+
+;
+!10/19/17 	KDL 	updated industrial and electric (VZ); industrial constant at 2013 value through 2040, smoothed after
+!8/29/19	KDL	updated residential, commercial, and transportation to align with IEO 2019
+!10/2/19	KDL	updated electric to align with historical capacity factors and expected new capacity
+!8/12/21	SYK	update data with latest IEO 2021 data. Data now in quads. Volumes for Columbia/Chile taken out based on historical shares
+
+IEO_MX_Consumption := data table                                        
+        Residential     Commercial      Industrial      Transportation     	Electric
+2010	0.044		0.013		1.319		0.000			0.951
+2011	0.042		0.012		1.319		0.000			1.015
+2012	0.042		0.013		1.398		0.000			1.029
+2013	0.047		0.014		1.478		0.000			1.046
+2014	0.051		0.016		1.394		0.000			1.072
+2015	0.051		0.017		1.466		0.000			1.192
+2016	0.051		0.016		1.535		0.000			1.231
+2017	0.050		0.018		1.568		0.000			1.170
+2018	0.050		0.017		1.607		0.001			1.181
+2019	0.056		0.018		1.540		0.001			1.345
+2020	0.056		0.017		1.323		0.002			1.452
+2021	0.056		0.018		1.481		0.003			1.690
+2022	0.056		0.019		1.520		0.005			1.720
+2023	0.056		0.019		1.551		0.006			1.750
+2024	0.056		0.019		1.591		0.007			1.780
+2025	0.056		0.019		1.630		0.008			1.810
+2026	0.057		0.019		1.668		0.010			1.820
+2027	0.057		0.019		1.702		0.011			1.831
+2028	0.057		0.019		1.731		0.012			1.841
+2029	0.059		0.020		1.775		0.014			1.851
+2030	0.059		0.020		1.818		0.015			1.862
+2031	0.059		0.020		1.873		0.017			1.888
+2032	0.059		0.020		1.923		0.019			1.915
+2033	0.059		0.020		1.990		0.021			1.941
+2034	0.060		0.020		2.043		0.023			1.968
+2035	0.060		0.020		2.104		0.025			1.995
+2036	0.061		0.021		2.153		0.028			1.981
+2037	0.061		0.021		2.203		0.030			1.968
+2038	0.062		0.021		2.246		0.033			1.954
+2039	0.062		0.021		2.290		0.036			1.941
+2040	0.063		0.021		2.332		0.039			1.927
+2041	0.064		0.022		2.375		0.042			1.902
+2042	0.065		0.022		2.413		0.045			1.878
+2043	0.065		0.022		2.453		0.049			1.853
+2044	0.066		0.022		2.517		0.053			1.828
+2045	0.066		0.022		2.553		0.057			1.804
+2046	0.066		0.022		2.591		0.061			1.759
+2047	0.066		0.022		2.618		0.065			1.714
+2048	0.067		0.022		2.654		0.070			1.669
+2049	0.066		0.022		2.683		0.075			1.624
+2050	0.068		0.023		2.731		0.084			1.579
+
+
+
+
+
+
+;
+
+ !8/29/19	KDL	updated LNG imports to align with IEO 2019
+
+ IEO_MX_Production := data table                        
+        (NA, MX_NE)     (AD, MX_SS)     (LNG, MX_IW)	!(LNG, MX_IW)
+ 2010   1.478           3.526            0.564 		! 0.564 
+ 2011   1.344           3.469            0.369 		! 0.369 
+ 2012   1.273           3.343            0.464 		! 0.464 
+ 2013   1.287           3.206            0.747 		! 0.747 
+ 2014   1.221           3.172            0.867 		! 0.867 
+ 2015   1.099           2.968            0.651 		! 0.651 
+ 2016   0.867           2.711            0.540 		! 0.540 
+ 2017   0.782           2.345            0.630 		! 0.630 
+ 2018   0.743           2.228            0.656 		! 0.656 
+ 2019   0.719           2.157            0.630 		! 0.630 
+ 2020   0.671           2.012            0.450 		! 0.450 
+ 2021   0.708           2.124            0.450		! 0.450 
+ 2022   0.719           2.157            0.400 		! 0.400 
+ 2023   0.728           2.185            0.300 		! 0.300 
+ 2024   0.764           2.292            0.200 		! 0.200 
+ 2025   0.807           2.420            0.100 		! 0.100 
+ 2026   0.882           2.509            0.100		! 0.100 
+ 2027   0.970           2.621            0.100		! 0.100 
+ 2028   1.071           2.753            0.00		! 0.00
+ 2029   1.169           2.862            0.00		! 0.00
+ 2030   1.248           2.912            0.00		! 0.00
+ 2031   1.356           3.019            0.00		! 0.00
+ 2032   1.461           3.104            0.00		! 0.00
+ 2033   1.561           3.170            0.00		! 0.00
+ 2034   1.658           3.219            0.00		! 0.00
+ 2035   1.772           3.291            0.00		! 0.00
+ 2036   1.881           3.345            0.00		! 0.00
+ 2037   1.986           3.382            0.00		! 0.00
+ 2038   2.088           3.406            0.00		! 0.00
+ 2039   2.186           3.419            0.00		! 0.00
+ 2040   2.280           3.421            0.00		! 0.00
+ 2041   2.405           3.461            0.00		! 0.00
+ 2042   2.524           3.486            0.00		! 0.00
+ 2043   2.643           3.503            0.00		! 0.00
+ 2044   2.880           3.665            0.00		! 0.00
+ 2045   2.977           3.638            0.00		! 0.00
+ 2046   3.117           3.659            0.00		! 0.00
+ 2047   3.337           3.763            0.00		! 0.00
+ 2048   3.508           3.800            0.00		! 0.00
+ 2049   3.702           3.853            0.00		! 0.00
+ 2050   3.904           3.904            0.00		! 0.00
+ ;
+ 
+!8/29/19	KDL	updated to align with IEO 2019
+
+IEO_LNGExport := data table     
+        CN_W
+2010    0.000
+2011    0.000
+2012    0.000
+2013    0.000
+2014    0.000
+2015    0.000
+2016    0.000
+2017    0.000
+2018    0.000
+2019    0.000
+2020    0.000
+2021    0.000
+2022    0.000
+2023    0.000
+2024    0.900  
+2025    1.440  
+2026    1.590  
+2027    1.890  
+2028    1.890  
+2029    1.890  
+2030    2.000  
+2031    2.000  
+2032    2.000  
+2033    3.300  
+2034    3.344  
+2035    3.344  
+2036    3.344  
+2037    3.344  
+2038    3.344  
+2039    3.344  
+2040    5.147  
+2041    5.147  
+2042    5.147  
+2043    5.147  
+2044    5.147  
+2045    5.147  
+2046    5.147  
+2047    5.147  
+2048    5.147  
+2049    5.147  
+2050    5.147  
+;
+
+!Canadian oil sands production by case                                                                                          
+                                                                                                                
+IEO_CN_Bitumen := data table                    
+        reference       high_wop        low_wop
+2010    2700            2700            2700
+2011    2900            2900            2900
+2012    3100            3100            3100
+2013    3300            3300            3300
+2014    3600            3600            3600
+2015    3700            3700            3700
+2016    3700            3700            3700
+2017    3800            3800            3800
+2018    4000            4000            4000
+2019    4100            4200            4000
+2020    4200            4400            4000
+2021    4300            4400            4000
+2022    4300            4400            4000
+2023    4300            4500            4000
+2024    4300            4500            4000
+2025    4300            4600            4000
+2026    4300            4600            4000
+2027    4300            4700            4000
+2028    4300            4800            3900
+2029    4300            4800            3900
+2030    4400            4900            3900
+2031    4400            5000            3900
+2032    4400            5100            3900
+2033    4500            5200            3900
+2034    4600            5200            3900
+2035    4600            5300            3900
+2036    4700            5500            3900
+2037    4700            5500            3900
+2038    4800            5600            3900
+2039    4900            5700            3900
+2040    4900            5800            3900
+2041    5000            5900            3900
+2042    5100            6000            4000
+2043    5200            6100            4000
+2044    5300            6200            4000
+2045    5400            6300            4000
+2046    5500            6300            4000
+2047    5600            6400            4000
+2048    5700            6400            4000
+2049    5700            6400            4000
+2050    5800            6400            4100
+;
+!LNG_WorldFlex must be converted to Bcf/d
+!All others are in Bcf/yr
+!Pulled from IEO 2017 website on 9/14/17
+
+!All of this data is in nglngexp.txt input file because it will be updated/adjusted during LNG export data updates                                                      
+!xyear  LNG_WorldFlex   Cons_EuropeOECD Cons_Japan      Cons_SKorea     Cons_China      Prod_China      Cons_India      Prod_India      
+
+!___________________________________________________________________________________________
+!
+!                               6.  Alaska Data and Assumptions
+!___________________________________________________________________________________________
+
+!AK NGTDM Variable Declaration
+!AK price used to evaluate LNG export build; in 1987$
+AK_ANGTS_Min_WHPrice :=0.78; 	!0.52; Currently equals $1.50 in 2018 dollars; 0.52 equals $1.00
+Pct_Liquifaction_Fuel :=0.081
+;
+!AK Consumption and AK Consumption Coefficient Declaration
+
+COMPOSITE TABLE:
+year            Population     
+!------------------------------
+1990             553.290
+1991             570.193
+1992             588.736
+1993             599.432
+1994             603.308
+1995             604.412
+1996             608.589
+1997             612.968
+1998             619.932
+1999             624.779
+2000             626.932
+2001             633.714
+2002             642.337
+2003             648.414
+2004             659.286
+2005             666.946
+2006             675.302
+2007             680.300
+2008             687.455
+2009             698.895
+2010             710.231
+2011             713.985
+2012             720.798
+2013             724.692
+2014             728.608
+2015             732.544
+2016             740.734
+2017             749.016
+2018             757.390
+2019             765.858
+2020             774.421
+2021             783.498
+2022             792.681
+2023             801.972
+2024             811.371
+2025             820.881
+2026             830.033
+2027             839.288
+2028             848.645
+2029             858.107
+2030             867.674
+2031             877.522
+2032             887.482
+2033             897.555
+2034             907.743
+2035             918.046
+2036             928.466
+2037             939.004
+2038             949.662
+2039             960.440
+2040             971.342
+2041             982.366
+2042             993.516
+2043            1004.793
+2044            1016.198
+2045            1027.732
+2046            1039.396
+2047            1051.194
+2048            1063.125
+2049            1075.192
+2050            1087.395;
+
+AK_Cons_Industrial := 6.0;
+x_AK_Cons_Commercial1 := .024;
+x_AK_Cons_Commercial2 := -.400;
+x_AK_Cons_Commercial3 := 0.4;
+x_AK_Cons_Residential1 := .027;
+x_AK_Cons_Residential2 := -.250;
+x_AK_Cons_Residential3 := .600
+;
+!AK LAP and PIP Declaration
+AK_PLT_Percent  :=      DATA{   AK_N    :0.0319,
+                                AK_S    :0.000};
+AK_PIP_Percent  :=      DATA{   AK_N    :0.030,
+                                AK_S    :0.0148};
+AK_LSE_Percent  :=      DATA{   AK_N    :0.0287,
+                                AK_S    :0.000};
+                  
+x_AK_N_LAP1 :=260;
+x_AK_N_LAP2 :=0.43;
+x_AK_N_LAP3 :=-0.4;
+
+!AK Prices Calculations
+x_AK_Citygate1 := -1.82;
+x_AK_Citygate2 :=0.82;
+PriceMarkup(sec)        := DATA{Residential     :1.638,
+                                Commercial      :1.416,
+                                Industrial      :-0.836,
+                                Transportation  :1.416,
+                                Electric        :-0.734}
+                                ;
+
+
+
+!___________________________________________________________________________________________
+!
+!                               6.  Mexico Assumptions
+!___________________________________________________________________________________________
+
+
+!Assumptions for Mexico Production to vary with oil price, Henry Hub Price
+!World Oil Price and Henry Hub Price in $1987/MMBtu, Mexico production in Bcf
+!Estimation and data are in Eviews file MX_PROD_OCT2017 in NGMM shared drive on Fs-f3
+
+!10/2/19	KDL	Updated for new relationship to WOP, HH, historical data
+!			Added new parameters to endogenously solve for Industrial (PEMEX and other) consumption
+!			Endogenously solve for Mexico crude oil production
+
+
+!Adjusting associated production (Mexico_SS) based on WOP
+! Eviews: ss_wop_c_hist
+x_MX_AD_Prod1 :=  0.645374;
+x_MX_AD_WOP2 :=  16.48550;
+x_MX_AD_C := 262.2209;
+
+
+!Adjusting non-associated production (Mexico_NE) off of Henry Hub price and Currently assigned production in reference case
+!Also adjust different based on first year shale production can come in
+MX_FirstShaleYear := '2050';
+
+! EVIEWS: na_wop_c_2050
+x_MX_NA_HH1_1 := 26.09625;
+x_MX_NA_Prod1_1 :=  0.655519;
+x_MX_NA_Prod2_1:= 0.139105;
+
+! Value seem to be from ne_wop_hh_c_2025, but I can't match up these values in Eviews
+x_MX_NA_HH1_2 := 40.15738;
+x_MX_NA_Prod1_2 :=  0.161177;
+
+!Parameters to estimate Mexico AD production using oil production
+!See \\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\AEO2022\Mexico_Data\KD_Eviews\mexico_ad_troy_v3.wf1
+MX_OilRecoveryYear := '2025';
+
+! (Cannot find EVIEWS equation, but it looks like AIMMS does not use the two coeffiicents use below anymore. References to them in code are commented out. 
+x_MX_Oil_Prod1_1 	:= 0.918224;
+x_MX_Oil_WOP_1 		:= 5.453086;
+
+! EVIEWS: e_oil_ieo_growth
+! SYK: Updated 8/10/2021
+x_MX_Oil_Prod1_2 	:= 1.008534;
+x_MX_Oil_WOP2_2 	:= 1.840410;
+
+! EVIEWS: e_ad_corr
+! SYK Updated 8/10/21
+x_MX_AD_Prod1 :=  0.723470;
+x_MX_AD_OilProd := 0.119414; 
+x_MX_AD_WOP1 :=  21.64182;
+
+! EVIEWS: e_q_pemex_sie
+! SYK Updated 8/10/21
+x_MX_Cons_PEMEX_1 := 0.873174;
+x_MX_Cons_PEMEX_Oil:= 0.100587;
+
+! EVIEWS: de_q_ind in the Mexico_AD_Troy_v2 Eviews file
+! SYK: Updated 8/10/21
+x_MX_Cons_Industrial_1 := 0.973156;
+x_MX_Cons_Industrial_HH:= -18.12828;
+c_MX_Cons_Industrial:= 94.50839;
+
+MX_Sector_PEMEX := 'PEMEX';
+MX_Sector_Industrial := 'Industrial';
+
+
+!after 2019, estimated values
+! SYK Updated 8/13/21 using latest historical/IEO estimates from oil_all_fsf in Eviews
+composite table:
+
+year	MX_Oil_Production
+1990	930.0232
+1991	976.6820
+1992	973.7193
+1993	975.7911
+1994	980.0622
+1995	955.2778
+1996	1043.291
+1997	1103.110
+1998	1120.715
+1999	1060.700
+2000	1099.367
+2001	1141.368
+2002	1159.641
+2003	1230.377
+2004	1234.757
+2005	1216.672
+2006	1188.286
+2007	1122.634
+2008	1018.925
+2009	949.5406
+2010	940.6120
+2011	931.7046
+2012	929.9877
+2013	920.5763
+2014	886.5001
+2015	827.3934
+2016	786.0370
+2017	711.1160
+2018	669.1527
+2019	620.7548
+2020	607.1922
+2021	579.2194
+2022	551.1243
+2023	521.8622
+2024	473.4587
+2025	607.3490
+;

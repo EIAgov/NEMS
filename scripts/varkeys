@@ -1,0 +1,599 @@
+LAUNCH=Q:/output     X Run launch directory
+OUTDIR=Q:/output     X Run output directory
+SCEN=aeo95b          X Run scenario
+DATE=d020911a        X Run datekey
+HOSTPC=pick          * Preferred host computer to use to run job. none means none specified
+NRUNS=1              * Number of run cycles with a restart file copy and rerun
+COPYINP=1            * Copies input files to subdirectory of run output directory if = 1
+COPYDIR=./input      * Directory to copy input files to
+DBDUMP=0             * Writes RESTART file to disk after every year (when=1)
+PACK=0               * Links OML-ANALYZE routine to allowing LP Pack file creation
+DOEMALL=0            * Forces NEMS to run all cycles requested (do all cycles=1)
+DOAMINOF=0           * Forces a minimum number of cycles before quitting early due to acceptable convergence
+OFFSET10=16          * Offset percentage, 2010-2015, for alternative GHG compliance (pre-aeo2008)
+OFFSET16=10          * Offset percentage, 2016-on, for alternative GHG compliance (pre-aeo2008)
+OFFSETDO=15          * Maximum GHG Offset percentage, domestic sources
+OFFSETIN=15          * Maximum GHG Offset percentage, international sources
+UTILDR=.08           * Discount rate for table 116 in ftab
+HOLD=0               X To put run on hold, use hold=1. release it using llhold -r jobnumber
+LASTYR=2050          * Last execution year - index
+AEOLSTYR=2050        * Last execution year typical for current AEO cycle
+MAXITRJR=1           * Maximum number of iterations 1990 through 2000
+MAXITR=4             * Maximum number of iterations overrides JR and SR if less than them
+MAXITRSR=4           * Maximum number of iterations 2001 on
+CUTITR=0             * Switch to cut maxitr iterations on early cycles to save time (experiment)
+WALLSW=0             * Switch to perform wall clock timings
+COMPRESS=0           X To run a compress job step at end of ftab
+RUNCOB=0             X To run after Close-of-Business, use RUNCOB=1
+RELEASE=0            X To run releasejobs.sh at end, use release=1.  Will release jobs on hold
+RANTORTF=0           * Run the RANToRTF and RANToXLS programs if 1, or 0 to save a few minutes
+EXBUILD=0            * Switch to run buildings module in external process (tfiler) to save memory
+EXCOAL=1             * Switch to run AIMMS coal module (when =1) in external process (tfiler)
+EXW=0                W Execution switch - World Module
+EXM=0                M Execution switch - Macro Module
+EXR=0                R Execution switch - Residential Module
+EXK=0                K Execution switch - Commercial Module
+EXI=0                I Execution switch - Industrial Module
+EXT=0                T Execution switch - Transportation Module
+EXE=0                E Execution switch - Utility Module
+EXC=0                C Execution switch - Coal Module
+EXL=0                L Execution switch - Oil & Gas Production Module
+EXG=0                G Execution switch - Natural Gas T&D Module
+EXO=0                O Execution switch - Refinery Module
+EXN=0                N Execution switch - Renewables Module
+EXH=0                H Execution switch - Hydrogen module
+ORDM=1               X Order of execution - Macro Module
+ORDC=2               X Order of execution - Coal Module
+ORDR=3               X Order of execution - Residential Module
+ORDK=4               X Order of execution - Commercial Module
+ORDI=5               X Order of execution - Industrial Module
+ORDT=6               X Order of execution - Transportation Module
+ORDE=7               X Order of execution - Utility Module
+ORDW=8               X Order of execution - World Module
+ORDL=9               X Order of execution - Oil & Gas Production Module
+ORDG=10              X Order of execution - Natural Gas T&D Module
+ORDO=11              X Order of execution - Refinery Module
+ORDN=12              X Order of execution - Renewables Module
+ORDH=13              X Order of execution - Hydrogen Module
+PRTDBGW=0            W Debug switch - World Module
+PRTDBGM=0            M Debug switch - Macro Module
+PRTDBGR=0            R Debug switch - Residential Module
+PRTDBGK=0            K Debug switch - Commercial Module
+PRTDBGI=1            I Debug switch - Industrial Module
+PRTDBGT=0            T Debug switch - Transportation Module
+PRTDBGE=0            E Debug switch - Utility Module
+PRTDBGC=0            C Debug switch - Coal Module
+PRTDBGL=1            L Debug switch - Oil & Gas Production Module
+PRTDBGG=0            G Debug switch - Natural Gas T&D Module
+PRTDBGO=0            O Debug switch - Refinery Module
+PRTDBGN=0            N Debug switch - Renewables Module
+PRTDBGH=0            H Debug switch - Hydrogen Module
+FIRSYR=1990          X First excution year - index
+FRCTOL=.05           * Convergence tolerance, fraction
+ABSTOL=20.           * Convergence tolerance, level
+RLXPC=.666           * Relaxation fraction
+NYRS=3               * Number of growth years
+I4SITE=2             X Foresight toggle (1=Myopic, 2=Adaptive, 3=Perfect)
+I4SCNT=2             X Foresight control (1=Main, 2=submodule)
+IRELAX=2             * Relaxation switch to speed convergence (0=off)
+ITIMNG=1             * Option to time the modules (1=Yes)
+PMMWOP=3             O World oil price switch for PMM
+WWOP=2               * World oil price case (1=Low, 2=Mid, 3=High)
+MMAC=2               * Macro case (1=Low, 2=Mid, 3=High)
+TTECH=2              * Technology case switch (1=Low or Frozen, 2=Mid, 3=High)
+CCOST=2              * Capital cost case switch (1=Low, 2=Reference, 3=High)
+NRGBILL=1            * Include 2005 Energy Bill legislation? (1=Yes, please;  0=No thank you)
+NRG2007=1            * Include 2007 Energy Bill legislation? (1=Yes, please;  0=No thank you)
+NRG2008=1            * Include 2008 Mental Health Energy legislation? (1=I'd like that; 0=Leave me alone)
+NOSUNSET=2           * Turn on to ignore legislation end years
+STIMULUS=1           * Include 2009 Economic Stimulus Package (1=Yes indeedy; 0=No never)
+AB32SW=1             * Switch to turn California AB-32 on (1) and off (0)
+EPA111D=0            * Switch for EPA rule 111d (0=off; 1=on)
+CAFE=0               M Is this a CAFE case?  (MAC will use vehicle costs from Tran)
+MACCAFE=0            M Is this a CAFE case?  (MAC will use vehicle costs from Tran) (same as CAFE)
+PMMCAFE=1            O PMM asking if this is a CAFE case?
+EXPLEASE=1           0 Whether exports of lease condensate are allowed (1=yex, please; 0=no)
+RFSCALIB=0           O 2 = recalibrate RFS from sprflrt down; 1 = start over; 0 = leave as in sprflrt)
+CAFEMEET=0           T Force them to meet the CAFE standard when set to 1
+WORLDSW=1            W Use U.S. petroleum supply/demand from input restart (=1) or expectations (=2)
+RDCVFACT=1           * Read in conversion factors this run (1 is yes; 2 could possibly be yes and carry the annual ones through the projection period)
+MACTAX=0             M Which MAM Tax Case (0=WOP, 1=DR,2=PT,3=CT,4=SS)
+MACTXYR=2008         M First year MACTAX takes effect
+HISTORY=0            X 1990 History data flag
+MODELON=1            X Leaves models on once converged (when=1)
+HGSTRUCT=1           E set =1 to include mercury structure and increase run time
+ECPSTART=2           X Util cap expansion (0=off, 1=IFFS, 2=LP)
+ECPACT=0             E Write ECP ACT file for this year (>0), or off (=0)
+ECPBASIS=0           E ECP Basis from current run (=0), previous run (=1)
+EMMBENCH=1           E Switch to indicate level of benchmarking for EMM.  The theory is that 1 is regular and increasing the number loosens the tolerance
+STSCALNG=0           G STEO scale factors origin (0=from code, 1=from file)
+FIXAKMD=0            G Fix Alaska (angts) and/or MacKenzie Delta volumes (0=not; 1=both; 2=Alaska; 3=MacKenzie)
+LNGGAMLV=550         G GAMMA coefficient, times 10, for representing sensitivity of expected wellhead prices to plan builds of LNG export capacity.
+LNGGAMCN=-425        G GAMMA constant, times 10, for representing sensitivity of expected wellhead prices to plan builds of LNG export capacity.
+IMULTBM=1            I Industrial SEDS Benchmarking method (1=multiplicative, 0=additive)
+HIRENEW=0            I High Renewables Case (1:high, 0: normal)
+LORENEW=0            I Low Renewables Case (1:low, 0: normal)
+STEONG=1             G NGTDM additional benchmark switch (0=Off, 1=On)
+NGDEMAND=1           G NGTDM constant demand run time option (0=Off, 1=On)
+COMMENT=....         * Run comment
+CLEANUP=$NEMS/scripts/cleanup.sh
+CLEANUP1=$NEMS/scripts/cleanup1.sh
+CLEANUP2=$NEMS/scripts/cleanup2.sh
+CLEANUP3=$NEMS/scripts/cleanup3.sh
+MACFDBK=1            M Macro feedback switch (1=on)
+ELASSW=0             X Elasticity switch (1=on)
+DSMSWTCH=0           E DSM logic switch (1=do DSM, 0 is don't)
+FUNFMT=1             * FORMAT OF RESTART FILES (1=UNFORMATTED)
+FMTON=NULLINE        * JCL SWITCHED ON WHEN FUNFMT=0
+FMTOFF=NULLSTR       * JCL SWITCHED ON WHEN FUNFMT=1
+XPRESSSW=1           * Switch to request ECP LP to run in XPRESS 
+XPRESEFD=0           * Switch to request EFD LP to run in XPRESS
+BANKONYR=2051        * For allowance banking, designates first year in which the bank balance and pricing path begin (see epmcntl.txt)
+FEEONYR=2051         * For allowance banking, designates an optional post-banking year to resume a banking price trajectory.  
+EXPNGPRD=2008        E Year of natural gas resource base (TCF) (end of year)
+EXPNGPRC=900         E GAS PRICE PAIRED TO CUM NG PROD (1998 CENTS/MCF)
+EXPNGGRW=20          E EXP GROWTH IN ANNUAL NG PROD (20 = 2.0 PERCENT/YEAR)
+EXPNGEXP=70          E GAS EXPECTATION EXPONENT before economic unconventionals (150= **1.5; 75= **0.75; etc)
+EXPNGIPT=350         E Price at which unconventionals become economic (1998 cents/mcf)
+EXPNGEX2=130         E GAS EXPECTATION EXPONENT after economic unconventionals (150= **1.5; etc)
+EMMRENEW=1           E INTEGRATE UTIL WITH RENEW (0=NO,1=YES,2=PARTIAL)
+ETHTECH=0            O Technology switch for the PMM ethanol (0 = base, 1 = high, -1 = low)
+OGTECADJ=0           L OGSM Technology adjustment percent (50 = 50 percent)
+OGACCESS=0           L Access to currently restricted or off-limits resources (0=none)
+OGHIST=1             L OGSM historical overwrites
+OGIPPR=0             L For internal price and production routine
+OGTECH=1             L Oil and Gas Technology (0=No, 1=Yes)
+OGFORE=0             L OGSM perfect foresight for carbon runs (0=Off, 1=On)
+OGOILOPT=1           L OGSM crude oil process option (0=no Enhanced Oil Recovery/Advanced Secondary Recovery; 1=with EOR/ASR; 2=no EOR/with ASR; 3=with EOR/no ASR)
+OGMEXICO=0           L OGSM Mexico import level manual override (Range: 0-2)
+OGLNGCST=100         L OGSM LNG cost multiplier for side cases
+OGCONADJ=0           L OGSM conventional resource adjustment percent (10=10% increase, -10=10% decrease)
+OGUNCADJ=0           L OGSM unconventional resource adjustment percent (10=10% increase, -10=10% decrease)
+EUEDEXP=1            E End-Use Electricity Demand EXPectation (0=normal, 1=perfect)
+WOPA_ONE=30          W WORLD OIL PRICE EXP.change/yr,92Cent/barrel, 2026-2030
+WOPA_TWO=30          W WORLD OIL PRICE EXP.change/yr,92Cent/barrel, 2031-on
+REBRACKT=0           0 Force epm to widen the bracket on the first cycle
+JUMPYR=2050          * Calendar year representation of year NEMS is programmed through (could be less than arrays dimensioned)
+WOPLIMIT=2602        W WORLD OIL PRICE EXP  Limit, post-2015, 92Cent/barrel
+IRESTRP=0            * For Restart price adjustment (=1)
+MNDBGCV=0            * Switch for force nonconvergence for debug
+RUNEPM=1             * Switch to run Emissions Policy Module (1=run)
+RUNPOLY=1            * Run Polysys (1=run)
+POLYCOST=100         N Cost multiplier for Polysys.  100 means the multiplier is 1; 120 means costs are increased 20%; 75 means costs are decreased 25%
+WGTGUESS=50          P Weight to apply to previous guess in calculating new guess (100-wgtguess weighs previous result)
+WELLPF=1             E switch to 1 to use perfect foresight for the wellhead price expectations
+PFGUESS=50           E Weight to apply to previous guess in wellhead price perfect foresight routine (similar to carbon above)
+ABGUESS=50           E Weight to apply to previous guess for AB-32 allowance price
+LNGGUESS=50          G Weight to apply to previous guess for Canadian natural gas price
+PPY=NULLINE          * LINES CONTROLLING EMM PREPROCESSOR FILES
+PPN=NULLSTR          * LINES CONTROLLING REGULAR NEMS FILES
+RETAIN=90            * Signifies retention period in days for run for potential automatic deletion
+RENEWBM=2            N RENEWABLES SWITCH TO OVERWRITE BIOMASS
+RENEWGE=0            N Renewables switch to overwrite GEOTHERMAL
+RENEWWI=0            N Renewables switch to overwrite WIND
+RENEWMS=2            N Renewables switch to overwrite MUNICIPAL SOLID WASTE
+ETTDBGI=NULLINE      E Input ETTDBUG file (EMM report)
+ETTDBGC=NULLSTR      E Create ETTDBUG file (NEMS)
+OGNOTECH=0           L .
+BMYREXP=1996         * BENCHMARK YEAR EXPECTATIONS
+MIDTERM=0            * Year to start a start-in-the-middle run
+MIDITR=2             * Iterations to run up to Year MIDTERM
+STEOBM=1             * STEO BenchMark switch (0=off, 1=on)
+PMM3RGN=1            O Number of PMM PADD regions (0 = 5, 1 = 3)
+IPMM=1               O Run international refinery (=1) or use supply curves
+INTLFDBK=1           O Switch to specify international feedback (0=off; 1=on)
+CRUDEXP=1            O Allow crude oil exports (0 does not allow; 1 allows)
+MARGINRN=0           O Switch to specify Special Margin run (0=off; 1=on)
+CTLSEQSW=0           O Switch to turn carbon sequestration on for CTL plants (0=no; 1=sequester, please)
+YEARPR=2022          * Year to scale dollars to
+CUMCAP=2022          F Year cumulative capacity additions begin from - NOT A SWITCH
+CUMPROD=2022         F Year cumulative oil and gas production begins
+ELGREXP=50           E Maximum expected electricity demand growth (15=1.5%)
+ORACLESW=1           E switch for writing to the access database (0=off, 1=on)
+ORCLECP=1            E switch for writing to the access ecp tables (0=off, 1=on)
+ORCLEFD=1            E switch for writing to the access efd tables (0=off, 1=on)
+ORCLEFP=1            E switch for writing to the access efp tables (0=off, 1=on)
+ORCLCL=0             C switch for writing to the access coal tables (0=off, 1=on)
+ORCLPMM=0            O switch for writing to the access pmm tables in pmmdb.mdb (0=off, 1=on)
+ORCLOGSM=0           L switch for writing to the access ogsm tables in ogsmdb.mdb (0=off, 1=on)
+TRANEFF=0            T Trans efficiency (0=Base, 1=Frozen, 2=High, 3=ACE, 4=Aggress)
+BEHAVE=2             * Consumer Behavior (1=Lazy, 2=Regular, 3=Aggressive)
+LADYFILE=4           F Switch to write out the Lady interface file in ftab 1:ftab.csv,2:old ran fmt, 4:new ran fmt
+NGCANOVR=0           G Canada gas switch
+FTABCOLS=34          F FTAB - Number of report columns
+FTABCOLW=6           F FTAB - Report column width
+FTABREG=0            F FTAB - =1 to print regional reports
+FOOTNOTE=0           F FTAB - =1 to print footnotes
+FTAB1ST=2000         F FTAB - First print year
+FTABLAST=2050        F FTAB - Last print year
+FTABGROW=0,2022      F FTAB - Growth rate option in the form 1,1999 to calculate growth rates from 1999-2022
+FTABSKIP=1,2050      F FTAB - Skip year option in the form 1,2015 to begin skipping at 2015
+FTABWK1=1            F FTAB - =1 to create .wk1 spreadsheet
+FTABCARB=co2         F FTAB - =c to print carbon; co2 to print carbon dioxide; default = nulline to repress line & default in code to 'c'
+FTABBONE=1           F FTAB - =1 to include bonus rows (non-published items) 
+MINSCORE=3.5         * Integration/Intercv: Minimum overall GPA-type score to signify intercycle convergence
+FGRAPH=1             * Sets up the FGRAPH.XLS graphics output worksheet 
+SHFILE=filemgr.shell X file in /scripts to use to generate the FILELIST input file for filemgr 
+SHJCL=jcl.shell      X file in /scripts to use to generate the jcl.dat  input file for main.f 
+SHOPT=moreopt.shell  X file in /scripts to use to generate the MOREOPT  input file for main.f 
+SSCRIPT=qnems.shell  X file in /scripts to use to generate the nems.sh  commands to run NEMS or PREPRO
+OMLVERS=oml64        * path in n:/default/oml/ and c:/oml for OML version to use 
+EVVERS=10            M specify version of EViews to run
+GAMSVERS=c:/gams/win64/35.1/gams.exe
+LNKINEMS=5           * Fortran to link NEMS with:  2=Intel 9.1   1=Intel 9.0   0=Digital Visual 6.0  3: intel 11.1 32-bit 4:intel 11.1 64-bit 5:Visual Studio 2015 64-bit
+BANKDSCR=74          * Discount Rate for greenhouse gas emissions banking, now in permille (previously percent pre-aeo2008)
+BANKSAFE=0           * Under GHG cap&trade with banking & safety, "=1" sets price in bank_endyr to safety-valve
+BIOSEQOK=0           * Under GHG cap&trade with offsets, "1" allows bio sequestration to count as offset. 0: doesn't count as offset
+OFFSETI=0            * International Offsets Option (1: option to calculate int'l offsets and price independently of domestic sources based on distinct limit)
+IJUMPYR=61           * Last model year - index
+IJUMPCAL=2050        * Last model year
+INDBMOVR=0           I Industrial benchmark override.  If 1, apply steo benchmark factors read from indrun.txt instead
+LCFSOPT=1            O Set to 1 to run a California low carbon fuel standard
+MXETHGAS=15          O Maximum ethanol in gasoline
+MXETHYR=2001         T First model year that can use max ethanol blends in gasoline
+WORKDIR=1            * Workdir=1 forces runit to execut run in local workdir even if output directory is on same PC. 
+CO2PLFMM=0           * 1 to have LFMM add CO2 price adders to petroleum product product prices rather than in price_adjust
+CLMAXITR=1           C Number of internal coal iterations to run until feasible solution found
+ITERDUMP=0           * Creates single-year restart file after every iteration.  Can be concatenated later.  
+RESTARTD=?           * Restart database datekey
+DICTD=?              * NEMS data dictionary
+MAIND=?              * Integrating module code
+WORLDD=?             W International (World) module
+MACD=?               M Macroeconomic module
+RESDD=?              R Residential module
+COMMD=?              K Commercial module
+INDD=?               I Industrial module
+TRAND=?              T Transportation module
+TRANFRTD=?           T Freight portion of Transportation module
+TRANAIRD=?           T air part of transportation
+UTILD=?              E Electric utility module (EMM) main routine
+UDATD=?              E EMM data routines
+UREADD=?             E EMM flat file read routine
+UDAFD=?              E EMM DAF  routines
+UEFDD=?              E EMM EFD routines
+UECPD=?              E EMM capacity planning routines
+UEFPD=?              E EMM financial planning routines
+UNUGSD=?             E EMM nonutility generation routines
+ULDSMD=?             E EMM demand side management routines
+UCAPED=?             E EMM IFFS Capacity Expansion Model for NEMS
+RENEWD=?             N Renewables module
+WELLOGSD=?           L Oil & gas production Main module
+WELLOFFD=?           L Oil & gas production Offshore
+WELLIMPD=?           L Oil & gas production Imports
+WELLEORD=?           L Oil & gas production Enhanced oil recovery
+WELLCOSTD=?          L Oil & gas production Costs
+WELLDCFD=?           L Oil & gas production discounted cash flow
+WELLEXPD=?           L Oil & gas production exports
+WELLREPD=?           L Oil & gas production reports
+WELLAKD=?            L Oil & gas production Alaskas
+CTUSD=?              L CTUS module
+REFINED=?            O Refinery (Petroleum Marketing) (PMM) module
+TFILERD=?            * Wrapper program that executes filer to read and write restart files
+FILERD=?             * Database communication module
+FILEMGRD=?           * File management module
+EPMD=?               P Emission Policy Module
+FWK1IOD=?            * FORTRAN routines to process WK1 files
+CIO4WK1D=?           * More worksheet routines
+DUMMYXD=?            * Dummy routines for all modules and other stuff
+OMLANALD=?           * OML/ANALYZE Interface FORTRAN subroutines
+DICTIOND=?           * Dictionary Program (Associated w/FILER)
+FTABD=?              F NEMS report writer module
+FTAB2D=?             F FTAB CODE -- PART 2 (THE NON-FDATA PART)
+LAYOUTD=?            F NEMS report writer layout file
+LAYIND=?             F Spreadsheet used to create layout.txt
+TABREQD=?            F NEMS report writer table request file
+CITATIOND=?          F The date-dependent publication citations for ftab footnotes
+VARLISTD=?           * .
+MCPARMSD=?           M Parameters unique to macro module
+EMMCNTLD=?           E EMM control file
+ELDATYRD=?           E EMM annual input data file
+INDRUND=?            I Industrial run options 
+ENPRODD=?            I Industrial data by industry and region
+WHYDROD=?            N hydro 
+KPARMD=?             K Commercial parameters file
+KFLSPCD=?            K Commercial floorspace
+KVINTD=?             K Commercial vintages
+KSHEFFD=?            K Commercial shell efficiency
+SPRFLRTD=?           O Strategic Petroleum Reserve fill rate
+KBEHAVD=?            K .
+KCAPFACD=?           K Commercial capacity factors
+KPREMD=?             K .
+PLNTDAFD=?           E EMM direct access plant file
+EFPTAXD=?            E .
+EFPALLD=?            E .
+EFPCNTLD=?           E EFP control file
+LDSMDAFD=?           E .
+KINTENSD=?           K .
+MSWDATD=?            N .
+MNCNVRGD=?           * .
+WESAREAD=?           N .
+KDELEFFD=?           K .
+KHURELAD=?           K .
+KEMFACD=?            K .
+SOLARIND=?           N .
+SOLARCLIPIND=?       N .
+KRENEWD=?            N .
+BASEMMID=?           E .
+LDSMSTRD=?           E .
+WGEPARMD=?           N .
+ETTIND=?             E .
+ETTDEMD=?            E .
+KSDELAD=?            K .
+KBLDGD=?             K .
+RSHTSHRD=?           R Residential inputs - heating shares
+NUGPIPED=?           E NUGS HISTORY AND PLANNED ADDITIONS
+EXSTCAPD=?           E EXISTING GENERATING CAPACITY
+PLANCAPD=?           E PLANNED NONUTILITY GENERATING CAPACITY
+EPMCNTLD=?           P CONTAINS POLICY OPTION FLAGS
+EPMDATAD=?           P EMISSION INPUT DATA including carbon caps and/or fees
+KDSSTMD=?            K Commercial District Service Steam EUIs
+KDSEFFD=?            K Commercial District Service Boiler Efficiencies
+KDSFSD=?             K Commercial District Service Fuel Shares
+CANSPLYD=?           E INPUT CANADIAN SUPPLY FILE -- EMM PREPROCESSOR
+PLTDATAD=?           E INPUT TO EMM PLANT PREPROCESSOR
+EFPDATAD=?           E efp input to plant preprocessor
+RSEFF01D=?           R Residential efficiency inputs
+PREPETTD=?           E Code for EMM Transmission preprocessor
+PREPPLTD=?           E Code for EMM Plant preprocessor
+PREPDSMDD=?          E LDSM preprocessor direct access file create and revise
+KMINFLD=?            K Commercial Module Minor Fuel Econometric Model Paramet
+SICGEND=?            E ELECTRICITY GENERATION DATA FROM THE 867 BY SIC CODE
+RSSTEOD=?            R RESIDENTIAL STEO BENCHMARK TARGETS
+KSTEOD=?             K Commercial sector STEresults for 1993 - 1995
+RSRET01D=?           R RESIDENTIAL RETIREMENTS OF 1990 EQUIPMENT STOCK
+WLALASKAD=?          L OGSM Alaska input
+WLBASICD=?           L OGSM basic input
+WLIMPD=?             L OGSM import data
+WLLOW48D=?           L OGSM lower 48 input
+WLOFFD=?             L OGSM OFFSHORE Input
+WLEORD=?             L OGSM ENHANCED OIL RECOVERY DATA
+HEMD=?               H HOUSEHOLD EXPENDITURE MODEL
+ITLBSHRD=?           I Boiler demand translog function parameter estimates
+FTAB05D=?            * Ftab unit 5 run time parameters
+WODSUPPD=?           N biomass supply for wood submodule
+WODTECHD=?           N input for wood gasification
+KDEGDAYD=?           K Heating and cooling degree day data used by both residential and commercial
+KVARSDID=?           K Commercial sdi
+READDAD=?            * Reads the iterational direct access file (MNPQIT)
+KCOGEND=?            K 1994 commercial cogeneration data
+CODES123D=?          * Contains 123 record id codes-used by NEMSWK1.F
+NEMSWK1D=?           * Object to read wk1 routines
+RENDATD=?            N Renewable capital cost elasticities and build bound types
+EINTLRND=?           W Electric Generators International Learning
+WLUGRD=?             L OGSM undiscovered reserves data
+WELLUGRD=?           L OGSM unrecoverable reserves code
+ORCLTABSD=?          * Routine to write ER tables to Oracle on NT Server
+PRODFLOWD=?          I Industrial Production Flow Data
+EMMDBDEFD=?          E Emm data base definitions
+RGENTKD=?            R Residential distributed generation input
+KGENTKD=?            K Commercial distributed generation input
+RSSTKEFFD=?          R Residential stock efficiency inputs
+DUMMYPPD=?           * Dummy routines for preprocessors
+ITECHD=?             I Industrial Technology coefficients (UEC and TPC) for base and hitech
+MNEXSTEOD=?          * adjustment for short-term natural gas expectation based on steo price
+MCEVCODED=?          M contains EViews code with keys for macro model to substitute for
+MCEVWORKD=?          M EViews workspace file for macro/DRI interaction
+MCEVSUBSD=?          M variable pools
+MASTERD=?            * the oml master cr file
+TEMFCTRD=?           T transportation emission factors (grams / mile)
+INDBEUD=?            I industrial building energy use
+DUMPACKD=?           * routine to not do packing
+INTERCVD=?           * inter-cycle convergence checker
+EMMDBD=?             E Access database for EMM
+WLHISTD=?            L bottom half of old wllow48 file
+COMFLOORD=?          M commercial floorspace macro model eviews input
+MCHIGHLOD=?          M high & low case factors
+FGR_SSGLF=//nem3/M/default/fgraph/GLFs/ss_combine.glf
+FGR_RAN2=none
+FGR_RAN3=none
+UDBPD=?              E plant group writes to utility access database; runs after nems completes
+GLFD=?               * graph layout file for the fgraph applications
+BASEFDID=?           E efd lp basis file - input
+HMMD=?               H hydrogen module code
+ICCNVRGD=?           * same as mncnvrg.txt for intercycle convergence
+WCDCFUSD=?           L discounted cash flow data from a U.S. run for Canada model
+QSBLKD=?             * SEDS historical data for qsblk
+EMMDBDOCD=?          E documetation describing the emm output database
+FTABXMLD=?           * xml code for replacement .wk1 file
+OGSDBDEFD=?          L Database definitions for OGSM output access database file OGSMDB.mdb
+PACK_ALLD=?          E little program to covert .act file to .pck file & produce text files (links with omlanal.obj)
+MNRISKD=?            * Risk premium to be applied consistently across modules
+XPRESSIND=?          * Xpress parameter input file
+MCEVRGMDD=?          M macro regional models
+WLOILD=?             L OLOGS input - primary oil recovery
+WLASRD=?             L OLOGS input - advanced secondary/tertiary oil recovery
+WLGASD=?             L OLOGS input - Primary conventional natural gas recovery
+WLUNDD=?             L OLOGS input - Undiscovered oil and natural gas
+WELLOND=?            L OLOGS code for onshore
+WLDISCD=?            L Lower 48 onshore project-level discovery order
+REFINTLD=?           O PMM international routines
+REFCHGD=?            O PMM matrix update routines
+REFSLND=?            O PMM solution retrieval routines
+REFRPTD=?            O PMM reporting code
+REFETHD=?            O Ethanol code - separating for PMM module
+RFHISTD=?            O PMM historical data - was elcgpur.txt
+RFINVESTD=?          O Refinery investment and possibly technology data
+MU1PRDSD=?           O First level refinery price markups
+MU2PRDSD=?           O Second level refinery price markups
+PMMDBPD=?            O puts pmmprnt into pmmdb.mdb
+REFCO2D=?            O PMM carbon emission related routines including
+GDXF9DEFD=?          * Interfaces and fortran calls to invoke a C library of "GDX" routines
+GDXF9GLUD=?          * library of routines to implement the GDX data structure and read/write GDX files
+VARLISTLD=?          O list of variables for LFMM to pass to GDX
+LFMINPUTD=?          O everything that goes into LFMM
+LF_NEMD=?            O NEMS/Gams variable linkage for LFMM
+LFINPUTD=?           O import subroutine for data external to NEMS
+LFMODELD=?           O LFMM linear program model definitions
+LFREPORTD=?          O LFMM reporting and database output
+LFSHELLD=?           O LFMM main routine
+LFPREPD=?            O LFMM data preparation for linear program
+CTSSHELLD=?          E CTS main routine calls the others
+CTSINDATD=?          E CTS non-NEMS data import subroutine
+CTSPREPD=?           E CTS Data preparation for LP
+CTSMODELD=?          E CTS linear program model definitions
+CTSCHECKD=?          E CTS data validation routine
+CTSREPRTD=?          E CTS reporting and database output
+CTSINPUTD=?          E CTS input data
+CTSSOLND=?           E CTS initial transport and storage costs for all coal units (gdx file)
+INTALLIND=?          W All the inputs for international model
+CRE8MPSD=?           O file instrumental in creating MPS file from LFMM output
+INDCMENTD=?          I cement industry data
+LFMINSETD=?          O LFMM input parameters
+RSSTKD=?             R residential count of existing houses
+RSUECD=?             R residential energy consumption survey year unit energy consumptions
+RSESTARD=?           R residential energy star home inputs
+RSMLGTD=?            R residential lighting menu and characterization
+RSSWITCHD=?          R residential fuel switching and fuel choice parameters
+RSMELSD=?            R residential miscellaneous end-use load unit energy consumption and saturation
+RSUECSHLD=?          R residential new home unit energy consumptions
+RSMISCD=?            R residential miscellaneous inputs (formerly rmisc) (now smaller)
+RSGENTKD=?           R residential distributed generation characterization  (formerly rgentk.txt)
+RSSQFTD=?            R residential floorspace (formerly rssqrft.txt)
+MPSSHELLD=?          O wrapper for cre8mps.gms (LFMM)
+COALD=?              C AIMMS Coal model files:  coal.prj
+COALPUTVARSD=?       C list of variables to send to AIMMS Coal model via filer
+COALGETVARSD=?       C list of variables extracted from AIMMS coal model via filer
+INTCRDSHRD=?         W crude oil import shares by type input to GAMS (LFMM)
+CLAGGEXPORTMAPD=?    C AIMMS coal model input
+CLEXPORTLIMITSD=?    C AIMMS coal model input
+CLDISTANCED=?        C AIMMS coal model input
+CLFEASIBLEROUTD=?    C AIMMS coal model input
+CLFREIGHTD=?         C AIMMS coal model input
+CLIMPORTLIMITSD=?    C AIMMS coal model input
+CLINTLDEMANDD=?      C AIMMS coal model input
+CLINTLQUALITYD=?     C AIMMS coal model input
+CLINTLSUPPLYD=?      C AIMMS coal model input
+CLRATESELECD=?       C AIMMS coal model input
+CLRATESNONELECD=?    C AIMMS coal model input
+CLTONRAILMILED=?     C AIMMS coal model input
+CLTONSPERCARD=?      C AIMMS coal model input
+CMMD=?               C AIMMS coal model input
+CMM2D=?              C AIMMS coal model input
+CPSD=?               C AIMMS coal model input
+DEMPUTVARSD=?        * list of variables transfered to residential and commercial modules from NEMS
+DEMGETVARSD=?        * list of variables transferred from residential and commercial module to NEMS. Should be subset of demputvars.txt list.
+INTBALANCED=?        W world liquids production and consumption by region
+CLINTLUSEXPORTD=?    C coal export assumptions for the US
+RUN45Q=1             * set to 1 to run the Tax Code Section 45Q tax credits; 0 to not
+RUNCTS=2             * set to 1 to run Carbon Transport and Storage; 0 to not
+RUNSTORE=1           E Run renewable and electricity storeage AIMMS LP
+RUNEMMSQL=1          E Run Dynamic EMM Sqlite3 code
+RUNRNGPL=1           * Run the R program for propane and ethane pricing
+RESTORED=?           E AIMMS zip file for Renewable and Storage evaluator
+PSELASTD=?           N Polysys demand elasticities and adjustment coefficients
+PSELASTOSPD=?        N other Polysys elasticities related to supply
+PSELASTS96D=?        N Polysys 1996 regional acreage elasticities
+PSRESULTTBD=?        N Polysys output format file
+PSSIMD=?             N Polysys biomass run control input
+PSBASEUNFD=?         N Polysys baseline zip files
+PSWHATIFRGD=?        N Polysys regional simulation parameters
+PSWHATIFUSD=?        N Polysys national simulation parameters
+VARLISTRECD=?        * variables set by renewables
+LFINVESTD=?          O LFMM investment and related parameters
+LFHISTD=?            O contains historical data for LFMM
+EXTRAP1=1            * set to 0 if you want to not do an extra p1 after all teh cycles
+EVIEWS32D=?          M EViews options
+NGPLPRICED=?         * R code to estimate ethane and propane prices.
+PSRAIND=?            N rain input for Polysys
+PSWINDD=?            N wind input for Polysys
+LFREPSETD=?          O LFMM reporting sets and hard-coded parameters
+BLDBASED=?           * EPA rule 111d baseline
+CRE8INVESTD=?        O GAMS code to create lfinvest.gdx
+APITABLED=?          * API gravity and corresponding Btu per gal from Thermal Properties 11/9/1929
+EFDD=?               E Electricity Fuel Dispatch LP model implemented in AIMMS. The zip contains the AIMMS 4.0 project folder.
+AIMMSVER=4           I AIMMS version (3 or 4) to use with Coal module
+AIMMSLOC=c:\aimms_installation_free_releases\4.37.4.1024-x86
+AIMMS64=0            I AIMMS 64-bit Version ODBC dsn template if 1; 32-bit dsn version if 0.
+RLOC=R-2.15.1
+ECPD=?               E Electricity Capacity Planning AIMMS project
+CLSTEOD=?            C STEO coal values
+REFOGMAPD=?          O Mapping OGSM districts to refinery regions
+REFRENT=0            O Consider unused refinery capacity when dealing with possibility of exports
+STEOVARSD=?          * variables from STEO tab STEO_A15BBB in STEO/AEO comparisons or a15bbb.csv file
+NGPUTVARSD=?         G List of global variables transferred from NEMS to AIMMS for the ngtdm module.
+AIMMSNG=1            G Invoke AIMMS Natural Gas T&D module
+NGGETVARSD=?         G List of global variables output by the AIMMS ngtdm and transferred from AIMMS to NEMS via filer
+NGAIMMSD=?           G AIMMS 4 project folder with the ngtdm aimms module code and settings
+STEOLISTD=?          * copy of steoblock include file read for STEO variable list
+IBFACTRID=?          I Industrial benchmark factors to apply when switch is set for applying them
+KMELSD=?             K Commercial sector miscellaeous electricity load inputs
+CLFLAGSD=?           C Flags and tolerances for coal model STEO benchmarking
+MNFACTORXD=?         * (Integration) conversion factor inputs.  file replaces mnfactor.xlm.
+GHGOFFXD=?           * (integration) greenhouse gas offset supply curves and non-co2 ghg emission baselines by category. replaces ghgoff.xml.
+CAFSHAREXD=?         * (integration) specifies the assumed California shares of Pacific fossil energy consumption by end use sector
+TRNAIRXD=?           T (tran) Transportation air model input data
+TRNSTOCKXD=?         T (tran) stock input data
+TRNFEMXD=?           T (tran) Transportation fuel economy input data
+TRNHDVXD=?           T (tran) Transportation heavy duty vehicle (freight) input data
+TRNLDVXD=?           T (tran) Transportation light duty vehicle input data
+TRNNHTSAXD=?         T (tran) Transportation input data from NHTSA
+KTEKXD=?             K (comm) Commercial end use technologies file
+INDCOGENXD=?         I (ind) industrial cogeneration or CHP assumptions.
+INDMOTORXD=?         I (ind) industrial motor cost and performance data
+IRONSTLXD=?          I (ind) input data for iron and steel industry
+FINREGYD=?           E (emm) regional electric power finance data (was finregx.xml)
+ECPDATYD=?           E (emm) electricity capacity planning assumptions for ECP submodel (was ecpdatx.xml)
+WLCO2D=?             L (ind) industrial carbon dioxide data (NETL)
+COALUNITSD=?         C (coal) cycle file holing final coal units from run for input to coal
+KEEPOPEN=0           * Switch to keep all AIMMS models in run open
+KEEPNG=0             G Switch to keep only natural gas AIMMS model open
+KEEPEFD=0            E Switch to keep only EFD AIMMS model open
+KEEPECP=0            E Switch to keep only ECP AIMMS model open
+KEEPEMM=0            E Switch to keep both ECP and EFD models open
+KEEPCOAL=0           C Switch to keep Coal AIMMS model open
+AIMMSEFD=0           E (emm) Invoke AIMMS EFD (Electricity Fuel Dispatch) LP interface
+AIMMSECP=0           E (emm) Invoke AIMMS ECP (Electricity Capacity Planning) LP interface
+AIMEFDBG=0           E (emm) Include additional EFD-AIMMS output for debugging and validation
+AIMMKEFD=0           E (emm) Run EFD with some EFD-AIMMS routines to make files needed for arraycode_efd.f to make AIMMS LP code
+AIMECPBG=0           E (emm) Include additional ECP-AIMMS output for debugging and validation
+AIMMKECP=0           E (emm) Run ECP with some ECP-AIMMS routines to make files needed for arraycode_ecp.f to make AIMMS LP code
+AIMEFDD=?            E (emm) AIMMS interface inputs for EFD
+AIMECPD=?            E (EMM) AIMMS interface inputs for ECP
+ECPARRAYS_ALLD=?     E (EMM) List of AIMMS coefficient parameter arrays.  Input file to arraycode preprocessor. generated by emm run and script get_ecp_array_list.sh.
+EFDARRAYS_ALLD=?     E (EMM) List of AIMMS coefficient parameter arrays.  Input file to arraycode preprocessor. generated by emm run and script get_efd_array_list.sh
+NOTIFY=0             I If =1 and not using cygwin, cycle.sh uses smtpmail to send email to submitter's eia address when job completes
+
+UAIMMSD=?            E (EMM) Routines for AIMMS interface for ECP and EFD linear programs.
+ECP_ROW_COLD=?       E (EMM) code for ecp_row_col.mod with shared declarations for aimms ecp interface data
+EFD_ROW_COLD=?       E (EMM) code for efd_row_col.mod with shared declarations for aimms efd interface data
+NGASSUMPTIONSD=?     G (NGMM) NGMM assumptions and switches
+NGMARKUPSD=?         G (NGMM) estimations and data related to end use natural gas prices
+NGLNGEXPD=?          G (NGMM) liquefied natural gas export data and assumptions
+NGMEXICOD=?          G (NGMM) historical Mexico natural gas data
+NGSPOTPRCD=?         G (NGMM) historical natural gas spot prices and wellhead adjustments
+NGCAPACITYD=?        G (NGMM) historical natural gas pipeline capacity and planned additions
+NGCANADAD=?          G (NGMM) historical Canada natural gas data
+NGEIAD=?             G (NGMM) data from Natural Gas Monthly and Natural Gas Annual
+NGSETMAPD=?          G (NGMM) sets and mappings
+NGVARTARD=?          G (NGMM) variable tariff curves by arc
+NGTEXASD=?           G (NGMM) various texas assumptions
+NGTXCAPAD=?          G (NGMM) texas pipeline capacities
+NGSTEOFACTIND=?      G (NGMM) STEO benchmark factors
+RSMESSD=?            R menus for residential equipment and shell selection
+BENCHMARKD=?         * R program to benchmark a NEMS series to a STEO series
+RESTPREPD=?          E input data for renewable and electricity storage AIMMS LP not provided by ECP
+LFG_PARAMETERSD=?    N input parameters for landfill gas model
+COALD2REFMAPD=?      O coal demand region to refinery region mapping for corn supply
+TCS45QIND=?          * values for tax code section 45 q years and credit variables
+CLOCEANDISTD=?       C inputs for coal ocean freight logic
+FEEDSTOCKD=?         I historical industrial feedstock consumption
+FEEDSTKAERD=?        I industrial feedstock data from Annual Energy Review
+NEMSFUNCTD=?         * library of functions theoretically useful for NEMS modules
+PROPCOD=?            * Coefficients for propane price equations
+RPSTRANCHED=?        N state renewable portfolio standard tranche details
+ETHANEREGD=?         I (industrial) fraction of ethane feedstock consumed by Census Division
+PROPANEREGD=?        I (industrial) fraction of propane feedstock consumed by Census Division
+EMM_DBD=?            E (emm) a zipped file of the database (Nems_input.db) and some excel files that feed it
+UESQLD=?             E (emm) fortran source code that makes calls to an SQL database
+FSQLITED=?           E (emm) source code for dynamic emm sql code
+INP_CMM_INPUTD=?     N general input for coal module
+CLBASEYR=2021        C Switch to update coal base year
+HYDROGEN_DATAD=?     N hydrogen data used for NEMS h2 model
+HYDROGEND=?          N compressed h2 project
+
+CLUSEXPORTICMMD=?    C US coal exports from WEPS International Coal Model (ICMM)
+ICMMCOMMODITYMAPD=?  C Mapping for ICMM coal commodity ranks to CMM indexes
+IND_COALD=?          I historical industrial coal consumption by industry
+IND_ELECTRICD=?      I historical industrial electricity consumption by industry
+NEMSPYENV=NULLSTR
+LEGIRA=1             * Whether 2022 IRA is being used in run or not

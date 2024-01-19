@@ -1,0 +1,15 @@
+!  $Header: N:/default/includes/RCS/qonroad,v 1.1 2004/06/17 18:32:04 PKC Exp $
+!  Common Block for on-road distillate quantity and conversion factor
+
+!  NEMS Common Block Parameters
+      INTEGER OQSIZE
+      PARAMETER(OQSIZE=MNUMCR*MNUMYR+MNUMYR) ! Size of array
+
+      REAL QDSTRHWY(MNUMCR,MNUMYR)  ! On-road distillate quantity, transportation sector
+      REAL CFDSTRHWY(MNUMYR)        ! On-road distillate conversion factor, transportation sector
+
+!  NEMS Common Block - quantitiy and conversion factor here, separated from price for adjusting purposes
+      COMMON /QONROAD/ QDSTRHWY, CFDSTRHWY
+
+      REAL OQARRY(OQSIZE)
+      EQUIVALENCE(OQARRY,QDSTRHWY)

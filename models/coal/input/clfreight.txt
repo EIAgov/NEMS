@@ -1,0 +1,770 @@
+COMPOSITE TABLE:
+  e       i    tc      InternationalUnitTransport
+!--------------------------------------------------
+  UI      UI   2       0   
+  UE      UI   2       0   
+  UG      UI   2       0   
+  UW      UI   2       0   
+  UA      UI   2       0   
+  NI      UI   2       5   
+  NW      UI   2       0.1   
+  CL      UI   2       0   
+  VZ      UI   2       0   
+  PO      UI   2       0   
+  RE      UI   2       0   
+  RA      UI   2       0   
+  SF      UI   2       0   
+  IN      UI   2       0   
+  HI      UI   2       0   
+  AU      UI   2       0   
+  VT      UI   2       0   
+  UI      UE   2       0   
+  UE      UE   2       0   
+  UG      UE   2       0   
+  UW      UE   2       0   
+  UA      UE   2       0   
+  NI      UE   2       5   
+  NW      UE   2       0   
+  CL      UE   2       5.7   
+  VZ      UE   2       5.7   
+  PO      UE   2       7.6   
+  RE      UE   2       0   
+  RA      UE   2       0   
+  SF      UE   2       13   
+  IN      UE   2       15.2   
+  HI      UE   2       17.9   
+  AU      UE   2       0   
+  VT      UE   2       17.2   
+  UI      UG   2       0   
+  UE      UG   2       0   
+  UG      UG   2       0   
+  UW      UG   2       0   
+  UA      UG   2       0   
+  NI      UG   2       0   
+  NW      UG   2       0   
+  CL      UG   2       3.4   
+  VZ      UG   2       3.4   
+  PO      UG   2       9.3   
+  RE      UG   2       0   
+  RA      UG   2       0   
+  SF      UG   2       13   
+  IN      UG   2       15.2   
+  HI      UG   2       17.9   
+  AU      UG   2       0   
+  VT      UG   2       17.2   
+  UI      UN   2       0   
+  UE      UN   2       0   
+  UG      UN   2       0   
+  UW      UN   2       0   
+  UA      UN   2       0   
+  NI      UN   2       0   
+  NW      UN   2       6.5   
+  CL      UN   2       8   
+  VZ      UN   2       8   
+  PO      UN   2       0   
+  RE      UN   2       0   
+  RA      UN   2       0   
+  SF      UN   2       0   
+  IN      UN   2       10.5   
+  HI      UN   2       0   
+  AU      UN   2       10.5   
+  VT      UN   2       17   
+  UI      NE   2       0   
+  UE      NE   2       0   
+  UG      NE   2       0   
+  UW      NE   2       0   
+  UA      NE   2       0   
+  NI      NE   2       0   
+  NW      NE   2       0   
+  CL      NE   2       6.1   
+  VZ      NE   2       6.1   
+  PO      NE   2       7.4   
+  RE      NE   2       0   
+  RA      NE   2       0   
+  SF      NE   2       13   
+  IN      NE   2       17   
+  HI      NE   2       17.9   
+  AU      NE   2       0   
+  VT      NE   2       0   
+  UI      NI   2       4.5   
+  UE      NI   2       0   
+  UG      NI   2       0   
+  UW      NI   2       0   
+  UA      NI   2       0   
+  NI      NI   2       0   
+  NW      NI   2       0   
+  CL      NI   2       0   
+  VZ      NI   2       0   
+  PO      NI   2       0   
+  RE      NI   2       0   
+  RA      NI   2       0   
+  SF      NI   2       0   
+  IN      NI   2       0   
+  HI      NI   2       0   
+  AU      NI   2       0   
+  VT      NI   2       0   
+  UI      SC   2       0   
+  UE      SC   2       4.3   
+  UG      SC   2       5.1   
+  UW      SC   2       0   
+  UA      SC   2       0   
+  NI      SC   2       0   
+  NW      SC   2       8.7   
+  CL      SC   2       5.1   
+  VZ      SC   2       6.7   
+  PO      SC   2       1.5   
+  RE      SC   2       2.7   
+  RA      SC   2       0   
+  SF      SC   2       7.2   
+  IN      SC   2       9.2   
+  HI      SC   2       15.1   
+  AU      SC   2       10.8   
+  VT      SC   2       12.8   
+  UI      BT   2       0   
+  UE      BT   2       5.2   
+  UG      BT   2       6.5   
+  UW      BT   2       0   
+  UA      BT   2       0   
+  NI      BT   2       0   
+  NW      BT   2       8.2   
+  CL      BT   2       6.6   
+  VZ      BT   2       6.6   
+  PO      BT   2       2.1   
+  RE      BT   2       3   
+  RA      BT   2       0   
+  SF      BT   2       9.6   
+  IN      BT   2       12.3   
+  HI      BT   2       14.8   
+  AU      BT   2       14.6   
+  VT      BT   2       12.3   
+  UI      GY   2       0   
+  UE      GY   2       4.1   
+  UG      GY   2       5   
+  UW      GY   2       0   
+  UA      GY   2       0   
+  NI      GY   2       0   
+  NW      GY   2       8.6   
+  CL      GY   2       5.1   
+  VZ      GY   2       6.7   
+  PO      GY   2       1.6   
+  RE      GY   2       2.8   
+  RA      GY   2       0   
+  SF      GY   2       7.1   
+  IN      GY   2       8.8   
+  HI      GY   2       15   
+  AU      GY   2       10.7   
+  VT      GY   2       12.7   
+  UI      OW   2       0   
+  UE      OW   2       3.9   
+  UG      OW   2       4.9   
+  UW      OW   2       0   
+  UA      OW   2       0   
+  NI      OW   2       0   
+  NW      OW   2       10.4    
+  CL      OW   2       4.9   
+  VZ      OW   2       6.3   
+  PO      OW   2       1.8   
+  RE      OW   2       2.9   
+  RA      OW   2       0   
+  SF      OW   2       7.9   
+  IN      OW   2       8.7   
+  HI      OW   2       14.7   
+  AU      OW   2       8.1   
+  VT      OW   2       12.4   
+  UI      PS   2       0   
+  UE      PS   2       3.7   
+  UG      PS   2       4.5   
+  UW      PS   2       0   
+  UA      PS   2       0   
+  NI      PS   2       0   
+  NW      PS   2       8   
+  CL      PS   2       4.6   
+  VZ      PS   2       5.8   
+  PO      PS   2       2.7   
+  RE      PS   2       4.5   
+  RA      PS   2       0   
+  SF      PS   2       7.2   
+  IN      PS   2       7.9   
+  HI      PS   2       13.9   
+  AU      PS   2       10   
+  VT      PS   2       11.3   
+  UI      TL   2       0   
+  UE      TL   2       4.8   
+  UG      TL   2       5.2   
+  UW      TL   2       0   
+  UA      TL   2       0   
+  NI      TL   2       0   
+  NW      TL   2       8.9   
+  CL      TL   2       5.5   
+  VZ      TL   2       7.2   
+  PO      TL   2       5.1   
+  RE      TL   2       4.1   
+  RA      TL   2       0   
+  SF      TL   2       6.4   
+  IN      TL   2       7.5   
+  HI      TL   2       12   
+  AU      TL   2       8.6   
+  VT      TL   2       9.6   
+  UI      RM   2       0   
+  UE      RM   2       6.9   
+  UG      RM   2       7.5   
+  UW      RM   2       0   
+  UA      RM   2       0   
+  NI      RM   2       0   
+  NW      RM   2       12.7   
+  CL      RM   2       8.1   
+  VZ      RM   2       7.9   
+  PO      RM   2       5.7   
+  RE      RM   2       2.8   
+  RA      RM   2       0   
+  SF      RM   2       7.2   
+  IN      RM   2       9.5   
+  HI      RM   2       10.9   
+  AU      RM   2       10.7   
+  VT      RM   2       9.2   
+  UI      MX   2       0   
+  UE      MX   2       4.6   
+  UG      MX   2       4.4   
+  UW      MX   2       4.3   
+  UA      MX   2       8.3   
+  NI      MX   2       0   
+  NW      MX   2       8.8   
+  CL      MX   2       3.9   
+  VZ      MX   2       3.9   
+  PO      MX   2       8.3   
+  RE      MX   2       11.4   
+  RA      MX   2       0   
+  SF      MX   2       13   
+  IN      MX   2       15.7   
+  HI      MX   2       15.1   
+  AU      MX   2       13.7   
+  VT      MX   2       12.9   
+  UI      LA   2       0   
+  UE      LA   2       6.6   
+  UG      LA   2       6.9   
+  UW      LA   2       9.2   
+  UA      LA   2       11.9   
+  NI      LA   2       0   
+  NW      LA   2       10.8   
+  CL      LA   2       7.4   
+  VZ      LA   2       5.8   
+  PO      LA   2       7.9   
+  RE      LA   2       11.1   
+  RA      LA   2       0   
+  SF      LA   2       9.9   
+  IN      LA   2       12.7   
+  HI      LA   2       13.9   
+  AU      LA   2       8.7   
+  VT      LA   2       13.2   
+  UI      JA   2       0  
+  UE      JA   2       9.7  
+  UG      JA   2       9.7  
+  UW      JA   2       4.2  
+  UA      JA   2       4  
+  NI      JA   2       0  
+  NW      JA   2       3.1  
+  CL      JA   2       10.9  
+  VZ      JA   2       14  
+  PO      JA   2       0  
+  RE      JA   2       0  
+  RA      JA   2       2.8
+  SF      JA   2       7.1  
+  IN      JA   2       3.6
+  HI      JA   2       2.4  
+  AU      JA   2       4.3  
+  VT      JA   2       3.6  
+  UI      EA   2       0  
+  UE      EA   2       10  
+  UG      EA   2       9.9  
+  UW      EA   2       4.4  
+  UA      EA   2       0.2  
+  NI      EA   2       0  
+  NW      EA   2       3.7  
+  CL      EA   2       11  
+  VZ      EA   2       14.1  
+  PO      EA   2       0  
+  RE      EA   2       0  
+  RA      EA   2       1.8  
+  SF      EA   2       4.7  
+  IN      EA   2       3.2  
+  HI      EA   2       2.2  
+  AU      EA   2       6.2  
+  VT      EA   2       2.6  
+  UI      CH   2       0  
+  UE      CH   2       10  
+  UG      CH   2       10  
+  UW      CH   2       6.9  
+  UA      CH   2       5.4  
+  NI      CH   2       0  
+  NW      CH   2       2.5  
+  CL      CH   2       11.5  
+  VZ      CH   2       14.8  
+  PO      CH   2       0  
+  RE      CH   2       0  
+  RA      CH   2       2.6  
+  SF      CH   2       5.7  
+  IN      CH   2       2.4  
+  HI      CH   2       2.5  
+  AU      CH   2       3.8  
+  VT      CH   2       0.8  
+  UI      AS   2       0  
+  UE      AS   2       16.4  
+  UG      AS   2       16.4  
+  UW      AS   2       9.6  
+  UA      AS   2       10.2  
+  NI      AS   2       0  
+  NW      AS   2       5.4  
+  CL      AS   2       17.6  
+  VZ      AS   2       17.8  
+  PO      AS   2       0  
+  RE      AS   2       0  
+  RA      AS   2       5.3  
+  SF      AS   2       8.7  
+  IN      AS   2       4.3  
+  HI      AS   2       4.9  
+  AU      AS   2       8.1  
+  VT      AS   2       4  
+  UI      IN   2       0  
+  UE      IN   2       11.4  
+  UG      IN   2       7.4  
+  UW      IN   2       7.6  
+  UA      IN   2       10.2  
+  NI      IN   2       0  
+  NW      IN   2       5.4  
+  CL      IN   2       17.6  
+  VZ      IN   2       17.8  
+  PO      IN   2       0  
+  RE      IN   2       0  
+  RA      IN   2       4.8  
+  SF      IN   2       6.7  
+  IN      IN   2       5.3  
+  HI      IN   2       4.9  
+  AU      IN   2       8.4  
+  VT      IN   2       7.0
+  NW      UE   1       1.0   
+  NW      UI   1       1.0   
+  UI      NI   1       4.5
+  UE      NI   1       0
+  UG      NI   1       0
+  UW      NI   1       0
+  UA      NI   1       0
+  NI      NI   1       0
+  NW      NI   1       0
+  CL      NI   1       0
+  VZ      NI   1       0
+  PO      NI   1       0
+  RE      NI   1       0
+  RA      NI   1       0
+  SF      NI   1       0
+  IN      NI   1       15.2
+  HI      NI   1       0
+  AU      NI   1       0
+  VT      NI   1       0
+  UI      SC   1       0
+  UE      SC   1       5.6
+  UG      SC   1       6.7
+  UW      SC   1       0
+  UA      SC   1       0
+  NI      SC   1       0
+  NW      SC   1       11.9
+  CL      SC   1       0
+  VZ      SC   1       0
+  PO      SC   1       1.5
+  RE      SC   1       2.7
+  RA      SC   1       0
+  SF      SC   1       9.8
+  IN      SC   1       9.2
+  HI      SC   1       15.1
+  AU      SC   1       15.1
+  VT      SC   1       12.8
+  UI      BT   1       0
+  UE      BT   1       4
+  UG      BT   1       4.9
+  UW      BT   1       0
+  UA      BT   1       0
+  NI      BT   1       0
+  NW      BT   1       8
+  CL      BT   1       0
+  VZ      BT   1       0
+  PO      BT   1       2.1
+  RE      BT   1       3
+  RA      BT   1       0
+  SF      BT   1       7.1
+  IN      BT   1       12.3
+  HI      BT   1       14.8
+  AU      BT   1       10.5
+  VT      BT   1       12.3
+  UI      GY   1       0
+  UE      GY   1       4.1
+  UG      GY   1       5
+  UW      GY   1       0
+  UA      GY   1       0
+  NI      GY   1       0
+  NW      GY   1       10.6
+  CL      GY   1       0
+  VZ      GY   1       0
+  PO      GY   1       1.6
+  RE      GY   1       2.8
+  RA      GY   1       0
+  SF      GY   1       10.9
+  IN      GY   1       8.8
+  HI      GY   1       15
+  AU      GY   1       10.7
+  VT      GY   1       12.7
+  UI      OW   1       0
+  UE      OW   1       4.9
+  UG      OW   1       4.9
+  UW      OW   1       0
+  UA      OW   1       0
+  NI      OW   1       0
+  NW      OW   1       10.4
+  CL      OW   1       0
+  VZ      OW   1       0
+  PO      OW   1       1.8
+  RE      OW   1       2.9
+  RA      OW   1       0
+  SF      OW   1       11.9
+  IN      OW   1       8.7
+  HI      OW   1       14.7
+  AU      OW   1       10.5
+  VT      OW   1       12.4
+  UI      PS   1       0
+  UE      PS   1       3.7
+  UG      PS   1       4.5
+  UW      PS   1       0
+  UA      PS   1       0
+  NI      PS   1       0
+  NW      PS   1       10
+  CL      PS   1       0
+  VZ      PS   1       0
+  PO      PS   1       2.7
+  RE      PS   1       4.5
+  RA      PS   1       0
+  SF      PS   1       7.2
+  IN      PS   1       7.9
+  HI      PS   1       13.9
+  AU      PS   1       10
+  VT      PS   1       11.3
+  UI      TL   1       0
+  UE      TL   1       4.8
+  UG      TL   1       5.2
+  UW      TL   1       0
+  UA      TL   1       0
+  NI      TL   1       0
+  NW      TL   1       10.9
+  CL      TL   1       0
+  VZ      TL   1       0
+  PO      TL   1       5.1
+  RE      TL   1       4.1
+  RA      TL   1       0
+  SF      TL   1       8.4
+  IN      TL   1       7.5
+  HI      TL   1       12
+  AU      TL   1       8.6
+  VT      TL   1       9.6
+  UI      RM   1       0
+  UE      RM   1       5.2
+  UG      RM   1       5.6
+  UW      RM   1       0
+  UA      RM   1       0
+  NI      RM   1       0
+  NW      RM   1       10.2
+  CL      RM   1       0
+  VZ      RM   1       0
+  PO      RM   1       5.7
+  RE      RM   1       2.8
+  RA      RM   1       0
+  SF      RM   1       7.2
+  IN      RM   1       9.5
+  HI      RM   1       10.9
+  AU      RM   1       7.9
+  VT      RM   1       9.2
+  UI      MX   1       0
+  UE      MX   1       4.6
+  UG      MX   1       4.4
+  UW      MX   1       0
+  UA      MX   1       0
+  NI      MX   1       0
+  NW      MX   1       8.3
+  CL      MX   1       0
+  VZ      MX   1       0
+  PO      MX   1       8.3
+  RE      MX   1       11.4
+  RA      MX   1       0
+  SF      MX   1       13
+  IN      MX   1       15.7
+  HI      MX   1       15.1
+  AU      MX   1       13.7
+  VT      MX   1       12.9
+  UI      LA   1       0
+  UE      LA   1       6.6
+  UG      LA   1       6.9
+  UW      LA   1       0
+  UA      LA   1       0
+  NI      LA   1       0
+  NW      LA   1       10.8
+  CL      LA   1       0
+  VZ      LA   1       0
+  PO      LA   1       7
+  RE      LA   1       11.1
+  RA      LA   1       0
+  SF      LA   1       9.9
+  IN      LA   1       12.7
+  HI      LA   1       13.9
+  AU      LA   1       10.2
+  VT      LA   1       13.2
+  UI      JA   1       0
+  UE      JA   1       3.7
+  UG      JA   1       9.7
+  UW      JA   1       6.2
+  UA      JA   1       0
+  NI      JA   1       0
+  NW      JA   1       4.6
+  CL      JA   1       0
+  VZ      JA   1       0
+  PO      JA   1       0
+  RE      JA   1       0
+  RA      JA   1       2
+  SF      JA   1       7.1
+  IN      JA   1       4
+  HI      JA   1       2.4
+  AU      JA   1       4.6
+  VT      JA   1       3.6
+  UI      EA   1       0
+  UE      EA   1       3.7
+  UG      EA   1       9.9
+  UW      EA   1       6.7
+  UA      EA   1       0
+  NI      EA   1       0
+  NW      EA   1       5.2
+  CL      EA   1       0
+  VZ      EA   1       0
+  PO      EA   1       0
+  RE      EA   1       0
+  RA      EA   1       1.8
+  SF      EA   1       4.7
+  IN      EA   1       3.2
+  HI      EA   1       2.2
+  AU      EA   1       4.7
+  VT      EA   1       2.6
+  UI      CH   1       0
+  UE      CH   1       10
+  UG      CH   1       10
+  UW      CH   1       6.9
+  UA      CH   1       0
+  NI      CH   1       0
+  NW      CH   1       5.0
+  CL      CH   1       0
+  VZ      CH   1       0
+  PO      CH   1       0
+  RE      CH   1       0
+  RA      CH   1       1.8
+  SF      CH   1       5.7
+  IN      CH   1       2.4
+  HI      CH   1       2.5
+  AU      CH   1       3.8
+  VT      CH   1       1.8
+  UI      AS   1       0
+  UE      AS   1       16.4
+  UG      AS   1       16.4
+  UW      AS   1       9.6
+  UA      AS   1       0
+  NI      AS   1       0
+  NW      AS   1       6.9
+  CL      AS   1       0
+  VZ      AS   1       0
+  PO      AS   1       0
+  RE      AS   1       0
+  RA      AS   1       5.3
+  SF      AS   1       8.7
+  IN      AS   1       4.3
+  HI      AS   1       4.9
+  AU      AS   1       6.9
+  VT      AS   1       4
+  UI      IN   1       0
+  UE      IN   1       10.4
+  UG      IN   1       7.4
+  UW      IN   1       0
+  UA      IN   1       0
+  NI      IN   1       0
+  NW      IN   1       7.9
+  CL      IN   1       0
+  VZ      IN   1       0
+  PO      IN   1       0
+  RE      IN   1       0
+  RA      IN   1       5.3
+  SF      IN   1       6.7
+  IN      IN   1       4.3
+  HI      IN   1       4.9
+  AU      IN   1       6.9
+  VT      IN   1       4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

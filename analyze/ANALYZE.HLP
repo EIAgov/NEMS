@@ -1,0 +1,107 @@
+                                Introduction
+                                ~~~~~~~~~~~~
+                          Part 1.  Session Control
+
+    You can execute commands from a file (see EXECUTE command); and, you
+    can route output to a file (see OUTPUT command).  Enter HELP to see
+    commands at any time; and, enter HELP command to get help for a
+    particular command.  To get help for each command enter HELP * (the
+    asterisk is a "mask" character in matching command names with your
+    specification after HELP).
+
+    The general syntax for all commands is of the form:
+
+              command required_parameters [optional_parameters]
+
+    Note that you must LOCK CAPS.
+
+    Special characters, called "delimiters," are used to recognized the
+    command and parameters.  Some of these delimiters are:
+                                blank
+                                comma        ,
+                                equal sign   =
+                                parentheses  ()
+                                braces       {}
+                                semi-colon   ;
+    The semi-colon is used to separate commands, so more than one command
+    can be specified in one input line.  For example,
+                                SCREEN ; SWITCH
+    executes the SCREEN command, followed by executing the SWITCH command.
+
+    There are other special characters, in addition to delimiters, which
+    are explained with each command.  The mask character (*) is a wild
+    character in row or column name, and it also represents infinity
+    when the item is a real value (input or output).  A complete table of
+    special symbols is in SYMBOLS.DOC (PRINT SYMBOLS to see the table).
+
+    When reading input from a file, comments may be included in 2 ways.
+    First, you may have * in column 1, in which case the line is simply
+    ignored.  Second, you may have $ in column 1, in which case the line
+    is first printed to the OUTPUT file, then ignored.
+
+    Commands and parameters can be abbreviated using "telescopic"
+    abbreviations that do not conflict.  For example, the telescopic
+    abbreviations for the OUTPUT command are:  O, OU, OUT, OUTP, OUTPU.
+    The least abbreviation, O, can be used as long as there is no other
+    command beginning with O.  Similarly, the SCREEN command has 2
+    parameters:  WIDTH and LENGTH.  These may be abbreviated W and L,
+    respectively.
+
+                         Part 2. Procedure Commands
+
+    ANALYZE lets you query the LP matrix or solution values, using row
+    and column names plus their attributes as keys to delineate a portion
+    (ie, submatrix).  A "name mask" references sets of rows or columns,
+    where * is the mask character.  For example, P**NE refers to names
+    whose first character is P and whose 4th and 5th characters are NE.
+    Trailing blanks are treated as mask characters, so P**NE*** refers to
+    the same set.  Also, the name mask * refers to all names (ie,
+    anything matches).
+
+    Commands may be functionally grouped as follows (besides session
+    control):
+
+    Input/Output (IO):  Getting LP and related information into memory/
+                        Saving information for later processing
+                Query:  Looking at the LP information, with a variety of
+                        view options
+                 Edit:  Making some changes in the LP information
+
+            Debugging: Running procedures to help understand a failure,
+                       such as an infeasible LP, or to verify values.
+             Analysis: Running procedures to help answer questions, such as
+                       What if ...?,  Why ...?,  Why not ...?
+
+    The commands in these functional groups are shown in MENU.DOC and
+    QUICKREF.DOC (you can enter PRINT MENU or PRINT QUICKREF, resp.).
+
+    Query (and other) commands have syntax that allows direct submatrix
+    specification, not only by name masks, but also by other delineation.
+    One way rows and columns may be delineated is by their "rim values"
+    (i.e., costs, bounds and solution values).  The rim elements are:
+    {C,L,U,X|Y,D|P}
+
+    where:  C = objective value, L = lower bound, U = upper bound,
+          X|Y = activity level (Y = AX); and,
+          D|P = dual price (D = C - PA).
+
+    PRINT CONDNL for more information about conditionals.  (You can also
+    look at the dictionary by entering ? CONDITIONAL.)
+
+    All query commands allow direct delineation of rows and/or columns.
+    It is also possible to build an arbitrary submatrix with the SUBMAT
+    command, using a sequence of additions, deletions and reversals.  In
+    general, all query commands are applied to the "working submatrix."
+    If direct entry is used, this defines the submatrix rows and/or
+    columns; otherwise, if the command is used without direct
+    delineation, the latest submatrix settings are used.  For example,
+    DISPLAY ROWS without conditional will display rows in the submatrix.
+    A direct conditional, like DISPLAY R * S=I, will change the submatrix
+    (in this case the rows become those with Infeasible solution Status).
+
+    All output, like from query commands ADDRIM, DISPLAY, COUNT, PICTURE,
+    LIST, TALLY and EXPLAIN, are printed in the OUTPUT file (initially
+    set to the terminal screen).  See each command for the syntax and
+    examples.  Also, see DIRDOCS for a Directory of document files that
+    you may want to print, notably QUICKREF, and see GUIDE for guidance on
+    what to read.

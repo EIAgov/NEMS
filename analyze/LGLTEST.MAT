@@ -1,0 +1,36 @@
+NAME          LGLTEST
+ROWS
+ N  OBJ
+ L  R1
+ L  R2
+ L  R3
+ L  R4
+COLUMNS
+    X1        R1         1.            R3         -1.
+              R4         1.
+    X2        R1        -1.            R2          1.
+              R4         1.
+    X3        R2        -1.            R3          1.
+              R4         1.
+    I4        R4         10.
+RHS
+    RHS       R4         1.
+BOUNDS
+ UP BNDSET    X1         1.
+ UP BNDSET    X2         1.
+ UP BNDSET    X3         1.
+ENDATA
+
+         MIN     0:  X=0,1
+       (R1)      X1 - X2             <= 0
+       (R2)           X2 - X3        <= 0
+       (R3)     -X1      + X3        <= 0
+       (R4)      X1 + X2 + X3 + 10I4 <= 1
+
+ REDUCE SHOULD FIX I4=0 AND PRODUCE IMPLICATIONS:
+        IF X1 = 1 THEN X2 = 1
+        IF X2 = 1 THEN X3 = 1
+        IF X3 = 1 THEN X1 = 1
+
+ ...{X1,X2,X3} THUS FORM AN EQUIVALENCE CLASS, WHICH SHOULD BE
+    DETECTED BY LGLSORT.

@@ -1,0 +1,386 @@
+! $Header: M:/default/includes/RCS/xprsparms.fi,v 1.1 2014/01/10 19:36:52 dsa Exp $
+
+!     FORTRAN include file XPRSPARMS.FI  (derived from C include file xprs.h)
+
+      !dec$ fixedformlinesize:80
+
+!******************************************************************************!
+! useful constants                                                             !
+!******************************************************************************!
+      real(8),    parameter :: XPRS_PLUSINFINITY                 =     1.0e+20
+      real(8),    parameter :: XPRS_MINUSINFINITY                =    -1.0e+20
+      integer(4), parameter :: XPRS_MAXINT                       =  2147483647
+      integer(4), parameter :: XPRS_OBJ_MINIMIZE                       =     1
+      integer(4), parameter :: XPRS_OBJ_MAXIMIZE                       =    -1
+      integer(4), parameter :: XPVERSION                               =    19
+
+!******************************************************************************!
+! control parameters for XPRSprob                                              !
+!******************************************************************************!
+! String control parameters
+      integer(4), parameter :: XPRS_MPSRHSNAME                         =  6001
+      integer(4), parameter :: XPRS_MPSOBJNAME                         =  6002
+      integer(4), parameter :: XPRS_MPSRANGENAME                       =  6003
+      integer(4), parameter :: XPRS_MPSBOUNDNAME                       =  6004
+      integer(4), parameter :: XPRS_OUTPUTMASK                         =  6005
+! Double control parameters
+      integer(4), parameter :: XPRS_MATRIXTOL                          =  7001
+      integer(4), parameter :: XPRS_PIVOTTOL                           =  7002
+      integer(4), parameter :: XPRS_FEASTOL                            =  7003
+      integer(4), parameter :: XPRS_OUTPUTTOL                          =  7004
+      integer(4), parameter :: XPRS_SOSREFTOL                          =  7005
+      integer(4), parameter :: XPRS_OPTIMALITYTOL                      =  7006
+      integer(4), parameter :: XPRS_ETATOL                             =  7007
+      integer(4), parameter :: XPRS_RELPIVOTTOL                        =  7008
+      integer(4), parameter :: XPRS_MIPTOL                             =  7009
+      integer(4), parameter :: XPRS_DEGRADEFACTOR                      =  7010
+      integer(4), parameter :: XPRS_MIPTARGET                          =  7011
+      integer(4), parameter :: XPRS_MIPADDCUTOFF                       =  7012
+      integer(4), parameter :: XPRS_MIPABSCUTOFF                       =  7013
+      integer(4), parameter :: XPRS_MIPRELCUTOFF                       =  7014
+      integer(4), parameter :: XPRS_PSEUDOCOST                         =  7015
+      integer(4), parameter :: XPRS_PENALTY                            =  7016
+      integer(4), parameter :: XPRS_BIGM                               =  7018
+      integer(4), parameter :: XPRS_MIPABSSTOP                         =  7019
+      integer(4), parameter :: XPRS_MIPRELSTOP                         =  7020
+      integer(4), parameter :: XPRS_CHOLESKYTOL                        =  7032
+      integer(4), parameter :: XPRS_BARGAPSTOP                         =  7033
+      integer(4), parameter :: XPRS_BARDUALSTOP                        =  7034
+      integer(4), parameter :: XPRS_BARPRIMALSTOP                      =  7035
+      integer(4), parameter :: XPRS_BARSTEPSTOP                        =  7036
+      integer(4), parameter :: XPRS_ELIMTOL                            =  7042
+      integer(4), parameter :: XPRS_PERTURB                            =  7044
+      integer(4), parameter :: XPRS_MARKOWITZTOL                       =  7047
+      integer(4), parameter :: XPRS_PPFACTOR                           =  7069
+      integer(4), parameter :: XPRS_SBEFFORT                           =  7086
+      integer(4), parameter :: XPRS_HEURSEARCHEFFORT                   =  7090
+      integer(4), parameter :: XPRS_CUTFACTOR                          =  7091
+      integer(4), parameter :: XPRS_EIGENVALUETOL                      =  7097
+! Integer control parameters
+      integer(4), parameter :: XPRS_EXTRAROWS                          =  8004
+      integer(4), parameter :: XPRS_EXTRACOLS                          =  8005
+      integer(4), parameter :: XPRS_EXTRAELEMS                         =  8006
+      integer(4), parameter :: XPRS_LPITERLIMIT                        =  8007
+      integer(4), parameter :: XPRS_LPLOG                              =  8009
+      integer(4), parameter :: XPRS_SCALING                            =  8010
+      integer(4), parameter :: XPRS_PRESOLVE                           =  8011
+      integer(4), parameter :: XPRS_CRASH                              =  8012
+      integer(4), parameter :: XPRS_PRICINGALG                         =  8013
+      integer(4), parameter :: XPRS_INVERTFREQ                         =  8014
+      integer(4), parameter :: XPRS_INVERTMIN                          =  8015
+      integer(4), parameter :: XPRS_MAXNODE                            =  8018
+      integer(4), parameter :: XPRS_MAXTIME                            =  8020
+      integer(4), parameter :: XPRS_MAXMIPSOL                          =  8021
+      integer(4), parameter :: XPRS_KEEPMIPSOL                         =  8022
+      integer(4), parameter :: XPRS_DEFAULTALG                         =  8023
+      integer(4), parameter :: XPRS_VARSELECTION                       =  8025
+      integer(4), parameter :: XPRS_NODESELECTION                      =  8026
+      integer(4), parameter :: XPRS_BACKTRACK                          =  8027
+      integer(4), parameter :: XPRS_MIPLOG                             =  8028
+      integer(4), parameter :: XPRS_KEEPNROWS                          =  8030
+      integer(4), parameter :: XPRS_MPSECHO                            =  8032
+      integer(4), parameter :: XPRS_MAXPAGELINES                       =  8034
+      integer(4), parameter :: XPRS_OUTPUTLOG                          =  8035
+      integer(4), parameter :: XPRS_EXTRAPRESOLVE                      =  8037
+      integer(4), parameter :: XPRS_CACHESIZE                          =  8043
+      integer(4), parameter :: XPRS_CROSSOVER                          =  8044
+      integer(4), parameter :: XPRS_BARITERLIMIT                       =  8045
+      integer(4), parameter :: XPRS_CHOLESKYALG                        =  8046
+      integer(4), parameter :: XPRS_BAROUTPUT                          =  8047
+      integer(4), parameter :: XPRS_CSTYLE                             =  8050
+      integer(4), parameter :: XPRS_EXTRAMIPENTS                       =  8051
+      integer(4), parameter :: XPRS_REFACTOR                           =  8052
+      integer(4), parameter :: XPRS_BARTHREADS                         =  8053
+      integer(4), parameter :: XPRS_KEEPBASIS                          =  8054
+      integer(4), parameter :: XPRS_VERSION                            =  8061
+      integer(4), parameter :: XPRS_BIGMMETHOD                         =  8068
+      integer(4), parameter :: XPRS_MPSNAMELENGTH                      =  8071
+      integer(4), parameter :: XPRS_SOLUTIONFILE                       =  8072
+      integer(4), parameter :: XPRS_PRESOLVEOPS                        =  8077
+      integer(4), parameter :: XPRS_MIPPRESOLVE                        =  8078
+      integer(4), parameter :: XPRS_MIPTHREADS                         =  8079
+      integer(4), parameter :: XPRS_BARORDER                           =  8080
+      integer(4), parameter :: XPRS_BREADTHFIRST                       =  8082
+      integer(4), parameter :: XPRS_AUTOPERTURB                        =  8084
+      integer(4), parameter :: XPRS_DENSECOLLIMIT                      =  8086
+      integer(4), parameter :: XPRS_CUTFREQ                            =  8116
+      integer(4), parameter :: XPRS_TRACE                              =  8130
+      integer(4), parameter :: XPRS_MAXIIS                             =  8131
+      integer(4), parameter :: XPRS_CPUTIME                            =  8133
+      integer(4), parameter :: XPRS_COVERCUTS                          =  8134
+      integer(4), parameter :: XPRS_GOMCUTS                            =  8135
+      integer(4), parameter :: XPRS_MPSFORMAT                          =  8137
+      integer(4), parameter :: XPRS_CUTSTRATEGY                        =  8138
+      integer(4), parameter :: XPRS_CUTDEPTH                           =  8139
+      integer(4), parameter :: XPRS_TREECOVERCUTS                      =  8140
+      integer(4), parameter :: XPRS_TREEGOMCUTS                        =  8141
+      integer(4), parameter :: XPRS_CUTSELECT                          =  8142
+      integer(4), parameter :: XPRS_TREECUTSELECT                      =  8143
+      integer(4), parameter :: XPRS_DUALIZE                            =  8144
+      integer(4), parameter :: XPRS_DUALGRADIENT                       =  8145
+      integer(4), parameter :: XPRS_SBITERLIMIT                        =  8146
+      integer(4), parameter :: XPRS_SBBEST                             =  8147
+      integer(4), parameter :: XPRS_MAXCUTTIME                         =  8149
+      integer(4), parameter :: XPRS_ACTIVESET                          =  8152
+      integer(4), parameter :: XPRS_BARINDEFLIMIT                      =  8153
+      integer(4), parameter :: XPRS_HEURSTRATEGY                       =  8154
+      integer(4), parameter :: XPRS_HEURFREQ                           =  8155
+      integer(4), parameter :: XPRS_HEURDEPTH                          =  8156
+      integer(4), parameter :: XPRS_HEURMAXSOL                         =  8157
+      integer(4), parameter :: XPRS_HEURNODES                          =  8158
+      integer(4), parameter :: XPRS_LNPBEST                            =  8160
+      integer(4), parameter :: XPRS_LNPITERLIMIT                       =  8161
+      integer(4), parameter :: XPRS_BRANCHCHOICE                       =  8162
+      integer(4), parameter :: XPRS_SBSELECT                           =  8164
+      integer(4), parameter :: XPRS_LOCALCHOICE                        =  8170
+      integer(4), parameter :: XPRS_DUALSTRATEGY                       =  8174
+      integer(4), parameter :: XPRS_L1CACHE                            =  8175
+      integer(4), parameter :: XPRS_HEURDIVESTRATEGY                   =  8177
+      integer(4), parameter :: XPRS_HEURSELECT                         =  8178
+      integer(4), parameter :: XPRS_SHAREMATRIX                        =  8186
+      integer(4), parameter :: XPRS_EXTRASETS                          =  8190
+      integer(4), parameter :: XPRS_EXTRASETELEMS                      =  8191
+      integer(4), parameter :: XPRS_FEASIBILITYPUMP                    =  8193
+      integer(4), parameter :: XPRS_HEURSEARCHFREQ                     =  8196
+      integer(4), parameter :: XPRS_HEURDIVESPEEDUP                    =  8197
+      integer(4), parameter :: XPRS_SBESTIMATE                         =  8198
+      integer(4), parameter :: XPRS_ALGAFTERCROSSOVER                  =  8208
+      integer(4), parameter :: XPRS_LINELENGTH                         =  8209
+      integer(4), parameter :: XPRS_MUTEXCALLBACKS                     =  8210
+      integer(4), parameter :: XPRS_BARCRASH                           =  8211
+      integer(4), parameter :: XPRS_HEURSEARCHROOTSELECT               =  8216
+      integer(4), parameter :: XPRS_HEURSEARCHTREESELECT               =  8217
+      integer(4), parameter :: XPRS_MPS18COMPATIBLE                    =  8223
+      integer(4), parameter :: XPRS_ROOTPRESOLVE                       =  8224
+      integer(4), parameter :: XPRS_CROSSOVERDRP                       =  8227
+      integer(4), parameter :: XPRS_FORCEOUTPUT                        =  8229
+      integer(4), parameter :: XPRS_DETERMINISTIC                      =  8232
+      integer(4), parameter :: XPRS_COLFIXBRANCH                       =  8234
+      integer(4), parameter :: XPRS_PREPROBING                         =  8238
+      integer(4), parameter :: XPRS_EXTRAQCELEMENTS                    =  8240
+      integer(4), parameter :: XPRS_EXTRAQCROWS                        =  8241
+      integer(4), parameter :: XPRS_TEMPBOUNDS                         =  8250
+      integer(4), parameter :: XPRS_IFCHECKCONVEXITY                   =  8251
+      integer(4), parameter :: XPRS_PRIMALUNSHIFT                      =  8252
+
+!******************************************************************************!
+! attributes for XPRSprob                                                      !
+!******************************************************************************!
+! String attributes
+      integer(4), parameter :: XPRS_MATRIXNAME                         =  3001
+      integer(4), parameter :: XPRS_BOUNDNAME                          =  3002
+      integer(4), parameter :: XPRS_OBJNAME                            =  3003
+      integer(4), parameter :: XPRS_RHSNAME                            =  3004
+      integer(4), parameter :: XPRS_RANGENAME                          =  3005
+! Double attributes
+      integer(4), parameter :: XPRS_LPOBJVAL                           =  2001
+      integer(4), parameter :: XPRS_SUMPRIMALINF                       =  2002
+      integer(4), parameter :: XPRS_MIPOBJVAL                          =  2003
+      integer(4), parameter :: XPRS_BESTBOUND                          =  2004
+      integer(4), parameter :: XPRS_OBJRHS                             =  2005
+      integer(4), parameter :: XPRS_OBJSENSE                           =  2008
+      integer(4), parameter :: XPRS_BRANCHVALUE                        =  2009
+      integer(4), parameter :: XPRS_PENALTYVALUE                       =  2061
+      integer(4), parameter :: XPRS_CURRMIPCUTOFF                      =  2062
+      integer(4), parameter :: XPRS_BARPRIMALOBJ                       =  4001
+      integer(4), parameter :: XPRS_BARDUALOBJ                         =  4002
+      integer(4), parameter :: XPRS_BARPRIMALINF                       =  4003
+      integer(4), parameter :: XPRS_BARDUALINF                         =  4004
+      integer(4), parameter :: XPRS_BARSTOP                            =  4005
+! Integer attributes
+      integer(4), parameter :: XPRS_ROWS                               =  1001
+      integer(4), parameter :: XPRS_SETS                               =  1004
+      integer(4), parameter :: XPRS_SETMEMBERS                         =  1005
+      integer(4), parameter :: XPRS_ELEMS                              =  1006
+      integer(4), parameter :: XPRS_PRIMALINFEAS                       =  1007
+      integer(4), parameter :: XPRS_DUALINFEAS                         =  1008
+      integer(4), parameter :: XPRS_SIMPLEXITER                        =  1009
+      integer(4), parameter :: XPRS_LPSTATUS                           =  1010
+      integer(4), parameter :: XPRS_MIPSTATUS                          =  1011
+      integer(4), parameter :: XPRS_CUTS                               =  1012
+      integer(4), parameter :: XPRS_NODES                              =  1013
+      integer(4), parameter :: XPRS_NODEDEPTH                          =  1014
+      integer(4), parameter :: XPRS_ACTIVENODES                        =  1015
+      integer(4), parameter :: XPRS_MIPSOLNODE                         =  1016
+      integer(4), parameter :: XPRS_MIPSOLS                            =  1017
+      integer(4), parameter :: XPRS_COLS                               =  1018
+      integer(4), parameter :: XPRS_SPAREROWS                          =  1019
+      integer(4), parameter :: XPRS_SPARECOLS                          =  1020
+      integer(4), parameter :: XPRS_SPAREELEMS                         =  1021
+      integer(4), parameter :: XPRS_SPAREMIPENTS                       =  1022
+      integer(4), parameter :: XPRS_ERRORCODE                          =  1023
+      integer(4), parameter :: XPRS_MIPINFEAS                          =  1024
+      integer(4), parameter :: XPRS_PRESOLVESTATE                      =  1026
+      integer(4), parameter :: XPRS_PARENTNODE                         =  1027
+      integer(4), parameter :: XPRS_NAMELENGTH                         =  1028
+      integer(4), parameter :: XPRS_QELEMS                             =  1030
+      integer(4), parameter :: XPRS_NUMIIS                             =  1031
+      integer(4), parameter :: XPRS_MIPENTS                            =  1032
+      integer(4), parameter :: XPRS_BRANCHVAR                          =  1036
+      integer(4), parameter :: XPRS_MIPTHREADID                        =  1037
+      integer(4), parameter :: XPRS_ORIGINALROWS                       =  1124
+      integer(4), parameter :: XPRS_STOPSTATUS                         =  1179
+      integer(4), parameter :: XPRS_SPARESETS                          =  1203
+      integer(4), parameter :: XPRS_SPARESETELEMS                      =  1204
+      integer(4), parameter :: XPRS_ORIGINALCOLS                       =  1214
+      integer(4), parameter :: XPRS_QCELEMS                            =  1232
+      integer(4), parameter :: XPRS_QCONSTRAINTS                       =  1234
+      integer(4), parameter :: XPRS_NLPHESSIANELEMS                    =  1243
+      integer(4), parameter :: XPRS_BARITER                            =  5001
+      integer(4), parameter :: XPRS_BARAASIZE                          =  5002
+      integer(4), parameter :: XPRS_BARLSIZE                           =  5003
+      integer(4), parameter :: XPRS_BARDENSECOL                        =  5004
+      integer(4), parameter :: XPRS_BARCROSSOVER                       =  5005
+
+!******************************************************************************!
+! control parameters for XPRSmipsolpool                                        !
+!******************************************************************************!
+! Double control parameters
+      integer(4), parameter :: XPRS_MSP_DEFAULTUSERSOLFEASTOL          =  6209
+      integer(4), parameter :: XPRS_MSP_DEFAULTUSERSOLMIPTOL           =  6210
+      integer(4), parameter :: XPRS_MSP_SOL_FEASTOL                    =  6402
+      integer(4), parameter :: XPRS_MSP_SOL_MIPTOL                     =  6403
+! Integer control parameters
+      integer(4), parameter :: XPRS_MSP_DUPLICATESOLUTIONSPOLICY       =  6203
+      integer(4), parameter :: XPRS_MSP_INCLUDEPROBNAMEINLOGGING       =  6211
+      integer(4), parameter :: XPRS_MSP_WRITESLXSOLLOGGING             =  6212
+      integer(4), parameter :: XPRS_MSP_SOL_BITFIELDSUSR               =  6406
+
+!******************************************************************************!
+! attributes for XPRSmipsolpool                                                !
+!******************************************************************************!
+! Double attributes
+      integer(4), parameter :: XPRS_MSP_SOLPRB_OBJ                     =  6500
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_PRIMAL           =  6502
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_MIP              =  6504
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_SLACK            =  6506
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_SLACK            =  6508
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_COLUMN           =  6510
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_COLUMN           =  6512
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_DELAYEDROW       =  6514
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_DELAYEDROW       =  6516
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_INT              =  6518
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_INT              =  6520
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_BIN              =  6522
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_BIN              =  6524
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_SC               =  6526
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_SC               =  6528
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_SI               =  6530
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_SI               =  6532
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_PI               =  6534
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_PI               =  6536
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_SET1             =  6538
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_SET1             =  6540
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFSUM_SET2             =  6542
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMAX_SET2             =  6544
+! Integer attributes
+      integer(4), parameter :: XPRS_MSP_SOLUTIONS                      =  6208
+      integer(4), parameter :: XPRS_MSP_PRB_VALIDSOLS                  =  6300
+      integer(4), parameter :: XPRS_MSP_PRB_FEASIBLESOLS               =  6301
+      integer(4), parameter :: XPRS_MSP_SOL_COLS                       =  6400
+      integer(4), parameter :: XPRS_MSP_SOL_NONZEROS                   =  6401
+      integer(4), parameter :: XPRS_MSP_SOL_ISUSERSOLUTION             =  6404
+      integer(4), parameter :: XPRS_MSP_SOL_ISREPROCESSEDUSERSOLUTION  =  6405
+      integer(4), parameter :: XPRS_MSP_SOL_BITFIELDSSYS               =  6407
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFEASCOUNT             =  6501
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_PRIMAL           =  6503
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_MIP              =  6505
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_SLACK            =  6507
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_SLACK            =  6509
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_COLUMN           =  6511
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_COLUMN           =  6513
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_DELAYEDROW       =  6515
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_DELAYEDROW       =  6517
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_INT              =  6519
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_INT              =  6521
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_BIN              =  6523
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_BIN              =  6525
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_SC               =  6527
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_SC               =  6529
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_SI               =  6531
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_SI               =  6533
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_PI               =  6535
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_PI               =  6537
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_SET1             =  6539
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_SET1             =  6541
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFCNT_SET2             =  6543
+      integer(4), parameter :: XPRS_MSP_SOLPRB_INFMXI_SET2             =  6545
+
+!******************************************************************************!
+! control parameters for XPRSmipsolenum                                        !
+!******************************************************************************!
+! Double control parameters
+      integer(4), parameter :: XPRS_MSE_OUTPUTTOL                      =  6609
+! Integer control parameters
+      integer(4), parameter :: XPRS_MSE_CALLBACKCULLSOLS_MIPOBJECT     =  6601
+      integer(4), parameter :: XPRS_MSE_CALLBACKCULLSOLS_DIVERSITY     =  6602
+      integer(4), parameter :: XPRS_MSE_CALLBACKCULLSOLS_MODOBJECT     =  6603
+      integer(4), parameter :: XPRS_MSE_OPTIMIZEDIVERSITY              =  6607
+
+!******************************************************************************!
+! attributes for XPRSmipsolenum                                                !
+!******************************************************************************!
+! Double attributes
+      integer(4), parameter :: XPRS_MSE_DIVERSITYSUM                   =  6608
+! Integer attributes
+      integer(4), parameter :: XPRS_MSE_SOLUTIONS                      =  6600
+      integer(4), parameter :: XPRS_MSE_METRIC_MIPOBJECT               =  6604
+      integer(4), parameter :: XPRS_MSE_METRIC_DIVERSITY               =  6605
+      integer(4), parameter :: XPRS_MSE_METRIC_MODOBJECT               =  6606
+
+!******************************************************************************!
+! values related to LPSTATUS                                                   !
+!******************************************************************************!
+      integer(4), parameter :: XPRS_LP_UNSTARTED                       =     0
+      integer(4), parameter :: XPRS_LP_OPTIMAL                         =     1
+      integer(4), parameter :: XPRS_LP_INFEAS                          =     2
+      integer(4), parameter :: XPRS_LP_CUTOFF                          =     3
+      integer(4), parameter :: XPRS_LP_UNFINISHED                      =     4
+      integer(4), parameter :: XPRS_LP_UNBOUNDED                       =     5
+      integer(4), parameter :: XPRS_LP_CUTOFF_IN_DUAL                  =     6
+      integer(4), parameter :: XPRS_LP_UNSOLVED                        =     7
+
+!******************************************************************************!
+! values related to MIPSTATUS                                                  !
+!******************************************************************************!
+      integer(4), parameter :: XPRS_MIP_NOT_LOADED                     =     0
+      integer(4), parameter :: XPRS_MIP_LP_NOT_OPTIMAL                 =     1
+      integer(4), parameter :: XPRS_MIP_LP_OPTIMAL                     =     2
+      integer(4), parameter :: XPRS_MIP_NO_SOL_FOUND                   =     3
+      integer(4), parameter :: XPRS_MIP_SOLUTION                       =     4
+      integer(4), parameter :: XPRS_MIP_INFEAS                         =     5
+      integer(4), parameter :: XPRS_MIP_OPTIMAL                        =     6
+
+!******************************************************************************!
+! values related to BARORDER                                                   !
+!******************************************************************************!
+      integer(4), parameter :: XPRS_BAR_DEFAULT                        =     0
+      integer(4), parameter :: XPRS_BAR_MIN_DEGREE                     =     1
+      integer(4), parameter :: XPRS_BAR_MIN_LOCAL_FILL                 =     2
+      integer(4), parameter :: XPRS_BAR_NESTED_DISSECTION              =     3
+
+!******************************************************************************!
+! values related to DEFAULTALG                                                 !
+!******************************************************************************!
+      integer(4), parameter :: XPRS_ALG_DEFAULT                        =     1
+      integer(4), parameter :: XPRS_ALG_DUAL                           =     2
+      integer(4), parameter :: XPRS_ALG_PRIMAL                         =     3
+      integer(4), parameter :: XPRS_ALG_BARRIER                        =     4
+
+!******************************************************************************!
+! values related to XPRSinterrupt                                              !
+!******************************************************************************!
+      integer(4), parameter :: XPRS_STOP_TIMELIMIT                     =     1
+      integer(4), parameter :: XPRS_STOP_CTRLC                         =     2
+      integer(4), parameter :: XPRS_STOP_NODELIMIT                     =     3
+      integer(4), parameter :: XPRS_STOP_ITERLIMIT                     =     4
+      integer(4), parameter :: XPRS_STOP_MIPGAP                        =     5
+      integer(4), parameter :: XPRS_STOP_SOLLIMIT                      =     6
+      integer(4), parameter :: XPRS_STOP_USER                          =     9
+
+!******************************************************************************!
+! values of bit flags for MipSolPool Solution                                  !
+!******************************************************************************!
+      integer(4), parameter :: XPRS_ISUSERSOLUTION               = Z'00000001'
+      integer(4), parameter :: XPRS_ISREPROCESSEDUSERSOLUTION    = Z'00000002'
+

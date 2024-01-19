@@ -1,0 +1,377 @@
+Section Capacity_Expansion {
+        DeclarationSection Capacity_Expansion_Declarations {
+            Parameter ConsumptionForCapExp {
+                IndexDomain: (mon,sec,d);
+            }
+            Parameter WeatherFactor1 {
+                IndexDomain: (mn,sec,reg);
+            }
+            Parameter WeatherFactor2 {
+                IndexDomain: (mn,sec);
+            }
+        }
+        Section Cap_Exp_QP_Structure {
+            DeclarationSection Cap_Exp_Supply_Curve_Declarations {
+                Parameter CE_Qbase {
+                    IndexDomain: (tcapexp,suptype,s,step);
+                }
+                Parameter CE_QbaseMin {
+                    IndexDomain: (tcapexp,suptype,s);
+                    Comment: "Minimum production";
+                }
+                Parameter CE_Q_UpperBound {
+                    IndexDomain: (tcapexp,suptype,s,step);
+                    Range: nonnegative;
+                }
+                Parameter CE_Q_LowerBound {
+                    IndexDomain: (tcapexp,suptype,s,step);
+                    Range: nonnegative;
+                }
+                Parameter CE_Pbase {
+                    IndexDomain: (tcapexp,suptype,s,step);
+                }
+            }
+            DeclarationSection Cap_Exp_Tariff_Curve_Declarations {
+                Parameter CE_PipelineTariff {
+                    IndexDomain: (tcapexp,h,h1,step);
+                }
+                Parameter CE_PipeTariffCurveQty {
+                    IndexDomain: (tcapexp,h,h1,step);
+                }
+                Parameter CE_PipeTarCrvQty_UpBound {
+                    IndexDomain: (tcapexp,h,h1,step);
+                }
+                Parameter CE_Fixed_Arc_Fee {
+                    IndexDomain: (tcapexp,reg,reg1);
+                    Text: "represents storage fees, fixed tariffs";
+                    Definition: 0;
+                }
+                Parameter CE_GatheringCharge {
+                    IndexDomain: (tcapexp,s);
+                    Text: "Gathering Charge";
+                    Comment: "represents gathering charges, storage fees, fixed tariffs";
+                }
+                Parameter CE_StorageFee {
+                    IndexDomain: (tcapexp,storage,h);
+                    Text: "storage fee";
+                    InitialData: 0.1;
+                    Comment: "represents storage fees by arc in Planning Period";
+                }
+            }
+            DeclarationSection Cap_Exp_LNG_Export_Curve_Declarations {
+                Parameter CE_LNGExportPrc {
+                    IndexDomain: (tcapexp,lngexp,step);
+                }
+                Parameter CE_LNGExportQty {
+                    IndexDomain: (tcapexp,lngexp,step);
+                }
+                Parameter CE_LNGExport_UpBound {
+                    IndexDomain: (tcapexp,lngexp,step);
+                }
+            }
+            DeclarationSection CAp_Exp_Capacity_Declarations {
+                Parameter CE_CapacityMaxBuild {
+                    IndexDomain: (tcapexp,h,h1);
+                }
+            }
+            DeclarationSection CE_Parameters {
+                Parameter CE_Consumption {
+                    IndexDomain: (tcapexp,d);
+                }
+                Parameter CE_Discrepancy {
+                    IndexDomain: (tcapexp,d);
+                }
+                Parameter CE_Storage_Withdrawals {
+                    IndexDomain: (tcapexp,storage);
+                    Definition: {
+                        !NetStorage(storage, mon)
+                    }
+                }
+                Parameter CE_Storage_Injections {
+                    IndexDomain: (tcapexp,storage);
+                    Definition: {
+                        !NetStorage(storage, mon)
+                    }
+                }
+                Parameter CE_Supply {
+                    IndexDomain: (tcapexp,suptype,s);
+                }
+                Parameter CE_SupplyPrice {
+                    IndexDomain: (tcapexp,suptype,s);
+                }
+                Parameter CE_VarPipelineTariff {
+                    IndexDomain: (tcapexp,h,h1);
+                }
+                Parameter CE_Capacity {
+                    IndexDomain: (tcapexp,h,h1);
+                }
+                Parameter CE_LNGExportCapacity {
+                    IndexDomain: (tcapexp,lngexp);
+                }
+                Parameter CE_LNGExportPrice {
+                    IndexDomain: (tcapexp,lngexp);
+                    Definition: 3;
+                }
+                Parameter CE_StorageLoss {
+                    IndexDomain: (tcapexp,storage);
+                }
+                Parameter CE_DistributionLoss {
+                    IndexDomain: (tcapexp,d);
+                }
+                Parameter CE_PlantFuel {
+                    IndexDomain: (tcapexp,d);
+                }
+            }
+            DeclarationSection Cap_Exp_QP_Variables_and_Constraints {
+                Set CE_Constraints {
+                    SubsetOf: AllConstraints;
+                    Definition: {
+                        Data {CE_SupplyMassBalance,
+                        CE_SupplyAccounting,
+                        CE_HubBalance,
+                        CE_DemandMassBalance,
+                        CE_StorageInjBalance,
+                        CE_StorageWthBalance,
+                        CE_LNGExportBalance,
+                        CE_TariffCurveQtyBalance}
+                    }
+                }
+                Variable CE_QSupplyStep {
+                    IndexDomain: (tcapexp,suptype,s,step)| map_Supply(s, suptype);
+                    Range: [CE_Q_LowerBound(tcapexp, suptype, s, step), CE_Q_UpperBound(tcapexp, suptype, s, step)];
+                }
+                Variable CE_QProduction {
+                    IndexDomain: (tcapexp,suptype,s)| CE_Supply(tcapexp,suptype,s);
+                    Range: nonnegative;
+                    Property: ReducedCost;
+                    Comment: "Sums up production over all the steps of supply curve";
+                }
+                Variable CE_QLNGexp {
+                    IndexDomain: (tcapexp,lngexp,step)| CE_LNGExportCapacity(tcapexp,lngexp);
+                    Range: [CE_LNGExport_UpBound(tcapexp, lngexp, step), CE_LNGExport_UpBound(tcapexp, lngexp, step)];
+                }
+                Variable CE_QTariffCurve {
+                    IndexDomain: (tcapexp,h,h1,step)| CE_Capacity(tcapexp, h, h1);
+                    Range: [0, CE_PipeTarCrvQty_UpBound(tcapexp, h, h1, step)];
+                }
+                Variable CE_FlowHubToHub {
+                    IndexDomain: (tcapexp,h,h1) | CE_Capacity(tcapexp,h,h1);
+                    Range: [0, CE_Capacity(tcapexp, h, h1)];
+                }
+                Variable CE_FlowSupplyToHub {
+                    IndexDomain: (tcapexp,s,h)| map_SupplyArcs(s, h);
+                    Range: nonnegative;
+                }
+                Variable CE_FlowHubToDemand {
+                    IndexDomain: (tcapexp,h,d);
+                    Range: nonnegative;
+                }
+                Variable CE_FlowHubToLNGExport {
+                    IndexDomain: (tcapexp,h,lngexp)| CE_LNGExportCapacity(tcapexp,lngexp);
+                    Range: nonnegative;
+                }
+                Variable CE_FlowStorageToHub {
+                    IndexDomain: (tcapexp,storage,h);
+                    Range: nonnegative;
+                }
+                Variable CE_FlowHubToStorage {
+                    IndexDomain: (tcapexp,h,storage);
+                    Range: nonnegative;
+                }
+                Variable CE_OBJ {
+                    Text: "Objective Function";
+                    Range: free;
+                    Definition: {
+                        sum(tcapexp,
+                        !Area under the Supply curve
+                         - sum((step,suptype,s) | map_Supply(s,suptype) and step <= SupCrv_MaxStep, (CE_Pbase(tcapexp,suptype,s,step)*CE_QSupplyStep(tcapexp,suptype,s,step) +
+                               0.5* sqr(CE_QSupplyStep(tcapexp,suptype,s,step)) * (CE_Pbase(tcapexp,suptype,s,step+1)-CE_Pbase(tcapexp,suptype,s,step))/ (CE_Qbase(tcapexp,suptype,s,step+1)-CE_Qbase(tcapexp,suptype,s,step))))
+                        - sum(s, 200* CE_SLackVar(tcapexp,s))
+                        !Area under the Pipeline Tariff curve
+                        -sum((h,h1,step)| CE_Capacity(tcapexp,h,h1) and step <= PTCrv_MaxStep, CE_PipelineTariff(tcapexp,h,h1,step) * CE_QTariffCurve(tcapexp,h,h1,step) +
+                             0.5 * sqr( CE_QTariffCurve(tcapexp,h,h1,step) ) *
+                             (CE_PipelineTariff(tcapexp,h,h1,step+1) - CE_PipelineTariff(tcapexp,h,h1,step) )/ (CE_PipeTariffCurveQty(tcapexp,h,h1,step+1) - CE_PipeTariffCurveQty(tcapexp,h,h1,step) ) )
+                        
+                         !Fixed  Fees
+                         - sum((h,h1) | CE_Capacity(tcapexp,h,h1), CE_Fixed_Arc_Fee(tcapexp,h,h1) * CE_FlowHubToHub(tcapexp,h,h1))
+                        
+                          !Gathering Charges
+                         - sum((s,h) | map_SupplyArcs(s, h), CE_GatheringCharge(tcapexp,s) * CE_FlowSupplyToHub(tcapexp,s,h))
+                        
+                         !Storage Fees
+                         - sum((storage,h) | map_StorageArcs(storage,h), CE_StorageFee(tcapexp,storage,h) * CE_FlowStorageToHub(tcapexp,storage,h))
+                        
+                         !Area under the LNG Export Curve
+                        + sum((step,lngexp) | step <= LNGExpCrv_MaxStep, CE_LNGExportPrc(tcapexp,lngexp,step) * CE_QLNGexp(tcapexp,lngexp,step) +
+                               0.5* sqr(CE_QLNGexp(tcapexp,lngexp,step)) * (CE_LNGExportPrc(tcapexp,lngexp,step+1)-CE_LNGExportPrc(tcapexp,lngexp,step)) / $ (CE_LNGExportQty(tcapexp,lngexp,step+1)-CE_LNGExportQty(tcapexp,lngexp,step))) )
+                    }
+                    Comment: "consumer plus producer surplus minus variable transport costs";
+                }
+                Variable CE_SLackVar {
+                    IndexDomain: (tcapexp,s)| sum(suptype, CE_Supply(tcapexp,suptype,s));
+                    Range: nonnegative;
+                    Comment: "Artificial Slack Varialble to add extra supply to avoid infeasibility";
+                }
+                Constraint CE_SupplyMassBalance {
+                    IndexDomain: (tcapexp,s);
+                    Property: ShadowPrice;
+                    Definition: {
+                        !sum((step,suptype) | map_Supply(s,suptype), (QSupplyStep(tmon,suptype,s,step)+ QbaseMin(tmon,suptype,s))+ SLackVar(tmon,s) = sum(h | map_SupplyArcs(s,h), FlowSupplyToHub(tmon,s,h) )
+                        sum(suptype | map_Supply(s,suptype), CE_QProduction(tcapexp,suptype,s))+ CE_SLackVar(tcapexp,s) = sum(h | map_SupplyArcs(s,h), CE_FlowSupplyToHub(tcapexp,s,h) )
+                    }
+                }
+                Constraint CE_SupplyAccounting {
+                    IndexDomain: (tcapexp,suptype,s);
+                    Property: ShadowPrice;
+                    Definition: CE_QProduction(tcapexp,suptype,s) = Sum(step | step <= SupCrv_MaxStep, CE_QSupplyStep(tcapexp,suptype,s,step))+ CE_QbaseMin(tcapexp,suptype,s);
+                    Comment: "Sums up production over all the steps of supply curve";
+                }
+                Constraint CE_DemandMassBalance {
+                    IndexDomain: (tcapexp,d);
+                    Definition: {
+                        sum(h | map_DemandArcs(h,d), CE_FlowHubToDemand(tcapexp,h,d)  ) = CE_Consumption(tcapexp,d) + CE_DistributionLoss(tcapexp,d) + CE_StorageLoss(tcapexp,d) +
+                                                                                                                    CE_PlantFuel(tcapexp,d) - CE_Discrepancy(tcapexp,d)
+                    }
+                }
+                Constraint CE_HubBalance {
+                    IndexDomain: (tcapexp,h);
+                    Property: ShadowPrice;
+                    Definition: {
+                        sum(storage | map_StorageArcs(storage,h), CE_FlowStorageToHub(tcapexp,storage,h)) +
+                        sum(s | map_SupplyArcs(s,h), CE_FlowSupplyToHub(tcapexp,s,h)) +
+                        sum(h1 | CE_Capacity(tcapexp,h1, h), CE_FlowHubToHub(tcapexp,h1,h) *(1-PipeFuelLossFactorOUT(h1, h)) *(1-PipeFuelLossFactorIN(h1, h))) =
+                        sum(h2 | CE_Capacity(tcapexp, h, h2), CE_FlowHubToHub(tcapexp,h,h2) ) + sum(d | map_DemandArcs(h,d), CE_FlowHubToDemand(tcapexp,h,d) )
+                        + sum(lngexp | map_LNGExpArcs(h,lngexp), CE_FlowHubToLNGExport(tcapexp,h,lngexp) ) +
+                        sum(storage | map_StorageArcs(storage,h), CE_FlowHubToStorage(tcapexp,h,storage))
+                    }
+                }
+                Constraint CE_StorageWthBalance {
+                    IndexDomain: (tcapexp,storage);
+                    Definition: sum(h | map_StorageArcs(storage,h), CE_FlowStorageToHub(tcapexp,storage,h) )= CE_Storage_Withdrawals(tcapexp,storage);
+                }
+                Constraint CE_StorageInjBalance {
+                    IndexDomain: (tcapexp,storage);
+                    Definition: sum(h | map_StorageArcs(storage,h), CE_FlowHubToStorage(tcapexp,h,storage))= CE_Storage_Injections(tcapexp,storage);
+                }
+                Constraint CE_LNGExportBalance {
+                    IndexDomain: (tcapexp,lngexp)| CE_LNGExportCapacity(tcapexp,lngexp);
+                    Definition: Sum(step |step <= LNGExpCrv_MaxStep , CE_QLNGexp(tcapexp,lngexp,step))= sum(h | map_LNGExpArcs(h,lngexp), CE_FlowHubToLNGExport(tcapexp,h,lngexp) );
+                }
+                Constraint CE_TariffCurveQtyBalance {
+                    IndexDomain: (tcapexp,h,h1);
+                    Definition: Sum(step | step <= PTCrv_MaxStep , CE_QTariffCurve(tcapexp,h,h1,step)) = CE_FlowHubToHub(tcapexp,h,h1);
+                }
+                MathematicalProgram CapacityExpansionQP {
+                    Objective: CE_OBJ;
+                    Direction: maximize;
+                    Constraints: CE_Constraints;
+                    Variables: AllVariables;
+                    Type: Automatic;
+                }
+            }
+        }
+        Procedure DefineParametersForCapExp {
+            Body: {
+                read from file "data\\weather_factor.txt" ;
+                ConsumptionForCapExp(modelyrmn, sec, l48) := sum(mn | map_Month_MonthinYear(modelyrmn,mn), Cons_State_Mon(modelyrmn, sec, l48) * WeatherFactor1(mn, sec, l48) * WeatherFactor2(mn, sec) );
+            }
+        }
+        Procedure CurveDefinitionsForCapExp {
+            Body: {
+                !Define supply curve steps
+                CE_Qbase(tcapexp,suptype,s,step) := CE_Supply(tcapexp,suptype,s) *  SupCrvParameter(suptype,step);
+                CE_Pbase(tcapexp,suptype,s,step) := CE_SupplyPrice(tcapexp,suptype,s) * SupCrvPriceElasticity(suptype,step);
+                !Define minimum production
+                CE_QbaseMin(tcapexp,suptype,s) := CE_Qbase(tcapexp,suptype,s,SupCrv_Firststep);
+                
+                ! Set upper bound for the supply curve steps
+                CE_Q_UpperBound( (tcapexp,suptype,s,step) | step <= SupCrv_MaxStep) := ( CE_Qbase(tcapexp,suptype,s,step+1) - CE_Qbase(tcapexp,suptype,s,step) ) ;
+                ! Set lower bound for the supply curve steps for variable supply
+                CE_Q_LowerBound( (tcapexp, varsup, s, step) | step <= SupCrv_MaxStep) := 0;
+                ! Set lower bound for the supply curve steps for fixed supply
+                CE_Q_LowerBound( (tcapexp, fixsup, s, step) | step <= SupCrv_MaxStep) := CE_Q_UpperBound(tcapexp, fixsup, s, step);
+                
+                !Define Pipeline Tariff Curve steps
+                CE_PipeTariffCurveQty(tcapexp,h,h1,step) := CE_Capacity(tcapexp,h,h1) * Parameter_CapacityUtilization(h,h1,step);
+                CE_PipelineTariff(tcapexp,h,h1,step) :=  Parameter_TariffCurvePrice(h,h1,step);
+                
+                CE_PipeTarCrvQty_UpBound( (tcapexp,h,h1,step) | step <= PTCrv_MaxStep) := CE_PipeTariffCurveQty( tcapexp,h,h1,step+1) - CE_PipeTariffCurveQty(tcapexp,h,h1,step);
+                
+                CE_CapacityMaxBuild(tcapexp, h, h1) := CE_PipeTariffCurveQty(CapExpFirstPeriodInPlanningInterval, h, h1, PTCrv_MaxStep+1);
+                
+                !define LNG Export Curve steps
+                CE_LNGExportQty(tcapexp,lngexp,step) := CE_LNGExportCapacity(tcapexp,lngexp) * Parameter_LNGExpQty(step);
+                CE_LNGExportPrc(tcapexp,lngexp,step) := CE_LNGExportPrice(tcapexp,lngexp) * Parameter_LNGExpPrc(step);
+                
+                CE_LNGExport_UpBound( (tcapexp,lngexp,step) | step <= LNGExpCrv_MaxStep ) := CE_LNGExportQty(tcapexp,lngexp,step+1) - CE_LNGExportQty(tcapexp,lngexp,step);
+            }
+        }
+        Procedure TransferDataIntoQPparameters_ForCapExp {
+            Body: {
+                LinkHorizonToCalendarForCapExp; !Create timetable
+                !Define maximum step on the tariff curve
+                PTCrv_MaxStep := Element(Supply_Curve_Step_,4);
+                
+                !Transfer data into QP Parameters
+                
+                !TotalConsumption( (mon,l48)  ) :=  sum(sec, Cons_State_Mon(mon, sec, l48)); !End Use Consumption Subroutine **moved to End Use Consumption Run... delete once verified it works
+                CE_Consumption(tcapexp,d) := 	TotalConsumption(CapExpMonthInPeriod(tcapexp), d);
+                !Increased consumption for capasity expansion submodel
+                CE_Consumption(tcapexp,l48) := 	sum(sec, ConsumptionForCapExp(CapExpMonthInPeriod(tcapexp), sec, l48));
+                !QP_Consumption(tmon,l48) := 	sum(sec, Cons_State_Mon(MonthInPeriod(tmon), sec, l48));	!End Use Consumption Subroutine
+                
+                CE_Discrepancy(tcapexp,d) := BalanceItem(CapExpMonthInPeriod(tcapexp), d);
+                CE_Storage_Withdrawals(tcapexp,storage) := StorageWithdrawals(CapExpMonthInPeriod(tcapexp), storage);
+                CE_Storage_Injections(tcapexp,storage) := StorageInjections(CapExpMonthInPeriod(tcapexp), storage);
+                
+                CE_Supply(tcapexp,suptype,s) := Supply(CapExpMonthInPeriod(tcapexp), suptype, s) ;
+                !Subtract lease fuel
+                CE_Supply(tcapexp, naadgas, s) *= (1 - LeaseFuelFactor(s));
+                CE_SupplyPrice(tcapexp,suptype,s) := WellhdPrice(CapExpYearInPeriod(tcapexp)-1, suptype, s);
+                CE_GatheringCharge(tcapexp,s) := GatheringCharge(s);
+                CE_Capacity(tcapexp,h,h1) := CurrentPipeCapacity(CapExpMonthInPeriod(tcapexp), h, h1);
+                Parameter_CapacityUtilization(h,h1,step) := VariableTariffCurve(h, h1, Qtype, step);
+                Parameter_TariffCurvePrice(h,h1,step) := VariableTariffCurve(h, h1, Ptype, step);
+                !QP_PipelineTariff(tmon,h,h1) := 1;
+                CE_LNGExportCapacity(tcapexp,lngexp) := LNGExports(CapExpMonthInPeriod(tcapexp), lngexp);
+                
+                ! storage losses
+                CE_StorageLoss(tcapexp,storage) := StorageLosses(CapExpMonthInPeriod(tcapexp), storage);
+                ! distribution losses
+                !**********Add Canada and Mexico later **************
+                CE_DistributionLoss(tcapexp,l48) := DistributionLosses(CapExpMonthInPeriod(tcapexp), l48) ;
+                
+                !plant fuel
+                CE_PlantFuel(tcapexp,l48) := PlantFuel(CapExpMonthInPeriod(tcapexp), l48) ;
+                CE_PlantFuel(tcapexp,mx) := PlantFuel(CapExpMonthInPeriod(tcapexp), mx) ;
+                
+                !this can be done once here
+                !Assign supply curve parameters for fixed and variable supply
+                Parameter_SupCrv(fixsup,step, n)  := Parameter_SupCrv('AD',step, n);
+                Parameter_SupElasticity(fixsup,step, n)  := Parameter_SupElasticity('AD',step, n);
+                Parameter_PrcElasticity(fixsup,step, n)  := Parameter_PrcElasticity('AD',step, n);
+                Parameter_SupCrv(varsup,step, n)  := Parameter_SupCrv('NA',step, n);
+                Parameter_SupElasticity(varsup,step, n)  := Parameter_SupElasticity('NA',step, n);
+                Parameter_PrcElasticity(varsup,step, n)  := Parameter_PrcElasticity('NA',step, n);
+            }
+            Comment: "Transfer data for Planning Period into QP parameters";
+        }
+        Procedure CapacityExpansionRun {
+            Body: {
+                DefineParametersForCapExp; !Define parameters that are used in Capacity Expansion Submodel
+                TransferDataIntoQPparameters_ForCapExp; !Transfer from main array to QP array for Capacity Expansion Submodel
+                CurveDefinitionsForCapExp;  !Define supply curves, variable pipeline tariff curve, LNG export curves
+                solve CapacityExpansionQP in merge mode; !Solve the Quadratic Program for Capacity Expansion
+                CapExpQPStatusNotOptimal;
+                DetermineCapacityAdditions; !Extract Capacity Additions from the QP solution
+            }
+        }
+        Procedure DetermineCapacityAdditions {
+            Body: {
+                !Define Max build allowed
+                CapacityAddition(h, h1) := MAX(tcapexp, CE_QTariffCurve(tcapexp,h,h1,PTCrv_MaxStep));
+                !CapacityAddition((h, h1) | CapacityAddition(h, h1)<=0.05 ) := 0;
+                CapacityAdditionsMonthly(modelyrmn, h, h1) := CapacityAddition(h, h1);
+            }
+        }
+    }

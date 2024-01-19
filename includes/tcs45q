@@ -1,0 +1,22 @@
+!  $Header: m:/default/includes/RCS/tcs45q,v 1.1 2019/05/09 14:59:36 pkc Exp $
+
+! Variables for implementing tax incentives included in U.S. tax code section 45q
+
+      INTEGER I_45Q_SYR            ! Start year for tax credit
+      INTEGER I_45Q_LYR_RET        ! Year tax credit expire for retrofits
+      INTEGER I_45Q_LYR_NEW        ! Year tax credit expire for new builds
+      INTEGER I_45Q_DURATION       ! Number of years tax credit apply to plant
+
+! tax credits are in 1987 dollars in the global data structure
+      REAL CCS_EOR_45Q(MNUMYR)     ! Tax credits for enhanced oil recovery in dollars per metric ton co2
+      REAL CCS_SALINE_45Q(MNUMYR)  ! Tax credits for saline injection in dollars per metric ton co2
+
+      COMMON /TCS45Q/ CCS_EOR_45Q, CCS_SALINE_45Q, &
+                      I_45Q_SYR, I_45Q_LYR_RET, I_45Q_LYR_NEW, I_45Q_DURATION
+
+!  For filer because this is in the global data structure:
+      INTEGER SIZE45Q
+      PARAMETER(SIZE45Q=MNUMYR*2 + 4)
+
+      REAL TCS45QEQ(SIZE45Q)
+      EQUIVALENCE(TCS45QEQ,CCS_EOR_45Q)

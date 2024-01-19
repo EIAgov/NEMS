@@ -1,0 +1,142 @@
+*  File:    PUM1SOS.MAT
+*  Source:  Karla Hoffman,   4/25/90
+*  Comments:
+
+*  Contains 'MARKER'  for integer (to be ignored) and for SOS's
+*  The SOS markers generate 1. in each row of active SOS name.
+*  The decimal point is left off of some coefficients, so these
+*  will be read as small values.  Some still get into the matrix
+*  (incorrectly), and some are rejected (message issued).
+
+NAME          PUMS1
+ROWS
+ N  TPST
+ L  RU01
+ E  JOB01
+ E  JOB02
+ E  JOB03
+ E  JOB04
+ E  JOB05
+ E  JOB06
+ E  JOB07
+ E  JOB08
+ E  JOB09
+ E  JOB10
+ L  RIM0102
+ L  RIM0103
+ L  RIM0201
+ L  RIM0203
+ L  RIM0301
+ L  RIM0302
+ L  RIM0401
+ L  RIM0402
+ L  RIM0403
+COLUMNS
+    BEGIN     'MARKER'                 'INTORG'
+    Z0102     TPST                10
+    Z0102     RIM0102             -2
+    Z0103     TPST                12
+    Z0103     RIM0103             -2
+    Z0201     TPST                13
+    Z0201     RU01                13
+    Z0201     RIM0201             -1
+    Z0203     TPST                15
+    Z0203     RIM0203             -3
+    Z0301     TPST                17
+    Z0301     RU01                17
+    Z0301     RIM0301              0
+    Z0302     TPST                18
+    Z0302     RIM0302             -3
+    Z0401     TPST                10
+    Z0401     RU01                10
+    Z0401     RIM0401             -2
+    Z0402     TPST                12
+    Z0402     RIM0402             -2
+    Z0403     TPST                15
+    Z0403     RIM0403             -2
+    JOB01     'MARKER'                 'SOSORG'
+    X0102     RIM0102   1.
+    X0102     TPST                 2
+    X0103     RIM0103   1.
+    X0103     TPST                 4
+    EJOB01    'MARKER'                 'SOSEND'
+    JOB02     'MARKER'                 'SOSORG'
+    X0201     RIM0201   1.
+    X0201     TPST                 3
+    X0201     RU01                 3
+    X0203     RIM0203   1.
+    X0203     TPST                 5
+    EJOB02    'MARKER'                 'SOSEND'
+    JOB03     'MARKER'                 'SOSORG'
+    X0301     RIM0301   1.
+    X0301     TPST                 2
+    X0301     RU01                 2
+    X0302     RIM0302   1.
+    X0302     TPST                 1
+    EJOB03    'MARKER'                 'SOSEND'
+    JOB04     'MARKER'                 'SOSORG'
+    X0401     RIM0401   1.
+    X0401     TPST                 2
+    X0401     RU01                 2
+    X0402     RIM0402   1.
+    X0402     TPST                 1
+    X0403     RIM0403   1.
+    X0403     TPST                 1
+    EJOB04    'MARKER'                 'SOSEND'
+    JOB05     'MARKER'                 'SOSORG'
+    X0501     RIM0201   1.
+    X0501     TPST                 4
+    X0501     RU01                 4
+    X0503     RIM0203   1.
+    X0503     TPST                 3
+    EJOB05    'MARKER'                 'SOSEND'
+    JOB06     'MARKER'                 'SOSORG'
+    X0601     RIM0301   1.
+    X0601     TPST                 2
+    X0601     RU01                 2
+    X0602     RIM0302   1.
+    X0602     TPST                 3
+    EJOB06    'MARKER'                 'SOSEND'
+    JOB07     'MARKER'                 'SOSORG'
+    X0701     RIM0401   1.
+    X0701     TPST                 2
+    X0701     RU01                 2
+    X0702     RIM0402   1.
+    X0702     TPST                 2
+    X0703     RIM0403   1.
+    X0703     TPST                 3
+    EJOB07    'MARKER'                 'SOSEND'
+    JOB08     'MARKER'                 'SOSORG'
+    X0801     RIM0201   1.
+    X0801     TPST                 1
+    X0801     RU01                 1
+    X0803     RIM0203   1.
+    X0803     TPST                 3
+    EJOB08    'MARKER'                 'SOSEND'
+    JOB09     'MARKER'                 'SOSORG'
+    X0901     RIM0301   1.
+    X0901     TPST                 3
+    X0901     RU01                 3
+    X0902     RIM0302   1.
+    X0902     TPST                 2
+    EJOB09    'MARKER'                 'SOSEND'
+    JOB10     'MARKER'                 'SOSORG'
+    X1002     RIM0102   1.
+    X1002     TPST                 1
+    X1003     RIM0103   1.
+    X1003     TPST                 2
+    EJOB10    'MARKER'                 'SOSEND'
+    END       'MARKER'                 'INTEND'
+RHS
+    RHS       RU01                15
+    RHS       JOB01               1.
+    RHS       JOB02               1.
+    RHS       JOB03               1.
+    RHS       JOB04               1.
+    RHS       JOB05               1.
+    RHS       JOB06               1.
+    RHS       JOB07               1.
+    RHS       JOB08               1.
+    RHS       JOB09               1.
+    RHS       JOB10               1.
+ENDATA

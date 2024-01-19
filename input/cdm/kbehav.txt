@@ -1,0 +1,183 @@
+FILE NAME:      KBEHAV
+
+DATE MODIFIED:  September 15, 2016
+
+CONTACT:       	Kimmie Klaiman		
+                NEMS Commercial Buildings Analyst
+                Kimberly.klaiman@eia.gov
+                (202)586-1678
+
+USED BY:        Technology Choice subroutine of the National Energy Modeling
+                System (NEMS) Commercial Demand Module (CDM)
+
+DEFINITION:     Behavior rule proportions
+
+                Share of commercial consumers following the least cost, same fuel,
+		and same technology behavior rules, for new, replacement, and
+                retrofit decision types.
+
+UNITS:          unitless
+
+DIMENSION:      End-use service, building type, decision type, behavior type
+
+SPECIAL CONSTRAINTS:
+
+                1.  Share should be between 0.0 and 1.0 inclusive
+                2.  For a given service, building type, and decision type, sum
+                    of the shares over the behavior rules, u, should = 1.0
+
+ORGANIZATION OF DATA:
+
+                Data starts on row 101 of this file as per CDM convention.
+
+                Each block corresponds to a service, in the following order:
+                Space Heating, Space Cooling, Water Heating, Ventilation, Cooking,
+                Lighting, and Refrigeration.
+
+                Each row corresponds to a building type, in the following order:
+                Assembly, Education, Food sales, Food service, Health, Lodging,
+                Large Office, Small Office, Merc/Service, Warehouse, and Other.
+
+                The first 3 columns correspond to the three behavior types, in following
+                order: least cost, same fuel, same technology for New Decision Type.
+
+                The second set of 3 columns correspond to the three behavior behavior
+                types, in the same order, for Replacement Decision Type.
+
+                The third set of 3 columns correspond to the three behavior types for
+                Retrofit Decision type.
+
+                For clarification of the organization of columns see diagram below.
+
+                         New             Replacement           Retrofit
+                    PLC  PSF  PST       PLC  PSF  PST       PLCD PSF  PST
+
+SOURCES:
+
+                Decision Analysis Corporation of Virginia and Science Applications
+                  International Corporation, "Alternative Methodologies for NEMS Building
+                  Sector Model Development," draft report, prepared under Contract No.
+                  DE-AC01-92EI21946, August 3, 1992, p. 14.
+
+               
+
+                Koomey, Jonathan G., "Energy Efficiency Choices in New Office Buildings:
+                  An Investigation of Market Failures and Corrective Policies," dissertation,
+                  University of California at Berkeley, 1990.
+
+                U.S. Department of Energy, Energy Information Administration, 2003 Commercial
+                  Buildings Energy Consumption Survey, Public Use Data, available July 2012 at
+                  http://www.eia.gov/emeu/cbecs/cbecs2003/public_use_2003/cbecs_pudata2003.html.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0.33	0.48	0.19	0.10	0.37	0.53	0.01	0.05	0.94
+0.35	0.50	0.15	0.13	0.42	0.45	0.02	0.07	0.91
+0.23	0.38	0.39	0.05	0.27	0.68	0.00	0.03	0.97
+0.23	0.38	0.39	0.07	0.31	0.62	0.01	0.03	0.96
+0.31	0.46	0.23	0.08	0.34	0.58	0.01	0.04	0.95
+0.30	0.45	0.25	0.08	0.33	0.59	0.01	0.04	0.95
+0.16	0.31	0.53	0.05	0.25	0.70	0.01	0.04	0.95
+0.18	0.33	0.49	0.05	0.27	0.68	0.01	0.03	0.96
+0.18	0.33	0.49	0.04	0.24	0.72	0.00	0.03	0.97
+0.23	0.38	0.39	0.05	0.27	0.68	0.01	0.03	0.96
+0.23	0.38	0.39	0.07	0.30	0.63	0.01	0.04	0.95
+								
+0.33	0.48	0.19	0.00	0.00	1.00	0.00	0.00	1.00
+0.35	0.50	0.15	0.00	0.00	1.00	0.00	0.00	1.00
+0.23	0.38	0.39	0.00	0.00	1.00	0.00	0.00	1.00
+0.23	0.38	0.39	0.00	0.00	1.00	0.00	0.00	1.00
+0.31	0.46	0.23	0.00	0.00	1.00	0.00	0.00	1.00
+0.30	0.45	0.25	0.00	0.00	1.00	0.00	0.00	1.00
+0.16	0.31	0.53	0.00	0.00	1.00	0.00	0.00	1.00
+0.18	0.33	0.49	0.00	0.00	1.00	0.00	0.00	1.00
+0.18	0.33	0.49	0.00	0.00	1.00	0.00	0.00	1.00
+0.23	0.38	0.39	0.00	0.00	1.00	0.00	0.00	1.00
+0.23	0.38	0.39	0.00	0.00	1.00	0.00	0.00	1.00
+								
+0.33	0.48	0.19	0.10	0.37	0.53	0.01	0.05	0.94
+0.35	0.50	0.15	0.13	0.42	0.45	0.02	0.07	0.91
+0.23	0.38	0.39	0.05	0.27	0.68	0.00	0.03	0.97
+0.23	0.38	0.39	0.07	0.31	0.62	0.01	0.03	0.96
+0.31	0.46	0.23	0.08	0.34	0.58	0.01	0.04	0.95
+0.30	0.45	0.25	0.08	0.33	0.59	0.01	0.04	0.95
+0.16	0.31	0.53	0.05	0.25	0.70	0.01	0.04	0.95
+0.18	0.33	0.49	0.05	0.27	0.68	0.01	0.03	0.96
+0.18	0.33	0.49	0.04	0.24	0.72	0.00	0.03	0.97
+0.23	0.38	0.39	0.05	0.27	0.68	0.01	0.03	0.96
+0.23	0.38	0.39	0.07	0.30	0.63	0.01	0.04	0.95
+								
+0.33	0.48	0.19	0.10	0.37	0.53	0.01	0.05	0.94
+0.35	0.50	0.15	0.13	0.42	0.45	0.02	0.07	0.91
+0.23	0.38	0.39	0.05	0.27	0.68	0.00	0.03	0.97
+0.23	0.38	0.39	0.07	0.31	0.62	0.01	0.03	0.96
+0.31	0.46	0.23	0.08	0.34	0.58	0.01	0.04	0.95
+0.30	0.45	0.25	0.08	0.33	0.59	0.01	0.04	0.95
+0.16	0.31	0.53	0.05	0.25	0.70	0.01	0.04	0.95
+0.18	0.33	0.49	0.05	0.27	0.68	0.01	0.03	0.96
+0.18	0.33	0.49	0.04	0.24	0.72	0.00	0.03	0.97
+0.23	0.38	0.39	0.05	0.27	0.68	0.01	0.03	0.96
+0.23	0.38	0.39	0.07	0.30	0.63	0.01	0.04	0.95
+								
+0.33	0.48	0.19	0.10	0.37	0.53	0.01	0.05	0.94
+0.35	0.50	0.15	0.13	0.42	0.45	0.02	0.07	0.91
+0.23	0.38	0.39	0.05	0.27	0.68	0.00	0.03	0.97
+0.23	0.38	0.39	0.07	0.31	0.62	0.01	0.03	0.96
+0.31	0.46	0.23	0.08	0.34	0.58	0.01	0.04	0.95
+0.30	0.45	0.25	0.08	0.33	0.59	0.01	0.04	0.95
+0.16	0.31	0.53	0.05	0.25	0.70	0.01	0.04	0.95
+0.18	0.33	0.49	0.05	0.27	0.68	0.01	0.03	0.96
+0.18	0.33	0.49	0.04	0.24	0.72	0.00	0.03	0.97
+0.23	0.38	0.39	0.05	0.27	0.68	0.01	0.03	0.96
+0.23	0.38	0.39	0.07	0.30	0.63	0.01	0.04	0.95
+								
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+								
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00
+0.00	0.00	1.00	0.00	0.00	1.00	0.00	0.00	1.00

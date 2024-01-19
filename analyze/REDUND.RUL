@@ -1,0 +1,108 @@
+* File:  REDUND.RUL
+* RULE FILE FOR INTERPRT REDUND
+
+$SET VMIN = *
+$SET VMAX = -*
+$SET MINNAM = *
+$SET MAXNAM = *
+ I shall investigate redundancies for the %NROWS x %NCOLS submatrix.
+$TEXT
+$IF %NCOLS = 0 THEN GOTO BEGIN
+$STACK
+$LOOP
+$IF %VCOLX <= %VCOLLO THEN SKIP 1
+$IF %VCOLLO <> -* THEN GOTO PUSH
+$IF %VCOLX >= %VCOLUP THEN SKIP LOOP
+$IF %VCOLUP >= * THEN SKIP LOOP
+:PUSH
+* COLUMN HAS X > L > -* OR X < U < *
+$PUSH 1,%COLUMN
+$NEXT COL
+
+:ROWS
+$IF %NROWS = 0 THEN GOTO BEGIN
+$LOOP
+$IF %VROWY <= %VROWLO THEN SKIP 1
+$IF %VROWLO <> -* THEN GOTO PUSH
+$IF %VROWY >= %VROWUP THEN SKIP LOOP
+$IF %VROWUP = * THEN SKIP LOOP
+:PUSH
+* ROW HAS Y > L > -* OR Y < U < *
+$PUSH 2,%ROW
+$NEXT ROW
+
+* STACK 1 CONTAINS COLS WITH X > L > -* (SO L IS POTENTIALLY REDUNDANT)
+*                         OR X < U <  * (SO U IS POTENTIALLY REDUNDANT)
+
+* STACK 2 CONTAINS ROWS WITH Y > L > -* (SO L IS POTENTIALLY REDUNDANT)
+*                         OR Y < U <  * (SO U IS POTENTIALLY REDUNDANT)
+
+:BEGIN
+ There are %NSTACK1 columns and %NSTACK2 rows with potential redundancy.
+$SET N = %NSTACK1
+$CALC N = N + %NSTACK2
+$IF %%N = 0 THEN EXIT
+$TEXT
+
+$LOOP
+:LOOP
+$POP 1,COL
+$IF @%%COL = @ THEN ENDLOOP
+$ANALYZE RATEOF COL %%COL //RANGE
+* NOW PARAMS VMIN/VMAX = RANGE
+$SET R=@
+$IF %%VMIN < %VCOLLO THEN GOTO UPPER
+$IF %VCOLLO = -* THEN GOTO UPPER
+ Column %%COL >= %%VMIN, so the lower bound, %VCOLLO is redundant.
+$TEXT
+$SET R=L
+
+:UPPER
+$IF %%VMAX > %VCOLUP THEN GOTO RATES
+$IF %VCOLUP = * THEN GOTO RATES
+ Column %%COL <= %%VMAX, so the upper bound, %VCOLUP is redundant.
+$TEXT
+$SET R=U
+
+:RATES
+$IF %%R = @ THEN GOTO LOOP
+ Look at the following rates, which determine the range of %%COL
+ from their bounds.
+$IF %SWOTFIL = F THEN ANALYZE _PAUSE
+$ANALYZE RATE
+$TEXT
+$GOTO LOOP
+$NEXT COL
+
+:ROWS
+$LOOP
+:LOOP
+$POP 2,ROW
+$IF @%%ROW = @ THEN ENDLOOP
+
+$ANALYZE RATEOF ROW %%ROW //RANGE
+$SET R=@
+$IF %%VMIN < %VROWLO THEN GOTO UPPER
+$IF %VROWLO = -* THEN GOTO UPPER
+ Row %%ROW >= %%VMIN, so the lower bound, %VROWLO is redundant.
+$TEXT
+$SET R=L
+
+:UPPER
+$IF %%VMAX > %VROWUP THEN GOTO RATES
+$IF %VROWUP = * THEN GOTO RATES
+ Row %%ROW <= %%VMAX, so the upper bound, %VROWUP is redundant.
+$TEXT
+$SET R=U
+
+:RATES
+$IF %%R = @ THEN GOTO LOOP
+ Look at the following rates, which determine the range of %%ROW
+ from their bounds.
+$IF %SWOTFIL = F THEN ANALYZE _PAUSE
+$ANALYZE RATE
+$GOTO LOOP
+$TEXT
+$NEXT ROW
+
+$EXIT

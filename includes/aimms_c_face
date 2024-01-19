@@ -1,0 +1,229 @@
+! $Header: M:/default/includes/RCS/aimms_c_face,v 1.5 2015/03/25 17:10:08 dsa Exp $
+! include file aimms_c_face
+!
+! This is the fortran-to-c interface to AIMMS System Developer's Kit (SDK)
+!  the library is named: aimmslink.lib  (for linking)
+!  the dll is named:     aimmslink.dll  (for runtime)
+!
+! To use the library in VIsual Studio, adjust   Debugging > Environment   to:
+! PATH=$(SolutionDir)\$(PlatformName)\$(ConfigurationName);$(AIMMS_SDK_HOME)\cpp\bin;%PATH%
+! and adjust Debugging > Working directory to: $(SolutionDir)
+!
+!  
+! It uses the C Interoperability features of Fortran 2003
+
+
+interface 
+
+    integer function AimmsOpenProject(aimmsFolder, projectName, projectHandle, timeOut, maxFlushInBackground, maxMemoryFlushInBackground, maxBufferSize ) bind(c,name="AimmsOpenProject")
+        use,intrinsic :: iso_c_binding 
+        !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOpenProject
+        character(kind=C_CHAR),dimension(*) :: aimmsFolder
+        character(kind=C_CHAR),dimension(*) :: projectName
+        integer(kind=C_INT), intent(out) :: projectHandle
+        integer(kind=C_INT), value, intent(in) ::  timeOut
+        integer(kind=C_INT), value, intent(in) ::  maxFlushInBackground
+        integer(kind=C_INT), value, intent(in) ::  maxMemoryFlushInBackground
+        integer(kind=C_INT), value, intent(in) ::  maxBufferSize
+    end function AimmsOpenProject
+
+    integer function AimmsCloseProject( projectHandle ) bind(c,name="AimmsCloseProject")
+        use,intrinsic :: iso_c_binding
+        !DEC$ ATTRIBUTES DLLIMPORT :: AimmsCloseProject
+        integer(kind=C_INT), value, intent(in) :: projectHandle
+    end function AimmsCloseProject
+    
+        integer function AimmsIntAssignIdentifier( projectHandle, identifierName, dim, first, last, identifierAddress ) bind(c,name="AimmsIntAssignIdentifier")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntAssignIdentifier
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsIntAssignIdentifier
+        integer function AimmsIntAssignIdentifierDouble( projectHandle, identifierName, dim, first, last, identifierAddress ) bind(c,name="AimmsIntAssignIdentifierDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntAssignIdentifierDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsIntAssignIdentifierDouble
+        
+        integer function AimmsIntRetrieveIdentifier( projectHandle, identifierName, dim, first, last, identifierAddress) bind(c,name="AimmsIntRetrieveIdentifier")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntRetrieveIdentifier
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsIntRetrieveIdentifier
+        integer function AimmsIntRetrieveIdentifierDouble( projectHandle, identifierName, dim, first, last, identifierAddress) bind(c,name="AimmsIntRetrieveIdentifierDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntRetrieveIdentifierDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsIntRetrieveIdentifierDouble
+       
+        integer function AimmsIntAssignIdentifierSlice( projectHandle, identifierName, dim, first, last, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsIntAssignIdentifierSlice")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntAssignIdentifierSlice
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsIntAssignIdentifierSlice
+        integer function AimmsIntAssignIdentifierSliceDouble( projectHandle, identifierName, dim, first, last, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsIntAssignIdentifierSliceDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntAssignIdentifierSliceDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsIntAssignIdentifierSliceDouble
+        
+        integer function AimmsIntRetrieveIdentifierSlice( projectHandle, identifierName, dim, first, last, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsIntRetrieveIdentifierSlice")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntRetrieveIdentifierSlice
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsIntRetrieveIdentifierSlice
+        integer function AimmsIntRetrieveIdentifierSliceDouble( projectHandle, identifierName, dim, first, last, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsIntRetrieveIdentifierSliceDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsIntRetrieveIdentifierSliceDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: first(5)
+            integer(kind=C_INT), intent(in) :: last(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsIntRetrieveIdentifierSliceDouble
+
+        integer function AimmsOrdAssignIdentifier( projectHandle, identifierName, dim, cards, identifierAddress ) bind(c,name="AimmsOrdAssignIdentifier")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdAssignIdentifier
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsOrdAssignIdentifier
+        integer function AimmsOrdAssignIdentifierDouble( projectHandle, identifierName, dim, cards, identifierAddress ) bind(c,name="AimmsOrdAssignIdentifierDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdAssignIdentifierDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_DOUBLE), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsOrdAssignIdentifierDouble
+
+        
+        integer function AimmsOrdRetrieveIdentifier( projectHandle, identifierName, dim, cards, identifierAddress) bind(c,name="AimmsOrdRetrieveIdentifier")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdRetrieveIdentifier
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsOrdRetrieveIdentifier
+        integer function AimmsOrdRetrieveIdentifierDouble( projectHandle, identifierName, dim, cards, identifierAddress) bind(c,name="AimmsOrdRetrieveIdentifierDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdRetrieveIdentifierDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+        end function AimmsOrdRetrieveIdentifierDouble
+       
+        integer function AimmsOrdAssignIdentifierSlice( projectHandle, identifierName, dim, cards, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsOrdAssignIdentifierSlice")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdAssignIdentifierSlice
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsOrdAssignIdentifierSlice
+        integer function AimmsOrdAssignIdentifierSliceDouble( projectHandle, identifierName, dim, cards, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsOrdAssignIdentifierSliceDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdAssignIdentifierSliceDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsOrdAssignIdentifierSliceDouble
+        
+        integer function AimmsOrdRetrieveIdentifierSlice( projectHandle, identifierName, dim, cards, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsOrdRetrieveIdentifierSlice")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdRetrieveIdentifierSlice
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_FLOAT), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsOrdRetrieveIdentifierSlice
+        integer function AimmsOrdRetrieveIdentifierSliceDouble( projectHandle, identifierName, dim, cards, identifierAddress, sliceAddresses, sliceCard ) bind(c,name="AimmsOrdRetrieveIdentifierSliceDouble")
+            use,intrinsic :: iso_c_binding
+            !DEC$ ATTRIBUTES DLLIMPORT :: AimmsOrdRetrieveIdentifierSliceDouble
+            integer(kind=C_INT), value, intent(in) :: projectHandle
+            character(kind=C_CHAR), dimension(*), intent(in) :: identifierName
+            integer(kind=C_INT), value, intent(in) :: dim
+            integer(kind=C_INT), intent(in) :: cards(5)
+            real(C_Double), dimension(*),intent(in) :: identifierAddress 
+            integer(kind=INT_PTR_KIND()), intent(in) :: sliceAddresses(5)
+            integer(kind=C_INT), intent(in) :: sliceCard(5)
+        end function AimmsOrdRetrieveIdentifierSliceDouble
+   
+    integer function AimmsRunProcedure( projectHandle, procedureName, returnCode ) bind (c, name = "AimmsRunProcedure")
+        use,intrinsic :: iso_c_binding 
+        !DEC$ ATTRIBUTES DLLIMPORT :: AimmsRunProcedure
+        integer(kind=C_INT), value, intent(in) :: projectHandle
+        character(kind=C_CHAR), dimension(*), intent(in) :: procedureName
+        integer(kind=C_INT), intent(out) :: returnCode
+    end function AimmsRunProcedure
+
+    integer function AimmsGetLastErrorMessage( textBufferLen, textBuffer) bind(c,name="AimmsGetLastErrorMessage")
+        use,intrinsic :: iso_c_binding
+        !DEC$ ATTRIBUTES DLLIMPORT :: AimmsGetLastErrorMessage 
+        integer(kind=C_INT), intent(inout) :: textBufferLen
+        character(kind=C_CHAR), dimension(*), intent(inout) :: textBuffer
+    end function AimmsGetLastErrorMessage
+
+
+end interface

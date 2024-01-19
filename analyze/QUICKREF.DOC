@@ -1,0 +1,62 @@
+              ANALYZE Quick Reference
+  Command             Function
+ ---------------------------------------------------------------
+ Session Control
+  EXECUTE  Execute commands from file
+  HELP     Get help with commands
+  OUTPUT   Set file for output (* = terminal)
+  PRINT    Print contents of a file (to OUTPUT)
+  QUIT     Terminate session
+  RECAP    Recapitulate last procedural commands
+  RETURN   Return to terminal (from file)
+  SCREEN   Set screen width and length
+  STRING   Set, clear or list strings
+  SWITCH   Set or list switches
+  _DICTNRY Clear, load or merge dictionary
+  _EJECT   Eject page (or clear screen)
+  _KEYWORD List or change keywords
+  _PAUSE   Interrupt with pause to user
+  _SETUP   Setup or list file qualifiers
+  _TYPE    Type text to output file
+  !DOS     Execute DOS command
+  ?        Introduction or dictionary
+ Input/Output
+  READIN   Readin LP file
+  SOLUTION Read solution file
+  WRITEOUT Write packed file
+ Query
+  ADDRIM   Add rim elements of rows or columns
+  COUNT    Count rows, columns and nonzeroes
+  DISPLAY  Display rim of row or column
+  GRAPH    Graph submatrix
+  LIST     List nonzeroes
+  PICTURE  Picture rows, columns and nonzeroes
+  SHOW     Show all information about row or column
+           or plot a step function
+  SUMMARY  Show summary statistics of LP
+  TABLE    Display a table formed from syntax and submatrix
+  TALLY    Tally strings (like sets) in row or column names
+  VERIFY   Verifies solution values
+ Edit
+  BASIS    CHECK and REFRESH options can cause changes
+  FIX      Fix levels
+  FREE     Free bounds
+  RENAME   Rename elements (see, also, LPRENAME).
+  ROUND    Round bound to nearest integer of level
+ Special Delineation
+  BLOCK    Block LP for macro views or find embedded structure
+  SUBMAT   Build submatrix
+ Syntax and English descriptions
+  EXPLAIN  Explain syntax of rows or columns
+  INTERPRT Interpret model and solution elements
+  SCHEMA   Display, Save or Load schema
+  SYNTAX   Show syntax specifications
+ Analysis procedures
+  AGGREGAT Display phase I aggregate constraint
+  BASIS    Give information about resident basis
+  RATEOF   Show rates of substitution between variables
+  REDUCE   Apply successive bound reductions
+  TRACE    Trace flow, starting with submatrix
+  VERIFY   Verify solution values
+ ================================================================
+ See CONDNL.DOC for syntax of row/column conditionals.

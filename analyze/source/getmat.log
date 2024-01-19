@@ -1,0 +1,66 @@
+                         ::: GETMAT.LOG  8-15-95 :::
+
+  Earlier dates deleted
+    2-12-95, 2-28-95, 5-12-95, 5-29-95, 7-05-95, 7-17-95, 7-21-95, 7-29-95,
+    8-04-95, 8-09-95, 8-13-95
+
+  The GETMAT module is a self-contained set of subroutines that gives access
+  to matrix and solution.  The file GETIO reads in matrix, solution or
+  "packed" files.  The subroutines in file GETLIB give access, and GETSET
+  initializes (see listings for more information).  The files GREDUCE and
+  GBASIS are special.  The routines in GREDUCE perform reduction and those
+  in GBASIS perform transformations (by the resident basis); they are
+  included in the GETMAT module because they access the data structure
+  (i.e., DCGETMAT).
+
+  The object files for DOS were compiled with Lahey FORTRAN.
+
+  See GETDATA.DOC and GALGRTHM.DOC for details about the data structure and
+  the algorithms, respectively.
+
+                                GETMAT Log
+  ...Earlier dates deleted
+  BEGIN 12.4
+  > Allow degenerate pivot (in GBRANGE.FOR).
+  > Added some checks in GUPCKGEN.FOR.
+  > Added check in GPUTSL (GETSET.FOR)
+  > Fixed bug in GPIVOT (GBRANGE.FOR)
+  > Fixed buts in GNEWLP (GETSET.FOR) and GUPCKC (GUPCKGEN.FOR), as
+    for Joe Creegan's problem
+  > Changed GRDFPK and GWRFPK (GETIOPCK.FOR) to read and write double
+    precision values.
+  BEGIN 12.5
+  > Added ED* stats (values in BASE changes DCGETMAT)...affects
+     GETSET.FOR:  GNEWLP, GETEDS (new)
+     GETEDIT.FOR: GETFRE, GETFIX, GROUND, GRENAM
+     GETRANS.FOR: GBREFR
+     GREDMAT.FOR: REDBND
+  > Changed CLAHEY dimensions in DCGETMAT
+  > Added GVERFY to GETRANS.FOR
+  > Added VTSUM and other changes to GRED*.FOR
+  > Added GPUTBS to GETSET.FOR (7-5-95)
+  > Added NAMELN to GETMAT calling args (7-17-95)
+  > Added recognition of line truncation in minos solution file
+    (GETIOSOL.FOR ... FORMAT=MINOS)
+  > REMOVED OB1 FROM GETIOSOL (saved in GETOB1.FOR)
+    ...only ANALYZE code changed:  ARDSOL in AREADIN.FOR
+      (LPRENAME & RANDMOD use same routine)
+  > Enhanced oslpck.f to read any matrix file (binary or formatted) or
+    a model file...see oslpck.DOC.
+  > Cosmetic changes in REDCOL.
+  > Removed GPUTBS (see HOLD) and moved BASCLR to GETSET (for LPRENAME).
+
+  8-3-95 BEGIN ANALYZE 12.6
+  > Added SWREPL to calling args of GBREFR (in GETRANS.FOR), and to those
+    of GUPCKW (in GUPCKGEN.FOR).  This affects oslanal.f and the OML
+    interface.
+  > Created GBRVER.FOR
+  > Changed calling args of GPIVOT (in GBRANGE.FOR)
+  > Removed SWREPL from GBREFR and told Joe Creegan to omit calling
+    GBREFR in GUPCKW (which was done here).
+  8-15-95  BEGIN ANALYZE 13.0
+  > Created GREDTEST.FOR and changed calling args to REDUCE.
+  > Created DCREDUCE and restructured FOR files (moving routines around)
+
+                         ::: End GETMAT.LOG :::
+

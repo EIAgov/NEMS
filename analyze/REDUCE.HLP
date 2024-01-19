@@ -1,0 +1,107 @@
+    Function: Reduce bounds of primal quantities and dual prices.
+    Syntax:   REDUCE [row_cond [,column_cond]]  [//specs]
+              where specs can be any of the following.
+
+     BINARY =name  ...specifies name mask for binary variables
+     INTEGER=name  ...specifies name mask for integer variables
+     LOGICAL       ...specifies execution of logical implications test
+     MAXITER=number...specifies max number of iterations...default=25
+                      (= 0 means look for null and singleton rows, but
+                       do not perform any iterations)
+     OVERWRIT      ...specifies overwrite bounds with reduced bounds
+                      (not done if infeasibility is detected)
+     REPORT ={{SB} ...specifies what to report after reductions
+               : |NONE}
+               :  :...no report
+               :...S write summary
+                   B write final bounds
+               ...default = S (only summary, same as specifying REPORT=S)
+           Output from LOGICAL specification is unaffected.  Also, if
+           infeasibility is detected, there is a special report and the
+           summary and bound reports are both suppressed.
+     VERIFY        ...specifies to verify reduced bounds by comparing
+                      with resident solution (applies only if solution
+                      is optimal)...default is not to verify
+     PHASE = number...specifies highest level to be performed...default=2
+             1...perform only inexpensive tests
+             2...perform expensive tests when phase 1 tests yield
+                 no reduction, or once after last iteration
+             3...perform all tests
+
+    In addition, the TIME key is used for interrupt, and the FREQUENCY
+    key is used to determine the reduction log (= 0 means the reductions
+    are not written to output;  = 1 means every reduction is written to
+    output).  The tolerance keys are also used (see KEYS.DIC).
+
+    The option BINARY=name is used to specify that all variables with
+    bounds 0,1 [whose name matches] are binary.  Similarly, INTEGER=name
+    specifies that all variables whose name matches are integer-valued.
+    (Binaries must have explicit upper bounds of 1 in the LP, whereas
+    integer variables need not have explicit bounds.) These specifications
+    can improve the reductions.
+
+    The PHASE specification limits the tests to be inexpensive (PHASE=1).
+    The default is the highest phase, which can be specified as PHASE=*
+    or PHASE=2.  This allows expensive tests to be performed when there is
+    no further reduction from the inexpensive tests.
+
+    Absence of row or column conditional uses current submatrix.  Note one
+    can start with the entire matrix, then using SUBMAT one can confine the
+    successive reduction to a portion of the LP.
+
+       ________________________ Note _______________________
+      | Output may be extensive, so prior use of the OUTPUT |
+      | command is recommended (depends on REPORT option).  |
+      |_____________________________________________________|
+
+    Examples:
+
+    OUTPUT WOODNET.RED ; REDUCE *,*
+    ...Apply successive bound reduction to the entire model (say WOODNET),
+       where the output is written to file WOODNET.RED.
+
+    REDUCE *,* //OVERWRIT,REPORT=S
+    ...same as above, except reduced bounds overwrite the resident bounds,
+       and the bound reduction report is suppressed.
+
+    REDUCE *,* //OV,REP=NONE
+    ...same as above, except no report is written (does not affect whether
+       each reduction is written - that is determined by the FREQUENCY
+       key setting).
+
+    REDUCE S,* //B=* PHASE=1
+    ...Apply successive bound reduction to the submatrix composed of all
+       rows whose name begins with S and all columns; all variables with
+       bounds L=0 and U=1 are binary (which means that if we deduce x > 0,
+       it must be that x=1, and if we deduce x < 1, it must be that x=0).
+       Limit tests to only the basic, inexpensive ones.
+
+    REDUCE  //B=A, I=Q, MAX=100, REP=S
+    ...Apply successive bound reduction to the current submatrix;  all
+       variables whose name begins with A and that have bound values L=0
+       and U=1 are binary.  All variables whose name begins with Q are
+       integer-valued.  The maximum number of iterations is specified
+       to be 100.  Only the summary report is written to the output file.
+
+    REDUCE  //MAX=0
+    ...Apply successive bound reduction to the current submatrix, but
+       just perform the preliminary tests (eg, null and singleton rows).
+       The PHASE value does not matter.
+
+    RED * S=LU,* //MAX=*,REP=SB
+    ...Apply successive bound reduction to the submatrix composed of all
+       nonbasic rows (which are active) and all columns.  There is no limit
+       on the number of iterations (MAX=* dentotes infinity).  Both the
+       bound report and summary are written.
+
+    RED //LOGICAL, BINARY *
+    ...Apply successive bound reduction to submatrix, where all 0-1
+       variables are binary, then execute the logical implications
+       test.
+
+    RED //L, B *, MAX=1, REP=B
+    ...Apply only 1 iteration of successive bound reduction to submatrix,
+       where all 0-1 variables are binary, then execute the logical
+       implications tests.  Only the final bounds are written (not the
+       summary).  Note:  the logical reductions are separate, and they are
+       still written to the output file.

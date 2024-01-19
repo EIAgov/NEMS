@@ -1,0 +1,32 @@
+ IIS-OL FILES:
+ MATRIX  : D:BLENDREV.MAT                                                  
+ SPEC    : DEFAULT.SPC                                                     
+ SOLUTION: D:BLENDREV.MNS                                                  
+ SPI     : DEFAULT.SPI                                                     
+LP NAME:
+SPECIFICATIONS:
+IIS METHOD: REVERSE DEL/SENS
+NUMBER OF COLUMNS IN IIS:
+NUMBER OF ROWS IN IIS:
+BEGIN IIS
+BEGIN COLUMNS
+OB02     lower bound
+OB04     lower bound
+OP01HC   lower bound
+OP01MC   lower bound
+OP02HC   lower bound
+OP02MC   lower bound
+OP03HC   lower bound
+OP03MC   lower bound
+OP04HC   lower bound
+OP04MC   lower bound
+OP05MC   lower bound
+END COLUMNS
+BEGIN ROWS
+BALGO    fixed value
+BALHN    fixed value
+BALLN    fixed value
+BALRS    fixed value
+DEMFO    lower bound
+END ROWS
+END IIS

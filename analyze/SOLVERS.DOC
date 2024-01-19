@@ -1,0 +1,22 @@
+               Solvers Recognized by ANALYZE SOLUTION Command
+
+    MINOS is a Modular In-core Nonlinear Optimization System,
+          developed by Bruce A. Murtagh and Michael A. Saunders.
+          Its copyright is held by Stanford University, and it is
+          marketed by Ketron Management Science.
+
+    MPS   can come from IBM's MPSX/370 or Ketron's MPS III or OML.  In
+          some environments (eg, SUN), this can come from CPLEX.  This
+          file is unformatted (all other solution files are formatted),
+          so you might need to use CONVFORT (see Primer) if you are in a
+          DOS environment.
+
+    OSL   is the IBM Optimization Software Library.  Its link with
+          ANALYZE has been tested on the IBM RISC 6000 under AIX 3.2.
+          It is necessary to have the subroutine (in oslsolve.f) to
+          generate a solution file from OSL that is recognized by
+          ANALYZE.  This is included with ANALYZE (you must have OSL to
+          compile it).  See WOODNET.OSL for the structure of the solution
+          file (and see the ANALYZE primer).  Also, see oslpck for a more
+          efficient interface with OSL.
+

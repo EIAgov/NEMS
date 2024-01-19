@@ -1,0 +1,91 @@
+                       The Output of the RATEOF Command
+
+    The "rate of substitution" is how a basic variable's level must vary
+    as a nonbasic variable's level is changed.  These are determined by
+    the original equations (constraints and objective row), but with the
+    resident solution determining which variables are basic and which
+    are nonbasic.
+
+    Algebraically, we have the "fundamental rate equation":
+
+              X(i) = Level(i) + Rate(i,j) x ÎX(j),
+              |      |          |           |___ Change in level of
+              |Level |          |               j-th nonbasic variable
+              | of   |_ Current |_ Rate of
+              | i-th    value      substitution
+              |basic    of X(i)
+              |variable
+
+    The current level of X(i) takes into account that the current levels
+    of nonbasic variables, such as X(j), may not be 0.  Note that X(i)
+    is driven to one of its bounds, depending upon the sign of the rate
+    by which X(j) displaces X(i).  We refer to "blockage" when X(i)
+    prevents any further change in X(j) (without crossing its bound).
+    In particular, the output of RATEOF gives the "Least" and "Greatest"
+    values X(j) could be without driving a basic variable beyond its
+    bound.
+
+    The conditional (or current submatrix) determines the set of
+    "impulse variables" whose rates of substitution are displayed.
+    If the impulse variable is nonbasic, the above equation is applied
+    straightforwardly with the "response variable" being the basic ones
+    having non-zero rate.  If the impulse variable is basic, the same
+    equation applies and that is the rate displayed;  however, the
+    interpretation is different.  The meanings of "Least Value" and
+    "Greatest Value" displayed also depend on whether the impulse is
+    basic or nonbasic.
+
+    For a basic impulse, the "implied range" is the "myopic range"
+    determined by finding the extreme values of x(i) subject to the
+    fundamental rate equation and the bounds on the nonbasic variables.
+    The myopic range is necessary in that the true range (over the entire
+    feasible region) must be within the myopic range.  Each basic
+    solution gives another re-write of the equations, and different
+    variables are nonbasic, so the myopic range is not necessarily a good
+    estimate of the true range.  One case where the myopic range gives
+    useful information is when it must exceed its explict lower bound (or
+    be strictly less than its explicit upper bound).  In this case the
+    bound value is redundant -- ie, its removal does not change the set
+    of feasible solutions.  (The BASIS REDUND command uses this in its
+    determination of redundant constraints.) Another useful case is when
+    the implied upper limit of the variable equals its given lower bound.
+    In that case, the variable is forced to equal this value in every
+    feasible solution.  In particular, a variable might be forced to be
+    zero in every feasible solution.
+
+    For a nonbasic impulse, the implied range is determined by a basic
+    variable's movement towards one of its bounds.  If no basic variable
+    is driven to one of its bound values, the implied range of the
+    impulse variable is infinite.  For example, suppose each basic
+    variable must simply be non-negative (no upper bound).  Then, a basic
+    variable with a positive rate of substitution moves away from its
+    bound (ie, its level increases as the impulse variable is increased).
+    If this is true for all basic variables, the impulse variable can
+    increase its value indefinitely while remaining feasible.  Otherwise,
+    if some basic variable has a negative rate of substitution, it is
+    driven to zero when the impulse level increases by -X(i)/R(i,j).
+    That is, the fundamental rate equation is 0 = X(i) + R(i,j)ÎX(j),
+    which has the solution ÎX(j) = -X(i)/R(i,j).  Disallowing any basic
+    variable becoming negative imposes the limit:  ÎX(j) <= -X(i)/R(i,j).
+    Since this must be true for all i such that R(i,j) < 0, we have the
+    upper limit in the range of ÎX(j) = Min[-X(i)/R(i,j): R(i,j) < 0].
+
+    The lower limit is found by considering decreasing the impulse value
+    (ie, ÎX(j) < 0) and determining a similar bound, ÎX(j) >=
+    Max[-X(i)/R(i,j): R(i,j) > 0].  When a basic variable has other
+    bounds, similar expressions give the implied range in order to remain
+    feasible.  If one (or both) of these limits is finite, the "blockage"
+    is a basic variable that yields the extreme (ie, it is driven to its
+    bound before (or same as) the others).
+
+    In the equation format with OBJECTIV specified (after EQUATION),
+    in the D or P option, and in the SYNTAX format, objective rates are
+    also shown, as "Net rate of" <objective row>.  This shows the effect
+    of the rate of substitution on the level of the objective value.  For
+    example, suppose we have the equation, A = 10 + 2 B, where A is a
+    basic column variable and B is non-basic.  The rate of substituion of
+    A with respect to B is 2, which means that if B is increased, A
+    increases at the rate of 2 units per unit of B.  If C is the
+    objective coefficient of A, this change causes the total objective
+    value to increase at the rate of 2 C.
+

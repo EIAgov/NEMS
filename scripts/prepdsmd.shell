@@ -1,0 +1,97 @@
+# The output will be stored in $OUTDIR/$scenario/$datekey
+# some initialization
+ OUTDIR=?OUTDIR@
+ scenario=?SCEN@
+ datekey=?DATE@
+
+# We need to know the "launched from" directory
+ OLDDIR=$PWD
+
+ if [ ! -f FILELIST.$scenario.$datekey ]; then
+   echo ' NO FILELIST FILE !!!!! '
+   echo ' SCRIPT ENDING '
+   exit
+ fi
+
+ if [ -d $OUTDIR/$scenario ]; then
+   echo directory $OUTDIR/$scenario exists
+   echo continuing
+ else
+   echo creating $OUTDIR/$scenario
+   mkdir $OUTDIR/$scenario
+ fi
+
+ cd $OUTDIR/$scenario
+ if [ -d $datekey ]; then
+   echo directory $datekey exists
+   echo continuing
+ else
+   echo creating $datekey
+   mkdir $datekey
+ fi
+
+ cd $datekey
+ cp $OLDDIR/keys.sed.$scenario.$datekey keys.sed
+ cp $OLDDIR/FILELIST.$scenario.$datekey FILELIST
+ cp $OLDDIR/scedes.all.$scenario.$datekey scedes.all
+ rm $OLDDIR/scedes.all.$scenario.$datekey
+
+#  check to see if all files in FILELIST exist ('u' tells it to uncompress only)
+ $NEMS/scripts/cac_filelist.exe FILELIST u
+
+# file created by cac_filelist to uncompress files
+ sh uncmprss.sh
+ rm -f uncmprss.sh
+
+# now link and submit the preprocessor
+
+OBJS="?FILEMGRN@?FILEMGRD@.obj \
+?PREPDSMDN@?PREPDSMDD@.obj"
+
+ notthere=0
+ for item in $OBJS
+ do
+    sh $NEMS/scripts/checkfor.z.sh $item print
+    if [ $? -ne "0" ] ; then
+      notthere=1
+    fi
+ done
+ if [ $notthere -eq 1 ] ;then
+   echo "not continuing because of missing object files"
+   exit
+ fi
+
+lnkinems=?LNKINEMS@
+if [ "$lnkinems" = "1" ] ; then
+  IVERS=9.0
+  export IVERS
+  . $NEMS/scripts/ifortvars.sh 9.0
+elif [ "$lnkinems" = "2" ] ; then
+  IVERS=9.1
+  export IVERS
+  . $NEMS/scripts/ifortvars.sh 9.1
+elif [ "$lnkinems" = "3" ] ; then
+   IVERS="11.1"
+   export IVERS
+   . $NEMS/scripts/ifortvars.sh
+elif [ "$lnkinems" = "5" ] ; then
+   IVERS="18.1"
+   export IVERS
+   . $NEMS/scripts/ifortvars18.sh
+else
+   IVERS="11.1"
+   export IVERS
+   . $NEMS/scripts/ifortvars64x64.sh
+fi
+if [ "$lnkinems" = "0" ] ; then
+# link with CVF linker
+  link /out:prepdsmd.exe /debug:full /FORCE $OBJS
+elif [ "lnkinmes" = "5" ] ; then
+  link /out:prepdsmd.exe /subsystem:console /debug:full /FORCE $OBJS legacy_stdio_definitions.lib
+else
+#  link with Intel linker (xilink.exe).  Set required environment strings and search paths first.
+  xilink /out:prepdsmd.exe /incremental:no    /debug /FORCE $OBJS
+fi
+
+echo "Submitting prepdsmd"          
+prepdsmd.exe > nohup.out &

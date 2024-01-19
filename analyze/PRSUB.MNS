@@ -1,0 +1,130 @@
+1
+ 
+          
+         ==============================
+         M I N O S    5.3    (Sep 1988)
+         ==============================
+
+ OPTIONS file
+ ------------
+      BEGIN
+      MINIMIZE                                                                
+      SCALE NO                                                                
+      ROWS       300                                                          
+      COLUMNS    500                                                          
+      ELEMENTS  2000                                                          
+      MPS FILE   11                                                           
+      END                                                                     
+
+ Reasonable WORKSPACE limits are         0 ...   15795
+ Actual     WORKSPACE limits are         0 ...   48300 ...   48300  words of  Z.
+1
+ MPS file
+ --------
+      1    NAME          PRSUB   
+      2    ROWS                  
+     16    COLUMNS               
+     34    RHS                   
+     39    ENDATA                
+
+
+
+ Names selected
+ --------------
+ OBJECTIVE      COST     (MIN)       1
+ RHS            RHS                  4
+ RANGES                              0
+ BOUNDS                              0
+
+ PARTIAL PRICE section size (A)            1
+ PARTIAL PRICE section size (I)            1
+
+ Nonzeros allowed for in LU factors    31988
+
+
+
+ Matrix statistics
+ -----------------
+               Total      Normal        Free       Fixed     Bounded
+ Rows             13           4           1           8           0
+ Columns          13          13           0           0           0
+
+ No. of matrix elements       32     Density      18.935
+ Biggest and smallest coeffs      1.0000E+00  1.0000E-02
+ (excluding free rows and RHS)
+1
+ 
+ Initial basis
+ -------------
+
+ No basis file supplied
+
+
+ CRASH option  1
+ Free rows     1     Free cols     0     Pass 2 (E rows)     8     Pass 3     3     Remainder     1
+
+
+
+ Iterations
+ ----------
+
+   Itn  Nopt  Ninf  Sinf,Objective     LU
+     1     1     1  4.77777778E+01     27
+ 
+ Itn     1 -- Feasible solution.  Objective =   5.916666667E+03
+ 
+1
+ 
+ EXIT -- OPTIMAL SOLUTION FOUND
+
+ No. of iterations                   2     Objective value      5.7366666667E+03
+
+ No. of degenerate steps             0     Percentage                        .00
+
+ Norm of X                   1.744E+03     Norm of PI                  7.281E+01
+1
+ NAME           PRSUB                 Objective value    5.7366666667E+03
+
+ Status         OPTIMAL SOLN          Iteration    2     Superbasics    0
+
+ OBJECTIVE      COST     (MIN)
+ RHS            RHS     
+ RANGES                 
+ BOUNDS                 
+ 
+ SECTION 1 - ROWS
+
+  NUMBER  ...ROW.. STATE  ...ACTIVITY...  SLACK ACTIVITY  ..LOWER LIMIT.  ..UPPER LIMIT.  .DUAL ACTIVITY    ..I
+
+      14  COST        BS      5736.66667     -5736.66667           NONE            NONE         -1.00000      1
+      15  ICO         EQ          .00000          .00000          .00000          .00000        10.00000      2
+      16  ING         EQ          .00000          .00000          .00000          .00000         5.00000      3
+      17  MCO         EQ          .00000          .00000          .00000          .00000        10.00000      4
+      18  MDS         EQ          .00000          .00000          .00000          .00000        55.00000      5
+      19  MOT      A  EQ          .00000          .00000          .00000          .00000          .00000      6
+      20  UNG         EQ          .00000          .00000          .00000          .00000         5.00000      7
+      21  UDS         EQ          .00000          .00000          .00000          .00000        55.00000      8
+      22  UEL         EQ          .00000          .00000          .00000          .00000        30.00000      9
+      23  ZNG         LL       100.00000          .00000       100.00000           NONE          3.20000     10
+      24  ZDS         LL        50.00000          .00000        50.00000           NONE         55.00000     11
+      25  ZOT         BS       242.00000      -232.00000        10.00000           NONE           .00000     12
+      26  ZEL         LL        80.00000          .00000        80.00000           NONE         33.33333     13
+1
+ SECTION 2 - COLUMNS
+
+  NUMBER  .COLUMN. STATE  ...ACTIVITY...  .OBJ GRADIENT.  ..LOWER LIMIT.  ..UPPER LIMIT.  REDUCED GRADNT    M+J
+
+       1  ACO         BS       270.00000        10.00000          .00000           NONE           .00000     14
+       2  ANG         BS       461.11111         5.00000          .00000           NONE           .00000     15
+       3  PCOP        BS       270.00000          .00000          .00000           NONE           .00000     16
+       4  PNGU        BS       461.11111          .00000          .00000           NONE           .00000     17
+       5  PNGD        LL          .00000          .00000          .00000           NONE          1.80000     18
+       6  RCO         BS       270.00000         1.00000          .00000           NONE           .00000     19
+       7  TDSD        BS        54.00000          .00000          .00000           NONE           .00000     20
+       8  TDSU     D  BS          .00000          .00000          .00000           NONE           .00000     21
+       9  TOTD        BS       243.00000          .00000          .00000           NONE           .00000     22
+      10  XNG         BS       461.11111         1.00000          .00000           NONE           .00000     23
+      11  XDS         LL          .00000         1.50000          .00000           NONE         44.50000     24
+      12  TELD        BS        92.22222          .00000          .00000           NONE           .00000     25
+      13  ZSUB        BS       100.00000          .00000          .00000           NONE           .00000     26
+ ENDRUN

@@ -1,0 +1,12 @@
+!  $Header: N:/default/includes/RCS/dsmnercr,v 1.2 1999/12/19 20:11:59 DSA Exp $
+! ===== (DSMNERCR) =====   ! updated
+! NERCnam(MAXNRG) - NERC REGION NAMES
+! NERCtdloss(MAXNRG) - transmission and distribution loss factors for NERC reg.
+! NERClsrN(MAXNRG) - DAF-LSR-DB record numbers for regional system load lsrs
+! nNERCreg - number of NERC regions to be processed
+! nCENSUSreg - number of CENSUS regions to be processed
+       CHARACTER*8 NERCnam(MAXNRG)
+       INTEGER*2 nNERCreg,nCENSUSreg,NERClsrN(MAXNRG)
+       REAL*4 NERCtdloss(MAXNRG)
+       COMMON/DSMNRn/NERCtdloss,NERClsrN,nNERCreg,nCENSUSreg
+       COMMON/DSMNRc/NERCnam

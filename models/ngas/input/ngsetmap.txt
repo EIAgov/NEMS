@@ -1,0 +1,1448 @@
+!___________________________________________________________________________________________
+!
+!				1. NGMM Set Declarations
+!
+!___________________________________________________________________________________________
+
+!	1.1  Regional/State sets
+!	1.2  Supply sets 
+!	1.3  Sectoral sets
+!	1.4  Miscellaneous sets
+!___________________________________________________________________________________________
+!
+!___________________________________________________________________________________________
+!
+!				1.1  Regional/State sets
+!___________________________________________________________________________________________
+
+States_ := data {AL,AK,AZ,AR,CA,CO,CT,DC,DE,FL,GA,HI,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,
+		OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY,TX_W,TX_N,TX_E};
+AK_HI_ := data {AK,HI};
+AK_ := data {AK};
+!Hubs_ 	:= DATA	{AL,AZ,AR,CA,CO,CT,DC,DE,FL,GA,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,
+!		MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,
+!		TX_E, TX_N, TX_W,UT,VT,VA,WA,WV,WI,WY,CN_E,CN_W,MX_NE,MX_NW,MX_IW,MX_CE,MX_SS,ME-CN_E,
+!		NH-CN_E,VT-CN_E,NY-CN_E,MI-CN_E,MN-CN_W,ND-CN_W,MT-CN_W,ID-CN_W,
+!		WA-CN_W,TX-MX_NE,NM-MX_NE,AZ-MX_NW,CA-MX_NW,TX_E-MX_SS};
+!L_48_ 	:= data {AL,AZ,AR,CA,CO,CT,DC,DE,FL,GA,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,
+!		MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,
+!		TX,UT,VT,VA,WA,WV,WI,WY};
+BorderCrossings_ 	:= data {ME-CN_E,NH-CN_E,VT-CN_E,NY-CN_E,MI-CN_E,MN-CN_W,ND-CN_W,
+				MT-CN_W,ID-CN_W,WA-CN_W,TX_W-MX_NE,NM-MX_NE,AZ-MX_NW,CA-MX_NW,TX_E-MX_SS, TX_E-MX_NE};
+BorderCrossingsMX_ 	:= data {TX_W-MX_NE,NM-MX_NE,AZ-MX_NW,CA-MX_NW,TX_E-MX_SS,TX_E-MX_NE};
+Mexico_	:= data {MX_NE,MX_NW,MX_IW,MX_CE,MX_SS};
+MexicoSouth_	:= data {MX_IW,MX_CE,MX_SS};
+MexicoNorthEast:='MX_NE';
+Canada_	:= data {CN_E,CN_W};
+CanadaEast:='CN_E';
+CanadaWest:='CN_W';
+
+!DemandNode_ 	:= DATA	{AL, AZ, AR, CA, CO, CT, DC, DE, FL, GA, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, 
+!			MI, MN, MS, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SC, 
+!			SD, TN, TX_E, TX_N, TX_W, UT, VT, VA, WA, WV, WI, WY, CN_E, CN_W, MX_NE, MX_NW, MX_IW, MX_CE, 
+!			MX_SS};
+
+!SupplyNode_	:= data	{AL, AK, AZ, AR, CA, CO, CT, DC, DE, FL, GA, HI, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, 
+!			MI, MN, MS, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SC, 
+!			SD, TN, TX_E, TX_N, TX_W, UT, VT, VA, WA, WV, WI, WY, 
+!                        CN_E, CN_W, MX_NE, MX_NW, MX_IW, MX_CE, MX_SS,
+!                        TX_1, TX_2, TX_3, TX_4, TX_5, TX_6, TX_7B, TX_7C, TX_8, TX_8A, TX_9, TX_10,
+!                        NM_E, NM_W, LA_N, LA_S, AL_N, AL_S,  MS_N, MS_S,
+!                        MA_ST, VA_ST, GA_ST, AL_ST, LA_ST, TX_ST, CA_ST, OR_ST, AK_ST,
+!                        MA_FD, VA_FD, GA_FD, AL_FD, LA_FD, TX_FD, CA_FD, OR_FD, AK_FD, GOM};
+SupplyNode_	:= data	{GOM}; !add the rest in the code
+Texas_ := data {TX_1, TX_2, TX_3, TX_4, TX_5, TX_6, TX_7B, TX_7C, TX_8, TX_8A, TX_9, TX_10};
+NewMexico_ := data {NM_E, NM_W};
+Louisiana_ := data {LA_N, LA_S};
+Alabama_ := data {AL_N, AL_S};
+Mississippi_ := data {MS_N, MS_S};
+StateOffshore_ := data {MA_ST, VA_ST, GA_ST, AL_ST, LA_ST, TX_ST, CA_ST, OR_ST};
+FederalOffshore_ := data {MA_FD, VA_FD, GA_FD, AL_FD, LA_FD, MS_FD, TX_FD, CA_FD, OR_FD};
+FederalGOM_ := data { AL_FD, LA_FD, MS_FD, TX_FD};
+FedGOM_OGDIST_ := data {EGOM_FD, CGOM_FD, WGOM_FD};
+EasternGOM:='EGOM_FD';
+CentralGOM:='CGOM_FD';
+WesternGOM:='WGOM_FD';
+TexasGOM:='TX_FD';
+LouisianaGOM:='LA_FD';
+AlabamaGOM:='AL_FD';
+MississippiGOM:='MS_FD';
+ShaleGasRegion := 'WY';
+GOMRegion := 'GOM';
+TexasState :='TX';
+CaliforniaState := 'CA';
+HawaiiState := 'HI';
+HenryHubRegion := 'LA_S';
+MinnesotaState:='MN';
+MichiganState:='MI';
+OhioState:='OH';
+PennState:='PA';
+AKRegion_South := 'AK_S';
+AKRegion_North := 'AK_N';
+AKRegion_ := data {AK_N,AK_S}; 
+AKState := 'AK';
+AKSupply_ :={AK,AK_ST,AK_FD};
+!INGMRegion_ := data {CN_E,CN_W,MX_NE,MX_NW,MX_S};
+!InternationalRegions_ := data {CN_E,CN_W,MX_NE,MX_NW,MX_IW,MX_CE,MX_SS};
+LNGTerminals_QP_ := data{LA,TX_E,GA,MD};
+Region_OilGas_ := DATA {NewEngland, MidAtlantic, ENCentral, WNCentral,SAtlantic_OG,ESCentral,WSCentral,Mountain_OG,Pacific_OG,FL,AZ_NM,CA,CN_E,CN_W,Mexico};
+Region_Flow_:= data {NewEngland, MidAtlantic_OH, Southeast, EasternMidwest, SouthCentral, RockiesPlains, NorthernGreatPlains, OR_WA, FL,AZ_NM,CA,CN_E,CN_W,Mexico};
+Mexico_SS := 'MX_SS';
+Mexico_NE := 'MX_NE';
+Mexico_NW := 'MX_NW';
+
+!___________________________________________________________________________________________
+!
+!				1.2  Supply sets
+!___________________________________________________________________________________________
+
+SupplyType_ := data {NA,AD,LNG,SNG_coal,SNG_liq,SNG_other};
+!SupplyType_ := data {NA,AD,LNG,SNG_coal,SNG_liq,SNG_other,NA_fixed,MEX};
+VariableSupply_ := data{NA};
+NA_AD_ := data{NA,AD};
+DomesticSupply_ := data{NA,AD,SNG_coal,SNG_liq,SNG_other};
+SNG_ := data{SNG_coal,SNG_liq,SNG_other};
+Supply_NA:= 'NA';
+Supply_AD:= 'AD';
+Supply_SNGcoal:= 'SNG_coal';
+Supply_LNG:= 'LNG';
+!Supply_NAfixed:='NA_fixed';
+Supply_Curve_Step_ := data {'step1'..'step6'};
+Tariff_Curve_Step_ := data {'step1'..'step5'};
+
+!___________________________________________________________________________________________
+!
+!				1.3  Sectoral/Demand sets
+!___________________________________________________________________________________________
+
+Sector_ := data {Residential, Commercial, Industrial, Transportation, Electric};
+SubSector_ := DATA 	{Core, Noncore, None};
+Sector_ResCom_ := data {Residential, Commercial};
+Sector_Residential := 'Residential';
+Sector_Commercial := 'Commercial';
+Sector_Industrial := 'Industrial';
+Sector_Transportation := 'Transportation';
+Sector_Electric := 'Electric';
+
+!Sets used for Transportation Sector
+
+TransFuel_ := data {CNG,LNG};
+VehicleType_ := data {personal,fleet, rail, marine};
+VehicleRoad_ := data {personal,fleet};
+Fuel_CNG := 'CNG';
+Fuel_LNG := 'LNG';
+Vehicle_Personal := 'personal';
+Vehicle_Fleet := 'fleet';
+Vehicle_Rail := 'rail';
+Vehicle_Marine := 'marine';
+
+
+!___________________________________________________________________________________________
+!
+!				1.4  Miscellaneous sets
+!___________________________________________________________________________________________
+
+
+
+!NEMS Mapping Sets
+Units_ := DATA {USD_bbl, USD_MMBtu};
+Region_Census_ := DATA {NewEngland, MidAtlantic, ENCentral, WNCentral,SAtlantic,ESCentral,WSCentral,Mountain,Pacific};
+CD_NewEngland:='NewEngland';
+CD_MidAtlantic:='MidAtlantic';
+CD_ENCentral:='ENCentral';
+CD_WNCentral:='WNCentral';
+CD_SAtlantic:='SAtlantic';
+CD_ESCentral:='ESCentral';
+CD_WSCentral:='WSCentral';
+CD_Mountain:='Mountain';
+CD_Pacific:= 'Pacific';
+Season_ := data {peak, offpeak, shoulder};
+
+
+!Sets used in Mexico subroutine
+MX_Sector_ := data {Residential, Commercial, Industrial, Transportation, Electric, PEMEX};
+
+!Set used to map crude oil types in NEMS
+CrudeType_ := data {LightSweet, LightSour, MedMedSour, MedSour, HeavySweet, HeavySour, California, Syncrude, Dilbit, UltraLightSweet, Condensate};
+
+
+!LNG Export Sets
+
+!Destinations for LNG Exports
+LNGDestination_ :=data {Asia, Europe};
+
+!Oil price steps for beta/flexible LNG exponent adjustment in $87/barrel Brent
+LNG_OilPriceSteps_ := data {1,2,3,4,5,6};
+
+!Set used to indicate which NEMS side case is being run
+NEMScase_ := data {reference, high_wop, low_wop};
+ReferenceCase := 'reference';
+HighWOPCase := 'high_wop';
+LowWOPCase := 'low_wop';
+
+!___________________________________________________________________________________________
+!
+!				2.  Mapping Parameters Declaration
+!
+!___________________________________________________________________________________________
+
+!	1.1  NEMS Mapping Parameters
+!	2.2  NGMM Mappings for flows (s, h, d, lngexp- supply, hub, demand, LNG exports) 
+!	2.3  Regional Mappings (states, substates, etc.)
+!	2.4  Supply Mappings
+!	2.5  Canada, Mexico, and Import/Export Mappings
+!	2.6  Miscellaneous (other) mappings
+
+!___________________________________________________________________________________________
+!				2.1  NEMS Mapping Parameters Declaration
+!___________________________________________________________________________________________
+
+!NEMS mapping parameters to set M2_
+
+!Mapping to units for oil quantity 1=USD per barrel 2=USD per MMBtu
+Composite table:
+M2 units      NEMSmap_M2_Units
+1  USD_bbl    1
+2  USD_MMBtu  1
+;
+!Mapping M2 to LNG Demand region 1= Europe 2=Asia
+composite table:
+
+M2	d_lng	NEMSmap_M2_d_lng
+1	Europe	1
+2	Asia	1
+;
+
+!Map M3 to seasons 
+
+composite table:		
+M3	season		NEMSmap_M3_season
+1	peak		1
+2	offpeak		1
+3	shoulder	1
+;
+
+
+!NEMS Mapping parameters to set MNUMCR (Census Division)
+composite table:
+r_cen		MNUMCR	NEMSmap_MNUMCR_CensusReg
+NewEngland	1	1
+MidAtlantic	2	1
+ENCentral	3	1
+WNCentral	4	1
+Satlantic	5	1
+ESCentral	6	1
+WSCentral	7	1
+Mountain	8	1
+Pacific		9	1
+;
+composite table:
+reg   MNUMCR NEMSmap_reg_MNUMCR
+CT     1       1  !NewEngland	
+ME     1       1  !NewEngland	
+MA     1       1  !NewEngland	
+NH     1       1  !NewEngland	
+RI     1       1  !NewEngland	
+VT     1       1  !NewEngland	
+NJ     2       1  !MidAtlantic	
+NY     2       1  !MidAtlantic	
+PA     2       1  !MidAtlantic	
+IL     3       1  !ENCentral	
+IN     3       1  !ENCentral	
+MI     3       1  !ENCentral	
+OH     3       1  !ENCentral	
+WI     3       1  !ENCentral	
+IA     4       1  !WNCentral	
+KS     4       1  !WNCentral	
+MN     4       1  !WNCentral	
+MO     4       1  !WNCentral	
+NE     4       1  !WNCentral	
+ND     4       1  !WNCentral	
+SD     4       1  !WNCentral	
+DC     5       1  !Satlantic	
+DE     5       1  !Satlantic	
+FL     5       1  !Satlantic	
+GA     5       1  !Satlantic	
+MD     5       1  !Satlantic	
+NC     5       1  !Satlantic	
+SC     5       1  !Satlantic	
+VA     5       1  !Satlantic	
+WV     5       1  !Satlantic	
+AL     6       1  !ESCentral	
+KY     6       1  !ESCentral	
+MS     6       1  !ESCentral	
+TN     6       1  !ESCentral	
+AR     7       1  !WSCentral	
+LA     7       1  !WSCentral	
+OK     7       1  !WSCentral	
+TX_E   7       1  !WSCentral	
+TX_N   7       1  !WSCentral
+TX_W   7       1  !WSCentral
+AZ     8       1  !Mountain	
+CO     8       1  !Mountain	
+ID     8       1  !Mountain	
+MT     8       1  !Mountain	
+NV     8       1  !Mountain	
+NM     8       1  !Mountain	
+UT     8       1  !Mountain	
+WY     8       1  !Mountain	
+AK     9       1  !Pacific		
+CA     9       1  !Pacific		
+HI     9       1  !Pacific		
+OR     9       1  !Pacific		
+WA     9       1  !Pacific		
+;
+
+
+!NEMS mapping to MNUMOR (Oil and Gas Supply Region)
+	!1-7 onshore (Northeast,GulfCoast, Midcontinent, Southwest, Rocky Mountain, West Coast)
+	!8-10 offshore (Atlantic, GulfofMexico,Pacific)
+	!11-13 Alaska (Offshore North Slope, Onshore North Slope, South Alaska)
+
+!Mapping of SupplyNodes_ to MNUMOR regions
+composite table:
+s     MNUMOR  NEMSmap_SupplyNode_MNUMOR
+AL_N     2    1
+AL_S     2    1
+AK      13    1
+AZ       5    1
+AR       3    1
+CA       6    1
+CO       5    1
+CT       1    1
+DE       1    1
+DC       1    1
+FL       2    1
+GA       1    1
+HI       6    1
+ID       5    1
+IL       1    1
+IN       1    1
+IA       3    1
+KS       3    1
+KY       1    1
+LA_N     2    1
+LA_S     2    1
+ME       1    1
+MD       1    1
+MA       1    1
+MI       1    1
+MN       3    1
+MS_N     2    1
+MS_S     2    1
+MO       3    1
+MT       7    1
+NE       3    1
+NV       5    1
+NH       1    1
+NJ       1    1
+NM_E     4    1
+NM_W     5    1
+NY       1    1
+NC       1    1
+ND       7    1
+OH       1    1
+OK       3    1
+OR       6    1
+PA       1    1
+RI       1    1
+SC       1    1
+SD       7    1
+TN       1    1
+TX_1     2    1
+TX_2     2    1
+TX_3     2    1
+TX_4     2    1
+TX_5     2    1
+TX_6     2    1
+TX_7B    4    1
+TX_7C    4    1
+TX_8     4    1
+TX_8A    4    1
+TX_9     4    1
+TX_10    3    1
+UT       5    1
+VT       1    1
+VA       1    1
+WA       6    1
+WV       1    1
+WI       1    1
+WY       5    1
+MA_ST    8    1
+VA_ST    8    1
+GA_ST    8    1
+AL_ST    9    1
+LA_ST    9    1
+TX_ST    9    1
+CA_ST   10    1
+OR_ST   10    1
+AK_ST   12    1
+MA_FD    8    1
+VA_FD    8    1
+GA_FD    8    1
+AL_FD    9    1
+LA_FD    9    1
+MS_FD    9    1
+TX_FD    9    1
+CA_FD   10    1
+OR_FD   10    1
+AK_FD   11    1
+;
+
+!Map AK regions to MNUMOR
+Composite table:
+MNUMOR  r_ak        NEMSmap_MNUMOR_AKreg
+12      AK_N        1
+13      AK_S        1
+;
+composite table:
+r_ak		NEMSmap_MNUMOR_AK(r_ak)
+AK_N		12
+AK_S		13
+;	
+
+!Mapping of hubs to NGTDM Regions for flows and capacities reporting
+Composite table:
+h           r_og           map_hub_Region_OilGas 
+CT          NewEngland     1
+ME          NewEngland     1
+MA          NewEngland     1
+NH          NewEngland     1
+RI          NewEngland     1
+VT          NewEngland     1
+NJ          MidAtlantic	   1
+NY          MidAtlantic	   1
+PA          MidAtlantic	   1
+IL          ENCentral      1
+IN          ENCentral      1
+MI          ENCentral      1
+OH          ENCentral      1
+WI          ENCentral      1
+IA          WNCentral      1
+KS          WNCentral      1
+MN          WNCentral      1
+MO          WNCentral      1
+NE          WNCentral      1
+ND          WNCentral      1
+SD          WNCentral      1
+DC          Satlantic_OG   1
+DE          Satlantic_OG   1
+FL          FL       	   1
+GA          Satlantic_OG   1
+MD          Satlantic_OG   1
+NC          Satlantic_OG   1
+SC          Satlantic_OG   1
+VA          Satlantic_OG   1
+WV          Satlantic_OG   1
+AL          ESCentral      1
+KY          ESCentral      1
+MS          ESCentral      1
+TN          ESCentral      1
+AR          WSCentral      1
+LA          WSCentral      1
+OK          WSCentral      1
+TX_E        WSCentral      1
+TX_N        WSCentral      1
+TX_W        WSCentral      1
+AZ          AZ_NM	   1
+CO          Mountain_OG	   1
+ID          Mountain_OG	   1
+MT          Mountain_OG	   1
+NV          Mountain_OG	   1
+NM          AZ_NM	   1
+UT          Mountain_OG	   1
+WY          Mountain_OG	   1
+CA          CA		   1
+OR          Pacific_OG     1
+WA          Pacific_OG     1
+ME-CN_E	    CN_E	   1
+NH-CN_E	    CN_E	   1
+VT-CN_E	    CN_E	   1
+NY-CN_E	    CN_E	   1
+MI-CN_E	    CN_E	   1
+MN-CN_W	    CN_W	   1
+ND-CN_W	    CN_W	   1
+MT-CN_W	    CN_W	   1
+ID-CN_W	    CN_W	   1
+WA-CN_W	    CN_W	   1
+TX_W-MX_NE  Mexico	   1
+TX_E-MX_SS  Mexico	   1
+AZ-MX_NW    Mexico	   1
+CA-MX_NW    Mexico	   1
+;
+!Mapping of hubs to NGTDM Regions for flows and capacities reporting using new regions
+Composite table:
+h           r_flow         		map_hub_Region_Flow 
+CT          NewEngland      		1
+ME          NewEngland      		1
+MA          NewEngland      		1
+NH          NewEngland     		1
+RI          NewEngland      		1
+VT          NewEngland     		1
+NJ          MidAtlantic_OH     		1
+NY          MidAtlantic_OH      	1
+PA          MidAtlantic_OH      	1
+IL          EasternMidwest        	1
+IN          EasternMidwest        	1
+MI          EasternMidwest        	1
+OH          MidAtlantic_OH      	1
+WI          EasternMidwest        	1
+IA          EasternMidwest        	1
+KS          SouthCentral   		1
+MN          EasternMidwest        	1
+MO          EasternMidwest        	1
+NE          RockiesPlains        	1
+ND          NorthernGreatPlains 	1
+SD          NorthernGreatPlains 	1
+DC          MidAtlantic_OH    		1
+DE          MidAtlantic_OH     		1
+FL          FL       	   		1
+GA          Southeast      		1
+MD          MidAtlantic_OH     		1
+NC          Southeast      		1
+SC          Southeast      		1
+VA          MidAtlantic_OH     		1
+WV          MidAtlantic_OH    		1
+AL          SouthCentral   		1
+KY          EasternMidwest        	1
+MS          SouthCentral   		1
+TN          EasternMidwest        	1
+AR          SouthCentral   		1
+LA          SouthCentral   		1
+OK          SouthCentral   		1
+TX_E        SouthCentral   		1
+TX_N        SouthCentral   		1
+TX_W        SouthCentral   		1
+AZ          AZ_NM	   		1
+CO          RockiesPlains	   	1
+ID          RockiesPlains	   	1
+MT          NorthernGreatPlains 	1
+NV          RockiesPlains		1
+NM          AZ_NM	   		1
+UT          RockiesPlains		1
+WY          RockiesPlains		1
+CA          CA		   		1
+OR          OR_WA			1
+WA          OR_WA			1
+ME-CN_E	    CN_E	   		1
+NH-CN_E	    CN_E	   		1
+VT-CN_E	    CN_E	   		1
+NY-CN_E	    CN_E	  		1
+MI-CN_E	    CN_E	   		1
+MN-CN_W	    CN_W	   		1
+ND-CN_W	    CN_W	   		1
+MT-CN_W	    CN_W	   		1
+ID-CN_W	    CN_W	   		1
+WA-CN_W	    CN_W	   		1
+TX_W-MX_NE  Mexico	   		1
+TX_E-MX_SS  Mexico	   		1
+AZ-MX_NW    Mexico	   		1
+CA-MX_NW    Mexico	   		1
+CN_E	    CN_E	   		1
+CN_W	    CN_W	   		1
+MX_NE       Mexico	   		1
+MX_SS       Mexico	   		1
+MX_NW       Mexico	   		1
+MX_NW       Mexico	   		1
+MX_IW	    Mexico			1
+;	
+
+!Mapping Regional Flows to NEMS Flow restart file variable using NGTDM Regions
+composite table:
+r_og		r_og1		 M12	M6	NEMSmap_NGFLOWS_OilGasRegions_M12_M6	! M12	
+MidAtlantic	NewEngland	 1	1	1					! 1	
+CN_E		NewEngland	 1	2	1					! 1	
+ENCentral 	MidAtlantic	 2	1	1					! 2	
+Satlantic_OG	MidAtlantic	 2	2	1					! 2	
+CN_E		MidAtlantic	 2	3	1					! 2	
+MidAtlantic	ENCentral	 3	3	1					! 3	
+WNCentral	ENCentral	 3	1	1					! 3	
+ESCentral 	ENCentral 	 3	2	1					! 3	
+ENCentral	WNCentral	 4	5	1					! 4	
+WSCentral	WNCentral	 4	1	1					! 4	
+Mountain_OG	WNCentral	 4	2	1					! 4	
+CN_W		WNCentral	 4	3	1					! 4	
+MidAtlantic	Satlantic_OG	 5	3	1					! 5	
+ENCentral	Satlantic_OG	 5	1	1					! 5	
+ESCentral 	Satlantic_OG	 5	2	1					! 5	
+ENCentral	ESCentral	 6	2	1					! 6	
+Satlantic_OG	ESCentral	 6	3	1					! 6	
+WSCentral	ESCentral	 6	1	1					! 6	
+WNCentral	WSCentral	 7	3	1					! 7	
+ESCentral 	WSCentral	 7	4	1					! 7	
+Mountain_OG	WSCentral	 7	1	1					! 7	
+AZ_NM		WSCentral	 7	2	1					! 7	
+CN_W		Mountain_OG	 8	1	1					! 8	
+Mountain_OG	Pacific_OG	 9	1	1					! 9	
+CN_W		Pacific_OG	 9	3	1 					! 9	
+ESCentral 	FL		 10	1	1					! 10	
+Mountain_OG	AZ_NM		 11	1	1					! 11	
+Mountain_OG	CA		 12	1	1					! 12	
+Pacific_OG	CA		 12	2	1					! 12	
+AZ_NM		CA		 12	3	1					! 12	
+;
+
+!Mapping Regional Flows to NEMS Flow restart file variable using NGTDM Regions
+composite table:
+r_flow			r_flow1		 	M12	M6	NEMSmap_NGFLOWS_FlowRegions_M12_M6
+MidAtlantic_OH		NewEngland	 	1	1	1					
+CN_E			NewEngland	 	1	2	1					
+EasternMidwest 		MidAtlantic_OH	 	2	1	1					
+Southeast		MidAtlantic_OH		2	2	1					
+CN_E			MidAtlantic_OH	 	2	3	1					
+MidAtlantic_OH		EasternMidwest		3	1	1					
+SouthCentral		EasternMidwest		3	2	1					
+RockiesPlains		EasternMidwest	 	3	3	1					
+NorthernGreatPlains	EasternMidwest		3	4	1					
+CN_E			EasternMidwest		3	5	1					
+CN_W			EasternMidwest		3	5	1					
+MidAtlantic_OH		Southeast	 	4	1	1					
+EasternMidwest		Southeast	 	4	2	1					
+SouthCentral		Southeast	 	4	3	1					
+Southeast		FL			5	1	1					
+SouthCentral		FL			5	2	1
+EasternMidwest		SouthCentral	 	6	1	1					
+Southeast 		SouthCentral	 	6	2	1					
+RockiesPlains		SouthCentral	 	6	3	1					
+AZ_NM			SouthCentral	 	6	4	1					
+EasternMidwest		RockiesPlains		7	1	1					
+SouthCentral		RockiesPlains		7	2	1					
+NorthernGreatPlains 	RockiesPlains		7	3	1					
+AZ_NM			RockiesPlains		7	4	1					
+OR_WA			RockiesPlains		7	5	1									
+EasternMidwest		NorthernGreatPlains	8	1	1					
+RockiesPlains		NorthernGreatPlains	8	2	1 					
+CN_W		 	NorthernGreatPlains	8	3	1					
+SouthCentral		AZ_NM			9	1	1					
+RockiesPlains		AZ_NM			9	2	1					
+OR_WA			CA		 	10	1	1					
+RockiesPlains		CA		 	10	2	1					
+AZ_NM			CA			10	3	1	
+RockiesPlains		OR_WA			11	1	1					
+RockiesPlains		OR_WA			11	2	1					
+CN_W			RockiesPlains		11	3	1	!Flow actually goes directly from ID into WA						
+				
+;
+
+!Mapping Regional Flows to NEMS Flow restart file variable using Border Crossings
+composite table: 
+bx		M12	M6	NEMSmap_NGFLOWS_BX 
+ID-CN_W		9	2	1
+;
+!Correct regional flows where necessary for border crossing/pipelines "cutting corners"
+composite table
+M12	M6	bx	  Correct_NGFLOWS		
+8	1	ID-CN_W	  1
+;
+
+!NEMS Mapping parameters to NGMM-EMM Regions NNGEMM
+
+!Mapping NNGEMM regions to Census divisions
+Composite table:
+NNGEMM  MNUMCR  NEMSmap_NNGEMM_CD
+1        1        1
+2        2        1
+3        3        1
+4        3        1
+5        4        1
+6        4        1
+7        5        1
+8        5        1
+9        6        1
+10       5        1
+11       6        1
+12       7        1
+13       8        1
+14       8        1
+15       9        1
+16       9        1
+;
+
+
+
+!NEMS Mappings for OGDIST (OGSM region) 
+
+!Mapping of OGDIST regions to SupplyNodes_       
+Composite table:		
+
+OGDIST	s	NEMSmap_OGDIST_SupplyNode
+1	AL_N	1	!Alabama_North
+2	AL_S	1	!Alabama_South
+3	AK	1	!Alaska
+4	AZ	1	!Arizona
+5	AR	1	!Arkansas
+6	CA	1	!California
+7	CO	1	!Colorado
+8	CT	1	!Connecticut
+9	DE	1	!Delaware
+10	DC	1	!Washington_DC
+11	FL	1	!Florida
+12	GA	1	!Georgia
+13	HI	1	!Hawaii
+14	ID	1	!Idaho
+15	IL	1	!Illinois
+16	IN	1	!Indiana
+17	IA	1	!Iowa
+18	KS	1	!Kansas
+19	KY	1	!Kentucky
+20	LA_N	1	!Louisiana_North
+21	LA_S	1	!Louisiana_South
+22	ME	1	!Maine
+23	MD	1	!Maryland
+24	MA	1	!Massachusetts
+25	MI	1	!Michigan
+26	MN	1	!Minnesota
+27	MS_N	1	!Mississippi_North
+28	MS_S	1	!Mississippi_South
+29	MO	1	!Missouri
+30	MT	1	!Montana
+31	NE	1	!Nebraska
+32	NV	1	!Nevada
+33	NH	1	!New_Hampshire
+34	NJ	1	!New_Jersey
+35	NM_E	1	!New_Mexico_East
+36	NM_W	1	!New_Mexico_West
+37	NY	1	!New_York
+38	NC	1	!North_Carolina
+39	ND	1	!North_Dakota
+40	OH	1	!Ohio
+41	OK	1	!Oklahoma
+42	OR	1	!Oregon
+43	PA	1	!Pennsylvania
+44	RI	1	!Rhode_Island
+45	SC	1	!South_Carolina
+46	SD	1	!South_Dakota
+47	TN	1	!Tennessee
+48	TX_1	1	!Texas_RRC_1
+49	TX_2	1	!Texas_RRC_2
+50	TX_3	1	!Texas_RRC_3
+51	TX_4	1	!Texas_RRC_4
+52	TX_5	1	!Texas_RRC_5
+53	TX_6	1	!Texas_RRC_6
+54	TX_7B	1	!Texas_RRC_7B
+55	TX_7C	1	!Texas_RRC_7C
+56	TX_8	1	!Texas_RRC_8
+57	TX_8A	1	!Texas_RRC_8A
+58	TX_9	1	!Texas_RRC_9
+59	TX_10	1	!Texas_RRC_10
+60	UT	1	!Utah
+61	VT	1	!Vermont
+62	VA	1	!Virginia
+63	WA	1	!Washington
+64	WV	1	!West_Virginia
+65	WI	1	!Wisconsin
+66	WY	1	!Wyoming
+67	MA_ST	1	!North_Atlantic_State_Offshore
+68	VA_ST	1	!Mid_Atlantic_State_Offshore
+69	GA_ST	1	!South_Atlantic_State_Offshore
+70	AL_ST	1	!Alabama_State_Offshore
+71	LA_ST	1	!Louisiana_State_Offshore
+72	TX_ST	1	!Texas_State_Offshore
+73	CA_ST	1	!California_State_Offshore
+74	OR_ST	1	!Northern_Pacific_State_Offshore
+75	AK_ST	1	!Alaska_State_Offshore
+76	MA_FD	1	!North_Atlantic_Federal_Offshore
+77	VA_FD	1	!Mid_Atlantic_Federal_Offshore
+78	GA_FD	1	!South_Atlantic_Federal_Offshore
+79	EGOM_FD	1	!Eastern_GOM_Federal_Offshore
+80	CGOM_FD	1	!Central_GOM_Federal_Offshore
+81	WGOM_FD	1	!Western_GOM_Federal_Offshore
+82	CA_FD	1	!California_Federal_Offshore
+83	OR_FD	1	!Northern_Pacific_Federal_Offshore
+84	AK_FD	1	!Alaska_Federal_Offshore
+;
+
+!Map OGDIST to AK regions
+composite table:
+ogdist		r_ak		NEMSmap_OGDIST_r_ak(ogdist,r_ak)	
+3		AK_N		1
+75		AK_S		1
+!84		AK_N		1	Does not seem like there will be any federal development anytime soon
+;
+
+!Map NEMS Crude Oil Types (MNCRUD) to descriptive names
+
+composite table:
+MNCRUD	crude			NEMSmap_MNCRUD_CrudeType
+1	LightSweet		1
+2	LightSour		1
+3	MedMedSour 		1
+4	MedSour 		1
+5	HeavySweet		1
+6	HeavySour		1
+7	California		1
+8	Syncrude		1
+9	Dilbit			1
+10	UltraLightSweet		1
+11	Condensate		1
+;
+!Mapping lngter to lngexp
+!Get rid of this index/change?  Also move into ngmapping at some point during merge
+
+composite table:
+
+LNGTER	lngexp		NEMSmap_LNGTER_lngexp
+3	MD		1
+3	GA		1
+6	LA		1
+6	TX_E		1
+!10	CN_W		1
+!11	AK		1
+;
+
+!Additional NEMS Mapping parameters for Sectoral Demand
+
+NEMSmap_SecE_Core('Core') := 1;
+NEMSmap_SecE_NonCore('NonCore') := 1;
+
+
+!_____________________________________________________________________________________________
+!				2.2  NGMM Mappings for flows 
+!_____________________________________________________________________________________________
+
+!Mapping of supply nodes to hubs 
+Composite table:
+s        h       map_SupplyArcs 
+AL       AL             1
+AZ       AZ             1
+AR       AR             1
+CA       CA             1
+CO       CO             1
+CT       CT             1
+DE       DE             1
+DC       DC             1
+FL       FL             1
+GA       GA             1
+ID       ID             1
+IL       IL             1
+IN       IN             1
+IA       IA             1
+KS       KS             1
+KY       KY             1
+LA       LA             1
+ME       ME             1
+MD       MD             1
+MA       MA             1
+MI       MI             1
+MN       MN             1
+MS       MS             1
+MO       MO             1
+MT       MT             1
+NE       NE             1
+NV       NV             1
+NH       NH             1
+NJ       NJ             1
+NM       NM             1
+NY       NY             1
+NC       NC             1
+ND       ND             1
+OH       OH             1
+OK       OK             1
+OR       OR             1
+PA       PA             1
+RI       RI             1
+SC       SC             1
+SD       SD             1
+TN       TN             1
+TX_E     TX_E           1
+TX_N     TX_N           1
+TX_W     TX_W           1
+UT       UT             1
+VT       VT             1
+VA       VA             1
+WA       WA             1
+WV       WV             1
+WI       WI             1
+WY       WY             1
+CN_E     CN_E           1
+CN_W     CN_W           1
+MX_NE    MX_NE          1
+MX_NW    MX_NW          1
+MX_IW    MX_IW          1
+MX_CE    MX_CE          1
+MX_SS    MX_SS          1
+TX_1     TX_E           1
+TX_2     TX_E           1
+TX_3     TX_E           1
+TX_4     TX_E           1
+TX_5     TX_N           1
+TX_6     TX_E           1
+TX_7B    TX_N           1
+TX_7C    TX_W           1
+TX_8     TX_W           1
+TX_8A    TX_W           1
+TX_9     TX_N           1
+TX_10    TX_W           1
+NM_E     NM             1
+NM_W     NM             1
+LA_N     LA             1
+LA_S     LA             1
+AL_N     AL             1
+AL_S     AL             1
+MS_N     MS             1
+MS_S     MS             1
+MA_ST    MA             1
+VA_ST    VA             1
+GA_ST    GA             1
+AL_ST    AL             1
+LA_ST    LA             1
+TX_ST    TX_E           1
+CA_ST    CA             1
+OR_ST    OR             1
+MA_FD    MA             1
+VA_FD    VA             1
+GA_FD    GA             1
+AL_FD    AL             1
+LA_FD    LA             1
+MS_FD    MS             1
+TX_FD    TX_E           1
+CA_FD    CA             1
+OR_FD    OR             1
+;
+
+!Mapping of hubs to demand nodes
+Composite table:
+h         d       map_DemandArcs 
+AL        AL             1
+AZ        AZ             1
+AR        AR             1
+CA        CA             1
+CO        CO             1
+CT        CT             1
+DE        DE             1
+DC        DC             1
+FL        FL             1
+GA        GA             1
+ID        ID             1
+IL        IL             1
+IN        IN             1
+IA        IA             1
+KS        KS             1
+KY        KY             1
+LA        LA             1
+ME        ME             1
+MD        MD             1
+MA        MA             1
+MI        MI             1
+MN        MN             1
+MS        MS             1
+MO        MO             1
+MT        MT             1
+NE        NE             1
+NV        NV             1
+NH        NH             1
+NJ        NJ             1
+NM        NM             1
+NY        NY             1
+NC        NC             1
+ND        ND             1
+OH        OH             1
+OK        OK             1
+OR        OR             1
+PA        PA             1
+RI        RI             1
+SC        SC             1
+SD        SD             1
+TN        TN             1
+TX_E      TX_E           1
+TX_N      TX_N           1
+TX_W      TX_W           1
+UT        UT             1
+VT        VT             1
+VA        VA             1
+WA        WA             1
+WV        WV             1
+WI        WI             1
+WY        WY             1
+CN_E      CN_E           1
+CN_W      CN_W           1
+MX_NE     MX_NE          1
+MX_NW     MX_NW          1
+MX_IW     MX_IW          1
+MX_CE     MX_CE          1
+MX_SS     MX_SS          1; 
+
+!_____________________________________________________________________________________________
+!					2.3  Regional Mappings
+!_____________________________________________________________________________________________
+
+Composite table:
+substate state 	 map_substate_state
+TX_1     TX_E    1         
+TX_2     TX_E    1          
+TX_3     TX_E    1          
+TX_4     TX_E    1          
+TX_5     TX_N    1          
+TX_6     TX_E    1          
+TX_7B    TX_N    1          
+TX_7C    TX_W    1      
+TX_8     TX_W    1      
+TX_8A    TX_W    1      
+TX_9     TX_N    1      
+TX_10    TX_W    1      
+NM_E     NM      1      
+NM_W     NM      1      
+LA_N     LA      1      
+LA_S     LA      1      
+AL_N     AL      1      
+AL_S     AL      1
+MS_N     MS      1      
+MS_S     MS      1;
+
+composite table:
+reg	r_cen		map_State_CensusRegion
+CT	NewEngland	1
+ME	NewEngland	1
+MA	NewEngland	1
+NH	NewEngland	1
+RI	NewEngland	1
+VT	NewEngland	1
+NJ	MidAtlantic	1
+NY	MidAtlantic	1
+PA	MidAtlantic	1
+IL	ENCentral	1
+IN	ENCentral	1
+MI	ENCentral	1
+OH	ENCentral	1
+WI	ENCentral	1
+IA	WNCentral	1
+KS	WNCentral	1
+MN	WNCentral	1
+MO	WNCentral	1
+NE	WNCentral	1
+ND	WNCentral	1
+SD	WNCentral	1
+DC	Satlantic	1
+DE	Satlantic	1
+FL	Satlantic	1
+GA	Satlantic	1
+MD	Satlantic	1
+NC	Satlantic	1
+SC	Satlantic	1
+VA	Satlantic	1
+WV	Satlantic	1
+AL	ESCentral	1
+KY	ESCentral	1
+MS	ESCentral	1
+TN	ESCentral	1
+AR	WSCentral	1
+LA	WSCentral	1
+OK	WSCentral	1
+TX_E	WSCentral	1
+TX_N	WSCentral	1
+TX_W	WSCentral	1
+AZ	Mountain	1
+CO	Mountain	1
+ID	Mountain	1
+MT	Mountain	1
+NV	Mountain	1
+NM	Mountain	1
+UT	Mountain	1
+WY	Mountain	1
+AK	Pacific		1
+CA	Pacific		1
+HI	Pacific		1
+OR	Pacific		1
+WA	Pacific		1
+;
+					
+
+
+
+!Mapping NNGEMM to States
+composite table:
+state	NNGEMM	map_State_NNGEMM
+CT	1	1
+MA	1	1
+ME	1	1
+NH	1	1
+RI	1	1
+VT	1	1
+NJ	2	1
+NY	2	1
+PA	2	1
+OH	3	1
+IL	4	1
+IN	4	1
+MI	4	1
+WI	5	1	!was 4
+IA	5	1
+KS	6	1	!was 5
+MN	5	1
+MO	6	1	!was 5
+ND	5	1
+NE	5	1
+SD	5	1
+DC	7	1
+DE	7	1
+MD	7	1
+NC	8	1
+SC	8	1
+VA	7	1
+WV	7	1
+GA	9	1
+FL	10	1
+KY	11	1
+TN	11	1
+AL	9	1
+MS	9	1
+AR	12	1
+LA	12	1
+OK	12	1
+TX_E	12	1
+TX_N	12	1
+TX_W	12	1
+ID	13	1
+MT	13	1
+WY	13	1
+CO	13	1
+NV	13	1
+UT	13	1
+AZ	14	1
+NM	14	1
+OR	15	1
+WA	15	1
+CA	16	1
+AK	17	1
+;
+
+
+
+!_____________________________________________________________________________________________
+!					2.4 Supply Mappings
+!_____________________________________________________________________________________________
+! Mapping of supply regions to supply types
+map_Supply := data table
+              NA      AD      LNG   SNG_coal  SNG_liq SNG_other  
+AL                             1       1        1         1        
+AZ             1       1               1        1         1
+AR             1       1               1        1         1
+CA             1       1       1       1        1         1
+CO             1       1               1        1         1
+CT             1       1       1       1        1         1
+DE             1       1       1       1        1         1
+DC             1       1               1        1         1
+FL             1       1       1       1        1         1
+GA             1       1       1       1        1         1
+ID             1       1               1        1         1
+IL             1       1               1        1         1
+IN             1       1               1        1         1
+IA             1       1               1        1         1
+KS             1       1               1        1         1
+KY             1       1               1        1         1
+LA                             1       1        1         1
+ME             1       1       1       1        1         1
+MD             1       1       1       1        1         1
+MA             1       1       1       1        1         1
+MI             1       1               1        1         1
+MN             1       1               1        1         1
+MS                             1       1        1         1
+MO             1       1               1        1         1
+MT             1       1               1        1         1
+NE             1       1               1        1         1
+NV             1       1               1        1         1
+NH             1       1       1       1        1         1
+NJ             1       1       1       1        1         1
+NM                                     1        1         1
+NY             1       1       1       1        1         1
+NC             1       1       1       1        1         1
+ND             1       1               1        1         1
+OH             1       1               1        1         1
+OK             1       1               1        1         1
+OR             1       1       1       1        1         1
+PA             1       1       1       1        1         1
+RI             1       1       1       1        1         1
+SC             1       1       1       1        1         1
+SD             1       1               1        1         1
+TN             1       1               1        1         1
+TX                             1       1        1         1
+UT             1       1               1        1         1
+VT             1       1               1        1         1
+VA             1       1       1       1        1         1
+WA             1       1       1       1        1         1
+WV             1       1               1        1         1
+WI             1       1               1        1         1
+WY             1       1               1        1         1
+CN_E           1       1       1                          	          
+CN_W           1       1       1                          	          
+MX_NE          1       1       1                                          
+MX_NW          1       1       1                                          
+MX_IW          1       1       1                                          
+MX_CE          1       1       1                                          
+MX_SS          1       1       1                                          
+TX_1           1       1
+TX_2           1       1
+TX_3           1       1
+TX_4           1       1
+TX_5           1       1
+TX_6           1       1
+TX_7B          1       1
+TX_7C          1       1
+TX_8           1       1
+TX_8A          1       1
+TX_9           1       1
+TX_10          1       1
+NM_E           1       1
+NM_W           1       1
+LA_N           1       1
+LA_S           1       1
+AL_N           1       1
+AL_S           1       1
+MS_N           1       1
+MS_S           1       1
+MA_ST          1       1
+VA_ST          1       1
+GA_ST          1       1
+AL_ST          1       1
+LA_ST          1       1
+TX_ST          1       1
+CA_ST          1       1
+OR_ST          1       1
+MA_FD          1       1
+VA_FD          1       1
+GA_FD          1       1
+AL_FD          1       1
+LA_FD          1       1
+MS_FD          1       1
+TX_FD          1       1
+CA_FD          1       1
+OR_FD          1       1
+;
+
+!_____________________________________________________________________________________________
+!			2.5  Canada, Mexico, and Import/Export Mappings
+!_____________________________________________________________________________________________
+
+
+!Mapping Mexico sectors (SENER) to global sectors
+composite table:
+mx_sec		  sec			map_MXsector_sector
+Residential	  Residential		1
+Commercial	  Commercial		1 
+Industrial	  Industrial		1
+Transportation	  Transportation	1
+Electric	  Electric		1
+PEMEX		  Industrial		1
+;
+
+!Mapping border crossings to hubs
+composite table:
+h		bx		map_hubs_borderXings
+ME		ME-CN_E		1
+NH		NH-CN_E		1
+VT		VT-CN_E	  	1
+NY		NY-CN_E		1
+MI		MI-CN_E		1
+MN		MN-CN_W		1
+ND		ND-CN_W		1
+MT		MT-CN_W		1
+ID		ID-CN_W		1
+WA		WA-CN_W		1
+TX_W		TX_W-MX_NE	1
+TX_E		TX_E-MX_SS	1
+TX_E		TX_E-MX_NE	1
+NM		NM-MX_NE	1
+AZ		AZ-MX_NW	1
+CA		CA-MX_NW	1
+CN_E		ME-CN_E		1
+CN_E		NH-CN_E		1
+CN_E		VT-CN_E		1
+CN_E		NY-CN_E		1
+CN_E		MI-CN_E		1
+CN_W		MN-CN_W		1
+CN_W		ND-CN_W		1
+CN_W		MT-CN_W		1
+CN_W		ID-CN_W		1
+CN_W		WA-CN_W		1
+MX_NE		TX_E-MX_NE	1
+MX_NE		TX_W-MX_NE	1
+MX_NE		NM-MX_NE	1
+MX_NW		AZ-MX_NW	1
+MX_NW		CA-MX_NW	1
+MX_SS		TX_E-MX_SS	1
+;
+!Map Gulf of Mexico supply: 3 OGDIST regions to 4 states
+composite table:
+gom_ogdist      fedGOMstate     map_GOMregions
+EGOM_FD         AL_FD            1
+CGOM_FD         AL_FD            1
+CGOM_FD         LA_FD            1
+CGOM_FD         MS_FD            1
+CGOM_FD         TX_FD            1
+WGOM_FD         LA_FD            1
+WGOM_FD         TX_FD            1
+;
+GOMpriceRegion := data {EGOM_FD :AL_FD,
+                        CGOM_FD :LA_FD, 
+                        WGOM_FD :TX_FD};
+
+!_____________________________________________________________________________________________
+!					2.6 Miscellaneous Mappings
+!_____________________________________________________________________________________________
+
+
+!Map Seasons to months
+composite table:		
+season		mn	map_season_mn
+peak		1	1
+peak		2	1
+peak		3	1
+shoulder	4	1
+shoulder	5	1
+offpeak		6	1
+offpeak		7	1
+offpeak 	8	1
+offpeak		9	1
+shoulder	10	1
+shoulder	11	1
+peak		12	1
+;
+
+!Map seasons for citygate price
+composite table:
+mn  season  map_citygate_season
+1   peak    1
+2   peak    1
+3   offpeak 1
+4   offpeak 1
+5   offpeak 1
+6   offpeak 1
+7   offpeak 1
+8   offpeak 1
+9   offpeak 1
+10  offpeak 1
+11  peak    1
+12  peak    1;
+
+!Map seasons for capacity expansion
+composite table:
+mn  season  map_capexp_season
+1   peak    1
+2   peak    1
+3   peak    1
+4   offpeak 1
+5   offpeak 1
+6   offpeak 1
+7   offpeak 1
+8   offpeak 1
+9   offpeak 1
+10  offpeak 1
+11  offpeak 1
+12  peak    1;
+
+
+!Mapping supply region to LNG export region
+
+composite table:
+
+s      lngexp  map_supply_lngexp
+LA_S    LA       1
+TX_3    TX_E     1
+GA      GA       1
+MD      MD       1
+!CN_W    CN_W     1
+;
+
+map_Sector_Subsector(sec,ssec) := DATA TABLE
+              Core    Noncore  None	
+!             -----   -------  -----
+Residential                     1
+Commercial                      1
+Industrial      1        1
+Transportation                  1
+Electric        1        1
+;
+
+!Move to Canada Input File
+!Map crude oil types to oil sands production and consumption parameters
+
+composite table:
+crude			BitumenFraction		ProductionFraction	ConsumptionFraction
+Syncrude		0.85			0.17			0.16
+Dilbit			0.70			0.07			0.37 !0.25 if not including electric power demand, 0.37 if you are.  Currently we are for projections.
+;
+
+!___________________________________________________________________________________________
+!
+!				3. NGMM Map/GIS:  Set Latitude and Longitude
+!
+!___________________________________________________________________________________________
+
+composite table:
+reg		Longitude_center(reg)		Latitude_center(reg)
+AL		-86.82838942			32.78978
+AZ		-111.6645845			34.2932515
+AR		-92.43928557			34.89970592
+CA		-119.6096576			37.24535831
+CO		-105.5478179			38.9985473
+CT		-72.7257783			41.62107513
+DE		-75.50029026			38.98663676
+DC		-77.01629977			38.90472696
+FL		-82.50104358			28.63921913
+GA		-83.44606086			32.64907881
+ID		-114.659308			44.38908446
+IL		-89.19828151			40.06474439
+IN		-86.27527998			39.90817437
+IA		-93.50003766			42.0746201
+KS		-98.38021575			38.48469935
+KY		-85.29030845			37.52654891
+LA		-92.00720841			31.06330299
+ME		-69.22616344			45.37127846
+MD		-76.76649509			39.02821214
+MA		-71.79702237			42.25286308
+MI		-85.43750967			44.35245962
+MN		-94.30873864			46.31643275
+MS		-89.66528866			32.75032317
+MO		-92.47722128			38.36748935
+MT		-109.6451312			47.03353388
+NE		-99.8105659			41.52707737
+NV		-116.6553882			39.35644227
+NH		-71.57765216			43.68572385
+NJ		-74.66213627			40.18292868
+NM		-106.1083803			34.42136374
+NY		-75.50299902			42.94062968
+NC		-79.33522759			35.53936053
+ND		-100.4693145			47.44633605
+OH		-82.79018334			40.29333449
+OK		-97.50843836			35.58349535
+OR		-120.5552194			43.93675212
+PA		-77.79953199			40.87381714
+RI		-71.55285274			41.67655653
+SC		-80.89540853			33.90604117
+SD		-100.2304896			44.43615176
+TN		-86.34336977			35.8429734
+TX		-99.35367449			31.4890564
+UT		-111.6782077			39.32378532
+VT		-72.66271531			44.07518081
+VA		-78.80628653			37.51527981
+WA		-120.4583684			47.38202005
+WV		-80.6138206			38.64252195
+WI		-90.01097607			44.6367259
+WY		-107.5514509			42.99962995
+CN_E		-79.281952			49.116252
+CN_W		-114.528286			53.139472	
+MX_NE		-101.775530			26.143693
+MX_NW		-111.781367			30.250272
+MX_IW		-103.384167			20.641974
+MX_CE		-99.093491			19.368192
+MX_SS		-94.100205			17.340185
+ME-CN_E		-67.754631			46.044012
+NH-CN_E		-71.336174			45.245248
+VT-CN_E		-72.654533			45.028450
+NY-CN_E		-76.917228			43.69038
+MI-CN_E		-82.410392			44.669961
+MN-CN_W		-96.253166			49.0000
+ND-CN_W		-100.471916			49.00
+MT-CN_W		-110.601310			49.00
+ID-CN_W		-116.522941			49.00
+WA-CN_W		-120.390128			49.00
+TX_E-MX_NE	-99.876694			27.802577
+TX_W-MX_NE	-105.816781			31.228661
+TX_E-MX_SS	-97.185728			25.980506
+NM-MX_NE	-107.421640			31.821262
+AZ-MX_NW	-111.006125			31.333295
+CA-MX_NW	-115.893219			32.626236
+TX_W		-103.267946			31.177642
+TX_N		-97.0696150			32.742766
+TX_E		-95.8310280			30.262337		
+;

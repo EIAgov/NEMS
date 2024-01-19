@@ -1,0 +1,35 @@
+   ......................................................................
+   : This is a copy of README.DOC, which is included with ANALYZE data. :
+   :....................................................................:
+
+              Summary of ANALYZE Enhancements for Version 13.0
+                    Since November 1994 (Version 12.4)
+                 Latest User's Guide is for version 13.0
+
+   1. Added WIDTH option to RATEOF //TABLEAU.
+   2. Expanded output of BASIS REFRESH command.
+   3. Added edit info to SUMMARY command (see SUMMARY.HLP).
+   4. Increased dimensions for DOS version to accommodate 2,000 rows and
+      8,000 columns (more disk space needed to hold EXE).
+   5. Added VERIFY command (see VERIFY.HLP).
+   6. Enhanced interfaces with GAMS, MINOS and OSL (eliminated OB1
+      solution file type).  These are mostly in the utilities, LPRENAME
+      and oslanal.
+   7. Recognition of commands and keywords is now case insensitive (other
+      entries remains case sensitive, such as file names and LP names).
+   8. Added IO option to SHOW command (see SHOW.HLP).
+   9. Added TIME interrupt parameter to commands that could take significant
+      time, such as BASIS CHECK and REDUCE.
+  10. Added NOCHANGE option to BASIS REFRESH.  (Note: this affects the GUPCK
+      utility, used for an in-core setup.)
+  11. Added keywords, used as global settings for command options.  In
+      particular, TIME, FREQUENCY, and tolerances used in the solution
+      verification commands:  BASIS CHECK, BASIS REFRESH, and VERIFY.  This
+      also makes REDUCE tolerances accessible.  (See help files, ANALYZE.KEY
+      and KEYS.DIC.)
+  12. Other enhancements were made to the three solution verification
+      commands, including enhanced output from BASIS CHECK and BASIS
+      REFRESH, and more options were added to REDUCE.
+  13. Added some document files (see DIRDOCS), and majorly revised User's
+      Guide.
+

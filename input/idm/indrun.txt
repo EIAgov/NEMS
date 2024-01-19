@@ -1,0 +1,67 @@
+Industrial Model Control File $Header: m:/default/input/RCS/indrun.txt,v 1.26 2015/09/22 16:10:06 pkc Exp $
+Write out the subroutine trace information (0=no, 1=yes)?
+   0
+The total number of industries in this run:
+  21
+Should the debug file be written (0=no, 1=yes)?
+   0
+Benchmark to SEDS (0=no, 1=yes)?
+   1
+Calibration Switch (1=ON, 0=OFF)
+   1
+Should price sensitivities be done (0=no, 1=yes)?
+   0
+ENTER PRICE SENSITIVITY FACTOR FOR ELECTRICITY (1.0=DEFAULT)?
+   1.00
+ENTER PRICE SENSITIVITY FACTOR FOR FIRM NATURAL GAS (1.0=DEFAULT)?
+   1.00
+ENTER PRICE SENSITIVITY FACTOR FOR INTERUPTIBLE GAS (1.0=DEFAULT)?
+   1.00
+ENTER PRICE SENSITIVITY FACTOR FOR COAL (1.0=DEFAULT)?
+   1.00
+ENTER PRICE SENSITIVITY FACTOR FOR RESIDUAL OIL (1.0=DEFAULT)?
+   1.00
+ENTER PRICE SENSITIVITY FACTOR FOR DISTILLATE OIL (1.0=DEFAULT)?
+   1.00
+ENTER PRICE SENSITIVITY FACTOR FOR LIQUID PETRO GAS (1.0=DEFAULT)?
+   1.00
+Should tpc sensitivities be done (0=no, 1=yes)?
+   0
+ENTER TPC SENSITIVITY FACTOR FOR OLD PLANTS(1.0=DEFAULT)?
+   1.00
+ENTER TPC SENSITIVITY FACTOR FOR NEW PLANTS(1.0=DEFAULT)?
+   1.00
+FROZEN TECHNOLOGY CASE (0=DEFAULT)?
+   0
+HIGH TECHNOLOGY CASE   (0=DEFAULT)?
+   0
+ENERGY EFFICIENT CASE  (0=DEFAULT)?
+   0
+Should retirement rate model sensitivities be done (0=no, 1=yes)?
+   0
+ENTER RETIRMENT RATE SENSITIVITY FACTOR (1.0=DEFAULT)?
+   1.00
+Number of lookahead years for CHP and Motors (0=default)
+   5
+Share of each industry's fossil consumption subject to carbon allowance costs.  Free (list-directed) format, 1 per line
+1.0   Agriculture, Crops
+1.0   Agriculture, Other
+1.0   Mining, oil&gas
+1.0   Mining, coal
+1.0   Mining, metal
+1.0   construction
+1.0   Food
+1.0   Paper
+1.0   Chemical
+1.0   Glass
+1.0   Cement
+1.0   Steel
+1.0   ALuminum
+1.0   MBD: fabricated metal products    
+1.0   MBD: machinery                
+1.0   MBD: computer & electronics   
+1.0   MBD: transport equipment      
+1.0   MBD: electrical equipment    
+1.0   BOM-wood products
+1.0   BOM-plastics
+1.0   BOM-other

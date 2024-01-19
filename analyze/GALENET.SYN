@@ -1,0 +1,22 @@
+n node
+  1 1st node
+  2 2nd node
+  3 3rd node
+  4 4th node
+  5 5th node
+  6 6th node
+  7 7th node
+  8 8th node
+m node
+  1 1st node
+  2 2nd node
+  3 3rd node
+  4 4th node
+  5 5th node
+ROW SYNTAX
+  S limits supply into &n:2
+  D requires demand at &n:2
+  NODE conserves flow through &n:5
+COLUMN SYNTAX
+  T transports from &m:2 to &n:3
+ENDATA

@@ -1,0 +1,30 @@
+ IIS-OL FILES:
+ MATRIX  : D:BLENDCAP.MAT                                                  
+ SPEC    : DEFAULT.SPC                                                     
+ SOLUTION: D:BLENDCAP.MNS                                                  
+ SPI     : DEFAULT.SPI                                                     
+LP NAME:
+SPECIFICATIONS:
+IIS METHOD: REVERSE DEL/SENS
+NUMBER OF COLUMNS IN IIS:
+NUMBER OF ROWS IN IIS:
+BEGIN IIS
+BEGIN COLUMNS
+OB02     lower bound
+OB03     upper bound
+OB04     upper bound
+OP01HC   lower bound
+OP04HC   lower bound
+OP05HC   lower bound
+END COLUMNS
+BEGIN ROWS
+BALGO    fixed value
+BALHN    fixed value
+BALLN    fixed value
+CAP01    upper bound
+CAP03    upper bound
+CAP04    upper bound
+SUPMC    upper bound
+INFEAS01 upper bound
+END ROWS
+END IIS

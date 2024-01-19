@@ -1,0 +1,17 @@
+! $Header: M:/default/includes/RCS/intllocl,v 1.9 2019/08/22 19:20:41 AGE Exp $
+
+!  include file intllocl for variables passed within the international model only
+
+      INTEGER FFY, NYEARS
+      PARAMETER (FFY=2008)          ! first forecast year
+      PARAMETER (NYEARS=ENDYR-FFY+1) ! number of years in the forecast  
+      
+      INTEGER Max_LFMM_FYR
+      PARAMETER (Max_LFMM_FYR = 21)         !maximum length of the LFMM planning horizon  
+       
+ 
+      INTEGER DBGUNIT 
+      COMMON /INTLDEBUGUNIT/ DBGUNIT 
+
+
+

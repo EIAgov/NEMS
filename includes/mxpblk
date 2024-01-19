@@ -1,0 +1,69 @@
+!  $Header: m:/default/includes/RCS/mxpblk,v 1.14 2014/11/10 22:26:22 pkc Exp $
+! EXPECTED PRICES
+      INTEGER MNUMPX
+      PARAMETER(MNUMPX=28)   ! No. of price expectation variables
+!
+      REAL XPELCM(MNUMCR,MNXYR)
+      REAL XPELIN(MNUMCR,MNXYR)
+      REAL XPGFEL(MNUMCR,MNXYR)
+      REAL XPGIIN(MNUMCR,MNXYR)
+      REAL XPGIEL(MNUMCR,MNXYR)
+      REAL XPNGCM(MNUMCR,MNXYR)
+      REAL XPNGEL(MNUMCR,MNXYR)
+      REAL XPCLEL(MNUMCR,MNXYR)
+      REAL XPDSCM(MNUMCR,MNXYR) ! 39 Distillate - Commercial
+      REAL XPDSEL(MNUMCR,MNXYR) ! 42 Distillate - Electricity (+petroleum coke)
+      REAL XPRLEL(MNUMCR,MNXYR) ! 56 Residual Fuel, Low Sulfur - Electricity
+      REAL XPRHEL(MNUMCR,MNXYR) ! 59 Residual Fuel, High Sulfur - Electricity
+      REAL XPRSEL(MNUMCR,MNXYR)
+      REAL XPUREL(MNUMCR,MNXYR)
+      REAL XPMGAS(MNUMCR,MNXYR) ! 36 Motor Gasoline - All Sectors
+      REAL XPJFTR(MNUMCR,MNXYR) ! 37 Jet Fuel - Transportation
+      REAL XPDSRS(MNUMCR,MNXYR) ! 38 Distillate - Residential
+      REAL XPDSTR(MNUMCR,MNXYR) ! 40 Distillate - Transportation
+      REAL XPDSIN(MNUMCR,MNXYR) ! 41 Distillate - Industrial
+      REAL XPKSAS(MNUMCR,MNXYR) ! 47 Kerosene - All Sectors
+      REAL XPLGAS(MNUMCR,MNXYR) ! 52 Liquid Petroleum Gases - All Sectors
+      REAL XPRLAS(MNUMCR,MNXYR) ! 57 Residual Fuel, Low Sulfur - All Sectors
+      REAL XPRHAS(MNUMCR,MNXYR) ! 60 Residual Fuel, High Sulfur - All Sectors
+      REAL XPPFIN(MNUMCR,MNXYR) ! 66 Petrochemical Feedstocks - Industrial
+      REAL XPASIN(MNUMCR,MNXYR) ! 67 Asphalt, Road Oil - Industrial
+      REAL XPOTAS(MNUMCR,MNXYR) ! 70 Other Petroleum- Industrial
+      REAL XPMETR(MNUMCR,MNXYR) ! 78 Methanol - Transporation
+      REAL XPETTR(MNUMCR,MNXYR) ! 79 Ethanol - Transporation
+      REAL XIT_WOP(MNXYR,2)             ! WORLD OIL PRICE (2--UNITS)
+      REAL XOGWPRNG(MNUMOR,MNXYR)       !NG WELLHEAD PRICE ($87/MCF)
+      REAL XOGWPRNGPF(2,MNUMOR,MNXYR)   !PF NG WELLHEAD PRICE EXP GUESS ($87/MCF) - (1 = current, 2 = previous)
+      REAL XP_ITIMCRSC(MNXYR,5,5,CRDSTEPS)   ! Crude Imports Supply Crv-Prc
+      REAL XWPETOH(MNCROP,MNUMCR,MNXYR,MNETOH) ! Ethanol Quan/Step
+      REAL XPCLGAS(MNUMCR,MNXYR)      ! coal to synthetic natural gas producers
+      REAL XPALMG (MNUMCR,MNXYR)      ! wholesale gasoline price
+      REAL XBRENT_PRICE(MNXYR)        ! Brent spot price
+      REAL XWTI_PRICE(MNXYR)          ! West Texas Intermediate spot price
+      REAL XSTART_PRICE(MNXYR)        ! World oil price as specified in memo
+
+      REAL HOLDOLDWHPX(MNUMOR,MNXYR)  ! if non-zero, then previous run used perfect foresight
+
+      COMMON/MXPBLK/XPELCM,XPELIN,XPGFEL,XPGIIN,XPGIEL,XPNGCM,XPNGEL, &
+            XPCLEL,XPDSCM,XPDSEL,XPRLEL,XPRHEL,XPRSEL,XPUREL, &
+            XPMGAS, XPJFTR, XPDSRS, XPDSTR, XPDSIN, &
+            XPKSAS, XPLGAS, XPRLAS, XPRHAS, XPPFIN, &
+            XPASIN, XPOTAS, XPMETR, XPETTR, &
+            XIT_WOP,XOGWPRNG,XOGWPRNGPF,XP_ITIMCRSC,XWPETOH,XPCLGAS,XPALMG, &
+            XBRENT_PRICE, XWTI_PRICE, XSTART_PRICE
+
+      COMMON /HOLDXWHP/HOLDOLDWHPX
+
+      REAL MXPRC(MNUMCR,MNXYR,MNUMPX)
+      EQUIVALENCE(MXPRC,XPELCM)
+! ARRAYS FOR FILER:
+      REAL MXPARRY(MNUMCR*MNXYR*MNUMPX +          &  ! MXPRC variables XPELCM through XPUREL
+                   MNXYR*2 +                      &  ! XIT_WOP
+                   MNXYR*MNUMOR*2 +               &  ! XOGWPRNGPF
+                   MNUMOR*MNXYR +                 &  ! XOGWPRNG
+                   MNXYR*5*5*CRDSTEPS +           &  ! XP_ITIMCRSC
+                   MNCROP*MNUMCR*MNXYR*MNETOH +   &  ! XWPETOH
+                   MNUMCR*MNXYR               +   &  ! XPCLGAS
+                   MNXYR + MNXYR + MNXYR      +   &  ! XBRENT_PRICE, XWTI_PRICE, XSTART_PRICE
+                   MNUMCR*MNXYR)                     ! XPALMG                   
+      EQUIVALENCE(MXPARRY,XPELCM)

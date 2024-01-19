@@ -1,0 +1,230 @@
+###
+#   EINTLRN
+#
+#   International Learning Input File
+#
+#NUMBER OF RECORDS IN THE INTERNATIONAL LEARNING TABLE
+%NREC INTLN%
+'NRECS'  98
+#
+# INTERNATIONAL LEARNING TABLE
+# This table was compiled using the plant data shown below.
+%INTLRN    %
+#
+# UPLRLCI(ECP$CAP,MNUMYR) - International Capacity added on by year and ECP Technology
+#
+#                                                               Net Summer
+#                                                               Capability
+#Technology                  Technology Code        Year        (MW)
+#
+# IGCC updated for AEO2012 from NETL Gasification Database
+# Adv CC based on H class system info from GE
+# Adv Nuclear based on AP1000 planned installations in China
+'Integrated Gas Comb Cycle'       'IG'        2000    740.00
+'Integrated Gas Comb Cycle'       'IG'        2001    486.00
+'Integrated Gas Comb Cycle'       'IG'        2003    434.00
+'Integrated Gas Comb Cycle'       'IG'        2006    250.00
+'Integrated Gas Comb Cycle'       'IG'        2007    246.00
+'Integrated Gas Comb Cycle'       'IG'        2008     94.00
+'Integrated Gas Comb Cycle'       'IG'        2011    410.00
+'Integrated Gas Comb Cycle'       'IG'        2012   1050.00
+'Advanced Combined Cycle'         'AC'        2002    525.00
+'Advanced Combined Cycle'         'AC'        2008    500.00
+'Advanced Combined Cycle'         'AC'        2009    500.00
+'Advanced Combined Cycle'         'AC'        2010    500.00
+'Advanced Combined Cycle'         'AC'        2010    700.00
+'Adv Combustion Turbine'          'AT'        2010  10000.00
+'Advanced Nuclear'                'AN'        2014   2200.00
+'Advanced Nuclear'                'AN'        2015   2200.00
+'Conventional Wind'               'WN'        2015  57130.00
+'Conventional Wind'               'WN'        2016  44020.00
+'Conventional Wind'               'WN'        2017  56970.00
+'Conventional Wind'               'WN'        2018  24890.00
+'Conventional Wind'               'WN'        2019  50424.00
+'Conventional Wind'               'WN'        2020   2318.00
+'Conventional Wind'               'WN'        2021   2318.00
+'Conventional Wind'               'WN'        2022  54840.00
+'Conventional Wind'               'WN'        2023  54820.00
+'Conventional Wind'               'WN'        2024  54830.00
+'Conventional Wind'               'WN'        2025  54830.00
+'Conventional Wind'               'WN'        2026  50220.00
+'Conventional Wind'               'WN'        2027  50220.00
+'Conventional Wind'               'WN'        2028  50210.00
+'Conventional Wind'               'WN'        2029  50220.00
+'Conventional Wind'               'WN'        2030  50220.00
+'Conventional Wind'               'WN'        2031  62190.00
+'Conventional Wind'               'WN'        2032  62200.00
+'Conventional Wind'               'WN'        2033  62190.00
+'Conventional Wind'               'WN'        2034  62180.00
+'Conventional Wind'               'WN'        2035  62200.00
+'Conventional Wind'               'WN'        2036  73950.00
+'Conventional Wind'               'WN'        2037  73940.00
+'Conventional Wind'               'WN'        2038  73960.00
+'Conventional Wind'               'WN'        2039  73940.00
+'Conventional Wind'               'WN'        2040  73950.00
+'Conventional Wind'               'WN'        2041  61040.00
+'Conventional Wind'               'WN'        2042  61050.00
+'Conventional Wind'               'WN'        2043  61030.00
+'Conventional Wind'               'WN'        2044  61040.00
+'Conventional Wind'               'WN'        2045  61040.00
+'Conventional Wind'               'WN'        2046  28300.00
+'Conventional Wind'               'WN'        2047  28310.00
+'Conventional Wind'               'WN'        2048  28310.00
+'Conventional Wind'               'WN'        2049  28310.00
+'Conventional Wind'               'WN'        2050  28300.00
+'Solar Thermal (no storage)'      'SO'        2015    251.00
+'Solar Thermal (no storage)'      'SO'        2016    100.00
+'Solar Thermal (no storage)'      'SO'        2017    103.00
+'Solar Thermal (no storage)'      'SO'        2018    513.00
+'Solar Thermal (no storage)'      'SO'        2020    209.00
+'PV w/axis tracking'              'PV'        2015  43190.00
+'PV w/axis tracking'              'PV'        2016  60620.00
+'PV w/axis tracking'              'PV'        2017  97810.00
+'PV w/axis tracking'              'PV'        2018  65320.00
+'PV w/axis tracking'              'PV'        2019  90603.00
+'PV w/axis tracking'              'PV'        2020  67778.50
+'PV w/axis tracking'              'PV'        2021  67778.50
+'PV w/axis tracking'              'PV'        2022  90170.00
+'PV w/axis tracking'              'PV'        2023  90180.00
+'PV w/axis tracking'              'PV'        2024  90180.00
+'PV w/axis tracking'              'PV'        2025  90180.00
+'PV w/axis tracking'              'PV'        2026 107640.00
+'PV w/axis tracking'              'PV'        2027 107650.00
+'PV w/axis tracking'              'PV'        2028 107650.00
+'PV w/axis tracking'              'PV'        2029 107630.00
+'PV w/axis tracking'              'PV'        2030 107650.00
+'PV w/axis tracking'              'PV'        2031 101050.00
+'PV w/axis tracking'              'PV'        2032 101040.00
+'PV w/axis tracking'              'PV'        2033 101060.00
+'PV w/axis tracking'              'PV'        2034 101040.00
+'PV w/axis tracking'              'PV'        2035 101050.00
+'PV w/axis tracking'              'PV'        2036 115270.00
+'PV w/axis tracking'              'PV'        2037 115270.00
+'PV w/axis tracking'              'PV'        2038 115270.00
+'PV w/axis tracking'              'PV'        2039 115270.00
+'PV w/axis tracking'              'PV'        2040 115270.00
+'PV w/axis tracking'              'PV'        2041 139760.00
+'PV w/axis tracking'              'PV'        2042 139760.00
+'PV w/axis tracking'              'PV'        2043 139760.00
+'PV w/axis tracking'              'PV'        2044 139750.00
+'PV w/axis tracking'              'PV'        2045 139770.00
+'PV w/axis tracking'              'PV'        2046 157630.00
+'PV w/axis tracking'              'PV'        2047 157630.00
+'PV w/axis tracking'              'PV'        2048 157640.00
+'PV w/axis tracking'              'PV'        2049 157630.00
+'PV w/axis tracking'              'PV'        2050 157630.00
+'Diurnal Storage'                 'DS'        2026   8580.00
+'Diurnal Storage'                 'DS'        2027   8580.00
+'Diurnal Storage'                 'DS'        2028   8590.00
+'Diurnal Storage'                 'DS'        2029   8580.00
+'Diurnal Storage'                 'DS'        2030   8580.00
+'Diurnal Storage'                 'DS'        2031  14960.00
+'Diurnal Storage'                 'DS'        2032  14960.00
+'Diurnal Storage'                 'DS'        2033  14960.00
+'Diurnal Storage'                 'DS'        2034  14960.00
+'Diurnal Storage'                 'DS'        2035  14960.00
+'Diurnal Storage'                 'DS'        2036  27140.00
+'Diurnal Storage'                 'DS'        2037  27150.00
+'Diurnal Storage'                 'DS'        2038  27150.00
+'Diurnal Storage'                 'DS'        2039  27140.00
+'Diurnal Storage'                 'DS'        2040  27150.00
+'Diurnal Storage'                 'DS'        2041  48370.00
+'Diurnal Storage'                 'DS'        2042  48360.00
+'Diurnal Storage'                 'DS'        2043  48370.00
+'Diurnal Storage'                 'DS'        2044  48360.00
+'Diurnal Storage'                 'DS'        2045  48370.00
+'Diurnal Storage'                 'DS'        2046  52340.00
+'Diurnal Storage'                 'DS'        2047  52340.00
+'Diurnal Storage'                 'DS'        2048  52330.00
+'Diurnal Storage'                 'DS'        2049  52340.00
+'Diurnal Storage'                 'DS'        2050  52340.00
+###
+###
+#   International Learning Adds for AEO99
+#
+%INTLRN_SHARE: SHARE OF INTERNATIONAL LEARNING TO APPLY TO LEARNING FUNCTION
+##
+##       UPISHR
+###
+ 'B1'     0.50
+ 'B2'     0.50
+ 'B3'     0.50
+ 'B4'     0.50
+ 'B5'     0.50
+ 'B6'     0.50
+ 'B7'     0.50
+ 'B8'     0.50
+ 'C1'     0.50
+ 'C2'     0.50
+ 'C3'     0.50
+ 'C4'     0.50
+ 'C5'     0.50
+ 'C6'     0.50
+ 'C7'     0.50
+ 'C8'     0.50
+ 'C9'     0.50
+ 'CX'     0.50
+ 'CY'     0.50
+ 'CZ'     0.50
+ 'H1'     0.50
+ 'H2'     0.50
+ 'H3'     0.50
+ 'H4'     0.50
+ 'H5'     0.50
+ 'H6'     0.50
+ 'H7'     0.50
+ 'H8'     0.50
+ 'H9'     0.50
+ 'HA'     0.50
+ 'HB'     0.50
+ 'HC'     0.50
+ 'PC'     0.50
+ 'OC'     0.50
+ 'IG'     0.75
+ 'I2'     0.75
+ 'PQ'     0.25
+ 'IS'     0.25
+ 'NG'     0.50
+ 'ST'     0.50
+ 'ET'     0.75
+ 'IC'     0.75
+ 'CT'     0.75
+ 'T2'     0.75
+ 'AT'     0.75
+ 'EC'     0.75
+ 'CC'     0.75
+ 'AC'     0.75
+ 'A2'     0.75
+ 'CS'     0.25
+ 'FC'     0.75
+ 'CN'     0.25
+ 'AN'     0.75 
+ 'SM'     0.75 
+ 'GN'     0.75 
+ 'WD'     0.50
+ 'BI'     0.50
+ 'GT'     0.50
+ 'AG'     0.50
+ 'MS'     0.50
+ 'HY'     0.50
+ 'HO'     0.50
+ 'HI'     0.50
+ 'TI'     0.50
+ 'PS'     0.50
+ 'SQ'     0.50
+ 'DS'     0.50
+ 'OS'     0.50
+ 'P2'     0.50
+ 'WN'     0.50
+ 'WL'     0.50
+ 'WF'     0.50
+ 'SO'     0.75
+ 'SS'     0.75
+ 'S2'     0.75
+ 'PV'     0.50
+ 'PT'     0.50
+ 'IN'     0.75
+ 'DB'     0.75
+ 'DP'     0.75
+####
+####

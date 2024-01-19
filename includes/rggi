@@ -1,0 +1,26 @@
+! $Header: m:/default/includes/RCS/rggi,v 1.3 2017/09/14 15:17:21 xj2 Exp $
+! Regional Greenhouse Gas Initiative AB32 cap and trade variables
+real rg_covd_em_ele(mnumyr) ! Covered emissions, electric                         (tonnes Ceq)
+real rg_cap_tot(mnumyr)     ! Combined cap or allowances issued
+real rg_allbank_avl(mnumyr) ! Banked allowances available (cumulative)
+real rg_allbank_use(mnumyr) ! Banked allowances available (cumulative)
+real rg_offsets_avl(mnumyr) ! Aggregate offset assumption (fract of rg_cap_tot, from 0 to 1)
+real rg_offsets_use(mnumyr) ! Offsets used
+real rg_reserve_avl(mnumyr) ! cost containment reserve allowances available (cumulative)
+real rg_reserve_use(mnumyr) ! cost containment reserve allowances used by year
+real rg_reserve_p(mnumyr)   ! Allowance price, 87$/kg-c, triggering release of cost containment reserve allowances
+real rg_rsrvecr_avl(mnumyr) ! emissions containment reserve allowances available (cumulative)
+real rg_rsrvecr_use(mnumyr) ! emissions containment reserve allowances used by year
+real rg_rsrvecr_p(mnumyr)   ! Allowance price, 87$/kg-c, triggering release of emissions containment reserve allowances
+real rg_auction_p(mnumyr)   ! Allowance floor price
+real rg_allow_p(mnumyr)     ! Allowance price
+
+common/rggi/rg_covd_em_ele, rg_cap_tot,                                       &
+            rg_allbank_avl, rg_allbank_use,                                   &
+            rg_offsets_avl, rg_offsets_use,                                   &
+            rg_reserve_avl, rg_reserve_use, rg_reserve_p,                     &
+            rg_rsrvecr_avl, rg_rsrvecr_use, rg_rsrvecr_p,                     &
+            rg_auction_p,   rg_allow_p                    
+ 
+real eq_rggi(14*MNUMYR)
+equivalence(rg_covd_em_ele(1),eq_rggi) ! equivalence for filer

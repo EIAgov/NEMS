@@ -1,0 +1,40 @@
+! $Header: m:/default/includes/RCS/edbwrt,v 1.1 2015/04/10 16:44:23 pkc Exp $
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     EDBWRT:
+!     CONTAINS EMM DATABASE VARIABLES TO BE USED FOR
+!     WRITING OUT DBASE TABLES TO THE ACCESS DATABASE                   
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+       COMMON /EDBWRT/     COLVALS,  COLV,                         & !REAL * 4
+       ORACLESW, ORCLEFD,  ORCLECP, ORCLEFP, ORCLCL,FNRUN,   &
+       TNUM,     LOOPING,  NUMCOLS,                                 & 
+       SCEN1,CHCOLVALS, CHCOLV, DYNSTM, WRTSTM, SQLSTMTOLD
+!
+       INTEGER MAXTABS,MAXCOLS,MAXRECS
+       PARAMETER(MAXTABS=40)             ! Maximum DB Tables written in a subroutine
+       PARAMETER(MAXCOLS=90)             ! Maximum Columns written in a DB record
+       PARAMETER(MAXRECS=100)           ! Maximum DB records written in one call to Load_data
+!
+!     STORE ORACLE SWITCH VALUES
+!
+      INTEGER*4    ORACLESW                     ! ORACLE MAIN ON/OFF SWITCH
+!                                               ! 0=OFF,1=ON-PRODUCTION,2=ON-TESTING
+      INTEGER*4    ORCLEFD                      ! WRITE EFD DATABASE INFO, 0=NO,1=YES
+      INTEGER*4    ORCLECP                      ! WRITE ECP DATABASE INFO, 0=NO,1=YES
+      INTEGER*4    ORCLEFP                      ! WRITE EFP DATABASE INFO, 0=NO,1=YES
+      INTEGER*4    ORCLCL                       ! WRITE COAL DATABASE INFO, 0=NO,1=YES
+!
+!     STORE FINAL RUN SWITCH
+!
+      INTEGER*4    FNRUN                        ! FINAL RUN SWITCH, 1 = final run
+!                                                !                   0 = not final run
+!     STORE ORACLE RECORD WRITING VARIABLES
+!
+      INTEGER TNUM,LOOPING(MAXTABS),NUMCOLS(MAXTABS)
+      REAL*8 COLVALS(MAXCOLS,MAXRECS),COLV(MAXTABS,MAXCOLS,MAXRECS)
+      CHARACTER*25 SCEN1
+      CHARACTER*40 CHCOLVALS(MAXCOLS,MAXRECS),CHCOLV(MAXTABS,MAXCOLS,MAXRECS)
+      CHARACTER*220 DYNSTM(MAXTABS)
+      CHARACTER*35  WRTSTM(MAXTABS)
+      CHARACTER*220 SQLSTMTOLD
+!

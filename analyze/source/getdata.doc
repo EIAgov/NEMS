@@ -1,0 +1,329 @@
+                      ::: GETDATA.DOC  2-12-95 :::
+
+    Last date:  8-1-92, 3-12-93, 8-07-93
+
+    Data structure for GETMAT module (interface with matrix and
+    solution).  Primary arrays (in named COMMONs...see DCGETMAT):
+
+     NAMERC holds names of rows and columns.....CHARACTER*1
+     INDEX  holds indexes, pointers and stats...INTEGER*4
+     VALUE  holds values...pool is first........REAL*4
+
+                       DICTIONARY FOR BASE VALUES
+
+      1 IFREE   points to available INDEX location
+    * 2 ENDIND  Base end measured in INDEX type (short or long integer)
+      3 IVFREE  points to available VALUE location
+    * 4 ENDBAS  Base end (last word of BASE)
+      5 ENDNAM  last used name character in NAMERC
+      6 INF     Infinity pointer (VALUE(INF)=VINF)
+
+     10 NROWS   number of rows
+     11 NCOLS   number of columns
+     12 NONZER  number of nonzero coefficients (from COLUMNS section)
+     13 NVALS   number of distinct coefficient values (magnitudes only)
+     14 NONES   number of unity coefficients (+ or -1)
+     15 NRFREE  number of free rows
+     16 NCFIX   number of fixed columns
+     17 NAMELN  number of characters in row/column names
+     18 OBJNUM  number of objective row
+     19 RMAXLN  number of row    with max number of nonzeroes
+     20 CMAXLN  number of column with max number of nonzeroes
+     21 OPT     sense of optimization (= OPTMIN or OPTMAX)
+    *22 OPTMIN  minimization (= -1)
+    *23 OPTMAX  maximization (= +1)
+     24 STCOMP  complementarity status
+                = 0 if not set
+                = 1 if strictly complementary
+                = 2 if not strictly complementary
+                = 3 if unknown
+     25 STBASC  basic status
+                = 0 if not set
+                = 1 if basic
+                = 2 if not basic (interior)
+                = 3 if unknown
+
+    *30 IRNAME  NAMERC base for row    names
+     31 ICNAME  NAMERC base for column names
+     32 IRSOLV  VALUE base for row    solution values
+     33 ICSOLV  VALUE base for column solution values
+     34 IRLBND  INDEX base for row    lower bound signed value index
+     35 ICLBND  INDEX base for column lower bound signed value index
+     36 IRUBND  INDEX base for row    upper bound signed value index
+     37 ICUBND  INDEX base for column upper bound signed value index
+     38 IRSTAT  INDEX base for row    status maps
+     39 ICSTAT  INDEX base for column status maps
+    *40 IRINFO  INDEX base for row    info (nonzero counts)
+     41 ICINFO  BASE  base for column info (pointers to nonzeroes)
+     42 INONZ   first nonzero row index
+
+     50 IPIVOT  INDEX base for pivot status of rows and columns
+                       (= 0 means no basis factor)
+     51 IRBLST  INDEX base for basis row indexes
+     52 IVBLST  VALUE base for basis values
+     53 NBLST   number of nonzeroes in basis factor
+     54 NBASNZ  number of stored nonzeroes in basis
+     55 NBFILL  number of fill-in nonzeroes
+     56 NBFTRI  number of columns in forward triangle
+     57 NBBTRI  number of columns in backward triangle
+     58 NBSPIK  number of spikes
+     59 NBLGL   number of logicals in basis
+     60 NBKRNL  number of rows (and columns) in kernel
+     61 NBPOSN  number of basic structurals
+     62 BCPOSN  heads list for col  in position   (temporary)
+     63 BCSTAT  heads list for stat in position      "
+     64 FRONT   points to front of agenda            "
+     65 REAR    points to rear  of agenda            "
+     66 BUCKET  heads list for count buckets         "
+     67 BUCKLO  heads list for low  count for bucket "
+     68 BLINK   heads list for bucket links          "
+     69 NBUCKT  number of buckets                    "
+     70 IZBLST  ZVALUE base for basic (factor) values
+
+     71 EDFREE  Number of bounds freed
+     72 EDFIX   Number of bounds fixed
+     73 EDROND  Number of bounds changed by integer rounding
+     74 EDREFR  Number of primal and dual values changed by GBREFR
+     75 EDRED   Number of bounds overwritten by REDUCE
+     76 EDREN   Byte map for what header names were changed:
+                1:PROBLEM  2:RHS  3:RANGESET  4:BOUNDSET
+
+    *80 DATFIL  formatted file unit number (eg, matrix and solution files)
+    *81 PCKFIL  unformatted file unit number (sometimes for scratch)
+
+    *90 EBASE2  last word of BASE2, used to copy base in GRDPCK
+    *91 MAXNAM  length of NAMERC (= PMXNAM)
+    *92 MAXIND  length of INDEX  (= PMXIND)
+    *93 MAXVAL  length of VALUE  (= PMXVAL)
+     94 MAXRC   maximum number of rows + columns
+    *95 MAXVPL  maximum number of distinct values
+    :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    * Set once and for all in GINITL.
+
+                        PIVOT HISTORY (COMMON/PIVHST/)
+                        ~~~~~~~~~~~~~
+      PIVNUM    number of pivots
+      PIVIN     entering nonbasic column
+      PIVOUT    exiting basic variable
+      PIVNBL    NBLST value (length of alpha's) before pivot
+      PIVST0    solution status before pivot...see GPVST0 in GBRANGE
+      PIVSTI    T means In-col stat was L;  F means stat was U
+      PIVSTO    T means Out-var stat was B; F means stat was I
+
+                            DATA STRUCTURES
+                            ~~~~~~~~~~~~~~~
+      NAMERC is byte list of name characters...with name lengths = NAMELN
+      ___________
+      | dummy   |...used for binary tree construction
+      |_________|<=== IRNAME is row base (= 0)
+      | Rows    |
+      |         |
+      |.........|
+      |::dummy::|<=== ICNAME is column base (= IRNAME + NROWS + 1)
+      | Columns |     note: ICNAME is NOT a byte pointer;  it is
+      |         |           used relative to the name length (NAMELN)
+      |         |           (see FUNCTION NAME).
+      |         |
+      |.........|<=== ENDNAM = (ICNAME+NCOLS)*NAMELN
+      |  waste  |
+      |_________|<=== MAXNAM >= (MAXRC+1)*NAMELN
+
+
+      INDEX is Long Integer...EQUIVALENCEd to BASE
+      ___________________________
+      | base                    |
+      |  ...pointers            |
+      |  ...stats               |
+      |.........................|<=== ENDIND = ENDBAS = IRINFO
+      | row info (counts)       |
+      |.........................|<=== IRLBND = IRINFO + NROWS
+      | row lower bound indexes |
+      | ===> VALUE              |
+      |.........................|<=== IRUBND = IRLBND + NROWS
+      | row upper bound indexes |
+      | ===> VALUE              |
+      |.........................|<=== IRSTAT = IRUBND + NROWS
+      | row status maps         |
+      |.........................|<=== IRSTAT + NROWS
+      | ::::::: dummy ::::::::: |<=== ICINFO = (IRSTAT + NROWS) + 1
+      | col nonzero pointers    |
+      | ===> offset into INDEX  |
+      |     (base = INONZ)      |
+      |.........................|<=== ICLBND = 2*(ICINFO + NCOLS) + 1
+      | col lower bound indexes |
+      | ===> VALUE              |
+      |.........................|<=== ICUBND = ICLBND + NCOLS
+      | col upper bound indexes |
+      | ===> VALUE              |
+      |.........................|<=== ICSTAT = ICUBND + NCOLS
+      | col status maps         |
+      |.........................|
+      |                         |<=== INONZ = ICSTAT + NCOLS + 1
+      | row/value indexes       |
+      |    (nonzeroes)          | Nonzeroes of column j begin at
+      |  [row | sign:value]     | BASE(ICINFO+J-1)+1 and end at
+      |                         | BASE(ICINFO+J)
+      | :::::::: dummy :::::::: |
+      |.........................|<=== IFREE = INONZ + 2*NONZER + 1
+      | free space              |
+      | (used by routines)      |
+      |_________________________|<=== MAXIND = max number of INDEX entries
+                                    > 120 + 4*NROWS + 6*NCOLS + 2*NONZER
+
+       VALUE
+       _________________
+       |  0            | <--- VALUE(0)=0
+       |  1            | <--- VALUE(1)=1.0
+       | VINF          | <=== INF (infinity)
+       |...............|
+       |  distinct     | Note: the number of distinct values
+       |  values       |       (magnitudes only)
+       |               |
+       |_______________| <=== IRSOLV = NVALS
+       | row solution  |
+       | values        |
+       |...............| <=== ICSOLV = IRSOLV + NROWS
+       | col solution  |
+       | values        |
+       |...............|
+       |  free space   | <=== IVFREE = ICSOLV + NCOLS + 1
+       | (used by      | This space must be > 132
+       |  routines)    |
+       |_______________| <=== MAXVAL > NVALS + NROWS + NCOLS + 132
+
+    VALUE is EQUIVALENCEd to I4VAL (INTEGER*4), which is used when reading
+    in a matrix file (GETMAT).  During this process, the value pool grows
+    downward, up to MAXVPL, which is set in GINITL (in GETSET.FOR).  The
+    links needed to store the binary tree for rows, then columns, is stored
+    in I4VAL, growing upward.  Space is reserved for the maximum allowable
+    number of rows + columns (MAXRC), also set in GINITL.  Once the matrix
+    is setup, this space is released to store solution values.  The
+    solution needs only 1 word per row and column, whereas link space is 2
+    words per row, then 2 per column (which is usually the greater of the
+    two numbers).  Here is a diagram of the storage allocation during
+    matrix construction:
+
+        VALUE                  I4VAL
+       _______________      _______________
+       |  0          |      |             |    |
+       |  1          |      |             |    |
+       | VINF        |      |             |    |
+       |             |      |             |    |
+       | distinct    |      |             |    |
+       | values      |      |             |    |
+       |_____________|      |_____________|    |
+       |             |      | value list  |    |
+       |             |      | link        |    |
+       |             |      |             |    |
+       |             |      |             |    |
+       |             |      |             |    \/
+       |-------------|      |-------------| <===== 2*MAXVPL
+       |             |      | list heads  |
+       |             |      |-------------|  <==== 2*MAXVPL + 257
+       |             |      |             |      = MAXVAL - 2*MAXRC - 257
+       |-------------|      |-------------| <===== MAXVAL - 2*MAXRC
+       |             |      |             |    /\
+       |             |      |             |    |
+       |             |      | RLINK       |    |
+       |             |      |             |    |
+       |             |      |             |    |
+       |             |      |             |    |
+       |             |      | LLINK       |    |
+       |_____________|      |_____________| <====== MAXVAL
+
+   All link space is released after matrix is constructed, so
+   VALUE retains the distinct values, which is <= MAXVPL.  Another
+   word is allocated for each row and column to store its solution
+   value (see above), leaving VALUE space for REDUCE and BASIS values.
+
+   VALUE is also EQUIVALENCEd to ZVALUE, which is double precision.  The
+   only values stored in ZVALUE are the alpha's for the basis factors:
+
+                  ZVALUE               INDEX
+                 _______________      ________
+   IZBLST --->   | value       |      | row  | <--- IRBLST
+
+
+                          Estimating array dimensions
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Let R = max number of rows, C = max number of columns,
+    Z = max number of nonzeroes, V = max number of distinct values,
+    L = max length of row or column name.  Then, the minimum space for
+    the primary arrays is:
+
+        PMXIND = 4*R + 6*C + 2*Z + 121
+        PMXVAL =   R +   C +   V + 133
+        PMXNAM = L*(R + C)
+
+    Since PMXNAM is simple and depends only on R+C (typically, L=8, but
+    you can have L=16), we focus on only the INDEX and VALUE arrays.
+
+    To execute REDUCE, you need to add 4*R + 2*C to PMXVAL.  For basis
+    factorization (to use the RATEOF command), at least 2*R must be added
+    to INDEX.  This brings total minimal dimensions to:
+
+        PMXIND = 6*R + 6*C + 2*Z + 121
+        PMXVAL = 5*R + 3*C +   V + 133
+
+    The added VALUE space is recommended, as it will also be needed during
+    matrix construction (see above).
+
+    A non-network LP needs more index and value space for basis
+    factorization.  This is difficult to estimate because it is highly
+    problem dependent.  Here is how I estimate:
+
+        About 10%*R = number of spikes (to be safe, if space is not tight,
+        use 25%).  Each spike is about 5% dense (use 10% for pessimistic
+        estimate), giving 5%*R non-zeroes per spike, so the non-zeroes in
+        the basis factorization (in addition to the 2 INDEX words above)
+        is about .5%*R^2 (squared).  (The pessimistic estimate is 2%*R^2.)
+        Each nonzero requires an index and a double precision value (2 VALUE
+        locations), so the array lengths need to be increased to:
+
+        PMXIND = 6*R + 6*C + 2*Z + 121 + .005*R^2 [.02*R^2]
+        PMXVAL = 5*R + 3*C +   V + 133 + .01 *R^2 [.04*R^2]
+
+        ([] denotes pessimistic estimate).
+
+    As a rule of thumb, some of the parameters experienced in practice
+    approximately satisfy:  Z = 5*C, and V = 15%*Z = .75*C.  Using these
+    approximations, INDEX and VALUE array lengths are:
+
+        PMXIND = (6 + .01*R)*R + 16*C
+        PMXVAL = (5 + .01*R)*R +  4*C
+
+    where the fixed amounts are relatively negligible, and 4*C is used in
+    PMXVAL (rather than 3.5) to allow more fill-in.  Now we simplify this
+    further.  For R < 2,000, we can use
+
+        PMXIND = 20*R + 16*C
+        PMXVAL = 35*R +  4*C
+
+    For 2,000 < R < 10,000, the fill-in estimate is too high, as the LP
+    probably has a large embedded network.  In this case, we increase the
+    coefficient of R just to:
+
+        PMXIND = 25*R + 16*C
+        PMXVAL = 40*R +  4*C
+
+    The above equations are a reasonable guide for setting primary array
+    dimensions.  Here is a table to illustrate, where 8 characters per name
+    is assumed for PMXNAM (estimates are rounded up to allow more basis
+    fill-in).
+
+                  ROWS     COLS      PMXIND   PMXVAL   PMXNAM
+                ===============   ===========================
+        Small    1 000    5 000     100 000   55 000   48 000
+        Medium   5 000   25 000     525 000  300 000  240 000
+        Large   10 000  100 000   1 900 000  800 000  880 000
+                =============================================
+
+    Contact the author (Harvey Greenberg) to assist in a tailored
+    installation.
+
+    The GETMAT module may be useful apart from ANALYZE to gain FORTRAN
+    access to matrix and solution values.  Please report such experiences
+    for the overall benefit of the project.
+
+                           ::: END GETDATA.DOC :::
+

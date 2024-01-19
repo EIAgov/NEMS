@@ -1,0 +1,13 @@
+AEO Name,STEO Name,Energy Generation,Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
+QUA000:ha_NaturalGas,ngepconb,Electric Power Consumption [Nat Gas Volumes (QBTU)],2.001%,2.001%,1,1,"conversion factor for units is 0.001, then multiply by days/year (STEO variable zsajqus)"
+ESD000:ca_Total + ESD000:da_Total,toepgen_us,Total Generation,2.001%,2.001%,1,1,
+ESD000:ca_Coal + ESD000:da_Coal ,clepgen_us,Coal Generation,2.001%,2.001%,1,1,
+ESD000:ca_NaturalGas + ESD000:da_NaturalGas,ngepgen_us,Natural Gas Generation,2.001%,2.001%,1,1,
+ESD000:ca_NuclearPower,nuepgen_us,Nuclear Power Generation,2.001%,2.001%,1,1,
+ESD000:ca_RenewableSour + ESD000:da_RenewableSour,rtepgen_us,Renewable Sources Generation,2.001%,2.001%,1,1,
+ESD000:nom_AllSectorsAv,estcuus,"Electricity Avg Price All Sectors, cents/kwh",2.001%,2.001%,1,1,
+QUA000:ha_SteamCoal,CLEPCONB,Coal Consumption - Electric Power,2.001%,2.001%,1,1,
+REN000:ca_ConventionalH,hvepgen_us,"Conventional Hydro Generation
+(billion kilowatthours)",2.001%,2.001%,1,1,
+REN000:ca_Wind + REN000:ca_OffshoreWind,wnepgen_us,Wind Generation (billion kilowatthours),2.001%,2.001%,1,1,
+REN000:x2_AllSunnyOut,soepgen_us + sochgen_us + sodtp_us,Solar generation all sectors (billion kilowatthours),2.001%,2.001%,1,1,

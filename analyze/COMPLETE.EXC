@@ -1,0 +1,4 @@
+* This sets the submatrix to completes the one containing column '1.
+COUNT * , '1 ; SUB DEL ROW * L=-* U=* ; SUB COL * ; COUNT
+_TYPE The above submatrix shows column '1 and its adjacent columns.
+* NO RETURN, SO THIS COULD BE AN INCLUDE FILE

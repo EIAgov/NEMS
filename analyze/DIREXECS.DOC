@@ -1,0 +1,50 @@
+                    ANALYZE Execution Files (.EXC suffix)
+
+    ATEST......Tests ANALYZE after installation (also sets packed files
+               needed for Primer exercises).
+    BCIIS......Sets submatrix = IIS blocks.
+    BIGTEST....Tests ANALYZE more extensively (execute after intalling
+               in a new environment).
+    BLRTFLOW...Executes flow trace for BLENDRT.
+    BLRTPRIC...Executes price interpretation for BLENDRT.
+    CLEANUP....Checks and cleans basis and solution values.
+    COMPLETE...Sets submatrix to one containing a particular column,
+               all of its non-free rows, and all adjacent columns.
+    DEMO.......Demo PROFILE.
+    DISTRIB....Interprets distribution of FOREST5 with 3 different
+               rule files.
+    DOCANAL....Generates ANALYZE documentation.
+    ERRTESTV...Tests error messages for some views.
+    EXERCISE...Exercise dictionary.
+    FIRSTIME...Set = PROFILE at installation.
+    FOREST.....Begins FOREST exercise (optimal instance).
+    FORMIS.....Forms infeasible subsystem from Phase I solution.
+    FORTIME....Pictures forest by time periods (first time period
+               passed as string variable 1).
+    IIS........Reads IIS file for infeasible instance (name passed as
+               string variable 1) and instantiates infeasibility
+               interpretation.
+    ITEST......Tests INTERPRT command.
+    NAME16.....Reads packed file created by LPRENAME with 16-character
+               row and column names.
+    NOTOPT.....Puts rows and columns into submatrix that have nonoptimal
+               dual prices.
+    OVERVIEW...Gives overview of resident LP (output to OVERVIEW.DOC)
+    PLOTS......Executes some plots.
+    PRSUB......Begins PRSUB exercise.
+    RATETAB....Executes RATEOF //T,L after setting submatrix
+    READWRIT...Reads matrix + solution, then writes packed file after
+               setting up the basis.
+    REDUND.....Seeks redundancies.
+    REFINERY...Reads REFINERY (with syntax) and gives report.
+    REPORT.....Gives a standard report.
+    SETDATA....Sets prefixes of data file types to passed string.
+    SETUP......Dummy SETUP (just comments, no commands).
+    SETUP0.....Restores _SETUP prefixes to blanks and suffixes to
+               their original defaults.
+    SWITCH0....Restores switches to their initial settings.
+    TABLTEST...Tests TABLE command.
+    WOODINFE...Begins WOODINFE exercise.
+    WOODNET....Begins WOODNET exercise.
+    WOODUNBD...Begins WOODUNBD exercise.
+    WRIIS......Writes IIS matrix file.

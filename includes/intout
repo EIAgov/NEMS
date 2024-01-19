@@ -1,0 +1,119 @@
+!  $Header: m:/default/includes/RCS/intout,v 1.27 2014/11/10 22:28:47 pkc Exp $
+! Output variables from International Module
+
+      Integer Max_Crude_Source,Max_NonUS_Demand_Steps, INTLREG, INTLSTEP
+      PARAMETER(Max_Crude_Source=1)
+      PARAMETER(Max_NonUS_Demand_Steps=1)
+      PARAMETER(INTLREG=4)
+      PARAMETER(INTLSTEP=14)
+
+      REAL IT_WOP(MNUMYR,2)            ! WORLD OIL PRICE (2--UNITS)
+      REAL REPORT(MNUMYR,57)           ! Sent to ftab for International Table (19)
+      REAL SPR_Fill(MNUMYR)            ! Annual SPR Fill Rate
+      REAL CRUDEPOINTS(MNUMYR,9,2)     ! 9 points on generic crude oil price/quantity curve
+      REAL REPORT2(MNUMYR,18)          ! Sent to ftab in addition to REPORT
+
+! Variables for LFMM
+      REAL P_Total_Crude(CRSTEP,1990:1989+MNXYR)    ! World crude-like liquids supply curve prices
+      REAL Q_Total_Crude(CRSTEP,1990:1989+MNXYR)    ! World crude-like liquids supply curve quantities
+      REAL P_Foreign_Crude(MNCRUD,Max_Crude_Source,CISTEP,1990:1989+MNXYR)   ! Incremental crude supply curve prices
+      REAL Q_Foreign_Crude(MNCRUD,Max_Crude_Source,CISTEP,1990:1989+MNXYR)   ! Incremental crude supply curve quantities
+      REAL P_Non_US_Demand(MNCRUD,Max_Crude_Source,Max_NonUS_Demand_Steps,1990:1989+MNXYR)    ! NonUS demand curve prices
+      REAL Q_Non_US_Demand(MNCRUD,Max_Crude_Source,Max_NonUS_Demand_Steps,1990:1989+MNXYR)    ! NonUS demand curve quantities
+      REAL P_C_MC_Demand(MCSTEP,1990:1989+MNXYR,MNPROD)    ! Caribbean and Maritime Canada demand curve prices
+      REAL Q_C_MC_Demand(MCSTEP,1990:1989+MNXYR,MNPROD)    ! Caribbean and Maritime Canada demand curve quantities
+      REAL P_Europe_Gas(EUSTEP,1990:1989+MNXYR)            ! European motor gasoline supply curve prices
+      REAL Q_Europe_Gas(EUSTEP,1990:1989+MNXYR)            ! European motor gasoline supply curve quantities
+      REAL Q_Import_Product(MNPROD,REFREG,1990:1989+MNXYR) ! Product imports, excluding from Caribbean and Maritime Canada
+      REAL Q_Export_Product(MNPROD,REFREG,1990:1989+MNXYR) ! Product exports, excluding to Caribbean and Maritime Canada
+
+! Variables for product import and export supply and demand curves:
+      REAL Product_Import_Q(MNPROD,INTLREG,INTLSTEP,MNXYR) ! Product import supply curve quantities
+      REAL Product_Import_P(MNPROD,INTLREG,INTLSTEP,MNXYR) ! Product import supply curve prices
+
+      REAL Product_Export_Q(MNPROD,INTLREG,INTLSTEP,MNXYR) ! Product export demand curve quantities
+      REAL Product_Export_P(MNPROD,INTLREG,INTLSTEP,MNXYR) ! Product export demand curve prices
+
+      REAL WTI_PRICE(MNUMYR)                               ! WTI spot price
+      REAL BRENT_PRICE(MNUMYR)                             ! Brent spot price
+      REAL START_PRICE(MNUMYR)                             ! world oil price as specified in memo
+
+!variables for filling Table 101:
+   ! Crude oil
+      REAL ICOCanada(MNUMYR)
+      REAL ICOMexico(MNUMYR)
+      REAL ICONorthSea(MNUMYR)
+      REAL ICOOPEC(MNUMYR)
+      REAL ICOOPAmericas(MNUMYR)
+      REAL ICOOPNoAfrica(MNUMYR)
+      REAL ICOOPWestAfrica(MNUMYR)
+      REAL ICOOPIndonesia(MNUMYR)
+      REAL ICOOPPersianGulf(MNUMYR)
+      REAL ICOOtherMidEast(MNUMYR)
+      REAL ICOOtherAmericas(MNUMYR)
+      REAL ICOOtherAfrica(MNUMYR)
+      REAL ICOOtherAsia(MNUMYR)
+      REAL ICOTotal(MNUMYR)
+   ! Heavy refined products
+      REAL IHPCanada(MNUMYR)
+      REAL IHPNorthEurope(MNUMYR)
+      REAL IHPSouthEurope(MNUMYR)
+      REAL IHPOPEC(MNUMYR)
+      REAL IHPOPAmericas(MNUMYR)
+      REAL IHPOPNoAfrica(MNUMYR)
+      REAL IHPOPWestAfrica(MNUMYR)
+      REAL IHPOPIndonesia(MNUMYR)
+      REAL IHPOPPersianGulf(MNUMYR)
+      REAL IHPCaribbean(MNUMYR)
+      REAL IHPAsia(MNUMYR)
+      REAL IHPOther(MNUMYR)
+      REAL IHPTotal(MNUMYR)
+   ! Light refined products
+      REAL ILPCanada(MNUMYR)
+      REAL ILPNorthEurope(MNUMYR)
+      REAL ILPSouthEurope(MNUMYR)
+      REAL ILPOPEC(MNUMYR)
+      REAL ILPOPAmericas(MNUMYR)
+      REAL ILPOPNoAfrica(MNUMYR)
+      REAL ILPOPWestAfrica(MNUMYR)
+      REAL ILPOPIndonesia(MNUMYR)
+      REAL ILPOPPersianGulf(MNUMYR)
+      REAL ILPCaribbean(MNUMYR)
+      REAL ILPAsia(MNUMYR)
+      REAL ILPOther(MNUMYR)
+      REAL ILPTotal(MNUMYR)
+
+      COMMON/INTOUT/ IT_WOP, REPORT, SPR_Fill, CRUDEPOINTS, &
+          P_Total_Crude, Q_Total_Crude, P_Foreign_Crude, Q_Foreign_Crude, &
+          P_Non_US_Demand, Q_Non_US_Demand, P_C_MC_Demand, Q_C_MC_Demand, &
+          P_Europe_Gas, Q_Europe_Gas, Q_Import_Product, Q_Export_Product, &
+          WTI_PRICE, BRENT_PRICE, REPORT2, Product_Import_Q, Product_Import_P, &
+          Product_Export_Q, Product_Export_P, &
+          ICOCanada, ICOMexico, ICONorthSea, ICOOPEC, ICOOPAmericas, &
+          ICOOPNoAfrica, ICOOPWestAfrica, ICOOPIndonesia, ICOOPPersianGulf, &
+          ICOOtherMidEast, ICOOtherAmericas, ICOOtherAfrica, &
+          ICOOtherAsia, ICOTotal, IHPCanada, IHPNorthEurope, IHPSouthEurope, &
+          IHPOPEC, IHPOPAmericas, IHPOPNoAfrica, IHPOPWestAfrica, &
+          IHPOPIndonesia, IHPOPPersianGulf, IHPCaribbean, IHPAsia, &
+          IHPOther, IHPTotal, ILPCanada, ILPNorthEurope, ILPSouthEurope, &
+          ILPOPEC, ILPOPAmericas, ILPOPNoAfrica, ILPOPWestAfrica, &
+          ILPOPIndonesia, ILPOPPersianGulf, ILPCaribbean, ILPAsia, &
+          ILPOther, ILPTotal, START_PRICE
+
+      REAL EQ_ITOUT(MNUMYR*(2 + 57 + 18) + &  ! IT_WOP and REPORT and REPORT2
+                     MNUMYR + &               ! SPR_Fill
+                     MNUMYR * 9 * 2 + &       ! CRUDEPOINTS
+             2 * CRSTEP*MNXYR + &             ! P_ and Q_Total_Crude 
+             2 * MNCRUD*Max_Crude_Source*CISTEP*MNXYR + &                  ! P_ and Q_Foreign_Crude
+             2 * MNCRUD*Max_Crude_Source*Max_NonUS_Demand_Steps*MNXYR + &  ! P_ and Q_Non_US_Demand
+             2 * MCSTEP*MNXYR*MNPROD + &    ! P_ and Q_C_MC_Demand
+             2 * EUSTEP*MNXYR + &           ! P_ and Q_Europe_Gas
+             2 * MNPROD*REFREG*MNXYR + &    ! Q_Import_Product and Q_Export_Product
+             2 * MNPROD*INTLREG*INTLSTEP*MNXYR + &     ! Product_Import_Q and Product_Import_P
+             2 * MNPROD*INTLREG*INTLSTEP*MNXYR + &     ! Product_Export_Q and Product_Export_P
+                     MNUMYR + &               ! WTI_PRICE
+                     MNUMYR + &               ! BRENT_PRICE
+                     MNUMYR + &               ! START_PRICE
+                     MNUMYR * 40 + &          ! variables for Table 101
+                          0)
+      EQUIVALENCE(EQ_ITOUT,IT_WOP)

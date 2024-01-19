@@ -1,0 +1,27 @@
+   Function: Display aggregation of rows in submatrix
+   Syntax:   AGGREGAT [{ROW | COL} [conditional]]
+
+   If ROW | COL is absent, current setting of switch DISP_COL is used.
+   If conditional is absent, current submatrix is used.
+
+   Aggregation weights are the resident dual variables.  This is
+   useful if the LP is infeasible and the dual prices are optimal
+   (unscaled) Phase 1 prices.  In that case, the aggregation of all
+   rows is a single infeasible constraint.
+
+   If rows are aggregated, columns with nonzero aggregate coefficients
+   are put into the submatrix;  and, columns with zero aggregate
+   coefficients are excluded from the submatrix.  (A similar result
+   occurs for column aggregation.)  See AGGREGAT.DOC (and primer) for
+   more information.
+
+   Examples:
+
+   AGGREGAT R *
+   ...Aggregates all rows
+
+   AGG R
+   ...Aggregates rows in the submatrix
+
+   AGG C * X GT L
+   ...Aggregates columns whose level is greater than its lower bound

@@ -1,0 +1,47 @@
+    Function: Set, clear or list strings
+    Syntax:   STRING [{name [=] [value]
+                      |INCREMENT name }]
+
+    No setting will list strings.  No value will erase string.
+    The INCREMENT specification (not abbreviated) will increment
+    the last character of the value of the string (name).  The
+    last value must be a digit (0,...,9) or a letter (A,...,Z).
+    The successor of 9 is A, and the incrementation wraps around
+    (i.e., the successor of Z is 0).
+
+    Examples:
+
+    STRING SC = SCREEN W=80 L=22
+    ...this sets the string named SC Then, 'SC will set screen the same
+       as SCREEN W=80 L=22
+
+    STRING
+    ...this asks to list the strings...output is:
+    String delimeter is '
+      1 string(s)
+    SC       =SCREEN W=80 L=22
+
+    STRING SC
+    ...this erases string SC
+
+    STRING *
+    ...this erases all strings
+
+    STRING PREF=ABC.
+    OUTPUT 'PREF' 5
+    ...sets output file to ABC.5
+    _KEYWORD SET 'PREF 5
+    ...executes _KEYWORD SET ABC. 5
+    The difference in the above string substitutions is the presence
+    of the string delimeter after the string name (PREF).  In the
+    case of the OUTPUT command, the appearance of the second string
+    delimeter (') forces no spaces after the substitution of PREF, so
+    the equivalent command is OUTPUT ABC.5, whereas the absence of a
+    second string delimeter keeps the blank between ABC. and 5.
+
+    Suppose the string N has been set to 0.  Then,
+    STRING INCREMENT N
+    ...resets string (N) to be 1.
+
+    ...the 5th such specification resets N to 5, and the 10th such
+       specification resets N to A.

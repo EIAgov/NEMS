@@ -1,0 +1,37 @@
+     Function: Change bound to equal the nearest integer of level and
+               render current non-integer solution infeasible
+     Syntax:   ROUND [conditional]
+
+     If conditional is absent, current submatrix columns are rounded.
+
+     If X is integer, there is no change.  Else, X is first rounded to
+     its nearest integer value, say RX.  Then, either the lower or upper
+     bound is changed to equal RX, whichever makes X infeasible.  Here
+     are some examples of how the bounds change (the column remains basic,
+     but the basis has become corrupted...use BASIS REFRESH DUAL):
+
+        Before Rounding   After Rounding
+         L    X    U       L    X    U
+        ==============    ==============
+         0    .4   1       0    .4   0
+         0    .6   1       1    .6   1
+         0    .4   2       0    .4   0
+         0    .9   2       1    .9   2
+         0   1.1   2       0   1.1   1
+         0   1.7   2       2   1.7   2
+         2   5.1   9       2   5.1   5
+         2   5.9   9       6   5.9   9
+         2   8.1   9       2   8.1   8
+        ==============    ==============
+                          Note X has become infeasible.
+
+     Original bounds are over-written, as with the FIX command.  If there
+     is no BOUNDSET (ie, all columns are 0 to infinity), ROUND is named.
+
+     Examples:
+
+     ROUND
+     ...Round all submatrix column levels.
+
+     ROUND X
+     ...Round all columns whose name begins with X.

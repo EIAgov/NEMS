@@ -1,0 +1,10 @@
+* This pictures forest by time periods, starting at '1
+* Other strings (2-9) are for column conditionals
+_PAUSE HERE IS TIME PERIOD '1
+SUB ROW B**'1
+SUB A R D'1
+SUB A R W**'1
+SUB COL ***'1 '2 '3 '4 '5 '6 '7 '8 '9
+PIC
+STRING INCREMENT 1
+RETURN Q

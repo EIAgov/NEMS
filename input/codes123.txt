@@ -1,0 +1,47 @@
+  0 BOF       Beginning of File
+  1 EOF       End of File
+  2 CALCMODE  Calculation Mode
+  3 CALCORDER Calculation Order
+  4 SPLIT     Split Window Mode
+  5 SYNC      Split Window Sync
+  6 DIMENSION Worksheet Dimensions
+  7 WINDOW1   Window 1
+  8 COLW1     Column Width, Window 1
+  9 WINDOW2   Window 2
+ 10 COLW2     Wolumn Width, Window 2
+ 11 UNKNOWN
+ 12 BLANK     Blank Cell
+ 13 INTEGER   Integer Cell
+ 14 NUMBER    Number Cell
+ 15 LABEL     Label Cell
+ 16 FORMULA   Formula Cell
+ 24 TABLE     Table Range
+ 25 QRANGE    Query Range
+ 26 PRANGE    Print Range
+ 27 SRANGE    Sort Range
+ 28 FRANGE    Fill Range
+ 29 KRANGE1   Sort Key Range, Primary
+ 32 DRANGE    Distribution Range
+ 35 KRANGE2   Sort Key Range, Secondary
+ 36 PROTECT   Global Protection
+ 37 FOOTER    Print Footer
+ 38 HEADER    Print Header
+ 39 SETUP     Print Setup
+ 40 MARGINS   Print Margins
+ 41 LABELFMT  Global Label Alignment
+ 42 TITLES    Print Borders
+ 45 GRAPH     123 Graph Settings
+ 46 NGRAPH    123 Named Graph Settings
+ 47 CALCCOUNT Iteration Count
+ 48 FORMAT    Print Format Mode
+ 49 CURSORW12 Cursor in Window 1 or 2
+ 51 STRING    Formula String
+ 71 SNRANGE   Symphony Named Range
+ 75 WKSPASS   Worksheet Password
+100 HIDCOL1   Hidden Columns, Screen  1
+101 HIDCOL2   Hidden Columns, Screen  2
+102 PARSE     Parse Ranges
+103 RRANGES   Linear Regression Range
+104 UNKNOWN
+105 MRANGES   Matrix Math Ranges
+150 CPI       Cell Pointer Index

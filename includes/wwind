@@ -1,0 +1,478 @@
+!  $Header: m:/default/includes/RCS/wwind,v 1.19 2017/08/30 18:44:38 LC2 Exp $
+! *****************************************************************
+!  COMMON WWIND
+!
+!  COMMON INCLUDES THE VARIABLE LAND AREA USED FOR THE WIND SUBMODULE
+! -----------------------------------------------------------------
+      Integer MNUMBF
+      Parameter(MNUMBF=3)
+
+!     WES ARRAY PARAMETERS
+
+      INTEGER CONTYR    ! YEARS NEMS DOES NOT OPERATE CONTINUOUSLY
+
+!     CRN - Appears to be number of input periods in WESTECH beyond NEMS max year
+!     CRN - that is, WESTECH goes to 2030, if max year=2020, CONTYR=2, if max year=2025, CONTYR=1
+
+      PARAMETER (CONTYR=1)
+      INTEGER EXNR    ! TOTAL NUMBER OF NERC REGIONS PLUS ONE
+      INTEGER EXCL    ! TOTAL NUMBER OF WIND CLASSES PLUS ONE
+      INTEGER CRYR    ! TOTAL YEARS FOR CAPACITY CREDIT INPUT ARRAY
+      INTEGER CFYR    ! TOTAL YEARS FOR CAPACITY FACTOR INPUT ARRAY
+      INTEGER ARYR    ! TOTAL YEARS FOR ENERGY PER AREA INPUT ARRAY
+      INTEGER CCYR    ! TOTAL YEARS FOR CAPITAL COST INPUT ARRAY
+      INTEGER OMVYR   ! TOTAL YEARS FOR VARIABLE O&M INPUT ARRAY
+      INTEGER OMFYR   ! TOTAL YEARSFOR FIXED O&M INPUT ARRAY
+      INTEGER EXYR    !TOTAL YEARS FOR PRE-EXISTING CAPACITY ARRAY
+      PARAMETER (EXNR=26, EXCL=4, CRYR=14, CFYR=14, ARYR=14, CCYR=14, &
+                 OMVYR=14, OMFYR=14, EXYR=5)
+      INTEGER OVERRIDECF !Switch to use cap factor learning instead of forced CF
+      REAL CFULT(MNUMCL)!The ultimate capacity factor acheivable in each wind class
+      REAL CFULT_WL(MNUMCL)!The ultimate capacity factor acheivable in each wind class
+      REAL CFATX      ! Known capacity factor for Class 6 wind
+      REAL FIXEDX     ! The U.S. wind capacity at which CFATX applied (GW)
+      REAL WL_FIXEDX  ! The U.S. wind capacity at which CFATX applied (GW) for low speed wind technology
+      REAL PWRDEN     ! Power density of a hypothetical wind turbine 10Dx5D (MW/sq. km)
+
+      REAL SUBPER(MNUMNR,MNUMWI)  ! SUBPERIOD ENERGY % (DECIMAL)
+      REAL SLICE(MNUMNR,MNUMWI)  ! SUBPERIOD HOUR % (DECIMAL)
+      REAL CFANN(CFYR,EXCL)  ! ANNUAL WIND CAPACITY FACTOR (DECIMAL)
+      REAL CFANN_WL(CFYR,EXCL)  ! ANNUAL WIND CAPACITY FACTOR (DECIMAL)
+      REAL CFANN_SO(CFYR,EXCL)  ! ANNUAL WIND CAPACITY FACTOR (DECIMAL)
+      REAL ENAREA(ARYR,EXCL)  ! ENERGY/SWEPT ROTOR AREA (KWH/SQM-YR)
+      REAL EXWIND(MNUMNR,EXYR)  ! EXISTING WIND INSTALLATIONS (MW)
+
+      REAL WISMTH  ! Smoothing constant: wca==wca*x+(1-x)*uadd
+
+      REAL AREA(MNUMYR,MNUMCL)
+      REAL CF(MNUMYR+ECP_D_FPH,MNUMCL)
+      REAL CF_WL(MNUMYR+ECP_D_FPH,MNUMCL)
+      REAL CF_SO(MNUMYR+ECP_D_FPH,MNUMSL)
+      REAL CF_PV(MNUMYR+ECP_D_FPH,MNUMSL)
+      REAL CF_PT(MNUMYR+ECP_D_FPH,MNUMSL)
+      REAL LDAREA(MNUMNR,MNUMYR,MNUMCL,MNUMBF)
+      REAL LDAREAC(MNUMNR,MNUMYR,MNUMCL)
+      REAL WNCumbld(MNUMNR,MNUMYR)
+      REAL WNTDBFCS(MNUMNR,MNUMBF)
+      REAL WWICAP(MNUMNR,MNUMYR+10)       ! user defined cap. constr. [MW]
+                                          ! over on-line horizont of MNUMYR+10
+                                          ! to capture decision year MNUMYR
+      REAL LTMult(mnumnr,mnumyr)          ! preserve LT multiplier for report at end of run
+      REAL LTMult_WL(mnumnr,mnumyr)       ! preserve LT multiplier for report at end of run
+      REAL LTMult_SO(mnumnr,mnumyr)       ! preserve LT multiplier for report at end of run
+      REAL LTMult_PV(mnumnr,mnumyr)       ! preserve LT multiplier for report at end of run
+      REAL LTMult_PT(mnumnr,mnumyr)       ! preserve LT multiplier for report at end of run
+      REAL CTURNDOWN(MNUMNR)   !Min turndown fraction for regional coal plant
+      REAL NTURNDOWN(MNUMNR)   !Min turndown fraction for regional coal plant
+      REAL INTSTDDV(MNUMNR,ECP_D_INT) !standard deviation for single intermit. plant output
+      REAL INTSTDDV_WL(MNUMNR,ECP_D_INT) !standard deviation for single intermit. plant output
+      REAL INTREGCRL(MNUMNR,ECP_D_INT) !output correlation coef. for intermit. plants in region
+      REAL INTREGCRL_WL(MNUMNR,ECP_D_INT) !output correlation coef. for intermit. plants in region
+      REAL*8  WindInputCF(mnumnr,mnumyr)    ! avg annual CF for wind calculated from input file
+      REAL*8  WindInputCF_WL(mnumnr,mnumyr)    ! avg annual CF for wind calculated from input file - Low Wind Speed
+      REAL*8  SolarInputCF(mnumnr,mnumyr)    ! avg annual CF for solar calculated from input file     
+      REAL*8  PVInputCF(mnumnr,mnumyr)    ! avg annual CF for solar calculated from input file      
+      REAL*8  PTInputCF(mnumnr,mnumyr)    ! avg annual CF for solar calculated from input file      
+      
+      LOGICAL INITRES(MNUMNR)   ! indicates initial resources in region
+
+      COMMON/WWIND/WindInputCF, WindInputCF_WL, SolarINputCF,PVINputCF,PTINputCF, SUBPER, SLICE, CFANN, CFANN_WL, ENAREA, EXWIND, WISMTH,  OVERRIDECF, &
+                   CFULT, CFULT_WL, CFATX, FIXEDX, WL_FIXEDX, PWRDEN, CFANN_SO, &
+                   AREA, CF, CF_WL, CF_SO, CF_PV, CF_PT, LDAREA, LDAREAC, WNCumbld, WNTDBFCS, INITRES, WWICAP, &
+                   LTMULT, CTURNDOWN, NTURNDOWN, INTSTDDV, INTSTDDV_WL, INTREGCRL, INTREGCRL_WL, LTMULT_WL, LTMULT_SO, LTMULT_PV, LTMULT_PT
+
+      INTEGER WCURCL(MNUMNR,MNUMYR)
+      INTEGER WCURBF(MNUMNR,MNUMYR)
+      INTEGER WCURCL_WL(MNUMNR,MNUMYR)
+      INTEGER WCURCL_SO(MNUMNR,MNUMYR)
+      INTEGER WCURCL_PV(MNUMNR,MNUMYR)
+      INTEGER WCURCL_PT(MNUMNR,MNUMYR)
+      INTEGER WCURBF_WL(MNUMNR,MNUMYR)
+      INTEGER WCURBF_SO(MNUMNR,MNUMYR)
+      INTEGER WCURBF_PV(MNUMNR,MNUMYR)
+      INTEGER WCURBF_PT(MNUMNR,MNUMYR)
+      COMMON /WWIN2/WCURCL, WCURBF, WCURCL_WL, WCURCL_SO, WCURCL_PV, WCURCL_PT, WCURBF_WL, WCURBF_SO, WCURBF_PV, WCURBF_PT
+
+      REAL*4 WCapMax(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 WCapMax_SO(mnumnr,mnumyr,mnumsl) 
+      REAL*4 WCapInc(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 WCapInc_WL(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 WCapInc_SO(mnumnr,mnumyr,mnumsl)
+      REAL*4 WCapInc_PV(mnumnr,mnumyr,mnumsl)
+      REAL*4 WCapInc_PT(mnumnr,mnumyr,mnumsl)
+      REAL*4 WCapAvl(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 WCapAvl_SO(mnumnr,mnumyr,mnumsl)  
+      REAL*4 WCapCum(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 WCapCum_WL(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 WCapCum_SO(mnumnr,mnumyr,mnumsl)
+      REAL*4 WCapCum_PV(mnumnr,mnumyr,mnumsl)
+      REAL*4 WCapCum_PT(mnumnr,mnumyr,mnumsl)
+      REAL*4 ICapInc(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 ICapInc_WL(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 ICapInc_SO(mnumnr,mnumyr,mnumsl)
+      REAL*4 ICapInc_PV(mnumnr,mnumyr,mnumsl)
+      REAL*4 ICapInc_PT(mnumnr,mnumyr,mnumsl)
+      REAL*4 ICapAvl(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 ICapAvl_SO(mnumnr,mnumyr,mnumsl)   
+      REAL*4 ICapCum(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 ICapCum_WL(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 ICapCum_SO(mnumnr,mnumyr,mnumsl)
+      REAL*4 ICapCum_PV(mnumnr,mnumyr,mnumsl)
+      REAL*4 ICapCum_PT(mnumnr,mnumyr,mnumsl)
+
+      COMMON/WWind1/WCapMax, WCapMax_SO, WCapInc, WCapInc_WL, WCapInc_SO, WCapInc_PV, WCapInc_PT, WCapAvl, WCapAvl_SO, WCapCum, WCapCum_WL, &
+           WCapCum_SO,WCapCum_PV,WCapCum_PT, ICapInc, ICapInc_WL, ICapInc_SO, ICapInc_PV, ICapInc_PT, ICapAvl, & 
+           ICapAvl_SO,ICapCum, ICapCum_WL, ICapCum_SO, ICapCum_PV, ICapCum_PT
+
+      INTEGER Rwc(mnumnr,25,mnumyr)
+      INTEGER Rbf(mnumnr,25,mnumyr)
+      INTEGER RNum
+      INTEGER Rank(mnumnr,mnumcl,mnumbf)
+      INTEGER Rwc_WL(mnumnr,25,mnumyr)
+      INTEGER Rwc_SO(mnumnr,25,mnumyr)
+      INTEGER Rwc_PV(mnumnr,25,mnumyr)
+      INTEGER Rwc_PT(mnumnr,25,mnumyr)
+      INTEGER Rbf_WL(mnumnr,25,mnumyr)
+      INTEGER Rbf_SO(mnumnr,25,mnumyr)
+      INTEGER RNum_WL
+      INTEGER RNum_SO
+      INTEGER RNum_PV
+      INTEGER RNum_PT
+      INTEGER Rank_WL(mnumnr,mnumcl,mnumbf)
+      INTEGER Rank_SO(mnumnr,mnumsl)
+      INTEGER Rank_PV(mnumnr,mnumsl)
+      INTEGER Rank_PT(mnumnr,mnumsl)
+
+      common/WWind2/Rwc, Rbf, RNum, Rank, Rwc_WL, Rwc_SO, Rwc_PV, Rwc_PT, Rbf_WL, Rbf_SO, RNum_WL, RNum_SO,RNum_PV,RNum_PT, Rank_WL, Rank_SO, Rank_PV, Rank_PT
+
+      REAL*4 CapInstall(mnumnr,mnumyr)
+      REAL*4 CapInstall_WL(mnumnr,mnumyr)
+      REAL*4 CapInstall_SO(mnumnr,mnumyr)
+      REAL*4 CapInstall_PV(mnumnr,mnumyr)
+      REAL*4 CapInstall_PT(mnumnr,mnumyr)
+      REAL*4 CapAdded(mnumnr,mnumyr)
+      REAL*4 CapAdded_WL(mnumnr,mnumyr)
+      REAL*4 CapAdded_SO(mnumnr,mnumyr)
+      REAL*4 CapAdded_PV(mnumnr,mnumyr)
+      REAL*4 CapAdded_PT(mnumnr,mnumyr)
+      REAL*4 CapCommit(mnumnr,mnumyr)
+      REAL*4 CapCommit_WL(mnumnr,mnumyr)
+      REAL*4 CapCommit_SO(mnumnr,mnumyr)
+      REAL*4 CapCommit_PV(mnumnr,mnumyr)
+      REAL*4 CapCommit_PT(mnumnr,mnumyr)
+      REAL*4 CapPComit(mnumnr,mnumyr)
+      REAL*4 CapChange(mnumnr,mnumyr)
+      REAL*4 CapOrig(mnumnr,mnumyr)
+      REAL*4 CapOrig_SO(mnumnr,mnumyr) 
+      REAL*4 CapOrig_PV(mnumnr,mnumyr) 
+      REAL*4 CapOrig_PT(mnumnr,mnumyr) 
+      REAL*4 CapIncr(mnumnr,mnumyr)
+      REAL*4 CapIncr_WL(mnumnr,mnumyr)
+      REAL*4 CapIncr_SO(mnumnr,mnumyr)
+      REAL*4 CapIncr_PV(mnumnr,mnumyr)
+      REAL*4 CapIncr_PT(mnumnr,mnumyr)
+      REAL*4 CapAvail(mnumnr,mnumyr)
+      REAL*4 CapAvail_SO(mnumnr,mnumyr)      
+      REAL*4 CapCumTot(mnumnr,mnumyr)  ! cumulative wind capacity across mnumcl (wind class) and mnumbf
+      REAL*4 CapCum_WL(mnumnr,mnumyr)
+      REAL*4 CapCum_SO(mnumnr,mnumyr)
+      REAL*4 CapCum_PV(mnumnr,mnumyr)
+      REAL*4 CapCum_PT(mnumnr,mnumyr)
+      REAL*4 CapNewBld(mnumnr,mnumyr)
+      REAL*4 CapNewBld_WL(mnumnr,mnumyr)
+      REAL*4 CapNewBld_SO(mnumnr,mnumyr)
+      REAL*4 CapNewBld_PV(mnumnr,mnumyr)
+      REAL*4 CapNewBld_PT(mnumnr,mnumyr)
+      REAL*4 CapPlnBld(mnumnr,mnumyr)
+      REAL*4 CapPlnBld_WL(mnumnr,mnumyr)
+      REAL*4 CapPlnBld_SO(mnumnr,mnumyr)
+      REAL*4 CapPlnBld_PV(mnumnr,mnumyr)
+      REAL*4 CapPlnBld_PT(mnumnr,mnumyr)
+      REAL*4 CapCmtTot(mnumnr,mnumyr)
+      REAL*4 CapCmtTot_WL(mnumnr,mnumyr)
+      REAL*4 CapCmtTot_SO(mnumnr,mnumyr)
+      REAL*4 CapCmtTot_PV(mnumnr,mnumyr)
+      REAL*4 CapCmtTot_PT(mnumnr,mnumyr)
+      REAL*4 CapIandC(mnumnr,mnumyr)
+      REAL*4 CapIandC_WL(mnumnr,mnumyr)
+      REAL*4 CapIandC_SO(mnumnr,mnumyr)
+      REAL*4 CapIandC_PV(mnumnr,mnumyr)
+      REAL*4 CapIandC_PT(mnumnr,mnumyr)
+
+      COMMON/WWind3/CapInstall, CapInstall_WL, CapInstall_SO, CapInstall_PV, CapInstall_PT, CapAdded, CapAdded_WL, CapAdded_SO, CapAdded_PV, CapAdded_PT, &
+         CapCommit, CapCommit_WL, CapCommit_SO, CapCommit_PV, CapCommit_PT, CapPComit, CapChange, CapOrig, CapOrig_SO, CapOrig_PV, CapOrig_PT,            &
+         CapIncr, CapIncr_WL, CapIncr_SO, CapIncr_PV, CapIncr_PT, CapAvail, CapAvail_SO, CapCumTot, CapCum_WL, CapCum_SO, CapCum_PV, CapCum_PT, &
+         CapNewBld, CapNewBld_WL, CapNewBld_SO, CapNewBld_PV, CapNewBld_PT, CapPlnBld, CapPlnBld_WL, CapPlnBld_SO, CapPlnBld_PV, CapPlnBld_PT, &
+         CapCmtTot, CapIandC, CapCmtTot_WL, CapCmtTot_SO, CapCmtTot_PV, CapCmtTot_PT, CapIandC_WL, CapIandC_SO, CapIandC_PV, CapIandC_PT
+
+      INTEGER NLead
+      INTEGER NLead_WL
+      INTEGER NLead_SO
+      INTEGER NLead_PV
+      INTEGER NLead_PT
+      REAL*4 STElas(msptmx)
+      REAL*4 STElas_WL(msptmx)
+      REAL*4 STElas_SO(msptmx)
+      REAL*4 LTElas(mnumnr)
+      REAL*4 LTElas_WL(mnumnr)
+      REAL*4 LTElas_SO(mnumnr)
+      REAL*4 LTElas_PV(mnumnr)
+      REAL*4 LTElas_PT(mnumnr)
+      REAL*4 PercentTOL
+      REAL*4 SuppCapMin
+
+      COMMON/WWind4/NLead, NLead_WL, NLead_SO, NLead_PV, NLead_PT, STElas, STElas_WL, STElas_SO, LTElas, LTElas_WL,LTElas_SO,LTElas_PV,LTElas_PT, PercentTOL, SuppCapMin
+
+      REAL*4 SCapAvl(mnumnr,mnumcl,mnumbf)
+      REAL*4 SCapAvl_SO(mnumnr,mnumsl)      
+      REAL*4 SCapInc(msptmx,mnumnr,mnumcl,mnumbf)
+      REAL*4 SCapInc_WL(msptmx,mnumnr,mnumcl,mnumbf)
+      REAL*4 SCapInc_SO(msptmx,mnumnr,mnumsl)
+      REAL*4 SCapInc_PV(msptmx,mnumnr,mnumsl)
+      REAL*4 SCapInc_PT(msptmx,mnumnr,mnumsl)
+      REAL*4 UTCACA(msptmx)
+      REAL*4 UTCACA_WL(msptmx)
+      REAL*4 UTCACA_SO(msptmx)
+      REAL*4 UTCACA_PV(msptmx)
+      REAL*4 UTCACA_PT(msptmx)
+      REAL*4 UTCACS(msptmx)
+      REAL*4 UTCACS_WL(msptmx)
+      REAL*4 UTCACS_SO(msptmx)
+      REAL*4 UTCACS_PV(msptmx)
+      REAL*4 UTCACS_PT(msptmx)
+
+      COMMON/WWind5/SCapAvl,SCapAvl_SO, SCapInc, SCapInc_WL, SCapInc_SO, SCapInc_PV, SCapInc_PT, UTCACA, UTCACA_WL, UTCACA_SO, UTCACA_PV, UTCACA_PT, UTCACS, UTCACS_WL, UTCACS_SO, UTCACS_PV, UTCACS_PT
+
+      REAL*4 AnnCost(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 AnnCost_WL(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 AnnCost_SO(mnumnr,mnumyr,mnumsl)
+      REAL*4 AnnCost_PV(mnumnr,mnumyr,mnumsl)
+      REAL*4 AnnCost_PT(mnumnr,mnumyr,mnumsl)
+      REAL*4 FixChg,CapCostR(mnumnr)
+      REAL*4 FixChg_SO
+      REAL*4 FixChg_PV
+      REAL*4 FixChg_PT
+      REAL*4 CapCostR_WL(mnumnr)
+      REAL*4 CapCostR_SO(mnumnr)
+      REAL*4 CapCostR_PV(mnumnr)
+      REAL*4 CapCostR_PT(mnumnr)
+      REAL*4 OMVCost,OMVCost_WL
+      REAL*4 OMFCost,OMFCost_WL
+      REAL*4 OMVCost_SO
+      REAL*4 OMFCost_SO
+      REAL*4 OMVCost_PV
+      REAL*4 OMFCost_PV
+      REAL*4 OMVCost_PT
+      REAL*4 OMFCost_PT
+      COMMON/WWind6/AnnCost, AnnCost_WL,AnnCost_SO,AnnCost_PV,AnnCost_PT, FixChg, FixChg_PV, FixChg_PT, CapCostR, FixChg_SO, CapCostR_SO, CapCostR_PV, CapCostR_PT, CapCostR_WL, OMVCost, OMVCost_WL, &
+         OMFCost, OMFCost_WL, OMVCost_SO, OMFCost_SO, OMVCost_PV, OMFCost_PV, OMVCost_PT, OMFCost_PT
+
+      INTEGER ICCMeth(mnumyr+5)
+      REAL*4 ICCMult(mnumcl,mnumyr+5)
+      REAL*4 ICCMult_SO(mnumsl,mnumyr+5)  
+      REAL*4 ICCMult_PV(mnumsl,mnumyr+5)      
+      REAL*4 ICCMult_PT(mnumsl,mnumyr+5)            
+      REAL*4 ICCCost(mnumcl,mnumyr+5)
+      REAL*4 ICCCost_SO(mnumsl,mnumyr+5)
+      REAL*4 ICCCost_PV(mnumsl,mnumyr+5)
+      REAL*4 ICCCost_PT(mnumsl,mnumyr+5)
+      REAL*4 ICCMultR(mnumnr,mnumcl,mnumyr+5)
+      REAL*4 ICCMultR_SO(mnumnr,mnumsl,mnumyr+5) 
+      REAL*4 ICCMultR_PV(mnumnr,mnumsl,mnumyr+5) 
+      REAL*4 ICCMultR_PT(mnumnr,mnumsl,mnumyr+5) 
+      REAL*4 ICCCostR(mnumnr,mnumcl,mnumyr+5)
+      INTEGER ICCMeth_WL(mnumyr+5)
+      INTEGER ICCMeth_SO(mnumyr+5)
+      INTEGER ICCMeth_PV(mnumyr+5)
+      INTEGER ICCMeth_PT(mnumyr+5)
+      REAL*4 ICCMult_WL(mnumcl,mnumyr+5)
+      REAL*4 ICCCost_WL(mnumcl,mnumyr+5)
+      REAL*4 ICCMultR_WL(mnumnr,mnumcl,mnumyr+5)
+      REAL*4 ICCCostR_WL(mnumnr,mnumcl,mnumyr+5)
+      REAL*4 ICCCostR_SO(mnumnr,mnumsl,mnumyr+5)
+      REAL*4 ICCCostR_PV(mnumnr,mnumsl,mnumyr+5)
+      REAL*4 ICCCostR_PT(mnumnr,mnumsl,mnumyr+5)
+
+      COMMON/WWind7/ICCMeth, ICCMult, ICCMult_SO, ICCMult_PV,ICCMult_PT,ICCCost, ICCCost_SO, ICCCost_PV,ICCCost_PT,ICCMultR, ICCMultR_SO, ICCMultR_PV, ICCMultR_PT,ICCCostR, ICCMeth_WL, ICCMeth_SO, ICCMeth_PV, ICCMeth_PT, &
+          ICCMult_WL, ICCCost_WL, ICCMultR_WL, ICCCostR_WL, ICCCostR_SO, ICCCostR_PV, ICCCostR_PT
+
+      INTEGER XSwitch
+      REAL*4 XCapCum(mnumnr,mnumcl)
+      REAL*4 XCapCum_SO(mnumnr,mnumsl)      
+      REAL*4 XCapMax(mnumnr,mnumcl)
+      REAL*4 XCapMax_SO(mnumnr,mnumsl)      
+      REAL*4 XRatio(mnumnr,mnumcl)
+      REAL*4 XRatio_SO(mnumnr,mnumsl)  
+      REAL*4 XRatio_PV(mnumnr,mnumsl) 
+      REAL*4 XRatio_PT(mnumnr,mnumsl) 
+      REAL*4 XLTElas(mnumnr,mnumcl)
+      REAL*4 XLTElas_WL(mnumnr,mnumcl)
+      REAL*4 XLTElas_SO(mnumnr,mnumsl)
+      REAL*4 XLTElas_PV(mnumnr,mnumsl)
+      REAL*4 XLTElas_PT(mnumnr,mnumsl)
+
+      COMMON/WWind8/XSwitch, XCapCum, XCapCum_SO,XCapMax, XCapMax_SO, XRatio, XRatio_SO, XRatio_PV, XRatio_PT, XLTElas, XLTElas_WL, XLTElas_SO, XLTElas_PV, XLTElas_PT
+
+      REAL*4 ConsTol(mnumnr)
+      REAL*4 ConsTol_WL(mnumnr)
+      REAL*4 ConsTol_SO(mnumnr)
+      REAL*4 ConsTol_PV(mnumnr)
+      REAL*4 ConsTol_PT(mnumnr)
+      REAL*4 ConsCap(mnumnr)
+      REAL*4 ConsCap_WL(mnumnr)
+      REAL*4 ConsCap_SO(mnumnr)
+      REAL*4 ConsCap_PV(mnumnr)
+      REAL*4 ConsCap_PT(mnumnr)
+      REAL*4 ConsLT(mnumnr)
+      REAL*4 ConsLT_WL(mnumnr)
+      REAL*4 ConsLT_SO(mnumnr)
+      REAL*4 ConsLT_PV(mnumnr)
+      REAL*4 ConsLT_PT(mnumnr)
+      REAL*4 ConsCC(mnumnr)
+      REAL*4 ConsCC_WL(mnumnr)
+      REAL*4 ConsCC_SO(mnumnr)
+      REAL*4 ConsCC_PV(mnumnr)
+      REAL*4 ConsCC_PT(mnumnr)
+      REAL*4 ConsCF(mnumnr)
+      REAL*4 ConsCF_WL(mnumnr)
+      REAL*4 ConsCF_SO(mnumnr)
+      REAL*4 ConsCF_PV(mnumnr)
+      REAL*4 ConsCF_PT(mnumnr)
+      REAL*4 ConsTD(mnumnr)
+      REAL*4 ConsTD_WL(mnumnr)
+      REAL*4 ConsTD_SO(mnumnr)
+      REAL*4 ConsTD_PV(mnumnr)
+      REAL*4 ConsTD_PT(mnumnr)
+
+      INTEGER ConsNum(mnumnr)
+      INTEGER ConsNum_WL(mnumnr)
+      INTEGER ConsNum_SO(mnumnr)
+      INTEGER ConsNum_PV(mnumnr)
+      INTEGER ConsNum_PT(mnumnr)
+
+      COMMON/WWind9/ConsTol, ConsTol_WL, ConsTol_SO, ConsTol_PV, ConsTol_PT, ConsCap, ConsCap_WL, ConsCap_SO, ConsCap_PV, ConsCap_PT, ConsLT, ConsLT_WL, ConsLT_SO, ConsLT_PV, ConsLT_PT, ConsCC, ConsCC_WL, &
+         ConsCC_SO, ConsCC_PV, ConsCC_PT, ConsCF, ConsCF_WL, ConsCF_SO, ConsCF_PV, ConsCF_PT, ConsTD, ConsTD_WL, ConsTD_SO, ConsTD_PV, ConsTD_PT, ConsNum, ConsNum_WL,ConsNum_SO,ConsNum_PV,ConsNum_PT
+
+!     OFFSHORE WIND 
+
+      INTEGER FOVERRIDECF !Switch to use cap factor learning instead of forced CF
+      REAL FCFULT(MNUMCL)!The ultimate capacity factor acheivable in each wind class
+      REAL FCFATX      ! Known capacity factor for Class 6 wind
+      REAL FFIXEDX     ! The U.S. wind capacity at which CFATX applied (GW)
+      REAL FPWRDEN     ! Power density of a hypothetical wind turbine 10Dx5D (MW/sq. km)
+      REAL FSUBPER(MNUMNR,MNUMWI)  ! SUBPERIOD ENERGY % (DECIMAL)
+      REAL FSLICE(MNUMNR,MNUMWI)  ! SUBPERIOD HOUR % (DECIMAL)
+      REAL FCFANN(CFYR,EXCL)  ! ANNUAL WIND CAPACITY FACTOR (DECIMAL)
+      REAL FENAREA(ARYR,EXCL)  ! ENERGY/SWEPT ROTOR AREA (KWH/SQM-YR)
+      REAL FEXWIND(MNUMNR,EXYR)  ! EXISTING WIND INSTALLATIONS (MW)
+
+      REAL FWISMTH  ! Smoothing constant: wca==wca*x+(1-x)*uadd
+
+      REAL FAREA(MNUMYR,MNUMCL), FCF(MNUMYR+ECP_D_FPH,MNUMCL)
+      REAL FLDAREA(MNUMNR,MNUMYR,MNUMCL,MNUMBF)
+      REAL FLDAREAC(MNUMNR,MNUMYR,MNUMCL)
+      REAL FWNCumbld(MNUMNR,MNUMYR)
+      REAL FWNTDBFCS(MNUMNR,MNUMBF)
+      REAL WWFCAP(MNUMNR,MNUMYR+10)       ! user defined cap. constr. [MW]
+                                          ! over on-line horizont of MNUMYR+10
+                                          ! to capture decision year MNUMYR
+      REAL FLTMult(mnumnr,mnumyr)  ! preserve LT multiplier for report at end of run
+      REAL FCTURNDOWN(MNUMNR)   !Min turndown fraction for regional coal plant
+      REAL FNTURNDOWN(MNUMNR)   !Min turndown fraction for regional coal plant
+      REAL FINTSTDDV(MNUMNR,ECP_D_INT) !standard deviation for single intermit. plant output
+      REAL FINTREGCRL(MNUMNR,ECP_D_INT) !output correlation coef. for intermit. plants in region
+      REAL*8 FWindInputCF(mnumnr,mnumyr)    ! avg annual CF for OFS wind calculated from input file
+     
+      LOGICAL FINITRES(MNUMNR)   ! indicates initial resources in region
+
+
+      COMMON/OFSWIND/FWindInputCF,FSUBPER,FSLICE,FCFANN,FENAREA,FEXWIND,FWISMTH,FOVERRIDECF,&
+         FCFULT,FCFATX,FFIXEDX,FPWRDEN,&
+         FLTMULT,FCTURNDOWN,FNTURNDOWN,FINTSTDDV,FINTREGCRL, &
+         FAREA,FCF,FLDAREA,FLDAREAC,FWNCumbld,FWNTDBFCS,FINITRES,WWFCAP
+
+      INTEGER FWCURCL(MNUMNR,MNUMYR)
+      INTEGER FWCURBF(MNUMNR,MNUMYR)
+      COMMON /OFSWIN2/FWCURCL,FWCURBF
+
+      REAL*4 FWCapMax(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FWCapInc(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FWCapAvl(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FWCapCum(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FICapInc(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FICapAvl(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FICapCum(mnumnr,mnumyr,mnumcl,mnumbf)
+
+      COMMON/OFSWind1/FWCapMax, FWCapInc, FWCapAvl, FWCapCum, FICapInc, FICapAvl, FICapCum
+
+      INTEGER FRwc(mnumnr,25,mnumyr)
+      INTEGER FRbf(mnumnr,25,mnumyr)
+      INTEGER FRNum
+      INTEGER FRank(mnumnr,mnumcl,mnumbf)
+
+      COMMON/OFSWind2/FRwc, FRbf, FRNum, FRank
+
+      REAL*4 FCapInstall(mnumnr,mnumyr)
+      REAL*4 FCapAdded(mnumnr,mnumyr)
+      REAL*4 FCapCommit(mnumnr,mnumyr)
+      REAL*4 FCapPComit(mnumnr,mnumyr)
+      REAL*4 FCapChange(mnumnr,mnumyr)
+      REAL*4 FCapOrig(mnumnr,mnumyr)
+      REAL*4 FCapIncr(mnumnr,mnumyr)
+      REAL*4 FCapAvail(mnumnr,mnumyr)
+      REAL*4 FCapCum(mnumnr,mnumyr)
+      REAL*4 FCapNewBld(mnumnr,mnumyr)
+      REAL*4 FCapPlnBld(mnumnr,mnumyr)
+      REAL*4 FCapCmtTot(mnumnr,mnumyr)
+      REAL*4 FCapIandC(mnumnr,mnumyr)
+
+      COMMON/OFSWind3/FCapInstall, FCapAdded, FCapCommit, FCapPComit, FCapChange, FCapOrig, FCapIncr, FCapAvail, FCapCum, FCapNewBld, FCapPlnBld, FCapCmtTot, FCapIandC
+
+      INTEGER FNLead
+      REAL*4 FSTElas(msptmx)
+      REAL*4 FLTElas(mnumnr)
+      REAL*4 FPercentTOL
+      REAL*4 FSuppCapMin
+
+      COMMON/OFSWind4/FSTElas, FLTElas, FNLead, FPercentTOL, FSuppCapMin
+
+      REAL*4 FSCapAvl(mnumnr,mnumcl,mnumbf)
+      REAL*4 FSCapInc(msptmx,mnumnr,mnumcl,mnumbf)
+      REAL*4 FUTCACA(msptmx)
+      REAL*4 FUTCACS(msptmx)
+
+      COMMON/OFSWind5/FSCapAvl, FSCapInc, FUTCACA, FUTCACS
+
+      REAL*4 FAnnCost(mnumnr,mnumyr,mnumcl,mnumbf)
+      REAL*4 FFixChg
+      REAL*4 FCapCostR(mnumnr)
+      REAL*4 FOMVCost
+      REAL*4 FOMFCost
+
+      COMMON/OFSWind6/FAnnCost, FFixChg, FCapCostR, FOMVCost, FOMFCost
+
+      INTEGEr FICCMeth(mnumyr+5)
+      REAL*4 FICCMult(mnumcl,mnumbf,mnumyr+5)
+      REAL*4 FICCCost(mnumcl,mnumbf,mnumyr+5)
+      REAL*4 FICCMultR(mnumnr,mnumcl,mnumbf,mnumyr+5)
+      REAL*4 FICCCostR(mnumnr,mnumcl,mnumbf,mnumyr+5)
+
+      COMMON/OFSWind7/FICCMeth, FICCMult, FICCCost, FICCMultR, FICCCostR
+
+      INTEGER FXSwitch
+      REAL*4 FXCapCum(mnumnr,mnumcl)
+      REAL*4 FXCapMax(mnumnr,mnumcl)
+      REAL*4 FXRatio(mnumnr,mnumcl)
+      REAL*4 FXLTElas(mnumnr,mnumcl)
+
+      COMMON/OFSWind8/FXSwitch, FXCapCum, FXCapMax, FXRatio, FXLTElas
+
+      REAL*4 FConsTol(mnumnr)
+      REAL*4 FConsCap(mnumnr)
+      REAL*4 FConsLT(mnumnr)
+      REAL*4 FConsCC(mnumnr)
+      REAL*4 FConsCF(mnumnr)
+      REAL*4 FConsTD(mnumnr)
+      INTEGER FConsNum(mnumnr)
+
+      COMMON/OFSWind9/FConsTol, FConsCap, FConsLT, FConsCC, FConsCF, FConsTD, FConsNum

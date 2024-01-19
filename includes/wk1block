@@ -1,0 +1,35 @@
+! $Header: m:/default/includes/RCS/wk1block,v 1.14 2020/01/21 19:27:55 AKN Exp $
+! Common Data for the nemswk1.f routines.  Stores Data as read in by
+! subroutine readrng.  Data is accessed via routines GETRNGR and
+! GETRNGI. Unless you are changing nemswk1.f, don't use this
+! include directly--use the functions set up for that purpose.
+!
+      integer*4 maxstrings ! max number of string in string vector
+      integer*4 maxrng     ! max number of ranges
+      integer*4 maxval     ! max number of range values in value vector
+      integer*4 locdim
+      parameter (maxrng=380,maxval=1026000 ,locdim=5,maxstrings=30000)
+
+!   locdim 1 - start column
+!          2 - start row
+!          3 - end column
+!          4 - end row
+!          5 - total number of rangeelements
+
+      integer*4 irng
+      integer*4 ival    ! counter for range values storage array
+      integer*4 icount  ! count number of defined ranges
+      integer*4 ivcount ! count total number of range data elements
+      integer*4 istrcount ! count total number of string elements
+      integer*4 rngdim(maxrng,locdim)   ! range location in worksheet
+      integer*4 rngloc(maxrng)  ! range values start position in rngval
+      character*16 rngname(maxrng),rngstr(maxrng)
+      real*4 rngval(maxval)  ! vector that holds all range values
+      character*254 rnglab(0:maxstrings)
+      integer*4 rnglen(0:maxstrings)
+      character*9 record(0:256)
+      character*26 recnam(0:256)
+      character*8 xsubfolder  ! optional input subfolder: ".\input\" for NEMS, or ".\" if the file is in the current folder
+      common/WK1_code/record,recnam
+      common/WK1_rngdat/rngval,rngloc,rngdim,icount,ivcount,istrcount,rnglen
+      common/WK1_RNGEXT/rngname,rngstr,rnglab,xsubfolder

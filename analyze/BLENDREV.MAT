@@ -1,0 +1,123 @@
+NAME          BLENDREV
+ROWS
+ E  BALGO   
+ E  BALHN   
+ E  BALLN   
+ E  BALRS   
+ L  CAP01   
+ L  CAP02   
+ L  CAP03   
+ L  CAP04   
+ L  CAP05   
+ N  COST    
+ G  DEMAV   
+ G  DEMFO   
+ G  DEMPG   
+ G  DEMRG   
+ L  SUPHC   
+ L  SUPMC   
+COLUMNS
+    OB01      BALLN      -.30000    
+    OB01      BALHN      -.70000    
+    OB01      DEMFO       .20000    
+    OB01      DEMRG       .60000    
+    OB01      DEMPG       .20000    
+    OB02      BALHN      -.70000    
+    OB02      BALGO      -.30000    
+    OB02      DEMFO       .10000    
+    OB02      DEMRG       .60000    
+    OB02      DEMPG       .30000    
+    OB03      BALGO      -.70000    
+    OB03      BALRS      -.30000    
+    OB03      DEMRG       .40000    
+    OB03      DEMPG       .40000    
+    OB04      BALLN      -.10000    
+    OB04      BALHN      -.20000    
+    OB04      BALGO      -.30000    
+    OB04      BALRS      -.40000    
+    OB04      DEMFO       .20000    
+    OB04      DEMRG       .50000    
+    OB04      DEMPG       .30000    
+    OB05      BALRS      -1.0000    
+    OB05      DEMFO       1.0000    
+    OP01HC    CAP01      -1.0000    
+    OP01HC    BALGO      -.40000    
+    OP01HC    BALRS      -.50000    
+    OP01HC    DEMAV      -.20000    
+    OP01MC    SUPMC      -1.0000    
+    OP01MC    CAP01      -1.0000    
+    OP01MC    BALGO      -.30000    
+    OP01MC    BALRS      -.60000    
+    OP01MC    DEMAV      -.20000    
+    OP02HC    CAP02      -1.0000    
+    OP02HC    BALGO      -.55000    
+    OP02HC    BALRS      -.30000    
+    OP02HC    DEMAV      -.30000    
+    OP02MC    SUPMC      -1.0000    
+    OP02MC    CAP02      -1.0000    
+    OP02MC    BALGO      -.50000    
+    OP02MC    BALRS      -.35000    
+    OP02MC    DEMAV      -.30000    
+    OP03HC    CAP03      -1.0000    
+    OP03HC    BALGO      -.45000    
+    OP03HC    BALRS      -.10000    
+    OP03HC    DEMFO      -.10000    
+    OP03HC    DEMAV      -.40000    
+    OP03MC    SUPMC      -1.0000    
+    OP03MC    CAP03      -1.0000    
+    OP03MC    BALGO      -.40000    
+    OP03MC    BALRS      -.15000    
+    OP03MC    DEMFO      -.10000    
+    OP03MC    DEMAV      -.40000    
+    OP04HC    SUPHC      -1.0000    
+    OP04HC    CAP04      -1.0000    
+    OP04HC    BALLN      -.15000    
+    OP04HC    BALHN      -.35000    
+    OP04HC    DEMFO      -.10000    
+    OP04HC    DEMAV      -.50000    
+    OP04MC    CAP04      -1.0000    
+    OP04MC    BALLN      -.10000    
+    OP04MC    BALHN      -.40000    
+    OP04MC    DEMFO      -.10000    
+    OP04MC    DEMAV      -.50000    
+    OP05HC    SUPHC      -1.0000    
+    OP05HC    CAP05      -1.0000    
+    OP05HC    BALLN      -.55000    
+    OP05HC    BALHN      -.50000E-01
+    OP05HC    DEMFO      -.20000    
+    OP05HC    DEMAV      -.30000    
+    OP05MC    CAP05      -1.0000    
+    OP05MC    BALLN      -.50000    
+    OP05MC    BALHN      -.10000    
+    OP05MC    DEMFO      -.20000    
+    OP05MC    DEMAV      -.30000    
+RHS
+    RHSMODL   CAP01       20.000    
+    RHSMODL   CAP02       20.000    
+    RHSMODL   CAP03       20.000    
+    RHSMODL   CAP04       20.000    
+    RHSMODL   CAP05       20.000    
+    RHSMODL   DEMAV       5.0000    
+    RHSMODL   DEMFO       10.000    
+    RHSMODL   DEMPG       10.000    
+    RHSMODL   DEMRG       15.000    
+    RHSMODL   SUPHC       20.000    
+    RHSMODL   SUPMC       20.000    
+BOUNDS
+ UP BNDMODL   OB01        20.000    
+ UP BNDMODL   OB02        20.000    
+ UP BNDMODL   OB03        20.000    
+ UP BNDMODL   OB04        20.000    
+ UP BNDMODL   OB05        20.000    
+ENDATA
+
+     The above matrix file was written by RANDMOD
+
+     Original problem name: BLEND           
+     Original source file:  BLEND.MAT                                                       
+
+     Operations performed:
+
+          RANDOMIZ PERCENT  ABSOLUTE UNIFORM   100         100            
+          REVERSE   REV...51 reversed                                     
+          GENERATE BLENDREV.MAT                                           

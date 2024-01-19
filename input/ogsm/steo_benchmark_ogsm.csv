@@ -1,0 +1,8 @@
+AEO Name,STEO Name,Energy Generation,Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
+PSD000:ba_DomesticCrude,coprpus,Domestic Crude Production (million b/d),2%,2%,1,1,
+PSD000:ba_Alaska,paprpak,Alaska Crude Production (million b/d),2%,2%,1,1,
+PSD000:ba_Lower48States,paprp48,Lower 48 States Crude Production (million b/d),2%,2%,1,1,
+PSD000:ca_NaturalGasPla,nlprpus,Natural Gas Plant Liquids Production (million b/d),2%,2%,1,1,
+PSD000:dome_ngpl_eth,ETFPPUS,Ethane NGPL production(million b/d),2%,2%,1,1,
+PSD000:dome_ngpl_prop,PRFPPUS,Propane NGPL production(million b/d),2%,2%,1,1,
+PSD000:dome_ngpl_pent,PPFPPUS,Natural Gasoline NGPL production(million b/d),2%,2%,1,1,

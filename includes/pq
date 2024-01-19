@@ -1,0 +1,10 @@
+!  $Header: N:/default/includes/RCS/pq,v 1.2 1999/12/19 18:56:47 dsa Exp $
+!  NEMS Price Quantity Common Block
+
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!
+!  NEMS Price Quantity Common Block Parameters
+      INCLUDE 'QBLK'        !INCLUDE QUANTITY COMMON BLOCK
+      INCLUDE 'MPBLK'       !INCLUDE PRICE COMMON BLOCK

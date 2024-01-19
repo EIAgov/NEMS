@@ -1,0 +1,13 @@
+$ WOODNET.....an optimal network model
+$   Analyze the properties,  beginning with model attributes.
+$   Then,  try using the  TRACE and RATEOF commands.  Try  to
+$   explain what you learn about the model, using the EXPLAIN
+$   and SYNTAX commands to put your  explanation  in English.
+$   In particular,  explain the marginal prices of the supply
+$   and demand rows.
+ SW MSG=F
+   READ P WOODNET
+   READ S
+ SW MSG=T
+ _DIC MERGE WOODNET
+ RETURN QUIETLY

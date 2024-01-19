@@ -1,0 +1,30 @@
+! $Header: m:/default/includes/RCS/bldglrn,v 1.5 2011/10/17 16:48:09 pkc Exp $
+!
+
+! Learning Common Block for Buildings Sector Distributed generation.
+!  The following series of variables represent cumulative shipments of Fuel Cells, PhotoVoltaic Modules,
+!  Distributed Wind Turbines and Micro Turbines.
+!  The buildings sector models include the total shipments for each technology into learning functions 
+!  for these technologies.  All cumulative shipment data are in MW of capacity.  
+!  Provisions for industrial, utility and international shipments have been included, 
+!  but are not yet initialized or used.
+
+       Real*4 CFuelCell_MW(MNUMYR), CPV_MW(MNUMYR), CMicroTur_MW(MNUMYR), CWind_MW(MNUMYR), &    !Commercial Cumulative Shipment Variables
+              RFuelCell_MW(MNUMYR), RPV_MW(MNUMYR), RMicroTur_MW(MNUMYR), RWind_MW(MNUMYR), &    !Residential Cumulative Shipment Variables
+              UPV_MW(MNUMYR)     !Electric Generator Cumulative Shipments for PV 
+
+!				UFuelCell_MW(MNUMYR), UPV_MW(MNUMYR), UMicroTur_MW(MNUMYR), UWind_MW(MNUMYR),&     !Utility Cumulative Shipment Variables
+!				IFuelCell_MW(MNUMYR), IPV_MW(MNUMYR), IMicroTur_mw(MNUMYR), IWind_MW(MNUMYR),&     !Industrial Cumulative Shipment Variables
+!				IntnlFuelCell_MW(MNUMYR), IntnlPV_MW(MNUMYR), IntnlMicroTur_MW(MNUMYR), IntnlWind_MW(MNUMYR) !International Cumulative Shipment Variables
+
+       COMMON/BldgLrn/ CFuelCell_MW, CPV_MW, CMicroTur_MW, CWIND_MW, & 
+                       RFuelCell_MW, RPV_MW, RMicroTur_MW, RWIND_MW, &
+                       UPV_MW
+
+!  		  UFuelCell_MW, UPV_MW, UMicroTur_MW, UWIND_MW,& 
+!		  IFuelCell_MW, IPV_MW, IMicroTur_MW, IWIND_MW,&  
+!		  IntnlFuelCell_MW, IntnlPV_MW, IntnlMicroTur_MW, INTNLWIND_MW
+
+! Equivalence for filer
+       Real*4 EQ_BldgLrn(MNUMYR*9)
+	 Equivalence(EQ_BldgLrn,CFuelCell_MW)

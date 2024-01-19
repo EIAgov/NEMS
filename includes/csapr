@@ -1,0 +1,50 @@
+! $Header: m:/default/includes/RCS/csapr,v 1.3 2013/08/30 10:10:38 xj2 Exp $
+
+      INTEGER MX_SO2_TRAN
+      PARAMETER (MX_SO2_TRAN=3)
+
+      COMMON /CSAPR/ TSO2_SHR_BY_CLRG,TSO2_SHR_BY_OLRG,  &
+                     TSO2_OSH_BY_OLCL,SO2OTHCL,  &
+                     TEMRFSA,TEMRFNA,  &
+                     TSO2_LM1_BY_CLRG,TSO2_LIM_BY_CLRG,TSO2_VR1_BY_CLRG,TSO2_VR3_BY_CLRG,  &
+                     TSO2_YR_BY_CLRG,TSO2_VR_BY_CLRG,TRANRULE1,TRANRULE2,  &
+                     TNXPH,TNFPH,TECPPLT
+
+      REAL*4 TSO2_SHR_BY_CLRG(NDREG,MX_SO2_TRAN)         ! Coal SO2 Emission Share by Coal and CSAPR Region
+      REAL*4 TSO2_SHR_BY_OLRG(MNUMCR,MX_SO2_TRAN)        ! Oil SO2 Emission Share by Oil and CSAPR Region
+      REAL*4 TSO2_OSH_BY_OLCL(MNUMCR,NDREG,MX_SO2_TRAN)  ! Oil SO2 shares by Oil/Coal Region
+      REAL*4 SO2OTHCL(MNUMYR,NDREG)                      ! Other SO2 Emissions by Coal Region 
+      REAL*4 TEMRFSA(MNUMYR,MX_SO2_TRAN)                 ! SO2 Limit by CSAPR Region
+      REAL*4 TEMRFNA(NOX_D_GRP,MNUMYR)                     ! NOX Limit for CSAPR by NOX Region
+      REAL*4 TSO2_LM1_BY_CLRG(NDREG)                     ! CSAPR Phase 1 SO2 Limit by Coal Region 
+      REAL*4 TSO2_LIM_BY_CLRG(NDREG)                     ! CSAPR Phase 2 SO2 Limit by Coal Region
+      REAL*4 TSO2_VR1_BY_CLRG(NDREG)                     ! CSAPR 1 Year Variability Limit by Coal Region
+      REAL*4 TSO2_VR3_BY_CLRG(NDREG)                     ! CSAOR 3 Year Variability Limit by Coal Region
+      INTEGER*4 TSO2_YR_BY_CLRG                          ! Initial Year to Impose Coal Region Caps
+      INTEGER*4 TSO2_VR_BY_CLRG                          ! Type of Variability from Cap
+      INTEGER*4 TRANRULE1                                ! Year for Phase 1 of EPA Transport Rule
+      INTEGER*4 TRANRULE2                                ! Year for Phase 2 of EPA Transport Rule
+      INTEGER*4 TNXPH                                    ! Variable to indicate ECP Explicit Horizon for CMM
+      INTEGER*4 TNFPH                                    ! Variable to indicate ECP Full Horizon for CMM
+      INTEGER*4 TECPPLT                                  ! Variable to indicate ECP Coal Plant to Use in CMM
+
+      REAL EQ_CSAPR( 0 + &
+                     NDREG * MX_SO2_TRAN + &
+                     MNUMCR * MX_SO2_TRAN + &
+                     MNUMCR * NDREG * MX_SO2_TRAN + &
+                     MNUMYR * NDREG + &
+                     MNUMYR * MX_SO2_TRAN + &
+                     NOX_D_GRP * MNUMYR + &
+                     NDREG + &
+                     NDREG + &
+                     NDREG + &
+                     NDREG + &
+                     1 + &
+                     1 + &
+                     1 + &
+                     1 + &
+                     1 + &
+                     1 + &
+                     1 + &
+                     0 )
+      EQUIVALENCE(EQ_CSAPR,TSO2_SHR_BY_CLRG)

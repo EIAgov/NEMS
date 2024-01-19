@@ -1,0 +1,8995 @@
+! $Header: M:/default/source/RCS/omlanal.f,v 1.16 2016/08/24 14:28:56 dsa Exp $
+        SUBROUTINE GOMHOT(PCKFIL,RCODE)
+        IMPLICIT NONE
+!
+!  ANALYZE-OML INTERFACE ROUTINE--DATA FROM C-WHIZ WORKSPACE
+!
+!  GETS MATRIX & SOLUTION FROM C-WHIZ WORKSPACE
+!  & PASSES THEM TO ANALYZE VIA GUPCK UTILITY
+!
+!       JOE CREEGAN
+!       KETRON MANAGEMENT SCIENCE
+!       703 412 3201
+!
+! ARGUMENTS:    PCKFIL      NAME OF PACKED FILE TO BE CREATED
+!               RCODE       RETURN CODE = 0 IFF GOMHOT SUCCESSFUL
+!
+!  GOMHOT IS CALLED BY APPLICATION PROGRAM ANY TIME AFTER THE
+!  MODEL HAS BEEN LOADED INTO RAM AND SOLVED AND
+!  WHILE THE MODEL & SOLUTION ARE STILL IN RAM
+!
+      include 'parametr'
+      include 'ncntrl'
+      include  'omlall.fi'
+
+      integer*4 IR
+!
+!   VARIABLE TYPES - DIMENSIONS
+!
+        integer(4) :: mxcoef, ipackf, i_row_txt,i_col_txt,i_mat_txt
+        integer(4) :: i,ic,nrows,ncols,nnzs,nnif,nndj,nunb,istt,i8,ncoef,irst
+        real(4) :: tolr,tola
+        PARAMETER   (MXCOEF=1000, IPACKF=11)
+        PARAMETER   (I_ROW_TXT=21,I_COL_TXT=31,I_MAT_TXT=41)
+        CHARACTER*16  FLPKNM
+        CHARACTER*15  ROW_TXT_NAME,COL_TXT_NAME,MAT_TXT_NAME
+        CHARACTER*8   PCKFIL
+        REAL*16     ROWNAM
+        CHARACTER*8 CRWNAM(MXCOEF)
+        CHARACTER*16 RCWNAM
+        REAL*8      ROWVAL(MXCOEF)
+        REAL*4      R4WVAL(MXCOEF)
+        INTEGER*4   ROWNDX(MXCOEF)
+        EQUIVALENCE (RCWNAM, ROWNAM)
+        
+!
+        LOGICAL*1   SWMSG /.TRUE./,     SWPCK /.TRUE./
+        character*2   STAT, &
+                    LL/'LL'/,  EQ/'EQ'/,  UL/'UL'/, &
+                    BS/'BS'/,  FR/'FR'/,  STARS/'**'/
+        REAL*16     COLNM,  ROWNM
+        REAL*8      D8NAME, D8PROB,  SOLNAM
+       CHARACTER*16 SSTT(4)/'OPTIMAL ','FEASIBLE','INFEASIBLE', &
+                            'UNBOUNDED'/
+       CHARACTER*16 BLANK/' '/, NONE/'NONE'/
+       CHARACTER*8  BLANK8/' '/, BLNK1, BLNK2, BLNK3(2)
+       CHARACTER*1  RSTT(5)/'B','I','L','U','?'/, STCT
+        REAL*4      SOLUT4(2)
+        REAL*16     ROBJ, RRHS
+        REAL*8            &
+                    RRNG, &
+                    RBND, &
+                    RMNX  !, &
+                        
+       character*8  ALUP/'ALUP    '/, &
+                    ALUD/'ALUD    '/
+        REAL*4      RA, RL, RU, RP, &
+                    VA, VL, VU, VP, &
+                    E420 /1.0E+20/, &
+                    PICRTR
+        REAL*8      RSOL(5),    CSOL(5), &
+                    E20 /1.0E+20/,  E21/1.0E+21/
+        EQUIVALENCE &
+                    (RSOL(1), CSOL(1))
+        INTEGER*4   RCODE, &
+                    ACTHST(28), ACTKEY(22), &
+                    IONE/1/, &
+                    MSTAT(9)
+        CHARACTER*16 COBJ, CRHS
+        CHARACTER*8  C8PROB,  CRNG,  CBND,  CMNX
+        CHARACTER*16 CROWNM,  CCOLNM
+        CHARACTER*8  C8NAME
+        EQUIVALENCE (COBJ, ROBJ),  (CRHS, RRHS),  (CRNG, RRNG), &
+                    (CBND, RBND),  (CMNX, RMNX),  (CROWNM, ROWNM), &
+                    (CCOLNM, COLNM),  (C8PROB, D8PROB), &
+                    (C8NAME, D8NAME)
+       CHARACTER*16 CWHZ   /'C-WHIZ  '/
+       CHARACTER*8  BEE /'        '/, STAR/'        '/
+       INTEGER K0,K1,K2,K3,K4
+       INTEGER IYR,CYEAR,Z
+       REAL AK0,AK1,AK2,AK3,AK4,AK5,AK6,AK7,AK8
+       REAL AKA(2)
+
+!     Identifier structure (black-box) for the OML database file:
+      TYPE(OMLDBFILE) DBFILE
+!     Identifier structure (black-box) for a problem in the OML database:
+      TYPE(OMLDBPROB) DB
+
+
+
+!           ................................
+!  OPEN THE ANALYZE PACKED FILE
+!
+       SWMSG = .TRUE.
+       SWPCK = .TRUE.
+       FLPKNM = PCKFIL
+!DESKTOP        FLPKNM = PCKFIL//'.PCK'
+!
+      READ(PCKFIL(3:4),'(I2)') IYR
+      IF (IYR .GT. 89) THEN
+         CYEAR = 1900 + IYR
+      ELSE
+         CYEAR = 2000 + IYR
+      END IF
+!
+      WRITE(ROW_TXT_NAME,'(A2,"_",I4,"_ROW.TXT")') PCKFIL(1:2),CYEAR
+      WRITE(COL_TXT_NAME,'(A2,"_",I4,"_COL.TXT")') PCKFIL(1:2),CYEAR
+      WRITE(MAT_TXT_NAME,'(A2,"_",I4,"_MAT.TXT")') PCKFIL(1:2),CYEAR
+
+      IF( SWMSG )THEN
+         PRINT *,' OPENING OUTPUT PACKED FILE UNIT ',IPACKF ,' AS ', FLPKNM
+      ENDIF
+!
+      if ((exe + exo + exg + exc) .eq. 0) then
+      CLOSE( IPACKF )
+      OPEN( IPACKF,FILE=FLPKNM,FORM='UNFORMATTED',STATUS='UNKNOWN',ERR=1302 )
+      REWIND( IPACKF )
+!
+      CLOSE( I_ROW_TXT )
+      OPEN( I_ROW_TXT,FILE=ROW_TXT_NAME,FORM='FORMATTED',STATUS='UNKNOWN',ERR=1302 )
+!
+      CLOSE( I_COL_TXT )
+      OPEN( I_COL_TXT,FILE=COL_TXT_NAME,FORM='FORMATTED',STATUS='UNKNOWN',ERR=1302 )
+!
+      CLOSE( I_MAT_TXT )
+      OPEN( I_MAT_TXT,FILE=MAT_TXT_NAME,FORM='FORMATTED',STATUS='UNKNOWN',ERR=1302 )
+      endif
+!
+!  GET MATRIX STATISTICS
+!
+!  INITIALIZE OML POINTERS TO THIS FILE, PROBLEM,
+!  & SOLUTION
+        C8NAME = OML.XACTFILE
+        C8PROB = OML.XACTPROB
+        I = DFOPEN (DBFILE, c8NAME)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** CANT OPEN ACTFILE ???? ', c8name, c8prob
+            GOTO 12345
+        ENDIF
+!  POSITION TO THE RIGHT PROBLEM
+        I = DFPINIT (DB, DBFILE, c8PROB)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** ACTPROB NOT ON ACTFILE ????'
+            GOTO 12345
+        ENDIF
+!  INITIALIZE FOR MATRIX PROCCESSING
+        I = DFMINIT(DB,IONE)
+!  GET MATRIX STATISTICS
+        I = DFMSTAT(MSTAT)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** MATRIX NOT IN PROBLEM ????'
+            GOTO 12345
+        ENDIF
+        NROWS = MSTAT(1)
+        NCOLS = MSTAT(2)
+        NNZS  = MSTAT(6)
+!  WE'RE FINISHED WITH THE ACTFILE FOR NOW
+        I = DFMEND()
+        I = DFCLOSE(DBFILE)
+!
+!  NOW FIND VALUES IN THE CR
+! OML.XOBJ
+        COBJ = OML.XOBJ
+! OML.XRHS
+        CRHS = OML.XRHS
+! OML.XRANGE
+        CRNG = OML.XRANGE
+! OML.XBOUND
+        CBND = OML.XBOUND
+! XMNX
+        CMNX = OML.XMINMAX
+! OML.XNIF
+        NNIF = OML.XNIF
+! XNDJ
+        NNDJ = OML.XNEGDJ
+! XUNB
+        NUNB = OML.XUNBDNDX
+! XTLR
+        TOLR = OML.XTOLDJ
+! XTLA
+        TOLA = OML.XTOLV
+!
+       IF (CRNG .EQ. BLANK) CRNG = NONE
+       IF (CBND .EQ. BLANK) CBND = NONE
+!
+!  SET SOLUTION STATUS INDEX
+        IF (NNIF .NE. 0) THEN
+            ISTT = 3
+        ELSEIF (NNDJ .NE. 0) THEN
+            ISTT = 2
+        ELSE
+            ISTT = 1
+        ENDIF
+        IF (NUNB .NE. 0) ISTT = 4
+!  HOW BIG IS THIS MODEL?  IF ZERO ROWS OR COLS, QUIT.
+        IF (NROWS * NCOLS .EQ. 0) THEN
+            IF (NROWS .EQ. 0) &
+            PRINT *,' **** MODEL HAS ZERO ROWS'
+            IF (NCOLS .EQ. 0) &
+            PRINT *,' **** MODEL HAS ZERO COLUMNS'
+            GOTO 12345
+        ENDIF
+!
+!  DO ACTFILE MODEL SIZES AGREE WITH CR
+        IF (NROWS + NCOLS .NE. OML.XJ .OR. NROWS .NE. OML.XM) GOTO 1233
+!
+!  INITIALIZE ANALYZE GUPCK UTILITY
+        I = 0
+        I8 = 8
+        CALL GUPCK0 (C8PROB, COBJ, CRHS, CRNG, CBND, CMNX, &
+                    CWHZ, SSTT(ISTT),I8, NROWS, NCOLS, NNZS, &
+                    E420, TOLA, TOLR, IPACKF, I)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** FAILURE IN ANALYZE INITIALIZATION'
+            GOTO 12345
+        ENDIF
+!
+!   INITIALIZE ROW PROCESSING BY GUPCK
+        BLNK1 = BLANK8
+        BLNK2 = BLANK8
+        K0 = 0
+        AK1= 0.
+        AK2= 0.
+        AK3= 0.
+        AK4= 0.
+        CALL GUPCKR(BLNK1,K0,AK1,AK2,AK3,AK4,BLNK2,I)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** FAILURE IN ANALYZE ROW INIT'
+            GOTO 12345
+        ENDIF
+!
+!  NOW, FOR EACH ROW
+!
+        DO 100 IR = 1, NROWS
+!
+!       ROW NAME
+            I = WFRNAME (IR, cROWNM)
+            IF (I .NE. 0) THEN
+                PRINT *,' **** ROW NAME RETRIEVAL FAILED'
+                GOTO 1234
+            ENDIF
+!       SOLUTION VALUES
+            I = WFSROW (cROWNM, ALUP, STAT, RSOL)
+            IF (I .NE. 0) THEN
+               PRINT *,' **** ROW SOLUTION RETRIEVAL FAILED'
+               write(6,*) 'i,crownm,alup,stat,rsol=',i,crownm,alup,stat,rsol
+                GOTO 1234
+            ENDIF
+!  ROW STATUS (B, I, L, U)
+            IF (STAT .EQ. LL .OR. STAT .EQ. EQ) THEN
+                IRST = 3
+            ELSEIF (STAT .EQ. UL) THEN
+                IRST = 4
+            ELSEIF (STAT .EQ. BS .OR. STAT .EQ. FR) THEN
+                IRST = 1
+            ELSEIF (STAT .EQ. STARS) THEN
+                IRST = 2
+            ELSE
+                PRINT 246, STAT, IR, cROWNM
+ 246            FORMAT (' **** UNKNOWN ROW STATUS: ',A2, &
+                    ' FOR ROW: ', I5, '--',A8)
+                IRST = 5
+            ENDIF
+!
+!  SEND IT ALL OFF TO ANALYZE
+!
+            STCT = RSTT(IRST)
+      if ((exe + exo + exg + exc) .eq. 0) &
+            WRITE(I_ROW_TXT,2333) PCKFIL(1:2),CYEAR,CROWNM,STAT,(RSOL(Z),Z=1,4)
+ 2333       FORMAT(A2,":",I4,":",A16,":",A2,4(":",E30.22E3))
+           IF (RSOL(2) .LT. -E20) RSOL(2) = -E21
+           IF (RSOL(3) .GT.  E20) RSOL(3) =  E21
+            RA = RSOL(1)
+            RL = RSOL(2)
+            RU = RSOL(3)
+            RP = - RSOL(4)
+            CALL GUPCKR(CROWNM, IR, RL, RU, RA, RP, STCT, I)
+!
+ 100    CONTINUE
+        BLNK1 = BLANK8
+        BLNK2 = BLANK8
+        K0 = NROWS+10
+        AK1= 0.
+        AK2= 0.
+        AK3= 0.
+        AK4= 0.
+        CALL GUPCKR(BLNK1,K0,AK1,AK2,AK3,AK4,BLNK2,I)
+!
+!
+!   INITIALIZE COLUMN PROCESSING BY GUPCK
+        BLNK1 = BLANK8
+        BLNK2 = BLANK8
+        BLNK3(1) = BLANK8
+        K0 = 0
+        K1 = 1
+        AKA(K1) = 0.
+        AK1= 0.
+        AK2= 0.
+        AK3= 0.
+        AK4= 0.
+        CALL GUPCKC(BLNK1,K0,K1,BLNK3,AKA,AK1,AK2,AK3,AK4,BLNK2,I)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** FAILURE IN ANALYZE COLUMN INIT'
+            GOTO 12345
+        ENDIF
+!
+!  NOW, FOR EACH COLUMN
+!
+        DO 200 IC = 1, NCOLS
+!
+!       COLUMN NAME
+            I = WFCNAME (IC, cCOLNM)
+            IF (I .NE. 0) THEN
+                PRINT *,' **** COL NAME RETRIEVAL FAILED'
+                GOTO 1235
+            ENDIF
+!
+!       SOLUTION VALUES
+            I = WFSCOL (cCOLNM, ALUD, STAT, CSOL)
+            IF (I .NE. 0) THEN
+                PRINT *,' **** COL SOLUTION RETRIEVAL FAILED'
+                GOTO 1235
+            ENDIF
+!
+!  COLUMNS (B, I, L, U)
+            IF (STAT .EQ. LL .OR. STAT .EQ. EQ) THEN
+                IRST = 3
+            ELSEIF (STAT .EQ. UL) THEN
+                IRST = 4
+            ELSEIF (STAT .EQ. BS .OR. STAT .EQ. FR) THEN
+                IRST = 1
+            ELSEIF (STAT .EQ. STARS) THEN
+                IRST = 2
+            ELSE
+                PRINT 247, STAT, IC, cCOLNM
+ 247            FORMAT (' **** UNKNOWN COLUMN STATUS: ',A2, &
+                    ' FOR COLUMN: ', I5, '--',A8)
+                IRST = 5
+            ENDIF
+      if ((exe + exo + exg + exc) .eq. 0) &
+            WRITE(I_COL_TXT,3333) PCKFIL(1:2),CYEAR,cCOLNM,STAT,(CSOL(Z),Z=1,4)
+ 3333       FORMAT(A2,":",I4,":",A16,":",A2,4(":",E30.22E3))
+!
+!  GET THE MATRIX COEFFICIENTS FROM THE C-WHIZ MATRIX
+!
+            NCOEF = WFRLVAL (cCOLNM, 1, ROWNDX, ROWVAL, 1000)
+            IF (NCOEF .LE. 0 ) THEN
+                PRINT 248, IC, cCOLNM
+ 248            FORMAT (' **** NO COEFFICIENTS IN COLUMN: ', &
+                    I5,'--',A8,' COLUMN SKIPPED')
+                GO TO 200
+            ENDIF
+!  GET ROW NAMES FOR COEFFICIENTS IN THIS COLUMN
+            DO 210 IR = 1, NCOEF
+!       ROW NAME
+                I = WFRNAME (ROWNDX(IR), RcWNAM)
+                CRWNAM(IR) = RCWNAM
+                R4WVAL(IR) = ROWVAL(IR)
+      if ((exe + exo + exg + exc) .eq. 0) &
+                WRITE(I_MAT_TXT,4333) PCKFIL(1:2),CYEAR,cCOLNM,RCWNAM,ROWVAL(IR)
+ 4333           FORMAT(A2,":",I4,2(":",A16),":",E30.22E3)
+                IF (I .NE. 0) THEN
+                    PRINT *,' **** ROW NAME RETRIEVAL FAILED'
+                    GOTO 1234
+                ENDIF
+ 210        CONTINUE
+!
+!  SEND IT ALL OFF TO ANALYZE
+            STCT = RSTT(IRST)
+           IF (CSOL(2) .LT. -E20) CSOL(2) = -E21
+           IF (CSOL(3) .GT.  E20) CSOL(3) =  E21
+            VA = CSOL(1)
+            VL = CSOL(2)
+            VU = CSOL(3)
+            VP = CSOL(4)
+            CALL GUPCKC (CCOLNM, IC, NCOEF, CRWNAM, R4WVAL, VL, VU, VA, VP, STCT, I)
+!
+ 200    CONTINUE
+!
+        BLNK1 = BLANK8
+        BLNK2 = BLANK8
+        K0 = 0
+        K1 = NCOLS+10 ! THIS SCREWS UP THE PASSED LENGTH ARRAY OFFSET
+        K2=1
+        AKA(1) = 0.
+        BLNK3(1) = BLANK8
+        AK1= 0.
+        AK2= 0.
+        AK3= 0.
+        AK4= 0.
+        CALL GUPCKC(BLNK1,K1,K2,BLNK3,AKA,AK1,AK2,AK3,AK4,BLNK2,I)
+!
+        CALL GUPCKW (SWMSG, SWPCK, I)
+        IF (I .NE. 0) THEN
+            PRINT *,' **** WRITE OF ANALYZE PACKED FILE FAILED'
+            GOTO 12345
+        ENDIF
+!
+!  THATS IT
+        RCODE = 0
+        CLOSE( IPACKF )
+        RETURN
+!
+!  ERROR EXITS          ERROR EXITS               ERROR EXITS
+!
+1233    PRINT 233, NROWS, NCOLS, OML.XM, OML.XJ-OML.XM
+ 233    FORMAT(' SIZE OF ACTFILE MATRIX DTFFERS FROM RAM MATRIX' / &
+        ' ACTFILE MATRIX: ROWS ', I5, ' COLS ', I6 / &
+        '     RAM MATRIX: ROWS ', I5, ' COLS ', I6 /)
+        GOTO 12345
+!
+1234    PRINT 234, IR, cROWNM
+ 234    FORMAT(' ERROR ENCOUNTERED AT ROW ', I5,', ', A8)
+        GOTO 12345
+!
+1235    PRINT 235, IC, cCOLNM
+ 235    FORMAT(' ERROR ENCOUNTERED AT COLUMN ', I5,', ', A8)
+        GOTO 12345
+!
+1302  PRINT *,' **** IO ERROR OPENING PACKED FILE UNIT ',IPACKF
+      PRINT *,'    ', FLPKNM
+      GOTO 12345
+!
+12345   PRINT *, ' ANALYZE MATRIX/SOLUTION CAPTURE ABORTED'
+        RCODE = 8
+        CLOSE( IPACKF )
+        RETURN
+!
+      END
+!              ::: GBAGNDA1.FOR  3-12-93 :::
+!
+! EARLIER DATES DELETED.
+!    8-31-92...ADDED GSPIKE
+!    9-14-92...REMOVED OUTPUT FROM BASTAT (CALLER PRINTS)
+!    9-17-92...MINOR CLEAN-UPS; CHANGED PIVOT TOLERANCE FOR SPIKES
+!    9-23-92...USING ZVALUE IN BAGNDA, BASPIK AND GSPIKE
+!    9-24-92...EXTENDED GSPIKE TO ADDºDEL SEGMENTS
+!   10-03-92...REMOVED DOUBLE PRECISION ZVALUE (NOW IN DCGETMAT)
+!   11-23-92...ADDED STBASC SETTING (BAGNDA)
+!
+! THIS CONTAINS THE FOLLOWING GETMAT SUBROUTINES.
+!
+!       BAGNDA.....AGENDA ALGORITHM (PRIMARY LINK TO OUTSIDE CALLERS)
+!       BASET......INITIALIZE BASIS AGENDA ALGORITHM
+!       BASTAT.....BASIS STATISTICS (ANOTHER LINK TO OUTSIDE CALLERS)
+!       GSPIKE.....ADDºDELETE SPIKESºNONSPIKES TOºFROM SUBMATRIX
+!                   (ANOTHER LINK TO OUTSIDE CALLERS)
+!       BASPIK.....INSERT SPIKE INTO ALPHA REGION
+!       BSUPD8.....UPDATE STATS AFTER SPIKE INSERTION INTO ALPHA REGION
+!
+! SEE GALGRTHM.DOC AND GETDATA.DOC FOR DETAILS.
+!
+      SUBROUTINE BAGNDA(ALPHA,NALPHA,SWMSG,FREQMS,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      include 'dcgetmat'
+!
+! THIS INITIALIZES ALPHA REGION FOR BASIS IN MEMORY.
+! CALLER MUST GIVE ALPHA, WHOSE LENGTH = NALPHA.  THIS MAY NOT BE NEEDED
+! (IE., IF BASIS TRIANGULARIZES), BUT IF SO, WE REQUIRE NALPHA >= NROWS.
+!
+      DOUBLE PRECISION ALPHA(NALPHA)
+      LOGICAL*1   SWMSG
+      INTEGER     FREQMS
+!                 :...MESSAGE FREQUENCY DURING ALGORITHM
+! ADDED 3-12-93:   STBASIC SET = 1 IF SUCCESSFUL
+!                                2 IF FAILS BY SPIKE INSERTION
+!                                3 IF FAILS OTHERWISE
+!                  RCODE = 2 IF STBASC = 2 UPON ENTRANCE
+!
+! LOCAL
+      CHARACTER*1 CHAR
+! SET SPIKE PIVOT TOLERANCE
+      REAL       TOLPIV
+      PARAMETER (TOLPIV=1.0E-15)
+!
+! CALLS  GALPHA, GETVAL, GFTRAN, BASET, BKERNL, BFTRI, BBTRI
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( STBASC.EQ.2 )THEN
+         RCODE = 2
+         RETURN
+      ENDIF
+! INITIALIZE
+      CALL BASET(*1313)
+      VPIVOT = VTOLAB
+! PIVOT TOLERANCE FOR NON-SPIKES = ABSOLUTE ZERO (SET BY USER)
+! ...VTOLAB >= NON-ZEROES IN MATRIX
+      IF( NBPOSN.EQ.0 )GOTO 900
+!                   :...BASIS IS ALL LOGICAL
+! INITIALIZE AGENDA
+      FRONT = 1
+      REAR  = NBPOSN
+      IF( (SWMSG .AND. NBPOSN.GT.1000) .OR. SWDBG ) &
+         PRINT *,' BEGINNING TRIANGULARIZATION'
+! FORWARD TRIANGULARIZATION
+      CALL BFTRI(*1313)
+      NBFTRI = FRONT - 1
+      IF( (SWMSG .AND. NBPOSN-NBFTRI.GT.500) .OR. SWDBG ) &
+         PRINT *,NBFTRI,' STRUCTURALS IN FTRI'
+! BACKWARD TRIANGULARIZATION
+      CALL BBTRI(*1313)
+      NBBTRI = NBPOSN - REAR
+      NBKRNL = NBPOSN - NBFTRI - NBBTRI
+!     :        :        :        :...NUMBER IN BACK TRIANGLE
+!     :        :        :            (NOT COUNTING BASIC LOGICALS)
+!     :        :        :...NUMBER IN FORWARD TRIANGLE
+!     :        :...NUMBER OF BASIC STRUCTURALS
+!     :...SIZE OF KERNEL
+! INITIAL TRIANGULARIZATION COMPLETE...NBKRNL=0 IFF BASIS TRIANGULARIZES
+      IF( (SWMSG .AND. NBKRNL.GT.500) .OR. SWDBG )THEN
+         WRITE(*,11) NBLGL,NBPOSN,NBFTRI,NBBTRI
+11       FORMAT(' PHASE 1 COMPLETE...BASIS HAS',I5,' LOGICALS AND', &
+                I7,' STRUCTURALS:'/ &
+                5X,I7,' IN FORWARD TRIANGLE (FTRI)'/ &
+                5X,I7,' IN BACK    TRIANGLE (BTRI)'/ &
+               )
+      ENDIF
+      IF( NBKRNL.GT.0 )THEN
+! BASIS DOES NOT TRIANGULARIZE
+         IF( NALPHA.LT.NROWS )THEN
+            PRINT *,' ** SYSERR...CALLER PASSED NALPHA =',NALPHA, &
+                    ' < NROWS =',NROWS
+            GOTO 1313
+         ENDIF
+         CALL BKERNL(*1313)
+         IF( (SWMSG .AND. NBKRNL.GT.500) .OR. SWDBG )THEN
+            WRITE(*,12) NBKRNL,NBSPIK
+12          FORMAT(5X,I7,' IN KERNEL...',I6,' SPIKES')
+         ENDIF
+         IF( SWMSG )PRINT *,' TRANSFORMING BASIS...PLEASE WAIT.'
+      ENDIF
+! ======================= AGENDA COMPLETE ============================
+! RELOCATE AGENDA LISTS TO MAKE ROOM FOR (PERMANENT) ALPHA REGION
+! (WE PUT AT FRONT OF INDEX BEFORE TO LEAVE ROOM (IFREE) FOR
+!  GETTING INTERSECTING ROWS/COLS)
+      BCP0   = BCPOSN
+      BCS0   = BCSTAT
+      BCPOSN = MAXIND - NBPOSN
+      BCSTAT = BCPOSN - NBPOSN
+      MAXIND = BCSTAT - 1
+      CALL BSPACE(2*NBPOSN,*1313)
+!
+      DO 150 I=1,NBPOSN
+         INDEX( BCPOSN+I ) = INDEX( BCP0+I )
+         INDEX( BCSTAT+I ) = INDEX( BCS0+I )
+150   CONTINUE
+!
+! SET FRONT AND REAR TO MARK LAST AND FIRST SPIKE, RESP.
+!
+      REAR  = NBFTRI + NBKRNL
+      FRONT = REAR   - NBSPIK
+! INDEX( BCPOSNºBCSTAT + FRONT+I) = INFO OF I-TH SPIKE
+!
+!           º\
+!           º \
+!           º  \ _______
+!           º   º    º  º
+!           º   º    º  º
+!           º   º    º  º
+!           º   º____º__º
+!           º   :    :  :\
+!           º   :    :  : \
+!           º___:____:__:__\
+!               :    :  :   :...NBPOSN
+!               :    :  :...REAR    (FIRST SPIKE) = END OF KERNEL
+!               :    :......FRONT+1 (LAST SPIKE)
+!               :...NBFTRI+1 (BEGINNING OF KERNEL)
+!
+! SET LISTS AND FORM ALPHA VECTORS
+! SET BASE POINTERS OF ALPHA REGION:
+!  IRBLST===>INDEX, IVBLST===>VALUE, IZBLST===>ZVALUE
+      IRBLST = IPIVOT + NROWS + 1
+      IVBLST = IVFREE   + 1
+      IZBLST = IVBLST/2 + 1
+! ...FIRST ALPHA RECORD IS DUMMY (NEEDED FOR BTRAN)
+      INDEX(IRBLST) = 0
+      ZVALUE(IZBLST) = VINF
+! NOW WE HAVE:          INDEX
+!                         0    <--- IRBLST (BEGIN ALPHA REGION)
+!                        ...
+!                              <--- MAXIND (END OF FREE SPACE)
+!                              <--- BCSTAT (BEGIN STAT IN AGENDA)
+!                        ...
+!                              <--- BCPOSN (BEGIN COL  IN AGENDA)
+!                        ...
+!                              <--- REAR (JUST BEFORE BTRI)
+!                        ...
+!                        ...   <--- PMXIND = TRUE END OF INDEX
+! INITIALIZE
+! ...NUMBER OF COLUMNS REMAINING TO BE INSERTED
+      REMAIN = NBPOSN
+! ...MESSAGE FREQUENCY
+      FREQCH = FREQMS
+! ...SOME DEBUG STATS
+      VPMIN  = 1.
+      SPIKIN = 0
+!
+!    LOOP OVER BASIC LISTS
+!
+      IF( NBFTRI.GT.0 )THEN
+! FIRST, THE FORWARD TRIANGLE (NONSPIKES)
+         DO 200 I=1,NBFTRI
+            ROW = INDEX( BCSTAT+I )
+            COL = INDEX( BCPOSN+I )
+            CALL BNONSP(ROW,COL,*1300)
+            IF( SWMSG )THEN
+               REMAIN = REMAIN-1
+               FREQCH = FREQCH-1
+               IF( FREQCH.LE.0 )THEN
+                  PRINT *,' COLUMN ',NAME(ICNAME+COL), &
+                        ' IN FTRI PIVOTING ON ROW ',NAME(IRNAME+ROW)
+                  PRINT *,REMAIN,' COLUMNS REMAIN...PLEASE WAIT'
+                  FREQCH = FREQMS
+               ENDIF
+            ENDIF
+200      CONTINUE
+      ENDIF
+!
+      IF( NBKRNL.EQ.0 )GOTO 800
+! SET PIVOT TOLERANCE FOR SPIKES = MAX{VTOLAB,TOLPIV}
+      IF( TOLPIV.GT.VTOLAB )THEN
+         VPIVOT = TOLPIV
+      ELSE
+         VPIVOT = VTOLAB
+      ENDIF
+!
+      IF( SWMSG .AND. NBFTRI.GT.FREQMS ) &
+         PRINT *,NBFTRI,' FTRI NONSPIKES INSERTED'
+!
+! SECOND, THE KERNEL
+!
+      DO 600 I=NBFTRI+1,FRONT
+!  PUT NONSPIKE
+         ROW = INDEX( BCSTAT+I )
+         COL = INDEX( BCPOSN+I )
+         CALL BNONSP(ROW,COL,*1300)
+         IF( SWMSG )THEN
+            REMAIN = REMAIN-1
+            FREQCH = FREQCH-1
+            IF( FREQCH.LE.0 )THEN
+               PRINT *,' COLUMN ',NAME(ICNAME+COL), &
+                     ' (NONSPIKE) PIVOTING ON ROW ',NAME(IRNAME+ROW)
+               PRINT *,REMAIN,' COLUMNS REMAIN...',NBSPIK-SPIKIN, &
+                              ' SPIKES'
+               IF( NBSPIK.GT.SPIKIN ) &
+                  PRINT *,' ...FILL-IN SO FAR =',NBFILL
+               FREQCH = FREQMS
+            ENDIF
+         ENDIF
+!
+300      CONTINUE
+         IF( FRONT.GE.REAR )GOTO 600
+!  SEE IF NEXT SPIKE CAN BE INSERTED
+         STAT = INDEX( BCSTAT+REAR )
+         IF( STAT.GT.I )GOTO 600
+! ATTEMPT TO INSERT SPIKE
+         COL  = INDEX( BCPOSN+REAR )
+         POSN = I
+         CALL BASPIK(ALPHA,NALPHA,COL,VPIVOT,POSN,ROW,VPVAL,*1300)
+         IF( ROW.GT.0 )THEN
+! INSERTION SUCCESSFUL
+            REAR   = REAR-1
+            IF( SWMSG )CALL BSUPD8 &
+               (ROW,COL,VPVAL,VPMIN,SPIKIN,REMAIN,FREQCH,FREQMS)
+            GOTO 300
+         ENDIF
+! INSERTION ATTEMPT UNSUCCESSFUL...BASPIK TELLS US THAT WE SHOULD
+! WAIT UNTIL THIS COL IS IN POSN (> I)
+         IF( NBSPIK-SPIKIN.GT.1 )THEN
+!    SLIDE IT DOWN THE AGENDA TO KEEP POSITION ORDER
+            DO 450 I1=REAR-1,FRONT+1,-1
+               STAT = INDEX( BCSTAT+I1 )
+               IF( STAT.GE.POSN )GOTO 460
+!    ...SLIDE COL AT I1 DOWN (TOWARDS REAR)
+               INDEX( BCSTAT+I1 + 1) = STAT
+               INDEX( BCPOSN+I1 + 1) = INDEX( BCPOSN+I1 )
+450         CONTINUE
+            I1 = FRONT
+460         CONTINUE
+! NOW PUT COL AT VACATED POSITION (AT I1+1)
+            INDEX( BCPOSN+I1 + 1 ) = COL
+            INDEX( BCSTAT+I1 + 1 ) = POSN
+            GOTO 300
+         ENDIF
+! JUST CHANGE COL'S STAT (EARLIEST POSITION INCREASED TO POSN)
+         INDEX( BCSTAT+REAR ) = POSN
+! NEXT KERNEL NONSPIKE
+600   CONTINUE
+!
+      IF( FRONT.LT.REAR )THEN
+! SPIKES REMAIN TO BE INSERTED
+! REDUCE PIVOT TOLERANCE = MIN{TOLPIV,VTOLAB}
+         IF( TOLPIV.LT.VPIVOT ) VPIVOT = TOLPIV
+         IF( SWDBG )THEN
+            PRINT *,' AFTER 600, FRONT,REAR=',FRONT,REAR
+            PRINT *,' ...BCPOSN,BCSTAT,SPIKIN=',BCPOSN,BCSTAT,SPIKIN
+            CALL GDEBUG
+         ENDIF
+         DO 690 I=REAR,FRONT+1,-1
+            COL = INDEX( BCPOSN+I )
+            POSN = I
+            CALL BASPIK(ALPHA,NALPHA,COL,VPIVOT,POSN,ROW,VPVAL,*1300)
+            IF( ROW.EQ.0 )GOTO 1200
+! SPIKE INSERTED...UPDATE
+            REAR   = REAR-1
+            IF( SWMSG )CALL BSUPD8 &
+               (ROW,COL,VPVAL,VPMIN,SPIKIN,REMAIN,FREQCH,FREQMS)
+690      CONTINUE
+! OK, ALL SPIKES ARE IN
+      ENDIF
+! END OF KERNEL (AND FTRI)
+!
+      IF( NBBTRI.GT.0 )THEN
+! FINALLY, THE BACK TRIANGLE
+! RESTORE PIVOT TOLERANCE TO VTOLAB
+         VPIVOT = VTOLAB
+         DO 700 I=NBFTRI+NBKRNL+1,NBPOSN
+            ROW = INDEX( BCSTAT+I )
+            COL = INDEX( BCPOSN+I )
+            CALL BNONSP(ROW,COL,*1300)
+            IF( SWMSG )THEN
+               FREQCH = FREQCH-1
+               IF( FREQCH.LE.0 )THEN
+                  PRINT *,' COLUMN ',NAME(ICNAME+COL), &
+                        ' IN BTRI PIVOTING ON ROW ',NAME(IRNAME+ROW)
+                  PRINT *,' ...PLEASE WAIT'
+                  FREQCH = FREQMS
+               ENDIF
+            ENDIF
+700      CONTINUE
+      ENDIF
+! ====================== DONE ========================
+!
+!    SUCCESSFULL COMPLETION
+800   CONTINUE
+      STBASC = 1
+! SET FREE SPACE POINTERS
+      IFREE  = IRBLST +   NBLST + 1
+      IVFREE = IVBLST + 2*NBLST + 1
+! RESTORE INDEX LENGTH
+      MAXIND = PMXIND
+!
+900   CONTINUE
+!
+      RETURN
+!     ======
+!
+1200  CONTINUE
+! COULD NOT INSERT ALL SPIKES...BASIS SETUP FAILS
+      N = NBSPIK-SPIKIN
+      IF( N.NE.REAR-FRONT )THEN
+         PRINT *,' ** SYSERR IN BAGNDA...',NBSPIK,' -',SPIKIN,' =',N
+         PRINT *,'                     <>',REAR  ,' -',FRONT,' =', &
+                    REAR-FRONT
+         GOTO 1300
+      ENDIF
+      STBASC = 2
+      COL = INDEX( BCPOSN+REAR )
+      PRINT *,' THERE ARE',N,' (SPIKE) COLUMNS THAT CANNOT BE IN'// &
+              ' THE BASIS...EG, ',NAME(ICNAME + COL)
+      IF( SWDBG )THEN
+         PRINT *,' FRONT,REAR =',FRONT,REAR
+         LINE = 5
+         DO 1213 I=REAR,REAR-N-1,-1
+            COL = INDEX( BCPOSN+I)
+            PRINT *,I,':',NAME( ICNAME+COL ),INDEX( BCSTAT+I )
+            IF( LINE.GT.21 )THEN
+               READ(*,'(A1)')CHAR
+               IF( CHAR.NE.' ')GOTO 1300
+               LINE = 0
+            ENDIF
+1213     CONTINUE
+      ENDIF
+! FALL THRU TO ERROR RETURN
+!
+! ** ERROR RETURNS
+1300  CONTINUE
+      IF( SWDBG )THEN
+         PRINT *,' AT 1300 IN BAGNDA (BEFORE RESTORING FREE SPACE)'
+         CALL GDEBUG
+      ENDIF
+! RESTORE FREE VALUE SPACE
+      IVFREE = IVBLST
+1313  RCODE = 1
+! RESTORE FREE INDEX SPACE
+      IFREE  = IPIVOT
+      IPIVOT = 0
+! ...AND LENGTH OF INDEX
+      MAXIND = PMXIND
+!
+      IF( STBASC.NE.2 )STBASC = 3
+      RETURN
+!
+! ** BAGNDA ENDS HERE
+      END
+      SUBROUTINE BASET(*)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS INITIALIZES BASIS AGENDA ALGORITHM
+! ...ALTERNATE RETURN IS ERROR...THE CALLER MUST RESET IFREE AND IPIVOT
+!
+      include 'dcgetmat'
+!
+! LOCAL
+      INTEGER*2 INT2
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! SET IPIVOT LOCATION (PERMANENT LIST)
+      IPIVOT = IFREE
+      IFREE  = IPIVOT + NROWS + 1
+! INITIALIZE ALPHA REGION POINTER (FOR GDEBUG ONLY)
+      IRBLST = 0
+      IF( IFREE.GT.MAXIND )GOTO 1300
+! INITIALIZE COUNTS AND OTHER POINTERS/OFFSETS
+! ...NUMBER IN FORWARD TRIANGLE
+      NBFTRI = 0
+! ...NUMBER IN BACKWARD TRIANGLE
+      NBBTRI = 0
+! ...NUMBER IN KERNEL
+      NBKRNL = 0
+! ...NUMBER OF SPIKES
+      NBSPIK = 0
+! ...FILL-IN (NUMBER OF NEW NONZEROES)
+      NBFILL = 0
+! ...LENGTH OF ALPHA REGION
+      NBLST  = 0
+! ...NUMBER OF BUCKETS (WILL = LONGEST NONBASIC ROW IN BASIS)
+      NBUCKT = 0
+!
+! PUT BASIC LOGICALS IN REAR
+      NBPOSN = NROWS
+!
+      DO 100 ROW=1,NROWS
+         IF( INDEX( IRSTAT+ROW ).LT.0 ) &
+             INDEX( IRSTAT+ROW ) = -INDEX( IRSTAT+ROW )
+         IF( INDEX( IRSTAT+ROW ).GE.3 )THEN
+! ROW IS BASIC (STAT = 3 OR 4)
+                         INT2 = -ROW
+!                             :...THIS IS BECAUSE MS COMPILER HAS BUG
+            INDEX( IPIVOT+ROW ) = INT2
+            INDEX( IRSTAT+ROW ) = -INDEX( IRSTAT+ROW )
+!  ...STAT < 0 USED THROUGHOUT TO FLAG ASSIGNED ROW
+            NBPOSN = NBPOSN - 1
+         ELSE
+! ROW IS NONBASIC (STAT = 1 OR 2)
+            INDEX( IPIVOT+ROW ) = 0
+!  ...THIS HOLDS ROW COUNT DURING AGENDA CONSTRUCTION (INTIALIZED = 0)
+         ENDIF
+100   CONTINUE
+!
+! NOW NBPOSN = NUMBER OF BASIC STRUCTURALS, SO NUMBER OF BASIC LOGICALS
+! MUST BE THE OTHERS:
+      NBLGL = NROWS - NBPOSN
+!
+! ALLOCATE MEMORY FOR BASIS LISTS (SEE GETBASIS.DOC)
+      BCSTAT = IFREE  + NROWS
+      BCPOSN = BCSTAT + NBPOSN
+      IFREE  = BCPOSN + NBPOSN + 1
+      IF( IFREE+NROWS.GE.MAXIND )GOTO 1300
+!
+! PUT BASIC COLUMNS INTO POSITION LIST
+      FRONT  = 0
+      NBASNZ = 0
+!
+      DO 500 COL=1,NCOLS
+         IF( INDEX( ICSTAT+COL ).LT.0 ) &
+             INDEX( ICSTAT+COL ) = -INDEX( ICSTAT+COL )
+         IF( INDEX( ICSTAT+COL ).LT.3 )GOTO 500
+         IF( FRONT.EQ.NBPOSN )THEN
+            PRINT *,' BASIS HAS TOO MANY STRUCTURAL ACTIVITIES'
+            GOTO 1390
+         ENDIF
+!  PUT COL INTO FRONT POSITION
+         FRONT = FRONT + 1
+         INDEX( BCPOSN + FRONT ) = COL
+!  SET COL COUNT AND UPDATE ROW COUNTS
+         NZ = BASE(ICINFO + COL) - BASE(ICINFO + COL-1)
+         I1 = INONZ + 2*BASE(ICINFO + COL-1)
+         I2 = I1 + 2*NZ - 1
+         NBASNZ = NBASNZ + NZ
+         COUNT = 0
+!
+         DO 300 I=I1,I2,2
+            ROW = INDEX(I)
+            IF( INDEX( IRSTAT+ROW ).LT.0 )GOTO 300
+!   ROW IS NOT ASSIGNED...ADD TO COLUMN COUNT
+            COUNT = COUNT + 1
+!   ...AND TO ROW COUNT
+            RCOUNT = INDEX( IPIVOT+ROW ) + 1
+            INDEX( IPIVOT+ROW ) = RCOUNT
+            IF( RCOUNT.GT.NBUCKT )NBUCKT = RCOUNT
+300      CONTINUE
+!
+         IF( COUNT.EQ.0 )THEN
+            PRINT *,' ** NULL COLUMN IN BASIS: ',NAME(ICNAME + COL)
+            GOTO 1390
+         ENDIF
+         INDEX( BCSTAT + FRONT ) = COUNT
+500   CONTINUE
+!
+      IF( FRONT.LT.NBPOSN )THEN
+         PRINT *,FRONT,' IS INSUFFICIENT NUMBER OF BASIC STRUCTURALS'
+         GOTO 1390
+      ENDIF
+!
+! NOW INDEX(IPIVOT+I) = COUNT OF ROW I, IF NOT ASSIGNED
+! ...FORM BUCKETS (NBUCKT = LONGEST ROW COUNT)
+      BUCKET = IFREE
+      BLSUCC = BUCKET + NBUCKT
+      BLPRED = BLSUCC + NROWS
+      IFREE  = BLPRED + NROWS + 1
+      IF( IFREE+NROWS.GT.MAXIND )GOTO 1300
+! INITIALIZE BUCKETS TO BE EMPTY
+      DO 750 I=1,NBUCKT
+750   INDEX( BUCKET+I ) = 0
+!
+      DO 800 ROW=1,NROWS
+         IF( INDEX( IRSTAT+ROW ).LT.0 )GOTO 800
+! ROW IS NOT ASSIGNED (IE, NOT BASIC)
+         COUNT = INDEX( IPIVOT+ROW )
+         IF( COUNT.EQ.0 )THEN
+            PRINT *,' ** NULL ROW IN BASIS: ',NAME(IRNAME+ROW)
+            GOTO 1390
+         ENDIF
+         CALL BUKADD(ROW,COUNT)
+800   CONTINUE
+!
+!                    SUMMARY OF BASET OUTCOME
+!                    ~~~~~~~~~~~~~~~~~~~~~~~~
+!  1. THE NUMBER OF BASIC VARIABLES IS VERIFIED TO = NUMBER OF ROWS.
+!  2. ALL LOGICAL BASICS ARE ASSIGNED TO THE REAR.  THIS IS DONE BY
+!     SETTING STATUS < 0 (AS IN SUBMATRIX SETTING FOR OTHER FUNCTIONS)
+!     AND SETTING INDEX( IPIVOT+ROW ) = -ROW...SEE GETBVP, WHICH
+!     INTERPRETS THIS AS LOGICAL PIVOT.
+!  3. NUMBER OF STRUCTURALS REMAINING TO BE ASSIGNED IS NBPOSN (PASSED
+!     IN COMMON...SEE DCGETMAT), AND 2 LISTS OF INDEXES, EACH OF LENGTH
+!     NBPOSN, ARE INITIALIZED:
+!     INDEX( BCPOSN+I ) = COLUMN IN I-TH POSITION (INITIALLY ARBITRARY)
+!     INDEX( BCSTAT+I ) = ASSOCIATED COUNT/STATUS
+!        ...WHILE THIS COLUMN IS UNASSIGNED (IE, FRONT <= I <= REAR),
+!           THIS IS THE COUNT;  ONCE ASSIGNED, THIS IS STATUS:
+!              STATUS > 0 MEANS THE INDEX IS THE PIVOT ROW,
+!                         AND THE COLUMN IS NONSPIKE;
+!              STATUS < 0 MEANS THE INDEX IS THE POSITION AT WHICH THE
+!                         COLUMN WAS FORCED TO BE SPIKE (ITS EARLIEST
+!                         INSERTION POSITION).
+!
+!  4. BUCKETS ARE SETUP, WHERE INDEX(BUCKET+B) POINTS TO ROW WITH
+!     COUNT = B (ELSE, 0).  ROWS WITH COUNT B (<= NBUCKT) ARE LINKED,
+!     WHERE INDEX(BLSUCC+I) = SUCCESSOR LINK OF ROW I AND
+!           INDEX(BLPRED+I) = PREDECESSOR LINK OR ROW I.
+!
+      IF( SWDBG )THEN
+         PRINT *,' END OF BASET'
+         CALL GDEBUG
+      ENDIF
+      RETURN
+!
+! ALL OVERFLOW EXITS COME HERE
+1300  PRINT *,' SORRY, NOT ENOUGH INDEX SPACE TO SETUP BASIS', &
+              '...NEED AT LEAST',IFREE
+! ALL ABORTIONS COME HERE
+1390  IFREE = IPIVOT
+      IF( SWDBG )CALL GDEBUG
+      RETURN 1
+!
+! ** BASET ENDS HERE
+      END
+      SUBROUTINE BASTAT(NFTRI,NBTRI,NLGL,NKRNL,NSPIK,NZORG,NFILL,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS GETS BASIS STATISTICS.
+!
+!    NFTRI = SIZE OF FORWARD TRIANGLE
+!    NBTRI = SIZE OF BACKWARD TRIANGLE, EXCEPT LOGICALS
+!    NLGL  = NUMBER OF BASIC LOGICALS
+!    NKRNL = SIZE OF KERNEL
+!    NSPIK = NUMBER OF SPIKES IN KERNEL
+!    NZORG = NUMBER OF ORIGINAL NONZEROES IN BASIS FACTORS
+!    NFILL = FILL-IN = NUMBER OF NEW NONZEROES IN BASIS FACTORS
+!
+! ...RCODE = 0 IFF ALL IS WELL
+!
+      include 'dcgetmat'
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( IPIVOT.LE.0 )THEN
+         PRINT *,' ** SYSERR IN BASTAT...',IPIVOT
+         RCODE = 13
+         RETURN
+      ENDIF
+! COPY STATS FOR CALLER
+      NFTRI = NBFTRI
+      NBTRI = NBBTRI
+      NLGL  = NBLGL
+      NKRNL = NBKRNL
+      NSPIK = NBSPIK
+      NZORG = NBASNZ
+      NFILL = NBFILL
+      RCODE = -PIVNUM
+      RETURN
+!
+! ** BASTAT ENDS HERE
+      END
+      SUBROUTINE GSPIKE(WHAT,SWADD,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS ADDSºDELETES SPIKESºNONSPIKES TOºFROM SUBMATRIX.
+!     SWADD = TRUE FOR ADD;  FALSE FOR DELETE
+!     WHAT := SPIKE º NONSPIKE º FTRI º BTRI º KERNEL
+!                                :..................:...ADDED 10-3-92
+! RETURNED:  NUMBER = NUMBER ADDED OR DELETED.
+!
+      include 'dcgetmat'
+!
+! IT IS PRESUMED CALLER HAS CHECKED THAT BASIS IS SETUP.
+!
+      CHARACTER*(*) WHAT
+      LOGICAL*1     SWADD
+! LOCAL
+      LOGICAL*1     SW
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! INITIALIZE
+      NUMBER = 0
+      POSN   = 0
+!        :...ALPHA NUMBER TO KNOW WHAT SEGMENT WE'RE IN
+      BBTRI1 = NBFTRI + NBKRNL + 1
+!        :...FIRST COL IN BTRI = NUMBER IN FTRI + NUMBER IN KERNEL + 1
+!
+!  ::: LOOP OVER ALPHA-FILE (FORWARD DIRECTION) :::
+      I = 1
+100   CONTINUE
+      IF( I.GT.NBLST )RETURN
+         ROW = INDEX(IRBLST + I)
+         IF( ROW.GT.0 )GOTO 190
+! BEGIN NEW ALPHA
+         POSN = POSN+1
+         IF( DABS( ZVALUE(IZBLST+I) ) .LE. 0. )THEN
+! ALPHA IS NONSPIKE...NEXT RECORD POINTS TO ORIGINAL COLUMN
+            I = I+1
+            IF( WHAT.EQ.'SPIKE' )GOTO 190
+            IF( WHAT.EQ.'BTRI'   .AND. POSN.LT.BBTRI1 )GOTO 190
+            IF( WHAT.EQ.'FTRI'   .AND. POSN.GT.NBFTRI )RETURN
+            IF( WHAT.EQ.'KERNEL' .AND. POSN.LE.NBFTRI )GOTO 190
+            IF( WHAT.EQ.'KERNEL' .AND. POSN.GE.BBTRI1 )RETURN
+! AT THIS POINT, WHAT = NONSPIKE º FTRI º KERNEL º BTRI, AND
+!  IF WHAT = FTRI,   WE ARE IN FTRI   SEGMENT (POSN <= NBFTRI)
+!  IF WHAT = BTRI,   WE ARE IN BTRI   SEGMENT (POSN >= BBTRI1)
+!  IF WHAT = KERNEL, WE ARE IN KERNEL SEGMENT (NBFTRI < POSN < BBTRI1)
+            COL = -INDEX(IRBLST + I)
+! COL WILL BE PROCESSED (ADDED OR DELETED) WHEN WE FALL THRU
+         ELSE IF( WHAT.EQ.'SPIKE' .OR. WHAT.EQ.'KERNEL' )THEN
+! NEW ALPHA IS SPIKE (AND MATCHES WHAT)...GET COL FROM PIVOT ROW
+            COL = INDEX(IPIVOT - ROW)
+         ELSE
+! DO NOT PROCESS
+            GOTO 190
+         ENDIF
+!
+! AT THIS POINT COL IS IN BASIS WITH TYPE MATCHING WHAT
+! ================== PROCESS COL ======================
+         CALL GETMAP('COL ',COL,SW)
+! SW = SWADD MEANS NO OPERATION NEEDED
+!    (COL IS ALEADY IN OR OUT OF SUBMATRIX, AS SUPPOSED TO BE)
+! SW <> SWADD MEANS COL MUST BE ADDED (SWADD=T) OR DELETED (SWADD=F)
+         SW = (SW.AND.SWADD ).OR. .NOT.(SW.OR.SWADD)
+         IF( .NOT.SW )THEN
+            CALL GPUTMP('COL ',COL,SWADD)
+            NUMBER = NUMBER+1
+         ENDIF
+! BOTTOM OF LOOP
+190   CONTINUE
+      I = I+1
+      GOTO 100
+!
+! ** GSPIKE ENDS HERE
+      END
+      SUBROUTINE BASPIK(ALPHA,NALPHA,COL,VPIVOT,POSN,ROW,VPVAL,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS ATTEMPTS TO INSERT SPIKE COL INTO ALPHA REGION AT POSN.
+!      VPIVOT = PIVOT TOLERANCE.
+! NORMAL RETURN MEANS WE GOT PIVOT ROW (SPIKE STORED IN ALPHA REGION).
+!      ROW   = 0 MEANS NO PIVOT ROW FOUND (NOT ADDED TO ALPHA REGION),
+!                IN WHICH CASE POSN MIGHT INCREASE TO INDICATE A NEW
+!                EARLIEST INSERTION.
+!      VPVAL = PIVOT VALUE (ROW > 0).
+! ...ALTERNATE RETURN MEANS NOT ENOUGH SPACE (FATAL).
+!
+      include 'dcgetmat'
+!
+      DOUBLE PRECISION ALPHA(NALPHA)
+!
+! CALLS  GALPHA, GFTRAN, BSPACE
+! BASIS POINTERS AND STATS USED (FROM BASE IN DCGETMAT):
+!       IRBLST = INDEX BASE FOR ALPHA REGION
+!       IVBLST = VALUE BASE FOR ALPHA REGION (FOR SINGLE PRECISION)
+!       IZBLST = VALUE BASE FOR ALPHA REGION (FOR DOUBLE PRECISION)
+!       NBLST  = LENGTH OF ALPHA REGION
+!       NBFILL = FILL-IN
+! NBFILL AND NBLST ARE UPDATED (IF SUCCESSFUL)
+! CALLER IS RESPONSIBLE FOR OTHER UPDATES (EG, REAR)
+!
+      PARAMETER (ABIT=5)
+!                :...WAIT TIME FOR NEXT ATTEMPT
+!                    (MUST BE AT LEAST 1...SEE BELOW)
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! FTRAN COL
+      CALL GALPHA('COL ',COL,ALPHA,NALPHA)
+      CALL GFTRAN(ALPHA,NALPHA)
+!  NOW -ALPHA IS OUR VECTOR TO BE STORED
+      IR = IRBLST + NBLST
+      IZ = IZBLST + NBLST
+      NZADD = 0
+      IMAX  = 0
+      VMAX  = 0.
+      IPOSN = NROWS
+      RPOSN = 0
+! CHECK SPACE FOR WORST CASE (100% DENSE ALPHA)
+      CALL BSPACE(NROWS,*1300)
+!
+! STORE WHILE LOOKING FOR UNASSIGNED ROW WITH LARGEST VALUE
+      DO 400 ROW=1,NROWS
+         ZALPHA = -ALPHA(ROW)
+         VABS = DABS(ZALPHA)
+         IF( VABS.LE.VPIVOT ) GOTO 400
+! ALPHA-VALUE IS ACCEPTABLE...ADD TO ALPHA REGION
+         NZADD = NZADD + 1
+         INDEX (IR + NZADD) = ROW
+         ZVALUE(IZ + NZADD) = ZALPHA
+         IF( INDEX( IRSTAT+ROW ).GT.0 .AND. VABS.GT.VMAX )THEN
+! ROW IS UNASSIGNED AND HAS GREATER PIVOT VALUE
+            ROWPSN = -INDEX( IPIVOT+ROW )
+            IF( ROWPSN.GT.0 )THEN
+! ...SEE IF ROW CAN BE INSERTED AT THIS POSITION
+               IF( POSN.GE.ROWPSN )THEN
+! ...IT CAN
+                  IMAX = NZADD
+                  VMAX = VABS
+               ELSE IF( ROWPSN.LT.IPOSN )THEN
+! ...IT CANNOT, AND THIS IS THE EARLIEST AMONG ROW CANDIDATES
+                  IPOSN = ROWPSN
+                  RPOSN = ROW
+               ENDIF
+            ENDIF
+         ENDIF
+400   CONTINUE
+!
+      IF( IMAX.EQ.0 )THEN
+! NO PIVOT ROW FOUND THAT COULD BE INSERTED AT POSN
+         ROW = 0
+         IF( RPOSN.GT.0 )THEN
+! THIS MEANS WE FOUND A PIVOT, BUT ITS ROW (RPOSN) COULD NOT BE
+! INSERTED YET
+             POSN = IPOSN
+         ELSE
+! THIS MEANS WE DID NOT FIND A PIVOT...TELL CALLER TO WAIT A BIT
+             POSN = POSN + ABIT
+         ENDIF
+         RETURN
+      ENDIF
+!
+! WE HAVE A PIVOT ROW
+      ROW    = INDEX (IR+IMAX)
+      ZPIVOT = ZVALUE(IZ+IMAX)
+      VPVAL  = ZPIVOT
+! PUT 1ST WITH SIGN TAG (SWITCH PIVOT WITH 1ST)
+      INDEX (IR+IMAX) = INDEX (IR+1)
+      ZVALUE(IZ+IMAX) = ZVALUE(IZ+1)
+      INDEX (IR+1) = -ROW
+      ZVALUE(IZ+1) = ZPIVOT
+! PUT ROW STAT (ASSIGNED)
+      INDEX( IRSTAT+ROW ) = -INDEX( IRSTAT+ROW )
+! ...AND COL PIVOT ON ROW
+      INDEX( IPIVOT+ROW ) = COL
+! UPDATE FILL-IN (NBFILL)
+      NZ = BASE(ICINFO + COL) - BASE(ICINFO + COL-1)
+      NBFILL = NBFILL + NZADD - NZ
+! UPDATE LENGTH OF BASIS ALPHA REGION (NBLST)
+      NBLST  = NBLST  + NZADD
+!
+      RETURN
+!
+! FATAL ERROR
+1300  RETURN 1
+!
+! ** BASPIK ENDS HERE
+      END
+      SUBROUTINE BSUPD8(ROW,COL,VPVAL,VPMIN,SPIKIN,REMAIN,FREQCH,FREQMS)
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS UPDATES STATS AFTER SPIKE COL INSERTION INTO ALPHA REGION,
+! PIVOTING ON ROW WITH PIVOT VALUE = VPVAL.
+!
+      include 'dcgetmat'
+!
+!       VPMIN  = MIN ABS PIVOT VALUE
+!       SPIKIN = NUMBER OF SPIKES INSERTED SO FAR
+!       REMAIN = NUMBER OF COLUMNS REMAINING TO BE ENTERED
+!       FREQCH = MESSAGE FREQUENCY CHECK
+!       FREQMS = MESSAGE FREQUENCY (USER SET)
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      SPIKIN = SPIKIN+1
+      IF( ABS( VPVAL ) .LT. VPMIN )VPMIN = ABS( VPVAL )
+      REMAIN = REMAIN - 1
+      FREQCH = FREQCH - 1
+      IF( FREQCH.LE.0 )THEN
+         PRINT *,' COLUMN ',NAME(ICNAME+COL), &
+                 ' (SPIKE) PIVOTING ON ROW ',NAME(IRNAME+ROW)
+         PRINT *,REMAIN,' COLUMNS REMAIN...'// &
+                        'FILL-IN SO FAR =',NBFILL
+         FREQCH = FREQMS
+         IF( SWDBG )THEN
+            PRINT *,' VPMIN =',VPMIN,' SPIKIN =',SPIKIN
+            PAUSE = PAUSE-3
+            IF(PAUSE.LE.0)CALL GDEBUG
+         ENDIF
+      ENDIF
+      RETURN
+!
+! ** BSUPD8 ENDS HERE
+      END
+!              ::: GBAGNDA2.FOR 12-01-92 :::
+!
+! DATES:  8-14-92...CHANGED BMINRO TO RETURN BASKET
+!         9-23-92...CHANGED BNONSP USING ZVALUE
+!                   ADDED BRLIST, USED INSTEAD OF BROLST
+!         9-24-92...REMOVED DOUBLE PRECISION ZVALUE FROM BNONSP
+!        11-23-92...FIXED BUG IN BRLIST
+!
+! THIS CONTAINS THE FOLLOWING GETMAT SUBROUTINES.
+!
+!     BFTRI......FORWARD TRIANGULARIZATION
+!     BBTRI......BACKWARD TRIANGULARIZATION
+!     BFRONT.....ASSIGN TO FRONT
+!     BREAR......ASSIGN TO REAR
+!     BKERNL.....ASSIGN WITHIN KERNEL
+!     BMINRO.....GET MIN ROW COUNT
+!     BROLST.....GET LIST OF UNASSIGNED COLUMNS INTERSECTING ROW
+!     BCOLST.....GET LIST OF UNASSIGNED ROWS INTERSECTING COLUMN
+!     BRLIST.....GET UNASSIGNED COLUMN INTERSECTING EACH ROW IN LIST
+!     BUKADD.....ADD ROW TO BUCKET
+!     BUKDEL.....DELETE ROW FROM BUCKET
+!     BSPACE.....CHECK SPACE IN INDEX AND VALUE ARRAYS.
+!     BNONSP.....PUT ALPHA VECTOR FOR NONSPIKE INTO ALPHA REGION
+!
+! SEE GALGRTHM.DOC AND GETDATA.DOC FOR DETAILS.
+!
+      SUBROUTINE BFTRI(*)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS EXECUTES FORWARD TRIANGULARIZATION, SEEKING TO ASSIGN ROW
+! SINGLETONS TO THE FRONT.
+! ...ALTERNATE RETURN IS SYSERR.
+!
+      include 'dcgetmat'
+!
+! CALLS  BFRONT, BRLIST
+! :::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::::
+! LOOP OVER ROWS WITH COUNT = 1 (1ST BUCKET)
+10    CONTINUE
+        IF( INDEX(BUCKET+1).EQ.0 )RETURN
+        CALL BMINRO(COUNT)
+! NOW WE HAVE A LIST OF ROWS WHOSE COUNTS = 1 (JUST A BASKET, NOT ALL)
+        CALL BRLIST(*1300)
+! LOOP OVER BASKET
+        NUMBER = INDEX(IFREE)
+        DO 500 I=1,NUMBER
+           ROW = INDEX( IFREE+I )
+           COL = INDEX( IFREE+NUMBER+I )
+           IF( COL.EQ.0 )GOTO 500
+! LOCATE COL
+           DO 100 CPOSN=FRONT,REAR
+              C = INDEX( BCPOSN+CPOSN )
+              IF( C.EQ.COL )GOTO 190
+100        CONTINUE
+! COL IS NO LONGER UNASSIGNED...ROW BECAME NULL
+           GOTO 500
+190        CONTINUE
+! ASSIGN TO FRONT
+           CALL BFRONT(ROW,CPOSN,1,*1300)
+500     CONTINUE
+      GOTO 10
+!
+! ERROR RETURN
+1300  CONTINUE
+      IF( SWDBG ) PRINT *,' AT 1300 IN BFTRI'
+      RETURN 1
+!
+! ** BFTRI ENDS HERE
+      END
+      SUBROUTINE BBTRI(*)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS EXECUTES BACKWARD TRIANGULARIZATION, SEEKING TO ASSIGN COLUMN
+! SINGLETONS TO THE REAR.
+! ...ALTERNATE RETURN IS SYSERR.
+!
+      include 'dcgetmat'
+!
+! LOCAL
+      LOGICAL*1  SW
+! CALLS  BREAR, BCOLST
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( FRONT.GT.REAR )RETURN
+10    CONTINUE
+      SW = .FALSE.
+!          :...INDICATES NO COLUMN SINGLETON FOUND
+!
+! ::: LOOP OVER BASIC COLUMNS :::
+! (DO NOT USED BECAUSE REAR CHANGES WHEN CALL BREAR)
+      CPOSN = FRONT
+100   CONTINUE
+         IF( INDEX(BCSTAT+CPOSN).NE.1 )GOTO 190
+! UNASSIGNED COLUMN IN POSITION CPOSN HAS COUNT = 1
+! ...GET ITS (UNASSIGNED) ROW
+         CALL BCOLST(CPOSN,1)
+         ROW = INDEX( IFREE+1 )
+! ASSIGN TO REAR
+         CALL BREAR(ROW,CPOSN,1,*1300)
+         SW = .TRUE.
+190   CONTINUE
+! INCREMENT CPOSN
+      IF( CPOSN.LT.REAR )THEN
+         CPOSN = CPOSN+1
+         GOTO 100
+      ENDIF
+! ::: END LOOP FROM FRONT TO REAR :::
+!
+      IF( SW ) GOTO 10
+      RETURN
+! ERROR RETURN
+1300  CONTINUE
+      IF(SWDBG)THEN
+         PRINT *,' ...AT 1300 IN BBTRI'
+      ENDIF
+      RETURN 1
+!
+! ** BBTRI ENDS HERE
+      END
+      SUBROUTINE BFRONT(ROW,CPOSN,COUNT,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS ASSIGNS COLUMN IN POSITION CPOSN WITH PIVOT ROW AT FRONT.
+! CALLER PASSES ROW COUNT (AVOIDS WORK AND NEEDED FOR BUCKET DELETION).
+! ...ALTERNATE RETURN IS SYSERR.
+!
+      include 'dcgetmat'
+!
+! CALLS  BCOLST, BROLST
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! SET COL AND ITS NEW COUNT (AFTER ASSIGNING ROW)
+      COL    = INDEX(BCPOSN + CPOSN)
+      CCOUNT = INDEX(BCSTAT + CPOSN) - 1
+! REMOVE ROW FROM BUCKET (IF IN ONE)
+      CALL BUKDEL(ROW,COUNT)
+! SWITCH CPOSN WITH FRONT
+      INDEX(BCPOSN + CPOSN) = INDEX(BCPOSN + FRONT)
+      INDEX(BCSTAT + CPOSN) = INDEX(BCSTAT + FRONT)
+      INDEX(BCPOSN + FRONT) = COL
+      INDEX(BCSTAT + FRONT) = ROW
+! SET ROW STATS
+      INDEX(IPIVOT + ROW)   = COL
+      INDEX(IRSTAT + ROW)   = -INDEX( IRSTAT + ROW)
+! ADVANCE FRONT
+      FRONT = FRONT + 1
+      IF( CCOUNT.GT.0 )THEN
+! UPDATE UNASSIGNED ROWS INTERSECTING COL
+         I1 = INONZ + 2*BASE(ICINFO + COL-1)
+         I2 = INONZ + 2*BASE(ICINFO + COL) - 1
+!
+         DO 100 I=I1,I2,2
+            R = INDEX(I)
+            IF( INDEX( IRSTAT + R ).LT.0 )GOTO 100
+!  ROW R IS NOT ASSIGNED...SET ITS COUNT (RCOUNT)
+            RCOUNT = INDEX( IPIVOT + R )
+!  ...REMOVE FROM BUCKET (IF IN ONE)
+            CALL BUKDEL(R,RCOUNT)
+!  ...DECREMENT ITS COUNT
+            RCOUNT = RCOUNT-1
+            IF( RCOUNT.EQ.0 )THEN
+!    ROW R HAS BECOME NULL...MARK EARLIEST INSERTION
+               INDEX(IPIVOT + R) = -FRONT
+            ELSE
+               INDEX(IPIVOT + R) = RCOUNT
+!    ADD R TO BUCKET
+               CALL BUKADD(R,RCOUNT)
+            ENDIF
+            CCOUNT = CCOUNT-1
+            IF( CCOUNT.LE.0 )GOTO 110
+100      CONTINUE
+      ENDIF
+!
+110   CONTINUE
+! FINISHED WITH ROW AND COL
+      IF( COUNT.EQ.1 )RETURN
+!
+! ROW COUNT > 1...FORCE OTHER UNASSIGNED COLUMNS INTERSECTING ROW
+!                 TO BE SPIKE
+      RCOUNT = COUNT - 1
+!                    :...ROW'S COUNT HAS DECREASED BY 1
+      CALL BROLST(ROW,RCOUNT)
+      NUMBER = INDEX( IFREE )
+!
+      NBSPIK = NBSPIK + NUMBER
+! INDEX(IFREE+I) CONTAINS I-TH COLUMN IN ROW'S LIST (I=1,...,NUMBER)
+! SAVE IFREE
+      TEMP   = IFREE
+! SET CCOUNT = MAX COL COUNT (SINCE WE DO NOT KNOW COL COUNTS)
+      CCOUNT = NROWS
+!
+      DO 200 IFREE=TEMP+NUMBER,TEMP+1,-1
+!            :...OK TO USE INDEX(IFREE) AFTER COL POSN (C) IS SET
+!                BECAUSE WE'RE GOING BOTTOM-UP
+         C = INDEX( IFREE )
+! COL IN POSN C IS SPIKE (NO PIVOT ROW ASSIGNED)
+         CALL BREAR(0,C,CCOUNT,*1300)
+200   CONTINUE
+!
+! RESTORE IFREE
+      IFREE = TEMP
+      RETURN
+!
+! ERROR RETURN
+1300  CONTINUE
+      IF( SWDBG )PRINT *,' AT 1300 IN BFRONT'
+      RETURN 1
+!
+! ** BFRONT ENDS HERE
+      END
+      SUBROUTINE BREAR(ROW,CPOSN,COUNT,*)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS ASSIGNS COLUMN IN POSITION CPOSN TO REAR WITH PIVOT ROW.
+! ROW = 0 MEANS COLUMN IS PUT INTO REAR AS A SPIKE, WITHOUT PIVOT ROW.
+! CALLER PASSES COLUMN COUNT TO AVOID EXTRA WORK (DOES NOT GET USED
+! IN THIS VERSION).
+! ...ALTERNATE RETURN IS SYSERR.
+!
+      include 'dcgetmat'
+!
+! CALLS  BROLST BUKDEL
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! SET COL AND ITS STATUS IN POSITION CPOSN
+      COL    = INDEX( BCPOSN + CPOSN )
+! SWITCH WITH REAR
+      INDEX(BCPOSN + CPOSN) = INDEX(BCPOSN + REAR)
+      INDEX(BCSTAT + CPOSN) = INDEX(BCSTAT + REAR)
+      INDEX(BCPOSN + REAR ) = COL
+      IF( ROW.GT.0 )THEN
+! ROW = PIVOT ASSIGNMENT
+         RCOUNT = INDEX( IPIVOT + ROW   )
+! REMOVE ROW FROM BUCKET (IF IN ONE)
+         CALL BUKDEL(ROW,RCOUNT)
+         INDEX( BCSTAT + REAR )  = ROW
+         INDEX( IPIVOT + ROW  )  = COL
+         INDEX( IRSTAT + ROW  )  = -INDEX( IRSTAT + ROW )
+         REAR = REAR - 1
+! DECREMENT COUNTS OF UNASSIGNED COLUMNS INTERSECTING ROW
+         RCOUNT = RCOUNT - 1
+!                        :...SUBTRACT THE COL JUST ASSIGNED
+         CALL BROLST(ROW,RCOUNT)
+         NUMBER = INDEX( IFREE )
+         IF( NUMBER.GT.0 )THEN
+            DO 100 I=IFREE+1,IFREE+NUMBER
+               C = INDEX(I)
+!  COLUMN C INTERSECTS ROW AND IS UNASSIGNED...DECREMENT ITS COUNT
+               INDEX( BCSTAT+C ) = INDEX( BCSTAT+C ) - 1
+100         CONTINUE
+         ENDIF
+      ELSE
+! NO PIVOT ASSIGNMENT (COL IS SPIKE)...ENTER EARLIEST INSERTION (FRONT)
+         INDEX( BCSTAT + REAR ) = FRONT
+         REAR = REAR - 1
+      ENDIF
+!
+      IF( COUNT.EQ.1 )RETURN
+!
+! IF WE GET HERE, CALLER HAS ASKED THAT COL BE MADE SPIKE AT REAR.
+! WE ALREADY PUT COL AT REAR WITH STAT = FRONT (EARLIEST INSERTION).
+! NOW WE MUST DECREMENT COUNTS OF COL'S UNASSIGNED ROWS.
+!
+      RCOUNT = NROWS
+      POSN   = REAR+1
+      CALL BCOLST(POSN,RCOUNT)
+      NUMBER = INDEX( IFREE )
+      IF( NUMBER.EQ.0 )RETURN
+! NOW INDEX( IFREE+I ) IS AN UNASSIGNED ROW THAT INTERSECTS COL
+! (I=1,...,NUMBER)
+!
+      DO 150 I=IFREE+1,IFREE+NUMBER
+         R = INDEX(I)
+         RCOUNT = INDEX( IPIVOT+R )
+! REMOVE FROM BUCKET (IF IN ONE)
+         CALL BUKDEL(R,RCOUNT)
+! DECREMENT ROW (R) COUNT
+         RCOUNT = RCOUNT - 1
+         IF( RCOUNT.EQ.0 )THEN
+!    ROW R HAS BECOME NULL...MARK EARLIEST INSERTION
+            INDEX( IPIVOT+R ) = -FRONT
+         ELSE
+            INDEX( IPIVOT+R ) = RCOUNT
+!    ADD TO BUCKET (MAYBE)
+            CALL BUKADD(R,RCOUNT)
+         ENDIF
+150   CONTINUE
+!
+      RETURN
+!
+! ** BREAR ENDS HERE
+      END
+      SUBROUTINE BKERNL(*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS ASSIGNS FROM WITHIN KERNEL...FOR THIS VERSION WE SHALL ASSIGN
+! ROW WITH MIN COUNT TO FRONT AND ONE OF ITS COLUMNS AS NONSPIKE.
+! ...ALTERNATE RETURN IS ERROR (BASIS SINGULAR) OR SYSERR.
+!
+      include 'dcgetmat'
+!
+! CALLS  BFTRI, BFRONT, BROLST, BMINRO
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( SWDBG )THEN
+         PRINT *,' ENTERED BKERNL WITH FRONT,REAR =',FRONT,REAR
+         CALL GDEBUG
+      ENDIF
+10    CONTINUE
+      IF( FRONT.GT.REAR )RETURN
+! GET MIN ROW COUNT (LIST OF ROWS PUT INTO INDEX(FREE+1),...)
+      CALL BMINRO(COUNT)
+      NUMBER = INDEX( IFREE )
+      IF( NUMBER.EQ.0 )THEN
+! ALL UNASSIGNED ROWS ARE NULL AMONG UNASSIGNED COLS
+! ...MAKE REMAINING COLS SPIKE
+         DO 50 I=FRONT,REAR
+50       INDEX(BCSTAT+I) = FRONT
+         NBSPIK = NBSPIK + REAR-FRONT+1
+         FRONT = REAR+1
+         RETURN
+      ENDIF
+! ROWS WITH MIN COUNT ARE IN INDEX(IFREE+I) FOR I=1,...,NUMBER
+! SAVE IFREE:
+      IFREE0= IFREE
+! SEE IF WE HAVE ENOUGH SPACE TO TALLY ROWS
+      IFRECO= IFREE + NUMBER + 1
+      IFRERO= IFRECO+ COUNT  + 1
+      MAX   = IFRERO+ REAR-FRONT+1
+      IF( COUNT.GT.5 .AND. MAX.LE.PMXIND )GOTO 190
+! EITHER COL HAS <= 5 NONZEROES, OR WE DON'T HAVE ENOUGH SPACE TO TALLY,
+! SO ASSIGN ONE TO FRONT AS NONSPIKE HAVING GREATEST PIVOT VALUE
+      VMAX = 0.
+      IFREE = IFRECO
+      DO 100 I=1,NUMBER
+         R = INDEX( IFREE0+I )
+         CALL BROLST(R,COUNT)
+         NUMCOL = INDEX(IFREE)
+         DO 75 J=1,NUMCOL
+            C   = INDEX( IFREE+J )
+            COL = INDEX( BCPOSN+C )
+            CALL GETAIJ(R,COL,V)
+            VABS = ABS( V )
+            IF( VABS.GT.VMAX )THEN
+               VMAX = VABS
+               ROW   = R
+               CPOSN = C
+            ENDIF
+75       CONTINUE
+100   CONTINUE
+      GOTO 900
+!     ========
+190   CONTINUE
+!     ========
+! WE HAVE ENOUGH SPACE TO TALLY THE NUMBER OF FRONT ASSIGNMENTS TO
+! PICK ONE THAT REDUCES THE MOST ROW COUNTS FOR SUBSEQUENT ASSIGNMENT
+! (WITH HOPE OF MORE TRIANGULARIZATION)
+!
+! WE SHALL USE INDEX AS FOLLOWS
+!            INDEX
+!            =====
+! IFREE0---> NUMBER OF ROWS WITH MIN COUNT (TO BE TALLIED)
+!            ROW 1
+!            ...
+!            ROW NUMBER
+! IFRECO---> FREE SPACE USED BY BROLST TO FETCH ADJACENT COLS (POSNS)
+!             (MAX # RESERVED = COUNT)
+! IFRERO---> FREE SPACE USED BY BCOLST TO FETCH ADJACENT UNASSIGNED ROWS
+!             (MAX # RESERVED = REAR-FRONT+1)
+!
+! INITIALIZE MAX NUMBER OF NONZEROES TO BE TALLIED (NZMAX)
+      NZMAX = 0
+      IMAX  = 1
+! ::: LOOP OVER ROW CONTENDERS :::
+      DO 300 I=1,NUMBER
+         ROW = INDEX( IFREE0+I )
+         IFREE = IFRECO
+         CALL BROLST(ROW,COUNT)
+! NOW INDEX( IFRECO+J)=J-TH COL (POSN) INTERSECTING ROW, FOR J=1,...,NC
+         IFREE = IFRERO
+! INITIALIZE NUMBER OF NONZEROES IN COLUMNS (NUMNZ) AND THE ONE
+! WITH MAX LENGTH (CNZMAX)
+         NUMNZ = 0
+         CNZMAX= 0
+! LOOP OVER COLUMNS INTERSECTING ROW TO TALLY THEIR ROW COUNTS
+         DO 200 J=1,COUNT
+            COLPSN = INDEX( IFRECO+J )
+            COLCNT = INDEX(BCSTAT+COLPSN)
+            NUMNZ = NUMNZ + COLCNT
+            IF( CNZMAX.LT.COLCNT )THEN
+               CNZMAX = COLCNT
+               CROMAX = COLPSN
+            ENDIF
+200      CONTINUE
+! NOW NUMNZ = NUMBER OF NONZEROES IN COLUMNS THAT WOULD BE ASSIGNED
+! IF ROW IS ASSIGNED (WITH THE DENSEST OF THOSE COLUMNS, CROMAX)
+!           = ROW COUNT DECREMENTATION
+! ...WE SEEK ROW WITH MAX VALUE OF NUMNZ
+         IF( NUMNZ.GT.NZMAX )THEN
+            NZMAX = NUMNZ
+            IMAX  = I
+            COLMAX= CROMAX
+         ENDIF
+300   CONTINUE
+!
+! NOW INDEX( IFREE0+IMAX ) = ROW THAT WILL CAUSE MOST REDUCTION IN
+! NEW ROW COUNTS IF ASSIGNED TO FRONT.  ITS DENSEST COLUMN IS COLMAX,
+! WHICH WE ASSIGN TO MINIMIZE ARITHMETIC THAT WILL BE DONE FOR ALPHA
+! CREATION (IE, ALPHA OF NON-SPIKE IS ORIGINAL COLUMN).
+!
+      ROW   = INDEX( IFREE0+IMAX )
+      CPOSN = COLMAX
+!
+900   CONTINUE
+! RESTORE IFREE
+      IFREE = IFREE0
+! ASSIGN COLUMN IN CPOSN TO FRONT WITH PIVOT ROW
+      CALL BFRONT(ROW,CPOSN,COUNT,*1313)
+      CALL BFTRI(*1313)
+      GOTO 10
+!
+! ** SYSERR
+1313  CONTINUE
+      IF( SWDBG )THEN
+         PRINT *,' AT 1313 IN BKERNL'
+         CALL GDEBUG
+      ENDIF
+      RETURN 1
+!
+! ** BKERNL ENDS HERE
+      END
+      SUBROUTINE BMINRO(COUNT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS DETERMINES UNASSIGNED ROWS OF MIN POSITIVE COUNT.  THE LIST OF
+! ROWS HAVING THIS MIN COUNT IS PUT INTO INDEX( IFREE+1 ),..., AND THE
+! NUMBER IN THIS LIST IS PUT INTO INDEX(IFREE).
+!
+      include 'dcgetmat'
+!
+      PARAMETER (BASKET=10)
+!                :...MAX NUMBER ROWS RETURNED (IF COUNT > 1)
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( SWDBG )THEN
+         PRINT *,' ENTERED BMINRO'
+         PAUSE = PAUSE-1
+         IF(PAUSE.LE.0)CALL GDEBUG
+      ENDIF
+! INITIALIZE NUMBER OF ROWS HAVING MIN COUNT
+      NUMBER = 0
+!
+! LOOK FOR BUCKET
+      DO 100 COUNT=1,NBUCKT
+         IF( INDEX( BUCKET+COUNT ).EQ.0 )GOTO 100
+! ROWS IN BUCKET HAVE MIN COUNT...TRAVERSE LIST TO COPY
+         ROW = INDEX( BUCKET+COUNT )
+         IF( COUNT.EQ.1 )THEN
+            MAXNUM = (PMXIND-IFREE-NROWS)/2
+         ELSE
+            MAXNUM = BASKET
+         ENDIF
+50       CONTINUE
+           NUMBER = NUMBER+1
+           INDEX(IFREE + NUMBER) = ROW
+           IF( NUMBER.EQ.MAXNUM )GOTO 900
+           ROW = INDEX( BLSUCC+ROW )
+         IF( ROW )900,900,50
+100   CONTINUE
+!
+900   CONTINUE
+      INDEX(IFREE) = NUMBER
+      RETURN
+!
+! ** BMINRO ENDS HERE
+      END
+      SUBROUTINE BROLST(ROW,COUNT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS OBTAINS LIST OF POSITIONS OF UNASSIGNED COLUMNS INTERSECTING
+! ROW, PUT INTO INDEX(IFREE+1),... WITH NUMBER PUT INTO INDEX(IFREE).
+! CALLER PASSES (MAX) ROW COUNT TO AVOID EXTRA WORK, ESPECIALLY IF
+! COUNT = 1.
+!
+      include 'dcgetmat'
+!
+! LOCAL
+      CHARACTER*1 CHAR
+! CALLS  GETSGN
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! INITIALIZE NUMBER
+      NUMBER = 0
+      IF( FRONT.GT.REAR )GOTO 900
+!  LOOP OVER POSITIONS BETWEEN FRONT AND REAR (UNASSIGNED)
+!  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      DO 100 POSN=FRONT,REAR
+         COL = INDEX(BCPOSN + POSN)
+         CALL GETSGN(ROW,COL,CHAR)
+         IF( CHAR.EQ.'-' .OR. CHAR.EQ.'+' )THEN
+            NUMBER = NUMBER + 1
+            INDEX(IFREE + NUMBER) = POSN
+            IF( NUMBER.GE.COUNT )GOTO 900
+         ENDIF
+100   CONTINUE
+!
+900   CONTINUE
+      INDEX(IFREE) = NUMBER
+      RETURN
+!
+! ** BROLST ENDS HERE
+      END
+      SUBROUTINE BCOLST(CPOSN,COUNT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS OBTAINS LIST OF UNASSIGNED ROWS INTERSECTING THE COLUMN IN CPOSN
+! ...PUT INTO INDEX( IFREE+1 ),... WITH NUMBER PUT INTO INDEX(IFREE).
+! CALLER PASSES MAX COLUMN COUNT TO AVOID EXTRA WORK.
+!
+      include 'dcgetmat'
+!
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+! GET COLUMN NUMBER (COL)
+      COL = INDEX(BCPOSN + CPOSN)
+! INITIALIZE NUMBER OF INTERSECTING ROWS
+      NUMBER = 0
+! SETUP LOOP OVER COL
+      I1 = INONZ + 2*BASE(ICINFO + COL-1)
+      I2 = INONZ + 2*BASE(ICINFO + COL) - 1
+!
+      DO 100 I=I1,I2,2
+         ROW = INDEX(I)
+         IF(INDEX( IRSTAT+ROW ).GT.0)THEN
+            NUMBER = NUMBER + 1
+            INDEX( IFREE+NUMBER ) = ROW
+            IF( NUMBER.GE.COUNT )GOTO 900
+         ENDIF
+100   CONTINUE
+!
+900   INDEX(IFREE) = NUMBER
+      RETURN
+!
+! ** BCOLST ENDS HERE
+      END
+      SUBROUTINE BRLIST(*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS GETS THE (UNIQUE) UNASSIGNED COLUMN FOR EACH ROW IN
+! INDEX(IFREE+1),...,INDEX(IFREE+NUMBER), WHERE NUMBER = INDEX(IFREE).
+! THE COLUMN POSITIONS ARE PUT INTO INDEX(IFREE+NUMBER+1),...,
+! INDEX(IFREE + 2*NUMBER).
+!
+! ...ALTERNATE RETURN IS NOT ENOUGH SPACE, OR SOME FATAL ERROR.
+!
+
+      include 'dcgetmat'
+!
+! LOCAL
+      CHARACTER*1  CHAR
+      CHARACTER*16 RNAME
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      NUMBER = INDEX(IFREE)
+      IF( NUMBER.LE.0 )RETURN
+      IF( IFREE+2*NUMBER .GT. PMXIND )THEN
+         PRINT *,' SORRY, NOT ENOUGH INDEX SPACE...NEED', &
+                 IFREE+2*NUMBER,'...MAX =',PMXIND
+         RETURN 1
+      ENDIF
+!
+! FOR EACH ROW IN LIST,
+! LOOP OVER POSITIONS BETWEEN FRONT AND REAR (UNASSIGNED COLS)
+!
+      DO 200 I=1,NUMBER
+         ROW = INDEX(IFREE+I)
+         IF( INDEX(IRSTAT+ROW) .LE. 0 .OR. &
+             INDEX(IPIVOT+ROW) .LE. 0 )THEN
+! ROW IS NOT ASSIGNED OR HAS 0 COUNT...RETURN COL=0
+            INDEX(IFREE+NUMBER + I) = 0
+            GOTO 200
+         ENDIF
+! ROW IS NOT ASSIGNED AND HAS POSITIVE COUNT...LOOK FOR ITS COL
+         DO 100 POSN=FRONT,REAR
+            COL = INDEX(BCPOSN + POSN)
+            CALL GETSGN(ROW,COL,CHAR)
+            IF( CHAR.EQ.'-' .OR. CHAR.EQ.'+' )THEN
+               INDEX(IFREE+NUMBER + I) = COL
+               GOTO 200
+            ENDIF
+100      CONTINUE
+! WE SHOULD NOT REACH HERE BECAUSE ROW SHOULD HAVE COL
+         GOTO 1300
+200   CONTINUE
+      RETURN
+!
+! NOW EACH (SINGLETON) ROW HAS ITS COL IDENTIFIED (IE, EACH ROW HAS
+! ONE COL, THOUGH THE SAME COL COULD BE THE ONE FOR MORE THAN ONE
+! ROW).  WE STORE COL, RATHER THAN POSN, BECAUSE THE POSITION MIGHT
+! CHANGE WHEN A ROW IS ASSIGNED (TO THE FRONT).
+!
+1300  CONTINUE
+      PRINT *,' ** SYSERR BRLIST...I =',I
+      PRINT *,' COUNT OF ROW',ROW,':'//NAME(IRNAME+ROW),'=', &
+                INDEX(IPIVOT+ROW)
+      IF( SWDBG )THEN
+         PRINT *,' FRONT,REAR =',FRONT,REAR
+         READ(*,'(A1)')CHAR
+         IF( CHAR.NE.' ')RETURN
+         PAUSE = 22
+         DO 1301 POSN=1,NROWS-NBLGL
+            COL = INDEX(BCPOSN + POSN)
+            CALL GETSGN(ROW,COL,CHAR)
+            IF(CHAR.EQ.' ')GOTO 1301
+            IF( PAUSE.LE.0 )THEN
+               READ(*,'(A1)')CHAR
+               IF( CHAR.NE.' ')RETURN
+               PAUSE = 23
+            ENDIF
+            IF( POSN.LT.FRONT .OR. POSN.GT.REAR )THEN
+               ROW = INDEX(BCSTAT+POSN)
+               RNAME = NAME(IRNAME+ROW)
+            ELSE
+               RNAME = 'UNASSIGNED'
+            ENDIF
+            PRINT *,POSN,COL,':',NAME(ICNAME+COL),CHAR//' '//RNAME
+            PAUSE = PAUSE-1
+1301     CONTINUE
+      ENDIF
+      RETURN 1
+!
+! ** BRLIST ENDS HERE
+      END
+      SUBROUTINE BUKADD(ROW,COUNT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS ADDS ROW TO COUNT BUCKET.
+!
+      include 'dcgetmat'
+
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( COUNT.LE.0 )RETURN
+      SUCC = INDEX( BUCKET + COUNT )
+      INDEX( BLSUCC+ROW   ) = SUCC
+      INDEX( BLPRED+ROW   ) = 0
+      IF( SUCC.GT.0 ) INDEX( BLPRED+SUCC  ) = ROW
+! ROW BECOMES NEW ENTRY
+      INDEX( BUCKET+COUNT ) = ROW
+!
+      RETURN
+!
+! ** BUKADD ENDS HERE
+      END
+      SUBROUTINE BUKDEL(ROW,COUNT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS DELETES ROW FROM COUNT BUCKET.
+!
+
+      include 'dcgetmat'
+
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      IF( COUNT.LE.0 )RETURN
+      PRED = INDEX( BLPRED + ROW )
+      SUCC = INDEX( BLSUCC + ROW )
+      IF( SUCC.GT.0 )INDEX( BLPRED+SUCC ) = PRED
+      IF( PRED.GT.0 ) THEN
+         INDEX( BLSUCC+PRED ) = SUCC
+      ELSE
+! ROW WAS ENTRY INTO BUCKET
+         INDEX( BUCKET+COUNT ) = SUCC
+      ENDIF
+!
+      RETURN
+!
+! ** BUKDEL ENDS HERE
+      END
+      SUBROUTINE BSPACE(NEED,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS CHECKS THERE IS ENOUGH INDEX AND VALUE SPACE TO STORE NEED.
+!
+      include 'dcgetmat'
+!
+! LOCAL
+      LOGICAL*1  SW
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      SW = .FALSE.
+      SPACE = NBLST+NEED
+      IF( IRBLST+SPACE.GT.MAXIND )THEN
+         write(6,*) 'need at least 3'
+         PRINT *,' ** NOT ENOUGH INDEX SPACE...NEED AT LEAST', &
+                 IRBLST+SPACE+PMXIND-MAXIND
+         SW = .TRUE.
+      ENDIF
+      IF( IVBLST+2*SPACE.GT.MAXVAL )THEN
+         write(6,*) ' need at least 1'
+         PRINT *,' ** NOT ENOUGH VALUE SPACE...NEED AT LEAST', &
+                 IVBLST+2*SPACE+PMXVAL-MAXVAL
+         SW = .TRUE.
+      ENDIF
+      IF( SW )THEN
+!C         PRINT *,' BASIS NOT SETUP'
+         IF( SWDBG )THEN
+            PRINT *,' IN BSPACE, NBLST,NEED =',NBLST,NEED
+            CALL GDEBUG
+         ENDIF
+         RETURN 1
+      ENDIF
+!
+      RETURN
+!
+! ** BSPACE ENDS HERE
+      END
+      SUBROUTINE BNONSP(ROW,COL,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS PUTS ALPHA VECTOR OF NONSPIKE COL WITH PIVOT ROW INTO ALPHA
+! REGION. (CALLER CHECKED SPACE).
+! ...ALTERNATE RETURN IS SYSERR.
+!
+      include 'dcgetmat'
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::
+      INDEX(IPIVOT + ROW) = COL
+! STORE 2 RECORDS
+      INDEX (IRBLST + NBLST+1) = -ROW
+      ZVALUE(IZBLST + NBLST+1) =  0.
+      NBLST = NBLST+2
+      INDEX (IRBLST + NBLST)   = -COL
+!  LOOP OVER COL'S NONZEROES TO GET PIVOT (STORED IN 2ND VALUE)
+      I1 = INONZ + 2*BASE(ICINFO + COL-1)
+      NZ = BASE(ICINFO+COL) - BASE(ICINFO+COL-1)
+      I2 = I1 + 2*NZ - 1
+!
+      DO 100 I=I1,I2,2
+         IF( INDEX(I).NE.ROW )GOTO 100
+         CALL GETVAL(V,I+1)
+         ZVALUE(IZBLST + NBLST) = -V
+!                                 :...STORED ALPHA = -COEF
+         RETURN
+100   CONTINUE
+      PRINT *,' ** SYSERR IN BNONSP...',ROW,':',NAME(IRNAME+ROW), &
+             COL,':',NAME(ICNAME+COL)
+      RETURN 1
+!
+! ** BNONSP ENDS HERE
+      END
+!                  ::: GBRANGE.FOR  6=8-30-94 :::
+!
+! LAST DATES:  Earlier dates deleted
+!              8-04-93...Allow degenerate pivot (CC 6-24 in GPIVOT)
+!              6-24-94...Fixed bug in GPIVOT
+!
+! This contains routines for redundancy testing.
+!     GBARNG.....computes ranges of basic variables
+!     GBRNGV.....gives range and identity of basic variable
+!                (used only after GBARNG is done)
+!     GPIVOT.....pivots to new basis
+!     BASCLR.....clears basis (restores space)
+!     GBUNDO.....undo pivot(s)
+!     GBPHST.....gives pivot history
+!     GPVST0.....puts|sets solution status before pivot|after undo
+!
+      SUBROUTINE GBARNG(RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! This computes ranges of basic variables, allowing nonbasics to
+! be at either of their bound values.
+!
+
+      include 'dcgetmat'
+
+!
+      COMMON/IBRNGV/IMIN,IMAX
+! LOCAL
+      CHARACTER*1  CHAR
+      CHARACTER*4  ROWCOL
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::
+! SETUP MEMORY
+      IV0   = IVFREE
+      IYL   = IVFREE
+      IYU   = IYL + NROWS
+      IVFREE= IYU + NROWS + 1
+      IZFREE= IVFREE/2 + 1
+      IMIN  = IZFREE
+      IMAX  = IZFREE + NROWS
+      IALPHA= IMAX + NROWS
+      IVFREE= 2*(IALPHA + NROWS) + 1
+      IF(IVFREE.GT.MAXVAL)THEN
+         PRINT *,' Sorry, not enough value space...need',IVFREE
+         RCODE = 1
+         GOTO 9000
+      ENDIF
+      NALPHA = NROWS
+!
+! NOTE:  IMIN, IMAX, IALPHA POINTERS ARE FOR DOUBLE PRECISION
+!     ZVALUE(IMIN+i) = MIN VALUE OF BASIC VARIABLE i
+!     ZVALUE(IMAX+i) = MAX VALUE OF BASIC VARIABLE i
+!     ZVALUE(IALPHA+1,...) = VECTOR FOR FTRAN OF NONBASIC COLUMN
+! ==============================================================
+!  INITIAL PASS TO REDUCE INFINITE BOUNDS OF NONBASICS
+!   (USING ORIGINAL MATRIX)
+!
+! USE ROW BOUND SPACE FOR ACCUMULATION
+      DO 10 I=1,NROWS
+         VALUE(IYL+I)=0.
+         VALUE(IYU+I)=0.
+10    CONTINUE
+!
+      I1 = INONZ
+!  ::: LOOP OVER COLUMNS TO ACCUMULATE ROW RANGES :::
+      DO 50 J=1,NCOLS
+         NZ = BASE(ICINFO + J) - BASE(ICINFO + J-1)
+         IF(NZ.EQ.0)GOTO 50
+         IF(INDEX(ICSTAT+J).GT.0)GOTO 40
+! COLUMN (J) IS IN SUBMATRIX AND NOT NULL
+         I2 = I1 + 2*NZ - 1
+         CALL GETBND('COL ',J,VLO,VUP)
+!
+         DO 25 I=I1,I2,2
+            ROW = INDEX(I)
+            CALL GETVAL(V,I+1)
+            IF(V.LT.0.)THEN
+! SWITCH BOUNDS
+               VL = -VUP
+               VU = -VLO
+               V = -V
+            ELSE
+               VL = VLO
+               VU = VUP
+            ENDIF
+! NOW V > 0 AND V*¦VL,VUá = RANGE OF TERM FOR ROW
+            IF(VL.GT.-VINF)THEN
+               VALUE(IYL+ROW) = VALUE(IYL+ROW) + VL*V
+            ELSE
+               VALUE(IYL+ROW) = -VINF
+            ENDIF
+            IF(VU.LT. VINF)THEN
+               VALUE(IYU+ROW) = VALUE(IYU+ROW) + VU*V
+            ELSE
+               VALUE(IYU+ROW) =  VINF
+            ENDIF
+25       CONTINUE
+! ADVANCE NONZERO POINTER
+40       I1 = I2+1
+! NEXT COLUMN
+50    CONTINUE
+!   ::: END LOOP OVER COLUMNS :::
+!
+! LOOP OVER ROWS TO PUT STRONGER OF ORIGINAL AND INFERRED BOUNDS
+      DO 75 I=1,NROWS
+         CALL GETBND('ROW ',I,VL,VU)
+         IF(VL.GT.VALUE(IYL+I)) VALUE(IYL+I)=VL
+         IF(VU.LT.VALUE(IYU+I)) VALUE(IYU+I)=VU
+75    CONTINUE
+!
+! NOW VALUE(IYL+i) HAS THE STRONGER OF THE ORIGINAL AND REDUCED BOUND
+!     VALUE(IYU+i) "
+!
+!   ============= END INITIAL BOUND REDUCTION ==============
+!
+! INITIALIZE ACCUMULATION
+      DO 100 I=IMIN+1,IMAX+NROWS
+100   ZVALUE(I)=0.
+!
+! LOOP OVER NONBASIC VARIABLES TO ACCUMULATE RANGES
+!
+! FIRST, THE ROWS
+      ROWCOL = 'ROW '
+      ISTAT  = IRSTAT
+      NUMBER = NROWS
+      ZSIGN  = -1.
+!
+200   CONTINUE
+!
+!   ::: MAIN LOOP OVER ROWS/COLUMNS TO ACCUMULATE RANGES :::
+!       ...SKIPPING THE BASICS AND THOSE NOT IN SUBMATRIX
+      DO 500 K=1,NUMBER
+         STAT = INDEX(ISTAT+K)
+         IF(STAT.GT.0)GOTO 500
+! ...ROW/COL IS IN SUBMATRIX...LOOK AT STATUS
+         CHAR = CHARST(-STAT)
+         IF(CHAR.NE.'L'.AND.CHAR.NE.'U')GOTO 500
+! STATUS IS L OR U (IE, NONBASIC)
+! ...FTRAN ITS COLUMN
+         CALL GALPHA(ROWCOL,K,ZVALUE(IALPHA+1),NALPHA)
+         CALL GFTRAN(ZVALUE(IALPHA+1),NALPHA)
+! ...GET ITS BOUNDS
+         IF(ROWCOL.EQ.'ROW ')THEN
+! USE REDUCED BOUNDS FOR NONBASIC ROW
+            VLO = VALUE(IYL+K)
+            VUP = VALUE(IYU+K)
+         ELSE
+! USE ORIGINAL BOUNDS FOR NONBASIC COLUMN
+            CALL GETBND(ROWCOL,K,VLO,VUP)
+         ENDIF
+!
+! LOOP OVER ALPHA'S TO ACCUMULATE RANGE
+         DO 300 I=1,NROWS
+            V = ZSIGN*ZVALUE(IALPHA+I)
+!               :....NEGATIVE SIGN FOR ROW NONBASIC
+!
+! NOW FOR THE EQUATONS:  u(i)=M(i,.)w
+!                u(i) = this basic level
+!                w    = this nonbasic variable
+!              M(i,*) = rate of substitution (V)
+!
+! THE EXTREMES ARE FROM w BEING AT ITS APPROPRIATE BOUND,
+! DEPENDING UPON THE SIGN OF THE RATE (V)
+!
+            IF(V.LE.-VTOLAB)THEN
+! RATE < 0...SWITCH BOUNDS
+               VL = -VUP
+               VU = -VLO
+               V  = -V
+            ELSE IF(V.GE.VTOLAB)THEN
+! RATE > 0
+               VL = VLO
+               VU = VUP
+            ELSE
+! RATE = 0
+               GOTO 300
+            ENDIF
+!  ...NOW V = ABS(RATE) AND RANGE OF NONBASIC TERM IS (V*VL,V*VU)
+            IF(VL.GT.-VINF)THEN
+               ZVALUE(IMIN+I) = ZVALUE(IMIN+I) + V*VL
+            ELSE
+               ZVALUE(IMIN+I) = -VINF
+            ENDIF
+            IF(VU.LT. VINF)THEN
+               ZVALUE(IMAX+I) = ZVALUE(IMAX+I) + V*VU
+            ELSE
+               ZVALUE(IMAX+I) = VINF
+            ENDIF
+300      CONTINUE
+!      ::: END LOOP OVER ALPHA :::
+! NEXT NONBASIC
+500   CONTINUE
+!  ::: END LOOP OVER NONBASIC ROW/COLUMNS IN SUBMATRIX :::
+!
+      IF(ROWCOL.EQ.'COL ')GOTO 9000
+! NOW THE COLUMNS
+        ROWCOL = 'COL '
+        ISTAT  = ICSTAT
+        NUMBER = NCOLS
+        ZSIGN  = 1.
+      GOTO 200
+!
+9000  CONTINUE
+!
+! RESTORE FREE VALUE SPACE (IVFREE)
+      IVFREE = IV0
+      RETURN
+!
+! ** GBARNG ENDS HERE
+      END
+      SUBROUTINE GBRNGV(I,ROWCOL,NUMBER,VMIN,VMAX)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! This gives the identity (ROWCOL NUMBER) of the I-th basic variable
+! and its range (VMIN, VMAX) computed from GBARNG.
+!
+      include 'dcgetmat'
+!
+! NOTE:  THIS MUST BE CALLED JUST AFTER GBARNG (AT LEAST BEFORE
+!        ANY OTHER ROUTINE THAT USES FREE VALUE SPACE) BECAUSE
+!        THE POINTER TO FREE VALUE SPACE (IVFREE) HAS BEEN RESTORED,
+!        SO THE RANGES WILL BE LOST.
+!
+      CHARACTER*4 ROWCOL
+      COMMON/IBRNGV/IMIN,IMAX
+! :::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::
+! GET PIVOT ON ROW (I)
+      CALL GETBVP(I,ROWCOL,NUMBER)
+      VMIN = ZVALUE(IMIN+I)
+      VMAX = ZVALUE(IMAX+I)
+      RETURN
+!
+! ** GBRNGV ENDS HERE
+      END
+      SUBROUTINE GPIVOT(RCIN,NUMIN,RCOUT,NUMOUT,ALPHA,NALPHA,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+
+      include 'dcgetmat'
+!
+! This pivots nonbasic row|col (RCIN NUMIN) into basis, in exchange
+! for basic row|col (RCOUT NUMOUT).
+! If NUMOUT = 0 (doesn't matter what RCOUT is), caller wants
+! automatic selection: 1st basic driven to a bound.  If none, NUMOUT=0
+! upon return (pivot not performed, but no error message is given here);
+! otherwise, (RCOUT NUMOUT) is set here for caller.
+!
+! CALLER IS RESPONSIBLE FOR INTEGRITY OF IN AND OUT VARS.
+! CALLER MUST REFRESH DUAL PRICES (LEVELS SHOULD BE OK).
+! ===============================
+! SOLUTION STATUS (SOLST) IS SET = INFEASIBLE IF THIS HAPPENS
+! OTHERWISE, SOLST NOT CHANGED (CALLER MAY WANT TO CHANGE).
+!
+! ALPHA  = array to perform FTRAN (double precision)
+! NALPHA = length of ALPHA...must be >= NROWS
+! ...Alternate return is fatal error (pivot not performed).
+!
+      CHARACTER*(*) RCIN, RCOUT
+      INTEGER       NUMIN,NUMOUT,NALPHA
+      DOUBLE PRECISION ALPHA(NALPHA)
+! LOCAL
+      CHARACTER*1   STAT,STATIN,STATOT,STOLD,STNEW
+      CHARACTER*16  CNAME
+      CHARACTER*4   ROWCOL
+      REAL       TOLPIV, TOL0
+      PARAMETER (TOLPIV=1.0E-14,TOL0=1.0E-12)
+!                :              :...0 TOLERANCE (TO ADD ALPHA)
+!                :...PIVOT TOLERANCE SLIGHTLY > NONSPIKE IN BAGNDA
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::::
+      IF( PIVNUM.GE.PIVMAX )THEN
+         PRINT *,' ** MAX NUMBER OF PIVOTS REACHED'// &
+                 ' (USE UNDO OR CLEAR)'
+         GOTO 1390
+      ENDIF
+      IF( RCIN.NE.'COL ')THEN
+         PRINT *,' ** ENTERING VARIABLE MUST BE A COLUMN'
+         GOTO 1390
+      ENDIF
+! CHECK THAT IN VAR IS NONBASIC AND GET DIRECTION OF CHANGE
+      CALL GETBND(RCIN,NUMIN,VLIN,VUIN)
+      CALL GETSOL(RCIN,NUMIN,VXIN,VPIN,STATIN,STNUM)
+      IF( STATIN.EQ.'L' )THEN
+         INDIR = 1
+         VIN = VLIN
+      ELSE IF( STATIN.EQ.'U' )THEN
+         INDIR = -1
+         VIN = VUIN
+      ELSE
+         CALL GETNAM(RCIN,NUMIN,CNAME)
+         PRINT *,' ** COLUMN '//CNAME(:NAMELN)//' IS ALREADY BASIC'
+         GOTO 1390
+      ENDIF
+! FTRAN THE NONBASIC VAR
+      IF( NALPHA.LT.NROWS )THEN
+         PRINT *,' ** SYSERR IN GPIVOT...NALPHA =',NALPHA,' <',NROWS
+         GOTO 1390
+      ENDIF
+      CALL GALPHA(RCIN,NUMIN,ALPHA,NALPHA)
+      CALL GFTRAN(ALPHA,NALPHA)
+!
+! AT THIS POINT, WE HAVE FOR INCOMING (NONBASIC) VAR:
+!       RCIN NUMIN = {ROW |COL } NUMBER
+!       STATIN     = CURRENT STATUS (L OR U)
+!       INDIR      = DIRECTION OF CHANGE (1 OR -1)
+!       VLIN,VUIN  = CURRENT BOUNDS (OF IN VARIABLE)
+!       VIN        = CURRENT LEVEL (VLIN OR VUIN)
+!       VPIN       = CURRENT PRICE
+!       ALPHA      = RATES OF SUBSTITUTION
+      IF( NUMOUT.GT.0 )GOTO 400
+! ==================== AUTOMATIC SELECTION ====================
+! FIND BASIC THAT'S DRIVEN TO BOUND 1ST
+! NOTE: FOR AUTOMATIC SELECTION, THE RANGE OF IN VAR IS ALSO A LIMIT
+      IF( INDIR.GT.0 )THEN
+         IF( VUIN.GE.VINF )THEN
+            ZTHETA = VINF
+         ELSE
+            ZTHETA = VUIN - VLIN
+         ENDIF
+      ELSE
+         IF( VLIN.LE.-VINF )THEN
+            ZTHETA = VINF
+         ELSE
+            ZTHETA = VUIN - VLIN
+         ENDIF
+      ENDIF
+! ZTHETA = RANGE OF IN VAR BEFORE IT HITS OTHER BOUND
+!   ::: LOOP OVER BASICS :::
+      DO 100 I=1,NROWS
+         VRATE = ALPHA(I)*INDIR
+         CALL GETBVP(I,ROWCOL,NUMBER)
+         CALL GETBND(ROWCOL,NUMBER,VL,VU)
+         CALL GETSOL(ROWCOL,NUMBER,VX,VP,STOLD,STNUM)
+         IF( VRATE.GT.TOLPIV )THEN
+! BASIC INCREASES
+            DIR = 1
+            IF( STOLD.EQ.'I' )THEN
+               IF( VX.GT.VU )GOTO 100
+! INFEASIBLE BASIC IS DRIVEN TOWARDS ITS LOWER BOUND
+               Z = (VL - VX)/VRATE
+               STAT = 'L'
+            ELSE
+! FEASIBLE   BASIC IS DRIVEN TOWARDS ITS UPPER BOUND
+               IF( VU.GE.VINF )GOTO 100
+               Z = (VU - VX)/VRATE
+               STAT = 'U'
+            ENDIF
+         ELSE IF( VRATE.LT.-TOLPIV )THEN
+! BASIC DECREASES
+            DIR = -1
+            IF( STOLD.EQ.'I' )THEN
+               IF( VX.LT.VL )GOTO 100
+! INFEASIBLE BASIC IS DRIVEN TOWARDS ITS UPPER BOUND
+               Z = (VU - VX)/VRATE
+               STAT = 'U'
+            ELSE
+! FEASIBLE   BASIC IS DRIVEN TOWARDS ITS LOWER BOUND
+               IF( VL.LE.-VINF )GOTO 100
+               Z = (VL - VX)/VRATE
+               STAT = 'L'
+            ENDIF
+         ELSE
+! PIVOT NOT ACCEPTABLE
+            GOTO 100
+         ENDIF
+! NOW Z = ABSOLUTE CHANGE IN LEVEL OF NONBASIC AT WHICH I-TH BASIC
+!         IS DRIVEN TO BOUND
+         IF( Z.GE.ZTHETA )GOTO 100
+! THIS BASIC BLOCKS THE NONBASIC
+         NUMOUT = NUMBER
+         PIVROW = I
+         RCOUT  = ROWCOL
+         ZTHETA = Z
+         OUTDIR = DIR
+         STATOT = STOLD
+         STNEW  = STAT
+         VXOUT  = VX
+!C ADDED 8-30-94
+         VLOUT  = VL
+         VUOUT  = VU
+!C =============
+         IF( Z.LE.0. )GOTO 500
+! NEXT BASIC
+100   CONTINUE
+      IF( NUMOUT.EQ.0 )RETURN
+      GOTO 500
+! ================= END AUTOMATIC SELECTION ==================
+400   CONTINUE
+! CALLER HAS SPECIFIED OUT VAR...FIND ITS PIVOT ROW
+      ROWCOL = RCOUT
+      CALL GETPIV(PIVROW,ROWCOL,NUMOUT)
+      IF( PIVROW.EQ.0 )THEN
+         CALL GETNAM(ROWCOL,NUMOUT,CNAME)
+         PRINT *,' ** '//ROWCOL//CNAME(:NAMELN)//' IS NOT BASIC'
+         GOTO 1390
+      ENDIF
+      VPIVOT = ALPHA(PIVROW)
+! GET OUT VAR DIRECTION OF CHANGE, RELATIVE TO INDIR (SAME OR OPPOSITE)
+      IF( VPIVOT.GT.TOLPIV )THEN
+         OUTDIR = INDIR
+      ELSE IF( VPIVOT.LT.-TOLPIV )THEN
+         OUTDIR = -INDIR
+      ELSE
+         GOTO 1310
+      ENDIF
+! FIND BLOCKING BOUND OF OUT VAR (DRIVEN BY IN VAR)
+      CALL GETBND(RCOUT,NUMOUT,VLOUT,VUOUT)
+      CALL GETSOL(RCOUT,NUMOUT,VXOUT,VPOUT,STATOT,STNUM)
+!C 6-24-94
+! IS PIVOT DEGENERATE?
+      IF( ABS(VXOUT).LE.VTOLAB .AND. ABS(VIN).LE.VTOLAB )THEN
+! -YES, IS IT A BOUND?
+         IF( ABS(VLOUT).LE.VTOLAB )THEN
+            STNEW = 'L'
+         ELSE IF( ABS(VUOUT).LE.VTOLAB )THEN
+            STNEW = 'U'
+         ELSE
+            GOTO 450
+         ENDIF
+! -YES, DRIVING DIRECTION DOES NOT MATTER...LET PIVOT OCCUR
+         VOUT = 0.
+         GOTO 490
+      ENDIF
+450   CONTINUE
+!C =======
+      IF( (STATOT.EQ.'B' .AND.OUTDIR.EQ. 1 ) .OR. &
+          (VXOUT.GT.VUOUT.AND.OUTDIR.EQ.-1 ) )THEN
+! ...OUT VAR DRIVEN TO VU (MUST BE FINITE)
+         IF( VUOUT.GE.VINF )GOTO 1320
+         STNEW = 'U'
+         VOUT  = VUOUT
+      ELSE IF( (STATOT.EQ.'B' .AND.OUTDIR.EQ.-1 ) .OR. &
+               (VXOUT.LT.VLOUT.AND.OUTDIR.EQ. 1 ) )THEN
+! ...OUT VAR DRIVEN TO VL (MUST BE FINITE)
+         IF( VLOUT.LE.-VINF )GOTO 1320
+         STNEW = 'L'
+         VOUT  = VLOUT
+      ENDIF
+!C 6-24-94
+490   CONTINUE
+!C =======
+      ZTHETA = (VOUT - VXOUT)/VPIVOT
+      IF( ZTHETA.LT.0 )ZTHETA = -ZTHETA
+! ============ GOT OUT VAR AND PIVOT ROW =============
+500   CONTINUE
+! ========== WE HAVE XB = X + VPIVOT*üXN =============
+!                    :        :      :...IN VAR CHANGE
+!                    :        :...RATE OF SUBSTITUTION
+!                    :...OUT VAR MOVES OUTDIR TO REACH VOUT (VL OR VU)
+!     ==============================
+!     ZTHETA = |üXN| = |(XB - X)/VPIVOT|
+!                        :    :...CURRENT LEVEL (VXOUT)
+!                        :...NEW LEVEL (VOUT)
+!     ==============================
+! AT THIS POINT, WE HAVE FOR OUTGOING BASIC VAR:
+!     RCOUT NUMOUT = {ROW |COL } NUMBER
+!     PIVROW       = PIVOT ROW
+!     OUTDIR       = DIRECTION (1 OR -1)
+!     STATOT       = OLD STATUS (B OR I)
+!     STNEW        = NEW STATUS (U OR L)
+!     VLOUT, VUOUT = OUT VAR BOUNDS
+!     VXOUT        = OLD LEVEL
+!     VOUT         = NEW LEVEL (VUOUT OR VLOUT)
+      V = ZTHETA
+      VPIVOT = ALPHA(PIVROW)
+      IF( V.GE.VINF.OR.ABS(VPIVOT).LT.TOLPIV )THEN
+         PRINT *,' ** SYSERR GPIVOT...VTHETA,VPIVOT =',V,VPIVOT
+         GOTO 1390
+      ENDIF
+! SET IN VAR CHANGE (MAGNITUDE * DIRECTION)
+      ZTHETA = ZTHETA*INDIR
+! SAVE POINTERS IN CASE WE ENCOUNTER ERROR
+      IFREE0 = IFREE
+      IVFRE0 = IVFREE
+      IRBLS0 = IRBLST
+      IVBLS0 = IVBLST
+      IZBLS0 = IZBLST
+      NBLST0 = NBLST
+! PUT CURRENT SOLUTION STATUS INTO NEW PIVOT
+      CALL GPVST0('PUT ',PIVNUM+1)
+! =============== ADD ALPHA-VECTOR ===============
+      IF( NBLST.EQ.0 )THEN
+! NO ALPHA REGION (LOGICAL BASIS)...CREATE ONE
+         IRBLST = IPIVOT + NROWS + 1
+         IVBLST = IVFREE   + 1
+         IZBLST = IVBLST/2 + 1
+! FIRST ALPHA RECORD IS DUMMY (NEEDED FOR BTRAN)
+         INDEX(IRBLST) = 0
+         ZVALUE(IZBLST) = VINF
+! FIRST ALPHA IS NONSPIKE
+         CALL BNONSP(PIVROW,NUMIN,*1300)
+         GOTO 900
+      ENDIF
+!
+! WE WANT TO ADD ALPHA AT REAR (AS SPIKE)
+! CHECK SPACE FOR WORST CASE (100% DENSE ALPHA)
+      CALL BSPACE(NROWS,*1300)
+      NBLST = NBLST + 1
+! PUT PIVOT FIRST (TAG ROW INDEX WITH -)
+      INDEX (IRBLST + NBLST) = -PIVROW
+      ZVALUE(IZBLST + NBLST) = -ALPHA(PIVROW)
+!                              :...STORING -ALPHA
+900   CONTINUE
+! SET ZERO TOLERANCE = MIN{TOL0, VTOLAB}  (SHOULD = TOL0)
+      IF( VTOLAB.LT.TOL0 )THEN
+         ZTOL0 = VTOLAB
+      ELSE
+         ZTOL0 = TOL0
+      ENDIF
+!
+! ::: LOOP TO PUT OTHER ALPHA'S :::
+      DO 1000 I=1,NROWS
+         IF( I.EQ.PIVROW )GOTO 1000
+         ZABS = ALPHA(I)
+         IF( ZABS.LT.0. )ZABS = -ZABS
+         IF( ZABS .LT. ZTOL0 )GOTO 1000
+! ALPHA-VALUE IS ACCEPTABLE (NONZERO)
+         IF( NBLST0.GT.0 )THEN
+! ADD TO ALPHA REGION
+            NBLST = NBLST + 1
+            INDEX (IRBLST + NBLST) = I
+            ZVALUE(IZBLST + NBLST) = -ALPHA(I)
+!                                    :...STORING -ALPHA
+         ENDIF
+! (NBLST0 = 0 MEANS WE ALREADY ADDED ALPHA AS NONSPIKE;
+!  WE ENTERED THIS LOOP JUST TO UPDATE BASIC LEVELS)
+! UPDATE BASIC LEVEL = CURRENT + RATE*(CHANGE IN XN)
+         CALL GETBVP(I,ROWCOL,NUMBER)
+         CALL GETSOL(ROWCOL,NUMBER,VX,VP,STAT,STNUM)
+         VX = VX + ALPHA(I)*ZTHETA
+         CALL GETBND(ROWCOL,NUMBER,VL,VU)
+         IF( VX.LT.VL .OR. VX.GT.VU )THEN
+            STAT = 'I'
+            SOLST = 'INFEASIBLE'
+         ELSE
+            STAT = 'B'
+         ENDIF
+         CALL GPTSOL(ROWCOL,NUMBER,STAT,VX)
+1000  CONTINUE
+! ::: END LOOP ... ALPHA ENTERED AND BASIC LEVELS UPDATED :::
+!
+! UPDATE PIVOT ID FOR ROW
+      INDEX( IPIVOT+PIVROW ) = NUMIN
+! CHANGE STATUS AND VALUES OF IN AND OUT VARS
+      VIN = VIN + ZTHETA
+      IF( VIN.LT.VLIN .OR. VIN.GT.VUIN )THEN
+         STAT  = 'I'
+         SOLST = 'INFEASIBLE'
+      ELSE
+         STAT  = 'B'
+      ENDIF
+      CALL GPTSOL(RCIN,NUMIN,STAT,VIN)
+      VPOUT = -VPIN/VPIVOT
+      CALL GPTSOL(RCOUT,NUMOUT,STNEW,VPOUT)
+! ADVANCE FREE SPACE POINTERS
+      IFREE  = IRBLST +   NBLST + 1
+      IVFREE = IVBLST + 2*NBLST + 1
+! ADD TO PIVOT HISTORY
+      PIVNUM = PIVNUM + 1
+! ONLY COLUMN ENTERS (MAY CHANGE LATER)
+      PIVIN (PIVNUM) = NUMIN
+      PIVSTI(PIVNUM) = STATIN.EQ.'L'
+      PIVSTO(PIVNUM) = STATOT.EQ.'B'
+! USE SIGN TO DISTINGUISH ROW (-) FROM COL (+)
+      IF( RCOUT.EQ.'ROW ')THEN
+         PIVOUT(PIVNUM) = -NUMOUT
+      ELSE
+         PIVOUT(PIVNUM) =  NUMOUT
+      ENDIF
+! NBLST BEFORE PIVOT (TO REMOVE ALPHA WITH UNDO)
+      PIVNBL(PIVNUM) = NBLST0
+!
+! SUCCESSFUL PIVOT COMES HERE
+      RETURN
+!
+! ERROR AFTER CHANGING BASIS POINTERS AND STATS
+1300  CONTINUE
+! RESTORE POINTERS
+      IFREE  = IFREE0
+      IVFREE = IVFRE0
+      IRBLST = IRBLS0
+      IVBLST = IVBLS0
+      IZBLST = IZBLS0
+      NBLST  = NBLST0
+! REMOVE PIVOT FROM HISTORY
+      PIVNUM = PIVNUM - 1
+      GOTO 1390
+1310  PRINT *,' ** PIVOT INDADMISSIBLE: ELEMENT TOO SMALL'
+      GOTO 1380
+1320  PRINT *,' ** PIVOT INADMISSIBLE: DIRECTION INCOMPATABLE'
+1380  PRINT *,' ...RATE OF SUBSTITUTION =',VPIVOT
+! ALL ERROR RETURNS COME HERE
+1390  CONTINUE
+      IF( SWDBG )THEN
+         CALL GETNAM(RCIN ,NUMIN ,CNAME)
+         PRINT *,' ',RCIN ,CNAME(:NAMELN),' ST=',STATIN,' X=',VIN  , &
+                 ' DIR',INDIR
+         CALL GETNAM(RCOUT,NUMOUT,CNAME)
+         PRINT *,' ',RCOUT,CNAME(:NAMELN),' ST=',STATOT,' X=',VXOUT, &
+                 ' DIR',OUTDIR
+      ENDIF
+      RETURN 1
+!
+! ** GPIVOT ENDS HERE
+      END
+      SUBROUTINE BASCLR
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+
+      include 'dcgetmat'
+!
+! This clears basis (removes alpha's and restores space).
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::::
+      IF( IPIVOT.EQ.0 )RETURN
+      IFREE  = IPIVOT + 1
+      IVFREE = IVBLST + 1
+      IRBLST = 0
+      IVBLST = 0
+      IZBLST = 0
+      IPIVOT = 0
+      PIVNUM = 0
+!
+! ** BASCLR ENDS HERE
+      END
+      SUBROUTINE GBUNDO(NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      include 'dcgetmat'
+!
+! This reverses last NUMBER of pivots.
+!       NUMBER >= PIVNUM ===> reverse all (restore to original basis).
+!                            (returned value of NUMBER = PIVNUM).
+! This only restores statuses and alpha's.
+! CALLER MUST REFRESH PRIMAL AND DUAL VALUES.
+!
+! LOCAL
+      CHARACTER*1  STAT
+      CHARACTER*4  ROWCOL
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::::
+      IF( NUMBER.GT.PIVNUM ) NUMBER=PIVNUM
+      IF( PIVNUM.EQ.0 )RETURN
+      V0 = 0.
+      DO 1000 PIVOT=PIVNUM,PIVNUM-NUMBER+1,-1
+! RESTORE PIVOT ROW ASSIGNMENT
+         OUTVAR = PIVOUT(PIVOT)
+         INVAR  = PIVIN(PIVOT)
+         CALL GETPIV(PIVROW,'COL ',INVAR)
+         IF( PIVROW.EQ.0 )THEN
+            PRINT *,' ** SYSERR GBUNDO...PIVROW=0',PIVOT
+            RETURN
+         ENDIF
+         INDEX(IPIVOT + PIVROW) = OUTVAR
+! CHANGE STATUSES OF IN AND OUT VARS
+         IF( PIVSTI(PIVOT) )THEN
+            STAT = 'L'
+         ELSE
+            STAT = 'U'
+         ENDIF
+         CALL GPTSOL('COL ',INVAR,STAT,V0)
+!
+         IF( OUTVAR.GT.0 )THEN
+            ROWCOL = 'COL '
+         ELSE
+            ROWCOL = 'ROW '
+            OUTVAR = -OUTVAR
+         ENDIF
+         IF( PIVSTO(PIVOT) )THEN
+            STAT = 'B'
+         ELSE
+            STAT = 'I'
+         ENDIF
+         CALL GPTSOL(ROWCOL,OUTVAR,STAT,V0)
+! REMOVE ALPHA
+         NBLST = PIVNBL(PIVOT)
+! PIVOT IS GONE
+1000  CONTINUE
+!
+      PIVNUM = PIVNUM-NUMBER
+! RESTORE SOLUTION STATUS
+      CALL GPVST0('SET ',PIVNUM)
+!
+      RETURN
+!
+! ** GBUNDO ENDS HERE
+      END
+      SUBROUTINE GBPHST(RCIN,RCOUT,SOLST0,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      include 'dcgetmat'
+!
+! This returns pivot info for NUMBER (1 transaction), where
+!       NUMBER > PIVNUM ===> NUMBER truncated to PIVNUM
+!  RCIN  form: {ROW|COL} name stat
+!                       :    :...1 space after NAMELN
+!                       :............1 space delimiter
+!  RCOUT form: {ROW|COL} name
+!
+      CHARACTER*(*) RCIN,RCOUT
+!                :...MUST BE >= 6+NAMELN
+      CHARACTER*(*) SOLST0
+!                :...SHOULD BE 16
+! LOCAL
+      CHARACTER*1  STAT
+      CHARACTER*4  ROWCOL
+      CHARACTER*16 CNAME
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::::
+      IF( NUMBER.GT.PIVNUM )NUMBER = PIVNUM
+      IF( PIVNUM.EQ.0 )RETURN
+      INVAR  = PIVIN(NUMBER)
+      CALL GETNAM('COL ',INVAR,CNAME)
+      IF( PIVSTI(NUMBER) )THEN
+         STAT = 'L'
+      ELSE
+         STAT = 'U'
+      ENDIF
+      RCIN = STAT//' COL '//CNAME(:NAMELN)
+!
+      OUTVAR = PIVOUT(NUMBER)
+      IF( OUTVAR.GT.0 )THEN
+         ROWCOL = 'COL '
+      ELSE
+         ROWCOL = 'ROW '
+         OUTVAR = -OUTVAR
+      ENDIF
+      CALL GETNAM(ROWCOL,OUTVAR,CNAME)
+      IF( PIVSTO(NUMBER) )THEN
+         STAT = 'B'
+      ELSE
+         STAT = 'I'
+      ENDIF
+      RCOUT = STAT//' '//ROWCOL//CNAME(:NAMELN)
+!
+      SOLST0 = 'GET '
+      CALL GPVST0(SOLST0,NUMBER)
+!
+      RETURN
+!
+! ** GBPHST ENDS HERE
+      END
+      SUBROUTINE GPVST0(WHAT,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      include 'dcgetmat'
+!
+      CHARACTER*(*) WHAT
+!
+!       WHAT = PUT ===> Put solution status into PIVST0(NUMBER)
+!            = SET ===> Set solution status from PIVST0(NUMBER)
+!            = GET ===> Get solution status from PIVST0(NUMBER)
+! LOCAL
+      CHARACTER*16 LCLST(0:4)
+      DATA         LCLST/'Unknown', &
+             'OPTIMAL','FEASIBLE','INFEASIBLE','UNBOUNDED'/
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+      IF( WHAT.EQ.'PUT ')THEN
+         IF( SOLST.EQ.'OPTIMAL' )THEN
+            PIVST0(NUMBER) = 1
+         ELSE IF( SOLST.EQ.'FEASIBLE' )THEN
+            PIVST0(NUMBER) = 2
+         ELSE IF( SOLST.EQ.'INFEASIBLE' )THEN
+            PIVST0(NUMBER) = 3
+         ELSE IF( SOLST.EQ.'UNBOUNDED' )THEN
+            PIVST0(NUMBER) = 4
+         ELSE
+            PIVST0(NUMBER) = 0
+         ENDIF
+         IF( STCOMP.EQ.1 )PIVST0(NUMBER) = -PIVST0(NUMBER)
+      ELSE
+         ST = PIVST0(NUMBER)
+         IF( ST.LT.0 )THEN
+            ST = -ST
+            STCOMP = 1
+         ENDIF
+         IF( WHAT.EQ.'SET ')THEN
+            SOLST = LCLST(ST)
+         ELSE
+            WHAT = LCLST(ST)
+         ENDIF
+      ENDIF
+!
+      RETURN
+!
+! ** GPVST0 ENDS HERE
+      END
+!             ::: GETEDIT.FOR  2-06-94 :::
+!
+! LAST DATES:  EARLIER DATES DELETED
+!              4-09-93...ADDED PIVOT ARRAYS IN GDEBUG
+!              5-11-93...ADDED GETFIX AND GTVNEW
+!              5-28-93...REMOVED I2VAL FROM GDEBUG
+!              9-03-93...CHANGED ARG SEQUENCE IN GRENAM
+!              9-18-93...INCREMENT NRFREE IN GETFRE AND NCFIX IN GETFIX
+!              1-24-94...ADDED GROUND
+!              2-01-94...EXTENDED GDEBUG
+!
+! THIS CONTAINS THE FOLLOWING GETMAT ROUTINES.
+!
+!       GETFRE.....FREE BOUND/LIMIT ON COLUMN/ROW
+!       GETFIX.....FIX LEVEL OF COLUMN/ROW
+!       GROUND.....ROUND LEVEL OF COLUMN
+!       GTVNEW.....GET VALUE ID FOR NEW VALUE (CANNOT USE GETVID)
+!       GRENAM.....RENAME SOMETHING (EG, PROBNAME)
+!       GPTSOL.....PUT SOLUTION VALUE(S).  (ADDED 2-6-93)
+!              CALLED BY OUTSIDER (LIKE ANALYZE)
+!              USE GPUTSL (IN GETSET.FOR) WITHIN GETMAT (LIKE GETIOSOL)
+!       GDEBUG.....DEBUG ROUTINE (MOVED FROM GETSET.FOR, 8-3-92)
+!
+      SUBROUTINE GETFRE(WHAT,ROWCOL,NUMBER,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS FREES BOUND/LIMIT ON ROWCOL NUMBER IN SUBMATRIX.
+!
+      CHARACTER*(*) ROWCOL,WHAT
+!
+!       WHAT := LOWER º UPPER º BOTH
+!
+!       RCODE = -1 IF LOWER IS REVISED AND STAT = L
+!             =  1 IF UPPER IS REVISED AND STAT = U
+!              IF RCODE <> 0 UPON ENTRANCE, REVISION DOES NOT OCCUR
+! LOCAL
+      CHARACTER*1 STAT
+      LOGICAL*1   SWOK,SWFIX,SWFREE
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      IF( ROWCOL.EQ.'ROW ' )THEN
+         LO = IRLBND + NUMBER
+         UP = IRUBND + NUMBER
+         SWFREE= (INDEX(LO).EQ.-INF) .AND. (INDEX(UP).EQ.INF)
+         IF( SWFREE )THEN
+! ROW IS ALREADY FREE
+            RCODE = 0
+            RETURN
+         ENDIF
+         SWFIX = .FALSE.
+         ISTAT = IRSTAT + NUMBER
+         ISOLV = IRSOLV + NUMBER
+      ELSE
+         LO = ICLBND + NUMBER
+         UP = ICUBND + NUMBER
+         SWFIX = INDEX(LO).EQ.INDEX(UP)
+         SWFREE= .TRUE.
+         ISTAT = ICSTAT + NUMBER
+         ISOLV = ICSOLV + NUMBER
+      ENDIF
+      CALL GETST(ROWCOL,NUMBER,STAT,STNUM)
+      SWOK = .TRUE.
+      IF( WHAT.NE.'LOWER' )THEN
+! FREE UPPER
+         IF( STAT.EQ.'U' )THEN
+            IF( RCODE.EQ.0 )THEN
+! CHANGE SOLUTION STAT TO BASIC AND SET VALUE = VUP
+               CALL GETVAL(V,UP)
+               CALL GPUTSL(ISTAT,ISOLV,'B',V,0.,RCODE)
+! PUT INTO SUBMATRIX
+               INDEX(ISTAT) = -INDEX(ISTAT)
+            ENDIF
+            SWOK = .FALSE.
+            RCODE = 1
+         ENDIF
+! FREE UPPER BOUND/LIMIT
+         INDEX(UP) = INF
+      ENDIF
+      IF( WHAT.NE.'UPPER' )THEN
+         IF( STAT.EQ.'L' )THEN
+            IF( RCODE.EQ.0 )THEN
+! CHANGE SOLUTION STAT TO BASIC AND SET VALUE = VLO
+               CALL GETVAL(V,LO)
+               CALL GPUTSL(ISTAT,ISOLV,'B',V,0.,RCODE)
+! PUT INTO SUBMATRIX
+               INDEX(ISTAT) = -INDEX(ISTAT)
+            ENDIF
+            SWOK = .FALSE.
+            RCODE = -1
+         ENDIF
+! FREE LOWER BOUND/LIMIT
+         INDEX(LO) = -INF
+      ENDIF
+!
+      IF( SWOK )RCODE = 0
+      IF( SWFIX .AND. INDEX(LO).NE.INDEX(UP) )NCFIX = NCFIX - 1
+      IF( .NOT.SWFREE .AND. INDEX(LO).EQ.-INF .AND. &
+                            INDEX(UP).EQ. INF )NRFREE = NRFREE + 1
+      RETURN
+!
+! ** GETFRE ENDS HERE
+      END
+      SUBROUTINE GETFIX(ROWCOL,NUMBER,V,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS FIXES LEVEL OF ROWCOL NUMBER = V (BOUNDS CHANGE).
+! ...RCODE > 0 IF FATAL ERROR (NO REVISION)
+! STATUS UPDATED FOR BASICS (I TO B OR B TO I), BUT
+! CALLER IS RESPONSIBLE FOR REFRESHING SOLUTION.
+!
+      CHARACTER*(*) ROWCOL
+! LOCAL
+      CHARACTER*1  STAT
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      CALL GTVNEW(V,ID,RCODE)
+      IF( RCODE.NE.0 )RETURN
+      IF( ROWCOL.EQ.'ROW ' )THEN
+         LO = IRLBND + NUMBER
+         UP = IRUBND + NUMBER
+         IF( INDEX(LO).EQ.-INF.AND.INDEX(UP).EQ.INF )NRFREE = NRFREE-1
+      ELSE
+         LO = ICLBND + NUMBER
+         UP = ICUBND + NUMBER
+         IF( INDEX(LO).NE.INDEX(UP) )THEN
+! ADD TO NUMBER OF FIXED COLS
+            NCFIX = NCFIX + 1
+            IF( BNDNAM.EQ.'NONE' )BNDNAM = 'FIX_EDIT'
+         ENDIF
+      ENDIF
+!
+      INDEX(UP) = ID
+      INDEX(LO) = ID
+      CALL GETSOL(ROWCOL,NUMBER,VX,VP,STAT,STNUM)
+      IF( STAT.EQ.'L' .OR. STAT.EQ.'U' )RETURN
+! PUT STAT (MAYBE CHANGED BETWEEN B AND I)
+      IF( ABS(VX-V).LE.VTOLAB )THEN
+         STAT = 'B'
+      ELSE
+         STAT = 'I'
+      ENDIF
+      CALL GPTSOL(ROWCOL,NUMBER,STAT,VX)
+!
+      RETURN
+!
+! ** GETFIX ENDS HERE
+      END
+      SUBROUTINE GROUND(COLUMN,CHBND,VBND,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS ROUNDS LEVEL OF COLUMN TO NEAREST INTEGER.
+! UPON RETURN,
+!   VBND = ROUND(X)
+!    BND = L IF COLUMN LOWER BOUND CHANGED = VBND
+!    BND = U IF COLUMN UPPER BOUND CHANGED = VBND
+!    BND = BLANK IF NO CHANGE
+! RCODE > 0 IF FATAL ERROR (NO REVISION)
+! CALLER IS RESPONSIBLE FOR REFRESHING BASIS.
+      CHARACTER*1 CHBND
+! LOCAL
+      CHARACTER*1 CSTAT
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      CHBND = ' '
+      CALL GETSOL('COL ',COLUMN,VX,VP,CSTAT,STNUM)
+      INT = VX + .5
+      VBND= FLOAT(INT)
+      IF( CSTAT.EQ.'L'.OR.CSTAT.EQ.'U' )RETURN
+      IF( VBND.LT.VX-VTOLAB )THEN
+! ROUND DOWN BY SETTING XU=VBND
+         CSTAT = 'U'
+      ELSE IF( VBND.GT.VX+VTOLAB )THEN
+! ROUND UP BY SETTING XL=VBND
+         CSTAT = 'L'
+      ELSE
+         RETURN
+      ENDIF
+! COL IS BASIC AND X IS NOT INTEGER
+      CALL GTVNEW(VBND,ID,RCODE)
+      IF( RCODE.NE.0 )RETURN
+! CHANGE BOUND OF COLUMN
+      CHBND = CSTAT
+      IF( CSTAT.EQ.'L' )THEN
+         INDEX(ICLBND+COLUMN) = ID
+      ELSE
+         INDEX(ICUBND+COLUMN) = ID
+      ENDIF
+      CALL GPTSOL('COL ',COLUMN,'I',VX)
+! MAKE SURE THERE'S A BOUND SET
+      IF( BNDNAM.EQ.'NONE' )BNDNAM = 'ROUNDED'
+! SEE IF COLUMN BECAME FIXED (IF SO, UPDATE NUMBER)
+! NOTE:  COLUMN WAS NOT FIXED BEFORE SINCE IT IS BASIC AND NOT INTEGER
+      IF( INDEX(ICLBND+COLUMN).EQ.INDEX(ICUBND+COLUMN) )NCFIX=NCFIX+1
+!
+      RETURN
+!
+! ** GROUND ENDS HERE
+      END
+      SUBROUTINE GTVNEW(V,ID,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS VALUE ID FOR V (ADDED TO POOL, IF NECESSARY).
+! ...RCODE > 0 IF NOT IN POOL AND NOT ENOUGH SPACE TO ADD.
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      IF( V.LT.-VTOLAB )THEN
+         VNEW = -V
+         SIGN = -1
+      ELSE IF( V.GT.VTOLAB )THEN
+         VNEW = V
+         SIGN = 1
+      ELSE
+         ID = 0
+         RETURN
+      ENDIF
+!
+      DO 100 I=1,NVALS
+         IF( ABS(VNEW-VALUE(I)).LE.VTOLAB+VTOLRE*(VNEW+VALUE(I)) )THEN
+            ID = SIGN*I
+            RETURN
+         ENDIF
+100   CONTINUE
+!
+! VALUE NOT IN POOL
+      IF( IVFREE.GE.PMXVAL )THEN
+         RCODE = 1
+         RETURN
+      ENDIF
+! ADD VALUE
+      ID = SIGN*IVFREE
+      VALUE(IVFREE) = VNEW
+      IVFREE = IVFREE+1
+!
+      RETURN
+!
+! ** GTVNEW ENDS HERE
+      END
+      SUBROUTINE GRENAM(PRBNM,RHSNM,RNGNM,BNDNM,SOLNM)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS RENAMES:
+!     PRBNM  = PROBLEM NAME
+!     RHSNM  = RIGHT-HAND SIDE NAME
+!     RNGNM  = RANGE NAME
+!     BNDNM  = BOUND NAME
+!     SOLNM  = SOLVER NAME
+!
+        CHARACTER*(*) PRBNM,RHSNM,RNGNM,BNDNM,SOLNM
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      PRBNAM = PRBNM
+      RHSNAM = RHSNM
+      RNGNAM = RNGNM
+      BNDNAM = BNDNM
+      SOLNAM = SOLNM
+      RETURN
+!
+! ** GRENAM ENDS HERE
+      END
+      SUBROUTINE GPTSOL(ROWCOL,NUMBER,STAT,VAL)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS PUTS SOLUTION STAT AND VALUE IN ROWCOL NUMBER.
+!
+      CHARACTER*(*) ROWCOL,STAT
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF( STAT.EQ.'L' )THEN
+         STNUM = 1
+      ELSE IF( STAT.EQ.'U' )THEN
+         STNUM = 2
+      ELSE IF( STAT.EQ.'B' )THEN
+         STNUM = 3
+      ELSE
+         STNUM = 4
+      ENDIF
+      IF( ROWCOL.EQ.'ROW ' )THEN
+         VALUE(IRSOLV+NUMBER) = VAL
+         IF( INDEX(IRSTAT+NUMBER).GT.0 )THEN
+            INDEX(IRSTAT+NUMBER) = STNUM
+         ELSE
+            INDEX(IRSTAT+NUMBER) = -STNUM
+         ENDIF
+      ELSE
+         VALUE(ICSOLV+NUMBER) = VAL
+         IF( INDEX(ICSTAT+NUMBER).GT.0 )THEN
+            INDEX(ICSTAT+NUMBER) = STNUM
+         ELSE
+            INDEX(ICSTAT+NUMBER) = -STNUM
+         ENDIF
+      ENDIF
+! UPDATE SOLUTION STATS
+      IF( STAT.EQ.'I' )SOLST = 'INFEASIBLE'
+      IF( SOLST.EQ.'INFEASIBLE' )THEN
+         STCOMP = 2
+         RETURN
+      ENDIF
+! SOLUTION STATUS IS NOT INFEASIBLE...GET BOUNDS
+      CALL GETBND(ROWCOL,NUMBER,VL,VU)
+      IF( STAT.EQ.'B' )THEN
+! CHECK COMPLEMENTARITY
+         IF( VAL.LE.VL .OR. VAL.GE.VU )STCOMP = 2
+      ELSE
+! CHECK COMPLEMENTARITY
+         IF( ABS(VAL).LE.VTOLAB )STCOMP = 2
+         IF( SOLST.EQ.'OPTIMAL' )THEN
+! CHECK OPTIMALITY
+            VP = -OPT*VAL
+            IF( STAT.EQ.'U' )VP = -VP
+            IF( VP.GT.VTOLAB )SOLST = 'FEASIBLE'
+         ENDIF
+      ENDIF
+!
+      RETURN
+!
+! ** GPTSOL ENDS HERE
+      END
+      SUBROUTINE GDEBUG
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS IS DEBUG ROUTINE ENTERED FROM SYSDBG / CALLED BY A GETMAT ROUTINE
+!
+! HERE IS REDUCE COMMON
+      LOGICAL*1     SWRED
+      COMMON/REDCOM/VINFX,VTAFIX,VTRFIX,VTAINF,VTRINF, &
+                IXL,IXU,IYL,IYU,IPL,IPU,IYMIN,IYMAX, &
+                NRFORC,NCFORC,PASS,MXPASS, &
+                TTYOUT, &
+                SWRED
+! LOCAL
+      CHARACTER*16  STR16
+      CHARACTER*8   ARRAY,STR8
+      CHARACTER*4   ROWCOL
+      CHARACTER*1   CHAR
+      CHARACTER*128 CLIST
+      PARAMETER (LCLMXR=100)
+      DOUBLE PRECISION ZLOCAL(LCLMXR)
+! CALLS  FVRNG, FPAUSE
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+       IF(PAUSE.LT.0)THEN
+          PRINT *,' ...PRESS RETURN'
+          READ(*,1)CHAR
+       ENDIF
+1      FORMAT(A1)
+       PRINT *,' GETMAT DEBUG 2/94'
+       PAUSE = PAUSE0
+!
+5      CONTINUE
+         PRINT *,' BASE, MEMORY, INDEX, VALUE, NAME, REDUCE, HEADER,', &
+                 ' BASIS, TRAN, PIVOT'
+
+         PRINT *,' ROW, COL, DEBUG '
+         READ(*,1)CHAR
+!
+         IF(CHAR.EQ.' ')RETURN
+         IF(CHAR.EQ.'H')THEN
+            PRINT *,' DATFIL,PCKFIL=',DATFIL,PCKFIL
+            PRINT *,' VTOLAB,VTOLRE=',VTOLAB,VTOLRE
+            PRINT *,' PRBNAM=',PRBNAM,' OBJNAM=',OBJNAM, &
+                    ' RHSNAM=',RHSNAM
+            PRINT *,' RNGNAM=',RNGNAM,' BNDNAM=',BNDNAM, &
+                    ' SOLST=',SOLST
+            PRINT *,' SOLNAM=',SOLNAM,' NAMELN=',NAMELN
+            GOTO 5
+         ENDIF
+         RCODE=0
+         IF(CHAR.EQ.'N')THEN
+                ARRAY = 'NAME'
+                BRANCH = 1
+                MAX = MAXNAM
+         ELSE IF(CHAR.EQ.'I')THEN
+                ARRAY = 'INDEX'
+                BRANCH = 2
+                PRINT *,' MAXIND =',MAXIND,' PMXMAX =',PMXIND
+                MAX = PMXIND
+         ELSE IF(CHAR.EQ.'B')THEN
+                ARRAY = 'BASE'
+                BRANCH = 3
+                MAX = PMXBAS
+         ELSE IF(CHAR.EQ.'V')THEN
+                PRINT *,' REAL, INTEGER, Z'
+                READ(*,1)CHAR
+                IF(CHAR.EQ.'R')THEN
+                        ARRAY = 'VALUE'
+                        BRANCH = 4
+                        MAX   = MAXVAL
+                ELSE IF(CHAR.EQ.'I')THEN
+                        ARRAY = 'I4VAL'
+                        MAX   = MAXVAL
+                        BRANCH = 6
+                ELSE IF(CHAR.EQ.'Z')THEN
+                        ARRAY = 'ZVALUE'
+                        MAX   = PMXVAL/2
+                        BRANCH = 7
+                ELSE
+                        PRINT *,' ?',CHAR
+                        GOTO 5
+                ENDIF
+         ELSE IF(CHAR.EQ.'M')THEN
+                WRITE(*,501)NAMELN, &
+                   IRNAME,ICNAME,ENDNAM, &
+                   IFREE, &
+                   IRINFO,IRLBND,IRUBND,IRSTAT, &
+                   ICINFO,ICLBND,ICUBND,ICSTAT, &
+                   INONZ,ENDIND,ENDBAS, &
+                   INF,NVALS,NONZER, &
+                   IRSOLV,ICSOLV,IVFREE, &
+                   IPIVOT,IRBLST,IVBLST,IZBLST
+501             FORMAT(' NAME...NAMELN=',I2 &
+                   /'   IRNAME=',I3,' ICNAME=',I5,' ENDNAM=',I6 &
+                   /' INDEX/BASE...IFREE=',I7 &
+                   /'   IRINFO=',I4,' IRLBND=',I5,' IRUBND=',I5 &
+                   ,  ' IRSTAT=',I5 &
+                   /'   ICINFO=',I5, ' ICLBND=',I5,' ICUBND=',I5 &
+                   ,  ' ICSTAT=',I5 &
+                   /'   INONZ=',I7,' ENDIND=',I3,' ENDBAS=',I3 &
+                   /'   VALUE...INF=',I3,' NVALS=',I5,' NONZER=',I5 &
+                   /'   IRSOLV=',I6,' ICSOLV=',I6,' IVFREE=',I7 &
+                   /'   IPIVOT=',I6,' IRBLST=',I6,' IVBLST=',I6 &
+                   ,  ' IZBLST=',I6 &
+                   /)
+                GOTO 5
+         ELSE IF(CHAR.EQ.'R')THEN
+                PRINT *,' PASS=',PASS,' MXPASS=',MXPASS, &
+                        ' TTYOUT=',TTYOUT
+                PRINT *,' VTAFIX,VTRFIX =',VTAFIX,VTRFIX
+                PRINT *,' VTAINF,VTRINF =',VTAINF,VTRINF
+                PRINT *,' NRFORC=',NRFORC,' NCFORC=',NCFORC
+                PRINT *,' IXL=',  IXL,  ' IXU=',  IXU, &
+                        ' IYL=',  IYL,  ' IYU=',  IYU
+                PRINT *,' IPL=',  IPL,  ' IPU=',  IPU, &
+                        ' IYMIN=',IYMIN,' IYMAX=',IYMAX
+                PRINT *,' CURRENTLY, SWRDBG=',SWRDBG
+                CALL FPAUSE(PAUSE0)
+                PAUSE = PAUSE0
+                SWRDBG = PAUSE0.GT.0
+                PRINT *,' NOW SWRDBG=',SWRDBG
+                IF(.NOT.SWRDBG)PAUSE = -PAUSE0
+                GOTO 5
+         ELSE IF(CHAR.EQ.'A')THEN
+                PRINT *,' BASE VALUES ARE 50/69'
+                PRINT *,' STATS, ALPHA, AGENDA, BUCKETS, SPIKES, FIND '
+                READ(*,1)CHAR
+                IF(CHAR.EQ.'A')THEN
+                   ARRAY = 'B-ALPHA'
+                   BRANCH= 8
+                   MAX   = NBLST
+                ELSE IF(CHAR.EQ.'S')THEN
+                   ARRAY = 'B-STATS'
+                   BRANCH= 9
+                   MAX   = NROWS
+                ELSE IF(CHAR.EQ.'G')THEN
+                   ARRAY = 'B-AGENDA'
+                   BRANCH= 10
+                   MAX   = NBPOSN
+                ELSE IF(CHAR.EQ.'B')THEN
+                   ARRAY = 'BUCKETS'
+                   BRANCH= 12
+                   MAX   = NBUCKT
+                ELSE IF(CHAR.EQ.'P')THEN
+                   ARRAY = 'B-SPIKES'
+                   BRANCH= 13
+                   MAX   = NBSPIK
+                ELSE IF(CHAR.EQ.'F')THEN
+70                 CONTINUE
+                   PRINT *,' COLUMN NAME: '
+                   READ(*,'(A16)')STR16
+                   IF( STR16.EQ.' ' )GOTO 5
+                   CALL GETNUM('COL ',STR16,NUMBER)
+                   IF( NUMBER.EQ.0 )THEN
+                      PRINT *,' ',STR16,' NOT A COLUMN'
+                      GOTO 70
+                   ENDIF
+                   CALL GETST('COL ',NUMBER,CHAR,STNUM)
+                   IF( CHAR.NE.'B' .AND. CHAR.NE.'I' )THEN
+                      PRINT *,' ',STR16,' NOT BASIC...STAT=',CHAR
+                      GOTO 70
+                   ENDIF
+                   PRINT *,' ...SCANNING 1 TO',NBPOSN,' FOR', &
+                                NUMBER,':',STR16
+                   DO 75 I=1,NBPOSN
+                      COL = INDEX(BCPOSN+I)
+                      IF( COL.EQ.NUMBER )THEN
+                         IF( I.LT.FRONT .OR. I.GT.REAR )THEN
+                            ROW   = INDEX(BCSTAT+I)
+                            STR16 = NAME(IRNAME+ROW)
+                         ELSE
+                            STR16 = 'UNASSIGNED'
+                         ENDIF
+                         PRINT *,' AT POSN',I,' ',STR16
+                         GOTO 70
+                      ENDIF
+75                 CONTINUE
+                   PRINT *,' ...SCANNING IPIVOT'
+                   DO 76 PIVROW=1,NROWS
+                      N = INDEX(IPIVOT+PIVROW)
+                      IF( N.LT.0 )N=-N
+                      IF( N.EQ.NUMBER )THEN
+                        CALL GETNAM('ROW ',PIVROW,CLIST(1:16))
+                        PRINT *,' ...PIVOT ROW =',PIVROW,':',CLIST(:16)
+                        GOTO 77
+                      ENDIF
+76                 CONTINUE
+                   GOTO 79
+77                 CONTINUE
+                   IF( NBLST.GT.0 )THEN
+                      PRINT *,' ...SCANNING ALPHA'
+                      CHAR = ' '
+                      DO 78 I=1,NBLST
+                         IF( INDEX(IRBLST+I).GT.0 )GOTO 78
+                         IF( CHAR.NE.' ' )THEN
+                            CHAR = ' '
+                            GOTO 78
+                         ENDIF
+                         N = -INDEX(IRBLST+I)
+                         IF( N.EQ.PIVROW )THEN
+                            PRINT *,' ALPHA STARTS AT',I
+                            GOTO 70
+                         ENDIF
+                         VABS = DABS( ZVALUE(IZBLST+I) )
+                         IF( VABS.LE.0. )CHAR='N'
+78                    CONTINUE
+                   ENDIF
+79                 PRINT *,' ** '//STR16//' NOT FOUND'
+                ELSE
+                   GOTO 5
+                ENDIF
+         ELSE IF(CHAR.EQ.'T')THEN
+                PRINT *,' BTRAN, FTRAN '
+                READ(*,1)CHAR
+                IF(CHAR.EQ.'B')THEN
+                   ARRAY = 'BTRAN'
+                   BRANCH= 11
+                   MAX   = NROWS
+                ELSE IF(CHAR.EQ.'F')THEN
+                   ARRAY = 'FTRAN'
+                   BRANCH= 11
+                   MAX   = NCOLS
+                ELSE
+                   GOTO 5
+                ENDIF
+         ELSE IF(CHAR.EQ.'P')THEN
+             PRINT *,' PIVMAX =',PIVMAX,' PIVNUM =',PIVNUM
+             WRITE(*,'( &
+        7H PIVIN ,7H PIVOUT,7H PIVNBL,7H PIVST0,7H PIVSTI,7H PIVSTO)')
+                DO 1010 I=1,PIVNUM+1
+                   WRITE(*,'( 4(I5,2X),2X,L1,5X,L1 )') &
+           PIVIN(I),PIVOUT(I),PIVNBL(I),PIVST0(I),PIVSTI(I),PIVSTO(I)
+1010            CONTINUE
+                GOTO 5
+         ELSE IF(CHAR.EQ.'D')THEN
+                PRINT *,' CURRENTLY, SWDBG=',SWDBG
+                CALL FPAUSE(PAUSE0)
+                PAUSE = PAUSE0
+                SWDBG = PAUSE0.GT.0
+                PRINT *,' ...PAUSE=',PAUSE,'...NOW SWDBG=',SWDBG
+                RETURN
+         ELSE
+                IF( CHAR.EQ.'W' .OR. CHAR.EQ.'C' )GOTO 1000
+                PRINT *,' ?',CHAR
+                GOTO 5
+         ENDIF
+!
+100      PRINT *,' ',ARRAY,' MAX = ',MAX
+         PRINT *,' ENTER RANGE (V[/V])'
+         READ(*,101)CLIST
+101      FORMAT(A128)
+         FIRST = 1
+         LAST  = 16
+         CALL FVRNG(CLIST,FIRST,LAST,VL,VU,VINF,CHAR,RCODE)
+         IF( RCODE.NE.0 )GOTO 5
+         IF( VL.LT.1.   ) VL=1.
+         IF( VU.GE.VINF ) VU=MAX
+         I1 = VL+.1
+         I2 = VU+.1
+         IF( I2.GT.MAX )I2 = MAX
+         IF( I1.GT.I2  )I1 = I2
+         LINE = 0
+!
+         GOTO(110,120,130,140,150,160,170,180,190,200,300,400,500 &
+             ),BRANCH
+!
+110      CONTINUE
+         PRINT *,' ACTUAL OR FUNCTIONAL '
+         READ(*,1)CHAR
+         IF(CHAR.EQ.'F')GOTO 115
+! ...PRINT ACTUAL ARRAY VALUES (NAMERC IS CHAR*1)
+         WRITE(*,1111)NAMELN
+1111     FORMAT('   USING NAME LENGTH (NAMELN) =',I2)
+         DO 112 I=I1,I2,NAMELN
+            WRITE(*,111)I,(NAMERC(II),II=I,I+NAMELN-1)
+111         FORMAT(I5,':',T10,64A1/T10,6(9X,':'))
+112      CONTINUE
+         GOTO 100
+115      CONTINUE
+! ...PRINT NAME FUNCTIONAL VALUE (CHAR*16)
+         DO 118 I=I1,I2,3
+            WRITE(*,116)(K,NAME(K),K=I,I+2)
+116         FORMAT(3(2X,I5,':',A16))
+118      CONTINUE
+         GOTO 100
+!
+120      WRITE(*,121)(I,INDEX(I),I=I1,I2)
+121      FORMAT(5(1X,I5,'=',I8))
+         GOTO 100
+!
+130      WRITE(*,121)(I,BASE(I),I=I1,I2)
+         GOTO 100
+!
+140      WRITE(*,141)(I,VALUE(I),I=I1,I2)
+141      FORMAT(3(1X,I5,'=',G19.9))
+         GOTO 100
+!
+150      PRINT *,' ** SHOULD NOT GET HERE (I2VAL REMOVED 9-3-93)'
+         GOTO 100
+!
+160      WRITE(*,121)(I,I4VAL(I),I=I1,I2)
+         GOTO 100
+!
+170      WRITE(*,171)(I,ZVALUE(I),I=I1,I2)
+171      FORMAT(2(1X,I5,'=',D25.12))
+         GOTO 100
+!
+180      CONTINUE
+         WRITE(*,'(2X,20HOFFSET: INDEX  VALUE)')
+         STR8 = ' '
+         DO 189 I=I1,I2
+            IF( I.EQ.NBLST )THEN
+               STR8 = '= NBLST'
+            ELSE IF( I.EQ.NBASNZ )THEN
+               STR8 = '= NBASNZ'
+            ELSE IF( INDEX(IRBLST+I).LT.0 )THEN
+               ROW = -INDEX(IRBLST+I)
+               IF( ZVALUE(IZBLST+I).EQ.0. )THEN
+                  STR8 = 'NONSPIKE'
+               ELSE IF( STR8.EQ.'NONSPIKE' )THEN
+                  STR8 = NAME(ICNAME+ROW)
+               ELSE IF( ZVALUE(IZBLST+I-1).NE.0. )THEN
+                  ROW  = INDEX(IPIVOT+ROW)
+                  STR8 = NAME(ICNAME+ROW)
+               ENDIF
+            ELSE
+               STR8 = ' '
+            ENDIF
+            WRITE(*,181) I,INDEX(IRBLST+I),ZVALUE(IZBLST+I),STR8
+181         FORMAT(1X,I7,':',I6,           D19.9,  1X,     A8)
+189      CONTINUE
+         GOTO 100
+!
+190      CONTINUE
+         WRITE(*,'(1X,14HIRSTAT,IPIVOT=,2I8)')IRSTAT,IPIVOT
+         WRITE(*,'(21X,18HROW:   RSTAT PIVOT)')
+         DO 199 I=I1,I2
+            STAT= INDEX(IRSTAT+I)
+            COL = INDEX(IPIVOT+I)
+            IF( COL.GT.0.AND.(STAT.LT.0.OR.IRBLST.GT.0) )THEN
+               STR8 = NAME(ICNAME+COL)
+            ELSE IF( STAT.GT.0.AND.(COL.LT.0.OR.IRBLST.EQ.0) )THEN
+               STR8 = 'UNASSIGN'
+            ELSE
+               STR8 = ' '
+            ENDIF
+            WRITE(*,191) NAME(IRNAME+I),I,STAT,COL,STR8
+191         FORMAT(1X,   A16,         I7,':',2I7,2X,A8)
+199      CONTINUE
+         GOTO 100
+!
+200      CONTINUE
+         IF( IRBLST.EQ.0 )GOTO 250
+         WRITE(*,'(T9,3HLOC,T16,3HROW,T25,3HCOL,T45,5HPIVOT)')
+         I = I1
+         N = I1
+         B1= 1
+205      CONTINUE
+! SKIP TO NEXT ALPHA
+         B = B1
+210      CONTINUE
+           IF( B.GT.NBLST )THEN
+              PRINT *,' END OF BLIST'
+              GOTO 100
+           ENDIF
+           IF( INDEX(IRBLST+B).LT.0 )THEN
+              ROW = -INDEX(IRBLST+B)
+              Z   = ZVALUE(IZBLST+B)
+              IF( Z.EQ.0. )THEN
+                 B = B+1
+                 Z = ZVALUE(IZBLST+B)
+                 CLIST = 'NONSPIKE'
+              ELSE
+                 CLIST = 'SPIKE'
+              ENDIF
+              N = N-1
+              IF(N.EQ.0)GOTO 211
+           ENDIF
+           B = B+1
+         GOTO 210
+!
+211        CONTINUE
+           COL =  INDEX(IPIVOT+ROW)
+           IF( COL.GT.0 )THEN
+              STR8 = NAME(ICNAME+COL)
+              IF( I.LE.NBFTRI )THEN
+                 CLIST = 'FTRI'
+              ELSE IF( I.GE.NBFTRI+NBKRNL+1 )THEN
+                 CLIST = 'BTRI'
+              ENDIF
+           ELSE
+              STR8  = ' '
+           ENDIF
+           WRITE(*,201) I,  B,NAME(IRNAME+ROW),COL,STR8,Z,CLIST
+201        FORMAT(I6,':',  I7,T16,A8,1X, I7,':',A8,T45,D19.9,1X,A8)
+           IF( I.GT.I2 )GOTO 100
+           I = I+1
+           N = 1
+           B1= B+1
+         GOTO 205
+!
+250      CONTINUE
+! ALPHA REGION NOT SET YET...GIVE AGENDA FROM LISTS
+         WRITE(*,'(8X,4HSTAT,14X,3HCOL)')
+         DO 290 I=I1,I2
+            COL  = INDEX(BCPOSN + I)
+            STAT = INDEX(BCSTAT + I)
+            STR8 = ' '
+            IF( I.EQ.FRONT.AND.FRONT.LE.REAR )THEN
+               CHAR = 'F'
+            ELSE IF( I.EQ.REAR.AND.FRONT.LE.REAR  )THEN
+               CHAR = 'R'
+            ELSE IF( I.LT.FRONT.OR.I.GT.REAR )THEN
+               IF( I.LE.NBFTRI )THEN
+                  STR8 = 'FTRI'
+               ELSE IF( I.GT.NBPOSN-NBBTRI )THEN
+                  STR8 = 'BTRI'
+               ELSE IF( I.GT.REAR )THEN
+                  CHAR = 'S'
+               ELSE
+                  STR8 = 'NONSPIKE'
+               ENDIF
+            ELSE
+               CHAR = 'U'
+            ENDIF
+            IF( STR8.EQ.' ' )THEN
+               CALL FI2C(STR8,STAT,F)
+               CLIST = STR8(F:8)
+               IF( CHAR.EQ.'S' )THEN
+                  STR8 = 'SPIKE'
+               ELSE IF( CHAR.EQ.'F' )THEN
+                  STR8 = 'FRONT'
+                  IF( FRONT.EQ.REAR )STR8(6:) = '=R'
+               ELSE IF( CHAR.EQ.'R' )THEN
+                  STR8 = 'REAR'
+               ELSE
+                  STR8 = 'UNASSIGN'
+               ENDIF
+            ELSE
+               CLIST = NAME(IRNAME+STAT)
+            ENDIF
+            CLIST(17:) = NAME(ICNAME+COL)
+            IF( LINE.GE.20 )THEN
+               LINE = 0
+               READ(*,1)CHAR
+               IF(CHAR.NE.' ')GOTO 100
+            ENDIF
+            WRITE(*,291)I,CLIST,COL,STR8
+291         FORMAT(I7,':',A33,':',I7,2X,A8)
+            LINE = LINE+1
+290      CONTINUE
+         GOTO 100
+!
+300      CONTINUE
+         IF( NROWS.GT.LCLMXR )THEN
+            PRINT *,' ** LCLMXR =',LCLMXR,' < NROWS =',NROWS
+            GOTO 5
+         ENDIF
+!
+         DO 350 I=I1,I2
+            IF( ARRAY.EQ.'BTRAN' )THEN
+               CALL GALPHA('ROW ',I,ZLOCAL,LCLMXR)
+               CALL GBTRAN(ZLOCAL,LCLMXR)
+               STR8 = NAME(IRNAME+I)
+            ELSE
+               CALL GALPHA('COL ',I,ZLOCAL,LCLMXR)
+               CALL GFTRAN(ZLOCAL,LCLMXR)
+               STR8 = NAME(ICNAME+I)
+            ENDIF
+            CLIST = ':'
+            DO 320 ROW=1,NROWS
+               IF( ZLOCAL(ROW).EQ.0. )GOTO 320
+               IF( LINE.GE.20 )THEN
+                  LINE = 0
+                  READ(*,1)CHAR
+                  IF(CHAR.NE.' ')GOTO 100
+               ENDIF
+               CLIST(2:) = NAME(IRNAME+ROW)
+               COL = INDEX(IPIVOT+ROW)
+               IF( COL.GT.0 )CLIST(15:) = NAME(ICNAME+COL)
+               WRITE(*,301)STR8,CLIST,ZLOCAL(ROW)
+301            FORMAT(1X,  A8,  A30, D19.9)
+               STR8 = ' '
+               LINE = LINE+1
+320         CONTINUE
+350      CONTINUE
+         GOTO 100
+!
+400      CONTINUE
+         IF( BUCKET.EQ.0.OR.IRBLST.GT.0 )THEN
+            PRINT *,' NO BUCKET'
+            GOTO 5
+         ENDIF
+         WRITE(*,'(1X,7HBUCKET=,I7,2X,7HBLSUCC=,I7,2X,7HBLPRED=,I7)') &
+                BUCKET,BLSUCC,BLPRED
+         WRITE(*,'(9X,3HROW,T22,4HSUCC,T32,4HPRED)')
+         LINE = 3
+         DO 450 I=I1,I2
+            ROW = INDEX(BUCKET+I)
+            IF( ROW.EQ.0 )THEN
+               WRITE(*,'(I7,7H: EMPTY)') I
+               LINE = LINE+1
+               GOTO 450
+            ENDIF
+410         CONTINUE
+              IF( LINE.GE.21 )THEN
+                 READ(*,'(A1)')CHAR
+                 IF( CHAR.NE.' ' )GOTO 100
+                 LINE = 0
+              ENDIF
+              STR8 = NAME ( IRNAME+ROW )
+              PRED = INDEX( BLPRED+ROW )
+              SUCC = INDEX( BLSUCC+ROW )
+              WRITE(*,'(I7,2H: ,A8,T20,I7,T30,I7)') I,STR8,SUCC,PRED
+              LINE = LINE+1
+              IF( SUCC.EQ.0 )GOTO 450
+              ROW = SUCC
+            GOTO 410
+450      CONTINUE
+         GOTO 100
+!
+500      CONTINUE
+         IF( IRBLST.EQ.0 )THEN
+            PRINT *,' SPIKES BEGIN AT REAR+1 =',REAR+1,' AND END AT', &
+                    ' NBPOSN-NBBTRI =',NBPOSN-NBBTRI
+            GOTO 5
+         ENDIF
+! SPIKES ARE LOCATED FROM REAR TO
+550      CONTINUE
+         PRINT *,' SPIKES AT REAR =',REAR,' TO FRONT+1 =',FRONT+1
+         I1 = REAR - I1+1
+         I2 = REAR - I2+1
+         IF( I1.GT.REAR   )I1 = REAR
+         IF( I1.LE.FRONT  )I1 = FRONT+1
+         IF( I2.LE.FRONT  )I2 = FRONT+1
+         IF( I2.GT.I1     )I2 = I1
+         DO 590 I=I1,I2,-1
+            COL = INDEX( BCPOSN+I )
+            PRINT *,I,':',COL,':',NAME(ICNAME+COL),INDEX(BCSTAT+I)
+590      CONTINUE
+         GOTO 100
+!C ADDED 2-6-94
+1000  CONTINUE
+      IF( CHAR.EQ.'W' )THEN
+         ROWCOL = 'ROW '
+      ELSE
+         ROWCOL = 'COL '
+      ENDIF
+1100  CONTINUE
+      PRINT *,' ',ROWCOL,'NAME: '
+      READ(*,'(A16)')STR16
+      IF( STR16.EQ.' ' )GOTO 5
+      CALL GETNUM(ROWCOL,STR16,NUMBER)
+      PRINT *,' ',ROWCOL,STR16,NUMBER
+      IF( NUMBER.EQ.0 )GOTO 1100
+      CALL GETRIM(ROWCOL,NUMBER,VL,VU,VC,NZ)
+      PRINT *,' VL,VU,VC =', VL,VU,VC
+      CALL GETSOL(ROWCOL,NUMBER,VX,VP,CHAR,STNUM)
+      PRINT *,' STAT,VX,VP,NZ=', CHAR,VX,VP,NZ
+      GOTO 1100
+!
+! ** GDEBUG ENDS HERE
+      END
+!             ::: GETIOMAT.FOR  2-19-94 :::
+!
+! LAST DATES: EALIER DATES DELETED
+!            12-01-92...ALLOW SHORT NAMES (< 8 CHARS)
+!             3-09-93...REMOVED CDOS
+!             8-30-93...CHANGED FORMATS (SEE CC)
+!             2-06-94...CC 2*
+!
+! THIS CONTAINS THE FOLLOWING GETMAT IO SUBROUTINE.
+!
+!     GETMAT.....READS MATRIX FILE
+!
+      SUBROUTINE GETMAT(SWMSG,VTZERO,MXNROW,MXNCOL,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS READS MATRIX FILE FROM UNIT DATFIL, PRESUMED OPEN
+! ...PCKFIL IS USED AS SCRATCH UNIT, UNFORMATTED
+!
+! ...DATFIL AND PCKFIL ARE CLOSED BEFORE RETURN IN ANY CASE.
+!
+! SUBROUTINES CALLED:  GADDNZ  GETNUM  GETVID  GETRIM
+!
+      LOGICAL*1    SWMSG
+!                  :...MESSAGE SWITCH
+      REAL         VTZERO
+!                  :...ZERO TOLERANCE FOR ADDING NONZERO
+!                      (CAN CHANGE VTOLAB)
+      INTEGER      MXNROW,MXNCOL
+!                  :......:....MAX NUMBER ALLOWED BY CALLER
+! LOCAL VARIABLES
+      CHARACTER*16 CNAME,RNAME1,RNAME2,SOSNAM,SETNAM,ERRNAM, &
+                   FNAME,LNAME
+      CHARACTER*8  SECTN,MARKER,SOSORG,SOSEND
+      CHARACTER*1  CHR1,ROWTYP
+      CHARACTER*2  BNDTYP
+      CHARACTER*80 CHR80
+      PARAMETER (MXWARN=5)
+!                :...MAX NUMBER OF WARNING MESSAGES
+!
+! CHR1 READS COLUMN 1 IN SECTIONS TO SKIP COMMENT CARD (*)
+! ROWTYP....N (FREE), G (>), L (<), E (=)
+!           0         1      2      3
+! BNDTYP....MI        LO     UP     FX     PL
+!
+! THE FOLLOWING ARE SECTION NAMES (UNIX USERS SEE BELOW)
+      CHARACTER*8  NAMSEC,ROWSEC,COLSEC,RHSSEC,RNGSEC,BNDSEC
+!
+! CALLS  GETRIM, GETVID, GETNUM, GADDNZ
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+! CHECK FOR ABSOLUTE TOLERANCE REDUCTION (PERMANANENT FOR SESSION)
+      IF( VTZERO.LE.0. .OR. VTZERO.GE.1. )THEN
+! USER HAS NOT SET ZERO TOLERANCE...SET = ABSOLUTE TOLERANCE
+          VTZERO = VTOLAB
+      ELSE IF( VTZERO.LE.VTOLAB )THEN
+! CALLER HAS LEGITIMATE ZERO TOLERANCE, LESS THAN CURRENT SETTING
+!            :...IE, > 0 AND < 1                  (VTOLAB)
+         VTOLAB = VTZERO
+         IF( SWMSG )PRINT *,' CHANGED ABSOLUTE TOLERANCE TO',VTOLAB
+      ENDIF
+! THE FOLLOWING NEED TO BE CHANGED TO LOWER CASE IF THAT IS WHAT
+! THE UNIX USER WANTS (SEE BELOW).
+      MARKER = '''MARKER'''
+      SOSORG = '''SOSORG'''
+      SOSEND = '''SOSEND'''
+      NAMSEC = 'NAME'
+      ROWSEC = 'ROWS'
+      COLSEC = 'COLUMNS'
+      RHSSEC = 'RHS'
+      RNGSEC = 'RANGES'
+      BNDSEC = 'BOUNDS'
+! HERE IS AN AUTOEDIT THAT WILL OVER-WRITE WITH LOWER CASE
+! (REPLACE CLCED WITH NULL).
+!LCED      MARKER = '''MARKER'''
+!LCED      SOSORG = '''SOSORG'''
+!LCED      SOSEND = '''SOSEND'''
+!LCED      NAMSEC = 'NAME'
+!LCED      ROWSEC = 'ROWS'
+!LCED      COLSEC = 'COLUMNS'
+!LCED      RHSSEC = 'RHS'
+!LCED      RNGSEC = 'RANGES'
+!LCED      BNDSEC = 'BOUNDS'
+!
+! INITIALIZE
+      CALL GNEWLP
+      NWARNV = MXWARN
+      LINE = 0
+!C    :::::::: ADDED 2-6-94
+!
+! READ NAME CARD
+      SECTN=NAMSEC
+10    READ(DATFIL,1,END=1380,ERR=1313)SETNAM,PRBNAM
+1     FORMAT(A8,T15,A8)
+      LINE = LINE+1
+      IF(SETNAM.EQ.SECTN)GOTO 19
+! SKIP IF LINE IS COMMENT (* IN COLUMN 1) OR BLANK
+      IF(SETNAM(1:1).EQ.'*' .OR. &
+         (SETNAM.EQ.' ' .AND. PRBNAM.EQ.' '))GOTO 10
+!
+! FILE IS NOT STANDARD MPS MATRIX FILE...TRY TO DIAGNOSE
+      IF(SETNAM(1:1).EQ.' ')THEN
+          PRINT *,'  ** SEEMS LIKE FIRST COLUMN IS BLANK', &
+                  ' THROUGHOUT...PLEASE CORRECT'
+      ELSE
+          PRINT *,' ** MATRIX FILE IS NOT IN MPS FORMAT...', &
+                  'LAST LINE READ:'
+          PRINT *,LINE,':',SETNAM,PRBNAM
+      ENDIF
+      GOTO 1399
+!
+19    IF( SWMSG )PRINT *,SECTN,PRBNAM
+! SET FREQUENCY CHECK
+      FREQCH = 200
+      FREQCH = 1000
+!
+! ROWS SECTION
+!
+      SECTN=ROWSEC
+      IF( NAMELN.GT.10 )THEN
+         NAMELN = 10
+         PRINT *,' ALLOWING ROW/COLUMN NAMES TO HAVE ONLY 10 CHARS'
+      ENDIF
+      IRNAME = 0
+! SKIP TO 'ROWS' CARD
+50    READ(DATFIL,1,END=1380,ERR=1313)SETNAM
+      LINE = LINE+1
+      IF(SETNAM.NE.SECTN)GOTO 50
+!
+! INITIALIZE ROW LINKS...USING BOTTOM OF VALUE ARRAY (I4VAL)
+      LLINK = MAXVAL - MAXRC
+      RLINK = LLINK  - MAXRC
+!
+!    ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+!     ROWS WILL BE PUT INTO BINARY TREE, RIGHT-THREADED FOR
+!     INORDER TRAVERSAL TO OBTAIN SORTED LIST.
+!    ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+!
+      IRINFO = IFREE
+!
+!     DURING ROWS SECTION, IRINFO INDEXES ARE ROW TYPES;
+!     AFTER COMPLETION, THESE WILL BE ROW COUNTS.
+!
+! INITIALIZE NAME VARIABLES (TO BE READ)
+      CNAME = ' '
+      RNAME1= ' '
+      CALL GPTNAM(IRNAME,CNAME)
+      I4VAL(LLINK) = 0
+      I4VAL(RLINK) = 0
+! INITIALIZE FREQUENCY
+      CHKFRQ = FREQCH
+! INITIALIZE FIRST AND LAST NAMES
+      FNAME = '~'
+      LNAME = ' '
+      BOTTOM= 0
+      TOP   = 0
+!
+!       ::: TOP OF ROWS SECTION READIN LOOP :::
+!
+100   READ(DATFIL,101,END=1380,ERR=1313)CHR1,BNDTYP,RNAME1
+101   FORMAT(A1,A2,T5,A10)
+      LINE = LINE+1
+!
+      IF(CHR1.EQ.'*')GOTO 100
+!
+      IF(CHR1.EQ.COLSEC(1:1))GOTO 190
+      IF(CHR1.NE.' ')GOTO 1310
+!
+! SET ROW TYPE (MAY BE IN COL 2 OR 3)
+      ROWTYP = BNDTYP(1:1)
+      IF(ROWTYP.EQ.' ')ROWTYP = BNDTYP(2:2)
+!
+      NROWS = NROWS + 1
+      IF( NROWS.GT.MXNROW ) GOTO 185
+!
+      CHKFRQ = CHKFRQ-1
+      IF(CHKFRQ.LE.0 .AND. SWMSG)THEN
+         PRINT *,' ROW',NROWS,': ',RNAME1(:NAMELN),' TYPE=',ROWTYP
+         CHKFRQ = FREQCH
+      ENDIF
+!
+! ENTER TYPE INTO ROW'S INFO (TEMPORARILY)
+!
+      IF(ROWTYP.EQ.'N' .OR. ROWTYP.EQ.'N')THEN
+          INDEX(IRINFO + NROWS) = 0
+          NRFREE = NRFREE + 1
+!  SET OBJ IF FIRST FREE ROW
+          IF(OBJNAM.EQ.' ')OBJNAM = RNAME1
+      ELSE IF(ROWTYP.EQ.'G' .OR. ROWTYP.EQ.'G')THEN
+          INDEX(IRINFO + NROWS) = 1
+      ELSE IF(ROWTYP.EQ.'L' .OR. ROWTYP.EQ.'L')THEN
+          INDEX(IRINFO + NROWS) = 2
+      ELSE IF(ROWTYP.EQ.'E' .OR. ROWTYP.EQ.'E')THEN
+          INDEX(IRINFO + NROWS) = 3
+      ELSE
+          PRINT *,' ** ROW TYPE ',ROWTYP,' NOT RECOGNIZED'
+          GOTO 1390
+      ENDIF
+!
+! LOCATE ROW IN TREE (AND TEST FOR DUPLICATE)
+!
+! ............................................................
+! : THE FOLLOWING IS MILT GUTTERMAN'S IMPROVEMENT FOR TREE   :
+! : INSERTION (FROM GTREIN IN LPRENSRT.FOR).                 :
+! : SPEEDUP OCCURS IF NAMES ARE ALREADY IN SORT ORDER.       :
+! :..........................................................:
+! IS NEW NAME LAST?
+      IF(RNAME1.GT.LNAME)THEN
+! YES, INSERT TO RIGHT OF BOTTOM (AND UPDATE LNAME)
+         LNAME = RNAME1
+         I4VAL(RLINK + NROWS)  = I4VAL(RLINK + BOTTOM)
+         I4VAL(RLINK + BOTTOM) = NROWS
+         BOTTOM= NROWS
+         IF(NROWS.EQ.1)THEN
+            FNAME = RNAME1
+            TOP   = 1
+         ENDIF
+         GOTO 180
+      ENDIF
+! IS NEW NAME FIRST?
+      IF(RNAME1.LT.FNAME)THEN
+! YES, INSERT TO LEFT OF TOP (AND UPDATE FNAME)
+         FNAME = RNAME1
+         I4VAL(LLINK + TOP)    = NROWS
+         I4VAL(RLINK + NROWS)  = -TOP
+         TOP   = NROWS
+         IF(NROWS.EQ.1)THEN
+            LNAME = RNAME1
+            BOTTOM= 1
+         ENDIF
+         GOTO 180
+      ENDIF
+! ............................................................
+! : END OF MILT'S IMPROVEMENT                                :
+! :..........................................................:
+      PARENT = 0
+! ...LOOP TO LOCATE AND INSERT
+150   IF(RNAME1.EQ.NAME(IRNAME+PARENT))THEN
+          PRINT *,' DUPLICATE ROW...',RNAME1,' ...IGNORED'
+          IF(INDEX(IRINFO + NROWS).EQ.0)NRFREE = NRFREE - 1
+          NROWS = NROWS - 1
+          GOTO 100
+      ELSE IF(RNAME1.LT.NAME(IRNAME + PARENT))THEN
+! LOOK LEFT
+          LOC = I4VAL(LLINK + PARENT)
+          IF(LOC.GT.0)THEN
+! ...MOVE LEFT
+             PARENT = LOC
+             GOTO 150
+          ELSE
+! ...INSERT LEFT
+             I4VAL(LLINK + PARENT) = NROWS
+             I4VAL(RLINK + NROWS)  = -PARENT
+          ENDIF
+      ELSE
+! LOOK RIGHT
+          LOC = I4VAL(RLINK + PARENT)
+          IF(LOC.GT.0)THEN
+! ...MOVE RIGHT
+             PARENT = LOC
+             GOTO 150
+          ELSE
+! ...INSERT RIGHT
+             I4VAL(RLINK + NROWS) = I4VAL(RLINK + PARENT)
+             I4VAL(RLINK + PARENT) = NROWS
+          ENDIF
+      ENDIF
+!
+! FINISH PUTTING ROW IN TREE
+180   CONTINUE
+      I4VAL(LLINK + NROWS) = 0
+      CALL GPTNAM(IRNAME + NROWS,RNAME1)
+!
+! CHECK FOR OVERFLOW
+!
+      IF(NROWS.LT.MAXRC - 2)GOTO 100
+!
+185   CONTINUE
+      PRINT *,' ** ',NROWS,' ARE TOO MANY ROWS'
+      GOTO 1390
+!
+!   ::: END ROWS SECTION :::
+!
+190   CONTINUE
+!
+!   LAST CARD HAD 'C' (OR 'C') IN COLUMN 1...ASSUME COLUMNS SECTION
+!
+! CHECK THAT WE GOT A FREE ROW (OBJ)
+      IF( NRFREE.EQ.0 )THEN
+         PRINT *,' ** NO FREE ROW (N-TYPE)...ERROR ASSUMED'
+         GOTO 1390
+      ENDIF
+!
+! CHECK THAT WE GOT A NONFREE ROW
+      IF( NRFREE.EQ.NROWS )THEN
+         PRINT *,' ** NO NON-FREE ROW...ERROR ASSUMED'
+         GOTO 1390
+      ENDIF
+!
+      IF(SWMSG)PRINT *,NROWS,' ROWS...',NRFREE,' FREE'
+!
+!       WRITE SORTED ROW LIST TO PCKFIL
+!       --------------------------------
+!
+      CLOSE(PCKFIL)
+! UNIX AND XENIX NEED RECORD LENGTHS (RECL) FOR UNFORMATTED FILES
+!IXNX      OPEN(PCKFIL,STATUS='SCRATCH',FORM='UNFORMATTED',ERR=1350,
+!IXNX     1     RECL=2048)
+!IXNX      GOTO 222
+!IEIAC   FILEINF NEEDED FOR SCRATCH FILE TO PROVIDE ENOUGH SPACE
+!IEIA      CALL FILEINF(RCODE,'TRK',50,'SECOND',100,'RECFM','VBS',
+!IEIA     1             'LRECL',-1,'BLKSIZE',32760)
+      OPEN(PCKFIL,STATUS='SCRATCH',FORM='UNFORMATTED',ERR=1350)
+222   REWIND(PCKFIL)
+      NCHECK = NROWS
+!
+!     TRAVERSE ROWS INORDER
+!
+      ROW=I4VAL(LLINK)
+      IF(ROW.EQ.0)GOTO 1950
+!   MOVE DOWN LEFT LEG OF TREE
+1910  IF(I4VAL(LLINK+ROW).GT.0)THEN
+          ROW=I4VAL(LLINK+ROW)
+          GOTO 1910
+      ENDIF
+!
+!     WRITE ROW
+!    -----------
+1920  WRITE(PCKFIL,ERR=1360)NAME(IRNAME+ROW),INDEX(IRINFO+ROW)
+      NCHECK = NCHECK - 1
+!
+! GET INORDER SUCCESSOR OF ROW
+!
+1950  IF(I4VAL(RLINK+ROW).LT.0)THEN
+          ROW = -I4VAL(RLINK+ROW)
+          GOTO 1920
+      ELSE IF(I4VAL(RLINK+ROW).GT.0)THEN
+          ROW = I4VAL(RLINK+ROW)
+          GOTO 1910
+      ENDIF
+!
+! NOW WE HAVE WRITTEN LAST ROW...RIGHT LINK = 0
+!
+      IF(NCHECK.NE.0)THEN
+          PRINT *,' **',NCHECK
+          I = ROW
+          GOTO 1355
+      ENDIF
+!
+! SET POINTERS, KNOWING NROWS
+!
+      IRLBND = IRINFO + NROWS
+      IRUBND = IRLBND + NROWS
+      IRSTAT = IRUBND + NROWS
+      ICINFO = IRSTAT + NROWS + 1
+!
+      ICNAME = IRNAME + NROWS + 1
+      CNAME = ' '
+      CALL GPTNAM(ICNAME,CNAME)
+!
+! WRITE A DUMMY RECORD TO AVOID EOF
+      DUMMY = 0.
+      WRITE(PCKFIL,ERR=1360)OBJNAM,DUMMY
+!
+! READ ROWS BACK (SORTED)
+!
+      REWIND(PCKFIL)
+!
+      DO 1989 I=1,NROWS
+        READ(PCKFIL,ERR=1355,END=1359)RNAME1,INDEX(IRINFO+I)
+        LINE = LINE+1
+        CALL GPTNAM(IRNAME+I,RNAME1)
+1989  CONTINUE
+! (DO LOOP USED BECAUSE SOME COMPILERS DO NOT WORK WITH IMPLIED LOOP)
+!
+! SET ROW BOUNDS AND INITIALIZE COUNTS
+!
+      OBJNUM = 0
+      DO 1990 ROW=1,NROWS
+           TYP=INDEX(IRINFO+ROW)
+           INDEX(IRINFO+ROW)=0
+           IF(TYP.EQ.0)THEN
+               INDEX(IRLBND+ROW)=-INF
+               INDEX(IRUBND+ROW)= INF
+!            SEE IF FREE ROW MATCHES OBJ NAME
+               IF(OBJNAM.EQ.NAME(IRNAME+ROW))OBJNUM = ROW
+!
+           ELSE IF(TYP.EQ.1)THEN
+               INDEX(IRLBND+ROW)= 0
+               INDEX(IRUBND+ROW)= INF
+           ELSE IF(TYP.EQ.2)THEN
+               INDEX(IRLBND+ROW)=-INF
+               INDEX(IRUBND+ROW)= 0
+           ELSE
+               INDEX(IRLBND+ROW)= 0
+               INDEX(IRUBND+ROW)= 0
+           ENDIF
+1990   CONTINUE
+!
+! CHECK THAT OBJ WAS SET
+!
+      IF(OBJNUM.EQ.0)THEN
+          PRINT *,' OBJECTIVE ROW ',OBJNAM,' NOT IN MATRIX FILE'
+          GOTO 1399
+      ENDIF
+!
+! PREPARE FOR COLUMNS SECTION
+!
+      MAXCOL = MAXRC - NROWS - 1
+      IF( MAXCOL.GT.MXNCOL )MAXCOL = MXNCOL
+      I4VAL(LLINK) = 0
+      I4VAL(RLINK) = 0
+      IFREE = ICINFO + MAXCOL + 1
+      SECTN  = COLSEC
+      SOSNAM = ' '
+!
+      CHKFRQ = FREQCH
+! INITIALIZE CURRENT COLUMN NAME (SETNAM)
+      SETNAM=' '
+      MAXLEN=0
+! INITIALIZE FIRST AND LAST NAMES
+      FNAME = '~'
+      LNAME = ' '
+      TOP   = 0
+      BOTTOM= 0
+!
+! NONZERO INDEXES GROW FROM BOTTOM OF INDEX
+!
+      INONZ=MAXIND
+!
+! READ NONZEROES IN COLUMNS SECTION
+!
+200   CNAME  = ' '
+      RNAME2 = ' '
+      RNAME1 = ' '
+      READ(DATFIL,201,END=1380,ERR=1313)CHR1,CNAME, &
+          RNAME1,V1,RNAME2,V2
+201   FORMAT(A1,T5,A10,T15,A10, G12.5,T40,A10, G12.5)
+!C                             :              :...REMOVED T50 2-5-94
+!C                             :...REMOVED T25 2-5-94
+      LINE = LINE+1
+         IF(CHR1.EQ.'*')GOTO 200
+         IF(CHR1.EQ.RNGSEC(1:1))GOTO 290
+         IF(CHR1.NE.' ')GOTO 1310
+!
+         IF(RNAME1(1:8).EQ.MARKER)THEN
+            IF(RNAME2(1:8).EQ.SOSEND)THEN
+               SOSNAM = ' '
+            ELSE IF(RNAME2(1:8).EQ.SOSORG)THEN
+               SOSNAM = CNAME
+!           ELSE ...IGNORE MARKER
+            ENDIF
+            GOTO 200
+         ENDIF
+!
+         IF(CNAME.EQ.' ')CNAME = SETNAM
+         IF(CNAME.NE.SETNAM)THEN
+!
+!            NEW COLUMN
+!
+         IF( NCOLS.EQ.MAXCOL )THEN
+            PRINT *,' **',NCOLS,' ARE TOO MANY COLUMNS'
+            GOTO 1390
+         ENDIF
+!
+! INITIALIZE NEW COLUMN
+                NCOLS=NCOLS+1
+! CHECK FREQUENCY OF LETTING USER KNOW WE'RE HERE
+                CHKFRQ = CHKFRQ - 1
+                IF(CHKFRQ.LE.0 .AND. SWMSG)THEN
+                   PRINT *,' COLUMN',NCOLS,': ',CNAME(:NAMELN), &
+                           '...', NONZER,' NONZEROES SO FAR'
+                   CHKFRQ = FREQCH
+                ENDIF
+! OK, LET'S MOVE AHEAD
+                SETNAM=CNAME
+                BASE(IFREE+NCOLS)=INONZ
+!
+!               BASE IS LONG INTEGER TO HOLD THE BEGINNING OF
+!               COLUMN'S NONZEROES (INONZ)...INFO HOLDS COUNT
+!               UNTIL SORTED
+!
+! INSERT INTO TREE (SEE ROWS SECTION FOR DETAILS)
+!
+! ............................................................
+! : THE FOLLOWING IS MILT GUTTERMAN'S IMPROVEMENT FOR TREE   :
+! : INSERTION (FROM GTREIN IN LPRENSRT.FOR).                 :
+! : SPEEDUP OCCURS IF NAMES ARE ALREADY IN SORT ORDER.       :
+! :..........................................................:
+! IS NEW NAME LAST?
+      IF(CNAME.GT.LNAME)THEN
+! YES, INSERT TO RIGHT OF BOTTOM (AND UPDATE LNAME)
+         LNAME = CNAME
+         I4VAL(RLINK + NCOLS)  = I4VAL(RLINK + BOTTOM)
+         I4VAL(RLINK + BOTTOM) = NCOLS
+         BOTTOM= NCOLS
+         IF(NCOLS.EQ.1)THEN
+            FNAME = CNAME
+            TOP   = 1
+         ENDIF
+         GOTO 280
+      ENDIF
+! IS NEW NAME FIRST?
+      IF(CNAME.LT.FNAME)THEN
+! YES, INSERT TO LEFT OF TOP (AND UPDATE FNAME)
+         FNAME = CNAME
+         I4VAL(LLINK + TOP)    = NCOLS
+         I4VAL(RLINK + NCOLS)  = -TOP
+         TOP   = NCOLS
+         IF(NCOLS.EQ.1)THEN
+            LNAME = CNAME
+            BOTTOM= 1
+         ENDIF
+         GOTO 280
+      ENDIF
+! ............................................................
+! : END OF MILT'S IMPROVEMENT                                :
+! :..........................................................:
+                PARENT = 0
+250             CONTINUE
+                IF( CNAME.EQ.NAME(ICNAME+PARENT) )THEN
+                   PRINT *,' ** COLUMN ',CNAME(:NAMELN), &
+                           ' IS OUT OF ORDER'
+                   GOTO 1390
+                ELSE IF( CNAME.LT.NAME(ICNAME+PARENT) )THEN
+                   IF( I4VAL(LLINK+PARENT).GT.0 )THEN
+                        PARENT=I4VAL(LLINK+PARENT)
+                        GOTO 250
+                   ELSE
+                        I4VAL(LLINK+PARENT)=NCOLS
+                        I4VAL(RLINK+NCOLS)=-PARENT
+                   ENDIF
+                ELSE
+                   IF(I4VAL(RLINK+PARENT).GT.0)THEN
+                        PARENT=I4VAL(RLINK+PARENT)
+                        GOTO 250
+                   ELSE
+                        I4VAL(RLINK+NCOLS)=I4VAL(RLINK+PARENT)
+                        I4VAL(RLINK+PARENT)=NCOLS
+                   ENDIF
+                ENDIF
+!
+280             CONTINUE
+!
+!               FINISH INSERTION
+!
+                I4VAL(LLINK+NCOLS)=0
+                CALL GPTNAM(ICNAME+NCOLS,CNAME)
+                BASE(ICINFO+NCOLS)=0
+! IS THIS IN AN SOS?
+                IF(SOSNAM.NE.' ')THEN
+! -YES, SO PUT 1. INTO SOS ROW
+                   V = 1.
+                   CALL GADDNZ(SOSNAM,V,VTZERO,RCODE)
+                   IF( RCODE.GT.0 )GOTO 1370
+                   IF( RCODE.LT.0 )THEN
+                      PRINT *,' ** SYSERR...SOS ',SOSNAM,V
+                      GOTO 1390
+                   ENDIF
+                ENDIF
+! END OF INITIALIZATION OF NEW COLUMN
+         ENDIF
+!
+! ADD FIRST NONZERO FROM INPUT LINE
+      CALL GADDNZ(RNAME1,V1,VTZERO,RCODE)
+      IF( RCODE.GT.0 )GOTO 1370
+         IF( RCODE.LT.0 )THEN
+! SUPPRESS MESSAGE IF REALLY ZERO OR IF MANY MESSAGES HAVE BEEN ISSUED
+            IF( ABS(V1).GT.0 .AND. NWARNV.GT.0 )THEN
+               NWARNV = NWARNV-1
+               PRINT *,' WARNING: COEFFICIENT OF ',RNAME1(:NAMELN+1), &
+                       'IN COLUMN ',CNAME(:NAMELN)
+               PRINT *,'        =',V1,'...TOO SMALL TO ADD'
+            ENDIF
+            RCODE = 0
+         ENDIF
+! ADD SECOND NONZERO, IF PRESENT
+      IF(RNAME2.EQ.' ')GOTO 200
+! ...IT IS
+      CALL GADDNZ(RNAME2,V2,VTZERO,RCODE)
+      IF( RCODE )275,200,1370
+275   IF( ABS(V2).GT.0 .AND. NWARNV.GT.0 )THEN
+         NWARNV = NWARNV-1
+         PRINT *,' WARNING: COEFFICIENT OF ',RNAME2(:NAMELN), &
+                 '=',V2,'...TOO SMALL TO ADD'
+      ENDIF
+      RCODE = 0
+      GOTO 200
+!
+!       ::: END COLUMNS SECTION :::
+!
+290   CONTINUE
+!
+      IF(SWMSG)PRINT *,NCOLS,' COLUMNS...',NONZER,' NONZEROES'
+!
+! SET COLUMN POINTERS, NOW THAT NCOLS IS KNOWN
+!
+      ICLBND = ICINFO + NCOLS + 1
+!C 2-18-94    :...REMOVED 2* (WAS FOR CONVERTING TO HALF WORDS)
+      ICUBND = ICLBND + NCOLS
+      ICSTAT = ICUBND + NCOLS
+!   ...AND FIRST NONZERO LOCATION
+      INONZ  = ICSTAT + NCOLS + 1
+!
+! TRAVERSE COLUMN TREE INORDER, WRITING NAME, INFO AND NONZERO LIST
+!
+      REWIND(PCKFIL)
+!
+      COLUMN = I4VAL(LLINK)
+      IF( COLUMN.EQ.0 )GOTO 2950
+!
+! MOVE DOWN LEFT LEG
+!
+2910  IF(I4VAL(LLINK+COLUMN).GT.0)THEN
+                COLUMN=I4VAL(LLINK+COLUMN)
+                GOTO 2910
+      ENDIF
+!
+! WRITE COLUMN NAME AND COUNT FIRST
+!
+2920  CONTINUE
+!
+      NZ=BASE(ICINFO+COLUMN)
+      WRITE(PCKFIL,ERR=1360)NAME(ICNAME+COLUMN),NZ
+! ...WRITE NONZEROES
+      IF(NZ.GT.0)THEN
+                I1=BASE(IFREE+COLUMN)
+                I2=I1 - 2*NZ + 1
+                WRITE(PCKFIL,ERR=1361)(INDEX(I),I=I1,I2,-1)
+      ENDIF
+!
+! GET INORDER SUCCESSOR OF COLUMN
+!
+2950  IF(I4VAL(RLINK+COLUMN).LT.0)THEN
+                COLUMN=-I4VAL(RLINK+COLUMN)
+                GOTO 2920
+      ELSE IF(I4VAL(RLINK+COLUMN).GT.0)THEN
+                COLUMN=I4VAL(RLINK+COLUMN)
+                GOTO 2910
+      ENDIF
+!
+!       ::: TRAVERSAL COMPLETE ...RIGHT LINK = 0 :::
+!
+! WRITE A DUMMY RECORD TO AVOID EOF
+      RNAME1 = '_END'
+      WRITE(PCKFIL,ERR=1360)RNAME1,NZ
+!
+! READ BACK SORTED COLUMN LIST AND SET INDEX POINTERS INTO INFO
+!
+      REWIND(PCKFIL)
+!
+       MAXLEN=0
+       I1=INONZ
+       BASE(ICINFO)=0
+!
+       DO 2980 COLUMN=1,NCOLS
+              READ(PCKFIL,ERR=1356,END=1359)CNAME,NZ
+              LINE = LINE+1
+              IF(CNAME.EQ.RNAME1)GOTO 2981
+              CALL GPTNAM(ICNAME+COLUMN,CNAME)
+              IF(NZ.GT.0)THEN
+                I2 = I1 + 2*NZ - 1
+                READ(PCKFIL,ERR=1357,END=1359)(INDEX(I),I=I1,I2)
+                LINE = LINE+1
+                I1=I2+1
+              ENDIF
+!
+              BASE(ICINFO+COLUMN)=BASE(ICINFO+COLUMN-1)+NZ
+!       ...INITIALIZE BOUNDS AND UPDATE MAX LENGTH
+              INDEX(ICLBND+COLUMN)=0
+              INDEX(ICUBND+COLUMN)=INF
+              IF(MAXLEN.LT.NZ)THEN
+                 MAXLEN=NZ
+                 CMAXLN=COLUMN
+              ENDIF
+2980   CONTINUE
+2981   CONTINUE
+!
+!       ::: COLUMNS NOW RESIDE IN SORT ORDER :::
+!
+! PREPARE FOR RHS SECTION
+!
+       IFREE = INONZ + 2*NONZER + 1
+!
+       SECTN=RHSSEC
+       CNAME=RHSNAM
+       RNAME1=' '
+       RNAME2=' '
+!
+300   READ(DATFIL,301,END=1300,ERR=1313)CHR1,SETNAM, &
+          RNAME1,V1,RNAME2,V2
+301   FORMAT(A1,T5,A10, A10,T25,G13.5,T40,A10, G13.5)
+!C 2-5-94              :          :...........:..:...CHANGED FROM G12.5
+!C                     :...REMOVED T15        :...REMOVED T50
+
+      LINE = LINE+1
+         IF(CHR1.EQ.'*')GOTO 300
+         IF(CHR1.NE.' ')GOTO 390
+!
+! CHECK RHS SETNAME
+!
+         IF(CNAME.EQ.'  ')CNAME = SETNAM
+         IF(CNAME.NE.SETNAM)THEN
+!       SEE IF THIS IS FIRST ONE...TO BE SET NOW
+                IF(CNAME.NE.'NONE')GOTO 300
+!       ...IT IS...SET RHS NAME
+                CNAME=SETNAM
+                RHSNAM=SETNAM
+         ENDIF
+!
+! LOOKUP ROW
+350      CALL GETNUM('ROW ',RNAME1,NUMBER)
+         IF( NUMBER.EQ.0 )GOTO 1371
+! GET VALUE INDEX
+         IF( V1.LT.0.0 )THEN
+            V = -V1
+            SIGN = -1
+         ELSE
+            V = V1
+            SIGN = 1
+         ENDIF
+!
+         ID=0
+         IF( ABS(V).GT.VTOLAB )THEN
+            CALL GETVID(V,ID)
+            IF( ID.EQ.0 )GOTO 1370
+         ENDIF
+!
+! OVERWRITE 0 BOUNDS IN ROW NUMBER (NONE ===> FREE ROW, NOT ADDED)
+!
+         IF(INDEX(IRLBND+NUMBER).EQ.0)INDEX(IRLBND+NUMBER)=ID*SIGN
+         IF(INDEX(IRUBND+NUMBER).EQ.0)INDEX(IRUBND+NUMBER)=ID*SIGN
+!
+         IF(RNAME2.NE.' ')THEN
+!   ADD 2ND RHS
+            RNAME1 = RNAME2
+            RNAME2 = ' '
+            V1 = V2
+            GOTO 350
+         ENDIF
+!
+! GO GET NEXT RHS CARD INPUT
+          GOTO 300
+!         --------
+!
+!       ::: END RHS SECTION :::
+!
+390      IF(SWMSG)PRINT *,' RHS SECTION COMPLETE...NAME = ',CNAME
+!
+         IF(CHR1.EQ.RNGSEC(1:1))GOTO 400
+         IF(CHR1.EQ.BNDSEC(1:1))GOTO 500
+         IF(CHR1.EQ.'E' .OR. CHR1.EQ.'E')GOTO 900
+         GOTO 1310
+!
+! RANGE SECTION
+400      SECTN=RNGSEC
+         CNAME=RNGNAM
+         ERRNAM = ' '
+!
+410      READ(DATFIL,301,END=1300,ERR=1313)CHR1,SETNAM, &
+             RNAME1,V,RNAME2,V2
+         LINE = LINE+1
+         IF(CHR1.EQ.'*')GOTO 410
+         IF(CHR1.NE.' ')GOTO 490
+!
+! CHECK SETNAME
+         IF(CNAME.EQ.' ')CNAME = SETNAM
+         IF(CNAME.NE.SETNAM)THEN
+! ...IS THIS FIRST ONE TO BE ENTERED NOW?
+                IF(CNAME.NE.'NONE')GOTO 410
+!       YES...
+                CNAME=SETNAM
+                RNGNAM=SETNAM
+         ENDIF
+!
+! LOOKUP ROW
+!
+450      CALL GETNUM('ROW ',RNAME1,NUMBER)
+         IF(NUMBER.EQ.0)THEN
+! ROW NOT DEFINED
+            ERRNAM = RNAME1
+            GOTO 410
+         ENDIF
+!
+! GET BOUND INDEX TO BE CHANGED...
+!
+!    ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+!    IF L = -INF, IT MUST BE THAT U < INF (FREE ROW CANNOT BE
+!            RANGED).  IN THIS CASE, L BECOMES U-V.
+!    IF U = INF, IT MUST BE THAT L > -INF.  IN THIS CASE,
+!            U BECOMES L+V.
+!    IF L = U, WE ADJUST TO L+V OR U+V ACCORDING TO V<0 OR V>0, RESP.
+!    ERROR RETURNS IF:
+!       -INF < L < U < INF (WE MUST HAVE ALREADY RANGED THIS ROW)
+!       -INF = L & U = INF  (FREE ROW)
+!    ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+!
+         CALL GETRIM('ROW ',NUMBER,VL,VU,VC,NZ)
+!
+         IF(VL.LE.-VINF)THEN
+                IF(VU.GE.VINF)THEN
+                     PRINT *,' ATTEMPT TO RANGE FREE ROW ',RNAME1, &
+                             '...IGNORED'
+                     GOTO 410
+                ENDIF
+                V = VU-ABS(V)
+                I = IRLBND+NUMBER
+         ELSE IF(VU.LT.VINF)THEN
+                IF(VL.LT.VU)THEN
+                   PRINT *,' ROW ',RNAME1,' HAS SECOND RANGE'
+                   GOTO 1310
+                ENDIF
+!     RANGE EQUATION...SIGN DETERMINES ADJUSTMENT
+                IF(V.LT.0.0)THEN
+                   V = VL + V
+                   I = IRLBND + NUMBER
+                ELSE
+                   V = VU + V
+                   I = IRUBND + NUMBER
+                ENDIF
+         ELSE
+                V = VL+ABS(V)
+                I = IRUBND+NUMBER
+         ENDIF
+!
+! GET VALUE INDEX OF V TO ENTER INTO INDEX(I)
+!
+         IF(V.LT.0)THEN
+                V = -V
+                SIGN = -1
+         ELSE IF(V.GT.0)THEN
+                SIGN = 1
+         ENDIF
+!
+         IF(V.LT.VTOLAB)THEN
+                ID = 0
+         ELSE
+                CALL GETVID(V,ID)
+                IF(ID.EQ.0)GOTO 1310
+                ID = SIGN*ID
+         ENDIF
+!
+         INDEX(I) = ID
+         IF(RNAME2.NE.' ')THEN
+!    ADD 2ND RANGE
+            RNAME1 = RNAME2
+            RNAME2 = ' '
+            V = V2
+            GOTO 450
+         ENDIF
+!
+! GO GET NEXT RANGE ENTRY
+         GOTO 410
+!        ========
+!  ::: END RANGE SECTION :::
+!
+490      CONTINUE
+         IF(ERRNAM.NE.' ')THEN
+            PRINT *,' WARNING: SOME ROWS IN RANGE SECTION,', &
+                    ' LIKE ',ERRNAM(:NAMELN),', WERE NOT DEFINED.'
+         ENDIF
+         IF(SWMSG)PRINT *,' RANGE COMPLETE...NAME = ',CNAME
+!
+         IF(CHR1.EQ.'E' .OR. CHR1.EQ.'E')GOTO 900
+         IF(CHR1.NE.BNDSEC(1:1))GOTO 1310
+!
+! BOUNDS SECTION
+500      CONTINUE
+         SECTN=BNDSEC
+         CNAME=BNDNAM
+         ERRNAM = ' '
+!
+510    READ(DATFIL,511,END=1300,ERR=1313)CHR1,BNDTYP,SETNAM,RNAME1,V
+511    FORMAT(A1,T2,A2,T5,A10, A10, G13.5)
+!C  2-5-94                    :    :  :...CHANGED FROM G12.5
+!C                            :    :...REMOVED T25
+!C                            :...REMOVED T15
+       LINE = LINE+1
+         IF(CHR1.EQ.'*')GOTO 510
+         IF(CHR1.NE.' ')GOTO 590
+!
+! CHECK BOUNDSET NAME
+!
+         IF(CNAME.EQ.' ')CNAME = SETNAM
+         IF(CNAME.NE.SETNAM)THEN
+                IF(CNAME.NE.'NONE')GOTO 510
+                CNAME=SETNAM
+                BNDNAM=SETNAM
+         ENDIF
+!
+! LOOKUP COLUMN
+!
+         CALL GETNUM('COL ',RNAME1,NUMBER)
+         IF(NUMBER.EQ.0)THEN
+! COLUMN NOT DEFINED
+            ERRNAM = RNAME1
+            GOTO 510
+         ENDIF
+! SET IF FREE COLUMN WITHOUT V
+         IF(BNDTYP.EQ.'MI'.OR.BNDTYP.EQ.'FR' .OR. &
+            BNDTYP.EQ.'MI'.OR.BNDTYP.EQ.'FR')THEN
+                INDEX(ICLBND+NUMBER)=-INF
+                GOTO 510
+         ENDIF
+! BOUND TYPE 'PL' IS JUST VANILLA (IGNORE)
+         IF(BNDTYP.EQ.'PL' .OR. BNDTYP.EQ.'PL')GOTO 510
+! BOUND TYPE 'BV' ACCOMMODATES FORTLP SPEC FOR BINARY VARIABLE (0-1)
+         IF(BNDTYP.EQ.'BV' .OR. BNDTYP.EQ.'BV')THEN
+                INDEX(ICUBND+NUMBER)=1
+                GOTO 510
+         ENDIF
+!
+! BND TYPE IS UP,LO,FX...SET VALUE INDEX
+         IF( V.LT.0.0 )THEN
+            V=-V
+            SIGN=-1
+         ELSE IF(V.GT.0.0)THEN
+            SIGN= 1
+         ENDIF
+         IF( V.LT.VTOLAB )THEN
+            ID=0
+         ELSE
+            CALL GETVID(V,ID)
+            IF(ID.EQ.0)GOTO 1370
+         ENDIF
+!
+         IF(BNDTYP.EQ.'UP' .OR. BNDTYP.EQ.'UP')THEN
+                INDEX(ICUBND+NUMBER)=ID*SIGN
+         ELSE IF(BNDTYP.EQ.'LO' .OR. BNDTYP.EQ.'LO')THEN
+                INDEX(ICLBND+NUMBER)=ID*SIGN
+         ELSE IF(BNDTYP.EQ.'FX' .OR. BNDTYP.EQ.'FX')THEN
+                INDEX(ICLBND+NUMBER)=ID*SIGN
+                INDEX(ICUBND+NUMBER)=ID*SIGN
+                NCFIX = NCFIX + 1
+         ELSE
+                PRINT *,' ** BOUND TYPE ',BNDTYP,' NOT RECOGNIZED'
+                GOTO 1390
+         ENDIF
+!
+! GO GET NEXT BOUND
+         GOTO 510
+!
+!       ::: END BOUNDS SECTION :::
+!
+590      CONTINUE
+         IF(ERRNAM.NE.' ')THEN
+            PRINT *,' WARNING: SOME COLUMNS IN BOUNDS SECTION,', &
+                    ' LIKE ',ERRNAM(:NAMELN),',WERE NOT DEFINED.'
+         ENDIF
+         IF(SWMSG)PRINT *,' BOUNDS COMPLETE...NAME = ',CNAME
+!
+         IF(CHR1.EQ.RNGSEC(1:1))GOTO 400
+         IF(CHR1.NE.'E' .AND. CHR1.NE.'E')GOTO 1310
+!
+!    ::: DONE :::
+900   CONTINUE
+      IF( SWMSG )PRINT *,' MATRIX READ IN '
+!
+! SET VALUE POINTERS FOR SOLUTION AND FREE SPACE
+      IRSOLV = NVALS
+      ICSOLV = IRSOLV + NROWS
+      IVFREE = ICSOLV + NCOLS + 1
+      ENDNAM = (ICNAME + NCOLS)*NAMELN
+!
+! SET ROW WITH MAX LENGTH (RMAXLN)
+      MAXL = 0
+      DO 990 I=1,NROWS
+         IF(   (INDEX(IRLBND+I).EQ.-INF .AND. INDEX(IRUBND+I).EQ.INF) &
+          .OR. (INDEX(IRINFO+I).LE.MAXL) )GOTO 990
+! NOT FREE ROW AND LENGTH IS NEW MAX
+         RMAXLN = I
+         MAXL   = INDEX(IRINFO+I)
+990   CONTINUE
+!
+      GOTO 9000
+!
+! ** ERROR RETURNS
+1300  PRINT *,' ** MISSING ',SECTN
+      GOTO 1390
+1310  PRINT *,' ** ',CHR1,' NOT EXPECTED'
+      GOTO 1390
+1313  PRINT *,' ** IO ERROR READING MATRIX FILE'
+      GOTO 1390
+!
+!  ERRORS READING PCKFIL
+!
+1350  PRINT *,' ** ERROR OPENING SCRATCH FILE...POSSIBLE OS ERROR'
+      GOTO 1399
+1355  PRINT *,' ** SYSIOERR...R5',I
+      GOTO 1390
+1356  PRINT *,' ** SYSIOERR...R6',COLUMN
+      GOTO 1390
+1357  PRINT *,' ** SYSIOERR...R7',I
+      GOTO 1390
+1359  PRINT *,' ** SYSIOERR...EOF'
+      GOTO 1390
+1360  PRINT *,' ** SYSIOERR...W0',ROW
+      GOTO 1390
+1361  PRINT *,' ** SYSIOERR...W1',I
+      GOTO 1390
+1370  PRINT *,' ** COULD NOT ADD NONZERO',V
+      GOTO 1390
+1371  PRINT *,' ** COULD NOT FIND ROW ',RNAME1
+      GOTO 1390
+1380  PRINT *,' ** PREMATURE END OF FILE REACHED IN ',SECTN
+      GOTO 1399
+1390  CONTINUE
+      BACKSPACE(DATFIL,ERR=1399)
+      READ(DATFIL,1301,ERR=1399,END=1399)CHR80
+      PRINT *,' ...LAST LINE READ IS:'
+1301  FORMAT(A79)
+      PRINT *,' ',CHR80
+!
+! ALL ERROR RETURNS COME HERE
+1399  RCODE = 1
+      PRINT *,' ** READ MATRIX ABORTED AT LINE',LINE, &
+              '...SECTION=',SECTN
+      IF( SWDBG )THEN
+         PRINT *,' DATFIL,PCKFIL =',DATFIL,PCKFIL
+         CALL GDEBUG
+      ENDIF
+!
+!  ALL RETURNS COME HERE
+9000  CLOSE(DATFIL)
+      CLOSE(PCKFIL)
+      IF(NWARNV.EQ.0)PRINT *,' WARNING:', &
+         '  OTHER COEFFICIENTS MAY HAVE BEEN TOO SMALL TO ADD.'
+      RETURN
+!
+! ** GETMAT ENDS HERE
+      END
+!             ::: GETIOPCK.FOR  9-18-93 :::
+!
+! LAST DATE  EARLIER DATES DELETED
+!            4-09-93...REMOVED ENVCHK
+!            7-30-93...ADDED GETIOSOL ROUTINES.
+!
+! THIS CONTAINS THE FOLLOWING GETMAT IO SUBROUTINES.
+!
+!     GRDPCK.....READS UNFORMATTED PACKED FILE
+!     GWRPCK.....WRITES UNFORMATTED PACKED FILE
+!     GRDFPK.....READS FORMATTED PACKED FILE
+!     GWRFPK.....WRITES FORMATTED PACKED FILE
+! THE FOLLOWING ROUTINES SUPPORT GETIOSOL (PUT HERE FOR SPACE REASONS)
+!     GRDSTA.....DECODE ROW OR COLUMN SOLUTION STATUS
+!     GFRCOL.....PROCESS NON-BASIC FREE COLUMN
+!     GSLFRE.....SETS LEVELS OF FREE ROWS (OSL DROPS THEM)
+!
+! RCODE = RETURN CODE = 0 IF ALL IS WELL
+!
+      SUBROUTINE GRDPCK(SWRATE,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS PACKED FILE FROM PCKFIL, PRESUMED OPEN (UNFORMATTED)
+!
+      LOGICAL*1 SWRATE
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+! FIRST SAVE OLD BASE (EXCEPT MAX'S)
+      DO 10 I=1,EBASE2
+10    BASE2(I) = BASE(I)
+      RCODE = 1
+      PCKSAV = PCKFIL
+      READ(PCKFIL,END=99,ERR=13)(BASE(I),I=1,EBASE2)
+! PCKFIL MIGHT HAVE CHANGED SINCE WRITTEN (IN BASE)
+      PCKFIL = PCKSAV
+!
+      INDLEN = IFREE
+      IF(IVFREE.GT.PMXVAL.OR.INDLEN.GT.PMXIND.OR.ENDNAM.GT.PMXNAM)THEN
+         PRINT *,' ** DIMENSION OF NEW FILE EXCEEDS MEMORY ALLOCATION'
+         PRINT *,' INDEX NEEDS ',INDLEN,'...HAS ',PMXIND
+         PRINT *,' VALUE NEEDS ',IVFREE,'...HAS ',PMXVAL
+         PRINT *,' NAME  NEEDS ',ENDNAM,'...HAS ',PMXNAM
+         GOTO 75
+      ENDIF
+!
+      RCODE = 2
+!
+      DO 1 I0=ENDIND,IFREE,256
+         I1 = I0 + 255
+         IF(I1.GT.IFREE)I1 = IFREE
+         READ(PCKFIL,END=99,ERR=13)(INDEX(I),I=I0,I1)
+1     CONTINUE
+!
+      RCODE = 3
+      READ(PCKFIL,END=99,ERR=13) &
+           PRBNAM,OBJNAM,RHSNAM,RNGNAM,BNDNAM,SOLST,SOLNAM
+      DO 2 I0=1,ENDNAM,128
+         I1 = I0 + 127
+         IF(I1.GT.ENDNAM)I1 = ENDNAM
+         READ(PCKFIL,END=99,ERR=13)(NAMERC(I),I=I0,I1)
+2     CONTINUE
+!
+      RCODE = 4
+      DO 3 I0=2,IVFREE,256
+         I1 = I0 + 255
+         IF(I1.GT.IVFREE)I1 = IVFREE
+         READ(PCKFIL,END=99,ERR=13)(VALUE(I),I=I0,I1)
+3     CONTINUE
+!
+      RCODE = 5
+      READ(PCKFIL,END=99,ERR=13)PIVNUM
+      IF( PIVNUM.GT.0 )READ(PCKFIL,END=99,ERR=13) &
+        ( PIVIN(I0),PIVOUT(I0),PIVNBL(I0),PIVST0(I0), &
+         PIVSTI(I0),PIVSTO(I0),I0=1,PIVNUM)
+!
+      RCODE = 0
+      CLOSE(PCKFIL)
+      SWRATE = IPIVOT .GT. 0
+      RETURN
+!
+! PROBLEM, BUT CAN RESTORE BASE TO KEEP LP RESIDENT
+75    CONTINUE
+      DO 80 I=1,EBASE2
+80    BASE(I) = BASE2(I)
+      GOTO 1390
+!
+99    RCODE = -RCODE
+!
+13    PRINT *,' ** IO ERROR READING PACKED FILE',PCKFIL,' RCODE=',RCODE
+1390  CLOSE(PCKFIL)
+      RETURN
+!
+! ** GRDPCK ENDS HERE
+      END
+      SUBROUTINE GWRPCK(RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS WRITES PCKFIL
+!
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+! WRITE BASE FIRST
+      RCODE = 1
+      WRITE(PCKFIL,ERR=13)(BASE(I),I=1,EBASE2)
+      DO 1 I0=ENDIND,IFREE,256
+         I1 = I0 + 255
+         IF(I1.GT.IFREE)I1 = IFREE
+1     WRITE(PCKFIL,ERR=13)(INDEX(I),I=I0,I1)
+      RCODE = 2
+      WRITE(PCKFIL,ERR=13) &
+           PRBNAM,OBJNAM,RHSNAM,RNGNAM,BNDNAM,SOLST,SOLNAM
+      DO 2 I0=1,ENDNAM,128
+         I1 = I0 + 127
+         IF(I1.GT.ENDNAM)I1 = ENDNAM
+2     WRITE(PCKFIL,ERR=13)(NAMERC(I),I=I0,I1)
+      RCODE = 3
+      DO 3 I0=2,IVFREE,256
+         I1 = I0 + 255
+         IF(I1.GT.IVFREE)I1 = IVFREE
+3     WRITE(PCKFIL,ERR=13)(VALUE(I),I=I0,I1)
+!
+      RCODE = 5
+      WRITE(PCKFIL,ERR=13)PIVNUM
+      IF( PIVNUM.GT.0 )WRITE(PCKFIL,ERR=13) &
+        ( PIVIN(I0),PIVOUT(I0),PIVNBL(I0),PIVST0(I0), &
+         PIVSTI(I0),PIVSTO(I0),I0=1,PIVNUM)
+!
+! WRITE A DUMMY RECORD TO AVOID EOF
+      WRITE(PCKFIL,ERR=13)VALUE(0)
+      RCODE = 0
+      CLOSE(PCKFIL)
+      RETURN
+!
+13    CLOSE(PCKFIL)
+      PRINT *,' ** IO ERROR WRITING PACKED FILE',PCKFIL
+      PRINT *,' RC I0 I =',RCODE,I0,I
+      RETURN
+!
+! ** GWRPCK ENDS HERE
+      END
+      SUBROUTINE GRDFPK(SWRATE,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS FORMATTED PACKED FILE FROM DATFIL, PRESUMED OPEN.
+!  SWRATE = TRUE MEANS THE BASIS IS SETUP TO SUPPORT THE RATEOF COMMAND.
+!        (THIS IS DETERMINED AFTER READING IN THE LP...SEE BELOW.)
+!
+      LOGICAL*1 SWRATE
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+! FIRST SAVE OLD BASE (EXCEPT MAX'S)
+      DO 10 I=1,EBASE2
+10    BASE2(I) = BASE(I)
+      RCODE = 1
+      DATSAV = DATFIL
+      READ(DATFIL,1,END=99,ERR=13)(BASE(I),I=1,EBASE2)
+1     FORMAT(5I15)
+! DATFIL MIGHT HAVE CHANGED SINCE WRITTEN (IN BASE)
+      DATFIL = DATSAV
+!
+      IF(IVFREE.GT.MAXVAL.OR.IFREE.GT.MAXIND.OR.ENDNAM.GT.MAXNAM)THEN
+         PRINT *,' ** DIMENSION OF NEW FILE EXCEEDS MEMORY ALLOCATION'
+         PRINT *,' INDEX NEEDS ',IFREE ,'...HAS ',MAXIND
+         PRINT *,' VALUE NEEDS ',IVFREE,'...HAS ',MAXVAL
+         PRINT *,' NAME  NEEDS ',ENDNAM,'...HAS ',MAXNAM
+         GOTO 75
+      ENDIF
+!
+      RCODE = 2
+      READ(DATFIL,21,END=99,ERR=13)(BASE(I),I=ENDBAS+1,IFREE)
+21    FORMAT(2I35)
+      RCODE = 3
+      READ(DATFIL,31,END=99,ERR=13) &
+           PRBNAM,OBJNAM,RHSNAM,RNGNAM,BNDNAM,SOLST,SOLNAM
+31    FORMAT(4A16)
+      RCODE = 4
+      READ(DATFIL,32,END=99,ERR=13)(NAMERC(I),I=1,ENDNAM)
+32    FORMAT(80A1)
+      RCODE = 5
+      READ(DATFIL,4,END=99,ERR=13)(VALUE(I),I=1,IVFREE)
+4     FORMAT(5E15.6)
+!
+      RCODE = 6
+      READ(DATFIL,61,END=99,ERR=13)PIVNUM
+61    FORMAT(I5)
+      IF( PIVNUM.GT.0 )READ(DATFIL,62,END=99,ERR=13) &
+        ( PIVIN(I0),PIVOUT(I0),PIVNBL(I0),PIVST0(I0), &
+         PIVSTI(I0),PIVSTO(I0),I0=1,PIVNUM)
+62    FORMAT(3I5,2L1)
+!
+      RCODE = 0
+      CLOSE(DATFIL)
+      SWRATE = IPIVOT .GT. 0
+      RETURN
+!
+! PROBLEM, BUT CAN RESTORE BASE TO KEEP LP RESIDENT
+75    CONTINUE
+      DO 80 I=1,EBASE2
+80    BASE(I) = BASE2(I)
+      GOTO 1390
+!
+99    RCODE = -RCODE
+!
+13    PRINT *,' ** IO ERROR READING FORMATTED PACKED FILE',DATFIL
+      PRINT *,' RC I =',RCODE,I
+1390  CLOSE(DATFIL)
+      RETURN
+!
+! ** GRDFPK ENDS HERE
+      END
+      SUBROUTINE GWRFPK(RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS WRITES FORMATTED PACKED FILE TO DATFIL, PRESUMED OPEN
+!
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+! WRITE BASE FIRST
+      RCODE = 1
+      WRITE(DATFIL,1,ERR=13)(BASE(I),I=1,EBASE2)
+1     FORMAT(5I15)
+      RCODE = 2
+      WRITE(DATFIL,21,ERR=13)(BASE(I),I=ENDBAS+1,IFREE)
+21    FORMAT(2I35)
+!              :...BASE CONTAINS INDEX (INT*2), SO ITS NUMERIC
+!                  VALUE COULD BE HUGE
+      RCODE = 3
+      WRITE(DATFIL,31,ERR=13) &
+           PRBNAM,OBJNAM,RHSNAM,RNGNAM,BNDNAM,SOLST,SOLNAM
+31    FORMAT(4A16)
+      RCODE = 4
+      WRITE(DATFIL,32,ERR=13)(NAMERC(I),I=1,ENDNAM)
+32    FORMAT(80A1)
+      RCODE = 5
+      WRITE(DATFIL,4,ERR=13)(VALUE(I),I=1,IVFREE)
+4     FORMAT(5E15.6)
+!
+      RCODE = 6
+      WRITE(DATFIL,61,ERR=13)PIVNUM
+61    FORMAT(I5)
+      IF( PIVNUM.GT.0 )WRITE(DATFIL,62,ERR=13) &
+        ( PIVIN(I0),PIVOUT(I0),PIVNBL(I0),PIVST0(I0), &
+         PIVSTI(I0),PIVSTO(I0),I0=1,PIVNUM)
+62    FORMAT(3I5,2L1)
+!
+! WRITE AN EXTRA LINE TO AVOID EOF WHEN READING
+      WRITE(DATFIL,39,ERR=13)
+39    FORMAT(' ::: END FORMATTED PACKED FILE :::')
+!
+      RCODE = 0
+      CLOSE(DATFIL)
+      RETURN
+!
+13    CLOSE(DATFIL)
+      PRINT *,' ** IO ERROR WRITING FORMATTED PACKED FILE',DATFIL, &
+              ' RC =',RCODE
+      RETURN
+!
+! ** GWRFPK ENDS HERE
+      END
+      SUBROUTINE GRDSTA(ROWCOL,NUMBER,VX,VP,STAT,NFRCOL,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS DECODES SOLUTION STATUS (STAT) OF ROWCOL NUMBER
+!       VX = LEVEL (NEEDED ONLY IF FREE COLUMN)
+!       VP = PRICE (NEEDED ONLY IF STAT DEPENDS ON PRICE)
+!       NFRCOL = NUMBER OF FREE COLUMNS WHOSE BOUND HAD TO BE
+!                ADJUSTED (INCREMENTED IF DONE)
+! ...ALTERNATE RETURN IS UNRECOGNIZED STATUS (FATAL ERROR).
+!
+      CHARACTER*(*) ROWCOL, STAT
+!
+! RECOGNIZED STATUSES                STAT
+!   BS...BASIC                  ===>  B
+!   **...INFEASIBLE (AND BASIC) ===>  I
+!   FR...FREE                   ===>  B IF ROW
+!                                     L OR U IF COL
+!                                     :....:...DEPENDS ON SIGN OF PRICE
+!                                              BOUND IS CHANGED = LEVEL
+!                                              & NFRCOL IS INCREMENTED
+!   EQ...EQUATION               ===> DEPENDS ON PRICE
+!   FX...FIXED COLUMN           ===> DEPENDS ON PRICE
+!   UL...UPPER LIMIT            ===> U
+!   LL...LOWER LIMIT            ===> L
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+      IF( STAT.EQ.'*' )STAT = 'I'
+      IF( STAT.EQ.'L' .OR. STAT.EQ.'U' .OR. STAT.EQ.'B' .OR. &
+          STAT.EQ.'I' )RETURN
+      IF( STAT.EQ.'E' )THEN
+! EQUATION (IN MINOS, THIS COULD BE A FIXED COLUMN)
+! ...SET BOUND STATUS ACCORDING TO PRICE
+          IF( OPT*VP.LE.0. )THEN
+            STAT = 'L'
+         ELSE
+            STAT = 'U'
+         ENDIF
+      ELSE IF( STAT.EQ.'F' )THEN
+         IF( ROWCOL.EQ.'ROW ' )THEN
+! FREE ROW IS BASIC
+            STAT = 'B'
+         ELSE IF( ROWCOL.EQ.'COL ' )THEN
+! WE MUST SEE IF COLUMN IS FREE OR FIXED
+            CALL GETBND(ROWCOL,NUMBER,VL,VU)
+            IF( VL.GE.VU )THEN
+! FIXED COLUMN...SET BOUND STATUS ACCORDING TO PRICE
+               IF( OPT*VP.LE.0. )THEN
+                  STAT = 'L'
+               ELSE
+                  STAT = 'U'
+               ENDIF
+            ELSE IF( VL.LT.-VINF .AND. VU.GE.VINF )THEN
+! FREE COLUMN (THAT IS NOT BASIC)
+               CALL GFRCOL(NUMBER,VX,VP,STAT)
+               NFRCOL = NFRCOL + 1
+            ELSE
+               GOTO 1300
+            ENDIF
+         ELSE
+            GOTO 1300
+         ENDIF
+      ELSE
+         GOTO 1300
+      ENDIF
+!
+      RETURN
+!
+! STATUS NOT RECOGNIZED
+1300  CONTINUE
+      IF( ROWCOL.EQ.'ROW' )THEN
+         I = IRNAME
+      ELSE IF( ROWCOL.EQ.'COL ' )THEN
+         I = ICNAME
+      ELSE
+         PRINT *,' ** SOLUTION STATUS NOT RECOGNIZED: ',STAT
+         PRINT *,'    ...ALSO, SYSERR IN GRDSTA...',ROWCOL
+         RETURN 1
+      ENDIF
+      PRINT *,' ** SOLUTION STATUS NOT RECOGNIZED FOR ',ROWCOL, &
+              NAME(I+NUMBER),': ',STAT
+      RETURN 1
+!
+! ** GRDSTA ENDS HERE
+      END
+      SUBROUTINE GFRCOL(COL,VX,VP,STAT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS PROCESSES A NON-BASIC FREE COLUMN (COL) WITH LEVEL = VX
+! AND REDUCED COST = VP.
+!
+      CHARACTER*1 STAT
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF( OPT.EQ.OPTMIN .OR. SOLST(1:6).EQ.'INFEAS' )THEN
+! USE REDUCED COST AS IS
+          VPRICE = VP
+      ELSE
+! REVERSE SIGN OF REDUCED COST
+          VPRICE = -VP
+      ENDIF
+      IF( VPRICE.GE.0. )THEN
+! CHANGE TO STAT = L WITH LOWER BOUND = LEVEL
+         STAT = 'L'
+         IBOUND = ICLBND
+      ELSE
+! CHANGE TO STAT = U WITH UPPER BOUND = LEVEL
+         STAT = 'U'
+         IBOUND = ICUBND
+      ENDIF
+! NOW CHANGE BOUND POINTER
+      IF( ABS(VX).LE.VTOLAB )THEN
+         INDEX( IBOUND+COL ) = 0
+      ELSE IF( ABS(VX-1.).LE.VTOLAB )THEN
+         INDEX( IBOUND+COL ) = 1
+      ELSE IF( ABS(VX+1.).LE.VTOLAB )THEN
+         INDEX( IBOUND+COL ) = -1
+      ELSE
+! ADD VALUE
+         IF( IVFREE.GE.MAXVAL )THEN
+! ...OH, OH, NO MORE VALUE SPACE...MAKE BASIC AND CORRUPT SOLUTION
+! (MOST LIKELY, THE SUPER-BASIC HAS 0 LEVEL, SO THIS IS NOT NECESSARY)
+            STAT = 'B'
+            VP = 0.
+         ELSE
+            IF( VX.GT.0. )THEN
+               INDEX( IBOUND+COL ) = IVFREE
+               VALUE( IVFREE )     = VX
+            ELSE
+               INDEX( IBOUND+COL ) = -IVFREE
+               VALUE( IVFREE )     = -VX
+            ENDIF
+            IVFREE = IVFREE+1
+         ENDIF
+      ENDIF
+!
+      RETURN
+!
+! ** GFRCOL ENDS HERE
+      END
+      SUBROUTINE GSLFRE(SWMSG,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS SETS LEVELS OF FREE ROWS (STAT = B).
+! ...ALTERNATE RETURN IS NOT ENOUGH SPACE TO SET LEVELS.
+!
+      LOGICAL*1   SWMSG
+      CHARACTER*1 CHAR
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF( IVFREE+NROWS.GT.PMXVAL )THEN
+        PRINT *,' ** NOT ENOUGH VALUE SPACE TO SET LEVELS OF FREE ROWS'
+        PRINT *,'    ...SETTING LEVELS = 0 (EXCEPT OBJECTIVE)'
+         DO 100 I=1,NROWS
+            IF( I.EQ.OBJNUM )GOTO 100
+            CALL GETYPE(I,CHAR)
+            IF( CHAR.NE.'N' )GOTO 100
+! ROW I IS FREE AND NOT THE OBJ...SET STAT=B AND LEVEL=PRICE=0
+            CALL GPUTSL(IRSTAT+I,IRSOLV+I,'B',0.,0.,RCODE)
+            IF( RCODE.NE.0 )RETURN
+100      CONTINUE
+         RETURN
+      ENDIF
+!
+      IF( SWMSG )PRINT *,' SETTING LEVELS OF FREE ROWS'
+      DO 500 I=1,NROWS
+500   VALUE(IVFREE+I) = 0.
+!
+      DO 600 J=1,NCOLS
+         CALL GETSOL('COL ',J,VX,VP,CHAR,DUMMY)
+         NZ = BASE(ICINFO + J) - BASE(ICINFO + J-1)
+         IF( NZ.EQ.0 )GOTO 600
+         I1 = INONZ + 2*BASE(ICINFO+J-1)
+         I2 = I1 + 2*NZ - 1
+         DO 550 I=I1,I2,2
+            ROW = INDEX(I)
+            CALL GETVAL(V,I+1)
+            VALUE(IVFREE+ROW) = VALUE(IVFREE+ROW) + VX*V
+550      CONTINUE
+600   CONTINUE
+! NOW VALUE(IVFREE+I) = ROW I LEVEL (ALL I)
+!
+      DO 900 I=1,NROWS
+         IF( I.EQ.OBJNUM )GOTO 900
+         CALL GETYPE(I,CHAR)
+         IF( CHAR.NE.'N' )GOTO 900
+! ROW I IS FREE AND NOT THE OBJ
+         VX = VALUE(IVFREE+I)
+! STORE ITS LEVEL (STAT=B AND PRICE=0)
+         CALL GPUTSL(IRSTAT+I,IRSOLV+I,'B',VX,0.,RCODE)
+         IF( RCODE.NE.0 )RETURN
+900   CONTINUE
+!
+      RETURN
+!
+! ** GSLFRE ENDS HERE
+      END
+!             ::: GETLIB.FOR  3-12-93 :::
+!
+! LAST DATE:  5-14-90...ONLY MINOR CLEANUPS SINCE THEN
+!            10-20-90...ADDED SLIDING MASK TO GETFNM
+!             3-27-92...EXTENDED GETFNM TO ALLOW SLIDING MASK TO
+!                      BEGIN ANYWHERE IN NAME MASK (NOT JUST 1ST CHAR)
+!             3-29-92...ADDED GETAIJ
+!             9-20-92...ADDED GETSTP
+!
+! THIS CONTAINS THE FOLLOWING GETMAT SUBROUTINES.
+!
+!     NAME.......FUNCTION THAT GIVES ROW/COLUMN NAME FROM ELEMENT NUMBER
+!     GPTNAM.....PUTS ROW/COLUMN NAME
+!     GETNUM.....GETS NUMBER FROM NAME
+!     GETNAM.....GETS NAME FROM NUMBER
+!     GETBND.....GETS BOUND VALUES
+!     GETRIM.....GETS RIM VALUES
+!     GETYPE.....GETS TYPE OF ROW (FOR MPS FORMAT)
+!     GETSOL.....GETS SOLUTION VALUES OF ROW OR COL
+!     GETST......GETS SOLUTION STATUS OF ROW OR COL
+!     GETSTP.....GETS SOLUTION TYPE (OVERALL)...ADDED 3-12-93
+!     GETFNM.....GETS FIRST NAME MATCH
+!     GETCOL.....GETS COLUMN NONZEROES
+!     GETROW.....GETS ROW NOZEROES
+!     GETSGN.....GETS SIGN OF NONZERO
+!     GETAIJ.....GETS VALUE OF NONZERO
+!     GETVID.....GETS VALUE INDEX (ADDS TO POOL)
+!     GETVAL.....GETS VALUE FROM INDEX
+!     GETBVP.....GETS BASIC VARIABLE FROM PIVOT POSITION
+!     GETPIV.....GETS PIVOT POSITION FROM BASIC VARIABLE
+!     GPRDCT.....GETS INNER PRODUCT
+!
+      FUNCTION NAME(LOC)
+!     =============
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GIVES ROW/COLUMN NAME FOR K=1,...,NROWS+NCOLS
+!
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      NAME = ' '
+      IF(LOC.EQ.0)RETURN
+      I = (LOC-1)*NAMELN
+      DO 10 K=1,NAMELN
+10    NAME(K:K) = NAMERC(I+K)
+      RETURN
+!
+! ** NAME FUNCTION ENDS HERE
+      END
+      SUBROUTINE GPTNAM(NUMBER,CNAME)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS PUTS NAME OF ROW/COLUMN (CNAME) AS (NUMBER)
+!
+      CHARACTER*(*)  CNAME
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! SET LOCATION (LOC) IN NAME ARRAY
+      LOC = (NUMBER-1)*NAMELN
+! LOOP TO COPY CHARS OF NAME
+      DO 10 K=1,NAMELN
+10    NAMERC(LOC+K) = CNAME(K:K)
+      RETURN
+!
+! ** GPTNAM ENDS HERE
+      END
+      SUBROUTINE GETNUM(ROWCOL,CNAME,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS NUMBER OF ROW/COL WITH NAME=CNAME
+! ...NUMBER=0 IF NOT FOUND
+!
+! BINARY SEARCH USED
+!
+         CHARACTER*4   ROWCOL
+         CHARACTER*(*) CNAME
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! SET POINTERS FOR ROW VS. COL
+         IF(ROWCOL.EQ.'ROW ')THEN
+                IF(CNAME.EQ.OBJNAM)THEN
+                   NUMBER = OBJNUM
+                   RETURN
+                ENDIF
+                INAME =IRNAME
+                NHIGH =NROWS
+         ELSE IF(ROWCOL.EQ.'COL ')THEN
+                INAME =ICNAME
+                NHIGH =NCOLS
+         ELSE
+                PRINT *,' ** SYSERR GNUM',ROWCOL,'...PLEASE REPORT'
+                NUMBER = 0
+                RETURN
+         ENDIF
+!
+         NLOW =1
+!
+! LOOP FOR BINARY SEARCH
+100      CONTINUE
+         NUMBER=(NLOW+NHIGH)/2
+!
+         IF(NAME(INAME+NUMBER).EQ.CNAME)THEN
+                RETURN
+         ELSE IF(NAME(INAME+NUMBER).LT.CNAME)THEN
+! MOVE DOWN
+                NLOW=NUMBER+1
+         ELSE
+! MOVE UP
+                NHIGH=NUMBER-1
+         ENDIF
+      IF(NLOW.LE.NHIGH)GOTO 100
+!     ~~~~~~~~~~~~~~~~~~~~~~~~~  NOT FOUND
+      NUMBER=0
+      RETURN
+!
+! ** GETNUM ENDS HERE
+      END
+      SUBROUTINE GETNAM(ROWCOL,NUMBER,CNAME)
+!     ==================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS NAME (CNAME) FROM NUMBER
+!
+      CHARACTER*4 ROWCOL
+      CHARACTER*(*) CNAME
+! :::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! LOCATION IN NAME ARRAY DEPENDS ON ROW VS. COL
+      IF(ROWCOL.EQ.'ROW ')THEN
+             CNAME=NAME(IRNAME+NUMBER)
+      ELSE IF(ROWCOL.EQ.'COL ')THEN
+             CNAME=NAME(ICNAME+NUMBER)
+      ELSE
+             PRINT *,' ** SYSERR GNAM',ROWCOL,'...PLEASE REPORT'
+             CNAME = ' *SYSERR'
+      ENDIF
+!
+      RETURN
+!
+! ** GETNAM ENDS HERE
+      END
+      SUBROUTINE GETBND(ROWCOL,NUMBER,VL,VU)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS BOUNDS:  VL,VU FOR ROW/COLUMN NUMBER
+!
+      CHARACTER*4 ROWCOL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! LOCATIONS DEPEND UPON ROW VS. COL
+      IF(ROWCOL.EQ.'ROW ')THEN
+                CALL GETVAL(VL,IRLBND+NUMBER)
+                CALL GETVAL(VU,IRUBND+NUMBER)
+      ELSE IF(ROWCOL.EQ.'COL ')THEN
+                CALL GETVAL(VL,ICLBND+NUMBER)
+                CALL GETVAL(VU,ICUBND+NUMBER)
+      ELSE
+                PRINT *,' ** SYSERR GB',ROWCOL,'...PLEASE REPORT'
+      ENDIF
+!
+      RETURN
+!
+! ** GETBND ENDS HERE
+      END
+      SUBROUTINE GETRIM(ROWCOL,NUMBER,VL,VU,VC,NZ)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS RIM FOR ROW/COL NUMBER...
+!
+!       VL = LOWER BOUND
+!       VU = UPPER BOUND
+!       VC = OBJECTIVE VALUE
+!       NZ = NUMBER OF NONZEROES
+!
+         CHARACTER*4 ROWCOL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! BOUNDS
+         CALL GETBND(ROWCOL,NUMBER,VL,VU)
+! OBJ
+         IF(ROWCOL.EQ.'ROW ')THEN
+                IF(NUMBER.EQ.OBJNUM)THEN
+                  VC=OPT
+                ELSE
+                  VC=0.0
+                ENDIF
+                NZ=INDEX(IRINFO+NUMBER)
+         ELSE IF(ROWCOL.EQ.'COL ')THEN
+                VC=0.0
+                I1=INONZ + 2*BASE(ICINFO+NUMBER-1)
+                I2=INONZ + 2*BASE(ICINFO+NUMBER) - 1
+                DO 200 I=I1,I2,2
+                   IF(INDEX(I).EQ.OBJNUM)THEN
+                      CALL GETVAL(VC,I+1)
+                      GOTO 210
+                   ENDIF
+200             CONTINUE
+210             CONTINUE
+                NZ=BASE(ICINFO+NUMBER)-BASE(ICINFO+NUMBER-1)
+         ELSE
+                PRINT *,' ** SYSERR GRM',ROWCOL,'...PLEASE REPORT'
+         ENDIF
+         RETURN
+!
+! ** GETRIM ENDS HERE
+      END
+      SUBROUTINE GETYPE(NUMBER,CHAR)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GIVES TYPE OF ROW (NUMBER) ===> CHAR
+!       BOUNDS
+!       LO  UP      TYPE
+!       ~~~~~~~~~~~~~~~~
+!       -*   *       N  NULL
+!       -*   U       L  <= U
+!        V   *       G  >= V
+!        V = U       E   = V
+!        V < U       R  >= V AND <= U
+!       ~~~~~~~~~~~~~~~~
+!
+      CHARACTER*1 CHAR
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::
+! GET ROW BOUNDS (VL,VU)
+      CALL GETBND('ROW ',NUMBER,VL,VU)
+! SET TYPE ACCORDING TO TABLE
+      IF(VL.LE.-VINF)THEN
+         IF(VU.GE.VINF)THEN
+            CHAR = 'N'
+         ELSE
+            CHAR = 'L'
+         ENDIF
+      ELSE IF(VL.GE.VU)THEN
+         CHAR = 'E'
+      ELSE IF(VU.GE.VINF)THEN
+         CHAR = 'G'
+      ELSE
+         CHAR = 'R'
+      ENDIF
+!
+      RETURN
+!
+! ** GETYPE ENDS HERE
+      END
+      SUBROUTINE GETSOL(ROWCOL,NUMBER,VX,VP,STAT,STNUM)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS SOLUTION VALUES AND STATUS...
+!
+!       VX      = LEVEL
+!       VP      = PRICE
+!       STAT    = STATUS (L,U,B,I)
+!       STNUM   =         1,2,3,4
+!
+!
+      CHARACTER*4 ROWCOL
+      CHARACTER*1 STAT
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! GET STATUS OF ROWCOL NUMBER
+      CALL GETST(ROWCOL,NUMBER,STAT,STNUM)
+!
+      IF(ROWCOL.EQ.'ROW ')THEN
+             IF(STAT.EQ.'L')THEN
+                  CALL GETVAL(VX,IRLBND + NUMBER)
+                  VP = VALUE(IRSOLV + NUMBER)
+             ELSE IF(STAT.EQ.'U')THEN
+                  CALL GETVAL(VX,IRUBND + NUMBER)
+                  VP = VALUE(IRSOLV + NUMBER)
+             ELSE IF(STAT.EQ.'B')THEN
+                  VX = VALUE(IRSOLV + NUMBER)
+                  IF(NUMBER.EQ.OBJNUM.AND.SOLST(:8).NE.'INFEASIB')THEN
+                             VP = OPT
+                  ELSE
+                             VP = 0.0
+                  ENDIF
+             ELSE
+                  VX = VALUE(IRSOLV + NUMBER)
+                  CALL GETBND(ROWCOL,NUMBER,VL,VU)
+                  IF(VX.LT.VL)THEN
+                             VP = 1.0
+                  ELSE
+                             VP =-1.0
+                  ENDIF
+             ENDIF
+      ELSE IF(ROWCOL.EQ.'COL ')THEN
+             IF(STAT.EQ.'L')THEN
+                   CALL GETVAL(VX,ICLBND + NUMBER)
+                   VP = VALUE(ICSOLV + NUMBER)
+             ELSE IF(STAT.EQ.'U')THEN
+                   CALL GETVAL(VX,ICUBND + NUMBER)
+                   VP = VALUE(ICSOLV + NUMBER)
+             ELSE IF(STAT.EQ.'B')THEN
+                   VX = VALUE(ICSOLV + NUMBER)
+                   VP = 0.0
+             ELSE
+                   VX = VALUE(ICSOLV + NUMBER)
+                   CALL GETBND(ROWCOL,NUMBER,VL,VU)
+                   IF(VX.LT.VL)THEN
+                             VP =  1.0
+                   ELSE
+                             VP = -1.0
+                   ENDIF
+             ENDIF
+      ELSE
+             PRINT *,' ** SYSERR GSL',ROWCOL,'...PLEASE REPORT'
+      ENDIF
+!
+      RETURN
+!
+! ** GETSOL ENDS HERE
+      END
+      SUBROUTINE GETST(ROWCOL,NUMBER,STAT,STNUM)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS STATUS (L,U,B,I) OF ROW/COL NUMBER
+!
+       CHARACTER*4 ROWCOL
+       CHARACTER*1 STAT
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! LOCATION DEPENDS UPON ROW VS. COL
+       IF(ROWCOL.EQ.'ROW ')THEN
+             STNUM=INDEX(IRSTAT+NUMBER)
+       ELSE IF(ROWCOL.EQ.'COL ')THEN
+             STNUM=INDEX(ICSTAT+NUMBER)
+       ELSE
+             PRINT *,' ** SYSERR GST',ROWCOL,'...PLEASE REPORT'
+             STAT = '*'
+             RETURN
+       ENDIF
+!
+! UNPACK STAT (BOTTOM 3 BITS HAVE STATUS CODE)
+!
+       IF(STNUM.LT.0)STNUM = -STNUM
+       STNUM=STNUM - (STNUM/8)*8
+       STAT=CHARST(STNUM)
+!
+       RETURN
+!
+! ** GETST ENDS HERE
+      END
+      SUBROUTINE GETSTP(BASIC,COMPL)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS SOLUTION TYPE:  COMPL = S º N º U º ?
+!                                   :   :   :   :...NOT SET
+!                                   :   :   :...UNKNOWN
+!                                   :   :...NOT STRICTLY COMPLEMENTARY
+!                                   :...STRICTLY COMPLEMENTARY
+!                           BASIC = B º N º U º ?
+!                                   :   :   :   :...NOT SET
+!                                   :   :   :...UNKNOWN
+!                                   :   :...NOT BASIC
+!                                   :...BASIC
+! IF STCOMP=0 UPON ENTRANCE (NOT SET), IT IS SET HERE.
+!
+       CHARACTER*(*) COMPL,BASIC
+       CHARACTER*1  STRCMP(0:3),  STAT,      STRBAS(0:3)
+       DATA         STRCMP/'?','S','N','U'/, STRBAS/'?','B','N','U'/
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::::
+      IF( STCOMP.GT.0 )GOTO 900
+! STCOMP NOT SET
+      IF( SOLST.EQ.'INFEASIBLE' )THEN
+         STCOMP = 2
+         GOTO 900
+      ENDIF
+! SET COMPLEMENTARITY STATUS...ASSUME STRICTLY COMP. AND LOOP
+      STCOMP = 1
+      DO 100 I=1,NROWS
+         CALL GETSOL('ROW ',I,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'B' )THEN
+            IF( I.EQ.OBJNUM )GOTO 100
+            CALL GETBND('ROW ',I,VL,VU)
+            IF( VX.GT.VL .AND. VX.LT.VU )GOTO 100
+         ELSE
+            IF( ABS(VP).GE.VTOLAB )GOTO 100
+         ENDIF
+! NOT STRICTLY COMPLEMENTARY
+         STCOMP = 2
+         GOTO 900
+100   CONTINUE
+! ROWS ARE STRICTLY COMPLEMENTARY...CHECK COLUMNS
+      DO 200 I=1,NCOLS
+         CALL GETSOL('COL ',I,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'B' )THEN
+            CALL GETBND('COL ',I,VL,VU)
+            IF( VX.GT.VL .AND. VX.LT.VU )GOTO 200
+         ELSE
+            IF( ABS(VP).GE.VTOLAB )GOTO 200
+         ENDIF
+! NOT STRICTLY COMPLEMENTARY
+          STCOMP = 2
+          GOTO 900
+200   CONTINUE
+! ============================
+900    CONTINUE
+! ======== SET STATS =========
+       COMPL = STRCMP(STCOMP)
+       IF( STBASC.EQ.0 .AND. IPIVOT.GT.0 )STBASC = 1
+       BASIC = STRBAS(STBASC)
+       RETURN
+!
+! ** GETSTP ENDS HERE
+      END
+      SUBROUTINE GETFNM(ROWCOL,CNAME,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS FIRST NAME MATCH OF CNAME, RETURNING NUMBER
+!
+! ...NUMBER=0 IF NO MATCH
+!
+      CHARACTER*4   ROWCOL
+      CHARACTER*16  RNAME
+      CHARACTER*(*) CNAME
+      LOGICAL*1     ANSWER
+! LOCAL
+      CHARACTER*1   SMCHAR
+      DATA          SMCHAR /'"'/
+!
+! CALLS FMATCH (WHICH MUST HAVE SAME SLIDING MASK CHAR)
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! REPLACE MASK CHARACTER IN CNAME WITH BLANK (LOWER ASCII CODE)
+!
+       RNAME=CNAME
+       DO 10 I=1,16
+10     IF(RNAME(I:I).EQ.GMASK)RNAME(I:I)=' '
+!
+! USE BINARY SEARCH IN NAMES (RNAME HAS ADJUSTED MASK: BLANKS REPLACE *)
+!
+       IF(ROWCOL.EQ.'ROW ')THEN
+                IBASE = IRNAME
+                MAXNUM= NROWS
+       ELSE IF(ROWCOL.EQ.'COL ')THEN
+                IBASE = ICNAME
+                MAXNUM= NCOLS
+       ELSE
+                PRINT *,' ** SYSERR GFN',ROWCOL,'...PLEASE REPORT'
+                NUMBER = 1
+                RETURN
+       ENDIF
+!
+       NLOW = 1
+! SEE IF RNAME HAS A SLIDING MASK
+       CALL FLOOKF(RNAME,1,16,SMCHAR,I)
+       IF(I.GT.0)GOTO 190
+!         :...MEANS RNAME CONTAINS SMCHAR...
+!  CANNOT USE BINARY SEARCH FOR FLOOR WITH A SLIDING MASK
+!
+! RNAME DOES NOT CONTAIN SLIDING MASK, SO PROCEED WITH BINARY SEARCH
+       NHIGH=MAXNUM
+!
+!   TOP OF BINARY SEARCH LOOP
+100    CONTINUE
+         NUMBER=(NLOW+NHIGH)/2
+         IF(NAME(IBASE+NUMBER).EQ.RNAME)THEN
+                RETURN
+         ELSE IF(NAME(IBASE+NUMBER).LT.RNAME)THEN
+                NLOW=NUMBER+1
+         ELSE
+                NHIGH=NUMBER-1
+         ENDIF
+      IF(NHIGH.GT.NLOW)GOTO 100
+!
+190   CONTINUE
+!
+! FLOOR FOUND...BEGIN LINEAR SEARCH (CNAME HAS ORIGINAL MASK)
+!
+      DO 200 NUMBER=NLOW,MAXNUM
+          CALL FMATCH(CNAME,NAME(IBASE+NUMBER),GMASK,ANSWER)
+          IF(ANSWER)RETURN
+200   CONTINUE
+! NO MATCH
+      NUMBER=0
+      RETURN
+!
+! ** GETFNM ENDS HERE
+      END
+      SUBROUTINE GETCOL(J,NZ,MAXLST,ROWLST,VALLST)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS NONZEROES OF COLUMN J
+!
+!       MAXLST  = LENGTH OF ROWLST AND VALLST
+!       NZ      = NUMBER OF NONZEROES RETURNED
+!                  ...> MAXLST MEANS TRUNCATED
+!       ROWLST = LIST OF ROW INDEXES
+!       VALLST = LIST OF VALUES
+!
+      DIMENSION ROWLST(MAXLST), VALLST(MAXLST)
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! SET NUMBER OF NONZEROES (NZ)
+      NZ = BASE(ICINFO + J) - BASE(ICINFO + J-1)
+      IF(NZ.EQ.0)RETURN
+!
+      I1=INONZ + 2*BASE(ICINFO+J-1)
+      IF(NZ.GT.MAXLST)THEN
+            I2 = I1 + 2*MAXLST - 1
+      ELSE
+            I2 = I1 + 2*NZ - 1
+      ENDIF
+!
+            K=0
+      DO 100 I=I1,I2,2
+            K=K+1
+            ROWLST(K)=INDEX(I)
+            CALL GETVAL(VALLST(K),I+1)
+100   CONTINUE
+      RETURN
+!
+! ** GETCOL ENDS HERE
+      END
+      SUBROUTINE GETROW(I,JLIST,VLIST,MAX,NZ,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+      DIMENSION  JLIST(MAX), VLIST(MAX)
+!
+! THIS GETS NONZEROES IN ROW I OF SUBMATRIX COLUMNS
+!
+!    NZ = NUMBER OF NONZEROES RETURNED = SIZE OF JLIST,VLIST
+!    RCODE = 1 MEANS NZ = MAX AND THERE ARE MORE NONZEROES
+!
+! LOCAL
+      LOGICAL*1  SW
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! INITIALIZE NUMBER OF NONZEROES (NZ)
+      NZ = 0
+! ...NONZERO POINTER
+      I1 = INONZ + 2*BASE(ICINFO)
+!
+! ::: LOOP OVER COLUMNS :::
+!
+      DO 900 J=1,NCOLS
+         NZOFJ = BASE(ICINFO + J) - BASE(ICINFO + J-1)
+         I2 = I1 + 2*NZOFJ - 1
+! SEE IF COLUMN J IS IN SUBMATRIX
+         CALL GETMAP('COL ',J,SW)
+         IF(.NOT.SW)GOTO 800
+! OK, IT IS
+!    ::: LOOP OVER NONZEROES OF COLUMN J TO SEE IF ROW I IS THERE :::
+         DO 500 K=I1,I2,2
+            IF(INDEX(K).EQ.I)GOTO 600
+500      CONTINUE
+         GOTO 800
+!
+600      CONTINUE
+! WE HAVE NONZERO AT (I,J)...ADD TO LIST
+         IF(NZ.EQ.MAX)THEN
+            RCODE = 1
+            RETURN
+         ENDIF
+         NZ = NZ + 1
+         JLIST(NZ) = J
+         CALL GETVAL(VLIST(NZ),K+1)
+800      CONTINUE
+! PREPARE FOR NEXT COLUMN
+         I1 = I2 + 1
+900   CONTINUE
+!
+      RETURN
+!
+! ** GETROW ENDS HERE
+      END
+      SUBROUTINE GETSGN(ROW,COLUMN,CHAR)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS CHARACTER OF NONZERO IN ROW,COLUMN
+!
+! ...BLANK IF NONZERO IS ABSENT...0 IF A ZERO IS THERE
+!
+      CHARACTER*1 CHAR
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! INITIALIZE
+      CHAR = ' '
+      I1 = INONZ + 2*BASE(ICINFO + COLUMN - 1)
+      I2 = INONZ + 2*BASE(ICINFO + COLUMN) - 1
+!
+      IF(I2.LE.I1)RETURN
+!
+! LOOP OVER COLUMN'S NONZEROES TO SEE IF ROW IS PRESENT
+!
+      DO 100 I=I1,I2,2
+           IF(INDEX(I).EQ.ROW)THEN
+              IF(INDEX(I+1).LT.0)THEN
+                             CHAR = '-'
+              ELSE IF(INDEX(I+1).GT.0)THEN
+                             CHAR = '+'
+              ELSE
+                             CHAR = '0'
+              ENDIF
+              RETURN
+           ENDIF
+100   CONTINUE
+!
+      RETURN
+!
+! ** GETSGN ENDS HERE
+      END
+      SUBROUTINE GETAIJ(ROW,COLUMN,V)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS VALUE OF NONZERO IN ROW,COLUMN:  V = A(ROW,COLUMN)
+! ::::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      I1 = INONZ + 2*BASE(ICINFO + COLUMN - 1)
+      I2 = INONZ + 2*BASE(ICINFO + COLUMN) - 1
+! LOOP OVER COLUMN'S NONZEROES TO SEE IF ROW IS PRESENT
+      DO 100 I=I1,I2,2
+         IF( INDEX(I).EQ.ROW )THEN
+! GOTCHA
+            CALL GETVAL(V,I+1)
+            RETURN
+         ENDIF
+100   CONTINUE
+!
+! ROW NOT IN COL'S LIST, SO COEF = 0
+      V = 0.
+      RETURN
+!
+! ** GETAIJ ENDS HERE
+      END
+      SUBROUTINE GETVID(V,ID)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! GET VALUE INDEX (ID) FOR VALUE (V > 0)
+!
+! ID = 0 IF NO MORE SPACE;  ELSE, ID WILL BE IN RANGE 1-NVALS
+!       AND VALUE(ID)=V
+!
+! WE USE THE (LESS EFFICIENT) METHOD OF DIVISION BECAUSE MACHINES
+! NUMBER BYTES DIFFERENTLY...PREVIOUS VERSION NEEDED BOTTOM(I) TO
+! USE EVEN I FOR SOME MACHINES AND ODD I FOR OTHERS.  THE PRESENT
+! METHOD WAS SUGGESTED BY MILTON M. GUTTERMAN, AMOCO OIL CO.
+!
+         INTEGER*4  WORD
+         EQUIVALENCE (VLOCAL,WORD)
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+!
+! ~~~~~~~~~~~~~~~~~~ DATA STRUCTURE ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!       THE MIDDLE SEGMENT OF THE VALUE ARRAY (EQUIVALENCED IN
+!       DCGETMAT TO I4VAL) IS USED TO HOLD LIST HEADS AND
+!                    :...CHANGED FROM I2, 6-22-92
+!       LINKS DURING VALUE POOL CREATION.
+! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+! REMOVED 6-22-92:         HEAD  = 2*MAXVPL + 1
+         HEAD  = MAXVPL + 1
+         LINK  = HEAD + 255
+!
+! HEAD HOLDS LIST HEADS INTO POOL;  IT IS THE RANGE OF THE
+!       HASH FUNCTION (0-255)
+!
+! LINK IS PARALLEL TO THE VALUE POOL;  IT HOLDS LINKS OF VALUES
+!       WITH THE SAME HASH VALUE (IE, IN SAME LIST)
+!
+! ----------------------- PROCEDURE --------------------------------
+!
+!       HASH V BY THE ARITHMETIC DIFFERENCING OF ITS 4 BYTES INTO
+!       AN INTEGER 0-255.  THIS DETERMINES THE LIST TO WHICH V
+!       BELONGS.  IF THE LIST IS EMPTY, V MUST BE ADDED TO THE
+!       POOL;  ELSE, TRAVERSE THE LIST (USING LINKS) TO FIND A
+!       RESIDENT VALUE WITHIN ABSOLUTE TOLERANCE.  IF ONE IS
+!       FOUND, ITS INDEX VALUE IS RETURNED;  ELSE, V MUST BE ADDED.
+!       TO POOL.
+!
+!       IF V MUST BE ADDED TO POOL, SPACE IS CHECKED FIRST.  IF NO
+!       MORE SPACE IS AVAILABLE, 0 IS RETURNED;  ELSE, V IS ADDED
+! ------------------------------------------------------------------
+! COPY V TO VLOCAL SO WE CAN USE ITS INTEGER VALUE (WORD)
+      VLOCAL=V
+! NOW WE EXTRACT THE 4 BYTES AS INTEGER VALUES
+      BYTE3 = WORD/256
+      BYTE4 = WORD - 256*BYTE3
+      BYTE2 = BYTE3/256
+      BYTE3 = BYTE3 - 256*BYTE2
+      BYTE1 = BYTE2/256
+      BYTE2 = BYTE2 - 256*BYTE1
+! WE HAVE NOW SEPARATED THE 4 BYTES OF V INTO 4 INTEGER VALUES, EACH
+! BETWEEN 0 AND 255...COMPUTE LIST (HASH) VALUE SIMILAR TO XOR
+!
+      LIST = BYTE1 - BYTE2 + BYTE3 - BYTE4
+      LIST = LIST - 256*(LIST/256)
+      IF(LIST.LT.0)LIST = 256 + LIST
+!
+! NOW LIST = HASH VALUE (0-255) INTO HEAD
+!
+! TRAVERSE LIST                 NOTE: I4VAL REPLACED I2VAL
+         ID=I4VAL(HEAD+LIST)
+100      IF(ID.GT.0)THEN
+             IF(ABS(V-VALUE(ID)).LE.VTOLAB + VTOLRE*V)RETURN
+             ID=I4VAL(LINK+ID)
+             GOTO 100
+         ENDIF
+! NEW ENTRANT...CHECK FOR SPACE
+         IF(NVALS.EQ.MAXVPL)THEN
+              ID=0
+         ELSE
+! OK, ADD V
+              NVALS=NVALS+1
+              ID=NVALS
+              VALUE(NVALS)=V
+              I4VAL(LINK+NVALS)=I4VAL(HEAD+LIST)
+              I4VAL(HEAD+LIST)=ID
+         ENDIF
+!
+      RETURN
+!
+! ** GETVID ENDS HERE
+      END
+      SUBROUTINE GETVAL(V,ID)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS VALUE (V) FROM IT INDEX(ID)
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+      I = INDEX(ID)
+      IF(I.GE.0)THEN
+          V = VALUE(I)
+      ELSE
+          V = -VALUE(-I)
+      ENDIF
+!
+      RETURN
+!
+! ** GETVAL ENDS HERE
+      END
+      SUBROUTINE GETBVP(ROW,ROWCOL,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GIVES ROWCOL NUMBER FOR PIVOT POSITION ROW
+! ...ASSUMES IPIVOT > 0 (IE, CALLER MUST KNOW PIVOT INFO IS STORED)
+!
+      CHARACTER*4 ROWCOL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! SET NUMBER = PIVOT INDEX FOR ROW
+      NUMBER = INDEX(IPIVOT + ROW)
+      IF(NUMBER.GT.0)THEN
+           ROWCOL = 'COL '
+      ELSE
+           ROWCOL = 'ROW '
+           NUMBER = -NUMBER
+      ENDIF
+!
+      RETURN
+!
+! ** GETBVP ENDS HERE
+      END
+      SUBROUTINE GETPIV(ROW,ROWCOL,NUMBER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GIVES PIVOT POSITION (ROW) FOR ROWCOL NUMBER (BASIC)
+! ...ASSUMES IPIVOT > 0 (IE, CALLER MUST KNOW PIVOT INFO IS STORED)
+! ...ROW = 0 IF ROWCOL NUMBER NOT FOUND
+!
+      CHARACTER*4 ROWCOL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! LOOP OVER ROWS TO FIND PIVOT OF NUMBER
+      DO 100 ROW=1,NROWS
+         PIVOT = INDEX(IPIVOT + ROW)
+         IF( PIVOT.EQ.NUMBER .AND. ROWCOL.EQ.'COL ')RETURN
+         IF(-PIVOT.EQ.NUMBER .AND. ROWCOL.EQ.'ROW ')RETURN
+100   CONTINUE
+!
+      ROW = 0
+!
+      RETURN
+!
+! ** GETPIV ENDS HERE
+      END
+      SUBROUTINE GPRDCT(VECTOR,COLUMN,VPROD)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! GET VPROD = VECTOR*A(COLUMN)
+!
+      DIMENSION VECTOR(100)
+!
+! ASSUMES CALLER HAS VECTOR LONG ENOUGH FOR NROWS
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! INITIALIZE
+      ZPROD = 0.0
+      I1 = INONZ + 2*BASE(ICINFO+COLUMN-1)
+      I2 = INONZ + 2*BASE(ICINFO+COLUMN) - 1
+!
+      DO 100 I=I1,I2,2
+           ROW = INDEX(I)
+           CALL GETVAL(V,I+1)
+           ZPROD = ZPROD + V*VECTOR(ROW)
+100   CONTINUE
+!
+      VPROD = ZPROD
+      RETURN
+!
+! ** GPRDCT ENDS HERE
+      END
+!             ::: GETRANS.FOR  2-01-94 :::
+!
+!  LAST DATES: 5-18-90...IMPLEMENTED KALAN'S PURIFICATION
+!                        FOR GFTRAN AND GBTRAN
+!              5-24-92...CHANGED DATA STRUCTURE (SEE GETBASIS.DOC)
+!              8-14-92...ADDED GBALPH
+!              9-23-92...USING ZVALUE IN GFTRAN,GBTRAN,GBALPH
+!              9-24-92...REMOVED DOUBLE PRECISION ZVALUE
+!             11-23-92...FIXED BUG IN GBTRAN (SIGN OF SUM)
+!             12-12-92...GBREFR MOVED HERE FROM GBRANGE...8-4-93
+!                        (SEE GBRANGE.FOR FOR NOTES.)
+!              8-04-93...ADDED TOLERANCES TO GBREFR (CHANGES ARGS)
+!              9-03-93...CHANGED GPUTSL TO GPTSOL IN GBREFR
+!
+! THIS CONTAINS THE FOLLOWING GETMAT SUBROUTINES.
+!
+!     GFTRAN.....FORWARD TRANSFORM TO SOLVE BX = ALPHA
+!     GBTRAN.....BACKWARD TRANSFORM TO SOLVE PB = ALPHA
+!     GALPHA.....FORM ALPHA VECTOR FOR ROW/COL
+!     GBALPH.....ADD ALPHA VECTOR AT END OF ALPHA REGION
+!                (SUPPORTS FIX IN BASIS CHECK)
+!     GBREFR.....REFRESHES PRIMAL AND/OR DUAL VALUES
+!     GBRDIF.....COMPUTES DIFFERENCE BETWEEN OLD AND NEW VALUES
+!
+      SUBROUTINE GFTRAN(ALPHA,NALPHA)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS SOLVES BX = ALPHA
+!
+      DOUBLE PRECISION ALPHA(NALPHA)
+      PARAMETER (ZERO=1.0D-18)
+!                :...SPECIAL ABSOLUTE TOLERANCE FOR ALPHA PURIFICATION
+! ::::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! NOTE: ALPHA DOES NOT CHANGE IF BASIS IS IDENTITY SINCE THEN NBLST=0
+!
+!  ::: LOOP OVER ALPHA-FILE (FORWARD DIRECTION) :::
+      I = 1
+100   CONTINUE
+      IF( I.GT.NBLST )RETURN
+         ROW = INDEX(IRBLST + I)
+         IF( ROW.GT.0 )THEN
+!           ==========
+! CONTINUATION OF SPIKE ALPHA
+            ALPHA(ROW) = ALPHA(ROW) - ZVALUE(IZBLST+I)*ZPIVOT
+! PURIFY ALPHA
+            IF( DABS( ALPHA(ROW) ).LE.ZERO ) ALPHA(ROW) = 0.
+         ELSE IF( ROW.LT.0 )THEN
+!                ==========
+! BEGIN NEW ALPHA
+            ROW = -ROW
+            ZPIVOT = ZVALUE(IZBLST+I)
+            IF( DABS( ZPIVOT ).LE.ZERO )THEN
+! ALPHA IS NONSPIKE...NEXT RECORD GIVES PIVOT VALUE AND POINTS
+!                      TO ORIGINAL COLUMN
+               I = I+1
+               COL    = -INDEX(IRBLST + I)
+               ZPIVOT = ALPHA(ROW) / ZVALUE(IZBLST+I)
+               ALPHA(ROW) = ZPIVOT
+! PIVOT SET...LOOP OVER OTHER NON-ZEROES OF COL TO COMPLETE FTRAN STEP
+               I1 = INONZ + 2*BASE(ICINFO + COL-1)
+               NZ = BASE(ICINFO + COL) - BASE(ICINFO + COL-1)
+               I2 = I1 + 2*NZ - 1
+!        LOOP OVER COL'S ORIGINAL NONZEROES
+               DO 50 INZ=I1,I2,2
+                  R = INDEX(INZ)
+                  IF( R.EQ.ROW )GOTO 50
+!    ROW (R) IS NOT THE PIVOT ROW, SO PERFORM TRANSFORMATION
+                  CALL GETVAL(V,INZ+1)
+                  ZALPHA = -V
+!                          :...ALPHA = -COEF
+                  ALPHA(R) = ALPHA(R) - ZALPHA*ZPIVOT
+!    PURIFY ALPHA (SET = 0 IF IT'S NEARLY 0)
+                  IF( DABS( ALPHA(R) ).LE.ZERO ) ALPHA(R) = 0.
+50             CONTINUE
+            ELSE
+! NEW ALPHA IS SPIKE...OPERATE IN-LINE
+               ZPIVOT = ALPHA(ROW) / ZPIVOT
+               ALPHA(ROW) = ZPIVOT
+            ENDIF
+         ENDIF
+! BOTTOM OF LOOP (NEXT ALPHA)
+190   CONTINUE
+      I = I+1
+      GOTO 100
+!
+! ** GFTRAN ENDS HERE
+      END
+      SUBROUTINE GBTRAN(ALPHA,NALPHA)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS SOLVES YB = ALPHA
+!
+      DOUBLE PRECISION ALPHA(NALPHA)
+! ::::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! NOTE: ALPHA DOES NOT CHANGE IF BASIS IS IDENTITY SINCE THEN NBLST=0
+!
+      ZSUM = 0.0
+!
+!  ::: LOOP OVER ALPHA-FILE (FROM BACK TO FRONT) :::
+      I = NBLST
+100   CONTINUE
+      IF( I.LE.0 )RETURN
+         ROW = INDEX(IRBLST + I)
+         IF( ROW.LT.0 )THEN
+!          ==========
+! WE MUST LOOK AT NEXT VALUE TO SEE IF THIS IS A NONSPIKE
+            IF( DABS( ZVALUE(IZBLST + I-1) ).LE.0. )THEN
+! ...IT IS:       INDEX   ZVALUE
+!                  -ROW    0              <---- I-1
+!                  -COL    PIVOT VALUE    <---- I  (ROW = -COL)
+!
+               COL = -ROW
+               ZPIVOT = ZVALUE(IZBLST+I)
+               I = I-1
+               ROW = -INDEX(IRBLST + I)
+!  COL PIVOTS ON ROW WITH PIVOT VALUE = ZPIVOT
+               I1 = INONZ + 2*BASE(ICINFO + COL-1)
+               NZ = BASE(ICINFO + COL) - BASE(ICINFO + COL-1)
+               I2 = I1 + 2*NZ - 1
+!       LOOP OVER COL'S ORIGINAL NONZEROES FOR BRTAN STEP
+               DO 50 INZ=I1,I2,2
+                  R = INDEX(INZ)
+                  IF( R.EQ.ROW )GOTO 50
+!    ROW (R) IS NOT THE PIVOT ROW, SO PERFORM TRANSFORMATION
+                  CALL GETVAL(V,INZ+1)
+                  ZALPHA = -V
+!                          :...= -STORED ALPHA
+                  ZSUM = ZSUM + ZALPHA*ALPHA(R)
+!C 12-12-92                   :...CHANGED FROM -
+50             CONTINUE
+! NOW THE LAST STEP OF BTRAN FOR THIS NONSPIKE
+               ALPHA(ROW) = ( ALPHA(ROW) - ZSUM ) / ZPIVOT
+            ELSE
+! ...WE ARE AT A SPIKE, SO THIS IS THE PIVOT ENTRY
+!   (1ST RECORD OF ALPHA VECTOR)
+! ...PROCEED WITH NORMAL LOGIC (IN-LINE) TO COMPLETE BTRAN STEP
+               ROW = -ROW
+               ALPHA(ROW) = ( ALPHA(ROW) - ZSUM ) / ZVALUE(IZBLST+I)
+            ENDIF
+! IN EITHER CASE, INITIALIZE ZSUM FOR NEXT BTRAN STEP
+            ZSUM = 0.0
+         ELSE IF( ROW.GT.0 )THEN
+!                ==========
+! PERFORM SUMMATION FOR IN-LINE SPIKE VALUE (NOT PIVOT)
+            ZSUM  = ZSUM + ZVALUE(IZBLST+I)*ALPHA(ROW)
+         ENDIF
+! BOTTOM OF LOOP
+190   CONTINUE
+      I = I-1
+      GOTO 100
+!
+! ** GBTRAN ENDS HERE
+      END
+      SUBROUTINE GALPHA(ROWCOL,NUMBER,ALPHA,NALPHA)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS INITIALIZES ALPHA FOR ROW/COL NUMBER
+!
+      CHARACTER*4      ROWCOL
+      DOUBLE PRECISION ALPHA(NALPHA)
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+! INITIALIZE ALPHA=0
+      DO 10 I=1,NROWS
+10    ALPHA(I) = 0.0
+!
+      IF(ROWCOL.EQ.'ROW ')THEN
+         ALPHA(NUMBER) = 1.0
+         RETURN
+      ENDIF
+!
+! UNPACK COLUMN'S NONZEROES
+!
+      I1 = INONZ + 2*BASE(ICINFO + NUMBER-1)
+      I2 = INONZ + 2*BASE(ICINFO + NUMBER) - 1
+!
+      IF(I2.LE.I1)RETURN
+      DO 100 I=I1,I2,2
+         ROW = INDEX(I)
+         CALL GETVAL(V,I+1)
+         ALPHA(ROW) = V
+100   CONTINUE
+!
+      RETURN
+!
+! ** GALPHA ENDS HERE
+      END
+      SUBROUTINE GBALPH(ALPHA,NALPHA,PIVROW,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS ADDS ALPHA TO END OF ALPHA REGION (FOR FIX).
+!    PIVROW = PIVOT ROW
+! ...RCODE = 0 IFF ALL IS WELL;  ELSE, NOT ENOUGH SPACE OR BAD PIVOT.
+!
+      DOUBLE PRECISION ALPHA(NALPHA)
+      PARAMETER (ZERO=1.0D-18)
+!                :...SPECIAL ABSOLUTE TOLERANCE FOR ALPHA PURIFICATION
+! ::::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      CALL BSPACE(NROWS,*1300)
+      IF( ALPHA(PIVROW).LE.ZERO ) GOTO 1300
+      NBLST = NBLST + 1
+      INDEX ( IRBLST+NBLST ) = -PIVROW
+      ZVALUE( IZBLST+NBLST ) = ALPHA(PIVROW)
+!
+      DO 100 I=1,NROWS
+         IF( I.EQ.PIVROW .OR. DABS( ALPHA(I) ) .LE. ZERO )GOTO 100
+         NBLST = NBLST + 1
+         INDEX ( IRBLST+NBLST ) = I
+         ZVALUE( IZBLST+NBLST ) = ALPHA(I)
+100   CONTINUE
+!
+      RETURN
+!
+1300  CONTINUE
+      RCODE = 1
+      RETURN
+!
+! ** GBALPH ENDS HERE
+      END
+      SUBROUTINE GBREFR(RCPRML,RCDUAL,NPRIML,NDUAL,VPRIML,VDUAL, &
+                        VAXDIF,VRXDIF,VAPDIF,VRPDIF, &
+                        VAXINF,VRXINF,VAPINF,VRPINF, &
+                        NEWST,ZLEVEL,ROWLST,VALLST,MAXLST,*)
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      include 'dcgetmat'
+!
+! THIS REFRESHES PRIMAL AND/OR DUAL VALUES FOR BASIS (PRESUMED SETUP).
+!
+      CHARACTER*16     RCPRML,RCDUAL,NEWST
+      DOUBLE PRECISION ZLEVEL(MAXLST)
+      REAL             VALLST(MAXLST)
+      INTEGER          ROWLST(MAXLST)
+!
+! INPUT:  RCPRML <> ' ' MEANS REFRESH PRIMAL VALUES
+!       RCDUAL <> ' ' MEANS REFRESH DUAL VALUES
+!       ZLEVEL, VALLST AND ROWLST ARE ARRAYS NEEDED LOCALLY
+!       ...MAXLST MUST BE >= NROWS
+!       VAXDIF = ABSOLUTE TOLERANCE TO DECLARE BASIC LEVELS DIFFERENT
+!       VRXDIF = RELATIVE TOLERANCE TO DECLARE BASIC LEVELS DIFFERENT
+!       VAPDIF = ABSOLUTE TOLERANCE TO DECLARE NONBASIC PRICES DIFFERENT
+!       VRPDIF = RELATIVE TOLERANCE TO DECLARE NONBASIC PRICES DIFFERENT
+!       VAXINF = ABSOLUTE TOLERANCE TO DECLARE BASIC LEVEL INFEASIBLE
+!       VRXINF = RELATIVE TOLERANCE TO DECLARE BASIC LEVEL INFEASIBLE
+!       VAPINF = ABSOLUTE TOLERANCE TO DECLARE NONBASIC PRICE INFEASIBLE
+!       VRPINF = RELATIVE TOLERANCE TO DECLARE NONBASIC PRICE INFEASIBLE
+!
+! OUTPUT: NPRIML = NUMBER OF PRIMAL VALUES REPLACED
+!         NDUAL  = NUMBER OF DUAL VALUES REPLACED
+!         VPRIML = MAX DEVIATION IN PRIMAL VALUES
+!         VDUAL  = MAX DEVIATION IN DUAL VALUES
+!         RCPRML = NAME OF ROW/COL WITH MAX DEVIATION IN PRIMAL
+!                  (UNCHANGED IF NPRIML=0)
+!         RCDUAL = NAME OF ROW/COL WITH MAX DEVIATION IN DUAL
+!                  (UNCHANGED IF NDUAL=0)
+!         NEWST  = NEW SOLUTION STATUS (SOLST)
+! ...ALTERNATE RETURN IS SYSERR.
+! LOCAL
+      CHARACTER*1  STAT
+      CHARACTER*4  ROWCOL
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+      IF( MAXLST.LT.NROWS )THEN
+         PRINT *,' ** SYSERR GBREFR...MAXLST =',MAXLST,' <',NROWS
+         RETURN 1
+      ENDIF
+      NPRIML = 0
+      VPRIML = 0.
+      NEWST  = ' '
+      IF( RCPRML.EQ.' ' )GOTO 1000
+! ========== REFRESH PRIMAL VALUES ==========
+10    CONTINUE
+! PRESUME SOLUTION IS FEASIBLE
+      NEWST  = 'FEASIBLE'
+! FORM RHS = YN - N(XN)
+      DO 100 I=1,NROWS
+         CALL GETSOL('ROW ',I,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'U' .OR. STAT.EQ.'L' )THEN
+            ZLEVEL(I) = VX
+         ELSE
+            ZLEVEL(I) = 0.
+         ENDIF
+100   CONTINUE
+!
+!  ::: LOOP OVER NONBASIC COLS TO INITIALIZE RHS :::
+      DO 300 J=1,NCOLS
+         CALL GETSOL('COL ',J,VX,VP,STAT,STNUM)
+         VABS = ABS(VX)
+         IF( STAT.EQ.'B' .OR. STAT.EQ.'I' .OR. VABS.LT.VTOLAB &
+           )GOTO 300
+! COLUMN J IS NONBASIC AT NONZERO LEVEL
+         CALL GETCOL(J,NZ,MAXLST,ROWLST,VALLST)
+         IF( NZ.EQ.0 )GOTO 300
+!
+         DO 200 I=1,NZ
+            ROW = ROWLST(I)
+            CALL GETST('ROW ',ROW,STAT,STNUM)
+            IF( STAT.EQ.'L' .OR. STAT.EQ.'U' )THEN
+! ADD ACTIVE ROW CONTRIBUTION
+               Z = VALLST(I)*VX
+               ZLEVEL(ROW) = ZLEVEL(ROW) - Z
+            ENDIF
+200      CONTINUE
+300   CONTINUE
+!
+! NOW B[XB] = ZLEVEL, SO
+      CALL GFTRAN(ZLEVEL,NROWS)
+! NOW ZLEVEL(I) = -LEVEL OF I-TH BASIC
+!                 :...GFTRAN RETURNS -ALPHA (= RATE)
+!
+! ::: LOOP OVER BASIC COLS :::
+      DO 500 I=1,NROWS
+         CALL GETBVP(I,ROWCOL,J)
+         IF( ROWCOL.EQ.'ROW ' )GOTO 500
+! COLUMN J PIVOTS ON ROW I, SO X(J) = -ZLEVEL(I)
+         CALL GETSOL('COL ',J,VX,VP,STAT,STNUM)
+         CALL GBRDIF(VX,-ZLEVEL(I),VZ,VDIF)
+         VABS = ABS(VX) + ABS(VZ)
+         IF( VDIF .GT. VAXDIF + VRXDIF*VABS )THEN
+! UPDATE STAT AND REPLACE VALUE
+            CALL GETBND('COL ',J,VL,VU)
+            IF( VZ.LT.VL - VAXINF - VRXINF*VABS .OR. &
+                VZ.GT.VU + VAXINF + VRXINF*VABS )THEN
+! COL J IS INFEASIBLE
+               STAT = 'I'
+            ELSE
+! COL J IS FEASIBLE
+               STAT = 'B'
+            ENDIF
+            CALL GPTSOL('COL ',J,STAT,VZ)
+            NPRIML = NPRIML + 1
+            IF( VPRIML.LT.VDIF )THEN
+               VPRIML = VDIF
+               RCPRML = NAME(ICNAME+J)
+            ENDIF
+         ENDIF
+         IF( STAT.EQ.'I' )NEWST  = 'INFEASIBLE'
+500   CONTINUE
+!
+! NOW THE BASIC LOGICALS:  Y(I) = SUM[J º A(I,J)X(J)]
+      DO 600 I=1,NROWS
+600   ZLEVEL(I) = 0.
+!
+      DO 800 J=1,NCOLS
+         CALL GETSOL('COL ',J,VX,VP,STAT,STNUM)
+         VABS = ABS(VX)
+         IF( VABS.LT.VTOLAB )GOTO 800
+         CALL GETCOL(J,NZ,MAXLST,ROWLST,VALLST)
+         IF( NZ.EQ.0 )GOTO 800
+! X(J) NOT = 0...ADD ITS ROW VALUES
+         DO 700 I=1,NZ
+            ROW = ROWLST(I)
+            Z = VALLST(I)*VX
+            ZLEVEL(ROW) = ZLEVEL(ROW) + Z
+700      CONTINUE
+800   CONTINUE
+!
+! NOW ZLEVEL(I) = Y(I)
+      DO 900 I=1,NROWS
+         CALL GETSOL('ROW ',I,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'L' .OR. STAT.EQ.'U' )GOTO 900
+! ROW I IS BASIC
+         CALL GBRDIF(VX,ZLEVEL(I),VZ,VDIF)
+         VABS = ABS(VX) + ABS(VZ)
+         IF( VDIF .GT. VAXDIF + VRXDIF*VABS )THEN
+! UPDATE STAT AND REPLACE VALUE
+            CALL GETBND('ROW ',I,VL,VU)
+            IF( VZ.LT.VL - VAXINF - VRXINF*ABS(VL) .OR. &
+                VZ.GT.VU + VAXINF + VRXINF*ABS(VZ) )THEN
+! ROW I IS INFEASIBLE
+               STAT  = 'I'
+            ELSE
+! ROW I IS FEASIBLE
+               STAT = 'B'
+            ENDIF
+            CALL GPTSOL('ROW ',I,STAT,VZ)
+            NPRIML = NPRIML + 1
+            IF( VPRIML.LT.VDIF )THEN
+               VPRIML = VDIF
+               RCPRML = NAME(IRNAME+I)
+            ENDIF
+         ENDIF
+         IF( STAT.EQ.'I' )NEWST = 'INFEASIBLE'
+900   CONTINUE
+! =========== END OF PRIMAL REFRESH ============
+!
+1000  CONTINUE
+      NDUAL = 0
+      VDUAL = 0.
+      IF( RCDUAL.EQ.' ' )THEN
+! NO DUAL REFRESH...IF FEASIBLE, PRESUME STAT REMAINS OPTIMAL
+         IF( NEWST.EQ.'FEASIBLE' .AND. SOLST.EQ.'OPTIMAL' ) &
+             NEWST = 'OPTIMAL'
+         GOTO 9000
+      ENDIF
+      IF( NEWST.EQ.' ' )THEN
+! PRIMAL NOT REFRESHED...USE CURRENT VALUES TO DETERMINE IF FEASIBLE
+         NEWST = 'FEASIBLE'
+         DO 1025 I=1,NROWS
+            CALL GETSOL('ROW ',I,VX,VP,STAT,STNUM)
+            IF( STAT.EQ.'L' .OR. STAT.EQ.'U' )GOTO 1025
+            CALL GETBND('ROW ',I,VL,VU)
+            IF( VX.LT.VL - VAXINF - VRXINF*ABS(VL) .OR. &
+                VX.GT.VU + VAXINF + VRXINF*ABS(VX) )THEN
+               STAT = 'I'
+            ELSE
+               STAT = 'B'
+            ENDIF
+            CALL GPTSOL('ROW ',I,STAT,VX)
+            IF( STAT.EQ.'I' )NEWST = 'INFEASIBLE'
+1025     CONTINUE
+!
+         DO 1075 J=1,NCOLS
+            CALL GETSOL('COL ',J,VX,VP,STAT,STNUM)
+            IF( STAT.EQ.'L' .OR. STAT.EQ.'U' )GOTO 1075
+            CALL GETBND('COL ',J,VL,VU)
+            IF( VX.LT.VL - VAXINF - VRXINF*ABS(VL) .OR. &
+                VX.GT.VU + VAXINF + VRXINF*ABS(VX) )THEN
+               STAT = 'I'
+            ELSE
+               STAT = 'B'
+            ENDIF
+            CALL GPTSOL('COL ',J,STAT,VX)
+            IF( STAT.EQ.'I' )NEWST = 'INFEASIBLE'
+1075     CONTINUE
+      ENDIF
+      IF( NEWST.EQ.'FEASIBLE' )NEWST = 'OPTIMAL'
+! NOW NEWST = INFEASIBLE º OPTIMAL
+!                          :...PRESUMED UNTIL VIOLATION FOUND
+! ========== REFRESH DUAL VALUES ==========
+! FORM PRICE VECTOR
+      DO 1100 I=1,NROWS
+         ZLEVEL(I) = 0.
+         CALL GETBVP(I,ROWCOL,J)
+         CALL GETSOL(ROWCOL,J,VX,VP,STAT,STNUM)
+         CALL GETBND(ROWCOL,J,VL,VU)
+         IF( NEWST.EQ.'INFEASIBLE' )THEN
+! PHASE 1
+            IF( STAT.EQ.'I' )THEN
+               IF( VX.LT.VL )THEN
+                  ZLEVEL(I) = 1.
+               ELSE IF( VX.GT.VU )THEN
+                  ZLEVEL(I) = -1.
+               ENDIF
+            ENDIF
+         ELSE
+! PHASE 2
+            IF( ROWCOL.EQ.'COL ')THEN
+               CALL GETRIM(ROWCOL,J,VL,VU,VC,NZ)
+               ZLEVEL(I) = -VC
+            ENDIF
+         ENDIF
+1100  CONTINUE
+!
+! NOW ZLEVEL = -BASIC COST COEFFICIENTS (EITHER PHASE), SO
+!              :...GBTRAN USES -ALPHA
+      CALL GBTRAN(ZLEVEL,NROWS)
+! NOW ZLEVEL(I) = I-TH ROW PRICE (EITHER PHASE)
+      IF( NEWST.NE.'INFEASIBLE' ) ZLEVEL(OBJNUM) = -1
+!
+      DO 1500 I=1,NROWS
+         CALL GETSOL('ROW ',I,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'B' .OR. STAT.EQ.'I' )GOTO 1500
+! ROW I IS NONBASIC (ACTIVE)
+         CALL GBRDIF(VP,ZLEVEL(I),VZ,VDIF)
+         VABS = ABS(VP) + ABS(VZ)
+         IF( VDIF .GT. VAPDIF + VRPDIF*VABS )THEN
+! REPLACE VALUE
+            CALL GPTSOL('ROW ',I,STAT,VZ)
+            NDUAL = NDUAL + 1
+            IF( VDUAL.LT.VDIF )THEN
+               VDUAL = VDIF
+               RCDUAL= NAME(IRNAME+I)
+            ENDIF
+         ENDIF
+         IF( NEWST.EQ.'OPTIMAL' )THEN
+! CHECK OPTIMALITY
+            VP = -OPT*VZ
+            IF( STAT.EQ.'U' )VP = -VP
+            IF( VP.LT.-VAPINF - VRPINF*ABS(VP) )NEWST = 'FEASIBLE'
+         ENDIF
+1500  CONTINUE
+!
+! NOW REFRESH NONBASIC COLUMN REDUCED COSTS (AND TEST OPTIMALITY)
+      DO 1700 J=1,NCOLS
+         CALL GETSOL('COL ',J,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'B' .OR. STAT.EQ.'I' )GOTO 1700
+! COLUMN J IS NONBASIC
+         CALL GETCOL(J,NZ,MAXLST,ROWLST,VALLST)
+         ZJ = 0.
+         IF( NZ.GT.0 )THEN
+            DO 1600 I=1,NZ
+               ROW = ROWLST(I)
+               Z = VALLST(I)
+               ZJ = ZJ - ZLEVEL(ROW)*Z
+1600        CONTINUE
+         ENDIF
+! NOW ZJ = REDUCED COST OF COL J
+         CALL GBRDIF(VP,ZJ,VZ,VDIF)
+         VABS = ABS(VP) + ABS(VZ)
+         IF( VDIF .GT. VAPDIF + VRPDIF*VABS )THEN
+! REPLACE VALUE
+            CALL GPTSOL('COL ',J,STAT,VZ)
+            NDUAL = NDUAL + 1
+            IF( VDUAL.LT.VDIF )THEN
+               VDUAL = VDIF
+               RCDUAL= NAME(ICNAME+J)
+            ENDIF
+         ENDIF
+         IF( NEWST.EQ.'OPTIMAL' )THEN
+! CHECK OPTIMALITY
+            VP = -OPT*VZ
+            IF( STAT.EQ.'U' )VP = -VP
+            IF( VP.LT.-VAPINF - VRPINF*ABS(VP) )NEWST = 'FEASIBLE'
+         ENDIF
+1700  CONTINUE
+! =========== END OF DUAL REFRESH ============
+      IF( NEWST.NE.'FEASIBLE' )GOTO 9000
+! TEST FOR UNBOUNDEDNESS
+      DO 3200 ROW=1,NROWS
+         CALL GETSOL('ROW ',ROW,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'L' .AND. VP*OPT.GT. VAPINF + VRPINF*ABS(VP) .OR. &
+             STAT.EQ.'U' .AND. VP*OPT.LT.-VAPINF - VRPINF*ABS(VP) )THEN
+! NONBASIC ROW HAS NON-OPTIMAL PRICE
+            CALL GETBND('ROW ',ROW,VL,VU)
+            IF( (STAT.EQ.'L' .AND. VU.LT. VINF) .OR. &
+                (STAT.EQ.'U' .AND. VL.GT.-VINF) )GOTO 3200
+! ...ROW DOES NOT BLOCK ITSELF
+! GET RATES TO SEE IF THERE IS BLOCKAGE
+            CALL GALPHA('ROW ',ROW,ZLEVEL,MAXLST)
+            CALL GFTRAN(ZLEVEL,MAXLST)
+            DO 3100 I=1,NROWS
+               VRATE = ZLEVEL(I)
+               IF( ABS(VRATE).LE.VTOLAB )GOTO 3100
+               CALL GETBVP(I,ROWCOL,NUMBER)
+               CALL GETBND(ROWCOL,NUMBER,VL,VU)
+               IF( (VRATE.GT.0. .AND. VU.LT. VINF) .OR. &
+                   (VRATE.LT.0. .AND. VL.GT.-VINF) )GOTO 3200
+3100        CONTINUE
+! -NO BLOCKAGE...
+            NEWST = 'UNBOUNDED'
+            GOTO 9000
+         ENDIF
+3200  CONTINUE
+! IF WE GET HERE, THIS MEANS ALL ROWS WITH NON-OPTIMAL PRICE ARE BLOCKED
+!
+      DO 3500 COL=1,NCOLS
+         CALL GETSOL('COL ',COL,VX,VP,STAT,STNUM)
+         IF( STAT.EQ.'L' .AND. VP*OPT.GT. VAPINF + VRPINF*ABS(VP) .OR. &
+             STAT.EQ.'U' .AND. VP*OPT.LT.-VTOLAB - VRPINF*ABS(VP) )THEN
+! NONBASIC COL HAS NON-OPTIMAL PRICE
+            CALL GETBND('COL ',COL,VL,VU)
+            IF( (STAT.EQ.'L' .AND. VU.LT. VINF) .OR. &
+                (STAT.EQ.'U' .AND. VL.GT.-VINF) )GOTO 3500
+! ...COL DOES NOT BLOCK ITSELF
+! GET RATES TO SEE IF THERE IS BLOCKAGE
+            CALL GALPHA('COL ',COL,ZLEVEL,MAXLST)
+            CALL GFTRAN(ZLEVEL,MAXLST)
+            DO 3400 I=1,NCOLS
+               VRATE = ZLEVEL(I)
+               IF( ABS(VRATE).LE.VTOLAB )GOTO 3400
+               CALL GETBVP(I,ROWCOL,NUMBER)
+               CALL GETBND(ROWCOL,NUMBER,VL,VU)
+               IF( (VRATE.GT.0. .AND. VU.LT. VINF) .OR. &
+                   (VRATE.LT.0. .AND. VL.GT.-VINF) )GOTO 3500
+3400        CONTINUE
+! -NO BLOCKAGE...
+            NEWST = 'UNBOUNDED'
+            GOTO 9000
+         ENDIF
+3500  CONTINUE
+!
+! ALL NORMAL RETURNS COME HERE
+9000  CONTINUE
+! STORE NEW SOLUTION STATUS
+      SOLST = NEWST
+      IF( SOLST.EQ.'INFEASIBLE' )THEN
+! NOT STRICTLY COMPLEMENTARY
+         STCOMP = 2
+      ELSE
+         STCOMP = 0
+      ENDIF
+!
+      RETURN
+!
+! ** GBREFR ENDS HERE
+      END
+      SUBROUTINE GBRDIF(VOLD,ZNEW,VNEW,VDIF)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+      include 'dcgetmat'
+!
+! THIS COMPUTES VNEW = ZNEW AND VDIF = ºVOLD-VNEWº
+! (VOLD AND ZNEW UNCHANGED).
+! ::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+      VNEW = ZNEW
+      ZOLD = VOLD
+      Z    = VNEW
+      Z    = DABS( ZOLD-Z )
+      VDIF = Z
+!
+      RETURN
+!
+! ** GBRDIF ENDS HERE
+      END
+!                 ::: GETSET.FOR  8-30-94 :::
+!
+! Earlier dates deleted.
+!       8-30-93...Added STAT check in GPUTSL (CC 8-18-94)
+!       8-18-94...Added IVFREE = 3 in GNEWLP (CC 8-30-94)
+!
+! This contains the following GETMAT subroutines.
+!
+!     GINITL.....initializes data (called once by host)
+!     GNEWLP.....initializes for new LP
+!     GETBAS.....gives base names/stats
+!     GSETNM.....sets names of obj, rhs, range, bound
+!     GSETOP.....sets sense of optimization
+!     GADDNZ.....adds nonzero
+!     GSETSL.....initializes solution values to all-logical basis
+!     GPUTSL.....puts solution into INDEX and VALUE arrays
+!     GMPCLR.....clears maps
+!     GETMAP.....gets map of row/col
+!     GPUTMP.....puts map of row/col
+!     GMAPNZ.....removes null rows/columns from submatrix
+!
+! See GETMAT.DOC for details about data structures.
+!
+      SUBROUTINE GINITL(FILDAT,FILPCK,VERSN)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This initializes data in COMMON blocks.
+!
+!             MUST BE CALLED BEFORE ANY OTHER GETMAT ROUTINE!
+!             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+! FILE UNITS PASSED
+      INTEGER*4 FILDAT,FILPCK
+!
+! FILDAT is for data files, used as DATFIL
+! FILPCK is UNFORMATTED, used as PCKFIL and for scratch
+!
+! VERSION (returned to caller)
+      CHARACTER*(*) VERSN
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      VERSN = '8/93'
+! DEBUG PARAMS
+      SWDBG  = .FALSE.
+      SWRDBG = .FALSE.
+      PAUSE0 = 0
+      PAUSE = 0
+! CONSTANTS
+      VTOLAB = 1.0E-10
+      VTOLRE = 1.0E-12
+      VINF   = 1.0E+20
+! DIMENSION LIMITS
+      MAXNAM = PMXNAM
+      MAXIND = PMXIND
+      MAXVAL = PMXVAL
+      EBASE2 = 89
+!              :...end of BASE, except for MAX values
+      ENDBAS = 99
+!              :.....end of BASE
+      ENDIND = ENDBAS
+! SET DEFAULT NAME LENGTH
+      NAMELN = 8
+! ...ROW NAME BASE
+      IRNAME = 0
+! ...ROW INFO BASE
+      IRINFO = ENDIND
+! INITIALIZE NAMERC TO HAVE BLANKS IN 0-TH NAME
+      DO 10 I=-16,0
+10    NAMERC(I)=' '
+! SET MAX NUMBER OF ROWS AND COLUMNS (MAXRC)
+      MAXRC  = MAXNAM/NAMELN
+! SET MAX NUMBER OF DISTINCT VALUES (MAXVPL)
+!  Value pool limited by less than half VALUE array...see GETDATA.DOC.
+      MAXVPL = MAXVAL/2 - MAXRC - 257
+!              ================   :
+!              changed 8-30-93    :...space for list heads
+!              to allow full word links in GETIOMAT (for > 64K cols)
+!  Note that while value pool is being constructed, the bottom 2*MAXRC
+!  words are reserved (+ 257 for list heads).  The remaining VALUE
+!  space becomes MAXVAL - 2*MAXRC, but half of this is for value pool
+!  links, so the maximum number of distinct values is (MAXVAL-2*MAXRC)/2
+!  - 257, which is equal to the above.  See GETDATA.DOC.
+      IF( MAXVPL.LT.100 )THEN
+         PRINT *,' ** SYSERR IN GINITL...MAXVPL =',MAXVPL
+         PRINT *,' ...PLEASE REPORT'
+         STOP
+      ENDIF
+!
+! SENSE OF OPTIMIZATION
+      OPTMIN  = -1
+      OPTMAX  =  1
+! SPECIAL CHARACTERS
+      GMASK  = '*'
+      CHARST(1) = 'L'
+      CHARST(2) = 'U'
+      CHARST(3) = 'B'
+      CHARST(4) = 'I'
+! ...Solution STATUS codes:
+!        L = nonbasic at Lower bound
+!        U = nonbasic at Upper bound
+!        B = Basic and feasible
+!        I = Infeasible (and basic)
+! SET FILES
+      DATFIL = FILDAT
+      PCKFIL = FILPCK
+!
+      CALL GNEWLP
+      RETURN
+!
+! ** GINITL ENDS HERE
+      END
+      SUBROUTINE GNEWLP
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This initializes for new LP (called before reading LP).
+!                                     ~~~~~~
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! CHECK MAX NUMBER OF ROWS + COLUMNS (NAMELN MAY HAVE CHANGED)
+      MAX = MAXNAM/NAMELN - 1
+      IF(MAXRC.GT.MAX)MAXRC = MAX
+!
+! VALUE POOL (enter 0, 1 and infinity).
+      VALUE(0) = 0.0
+      NVALS= 0
+      HEAD = MAXVPL + 1
+! ...SET HEAD POINTERS = 0 (using secondary hash with 256 lists)
+      DO 25 I=HEAD,HEAD+255
+25    I4VAL(I) = 0
+! ENTER 1.0 INTO VALUE POOL RIGHT AWAY (MAKE IT FIRST IN ITS LIST)
+      V = 1.0
+      CALL GETVID(V,ID)
+      IF(ID.NE.1)THEN
+          PRINT *,' ** VALUE INITIALIZATION ERROR...',V,ID
+          STOP
+      ENDIF
+! WE NOW HAVE VALUE(1)=1...PUT INFINITY INTO VALUE POOL
+      V = VINF
+      CALL GETVID(V,ID)
+      IF(ID.NE.2 .OR. NVALS.NE.2)THEN
+          PRINT *,' ** VALUE INITIALIZATION ERROR...',V,ID,NVALS
+          STOP
+      ENDIF
+      INF = 2
+!  ::::::::::::::: END VALUE POOL INITIALIZATION :::::::::::::
+!
+      IFREE  = ENDIND + 1
+!  NOTE:  IFREE points to free space at end of INDEX, which may
+!         change;  however, ENDIND is constant end of base.
+!C 8-3-94
+      IVFREE = 3
+!
+! SENSE OF OPTIMIZATION
+      OPT     = OPTMIN
+! SET STATS
+      NROWS  = 0
+      NCOLS  = 0
+      NONZER = 0
+      NONES  = 0
+      STCOMP = 0
+      STBASC = 0
+!
+      NRFREE = 0
+      NCFIX  = 0
+      OBJNUM = 0
+      RMAXLN = 0
+      CMAXLN = 0
+! SET NONZERO POINTER TO BOTTOM OF INDEX
+! (FOR GETMAT, WHICH INSERTS FROM BOTTOM UP)
+      INONZ  = MAXIND
+!
+! SET NAMES (NO LP IF NO PROBLEM NAME (PRBNAM))
+      PRBNAM = ' '
+      OBJNAM = ' '
+! ...OPTIONAL
+      RHSNAM = 'none'
+      BNDNAM = 'none'
+      RNGNAM = 'none'
+      SOLNAM = 'unknown'
+!
+! NO BASIS FACTORIZATION (DEFER UNTIL COMMAND NEEDS IT)
+      IPIVOT = 0
+      PIVNUM = 0
+      RETURN
+!
+! ** GNEWLP ENDS HERE
+      END
+      SUBROUTINE GETBAS(PRBNM,OBJNM,RHSNM,RNGNM,BNDNM,STATNM,SOLNM, &
+        NMROWS,NMCOLS,NMNZ,NMVALS,NMONES,NMOBJ, &
+        NMFREE,NMFIXD,NMMAXR,NMMAXC,NAMLEN,VINFTY,VTOLA,VTOLR)
+!      ==================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This returns base names/stats.
+!
+        CHARACTER*(*) PRBNM,OBJNM,RHSNM,RNGNM,BNDNM,STATNM,SOLNM
+!
+! NAMES
+!       PRBNM  = problem name
+!       OBJNM  = objective row name
+!       RHSNM  = right-hand side name ('none' if none)
+!       RNGNM  = range name ('none' if none)
+!       BNDNM  = bound name ('none' if none)
+!       STATNM = solution status:
+!                OPTIMAL | FEASIBLE | INFEASIBLE | UNBOUNDED | unknown
+!       SOLNM  = solver name
+! NUMBERS
+!       NMROWS  = number of rows
+!       NMCOLS  = number of columns
+!       NMNZ    = number of nonzeroes
+!       NMVALS  = number of distinct (positive) values
+!       NMONES  = number of 1's (+ or -)
+!       NMOBJ   = number of objective row (OBJNUM)
+!       NMFREE  = number of free rows
+!       NMFIXD  = number of fixed columns
+!       NMMAXR  = index number of longest row, except OBJ
+!       NMMAXC  = index number of longest column
+!       NAMLEN  = max length of row/column name (2 to 16)
+! REALS
+!       VINFTY  = infinity (VINF)
+!       VTOLA   = absolute tolerance (VTOLAB)
+!       VTOLR   = relative tolerance (VTOLRE)
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      PRBNM  = PRBNAM
+      OBJNM  = OBJNAM
+      RHSNM  = RHSNAM
+      RNGNM  = RNGNAM
+      BNDNM  = BNDNAM
+      STATNM = SOLST
+      SOLNM  = SOLNAM
+!
+      NMROWS = NROWS
+      NMCOLS = NCOLS
+      NMNZ   = NONZER
+      NMVALS = NVALS
+      NMONES = NONES
+      NMOBJ  = OBJNUM
+!
+      NMFREE = NRFREE
+      NMFIXD = NCFIX
+      NMMAXR = RMAXLN
+      NMMAXC = CMAXLN
+      NAMLEN = NAMELN
+!
+      VINFTY = VINF
+      VTOLA  = VTOLAB
+      VTOLR  = VTOLRE
+!
+      RETURN
+!
+! ** GETBAS ENDS HERE
+      END
+      SUBROUTINE GSETNM(OPTNM,OBJNM,RHSNM,RNGNM,BNDNM,MAXNL)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This sets names (for GETMAT to read in)
+!
+!       OPTNM = 'MINIMIZE' or 'MAXIMIZE' or ' '
+!       OBJNM = objective row (must be N-type)
+!       RHSNM = right-hand side set
+!       RNGNM = range set
+!       BNDNM = bound set
+!       MAXNL = max name length
+!
+      CHARACTER*(*) OPTNM,OBJNM,RHSNM,RNGNM,BNDNM
+!
+! If no change in a xxxNM is wanted, it is entered as null (' ')
+! Otherwise, the name passed is set into COMMON/GNAME/
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF(OBJNM.NE.' ')OBJNAM = OBJNM
+      IF(RHSNM.NE.' ')RHSNAM = RHSNM
+      IF(RNGNM.NE.' ')RNGNAM = RNGNM
+      IF(BNDNM.NE.' ')BNDNAM = BNDNM
+! Now set OPT
+      CALL GSETOP(OPTNM)
+! Finally, max name length
+      IF(MAXNL.LT.2)THEN
+         NAMELN = 2
+      ELSE IF(MAXNL.GT.16)THEN
+         NAMELN = 16
+      ELSE
+         NAMELN = MAXNL
+      ENDIF
+      RETURN
+!
+! ** GSETNM ENDS HERE
+      END
+      SUBROUTINE GSETOP(OPTNM)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This sets sense of optimization.
+!
+      CHARACTER*(*) OPTNM
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF( OPTNM(1:3).EQ.'MAX' )THEN
+         OPT = OPTMAX
+      ELSE IF( OPTNM(1:3).EQ.'MIN' )THEN
+         OPT = OPTMIN
+      ELSE
+         PRINT *,' Warning: ',OPTNM, &
+                 ' not recognized sense of optimization'
+      ENDIF
+      RETURN
+!
+! ** GSETOP ENDS HERE
+      END
+      SUBROUTINE GADDNZ(RNAME,V,VTZERO,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This adds nonzero value (V) for column NCOLS in row named RNAME.
+!       VTOLZ = zero tolerance
+!
+! RCODE (return code) = 0  means all is well
+!                     = 1  means RNAME not found
+!                     = 2  means out of space
+!                     =-1  means V too small to add
+!                         i.e., ABS(V) < VTOLZ
+!
+      CHARACTER*(*) RNAME
+!
+! CALLS GETVID, GETNUM
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! LOOKUP ROW
+      CALL GETNUM('ROW ',RNAME,NUMBER)
+      IF(NUMBER.EQ.0)THEN
+           PRINT *,' Row ',RNAME,' not recognized'
+           RCODE=1
+           RETURN
+      ENDIF
+!
+! GET VALUE ID (ADD TO POOL)
+      IF(V.LT.-VTZERO)THEN
+           SIGN = -1
+           V = -V
+      ELSE IF(V.GT. VTZERO)THEN
+           SIGN = 1
+      ELSE
+! COEFFICIENT TOO SMALL...DO NOT ADD
+           RCODE = -1
+           RETURN
+      ENDIF
+! TEST IF = 1
+      IF(ABS(V-1.0).LE.VTOLAB)THEN
+           ID = 1
+           NONES = NONES+1
+      ELSE
+           CALL GETVID(V,ID)
+           IF(ID.EQ.0)THEN
+              PRINT *,' Sorry, not enough VALUE space'
+              RCODE = 2
+              RETURN
+           ENDIF
+      ENDIF
+!
+! NOW VALUE(ID) = ABS(V)
+!
+! NONZERO INDEXES ARE GROWN UPWARD FROM BOTTOM OF INDEX
+! ...INONZ IS RUNNING POINTER, DECREMENTED BY 2 FOR EACH NONZERO
+!
+! CHECK OVERFLOW
+       IF(2*(IFREE + NCOLS + 1).GE.INONZ)THEN
+           PRINT *,' Sorry, ',NONZER,' are too many nonzeroes'
+           RCODE = 2
+           RETURN
+       ENDIF
+! OK, PUT ROW INDEX (NUMBER)
+      INDEX(INONZ) = NUMBER
+! PUT SIGNED VALUE INDEX
+      INDEX(INONZ-1) = ID*SIGN
+! ADVANCE POINTER
+      INONZ = INONZ-2
+! ...AND NONZERO COUNT
+      NONZER = NONZER+1
+!
+! INCREMENT ROW & COLUMN (NCOLS) COUNTS
+      INDEX(IRINFO+NUMBER)=INDEX(IRINFO+NUMBER)+1
+      BASE(ICINFO+NCOLS) =BASE(ICINFO+NCOLS) +1
+!
+      RETURN
+!
+! ** GADDNZ ENDS HERE
+      END
+      SUBROUTINE GSETSL(SWRATE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This sets solution to all-logical basis
+! (Assumes OPT is set correctly for status setting.)
+!
+      LOGICAL*1 SWRATE
+! ...SWRATE = TRUE iff enough space to support pivot info
+!
+! SUCCESSFULL RETURN SETS STCOMP=3 (UNKNOWN) AND STBASC=1 (BASIC)
+!
+! CALLS  GPRDCT, GETBND, GETVAL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! RE-SET POINTER FOR LIST OF BASIC VARIABLES (NO RATE FOR LOGICAL BASIS)
+      IPIVOT = 0
+      SWRATE = .FALSE.
+!
+! SET ROW STATUS AND INITIALIZE SOLUTION VALUE
+!
+      DO 100 I=1,NROWS
+           INDEX(IRSTAT+I) = 3
+           VALUE(IRSOLV+I) = 0.0
+100   CONTINUE
+!
+! LOOP OVER COLUMNS TO SET STATUS AND ACCUMULATE y=Ax
+!
+      SOLST = 'OPTIMAL'
+      I1 = INONZ
+!
+      DO 200 J=1,NCOLS
+           I2 = INONZ + 2*BASE(ICINFO+J) - 1
+!          :::::::::::::::::::::::::::::::::::::::
+!           The nonzero pointers are I1,I2.  We
+!           shall first set status to finite bound
+!           (L or U) arbitrarily;  if column J is
+!           is free (L = -inf and U = +inf), we shall
+!           make x = 0 with status=Basic, giving an
+!           overdetermined "basis."  Also, to test
+!           unboundedness we shall determine the
+!           qualitative max change:
+!
+!            If L, SIGN = 1, MOVEDN = 0, MOVEUP = 0 | 1
+!            If U, SIGN =-1, MOVEDN = 0 | 1, MOVEUP = 0
+!            If B, SIGN = 0, MOVEDN = 1, MOVEUP = 1
+!
+!      The SIGN is the direction of movement, allowing free variables
+!      to move up or down.  MOVEUP and MOVEDN qualitatively determine
+!      limits, where 0 means finite limit and 1 means unlimited.
+!
+!           After we complete the loop through column
+!           J's nonzeroes, we shall test its reduced
+!           cost sign (for phase 2), which is simply
+!           its input cost, adjusted for sense of
+!           optimization (OPT).  If it is not optimal,
+!           we set SOLST = feasible unless we already
+!           have SOLST = unbounded.  If the reduced
+!           cost is not optimal, we test for unboundedness
+!           using MOVEUP and MOVEDN.
+!
+!           The net result is that column J will either
+!           determine SOLST = unbounded, or it will
+!           change SOLST from optimal to feasible, or
+!           it will leave SOLST unchanged.  After we
+!           complete the column loop, we shall test feasibility
+!           so that SOLST will be the correct status of this
+!           solution.
+!          ::::::::::::::::::::::::::::::::::::::::::::::::::::
+!
+           CALL GETVAL(VL,ICLBND+J)
+           CALL GETVAL(VU,ICUBND+J)
+!
+           IF(VL.GT.-VINF)THEN
+!            SET X = L
+               INDEX(ICSTAT+J) = 1
+               VX = VL
+!          ...SET DIRECTION/LIMIT
+               SIGN = 1
+               MOVEDN = 0
+               IF(VU.LT.VINF)THEN
+                  MOVEUP = 1
+               ELSE
+                  MOVEUP = 0
+               ENDIF
+!
+           ELSE IF(VU.LT.VINF)THEN
+!            SET X = U
+               INDEX(ICSTAT+J) = 2
+               VX = VU
+!          ...SET DIRECTION/LIMIT
+               SIGN = -1
+               MOVEUP = 0
+               MOVEDN = 1
+!
+           ELSE
+!            SET X = 0 BUT STAT = BASIC
+               INDEX(ICSTAT+J) = 3
+               VX = 0.0
+               SIGN = 0
+               MOVEUP = 1
+               MOVEDN = 1
+           ENDIF
+!
+!          INITIALIZE REDUCED COST = 0
+           VALUE(ICSOLV+J) = 0.0
+!
+           IF(I2.LE.I1)GOTO 175
+!
+! LOOP OVER COLUMN J'S NONZEROES TO ACCUMULATE y AND TO SET DJ=OBJ
+!
+           DO 150 I=I1,I2,2
+              ROW = INDEX(I)
+              CALL GETVAL(V,I+1)
+              IF(ROW.EQ.OBJNUM)VALUE(ICSOLV+J) = V
+              VALUE(IRSOLV+ROW) = VALUE(IRSOLV+ROW) + V*VX
+!         ...UPDATE MOVEMENT
+!
+              IF(MOVEUP.EQ.1)THEN
+                 IF(V.GT.0.0)THEN
+                    IF(INDEX(IRUBND+ROW).NE.INF)MOVEUP = 0
+                 ELSE IF(V.LT.0.0)THEN
+                    IF(INDEX(IRLBND+ROW).NE.-INF)MOVEUP = 0
+                 ENDIF
+              ELSE IF(MOVEDN.EQ.1)THEN
+                 IF(V.GT.0.0)THEN
+                    IF(INDEX(IRLBND+ROW).NE.-INF)MOVEDN = 0
+                 ELSE IF(V.LT.0.0)THEN
+                    IF(INDEX(IRUBND+ROW).NE.INF)MOVEDN = 0
+                 ENDIF
+              ENDIF
+!
+! NOW MOVEUP = 0 IFF UPWARD MOVEMENT IS LIMITED (ELSE, 1);
+!     MOVEDN = 0 IFF DOWNWARD MOVEMENT IS LIMITED (ELSE, 1).
+!
+150        CONTINUE
+!
+           I1=I2 + 1
+!
+! CHECK OPTIMALITY OF REDUCED COST
+!
+175        CONTINUE
+!
+           VDJ = VALUE(ICSOLV+J)*OPTMIN*OPT
+!
+!          OPT = OPTMIN MAKES VDJ = OBJ VALUE
+!              = OPTMAX MAKES VDJ =-OBJ VALUE
+!
+             IF(SIGN.LT.0)THEN
+                IF(VDJ.LE.0.0)GOTO 200
+             ELSE IF(SIGN.GT.0)THEN
+                IF(VDJ.GE.0.0)GOTO 200
+             ELSE
+                IF(ABS(VDJ).LE.VTOLAB)GOTO 200
+             ENDIF
+!          ACTIVITY IS NOT OPTIMAL...TEST FOR UNBOUNDEDNESS
+             IF(MOVEUP+MOVEDN.GT.0)SOLST = 'UNBOUNDED'
+             IF(SOLST.EQ.'OPTIMAL')SOLST = 'FEASIBLE'
+! _____________
+200   CONTINUE
+!~~~~~~~~~~~~~~
+! LOOP OVER ROWS TO CHECK FEASIBILITY
+!
+      DO 300 NUMBER=1,NROWS
+           CALL GETBND('ROW ',NUMBER,VL,VU)
+           IF(VALUE(IRSOLV+NUMBER).LT.VL)THEN
+             VALUE(IVFREE+NUMBER) = -1.0
+           ELSE IF(VALUE(IRSOLV+NUMBER).GT.VU)THEN
+             VALUE(IVFREE+NUMBER) = 1.0
+           ELSE
+             VALUE(IVFREE+NUMBER) = 0.0
+             GOTO 300
+           ENDIF
+           SOLST = 'INFEASIBLE'
+           INDEX(IRSTAT+NUMBER) = 4
+300   CONTINUE
+!
+      IF(SOLST.EQ.'INFEASIBLE')THEN
+!
+! LP IS INFEASIBLE...ADJUST REDUCED COSTS OF COLUMNS FOR PHASE 1
+!
+          DO 500 COLUMN=1,NCOLS
+500       CALL GPRDCT(VALUE(IVFREE+1),COLUMN,VALUE(ICSOLV+COLUMN))
+!
+      ENDIF
+!
+      SOLNAM = 'logical'
+      STCOMP = 0
+      STBASC = 1
+      RETURN
+!
+! ** GSETSL ENDS HERE
+      END
+      SUBROUTINE GPUTSL(ISTAT,ISOLV,STAT,VX,VD,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! PUT SOLUTION STAT (B,L,U, or I) AND VALUE (VX=LEVEL, VD=DUAL PRICE)
+!
+      CHARACTER*(*) STAT
+! LOCAL
+      CHARACTER*1  CHAR
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF(ISOLV.GT.PMXVAL)THEN
+         PRINT *,' ** SYSERR...GPUTSL...ISOLV =',ISOLV, &
+                                        ' > PMXVAL =',PMXVAL
+         RCODE = 13
+         RETURN
+      ENDIF
+      IF(ISTAT.GT.PMXIND)THEN
+         PRINT *,' ** SYSERR...GPUTSL...ISTAT =',ISTAT, &
+                                        ' > PMXIND =',PMXIND
+         RCODE = 13
+         RETURN
+      ENDIF
+!C ADDED 8-18-94
+      CHAR = STAT
+      IF( CHAR.EQ.'F' )CHAR = 'L'
+      IF( SOLST.EQ.'OPTIMAL '.AND.(CHAR.EQ.'L'.OR.CHAR.EQ.'U') )THEN
+! SEE IF COL
+         COL = ISTAT - ICSTAT
+         IF( COL.GE.1 .AND. COL.LE.NCOLS )THEN
+! ...YES, GET ITS BOUNDS
+            CALL GETBND('COL ',COL,VL,VU)
+            IF( VL.GE.VU )THEN
+! .COL IS FIXED (VL=VU)...CHECK ITS PRICE(CALLER MIGHT HAVE WRONG STAT)
+               IF( VD*OPT.LT.0. )THEN
+                  CHAR = 'L'
+               ELSE IF( VD*OPT.GT.0. )THEN
+                  CHAR = 'U'
+               ENDIF
+            ENDIF
+         ENDIF
+      ENDIF
+!C ============== IN THE FOLLOWING, CHAR REPLACED STAT
+      IF( CHAR.EQ.'L' )THEN
+           INDEX(ISTAT) = 1
+           VALUE(ISOLV) = VD
+      ELSE IF( CHAR.EQ.'U' )THEN
+           INDEX(ISTAT) = 2
+           VALUE(ISOLV) = VD
+      ELSE IF( CHAR.EQ.'B' )THEN
+           INDEX(ISTAT) = 3
+           VALUE(ISOLV) = VX
+      ELSE IF( CHAR.EQ.'I' )THEN
+           INDEX(ISTAT) = 4
+           VALUE(ISOLV) = VX
+      ELSE
+           RCODE = 1
+      ENDIF
+      RETURN
+!
+! ** GPUTSL ENDS HERE
+      END
+!
+!     .~~~~~~~~~~~~~~~.
+!     : MAPS Routines :
+!     :...............:
+!
+      SUBROUTINE GMPCLR
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This clears maps
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      DO 100 I=IRSTAT+1,IRSTAT+NROWS
+           IF(INDEX(I).LT.0)INDEX(I) = -INDEX(I)
+100   CONTINUE
+!
+      DO 150 I=ICSTAT+1,ICSTAT+NCOLS
+           IF(INDEX(I).LT.0)INDEX(I) = -INDEX(I)
+150   CONTINUE
+!
+      RETURN
+!
+! ** GMPCLR ENDS HERE
+      END
+      SUBROUTINE GETMAP(ROWCOL,NUMBER,SW)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This gets map for row/column NUMBER...SW = T if map bit is on
+!
+      LOGICAL*1     SW
+      CHARACTER*(*) ROWCOL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF(ROWCOL.EQ.'ROW ')THEN
+           SW = INDEX(IRSTAT + NUMBER).LT.0
+      ELSE IF(ROWCOL.EQ.'COL ')THEN
+           SW = INDEX(ICSTAT + NUMBER).LT.0
+      ELSE
+           PRINT *,' ** SYSERR GMP',ROWCOL,'...please report'
+      ENDIF
+!
+      RETURN
+!
+! ** GETMAP ENDS HERE
+      END
+      SUBROUTINE GPUTMP(ROWCOL,NUMBER,SW)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This puts map for row/column NUMBER
+! ...SW=T if map bit is to be on
+!
+      LOGICAL*1 SW
+      CHARACTER*4 ROWCOL
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF(ROWCOL.EQ.'ROW ')THEN
+           I = IRSTAT+NUMBER
+      ELSE IF(ROWCOL.EQ.'COL ')THEN
+           I = ICSTAT+NUMBER
+      ENDIF
+!
+      IF(SW)THEN
+           IF(INDEX(I).GT.0)INDEX(I) = -INDEX(I)
+      ELSE
+           IF(INDEX(I).LT.0)INDEX(I) = -INDEX(I)
+      ENDIF
+!
+      RETURN
+!
+! ** GPUTMP ENDS HERE
+      END
+      SUBROUTINE GMAPNZ(NRSUB,ROW1,NCSUB,COL1,NZSUB)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! This removes null rows/columns from submatrix and resets:
+!
+!    NRSUB = NUMBER OF ROWS IN SUBMATRIX
+!    ROW1  = FIRST ROW NUMBER IN SUBMATRIX
+!    NCSUB = NUMBER OF COLUMNS IN SUBMATRIX
+!    COL1  = FIRST COLUMN NUMBER IN SUBMATRIX
+!    NZSUB = NUMBER OF NONZEROES IN SUBMATRIX
+!
+      INTEGER*4 I,I1,I2
+      LOGICAL*1 SW
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      BITON = 2**14
+      NZSUB = 0
+      IF(COL1.LE.0)COL1=1
+      IF(ROW1.LE.0)ROW1=1
+!
+! LOOP OVER COLUMNS
+!
+      NEW1 = COL1
+      DO 500 COLUMN=COL1,NCOLS
+           IF(INDEX(ICSTAT+COLUMN).GT.0)GOTO 500
+!     COLUMN IS IN SUBMATRIX...TEST IF NULL OVER ROWS IN SUBMATRIX
+!
+           I1 = INONZ + 2*BASE(ICINFO+COLUMN-1)
+           NZ = BASE(ICINFO+COLUMN) - BASE(ICINFO+COLUMN-1)
+           IF(NZ.EQ.0)GOTO 400
+           I2 = I1 + 2*NZ - 1
+!
+!          INITIALIZE SW (FALSE MEANS NULL)
+           SW = .FALSE.
+!
+!          LOOP OVER ROWS
+!
+           DO 300 I=I1,I2,2
+             ROW = INDEX(I)
+             IF(INDEX(IRSTAT+ROW).GT.0)GOTO 300
+!       ...ROW IS IN SUBMATRIX
+             NZSUB = NZSUB + 1
+             IF(-INDEX(IRSTAT+ROW).LT.BITON) &
+              INDEX(IRSTAT+ROW)=INDEX(IRSTAT+ROW) - BITON
+!
+!          (BITON SHOWS ROW HAD COLUMN INTERSECTION)
+             SW = .TRUE.
+300        CONTINUE
+!
+           IF(SW)GOTO 500
+!
+!          COLUMN IS NULL...REMOVE FROM SUBMATRIX
+!
+400        INDEX(ICSTAT+COLUMN) = -INDEX(ICSTAT+COLUMN)
+           NCSUB = NCSUB - 1
+           IF(COLUMN.EQ.NEW1)NEW1=COLUMN+1
+500   CONTINUE
+!
+      IF(NEW1.LE.NCOLS)COL1 = NEW1
+      NEW1 = ROW1
+!
+! NOW LOOP OVER ROWS TO RETAIN ONLY NONNULL ONES
+!
+      DO 600 ROW=ROW1,NROWS
+           IF(INDEX(IRSTAT+ROW).GT.0)GOTO 600
+           IF(-INDEX(IRSTAT+ROW).GT.BITON)THEN
+!          ..ROW IS NOT NULL...RESTORE MAP (IE, TURN OFF BIT)
+             INDEX(IRSTAT+ROW) = INDEX(IRSTAT+ROW) + BITON
+           ELSE
+!          ...REMOVE NULL ROW
+             INDEX(IRSTAT+ROW) = -INDEX(IRSTAT+ROW)
+             NRSUB = NRSUB - 1
+             IF(ROW.EQ.NEW1)NEW1=ROW+1
+           ENDIF
+600   CONTINUE
+!
+      IF(NEW1.LE.NROWS)ROW1=NEW1
+!
+      RETURN
+!
+! ** GMAPNZ ENDS HERE
+      END
+!               ::: GUPCKGEN.FOR  3-28-94
+!
+! THIS IS A STAND-ALONE UTILITY TO CREATE A PACKED FILE FROM LP IN CORE.
+! (BYPASSES NEED TO CREATE MATRIX + SOLUTION FILES FOR ANALYZE.)
+! LINK WITH GUPCKLIB.
+!
+!     GUPCK0....INITIALIZE MEMORY...MUST BE CALLED FIRST
+!     GUPCKR....ENTER ROWS
+!     GUPCKC....ENTER COLS
+!     GUPCKV....ENTER NONZERO INTO POOL
+!     GUPCKW....END IN-CORE SEUP, THEN WRITES PACKED FILE
+!               ...MUST BE CALLED LAST
+!     GUPCKD....PRINT ROUTINE (USED FOR DEBUGGING)
+!
+! IN EACH CASE, THERE IS AN INTEGER-VALUED RETURN CODE (RCODE).
+! RCODE = 0 IFF ALL IS WELL;  ELSE, ERROR IS FATAL.
+!
+      SUBROUTINE GUPCK0(PRNAME,OBNAME,RHNAME,RGNAME,BDNAME,OPNAME, &
+                       SVNAME,STNAME, LENGTH,ROWS,COLS,NZ, &
+                       VINFTY,VTOLA,VTOLR,FILE,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS IS THE INITIAL CALL TO THE GUPCKX ROUTINES, WHICH BYPASS THE NEED
+! FOR READING MATRIX AND SOLUTION FILE.  IT IS ALSO MORE EFFICIENT THAN
+! READING AN LP FILE WITH LPRENAME.
+!
+      CHARACTER*(*) PRNAME,OBNAME,RHNAME,RGNAME,BDNAME,SVNAME, &
+                    OPNAME,STNAME
+      INTEGER       ROWS,COLS,NZ,RCODE
+      REAL          VINFTY,VTOLA,VTOLR
+! NAMES (STORED AS 16-CHAR, AND IS CASE-SENSITIVE):
+!     PRNAME = PROBLEM NAME (REQUIRED)
+!     OBNAME = OBJECTIVE ROW NAME (REQUIRED)
+!     RHNAME = RIGHT-HAND SIDE NAME (REQUIRED)
+!     RGNAME = RANGE NAME ('NONE' IF NONE)
+!     BDNAME = BOUND NAME ('NONE' IF NONE)
+!     SVNAME = SOLVER NAME (EG, OML)
+!     STNAME = SOLUTION STATUS:
+!              OPTIMAL º FEASIBLE º INFEASIBLE º UNBOUNDED º UNKNOWN
+!     OPNAME = SENSE OF OPT:  MINIMIZE º MAXIMIZE
+! NUMBERS:
+!     LENGTH = MAX NAME LENGTH OF ROWS AND COLS (<= 16, AND USUALLY 8)
+!     ROWS   = NUMBER OF ROWS (> 0)
+!     COLS   = NUMBER OF COLUMNS (> 0)
+!     NZ     = NUMBER OF NONZEROES (> 0)
+!     VINFTY = INFINITY (USUALLY 1.0E+20)
+!     VTOLA  = ABSOLUTE TOLERANCE
+!     VTOLR  = RELATIVE TOLERANCE
+!     FILE   = OUTPUT FILE UNIT
+!              CALLER IS RESPONSIBLE FOR OPENING BEFORE CALLING GUPCKW
+!
+      COMMON/GUNUM/LLINK,RLINK,TOP,BOTTOM,FILOUT,NZREMN
+      CHARACTER*16 FNAME,LNAME,RCNAME
+      COMMON/GUCHR/FNAME,LNAME,RCNAME
+!
+      CHARACTER*4  VERSN
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      FILOUT = FILE
+! GINITL WANTS DATA FILE AND PACKED FILE
+      FILDAT = 10
+      FILPCK = 11
+! BUT DO NOT USE CALLER'S FILE (PCKFIL WILL BE USED AS SCRATCH)
+      IF( FILDAT.EQ.FILE )FILDAT = 12
+      IF( FILPCK.EQ.FILE )FILPCK = 12
+      CALL GINITL(FILDAT,FILPCK,VERSN)
+! NOW PCKFIL=FILPCK AND DATFIL=FILDAT IN DCGETMAT COMMON
+! AND MEMORY HAS BEEN INITIALIZED (GINITL CALLED GNEWLP)
+! CHECK MEMORY, USING MINIMAL SAFE DIMENSIONS
+      NUMRC  = ROWS + COLS
+      IF( NUMRC.GT.MAXRC )THEN
+         PRINT *,' ** TOO MANY ROWS + COLS:', &
+                 ROWS,' +',COLS,' >',MAXRC
+         RCODE = 1
+         RETURN
+      ENDIF
+      MIN = 6*ROWS + 7*COLS + 2*NZ + 500
+      IF( MIN.GE.PMXIND )THEN
+         PRINT *,' ** NOT ENOUGH INDEX SPACE...NEED',MIN
+         RCODE = 1
+         RETURN
+      ENDIF
+      MIN = 7*ROWS + 6*COLS + 2*NZ + .01*ROWS*ROWS + 400
+      IF( MIN.GE.PMXVAL )THEN
+               write(6,*) ' need 1'
+
+         PRINT *,' ** NOT ENOUGH VALUE SPACE...NEED',MIN
+         RCODE = 1
+         RETURN
+      ENDIF
+! OK, SET NAMES
+      PRBNAM = PRNAME
+      OBJNAM = OBNAME
+      RHSNAM = RHNAME
+      RNGNAM = RGNAME
+      BNDNAM = BDNAME
+      SOLNAM = SVNAME
+      SOLST  = STNAME
+      CALL GSETOP(OPNAME)
+! SET NUMBERS
+      NAMELN = LENGTH
+      NROWS  = ROWS
+      NCOLS  = COLS
+      NONZER = NZ
+      VINF   = VINFTY
+      VALUE(INF) = VINF
+      VTOLAB = VTOLA
+      VTOLRE = VTOLR
+! SET POINTERS
+      IRNAME = 0
+      IRINFO = IFREE
+      IRLBND = IRINFO + NROWS
+      IRUBND = IRLBND + NROWS
+      IRSTAT = IRUBND + NROWS
+!
+      ICNAME = IRNAME + NROWS + 1
+      ICINFO = IRSTAT + NROWS + 1
+      INDEX(ICINFO) = 0
+      ICLBND = ICINFO + NCOLS + 1
+      ICUBND = ICLBND + NCOLS
+      ICSTAT = ICUBND + NCOLS
+      INONZ  = ICSTAT + NCOLS + 1
+      IFREE  = INONZ  + 2*NONZER + 1
+      IF( IFREE+NCOLS.GE.PMXIND )THEN
+         PRINT *,' ** NOT ENOUGH INDEX SPACE...NEED AT LEAST', &
+                 IFREE+NCOLS
+         RCODE = 1
+         PRBNAM = ' '
+         RETURN
+      ENDIF
+      CALL GPTNAM(IRNAME,'        ')
+      CALL GPTNAM(ICNAME,'        ')
+!     CALL GPTNAM(IRNAME,' ')
+!     CALL GPTNAM(ICNAME,' ')
+      MAXVAL = PMXVAL - 4*NUMRC
+!     :                 :...2 PER ROW AND COL USED DURING CONSTRUCTION
+!     :                   + 2 FOR SOLUTION VALUES
+!     :....THIS IS LIMIT FOR VALUE POOL
+! THE FOLLOWING LINKS ARE JUST DURING CONSTRUCTION
+! (PASSED IN COMMON/GUNUM/ FOR GUPCKR AND GUPCKC)
+      LLINK  = MAXVAL
+      RLINK  = LLINK  + NUMRC
+      IRSOLV = RLINK  + NUMRC
+      ICSOLV = IRSOLV + NROWS
+! NOTE:  SOLUTION VALUES ARE AT BOTTOM OF VALUE ARRAY NOW, BUT THIS
+!        WILL BE MOVED UP AFTER VALUE POOL IS FINISHED.
+!
+!             VALUE º I4VAL
+!       .______________________.
+!       º                      º <=== MAXVAL = LLINK
+!       º----------------------º
+!       º I-TH LEFT LINK       º <=== LLINK + I \
+!       º----------------------º                 º WILL BE FREE
+!       º I-TH RIGHT LINK      º <=== RLINK + I /
+!       º----------------------º <=== IRSOLV      \
+!       º ROW I SOLUTION VALUE º <=== IRSOLV + I   \
+!       º----------------------º                    º WILL MOVE UP
+!       º COL J SOLUTION VALUE º <=== ICSOLV + J   /
+!       º______________________º <=== PMXVAL      /
+!                                     = ICSOLV + NCOLS
+!
+      RETURN
+!
+! ** GUPCK0 ENDS HERE
+      END
+      SUBROUTINE GUPCKR(RNAME,NR,VLO,VUP,VX,VP,STAT,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS ENTERS A ROW AND ITS RIM.
+!
+      CHARACTER*(*) RNAME
+      INTEGER       NR
+      REAL          VLO,VUP,VX,VP
+      CHARACTER*(*) STAT
+      INTEGER       RCODE
+!   RNAME = NAME OF ROW
+!   NR    = ROW NUMBER º 0 TO INIT º > NROWS TO FINISH
+! THE FOLLOWING ARE RELEVANT ONLY IF 1 <= NR <= NROWS
+!   VLO   = LOWER BOUND OF ROW
+!   VUP   = UPPER BOUND OF ROW
+!   VX    = LEVEL OF ROW IN SOLUTION (= AX, NOT THE SLACK OR SURPLUS)
+!   VP    = DUAL PRICE OF ROW IN SOLUTION
+!           ...CHECK SIGN FOR THEORETICALLY CORRECT VALUE
+!   STAT  = SOLUTION STATUS: B º I º L º U
+! FIRST, CALL GPCKR WITH NR = 0...THIS WILL SETUP MEMORY STUFF.
+! LAST,  CALL GPCKR WITH NR > NROWS...THIS WILL WRAP UP ROWS SECTION.
+!
+      COMMON/GUNUM/LLINK,RLINK,TOP,BOTTOM,FILOUT,NZREMN
+      CHARACTER*16 FNAME,LNAME,RCNAME
+      COMMON/GUCHR/FNAME,LNAME,RCNAME
+      CHARACTER*1  CHAR
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! SEE GETMAT ROWS SECTION FOR COMMENTS
+      IF( NR.EQ.0 )THEN
+! INITALIZE
+         I4VAL(LLINK) = 0
+         I4VAL(RLINK) = 0
+         FNAME = '~'
+         LNAME = ' '
+         TOP   = 0
+         BOTTOM= 0
+         IF( RNAME.NE.' ' )THEN
+            PRINT *,' ROW INITIALIZATION'
+            CALL GUPCKD(RNAME)
+         ENDIF
+         RETURN
+      ENDIF
+! COPY NAME TO BE SURE WE HAVE IT IN 16 CHAR STRING
+      RCNAME = RNAME
+      IF( NR.GT.NROWS )GOTO 1000
+!
+! ========== PUT ROW ===========
+! LOCATE ROW IN TREE (AND TEST FOR DUPLICATE)
+! IS NEW NAME LAST?
+      IF( RCNAME.GT.LNAME )THEN
+! YES, INSERT TO RIGHT OF BOTTOM (AND UPDATE LNAME)
+         LNAME = RCNAME
+         I4VAL(RLINK + NR)     = I4VAL(RLINK + BOTTOM)
+         I4VAL(RLINK + BOTTOM) = NR
+         BOTTOM = NR
+         IF( NR.EQ.1 )THEN
+            FNAME = RCNAME
+            TOP   = 1
+         ENDIF
+         GOTO 180
+      ENDIF
+! IS NEW NAME FIRST?
+      IF( RCNAME.LT.FNAME )THEN
+! YES, INSERT TO LEFT OF TOP (AND UPDATE FNAME)
+         FNAME = RCNAME
+         I4VAL(LLINK + TOP) = NR
+         I4VAL(RLINK + NR)  = -TOP
+         TOP   = NR
+         IF( NROWS.EQ.1 )THEN
+            LNAME = RCNAME
+            BOTTOM= 1
+         ENDIF
+         GOTO 180
+      ENDIF
+! NOT FIRST OR LAST
+      PARENT = 0
+! LOOP TO LOCATE AND INSERT
+150   CONTINUE
+      IF( RCNAME.LT.NAME(IRNAME + PARENT) )THEN
+! LOOK LEFT
+          LOC = I4VAL(LLINK + PARENT)
+          IF( LOC.GT.0 )THEN
+! ...MOVE LEFT
+             PARENT = LOC
+             GOTO 150
+          ELSE
+! ...INSERT LEFT
+             I4VAL(LLINK + PARENT) = NR
+             I4VAL(RLINK + NR)     = -PARENT
+          ENDIF
+      ELSE IF( RCNAME.GT.NAME(IRNAME + PARENT) )THEN
+! LOOK RIGHT
+          LOC = I4VAL(RLINK + PARENT)
+          IF( LOC.GT.0 )THEN
+! ...MOVE RIGHT
+             PARENT = LOC
+             GOTO 150
+          ELSE
+! ...INSERT RIGHT
+             I4VAL(RLINK + NR)     = I4VAL(RLINK + PARENT)
+             I4VAL(RLINK + PARENT) = NR
+          ENDIF
+      ELSE
+          PRINT *,' ** DUPLICATE ROW: ',RCNAME
+          RCODE = 1
+          RETURN
+      ENDIF
+!
+! FINISH PUTTING ROW IN TREE
+180   CONTINUE
+      CALL GUPCKV(LO,VLO,*1310)
+      CALL GUPCKV(UP,VUP,*1310)
+      INDEX(IRLBND+NR) = LO
+      INDEX(IRUBND+NR) = UP
+! COPY STAT TO BE SURE IT'S IN 1 CHAR STRING
+      CHAR = STAT
+      CALL GPUTSL(IRSTAT+NR,IRSOLV+NR,CHAR,VX,VP,RCODE)
+      IF( RCODE.NE.0 )GOTO 1399
+      INDEX(IRINFO+NR) = 0
+      CALL GPTNAM(IRNAME+NR,RCNAME)
+      I4VAL(LLINK + NR) = 0
+! TALLY
+      IF( LO.EQ.-INF .AND. UP.EQ.INF )NRFREE = NRFREE + 1
+      RETURN
+!
+1000  CONTINUE
+! ======= WRAP UP =======
+      CHAR = STAT
+      IF( CHAR.NE.'E' .AND. CHAR.NE.'E' .AND. RNAME.NE.' ' )THEN
+         PRINT *,' AT BEGINNING OF GUPCKR TERMINATION'
+         CALL GUPCKD(RNAME)
+      ENDIF
+!
+!  WRITE SORTED ROW LIST TO PCKFIL
+!  --------------------------------
+      CLOSE(PCKFIL)
+! UNIX AND XENIX NEED RECORD LENGTHS (RECL) FOR UNFORMATTED FILES
+!IXNX      OPEN(PCKFIL,STATUS='SCRATCH',FORM='UNFORMATTED',ERR=1350,
+!IXNX     1     RECL=2048)
+!IXNX      GOTO 222
+!IEIAC   FILEINF NEEDED FOR SCRATCH FILE TO PROVIDE ENOUGH SPACE
+!IEIA      CALL FILEINF(RCODE,'TRK',50,'SECOND',100,'RECFM','VBS',
+!IEIA     1             'LRECL',-1,'BLKSIZE',32760)
+      OPEN(PCKFIL,STATUS='SCRATCH',FORM='UNFORMATTED',ERR=1350)
+222   REWIND(PCKFIL)
+!
+!     TRAVERSE ROWS INORDER
+!
+      ROW = I4VAL(LLINK)
+      IF( ROW.EQ.0 )GOTO 1950
+!   MOVE DOWN LEFT LEG OF TREE
+1910  CONTINUE
+      IF( I4VAL(LLINK+ROW).GT.0 )THEN
+          ROW = I4VAL(LLINK+ROW)
+          GOTO 1910
+      ENDIF
+!     WRITE ROW
+!     =========
+1920  CONTINUE
+      RCNAME = NAME(IRNAME+ROW)
+      WRITE(PCKFIL,ERR=1356)RCNAME,VALUE(IRSOLV+ROW), &
+            INDEX(IRSTAT+ROW),INDEX(IRLBND+ROW),INDEX(IRUBND+ROW)
+!
+! GET INORDER SUCCESSOR OF ROW
+1950  CONTINUE
+      IF( I4VAL(RLINK+ROW).LT.0 )THEN
+          ROW = -I4VAL(RLINK+ROW)
+          GOTO 1920
+      ELSE IF( I4VAL(RLINK+ROW).GT.0 )THEN
+          ROW = I4VAL(RLINK+ROW)
+          GOTO 1910
+      ENDIF
+! NOW WE HAVE WRITTEN LAST ROW...RIGHT LINK = 0
+! SET POINTERS
+! WRITE A DUMMY RECORD TO AVOID EOF
+      WRITE(PCKFIL,ERR=1356)OBJNAM
+!
+! READ ROWS BACK (SORTED)
+      REWIND(PCKFIL,ERR=1357)
+      OBJNUM = 0
+!
+      DO 1989 ROW=1,NROWS
+         READ(PCKFIL,ERR=1355,END=1359)RCNAME,VALUE(IRSOLV+ROW), &
+            INDEX(IRSTAT+ROW),INDEX(IRLBND+ROW),INDEX(IRUBND+ROW)
+         CALL GPTNAM(IRNAME+ROW,RCNAME)
+         IF( RCNAME.EQ.OBJNAM )OBJNUM = ROW
+1989  CONTINUE
+      IF( OBJNUM.EQ.0 )THEN
+         PRINT *,' ** OBJ ROW ',OBJNAM(:NAMELN),' NOT FOUND'
+         GOTO 1390
+      ENDIF
+!
+! NOW ROWS ARE IN NAME SORT ORDER WITH THEIR BOUNDS AND SOLUTION
+! ...ROW COUNTS (IRINFO) WILL BE UPDATED AS WE GET COLS (GUPCKC).
+!
+      CHAR = STAT
+      IF( CHAR.EQ.'E' .OR. CHAR.EQ.'E' .OR. CHAR.EQ.'*' )THEN
+         PRINT *,' AT END OF GUPCKR TERMINATION'
+         CALL GUPCKD(RNAME)
+      ENDIF
+      RETURN
+!
+! ERROR RETURNS
+1310  PRINT *,' ** NOT ENOUGH VALUE SPACE. 1'
+      GOTO 1399
+1350  PRINT *,' ** ERROR OPENING UNIT',PCKFIL,' AS SCRATCH FILE'
+      GOTO 1399
+1355  PRINT *,' ** ERROR READING SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1356  PRINT *,' ** ERROR WRITING SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1357  PRINT *,' ** ERROR REWINDING SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1359  PRINT *,' ** PREMATURE END OF SCRATCH FILE...UNIT',PCKFIL
+1390  CLOSE( PCKFIL )
+1399  CONTINUE
+      IF( RCODE.LE.0 )RCODE = 12
+      PRINT *,' ...ABORTING GUPCKR.  ENTERING VALUES:'
+      PRINT *,' RNAME=',RNAME,' NR =',NR
+      PRINT *,'   VLO,VUP =',VLO,VUP
+      PRINT *,'   STAT=',STAT,' VX,VP =',VX,VP
+      RETURN
+!
+! ** GUPCKR ENDS HERE
+      END
+      SUBROUTINE GUPCKC(CNAME,NC,NZ,RNAME,VCOEF,VLO,VUP, &
+                        VX,VP,STAT,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS RECEIVES COLUMN (CNAME) AND ITS INFO.
+!
+      CHARACTER*(*) CNAME
+      INTEGER       NC,NZ,SV_NZ
+      CHARACTER*(*) RNAME(NZ)
+      REAL          VCOEF(NZ)
+      REAL          VLO,VUP,VX,VP
+      CHARACTER*(*) STAT
+      INTEGER       RCODE
+!   CNAME = NAME OF COLUMN
+!   NC    = COL NUMBER º 0 TO INIT º > NCOLS TO FINISH
+! THE FOLLOWING ARE RELEVANT ONLY IF 1 <= NC <= NCOLS
+!   NZ    = NUMBER OF NONZEROES IN COLUMN (MUST BE > 0)
+!   RNAME(I) = NAME OF I-TH NONZERO ROW
+!   VCOEF(I) = VALUE OF I-TH NONZERO COEFFICIENT
+!   VLO   = LOWER BOUND OF COLUMN
+!   VUP   = UPPER BOUND OF COLUMN
+!   VX    = LEVEL OF COLUMN IN SOLUTION
+!   VP    = DUAL PRICE OF COLUMN IN SOLUTION
+!   STAT  = SOLUTION STATUS: B º I º L º U
+! FIRST, CALL GUPCKC WITH NC = 0...THIS WILL SETUP MEMORY STUFF.
+! LAST,  CALL GUPCKC WITH NC > NCOLS...THIS WILL WRAP UP COLS.
+!
+      COMMON/GUNUM/LLINK,RLINK,TOP,BOTTOM,FILOUT,NZREMN
+      CHARACTER*16 FNAME,LNAME,RCNAME,STR16
+      COMMON/GUCHR/FNAME,LNAME,RCNAME
+      CHARACTER*1 CHAR
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! SEE GETMAT COLUMNS SECTION FOR COMMENTS
+      SV_NZ = NZ
+      IF( NC.EQ.0 )THEN
+! INITIALIZE
+         I4VAL(LLINK) = 0
+         I4VAL(RLINK) = 0
+         FNAME = '~'
+         LNAME = ' '
+         TOP   = 0
+         BOTTOM= 0
+         NZREMN= NONZER
+! DURING COLUMNS:                   INDEX
+!                         .------------------------------.
+!      INDEX(IFREE+J)===> º 1ST NONZERO PAIR OF COLUMN J º
+!
+! AND
+!      INDEX(ICINFO+J) = NUMBER OF NONZEROES IN COLUMN J
+!
+! SO INDEX(IFREE+J) = INDEX(IFREE+J-1) + 2*INDEX(ICINFO+J-1)
+!
+! THUS, WE INITIALIZE:
+         INDEX(IFREE) = INONZ
+         INDEX(ICINFO)= 0
+!
+         IF( CNAME.NE.' ' )THEN
+            PRINT *,' COLUMN INITIALIZATION'
+            CALL GUPCKD(CNAME)
+         ENDIF
+         RETURN
+      ENDIF
+! COPY NAME TO BE SURE WE HAVE IT IN 16 CHAR STRING
+      RCNAME = CNAME
+      IF( NC.GT.NCOLS )GOTO 1000
+!
+      IF( NZ.LE.0 )GOTO 1330
+      IF( NZREMN-NZ.LT.0 )GOTO 1331
+      NZREMN = NZREMN - NZ
+!
+! LOCATE COLUMN IN TREE (AND TEST FOR DUPLICATE)
+! IS NEW NAME LAST?
+      IF( RCNAME.GT.LNAME )THEN
+! YES, INSERT TO RIGHT OF BOTTOM (AND UPDATE LNAME)
+         LNAME = RCNAME
+         I4VAL(RLINK + NC) = I4VAL(RLINK + BOTTOM)
+         I4VAL(RLINK + BOTTOM) = NC
+         BOTTOM = NC
+         IF( NC.EQ.1 )THEN
+            FNAME = RCNAME
+            TOP   = 1
+         ENDIF
+         GOTO 280
+      ENDIF
+! IS NEW NAME FIRST?
+      IF( RCNAME.LT.FNAME )THEN
+! YES, INSERT TO LEFT OF TOP (AND UPDATE FNAME)
+         FNAME = RCNAME
+         I4VAL(LLINK + TOP) = NC
+         I4VAL(RLINK + NC)  = -TOP
+         TOP   = NC
+         IF( NC.EQ.1 )THEN
+            LNAME = RCNAME
+            BOTTOM= 1
+         ENDIF
+         GOTO 280
+      ENDIF
+! NEITHER FIRST NOR LAST...SEARCH
+      PARENT = 0
+250   CONTINUE
+        IF( RCNAME.LT.NAME(ICNAME+PARENT) )THEN
+! LOOK LEFT
+           IF( I4VAL(LLINK+PARENT).GT.0 )THEN
+! MOVE LEFT
+              PARENT = I4VAL(LLINK+PARENT)
+              GOTO 250
+           ELSE
+! INSERT LEFT
+              I4VAL(LLINK+PARENT)= NC
+              I4VAL(RLINK+NC)    = -PARENT
+           ENDIF
+        ELSE
+           IF( I4VAL(RLINK+PARENT).GT.0 )THEN
+! MOVE RIGHT
+              PARENT = I4VAL(RLINK+PARENT)
+              GOTO 250
+           ELSE
+! INSERT RIGHT
+              I4VAL(RLINK+NC)    = I4VAL(RLINK+PARENT)
+              I4VAL(RLINK+PARENT)= NC
+           ENDIF
+        ENDIF
+280   CONTINUE
+! FINISH PUTTING COL IN TREE
+      CALL GUPCKV(LO,VLO,*1310)
+      CALL GUPCKV(UP,VUP,*1310)
+      INDEX(ICLBND+NC) = LO
+      INDEX(ICUBND+NC) = UP
+! COPY STAT TO BE SURE IT'S IN 1 CHAR STRING
+      CHAR = STAT
+      CALL GPUTSL(ICSTAT+NC,ICSOLV+NC,CHAR,VX,VP,RCODE)
+      IF( RCODE.NE.0 )GOTO 1399
+      LOCNZ = INDEX(IFREE+NC-1) + 2*INDEX(ICINFO+NC-1)
+      IF (LOCNZ .EQ. 0.0) THEN
+         DO INC = 2 , NC - 1
+            LOCNZ = INDEX(IFREE+NC-INC) + 2*INDEX(ICINFO+NC-INC)
+            IF (LOCNZ .GT. 0) EXIT
+         END DO
+      END IF
+      INDEX(IFREE +NC) = LOCNZ
+      INDEX(ICINFO+NC) = NZ
+! PUT NONZEROES
+      DO 300 I=1,NZ
+         STR16 = RNAME(I)
+         CALL GETNUM('ROW ',STR16,ROW)
+         IF( ROW.EQ.0 )GOTO 1320
+         CALL GUPCKV(ID,VCOEF(I),*1310)
+         IF (LOCNZ .LE. 0) THEN
+            WRITE(6,3113) CNAME,NC,I,NZ,RNAME(I),VCOEF(I),ID, ifree , icinfo, index(ifree+nc-1),index(icinfo+nc-1),index(ifree+nc),index(icinfo+nc)
+ 3113       FORMAT(1X,"GUPCKV_OOPS:",A8,3(":",I9),":",A8,":",E20.6e3,":",I9,6(":",I9))
+         END IF
+         INDEX(LOCNZ  ) = ROW
+         INDEX(LOCNZ+1) = ID
+         LOCNZ = LOCNZ + 2
+         IF( ID.EQ.1 .OR. ID.EQ.-1 )NONES = NONES+1
+         INDEX(IRINFO+ROW) = INDEX(IRINFO+ROW) + 1
+300   CONTINUE
+!
+      CALL GPTNAM(ICNAME+NC,RCNAME)
+      I4VAL(LLINK +NC) = 0
+! TALLY
+      IF( LO.EQ.UP )NCFIX = NCFIX + 1
+      RETURN
+!
+1000  CONTINUE
+! ============ WRAP UP ============
+      IF( NZREMN.NE.0 )GOTO 1335
+      CHAR = STAT
+      IF( CHAR.NE.'E' .AND. CHAR.NE.'E' .AND. CNAME.NE.' ' )THEN
+         PRINT *,' AT BEGINNING OF GUPCKC TERMINATION'
+         CALL GUPCKD(CNAME)
+      ENDIF
+      CLOSE( PCKFIL )
+! UNIX AND XENIX NEED RECORD LENGTHS (RECL) FOR UNFORMATTED FILES
+!IXNX      OPEN(PCKFIL,STATUS='SCRATCH',FORM='UNFORMATTED',ERR=1350,
+!IXNX     1     RECL=2048)
+!IXNX      GOTO 222
+!IEIAC   FILEINF NEEDED FOR SCRATCH FILE TO PROVIDE ENOUGH SPACE
+!IEIA      CALL FILEINF(RCODE,'TRK',50,'SECOND',100,'RECFM','VBS',
+!IEIA     1             'LRECL',-1,'BLKSIZE',32760)
+! TRAVERSE COLUMN TREE INORDER (VISIT = WRITE TO PCKFIL)
+      OPEN(PCKFIL,STATUS='SCRATCH',FORM='UNFORMATTED',ERR=1350)
+222   REWIND( PCKFIL )
+      COL = I4VAL(LLINK)
+      IF( COL.EQ.0 )GOTO 2950
+! MOVE DOWN LEFT LEG
+2910  CONTINUE
+      IF( I4VAL(LLINK+COL).GT.0 )THEN
+         COL = I4VAL(LLINK+COL)
+         GOTO 2910
+      ENDIF
+! === VISIT COLUMN (WRITE TO PCKFIL) ===
+2920  CONTINUE
+      NZ = INDEX(ICINFO+COL)
+      WRITE(PCKFIL,ERR=1356)NAME(ICNAME+COL),VALUE(ICSOLV+COL),NZ, &
+              INDEX(ICSTAT+COL),INDEX(ICLBND+COL),INDEX(ICUBND+COL)
+! ...WRITE NONZEROES
+      I1 = INDEX(IFREE +COL)
+      I2 = I1 + 2*NZ - 1
+      WRITE(PCKFIL,ERR=1356)(INDEX(I),I=I1,I2)
+! GET INORDER SUCCESSOR OF COLUMN
+2950  IF( I4VAL(RLINK+COL).LT.0 )THEN
+! MOVE TO RIGHT THREAD, AND VISIT
+         COL = -I4VAL(RLINK+COL)
+         GOTO 2920
+      ELSE IF( I4VAL(RLINK+COL).GT.0 )THEN
+! MOVE TO RIGHT, THEN DOWN LEFT LEG
+         COL = I4VAL(RLINK+COL)
+         GOTO 2910
+      ENDIF
+! ::: TRAVERSAL COMPLETE ...RIGHT LINK = 0 :::
+!
+! WRITE A DUMMY RECORD TO AVOID EOF
+      WRITE(PCKFIL,ERR=1356)NZ
+!
+! READ BACK SORTED COLUMN LIST AND SET INDEX POINTERS INTO INFO
+      REWIND(PCKFIL,ERR=1357)
+      I1 = INONZ
+!
+      DO 2980 COL=1,NCOLS
+         READ(PCKFIL,ERR=1355,END=1359)RCNAME,VALUE(ICSOLV+COL),NZ, &
+              INDEX(ICSTAT+COL),INDEX(ICLBND+COL),INDEX(ICUBND+COL)
+         I2 = I1 + 2*NZ - 1
+         READ(PCKFIL,ERR=1355,END=1359)(INDEX(I),I=I1,I2)
+         I1 = I2 + 1
+         CALL GPTNAM(ICNAME+COL,RCNAME)
+         INDEX(ICINFO+COL) = INDEX(ICINFO+COL-1) + NZ
+2980  CONTINUE
+!
+      CHAR = STAT
+      IF( CHAR.EQ.'E' .OR. CHAR.EQ.'E' .OR. CHAR.EQ.'*' )THEN
+         PRINT *,' AT END OF GUPCKC TERMINATION'
+         CALL GUPCKD(CNAME)
+      ENDIF
+      RETURN
+!
+! ERROR RETURNS
+1310  PRINT *,' ** NOT ENOUGH VALUE SPACE. 2'
+      GOTO 1399
+1320  PRINT *,' ** ROW ',RNAME(I)(:NAMELN),' NOT FOUND'
+      GOTO 1399
+1330  PRINT *,' ** COL ',CNAME(:NAMELN),' NONZEROES =',NZ
+      PRINT *,' ...MUST BE POSITIVE'
+      GOTO 1399
+1331  PRINT *,' ** COL ',CNAME(:NAMELN),' NONZEROES =',NZ
+      PRINT *,' THIS MAKES TOTAL NONZEROES > ',NONZER, &
+            ' (DECLARED IN GUPCK0)'
+      GOTO 1399
+1335  PRINT *,' ** NONZERO COUNT DISCREPENCY...REMAIN =',NZREMN
+      PRINT *,NONZER,' DECLARED IN GUPCK0'
+      GOTO 1399
+1350  PRINT *,' ** ERROR OPENING UNIT',PCKFIL,' AS SCRATCH FILE'
+      GOTO 1399
+1355  PRINT *,' ** ERROR READING SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1356  PRINT *,' ** ERROR WRITING SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1357  PRINT *,' ** ERROR REWINDING SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1359  PRINT *,' ** PREMATURE END OF SCRATCH FILE...UNIT',PCKFIL
+      GOTO 1390
+1390  CLOSE( PCKFIL )
+1399  CONTINUE
+      IF( RCODE.LE.0 )RCODE = 12
+      PRINT *,' ...ABORTING GUPCKC.  ENTERING VALUES:'
+      PRINT *,' CNAME=',CNAME,' NC,NZ =',NC,NZ,SV_NZ
+      PRINT *,'   VLO,VUP =',VLO,VUP
+      PRINT *,'   STAT=',STAT,' VX,VP =',VX,VP
+      IF( NZ.GT.0 .AND. NZ .LE. SV_NZ)THEN
+         PRINT *,'   RNAME               VCOEF'
+         DO 13991 I=1,NZ
+13991    PRINT *,'   ',RNAME(I),VCOEF(I)
+      ELSE
+         PRINT *,' NZ',NZ,SV_NZ
+      ENDIF
+      RETURN
+!
+! ** GUPCKC ENDS HERE
+      END
+      SUBROUTINE GUPCKV(ID,V,*)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS GETS VALUE POOL ID FOR V.
+! ...ALTERNATE RETURN MEANS OUT OF SPACE TO ADD V TO POOL (FATAL).
+!
+      REAL     V
+      INTEGER  ID
+!
+! CALLS GETVID
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      IF( V.GT.VTOLAB )THEN
+         VABS = V
+         SIGN = 1
+      ELSE IF( V.LT.-VTOLAB )THEN
+         VABS = -V
+         SIGN = -1
+      ELSE
+         ID = 0
+         RETURN
+      ENDIF
+      IF( VABS.GE.VINF )THEN
+         ID = SIGN*INF
+         RETURN
+      ENDIF
+      IF( ABS(VABS-1.).LE.VTOLAB )THEN
+         ID = SIGN
+         RETURN
+      ENDIF
+      CALL GETVID(VABS,ID)
+      IF( ID.EQ.0 )RETURN 1
+      ID = SIGN*ID
+      RETURN
+!
+! ** GUPCKV ENDS HERE
+      END
+      SUBROUTINE GUPCKW(SWMSG,SWPCK,RCODE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS ENDS PACKED FILE SETUP AND WRITES TO FILOUT, PRESUMED OPEN.
+!
+      LOGICAL*1     SWMSG,SWPCK
+!                       :     :...TRUE IFF PACKED (UNFORMATTED)
+!                       :         FALSE IF FORMATTED
+!                       :...MESSAGE SWITCH
+      COMMON/GUNUM/LLINK,RLINK,TOP,BOTTOM,FILOUT,NZREMN
+! LOCAL
+!LAHEY       PARAMETER  (PMXROW=500)
+      PARAMETER  (PMXROW=9000)
+!                        :... MAX # ROWS (SHOULD BE >= DCANAL)
+      PARAMETER (FREQMS=500)
+!                :...FOR BAGNDA (FREQUENCY MESSAGES)
+      DOUBLE PRECISION ZALPHA(PMXROW)
+      REAL             VALLST(PMXROW)
+      INTEGER          ROWLST(PMXROW)
+      CHARACTER*16     NEWST
+      CHARACTER*16     ARG1,ARG2  ! EIA/DS  PROTECT CONSTANTS
+      INTEGER          ARG3       ! EIA/DS  PROTECT CONSTANTS
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+! MOVE UP SOLUTION VALUES
+      DO 100 I=1,NROWS+NCOLS
+100   VALUE(NVALS+I) = VALUE(IRSOLV+I)
+      IRSOLV = NVALS
+      ICSOLV = IRSOLV + NROWS
+      IVFREE = ICSOLV + NCOLS + 1
+      MAXVAL = PMXVAL
+      ENDNAM = (ICNAME + NCOLS)*NAMELN
+! GET ROW INFO
+      RMAXLN = 0
+      MAX = 0
+      DO 200 I=1,NROWS
+         IF(   (INDEX(IRLBND+I).NE.-INF .OR. INDEX(IRUBND+I).NE.INF) &
+          .AND. MAX.LT.INDEX(IRINFO+I) )THEN
+! NOT A FREE ROW...UPDATE MAX LENGTH
+            MAX = INDEX(IRINFO+I)
+            RMAXLN = I
+         ENDIF
+200   CONTINUE
+      IF( RMAXLN.EQ.0 )THEN
+         PRINT *,' ** SYSERR...RMAXLN = 0'
+         GOTO 1390
+      ENDIF
+! GET COL INFO
+      CMAXLN = 0
+      MAX = 0
+      DO 300 I=1,NCOLS
+         NZ = INDEX(ICINFO+I) - INDEX(ICINFO+I-1)
+         IF( MAX.LT.NZ )THEN
+! UPDATE MAX LENGTH
+            MAX = NZ
+            CMAXLN = I
+         ENDIF
+300   CONTINUE
+      IF( CMAXLN.EQ.0 )THEN
+         PRINT *,' ** SYSERR...CMAXLN = 0'
+         GOTO 1390
+      ENDIF
+! ============= END PACKED FILE SETUP IN CORE ==============
+      CLOSE( PCKFIL )
+! ================= NOW TRY TO SETUP BASIS =====================
+      NZ = NROWS
+! try omitting this step from NEMS to save run time.  We hope it can
+! be done in analyze itself instead
+!
+      
+      rcode=1
+!!!!      CALL BAGNDA(ZALPHA,NZ,SWMSG,FREQMS,RCODE)
+      IF( RCODE.EQ.0 )THEN
+         IF( SWMSG )PRINT *,' BASIS IS SETUP'
+! REFRESH BASIS (OSL NEEDS THIS FOR INFEASIBLE LP)
+         VAXDIF = VTOLAB
+         VRXDIF = VTOLRE
+         VAPDIF = VTOLAB
+         VRPDIF = VTOLRE
+         VAXINF = VTOLAB
+         VRXINF = VTOLRE
+         VAPINF = VTOLAB
+         VRPINF = VTOLRE
+         ARG1='*                '                !EIA
+         ARG2='*                '                !EIA
+         ARG3=PMXROW                             !EIA
+!         CALL GBREFR(ARG1,ARG2,NPRIML,NDUAL,VPRIML,VDUAL,    !EIA
+!     1            VAXDIF,VRXDIF,VAPDIF,VRPDIF,               !EIA
+!     2            VAXINF,VRXINF,VAPINF,VRPINF,               !EIA
+!     3            NEWST,ZALPHA,ROWLST,VALLST,ARG3  ,*1390)   !EIA
+!         SOLST = NEWST
+      ELSE
+! BASIS NOT SETUP, BUT WRITE PACKED FILE ANYWAY
+         IF( SWMSG )PRINT *,' WARNING: BASIS WAS NOT SETUP FOR PACK FILE'
+         RCODE = 0
+      ENDIF
+      IF( SWPCK )THEN
+! SAVE ORIGINAL PACKED FILE UNIT (PCKFIL)
+         PCKSAV = PCKFIL
+! SET PCKFIL TO USER'S FILE (OPENED BY CALLER)
+         PCKFIL = FILOUT
+! WRITE PACKED FILE
+         CALL GWRPCK(RCODE)
+! RESTORE ORIGINAL PACKED FILE UNIT
+         PCKFIL = PCKSAV
+         IF( RCODE.EQ.0 .AND. SWMSG )PRINT *,' PACKED FILE WRITTEN'
+      ELSE
+! SAVE ORIGINAL DATA FILE UNIT (DATFIL)
+         DATSAV = DATFIL
+! SET DATFIL TO USER'S FILE (OPENED BY CALLER)
+         DATFIL = FILOUT
+! WRITE FORMATTED PACKED FILE
+         CALL GWRFPK(RCODE)
+         DATFIL = DATSAV
+         IF( RCODE.EQ.0 .AND. SWMSG ) &
+            PRINT *,' FORMATTED PACKED FILE WRITTEN'
+      ENDIF
+!
+      RETURN
+!
+! ERROR RETURN
+1390  CONTINUE
+      IF( RCODE.EQ.0 )RCODE = 13
+      CLOSE( FILOUT )
+      RETURN
+!
+! ** GUPCKW ENDS HERE
+      END
+      SUBROUTINE GUPCKD(WHAT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+      include 'dcgetmat'
+!
+! THIS PRINTS BASE AND/OR MEMORY VALUES ACCORDING TO:
+!       WHAT := B º B º M º M º *
+! (SEE GUPCK.DOC)
+!
+      CHARACTER*(*) WHAT
+!
+      COMMON/GUNUM/LLINK,RLINK,TOP,BOTTOM,FILOUT,NZREMN
+      CHARACTER*16 FNAME,LNAME,RCNAME
+      COMMON/GUCHR/FNAME,LNAME,RCNAME
+      CHARACTER*1 CHAR
+! :::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      CHAR = WHAT
+      IF( CHAR.EQ.'B' .OR. CHAR.EQ.'B' .OR. CHAR.EQ.'*' )THEN
+! PRINT BASE VALUES
+         PRINT *,' PRBNAM=',PRBNAM,' OBJNAM=',OBJNAM,' NAMELN=',NAMELN
+         PRINT *,' RHSNAM=',RHSNAM,' RNGNAM=',RNGNAM,' BNDNAM=',BNDNAM
+         PRINT *,' SOLNAM=',SOLNAM,' SOLST =',SOLST ,' OPT   =',OPT
+         PRINT *,' NROWS =',NROWS ,' NCOLS =',NCOLS ,' NONZER=',NONZER
+         PRINT *,' NVALS =',NVALS ,' NONES =',NONES ,' MAXVAL=',MAXVAL
+         PRINT *,' VINF  =',VINF  ,' VTOLAB=',VTOLAB,' VTOLRE=',VTOLRE
+      ENDIF
+!
+      IF( CHAR.EQ.'M' .OR. CHAR.EQ.'M' .OR. CHAR.EQ.'*' )THEN
+! PRINT MEMORY VALUES
+         IF( CHAR.EQ.'*' )PRINT *
+         PRINT *,' IRNAME=',IRNAME,' IRINFO=',IRINFO,' IRSTAT=',IRSTAT
+         PRINT *,' IRLBND=',IRLBND,' IRUBND=',IRUBND,' IRSOLV=',IRSOLV
+         PRINT *,' ICNAME=',ICNAME,' ICINFO=',ICINFO,' ICSTAT=',ICSTAT
+         PRINT *,' ICLBND=',ICLBND,' ICUBND=',ICUBND,' ICSOLV=',ICSOLV
+         PRINT *,' INONZ =',INONZ ,' IFREE =',IFREE ,' IVFREE=',IVFREE
+         PRINT *,' MAXVAL=',MAXVAL,' LLINK =',LLINK ,' RLINK =',RLINK
+      ENDIF
+900   CONTINUE
+      PRINT *,' ENTER NOTHING TO CONTINUE (ANY NON-BLANK TO STOP) '
+      READ( *,'(A1)' )CHAR
+      IF( CHAR.EQ.' ' )RETURN
+      IF( CHAR.EQ.'D'.OR.CHAR.EQ.'D'.OR.CHAR.EQ.',' )THEN
+         CALL GDEBUG
+         GOTO 900
+      ENDIF
+      STOP
+!
+! ** GUPCKD ENDS HERE
+      END
+! THE FOLLOWING ARE COPIES FROM THE FLIP LIBRARY TO BE LINKED WITH
+! GUPCKGEN.FOR.
+!
+      SUBROUTINE FTOKEN(CLIST,FIRST,LAST,TOKEN,TLENTH,DELMTR)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! GET TOKEN FROM CLIST(FIRST:LAST)
+! ...FIRST IS ADVANCED 1 PAST DELIMETER
+! ...DLMTR = DELIMETER (FOR CALLING PROGRAM'S USE)
+! TOKEN = NULL IF NO TOKEN IS FOUND (EG, FIRST > LAST)
+! TLENTH = MAX LENGTH OF TOKEN
+!
+       PARAMETER (NDLMTR=6)
+!                        :...NUMBER OF DELIMETERS (BESIDES SPACE)
+       CHARACTER*(*) CLIST
+       CHARACTER*(*) TOKEN
+       INTEGER       TLENTH
+       CHARACTER*1   DELMTR,DELTBL(NDLMTR)
+!
+       DATA DELTBL / '=', ',', '(', ')','{','}'  /
+!                     1    2    3    4   5   6
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+      TOKEN=' '
+      IF(FIRST.GT.LAST)RETURN
+! SKIP LEADING BLANKS
+      DO 10 I=FIRST,LAST
+         IF(CLIST(I:I).NE.' ')GOTO 100
+10    CONTINUE
+! ...BLANK LINE
+      FIRST=LAST+1
+      RETURN
+!
+100   CONTINUE
+! BEGIN AT FIRST NONBLANK
+      FIRST=I
+      I2=FIRST+TLENTH-1
+      IF(I2.GT.LAST)I2=LAST
+! ...GET TOKEN
+110   CONTINUE
+!
+      DO 200 I=FIRST,I2
+          DELMTR=CLIST(I:I)
+          IF(DELMTR.EQ.' ')GOTO 290
+          DO 210 D=1,NDLMTR
+210       IF(DELMTR.EQ.DELTBL(D))GOTO 290
+200   CONTINUE
+      I=I2+1
+      DELMTR=CLIST(I:I)
+!
+290   CONTINUE
+      IF(FIRST.LT.I)TOKEN=CLIST(FIRST:I-1)
+      FIRST=I+1
+      IF(DELMTR.NE.' '.OR.FIRST.GT.LAST)RETURN
+! SKIP BLANKS TO GET CORRECT DELIMETER (MAY NOT BE BLANK)
+      DO 300 I=FIRST,LAST
+         IF(CLIST(I:I).NE.' ')GOTO 310
+300   CONTINUE
+      FIRST=LAST+1
+      RETURN
+!
+310   CONTINUE
+! FIRST NONBLANK AFTER TOKEN...SEE IF DELIMETER
+      DO 350 D=1,NDLMTR
+         IF(CLIST(I:I).EQ.DELTBL(D))THEN
+            FIRST=I+1
+            DELMTR=CLIST(I:I)
+            RETURN
+         ENDIF
+350   CONTINUE
+      FIRST=I
+      RETURN
+!
+! *** FTOKEN ENDS HERE
+      END
+      SUBROUTINE FLOOK(CLIST,FIRST,LAST,STRING,IAMIT)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS LOOKS AT CLIST(FIRST:LAST) TO SEE IF IT CONTAINS STRING.
+! IF NOT, IAMIT=0;  ELSE, CLIST(IAMIT:IAMIT+L-1)=STRING, WHERE L
+! IS THE LENGTH OF STRING (L <= 32).
+!
+! ...SEARCH IS BACKWARD DIRECTION (SEE FLOOKF FOR FORWARD DIRECTION).
+!
+! NOTE:  FIRST AND LAST ARE UNCHANGED.
+      CHARACTER*(*) CLIST,STRING
+      CHARACTER*32  STR32
+! :::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+      STR32=STRING
+      CALL FSLEN(STR32,32,L)
+      IF(L.EQ.0 .OR. FIRST+L-1.GT.LAST)THEN
+         IAMIT=0
+         RETURN
+      ENDIF
+! SEARCH CLIST(FIRST:LAST) BACKWARDS (RIGHT TO LEFT)
+      DO 100 IAMIT=LAST-L+1,FIRST,-1
+         IF(CLIST(IAMIT:IAMIT+L-1).EQ.STR32(1:L))RETURN
+100   CONTINUE
+      IAMIT=0
+      RETURN
+!
+!  ** FLOOK ENDS HERE
+      END
+      SUBROUTINE FLOOKF(CLIST,FIRST,LAST,STRING,IAMIT)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! THIS LOOKS AT CLIST(FIRST:LAST) TO SEE IF IT CONTAINS STRING.
+! IF NOT, IAMIT=0;  ELSE, CLIST(IAMIT:IAMIT+L-1)=STRING, WHERE L
+! IS THE LENGTH OF STRING (<= 32).
+!
+! IF STRING IS NULL, SEARCH IS FOR FIRST NON-BLANK
+!    (IE, CALLER WANTS TO SKIP BLANKS)
+!
+! ...SEARCH IS FORWARD DIRECTION.
+!
+! NOTE:  FIRST AND LAST ARE UNCHANGED.
+      CHARACTER*(*) CLIST,STRING
+      CHARACTER*32  STR32
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+      STR32=STRING
+      CALL FSLEN(STR32,32,L)
+      IF(L.EQ.0)THEN
+! SEARCH FOR FIRST NON-BLANK
+         DO 10 IAMIT=FIRST,LAST
+10       IF(CLIST(IAMIT:IAMIT).NE.' ')RETURN
+         IAMIT = LAST+1
+         RETURN
+      ENDIF
+! SEE IF STRING FITS WITHIN FIRST:LAST
+      IF(FIRST+L-1.GT.LAST)THEN
+         IAMIT=0
+         RETURN
+      ENDIF
+! OK, SEARCH CLIST(FIRST:LAST) FORWARDS (LEFT TO RIGHT)
+      DO 100 IAMIT=FIRST,LAST-L+1
+         IF(CLIST(IAMIT:IAMIT+L-1).EQ.STR32(1:L))RETURN
+100   CONTINUE
+      IAMIT=0
+      RETURN
+!
+!  ** FLOOKF ENDS HERE
+      END
+      SUBROUTINE FVRNG(CLIST,FIRST,LAST,VL,VU,VINF,CHAR,RCODE)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! PARSE FOR VALUE RANGE
+!   V  OR  VL/VU  OR  -*/VU   OR   VL/*   OR   *  OR  -*/*
+! (* MEANS INFINITY)
+! ...CHAR=LAST DELIMETER (RETURNED TO CALLER)
+!
+       CHARACTER*(*) CLIST
+       REAL          VL,VU,VINF
+       CHARACTER*1   CHAR
+! LOCAL
+       CHARACTER*64  STR64
+       CHARACTER*32  STRVAL
+       CHARACTER*1   RNGDLM
+! SET RANGE DELIMITER
+       DATA RNGDLM/'/'/
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+! GET RANGE (TOKEN OF 64 CHARS)
+      CALL FTOKEN(CLIST,FIRST,LAST,STR64,64,CHAR)
+      IF(STR64.EQ.' ')THEN
+         PRINT *,' ** VALUE EXPECTED'
+         RCODE = -1
+         RETURN
+      ENDIF
+! SEE IF RANGE IS PRESENT
+      CALL FLOOK(STR64,1,64,RNGDLM,IRANGE)
+      IF(IRANGE.EQ.0)THEN
+         STRVAL = STR64
+      ELSE
+         STRVAL = STR64(1:IRANGE-1)
+      ENDIF
+! SET VL
+      IF(STRVAL.EQ.'*')THEN
+         VL = VINF
+      ELSE IF(STRVAL.EQ.'-*')THEN
+         VL = -VINF
+      ELSE
+         CALL FC2R(STRVAL,VL,RCODE)
+         IF(RCODE.NE.0)RETURN
+      ENDIF
+! SET VU
+      IF(IRANGE.EQ.0)THEN
+! SPECIFIC VALUE (EQUALITY)
+         VU = VL
+!          NOTE:  INFINITY IS A TRUE VALUE WITH SAME SYNTAX
+!                 AS FINITE VALUES--IE, V=* WILL RETURN VL=VU=VINF,
+!                 V=-* WILL RETURN VL=VU=-VINF, AND V=-*/* (OR */*)
+!                 WILL RETURN VL=-VINF, VU=VINF.
+      ELSE
+! RANGE
+         STRVAL = STR64(IRANGE+1:)
+         IF(STRVAL.EQ.' ')THEN
+            PRINT *,' ** UPPER VALUE OF RANGE EXPECTED AFTER ',RNGDLM
+            RCODE = -1
+         ELSE IF(STRVAL.EQ.'*')THEN
+            VU = VINF
+         ELSE
+! CONVERT STRING TO SET UPPER BOUND OF RANGE
+            CALL FC2R(STRVAL,VU,RCODE)
+         ENDIF
+! ADJUST VL=-VINF IF CALLER HAD */V (SEE ABOVE NOTE)
+         IF(VL.GE.VINF)VL = -VINF
+      ENDIF
+!
+      IF(VL.GT.VU)THEN
+!   HERE IS WHERE BOUNDS OUT OF ORDER ARE ADJUSTED
+!   ...SECOND VALUE WILL BE TREATED AS INCREMENT TO FIRST.
+!      FOR EXAMPLE, 1000/5 RETURNS VL=1000 AND VU=1005;
+!                  1000/-5 RETURNS VL= 995 AND VU=1000.
+         IF(VU.GE.0)THEN
+            VU = VL + VU
+         ELSE
+            V  = VL + VU
+            VU = VL
+            VL = V
+         ENDIF
+      ENDIF
+      RETURN
+!
+!  ** FVRNG ENDS HERE
+      END
+      SUBROUTINE FMATCH(NAME1,NAME2,MASKIN,ANSWER)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! TEST IF NAME1 MATCHES NAME2
+! ...ANSWER = TRUE IFF EACH NON-MASK CHARACTER OF NAME1 EQUALS THE
+!      CORRESPONDING CHARACTER OF NAME2
+! NOTE: MASKIN=' ' ASKS IF NAME1 IS A TELESCOPIC ABBREVIATION OF NAME2
+!       TRAILING BLANKS IN NAME1 ARE SAME AS MASK CHARS.
+!
+!  EXAMPLES:  'ABC*D','ABCXD','*' ===> ANSWER=TRUE
+!             'ABC'  ,'ABCD', ANY ===> ANSWER=TRUE
+!             'A'    ,'ABCD', ANY ===> ANSWER=TRUE
+!             'A'    ,'A',    ANY ===> ANSWER=FALSE
+!
+       CHARACTER*(*) NAME1,NAME2
+       CHARACTER*32  A,B
+!                :......MAX LENGTH OF NAME1 & NAME2
+       CHARACTER*1   MASKIN
+       LOGICAL*1     ANSWER
+! LOCAL
+       CHARACTER*1   SMCHAR
+       DATA          SMCHAR /'"'/
+!
+! SMCHAR IS A SLIDING MASK CHAR, ADDED 3-24-92, TO ALLOW A NAME
+! MATCH THAT IS POSITION INDEPENDENT.  IF SMCHAR IS THE FIRST CHAR
+! OF NAME1, THE TEST LOOKS FOR THE REMAINING STRING IN NAME2.
+! EXAMPLES:
+!      NAME1  NAME2       MASKIN   ANSWER
+!      "ABC   XXXABCYYY   ANY      TRUE
+!      "ABC   XAXBC       ANY      FALSE
+!      "      ANY         ANY      TRUE
+!      "A*B   XAYB        *        TRUE
+!      "A*B   XAB         ANY      FALSE
+!
+! GENERAL MASK HAS FORM:   [FIXED]["SLIDING]
+! OLD MASK IS FIXED (NO " PRESENT).  ABOVE EXAMPLES HAVE FIXED NULL,
+! SO THE SLIDING MASK CAN MATCH ANYWHERE.  HERE ARE EXAMPLES OF THE
+! GENERAL FORM:
+!      NAME1  NAME2       MASKIN   ANSWER
+!      A"BC   XXXABCYYY   ANY      FALSE
+!      A"BC   AXBC        ANY      TRUE
+!      C"A*B  CXXAYB      *        TRUE
+!      C"A*B  CAB         ANY      FALSE
+!      *"A    AX          ANY      FALSE
+!      *"A    XA          *        TRUE
+!
+! NOTE FROM LAST 2 CASES THAT THE SLIDING MASK MUST MATCH THE
+! SUBSTRING THAT REMAINS AFTER THE FIXED MASK IS MATCHED -- EG,
+! AX FAILS TO MATCH *"A BECAUSE THE A IS NOT AFTER POSITION 1
+! :::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::::
+      A = NAME1
+      B = NAME2
+      ANSWER = A.EQ.B
+      IF(ANSWER)RETURN
+      CALL FLOOKF(A,1,32,SMCHAR,ISLIDE)
+      IF(ISLIDE.GT.0)GOTO 500
+! WE HAVE FIXED MASK (NO SLIDING MASK)
+      DO 100 I=1,32
+       IF(A(I:I).EQ.' ')GOTO 200
+       IF(A(I:I).NE.B(I:I).AND.A(I:I).NE.MASKIN)RETURN
+100   CONTINUE
+200   CONTINUE
+      ANSWER=.TRUE.
+      RETURN
+!
+500   CONTINUE
+! NAME1 HAS SLIDING MASK CHAR AT ISLIDE
+      IF(ISLIDE.GT.1)THEN
+! FIRST MATCH FIXED MASK
+         DO 550 I=1,ISLIDE-1
+            IF(A(I:I).NE.B(I:I).AND.A(I:I).NE.MASKIN)RETURN
+550      CONTINUE
+      ENDIF
+! FIXED MASK MATCHES...NOW MATCH SLIDING MASK
+      A = NAME1(ISLIDE+1:)
+      B = NAME2(ISLIDE:)
+      IF(A.EQ.B.OR.A.EQ.MASKIN)GOTO 200
+!               ~~~~~~~~~~~~~~ADDED 4-28-93
+      IF(A.EQ.' '.OR.B.EQ.' ')RETURN
+      CALL FSLEN(B,32,LB)
+      CALL FSLEN(A,32,LA)
+! REMOVE TRAILING MASK CHARS FROM A
+650   CONTINUE
+      IF(A(LA:LA).EQ.MASKIN)THEN
+         IF(LA.EQ.0)GOTO 200
+!                  (IF A IS ALL MASK CHARS, ANSWER=TRUE)
+         A(LA:LA) = ' '
+         LA = LA-1
+         IF(LA.GT.0)GOTO 650
+         GOTO 200
+      ENDIF
+      IF(LA.GT.LB)RETURN
+! WE NOW KNOW THAT THE LENGTH OF A (LA) IS <= LENGTH OF B (LB), SO
+! A MATCH IS POSSIBLE.
+      DO 800 K=0,LB-LA
+! START COMPARING A AT B(K+1:)
+         DO 750 I=1,LA
+750      IF(A(I:I).NE.MASKIN .AND. A(I:I).NE.B(K+I:K+I))GOTO 800
+! WE HAVE A MATCH...A MATCHES B(K+1:K+LA)
+         GOTO 200
+800   CONTINUE
+!
+! NO MATCH
+      RETURN
+!
+! ** FMATCH ENDS HERE
+      END
+      SUBROUTINE FI2C(STRING,INT,FIRST)
+!     ===============
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! CONVERT POSITIVE INTEGER (INT) TO STRING
+! ...RIGHT JUSTIFIED WITH FIRST DIGIT (IE, NONBLANK) RETURNED
+!
+      include 'dcflip'
+!
+      CHARACTER*(*) STRING
+! ::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+      NUMBER=INT
+!
+! USE HORNER'S RULE
+!
+      DO 100 FIRST=8,1,-1
+         DIGIT = NUMBER - 10*(NUMBER/10)
+         STRING(FIRST:FIRST) = CHRNUM(DIGIT)
+         NUMBER = NUMBER/10
+         IF(NUMBER.EQ.0)RETURN
+100   CONTINUE
+!
+      FIRST = 1
+      RETURN
+!
+! **  FI2C ENDS HERE
+      END
+      SUBROUTINE FPAUSE(PAUSE)
+!     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! PROMPT FOR PAUSE VALUE
+!
+      CHARACTER*12 STRVAL
+      LOGICAL*1    SW
+! ::::::::::::::::::::::::::: BEGIN ::::::::::::::::::::::::::::::
+!     =================
+1     PRINT *,' ENTER PAUSE VALUE (',PAUSE,') '
+      READ(*,51)STRVAL
+51    FORMAT(A12)
+      IF(STRVAL.EQ.' ')RETURN
+      IF(STRVAL.EQ.'*')THEN
+         PAUSE = 32000
+         RETURN
+      ENDIF
+! PARSE VALUE
+      RCODE = 0
+      SW = STRVAL(1:1).EQ.'-'
+      IF(SW)STRVAL(1:1) = ' '
+      CALL FC2I(STRVAL,12,INT,RCODE)
+      IF(RCODE.EQ.0)THEN
+         IF(SW)THEN
+            PAUSE = -INT
+         ELSE
+            PAUSE = INT
+         ENDIF
+         RETURN
+      ENDIF
+      PRINT *,' ?',STRVAL
+      GOTO 1
+!
+! ** FPAUSE ENDS HERE
+      END
+      SUBROUTINE FSLEN(STRING,MAX,LENGTH)
+!     ================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! RETURNS TRUE LENGTH OF STRING (EXCLUDING TRAILING BLANKS)
+!
+       CHARACTER*(*) STRING
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+      DO 10 LENGTH=MAX,1,-1
+10    IF(STRING(LENGTH:LENGTH).NE.' ')RETURN
+      LENGTH = 0
+      RETURN
+!
+! ** FSLEN ENDS HERE
+      END
+      SUBROUTINE FC2R(STRING,VALUE,RCODE)
+!     ===============
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! CONVERT STRING TO VALUE
+! WARNING: THIS IS FOR PARSING LINE, NOT EFFICIENT FOR DATA...
+!
+      include 'dcflip'
+!
+       CHARACTER*(*) STRING
+! LOCAL
+       CHARACTER*32  SLOCAL
+       CHARACTER*1   CHAR
+       REAL          VALUE
+       PARAMETER     (VINF = 1.0E+20)
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+! INITIALIZE
+      VALUE = 0.0
+! COPY TO SLOCAL (NOTE: MAX LENGTH OF STRING = 32)
+      SLOCAL = STRING
+      CALL FSLEN(SLOCAL,32,LENGTH)
+      IF(LENGTH.EQ.0)RETURN
+!
+! LOOK FOR SIGN
+!
+      SIGN = 1
+      DO 10 K=1,LENGTH
+         CHAR = SLOCAL(K:K)
+         IF(CHAR.EQ.' ')GOTO 10
+         IF(CHAR.EQ.'-')THEN
+             SIGN = -1
+             GOTO 20
+         ELSE IF(CHAR.EQ.'+')THEN
+             GOTO 20
+         ELSE
+             GOTO 30
+         ENDIF
+10    CONTINUE
+! STRING = '-' OR '+' (NO NUMBERS TAKEN AS 0)
+      RETURN
+!
+20    L = K + 1
+! SKIP BLANKS
+      DO 25 K=L,LENGTH
+         CHAR = SLOCAL(K:K)
+         IF(CHAR.NE.' ')GOTO 30
+25    CONTINUE
+      RETURN
+!
+30    CONTINUE
+! NOW SIGN IS SET AND SLOCAL(K:12) CONTAINS REAL VALUE
+      IF(SLOCAL(K:K).EQ.'*')THEN
+         VALUE = SIGN*VINF
+         RETURN
+      ENDIF
+!
+40    CONTINUE
+! BEGIN NUMERIC PARSE...INITIALIZE EXPONENT (EXPNT)
+      EXPNT = 0
+!
+! USING HORNER'S RULE TO PARSE STRING(K:)
+!
+      DO 100  L=K,LENGTH
+         CHAR = SLOCAL(L:L)
+         DO 50 DIGIT=0,9
+            IF(CHAR.EQ.CHRNUM(DIGIT))THEN
+                VALUE = 10.*VALUE + FLOAT(DIGIT)
+                GOTO 100
+            ENDIF
+50       CONTINUE
+!
+!     SEE IF DECIMAL POINT
+         IF(CHAR.EQ.'.')THEN
+            IF(EXPNT.NE.0)GOTO 13
+            EXPNT = L - LENGTH
+         ELSE IF(CHAR.EQ.'E'.OR.CHAR.EQ.'D')THEN
+            GOTO 200
+         ELSE
+            GOTO 13
+         ENDIF
+100   CONTINUE
+!
+! INTEGER OR F-FORMAT...ADJUST FOR EXPONENT AND SIGN
+!
+      GOTO 900
+!
+200   CONTINUE
+!
+! E-FORMAT (OR D-)
+!  ...ADJUST EXPONENT, WHICH WAS SET BY LENGTH
+      IF(EXPNT.NE.0)EXPNT = EXPNT + LENGTH - L + 1
+      L = L + 1
+! SEE IF EXPONENT HAS SIGN
+      CHAR = SLOCAL(L:L)
+      ESIGN = 1
+      IF(CHAR.EQ.'-')THEN
+         ESIGN = -1
+         L = L + 1
+      ELSE IF(CHAR.EQ.'+')THEN
+         L = L + 1
+      ENDIF
+!
+      CHAR = SLOCAL(L:L)
+! PARSE EXPONENT (1 OR 2 DIGITS)
+      DO 210 E=0,9
+         IF(CHAR.EQ.CHRNUM(E))GOTO 220
+210   CONTINUE
+      GOTO 13
+220   CONTINUE
+!
+      IF(L.LT.LENGTH)THEN
+          IF(L+1.LT.LENGTH)GOTO 13
+          CHAR = SLOCAL(LENGTH:)
+!     ...2ND DIGIT OF EXPONENT
+          DO 230 DIGIT=0,9
+             IF(CHAR.EQ.CHRNUM(DIGIT))THEN
+                E = 10*E + DIGIT
+                GOTO 250
+             ENDIF
+230       CONTINUE
+          GOTO 13
+      ENDIF
+!
+! COMBINE EXPONENTS (EXPNT FROM DECIMAL POINT AND E FROM E-FORMAT)
+250   CONTINUE
+      EXPNT = EXPNT + E*ESIGN
+!
+900   CONTINUE
+      VALUE = SIGN*VALUE*(10.**EXPNT)
+      RETURN
+!
+! ** ERROR RETURN
+13    PRINT *,' ** NUMERIC FORMAT ERROR...',STRING
+      SLOCAL = ' '
+      SLOCAL(L:) = '?'
+      PRINT *,'                          ',SLOCAL(:L)
+      RCODE = 1
+      RETURN
+!
+! ** FC2R ENDS HERE
+      END
+      SUBROUTINE FR2C(STRING,VALUE)
+!     ===============
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! CONVERT REAL VALUE TO STRING (MAX LENGTH = 8 CHARS)
+!
+      CHARACTER*(*) STRING
+! LOCAL
+      CHARACTER*8   DUMMY,STRLCL
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+      IF(VALUE.LT.0)THEN
+         STRLCL = '-'
+         V = -VALUE
+      ELSE IF(VALUE.GT.0)THEN
+         STRLCL = ' '
+         V = VALUE
+      ELSE
+         STRING = '    0'
+         RETURN
+      ENDIF
+      IF(V.GT.1.0E+15)THEN
+         STRLCL(5:) = '*'
+         GOTO 999
+      ENDIF
+      IF(V.GE.1.0E+06)THEN
+         STRLCL(2:) = '(> E+6)'
+         GOTO 999
+      ENDIF
+      IF(V.LE.1.0E-06)THEN
+         STRLCL(2:) = '(< E-6)'
+         GOTO 999
+      ENDIF
+      IF(V.EQ.1.)THEN
+         STRLCL(2:) = '1.'
+         GOTO 999
+      ENDIF
+!
+! GET INTEGER PART
+      INTVAL = V + 1.0E-07
+      DUMMY = ' '
+      CALL FI2C(DUMMY,INTVAL,FIRST)
+! SET MANTISSA
+      STRLCL(2:) = DUMMY(FIRST:8)//'.'
+! USE REMAINING CHARS FOR FRACTION, IF ROOM
+      CALL FSLEN(STRLCL,8,LAST)
+      IF(LAST.GE.8)GOTO 999
+!
+! GET FRACTIONAL PART
+      FRAC = 8-LAST
+! ...FRAC = # DIGITS IN FRACTIONAL PART
+      VFRAC =  (V-FLOAT(INTVAL) + 1.E-07)*(10.**FRAC)
+!                :                  :         :.....SHIFT
+!                :                  :... BUMP UP
+!                :....... TRUE FRACTIONAL PART
+      INTVAL = .499999 + VFRAC
+!              :... ROUND
+      DUMMY = '00000000'
+      CALL FI2C(DUMMY,INTVAL,FIRST)
+! REMOVE TRAILING 0'S FROM FRACTION
+      L = 8
+50    IF(DUMMY(L:L).EQ.'0')THEN
+         DUMMY(L:) = ' '
+         L = L-1
+         GOTO 50
+      ENDIF
+      STRLCL(LAST+1:) = DUMMY(9-FRAC:)
+!                              :.... SHIFT TO WHERE FRAC BEGINS
+! FINALLY, COPY LOCAL STRING (STRLCL) TO CALLER'S STRING
+999   CONTINUE
+! REMOVE DECIMAL IF FRACTIONAL PART = 0
+      CALL FSLEN(STRLCL,8,L)
+      IF(STRLCL(L:L).EQ.'.') STRLCL(L:) = ' '
+!
+      STRING = STRLCL
+      RETURN
+!
+! *** FR2C ENDS HERE
+      END
+      SUBROUTINE FC2I(STRING,LENGTH,INT,RCODE)
+!     ===============
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+!
+! CONVERT STRING TO INTEGER...NON-DIGIT/NON-BLANK YIELDS RCODE=-1
+!
+      include 'dcflip'
+!
+      CHARACTER*(*) STRING
+      INTEGER       LENGTH
+! ::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::::::
+      IF(STRING.EQ.'*')THEN
+! INFINITY
+         INT = 32000
+         RETURN
+      ENDIF
+      INT = 0
+!
+      DO 100 I=1,LENGTH
+           DO 50 DIGIT=0,9
+             IF(STRING(I:I).EQ.CHRNUM(DIGIT))THEN
+                INT = INT*10 + DIGIT
+                GOTO 100
+             ENDIF
+50         CONTINUE
+!
+           IF(STRING(I:I).NE.' ')RCODE = -1
+           RETURN
+!
+100   CONTINUE
+!
+      RETURN
+!
+!  ** FC2I ENDS HERE
+      END

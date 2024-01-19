@@ -1,0 +1,29 @@
+!  $Header: m:/default/includes/RCS/uettout,v 1.3 2010/08/14 21:14:12 rsc Exp $
+!  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!     INCLUDE(EMM$PARM)
+!
+!  UETT  OUTPUT VARIABLES
+!
+      REAL UTDMMF(MNUMNR,MNUMYR)  !  1 Net Domestic Firm Power  --Nerc (Mkwh)
+      REAL UTDMME(MNUMNR,MNUMYR)  !  2 Net Domestic Economy Sales-Nerc (Mkwh)
+      REAL UTDMDF(MNUMNR,MNUMYR)  !  3 Net Domestic Firm Power   -Nerc (MM$)
+      REAL UTDMDE(MNUMNR,MNUMYR)  !  4 Net Domestic Economy Sales--Nerc (MM$)
+      REAL UTIMPF(MNUMNR,MNUMYR)  !  5 Firm Power Imports--Nerc (Mkwh)
+      REAL UTIMPE(MNUMNR,MNUMYR)  !  6 Economy Power Imports--Nerc (Mkwh)
+      REAL UTEXPF(MNUMNR,MNUMYR)  !  7 Firm Power Exports--Nerc (Mwh)
+      REAL UTEXPE(MNUMNR,MNUMYR)  !  8 Economy Power Exports--Nerc (Mwh)
+      REAL UTEXMF(MNUMNR,MNUMYR)  !  9 Gross Dom. Firm Power  --Nerc (Mkwh)
+      REAL UTEXME(MNUMNR,MNUMYR)  !  10 Gross Dom. Economy Sales-Nerc (Mkwh)
+      REAL UTEXDF(MNUMNR,MNUMYR)  !  11 Gross Dom. Firm Power   -Nerc (MM$)
+      REAL UTEXDE(MNUMNR,MNUMYR)  !  12 Gross Dom. Economy Sales--Nerc (MM$)
+      REAL UTRELADJ(MNUMNR,MNUMYR+ECP_D_XPH)  !  13 Adjustment to Reliabilty due to Firm New Transmission
+      REAL UTNEWTRN(MNUMNR,MNUMNR,MNUMYR+ECP_D_XPH)  !  14 New Transmission (X,M,Y)
+!  UETT OUTPUT COMMON BLOCK
+      COMMON/UETTOUT/UTDMMF,UTDMME,UTDMDF,UTDMDE,UTIMPF, &
+              UTIMPE,UTEXPF,UTEXPE,UTEXMF,UTEXME,UTEXDF,UTEXDE,UTRELADJ,UTNEWTRN
+!   Equivalence for FILER used for data storage
+      REAL UETTDAT(MNUMYR*(12*MNUMNR)+(MNUMYR+ECP_D_XPH)*MNUMNR+(MNUMYR+ECP_D_XPH)*MNUMNR*MNUMNR)
+      EQUIVALENCE (UETTDAT,UTDMMF)

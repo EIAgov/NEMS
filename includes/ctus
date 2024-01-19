@@ -1,0 +1,7 @@
+!  CTUS shared data
+
+! Need to include 'ogsmparm' for: max_reg,max_src,max_yr
+
+real nat_availco2(max_reg,max_src,max_yr)  ! Annual CO2 availibilty by Region (BCF) - includes industrial and natural
+
+common /ctus_ogsm/ nat_availco2

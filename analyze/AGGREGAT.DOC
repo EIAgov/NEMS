@@ -1,0 +1,184 @@
+
+                              AGGREGAT Command
+
+    The AGGREGAT command computes a price-weighted sum of the rows in the
+    submatrix to produce the following single constraint (implied by
+    those in the submatrix).
+
+                        a <= Sum[j | p(j)X(j)] <= b,
+
+    where p(j) = Sum[i in submatrix | P(i)A(i,j)], and
+
+                      P(i)   = price of i-th row
+                      A(i,j) = matrix coefficient
+                      X(j)   = level of j-th activity
+
+    The aggregate coefficient, p(j), shown with the output, is formed by
+    a P-weighted sum of matrix coefficients, where P is is the dual price
+    vector.  Only the rows in the submatrix are used in forming p(j), but
+    the aggregate constraint pertains to all columns.
+
+    The aggregate limits, a and b, are:
+
+         a = Sum[i IN I+ | P(i)L(i)] + Sum[i IN I- | P(i)U(i)]
+         b = Sum[i IN I+ | P(i)U(i)] + Sum[i IN I- | P(i)L(i)],
+
+    where I+ = {i:  P(i) > 0} and I- = {i:  P(i) < 0}; and, L(i), U(i)
+    are the (original) limits on row i.  What this says is that if a
+    price is negative, the row's inequalities are reversed in forming the
+    aggregate range.
+
+    The primary purpose of the AGGREGAT command is when the LP is
+    infeasible, in which case P(i) = 0 for i = objective row; however,
+    the AGGREGAT command could be used for examining ranges of rows in an
+    optimal solution.  We shall separate these two uses of the AGGREGAT
+    command after we present a fundamental derivation.
+
+    If the submatrix contains all rows, the aggregate coefficient, p(j) =
+    P*A(j) (where A(j) includes the objective), equals minus the reduced
+    cost of activity j -- that is, P*A(j) = -D(j).  The aggregate
+    constraint, therefore, is:
+
+                      a <= y = Sum[j | -D(j)X(j)] <= b
+
+    and we require L <= X <= U.  (The variable y is introduced here for
+    notational convenience below.)
+
+                          Infeasible Linear Program
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+    Let us begin with the infeasible case.  The output begins with a
+    statement about the "required" range.  This is [a, b] (where a = -*
+    means negative infinity and b = * means positive infinity).
+
+    Then, the nonzero aggregate coefficients are listed (see Primer for
+    discussions of WOODINFE and FOREST6, which are two infeasible linear
+    programs that came with ANALYZE).  The activities with nonzero
+    aggregate coefficients, P*A(j), are put into the submatrix; and,
+    those with zero (or nearly zero) coefficients are excluded from the
+    submatrix.  Thus, when AGGREGAT finishes, the columns in the
+    submatrix are determined by the aggregation, over-riding whatever
+    setting you had prior to the aggregation.  It is possible for all
+    coefficients to be zero, in which case there will be no columns in
+    the submatrix.
+
+    After the coefficients are listed (if any), the "myopic range" is
+    given.  This is obtained by setting each variable to one of its bound
+    values, depending upon the sign of its aggregate coefficient.  That
+    is, the range contribution from X(j) is determined as follows.
+
+    Suppose L(j) <= X(j) <= U(j), where L(j), U(j) are the (original)
+    bounds on the level, X(j) (which could be infinite).  Then, the range
+    of the term, -D(j)X(j), is given by:
+
+                 [D(j)*L(j), D(j)*U(j)]  if D(j) > 0
+                 [D(j)*U(j), D(j)*L(j)]  if D(j) < 0.
+
+    The bottom line myopic range of the aggregate row is the sum of the
+    ranges of the terms.  For an infeasible instance, with all rows in
+    the submatrix, the myopic range is necessarily disjoint from the
+    required range (displayed first).  For example, if the required range
+    is [a, b] and the myopic range is [c, d], it must be that d < a or c
+    > b, so the required range can never be satisfied.  This follows from
+    the theory of linear programming if the resident solution prices
+    represent a Phase I solution.
+
+    At a Phase I solution, the term, -D(j)X(j), has no direction of
+    change in X(j) that reduces the infeasibility.  The myopic range,
+    given at the end of the output of the AGGREGAT command, reveals the
+    range of the sum, which is disjoint from [a, b].  To aid
+    infeasibility diagnosis, the real information is in which activities
+    have nonzero aggregate coefficients.
+
+    Suppose the LP contains supplies and demands.  If d < a, this
+    suggests the aggregate demand requirement, y >= a, cannot be
+    satisfied since the myopic range means y <= d in every solution
+    satsifying L <= X <= U.  In this case, look for activities in the
+    output that limit the range from above (i.e., contributing to why d
+    is so low, relative to a).  If you find activities with positive
+    coefficients, they will have limiting upper bounds, and if you find
+    activities with negative coefficients, they will have limiting lower
+    bounds.  Sometimes, this provides enough information to form a
+    diagnosis.
+
+    Similarly, if c > b, we require y <= b, but we have y >= c.  This
+    suggests a problem with the aggregate supply limit.  The activities
+    listed (if any) might be enough information to form a diagnosis of
+    what went wrong.
+
+    To begin to understand how to use the AGGREGAT command to aid
+    infeasibility diagnosis, apply it to WOODINFE (the other instance,
+    FOREST6, is more complicated).  Details of this reasoning can be
+    found in the paper,
+
+       H.J. Greenberg, "An Empirical Analysis of Infeasible Instances
+           of a Linear Programming Blending Model," IMA Journal of
+           Mathematics Applied in Business & Industry 4 (1992), 163-210.
+
+
+                           Optimal Linear Program
+                           ~~~~~~~~~~~~~~~~~~~~~~
+    Now suppose the linear program has an optimal solution, which is
+    resident.  Then, the AGGREGAT command can be used to examine ranges
+    of rows, for the particular aggregation by optimal prices.
+
+    To help gain insight, suppose all rows are in the submatrix, so the
+    aggregate row is:
+
+                           y = Sum[j | -D(j)X(j)].
+
+    Since the objective row is included, and it is a free row (i.e., L =
+    -* and U = *), the required range is -* to *, as you will see (this
+    does not occur in an infeasible instance because then the price for
+    each free row, including the objective, is 0).
+
+    Now consider the myopic range.  For j basic, D(j) = 0, so the sum is
+    over nonbasic variables.  At optimality, if X(j) = L(j), D(j) >= 0,
+    so the range of the term, -D(j)X(j), is [-D(j)U(j), -D(j)L(j)].
+    Similarly, if X(j) = U(j), D(j) <= 0, so the range is [-D(j)L(j),
+    -D(j)U(j)].  Putting these together, the myopic range of the sum is:
+
+                  y >=  Sum[j: STAT(j) = L | -D(j)U(j)]
+                      + Sum[j: STAT(j) = U | -D(j)L(j)]
+    and
+                  y <=  Sum[j: STAT(j) = L | -D(j)L(j)]
+                      + Sum[j: STAT(j) = U | -D(j)U(j)]
+
+    If there is some activity, j, for which STAT(j) = L, D(j) > 0 and
+    U(j) = *, it follows that y >= -*.  This is typically what you will
+    see as the lower bound on the myopic range.
+
+    Now examine the upper bound on y.  It is "typical" that L >= 0 for
+    each non-basic variable, so the upper bound on y is finite.  In
+    particular, if L = 0 and U = *, the upper bound is 0.
+
+    The meaning of this case, where our LP is the canonical form,
+
+                      Minimize cx: x >= 0 and Ax >= b,
+
+    is that optimal prices weight the rows so that
+
+                  0 = Max[-DX: X >= 0] = -Min[DX: X >= 0],
+
+    which states that the objective cannot be decreased from its current
+    (optimal) level.
+
+    If you examine WOODNET, you will see another property, namely that
+    the myopic range is -* to -min.  This happens, not by coincidence,
+    but because the LP is modeled with homogeneous equations.  Its form
+    is:
+
+                      Minimize cx: L <= x <= U, Ax = 0,
+
+    where L >= 0.  Supply limits appear as upper bounds on supply
+    activities, and demand requirements appear as fixed levels, L = U > 0
+    (which could also have U = * in an equivalent formulation).  Since
+    WOODNET is a network model, the homogeneous equations, Ax = 0,
+    represent conservation of flows.
+
+    To see why y <= -min results in the myopic range, note that cx = Dx
+    since the right-hand side is 0 (from the theory of linear
+    programming, cx = Dx + Pb when LP is in standard form, where the
+    constraints (except simple bounds on x) are equations, Ax = b).
+
+    Therefore, Dx >= min, or -Dx <= -min, which is what you see in the
+    output for WOODNET.

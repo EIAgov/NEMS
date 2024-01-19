@@ -1,0 +1,6 @@
+﻿    STEOTargetCNImports(year) := data { 2015 : 2626.290,  2016 : 2732.490,  2017 : 2524.120 } ;
+
+    STEOTargetCNExports(year) := data { 2015 : 666.949,  2016 : 771.924,  2017 : 759.320 } ;
+
+    STEOTargetMXExports(year) := data { 2015 : 1088.181,  2016 : 1259.456,  2017 : 1238.890 } ;
+

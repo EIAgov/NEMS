@@ -1,0 +1,41 @@
+* WOODPLOT.RUL
+* This is a rule file to demonstrate use of SHOW PLOT
+* (Instantiated by INTERP TEST WOODPLOT [material]).
+
+$IF @%%2 <> @ THEN ANALYZE STRING MT=%%2
+$IF @'MT <> @ THEN SKIP 2
+ First set string MT (material), or pass as argument.
+$EXIT
+
+ Supply of
+$ENTITY 'MT MT
+(over regions)
+$TEXT CENTER
+$ANALYZE SUB COL S'MT
+$SET N=%NCOLS
+$ANALYZE SUB D C * U=*
+$IF %NCOLS = 0 THEN GOTO NONE
+$CALC N = N - %NCOLS
+$ANALYZE SUB ROW COST
+$ANALYZE SCREEN L 15
+$ANALYZE SHOW PLOT
+$ANALYZE SCREEN L 23
+$IF %%N = 0 THEN EXIT
+$IF %%N = 1 THEN GOTO ONE
+ There are also %%N
+$ENTITY 'MT MT
+ supply activities with no bound on level.
+$TEXT CENTER
+$EXIT
+:ONE
+ There is also 1
+$ENTITY 'MT MT
+ supply activity with no bound on level.
+$TEXT CENTER
+$EXIT
+:NONE
+ There are no bounded supply activities for
+$ENTITY 'MT MT
+  , but there are %%N unbounded supply activities.
+$TEXT
+$EXIT

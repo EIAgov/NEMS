@@ -1,0 +1,144 @@
+# The output will be stored in $OUTDIR/$scenario/$datekey
+# some initialization
+ OUTDIR=?OUTDIR@
+ scenario=?SCEN@
+ datekey=?DATE@
+
+# We need to know the "launched from" directory
+ OLDDIR=$PWD
+
+ if [ ! -f FILELIST.$scenario.$datekey ]; then
+   echo ' NO FILELIST FILE !!!!! '
+   echo ' SCRIPT ENDING '
+   exit
+ fi
+
+ if [ -d $OUTDIR/$scenario ]; then
+   echo directory $OUTDIR/$scenario exists
+   echo continuing
+ else
+   echo creating $OUTDIR/$scenario
+   mkdir $OUTDIR/$scenario
+ fi
+
+ cd $OUTDIR/$scenario
+ if [ -d $datekey ]; then
+   echo directory $datekey exists
+   echo continuing
+ else
+   echo creating $datekey
+   mkdir $datekey
+ fi
+
+ #cd $datekey
+ cd $OUTDIR/$scenario/$datekey
+ cp $OLDDIR/keys.sed.$scenario.$datekey keys.sed
+ cp $OLDDIR/FILELIST.$scenario.$datekey FILELIST
+ cp $OLDDIR/scedes.all.$scenario.$datekey scedes.all
+ 
+ #create scedeall.hash file so that source and input files can be compared between runs
+ #  sh $NEMS/scripts/scedeshash.sh scedes.all
+
+copyem=?COPYINP@
+# replace option $NEMS string in scedes file names with the value of environment variable $NEMS
+cat FILELIST | sed "s@\$NEMS@$NEMS@g" > filelist.tmp
+mv filelist.tmp FILELIST
+
+if [ "$copyem" != "0" ] ; then
+  rm -f filelist.changed
+  rm -f cpcmds.sh
+  
+  $NEMS/scripts/cac_filelist.exe FILELIST ?COPYDIR@
+  rm -f FILELIST
+  sh $NEMS/scripts/trim.sh filelist.changed FILELIST
+  rm -f filelist.changed
+  if [ ! -d ?COPYDIR@ ] ; then
+    mkdir ?COPYDIR@
+  fi
+# file created by cac_filelist to uncompress files - need to uncompress before copying
+  sh uncmprss.sh
+  rm -f uncmprss.sh
+  sh cpcmds.sh
+  rm -f cpcmds.sh
+else
+#  the u as the directory to copy input files to really means do an "uncompress only"
+  $NEMS/scripts/cac_filelist.exe FILELIST u
+# file created by cac_filelist to uncompress files
+  sh uncmprss.sh
+  rm -f uncmprss.sh
+fi
+
+# now link and submit the preprocessor
+OBJS="?FILEMGRN@?FILEMGRD@.obj \
+?FILERN@?FILERD@.obj \
+?UDATN@?UDATD@.obj \
+?UDAFN@?UDAFD@.obj \
+?ULDSMN@?ULDSMD@.obj \
+?PREPETTN@?PREPETTD@.obj \
+?CIO4WK1N@?CIO4WK1D@.obj \
+?FWK1ION@?FWK1IOD@.obj \
+?UREADN@?UREADD@.obj \
+?UESQLN@?UESQLD@.obj \
+?DUMMYPPN@?DUMMYPPD@.obj"
+
+ notthere=0
+ for item in $OBJS
+ do
+    sh $NEMS/scripts/checkfor.z.sh $item print
+    if [ $? -ne "0" ] ; then
+      notthere=1
+    fi
+ done
+ if [ $notthere -eq 1 ] ;then
+   echo "not continuing because of missing object files"
+   exit
+ fi
+
+lnkinems=?LNKINEMS@
+if [ "$lnkinems" = "0" ] ; then
+# link with CVF linker
+  link /out:prepett.exe /debug:full /FORCE $OBJS
+else
+# link with Intel (version number set above).  Set required environment strings and search paths first
+  if [ "$lnkinems" = "5" ] ; then
+    IVERS="18.1";export IVERS
+    . $NEMS/scripts/ifortvars18.sh
+       if [ "?RUNEMMSQL@" = "1" ] ; then    
+    xilink /out:prepett.exe /subsystem:console /incremental:no  /FORCE $OBJS  m:/default/scripts/libfsqlite.lib legacy_stdio_definitions.lib
+       else
+    xilink /out:prepett.exe /subsystem:console /incremental:no  /FORCE $OBJS legacy_stdio_definitions.lib       
+       fi
+  elif [ "$lnkinems" = "4" ] ; then
+    IVERS="11.1";export IVERS
+    . $NEMS/scripts/ifortvars64x64.sh
+       if [ "?RUNEMMSQL@" = "1" ] ; then        
+    xilink /out:prepett.exe /incremental:no /debug /FORCE $OBJS  m:/default/scripts/libfsqlite.lib
+       else
+    xilink /out:prepett.exe /incremental:no /debug /FORCE $OBJS       
+       fi
+  elif [ "$lnkinems" = "3" ] ; then
+    IVERS="11.1";export IVERS
+    . $NEMS/scripts/ifortvars.sh
+    xilink /out:prepett.exe /incremental:no    /debug /FORCE $OBJS
+  elif [ "$lnkinems" = "2" ] ; then
+    IVERS="9.1";export IVERS
+    . $NEMS/scripts/ifortvars.sh
+    xilink /out:prepett.exe /incremental:no    /debug:full /FORCE $OBJS
+  else
+    IVERS="9.0";export IVERS
+    . $NEMS/scripts/ifortvars.sh
+    xilink /out:prepett.exe /incremental:no    /debug:full /FORCE $OBJS
+  fi
+fi
+
+if [ "?RUNEMMSQL@" = "1" ] ; then
+  echo Unzipped emm_db AIMMS project 
+  if [ ! -d emm_db ] ; then
+    mkdir emm_db
+  fi
+   cp -rf ?EMM_DBN@/* ./emm_db > /dev/null
+fi
+
+
+echo "Submitting prepett"          
+prepett.exe > nohup.out &

@@ -1,0 +1,7 @@
+$$ This tests TABLE command.  (Syntax read by REPORT.RUL.)
+READ P WOODNET
+I T REPORT
+REA P BLENDRT
+I T REPORT
+REA P FOREST5
+I T REPORT

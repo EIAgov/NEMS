@@ -1,0 +1,52 @@
+!  $Header: m:/default/includes/RCS/elcntl,v 1.5 2019/07/23 15:28:50 rsc Exp $
+!
+!  Electricity Market Module (EMM) Output Control Common Block
+!
+!  The dimension parameters are in the common blockis emmparm and parametr.
+!
+!  The following INCLUDE statements access these common blocks:
+!     INCLUDE(EMMPARM)
+!     INCLUDE(PARAMETR)
+!
+!     EMM Output Control Variables
+!
+      INTEGER*4 EMMNREC                  ! Last EMM Database Record Used
+!
+!     Plant Group Data
+!
+      INTEGER*4 ULIGRP(EMM_D_GRP)          ! Initial Plant Group
+      INTEGER*4 ULORGN(EMM_D_GRP)          ! Ownership Region
+      INTEGER*4 ULOPER(EMM_D_GRP)          ! Operator Region
+      INTEGER*4 ULRGNT(EMM_D_GRP)          ! Owner = Operator => 1, Not = => 2
+      INTEGER*4 ULCENS(EMM_D_GRP)          ! Census Region
+      INTEGER*4 ULECPT(EMM_D_GRP)          ! ECP Type
+      INTEGER*4 ULEFDT(EMM_D_GRP)          ! EFD Type
+      INTEGER*4 ULEFPT(EMM_D_GRP)          ! EFP Type
+      INTEGER*4 ULVINT(EMM_D_GRP)          ! Vintage (1 = Existing, 2 = Planned, 3 = New)
+      INTEGER*4 ULOWNT(EMM_D_GRP)          ! Ownership Type
+      INTEGER*4 ULHRQ(EMM_D_GRP)           ! Heatrate Quartile
+      INTEGER*4 ULFUEL(EFD_D_FPP,EMM_D_GRP)  ! Fuel Type
+      INTEGER*4 ULFLRG(EFD_D_FPP,EMM_D_GRP)  ! Fuel Region
+      INTEGER*4 ULMRUN(EMM_D_GRP)          ! Must Run Status for Plant Groups
+      INTEGER*4 ULRPS(EMM_D_GRP)           ! RPS Status for Plant Groups
+      INTEGER*4 ULFRGN(EMM_D_GRP)          ! EMM Fuel Region - For New Renewables or Nuclear Set to Zero
+      INTEGER*4 ULSTATE(EMM_D_GRP)         ! State - Index of state where the unit is located, zero if new or unknown
+      INTEGER*4 ULSINDX(EMM_D_GRP)         ! Start Year-Month Index = W_SYR * 100 + W_SMO
+      INTEGER*4 ULRINDX(EMM_D_GRP)         ! Retire Year-Month Index = W_RYR * 100 + W_RMO
+      INTEGER*4 ULAGE(EMM_D_GRP)           ! Age of generating unit
+      INTEGER*4 UL_45Q_YR(EMM_D_GRP)       ! Start year for 45Q subsidies, 0=> No Subsidies
+!
+!     ELCNTL Common Block
+!
+      COMMON /ELCNTL/ EMMNREC, &
+               ULORGN, ULIGRP, ULOPER, ULRGNT, ULCENS, &
+               ULECPT,  ULEFDT,  ULEFPT, ULVINT, ULOWNT, ULFUEL, &
+               ULFLRG,  ULMRUN, ULRPS, ULFRGN, ULSINDX, ULRINDX, ULAGE, UL_45Q_YR, ULHRQ, ULSTATE
+      
+!
+!     Calculate Storage Requirement
+!
+      INTEGER*4 UCSIZE
+      PARAMETER ( UCSIZE =  1 * 4 + &
+               17 * 4 * EMM_D_GRP + &
+                2 * 4 * EFD_D_FPP * EMM_D_GRP)

@@ -1,0 +1,43 @@
+     Function: Free bounds of rows or columns
+     Syntax:   FREE {LOWER,UPPER} [{ROW | COL} [conditional]]
+
+     If ROW | COL is absent, current setting of switch DISP_COL is used.
+     If conditional is absent, current submatrix is used.
+
+     If an upper bound is freed, but its solution status is U, or if a
+     lower bound is freed, but its solution status is L, the solution
+     is corrupted (and a message will appear).  The FREE command
+     sets the status to Basic in both cases.  Its level is maintained
+     as the solution value, but its dual price becomes 0.  When the
+     solution is corrupted, the status is changed to 'Unknown', and
+     the BASIS command cannot be executed (which disables other commands
+     that depend upon the basis, such as the RATEOF command).
+     .----------------------------------------------------------------.
+     |  Since the solution can become corrupted, this command is not  |
+     |  recommended for interactive analysis.                         |
+     |________________________________________________________________|
+
+     The main reason for freeing bounds is to write a submatrix without
+     the bound (see SUBMAT WRITE).  This arises after reading an IIS if
+     you want to generate only the IIS as a system of (infeasible)
+     constraints (without the bounds that are not in the IIS).  To do
+     this, see the Execute file, WRIIS.EXC.
+
+     Examples:
+
+     FREE * COL
+     ...Free both bounds of all submatrix columns.
+
+     FREE * ROW S
+     ...Free both bounds of rows whose name begins with S.
+
+     FREE LOWER
+     ...Free lower bounds of rows or columns (according to switch
+        DISP_COL) in submatrix.
+
+     FRE LO C * L=1/100
+     ...Free lower bounds of columns whose lower bound is in the range,
+        1 to 100.
+
+     FRE UP R * S=B
+     ...Free upper bounds of rows whose solution status is Basic.

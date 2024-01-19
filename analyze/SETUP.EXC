@@ -1,0 +1,12 @@
+*=======================================================
+* This file contains the arguments for a
+* series of "_SETUP" commands that ANALYZE will
+* execute.  The commands are used to tell ANALYZE
+* where files are located (set prefixes) and what
+* their extensions (suffixes) will be.
+* The next two tell analyze where to find HLP and DOC
+* files associated with the HELP and PRINT commands.
+*=======================================================
+HELP M:/default/analyze/
+PRINT M:/default/analyze/ 
+*=======================================================

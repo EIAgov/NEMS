@@ -1,0 +1,93 @@
+!  $Header: m:/default/includes/RCS/fdict,v 1.18 2017/06/16 19:33:12 pkc Exp $
+! START OF  /FDICTC/ DECLARATION
+!  DICTIONARY VARIABLES.
+!  FMAXDT = PARAMETER FOR MAXIMUM NUMBER OF VARIABLES IN DICTIONARY.
+!  FMAXCM = PARAMETER FOR MAXIMUM NUMBER OF COMMON BLOCKS IN DICTIONARY
+!  FMaxDim = PARAMETER FOR MAXIMUM NUMBER OF TYPES OF ARRAY DIMENSIONS
+!  FMaxDimS = PARAMETER FOR MAXIMUM NUMBER OF string elements for any ARRAY DIMENSIONS
+!  FMaxAtt = PARAMETER FOR MAXIMUM NUMBER OF ARRAY ATTRIBUTE
+!  FAttTyp = PARAMETER FOR ARRAY ATTRIBUTE TYPE
+!  FAttVal = PARAMETER FOR ARRAY ATTRIBUTE VALUE
+!  FDimNam(FMaxDim) = ARRAY DIMENSION MNEMONIC (6 CHARS MAX)
+!  FDimSiz(FMaxDim) = ARRAY DIMENSION SIZE
+!  FDimDescrip(FMaxDim) = ARRAY DIMENSION NAME (25 CHARS MAX)
+!  FDimStr_Index(FMaxDim) = Index to first dimension string in FDimStrs
+!       Here is a set of strings for a given dimension, d:
+!       FDimStrs(FDimStr_Index(d):FDimStr_Index(d)+FDimSize(d)-1)
+!  FDimStr_Long(FMaxDim) = length of longest string for this dimension
+!  FDimStrs(FMaxStrs)  = Dimension strings
+!  FDimStr(FMaxDim,5) = Dimension strings for up to 5 dimensions
+!  FVarDim(5)         = dimension mnemonics for each dimension
+!  FDimLong(5)        = Length of longest dimension string
+!  FAttNam(2,FMaxAtt) = 1ST ROW: ARRAY ATTRIBUTE MNEMONIC (FAttTyp)
+!                       2ND ROW: ARRAY ATTRIBUTE VALUE (FAttVal)
+!                       (BOTH COLUMNS ARE 6 CHARS MAX)
+!  FAttDescrip(FMaxAtt) = ARRAY ATTRIBUTE NAME (25 CHARS MAX)
+!  FDimIndex = NUMBER OF DIMENSIONS READ
+!  FAttIndex = NUMBER OF ATTRIBUTES READ
+!  FVarDims(5,FMAXDT) = DIMENSION MNEMONICS FOR EACH VARIABLE
+!  FVarAtts(5,FMAXDT) = ATTRIBUTE MNEMONICS FOR EACH VARIABLE
+!  FBlkAtts(5,FMAXCM) = ATTRIBUTE TYPE MNEMONICS FOR EACH COMMON BLOCK
+!  FBlkDesc(FMAXCM) = COMMON BLOCK DESCRIPTION
+!  FVARNM(FMAXDT) = VARIABLE NAME (6 CHARS MAX)
+!  FBLKNM(FMAXDT) = COMMON BLOCK NAME (MAX OF FMAXCHARCOM CHARACTERS) FOR EACH VARIABLE
+!  FDESCR(FMAXDT) = VARIABLE DEFINITION
+!  FVARTY(FMAXDT) = VARIABLE TYPE (I, R, C)
+!  FVARLN(FMAXDT) = BYTE LENGTH OF THE VARIABLE TYPE (2 OR 4 FOR INTEGER,
+!                   4 OR 8 FOR REAL, OR THE STRING LENGTH IF A
+!                   CHARACTER VARIABLE
+!  FNDIMS(FMAXDT) = NUMBER OF DIMENSIONS (0 TO 5).  0 FOR SCALAR.
+!  FKDIM(5,FMAXDT)= RANK OF EACH DIMENSION, UP TO 5.  DEFAULT IS 1 FOR EACH
+!  FVARSZ(FMAXDT) = COMPUTED BYTE LENGTH OF THE VARIABLE, GIVEN "VARLEN" AND
+!                   (KDIM(I,),I=1,NDIMEN)
+!  FBPOIN(FMAXDT) = COMPUTED STARTING BYTE LOCATION IN COMMON BLOCK
+!  FNDICT         = TOTAL NUMBER OF DICTIONARY ENTRIES (MUST BE <=FMAXDT)
+!  FINDEX(FMAXCM) = DICTIONARY INDEX TO START OF EACH COMMON BLOCK
+!  FBLOCK(FMAXCM) = COMMON BLOCK NAMES CONTAINED IN DICTIONARY
+!  FNVARS(FMAXCM) = NUMBER OF VARIABLES/ENTRIES IN EACH COMMON BLOCK
+!  FBLKSZ(FMAXCM) = TOTAL SIZE OF EACH COMMON BLOCK IN BYTES. MUST
+!                   AGREE WITH THE SIZE OF THE COMMON AS REPORTED IN THE LINK
+!                   EDITOR MAP.
+!  FNBLOC         = TOTAL NUMBER OF COMMON BLOCKS (MUST BE <= FMAXCM)
+!  FYearSubset    = Option (if 1) to transfer a subset of years of Glogal data when processing varlist
+!  FYearStart     = NEMS start year index for FYearSubset option
+!  FYearEnd       = NEMS   end year index for FYearSubset option
+
+      INTEGER*4 FMaxDim,FMaxDims,FMaxAtt,FAttTyp,FAttVal,FDimIndex,FAttIndex,FMaxStrs
+      PARAMETER (FMaxDim=250,FMaxDims=101,FMaxAtt=256,FAttTyp=1,FAttVal=2,FMaxStrs=7500)
+      INTEGER*4 FMAXDT,FMAXCM,FMAXCHARVAR,FMAXCHARCOM
+      PARAMETER (FMAXDT=4000,FMAXCM=100,FMAXCHARVAR=16,FMAXCHARCOM=16)
+      CHARACTER FDimNam(FMaxDim)*6,FAttNam(2,FMaxAtt)*6, &
+       FAttDescrip(FMaxAtt)*25,FDimDescrip(FMaxDim)*25, &
+       FVarDims(5,FMAXDT)*6,FVarDIM(5)*6,FVarAtts(5,FMAXDT)*6, &
+       FBlkAtts(5,FMAXCM)*6,FBlkDesc(FMAXCM)*50, &
+       FDimStrs(FMaxStrs)*25,FDimStr(FMaxDims,5)*25
+      
+      INTEGER*4 FYearSubset           !Option (if 1) to transfer a subset of years of Glogal data when processing varlist
+      INTEGER*4 FYearStart            !NEMS start year index for FYearSubset option
+      INTEGER*4 FYearEnd              !NEMS   end year index for FYearSubset option
+      INTEGER*4 FDimSiz(FMaxDim)
+      INTEGER*4 FDimStr_Index(FMaxDim)
+      INTEGER*4 FDimStr_Long(FMaxDim)
+      INTEGER*4 FDimLong(5)
+      integer*4 count_str,largest
+
+      CHARACTER FVARNM(FMAXDT)*(FMAXCHARVAR)
+      CHARACTER FBLKNM(FMAXDT)*(FMAXCHARCOM), &
+       FBLOCK(FMAXCM)*(FMAXCHARCOM)
+      CHARACTER FDESCR(FMAXDT)*50,FVARTY(FMAXDT)*1
+      INTEGER*4 FVARSZ(FMAXDT),FVARLN(FMAXDT),FKDIM(5,FMAXDT),FNDICT, &
+       FBPOIN(FMAXDT),FINDEX(FMAXCM),FNVARS(FMAXCM),FNDIMS(FMAXDT), &
+       FBLKSZ(FMAXCM),FNBLOC
+      COMMON/FDICTC/FVARNM,FBLKNM,FVARTY,FVARLN,FNDIMS, &
+       FKDIM,FVARSZ,FBPOIN,FNDICT,FINDEX,FBLOCK,FNVARS,FBLKSZ,FNBLOC
+      COMMON/FDICTD/FDESCR
+      COMMON/FDICTE/FDimIndex,FAttIndex,FDimSiz,FDimStr_Index,FDimStr_Long,FDimLong
+      COMMON/FDICTF/FDimNam,FAttNam,FAttDescrip,FDimDescrip, &
+       FVarDims,FVarDim,FDimStrs,FDimStr 
+
+      COMMON/FDICTG/FVarAtts
+      COMMON/FDICTH/FBlkAtts,FBlkDesc
+      common/fdicti/FYearSubset,FYearStart,FYearEnd
+      common/fdictj/count_str,largest
+! END OF  /FDICTC/ DECLARATION

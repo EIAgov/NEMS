@@ -1,0 +1,23 @@
+! $Header: M:/default/includes/RCS/converge,v 1.11 2014/09/19 20:22:34 dsa Exp $
+! $header$
+! Variables for the Ftab Converge Summary Table
+      INTEGER MNUMCVTST
+      PARAMETER (MNUMCVTST=106)
+      integer MAXCYCLES
+      PARAMETER (MAXCYCLES=10)
+      REAL*4 CVTAB(MNUMCVTST,4,MNUMYR)   ! Convergence Summary Table:  (106 items, cur/bef/abs} , year)
+      real*4 CVSCORE(MNUMYR)             ! Convergence Score, like GPA( 4:A, 3:B, 3:C, 4:D, 0:F) ,year)
+      real*4 CVSCORE_US(MNUMYR)          ! Convergence Score on US aggregates only
+      real*4 CVSCOREHIST(MNUMYR,MAXCYCLES) ! history of regional GPA scores in prior cycles
+      integer*4 OSCOR                   ! Oscillation Score, indicator of intercycle oscillations (item count from oscillate.f90 output, computed outside of NEMS)
+      COMMON/CONVERGE/CVTAB,CVSCORE,CVSCORE_US,CVSCOREHIST,OSCOR
+ 
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      integer size_converge
+      parameter (size_converge= &
+           MNUMCVTST*4*mnumyr   &
+         + MAXCYCLES*mnumyr     &
+         + mnumyr*2 + 1          &
+           )
+      REAL EQ_CONVERGE(size_converge)
+      EQUIVALENCE (EQ_CONVERGE,CVTAB)

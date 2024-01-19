@@ -1,0 +1,4 @@
+AEO Name,STEO Name,Energy Generation,Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
+MEI000:ba_RealGrossDome,GDPQXUS,Real GDP,2%,2%,1,1,
+MEI000:ba_RealDisposabl,YD87OUS,Real Disposable Personal Income,2%,2%,1,1,
+"MEI000:ka_Employment,No",EMNFPUS,Non-farm Employment,2%,2%,1,1,

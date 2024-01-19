@@ -1,0 +1,38 @@
+! $Header: M:/default/includes/RCS/omlnoxprs.fi,v 1.1 2014/01/10 19:28:32 dsa Exp $
+
+!     FORTRAN include file omlnoxprs.fi
+
+!     This is a convenience for including all OML include files
+!     *except* omlxprs.fi.
+
+      include 'buildenv.fi'
+      include 'omldb.fi'
+      include 'omllib.fi'
+      include 'omllp.fi'      ! includes wcr.fi
+
+
+! The declarations in buildenv.fi are needed in the other include files,
+! but these declarations can be processed only once within a given
+! subroutine or function.
+
+! Unless this developer has missed something ...
+
+! The annoyance is that neither the !dec$ nor the C-like # form of pre-
+! processor seems to provide a mechanism to test whether declarations
+! have already been made specifically within a given routine.
+
+! (Aside: the Intel compiler does not invoke the C-like preprocessor on
+! code included via the standard FORTRAN include statement. Boo.)
+
+! So one's choices are:
+! (a) include buildenv.fi and any relevant oml<...>.fi files explicitly
+!     on a routine-by-routine basis
+! (b) code wrapper include files to handle any possible combination of
+!     include files that might be needed
+! (c) use wrapper omlall.fi even if it brings in unnecessary declarations
+
+! The additional memory load from unnecessary declarations is < 1 KB.
+
+! There is some chance that a symbol used in an unnecessary declaration
+! is being used locally in the routine including omlall.fi.
+

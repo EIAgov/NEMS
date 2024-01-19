@@ -1,0 +1,95 @@
+! $Header: m:/default/includes/RCS/wmscomon,v 1.9 2020/10/16 14:52:14 tdm Exp $
+! COMMON: WMSW
+!    Real:
+!       WVC      : variable operating cost [mills/kWh]
+!       a1       : regression coeff. for GDP [10^6 ton/10^9 S]
+!       a2       : regression coeff. for population [10^6 ton/10^6 people]
+!       alpha    : adjustment factor
+!       Fshr     : share of combusted waste used for generating elect.
+!                  by NERC [-]
+!       WHC      : heat content of waste in [BTU/lb]
+!       WHRMSTECH: heat rate for incineartors [BTU/kWh]
+!       Fshr     : Share of burned waste used for generation of electricity [-]
+!       LFshr    : regional share for landfill capacity by NERC [-]
+!       PCshr    : combustion share of waste stream by NERC [-]
+!       SR       : source reduction factor [-]
+!       TLFCAP   : total landfill capacity by years [MW]
+!       WNRPOPSHR: Regional share of population [-]
+!       MSTIPPCR : Tipping Fee for 9 Census regions [$/ton]
+!       WMSCTON  : Mapping matrix from Census to Nerc
+!       Clb_ton  : conversion lb to tons (2204.6 [lb]=1 [ton])
+!
+!
+! ................. MSW COMMON ........................................
+      INTEGER NUM_YEARS ! Number of MSW Historical + Forecast Years
+      INTEGER WLF_TYP   ! Decomposition Type: 1) Decomposed Readily
+                        !                     2) Decomposed Moderately
+                        !                     3) Decomposed Slowly    
+      INTEGER YLD_TYP   ! Yield Type: 1) Non-EPA105 High Yield
+                        !             2) Non-EPA105 Low Yield         
+                        !             3) EPA105 High Yield
+                        !             4) EPA105 Low Yield 
+      INTEGER WRGLF_TYP ! Regional Yield Type: 1) Very Low Yield       
+                        !                      2) Low Yield         
+                        !                      3) High Yield
+      PARAMETER (NUM_YEARS=MNUMYR+49)
+      PARAMETER (WLF_TYP=3)
+      PARAMETER (YLD_TYP=4)
+      PARAMETER (WRGLF_TYP=3)
+!
+      INTEGER LFGLHYR   ! Last MSW Historical Year                  
+      INTEGER LFGFHYR   ! First MSW Historical Year                  
+!
+      real WVC,WHC(MNUMYR),WHRMSTECH,SR,a1,a2,alpha
+      real Fshr(MNUMNR),LFshr(MNUMNR),PCshr(MNUMNR),WIPSHR(MNUMNR),TLFCAP(MNUMYR)
+      real WNRPOPSHR(MNUMNR),MSTIPPCR(MNUMCR)
+      real WMSCTON(MNUMNR,MNUMCR)
+      real Clb_ton
+      real lfgcapnr(MNUMNR,MNUMYR)
+!     Variables added for MSW supply curve calculation
+      REAL DECOMP_FRAC(WLF_TYP,YLD_TYP)   ! Fraction Decomposed by decomposition type 
+!                                           and yield type
+      REAL YLD_RATE(WLF_TYP,YLD_TYP)      ! Rate of Methane Yield by decomposition type 
+!                                           and yield type (CUFT/LB)     
+      REAL LAG(WLF_TYP,YLD_TYP)           ! Lag for Methane Generation by decomposition type 
+!                                           and yield type (Years)
+      REAL PROD_LIMIT(WLF_TYP,YLD_TYP)    ! Production Limit by decomposition type 
+!                                           and yield type (Years)          
+      REAL WIP_RATE(YLD_TYP)              ! Fraction of Waste in Place by yield type
+      REAL WLF_HRZN(YLD_TYP)              ! Number of prior years to apply to total methane 
+!                                           available by yield type
+      REAL LANDFILL_1998                  ! Percent of Total Waste Recycled in 1998
+      REAL LANDFILL_2005                  ! Percent of Total Waste Recycled in 2005
+      REAL LANDFILL_2010                  ! Percent of Total Waste Recycled in 2010
+      REAL LANDFILL_2015                  ! Percent of Total Waste Recycled in 2015
+      REAL LANDFILL_2020                  ! Percent of Total Waste Recycled in 2020
+      REAL LANDFILL_2025                  ! Percent of Total Waste Recycled in 2025
+      REAL LANDFILL_2030                  ! Percent of Total Waste Recycled in 2030
+      REAL YIELD_RATIOS(MNUMNR,WRGLF_TYP) ! Yield Ratios by NERC Region                             
+      REAL RECOVERY_FCTR(NUM_YEARS)       ! Methane Recovery Factor
+      REAL FLARE_FCTR(NUM_YEARS)          ! Methane Flare Factor
+      REAL FRANKLIN_LFILL(NUM_YEARS)      ! Total MSW Landfilled (Franklin) Thousand Short Tons
+      REAL BIOCYCLE_LFILL(NUM_YEARS)      ! Total MSW Generated  (Biocycle) Thousand Short Tons
+      REAL FRANKLIN_RATIO(NUM_YEARS)      ! Average Ratio of MSW Generated (Biocycle/Franklin) 
+      REAL UNKNOWN_RATIO(NUM_YEARS)       ! Unknown Ratio
+      REAL MSWPOP(NUM_YEARS)              ! Historical Population (Millions)
+      REAL MSWGDP(NUM_YEARS)              ! Historical GDP - BEA (Billion 92$)
+      REAL MSWSUPPADD(MNUMYR,MNUMNR)      ! MSW Supplemental Additions         
+!
+!     Variables added for dsb vb calculations
+!
+      REAL  HIS_TOTYLDS(YLD_TYP,MNUMYR)
+      REAL  HIS_TOTYLD(MNUMYR)
+      REAL  PERCENT_RECYCLE(MNUMYR)
+      REAL  YRYLDTOT(MNUMYR,YLD_TYP,MNUMYR)
+      REAL  YRLY_YIELD(MNUMYR,MNUMYR)
+
+      COMMON /WMSW/LFGLHYR,LFGFHYR,WVC,WHRMSTECH,WHC,SR,a1,a2,alpha,          &
+          Fshr,LFshr,PCshr,TLFCAP,WNRPOPSHR,WIPSHR,MSTIPPCR,WMSCTON,LFGCAPNR,     &
+          DECOMP_FRAC,YLD_RATE,LAG,PROD_LIMIT,WIP_RATE,WLF_HRZN,  &
+          LANDFILL_1998,LANDFILL_2005,LANDFILL_2010,LANDFILL_2015, &
+          LANDFILL_2020,LANDFILL_2025,LANDFILL_2030,YIELD_RATIOS, &
+          RECOVERY_FCTR,FLARE_FCTR,FRANKLIN_LFILL,BIOCYCLE_LFILL, &
+          FRANKLIN_RATIO,UNKNOWN_RATIO,MSWPOP,MSWGDP,MSWSUPPADD,  &
+          HIS_TOTYLD,HIS_TOTYLDS,PERCENT_RECYCLE,YRYLDTOT,YRLY_YIELD
+      data Clb_ton /2204.6/

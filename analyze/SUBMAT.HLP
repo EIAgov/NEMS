@@ -1,0 +1,110 @@
+    Function: Build submatrix
+    Syntax:   SUBMAT [{CLEAR
+                      |SET                                .............
+                      |ROW|COLUMN  conditional            : Direct Use:
+                      |*                                  :(Subcommand:
+                      |ADD     ROW|COLUMN conditional     : level not :
+                      |DELETE  ROW|COLUMN conditional     : entered)  :
+                      |WRITE [filename] [//{PRIMAL|DUAL}] :...........:
+                      }]
+        ...subcommand level described below
+
+     Direct Use:
+
+       If any parameter is specified (except CLEAR), SUBMAT command level
+       is not entered.  The ROW|COLUMN specification is used to set the
+       rows or columns in the submatrix.  Unlike setting the submatrix
+       with a query command, like ADDRIM, this causes no output.
+
+       If * is specified the submatrix is set to the entire matrix.
+
+       If SET is specified, null rows and columns are removed (this
+       happens automatically with COUNT, LIST and PICTURE).
+
+       The ADD and DELETE options are the same as in the Sub-Command
+       level, except you stay at the main ANALYZE command level.  This
+       is useful for adding a single row, like COST to a submatrix
+       created by a procedure.  It can also be used from an EXECUTE file.
+
+       SUBMAT WRITE writes the submatrix to a matrix file, where the
+       default filename is the problem name.  (The entire filespec is
+       determined by MATRIX in _SETUP.)  The format is the "standard"
+       (MPS) matrix file.  The //DUAL option writes the dual of the
+       submatrix LP (PRIMAL is the default).
+
+    Examples of Direct Use:
+
+    SUBMAT *
+    ...sets submatrix = entire matrix (all rows and columns)
+
+    SUBMAT ROW P Y=0
+    ...sets rows in submatrix to those whose name begins with P and whose
+       level (Y) is zero
+
+    SUBMAT COL * X GT L
+    ...sets columns in submatrix to those whose level (X) is strictly
+       greater than its lower bound (L)
+
+    SUBMAT WRITE MYSUB
+    ...writes submatrix to file named MYSUB.MAT (unless _SETUP changed the
+       .MAT suffix or the prefix).
+
+    SUBMAT WR
+    ...writes submatrix to file named by the resident problem name.
+
+    SUB WR //DUAL
+    ...writes dual of submatrix to file named by the resident problem name.
+
+    SUB *
+    SUB DEL ROW COST
+    SUB WR MYDUAL.MAT //DUAL
+    ...writes dual of LP that has 0 objective (removing row COST, which is
+       presumed the original primal objective) to file named MYDUAL.MAT.
+
+      ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+     Subcommand Level:
+
+       If CLEAR option is used, submatrix is initialized to have no rows
+       and columns; else, submatrix is left intact upon entering SUBMAT
+       command level.
+
+       Upon entering SUBMAT you may ADD, DELETE, or REVERSE rows and
+       columns by using conditional specifications.  You may also SAVE
+       a submatrix  as an execution file.  The subcommand level shows
+       the possible commands by entering ? at the SUBMAT prompt.
+
+     Examples in Subcommand Level:
+
+    SUBMAT CL
+    ...enters SUBMAT command level with null submatrix
+       SUBMAT will show commands, then prompt for entry.
+
+    In SUBMAT we may do:
+
+    A R * S=B
+    ...Adds all rows whose solution Status is Basic
+    A C * L LT U
+    ...Adds all columns whose Lower bound is strictly less than its Upper
+       bound
+    D C P
+    ...Deletes all columns whose name begins with P
+
+    ...blank line (RETURN) returns to ANALYZE main command level
+
+    R C *
+    ...reverses all columns--ie, those in become out and those out
+       become in
+
+    R R * S=B
+    ...reverses all basic rows
+
+    SAVE MYSUB
+    ...saves submatrix in execution file named MYSUB.SUB (using the
+       _SETUP defaults for the SUBMAT file type).
+
+    If the problem name is MYPROB:
+    SAV
+    ...saves submatrix into MYPROB.SUB;  later, you can
+       EXECUTE MYPROB.SUB to merge the rows and columns with your
+       submatrix.

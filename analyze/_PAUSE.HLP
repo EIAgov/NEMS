@@ -1,0 +1,5 @@
+    Function: Pause, giving user opportunity to abort
+    Syntax:   _PAUSE [text]
+
+    Generally, this is used from an EXECUTE file.  If text is given,
+    it is printed before the "Continue (Y/N)?" prompt.

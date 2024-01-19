@@ -1,0 +1,230 @@
+                                 GUPCK.DOC
+
+   The GUPCKGEN Fortran code enables direct setup of a packed file as
+   input to ANALYZE, using the information in core.  It eliminates the
+   need to write matrix and solution files.  It needs to be linked with
+   GUPCKLIB (copies of FLIP routines called by GUPCKGEN) and some of the
+   GETMAT routines (see loslanal.s for files to link).
+
+   Here is the list of files that comprise this utility (see below).
+
+      Source codes: GUPCKGEN.FOR GUPCKLIB.FOR oslanal.f
+          Document: GUPCK.DOC (this file) oslanal.doc
+      Auto install: GUPCK.BAT
+        RS scripts: CGUPCK.S coslanal.s loslanal.s moslanal.s
+          FTP take: OSLANAL.FTP
+
+   You must already have the getmat module source code (contact author for
+   info about availability).  You will also need the include files, DCFLIP
+   and DCGETMAT, which are source code files.
+
+   Use GUPCK.BAT as you use SETANAL.BAT, giving the environment first,
+   then the drive (if different from A).  If you already have object
+   codes for the GETMAT routines, look at loslanal.s to see what to link.
+   The only new source codes for you to compile, besides your main
+   program, is GUPCKGEN.FOR and GUPCKLIB.FOR.  (See oslanal.f for an
+   example main program, using OSL.)
+
+   The summary of calls are as follows, with arguments given below.
+   (In each call, there is an INTEGER valued return code (RCODE), where
+    RCODE = 0 iff all is well;  else, error is fatal.)
+
+          GUPCK0
+          GUPCKR  with NR = 0
+          GUPCKR  for each row (NR)
+          GUPCKR  with NR > number of rows (NROWS)
+          GUPCKC  with NC = 0
+          GUPCKC  for each column (NC)
+          GUPCKC  with NC > number of columns (NCOLS)
+          GUPCKW
+
+   0. Initialize
+
+     CALL GUPCK0(PRNAME,OBNAME,RHNAME,RGNAME,BDNAME,OPNAME,
+    1            SVNAME,STNAME, LENGTH,ROWS,COLS,NZ,
+    2            VINFTY,VTOLA,VTOLR,FILE,RCODE)
+
+  Names (stored as 16-char, and case-sensitive):
+    PRNAME = problem name (required)
+    OBNAME = objective row name (required)
+    RHNAME = right-hand side name (required)
+    RGNAME = range name ('none' if none)
+    BDNAME = bound name ('none' if none)
+    SVNAME = solver name (eg, OSL or OML)
+    STNAME = solution status:
+             OPTIMAL | FEASIBLE | INFEASIBLE | UNBOUNDED | unknown
+    OPNAME = sense of opt:  MINIMIZE | MAXIMIZE
+  Numbers (long INTEGER and single precision REAL):
+    LENGTH = max name length of rows and cols (<= 16, and usually 8)
+    ROWS   = number of rows (> 0)
+    COLS   = number of columns (> 0)
+    NZ     = number of nonzeroes (>= 0)
+         Note:  NZ > 0 means NZ = number of nonzeroes, which is checked
+                   = 0 means don't know (will be tallied)
+    VINFTY = infinity (eg, 1.0E+20)
+    VTOLA  = absolute tolerance (eg, 1.0E-10)
+    VTOLR  = relative tolerance (eg, 1.0E-12)
+    FILE   = file unit number of packed (output) file
+             (opened by caller as UNFORMATTED)
+
+   1. Rows
+
+     CALL GUPCKR(RNAME,NR,VLO,VUP,VX,VP,STAT,RCODE)
+
+        RNAME = Row name
+        NR    = Row number | 0 to init | > NROWS to finish
+     The following are relevant only if 1 <= NR <= NROWS
+        VLO   = Lower bound of row
+        VUP   = Upper bound of row
+        VX    = Level of row in solution (= Ax, not the slack or surplus)
+        VP    = Dual price of row in solution
+                ...CHECK SIGN FOR THEORETICALLY CORRECT VALUE
+        STAT  = Solution status: B | I | L | U
+   First, CALL GPCKR with NR = 0...This will setup memory.
+   Last,  CALL GPCKR with NR > NROWS...This will wrap up rows section.
+
+   For debugging purposes, RNAME and STAT determine some printing options.
+   Options when NR = 0 (initial call) or NR > NROWS (last call):
+        RNAME blank  prints nothing (except fatal error messages)
+        RNAME = B|b  prints base values
+        RNAME = M|m  prints memory info, including internal pointers
+        RNAME = *    prints both of the above
+   Added options for NR > NROWS:
+        STAT = blank prints the above (according to RNAME) first
+        STAT = E|e   prints the above last (just before return)
+        STAT = *     prints first and last
+        Any other value of STAT is the same as blank.
+
+   2. Columns
+
+     CALL GUPCKC(CNAME,NC,NZ,RNAME,VCOEF,VLO,VUP,VX,VP,STAT,RCODE)
+
+        CNAME = Column name
+        NC    = Column number | 0 to init | > NCOLS to finish
+     The following are relevant only if 1 <= NC <= NCOLS
+        NZ    = Number of nonzeroes in column (MUST BE > 0)
+        RNAME(i) = Name of i-th nonzero row
+        VCOEF(i) = Value of i-th nonzero coefficient
+        VLO   = Lower bound of column
+        VUP   = Upper bound of column
+        VX    = Level of column in solution
+        VP    = Dual price of column in solution
+        STAT  = Solution status: B | I | L | U
+   First, CALL GUPCKC with NC = 0...This will setup memory.
+   Last,  CALL GUPCKC with NC > NCOLS...This will wrap up columns section.
+
+   For debugging purposes, RNAME and STAT determine some printing options.
+   Options when NC = 0 (initial call) or NC > NCOLS (last call):
+        CNAME blank suppresses messages (except fatal error).
+        CNAME = B|b  prints base values
+        CNAME = M|m  prints memory info, including internal pointers
+        CNAME = *    prints both of the above
+   Added options for NC > NCOLS:
+        STAT = blank prints the above (according to CNAME) first
+        STAT = E|e   prints the above last (just before return)
+        STAT = *     prints first and last
+        Any other value of STAT is the same as blank.
+
+   **********************************************************************
+   *                               Note                                 *
+   * Passing a non-blank for RNAME (or CNAME) and STAT in the initial   *
+   * call to GUPCKR (or GUPCKC, resp.) is for debugging, and the output *
+   * is printed to the screen, followed by a prompt to continue.  If    *
+   * your terminal has been declared as a file (so you are not running  *
+   * interactive mode), DO NOT SPECIFY A NON-BLANK.                     *
+   **********************************************************************
+
+   3. Finish setup and write packed file
+
+     CALL GUPCKW(SWMSG,SWPCK,RCODE)
+
+   SWMSG and SWPCK are declared LOGICAL*1 (do not pass as literal because
+   that is usually passed as a LOGICAL (4 bytes)).  SWMSG is the message
+   switch, and SWPCK=TRUE means write unformatted packed file (FALSE means
+   write the formatted packed file).  The file unit is presumed open
+   with the correct format specification.
+
+   There is an OSL system for the RS/6000.  The source code is oslanal.f
+   and there are script files:
+
+      cgupck.s    compiles gupckgen.f and gupcklib.f
+      coslanal.s  compiles oslanal (needs osl includes)
+      loslanal.s  links oslanal (with osl & gupck* & getmat)
+      moslanal.s  makes oslanal (compiles everything and links).
+
+   After uploading, chmod +x moslanal.s, then execute moslanal.s to change
+   other script file modes and make oslanal.
+
+   If you receive the RISC version, oslanal will already be there.  The
+   source codes require some include files that are not in the turn-
+   key RISC system.  Also not included are the other source codes in the
+   GETMAT module.  You must prepare and upload these yourself.
+
+   When running oslanal, the user is prompted for an input file name.  The
+   root of this name is used as a default packed file name, but the user
+   will be prompted to enter a different name, if he/she so wishes.  The
+   usual IO error messages appear if there is a problem, such as trying to
+   open a file that doesn't exist.
+
+   A second type of error message is when not not enough space has been
+   allocated to one of the primary arrays (VALUE or INDEX).  The
+   dimensions are in DCGETMAT.  If you change them, you should also
+   re-compile the GETMAT module and create another ANALYZE executable to
+   match the dimensions for oslanal.
+
+   A third type of error message pertains to an internal verification of
+   the nonzeroes specified when calling GUPCK0.  You will see that oslanal
+   takes this from OSL's Inumels + nonzeroes in the objective.  (ANALYZE
+   treats the objective as another row.)
+
+   The following applies only if you passed the number of nonzeroes to
+   GUPCK0 (ie, NZ > 0).  When looping over the columns, the number of
+   nonzeroes remaining is the original number minus what had been passed
+   so far.  If this becomes negative, there is a discrepency, and
+   execution must stop because memory might have become corrupted.  The
+   final call to GUPCKC checks that the number remaining is zero, and a
+   fatal error is given if it is positive.  If you did not change oslanal,
+   please report this; otherwise, check your code and be sure you included
+   the objective row coefficients in the initial call as well as all
+   column calls.
+
+   Notice the structure of oslanal.f, so you can copy it for your own
+   structure.
+
+   ......................................................................
+   |    Declare stuff                                                   |
+   |                                                                    |
+   |    Set the values for initialization, then:                        |
+   |  CALL GUPCK0(PRNAME,OBNAME,RHNAME,RGNAME,BDNAME,OPNAME,            |
+   | 1            SVNAME,STNAME, LENGTH,ROWS,COLS,NZ,                   |
+   | 2            VINFTY,VTOLA,VTOLR,FILE,RCODE)                        |
+   |  IF( RCODE.NE.0 )RETURN                                            |
+   |                                                                    |
+   |  CALL GUPCKR(' ',0,Dummy,Dummy,Dummy,Dummy,' ',RCODE)              |
+   |  IF( RCODE.NE.0 )RETURN                                            |
+   |  DO I=1,NROWS                                                      |
+   |    Set the rim values of the rows, then:                           |
+   |    CALL GUPCKR(RNAME,I,VLO,VUP,VX,VP,STAT,RCODE)                   |
+   |    IF( RCODE.NE.0 )RETURN                                          |
+   |  END DO                                                            |
+   |                                                                    |
+   |  CALL GUPCKR(' ',NROWS+1,Dummy,Dummy,Dummy,Dummy,' ',RCODE)        |
+   |  IF( RCODE.NE.0 )RETURN                                            |
+   |  CALL GUPCKC(' ',0,1,RNAME,VCOEF,Dummy,Dummy,Dummy,Dummy,' ',RCODE)|
+   |  IF( RCODE.NE.0 )RETURN                                            |
+   |                                                                    |
+   |  DO J=1,NCOLS                                                      |
+   |    Set the rim values and nonzero lists of columns, then:          |
+   |    CALL GUPCKC(CNAME,J,NZ,RNAME,VCOEF,VLO,VUP,VX,VP,STAT,RCODE)    |
+   |    IF( RCODE.NE.0 )RETURN                                          |
+   |  END DO                                                            |
+   |  CALL GUPCKC(' ',NCOLS+1,1,RNAME,VCOEF,                            |
+   | 1            Dummy,Dummy,Dummy,Dummy,' ',RCODE)                    |
+   |  IF( RCODE.NE.0 )RETURN                                            |
+   |                                                                    |
+   |  Set SWMSG and SWPCK, then:                                        |
+   |  CALL GUPCKW(SWMSG,SWPCK,RCODE)                                    |
+   |                                                                    |
+   |  Done (RCODE=0 means all is well;  packed file written)            |
+   |....................................................................|
+

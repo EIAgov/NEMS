@@ -1,0 +1,22 @@
+!  $Header: m:/default/includes/RCS/dsmhelm,v 1.4 2011/08/08 13:10:33 LC2 Exp $
+! ===== (DSMHELM) =====
+!**** This variables are used for communication within DSMHELM
+      INTEGER*2 K1 ! CURRENT YEAR NUMBER
+      INTEGER*2 UBASEYR ! EIther CURIYR or CURIYR - 1 for ecp
+      INTEGER*2 RNB  ! CURRENT REGION NUMBER
+      REAL*8 SYLOAD(MAXHOUR) ! system hourly loads
+      REAL*8 SectorLoad(MAXHOUR,MAXSEC) ! sectoral loads
+      REAL*8 SystemPeak(MNUMYR+ECP_D_FPH) ! System peaks for all years
+      INTEGER*2 SystemPeakMonth(MNUMYR+ECP_D_FPH) !System peak month
+      INTEGER*2 SystemPeakDay(MNUMYR+ECP_D_FPH) !System peak day
+      INTEGER*2 SystemPeakHour(MNUMYR+ECP_D_FPH) !System peak hour
+      REAL*8 SystemLoadFactor(MNUMYR+ECP_D_FPH) !System load factor
+      REAL*8 TotSystemLoad(MNUMYR+ECP_D_FPH) !Total annual system load
+      INTEGER valloadrec(MNUMYR+ECP_D_XPH,MAXNRG) ! map of VALCAP output records
+      INTEGER vallastyr ! last year valcap provides load shapes
+      REAL*4  valdem(MNUMYR+ECP_D_XPH,MAXNRG) ! VALCAP annual energy demands
+      REAL*4  SYSLDHR(MNUMYR,MAXNRG,MAXHOUR) ! system load by original calendar hours
+      COMMON/DSMHLr/SYLOAD,SectorLoad,SystemPeak,SystemLoadFactor &
+      ,TotSystemLoad,valdem,vallastyr,valloadrec,SYSLDHR
+      COMMON/DSMHLi/K1,RNB,SystemPeakMonth,SystemPeakDay, &
+      SystemPeakHour,UBASEYR

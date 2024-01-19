@@ -1,0 +1,19 @@
+@echo off
+if exist SYSWHIZ.act del SYSWHIZ.act
+if exist BAXPMM1.dat del BAXPMM1.dat
+if exist BAXPMM2.dat del BAXPMM2.dat
+if exist BASPMM1.dat del BASPMM1.dat
+if exist BASPMM2.dat del BASPMM2.dat
+if exist BASEMMO.dat del BASEMMO.dat
+if exist BASEMMI.dat del BASEMMI.dat
+if exist MPSPMM.dat del MPSPMM.dat
+if exist MPSNRM.dat del MPSNRM.dat
+if exist ACTEMMI.act del ACTEMMI.act
+if exist ACTPMM1.act del ACTPMM1.act
+if exist ACTPMM2.act del ACTPMM2.act
+if exist ACTFCES.act del ACTFCES.act
+if exist ACTFEDN.act del ACTFEDN.act
+if exist COAL1CPS del COAL1CPS
+if exist EDN0SLC del EDN0SLC
+if exist CTSSoln.gdx del CTSSoln.gdx
+if exist CTSSavR.gdx del CTSSavR.gdx

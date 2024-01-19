@@ -1,0 +1,23 @@
+ SWITCH MSG=F
+ READ P PRSUB
+ READ S
+ SWITCH MSG=T
+$     PRSUB.....a simplified energy market model
+$ Start with a picture (PIC *,*) and use EXPLAIN to become familiar with
+$ the model.  Note column ZSUB is a "substitute fuel bundle."  One basic
+$ question you should address is the following.
+$     What effect does the substitute fuel bundle activity (ZSUB)
+$     have on the utility decision to use gas or oil?
+$ Related questions, which you should address first, are:
+$     Which activities must be basic in a feasible solution?
+$     Why must either XNG or XDS be basic?
+$
+$ The first question will explain certain marginal prices (hint:  TELD
+$ is one that must be basic).  The second question will help you to relate
+$ the relevant activities via price relations.
+$
+$ In this optimal solution (for the data) ZSUB is nonbasic.  Use the RATEOF
+$ command to see its range and rates of substitution.  What if the data
+$ changed to where the level of ZSUB is positive in an optimal solution?
+ SUB *
+ RETURN Q

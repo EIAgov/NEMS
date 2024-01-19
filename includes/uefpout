@@ -1,0 +1,26 @@
+!  $Header: m:/default/includes/RCS/uefpout,v 1.3 2007/10/03 11:48:48 pkc Exp $
+!  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!     INCLUDE(EMM$PARM)
+!
+!   UEFP OUTPUT VARIABLES
+!
+!         CENSUS DIVISIONS
+      REAL PELAV(MNUMCR,MNUMYR)  ! 1 Utility avoided costs
+      REAL PELCP(MNUMCR,MNUMYR)  ! 2 Capital component of price
+      REAL PELFL(MNUMCR,MNUMYR)  ! 3 Fuel component of price
+      REAL PELOM(MNUMCR,MNUMYR)  ! 4 O&M component of price
+      REAL PELWH(MNUMCR,MNUMYR)  ! 5 Wholesale Electricity Price
+      REAL PELME(MNUMCR,MNUMYR)  ! 6 Marginal Energy Price
+      REAL PELTL(MNUMCR,MNUMYR)  ! 7 Total price
+      REAL PELBS(MNUMCR,MNUMYR)  ! 8 Marginal Energy Price of Base Load Generation
+                                 !   (i.e. Time Weighted - Energy and Reliability)      
+!
+!   UEFP OUTPUT COMMON BLOCK
+!
+      COMMON/UEFPOUT/PELAV,PELCP,PELFL,PELOM,PELWH,PELME,PELTL,PELBS
+!   Equivalence for FILER used for data storage
+      REAL UEFPDAT(MNUMYR*(8*MNUMCR))
+      EQUIVALENCE (UEFPDAT,PELAV)

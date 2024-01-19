@@ -1,0 +1,67 @@
+! $Header: N:/default/includes/RCS/bildout,v 1.7 2002/09/17 21:49:57 RSC Exp $
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!     BILDOUT STORES SELECTED OUTPUT FROM THE ECP SOLUTION MATRIX
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+       COMMON /BILDOUT/  EPAVOID, EPBANK,  EPALLOW, EPRMRGN, EPRENEW,  & !REAL
+       EPALLNOX, &
+       EPLVCAP, EPLVFCF, EPLVFOM, EPLVFLC, EPLVVOM, EPLVEXT,          &
+       EPLVTRN, EPLVBCK,  EPTAVD, &
+       EPPLNM, EPXFLPR, EPXCLPR, EPXCAPR, EPXCBPR, EPXCCPR, &
+       EPXCDPR, EPXRSPR, EPXNGPR, &
+       EPBOUTL                                                        ! CHAR
+!
+      INTEGER ESIZ$BOUT,EBLK$BOUT,ELFT$BOUT
+!
+      PARAMETER( ESIZ$BOUT = ( ( 2 * 4) + &
+        (2 * 4 * ECP_D_XPH) + &
+        (1 * 4 * NOX_D_GRP * ECP_D_XPH) + &
+        (11 * 4 * ECP_D_CAP) + &
+        (1 * 4 * EFD_D_NFL * ECP_D_FPH) + &
+        (8 * 4 * ECP_D_FPH) + &
+        (1 * 4 * ECP_D_CAP * ECP_D_MSP) + &
+        (1 * 4 * ECP_D_VLS * ECP_D_XPH) )  )
+!
+      PARAMETER (EBLK$BOUT = ( (ESIZ$BOUT - 1) / 1024) + 1)
+      PARAMETER (ELFT$BOUT = EBLK$BOUT * 1024 - ESIZ$BOUT)
+!
+!  Avoided Costs and SO2 Allowance Costs
+!
+      REAL*4 EPAVOID(ECP_D_VLS,ECP_D_XPH)  ! Electricity Avoided Costs
+      REAL*4 EPBANK                    ! Current Year SO2 Allowance Banking Decision
+      REAL*4 EPALLOW(ECP_D_XPH)          ! Current Year SO2 Allowance Cost
+      REAL*4 EPALLNOX(NOX_D_GRP,ECP_D_XPH) ! Current Year NOX Allowance Cost (DUAL)
+      REAL*4 EPRETRO                   ! Current Year Retrofit Decision
+      REAL*4 EPRMRGN(ECP_D_XPH)          ! Reserve Margin Avoided Cost
+      REAL*4 EPRENEW(ECP_D_XPH)          ! Cost of Ren. Port. Standard Credit
+!
+!  Levelized and Avoided Costs By ECP Technology
+!
+      REAL*4 EPLVCAP(ECP_D_CAP,2)        ! Levelized Capital Costs (by owner)
+      REAL*4 EPLVFCF(ECP_D_CAP,2)        ! Levelized Fixed Cost Factor (by owner)
+      REAL*4 EPLVFOM(ECP_D_CAP)          ! Levelized Fixed O&M Costs
+      REAL*4 EPLVFLC(ECP_D_CAP)          ! Levelized Fuel Costs
+      REAL*4 EPLVVOM(ECP_D_CAP)          ! Levelized Variable O&M Costs
+      REAL*4 EPLVEXT(ECP_D_CAP)          ! Levelized Externality Costs
+      REAL*4 EPLVTRN(ECP_D_CAP)          ! Levelized Interconnection Costs
+      REAL*4 EPLVBCK(ECP_D_CAP)          ! Levelized Backup Costs
+      REAL*4 EPTAVD(ECP_D_CAP)           ! Total Avoided Cost
+!
+!  PLANNED MAINTENANCE DECISIONS (%) BY ECP TECHNOLOGY AND SEASON
+!
+      REAL*4 EPPLNM(ECP_D_CAP,ECP_D_MSP)   ! Seasonal Planned maintenance
+!
+!   Expected Fuel Prices
+!
+      REAL*4 EPXFLPR(EFD_D_NFL,ECP_D_FPH)  ! Expected Avg Fuel Price (REAL)
+      REAL*4 EPXCLPR(ECP_D_FPH)          ! Expected Avg Coal Price (REAL)
+      REAL*4 EPXCAPR(ECP_D_FPH)          ! Expected Avg LS Coal  Price (REAL)
+      REAL*4 EPXCBPR(ECP_D_FPH)          ! Expected Avg MS Coal  Price (REAL)
+      REAL*4 EPXCCPR(ECP_D_FPH)          ! Expected Avg HS Coal  Price (REAL)
+      REAL*4 EPXCDPR(ECP_D_FPH)          ! Expected Avg VH Coal Price (REAL)
+      REAL*4 EPXRSPR(ECP_D_FPH)          ! Expected Avg RES Oil Price (REAL)
+      REAL*4 EPXNGPR(ECP_D_FPH)          ! Expected Avg Nat Gas Price (REAL)
+!
+      CHARACTER*1 EPBOUTL(ELFT$BOUT+1)
+      CHARACTER*1024 EBILDOUT(EBLK$BOUT)
+
+      EQUIVALENCE (EPAVOID(1,1),EBILDOUT(1))

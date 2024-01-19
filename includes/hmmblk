@@ -1,0 +1,112 @@
+! -*- f90 -*-
+!  $Header: m:/default/includes/RCS/hmmblk,v 1.6 2009/05/22 15:38:13 RSC Exp $
+!  NEMS Hydrogen Market Model Variables 
+!
+! PARAMETERS
+      INTEGER HSIZE
+      INTEGER HMKT
+      INTEGER NUMFUEL
+      PARAMETER (NUMFUEL=6)
+      PARAMETER(HMKT=3)
+      INTEGER PCHTCH
+      PARAMETER (PCHTCH=8)
+      INTEGER PGHTCH
+      PARAMETER (PGHTCH=2)
+      INTEGER PFHTCH
+      PARAMETER (PFHTCH=3)
+      INTEGER TCHTCH
+      PARAMETER (TCHTCH=3)
+      INTEGER TGHTCH
+      PARAMETER (TGHTCH=3)
+      INTEGER DOHTCH
+      PARAMETER (DOHTCH=5)
+      INTEGER SOHTCH
+      PARAMETER (SOHTCH=3)
+      INTEGER SGHTCH
+      PARAMETER (SGHTCH=1)
+!
+!      INTEGER TTDNDX
+!      PARAMETER (TTDNDX=27)
+!
+      INTEGER TOTNDX
+      PARAMETER (TOTNDX=PCHTCH+PGHTCH-1+PFHTCH+TCHTCH+TGHTCH+DOHTCH+SOHTCH-1+SGHTCH)
+      PARAMETER (HSIZE = 2*(MNUMYR*MNUMCR*HMKT*TOTNDX) + &                  ! PHMM,HMMPRD
+                         7*(MNUMYR*MNUMCR*HMKT) + &                         ! HMGSCNS,HMCLCNS,HMBICNS,HMELCNS,HMURCNS,HMETCNS,HSTAT
+                         MNUMCR*HMKT + &                                    ! MSHARE
+                         MNUMYR*PCHTCH + MNUMYR*PGHTCH + MNUMYR*PFHTCH + &  ! PCFCP,PGFCP,PFFCP
+                         MNUMYR*MNUMCR*(PCHTCH+PGHTCH+PFHTCH)          + &  ! HCNSTECH
+                         12*MNUMYR*MNUMCR )                                 ! HM**PRD,HM**HP
+!      
+! PRICES
+!
+      REAL PHMM(MNUMYR,MNUMCR,HMKT,TOTNDX) ! Hydrogen prices (87$/kg)
+!
+! Quantities
+!
+      REAL HMMPRD(MNUMYR,MNUMCR,HMKT,TOTNDX)  ! hydrogen quantities (bil. kg)
+      
+!
+! BTUs of produced hydrogen by fuel type
+!
+!            
+      REAL HMGSPRD(MNUMYR,MNUMCR)  ! trills gas
+      REAL HMCLPRD(MNUMYR,MNUMCR)  ! trills coal
+      REAL HMBIPRD(MNUMYR,MNUMCR)  ! trills bio
+      REAL HMELPRD(MNUMYR,MNUMCR)  ! trills elec
+      REAL HMURPRD(MNUMYR,MNUMCR)  ! trills uranium
+      REAL HMETPRD(MNUMYR,MNUMCR)  ! trills ethanol
+      
+!
+! Inputs to hydrogen production by fuel type (Heat and Power)
+!
+      REAL HMGSHP(MNUMYR,MNUMCR)  ! trills gas
+      REAL HMCLHP(MNUMYR,MNUMCR)  ! trills coal
+      REAL HMBIHP(MNUMYR,MNUMCR)  ! trills bio
+      REAL HMELHP(MNUMYR,MNUMCR)  ! trills elec
+      REAL HMURHP(MNUMYR,MNUMCR)  ! trills uranium
+      REAL HMETHP(MNUMYR,MNUMCR)  ! trills ethanol
+      
+!
+! Consumption by submarket
+!
+      REAL HMGSCNS(MNUMYR,MNUMCR,HMKT)  ! quads gas
+      REAL HMCLCNS(MNUMYR,MNUMCR,HMKT)  ! quads coal
+      REAL HMBICNS(MNUMYR,MNUMCR,HMKT)  ! quads bio
+      REAL HMELCNS(MNUMYR,MNUMCR,HMKT)  ! quads elec
+      REAL HMURCNS(MNUMYR,MNUMCR,HMKT)  ! quads uranium
+      REAL HMETCNS(MNUMYR,MNUMCR,HMKT)  ! quads ethanol
+!
+! VMT Market Shares
+!
+      REAL MSHARE(MNUMCR,HMKT)
+      
+!
+! Input - hmmindat.txt 
+!
+! Fraction CaPtured   (used in sequestration tech price and emission calculations)
+!
+      REAL PCFCP(MNUMYR,PCHTCH)    !Fraction Captured-central
+      REAL PGFCP(MNUMYR,PGHTCH)    !Fraction Captured-citygate
+      REAL PFFCP(MNUMYR,PFHTCH)    !Fraction Captured-forecourt
+
+!
+! Consumption by technology (quads)
+!
+      REAL HCNSTECH(MNUMYR,MNUMCR,PCHTCH+PGHTCH+PFHTCH)      
+      
+!
+! Number of hydrogen fueling station by region,market
+!
+      REAL HSTAT(MNUMYR,MNUMCR,HMKT)        
+
+
+COMMON/HMMBLK/PHMM,HMMPRD, &
+              HMGSCNS,HMCLCNS,HMBICNS,HMELCNS,HMURCNS,HMETCNS, &
+              HMGSPRD,HMCLPRD,HMBIPRD,HMELPRD,HMURPRD,HMETPRD, &
+              HMGSHP,HMCLHP,HMBIHP,HMELHP,HMURHP,HMETHP, &
+              MSHARE,PCFCP,PGFCP,PFFCP,HCNSTECH,HSTAT
+
+REAL HMARRY(HSIZE)
+EQUIVALENCE(HMARRY,PHMM)
+
+

@@ -1,0 +1,65 @@
+    Function: Display rim of row or column
+    Syntax:   DISPLAY [{ROW | COL} [conditional]] [//options]
+
+    If ROW | COL is absent, current setting of switch DISP_COL is used.
+    If conditional is absent, current submatrix is used.
+
+    Options (following //) are fields displayed:
+       STATUS..........solution status
+       LEVEL | X | Y...solution level
+       LO_BOUND........lower bound
+       UP_BOUND........upper bound
+       PRICE | D.......dual price (reduced cost for column)
+       SYNTAX..........syntax (if available)
+       NOSYNTAX........suppress syntax display
+
+    No options specified after // results in just the names displayed.
+    Specifying SYNTAX or NOSYNTAX over-rides the SYNTAX switch (but
+    does not change it).  Specifying //NOSYNTAX with no other option
+    displays all values without the syntax.
+
+    Examples:
+
+    DISPLAY R *
+    ...Displays all rows
+
+    DISP   C P
+    ...Displays all columns whose name begins with P
+
+    DIS   C
+    ...Displays columns in submatrix
+
+    D  R *NE Y=0
+    ...Displays rows whose name has NE in positions 2-3 and whose level
+       (Y) is zero.
+
+    D R *NE Y=0 //LO,UP
+    ...same as above, but only the bounds (and names) are displayed.
+
+    D //
+    ...displays names of rows or columns, according to DISP_COL switch
+       setting, that are in the submatrix.
+
+    D C * //LEVEL,STAT
+    ...displays level and status of all columns.
+
+    D C * //X,STAT
+    ...same as previous.
+
+    D C * //NOSYN
+    ...displays all columns without syntax
+
+    D R * Y EQ L //SYN
+    ...displays all rows whose level equals its lower bound, with syntax
+
+    D C "CH //D
+    ...displays reduced cost of all columns whose name contains CH (in
+       any position)
+
+    D R D"CH //P
+    ...displays dual price all rows whose name begins with D and has CH in
+       any position after the first character
+
+    D R ***"CH //Y,P
+    ...displays level and price of all rows whose name contains CH in any
+       position after the 3rd character

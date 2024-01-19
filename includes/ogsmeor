@@ -1,0 +1,301 @@
+!  $Header: m:/default/includes/RCS/ogsmeor,v 1.16 2019/08/13 21:32:29 rsc Exp $
+      REAL*4    PR_INCR                ! PRICE INCREMENT VALUE
+      REAL*4    MIN_INDEX, MAX_INDEX   ! PRICE RANGE FOR REVERVE VALUES
+      REAL*4    MIN_PRV, MAX_PRV       ! PRICE RANGE FOR PROVED RESERVES
+      INTEGER   NUM_PRV                ! NUMBER OF PROVED PRICE INTERVALS
+      REAL*4    MIN_INF, MAX_INF       ! PRICE RANGE FOR INFERRED RESERVES
+      INTEGER   NUM_INF                ! NUMBER OF INFERRED PRICE INTERVALS
+      INTEGER   NUM_EOR                ! NUMBER OF EOR TYPES
+                                       ! (1=THERMAL,2=CO2,3=OTHER)
+      INTEGER   NUM_DEV                ! NUMBER OF DEVELOPMENT SCHEDULES
+      INTEGER   TECH_CASE              ! TYPE OF TECHNOLOGY
+                                       ! (1=BASE, 2=ADVANCED)
+      INTEGER   NUM_TECH               ! TOT NUMBER OF TECHNOLOGY CASE
+                                       ! (1=BASE, 2=ADVANCED)
+      INTEGER   NUM_COG                ! NUMBER OF COGENERATION
+
+      PARAMETER (PR_INCR=0.5)
+      PARAMETER (MIN_INDEX=4, MAX_INDEX=30)
+      PARAMETER (MIN_PRV=4, MAX_PRV=30)
+      PARAMETER (NUM_PRV=((MAX_PRV-MIN_PRV)*2)+1)
+      PARAMETER (MIN_INF=7, MAX_INF=35)
+      PARAMETER (NUM_INF=((MAX_INF-MIN_INF)*2)+1)
+      PARAMETER (NUM_EOR=3)
+      PARAMETER (NUM_DEV=11)
+      PARAMETER (TECH_CASE=1)
+      PARAMETER (NUM_TECH=3)
+      PARAMETER (NUM_COG=6)
+
+!  VARIABLES USED TO READ IN FROM WLPDS(EOR) FILE
+!
+      COMMON /EOR_INPUT/ PRV_HEADER, INF_HEADER, &
+         PRV_RPRICE, INF_RPRICE, ROPRICE, WOPRICE, RGPRICE, &
+         PRV_PR, INF_PR, &
+         DEV_SCHED, &
+         PRV_PS_TBL, INF_PS_TBL, INVEST_TBL, &
+         LPROFIT, UPROFIT, DEV_YRS, PR_MATRIX, MAX_EOR
+
+      CHARACTER*30 PRV_HEADER(L48RGN,NUM_EOR,10) ! HEADER INFO
+      CHARACTER*30 INF_HEADER(L48RGN,NUM_EOR,10) ! HEADER INFO
+      REAL*4    PRV_RPRICE(NUM_PRV) ! PRICE INCREMENT FOR PROVED RES
+      REAL*4    INF_RPRICE(NUM_INF) ! PRICE INCREMENT FOR INFER. RES
+      REAL*4    ROPRICE(L48RGN,NUM_EOR,MNUMYR) ! REGIONAL OIL PRICE
+      REAL*4    RGPRICE(L48RGN,MNUMYR,2) ! 1=ARI ASSUMED, 2=NGTDM
+      REAL*4    WOPRICE(MNUMYR) ! WORLD OIL PRICE
+      REAL*4    PRV_PR(NUM_TECH,L48RGN,NUM_EOR,MNUMYR) ! PROVED PR RATIO
+      REAL*4    INF_PR(NUM_TECH,L48RGN,NUM_EOR,MNUMYR) ! INFER. PR RATIO
+      REAL*4    DEV_SCHED(NUM_INF) ! DEVELOPMENT SCHEDULE
+!  CUMMULATIVE DEVELOPMENT SCHEDULE
+      REAL*4    CDEV_SCHED(NUM_TECH,L48RGN,NUM_EOR,NUM_INF)
+!  PROVED RES. PRICE SUPPLY TABLE
+      REAL*4    PRV_PS_TBL(NUM_TECH,L48RGN,NUM_EOR,MNUMYR,NUM_PRV)
+!  INF. RES. PRICE SUPPLY TABLE
+      REAL*4    INF_PS_TBL(NUM_TECH,L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+!  INVESTMENT POOL TABLE
+      REAL*4    INVEST_TBL(NUM_TECH,L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    LPROFIT(NUM_TECH,L48RGN,NUM_EOR,NUM_DEV)
+      REAL*4    UPROFIT(NUM_TECH,L48RGN,NUM_EOR,NUM_DEV)
+!  DEVELOPMENT YEARS
+      REAL*4    DEV_YRS(NUM_TECH,L48RGN,NUM_EOR,NUM_DEV)
+      INTEGER   PR_MATRIX(L48RGN,NUM_TECH) ! OIL TYPE PRICE MATRIX
+      INTEGER   MAX_EOR ! 1 FOR ADVANCED TECH, 2 FOR BASE TECH
+
+!  RESERVES AND PRODUCTION RELATED DATA
+!
+      COMMON /TWELLEOR/ &
+         PRV_RES, PRV_PROD, &
+         TN_PROD, TMP_RES, TRP_RES, TUI_RES, TEUI_RES, TNP_RES
+
+      REAL*4    PRV_RES(L48RGN,NUM_EOR)  ! PROVED RESERVES
+      REAL*4    PRV_PROD(L48RGN,NUM_EOR) ! PRODUCTION FROM INITIAL STOCK
+      REAL*4    TN_PROD(L48RGN,NUM_EOR)  ! PRODUCTION FROM NEW DRILLING
+      REAL*4    TMP_RES(L48RGN,NUM_EOR)  ! CUMULATIVE RESERVES
+      REAL*4    TRP_RES(L48RGN,NUM_EOR)  ! CURRENT RESERVES
+      REAL*4    TUI_RES(L48RGN,NUM_EOR)  ! UNDEVELOPED INFERRED RES.
+      REAL*4    TEUI_RES(L48RGN,NUM_EOR) ! ECON UND. INFERRED RES.
+      REAL*4    TNP_RES(L48RGN,NUM_EOR)  ! NEW PROVED RES.
+
+!  EMISSIONS, COGENERATION AND FUEL RELATED VARIABLES
+!
+      COMMON /ECFVAR/ TP_INVEST_YR, &
+         SIFAC, NGFFAC, COGFAC, EORFAC, &
+         PRV_STEAM, PRV_NGFUEL, PRV_UTIL, PRV_COGEN, PRV_EOREM, &
+         INF_STEAM, INF_NGFUEL, INF_UTIL, INF_COGEN, INF_EOREM, &
+         ACT_COGEN, ADJFAC_EMM, HCGOGQ, HCGOGGEN
+
+      REAL*4    TP_INVEST_YR(L48RGN,NUM_EOR) ! INVESTMENT YEARS
+
+      REAL*4    SIFAC  ! FACTOR FOR STEAM INJECTION
+      REAL*4    NGFFAC ! FACTOR FOR NATUAL GAS FUEL CONSUMPTION
+      REAL*4    COGFAC ! COGENERATION FACTOR
+      REAL*4    EORFAC(MNPOLLUT)  !EOR EMISSIONS FACTORS
+
+      REAL*4    PRV_STEAM(L48RGN) ! STEAM INJECTION
+      REAL*4    PRV_NGFUEL(L48RGN,3) ! NATUAL GAS FUEL INJECTION
+      REAL*4    PRV_UTIL(L48RGN,NUM_EOR,MNUMYR,4) ! UTILIZATION FACTORS
+      REAL*4    PRV_COGEN(L48RGN,NUM_COG) ! COGENERATION
+      REAL*4    PRV_EOREM(L48RGN,MNPOLLUT) !EOR EMISSIONS
+                                     !(C,CO,CO2,SOX,NOX,VOC,CH4,PART)
+      REAL*4    INF_STEAM(L48RGN) ! STEAM INJECTION
+      REAL*4    INF_NGFUEL(L48RGN,3) ! NATUAL GAS FUEL CONSUMPTION
+      REAL*4    INF_UTIL(L48RGN,NUM_EOR,MNUMYR,4) ! UTILIZATION FACTOR
+      REAL*4    INF_COGEN(L48RGN,NUM_COG) ! COGENERATION
+      REAL*4    INF_EOREM(L48RGN,MNPOLLUT) !EOR EMISSIONS
+                                     !(C,CO,CO2,SOX,NOX,VOC,CH4,PART)
+      REAL*4    ACT_COGEN(L48RGN,MNUMYR) ! COGENERATION
+      REAL*4    ADJFAC_EMM(MNUMYR)   ! COGEN ADJ FAC TO BENCH TO EMM HIST
+      REAL*4    HCGOGQ(MNUMCR,MNUMYR)  ! HISTORICAL COGEN CONSUMPTION
+      REAL*4    HCGOGGEN(MNUMYR)       ! NATL HISTORICAL COGEN GENERATION
+
+!  SUMMARY VARIABLES OF EOR
+!
+      COMMON /SUMVAR/ TOT_PROD, TOT_RES, TOT_RAD, TOT_INV, TOT_EMI, &
+         OGQEORRS, OGQEORRA, OGQEORPRC
+
+      REAL*4    TOT_PROD(L48RGN,NUM_EOR,MNUMYR)! TOT PRODUCTION
+      REAL*4    TOT_RES(L48RGN,NUM_EOR,MNUMYR) ! TOT RESERVES
+      REAL*4    TOT_RAD(L48RGN,NUM_EOR,MNUMYR) ! TOT RES. ADDITION
+      REAL*4    TOT_INV(L48RGN,NUM_EOR,MNUMYR) ! TOT INVESTMENT
+      REAL*4    TOT_EMI(MNPOLLUT,MNUMYR) ! TOT EMISSIONS
+      REAL*4    OGQEORRS(L48RGN,MNUMYR)  ! TOTAL RESERVES
+      REAL*4    OGQEORRA(L48RGN,MNUMYR)  ! TOTAL RESERVE ADDITIONS
+      REAL*4    OGQEORPRC(L48RGN,MNUMYR) ! WEIGHTED AVERAGE PRICE, THERM,CO2
+
+!  TEMPORARY VARIABLES FOR REPORTING PURPOSES
+!
+      COMMON /TEMPVAR/ &
+         T_ROPRICE, T_WOPRICE, &
+         T_PRV_RES, T_PRV_PROD, T_DEV_SCHED, &
+         T_NEW_PRV_RES, T_CUM_PRV_RES, T_CUR_PRV_RES, T_UND_INF_RES, &
+         T_NEW_PROD, &
+         T_INVEST_YR, &
+         T_PRV_STEAM, T_PRV_NGFUEL, T_PRV_COGEN, T_PRV_EOREM, &
+         T_INF_STEAM, T_INF_NGFUEL, T_INF_COGEN, T_INF_EOREM, &
+         T_FLAG, EORBYR, EORHYR, &
+         T_PLATFORM
+
+      REAL*4    T_ROPRICE(L48RGN,NUM_EOR,MNUMYR)
+      REAL*4    T_WOPRICE(MNUMYR)
+
+      REAL*4    T_PRV_RES(L48RGN,NUM_EOR,MNUMYR)
+      REAL*4    T_PRV_PROD(L48RGN,NUM_EOR,MNUMYR)
+      REAL*4    T_DEV_SCHED(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    T_UND_INF_RES(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    T_NEW_PRV_RES(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    T_CUM_PRV_RES(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    T_CUR_PRV_RES(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    T_NEW_PROD(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+      REAL*4    T_INVEST_YR(L48RGN,NUM_EOR,MNUMYR,NUM_INF)
+
+      REAL*4    T_PRV_STEAM(L48RGN,MNUMYR)
+      REAL*4    T_PRV_NGFUEL(L48RGN,MNUMYR,3)
+      REAL*4    T_PRV_COGEN(L48RGN,MNUMYR,NUM_COG)
+      REAL*4    T_PRV_EORFAC(L48RGN,MNPOLLUT) !EOR EMISSIONS FACTORS
+      REAL*4    T_PRV_EOREM(L48RGN,MNPOLLUT,MNUMYR) !EOR EMISSIONS
+                                     !(C,CO,CO2,SOX,NOX,VOC,CH4,PART)
+      REAL*4    T_INF_STEAM(L48RGN,MNUMYR)
+      REAL*4    T_INF_NGFUEL(L48RGN,MNUMYR,3)
+      REAL*4    T_INF_COGEN(L48RGN,MNUMYR,NUM_COG)
+      REAL*4    T_INF_EORFAC(L48RGN,MNPOLLUT) !EOR EMISSIONS FACTORS
+      REAL*4    T_INF_EOREM(L48RGN,MNPOLLUT,MNUMYR) !EOR EMISSIONS
+                                     !(C,CO,CO2,SOX,NOX,VOC,CH4,PART)
+      INTEGER   T_FLAG(L48RGN,NUM_EOR,2)  ! 1=READ FLAG, 2=WRITE FLAG
+      INTEGER   EORBYR               ! EOR BASE (START) YEAR
+      INTEGER   EORHYR               ! EOR LAST HISTORICAL YEAR
+      CHARACTER*2 T_PLATFORM
+!
+!  START OF ADDED INCLUDES TO HANDLE SPREADSHEET CONVERTED TO FORTRAN
+!
+      INTEGER*4 NIFLD              ! num of prod flds for TEOR inf, reg. 6
+      INTEGER*4 NPFLD              ! num of prod flds for TEOR prv, reg. 6
+      INTEGER*4 NPRDCAT            ! num of prod cat for TEOR prv, reg 6
+      PARAMETER (NIFLD=14,NPFLD=10,NPRDCAT=8)
+
+
+      COMMON /OGEOR1/ &
+        API_GRV(NIFLD), &
+        AVGRDEPTH(NIFLD), &
+        BOYRES_PRV(L48RGN,2), &
+        CO2RES_INF(L48RGN,MNUMYR), &
+        CALCPR_INF(5), &
+        DISCRATE, &
+        HIMPRV_REC, &
+        HLENGTH, &
+        HPRDYR, &
+        INITPRD(NPFLD,NPRDCAT), &
+        LAHPCT_COST(3), &
+        LAHPCT_RESV(3), &
+        OPRDELAY, &
+        PENMAX, &
+        PENPERD, &
+        SPLIT_INF(5,L48RGN), &
+        STMINJ(NIFLD), &
+        V92_H2ODISP, &
+        V92_STMLINE, &
+        V92_SURFLINE, &
+        V92_VAPREC, &
+        V92_PLTFAC, &
+        V92_DRILLEQ, &
+        V92_PRD2INJ, &
+        VPRDYR, &
+        VTCH_CREDUC, &
+        YRPEN, &
+        ADVALRM, &
+        DCL_RATE(NPFLD), &
+        EORWELLS(NIFLD), &
+        FAC1(NPFLD), &
+        FAC2(NPFLD,NPRDCAT), &
+        HREPLWELL(NIFLD), &
+        WELLFXOC(NIFLD), &
+        OTHOMC(NIFLD), &
+        PSPACING(NIFLD), &
+        TF_EORPROD(NIFLD), &
+        TF_FLDPROD(NIFLD), &
+        TF_FLDRESV(NIFLD), &
+        UNDEVACRE(NIFLD), &
+        VRESWELL(NIFLD), &
+        WELLOPC(NIFLD), &
+        PRV_SHUTIN(L48RGN,NUM_EOR)
+
+
+      REAL*4    API_GRV                !
+      REAL*4    AVGRDEPTH              !
+      REAL*4    BOYRES_PRV             !
+      REAL*4    CO2RES_INF             ! CO2 INFERRED RESERVES
+      REAL*4    CALCPR_INF             ! PR FLG TO DEFINE P-S INF TBL
+      REAL*4    DISCRATE               !
+      REAL*4    HIMPRV_REC             ! imprv recovery rate for horz vs vert (frac)
+      REAL*4    HLENGTH                !
+      REAL*4    HPRDYR                 ! horizontal production yrs
+      REAL*4    INITPRD                ! MIDPOINT PRODUCTION BY CATEGORY
+      REAL*4    LAHPCT_COST            !
+      REAL*4    LAHPCT_RESV            !
+      REAL*4    OPRDELAY               ! OPERATOR DELAY FACTOR FOR SHUT-IN DECISION
+      REAL*4    PENMAX                 ! maximum penetration (fraction)
+      REAL*4    PENPERD                ! penetration period (num of yrs)
+      REAL*4    SPLIT_INF              ! DEFINES SPLIT OF RESV OVER PRC IN TBL
+      REAL*4    STMINJ                 !
+      REAL*4    V92_H2ODISP            ! Water disposal costs (92$ /BW capacity)
+      REAL*4    V92_STMLINE            ! Stm manifold & flowline cst (92$ /acre)
+      REAL*4    V92_SURFLINE           ! Surface prod line cst (92$ /acre)
+      REAL*4    V92_VAPREC             ! Vapor recovery cst (92$ /acre)
+      REAL*4    V92_PLTFAC             ! Central plnt facilities cst (92$ /BOPD)
+      REAL*4    V92_DRILLEQ            ! Drill/comp/equip etc cst (92$ /foot)
+      REAL*4    V92_PRD2INJ            ! Convert producer to injector (92$ /well)
+      REAL*4    VPRDYR                 ! vertical production yrs
+      REAL*4    VTCH_CREDUC            !
+      REAL*4    YRPEN                  ! penetration change each year (frac)
+
+      REAL*4    ADVALRM                ! AD VALORUM TAX AS PCT OF WOP
+      REAL*4    DCL_RATE               ! DECLINE RATE
+      REAL*4    EORWELLS               ! num of producing EOR wells
+      REAL*4    FAC1
+      REAL*4    FAC2
+      REAL*4    HREPLWELL
+      REAL*4    WELLFXOC
+      REAL*4    OTHOMC
+      REAL*4    PSPACING
+      REAL*4    TF_EORPROD             ! TOTAL EOR PRODUCTION BY FLD (MMBO)
+      REAL*4    TF_FLDPROD             ! TOTAL PRODUCTION BY FLD (MMBO)
+      REAL*4    TF_FLDRESV             ! TOTAL RESERVES BY FLD (MMBO)
+      REAL*4    UNDEVACRE
+      REAL*4    VRESWELL
+      REAL*4    WELLOPC
+      REAL*4    PRV_SHUTIN             ! SHUTIN RES (MMBO)
+
+      COMMON /OGEOR2/ YRDOL, PHASYR
+      INTEGER*4 YRDOL         ! YEAR DOLLARS FOR VERT COST INFO
+      INTEGER*4 PHASYR
+
+!
+!  END OF NEW COMMONS FOR SPREADSHEET INTO FORTRAN
+!
+!  CO2 EOR VARIABLES FOR AEO2008 (July 2007)
+      COMMON /OGEOROUT/EORProduction,GasProduction,NGLProduction, &
+                       CO2produced,CO2Injected,CO2Recycled,CO2Purchased, &
+                       CO2Available,H2OProduction,ProducingWells,Injectors,  &
+                       NewWellsDrilled,FootageDrilled,CO2Purchased2,CO2Purchasedb,CO2Purchased45Q
+
+       REAL*4 EORProduction(l48rgn+1,13,mnumyr)
+       REAL*4 GasProduction(l48rgn+1,13,mnumyr)
+       REAL*4 NGLProduction(l48rgn+1,13,mnumyr)
+       REAL*4 CO2Produced(l48rgn+1,13,mnumyr)
+       REAL*4 CO2Injected(l48rgn+1,13,mnumyr)
+       REAL*4 CO2Recycled(l48rgn+1,13,mnumyr)
+       REAL*4 CO2Purchasedb(l48rgn+1,13,mnumyr) ! Purchased from Available Bins - Combination of Industrial sources by Price Bin
+       REAL*4 CO2Purchased2(l48rgn+1,13,mnumyr) ! Purchased at EOR sites
+       REAL*4 CO2Purchased(l48rgn+1,13,mnumyr)  ! Purchased from Available Sources
+       REAL*4 CO2Purchased45Q(l48rgn+1,13,mnumyr)  ! Purchased from Available Sources and recieves 45Q credit
+       REAL*4 CO2Available(l48rgn+1,13,mnumyr)
+       REAL*4 H2OProduction(l48rgn+1,13,mnumyr)
+       REAL*4 ProducingWells(l48rgn+1,13,mnumyr)
+       REAL*4 Injectors(l48rgn+1,13,mnumyr)
+       REAL*4 NewWellsDrilled(l48rgn+1,13,mnumyr)
+       REAL*4 FootageDrilled(l48rgn+1,13,mnumyr)
+
+       COMMON /OGEORC/CO2SOURCE
+       CHARACTER*40 CO2SOURCE(13)
+
+       COMMON /OGEORCST/INDCO2CST,CO2ADJ,CO2MAX
+       REAL*4 INDCO2CST(13)
+       REAL*4 CO2ADJ, CO2MAX

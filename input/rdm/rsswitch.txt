@@ -1,0 +1,85 @@
+FILE NAME:     RSSWITCH
+DATE MODIFIED: September 10, 2018
+USED BY:       RSSWITCHREAD subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
+DEFINITION:    Residential fuel switching parameters for end uses that cross fuels
+UNITS:         Various
+DIMENSION:     Various
+SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
+ORGANIZATION OF DATA:
+               Variables: RTFCBIAS, RPINSCOST
+               Bias parameters columns sorted by 9 census divisions; rows correspond to 11 heating/ 4 cooling equipment classes (RTCLEQCL from RSCLASS.txt; excludes Room AC);
+                each block of 11 rows corresponds to each of the 3 building types
+               Fuel switching costs matrix arranged with same heating, cooling, water heating, cooking, and clothes drying end uses along columns and rows
+SOURCES:       "Residential End Uses: Area 2: Incremental Installed Costs for Efficiency Upgrades," Navigant Consulting, Inc., 2015
+COMMENT:       Updated labels
+
+ 
+ 
+
+
+Bias paramters for new home heating fuel choice (RTFCBIAS(E,B,D))
+-7	-5	-3.3	-2.3	-3.6	-3.1	-2	-5.5	-4.8	Electric Heating Other Than Heat Pumps
+-12	-6	-5.5	-4.2	-1	-1.75	-2.6	-4	-4.3	Air-Source Heat Pumps (heating)
+-1.5	-1.85	-1.15	-1.35	-1.25	-1.85	-1.55	-1.4	-1.5	Natural Gas Furnaces
+-2.2	-4.3	-4	-3.4	-4.5	-11	-7	-4.3	-6	Natural Gas Boilers & Other
+-15	-15	-15	-15	-15	-15	-15	-15	-15	Kerosene Furnaces (unused placeholder)
+-2.5	-5.5	-4.4	-5	-4	-6	-6	-5.4	-4.8	Propane Furnaces & Other
+-1.95	-3.95	-6	-15	-11	-15	-11	-11	-15	Distillate Fuel Oil & Kerosene Furnaces
+-1.75	-4.5	-15	-10	-11	-15	-11	-11	-15	Distillate Fuel Oil & Kerosene Boilers & Other
+-15	-15	-15	-15	-15	-15	-15	-15	-15	Wood Stoves & Other
+-4.05	-3.02	-2.34	-2.52	-3.15	-1.8	-3.06	-5.04	-4.95	Ground-Source Heat Pumps (heating)
+-15	-15	-15	-15	-15	-15	-15	-15	-15	Natural Gas Heat Pumps (heating)
+-11	-11	-2.2	-2.3	-0.2	-0.3	-0.75	-3.25	-3.6	Electric Heating Other Than Heat Pumps
+-2.75	-4.45	-3.75	-4	-0.2	-0.35	-0.75	-2.75	-2.9	Air-Source Heat Pumps (heating)
+0	-1.7	-1.5	-1.6	-2.3	-2.4	-2.8	-1.5	-1.65	Natural Gas Furnaces
+-11	-15	-11	-11	-11	-11	-11	-15	-15	Natural Gas Boilers & Other
+-11	-11	-11	-11	-11	-11	-11	-15	-15	Kerosene Furnaces (unused placeholder)
+-11	-15	-11	-11	-11	-11	-11	-15	-15	Propane Furnaces & Other
+-3	-4.65	-11	-11	-11	-11	-11	-15	-15	Distillate Fuel Oil & Kerosene Furnaces
+-11	-15	-11	-11	-11	-11	-11	-15	-15	Distillate Fuel Oil & Kerosene Boilers & Other
+-11	-11	-11	-11	-11	-11	-11	-15	-15	Wood Stoves & Other
+-11	-11	-11	-11	-11	-11	-11	-15	-15	Ground-Source Heat Pumps (heating)
+-11	-15	-11	-12	-11	-11	-11	-15	-15	Natural Gas Heat Pumps (heating)
+-11	-11	-11	-1.65	-0.85	-0.5	0	-2.2	-3.1	Electric Heating Other Than Heat Pumps
+-11	-11	-11	-11	-0.9	-3	-2.25	-3.5	-15	Air-Source Heat Pumps (heating)
+-11	-2.55	-3	-11	-1.9	-3.7	-2.6	-2.5	-3.85	Natural Gas Furnaces
+-11	-11	-11	-11	-11	-11	-11	-11	-4.15	Natural Gas Boilers & Other
+0	-0.3	-11	-11	-11	-3.5	-11	-11	-12	Kerosene Furnaces (unused placeholder)
+-11	-1.1	-4.1	-1	-2.7	-1.4	-1.75	-0.9	-12	Propane Furnaces & Other
+-1	-2	-11	-11	-11	-11	-11	-11	-12	Distillate Fuel Oil & Kerosene Furnaces
+-11	-11	-11	-11	-11	-11	-11	-11	-12	Distillate Fuel Oil & Kerosene Boilers & Other
+-11	-11	-11	-11	-11	-11	-11	-11	-12	Wood Stoves & Other
+-11	-11	-11	-11	-11	-11	-11	-11	-12	Ground-Source Heat Pumps (heating)
+-11	-11	-11	-11	-11	-11	-11	-11	-15	Natural Gas Heat Pumps (heating)
+
+
+ELEC	ELEC	NG	NG	KERO	LPG	DIST	DIST	WOOD	GEO	NG	NOT	NOT	NOT	NOT	NOT	NOT	NOT	NG	ELEC	DIST	LPG	SOLAR	NG	LPG	ELEC	NG	ELEC	<--Switch From
+_RAD	_HP	_FA	_RAD	_FA	_FA	_FA	_RAD	_HT	_HP	_HP	_USED	_USED	_USED	_USED	_USED	_USED	_USED	_WH	_WH	_WH	_WH	_WH	_STV	_STV	_STV	_DRY	_DRY	To:
+0	9999	9999	9999	9999	9999	9999	9999	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	ELEC_RAD
+1800	0	1100	9999	1900	9999	1900	2950	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	ELEC_HP
+2600	1650	0	2300	1800	1800	1800	3600	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NG_FA
+7300	7100	9999	0	8000	8000	8000	1300	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NG_RAD
+9999	9999	9999	9999	0	9999	9999	9999	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	KERO_FA
+3000	2900	9999	9999	9999	0	9999	9999	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	LPG_FA
+2700	3350	9999	9999	9999	9999	0	9999	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	DIST_FA
+9999	9999	9999	9999	9999	9999	6700	0	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	DIST_RAD
+9999	9999	9999	9999	9999	9999	9999	9999	0	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	WOOD_HT
+1800	850	1100	3200	1900	1900	1900	3700	900	0	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	GEO_HP
+9999	9999	5000	200	9999	9999	9999	9999	9999	9999	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NG_HP
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	NOT_USED
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	800	1700	1000	9500	0	0	0	0	0	NG_WH
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	200	0	1100	400	9500	0	0	0	0	0	ELEC_WH
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	9500	9500	0	9500	9500	0	0	0	0	0	DIST_WH
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	9500	9500	9500	0	9500	0	0	0	0	0	LPG_WH
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	200	200	1300	1500	0	0	0	0	0	0	SOLAR_WH
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	850	800	0	0	NG_STV
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	9500	0	9500	0	0	LPG_STV
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	200	250	0	0	0	ELEC_STV
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	800	NG_DRY
+0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	200	0	ELEC_DRY

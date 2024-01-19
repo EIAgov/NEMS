@@ -1,0 +1,975 @@
+COMPOSITE TABLE:
+MnumCR              CensDiv                  Map_Mnumcr_CensDiv
+1                   01NEN                    1
+2                   02MAT                    1
+3                   03ENC                    1
+4                   04WNC                    1
+5                   05SAT                    1
+6                   06ESC                    1
+7                   07WSC                    1
+8                   08MTN                    1
+9                   09PAC                    1
+11                  11USA                    1
+;
+COMPOSITE TABLE:
+DReg                MnumCR                   Map_DReg_MNUMCR
+01NE                1                        1
+02YP                2                        1
+03S1                5                        1
+04S2                5                        1
+05GF                5                        1
+06OH                3                        1
+07EN                3                        1
+08KT                6                        1
+09AM                6                        1
+10C1                4                        1
+11C2                4                        1
+12WS                7                        1
+13MT                8                        1
+14CU                8                        1
+15ZN                8                        1
+16PC                9                        1
+;
+COMPOSITE TABLE:
+Sec                 MajorSectorFlag
+R                   -1
+I                   -2
+C                   -3
+L                   -4
+E                   -6
+X                   -5
+;
+COMPOSITE TABLE:
+Subsec              SubSectorFlag            SubsectorOrder
+R1                  -1                       1
+R2                  -1                       2
+I1                  -2                       3
+I2                  -2                       4
+I3                  -2                       5
+C1                  -3                       6
+C2                  -3                       7
+L1                  -4                       8
+X1                  -5                       9
+X2                  -5                       10
+X3                  -5                       11
+X4                  -5                       12
+X5                  -5                       13
+X6                  -5                       14
+15                  -6                       15
+16                  -6                       16
+17                  -6                       17
+18                  -6                       18
+19                  -6                       19
+20                  -6                       20
+21                  -6                       21
+22                  -6                       22
+23                  -6                       23
+24                  -6                       24
+25                  -6                       25
+26                  -6                       26
+27                  -6                       27
+28                  -6                       28
+29                  -6                       29
+30                  -6                       30
+31                  -6                       31
+32                  -6                       32
+33                  -6                       33
+34                  -6                       34
+35                  -6                       35
+36                  -6                       36
+37                  -6                       37
+38                  -6                       38
+39                  -6                       39
+40                  -6                       40
+41                  -6                       41
+42                  -6                       42
+43                  -6                       43
+44                  -6                       44
+45                  -6                       45
+46                  -6                       46
+47                  -6                       47
+48                  -6                       48
+49                  -6                       49
+50                  -6                       50
+51                  -6                       51
+52                  -6                       52
+;
+COMPOSITE TABLE:
+ExpSec              ExpSubSectorFLAG
+X1                  -7
+X2                  -7
+X3                  -7
+X4                  -8
+X5                  -8
+X6                  -8
+;
+COMPOSITE TABLE:
+Sec                 Subsec                   SectorComboFlag          SubsectorName
+R                   R1                       -1                       "Residential/Commercial Demand 1"
+R                   R2                       -1                       "Residential/Commercial Demand 2"
+I                   I1                       -2                       "Stoker Fired Indust Steam Coal Demand"
+I                   I2                       -2                       "Pulverized Coal Indust Steam Coal"
+I                   I3                       -2                       "Other Indust Steam Coal Demand"
+C                   C1                       -3                       "Metall 1 - Coking Coal"
+C                   C2                       -3                       "Metall 2 - Coking Coal"
+L                   L1                       -4                       "Export Met Demand 1"
+X                   X1                       -5                       "Export Met Demand 2"
+X                   X2                       -5                       "Export Met Demand 3"
+X                   X3                       -5                       "Export Steam Demand 1"
+X                   X4                       -5                       "Export Steam Demand 2"
+X                   X5                       -5                       "Export Steam Demand 3"
+X                   X6                       -5                       "Liquids"
+E                   15                       -6                       "Electric Gen B1 - BagH-No SOx-Any NOx-"
+E                   16                       -6                       "Electric Gen B2 - BagH-No SOx-Any NOx-CCS"
+E                   17                       -6                       "Electric Gen B3 - BagH-WetScrub-No NOx-"
+E                   18                       -6                       "Electric Gen B4 - BagH-WetScrub-No NOx-CCS"
+E                   19                       -6                       "Electric Gen B5 - BagH-WetScrub-SCR-"
+E                   20                       -6                       "Electric Gen B6 - BagH-WetScrub-SCR-CCS"
+E                   21                       -6                       "Electric Gen B7 - BagH-DryScrub-Any NOx-"
+E                   22                       -6                       "Electric Gen B8 - BagH-DryScrub-Any NOx-CCS"
+E                   23                       -6                       "Electric Gen C1 - ColdESP-No SOx-Any NOx-"
+E                   24                       -6                       "Electric Gen C2 - ColdESP-No SOx-Any NOx-FF"
+E                   25                       -6                       "Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS"
+E                   26                       -6                       "Electric Gen C4 - ColdESP-WetScrub-No NOx-"
+E                   27                       -6                       "Electric Gen C5 - ColdESP-WetScrub-No NOx-FF"
+E                   28                       -6                       "Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS"
+E                   29                       -6                       "Electric Gen C7 - ColdESP-WetScrub-SCR-"
+E                   30                       -6                       "Electric Gen C8 - ColdESP-WetScrub-SCR-FF"
+E                   31                       -6                       "Electric Gen C9 - ColdESP-WetScrub-SCR-CCS"
+E                   32                       -6                       "Electric Gen CX - ColdESP-DryScrub-Any NOx-"
+E                   33                       -6                       "Electric Gen CY - ColdESP-DryScrub-Any NOx-FF"
+E                   34                       -6                       "Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS"
+E                   35                       -6                       "Electric Gen H1 - HotESP-No SOx-Any NOx-"
+E                   36                       -6                       "Electric Gen H2 - HotESP-No SOx-Any NOx-FF"
+E                   37                       -6                       "Electric Gen H3 - HotESP-No SOx-Any NOx-CCS"
+E                   38                       -6                       "Electric Gen H4 - HotESP-WetScrub-No NOx-"
+E                   39                       -6                       "Electric Gen H5 - HotESP-WetScrub-No NOx-FF"
+E                   40                       -6                       "Electric Gen H6 - HotESP-WetScrub-No NOx-CCS"
+E                   41                       -6                       "Electric Gen H7 - HotESP-WetScrub-SCR-"
+E                   42                       -6                       "Electric Gen H8 - HotESP-WetScrub-SCR-FF"
+E                   43                       -6                       "Electric Gen H9 - HotESP-WetScrub-SCR-SCR"
+E                   44                       -6                       "Electric Gen HA - HotESP-DryScrub-Any NOx-"
+E                   45                       -6                       "Electric Gen HB - HotESP-DryScrub-Any NOx-FF"
+E                   46                       -6                       "Electric Gen HC - HotESP-DryScrub-Any NOx-CCS"
+E                   47                       -6                       "Electric Gen PC - PulvCoal-WetScrub-SCR-FF"
+E                   48                       -6                       "Electric Gen OC - Other New Coal"
+E                   49                       -6                       "Electric Gen IG - IGCC-AGR-SCR-"
+E                   50                       -6                       "Electric Gen I2 - IGCC NGcofiring"
+E                   51                       -6                       "Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF"
+E                   52                       -6                       "Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF"
+;
+COMPOSITE TABLE:
+NDREGN              Map_ndregn
+1                   "01NE"
+2                   "02YP"
+3                   "03S1"
+4                   "04S2"
+5                   "05GF"
+6                   "06OH"
+7                   "07EN"
+8                   "08KT"
+9                   "09AM"
+10                  "10C1"
+11                  "11C2"
+12                  "12WS"
+13                  "13MT"
+14                  "14CU"
+15                  "15ZN"
+16                  "16PC"
+;
+COMPOSITE TABLE:
+DReg                USImpShare
+01NE                0.6
+02YP                0
+03S1                0.07
+04S2                0.07
+05GF                0
+06OH                0
+07EN                0
+08KT                0
+09AM                0.2
+10C1                0.2
+11C2                0
+12WS                0
+13MT                0
+14CU                0
+15ZN                0
+16PC                0.2
+;
+COMPOSITE TABLE:
+e                   M11                      Map_e_M11                IntSplyName
+AU                  1                        1                        "Australia"
+UA                  2                        1                        "United States"
+UE                  2                        1                        "United States"
+UG                  2                        1                        "United States"
+UI                  2                        1                        "United States"
+UW                  2                        1                        "United States"
+SF                  3                        1                        "Southern Africa"
+RA                  4                        1                        "Eurasia"
+RE                  4                        1                        "Eurasia"
+PO                  5                        1                        "Poland"
+NI                  6                        1                        "Canada"
+NW                  6                        1                        "Canada"
+HI                  7                        1                        "China"
+VZ                  8                        1                        "South America"
+CL                  8                        1                        "South Amerida"
+VT                  9                        1                        "Vietnam"
+IN                  10                       1                        "Indonesia/Other"
+;
+COMPOSITE TABLE:
+i                   M4                       Map_i_M4                 IntlDemGroup
+BT                  1                        1                        "America"
+GY                  1                        1                        "America"
+OW                  1                        1                        "America"
+PS                  1                        1                        "America"
+RM                  1                        1                        "America"
+SC                  1                        1                        "America"
+TL                  1                        1                        "America"
+AS                  2                        1                        "America"
+CH                  2                        1                        "America"
+EA                  2                        1                        "Asia"
+IN                  2                        1                        "Asia"
+JA                  2                        1                        "Asia"
+LA                  3                        1                        "Asia"
+MX                  3                        1                        "Asia"
+NE                  3                        1                        "Europe"
+NI                  3                        1                        "Europe"
+UA                  3                        1                        "Europe"
+UE                  3                        1                        "Europe"
+UG                  3                        1                        "Europe"
+UI                  3                        1                        "Europe"
+UN                  3                        1                        "Europe"
+;
+COMPOSITE TABLE:
+e                   USeFLAG                  NonUSFLAG
+AU                                           -1
+CL                                           -1
+HI                                           -1
+IN                                           -1
+NI                                           -1
+NW                                           -1
+PO                                           -1
+RA                                           -1
+RE                                           -1
+SF                                           -1
+UA                  -1
+UE                  -1
+UG                  -1
+UI                  -1
+UW                  -1
+VT                                           -1
+VZ                                           -1
+;
+COMPOSITE TABLE:
+M11                 Ae                       Map_M11_Ae
+1                   AU                       1
+2                   US                       1
+3                   SF                       1
+4                   RS                       1
+5                   PO                       1
+6                   NA                       1
+7                   HI                       1
+8                   CL                       1
+8                   VZ                       1
+9                   VT                       1
+10                  IN                       1
+;
+COMPOSITE TABLE:
+e                   MX_ISC                   Map_e_MX_ISC
+NI                  1                        1
+NW                  2                        1
+CL                  3                        1
+VZ                  4                        1
+PO                  5                        1
+RE                  6                        1
+RA                  7                        1
+SF                  8                        1
+IN                  9                        1
+HI                  10                       1
+AU                  11                       1
+VT                  12                       1
+;
+COMPOSITE TABLE:
+nutSec              pt2                      Map_nutsec_pt2
+1                   15                       1
+2                   16                       1
+3                   17                       1
+4                   18                       1
+5                   19                       1
+6                   20                       1
+7                   21                       1
+8                   22                       1
+9                   23                       1
+10                  24                       1
+11                  25                       1
+12                  26                       1
+13                  27                       1
+14                  28                       1
+15                  29                       1
+16                  30                       1
+17                  31                       1
+18                  32                       1
+19                  33                       1
+20                  34                       1
+21                  35                       1
+22                  36                       1
+23                  37                       1
+24                  38                       1
+25                  39                       1
+26                  40                       1
+27                  41                       1
+28                  42                       1
+29                  43                       1
+30                  44                       1
+31                  45                       1
+32                  46                       1
+33                  47                       1
+34                  48                       1
+35                  49                       1
+36                  50                       1
+37                  51                       1
+38                  52                       1
+;
+COMPOSITE TABLE:
+nutSec              pt3                      Map_nutsec_pt3
+1                   15                       1
+2                   16                       1
+3                   17                       1
+4                   18                       1
+5                   19                       1
+6                   20                       1
+7                   21                       1
+8                   22                       1
+9                   23                       1
+10                  24                       1
+11                  25                       1
+12                  26                       1
+13                  27                       1
+14                  28                       1
+15                  29                       1
+16                  30                       1
+17                  31                       1
+18                  32                       1
+19                  33                       1
+20                  34                       1
+21                  35                       1
+22                  36                       1
+23                  37                       1
+24                  38                       1
+25                  39                       1
+26                  40                       1
+27                  41                       1
+28                  42                       1
+29                  43                       1
+30                  44                       1
+31                  45                       1
+32                  46                       1
+33                  47                       1
+34                  48                       1
+35                  49                       1
+36                  50                       1
+37                  51                       1
+38                  52                       1
+99                  0                        1
+;
+COMPOSITE TABLE:
+PADD                MNUMPR                   Map_PADD_Mnumpr
+01PADD              1                        1
+02PADD              2                        1
+03PADD              3                        1
+04PADD              4                        1
+05PADD              5                        1
+06PADD              6                        1
+07PADD              7                        1
+08PADD              8                        1
+09PADD              9                        1
+10PADD              10                       1
+;
+COMPOSITE TABLE:
+Sec                 PADD                     DReg                     PMMDivShare
+L                   01PADD                   02YP                     1.00
+L                   02PADD                   12WS                     1.00
+L                   03PADD                   07EN                     1.00
+L                   04PADD                   12WS                     1.00
+L                   05PADD                   12WS                     1.00
+L                   06PADD                   13MT                     1.00
+L                   06PADD                   14CU                     0.00
+L                   07PADD                   14CU                     0.00
+L                   07PADD                   16PC                     1.00
+L                   08PADD                   14CU                     0.00
+L                   08PADD                   16PC                     1.00
+L                   09PADD                   14CU                     0.00
+L                   09PADD                   16PC                     1.00
+;
+COMPOSITE TABLE:
+PADD                DReg                     Map_PADD_DReg
+01PADD              02YP                     1
+02PADD              12WS                     1
+04PADD              12WS                     1
+03PADD              07EN                     1
+05PADD              12WS                     1
+06PADD              13MT                     1
+07PADD              16PC                     1
+08PADD              16PC                     1
+09PADD              16PC                     1
+;
+COMPOSITE TABLE:
+Sec                 CensDiv                  DReg                     CensDivShare
+I                   01NEN                    01NE                     1.0000
+I                   02MAT                    02YP                     1.0000
+I                   03ENC                    06OH                     0.1486
+I                   03ENC                    07EN                     0.8514
+I                   04WNC                    10C1                     0.5083
+I                   04WNC                    11C2                     0.4917
+I                   05SAT                    03S1                     0.2500
+I                   05SAT                    04S2                     0.5000
+I                   05SAT                    05GF                     0.2500
+I                   06ESC                    08KT                     0.7072
+I                   06ESC                    09AM                     0.2928
+I                   08MTN                    13MT                     0.5572
+I                   08MTN                    14CU                     0.3632
+I                   08MTN                    15ZN                     0.0796
+I                   07WSC                    12WS                     1.0000
+I                   09PAC                    16PC                     1.0000
+I                   10CAL                    16PC                     0.0000
+R                   01NEN                    01NE                     1.0000
+R                   02MAT                    02YP                     1.0000
+R                   03ENC                    06OH                     0.0379
+R                   03ENC                    07EN                     0.9621
+R                   04WNC                    10C1                     0.3067
+R                   04WNC                    11C2                     0.6933
+R                   05SAT                    03S1                     0.0067
+R                   05SAT                    04S2                     0.9933
+R                   05SAT                    05GF                     0.0000
+R                   06ESC                    08KT                     1.0000
+R                   06ESC                    09AM                     0.0000
+R                   08MTN                    13MT                     0.9367
+R                   08MTN                    14CU                     0.0633
+R                   08MTN                    15ZN                     0.0000
+R                   07WSC                    12WS                     1.0000
+R                   09PAC                    16PC                     1.0000
+R                   10CAL                    16PC                     0.0000
+C                   01NEN                    01NE                     1.0000
+C                   02MAT                    02YP                     1.0000
+C                   03ENC                    06OH                     0.1399
+C                   03ENC                    07EN                     0.8601
+C                   04WNC                    10C1                     1.0000
+C                   04WNC                    11C2                     0.0000
+C                   05SAT                    03S1                     1.0000
+C                   05SAT                    04S2                     0.0000
+C                   05SAT                    05GF                     0.0000
+C                   06ESC                    08KT                     0.3784
+C                   06ESC                    09AM                     0.6216
+C                   08MTN                    13MT                     0.0000
+C                   08MTN                    14CU                     0.7050
+C                   08MTN                    15ZN                     0.2950
+C                   07WSC                    12WS                     1.0000
+C                   09PAC                    16PC                     0.0000
+C                   10CAL                    16PC                     0.0000
+;
+COMPOSITE TABLE:
+nsteps              allowed
+1                   1
+2                   1
+3                   0
+4                   0
+5                   0
+6                   0
+7                   0
+8                   0
+;
+COMPOSITE TABLE:
+USi                 DReg                     DistanceSurchargeImport
+UI                  01NE                     100
+UE                  01NE                     8
+UG                  01NE                     3000
+UN                  01NE                     3000
+UI                  02YP                     100
+UE                  02YP                     50
+UG                  02YP                     3000
+UN                  02YP                     3000
+UI                  03S1                     3000
+UE                  03S1                     58
+UG                  03S1                     3000
+UN                  03S1                     3000
+UI                  04S2                     3000
+UE                  04S2                     58
+UG                  04S2                     3000
+UN                  04S2                     3000
+UI                  05GF                     3000
+UE                  05GF                     12
+UG                  05GF                     200
+UN                  05GF                     3000
+UI                  06OH                     100
+UE                  06OH                     300
+UG                  06OH                     3000
+UN                  06OH                     3000
+UI                  07EN                     100
+UE                  07EN                     500
+UG                  07EN                     3000
+UN                  07EN                     3000
+UI                  08KT                     3000
+UE                  08KT                     300
+UG                  08KT                     100
+UN                  08KT                     3000
+UI                  09AM                     3000
+UE                  09AM                     300
+UG                  09AM                     50
+UN                  09AM                     3000
+UI                  10C1                     200
+UE                  10C1                     3000
+UG                  10C1                     500
+UN                  10C1                     3000
+UI                  11C2                     3000
+UE                  11C2                     3000
+UG                  11C2                     1000
+UN                  11C2                     3000
+UI                  12WS                     3000
+UE                  12WS                     3000
+UG                  12WS                     50
+UN                  12WS                     3000
+UI                  13MT                     200
+UE                  13MT                     3000
+UG                  13MT                     3000
+UN                  13MT                     3000
+UI                  14CU                     3000
+UE                  14CU                     3000
+UG                  14CU                     3000
+UN                  14CU                     3000
+UI                  15ZN                     3000
+UE                  15ZN                     3000
+UG                  15ZN                     800
+UN                  15ZN                     3000
+UI                  16PC                     50
+UE                  16PC                     3000
+UG                  16PC                     3000
+UN                  16PC                     50
+;
+COMPOSITE TABLE:
+USi                 TonsPCar_Imp             Trigger_Imp              Trig_Incr_Imp                                     ChargePermile_car_imp
+UI                  110                      2                        0.04                                              0.01
+UE                  110                      2                        0.04                                              0.01
+UG                  110                      2                        0.04                                              0.01
+UN                  110                      2                        0.04                                              0.01
+;
+COMPOSITE TABLE:
+DReg                Subsec                   FRADI
+01NE                C1                       0
+01NE                C2                       0
+01NE                I1                       0.81
+01NE                I2                       0
+01NE                I3                       0.19
+01NE                L1                       1
+01NE                R1                       0.02
+01NE                R2                       0.98
+02YP                C1                       0.94
+02YP                C2                       0.06
+02YP                I1                       0.18
+02YP                I2                       0.63
+02YP                I3                       0.19
+02YP                L1                       1
+02YP                R1                       0.11
+02YP                R2                       0.89
+03S1                C1                       1
+03S1                C2                       0
+03S1                I1                       0.15
+03S1                I2                       0.35
+03S1                I3                       0.5
+03S1                L1                       1
+03S1                R1                       0.87
+03S1                R2                       0.13
+04S2                C1                       1
+04S2                C2                       0
+04S2                I1                       0.2
+04S2                I2                       0.75
+04S2                I3                       0.05
+04S2                L1                       1
+04S2                R1                       0.87
+04S2                R2                       0.13
+05GF                C1                       0
+05GF                C2                       0
+05GF                I1                       0.5
+05GF                I2                       0.4
+05GF                I3                       0.1
+05GF                L1                       1
+05GF                R1                       0.98
+05GF                R2                       0.02
+06OH                C1                       0.55
+06OH                C2                       0.45
+06OH                I1                       0.29
+06OH                I2                       0.26
+06OH                I3                       0.45
+06OH                L1                       1
+06OH                R1                       0.4
+06OH                R2                       0.6
+07EN                C1                       0.2
+07EN                C2                       0.8
+07EN                I1                       0.22
+07EN                I2                       0.5
+07EN                I3                       0.28
+07EN                L1                       1
+07EN                R1                       0.12
+07EN                R2                       0.88
+08KT                C1                       0.75
+08KT                C2                       0.25
+08KT                I1                       0.13
+08KT                I2                       0.77
+08KT                I3                       0.1
+08KT                L1                       1
+08KT                R1                       1
+08KT                R2                       0
+09AM                C1                       0.4
+09AM                C2                       0.6
+09AM                I1                       0.13
+09AM                I2                       0.68
+09AM                I3                       0.19
+09AM                L1                       1
+09AM                R1                       0
+09AM                R2                       1
+10C1                C1                       0
+10C1                C2                       0
+10C1                I1                       0.3
+10C1                I2                       0
+10C1                I3                       0.7
+10C1                L1                       1
+10C1                R1                       1
+10C1                R2                       0
+11C2                C1                       0
+11C2                C2                       0
+11C2                I1                       0.5
+11C2                I2                       0.5
+11C2                I3                       0
+11C2                L1                       1
+11C2                R1                       0
+11C2                R2                       1
+12WS                C1                       0
+12WS                C2                       0
+12WS                I1                       0.2
+12WS                I2                       0.15
+12WS                I3                       0.65
+12WS                L1                       1
+12WS                R1                       0
+12WS                R2                       1
+13MT                C1                       0
+13MT                C2                       0
+13MT                I1                       0.06
+13MT                I2                       0.42
+13MT                I3                       0.52
+13MT                L1                       1
+13MT                R1                       0.6
+13MT                R2                       0.4
+14CU                C1                       0
+14CU                C2                       1
+14CU                I1                       1
+14CU                I2                       0
+14CU                I3                       0
+14CU                L1                       1
+14CU                R1                       1
+14CU                R2                       0
+15ZN                C1                       0
+15ZN                C2                       1
+15ZN                I1                       0.38
+15ZN                I2                       0.5
+15ZN                I3                       0.12
+15ZN                L1                       1
+15ZN                R1                       0.11
+15ZN                R2                       0.89
+16PC                C1                       0
+16PC                C2                       0
+16PC                I1                       0
+16PC                I2                       0.93
+16PC                I3                       0.07
+16PC                L1                       1
+16PC                R1                       0.01
+16PC                R2                       0.99
+;
+COMPOSITE TABLE:
+USi                 DReg                     USDRegImportMapping
+UE                  01NE                     -1
+UE                  02YP                     -1
+UE                  03S1                     -1
+UE                  04S2                     -1
+UE                  05GF                     -1
+UE                  06OH                     -1
+UE                  07EN                     -1
+UE                  08KT                     -1
+UE                  09AM                     -1
+UG                  03S1                     -1
+UG                  04S2                     -1
+UG                  05GF                     -1
+UG                  08KT                     -1
+UG                  09AM                     -1
+UG                  12WS                     -1
+UG                  15ZN                     -1
+UI                  03S1                     -1
+UI                  04S2                     -1
+UI                  06OH                     -1
+UI                  07EN                     -1
+UI                  10C1                     -1
+UI                  11C2                     -1
+UN                  16PC                     -1
+UA                  16PC                     -1
+UI                  02YP                     -1
+UI                  13MT                     -1
+UI                  14CU                     -1
+;
+COMPOSITE TABLE:
+USe                 DReg                     USDRegIntlMapping
+UI                  01NE                     0
+UI                  02YP                     -1
+UI                  06OH                     -1
+UI                  07EN                     -1
+UI                  10C1                     -1
+UI                  11C2                     0
+UI                  03S1                     0
+UI                  04S2                     0
+UI                  05GF                     0
+UI                  08KT                     0
+UI                  09AM                     0
+UI                  13MT                     0
+UI                  14CU                     0
+UI                  15ZN                     0
+UI                  12WS                     0
+UI                  16PC                     0
+UE                  01NE                     0
+UE                  02YP                     0
+UE                  06OH                     0
+UE                  07EN                     0
+UE                  10C1                     0
+UE                  11C2                     0
+UE                  03S1                     -1
+UE                  04S2                     -1
+UE                  05GF                     0
+UE                  08KT                     0
+UE                  09AM                     0
+UE                  13MT                     0
+UE                  14CU                     0
+UE                  15ZN                     0
+UE                  12WS                     0
+UE                  16PC                     0
+UG                  01NE                     0
+UG                  02YP                     0
+UG                  06OH                     0
+UG                  07EN                     0
+UG                  10C1                     0
+UG                  11C2                     0
+UG                  03S1                     0
+UG                  04S2                     0
+UG                  05GF                     0
+UG                  08KT                     0
+UG                  09AM                     -1
+UG                  13MT                     0
+UG                  14CU                     0
+UG                  15ZN                     0
+UG                  12WS                     -1
+UG                  16PC                     0
+UW                  01NE                     0
+UW                  02YP                     0
+UW                  06OH                     0
+UW                  07EN                     0
+UW                  10C1                     0
+UW                  11C2                     0
+UW                  03S1                     0
+UW                  04S2                     0
+UW                  05GF                     0
+UW                  08KT                     0
+UW                  09AM                     0
+UW                  13MT                     0
+UW                  14CU                     0
+UW                  15ZN                     0
+UW                  12WS                     0
+UW                  16PC                     -1
+UA                  01NE                     0
+UA                  02YP                     0
+UA                  06OH                     0
+UA                  07EN                     0
+UA                  10C1                     0
+UA                  11C2                     0
+UA                  03S1                     0
+UA                  04S2                     0
+UA                  05GF                     0
+UA                  08KT                     0
+UA                  09AM                     0
+UA                  13MT                     0
+UA                  14CU                     0
+UA                  15ZN                     0
+UA                  12WS                     0
+UA                  16PC                     -1
+;
+COMPOSITE TABLE:
+yr                  VesselClass              DailyHireCost            PortCostPer_mTon                                  PortDays            BunkerFuelUseSea    DieselFuelUseSea    DieselFuelUsePort   SailingSpeedKn
+2002                Capesize                 16238                    2                                                 8.8                 54                  2                   4                   13.5
+2003                Capesize                 53847                    2                                                 8.8                 54                  2                   4                   13.5
+2004                Capesize                 89802                    2                                                 8.8                 54                  2                   4                   13.5
+2005                Capesize                 63213                    2                                                 8.8                 54                  2                   4                   13.5
+2006                Capesize                 55204                    2                                                 8.8                 54                  2                   4                   13.5
+2007                Capesize                 138193                   2                                                 8.8                 54                  2                   4                   13.5
+2008                Capesize                 123916                   2                                                 8.8                 54                  2                   4                   13.5
+2009                Capesize                 49528                    2                                                 8.8                 54                  2                   4                   13.5
+2010                Capesize                 38200                    2                                                 8.8                 54                  2                   4                   13.5
+2011                Capesize                 17579                    2                                                 8.8                 54                  2                   4                   13.5
+2012                Capesize                 8474                     2                                                 8.8                 54                  2                   4                   13.5
+2013                Capesize                 15807                    2                                                 8.8                 54                  2                   4                   13.5
+2014                Capesize                 14687                    2                                                 8.8                 54                  2                   4                   13.5
+2015                Capesize                 7375                     2                                                 8.8                 54                  2                   4                   13.5
+2016                Capesize                 6653                     2                                                 8.8                 54                  2                   4                   13.5
+2017                Capesize                 15492                    2                                                 8.8                 54                  2                   4                   13.5
+2018                Capesize                 16529                    2                                                 8.8                 54                  2                   4                   13.5
+2019                Capesize                 17310                    2                                                 8.8                 54                  2                   4                   13.5
+2020                Capesize                 13107                    2                                                 8.8                 54                  2                   4                   13.5
+2021                Capesize                 30852                    2                                                 8.8                 54                  2                   4                   13.5
+2022                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2023                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2024                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2025                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2026                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2027                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2028                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2029                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2030                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2031                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2032                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2033                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2034                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2035                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2036                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2037                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2038                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2039                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2040                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2041                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2042                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2043                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2044                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2045                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2046                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2047                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2048                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2049                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2050                Capesize                 18658                    2                                                 8.8                 54                  2                   4                   13.5
+2002                Panamax                  10520                    2                                                 5                   33                  1                   4                   13.5
+2003                Panamax                  26787                    2                                                 5                   33                  1                   4                   13.5
+2004                Panamax                  46472                    2                                                 5                   33                  1                   4                   13.5
+2005                Panamax                  31148                    2                                                 5                   33                  1                   4                   13.5
+2006                Panamax                  29081                    2                                                 5                   33                  1                   4                   13.5
+2007                Panamax                  67646                    2                                                 5                   33                  1                   4                   13.5
+2008                Panamax                  57285                    2                                                 5                   33                  1                   4                   13.5
+2009                Panamax                  22404                    2                                                 5                   33                  1                   4                   13.5
+2010                Panamax                  28729                    2                                                 5                   33                  1                   4                   13.5
+2011                Panamax                  15736                    2                                                 5                   33                  1                   4                   13.5
+2012                Panamax                  8478                     2                                                 5                   33                  1                   4                   13.5
+2013                Panamax                  10268                    2                                                 5                   33                  1                   4                   13.5
+2014                Panamax                  8214                     2                                                 5                   33                  1                   4                   13.5
+2015                Panamax                  5861                     2                                                 5                   33                  1                   4                   13.5
+2016                Panamax                  5806                     2                                                 5                   33                  1                   4                   13.5
+2017                Panamax                  10000                    2                                                 5                   33                  1                   4                   13.5
+2018                Panamax                  11653                    2                                                 5                   33                  1                   4                   13.5
+2019                Panamax                  12224                    2                                                 5                   33                  1                   4                   13.5
+2020                Panamax                  9609                     2                                                 5                   33                  1                   4                   13.5
+2021                Panamax                  25426                    2                                                 5                   33                  1                   4                   13.5
+2022                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2023                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2024                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2025                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2026                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2027                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2028                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2029                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2030                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2031                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2032                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2033                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2034                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2035                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2036                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2037                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2038                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2039                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2040                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2041                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2042                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2043                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2044                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2045                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2046                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2047                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2048                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2049                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+2050                Panamax                  13782                    2                                                 5                   33                  1                   4                   13.5
+;
+COMPOSITE TABLE:
+yr                  BunkerIFO380_USGulf      DieselMGO_USGulf
+2005                351.49                   650.67
+2006                416.42                   702.98
+2007                467.13                   758.14
+2008                623.47                   1032.70
+2009                447.61                   584.36
+2010                557.18                   751.92
+2011                757.61                   1031.14
+2012                768.45                   1034.92
+2013                708.63                   974.75
+2014                622.18                   867.98
+2015                307.04                   475.06
+2016                241.19                   384.14
+2017                333.08                   471.05
+2018                427.59                   605.90
+2019                399.13                   584.51
+2020                397.22                   621.92
+2021                396.75                   588.18
+2022                398.80                   570.60
+2023                398.04                   567.28
+2024                403.30                   568.43
+2025                411.82                   574.51
+2026                416.15                   577.74
+2027                423.81                   586.94
+2028                430.23                   597.07
+2029                436.75                   607.83
+2030                442.52                   615.43
+2031                442.96                   615.22
+2032                442.95                   614.64
+2033                441.15                   614.56
+2034                440.37                   614.35
+2035                440.43                   613.15
+2036                440.94                   612.41
+2037                441.32                   612.63
+2038                441.55                   613.05
+2039                441.86                   613.42
+2040                442.50                   613.51
+2041                442.50                   613.50
+2042                442.50                   613.50
+2043                442.50                   613.50
+2044                442.50                   613.50
+2045                442.50                   613.50
+2046                442.50                   613.50
+2047                442.50                   613.50
+2048                442.50                   613.50
+2049                442.50                   613.50
+2050                442.50                   613.50
+;
+COMPOSITE TABLE:
+e                   BunkerIFO_RgnDiff        DieselMGO_RgnDiff
+AU                  17                       25
+CL                  0                        0
+HI                  17                       25
+IN                  17                       25
+NI                  0                        0
+NW                  14                       66
+PO                  -20                      -30
+RA                  17                       25
+RE                  -20                      -30
+SF                  -10                      -15
+UE                  -20                      -30
+UG                  0                        0
+UI                  0                        0
+UN                  14                       66
+UW                  14                       66
+VT                  17                       25
+VZ                  0                        0
+;
+COMPOSITE TABLE:
+USi                 M4                       Map_USi_M4
+UI                  1                        1
+UE                  2                        1
+UG                  3                        1
+UN                  4                        1
+;

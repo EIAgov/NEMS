@@ -1,0 +1,565 @@
+## ams_version=1.0
+
+Section Reports_Section {
+    DeclarationSection Identifier_Display_Declarations {
+        ElementParameter DisplayedYear {
+            Range: Years_;
+        }
+        ElementParameter PreviousYear {
+            Range: Years_;
+            Definition: ModelYear-1;
+        }
+        StringParameter PeriodDescription {
+            IndexDomain: (tmon in MonthlyHorizon_);
+            Definition: FormatString("%e",MonthInPeriod(tmon));
+        }
+        ElementParameter DisplayedRegion {
+            Range: Hubs_;
+        }
+        ElementParameter DisplayedState {
+            Range: L_48_;
+        }
+        ElementParameter DisplayedDemandRegion {
+            Range: DemandNode_;
+        }
+        ElementParameter DisplayedSupplyRegion {
+            Range: SupplyNode_;
+        }
+        ElementParameter DisplayedSupplyType {
+            Range: SupplyType_;
+        }
+        ElementParameter DisplayedCensusRegion {
+            Range: Region_Census_;
+        }
+        ElementParameter DisplayedSector {
+            Range: Sector_;
+        }
+        ElementParameter DisplayedNNGEMMRegion {
+            Range: NNGEMM_;
+        }
+        ElementParameter DisplayedMonthInYear {
+            IndexDomain: mon;
+            Range: MonthinYear_;
+            Definition: TimeSlotCharacteristic(mon, 'month');
+        }
+        ElementParameter DisplayedMexicoRegion {
+            Range: Mexico_;
+        }
+        Set DisplayedCensusStates {
+            SubsetOf: L_48_;
+            Index: show_cen;
+            Definition: {
+                {l48|map_l48_CensusRegion(l48,DisplayedCensusRegion)}
+            }
+        }
+        Set DisplayedNNGEMMStates {
+            SubsetOf: L_48_;
+            Index: show_emm;
+            Definition: {
+                {l48| map_l48_NNGEMM(l48,DisplayedNNGEMMRegion)}
+            }
+        }
+        ElementParameter DisplayedHubFrom {
+            Range: Hubs_;
+        }
+        ElementParameter DisplayedHubTo {
+            Range: Hubs_;
+        }
+    }
+    DeclarationSection Flow_Reports_Declaration {
+        Parameter FlowsAnnual {
+            IndexDomain: (year,h,h1);
+        }
+        Parameter FlowsMonthly {
+            IndexDomain: (mon,h,h1);
+        }
+        Parameter FlowBinding {
+            IndexDomain: (year,h,h1);
+        }
+        Parameter ImportsAnnual {
+            IndexDomain: (year,l48);
+        }
+        Parameter ExportsAnnual {
+            IndexDomain: (year,l48);
+        }
+        Parameter Longitude_center {
+            IndexDomain: reg;
+        }
+        Parameter Latitude_center {
+            IndexDomain: reg;
+        }
+        Parameter FlowDifference {
+            IndexDomain: (year,h,h1);
+        }
+        ElementParameter FlowColor {
+            IndexDomain: (year,h,h1);
+            Range: AllColors;
+        }
+        ElementParameter BindingFlowColor {
+            IndexDomain: (year,h,h1);
+            Range: AllColors;
+        }
+        ElementParameter CapacityColor {
+            IndexDomain: (year,h,h1);
+            Range: AllColors;
+        }
+        Parameter FlowColorThreshold {
+            InitialData: {
+                50 ;
+            }
+        }
+    }
+    DeclarationSection LNG_Exports_Reports_Declaration {
+        Parameter AnnualLNGExportForReports {
+            IndexDomain: (year,lngexp);
+            Text: "Annual LNG exports from QP";
+        }
+        Parameter LNGExportForReports {
+            IndexDomain: (mon,lngexp);
+            Text: "Monthly LNG exports from QP";
+        }
+    }
+    DeclarationSection Production_Reports_Declaration {
+        Parameter MonthlyProductionForReport {
+            IndexDomain: (mon,suptype,reg);
+            Text: "Monthly Production by type and region";
+        }
+        Parameter TotalExpectedProductionMonthly {
+            IndexDomain: (mon,reg);
+        }
+        Parameter TotalExpectedProductionAnnual {
+            IndexDomain: (year,reg);
+        }
+        Parameter MinimumProductionAnnual {
+            IndexDomain: (year,suptype,reg);
+        }
+        Parameter MinimumProductionMonthly {
+            IndexDomain: (mon,suptype,reg);
+        }
+    }
+    DeclarationSection Totals_Declarations {
+        Parameter TotalUSProductionAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalUSStorageWthAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalUSStorageInjAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalUSLNGexports {
+            IndexDomain: year;
+        }
+        Parameter TotalUSSupplyAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalExpectedUSSupplyAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalUSDemandAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalUSConsumptionAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalImportsAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalExportsAnnual {
+            IndexDomain: year;
+        }
+        Parameter TotalModelDemand {
+            IndexDomain: year;
+        }
+        Parameter TotalModelSupply {
+            IndexDomain: year;
+        }
+    }
+    DeclarationSection WHPrice_Declaration {
+        Parameter WHPrcSoln_monthly {
+            IndexDomain: (mon,s);
+        }
+        Parameter WHPrcSoln_annual {
+            IndexDomain: (year,s);
+        }
+        Parameter WHPrcCalc_monthly {
+            IndexDomain: (mon,s);
+        }
+        Parameter WHPrcCalc_annual {
+            IndexDomain: (year,s);
+        }
+        Parameter Stepnumber {
+            IndexDomain: (mon,s);
+        }
+        ElementParameter MaxStepsln {
+            IndexDomain: (mon,s);
+            Range: Supply_Curve_Step_;
+        }
+        Parameter Pnode {
+            IndexDomain: (year,s);
+        }
+        Parameter Qnode {
+            IndexDomain: (year,s);
+        }
+        Parameter MaximumProductionAnnual {
+            IndexDomain: (year,suptype,reg);
+        }
+        Parameter MaximumProductionMonthly {
+            IndexDomain: (mon,suptype,reg);
+        }
+    }
+    DeclarationSection Tariff_Debug_Declarations {
+        Parameter Tariff_Calc {
+            IndexDomain: (mon,h,h1);
+        }
+        Parameter Tariff_Soln {
+            IndexDomain: (mon,h,h1);
+        }
+        Parameter TariffStep_Calc {
+            IndexDomain: (tmon,h,h1,step);
+        }
+        Parameter ArcPrice_Soln {
+            IndexDomain: (mon,h,h1);
+        }
+        Parameter TariffStepnumber {
+            IndexDomain: (mon,h,h1);
+        }
+        ElementParameter TariffMaxStepSln {
+            IndexDomain: (mon,h,h1);
+            Range: Supply_Curve_Step_;
+        }
+    }
+    DeclarationSection Tariff_Curve_Analysis_Declarations {
+        Set PossibleHubsTo {
+            SubsetOf: Hubs_;
+            Index: show_h1;
+            Definition: {
+                {h1|CapacityAnnual(LastModelYear,DisplayedHubFrom,h1)}
+            }
+        }
+        Set PossibleHubsFrom_ {
+            SubsetOf: Hubs_;
+            Index: show_h;
+            Definition: {
+                {h|CapacityAnnual(LastModelYear,h,DisplayedHubTo)}
+            }
+        }
+        ElementParameter DisplayedHubTo1 {
+            Range: PossibleHubsTo;
+        }
+        ElementParameter DisplayedHubTo2 {
+            Range: PossibleHubsTo;
+        }
+        ElementParameter DisplayedHubTo3 {
+            Range: PossibleHubsTo;
+        }
+        ElementParameter DisplayedHubFrom1 {
+            Range: PossibleHubsFrom_;
+        }
+        ElementParameter DisplayedHubFrom2 {
+            Range: PossibleHubsFrom_;
+        }
+        ElementParameter DisplayedHubFrom3 {
+            Range: PossibleHubsFrom_;
+        }
+        Parameter Displayed_Max_PriceTo {
+            Definition: max((show_h1,step),Parameter_TariffCurvePrice(DisplayedHubFrom,show_h1,step));
+        }
+        Parameter Displayed_Max_PriceFrom {
+            Definition: max((show_h,step),Parameter_TariffCurvePrice(show_h,DisplayedHubTo,step));
+        }
+    }
+    Procedure Flow_report {
+        Body: {
+            FlowsMonthly(MonthInPeriod(tmon), h, h1) := FlowHubToHub(tmon,h,h1);
+            FlowsAnnual(ModelYear, h, h1)  := sum(modelyrmn, FlowsMonthly(modelyrmn, h, h1));
+            ImportsAnnual(ModelYear, l48) :=  sum(BX, FlowsAnnual(ModelYear, BX, l48));
+            ExportsAnnual(ModelYear, l48) :=  sum(BX, FlowsAnnual(ModelYear, l48, BX));
+            
+            FlowDifference(ModelYear,h,h1) :=FlowsAnnual(ModelYear, h, h1)-FlowsAnnual(ModelYear-1, h, h1);
+            
+            FlowBinding( (ModelYear,h,h1) | (CapacityAnnual(ModelYear,h,h1)- FlowsAnnual(ModelYear,h,h1))< 0.01) := FlowsAnnual(ModelYear,h,h1);
+        }
+    }
+    Procedure Production_Reports {
+        Body: {
+            ActualProductionMonthly(MonthInPeriod(tmon), suptype, s) := QProduction(tmon,suptype,s); !/(1 - PCTLP(suptype,s));!sum(step, QSupplyStep(tmon,suptype,s,step)); !net of lease fuel
+            ActualProductionAnnual(ModelYear, suptype, s) := sum(modelyrmn, ActualProductionMonthly(modelyrmn, suptype, s));
+            MinimumProductionMonthly(MonthInPeriod(tmon), suptype, s) := QbaseMin(tmon,suptype,s);
+            MinimumProductionAnnual(ModelYear, suptype, s) := sum(modelyrmn, MinimumProductionMonthly(modelyrmn, suptype, s));
+            MaximumProductionMonthly(MonthInPeriod(tmon), suptype, s) := QbaseMax(tmon,suptype,s);
+            MaximumProductionAnnual(ModelYear, suptype, s) := sum(modelyrmn, MaximumProductionMonthly(modelyrmn, suptype, s));
+            TotalProduction(modelyrmn, h) := sum((suptype, s) | map_SupplyArcs(s, h), ActualProductionMonthly(modelyrmn, suptype, s));
+            MonthlyProductionForReport(modelyrmn, suptype, h) := sum( s | map_SupplyArcs(s, h), ActualProductionMonthly(modelyrmn, suptype, s));
+            TotalExpectedProductionMonthly(modelyrmn, h) := sum((naadgas, s) | map_SupplyArcs(s, h), Supply(modelyrmn, naadgas, s)* (1 - LeaseFuelFactor(s)));
+            TotalExpectedProductionMonthly(modelyrmn, h) += sum((suptype, s) | map_SupplyArcs(s, h) and suptype in (SupplyType_-NA_AD_), Supply(modelyrmn, suptype, s));
+            TotalExpectedProductionAnnual(ModelYear,  h) := sum(modelyrmn, TotalExpectedProductionMonthly(modelyrmn, h));
+            
+            WellheadPrice_Report_Debug;
+            Tariff_Report_Debug;
+            ! Fill the NEMS arrays
+            !SUPPLEMENTAL
+            !national total across all three categories (coal, oil, other) of supplemental fuel produced
+            NGTDMREP_OGPRSUP(NEMSmap_MNUMYR(ModelYear)) := sum((sng,l48), ActualProductionAnnual(ModelYear, sng, l48));
+            !SNG-coal
+            NGTDMREP_OGSUPGAS(1, TotalUS_MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum(l48, ActualProductionAnnual(ModelYear, 'SNG_coal', l48));
+            !SNG-oil+other
+            NGTDMREP_OGSUPGAS(2, TotalUS_MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum((sng,l48) | sng in (SNG_-'SNG_coal'), ActualProductionAnnual(ModelYear, sng, l48));
+            
+            !NA production
+            NGTDMREP_NGRNAGPRD(OGDIST, NEMSmap_MNUMYR(ModelYear)) := sum(ussup | NEMSmap_OGDIST_SupplyNode(OGDIST, ussup), ActualProductionAnnual(ModelYear, 'NA', ussup)/ (1 - LeaseFuelFactor(ussup)));
+            
+            !NA + AD production by MNUMOR region
+            ! Alaska ActualProductionAnnual and Wellhdprice should be set prior to this
+            NGTDMREP_OGPRDNG(MNUMOR, NEMSmap_MNUMYR(ModelYear)) := sum(ussup | NEMSmap_SupplyNode_MNUMOR(ussup,MNUMOR), ActualProductionAnnual(ModelYear, 'AD', ussup)+
+                                                                             ActualProductionAnnual(ModelYear, 'NA', ussup)/ (1 - LeaseFuelFactor(ussup)));
+            !W/h prices
+            NGTDMREP_OGWPRNG(MNUMOR, NEMSmap_MNUMYR(ModelYear)) := sum(ussup | NEMSmap_SupplyNode_MNUMOR(ussup,MNUMOR), (ActualProductionAnnual(ModelYear, 'AD', ussup)+
+                                                                             ActualProductionAnnual(ModelYear, 'NA', ussup)/ (1 - LeaseFuelFactor(ussup))) * WellhdPrice(ModelYear, 'NA', ussup))/$
+                                                                             NGTDMREP_OGWPRNG(MNUMOR, NEMSmap_MNUMYR(ModelYear));
+            !US total
+            NGTDMREP_OGPRDNG(TotalUS_MNUMOR, NEMSmap_MNUMYR(ModelYear)) := sum(l48_MNUMOR, NGTDMREP_OGPRDNG(l48_MNUMOR, NEMSmap_MNUMYR(ModelYear)));
+            !Average l48 price
+            NGTDMREP_OGWPRNG(TotalUS_MNUMOR, NEMSmap_MNUMYR(ModelYear)) := sum(l48_MNUMOR, NGTDMREP_OGPRDNG(l48_MNUMOR, NEMSmap_MNUMYR(ModelYear))*NGTDMREP_OGWPRNG(l48_MNUMOR, NEMSmap_MNUMYR(ModelYear)))/$
+                                                                            sum(l48_MNUMOR, NGTDMREP_OGPRDNG(l48_MNUMOR, NEMSmap_MNUMYR(ModelYear)));
+            
+            !YDA: need to add OGPRCNG(OGDIST,MNUMYR) to global structure to fill in the prices
+            !NGTDMREP_OGPRCNG(OGDIST, NEMSmap_MNUMYR(ModelYear)) := sum(ussup | NEMSmap_OGDIST_SupplyNode(OGDIST, ussup),  WellhdPrice(ModelYear, 'NA', ussup));
+            !The Henry Hub prices ( 87$/MMBtu)
+            NGTDMREP_OGHHPRNG(NEMSmap_MNUMYR(ModelYear)) := WellhdPrice(ModelYear, 'NA', HenryHubRegion)/Convert_TBtu_Bcf(ModelYear);
+        }
+    }
+    Procedure WellheadPrice_Report_Debug {
+        Body: {
+            
+            WHPrcSoln_monthly((MonthInPeriod(tmon), s)| map_Supply(s, 'NA') )  := SupplyAccounting.ShadowPrice(tmon,'NA',s);
+            
+            Stepnumber(MonthInPeriod(tmon), s) := count(step | QSupplyStep(tmon, 'NA', s, step)) ;
+            !
+            MaxStepsln(mon, s) := Element(Supply_Curve_Step_, Stepnumber(mon, s));
+            
+            WHPrcCalc_monthly((MonthInPeriod(tmon), s) | map_Supply(s, 'NA') ) := Pbase(tmon, 'NA', s, MaxStepsln(MonthInPeriod(tmon), s)) +
+              ( QProduction(tmon, 'NA', s) - Qbase(tmon, 'NA', s, MaxStepsln(MonthInPeriod(tmon), s)) ) *
+              ( Pbase(tmon, 'NA', s, MaxStepsln(MonthInPeriod(tmon), s)+1) - Pbase(tmon, 'NA', s, MaxStepsln(MonthInPeriod(tmon), s)) ) /$
+              ( Qbase(tmon, 'NA', s, MaxStepsln(MonthInPeriod(tmon), s)+1) - Qbase(tmon, 'NA', s, MaxStepsln(MonthInPeriod(tmon), s)) );
+            
+            !Do weighted average to calculate annual price
+            
+            WHPrcSoln_annual((ModelYear, s)| map_Supply(s, 'NA') ) :=  sum(modelyrmn, WHPrcSoln_monthly(modelyrmn, s)* ActualProductionMonthly(modelyrmn, 'NA', s))/ $ ActualProductionAnnual(ModelYear, 'NA', s);
+            WHPrcCalc_annual((ModelYear, s)| map_Supply(s, 'NA') ) :=  sum(modelyrmn, WHPrcCalc_monthly(modelyrmn, s)* ActualProductionMonthly(modelyrmn, 'NA', s))/ $ ActualProductionAnnual(ModelYear, 'NA', s);
+            
+            Pnode((ModelYear, s)| map_Supply(s, 'NA') ) := WellhdPrice(ModelYear-1, 'NA', s);
+            Qnode((ModelYear, s)| map_Supply(s, 'NA') ) :=sum(modelyrmn, Supply(modelyrmn, 'NA', s)* (1 - LeaseFuelFactor(s)) );
+        }
+    }
+    Procedure Tariff_Report_Debug {
+        Body: {
+            TariffStepnumber(MonthInPeriod(tmon), h,h1) := count(step | QTariffCurve(tmon, h, h1, step)) ;
+            !
+            TariffMaxStepSln(mon, h,h1) := Element(Supply_Curve_Step_, TariffStepnumber(mon, h, h1));
+            
+            Tariff_Calc(MonthInPeriod(tmon), h, h1)  := PipelineTariff(tmon, h, h1, TariffMaxStepSln(MonthInPeriod(tmon), h, h1)) +
+              ( FlowHubToHub(tmon,h,h1) - PipeTariffCurveQty(tmon, h, h1, TariffMaxStepSln(MonthInPeriod(tmon), h, h1)) ) *
+              ( PipelineTariff(tmon, h, h1, TariffMaxStepSln(MonthInPeriod(tmon), h, h1)+1) - PipelineTariff(tmon, h, h1, TariffMaxStepSln(MonthInPeriod(tmon), h, h1)) ) /$
+              ( PipeTariffCurveQty(tmon, h, h1, TariffMaxStepSln(MonthInPeriod(tmon), h, h1)+1) - PipeTariffCurveQty(tmon, h, h1, TariffMaxStepSln(MonthInPeriod(tmon), h, h1)) );
+            
+              Tariff_Soln(MonthInPeriod(tmon), h, h1)  := TariffCurveQtyBalance.ShadowPrice(tmon,h,h1);
+            
+            TariffStep_Calc((tmon, h, h1,step) | step <= PTCrv_MaxStep)  := PipelineTariff(tmon, h, h1, step) +
+              ( QTariffCurve(tmon,h,h1,step) ) *
+              ( PipelineTariff(tmon, h, h1, step+1) - PipelineTariff(tmon, h, h1, step) ) /$
+              ( PipeTariffCurveQty(tmon, h, h1, step+1) - PipeTariffCurveQty(tmon, h, h1, step) );
+        }
+    }
+    Procedure Lease_and_Plant_Fuel_Report {
+        Body: {
+            LeaseFuelBySupplyRegion(modelyrmn,ussup) := sum(naadgas, ActualProductionMonthly(modelyrmn, naadgas, ussup)) * LeaseFuelFactor(ussup) / (1 - LeaseFuelFactor(ussup));
+            LeaseFuel(modelyrmn,l48) := sum(ussup | map_SupplyArcs(ussup, l48), LeaseFuelBySupplyRegion(modelyrmn,ussup));
+            LeaseFuelAnnual(ModelYear, l48) := sum(modelyrmn, LeaseFuel(modelyrmn,l48));
+            PlantFuelAnnual(ModelYear, l48) := sum(modelyrmn, PlantFuel(modelyrmn,l48));
+            LeaseAndPlantFuelAnnual(ModelYear, l48) := LeaseFuelAnnual(ModelYear, l48) + PlantFuelAnnual(ModelYear, l48);
+            
+            !Sum up to census divisions
+            !!!!!!!NOTE: AK is not in the mapping -- re-do mapping or add AK separately !!!!!!
+            LeaseandPlantCDAnnual(ModelYear,r_cen) := sum(l48 | map_State_CensusRegion(l48, r_cen), LeaseAndPlantFuelAnnual(ModelYear, l48));
+            TotalLeaseAndPlantAnnual(ModelYear) := sum(r_cen, LeaseandPlantCDAnnual(ModelYear, r_cen));
+            
+            !Fill the NEMS array
+            
+            QBLK_QLPIN(MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum(r_cen, LeaseandPlantCDAnnual(ModelYear, r_cen)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) * Convert_TBtu_Bcf(ModelYear);
+            
+            QBLK_QLPIN(TotalUS_MNUMCR, NEMSmap_MNUMYR(ModelYear)) := TotalLeaseAndPlantAnnual(ModelYear)* Convert_TBtu_Bcf(ModelYear);
+        }
+        DeclarationSection LP_Fuel_Declaration {
+            Parameter LeaseFuelBySupplyRegion {
+                IndexDomain: (mon,s);
+            }
+            Parameter TotalLeaseAndPlantAnnual {
+                IndexDomain: year;
+            }
+            Parameter LeaseandPlantCDAnnual {
+                IndexDomain: (year,r_cen);
+            }
+        }
+    }
+    Procedure Lease_and_Plant_Fuel_Report_History {
+        Body: {
+            LeaseFuelAnnual(histyr,state) := HistoricalAnnualLeaseFuel(histyr, state);
+            ! NOTE: cannot calculate historical shares to split Lease fuel from Gulf of Mexico, since no data for flows from Gulf of Mexico to states
+            ! temporarily use equal splits
+             HistoricalGOMLeaseFuel(histyr, fedGOM)   := HistoricalAnnualLeaseFuel(histyr, GOMRegion) /Card(FederalGOM_);
+             LeaseFuelAnnual(histyr,l48) += sum(fedGOM | map_SupplyArcs(fedGOM, l48), HistoricalGOMLeaseFuel(histyr, fedGOM));
+            
+            PlantFuelAnnual(histyr,state) := HistoricalAnnualPlantFuel(histyr, state);
+            LeaseAndPlantFuelAnnual(histyr,state) := HistoricalAnnualLeaseFuel(histyr, state) + HistoricalAnnualPlantFuel(histyr, state);
+            
+            
+            
+            !Sum up to census divisions
+            !!!!!!!NOTE: AK is not in the mapping -- re-do mapping or add AK separately !!!!!!
+            LeaseandPlantCDAnnual(histyr,r_cen) := sum(l48 | map_State_CensusRegion(l48, r_cen), LeaseAndPlantFuelAnnual(histyr, l48));
+            TotalLeaseAndPlantAnnual(histyr) := sum(r_cen, LeaseandPlantCDAnnual(histyr, r_cen));
+            
+            !Fill the NEMS array
+            
+            QBLK_QLPIN(MNUMCR, NEMSmap_MNUMYR(histyr)) := sum(r_cen, LeaseandPlantCDAnnual(histyr, r_cen)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) * Convert_TBtu_Bcf(histyr);
+            
+            QBLK_QLPIN(TotalUS_MNUMCR, NEMSmap_MNUMYR(histyr)) := TotalLeaseAndPlantAnnual(histyr)* Convert_TBtu_Bcf(histyr);
+        }
+        DeclarationSection Hist_LP_Fuel_Declaration {
+            Parameter LeaseandPlantCDAnnual {
+                IndexDomain: (histyr,r_cen);
+            }
+            Parameter TotalLeaseAndPlantAnnual {
+                IndexDomain: histyr;
+            }
+            Parameter HistoricalGOMLeaseFuel {
+                IndexDomain: (histyr,fedGOM);
+            }
+        }
+    }
+    Procedure LNGExports_Report {
+        Body: {
+            LNGExportForReports((MonthInPeriod(tmon), lngexp) | QP_LNGExportCapacity(tmon,lngexp)) := Sum(step |step <= LNGExpCrv_MaxStep , QLNGexp(tmon,lngexp,step));
+            AnnualLNGExportForReports(ModelYear,lngexp) := sum(modelyrmn, LNGExportForReports(modelyrmn, lngexp));
+            
+            !Sum up to census divisions
+            !!!!!!!NOTE: AK is not in the mapping --  add AK separately !!!!!!
+            LNGLQfuelCDAnnual(ModelYear,r_cen) := sum(l48 | map_State_CensusRegion(l48, r_cen), AnnualLNGExportForReports(ModelYear, l48) * 0.10);
+            TotalLNGLQAnnual(ModelYear) := sum(r_cen, LNGLQfuelCDAnnual(ModelYear, r_cen));
+            
+            !Fill the NEMS array
+            
+            !_QNGLQ(MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum(r_cen, LNGLQfuelCDAnnual(ModelYear, r_cen)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) * Convert_TBtu_Bcf(ModelYear);
+            
+            !_QNGLQ(TotalUS_MNUMCR, NEMSmap_MNUMYR(ModelYear)) := TotalLNGLQAnnual(ModelYear)* Convert_TBtu_Bcf(ModelYear);
+        }
+        DeclarationSection LNG_Export_Declaration {
+            Parameter LNGLQfuelCDAnnual {
+                IndexDomain: (year,r_cen);
+            }
+            Parameter TotalLNGLQAnnual {
+                IndexDomain: year;
+            }
+        }
+    }
+    Procedure Pipefuel_Report {
+        Body: {
+            TranFuelLosses(modelyrmn, h) := sum(h1, FlowsMonthly(modelyrmn, h, h1) * PipeFuelLossFactorOUT(h, h1))
+                                          + sum(h1, FlowsMonthly(modelyrmn, h1, h) * (1 - PipeFuelLossFactorOUT(h1, h))* PipeFuelLossFactorIN(h1, h));
+            PipeFuelLoss(modelyrmn, d) :=  TranFuelLosses(modelyrmn, d) + DistributionLosses(modelyrmn, d) + StorageLosses(modelyrmn, d);
+            PipeFuelLossAnnual(ModelYear, d) := sum(modelyrmn , PipeFuelLoss(modelyrmn, d));
+            PipeFuelLossCDAnnual(ModelYear, r_cen) := sum((modelyrmn,l48) | map_State_CensusRegion(l48, r_cen), PipeFuelLoss(modelyrmn, l48));
+            TotalPipeFuelLossAnnual(ModelYear) := sum(r_cen, PipeFuelLossCDAnnual(ModelYear, r_cen));
+            !Fill the NEMS array
+            !Need to add Alaska pipe fuel??
+            !Not sure this is the best way - re-visit
+            QBLK_QGPTR(MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum(r_cen, PipeFuelLossCDAnnual(ModelYear, r_cen)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) * Convert_TBtu_Bcf(ModelYear);
+            
+            QBLK_QGPTR(TotalUS_MNUMCR, NEMSmap_MNUMYR(ModelYear)) := TotalPipeFuelLossAnnual(ModelYear)* Convert_TBtu_Bcf(ModelYear);
+        }
+        DeclarationSection pipefuel_Declaration {
+            Parameter TranFuelLosses {
+                IndexDomain: (mon,reg);
+            }
+            Parameter PipeFuelLossCDAnnual {
+                IndexDomain: (year,r_cen);
+            }
+            Parameter TotalPipeFuelLossAnnual {
+                IndexDomain: (year);
+            }
+        }
+    }
+    Procedure Pipefuel_Report_History {
+        Body: {
+            TranFuelLosses(histyr, h) := sum(h1, FlowsAnnual(histyr, h, h1) * PipeFuelLossFactorOUT(h, h1))
+                                          + sum(h1, FlowsAnnual(histyr, h1, h) * (1 - PipeFuelLossFactorOUT(h1, h))* PipeFuelLossFactorIN(h1, h));
+            
+            PipeFuelLossAnnual(histyr, d) := TranFuelLosses(histyr, d) + sum( histmon | map_month_year(histmon, histyr), (DistributionLosses(histmon, d) + StorageLosses(histmon, d)));
+            PipeFuelLossCDAnnual(histyr, r_cen) := sum(l48 | map_State_CensusRegion(l48, r_cen), PipeFuelLossAnnual(histyr, l48));
+            TotalPipeFuelLossAnnual(histyr) := sum(r_cen, PipeFuelLossCDAnnual(histyr, r_cen));
+            !Fill the NEMS array
+            !Need to add Alaska pipe fuel??
+            !Not sure this is the best way - re-visit
+            QBLK_QGPTR(MNUMCR, NEMSmap_MNUMYR(histyr)) := sum(r_cen, PipeFuelLossCDAnnual(histyr, r_cen)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) * Convert_TBtu_Bcf(histyr);
+            
+            QBLK_QGPTR(TotalUS_MNUMCR, NEMSmap_MNUMYR(histyr)) := TotalPipeFuelLossAnnual(histyr)* Convert_TBtu_Bcf(histyr);
+        }
+        DeclarationSection pipefuel_history_Declaration {
+            Parameter TranFuelLosses {
+                IndexDomain: (histyr,reg);
+            }
+            Parameter PipeFuelLossCDAnnual {
+                IndexDomain: (year,r_cen);
+            }
+            Parameter TotalPipeFuelLossAnnual {
+                IndexDomain: (histyr);
+            }
+        }
+    }
+    Procedure Totals_Report {
+        Body: {
+            !Calculate annual totals for the US
+            TotalUSProductionAnnual(ModelYear):= sum((l48,modelyrmn),TotalProduction(modelyrmn, l48));
+            TotalUSStorageWthAnnual(ModelYear):= sum(l48, AnnualStorageWithdrawals(ModelYear, l48));
+            TotalUSStorageInjAnnual(ModelYear):= sum(l48, AnnualStorageInjections(ModelYear, l48));
+            TotalUSConsumptionAnnual(ModelYear):= sum((l48,modelyrmn),TotalConsumption(modelyrmn, l48));
+            TotalUSLNGexports(ModelYear) := sum(l48,AnnualLNGExportForReports(ModelYear, l48));
+            TotalImportsAnnual(ModelYear) := sum(l48,ImportsAnnual(ModelYear,l48));
+            TotalExportsAnnual(ModelYear) := sum(l48,ExportsAnnual(ModelYear,l48));
+            
+            TotalUSSupplyAnnual(ModelYear):= TotalUSProductionAnnual(ModelYear) + TotalUSStorageWthAnnual(ModelYear) + TotalImportsAnnual(ModelYear);
+            TotalExpectedUSSupplyAnnual(ModelYear):=  TotalUSStorageWthAnnual(ModelYear) + sum(l48, TotalExpectedProductionAnnual(ModelYear, l48))+ TotalImportsAnnual(ModelYear);
+            
+            TotalUSDemandAnnual(ModelYear):= TotalUSConsumptionAnnual(ModelYear) + TotalUSStorageInjAnnual(ModelYear) + TotalUSLNGexports(ModelYear) + TotalExportsAnnual(ModelYear);
+            
+            TotalModelDemand(ModelYear) := sum((d,modelyrmn),TotalConsumption(modelyrmn, d)+StorageInjections(modelyrmn,d) +PipeFuelLoss(modelyrmn, d) )+ TotalUSLNGexports(ModelYear); !plus losses
+            TotalModelSupply(ModelYear) := sum((d,modelyrmn),TotalProduction(modelyrmn, d)+StorageWithdrawals(modelyrmn,d) );
+        }
+    }
+    Procedure Colors_Report {
+        Body: {
+             FlowColor(year,h,h1) :=  if (FlowDifference(year, h, h1) > FlowColorThreshold) then
+            	'Red'
+            elseif (FlowDifference(year, h, h1) < - FlowColorThreshold) then
+            	'Cyan'
+            endif;
+            
+            CapacityColor(year,h,h1) :=  if (CapacityAdditionAnnual(year, h, h1) > FlowColorThreshold) then
+            	'Red'
+            elseif (CapacityAdditionAnnual(year, h, h1) < - FlowColorThreshold) then
+            	'Cyan'
+            endif;
+        }
+    }
+    Procedure Colors_Report2 {
+        Body: {
+            
+            BindingFlowColor(year,h,h1) :=  if (FlowBinding(year, h, h1) > 0) then
+            	'Red'
+            else
+            	'Black'
+            endif;
+        }
+    }
+}

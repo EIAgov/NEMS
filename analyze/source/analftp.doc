@@ -1,0 +1,44 @@
+                                  ANALFTP.DOC
+
+   To get ANALYZE via FTP, do the following.
+
+   1. FTP crane.denver.colorado.edu (if this fails, try FTP 132.194.30.30).
+   Once you get the login prompt, your userid and password are both analyze
+   (note lower case).
+
+   2. First, enter:  get takeanal.ftp takeanal.ftp
+                     get takedata.ftp takedata.ftp
+   These are take files.  The first takes source code;  the second takes
+   data (including the moredata library).
+   Now enter:   take takeanal.ftp
+                take takedata.ftp
+   After these are done, quit ftp and return to your home computer.
+
+   3. If you are in unix, execute the script file, makeanal.s (you might
+   have to chmod).  Otherwise, use these script files to write your own
+   command file.  Now ANALYZE has been compiled and linked, and your
+   executable is called ANALYZE (or ANALYZE.EXE).
+
+   4. Enter ANALYZE and test it by EXEC ATEST (if this is your first time,
+   you should also EXEC BIGTEST to be sure all is well).  You can also
+   EXEC MOREDATA to setup the moredata files (or just for more testing).
+
+   If all is well, please remove the source codes by entering:  rm *.f and
+   rm DC*.  (If you are not in unix, replace the rm command with delete, or
+   whatever.)  As described in README.ANL, you have agreed not to make the
+   source code available to anyone.  Just in case you need to re-compile
+   (say for larger dimensions), you may copy the source files to a disk and
+   store it in a safe place, so no one else can get it.
+
+   If you have any problems, please contact the author:
+                      Prof. Harvey J. Greenberg
+                      Math Dept - Campus Box 170
+                      University of Colorado at Denver
+                      PO Box 173364
+                      Denver, CO 80217-3364
+               email: hgreenberg@castle.cudenver.edu
+     office phone: 303-556-8464                  fax: 303-556-8550
+     home  phone:  303-796-7830
+
+   (In general, see AUTHOR.DOC for the address and phone numbers.)
+

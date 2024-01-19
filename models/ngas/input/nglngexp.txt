@@ -1,0 +1,1760 @@
+! $Header: m:/default/input/RCS/nglngexp.txt,v 1.24 2020/11/12 16:53:56 KDL Exp $
+
+!Updated 8/16/18	KDL	Lowered LNG shipping costs
+!___________________________________________________________________________________________
+!
+!                               NGMM LNG Export Assumptions and Inputs
+!
+!___________________________________________________________________________________________
+!
+!       1.  LNG Assumptions/Settings
+!       2.  LNG Export Capacity Builds Under Construction
+!       3.  LNG Export Capacity Build Parameters
+!       4.  LNG World Prices and Associated Parameters
+!       5.  Exogenous LNG Exports
+!	
+!___________________________________________________________________________________________
+!	
+!	Identifiers/inputs in nglngexp.txt:
+!	
+!	LNG_FixedExports_Switch		LNG_MaxExports			HistoricalLNGPrice
+!	ExogenousLNGExportCase	     	LNG_FirstYear			LNG_PctFlex
+!	LNGLastHistoricalYear	     	LNG_Liquefaction		LNG_ExpOil								
+!	LNG_RiskThreshold	      	LNG_SunkCost			LNG_ExpFlexLNG
+!	LNG_GrowthRateYr		LNG_PctFuelCharge		Convert_barrel_MMBtu
+!	LNG_Increment			LNG_PeakExports			LNG_step_OilPrice
+!	LNG_DCFDiscountRate		LNG_Regasification		LNG_ExpFlexLNG_adj
+!	LNG_HighPriceRatio 		LNG_AKMaxExports		LNG_WorldFlex
+!	LNG_MaxTrainsYr			LNG_AKFirstYear			Cons_EuropeOECD
+!	LNG_FirstBuildYear		LNG_AKLiquefaction		Cons_Japan
+!	LNG_YrsUntilBuild 		LNG_AKSunkCost
+!	LNG_PctCapacityYr1		LNG_AKPctFuelCharge		ExogenousAnnualLNGExports
+!	LNG_PctCapacityYr2		LNG_AKPeakExports		ExogenousAnnualLNGExports2016
+!	LNG_AKTrainTotal		LNG_AKRegasification		ExogenousAnnualLNGExports_orig20
+!	LNG_PhaseInYrs			LNG_PctLossShipping		ExogenousAnnualLNGExports_orig30
+!	LNG_Utilization			LNG_ShippingCost		ExogenousAnnualLNGExports_orig30_TX
+!					LNG_AKShippingCost		ExogenousAnnualLNGExports_orig30_la
+!	LNG_BaseloadCapacity 		LNG_AKPctLossShipping		ExogenousAnnualLNGExports_orig40 
+!	LNG_InServiceDate		LNG_CostsYrDollars		ExogenousAnnualLNGExports_30B
+!	map_lngproj_lngexp						ExogenousAnnualLNGExports_35B
+!	LNG_NumberOfMonthsRampUp_					ExogenousAnnualLNGExports_40B
+!	LNG_RampUpUtilization		
+!_________________________________________________________________________________________
+!
+!                               1.  LNG Assumptions/Settings
+!___________________________________________________________________________________________
+
+
+!Model setup for LNG Exports
+
+LNG_FixedExports_Switch :=0;	!0=Endogenously solved for in model 1=LNG export capacity fixed through projection
+
+!Assumptions about Fixed LNG Exports
+ExogenousLNGExportCase := "ref2018_d110617a";
+
+!Last Historical Year for LNG data
+LNGLastHistoricalYear :='2021';
+
+!Risk Threshold to Determine number of trains added
+LNG_RiskThreshold := 5;
+!Year to start calculating growth rate for US Supply price in future
+LNG_GrowthRateYr := '2045';
+
+!Export volume (bcf/year) associated with new train
+LNG_Increment :=          200;
+
+!Rate used in calculating net present value of project
+LNG_DCFDiscountRate := 0.10;
+
+!Minimum (high price) or maximum (low price) global/domestic equivalent price ratio 
+!where utilitiy is assumed at 100% (high price) or 0% (low price)
+LNG_HighPriceRatio := 1.0;
+LNG_LowPriceRatio := 0.7;
+
+!Number of trains allowed to be built per year
+LNG_MaxTrainsYr :=3;
+
+!First year new LNG builds (not under construction) allowed
+LNG_FirstBuildYear := '2027';
+
+!number of years after end of year of planning before train can be built
+LNG_YrsUntilBuild := 4;	
+
+!Phase in of LNG capacity (years and utilization)
+LNG_PctCapacityYr1 := 0.5;
+!LNG_PctCapacityYr2 := 0.67;
+LNG_PhaseInYrs :=2;
+
+!Total trains in AK LNG project (dealt with differently in model/outside QP)
+LNG_AKTrainTotal := 4;
+
+!Parameter added to adjust utilization of LNG facilities
+!10/14/21	SYK	Changing to adjust based on month/year to allow coming off of STEO assumptions better. 90% is the long-term assumption.
+composite table:  
+mon		LNG_Utilization
+January, 1990	0.9
+February, 1990	0.9
+March, 1990	0.9
+April, 1990	0.9
+May, 1990	0.9
+June, 1990	0.9
+July, 1990	0.9
+August, 1990	0.9
+September, 1990	0.9
+October, 1990	0.9
+November, 1990	0.9
+December, 1990	0.9
+January, 1991	0.9
+February, 1991	0.9
+March, 1991	0.9
+April, 1991	0.9
+May, 1991	0.9
+June, 1991	0.9
+July, 1991	0.9
+August, 1991	0.9
+September, 1991	0.9
+October, 1991	0.9
+November, 1991	0.9
+December, 1991	0.9
+January, 1992	0.9
+February, 1992	0.9
+March, 1992	0.9
+April, 1992	0.9
+May, 1992	0.9
+June, 1992	0.9
+July, 1992	0.9
+August, 1992	0.9
+September, 1992	0.9
+October, 1992	0.9
+November, 1992	0.9
+December, 1992	0.9
+January, 1993	0.9
+February, 1993	0.9
+March, 1993	0.9
+April, 1993	0.9
+May, 1993	0.9
+June, 1993	0.9
+July, 1993	0.9
+August, 1993	0.9
+September, 1993	0.9
+October, 1993	0.9
+November, 1993	0.9
+December, 1993	0.9
+January, 1994	0.9
+February, 1994	0.9
+March, 1994	0.9
+April, 1994	0.9
+May, 1994	0.9
+June, 1994	0.9
+July, 1994	0.9
+August, 1994	0.9
+September, 1994	0.9
+October, 1994	0.9
+November, 1994	0.9
+December, 1994	0.9
+January, 1995	0.9
+February, 1995	0.9
+March, 1995	0.9
+April, 1995	0.9
+May, 1995	0.9
+June, 1995	0.9
+July, 1995	0.9
+August, 1995	0.9
+September, 1995	0.9
+October, 1995	0.9
+November, 1995	0.9
+December, 1995	0.9
+January, 1996	0.9
+February, 1996	0.9
+March, 1996	0.9
+April, 1996	0.9
+May, 1996	0.9
+June, 1996	0.9
+July, 1996	0.9
+August, 1996	0.9
+September, 1996	0.9
+October, 1996	0.9
+November, 1996	0.9
+December, 1996	0.9
+January, 1997	0.9
+February, 1997	0.9
+March, 1997	0.9
+April, 1997	0.9
+May, 1997	0.9
+June, 1997	0.9
+July, 1997	0.9
+August, 1997	0.9
+September, 1997	0.9
+October, 1997	0.9
+November, 1997	0.9
+December, 1997	0.9
+January, 1998	0.9
+February, 1998	0.9
+March, 1998	0.9
+April, 1998	0.9
+May, 1998	0.9
+June, 1998	0.9
+July, 1998	0.9
+August, 1998	0.9
+September, 1998	0.9
+October, 1998	0.9
+November, 1998	0.9
+December, 1998	0.9
+January, 1999	0.9
+February, 1999	0.9
+March, 1999	0.9
+April, 1999	0.9
+May, 1999	0.9
+June, 1999	0.9
+July, 1999	0.9
+August, 1999	0.9
+September, 1999	0.9
+October, 1999	0.9
+November, 1999	0.9
+December, 1999	0.9
+January, 2000	0.9
+February, 2000	0.9
+March, 2000	0.9
+April, 2000	0.9
+May, 2000	0.9
+June, 2000	0.9
+July, 2000	0.9
+August, 2000	0.9
+September, 2000	0.9
+October, 2000	0.9
+November, 2000	0.9
+December, 2000	0.9
+January, 2001	0.9
+February, 2001	0.9
+March, 2001	0.9
+April, 2001	0.9
+May, 2001	0.9
+June, 2001	0.9
+July, 2001	0.9
+August, 2001	0.9
+September, 2001	0.9
+October, 2001	0.9
+November, 2001	0.9
+December, 2001	0.9
+January, 2002	0.9
+February, 2002	0.9
+March, 2002	0.9
+April, 2002	0.9
+May, 2002	0.9
+June, 2002	0.9
+July, 2002	0.9
+August, 2002	0.9
+September, 2002	0.9
+October, 2002	0.9
+November, 2002	0.9
+December, 2002	0.9
+January, 2003	0.9
+February, 2003	0.9
+March, 2003	0.9
+April, 2003	0.9
+May, 2003	0.9
+June, 2003	0.9
+July, 2003	0.9
+August, 2003	0.9
+September, 2003	0.9
+October, 2003	0.9
+November, 2003	0.9
+December, 2003	0.9
+January, 2004	0.9
+February, 2004	0.9
+March, 2004	0.9
+April, 2004	0.9
+May, 2004	0.9
+June, 2004	0.9
+July, 2004	0.9
+August, 2004	0.9
+September, 2004	0.9
+October, 2004	0.9
+November, 2004	0.9
+December, 2004	0.9
+January, 2005	0.9
+February, 2005	0.9
+March, 2005	0.9
+April, 2005	0.9
+May, 2005	0.9
+June, 2005	0.9
+July, 2005	0.9
+August, 2005	0.9
+September, 2005	0.9
+October, 2005	0.9
+November, 2005	0.9
+December, 2005	0.9
+January, 2006	0.9
+February, 2006	0.9
+March, 2006	0.9
+April, 2006	0.9
+May, 2006	0.9
+June, 2006	0.9
+July, 2006	0.9
+August, 2006	0.9
+September, 2006	0.9
+October, 2006	0.9
+November, 2006	0.9
+December, 2006	0.9
+January, 2007	0.9
+February, 2007	0.9
+March, 2007	0.9
+April, 2007	0.9
+May, 2007	0.9
+June, 2007	0.9
+July, 2007	0.9
+August, 2007	0.9
+September, 2007	0.9
+October, 2007	0.9
+November, 2007	0.9
+December, 2007	0.9
+January, 2008	0.9
+February, 2008	0.9
+March, 2008	0.9
+April, 2008	0.9
+May, 2008	0.9
+June, 2008	0.9
+July, 2008	0.9
+August, 2008	0.9
+September, 2008	0.9
+October, 2008	0.9
+November, 2008	0.9
+December, 2008	0.9
+January, 2009	0.9
+February, 2009	0.9
+March, 2009	0.9
+April, 2009	0.9
+May, 2009	0.9
+June, 2009	0.9
+July, 2009	0.9
+August, 2009	0.9
+September, 2009	0.9
+October, 2009	0.9
+November, 2009	0.9
+December, 2009	0.9
+January, 2010	0.9
+February, 2010	0.9
+March, 2010	0.9
+April, 2010	0.9
+May, 2010	0.9
+June, 2010	0.9
+July, 2010	0.9
+August, 2010	0.9
+September, 2010	0.9
+October, 2010	0.9
+November, 2010	0.9
+December, 2010	0.9
+January, 2011	0.9
+February, 2011	0.9
+March, 2011	0.9
+April, 2011	0.9
+May, 2011	0.9
+June, 2011	0.9
+July, 2011	0.9
+August, 2011	0.9
+September, 2011	0.9
+October, 2011	0.9
+November, 2011	0.9
+December, 2011	0.9
+January, 2012	0.9
+February, 2012	0.9
+March, 2012	0.9
+April, 2012	0.9
+May, 2012	0.9
+June, 2012	0.9
+July, 2012	0.9
+August, 2012	0.9
+September, 2012	0.9
+October, 2012	0.9
+November, 2012	0.9
+December, 2012	0.9
+January, 2013	0.9
+February, 2013	0.9
+March, 2013	0.9
+April, 2013	0.9
+May, 2013	0.9
+June, 2013	0.9
+July, 2013	0.9
+August, 2013	0.9
+September, 2013	0.9
+October, 2013	0.9
+November, 2013	0.9
+December, 2013	0.9
+January, 2014	0.9
+February, 2014	0.9
+March, 2014	0.9
+April, 2014	0.9
+May, 2014	0.9
+June, 2014	0.9
+July, 2014	0.9
+August, 2014	0.9
+September, 2014	0.9
+October, 2014	0.9
+November, 2014	0.9
+December, 2014	0.9
+January, 2015	0.9
+February, 2015	0.9
+March, 2015	0.9
+April, 2015	0.9
+May, 2015	0.9
+June, 2015	0.9
+July, 2015	0.9
+August, 2015	0.9
+September, 2015	0.9
+October, 2015	0.9
+November, 2015	0.9
+December, 2015	0.9
+January, 2016	0.9
+February, 2016	0.9
+March, 2016	0.9
+April, 2016	0.9
+May, 2016	0.9
+June, 2016	0.9
+July, 2016	0.9
+August, 2016	0.9
+September, 2016	0.9
+October, 2016	0.9
+November, 2016	0.9
+December, 2016	0.9
+January, 2017	0.9
+February, 2017	0.9
+March, 2017	0.9
+April, 2017	0.9
+May, 2017	0.9
+June, 2017	0.9
+July, 2017	0.9
+August, 2017	0.9
+September, 2017	0.9
+October, 2017	0.9
+November, 2017	0.9
+December, 2017	0.9
+January, 2018	0.9
+February, 2018	0.9
+March, 2018	0.9
+April, 2018	0.9
+May, 2018	0.9
+June, 2018	0.9
+July, 2018	0.9
+August, 2018	0.9
+September, 2018	0.9
+October, 2018	0.9
+November, 2018	0.9
+December, 2018	0.9
+January, 2019	0.9
+February, 2019	0.9
+March, 2019	0.9
+April, 2019	0.9
+May, 2019	0.9
+June, 2019	0.9
+July, 2019	0.9
+August, 2019	0.9
+September, 2019	0.9
+October, 2019	0.9
+November, 2019	0.9
+December, 2019	0.9
+January, 2020	0.9
+February, 2020	0.9
+March, 2020	0.9
+April, 2020	0.9
+May, 2020	0.9
+June, 2020	0.9
+July, 2020	0.9
+August, 2020	0.9
+September, 2020	0.9
+October, 2020	0.9
+November, 2020	0.9
+December, 2020	0.9
+January, 2021	1.05
+February, 2021	1.05
+March, 2021	1.05
+April, 2021	1.05
+May, 2021	1.05
+June, 2021	1.05
+July, 2021	1.05
+August, 2021	1.05
+September, 2021	1.05
+October, 2021	1.05
+November, 2021	1.05
+December, 2021	1.05
+January, 2022	1.05
+February, 2022	1.05
+March, 2022	1.05
+April, 2022	1.05
+May, 2022	1.05
+June, 2022	1.05
+July, 2022	1.05
+August, 2022	1.05
+September, 2022	1.05
+October, 2022	1.05
+November, 2022	1.05
+December, 2022	1.05
+January, 2023	1.00
+February, 2023	1.00
+March, 2023	1.00
+April, 2023	1.00
+May, 2023	1.00
+June, 2023	1.00
+July, 2023	1.00
+August, 2023	1.00
+September, 2023	1.00
+October, 2023	1.00
+November, 2023	1.00
+December, 2023	1.00
+January, 2024	1.00
+February, 2024	1.02
+March, 2024	1.02
+April, 2024	1.02
+May, 2024	1.02
+June, 2024	1.02
+July, 2024	1.02
+August, 2024	1.02
+September, 2024	1.02
+October, 2024	1.02
+November, 2024	1.02
+December, 2024	1.02
+January, 2025	0.9
+February, 2025	0.9
+March, 2025	0.9
+April, 2025	0.9
+May, 2025	0.9
+June, 2025	0.9
+July, 2025	0.9
+August, 2025	0.9
+September, 2025	0.9
+October, 2025	0.9
+November, 2025	0.9
+December, 2025	0.9
+January, 2026	0.9
+February, 2026	0.9
+March, 2026	0.9
+April, 2026	0.9
+May, 2026	0.9
+June, 2026	0.9
+July, 2026	0.9
+August, 2026	0.9
+September, 2026	0.9
+October, 2026	0.9
+November, 2026	0.9
+December, 2026	0.9
+January, 2027	0.9
+February, 2027	0.9
+March, 2027	0.9
+April, 2027	0.9
+May, 2027	0.9
+June, 2027	0.9
+July, 2027	0.9
+August, 2027	0.9
+September, 2027	0.9
+October, 2027	0.9
+November, 2027	0.9
+December, 2027	0.9
+January, 2028	0.9
+February, 2028	0.9
+March, 2028	0.9
+April, 2028	0.9
+May, 2028	0.9
+June, 2028	0.9
+July, 2028	0.9
+August, 2028	0.9
+September, 2028	0.9
+October, 2028	0.9
+November, 2028	0.9
+December, 2028	0.9
+January, 2029	0.9
+February, 2029	0.9
+March, 2029	0.9
+April, 2029	0.9
+May, 2029	0.9
+June, 2029	0.9
+July, 2029	0.9
+August, 2029	0.9
+September, 2029	0.9
+October, 2029	0.9
+November, 2029	0.9
+December, 2029	0.9
+January, 2030	0.9
+February, 2030	0.9
+March, 2030	0.9
+April, 2030	0.9
+May, 2030	0.9
+June, 2030	0.9
+July, 2030	0.9
+August, 2030	0.9
+September, 2030	0.9
+October, 2030	0.9
+November, 2030	0.9
+December, 2030	0.9
+January, 2031	0.9
+February, 2031	0.9
+March, 2031	0.9
+April, 2031	0.9
+May, 2031	0.9
+June, 2031	0.9
+July, 2031	0.9
+August, 2031	0.9
+September, 2031	0.9
+October, 2031	0.9
+November, 2031	0.9
+December, 2031	0.9
+January, 2032	0.9
+February, 2032	0.9
+March, 2032	0.9
+April, 2032	0.9
+May, 2032	0.9
+June, 2032	0.9
+July, 2032	0.9
+August, 2032	0.9
+September, 2032	0.9
+October, 2032	0.9
+November, 2032	0.9
+December, 2032	0.9
+January, 2033	0.9
+February, 2033	0.9
+March, 2033	0.9
+April, 2033	0.9
+May, 2033	0.9
+June, 2033	0.9
+July, 2033	0.9
+August, 2033	0.9
+September, 2033	0.9
+October, 2033	0.9
+November, 2033	0.9
+December, 2033	0.9
+January, 2034	0.9
+February, 2034	0.9
+March, 2034	0.9
+April, 2034	0.9
+May, 2034	0.9
+June, 2034	0.9
+July, 2034	0.9
+August, 2034	0.9
+September, 2034	0.9
+October, 2034	0.9
+November, 2034	0.9
+December, 2034	0.9
+January, 2035	0.9
+February, 2035	0.9
+March, 2035	0.9
+April, 2035	0.9
+May, 2035	0.9
+June, 2035	0.9
+July, 2035	0.9
+August, 2035	0.9
+September, 2035	0.9
+October, 2035	0.9
+November, 2035	0.9
+December, 2035	0.9
+January, 2036	0.9
+February, 2036	0.9
+March, 2036	0.9
+April, 2036	0.9
+May, 2036	0.9
+June, 2036	0.9
+July, 2036	0.9
+August, 2036	0.9
+September, 2036	0.9
+October, 2036	0.9
+November, 2036	0.9
+December, 2036	0.9
+January, 2037	0.9
+February, 2037	0.9
+March, 2037	0.9
+April, 2037	0.9
+May, 2037	0.9
+June, 2037	0.9
+July, 2037	0.9
+August, 2037	0.9
+September, 2037	0.9
+October, 2037	0.9
+November, 2037	0.9
+December, 2037	0.9
+January, 2038	0.9
+February, 2038	0.9
+March, 2038	0.9
+April, 2038	0.9
+May, 2038	0.9
+June, 2038	0.9
+July, 2038	0.9
+August, 2038	0.9
+September, 2038	0.9
+October, 2038	0.9
+November, 2038	0.9
+December, 2038	0.9
+January, 2039	0.9
+February, 2039	0.9
+March, 2039	0.9
+April, 2039	0.9
+May, 2039	0.9
+June, 2039	0.9
+July, 2039	0.9
+August, 2039	0.9
+September, 2039	0.9
+October, 2039	0.9
+November, 2039	0.9
+December, 2039	0.9
+January, 2040	0.9
+February, 2040	0.9
+March, 2040	0.9
+April, 2040	0.9
+May, 2040	0.9
+June, 2040	0.9
+July, 2040	0.9
+August, 2040	0.9
+September, 2040	0.9
+October, 2040	0.9
+November, 2040	0.9
+December, 2040	0.9
+January, 2041	0.9
+February, 2041	0.9
+March, 2041	0.9
+April, 2041	0.9
+May, 2041	0.9
+June, 2041	0.9
+July, 2041	0.9
+August, 2041	0.9
+September, 2041	0.9
+October, 2041	0.9
+November, 2041	0.9
+December, 2041	0.9
+January, 2042	0.9
+February, 2042	0.9
+March, 2042	0.9
+April, 2042	0.9
+May, 2042	0.9
+June, 2042	0.9
+July, 2042	0.9
+August, 2042	0.9
+September, 2042	0.9
+October, 2042	0.9
+November, 2042	0.9
+December, 2042	0.9
+January, 2043	0.9
+February, 2043	0.9
+March, 2043	0.9
+April, 2043	0.9
+May, 2043	0.9
+June, 2043	0.9
+July, 2043	0.9
+August, 2043	0.9
+September, 2043	0.9
+October, 2043	0.9
+November, 2043	0.9
+December, 2043	0.9
+January, 2044	0.9
+February, 2044	0.9
+March, 2044	0.9
+April, 2044	0.9
+May, 2044	0.9
+June, 2044	0.9
+July, 2044	0.9
+August, 2044	0.9
+September, 2044	0.9
+October, 2044	0.9
+November, 2044	0.9
+December, 2044	0.9
+January, 2045	0.9
+February, 2045	0.9
+March, 2045	0.9
+April, 2045	0.9
+May, 2045	0.9
+June, 2045	0.9
+July, 2045	0.9
+August, 2045	0.9
+September, 2045	0.9
+October, 2045	0.9
+November, 2045	0.9
+December, 2045	0.9
+January, 2046	0.9
+February, 2046	0.9
+March, 2046	0.9
+April, 2046	0.9
+May, 2046	0.9
+June, 2046	0.9
+July, 2046	0.9
+August, 2046	0.9
+September, 2046	0.9
+October, 2046	0.9
+November, 2046	0.9
+December, 2046	0.9
+January, 2047	0.9
+February, 2047	0.9
+March, 2047	0.9
+April, 2047	0.9
+May, 2047	0.9
+June, 2047	0.9
+July, 2047	0.9
+August, 2047	0.9
+September, 2047	0.9
+October, 2047	0.9
+November, 2047	0.9
+December, 2047	0.9
+January, 2048	0.9
+February, 2048	0.9
+March, 2048	0.9
+April, 2048	0.9
+May, 2048	0.9
+June, 2048	0.9
+July, 2048	0.9
+August, 2048	0.9
+September, 2048	0.9
+October, 2048	0.9
+November, 2048	0.9
+December, 2048	0.9
+January, 2049	0.9
+February, 2049	0.9
+March, 2049	0.9
+April, 2049	0.9
+May, 2049	0.9
+June, 2049	0.9
+July, 2049	0.9
+August, 2049	0.9
+September, 2049	0.9
+October, 2049	0.9
+November, 2049	0.9
+December, 2049	0.9
+January, 2050	0.9
+February, 2050	0.9
+March, 2050	0.9
+April, 2050	0.9
+May, 2050	0.9
+June, 2050	0.9
+July, 2050	0.9
+August, 2050	0.9
+September, 2050	0.9
+October, 2050	0.9
+November, 2050	0.9
+December, 2050	0.9
+;
+
+!___________________________________________________________________________________________
+!
+!                               2.  LNG Export Capacity Builds Under Construction
+!___________________________________________________________________________________________	       
+ 
+!Setting LNG Export capacity based on current projects under construction
+!8/1/17 KDL	Data updated from EIA spreadsheet "U.S.liquefactioncapacity.xlsx"
+! 		https ://www.eia.gov/naturalgas/data.php#imports
+!		Units in Bcf/d... convert to Bcf/year in code
+!		Freeport and Cameron updated from McDermott newswire
+!		https ://www.prnewswire.com/news-releases/mcdermott-reports-second-quarter-2018
+!		-financial-and-operational-results-300689581.html
+!		Updates from Platts third party data
+!6/18/19 KDL 	Sabine Train 6 from Reuters https //www.reuters.com/article/us-usa-cheniere-sabine-lng/
+!		cheniere-to-build-louisiana-sabine-pass-6-lng-export-train-idUSKCN1T41S1
+!		All other edits from U.S.liquefaction.xlsx online at eia.gov
+!8/5/20  KDL	Update to be consistent with US Liquefaction spreadsheet available at eia.gov
+!7/23/21 SYK	Updated LNG projects to be consistent with US Liquefaction spreadsheet.
+!9/21/21 SYK	Update LNG project dates to be consistent with latest assumptions in STEO. Also adjusted Elba Island capacity
+!		to be consistent with LNG liquefaction capacity spreadsheet. 
+!8/4/22	 SYK	Updated capacities with most liquefaction tracker published 6/8/2022. 
+!		I also went through and made general corrections to capacities and in-service dates
+!		to ensure 100% alignment with the tracker going forward. Originally, some in-service dates were
+!		"date of commercial service". Moving forward, the "in-service" date will be used.
+!		Since only year for Golden Pass is provided, those months are estimates.
+!		Added Plaquemines LNG
+!9/8/22	SYK	Adding Corpus Christi Stage III (CCStageIII)
+
+composite table:
+
+lngproj		train 	LNG_BaseloadCapacity 	LNG_InServiceDate	
+SabinePass	1	0.59 			'February, 2016'
+SabinePass	2	0.59 			'August, 2016'
+SabinePass	3	0.59  			'January, 2017'
+SabinePass	4	0.59  			'August, 2017'
+SabinePass	5	0.59  			'November, 2018'			
+SabinePass	6	0.59 			'December, 2021'	
+CovePoint	1	0.69 			'March, 2018'			
+ElbaIsland	1	0.17 			'September, 2019'	!Trains 1-5
+ElbaIsland	2	0.17 			'May, 2020'		!Trains 6-10				
+CorpusChristi	1	0.60 			'December, 2018'
+CorpusChristi	2	0.60 			'July, 2019'		
+CorpusChristi	3	0.60 			'December, 2020'	
+Cameron		1	0.59 			'May, 2019'
+Cameron		2	0.59 			'December, 2019'
+Cameron		3	0.59 			'August, 2020'						
+Freeport	1	0.66 			'September, 2019'
+Freeport	2	0.66 			'December, 2019'
+Freeport	3	0.66 			'March, 2020'
+CalcasieuPass	1	0.66			'December, 2021'	!Trains 1-9
+CalcasieuPass	2	0.66			'September, 2022'	!Trains 10-18	
+GoldenPass	1	0.68			'December, 2023'
+GoldenPass	2	0.68			'July, 2024'
+GoldenPass	3	0.68			'December, 2024'
+Plaquemines	1	1.58			'December, 2024'	!Trains 1-24
+CCStageIII	1	1.32			'December, 2025'	!Trains 1-14
+;
+
+!map projects to LNG export regions
+
+composite table:
+
+lngproj		lngexp		map_lngproj_lngexp
+SabinePass	LA		1				
+CovePoint	MD		1
+ElbaIsland	GA		1
+CorpusChristi	TX_E		1
+Cameron		LA		1
+Freeport	TX_E		1
+CalcasieuPass	LA		1
+GoldenPass	TX_E		1
+Plaquemines	LA		1
+CCStageIII	TX_E		1
+;
+
+!Define ramp-up for new facilities by month and train
+!First train assumed to take longer to ramp up
+
+LNG_NumberOfMonthsRampUp_ := data{1..6};
+
+composite table:
+
+train	ramp_mon	LNG_RampUpUtilization 
+1	1		0.10
+1	2		0.25
+1	3		0.5
+1	4		0.5
+1	5		0.85
+!1	6		0.85
+2	1		0.10
+2	2		0.25
+2	3		0.50
+2	4		0.85
+3	1		0.5
+3	2		0.85
+;
+
+!___________________________________________________________________________________________
+!
+!                               3.  LNG Export Capacity Build Parameters
+!___________________________________________________________________________________________
+
+
+!Assumptions for LNG export capacity builds- costs, restrictions
+
+!Year in which real dollars define costs; must be converted to 87$ in model
+LNG_CostsYrDollars := '2021';
+
+composite table:
+
+lngexp	LNG_MaxExports	LNG_FirstYear	LNG_Liquefaction	LNG_SunkCost	LNG_PctFuelCharge	LNG_PeakExports		LNG_Regasification		
+MD	407.9		2027		3.30			3.00		0.15			0.38			0.1
+GA	119.9		2027		3.30			3.00		0.15			0.38			0.1
+LA	9999.9		2027		3.00			3.00		0.15			0.34			0.1
+TX_E	9999.9		2027		3.00			3.00		0.15			0.34			0.1
+;
+
+LNG_AKMaxExports:=799.9;
+LNG_AKFirstYear:=2030;
+LNG_AKLiquefaction:=7.00;	!equals $7 in 2018 dollars
+LNG_AKSunkCost:=0.00;
+LNG_AKPctFuelCharge:=0.15;
+LNG_AKPeakExports:=0.33;
+LNG_AKRegasification:=0.1;		
+
+!Data for LNG supply and destination points
+!Testing with different shipping costs
+
+!Different shipping cost options
+!lngexp	d_lng		shipKD  shipJB	shipJB+	shipNGTDM
+!MD	Asia		1.369	1.92	2.27	2.63
+!GA	Asia		1.329	1.92    2.27	2.63
+!LA 	Asia		1.327	1.87    2.21	2.55
+!TX 	Asia		1.329	1.87    2.21	2.55
+!MD 	Europe		0.443	0.70    0.80	0.98
+!GA 	Europe		0.479	0.70    0.80	0.98
+!LA 	Europe		0.587	0.86    1.07	1.28
+!TX 	Europe		0.595	0.86    1.07	1.28
+
+composite table:
+
+lngexp	d_lng		LNG_PctLossShipping	LNG_ShippingCost
+MD	Asia		0.041			1.92	!1.75	potential change 8/5/20. Revisit during tweeking if needed
+GA	Asia		0.041			1.92	!1.75	potential change 8/5/20. Revisit during tweeking if needed
+LA 	Asia		0.041			1.87	!1.60	potential change 8/5/20. Revisit during tweeking if needed
+TX_E 	Asia		0.041			1.87	!1.60	potential change 8/5/20. Revisit during tweeking if needed
+MD 	Europe		0.015			0.70
+GA 	Europe		0.015			0.70
+LA 	Europe		0.037			0.86
+TX_E 	Europe		0.037			0.86
+
+;
+composite table
+d_lng		LNG_AKShippingCost	LNG_AKPctLossShipping	!LNG_IHS_AKShippingCost	 Old shipping
+Asia		0.65			0.015			!0.429                     0.90
+Europe		2.00  			0.041			!1.392  		   3.65
+; 
+
+!___________________________________________________________________________________________
+!
+!                               4.  LNG World Prices and Associated Parameters
+!___________________________________________________________________________________________
+
+!LNG historical prices
+!For Europe, use NBP.  For Asia, use Japan.
+!NBP from https://ycharts.com/indicators/uk_heren_nbp_index_natural_gas_prices
+!Japanese price from https://ycharts.com/indicators/japan_liquefied_natural_gas_import_price
+!MUST CONVERT TO 87$/Mcf IN CODE
+!Note to check for using IHS data, which has these prices
+
+HistoricalLNGPrice := data table    
+
+year	Europe	   Asia				
+2000 	 2.711     4.680
+2001 	 3.175     4.590
+2002 	 2.373     4.265
+2003 	 3.332     4.768
+2004 	 4.457     5.163
+2005 	 7.383     5.989
+2006 	 7.872     7.083
+2007 	 6.006     7.704
+2008 	10.790     12.603
+2009 	 4.850     8.994
+2010 	 6.556     10.925
+2011 	 9.042     14.709
+2012 	 9.464     16.613
+2013 	10.640     15.956
+2014 	 8.253     16.036 
+2015 	 6.526     10.402
+2016	 4.69	   6.89
+2017	 5.805	   8.043
+2018	 8.061	   10.67
+2019	 4.467	   10.565
+2020	 3.420	   8.314
+;
+
+!Parameters to calculate price
+!LNG_PctFlex is percentage of U.S. volumes to add to flexible LNG volume total
+!LNG_ExpOil (formerly alpha) is coefficient for Brent term in price equation
+!	Note that for 5 year average, alpha is 0.78 and 0.97, respectively
+!LNG_ExpFlexLNG (formerly beta) is coefficient for flexible LNG term in price equation
+!9/23/19	KDL	Changed Asia LNG_ExpFlexLNG from -0.8 to -0.4 to align with history in IEO
+!9/23/19	KDL	Changed Asia LNG_ExpFlexLNG from -0.4 to -0.6 to align with history in IEO
+!			Changed Asia LNG_ExpOil from 0.955 to 1.0 to align with history in IEO	
+!9/14/20	KDL	Changed both LNG_ExpOil to align with recent (last 10 yrs) history
+!10/721		SYK	Changed LNG_ExpOil to align with 15 yr history. Reverted LNG_ExpFlexLNG(Asia) back to -0.6
+!10/11/22	SYK	Updated LNG_ExpOil to align with new 15 yr history.
+
+composite table:
+
+d_lng	LNG_PctFlex	LNG_ExpOil	LNG_ExpFlexLNG
+Europe	1.0		0.7248		-0.4
+Asia	1.0		0.9385		-0.6
+;
+
+Convert_barrel_MMBtu := 5.8;
+
+!Values used to calculate Gamma in order to aid convergence between cycles via supply price.  From old NGTDM. Now reads from ng_runval.txt
+!x_LNG_Gamma1 := -42.55;
+!x_LNG_Gamma2 := 45.0; 
+
+!LNG Brent crude oil price step adjustments on LNG_ExpFlexLNG (beta)
+!LNG_step_OilPrice are the brent price ranges in 87$/barrel defining LNG_OilPriceSteps_
+!LNG_ExpFlexLNG_adj is the adder to beta as a function of oil price
+
+!Updated 11/12/20	KDL	Updated oil price steps (2,4,5) and the adjustement factors (1) for high and low oil price cases
+
+composite table:
+								!Old oil price steps and prices in curve from AEO2020
+step_wop	LNG_step_OilPrice	LNG_ExpFlexLNG_adj	! LNG_step_OilPrice	LNG_ExpFlexLNG_adj
+1		5			0.6			! 5			0.6
+2		20			0.3			! 25			0.6
+3		35			0.0			! 35			0.0
+4		55			-0.3			! 75			-0.3
+5		65			-0.6			! 115			-0.6
+6		100			-0.6			! 165			-0.6
+;
+
+!INGM related data for LNG Export calculations
+!Last updated for AEO 2022/IEO 2021
+!All units in Bcf/yr
+!9/28/17 	KDL 	updated for IEO 2017.  As placeholders, Cons_EuropeOECD and Cons_Japan are really total LNG imports for Europe and Asia
+!			LNG WorldFlex has 2 different options that may be used
+!9/9/19		KDL	updated for IEO 2019.  Flexible LNG from Victoria.  
+!10/17/19	KDL	Updated consumption to match history and 2019-2020 forecast from VZ.
+!			Updated production to match all Asia from IEO 2019.
+!			Consumption growth rates consistent with IEO 2019.
+!8/12/21	SYK		Updated Europe/Asia Cons and Asia production values from IEO 2021
+
+composite table:
+
+
+xyear   LNG_WorldFlex   	Cons_EuropeOECD  		Cons_Japan	Prod_China        
+2010	2013			20320				19100		15070
+2011	2927			18800				20490		14960
+2012	2838			18090				21560		15320
+2013	3124			18060				22220		15410
+2014	3382			16540				22710		16000
+2015	3272			17070				22840		16380
+2016	3489			18080				23860		16780
+2017	3343			18900				25190		17370
+2018	4132			18490				27420		17890
+2019	3906			19230				28210		18710
+2020	3550			18970				28990		18690
+2021	4083			19540				29800		19350
+2022	4185			19660				30790		20000
+2023	4489			19780				31720		20300
+2024	4851			19880				32620		20540
+2025	5032			19950				33430		20370
+2026	5450			20010				34300		20770
+2027	5984			20020				34990		21160
+2028	6278			20010				35740		21560
+2029	6755			20230				36480		21750
+2030	7293			20260				37210		22230
+2031	7870			20160				37550		22220
+2032	8366			20150				37910		22160
+2033	8469			20170				38330		22460
+2034	8893			20200				38790		22600
+2035	9429			20230				39160		22420
+2036	9886			20220				39650		21630
+2037	10670			20210				40000		21510
+2038	11142			20210				40650		21990
+2039	11457			20180				40880		21940
+2040	11305			20210				41610		22290
+2041	12876			20300				41840		21620
+2042	13811			20390				42360		22070
+2043	15137			20460				43180		22760
+2044	14972			20570				43780		23260
+2045	16098			20670				44140		23490
+2046	16351			20780				44780		24110
+2047	16485			20870				45460		24710
+2048	16611			21020				46080		25230
+2049	16753			21110				46650		25710
+2050	16889			21320				47240		26190
+2051	17047			21403				48084		26486
+2052	17205			21487				48947		26785
+2053	17363			21570				49828		27088
+2054	17521			21655				50729		27394
+2055	17679			21739				51650		27704
+2056	17837			21824				52590		28017
+2057	17996			21909				53552		28333
+2058	18154			21994				54534		28653
+2059	18312			22080				55537		28977
+2060	18470			22166				56562		29305
+2061	18628			22253				57610		29636
+2062	18786			22339				58680		29971
+2063	18944			22427				59773		30309
+2064	19102			22514				60890		30652
+2065	19260			22602				62031		30998
+2066	19418			22690				63196		31348
+2067	19576			22778				64387		31703
+2068	19735			22867				65603		32061
+2069	19893			22957				66845		32423
+2070	20051			23046				68114		32790
+      
+;
+
+
+!___________________________________________________________________________________________
+!
+!                               5.  Exogenous LNG Exports
+!___________________________________________________________________________________________
+
+
+! LNG exports in billion cubic feet
+! for now assign monthly by dividing by 12, later the LNG routine will assign to monthly
+! all states/regions not included are zero, including Canada and Mexico
+! Note that there are inputs for AEO2016 and AEO2017; assign accordingly
+
+!LNG Exports AEO2017						
+!Mappings to LNGTER (might change?)
+!	3	6	6	10		6
+	
+ExogenousAnnualLNGExports := data table      
+
+	GA	LA	MD	TX_E
+
+2015				
+2016		186.84		
+2017		671.25		
+2018	25.625	923.895 162.4	
+2019	72	1287	255.5	331.1
+2020	120	1648	255.5	1010
+2021	120	1657	255.5	1124
+2022	120	1857	255.5	1124
+2023	120	2257	255.5	1124
+2024	120	2657	255.5	1124
+2025	120	2923.66 255.5	1257.333333
+2026	120	2990.33 255.5	1390.666667
+2027	120	3057	255.5	1524
+2028	120	3057	255.5	1524
+2029	120	3057	255.5	1524
+2030	120	3057	255.5	1524
+2031	120	3057	255.5	1524
+2032	120	3057	255.5	1524
+2033	120	3057	255.5	1524
+2034	120	3057	255.5	1524
+2035	120	3057	255.5	1524
+2036	120	3057	255.5	1524
+2037	120	3057	255.5	1524
+2038	120	3057	255.5	1524
+2039	120	3057	255.5	1524
+2040	120	3057	255.5	1524
+2041	120	3057	255.5	1524
+2042	119.327 3057	255.5	1524
+2043	119.589 3057	255.5	1524
+2044	119.272 3057	255.5	1524
+2045	119.859 3057	255.5	1524
+2046	119.063 3057	255.5	1524
+2047	118.984 3057	255.5	1524
+2048	118.443 3057	255.5	1524
+2049	118.755 3057	255.5	1524
+2050	118.908 3057	255.5	1524
+;
+
+
+
+
+!AEO2016 results; read in and overwrite if necessary (or comment out of file)
+ExogenousAnnualLNGExports2016 := data table      
+         MD       LA      TX_E
+1990      0        0       0
+1991      0        0       0
+1992      0        0       0
+1993      0        0       0
+1994      0        0       0
+1995      0        0       0
+1996      0        0       0
+1997      0        0       0
+1998      0        0       0
+1999      0        0       0
+2000      0        0       0
+2001      0        0       0
+2002      0        0       0
+2003      0        0       0
+2004      0        0       0
+2005      0        0       0
+2006      0        0       0
+2007      0        0       0
+2008      0        0       0
+2009      0        0       0
+2010      0        0       0
+2011      0        0       0
+2012      0        0       0
+2013      0        0       0
+2014      0        0       0
+2015      0        0       0
+2016      0      178       0
+2017      0      485       0
+2018    150      907       0
+2019    256     1062     107
+2020    256     1579     646
+2021    256     1879     916
+2022    256     2119    1076
+2023    256     2359    1436
+2024    256     2599    1596
+2025    230     2600    1795
+2026    232     2600    1795
+2027    252     2600    1862
+2028    248     2600    1929
+2029    256     2600    2062
+2030    256     2600    2262
+2031    256     2600    2529
+2032    256     2600    2796
+2033    256     2600    2996
+2034    256     2600    3196
+2035    256     2600    3396
+2036    256     2600    3529
+2037    256     2600    3596
+2038    256     2600    3596
+2039    256     2600    3729
+2040    256     2600    3862
+2041    257     2600    3862
+2042    258     2600    3862
+2043    259     2600    3862
+2044    260     2600    3862
+2045    261     2600    3862
+2046    262     2600    3862
+2047    263     2600    3862
+2048    264     2600    3862
+2049    265     2600    3862
+2050    266     2600    3862
+;
+
+
+ExogenousAnnualLNGExports_orig20 := data table      
+
+year          MD       TX_E           
+1990          0.00     0.00    
+1991          0.00     0.00    
+1992          0.00     0.00    
+1993          0.00     0.00    
+1994          0.00     0.00    
+1995          0.00     0.00    
+1996          0.00     0.00    
+1997          0.00     0.00    
+1998          0.00     0.00    
+1999          0.00     0.00    
+2000          0.00     0.00    
+2001          0.00     0.00    
+2002          0.00     0.00    
+2003          0.00     0.00    
+2004          0.00     0.00    
+2005          0.00     0.00    
+2006          0.00     0.00    
+2007          0.00     0.00    
+2008          0.00     0.00    
+2009          0.00     0.00    
+2010          0.00     0.00    
+2011          0.00     0.00    
+2012          0.00     0.00    
+2013          0.00     0.00    
+2014          0.00     0.00    
+2015          0.00     0.00    
+2016          0.00   158.72    
+2017          0.00   532.90    
+2018        152.10   865.30    
+2019        255.50  1618.10    
+2020        255.50  2658.00    
+2021        620.50  3030.30    
+2022        620.50  3760.30    
+2023        620.50  4490.30    
+2024        620.50  5220.30    
+2025        620.50  5950.30    
+2026        985.50  6315.30    
+2027        985.50  7045.30    
+2028        985.50  7775.30    
+2029        985.50  8505.30    
+2030        985.50  9235.30    
+2031        985.50  9965.30          
+2032        985.50  9965.30    
+2033        985.50  9965.30    
+2034        985.50  9965.30    
+2035        985.50  9965.30    
+2036        985.50  9965.30    
+2037        985.50  9965.30    
+2038        985.50  9965.30    
+2039        985.50  9965.30    
+2040        985.50  9965.30    
+2041        985.50  9965.30    
+2042        985.50  9965.30    
+2043        985.50  9965.30    
+2044        985.50  9965.30    
+2045        985.50  9965.30    
+2046        985.50  9965.30    
+2047        985.50  9965.30    
+2048        985.50  9965.30    
+2049        985.50  9965.30    
+2050        985.50  9965.30    
+;
+ExogenousAnnualLNGExports_orig30 := data table  
+
+year          MD       LA       TX_E 
+2005				
+2006				
+2007				
+2008				
+2009				
+2009          0.00     0.00     
+2010          0.00     0.00     
+2011          0.00     0.00     
+2012          0.00     0.00     
+2013          0.00     0.00     
+2014          0.00     0.00     
+2015          0.00     0.00     
+2016          0.00   158.72     
+2017          0.00   532.90     
+2018        152.10   865.30     
+2019        255.50  1618.10     
+2020        255.50  2327.10      331.1	
+2021        620.50  2030.30     1000	
+2022        620.50  2760.30     1000	
+2023        620.50  3490.30     1000	
+2024        620.50  4220.30     1000	
+2025        620.50  4950.30     1000	
+2026        985.50  5315.30     1000
+2027        985.50  6045.30     1000
+2028        985.50  6275.30     1500
+2029        985.50  7005.30     1500
+2030        985.50  7235.30     2000
+2031        985.50  7965.30     2000
+2032        985.50  8195.30     2500
+2033        985.50  8425.30     3000
+2034        985.50  8790.30     3000
+2035        985.50  8790.30     3000
+2036        985.50  8790.30     3000
+2037        985.50  8790.30     3000
+2038        985.50  8790.30     3000
+2039        985.50  8790.30     3000
+2040        985.50  8790.30     3000
+2041        985.50  8790.30     3000
+2042        985.50  8790.30     3000
+2043        985.50  8790.30     3000
+2044        985.50  8790.30     3000
+2045        985.50  8790.30     3000
+2046        985.50  8790.30     3000
+2047        985.50  8790.30     3000
+2048        985.50  8790.30     3000
+2049        985.50  8790.30     3000
+2050        985.50  8790.30     3000
+;
+
+ExogenousAnnualLNGExports_orig30_TX := data table  
+
+year          MD       TX_E            
+1990          0.00     0.00   
+1991          0.00     0.00   
+1992          0.00     0.00   
+1993          0.00     0.00   
+1994          0.00     0.00   
+1995          0.00     0.00   
+1996          0.00     0.00   
+1997          0.00     0.00   
+1998          0.00     0.00   
+1999          0.00     0.00   
+2000          0.00     0.00   
+2001          0.00     0.00   
+2002          0.00     0.00   
+2003          0.00     0.00   
+2004          0.00     0.00   
+2005          0.00     0.00   
+2006          0.00     0.00   
+2007          0.00     0.00   
+2008          0.00     0.00   
+2009          0.00     0.00   
+2010          0.00     0.00   
+2011          0.00     0.00   
+2012          0.00     0.00   
+2013          0.00     0.00   
+2014          0.00     0.00   
+2015          0.00     0.00   
+2016          0.00   158.72   
+2017          0.00   532.90   
+2018        152.10   865.30   
+2019        255.50  1618.10   
+2020        255.50  2658.00   
+2021        620.50  3030.30   
+2022        620.50  3760.30   
+2023        620.50  4490.30   
+2024        620.50  5220.30   
+2025        620.50  5950.30   
+2026        985.50  6315.30   
+2027        985.50  7045.30   
+2028        985.50  7775.30   
+2029        985.50  8505.30   
+2030        985.50  9235.30   
+2031        985.50  9965.30           
+2032        985.50 10695.30   
+2033        985.50 11425.30   
+2034        985.50 11790.30   
+2035        985.50 11790.30   
+2036        985.50 11790.30   
+2037        985.50 11790.30   
+2038        985.50 11790.30   
+2039        985.50 11790.30   
+2040        985.50 11790.30   
+2041        985.50 11790.30   
+2042        985.50 11790.30   
+2043        985.50 11790.30   
+2044        985.50 11790.30   
+2045        985.50 11790.30   
+2046        985.50 11790.30   
+2047        985.50 11790.30   
+2048        985.50 11790.30   
+2049        985.50 11790.30   
+2050        985.50 11790.30   
+;
+
+ExogenousAnnualLNGExports_orig30_la := data table  
+
+year          MD       LA          
+1990          0.00     0.00    
+1991          0.00     0.00    
+1992          0.00     0.00    
+1993          0.00     0.00    
+1994          0.00     0.00    
+1995          0.00     0.00    
+1996          0.00     0.00    
+1997          0.00     0.00    
+1998          0.00     0.00    
+1999          0.00     0.00    
+2000          0.00     0.00    
+2001          0.00     0.00    
+2002          0.00     0.00    
+2003          0.00     0.00    
+2004          0.00     0.00    
+2005          0.00     0.00    
+2006          0.00     0.00    
+2007          0.00     0.00    
+2008          0.00     0.00    
+2009          0.00     0.00    
+2010          0.00     0.00    
+2011          0.00     0.00    
+2012          0.00     0.00    
+2013          0.00     0.00    
+2014          0.00     0.00    
+2015          0.00     0.00    
+2016          0.00   158.72    
+2017          0.00   532.90    
+2018        152.10   865.30    
+2019        255.50  1618.10    
+2020        255.50  2658.00    
+2021        620.50  3030.30    
+2022        620.50  3760.30    
+2023        620.50  4490.30    
+2024        620.50  5220.30    
+2025        620.50  5950.30    
+2026        985.50  6315.30    
+2027        985.50  7045.30    
+2028        985.50  7775.30    
+2029        985.50  8505.30    
+2030        985.50  9235.30    
+2031        985.50  9965.30         
+2032        985.50 10695.30    
+2033        985.50 11425.30    
+2034        985.50 11790.30    
+2035        985.50 11790.30    
+2036        985.50 11790.30    
+2037        985.50 11790.30    
+2038        985.50 11790.30    
+2039        985.50 11790.30    
+2040        985.50 11790.30    
+2041        985.50 11790.30    
+2042        985.50 11790.30    
+2043        985.50 11790.30    
+2044        985.50 11790.30    
+2045        985.50 11790.30    
+2046        985.50 11790.30    
+2047        985.50 11790.30    
+2048        985.50 11790.30    
+2049        985.50 11790.30    
+2050        985.50 11790.30    
+;
+
+ExogenousAnnualLNGExports_orig40 := data table  
+
+year            MD       TX_E           
+1990            0.00     0.00 
+1991            0.00     0.00 
+1992            0.00     0.00 
+1993            0.00     0.00 
+1994            0.00     0.00 
+1995            0.00     0.00 
+1996            0.00     0.00 
+1997            0.00     0.00 
+1998            0.00     0.00 
+1999            0.00     0.00 
+2000            0.00     0.00 
+2001            0.00     0.00 
+2002            0.00     0.00 
+2003            0.00     0.00 
+2004            0.00     0.00 
+2005            0.00     0.00 
+2006            0.00     0.00 
+2007            0.00     0.00 
+2008            0.00     0.00 
+2009            0.00     0.00 
+2010            0.00     0.00 
+2011            0.00     0.00 
+2012            0.00     0.00 
+2013            0.00     0.00 
+2014            0.00     0.00 
+2015            0.00     0.00 
+2016            0.00   158.72 
+2017            0.00   532.90 
+2018          152.10   865.30 
+2019          255.50  1618.10 
+2020          255.50  2658.00 
+2021          620.50  3030.30 
+2022          620.50  3760.30 
+2023          620.50  4490.30 
+2024          620.50  5220.30 
+2025          620.50  5950.30 
+2026          985.50  6315.30 
+2027          985.50  7045.30 
+2028          985.50  7775.30 
+2029          985.50  8505.30 
+2030          985.50  9235.30 
+2031          985.50  9965.30         
+2032          985.50 10695.30 
+2033          985.50 11425.30 
+2034          985.50 12155.30 
+2035          985.50 12885.30 
+2036          985.50 13615.30 
+2037          985.50 13615.30 
+2038          985.50 13615.30 
+2039          985.50 13615.30 
+2040          985.50 13615.30 
+2041          985.50 13615.30 
+2042          985.50 13615.30 
+2043          985.50 13615.30 
+2044          985.50 13615.30 
+2045          985.50 13615.30 
+2046          985.50 13615.30 
+2047          985.50 13615.30 
+2048          985.50 13615.30 
+2049          985.50 13615.30 
+2050          985.50 13615.30 
+;
+
+!ExogenousAnnualLNGExports_30B := data table  
+!
+!year         PA     MD        LA      OR       
+!1990         0.00    0.00     0.00    0.00  
+!1991         0.00    0.00     0.00    0.00  
+!1992         0.00    0.00     0.00    0.00  
+!1993         0.00    0.00     0.00    0.00  
+!1994         0.00    0.00     0.00    0.00  
+!1995         0.00    0.00     0.00    0.00  
+!1996         0.00    0.00     0.00    0.00  
+!1997         0.00    0.00     0.00    0.00  
+!1998         0.00    0.00     0.00    0.00  
+!1999         0.00    0.00     0.00    0.00  
+!2000         0.00    0.00     0.00    0.00  
+!2001         0.00    0.00     0.00    0.00  
+!2002         0.00    0.00     0.00    0.00  
+!2003         0.00    0.00     0.00    0.00  
+!2004         0.00    0.00     0.00    0.00  
+!2005         0.00    0.00     0.00    0.00  
+!2006         0.00    0.00     0.00    0.00  
+!2007         0.00    0.00     0.00    0.00  
+!2008         0.00    0.00     0.00    0.00  
+!2009         0.00    0.00     0.00    0.00  
+!2010         0.00    0.00     0.00    0.00  
+!2011         0.00    0.00     0.00    0.00  
+!2012         0.00    0.00     0.00    0.00  
+!2013         0.00    0.00     0.00    0.00  
+!2014         0.00    0.00     0.00    0.00  
+!2015         0.00    0.00     0.00    0.00  
+!2016         0.00    0.00   158.72    0.00  
+!2017         0.00    0.00   532.90    0.00  
+!2018         0.00  152.10   865.30    0.00  
+!2019         0.00  255.50  1618.10    0.00  
+!2020         0.00  255.50  2658.00    0.00  
+!2021         0.00  620.50  3030.30    0.00  
+!2022         0.00  620.50  3760.30    0.00  
+!2023         0.00  620.50  4490.30    0.00  
+!2024         0.00  620.50  5220.30    0.00  
+!2025         0.00  620.50  5950.30    0.00  
+!2026         0.00  985.50  6680.30    0.00  
+!2027         0.00  985.50  7045.30    0.00  
+!2028         0.00  985.50  7410.30  365.00  
+!2029       365.00  985.50  7775.30  365.00  
+!2030       365.00  985.50  8505.30  365.00  
+!2031       730.00  985.50  8870.30  365.00         
+!2032       730.00  985.50  8870.30  365.00  
+!2033       730.00  985.50  8870.30  365.00  
+!2034       730.00  985.50  8870.30  365.00  
+!2035       730.00  985.50  8870.30  365.00  
+!2036       730.00  985.50  8870.30  365.00  
+!2037       730.00  985.50  8870.30  365.00  
+!2038       730.00  985.50  8870.30  365.00  
+!2039       730.00  985.50  8870.30  365.00  
+!2040       730.00  985.50  8870.30  365.00  
+!2041       730.00  985.50  8870.30  365.00  
+!2042       730.00  985.50  8870.30  365.00  
+!2043       730.00  985.50  8870.30  365.00  
+!2044       730.00  985.50  8870.30  365.00  
+!2045       730.00  985.50  8870.30  365.00  
+!2046       730.00  985.50  8870.30  365.00  
+!2047       730.00  985.50  8870.30  365.00  
+!2048       730.00  985.50  8870.30  365.00  
+!2049       730.00  985.50  8870.30  365.00  
+!2050       730.00  985.50  8870.30  365.00  
+!;
+!
+!ExogenousAnnualLNGExports_35B := data table  
+!
+!year         PA      MD       LA      OR         
+!1990         0.00    0.00     0.00    0.00 
+!1991         0.00    0.00     0.00    0.00 
+!1992         0.00    0.00     0.00    0.00 
+!1993         0.00    0.00     0.00    0.00 
+!1994         0.00    0.00     0.00    0.00 
+!1995         0.00    0.00     0.00    0.00 
+!1996         0.00    0.00     0.00    0.00 
+!1997         0.00    0.00     0.00    0.00 
+!1998         0.00    0.00     0.00    0.00 
+!1999         0.00    0.00     0.00    0.00 
+!2000         0.00    0.00     0.00    0.00 
+!2001         0.00    0.00     0.00    0.00 
+!2002         0.00    0.00     0.00    0.00 
+!2003         0.00    0.00     0.00    0.00 
+!2004         0.00    0.00     0.00    0.00 
+!2005         0.00    0.00     0.00    0.00 
+!2006         0.00    0.00     0.00    0.00 
+!2007         0.00    0.00     0.00    0.00 
+!2008         0.00    0.00     0.00    0.00 
+!2009         0.00    0.00     0.00    0.00 
+!2010         0.00    0.00     0.00    0.00 
+!2011         0.00    0.00     0.00    0.00 
+!2012         0.00    0.00     0.00    0.00 
+!2013         0.00    0.00     0.00    0.00 
+!2014         0.00    0.00     0.00    0.00 
+!2015         0.00    0.00     0.00    0.00 
+!2016         0.00    0.00   158.72    0.00 
+!2017         0.00    0.00   532.90    0.00 
+!2018         0.00  152.10   865.30    0.00 
+!2019         0.00  255.50  1618.10    0.00 
+!2020         0.00  255.50  2658.00    0.00 
+!2021         0.00  620.50  3030.30    0.00 
+!2022         0.00  620.50  3760.30    0.00 
+!2023         0.00  620.50  4490.30    0.00 
+!2024         0.00  620.50  5220.30    0.00 
+!2025         0.00  620.50  5950.30    0.00 
+!2026         0.00  620.50  6680.30    0.00 
+!2027         0.00  985.50  7045.30    0.00 
+!2028         0.00  985.50  7410.30  365.00 
+!2029       365.00  985.50  7775.30  365.00 
+!2030       365.00  985.50  8505.30  365.00 
+!2031       730.00  985.50  8870.30  365.00         
+!2032       730.00  985.50  9600.30  365.00 
+!2033      1095.00  985.50  9965.30  365.00 
+!2034      1095.00  985.50 10330.30  365.00 
+!2035      1095.00  985.50 10330.30  365.00 
+!2036      1095.00  985.50 10330.30  365.00 
+!2037      1095.00  985.50 10330.30  365.00 
+!2038      1095.00  985.50 10330.30  365.00 
+!2039      1095.00  985.50 10330.30  365.00 
+!2040      1095.00  985.50 10330.30  365.00 
+!2041      1095.00  985.50 10330.30  365.00 
+!2042      1095.00  985.50 10330.30  365.00 
+!2043      1095.00  985.50 10330.30  365.00 
+!2044      1095.00  985.50 10330.30  365.00 
+!2045      1095.00  985.50 10330.30  365.00 
+!2046      1095.00  985.50 10330.30  365.00 
+!2047      1095.00  985.50 10330.30  365.00 
+!2048      1095.00  985.50 10330.30  365.00 
+!2049      1095.00  985.50 10330.30  365.00 
+!2050      1095.00  985.50 10330.30  365.00 
+!;
+!
+!ExogenousAnnualLNGExports_40B := data table  
+!
+!year        PA       MD       LA      OR     
+!2015         0.00    0.00     0.00    0.00 
+!2016         0.00    0.00   158.72    0.00 
+!2017         0.00    0.00   532.90    0.00 
+!2018         0.00  152.10   865.30    0.00 
+!2019         0.00  255.50  1618.10    0.00 
+!2020         0.00  255.50  2658.00    0.00 
+!2021         0.00  620.50  3030.30    0.00 
+!2022         0.00  620.50  3760.30    0.00 
+!2023         0.00  620.50  4490.30    0.00 
+!2024         0.00  620.50  5220.30    0.00 
+!2025         0.00  620.50  5950.30    0.00 
+!2026         0.00  620.50  6680.30    0.00 
+!2027         0.00  985.50  7045.30    0.00 
+!2028         0.00  985.50  7410.30  365.00 
+!2029       365.00  985.50  7775.30  365.00 
+!2030       365.00  985.50  8505.30  365.00 
+!2031       730.00  985.50  8870.30  365.00         
+!2032       730.00  985.50  9600.30  365.00 
+!2033      1095.00  985.50  9965.30  365.00 
+!2034      1095.00  985.50 10695.30  365.00 
+!2035      1460.00  985.50 11060.30  365.00 
+!2036      1460.00  985.50 11790.30  365.00 
+!2037      1460.00  985.50 11790.30  365.00 
+!2038      1460.00  985.50 11790.30  365.00 
+!2039      1460.00  985.50 11790.30  365.00 
+!2040      1460.00  985.50 11790.30  365.00 
+!2041      1460.00  985.50 11790.30  365.00 
+!2042      1460.00  985.50 11790.30  365.00 
+!2043      1460.00  985.50 11790.30  365.00 
+!2044      1460.00  985.50 11790.30  365.00 
+!2045      1460.00  985.50 11790.30  365.00 
+!2046      1460.00  985.50 11790.30  365.00 
+!2047      1460.00  985.50 11790.30  365.00 
+!2048      1460.00  985.50 11790.30  365.00 
+!2049      1460.00  985.50 11790.30  365.00 
+!2050      1460.00  985.50 11790.30  365.00 
+!;

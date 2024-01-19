@@ -1,0 +1,40 @@
+!  $Header: N:/default/includes/RCS/efpnd,v 1.2 1999/12/19 20:13:40 DSA Exp $
+! UEFP COMMON BLOCK FOR NUC DECOMMISSIONING
+!     INCLUDE (PARAMETR)
+      INTEGER MXNDU           ! maximum allowed nuclear units
+      INTEGER NDLIFE          ! maximum live of Nuc Units
+      PARAMETER (MXNDU=120, NDLIFE=50)
+! define ND input                  common block variables
+!   Global for all nuclear units
+      REAL *4 NDTAXR(NDLIFE)  ! Tax rate applied to the ND fund earnings
+      REAL *4 NESTESC(NDLIFE) ! Nuclear decom. cost ESTimate ESCalation rate
+      REAL *4 NDADMNR         ! ND qualifying fund administrative cost rate
+      REAL *4 NDEARNR         ! ND qualifying fund annual earnings
+      INTEGER NDCATCH         ! 'catch up year' - when payments will reflect estimate value
+      REAL *4 NDTCMON         ! total annual monitoring expence [$/capacityMW]
+      REAL *4 NDPSER(3)       ! Payment shortfall split at early retirement :
+!                                1 - ratepayers share
+!                                2 - equity holders share
+!                                3 - goverment share
+      REAL *4 NDPSCU(3)       ! Payment shortfall split after catch up year
+!                                1,2,3 as above
+!   By nuclear unit
+      INTEGER NUCNUM          ! number of nuclear units (unit/owner combinations...)
+      INTEGER NUREG(MXNDU)    ! REGion of the nuclear unit
+      REAL *4 NUCAP(MXNDU)    ! Nuclear Unit CAPacity
+      REAL *4 NUPPR(MXNDU)    ! Nuclear Unit Private/Public Ratio
+      REAL *4 NDEST(MXNDU)    ! Nuclear Decommissioning ESTimated cost by unit
+      INTEGER NDESTY(MXNDU)   ! year of the estimate
+      REAL *4 NDCBAL(MXNDU)   ! Nuclear Decommissioning Current BALance
+      INTEGER NDCBALY(MXNDU)  ! Year the balance is known for
+      REAL *4 NDCAPMT(MXNDU)  ! Current Annual PayMenT
+      INTEGER NDRET(MXNDU)    ! RETirement year - licence expiration year.
+      INTEGER NDERET(MXNDU)   ! Early RETirement year
+      INTEGER NDPRMON(MXNDU)  ! Post Retirement MONitoring period
+!                             ! all not collected yet funds must be colected.
+! declare all input variables in a common block : real first then integer...
+      COMMON /EFPND/ NDTAXR, NESTESC, NDADMNR, NDEARNR, NDTCMON, &
+                     NDPSER,  NDPSCU, &
+                      NUCAP,   NUPPR,   NDEST,  NDCBAL, NDCAPMT, &
+                    NDCATCH,  NUCNUM,   NUREG,  NDESTY, NDCBALY, &
+                      NDRET,  NDERET, NDPRMON

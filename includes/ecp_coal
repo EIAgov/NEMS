@@ -1,0 +1,263 @@
+!  $Header: N:/default/includes/RCS/ECP_COAL
+!
+      INTEGER ECP_COAL_SIZE
+      PARAMETER (ECP_COAL_SIZE = 20 * 4                               + &
+                                  4 * 8                               + &
+                                 43 * 4 * MAX_CL                      + &
+                                 10 * 4 * ECP_D_XPH * MAX_CL            + &
+                                  1 * 4 * ECP_D_XPH * NOX_D_GRP * MAX_CL  + &
+                                  1 * 4 * MX_RANK * ECP_D_XPH * MAX_CL  + &
+                                  2 * 4 * WPLT_D_REC                    + &
+                                  2 * 4 * MX_ACSS                     + &
+                                  1 * 4 * MX_ROPT * MX_RCMB           + &
+                                  1 * 4 * MX_CNFG * MX_ROPT           + &
+                                  1 * 4 * (MX_RCMB + 1) * MX_CNFG     + &
+                                  1 * 4 * ECP_D_XPH                     + &
+                                  1 * 4 * MX_CNFG                     + &
+                                  8 * 4 * ECP_D_CAP                     + &
+                                  1 * 4 * MNUMNR * MAX_CL             + &
+                                  1 * 4 * ECP_D_MSP * MAX_CL            + &
+                                  1 * 4 * MX_RANK * MX_SO2T * MNUMNR  + &
+                                  2 * 4 * MX_RANK * ECP_D_CAP * MNUMNR  + &
+                                  1 * 4 * NDREG * ECP_D_CAP * ECP_D_XPH)
+!
+      COMMON /ECP_COAL/ UCL_CF1, UCL_CF2, UCL_CF3, UCL_CF4, UACI_OPR, UHG_RANK, UCL_ACC, UCL_AOM,     &
+         UCL_ACI_O, UCL_ACI_F, UCL_SC_O, UCL_CL_NG_FOM_ADJ, UCL_CL_NG_VOM_ADJ, UCL_CL_NG_HR_PEN,      &
+         UCL_SC_F, UCL_FF_O, UCL_FF_F, UCL_QAC, UCL_PAC, ECL_RVAL, ECL_CAP,                           &
+         ECL_VADJ, ECL_FOM, ECL_CF, ECL_NXR, ECL_SO2R, ECL_HGF,                                       &
+         ECL_CMB_O, ECL_CMB_F, ECL_CMB_V, ECL_CMB_R, ECL_SNCR_O, ECL_SNCR_F,                          &
+         ECL_SNCR_V, ECL_SNCR_R, ECL_SCR_O, ECL_SCR_F, ECL_SCR_V, ECL_SCR_R,                          &
+         ECL_FGD_O, ECL_FGD_V, ECL_FGD_R, ECL_FGD_F,                                                  &
+         ECL_DSI_O, ECL_DSI_V, ECL_DSI_R, ECL_DSI_F,                                                  &
+         ECL_CCS_O, ECL_CCS_V, ECL_CCS_R, ECL_CCS_F, ECL_CCS_H, ECL_CCS_C,                            &
+         ECL_FF_O,  ECL_FF_V,  ECL_FF_F,                                                              &
+         ECL_HRI_O, ECL_HRI_V, ECL_HRI_F, ECL_HRI_H,                                                  &
+         ECL_CFB_O, ECL_CFB_V, ECL_CFB_F, ECL_ESP_O, ECL_CL_NG_COST, ECL_CL_NG_TRAN,                  &
+         ECL_ACEST, ECL_ACEYR,                                                                        &
+         NUM_CL, NUM_CNFG, NUM_SCTYP, NUM_ACI,                                                        &
+         NUM_ACSS, NUM_ROPT, NUM_RCMB, UCL_ROPT, UCL_RCMB, UCL_ECP,                                   &
+         C_ECP_PART,C_ECP_COMB,C_ECP_SNCR,C_ECP_SCR,C_ECP_CCS,C_ECP_FF,                               &
+         UCL_NSR_CFG, UCL_MACT_CFG, UCL_VIN, UCL_SYR, UCL_XGRP, UCL_RGRP,                             &
+         ECL_RG, ECL_RYR, ECL_FREC, ECL_NREC, UCL_CGRP, UCL_CNFG,                                     &
+         ECL_GRP, ECL_IGRP, ECL_YR, ECL_MGRP, ECL_MR, ECL_QT, ECL_NXG, ECL_ICFG,                      &
+         ECL_RCFG, ECL_ECP, ECL_CLRG, ECL_RG_CAP, ECL_SP_CAP_FAC, TST_CAP_BY_CRG,                     &
+         UCL_CL_NG_SYR
+!
+!     ECP_COAL Arrays
+!           
+      INTEGER*4   NUM_CL                                ! Number of Coal Units
+      INTEGER*4   ECL_RG(MAX_CL)                        ! EMM Region by Coal Unit
+      INTEGER*4   ECL_RYR(MAX_CL)                       ! Retire Year by Coal Unit
+      REAL*4      ECL_RG_CAP(MNUMNR,MAX_CL)             ! Capacity by EMM Region and Coal Unit
+      REAL*4      ECL_SP_CAP_FAC(ECP_D_MSP,MAX_CL)        ! Ratio of Average Seasonal Capacity to Summer Capacity
+      INTEGER*4   ECL_CLRG(MAX_CL)                      ! Coal Demand Region by Coal Unit
+      INTEGER*4   ECL_GRP(ECP_D_XPH,MAX_CL)               ! Plant Group Number
+      INTEGER*4   ECL_IGRP(MAX_CL)                      ! Plant Initial Group Number
+      INTEGER*4   ECL_YR(MAX_CL)                        ! New Source Review Year
+      INTEGER*4   ECL_MGRP(MAX_CL)                      ! Mercury Cap and Trade Group
+      INTEGER*4   ECL_MR(MAX_CL)                        ! Must Run Status 0=> No, 1=> Yes
+      INTEGER*4   ECL_QT(MAX_CL)                        ! Quartile for HRI
+      REAL*4      ECL_RVAL(MAX_CL)                      ! Profit Margin in Previous Forecast Year
+      REAL*4      ECL_CAP(ECP_D_XPH,MAX_CL)               ! Capacity
+      REAL*4      ECL_VADJ(ECP_D_XPH,MAX_CL)              ! Adjustment to fixed cost to approximate variable cost differences
+      INTEGER*4   ECL_ECP(ECP_D_XPH,MAX_CL)               ! ECP Type
+      INTEGER*4   ECL_FREC(MAX_CL)                      ! First Record for Each Coal Group
+      INTEGER*4   ECL_NREC(WPLT_D_REC)                    ! Next Record for Each Coal Group
+      INTEGER*4   ECL_ICFG(MAX_CL)                      ! Initial Configuration
+      INTEGER*4   ECL_RCFG(ECP_D_XPH,MAX_CL)              ! Retrofit Configuration
+      REAL*4      ECL_FOM(ECP_D_XPH,MAX_CL)               ! Fixed O&M
+      REAL*4      ECL_CF(ECP_D_XPH,MAX_CL)                ! Expected Utilization Rate
+      REAL*4      ECL_NXR(ECP_D_XPH,MAX_CL)               ! NOX Rate
+      INTEGER*4   ECL_NXG(ECP_D_XPH,NOX_D_GRP,MAX_CL)       ! NOX Compliance Group 0->No 1->Yes
+      REAL*4      ECL_SO2R(ECP_D_XPH,MAX_CL)              ! SO2 Emission Reduction Rate
+      REAL*4      ECL_HGF(MX_RANK,ECP_D_XPH,MAX_CL)       ! Mercury Emission Factor
+      REAL*4      ECL_CMB_O(MAX_CL)                     ! NOX Combustion - Overnight Cost
+      REAL*4      ECL_CMB_F(MAX_CL)                     ! NOX Combustion - Fixed OM Cost
+      REAL*4      ECL_CMB_V(MAX_CL)                     ! NOX Combustion - Variable O&M
+      REAL*4      ECL_CMB_R(MAX_CL)                     ! NOX Combustion - Removal Rate
+      REAL*4      ECL_SNCR_O(MAX_CL)                    ! NOX SNCR - Overnight Cost
+      REAL*4      ECL_SNCR_F(MAX_CL)                    ! NOX SNCR - Fixed OM Cost
+      REAL*4      ECL_SNCR_V(MAX_CL)                    ! NOX SNCR - Variable O&M
+      REAL*4      ECL_SNCR_R(MAX_CL)                    ! NOX SNCR - Removal Rate
+      REAL*4      ECL_SCR_O(MAX_CL)                     ! NOX SCR - Overnight Cost
+      REAL*4      ECL_SCR_F(MAX_CL)                     ! NOX SCR - Fixed OM Cost
+      REAL*4      ECL_SCR_V(MAX_CL)                     ! NOX SCR - Variable O&M
+      REAL*4      ECL_SCR_R(MAX_CL)                     ! NOX SCR - Removal Rate
+      REAL*4      ECL_FGD_O(MAX_CL)                     ! SO2 FGD - Overnight Cost
+      REAL*4      ECL_FGD_F(MAX_CL)                     ! SO2 FGD - Fixed OM Cost
+      REAL*4      ECL_FGD_V(MAX_CL)                     ! SO2 FGD - Variable O&M
+      REAL*4      ECL_FGD_R(MAX_CL)                     ! SO2 FGD - Removal Rate
+      REAL*4      ECL_DSI_O(MAX_CL)                     ! SO2 DSI - Overnight Cost
+      REAL*4      ECL_DSI_F(MAX_CL)                     ! SO2 DSI - Fixed OM Cost
+      REAL*4      ECL_DSI_V(MAX_CL)                     ! SO2 DSI - Variable O&M
+      REAL*4      ECL_DSI_R(MAX_CL)                     ! SO2 DSI - Removal Rate
+      REAL*4      ECL_CCS_O(MAX_CL)                     ! CO2 CCS - Overnight Cost
+      REAL*4      ECL_CCS_F(MAX_CL)                     ! CO2 CCS - Fixed OM Cost
+      REAL*4      ECL_CCS_V(MAX_CL)                     ! CO2 CCS - Variable O&M
+      REAL*4      ECL_CCS_R(MAX_CL)                     ! CO2 CCS - Removal Rate
+      REAL*4      ECL_CCS_H(MAX_CL)                     ! CO2 CCS - Heat Rate (after)
+      REAL*4      ECL_CCS_C(MAX_CL)                     ! CO2 CCS - Capacity Penalty
+      REAL*4      ECL_FF_O(MAX_CL)                      ! Hg  FF  - Overnight Cost
+      REAL*4      ECL_FF_F(MAX_CL)                      ! Hg  FF  - Fixed OM Cost
+      REAL*4      ECL_FF_V(MAX_CL)                      ! Hg  FF  - Variable O&M
+      REAL*4      ECL_HRI_O(MAX_CL)                     ! CO2 HRI - Overnight Cost
+      REAL*4      ECL_HRI_F(MAX_CL)                     ! CO2 HRI - Fixed OM Cost
+      REAL*4      ECL_HRI_V(MAX_CL)                     ! CO2 HRI - Variable O&M
+      REAL*4      ECL_HRI_H(MAX_CL)                     ! CO2 HRI - Heat Rate Improvement Rate (Fraction)
+      REAL*4      ECL_CFB_O(MAX_CL)                     ! SO2 CFB - Overnight Cost
+      REAL*4      ECL_CFB_F(MAX_CL)                     ! SO2 CFB - Fixed OM Cost
+      REAL*4      ECL_CFB_V(MAX_CL)                     ! SO2 CFB - Variable O&M
+      REAL*4      ECL_ESP_O(MAX_CL)                     ! Par ESP - Overnight Cost
+      REAL*4      ECL_CL_NG_COST(MAX_CL)                ! CL to NG Conversion Costs
+      REAL*4      ECL_CL_NG_TRAN(MAX_CL)                ! NG Hookup Costs for CL to NG Conversion
+      INTEGER*4   ECL_ACEST(MAX_CL)                     ! State ID for Affordable Clean Energy Requirement
+      INTEGER*4   ECL_ACEYR(MAX_CL)                     ! Year for Affordable Clean Energy Requirement, if any
+      REAL*4      UCL_CL_NG_FOM_ADJ                     ! Fixed O&M Adjustment Factor for CL to NG Conversions
+      REAL*4      UCL_CL_NG_VOM_ADJ                     ! Variable O&M Adjustment Factor for CL to NG Conversions
+      REAL*4      UCL_CL_NG_HR_PEN                      ! Heatrate Penalty for CL to NG Conversions (Fraction: New_HR = OLD_HR * (1.0 + HR_PEN))
+      INTEGER*4   UCL_CL_NG_SYR                         ! CL to NG Conversions Start Year; 9999 => No Conversions Allowed
+      INTEGER*4   UCL_CGRP(WPLT_D_REC)                    ! Coal Group each Plant Record Belongs to
+      INTEGER*4   UCL_CNFG(MX_RCMB+2,MX_CNFG)           ! Definition of each Configuration as a collection of components
+      INTEGER*4   NUM_SCTYP                             ! Number of Sulfur Control Types
+      REAL*4      UCL_ACI_O                             ! Activated Carbon Injection Overnight Cost
+      REAL*4      UCL_ACI_F                             ! Activated Carbon Injection Fixed O&M Cost
+      REAL*4      UCL_SC_O                              ! Spray Cooling Overnight Cost
+      REAL*4      UCL_SC_F                              ! Spray Cooling Fixed O&M Cost
+      REAL*8      UCL_CF1                               ! Coefficient in CLOSS equation
+      REAL*8      UCL_CF2                               ! Coefficient in CLOSS equation
+      REAL*8      UCL_CF3                               ! Coefficient in CLOSS equation
+      REAL*8      UCL_CF4                               ! Coefficient in CLOSS equation      
+      REAL*4      UCL_FF_O                              ! Fabric Filter Overnight Cost
+      REAL*4      UCL_FF_F                              ! Fabric Filter Fixed O&M Cost
+      INTEGER*4   NUM_ACI                               ! Number of Activated Carbon Injection Options
+      INTEGER*4   NUM_ACSS                              ! Number of Activated Carbon Supply Steps
+      REAL*4      UCL_QAC(MX_ACSS)                      ! Activated Carbon Supply Quantity
+      REAL*4      UCL_PAC(MX_ACSS)                      ! Activated Carbon Supply Price
+      INTEGER*4   NUM_ROPT                              ! Number of Retrofit Combinations
+      INTEGER*4   NUM_RCMB                              ! Number of Retrofit Components
+      INTEGER*4   NUM_CNFG                              ! Number of Coal Plant Configurations
+      INTEGER*4   UCL_ROPT(MX_RCMB,MX_ROPT)             ! Retrofit Combinations
+      INTEGER*4   UCL_RCMB(MX_ROPT,MX_CNFG)             ! Retrofit Options Allowed per Each Configuration
+      INTEGER*4   UCL_ECP(MX_CNFG)                      ! Configuration Options ECP Type
+      INTEGER*4   UCL_NSR_CFG(MX_CNFG)                  ! Acceptable NSR Configurations
+      INTEGER*4   UCL_MACT_CFG(ECP_D_CAP)                 ! Acceptable MACT Configurations
+      INTEGER*4   UACI_OPR(ECP_D_CAP)                     ! Operate without Activated Carbon Injection - 1=>Yes , 0=>No
+      INTEGER*4   C_ECP_PART(ECP_D_CAP)                   ! Index for Particulate Controls - 1=>Yes (BH) , 2=>No (ESP)
+      INTEGER*4   C_ECP_COMB(ECP_D_CAP)                   ! Index for NOX Comb Controls - 1=>Yes , 2=>No
+      INTEGER*4   C_ECP_SNCR(ECP_D_CAP)                   ! Index for NOX SNCR Controls - 1=>Yes , 2=>No
+      INTEGER*4   C_ECP_SCR(ECP_D_CAP)                    ! Index for NOX SCR  Controls - 1=>Yes , 2=>No
+      INTEGER*4   C_ECP_CCS(ECP_D_CAP)                    ! Index for CO2 CCS  Controls - 1=>Yes , 2=>No
+      INTEGER*4   C_ECP_FF(ECP_D_CAP)                     ! Index for Hg  FF   Controls - 1=>Yes , 2=>No
+      REAL*4      UHG_RANK(MX_RANK,MX_SO2T,MNUMNR)      ! Coal Rank Shares by Sulfur Type and Region
+      REAL*4      UCL_ACC(MX_RANK,ECP_D_CAP,MNUMNR)       ! Activated Carbon Cost from ECP, passed to EFD/CMM
+      REAL*4      UCL_AOM(MX_RANK,ECP_D_CAP,MNUMNR)       ! Activated Carbon O&M from ECP, passed to EFD/EMM
+      INTEGER*4   UCL_VIN(ECP_D_XPH)                      ! Coal Retrofit Vintage Groups
+      INTEGER*4   UCL_SYR                               ! First Year for Retirement Decisions
+      INTEGER*4   UCL_XGRP                              ! Group for Retirement Decisions
+      INTEGER*4   UCL_RGRP                              ! Group for Retrofit Decisions
+      REAL*4      TST_CAP_BY_CRG(ECP_D_CAP,NDREG,ECP_D_XPH) ! For existing coal type sum total capacity that is or could become specified ECP type
+
+!     Put Natural Gas / Oil Baseload group data into ecp_coal include to avoid creating new include file
+
+      INTEGER*4 MX_NGBS   ! Maximum Number of Existing Natural Gas and Oil Baseload Units = 1800
+      PARAMETER(MX_NGBS  = 1800)
+
+      COMMON /ECP_NGBS/ ENG_SP_CAP_FAC, ENG_CF, ENG_FOM, ENG_VOM, ENG_RVAL, ENG_CAP, ENG_CCS_O, ENG_CCS_F, ENG_CCS_V, ENG_CCS_R, ENG_CCS_H, ENG_CCS_C, &
+         NGBS_SW, NG_CCS_SYR, NUM_NGBS, ENG_RG, ENG_ECP, ENG_FLRG, ENG_GRP, ENG_MR, ENG_SYR, ENG_RYR, ENG_FREC, ENG_NREC, UNG_CGRP, UNG_WGRP
+
+      INTEGER ECP_NGBS_SIZE
+      PARAMETER (ECP_NGBS_SIZE = ( &
+         1 * 4 * ECP_D_MSP * MX_NGBS + &            ! ENG_SP_CAP_FAC
+         1 * 4 * MX_NGBS + &                      ! ENG_CF
+         1 * 4 * ECP_D_XPH * MX_NGBS + &            ! ENG_FOM
+         1 * 4 * MX_NGBS + &                      ! ENG_VOM
+         1 * 4 * MX_NGBS + &                      ! ENG_RVAL
+         1 * 4 * ECP_D_XPH * MX_NGBS + &            ! ENG_CAP
+         1 * 4 * MX_NGBS + &                      ! ENG_CCS_O
+         1 * 4 * MX_NGBS + &                      ! ENG_CCS_F
+         1 * 4 * MX_NGBS + &                      ! ENG_CCS_V
+         1 * 4 * MX_NGBS + &                      ! ENG_CCS_R
+         1 * 4 * MX_NGBS + &                      ! ENG_CCS_H
+         1 * 4 * 1 + &                            ! NGBS_SW
+         1 * 4 * 1 + &                            ! NG_CCS_SYR
+         1 * 4 * 1 + &                            ! NUM_NGBS
+         1 * 4 * MX_NGBS + &                      ! ENG_RG
+         1 * 4 * MX_NGBS + &                      ! ENG_ECP
+         1 * 4 * MX_NGBS + &                      ! ENG_FLRG
+         1 * 4 * MX_NGBS + &                      ! ENG_GRP
+         1 * 4 * MX_NGBS + &                      ! ENG_MR
+         1 * 4 * MX_NGBS + &                      ! ENG_SYR
+         1 * 4 * MX_NGBS + &                      ! ENG_RYR
+         1 * 4 * MX_NGBS + &                      ! ENG_FREC
+         1 * 4 * WPLT_D_REC + &                     ! ENG_NREC
+         1 * 4 * WPLT_D_REC + &                     ! UNG_CGRP
+         1 * 4 * EMM_D_GRP))                        ! UNG_WGRP
+
+!     ECP_NGBS Arrays
+
+      REAL*4      ENG_SP_CAP_FAC(ECP_D_MSP,MX_NGBS) ! Ratio of Average Seasonal Capacity to Summer Capacity
+      REAL*4      ENG_CF(MX_NGBS)                 ! Expected Utilization Rate
+      REAL*4      ENG_FOM(ECP_D_XPH,MX_NGBS)        ! Fixed O&M
+      REAL*4      ENG_VOM(MX_NGBS)                ! Variable O&M
+      REAL*4      ENG_RVAL(MX_NGBS)               ! Net Revenue
+      REAL*4      ENG_CAP(ECP_D_XPH,MX_NGBS)        ! Capacity
+      REAL*4      ENG_CCS_O(MX_NGBS)              ! CO2 CCS - Overnight Cost
+      REAL*4      ENG_CCS_F(MX_NGBS)              ! CO2 CCS - Fixed OM Cost
+      REAL*4      ENG_CCS_V(MX_NGBS)              ! CO2 CCS - Variable O&M
+      REAL*4      ENG_CCS_R(MX_NGBS)              ! CO2 CCS - Removal Rate
+      REAL*4      ENG_CCS_H(MX_NGBS)              ! CO2 CCS - Heat Rate (after)
+      REAL*4      ENG_CCS_C(MX_NGBS)              ! CO2 CCS - Capacity Penalty
+      INTEGER*4   NGBS_SW                         ! Switch to Maximize Group Sizes - to original groups
+      INTEGER*4   NG_CCS_SYR                      ! First year existing combined cycle units can retrofit with CO2 capture
+      INTEGER*4   NUM_NGBS                        ! Number of NGBS Units
+      INTEGER*4   ENG_RG(MX_NGBS)                 ! EMM Region by NGBS Unit
+      INTEGER*4   ENG_ECP(MX_NGBS)                ! ECP Type for NGBS Unit in CURIYR
+      INTEGER*4   ENG_FLRG(MX_NGBS)               ! Fuel Region by NGBS Unit
+      INTEGER*4   ENG_GRP(MX_NGBS)                ! IGRP for each NGBS Unit
+      INTEGER*4   ENG_MR(MX_NGBS)                 ! Must Run Status 0=> No, 1=> Yes
+      INTEGER*4   ENG_SYR(MX_NGBS)                ! Start Year
+      INTEGER*4   ENG_RYR(MX_NGBS)                ! Retire Year
+      INTEGER*4   ENG_FREC(MX_NGBS)               ! First Record for Each NGBS Group
+      INTEGER*4   ENG_NREC(WPLT_D_REC)              ! Next Record for Each NGBS Group
+      INTEGER*4   UNG_CGRP(WPLT_D_REC)              ! NGBS Group each Plant Record Belongs to
+      INTEGER*4   UNG_WGRP(EMM_D_GRP)              ! NGBS Group each W_IGRP Belongs to
+
+      COMMON /GRP_NGBS/ GRP_SP_CAP_FAC, GRP_CF, GRP_FOM, GRP_VOM, GRP_RVAL, GRP_HTRT, GRP_CAP, GRP_CCS_O, GRP_CCS_F, GRP_CCS_V, GRP_CCS_R, GRP_CCS_H, &
+         TOL_HTRT_NGBS, TOL_SP_CAP_FAC, TOL_CF, TOL_FOM, TOL_VOM, TOL_RVAL, TOL_CAP, TOL_CCS_O, TOL_CCS_F, TOL_CCS_V, TOL_CCS_R, TOL_CCS_H, &
+         NUM_NGBS_GRPS, GRP_RG, GRP_ECP, GRP_SYR, GRP_RYR, GRP_FLRG, GRP_MR, F_GRP_TO_NGBS, N_GRP_TO_NGBS, MAP_NGBS_TO_GRP
+      
+
+      REAL*4      GRP_SP_CAP_FAC(ECP_D_MSP,MX_NGBS) ! Ratio of Average Seasonal Capacity to Summer Capacity
+      REAL*4      GRP_CF(MX_NGBS)                 ! Expected Utilization Rate
+      REAL*4      GRP_FOM(ECP_D_XPH,MX_NGBS)        ! Fixed O&M
+      REAL*4      GRP_VOM(MX_NGBS)                ! Variable O&M
+      REAL*4      GRP_RVAL(MX_NGBS)               ! Net Revenue
+      REAL*4      GRP_HTRT(ECP_D_XPH,MX_NGBS)       ! Heatrate
+      REAL*4      GRP_CAP(ECP_D_XPH,MX_NGBS)        ! Capacity
+      REAL*4      GRP_CCS_O(MX_NGBS)              ! CO2 CCS - Overnight Cost
+      REAL*4      GRP_CCS_F(MX_NGBS)              ! CO2 CCS - Fixed OM Cost
+      REAL*4      GRP_CCS_V(MX_NGBS)              ! CO2 CCS - Variable O&M
+      REAL*4      GRP_CCS_R(MX_NGBS)              ! CO2 CCS - Removal Rate
+      REAL*4      GRP_CCS_H(MX_NGBS)              ! CO2 CCS - Heat Rate (after)
+      REAL*4      TOL_HTRT_NGBS
+      REAL*4      TOL_SP_CAP_FAC
+      REAL*4      TOL_CF
+      REAL*4      TOL_FOM
+      REAL*4      TOL_VOM
+      REAL*4      TOL_RVAL
+      REAL*4      TOL_CAP
+      REAL*4      TOL_CCS_O
+      REAL*4      TOL_CCS_F
+      REAL*4      TOL_CCS_V
+      REAL*4      TOL_CCS_R
+      REAL*4      TOL_CCS_H
+      INTEGER*4   NUM_NGBS_GRPS
+      INTEGER*4   GRP_RG(MX_NGBS)                 ! EMM Region by NGBS Unit
+      INTEGER*4   GRP_ECP(MX_NGBS)                ! ECP Type for NGBS Unit in CURIYR
+      INTEGER*4   GRP_SYR(MX_NGBS)                ! Start Year
+      INTEGER*4   GRP_RYR(MX_NGBS)                ! Retire Year
+      INTEGER*4   GRP_FLRG(MX_NGBS)               ! Fuel Region by NGBS Unit
+      INTEGER*4   GRP_MR(MX_NGBS)                 ! Must Run Status 0=> No, 1=> Yes
+      INTEGER*4   F_GRP_TO_NGBS(MX_NGBS)          ! First NGBS in NGBS_GRP
+      INTEGER*4   N_GRP_TO_NGBS(MX_NGBS)          ! Next NGBS in NGBS_GRP
+      INTEGER*4   MAP_NGBS_TO_GRP(MX_NGBS)        ! NGBS_GRP that NGBS is a member

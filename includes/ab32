@@ -1,0 +1,29 @@
+! $Header: m:/default/includes/RCS/ab32,v 1.8 2016/09/26 16:00:13 xj2 Exp $
+! California AB32 cap and trade variables
+real ab_covd_em_ind(mnumyr) ! Covered CO2 emissions, industrial, excl refining    (tonnes Ceq)
+real ab_covd_em_ref(mnumyr) ! Covered CO2 emissions, refining from p1             (tonnes Ceq)
+real ab_covd_em_rfe(mnumyr) ! Covered CO2 emissions, refining passed to EMM       (tonnes Ceq)
+real ab_covd_em_ele(mnumyr) ! Covered CO2 emissions, electric                     (tonnes Ceq)
+real ab_covd_em_fue(mnumyr) ! Covered CO2 emissions, fuel providers               (tonnes Ceq)
+real ab_covd_em_oth(mnumyr) ! Covered other emissions, mostly non-co2             (tonnes Ceq)
+real ab_covd_em_tot(mnumyr) ! Covered emissions, combined                         (tonnes Ceq)
+real ab_cap_tot(mnumyr)     ! Combined cap or allowances issued
+real ab_allbank_avl(mnumyr) ! Banked allowances available (cumulative)
+real ab_offset_frac(mnumyr) ! Aggregate offset assumption (fract of ab_cap_tot, from 0 to 1)
+real ab_offset_used(mnumyr) ! Offsets used
+real ab_cstcont_frac(mnumyr)! Cost containment assumption (fract of ab_cap_tot, from 0 to 1) held in reserve for cost containment
+real ab_cstcont_avl(mnumyr) ! cost containment reserve allowances available (cumulative)
+real ab_cstcont_use(mnumyr) ! cost containment reserve allowances used by year
+real ab_reserve_p(3,mnumyr) ! Allowance price, 87$/kg-c, triggering release of cost containment reserve allowances
+real ab_auction_p(mnumyr)   ! Allowance price, 87$/kg-c, cost of auction reserve allowances
+real ab_allow_p(mnumyr)     ! Allowance price, 87$/kg-c 
+real ab_allow_pold(mnumyr)  ! Allowance price, 87$/kg-c, prior iteration or cycle, for possible smoothing
+
+common/ab32/ab_covd_em_ind, ab_covd_em_ref, ab_covd_em_rfe, ab_covd_em_ele,   &
+            ab_covd_em_fue, ab_covd_em_oth, ab_covd_em_tot,                   &
+            ab_cap_tot,     ab_allbank_avl, ab_offset_frac, ab_offset_used,   &
+            ab_cstcont_frac,ab_cstcont_avl, ab_cstcont_use, ab_reserve_p,     &
+            ab_auction_p,   ab_allow_p,     ab_allow_pold
+ 
+real eq_ab32(20*MNUMYR)
+equivalence(ab_covd_em_ind(1),eq_ab32) ! equivalence for filer

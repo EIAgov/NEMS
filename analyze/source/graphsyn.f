@@ -1,0 +1,528 @@
+C                   ::: GRAPHSYN.FOR  5-07-92 :::
+C
+C LAST DATE:  2-03-91...Minor cleanups & added syntax form of column
+C                       digraph
+C             9-03-91...Added NOHEADER option
+C             9-19-91
+C             5-07-92...Added schema setting to GPHTRN
+C
+C This contains the following subroutine for the GRAPH module of ANALYZE.
+C
+C       GPHSYN....display graph in SYNTAX format
+C       GPHSYR....put syntactic form of row/col name into string
+C       GPHTRN....reduce submatrix by applying attribute screen
+C
+      SUBROUTINE GPHSYN(TYPE,FORMAT,LINE,RCODE,*)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCSCHEMA.'
+      INCLUDE 'DCGRAPH.'
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCSCHEMA)
+CITSO      INCLUDE (DCGRAPH)
+CI$$INSERT DCANAL
+CI$$INSERT DCSCHEMA
+CI$$INSERT DCGRAPH
+C
+C This displays syntax of the graph (to OUTPUT, using FTEXT)
+C       TYPE   = ROW | COL | BIGRAPH
+C       FORMAT = HEADER | NOHEADER
+C
+C LINE is incremented...alternate return is for user abort.
+C
+      CHARACTER*(*) TYPE,FORMAT
+C LOCAL
+      CHARACTER*128 CLIST,CTEMP
+      CHARACTER*16  RNAME
+      CHARACTER*8   STR8
+      CHARACTER*4   ROWCOL
+      CHARACTER*1   CHAR
+      LOGICAL*1     SW,SWPR
+      INTEGER*2     STRMAP(PMSROW,PMXENT)
+C :::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+C SEE IF WE HAVE ROOM FOR SET INFO
+      BEGSET = ICSYN + NCSYN
+      SPACE = BEGSET + NENTY - PMXSYN + 1
+      IF(SPACE.GT.0)GOTO 1310
+C OK, INITIALIZE SET REFERENCES
+      IF(FORMAT.EQ.'HEADER  ')THEN
+C INITIALIZE SET REFERENCE (EXTABL) TO NULL
+         CHAR = ' '
+      ELSE
+C INITIALIZE SET REFERENCE TO APPEAR TO REFERENCE > 1 FROM SET
+         CHAR = '*'
+      ENDIF
+C
+      DO 10 SET=1,NENTY
+         ISET = EXINDX(SET-1) + 1
+         EXKEY(BEGSET+SET) = EXKEY(ISET)
+         EXTABL(BEGSET+SET) = CHAR
+10    CONTINUE
+C
+      IF(SCHNR.LE.0 .OR. SCHNC.LE.0)THEN
+C SET SCHEMA
+         CALL ASCHDO(RCODE)
+         IF(RCODE.NE.0)THEN
+            PRINT *,' ...SYNTAX FORM OF GRAPH DISPLAY USES SCHEMA'
+            RETURN
+         ENDIF
+      ENDIF
+C
+C BRANCH ON GRAPH TYPE
+      IF(TYPE.EQ.'ROW '.OR.TYPE.EQ.'COL ')THEN
+         ROWCOL = TYPE
+         GOTO 1000
+      ENDIF
+      IF(TYPE.NE.'BIGRAPH')THEN
+         PRINT *,' ** SYSERR IN GPHSYN...TYPE=',TYPE
+         RCODE = 13
+         RETURN
+      ENDIF
+C
+C       FUNDAMENTAL DIGRAPH
+C
+      PRINT *,' BIGRAPH SYNTAX DISPLAY NOT READY'
+      RETURN
+C
+1000  CONTINUE
+C
+C       ROW OR COLUMN DIGRAPH
+C
+      IF(ROWCOL.EQ.'ROW ')THEN
+         NSYN = NRSYN
+         NNODE= RGNODE
+      ELSE
+         NSYN = NCSYN
+         NNODE= CGNODE
+      ENDIF
+C NSYN = NUMBER OF (ROWCOL) CLASSES
+C INITIALIZE CLASSES
+      DO 1090 CLASS=1,NSYN
+         IF(ROWCOL.EQ.'ROW ')THEN
+            RNAME = SCHROW(CLASS)
+         ELSE
+            RNAME = SCHCOL(CLASS)
+         ENDIF
+         DO 1060 SET=1,NENTY
+1060     STRMAP(CLASS,SET) = 0
+         CALL FLOOK(RNAME,1,16,'(',FIRST)
+         IF(FIRST.EQ.0)GOTO 1090
+         CALL FSLEN(RNAME,16,REF)
+         REF = FIRST
+C        :...POINTS TO POSITION IN NAME
+         FIRST = FIRST+1
+         CALL FLOOK(RNAME,FIRST,16,')',LAST)
+         LAST = LAST-1
+C
+1070     CONTINUE
+         CALL FTOKEN(RNAME,FIRST,LAST,STR8,8,CHAR)
+         IF(STR8.NE.' ')THEN
+            CALL FSLEN(STR8,8,L)
+            DO 1080 SET=1,NENTY
+               IF(STR8.EQ.EXKEY(BEGSET+SET))THEN
+                  STRMAP(CLASS,SET) = REF
+                  REF = REF+L
+                  GOTO 1070
+               ENDIF
+1080        CONTINUE
+            PRINT *,' ** SET ',STR8(:L),' NOT RECOGNIZED'
+            GOTO 1390
+         ENDIF
+         STRMAP(CLASS,NENTY+1) = REF
+C NEXT CLASS
+1090  CONTINUE
+C
+C NOW STRMAP(I,J)       = REFERENCE POSITION OF J-TH SET IN DOMAIN OF
+C                         I-TH STRIP (0 MEANS SET J IS NOT REFERENCED)
+C     EXKEY(BEGSET + J) = NAME OF SET J
+C     EXTABL(BEGSET+ J) = blank IFF SET J IS NOT PRESENT
+C
+C TALLY CLASSES
+      DO 1190 N=1,NNODE
+         IF(ROWCOL.EQ.'ROW ')THEN
+            RC = ROWNOD(N)
+         ELSE
+            RC = COLNOD(N)
+         ENDIF
+         CALL GETNAM(ROWCOL,RC,RNAME)
+C GET CLASS
+         CALL ASTRIP(ROWCOL,RNAME,CLASS)
+         IF(CLASS.GT.NSYN)GOTO 1190
+C MARK EACH SET IN ITS DOMAIN WITH MEMBER IN ROW (RNAME)
+         DO 1150 SET=1,NENTY
+            REF = STRMAP(CLASS,SET)
+            IF(REF.LE.0)GOTO 1150
+            DO 1140 I=SET+1,NENTY+1
+               ENDREF = STRMAP(CLASS,I)
+               IF(ENDREF.GT.0)GOTO 1149
+1140        CONTINUE
+            PRINT *,' ** SYSERR IN GPHSYN...RNAME=',ROWCOL,RNAME
+            PRINT *,' ...CLASS',CLASS,(STRMAP(CLASS,II),II=1,NENTY+1)
+            GOTO 1390
+C
+1149        CONTINUE
+            IF(ENDREF.LT.REF)THEN
+               PRINT *,' ** SYSERR IN GPHSYN...RNAME=',RNAME(:NAMELN),
+     1                 ' ENDREF=',ENDREF
+               PRINT *,' ...CLASS',CLASS,
+     1                 (STRMAP(CLASS,II),II=1,NENTY+1)
+               GOTO 1390
+            ENDIF
+            STR8 = RNAME(REF:ENDREF-1)
+C NOW STR8 = MEMBER OF SET
+            IF(EXTABL(BEGSET+SET).EQ.' ')THEN
+               EXTABL(BEGSET+SET) = STR8
+            ELSE IF(EXTABL(BEGSET+SET).NE.STR8)THEN
+               EXTABL(BEGSET+SET) = '*'
+            ENDIF
+C NEXT SET
+1150     CONTINUE
+C NEXT ROW/COL
+1190  CONTINUE
+C
+1199  CONTINUE
+C
+C NOW EXTABL(BEGSET+I) = * MEANS >1 MEMBER OF SET I HAS BEEN REFERENCED
+C                    blank MEANS SET I HAS NOT BEEN REFERENCED
+C   ELSE, EXTABL(BEGSET+I) IS UNIQUELY REFERENCED (CAN BE IN HEADER)
+C
+      IF(FORMAT.NE.'HEADER  ')GOTO 1690
+C FORM HEADER
+C
+C GET FIXED SETS
+      SW = .FALSE.
+C      :...TRUE IFF ' Flow for' is printed'
+      SWPR = .FALSE.
+C      :...TRUE IFF we have printed part of header
+      LAST = 0
+      DO 1600 SET=1,NENTY
+         STR8 = EXTABL(BEGSET+SET)
+         IF(STR8.EQ.' '.OR.STR8.EQ.'*')GOTO 1600
+         IF(.NOT.SW)THEN
+            CLIST = ' Flow for'
+            LAST = 11
+            SW = .TRUE.
+         ELSE
+            CLIST(LAST+1:) = ','
+            LAST = LAST+3
+         ENDIF
+C CHECK BUFFER
+         IF(LAST.GT.80)THEN
+            CALL FTEXT(CLIST,LAST,1,0,LINE,'KEEP ',*9900)
+            SWPR = .TRUE.
+         ENDIF
+C TRANSLATE MEMBER (STR8) OF SET
+         RNAME = EXKEY(BEGSET+SET)
+         CLIST(LAST:) = RNAME
+         CALL FSLEN(CLIST,80,LAST)
+         CLIST(LAST+1:) = '='
+         LAST = LAST+2
+         CALL EXENTY(RNAME,STR8,CLIST,LAST,RCODE)
+         IF(RCODE.NE.0)RETURN
+C CHECK BUFFER
+         IF(LAST.GT.80)THEN
+            CALL FTEXT(CLIST,LAST,1,0,LINE,'KEEP ',*9900)
+            SWPR = .TRUE.
+         ENDIF
+1600  CONTINUE
+      IF(LAST.GT.0)THEN
+C PRINT HEADING
+         IF(.NOT.SWPR)
+C ...FIRST, CENTER HEADING
+     1      CALL FCENTR(CLIST,FIRST,LAST)
+         CALL FTEXT(CLIST,LAST,1,0,LINE,'CLEAR ',*9900)
+      ENDIF
+C
+C NODES REPRESENT VARIABILITY
+C
+1690  CLIST = ' '
+C ::: LOOP OVER NODES FOR DISPLAY :::
+      DO 1800 I=1,NNODE
+         IF(ROWCOL.EQ.'ROW ')THEN
+            RC = ROWNOD(I)
+         ELSE
+            RC = COLNOD(I)
+         ENDIF
+         CALL GETNAM(ROWCOL,RC,RNAME)
+         CALL ASTRIP(ROWCOL,RNAME,CLASS)
+         IF(CLASS.GT.NSYN)GOTO 1800
+C FORM SYNTACTIC REPRESENTATION OF ROW
+         CALL GPHSYR(ROWCOL,RNAME,CLASS,BEGSET,CLIST,RCODE)
+         IF(RCODE.NE.0)RETURN
+         CALL FSLEN(CLIST,80,LAST)
+         TAB = LAST+2
+C
+C LOOP OVER OTHER NODES FOR SUCCESSORS
+         DO 1700 I1=1,NNODE
+            IF(I1.EQ.I)GOTO 1700
+            IF(ROWCOL.EQ.'ROW ')THEN
+               CHAR = RGMAT(I,I1)
+               SUCC = ROWNOD(I1)
+            ELSE
+               CHAR = CGMAT(I,I1)
+               SUCC = COLNOD(I1)
+            ENDIF
+            IF(CHAR.NE.'1')GOTO 1700
+C ROW/COL AT I1 (SUCC) IS SUCCESSOR
+            CALL GETNAM(ROWCOL,SUCC,RNAME)
+            CALL ASTRIP(ROWCOL,RNAME,CLASS)
+            IF(CLASS.GT.NSYN)GOTO 1700
+C FORM SYNTACTIC REPRESENTATION OF SUCCESSOR
+            CALL GPHSYR(ROWCOL,RNAME,CLASS,BEGSET,CTEMP,RCODE)
+            IF(RCODE.NE.0)RETURN
+            CALL FSLEN(CTEMP,80,LAST)
+            IF(TAB+LAST.GE.74)THEN
+C REDUCE TAB
+               IF(CLIST(:TAB).NE.' ')THEN
+C ...FIRST PRINT ROW/COL
+                  L = TAB
+                  CALL FTEXT(CLIST,L,1,0,LINE,'CLEAR ',*9900)
+                  CLIST = ' '
+               ENDIF
+               TAB = 10
+            ENDIF
+            CLIST(TAB:) = '--->'//CTEMP
+            CALL FSLEN(CLIST,127,LAST)
+            CALL FTEXT(CLIST,LAST,TAB+1,-TAB,LINE,'CLEAR ',*9900)
+C NEXT SUCCESSOR
+1700     CONTINUE
+         CLIST = ' '
+C
+C NEXT ROW/COL IN DIGRAPH
+1800  CONTINUE
+C
+C LAST LINE
+1900  CALL FSLEN(CLIST,127,LAST)
+      IF(LAST.GT.0)
+     1   CALL FTEXT(CLIST,LAST,1,0,LINE,'CLEAR ',*9900)
+C
+9000  RETURN
+9900  RETURN 1
+C
+C   ERROR RETURNS
+1310  CONTINUE
+      PRINT *,' Sorry, not enough room for syntax...need',
+     1        SPACE,' more'
+1390  RCODE = 1
+      RETURN
+C
+C ** GPHSYN ENDS HERE
+      END
+      SUBROUTINE GPHSYR(ROWCOL,RNAME,CLASS,BEGSET,CLIST,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCSCHEMA.'
+      INCLUDE 'DCGRAPH.'
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCSCHEMA)
+CITSO      INCLUDE (DCGRAPH)
+CI$$INSERT DCANAL
+CI$$INSERT DCSCHEMA
+CI$$INSERT DCGRAPH
+C
+C This puts syntactic form of row (RNAME) into CLIST
+C ...Caller has set:
+C       CLASS = ROW STRIP
+C       EXKEY(BEGSET + I) = NAME OF SET I
+C       EXTABL(BEGSET+ I) = blank, * OR A UNIQUE MEMBER
+C The form of the response is:  a1, a2, ...
+C       where ai is the meaning of member of set in domain
+C       (skipping unique members)
+C
+      CHARACTER*(*) ROWCOL
+      CHARACTER*128 CLIST
+      CHARACTER*16  RNAME
+C LOCAL
+      CHARACTER*32  CNAME
+      CHARACTER*8   SETNAM,MEMBER
+      CHARACTER*1   CHAR
+C :::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+      IF(ROWCOL.EQ.'ROW ')THEN
+C PUT ROW CLASS
+         CLIST = SCHROW(CLASS)
+      ELSE
+C PUT COL CLASS
+         CLIST = SCHCOL(CLASS)
+      ENDIF
+C LOOK FOR DOMAIN REFERENCE
+      CALL FLOOK(CLIST,1,16,'(',REF)
+      IF(REF.EQ.0)RETURN
+C PREPARE FOR SET REFERENCES
+      CALL FLOOK(CLIST,2,14,')',LAST)
+      LAST = LAST-1
+      CNAME = CLIST
+      CLIST = ' '
+      FIRST = REF+1
+      ENDCL = 1
+C DOMAIN IS IN CNAME(FIRST:LAST)...SETS SEPARATED BY COMMAS
+C
+100   CALL FTOKEN(CNAME,FIRST,LAST,SETNAM,8,CHAR)
+      IF(SETNAM.EQ.' ')RETURN
+      CALL FSLEN(SETNAM,8,L)
+C SETNAM = SET NAME...LOOKUP
+      DO 200 SET=1,NENTY
+         IF(SETNAM.EQ.EXKEY(BEGSET+SET))GOTO 290
+200   CONTINUE
+      PRINT *,' ** SET ',SETNAM(:L),' NOT RECOGNIZED'
+      RCODE = 1
+      RETURN
+C
+290   CONTINUE
+      IF(EXTABL(BEGSET+SET).EQ.'*')THEN
+C SET IS VARIABLE...GET ITS MEMBER IN THIS ROW
+         MEMBER = RNAME(REF:REF+L-1)
+         IF(ENDCL.GT.1)THEN
+            ENDCL = ENDCL+1
+            CLIST(ENDCL:) = ','
+         ENDIF
+         CALL EXENTY(SETNAM,MEMBER,CLIST,ENDCL,RCODE)
+         IF(RCODE.NE.0)RETURN
+      ENDIF
+      REF = REF+L
+      GOTO 100
+C
+C ** GPHSYR ENDS HERE
+      END
+      SUBROUTINE GPHTRN(CLIST,FIRST,LAST,RCODE)
+C     =================
+      IMPLICIT INTEGER (A-U), DOUBLE PRECISION (Z)
+C
+      INCLUDE 'DCANAL.'
+      INCLUDE 'DCSCHEMA.'
+      INCLUDE 'DCGRAPH.'
+CITSO      INCLUDE (DCANAL)
+CITSO      INCLUDE (DCSCHEMA)
+CITSO      INCLUDE (DCGRAPH)
+CI$$INSERT DCANAL
+CI$$INSERT DCSCHEMA
+CI$$INSERT DCGRAPH
+C
+C This reduces submatrix by attribute specs in CLIST(FIRST:LAST).
+C
+      CHARACTER*(*) CLIST
+C
+C LOCAL
+      LOGICAL*1    PICK(PMXATR),SWATR(PMXATR),SW
+      CHARACTER*1  CHAR
+      CHARACTER*16 RNAME
+      CHARACTER*4  SETNAM,SETMEM,ATRNAM(PMXATR)
+C :::::::::::::::::::::::::::: BEGIN :::::::::::::::::::::::::::::::::
+CD      IF(SWDBG)THEN
+CD         PRINT *,' ENTERED GPHTRN WITH CLIST:',CLIST(FIRST:LAST)
+CD         PAUSE = PAUSE-1
+CD         IF(PAUSE.LE.0)CALL SYSDBG
+CD      ENDIF
+C SEE IF SCHEMA HAS BEEN SET
+      IF(SCHNR.LE.0 .OR. SCHNC.LE.0)THEN
+C ...NO, SO SET SCHEMA
+         CALL ASCHDO(RCODE)
+         IF(RCODE.NE.0)THEN
+            PRINT *,' ...SCHEMA NEEDED TO SET GRAPH WITH ATTRIBUTE'
+            RETURN
+         ENDIF
+      ENDIF
+C GET ATTRIBUTE SPECIFICATION(S)
+      IF(NUMATR.EQ.0)THEN
+         PRINT *,' No sets have been attributed'
+         RCODE = 1
+         RETURN
+      ENDIF
+      NUMBER = NUMATR
+      RCODE = -1
+      CALL FOPSET(CLIST,FIRST,LAST,ATRTYP(1),NUMBER,PICK,RCODE)
+      IF(RCODE.NE.0)RETURN
+C
+      NC = NRCSUB(2)
+      IF(NC.EQ.0)RETURN
+      DELETE = 0
+C
+C ::: LOOP OVER COLUMNS TO REMOVE THOSE NOT OF :::
+C           ATTRIBUTED TRANSFORMATION
+C
+      DO 500 J=RCSUB1(2),NCOLS
+         CALL GETMAP('COL ',J,SW)
+         IF(.NOT.SW)GOTO 500
+C COLUMN (J) IS IN SUBMATRIX
+         NC = NC-1
+C IS THIS A TRANSFORMATION OF ATTRIBUTED SETS?
+         CALL GETCOL(J,NZ,PMXROW,ROWLST,VALLST)
+         IF(NZ.EQ.0)GOTO 490
+C
+         DO 125 I=1,NUMATR
+            ATRNAM(I) = ' '
+            SWATR(I) = .FALSE.
+125      CONTINUE
+C
+C  ::: LOOP OVER COLUMN'S NONZEROES TO INFER TRANSFORMS :::
+         DO 400 I=1,NZ
+            ROW = ROWLST(I)
+            CALL GETNAM('ROW ',ROW,RNAME)
+            CALL ASTRIP('ROW ',RNAME,STRIP)
+            CALL FLOOK(SCHROW(STRIP),2,14,'(',BEGDOM)
+            IF(BEGDOM.EQ.0)GOTO 400
+C LOOP OVER ROW'S DOMAIN TO GET SETS
+            FIRST = BEGDOM+1
+150         CALL FTOKEN(SCHROW(STRIP),FIRST,16,SETNAM,4,CHAR)
+            DO 100 SET=1,NENTY
+               EPOINT = EXINDX(SET-1)+1
+               IF(SETNAM.EQ.EXKEY(EPOINT))GOTO 110
+100         CONTINUE
+            PRINT *,' ** COULD NOT FIND SET ',SETNAM,' IN SYNTAX'
+            RCODE = 1
+            RETURN
+110         CONTINUE
+C RECORD SET MEMBER (FROM ROW NAME) INTO ATTRIBUTE
+            CALL FSLEN(SETNAM,4,LENGTH)
+            SETMEM = RNAME(BEGDOM:BEGDOM+LENGTH-1)
+            BEGDOM = BEGDOM+LENGTH
+C
+            ATR = ATTRIB(SET)
+            IF(ATR.GT.0)THEN
+               IF(ATRNAM(ATR).EQ.' ')THEN
+                  ATRNAM(ATR) = SETMEM
+               ELSE IF(ATRNAM(ATR).NE.SETMEM)THEN
+                  SWATR(ATR) = .TRUE.
+               ENDIF
+            ENDIF
+            IF(CHAR.NE.')')GOTO 150
+C     ::: END LOOP OVER ROW'S DOMAIN :::
+C
+C NEXT NONZERO (IE, ROW)
+400      CONTINUE
+C  ::: END LOOP OVER NONZEROES :::
+C
+C NOW SWATR(I) = TRUE IFF ACTIVITY WAS A TRANSFORMATION ATTRIBUTE I.
+C
+C REMOVE COLUMN IF NOT A TRANSFORMATION OF EACH ATTRIBUTE PICKED
+         SW = .FALSE.
+         DO 425 I=1,NUMATR
+425      SW = SW .OR. (PICK(I) .AND. .NOT.SWATR(I))
+C NOW SW = TRUE IFF COLUMN IS TO BE REMOVED FROM SUBMATRIX
+         IF(SW)THEN
+            SW = .NOT.SW
+            CALL GPUTMP('COL ',J,SW)
+            DELETE = DELETE+1
+         ENDIF
+C TEST FOR EARLY EXIT
+490      IF(NC.LE.0)GOTO 510
+C NEXT COLUMN
+500   CONTINUE
+510   CONTINUE
+C
+      IF(DELETE.GT.0)THEN
+         IF(SWMSG)PRINT *,DELETE,' Columns deleted from submatrix'
+C SET SUBMATRIX
+         CALL ASETSB('ROW ')
+         CALL ASETSB('COL ')
+C CLEAR NULL ROWS AND COLUMNS
+         CALL GMAPNZ(NRCSUB(1),RCSUB1(1),NRCSUB(2),RCSUB1(2),NZSUB)
+      ENDIF
+C DONE
+      RETURN
+C
+C ** GPHTRN ENDS HERE
+      END

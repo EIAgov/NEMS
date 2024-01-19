@@ -1,0 +1,148 @@
+!  $Header: m:/default/includes/RCS/dsmsectr,v 1.13 2019/06/27 12:25:43 pkc Exp $
+! ===== (DSMSECTR) =====
+! SEC(MAXSEC) - SECTOR INDICES IN ORDER
+! SecNam(MAXSEC) - ABBREVIATED SECTOR NAMES
+! NumSec - NUMBER OF SECTORS
+! SLNAM(MAXSEC) - FULL LENGTH SECTOR NAMES
+! NEUSES(MAXSEC) - NUMBER OF END-USES IN SECTORS
+! EUINDEX(MAXSEC,2) - FIRST/LAST END-USE NUMBER FOR A GIVEN SECTOR
+! EUNAM(MAXEU) - END-USE NAMES
+! LoadForec(MAXEU,2) - TRADITIONAL/DELTA approach load forecast by end-use
+! NumbECMs(MAXEU) - NUMBER OF ECMS WCHICH CAN BE USED WITH AN END-USE
+! EUrecNUM(MAXEU,MAXNRG) - DAF-LSR-DB record number for lsr for an eu
+! Neu  - Total number of end-uses defined on the structure file
+! LFinum - number of items on LoadForec array
+! BaseYrLd(MAXEU,MAXNRG) - Base year load by end-use and region
+! BaseYrSysLd(MAXNRG) - Base year system load by NERC region
+! SystemLoad - Total system load for a region
+! TotDemCensus - Total Demand in Census regions
+! TotDemNERC - Total Demand in NERC regions
+! ResTGdem(MAXREU) - Current region, year demand for end-uses in residential s.
+! DSMimpRS(MAXREU,ECP_D_FPH) - impact of DSM programs started in the past
+! DSMimpCM(MAXCBIL,MAXCSRV,ECP_D_FPH) - impact of DSM programs
+! ComDemAdjFac(MNUMCR) - Adjustment factors for Commercial load by census div. and Year
+! MappCtoN(MNUMNR,MNUMCR,MAXSEC) - matrix used for mapping CENSUS to NERC reg.
+!  tells what fraction of a CENSUS value contributes to a NERC value
+! MappNtoC(MNUMNR,MNUMCR,MAXSEC) - matrix used for mapping NERC to CENSUS div.
+!  tells what fraction of a NERC value contributes to a CENSUS value
+! PACnR - number of rows in the Payback-Acceptance Curves (PAC) definition
+! PACnS - number of sectors that have the Payback-Acceptance Curves defined
+! PACpb(MAXPACR) - values of payback in PAC definition
+! PACmp(MAXPACR,MAXSEC) - values of market penetration in PAC definition
+! EUGRP(MAXEU+1)    end-use groups for pricing
+! EUGRPNDX(MAXEU+1) ordered set of end-uses by group
+! NEUSGRP(MAXSEC)   number of groups per sector
+! DPROB(nprob)      probability of each part of hour for demand cululant
+! LOADU             load uncertainty SD as percent of load
+! LOADECPU          ecp load uncertainty SD as percent of load
+! NODYN             turn off dynamic reserve margins
+! DELRES            max change in reserve margin in competitive region
+! MEFAC             marginal cost of capacity goal
+! DEMINT            intermittent demand
+! dincr             increments for prob of demand
+! newcap            increment of new capacity kw
+! unserv            value of unserved energy ($/kwh)
+! RNWFAC            renewable factor
+! GBlockNumEfd       Sorted blocks (LDC per season),  same as
+!                    BlockNumEFD in uldsm, but by region
+      INTEGER*2 PACnR
+      INTEGER*2 PACnS
+      REAL*4 DSMimpRS(MAXREU,ECP_D_FPH)
+      REAL*4 DSMimpCM(MAXCBIL,MAXCSRV,ECP_D_FPH)
+      REAL*4 PACpb(MAXPACR)
+      REAL*4 PACmp(MAXPACR,MAXSEC)
+      REAL*4 MappCtoN(MNUMNR,MNUMCR,MAXSEC)
+      REAL*4 MappNtoC(MNUMNR,MNUMCR,MAXSEC)
+      REAL*4 ComDemAdjFac(MNUMCR,2,MNUMYR)
+      REAL*4 ResTGdem(MAXREU)
+      REAL*4 TotDemCensus,TotDemNERC
+      CHARACTER*3 SecNam(MAXSEC)
+      CHARACTER*12 SLNAM(MAXSEC)
+      CHARACTER*40 EUNAM(MAXEU)
+      INTEGER*2 EUINDEX(MAXEU,2)
+      INTEGER*2 NumSec
+      INTEGER*2 EUrecNUM(MAXEU,MAXNRG)
+      INTEGER*2 SEC(MAXSEC),NEUSES(MAXSEC),NumbECMs(MAXEU)
+      INTEGER*2 Neu
+      INTEGER*2 LFinum
+      integer*2 GBlockNumEFD(MAXEFTB,MNUMNR) ! Sorted Numbers of blocks   
+      REAL*4 LoadForec(MAXEU,2)
+      REAL*4 BaseYrLd(MAXEU,MAXNRG)
+      REAL*4 BaseYrSysLd(MAXNRG)
+      REAL*4 SystemLoad,Histshr
+      COMMON/DSMSCn/GBlockNumEFD,LFinum,NumSec,SEC,NEUSES,NumbECMs,EUINDEX,EUrecNUM,Neu,PACnR,PACnS
+      COMMON/DSMSCr/LoadForec,SystemLoad,BaseYrLd, &
+          BaseYrSysLd,TotDemCensus,TotDemNERC,ResTGdem,ComDemAdjFac, &
+          MappCtoN,MappNtoC,PACpb,PACmp,DSMimpRS,DSMimpCM,Histshr
+      COMMON/DSMSCc/SecNam,SLNAM,EUNAM
+      real*4 efdblkserv(MAXEFDSS,MAXSEA,MNUMNR,MAXEUGRP)
+      real*4 efdblkservo(MAXEFDSS,MAXSEA,MNUMNR,MAXEUGRP)
+      integer*4 eugrp(MAXEU+1)
+      integer*4 eugrpndx(MAXEU+1)
+      integer*4 neusgrp(MAXSEC)
+      real*8 dprob(NPROB)
+      real*4 loadu
+      real*4 dcum(MAXEFTB,NMOM,MNUMNR)
+      real*4 dcumold(MAXEFTB,NMOM,MNUMNR) ! store previous year
+      integer*4 dcumhr(MAXEFTB,MNUMNR) ! associated hours
+      real*4 unserv
+      real*4 newcap,newfor
+      real*4 plntgrpsz(EFD_D_MPG)
+      real*4 renplntgrpsz(EFD_D_MHG)
+
+      real*4 capcum(MAXSEA,NMOM,MNUMNR,2)
+      real*4  pcap(MAXEFDSS,MAXSEA,MNUMNR)
+      real*4  toteuload(MAXEUGRP,MNUMNR)  ! end-use load by service group
+      real*4  RNWFAC       ! renewable capacity factor type
+      real*4  ECPVOLL(MNUMNR)         ! value of lost load
+      real*4  EFDVOLL(MNUMNR)         ! value of lost load
+      real*4  NETCON,CPWT1,CPWT2,CPWT3,CPWT4
+      real*4 loadecpu
+      integer*4 nodyn
+      real*4 delres
+      real*4  mefac(MNUMNR)
+      real*4  DEMINT(MNUMNR)
+
+      COMMON/DSMVAL/neusgrp,eugrp,eugrpndx,dcumhr,nodyn,efdblkserv,dcum,loadu, &
+       unserv,capcum,toteuload,pcap,newcap,newfor,plntgrpsz,renplntgrpsz, &
+       efdblkservo,loadecpu,delres,mefac,dcumold,demint                 
+       
+      COMMON/DP/dprob
+
+      real*8   dincr(NPROB)
+      data dincr/-3.,-2.5,-2.0,-1.5,-1.0,-.5,0.,.5,1.0,1.5,2.0,2.5,3.0/
+      data RNWFAC/0.70/
+
+! data that sums existing available (after planned maintenance) capacity by ecp type
+      REAL*4 ECUMDSP(ECP_D_MSP,ECP_D_DSP,MNUMNR)
+      REAL*4 PMDSP(ECP_D_MSP,ECP_D_DSP,MNUMNR)
+      REAL*4 ECUMRNW(ECP_D_RNW,MNUMNR)
+      REAL*4 ECUMINTI(ECP_D_INT,MNUMNR)
+      REAL*4 ECUMDGN(ECP_D_DGN,MNUMNR)
+      REAL*4 LCUM(ECP_D_VLS,MNUMNR,ECP_D_FPH)
+      COMMON/ECPCUM/ECUMDSP,PMDSP,ECUMRNW,ECUMINTI,  &
+                    ECUMDGN,LCUM
+
+      REAL*4 DELEMUEDSP(ECP_D_MSP,ECP_D_DSP,MNUMNR)
+      REAL*4 DELEMUERNW(ECP_D_MSP,ECP_D_RNW,MNUMNR)
+      REAL*4 DELEMUEINT(ECP_D_MSP,ECP_D_INT,MNUMNR)
+      REAL*4 DELEMUEDGN(ECP_D_MSP,ECP_D_DGN,MNUMNR)
+      REAL*4 DELEMUERHS(ECP_D_FPH,MNUMNR)
+      REAL*4 EPKMRGN(MNUMNR,ECP_D_FPH)
+      REAL*4 ETRMRGN(MNUMNR,ECP_D_FPH)
+      REAL*4 ERMRGN(MNUMNR,ECP_D_FPH)
+      REAL*4 ECAPCUM(ECP_D_MSP,NMOM)
+      REAL*4 euelas(MNUMNR,MAXSEC,MAXEUGRP)
+      REAL*4 EPKSHFT(MNUMNR,MNUMYR+ECP_D_FPH)
+      COMMON/ECPRMCOFF/DELEMUEDSP,DELEMUERNW,DELEMUEINT, &
+         DELEMUEDGN,DELEMUERHS,EPKMRGN,ETRMRGN,ERMRGN,ECPVOLL &
+         ,EFDVOLL,NETCON,CPWT1,CPWT2,CPWT3,CPWT4,ecapcum,euelas,EPKSHFT
+
+! for CECA runs, variables to adjust sectoral demands for
+! DSM and distributed generation
+      REAL*4 DEMCERS(ECP_D_FPH)
+      REAL*4 DEMCECM(ECP_D_FPH)
+      REAL*4 DEMCEIN(ECP_D_FPH)
+      REAL*4 DEMCETR(ECP_D_FPH)
+      REAL*4 DEMCEAS(ECP_D_FPH)
+      COMMON/CECADEM/DEMCERS,DEMCECM,DEMCEIN,DEMCETR,DEMCEAS

@@ -1,0 +1,56 @@
+!  $Header: m:/default/includes/RCS/pqchar,v 1.13 2019/06/20 20:35:16 pkc Exp $
+! INCLUDE FILE TO HOLD NAMES OF PRICE/QUANTITY VARIABLES EQUIVALENCED TO MPRC AND MQTY.
+! THIS ALSO HOLDS THE NAMES OF THE VARIABLES FOR NATURAL GAS TO UTILITIES
+      integer MNOTH ! number of miscellaneous other convergence variables
+      parameter (MNOTH=65)
+      CHARACTER*6 MPVARS(MNUMP),MQVARS(MNUMQ) ! names of main convergence price and quantity variables
+      CHARACTER*9 MUPVARS(3),MUQVARS(3) ! names of electricy Utility price and quantity convergence variables
+      CHARACTER*9 SMUQVARS(4),SMUPVARS(4)    ! additional names of seasonal electric utility variables
+      CHARACTER*9 SGASQVARS(3),SGASPVARS(3)  ! 3 seasons for these variables
+      CHARACTER*9 MOVARS(MNOTH)     ! Names of "other" convergence variables
+      CHARACTER*7 MCQVARSS(NCLUT1)  ! names of coal quantity convergence variables
+      CHARACTER*9 MCPVARSS(2)       ! names of coal price convergence variables
+      CHARACTER*8 MZVARS(3)
+      COMMON/MCVAR/MQVARS,MPVARS,MUQVARS,MUPVARS,SMUQVARS,SMUPVARS,SGASQVARS,SGASPVARS,  &
+                   MCQVARSS,MCPVARSS,MOVARS,MZVARS
+
+
+! storage of fractional (1) and absolute (2) tolerances for convergence variables
+! value must be at least [absolute] in size to be tested (quantities only)
+! if it changes by [fractional] in percentage terms, it is considered out of convergence
+      REAL MNQCNV(2,MNUMQ),MNPCNV(2,MNUMP),MNOCNV(2,MNOTH)
+      REAL MNUQCNV(2,3),MNUPCNV(2,3)
+      REAL MNGASQCNV(2,3),MNGASPCNV(2,3)      !  3 seasons for these variables
+      REAL MNCQCNV(2,15),MNCPCNV(2,12)
+      REAL MNCQCNVS(2,NCLUT1),MNCPCNVS(2)
+      REAL MNZCNV(2,3)
+      COMMON/MNCNVRG/ MNQCNV,MNPCNV,MNOCNV,MNUQCNV,MNUPCNV,MNGASQCNV,MNGASPCNV,   &
+                      MNCQCNV,MNCPCNV,MNCQCNVS,MNCPCNVS,MNZCNV
+
+!  Variables telling how much to relax.   Values read in from mncnvrg.txt
+!  First dimension is 20 for changing relaxation parameters across iterations, up to 20.
+      REAL RLXQ(20,MNUMQ),RLXP(20,MNUMP)
+      REAL RLXUQ(20,3),RLXUP(20,3)
+      REAL RLXGASQ(20,3),RLXGASP(20,3)        !  3 seasons for these variables
+      REAL RLXCQ(20,15),RLXCP(20,12)
+      REAL RLXCQS(20,NCLUT1),RLXCPS(20)
+      REAL RLXOTH(20,MNOTH)
+      REAL RLXPCAP(20,3)
+
+      COMMON/RLX/RLXQ,RLXP,RLXUQ,RLXUP,RLXGASQ,RLXGASP,RLXCQ,RLXCP,RLXOTH,RLXCPS,RLXCQS,RLXPCAP
+
+! +++ Holding Arrays for Previous Iteration's PRICES and QUANTITIES
+      REAL PREVQ(MNUMCR,MNUMYR,MNUMQ),PREVP(MNUMCR,MNUMYR,MNUMP)
+      REAL PREVUQ(NNGEM,MNUMYR,7),PREVUP(NNGEM,MNUMYR,7)
+      REAL PREVGASQ(NNGEM,MNUMYR,3),PREVGASP(NNGEM,MNUMYR,3)
+      REAL PREVCQS(NDRGG,MNUMYR,NCLUT1),PREVCPS(2,NDRGG,MNUMYR)
+! +++ Holding Array for Previous Iteration's Coal Productive Capacity
+!     These variables are in here to get relaxed
+      REAL PREVPCAP(MX_NCOALS,MNUMYR)
+      REAL PREV_CL_CF(MX_UNITS,MNUMYR)
+      REAL PREV_CL_BTUs(MX_UNITS,MNUMYR)
+! +++ Holding arrays for prior year's restart prices
+      REAL CONVOTH(2,MNOTH,MNUMYR)  
+      COMMON/PREV/PREVQ,PREVP,CONVOTH,PREVUQ,PREVUP,PREVCQS,PREVCPS,  &
+                  PREVGASQ,PREVGASP,                 &
+                  PREVPCAP,PREV_CL_CF,PREV_CL_BTUs

@@ -1,0 +1,391 @@
+## ams_version=1.0
+
+Section NLP_Structure {
+    DeclarationSection Supply_Curve_Declarations {
+        Parameter Qbase {
+            IndexDomain: (step,suptype,s,tmon);
+        }
+        ElementParameter SupCrv_MaxStep {
+            Range: Supply_Curve_Step_;
+            Definition: Element(Supply_Curve_Step_,5);
+            Comment: "Maximum step on the supply curve";
+        }
+        Parameter Q_UpperBound {
+            IndexDomain: (step,suptype,s,tmon);
+            Range: nonnegative;
+            Definition: {
+                !if step = 'step1' then
+                !  Qbase(step,suptype,s,tmon)*(1-PCTLP(suptype,s))
+                !elseif step = 'step2' then
+                !   (Qbase(step,suptype,s,tmon)-Qbase('step1',suptype,s,tmon))*(1-PCTLP(suptype,s))
+                !elseif step = 'step3' then
+                !   (Qbase('step4',suptype,s,tmon)-Qbase('step2',suptype,s,tmon))*(1-PCTLP(suptype,s))
+                !elseif step = 'step4' then
+                !   (Qbase('step5',suptype,s,tmon)-Qbase(step,suptype,s,tmon))*(1-PCTLP(suptype,s))
+                !elseif step = 'step5' then
+                !   Inf
+                !endif
+            }
+        }
+        Parameter Pbase {
+            IndexDomain: (step,suptype,s,tmon);
+        }
+        Parameter PCTLP {
+            IndexDomain: (suptype,s);
+            Definition: 0.05;
+        }
+        Parameter SupCrvElasticity {
+            IndexDomain: (step,suptype);
+        }
+        Parameter SupCrvParameter {
+            IndexDomain: (step,suptype);
+            Definition: prod( n, (1+Parameter_SupCrv(step,n)));
+        }
+        Parameter SupCrvPriceElasticity {
+            IndexDomain: (step,suptype);
+            Definition: prod( n, (1 + Parameter_SupCrv(step, n) / Parameter_SupElasticity(step,n)));
+        }
+    }
+    DeclarationSection Tariff_Curve_Declarations {
+        ElementParameter PTCrv_MaxStep {
+            Range: Supply_Curve_Step_;
+            Definition: Element(Supply_Curve_Step_,3);
+            Comment: "Maximum step on the pipeline tariff curve";
+        }
+        Parameter PipelineTariff {
+            IndexDomain: (step,h,h1,tmon);
+        }
+        Parameter PipeTariffCurveQty {
+            IndexDomain: (step,h,h1,tmon);
+        }
+        Parameter PipeTarCrvQty_UpBound {
+            IndexDomain: (step,h,h1,tmon);
+        }
+        Parameter Fixed_Arc_Fee {
+            IndexDomain: (reg,reg1,tmon);
+            Text: "represents gathering charges, storage fees, fixed tariffs";
+        }
+        Parameter GatheringCharge {
+            IndexDomain: (s,h,tmon);
+            Text: "represents gathering charges, storage fees, fixed tariffs";
+        }
+        Parameter StorageFee {
+            IndexDomain: (storage,h,tmon);
+            Text: "represents gathering charges, storage fees, fixed tariffs";
+        }
+        Parameter Parameter_TariffCurve {
+            IndexDomain: step;
+        }
+        Parameter Parameter_Capacity {
+            IndexDomain: step;
+        }
+    }
+    DeclarationSection LNG_Export_Curve_Declarations {
+        ElementParameter LNGExpCrv_MaxStep {
+            Range: Supply_Curve_Step_;
+            Definition: Element(Supply_Curve_Step_,2);
+            Comment: "Maximum step on the LNG export curve";
+        }
+        Parameter LNGExportPrc {
+            IndexDomain: (step,lngexp,tmon);
+        }
+        Parameter LNGExportQty {
+            IndexDomain: (step,lngexp,tmon);
+        }
+        Parameter LNGExport_UpBound {
+            IndexDomain: (step,lngexp,tmon);
+        }
+        Parameter Parameter_LNGExpQty {
+            IndexDomain: step;
+        }
+        Parameter Parameter_LNGExpPrc {
+            IndexDomain: step;
+        }
+    }
+    DeclarationSection Capacity_Declarations {
+        Parameter PipeCapacity {
+            IndexDomain: (h,h1);
+        }
+        Parameter CurrentPipeCapacity {
+            IndexDomain: (h,h1);
+        }
+        Parameter CapacityAddition {
+            IndexDomain: (h,h1);
+        }
+        Parameter CapacityMaxBuild {
+            IndexDomain: (h,h1);
+        }
+    }
+    DeclarationSection QP_Parameters {
+        Parameter QP_Consumption {
+            IndexDomain: (d,tmon);
+        }
+        Parameter QP_Discrepancy {
+            IndexDomain: (d,tmon);
+        }
+        Parameter QP_PipefuelLossFactor {
+            IndexDomain: h;
+        }
+        Parameter QP_Storage_Withdrawals {
+            IndexDomain: (storage,tmon);
+            Definition: {
+                !NetStorage(storage, mon)
+            }
+        }
+        Parameter QP_Storage_Injections {
+            IndexDomain: (storage,tmon);
+            Definition: {
+                !NetStorage(storage, mon)
+            }
+        }
+        Parameter QP_Supply {
+            IndexDomain: (suptype,s,tmon);
+        }
+        Parameter QP_SupplyPrice {
+            IndexDomain: (suptype,s,tmon);
+        }
+        Parameter QP_PipelineTariff {
+            IndexDomain: (h,h1,tmon);
+        }
+        Parameter QP_Capacity {
+            IndexDomain: (h,h1,tmon);
+        }
+        Parameter QP_LNGExportCapacity {
+            IndexDomain: (lngexp,tmon);
+        }
+        Parameter QP_LNGExportPrice {
+            IndexDomain: (lngexp,tmon);
+            Definition: 3;
+        }
+        Parameter Parameter_SupCrv {
+            IndexDomain: (step,n);
+        }
+        Parameter Parameter_SupElasticity {
+            IndexDomain: (step,n);
+        }
+        Parameter Parameter_PrcElasticity {
+            IndexDomain: (step,n);
+        }
+        Set supnum_ {
+            Index: n;
+            Definition: {
+                {1..3}
+            }
+            Comment: "generic counter for processing supply curve steps";
+        }
+    }
+    DeclarationSection NLP_Declarations {
+        Variable Qsupply {
+            IndexDomain: (step,suptype,s,tmon) | map_Supply(s, suptype);
+            Range: [0, Q_UpperBound(step, suptype, s, tmon)];
+        }
+        Set TestConstraints {
+            SubsetOf: AllConstraints;
+            Definition: Data {SupplyMassBalance, HubBalance, DemandMassBalance};
+        }
+        Set TestVariables {
+            SubsetOf: AllVariables;
+            Definition: Data { Qsupply, FlowSupplyToHub, FlowHubToHub, FlowHubToDemand, SLackVar};
+        }
+        Variable QLNGexp {
+            IndexDomain: (step,lngexp,tmon);
+            Range: [0, LNGExport_UpBound(step, lngexp, tmon)];
+        }
+        Variable QTariffCurve {
+            IndexDomain: (step,h,h1,tmon);
+            Range: [0, PipeTarCrvQty_UpBound(step, h, h1, tmon)];
+        }
+        Variable FlowHubToHub {
+            IndexDomain: (h,h1,tmon) | PipeCapacity(h, h1);
+            Range: [0, PipeCapacity(h, h1)];
+        }
+        Variable FlowSupplyToHub {
+            IndexDomain: (s,h,tmon) | map_SupplyArcs(s, h);
+            Range: nonnegative;
+        }
+        Variable FlowHubToDemand {
+            IndexDomain: (h,d,tmon);
+            Range: nonnegative;
+        }
+        Variable FlowHubToLNGExport {
+            IndexDomain: (h,lngexp,tmon);
+            Range: nonnegative;
+        }
+        Variable FlowStorageToHub {
+            IndexDomain: (storage,h,tmon);
+            Range: nonnegative;
+        }
+        Variable FlowHubToStorage {
+            IndexDomain: (h,storage,tmon);
+            Range: nonnegative;
+        }
+        Variable OBJ {
+            Text: "consumer plus producer surplus minus variable transport costs";
+            Range: free;
+            Definition: {
+                sum(tmon,
+                !Area under the Supply curve
+                 - sum((step,suptype,s) | map_Supply(s,suptype) and step <= SupCrv_MaxStep, Pbase(step, suptype, s, tmon)*Qsupply(step, suptype, s, tmon) +
+                       0.5* sqr(Qsupply(step, suptype, s, tmon)) * (Pbase(step+1, suptype, s, tmon)-Pbase(step, suptype, s, tmon))/ (Qbase(step+1, suptype, s, tmon)-Qbase(step, suptype, s, tmon)))
+                
+                !Area under the Pipeline Tariff curve
+                -sum((step,h,h1)| PipeCapacity(h, h1) and step <= PTCrv_MaxStep, PipelineTariff(step, h, h1, tmon) * QTariffCurve(step, h, h1, tmon) +
+                     0.5 * sqr( QTariffCurve(step, h, h1, tmon) ) *
+                     (PipelineTariff(step+1, h, h1, tmon) - PipelineTariff(step, h, h1, tmon) )/ (PipeTariffCurveQty(step+1, h, h1, tmon) - PipeTariffCurveQty(step, h, h1, tmon) ) )
+                
+                 !Fixed  Fees
+                 - sum((h,h1) | PipeCapacity(h, h1), Fixed_Arc_Fee(h, h1, tmon) * FlowHubToHub(h, h1, tmon))
+                
+                  !Gathering Charges
+                 - sum((s,h) | map_SupplyArcs(s, h), GatheringCharge(s, h, tmon) * FlowSupplyToHub(s, h, tmon))
+                
+                 !Storage Fees
+                 - sum((storage,h) | map_StorageArcs(storage,h), StorageFee(storage,h, tmon) * FlowStorageToHub(storage,h, tmon))
+                
+                 !Area under the LNG Export Curve
+                + sum((step,lngexp) | step <= LNGExpCrv_MaxStep, LNGExportPrc(step, lngexp, tmon) * QLNGexp(step, lngexp, tmon) +
+                       0.5* sqr(QLNGexp(step, lngexp, tmon)) * (LNGExportPrc(step+1, lngexp, tmon)-LNGExportPrc(step, lngexp, tmon)) / (LNGExportQty(step+1, lngexp, tmon)-LNGExportQty(step, lngexp, tmon))) )
+            }
+        }
+        Variable TestOBJ {
+            Text: "consumer plus producer surplus minus variable transport costs";
+            Range: free;
+            Definition: {
+                sum(tmon,
+                !Area under the Supply curve
+                  sum((step,suptype,s) | map_Supply(s,suptype) and step <= SupCrv_MaxStep, Pbase(step, suptype, s, tmon)*Qsupply(step, suptype, s, tmon) +
+                       0.5* sqr(Qsupply(step, suptype, s, tmon)) * (Pbase(step+1, suptype, s, tmon)-Pbase(step, suptype, s, tmon))/ (Qbase(step+1, suptype, s, tmon)-Qbase(step, suptype, s, tmon)))
+                + sum(s, 20* SLackVar(s, tmon))
+                !!Area under the Pipeline Tariff curve
+                !-sum((step,h,h1)| PipeCapacity(h, h1) and step <= PTCrv_MaxStep, PipelineTariff(step, h, h1, tmon) * QTariffCurve(step, h, h1, tmon) +
+                !     0.5 * sqr( QTariffCurve(step, h, h1, tmon) ) *
+                !     (PipelineTariff(step+1, h, h1, tmon) - PipelineTariff(step, h, h1, tmon) )/ (PipeTariffCurveQty(step+1, h, h1, tmon) - PipeTariffCurveQty(step, h, h1, tmon) ) )
+                !
+                ! !Fixed  Fees
+                ! - sum((h,h1) | PipeCapacity(h, h1), Fixed_Arc_Fee(h, h1, tmon) * FlowHubToHub(h, h1, tmon))
+                !
+                !  !Gathering Charges
+                ! - sum((s,h) | map_SupplyArcs(s, h), GatheringCharge(s, h, tmon) * FlowSupplyToHub(s, h, tmon))
+                !
+                ! !Storage Fees
+                ! - sum((storage,h) | map_StorageArcs(storage,h), StorageFee(storage,h, tmon) * FlowStorageToHub(storage,h, tmon))
+                !
+                ! !Area under the LNG Export Curve
+                !+ sum((step,lngexp) | step <= LNGExpCrv_MaxStep, LNGExportPrc(step, lngexp, tmon) * QLNGexp(step, lngexp, tmon) +
+                !       0.5* sqr(QLNGexp(step, lngexp, tmon)) * (LNGExportPrc(step+1, lngexp, tmon)-LNGExportPrc(step, lngexp, tmon)) / (LNGExportQty(step+1, lngexp, tmon)-LNGExportQty(step, lngexp, tmon)))
+                )
+            }
+        }
+        Variable SLackVar {
+            IndexDomain: (s,tmon);
+            Range: free;
+        }
+        Constraint SupplyMassBalance {
+            IndexDomain: (s,tmon);
+            Definition: Sum((step,suptype) | map_Supply(s,suptype), Qsupply(step,suptype,s,tmon))+ SLackVar(s, tmon) = sum(h | map_SupplyArcs(s,h), FlowSupplyToHub(s,h,tmon) );
+        }
+        Constraint DemandMassBalance {
+            IndexDomain: (d,tmon);
+            Definition: {
+                sum(h | map_DemandArcs(h,d), FlowHubToDemand(h,d,tmon) ) = QP_Consumption(d,tmon) !+ QP_Discrepancy(d,tmon)
+            }
+        }
+        Constraint HubBalance {
+            IndexDomain: (h,tmon);
+            Definition: {
+                !sum(storage | map_StorageArcs(storage,h), FlowStorageToHub(storage,h,tmon)) +
+                sum(s | map_SupplyArcs(s,h), FlowSupplyToHub(s,h,tmon)) +
+                sum(h1 | PipeCapacity(h1,h), FlowHubToHub(h1,h,tmon) *(1-QP_PipefuelLossFactor(h))) =
+                sum(h2 | PipeCapacity(h,h2), FlowHubToHub(h,h2,tmon) ) + sum(d | map_DemandArcs(h,d), FlowHubToDemand(h,d,tmon) )
+                !+ sum(lngexp | map_LNGExpArcs(h,lngexp), FlowHubToLNGExport(h,lngexp,tmon) ) +
+                !sum(storage | map_StorageArcs(storage,h), FlowHubToStorage(h, storage, tmon))
+            }
+        }
+        Constraint StorageWthBalance {
+            IndexDomain: (storage,tmon);
+            Definition: sum(h | map_StorageArcs(storage,h), FlowStorageToHub(storage,h,tmon))= QP_Storage_Withdrawals(storage,tmon);
+        }
+        Constraint StorageInjBalance {
+            IndexDomain: (storage,tmon);
+            Definition: sum(h | map_StorageArcs(storage,h), FlowHubToStorage(h,storage,tmon))= QP_Storage_Injections(storage,tmon);
+        }
+        Constraint LNGExportBalance {
+            IndexDomain: (lngexp,tmon);
+            Definition: Sum(step |step <= LNGExpCrv_MaxStep , QLNGexp(step,lngexp,tmon))= sum(h | map_LNGExpArcs(h,lngexp), FlowHubToLNGExport(h,lngexp,tmon) );
+        }
+        Constraint TariffCurveQtyBalance {
+            IndexDomain: (h,h1,tmon) | map_HubArcs(h, h1);
+            Definition: Sum(step | step <= PTCrv_MaxStep , QTariffCurve(step, h, h1, tmon)) = FlowHubToHub(h,h1,tmon);
+        }
+        MathematicalProgram MaxConsumerProducerSurplus {
+            Objective: OBJ;
+            Direction: maximize;
+            Constraints: AllConstraints;
+            Variables: AllVariables;
+            Type: Automatic;
+        }
+        MathematicalProgram TestQP {
+            Objective: TestOBJ;
+            Direction: minimize;
+            Constraints: TestConstraints;
+            Variables: TestVariables;
+            Type: Automatic;
+        }
+    }
+    Procedure DefineCapacities {
+        Body: {
+            if ModelYear = FirstModelYear then
+                   CurrentPipeCapacity(h, h1) :=
+                     if Capacity(h,h1,FirstModelYear) then Capacity(h,h1,FirstModelYear)
+                     else Capacity(h,h1,LastHistoricalYear)
+                     endif;
+            else
+                   CurrentPipeCapacity(h, h1) += CapacityAddition(h, h1) ;
+            endif ;
+            CurrentPipeCapacity(h, h1) :=
+              if Capacity(h,h1,FirstModelYear) then Capacity(h,h1,FirstModelYear)
+              else Capacity(h,h1,LastHistoricalYear)
+              endif;  !temp
+                    !Define Max build allowed
+            !        CapacityAddition(h,h1) := MAX(QTariffCurve(PTCrv_MaxStep,h,h1,tmon));  !transfer to cap expansion post-processing
+                    PipeCapacity(h,h1 ):= CurrentPipeCapacity(h,h1);
+        }
+    }
+    Procedure TransferDataIntoQPparameters {
+        Body: {
+            QP_Consumption(d, tmon) := TotalConsumption(MonthInPeriod(tmon), d);
+            QP_Discrepancy(d, tmon) := Discrepancy(MonthInPeriod(tmon), d);
+            QP_Storage_Withdrawals(storage, tmon) := StorageWithdrawals(MonthInPeriod(tmon), storage);
+            QP_Storage_Injections(storage, tmon) := StorageInjections(MonthInPeriod(tmon), storage);
+            QP_PipefuelLossFactor(h) := 0.05;
+            QP_Supply(suptype, s, tmon) := Supply(MonthInPeriod(tmon), suptype, s);
+            QP_SupplyPrice(suptype, s, tmon) := WHPrice(MonthInPeriod(tmon), suptype, s);
+            QP_Capacity(h, h1, tmon) := CurrentPipeCapacity(h, h1);
+            QP_PipelineTariff(h, h1, tmon) := 1;
+        }
+        Comment: "Transfer data for Planning Period into QP parameters";
+    }
+    Procedure CurveDefinitions {
+        Body: {
+            !Define supply curve steps
+            Qbase(step, suptype, s, tmon) := QP_Supply(suptype, s, tmon) *  SupCrvParameter(step, suptype);
+            Pbase(step, suptype, s, tmon) := QP_SupplyPrice(suptype, s, tmon) * SupCrvPriceElasticity(step, suptype);
+            
+            Q_UpperBound( (step, suptype, s, tmon) | step <= SupCrv_MaxStep) := ( Qbase(step+1, suptype, s, tmon) - Qbase(step, suptype, s, tmon) ) * (1 - PCTLP(suptype,s));
+            
+            !Define Pipeline Tariff Curve steps
+            PipeTariffCurveQty(step, h, h1, tmon) := QP_Capacity(h, h1, tmon) * Parameter_Capacity(step);
+            PipelineTariff(step, h, h1, tmon) := QP_PipelineTariff(h, h1, tmon) * Parameter_TariffCurve(step);
+            
+            PipeTarCrvQty_UpBound( (step, h, h1, tmon) | step <= PTCrv_MaxStep) := PipeTariffCurveQty(step+1, h, h1, tmon) - PipeTariffCurveQty(step, h, h1, tmon);
+            
+            CapacityMaxBuild(h, h1) := PipeTariffCurveQty(PTCrv_MaxStep, h, h1, FirstPeriodInPlanningInterval);
+            
+            !define LNG Export Curve steps
+            LNGExportQty(step, lngexp, tmon) := QP_LNGExportCapacity(lngexp, tmon) * Parameter_LNGExpQty(step);
+            LNGExportPrc(step, lngexp, tmon) := QP_LNGExportPrice(lngexp, tmon) * Parameter_LNGExpPrc(step);
+            
+            LNGExport_UpBound( (step, lngexp, tmon) | step <= LNGExpCrv_MaxStep ) := LNGExportQty(step+1, lngexp, tmon) - LNGExportQty(step, lngexp, tmon);
+        }
+    }
+}

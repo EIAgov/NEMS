@@ -1,0 +1,59 @@
+!  $Header: m:/default/includes/RCS/epmeusprc,v 1.1 2009/04/02 15:27:50 pkc Exp $
+!  Utility end-use service prices
+!   Utility end-use service prices Common Block Parameters
+      INTEGER AMNEUGRP,AMUEUSIZE,AMNEURSGRP,AMNEUCMGRP,AMNEUINGRP,AMNEUTRGRP
+      PARAMETER(AMNEURSGRP=10)   ! Number of residential end-use price variables
+      PARAMETER(AMNEUCMGRP=10)   ! Number of commercial end-use price variables
+      PARAMETER(AMNEUINGRP=3)   ! Number of industrial end-use price variables
+      PARAMETER(AMNEUTRGRP=2)   ! Number of transportation end-use price variables
+      PARAMETER(AMNEUGRP=25)     ! TOTAL Number of end-use price variables
+      PARAMETER(AMUEUSIZE=AMNEUGRP*MNUMCR*MNUMYR) ! Size of EU price array
+! PRICES
+      REAL AELSHRS(MNUMCR,MNUMYR) !   space heating RS
+      REAL AELCLRS(MNUMCR,MNUMYR) !   cooling RS
+      REAL AELWHRS(MNUMCR,MNUMYR) !   water heating RS
+      REAL AELCKRS(MNUMCR,MNUMYR) !   cooking RS
+      REAL AELCDRS(MNUMCR,MNUMYR) !   clothes dryers RS
+      REAL AELRFRS(MNUMCR,MNUMYR) !   refrigeration RS
+      REAL AELFZRS(MNUMCR,MNUMYR) !   freezers RS
+      REAL AELLTRS(MNUMCR,MNUMYR) !   lighting RS
+      REAL AELOTRS(MNUMCR,MNUMYR) !   appliances/other RS
+      REAL AELH2RS(MNUMCR,MNUMYR) !   secondary heating RS
+      REAL AELSHCM(MNUMCR,MNUMYR) !   space heating CM
+      REAL AELSCCM(MNUMCR,MNUMYR) !   space cooling CM
+      REAL AELWHCM(MNUMCR,MNUMYR) !   water heating CM
+      REAL AELVTCM(MNUMCR,MNUMYR) !   ventilation CM
+      REAL AELCKCM(MNUMCR,MNUMYR) !   cooking CM
+      REAL AELLTCM(MNUMCR,MNUMYR) !   lighting CM
+      REAL AELRFCM(MNUMCR,MNUMYR) !   refrigeration CM
+      REAL AELOPCM(MNUMCR,MNUMYR) !   office equipment PCs CM
+      REAL AELONCM(MNUMCR,MNUMYR) !   office equipment, nonPCs CM8
+      REAL AELOTCM(MNUMCR,MNUMYR) !   other commercial
+      REAL AELINP(MNUMCR,MNUMYR) !   industrial primary
+      REAL AELINS(MNUMCR,MNUMYR) !   industrial shift
+      REAL AELINM(MNUMCR,MNUMYR) !   industrial miscellaneous
+      REAL AELLTTR(MNUMCR,MNUMYR) !   light trains TR
+      REAL AELVHTR(MNUMCR,MNUMYR) !   vehicle TR
+
+
+      COMMON /AEUSPRC/AELSHRS,AELCLRS,AELWHRS,AELCKRS,AELCDRS,AELRFRS, &
+       AELFZRS,AELLTRS,AELOTRS,AELH2RS,AELSHCM,AELSCCM,AELWHCM,AELVTCM, &
+       AELCKCM,AELLTCM,AELRFCM,AELOPCM,AELONCM,AELOTCM,AELINP,AELINS, &
+       AELINM,AELLTTR,AELVHTR
+
+!    equivalence for residential
+      REAL APELRSOUT(MNUMCR,MNUMYR,AMNEURSGRP) !   equivalenced sector prices
+      EQUIVALENCE(APELRSOUT(1,1,1),AELSHRS(1,1))
+
+!    equivalence for commercial
+      REAL APELCMOUT(MNUMCR,MNUMYR,AMNEUCMGRP) !   equivalenced commercial sector prices
+      EQUIVALENCE(APELCMOUT(1,1,1),AELSHCM(1,1))
+
+!    equivalence for industrial
+      REAL APELINOUT(MNUMCR,MNUMYR,AMNEUINGRP) !   equivalenced industrial sector prices
+      EQUIVALENCE(APELINOUT(1,1,1),AELINP(1,1))
+
+!    equivalence for filer
+      REAL APELOUT(AMUEUSIZE) !   equivalenced sector prices
+      EQUIVALENCE(APELOUT(1),AELSHRS(1,1))
+

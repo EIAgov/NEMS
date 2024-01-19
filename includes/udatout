@@ -1,0 +1,271 @@
+!  $Header: m:/default/includes/RCS/udatout,v 1.16 2019/07/23 15:29:23 rsc Exp $
+!  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!     INCLUDE(PARAMETR)
+!     INCLUDE(EMM$PARM)
+!
+!   UDAT OUTPUT VARIABLES
+!
+      REAL UCAPCSU(MNUMNR,MNUMYR)   !   1 Util Coal Steam Capacity by NERC
+      REAL UCAPSQU(MNUMNR,MNUMYR)   !   2 Util Coal Steam Capacity (existing) w/Seq by NERC
+      REAL UCAPIGU(MNUMNR,MNUMYR)   !   3 Util Advanced Coal Steam Capacity by NERC
+      REAL UCAPISU(MNUMNR,MNUMYR)   !   4 Util Advanced Coal Steam W/Seq Capacity by NERC
+      REAL UCAPOSU(MNUMNR,MNUMYR)   !   5 Util Other Steam Capacity by NERC
+      REAL UCAPCCU(MNUMNR,MNUMYR)   !   6 Util Combined Cycle Capacity by NERC
+      REAL UCAPACU(MNUMNR,MNUMYR)   !   7 Util Advanced Combined Cycle Capacity by NERC
+      REAL UCAPASU(MNUMNR,MNUMYR)   !   8 Util Advanced Combined Cycle W/Seq Capacity by NERC
+      REAL UCAPCTU(MNUMNR,MNUMYR)   !   9 Util Combustion Turb. Capacity by NERC
+      REAL UCAPATU(MNUMNR,MNUMYR)   !  10 Util Advanced Combustion Turb. Capacity by NERC
+      REAL UCAPNUU(MNUMNR,MNUMYR)   !  11 Util Nuclear Capacity by NERC
+      REAL UCAPFCU(MNUMNR,MNUMYR)   !  12 Util Fuel Cell Capacity by NERC
+      REAL UCAPPSU(MNUMNR,MNUMYR)   !  13 Util Pump Storage Capacity by NERC
+      REAL UCAPHYU(MNUMNR,MNUMYR)   !  14 Util Convention Hydro Cap  by NERC
+      REAL UCAPGEU(MNUMNR,MNUMYR)   !  15 Util Geothermal Capacity by NERC
+      REAL UCAPMSU(MNUMNR,MNUMYR)   !  16 Util MSW Capacity by NERC
+      REAL UCAPWDU(MNUMNR,MNUMYR)   !  17 Util Biomass/Wood Capacity by NERC
+      REAL UCAPSTU(MNUMNR,MNUMYR)   !  18 Util Solar Thermal Capacity by NERC
+      REAL UCAPPVU(MNUMNR,MNUMYR)   !  19 Util Photovoltaic Capacity by NERC
+      REAL UCAPWNU(MNUMNR,MNUMYR)   !  20 Util Wind Capacity by NERC
+      REAL UCAPWFU(MNUMNR,MNUMYR)   !  21 Util OFS Wind Capacity by NERC
+      REAL UCAPRNU(MNUMNR,MNUMYR)   !  22 Util Renewable (exclud PS) Cap by NERC
+      REAL UCAPDBU(MNUMNR,MNUMYR)   !  23 Util Dist Gen <Base> Cap by NERC
+      REAL UCAPDPU(MNUMNR,MNUMYR)   !  24 Util Dist Gen <Peak> Cap by NERC
+      REAL UCAPTLU(MNUMNR,MNUMYR)   !  25 Util Total Capacity by NERC
+      REAL UCAPCSN(MNUMNR,MNUMYR)   !  26 NonUtil Coal Steam Capacity by NERC
+      REAL UCAPSQN(MNUMNR,MNUMYR)   !  27 NonUtil Coal Steam Capacity (Existing) W/Seq by NERC
+      REAL UCAPIGN(MNUMNR,MNUMYR)   !  28 NonUtil Advanced Coal Steam Capacity by NERC
+      REAL UCAPISN(MNUMNR,MNUMYR)   !  29 NonUtil Advanced Coal Steam W/Seq Capacity by NERC
+      REAL UCAPOSN(MNUMNR,MNUMYR)   !  30 NonUtil Other Steam Capacity by NERC
+      REAL UCAPCCN(MNUMNR,MNUMYR)   !  31 NonUtil Combined Cycle Cap by NERC
+      REAL UCAPACN(MNUMNR,MNUMYR)   !  32 NonUtil Advanced Combined Cycle Cap by NERC
+      REAL UCAPASN(MNUMNR,MNUMYR)   !  33 NonUtil Advanced Combined Cycle W/Seq Cap by NERC
+      REAL UCAPCTN(MNUMNR,MNUMYR)   !  34 NonUtil Comb Turb. Capacity by NERC
+      REAL UCAPATN(MNUMNR,MNUMYR)   !  35 NonUtil Advanced Comb Turb. Capacity by NERC
+      REAL UCAPNUN(MNUMNR,MNUMYR)   !  36 NonUtil Nuclear Capacity by NERC
+      REAL UCAPFCN(MNUMNR,MNUMYR)   !  37 NonUtil Fuel Cell Capacity by NERC
+      REAL UCAPPSN(MNUMNR,MNUMYR)   !  38 NonUtil Pump Storage Capacity by NERC
+      REAL UCAPHYN(MNUMNR,MNUMYR)   !  39 NonUtil Convention Hydro Cap  by NERC
+      REAL UCAPGEN(MNUMNR,MNUMYR)   !  40 NonUtil Geothermal Capacity by NERC
+      REAL UCAPMSN(MNUMNR,MNUMYR)   !  41 NonUtil MSW Capacity by NERC
+      REAL UCAPWDN(MNUMNR,MNUMYR)   !  42 NonUtil Biomass/Wood Capacity by NERC
+      REAL UCAPSTN(MNUMNR,MNUMYR)   !  43 NonUtil Solar Thermal Capacity by NERC
+      REAL UCAPPVN(MNUMNR,MNUMYR)   !  44 NonUtil Photovoltaic Capacity by NERC
+      REAL UCAPWNN(MNUMNR,MNUMYR)   !  45 NonUtl Wind Capacity by NERC
+      REAL UCAPWFN(MNUMNR,MNUMYR)   !  46 NonUtl OFS Wind Capacity by NERC
+      REAL UCAPRNN(MNUMNR,MNUMYR)   !  47 NonUtil Renewable (ex PS) Cap by NERC
+      REAL UCAPDBN(MNUMNR,MNUMYR)   !  48 NonUtil Dist Gen <Base> Cap by NERC
+      REAL UCAPDPN(MNUMNR,MNUMYR)   !  49 NonUtil Dist Gen <Peak> Cap by NERC
+      REAL UCAPTLN(MNUMNR,MNUMYR)   !  50 NonUtil Total Capacity by NERC
+      REAL URETCSU(MNUMNR,MNUMYR)   !  51  Coal Steam Retirements by NERC
+      REAL URETSQU(MNUMNR,MNUMYR)   !  52  Coal Steam (Existing) W/Seq Retirements by NERC
+      REAL URETIGU(MNUMNR,MNUMYR)   !  53  Advanced Coal Steam Retirements by NERC
+      REAL URETISU(MNUMNR,MNUMYR)   !  54  Advanced Coal Steam W/Seq Retirements by NERC
+      REAL URETOSU(MNUMNR,MNUMYR)   !  55  Other Steam Retirements by NERC
+      REAL URETCCU(MNUMNR,MNUMYR)   !  56  Combined Cycle Cap by NERC
+      REAL URETACU(MNUMNR,MNUMYR)   !  57  Advanced Combined Cycle Cap by NERC
+      REAL URETASU(MNUMNR,MNUMYR)   !  58  Advanced Combined Cycle Cap W/Seq by NERC
+      REAL URETCTU(MNUMNR,MNUMYR)   !  59  Comb Turb. Retirements by NERC
+      REAL URETATU(MNUMNR,MNUMYR)   !  60  Advanced Comb Turb. Retirements by NERC
+      REAL URETNUU(MNUMNR,MNUMYR)   !  61  Nuclear Retirements by NERC
+      REAL URETFCU(MNUMNR,MNUMYR)   !  62  Fuel Cell Retirements by NERC
+      REAL URETPSU(MNUMNR,MNUMYR)   !  63  Pump Storage Retirements by NERC
+      REAL URETHYU(MNUMNR,MNUMYR)   !  64  Convention Hydro Cap  by NERC
+      REAL URETGEU(MNUMNR,MNUMYR)   !  65  Geothermal Retirements by NERC
+      REAL URETMSU(MNUMNR,MNUMYR)   !  66  MSW Retirements by NERC
+      REAL URETWDU(MNUMNR,MNUMYR)   !  67  Biomass/Wood Retirements by NERC
+      REAL URETSTU(MNUMNR,MNUMYR)   !  68  Solar Thermal Retirements by NERC
+      REAL URETPVU(MNUMNR,MNUMYR)   !  69  Photovoltaic Retirements by NERC
+      REAL URETWNU(MNUMNR,MNUMYR)   !  70  Wind Retirements by NERC
+      REAL URETWFU(MNUMNR,MNUMYR)   !  71  OFS Wind Retirements by NERC
+      REAL URETRNU(MNUMNR,MNUMYR)   !  72  Renewable (ex PS) Ret by NERC
+      REAL QELASN(MNUMNR,MNUMYR)    !  73 TOTAL DEMAND BY NERC REGION
+      REAL QELRSN(MNUMNR,MNUMYR)    !  74 RESIDENTIAL DEMAND BY NR
+      REAL QELCMN(MNUMNR,MNUMYR)    !  75 COMMERCIAL DEMAND BY NR
+      REAL QELINN(MNUMNR,MNUMYR)    !  76 INDUSTIAL DEMAND BY NERC
+      REAL QELTRN(MNUMNR,MNUMYR)    !  77 TRANSPORTATION DEMAND - NERC
+      REAL UCAPWNR(MNUMNR,MNUMYR)   !  78 Wind Capacity by NERC for Resource Calculations
+      REAL UCAPWLR(MNUMNR,MNUMYR)   ! 184 Low speed Wind Capacity by NERC for Resource Calculations
+      REAL UCAPWFR(MNUMNR,MNUMYR)   !  79 OFS Wind Capacity by NERC for Resource Calculations
+      REAL UCAPP2(MNUMNR,MNUMYR)    !  80 Total P2 Capacity by NERC
+
+!  Generation by plant type for ftab
+
+      REAL UGENPC(MNUMNR,MNUMYR)    !  81 Total Pulv Coal generation by NERC
+      REAL UGENSQ(MNUMNR,MNUMYR)    !  82 Total Pulv Coal generation w/Seq by NERC
+      REAL UGENSQ_ALT(MNUMNR,MNUMYR) ! 184 Total Pulv Coal generation w/Seq by NERC w/o capture
+      REAL UGENIG(MNUMNR,MNUMYR)    !  83 Total IGCC w/o seq coal generation by NERC
+      REAL UGENIS(MNUMNR,MNUMYR)    !  84 Total IGCC w/seq generation by NERC
+      REAL UGENIS_ALT(MNUMNR,MNUMYR) ! 185 Total IGCC w/seq generation by NERC w/o capture
+      REAL UGENOS(MNUMNR,MNUMYR)    !  85 Total Oil/Gas steam generation by NERC
+      REAL UGENCC(MNUMNR,MNUMYR)    !  86 Total Conv. CC generation by NERC
+      REAL UGENAC(MNUMNR,MNUMYR)    !  87 Total Adv. CC w/o seq generation by NERC
+      REAL UGENCS(MNUMNR,MNUMYR)    !  88 Total Adv. CC w/seq generation by NERC
+      REAL UGENCS_ALT(MNUMNR,MNUMYR) ! 187 Total Adv. CC w/seq generation by NERC w/o capture
+      REAL UGENCT(MNUMNR,MNUMYR)    !  89 Total Conv. Turb. generation by NERC
+      REAL UGENAT(MNUMNR,MNUMYR)    !  90 Total Adv. Turb. generation by NERC
+      REAL UGENNU(MNUMNR,MNUMYR)    !  91 Total Nuclear generation by NERC
+      REAL UGENPS(MNUMNR,MNUMYR)    !  92 Total Pumped St. generation by NERC
+      REAL UGENFC(MNUMNR,MNUMYR)    !  93 Total Fuel Cell generation by NERC
+      REAL UGENRN(MNUMNR,MNUMYR)    !  94 Total Renew.  generation by NERC
+      REAL UGENDG(MNUMNR,MNUMYR)    !  95 Total Dist. Gen. generation by NERC
+
+!      Coal Steam to Natural Gas Steam Conversions
+
+      REAL UCAPNGU(MNUMNR,MNUMYR)   !  96 Util Natural Gas Steam Capacity from Coal Steam by NERC
+      REAL UCAPNGN(MNUMNR,MNUMYR)   !  97 NonUtil Natural Gas Steam Capacity from Coal Steam by NERC
+
+      REAL URETNGU(MNUMNR,MNUMYR)   !  98 Retirements Coal to NG by NERC
+      REAL UGENNG(MNUMNR,MNUMYR)    !  99 Total Coal to NG generation by NERC
+ 
+      REAL UCAPOCU(MNUMNR,MNUMYR)   ! 100 Util Other New Coal Capacity by NERC
+      REAL UCAPOCN(MNUMNR,MNUMYR)   ! 101 NonUtil Other New Coal Capacity by NERC
+      REAL URETOCU(MNUMNR,MNUMYR)   ! 102 Other New Coal Retirements by NERC
+      REAL UGENOC(MNUMNR,MNUMYR)    ! 103 Total Other New Coal generation by NERC
+
+      REAL UCAPI2U(MNUMNR,MNUMYR)   ! 104 Util IGCC w/NG Cofiring Capacity by NERC
+      REAL UCAPI2N(MNUMNR,MNUMYR)   ! 105 NonUtil IGCC w/NG Cofiring Capacity by NERC
+      REAL URETI2U(MNUMNR,MNUMYR)   ! 106 IGCC w/NG Cofiring Retirements by NERC
+      REAL UGENI2(MNUMNR,MNUMYR)    ! 107 Total IGCC w/NG Cofiring generation by NERC
+
+      REAL UCAPPQU(MNUMNR,MNUMYR)   ! 108 Util IGCC w/PartSeq Capacity by NERC
+      REAL UCAPPQN(MNUMNR,MNUMYR)   ! 109 NonUtil IGCC w/PartSeq Capacity by NERC
+      REAL URETPQU(MNUMNR,MNUMYR)   ! 110 Retirements IGCC w/PartSeq Retirements by NERC
+      REAL UGENPQ(MNUMNR,MNUMYR)    ! 111 Total IGCC w/PartSeq generation by NERC
+      REAL UGENPQ_ALT(MNUMNR,MNUMYR) ! 186 Total IGCC w/PartSeq generation by NERC w/o capture
+
+      REAL UCAPICU(MNUMNR,MNUMYR)   ! 112 Util Int Comb ENG Capacity by NERC
+      REAL UCAPICN(MNUMNR,MNUMYR)   ! 113 NonUtil Int Comb ENG Capacity by NERC
+      REAL URETICU(MNUMNR,MNUMYR)   ! 114 Retirements Int Comb ENG by NERC
+      REAL UGENIC(MNUMNR,MNUMYR)    ! 115 Total Int Comb ENG generation by NERC
+
+      REAL UCAPT2U(MNUMNR,MNUMYR)   ! 116 Util Aero-Turbine Capacity by NERC
+      REAL UCAPT2N(MNUMNR,MNUMYR)   ! 117 NonUtil Aero-Turbine Capacity by NERC
+      REAL URETT2U(MNUMNR,MNUMYR)   ! 118 Retirements Aero-Turbine by NERC
+      REAL UGENT2(MNUMNR,MNUMYR)    ! 119 Total Aero-Turbine generation by NERC
+
+      REAL UCAPA2U(MNUMNR,MNUMYR)   ! 120 Util New Adv CC Capacity by NERC
+      REAL UCAPA2N(MNUMNR,MNUMYR)   ! 121 NonUtil New Adv CC Capacity by NERC
+      REAL URETA2U(MNUMNR,MNUMYR)   ! 122 Retirements New Adv CC by NERC
+      REAL UGENA2(MNUMNR,MNUMYR)    ! 123 Total New Adv CC generation by NERC
+      REAL UGENA2_ALT(MNUMNR,MNUMYR)! 197 Total New Adv CC generation by NERC w/o capture
+
+      REAL UCAPSMU(MNUMNR,MNUMYR)   ! 124 Util SMR Nuclear Capacity by NERC
+      REAL UCAPSMN(MNUMNR,MNUMYR)   ! 125 NonUtil SMR Nuclear Capacity by NERC
+      REAL URETSMU(MNUMNR,MNUMYR)   ! 126 Retirements SMR Nuclear by NERC
+      REAL UGENSM(MNUMNR,MNUMYR)    ! 127 Total SMR Nuclear generation by NERC
+
+      REAL UCAPGNU(MNUMNR,MNUMYR)   ! 128 Util Greenfield Nuclear Capacity by NERC
+      REAL UCAPGNN(MNUMNR,MNUMYR)   ! 129 NonUtil Greenfield Nuclear Capacity by NERC
+      REAL URETGNU(MNUMNR,MNUMYR)   ! 130 Retirements Greenfield Nuclear by NERC
+      REAL UGENGN(MNUMNR,MNUMYR)    ! 131 Total Greenfield Nuclear generation by NERC
+
+      REAL UCAPBIU(MNUMNR,MNUMYR)   ! 132 Util Biomass IGCC Capacity by NERC
+      REAL UCAPBIN(MNUMNR,MNUMYR)   ! 133 NonUtil Biomass IGCC Capacity by NERC
+      REAL URETBIU(MNUMNR,MNUMYR)   ! 134 Retirements Biomass IGCC by NERC
+      REAL UGENBI(MNUMNR,MNUMYR)    ! 135 Total Biomass IGCC generation by NERC
+
+      REAL UCAPAGU(MNUMNR,MNUMYR)   ! 136 Util Adv Geothermal Capacity by NERC
+      REAL UCAPAGN(MNUMNR,MNUMYR)   ! 137 NonUtil Adv Geothermal Capacity by NERC
+      REAL URETAGU(MNUMNR,MNUMYR)   ! 138 Retirements Adv Geothermal by NERC
+      REAL UGENAG(MNUMNR,MNUMYR)    ! 139 Total Adv Geothermal generation by NERC
+
+      REAL UCAPHOU(MNUMNR,MNUMYR)   ! 140 Util Adv Hydroelectric Capacity by NERC
+      REAL UCAPHON(MNUMNR,MNUMYR)   ! 141 NonUtil Adv Hydroelectric Capacity by NERC
+      REAL URETHOU(MNUMNR,MNUMYR)   ! 142 Retirements Adv Hydroelectric by NERC
+      REAL UGENHO(MNUMNR,MNUMYR)    ! 143 Total Adv Hydroelectric generation by NERC
+
+      REAL UCAPHIU(MNUMNR,MNUMYR)   ! 144 Util In Stream Hydro Capacity by NERC
+      REAL UCAPHIN(MNUMNR,MNUMYR)   ! 145 NonUtil In Stream Hydro Capacity by NERC
+      REAL URETHIU(MNUMNR,MNUMYR)   ! 146 Retirements In Stream Hydro by NERC
+      REAL UGENHI(MNUMNR,MNUMYR)    ! 147 Total In Stream Hydro generation by NERC
+
+      REAL UCAPTIU(MNUMNR,MNUMYR)   ! 148 Util Tidal Hydro Capacity by NERC
+      REAL UCAPTIN(MNUMNR,MNUMYR)   ! 149 NonUtil Tidal Hydro Capacity by NERC
+      REAL URETTIU(MNUMNR,MNUMYR)   ! 150 Retirements Tidal Hydro by NERC
+      REAL UGENTI(MNUMNR,MNUMYR)    ! 151 Total Tidal Hydro generation by NERC
+
+      REAL UCAPQSU(MNUMNR,MNUMYR)   ! 152 Util Quick Storage Capacity by NERC
+      REAL UCAPQSN(MNUMNR,MNUMYR)   ! 153 NonUtil Quick Storage Capacity by NERC
+      REAL URETQSU(MNUMNR,MNUMYR)   ! 154 Retirements Quick Storage by NERC
+      REAL UGENQS(MNUMNR,MNUMYR)    ! 155 Total Quick Storage generation by NERC
+
+      REAL UCAPDSU(MNUMNR,MNUMYR)   ! 156 Util Diurnal Storage Capacity by NERC
+      REAL UCAPDSN(MNUMNR,MNUMYR)   ! 157 NonUtil Diurnal Storage Capacity by NERC
+      REAL URETDSU(MNUMNR,MNUMYR)   ! 158 Retirements Diurnal Storage by NERC
+      REAL UGENDS(MNUMNR,MNUMYR)    ! 159 Total Diurnal Storage generation by NERC
+
+      REAL UCAPZSU(MNUMNR,MNUMYR)   ! 160 Util Other Storage Capacity by NERC
+      REAL UCAPZSN(MNUMNR,MNUMYR)   ! 161 NonUtil Other Storage Capacity by NERC
+      REAL URETZSU(MNUMNR,MNUMYR)   ! 162 Retirements Other Storage by NERC
+      REAL UGENZS(MNUMNR,MNUMYR)    ! 163 Total Other Storage generation by NERC
+
+      REAL UCAPWLU(MNUMNR,MNUMYR)   ! 164 Util Wind Low Speed Capacity by NERC
+      REAL UCAPWLN(MNUMNR,MNUMYR)   ! 165 NonUtil Wind Low Speed Capacity by NERC
+      REAL URETWLU(MNUMNR,MNUMYR)   ! 166 Retirements Wind Low Speed by NERC
+      REAL UGENWL(MNUMNR,MNUMYR)    ! 167 Total Wind Low Speed generation by NERC
+
+      REAL UCAPSSU(MNUMNR,MNUMYR)   ! 168 Util Solar Thermal w/Storage Capacity by NERC
+      REAL UCAPSSN(MNUMNR,MNUMYR)   ! 169 NonUtil Solar Thermal w/Storage Capacity by NERC
+      REAL URETSSU(MNUMNR,MNUMYR)   ! 170 Retirements Solar Thermal w/Storage by NERC
+      REAL UGENSS(MNUMNR,MNUMYR)    ! 171 Total Solar Thermal w/Storage generation by NERC
+
+      REAL UCAPS2U(MNUMNR,MNUMYR)   ! 172 Util Solar Thermal w/Storage2 Capacity by NERC
+      REAL UCAPS2N(MNUMNR,MNUMYR)   ! 173 NonUtil Solar Thermal w/Storage2 Capacity by NERC
+      REAL URETS2U(MNUMNR,MNUMYR)   ! 174 Retirements Solar Thermal w/Storage2 by NERC
+      REAL UGENS2(MNUMNR,MNUMYR)    ! 175 Total Solar Thermal w/Storage2 generation by NERC
+
+      REAL UCAPPTU(MNUMNR,MNUMYR)   ! 176 Util PV w/fixed tilt Capacity by NERC
+      REAL UCAPPTN(MNUMNR,MNUMYR)   ! 177 NonUtil PV w/fixed tilt Capacity by NERC
+      REAL URETPTU(MNUMNR,MNUMYR)   ! 178 Retirements PV w/fixed tilt by NERC
+      REAL UGENPT(MNUMNR,MNUMYR)    ! 179 Total PV w/fixed tilt generation by NERC
+
+      REAL UCAPINU(MNUMNR,MNUMYR)   ! 180 Util Other Intermittent Capacity by NERC
+      REAL UCAPINN(MNUMNR,MNUMYR)   ! 181 NonUtil Other Intermittent Capacity by NERC
+      REAL URETINU(MNUMNR,MNUMYR)   ! 182 Retirements Other Intermittent by NERC
+      REAL UGENIN(MNUMNR,MNUMYR)    ! 183 Total Other Intermittent generation by NERC
+
+      REAL UNRVCOL(MNUMNR,MNUMYR)   ! 185 Negative Net Revenue Amounts for Coal by NERC
+      REAL UNRVCCY(MNUMNR,MNUMYR)   ! 186 Negative Net Revenue Amounts for CC   by NERC
+      REAL UNRVSTM(MNUMNR,MNUMYR)   ! 187 Negative Net Revenue Amounts for OGST by NERC
+      REAL UNRVNUC(MNUMNR,MNUMYR)   ! 188 Negative Net Revenue Amounts for Nuc  by NERC
+      REAL UNCPCOL(MNUMNR,MNUMYR)   ! 189 Negative Net Revenue Capacity for Coal by NERC
+      REAL UNCPCCY(MNUMNR,MNUMYR)   ! 190 Negative Net Revenue Capacity for CC   by NERC
+      REAL UNCPSTM(MNUMNR,MNUMYR)   ! 191 Negative Net Revenue Capacity for OGST by NERC
+      REAL UNCPNUC(MNUMNR,MNUMYR)   ! 192 Negative Net Revenue Capacity for Nuc  by NERC
+
+!   UDAT output Common block
+
+      COMMON/UDATOUT/UCAPCSU,UCAPSQU,UCAPIGU,UCAPISU,UCAPOSU,UCAPCCU,UCAPACU, &
+                     UCAPASU,UCAPCTU,UCAPATU,UCAPNUU,UCAPFCU, &
+                     UCAPPSU,UCAPHYU,UCAPGEU,UCAPMSU,UCAPWDU,UCAPSTU, &
+                     UCAPPVU,UCAPWNU,UCAPWFU,UCAPRNU,UCAPDBU,UCAPDPU,UCAPTLU, &
+                     UCAPCSN,UCAPSQN,UCAPIGN,UCAPISN,UCAPOSN,UCAPCCN,UCAPACN, &
+                     UCAPASN,UCAPCTN,UCAPATN,UCAPNUN,UCAPFCN, &
+                     UCAPPSN,UCAPHYN,UCAPGEN,UCAPMSN,UCAPWDN,UCAPSTN, &
+                     UCAPPVN,UCAPWNN,UCAPWFN,UCAPRNN,UCAPDBN,UCAPDPN,UCAPTLN, &
+                     URETCSU,URETSQU,URETIGU,URETISU,URETOSU,URETCCU,URETACU, &
+                     URETASU,URETCTU,URETATU,URETNUU,URETFCU, &
+                     URETPSU,URETHYU,URETGEU,URETMSU,URETWDU,URETSTU, &
+                     URETPVU,URETWNU,URETWFU,URETRNU, &
+                     QELASN,QELRSN,QELCMN,QELINN,QELTRN,UCAPWNR,UCAPWFR,UCAPP2, &
+                     UGENPC,UGENSQ,UGENIG,UGENIS,UGENOS,UGENCC,UGENAC,UGENCS,UGENCT, & 
+                     UGENAT,UGENNU,UGENPS,UGENFC,UGENRN,UGENDG,  &
+                     UCAPNGU, UCAPNGN, URETNGU, UGENNG, UCAPOCU, UCAPOCN, URETOCU, UGENOC, &
+                     UCAPI2U, UCAPI2N, URETI2U, UGENI2, UCAPPQU, UCAPPQN, URETPQU, UGENPQ, &
+                     UCAPICU, UCAPICN, URETICU, UGENIC, UCAPT2U, UCAPT2N, URETT2U, UGENT2, &
+                     UCAPA2U, UCAPA2N, URETA2U, UGENA2, UCAPSMU, UCAPSMN, URETSMU, UGENSM, &
+                     UCAPGNU, UCAPGNN, URETGNU, UGENGN, UCAPBIU, UCAPBIN, URETBIU, UGENBI, &
+                     UCAPAGU, UCAPAGN, URETAGU, UGENAG, UCAPHOU, UCAPHON, URETHOU, UGENHO, &
+                     UCAPHIU, UCAPHIN, URETHIU, UGENHI, UCAPTIU, UCAPTIN, URETTIU, UGENTI, &
+                     UCAPQSU, UCAPQSN, URETQSU, UGENQS, UCAPDSU, UCAPDSN, URETDSU, UGENDS, &
+                     UCAPZSU, UCAPZSN, URETZSU, UGENZS, UCAPWLU, UCAPWLN, URETWLU, UGENWL, &
+                     UCAPSSU, UCAPSSN, URETSSU, UGENSS, UCAPS2U, UCAPS2N, URETS2U, UGENS2, &
+                     UCAPPTU, UCAPPTN, URETPTU, UGENPT, UCAPINU, UCAPINN, URETINU, UGENIN, UCAPWLR, &
+                     UNRVCOL, UNRVCCY, UNRVSTM, UNRVNUC,UNCPCOL, UNCPCCY, UNCPSTM, UNCPNUC, &
+                     UGENSQ_ALT, UGENIS_ALT, UGENPQ_ALT, UGENCS_ALT, UGENA2_ALT
+
+!   Equivalence for FILER used for data storage
+
+      REAL UDATDAT(MNUMYR*(197*MNUMNR))
+      EQUIVALENCE (UDATDAT,UCAPCSU)

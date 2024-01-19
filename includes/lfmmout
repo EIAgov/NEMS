@@ -1,0 +1,263 @@
+!  $Header: M:/default/includes/RCS/lfmmout,v 1.35 2020/02/25 15:57:21 jpg Exp $
+
+!     LIQUID FUELS (REFINERY) MODULE COMMON BLOCK
+!     For variables passed to other modules (like WORLD)
+
+      INTEGER LCFS_Cat
+      PARAMETER (LCFS_Cat=2) !  1 = Motor Gas, 2 = Diesel
+
+      REAL P_CRUDE_IMPORTS(MNUMPR,MNCRUD,1990:1989+MNXYR)    ! Imported crude oil price
+      REAL Q_CRUDE_IMPORTS(MNUMPR,MNCRUD,1990:1989+MNXYR)    ! Imported crude oil quantity
+      REAL Q_CRUDE_IMPORTA(MNUMPR,MNCRUD,1990:1989+MNXYR)    ! Revised Imported crude oil quantity
+      REAL P_CRUDE_EXPORTS(MNUMPR,MNCRUD,1990:1989+MNXYR)    ! Exported crude oil price
+      REAL Q_CRUDE_EXPORTS(MNUMPR,MNCRUD,1990:1989+MNXYR)    ! Exported crude oil quantities
+      REAL P_CRUDE_TO_CAN(MNUMPR,MNCRUD,1990:1989+MNXYR)     ! Price of crude oil exported to Canada
+      REAL Q_CRUDE_TO_CAN(MNUMPR,MNCRUD,1990:1989+MNXYR)     ! Amount of crude oil exported  to Canada
+      REAL GRD2DSQTY(MNUMPR,MNUMYR)       !Renewable diesel to distillate Mbbl per day by PADD level
+      REAL GRN2MGQTY(MNUMPR,MNUMYR)       !Renewable diesel to gasoline Mbbl per day by PADD level
+	  REAL SAF2JTQTY(MNUMPR,MNUMYR)		  !HEFA-SPK renewable jet to jet Mbbl per day by PADD level   
+      REAL ETHTOT(MNUMPR,MNUMYR)          !Total ethanol production by PADD Mbbl per day
+      REAL BIMQTY(4,MNUMPR,MNUMYR)        !Biodiesel production by type and PADD Mbbl per day
+      REAL BIODIMPPD(MNUMPR,MNUMYR)       !Biodiesel imports by PADD in MBBL per day
+      REAL BIODEXPPD(MNUMPR,MNUMYR)       !Biodiesel exports by PADD
+      REAL RFSCREDPRC(4,MNUMYR)           !RFS credit price by constraint category in 87$ per BBL
+      REAL RFSCREDITS(4,13,MNUMYR)        !RFS credits by category and biofuel in billion gallons per year
+      REAL RFSSAFETY(4,MNUMYR)            !RFS safety valve activity by category and year in billion gallons per year
+      REAL RFSACTUAL(4,MNUMYR)            !Actual RFS production levels from prior year Period 2 in M BBL per day
+      REAL RFSMANDATES(4,MNUMYR)          !RFS mandates by category and year in billion gallons per year
+      REAL RFS_WAIVER(4,MNUMYR)           !RFS waiver price by constraint category in 87$ per BBL
+      REAL RFSDSTR(MNUMCR,MNUMYR)         !RFS contribution to diesel price in 87$ per BBL
+      REAL RFSMGTR(MNUMCR,MNUMYR)         !RFS contribution to motor gasoline price in 87$ per BBL
+      REAL RFSRBOB(MNUMCR,MNUMYR)         !RFS contribution to RBOB price in 87$ per BBL
+      REAL RFSJFTR(MNUMCR,MNUMYR)         !RFS contribution to jet fuel price in 87$ per BBL
+      REAL RFSDSRS(MNUMCR,MNUMYR)         !RFS contribution to heating oil price in 87$ per BBL
+      REAL REF_CAP(57,MNUMPR,MNUMYR)      !Refinery Capacity in thousand barrels per day
+      REAL REF_UTL(57,MNUMPR,MNUMYR)      !Refinery Utilization      
+      REAL LCFS_BaseLine(LCFS_Cat,MNXYR)      ! LCFS Baseline Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL LCFS_Actual(LCFS_Cat,MNXYR)        ! LCFS Actual Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL LCFS_Waiver(LCFS_Cat,MNXYR)        ! LCFS Waivers Purchased - M mton CO2
+      REAL LCFS_Offset_Prc(LCFS_Cat,MNXYR)    ! LCFS Offset Price (1987$ / mton CO2)
+      REAL LCFS_Carb_Offset(LCFS_Cat,MNXYR)   ! LCFS Carbon Offset M mton CO2 - Excludes Waivers Purchased
+      REAL LCFS_PeToTrills(LCFS_Cat,MNXYR)    ! Total carbon in all trans fuels (1000 tons C) per DAY 
+	  REAL CFP_BaseLine(LCFS_Cat,MNXYR)        ! CFP Baseline Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL CFP_Actual(LCFS_Cat,MNXYR)          ! CFP Actual Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL CFP_Waiver(LCFS_Cat,MNXYR)          ! CFP Waivers Purchased - M mton CO2
+      REAL CFP_Offset_Prc(LCFS_Cat,MNXYR)      ! CFP Offset Price (1987$ / mton CO2)
+      REAL CFP_Carb_Offset(LCFS_Cat,MNXYR)     ! CFP Carbon Offset M mton CO2 - Excludes Waivers Purchased
+      REAL CFP_PeToTrills(LCFS_Cat,MNXYR)      ! Total carbon in all trans fuels (1000 tons C) per DAY
+      REAL REFGAIN(MNUMPR,2,MNUMYR)           ! Refinery gain by refining region and refinery type (1=coking,2=cracking) in Mbbl/day
+      REAL RFIPQMG(MNUMPR,MNUMYR,2)           ! Imports - conventional motor gas - price/quantity
+      REAL RFIPQRG(MNUMPR,MNUMYR,2)           ! Imports - reformulated motor gas - price/quantity
+      REAL RFIPQCBOB(MNUMPR,MNUMYR,2)         ! Imports - CBOB - price/quantity
+      REAL RFIPQRBOB(MNUMPR,MNUMYR,2)         ! Imports - RBOB - price/quantity
+      REAL RFIPQCG(MNUMPR,MNUMYR,2)           ! Imports - California Air Resource Board BOB - price/quantity
+      REAL RFIPQDS(MNUMPR,MNUMYR,2)           ! Imports - heating oil - price/quantity
+      REAL RFIPQDL(MNUMPR,MNUMYR,2)           ! Imports - low sulfur diesel - price/quantity
+      REAL RFIPQDU(MNUMPR,MNUMYR,2)           ! Imports - ultra-low sulfur diesel - price/quantity
+      REAL RFIPQCD(MNUMPR,MNUMYR,2)           ! Imports - California Air Resource Board Diesel - price/quantity
+      REAL RFIPQRL(MNUMPR,MNUMYR,2)           ! Imports - low sulfur residual - price/quantity
+      REAL RFIPQRH(MNUMPR,MNUMYR,2)           ! Imports - high sulfur residual - price/quantity
+      REAL RFIPQJF(MNUMPR,MNUMYR,2)           ! Imports - jet fuel - price/quantity
+      REAL RFIPQPF(MNUMPR,MNUMYR,2)           ! Imports - petrochemical feedstocks - price/quantity
+      REAL RFIPQAS(MNUMPR,MNUMYR,2)           ! Imports - Asphalt - price/quantity
+      REAL RFIPQAG(MNUMPR,MNUMYR,2)           ! Imports - Aviation Gasoline - price/quantity
+      REAL RFIPQLU(MNUMPR,MNUMYR,2)           ! Imports - Lubricants - price/quantity
+      REAL RFIPQPC(MNUMPR,MNUMYR,2)           ! Imports - petroleum coke - price/quantity
+      REAL RFIPQET(MNUMPR,MNUMYR,2)           ! Imports - ethane - price/quantity
+      REAL RFIPQPR(MNUMPR,MNUMYR,2)           ! Imports - propane - price/quantity
+      REAL RFIPQPY(MNUMPR,MNUMYR,2)           ! Imports - propylene - price/quantity
+      REAL RFIPQBU(MNUMPR,MNUMYR,2)           ! Imports - butane - price/quantity
+      REAL RFIPQIS(MNUMPR,MNUMYR,2)           ! Imports - isobutane - price/quantity
+      REAL RFIPQPP(MNUMPR,MNUMYR,2)           ! Imports - pentanes plus - price/quantity
+      REAL RFIPQMN3(MNUMPR,MNUMYR,2)          ! Imports - medium naphtha - price/quantity
+      REAL RFIPQGO3(MNUMPR,MNUMYR,2)          ! Imports - gas oil - price/quantity
+      REAL RFIPQAR3(MNUMPR,MNUMYR,2)          ! Imports - atmospheric residuum - price/quantity
+
+! motor gasoline broken into:
+!   1.  petroleum       2.  ethanol         3.  denaturant
+!   1.  e-10            2.  e-15            3.  e-85
+      REAL MOTOR_FUEL(4,3,MNUMYR)
+! distillate broken into:
+!   1.  petroleum       2.  renewable       3.  nonpetroleum fossil
+!   1.  heating         2.  low sulfur      3.  ultra-low sulf  4.  Carb
+      REAL DIST_FUEL(3,4,MNUMYR)
+!  variables to fill table 21:
+      REAL FEEDSTOCKS(4,10,MNUMYR)
+      REAL INTERMEDIATE(4,13,MNUMYR)
+      REAL REFINE_PROD(4,11,MNUMYR)
+      REAL GROSS_IMPORT(4,11,MNUMYR)
+      REAL GROSS_EXPORT(4,12,MNUMYR)
+      REAL DOM_CONSUME(4,12,MNUMYR)
+      REAL QNGRFPD(MNUMPR,MNUMYR)     ! Quantity of GTL (Gas to Liquid)
+      REAL RFSREVMANDATE(4,MNUMYR)    ! RFS revised mandates by category
+      REAL RFS_REV(MNUMYR)            ! RFS revenue (p*q) summed over 4 groups in million 1987 dollars
+
+      REAL RFCRUDEWHP(MNUMPR,MNCRUD,MNUMYR)    ! Crude oil wellhead price by refinery region and type
+      REAL RFCRUDEINP(MNUMPR,MNCRUD,MNUMYR)    ! Crude oil refinery inputs by refinery region and type
+      REAL RFOTHERINP(MNUMPR,MNUMYR)           ! Other refinery inputs (mainly unfinished oils) by refinery region and type
+      REAL P_RFCRUDEINP(MNUMPR,MNCRUD,MNUMYR)  ! Crude oil refinery input price by region and type
+
+!  biobutenol variables:
+      REAL RFBIOBUTECD(MNUMCR,MNUMYR)     !  production of biobutenol by Census division
+      REAL RFBIOBUTERR(MNUMPR,MNUMYR)     !  production of biobutenol by refinery region
+      REAL QBIOBUTE(MNUMCR,MNUMYR)        !  consumption of biobutenol by Census division
+      REAL BIOBUTEIMP(MNUMYR)             !  imports of biobutenol
+      REAL BIOBUTEEXP(MNUMYR)             !  exports of biobutenol
+      REAL BIOBUTEPRICE(MNUMYR)           !  biobutenol price
+
+!  variables for ethanol and biodiesel stock changes, for completeness
+      REAL ETHSTKCHG(MNUMYR)          ! Ethanol stock withdrawal (+) or addition (-)
+      REAL BIODSTKCHG(MNUMYR)         ! Biodiesel stock withdrawal (+) or addition (-)
+      REAL BIOBUTESTK(MNUMYR)         ! Biobutenol stock withdrawal (+) or addition (-)
+!  refinery production variables
+      REAL RFPRDDIESEL(MNUMCR,MNUMYR) ! refinery production of diesel
+
+      REAL  CORNCD(3,MNUMCR,MNUMYR)       ! Corn consumption in CD million bushels
+      REAL  GRAINCD(MNUMCR,MNUMYR)        ! MM bushels/yr of grain for making non-corn ethanol
+
+! denaturant details.  first two subscripts as follows:
+!    subscript 1:  1=pentanes plus    2=straight-run naphtha
+!    subscript 2:  1=domestic ethanol production    2=ethanol imports    3=ethanol exports
+      REAL LFDENPROD(2,3,MNUMCR,MNUMYR)
+      REAL LFDENCONS(2,3,MNUMCR,MNUMYR)
+
+      INTEGER LFEXPLEASE              ! Switch allowing exports of lease condensate
+      INTEGER LFREFRENT               ! Switch to activate crude oil export logic to simulate rent for unused refinery capacity
+      INTEGER LFMMCODE                ! Return code from GAMS
+      
+      REAL PROFIT_BBL(MNUMPR,MNUMYR)  ! Refinery Marginal Profit per BBL of Crude Run in 87$ per BBL
+
+      REAL AB32JETCOVER(MNUMYR)       ! Portion of California jet fuel covered by AB32 (intrastate use)
+
+!  Refinery production variables:
+      REAL REFPRODET(MNUMPR,MNUMYR)   !  Refinery production:  ethane
+      REAL REFPRODPR(MNUMPR,MNUMYR)   !  Refinery production:  propane
+      REAL REFPRODBU(MNUMPR,MNUMYR)   !  Refinery production:  butane
+      REAL REFPRODIS(MNUMPR,MNUMYR)   !  Refinery production:  isobutane
+      REAL REFPRODPP(MNUMPR,MNUMYR)   !  Refinery production:  natural gasoline (aka:  pentanes plus)
+      REAL REFPRODPY(MNUMPR,MNUMYR)   !  Refinery production:  propylene
+      REAL REFPRODOO(MNUMPR,MNUMYR)   !  Refinery production:  other olefins
+!  Refinery input variables:
+      REAL REFINPET(MNUMPR,MNUMYR)   !  Refinery inputs:  ethane
+      REAL REFINPPR(MNUMPR,MNUMYR)   !  Refinery inputs:  propane
+      REAL REFINPBU(MNUMPR,MNUMYR)   !  Refinery inputs:  butane
+      REAL REFINPIS(MNUMPR,MNUMYR)   !  Refinery inputs:  isobutane
+      REAL REFINPPP(MNUMPR,MNUMYR)   !  Refinery inputs:  natural gasoline (aka:  pentanes plus)
+      REAL REFINPPY(MNUMPR,MNUMYR)   !  Refinery inputs:  propylene
+      REAL REFINPOO(MNUMPR,MNUMYR)   !  Refinery inputs:  other olefins
+
+
+      REAL  SBOQGD(MNUMPR,MNUMYR)     ! qty green nap/dist fr SBO,CD Mbbl/cd
+      REAL  YGRQGD(MNUMPR,MNUMYR)     ! qty green nap/dist fr YGR,CD Mbbl/cd
+      REAL  WGRQGD(MNUMPR,MNUMYR)     ! qty green nap/dist fr WGR,CD Mbbl/cd
+	  REAl  SBOQRJH(MNUMPR,MNUMYR)	  ! qty HEFA-SPK renewable jet fr SBO, CD Mbbl/cd
+	  REAL  WGRQRJH(MNUMPR,MNUMYR)    ! qty HEFA-SPK renewable jet fr WGR,CD Mbbl/cd
+	  REAL  WGRQRDH(MNUMPR,MNUMYR)    ! qty green dist fr WGR,CD Mbbl/cd
+
+      REAL  AB32_DS(MNUMYR)           ! AB32 allowance price markup for distillate
+      REAL  AB32_KS(MNUMYR)           ! AB32 allowance price markup for kerosene
+      REAL  AB32_PR(MNUMYR)           ! AB32 allowance price markup for propane
+      REAL  AB32_MG(MNUMYR)           ! AB32 allowance price markup for motor gasoline
+      REAL  AB32_ET(MNUMYR)           ! AB32 allowance price markup for E85
+      REAL  AB32_JF(MNUMYR)           ! AB32 allowance price markup for jet fuel
+      
+!  Renewable diesel imports
+      REAL  RenewDIMP(MNUMCR,MNUMYR)    ! Renewable diesel imports by census in 1000 bbl per day
+      REAL  RenewDImpPD(MNUMPR,MNUMYR)  ! Renewable diesel import by subPADD in 1000 bbl per day
+
+      COMMON /LFMMOUT/ P_CRUDE_IMPORTS, Q_CRUDE_IMPORTS, Q_CRUDE_IMPORTA,GRD2DSQTY, GRN2MGQTY, SAF2JTQTY,  &
+                       ETHTOT, BIMQTY, BIODIMPPD,BIODEXPPD, RFSCREDPRC, RFSCREDITS, RFSSAFETY, RFSACTUAL, RFSMANDATES, &
+                       RFS_WAIVER, RFSDSTR, RFSMGTR, RFSRBOB, RFSJFTR, RFSDSRS, REF_CAP, REF_UTL, &
+                       LCFS_BaseLine, LCFS_Actual, LCFS_Waiver, LCFS_Offset_Prc, LCFS_Carb_Offset,  &
+                       LCFS_PeToTrills, &
+					   CFP_BaseLine, CFP_Actual, CFP_Waiver, CFP_Offset_Prc, CFP_Carb_Offset,  &
+                       CFP_PeToTrills, REFGAIN, &
+                       RFIPQMG, RFIPQRG, RFIPQCBOB, RFIPQRBOB, RFIPQCG, &
+                       RFIPQDS, RFIPQDL, RFIPQDU, RFIPQCD, RFIPQRL, RFIPQRH, &
+                       RFIPQJF, RFIPQPF, RFIPQAS, RFIPQAG, RFIPQLU, RFIPQPC, &
+                       RFIPQET, RFIPQPR, RFIPQPY, RFIPQBU, RFIPQIS, RFIPQPP, &
+                       RFIPQMN3, RFIPQGO3, RFIPQAR3, &
+                       MOTOR_FUEL, DIST_FUEL, &
+                       FEEDSTOCKS, INTERMEDIATE, REFINE_PROD, GROSS_IMPORT, GROSS_EXPORT, DOM_CONSUME, &
+                       QNGRFPD, RFSREVMANDATE, RFS_REV, P_CRUDE_EXPORTS, Q_CRUDE_EXPORTS, &
+                       RFCRUDEWHP, RFCRUDEINP, RFOTHERINP, &
+                       ETHSTKCHG, BIODSTKCHG, BIOBUTESTK, RFPRDDIESEL, PROFIT_BBL, &
+                       RFBIOBUTECD, RFBIOBUTERR, QBIOBUTE, BIOBUTEIMP, BIOBUTEEXP, BIOBUTEPRICE, &
+                       CORNCD, P_CRUDE_TO_CAN, Q_CRUDE_TO_CAN, LFDENPROD, LFDENCONS, &
+                       REFPRODET, REFPRODPR, REFPRODBU, REFPRODIS, REFPRODPP, REFPRODPY, REFPRODOO, &
+                       REFINPET, REFINPPR, REFINPBU, REFINPIS, REFINPPP, REFINPPY, REFINPOO, &
+                       SBOQGD, YGRQGD, WGRQGD, &
+					   SBOQRJH, WGRQRJH, WGRQRDH, &
+                       P_RFCRUDEINP, GRAINCD, AB32JETCOVER, &
+                       AB32_DS, AB32_KS, AB32_PR, AB32_MG, AB32_ET, AB32_JF, &
+                       LFEXPLEASE, LFREFRENT, LFMMCODE, RenewDIMP, RenewDImpPD
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE:
+      REAL EQ_LFMMOUT(                               &
+                    MNUMPR * MNCRUD * MNXYR +        &  ! P_CRUDE_IMPORTS
+                    MNUMPR * MNCRUD * MNXYR +        &  ! Q_CRUDE_IMPORTS
+                    MNUMPR * MNCRUD * MNXYR +        &  ! Q_CRUDE_IMPORTA
+                    MNUMPR * MNCRUD * MNXYR +        &  ! P_CRUDE_EXPORTS
+                    MNUMPR * MNCRUD * MNXYR +        &  ! Q_CRUDE_EXPORTS
+                    MNUMPR * MNUMYR +                &  ! GRD2DSQTY
+                    MNUMPR * MNUMYR +                &  ! GRN2MGQTY
+					MNUMPR * MNUMYR +                &  ! SAF2JTQTY
+                    MNUMPR * MNUMYR +                &  ! ETHTOT
+                    4 * MNUMPR * MNUMYR +            &  ! BIMQTY
+                    MNUMPR * MNUMYR +                &  ! BIODIMPPD                  
+                    MNUMPR * MNUMYR +                &  ! BIODEXPPD                      
+                    4 * MNUMYR +                     &  ! RFSCREDPRC
+                    4 * 13 * MNUMYR +                &  ! RFSCREDITS  
+                    4 * MNUMYR +                     &  ! RFSSAFETY
+                    4 * MNUMYR +                     &  ! RFSACTUAL
+                    4 * MNUMYR +                     &  ! RFSMANDATES
+                    4 * MNUMYR +                     &  ! RFS_WAIVER
+                    5 * MNUMCR * MNUMYR +            &  ! RFSDSTR, RFSMGTR, RFSRBOB, RFSJFTR, RFSDSRS
+                    2 * 57 * MNUMPR * MNUMYR +       &  ! REF_CAP AND REF_UTL
+                    6 * LCFS_Cat * MNXYR +           &  ! LCFS Info
+                    6 * LCFS_Cat * MNXYR +            &  ! CFP Info
+                    MNUMPR * 2 * MNUMYR +            &  ! REFGAIN
+                    26 * MNUMPR * MNUMYR * 2 +       &  ! price/quantity import variables
+                    4 * 3 * MNUMYR +                 &  ! MOTOR_FUEL
+                    3 * 4 * MNUMYR +                 &  ! DIST_FUEL
+                    4 * 10 * MNUMYR +                &  ! FEEDSTOCKS
+                    4 * 13 * MNUMYR +                &  ! INTERMEDIATE
+                    4 * 11 * MNUMYR +                &  ! REFINE_PROD
+                    4 * 11 * MNUMYR +                &  ! GROSS_IMPORT
+                    4 * 12 * MNUMYR +                &  ! GROSS_EXPORT
+                    4 * 12 * MNUMYR +                &  ! DOM_CONSUME
+                    MNUMPR * MNUMYR +                &  ! QNGRFPD
+                    4 * MNUMYR +                     &  ! RFSREVMANDATE
+                    MNUMYR +                         &  ! RFS_REV
+                    MNUMPR * MNCRUD * MNUMYR +       &  ! RFCRUDEWHP
+                    MNUMPR * MNCRUD * MNUMYR +       &  ! RFCRUDEINP
+                    MNUMPR * MNUMYR +                &  ! RFOTHERINP
+                    MNUMYR +                         &  ! ETHSTKCHG
+                    MNUMYR +                         &  ! BIODSTKCHG
+                    MNUMYR +                         &  ! BIOBUTESTK
+                    MNUMCR * MNUMYR +                &  ! RFPRDDIESEL
+                    MNUMPR * MNUMYR +                &  ! PROFIT_BBL
+                    MNUMCR * MNUMYR +                &  ! RFBIOBUTECD
+                    MNUMPR * MNUMYR +                &  ! RFBIOBUTERR
+                    MNUMCR * MNUMYR +                &  ! QBIOBUTE
+                    MNUMYR +                         &  ! BIOBUTEIMP
+                    MNUMYR +                         &  ! BIOBUTEEXP
+                    MNUMYR +                         &  ! BIOBUTEPRICE
+                    3*MNUMCR*MNUMYR +                &  ! CORNCD
+                    MNUMPR*MNCRUD*MNXYR +            &  ! P_CRUDE_TO_CAN
+                    MNUMPR*MNCRUD*MNXYR +            &  ! Q_CRUDE_TO_CAN
+                    2*3*MNUMCR*MNUMYR * 2 +          &  ! LFDENPROD, LFDENCONS
+                    MNUMPR * MNUMYR * 7 +            &  ! REFPRODET through REFPRODOO
+                    MNUMPR * MNUMYR * 7 +            &  ! REFINPET through REFINPOO
+                    MNUMPR * MNUMYR * 3 +            &  ! SBOQGD, YGRQGD, WGRQGD
+					MNUMPR * MNUMYR * 3 +            &  ! SBOQRJH, WGRQRJH, WGRQRDH
+                    MNUMPR * MNCRUD * MNUMYR +       &  ! P_RFCRUDEINP
+                    MNUMCR * MNUMYR +                &  ! GRAINCD
+                    4 +                              &  ! LFEXPLEASE, LFREFRENT, LFMMCODE
+                    MNUMYR +                         &  ! AB32JETCOVER
+                    6 * MNUMYR +                     &  ! AB32_DS, AB32_KS, AB32_PR, AB32_MG, AB32_ET, AB32_JF
+                    MNUMCR * MNUMYR +                &  ! RenewDIMP
+                    MNUMPR * MNUMYR +                &  ! RenewDImpPD
+                     0)            ! close parenthesis
+                    
+      EQUIVALENCE (EQ_LFMMOUT,P_CRUDE_IMPORTS)

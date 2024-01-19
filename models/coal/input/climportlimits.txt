@@ -1,0 +1,436 @@
+  COMPOSITE TABLE:
+  Ae      i   tc   InternationalImportMaxShare  
+!-----------------------------------------------------------------------------
+  US      NE  2       
+  US      NI  2    100                      
+  US      SC  2    40                       
+  US      BT  2    40                       
+  US      GY  2    40                       
+  US      OW  2    40                       
+  US      PS  2    45                       
+  US      TL  2    45                       
+  US      RM  2    49                       
+  US      MX  2    59                       
+  US      LA  2    55                       
+  US      JA  2    40                       
+  US      EA  2    40                       
+  US      CH  2    25                       
+  US      AS  2    40                       
+  US      IN  2    40                       
+  NA      UI  2    100      
+  NA      UE  2       
+  NA      UG  2       
+  NA      UN  2       
+  NA      NE  2       
+  NA      NI  2       
+  NA      SC  2    35                       
+  NA      BT  2    25                       
+  NA      GY  2    25                       
+  NA      OW  2    25                       
+  NA      PS  2    25                       
+  NA      TL  2    25                       
+  NA      RM  2    25                       
+  NA      MX  2    29                       
+  NA      LA  2    20                       
+  NA      JA  2    20                       
+  NA      EA  2    20                       
+  NA      CH  2    25                       
+  NA      AS  2    25                       
+  NA      IN  2    25                       
+  CL      UI  2       
+  CL      UE  2    50 
+  CL      UG  2    95 
+  CL      UN  2    50 
+  CL      NE  2    50 
+  CL      NI  2       
+  CL      SC  2    40 
+  CL      BT  2    40 
+  CL      GY  2    40 
+  CL      OW  2    40 
+  CL      PS  2    45 
+  CL      TL  2    40 
+  CL      RM  2    42 
+  CL      MX  2    50 
+  CL      LA  2    65 
+  CL      JA  2    40 
+  CL      EA  2    40 
+  CL      CH  2    40 
+  CL      AS  2    40 
+  CL      IN  2    40 
+  VZ      UI  2       
+  VZ      UE  2    30 
+  VZ      UG  2    50 
+  VZ      UN  2    50 
+  VZ      NE  2    50 
+  VZ      NI  2       
+  VZ      SC  2    40 
+  VZ      BT  2    40 
+  VZ      GY  2    40 
+  VZ      OW  2    40 
+  VZ      PS  2    40 
+  VZ      TL  2    40 
+  VZ      RM  2    40 
+  VZ      MX  2    45 
+  VZ      LA  2    45 
+  VZ      JA  2    40 
+  VZ      EA  2    40 
+  VZ      CH  2    40 
+  VZ      AS  2    40 
+  VZ      IN  2    40 
+  PO      UI  2       
+  PO      UE  2    2  
+  PO      UG  2    20 
+  PO      UN  2       
+  PO      NE  2    30 
+  PO      NI  2       
+  PO      SC  2    45                       
+  PO      BT  2    20                       
+  PO      GY  2    40                       
+  PO      OW  2    40                       
+  PO      PS  2    30                       
+  PO      TL  2    35                       
+  PO      RM  2    30                       
+  PO      MX  2    25                       
+  PO      LA  2    25                       
+  PO      JA  2       
+  PO      EA  2       
+  PO      CH  2       
+  PO      AS  2       
+  PO      IN  2                             
+  RS      UI  2       
+  RS      UE  2       
+  RS      UG  2       
+  RS      UN  2       
+  RS      NE  2       
+  RS      NI  2       
+  RS      SC  2    40                       
+  RS      BT  2    35                       
+  RS      GY  2    40                       
+  RS      OW  2    40                       
+  RS      PS  2    30                       
+  RS      TL  2    30                       
+  RS      RM  2    35                       
+  RS      MX  2    25                       
+  RS      LA  2    20                       
+  RS      JA  2    20                       
+  RS      EA  2    20                       
+  RS      CH  2    25                       
+  RS      AS  2    25                       
+  RS      IN  2    35                       
+  SF      UI  2       
+  SF      UE  2    2  
+  SF      UG  2    30 
+  SF      UN  2    40 
+  SF      NE  2    40 
+  SF      NI  2       
+  SF      SC  2    40                       
+  SF      BT  2    40                       
+  SF      GY  2    40                       
+  SF      OW  2    40                       
+  SF      PS  2    60                       
+  SF      TL  2    50                       
+  SF      RM  2    52                       
+  SF      MX  2    45                       
+  SF      LA  2    40                       
+  SF      JA  2    40                       
+  SF      EA  2    20                       
+  SF      CH  2    45                       
+  SF      AS  2    40                       
+  SF      IN  2    40                       
+  IN      UI  2       
+  IN      UE  2    30 
+  IN      UG  2    20 
+  IN      UN  2    30 
+  IN      NE  2    30 
+  IN      NI  2       
+  IN      SC  2    45 
+  IN      BT  2    45 
+  IN      GY  2    45 
+  IN      OW  2    45                       
+  IN      PS  2    45 
+  IN      TL  2    60 
+  IN      RM  2    35 
+  IN      MX  2    35 
+  IN      LA  2    35 
+  IN      JA  2    60                       
+  IN      EA  2    60 
+  IN      CH  2    60 
+  IN      AS  2    70 
+  IN      IN  2    70 
+  HI      UI  2       
+  HI      UE  2    30 
+  HI      UG  2    15 
+  HI      UN  2       
+  HI      NE  2    30 
+  HI      NI  2       
+  HI      SC  2    30                       
+  HI      BT  2    25                       
+  HI      GY  2    25                       
+  HI      OW  2    25                       
+  HI      PS  2    25                       
+  HI      TL  2    25                       
+  HI      RM  2    25                       
+  HI      MX  2    25                       
+  HI      LA  2    20                       
+  HI      JA  2    20                       
+  HI      EA  2    60                       
+  HI      CH  2       
+  HI      AS  2    60                       
+  HI      IN  2    50                       
+  AU      UI  2       
+  AU      UE  2       
+  AU      UG  2       
+  AU      UN  2    30 
+  AU      NE  2       
+  AU      NI  2       
+  AU      SC  2    5                        
+  AU      BT  2    5                        
+  AU      GY  2    5                        
+  AU      OW  2    5                        
+  AU      PS  2    5                        
+  AU      TL  2    5                        
+  AU      RM  2    5                        
+  AU      MX  2    65                       
+  AU      LA  2    40                       
+  AU      JA  2    60                       
+  AU      EA  2    40                       
+  AU      CH  2    40                       
+  AU      AS  2    40                       
+  AU      IN  2    40                       
+  VT      UI  2       
+  VT      UE  2    30 
+  VT      UG  2    20 
+  VT      UN  2    30 
+  VT      NE  2    30 
+  VT      NI  2       
+  VT      SC  2    35 
+  VT      BT  2    35 
+  VT      GY  2    35 
+  VT      OW  2    15                       
+  VT      PS  2    40 
+  VT      TL  2    35 
+  VT      RM  2    35 
+  VT      MX  2    35 
+  VT      LA  2    35 
+  VT      JA  2    40                       
+  VT      EA  2    40 
+  VT      CH  2    60 
+  VT      AS  2    20 
+  VT      IN  2    30 
+  US      NE  1          
+  US      NI  1    100    
+  US      SC  1    50     
+  US      BT  1    50     
+  US      GY  1    50     
+  US      OW  1    50     
+  US      PS  1    50     
+  US      TL  1    50     
+  US      RM  1    50     
+  US      MX  1    30     
+  US      LA  1    65     
+  US      JA  1    25     
+  US      EA  1    25     
+  US      CH  1    40     
+  US      AS  1    40     
+  US      IN  1    40    
+  NA      UI  1       
+  NA      UE  1       
+  NA      UG  1       
+  NA      UN  1       
+  NA      NE  1       
+  NA      NI  1       
+  NA      SC  1    50 
+  NA      BT  1    50 
+  NA      GY  1    50 
+  NA      OW  1    15 
+  NA      PS  1    25 
+  NA      TL  1    50 
+  NA      RM  1    50 
+  NA      MX  1    70 
+  NA      LA  1    40 
+  NA      JA  1    24 
+  NA      EA  1    25 
+  NA      CH  1    27 
+  NA      AS  1    25 
+  NA      IN  1    25 
+  CL      UI  1       
+  CL      UE  1       
+  CL      UG  1       
+  CL      UN  1       
+  CL      NE  1       
+  CL      NI  1       
+  CL      SC  1       
+  CL      BT  1       
+  CL      GY  1       
+  CL      OW  1       
+  CL      PS  1       
+  CL      TL  1       
+  CL      RM  1       
+  CL      MX  1       
+  CL      LA  1       
+  CL      JA  1       
+  CL      EA  1       
+  CL      CH  1       
+  CL      AS  1       
+  CL      IN  1       
+  VZ      UI  1       
+  VZ      UE  1       
+  VZ      UG  1       
+  VZ      UN  1       
+  VZ      NE  1       
+  VZ      NI  1       
+  VZ      SC  1       
+  VZ      BT  1       
+  VZ      GY  1       
+  VZ      OW  1       
+  VZ      PS  1       
+  VZ      TL  1       
+  VZ      RM  1       
+  VZ      MX  1       
+  VZ      LA  1       
+  VZ      JA  1       
+  VZ      EA  1       
+  VZ      CH  1       
+  VZ      AS  1       
+  VZ      IN  1       
+  PO      UI  1       
+  PO      UE  1       
+  PO      UG  1       
+  PO      UN  1       
+  PO      NE  1       
+  PO      NI  1       
+  PO      SC  1    25 
+  PO      BT  1    25 
+  PO      GY  1    35 
+  PO      OW  1    35 
+  PO      PS  1    25 
+  PO      TL  1    30 
+  PO      RM  1    30 
+  PO      MX  1    25 
+  PO      LA  1    25 
+  PO      JA  1       
+  PO      EA  1       
+  PO      CH  1       
+  PO      AS  1       
+  PO      IN  1    3  
+  RS      UI  1       
+  RS      UE  1       
+  RS      UG  1       
+  RS      UN  1       
+  RS      NE  1       
+  RS      NI  1       
+  RS      SC  1    25 
+  RS      BT  1    20 
+  RS      GY  1    20 
+  RS      OW  1    20 
+  RS      PS  1    20 
+  RS      TL  1    25 
+  RS      RM  1    37 
+  RS      MX  1    25 
+  RS      LA  1    15 
+  RS      JA  1    15 
+  RS      EA  1    12 
+  RS      CH  1    25 
+  RS      AS  1    25 
+  RS      IN  1    20 
+  SF      UI  1       
+  SF      UE  1       
+  SF      UG  1       
+  SF      UN  1       
+  SF      NE  1       
+  SF      NI  1       
+  SF      SC  1    30 
+  SF      BT  1    30 
+  SF      GY  1    30 
+  SF      OW  1    30 
+  SF      PS  1    30 
+  SF      TL  1    30 
+  SF      RM  1    30 
+  SF      MX  1    30 
+  SF      LA  1    30 
+  SF      JA  1    30 
+  SF      EA  1    30 
+  SF      CH  1    30 
+  SF      AS  1    30 
+  SF      IN  1    30 
+  IN      UI  1       
+  IN      UE  1       
+  IN      UG  1       
+  IN      UN  1       
+  IN      NE  1       
+  IN      NI  1       
+  IN      SC  1       
+  IN      BT  1       
+  IN      GY  1       
+  IN      OW  1    3  
+  IN      PS  1       
+  IN      TL  1       
+  IN      RM  1       
+  IN      MX  1       
+  IN      LA  1       
+  IN      JA  1    40 
+  IN      EA  1       
+  IN      CH  1       
+  IN      AS  1       
+  IN      IN  1       
+  HI      UI  1       
+  HI      UE  1       
+  HI      UG  1       
+  HI      UN  1       
+  HI      NE  1       
+  HI      NI  1       
+  HI      SC  1    20 
+  HI      BT  1    20 
+  HI      GY  1    20 
+  HI      OW  1    20 
+  HI      PS  1    15 
+  HI      TL  1    25 
+  HI      RM  1    25 
+  HI      MX  1    25 
+  HI      LA  1    20 
+  HI      JA  1    15 
+  HI      EA  1    10 
+  HI      CH  1       
+  HI      AS  1    25 
+  HI      IN  1    40 
+  AU      UI  1       
+  AU      UE  1       
+  AU      UG  1       
+  AU      UN  1       
+  AU      NE  1       
+  AU      NI  1       
+  AU      SC  1    60 
+  AU      BT  1    65 
+  AU      GY  1    5  
+  AU      OW  1    60 
+  AU      PS  1    60 
+  AU      TL  1    60 
+  AU      RM  1    60 
+  AU      MX  1    40 
+  AU      LA  1    48 
+  AU      JA  1    65 
+  AU      EA  1    65 
+  AU      CH  1    75 
+  AU      AS  1    69 
+  AU      IN  1    95 
+  VT      UI  1       
+  VT      UE  1       
+  VT      UG  1       
+  VT      UN  1       
+  VT      NE  1       
+  VT      NI  1       
+  VT      SC  1       
+  VT      BT  1       
+  VT      GY  1       
+  VT      OW  1    3  
+  VT      PS  1       
+  VT      TL  1       
+  VT      RM  1       
+  VT      MX  1       
+  VT      LA  1       
+  VT      JA  1    25 
+  VT      EA  1       
+  VT      CH  1       
+  VT      AS  1       
+  VT      IN  1       
+

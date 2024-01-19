@@ -1,0 +1,27 @@
+* SYNTAX FILE FOR FOREST
+AR area
+  BR Blue Ridge
+  SM South Meadows
+  BB Black Butte
+  NR North Ridge
+  GA Glenn Acres
+T  time period
+  0 initial period
+  1 period 1
+  2 period 2
+  3 period 3
+  4 period 4
+  5 period 5
+  6 period 6
+  7 period 7
+  8 period 8
+  9 period 9
+ROW SYNTAX
+  B  balances land use in &AR:2 in &T:4
+  D  demands timber in &T:2
+  W  requires percent of wilderness in &AR:2 in &T:4
+COLUMN SYNTAX
+  I  carries inventory of land in &AR:2 at end of &T:4
+  H  harvests timber in &AR:2 in &T:4
+  W  preserves wilderness in &AR:2 in &T:4
+ENDATA

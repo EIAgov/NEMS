@@ -1,0 +1,265 @@
+! $Header: m:/default/includes/RCS/emission,v 1.31 2017/08/10 16:59:24 rsc Exp $
+!
+!     EMISSION COMMON BLOCK
+!
+!     The user should add the following INCLUDE statement:      INCLUDE(PARAMETR)
+!
+!     Emission variables
+!
+      INTEGER numcoalch4regs
+      PARAMETER(numcoalch4regs=5)
+      INTEGER MX_HG_GRP
+      PARAMETER(MX_HG_GRP=NDREG)
+      INTEGER EPM_HG_CLS
+      PARAMETER(EPM_HG_CLS=3)
+      INTEGER EPM_RANK
+      PARAMETER(EPM_RANK=3)
+      INTEGER MX_SO2_GRP
+      PARAMETER(MX_SO2_GRP=EFD_D_SO2)
+!
+      REAL    EMRFSA(MNUMYR,MX_SO2_GRP)             !  1 Sulfur allowances
+      REAL    EMELPSO2(MNUMYR,MX_SO2_GRP)           !  2 CDS Sulfur dioxide emission allowance price
+      INTEGER NUM_HG_GRP                            !  3 Number of Mercury Cap and Trade Groups
+      INTEGER HG_GRP(NDREG)                         !  4 Identify Mercury Cap and Trade Group by Region
+      REAL    TOT_MERC(MNUMYR)                      !  5 Mercury Emission
+      REAL    EMEL_QHG(MX_HG_GRP,MNUMYR)            !  6 Mercury Caps by Group and Year
+      REAL    EMEL_PHG(MX_HG_GRP,MNUMYR)            !  7 Mercury Penalty Price by Group and Year
+      REAL    EMUMM(MNUMYR)                         !  8 Spent nuclear fuel discharges
+      REAL    EMRS(4,MNPOLLUT,MNUMYR)               !  9 Resd Emissions of Air Pollutants
+                                                    !    (C, CO, CO2, SOx, NOx, VOC, CH4, Part), by Fuel type
+                                                    !    where CH4 & Particulates are Reserved placeholders
+      REAL    EMRSC(MNUMCR,MNPOLLUT,MNUMYR)         ! 10 Resd Emissions by Region
+      REAL    EMCM(5,MNPOLLUT,MNUMYR)               ! 11 Comm Emissions by Air Pollutants
+      REAL    EMCMC(MNUMCR,MNPOLLUT,MNUMYR)         ! 12 Comm Emissions by Region
+      REAL    EMINC(4,MNPOLLUT,MNUMYR)              ! 13 Ind Emis by Fuel-Combustion
+      REAL    EMINCC(MNUMCR,MNPOLLUT,MNUMYR)        ! 14 Ind Emis by Region-Comb
+      REAL    EMINCN(MNUMCR,MNPOLLUT,MNUMYR)        ! 15 Ind Emis by Reg-Noncomb
+      REAL    EMTR(5,MNPOLLUT,MNUMYR)               ! 16 Transportation Emissions by Fuel
+      REAL    EMTRC(MNUMCR,MNPOLLUT,MNUMYR)         ! 17 Trans Emissions by Region
+      REAL    EMTRS(5,MNPOLLUT,MNUMYR)              ! 18 Trans Emissions by Trans Modes
+      REAL    EMNT(MNUMCR,MNPOLLUT,MNUMYR)          ! 19 NGTDM Emissions by Region
+      REAL    EMOGC(MNUMCR,MNPOLLUT,MNUMYR)         ! 20 Oil&Gas Emissions by Region
+      REAL    EMOGCS(2,MNPOLLUT,MNUMYR)             ! 21 O&G Emis by Activity (On/offshore)
+      REAL    EMOGF(2,MNPOLLUT,MNUMYR)              ! 22 O&G Emis by Fuel (Oil, NG)
+      REAL    EMEL(4,MNPOLLUT,MNUMYR)               ! 23 EMM Emissions by Fuel Type
+      REAL    EMELC(MNUMCR,MNPOLLUT,MNUMYR)         ! 24 EMM Emissions by Region
+      REAL    EMPMC(4,MNPOLLUT,MNUMYR)              ! 25 Petroleum Emis by Fuel-Combustion
+      REAL    EMPMCC(MNUMCR,MNPOLLUT,MNUMYR)        ! 26 PMM Emis by Regn-Comb
+      REAL    EMPMCN(MNUMCR,MNPOLLUT,MNUMYR)        ! 27 PMM Emis by Reg-Noncomb
+      REAL    EMCP(MNUMCR,MNPOLLUT,MNUMYR)          ! 28 Coal Supply Emissions by Region
+      REAL    EMCPS(3,MNPOLLUT,MNUMYR)              ! 29 Coal Supply Emissions by Activity
+      REAL    EMCS(MNUMCR,MNPOLLUT,MNUMYR)          ! 30 Coal Synthetics Emissions by Reg
+      REAL    EMRN(3,MNPOLLUT,MNUMYR)               ! 31 Renewable Emissions by Fuel
+      REAL    EMRNC(MNUMCR,MNPOLLUT,MNUMYR)         ! 32 Renewable Emissions by Region
+      REAL    EMCARBON(FLTYPE,MNUMNR,MNUMYR)        ! 33 National Carbon emissions by fuel
+                                                    !    Fuel type (Oil, NG, MCL, SCL, Ren, Al)
+      REAL    EMRNET(MNETOH,MNPOLLUT,MNUMYR)        ! 34 Ethanol Emissions by Vol
+      REAL    EMRNEC(MNETOH,MNPOLLUT,MNUMYR)        ! 35 Ethanol Emissions by Reg
+                                                    !    Policy Related Data Structures at National Level
+      REAL    EMBTAX(15,MNUMYR)                     ! 36 Btu Tax by Fuel
+      REAL    EMETAX(15,MNUMYR)                     ! 37 Excise (Consumption) Tax by Fuel
+      REAL    EMEMTAX(MNPOLLUT,MNUMYR)              ! 38 Emissions Tax by Air Pollutant
+      REAL    EMLIM(4,MNUMYR)                       ! 39 Emission Constraints by (CO2,SOx,NOx,Hg)
+      REAL    EMREV(12,MNUMYR)                      ! 40 Emission Revenues by Demand Sector
+      REAL    SO2_D_RMV(NDREG,MNUMYR,3)               ! 41 Fraction of sulfur after scrubbing
+      REAL    EMELDSO2(MNUMYR)                      ! 42 EFD sulfur dioxide emission allowance price
+      REAL    EMELBNK(MNUMYR,MX_SO2_GRP)            ! 43 Banked sulfur dioxide allowances
+      REAL    EMELRET(MNUMNR,MNUMYR)                ! 44 scrubber retrofits
+      REAL    EMMETHANE(25,MNUMYR)                  ! 45 methane emissions by 25 sources/sectors and year, mmtce
+      REAL    EMCOALPROD(numcoalch4regs+1,2,MNUMYR) ! 46 coal production, shtons, by 5 emissionsions+us, mine type: underground/surface, year
+      REAL    EMELNOX(MNUMNR,MNUMYR)                ! 47 NOX combustion controls
+      REAL    EMELSCR(MNUMNR,MNUMYR)                ! 48 NOX post-combustion SCR controls
+      REAL    EMELNCR(MNUMNR,MNUMYR)                ! 49 NOX post-combustion SNCR controls
+      REAL    EMELCCS(MNUMNR,MNUMYR)                ! 50 Coal CO2 CCS controls - Gross Capacity
+      REAL    EMELCDR(MNUMNR,MNUMYR)                ! 51 Coal CO2 CCS controls - Derated Capacity
+      REAL    EMELSC(MNUMNR,MNUMYR)                 ! 52 ACI Spray Cooling controls
+      REAL    EMELFF(MNUMNR,MNUMYR)                 ! 53 ACI Supplemental Fabric Filter controls
+      REAL    EMELDSI(MNUMNR,MNUMYR)                ! 54 HCI DSI controls
+      REAL    EMELRETP(MNUMNR,MNUMYR)               ! 55 Planned scrubber retrofits
+      REAL    EMELNOXP(MNUMNR,MNUMYR)               ! 56 Planned low-NOX retrofits
+      REAL    EMELSCRP(MNUMNR,MNUMYR)               ! 57 Planned SCR retrofits
+      REAL    EMELNCRP(MNUMNR,MNUMYR)               ! 58 Planned SNCR retrofits
+      REAL    ECP_PSO2(0:ECP_D_XPH,MNUMYR,MX_SO2_GRP) ! 59 ECP Sulfur dioxide emission allowance prices
+      REAL    EMSOL(4,MNUMYR)                       ! 60 Emission level solvrd for (CO2,SOx,NOx,Hg)
+      REAL    ECP_PNOX(NOX_D_GRP,MNUMYR)              ! 61 ECP Nitrogen oxide emission allowance prices
+      REAL    ECP_PHG(MX_HG_GRP,MNUMYR)             ! 62 ECP Mercury emission allowance prices
+      REAL    ECP_PCARG(CO2_D_GRP,MNUMYR)             ! 63 ECP Carbon emission allowance prices (by regional group)
+      REAL    EMRFNA(NOX_D_GRP,MNUMYR)                ! 64 NOX Allowances by Group and Year
+      REAL    EMRFCA(CO2_D_GRP,MNUMYR)                ! 65 CAR Allowances by Group and Year
+      REAL    ECP_QSO2(MNUMYR)                      ! 66 ECP Sulfur dioxide emissions
+      REAL    ECP_QNOX(NOX_D_GRP,MNUMYR)              ! 67 ECP Nitrogen oxide emissions
+      REAL    ECP_QHG(MX_HG_GRP,MNUMYR)             ! 68 ECP Mercury emissions
+      REAL    ECP_QCARG(CO2_D_GRP,MNUMYR)             ! 69 ECP Carbon emissions by Group
+      REAL    HG_GRAMS_MWH(EPM_HG_CLS,MNUMYR)       ! 70 Mercury emissions limits in grams per megawatthour, 0.0 => Not Applicable
+      REAL    HG_OUTPUT(EPM_HG_CLS,EPM_RANK,MNUMYR) ! 71 Mercury emissions limits in grams per megawatthour by coal rank, 0.0 => Not Applicable
+      REAL    HG_INPUT(EPM_HG_CLS,EPM_RANK,MNUMYR)  ! 72 Mercury emissions limits in grams per million btu by coal rank, 0.0 => Not Applicable
+      REAL    HG_MEF(EPM_HG_CLS,EPM_RANK,MNUMYR)    ! 73 Mercury emissions limits as percent of input mercury (i.e. Maximum MEF), 0.0 => Not Applicable 
+      REAL    SO2_SHR_BY_CLRG(MX_HG_GRP,MX_SO2_GRP) ! 74 Share of SO2 Emissions in SO2 Group by Coal Region 1 => East  2 => West
+      REAL    SO2_SHR_BY_OLRG(MNUMCR,MX_SO2_GRP)    ! 75 Share of SO2 Emissions in SO2 Group by Coal Region 1 => East  2 => West
+      REAL    SO2_SHR_ALW_GRP(MNUMYR,MX_SO2_GRP)    ! 76 Value of Allowances Shared Across SO2 Groups (0.0 = no sharing)
+      REAL    NOX_SHR_BY_CLRG(MX_HG_GRP,NOX_D_GRP)    ! 77 Share of NOX Emission in NOX Group by Coal region
+      REAL    EM_AUCTION_SH(MNUMYR)                 ! 78 emissions allowance auction share (1- this) is pass-thru percentage for electricity pricing
+      REAL    ECP_SCAR(MNUMYR)                      ! 79 Carbon emissions from end-use sectors passed to ECP
+      REAL    ECP_OCAR(MNUMYR)                      ! 80 Carbon emissions from other (GEO/MSW) passed to ECP
+      REAL    ECP_LCAR(MNUMYR)                      ! 81 ECP Carbon emissions limit for electricity
+      REAL    ECP_QCAR(MNUMYR)                      ! 82 ECP Carbon emissions for electricity
+      REAL    ECP_PCAR(0:ECP_D_XPH,MNUMYR)            ! 83 ECP Carbon emission allowance price
+      REAL    EFD_LCAR(MNUMYR)                      ! 84 ECP Carbon emissions limit for electricity
+      REAL    EFD_QCAR(MNUMYR)                      ! 85 ECP Carbon emissions for electricity
+      REAL    EFD_PCAR(MNUMYR)                      ! 86 ECP Carbon emission allowance price
+      REAL    EMHM(3,MNPOLLUT,MNUMYR)               ! 87 Hydrogen emissions by fuel and pollutant        
+      REAL    EXTRARISK(BASEYR:ENDYR)               ! 88 Extra risk premium possibly due to carbon
+      REAL    HG_MEFNC(NDREG,MNUMYR)                ! 89 Required Hg MEF if No CAMR
+
+      REAL CCS_PMM(5,MNUMPR,MNUMYR)                 ! 90 Carbon capture and storage from pmm
+                                                    !    Fuel type 1=Biomass, 2=Coal, 3=NG, 4=Still gas
+
+      REAL HEMNGTL(MNPOLLUT,MNUMYR)                 ! 91 HISTORICAL GAS (C,CO,CO2,SO2,NOX,VOC)
+      REAL HEMOLTL(MNPOLLUT,MNUMYR)                 ! 92 HISTORICAL OIL  (C,CO,CO2,SO2,NOX,VOC)
+      REAL HEMCLTL(MNPOLLUT,MNUMYR)                 ! 93 HISTORICAL COAL (C,CO,CO2,SO2,NOX,VOC)
+      REAL HEMOTTL(MNPOLLUT,MNUMYR)                 ! 94 HISTORICAL REN  (C,CO,CO2,SO2,NOX,VOC)
+ 
+      REAL HEMSO2R(MNUMNR,MNUMYR)                   ! 95 HISTORICAL SO2 EMISSIONS BY REGION AND POLLUTANT
+      REAL HEMNOXR(MNUMNR,MNUMYR)                   ! 96 HISTORICAL NOX EMISSIONS BY REGION AND POLLUTANT
+      REAL HEMCO2R(MNUMNR,MNUMYR)                   ! 97 HISTORICAL CO2 EMISSIONS BY REGION AND POLLUTANT
+      REAL HNOXFAC(MNUMNR)                          ! 98 CALIBRATION FAC. FOR HIST. NOX EM.
+      REAL HSO2FAC(MNUMNR)                          ! 99 CALIBRATION FAC. FOR HIST. SO2 EM.
+ 
+      REAL UCAP_HG                                  !100 CAP ON HG  CREDIT PRICE
+
+      INTEGER USW_CAMR                              !101 Switch to turn off CAMR (0 = CAMR, 1 = No CAMR)
+      INTEGER NUM_SO2_GRP                           !102 Number of SO2 Compliance Groups
+      
+      REAL    EMELGCS(MNUMNR,MNUMYR)                ! 103 Gas CO2 CCS controls - Gross Capacity
+      REAL    EMELGDR(MNUMNR,MNUMYR)                ! 104 Gas CO2 CCS controls - Derated Capacity
+      
+
+!     Emission common block   
+
+      COMMON/EMISSION/EMRFSA,EMELPSO2,NUM_HG_GRP,HG_GRP,TOT_MERC,                         &
+         EMEL_QHG,EMEL_PHG,EMUMM,EMRS,EMRSC,EMCM,EMCMC,                                   &
+         EMINC,EMINCC,EMINCN,EMTR,EMTRC,EMTRS,EMNT,                                       &
+         EMOGC,EMOGCS,EMOGF,EMEL,EMELC,EMPMC,EMPMCC,EMPMCN,                               &
+         EMCP,EMCPS,EMCS,EMRN,EMRNC,EMCARBON,EMRNET,EMRNEC,                               &
+         EMBTAX,EMETAX,EMEMTAX,EMLIM,EMREV,SO2_D_RMV,                                       &
+         EMELDSO2,EMELBNK,EMELRET,EMMETHANE,EMCOALPROD,                                   &
+         EMELNOX,EMELSCR,EMELNCR,EMELCCS,EMELCDR,EMELSC,EMELFF,EMELDSI,                   &
+         EMELRETP,EMELNOXP,EMELSCRP,EMELNCRP,ECP_PSO2,EMSOL,                              &
+         ECP_PNOX,ECP_PHG,ECP_PCARG,EMRFNA,EMRFCA,ECP_QSO2,ECP_QNOX,ECP_QHG,ECP_QCARG,    &
+         HG_GRAMS_MWH,HG_OUTPUT,HG_INPUT,HG_MEF,                                          &
+         SO2_SHR_BY_CLRG,SO2_SHR_BY_OLRG,SO2_SHR_ALW_GRP,                                 &
+         NOX_SHR_BY_CLRG,EM_AUCTION_SH,                                                   &
+         ECP_SCAR,ECP_OCAR,ECP_LCAR,ECP_QCAR,ECP_PCAR,                                    &
+         EFD_LCAR,EFD_QCAR,EFD_PCAR,EMHM, EXTRARISK, HG_MEFNC,                            &
+         CCS_PMM,HEMNGTL,HEMOLTL,HEMCLTL,HEMOTTL,HEMSO2R,HEMNOXR,HEMCO2R,HNOXFAC,HSO2FAC, &
+         UCAP_HG,                                                                         &
+         USW_CAMR, NUM_SO2_GRP, EMELGCS, EMELGDR
+!
+!     Equivalence for FILER used for data storage
+!
+      REAL EQ_EMOUT( (MNUMYR * MX_SO2_GRP)     +  & !  1 Sulfur allowances
+         (MNUMYR * MX_SO2_GRP)                 +  & !  2 CDS Sulfur dioxide emission allowance price
+         1                                     +  & !  3 Number of Mercury Cap and Trade Groups
+         (NDREG)                               +  & !  4 Identify Mercury Cap and Trade Group by Region
+         (MNUMYR)                              +  & !  5 Mercury Emission
+         (MX_HG_GRP * MNUMYR)                  +  & !  6 Mercury Caps by Group and Year
+         (MX_HG_GRP * MNUMYR)                  +  & !  7 Mercury Penalty Price by Group and Year
+         (MNUMYR)                              +  & !  8 Spent nuclear fuel discharges
+         (4 * MNPOLLUT * MNUMYR)               +  & !  9 Resd Emissions of Air Pollutants
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 10 Resd Emissions by Region
+         (5 * MNPOLLUT * MNUMYR)               +  & ! 11 Comm Emissions by Air Pollutants
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 12 Comm Emissions by Region
+         (4 * MNPOLLUT * MNUMYR)               +  & ! 13 Ind Emis by Fuel-Combustion
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 14 Ind Emis by Region-Comb
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 15 Ind Emis by Reg-Noncomb
+         (5 * MNPOLLUT * MNUMYR)               +  & ! 16 Transportation Emissions by Fuel
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 17 Trans Emissions by Region
+         (5 * MNPOLLUT * MNUMYR)               +  & ! 18 Trans Emissions by Trans Modes
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 19 NGTDM Emissions by Region
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 20 Oil&Gas Emissions by Region
+         (2 * MNPOLLUT * MNUMYR)               +  & ! 21 O&G Emis by Activity (On/offshore)
+         (2 * MNPOLLUT * MNUMYR)               +  & ! 22 O&G Emis by Fuel (Oil *  NG)
+         (4 * MNPOLLUT * MNUMYR)               +  & ! 23 EMM Emissions by Fuel Type
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 24 EMM Emissions by Region
+         (4 * MNPOLLUT * MNUMYR)               +  & ! 25 Petroleum Emis by Fuel-Combustion
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 26 PMM Emis by Regn-Comb
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 27 PMM Emis by Reg-Noncomb
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 28 Coal Supply Emissions by Region
+         (3 * MNPOLLUT * MNUMYR)               +  & ! 29 Coal Supply Emissions by Activity
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 30 Coal Synthetics Emissions by Reg
+         (3 * MNPOLLUT * MNUMYR)               +  & ! 31 Renewable Emissions by Fuel
+         (MNUMCR * MNPOLLUT * MNUMYR)          +  & ! 32 Renewable Emissions by Region
+         (FLTYPE * MNUMNR * MNUMYR)            +  & ! 33 National Carbon emissions by fuel
+         (MNETOH * MNPOLLUT * MNUMYR)          +  & ! 34 Ethanol Emissions by Vol
+         (MNETOH * MNPOLLUT * MNUMYR)          +  & ! 35 Ethanol Emissions by Reg
+         (15 * MNUMYR)                         +  & ! 36 Btu Tax by Fuel
+         (15 * MNUMYR)                         +  & ! 37 Excise (Consumption) Tax by Fuel
+         (MNPOLLUT * MNUMYR)                   +  & ! 38 Emissions Tax by Air Pollutant
+         (4 * MNUMYR)                          +  & ! 39 Emission Constraints by (CO2 * SOx * NOx * Hg)
+         (12 * MNUMYR)                         +  & ! 40 Emission Revenues by Demand Sector
+         (NDREG * MNUMYR * 3)                  +  & ! 41 Fraction of sulfur after scrubbing
+         (MNUMYR)                              +  & ! 42 EFD sulfur dioxide emission allowance price
+         (MNUMYR * MX_SO2_GRP)                 +  & ! 43 Banked sulfur dioxide allowances
+         (MNUMNR * MNUMYR)                     +  & ! 44 scrubber retrofits
+         (25 * MNUMYR)                         +  & ! 45 methane emissions by 25 sources/sectors and year *  mmtce
+         ((numcoalch4regs + 1) * 2 * MNUMYR)   +  & ! 46 coal production *  shtons *  by 5 emissionsions+us *  mine type: underground/surface *  year
+         (MNUMNR * MNUMYR)                     +  & ! 47 NOX combustion controls
+         (MNUMNR * MNUMYR)                     +  & ! 48 NOX post-combustion SCR controls
+         (MNUMNR * MNUMYR)                     +  & ! 49 NOX post-combustion SNCR controls
+         (MNUMNR * MNUMYR)                     +  & ! 50 CO2 CCS controls
+         (MNUMNR * MNUMYR)                     +  & ! 51 CO2 CCS controls - Capacity Derate
+         (MNUMNR * MNUMYR)                     +  & ! 52 ACI Spray Cooling controls
+         (MNUMNR * MNUMYR)                     +  & ! 53 ACI Supplemental Fabric Filter controls
+         (MNUMNR * MNUMYR)                     +  & ! 54 HCI DSI Control
+         (MNUMNR * MNUMYR)                     +  & ! 55 Planned scrubber retrofits
+         (MNUMNR * MNUMYR)                     +  & ! 56 Planned low-NOX retrofits
+         (MNUMNR * MNUMYR)                     +  & ! 57 Planned SCR retrofits
+         (MNUMNR * MNUMYR)                     +  & ! 58 Planned SNCR retrofits
+         ((ECP_D_XPH + 1) * MNUMYR * MX_SO2_GRP) +  & ! 59 ECP Sulfur dioxide emission allowance prices
+         (4 * MNUMYR)                          +  & ! 60 Emission level solvrd for (CO2 * SOx * NOx * Hg)
+         (NOX_D_GRP * MNUMYR)                    +  & ! 61 ECP Nitrogen oxide emission allowance prices
+         (MX_HG_GRP * MNUMYR)                  +  & ! 62 ECP Mercury emission allowance prices
+         (CO2_D_GRP * MNUMYR)                    +  & ! 63 ECP Carbon emission allowance prices
+         (NOX_D_GRP * MNUMYR)                    +  & ! 64 NOX Allowances by Group and Year
+         (CO2_D_GRP * MNUMYR)                    +  & ! 65 CAR Allowances by Group and Year
+         (MNUMYR)                              +  & ! 66 ECP Sulfur dioxide emissions
+         (NOX_D_GRP * MNUMYR)                    +  & ! 67 ECP Nitrogen oxide emissions
+         (MX_HG_GRP * MNUMYR)                  +  & ! 68 ECP Mercury emissions
+         (CO2_D_GRP * MNUMYR)                    +  & ! 69 ECP Carbon emissions
+         (EPM_HG_CLS * MNUMYR)                 +  & ! 70 Mercury emissions limits in grams per megawatthour *  0.0 => Not Applicable
+         (EPM_HG_CLS * EPM_RANK * MNUMYR)      +  & ! 71 Mercury emissions limits in grams per megawatthour by coal rank, 0.0 => Not Applicable
+         (EPM_HG_CLS * EPM_RANK * MNUMYR)      +  & ! 72 Mercury emissions limits in grams per million btu by coal rank, 0.0 => Not Applicable
+         (EPM_HG_CLS * EPM_RANK * MNUMYR)      +  & ! 73 Mercury emissions limits as percent of input mercury 0.0 => Not Applicable
+         (MX_HG_GRP * MX_SO2_GRP)              +  & ! 74 Percent of SO2 Emissions in SO2 Group by Coal Region 1 => East  2 => West
+         (MNUMCR * MX_SO2_GRP)                 +  & ! 75 Percent of SO2 Emissions in SO2 Group by Coal Region 1 => East  2 => West
+         (MNUMYR * MX_SO2_GRP)                 +  & ! 76 Value of SO2 Allowances Shared Across SO2 Groupts (0.0 = no sharing)    
+         (MX_HG_GRP * NOX_D_GRP)                 +  & ! 77 Percent of NOX emissions in NOX Group by Coal Region
+         MNUMYR                                +  & ! 78 Emissions allowance auction share
+         MNUMYR                                +  & ! 79 Carbon emissions from end-use sectors passed to ECP
+         MNUMYR                                +  & ! 80 Carbon emissions from other (GEO/MSW) passed to ECP
+         MNUMYR                                +  & ! 81 ECP Carbon emissions limit for electricity
+         MNUMYR                                +  & ! 82 ECP Carbon emissions for electricity
+         ((ECP_D_XPH + 1) * MNUMYR)              +  & ! 83 ECP Carbon emission allowance price
+         MNUMYR                                +  & ! 84 ECP Carbon emissions limit for electricity
+         MNUMYR                                +  & ! 85 ECP Carbon emissions for electricity
+         MNUMYR                                +  & ! 86 ECP Carbon emission allowance price
+         (3 * MNPOLLUT * MNUMYR)               +  & ! 87 Hydrogen emissions         
+         MNUMYR                                +  & ! 88 EXTRARISKA
+         (NDREG * MNUMYR)                      +  & ! 89 Hg MEF Without CAMR
+         5 * MNUMPR * MNUMYR                   +  & ! 90 Carbon capture and storage from pmm
+         MNPOLLUT * MNUMYR                     +  & ! 91 HISTORICAL GAS  (C,CO,CO2,SO2,NOX,VOC)
+         MNPOLLUT * MNUMYR                     +  & ! 92 HISTORICAL OIL  (C,CO,CO2,SO2,NOX,VOC)
+         MNPOLLUT * MNUMYR                     +  & ! 93 HISTORICAL COAL (C,CO,CO2,SO2,NOX,VOC)
+         MNPOLLUT * MNUMYR                     +  & ! 94 HISTORICAL REN  (C,CO,CO2,SO2,NOX,VOC)
+         MNUMNR * MNUMYR                       +  & ! 95 HISTORICAL SO2 EMISSIONS BY REGION AND POLLUTANT
+         MNUMNR * MNUMYR                       +  & ! 96 HISTORICAL NOX EMISSIONS BY REGION AND POLLUTANT
+         MNUMNR * MNUMYR                       +  & ! 97 HISTORICAL CO2 EMISSIONS BY REGION AND POLLUTANT
+         MNUMNR                                +  & ! 98 CALIBRATION FAC. FOR HIST. NOX EM.
+         MNUMNR                                +  & ! 99 CALIBRATION FAC. FOR HIST. SO2 EM.
+         1                                     +  & !100 CAP ON HG CREDIT PRICE
+         1                                     +  & !101 CAMR (No) Switch
+         1                                     +  & !102 Number of SO2 Compliance Groups
+        (MNUMNR * MNUMYR)                      +  & !103 Gas CO2 CCS controls
+        (MNUMNR * MNUMYR)                         ) !104 Gas CO2 CCS controls - Capacity Derate
+ 
+      EQUIVALENCE (EQ_EMOUT,EMRFSA)
