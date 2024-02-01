@@ -108,9 +108,9 @@ We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning lin
 - From the NEMS GitHub repository, clone or download the NEMS [main remote branch](https://git.eia.gov/oea/NEMS/-/wikis/Git-101:-NEMS-Initialization).
 - You can find specific libraries to install as part of Cygwin, R, and Python in a separate document with additional installation details.
 
-## Licenses _Replace with information from OA_
+## Licenses 
 
-The NEMS code, as distributed here, is governed by the XXXXX license.
+The NEMS code, as distributed here, is governed by the licenses listed [here](https://github.com/eiagov).
 
 ## Getting help
 
@@ -120,10 +120,6 @@ You can direct technical questions about the NEMS model to [NEMSModel@eia.gov](m
 
 As part of developing each AEO, EIA schedules working group meetings to gather input from various sectors of the industry. You can find more information on the [AEO Working Groups](https://www.eia.gov/outlooks/aeo/workinggroup/) webpage.
 
-## Contributing to NEMS _Replace with information from OA_
+## Contributing to NEMS 
 
-All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. You can also triage issues which may include reproducing bug reports, or asking for vital information such as version numbers or reproduction instructions. If you would like to start triaging issues, one easy way to get started is to subscribe to pandas on CodeTriage.
-
-Or maybe through using pandas you have an idea of your own or are looking for something in the documentation and thinking 'this can be improved'...you can do something about it!
-
-As contributors and maintainers to this project, you are expected to abide by pandas' code of conduct. More information can be found at: Contributor Code of Conduct
+Contributions to NEMS are governed by the rules listed [here] (https://github.com/eiagov).  You can direct technical questions about the NEMS model to [NEMSModel@eia.gov](mailto:NEMSModel@eia.gov).
