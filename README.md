@@ -105,7 +105,7 @@ We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning lin
 
 ## Installation
 
-- From the NEMS GitHub repository, clone or download the NEMS [main remote branch](https://git.eia.gov/oea/NEMS/-/wikis/Git-101:-NEMS-Initialization).
+- From the NEMS GitHub repository, clone or download NEMS.
 - You can find specific libraries to install as part of Cygwin, R, and Python in a separate document with additional installation details.
 
 ## Licenses 
