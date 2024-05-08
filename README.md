@@ -1,4 +1,4 @@
-_February 2024_
+_May 2024_
 
 # ​The National Energy Modeling System
 
@@ -60,7 +60,7 @@ This initial version of NEMS is based on the version used for AEO2023, with upda
 
 ## Where to get it
 
-NEMS development is a year-round process led by EIA. A snapshot of the source code corresponding to the regularly scheduled annual release of the AEO is hosted on GitHub at: [https://github.com/pandas-dev/pandas](https://github.com/pandas-dev/pandas).
+NEMS development is a year-round process led by EIA. A snapshot of the source code corresponding to the regularly scheduled annual release of the AEO is hosted on GitHub at: [https://github.com/EIAgov/NEMS](https://github.com/EIAgov/NEMS).
 
 ## Dependencies
 
@@ -101,7 +101,7 @@ We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning lin
 - Programming language R. NEMS uses the programming language R (version 2.15.1). Version 2.15.1 is required for NEMS runtime.
 
 
-- Python 3.11. The NEMS validator (test suite) and the filer utility are written in Python.
+- Python 3.11. The NEMS validator (test suite) and the pyfiler utility are written in Python.
 
 ## Installation
 
