@@ -1,5 +1,3 @@
-_May 2024_
-
 # ​The National Energy Modeling System
 
 ## What is it?
@@ -8,7 +6,7 @@ The National Energy Modeling System (NEMS) is a long-term energy-economy modelin
 
 NEMS produces a general equilibrium solution for energy supply and demand in the U.S. energy markets on an annual basis.
 
-EIA's Office of Energy Analysis develops and maintains NEMS to support the _Annual Energy Outlook_ (AEO). EIA analysts perform policy analyses requested by decisionmakers in the White House; the U.S. Congress; offices within the U.S. Department of Energy (DOE), including program offices; and other government agencies. Users outside of EIA use NEMS for a variety of purposes.
+EIA's Office of Energy Analysis develops and maintains NEMS to support the _Annual Energy Outlook_ (AEO). EIA analysts perform policy analyses requested by decisionmakers in the White House; the U.S. Congress; offices within the U.S. Department of Energy, including program offices; and other government agencies. Users outside of EIA use NEMS for a variety of purposes.
 
 The [AEO page](https://www.eia.gov/outlooks/aeo/) contains results from many EIA analysis products that rely on NEMs.
 
@@ -78,7 +76,7 @@ NEMS was installed using a free download of the 23.2.0 release for Intel Fortran
 
 - Fair-Isaac Corporation's (FICO) Xpress optimizer (license required)
 
-We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning linear program (LP); the Liquid Fuels Market Module LP; and the Carbon Transport, Utilization, and Storage mixed integer program (MIP). The Carbon Transport, Utilization, and Storage module is incorporated in the EMM, OGSM, and the Liquid Fuels Market Module. To purchase an Xpress license, please refer to [FICO's webpage](https://www.fico.com/en/fico-xpress-trial-and-licensing-options).
+We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning linear program (LP); the LFMM LP; and the Carbon Transport, Utilization, and Storage mixed integer program (MIP). The Carbon Transport, Utilization, and Storage module is incorporated in the EMM, OGSM, and LFMM. To purchase an Xpress license, please refer to [FICO's webpage](https://www.fico.com/en/fico-xpress-trial-and-licensing-options).
 
 - A Fortran-to-SQLite library to use with EMM that holds regional electricity data. SQLite is not required for running NEMS with the default data provided.
 
@@ -86,16 +84,16 @@ We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning lin
 - Optimization and Modeling Library (OML) license from [Ketron Optimization](http://www.ketronms.com/oml.shtml) with XpressMP barrier interface (optional). The EMM in NEMS uses the OML optimizer.
 
 
-- GAMS is used for the Carbon Transport, Utilization, and Storage submodule and for the Liquid Fuels Market Module. We used GAMS version 43.2 for this release. Our GAMS implementation uses the Xpress solver mentioned above. We purchased the development license (rather than the run-time license), which allows changes to the linear program matrix during execution of a NEMS run.
+- GAMS. It is used for the Carbon Transport, Utilization, and Storage submodule and for the LFMM. We used GAMS version 43.2 for this release. Our GAMS implementation uses the Xpress solver mentioned above. We purchased the development license (rather than the run-time license), which allows changes to the linear program matrix during execution of a NEMS run.
 
 
-- Advanced Integrated Multidimensional Modeling Software (AIMMS). AIMMS is used for the Coal Market Module, the Natural Gas Market Module, and the Renewable and Electricity Storage submodule within EMM. We used AIMMS version 4 (release 4.96.4) for this release licensed with the CPLEX solver. The AIMMS System Development Kit, which has a programming interface known as the AIMMSLINK library, has been installed at EIA and is also used with the NEMS Coal Market Module. The AIMMSLINK library invokes the AIMMS SDK and is linked in for NEMS runs. The AIMMS SDK is no longer supported by AIMMS.
+- Advanced Integrated Multidimensional Modeling Software (AIMMS). AIMMS is used for the CMM, the NGMM, and the Renewable Electricity Storage Submodule within the EMM. We used AIMMS version 4 (release 4.96.4) for this release licensed with the CPLEX solver. The AIMMS Software Development Kit (SDK), which has a programming interface known as the AIMMSLINK library, has been installed at EIA and is also used with the NEMS CMM. The AIMMSLINK library invokes the AIMMS SDK and is linked in for NEMS runs. The AIMMS SDK is no longer supported by AIMMS.
 
 
-- (Optional) We use the [S&P Global Macroeconomic Model](https://www.spglobal.com/en/) as implemented with the EViews13 software package. We currently use the EViews13 standard edition. The S&P Global macro module is executed as a subprocess to NEMS if the macro feedback switch in NEMS is turned on. You can elect to run NEMS without macro feedback, in which case the run uses static macroeconomic inputs taken as is. When the macro feedback switch is on, NEMS will attempt to call the macro model by executing EViews using the S&P Global model's work files as the input to EViews. These EViews work files are not included in the EIA archive, but you can obtain them from EIA after licensing the S&P Global model. You must also get a copy of EViews to run the S&P Global model. Contact S&P Global for more information.
+- (Optional) The [S&P Global Macroeconomic Model](https://www.spglobal.com/en/) as implemented with the EViews13 software package. We currently use the EViews13 standard edition. The S&P Global macro module is executed as a subprocess to NEMS if the macro feedback switch in NEMS is turned on. You can elect to run NEMS without macro feedback, in which case the run uses static macroeconomic inputs taken as is. When the macro feedback switch is on, NEMS will attempt to call the macro model by executing EViews using the S&P Global model's work files as the input to EViews. These EViews work files are not included in the EIA archive, but you can obtain them from EIA after licensing the S&P Global model. You must also get a copy of EViews to run the S&P Global model. Contact S&P Global for more information.
 
 
-- Cygwin is used for certain NEMS utility programs.
+- Cygwin for certain NEMS utility programs.
 
 
 - Programming language R. NEMS uses the programming language R (version 2.15.1). Version 2.15.1 is required for NEMS runtime.
@@ -110,7 +108,7 @@ We use the Xpress optimizer to solve the EMM's Electricity Capacity Planning lin
 
 ## Licenses 
 
-The NEMS code, as distributed here, is governed by the licenses listed [here](https://github.com/eiagov).
+The NEMS code, as distributed here, is governed by [specific licenses](https://github.com/eiagov).
 
 ## Getting help
 
@@ -122,4 +120,4 @@ As part of developing each AEO, EIA schedules working group meetings to gather i
 
 ## Contributing to NEMS 
 
-Contributions to NEMS are governed by the rules listed [here] (https://github.com/eiagov).  You can direct technical questions about the NEMS model to <EIA-NEMS-GITHUB@eia.gov>.
+Contributions to NEMS are governed by [specific rules](https://github.com/eiagov).  You can direct technical questions about the NEMS model to <EIA-NEMS-GITHUB@eia.gov>.
