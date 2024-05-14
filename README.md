@@ -12,7 +12,7 @@ The [AEO page](https://www.eia.gov/outlooks/aeo/) contains results from many EIA
 
 The [NEMS documentation page](https://www.eia.gov/outlooks/aeo/nems/documentation/) has more details about each module. The [Assumptions page](https://www.eia.gov/outlooks/aeo/assumptions/) contains separate reports about the latest assumptions for each module. The [Case Descriptions page](https://www.eia.gov/outlooks/aeo/assumptions/case_descriptions.php) explains the cases preconfigured in the repository.
 
-We also publish the [World Energy Projection System (](https://www.eia.gov/outlooks/ieo/ieoweps_sourcecode.php.)WEPS), which we use for global analysis and to support the _International Energy Outlook_.
+We also publish the [World Energy Projection System](https://www.eia.gov/outlooks/ieo/ieoweps_sourcecode.php) (WEPS), which we use for global analysis and to support the _International Energy Outlook_.
 
 ## Main features
 
@@ -36,7 +36,7 @@ Four supply modules:
 Four demand modules:
 
 - Residential Demand Module (RDM)
-- Commercial Demand Module (CMM)
+- Commercial Demand Module (CDM)
 - Industrial Demand Module (IDM)
 - Transportation Demand Module (TDM)
 
