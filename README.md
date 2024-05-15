@@ -112,7 +112,7 @@ The NEMS code, as distributed here, is governed by [specific licenses](https://g
 
 ## Getting help
 
-You can direct technical questions about the NEMS model to <EIA-NEMS-GITHUB@eia.gov>.
+You can direct questions about the NEMS model to <EIA-NEMS-GITHUB@eia.gov>.
 
 ## Discussion and development
 
@@ -120,4 +120,4 @@ As part of developing each AEO, EIA schedules working group meetings to gather i
 
 ## Contributing to NEMS 
 
-Contributions to NEMS are governed by [specific rules](https://github.com/eiagov).  You can direct technical questions about the NEMS model to <EIA-NEMS-GITHUB@eia.gov>.
+Contributions to NEMS are governed by [specific rules](https://github.com/eiagov).  You can direct questions about the NEMS model to <EIA-NEMS-GITHUB@eia.gov>.
