@@ -1,0 +1,14 @@
+Variable,FractionTolerance,AbsoluteTolerance,RelaxFactor,Test,Relax,PQType,QMATCH,Module,CVTAB ID,Variables_in_Group,Group_Name,Weight_Class_Name,Weight_Class,Weight_Start
+MC_GDPR,0.001,0,1,0,1,O,NA,MAM,,,,,,
+IT_WOP,0.01,0,1,0,1,O,NA,IEM,,,,,,
+RFQICRD,0.01,0,1,0,1,O,NA,LFMM,,,,,,
+RFPQIPRDT,0.01,0,1,0,1,O,NA,LFMM,,,,,,
+EMETAX,0.01,0.02,1,0,0,O,NA,EMM,100,EMETAX,CO2 ALLOWANCE,Carbon Dioxide,5,0
+EMELPSO2,0.01,5,0.5,0,1,O,NA,EMM,101,EMELPSO2,SO2 Allowance,SO2 ALlowance,6,1
+ECP_PHG,0.01,5,1,0,1,O,NA,EMM,102,ECP_PHG,Mercury Allowance,Mercury,7,1
+OGWPRNG,0.01,0,1,0,0,O,NA,HSM,,,,,,
+OGCNPPRD,0.01,0,0.3,0,1,O,NA,HSM,,,,,,
+PBMET,0.01,0,1,0,0,PR,NA,RENEW,,,,,,
+QBMET,0.01,0,1,0,0,QR,NA,RENEW,,,,,,
+GLBCRDDMD,0.01,0,1,0,1,O,NA,LFMM,,,,,,
+ECP_PSO2,0.01,5,0.5,0,1,O,NA,EMM,,,,,,

@@ -1,0 +1,7 @@
+parameter,value,type,description,units
+price_limit,1000,input_variable,Maximum price (+/-) returned by CCATS,$1987
+price_peg,0.30,input_variable,Maximum price (+/-) movement allowed per cycle relative to the previous cycle,$1987
+slack_threshold,1.0,input_variable,Threshold at which slack infeasibilities are recorded in debug outputs,tonnes
+log_b1_infeasibilities,TRUE,switch,Log b1 infeasibilties if TRUE
+log_b2_infeasibilities,FALSE,switch,Log b2 infeasibilties if TRUE
+infeasibility_threshold_pct,0.5,input_variable,Log infeasibilities if greater than provided percentage of total flow,%

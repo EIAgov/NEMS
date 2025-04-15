@@ -1,0 +1,307 @@
+﻿! Regions
+!CensusRegions_:= DATA {NewEngland, MidAtlantic, ENCentral, WNCentral,SAtlantic,ESCentral,WSCentral,Mountain,Pacific};
+!NERCRegions_ := DATA {TRE, FRCC, MISW, MISC, MISE, MISS, ISNE, NYCW, NYUP, PJME, PJMW, PJMC, PJMD, SRCA, SRSE, SRCE, SPPS, SPPC, SPPN, SRSG, CANO, CASO, NWPP, RMRG, BASN};
+
+!NEMS Mapping parameters to set MNUMCR (Census Division)
+composite table:
+regCEN		MNUMCR	NEMSmap_MNUMCRToCensusRegion
+NewEngland	1	1
+MidAtlantic	2	1
+ENCentral	3	1
+WNCentral	4	1
+Satlantic	5	1
+ESCentral	6	1
+WSCentral	7	1
+Mountain	8	1
+Pacific		9	1
+;
+
+! Map storage nodes to market hubs.
+composite table:
+lpstorage	lph		map_StorageArcs
+NewEngland	NewEngland	1
+MidAtlantic	MidAtlantic	1
+ENCentral	ENCentral	1
+WNCentral	WNCentral	1
+Satlantic	Satlantic	1
+ESCentral	ESCentral	1		
+WSCentral	WSCentral	1
+Mountain	Mountain	1
+Pacific		Pacific		1
+;	
+
+! Map supply nodes to market hubs.
+composite table:
+lps		lph		map_SupplyArcs
+NewEngland	NewEngland	1
+MidAtlantic	MidAtlantic	1
+ENCentral	ENCentral	1
+WNCentral	WNCentral	1
+Satlantic	Satlantic	1
+ESCentral	ESCentral	1		
+WSCentral	WSCentral	1
+Mountain	Mountain	1
+Pacific		Pacific		1
+;	
+
+! Map demand nodes to market hubs.
+composite table:
+lpd		lph		map_DemandArcs
+NewEngland	NewEngland	1
+MidAtlantic	MidAtlantic	1
+ENCentral	ENCentral	1
+WNCentral	WNCentral	1
+Satlantic	Satlantic	1
+ESCentral	ESCentral	1		
+WSCentral	WSCentral	1
+Mountain	Mountain	1
+Pacific		Pacific		1
+;	
+
+
+! Mapping of feasisible census arcs.
+composite table:
+regCen		regCen_j	map_regCENarcs
+NewEngland	MidAtlantic	1
+MidAtlantic	NewEngland	1
+MidAtlantic	ENCentral	1
+MidAtlantic	Satlantic	1
+ENCentral	MidAtlantic	1
+Satlantic	MidAtlantic	1
+Satlantic	ENCentral	1
+Satlantic	ESCentral	1
+ENCentral	ESCentral	1
+ENCentral	WNCentral	1
+ENCentral	Satlantic	1
+WNCentral	ENCentral	1
+ESCentral	ENCentral	1
+ESCentral	Satlantic	1
+WSCentral	ESCentral	1
+ESCentral	WSCentral	1
+WSCentral	WNCentral	1
+WNCentral	WSCentral	1
+WSCentral	Mountain	1
+Mountain	WSCentral	1
+Mountain	WNCentral	1
+WNCentral	Mountain	1
+Mountain	Pacific		1
+Pacific		Mountain	1
+;
+
+! Map Census Divisions to supply nodes
+composite table:
+regCEN		lps		map_supply
+NewEngland	NewEngland	1
+MidAtlantic	MidAtlantic	1
+ENCentral	ENCentral	1
+WNCentral	WNCentral	1
+Satlantic	Satlantic	1
+ESCentral	ESCentral	1		
+WSCentral	WSCentral	1
+Mountain	Mountain	1
+Pacific		Pacific		1
+;
+
+! Map months to seasons
+composite table:
+seas	M12	NEMSmap_seasToM12
+4	1	1
+4	2	1
+1	3	1	
+1	4	1	
+2	5	1	
+2	6	1	
+2	7	1	
+2	8	1	
+3	9	1	
+3	10	1	
+4	11	1	
+4	12	1	
+;
+
+composite table:
+MNUMNR		regNERC		NEMSmap_MNUMNR_toNERCRegion
+1		TRE		1
+2		FRCC		1
+3		MISW		1
+4		MISC		1
+5		MISE		1
+6		MISS		1
+7		ISNE		1
+8		NYCW		1
+9		NYUP		1
+10		PJME		1
+11		PJMW		1
+12		PJMC		1
+13		PJMD		1
+14		SRCA		1
+15		SRSE		1
+16		SRCE		1
+17		SPPS		1
+18		SPPC		1
+19		SPPN		1
+20		SRSG		1
+21		CANO		1
+22		CASO		1
+23		NWPP		1
+24		RMRG		1
+25		BASN		1
+;
+
+
+composite table:
+M24	hr	NEMSmap_M24_ToHr
+1	1	1
+2	2	1
+3	3	1
+4	4	1
+5	5	1	
+6	6	1
+7	7	1
+8	8	1
+9	9	1
+10	10	1	
+11	11	1
+12	12	1
+13	13	1
+14	14	1
+15	15	1
+16	16	1	
+17	17	1
+18	18	1
+19	19	1
+20	20	1	
+21	21	1
+22	22	1
+23	23	1
+24	24	1
+;
+
+composite table:
+regNERC	regCEN		map_regNERCToRegCEN
+TRE	WSCentral	1
+FRCC	Satlantic	1
+MISW	WNCentral	1
+MISC	ENCEntral	1
+MISE	ENCEntral	1
+MISS	ESCentral	1
+ISNE	NewEngland	1
+NYCW	MidAtlantic	1
+NYUP	MidAtlantic	1
+PJME	MidAtlantic	1
+PJMW	ENCEntral	1
+PJMC	ENCEntral	1
+PJMD	Satlantic	1
+SRCA	Satlantic	1
+SRSE	ESCentral	1
+SRCE	ESCentral	1
+SPPS	WSCentral	1
+SPPC	WNCentral	1
+SPPN	WNCentral	1
+SRSG	Mountain	1
+CANO	Pacific		1
+CASO	Pacific		1
+NWPP	Pacific		1
+RMRG	Mountain	1
+BASN	Mountain	1
+;
+
+composite table:
+M4	seas	NEMSmap_M4_to_seas
+1	1	1
+2	2	1
+3	3	1
+4	4	1
+;
+
+composite table:
+M3	seas	NEMSmap_M3_to_seas
+3	1	1
+2	2	1
+3	3	1
+1	4	1
+;
+
+TotalUS := 11;
+
+! Technologies
+!prodTech_ := DATA {SMR, SMRwCCS, gridElectrolysis}
+ElectrolyzerTechs_ := DATA {PEM};
+PEMTech := 'PEM';
+SMRTech := 'SMR';
+SMRCCSTech := 'SMR_CCS';
+CCSTechs_ := {SMR_CCS}; ! Techs that can capture CO2.
+
+Sectors_ := DATA {Industrial, Electricity, Transportation, Refining};
+IndustrialSector := 'Industrial';
+TransportationSector := 'Transportation';
+ElectricitySector := 'Electricity';
+RefiningSector := 'Refining';
+
+Fuels_ := DATA {NG, Electricity, Coal, Biomass};
+
+FuelNG := 'NG';
+FuelElec := 'Electricity';
+
+! Planning period sets
+PlanningPeriods_ := DATA {1,2,3};
+FirstPlanningPeriod := '1';
+SecondPlanningPeriod := '2';
+ThirdPlanningPeriod := '3';
+SecondAndThirdPlanningPeriods := DATA {2,3};
+
+! Multiplier Sets
+StorageSteps_ := DATA {1,2,3};
+TransportationSteps_ := DATA {1,2,3};
+ProductionSteps_ := DATA {1,2,3};
+
+
+! LEARNING SETS
+! Learning Steps
+LearningRateSteps_ := data {1,2,3};
+VintageTypes_ := DATA {'Revolutionary', 'Evolutionary', 'Conventional'};
+VintageTypeRevolutionary := 'Revolutionary';
+VintageTypeEvolutionary := 'Evolutionary';
+VintageTypeConventional := 'Conventional';
+
+
+composite table:
+reg             ui_latitude(reg)   ui_longitude(reg)
+NewEngland	42                 -71
+MidAtlantic	42                 -74
+ENCentral	41                 -84
+WNCentral	41                 -93
+Satlantic	33                 -80
+ESCentral	35                 -87
+WSCentral	30                 -94
+Mountain	37                 -109
+Pacific		35                 -119
+TRE             31                 -97
+FRCC		28                 -82
+MISW		43                 -93
+MISC		40.5               -88
+MISE		44                 -83
+MISS		33                 -91
+ISNE		43                 -70
+NYCW		40.5               -73.5
+NYUP		43.5               -76
+PJME		41.5               -76.5
+PJMW		39                 -79
+PJMC		42                 -89
+PJMD		36.5               -76
+SRCA		35                 -80
+SRSE		33                 -84
+SRCE		36                 -84
+SPPS		36                 -101
+SPPC		38                 -98
+SPPN		46                 -100
+SRSG		34                 -109
+CANO		38                 -122
+CASO		33                 -118
+NWPP		45.5               -120
+RMRG		41                 -104
+BASN		42                 -113
+;
+
+
+

@@ -2,14 +2,12 @@
 !  TRANSPORTATION MODULE MAIN COMMON BLOCK
 !  Freight variables passed from tranfrt.f to tran.f
 
-	  
-
       REAL     TSIC(18,MNUMCR,MNUMYR)
-      REAL     VMTFLT_SAF_TR(3,9,11)             ! Summation of vmtflt by size class, fuel, and region
-      REAL     VMTFLT_SF_TR(3,34,9,11)           ! Summation of vmtflt by size class, age, fuel, and region
+      REAL     VMTFLT_SAF_TR(3,12,11)            ! Summation of vmtflt by size class, fuel, and region
+      REAL     VMTFLT_SF_TR(3,34,12,11)          ! Summation of vmtflt by size class, age, fuel, and region
       REAL     VMT_TR(MNUMYR)                    ! Total truck VMT
       REAL     FTMPG_TR(MNUMYR)                  ! Total stock mpg by everything
-      REAL     TFRBTU_F_T(MNUMYR,3,9,MNUMCR)     ! Truck fuel consumption:  Passed back to TRAN main
+      REAL     TFRBTU_F_T(MNUMYR,3,7,MNUMCR)     ! Truck fuel consumption:  Passed back to TRAN main
       REAL     SEDSHREL(MNUMCR,MNUMYR),  &
                SEDSHRNG(MNUMCR,MNUMYR),  &
                SEDSHRMG(MNUMCR,MNUMYR),  &
@@ -20,9 +18,7 @@
                SEDSHROT(MNUMCR,MNUMYR),  &
                SEDSHRME(MNUMCR,MNUMYR),  &
                SEDSHRET(MNUMCR,MNUMYR),  &
-               SEDSHRHY(MNUMCR,MNUMYR)                        
-      REAL     TMC_REVIND(MNUMCR,MNSICM,MNUMYR)  ! MANUFACTURING OUTPUT
-      REAL     TMC_REVSER(MNUMCR,MNSICNM,MNUMYR) ! NON-MANUFACTURING OUTPUT
+               SEDSHRHY(MNUMCR,MNUMYR)
       REAL     BENEL(MNUMCR,MNUMYR),     &
                BENNG(MNUMCR,MNUMYR),     &
                BENMG(MNUMCR,MNUMYR),     &
@@ -37,48 +33,46 @@
       REAL     HWYPMGTR(MNUMCR,MNUMYR),  &
                HWYPDSTR(MNUMCR,MNUMYR)
       INTEGER  iFAFyear
-	  
-!... Price of hydrogen
-    REAL       PRICE_HY(MNUMCR,MNUMYR)           ! regional hydrogen price from EE/RE & ANL
+      REAL     TFRBTU_chgsplit(2,MNUMYR)         ! Share of freight truck elec cons. by public/retail (1) and depot/fleet (2) 
 
 !... Percent alt. fuel for flex and bi vehicles	
-    REAL       PCTAF(4,MNUMCR,MNUMYR)
-!... Percent electric in PHEV for heavy trucks
-    REAL       PctPHEV_HDV
+      REAL       PCTAF(4,MNUMCR,MNUMYR)
 	  
-! Waterborne Commerce/Freight Module - Freight variables passed from tranfrt.f to tran.f
-!   Domestic Waterborne Commerce/Freight
+!... Waterborne Commerce/Freight Module - Freight variables passed from tranfrt.f to tran.f
+!    Domestic Waterborne Commerce/Freight
       REAL     TQDSHIPR(4,MNUMCR,MNUMYR)         ! Regional (census division) energy demand by fuel type
       INTEGER  SHIPHISTYR                        ! last historic year
       REAL     DSEFF(MNUMYR)                     ! domestic marine efficiency (1000 Btu/ton-mile)
       REAL     HTDSEFF(MNUMYR)                   ! high tech case domestic marine efficiency (1000 Btu/ton-mile)
       REAL     STMTT(MNUMYR,MNUMCR)              ! domestic marine ton-miles (billion)
       REAL     BSTMTT(MNUMYR,MNUMCR)             ! benchmarked travel demand
-!   International Waterborne Commerce/Freight
+!    International Waterborne Commerce/Freight
       REAL     TQISHIPR(5,MNUMCR,MNUMYR)         ! regional energy demand by fuel type (1=distillate 2=residual 3=cng 4=lng 5=low sulfur fuel oil)
 
-
-!  Air variables passed between tranair.f and tran.f
-      REAL     INC00$NP(MNUMCR,MNUMYR)           ! disposable income per capita (2000$)
+!... Air variables passed between tranair.f and tran.f
+      REAL     INC00_D_NP(MNUMCR,MNUMYR)         ! disposable income per capita (2000$)
       REAL     QJETR(MNUMCR,MNUMYR)              ! total US jet fuel demanded (quads)
 	  REAL	   QJETR_DI(16,2,2,MNUMYR)			 ! Total jet fuel demand, dimensions: (iwreg,domint,pass/frt,n)
       REAL     ASMDEMD(16,3,MNUMYR)              ! total US&non-US asm  
       REAL     SMD_TOT(16,MNUMYR)                ! total asm + FTM 
       REAL     FTM(16,MNUMYR,2)                  ! total world revenue ton miles
-      REAL     TMC_EX(MNUMYR)                    ! real exports
-      REAL     TMC_IM(MNUMYR)                    ! real imports
 
 !... Class 2b variables moving between tran.f and tranfrt.f
-REAL         CLTSTK(mnumyr,9,34,mnumcr)         ! Commercial light truck stock by year, powertrain, vintage, and census division	! MDRAEO2023
-REAL         CLTVMT(mnumyr,9,34)                ! Commercial light truck total vmt by year, powertrain, and vintage
-REAL         CLTMPG_YR(mnumyr,10,34)             ! MPG by year rather than cur/lag
-REAL		 CLTVMTVA_H(mnumyr)                  ! Historic new commerical light truck annual miles traveled 
-REAL         LTSPLIT(mnumyr)                     ! Share of class 1-2 trucks that are class 1 and 2a
-
+      REAL     CLTFBTU(mnumyr,7,mnumcr)          ! Commercial truck BTU by fuel type
+      REAL     NCLTMPG(mnumyr,12)                ! Commercial light truck new MPG by powertrain
+      REAL     CLTMPG(mnumyr,12)                 ! Commercial light truck MPG by powertrain
+      REAL     CLTBTUT(12,MNUMCR,MNUMYR)         ! total CLT consumption by Btu
+	  REAL     VMTHH(mnumyr,mnumcr,16,2) 		 ! total household ldv vmt derived from licensed drivers
+      REAL     FLTVMTECH(2,4,16,4)				 ! fleet vmt (MAXVTYP,MAXFLEET,MAXLDV,MAXHAV)
+	  REAL	   CLTVMTT(12,mnumyr)				 ! Total CLT VMT by fuel (non-vintaged)
+	  REAL     LTSPLIT(mnumyr)                   ! Share of class 1-2 trucks that are class 1 and 2a
+	  REAL	   PctEVMT_PHEV(mnumyr,4,mnumcr,2)	 ! Share of PHEV VMT that is driven on electricity {1: DS, 2:MG}
+	  REAL 	   CHRG_EFF(MNUMYR)					 ! EVSE efficiency
 !... Cumulative GWh production for EV and PHEV moving between tran.f and tranfrt.f
-	REAL :: cumulative_gwh(mnumyr)               !...cumulative EV and PHEV li-ion battery production [smn]
+	REAL :: cumulative_gwh(mnumyr)               !...cumulative EV and PHEV li-ion battery production
 	
-      PARAMETER(iFAFyear = 28)   ! Latest year for Freight Analysis Frame (FAF) data in input files (1 = 1990)
+      PARAMETER(iFAFyear 	= 28,	&			 !...Latest year for Freight Analysis Frame (FAF) data in input files (1 = 1990)
+				TMAC_YR	 	= 2012)				 !...Macro base dollar-year
 	  
       COMMON /TRANMAIN/ TSIC,					                          &
                         VMTFLT_SAF_TR,VMTFLT_SF_TR,VMT_TR,                &
@@ -86,15 +80,13 @@ REAL         LTSPLIT(mnumyr)                     ! Share of class 1-2 trucks tha
                         SEDSHREL,SEDSHRNG,SEDSHRMG,SEDSHRJF,SEDSHRDS,     &
                         SEDSHRLG,SEDSHRRS,SEDSHROT,SEDSHRME,SEDSHRET,     &
                         SEDSHRHY,                                         &
-                        TMC_REVIND,TMC_REVSER,                            &
                         BENEL,BENNG,BENMG,BENJF,BENDS,BENLG,BENRS,BENOT,  &
                         BENME,BENET,BENHY,                                &
-                        HWYPMGTR,HWYPDSTR,                                &
-                        INC00$NP,QJETR,ASMDEMD,         				  &
-                        SMD_TOT,FTM,                        	  		  &
+                        HWYPMGTR,HWYPDSTR,TFRBTU_chgsplit,                &
+                        INC00_D_NP,QJETR,ASMDEMD,SMD_TOT,FTM,    	  	  &
                         TQDSHIPR, SHIPHISTYR,                             &
                         DSEFF, HTDSEFF, STMTT,                            &
-                        BSTMTT, TQISHIPR,                                 &
-                        TMC_EX, TMC_IM, CLTSTK, CLTVMT, CLTMPG_YR,        &
-						CLTVMTVA_H, LTSPLIT, PCTAF, QJETR_DI,             &
-						CUMULATIVE_GWH
+                        BSTMTT, TQISHIPR, FLTVMTECH,                      &
+                        VMTHH, CLTVMTT, CLTBTUT, CLTMPG,NCLTMPG,CLTFBTU,   &
+						LTSPLIT,PCTAF, QJETR_DI,    &
+						CUMULATIVE_GWH,PctEVMT_PHEV,CHRG_EFF

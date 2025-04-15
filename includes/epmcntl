@@ -1,6 +1,4 @@
 !  $Header: M:/default/includes/RCS/epmcntl,v 1.3 2007/05/24 20:49:47 DSA Exp $
 ! EPMCNTL OPTIONS FOR EMISSION POLICY SUBMODULE
       INTEGER RUNEPM ! SWITCH TO RUN IT OR NOT (1=RUN)
-      real bank_end_balance ! target allowance balance in bank_endyr with cap&trade banking
       COMMON/EPMCNTL/RUNEPM
-      COMMON/EPMOTH/bank_end_balance

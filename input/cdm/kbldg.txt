@@ -1,11 +1,7 @@
 FILE NAME:      KBLDG
 
-DATE MODIFIED:  July 18, 2017
+DATE MODIFIED:  February 27, 2023
 
-CONTACT:        Kimmie Klaiman
-                NEMS Commercial Buildings Analyst
-                Kimberly.klaiman@eia.gov
-                (202)586-1678
 
 USED BY:        COMFloorspace subroutine of the National Energy Modeling System
                 (NEMS) Commercial Demand Module (CDM)
@@ -35,12 +31,12 @@ ORGANIZATION OF DATA:
 
 SOURCES:
 
-                U.S. Department of Energy, Energy Information Administration, 2012 Commercial
-                  Buildings Energy Consumption Survey, Public Use Data, available July 2012 at
-                  http://www.eia.gov/emeu/cbecs/cbecs2003/public_use_20012/cbecs_pudata2003.html.
+                U.S. Department of Energy, Energy Information Administration, 2018 Commercial
+                  Buildings Energy Consumption Survey, Public Use Data, available December 2022 at
+                  https://www.eia.gov/consumption/commercial/data/2018/.
 
-                Also public use and table data from NBECS 1983, NBECS 1986, CBECS 1989,
-                  CBECS 1992, CBECS 1995, and CBECS 1999.
+                Also public use and table data from 1983 NBECS, 1986 NBECS, 1989 CBECS,
+                   1992 CBECS,  1995 CBECS,  1999 CBECS,  2003 CBECS,  and 2012 CBECS.
      
                 Journal of Business & Economic Statistics, April 1986, Vol 4, No. 2.
 
@@ -98,6 +94,11 @@ SOURCES:
 
 
 
-55	62	55	50	55	53	65	58	50	58	60
+
+
+
+
+
+46	49	39	40	46	40	46	43	38	41	46
 
 1.21	1.38	1.02	1.43	1.39	1.40	1.98	1.45	1.26	1.31	1.29

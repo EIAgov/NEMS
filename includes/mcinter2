@@ -10,9 +10,9 @@
 
       DOUBLE PRECISION DLINK(164,MNUMYR)    !Number of energy drivers, MNUMYR
       DOUBLE PRECISION NLINK(362,MNUMYR)    !Number of NEMS energy variables, MNUMYR
-      DOUBLE PRECISION EPMAC(186,MNUMYR)    !Number of solution variables returned to nems from gi model,MNUMYR
+      DOUBLE PRECISION EPMAC(193,MNUMYR)    !Number of solution variables returned to nems from US model,MNUMYR
       DOUBLE PRECISION MCXTABS(158,MNUMYR)  !Number of solution variables returned for extra tables,MNUMYR
-      DOUBLE PRECISION MCGIXTAB(206,MNUMYR) !Number of GI solution variables returned for extra tables, MNUMYR
+      DOUBLE PRECISION MCGIXTAB(206,MNUMYR) !Number of US solution variables returned for extra tables, MNUMYR
 
 !
 ! Integers
@@ -21,11 +21,11 @@
       INTEGER MCNMSERV                   !Number of service industries
       INTEGER NUMEMPL                    !Number of industrial employment categories
       INTEGER NEMSENERGYNUM              !Number of exogenous variables (aggregates and components) read from nems
-      INTEGER SCENNUM                    !Number of driver variables passed to gi model from nems
-      INTEGER NUMEPMAC                   !Number of solution variables returned to nems from gi model
-      INTEGER NUMXTABS                   !Number of solution variables returned to nems from gi model for extra tables
-      INTEGER GISWITCH                   !GI scenario switch -1:OFF; 0="_0"; 1="_pes"; 2="_opt"; 3="_cyc"
-      INTEGER NUMGIXTAB                  !Number of solution variables returned to nems from gi model for extra tables
+      INTEGER SCENNUM                    !Number of driver variables passed to US model from nems
+      INTEGER NUMEPMAC                   !Number of solution variables returned to nems from US model
+      INTEGER NUMXTABS                   !Number of solution variables returned to nems from US model for extra tables
+      INTEGER GISWITCH                   !US scenario switch -1=OFF; 0="_0"
+      INTEGER NUMGIXTAB                  !Number of solution variables returned to nems from US model for extra tables
 
       INTEGER MCNMNATREG                 !Number of regional macro variables from the nat model plus man and non-man wages
       INTEGER TAXMODE                    !Presence and type of tax; NEMS parameter MACTAX
@@ -37,7 +37,6 @@
       INTEGER MAMLASTYR                  !MAM/EViews last year
       INTEGER CONTROLTARGET              !Commercial add factor switch; 1 is on, 0 is off
       INTEGER CFDIAGX                    !Commercial growth rate table switch; 1 is on, 0 is off
-      INTEGER CFLEVER                    !Switch for running the commercial floor space model 1:ON; 0=OFF
       INTEGER LINKRUN                    !Switch for running the Linkage model; 1=ON 0=OFF
       INTEGER LINKCYCLEMAX               !Number of max cycles to allow for Linkage model
       INTEGER LINKREC                    !Switch for recording Linkage cycle results; 1=ON 0=OFF
@@ -51,19 +50,19 @@
       REAL ESMACREG(11,57,MNUMYR)        !Solution macro vars, regionalized
       REAL ESEMP(11,43,MNUMYR)           !Employment solution
       REAL ESMAC(75,MNUMYR)              !Solution macro variables, not regionalized      
-      REAL ESIND(11,55,MNUMYR)           !Industrial output forecast
+      REAL ESIND(11,62,MNUMYR)           !Industrial output forecast
       REAL ESSERV(12,MNUMYR)             !Service output forecast
       REAL MYINPUTS(197,MNUMYR)          !Direct link
-      REAL MY_DETAIL(113,MNUMYR)         !Number of solution variables returned to nems from gi model,MNUMYR
+      REAL MY_DETAIL(113,MNUMYR)         !Number of solution variables returned to nems from US model,MNUMYR
       REAL MC_COMMFLR(280,MNUMYR)        !Commflr endogenous variables
       REAL MC_REGMAC(260,MNUMYR)         !Regional model macro endogenous variables
-      REAL MC_REGIO(432,MNUMYR)          !Regional model IO endogenous variables
+      REAL MC_REGIO(495,MNUMYR)          !Regional model IO endogenous variables
       REAL MC_REGEMP(351,MNUMYR)         !Regional model EMPLOYMENT endogenous variables
       REAL MC_ENGIMP(MNUMYR)             !Imports of all energy
       REAL MC_ENGEXP(MNUMYR)             !Exports of all energy
       REAL RMFFLEV                       !Lever for turning on Federal Reserve reaction function
       REAL CORPREBATE                    !Read percent of no-cost allocation of permits to corporations
-                                         ! that are then rebated to consumers (revenue neutral).
+                                         ! that are then rebated to consumers (revenue neutral)
       REAL mc_engdompet(mnumyr)
       REAL mc_engdomoo(mnumyr)
       REAL mc_engdombio(mnumyr)
@@ -95,7 +94,7 @@
       CHARACTER*100 NEMSENERGYLABEL(362) !Labels for NEMS energy variables
       CHARACTER*100 MAMINVESTLABEL(24)   !Labels for the investment variables
       CHARACTER*100 MAMNATIONLABEL(62)   !Labels for the national variables
-      CHARACTER*100 MAMREGIONLABEL(117)  !Labels for the regional variables
+      CHARACTER*100 MAMREGIONLABEL(121)  !Labels for the regional variables
       CHARACTER*100 MAMCENSUSLABEL(11)   !Labels for the Census divisions
       CHARACTER*100 MAMNONMANGOLABEL(11) !Labels for nonmanufacturing variables
       CHARACTER*100 MAMEMPLOYLABEL(43)   !Labels for employment variables
@@ -104,7 +103,7 @@
                       MCNMSERV,         NUMEMPL,           NEMSENERGYNUM,     SCENNUM,           NUMEPMAC,          &
                       NUMXTABS,         GISWITCH,          NUMGIXTAB,         MCNMNATREG,        TAXMODE,           &
                       CAFEMODE,         TTECHMODE,         MACMODE,           MAC111D,           OGTECHMODE,        &
-                      MAMLASTYR,        CONTROLTARGET,     CFDIAGX,           CFLEVER,           LINKRUN,           &
+                      MAMLASTYR,        CONTROLTARGET,     CFDIAGX,           LINKRUN,                              &
                       LINKCYCLEMAX,     LINKREC,           MAMENERGY,         MAMINVEST,         MAMEMPLOY,         &
                       ESMACREG,         ESEMP,             ESMAC,             ESIND,             ESSERV,            &
                       MYINPUTS,         MY_DETAIL,         MC_COMMFLR,        MC_REGMAC,         MC_REGIO,          &

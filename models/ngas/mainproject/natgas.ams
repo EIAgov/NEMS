@@ -9,65 +9,107 @@ Model Main_NGTDM {
 	}
 	Procedure NEMS_Monitor {
 		Body: {
-			            ! the initial loaddata is required because this procedure is invoked from the command line.
-			            ! Aimms doesn't load case files automatically, as specified in the project settings, when a procedure is invoked from 
-			            ! the command line.   
-			            LoadData("restart"); 
-			            MainInitialization;
-			            
-			            Read_Runtime_Parameters;  ! read here in case "keepopen" setting needed by this procedure. currently not used.
+			           EnterNEMSMonitor := CurrentToString("%c%y-%m-%d %H:%M:%S") + " I'm Alive! AIMMS entered NEMS_Monitor. Model Year, Cycle, or Iteration info not yet known. AIMMS has not yet read monitor.in.txt or GDS";
+				   put ngStatusFile;
+				   put EnterNEMSMonitor;
+				   putclose;
 			
-			            
-			            ! the following allows the aimms project to be kept open (when keepopen=1) and to later Quit at direction of NEMS,
-			            ! or to run and exit immediately. There is sometimes a delay with the Quit option due to error trapping, so NEMS is set up to wait for 
-			            ! an action message of "Exited" written by the MainTermination procedure right before aimms exits.
-			            CountSleep := 0;
-			            ! count sleep/wake cycles while waiting for direction from nems via sAction in the message file, monitor.in.txt
-			            while ( CountSleep <= 2000 ) do
-			               if fileexists(sMessageInFile) then
-			               ! read sAction, current model year, and current iteration from sMessageInFile
-			                 sAction:=" ";
-			                 read from file sMessageInFile in merge mode;
-			               else
-			                 put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
-			               endif;
-			               if sAction = "MainExecution" then
-			                 sAction:="executing";    ! Action message to tell NEMS I'm executing
-			                 write sAction to file NEMSMessageOutFile in replace mode;  
+			           ! the initial loaddata is required because this procedure is invoked from the command line.
+			           ! Aimms doesn't load case files automatically, as specified in the project settings, when a procedure is invoked from 
+			           ! the command line.   
+			           !LoadData("restart"); 
+			           MainInitialization;
 			
-			                 dialogProgress(""); ! remove progress dialog
-			                 sStatusMessage := formatstring("Invoking MainExecution for %s",ncntrl_curcalyr('1')) + 
-			                                   formatstring(", iteration %s",ncntrl_curitr('1')) +
-			                                   formatstring(", reporting loop indicator=%s",ncntrl_ncrl('1'));
-			                 put sStatusMessage;
-			                 ReadGlobalDataFromNEMS; ! read globaldatatoAIMMS_yyyy_ii.txt where yyyy is ncntrl_curcalyr(1) and ii is ncntrl_curitr(1)
-			                 !Initialize ModelYear
-					 ModelYear := StringToElement(Years_, FormatString("%n", NCNTRL_CURCALYR(1)));
-					 MonthInPeriod(tmon) := Element( ModelYearMonths_, Ord(tmon));
-			                 MainExecution;
-			                 sAction:=formatstring("Completed %s,",ncntrl_curcalyr('1')) + 
-			                          formatstring("iteration %s ",ncntrl_curitr('1')) ;    ! Action message to tell NEMS I'v completed this year, iteration
-			                 write sAction to file NEMSMessageOutFile in replace mode;  
-			                 CountSleep:=0;   
-			                 sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
-			                 put sStatusMessage;
-			                 Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
-			               elseif sAction = "Quit" then ! NEMS says to exit aimms
-			                 CountSleep:=2000;
-			               else
-			                 sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
-			                 Delay(.5);                  
-			               endif;
-			               dialogProgress(sStatusMessage,round(100*CountSleep/2000));
-			               CountSleep += 1;
-			            
-			            endwhile;
-			            if CountSleep>=2001 then
-			              put "Quit directive found in monitor.in.txt. Exiting AIMMS";
-			            else
-			              put "Wait time exceeded. Exiting Aimms";
-			            endif;
-			            exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
+			           Read_Runtime_Parameters;  ! read here in case "keepopen" setting needed by this procedure. currently not used.
+			
+			
+			           ! the following allows the aimms project to be kept open (when keepopen=1) and to later Quit at direction of NEMS,
+			           ! or to run and exit immediately. There is sometimes a delay with the Quit option due to error trapping, so NEMS is set up to wait for 
+			           ! an action message of "Exited" written by the MainTermination procedure right before aimms exits.
+			           CountSleep := 0;
+			           ! count sleep/wake cycles while waiting for direction from nems via sAction in the message file, monitor.in.txt
+			           while ( CountSleep <= 2000 ) do
+			              if fileexists(sMessageInFile) then
+			              ! read sAction, current model year, and current iteration from sMessageInFile
+			                sAction:=" ";
+			                read from file sMessageInFile in merge mode;
+			
+			                ReadMonitorInStatus := CurrentToString("%c%y-%m-%d %H:%M:%S") + " Reading monitor.in.txt. sAction is " + sAction; 
+			                put ngStatusFile;
+			                put ReadMonitorInStatus;
+			                putclose;
+			
+			              else
+			                put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
+			              endif;
+			              if sAction = "MainExecution" then
+			                sAction:="executing";    ! Action message to tell NEMS I'm executing
+			                write sAction to file NEMSMessageOutFile in replace mode;  
+			                ExecutingMonitorOutStatus := CurrentToString("%c%y-%m-%d %H:%M:%S") + " AIMMS sees MainExecution in monitor.in. Writing 'executing' to sAction";
+			                put ngStatusFile;
+			                put ExecutingMonitorOutStatus;
+			                putclose;
+			
+			
+			                dialogProgress(""); ! remove progress dialog
+			                sStatusMessage := formatstring("Invoking MainExecution for %s",ncntrl_curcalyr('1')) + 
+			                                  formatstring(", iteration %s",ncntrl_curitr('1')) +
+			                                  formatstring(", reporting loop indicator=%s",ncntrl_ncrl('1'));
+			                put sStatusMessage;
+			
+			                MiddleNEMSMonitor := CurrentToString("%c%y-%m-%d %H:%M:%S") + " I'm Alive! AIMMS in NEMS_Monitor and has read monitor.in.txt - " +
+					formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+					formatstring("%i, ",ncntrl_curcalyr(1));
+					put ngStatusFile;
+					put MiddleNEMSMonitor;
+					putclose;
+			
+			                if ParquetReadSwitch = 1 then
+			                	ReadGlobalDataFromNEMS_parquet;
+			                else
+			                ReadGlobalDataFromNEMS; ! read globaldatatoAIMMS_yyyy_ii.txt where yyyy is ncntrl_curcalyr(1) and ii is ncntrl_curitr(1)
+			                endif;
+			                !Initialize ModelYear
+			ModelYear := StringToElement(Years_, FormatString("%n", NCNTRL_CURCALYR(1)));
+			MonthInPeriod(tmon) := Element( ModelYearMonths_, Ord(tmon));
+			                MainExecution;
+			                sAction:=formatstring("Completed %s,",ncntrl_curcalyr('1')) + 
+			                         formatstring("iteration %s ",ncntrl_curitr('1')) ;    ! Action message to tell NEMS I'v completed this year, iteration
+			                write sAction to file NEMSMessageOutFile in replace mode;  
+			
+			                CompletedMonitorOutStatus := CurrentToString("%c%y-%m-%d %H:%M:%S") + " AIMMS completed MainExeuction. Writing 'Completed' to monitor.out";
+			                put ngStatusFile;
+					put CompletedMonitorOutStatus;
+					putclose;
+			
+			                CountSleep:=0;   
+			                sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			                put sStatusMessage;
+			                Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
+			              elseif sAction = "Quit" then ! NEMS says to exit aimms
+			                CountSleep:=2000;
+			              else
+			                sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			                Delay(.5);                  
+			              endif;
+			              dialogProgress(sStatusMessage,round(100*CountSleep/2000));
+			              CountSleep += 1;
+			
+			           endwhile;
+			           if CountSleep>=2001 then
+			             put "Quit directive found in monitor.in.txt. Exiting AIMMS";
+			           else
+			             put "Wait time exceeded. Exiting Aimms";
+			           endif;
+			
+			                ExitNEMSMonitor := CurrentToString("%c%y-%m-%d %H:%M:%S") +  " I'm Alive! AIMMS is preparing to exit NEMS_Monitor and begin Main_Termination  - "  + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+					formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+					formatstring("%i, ",ncntrl_curcalyr(1));
+					put ngStatusFile;
+					put ExitNEMSMonitor;
+					putclose;
+			
+			           exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
 		}
 		Comment: {
 			"For KEEPOPEN=1 option, This routines cause AIMMS to sleep and periodically wake to check a message input file from NEMS. If the file
@@ -85,6 +127,10 @@ Model Main_NGTDM {
 			MonthInPeriod(tmon) := Element( ModelYearMonths_, Ord(tmon));
 			!Initialize regions and other sets; read and transfer historical data
 			!HQPYear:=FirstHQPYear;
+			
+			read from file "input\\ngparquetswitch.txt" in merge mode;
+			
+			SetSolverOptions;
 		}
 		Comment: {
 			"This procedure is used for MainExecution_Standalone.
@@ -94,6 +140,13 @@ Model Main_NGTDM {
 	}
 	Procedure MainExecution {
 		Body: {
+			EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " I'm Alive! AIMMS entered MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			put ngStatusFile;
+			put EnterMainExecution;
+			putclose;
+			
 			!Read in first model year (user-defined)
 			Read_FirstModelYear;
 			!Initialize ModelYear
@@ -145,7 +198,7 @@ Model Main_NGTDM {
 			
 			 if (ModelYear >= FirstModelYear and ncntrl_ncrl(1)=1 ) then
 			    	!Only run LNG export capacity expansion if it's the last NEMS iteration, we are determining builds in model, and facility will be fully built before last model year
-			   	if (LNG_FixedExports_Switch = 0) and ((NEMSmap_XYear(NEMSmap_MNXYRS(ModelYear)) + LNG_YrsUntilBuild) < (LastModelYear-LNG_PhaseInYrs-5)) then 
+			   	if (LNG_FixedExports_Switch = 0) and ((NEMSmap_XYear(NEMSmap_MNXYRS(ModelYear))  + LNG_YrsUntilBuild) < (LastModelYear-LNG_PhaseInYrs)) then 
 			
 					NEMS_Report_Loop;
 					Write_to_NEMS_LNGExports;
@@ -179,7 +232,18 @@ Model Main_NGTDM {
 				SaveAll( FormatString("ngmm%e_%i", ModelYear,ncntrl_curitr(1)));
 			endif;
 			            ! output the global variables (as previously set up in nggetvars.txt) to nems in a text file
-			            SendGlobalDataToNEMS;
+			            if (ParquetWriteSwitch = 1) then
+			            	SendGlobalDatatoNEMS_parquet;
+			            else
+			                SendGlobalDataToNEMS;
+			            endif;
+			
+			ExitMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " I'm Alive! AIMMS exiting MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			put ngStatusFile;
+			put ExitMainExecution;
+			putclose;
 		}
 		Comment: {
 			"MainExecution is the procedure through which NEMS runs NGTDM.
@@ -189,6 +253,7 @@ Model Main_NGTDM {
 	}
 	Procedure MainExecution_Standalone {
 		Body: {
+			ProfilerStart;
 			empty Cleared_Identifiers_;
 			Read_FirstModelYear;
 			!LoadData("restart_initial");
@@ -214,6 +279,9 @@ Model Main_NGTDM {
 			!write STEO factors
 			STEOFactors_Write;
 			!SaveAll( FormatString("ngmm%e_%i", ModelYear,ncntrl_curitr(1)));
+			
+			! Collect profiler information for line hits above 0.5 seconds.
+			ProfilerCollectAllData(Results, GrossTimeThreshold: 0.5);
 		}
 		Comment: "This procedure serves as \"MainExecution\" when invoking NGTDM from/within AIMMS.";
 	}
@@ -367,6 +435,9 @@ Model Main_NGTDM {
 			}
 			Section COMMREP_Declarations {
 				DeclarationSection COMMREP {
+					Parameter COMMREP_SurvFloorTotal {
+						IndexDomain: (MNUMCR,M11,MNUMYR);
+					}
 					Parameter COMMREP_CMTotalFlspc {
 						IndexDomain: (MNUMCR,CMnumBldg,MNUMYR);
 					}
@@ -410,6 +481,10 @@ Model Main_NGTDM {
 			}
 			Section LFMMOUT_Declarations {
 				DeclarationSection LFMMOUT {
+					Parameter LFMMOUT_LCFS_BaseLine {
+						IndexDomain: (LCFS_C,MNXYRS);
+						Text: "Baseline LCFS Carbon Itensity(1=Gasoline, 2 = Diesel)";
+					}
 					Parameter LFMMOUT_Q_CRUDE_IMPORTS {
 						IndexDomain: (M10,MNCRUD,MNXYRS);
 						Text: "Imported crude oil quantity (9=US Total)";
@@ -454,6 +529,10 @@ Model Main_NGTDM {
 						IndexDomain: (MNUMCR,MNUMYR);
 						Text: "Natural Gas - Electric Power";
 					}
+					Parameter Copy_MPBLK_PNGEL {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Natural Gas - Electric Power";
+					}
 					Parameter MPBLK_PNGIN {
 						IndexDomain: (MNUMCR,MNUMYR);
 						Text: "Natural Gas - Industrial";
@@ -466,9 +545,13 @@ Model Main_NGTDM {
 			}
 			Section MXPBLK_Declarations {
 				DeclarationSection MXPBLK {
+					Parameter MXPBLK_XBRENT_PRICE {
+						IndexDomain: MNXYRS;
+					}
 					Parameter MXPBLK_XSTART_PRICE {
 						IndexDomain: (MNXYRS);
 						Text: "World oil price as specified in memo";
+						Comment: "Brent spot price";
 					}
 				}
 			}
@@ -494,6 +577,11 @@ Model Main_NGTDM {
 			}
 			Section NGTDMOUT_Declarations {
 				DeclarationSection NGTDMOUT {
+					Parameter NGTDMOUT_SPNGIN {
+						IndexDomain: (MNUMCR,MNUMYR,M4);
+						Text: "natural gas delivered price to industrial sector by HMM season";
+						Comment: "natural gas delivered price to industrial sector by season";
+					}
 					Parameter NGTDMOUT_PGFTRFV {
 						IndexDomain: (MNUMCR,MNUMYR);
 						Text: "PRICE COMPRESSED NG TO FLEET VEHICLES";
@@ -576,6 +664,9 @@ Model Main_NGTDM {
 			}
 			Section NGTDMREP_Declarations {
 				DeclarationSection NGTDMREP {
+					Parameter NGTDMREP_LCFSRNGOS {
+						IndexDomain: MNUMYR;
+					}
 					Parameter NGTDMREP_ACGPR_RESCOM {
 						IndexDomain: (M12,MNUMYR);
 						Text: "average residential/commercial citygate price";
@@ -694,6 +785,10 @@ Model Main_NGTDM {
 						IndexDomain: (NNGEMM,MNUMYR);
 						Text: "distributor tariff for electric power sector";
 					}
+					Parameter NGTDMREP_OGPRRNG {
+						IndexDomain: MNUMYR;
+						Comment: "Total annual RNG production";
+					}
 				}
 			}
 			Section OGSMOUT_Declarations {
@@ -755,6 +850,7 @@ Model Main_NGTDM {
 					Parameter QBLK_QGFIN {
 						IndexDomain: (MNUMCR,MNUMYR);
 						Text: "Natural Gas, Core - Industrial";
+						dex::Document: Test;
 					}
 					Parameter QBLK_QGIIN {
 						IndexDomain: (MNUMCR,MNUMYR);
@@ -1083,6 +1179,12 @@ Model Main_NGTDM {
 			}
 		}
 		DeclarationSection GDS_Sets {
+			Set LCFS_C_ {
+				Index: LCFS_C;
+				Definition: {
+					{1..2}
+				}
+			}
 			Set GDSIdentifiers_ {
 				SubsetOf: AllIdentifiers;
 				Definition: {
@@ -1495,6 +1597,7 @@ Model Main_NGTDM {
 				Historical_reads;                       !Read historical data
 				TX_InitializeData;			!Initialize Texas data
 				Historical_InitializeData;              !Pre-process historical data: convert to required units, assign missing data, etc.
+				RNG_Initialize; 			! Initialize RNG production history
 				
 				!Initialize Preprocessing Routines
 				Capacity_InitializeData;                !Initialize capacities
@@ -1517,6 +1620,7 @@ Model Main_NGTDM {
 				BalancingItem_Initialize;               !Calculate average discrepancy and apply to forecast years
 				BalancingItem_Canada;                   !Calculate average discrepancy for Canada and apply to forecast years; CN_W->CN_E hist flow is also calculated here
 				STEOFactors_Initialize;                 !Initialize STEO factors
+				!RNG_Production_Run;
 				if STEOBM=1 and STEONG=1 then
 				  STEOTargets_Set;                        !Set STEO targets prior to model run
 				  if STSCALNG then
@@ -1547,6 +1651,7 @@ Model Main_NGTDM {
 				Calculate_Losses_Run; ! Calculate storage and distribution losses
 				LNGExportUtilization_Run;	!Calculate utilization of LNG export capacity
 				DefineCapacities; !Adjusts current pipeline capacity by state by arc (capacity expansion)
+				RNG_Production_Run;
 				if (STEOBM=1 and STEONG=1) then
 				! if STSCALNG=0 then
 				  if (STSCALNG=0 or ModelYear < LastSTEOYear) then   !temp for aeo2018
@@ -1575,7 +1680,7 @@ Model Main_NGTDM {
 				Production_Postprocess; !Fill production arrays with solution results
 				!Only run LNG export capacity expansion if determining builds in model and facility will be fully built before last model year
 				if ( ( AIMMS_Standalone_Switch =1) and (LNG_FixedExports_Switch = 0) and 
-					((NEMSmap_XYear(NEMSmap_MNXYRS(ModelYear)) + LNG_YrsUntilBuild) < (LastModelYear-LNG_PhaseInYrs)))then 
+					((NEMSmap_XYear(NEMSmap_MNXYRS(ModelYear))  + LNG_YrsUntilBuild) < (LastModelYear-LNG_PhaseInYrs)))then 
 					LNGExportsCapExpansion_Run;
 				endif;
 				LNGAnnualExports_PostProcess; !Calculate Annual LNG Exports (assuming Switch is on for endogenous)
@@ -1660,9 +1765,18 @@ Model Main_NGTDM {
 				!NGTDMOUT_SPNGELGR((card(NNGEMM), NEMSmap_MNUMYR(histyr), M3)):=AK_Price_EndUse(histyr, Sector_Electric)/
 				!                                                  Convert_TBtu_Bcf_Utility(histyr);    
 				
+				NGTDMOUT_SPNGIN(MNUMCR, NEMSmap_MNUMYR(histyr), hmmseason) := sum(r_cen, Price_EnduseSeasonalIndustrial(histyr, r_cen, hmmseason) * NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) /
+											Convert_TBtu_Bcf_NonUtility(histyr);
+				
 				MPBLK_PNGEL(MNUMCR, NEMSmap_MNUMYR(histyr)):=sum((NNGEMM,season,M3) |(NEMSmap_NNGEMM_CD(NNGEMM, MNUMCR) and NEMSmap_M3_season(M3,season)),
 				                                                NGTDMOUT_SPNGELGR(NNGEMM, NEMSmap_MNUMYR(histyr), M3)*Electric_NNGEMM_Season(histyr,NNGEMM,season))/$
 				                                                sum((NNGEMM,season, M3)| (NEMSmap_NNGEMM_CD(NNGEMM, MNUMCR) and NEMSmap_M3_season(M3,season)), Electric_NNGEMM_Season(histyr,NNGEMM,season));
+				
+				Copy_MPBLK_PNGEL(MNUMCR, NEMSmap_MNUMYR(histyr)) := sum(reg  |NEMSmap_reg_MNUMCR(reg, MNUMCR),  HistoricalAnnualEndUsePrice(histyr, Sector_Electric, reg) * HistoricalAnnualDemand(histyr, Sector_Electric, reg)) /$
+											sum(reg |  NEMSmap_reg_MNUMCR(reg, MNUMCR),  HistoricalAnnualDemand(histyr, Sector_Electric, reg));
+				
+				Copy_MPBLK_PNGEL(TotalUS_MNUMCR, NEMSmap_MNUMYR(histyr)) := sum(MNUMCR, Copy_MPBLK_PNGEL(MNUMCR, NEMSmap_MNUMYR(histyr)) * QBLK_QNGEL(MNUMCR, NEMSmap_MNUMYR(histyr))) /$
+												QBLK_QNGEL(TotalUS_MNUMCR, NEMSmap_MNUMYR(histyr));
 				
 				
 				NGTDMOUT_PGFTRFV(MNUMCR,NEMSmap_MNUMYR(histyr)) := sum(r_cen, Price_EndUseTransportation(histyr, Fuel_CNG, Vehicle_Fleet, r_cen, TransportationOption(Fuel_CNG))*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR) )/
@@ -1820,7 +1934,14 @@ Model Main_NGTDM {
 				!NGTDMREP_OGPRDNG(TotalUS_MNUMOR, NEMSmap_MNUMYR(histyr)) := sum(MNUMOR| MNUMOR<TotalUS_MNUMOR, NGTDMREP_OGPRDNG(MNUMOR, NEMSmap_MNUMYR(histyr)));
 				
 				!!national total across all three categories (coal, oil, other) of supplemental fuel produced
+				! temporarily adding RNG to supplemental.
 				NGTDMREP_OGPRSUP(NEMSmap_MNUMYR(histyr)) := sum((sng,l48), AnnualSupply(histyr, sng, l48));
+				
+				! National RNG Production
+				NGTDMREP_OGPRRNG(NEMSmap_MNUMYR(histyr)) := sum(l48, ActualProductionAnnual(histyr, Supply_RNG, l48));
+				
+				! Carbon offset by RNG via LCFS
+				NGTDMREP_LCFSRNGOS(NEMSmap_MNUMYR(histyr)) := AnnualRNGCarbonOffset(histyr);
 				
 				!!SNG-coal
 				NGTDMREP_OGSUPGAS(1,MNUMCR, NEMSmap_MNUMYR(histyr)) := sum((r_cen,l48) |  map_State_CensusRegion(l48, r_cen) and NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR),
@@ -1849,6 +1970,8 @@ Model Main_NGTDM {
 				NGTDMREP_OGWPRNG(TotalUS_MNUMOR, NEMSmap_MNUMYR(histyr)) := sum(l48_MNUMOR, NGTDMREP_OGPRDNG(l48_MNUMOR, NEMSmap_MNUMYR(histyr))*NGTDMREP_OGWPRNG(l48_MNUMOR, NEMSmap_MNUMYR(histyr)))/$
 				                                                                sum(l48_MNUMOR, NGTDMREP_OGPRDNG(l48_MNUMOR, NEMSmap_MNUMYR(histyr)));
 				
+				! World LNG Price history
+				NGTDMREP_PINTLNG(M2,NEMSmap_MNUMYR(histyr)) := sum( d_lng, HistoricalLNGPrice(histyr,d_lng)*NEMSmap_M2_d_lng(M2,d_lng));
 				
 				!Write Consumption variables to common block
 				
@@ -1997,7 +2120,10 @@ Model Main_NGTDM {
 				NGTDMOUT_SPNGELGR(NNGEMM, NEMSmap_MNUMYR(ModelYear), M3):=sum(season, Price_EnduseElectric(ModelYear, NNGEMM, season, ElectricOption)*NEMSmap_M3_season(M3,season))/
 				                                                  Convert_TBtu_Bcf_Utility(ModelYear);
 				NGTDMOUT_SPNGELGR((card(NNGEMM), NEMSmap_MNUMYR(ModelYear), M3)):=AK_Price_EndUse(ModelYear, Sector_Electric)/
-				                                                  Convert_TBtu_Bcf_Utility(ModelYear);                                                  
+				                                                  Convert_TBtu_Bcf_Utility(ModelYear);    
+				
+				NGTDMOUT_SPNGIN(MNUMCR, NEMSmap_MNUMYR(ModelYear), hmmseason) := sum(r_cen, Price_EnduseSeasonalIndustrial(ModelYear, r_cen, hmmseason) * NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR)) /
+											Convert_TBtu_Bcf_NonUtility(ModelYear);
 				
 				MPBLK_PNGEL(MNUMCR, NEMSmap_MNUMYR(ModelYear)):=sum((NNGEMM,M3), NGTDMOUT_SPNGELGR(NNGEMM, NEMSmap_MNUMYR(ModelYear), M3)*UEFDOUT_SQNGELGR(NNGEMM,NEMSmap_MNUMYR(ModelYear),M3)*
 				                                                NEMSmap_NNGEMM_CD(NNGEMM, MNUMCR))/$
@@ -2150,10 +2276,14 @@ Model Main_NGTDM {
 				NGTDMREP_OGPRCNG(OGDIST, NEMSmap_MNUMYR(ModelYear)) := $ sum(ak_s,  AK_Citygate(ModelYear)*NEMSmap_OGDIST_SupplyNode(OGDIST, ak_s));
 				
 					!NA production  - Assign realized production to OGSM
+				CurrentMNUMYR := NEMSmap_MNUMYR(ModelYear);
+				empty OGSMOUT_OGRNAGPRD(OGDIST, '5', CurrentMNUMYR);
+				
 				OGSMOUT_OGRNAGPRD(OGDIST, 5, NEMSmap_MNUMYR(ModelYear)) := sum(ussup | NEMSmap_OGDIST_SupplyNode(OGDIST, ussup), ActualProductionAnnual(ModelYear, Supply_NA, ussup)/
 				                                                       (1 - LeaseFuelFactor(ussup)*STEOLeaseFuelFactor(ModelYear)));
 				
 					!NA + AD production by MNUMOR region
+				empty NGTDMREP_OGPRDNG(MNUMOR, CurrentMNUMYR);
 				NGTDMREP_OGPRDNG(MNUMOR, NEMSmap_MNUMYR(ModelYear)) := sum(l48s | NEMSmap_SupplyNode_MNUMOR(l48s,MNUMOR), (ActualProductionAnnual(ModelYear, Supply_AD, l48s)+
 				                                                                 ActualProductionAnnual(ModelYear, Supply_NA, l48s))/ (1 - LeaseFuelFactor(l48s)*STEOLeaseFuelFactor(ModelYear)));
 				NGTDMREP_OGPRDNG('11',CURIYR) := 0.0;
@@ -2161,12 +2291,19 @@ Model Main_NGTDM {
 				NGTDMREP_OGPRDNG('13',CURIYR) := AK_Production(ModelYear,AKRegion_South);
 				NGTDMREP_OGPRDNG(TotalUS_MNUMOR, NEMSmap_MNUMYR(ModelYear)) := sum(MNUMOR| MNUMOR<TotalUS_MNUMOR, NGTDMREP_OGPRDNG(MNUMOR, NEMSmap_MNUMYR(ModelYear)));
 				
-					!national total across all three categories (coal, oil, other) of supplemental fuel produced
+				!national total across all three categories (coal, oil, other) of supplemental fuel produced
 				NGTDMREP_OGPRSUP(NEMSmap_MNUMYR(ModelYear)) := sum((sng,l48), ActualProductionAnnual(ModelYear, sng, l48));
+				
+				! National RNG Production
+				NGTDMREP_OGPRRNG(NEMSmap_MNUMYR(ModelYear)) := sum(l48s, ActualProductionAnnual(ModelYear, Supply_RNG, l48s));
+				
+				! Carbon offset by RNG via LCFS
+				NGTDMREP_LCFSRNGOS(NEMSmap_MNUMYR(ModelYear)) := AnnualRNGCarbonOffset(ModelYear);
 				
 					!SNG-coal
 				NGTDMREP_OGSUPGAS(1,MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum((r_cen,l48) |  map_State_CensusRegion(l48, r_cen) and NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR),
 				                                                                  ActualProductionAnnual(ModelYear, Supply_SNGcoal, l48));
+				
 				NGTDMREP_OGSUPGAS(1, TotalUS_MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum(l48, ActualProductionAnnual(ModelYear, Supply_SNGcoal, l48));
 				!SNG-oil+other
 				NGTDMREP_OGSUPGAS(2, MNUMCR, NEMSmap_MNUMYR(ModelYear)) := sum((sng,l48,r_cen) | sng in (SNG_-Supply_SNGcoal) and map_State_CensusRegion(l48, r_cen) and NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR),
@@ -2273,6 +2410,20 @@ Model Main_NGTDM {
 	Section NEMS_Interface {
 		Section NEMS_Monitor_Section {
 			DeclarationSection NEMS_Monitor_Identifiers {
+				StringParameter ReadMonitorInStatus;
+				StringParameter ExecutingMonitorOutStatus;
+				StringParameter CompletedMonitorOutStatus;
+				StringParameter EnterMainExecution;
+				StringParameter EnterMainTermination;
+				StringParameter EnterNEMSMonitor;
+				StringParameter MiddleNEMSMonitor;
+				StringParameter ExitNEMSMonitor;
+				StringParameter ExitMainExecution;
+				File ngStatusFile {
+					Name: "ng_status.txt";
+					Device: Disk;
+					Mode: merge;
+				}
 				Parameter CountSleep;
 			}
 			DeclarationSection Transfer_Global_Data {
@@ -2350,6 +2501,7 @@ Model Main_NGTDM {
 					                      display {NGTDMOUT_PGLTRSHIP(M3,MNUMCR,globalyr)} where decimals:=22;
 					                      display {NGTDMOUT_SPNGELGR(NNGEMM,globalyr,M3)} where decimals:=22;
 					                      display {NGTDMOUT_PNGELGR(NNGEMM,globalyr)} where decimals:=22;
+					                      display {NGTDMOUT_SPNGIN(MNUMCR, globalyr, M4)} where decimals:=22;
 					                      display {NGTDMREP_ACGPR_RESCOM(M12,globalyr)} where decimals:=22;
 					                      display {NGTDMREP_CNLNGIMP(globalyr)} where decimals:=22;
 					                      display {NGTDMREP_EL_MRKUP_BETA(M3)} where decimals:=22;
@@ -2367,6 +2519,8 @@ Model Main_NGTDM {
 					                      display {NGTDMREP_OGHHPRNG(globalyr)} where decimals:=22;
 					                      display {NGTDMREP_OGPRDNG(MNUMOR,globalyr)} where decimals:=22;
 					                      display {NGTDMREP_OGPRSUP(globalyr)} where decimals:=22;
+					                      display {NGTDMREP_OGPRRNG(globalyr)} where decimals:=22;
+					                      display {NGTDMREP_LCFSRNGOS(globalyr)} where decimals:=22;
 					                      display {NGTDMREP_OGSUPGAS(M2,MNUMCR,globalyr)} where decimals:=22;
 					                      display {NGTDMREP_OGWPRNG(MNUMOR,globalyr)} where decimals:=22;
 					                      display {NGTDMREP_PINTLNG(M2,globalyr)} where decimals:=22;
@@ -2697,7 +2851,7 @@ Model Main_NGTDM {
 				}
 				Parameter Floorspace {
 					IndexDomain: (year,r_cen);
-					Definition: sum((MNUMCR,MNUMYR), COMMREP_CMTotalFlspc(MNUMCR, last(CMnumBldg_), MNUMYR)*NEMSmap_MNUMYR_yr(MNUMYR,year)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR));
+					Definition: sum((MNUMCR,MNUMYR), sum(M11, COMMREP_SurvFloorTotal(MNUMCR,M11,MNUMYR))*NEMSmap_MNUMYR_yr(MNUMYR,year)*NEMSmap_MNUMCR_CensusReg(r_cen, MNUMCR));
 				}
 				Parameter CDD {
 					IndexDomain: (year,r_cen);
@@ -3002,7 +3156,7 @@ Model Main_NGTDM {
 				Set QPSupplyNode_ {
 					SubsetOf: SupplyNode_;
 					Index: qps;
-					Definition: L_48_ + Substates_ + Offshore_ + Canada_ + Mexico_ - TXRegion_-TexasState;
+					Definition: L_48_ + Substates_ + Offshore_ + Canada_ + Mexico_ -TexasState;
 					Comment: "Supply Nodes used in the QP";
 				}
 				Set USSupply_ {
@@ -3010,7 +3164,7 @@ Model Main_NGTDM {
 					Index: ussup;
 					Definition: {
 						!SupplyNode_ - Canada_ - Mexico_
-						States_+ Substates_ + Offshore_ + AKSupply_ + FedGOM_OGDIST_
+						States_+ Substates_ + Offshore_ + AKSupply_ + FedGOM_OGDIST_ + TXRegion_
 					}
 				}
 				Set L48_Supply_ {
@@ -3179,13 +3333,18 @@ Model Main_NGTDM {
 				}
 			}
 			DeclarationSection International_Region_Declarations {
+				Set International_LNG {
+					SubsetOf: Regions_;
+					Index: ieo_lng;
+					Comment: "Regions that international LNG is exogenously set for";
+				}
 				Set Mexico_ {
 					SubsetOf: Regions_;
 					Text: "Mexico";
 					Index: mx, mx1;
 					Comment: "Mexican subregions";
 				}
-				Set MexicoSouth_ {
+				Set MexicoSouth {
 					SubsetOf: Regions_;
 					Index: MX_S;
 				}
@@ -3416,6 +3575,10 @@ Model Main_NGTDM {
 				}
 			}
 			DeclarationSection Other_Dimension_Declarations {
+				Set HMMSeason_ {
+					SubsetOf: Integers;
+					Index: hmmseason;
+				}
 				Set Supply_Curve_Step_ {
 					Index: step, x_step;
 				}
@@ -3618,6 +3781,12 @@ Model Main_NGTDM {
 					Property: NoSave;
 					Definition: 1;
 				}
+				Parameter map_month_year_adj {
+					IndexDomain: (mon,year)|MonthToYear(mon)=year;
+					Range: binary;
+					Property: NoSave;
+					Definition: 1;
+				}
 				Set Days_ {
 					SubsetOf: XDays_;
 					Index: days;
@@ -3667,6 +3836,9 @@ Model Main_NGTDM {
 				}
 			}
 			DeclarationSection NGMM_Time_Declarations {
+				ElementParameter CurrentMNUMYR {
+					Range: MNXYRS_;
+				}
 				ElementParameter LastHistoricalMonth {
 					Range: XMonths_;
 					Property: NoSave;
@@ -3923,6 +4095,22 @@ Model Main_NGTDM {
 				}
 			}
 			DeclarationSection Calendar_Case_File_Declarations {
+				ElementParameter MonthsInHMMSeason {
+					IndexDomain: mon;
+					Range: HMMSeason_;
+					Property: NoSave;
+					Definition: {
+						if (TimeslotCharacteristic(mon,'month') <= 3 or TimeslotCharacteristic(mon,'month') =12) then
+						'4'
+						elseif (4 <= TimeslotCharacteristic(mon,'month') <= 5) then
+						'1'
+						elseif (6 <= TimeslotCharacteristic(mon,'month') <= 9) then
+						'2'
+						elseif (10 <= TimeslotCharacteristic(mon,'month') <= 11) then
+						'3'
+						endif;
+					}
+				}
 				ElementParameter MonthsInSeason {
 					IndexDomain: mon;
 					Range: Season_;
@@ -3966,6 +4154,10 @@ Model Main_NGTDM {
 				}
 			}
 			DeclarationSection NGMM_Time_Case_File_Declarations {
+				Parameter map_hmmseason_mn {
+					IndexDomain: (hmmseason,mn);
+					Range: binary;
+				}
 				Parameter map_season_mn {
 					IndexDomain: (season,mn);
 					Range: binary;
@@ -4013,16 +4205,26 @@ Model Main_NGTDM {
 				Quantity SI_Time_Duration {
 					BaseUnit: month;
 					Conversions: {
-						year -> month : # -> # * 12,
-						day  -> month : # -> # * 0.03287671233
+						year->month : #-># * 12,
+						day->month : #-># * 0.03287671233,
+						s->month : #-># / 2628000
 					}
-					Comment: "Expresses the value for the duration of periods.";
+					Comment: {
+						"Expresses the value for the duration of periods.
+						
+						The unit s has been added automatically because it is a required unit for DataExchange."
+					}
 				}
 			}
 		}
 	}
 	Section Mapping_Section {
 		DeclarationSection Seasonal_Mapping_Declarations {
+			Parameter map_mon_hmmseason {
+				IndexDomain: (mon,hmmseason) | (MonthsInHMMSeason(mon)=hmmseason);
+				Range: binary;
+				Definition: 1;
+			}
 			Parameter map_Month_MonthinYear {
 				IndexDomain: (xmon,mn)|TimeslotCharacteristic(xmon,'month')=mn;
 				Range: binary;
@@ -4111,6 +4313,12 @@ Model Main_NGTDM {
 		}
 	}
 	Section QP_Structure {
+		Procedure SetSolverOptions {
+			Body: {
+				option 'Cplex 22.1'.qp_method := 'barrier';
+				option 'Cplex 22.1'.barrier_crossover_algorithm  := 'dual_crossover';
+			}
+		}
 		Section Supply_Curve_Setup {
 			DeclarationSection Supply_Curve_Definitions {
 				Set SupCrv_Option_ {
@@ -5108,6 +5316,15 @@ Model Main_NGTDM {
 				QP_Consumption(tmon,Mexico_NE) -= sum(mn|map_MonthinYear_ModelYearMonth(mn,MonthInPeriod(tmon)),Cons_share_MonYr_MX(Sector_Electric,Mexico_NE,mn)*STEOMXExportFactor(ModelYear));
 				!QP_Consumption(tmon,l48) := 	sum(sec, Cons_State_Mon(MonthInPeriod(tmon), sec, l48));	!End Use Consumption Subroutine
 				
+				! Apply Canada Export phaseout factor
+				if ModelYear > LastSTEOYear then
+					QP_Consumption(tmon, cn) *= STEOCNExportFactor(ModelYear);
+				endif;
+				
+				! Add LNG exports to Mexico region for consumption
+				QP_Consumption(tmon,Mexico_NE) += IEO_LNGExport_Monthly(MonthInPeriod(tmon), Mexico_NE);
+				QP_Consumption(tmon,Mexico_SS) += IEO_LNGExport_Monthly(MonthInPeriod(tmon), Mexico_SS);
+				
 				QP_Discrepancy(tmon,qpd) := BalanceItem(MonthInPeriod(tmon), qpd);
 				!This code replaces the line above in the attempt to avoid infeasibilities caused by negative "demand" when discrepancy for a state is larger than consumption in that state
 				!QP_Discrepancy_Demand((tmon,d) | BalanceItem(MonthInPeriod(tmon), d)<=0) := BalanceItem(MonthInPeriod(tmon), d);
@@ -5121,6 +5338,12 @@ Model Main_NGTDM {
 				!QP_Supply((tmon,suptype,qps) | QP_Supply(tmon,suptype,qps)<=1 ) := 0;
 				!Subtract lease fuel
 				QP_Supply(tmon,naadgas, qps) *= (1 - LeaseFuelFactor(qps)*STEOLeaseFuelFactor(ModelYear));
+				
+				! Split Texas RNG supply into supply districts and then zero out Texas RNG supply
+				QP_Supply(tmon, Supply_RNG, tx) := Supply(MonthInPeriod(tmon),Supply_RNG,TexasState)/card(Texas_);
+				QP_Supply(tmon, Supply_RNG, TexasState) := 0;
+				
+				!QP_Supply(tmon, sng, tx) := Supply(MonthInPeriod(tmon),sng,TexasState)/card(Texas_);
 				
 				QP_SupplyPrice((tmon,suptype,qps)|map_Supply(qps, suptype)) :=
 				!   if (ModelYear=FirstModelYear and WellhdPrice(ModelYear, suptype, qps)) then  
@@ -5294,8 +5517,23 @@ Model Main_NGTDM {
 				
 				!Set wellhead price in substates
 				HistoricalAnnualWellhdPrice(datayear, substate) := sum(l48 | map_SupplyArcs(substate, l48), HistoricalAnnualWellhdPrice(datayear, l48) );
+				
+				
 				!Calculate annual spot price by calculating straight average of monthly spot price
 				HistoricalAnnualSpotPrice(datayear, reg) := $ sum(datamon | map_month_year(datamon,datayear), HistoricalSpotPrice(datamon, reg))/12;
+				
+				
+				! AEO2025 ADJUSTMENT THAT OMITS SOME OUTLIER PRICES IN SPOT PRICE HISTORY THAT THROW OFF NEAR-TERM RESULTS.
+				! Manually setting to calculated prices outside of AIMMS
+				HistoricalAnnualSpotPrice('2023', 'CO') := 1.11988;
+				HistoricalAnnualSpotPrice('2023', 'UT') := 1.50946;
+				HistoricalAnnualSpotPrice('2023', 'WY') := 1.15922;
+				
+				!HistoricalAnnualSpotPrice('2023', 'CO') := $ sum(datamon | datamon <> 'January 2023' or datamon <> 'February 2023', HistoricalSpotPrice(datamon, 'CO'))/10;
+				!HistoricalAnnualSpotPrice('2023', 'UT') := $ sum(datamon | datamon <> 'January 2023' or datamon <> 'February 2023', HistoricalSpotPrice(datamon, 'UT'))/10;
+				!HistoricalAnnualSpotPrice('2023', 'WY') := $ sum(datamon | datamon <> 'January 2023' or datamon <> 'February 2023', HistoricalSpotPrice(datamon, 'WY'))/10;
+				
+				
 				!Set annual spot price for Canada and Mexico by calculating straight average of monthly spot price
 				!HistoricalAnnualSpotPrice(datayear, cn) := sum(datamon | map_month_year(datamon,datayear), HistoricalSpotPrice(datamon, cn))/12;
 				!Spot price in Mexico is set equal to spot price at border-crossing for now
@@ -7413,6 +7651,10 @@ Model Main_NGTDM {
 				CE_Consumption(tcapexp,l48) := 	sum(sec, ConsumptionForCapExp(CapExpMonthInPeriod(tcapexp), sec, l48));
 				!QP_Consumption(tmon,l48) := 	sum(sec, Cons_State_Mon(MonthInPeriod(tmon), sec, l48));	!End Use Consumption Subroutine
 				
+				! Add LNG exports to Mexico region for consumption
+				CE_Consumption(tcapexp,Mexico_NE) += IEO_LNGExport_Monthly(CapExpMonthInPeriod(tcapexp), Mexico_NE);
+				CE_Consumption(tcapexp,Mexico_SS) += IEO_LNGExport_Monthly(CapExpMonthInPeriod(tcapexp), Mexico_SS);
+				
 				CE_Discrepancy(tcapexp,qpd) := BalanceItem(CapExpMonthInPeriod(tcapexp), qpd);
 				!CE_Discrepancy_Demand((tcapexp,d) | BalanceItem(CapExpMonthInPeriod(tcapexp), d)<=0) := BalanceItem(CapExpMonthInPeriod(tcapexp), d);
 				!CE_Discrepancy_Supply((tcapexp,s) | BalanceItem(CapExpMonthInPeriod(tcapexp), s)>=0) := BalanceItem(CapExpMonthInPeriod(tcapexp), s);
@@ -7794,7 +8036,7 @@ Model Main_NGTDM {
 				NEMS_Consumption(ModelYear,Sector_Residential,r_cen) :=	Cons_Residential(r_cen, ModelYear);
 				NEMS_Consumption(ModelYear,Sector_Commercial,r_cen) :=	Cons_Commercial(r_cen, ModelYear);
 				NEMS_Consumption(ModelYear,Sector_Industrial,r_cen) :=	Cons_Industrial_Core(r_cen, ModelYear)
-					+ Cons_Industrial_Noncore(r_cen,ModelYear) + Cons_Hydrogen(r_cen,ModelYear) + Cons_GasToLiquids(r_cen,ModelYear);
+					+ Cons_Industrial_Noncore(r_cen,ModelYear)  + Cons_GasToLiquids(r_cen,ModelYear);
 				NEMS_Consumption(ModelYear,Sector_Transportation,r_cen) :=	Cons_Transportation(r_cen, ModelYear);
 				NEMS_Consumption_EMM(ModelYear,NNGEMM,season) := 	Cons_Electric_Season(NNGEMM,ModelYear,season);
 				
@@ -7993,6 +8235,9 @@ Model Main_NGTDM {
 			Parameter Price_Enduse {
 				IndexDomain: (year,sec,r_cen,opt);
 			}
+			Parameter Price_EnduseSeasonalIndustrial {
+				IndexDomain: (year,r_cen,hmmseason);
+			}
 			Parameter Price_EnduseElectric {
 				IndexDomain: (year,NNGEMM,season,opt);
 			}
@@ -8006,6 +8251,21 @@ Model Main_NGTDM {
 		}
 		Section Citygate_Prices {
 			DeclarationSection CityGate_Prices_Declaration {
+				Parameter PriceSpotSeasonalCensus {
+					IndexDomain: (year,r_cen,hmmseason);
+				}
+				Parameter PriceCityGateSeasonalForMarkups {
+					IndexDomain: (year,sec,r_cen,hmmseason);
+				}
+				Parameter PriceCityGateMonthlyForMarkups {
+					IndexDomain: (mon,sec,r_cen);
+				}
+				Parameter PriceSpotAnnualSeasonalIndustrial {
+					IndexDomain: (year,r_cen,hmmseason);
+				}
+				Parameter PriceSpotMonthlyCensus {
+					IndexDomain: (mon,r_cen);
+				}
 				Parameter Price_Citygate {
 					IndexDomain: (mon,state);
 				}
@@ -8513,6 +8773,18 @@ Model Main_NGTDM {
 				PriceSpotAnnualState(ModelYear,l48) := sum((modelyrmn,sec), Price_Spot(modelyrmn,l48)* Cons_State_Mon(modelyrmn,sec, l48))/$
 				     sum(sec,Cons_State_Yr(ModelYear, sec, l48));
 				
+				! Weighted average monthly spot price by Census Region 
+				PriceSpotMonthlyCensus(modelyrmn, r_cen) := sum(l48 | map_State_CensusRegion(l48, r_cen), Price_Spot(modelyrmn, l48)*(sum(sec, Cons_State_Mon(modelyrmn, sec, l48)))) /$ 
+					sum((l48,sec) | map_State_CensusRegion(l48, r_cen), Cons_State_Mon(modelyrmn, sec, l48)) ;
+				
+				
+				PriceSpotSeasonalCensus(ModelYear, r_cen, hmmseason) := sum((l48,modelyrmn) | map_State_CensusRegion(l48, r_cen) and map_mon_hmmseason(modelyrmn, hmmseason), Price_Spot(modelyrmn, l48)*(sum(sec, Cons_State_Mon(modelyrmn, sec, l48)))) /$ 
+					sum((l48,modelyrmn, sec) | map_State_CensusRegion(l48, r_cen) and map_mon_hmmseason(modelyrmn, hmmseason), Cons_State_Mon(modelyrmn, sec, l48)) ;
+				
+				! Monthly Industrial price for markup, option 1.
+				PriceCityGateMonthlyForMarkups(modelyrmn, Sector_Industrial, r_cen) := PriceSpotMonthlyCensus(modelyrmn, r_cen);
+				PriceCityGateSeasonalForMarkups(ModelYear, Sector_Industrial, r_cen, hmmseason) := PriceSpotSeasonalCensus(ModelYear, r_cen, hmmseason);
+				
 				!Annual State Citygate price
 				PriceCitygateAnnualState(ModelYear,l48) := sum(modelyrmn, Price_Citygate(modelyrmn,l48)*
 				     (Cons_State_Mon(modelyrmn, Sector_Residential, l48) + Cons_State_Mon(modelyrmn, Sector_Commercial, l48)))/$
@@ -8527,12 +8799,23 @@ Model Main_NGTDM {
 				     (Cons_State_Yr(ModelYear, Sector_Residential, state) + Cons_State_Yr(ModelYear, Sector_Commercial, state)))/
 				     (NEMS_Consumption(ModelYear,Sector_Residential,r_cen)+NEMS_Consumption(ModelYear,Sector_Commercial,r_cen));
 				
+				
+				
 				!Average annual Census Division industrial spot price
 				PriceCitygateAnnualforMarkups(ModelYear,Sector_Industrial,r_cen,Option1) := sum((modelyrmn,l48) | map_State_CensusRegion(l48, r_cen), Price_Spot(modelyrmn,l48)*Cons_State_Mon(modelyrmn, Sector_Industrial, l48) )/$
 				     NEMS_Consumption(ModelYear,Sector_Industrial,r_cen);
+				
+				!PriceCityGateMonthlyForMarkups(modelyrmn, Sector_Industrial, r_cen) := sum((l48) | map_State_CensusRegion(l48, r_cen), Price_Spot(modelyrmn, l48)* Cons_State_Mon(modelyrmn, Sector_Industrial, l48)) /$
+				!	sum(l48 | map_State_CensusRegion(l48, r_cen), Cons_State_Mon(modelyrmn, Sector_Industrial, l48));
+				
+				
 				     PriceCitygateAnnualforMarkups(ModelYear,Sector_Industrial,r_cen,Option2) := PriceCitygateAnnualforMarkups(ModelYear,Sector_Industrial,r_cen,Option1);
 				PriceCitygateAnnualforMarkups(ModelYear,Sector_Industrial,r_cen,Option3) :=  PriceCitygateAnnualforMarkups(ModelYear,Sector_Residential,r_cen,Option1);
+				
+				!PriceCityGateMonthlyForMarkups
+				
 				PriceSpotAnnualIndustrial(ModelYear, r_cen):= PriceCitygateAnnualforMarkups(ModelYear,Sector_Industrial,r_cen,Option2);
+				
 				!Average annual Census Division  spot price
 				PriceSpotAnnualCD(ModelYear,r_cen) := sum((modelyrmn,l48) | map_State_CensusRegion(l48, r_cen), Price_Spot(modelyrmn,l48)*TotalConsumption(modelyrmn, l48) )/$
 				     sum((modelyrmn,l48) | map_State_CensusRegion(l48, r_cen), TotalConsumption(modelyrmn, l48) );
@@ -8541,6 +8824,9 @@ Model Main_NGTDM {
 				!Average annual NNGEMM electric spot price
 				PriceSpotAnnualElectric(ModelYear, NNGEMM, season) := sum((modelyrmn,l48)| map_mon_season(modelyrmn,season) and map_State_NNGEMM(l48,NNGEMM),
 				     Price_Spot(modelyrmn,l48)*Cons_State_Mon(modelyrmn, Sector_Electric, l48) )/$ NEMS_Consumption_EMM(ModelYear,NNGEMM,season);
+				
+				!PriceSpotAnnualSeasonalIndustrial(year, r_cen, hmmseason) := sum((modelyrmn,l48)| map_mon_hmmseason(modelyrmn,hmmseason) and map_State_CensusRegion(l48,r_cen),
+				!     Price_Spot(modelyrmn,l48)*Cons_State_Mon(modelyrmn, Sector_Industrial, l48) )/$ NEMS_Consumption(ModelYear,r_cen,Sector_Industrial);
 			}
 			Comment: "General equation is citygate(state,month) = inter(state) + [pspot(state) * SpotPrice(state,month)] + [pQ(state)/(QRS+QCM)]";
 		}
@@ -8554,6 +8840,8 @@ Model Main_NGTDM {
 				
 				!Calculate end-use price for all sectors (except electric) and options; Transportation done after STEO
 				Price_Enduse(ModelYear, sec, r_cen, opt):= Markups_Enduse(ModelYear, sec, r_cen, opt) + PriceCitygateAnnualforMarkups(ModelYear, sec, r_cen, opt);
+				Price_EnduseSeasonalIndustrial(ModelYear, r_cen, hmmseason) := Markups_Enduse(ModelYear, Sector_Industrial, r_cen, Option1) + PriceCityGateSeasonalForMarkups(ModelYear, Sector_Industrial, r_cen, hmmseason);
+				
 				
 				!Set STEO factors
 				if (STEOBM=1 and STEONG=1) then
@@ -8794,14 +9082,14 @@ Model Main_NGTDM {
 					PAR1_COM_CD(r_cen,Option1)*(NEMS_Consumption(ModelYear,Sector_Commercial,r_cen)/Floorspace(ModelYear, r_cen))+
 				       PAR2_COM_CD(r_cen,Option1)*NEMS_Consumption(ModelYear,Sector_Commercial,r_cen);
 				
-				!Option 2
-				Markups_Enduse(ModelYear,Sector_Commercial,r_cen,Option2) := exp(DIV_COM(r_cen, Option2))*
-				       ((NEMS_Consumption(ModelYear,Sector_Commercial,r_cen)/Floorspace(ModelYear, r_cen))^PAR1_COM(Option2) )*
-				       (NEMS_Consumption(ModelYear,Sector_Commercial,r_cen)^PAR2_COM(Option2))*
-				       (Markups_Enduse(ModelYear-1,Sector_Commercial,r_cen,Option2)^PAR3_COM(Option2))*
-				       exp(DIV_COM(r_cen, Option2)* (-PAR3_COM(Option2)))*
-				       ((NEMS_Consumption(ModelYear-1,Sector_Commercial,r_cen)/Floorspace(ModelYear-1, r_cen))^(PAR1_COM(Option2)*(-PAR3_COM(Option2)) ))*
-				       (NEMS_Consumption(ModelYear-1,Sector_Commercial,r_cen)^(PAR2_COM(Option2)* (-PAR3_COM(Option2))));
+				!Option 2 (temporarily commenting out to avoid negative numbers causing issues)
+				!Markups_Enduse(ModelYear,Sector_Commercial,r_cen,Option2) := exp(DIV_COM(r_cen, Option2))*
+				!       ((NEMS_Consumption(ModelYear,Sector_Commercial,r_cen)/Floorspace(ModelYear, r_cen))^PAR1_COM(Option2) )*
+				!       (NEMS_Consumption(ModelYear,Sector_Commercial,r_cen)^PAR2_COM(Option2))*
+				!       (Markups_Enduse(ModelYear-1,Sector_Commercial,r_cen,Option2)^PAR3_COM(Option2))*
+				!       exp(DIV_COM(r_cen, Option2)* (-PAR3_COM(Option2)))*
+				!       ((NEMS_Consumption(ModelYear-1,Sector_Commercial,r_cen)/Floorspace(ModelYear-1, r_cen))^(PAR1_COM(Option2)*(-PAR3_COM(Option2)) ))*
+				!       (NEMS_Consumption(ModelYear-1,Sector_Commercial,r_cen)^(PAR2_COM(Option2)* (-PAR3_COM(Option2))));
 				!Option 3
 				Markups_Enduse(ModelYear,Sector_Commercial,r_cen,Option3) := DIV_COM(r_cen, Option3) + PAR1_COM(Option3)*(NEMS_Consumption(ModelYear,Sector_Commercial,r_cen)/Floorspace(ModelYear, r_cen))+
 				       PAR2_COM(Option3)*Floorspace(ModelYear, r_cen) + PAR3_COM(Option3)*
@@ -9389,7 +9677,10 @@ Model Main_NGTDM {
 		Procedure Initialize_IEO_Data {
 			Body: {
 				IEO_MX_Production(year,suptype,mx) *=  NumberOfDaysInYear(year);
-				IEO_LNGexport(year,cn) *=  NumberOfDaysInYear(year);
+				IEO_LNGExport_Monthly(mon, ieo_lng) := IEO_LNGExport(monthToYear(mon), ieo_lng) * NumberOfDaysInMonth(mon);
+				IEO_LNGexport(year,ieo_lng) *=  NumberOfDaysInYear(year);
+				
+				!IEO_LNGExport_Monthly(mon, ieo_lng) := IEO_LNGExport(monthToYear(mon), ieo_lng) * NumberOfDaysInMonth(mon);
 				
 				! The IEO MX/CN data is read in as quads, but needs to be converted to Bcf/yr
 				! Multiply by by conversion factor (currently 0.00096432) to get into cubic feet, and then divide by 1000000000 to get into Bcf
@@ -9416,7 +9707,10 @@ Model Main_NGTDM {
 					Range: Years_;
 				}
 				Parameter IEO_LNGexport {
-					IndexDomain: (year,cn);
+					IndexDomain: (year,ieo_lng);
+				}
+				Parameter IEO_LNGexport_Monthly {
+					IndexDomain: (mon,ieo_lng);
 				}
 				Parameter IEO_CN_Consumption {
 					IndexDomain: (year, sec);
@@ -9861,7 +10155,9 @@ Model Main_NGTDM {
 					AnnualSupply (ModelYear, Supply_AD, Mexico_SS)  := 
 						(x_MX_AD_Prod1*AnnualSupply (ModelYear-1, Supply_AD, Mexico_SS))+
 						(x_MX_AD_WOP1*WorldOilPrice(ModelYear-1, 'USD_MMBtu'))+
-						 x_MX_AD_OilProd* MX_Oil_Production(ModelYear) ;
+						(x_MX_AD_WOP2*WorldOilPrice(ModelYear-2, 'USD_MMBtu'))+
+						 x_MX_AD_OilProd1* MX_Oil_Production(ModelYear-1) +
+						 x_MX_AD_OilProd2* MX_Oil_Production(ModelYear-2) ;
 					
 					Cons_MX_PEMEX(LastHistoricalYear) :=  sum((lhisyr,mx), HistoricalConsumptionSENER(lhisyr,MX_Sector_PEMEX ,mx)*NumberOfDaysInMonth(lhisyr)); 
 					Cons_MX_Industrial(LastHistoricalYear) :=  sum((lhisyr,mx), HistoricalConsumptionSENER(lhisyr,MX_Sector_Industrial ,mx)*NumberOfDaysInMonth(lhisyr)); 
@@ -9878,6 +10174,8 @@ Model Main_NGTDM {
 				}
 			}
 			DeclarationSection Oil_Declarations {
+				Parameter x_MX_AD_OilProd2;
+				Parameter x_MX_AD_OilProd1;
 				Parameter MX_Oil_Production {
 					IndexDomain: year;
 				}
@@ -9986,10 +10284,21 @@ Model Main_NGTDM {
 				
 				
 				!Add Western Canada volumes to world flexible LNG volumes
-				
 				LNG_WorldFlex(year) += LNG_ExportCapacity(year, CanadaWest);
 				for (xyear| xyear> LastModelYear) do
 					LNG_WorldFlex(xyear) += LNG_ExportCapacity(LastModelYear, CanadaWest);
+				endfor;
+				
+				!Add Northwest Mexico volumes to world flexible LNG volumes
+				LNG_WorldFlex(year) += LNG_ExportCapacity(year, Mexico_NW);
+				for (xyear| xyear> LastModelYear) do
+					LNG_WorldFlex(xyear) += LNG_ExportCapacity(LastModelYear, Mexico_NW);
+				endfor;
+				
+				!Add Southsouthwest Mexico volumes to world flexible LNG volumes
+				LNG_WorldFlex(year) += LNG_ExportCapacity(year, Mexico_NE);
+				for (xyear| xyear> LastModelYear) do
+					LNG_WorldFlex(xyear) += LNG_ExportCapacity(LastModelYear, Mexico_NE);
 				endfor;
 				
 				!Calculate LNG export capacity based on projects under construction
@@ -10100,7 +10409,7 @@ Model Main_NGTDM {
 				LNG_ConvergenceFactor(LastHistoricalYear,lngexp_qp) := 1;
 				USLNGSupplyPrice(histyr,lngexp_qp) := LastCycle_USLNGSupplyPrice(histyr,lngexp_qp);
 				
-				NEMS_WOP_Memo(NEMSmap_XYear(MNXYRS)) :=MXPBLK_XSTART_PRICE(MNXYRS);
+				NEMS_WOP_Memo(NEMSmap_XYear(MNXYRS)) :=MXPBLK_XBRENT_PRICE(MNXYRS);
 				
 				WeightedAveExpectedWOP(year) := sum((look_yrs,xyear)|xyear=year, (Card(NumberOfYearsForLookAhead_LNG_)-Val(look_yrs)+1)*NEMS_WOP_Memo(xyear+Val(look_yrs)-1))/$
 								sum(look_yrs,Card(NumberOfYearsForLookAhead_LNG_)-Val(look_yrs)+1);
@@ -10333,7 +10642,6 @@ Model Main_NGTDM {
 				
 				!Determine optimal destination for each LNG export terminal
 				LNG_BestDestination(lngexp_qp) := ArgMax(d_lng,LNG_USDiscount(lngexp_qp,d_lng));
-				
 				
 				! LNG Export Capacity added to region/state with highest discount for world
 				LNG_AddedCapacity:= ArgMax(lngexp_qp|	(((Val(ModelYear) + LNG_YrsUntilBuild )>= LNG_FirstYear(lngexp_qp))
@@ -11020,6 +11328,11 @@ Model Main_NGTDM {
 				
 				!Transfer SUPPLEMENTAL SUPPLY
 				AnnualSupply(datayear, sng, l48) := HistoricalAnnualSupply(datayear, sng, l48);
+				
+				! Divide TX sng accross three sub-regions and zero out TX
+				AnnualSupply(datayear, sng, r_tx) := HistoricalAnnualSupply(datayear, sng, TexasState)/card(r_tx);
+				AnnualSupply(datayear, sng, TexasState) := 0;
+				
 				!Add Hawaii supplemental supply to California
 				AnnualSupply(datayear, sng, CaliforniaState) += HistoricalAnnualSupply(datayear, sng, HawaiiState);
 				
@@ -11594,6 +11907,9 @@ Model Main_NGTDM {
 			Parameter STEOMXExportsPhaseOutFlag {
 				Range: binary;
 			}
+			Parameter STEOCANExportsPhaseOutFlag {
+				Range: binary;
+			}
 			Set STEOIterations_ {
 				Index: isteo;
 				Definition: {
@@ -11874,7 +12190,7 @@ Model Main_NGTDM {
 				  STEOBalancingItemFactor(ModelYear) := STEOTargetBalancingItem(ModelYear)/sum((modelyrmn,l48), BalanceItem(modelyrmn,l48));
 				  !***************************************************************************************************
 				  !SUPPLEMENTAl SUPPLY
-				  STEOSupplementalSupplyFactor(ModelYear) := STEOTargetSupplementalSupply(ModelYear)/sum((sng,l48) , AnnualSupply(ModelYear, sng, l48));
+				  STEOSupplementalSupplyFactor(ModelYear) := STEOTargetSupplementalSupply(ModelYear)/sum((sng,qps) , AnnualSupply(ModelYear, sng, qps));
 				  !**************************************************************************************************
 				  !LNG EXPORTS
 				  STEOTargetLNGExports(ModelYear) := NGEXPUS_LNG(ModelYear)*1000-AK_LNG_Exports(ModelYear);
@@ -11935,6 +12251,9 @@ Model Main_NGTDM {
 				! Only do STEO benchmarking based on flags read in from ngassumptions.txt
 				if (STEOMXExportsPhaseOutFlag = 1) then
 					  STEOMXExportFactor(ModelYear) := STEOMXExportFactor(ModelYear-1) + (STEOFactor0-STEOMXExportFactor(LastSTEOYear))/NumberOfSTEOPhaseOutYears;
+				endif;
+				if (STEOCANExportsPhaseOutFlag = 1) then
+					  STEOCNExportFactor(ModelYear) := STEOCNExportFactor(ModelYear-1) + (STEOFactor0-STEOCNExportFactor(LastSTEOYear))/NumberOfSTEOPhaseOutYears;
 				endif;
 				if (STEOPipelineImportPhaseOutFlag = 1) then
 				  	STEOPipelineImportFactor(ModelYear) := STEOPipelineImportFactor(ModelYear-1) + (STEOFactor0-STEOPipelineImportFactor(LastSTEOYear))/NumberOfSTEOPhaseOutYears;
@@ -12051,7 +12370,9 @@ Model Main_NGTDM {
 					StorageInjections(modelyrmn,l48) *=   STEOStorageInjectionFactor(MonthToYear(modelyrmn));
 					StorageWithdrawals(modelyrmn,l48) *=  STEOStorageWithdrawalFactor(MonthToYear(modelyrmn));
 				endif;
-				if (not LastDataYearFlg_SupProd(ModelYear)) then Supply(modelyrmn, sng, l48)  *= STEOSupplementalSupplyFactor(MonthToYear(modelyrmn)); endif;
+				if (not LastDataYearFlg_SupProd(ModelYear)) then
+					Supply(modelyrmn, sng, qps)  *= STEOSupplementalSupplyFactor(MonthToYear(modelyrmn));
+				endif;
 				if (not LastDataYearFlg_LNGImp(ModelYear)) then Supply(modelyrmn, Supply_LNG, l48) *= STEOLNGImportsFactor(MonthToYear(modelyrmn)); endif;
 				
 				!BalanceItem(modelyrmn,l48) *=   STEOBalancingItemFactor(MonthToYear(modelyrmn));
@@ -12255,6 +12576,11 @@ Model Main_NGTDM {
 				!QP_Discrepancy_Demand((tmon,d) | BalanceItem(MonthInPeriod(tmon), d)<=0) := BalanceItem(MonthInPeriod(tmon), d);
 				!QP_Discrepancy_Supply((tmon,s) | BalanceItem(MonthInPeriod(tmon), s)>=0) := BalanceItem(MonthInPeriod(tmon), s);
 				!
+				
+				! Add LNG exports to Mexico region for consumption
+				QP_Consumption(tmon,Mexico_NE) += IEO_LNGExport_Monthly(MonthInPeriod(tmon), Mexico_NE);
+				QP_Consumption(tmon,Mexico_SS) += IEO_LNGExport_Monthly(MonthInPeriod(tmon), Mexico_SS);
+				
 				QP_Storage_Withdrawals(tmon,storage) := StorageWithdrawals(MonthInPeriod(tmon), storage);
 				QP_Storage_Injections(tmon,storage) := StorageInjections(MonthInPeriod(tmon), storage);
 				
@@ -12760,6 +13086,7 @@ Model Main_NGTDM {
 					
 					!Run QP to solve for optimum natural gas transmission and distribution :)
 					!Solve the Quadratic Program
+					
 					solve MaxConsumerProducerSurplus in merge mode;
 					QPStatusNotOptimal;
 				}
@@ -12896,6 +13223,24 @@ Model Main_NGTDM {
 		}
 	}
 	Section Reports_Section {
+		DeclarationSection Profiling {
+			Set IterationNumber_ {
+				Index: iteration;
+			}
+			Set CycleNumber_ {
+				Index: cycle;
+			}
+			Parameter ResultsNEMS {
+				IndexDomain: (year, cycle, iteration, IndexProcedures, line, IndexProfilerTypes);
+			}
+			Parameter Results {
+				IndexDomain: (IndexProcedures,line,IndexProfilerTypes);
+			}
+			Set Lines_ {
+				SubsetOf: Integers;
+				Index: line;
+			}
+		}
 		Procedure AddedCapacity_Report {
 			Body: {
 				CumulativeAddedCapacity(ModelYear, h, h1) := CapacityAnnual(ModelYear, h, h1) - CapacityAnnual((FirstModelYear-1), h, h1);
@@ -13518,6 +13863,13 @@ Model Main_NGTDM {
 			}
 		}
 		DeclarationSection Capacity_and_Flow_Debugging {
+			ElementParameter CapacityUtilizationColor {
+				IndexDomain: (year,h,h1);
+				Range: AllColors;
+			}
+			Parameter CapacityUtilization {
+				IndexDomain: (year,h,h1);
+			}
 			ElementParameter DisplayedHubFromCapacity {
 				Range: Hubs_;
 			}
@@ -13748,6 +14100,8 @@ Model Main_NGTDM {
 				TariffAnnual(ModelYear,h,h1) := sum(modelyrmn, Tariff_Soln(modelyrmn, h, h1)*FlowsMonthly(modelyrmn, h, h1))/$ FlowsAnnual(ModelYear,h,h1);
 				!straight average node price
 				NodePriceAnnual(ModelYear, h) := sum(modelyrmn, NodePrice_Soln(modelyrmn, h))/card(ModelYearMonths_);
+				
+				Capacity_Utilization_Report;
 			}
 		}
 		Procedure Totals_Report {
@@ -13812,6 +14166,23 @@ Model Main_NGTDM {
 				else
 					'Black'
 				endif;
+			}
+		}
+		Procedure Capacity_Utilization_Report {
+			Body: {
+				CapacityUtilization(ModelYear, h, h1) :=  FlowsAnnual(ModelYear, h, h1)  /$  CapacityAnnual(ModelYear, h, h1);
+				
+				!if last(AllColors) <> 'orange' then
+				!	UserColorAdd("orange", 255, 165, 0);
+				!endif;
+				
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) >= 0.95 := 'red';  
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) < 0.95 and CapacityUtilization(ModelYear, h, h1) >= 0.90 := 'redorange'; 
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) < 0.90 and CapacityUtilization(ModelYear, h, h1) >= 0.80 := 'orange'; 
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) < 0.80 and CapacityUtilization(ModelYear, h, h1) >= 0.70 := 'oranyel'; 
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) < 0.70 and CapacityUtilization(ModelYear, h, h1) >= 0.60 := 'yellow'; 
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) < 0.6 and CapacityUtilization(ModelYear, h, h1) >= 0.4 := 'greenyellow';  
+				CapacityUtilizationColor(ModelYear, h, h1) | CapacityUtilization(ModelYear, h, h1) < 0.4  := 'green';
 			}
 		}
 	}
@@ -13911,9 +14282,854 @@ Model Main_NGTDM {
 			}
 		}
 	}
+	Section RNG_Section {
+		DeclarationSection RNG_Production_Declarations {
+			Parameter USVehicileConsAnnual {
+				IndexDomain: year;
+			}
+			Parameter CAVehicleConsAnnual {
+				IndexDomain: year;
+			}
+			Parameter LCFSProductionAnnual {
+				IndexDomain: year;
+			}
+			Parameter TotalAnnualRNGProductionType {
+				IndexDomain: (year,rng_type);
+			}
+			Set active_rng_projects {
+				SubsetOf: id;
+			}
+			Set available_rng_projects {
+				SubsetOf: id;
+			}
+			Set lcfs_projects {
+				SubsetOf: id;
+			}
+			ElementParameter rng_project_add {
+				Range: id;
+			}
+			ElementParameter rng_project_add_type {
+				Range: rng_prod_type;
+			}
+			Parameter max_profit_from_project;
+			Parameter ModelYearRNGProduction;
+			Set TotalAnnualRNGProductionf;
+			StringParameter mapProjectsFarm {
+				IndexDomain: (proj_id,reg);
+			}
+			StringParameter MapRNGProjectType {
+				IndexDomain: (proj_id,reg);
+			}
+			Parameter landfill_projects {
+				IndexDomain: proj_id;
+			}
+			Parameter CAVehicleCons;
+			StringParameter mapProjectsLandfill {
+				IndexDomain: (proj_id,reg);
+			}
+			Parameter mapProj_id_ToReg {
+				IndexDomain: proj_id;
+			}
+			Parameter PacifcRegCons;
+			Parameter annual_rng_capacity_flag {
+				IndexDomain: (year,proj_id,rng_type);
+				Range: binary;
+			}
+			Parameter rng_produced_monthly {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter lcoe_rfs_lcfs_adj {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+		}
+		DeclarationSection LCFS_Declarations {
+			Parameter LCFS_carbon_offset_project {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Set AnnualLCFSProjects {
+				SubsetOf: id;
+			}
+			Parameter AnnualRNGCarbonOffset {
+				IndexDomain: year;
+			}
+			Parameter rng_lcfs_production {
+				IndexDomain: year;
+			}
+			Parameter rng_lcfs_totalCI_difference_from_target {
+				IndexDomain: year;
+			}
+			Parameter RNGProduction_LCFS {
+				Comment: "RNG Production from LCFS. Constrained by California transportation volumes.";
+			}
+			Parameter baseline_CI {
+				IndexDomain: xyear;
+			}
+			Parameter CI_adder_from_elec {
+				IndexDomain: reg;
+			}
+			Parameter MJ_to_MMBtu;
+			Parameter LCFS_credit_per_MMBtu {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter target_CI;
+			Parameter CI_difference_from_target {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter CI_penalty_per_mile;
+			Parameter proj_base_ci {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter proj_distance {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter proj_CI {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter distance {
+				IndexDomain: reg;
+			}
+			Parameter assumed_CI_base {
+				IndexDomain: rng_type;
+			}
+			ElementParameter LatestLCFSVolumeYear {
+				Range: Years_;
+			}
+			Parameter LatestLCFSVolume;
+		}
+		DeclarationSection RNG_Supply_Curve_Declarations {
+			Set rng_state_loop_iterator {
+				SubsetOf: Regions_;
+				Index: rng_state_loop_i;
+			}
+			Parameter RNG_prod_last_historical_year {
+				IndexDomain: rng_type;
+			}
+			Parameter RNG_prod_last_historical_yearState {
+				IndexDomain: (rng_type,state);
+			}
+			Parameter proj_rng {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+		}
+		DeclarationSection Starting_RNG_Capacity_Declarations {
+			Set smallest_allowable_proj {
+				SubsetOf: id;
+				Index: proj_small;
+			}
+			Set RNGSources_ {
+				SubsetOf: rng_prod_type;
+				Index: rng_source_i;
+				Comment: "RNG sources for the capacity loops";
+			}
+			Parameter state_project_id {
+				IndexDomain: proj_id;
+			}
+			Parameter project_id_ord_iterator;
+			Parameter RNG_from_historical_capacity {
+				IndexDomain: (reg,rng_type);
+			}
+			Parameter rng_state_sum_temp;
+			Set projects_for_state {
+				SubsetOf: id;
+			}
+			Parameter historical_capacity_flag {
+				IndexDomain: proj_id;
+				Range: binary;
+			}
+			Parameter ANL_rng_historicalProductionAnnual {
+				IndexDomain: (year,rng_type, h);
+			}
+			Parameter RNG_CapacityLastHistoricalYear;
+		}
+		DeclarationSection LCOE_declarations {
+			Parameter profit_lcfs {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter profit_rfs {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter profit_lcfs_rfs {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter profit_noCredits {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter AnnualStateSpotPrice_RNG {
+				IndexDomain: (year,reg);
+			}
+			Parameter lcoe_lcfs_rfs_adj {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter lcoe_rfs_adj {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter lcoe_lcfs_adj {
+				IndexDomain: (proj_id,reg,rng_type);
+				Range: free;
+			}
+			Parameter LCFS_credit_price;
+			ElementParameter LCFS_credit_price_year {
+				Range: Years_;
+			}
+			Parameter rng_produced {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter lcoe {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Set id {
+				Index: proj_id;
+			}
+			StringParameter rng_source {
+				IndexDomain: (proj_id,reg);
+			}
+		}
+		Procedure Calculate_LCOE_and_Credits {
+			Body: {
+				!ModelYear := '2022';
+				
+				! Calculate difference from target CI
+				CI_difference_from_target(proj_id, reg, rng_type | lcoe(proj_id, reg, rng_type)) := baseline_CI(ModelYear)  - proj_CI(proj_id, reg, rng_type);
+				
+				! Calculate how $/MMBtu credit value each project would get for LCFS and RIN credits
+				LCFS_credit_per_MMBtu(proj_id, reg, rng_type) := CI_difference_from_target(proj_id, reg, rng_type) * LCFS_credit_price * MJ_to_MMBtu ;
+				RIN_credit_per_MMBTU(proj_id, reg, rng_type | lcoe(proj_id, reg, rng_type)) := D3_RIN_Price;
+				
+				! Convert RNG from Bcf, to MMBtu, and then to MJ. Then multiply by CI difference to get grams of CO2. Divide by 1,000,000 to convert to tons,
+				! and then divide by 1,000,000 to convert to million tons. 
+				LCFS_carbon_offset_project(proj_id, reg, rng_Type) := ((rng_produced(proj_id, reg, rng_type)*1037000)/MJ_to_MMBtu) * 
+									       (CI_difference_from_target(proj_id, reg, rng_type)) / 1000000 / 1000000;
+				
+				! Make adjusted LCOE parameters using the credits
+				lcoe_lcfs_adj(proj_id,reg,rng_type) := lcoe(proj_id, reg, rng_type) - LCFS_credit_per_MMBtu(proj_id, reg, rng_type);
+				lcoe_rfs_adj(proj_id,reg,rng_type) := lcoe(proj_id, reg, rng_type) - RIN_credit_per_MMBtu(proj_id, reg, rng_type);
+				lcoe_lcfs_rfs_adj(proj_id, reg, rng_type) := lcoe(proj_id, reg, rng_type) - LCFS_credit_per_MMBtu(proj_id, reg, rng_type) - RIN_credit_per_MMBtu(proj_id, reg, rng_type);
+				
+				! Calculate Annual Spot Prices (including Texas)
+				AnnualStateSpotPrice_RNG(year, reg) := sum((mon,sec)| map_month_year(mon,year), Price_Spot(mon,reg)*
+				     Cons_State_Mon(mon,sec, reg))/$
+				     sum(sec,Cons_State_Yr(year, sec, reg));
+				
+				 ! Take the weighted average of the Texas regions spot price so we have prices for Texas
+				!AnnualStateSpotPrice_RNG(ModelYear, TexasState) := sum((modelyrmn,sec, r_tx), Price_Spot(modelyrmn,r_tx)* Cons_State_Mon(modelyrmn,sec,r_tx))/$
+				!     sum((sec, r_tx),Cons_State_Yr(ModelYear-1, sec, r_tx));
+				
+				! Calculate $/MMBtu profit under various credit systems
+				 profit_lcfs(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, CaliforniaState | lcoe_lcfs_adj(proj_id, reg, rng_type)) - lcoe_lcfs_adj(proj_id, reg, rng_type);
+				 profit_rfs(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, reg | lcoe_rfs_adj(proj_id, reg, rng_type)) - lcoe_rfs_adj(proj_id, reg, rng_type);
+				 profit_lcfs_rfs(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, CaliforniaState | lcoe_lcfs_rfs_adj(proj_id, reg, rng_type)) - lcoe_lcfs_rfs_adj(proj_id, reg, rng_type);
+				 profit_noCredits(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, reg | lcoe(proj_id, reg, rng_type)) - lcoe(proj_id, reg, rng_type);
+			}
+		}
+		Procedure RNG_Production_Run {
+			Body: {
+				Calculate_LCOE_and_Credits;
+				! Convert to Bcf/month (need to redo properly)
+				rng_produced_monthly(proj_id, reg, rng_type) := rng_produced(proj_id, reg, rng_type) / 12;
+				
+				! Determine HH spot price
+				rng_avg_spot_prc(reg) := mean(rng_avg_year, PriceSpotAnnualState(rng_avg_year, reg));
+				! Convert RINs from EGE to MMcf
+				RIN_D3_Mandate_MMcf(year) := RIN_D3_Mandate(year) * 1000000000 * EGE_to_MMcf;
+				
+				! Convert RIN mandate from MMcf to Bcf
+				RIN_D3_Mandate_Bcf(year) := RIN_D3_Mandate_MMcf(year)/1000;
+				
+				! Determine last year of RIN mandate and corresponding volumes
+				Last_RIN_Mandate_Year := Last(year | RIN_D3_Mandate_Bcf(year) <> 0);
+				Last_RIN_Mandate_Volume := RIN_D3_Mandate_Bcf(Last(year | RIN_D3_Mandate_Bcf(year) <> 0));
+				
+				! Apply last year of RIN mandate volumes forward into the future.
+				RIN_D3_Mandate_Bcf(year | year > Last_RIN_Mandate_Year) := Last_RIN_Mandate_Volume;
+				
+				! Pacific region veihicle transportation consumption
+				PacifcRegCons := sum((fuel, vehicle), NEMS_AnnualConsByMode(ModelYear, fuel, vehicle, CD_Pacific));
+				
+				! Apply california share of Pacific consumption
+				CAVehicleCons := Cons_share_StateCen(Sector_Transportation,CaliforniaState,CD_Pacific)*PacifcRegCons;
+				CAVehicleConsAnnual(year) := sum((fuel, vehicle), NEMS_AnnualConsByMode(year, fuel, vehicle, CD_Pacific)) * Cons_share_StateCen(Sector_Transportation,CaliforniaState,CD_Pacific);
+				
+				USVehicileConsAnnual(year):= sum((fuel, vehicle, r_cen), NEMS_AnnualConsByMode(year, fuel, vehicle, r_cen));
+				
+				ModelYearRNGProduction :=  sum(l48,AnnualSupply(ModelYear-1, Supply_RNG, l48 ));
+				
+				! Re-do to ensure that just because production is hit in a prior year, it does skip the RFS mandate section
+				if ModelYear = '2022' then
+					ModelYearRNGProduction := 0;
+				endif;
+				
+				active_rng_projects := {proj_id | Exists((year, rng_type), annual_rng_capacity_flag(year, proj_id, rng_type))};
+				available_rng_projects := id - active_rng_projects;
+				
+				!available_rng_projects := {33, 34};
+				
+				!RNGProduction_LCFS := LatestLCFSVolume;
+				
+				empty AnnualLCFSProjects;
+				
+				! Pull forward prior year projects
+				if ModelYear = RNGYear then
+					annual_rng_capacity_flag(ModelYear, proj_id, rng_type) := annual_rng_capacity_flag(RNGYear, proj_id, rng_type);
+				else
+					annual_rng_capacity_flag(ModelYear, proj_id, rng_type) := annual_rng_capacity_flag(ModelYear-1, proj_id, rng_type);
+				endif;
+				
+				 While (RIN_D3_Mandate_Bcf(ModelYear) > ModelYearRNGProduction) and ModelYearRNGProduction < USVehicileConsAnnual(ModelYear)  do
+				
+					if ((RIN_D3_Mandate_Bcf(ModelYear) > ModelYearRNGProduction) and (RNGProduction_LCFS < CAVehicleCons)) then
+						! Use LCOE_RFS_LCFS
+				
+						! Determine value of most profitable project
+						max_profit_from_project := max((proj_id, reg, rng_type), profit_lcfs_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects and profit_lcfs_rfs(proj_id, reg, rng_type) > 0));
+						! Use profit value to determine which project is associated with the profit value
+						rng_project_add := Element({proj_id | Exists(((reg, rng_type)) | profit_lcfs_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project ) }, 1);
+				
+						rng_project_add_type := Element({rng_type | Exists(((proj_id, reg)) | profit_lcfs_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project )}, 1);
+				
+						annual_rng_capacity_flag(ModelYear, rng_project_add, rng_project_add_type) := 1;
+						available_rng_projects -= rng_project_add;
+						lcfs_projects += rng_project_add;
+						AnnualLCFSProjects += rng_project_add;
+				
+						ModelYearRNGProduction := sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
+						RNGProduction_LCFS := LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+						!break;
+				
+						! Keep track of projects that are added in this section because of LCFS accounting
+					elseif (RNGProduction_LCFS > CAVehicleCons) then
+						! Use only RFS credits
+								! Determine value of most profitable project
+						max_profit_from_project := max((proj_id, reg, rng_type), profit_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects and  profit_rfs(proj_id, reg, rng_type) > 0));
+				
+						if max_profit_from_project > 0 then
+							! Use profit value to determine which project is associated with the profit value
+							rng_project_add := Element({proj_id | Exists(((reg, rng_type)) | profit_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project ) }, 1);
+				
+							rng_project_add_type := Element({rng_type | Exists(((proj_id, reg)) | profit_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project )}, 1);
+				
+							annual_rng_capacity_flag(ModelYear, rng_project_add, rng_project_add_type) := 1;
+							available_rng_projects -= rng_project_add;
+				
+				
+							ModelYearRNGProduction := sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
+							RNGProduction_LCFS := LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+						else
+							break;
+						endif;
+				
+					else 
+						break;
+					endif;
+				
+				
+				
+					endwhile;
+				
+				! If the D3 RFS Mandate has already been reached, then only look at projects that use LCFS credits
+				while  CAVehicleCons > RNGProduction_LCFS and ModelYear > RNGYear do
+					max_profit_from_project := max((proj_id, reg, rng_type), profit_lcfs(proj_id, reg, rng_type | proj_id in available_rng_projects and profit_lcfs(proj_id, reg, rng_type) > 0));
+				
+					if max_profit_from_project > 0 then
+				
+						! Use profit value to determine which project is associated with the profit value
+						rng_project_add := Element({proj_id | Exists(((reg, rng_type)) | profit_lcfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project ) }, 1);
+				
+						rng_project_add_type := Element({rng_type | Exists(((proj_id, reg)) | profit_lcfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project )}, 1);
+				
+						annual_rng_capacity_flag(ModelYear, rng_project_add, rng_project_add_type) := 1;
+						available_rng_projects -= rng_project_add;
+						lcfs_projects += rng_project_add;
+						AnnualLCFSProjects += rng_project_add;
+				
+						ModelYearRNGProduction := sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
+						RNGProduction_LCFS := LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+					else
+						break;
+					endif;
+				
+				endwhile;
+				
+				! Add to Annual Supply 
+				if ModelYear > RNGYear then
+				
+					rng_lcfs_production(ModelYear) := RNGProduction_LCFS-LatestLCFSVolume;
+					!rng_lcfs_totalCI_difference_from_target(ModelYear) := sum((proj_id, rng_type, reg), CI_difference_from_target(proj_id, reg, rng_type) | proj_id in lcfs_projects);
+					! Convert from Bcf to MMBtu/ and then to MJ (look for conversion factor for this)
+					! Reduces down to multiplying Bcf by ~1094.112682.
+					! Dividy mass by 907200 to convert grams to tons.
+					!rng_carbon_offset(ModelYear) := (rng_lcfs_totalCI_difference_from_target(ModelYear)* (rng_lcfs_production(ModelYear)*1094.112682))/907200/1000;
+				
+					AnnualRNGCarbonOffset(ModelYear) := sum( (proj_id, reg, rng_type), LCFS_carbon_offset_project(proj_id, reg, rng_type | proj_id in lcfs_projects)) + AnnualRNGCarbonOffset('2021');
+				
+					AnnualSupply(ModelYear, Supply_RNG, reg) := sum( (proj_id, rng_type) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type )) + ANL_rng_historicalProductionAnnual(RNGYear,'food_waste', reg) + ANL_rng_historicalProductionAnnual(RNGYear,'WRRF', reg) ;
+					LCFSProductionAnnual(ModelYear) :=  LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+					Supply(modelyrmn, Supply_RNG, reg)  := AnnualSupply(MonthToYear(modelyrmn), Supply_RNG, reg) * NumberOfDaysInMonth(modelyrmn)/ NumberOfDaysInYear(MonthToYear(modelyrmn));
+				
+					! For debug/report page
+					TotalAnnualRNGProduction(year) := sum(reg , AnnualSupply(year, Supply_RNG, reg));
+					TotalAnnualRNGProductionType(year, rng_type) := sum( (proj_id, reg) | annual_rng_capacity_flag(year, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
+				endif;
+			}
+		}
+		Procedure Set_Historical_RNG_Capacity_old {
+			Body: {
+				
+				
+				! Calculate the amount of RNG, by type that history ends on
+				!RNG_prod_last_historical_year(rng_type)(rng_type) := sum((datamon, h), ANL_rng_historicalProduction(datamon, h, rng_type | datamon = 'December, 2022'));
+				
+				! Calculate historical production by year
+				ANL_rng_historicalProductionAnnual(datayear, rng_type, h) := sum((datamon) |map_month_year(datamon,datayear), ANL_rng_historicalProduction(datamon, h, rng_type));
+				
+				! Determine total natural gas production by type for last historical year
+				! Remove hardcoding to dynamically select last RNG year
+				RNG_prod_last_historical_year(rng_type) := sum((datayear, h), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = '2022'));
+				RNG_prod_last_historical_yearState(rng_type, h) := sum((datayear), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = '2022'));
+				
+				historical_capacity_flag(proj_id) := 0;
+				
+				! Right now, this is just for landfills
+				!rng_state_loop_iterator := Hubs_;
+				!rng_state_loop_iterator := { reg | Exists((proj_id, rng_type), lcoe(proj_id, reg, rng_type)) } ;
+				rng_state_loop_iterator := { h | Exists((rng_type | rng_type = 'landfill'), RNG_prod_last_historical_yearState(rng_type, h)) } ;
+				for rng_state_loop_i do
+					! Determine projects that are associated with a particular state
+					! Each state will have certain projects associated with it given a certain type of RNG source
+					! We will be looping through each of these projects, and turning the `historical_capacity_flag` to 1 UNTIL
+					! the cumulative sum of what is produced annually from those projects is at least equal to what the historical production is for that state.
+					! If the largest project is larger than what the state produced anually, then the largest project will be the first and only project turned on.
+					projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i, 'landfill')) } ;
+					rng_loop_iterator := projects_for_state;
+				
+					for rng_loop_i do
+				
+						! rng_state_sum_temp is the rolling cumulative sum of RNG production from the projects associated with the state.
+						rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type | rng_type = 'landfill' ));
+				
+						! IF the cumulative sum from the projects (including the project in question) is less than the historical RNG projection from the most recent year,
+						! then set that project as active. (historical_capacity_flag to 1)
+						if(rng_state_sum_temp <= RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
+							historical_capacity_flag(rng_loop_i) := 1;
+				
+						! IF the cumulative sum of the projects (including the project in question) is more than the historical production AND we're only on the first project,
+						! then set the first project as active and break out of the loop/move on to the next state 
+						elseif( (rng_state_sum_temp > RNG_prod_last_historical_yearState('landfill', rng_state_loop_i) ) and
+						rng_loop_i = Element(rng_loop_iterator, 1))  then
+							historical_capacity_flag(rng_loop_i) := 1;
+							break;
+				
+						! ! IF the cumulative sum of the projects (including the project in question) is more than the historical production and we're not on the first project
+						! THEN break out of the loop and move on to the next state.
+						elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
+							break;
+						endif;
+						endfor;
+					endfor;
+				
+				!RNG_from_historical_capacity(reg) := sum( (proj_id, rng_type) | historical_capacity_flag(proj_id) , rng_produced(proj_id, reg, rng_type ));
+				
+				! Set initial projects online to 
+				annual_rng_capacity_flag('2022', proj_id, 'landfill') := historical_capacity_flag(proj_id);
+				
+				! Now do farms
+				historical_capacity_flag(proj_id) := 0;
+				
+				! Right now, this is just for landfills
+				!rng_state_loop_iterator := Hubs_;
+				!rng_state_loop_iterator := { reg | Exists((proj_id, rng_type), lcoe(proj_id, reg, rng_type)) } ;
+				rng_state_loop_iterator := { h | Exists((rng_type | rng_type = 'farm'), RNG_prod_last_historical_yearState(rng_type, h)) } ;
+				for rng_state_loop_i do
+					! Determine projects that are associated with a particular state
+					! Each state will have certain projects associated with it given a certain type of RNG source
+					! We will be looping through each of these projects, and turning the `historical_capacity_flag` to 1 UNTIL
+					! the cumulative sum of what is produced annually from those projects is at least equal to what the historical production is for that state.
+					! If the largest project is larger than what the state produced anually, then the largest project will be the first and only project turned on.
+					projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i, 'farm')) } ;
+					rng_loop_iterator := projects_for_state;
+				
+					for rng_loop_i do
+				
+						! rng_state_sum_temp is the rolling cumulative sum of RNG production from the projects associated with the state.
+						rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type | rng_type = 'farm'));
+				
+						! IF the cumulative sum from the projects (including the project in question) is less than the historical RNG projection from the most recent year,
+						! then set that project as active. (historical_capacity_flag to 1)
+						if(rng_state_sum_temp <= RNG_prod_last_historical_yearState('farm', rng_state_loop_i)) then
+							historical_capacity_flag(rng_loop_i) := 1;
+				
+						! IF the cumulative sum of the projects (including the project in question) is more than the historical production AND we're only on the first project,
+						! then set the first project as active and break out of the loop/move on to the next state 
+						elseif( (rng_state_sum_temp > RNG_prod_last_historical_yearState('farm', rng_state_loop_i) ) and
+						rng_loop_i = Element(rng_loop_iterator, 1))  then
+							historical_capacity_flag(rng_loop_i) := 1;
+							break;
+				
+						! ! IF the cumulative sum of the projects (including the project in question) is more than the historical production and we're not on the first project
+						! THEN break out of the loop and move on to the next state.
+						elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState('farm', rng_state_loop_i)) then
+							break;
+						endif;
+						endfor;
+					endfor;
+				
+				annual_rng_capacity_flag('2022', proj_id, 'farm') := historical_capacity_flag(proj_id);
+				
+				!RNG_from_historical_capacity(reg, rng_type) := sum( (proj_id) | historical_capacity_flag(proj_id) , rng_produced(proj_id, reg, rng_type ));
+				
+				RNG_from_historical_capacity(reg, rng_type) := sum( (proj_id) | annual_rng_capacity_flag('2022', proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
+				
+				!
+				!for rng_state_loop_i do
+				!
+				!	! Determine projects that are associated with a particular state
+				!	projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i, rng_type)) } ;
+				!	rng_loop_iterator := projects_for_state;
+				!
+				!	project_id_ord_iterator := 1;
+				!	rng_state_sum_temp := 0;
+				!
+				!
+				!
+				!	while(rng_state_sum_temp <= sum((proj_id, rng_type) | proj_id <= Element(projects_for_state,project_id_ord_iterator) , proj_rng(proj_id ,rng_state_loop_i, rng_type))) do
+				!
+				!		rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= Element(projects_for_state,project_id_ord_iterator), proj_rng(proj_id ,rng_state_loop_i, rng_type));
+				!		if(rng_state_sum_temp <= RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
+				!			historical_capacity_flag(Element(projects_for_state,project_id_ord_iterator)) := 1;
+				!		elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
+				!			break;
+				!		endif;
+				!		project_id_ord_iterator += 1;
+				!	endwhile;
+				!endfor;
+				!
+				!RNG_from_historical_capacity(reg) := sum( (proj_id | historical_capacity_flag(proj_id)) , proj_rng(proj_id, reg, rng_type));
+				!
+				!
+				!
+				!
+				!
+				!
+				!
+				!	rng_sum_temp := sum((reg, proj_id) | proj_id <= rng_loop_i, proj_rng(proj_id, reg)) ;
+				!	if (rng_sum_temp <= RNG_prod_last_historical_year('landfill') ) then
+				!		historical_capacity_flag(rng_loop_i) := 1;
+				!	elseif (rng_sum_temp >= RNG_prod_last_historical_year('landfill')) then
+				!		break;
+				!		endif;
+				!	endfor;
+				!
+				! Set initial projects online to 
+				!annual_rng_capacity_flag('2022', proj_id, 'landfill') := historical_capacity_flag(proj_id);
+				!
+			}
+		}
+		Procedure Set_Historical_RNG_Capacity {
+			Body: {
+				! Calculate the amount of RNG, by type that history ends on
+				!RNG_prod_last_historical_year(rng_type)(rng_type) := sum((datamon, h), ANL_rng_historicalProduction(datamon, h, rng_type | datamon = 'December, 2022'));
+				
+				! Calculate historical production by year
+				ANL_rng_historicalProductionAnnual(datayear, rng_type, h) := sum((datamon) |map_month_year(datamon,datayear), ANL_rng_historicalProduction(datamon, h, rng_type));
+				
+				! Determine total natural gas production by type for last historical year
+				! Remove hardcoding to dynamically select last RNG year
+				RNG_prod_last_historical_year(rng_type) := sum((datayear, h), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = RNGYear));
+				RNG_prod_last_historical_yearState(rng_type, h) := sum((datayear), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = RNGYear));
+				
+				for rng_source_i do
+				
+					historical_capacity_flag(proj_id) := 0;
+				
+					! Right now, this is just for landfills
+					!rng_state_loop_iterator := Hubs_;
+					!rng_state_loop_iterator := { reg | Exists((proj_id, rng_type), lcoe(proj_id, reg, rng_type)) } ;
+					rng_state_loop_iterator := { h | Exists((rng_type | rng_type = rng_source_i), RNG_prod_last_historical_yearState(rng_type, h)) } ;
+					for rng_state_loop_i do
+						! Determine projects that are associated with a particular state
+						! Each state will have certain projects associated with it given a certain type of RNG source
+						! We will be looping through each of these projects, and turning the `historical_capacity_flag` to 1 UNTIL
+						! the cumulative sum of what is produced annually from those projects is at least equal to what the historical production is for that state.
+						! If the largest project is larger than what the state produced anually, then the largest project will be the first and only project turned on.
+						projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i,rng_source_i)) } ;
+						rng_loop_iterator := projects_for_state;
+				
+						for rng_loop_i do
+				
+							! rng_state_sum_temp is the rolling cumulative sum of RNG production from the projects associated with the state.
+							rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type | rng_type = rng_source_i));
+				
+							! IF the cumulative sum from the projects (including the project in question) is less than the historical RNG projection from the most recent year,
+							! then set that project as active. (historical_capacity_flag to 1)
+							if(rng_state_sum_temp <= RNG_prod_last_historical_yearState(rng_source_i, rng_state_loop_i)) then
+								historical_capacity_flag(rng_loop_i) := 1;
+				
+							! IF the cumulative sum of the projects (including the project in question) is more than the historical production AND we're only on the first project,
+							! then set the first project that would be less than or equal to the current production level as active
+							elseif( (rng_state_sum_temp > RNG_prod_last_historical_yearState(rng_source_i, rng_state_loop_i)) and
+							rng_loop_i = Element(rng_loop_iterator, 1))  then
+				
+								! Find the proj_id that would at least be equal to the historical production
+								smallest_allowable_proj := First(proj_id | rng_produced(proj_id | rng_produced(proj_id, rng_state_loop_i, rng_source_i) <= 
+								RNG_prod_last_historical_yearState(rng_source_i, rng_state_loop_i),rng_state_loop_i, rng_source_i));
+								historical_capacity_flag(proj_small) := 1;
+								break;
+				
+							! ! IF the cumulative sum of the projects (including the project in question) is more than the historical production and we're not on the first project
+							! THEN break out of the loop and move on to the next state.
+							elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState(rng_source_i, rng_state_loop_i)) then
+								break;
+							endif;
+							endfor;
+						endfor;
+					! Set initial projects online to 
+					annual_rng_capacity_flag(RNGYear, proj_id, rng_source_i) := historical_capacity_flag(proj_id);
+				endfor;
+				
+				RNG_from_historical_capacity(reg, rng_type) := sum( (proj_id) | annual_rng_capacity_flag(RNGYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
+			}
+		}
+		Procedure RNG_Initialize {
+			Body: {
+				read from file "input/ngrng.txt" in merge mode;
+				read from file "input/lcoe.txt" in merge mode;
+				
+				! Intiailize LCFS Basline CI Target from GDS
+				baseline_CI(NEMSmap_XYear(MNXYRS)) := LFMMOUT_LCFS_BaseLine('1', MNXYRS);
+				
+				!historical RNG production
+				HistoricalSupply(mon, Supply_RNG, s) := sum((rng_type), ANL_rng_historicalProduction(mon, s, rng_type));
+				HistoricalAnnualSupply(datayear, Supply_RNG, s) := sum((datamon) |map_month_year(datamon,datayear), HistoricalSupply(datamon, Supply_RNG, s));
+				
+				!HistoricalFoodWasteRNGProductionAnnual(year, s, rng_type) := 
+				
+				Supply(mon, Supply_RNG, s) := HistoricalSupply(mon, Supply_RNG, s);
+				AnnualSupply(datayear, Supply_RNG, s) := HistoricalAnnualSupply(datayear, Supply_RNG, s);
+				
+				RNGProduction_LCFS := LatestLCFSVolume;
+				
+				! Convert D3 RIN/LCFS credit price, and  LCOE costs to 1987 dollars 
+				D3_RIN_Price /= GDPPriceDeflator87(RIN_Price_Year);
+				lcoe(proj_id, reg, rng_type) /= GDPPriceDeflator87(RIN_Price_Year);
+				LCFS_credit_price /= GDPPriceDeflator87(LCFS_credit_price_year);
+				
+				! Convert MMcf/yr of supply curve to Bcf/yr
+				! NOTE: NEED TO CHANGE CODE TO EXPORT TO BCF/YR PRIOR TO BEING READ INTO AIMMS
+				!proj_rng(proj_id, reg, rng_type) := proj_rng(proj_id, reg, rng_type) / (1/0.001);
+				
+				! Convert MMcf/yr of supply curve to Bcf/yr
+				rng_produced(proj_id, reg, rng_type) := rng_produced(proj_id, reg, rng_type) / (1/0.001);
+				
+				! Map distances to project IDs
+				proj_distance(proj_id, reg, rng_type | lcoe(proj_id, reg, rng_type)) := distance(reg);
+				
+				! Map assumed CI to projects and multiply by the CI penalty per mile. Add CI adder for electricity generation mix source.
+				proj_CI(proj_id, reg, rng_type | lcoe(proj_id, reg, rng_type)) := assumed_CI_base(rng_type) + proj_distance(proj_id, reg, rng_type) * CI_penalty_per_mile + CI_adder_from_elec(reg);
+				
+				Set_Historical_RNG_Capacity;
+			}
+		}
+		DeclarationSection RNG_Declarations {
+			Set non_modeled_rng_types {
+				SubsetOf: rng_prod_type;
+				Definition: rng_prod_type - 'food_waste' - 'WRRF';
+			}
+			ElementParameter RNGYear {
+				Range: XYears_;
+			}
+			Parameter starting_rng {
+				IndexDomain: rng_type;
+			}
+			ElementParameter Supply_RNG {
+				Range: SupplyType_;
+			}
+			Parameter master_running_capacity_flag {
+				IndexDomain: proj_id;
+			}
+			Parameter TotalAnnualRNGProduction {
+				IndexDomain: year;
+			}
+			Parameter rng_production {
+				IndexDomain: (year,reg);
+			}
+			Set rng_loop_iterator {
+				SubsetOf: id;
+				Index: rng_loop_i;
+			}
+			Parameter rng_sum_temp;
+			Parameter landfill_potential_cumsum {
+				IndexDomain: proj_id;
+			}
+			Set rng_prod_type {
+				Index: rng_type;
+			}
+			Parameter ANL_rng_historicalProduction {
+				IndexDomain: (datamon,h, rng_type);
+			}
+			Parameter current_rng_capacity {
+				IndexDomain: reg;
+			}
+			Parameter rng_avg_spot_prc {
+				IndexDomain: reg;
+			}
+			Set rng_avg_spot_price_years {
+				SubsetOf: Years_;
+				Index: rng_avg_year;
+				Definition: {
+					{'2030', '2031'}
+				}
+			}
+			Parameter rng_capacity_install_flag {
+				IndexDomain: proj_id;
+			}
+			Parameter EGE_to_MMBtu {
+				Comment: "Assumed price of a D3 RIN in MMBtu";
+			}
+			Parameter EGE_to_MMcf;
+		}
+		DeclarationSection RIN_Declarations {
+			Parameter RIN_credit_per_MMBtu {
+				IndexDomain: (proj_id,reg,rng_type);
+			}
+			Parameter RIN_volumes_needed;
+			Parameter Last_RIN_Mandate_Volume;
+			ElementParameter Last_RIN_Mandate_Year {
+				Range: Years_;
+			}
+			Parameter new_RNG_from_RIN_flag {
+				IndexDomain: proj_id;
+				Range: binary;
+			}
+			Parameter RNG_RIN_flag {
+				IndexDomain: proj_id;
+			}
+			Parameter D3_RIN_Price;
+			Parameter RIN_D3_Mandate_MMcf {
+				IndexDomain: year;
+			}
+			Parameter RIN_D3_Mandate {
+				IndexDomain: year;
+			}
+			Parameter RIN_D3_Mandate_Bcf {
+				IndexDomain: year;
+			}
+			ElementParameter RIN_Price_Year {
+				Range: Years_;
+			}
+		}
+	}
+	Section DEX_Processing_Section {
+		DeclarationSection DEX_Declarations {
+			StringParameter fromAIMMSFolder;
+			StringParameter toAIMMSFolder;
+			Parameter ParquetWriteSwitch;
+			Parameter ParquetReadSwitch;
+		}
+		Procedure SendGlobalDatatoNEMS_parquet {
+			UsesRuntimeLibs: ParquetMappingToAIMMS;
+			Body: {
+				dex::AddMapping(mappingName : "ParquetMappingFromAIMMS",
+						mappingFile : "Mappings/ParquetMappingFromAIMMS.xml");
+				
+				FromAIMMSFolder := "FromAIMMS/" + formatstring("%i",ncntrl_curcalyr(1)) + "_" + formatstring("%i",ncntrl_curitr(1)) + "/";
+				
+				dex::WriteToFile(
+				    FromAIMMSFolder,                   ! location + name of the output file
+				    "ParquetMappingFromAIMMS",                 ! mapping name
+				    1                               ! use a pretty writer
+				);
+			}
+		}
+		Procedure ReadGlobalDataFromNEMS_parquet {
+			UsesRuntimeLibs: ParquetMappingToAIMMS;
+			Body: {
+				dex::AddMapping(mappingName : "ParquetMappingToAIMMS",
+						mappingFile : "Mappings/ParquetMappingToAIMMS.xml");
+				
+				
+				! Write out the parquet files to a folder for the given year/iteration in the format ToAIMMS/YYYY_i/
+				ToAIMMSFolder := "ToAIMMS/" + formatstring("%i",ncntrl_curcalyr(1)) + "_" + formatstring("%i",ncntrl_curitr(1)) + "/";
+				
+				dex::ReadFromFile(
+				    toAIMMSFolder,                   ! location + name of the output file
+				    "ParquetMappingToAIMMS",                 ! mapping name
+				    1                               ! use a pretty writer
+				);
+			}
+		}
+		DeclarationSection SetsToWrite;
+		Procedure Read_Parquet {
+			Body: {
+				!dex::AddMapping(mappingName : "ParquetMappingAll_Mike",
+				!		mappingFile : "Mappings/ParquetMappingAll_Mike.xml");
+				
+				
+				!empty COMMREP_DegreeDays;
+				!empty QBLK_QGFIN;
+				
+				!empty GDS_Identifiers_;
+				
+				!dex::ReadFromFile("COMMREP_DegreeDays.parquet",
+				!"COMREP_DegreeDaysMapping",
+				!);
+				
+				! Read parquet file
+				!dex::ReadFromFile(
+				!dataFile : "parquet_files",
+				!mappingName : "ParquetMappingAll_Mike");
+				
+				! Read text file (current status quo)
+				!read from file "ToAimms/GlobalDataToAIMMS_2050_05.txt";
+				
+				! Write the parquet files
+				!dex::WriteToFile(
+				!    "written_parquet_files",                   ! location + name of the output file
+				!    "ParquetMappingAll_Mike",                 ! mapping name
+				!    0                               ! use a pretty writer
+				!);
+				
+				!write GDS_Identifiers_ to file "written_parquet_files/GDS.txt";
+				
+				!SendGlobalDataToNEMS;
+			}
+		}
+		Procedure DEX_Processing {
+			Body: {
+				!dex::ReadAllMappings();
+				
+				!dex::WriteToFile(
+				!    "QBLK_QGFIN.csv",                   ! location + name of the output file
+				!    "CSVMapping",                 ! mapping name
+				!    1                               ! use a pretty writer
+				!);
+				
+				!dex::WriteToFile(
+				!    "QBLK_QGFIN.parquet",                   ! location + name of the output file
+				!    "ParquetMapping",                 ! mapping name
+				!    1                               ! use a pretty writer
+				!);
+				
+				!dex::ReadFromFile("QBLK_QGFIN.parquet",
+				!"ParquetMapping",
+				!);
+				
+				!empty QBLK_QGFIN; 
+				
+				!dex::ReadFromFile("QBLK_QGFIN.csv",
+				!"CSVMapping",
+				!);
+			}
+		}
+	}
 	Procedure MainTermination {
 		Body: {
 			!return DataManagementExit();
+			EnterMainTermination := CurrentToString("%c%y-%m-%d %H:%M:%S") +  " I'm Alive! AIMMS Entering MainTermination - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			put ngStatusFile;
+			put EnterMainTermination;
+			putclose;
+			
 			sAction:="Exited";    ! Action message for NEMS
 			write sAction to file NEMSMessageOutFile in replace mode;  
 			return 1;
@@ -13926,6 +15142,7 @@ Model Main_NGTDM {
 					!Clear out old data series to avoid confusion
 					empty Cleared_Identifiers_ ;
 					
+					Read_Runtime_Parameters;
 					Read_set_data;	                        !Reads all main sets used to create "NLP Structure"
 					ReadPipelineProjects;			!Reads EIA_NaturalGasPipelineProjects.xls file from input directory outside of project directory
 					ReadStateToStateCapacity;		!Reads EIA_StatetoStateCapacity.xls file from input directory outside of project directory
@@ -14010,7 +15227,7 @@ Model Main_NGTDM {
 						
 						axll::ReadSet(
 							SetReference	: StateName_,
-							SetRange	: "A2:A53",
+							SetRange	: "A2:A90",
 							ExtendSuperSets	: 1);
 						
 						axll::ReadSet(
@@ -14020,8 +15237,8 @@ Model Main_NGTDM {
 						
 						axll::ReadList(
 							IdentifierReference	: StateAbbrev(st_name),
-							RowHeaderRange		: "A2:A53",
-							DataRange		: "B2:B53");
+							RowHeaderRange		: "A2:A90",
+							DataRange		: "B2:B90");
 						
 						!Spreadsheet::RetrieveTable( Workbook : WorkbookName,
 						!                                   Parameter     : ProvAbbrev(prov),
@@ -14220,22 +15437,22 @@ Model Main_NGTDM {
 						
 						axll::ReadSet(
 							SetReference	: RowCount_,
-							SetRange	: "A1:A16652",
+							SetRange	: "A1:A17984",
 							ExtendSuperSets	: 1);
 						
 						axll::ReadSet(
 							SetReference	: Pipeline_,
-							SetRange	: "C1:C16652",
+							SetRange	: "C1:C17984",
 							ExtendSuperSets	: 1);
 						
 						axll::ReadSet(
 							SetReference	: StateFrom_,
-							SetRange	: "D1:D16652",
+							SetRange	: "D1:D17984",
 							ExtendSuperSets	: 1);
 						
 						axll::ReadSet(
 							SetReference	: StateTo_,
-							SetRange	: "E1:E16652",
+							SetRange	: "E1:E17984",
 							ExtendSuperSets	: 1);
 						
 						!Spreadsheet::RetrieveTable( Workbook : WorkbookName,
@@ -14261,8 +15478,8 @@ Model Main_NGTDM {
 						
 						axll::ReadList(
 							IdentifierReference	: StateToStateCapacity(i,year,pipe,st_from,st_to),
-							RowHeaderRange		: "A1:E16652",
-							DataRange		: "F1:F16652");
+							RowHeaderRange		: "A1:E17984",
+							DataRange		: "F1:F17984");
 						
 						axll::ReadList(
 							IdentifierReference	: flows_to_remove(pipe,st_from,st_to),
@@ -15222,7 +16439,7 @@ Model Main_NGTDM {
 					!-- Reading from Excel file MasterNGIPrices.xlsx, which is the NGWU/NGI Master list of prices adapted to read into AIMMS
 					
 					
-					WorkbookName := "input\\MasterNGIPrices_after_tx_merge.xlsx";
+					WorkbookName := "input\\MasterNGIPrices.xlsx";
 					!BLOCK
 					if axll::WorkBookIsOpen(WorkbookName) then
 						axll::SelectWorkBook(WorkbookName);
@@ -15238,7 +16455,7 @@ Model Main_NGTDM {
 					
 					axll::ReadSet(
 						SetReference	: PricingPoint_,
-						SetRange	: "B2:B395936",
+						SetRange	: "B2:B488512",
 						ExtendSuperSets	: 1);
 					
 					!Read in daily spot prices for all trading points
@@ -15251,8 +16468,8 @@ Model Main_NGTDM {
 					      !                           ) ;
 					axll::ReadList(
 						IdentifierReference	: DailySpotPrice(days,pp),
-						RowHeaderRange		: "A2:B395936",
-						DataRange		: "C2:C395936");
+						RowHeaderRange		: "A2:B488512",
+						DataRange		: "C2:C488512");
 					
 					!Read in the pricing points (up to 3) used for each hub/state/region/supply node
 					
@@ -15304,6 +16521,7 @@ Model Main_NGTDM {
 				Body: {
 					empty Cleared_Identifiers_ ;
 					
+					Read_Runtime_Parameters;
 					Read_set_data;	                        !Reads all main sets used to create "NLP Structure"
 					ReadMasterNGIPrices;
 					
@@ -15355,6 +16573,7 @@ Model Main_NGTDM {
 				Body: {
 					empty Cleared_Identifiers_ ;
 					
+					Read_Runtime_Parameters;	
 					Read_set_data;	                        !Reads all main sets used to create "NLP Structure"
 					
 					!Read in historical data from PEMEX (SENER consumption and prices read in with rest of historical data in historical_reads
@@ -15404,7 +16623,7 @@ Model Main_NGTDM {
 					!Clear out old data series to avoid confusion
 					empty Pemex_Production_Data ;
 					
-					WorkbookName := "..\\input\\PemexHistoricalProduction.xlsm";
+					WorkbookName := "input\\PemexHistoricalProduction.xlsm";
 					!BLOCK
 					
 					!—Deals with reading workbook if it’s already open or closed
@@ -15427,7 +16646,7 @@ Model Main_NGTDM {
 					      ExtendSuperSets   : 1);
 					axll::ReadSet(
 					      SetReference      : Pemex_Dates_,
-					      SetRange    : "A3:A259",
+					      SetRange    : "A3:A296",
 					      ExtendSuperSets   : 1);
 					
 					!Determine set elements for Pemex_Fields
@@ -15436,8 +16655,8 @@ Model Main_NGTDM {
 					!Read in mapping parameters.  Note must extend date range in excel and here
 					axll::ReadList(
 					      IdentifierReference     : map_mon_pemex_mon(mon_pemex,mon),
-					      RowHeaderRange          : "A3:B259",
-					      DataRange         : "C3:C259");
+					      RowHeaderRange          : "A3:B296",
+					      DataRange         : "C3:C296");
 					axll::ReadList(
 					      IdentifierReference     : map_mx_field_mx(mx_field, mx),
 					      RowHeaderRange          : "G2:H13",
@@ -15449,24 +16668,24 @@ Model Main_NGTDM {
 					axll::ReadTable(
 					      IdentifierReference     : HistoricalData_PEMEX(mx_prod,suptype,mon_pemex),
 					      RowHeaderRange          : "A12:B38",
-					      ColumnHeaderRange : "C6:IY6",
-					      DataRange         : "C12:IY38",
+					      ColumnHeaderRange : "C6:KJ6",
+					      DataRange         : "C12:KJ38",
 					      ModeForUnknownElements  : 2,  !2=skip non-elements, 0-3 are options
 					      MergeWithExistingData   : 0); !0=completely empty then write, 1=merge
 					
 					axll::ReadTable(
 					      IdentifierReference     :  HistoricalNitrogenPEMEX(mx_prod,mon_pemex),
 					      RowHeaderRange          : "A49:A54",
-					      ColumnHeaderRange : "C6:IY6",
-					      DataRange         : "C49:IY54",
+					      ColumnHeaderRange : "C6:KJ6",
+					      DataRange         : "C49:KJ54",
 					      ModeForUnknownElements  : 2,  !2=skip non-elements, 0-3 are options
 					      MergeWithExistingData   : 0); !0=completely empty then write, 1=merge
 					
 					axll::ReadTable(
 					      IdentifierReference     :  HistoricalAdjustmentPEMEX(mon_pemex),
 					      RowHeaderRange          : "",
-					      ColumnHeaderRange : "C6:IY6",
-					      DataRange         : "C56:IY56",
+					      ColumnHeaderRange : "C6:KJ6",
+					      DataRange         : "C56:KJ56",
 					      ModeForUnknownElements  : 2,  !2=skip non-elements, 0-3 are options
 					      MergeWithExistingData   : 0); !0=completely empty then write, 1=merge   
 					

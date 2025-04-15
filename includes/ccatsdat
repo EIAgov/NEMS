@@ -1,0 +1,82 @@
+! -*- f90 -*-
+! $Header: M:/default/includes/RCS/ccatsdat ,v 1.37 2024/04/01 14:12:49 wrs Exp $
+!  CARBON CAPTURE ALLOCATION TRANSPORTATION AND SEQUESTRATION MODULE (CCATS) COMMON BLOCK
+!  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
+!  the user should add the following INCLUDE statement
+!   CCATS output variables
+
+! ****>  VARIABLES FOR CAPTURED CARBON VOLUMES
+
+      REAL SUP_REC_45Q(200,MNUMYR)      ! CO2 volumes from recycled CO2 that are 45Q eligible - project-level
+      REAL SUP_REC_NTC(200,MNUMYR)      ! CO2 volumes from recycled CO2, no tax credit - project-level
+      REAL SUP_NGP_45Q(MNUMCR,MNUMYR)   ! CO2 volumes from natural gas processing facilities that are 45Q eligible
+      REAL SUP_NGP_NTC(MNUMCR,MNUMYR)   ! CO2 volumes from natural gas processing facilities, no tax credit
+      REAL SUP_EMM_45Q(5,MNUMCR,MNUMYR) ! CO2 volumes from power plants that are 45Q eligible
+      REAL SUP_EMM_NTC(5,MNUMCR,MNUMYR) ! CO2 volumes from power plants, no tax credit
+      REAL SUP_CMT_45Q(4,MNUMYR)        ! CO2 volumes from cement plants that are 45Q eligible
+      REAL SUP_CMT_NTC(4,MNUMYR)        ! CO2 volumes from cement plants, no tax credit
+      REAL SUP_ETH_45Q(MNUMCR,MNUMYR)   ! CO2 volumes from ethanol production that are 45Q eligible
+      REAL SUP_ETH_NTC(MNUMCR,MNUMYR)   ! CO2 volumes from ethanol production, no tax credit
+      REAL SUP_H2_45Q(MNUMCR,MNUMYR)    ! CO2 volumes from hydrogen production that are 45Q eligible
+      REAL SUP_H2_NTC(MNUMCR,MNUMYR)    ! CO2 volumes from hydrogen production, no tax credit
+
+! ****>  VARIABLES FOR CAPTURED CARBON COSTS
+
+      REAL CST_REC_INV(200,MNUMYR)      ! Investment cost for recyled CO2 - project-level
+      REAL CST_REC_OM(200,MNUMYR)       ! O&M cost for recyled CO2 - project-level
+      REAL CST_NGP_INV(MNUMCR,MNUMYR)   ! Investment cost for CO2 capture from natural gas processing facilities
+      REAL CST_NGP_OM(MNUMCR,MNUMYR)    ! O&M cost for CO2 capture from natural gas processing facilities
+      REAL CST_EMM_INV(5,MNUMCR,MNUMYR) ! Investment costs for CO2 capture from power plants
+      REAL CST_EMM_OM(5,MNUMCR,MNUMYR)  ! O&M cost for CO2 capture from power plants
+      REAL CST_CMT_INV(4,MNUMYR)        ! Investment cost for CO2 capture from cement plants
+      REAL CST_CMT_OM(4,MNUMYR)         ! O&M cost for CO2 capture from cement plants
+      REAL CST_ETH_INV(MNUMCR,MNUMYR)   ! Investment cost for carbon capture from ethanol production
+      REAL CST_ETH_OM(MNUMCR,MNUMYR)    ! O&M cost for carbon capture from ethanol production
+      REAL CST_H2_INV(MNUMCR,MNUMYR)    ! Investment cost for carbon capture from hydrogen production
+      REAL CST_H2_OM(MNUMCR,MNUMYR)     ! O&M cost for carbon capture from hydrogen production
+
+! ****>  VARIABLES FOR CO2 EOR DEMAND
+
+      REAL DEM_EOR(200,MNUMYR) ! CO2 demand from EOR volumes - project-level
+      REAL CST_EOR(200,MNUMYR) ! CO2 price CO2 EOR projects are willing to offer for CO2 - project-level
+      
+! ****>  VARIABLES FOR CO2 PRICES
+
+      REAL CO2_PRC_DIS_45Q(MNUMCR,MNUMYR) ! CO2 price output after optimization, 45Q eligible CO2, Census Division
+      REAL CO2_PRC_DIS_NTC(MNUMCR,MNUMYR) ! CO2 price output after optimization, no tax credit, Census Division
+      REAL CO2_PRC_REG_45Q(4,MNUMYR)      ! CO2 price output after optimization, 45Q eligible CO2, Census Region
+      REAL CO2_PRC_REG_NTC(4,MNUMYR)      ! CO2 price output after optimization, no tax credit, Census Region
+      
+! ****>  VARIABLES FOR CCATS REPORTING
+
+      REAL CO2_SUP_OUT(MNUMCR,9,MNUMYR)   ! CO2 supply output after optimization
+      REAL CO2_SEQ_OUT(MNUMCR,2,MNUMYR)   ! CO2 demand output after optimization
+      REAL CO2_SUP_OUT_R(MNUMCR,9,MNUMYR) ! CO2 supply output after optimization, realized
+      REAL CO2_SEQ_OUT_R(MNUMCR,2,MNUMYR) ! CO2 demand output after optimization, realized
+      REAL CO2_ELEC(MNUMCR,MNUMYR)        ! CO2 electricity consumption by CCATS
+
+
+!   CCATS output common block
+      COMMON/CCATSDAT/ SUP_REC_45Q,SUP_REC_NTC,SUP_NGP_45Q, &
+       SUP_NGP_NTC,SUP_EMM_45Q,SUP_EMM_NTC,SUP_CMT_45Q,SUP_CMT_NTC, &
+       SUP_ETH_45Q,SUP_ETH_NTC,SUP_H2_45Q,SUP_H2_NTC, &
+       CST_REC_INV,CST_REC_OM,CST_NGP_INV,CST_NGP_OM,CST_EMM_INV, &
+       CST_EMM_OM,CST_CMT_INV,CST_CMT_OM,CST_ETH_INV,CST_ETH_OM,CST_H2_INV,CST_H2_OM, &
+       DEM_EOR,CST_EOR, &
+       CO2_PRC_DIS_45Q,CO2_PRC_DIS_NTC,CO2_PRC_REG_45Q,CO2_PRC_REG_NTC, &
+       CO2_SUP_OUT,CO2_SEQ_OUT,CO2_SUP_OUT_R,CO2_SEQ_OUT_R,CO2_ELEC
+
+
+
+!   Equivalence for FILER used for data storage
+      REAL EQ_CCATSOUT(200 * MNUMYR * 6         + &      !  SUP_REC_45Q, SUP_REC_NTC, CST_REC_INV, CST_REC_OM, DEM_EOR, CST_EOR
+        MNUMCR * MNUMYR * 14     + &      !  SUP_NGP_45Q, SUP_NGP_NTC, SUP_ETH_45Q, SUP_ETH_NTC, SUP_H2_45Q, SUP_H2_NTC, CST_NGP_INV, CST_NGP_OM, CST_ETH_INV, CST_ETH_OM, CST_H2_INV, CST_H2_OM, CO2_PRC_DIS_45Q, CO2_PRC_DIS_NTC
+        5 * MNUMCR * MNUMYR * 4  + &      !  SUP_EMM_45Q, SUP_EMM_NTC, CST_EMM_INV, CST_EMM_OM
+        4 * MNUMYR * 6           + &      !  SUP_CMT_45Q, SUP_CMT_NTC, CST_CMT_INV, CST_CMT_OM, CO2_PRC_REG_45Q, CO2_PRC_REG_NTC
+        MNUMCR * 9 * MNUMYR * 2  + &      !  CO2_SUP_OUT, CO2_SUP_OUT_R
+        MNUMCR * 2 * MNUMYR * 2  + &      !  CO2_SEQ_OUT, CO2_SEQ_OUT_R
+        MNUMCR * MNUMYR          + &      !  CO2_ELEC
+        0)
+        
+        
+      EQUIVALENCE (EQ_CCATSOUT,SUP_REC_45Q)

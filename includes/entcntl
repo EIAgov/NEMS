@@ -7,7 +7,7 @@
       COMMON /ENT$CNTL/  UPLROP0, UPLRLCR, UPLRSIZ, UPLRMIN, UPLRMAX, & ! REAL
        UPLRPC,  UPANNADJ, UPLRLCI, UPLRDBL, UPISHR, UPMNLRN, UPMSSIZ,   &
        UPLRSYR, UPLRLYR, UPLROPS, UPLROPE, UPLRLCU, UPLRLCX,  & ! INTEGERS
-       UPLCSTWT, UPLCAPWT,UPLCAPWT_INT, UPANNLMT,             & ! REAL
+       UPLCSTWT, UPLCAPWT,UPLCAPWT_INT, UPANNLMT, UPCCS_INVSH, UPCCS_INVSH0, UPCCS_VOMSH, UPCCS_FOMSH,  & ! REAL
        UPDHRSW, UPDHRY0, UPDHRYN                                ! INTEGERS
 !
       INTEGER ECP$LRN                    ! NUMBER OF STEPS IN LEARNING CURVE
@@ -17,10 +17,12 @@
       INTEGER ECP$LVN
       PARAMETER (ECP$LVN = 3)
       INTEGER ESIZ$ENT
-      PARAMETER( ESIZ$ENT = (( 11 * 4 * ECP_D_CAP) + &
-                             ( 2 * 4 * ECP_D_CAP * ECP$LRN) + &
-                             ( 2 * 4 * ECP_D_CAP * MNUMYR) + &
-                             (3 * 4 * ECP_D_DSP)) )
+      PARAMETER( ESIZ$ENT = (( 10 * 4 * ECP_D_CAP) + &
+                              (7 * 4 * ECP$COMP) + &
+                             ( 2 * 4 * ECP$COMP * ECP$LRN) + &
+                             ( 3 * 4 * ECP_D_CAP * MNUMYR) + &
+                             (3 * 4 * ECP_D_DSP)) + &
+                             ( 3 * 4 * ECP_D_CAP * ECP$COMP) + 4*4)
 !
 !     ENT$CNTL - VARIABLE DECLARATION AND DEFINITIONS
 !
@@ -34,7 +36,11 @@
       REAL*4    UPLRLCI(ECP_D_CAP,MNUMYR)  ! INT. CAP. BY YEAR FOR LEARNING
       REAL*4    UPISHR(ECP_D_CAP)          ! SHARE OF INTERNATIONAL CAPACITY TO
                                          ! APPLY TO LEARNING (0.0 < UPLRISHR <= 1.0)
-      INTEGER*4 UPLRSYR(ECP_D_CAP)         ! Start Calendar Year For Accumulating Cap
+      REAL*4     UPCCS_INVSH(ECP_D_CAP)    ! CCS share of new plant OVR cost (for CCATS)
+      REAL*4     UPCCS_INVSH0(ECP_D_CAP)    ! CCS share of new plant OVR cost (initial - no learning) (for CCATS)
+      REAL*4     UPCCS_FOMSH(ECP_D_CAP)     ! CCS share of new plant FO&M (for CCATS)
+      REAL*4     UPCCS_VOMSH(ECP_D_CAP)     ! CCS share of new plant VO&M (for CCATS)
+     INTEGER*4 UPLRSYR(ECP_D_CAP)         ! Start Calendar Year For Accumulating Cap
       INTEGER*4 UPLRLYR(ECP_D_CAP)         ! Last Calendar Year For Accumulating Cap
 !
 !     ALL ECP PLANT COMPONENTS

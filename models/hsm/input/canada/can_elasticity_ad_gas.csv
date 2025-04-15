@@ -1,0 +1,106 @@
+year,region,high,low
+2016,Alberta,0.0377,0.0
+2017,Alberta,0.0189,0.1446
+2018,Alberta,0.0046,0.3437
+2019,Alberta,0.001,0.5306
+2020,Alberta,0.001,0.7056
+2021,Alberta,0.001,0.869
+2022,Alberta,0.001,1.0053
+2023,Alberta,0.001,1.0384
+2024,Alberta,0.001,1.0664
+2025,Alberta,0.0108,1.0904
+2026,Alberta,0.0239,1.1112
+2027,Alberta,0.0394,1.1292
+2028,Alberta,0.057,1.1448
+2029,Alberta,0.0764,1.1584
+2030,Alberta,0.0974,1.1702
+2031,Alberta,0.1197,1.1804
+2032,Alberta,0.1431,1.1892
+2033,Alberta,0.1674,1.1967
+2034,Alberta,0.1923,1.203
+2035,Alberta,0.2176,1.2083
+2036,Alberta,0.2429,1.2126
+2037,Alberta,0.2682,1.216
+2038,Alberta,0.293,1.2185
+2039,Alberta,0.3172,1.2203
+2040,Alberta,0.3406,1.2213
+2041,Alberta,0.3628,1.2217
+2042,Alberta,0.3837,1.2215
+2043,Alberta,0.403,1.2207
+2044,Alberta,0.4204,1.2194
+2045,Alberta,0.4357,1.2175
+2046,Alberta,0.4487,1.2153
+2047,Alberta,0.4591,1.2126
+2048,Alberta,0.4666,1.2096
+2049,Alberta,0.4711,1.2062
+2050,Alberta,0.4722,1.2025
+2016,British Columbia,0.0,0.0
+2017,British Columbia,0.0,0.0619
+2018,British Columbia,0.0,0.2887
+2019,British Columbia,0.0,0.4957
+2020,British Columbia,0.0,0.684
+2021,British Columbia,0.0,0.855
+2022,British Columbia,0.0,1.0024
+2023,British Columbia,0.0,1.0354
+2024,British Columbia,0.0,1.0626
+2025,British Columbia,0.0,1.0854
+2026,British Columbia,0.0,1.1046
+2027,British Columbia,0.0,1.1211
+2028,British Columbia,0.0,1.1354
+2029,British Columbia,0.0,1.1477
+2030,British Columbia,0.0,1.1586
+2031,British Columbia,0.0,1.1683
+2032,British Columbia,0.0,1.1771
+2033,British Columbia,0.0,1.1852
+2034,British Columbia,0.0,1.1928
+2035,British Columbia,0.0,1.2001
+2036,British Columbia,0.0,1.2073
+2037,British Columbia,0.0,1.2146
+2038,British Columbia,0.0,1.2221
+2039,British Columbia,0.0,1.2299
+2040,British Columbia,0.0,1.2383
+2041,British Columbia,0.0,1.2473
+2042,British Columbia,0.0,1.257
+2043,British Columbia,0.0,1.2675
+2044,British Columbia,0.0,1.2789
+2045,British Columbia,0.0,1.2913
+2046,British Columbia,0.0,1.3046
+2047,British Columbia,0.0,1.319
+2048,British Columbia,0.0,1.3345
+2049,British Columbia,0.0,1.351
+2050,British Columbia,0.0,1.3685
+2016,Saskatchewan,0.0,0.0954
+2017,Saskatchewan,0.0,0.2739
+2018,Saskatchewan,0.0,0.4355
+2019,Saskatchewan,0.0136,0.5809
+2020,Saskatchewan,0.0304,0.711
+2021,Saskatchewan,0.0484,0.8267
+2022,Saskatchewan,0.0673,0.9817
+2023,Saskatchewan,0.0872,1.0046
+2024,Saskatchewan,0.1077,1.0232
+2025,Saskatchewan,0.1287,1.0385
+2026,Saskatchewan,0.1502,1.0509
+2027,Saskatchewan,0.1719,1.061
+2028,Saskatchewan,0.1936,1.0691
+2029,Saskatchewan,0.2153,1.0755
+2030,Saskatchewan,0.2367,1.0805
+2031,Saskatchewan,0.2578,1.0843
+2032,Saskatchewan,0.2783,1.0871
+2033,Saskatchewan,0.2981,1.0891
+2034,Saskatchewan,0.317,1.0905
+2035,Saskatchewan,0.3349,1.0914
+2036,Saskatchewan,0.3516,1.0921
+2037,Saskatchewan,0.367,1.0926
+2038,Saskatchewan,0.3809,1.0932
+2039,Saskatchewan,0.3932,1.094
+2040,Saskatchewan,0.4037,1.0952
+2041,Saskatchewan,0.4122,1.097
+2042,Saskatchewan,0.4186,1.0994
+2043,Saskatchewan,0.4228,1.1027
+2044,Saskatchewan,0.4245,1.107
+2045,Saskatchewan,0.4236,1.1123
+2046,Saskatchewan,0.4201,1.1189
+2047,Saskatchewan,0.4136,1.1268
+2048,Saskatchewan,0.4041,1.136
+2049,Saskatchewan,0.3913,1.1467
+2050,Saskatchewan,0.3752,1.1588

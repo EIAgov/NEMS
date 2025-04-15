@@ -1,0 +1,15 @@
+parameter,value,type,description,units
+debt_ratio,0.4,input_variable,Ratio of debt financing,fraction
+return_over_capital_cost,0.05,input_variable,Assumed required return over capital cost for investment,fraction
+fed_tax_rate,0.21,input_variable,Assumed federal tax rate,rate
+duration_block0,1,input_variable,Duration of optimization model block 0,years
+duration_block1,1,input_variable,Duration of optimization model block 1,years
+duration_block2,18,input_variable,Duration of optimization model block 2,years
+duration_45q,12,input_variable,Duration of 45Q tax credit policy for a single facility,years
+financing_risk_premia,0.02,input_variable,Assumed risk premia required by investors over risk-free market rate,fraction
+financing_years_transport,20,input_variable,Assumed financing years for pipeline transport investments,years
+financing_years_storage,26,input_variable,Assumed financing years for saline formation storage investments,years
+fixed_om_fraction_transport,0.025,input_variable,Fixed O&M costs as a percentage of capital costs for pipeline transport,fraction
+fixed_om_fraction_storage,0.087,input_variable,Fixed O&M costs as a percentage of capital costs for saline formation storage,fraction
+site_dev_years_storage,4,input_variable,Assumed number of years for storage site development,years
+construction_years_storage,2,input_variable,Assumed number of years for storage site construction,years

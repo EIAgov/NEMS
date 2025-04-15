@@ -20,7 +20,7 @@ def test_gas_model_aimms_files_exist(record_property):
     h = StatusHelper()
     h.skip_test(h.get_status('test_gas_model_aimms_files_exist'))
     
-    START_YEAR = 2016
+    START_YEAR = 2023
     END_YEAR = 2050
 
     if not Model.getInstance().files.parnems:
@@ -51,7 +51,7 @@ def test_coal_model_aimms_files_exist(record_property):
     h = StatusHelper()
     h.skip_test(h.get_status('test_coal_model_aimms_files_exist'))
     
-    START_YEAR = 2021
+    START_YEAR = 2022
     END_YEAR = 2050
 
     if not Model.getInstance().files.parnems:
@@ -77,12 +77,12 @@ def test_coal_model_aimms_files_exist(record_property):
 
 def test_restore_model_aimms_files_exist(record_property):
     """
-    P2/coal/fromAIMMS folder has files for every year 2021-2050
+    P2/rest/fromAIMMS folder has files for every year 2024-2050
     """
     h = StatusHelper()
     h.skip_test(h.get_status('test_restore_model_aimms_files_exist'))
     
-    START_YEAR = 2022
+    START_YEAR = 2024
     END_YEAR = 2050
 
     if not Model.getInstance().files.parnems:
@@ -105,6 +105,36 @@ def test_restore_model_aimms_files_exist(record_property):
 
     assert not errors
 
+
+def test_hmm_model_aimms_files_exist(record_property):
+    """
+    P2/hmm/fromAIMMS folder has files for every year 2023-2050
+    """
+    h = StatusHelper()
+    h.skip_test(h.get_status('test_hmm_model_aimms_files_exist'))
+    
+    START_YEAR = 2023
+    END_YEAR = 2050
+
+    if not Model.getInstance().files.parnems:
+        pytest.skip("Must be Parallel run to run this test.")
+
+    try:
+        hmm_files = Model.getInstance().files.p2.hmm.files
+    except AttributeError:
+        record_property("csv_header", "Error")
+        record_property("ERROR", "p2/hmm folder does not exist.")
+        assert False
+
+    record_property("csv_header", "Error Message")
+    errors = False
+
+    for year in range(START_YEAR, END_YEAR+1):
+        if not check_year_exists(year, hmm_files):
+            record_property("ERROR", f"Missing hmm/fromAIMMS file for year {year}.")
+            errors = True
+
+    assert not errors
 
 def test_lfmm_gams_model_gdx_files_exist(record_property):
     """

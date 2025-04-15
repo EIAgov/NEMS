@@ -8,7 +8,7 @@ fi
 echo "This command lists the runs which have a RESTART file in the output directory."
 narg=$#
 argstr=$*
-cmdstr="grep -v Deleted $NEMSJOBLOG/runlog | awk '{print tolower(\$0)}' | sed 's@\/\/nem2\/l\/@l:\/@' | grep -i "
+cmdstr="grep -v Deleted Y:/RabbitMQ/runlog | awk '{print tolower(\$0)}' | sed 's@\/\/nem2\/l\/@l:\/@' | grep -i "
 i=1
 for arg in $argstr   
 do

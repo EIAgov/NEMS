@@ -1,0 +1,85 @@
+# Mercury Parameters
+
+
+# Mercury Maximum Avaliable Control Technology (MACT) Info
+
+# Mercury MACT Policy Switch
+# 0 => No MACT
+# 1 => MACT
+usw_mact = 0
+
+# Year Mercury MACT is to be realized
+umact_yr = 9999
+
+usw_bact = 0
+ubact_yr = 9999
+
+# DSI Policy Switch
+# 0 => No
+# 1 => Yes
+usw_dsi = 1
+
+# Year DSI Policy is to be realized
+udsi_yr = 2016
+
+ucap_hg = 0.0
+
+
+# Mercury Emissions Group (max = MX_HG_GRP)
+# Establishes mercury emission regions by coal demand region
+# All 1s indicate national total only
+# Variable name: HG_GRP(NDRGG)
+hg_grp = [
+    1,  # NE
+    1,  # YP
+    1,  # S1
+    1,  # S2
+    1,  # GF
+    1,  # OH
+    1,  # EN
+    1,  # KT
+    1,  # AM
+    1,  # C1
+    1,  # C2
+    1,  # WS
+    1,  # MT
+    1,  # CU
+    1,  # ZN
+    1,  # PC
+]
+
+
+# Mercury Emissions Requirements Switch (Without CAMR) by Coal Demand Region
+# 0 => CAMR
+# 1 => No CAMR
+usw_camr = 1
+
+
+# Mercury Emissions Requirements MEF (Without CAMR) by Coal Demand Region
+# (new standards (MEF), 1.00 = no standard)
+# Mercury standards are specified below by year
+hg_mefnc.2016 = [  # YR
+    0.1,  # NE
+    0.1,  # YP
+    0.1,  # S1
+    0.1,  # S2
+    0.1,  # GF
+    0.1,  # OH
+    0.1,  # EN
+    0.1,  # KT
+    0.1,  # AM
+    0.1,  # C1
+    0.1,  # C2
+    0.1,  # WS
+    0.1,  # MT
+    0.1,  # CU
+    0.1,  # ZN
+    0.1,  # PC
+]
+
+
+# Mercury contents for oil and gas in lbs/mmmmtbu
+hgdsel = 0.6048
+hgrlel = 0.6048
+hgrhel = 0.6048
+hgngel = 0.0

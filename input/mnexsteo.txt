@@ -1,9 +1,0 @@
-2000  2007     First and last years for STEO wellhead overwrites (in YEARPR $)
-3.97           Year 1 expectations overwrite
-4.30           Year 2 expectations overwrite
-3.13           Year 3 expectations overwrite
-5.08           Year 4 expectations overwrite
-5.49           Year 5 expectations overwrite
-6.62           Year 6 expectations overwrite
-6.27           Year 7 expectations overwrite
-6.27           Year 8 expectations overwrite

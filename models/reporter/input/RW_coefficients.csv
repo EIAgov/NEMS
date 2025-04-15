@@ -1,0 +1,47 @@
+name,value,type,Description
+ALLOW_PER_OFFSET_rwpre,0.8,float,
+CFMTBE_rwpre,4.24,float,
+CFUBA_rwpre,5.763,float,Pyrolysis oil conversion btu to bbl??
+BTU_BBL_rwpre,5.8,float,conversion btu to bbl
+ETHANOL_PARAM_rwpre,0.9751,float,
+GASTYPES_rwpre,5,int,Types of Oil and Natural Gas wells
+GWh_to_TRIL_rwpre,3.412,float,Gigawatt hour to trillion Btu
+LBS_per_TON_rwpre,2000,int,Pounds per ton
+MAXNFR_rwpre,24,int, Maximum Number of EMM Fuel Regions
+MNCRUD_rwpre,11,int,Crude Oil Types
+MNL48N_rwpre,7,int,OGSM L48 Onshore Regions
+MNL48T_rwpre,11,int,Total OGSM L48 regions
+MNUMCR_rwpre,11,int,Census Regions
+MNUMLR_rwpre,17,int,Coal supply regions
+MNUMNR_rwpre,28,int,Electricity Supply (NERC) Regions
+MNUMOR_rwpre,14,int,Oil and Gas regions
+MNUMPR_rwpre,10,int,PADD regions
+MNUMYR_rwpre,61,int,Max number of years (1990-2050)
+MTOECONV_rwpre,25.2,float,M to E conversion
+NATURAL_GAS_HYDROGEN_PARAM_rwpre,0.7,float,
+NDREG_rwpre,16,int,Coal demand regions
+NNGEM_rwpre,17,int,Natural Gas Electricity regions
+NSREG_rwpre,14,int,Number of coal supply regions
+NUTSEC_rwpre,38,int,Utility demand sectors
+OGDIST_rwpre,84,int,OGSM districts
+OILTYPES_rwpre,5,int,Types of Oil and Natural Gas wells
+QUAD_TO_TRIL_rwpre,1000,int,
+RDAYS_rwpre,365,int,
+T41_SHARE1_rwpre,0.91,float,
+T41_SHARE2_rwpre,0.72,float,
+T62_CTLHG_rwpre,0,int,
+T62_CTLNOX_rwpre,0,int,
+T62_CTLSO2_rwpre,0,int,
+T62_PARAM_1_rwpre,-999,int,
+T62_PARAM_2_rwpre,2204,int,1 Kg = 2.204 lb
+T62_PARAM_3_rwpre,2000,int,
+TCF_to_MMT_rwpre,18000,int,convert thousand cubic feet to million metric tons
+TRIL_TO_QUAD_rwpre,0.001,float,**don't need tril to quad and quad to trill
+GAL_PER_BBL_rwpre,42,int,gallons per barrel
+C_CO2_FACTOR_rwpre,3.666666667,float,"conversion factor, carbon to CO2"
+MNLNP1_rwpre,8,int,7 L48 OGSM regions +1 for total
+TNUMCLASS_rwpre,9,int,from tranrep but not in restart; number of vehicle classes
+UT_DR_rwpre,0.08,float,Discount Rate for Electric Utility NPV of Resource Costs (currently in ftab.dat)
+CUMCAPADD_rwpre,2020,int,currently in ftab.dat
+hydrogen_factor_rwpre,0.1345,float,hydrogen conversion factor from table 125
+NOX_D_GRP_rwpre,5,int,max number of NOX cap groups

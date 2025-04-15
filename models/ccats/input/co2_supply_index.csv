@@ -1,0 +1,9 @@
+﻿co2_supply_type,key
+pp_coal,1
+pp_natgas,2
+beccs,3
+ng_processing,4
+cement,5
+ethanol,6
+ammonia,7
+other_existing,8

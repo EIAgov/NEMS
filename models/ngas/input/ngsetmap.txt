@@ -1,4 +1,4 @@
-!___________________________________________________________________________________________
+﻿!___________________________________________________________________________________________
 !
 !				1. NGMM Set Declarations
 !
@@ -31,11 +31,12 @@ BorderCrossings_ 	:= data {ME-CN_E,NH-CN_E,VT-CN_E,NY-CN_E,MI-CN_E,MN-CN_W,ND-CN
 				MT-CN_W,ID-CN_W,WA-CN_W,TX_W-MX_NE,NM-MX_NE,AZ-MX_NW,CA-MX_NW,TX_E-MX_SS, TX_E-MX_NE};
 BorderCrossingsMX_ 	:= data {TX_W-MX_NE,NM-MX_NE,AZ-MX_NW,CA-MX_NW,TX_E-MX_SS,TX_E-MX_NE};
 Mexico_	:= data {MX_NE,MX_NW,MX_IW,MX_CE,MX_SS};
-MexicoSouth_	:= data {MX_IW,MX_CE,MX_SS};
+MexicoSouth	:= data {MX_IW,MX_CE,MX_SS};
 MexicoNorthEast:='MX_NE';
 Canada_	:= data {CN_E,CN_W};
 CanadaEast:='CN_E';
 CanadaWest:='CN_W';
+International_LNG := data {CN_W, MX_NW, MX_NE};
 
 !DemandNode_ 	:= DATA	{AL, AZ, AR, CA, CO, CT, DC, DE, FL, GA, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, 
 !			MI, MN, MS, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SC, 
@@ -96,7 +97,7 @@ Mexico_NW := 'MX_NW';
 !				1.2  Supply sets
 !___________________________________________________________________________________________
 
-SupplyType_ := data {NA,AD,LNG,SNG_coal,SNG_liq,SNG_other};
+SupplyType_ := data {NA,AD,LNG,SNG_coal,SNG_liq,RNG,SNG_other};
 !SupplyType_ := data {NA,AD,LNG,SNG_coal,SNG_liq,SNG_other,NA_fixed,MEX};
 VariableSupply_ := data{NA};
 NA_AD_ := data{NA,AD};
@@ -106,6 +107,7 @@ Supply_NA:= 'NA';
 Supply_AD:= 'AD';
 Supply_SNGcoal:= 'SNG_coal';
 Supply_LNG:= 'LNG';
+Supply_RNG:='RNG';
 !Supply_NAfixed:='NA_fixed';
 Supply_Curve_Step_ := data {'step1'..'step6'};
 Tariff_Curve_Step_ := data {'step1'..'step5'};
@@ -157,6 +159,7 @@ CD_WSCentral:='WSCentral';
 CD_Mountain:='Mountain';
 CD_Pacific:= 'Pacific';
 Season_ := data {peak, offpeak, shoulder};
+HMMSeason_ := data {1,2,3,4};
 
 
 !Sets used in Mexico subroutine
@@ -1113,56 +1116,59 @@ AK	17	1
 !_____________________________________________________________________________________________
 ! Mapping of supply regions to supply types
 map_Supply := data table
-              NA      AD      LNG   SNG_coal  SNG_liq SNG_other  
-AL                             1       1        1         1        
-AZ             1       1               1        1         1
-AR             1       1               1        1         1
-CA             1       1       1       1        1         1
-CO             1       1               1        1         1
-CT             1       1       1       1        1         1
-DE             1       1       1       1        1         1
-DC             1       1               1        1         1
-FL             1       1       1       1        1         1
-GA             1       1       1       1        1         1
-ID             1       1               1        1         1
-IL             1       1               1        1         1
-IN             1       1               1        1         1
-IA             1       1               1        1         1
-KS             1       1               1        1         1
-KY             1       1               1        1         1
-LA                             1       1        1         1
-ME             1       1       1       1        1         1
-MD             1       1       1       1        1         1
-MA             1       1       1       1        1         1
-MI             1       1               1        1         1
-MN             1       1               1        1         1
-MS                             1       1        1         1
-MO             1       1               1        1         1
-MT             1       1               1        1         1
-NE             1       1               1        1         1
-NV             1       1               1        1         1
-NH             1       1       1       1        1         1
-NJ             1       1       1       1        1         1
-NM                                     1        1         1
-NY             1       1       1       1        1         1
-NC             1       1       1       1        1         1
-ND             1       1               1        1         1
-OH             1       1               1        1         1
-OK             1       1               1        1         1
-OR             1       1       1       1        1         1
-PA             1       1       1       1        1         1
-RI             1       1       1       1        1         1
-SC             1       1       1       1        1         1
-SD             1       1               1        1         1
-TN             1       1               1        1         1
-TX                             1       1        1         1
-UT             1       1               1        1         1
-VT             1       1               1        1         1
-VA             1       1       1       1        1         1
-WA             1       1       1       1        1         1
-WV             1       1               1        1         1
-WI             1       1               1        1         1
-WY             1       1               1        1         1
+              NA      AD      LNG   SNG_coal  SNG_liq SNG_other		RNG  
+AL                             1       1        1         1		1        
+AZ             1       1               1        1         1		1 
+AR             1       1               1        1         1		1 
+CA             1       1       1       1        1         1		1 
+CO             1       1               1        1         1		1 
+CT             1       1       1       1        1         1		1 
+DE             1       1       1       1        1         1		1 
+DC             1       1               1        1         1		1 
+FL             1       1       1       1        1         1		1 
+GA             1       1       1       1        1         1		1 
+ID             1       1               1        1         1		1 
+IL             1       1               1        1         1		1 
+IN             1       1               1        1         1		1 
+IA             1       1               1        1         1		1 
+KS             1       1               1        1         1		1 
+KY             1       1               1        1         1		1 
+LA                             1       1        1         1		1 
+ME             1       1       1       1        1         1		1 
+MD             1       1       1       1        1         1		1 
+MA             1       1       1       1        1         1		1 
+MI             1       1               1        1         1		1 
+MN             1       1               1        1         1		1 
+MS                             1       1        1         1		1 
+MO             1       1               1        1         1		1 
+MT             1       1               1        1         1		1 
+NE             1       1               1        1         1		1 
+NV             1       1               1        1         1		1 
+NH             1       1       1       1        1         1		1 
+NJ             1       1       1       1        1         1		1 
+NM                                     1        1         1		1 
+NY             1       1       1       1        1         1		1 
+NC             1       1       1       1        1         1		1 
+ND             1       1               1        1         1		1 
+OH             1       1               1        1         1		1 
+OK             1       1               1        1         1		1 
+OR             1       1       1       1        1         1		1 
+PA             1       1       1       1        1         1		1 
+RI             1       1       1       1        1         1		1 
+SC             1       1       1       1        1         1		1 
+SD             1       1               1        1         1		1 
+TN             1       1               1        1         1		1 
+TX                             1       1        1         1		1 
+TX_E                           1       1        1         1		1
+TX_W                           1       1        1         1		1 
+TX_N                           1       1        1         1		1  
+UT             1       1               1        1         1		1 
+VT             1       1               1        1         1		1 
+VA             1       1       1       1        1         1		1 
+WA             1       1       1       1        1         1		1 
+WV             1       1               1        1         1		1 
+WI             1       1               1        1         1		1 
+WY             1       1               1        1         1		1 
 CN_E           1       1       1                          	          
 CN_W           1       1       1                          	          
 MX_NE          1       1       1                                          
@@ -1170,18 +1176,18 @@ MX_NW          1       1       1
 MX_IW          1       1       1                                          
 MX_CE          1       1       1                                          
 MX_SS          1       1       1                                          
-TX_1           1       1
-TX_2           1       1
-TX_3           1       1
-TX_4           1       1
-TX_5           1       1
-TX_6           1       1
-TX_7B          1       1
-TX_7C          1       1
-TX_8           1       1
-TX_8A          1       1
-TX_9           1       1
-TX_10          1       1
+TX_1           1       1                                                1
+TX_2           1       1                                                1
+TX_3           1       1                                                1
+TX_4           1       1                                                1
+TX_5           1       1                                                1
+TX_6           1       1                                                1
+TX_7B          1       1                                                1
+TX_7C          1       1                                                1
+TX_8           1       1                                                1
+TX_8A          1       1                                                1
+TX_9           1       1                                                1
+TX_10          1       1                                                1
 NM_E           1       1
 NM_W           1       1
 LA_N           1       1
@@ -1296,6 +1302,22 @@ offpeak		9	1
 shoulder	10	1
 shoulder	11	1
 peak		12	1
+;
+
+composite table:
+hmmseason	mn	map_hmmseason_mn
+4		1	1
+4		2	1
+4		3	1
+1		4	1
+1		5	1
+2		6	1
+2		7	1
+2		8	1
+2		9	1
+3		10	1
+3		11	1
+4		12	1
 ;
 
 !Map seasons for citygate price

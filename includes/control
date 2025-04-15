@@ -366,7 +366,7 @@
       INTEGER*4 UIRH  ! Index: Residual Fuel Oil High Sulfur
       INTEGER*4 UIGF  ! Index: Natural Gas Firm
       INTEGER*4 UIGI  ! Index: Natural Gas Interruptable
-      INTEGER*4 UIGC  ! Index: Natural Gas Competitive
+      INTEGER*4 UIGC  ! Index: Hydrogen Gas from Electrolysis (ephrts)
       INTEGER*4 UIUF  ! Index: Uranium Fuel
       INTEGER*4 UIOG  ! Index: Other Gaseous Fuels
       INTEGER*4 UIWD  ! Index: Biomass (Wood) Energy
@@ -397,7 +397,7 @@
       INTEGER*4 UISTO           ! EFD Type Index: Oil Steam                   
       INTEGER*4 UISTG           ! EFD Type Index: Gas Steam                   
       INTEGER*4 UISTX           ! EFD Type Index: Oil/Gas Steam               
-      INTEGER*4 UIICE           ! EFD Type Index: Internal Combustion Engine       
+      INTEGER*4 UIICE           ! EFD Type Index: Hydrogen Gas Plant (ephrts)    
       INTEGER*4 UICTO           ! EFD Type Index: Oil Turbine                 
       INTEGER*4 UICTG           ! EFD Type Index: Gas Turbine                 
       INTEGER*4 UICTX           ! EFD Type Index: Oil/Gas Turbine             
@@ -519,7 +519,7 @@
 !
 !     MAXFLSH: Variables to calc. max gas and oil shares by plt type and fuel region for new LP
 !
-      COMMON /MAXFLSH/UIGAS,UIDIS,UIRES,EDMXGS,EDMXRS,EDMXDS,FSCAPWT,FCLSH,FGSSH,FOLSH,FWDSH,UICOL,UINUC
+      COMMON /MAXFLSH/UIGAS,UIDIS,UIRES,EDMXGS,EDMXRS,EDMXDS,EDMXCL,FSCAPWT,FCLSH,FGSSH,FOLSH,FWDSH,UICOL,UINUC
       INTEGER*4 UIGAS(EFD_D_NFL)                    ! index to indicate if fuel type is gas
       INTEGER*4 UIRES(EFD_D_NFL)                    ! index to indicate if fuel type is resid
       INTEGER*4 UIDIS(EFD_D_NFL)                    ! index to indicate if fuel type is distillate
@@ -528,6 +528,7 @@
       REAL      EDMXGS(2,ECP_D_CAP,MAXNFR)            ! avg max gas share by plt type and fuel region
       REAL      EDMXRS(2,ECP_D_CAP,MAXNFR)            ! avg max resid share by plt type and fuel region
       REAL      EDMXDS(2,ECP_D_CAP,MAXNFR)            ! avg max dist share by plt type and fuel region
+      REAL      EDMXCL(2,ECP_D_CAP,MAXNFR)            ! avg max coal share by plt type and fuel region
       REAL      FSCAPWT(2,ECP_D_CAP,MAXNFR)           ! total capacity by plt type and fuel region
       REAL      FCLSH(2,ECP_D_CAP,MAXNFR)             ! final coal share by plt type and fuel region
       REAL      FGSSH(2,ECP_D_CAP,MAXNFR)             ! final gas  share by plt type and fuel region
@@ -536,7 +537,7 @@
 !
 !     Store Temporary ECP Maximum Shares and Average Fuel Prices
 !
-      COMMON /ECP_FUELS/ TPMXGAS, TPMXOIL, TPMXCOL, TPMXWGT, TPGASPRC, TPGASWGT, TPDISPRC, TPDISWGT, TPRESPRC, TPRESWGT, TPCOLPRC, TPCOLPRA, TPCOLWGT, TPNUCPRC, TPNUCWGT, &
+      COMMON /ECP_FUELS/ TPMXGAS, TPMXOIL, TPMXCOL, TPMXWGT, TPGASPRC, TPGASWGT, TPDISPRC, TPDISWGT, TPRESPRC, TPRESWGT, TPCOLPRC, TPCOLPRA, TPCOLWGT, TPNUCPRC, TPNUCWGT,TPHYDPRC, TPHYDWGT, &
          TPMXGAS_MR, TPMXOIL_MR, TPMXCOL_MR, TPMXWGT_MR
 
       REAL*8 TPMXGAS(ECP_D_DSP,MAXNFR)     ! Max Gas Shares - Non - Must Run
@@ -554,6 +555,8 @@
       REAL*8 TPCOLWGT(MNUMNR)            ! Total Coal Btu's
       REAL*8 TPNUCPRC(MNUMNR)            ! Average Nuclear Price
       REAL*8 TPNUCWGT(MNUMNR)            ! Total Nuclear Btu's
+      REAL*8 TPHYDPRC(MNUMNR)            ! Average Nuclear Price
+      REAL*8 TPHYDWGT(MNUMNR)            ! Total Nuclear Btu's
       REAL*8 TPMXGAS_MR(ECP_D_DSP,MAXNFR)  ! Max Gas Shares - Must Run Only
       REAL*8 TPMXOIL_MR(ECP_D_DSP,MAXNFR)  ! Max Oil Shares - Must Run Only
       REAL*8 TPMXCOL_MR(ECP_D_DSP,MAXNFR)  ! Max Coal Shares - Must Run Only
@@ -735,3 +738,12 @@
       REAL DPVTOTGENNR(MNUMNR,MNUMYR)
       REAL DPVCOMMGEN(MNUMCR,MNUMYR)
       REAL DPVRESGEN(MNUMCR,MNUMYR)
+
+      COMMON /EPA111_2024/USW_EPA111,UEPA_GSYR,UEPA_CGSH,UEPA_CLCFYR,UEPA_CLYR,UEPA_NWGSYR,UEPA_NWGSCF    !inputs for EPA111 rule passed in 2024
+      INTEGER USW_EPA111                    !switch to indicate program is active
+      INTEGER UEPA_GSYR                     !Last year coal can switch to natural gas
+	  REAL UEPA_CGSH                        !Max coal share for coal-gas cofiring plants
+	  INTEGER UEPA_CLCFYR                   !Last year for coal-gas cofiring
+      INTEGER UEPA_CLYR                     !year takes effect for existing coal
+      INTEGER UEPA_NWGSYR                   !year takes effect for new gas CC
+      REAL UEPA_NWGSCF                      !maximum CF allowed for new gas

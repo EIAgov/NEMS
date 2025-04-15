@@ -28,6 +28,10 @@ class UnifApiCsv(BaseFile):
         if self.df is not None:
             return self.df
 
+class Npz(BaseFile):
+    def __init__(self, path):
+        super(Npz, self).__init__(path=path)
+
 class BaseFolder:
     def __init__(self, path):
         self.path = path
@@ -44,16 +48,6 @@ class Lfmmlog(BaseFile):
     def __init__(self, path):
         super(Lfmmlog, self).__init__(path=path)
 
-class CtsLog(BaseFile):
-    def __init__(self, path):
-        super(CtsLog, self).__init__(path=path)
-
-class CtsModelLog(BaseFile):
-    def __init__(self, path):
-        super(CtsModelLog, self).__init__(path=path)
-class CtsReportLog(BaseFile):
-    def __init__(self, path):
-        super(CtsReportLog, self).__init__(path=path)
 
 class P1(BaseFolder):
     def __init__(self, path):
@@ -69,21 +63,18 @@ class P1(BaseFolder):
                 self.nohup = Nohup(path=os.path.join(self.path, file))
             elif fnmatch.fnmatch(file, "ngas"):
                 self.ngas = FromAIMMS(os.path.join(self.path, "ngas/fromAIMMS"))
-            elif fnmatch.fnmatch(file, "LFMM_p*.gdx.gz"):
+            
+            # use wider search condition to prevent/avoid cycle.py compress timing problem and cover LFMM_p*.gdx.gz files
+            elif fnmatch.fnmatch(file, "LFMM_p*.gdx*"):
                 self.lfmm.append(os.path.join(self.path, file))
             elif fnmatch.fnmatch(file, "LFMM.log"):
                 self.lfmmlog=Lfmmlog(path=os.path.join(self.path, file))
-
 
 class P2(BaseFolder):
     def __init__(self, path):
         super(P2, self).__init__(path=path)
         self.rest = None
         self.coal = None
-        self.ctus = None
-        self.cts_log = None
-        self.cts_model_log = None
-        self.cts_report_log = None
         self.scan_directory()
 
     def scan_directory(self):
@@ -94,14 +85,8 @@ class P2(BaseFolder):
                 self.coal = FromAIMMS(os.path.join(self.path, "coal/fromAIMMS"))
             elif fnmatch.fnmatch(file, "rest"):
                 self.rest = FromAIMMS(os.path.join(self.path, "rest/fromAIMMS"))
-            elif fnmatch.fnmatch(file, "CTSSoln.gdx*"):
-                self.ctus = os.path.join(self.path, file)
-            elif fnmatch.fnmatch(file, "CTS.log"):
-                self.cts_log=CtsLog(path=os.path.join(self.path, file))
-            elif fnmatch.fnmatch(file, "CTSmodel.log"):
-                self.cts_model_log=CtsModelLog(path=os.path.join(self.path, file))
-            elif fnmatch.fnmatch(file, "CTSreprt.log"):
-                self.cts_report_log=CtsReportLog(path=os.path.join(self.path, file))
+            elif fnmatch.fnmatch(file, "hmm"):
+                self.hmm = FromAIMMS(os.path.join(self.path, "hmm/fromAIMMS"))
 
 class P3(BaseFolder):
     def __init__(self, path):
@@ -176,7 +161,7 @@ class NEMSFiles(BaseFolder):
         self.csv_aeo2steo_ind = None
         self.csv_aeo2steo_itg = None
         self.csv_aeo2steo_liq = None
-        self.csv_aeo2steo_ogsm = None
+        self.csv_aeo2steo_hsm = None
         self.csv_aeo2steo_mco = None
 
         self.scan_directory()
@@ -194,6 +179,8 @@ class NEMSFiles(BaseFolder):
                 self.csv = UnifApiCsv(path=os.path.join(self.path, file))
             elif fnmatch.fnmatch(file, "nohup.out"):
                 self.nohup = Nohup(path=os.path.join(self.path, file))
+            elif fnmatch.fnmatch(file, "restart.npz"):
+                self.npz = Npz(path=os.path.join(self.path, file))
             elif file == "p1":
                 self.parnems = True
                 self.p1 = P1(path=os.path.join(self.path, file))
@@ -235,9 +222,9 @@ class NEMSFiles(BaseFolder):
         p = f'{self.path}\\Validator\\input\\steo_benchmark_liquids.csv'
         if exists(p):
             self.csv_aeo2steo_liq = CsvHolder(path=p)
-        p = f'{self.path}\\Validator\\input\\steo_benchmark_ogsm.csv'
+        p = f'{self.path}\\Validator\\input\\steo_benchmark_hsm.csv'
         if exists(p):
-            self.csv_aeo2steo_ogsm = CsvHolder(path=p)
+            self.csv_aeo2steo_hsm = CsvHolder(path=p)
         p = f'{self.path}\\Validator\\input\\steo_benchmark_macro.csv'
         if exists(p):
             self.csv_aeo2steo_mco = CsvHolder(path=p)

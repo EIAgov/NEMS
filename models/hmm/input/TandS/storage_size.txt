@@ -1,0 +1,3 @@
+! Note: Source: several papers. based on 580,000 cubic meter salt cavern, 30"%" cushion gas percentage
+! Unit: kg
+working_gas_capacity := 4366419.223773535

@@ -19,14 +19,14 @@
         (1 * 4 * EFD_D_NFL * ECP_D_FPH) + &
         (8 * 4 * ECP_D_FPH) + &
         (1 * 4 * ECP_D_CAP * ECP_D_MSP) + &
-        (1 * 4 * ECP_D_VLS * ECP_D_XPH) )  )
+        (1 * 4 * ECP_D_STP * ECP_D_SSZ * ECP_D_XPH) )  )
 !
       PARAMETER (EBLK$BOUT = ( (ESIZ$BOUT - 1) / 1024) + 1)
       PARAMETER (ELFT$BOUT = EBLK$BOUT * 1024 - ESIZ$BOUT)
 !
 !  Avoided Costs and SO2 Allowance Costs
 !
-      REAL*4 EPAVOID(ECP_D_VLS,ECP_D_XPH)  ! Electricity Avoided Costs
+      REAL*4 EPAVOID(ECP_D_STP,ECP_D_SSZ,ECP_D_XPH)  ! Electricity Avoided Costs
       REAL*4 EPBANK                    ! Current Year SO2 Allowance Banking Decision
       REAL*4 EPALLOW(ECP_D_XPH)          ! Current Year SO2 Allowance Cost
       REAL*4 EPALLNOX(NOX_D_GRP,ECP_D_XPH) ! Current Year NOX Allowance Cost (DUAL)
@@ -64,4 +64,4 @@
       CHARACTER*1 EPBOUTL(ELFT$BOUT+1)
       CHARACTER*1024 EBILDOUT(EBLK$BOUT)
 
-      EQUIVALENCE (EPAVOID(1,1),EBILDOUT(1))
+      EQUIVALENCE (EPAVOID(1,1,1),EBILDOUT(1))

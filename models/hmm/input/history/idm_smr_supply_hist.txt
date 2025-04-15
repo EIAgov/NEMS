@@ -1,0 +1,29 @@
+! Note: From IDM team MECS 2018 calculations
+! Unit: Annual mmMT of hydrogen supplied. ICR is Census Region 1-4 in normal order
+Composite Table:
+subindustry                 icr      h_chem_feed_supply_reg
+industrial_gases            1        0
+industrial_gases            2        0.0371025
+industrial_gases            3        0.860778
+industrial_gases            4        0.111308
+other_inorganics            1        0
+other_inorganics            2        0.0074205
+other_inorganics            3        0.281979
+other_inorganics            4        0.0074205
+petrochemicals              1        0
+petrochemicals              2        0
+petrochemicals              3        0.0222615
+petrochemicals              4        0
+other_organics              1        0
+other_organics              2        0
+other_organics              3        0.44523
+other_organics              4        0
+resins                      1        0
+resins                      2        0
+resins                      3        0.252297
+resins                      4        0
+agricultural_chemicals      1        0
+agricultural_chemicals      2        0.972086
+agricultural_chemicals      3        1.81802
+agricultural_chemicals      4        0.0667845
+;

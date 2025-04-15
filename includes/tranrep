@@ -3,9 +3,8 @@
 !     COMMON TRANREP
 !     Report Variables for the Transportation Module
       INTEGER CLTFUELS
-      PARAMETER (CLTFUELS=10)
       INTEGER FRFUEL
-      PARAMETER (FRFUEL=10)
+      PARAMETER (FRFUEL=12)
       INTEGER MAXZEV
       PARAMETER (MAXZEV=3)
       INTEGER TNUMCLASS
@@ -21,7 +20,7 @@
       REAL TRQAIRT(2,MNUMYR)   				! 9 Air Transportation Energy Use
       REAL TRQMIL(4,MNUMYR)    				! 10 Military Energy Use
       REAL TRQBUS(3,8,MNUMYR)  				! 11 Bus Transportation Energy Use (type, fuel)
-												! types: 1=transit,2=intercity,3=school; fuels: 1=gasoline,2=diesel,3=CNG,4=LPG
+											! types: 1=transit,2=intercity,3=school; fuels: 1=gasoline,2=diesel,3=CNG,4=LPG
       REAL TRQRRP(9,MNUMYR)    				! 12 Passenger Rail Energy Use
       REAL TRQBOAT(2,MNUMYR)   				! 13 Recreational Boats Energy Use
       REAL TRQLUB(MNUMYR)      				! 14 Lubricants Energy Use
@@ -71,13 +70,13 @@
       REAL MPG(2,16,6,1990:1989+MNUMYR) 	! 61 MPG (veh type,tech,size)
       REAL PRI(2,16,6,1990:1989+MNUMYR) 	! 62 Price(veh type,tech,size)
       REAL RNG(2,16,6,1990:1989+MNUMYR) 	! 63 Range(veh type,tech,size)
-      REAL BCLTBTUT(CLTFUELS,MNUMYR)    	! 64 Tot CLT Btu fuel consumption
-      REAL BCLTVMT(CLTFUELS,MNUMYR)     	! 65 Total CLT benchmarked VMT
-      REAL CLTSTKT(CLTFUELS,MNUMYR)     	! 66 Total CLT stock
+      REAL BCLTBTUT(FRFUEL,MNUMYR)    	    ! 64 Tot CLT Btu fuel consumption
+      REAL BCLTVMT(FRFUEL,MNUMYR)     	    ! 65 Total CLT benchmarked VMT
+      REAL CLTSTKT(FRFUEL,MNUMYR)     	    ! 66 Total CLT stock
       REAL NCLTMPGT(MNUMYR)             	! 67 Aggregate new CLT MPG
       REAL CLTMPGT(MNUMYR)              	! 68 Aggregate stock CLT MPG
-      REAL CLTSALT(CLTFUELS,MNUMYR)     	! 69 Total CLT Sales
-      REAL CLTFUELBTU(CLTFUELS,MNUMYR)  	!    Commercial light truck consumption by fuel
+      REAL CLTSALT(FRFUEL,MNUMYR)     	    ! 69 Total CLT Sales
+      REAL CLTFUELBTU(FRFUEL,MNUMYR)  	    !    Commercial light truck consumption by fuel
       REAL NEWMPG(3,MNUMYR)             	! 70 Avg New vehicle efficiency
       REAL AVG_PRC_CAR(MNUMYR)        		! Average price of cars ($1990)
       REAL AVG_PRC_TRK(MNUMYR)        		! Average price of Trucks ($1990)
@@ -97,8 +96,8 @@
       REAL TFR_FTMPG_S(MNUMYR,3,2)      	! MPG by size class stk/new
       REAL TFR_FTMPG_TR(MNUMYR,2)         	! Total stock mpg by everything
       REAL TFR_INVEST_TR(MNUMYR)            ! Total freight investment
-      REAL TECHSHARE(MNUMYR,106,5,2)    	! Technology shares by Tech, SC (pared down from 13), Fuel (Diesel & Gas only out of 4)
-      REAL MKT_D_P(3,100,1990:1989+MNUMYR)  	! Market Penetration  1=car, 2=light truck, 3=ldv
+      REAL TECHSHARE(MNUMYR,83,5,2)    	    ! Technology shares by Tech, SC (5), Fuel (Diesel & Gas only out of 4)
+      REAL MKT_D_P(3,100,1990:1989+MNUMYR)  ! Market Penetration  1=car, 2=light truck, 3=ldv
       REAL AVGCOST(3,100,1990:1989+MNUMYR)  ! Technology cost  1=car, 2=light truck, 3=ldv
       REAL TRWTCAR_STOCK(MNUMYR)   			! Car Average Weight, Stock
       REAL TRWTTRK_STOCK(MNUMYR)   			! Light Truck Average Weight, Stock
@@ -115,8 +114,6 @@
       REAL E10SHARE(MNUMCR,MNUMYR)   		! E10-only motor gasoline demand as percent of total motor gasoline demand
       REAL XQFFV(MNUMCR,MNXYR)       		! Total flex fuel energy demand by region and expectations years
       REAL XTRQLDV(8,MNUMCR,MNXYR)   		!  LT DUTY ENERGY USE for expecation years
- 
-
       REAL HFAVL(3,MNUMCR,MNUMYR)    		! Hydrogen fuel availability
       REAL TRUEMPG(3,MNUMYR)         		! MPG without credits
       REAL CAFESTD(3,MNUMYR)         		! CAFE Standard
@@ -126,12 +123,10 @@
       REAL WLD_POP(16,MNUMYR)        		! population
 
 !  regional consumption of aviation gasoline and lubricants, and expectations
-      REAL     QAGTR(MNUMCR,MNUMYR)         ! aviation gas demand
-      REAL     QLUTR(MNUMCR,MNUMYR)         ! lubricants demand
-      REAL     XQAGTR(MNUMCR,MNXYR)         ! expectation variable for aviation gas demand
-      REAL     XQLUTR(MNUMCR,MNXYR)         ! expectation variable for lubricants demand
-
-!
+      REAL QAGTR(MNUMCR,MNUMYR)             ! aviation gas demand
+      REAL QLUTR(MNUMCR,MNUMYR)             ! lubricants demand
+      REAL XQAGTR(MNUMCR,MNXYR)             ! expectation variable for aviation gas demand
+      REAL XQLUTR(MNUMCR,MNXYR)             ! expectation variable for lubricants demand
       REAL FULL_PRC_CAR(MNUMYR)        		! Average price of cars ($1990)
       REAL FULL_PRC_TRK(MNUMYR)        		! Average price of Trucks ($1990)
       REAL FULL_PRC_VEH(MNUMYR)        		! Average price of vehicles ($1990)
@@ -151,9 +146,15 @@
       REAL LDVMPG(2,16,TNUMCLASS-1,1990:1989+MNUMYR)
       REAL LDVPRI(2,16,TNUMCLASS-1,1990:1989+MNUMYR)
       REAL LDVRNG(2,16,TNUMCLASS-1,1990:1989+MNUMYR)
-	  REAL TRQ_ELEC(5,MNUMCR,MNUMYR)						! Electricity consumption for EMM {1:LDV,2:Bus,3:CLT,4:freight truck,5:pass rail}
-	  REAL Li_ion_Cost(16,1990:1989+MNUMYR)                            ! Lithium-ion battery cost ($/kWhr) by vehicle type
-	  
+	  REAL TRQ_ELEC(10,MNUMCR,MNUMYR)						! Electricity consumption for EMM {1:LDV home, 2:LDV public L2, 3:LDV public DCFC,
+																							  !4:School bus, 5:Transit bus, 6:Intercity bus,
+																							  !7:CLT,8:freight truck fleet, 9:freight truck non-fleet,
+																							  !10:pass rail}
+	  REAL LI_ION_COST(16,1990:1989+MNUMYR)                             ! Lithium-ion battery cost ($/kWhr) by vehicle type
+      REAL COST_BATTKWH_TRK(5,MNUMYR)                                   ! Li-ion battery cost ($/kWhr) for freight trucks {1: Class 2b-3, 2:Class 4-5, 3: Class 6-7V, 4: Class 7/8 Tractor, 5: HEV}
+	  REAL AdjMpg(3,MNUMYR)             !...5-cycle tested (EPA "adjusted") fuel economy
+      
+      
       COMMON/TRANREP/ TRQHWY,TRQNHWY,TRQENUSE,TRQFTRK, &                ! Row 1
          TRQRRF,TRQDOMS,TRQINTS,TRQAIRT,TRQMIL,TRQBUS, &                ! Row 2
          TRQRRP,TRQBOAT,TRQLUB,TREFFCAR,TREFFTRK,TREFFALTC, &           ! Row 3
@@ -179,57 +180,58 @@
          QAGTR, QLUTR, XQAGTR, XQLUTR, FULL_PRC_CAR, FULL_PRC_TRK, FULL_PRC_VEH, &
          FCLOGIT0, FCLOGIT1, FCLOGIT2, FCLOGIT3, FCLOGIT4, CLTFUELBTU, &
          PAS_RPM, TRK_TMT, LDV_MPG, TTHCONS, TRQFTRK_NEW, TRQHWY_NEW, &
-         TECHMPG, STKMPG, ZEV_CREDIT_BANK, LDVMPG, LDVPRI, LDVRNG, TRQ_ELEC,Li_ion_Cost
+         TECHMPG, STKMPG, ZEV_CREDIT_BANK, LDVMPG, LDVPRI, LDVRNG, TRQ_ELEC,LI_ION_COST,COST_BATTKWH_TRK,AdjMpg
 
 ! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
-      REAL EQ_TRREP(MNUMYR*(  &              				! get size from dictionary output in nohup.out and divide by 4, or calculate
-           6 + 4 + 12 + FRFUEL +   &         				! TRQHWY through TRQFTRK  (COMMON row 1)
-           4 + 4 + 4 + 2 + 4 + 3*8 + &       				! TRQRRF through TRQBUS          (row 2)
-           9 + 1 + 2 +             &         				! TRQRRP, TRQBOAT, and TRQLUB
-           2 * (TNUMCLASS+1) +     &         				! TREFFCAR and TREFFTRK
-           8 * TNUMCLASS +         &         				! TREFFALTC through TRWTTRK
-          17 + 16*MNUMCR + 16*MNUMCR + 17 + 17 + &    		! TRLDQTEK through TRLDSTKT (row 6)
-          16 + 16 + 3 + 17 + 12 + &          				! TRLDMPGC through TRLDVMTE      (row 7)
-          11 +        430 + 4 + 4 + &        				! TRTRAVLD through TRAIREFFS     (row 8)
-           2 + 9 + 2*FRFUEL + 2 + 2 + 2 + 1 + &   			! TRSTMDEM through TRIMSHIP      (row 9)
-           8*MNUMCR + 3*MNUMCR + 2*16 + 2*16 + &   			! TRQLDV through FLTECHSTKRPT (row 10)
-        2*16 + 2*16 + 2 + 4 + &             				! FLTFCLDVBTU through TREFFFLT   (row 11)
-        3*12 + &                             				! TOT_EMIS                       (row 12)
-           3*MNUMCR + 1 + 2*16*6 + 2*16*6 + 2*16*6 + 1 + &  ! LEGALTSAL through RNG (row 13)
-           1 + 1 + 3 + &                     				! NCLTMPGT, CLTMPGT, NEWMPG
-           4 * CLTFUELS + &                  				! BCLTBTUT, BCLTVMT, CLTSTKT, CLTSALT
-           1 + 1 + 1 + &                     				! AVG_PRC_CAR through AVG_PRC_VEH (row 15)
-       3*FRFUEL*2 + 3*2 + 2 + &              				! TFR_FBTU_FAS_T through TFR_FBTU_TR (row 16)
-       3*FRFUEL*2 + 3*2 + 2 + &              				! TFR_TRK_FAS_T through TFR_TRK_TR (row 17)
-       3*FRFUEL*2 + 3*2 + 2 + &              				! TFR_VMT_FAS_T through TFR_VMT_TR (row 18)
-       3*FRFUEL*2 + 3*2 + 2 + 1 + &          				! TFR_FTMPG through TFR_INVEST_TR (row 19)
-       106*5*2 + 3*100 + 3*100 + 1 + 1 + 1) + & 			! TECHSHARE through HFUELTAX    (row 20)
+      REAL EQ_TRREP(MNUMYR*(  &                                             ! get size from dictionary output in nohup.out and divide by 4, or calculate
+           6 + 4 + 12 + FRFUEL +   &                                        ! TRQHWY through TRQFTRK  (COMMON row 1)
+           4 + 4 + 4 + 2 + 4 + 3*8 + &                                      ! TRQRRF through TRQBUS          (row 2)
+           9 + 1 + 2 +             &                                        ! TRQRRP, TRQBOAT, and TRQLUB
+           2 * (TNUMCLASS+1) +     &                                        ! TREFFCAR and TREFFTRK
+           8 * TNUMCLASS +         &                                        ! TREFFALTC through TRWTTRK
+          17 + 16*MNUMCR + 16*MNUMCR + 17 + 17 + &                          ! TRLDQTEK through TRLDSTKT (row 6)
+          16 + 16 + 3 + 17 + 12 + &                                         ! TRLDMPGC through TRLDVMTE      (row 7)
+          11 +        430 + 4 + 4 + &                                       ! TRTRAVLD through TRAIREFFS     (row 8)
+           2 + 9 + 2*FRFUEL + 2 + 2 + 2 + 1 + &                             ! TRSTMDEM through TRIMSHIP      (row 9)
+           8*MNUMCR + 3*MNUMCR + 2*16 + 2*16 + &                            ! TRQLDV through FLTECHSTKRPT (row 10)
+        2*16 + 2*16 + 2 + 4 + &                                             ! FLTFCLDVBTU through TREFFFLT   (row 11)
+        3*12 + &                                                            ! TOT_EMIS                       (row 12)
+           3*MNUMCR + 1 + 2*16*6 + 2*16*6 + 2*16*6 + 1 + &                  ! LEGALTSAL through RNG (row 13)
+           1 + 1 + 3 + &                                                    ! NCLTMPGT, CLTMPGT, NEWMPG
+           4 * FRFUEL + &                                                   ! BCLTBTUT, BCLTVMT, CLTSTKT, CLTSALT
+           1 + 1 + 1 + &                                                    ! AVG_PRC_CAR through AVG_PRC_VEH (row 15)
+       3*FRFUEL*2 + 3*2 + 2 + &                                             ! TFR_FBTU_FAS_T through TFR_FBTU_TR (row 16)
+       3*FRFUEL*2 + 3*2 + 2 + &                                             ! TFR_TRK_FAS_T through TFR_TRK_TR (row 17)
+       3*FRFUEL*2 + 3*2 + 2 + &                                             ! TFR_VMT_FAS_T through TFR_VMT_TR (row 18)
+       3*FRFUEL*2 + 3*2 + 2 + 1 + &                                         ! TFR_FTMPG through TFR_INVEST_TR (row 19)
+       83*5*2 + 3*100 + 3*100 + 1 + 1 + 1) + &                              ! TECHSHARE through HFUELTAX    (row 20)
         MNUMCR*MNUMYR + MNUMCR*MNUMYR + MNUMCR*MNUMYR + 3*MNUMCR*MNUMYR + & ! QFFV through HFAVL (row 21)
-           3 * MNUMYR + &                    				! TRUEMPG
-           3 * MNUMYR + &                    				! CAFESTD
-           2 * 16 * MNUMYR + &               				! WLD_GDP and WLD_POP
-           2 * 16 * MNUMCR * MNUMYR + &      				! TRMICROS
-          MNUMCR*MNXYR +             &       				! XQFFV
-          MNUMCR * MNUMYR + &                				! QAVTR
-          MNUMCR * MNUMYR + &                				! QLUTR
-          MNUMCR * MNXYR + &                 				! XQAVTR
-          MNUMCR * MNXYR + &                 				! XQLUTR
-          8*MNUMCR*MNXYR + &                 				! XTRQLDV
-           3 * MNUMYR + &                    				! FULL_PRC_CAR, FULL_PRC_TRK, FULL_PRC_VEH
-          4 + MNUMCR-2 + &                   				! FCLOGIT variables 0-4
-          CLTFUELS * MNUMYR + &              				! CLTFUELBTU
-          3 * MNUMYR + &                     				! PAS_RPM
-          3 * MNUMYR + &                     				! TRK_TMT
-          3 * MNUMYR + &                     				! LDV_MPG
-          6 * MNUMYR + &                     				! TTHCONS
-          3 * 6 * MNUMYR + &                 				! TRQFTRK_NEW
-          6 * MNUMYR + &                     				! TRQHWY_NEW
-          8 * MNUMYR + &                     				! TECHMPG
-          8 * MNUMYR + &                     				! STKMPG
-          (MNUMCR-2) * MAXZEV * MNUMYR + &   				! ZEV_CREDIT_BANK
-      3 * 2 * 16 * (TNUMCLASS-1) * MNUMYR + &    			! LDVMPG, LDVPRI, LDVRNG
-          5*MNUMCR*MNUMYR + 16*MNUMYR + &					! TRQ_ELEC, Li_ion_cost
-		  0)                                 				! the end
+           3 * MNUMYR + &                                                   ! TRUEMPG
+           3 * MNUMYR + &                                                   ! CAFESTD
+           2 * 16 * MNUMYR + &                                              ! WLD_GDP and WLD_POP
+           2 * 16 * MNUMCR * MNUMYR + &                                     ! TRMICROS
+          MNUMCR*MNXYR +             &                                      ! XQFFV
+          MNUMCR * MNUMYR + &                                               ! QAVTR
+          MNUMCR * MNUMYR + &                                               ! QLUTR
+          MNUMCR * MNXYR + &                                                ! XQAVTR
+          MNUMCR * MNXYR + &                                                ! XQLUTR
+          8*MNUMCR*MNXYR + &                                                ! XTRQLDV
+           3 * MNUMYR + &                                                   ! FULL_PRC_CAR, FULL_PRC_TRK, FULL_PRC_VEH
+          4 + MNUMCR-2 + &                                                  ! FCLOGIT variables 0-4
+          FRFUEL * MNUMYR + &                                               ! CLTFUELBTU
+          3 * MNUMYR + &                                                    ! PAS_RPM
+          3 * MNUMYR + &                                                    ! TRK_TMT
+          3 * MNUMYR + &                                                    ! LDV_MPG
+          6 * MNUMYR + &                                                    ! TTHCONS
+          3 * 6 * MNUMYR + &                                                ! TRQFTRK_NEW
+          6 * MNUMYR + &                                                    ! TRQHWY_NEW
+          8 * MNUMYR + &                                                    ! TECHMPG
+          8 * MNUMYR + &                                                    ! STKMPG
+          (MNUMCR-2) * MAXZEV * MNUMYR + &                                  ! ZEV_CREDIT_BANK
+          3 * 2 * 16 * (TNUMCLASS-1) * MNUMYR + &                           ! LDVMPG, LDVPRI, LDVRNG
+          10*MNUMCR*MNUMYR + 16*MNUMYR + 5*MNUMYR + &                       ! TRQ_ELEC, LI_ION_COST, cost_battkWh_trk
+		  3*MNUMYR + &                                                      ! ADJMPG
+          0)                                                                ! the end
            
       EQUIVALENCE (EQ_TRREP,TRQHWY)
 

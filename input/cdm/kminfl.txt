@@ -1,11 +1,11 @@
-FILE NAME:      KMINFL
+FILE NAME:     KMINFL
 
-DATE MODIFIED:  December 14 2015 - new floorspace coefficients; September 20 2019 - new regression parameters for consumption
+DATE MODIFIED: August 30, 2024
 
-CONTACT:        Kevin Jarzomski
-                NEMS Commercial Buildings Analyst
-                Kevin.Jarzomski@eia.gov
-                (202)586-3208
+
+
+
+
 
 USED BY:        Consumption subroutine of the National Energy Modeling System
                 (NEMS) Commercial Demand Module (CDM)
@@ -13,12 +13,12 @@ USED BY:        Consumption subroutine of the National Energy Modeling System
 DEFINITION:     Regression parameter used in the calculation of minor fuel
                 consumption.
 
-                This file contains minor fuel forecasting coefficients obtained
+                This file contains minor fuel projection coefficients obtained
                 from log-log regressions of the SEDS and McGraw-Hill Construction historical data, with
-                own-fuel price and time specific dummy as the independent variables, consumption/sq. ft.      
+                own-fuel price as the independent variable and consumption/sq. ft.
                 as the dependent variable.
 
-UNITS:          Beta - unitless; Alpha - ln[(MMBtu/sq ft)/(2012$/MMBtu)]
+UNITS:          Beta - MMBtu/sq ft; Alpha - ln[(MMBtu/sq ft)/(2012$/MMBtu)]
 
 DIMENSION:      Census division, fuel type
 
@@ -28,7 +28,7 @@ ORGANIZATION OF DATA:
 
                 Data starts on row 101 of this file as per CDM convention.
 
-                The first row contains floorspace adjustment factors for each Census Divion. 
+                The first row contains floorspace adjustment factors for each Census Division (discontinued -- all set to 1).
                 After that 
 
                 Each block corresponds to a Census Division, in the following order:
@@ -37,25 +37,25 @@ ORGANIZATION OF DATA:
                 Pacific
 
                 Each row within a block corresponds to a minor fuel, in the following
-                order:  Residual Fuel Oil, LPG, Coal, Motor Gasoline, Kerosene
+                order:  residual fuel oil, propane, coal, motor gasoline, kerosene, 
 
                 The first column of values is the regression intercept.
                 The second column of values is the regression coefficient (elasticity)
-                on own-fuel price.  
+                on own-fuel price. For census divisions with no consumption of that particular fuel, we have set alpha = -100
+                to force exp(alpha) to be near zero.
 
 SOURCES:
 
-                Energy Information Administration, "State Energy Data Report:
-                  Consumption Estimates, 1985-2017," DOE/EIA-0214(90), Washington DC, June 2019.
+                Energy Information Administration, 'State Energy Data Report:
+                 Consumption, price, expenditure, and production estimates, 1960-2022,' DOE/EIA-0214(90), Washington DC, June 2024.
 
-                Energy Information Administration, "State Energy Price and Expenditure"
-                 DOE/EIA-0376(91), Washington DC, June 2019.
+                Energy Information Administration, 'State Energy Data Report:
+                 Codes and descriptions, 1960-2022,' DOE/EIA-0214(90), Washington DC, June 2024.
 
-                McGraw-Hill Construction database of historical commercial floorspace growth rates
+                Dodge Data & Analytics estimated building stock - 2nd quarter 2021 forecast
 
-                U.S. Department of Energy, Energy Information Administration, 2012 Commercial
-                  Buildings Energy Consumption Survey, Public Use Data, available August 2016 at
-                 https://www.eia.gov/consumption/commercial/data/2012/index.php?view=microdata
+                NEMS price deflators
+
 
 
 
@@ -102,56 +102,56 @@ Floorspace Adjustment factors
 
 
 
--6.5874	-0.5772
--5.9967	-0.0883
--3.0975	-0.4172
--4.9195	-0.7378
--7.5680	-0.1374
-	
--7.4375	-0.4416
--6.9519	-0.0389
--5.8271	-0.0875
--5.2249	-0.8831
--7.4292	-0.2304
-	
--7.8722	-0.7486
--6.1435	-0.1322
--5.2867	-0.5654
--5.5221	-0.5365
--8.5593	-0.2692
-	
--9.3152	-1.0615
--5.8184	-0.0908
--5.8685	-0.3330
--7.4624	-1.0094
--10.7756	0.1687
-	
--7.4967	-0.6038
--5.7839	0.1345
--6.1729	-0.9166
--7.0330	-0.0095
--8.0747	-0.2515
-	
--9.2188	-0.4111
--5.2927	-0.2354
--6.2369	-0.4717
--7.3431	-0.5915
--7.1910	-0.6945
-	
--11.4125	-0.4728
--6.2065	-0.0787
--9.6680	-0.5023
--7.6284	0.1073
--10.0985	-0.0463
-	
--10.8839	-0.5032
--7.0374	0.5617
--5.6231	-0.6329
--10.5192	0.0628
--11.5636	0.4787
-	
--8.1214	-0.7607
--6.7963	-0.1183
--7.6854	0.1670
--6.7139	-0.3098
--8.1225	-0.6518
+-3.1660	-1.4274
+-5.0136	0.0000
+-100.0000	0.0000
+-5.2691	0.0000
+-5.0030	-1.2739
+
+-8.8923	0.0000
+-6.1117	0.0000
+-4.9359	-2.8489
+-5.2786	0.0000
+-3.3930	-1.9608
+
+-5.9924	-2.4803
+-6.2604	0.0000
+-5.4282	-1.4311
+-5.3791	0.0000
+-5.1024	-1.8548
+
+-5.8452	-1.7591
+-5.6246	0.0000
+-7.3299	0.0000
+-5.4179	0.0000
+-6.5883	-1.5600
+
+-4.5733	-2.8464
+-6.0726	0.0000
+-5.8059	-1.8103
+-5.1557	0.0000
+-3.7864	-2.2174
+
+-8.5617	-1.4702
+-6.2647	0.0000
+-4.8013	-3.0113
+-5.4127	0.0000
+-4.2132	-2.2058
+
+-100.0000	0.0000
+-6.3824	0.0000
+-100.0000	0.0000
+-5.5119	0.0000
+-7.4500	-1.3455
+
+-100.0000	0.0000
+-5.8419	0.0000
+-5.7484	-3.8097
+-5.2497	0.0000
+-6.2569	-1.8911
+
+-100.0000	0.0000
+-6.0990	0.0000
+-6.4403	-0.4959
+-5.0657	0.0000
+-6.6746	-1.3520

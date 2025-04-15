@@ -22,6 +22,7 @@ variable_errors = [
     "DUPLICATE VARIABLE FOUND:",
     "WILL SKIP THAT ENTRY",
     "COULD NOT FIND ATTRIBUTE",
+    "NOT FOUND IN THE DICTIONARY UNDER COMMON BLOCK"
 ]
 
 # Make a regex that matches if any of our regexes match.
@@ -186,7 +187,8 @@ def test_nohup_contains_no_infeas(record_property):
 
 def test_nohup_contains_no_duplicate_variable(record_property):
     """
-    Tests that Nohup2.out files do not contain any "COULD NOT FIND ATTRIBUTE: QUNTY  FOR BLOCK: QBLK", "DUPLICATE VARIABLE FOUND:" or " WILL SKIP THAT ENTRY" messages
+    Tests that nohup.out files do not contain any "COULD NOT FIND ATTRIBUTE: QUNTY  FOR BLOCK: QBLK", "DUPLICATE VARIABLE FOUND:" or " WILL SKIP THAT ENTRY" messages.
+    or "NOT FOUND IN THE DICTIONARY UNDER COMMON BLOCK".
 
     Parameters
     ----------

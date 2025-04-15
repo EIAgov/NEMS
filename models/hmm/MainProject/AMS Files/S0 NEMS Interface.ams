@@ -1,0 +1,110 @@
+## ams_version=1.0
+
+Section S0_NEMS_Interface {
+	DeclarationSection HMM_Switches {
+		Parameter ExtraDebugSwitch;
+		Parameter SaveEachIterationSwitch;
+		Parameter AIMMS_Standalone_Switch {
+			Range: binary;
+			InitialData: 0;
+			Comment: "Switch that indicates that HMM is being run in a standalone AIMMS enviorment. Mostly useful for things like error handling.";
+		}
+	}
+	DeclarationSection NEMS_Interface_Debug_Declarations {
+		File HelloworldFile {
+			Name: "hmm_helloworld.txt";
+			Device: Disk;
+			Mode: replace;
+		}
+	}
+	Procedure Read_Runtime_Parameters {
+		Body: {
+			read from file "h2_runval.txt" ;
+			
+			! If the value of ZTCCOSTM is greater than 1, we divide by 100 to get our % reduction.
+			if(ZTCCOSTM > 1) then
+				ZTCCOSTM := ZTCCOSTM/100;
+			endif;
+			
+			! Only set CPLEX option in no cafe case.
+			if TRANEFF = 3 then
+				option "CPLEX 22.1".feasibility := 1e-06;
+			endif;
+		}
+	}
+	Section NEMS_Monitor_Section {
+		DeclarationSection H2runval_declarations {
+			Parameter TRANEFF;
+			Parameter ZTCCOSTM {
+				Comment: "Zero carbon cost case scedes key. 1 = Use normal costs, 1 < 0 apply % reduction, 0 do not apply any cost reduction (learning) to capital costs.";
+			}
+			Parameter KEEPOPEN {
+				Range: binary;
+			}
+		}
+		Procedure ReadGlobalDataFromNEMS {
+			Body: {
+				! reads global data from NEMS
+				sDataYearFile:="toAIMMS\\GlobalDataToAimms_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+				!Overwrite if debugging NEMS run output
+				!sDataYearFile:="toAIMMS\\GlobalDataToAIMMS_2023_01.txt";
+				put formatstring("the global data transfer file name is %s\n", sDataYearFile);
+				if fileexists(sDataYearFile) then
+				   read from file sDataYearFile in merge mode;
+				else
+					put "the global data transfer file not found \n ";
+				endif;
+			}
+		}
+		DeclarationSection NEMS_Monitor_Identifiers {
+			StringParameter EnterMainExecution;
+			StringParameter EnterMainTermination;
+			StringParameter EnterNEMSMonitor;
+			StringParameter MiddleNEMSMonitor;
+			StringParameter ExitNEMSMonitor;
+			StringParameter ExitMainExecution;
+			File h2StatusFile {
+				Name: "h2_status.txt";
+				Device: Disk;
+				Mode: merge;
+			}
+			Set YearForGlobalVariables {
+				SubsetOf: MNUMYR_;
+				Index: globalyr;
+				Comment: "Used to specify years for which global data are sent back to NEMS. Keep the name globalyr in lower case";
+			}
+			File DebugDataToNEMS {
+				Name: sDataYearFile;
+				Device: Disk;
+				Mode: replace;
+			}
+			File GlobalDataToNEMS {
+				Name: sDataYearFile;
+				Device: Disk;
+				Mode: replace;
+			}
+			StringParameter sDataYearFile {
+				Comment: "File that HMM will read/write NEMS data";
+			}
+			File NEMSMessageInFile {
+				Name: sMessageInFile;
+				Device: Disk;
+				Mode: replace;
+			}
+			File NEMSMessageOutFile {
+				Name: sMessageOutFile;
+				Device: Disk;
+				Mode: replace;
+			}
+			StringParameter sStatusMessage;
+			StringParameter sAction;
+			StringParameter sMessageOutFile {
+				Definition: "monitor.out.txt";
+			}
+			StringParameter sMessageInFile {
+				Definition: "monitor.in.txt";
+			}
+			Parameter CountSleep;
+		}
+	}
+}

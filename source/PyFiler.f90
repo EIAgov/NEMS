@@ -69,8 +69,18 @@ module utils
     include 'csapr'
     include 'e111d'
     include 'tcs45q'
+    include 'emoblk'
+    include 'calshr'
+    include 'indepm'
+    include 'ccatsdat'
 
+    include 'pqchar'
+	include 'maindbg'
+	integer, parameter :: log_unit=157839
+		
+	
 contains
+
 
 subroutine init_filer
 
@@ -84,56 +94,52 @@ subroutine init_filer
     EXTERNAL FILE_MGR
     CHARACTER*18 FM_NAME/' '/
     CHARACTER*11 FUNFMTC
-    print*, "init_filer"
+	open(log_unit, file="pyfiler_log.txt", position="append", status="unknown", action="write")
+    write(log_unit,*) "init_filer"
 
     ! get unit number
-    print*, "   FILE_MGR - I"
+    write(log_unit,*) "   FILE_MGR - I"
     new_bn=.false.
     ISTATUS=FILE_MGR('I',FM_NAME,new_bn)
-    print*, "       ISTATUS: ", ISTATUS
+    write(log_unit,*) "       ISTATUS: ", ISTATUS
 
-    ! optional, write file table
-    ! print*, "FILE_MGR - T"
-    ! new_bn=.false.
-    ! ISTATUS=FILE_MGR('T',FM_NAME,new_bn)
-    ! print*, "ISTATUS: ", ISTATUS
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*) "   FILE_MGR - O"
     UNIQUE_NAMEIN = 'DICT'
     new_bn=.false.
     FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-    print*, "       ISTATUS: ", ISTATUS
+    write(log_unit,*)"       ISTATUS: ", ISTATUS
 
     ! run filer on dict
     FRTYPE = 3
     FSOURC = 0
     ! FUNITI = 1
-    FUNITO = 6
+    FUNITO = log_unit
     FNAMEI = ' '
     FNAMEO = ' '
     FRETCD = 0
     FUNFMT = 1
 
     ! run filer on dict
-    print*, '   FRTYPE: ', FRTYPE
-    print*, '   FSOURC: ', FSOURC
-    print*, '   FUNITI: ', FUNITI
-    print*, '   FUNITO: ', FUNITO
-    print*, '   FNAMEI: ', FNAMEI
-    print*, '   FNAMEO: ', FNAMEO
-    print*, '   FRETCD: ', FRETCD
-    print*, '   FUNFMT: ', FUNFMT
+    write(log_unit,*)'   FRTYPE: ', FRTYPE
+    write(log_unit,*)'   FSOURC: ', FSOURC
+    write(log_unit,*)'   FUNITI: ', FUNITI
+    write(log_unit,*)'   FUNITO: ', FUNITO
+    write(log_unit,*)'   FNAMEI: ', FNAMEI
+    write(log_unit,*)'   FNAMEO: ', FNAMEO
+    write(log_unit,*)'   FRETCD: ', FRETCD
+    write(log_unit,*)'   FUNFMT: ', FUNFMT
 
-    PRINT*, "   Calling FILER(): " ! , CNADGPRD
+    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    PRINT*, "   Returning from FILER():" ! , CNADGPRD
+    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     UNIQUE_NAMEIN = 'DICT'
     new_bn=.false.
     FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"   FILE_MGR - O"
     UNIQUE_NAMEIN = 'RESTARTI'
     new_bn=.false.
     FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
@@ -142,7 +148,7 @@ subroutine init_filer
     FRTYPE = 2
     FSOURC = 1
     ! FUNITI = 1
-    FUNITO = 6
+    FUNITO = log_unit
     FNAMEI = ' '
     FNAMEO = ' '
     FRETCD = 0
@@ -153,30 +159,30 @@ subroutine init_filer
     IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
 
     ! run filer on dict
-    print*, '   FRTYPE: ', FRTYPE
-    print*, '   FSOURC: ', FSOURC
-    print*, '   FUNITI: ', FUNITI
-    print*, '   FUNITO: ', FUNITO
-    print*, '   FNAMEI: ', FNAMEI
-    print*, '   FNAMEO: ', FNAMEO
-    print*, '   FRETCD: ', FRETCD
-    print*, '   FUNFMT: ', FUNFMT
+    write(log_unit,*)'   FRTYPE: ', FRTYPE
+    write(log_unit,*)'   FSOURC: ', FSOURC
+    write(log_unit,*)'   FUNITI: ', FUNITI
+    write(log_unit,*)'   FUNITO: ', FUNITO
+    write(log_unit,*)'   FNAMEI: ', FNAMEI
+    write(log_unit,*)'   FNAMEO: ', FNAMEO
+    write(log_unit,*)'   FRETCD: ', FRETCD
+    write(log_unit,*)'   FUNFMT: ', FUNFMT
 
-    PRINT*, "   Calling FILER(): " ! , CNADGPRD
+    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    PRINT*, "   Returning from FILER():" ! , CNADGPRD
+    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     UNIQUE_NAMEIN = 'RESTARTI'
     new_bn=.false.
     FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"   FILE_MGR - O"
     FNAMEI18='VARLIST'  ! input file with list of variable names to write
     new_bn=.FALSE.
     FUNITI=FILE_MGR('O',FNAMEI18,new_bn)
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"   FILE_MGR - O"
     UNIQUE_NAMEIN = 'RESTART'
     new_bn=.true.
     FUNITO=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
@@ -196,29 +202,29 @@ subroutine init_filer
     IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
 
     ! run filer on dict
-    print*, '   FRTYPE: ', FRTYPE
-    print*, '   FSOURC: ', FSOURC
-    print*, '   FUNITI: ', FUNITI
-    print*, '   FUNITO: ', FUNITO
-    print*, '   FNAMEI: ', FNAMEI
-    print*, '   FNAMEO: ', FNAMEO
-    print*, '   FRETCD: ', FRETCD
-    print*, '   FUNFMT: ', FUNFMT
+    write(log_unit,*)'   FRTYPE: ', FRTYPE
+    write(log_unit,*)'   FSOURC: ', FSOURC
+    write(log_unit,*)'   FUNITI: ', FUNITI
+    write(log_unit,*)'   FUNITO: ', FUNITO
+    write(log_unit,*)'   FNAMEI: ', FNAMEI
+    write(log_unit,*)'   FNAMEO: ', FNAMEO
+    write(log_unit,*)'   FRETCD: ', FRETCD
+    write(log_unit,*)'   FUNFMT: ', FUNFMT
 
-    PRINT*, "   Calling FILER(): " ! , CNADGPRD
+    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    PRINT*, "   Returning from FILER():" ! , CNADGPRD
+    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     FNAMEI18='VARLIST'  ! input file with list of variable names to write
     new_bn=.FALSE.
     FUNITI=FILE_MGR('C',FNAMEI18,new_bn)
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     UNIQUE_NAMEIN = 'RESTART'
     new_bn=.FALSE.
     FUNITO=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
+	close(log_unit)
 end subroutine init_filer
 
 subroutine read_filer (RESTFILENAME)
@@ -233,56 +239,58 @@ subroutine read_filer (RESTFILENAME)
     EXTERNAL FILE_MGR
     CHARACTER*18 FM_NAME/' '/
     CHARACTER*11 FUNFMTC
-    print*, "read_filer"
+	
+	open(log_unit, file="pyfiler_log.txt", position="append", status="unknown", action="write")
+    write(log_unit,*)"read_filer"
 
     ! get unit number
-    print*, "   FILE_MGR - I"
+    write(log_unit,*)"   FILE_MGR - I"
     new_bn=.false.
     ISTATUS=FILE_MGR('I',FM_NAME,new_bn)
-    print*, "       ISTATUS: ", ISTATUS
+    write(log_unit,*)"       ISTATUS: ", ISTATUS
 
     ! optional, write file table
-    ! print*, "FILE_MGR - T"
+    ! write(log_unit,*)"FILE_MGR - T"
     ! new_bn=.false.
     ! ISTATUS=FILE_MGR('T',FM_NAME,new_bn)
-    ! print*, "ISTATUS: ", ISTATUS
+    ! write(log_unit,*)"ISTATUS: ", ISTATUS
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"   FILE_MGR - O"
     UNIQUE_NAMEIN = 'DICT'
     new_bn=.false.
     FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-    print*, "       ISTATUS: ", ISTATUS
+    write(log_unit,*)"       ISTATUS: ", ISTATUS
 
     ! run filer on dict
     FRTYPE = 3
     FSOURC = 0
     ! FUNITI = 1
-    FUNITO = 6
+    FUNITO = log_unit
     FNAMEI = ' '
     FNAMEO = ' '
     FRETCD = 0
     FUNFMT = 1
 
     ! run filer on dict
-    print*, '   FRTYPE: ', FRTYPE
-    print*, '   FSOURC: ', FSOURC
-    print*, '   FUNITI: ', FUNITI
-    print*, '   FUNITO: ', FUNITO
-    print*, '   FNAMEI: ', FNAMEI
-    print*, '   FNAMEO: ', FNAMEO
-    print*, '   FRETCD: ', FRETCD
-    print*, '   FUNFMT: ', FUNFMT
+    write(log_unit,*)'   FRTYPE: ', FRTYPE
+    write(log_unit,*)'   FSOURC: ', FSOURC
+    write(log_unit,*)'   FUNITI: ', FUNITI
+    write(log_unit,*)'   FUNITO: ', FUNITO
+    write(log_unit,*)'   FNAMEI: ', FNAMEI
+    write(log_unit,*)'   FNAMEO: ', FNAMEO
+    write(log_unit,*)'   FRETCD: ', FRETCD
+    write(log_unit,*)'   FUNFMT: ', FUNFMT
 
-    PRINT*, "   Calling FILER(): " ! , CNADGPRD
+    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    PRINT*, "   Returning from FILER():" ! , CNADGPRD
+    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     UNIQUE_NAMEIN = 'DICT'
     new_bn=.false.
     FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"   FILE_MGR - O"
     UNIQUE_NAMEIN = 'RESTART'
     new_bn=.false.
     FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
@@ -291,7 +299,7 @@ subroutine read_filer (RESTFILENAME)
     FRTYPE = 2
     FSOURC = 0
     !FUNITI = 1
-    FUNITO = 6
+    FUNITO = log_unit
     FNAMEI=RESTFILENAME
     FNAMEO = ' '
     FRETCD = 0
@@ -302,27 +310,30 @@ subroutine read_filer (RESTFILENAME)
     IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
 
     ! run filer on dict
-    print*, '   FRTYPE: ', FRTYPE
-    print*, '   FSOURC: ', FSOURC
-    print*, '   FUNITI: ', FUNITI
-    print*, '   FUNITO: ', FUNITO
-    print*, '   FNAMEI: ', FNAMEI
-    print*, '   FNAMEO: ', FNAMEO
-    print*, '   FRETCD: ', FRETCD
-    print*, '   FUNFMT: ', FUNFMT
+    write(log_unit,*)'   FRTYPE: ', FRTYPE
+    write(log_unit,*)'   FSOURC: ', FSOURC
+    write(log_unit,*)'   FUNITI: ', FUNITI
+    write(log_unit,*)'   FUNITO: ', FUNITO
+    write(log_unit,*)'   FNAMEI: ', FNAMEI
+    write(log_unit,*)'   FNAMEO: ', FNAMEO
+    write(log_unit,*)'   FRETCD: ', FRETCD
+    write(log_unit,*)'   FUNFMT: ', FUNFMT
 
-    PRINT*, "Calling FILER(): " ! , CNADGPRD
+    write(log_unit,*)"Calling FILER(): " ! , CNADGPRD
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    PRINT*, "Returning from FILER():" ! , CNADGPRD
+    write(log_unit,*)"Returning from FILER():" ! , CNADGPRD
 
-    print*, "FILE_MGR - C"
+    write(log_unit,*)"FILE_MGR - C"
     UNIQUE_NAMEIN = 'RESTART'
     new_bn=.false.
     FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
+    
+    !Close Unit 10, FMGROUT.tfiler.txt
+    CLOSE(10)
+	close(log_unit)
 end subroutine read_filer
 
 subroutine write_filer(RESTNAMEO)
-
     implicit none
     INTEGER*4 FRTYPE,FSOURC,FUNITI,FUNITO,FRETCD,FUNFMT
     CHARACTER*100 FNAMEI,FNAMEO,RESTNAMEO
@@ -333,14 +344,16 @@ subroutine write_filer(RESTNAMEO)
     EXTERNAL FILE_MGR
     CHARACTER*18 FM_NAME/' '/
     CHARACTER*11 FUNFMTC
-    print*, "write_filer"
+	open(log_unit, file="pyfiler_log.txt", position="append", status="unknown", action="write")
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"write_filer"
+
+    write(log_unit,*)"   FILE_MGR - O"
     FNAMEI18='VARLIST'  ! input file with list of variable names to write
     new_bn=.FALSE.
     FUNITI=FILE_MGR('O',FNAMEI18,new_bn)
 
-    print*, "   FILE_MGR - O"
+    write(log_unit,*)"   FILE_MGR - O"
     UNIQUE_NAMEIN = 'RESTART'
     new_bn=.true.
     FUNITO=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
@@ -348,41 +361,42 @@ subroutine write_filer(RESTNAMEO)
     ! run filer to write new RESTARTO
     FRTYPE = 1
     FSOURC = 1
-    ! FUNITI = 1
-    ! FUNITO = 6
     FNAMEI = ' '
     FNAMEO = RESTNAMEO
     FRETCD = 0
-    FUNFMT = 0
-
-    INQUIRE(FUNITO,FORM=FUNFMTC)
-    IF(FUNFMTC.EQ.'FORMATTED') FUNFMT=0
-    IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
+    !INQUIRE(FUNITO,FORM=FUNFMTC)
+    FUNFMT=1
+    if (RESTNAMEO .eq. 'restart.gdx') then
+        FUNFMT=5
+    endif
 
     ! run filer on dict
-    print*, '   FRTYPE: ', FRTYPE
-    print*, '   FSOURC: ', FSOURC
-    print*, '   FUNITI: ', FUNITI
-    print*, '   FUNITO: ', FUNITO
-    print*, '   FNAMEI: ', FNAMEI
-    print*, '   FNAMEO: ', FNAMEO
-    print*, '   FRETCD: ', FRETCD
-    print*, '   FUNFMT: ', FUNFMT
+    write(log_unit,*)'   FRTYPE: ', FRTYPE
+    write(log_unit,*)'   FSOURC: ', FSOURC
+    write(log_unit,*)'   FUNITI: ', FUNITI
+    write(log_unit,*)'   FUNITO: ', FUNITO
+    write(log_unit,*)'   FNAMEI: ', FNAMEI
+    write(log_unit,*)'   FNAMEO: ', FNAMEO
+    write(log_unit,*)'   FRETCD: ', FRETCD
+    write(log_unit,*)'   FUNFMT: ', FUNFMT
 
-    PRINT*, "   Calling FILER(): " ! , CNADGPRD
+    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    PRINT*, "   Returning from FILER():" ! , CNADGPRD
+    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     FNAMEI18='VARLIST'  ! input file with list of variable names to write
     new_bn=.FALSE.
     FUNITI=FILE_MGR('C',FNAMEI18,new_bn)
 
-    print*, "   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - C"
     UNIQUE_NAMEIN = 'RESTART'
     new_bn=.FALSE.
     FUNITO=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
+    
+    !Close Unit 10, testing
+    CLOSE(10)
+	close(log_unit)
 end subroutine write_filer
 
 end module utils
@@ -395,4 +409,16 @@ module other
     include 'acoalprc'
     include 'aponroad'
     include 'aeusprc'
+
+    include 'steoblock'
 end module other
+
+module NXPECT_run
+    contains
+    subroutine go_NXPECT(IMODEL)
+    INTEGER IMODEL
+    !write(*,*) 'IMODEL=',IMODEL
+    CALL NXPECT(IMODEL)
+    CLOSE(10)
+    end subroutine go_NXPECT
+end module NXPECT_run

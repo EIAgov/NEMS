@@ -18,47 +18,47 @@ function read_access {
 #  function returns 0 if all test passed and returns -1 on error
 #  
 # --- does file exist
- print $1
+ echo $1
   $NEMS/scripts/checkfor.z.sh $1
   if [[ ! -a $1 ]]; then
-    print "$0: file $1 not found"
+    echo "$0: file $1 not found"
     return -1
   fi
 # --- does user have read access
   if [[ ! -r $1 ]]; then   
-    print "$0: do not have read permission for $1"
+    echo "$0: do not have read permission for $1"
     return -1
   fi  
 # --- file is not directory or other special file type
   if [[ ! -f $1 ]]; then   
-    print "$0: file $1 is either a directory or other special type"
+    echo "$0: file $1 is either a directory or other special type"
     return -1
   fi  
   return 0
   }
 # Start of script - Print a heading
-print " "
-print " "
-print "**********************************************"
-print "***                                        ***"
-print "***  Hydro Debug Script                    ***"
-print "***                                        ***"
-print "***   This script will create the input    ***"
-print "***   files to the hydro debug             ***"
-print "***   spreadsheet file. The data is        ***"
-print "***   obtained from the WDUMP.txt file.    ***"
-print "**********************************************"
-print " "
-print "Press return to get default answers shown in brackets <>"
-print ""
+echo " "
+echo " "
+echo "**********************************************"
+echo "***                                        ***"
+echo "***  Hydro Debug Script                    ***"
+echo "***                                        ***"
+echo "***   This script will create the input    ***"
+echo "***   files to the hydro debug             ***"
+echo "***   spreadsheet file. The data is        ***"
+echo "***   obtained from the WDUMP.txt file.    ***"
+echo "**********************************************"
+echo " "
+echo "Press return to get default answers shown in brackets <>"
+echo ""
 acceptable=0
 while [[ $acceptable = 0 ]]
 do
-  print "Choose WDUMP option : "
-  print "  1.  Locate WDUMP file using NEMS scenario "
-  print "  2.  User specifies full name of WDUMP file   "
-  print ""
-  print -n "Please enter WDUMP option < 1 > : "
+  echo "Choose WDUMP option : "
+  echo "  1.  Locate WDUMP file using NEMS scenario "
+  echo "  2.  User specifies full name of WDUMP file   "
+  echo ""
+  echo -n "Please enter WDUMP option < 1 > : "
   read EOPT 
   case $EOPT in
        [1]    ) emmopt=1
@@ -69,16 +69,16 @@ do
                    let emmopt=1
                    acceptable=1
                  else
-                   print " *** UNACCEPTABLE RESPONSE - RE-ENTER ***"
+                   echo " *** UNACCEPTABLE RESPONSE - RE-ENTER ***"
                  fi;;
   esac     
 done
-print " "
+echo " "
   found=0
   while [[ $found != 1 ]]
   do
     if [[ $emmopt = 1 ]]; then
-    print -n "Please enter NEMS run scenario <aeo2001> : "
+    echo -n "Please enter NEMS run scenario <aeo2001> : "
     read SCEN
     if [[ -z "$SCEN" ]]; then
       SCEN='aeo2001'
@@ -86,11 +86,11 @@ print " "
     accept=0
     while [[ $accept = 0 ]]
     do
-      print -n "Please enter NEMS run datekey  : "
+      echo -n "Please enter NEMS run datekey  : "
       read DATEKEY
       if [[ -z "$DATEKEY" ]]; then
-        print '$0: *** DATEKEY HAS NO DEFAULT VALUE - RE-ENTER ***'
-        print ' '
+        echo '$0: *** DATEKEY HAS NO DEFAULT VALUE - RE-ENTER ***'
+        echo ' '
       else
         accept=1
       fi
@@ -98,30 +98,30 @@ print " "
       # --- Get full scenario name using runlog
     grep  \/${SCEN}\/${DATEKEY} $NEMSJOBLOG/runlog | sed "s!^.* !!" > temp.$$
     read RUNDIR < temp.$$ ; rm temp.$$
-    print "${RUNDIR}/p2/WDUMP.txt" > temp.$$ ; read WDUMP < temp.$$ ; rm temp.$$
+    echo "${RUNDIR}/p2/RFM_WDUMP.txt" > temp.$$ ; read WDUMP < temp.$$ ; rm temp.$$
     fi
       # --- Get WDUMP file name for option 2
     if [[ $emmopt = 2 ]]; then
-      print ""
-      print -n "Please enter WDUMP file full name: "
+      echo ""
+      echo -n "Please enter WDUMP file full name: "
       read WDUMP  
-      print ""
+      echo ""
     fi 
       # --- check existence, access, and file type of restart file
     if read_access ${WDUMP}; then
       found=1
     else
-      print "$0: *** RE-ENTER RUN SCENARIO & DATEKEY AGAIN ***"
-      print " "
-      print " "
+      echo "$0: *** RE-ENTER RUN SCENARIO & DATEKEY AGAIN ***"
+      echo " "
+      echo " "
     fi
   done
-grep -I hyd_input_data ${WDUMP} > hyd_input_data.txt
-grep -I hyd_curve_data ${WDUMP} > hyd_curve_data.txt
-grep -I hyd_builds ${WDUMP} > hyd_builds.txt
-grep -I hyd_temp_data ${WDUMP} > hyd_temp_data.txt
-grep -I hyd_curve_info ${WDUMP} > hyd_curve_info.txt
-grep -I hyd_final_curves ${WDUMP} > hyd_final_curves.txt
-print " "
-print " Your Hydro Debug Files have been created "
-print " "
+grep -i hyd_input_data ${WDUMP} > hyd_input_data.txt
+grep -i hyd_curve_data ${WDUMP} > hyd_curve_data.txt
+grep -i hyd_builds ${WDUMP} > hyd_builds.txt
+grep -i hyd_temp_data ${WDUMP} > hyd_temp_data.txt
+grep -i hyd_curve_info ${WDUMP} > hyd_curve_info.txt
+grep -i hyd_final_curves ${WDUMP} > hyd_final_curves.txt
+echo " "
+echo " Your Hydro Debug Files have been created "
+echo " "

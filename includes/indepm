@@ -1,0 +1,19 @@
+! $Header: m:/default/includes/RCS/indepm
+! INDEPM -- Cement-related CO2 process emissions passed from IDM to EPM
+!           for use in greenhouse gas accounting
+
+    ! Clinker process CO2 emissions in thousand metric tons CO2,
+    ! by year and region
+    REAL CO2_CLINK(MNUMYR, 5)
+
+    ! Lime production process CO2 emissions in thousand metric tons CO2,
+    ! by year and region
+    REAL CO2_LIME(MNUMYR, 5)
+
+    COMMON/INDEPM/ CO2_CLINK, CO2_LIME
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      REAL EQ_INEPM(MNUMYR*(5 * 2) + &                      ! CO2_CLINK, CO2_LIME
+          0)                                                ! the end
+
+      EQUIVALENCE (EQ_INEPM,CO2_CLINK)

@@ -1,0 +1,25 @@
+# California AB32 Carbon Parameters
+
+# Year $ for AB32 Reserve Prices
+reserve_price_dollar_year = 2012
+
+# Year before Starting Escalation of Containment Reserve Prices
+reserve_price_start_year = 2013
+
+# Last Year for Escalation of Containment Reserve Prices
+reserve_price_end_year = 2020
+
+# Number of Containment Reserve Price Tiers
+reserve_price_tiers = 3
+
+# Containment Reserve Price Real Escalation Rate (if Any)
+reserve_price_rate = 0.05
+
+# Year before Starting Escalation of Auction Reserve Price
+auction_price_start_year = 2013
+
+# Last Year for Escalation of Auction Reserve Price
+auction_price_end_year = 2020
+
+# Auction Reserve Price Real Escalation Rate (if Any)
+auction_price_rate = 0.05

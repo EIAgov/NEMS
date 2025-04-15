@@ -1,7 +1,0 @@
-    Function: Recapitulate last procedural commands
-    Syntax:   RECAP
-
-    This will write your last terminally entered procedural commands
-    to the output file.  This may be useful when you want to
-    reconstruct your last steps, or in a workshop where the instructor
-    wants to see what you have done.

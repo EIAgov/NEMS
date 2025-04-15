@@ -1,0 +1,48 @@
+notes,,,,,,,,,,,,,bbl/Mcf,,,,,
+evaluation_unit,planning_area,district_number,district_name,offshore_4_region,offshore_4_region_number,planning_area_number,evaluation_unit_number,offshore_5_region_number,region_number,region_name,discount_rate_adjustment,offshore_region_number,ngpl_ratio,ethane_fraction,propane_fraction,butane_fraction,isobutane_fraction,natural_gasoline_fraction
+WGOM0002,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,1,3,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+WGOMDG02,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,2,3,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+WGOM0204,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,3,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+WGOM0408,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,4,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+WGOM0816,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,5,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+WGOM1624,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,6,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+WGOM2400,western_gom,81,Western GOM Federal Offshore,central_western_gom,1,1,7,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+CGOM0002,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,1,3,9,gulf_of_mexico,1,1,0.06,0.48,0.27,0.02,0.16,0.06
+CGOMDG02,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,2,3,9,gulf_of_mexico,1,1,0.1,0.48,0.27,0.02,0.16,0.06
+CGOM0204,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,3,4,9,gulf_of_mexico,1,1,0.1,0.48,0.27,0.02,0.16,0.06
+CGOM0408,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,4,4,9,gulf_of_mexico,1,1,0.1,0.48,0.27,0.02,0.16,0.06
+CGOM0816,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,5,4,9,gulf_of_mexico,1,1,0.1,0.48,0.27,0.02,0.16,0.06
+CGOM1624,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,6,4,9,gulf_of_mexico,1,1,0.1,0.48,0.27,0.02,0.16,0.06
+CGOM2400,central_gom,80,Central GOM Federal Offshore,central_western_gom,1,2,7,4,9,gulf_of_mexico,1,1,0.1,0.48,0.27,0.02,0.16,0.06
+EGOM0002,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,1,3,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+EGOM0204,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,2,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+EGOM0408,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,3,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+EGOM0816,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,4,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+EGOM1624,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,5,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+EGOM2400,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,6,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+EGOML181,eastern_gom,79,Eastern GOM Federal Offshore,eastern_gom,2,3,7,4,9,gulf_of_mexico,1,1,0.02,0,0.1967,0.0739,0.2703,0.4591
+NATL0002,north_atlantic,76,North Atlantic Federal Offshore,atlantic_offshore,3,4,1,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+NATL0208,north_atlantic,76,North Atlantic Federal Offshore,atlantic_offshore,3,4,2,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+NATL0800,north_atlantic,76,North Atlantic Federal Offshore,atlantic_offshore,3,4,3,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+MATL0002,mid_atlantic,77,Mid Atlantic Federal Offshore,atlantic_offshore,3,5,1,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+MATL0208,mid_atlantic,77,Mid Atlantic Federal Offshore,atlantic_offshore,3,5,2,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+MATL0800,mid_atlantic,77,Mid Atlantic Federal Offshore,atlantic_offshore,3,5,3,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+SATL0002,south_atlantic,78,South Atlantic Federal Offshore,atlantic_offshore,3,6,1,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+SATL0208,south_atlantic,78,South Atlantic Federal Offshore,atlantic_offshore,3,6,2,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+SATL0800,south_atlantic,78,South Atlantic Federal Offshore,atlantic_offshore,3,6,3,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+FLST0002,florida_straits,78,South Atlantic Federal Offshore,atlantic_offshore,3,7,1,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+FLST0208,florida_straits,78,South Atlantic Federal Offshore,atlantic_offshore,3,7,2,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+FLST0800,florida_straits,78,South Atlantic Federal Offshore,atlantic_offshore,3,7,3,1,8,atlantic,1.25,3,0.02,0,0.1967,0.0739,0.2703,0.4591
+PNW0002,pacific_northwest,83,Northern Pacific Federal Offshore,pacific_offshore,4,8,1,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+PNW0208,pacific_northwest,83,Northern Pacific Federal Offshore,pacific_offshore,4,8,2,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+NCA0002,north_california,82,California Federal Offshore,pacific_offshore,4,9,1,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+NCA0208,north_california,82,California Federal Offshore,pacific_offshore,4,9,2,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+NCA0816,north_california,82,California Federal Offshore,pacific_offshore,4,9,3,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+NCA1624,north_california,82,California Federal Offshore,pacific_offshore,4,9,4,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+CCA0002,central_california,82,California Federal Offshore,pacific_offshore,4,10,1,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+CCA0208,central_california,82,California Federal Offshore,pacific_offshore,4,10,2,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+CCA0816,central_california,82,California Federal Offshore,pacific_offshore,4,10,3,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+SCA0002,south_california,82,California Federal Offshore,pacific_offshore,4,11,1,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+SCA0208,south_california,82,California Federal Offshore,pacific_offshore,4,11,2,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+SCA0816,south_california,82,California Federal Offshore,pacific_offshore,4,11,3,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591
+SCA1624,south_california,82,California Federal Offshore,pacific_offshore,4,11,4,2,10,pacific,1.25,2,0.02,0,0.1967,0.0739,0.2703,0.4591

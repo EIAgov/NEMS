@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<References AIMMS_Version="4.76.11.11 (x64)">
+<References AIMMS_Version="4.96.4.6 (x64)">
 	<MainProject Path="MainProject" />
-	<Library System="true" Path="AIMMSXLLibrary" />
+	<RepositoryLibrary UUID="E26C298C-5EF6-42C5-B7B7-59ED3DF48D6F" Name="AimmsXLLibrary" Version="1.1.0.30" />
 </References>

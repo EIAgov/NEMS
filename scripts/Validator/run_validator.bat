@@ -1,4 +1,4 @@
-::This script is all that needs to be called from cycle.sh or cycle_par.sh to run the validator
+::This script is all that needs if you want to run the validator from batch command prompt
 
 :: change our working directory to that of the validator
 set cur_dir=%cd%

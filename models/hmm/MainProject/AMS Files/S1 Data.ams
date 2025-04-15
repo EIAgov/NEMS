@@ -1,0 +1,379 @@
+## ams_version=1.0
+
+Section S1_Data {
+	Section HMM_Dimensions {
+		DeclarationSection Fuel_Declarations {
+			Set Fuels_ {
+				Index: fuel;
+			}
+			ElementParameter FuelNG {
+				Range: Fuels_;
+				Comment: "Natural gas (\'NG\') as element parameter";
+			}
+			ElementParameter FuelElec {
+				Range: Fuels_;
+				Comment: "Electricity (\'Electricity\') as element parameter.";
+			}
+		}
+		DeclarationSection Sector_Dimensions {
+			ElementParameter IndustrialSector {
+				Range: Sectors_;
+			}
+			ElementParameter RefiningSector {
+				Range: Sectors_;
+			}
+			ElementParameter TransportationSector {
+				Range: Sectors_;
+			}
+			ElementParameter ElectricitySector {
+				Range: Sectors_;
+			}
+			Set Sectors_ {
+				Index: sec;
+			}
+			Set Subindustry_ {
+				Index: subindustry;
+				Definition: Data {'industrial_gases' , 'other_inorganics', 'petrochemicals', 'other_organics', 'resins', 'agricultural_chemicals'};
+			}
+		}
+		DeclarationSection Transportation_Dimensions {
+			Set TransportationSteps_ {
+				Index: tranStep;
+			}
+		}
+		DeclarationSection Storage_Dimensions {
+			Set StorageSteps_ {
+				Index: storStep;
+			}
+			Set StorageTechs_ {
+				Index: storageTech;
+			}
+		}
+		DeclarationSection Production_Dimensions {
+			Set CreditStepsNoCurtail_ {
+				SubsetOf: CreditSteps_;
+				Index: CreditStepNoCurtail;
+			}
+			Set CreditStepsCurtail_ {
+				SubsetOf: CreditSteps_;
+				Index: CreditStepCurtail;
+			}
+			Set CreditSteps45V_ {
+				SubsetOf: CreditSteps_;
+				Index: creditStep45V;
+				Comment: "Steps that use the 45V credits.";
+			}
+			Set CCSTechs_ {
+				SubsetOf: NonElectrolysisTechs_;
+				Index: prodtech_ccs;
+				Comment: "Production technologies that can capture CO2.";
+			}
+			ElementParameter SMRCCSTech {
+				Range: NonElectrolysisTechs_;
+			}
+			Set CreditSteps_ {
+				Index: creditStep;
+				Comment: "Index to handle whether or not production using 45V credit.";
+			}
+			ElementParameter SMRTech {
+				Range: NonElectrolysisTechs_;
+			}
+			ElementParameter LearningRateStepOne {
+				Range: LearningRateSteps_;
+				Definition: '1';
+				Comment: "Step one of the learning curve.";
+			}
+			ElementParameter LearningRateStepTwo {
+				Range: LearningRateSteps_;
+				Definition: '2';
+				Comment: "Step two of the learning curve.";
+			}
+			ElementParameter LearningRateStepThree {
+				Range: LearningRateSteps_;
+				Definition: '3';
+				Comment: "Step three of the learning curve.";
+			}
+			Set LearningRateSteps_ {
+				Index: lr_step;
+				Comment: "Steps for learning algorithim. Step 1 represents more techs in infancy, while step 3 represents techs in a more stable time period.";
+			}
+			ElementParameter PEMTech {
+				Range: ElectrolyzerTechs_;
+			}
+			Set NonElectrolysisTechs_ {
+				SubsetOf: ProductionTechs_;
+				Index: prodTech_nonElec;
+				Definition: {
+					ProductionTechs_ - ElectrolyzerTechs_;
+				}
+			}
+			Set ElectrolyzerTechs_ {
+				SubsetOf: ProductionTechs_;
+				Index: prodTech_elec;
+				Comment: "Subset of prodTech that only includes electrolysis technologies.";
+			}
+			Set ProductionSteps_ {
+				Index: prodStep;
+			}
+			Set ProductionTechs_ {
+				Index: prodTech;
+			}
+		}
+		DeclarationSection Planning_Period_Declarations {
+			Set PlanningPeriods_ {
+				Index: pp, pp_j;
+				Property: NoSave;
+			}
+			ElementParameter FirstPlanningPeriod {
+				Range: PlanningPeriods_;
+			}
+			ElementParameter SecondPlanningPeriod {
+				Range: PlanningPeriods_;
+				Property: NoSave;
+			}
+			ElementParameter ThirdPlanningPeriod {
+				Range: PlanningPeriods_;
+				Property: NoSave;
+			}
+			Set SecondAndThirdPlanningPeriods {
+				SubsetOf: PlanningPeriods_;
+				Index: SecondThird_pp;
+				Property: NoSave;
+			}
+		}
+		DeclarationSection Time_Declarations {
+			ElementParameter FirstPipelineBuildYear {
+				Range: cal_Year;
+			}
+			ElementParameter FirstStorageBuildYear {
+				Range: cal_Year;
+			}
+			Set PlanningPeriodsModel_ {
+				Index: pp_mod;
+			}
+			Set ElecYearsMod_ {
+				SubsetOf: CapacityYears_;
+				Index: elecyearmod;
+			}
+			Set AllPeriodYears_ {
+				SubsetOf: cal_Year;
+				Index: AllPeriodYears;
+				Definition: YearsInThirdPlanningPeriod_ + CurrentModelYear + NextModelYear;
+			}
+			Set FirstTwoPlanningPeriodYears_ {
+				SubsetOf: cal_Year;
+				Index: firstTwoPeriodYears;
+				Definition: CurrentModelYear + NextModelYear;
+			}
+			Set CapYearModelNonElectrolyzer_ {
+				SubsetOf: CapYearModel_;
+				Index: CapYearModNE;
+			}
+			Set CapYearModelElectrolyzer_ {
+				SubsetOf: CapYearModel_;
+				Index: CapYearModE;
+			}
+			ElementParameter LastYearInThirdPlanningPeriod {
+				Range: YearsInThirdPlanningPeriod_;
+				Definition: last(thirdPeriodYears);
+			}
+			Set CapYearModel_ {
+				SubsetOf: CapacityYears_;
+				Index: capYearMod;
+			}
+			Set VintageYears_ {
+				Index: vyears;
+				Definition: Data {1990..2080, 'AllRemainingYears'};
+			}
+			Set YearsInThirdPlanningPeriod_ {
+				SubsetOf: cal_Year;
+				Index: thirdPeriodYears;
+				Comment: "Years that are in the third planning period";
+			}
+			ElementParameter ThirdModelYear {
+				Range: cal_Year;
+			}
+			ElementParameter NextModelYear {
+				Range: cal_Year;
+				Comment: "Year following the CurrentModelYear";
+			}
+			ElementParameter CurrentModelYear {
+				Range: cal_Year;
+				Comment: "Current year HMM is modeling, as per the NCNTRL_CURCALYR variable from NEMS";
+			}
+			Set ModelYears_ {
+				SubsetOf: NEMSYears_;
+				Index: modelyear;
+				Definition: {
+					{FirstModelYear..LastModelYear};
+				}
+			}
+			Parameter SeasonalFraction {
+				IndexDomain: seas;
+			}
+			Parameter HourlyFraction {
+				IndexDomain: hr;
+				Definition: 1/24;
+			}
+			Set Hours_ {
+				SubsetOf: Integers;
+				Index: hr;
+				Definition: {
+					{1..24}
+				}
+			}
+			Set CapacityYears_ {
+				SubsetOf: cal_Year;
+				Index: capYear, capYear_j, elecYear;
+			}
+			Set CapacityYearsThirdPlanningPeriod_ {
+				SubsetOf: CapacityYears_;
+				Index: capYearThird_pp;
+				Definition: {
+					{NextModelYear+1..'2080'}
+				}
+			}
+			Set Seasons_ {
+				Index: seas, seas_j;
+				OrderBy: seas, seas_j;
+			}
+			Set HistoricalYears_ {
+				SubsetOf: cal_Year;
+				Index: histyear;
+				Definition: {
+					{FirstHistoricalYear..FirstModelYear};
+				}
+			}
+			Set IDMHistoricalDataYear_ {
+				SubsetOf: cal_Year;
+				Index: idm_histyear;
+				Definition: {
+					{FirstHistoricalYear..FirstModelYear-1};
+				}
+				Comment: "Years to write historical data for IDM in the restart file.";
+			}
+			Parameter NumberFutureYears {
+				Comment: "The number of years to add to the calendar after LastModelYear, also number of years after NextModelYear that are in the Third Planning Period";
+			}
+			ElementParameter FirstHistoricalYear {
+				Range: cal_Year;
+				Comment: "First year of *any* data. Sets lower bound of initial calendar for HMM.";
+			}
+			ElementParameter LastModelYear {
+				Range: cal_Year;
+				Comment: "Last model year for NEMS";
+			}
+			ElementParameter FirstModelYear {
+				Range: cal_Year;
+				Comment: "First year that HMM will begin projections";
+			}
+			Set NEMSYears_ {
+				SubsetOf: cal_Year;
+				Index: year;
+				OrderBy: i_calYear;
+				Definition: {
+					{FirstHistoricalYear..LastModelYear}
+				}
+				Comment: "All years within the NEMS (i.e., all years where there is an MNUMYR equivilent)";
+			}
+		}
+		DeclarationSection Region_Declarations {
+			ElementParameter TotalUS {
+				Range: Integers;
+			}
+			Parameter map_supply {
+				IndexDomain: (regCen,lps);
+				Range: binary;
+			}
+			Set LP_DemandHub_ {
+				SubsetOf: Regions_;
+				Index: lpd;
+				Definition: CensusRegions_;
+			}
+			Parameter map_DemandArcs {
+				IndexDomain: (lpd,lph);
+				Range: binary;
+			}
+			Parameter map_SupplyArcs {
+				IndexDomain: (lps,lph);
+				Range: binary;
+			}
+			Parameter map_StorageArcs {
+				IndexDomain: (lpstorage,lph);
+				Range: binary;
+			}
+			Set LP_StorageHub_ {
+				SubsetOf: Regions_;
+				Index: lpstorage;
+				Definition: CensusRegions_;
+			}
+			Set LP_CensusRegionsHub_ {
+				SubsetOf: Regions_;
+				Index: lph, lph1, lph2;
+				Definition: CensusRegions_;
+			}
+			Set LP_SupplyHub_ {
+				SubsetOf: Regions_;
+				Index: lps;
+				Definition: CensusRegions_;
+			}
+			Set Regions_ {
+				Index: reg;
+				Definition: CensusRegions_+NERCRegions_;
+				Comment: "Root set of all regions";
+			}
+			Set CensusRegions_ {
+				SubsetOf: Regions_;
+				Index: regCen, regCen_j, regCen_k;
+				Comment: "Named Census Regions";
+			}
+			Set NERCRegions_ {
+				SubsetOf: Regions_;
+				Index: regNERC;
+				Comment: "Named NERC regions";
+			}
+			Parameter map_Census_div_region {
+				IndexDomain: (icr,regCen);
+				Definition: {
+					data 
+					{ ( 1, NewEngland  ) : 1,  ( 1, MidAtlantic ) : 1,  ( 2, ENCentral   ) : 1,  ( 2, WNCentral   ) : 1,  ( 3, Satlantic   ) : 1,
+					  ( 3, ESCentral   ) : 1,  ( 3, WSCentral   ) : 1,  ( 4, Mountain    ) : 1,  ( 4, Pacific     ) : 1 }
+				}
+				Comment: "to-do: probably shouldn\'t hardcode this here";
+			}
+		}
+	}
+	Section HMM_Mappings {
+		DeclarationSection Regional_Mapping_Declarations {
+			Parameter map_regNERCToRegCEN {
+				IndexDomain: (regNERC,regCen);
+				Range: binary;
+				Comment: "Maps EMM regions to Census regions";
+			}
+			Parameter map_regCENarcs {
+				IndexDomain: (regCen,regCen_j);
+				Range: binary;
+			}
+		}
+	}
+	Section Calendars {
+		SourceFile: "Calendars.ams";
+		Comment: {
+			"# Calendars
+			
+			Default calendars for years, months, weeks and days."
+		}
+	}
+	Section Units {
+		SourceFile: "Units.ams";
+		Comment: {
+			"A note regarding units:
+			According to Marcel Hunting (AIMMS), in some rare cases, the use of units in mathematical
+			programs results in unexpected problems. It is unclear what the exact cause of these problems
+			is, which is why Marcel Hunting never uses units in his models."
+		}
+	}
+	Section Constants {
+		SourceFile: "Constants.ams";
+	}
+}

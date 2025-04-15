@@ -18,11 +18,11 @@
       character*20 uniqfile(num_def),uniq_shrt,uniq
       character*15 scen
       character*99 fld(4), vers, val
-      character*25 NEMS, NEMSPC, USERPC, NEMSSHARE, type
-      character*35 NEMSPCDIR
+      character*100 NEMS, NEMSPC, USERPC, NEMSSHARE, type
+      character*100 NEMSPCDIR
       character*20 key, swtch, uniqswitch(1000)
       character*40 def
-      character*45 var
+      character*145 var
       integer nline, l, ic, idef, ndef, start,i,ieq,nv, &
        ifile,lngth,first,ifound, imatch, iexe, is_mod_sw,ndefs
       integer iend, iscedes

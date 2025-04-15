@@ -108,9 +108,6 @@
       REAL CGTOTGENNR(MNUMNR,MNUMYR,MNUMCGF,2)
 
 ! hydrogen sector:
-      REAL CGHMMQ(MNUMCR,MNUMYR,5)           ! consumption in trillion Btu
-      REAL CGHMMCAP(MNUMCR,MNUMYR,5)         ! capacity in megawatts
-      REAL CGHMMGEN(MNUMCR,MNUMYR,5,2)       ! electricity generation in gigawatthours
 
 ! RPS Credit Amounts / kwh for Bingaman, Markey, etc.
       REAL CGCPVRES(MNUMCR,MNUMYR)           ! Residential RPS Credit / kwh for PV (scalar)
@@ -141,7 +138,7 @@
        CGINDLQ, CGINDLCAP, CGINDLGEN, &
        CGCOMMQ, CGCOMMCAP, CGCOMMGEN, &
        CGTOTQNR, CGTOTCAPNR, CGTOTGENNR, &
-       CGEPGEN, CGHMMQ, CGHMMCAP, CGHMMGEN, &
+       CGEPGEN, &
        CGCPVRES,CGCWNRES,CGCPVCOM,CGCWNCOM, &
        ICHPCESGEN,OCHPCESGEN,KCHPCESGEN,RCHPCESGEN, &
        WHRFOSS,UCAPWLC,UCAPPTC,UADDWLC,UADDPTC
@@ -208,9 +205,6 @@
            MNUMNR*MNUMYR*MNUMCGF +        & ! CGTOTQNR
            MNUMNR*MNUMYR*MNUMCGF +        & ! CGTOTCAPNR
            MNUMNR*MNUMYR*MNUMCGF*2 +      & ! CGTOTGENNR
-           MNUMCR*MNUMYR*5 +              & ! CGHMMQ
-           MNUMCR*MNUMYR*5 +              & ! CGHMMCAP
-           MNUMCR*MNUMYR*5*2 +            & ! CGHMMGEN 
            MNUMCR*MNUMYR +                & ! CGCPVRES
            MNUMCR*MNUMYR +                & ! CGCWNRES
            MNUMCR*MNUMYR +                & ! CGCPVCOM

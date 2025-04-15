@@ -1,0 +1,39 @@
+# local files from main for testing
+FILELIST
+FMGROUT.tfiler.txt
+keys.sed
+*.pyd
+ccats_debug.log
+main_opt_log.log
+input/dict.txt
+input/varlist.txt
+pyfiler_log.txt
+
+# __pycache__
+__pycache__/*
+ccats_common/__pycache__/*
+models/__pycache__/*
+
+# debug outputs
+debug/*.csv
+debug/electricity_demand/*.csv
+debug/facility_ranking/*.csv
+debug/financing/*.csv
+debug/model_file/*.mps
+debug/model_file/*.lp
+debug/optimization_inputs/supply/*.csv
+debug/optimization_inputs/data/*.pkl
+debug/optimization_inputs/elec_costs/*.csv
+debug/optimization_inputs/transport/*.csv
+debug/optimization_inputs/storage/*.csv
+debug/optimization_results/binding_constraints/*.csv
+debug/optimization_results/duals/*.csv
+debug/optimization_results/flows/*.csv
+debug/optimization_results/investment_decisions/*.csv
+debug/optimization_results/transport_cap_added/*.csv
+debug/optimization_tests/*.csv
+debug/restart_file_debug/*.csv
+debug/restart_file_debug/*.xlsx
+debug/visualization_results/ccats_opt/map.run
+debug/visualization_results/ccats_opt/*.html
+debug/tech_learning/*.csv

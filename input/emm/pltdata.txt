@@ -8,11 +8,11 @@
   07 'CNG' 'IGCC with NG Cofiring            '   0.065 0.060 0.850   'I2'   'DS'   'WD' 1.000  0.010  0.150  0.080 1.000
   08 'COQ' 'New Coal w/Partial Sequestration '   0.065 0.060 0.850   'PQ'   'DS'   'WD' 1.000  0.010  0.150  0.080 1.000
   09 'CAS' 'Integrated Gas CC w/Seq.'            0.065 0.060 0.850   'IS'   'NA'   'NA' 1.000  0.000  0.000  0.080 1.000
-  10 'CTN' 'Coal to Gas Retrofit             '   0.105 0.071 0.840   'GF'   'NA'   'NA' 1.000  0.000  0.000  0.080 1.000
-  11 'STO' 'Oil Steam'                           0.105 0.071 0.840   'RL'   'NA'   'NA' 1.000  0.000  0.000  0.080 1.000
+  10 'CTN' 'Coal to Gas Retrofit             '   0.071 0.066 0.650   'GF'   'NA'   'NA' 1.000  0.000  0.000  0.000 1.000
+  11 'STO' 'Oil Steam'                           0.105 0.071 0.840   'RL'   'NA'   'NA' 1.000  0.000  0.000  0.000 1.000
   12 'STG' 'Gas Steam'                           0.105 0.071 0.840   'GF'   'NA'   'NA' 1.000  0.000  0.000  0.000 1.000
   13 'STX' 'Oil / Gas Steam'                     0.105 0.071 0.840   'RL'   'GF'   'NA' 1.000  0.000  0.000  0.000 1.000
-  14 'ICE' 'Internal Combustion Engine       '   0.041 0.036 0.924   'GI'   'DS'   'NA' 1.000  1.000  0.000  0.000 1.000
+  14 'ICE' 'Internal Combustion Engine       '   0.041 0.036 0.924   'GC'   'NA'   'NA' 1.000  0.000  0.000  0.000 1.000
   15 'CTO' 'Oil Turbine'                         0.041 0.036 0.924   'DS'   'NA'   'NA' 1.000  0.000  0.000  0.000 1.000
   16 'CTG' 'Gas Turbine'                         0.041 0.036 0.924   'GI'   'NA'   'NA' 1.000  0.000  0.000  0.000 1.000
   17 'CTX' 'Oil / Gas Turbine'                   0.041 0.036 0.924   'GI'   'DS'   'NA' 1.000  1.000  0.000  0.000 1.000

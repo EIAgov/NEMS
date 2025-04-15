@@ -1,0 +1,110 @@
+## ams_version=1.0
+
+Section Cases {
+	Procedure SaveAll {
+		Arguments: (CaseName);
+		Body: {
+			CaseFileSave(
+			url: FormatString("data\\cases\\%s.data",CaseName),
+			contents: AllIdentifiers );
+		}
+		StringParameter CaseName {
+			Property: Input;
+		}
+	}
+	DeclarationSection Case_Management_Declarations {
+		Set GDS_Identifiers_ {
+			SubsetOf: AllIdentifiers;
+			Definition: {
+				Global_Data_Structure - 'NCNTRL_CURCALYR' - 'NCNTRL_CURITR' - 'NCNTRL_FCRL' - 'NCNTRL_NCRL';
+			}
+		}
+		Set HMM_Identifiers_ {
+			SubsetOf: AllIdentifiers;
+			Definition: AllIdentifiers-Global_Data_Structure-'CurrentModelYear'-'NextModelYear'-'ThirdModelYear'-'YearsInThirdPlanningPeriod_'-DataExchange-AIMMSProLibrary;
+		}
+	}
+	Procedure SaveHMM {
+		Arguments: (CaseName);
+		Body: {
+			CaseFileSave(
+			url: FormatString("data\\cases\\%s.data",CaseName),
+			contents: HMM_Identifiers_ );
+		}
+		StringParameter CaseName {
+			Property: Input;
+		}
+	}
+	Procedure SaveGDS {
+		Arguments: (CaseName);
+		Body: {
+			CaseFileSave(
+			url: FormatString("data\\cases\\%s.data",CaseName),
+			contents: GDS_Identifiers_);
+		}
+		StringParameter CaseName {
+			Property: Input;
+		}
+	}
+	Procedure LoadGDS {
+		Arguments: (CaseName);
+		Body: {
+			CaseFileLoad(
+			url: FormatString("data\\cases\\%s.data",CaseName));
+		}
+		StringParameter CaseName {
+			Property: Input;
+		}
+	}
+	Procedure LoadData {
+		Arguments: (CaseName);
+		Body: {
+			CaseFileLoad(
+			url: FormatString("data\\cases\\%s.data",CaseName),0);	!Load case file "CaseName" and destroy previous runtime libraries
+		}
+		StringParameter CaseName {
+			Property: Input;
+		}
+	}
+	Procedure SaveHMMCaseGDS {
+		Body: {
+			pr_SaveCaseFile(
+				_sp_CaseFilename     :  "HMM_GDS", 
+				_s_IdentifiersToSave :  Global_Data_Structure);
+		}
+	}
+	Procedure SaveHMMCaseALL {
+		Body: {
+			pr_SaveCaseFile(
+				_sp_CaseFilename     :  "HMM_Restart", 
+				_s_IdentifiersToSave :  AllIdentifiers);
+		}
+	}
+	Procedure pr_SaveCaseFile {
+		Arguments: (_sp_CaseFilename,_s_IdentifiersToSave);
+		Body: {
+			! This procedure saves all model identifiers without a definition in a data case.
+			if _sp_CaseFilename = "" then
+				_sp_CaseFilename := "MainCase";
+			endif;
+			
+			if ProjectDeveloperMode then
+				_sp_CasePath := "data/";
+			
+			else
+			    _sp_CasePath :=  FormatString( "PRO:/PublicData/Cases/%s", pro::Modelname);
+			
+			endif;
+			
+			CaseFileSave( _sp_CasePath + _sp_CaseFilename + ".data", _s_IdentifiersToSave );
+		}
+		StringParameter _sp_CaseFilename {
+			Property: Input;
+		}
+		StringParameter _sp_CasePath;
+		Set _s_IdentifiersToSave {
+			SubsetOf: AllUpdatableIdentifiers;
+			Property: Input;
+		}
+	}
+}

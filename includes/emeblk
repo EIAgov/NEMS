@@ -6,13 +6,11 @@
       REAL EGFTR(MNUMYR)   !  3 Natural Gas, Core - Transportation
       REAL EGFIN(MNUMYR)   !  4 Natural Gas, Core - Industrial
       REAL EGFEL(MNUMYR)   !  5 Natural Gas, Core - Electric Power
-      REAL EGFHM(MNUMYR)   !  6 Natural Gas, Core - Hydrogen
       REAL EGIRS(MNUMYR)   !  7 Natural Gas, Noncore - Residential
       REAL EGICM(MNUMYR)   !  8 Natural Gas, Noncore - Commercial
       REAL EGITR(MNUMYR)   !  9 Natural Gas, Noncore - Transportation
       REAL EGIIN(MNUMYR)   ! 10 Natural Gas, Noncore - Industrial
       REAL EGIEL(MNUMYR)   ! 11 Natural Gas, Noncore - Electric Power
-      REAL EGIHM(MNUMYR)   ! 12 Natural Gas, Noncore - Hydrogen
       REAL ENGRS(MNUMYR)   ! 13 Natural Gas - Residential
       REAL ENGCM(MNUMYR)   ! 14 Natural Gas - Commercial
       REAL ENGTR(MNUMYR)   ! 15 Natural Gas - Transportation
@@ -36,7 +34,7 @@
       REAL EDSCM(MNUMYR)   ! 33 Distillate - Commercial
       REAL EDSTR(MNUMYR)   ! 34 Distillate - Transportation
       REAL EDSIN(MNUMYR)   ! 35 Distillate - Industrial
-      REAL EDSEL(MNUMYR)   ! 36 Distillate - Electricity (+petroleum coke)
+      REAL EDSEL(MNUMYR)   ! 36 Distillate - Electricity
       REAL EKSRS(MNUMYR)   ! 37 Kerosene - Residential
       REAL EKSCM(MNUMYR)   ! 38 Kerosene - Commercial
       REAL EKSIN(MNUMYR)   ! 39 Kerosene - Industrial
@@ -62,8 +60,7 @@
       REAL EOTIN(MNUMYR)   ! 59 Other petroleum - Industrial
       REAL EPCEL(MNUMYR)   ! 60 Petroleum coke   - Electricity
       REAL EMETR(MNUMYR)   ! 61 Methanol - Transporation
-      REAL EETTR(MNUMYR)   ! 62 Ethanol - Transporation
-      REAL EETHM(MNUMYR)   ! 63 Ethanol - Hydrogen
+      REAL EETTR(MNUMYR)   ! 62 Ethanol - Transporation (sold as E85)
       REAL EMSEL(MNUMYR)   ! 64 Municipal Solid Waste - Electric Power
       REAL EGFELGR(MNUMYR) ! 65 Natural gas, electric power firm
       REAL EGIELGR(MNUMYR) ! 66 Natural gas, electric power interruptible
@@ -91,8 +88,8 @@
 
 !   
       COMMON/EMEBLK/ &
-       EGFRS,EGFCM,EGFTR,EGFIN,EGFEL,EGFHM, &
-       EGIRS,EGICM,EGITR,EGIIN,EGIEL,EGIHM, &
+       EGFRS,EGFCM,EGFTR,EGFIN,EGFEL, &
+       EGIRS,EGICM,EGITR,EGIIN,EGIEL, &
        ENGRS,ENGCM,ENGTR,ENGIN,ENGEL,ENGHM,ENQNGPF,EGPTR,ELPIN, &
        ECLRS,ECLCM,ECLIN,ECLEL,ECLHM,EMCIN, &
        EMGCM,EMGTR,EMGIN,EJFTR, &
@@ -100,7 +97,7 @@
        ELGRS,ELGCM,ELGTR,ELGIN, &
        ERLCM,ERLTR,ERLIN,ERLEL,ERHTR,ERHEL,ERSCM,ERSTR,ERSIN,ERSEL, &
        EOTTR,EPFIN,EPCIN,ENQLGPF,ESGIN,EOTIN,EPCEL, &
-       EMETR,EETTR,EETHM,EMSEL, &
+       EMETR,EETTR,EMSEL, &
        EGFELGR, EGIELGR, EGCELGR, ECIIN, EBMHM, &
        EPRRS, EPRCM, EPRTR, EETIN, EPRIN, EBUIN, EISIN, &
        EETINPF, EPRINPF, EBUINPF, EISINPF, &

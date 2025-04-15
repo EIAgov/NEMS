@@ -1,0 +1,18 @@
+! This file content is used in mnfactorx_parser.py file
+CFDSCM
+CFDSEL
+CFDSIN
+CFDSRS
+CFDSTR
+CFE85Q
+CFETFAC
+CFETQ
+CFLGQ
+CFMGQ
+CFNGC
+CFNGE
+CFNGI
+CFNGN
+CFNGP
+CFNGU
+CFPFQ

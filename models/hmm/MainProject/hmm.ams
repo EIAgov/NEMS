@@ -1,0 +1,462 @@
+## ams_version=1.0
+
+Model Main_Model {
+	Comment: {
+		"Template version 2.0, 2021/01/08
+		------------------------------------------------------------------------------------------------
+			Disclaimer
+		------------------------------------------------------------------------------------------------
+		This AIMMS template has been developed by Districon Solutions B.V. and is intended for internal
+		use only. Please do not share this model without permission of Districon Solutions B.V. 
+		
+		*NOTE: This template was shared by Districon to EIA via an email attachment from Diago Perez-Urruti Castillo-Puche on 12/1/2023
+		
+		It can be cloned from the git repository:
+			https://bitbucket.org/DistriconSolutions/districon-aimms-base-model/src/master/
+		
+		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		
+		-----------------------------------------------------------------------------------------------
+			Project information
+		------------------------------------------------------------------------------------------------
+		Model name:                 Hydrogen Market Module
+		Project code:               HMM
+		Project start date:         <12-01-2023>
+		Project status:             Under development
+		Development end date:       <dd-mm-yyyy> 
+		Project developers:         1. Stephen York         Involved per <12-01-2023>
+		                            2. Katie Dyl            Involved per <12-01-2023>
+		                            3. Neil Wagner          Involved per <12-01-2023>
+		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		
+		------------------------------------------------------------------------------------------------
+			Model structure
+		------------------------------------------------------------------------------------------------
+		The model is divided into 8 different sections:
+			S1 Data                     Main data related identifiers (calendars, units, constants)
+			S2 Data Import Export       Storing \"raw\" identifiers, directly read from their source
+			S3 Data Processing          Data modifications needed to transfrom the inputs
+			S4 Calculations             Data additions and business logic
+			S5 Optimization             LP related identifiers
+			S6 Output                   Output related identifiers, often including scenario support
+			S7 GUI                      UI related identifiers
+			S8 Miscellaneous            General procedures which do not belong in any of the above
+		
+		The WebuiFeatureSupport library is developed by Districon and contains supportive parameters
+		and procedures to configure webUI features requiring a string parameter, such as side panels,
+		widget actions, etc. It has prefix wfs::, which you can use to refer to identifers in this 
+		library.
+		
+		All sections are stored in a separate .ams file. They are found in the MainProject/AMS files 
+		folder. When a new section is added, make sure to store it in a new .ams file as well. You can
+		do this via the source file wizard in the section object. To create a .ams file, open the wizard
+		and select \"write...\". Name the .ams file the same as the section it is created for.
+		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		
+		------------------------------------------------------------------------------------------------
+			Naming and modelling conventions
+		------------------------------------------------------------------------------------------------
+		The guidelines below are intended to help keep structure and naming conventions uniform, also
+		across projects. Please keep in mind that whatever naming rules you have chosen, consistency
+		within a project is important.
+		
+		Naming
+			1.	Use the first 1 or 2 letters of the model identifier followed by a _ (p_, pr_, …)
+					- The prefix names should be lower case. This convention is also used by AIMMS in
+					  their examples. All other words should begin with a Captial (PascalCase).
+					  e.g. p_SomeIdentifier, not p_someIdentifier.
+			2.	Add prefix b if the identifier is binary (bp_, bv_,…). Set range binary.
+			3.	Add _d as post fix if the identifier has a definition (p_SomeName_d, ep_SomeName_d, …)
+				     -  moving _d to post-fix makes looking for identifiers easier, as you don\'t have to 
+				        worry about whether it has a definition or not.
+			4.	Locally defined (e.g. in procedures) model identifiers start with _ (_p_DepotCosts)	     
+			5.	Only use _ for the naming conventions mentioned above. Start new words in a name 
+				with a capital (p_TotalCost, not p_totalCost, p_Total_Cost or p_Totalcost)	        
+			6.	A set is the name of its contents in plural (s_Depots)
+				     -  Indices are singular and use i,j, (i_depot, j_depot, not i_depot, i_depot2)
+				     -  Subset names start with the superset (s_DepotsGermany, not s_German_Depots)
+			7.	Procedures are named as verbs (pr_DoSomething)
+			8.	Identifiers are named as nouns (p_Something)
+		
+		Local vs Global
+			1. If a parameter is only used for a procedure or as an intermediate use a local parameter. 
+			   This will make sure no unnecessary memory is being used. 
+		
+		Constants and single values
+			1.	All constants and single values are to be stored in model identifiers in the section Constants
+			    This prevents the use of magic numbers throughout the code.
+		
+		Use of sections
+			1. All section must have a seperate .ams file. Creates less merge conflicts and easier to code review
+			2. Create a separate section for all UI pages. This makes it easier to locate identifiers specifically
+			   designed for a page.
+		
+		Comments
+			1.	Use the comment block at the bottom of identifier attributes if an identifier
+				can use an explanation. This comment is shown when hovering over the identifier.
+			2.	Use the following commenting keywords for easy referencing/bookmarking:
+			    	a.	@TODO(<developer name>)
+			    	b.	@FIXME(<developer name>)
+			    	c.	@TEMP(<developer name>)
+			3.	If you want to refer to a model identifier in your comments, make sure to write
+				it between single quotes (\'p_Something\'). This ensures that it gets updated
+				when the name is changed.
+		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		
+		TO DO A TEST RUN OF THE MODEL (1/31/2024)
+		1) Run Main_Execution_Standalone procedure
+		2) Run Optimize procedure
+		3) Run ExtractModelResults procedure
+		
+		------------------------------------------------------------------------------------------------
+			Final notes
+		------------------------------------------------------------------------------------------------
+		This template is created and maintained by
+			Tanya Bulavskaya			t.bulavskaya@districon.com
+			Sander Djohan				s.djohan@districon.com
+			Richard Hornstra			r.hornstra@districon.com
+			Martijn Hoogendoorn			m.hoogendoorn@districon.com
+		
+		Please contact one of them in case of questions or suggestions for improvement.
+		
+		Happy modelling!
+		- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	}
+	Module TestModule {
+		SourceFile: "AMS Files\\TestModule.ams";
+	}
+	Section S0_NEMS_Interface {
+		SourceFile: "AMS Files\\S0 NEMS Interface.ams";
+	}
+	Section S1_Data {
+		SourceFile: "AMS Files\\S1 Data.ams";
+	}
+	Section S2_Data_Import_Export {
+		SourceFile: "AMS Files\\S2 Data Import Export.ams";
+	}
+	Section S3_Data_Processing {
+		SourceFile: "AMS Files\\S3 Data Processing.ams";
+	}
+	Section S4_Calculations {
+		SourceFile: "AMS Files\\S4 Calculations.ams";
+	}
+	Section S5_Optimization {
+		SourceFile: "AMS Files\\S5 Optimization.ams";
+	}
+	Section S6_Output {
+		SourceFile: "AMS Files\\S6 Output.ams";
+	}
+	Section S7_GUI {
+		SourceFile: "AMS Files\\S7 GUI.ams";
+	}
+	Section S8_Miscellaneous {
+		SourceFile: "AMS Files\\S8 Miscellaneous.ams";
+	}
+	Procedure MainInitialization {
+		Body: {
+			if ProjectDeveloperMode then
+				ProfilerStart;
+			!	IdentifierShowAttributes('Main_Model');
+			endif;
+			
+			pr_InitializeCalendar;
+			
+			read from file "input/h2config.txt" in merge mode;
+			read from file "input/h2setmap.txt" in merge mode;
+			
+			SeasonalFraction(seas) := DATA {'1' : 0.16666666666, '2': 0.33333333333, '3' : 0.16666666666, '4' : 0.33333333333};
+		}
+		Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+	}
+	Procedure PostMainInitialization {
+		Body: {
+			pr_WriteIdentifierTranslations;
+			pr_MakeIdentifiersReadOnly;
+		}
+		Comment: {
+			"Add initialization statements here that require that the libraries are already initialized properly,
+			or add statements that require the Data Management module to be initialized."
+		}
+	}
+	Procedure NEMS_Monitor {
+		Body: {
+			EnterNEMSMonitor := "I'm Alive! AIMMS entered NEMS_Monitor. Model Year, Cycle, or Iteration info not yet known. AIMMS has not yet read monitor.in.txt or GDS";
+			put h2StatusFile;
+			put EnterNEMSMonitor;
+			putclose;
+			
+			MainInitialization;
+			
+			Read_Runtime_Parameters;
+			
+			CountSleep := 0;
+			! count sleep/wake cycles while waiting for direction from nems via sAction in the message file, monitor.in.txt
+			           while ( CountSleep <= 2000 ) do
+			              if fileexists(sMessageInFile) then
+			              ! read sAction, current model year, and current iteration from sMessageInFile
+			                sAction:=" ";
+			                read from file sMessageInFile in merge mode;
+			              else
+			                put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
+			              endif;
+			              if sAction = "MainExecution" then
+			                sAction:="executing";    ! Action message to tell NEMS I'm executing
+			                write sAction to file NEMSMessageOutFile in replace mode;  
+			                dialogProgress(""); ! remove progress dialog
+			                sStatusMessage := formatstring("Invoking MainExecution for %s",ncntrl_curcalyr('1')) + 
+			                                  formatstring(", iteration %s",ncntrl_curitr('1')) +
+			                                  formatstring(", reporting loop indicator=%s",ncntrl_ncrl('1'));
+			                put sStatusMessage;
+			
+			                MiddleNEMSMonitor := "I'm Alive! AIMMS in NEMS_Monitor and has read monitor.in.txt - " +
+					formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+					formatstring("%i, ",ncntrl_curcalyr(1));
+					put h2StatusFile;
+					put MiddleNEMSMonitor;
+					putclose;
+			
+			!                ReadGlobalDataFromNEMS; ! read globaldatatoAIMMS_yyyy_ii.txt where yyyy is ncntrl_curcalyr(1) and ii is ncntrl_curitr(1)
+			
+					MainExecution;
+			                sAction:=formatstring("Completed %s,",ncntrl_curcalyr('1')) + 
+			                         formatstring("iteration %s ",ncntrl_curitr('1')) ;    ! Action message to tell NEMS I'v completed this year, iteration
+			                write sAction to file NEMSMessageOutFile in replace mode;  
+			                CountSleep:=0;   
+			                sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			                put sStatusMessage;
+			                Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
+			              elseif sAction = "Quit" then ! NEMS says to exit aimms
+			                CountSleep:=2000;
+			              else
+			                sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			                Delay(0.5);                  
+			              endif;
+			              dialogProgress(sStatusMessage,round(100*CountSleep/2000));
+			              CountSleep += 1;
+			           endwhile;
+			           if CountSleep>=2001 then
+			             put "Quit directive found in monitor.in.txt. Exiting AIMMS";
+			           else
+			             put "Wait time exceeded. Exiting Aimms";
+			           endif;
+			
+			                ExitNEMSMonitor := "I'm Alive! AIMMS is preparing to exit NEMS_Monitor and begin Main_Termination  - "  + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+					formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+					formatstring("%i, ",ncntrl_curcalyr(1));
+					put h2StatusFile;
+					put ExitNEMSMonitor;
+					putclose;
+			
+			           exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
+		}
+	}
+	Procedure MainExecution {
+		Body: {
+			EnterMainExecution := "I'm Alive! AIMMS entered MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			
+			put h2StatusFile;
+			put EnterMainExecution;
+			putclose;
+			
+			! Establish current model year based on the information in monitor.in.txt
+			CurrentModelYear := StringToElement(NEMSYears_, FormatString("%n", NCNTRL_CURCALYR(1)));
+			!CurrentModelYear := '2034';
+			
+			AIMMS_Standalone_Switch := 0;
+			PlanningPeriods_ := DATA {1,2,3};
+			FirstPlanningPeriod := '1';
+			SecondPlanningPeriod := '2';
+			ThirdPlanningPeriod := '3';
+			SecondAndThirdPlanningPeriods := DATA {2,3};
+			
+			! NEMS writes data for the full projection period during HMM's first model year that HMM reads in.
+			! HMM saves this data to case file, and loads that data each time HMM runs.
+			! In years greater than the first model year, NEMS only writes data for the current model year, data for future years is populated by loading the GDS case file from the previous year.
+			if CurrentModelYear > FirstModelYear then
+				loadGDS("restart");
+			endif;
+			
+			! Read GDS data
+			ReadGlobalDataFromNEMS;
+			
+			! Save GDS updates to startup case
+			saveGDS("restart");
+			
+			if CurrentModelYear >= FirstModelYear then 
+			
+				Initialize_HMM_Parameters;
+			
+				! If it is the first model year, run the FirstYearInitialiation procedures to initialize history, capacities, input costs, etc.
+				if (CurrentModelYear = FirstModelYear) then
+					Process_GDS_Parameters;
+					Calculate_Financial_Parameters;
+					FirstYearInitialization;
+				else !Otherwise, load the data from the previously saved case file
+					LoadData("hmm_only");
+					PlanningPeriods_ := DATA {1,2,3};
+					FirstPlanningPeriod := '1';
+					SecondPlanningPeriod := '2';
+					ThirdPlanningPeriod := '3';
+					SecondAndThirdPlanningPeriods := DATA {2,3};
+					!Overwrite case file for NEMS debugging
+					!LoadData("HMMIterationDebug_Cycle4_2050_1");
+				endif;
+			
+				! If in greater than the FirstModelYear and it is not the report loop, run HMM procedure and write the NEMS parameters
+				if (CurrentModelYear >= FirstModelYear) and (ncntrl_ncrl(1) <> 1) then
+					Process_GDS_Parameters;
+					Calculate_Financial_Parameters;
+					HMM;
+					Write_to_NEMS;		! Assign values to NEMS transfer parameters
+				endif;
+			
+				! If less than the LastModelYear, then save the HMM identifiers to a case file so they can be loaded back up next iteration.
+				if (CurrentModelYear < LastModelYear) then
+					saveHMM("hmm_only");
+				else !At the end of the cycle, in the final model year, save AllIdentifiers in a case file.
+					SaveAll( FormatString("cycle%i", CYCLEINFO_CURIRUN(1)));
+				endif;
+			
+				if SaveEachIterationSwitch = 1 then
+					SaveALL(FormatString("HMMIterationDebug_Cycle%i_%e_%i", CYCLEINFO_CURIRUN(1), CurrentModelYear,ncntrl_curitr(1)));
+				endif;
+			
+			endif;
+			
+			! Send GDS Data back to NEMS (Happens every year, regardless of if CurrentModelYear is Greater Than or Equal to FirstModelYear
+			Write_To_NEMS;
+			SendGlobalDataToNEMS;
+			
+			ExitMainExecution := "I'm Alive! AIMMS exiting MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			
+			put h2StatusFile;
+			put ExitMainExecution;
+			putclose;
+		}
+	}
+	Procedure MainExecution_Standalone {
+		Body: {
+			!empty AllIdentifiers;
+			Empty AllIdentifiers;
+			AIMMS_Standalone_Switch := 1;
+			ZTCCOSTM := 1.0;
+			MainInitialization;
+			CurrentModelYear := '2023';
+			
+			Read_GDS_Initial;
+			
+			repeat
+				Initialize_HMM_Parameters;
+				Process_GDS_Parameters;
+				Calculate_Financial_Parameters;
+			
+				if (CurrentModelYear = FirstModelYear) then
+				FirstYearInitialization;
+				endif;
+				HMM;
+				break when (CurrentModelYear = LastModelYear);
+				CurrentModelYear += 1;
+			
+			endrepeat;
+			
+			! Fills parameter `Results~ with profiler measurements for which gross time is larger than 0.5 seconds
+			ProfilerCollectAllData(Results, GrossTimeThreshold: 0.5);
+		}
+	}
+	Procedure FirstYearInitialization {
+		Body: {
+			Read_Input_Data;
+			
+			! Adjust capital costs for debug purposes.
+			
+			if LowerElectrolyzerCapitalSwitch = 1 then
+				base_PUCCostElectrolyzer(regNERC, prodTech) := base_PUCCostElectrolyzer(regNERC, prodTech) * ElectrolyzerCostFactorDebug;
+			endif;
+			
+			Convert_Input_Units;
+			Initialize_Capacities_From_History;
+			Initialize_Capital_Costs;
+			Calculate_45Q_Eligiblity;
+			
+			Impute_Historical_Consumption;
+			Impute_Historical_Prices;
+			
+			if (ZTCCOSTM > 0 and ZTCCOSTM < 1) then
+				read from file "data/CapitalCostsByYearReference.txt";
+			endif;
+		}
+		Comment: "Data processing and I/0 that only need to happen in the first model year. Future model years will retrieve this value by loading the AIMMS case file.";
+	}
+	Procedure HMM {
+		Body: {
+			Process_Capacities;
+			Process_Technology_Costs;
+			Process_FuelPrices_And_Credits;
+			Process_Demands_and_Quantities;
+			Optimize;
+			ExtractModelResults;
+			Create_UI_Parameters;
+			Write_To_NEMS;
+			if ExtraDebugSwitch = 1 then
+				WriteDebugInfo;
+			endif;
+			!SaveHMMCaseALL();
+		}
+	}
+	Procedure PreMainTermination {
+		Body: {
+			return DataManagementExit();
+		}
+		Comment: {
+			"Add termination statements here that require all libraries to be still alive.
+			Return 1 if you allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence."
+		}
+	}
+	Procedure MainTermination {
+		Body: {
+			EnterMainTermination := "I'm Alive! AIMMS Entering MainTermination - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			
+			put h2StatusFile;
+			put EnterMainTermination;
+			putclose;
+			
+			if SaveEachIterationSwitch = 1 then
+				SaveProfilerResults;
+			endif;
+			sAction:="Exited";    ! Action message for NEMS
+			write sAction to file NEMSMessageOutFile in replace mode;  
+			return 1;
+		}
+		Comment: {
+			"Add termination statements here that do not require all libraries to be still alive.
+			Return 1 to allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence.
+			It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1."
+		}
+	}
+	ExternalProcedure CSVExport {
+		Arguments: (param,location);
+		DllName: "CSVExport64.dll";
+		BodyCall: {
+			CSVExport(
+				scalar string : param,
+				scalar string : location
+				)
+		}
+		ElementParameter param {
+			Range: AllIdentifiers;
+			Property: Input;
+		}
+		StringParameter location {
+			Default: ".";
+			Property: Optional;
+		}
+	}
+}

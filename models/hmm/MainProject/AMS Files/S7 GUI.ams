@@ -1,0 +1,229 @@
+## ams_version=1.0
+
+Section S7_GUI {
+	DeclarationSection Credit45V_Production {
+		Parameter ui_ElecConsumedElecVintage {
+			IndexDomain: (regNERC,elecYear,hr,seas,year);
+		}
+		Parameter ui_ElectrolyzerProductionByCreditAnnual {
+			IndexDomain: (year,creditStep);
+		}
+		Parameter ui_45VElectricityConsumptionNoCurtail {
+			IndexDomain: (regNERC,capYear,hr,seas,year);
+		}
+		Parameter ui_45VElectricityConsumptionCurtail {
+			IndexDomain: (regNERC,capYear,hr,seas,year);
+		}
+		Parameter ui_Eligible45VGeneration {
+			IndexDomain: (regNERC,capYear,hr,seas,year);
+		}
+	}
+	DeclarationSection SupplyCurve {
+		Set ui_H2STEP_display {
+			SubsetOf: H2STEP_;
+			Index: ui_H2STEP;
+			Definition: {
+				H2STEP_-card(H2STEP_);
+			}
+		}
+	}
+	Procedure SelectRegionOnMap {
+		Arguments: (ui_SelectedRegion);
+		Body: {
+			ui_DisplayedHub:=ui_SelectedRegion;
+		}
+		ElementParameter ui_SelectedRegion {
+			Range: CensusRegions_;
+			Property: Input;
+		}
+	}
+	DeclarationSection Maps {
+		Parameter ui_AnnualH2DemandRegion {
+			IndexDomain: (i_calYear,regCen);
+		}
+		Parameter ui_RegCenHydrogenTransportationByYear {
+			IndexDomain: (i_calYear,regCen,regCen_j);
+		}
+		ElementParameter ui_DisplayedHub {
+			Range: CensusRegions_;
+		}
+		Parameter ui_NERCtoCEN {
+			IndexDomain: (i_calYear,regNERC,regCen);
+		}
+		Parameter ui_latitude {
+			IndexDomain: reg;
+		}
+		Parameter ui_longitude {
+			IndexDomain: reg;
+		}
+	}
+	DeclarationSection Capacity {
+		Parameter ui_TotalCapacityByYear {
+			IndexDomain: (i_calYear,prodTech);
+		}
+	}
+	DeclarationSection H2_Production {
+		Parameter ui_H2ProductionByRegion;
+	}
+	DeclarationSection CapacityCosts {
+		Parameter ui_CapitalCCosts {
+			IndexDomain: (prodTech,year);
+		}
+	}
+	DeclarationSection HMM_Debug_Home_Page {
+		StringParameter ui_HMM_Debug_Title {
+			Definition: "Hydrogen Market Module";
+		}
+	}
+	DeclarationSection SMR_LCOH;
+	DeclarationSection SMR_CCS_LCOH {
+		Parameter ui_SMRTotal {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_SMRCCSTotal_45Q {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_SMRCCSTotal_No45Q {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_CO2Cost45Q {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_CO2CostNo45Q {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_hpSMRCCS {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_feedstockSMRCCS {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_varOMSMRCCS {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_fixedOMSMRCCS {
+			IndexDomain: (regCen,seas,year);
+		}
+	}
+	DeclarationSection ElectrolyzerHourlyLCOE {
+		Parameter ui_totalElectrolyzerLCOH {
+			IndexDomain: (regNERC,seas,hr,year,creditStep);
+		}
+		Parameter ui_45VTaxCredit {
+			IndexDomain: (regNERC,seas,hr,year);
+		}
+		Parameter ui_varOMElectrolyzer {
+			IndexDomain: (regNERC,seas,hr,year);
+		}
+		Parameter ui_fixedOMElectrolyzer {
+			IndexDomain: (regNERC,seas,hr,year);
+		}
+		Parameter ui_hourlyfuelcost {
+			IndexDomain: (regNERC,seas,hr,year);
+		}
+	}
+	DeclarationSection SMR_LCOE {
+		Parameter ui_hpSMR {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_feedstockSMR {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_varOMSMR {
+			IndexDomain: (regCen,seas,year);
+		}
+		Parameter ui_fixedOMSMR {
+			IndexDomain: (regCen,seas,year);
+		}
+	}
+	DeclarationSection General_UI_Declarations {
+		ElementParameter ui_hourSelect {
+			Range: Hours_;
+		}
+		ElementParameter ui_regionSelectNERC {
+			Range: NERCRegions_;
+		}
+		ElementParameter ui_regionSelectCEN {
+			Range: CensusRegions_;
+		}
+		ElementParameter ui_regionSelect {
+			Range: Regions_;
+		}
+		ElementParameter ui_seasonSelect {
+			Range: Seasons_;
+		}
+		ElementParameter ui_yearSelect {
+			Range: NEMSYears_;
+		}
+		ElementParameter ui_capyearSelect {
+			Range: CapacityYears_;
+		}
+		ElementParameter ui_ElecYearSelect {
+			Range: CapacityYears_;
+		}
+		ElementParameter ui_dollar_year_current {
+			Range: cal_Year;
+			Definition: '2023';
+		}
+	}
+	Procedure Create_UI_Parameters {
+		Body: {
+			ui_pipeline_capital_cost_kg(regCen, regCen_j) := (TUCCost(regCen, regCen_j, FirstPlanningPeriod) * GDPPriceDeflator87(ui_dollar_year_current)) / kg_to_mMton;
+			
+			! Electrolyzer LCOE Hourly
+			ui_hourlyfuelcost(regNERC, seas, hr, CurrentModelYear) := (HourlyFuelCost(regNERC, seas, hr, FuelElec, FirstPlanningPeriod) * ElectrolyzerFuelConsumption('PEM', FuelElec)) / kg_to_mMton;
+			
+			ui_fixedOMElectrolyzer(regNERC, seas, hr, CurrentModelYear) := FixedOMCostElectrolyzer('1', regNERC, 'PEM', FirstPlanningPeriod) / kg_to_mMton;
+			ui_varOMElectrolyzer(regNERC, seas, hr, CurrentModelYear) := VarOMCostElectrolyzer('1', regNERC, 'PEM', FirstPlanningPeriod) / kg_to_mMton;
+			ui_45VTaxCredit(regNERC, seas, hr, CurrentModelYear) := -(3/2.2);
+			
+			ui_totalElectrolyzerLCOH(regNERC, seas, hr, CurrentModelYear, '45V') := ui_hourlyfuelcost(regNERC, seas, hr, CurrentModelYear)
+				 + ui_fixedOMElectrolyzer(regNERC, seas, hr, CurrentModelYear) + ui_varOMElectrolyzer(regNERC, seas, hr, CurrentModelYear) + ui_45VTaxCredit(regNERC, seas, hr, CurrentModelYear);
+			
+			ui_totalElectrolyzerLCOH(regNERC, seas, hr, CurrentModelYear, 'No45V') := ui_hourlyfuelcost(regNERC, seas, hr, CurrentModelYear)
+				 + ui_fixedOMElectrolyzer(regNERC, seas, hr, CurrentModelYear) + ui_varOMElectrolyzer(regNERC, seas, hr, CurrentModelYear);
+			
+			! SMR LCOE
+			ui_fixedOMSMR(regCen,seas,CurrentModelYear) := FixedOMCostNonElectrolyzer(seas, regCen, SMRTech, FirstPlanningPeriod)/kg_to_mMton;
+			ui_varOMSMR(regCen, seas, CurrentModelYear) := VarOMCostNonElectrolyzer(seas, regCen, SMRTech, FirstPlanningPeriod)/kg_to_mMton;
+			ui_feedstockSMR(regCen, seas, CurrentModelYear) := sum(fuel, FeedstockConsumption(SMRTech, fuel) * FuelCost(seas, regCen, fuel, FirstPlanningPeriod))/kg_to_mMton;
+			ui_hpSMR(regCen, seas, CurrentModelYear) := sum(fuel, HPConsumption(SMRTech, fuel) * FuelCost(seas, regCen, fuel, FirstPlanningPeriod))/kg_to_mMton;
+			ui_SMRTotal(regCen, seas, CurrentModelYear) := ui_fixedOMSMR(regCen, seas, CurrentModelYear) + ui_varOMSMR(regCen, seas, CurrentModelYear) + ui_feedstockSMR(regCen, seas, CurrentModelYear) + ui_hpSMR(regCen, seas, CurrentModelYear);
+			
+			! SMR CCS LCOH
+			ui_fixedOMSMRCCS(regCen, seas, CurrentModelYear) := FixedOMCostNonElectrolyzer(seas, regCen, SMRCCSTech, FirstPlanningPeriod) / kg_to_mMton;
+			ui_varOMSMRCCS(regCen, seas, CurrentModelYear) := VarOMCostNonElectrolyzer(seas, regCen, SMRCCSTech, FirstPlanningPeriod)/kg_to_mMton;
+			ui_feedstockSMRCCS(regCen, seas, CurrentModelYear) := sum(fuel, FeedstockConsumption(SMRCCSTech, fuel) * FuelCost(seas, regCen, fuel, FirstPlanningPeriod))/kg_to_mMton;
+			ui_hpSMRCCS(regCen, seas, CurrentModelYear) := sum(fuel, HPConsumption(SMRCCSTech, fuel) * FuelCost(seas, regCen, fuel, FirstPlanningPeriod))/kg_to_mMton;
+			ui_CO2Cost45Q(regCen, seas, CurrentModelYear) := ((CO2CaptureRate(SMRCCSTech)/kg_to_tons) * (CO2Price(regCen, FirstPlanningPeriod) + TaxCredit45Q(regCen, SMRCCSTEch, FirstPlanningPeriod, CurrentModelYear)))/kg_to_mMton;
+			ui_CO2CostNo45Q(regCen, seas, CurrentModelYear) := ((CO2CaptureRate(SMRCCSTech)/kg_to_tons) * (CO2Price(regCen, FirstPlanningPeriod)))/kg_to_mMton;
+			
+			ui_SMRCCSTotal_No45Q(regCen, seas, CurrentModelYear) := ui_fixedOMSMRCCS(regCen, seas, CurrentModelYear) + ui_varOMSMRCCS(regCen, seas, CurrentModelYear) + ui_feedstockSMRCCS(regCen, seas, CurrentModelYear) + 
+										ui_hpSMRCCS(regCen, seas, CurrentModelYear) + ui_CO2CostNo45Q(regCen, seas, CurrentModelYear);
+			
+			ui_SMRCCSTotal_45Q(regCen, seas, CurrentModelYear) :=   ui_fixedOMSMRCCS(regCen, seas, CurrentModelYear) + ui_varOMSMRCCS(regCen, seas, CurrentModelYear) + ui_feedstockSMRCCS(regCen, seas, CurrentModelYear) + 
+									        ui_hpSMRCCS(regCen, seas, CurrentModelYear) + ui_CO2Cost45Q(regCen, seas, CurrentModelYear);
+			
+			! Create capacity-weighted capital costs by year.
+			ui_CapitalCCosts(prodTech_nonElec, year) := CapitalCostsByYear(year, 'MidAtlantic', prodTech_nonElec);
+			ui_CapitalCCosts(prodTech_elec, year) := CapitalCostsByYear(year, 'TRE', prodTech_elec);
+			
+			! UI Paramaters to display 45V information
+			ui_45VElectricityConsumptionNoCurtail(regNERC,CapYearModE, hr, seas, CurrentModelYear) := sum(elecyearmod, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecyearmod, hr, seas, FirstPlanningPeriod));
+			ui_Eligible45VGeneration(regNERC, capYear, hr, seas, CurrentModelYear) := sum(elecyearmod, EligibleGeneration45V(regNERC, capYear, elecyearmod, hr, seas, FirstPlanningPeriod));
+			ui_45VElectricityConsumptionCurtail(regNERC, CapYearModE, hr, seas, CurrentModelYear) := sum(prodtech_elec, H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, CapYearModE, '45VCurtail') *  ElectrolyzerFuelConsumption(prodTech_elec, FuelElec));
+			ui_ElectrolyzerProductionByCreditAnnual(year, creditStep) := sum((regNERC, seas, hr, prodtech_elec,capyear),  ElectrolyzerProductionByCredit(year, regNERC, seas, hr, prodTech_elec, capYear, creditStep));
+			ui_elecConsumedElecVintage(regNERC, elecyearmod, hr, seas, CurrentModelYear) := sum(capyearmode, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecyearmod, hr, seas, FirstPlanningPeriod));
+			
+			ui_TotalCapacityByYear(i_calYear, PEMTech) := sum((regNERC, capYear), CapacityElecVintage(i_calYear, regNERC, PEMTech, capYear));
+			
+			ui_RegCenHydrogenTransportationByYear(i_calYear, lph, lph1) := HydrogenTransportationByYear(i_calYear, lph, lph1);
+		}
+	}
+	DeclarationSection Technology_costs {
+		Parameter ui_pipeline_capital_cost_kg {
+			IndexDomain: (regCen,regCen_j);
+			Comment: "Pipeline capital costs, $2023/kg H2 in Planning Period 1";
+		}
+	}
+}

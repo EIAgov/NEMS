@@ -4,11 +4,18 @@ import numpy as np
 
 from Controller.StatusHelper import StatusHelper
 
-start_year = 2020
+start_year = 2023
 end_year = 2050
 DISCREPANCY_TOLERANCE = 5
 num_years = end_year - start_year + 1
 
+h = StatusHelper()
+# ideally we shall check all tests under test_steo_benchmark test class. Here I grab 3 models instead of checking all test status
+status1=h.get_status('test_steo_integration_equals_aeo') == "inactive"
+status2=h.get_status('test_steo_industrial_equals_aeo') == "inactive"
+status3=h.get_status('test_steo_buildings_equals_aeo') == "inactive"
+# Warning: hardcoded 2026 start date. Remove for AEO2026
+if status1 and status3 and status3: start_year=2026
 
 def load_table():
     df = Model.getInstance().files.csv.load_table(1)

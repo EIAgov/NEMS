@@ -2,118 +2,124 @@
 ! Calshr:  has assumed California shares of the Pacific Region for estimating AB32 covered emissions for fuel suppliers
 !  fuel/sector detail similar to that in the NEMS quantity variables in qsblk and qblk
 
-      real ELRS_SHR(mnumyr)     !  Purchased Electricity - Residential
-      real ELCM_SHR(mnumyr)     !  Purchased Electricity - Commercial
-      real ELTR_SHR(mnumyr)     !  Purchased Electricity - Transportation
-      real ELIN_SHR(mnumyr)     !  Purchased Electricity - Industrial
-      real ELRF_SHR(mnumyr)     !  Purchased Electricity - Refinery
-      real ELHM_SHR(mnumyr)     !  Purchased Electricity - Hydrogen
-       
-      real NGRS_SHR(mnumyr)     !  Natural Gas - Residential
-      real NGCM_SHR(mnumyr)     !  Natural Gas - Commercial
-      real NGTR_SHR(mnumyr)     !  Natural Gas - Transportation
-      real NGIN_SHR(mnumyr)     !  Natural Gas - Industrial
-      real NGRF_SHR(mnumyr)     !  Natural Gas - Refinery
-      real NGEL_SHR(mnumyr)     !  Natural Gas - Electricity
-      real NGHM_SHR(mnumyr)     !  Natural Gas - Hydrogen
-      real GPTR_SHR(mnumyr)     !  Natural Gas - Pipeline
-      real LPIN_SHR(mnumyr)     !  Natural Gas - Lease and Plant Fuel
-       
-      real CLRS_SHR(mnumyr)     !  Coal - Residential
-      real CLCM_SHR(mnumyr)     !  Coal - Commercial
-      real CLIN_SHR(mnumyr)     !  Coal - Industrial
-      real CLRF_SHR(mnumyr)     !  Coal - Refinery
-      real CLEL_SHR(mnumyr)     !  Coal - Electricity
-      real CLSN_SHR(mnumyr)     !  Coal - Synthetics
-      real CLHM_SHR(mnumyr)     !  Coal - Hydrogen
-       
-      real MCIN_SHR(mnumyr)     !  Metallurgical Coal - Industrial
-      real MGCM_SHR(mnumyr)     !  Motor Gasoline - Commercial
-      real MGTR_SHR(mnumyr)     !  Motor Gasoline - Transportation
-      real MGIN_SHR(mnumyr)     !  Motor Gasoline - Industrial
-       
-      real JFTR_SHR(mnumyr)     !  Jet Fuel - Transportation
-      real DSRS_SHR(mnumyr)     !  Distillate - Residential
-      real DSCM_SHR(mnumyr)     !  Distillate - Commercial
-      real DSTR_SHR(mnumyr)     !  Distillate - Transportation
-      real DSIN_SHR(mnumyr)     !  Distillate - Industrial
-      real DSRF_SHR(mnumyr)     !  Distillate - Refinery
-      real DSEL_SHR(mnumyr)     !  Distillate - Electricity (+petroleum coke)
-       
-      real KSRS_SHR(mnumyr)     !  Kerosene - Residential
-      real KSCM_SHR(mnumyr)     !  Kerosene - Commercial
-      real KSIN_SHR(mnumyr)     !  Kerosene - Industrial
-       
-      real LGRS_SHR(mnumyr)     !  Liquid Petroleum Gases - Residential
-      real LGCM_SHR(mnumyr)     !  Liquid Petroleum Gases - Commercial
-      real LGTR_SHR(mnumyr)     !  Liquid Petroleum Gases - Transportation
-      real LGIN_SHR(mnumyr)     !  Liquid Petroleum Gases - Industrial
-      real LGRF_SHR(mnumyr)     !  Liquid Petroleum Gases - Refinery
-       
-      real RSCM_SHR(mnumyr)     !  Residual Fuel - Commercial
-      real RSTR_SHR(mnumyr)     !  Residual Fuel - Transportation
-      real RSIN_SHR(mnumyr)     !  Residual Fuel - Industrial
-      real RSRF_SHR(mnumyr)     !  Residual Fuel - Refinery
-      real RSEL_SHR(mnumyr)     !  Residual Fuel - Electricity
-       
-      real PFIN_SHR(mnumyr)     !  Petrochemical Feedstocks - Industrial
-      real SGIN_SHR(mnumyr)     !  Still Gas - Industrial
-      real SGRF_SHR(mnumyr)     !  Still Gas - Refinery
-      real PCIN_SHR(mnumyr)     !  Petroleum Coke - Industrial
-      real PCRF_SHR(mnumyr)     !  Petroleum Coke - Refinery
-      real PCEL_SHR(mnumyr)     !  Petroleum Coke - Electricity
-      real PCAS_SHR(mnumyr)     !  Petroleum Coke - All Sectors
-      real ASIN_SHR(mnumyr)     !  Asphalt and Road Oil - Industrial
-      real OTTR_SHR(mnumyr)     !  Other Petroleum - Transportation
-      real OTIN_SHR(mnumyr)     !  Other Petroleum - Industrial
-      real OTRF_SHR(mnumyr)     !  Other Petroleum - Refinery
-       
-      real METR_SHR(mnumyr)     !  Methanol - Transporation
-      real ETTR_SHR(mnumyr)     !  Ethanol - Transporation
-      real ETHM_SHR(mnumyr)     !  Ethanol - Hydrogen
-      real HYTR_SHR(mnumyr)     !  Liquid Hydrogen - Transportation
-      real UREL_SHR(mnumyr)     !  Uranium - Electricity
-      real URHM_SHR(mnumyr)     !  Uranium - Hydrogen
-      real HOIN_SHR(mnumyr)     !  Hydropower - Industrial
-      real HOEL_SHR(mnumyr)     !  Hydropower - Electricity
-       
-      real GERS_SHR(mnumyr)     !  Geothermal - Residential
-      real GEIN_SHR(mnumyr)     !  Geothermal - Industrial
-      real GEEL_SHR(mnumyr)     !  Geothermal - Electricity
-       
-      real BMRS_SHR(mnumyr)     !  Biomass - Residential
-      real BMCM_SHR(mnumyr)     !  Biomass - Commercial
-      real BMIN_SHR(mnumyr)     !  Biomass - Industrial
-      real BMRF_SHR(mnumyr)     !  Biomass - Refinery
-      real BMEL_SHR(mnumyr)     !  Biomass - Electricity
-      real BMSN_SHR(mnumyr)     !  Biomass - Synthetics
-      real BMHM_SHR(mnumyr)     !  Biomass - Hydrogen
-       
-      real MSIN_SHR(mnumyr)     !  Municipal Solid Waste - Industrial
-      real MSEL_SHR(mnumyr)     !  Municipal Solid Waste - Electricity
-       
-      real STRS_SHR(mnumyr)     !  Solar Thermal - Residential
-      real STCM_SHR(mnumyr)     !  Solar Thermal - Commercial
-      real STIN_SHR(mnumyr)     !  Solar Thermal - Industrial
-      real STEL_SHR(mnumyr)     !  Solar Thermal - Electricity
-       
-      real PVRS_SHR(mnumyr)     !  Photovoltaic - Residential
-      real PVCM_SHR(mnumyr)     !  Photovoltaic - Commercial
-      real PVIN_SHR(mnumyr)     !  Photovoltaic - Industrial
-      real PVEL_SHR(mnumyr)     !  Photovoltaic - Electricity
-      real PTEL_SHR(mnumyr)     !  Photovoltaic tilt- Electricity
-      
-      real WIIN_SHR(mnumyr)     !  Wind - Industrial
-      real WIEL_SHR(mnumyr)     !  Wind - Electricity
-       
-      real EIEL_SHR(mnumyr)     !  Net Electricity Imports - Electricity
-      real CIIN_SHR(mnumyr)     !  Net Coal Coke Imports - Industrial
+      REAL ELRS_SHR(MNUMYR)     !  Purchased Electricity - Residential
+      REAL ELCM_SHR(MNUMYR)     !  Purchased Electricity - Commercial
+      REAL ELTR_SHR(MNUMYR)     !  Purchased Electricity - Transportation
+      REAL ELIN_SHR(MNUMYR)     !  Purchased Electricity - Industrial
+      REAL ELRF_SHR(MNUMYR)     !  Purchased Electricity - Refinery
+      REAL ELHM_SHR(MNUMYR)     !  Purchased Electricity - Hydrogen
 
-     COMMON/CALSHR/ELRS_SHR,ELCM_SHR,ELTR_SHR,ELIN_SHR,ELRF_SHR,ELHM_SHR, &
-     NGRS_SHR,NGCM_SHR,NGTR_SHR,NGIN_SHR,NGRF_SHR,NGEL_SHR,NGHM_SHR,GPTR_SHR,LPIN_SHR,CLRS_SHR,CLCM_SHR, &
-     CLIN_SHR,CLRF_SHR,CLEL_SHR,CLSN_SHR,CLHM_SHR,MCIN_SHR,MGCM_SHR,MGTR_SHR,MGIN_SHR,JFTR_SHR,DSRS_SHR,DSCM_SHR, &
-     DSTR_SHR,DSIN_SHR,DSRF_SHR,DSEL_SHR,KSRS_SHR,KSCM_SHR,KSIN_SHR,LGRS_SHR,LGCM_SHR,LGTR_SHR,LGIN_SHR,LGRF_SHR, &
-     RSCM_SHR,RSTR_SHR,RSIN_SHR,RSRF_SHR,RSEL_SHR,PFIN_SHR,SGIN_SHR,SGRF_SHR,PCIN_SHR,PCRF_SHR,PCEL_SHR,PCAS_SHR, &
-     ASIN_SHR,OTTR_SHR,OTIN_SHR,OTRF_SHR,METR_SHR,ETTR_SHR,ETHM_SHR,HYTR_SHR,UREL_SHR,URHM_SHR,HOIN_SHR,HOEL_SHR, &
-     GERS_SHR,GEIN_SHR,GEEL_SHR,BMRS_SHR,BMCM_SHR,BMIN_SHR,BMRF_SHR,BMEL_SHR,BMSN_SHR,BMHM_SHR,MSIN_SHR,MSEL_SHR, &
-     STRS_SHR,STCM_SHR,STIN_SHR,STEL_SHR,PVRS_SHR,PVCM_SHR,PVIN_SHR,PVEL_SHR,WIIN_SHR,WIEL_SHR,EIEL_SHR,CIIN_SHR,PTEL_SHR
+      REAL NGRS_SHR(MNUMYR)     !  Natural Gas - Residential
+      REAL NGCM_SHR(MNUMYR)     !  Natural Gas - Commercial
+      REAL NGTR_SHR(MNUMYR)     !  Natural Gas - Transportation
+      REAL NGIN_SHR(MNUMYR)     !  Natural Gas - Industrial
+      REAL NGRF_SHR(MNUMYR)     !  Natural Gas - Refinery
+      REAL NGEL_SHR(MNUMYR)     !  Natural Gas - Electricity
+      REAL NGHM_SHR(MNUMYR)     !  Natural Gas - Hydrogen
+      REAL GPTR_SHR(MNUMYR)     !  Natural Gas - Pipeline
+      REAL LPIN_SHR(MNUMYR)     !  Natural Gas - Lease and Plant Fuel
+
+      REAL CLRS_SHR(MNUMYR)     !  Coal - Residential
+      REAL CLCM_SHR(MNUMYR)     !  Coal - Commercial
+      REAL CLIN_SHR(MNUMYR)     !  Coal - Industrial
+      REAL CLRF_SHR(MNUMYR)     !  Coal - Refinery
+      REAL CLEL_SHR(MNUMYR)     !  Coal - Electricity
+      REAL CLSN_SHR(MNUMYR)     !  Coal - Synthetics
+      REAL CLHM_SHR(MNUMYR)     !  Coal - Hydrogen
+
+      REAL MCIN_SHR(MNUMYR)     !  Metallurgical Coal - Industrial
+      REAL MGCM_SHR(MNUMYR)     !  Motor Gasoline - Commercial
+      REAL MGTR_SHR(MNUMYR)     !  Motor Gasoline - Transportation
+      REAL MGIN_SHR(MNUMYR)     !  Motor Gasoline - Industrial
+
+      REAL JFTR_SHR(MNUMYR)     !  Jet Fuel - Transportation
+      REAL DSRS_SHR(MNUMYR)     !  Distillate - Residential
+      REAL DSCM_SHR(MNUMYR)     !  Distillate - Commercial
+      REAL DSTR_SHR(MNUMYR)     !  Distillate - Transportation
+      REAL DSIN_SHR(MNUMYR)     !  Distillate - Industrial
+      REAL DSRF_SHR(MNUMYR)     !  Distillate - Refinery
+      REAL DSEL_SHR(MNUMYR)     !  Distillate - Electricity
+
+      REAL KSRS_SHR(MNUMYR)     !  Kerosene - Residential
+      REAL KSCM_SHR(MNUMYR)     !  Kerosene - Commercial
+      REAL KSIN_SHR(MNUMYR)     !  Kerosene - Industrial
+
+      REAL LGRS_SHR(MNUMYR)     !  Liquid Petroleum Gases - Residential
+      REAL LGCM_SHR(MNUMYR)     !  Liquid Petroleum Gases - Commercial
+      REAL LGTR_SHR(MNUMYR)     !  Liquid Petroleum Gases - Transportation
+      REAL LGIN_SHR(MNUMYR)     !  Liquid Petroleum Gases - Industrial
+      REAL LGRF_SHR(MNUMYR)     !  Liquid Petroleum Gases - Refinery
+
+      REAL RSCM_SHR(MNUMYR)     !  Residual Fuel - Commercial
+      REAL RSTR_SHR(MNUMYR)     !  Residual Fuel - Transportation
+      REAL RSIN_SHR(MNUMYR)     !  Residual Fuel - Industrial
+      REAL RSRF_SHR(MNUMYR)     !  Residual Fuel - Refinery
+      REAL RSEL_SHR(MNUMYR)     !  Residual Fuel - Electricity
+
+      REAL PFIN_SHR(MNUMYR)     !  Petrochemical Feedstocks - Industrial
+      REAL SGIN_SHR(MNUMYR)     !  Still Gas - Industrial
+      REAL SGRF_SHR(MNUMYR)     !  Still Gas - Refinery
+      REAL PCIN_SHR(MNUMYR)     !  Petroleum Coke - Industrial
+      REAL PCRF_SHR(MNUMYR)     !  Petroleum Coke - Refinery
+      REAL PCEL_SHR(MNUMYR)     !  Petroleum Coke - Electricity
+      REAL PCAS_SHR(MNUMYR)     !  Petroleum Coke - All Sectors
+      REAL ASIN_SHR(MNUMYR)     !  Asphalt and Road Oil - Industrial
+      REAL OTTR_SHR(MNUMYR)     !  Other Petroleum - Transportation
+      REAL OTIN_SHR(MNUMYR)     !  Other Petroleum - Industrial
+      REAL OTRF_SHR(MNUMYR)     !  Other Petroleum - Refinery
+
+      REAL METR_SHR(MNUMYR)     !  Methanol - Transporation
+      REAL ETTR_SHR(MNUMYR)     !  Ethanol - Transporation (sold as E85)
+      REAL ETHM_SHR(MNUMYR)     !  Ethanol - Hydrogen
+      REAL HYTR_SHR(MNUMYR)     !  Liquid Hydrogen - Transportation
+      REAL UREL_SHR(MNUMYR)     !  Uranium - Electricity
+      REAL URHM_SHR(MNUMYR)     !  Uranium - Hydrogen
+      REAL HOIN_SHR(MNUMYR)     !  Hydropower - Industrial
+      REAL HOEL_SHR(MNUMYR)     !  Hydropower - Electricity
+
+      REAL GERS_SHR(MNUMYR)     !  Geothermal - Residential
+      REAL GEIN_SHR(MNUMYR)     !  Geothermal - Industrial
+      REAL GEEL_SHR(MNUMYR)     !  Geothermal - Electricity
+
+      REAL BMRS_SHR(MNUMYR)     !  Biomass - Residential
+      REAL BMCM_SHR(MNUMYR)     !  Biomass - Commercial
+      REAL BMIN_SHR(MNUMYR)     !  Biomass - Industrial
+      REAL BMRF_SHR(MNUMYR)     !  Biomass - Refinery
+      REAL BMEL_SHR(MNUMYR)     !  Biomass - Electricity
+      REAL BMSN_SHR(MNUMYR)     !  Biomass - Synthetics
+      REAL BMHM_SHR(MNUMYR)     !  Biomass - Hydrogen
+
+      REAL MSIN_SHR(MNUMYR)     !  Municipal Solid Waste - Industrial
+      REAL MSEL_SHR(MNUMYR)     !  Municipal Solid Waste - Electricity
+
+      REAL STRS_SHR(MNUMYR)     !  Solar Thermal - Residential
+      REAL STCM_SHR(MNUMYR)     !  Solar Thermal - Commercial
+      REAL STIN_SHR(MNUMYR)     !  Solar Thermal - Industrial
+      REAL STEL_SHR(MNUMYR)     !  Solar Thermal - Electricity
+
+      REAL PVRS_SHR(MNUMYR)     !  Photovoltaic - Residential
+      REAL PVCM_SHR(MNUMYR)     !  Photovoltaic - Commercial
+      REAL PVIN_SHR(MNUMYR)     !  Photovoltaic - Industrial
+      REAL PVEL_SHR(MNUMYR)     !  Photovoltaic - Electricity
+      REAL PTEL_SHR(MNUMYR)     !  Photovoltaic Tilt - Electricity
+
+      REAL WIIN_SHR(MNUMYR)     !  Wind - Industrial
+      REAL WIEL_SHR(MNUMYR)     !  Wind - Electricity
+
+      REAL EIEL_SHR(MNUMYR)     !  Net Electricity Imports - Electricity
+      REAL CIIN_SHR(MNUMYR)     !  Net Coal Coke Imports - Industrial
+
+      COMMON/CALSHR/ ELRS_SHR,ELCM_SHR,ELTR_SHR,ELIN_SHR,ELRF_SHR,ELHM_SHR, &
+        NGRS_SHR,NGCM_SHR,NGTR_SHR,NGIN_SHR,NGRF_SHR,NGEL_SHR,NGHM_SHR,GPTR_SHR,LPIN_SHR,CLRS_SHR,CLCM_SHR, &
+        CLIN_SHR,CLRF_SHR,CLEL_SHR,CLSN_SHR,CLHM_SHR,MCIN_SHR,MGCM_SHR,MGTR_SHR,MGIN_SHR,JFTR_SHR,DSRS_SHR,DSCM_SHR, &
+        DSTR_SHR,DSIN_SHR,DSRF_SHR,DSEL_SHR,KSRS_SHR,KSCM_SHR,KSIN_SHR,LGRS_SHR,LGCM_SHR,LGTR_SHR,LGIN_SHR,LGRF_SHR, &
+        RSCM_SHR,RSTR_SHR,RSIN_SHR,RSRF_SHR,RSEL_SHR,PFIN_SHR,SGIN_SHR,SGRF_SHR,PCIN_SHR,PCRF_SHR,PCEL_SHR,PCAS_SHR, &
+        ASIN_SHR,OTTR_SHR,OTIN_SHR,OTRF_SHR,METR_SHR,ETTR_SHR,ETHM_SHR,HYTR_SHR,UREL_SHR,URHM_SHR,HOIN_SHR,HOEL_SHR, &
+        GERS_SHR,GEIN_SHR,GEEL_SHR,BMRS_SHR,BMCM_SHR,BMIN_SHR,BMRF_SHR,BMEL_SHR,BMSN_SHR,BMHM_SHR,MSIN_SHR,MSEL_SHR, &
+        STRS_SHR,STCM_SHR,STIN_SHR,STEL_SHR,PVRS_SHR,PVCM_SHR,PVIN_SHR,PVEL_SHR,WIIN_SHR,WIEL_SHR,EIEL_SHR,CIIN_SHR,PTEL_SHR
+
+! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
+      REAL EQ_CASHR(MNUMYR * 90 + &                         ! 90 Variables above
+          0)                                                ! the end
+
+      EQUIVALENCE (EQ_CASHR,ELRS_SHR)

@@ -1,5 +1,5 @@
 FILE NAME:     RSUEC
-DATE MODIFIED: August 11, 2021
+DATE MODIFIED: September 6, 2023
 USED BY:       RDUECS subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Annual unit energy consumption (UEC) for all residential equipment classes (29 major and the rest minor classes)
 UNITS:         Classes 1-30 (major end uses in RSCLASS): MMBtu/unit/yr
@@ -9,105 +9,105 @@ SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
 ORGANIZATION OF DATA:
                Variables: EQCUEC (for major end uses in RSCLASS),FANUEC,TVSUEC,STBUEC,HTSUEC,OTTUEC,VGCUEC,DPCUEC,LPCUEC,MONUEC,NETUEC,BATUEC,
                 CFNUEC,COFUEC,DEHUEC,MCOUEC,PHPUEC,SECUEC,SPAUEC,WCLUEC,SPKUEC,PHNEC,TABUEC,KITUEC,EAUEC,SHTUEC,APPUEC
-SOURCES:       2015 RECS microdata (https://www.eia.gov/consumption/residential/data/2015/index.php?view=microdata)
+SOURCES:       2020 RECS microdata (https://www.eia.gov/consumption/residential/data/2020/index.php?view=microdata)
                "Analysis and Representation of Miscellaneous Electric Loads in NEMS": https://www.eia.gov/analysis/studies/demand/miscelectric/
-COMMENT:       Added new MELs (smart speakers, smartphones, tablets, small kitchen appliances); replace DVD players with Over-the-top (OTT) streaming devices; disaggregate pool pumps and heaters; updated MELs using final Guidehouse/Leidos report
+COMMENT:       Updated consumption based on latest federal/energy star standards; Revised for 2020 RECS base year (except natural gas heat pumps, which will be replaced by mini-split heat pumps)
 
 
 
 
 
 SF	MF	MOBILE	EQUIPMENT_CLASS	CD
-12.920	10.570	0.000	Electric Heating Other Than Heat Pumps	1
-22.986	8.302	28.296	Electric Heating Other Than Heat Pumps	2
-25.796	8.118	30.726	Electric Heating Other Than Heat Pumps	3
-29.433	8.523	24.983	Electric Heating Other Than Heat Pumps	4
-14.684	5.609	12.023	Electric Heating Other Than Heat Pumps	5
-17.340	7.041	16.817	Electric Heating Other Than Heat Pumps	6
-17.136	7.330	11.887	Electric Heating Other Than Heat Pumps	7
-13.760	4.246	15.456	Electric Heating Other Than Heat Pumps	8
-17.204	3.492	16.961	Electric Heating Other Than Heat Pumps	9
-5.674	10.686	0.000	Air-Source Heat Pumps (heating)	1
-26.342	5.231	0.000	Air-Source Heat Pumps (heating)	2
-29.783	3.492	0.000	Air-Source Heat Pumps (heating)	3
-32.509	7.056	0.000	Air-Source Heat Pumps (heating)	4
-12.408	4.354	4.474	Air-Source Heat Pumps (heating)	5
-18.631	4.179	8.278	Air-Source Heat Pumps (heating)	6
-13.221	2.339	8.446	Air-Source Heat Pumps (heating)	7
-8.725	2.170	0.000	Air-Source Heat Pumps (heating)	8
-19.738	1.594	10.566	Air-Source Heat Pumps (heating)	9
-74.293	21.178	52.947	Natural Gas Furnaces	1
-70.211	34.176	45.839	Natural Gas Furnaces	2
-72.245	25.968	57.820	Natural Gas Furnaces	3
-57.525	24.960	63.771	Natural Gas Furnaces	4
-45.159	15.380	25.041	Natural Gas Furnaces	5
-42.215	25.041	18.203	Natural Gas Furnaces	6
-32.687	11.364	25.353	Natural Gas Furnaces	7
-44.950	10.259	28.198	Natural Gas Furnaces	8
-22.639	5.323	19.888	Natural Gas Furnaces	9
-89.696	29.420	0.000	Natural Gas Boilers & Other	1
-88.413	22.732	0.000	Natural Gas Boilers & Other	2
-88.001	29.643	70.007	Natural Gas Boilers & Other	3
-70.087	16.802	66.841	Natural Gas Boilers & Other	4
-35.903	11.842	0.000	Natural Gas Boilers & Other	5
-32.098	11.375	0.000	Natural Gas Boilers & Other	6
-29.642	0.000	31.433	Natural Gas Boilers & Other	7
-54.242	7.433	36.784	Natural Gas Boilers & Other	8
-23.371	4.880	10.823	Natural Gas Boilers & Other	9
-0	0	0	Kerosene Furnaces (unused placeholder)	1
-0	0	0	Kerosene Furnaces (unused placeholder)	2
-0	0	0	Kerosene Furnaces (unused placeholder)	3
-0	0	0	Kerosene Furnaces (unused placeholder)	4
-0	0	0	Kerosene Furnaces (unused placeholder)	5
-0	0	0	Kerosene Furnaces (unused placeholder)	6
-0	0	0	Kerosene Furnaces (unused placeholder)	7
-0	0	0	Kerosene Furnaces (unused placeholder)	8
-0	0	0	Kerosene Furnaces (unused placeholder)	9
-50.064	11.809	0.000	Propane Furnaces & Other	1
-63.115	34.047	0.000	Propane Furnaces & Other	2
-52.969	30.162	24.009	Propane Furnaces & Other	3
-49.687	7.326	23.098	Propane Furnaces & Other	4
-45.221	0.000	19.726	Propane Furnaces & Other	5
-24.066	0.000	15.226	Propane Furnaces & Other	6
-38.640	0.000	23.480	Propane Furnaces & Other	7
-41.398	3.021	16.229	Propane Furnaces & Other	8
-29.010	0.000	17.804	Propane Furnaces & Other	9
-93.279	31.987	35.712	Distillate Fuel Oil & Kerosene Furnaces	1
-84.371	17.166	41.431	Distillate Fuel Oil & Kerosene Furnaces	2
-85.396	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	3
-102.799	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	4
-61.337	14.079	0.000	Distillate Fuel Oil & Kerosene Furnaces	5
-56.258	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	6
+22.354	6.705	0.595	Electric Heating Other Than Heat Pumps	1
+28.659	7.049	23.133	Electric Heating Other Than Heat Pumps	2
+28.760	9.166	19.130	Electric Heating Other Than Heat Pumps	3
+30.369	8.358	24.425	Electric Heating Other Than Heat Pumps	4
+11.890	4.431	11.488	Electric Heating Other Than Heat Pumps	5
+16.063	5.112	17.378	Electric Heating Other Than Heat Pumps	6
+13.934	4.559	12.228	Electric Heating Other Than Heat Pumps	7
+13.384	5.136	13.195	Electric Heating Other Than Heat Pumps	8
+14.997	3.746	17.917	Electric Heating Other Than Heat Pumps	9
+14.999	4.497	0.000	Air-Source Heat Pumps (heating)	1
+20.801	5.744	14.590	Air-Source Heat Pumps (heating)	2
+29.191	5.717	12.043	Air-Source Heat Pumps (heating)	3
+28.488	5.897	17.321	Air-Source Heat Pumps (heating)	4
+9.996	3.198	9.323	Air-Source Heat Pumps (heating)	5
+15.268	4.833	16.822	Air-Source Heat Pumps (heating)	6
+10.897	2.785	10.627	Air-Source Heat Pumps (heating)	7
+5.633	1.503	4.108	Air-Source Heat Pumps (heating)	8
+12.647	1.600	13.602	Air-Source Heat Pumps (heating)	9
+61.076	31.158	34.604	Natural Gas Furnaces	1
+64.815	25.110	51.537	Natural Gas Furnaces	2
+69.658	34.720	48.253	Natural Gas Furnaces	3
+62.154	25.311	62.270	Natural Gas Furnaces	4
+42.701	12.218	26.601	Natural Gas Furnaces	5
+43.402	18.449	31.047	Natural Gas Furnaces	6
+29.558	8.025	26.442	Natural Gas Furnaces	7
+44.238	14.403	32.312	Natural Gas Furnaces	8
+27.281	6.484	18.162	Natural Gas Furnaces	9
+68.022	40.290	0.000	Natural Gas Boilers & Other	1
+80.532	23.007	71.263	Natural Gas Boilers & Other	2
+110.346	37.617	34.754	Natural Gas Boilers & Other	3
+92.379	32.078	17.126	Natural Gas Boilers & Other	4
+58.927	12.171	12.665	Natural Gas Boilers & Other	5
+35.221	10.240	0.000	Natural Gas Boilers & Other	6
+27.295	5.898	44.049	Natural Gas Boilers & Other	7
+62.575	20.921	35.642	Natural Gas Boilers & Other	8
+26.425	7.902	8.721	Natural Gas Boilers & Other	9
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	1
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	2
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	3
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	4
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	5
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	6
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	7
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	8
+0.000	0.000	0.000	Kerosene Furnaces (unused placeholder)	9
+49.432	15.347	50.567	Propane Furnaces & Other	1
+56.010	8.302	41.754	Propane Furnaces & Other	2
+70.153	8.095	46.661	Propane Furnaces & Other	3
+64.491	13.694	39.041	Propane Furnaces & Other	4
+35.004	5.604	20.290	Propane Furnaces & Other	5
+33.144	0.000	19.362	Propane Furnaces & Other	6
+30.814	0.000	17.979	Propane Furnaces & Other	7
+53.847	12.676	36.809	Propane Furnaces & Other	8
+30.296	5.766	29.386	Propane Furnaces & Other	9
+76.513	26.757	44.121	Distillate Fuel Oil & Kerosene Furnaces	1
+71.408	15.807	49.882	Distillate Fuel Oil & Kerosene Furnaces	2
+82.253	21.565	0.000	Distillate Fuel Oil & Kerosene Furnaces	3
+78.888	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	4
+51.130	10.264	55.582	Distillate Fuel Oil & Kerosene Furnaces	5
+43.109	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	6
 0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	7
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	8
-41.328	0.000	0.000	Distillate Fuel Oil & Kerosene Furnaces	9
-100.629	32.690	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	1
-73.295	21.284	36.286	Distillate Fuel Oil & Kerosene Boilers & Other	2
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	3
-82.510	18.390	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	4
-51.478	0.000	14.019	Distillate Fuel Oil & Kerosene Boilers & Other	5
-0.000	11.682	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	6
+61.698	4.096	0.000	Distillate Fuel Oil & Kerosene Furnaces	8
+65.316	20.541	57.515	Distillate Fuel Oil & Kerosene Furnaces	9
+74.452	29.360	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	1
+76.676	15.995	15.015	Distillate Fuel Oil & Kerosene Boilers & Other	2
+85.895	31.521	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	3
+148.983	28.412	51.496	Distillate Fuel Oil & Kerosene Boilers & Other	4
+54.938	12.759	38.481	Distillate Fuel Oil & Kerosene Boilers & Other	5
+41.407	0.000	26.374	Distillate Fuel Oil & Kerosene Boilers & Other	6
 0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	7
 0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	8
-71.101	21.058	0.000	Distillate Fuel Oil & Kerosene Boilers & Other	9
-80.443	31.044	0.000	Wood Stoves & Other	1
-144.572	60.147	0.000	Wood Stoves & Other	2
-120.211	0.000	0.000	Wood Stoves & Other	3
-130.213	0.000	48.076	Wood Stoves & Other	4
-84.069	0.000	28.332	Wood Stoves & Other	5
-82.351	0.000	29.239	Wood Stoves & Other	6
-52.716	0.000	20.000	Wood Stoves & Other	7
-80.770	0.000	84.928	Wood Stoves & Other	8
-63.533	0.000	55.175	Wood Stoves & Other	9
-4.238	7.981	0.000	Ground-Source Heat Pumps (heating)	1
-19.675	3.907	0.000	Ground-Source Heat Pumps (heating)	2
-22.245	2.608	0.000	Ground-Source Heat Pumps (heating)	3
-24.281	5.270	0.000	Ground-Source Heat Pumps (heating)	4
-9.267	3.252	0.000	Ground-Source Heat Pumps (heating)	5
-13.915	3.121	0.000	Ground-Source Heat Pumps (heating)	6
-9.874	1.747	0.000	Ground-Source Heat Pumps (heating)	7
-6.517	1.621	0.000	Ground-Source Heat Pumps (heating)	8
-14.742	1.191	0.000	Ground-Source Heat Pumps (heating)	9
+88.448	50.395	57.902	Distillate Fuel Oil & Kerosene Boilers & Other	9
+94.945	41.525	78.748	Wood Stoves & Other	1
+96.022	0.000	58.545	Wood Stoves & Other	2
+142.689	59.949	114.515	Wood Stoves & Other	3
+93.901	0.000	0.000	Wood Stoves & Other	4
+76.993	0.000	63.919	Wood Stoves & Other	5
+61.430	0.000	50.000	Wood Stoves & Other	6
+61.556	0.000	67.103	Wood Stoves & Other	7
+71.246	41.719	74.526	Wood Stoves & Other	8
+64.242	15.936	55.717	Wood Stoves & Other	9
+7.936	0.000	0.000	Ground-Source Heat Pumps (heating)	1
+22.892	3.659	0.000	Ground-Source Heat Pumps (heating)	2
+22.574	0.000	12.537	Ground-Source Heat Pumps (heating)	3
+24.951	2.672	0.000	Ground-Source Heat Pumps (heating)	4
+9.856	1.924	8.343	Ground-Source Heat Pumps (heating)	5
+15.680	2.034	19.405	Ground-Source Heat Pumps (heating)	6
+10.956	4.148	1.445	Ground-Source Heat Pumps (heating)	7
+7.142	0.000	0.000	Ground-Source Heat Pumps (heating)	8
+13.981	2.039	0.000	Ground-Source Heat Pumps (heating)	9
 73.751	0.000	0.000	Natural Gas Heat Pumps (heating)	1
 47.526	11.886	0.000	Natural Gas Heat Pumps (heating)	2
 84.146	7.266	0.000	Natural Gas Heat Pumps (heating)	3
@@ -117,42 +117,42 @@ SF	MF	MOBILE	EQUIPMENT_CLASS	CD
 34.733	0.000	0.000	Natural Gas Heat Pumps (heating)	7
 17.190	5.247	0.000	Natural Gas Heat Pumps (heating)	8
 22.708	3.592	2.295	Natural Gas Heat Pumps (heating)	9
-1.099	0.655	0.570	Room/Window/Wall Air Conditioners (excludes portable ACs)	1
-1.433	1.295	0.787	Room/Window/Wall Air Conditioners (excludes portable ACs)	2
-1.467	0.877	1.491	Room/Window/Wall Air Conditioners (excludes portable ACs)	3
-1.256	0.749	1.991	Room/Window/Wall Air Conditioners (excludes portable ACs)	4
-3.319	2.315	3.276	Room/Window/Wall Air Conditioners (excludes portable ACs)	5
-3.869	1.572	2.194	Room/Window/Wall Air Conditioners (excludes portable ACs)	6
-4.639	6.107	3.062	Room/Window/Wall Air Conditioners (excludes portable ACs)	7
-1.347	0.968	0.286	Room/Window/Wall Air Conditioners (excludes portable ACs)	8
-1.046	0.974	1.023	Room/Window/Wall Air Conditioners (excludes portable ACs)	9
-3.373	0.954	1.978	Central Air Conditioners	1
-5.105	1.723	4.403	Central Air Conditioners	2
-4.669	1.621	2.011	Central Air Conditioners	3
-5.981	1.614	3.922	Central Air Conditioners	4
-12.589	4.905	8.367	Central Air Conditioners	5
-10.735	3.729	8.238	Central Air Conditioners	6
-16.950	4.991	7.372	Central Air Conditioners	7
-8.587	3.037	4.804	Central Air Conditioners	8
-5.710	2.317	2.902	Central Air Conditioners	9
-20.043	7.209	0.000	Air-Source Heat Pumps (cooling)	1
-12.296	3.668	0.000	Air-Source Heat Pumps (cooling)	2
-10.398	1.866	0.000	Air-Source Heat Pumps (cooling)	3
-13.631	3.186	0.000	Air-Source Heat Pumps (cooling)	4
-22.689	13.695	13.527	Air-Source Heat Pumps (cooling)	5
-16.108	7.733	11.123	Air-Source Heat Pumps (cooling)	6
-31.924	18.687	0.000	Air-Source Heat Pumps (cooling)	7
-25.805	6.905	0.000	Air-Source Heat Pumps (cooling)	8
-8.970	13.446	2.174	Air-Source Heat Pumps (cooling)	9
-16.938	6.092	0.000	Ground-Source Heat Pumps (cooling)	1
-10.391	3.100	0.000	Ground-Source Heat Pumps (cooling)	2
-8.787	1.577	0.000	Ground-Source Heat Pumps (cooling)	3
-11.519	2.693	0.000	Ground-Source Heat Pumps (cooling)	4
-19.174	11.574	0.000	Ground-Source Heat Pumps (cooling)	5
-13.613	6.535	0.000	Ground-Source Heat Pumps (cooling)	6
-26.979	15.793	0.000	Ground-Source Heat Pumps (cooling)	7
-21.807	5.836	0.000	Ground-Source Heat Pumps (cooling)	8
-7.581	11.363	0.000	Ground-Source Heat Pumps (cooling)	9
+1.518	1.373	0.927	Room/Window/Wall Air Conditioners (excludes portable ACs)	1
+2.022	1.707	1.450	Room/Window/Wall Air Conditioners (excludes portable ACs)	2
+2.346	1.467	1.762	Room/Window/Wall Air Conditioners (excludes portable ACs)	3
+2.613	1.220	1.872	Room/Window/Wall Air Conditioners (excludes portable ACs)	4
+3.427	3.676	3.298	Room/Window/Wall Air Conditioners (excludes portable ACs)	5
+3.260	2.752	2.854	Room/Window/Wall Air Conditioners (excludes portable ACs)	6
+4.325	3.152	3.370	Room/Window/Wall Air Conditioners (excludes portable ACs)	7
+3.505	1.773	3.599	Room/Window/Wall Air Conditioners (excludes portable ACs)	8
+2.216	1.577	1.863	Room/Window/Wall Air Conditioners (excludes portable ACs)	9
+5.794	2.606	3.409	Central Air Conditioners	1
+6.882	3.665	4.484	Central Air Conditioners	2
+5.711	3.313	3.300	Central Air Conditioners	3
+6.974	3.553	6.329	Central Air Conditioners	4
+12.890	6.781	11.993	Central Air Conditioners	5
+11.664	4.554	9.612	Central Air Conditioners	6
+16.049	6.952	13.878	Central Air Conditioners	7
+12.511	6.485	10.774	Central Air Conditioners	8
+6.894	3.076	6.137	Central Air Conditioners	9
+2.370	0.583	0.000	Air-Source Heat Pumps (cooling)	1
+4.865	2.160	7.668	Air-Source Heat Pumps (cooling)	2
+6.557	1.717	0.000	Air-Source Heat Pumps (cooling)	3
+7.487	1.543	7.374	Air-Source Heat Pumps (cooling)	4
+10.265	4.983	7.661	Air-Source Heat Pumps (cooling)	5
+9.223	3.200	9.554	Air-Source Heat Pumps (cooling)	6
+13.289	5.461	9.162	Air-Source Heat Pumps (cooling)	7
+19.869	5.454	16.105	Air-Source Heat Pumps (cooling)	8
+5.055	1.767	6.469	Air-Source Heat Pumps (cooling)	9
+1.825	0.000	0.000	Ground-Source Heat Pumps (cooling)	1
+3.964	0.000	0.000	Ground-Source Heat Pumps (cooling)	2
+6.344	0.000	1.298	Ground-Source Heat Pumps (cooling)	3
+5.223	2.144	0.000	Ground-Source Heat Pumps (cooling)	4
+11.358	0.000	5.415	Ground-Source Heat Pumps (cooling)	5
+9.145	2.740	0.000	Ground-Source Heat Pumps (cooling)	6
+8.117	0.000	0.000	Ground-Source Heat Pumps (cooling)	7
+2.332	0.000	0.000	Ground-Source Heat Pumps (cooling)	8
+4.167	0.396	0.000	Ground-Source Heat Pumps (cooling)	9
 11.301	4.684	7.636	Natural Gas Heat Pumps (cooling)	1
 19.099	9.477	12.905	Natural Gas Heat Pumps (cooling)	2
 15.531	7.224	10.495	Natural Gas Heat Pumps (cooling)	3
@@ -162,60 +162,60 @@ SF	MF	MOBILE	EQUIPMENT_CLASS	CD
 80.041	30.247	58.158	Natural Gas Heat Pumps (cooling)	7
 60.595	32.232	52.759	Natural Gas Heat Pumps (cooling)	8
 26.132	11.156	11.332	Natural Gas Heat Pumps (cooling)	9
-0.363	0.311	0.325	Clothes Washers	1
-0.378	0.254	0.335	Clothes Washers	2
-0.382	0.305	0.430	Clothes Washers	3
-0.392	0.266	0.282	Clothes Washers	4
-0.356	0.293	0.384	Clothes Washers	5
-0.379	0.307	0.263	Clothes Washers	6
-0.393	0.299	0.346	Clothes Washers	7
-0.367	0.245	0.247	Clothes Washers	8
-0.359	0.311	0.337	Clothes Washers	9
-0.351	0.155	0.166	Dishwashers	1
-0.336	0.212	0.298	Dishwashers	2
-0.343	0.205	0.166	Dishwashers	3
-0.351	0.269	0.465	Dishwashers	4
-0.325	0.227	0.339	Dishwashers	5
-0.307	0.301	0.394	Dishwashers	6
-0.345	0.233	0.290	Dishwashers	7
-0.313	0.228	0.126	Dishwashers	8
-0.320	0.216	0.304	Dishwashers	9
-23.092	18.064	0.000	Natural Gas water heaters (storage & tankless)	1
-20.529	17.700	9.758	Natural Gas water heaters (storage & tankless)	2
-19.521	15.922	11.833	Natural Gas water heaters (storage & tankless)	3
-17.932	12.817	15.560	Natural Gas water heaters (storage & tankless)	4
-18.061	13.347	20.771	Natural Gas water heaters (storage & tankless)	5
-17.705	17.667	0.000	Natural Gas water heaters (storage & tankless)	6
-13.635	9.132	15.912	Natural Gas water heaters (storage & tankless)	7
-18.847	16.316	30.274	Natural Gas water heaters (storage & tankless)	8
-18.459	12.925	18.063	Natural Gas water heaters (storage & tankless)	9
-10.085	7.356	11.290	Electric water heaters (storage & tankless)	1
-12.014	7.449	16.057	Electric water heaters (storage & tankless)	2
-12.228	7.412	14.372	Electric water heaters (storage & tankless)	3
-10.294	8.639	15.174	Electric water heaters (storage & tankless)	4
-10.184	8.431	12.251	Electric water heaters (storage & tankless)	5
-11.544	9.888	12.794	Electric water heaters (storage & tankless)	6
-9.613	10.299	10.684	Electric water heaters (storage & tankless)	7
-10.213	7.880	13.655	Electric water heaters (storage & tankless)	8
-11.922	7.282	14.712	Electric water heaters (storage & tankless)	9
-20.026	20.237	20.691	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	1
-19.745	22.650	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	2
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	3
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	4
-17.105	10.913	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	5
+0.428	0.364	0.357	Clothes Washers	1
+0.429	0.318	0.401	Clothes Washers	2
+0.446	0.335	0.376	Clothes Washers	3
+0.473	0.378	0.469	Clothes Washers	4
+0.447	0.346	0.482	Clothes Washers	5
+0.483	0.371	0.624	Clothes Washers	6
+0.476	0.391	0.504	Clothes Washers	7
+0.450	0.395	0.412	Clothes Washers	8
+0.427	0.317	0.445	Clothes Washers	9
+0.425	0.306	0.276	Dishwashers	1
+0.389	0.313	0.291	Dishwashers	2
+0.403	0.275	0.408	Dishwashers	3
+0.418	0.277	0.334	Dishwashers	4
+0.384	0.264	0.352	Dishwashers	5
+0.382	0.286	0.331	Dishwashers	6
+0.367	0.276	0.362	Dishwashers	7
+0.419	0.266	0.325	Dishwashers	8
+0.381	0.258	0.281	Dishwashers	9
+19.598	18.472	23.104	Natural Gas water heaters (storage & tankless)	1
+21.489	15.742	14.644	Natural Gas water heaters (storage & tankless)	2
+16.536	16.571	14.178	Natural Gas water heaters (storage & tankless)	3
+17.669	13.704	16.941	Natural Gas water heaters (storage & tankless)	4
+17.168	13.617	7.941	Natural Gas water heaters (storage & tankless)	5
+16.995	13.868	14.126	Natural Gas water heaters (storage & tankless)	6
+14.840	13.578	16.139	Natural Gas water heaters (storage & tankless)	7
+18.649	15.725	15.232	Natural Gas water heaters (storage & tankless)	8
+20.142	15.468	16.474	Natural Gas water heaters (storage & tankless)	9
+8.646	4.569	7.626	Electric water heaters (storage & tankless)	1
+10.392	5.633	11.040	Electric water heaters (storage & tankless)	2
+10.593	5.373	9.554	Electric water heaters (storage & tankless)	3
+10.289	6.559	10.940	Electric water heaters (storage & tankless)	4
+9.338	7.294	11.852	Electric water heaters (storage & tankless)	5
+9.276	8.243	12.300	Electric water heaters (storage & tankless)	6
+8.502	8.309	11.846	Electric water heaters (storage & tankless)	7
+9.024	6.823	9.511	Electric water heaters (storage & tankless)	8
+9.766	6.519	10.737	Electric water heaters (storage & tankless)	9
+20.329	19.890	20.758	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	1
+19.101	18.997	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	2
+20.071	9.477	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	3
+22.376	0.000	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	4
+21.876	18.600	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	5
 0.000	0.000	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	6
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	7
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	8
-33.580	52.260	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	9
-18.144	11.609	0.000	Propane water heaters (storage & tankless)	1
-18.006	15.450	10.623	Propane water heaters (storage & tankless)	2
-17.910	16.526	18.911	Propane water heaters (storage & tankless)	3
-19.775	34.104	0.000	Propane water heaters (storage & tankless)	4
-19.670	21.905	21.275	Propane water heaters (storage & tankless)	5
-17.849	9.979	0.000	Propane water heaters (storage & tankless)	6
-11.802	0.000	17.380	Propane water heaters (storage & tankless)	7
-17.587	0.000	16.148	Propane water heaters (storage & tankless)	8
-15.669	22.159	18.179	Propane water heaters (storage & tankless)	9
+25.937	21.726	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	7
+0.000	19.882	0.000	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	8
+22.387	20.777	27.639	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	9
+17.639	15.213	15.167	Propane water heaters (storage & tankless)	1
+18.036	15.344	16.757	Propane water heaters (storage & tankless)	2
+17.243	14.109	12.655	Propane water heaters (storage & tankless)	3
+17.152	15.662	20.627	Propane water heaters (storage & tankless)	4
+14.793	4.230	15.927	Propane water heaters (storage & tankless)	5
+14.633	17.500	13.776	Propane water heaters (storage & tankless)	6
+12.781	14.743	11.361	Propane water heaters (storage & tankless)	7
+16.828	10.829	16.852	Propane water heaters (storage & tankless)	8
+16.347	12.961	14.660	Propane water heaters (storage & tankless)	9
 0.000	0.000	0.000	Solar water heaters (storage & tankless)	1
 0.000	0.000	0.000	Solar water heaters (storage & tankless)	2
 0.000	0.000	0.000	Solar water heaters (storage & tankless)	3
@@ -223,251 +223,251 @@ SF	MF	MOBILE	EQUIPMENT_CLASS	CD
 0.000	0.000	0.000	Solar water heaters (storage & tankless)	5
 0.000	0.000	0.000	Solar water heaters (storage & tankless)	6
 0.000	0.000	0.000	Solar water heaters (storage & tankless)	7
-0.798	0.000	0.000	Solar water heaters (storage & tankless)	8
-0.929	0.000	0.000	Solar water heaters (storage & tankless)	9
-2.562	1.544	1.708	Natural Gas Cooking Ranges/Cooktops/Ovens	1
-2.727	2.505	1.017	Natural Gas Cooking Ranges/Cooktops/Ovens	2
-2.556	2.575	1.064	Natural Gas Cooking Ranges/Cooktops/Ovens	3
-2.232	2.876	0.919	Natural Gas Cooking Ranges/Cooktops/Ovens	4
-2.298	2.276	1.262	Natural Gas Cooking Ranges/Cooktops/Ovens	5
-2.335	2.915	0.984	Natural Gas Cooking Ranges/Cooktops/Ovens	6
-1.697	1.916	3.057	Natural Gas Cooking Ranges/Cooktops/Ovens	7
-2.241	2.637	1.641	Natural Gas Cooking Ranges/Cooktops/Ovens	8
-1.904	1.663	1.511	Natural Gas Cooking Ranges/Cooktops/Ovens	9
-2.893	2.628	7.144	Propane Cooking Ranges/Cooktops/Ovens	1
-3.351	0.000	1.153	Propane Cooking Ranges/Cooktops/Ovens	2
-3.065	0.000	1.633	Propane Cooking Ranges/Cooktops/Ovens	3
-2.375	0.000	1.349	Propane Cooking Ranges/Cooktops/Ovens	4
-1.982	4.425	0.995	Propane Cooking Ranges/Cooktops/Ovens	5
-2.188	0.000	2.227	Propane Cooking Ranges/Cooktops/Ovens	6
-2.746	0.000	2.310	Propane Cooking Ranges/Cooktops/Ovens	7
-3.848	0.000	0.944	Propane Cooking Ranges/Cooktops/Ovens	8
-1.891	5.426	1.577	Propane Cooking Ranges/Cooktops/Ovens	9
-0.679	0.575	0.822	Electric Cooking Ranges/Cooktops/Ovens	1
-0.642	0.390	0.942	Electric Cooking Ranges/Cooktops/Ovens	2
-0.696	0.542	0.446	Electric Cooking Ranges/Cooktops/Ovens	3
-0.631	0.457	0.573	Electric Cooking Ranges/Cooktops/Ovens	4
-0.586	0.468	0.654	Electric Cooking Ranges/Cooktops/Ovens	5
-0.759	0.483	0.639	Electric Cooking Ranges/Cooktops/Ovens	6
-0.482	0.447	0.469	Electric Cooking Ranges/Cooktops/Ovens	7
-0.536	0.456	0.455	Electric Cooking Ranges/Cooktops/Ovens	8
-0.526	0.495	0.741	Electric Cooking Ranges/Cooktops/Ovens	9
-2.591	2.183	0.000	Natural Gas Clothes Dryers	1
-2.183	1.896	0.458	Natural Gas Clothes Dryers	2
-2.208	1.359	0.682	Natural Gas Clothes Dryers	3
-1.610	0.483	0.925	Natural Gas Clothes Dryers	4
-2.411	1.039	0.000	Natural Gas Clothes Dryers	5
-1.875	0.000	0.000	Natural Gas Clothes Dryers	6
-2.255	0.000	4.510	Natural Gas Clothes Dryers	7
-2.218	1.136	0.146	Natural Gas Clothes Dryers	8
-1.857	1.468	1.755	Natural Gas Clothes Dryers	9
-2.420	2.052	2.245	Electric Clothes Dryers	1
-2.698	2.206	2.568	Electric Clothes Dryers	2
-2.782	2.255	3.065	Electric Clothes Dryers	3
-2.786	2.034	2.445	Electric Clothes Dryers	4
-2.517	1.931	2.336	Electric Clothes Dryers	5
-2.896	2.880	2.815	Electric Clothes Dryers	6
-2.857	2.312	2.311	Electric Clothes Dryers	7
-2.548	1.743	1.492	Electric Clothes Dryers	8
-2.651	2.351	2.645	Electric Clothes Dryers	9
-1.722	1.408	2.765	Refrigerators	1
-1.800	1.504	1.709	Refrigerators	2
-1.893	1.592	2.037	Refrigerators	3
-1.851	1.535	1.657	Refrigerators	4
-2.065	1.611	1.792	Refrigerators	5
-2.030	1.415	1.694	Refrigerators	6
-2.158	1.616	1.914	Refrigerators	7
-2.049	1.751	1.445	Refrigerators	8
-2.023	1.617	1.713	Refrigerators	9
-1.581	1.174	0.849	Standalone Freezers	1
-1.696	1.338	1.213	Standalone Freezers	2
-1.656	1.894	1.269	Standalone Freezers	3
-1.672	1.376	1.766	Standalone Freezers	4
-1.566	1.421	1.465	Standalone Freezers	5
-1.611	1.284	1.311	Standalone Freezers	6
-1.705	1.212	1.382	Standalone Freezers	7
-1.700	1.774	1.861	Standalone Freezers	8
-1.746	1.440	1.479	Standalone Freezers	9
-1.442	0.248	0.483	Furnace Fans & Boiler Pumps	1
-1.459	0.238	0.498	Furnace Fans & Boiler Pumps	2
-1.868	0.322	0.568	Furnace Fans & Boiler Pumps	3
-1.654	0.214	0.548	Furnace Fans & Boiler Pumps	4
-1.219	0.292	0.420	Furnace Fans & Boiler Pumps	5
-0.932	0.262	0.446	Furnace Fans & Boiler Pumps	6
-1.396	0.317	0.455	Furnace Fans & Boiler Pumps	7
-1.212	0.202	0.353	Furnace Fans & Boiler Pumps	8
-0.628	0.152	0.328	Furnace Fans & Boiler Pumps	9
-0.368	0.368	0.368	Televisions	1
-0.368	0.368	0.368	Televisions	2
-0.368	0.368	0.368	Televisions	3
-0.368	0.368	0.368	Televisions	4
-0.368	0.368	0.368	Televisions	5
-0.368	0.368	0.368	Televisions	6
-0.368	0.368	0.368	Televisions	7
-0.368	0.368	0.368	Televisions	8
-0.368	0.368	0.368	Televisions	9
-0.339	0.339	0.339	Set-top Boxes	1
-0.339	0.339	0.339	Set-top Boxes	2
-0.339	0.339	0.339	Set-top Boxes	3
-0.339	0.339	0.339	Set-top Boxes	4
-0.339	0.339	0.339	Set-top Boxes	5
-0.339	0.339	0.339	Set-top Boxes	6
-0.339	0.339	0.339	Set-top Boxes	7
-0.339	0.339	0.339	Set-top Boxes	8
-0.339	0.339	0.339	Set-top Boxes	9
-0.276	0.276	0.276	Home Audio Equipment	1
-0.276	0.276	0.276	Home Audio Equipment	2
-0.276	0.276	0.276	Home Audio Equipment	3
-0.276	0.276	0.276	Home Audio Equipment	4
-0.276	0.276	0.276	Home Audio Equipment	5
-0.276	0.276	0.276	Home Audio Equipment	6
-0.276	0.276	0.276	Home Audio Equipment	7
-0.276	0.276	0.276	Home Audio Equipment	8
-0.276	0.276	0.276	Home Audio Equipment	9
-0.030	0.030	0.030	OTT Streaming Devices	1
-0.030	0.030	0.030	OTT Streaming Devices	2
-0.030	0.030	0.030	OTT Streaming Devices	3
-0.030	0.030	0.030	OTT Streaming Devices	4
-0.030	0.030	0.030	OTT Streaming Devices	5
-0.030	0.030	0.030	OTT Streaming Devices	6
-0.030	0.030	0.030	OTT Streaming Devices	7
-0.030	0.030	0.030	OTT Streaming Devices	8
-0.030	0.030	0.030	OTT Streaming Devices	9
-0.214	0.214	0.214	Video Game Consoles	1
-0.214	0.214	0.214	Video Game Consoles	2
-0.214	0.214	0.214	Video Game Consoles	3
-0.214	0.214	0.214	Video Game Consoles	4
-0.214	0.214	0.214	Video Game Consoles	5
-0.214	0.214	0.214	Video Game Consoles	6
-0.214	0.214	0.214	Video Game Consoles	7
-0.214	0.214	0.214	Video Game Consoles	8
-0.214	0.214	0.214	Video Game Consoles	9
-0.854	0.854	0.854	Desktop PCs	1
-0.854	0.854	0.854	Desktop PCs	2
-0.854	0.854	0.854	Desktop PCs	3
-0.854	0.854	0.854	Desktop PCs	4
-0.854	0.854	0.854	Desktop PCs	5
-0.854	0.854	0.854	Desktop PCs	6
-0.854	0.854	0.854	Desktop PCs	7
-0.854	0.854	0.854	Desktop PCs	8
-0.854	0.854	0.854	Desktop PCs	9
-0.133	0.133	0.133	Laptop PCs	1
-0.133	0.133	0.133	Laptop PCs	2
-0.133	0.133	0.133	Laptop PCs	3
-0.133	0.133	0.133	Laptop PCs	4
-0.133	0.133	0.133	Laptop PCs	5
-0.133	0.133	0.133	Laptop PCs	6
-0.133	0.133	0.133	Laptop PCs	7
-0.133	0.133	0.133	Laptop PCs	8
-0.133	0.133	0.133	Laptop PCs	9
-0.165	0.165	0.165	Monitors	1
-0.165	0.165	0.165	Monitors	2
-0.165	0.165	0.165	Monitors	3
-0.165	0.165	0.165	Monitors	4
-0.165	0.165	0.165	Monitors	5
-0.165	0.165	0.165	Monitors	6
-0.165	0.165	0.165	Monitors	7
-0.165	0.165	0.165	Monitors	8
-0.165	0.165	0.165	Monitors	9
-0.308	0.308	0.308	Network Equipment	1
-0.308	0.308	0.308	Network Equipment	2
-0.308	0.308	0.308	Network Equipment	3
-0.308	0.308	0.308	Network Equipment	4
-0.308	0.308	0.308	Network Equipment	5
-0.308	0.308	0.308	Network Equipment	6
-0.308	0.308	0.308	Network Equipment	7
-0.308	0.308	0.308	Network Equipment	8
-0.308	0.308	0.308	Network Equipment	9
-0.009	0.009	0.009	Non-PC Rechargables	1
-0.009	0.009	0.009	Non-PC Rechargables	2
-0.009	0.009	0.009	Non-PC Rechargables	3
-0.009	0.009	0.009	Non-PC Rechargables	4
-0.009	0.009	0.009	Non-PC Rechargables	5
-0.009	0.009	0.009	Non-PC Rechargables	6
-0.009	0.009	0.009	Non-PC Rechargables	7
-0.009	0.009	0.009	Non-PC Rechargables	8
-0.009	0.009	0.009	Non-PC Rechargables	9
-0.296	0.296	0.296	Ceiling Fans	1
-0.197	0.197	0.197	Ceiling Fans	2
-0.265	0.265	0.265	Ceiling Fans	3
-0.287	0.287	0.287	Ceiling Fans	4
-0.346	0.346	0.346	Ceiling Fans	5
-0.378	0.378	0.378	Ceiling Fans	6
-0.364	0.364	0.364	Ceiling Fans	7
-0.400	0.400	0.400	Ceiling Fans	8
-0.224	0.224	0.224	Ceiling Fans	9
-0.233	0.233	0.233	Coffee Makers	1
-0.233	0.233	0.233	Coffee Makers	2
-0.233	0.233	0.233	Coffee Makers	3
-0.233	0.233	0.233	Coffee Makers	4
-0.233	0.233	0.233	Coffee Makers	5
-0.233	0.233	0.233	Coffee Makers	6
-0.233	0.233	0.233	Coffee Makers	7
-0.233	0.233	0.233	Coffee Makers	8
-0.233	0.233	0.233	Coffee Makers	9
-1.903	1.110	0.000	Dehumidifiers	1
-2.215	2.124	1.397	Dehumidifiers	2
-1.923	1.753	0.000	Dehumidifiers	3
-2.009	2.206	1.746	Dehumidifiers	4
-2.391	3.592	2.810	Dehumidifiers	5
-1.797	0.000	1.206	Dehumidifiers	6
-1.950	0.000	4.191	Dehumidifiers	7
-1.870	0.000	2.088	Dehumidifiers	8
-2.100	1.987	0.698	Dehumidifiers	9
-0.397	0.397	0.397	Microwave Ovens	1
-0.397	0.397	0.397	Microwave Ovens	2
-0.397	0.397	0.397	Microwave Ovens	3
-0.397	0.397	0.397	Microwave Ovens	4
-0.397	0.397	0.397	Microwave Ovens	5
-0.397	0.397	0.397	Microwave Ovens	6
-0.397	0.397	0.397	Microwave Ovens	7
-0.397	0.397	0.397	Microwave Ovens	8
-0.397	0.397	0.397	Microwave Ovens	9
-7.307	0.000	0.000	Pool Pump	1
-7.307	0.000	0.000	Pool Pump	2
-7.307	0.000	0.000	Pool Pump	3
-7.307	0.000	0.000	Pool Pump	4
-12.179	0.000	12.179	Pool Pump	5
-12.179	0.000	0.000	Pool Pump	6
-12.179	0.000	12.179	Pool Pump	7
-7.307	0.000	0.000	Pool Pump	8
-12.179	0.000	12.179	Pool Pump	9
-14.699	0.000	0.000	Pool Heaters	1
-14.699	0.000	0.000	Pool Heaters	2
-14.699	0.000	0.000	Pool Heaters	3
-14.699	0.000	0.000	Pool Heaters	4
-4.900	0.000	0.000	Pool Heaters	5
-4.900	0.000	0.000	Pool Heaters	6
-4.900	0.000	0.000	Pool Heaters	7
-14.699	0.000	0.000	Pool Heaters	8
-4.900	0.000	0.000	Pool Heaters	9
-0.164	0.132	0.132	Residential Security Systems	1
-0.164	0.132	0.132	Residential Security Systems	2
-0.164	0.132	0.132	Residential Security Systems	3
-0.164	0.132	0.132	Residential Security Systems	4
-0.164	0.132	0.132	Residential Security Systems	5
-0.164	0.132	0.132	Residential Security Systems	6
-0.164	0.132	0.132	Residential Security Systems	7
-0.164	0.132	0.132	Residential Security Systems	8
-0.164	0.132	0.132	Residential Security Systems	9
-7.656	7.656	7.656	Portable Electric Spas	1
-7.656	7.656	7.656	Portable Electric Spas	2
-7.656	7.656	7.656	Portable Electric Spas	3
-7.656	7.656	7.656	Portable Electric Spas	4
-7.656	7.656	7.656	Portable Electric Spas	5
-7.656	7.656	7.656	Portable Electric Spas	6
-7.656	7.656	7.656	Portable Electric Spas	7
-7.656	7.656	7.656	Portable Electric Spas	8
-7.656	7.656	7.656	Portable Electric Spas	9
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	1
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	2
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	3
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	4
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	5
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	6
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	7
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	8
-1.557	1.557	1.557	Miscellaneous Refrigeration Products	9
+0.421	0.000	0.000	Solar water heaters (storage & tankless)	8
+0.440	0.330	0.000	Solar water heaters (storage & tankless)	9
+1.685	2.236	1.520	Natural Gas Cooking Ranges/Cooktops/Ovens	1
+1.593	1.730	0.774	Natural Gas Cooking Ranges/Cooktops/Ovens	2
+1.597	1.598	1.278	Natural Gas Cooking Ranges/Cooktops/Ovens	3
+1.593	1.806	1.265	Natural Gas Cooking Ranges/Cooktops/Ovens	4
+1.411	1.441	0.923	Natural Gas Cooking Ranges/Cooktops/Ovens	5
+1.524	2.040	1.209	Natural Gas Cooking Ranges/Cooktops/Ovens	6
+1.062	1.228	1.300	Natural Gas Cooking Ranges/Cooktops/Ovens	7
+1.560	1.218	1.225	Natural Gas Cooking Ranges/Cooktops/Ovens	8
+1.325	1.668	0.948	Natural Gas Cooking Ranges/Cooktops/Ovens	9
+2.091	1.620	1.739	Propane Cooking Ranges/Cooktops/Ovens	1
+1.972	1.790	1.873	Propane Cooking Ranges/Cooktops/Ovens	2
+2.250	0.000	0.865	Propane Cooking Ranges/Cooktops/Ovens	3
+1.644	0.000	1.813	Propane Cooking Ranges/Cooktops/Ovens	4
+1.560	0.000	1.203	Propane Cooking Ranges/Cooktops/Ovens	5
+1.700	0.000	1.838	Propane Cooking Ranges/Cooktops/Ovens	6
+1.530	0.000	1.687	Propane Cooking Ranges/Cooktops/Ovens	7
+1.272	0.000	1.386	Propane Cooking Ranges/Cooktops/Ovens	8
+1.427	1.179	1.488	Propane Cooking Ranges/Cooktops/Ovens	9
+0.693	0.701	0.734	Electric Cooking Ranges/Cooktops/Ovens	1
+0.711	0.536	0.552	Electric Cooking Ranges/Cooktops/Ovens	2
+0.744	0.554	0.754	Electric Cooking Ranges/Cooktops/Ovens	3
+0.770	0.688	0.733	Electric Cooking Ranges/Cooktops/Ovens	4
+0.725	0.619	0.784	Electric Cooking Ranges/Cooktops/Ovens	5
+0.769	0.692	0.794	Electric Cooking Ranges/Cooktops/Ovens	6
+0.500	0.734	0.856	Electric Cooking Ranges/Cooktops/Ovens	7
+0.639	0.714	0.571	Electric Cooking Ranges/Cooktops/Ovens	8
+0.495	0.592	0.623	Electric Cooking Ranges/Cooktops/Ovens	9
+2.294	1.709	0.246	Natural Gas Clothes Dryers	1
+1.964	1.471	1.759	Natural Gas Clothes Dryers	2
+1.954	1.382	1.548	Natural Gas Clothes Dryers	3
+2.102	2.030	1.187	Natural Gas Clothes Dryers	4
+2.380	1.671	2.909	Natural Gas Clothes Dryers	5
+2.442	0.000	3.506	Natural Gas Clothes Dryers	6
+2.020	2.152	2.192	Natural Gas Clothes Dryers	7
+2.134	1.615	0.944	Natural Gas Clothes Dryers	8
+2.119	1.531	2.462	Natural Gas Clothes Dryers	9
+2.283	1.852	1.879	Electric Clothes Dryers	1
+2.286	1.524	2.421	Electric Clothes Dryers	2
+2.435	1.658	2.052	Electric Clothes Dryers	3
+2.579	2.043	2.763	Electric Clothes Dryers	4
+2.360	1.624	2.455	Electric Clothes Dryers	5
+2.639	1.925	2.900	Electric Clothes Dryers	6
+2.592	2.180	3.014	Electric Clothes Dryers	7
+2.468	1.909	2.164	Electric Clothes Dryers	8
+2.240	1.419	1.903	Electric Clothes Dryers	9
+1.840	1.587	1.660	Refrigerators	1
+1.912	1.597	1.741	Refrigerators	2
+1.973	1.704	1.784	Refrigerators	3
+2.012	1.685	1.758	Refrigerators	4
+2.184	1.854	1.979	Refrigerators	5
+2.124	1.703	2.003	Refrigerators	6
+2.206	1.762	1.947	Refrigerators	7
+2.116	1.716	1.911	Refrigerators	8
+2.032	1.757	2.050	Refrigerators	9
+1.394	1.462	1.526	Standalone Freezers	1
+1.610	1.508	1.855	Standalone Freezers	2
+1.595	1.633	1.798	Standalone Freezers	3
+1.683	1.532	1.645	Standalone Freezers	4
+1.851	1.589	1.863	Standalone Freezers	5
+1.808	1.736	1.740	Standalone Freezers	6
+1.870	1.456	2.102	Standalone Freezers	7
+1.699	1.451	1.712	Standalone Freezers	8
+1.655	1.454	2.035	Standalone Freezers	9
+1.719	0.328	1.157	Furnace Fans & Boiler Pumps	1
+1.887	0.329	1.055	Furnace Fans & Boiler Pumps	2
+2.704	0.598	0.992	Furnace Fans & Boiler Pumps	3
+2.770	0.572	1.217	Furnace Fans & Boiler Pumps	4
+2.535	0.918	1.028	Furnace Fans & Boiler Pumps	5
+2.459	0.655	1.106	Furnace Fans & Boiler Pumps	6
+3.147	0.881	1.225	Furnace Fans & Boiler Pumps	7
+2.666	0.698	1.122	Furnace Fans & Boiler Pumps	8
+1.341	0.293	0.727	Furnace Fans & Boiler Pumps	9
+0.281	0.281	0.281	Televisions	1
+0.281	0.281	0.281	Televisions	2
+0.281	0.281	0.281	Televisions	3
+0.281	0.281	0.281	Televisions	4
+0.281	0.281	0.281	Televisions	5
+0.281	0.281	0.281	Televisions	6
+0.281	0.281	0.281	Televisions	7
+0.281	0.281	0.281	Televisions	8
+0.281	0.281	0.281	Televisions	9
+0.257	0.257	0.257	Set-top Boxes	1
+0.257	0.257	0.257	Set-top Boxes	2
+0.257	0.257	0.257	Set-top Boxes	3
+0.257	0.257	0.257	Set-top Boxes	4
+0.257	0.257	0.257	Set-top Boxes	5
+0.257	0.257	0.257	Set-top Boxes	6
+0.257	0.257	0.257	Set-top Boxes	7
+0.257	0.257	0.257	Set-top Boxes	8
+0.257	0.257	0.257	Set-top Boxes	9
+0.269	0.269	0.269	Home Audio Equipment	1
+0.269	0.269	0.269	Home Audio Equipment	2
+0.269	0.269	0.269	Home Audio Equipment	3
+0.269	0.269	0.269	Home Audio Equipment	4
+0.269	0.269	0.269	Home Audio Equipment	5
+0.269	0.269	0.269	Home Audio Equipment	6
+0.269	0.269	0.269	Home Audio Equipment	7
+0.269	0.269	0.269	Home Audio Equipment	8
+0.269	0.269	0.269	Home Audio Equipment	9
+0.031	0.031	0.031	OTT Streaming Devices	1
+0.031	0.031	0.031	OTT Streaming Devices	2
+0.031	0.031	0.031	OTT Streaming Devices	3
+0.031	0.031	0.031	OTT Streaming Devices	4
+0.031	0.031	0.031	OTT Streaming Devices	5
+0.031	0.031	0.031	OTT Streaming Devices	6
+0.031	0.031	0.031	OTT Streaming Devices	7
+0.031	0.031	0.031	OTT Streaming Devices	8
+0.031	0.031	0.031	OTT Streaming Devices	9
+0.227	0.227	0.227	Video Game Consoles	1
+0.227	0.227	0.227	Video Game Consoles	2
+0.227	0.227	0.227	Video Game Consoles	3
+0.227	0.227	0.227	Video Game Consoles	4
+0.227	0.227	0.227	Video Game Consoles	5
+0.227	0.227	0.227	Video Game Consoles	6
+0.227	0.227	0.227	Video Game Consoles	7
+0.227	0.227	0.227	Video Game Consoles	8
+0.227	0.227	0.227	Video Game Consoles	9
+0.710	0.710	0.710	Desktop PCs	1
+0.710	0.710	0.710	Desktop PCs	2
+0.710	0.710	0.710	Desktop PCs	3
+0.710	0.710	0.710	Desktop PCs	4
+0.710	0.710	0.710	Desktop PCs	5
+0.710	0.710	0.710	Desktop PCs	6
+0.710	0.710	0.710	Desktop PCs	7
+0.710	0.710	0.710	Desktop PCs	8
+0.710	0.710	0.710	Desktop PCs	9
+0.132	0.132	0.132	Laptop PCs	1
+0.132	0.132	0.132	Laptop PCs	2
+0.132	0.132	0.132	Laptop PCs	3
+0.132	0.132	0.132	Laptop PCs	4
+0.132	0.132	0.132	Laptop PCs	5
+0.132	0.132	0.132	Laptop PCs	6
+0.132	0.132	0.132	Laptop PCs	7
+0.132	0.132	0.132	Laptop PCs	8
+0.132	0.132	0.132	Laptop PCs	9
+0.112	0.112	0.112	Monitors	1
+0.112	0.112	0.112	Monitors	2
+0.112	0.112	0.112	Monitors	3
+0.112	0.112	0.112	Monitors	4
+0.112	0.112	0.112	Monitors	5
+0.112	0.112	0.112	Monitors	6
+0.112	0.112	0.112	Monitors	7
+0.112	0.112	0.112	Monitors	8
+0.112	0.112	0.112	Monitors	9
+0.242	0.242	0.242	Network Equipment	1
+0.242	0.242	0.242	Network Equipment	2
+0.242	0.242	0.242	Network Equipment	3
+0.242	0.242	0.242	Network Equipment	4
+0.242	0.242	0.242	Network Equipment	5
+0.242	0.242	0.242	Network Equipment	6
+0.242	0.242	0.242	Network Equipment	7
+0.242	0.242	0.242	Network Equipment	8
+0.242	0.242	0.242	Network Equipment	9
+0.007	0.007	0.007	Non-PC Rechargables	1
+0.007	0.007	0.007	Non-PC Rechargables	2
+0.007	0.007	0.007	Non-PC Rechargables	3
+0.007	0.007	0.007	Non-PC Rechargables	4
+0.007	0.007	0.007	Non-PC Rechargables	5
+0.007	0.007	0.007	Non-PC Rechargables	6
+0.007	0.007	0.007	Non-PC Rechargables	7
+0.007	0.007	0.007	Non-PC Rechargables	8
+0.007	0.007	0.007	Non-PC Rechargables	9
+0.131	0.190	0.181	Ceiling Fans	1
+0.158	0.165	0.193	Ceiling Fans	2
+0.183	0.185	0.213	Ceiling Fans	3
+0.200	0.201	0.191	Ceiling Fans	4
+0.298	0.317	0.354	Ceiling Fans	5
+0.299	0.417	0.381	Ceiling Fans	6
+0.329	0.431	0.403	Ceiling Fans	7
+0.215	0.287	0.235	Ceiling Fans	8
+0.178	0.192	0.162	Ceiling Fans	9
+0.206	0.206	0.206	Coffee Makers	1
+0.206	0.206	0.206	Coffee Makers	2
+0.206	0.206	0.206	Coffee Makers	3
+0.206	0.206	0.206	Coffee Makers	4
+0.206	0.206	0.206	Coffee Makers	5
+0.206	0.206	0.206	Coffee Makers	6
+0.206	0.206	0.206	Coffee Makers	7
+0.206	0.206	0.206	Coffee Makers	8
+0.206	0.206	0.206	Coffee Makers	9
+2.540	2.216	4.108	Dehumidifiers	1
+3.313	2.045	9.047	Dehumidifiers	2
+3.455	3.133	0.895	Dehumidifiers	3
+3.020	1.420	5.441	Dehumidifiers	4
+4.360	5.081	3.743	Dehumidifiers	5
+3.744	0.404	3.167	Dehumidifiers	6
+4.579	7.827	2.756	Dehumidifiers	7
+4.523	2.618	3.069	Dehumidifiers	8
+2.533	2.646	2.842	Dehumidifiers	9
+0.346	0.316	0.356	Microwave Ovens	1
+0.347	0.258	0.302	Microwave Ovens	2
+0.368	0.273	0.310	Microwave Ovens	3
+0.364	0.310	0.366	Microwave Ovens	4
+0.365	0.310	0.327	Microwave Ovens	5
+0.362	0.300	0.338	Microwave Ovens	6
+0.376	0.313	0.328	Microwave Ovens	7
+0.377	0.335	0.374	Microwave Ovens	8
+0.378	0.307	0.358	Microwave Ovens	9
+6.331	0.000	4.442	Pool Pump	1
+6.340	0.000	0.000	Pool Pump	2
+6.724	0.000	5.347	Pool Pump	3
+8.056	0.000	10.665	Pool Pump	4
+9.129	0.000	5.324	Pool Pump	5
+8.839	0.000	7.113	Pool Pump	6
+9.643	0.000	7.203	Pool Pump	7
+7.403	0.000	22.366	Pool Pump	8
+5.778	0.000	6.839	Pool Pump	9
+6.480	0.000	0.000	Pool Heaters	1
+6.480	0.000	0.000	Pool Heaters	2
+6.480	0.000	0.000	Pool Heaters	3
+6.480	0.000	0.000	Pool Heaters	4
+2.160	0.000	0.000	Pool Heaters	5
+2.160	0.000	0.000	Pool Heaters	6
+2.160	0.000	0.000	Pool Heaters	7
+6.480	0.000	0.000	Pool Heaters	8
+2.160	0.000	0.000	Pool Heaters	9
+0.156	0.125	0.125	Residential Security Systems	1
+0.156	0.125	0.125	Residential Security Systems	2
+0.156	0.125	0.125	Residential Security Systems	3
+0.156	0.125	0.125	Residential Security Systems	4
+0.156	0.125	0.125	Residential Security Systems	5
+0.156	0.125	0.125	Residential Security Systems	6
+0.156	0.125	0.125	Residential Security Systems	7
+0.156	0.125	0.125	Residential Security Systems	8
+0.156	0.125	0.125	Residential Security Systems	9
+5.815	1.366	0.000	Portable Electric Spas	1
+6.265	6.595	0.000	Portable Electric Spas	2
+8.976	3.305	20.013	Portable Electric Spas	3
+6.913	8.000	9.438	Portable Electric Spas	4
+5.985	6.357	5.760	Portable Electric Spas	5
+6.133	4.827	4.682	Portable Electric Spas	6
+5.623	5.953	8.389	Portable Electric Spas	7
+7.163	4.602	6.107	Portable Electric Spas	8
+7.285	4.168	5.699	Portable Electric Spas	9
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	1
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	2
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	3
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	4
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	5
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	6
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	7
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	8
+1.334	1.334	1.334	Miscellaneous Refrigeration Products	9
 0.051	0.051	0.051	Smart Speakers	1
 0.051	0.051	0.051	Smart Speakers	2
 0.051	0.051	0.051	Smart Speakers	3
@@ -477,15 +477,15 @@ SF	MF	MOBILE	EQUIPMENT_CLASS	CD
 0.051	0.051	0.051	Smart Speakers	7
 0.051	0.051	0.051	Smart Speakers	8
 0.051	0.051	0.051	Smart Speakers	9
-0.015	0.015	0.015	Smartphones	1
-0.015	0.015	0.015	Smartphones	2
-0.015	0.015	0.015	Smartphones	3
-0.015	0.015	0.015	Smartphones	4
-0.015	0.015	0.015	Smartphones	5
-0.015	0.015	0.015	Smartphones	6
-0.015	0.015	0.015	Smartphones	7
-0.015	0.015	0.015	Smartphones	8
-0.015	0.015	0.015	Smartphones	9
+0.016	0.016	0.016	Smartphones	1
+0.016	0.016	0.016	Smartphones	2
+0.016	0.016	0.016	Smartphones	3
+0.016	0.016	0.016	Smartphones	4
+0.016	0.016	0.016	Smartphones	5
+0.016	0.016	0.016	Smartphones	6
+0.016	0.016	0.016	Smartphones	7
+0.016	0.016	0.016	Smartphones	8
+0.016	0.016	0.016	Smartphones	9
 0.021	0.021	0.021	Tablets	1
 0.021	0.021	0.021	Tablets	2
 0.021	0.021	0.021	Tablets	3
@@ -495,60 +495,60 @@ SF	MF	MOBILE	EQUIPMENT_CLASS	CD
 0.021	0.021	0.021	Tablets	7
 0.021	0.021	0.021	Tablets	8
 0.021	0.021	0.021	Tablets	9
-0.061	0.061	0.061	Small Kitchen Appliances	1
-0.061	0.061	0.061	Small Kitchen Appliances	2
-0.061	0.061	0.061	Small Kitchen Appliances	3
-0.061	0.061	0.061	Small Kitchen Appliances	4
-0.061	0.061	0.061	Small Kitchen Appliances	5
-0.061	0.061	0.061	Small Kitchen Appliances	6
-0.061	0.061	0.061	Small Kitchen Appliances	7
-0.061	0.061	0.061	Small Kitchen Appliances	8
-0.061	0.061	0.061	Small Kitchen Appliances	9
-5.464	3.345	5.694	Electric Other	1
-5.269	3.459	4.209	Electric Other	2
-4.257	2.655	3.770	Electric Other	3
-4.644	2.737	3.331	Electric Other	4
-5.481	3.339	5.462	Electric Other	5
-5.824	4.860	7.802	Electric Other	6
-6.095	3.599	8.047	Electric Other	7
-4.611	3.047	7.795	Electric Other	8
-4.929	3.035	4.766	Electric Other	9
-6.350	1.839	2.081	Natural Gas Secondary Heating	1
-7.641	2.573	0.000	Natural Gas Secondary Heating	2
-9.495	13.352	0.000	Natural Gas Secondary Heating	3
-5.469	0.000	2.870	Natural Gas Secondary Heating	4
-3.980	0.848	0.000	Natural Gas Secondary Heating	5
-3.302	0.000	5.638	Natural Gas Secondary Heating	6
-3.367	0.000	0.190	Natural Gas Secondary Heating	7
-4.551	0.000	0.000	Natural Gas Secondary Heating	8
-2.597	0.106	0.000	Natural Gas Secondary Heating	9
-6.078	2.011	20.757	Electric Secondary Heating	1
-8.361	4.254	10.390	Electric Secondary Heating	2
-6.568	1.702	7.669	Electric Secondary Heating	3
-7.044	2.359	5.817	Electric Secondary Heating	4
-6.575	3.065	4.010	Electric Secondary Heating	5
-6.930	2.299	5.386	Electric Secondary Heating	6
-4.630	1.089	4.179	Electric Secondary Heating	7
-6.147	0.848	7.371	Electric Secondary Heating	8
-3.747	0.883	2.547	Electric Secondary Heating	9
-28.682	10.301	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	1
-24.527	3.265	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	2
-3.933	0.000	7.484	Distillate Fuel Oil & Kerosene Secondary Heating	3
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	4
-7.831	0.000	0.871	Distillate Fuel Oil & Kerosene Secondary Heating	5
-16.239	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	6
-10.893	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	7
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	8
-17.272	0.000	18.949	Distillate Fuel Oil & Kerosene Secondary Heating	9
-21.604	0.000	28.398	Propane Secondary Heating	1
-14.274	0.000	7.158	Propane Secondary Heating	2
-13.429	0.000	0.000	Propane Secondary Heating	3
-15.518	0.000	0.000	Propane Secondary Heating	4
-8.743	0.000	8.384	Propane Secondary Heating	5
-11.284	0.619	1.142	Propane Secondary Heating	6
-7.328	0.000	4.825	Propane Secondary Heating	7
-14.052	0.000	1.109	Propane Secondary Heating	8
-7.668	0.000	0.998	Propane Secondary Heating	9
+0.063	0.063	0.063	Small Kitchen Appliances	1
+0.063	0.063	0.063	Small Kitchen Appliances	2
+0.063	0.063	0.063	Small Kitchen Appliances	3
+0.063	0.063	0.063	Small Kitchen Appliances	4
+0.063	0.063	0.063	Small Kitchen Appliances	5
+0.063	0.063	0.063	Small Kitchen Appliances	6
+0.063	0.063	0.063	Small Kitchen Appliances	7
+0.063	0.063	0.063	Small Kitchen Appliances	8
+0.063	0.063	0.063	Small Kitchen Appliances	9
+5.526	3.535	4.297	Electric Other	1
+6.084	3.250	3.673	Electric Other	2
+6.092	2.942	6.238	Electric Other	3
+6.192	2.958	4.555	Electric Other	4
+6.383	3.990	7.022	Electric Other	5
+6.679	3.230	5.502	Electric Other	6
+7.051	3.707	5.505	Electric Other	7
+6.657	3.816	5.783	Electric Other	8
+6.286	3.129	4.197	Electric Other	9
+12.013	5.755	0.000	Natural Gas Secondary Heating	1
+6.857	1.755	10.013	Natural Gas Secondary Heating	2
+9.046	1.576	6.439	Natural Gas Secondary Heating	3
+4.876	2.143	8.744	Natural Gas Secondary Heating	4
+5.119	1.813	0.834	Natural Gas Secondary Heating	5
+7.796	2.504	1.440	Natural Gas Secondary Heating	6
+3.577	0.000	3.140	Natural Gas Secondary Heating	7
+3.453	0.779	19.959	Natural Gas Secondary Heating	8
+3.596	2.751	5.326	Natural Gas Secondary Heating	9
+3.877	1.419	1.776	Electric Secondary Heating	1
+4.069	1.287	1.746	Electric Secondary Heating	2
+4.784	2.643	3.394	Electric Secondary Heating	3
+5.015	1.358	4.404	Electric Secondary Heating	4
+2.397	0.903	1.694	Electric Secondary Heating	5
+2.595	0.544	2.703	Electric Secondary Heating	6
+2.430	0.736	1.869	Electric Secondary Heating	7
+3.432	1.570	1.402	Electric Secondary Heating	8
+2.431	0.632	1.965	Electric Secondary Heating	9
+23.350	8.702	12.062	Distillate Fuel Oil & Kerosene Secondary Heating	1
+15.740	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	2
+20.617	0.000	6.918	Distillate Fuel Oil & Kerosene Secondary Heating	3
+40.470	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	4
+4.993	0.000	4.781	Distillate Fuel Oil & Kerosene Secondary Heating	5
+2.740	0.000	7.657	Distillate Fuel Oil & Kerosene Secondary Heating	6
+0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	7
+22.392	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	8
+18.693	0.000	0.000	Distillate Fuel Oil & Kerosene Secondary Heating	9
+9.377	7.434	8.916	Propane Secondary Heating	1
+8.768	4.855	3.566	Propane Secondary Heating	2
+9.555	0.000	0.291	Propane Secondary Heating	3
+11.862	3.608	0.000	Propane Secondary Heating	4
+4.796	0.000	3.962	Propane Secondary Heating	5
+4.476	0.000	5.568	Propane Secondary Heating	6
+4.156	0.000	2.231	Propane Secondary Heating	7
+13.682	0.577	20.661	Propane Secondary Heating	8
+7.425	0.000	0.000	Propane Secondary Heating	9
 0	0	0	Kerosene Secondary Heating (unused placeholder)	1
 0	0	0	Kerosene Secondary Heating (unused placeholder)	2
 0	0	0	Kerosene Secondary Heating (unused placeholder)	3
@@ -567,39 +567,39 @@ SF	MF	MOBILE	EQUIPMENT_CLASS	CD
 0	0	0	Coal Secondary Heating (unused placeholder)	7
 0	0	0	Coal Secondary Heating (unused placeholder)	8
 0	0	0	Coal Secondary Heating (unused placeholder)	9
-27.931	0.000	26.969	Wood Secondary Heating	1
-29.527	10.654	12.149	Wood Secondary Heating	2
-29.878	8.654	0.000	Wood Secondary Heating	3
-28.395	0.000	100.000	Wood Secondary Heating	4
-20.103	10.000	3.515	Wood Secondary Heating	5
-31.981	0.000	1.474	Wood Secondary Heating	6
-16.132	10.594	14.309	Wood Secondary Heating	7
-17.547	0.000	16.457	Wood Secondary Heating	8
-18.868	11.484	21.583	Wood Secondary Heating	9
-11.105	18.414	0.000	Natural Gas Other	1
-14.084	28.928	1.073	Natural Gas Other	2
-25.988	10.114	0.000	Natural Gas Other	3
-10.090	2.838	32.532	Natural Gas Other	4
-31.113	12.043	20.340	Natural Gas Other	5
-22.484	17.908	2.239	Natural Gas Other	6
-26.436	46.368	7.996	Natural Gas Other	7
-25.336	6.868	2.274	Natural Gas Other	8
-23.005	13.662	0.000	Natural Gas Other	9
-11.829	0.000	0.000	Propane Other	1
-23.613	0.000	0.000	Propane Other	2
-37.796	0.000	0.000	Propane Other	3
-9.475	0.000	0.000	Propane Other	4
-35.362	0.000	0.000	Propane Other	5
-20.970	0.000	0.000	Propane Other	6
-22.168	0.000	33.264	Propane Other	7
-51.213	0.000	29.818	Propane Other	8
-28.366	0.000	1.385	Propane Other	9
-23.549	0.000	42.013	Distillate Fuel Oil & Kerosene Other	1
-23.012	0.000	0.000	Distillate Fuel Oil & Kerosene Other	2
-8.966	0.000	0.000	Distillate Fuel Oil & Kerosene Other	3
+28.368	17.587	32.985	Wood Secondary Heating	1
+26.555	2.647	18.920	Wood Secondary Heating	2
+26.675	11.017	46.470	Wood Secondary Heating	3
+23.077	3.467	32.125	Wood Secondary Heating	4
+11.861	3.912	15.210	Wood Secondary Heating	5
+12.980	1.959	12.872	Wood Secondary Heating	6
+9.322	2.728	16.488	Wood Secondary Heating	7
+17.916	2.369	13.481	Wood Secondary Heating	8
+11.270	4.859	32.562	Wood Secondary Heating	9
+14.639	18.618	1.833	Natural Gas Other	1
+108.902	23.750	31.800	Natural Gas Other	2
+90.344	16.900	1.607	Natural Gas Other	3
+18.122	10.298	5.903	Natural Gas Other	4
+62.622	21.717	1.095	Natural Gas Other	5
+58.843	11.061	4.352	Natural Gas Other	6
+43.459	17.575	11.011	Natural Gas Other	7
+55.781	21.488	110.134	Natural Gas Other	8
+37.482	24.084	1.299	Natural Gas Other	9
+31.082	16.850	7.650	Propane Other	1
+24.446	15.135	14.138	Propane Other	2
+33.391	0.000	1.247	Propane Other	3
+25.909	15.795	16.273	Propane Other	4
+19.292	14.767	13.037	Propane Other	5
+18.426	0.000	24.795	Propane Other	6
+17.089	0.000	19.099	Propane Other	7
+26.080	0.000	19.082	Propane Other	8
+33.621	9.844	18.117	Propane Other	9
+38.169	42.136	43.446	Distillate Fuel Oil & Kerosene Other	1
+37.004	42.281	0.000	Distillate Fuel Oil & Kerosene Other	2
+27.076	0.000	0.000	Distillate Fuel Oil & Kerosene Other	3
 0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Other	4
-26.338	0.000	0.000	Distillate Fuel Oil & Kerosene Other	5
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Other	6
+35.834	0.000	29.610	Distillate Fuel Oil & Kerosene Other	5
+29.796	0.000	29.844	Distillate Fuel Oil & Kerosene Other	6
 0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Other	7
-0.000	0.000	0.000	Distillate Fuel Oil & Kerosene Other	8
-49.233	0.000	0.000	Distillate Fuel Oil & Kerosene Other	9
+34.895	0.000	0.000	Distillate Fuel Oil & Kerosene Other	8
+32.885	0.000	0.000	Distillate Fuel Oil & Kerosene Other	9

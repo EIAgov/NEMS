@@ -1,0 +1,10 @@
+notes,,,,,,,,,,
+drill_rig,water_depth_min,use_rank,water_depth_max,Number of Rigs (2007),Drilling Days/Well,Minimum Rig Increment,Maximum Rig Build Rate (%),Target Rig Utilization (%),Calculated Drilling Capacity (Wells/Year/Rig),efficiency_scalar
+Jack-Up,0,1,1500,240,90,1,5,90,4,0.25
+Jack-Up_DG,0,2,1500,139,120,1,5,90,3,0.25
+Submersible,0,3,1500,6,90,1,5,70,4,0.25
+Semi-Submers ,1500,4,5000,88,120,1,15,90,3,0.25
+Semi-Submers ,5000,5,7500,57,180,1,15,90,2,0.25
+Semi-Submers ,7500,7,10000,8,240,1,5,95,1,0.25
+Drill Ship,5000,6,7500,10,180,1,10,90,2,0.25
+Drill Ship,7500,8,10000,14,240,1,5,95,1,0.25

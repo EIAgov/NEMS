@@ -1,7 +1,0 @@
-$ The formatted packed file, NAME16.FPK, was created under DOS
-$ by LPRENAME.  You should see the LIST and DISPLAY work properly.
- READ P NAME16 F
-  D R * ; D C *
- _PAUSE Ready to LIST
- L
-* no return so this can be include

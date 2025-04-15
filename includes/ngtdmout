@@ -53,6 +53,8 @@
 !  natural gas price variable - three seasons, eliminates firm/interruptible, also national average
       REAL SPNGELGR(NNGEM,MNUMYR,3)
       REAL PNGELGR(NNGEM,MNUMYR)
+!  Hydrogen Variables
+      REAL SPNGIN(MNUMCR,MNUMYR,4)       ! Natural Gas delivered price to industrial sector by HMM season
 !
       COMMON /NGTDMOUT/ OGPRDNGON, OGPRDNGOF, &
          PRNG_PADD, PGFELGR, PGIELGR, PGCELGR, CLSYNGWP, &
@@ -61,10 +63,10 @@
          SPGFELGR, SPGIELGR, PBAJA, QBAJA, &
          QGFTRRAIL, QGLTRRAIL, PGFTRRAIL, PGLTRRAIL, &
          QGFTRSHIP, QGLTRSHIP, PGFTRSHIP, PGLTRSHIP, &
-         SPNGELGR, PNGELGR
+         SPNGELGR, PNGELGR, SPNGIN
 !   Equivalence for FILER used for data storage
       REAL EQ_NTOUT(MNUMYR*(7*NNGEM+2*17+3+MNUMPR+4*MNUMCR+4*MNUMCR+2) + &
-                   4*4*MNUMCR*MNUMYR + &           ! 4 rail variables
+                   5*4*MNUMCR*MNUMYR + &           ! 4 rail variables and SPNGIN
                    4*3*MNUMCR*MNUMYR + &           ! 4 ship variables
                      NNGEM*MNUMYR*3  + &           ! SPNGELGR
                      NNGEM*MNUMYR    + &           ! PNGELGR

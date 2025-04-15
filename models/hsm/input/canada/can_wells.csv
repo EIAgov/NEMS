@@ -1,0 +1,553 @@
+year,region,gas_type,wells
+2005,Alberta,Shale,0.0
+2006,Alberta,Shale,0.0
+2007,Alberta,Shale,0.0
+2008,Alberta,Shale,0.0
+2009,Alberta,Shale,0.0
+2010,Alberta,Shale,1.0
+2011,Alberta,Shale,9.0
+2012,Alberta,Shale,41.0
+2013,Alberta,Shale,79.0
+2014,Alberta,Shale,111.0
+2015,Alberta,Shale,117.0
+2016,Alberta,Shale,105.0
+2017,Alberta,Shale,122.0
+2018,Alberta,Shale,138.0
+2019,Alberta,Shale,102.0
+2020,Alberta,Shale,58.0
+2021,Alberta,Shale,148.23
+2022,Alberta,Shale,197.0
+2023,Alberta,Shale,103.37
+2024,Alberta,Shale,103.31
+2025,Alberta,Shale,106.32
+2026,Alberta,Shale,105.2
+2027,Alberta,Shale,101.08
+2028,Alberta,Shale,101.0
+2029,Alberta,Shale,99.75
+2030,Alberta,Shale,95.97
+2031,Alberta,Shale,95.84
+2032,Alberta,Shale,97.99
+2033,Alberta,Shale,98.44
+2034,Alberta,Shale,100.25
+2035,Alberta,Shale,102.92
+2036,Alberta,Shale,106.07
+2037,Alberta,Shale,109.03
+2038,Alberta,Shale,112.09
+2039,Alberta,Shale,115.23
+2040,Alberta,Shale,118.26
+2041,Alberta,Shale,121.09
+2042,Alberta,Shale,123.97
+2043,Alberta,Shale,127.12
+2044,Alberta,Shale,130.27
+2045,Alberta,Shale,133.29
+2046,Alberta,Shale,136.11
+2047,Alberta,Shale,138.89
+2048,Alberta,Shale,141.66
+2049,Alberta,Shale,144.25
+2050,Alberta,Shale,146.76
+2005,Alberta,Coalbed Methane,4646.0
+2006,Alberta,Coalbed Methane,2967.0
+2007,Alberta,Coalbed Methane,2521.0
+2008,Alberta,Coalbed Methane,2188.0
+2009,Alberta,Coalbed Methane,1048.0
+2010,Alberta,Coalbed Methane,1139.0
+2011,Alberta,Coalbed Methane,663.0
+2012,Alberta,Coalbed Methane,183.0
+2013,Alberta,Coalbed Methane,192.0
+2014,Alberta,Coalbed Methane,215.0
+2015,Alberta,Coalbed Methane,54.0
+2016,Alberta,Coalbed Methane,18.0
+2017,Alberta,Coalbed Methane,22.0
+2018,Alberta,Coalbed Methane,20.0
+2019,Alberta,Coalbed Methane,21.0
+2020,Alberta,Coalbed Methane,22.0
+2021,Alberta,Coalbed Methane,0.0
+2022,Alberta,Coalbed Methane,0.0
+2023,Alberta,Coalbed Methane,0.0
+2024,Alberta,Coalbed Methane,0.0
+2025,Alberta,Coalbed Methane,0.0
+2026,Alberta,Coalbed Methane,0.0
+2027,Alberta,Coalbed Methane,0.0
+2028,Alberta,Coalbed Methane,0.0
+2029,Alberta,Coalbed Methane,0.0
+2030,Alberta,Coalbed Methane,0.0
+2031,Alberta,Coalbed Methane,0.0
+2032,Alberta,Coalbed Methane,0.0
+2033,Alberta,Coalbed Methane,0.0
+2034,Alberta,Coalbed Methane,0.0
+2035,Alberta,Coalbed Methane,0.0
+2036,Alberta,Coalbed Methane,0.0
+2037,Alberta,Coalbed Methane,0.0
+2038,Alberta,Coalbed Methane,0.0
+2039,Alberta,Coalbed Methane,0.0
+2040,Alberta,Coalbed Methane,0.0
+2041,Alberta,Coalbed Methane,0.0
+2042,Alberta,Coalbed Methane,0.0
+2043,Alberta,Coalbed Methane,0.0
+2044,Alberta,Coalbed Methane,0.0
+2045,Alberta,Coalbed Methane,0.0
+2046,Alberta,Coalbed Methane,0.0
+2047,Alberta,Coalbed Methane,0.0
+2048,Alberta,Coalbed Methane,0.0
+2049,Alberta,Coalbed Methane,0.0
+2050,Alberta,Coalbed Methane,0.0
+2005,Alberta,Tight,4560.0
+2006,Alberta,Tight,4344.0
+2007,Alberta,Tight,3415.0
+2008,Alberta,Tight,2804.0
+2009,Alberta,Tight,1309.0
+2010,Alberta,Tight,1518.0
+2011,Alberta,Tight,663.0
+2012,Alberta,Tight,326.0
+2013,Alberta,Tight,325.0
+2014,Alberta,Tight,502.0
+2015,Alberta,Tight,458.0
+2016,Alberta,Tight,488.0
+2017,Alberta,Tight,794.0
+2018,Alberta,Tight,565.0
+2019,Alberta,Tight,446.0
+2020,Alberta,Tight,355.0
+2021,Alberta,Tight,427.0
+2022,Alberta,Tight,550.0
+2023,Alberta,Tight,284.0
+2024,Alberta,Tight,288.0
+2025,Alberta,Tight,323.0
+2026,Alberta,Tight,311.0
+2027,Alberta,Tight,296.0
+2028,Alberta,Tight,305.0
+2029,Alberta,Tight,316.0
+2030,Alberta,Tight,302.0
+2031,Alberta,Tight,289.0
+2032,Alberta,Tight,304.0
+2033,Alberta,Tight,312.0
+2034,Alberta,Tight,316.0
+2035,Alberta,Tight,326.0
+2036,Alberta,Tight,334.0
+2037,Alberta,Tight,344.0
+2038,Alberta,Tight,356.0
+2039,Alberta,Tight,368.0
+2040,Alberta,Tight,380.0
+2041,Alberta,Tight,391.0
+2042,Alberta,Tight,402.0
+2043,Alberta,Tight,414.0
+2044,Alberta,Tight,427.0
+2045,Alberta,Tight,440.0
+2046,Alberta,Tight,452.0
+2047,Alberta,Tight,464.0
+2048,Alberta,Tight,476.0
+2049,Alberta,Tight,488.0
+2050,Alberta,Tight,500.0
+2005,Alberta,Non Associated,7096.0
+2006,Alberta,Non Associated,6001.0
+2007,Alberta,Non Associated,4119.0
+2008,Alberta,Non Associated,3009.0
+2009,Alberta,Non Associated,1080.0
+2010,Alberta,Non Associated,1048.0
+2011,Alberta,Non Associated,579.0
+2012,Alberta,Non Associated,339.0
+2013,Alberta,Non Associated,497.0
+2014,Alberta,Non Associated,587.0
+2015,Alberta,Non Associated,200.0
+2016,Alberta,Non Associated,112.0
+2017,Alberta,Non Associated,157.0
+2018,Alberta,Non Associated,90.0
+2019,Alberta,Non Associated,35.0
+2020,Alberta,Non Associated,75.0
+2021,Alberta,Non Associated,138.0
+2022,Alberta,Non Associated,177.0
+2023,Alberta,Non Associated,91.0
+2024,Alberta,Non Associated,92.0
+2025,Alberta,Non Associated,96.0
+2026,Alberta,Non Associated,96.0
+2027,Alberta,Non Associated,93.0
+2028,Alberta,Non Associated,94.0
+2029,Alberta,Non Associated,93.0
+2030,Alberta,Non Associated,89.0
+2031,Alberta,Non Associated,90.0
+2032,Alberta,Non Associated,92.0
+2033,Alberta,Non Associated,93.0
+2034,Alberta,Non Associated,95.0
+2035,Alberta,Non Associated,98.0
+2036,Alberta,Non Associated,102.0
+2037,Alberta,Non Associated,105.0
+2038,Alberta,Non Associated,109.0
+2039,Alberta,Non Associated,112.0
+2040,Alberta,Non Associated,116.0
+2041,Alberta,Non Associated,119.0
+2042,Alberta,Non Associated,123.0
+2043,Alberta,Non Associated,127.0
+2044,Alberta,Non Associated,131.0
+2045,Alberta,Non Associated,134.0
+2046,Alberta,Non Associated,138.0
+2047,Alberta,Non Associated,142.0
+2048,Alberta,Non Associated,145.0
+2049,Alberta,Non Associated,149.0
+2050,Alberta,Non Associated,152.0
+2005,British Columbia,Shale,0.0
+2006,British Columbia,Shale,1.0
+2007,British Columbia,Shale,2.0
+2008,British Columbia,Shale,25.0
+2009,British Columbia,Shale,56.0
+2010,British Columbia,Shale,47.0
+2011,British Columbia,Shale,70.0
+2012,British Columbia,Shale,29.0
+2013,British Columbia,Shale,21.0
+2014,British Columbia,Shale,0.0
+2015,British Columbia,Shale,2.0
+2016,British Columbia,Shale,1.0
+2017,British Columbia,Shale,0.0
+2018,British Columbia,Shale,0.0
+2019,British Columbia,Shale,0.0
+2020,British Columbia,Shale,0.0
+2021,British Columbia,Shale,0.0
+2022,British Columbia,Shale,0.0
+2023,British Columbia,Shale,0.0
+2024,British Columbia,Shale,0.0
+2025,British Columbia,Shale,13.0
+2026,British Columbia,Shale,6.0
+2027,British Columbia,Shale,3.0
+2028,British Columbia,Shale,6.0
+2029,British Columbia,Shale,14.0
+2030,British Columbia,Shale,13.0
+2031,British Columbia,Shale,4.0
+2032,British Columbia,Shale,8.0
+2033,British Columbia,Shale,11.0
+2034,British Columbia,Shale,9.0
+2035,British Columbia,Shale,9.0
+2036,British Columbia,Shale,7.0
+2037,British Columbia,Shale,6.0
+2038,British Columbia,Shale,6.0
+2039,British Columbia,Shale,6.0
+2040,British Columbia,Shale,6.0
+2041,British Columbia,Shale,6.0
+2042,British Columbia,Shale,6.0
+2043,British Columbia,Shale,6.0
+2044,British Columbia,Shale,6.0
+2045,British Columbia,Shale,6.0
+2046,British Columbia,Shale,6.0
+2047,British Columbia,Shale,6.0
+2048,British Columbia,Shale,6.0
+2049,British Columbia,Shale,6.0
+2050,British Columbia,Shale,6.0
+2005,British Columbia,Tight,380.0
+2006,British Columbia,Tight,353.0
+2007,British Columbia,Tight,226.0
+2008,British Columbia,Tight,289.0
+2009,British Columbia,Tight,225.0
+2010,British Columbia,Tight,394.0
+2011,British Columbia,Tight,361.0
+2012,British Columbia,Tight,294.0
+2013,British Columbia,Tight,395.0
+2014,British Columbia,Tight,583.0
+2015,British Columbia,Tight,434.0
+2016,British Columbia,Tight,280.0
+2017,British Columbia,Tight,541.0
+2018,British Columbia,Tight,384.0
+2019,British Columbia,Tight,350.0
+2020,British Columbia,Tight,321.0
+2021,British Columbia,Tight,457.0
+2022,British Columbia,Tight,586.0
+2023,British Columbia,Tight,301.0
+2024,British Columbia,Tight,303.0
+2025,British Columbia,Tight,738.0
+2026,British Columbia,Tight,513.0
+2027,British Columbia,Tight,390.0
+2028,British Columbia,Tight,506.0
+2029,British Columbia,Tight,755.0
+2030,British Columbia,Tight,687.0
+2031,British Columbia,Tight,421.0
+2032,British Columbia,Tight,557.0
+2033,British Columbia,Tight,645.0
+2034,British Columbia,Tight,596.0
+2035,British Columbia,Tight,607.0
+2036,British Columbia,Tight,563.0
+2037,British Columbia,Tight,547.0
+2038,British Columbia,Tight,559.0
+2039,British Columbia,Tight,572.0
+2040,British Columbia,Tight,584.0
+2041,British Columbia,Tight,597.0
+2042,British Columbia,Tight,595.0
+2043,British Columbia,Tight,609.0
+2044,British Columbia,Tight,622.0
+2045,British Columbia,Tight,636.0
+2046,British Columbia,Tight,649.0
+2047,British Columbia,Tight,662.0
+2048,British Columbia,Tight,675.0
+2049,British Columbia,Tight,688.0
+2050,British Columbia,Tight,700.0
+2005,British Columbia,Non Associated,778.0
+2006,British Columbia,Non Associated,718.0
+2007,British Columbia,Non Associated,407.0
+2008,British Columbia,Non Associated,388.0
+2009,British Columbia,Non Associated,131.0
+2010,British Columbia,Non Associated,93.0
+2011,British Columbia,Non Associated,27.0
+2012,British Columbia,Non Associated,16.0
+2013,British Columbia,Non Associated,17.0
+2014,British Columbia,Non Associated,14.0
+2015,British Columbia,Non Associated,3.0
+2016,British Columbia,Non Associated,1.0
+2017,British Columbia,Non Associated,3.0
+2018,British Columbia,Non Associated,3.0
+2019,British Columbia,Non Associated,2.0
+2020,British Columbia,Non Associated,0.0
+2021,British Columbia,Non Associated,1.0
+2022,British Columbia,Non Associated,1.0
+2023,British Columbia,Non Associated,0.0
+2024,British Columbia,Non Associated,0.0
+2025,British Columbia,Non Associated,0.0
+2026,British Columbia,Non Associated,0.0
+2027,British Columbia,Non Associated,0.0
+2028,British Columbia,Non Associated,0.0
+2029,British Columbia,Non Associated,0.0
+2030,British Columbia,Non Associated,0.0
+2031,British Columbia,Non Associated,0.0
+2032,British Columbia,Non Associated,0.0
+2033,British Columbia,Non Associated,0.0
+2034,British Columbia,Non Associated,0.0
+2035,British Columbia,Non Associated,0.0
+2036,British Columbia,Non Associated,0.0
+2037,British Columbia,Non Associated,0.0
+2038,British Columbia,Non Associated,0.0
+2039,British Columbia,Non Associated,0.0
+2040,British Columbia,Non Associated,0.0
+2041,British Columbia,Non Associated,0.0
+2042,British Columbia,Non Associated,1.0
+2043,British Columbia,Non Associated,1.0
+2044,British Columbia,Non Associated,1.0
+2045,British Columbia,Non Associated,1.0
+2046,British Columbia,Non Associated,1.0
+2047,British Columbia,Non Associated,1.0
+2048,British Columbia,Non Associated,1.0
+2049,British Columbia,Non Associated,1.0
+2050,British Columbia,Non Associated,1.0
+2005,Saskatchewan,Tight,1184.0
+2006,Saskatchewan,Tight,990.0
+2007,Saskatchewan,Tight,935.0
+2008,Saskatchewan,Tight,1005.0
+2009,Saskatchewan,Tight,196.0
+2010,Saskatchewan,Tight,67.0
+2011,Saskatchewan,Tight,37.0
+2012,Saskatchewan,Tight,6.0
+2013,Saskatchewan,Tight,0.0
+2014,Saskatchewan,Tight,0.0
+2015,Saskatchewan,Tight,0.0
+2016,Saskatchewan,Tight,0.0
+2017,Saskatchewan,Tight,0.0
+2018,Saskatchewan,Tight,0.0
+2019,Saskatchewan,Tight,0.0
+2020,Saskatchewan,Tight,0.0
+2021,Saskatchewan,Tight,0.0
+2022,Saskatchewan,Tight,0.0
+2023,Saskatchewan,Tight,0.0
+2024,Saskatchewan,Tight,0.0
+2025,Saskatchewan,Tight,0.0
+2026,Saskatchewan,Tight,0.0
+2027,Saskatchewan,Tight,0.0
+2028,Saskatchewan,Tight,0.0
+2029,Saskatchewan,Tight,0.0
+2030,Saskatchewan,Tight,0.0
+2031,Saskatchewan,Tight,0.0
+2032,Saskatchewan,Tight,0.0
+2033,Saskatchewan,Tight,0.0
+2034,Saskatchewan,Tight,0.0
+2035,Saskatchewan,Tight,0.0
+2036,Saskatchewan,Tight,0.0
+2037,Saskatchewan,Tight,0.0
+2038,Saskatchewan,Tight,0.0
+2039,Saskatchewan,Tight,0.0
+2040,Saskatchewan,Tight,0.0
+2041,Saskatchewan,Tight,0.0
+2042,Saskatchewan,Tight,0.0
+2043,Saskatchewan,Tight,0.0
+2044,Saskatchewan,Tight,0.0
+2045,Saskatchewan,Tight,0.0
+2046,Saskatchewan,Tight,0.0
+2047,Saskatchewan,Tight,0.0
+2048,Saskatchewan,Tight,0.0
+2049,Saskatchewan,Tight,0.0
+2050,Saskatchewan,Tight,0.0
+2005,Saskatchewan,Non Associated,383.0
+2006,Saskatchewan,Non Associated,276.0
+2007,Saskatchewan,Non Associated,137.0
+2008,Saskatchewan,Non Associated,159.0
+2009,Saskatchewan,Non Associated,15.0
+2010,Saskatchewan,Non Associated,6.0
+2011,Saskatchewan,Non Associated,10.0
+2012,Saskatchewan,Non Associated,11.0
+2013,Saskatchewan,Non Associated,7.0
+2014,Saskatchewan,Non Associated,6.0
+2015,Saskatchewan,Non Associated,1.0
+2016,Saskatchewan,Non Associated,2.0
+2017,Saskatchewan,Non Associated,5.0
+2018,Saskatchewan,Non Associated,2.0
+2019,Saskatchewan,Non Associated,1.0
+2020,Saskatchewan,Non Associated,2.0
+2021,Saskatchewan,Non Associated,0.0
+2022,Saskatchewan,Non Associated,0.0
+2023,Saskatchewan,Non Associated,0.0
+2024,Saskatchewan,Non Associated,0.0
+2025,Saskatchewan,Non Associated,0.0
+2026,Saskatchewan,Non Associated,0.0
+2027,Saskatchewan,Non Associated,0.0
+2028,Saskatchewan,Non Associated,0.0
+2029,Saskatchewan,Non Associated,0.0
+2030,Saskatchewan,Non Associated,0.0
+2031,Saskatchewan,Non Associated,0.0
+2032,Saskatchewan,Non Associated,0.0
+2033,Saskatchewan,Non Associated,0.0
+2034,Saskatchewan,Non Associated,0.0
+2035,Saskatchewan,Non Associated,0.0
+2036,Saskatchewan,Non Associated,0.0
+2037,Saskatchewan,Non Associated,0.0
+2038,Saskatchewan,Non Associated,0.0
+2039,Saskatchewan,Non Associated,0.0
+2040,Saskatchewan,Non Associated,0.0
+2041,Saskatchewan,Non Associated,0.0
+2042,Saskatchewan,Non Associated,0.0
+2043,Saskatchewan,Non Associated,0.0
+2044,Saskatchewan,Non Associated,0.0
+2045,Saskatchewan,Non Associated,0.0
+2046,Saskatchewan,Non Associated,0.0
+2047,Saskatchewan,Non Associated,0.0
+2048,Saskatchewan,Non Associated,0.0
+2049,Saskatchewan,Non Associated,0.0
+2050,Saskatchewan,Non Associated,0.0
+2005,Alberta,Solution,0.0
+2006,Alberta,Solution,0.0
+2007,Alberta,Solution,0.0
+2008,Alberta,Solution,0.0
+2009,Alberta,Solution,0.0
+2010,Alberta,Solution,0.0
+2011,Alberta,Solution,0.0
+2012,Alberta,Solution,0.0
+2013,Alberta,Solution,0.0
+2014,Alberta,Solution,0.0
+2015,Alberta,Solution,0.0
+2016,Alberta,Solution,0.0
+2017,Alberta,Solution,0.0
+2018,Alberta,Solution,0.0
+2019,Alberta,Solution,0.0
+2020,Alberta,Solution,0.0
+2021,Alberta,Solution,0.0
+2022,Alberta,Solution,0.0
+2023,Alberta,Solution,0.0
+2024,Alberta,Solution,0.0
+2025,Alberta,Solution,0.0
+2026,Alberta,Solution,0.0
+2027,Alberta,Solution,0.0
+2028,Alberta,Solution,0.0
+2029,Alberta,Solution,0.0
+2030,Alberta,Solution,0.0
+2031,Alberta,Solution,0.0
+2032,Alberta,Solution,0.0
+2033,Alberta,Solution,0.0
+2034,Alberta,Solution,0.0
+2035,Alberta,Solution,0.0
+2036,Alberta,Solution,0.0
+2037,Alberta,Solution,0.0
+2038,Alberta,Solution,0.0
+2039,Alberta,Solution,0.0
+2040,Alberta,Solution,0.0
+2041,Alberta,Solution,0.0
+2042,Alberta,Solution,0.0
+2043,Alberta,Solution,0.0
+2044,Alberta,Solution,0.0
+2045,Alberta,Solution,0.0
+2046,Alberta,Solution,0.0
+2047,Alberta,Solution,0.0
+2048,Alberta,Solution,0.0
+2049,Alberta,Solution,0.0
+2050,Alberta,Solution,0.0
+2005,British Columbia,Solution,0.0
+2006,British Columbia,Solution,0.0
+2007,British Columbia,Solution,0.0
+2008,British Columbia,Solution,0.0
+2009,British Columbia,Solution,0.0
+2010,British Columbia,Solution,0.0
+2011,British Columbia,Solution,0.0
+2012,British Columbia,Solution,0.0
+2013,British Columbia,Solution,0.0
+2014,British Columbia,Solution,0.0
+2015,British Columbia,Solution,0.0
+2016,British Columbia,Solution,0.0
+2017,British Columbia,Solution,0.0
+2018,British Columbia,Solution,0.0
+2019,British Columbia,Solution,0.0
+2020,British Columbia,Solution,0.0
+2021,British Columbia,Solution,0.0
+2022,British Columbia,Solution,0.0
+2023,British Columbia,Solution,0.0
+2024,British Columbia,Solution,0.0
+2025,British Columbia,Solution,0.0
+2026,British Columbia,Solution,0.0
+2027,British Columbia,Solution,0.0
+2028,British Columbia,Solution,0.0
+2029,British Columbia,Solution,0.0
+2030,British Columbia,Solution,0.0
+2031,British Columbia,Solution,0.0
+2032,British Columbia,Solution,0.0
+2033,British Columbia,Solution,0.0
+2034,British Columbia,Solution,0.0
+2035,British Columbia,Solution,0.0
+2036,British Columbia,Solution,0.0
+2037,British Columbia,Solution,0.0
+2038,British Columbia,Solution,0.0
+2039,British Columbia,Solution,0.0
+2040,British Columbia,Solution,0.0
+2041,British Columbia,Solution,0.0
+2042,British Columbia,Solution,0.0
+2043,British Columbia,Solution,0.0
+2044,British Columbia,Solution,0.0
+2045,British Columbia,Solution,0.0
+2046,British Columbia,Solution,0.0
+2047,British Columbia,Solution,0.0
+2048,British Columbia,Solution,0.0
+2049,British Columbia,Solution,0.0
+2050,British Columbia,Solution,0.0
+2005,Saskatchewan,Solution,0.0
+2006,Saskatchewan,Solution,0.0
+2007,Saskatchewan,Solution,0.0
+2008,Saskatchewan,Solution,0.0
+2009,Saskatchewan,Solution,0.0
+2010,Saskatchewan,Solution,0.0
+2011,Saskatchewan,Solution,0.0
+2012,Saskatchewan,Solution,0.0
+2013,Saskatchewan,Solution,0.0
+2014,Saskatchewan,Solution,0.0
+2015,Saskatchewan,Solution,0.0
+2016,Saskatchewan,Solution,0.0
+2017,Saskatchewan,Solution,0.0
+2018,Saskatchewan,Solution,0.0
+2019,Saskatchewan,Solution,0.0
+2020,Saskatchewan,Solution,0.0
+2021,Saskatchewan,Solution,0.0
+2022,Saskatchewan,Solution,0.0
+2023,Saskatchewan,Solution,0.0
+2024,Saskatchewan,Solution,0.0
+2025,Saskatchewan,Solution,0.0
+2026,Saskatchewan,Solution,0.0
+2027,Saskatchewan,Solution,0.0
+2028,Saskatchewan,Solution,0.0
+2029,Saskatchewan,Solution,0.0
+2030,Saskatchewan,Solution,0.0
+2031,Saskatchewan,Solution,0.0
+2032,Saskatchewan,Solution,0.0
+2033,Saskatchewan,Solution,0.0
+2034,Saskatchewan,Solution,0.0
+2035,Saskatchewan,Solution,0.0
+2036,Saskatchewan,Solution,0.0
+2037,Saskatchewan,Solution,0.0
+2038,Saskatchewan,Solution,0.0
+2039,Saskatchewan,Solution,0.0
+2040,Saskatchewan,Solution,0.0
+2041,Saskatchewan,Solution,0.0
+2042,Saskatchewan,Solution,0.0
+2043,Saskatchewan,Solution,0.0
+2044,Saskatchewan,Solution,0.0
+2045,Saskatchewan,Solution,0.0
+2046,Saskatchewan,Solution,0.0
+2047,Saskatchewan,Solution,0.0
+2048,Saskatchewan,Solution,0.0
+2049,Saskatchewan,Solution,0.0
+2050,Saskatchewan,Solution,0.0

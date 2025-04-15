@@ -1,0 +1,52 @@
+# Emissions Policy Module (EPM) Control File
+# Version: this is the $35 carbon fee version of this file
+
+# Variable dbugepm is an output switch for the EPM
+# dbugepm is an integer defined in emoblk and read in
+# dbugepm = 2 lots of EPM output
+# dbugepm = 1 turn output switch on
+# dbugepm = 0 turn output switch off
+dbugepm = 1
+
+# The following is a flag to signal whether nominal dollars are
+# being used for variable emtax or 87 dollars are being used
+# For nominal dollars use taxflag = 1
+nominal_flag = 0
+
+tax_flag = 1
+permit_flag = 0  # Also called "auction flag" in some places
+market_flag = 0
+offset_flag = 0
+etax_flag = 0  # Energy tax flag
+
+elec_flag = 0  # If 1, cap/fee applies to electricity sector only
+tran_flag = 0  # If 1, cap/fee applies to transportation sector only
+resd_flag = 0  # If 1, residential sector is excluded from cap/fee
+comm_flag = 0  # If 1, commercial sector is excluded from cap/fee
+
+bank_flag = 0  # If 1, escalated fee with early-action banking to meet cap over long term
+bank_priceyr = 2012
+bank_startyr = 2012
+bank_endyr = 2050
+bank_end_balance = 0.0  # mmtC
+
+
+# Names of other EPM input files (change these for alternative scenarios)
+# Files are assumed to be in the EPM input folder unless absolute paths are provided
+[input_files]
+history = "epm_history.csv"
+tax_or_cap = "epm_tax_or_cap_fee_35_5_2023.csv"
+coal_regions = "epm_coal_regions.toml"
+carbon_factors = "epm_carbon_factors.tsv"
+mercury_parameters = "epm_mercury_parameters.toml"
+mercury_classes = "epm_mercury_classes.csv"
+mercury_caps = "epm_mercury_caps.csv"
+ab32_parameters = "epm_ab32_parameters.toml"
+ab32_data = "epm_ab32_data.csv"
+ghgoffx = "ghgoffx.xlsx"
+
+# Names of EPM output files (change these to redirect model output)
+# Files will be created in the EPM output folder unless absolute paths are provided
+[output_files]
+epmout = "EPM_epmout.txt"
+demand_co2 = "EPM_demand_co2.csv"

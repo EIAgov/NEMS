@@ -52,7 +52,7 @@
       REAL*4 PACpb(MAXPACR)
       REAL*4 PACmp(MAXPACR,MAXSEC)
       REAL*4 MappCtoN(MNUMNR,MNUMCR,MAXSEC)
-      REAL*4 MappNtoC(MNUMNR,MNUMCR,MAXSEC)
+      !REAL*4 MappNtoCRestart(MNUMNR,MNUMCR,MAXSEC) ! Restart file version
       REAL*4 ComDemAdjFac(MNUMCR,2,MNUMYR)
       REAL*4 ResTGdem(MAXREU)
       REAL*4 TotDemCensus,TotDemNERC
@@ -73,7 +73,7 @@
       COMMON/DSMSCn/GBlockNumEFD,LFinum,NumSec,SEC,NEUSES,NumbECMs,EUINDEX,EUrecNUM,Neu,PACnR,PACnS
       COMMON/DSMSCr/LoadForec,SystemLoad,BaseYrLd, &
           BaseYrSysLd,TotDemCensus,TotDemNERC,ResTGdem,ComDemAdjFac, &
-          MappCtoN,MappNtoC,PACpb,PACmp,DSMimpRS,DSMimpCM,Histshr
+          MappCtoN,PACpb,PACmp,DSMimpRS,DSMimpCM,Histshr
       COMMON/DSMSCc/SecNam,SLNAM,EUNAM
       real*4 efdblkserv(MAXEFDSS,MAXSEA,MNUMNR,MAXEUGRP)
       real*4 efdblkservo(MAXEFDSS,MAXSEA,MNUMNR,MAXEUGRP)

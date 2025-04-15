@@ -240,7 +240,7 @@ REAL 		  WEPS_TRAN_POP(maxwreg,mnumyr)
   AIR_MGMT_ADJ, ASMPG_STK_TYP, ASMPG_NEW_TYP, PASS_WEIGHT, GPTM, RPMPG, PASSAC_RPM_DMD,CARGOAC_FTM_DMD, &
   BELLY_RPM_EQ, PCT_PASS_MTOW, PCT_BELLY_PLOAD,ASMPG_VINT,ASMPG_AVG_AGE, PCT_BELLY_FRT,FUEL_BURN_RED, &
   intercept_rpm, beta1_rpm, intercept_ftm, beta1_ftm, SHR_RPM, WEPS_TRAN_GDP, WEPS_TRAN_POP,&
-  COVID_MULT,COVIDMULT_REF,COVIDMULT_LOMAC,COVIDMULT_HIMAC, & ! QJETR_DI, &  NEMSWEPSSWITCH -- Uncomment for WEPS, comment out for NEMS (in tranmain)
+  COVID_MULT,COVIDMULT_REF,COVIDMULT_LOMAC,COVIDMULT_HIMAC, & ! QJETR_DI, &  !NEMSWEPSSWITCH -- Uncomment QJETR_DI for WEPS, comment out QJETR_DI for NEMS (in tranmain)
   MAX_UNPRK_SHR,STK_ALIGN_MULT, STK_AVGAGE_PA
 
   common/tranairint4/ TRANEFF, iy, Num_to_Read, First_Read_Year, AIRUNIT, AGEUNIT,di, &
@@ -270,16 +270,16 @@ SUBROUTINE TRANAIR
   
   FIRST_READ_YEAR = 1995
   iy = FIRST_READ_YEAR - BASEYR + 1		! BASEYR is 1990
-  FIRST_FCST_YR = 2021
+  FIRST_FCST_YR = 2023
   LAST_HIST_YR = FIRST_FCST_YR-1 
   FIRST_FCST_INDEX = FIRST_FCST_YR-1989 
   LAST_HIST_INDEX = LAST_HIST_YR - 1989 
-
+  
   N = CURIYR
   YRS = N + 1989
   NUM_TO_READ = IJUMPYR -(FIRST_READ_YEAR - BASEYR)
   
-! Open debug write files and read the air variables from trnairx.xlsx
+!! Open debug write files and read the air variables from trnairx.xlsx
   IF (YRS.eq.FIRST_READ_YEAR.and.curitr.eq.1) THEN
     FNAME = 'TRANAIR '
     AIRUNIT = FILE_MGR('O',FNAME,NEW)   ! open writes file for air subroutine
@@ -308,7 +308,7 @@ END SUBROUTINE TRANAIR
 !   
 !  FIRST_READ_YEAR = 1995
 !  iy = FIRST_READ_YEAR - BASEYR + 1		! BASEYR is 1990
-!  FIRST_FCST_YR = 2021
+!  FIRST_FCST_YR = 2023
 !  LAST_HIST_YR = FIRST_FCST_YR-1
 !  FIRST_FCST_INDEX = FIRST_FCST_YR-1989
 !  LAST_HIST_INDEX = LAST_HIST_YR - 1989
@@ -320,7 +320,7 @@ END SUBROUTINE TRANAIR
 !    YRS = CURCALYR
 !    NUM_TO_READ = IJUMPYR -(FIRST_READ_YEAR - BASEYR)
 !  
-!!   Open debug write files and read the air variables from trnair.xml
+!!!   Open debug write files and read the air variables from trnair.xml
 !    IF (YRS.eq.FIRST_READ_YEAR) THEN
 !      OPEN(unit=70,file='tranair.txt')
 !  	  AIRUNIT=70
@@ -330,7 +330,7 @@ END SUBROUTINE TRANAIR
 !	  WRITE(airunit,*)'CHECKPOINT: Completed subroutine READAIR'
 !    ENDIF
 !	
-!!   Combine historical/projected macro data	
+!!!   Combine historical/projected macro data	
 !    IF (curcalyr.lt.pFFYr) THEN		! pFFYr = first forecast year, all of WEPS
 !      WLD_POP(:,curiyr)  = HPOP(:,curcalyr)
 !      WLD_GDP(:,curiyr)  = HGDP_PPP(:,curcalyr)
@@ -367,7 +367,7 @@ SUBROUTINE READAIR
   USE AIRMOD
   IMPLICIT NONE
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-!  CHARACTER*(*) tranair_input_file 
+  !CHARACTER*(*) tranair_input_file 
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! Declare local parameters
@@ -387,15 +387,15 @@ SUBROUTINE READAIR
   WKUNIT = FILE_MGR('O',INAME,NEW)                   ! open trnairx.xlsx input file
   CALL ReadRngXLSX(WKUNIT,'trnair')                  ! read range names & corresponding data from worksheet "trnair"
   WKUNIT = FILE_MGR('C',INAME,NEW)                   ! close wk1 input file
-! Non-US regions use exogenous gdp and population in NEMS  
+!! Non-US regions use exogenous gdp and population in NEMS  
   CALL GETRNGR('WLD_POP         ',WLD_POP(1:maxwreg,iy:IJUMPYR),maxwreg,Num_to_Read,1)                ! regional population
   CALL GETRNGR('WLD_GDP         ',WLD_GDP(1:maxwreg,iy:IJUMPYR),maxwreg,Num_to_Read,1)                ! regional gdp
 ! NEMS section END -- NEMSWEPSSWITCH ---------------------------------------------------------------------------------------------------------------- 
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-!  INAME=tranair_input_file
-!  OPEN(unit=80,file=trim(INAME))
-!  CALL ReadRngXML(80,'trnair') 
+  !INAME=tranair_input_file
+  !OPEN(unit=80,file=trim(INAME))
+  !CALL ReadRngXML(80,'trnair') 
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
   
   CALL GETRNGR('QAGTR_US        ',QAGTR_US(1:1,iy:IJUMPYR),1,Num_to_Read,1)                                             ! US aviation gasoline consumption
@@ -436,7 +436,7 @@ SUBROUTINE READAIR
   CALL GETRNGR('PCT_BELLY_PLOAD ',PCT_BELLY_PLOAD(1:maxatyp,iy:IJUMPYR,1:2),maxatyp,NUM_TO_READ,domint)				! Percent of passenger flight payload (pass + freight) that is freight (aka belly freight)
   CALL GETRNGR('PCT_BELLY_FRT   ',PCT_BELLY_FRT(1:maxatyp,iy:IJUMPYR,1:2),maxatyp,NUM_TO_READ,domint)		
   CALL GETRNGR('AIR_MGMT_ADJ    ',AIR_MGMT_ADJ(1:maxwreg,iy:IJUMPYR,1:2),maxwreg,NUM_TO_READ,domint)					! Factor applied to account for distance traveled beyond the great circle distance (relative to US value)
-  CALL GETRNGR('STK_ALIGN_MULT  ',STK_ALIGN_MULT(1:maxwreg,31:36,1:maxatyp),maxwreg,6,maxatyp)								! GPTM calibration factor (align vintaged stock GPTM to total stock GPTM)
+  CALL GETRNGR('STK_ALIGN_MULT  ',STK_ALIGN_MULT(1:maxwreg,31:37,1:maxatyp),maxwreg,7,maxatyp)								! GPTM calibration factor (align vintaged stock GPTM to total stock GPTM)
 
 !.Econometric equation coefficients
 ! Passenger demand (RPM)
@@ -451,15 +451,15 @@ SUBROUTINE READAIR
   CALL GETRNGR('beta1_ftm       ',beta1_ftm(1:maxwreg,1:2),maxwreg,domint,1)													! gdp coefficient for FTM projection
   
 ! NEMS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-!   Fuel consumption variables
+!!   Fuel consumption variables
     CALL GETRNGR('PASS_WEIGHT     ',PASS_WEIGHT,1,1,1)															! Average passenger weight, including luggage (200lb, BTS)
     CALL GETRNGR('FUEL_BURN_RED   ',FUEL_BURN_RED,1,1,1)														! Projected annual fuel burn reduction (all body types and regions). Source: ICCT historical (2010+)
-!   Domestic yield  
+!!   Domestic yield  
     CALL GETRNGR('ALPHAYD         ',ALPHAYD,1,1,1)
     CALL GETRNGR('RHOYD           ',RHOYD,1,1,1)
     CALL GETRNGR('BETAFUELD       ',BETAFUELD,1,1,1)
     CALL GETRNGR('BETATIMED       ',BETATIMED,1,1,1)
-!   Int'l yield
+!!   Int'l yield
     CALL GETRNGR('ALPHAYI         ',ALPHAYI,1,1,1)
     CALL GETRNGR('RHOYI           ',RHOYI,1,1,1)
     CALL GETRNGR('BETAFUELI       ',BETAFUELI,1,1,1)
@@ -480,16 +480,16 @@ SUBROUTINE READAIR
 ! NEMS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-! WEPS currently uses ReadXML rather than ReadXLSX. Single read-in values from ReadXML have to be re-dimensioned...
-!! Fuel consumption variables
+!!! WEPS currently uses ReadXML rather than ReadXLSX. Single read-in values from ReadXML have to be re-dimensioned...
+!!! Fuel consumption variables
 !  CALL GETRNGR('PASS_WEIGHT     ',PASS_WEIGHTX,1,1,1)															       	! Average passenger weight, including luggage (200lb, BTS)
 !  CALL GETRNGR('FUEL_BURN_RED   ',FUEL_BURN_REDX,1,1,1)																! Projected annual fuel burn reduction (all body types and regions). Source: ICCT historical (2010+)
-!! Domestic yield  
+!!! Domestic yield  
 !  CALL GETRNGR('ALPHAYD         ',ALPHAYDX,1,1,1)
 !  CALL GETRNGR('RHOYD           ',RHOYDX,1,1,1)
 !  CALL GETRNGR('BETAFUELD       ',BETAFUELDX,1,1,1)
 !  CALL GETRNGR('BETATIMED       ',BETATIMEDX,1,1,1)
-!! Int'l yield
+!!! Int'l yield
 !  CALL GETRNGR('ALPHAYI         ',ALPHAYIX,1,1,1)
 !  CALL GETRNGR('RHOYI           ',RHOYIX,1,1,1)
 !  CALL GETRNGR('BETAFUELI       ',BETAFUELIX,1,1,1)
@@ -521,7 +521,7 @@ SUBROUTINE READAIR
 !  MINAGE_PRK_P  = MINAGE_PRK_PX(1)
 !  MAXAGE_UNPRK_P= MAXAGE_UNPRK_PX(1)
 !  MAX_UNPRK_SHR = MAX_UNPRK_SHRX(1)
-!  
+  
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 	
 ! Input pre-processing / re-arranging
@@ -560,8 +560,8 @@ SUBROUTINE READAIR
 ! NEMS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-!  COVID_MULT(:,:,:) = COVIDMULT_REF(:,:,:)
-!  CFJFK = 5.670											! WEPS doesn't have an internal energy content variable. This is mmBTU/barrel of jet fuel.
+  !COVID_MULT(:,:,:) = COVIDMULT_REF(:,:,:)
+  !CFJFK = 5.670											! WEPS doesn't have an internal energy content variable. This is mmBTU/barrel of jet fuel.
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! ************************************ TESTING/DEBUG ************************************
@@ -598,11 +598,11 @@ SUBROUTINE TAIRT
 ! NEMS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-!  IF(n >= (pFFYr - 1989)) THEN
-!    PJFTR_US(N) = PJFTR(1,N+1989)
-!  ELSE
-!    PJFTR_US(N) = PJFTR(1,pFFYr)
-!  ENDIF
+  !IF(n >= (pFFYr - 1989)) THEN
+  !  PJFTR_US(N) = PJFTR(1,N+1989)
+  !ELSE
+  !  PJFTR_US(N) = PJFTR(1,pFFYr)
+  !ENDIF
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
   
   IF(curcalyr.eq.FIRST_READ_YEAR) THEN 
@@ -935,23 +935,28 @@ SUBROUTINE TAIREFF
             STKPASS_ACTIVE(iwreg,iatyp,iage,N) 	= STKPAVINT(iwreg,iage,iatyp) 											! Stock - Active Passenger
             STKCARGO_ACTIVE(iwreg,iatyp,iage,N) = STKCAVINT(iwreg,iage,iatyp)											! Stock - Active Cargo
           ENDDO  ! iage
+		  
+		  ! MDR IEO2023 populate historical sales for viewing in TIRE
+		  DO iage = 6, LAST_HIST_INDEX-1 	! iage is being used as a counter for YEAR here
+		    STKPASS_ACTIVE(iwreg,iatyp,1,iage) = STK_SUP_NEW(iwreg,iage,iatyp)
+		  ENDDO
 
 		  ASMAC_ADJ(iwreg,iatyp) = 0		! Calibrate ASMAC/FTMAC to 2019 levels
 		  FTMAC_ADJ(iwreg,iatyp) = 0
 
-          IF ((STKCTOT(iwreg,iatyp,30) .NE. 0.0).and.(SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,30)).NE.0.0)) THEN
+          IF ((STKCTOT(iwreg,iatyp,32) .NE. 0.0).and.(SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)).NE.0.0)) THEN		! MDRIEO2023 switched all calibration from 2019 to 2021
               WRITE(AIRUNIT,'("  Adjusting projected ",a," FTMAC for region ",a," from ",F11.0," to ",F11.0)') reg_atyp(iatyp),reg_def(iwreg), &
-					FTMAC(iwreg,30,iatyp),SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,30)) * 1000000. / STKCTOT(iwreg,iatyp,30)						! Calibrate to 2019 history, since that was "normal"
-			  FTMAC_ADJ(iwreg,iatyp)	   = (SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,30)) * 1000000. / STKCTOT(iwreg,iatyp,30)) &
-											 / FTMAC(iwreg,30,iatyp)
-			  FTMAC(iwreg,30:mnumyr,iatyp) = FTMAC_ADJ(iwreg,iatyp)*FTMAC(iwreg,30:mnumyr,iatyp)		! Apply the 2019 adjustment to the whole exogenous FTMAC projection
+					FTMAC(iwreg,32,iatyp),SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)) * 1000000. / STKCTOT(iwreg,iatyp,32)						! Calibrate to 2019 history, since that was "normal"
+			  FTMAC_ADJ(iwreg,iatyp)	   = (SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)) * 1000000. / STKCTOT(iwreg,iatyp,32)) &
+											 / FTMAC(iwreg,32,iatyp)
+			  FTMAC(iwreg,32:mnumyr,iatyp) = FTMAC_ADJ(iwreg,iatyp)*FTMAC(iwreg,32:mnumyr,iatyp)		! Apply the 2019 adjustment to the whole exogenous FTMAC projection
 		  ENDIF
 		  
-		  IF (STKPA(iwreg,30,iatyp).NE.0.0) THEN
+		  IF (STKPA(iwreg,32,iatyp).NE.0.0) THEN
 		      WRITE(AIRUNIT,'("  Adjusting projected ",a," ASMAC for region ",a," from ",F13.0," to ",F13.0)') reg_atyp(iatyp),reg_def(iwreg), &
-					ASMAC(iwreg,30,iatyp),ASMDEMD(iwreg,iatyp,30)*1000000 / STKPA(iwreg,30,iatyp)
-			  ASMAC_ADJ(iwreg,iatyp)	   = (ASMDEMD(iwreg,iatyp,30) *1000000 / STKPA(iwreg,30,iatyp))/ASMAC(iwreg,30,iatyp)
-			  ASMAC(iwreg,30:mnumyr,iatyp) = ASMAC_ADJ(iwreg,iatyp)*ASMAC(iwreg,30:mnumyr,iatyp)
+					ASMAC(iwreg,32,iatyp),ASMDEMD(iwreg,iatyp,32)*1000000 / STKPA(iwreg,32,iatyp)
+			  ASMAC_ADJ(iwreg,iatyp)	   = (ASMDEMD(iwreg,iatyp,32) *1000000 / STKPA(iwreg,32,iatyp))/ASMAC(iwreg,32,iatyp)
+			  ASMAC(iwreg,32:mnumyr,iatyp) = ASMAC_ADJ(iwreg,iatyp)*ASMAC(iwreg,32:mnumyr,iatyp)
 		  ENDIF
 		  
         ENDDO  ! iatyp
@@ -1234,10 +1239,9 @@ SUBROUTINE TAIREFF
 		  MAX_UNPARK = SUM(STKPASS_PARKED(iwreg,iatyp,:,N))*MAX_UNPRK_SHR									! Set a limit on the number of planes that can be unparked in a given year
 
 !		  MDR: This is a temporary adjustment to allow more planes to unpark after covid
-		  IF (YRS.EQ.2021) MAX_UNPARK = (SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp))*0.9
 		  IF (YRS.EQ.2022) MAX_UNPARK = (SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp))*0.9
-		  IF (YRS.EQ.2023) MAX_UNPARK = (SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp))*0.6
-		  IF (YRS.EQ.2024) MAX_UNPARK = (SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp))*0.3
+		  IF (YRS.EQ.2023) MAX_UNPARK = (SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp))*0.9		! MDRIEO2023 changed from 0.6 (and 0.3 for 2024)
+		  IF (YRS.EQ.2024) MAX_UNPARK = (SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp))*0.6
 
 		  IF ((SUM(STKPASS_PARKED(iwreg,iatyp,:,N))-MIN_PARK(iwreg,iatyp)).gt.0.0) THEN		! If there are jets available to unpark
 
@@ -1353,7 +1357,7 @@ SUBROUTINE TAIREFF
 !			GPTM and RPMPG are calculated for use in energy calculations
 		    ASMPG_AVG_AGE(iwreg,iatyp,di,N) = STKPA(iwreg,N,iatyp)/SUM_ASMPG_STK_AGE(iwreg,iatyp,di)
 			GPTM(iwreg,N,iatyp,di) = 1/(ASMPG_AVG_AGE(iwreg,iatyp,di,N)*pass_weight/2000)
-			IF (YRS.ge.2020.and.YRS.le.2025) GPTM(iwreg,N,iatyp,di) = GPTM(iwreg,N,iatyp,di)*STK_ALIGN_MULT(iwreg,N,iatyp)
+			IF (YRS.ge.2020.and.YRS.le.2026) GPTM(iwreg,N,iatyp,di) = GPTM(iwreg,N,iatyp,di)*STK_ALIGN_MULT(iwreg,N,iatyp)		! MDRIEO2023 extended phaseout to 2026
 			
 			IF (PASSAC_RPM_DMD(iwreg,iatyp,di,N).gt.0.0) THEN
 			  RPMPG(iwreg,iatyp,di,N) = 1/(GPTM(iwreg,N,iatyp,di)*pass_weight/2000* &
@@ -1431,7 +1435,7 @@ SUBROUTINE TAIREFF
     IF (YRS.ge.FIRST_FCST_YR) QAGTR(11,N)=QAGTR(11,24)+GAMMA*EXP(-KAPPA*(YRS-1979)) 
     
 	IF ((CURIYR.eq.LASTYR).and.(FCRL.eq.1)) THEN		! NEMSWEPSSWITCH   NEMS version
-!	IF ((CURIYR.eq.LASTYR)) THEN								! NEMSWEPSSWITCH   WEPS version
+	!IF ((CURIYR.eq.LASTYR)) THEN								! NEMSWEPSSWITCH   WEPS version
 	  WRITE(AIRUNIT,*)'MDR Check -- QJETR, QAGTR Projection'
 	  DO i = iy,mnumyr
 	    WRITE(AIRUNIT,'(i4,2F10.2)')i+1989,QJETR(11,i),QAGTR(11,i)
@@ -1468,7 +1472,7 @@ SUBROUTINE TAREPORT
 ! NEMS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
-!    IF(N.ge.(pFFYr-1989)) AIROUT(1,N) = PJFTR(1,N+1989)
+    !IF(N.ge.(pFFYr-1989)) AIROUT(1,N) = PJFTR(1,N+1989)
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 !    AIROUT( 2,N) = YIELD(1,N)                      ! ticket price - domestic
@@ -1478,7 +1482,7 @@ SUBROUTINE TAREPORT
 !...Calculate U.S. Load Factor
     AIROUT( 2,N) = LOAD_FACTOR(us,N,dom)         ! load factor-dom
     AIROUT( 3,N) = LOAD_FACTOR(us,N,int)         ! load factor-int
-    
+    	
 !...Writes for ftab
     DO j = 0,15
 !	  Revenue passenge miles (note these are dimensioned a little differently in AIROUT v the proceeding metrics)
@@ -1506,6 +1510,7 @@ SUBROUTINE TAREPORT
       AIROUT(263+4*j,N) = STKPA(j+1,N,1) 
       AIROUT(264+4*j,N) = STKPA(j+1,N,2) 
       AIROUT(265+4*j,N) = STKPA(j+1,N,3)
+
 !	  Stock, passenger parked
       AIROUT(330+4*j,N) = STKPP(j+1,N,1)+ STKPP(j+1,N,2) + STKPP(j+1,N,3) 
       AIROUT(331+4*j,N) = STKPP(j+1,N,1) 
@@ -1553,9 +1558,10 @@ SUBROUTINE TAREPORT
 !	Stock, cargo (active and parked)
 	AIROUT(414,N) = SUM(STKCTOT(:,:,N))
 
+
 ! ************************************ TESTING/DEBUG ************************************
 	IF ((N.eq.mnumyr).and.(FCRL.eq.1)) THEN		! NEMSWEPSSWITCH   NEMS version
-!	IF ((N.eq.mnumyr)) THEN						! NEMSWEPSSWITCH   WEPS version
+	!IF ((N.eq.mnumyr)) THEN						! NEMSWEPSSWITCH   WEPS version
 	  WRITE(airunit,*)'Energy check'
 	  DO iwreg = 1, maxwreg
 	    WRITE(airunit,*)reg_def(iwreg),QJETR_NUS(iwreg,21:MNUMYR)
@@ -1578,12 +1584,13 @@ SUBROUTINE TAREPORT
     TRTRAVLD(9,N)  = YIELD(1,N)                    									! ticket price
     TRTRAVLD(10,N) = MC_YPDR(11,N)              									! disposable income	
 
+
 ! NEMS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------	
 	TRTRAVLD( 11,N) = PJFTR(11,N)     	         	   		! jet fuel cost in 87$
 ! NEMS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------	
-!	IF(N.ge.(pFFYr-1989)) TRTRAVLD(11,N) = PJFTR(1,N+1989)
+	!IF(N.ge.(pFFYr-1989)) TRTRAVLD(11,N) = PJFTR(1,N+1989)
 ! WEPS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 !...Seat miles demanded
@@ -1602,7 +1609,7 @@ SUBROUTINE TAREPORT
     TRAIREFFS(4,N) = ASMPGT(2,N)
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------	
-!! Populate global WEPS variables
+!!! Populate global WEPS variables
 !
 !	PMode_TonMiles(:,n+1989,5) 	= 0.0
 !	FMode_TonMiles(:,n+1989,7)	= 0.0
@@ -1621,27 +1628,28 @@ SUBROUTINE TAREPORT
 !	  IF (Isnan(PassCons(i,n+1989,11,5)).or.PassCons(i,n+1989,11,5).gt.99999) WRITE(airunit,*)'check air',i,n,PassCons(i,n+1989,3,5),airout(294,n)
 !    ENDDO
 !	
+!	
 !IF((N+1989).ge.pFFYr) THEN
-!!	Air tech variables
+!!!	Air tech variables
 !	DO i = 1,4             								! Type of airplane (1=narrow body; 2=wide body; 3=regional; 4=average)
 !	  Airefficiencynew(i,n+1989) = TRAIREFFN(i,n)       !(seat miles per gallon)
 !	  Airefficiencystock(i,n+1989) = TRAIREFFS(i,n)     !(seat miles per gallon)
 !	ENDDO
 !
-!!	Air variables
+!!!	Air variables
 !	DO r = 1,maxwreg
-!!	  Revenue passenger miles (billions)
+!!!	  Revenue passenger miles (billions)
 !	  Airpassengerrevenuemilesdomestic(r,n+1989) 	  = RPMT(r,DOM,N)/1000.0
 !	  Airpassengerrevenuemilesinternational(r,n+1989) = RPMT(r,INT,N)/1000.0
-!!	  Available seat-miles (billions)
+!!!	  Available seat-miles (billions)
 !	  Airpassengerseatmilesdemanded(r,n+1989) 		  = SMDEMD(r,N)/1000.0
-!!	  Freight ton-miles (billions)
+!!!	  Freight ton-miles (billions)
 !	  Airfreightrevenuemiles(r,n+1989) 				  = SUM(FTM(r,N,:))/1000.0
-!!	  Jet fuel use (trillion BTU)
+!!!	  Jet fuel use (trillion BTU)
 !	  Airqjftrcommercial(r,n+1989) 					  = QJETR_NUS(r,N)
 !	ENDDO 
 !	
-!!	Air variables for TIRE
+!!!	Air variables for TIRE
 !	1240 Format(a,a,a,a,A,a,I4,a,A3,a,I4,a,F12.3)
 !	1245 Format(a,a,a,a,A,a,I4,a,A3,a,I4,a,F8.3)
 !	IF (YRS.eq.2050) THEN

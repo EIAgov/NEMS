@@ -1,30 +1,30 @@
 FILE NAME:      KPARM
-
-DATE MODIFIED:  September 21, 2022
-                Bench exactly to  within 2% of STEO values through 2023 (KSTEOYR set in COMVARS); require 2% STEO tolerance afterward for EL and NG.
-
-
-CONTACT:        Courtney Sourmehi
-                NEMS Commercial Buildings Analyst
-                Courtney.Sourmehi@eia.gov
-                
-
-USED BY:        Main subroutine of the National Energy Modeling System
-                (NEMS) Commercial Demand Module (CDM)
-
+DATE MODIFIED:  October 25, 2024
+USED BY:        Main subroutine of the National Energy Modeling System (NEMS) Commercial Demand Module (CDM)
 DEFINITION:     Commercial Sector Demand Module parameters
-
 UNITS:          unitless
-
 DIMENSION:      various
-
 SPECIAL CONSTRAINTS:    None
-
-ORGANIZATION OF DATA:
-
-                Data starts on row 101 of this file as per CDM convention.
-
+ORGANIZATION OF DATA: Data starts on row 101 of this file as per CDM convention.
 SOURCES:        Not applicable
+COMMENT: Update CoolingTechIndexHP; Bench within 2% of STEO values through 2025 (KSTEOYR set in COMVARS); and afterward for KS, EL and NG only. Decay through 2028.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -106,14 +106,14 @@ Proportion of Office Equip EUI attributable to computers:
 ReportOption (1-> print KRPT; 0-> do not print KRPT)
 1
 
-CoolingEquipIndexHP (tech index of cooling equip to compare heat pumps with)
-12
+CoolingTechIndexHP (tech index of cooling equip to compare heat pumps with)
+11
 
 DecayBM (1-> final STEO mistie is ramped down to 0; 0-> not ramped down to 0) 
 1
 
 LastDecayYr (yr in which the final STEO mistie is ramped down to 0)
-2027
+2028
 
 Options for Service Demand Reporting:
     Switch 1:  Print Demand Census Divisions, National or Both
@@ -148,7 +148,7 @@ NOTE: Both STEOBM in SCEDES file and commercial benchmarking switch above must b
 Benchmarking switch to get within 2 percent of STEO for years subsequent to KSTEOYR, by fuel
 NOTE: This switch is for years AFTER KSTEOYR. The previous switch is for years up to KSTEOYR.
 EL	NG	DS	RF	LG	CL	MG	KS
-1	1	0	0	0	0	0	0
+1	1	0	0	0	0	0	1
 
 Begin Year, End Year, Electric Scaler, Gas Scaler, Distillate Scaler for Elasticity Estimation
 16	61	1.0	1.0	1.0

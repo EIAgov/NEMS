@@ -1,0 +1,1183 @@
+## ams_version=1.0
+
+Section S3_Data_Processing {
+	DeclarationSection Other {
+		ElementParameter ep_M1 {
+			Range: M1_;
+			Definition: '1';
+		}
+		ElementParameter ep_maxYear {
+			Range: MNUMYR_;
+			Property: NoSave;
+		}
+		ElementParameter ep_firstYear {
+			Range: MNUMYR_;
+			Property: NoSave;
+		}
+		StringParameter ep_lastElecYear {
+			Property: NoSave;
+		}
+	}
+	Section GDS_Parameters_in_HMM {
+		DeclarationSection Macro_Declarations {
+			Parameter GDPPriceDeflator87 {
+				IndexDomain: i_calYear;
+				Comment: "Price deflator where 1987 = 1.";
+			}
+			Parameter SP500Index {
+				IndexDomain: year;
+				Text: "S&P 500 common stock index";
+				Comment: "S&P 500 common stock index";
+			}
+			Parameter Treasury10yrYield {
+				IndexDomain: year;
+				Text: "Real yield on us treasury long-term bonds";
+				Comment: "Real yield on us treasury long-term bonds";
+			}
+			Parameter IndustrialWeight {
+				IndexDomain: (regCen, subindustry, histyear);
+			}
+		}
+		DeclarationSection quantities {
+			Parameter H2DemandBySectorSeasonalMMTons {
+				IndexDomain: (regCen,sec,seas,i_calYear);
+			}
+			Parameter H2DemandBySeason {
+				IndexDomain: (regCen,seas,i_calYear);
+			}
+			Parameter H2DemandBySectorSeasonal {
+				IndexDomain: (regCen,sec,seas,i_calYear);
+			}
+			Parameter ByproductSupplyByYear {
+				IndexDomain: (regCen,i_calYear);
+			}
+			Parameter H2DemandByYear {
+				IndexDomain: (regCen,i_calYear);
+			}
+			Parameter ElecCurtailedByYear {
+				IndexDomain: (regNERC,seas,hr,i_calYear);
+				Comment: "Hourly curtailment by EMM region (MMBTU)";
+			}
+			Parameter H2DemandBySectorAnnual {
+				IndexDomain: (regCen,sec,i_calYear);
+				Comment: "Hydrogen demand by sector (Tbtu) NOTE: FOR INDUSTRIAL DEMAND, REFINING DEMAND HAS BEEN SUBTRACTED OUT. SO INDUSTRIAL IS QBLK_QH2IN-QMORE_QH2RF";
+			}
+		}
+		DeclarationSection Prices {
+			Parameter HourlyElectricityPricesByCredit {
+				IndexDomain: (regNERC,seas,hr,i_calYear,creditStep);
+			}
+			Parameter HourlyElectricityPricesCurtailed {
+				IndexDomain: (regNERC,seas,hr,year);
+			}
+			Parameter Implied45QValue {
+				IndexDomain: (regCen,i_calYear);
+			}
+			Parameter CO2PriceWithout45Q {
+				IndexDomain: (regCen,i_calYear);
+			}
+			Parameter CO2PriceWith45Q {
+				IndexDomain: (regCen,i_calYear);
+			}
+			Parameter SeasonalNaturalGasPrice {
+				IndexDomain: (regCen,seas,year);
+			}
+			Parameter ReliabilityAdder {
+				IndexDomain: (regNERC,year);
+				Comment: "Reliability adder to hourly electricity costs ($1987/MMBtu)";
+			}
+			Parameter TandDAdder {
+				IndexDomain: (regNERC,year);
+				Comment: "Transmission and Distribution adder to hourly electricity costs ($1987/MMBtu)";
+			}
+			Parameter HourlyElectricityPrices {
+				IndexDomain: (regNERC,seas,hr,i_calYear);
+				Comment: "Hourly electricity prices by EMM region. (1987$/MMBtu)";
+			}
+			Parameter PriceIndNG {
+				IndexDomain: (regCEN,i_calYear);
+				Text: "Price, Natural Gas - Industrial (87$/MMBtu)";
+			}
+			Parameter priceIndElec {
+				IndexDomain: (regCen,i_calYear);
+				Text: "Price of electricity to industrial consumers (1987$/MMBtu)";
+				Comment: "Price of electricity to industrial consumers (1987$/MMBtu)";
+			}
+		}
+	}
+	Procedure Process_GDS_Parameters {
+		Body: {
+			
+			empty GDS_Parameters_in_HMM;
+			
+			! Macro paremeters
+			Treasury10yrYield(year) := sum(MNUMYR | NEMSmap_MNUMYRToYear(MNUMYR,year), MACOUT_MC_RMGBLUSREAL(MNUMYR))/100;
+			SP500Index(year) := sum(MNUMYR | NEMSmap_MNUMYRToYear(MNUMYR,year), MACOUT_MC_SP500(MNUMYR));
+			IndustrialBondRate(year) := sum(MNUMYR | NEMSmap_MNUMYRToYear(MNUMYR,year), MACOUT_MC_RMCORPBAA(MNUMYR))/100;
+			
+			! Natural Gas Prices
+			PriceIndNG(regCEN,year) := sum((MNUMCR,MNUMYR), 
+				(MPBLK_PNGIN(MNUMCR,MNUMYR))*NEMSmap_MNUMYRToYear(MNUMYR,year)*NEMSmap_MNUMCRToCensusRegion(regCEN, MNUMCR));
+			
+			! Annual Electricity prices to industrial sector
+			priceIndElec(regCen, year) := sum((MNUMCR, MNUMYR), MPBLK_PELIN(MNUMCR, MNUMYR) * NEMSmap_MNUMYRToYear(MNUMYR,year)*NEMSmap_MNUMCRToCensusRegion(regCEN, MNUMCR));
+			
+			! Calculate Implied hydrogen supply from the industrial sector, less by-product and refinery supply
+			IndustrialWeight(regCen, subindustry, year) := sum((MNUMCR, MNSICM, MNUMYR), MACOUT_MC_REVIND(MNUMCR, MNSICM, MNUMYR) * NEMSmap_MNUMCRToCensusRegion(regCEN, MNUMCR) * NEMSmap_MNSICMToSubIndustry(MNSICM, subindustry) *  NEMSmap_MNUMYRToYear(MNUMYR,year));
+			! Process assign GDP Deflator and extend range based on average growth
+			GDPPriceDeflator87(i_calYear) := sum(MNUMY3 | NEMSmap_MNUMY3toCalYear(MNUMY3, i_calYear), MACOUT_MC_JPGDP(MNUMY3));
+			AverageDeflatorGrowth := average(i_calYear | (GDPPriceDeflator87(i_calYear) and GDPPriceDeflator87(i_calYear-1)), GDPPriceDeflator87(i_calYear)/$GDPPriceDeflator87(i_calYear-1));
+			GDPPriceDeflator87(i_calYear)|(i_calYear > StringToElement(cal_year, LastModelYear)) := GDPPriceDeflator87(LastModelYear)*power(AverageDeflatorGrowth,ord(i_calYear)-card(GDPPriceDeflator87));
+			
+			
+			
+			! Seasonal Natural Gas Prices by Year
+			SeasonalNaturalGasPrice(regCen, seas, year) := sum((MNUMCR, MNUMYR, M4) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR) and NEMSmap_MNUMYRToYear(MNUMYR, year) and NEMSmap_M4_to_seas(M4, seas),
+			 						NGTDMOUT_SPNGIN(MNUMCR, MNUMYR, M4));
+			
+			! Assign fuel prices
+			FuelPricesByYear(FuelNG, seas, regCen, year) := SeasonalNaturalGasPrice(regCen, seas, year);
+			FuelPricesByYear(FuelElec, seas, regCen, year) := priceIndElec(regCen, year);
+			! Extend fuel prices to end of calendar (take the last value and extend)
+			FuelPricesByYear(fuel, seas, regCen, i_calYear) | (i_calYear > LastModelYear) := FuelPricesByYear(fuel,seas, regCen, LastModelYear);
+			
+			
+			! Aggregate curtailment data, also, convert to MMBTU
+			ElecCurtailedByYear(regNERC, seas, hr, year) := ((sum((MNUMNR, M4, M24, MNUMYR) | (NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC)) and (NEMSmap_M4_to_seas(M4, seas)) and
+				(NEMSmap_M24_ToHr(M24,hr)) and (NEMSmap_MNUMYRToYear(MNUMYR, year)), UECPOUT_QELCUR(MNUMNR, M4, M24, MNUMYR))) * bkwh_to_mmbtu)/1000;
+			
+			! Extend Curtailment data to end of calendar (take the last value and extend)
+			ElecCurtailedByYear(regNERC, seas, hr, i_calYear) | (i_calYear > LastModelYear) := ElecCurtailedByYear(regNERC, seas, hr, LastModelYear);
+			
+			! Adders for Transportation and Distribution, Relaibility that are added to the hourly wholesale prices
+			TandDAdder(regNERC, year) :=  sum((MNUMNR, MNUMYR) | (NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC) and (NEMSmap_MNUMYRToYear(MNUMYR, year))), EFPOUT_PECINTDN(MNUMNR, MNUMYR)) * (1/Mwh_to_MMBtu);
+			ReliabilityAdder(regNERC, year) := sum((MNUMNR, MNUMYR) | (NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC) and (NEMSmap_MNUMYRToYear(MNUMYR, year))), EFPOUT_PECINRLN(MNUMNR, MNUMYR)) * (1/Mwh_to_MMBtu);
+			
+			
+			! Hourly electricity prices, convert to $/MMBTU
+			HourlyElectricityPrices(regNERC, seas, hr, year) := sum((MNUMNR, M4, M24, MNUMYR) | NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC) and NEMSmap_M4_to_seas(M4, seas) and 
+				NEMSmap_M24_ToHr(M24, hr) and NEMSmap_MNUMYRToYear(MNUMYR, year), UECPOUT_PRICE_EL_HR(MNUMNR, M4, M24, MNUMYR)) * (1/Mwh_to_MMBTU);
+			
+			
+			! To minimize the size of the identifier, we can only assign curtailed prices to hours where there is actual curtailment occurring.
+			HourlyElectricityPricesCurtailed(regNERC, seas, hr, i_calYear) | ElecCurtailedByYear(regNERC, seas, hr, i_calYear) := HourlyElectricityPrices(regNERC, seas, hr, i_calYear);
+			HourlyElectricityPricesCurtailed(regNERC, seas, hr, i_calYear)  | (i_calYear > LastModelYear) := HourlyElectricityPricesCurtailed(regNERC, seas, hr, LastModelYear);
+			
+			! Add reliability adder
+			HourlyElectricityPrices(regNERC, seas, hr, year) | HourlyElectricityPrices(regNERC, seas, hr, year)  +=  ReliabilityAdder(regNERC, year);
+			
+			!HourlyElectricityPrices(regNERC, seas, hr, year) | HourlyElectricityPrices(regNERC, seas, hr, year)  += (TandDAdder(regNERC, year) + ReliabilityAdder(regNERC, year));
+			!HourlyElectricityPrices(regNERC, seas, hr, year) | HourlyElectricityPrices(regNERC, seas, hr, year)  += 1.5;
+			
+			! Extend Hourly Electricity prices to end of calendar
+			HourlyElectricityPrices(regNERC, seas, hr, i_calYear) | (i_calYear > LastModelYear) := HourlyElectricityPrices(regNERC, seas, hr, LastModelYear);
+			
+			HourlyElectricityPricesByCredit(regNERC, seas, hr, i_calYear, CreditStepNoCurtail) := HourlyElectricityPrices(regNERC, seas, hr, i_calYear);
+			HourlyElectricityPricesByCredit(regNERC, seas, hr, i_calYear, CreditStepCurtail) := HourlyElectricityPricesCurtailed(regNERC, seas, hr, i_calYear);
+			HourlyElectricityPricesByCredit(regNERC, seas, hr, i_calYear, creditStep) | (i_calYear > LastModelYear) := HourlyElectricityPricesByCredit(regNERC, seas, hr, LastModelYear, creditStep);
+			
+			
+			!!!! TEMPORARY SECTION FOR EXOGENOUS H2 DEMAND FROM INDUSTRIAL
+			! Hydrogen Demand
+			H2DemandBySectorAnnual(regCen, IndustrialSector, year) := sum((MNUMCR, MNUMYR) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, year)), QBLK_QH2IN(MNUMCR,MNUMYR));
+			H2DemandBySectorAnnual(regCEN, TransportationSector, year) := sum((MNUMCR, MNUMYR) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, year)), QBLK_QH2TR(MNUMCR,MNUMYR));
+			H2DemandBySectorAnnual(regCEN, RefiningSector, year) := sum((MNUMCR, MNUMYR) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, year)), QMORE_QH2RF(MNUMCR, MNUMYR));
+			
+			! QBLK_QH2IN INCLUDES QMORE_QH2RF, TO AVOID DOUBLE COUNTING, BUT STILL PRESERVE REFINING AS A SEPERATE DEMAND SECTOR, SUBTRACT QMORE_QH2RF FROM QBLK_QH2IN
+			H2DemandBySectorAnnual(regCen, IndustrialSector, year) | H2DemandBySectorAnnual(regCen, IndustrialSector, year)  := H2DemandBySectorAnnual(regCen, IndustrialSector, year) - H2DemandBySectorAnnual(regCEN, RefiningSector, year);
+			
+			H2DemandBySectorAnnual(regCEN, ElectricitySector, year) := sum((MNUMCR, MNUMYR) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, year)), QMORE_QH2EL(MNUMCR, MNUMYR));
+			
+			H2DemandBySectorSeasonal(regCen, IndustrialSector, seas, i_calYear) := H2DemandBySectorAnnual(regCen, IndustrialSector, i_calYear) * SeasonalFraction(seas);
+			H2DemandBySectorSeasonal(regCen, TransportationSector, seas, i_calYear) := H2DemandBySectorAnnual(regCen, TransportationSector, i_calYear) * SeasonalFraction(seas);
+			H2DemandBySectorSeasonal(regCen, RefiningSector, seas, i_calYear) := H2DemandBySectorAnnual(regCen, RefiningSector, i_calYear) * SeasonalFraction(seas);
+			H2DemandBySectorSeasonal(regCen, ElectricitySector, seas, year) := sum((MNUMCR, MNUMYR, M3) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, year))
+												and (NEMSmap_M3_to_seas(M3, seas)), UEFDOUT_SQH2EL(MNUMCR, M3, MNUMYR));
+			
+			H2DemandByYear(regCen, i_calYear) := sum(sec, H2DemandBySectorAnnual(regCen, sec, i_calYear));
+			H2DemandByYear(regCen, i_calYear) | (i_calYear > LastModelYear) := H2DemandByYear(regCen, LastModelYear);
+			
+			H2DemandBySeason(regCen, seas, i_calYear) := sum(sec, H2DemandBySectorSeasonal(regCen, sec, seas, i_calYear));
+			H2DemandBySeason(regCen, seas, i_calYear) | (i_calYear > LastModelYear) := H2DemandBySeason(regCen, seas, LastModelYear);
+			
+			
+			! Convert from trills to mmton 
+			H2DemandByYear(regCen, i_calYear) := (H2DemandByYear(regCen, i_calYear) * CONVFACT_CFH2Q_KG('1')/1000);
+			H2DemandBySeason(regCen, seas, i_calYear) := (H2DemandBySeason(regCen, seas, i_calYear)* CONVFACT_CFH2Q_KG('1')/1000);
+			
+			! Byproduct H2 Supply
+			ByproductSupplyByYear(regCen, i_calYear) := sum((MNUMCR, MNUMYR) |  (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, i_calYear)), INDOUT_BYPRDH2IN(MNUMCR, MNUMYR));
+			ByproductSupplyByYear(regCen, i_calYear) := (ByproductSupplyByYear(regCen, i_calYear) * CONVFACT_CFH2Q_KG('1')/1000);
+			ByproductSupplyByYear(regCen, i_calYear) | (i_calYear > LastModelYear) := ByproductSupplyByYear(regCen, LastModelYear);
+			
+			! CO2 Related Parameters
+			! @TODO - temp stuff 
+			!CCATSDAT_CO2_PRC_DIS_45Q(MNUMCR, MNUMYR) := -50;
+			!CCATSDAT_CO2_PRC_DIS_NTC(MNUMCR, MNUMYR) := -30;
+			
+			CO2PriceWith45Q(regCen, i_calYear) := sum((MNUMCR, MNUMYR) |  (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, i_calYear)), CCATSDAT_CO2_PRC_DIS_45Q(MNUMCR, MNUMYR));
+			CO2PriceWithout45Q(regCen, i_calYear) := sum((MNUMCR, MNUMYR) |  (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)) and (NEMSmap_MNUMYRToYear(MNUMYR, i_calYear)), CCATSDAT_CO2_PRC_DIS_NTC(MNUMCR, MNUMYR));
+			CO2PriceWith45Q(regCen, i_calYear) | (i_calYear > LastModelYear) := CO2PriceWith45Q(regCen, LastModelYear); 
+			CO2PriceWithout45Q(regCen, i_calYear) | (i_calYear > LastModelYear) := CO2PriceWithout45Q(regCen, LastModelYear); 
+			
+			Implied45QValue(regCen, i_calYear) := CO2PriceWith45Q(regCen, i_calYear) - CO2PriceWithout45Q(regCen, i_calYear);
+			
+			! Turn off second and third planning periods when not in FCRL iteration to save runtime
+			if NCNTRL_FCRL('1') <> 1 and AIMMS_Standalone_Switch <> 1 then
+				PlanningPeriods_ := {1};
+				SecondAndThirdPlanningPeriods := {};
+			endif;
+		}
+		Comment: "Process data from GDS, and turn the data into AIMMS paramters instead of using the NEMS names";
+	}
+	Procedure Initialize_Capital_Costs {
+		Body: {
+			! Initialize capital cost for H2 Production by year parameter (convert to 1987$)
+			CapitalCostsByYear(FirstModelYear, regNERC, prodTech_elec) := base_PUCCostElectrolyzer(regNERC, prodTech_elec) / GDPPriceDeflator87(base_dollar_year);
+			CapitalCostsByYear(FirstModelYear, regCen, prodTech_nonElec) := base_PUCCostNonElectrolyzer(regCen, prodTech_nonElec) / GDPPriceDeflator87(base_dollar_year);
+			
+			! Initialize pipeline capital costs
+			! @TODO - Remove hardcoding for 365 (days in year) and .9 (assumed utilization rate)
+			base_TUCCost(regCen, regCen_j) := pipe_tcc(regCen, regCen_j) /$ ((pipe_cap(regCen, regCen_j)*365)*.9);
+		}
+	}
+	Procedure Initialize_HMM_Parameters {
+		Body: {
+			!CurrentModelYear := '2023';
+			NextModelYear := CurrentModelYear + 1;
+			ThirdModelYear := CurrentModelYear + 2;
+			
+			YearsInThirdPlanningPeriod_ := {i_calYear|(i_calYear > NextModelYear and i_calYear < CurrentModelYear+NumberFutureYears)};
+			
+			CapacityYears_ := cal_Year;
+		}
+	}
+	Procedure Convert_Input_Units {
+		Body: {
+			
+			
+			! Convert operational costs from $/kg to $/million metric ton
+			base_FixedOM_Electrolyzer(seas, regNERC, prodTech) := base_FixedOM_Electrolyzer(seas, regNERC, prodTech) * kg_to_mMton;
+			base_FixedOM_NonElectrolyzer(seas, regCen, prodTech) := base_FixedOM_NonElectrolyzer(seas, regCen, prodTech) * kg_to_mMton;
+			base_PUCCostElectrolyzer(regNERC, prodTech) := base_PUCCostElectrolyzer(regNERC, prodTech) * kg_to_mMton;
+			base_PUCCostNonElectrolyzer(regCen, prodTech) := base_PUCCostNonElectrolyzer(regCen, prodTech) * kg_to_mMton;
+			base_VarOM_Electrolyzer(seas, regNERC, prodTech) := base_VarOM_Electrolyzer(seas, regNERC, prodTech) * kg_to_mMton;
+			base_VarOM_NonElectrolyzer(seas, regCen, prodTech) := base_VarOM_NonElectrolyzer(seas, regCen, prodTech) * kg_to_mMton;
+			CO2CaptureRate(prodTech) := CO2CaptureRate(prodTech) * kg_to_mMton;
+			ElectrolyzerFuelConsumption(prodTech, FuelElec) := (ElectrolyzerFuelConsumption(prodTech, FuelElec)*Kwh_to_MMBtu) * kg_to_mMton;
+			FeedstockConsumption(prodTech, fuel) := FeedstockConsumption(prodTech, fuel) * kg_to_mMton;
+			HPConsumption(prodTech, fuel) := HPConsumption(prodTech, fuel) * kg_to_mMton;
+			HPConsumption(prodtech, FuelElec) := HPConsumption(prodtech, FuelElec) * Kwh_to_MMBtu; ! Convert electricity consumption for HP from Kwh to MMBtu.
+			
+			! History
+			electrolyzer_learning_cap /= kg_to_mMton;
+			hist_prod_cap(histyear, reg, prodTech) /= kg_to_mMton;
+			hist_storage_cap(histyear, regCen, storageTech) /= kg_to_mMton;
+			planned_cap(i_calYear, reg, prodTech) /= kg_to_mMton;
+			
+			! Transportation and Storage
+			base_StorageINJCost(regCen, storageTech) /= kg_to_mMton;
+			base_StorageWthCost(regCen, storageTech) /= kg_to_mMton;
+			base_SUCCost(regCen, storageTech) /= kg_to_mMton;
+			base_TransportationCost(regCen, regCen_j) /= kg_to_mMton;
+			base_TUCCost(regCen, regCen_j) /= kg_to_mMton;
+			pipe_cap(regCen, regCen_j) /= kg_to_mMton;
+			pipe_energy_intensity(regCen, regCen_j) *= (kg_to_mMton * Kwh_to_MMBtu);
+			non_energy_opex(regCen, regCen_j) *= kg_to_mMton;
+			
+			! Levelize storage costs and convert to $/mmton
+			base_StorageCapex := storage_capex / working_gas_capacity;
+			base_StorageCapex *= kg_to_mMton;
+			
+			
+			! From h2config
+			StorageElecConsRate *= kg_to_mMton;
+			
+			! Convert end-use markup to 1987$
+			EndUseMarkup(sec) := markup(sec) / GDPPriceDeflator87(base_dollar_year);
+		}
+	}
+	Procedure Process_Electrolyzer_Limits {
+		Body: {
+			! Process GDS for max electrolyzer load
+			MaxElectrolyzerLoadByYear(i_calYear, regNERC, hr, seas) := sum((MNUMYR, MNUMNR, M24, M4) | NEMSmap_MNUMYRToYear(MNUMYR, i_calYear) and NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC) and
+									      NEMSmap_M24_ToHr(M24, hr) and NEMSmap_M4_to_seas(M4, seas),  UECPOUT_LOADMAXH2EL(MNUMNR, M4, M24, MNUMYR));
+			
+			! Convert data from Gwh to MMBTU
+			MaxElectrolyzerLoadByYear(i_calYear, regNERC, hrs, seas) := MaxElectrolyzerLoadByYear(i_calYear, regNERC, hrs, seas) * (Mwh_to_mmbtu*1000) * 0.5;
+			
+			! Extend data
+			MaxElectrolyzerLoadByYear(i_calYear, regNERC, hr, seas) | i_calYear >= LastModelYear := MaxElectrolyzerLoadByYear(LastModelYear, regNERC, hr, seas);
+			
+			! Process into planning periods
+			for (regNERC, seas, hr) | (Exists(i_calYear | MaxElectrolyzerLoadByYear(i_calYear, regNERC, hr, seas))) do
+				MaxElectrolyzerLoad(regNERC, hr, seas, pp) := NPVByPlanningPeriod(
+					AnnualValue : MaxElectrolyzerLoadByYear(i_calYear, regNERC, hr, seas) , 
+					DiscountRate   : WACC ,
+					NPV_Type   	 :  2)(pp);
+			endfor;
+		}
+	}
+	DeclarationSection Process_45V_Declarations {
+		Parameter TestMatrix {
+			IndexDomain: (elecYear,pp);
+			Range: binary;
+		}
+		Parameter TotalIncrementalGenerationByPeriod {
+			IndexDomain: (regNERC,elecYear,hr,seas,pp);
+			Property: NoSave;
+		}
+		Parameter AverageThirdPeriodGeneration {
+			IndexDomain: (regNERC,elecYear,hr,seas);
+		}
+		Parameter EligibleGeneration45V {
+			IndexDomain: (regNERC,capYear,elecYear,hr,seas,pp);
+		}
+		Parameter EligibleGenerationByElecYear {
+			IndexDomain: (regNERC,capYear,elecYear,hr,seas,pp);
+		}
+		Parameter EligibleGenerationByCapYear {
+			IndexDomain: (regNERC,capYear,hr,seas,pp);
+		}
+		Set IncrementalityRange {
+			SubsetOf: CapacityYears_;
+			Index: inc_range;
+		}
+		Parameter IncrementalityYears;
+		ElementParameter IncrementalityStart {
+			Range: CapacityYears_;
+		}
+		ElementParameter IncrementalityEnd {
+			Range: CapacityYears_;
+		}
+		Parameter IncrementalityEligibility {
+			IndexDomain: (elecyear,capYear);
+			Range: binary;
+		}
+		Parameter IncrementalGeneration {
+			IndexDomain: (i_calYear,regNERC,elecYear,hr,seas);
+		}
+		Parameter RenewableGenerationByYear {
+			IndexDomain: (i_calYear,regNERC,capYear,hr,seas);
+		}
+		Parameter RenewableGenerationByPeriod {
+			IndexDomain: (regNERC,elecYear,hr,seas,pp);
+		}
+		Parameter RenewableGeneration45V {
+			IndexDomain: (i_calYear,regNERC,elecYear,hr,seas) | elecYear <= ep_lastElecYear and i_calYear <= ep_lastElecYear;
+			Property: NoSave;
+		}
+		Parameter GDS_Renewable45VGeneration {
+			IndexDomain: (MNUMYR,MNUMNR,MNUMYRVIN,M24,M4,M3) | MNUMYR >= ep_firstYear and MNUMYR <= ep_maxYear;
+			Property: NoSave;
+		}
+		Parameter GDS_Vintage45V {
+			IndexDomain: (MNUMYR,MNUMNR,MNUMYRVIN,M3) | MNUMYR >= ep_firstYear and MNUMYR <= ep_maxYear;
+			dex::Dataset: HMMLargeDataFiles;
+			dex::TableName: ToAIMMS_VintageRatio;
+		}
+		Parameter Gen45VDataByTech {
+			IndexDomain: (MNUMYR,MNUMNR,M24,M4,M3) | MNUMYR >= ep_firstYear and MNUMYR <= ep_maxYear;
+			dex::Dataset: HMMLargeDataFiles;
+			dex::TableName: ToAIMMS_45V_generation_by_tech;
+		}
+	}
+	DeclarationSection Electrolyzer_Limits {
+		Parameter MaxElectrolyzerLoad {
+			IndexDomain: (regNERC,hr,seas,pp);
+		}
+		Parameter MaxElectrolyzerLoadByYear {
+			IndexDomain: (i_calYear,regNERC,hr,seas);
+			Comment: "Maximum load that can be demand from an electrolyzer for each hour/season/region (GWh)";
+		}
+		Parameter LDLM {
+			IndexDomain: (MNUMYR, MNUMNR, M24, M4);
+			dex::Dataset: HMMLargeFiles;
+			dex::TableName: debug_electrolyzer_limits;
+		}
+	}
+	Procedure Process_EMM45V {
+		Body: {
+			! Read 45V data from sample csv file. 
+			!dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
+			!dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
+			!dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
+			!dex::DatasetGeneratorFilter('CSV', 'Dense') := 1;
+			!dex::DatasetGeneratorFilter('Parquet', 'Dense') := 1;
+			!DEX::PrefixAutoTableWithDataset := 1;
+			!dex::GenerateDatasetMappings();
+			! Add mapping
+			!dex::AddMapping("Gen45V_Mapping_CSV", "Mappings/Generated/HMMLargeDataFiles-ToAIMMS_45V_generation_by_tech-CSV.xml");
+			! Read the CSV
+			!dex::ReadFromFile("ToAIMMS/EMM_files/ToAIMMS_45V_generation_by_tech.csv", "Gen45V_Mapping_CSV");
+			!dex::AddMapping("VintageRatio_Mapping_CSV", "Mappings/Generated/HMMLargeDataFiles-ToAIMMS_VintageRatio-CSV.xml");
+			!dex::ReadFromFile("ToAIMMS/EMM_files/ToAIMMS_VintageRatio.csv", "VintageRatio_Mapping_CSV");
+			
+			! shrink the year domain if not in standalone or FCRL is off. Don't need to hold as much data and perform extra calculations if pp2/3 are not used.
+			if NCNTRL_FCRL('1') = 1 or AIMMS_Standalone_Switch =1 then
+				! maximum years if FCRL is 1 or running standalone
+				ep_maxYear := card(MNUMYR);
+				ep_lastElecYear := last(CapacityYears_);
+			else
+				ep_maxYear := sum((MNUMYR, year) | year <= CurrentModelYear, NEMSmap_MNUMYRToYear(MNUMYR, year));
+				ep_lastElecYear := CurrentModelYear;
+			endif;
+			
+			ep_firstYear := sum((MNUMYR, year) | year <= FirstModelYear, NEMSmap_MNUMYRToYear(MNUMYR, year));
+			
+			! Add generation by tech and vintage ratios together to get generation by vintage.
+			GDS_Renewable45VGeneration(MNUMYR, MNUMNR, MNUMYV, M24, M4, M3) := UECPOUT_QELGEN(M3, MNUMNR, M24, M4, MNUMYR) * UECPOUT_QELGEN_VINT(M3, MNUMNR, MNUMYR, MNUMYV);
+			
+			!write GDS_Vintage45V(MNUMYR, MNUMNR, MNUMYRVIN, M3) to file "GDS_Vintage45V.txt";
+			
+			! Convert from GDS to HMM naming. Sum up generation tech.
+			RenewableGeneration45V(year, regNERC, elecYear, hr, seas) := 
+			sum((MNUMYR, MNUMNR, MNUMYV, M24, M4, M3), GDS_Renewable45VGeneration(MNUMYR, MNUMNR, MNUMYV, M24, M4, M3) * NEMSmap_MNUMYRToYear(MNUMYR, year) *
+			 NEMSmap_MNUMYRToYear(MNUMYV, elecYear) * NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC) *  NEMSmap_M24_ToHr(M24, hr) * NEMSmap_M4_to_seas(M4, seas));
+			
+			! Extend data
+			RenewableGeneration45V(i_calYear, regNERC, elecYear, hr, seas) | (i_calYear > LastModelYear) := RenewableGeneration45V(LastModelYear, regNERC, elecYear, hr, seas);
+			
+			! Convert data (from gwh to mmbtu)
+			RenewableGeneration45V(i_calYear, regNERC, elecYear, hr, seas) := RenewableGeneration45V(i_calYear, regNERC, elecYear, hr, seas) * (Mwh_to_mmbtu*1000);
+			
+			! Goes into first year initialization
+			if CurrentModelYear = FirstModelYear then
+			empty IncrementalityEligibility;
+			IncrementalityYears := 3;
+			for capyear do
+				if (capyear >= Credit45VStartYear and capyear <= (Credit45VEndYear+ProjectBuildTime)) then
+					IncrementalityStart := capyear - 3;
+					IncrementalityEnd := capyear +3;
+					IncrementalityRange := {IncrementalityStart..IncrementalityEnd};
+					IncrementalityEligibility(inc_range, capyear) := 1;
+				endif;
+			endfor;
+			endif;
+			
+			empty EligibleGeneration45V;
+			EligibleGeneration45V(regNERC, capYear, elecYear, hr, seas, FirstPlanningPeriod) := Credit45VEligibility(CurrentModelYear, capYear) * IncrementalityEligibility(elecYear, capYear) * RenewableGeneration45V(capYear, regNERC, elecYear, hr, seas) | capYear <= CurrentModelYear;
+			EligibleGeneration45V(regNERC, capyear, elecYear, hr, seas, SecondPlanningPeriod) | capyear < NextModelYear:=  RenewableGeneration45V(NextModelYear, regNERC, elecYear, hr, seas) * IncrementalityEligibility(elecYear, capyear) * Credit45VEligibility(NextModelYear, capYear);
+			
+			
+			! For third planning period we first calculate the average generation for each generation vintage accross the third planning period years, then extract. 
+			! NOTE - I think this should technically be a NPV-weighted average. But need to do a way that is efficient and doesn't blow up run time. 
+			! NDW: Even if this is empty, running the code loop still takes almost half a second. Turning it off in non FCRL iterations.
+			if NCNTRL_FCRL(1) = 1 or AIMMS_Standalone_Switch = 1 then
+				AverageThirdPeriodGeneration(regNERC, elecYear, hr, seas) := mean(thirdPeriodYears, RenewableGeneration45V(thirdPeriodYears, regNERC, elecYear, hr, seas));
+				EligibleGeneration45V(regNERC, capyear, elecYear, hr, seas, ThirdPlanningPeriod) := AverageThirdPeriodGeneration(regNERC, elecYear, hr, seas) * IncrementalityEligibility(elecYear, capyear) * Credit45VEligibility(ThirdModelYear, capYear);
+			else
+				AverageThirdPeriodGeneration(regNERC, elecYear, hr, seas) := 0;
+				EligibleGeneration45V(regNERC, capyear, elecYear, hr, seas, ThirdPlanningPeriod) := 0 ;
+			endif;
+			
+			TotalIncrementalGenerationByPeriod(regNERC, elecYear, hr, seas, FirstPlanningPeriod) := RenewableGeneration45V(FirstModelYear, regNERC, elecyear, hr, seas);
+			TotalIncrementalGenerationByPeriod(regNERC, elecYear, hr, seas, SecondPlanningPeriod) := RenewableGeneration45V(NextModelYear, regNERC, elecyear, hr, seas);
+			TotalIncrementalGenerationByPeriod(regNERC, elecYear, hr, seas, ThirdPlanningPeriod) := mean(thirdPeriodYears, RenewableGeneration45V(thirdPeriodYears, regNERC, elecyear, hr, seas));
+			
+			TestMatrix(elecYear, pp) := exists((regNERC, capyear, hr, seas), EligibleGeneration45V(regNERC, capYear, elecYear, hr, seas, pp));
+		}
+	}
+	Procedure Initialize_Capacities_From_History {
+		Body: {
+			! For things like initializing existing capacity, we only need to do that in the FirstModelYear, not everytime the model runs.
+			! PRODUCTION HISTORY
+			
+			! calculate industrial share of total weight for each subindustry within a census division
+			region_industrial_total_weight(icr, subindustry, histyear) := sum((regCen), IndustrialWeight(regCen, subindustry, histyear) * map_Census_div_region(icr, regCen));
+			division_industrial_weight(regCen, subindustry, histyear) := IndustrialWeight(regCen, subindustry, histyear) / $ sum(icr, region_industrial_total_weight(icr, subindustry, histyear) * map_Census_div_region(icr, regCen));
+			hist_smr_industrial_div(regCen, subindustry, histyear) := sum(icr, h_chem_feed_supply_reg(subindustry, icr) * division_industrial_weight(regCen, subindustry, histyear) * map_Census_div_region(icr, regCen));
+			! sum across industries to get census division industrial SMR capacity
+			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech) := sum(subindustry, hist_smr_industrial_div(regCen, subindustry, histyear));
+			
+			! Calculations above adjust supply based on macro industrial value of shipments. Since we want estimated capacity implied by supply from MECS 2018, carry MECS 2018 data forward and then adjust by refinery capacity.
+			! This might have to change in future years.
+			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech) | histyear >= MECSYear := HistoricalProductionCapacityNonElecByYear(MECSYear, regCen, SMRTech) * CapacityReserveRatio;
+			
+			! add refining SMR capacity
+			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech)  += hist_refinery_smr_cap(histyear, regCen, SMRTech);
+			! subtract CCS cap
+			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech)  | HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech) -= hist_smr_ccs_cap(histyear, regCen, SMRCCSTech);
+			! add CCS capacity into its own slot
+			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRCCSTech) := hist_smr_ccs_cap(histyear, regCen, SMRCCSTech);
+			
+			!HistoricalProductionCapacityNonElecByYear(histyear, regCen, prodTech_nonElec) := hist_prod_cap(histyear, regCen, prodTech_nonElec);
+			HistoricalProductionCapacityElecByYear(histyear, regNERC, prodTech_elec) := hist_prod_cap(histyear, regNERC, prodTech_elec);
+			
+			! Find what was added in which years so we know what the capacity vintages are.
+			AddedElectrolyzerCapacityByYear(histyear, regNERC, prodTech_elec) := HistoricalProductionCapacityElecByYear(histyear, regNERC, prodTech_elec) - HistoricalProductionCapacityElecByYear(histyear-1, regNERC, prodTech_elec);
+			LastHistoricalProductionCapacityYearElec(regNERC, prodTech_elec) := Last(i_calYear | AddedElectrolyzerCapacityByYear(i_calYear,regNERC,prodTech_elec));
+			CapacityElecVintage(LastHistoricalProductionCapacityYearElec(regNERC, prodTech_elec), regNERC, prodTech_elec, histyear) := AddedElectrolyzerCapacityByYear(histyear, regNERC, prodTech_elec);
+			
+			! Extend existing production capacity to remaining years in calendar.
+			CapacityElecVintage(i_calYear, regNERC, prodTech_elec, LastHistoricalProductionCapacityYearElec(regNERC, prodTech_elec)) | (i_calYear > LastHistoricalProductionCapacityYearElec(regNERC, prodTech_elec))
+			 := CapacityElecVintage(LastHistoricalProductionCapacityYearElec(regNERC, prodTech_elec), regNERC, prodTech_elec, LastHistoricalProductionCapacityYearElec(regNERC, prodTech_elec));
+			
+			! Find what was added in which years so we know what the capacity vintages are.
+			AddedSMRCCSCapacityByYear(histyear, regCen, SMRCCSTech) := HistoricalProductionCapacityNonElecByYear(histyear, regCEN, SMRCCSTech) - HistoricalProductionCapacityNonElecByYear(histyear-1, regCEN, SMRCCSTech);
+			
+			
+			! Build initial capacity array for SMR CCS
+			for (histyear, regCen) do
+				CapacityNonElecVintage(histyear, regCen, SMRCCSTech, histyear) := AddedSMRCCSCapacityByYear(histyear, regCen, SMRCCSTech);
+			endfor;
+			
+			! Build initial capacity array for SMR
+			LastHistoricalProductionCapacityYear := Last(i_calYear | Exists((regCen, prodTech_nonElec)|HistoricalProductionCapacityNonElecByYear(i_calYear,regCen,SMRTech)));
+			CapacityNonElecVintage(LastHistoricalProductionCapacityYear, regCen, SMRTech , LastHistoricalProductionCapacityYear) :=  HistoricalProductionCapacityNonElecByYear(LastHistoricalProductionCapacityYear, regCen, SMRTech);
+			
+			! Fill and extend SMR CCS array 
+			SMRCCSVintage(capYear, regCEN) := Exists((i_calYear) | CapacityNonElecVintage(i_calYear, regCen, SMRCCSTech, capYear));
+			for (capyear, regCEN) | SMRCCSVintage(capYear, regCen) do
+				loopCapYear := capyear;
+				loopRegCen := regcen;
+				CapacityNonElecVintage(i_calYear, loopRegCen, SMRCCSTech, loopCapYear) | (i_calYear > loopCapYear)  := CapacityNonElecVintage(loopCapYear, loopRegCen, SMRCCSTech, loopCapYear);
+			endfor; 
+			
+			! Find latest year that capacity data exists.
+			!LastHistoricalProductionCapacityYear(histyear, regCEN, SMRCCSTech) :=   First((histyear, regCEN ) | AddedSMRCCSCapacityByYear(histyear,regCen,SMRCCSTech));
+			!LastHistoricalProductionCapacityYear(regCEN,SMRTech) := Last(i_calYear | HistoricalProductionCapacityNonElecByYear(i_calYear,regCen,SMRTech));
+			
+			!CapacityNonElecVintage(LastHistoricalProductionCapacityYear(regCEN, SMRCCSTech), regCEN, SMRCCSTech, histyear) := AddedSMRCCSCapacityByYear(histyear, regCEN, SMRCCSTech);
+			
+			! For now, putting all historical capacity in 2023
+			! I think only capacity post 2023 is eligible for 45Q???
+			!CapacityNonElecVintage(LastHistoricalProductionCapacityYear(regCen, prodTech_nonElec), regCen, prodTech , LastHistoricalProductionCapacityYear(regCen, prodTech_nonElec)) :=  HistoricalProductionCapacityNonElecByYear(LastHistoricalProductionCapacityYear(regCen, prodTech_nonElec), regCen, prodTech);
+			
+			! Fill and extend SMR capacity array
+			CapacityNonElecVintage(i_calYear, regCen, SMRTech, LastHistoricalProductionCapacityYear) | (i_calYear > LastHistoricalProductionCapacityYear)
+			 := CapacityNonElecVintage(LastHistoricalProductionCapacityYear, regCen, SMRTech, LastHistoricalProductionCapacityYear);
+			
+			 ! Add in planned capacity
+			 for (capYear | capYear >= FirstModelYear) do
+			 	PlannedCapacityYear := capYear;
+				CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec, capYear) | (i_calYear >= PlannedCapacityYear)+= planned_cap(PlannedCapacityYear, regCen, prodTech_nonElec);
+				endfor; 
+			
+			! STORAGE HISTORY
+			HistoricalStorageCapacityByYear(histyear, regCen, storageTech) := hist_storage_cap(histyear, regCen, storageTech);
+			! Extend existing storage capacity to remaining years in calendar
+			LastHistoricalStorageCapacityYear := Last(i_calYear | Exists((regCen, storageTech)|hist_storage_cap(i_calYear,regCen,storageTech)));
+			HistoricalStorageCapacityByYear(i_calYear, regCen, storageTech) | (i_calYear > CurrentModelYear) := hist_storage_cap(LastHistoricalStorageCapacityYear, regCen, storageTech);
+			
+			empty InitialCapacityForLearning;
+			! Initialize capacities for learning
+			InitialCapacityForLearning(PEMTech) := electrolyzer_learning_cap;
+			InitialCapacityForLearning(prodTech_nonElec) :=  sum((capYear, regCEN), CapacityNonElecVintage(FirstModelYear, regCen, prodTech_nonElec, capYear));
+		}
+	}
+	Procedure Impute_Historical_Consumption {
+		Body: {
+			! Imputation of total natural gas consumption for hydrogen production back to 2018
+			
+			NetH2DemandForHistory(regCen, year) := H2DemandByYear(regCen, year) - ByproductSupplyByYear(regCen, year);
+			
+			! map to QNGHM
+			hist_ng_consumption(regCen, idm_histyear) | idm_histyear >= '2018' := 
+				sum(prodTech | prodTech = SMRTech, NetH2DemandForHistory(regCen, idm_histyear) * (FeedstockConsumption(prodTech, FuelNG) + HPConsumption(prodTech, FuelNG)));
+			
+			! map to QNGHMHP
+			hist_ng_heat_power(regCen, idm_histyear) | idm_histyear >= '2018' := 
+				sum(prodTech | prodTech = SMRTech, NetH2DemandForHistory(regCen, idm_histyear) * (HPConsumption(prodTech, FuelNG)));
+			
+			! map to QNGHMPF
+			hist_ng_feedstock(regCen, idm_histyear) | idm_histyear >= '2018' :=
+				sum(prodTech | prodTech = SMRTech, NetH2DemandForHistory(regCen, idm_histyear) * (FeedstockConsumption(prodTech, FuelNG)));
+			
+			! map to QELHM, electricity consumed for hydrogen production
+			hist_elec_consumption(regCen, idm_histyear) | idm_histyear >= '2018' := 
+				sum(prodTech | prodTech = SMRTech, NetH2DemandForHistory(regCen, idm_histyear) * (HPConsumption(prodTech, FuelElec))); !+
+				!sum((regNERC, prodTech_elec), HistoricalProductionCapacityElecByYear(histyear, regNERC, prodTech_elec)* ElectrolyzerFuelConsumption(prodTech_elec, 'Electricity') * map_regNERCToRegCEN(regNERC, regCen));
+			
+			! map to QELINH2NG, electricity consumed by natural gas feedstock technologies only
+			hist_elec_smrs(regCen, idm_histyear) | idm_histyear >= '2018' := 
+				sum(prodTech | prodTech = SMRTech, NetH2DemandForHistory(regCen, idm_histyear) * (HPConsumption(prodTech, FuelElec)));
+			
+			! map to QLINH2E, electricity consumed by electric power feedstock technologies only
+			hist_elec_electrolyzers(regCen, idm_histyear) | idm_histyear >= '2018' := 0;
+				!sum((regNERC, prodTech_elec), HistoricalProductionCapacityElecByYear(histyear, regNERC, prodTech_elec)* ElectrolyzerFuelConsumption(prodTech_elec, 'Electricity') * map_regNERCToRegCEN(regNERC, regCen));
+		}
+		Comment: "IDM needs natural gas fuel and feedstock and electrciity consumption from HMM for historical years 2018-2022. This is to benchmark to SEDS, STEO, and Annual Survey of Manufactures electricty data.";
+	}
+	Procedure Impute_Historical_Prices {
+		Body: {
+			! @TODO Change '2018' to an element parameter? Also, include either a comment or identifier name what exactly 2018 refers to. IDM base year?
+			hist_h2_price(regCen, histyear) | histyear >= '2018' := 
+			
+					! Fuel costs for non-electrolyzer
+					(PriceIndNG(regCen, histyear) * (FeedstockConsumption(SMRTech, FuelNG) + HPConsumption(SMRTech, FuelNG)) 
+					+ priceIndElec(regCen, histyear) * (FeedstockConsumption(SMRTech, FuelElec) + HPConsumption(SMRTech, FuelElec))
+					! Non-Electrolyzer O&M Costs
+					+ mean(seas, base_FixedOM_NonElectrolyzer(seas, regCen, SMRTech) )
+					+ mean(seas, base_VarOM_NonElectrolyzer(seas, regCen, SMRTech)))  / kg_to_mMton 
+					+ EndUseMarkup(IndustrialSector) ;
+		}
+	}
+	Function NPVByPlanningPeriod {
+		Arguments: (AnnualValue,DiscountRate,NPV_Type);
+		IndexDomain: pp;
+		Body: {
+			NPVByPlanningPeriod(FirstPlanningPeriod) := AnnualValue(CurrentModelYear);
+			
+			
+			! For NPV_Type = 1, the InvestmentVariablePresentValue function calculates the NPV for all years in the Third Planning Period and
+			! then sums those values together. The summed value is then divided by (1+ WACC)^2. The ^2 is because
+			! the value needs to be expressed as two periods in the future for the "all remaining years" planning period.
+			! Use for prices/costs.
+			if NPV_Type = 1 then
+				NPVByPlanningPeriod(SecondPlanningPeriod) := AnnualValue(NextModelYear)/$(1 + DiscountRate);
+				! Testing for zero here sets negative numbers to blanks.
+			
+				NPVByPlanningPeriod(ThirdPlanningPeriod) | (sum(thirdPeriodYears, AnnualValue(thirdPeriodYears)) <> 0)
+					:= InvestmentVariablePresentValue(
+						AnnualValue(thirdPeriodYears),! (input) one-dimensional numerical parameter
+						DiscountRate  ! (input) numerical expression
+						)
+						/$ power(1 + DiscountRate,2);
+			
+			! NPV_Type = 2 calculates NPV by using a NPV-weighted average in the third planning period.
+			! Use for quantities, historical capacities, etc.
+			! @TODO: Do I need to divide by 1+ discount rate in second planning period.
+			elseif NPV_Type = 2 then
+				Ones(i_calYear) := 1;
+				NPVByPlanningPeriod(SecondPlanningPeriod) := AnnualValue(NextModelYear);
+			
+				NPVByPlanningPeriod(ThirdPlanningPeriod)
+				| (sum(thirdPeriodYears, AnnualValue(thirdPeriodYears)) <> 0)
+					:= InvestmentVariablePresentValue(
+						AnnualValue(thirdPeriodYears),                   ! (input) one-dimensional numerical parameter
+						DiscountRate             ! (input) numerical expression
+						)
+					/ $InvestmentVariablePresentValue(
+						Ones(thirdPeriodYears),                   ! (input) one-dimensional numerical parameter
+						DiscountRate             ! (input) numerical expression
+						);
+			
+			
+			elseif NPV_Type = 3 then
+			
+			! NPV_Type = 3 is used for *capacity expansion costs.*
+			! The difference between Type 1 and Type 3, is that in Type 3, the annual costs of capacity expansion are summed into the second planning period after taking their NPVs.
+			! This way, the model takes into account total capital costs when it makes it capacity expansion decision in the Second Planning Period.
+				NPVByPlanningPeriod(SecondPlanningPeriod) |  (sum(thirdPeriodYears, AnnualValue(thirdPeriodYears)) <> 0) 
+				:= AnnualValue(NextModelYear)/$(1 + DiscountRate)
+					+ InvestmentVariablePresentValue(
+						AnnualValue(thirdPeriodYears),                   ! (input) one-dimensional numerical parameter
+						DiscountRate             ! (input) numerical expression
+						)
+						/ $power(1 + DiscountRate,2);
+			
+				NPVByPlanningPeriod(ThirdPlanningPeriod) 
+				|  (sum(thirdPeriodYears, AnnualValue(thirdPeriodYears)) <> 0)
+					:= InvestmentVariablePresentValue(
+						AnnualValue(thirdPeriodYears),                   ! (input) one-dimensional numerical parameter
+						DiscountRate             ! (input) numerical expression
+						)
+						/ $power(1 + DiscountRate,2);			
+			
+			endif;
+		}
+		Parameter AnnualValue {
+			IndexDomain: ::i_calYear;
+			Property: Input;
+		}
+		Parameter Ones {
+			IndexDomain: ::i_calYear;
+		}
+		Parameter DiscountRate {
+			Property: Input;
+		}
+		Parameter NPV_Type {
+			Property: Input;
+		}
+	}
+	Section Preoptimization_Processing {
+		Procedure Process_Demands_and_Quantities {
+			Body: {
+				for (regNERC, seas, hr) | (Exists(i_calYear | ElecCurtailedByYear(regNERC, seas, hr, i_calYear))) do
+					ElecCurtailed(regNERC, seas, hr, pp) := NPVByPlanningPeriod(
+						AnnualValue : ElecCurtailedByYear(regNERC, seas, hr, i_calYear) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  2)(pp);
+				endfor;
+				
+				for (regCen, seas) do
+				H2Demand(seas, regCen, pp) := NPVByPlanningPeriod(
+					AnnualValue  :  H2DemandBySeason(regCen,seas, i_calYear), 
+					DiscountRate :  WACC, 
+					NPV_Type     :  2)(pp);
+				endfor;
+				
+				H2Demand(seas, regCen, SecondPlanningPeriod) := H2Demand(seas, regCen, SecondPlanningPeriod) * CapacityReserveRatio;
+				
+				for (regCEN, seas) do
+				ByproductSupply(regCEN, seas, pp) := NPVByPlanningPeriod(
+					AnnualValue  :  ByproductSupplyByYear(regCen, year), 
+					DiscountRate :  WACC, 
+					NPV_Type     :  2)(pp);
+				endfor;
+				ByproductSupply(regCen, seas, pp) := ByproductSupply(regCen, seas, pp) * SeasonalFraction(seas);
+			}
+		}
+		Procedure Process_Capacities {
+			Body: {
+				! @TODO - Need to also make sure to build in a spot for planned capacity expansions.
+				
+				! Add capacity built in prior model run to existing capacity
+				! NOTE: `CurrentModelYear` in PUCExpansionsNonElectrolyzer would equal `NextModelYear` (i.e., PP 2) in the prior model year run.
+				! @TODO - Declare PUCExpansionsNonElectrolyzer to be 0 in an initialization procedure in FirstYearInitialization()
+				!CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec, CurrentModelYear) | (i_calYear >= CurrentModelYear)  := PUCExpansionsNonElectrolyzer(regCen, prodTech_nonElec, CurrentModelYear);
+				
+				! Discount and aggregate into planning periods
+				! NOTE: The `Exists() stuff is there to only run the loop through combinations that actually exists, which reduces unnecessary hits to this loop for the empty capYear/prodTech/region combinations.
+				for (regCen, prodTech_nonElec, capyear) | (Exists(i_calYear | CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec, capYear))) do
+					ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capyear) := NPVByPlanningPeriod(
+						AnnualValue : CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec,capyear), 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  2)(pp);
+				endfor;
+				
+				for (regNERC, prodTech_Elec, capyear) | (Exists(i_calYear | CapacityElecVintage(i_calYear, regNERC, prodTech_Elec, capYear))) do
+					ExistingCapacityElectrolyzer(regNERC, prodTech_Elec, pp, capyear) := NPVByPlanningPeriod(
+						AnnualValue : CapacityElecVintage(i_calYear, regNERC, prodTech_Elec,capyear), 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  2)(pp);
+				endfor;
+				
+				for (regCen, storageTech) do
+					ExistingStorageCapacity(regCen, storageTech, pp) := NPVByPlanningPeriod(
+						AnnualValue : HistoricalStorageCapacityByYear(i_calYear, regCen, storageTech) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  2)(pp);
+				endfor;
+				
+				for (regCen, regCen_j) do
+					ExistingTransportationCapacity(regCen, regCen_j, pp) := NPVByPlanningPeriod(
+					AnnualValue  : TransportationCapacityByYear(regCen, regCen_j, i_calYear) , 
+					DiscountRate :  WACC, 
+					NPV_Type     :  2)(pp);
+				endfor;
+			}
+		}
+		Procedure Process_FuelPrices_And_Credits {
+			Body: {
+				for (regCen, fuel) do
+					FuelCost(seas, regCen, fuel, pp) := NPVByPlanningPeriod(
+						AnnualValue : FuelPricesByYear(fuel, seas, regCen, i_calYear) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+				
+				for(regNERC, seas, hr) | (Exists(i_calYear | HourlyElectricityPrices(regNERC, seas, hr, i_calYear))) do
+					HourlyFuelCost(regNERC, seas, hr, FuelElec, pp) := NPVByPlanningPeriod(
+						AnnualValue: HourlyElectricityPrices(regNERC, seas, hr, i_calYear),
+						DiscountRate : WACC,
+						NPV_Type : 1)(pp);
+				endfor;
+				
+				for(regNERC, seas, hr) | (Exists(i_calYear | HourlyElectricityPrices(regNERC, seas, hr, i_calYear))) do
+					HourlyFuelCost(regNERC, seas, hr, FuelElec, pp) := NPVByPlanningPeriod(
+						AnnualValue: HourlyElectricityPrices(regNERC, seas, hr, i_calYear),
+						DiscountRate : WACC,
+						NPV_Type : 1)(pp);
+				endfor;
+				
+				for(regNERC, seas, hr, creditStep) | (Exists(i_calYear | HourlyElectricityPricesByCredit(regNERC, seas, hr, i_calYear, creditStep))) do
+					HourlyFuelCostCredit(regNERC, seas, hr, FuelElec,creditStep, pp) := NPVByPlanningPeriod(
+						AnnualValue: HourlyElectricityPricesByCredit(regNERC, seas, hr, i_calYear, creditStep),
+						DiscountRate : WACC,
+						NPV_Type : 1)(pp);
+				endfor;
+				
+				
+				! 45V Relating Processing
+				Calculate_45V_Weights;
+				
+				Credit45VByYear(year, capYear) := Credit45VEligibility(year, capYear) * (Credit45VValue / GDPPriceDeflator87(Credit45VDollarYear));
+				
+				! Add in Credit45V for what could be built by the third planning period?
+				Credit45VByYear(thirdPeriodYears, LastYearInThirdPlanningPeriod)  := (Credit45VValue / GDPPriceDeflator87(Credit45VDollarYear));
+				for(capYear) do
+					Credit45VByPlanningPeriod(pp, capyear) := NPVByPlanningPeriod(
+						AnnualValue  :  Credit45VByYear(year, capyear), 
+						DiscountRate :  WACC, 
+						NPV_Type     :  1)(pp);
+				endfor;
+				TaxCredit45V(pp, capYear, creditStep45V) := Credit45VByPlanningPeriod(pp, capYear) * Credit45VPlanningPeriodWeights(pp, capYear);
+				TaxCredit45V(pp, capYear, 'No45V') := 0;
+				
+				! If year is not eligible for Tax Credit, then apply minor negative credit so that the model does not see it as equal to "No45V".
+				! Kinda dumb, but so far, simplest workaround.
+				TaxCredit45V(pp, capYear, creditStep45V) | TaxCredit45V(pp, capYear, creditStep45V) = 0 := -.01;
+				
+				! 45Q related processing
+				Credit45QByYear(regCen, year, capYear) := Credit45QEligibility(year, capYear) * Implied45QValue(regCen, year); ! I believe the incoming data from CCATS is already in 1987$, no need to deflate.
+				Credit45QByYear(regCen, thirdPeriodYears, LastYearInThirdPlanningPeriod) := Implied45QValue(regCen, thirdPeriodYears);
+				
+				for(regcen, prodTech_nonElec, capyear) do
+					Credit45QByPlanningPeriod(pp, regCen, capYear) := NPVByPlanningPeriod(
+						AnnualValue  :  Credit45QByYear(regCen, year, capYear), 
+						DiscountRate :  WACC, 
+						NPV_Type     :  1)(pp);
+				endfor;
+				TaxCredit45Q(regCen, prodtech_ccs, pp, capYear) := Credit45QByPlanningPeriod(pp, regCen, capYear);
+				
+				! Price of CO2, excluding credit
+				for (regCen) do
+					CO2Price(regCen, pp) := NPVByPlanningPeriod(
+						AnnualValue : CO2PriceWithout45Q(regCen, i_calYear) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+			}
+		}
+		Procedure Process_Technology_Costs {
+			Body: {
+				! PRODUCTION CAPITAL COSTS
+				!@TODO: Add start year that allows when endogenous builds can start.
+				
+				! Electrolyzer Capital Costs
+				PUCCostElectrolyzerByYear(i_calYear, regNERC, prodTech_elec) := CapitalRecoveryFactor * CapitalCostsByYear(CurrentModelYear, regNERC, prodTech_elec);
+				for (regNERC, prodTech_elec) do
+					PUCCostElectrolyzer(regNERC, prodTech_elec, pp) := NPVByPlanningPeriod(
+						AnnualValue : PUCCostElectrolyzerByYear(i_calYear, regNERC, prodTech_elec) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  3)(pp);
+				endfor;
+				
+				! Non-Electrolyzer Capital Costs
+				PUCCostNonElectrolyzerByYear(i_calYear, regCen, prodTech_nonElec) := CapitalRecoveryFactor * CapitalCostsByYear(CurrentModelYear, regCEN, prodTech_nonElec);
+				for (regCen, prodTech_nonElec) do
+					PUCCostNonElectrolyzer(regCen, prodTech_nonElec, pp) := NPVByPlanningPeriod(
+						AnnualValue : PUCCostNonElectrolyzerByYear(i_calYear, regCen, prodTech_nonElec) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  3)(pp);
+				endfor;
+				
+				! PRODUCTION O&M
+				! Electrolyzer OM
+				! NOTE: Looks like we get performance boosts by limiting the index domain to specific techs (like prodTech_elec instead of prodTech), even if the output does not change.
+				FixedOMCostElectrolyzerByYear(seas, i_calYear, regNERC, prodTech_elec ) := base_FixedOM_Electrolyzer(seas, regNERC, prodTech_elec) / GDPPriceDeflator87(base_dollar_year);
+				
+				!FixedOMCostElectrolyzerByYear(seas, i_calYear, regNERC, prodTech_Elec) += PUCCostElectrolyzerByYear(i_calYear, regNERC, prodTech_Elec);
+				
+				for (seas, regNERC, prodTech_elec ) do
+					FixedOMCostElectrolyzer(seas, regNERC, prodTech_elec, pp) := NPVByPlanningPeriod(
+						AnnualValue : FixedOMCostElectrolyzerByYear(seas, i_calYear, regNERC, prodTech_elec) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+				
+				
+				varOMCostElectrolyzerByYear(seas, i_calYear, regNERC, prodTech_elec) := base_VarOM_Electrolyzer(seas, regNERC, prodTech_elec) / GDPPriceDeflator87(base_dollar_year);
+				for (seas, regNERC, prodTech_elec) do
+					VarOMCostElectrolyzer(seas, regNERC, prodTech_elec, pp) := NPVByPlanningPeriod(
+					AnnualValue   :  varOMCostElectrolyzerByYear(seas, i_calYear, regNERC, prodTech_elec), 
+					DiscountRate :  WACC, 
+					NPV_Type     :  1)(pp);
+				endfor;
+				
+				! Non-Electrolyzer OM
+				FixedOMCostNonElectrolyzerByYear(seas, i_calYear, regCEN, prodTech_nonElec) := base_FixedOM_NonElectrolyzer(seas, regCEN, prodTech_nonElec) / GDPPriceDeflator87(base_dollar_year);
+				! Add annualized capital costs to fixed OM so it can be recovered in present planning period.
+				!FixedOMCostNonElectrolyzerByYear(seas, i_calYear, regCEN, prodTech_nonElec) += PUCCostNonElectrolyzerByYear(i_calYear, regCen, prodTech_nonElec);
+				
+				
+				for (seas, regCen, prodTech_nonElec) do
+					FixedOMCostNonElectrolyzer(seas, regCen, prodTech_nonElec, pp) := NPVByPlanningPeriod(
+						AnnualValue : FixedOMCostNonElectrolyzerByYear(seas, i_calYear, regCen, prodTech_nonElec) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+				
+				
+				! Create a version of FixedOM costs without the capital recovery portion for other calculations in post-processing.
+				FixedOMCostNonElectrolyzerByYearNoCAPEX(seas, i_calYear, regCen, prodTech_nonElec):= base_FixedOM_NonElectrolyzer(seas, regCEN, prodTech_nonElec) / GDPPriceDeflator87(base_dollar_year);
+				for (seas, regCen, prodTech_nonElec) do
+					FixedOMCostNonElectrolyzerNoCapex(seas, regCen, prodTech_nonElec, pp) := NPVByPlanningPeriod(
+						AnnualValue : FixedOMCostNonElectrolyzerByYearNoCAPEX(seas, i_calYear, regCen, prodTech_nonElec) , 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+				
+				
+				varOMCostNonElectrolyzerByYear(seas, i_calYear, regCen, prodTech_nonElec) := base_VarOM_NonElectrolyzer(seas, regCen, prodTech_nonElec)  / GDPPriceDeflator87(base_dollar_year);
+				for (seas, regCEN, prodTech_nonElec) do
+					VarOMCostNonElectrolyzer(seas, regCen, prodTech_nonElec, pp) := NPVByPlanningPeriod(
+					AnnualValue   :  varOMCostNonElectrolyzerByYear(seas, i_calYear, regCEN, prodTech_nonElec), 
+					DiscountRate :  WACC, 
+					NPV_Type     :  1)(pp);
+				endfor;	
+				
+				
+				! STORAGE
+				!SUCCostByYear(regCen, storageTech,i_calYear) := base_SUCCost(regCen, storageTech) / GDPPriceDeflator87(base_dollar_year);
+				!for (regCen, storageTech) do
+				!	SUCCost(regCen, storageTech, pp) := NPVByPlanningPeriod(
+				!		AnnualValue : SUCCostByYear(regCen, storageTech, i_calYear), 
+				!		DiscountRate   : WACC ,
+				!		NPV_Type   	 :  3)(pp);
+				!endfor;
+				
+				
+				SUCCostByYear(regCen, 'SaltCavern', i_calYear) := ((base_StorageCapex * storage_flag(regCen)) * CapitalRecoveryFactor) / GDPPriceDeflator87(base_dollar_year);
+				
+				for (regCen, storagetech) do
+					SUCCost(regCen, 'SaltCavern', pp) := NPVByPlanningPeriod(
+						AnnualValue : SUCCostByYear(regCen, 'SaltCavern',  i_calYear), 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  3)(pp);
+				endfor;
+				
+				StorageWthCostByYear(regCen, storageTech, i_calYear) := base_StorageWthCost(regCen, storageTech) / GDPPriceDeflator87(base_dollar_year);
+				for (regCen, storageTech) do
+					StorageWthCost(regCen, storageTech, pp) := NPVByPlanningPeriod(
+						AnnualValue : StorageWthCostByYear(regCen, storageTech, i_calYear), 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+				
+				StorageInjCostByYear(regCen, storageTech, i_calYear) := base_StorageInjCost(regCen, storageTech) / GDPPriceDeflator87(base_dollar_year);
+				for (regCen, storageTech) do
+					StorageInjCost(regCen, storageTech, pp) := NPVByPlanningPeriod(
+						AnnualValue : StorageInjCostByYear(regCen, storageTech, i_calYear), 
+						DiscountRate   : WACC ,
+						NPV_Type   	 :  1)(pp);
+				endfor;
+				
+				
+				
+				
+				! TRANSPORTATION COSTS
+				TUCCostByYear(regCen, regCen_j, i_calYear) := CapitalRecoveryFactor * (base_TUCCost(regCen, regCen_j) / GDPPriceDeflator87(base_dollar_year));
+				for(regCen, regCen_j) do
+					TUCCost(regCen, regCen_j, pp) := NPVByPlanningPeriod(
+					AnnualValue   :  TUCCostByYear(regCen, regCen_j, i_calYear), 
+					DiscountRate :  WACC, 
+					NPV_Type     :  3)(pp);
+				endfor;
+				
+				TUC_nonenergy_opexByYear(regCen, regCen_j, i_calYear) := non_energy_opex(regCen,regCen_j) / GDPPriceDeflator87(base_dollar_year);
+				
+				for(regCen, regCen_j) do
+					TUC_nonenergy_opex(regCen, regCen_j, pp) := NPVByPlanningPeriod(
+					AnnualValue   :  TUC_nonenergy_opexByYear(regCen, regCen_j, i_calYear), 
+					DiscountRate :  WACC, 
+					NPV_Type     :  1)(pp);
+				endfor;
+				
+				! Add opex to TUC.
+				TUCCost(regCen, regCen_j, pp) += TUC_nonenergy_opex(regCen, regCen_j, pp);
+				
+				!TransportationCostByYear(regCen, regCen_j) := base_TransportationCost(regCen, regCen_j) / GDPPriceDeflator87(CostDollarYear);
+				!for(regCen, regCen_j) do
+				!	TransportationCost(regCen, regCen_j, prodTech, pp) := NPVByPlanningPeriod(
+				!	AnnualCost   :  TransportationCostByYear(regCen, regCen_j, prodTech, i_calYear), 
+				!	DiscountRate :  WACC, 
+				!	NPV_Type     :  1)(pp);
+				!endfor;
+			}
+		}
+		DeclarationSection Historical_Declarations {
+			ElementParameter loopRegCen {
+				Range: CensusRegions_;
+			}
+			ElementParameter loopCapYear {
+				Range: CapacityYears_;
+			}
+			Parameter SMRCCSVintage {
+				IndexDomain: (capYear, regCEN);
+			}
+			Parameter AddedSMRCCSCapacityByYear {
+				IndexDomain: (histyear,regCen,prodTech_nonElec);
+			}
+			Parameter NetH2DemandForHistory {
+				IndexDomain: (regCen,year);
+			}
+			ElementParameter MECSYear {
+				Range: HistoricalYears_;
+				Comment: "MECS vintage being used for initial capacity estimations";
+			}
+			Parameter AddedElectrolyzerCapacityByYear {
+				IndexDomain: (histyear,regNERC,prodTech_elec);
+			}
+			Parameter HistoricalProductionCapacityElecByYear {
+				IndexDomain: (histyear,regNERC,prodTech_elec);
+			}
+			Parameter HistoricalProdCapAnnualChange {
+				IndexDomain: (histyear,regCen,prodTech);
+			}
+			ElementParameter PlannedCapacityYear {
+				Range: cal_Year;
+				Comment: "Parameter to iterate for planned capacity additions";
+			}
+			Parameter CapacityNonElecVintage {
+				IndexDomain: (i_calYear, regCen,prodTech, capyear);
+				Comment: "Historical + Planned production capacity (million metric tons) by year and capacity year.";
+			}
+			Parameter CapacityElecVintage {
+				IndexDomain: (i_calYear,regNERC,prodTech,capYear);
+				Comment: "Existing electrolyzer capacity by year (million metric tons H2)";
+			}
+			ElementParameter LastHistoricalProductionCapacityYear {
+				Range: cal_Year;
+			}
+			ElementParameter LastHistoricalProductionCapacityYearElec {
+				IndexDomain: (regNERC, prodTech_elec);
+				Range: cal_Year;
+			}
+			Parameter HistoricalProductionCapacityNonElecByYear {
+				IndexDomain: (i_calYear,regCen,prodTech);
+				Comment: "Historical non-electrolyzer capacity (million metric tons)";
+			}
+			ElementParameter LastHistoricalStorageCapacityYear {
+				Range: cal_Year;
+				Comment: "Last year for which hydrogen storage data exists.";
+			}
+			Parameter HistoricalStorageCapacityByYear {
+				IndexDomain: (i_calYear,regCen,storageTech);
+				Comment: "Working hydrogen storage capacity by year (million metric tons)";
+			}
+			Parameter h_chem_feed_supply_reg {
+				IndexDomain: (subindustry,icr);
+			}
+			Parameter hist_smr_industrial_div {
+				IndexDomain: (regCen,subindustry,histyear);
+			}
+			Parameter division_industrial_weight {
+				IndexDomain: (regCen,subindustry,histyear);
+			}
+			Parameter region_industrial_total_weight {
+				IndexDomain: (icr,subindustry,histyear);
+			}
+			Parameter hist_refinery_smr_cap {
+				IndexDomain: (histyear,regCen,prodTech);
+			}
+			Parameter hist_smr_ccs_cap {
+				IndexDomain: (histyear,regCen,prodTech);
+			}
+			Parameter hist_ng_consumption {
+				IndexDomain: (regCen,histYear);
+				Comment: "Holder for imputed historical natural gas consumptiont o map back to QNGHM";
+			}
+			Parameter hist_ng_heat_power {
+				IndexDomain: (regCen,histYear);
+			}
+			Parameter hist_ng_feedstock {
+				IndexDomain: (regCen,histYear);
+			}
+			Parameter hist_elec_consumption {
+				IndexDomain: (regCen,histyear);
+			}
+			Parameter hist_elec_smrs {
+				IndexDomain: (regCen,histyear);
+			}
+			Parameter hist_elec_electrolyzers {
+				IndexDomain: (regCen,histyear);
+			}
+			Parameter hist_h2_price {
+				IndexDomain: (regCen,histyear);
+			}
+		}
+		DeclarationSection Transportation_Declarations {
+			Parameter TransportationCapacityByYear {
+				IndexDomain: (regCen,regCen_j,i_calYear);
+			}
+			Parameter TUC_nonenergy_opexByYear {
+				IndexDomain: (regCen,regCen_j,i_calYear);
+			}
+			Parameter TUC_nonenergy_opex {
+				IndexDomain: (regCen, regCen_j, pp);
+			}
+			Parameter TransportationCostByYear {
+				IndexDomain: (regCen,regCen_j, prodTech);
+			}
+			Parameter TUCCostByYear {
+				IndexDomain: (regCen,regCen_j,i_calYear);
+				Comment: "Unplanned transportation capacity addition costs by year. (1987$/million metric tons H2)";
+			}
+		}
+		DeclarationSection Storage_Declarations {
+			Parameter StorageInjCostByYear {
+				IndexDomain: (regCen,storageTech,i_calYear);
+				Comment: "Storage injection costs by year. (1987$/million metric tons H2)";
+			}
+			Parameter StorageWthCostByYear {
+				IndexDomain: (regCen,storageTech,i_calYear);
+				Comment: "Storage withdrawal costs by yeear (1987$/million metric ton H2)";
+			}
+			Parameter SUCCostByYear {
+				IndexDomain: (regCen, storagetech, i_calYear);
+				Comment: "Unplanned storage capacity expansion costs by year (1987$/million metric ton)";
+			}
+		}
+		DeclarationSection Production_Declarations {
+			Parameter Credit45QByYear {
+				IndexDomain: (regCen,year,capYear);
+			}
+			Parameter Credit45VByPlanningPeriod {
+				IndexDomain: (pp,capYear);
+				Comment: "Credit value of the 45V Credit by planning period (1987$ / million metric tons of H2)";
+			}
+			Parameter Credit45QByPlanningPeriod {
+				IndexDomain: (pp,regCen,capYear);
+			}
+			Parameter Credit45VByYear {
+				IndexDomain: (year,capYear);
+				Comment: "Value of the 45V Tax Credit by year (1987$/million metric tons of H2)";
+			}
+			Parameter varOMCostElectrolyzerByYear {
+				IndexDomain: (seas,i_calYear,regNERC,prodTech_elec);
+				Comment: "variable electrolyzer cost by year (1987$/million metric ton)";
+			}
+			Parameter varOMCostNonElectrolyzerByYear {
+				IndexDomain: (seas,i_calYear,regCEN,prodTech_nonElec);
+				Comment: "Non-electrolyzer variable OM costs by year (1987$/million metric ton)";
+			}
+			Parameter ProductionStepSize {
+				IndexDomain: prodStep;
+			}
+			Parameter PUCCostElectrolyzerByYear {
+				IndexDomain: (i_calYear,regNERC,prodTech);
+				Comment: "Electrolyzer Capital Costs (1987$ / million metric ton H2).";
+			}
+			Parameter FixedOMCostElectrolyzerByYear {
+				IndexDomain: (seas,i_calYear,regNERC,prodTech);
+				Comment: "Fixed OM Costs for electrolyzers by year (1987$/million metric ton)";
+			}
+			Parameter PUCCostNonElectrolyzerByYear {
+				IndexDomain: (i_calYear,regCen,prodTech);
+				Comment: "Non-electrolyzer Capital Costs, annualized (1987$ / million metric ton H2).";
+			}
+			Parameter FuelPricesByYear {
+				IndexDomain: (fuel,seas,regCen,i_calYear);
+				Comment: "Fuel prices by commodity type. All prices in $1987/MMBtu";
+			}
+			Parameter FixedOMCostNonElectrolyzerByYear {
+				IndexDomain: (seas,i_calYear,regCen,prodTech);
+				Comment: "Non-electrolyzer OM Costs by year (1987$ / million metric ton)";
+			}
+			Parameter FixedOMCostNonElectrolyzerNoCapex {
+				IndexDomain: (seas,regCen,prodTech,pp);
+				Comment: "Non-electrolyzer OM costs by planning period (1987$/million metric ton)";
+			}
+			Parameter FixedOMCostNonElectrolyzerByYearNoCAPEX {
+				IndexDomain: (seas,i_calYear,regCen,prodTech);
+				Comment: "Non-electrolyzer OM Costs by year (1987$ / million metric ton) (this excludes capex recovery portion)";
+			}
+		}
+		DeclarationSection Demands_and_Quantities_Declarations {
+			Parameter ElecCurtailed {
+				IndexDomain: (regNERC,seas,hr,pp);
+				Comment: "Electricity curtailed by planning period (MMBtu)";
+			}
+		}
+	}
+	Section Mapping_Section {
+		DeclarationSection Regional_Mappings {
+			Parameter Map_NERCToCEN {
+				IndexDomain: (regNERC,regCen);
+			}
+		}
+	}
+}

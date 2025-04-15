@@ -1,0 +1,156 @@
+$Header: m:/default/input/RCS/tabreq.txt,v 1.49 2020/04/07 16:36:57 NSK Exp $
+THIS FILE CONTAINS SWITCHES FOR TURNING REPORTS ON AND OFF IN FTAB
+     When present in cols/1/2, a "99" in this heading section
+     triggers input of sequence number from a new optional 2nd column.  Original Internal table numbers in 3rd column.
+     This is done to maintain compatibility with older tabreq.txt files
+@
+1   1. Total Energy Supply, Disposition, and Price Summary
+1   2. Energy Consumption by Sector and Source
+1   3. Energy Prices by Sector and Source
+1   4. Residential Sector Key Indicators and Consumption
+1   5. Commercial Sector Key Indicators and Consumption
+1   6. Industrial Sector Key Indicators and Consumption
+1   7. Transportation Sector Key Indicators and Delivered Energy Consumption
+1   8. Electricity Supply, Disposition, Prices, and Emissions
+1   9. Electricity Generating Capacity
+1  10. Electricity Trade
+1  11. Liquid Fuels Supply and Disposition
+1  12. Petroleum Product Prices
+1  13. Natural Gas Supply, Disposition, and Prices
+1  14. Oil and Gas Supply
+1  15. Coal Supply, Disposition, and Prices
+1  16. Renewable Energy Generating Capacity and Generation
+1  17. Energy-Related Carbon Dioxide Emissions by Sector and Source
+1  18. Macroeconomic Indicators
+1  19. International Liquids Supply and Disposition
+1  20. Conversion Factors
+1  21. Liquid Fuels Supply and Disposition
+1  22. Energy-Related Carbon Dioxide Emissions by End Use
+1  23. Hydrogen Supply, Disposition, and Prices 
+1  24. Renewable Energy Consumption by Sector and Source
+1  25. Carbon Dioxide Enhanced Oil Recovery Operations by Source
+1  26. Non-Utility Electricity Generation
+1  27. Non-Utility Electricity Capacity
+1  28. Non-Utility Fuel Consumption
+1  29. Refinery Process Unit Capacity and Utilization
+1  30. Residential Sector Equipment Stock and Efficiency
+1  31. Energy and Energy Efficiency Indices
+1  32. Commercial Sector Energy Consumption, Floorspace, and Equipment Efficiency
+1  33. Other Commercial Sector Consumption
+1  34. Industrial Sector Macroeconomic Indicators
+1  35. Refining Industry Energy Consumption
+1  36. Food Industry Energy Consumption
+1  37. Paper Industry Energy Consumption
+1  38. Bulk Chemical Industry Energy Consumption
+1  39. Glass Industry Energy Consumption
+1  40. Cement and Lime Industry Energy Consumption
+1  41. Iron and Steel Industry Energy Consumption
+1  42. Aluminum Industry Energy Consumption
+1  43. Nonmanufacturing Sector Energy Consumption
+1  44. Industrial Consumption by Sector
+1  45. Transportation Sector Energy Use by Mode and Type
+1  46. Transportation Sector Energy Use by Fuel Type Within a Mode
+1  47. Light-Duty Vehicle Energy Consumption by Technology Type and Fuel Type
+1  48. Light-Duty Vehicle Sales by Technology Type
+1  49. Light-Duty Vehicle Stock by Technology Type
+1  50. Light-Duty Vehicle Miles per Gallon by Technology Type
+1  51. Light-Duty Vehicle Miles Traveled by Technology Type
+1  52. Summary of New Light-Duty Vehicle Size Class Attributes
+1  53. Transportation Fleet Car and Truck Fuel Consumption by Type and Technology
+1  54. Transportation Fleet Car and Truck Sales by Type and Technology
+1  55. Transportation Fleet Car and Truck Stock by Type and Technology
+1  56. Transportation Fleet Car and Truck Vehicle Miles Traveled by Type and Technology
+1  57. Air Travel Energy Use
+1  58. Freight Transportation Energy Use
+1  59. Electric Power Sector Generating Capacity and Generation by Plant Type and Technology
+1  60. Technology Market Penetration in Light-Duty Vehicles
+1  61. Competitive Electricity Prices
+1  62. Electric Power Projections by Electricity Market Module Region
+1  63. Electricity Generation by Electricity Market Module Region and Source
+1  64. Electricity Generation Capacity by Electricity Market Module Region and Source
+1  65. Technically Recoverable Crude Oil Resources by Region
+1  66. Technically Recoverable Natural Gas Resources by Region
+1  67. Renewable Energy Generation by Fuel
+1  68. Domestic Refinery Distillation Base Capacity, Expansion, and Utilization
+1  69. Carbon Dioxide Emissions by Category and Sector
+1  70. Components of Selected Petroleum Product Prices
+1  71. Lower 48 Crude Oil Production and Wellhead Prices by Supply Region
+1  72. Lower 48 Natural Gas Production and Spot Prices by Supply Region
+1  73. Hydrogen Market Projections by Census division
+1  74. Lower 48 Oil and Gas Well Completions
+1  75. Average Technology Cost for Light-Duty Vehicles
+1  76. Natural Gas Imports and Exports
+1  77. Natural Gas Consumption by End-Use Sector and Census Division
+1  78. Natural Gas Delivered Prices by End-Use Sector and Census Division
+1  79. Lower 48 Onshore Crude Oil Production by Region and Type
+1  80. Lower 48 Onshore Natural Gas Production by Region and Type
+1  81. Shale Gas & Tight Oil Production by Play
+0  82. Natural Gas Consumption by End-Use Sector, Region, and Service Type
+1  83. Trace Report for Gas Price to the Electric Power Sector
+0  84. Natural Gas Pipeline Capacity by NGTDM Region
+0  85. Natural Gas Pipeline Flows by NGTDM Region
+0  86. Natural Gas Pipeline Capacity Utilization by NGTDM Region
+0  87. Natural Gas Pipeline Capacity by Census Division
+0  88. Natural Gas Pipeline Flows by Census Division
+0  89. Natural Gas Pipeline Capacity Utilization by Census Division
+1  90. Primary Natural Gas Flows Entering NGTDM Region from Neighboring Regions
+1  91. Primary Natural Gas Capacity Entering NGTDM Region from Neighboring Regions
+0  92. Blank table
+1  93. Domestic Coal Supply, Disposition, and Prices
+1  94. Coal Production and Minemouth Prices by Region
+1  95. Coal Production by Region and Type
+1  96. World Steam Coal Flows By Importing Regions and Exporting Countries
+1  97. World Metallurgical Coal Flows By Importing Regions and Exporting Countries
+1  98. World Total Coal Flows By Importing Regions and Exporting Countries
+1  99. Coal Minemouth Prices by Region and Type
+1 100. Employment and Shipments by Industry, and Income and Employment by Region
+1 101. Imported Liquids by Source
+1 102. Alternative Liquid Fuels
+1 103. Renewable Fuel Standard and Low Carbon Fuel Standard Results
+0 104. blank table
+1 105. Domestic Crude Oil Production and Prices by Refinery Region
+1 106. Crude Oil Refinery Inputs by Refinery Region
+1 107. Supply and Disposition Balances by Fuel
+1 108. Domestic Crude Oil Production by Region and Type
+1 109. Impacts of Clean Power Plan (111d) by Electricity Market Module Region
+1 110. Impacts of Clean Power Plan (111d) by Fuel Region
+1 111. Biomass Prices by Coal Region, Sector, and Type
+1 112. Biomass Quantities by Coal Region, Sector, and Type
+1 113. New Light-Duty Vehicle Fuel Economy
+1 114. New Light-Duty Vehicle Prices
+1 115. New Light-Duty Vehicle Range
+1 116. Total Resource Costs in the Electric Power Sector
+1 117. National Impacts of the Clean Air Act Amendments of 1991 (CAAA90)
+1 118. Greenhouse Gas Compliance Results
+1 119. Unadjusted Energy Prices by Sector and Source
+0 120. International Energy Agency Submission
+0 121. blank table
+1 122. National Impacts of Renewable or Carbon Portfolio Standards (RPS/CPS) and Production Tax Credits (PTC)
+1 123. Overnight Capital Costs for New Electricity Generating Plants
+1 124. Key Results for Residential and Commercial Sector Technology Cases
+1 125. Hydrogen Model Results
+1 126. Crude Oil Import Volumes by Region
+1 127. Crude Oil Import Prices by Region
+1 128. Petroleum Product Import Volumes by Region
+1 129. Petroleum Product Import Prices by Region
+1 130. Crude Oil Export Volumes by Region
+1 131. Crude Oil Export Prices by Region
+1 132. Crude Oil Refinery Input Price by Refinery Region
+1 133. Capacity with Carbon Capture and Carbon Flows
+1 134. Pipeline, Transport, and Storage Costs for Captured Carbon
+1 135. Key Results for Coal Mining Cost Cases
+1 136. Key Results for Nuclear Cost Cases
+1 137. Key Results for Renewable Energy Technology Cases
+1 138. Key Results for Electric Power Sector Technology Cases
+1 139. Metal Based Durables Industry Energy Consumption
+1 140. Other Manufacturing Industry Energy Consumption
+1 141. Summary of the U.S. Economy
+1 142. Real Composition of Gross Domestic Product
+1 143. Nominal Composition of Gross Domestic Product
+1 144. Distribution of GDP, GNP, and National Income
+1 145. GDP Composition and Other Assorted Macro Topics
+1 146. Freight Truck Technology Penetration
+1 147. Transportation Sector Criteria Pollutants Emissions
+1 148. Aircraft Stock
+1 149. Energy Prices for FEMP by Census Region
+1 150. Convergence Indicators

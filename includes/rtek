@@ -1,7 +1,5 @@
-! $Header: M:/default/includes/RCS/rtek,v 1.51 2018/09/19 19:36:14 kja Exp $
-
 !FILE NAME:      RTEK
-!DATE MODIFIED:  September 12, 2018
+!DATE MODIFIED:  May 30, 2023
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
 !                Residential Demand Module (RDM)
 !DEFINITION:     Technology data inputs sourced from RSMESS.xlsx (RSCLASS, RSMEQP, and RSMSHL) & RSSWITCH.txt input files
@@ -10,6 +8,7 @@
 !SPECIAL CONSTRAINTS:  None
 !ORGANIZATION OF DATA:  Various non-RSMESS inputs listed at end
 !SOURCES:        Not applicable
+!COMMENT:        Revise RTBASEFF range to 2020 for new RECS base year
 
 
 !PARAMETERS
@@ -79,7 +78,7 @@
 !REAL INPUT FROM RSCLASS
 
   REAL*4 &
-    RTBASEFF(2015:ENDYR,MNUMRTCL),  & ! BASE EFFICIENCY (ENSURE THAT START YEAR IS ALWAYS SET TO CURRENT RECSYR FROM RESDREP)
+    RTBASEFF(2020:ENDYR,MNUMRTCL),  & ! BASE EFFICIENCY (ENSURE THAT START YEAR IS ALWAYS SET TO CURRENT RECSYR FROM RESDREP)
     RTALPHA(MNUMRTCL),              & ! EQUIPMENT LIFE ALPHA PARAMETER
     RTK(MNUMRTCL),                  & ! EQUIPMENT LIFE WEIBULL K PARAMETER
     RTLAMBDA(MNUMRTCL),             & ! EQUIPMENT LIFE WEIBULL LAMBDA PARAMETER

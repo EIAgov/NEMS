@@ -1,0 +1,8 @@
+"Notes - See code for metrics (tier 2 used to be 0.02, but lowered since some projects coming on too strong)",,,,,
+well_type_number,drill_tech,cost_tech,tier_1_eur_tech,tier_2_eur_tech,spacing_tech
+1,0.0025,0.0025,0.0025,0.0025,0
+2,0.01,0.005,0.01,0.02,0.01
+3,0.0025,0.0025,0.0025,0.0025,0
+4,0.01,0.005,0.01,0.02,0.01
+5,0.01,0.005,0.01,0.02,0.01
+6,0.0025,0.0025,0.0025,0.0025,0

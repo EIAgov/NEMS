@@ -1,0 +1,150 @@
+## ams_version=1.0
+
+Section Calendars {
+	Procedure pr_InitializeCalendar {
+		Body: {
+			sp_TimeslotFormatYear := "%c%y";
+			sp_TimeslotFormatMonth := "%c%y-M%sm";
+			sp_TimeslotFormatWeek := "%C%Y-%W";
+			sp_TimeslotFormatDay := "%c%y-%m-%d";
+			
+			sp_Today := CurrentToString(sp_TimeslotFormatDay);
+			
+			! With sp_BeginDate and sp_EndDate set, we have working calendars.
+			_p_currentyear := Val(SubString(CurrentToString("%c%y-%m-%d"), 1, 4));
+			
+			!@TODO: Add parameter to control year extension. Base on `NumberOfFutureYears` parameter?
+			sp_BeginDate := "1987-01-01"; ! 
+			sp_EndDate := "2080-12-31";
+			
+			ep_Today := CurrentToTimeSlot(cal_Day);
+			ep_CurrentMonth := CurrentToTimeslot(cal_Month);
+			ep_CurrentYear := CurrentToTimeslot(cal_Year);
+			
+			ep_WeekOfDay(i_calDay) 
+				:= StringToElement(cal_Week, TimeslotToString(sp_TimeslotFormatWeek, cal_Day, i_calDay), 0);
+			
+			ep_MonthOfDay(i_calDay) 
+				:= StringToElement(cal_Month, TimeslotToString(sp_TimeslotFormatMonth, cal_Day, i_calDay), 0);
+			
+			ep_YearOfDay(i_calDay) 
+				:= StringToElement(cal_Year, TimeslotToString(sp_TimeslotFormatYear, cal_Day, i_calDay), 0);
+			
+			ep_YearOfMonth(i_calMonth) 
+				:= StringToElement(cal_Year, TimeslotToString(sp_TimeslotFormatYear, cal_Month, i_calMonth), 0);
+			
+			ep_YearOfWeek(i_calWeek) 
+				:= StringToElement(cal_Year, TimeslotToString(sp_TimeslotFormatYear, cal_Week, i_calWeek), 0);
+			
+			ep_WeekOfMonth(i_calWeek)
+				:= ep_MonthOfDay(first( i_calDay | ep_WeekOfDay(i_calDay) = i_calWeek ) );
+		}
+		Parameter _p_currentyear;
+	}
+	DeclarationSection Time_Calendars {
+		Calendar cal_Year {
+			Index: i_calYear, j_calYear;
+			Unit: year;
+			BeginDate: sp_BeginDate;
+			EndDate: sp_EndDate;
+			TimeslotFormat: sp_TimeslotFormatYear;
+		}
+		Calendar cal_Month {
+			Index: i_calMonth, j_calMonth;
+			Unit: month;
+			BeginDate: sp_BeginDate;
+			EndDate: sp_EndDate;
+			TimeslotFormat: sp_TimeslotFormatMonth;
+		}
+		Calendar cal_Day {
+			Index: i_calDay, j_calDay;
+			Unit: day;
+			BeginDate: sp_BeginDate;
+			EndDate: sp_EndDate;
+			TimeslotFormat: sp_TimeslotFormatDay;
+		}
+		Calendar cal_Week {
+			Index: i_calWeek, j_calWeek;
+			Unit: 7 * day;
+			BeginDate: sp_MondayAtOrBeforeCalDayStart_d;
+			EndDate: sp_SundayAtOrAfterCalDayEnd_d;
+			TimeslotFormat: sp_TimeslotFormatWeek;
+		}
+	}
+	DeclarationSection Calendar_Formats {
+		StringParameter sp_TimeslotFormatYear;
+		StringParameter sp_TimeslotFormatMonth;
+		StringParameter sp_TimeslotFormatWeek;
+		StringParameter sp_TimeslotFormatDay {
+			InitialData: "%c%y-%m-%d";
+		}
+	}
+	DeclarationSection Calendars_Element_Parameters {
+		ElementParameter ep_Today {
+			Range: cal_Day;
+		}
+		ElementParameter ep_CurrentMonth {
+			Range: cal_Month;
+		}
+		ElementParameter ep_CurrentYear {
+			Range: cal_Year;
+		}
+		ElementParameter ep_CurrentWeek {
+			Range: cal_Week;
+			Definition: {
+				StringToElement( cal_Week, "2019-42", 0 );
+			}
+		}
+		ElementParameter ep_YearOfMonth {
+			IndexDomain: i_calMonth;
+			Range: cal_Year;
+		}
+		ElementParameter ep_YearOfWeek {
+			IndexDomain: i_calWeek;
+			Range: cal_Year;
+		}
+		ElementParameter ep_YearOfDay {
+			IndexDomain: i_calDay;
+			Range: cal_Year;
+		}
+		ElementParameter ep_MonthOfDay {
+			IndexDomain: i_calDay;
+			Range: cal_Month;
+		}
+		ElementParameter ep_WeekOfDay {
+			IndexDomain: i_calDay;
+			Range: cal_Week;
+		}
+		ElementParameter ep_WeekOfMonth {
+			IndexDomain: i_calWeek;
+			Range: cal_Month;
+		}
+	}
+	DeclarationSection Calendars_Parameters {
+		StringParameter sp_Today;
+		StringParameter sp_BeginDate {
+			InitialData: "2018-01-01";
+		}
+		StringParameter sp_EndDate {
+			InitialData: "2018-01-01";
+		}
+		StringParameter sp_MondayAtOrBeforeCalDayStart_d {
+			Definition: {
+				MomentToString(
+					"%c%y-%m-%d",
+					[day],
+					First(Cal_Day),
+					-1 [day] * Mod( TimeslotCharacteristic(First(Cal_Day), 'weekday') - 1, 7) );
+			}
+		}
+		StringParameter sp_SundayAtOrAfterCalDayEnd_d {
+			Definition: {
+				MomentToString(
+					"%c%y-%m-%d",
+					[day],
+					Last(Cal_Day),
+					1 [day] * Mod( -1 * (TimeslotCharacteristic(Last(Cal_Day), 'weekday') - 7), 7) );
+			}
+		}
+	}
+}

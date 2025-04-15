@@ -1,0 +1,86 @@
+Notes,,,,,,,,,,,
+coef_name,coef,std err,t,p_val,low_con_int(0.025),high_con_int(0.975),cost_type,base_year,resource_type,usgs_province_num,usgs_province_num_merge
+Intercept,13.3482,0.073,183.273,0,13.205,13.491,capex_per_well_1987,2017,gas,,n
+Appalachian Basin (Marcellus),0.4419,0.044,10.112,0,0.356,0.528,capex_per_well_1987,2017,gas,50671,671
+Appalachian Basin (Other),0.1877,0.124,1.518,0.129,-0.055,0.43,capex_per_well_1987,2017,gas,5067,67
+Appalachian Basin (Utica),0.4744,0.043,11.096,0,0.391,0.558,capex_per_well_1987,2017,gas,50672,672
+Arkoma Basin,0.1862,0.045,4.094,0,0.097,0.275,capex_per_well_1987,2017,gas,5062,62
+Bend Arch-Ft. Worth Basin,-0.5502,0.098,-5.635,0,-0.742,-0.359,capex_per_well_1987,2017,gas,5045,45
+Cherokee Platform,-0.1014,0.16,-0.632,0.527,-0.416,0.213,capex_per_well_1987,2017,gas,5060,60
+Denver Basin,-0.1367,0.233,-0.588,0.557,-0.593,0.319,capex_per_well_1987,2017,gas,5039,39
+East Texas Basin/LA-MS Salt Basins (Haynesville),0.1726,0.097,1.772,0.076,-0.018,0.364,capex_per_well_1987,2017,gas,50471,471
+East Texas Basin/LA-MS Salt Basins (Other),-0.2397,0.094,-2.549,0.011,-0.424,-0.055,capex_per_well_1987,2017,gas,5047,47
+Illinois Basin,-0.8202,0.105,-7.794,0,-1.027,-0.614,capex_per_well_1987,2017,gas,5064,64
+Michigan Basin,0.1077,0.086,1.251,0.211,-0.061,0.277,capex_per_well_1987,2017,gas,5063,63
+Permian Basin,-0.2317,0.103,-2.242,0.025,-0.434,-0.029,capex_per_well_1987,2017,gas,5044,44
+Powder River Basin,-1.26E-12,4.08E-13,-3.088,0.002,-2.06E-12,-4.59E-13,capex_per_well_1987,2017,gas,5033,33
+San Juan Basin,-0.5169,0.145,-3.561,0,-0.802,-0.232,capex_per_well_1987,2017,gas,5022,22
+Southwestern Wyoming,0.3679,0.048,7.711,0,0.274,0.461,capex_per_well_1987,2017,gas,5037,37
+Uinta-Piceance Basin,0.1044,0.219,0.477,0.634,-0.325,0.534,capex_per_well_1987,2017,gas,5020,20
+Williston Basin,0.1864,0.078,2.391,0.017,0.034,0.339,capex_per_well_1987,2017,gas,5031,31
+Wind River Basin,-0.4991,0.067,-7.483,0,-0.63,-0.368,capex_per_well_1987,2017,gas,5035,35
+CO,0.1767,0.218,0.811,0.417,-0.25,0.604,capex_per_well_1987,2017,gas,,n
+IL,-0.2689,0.162,-1.658,0.098,-0.587,0.049,capex_per_well_1987,2017,gas,,n
+IN,-0.307,0.123,-2.486,0.013,-0.549,-0.065,capex_per_well_1987,2017,gas,,n
+KY,-0.2689,0.099,-2.729,0.006,-0.462,-0.076,capex_per_well_1987,2017,gas,,n
+LA,0.8566,0.104,8.237,0,0.653,1.061,capex_per_well_1987,2017,gas,,n
+MI,0.1077,0.086,1.251,0.211,-0.061,0.277,capex_per_well_1987,2017,gas,,n
+MS,0.7957,0.147,5.395,0,0.506,1.085,capex_per_well_1987,2017,gas,,n
+ND,0.1864,0.078,2.391,0.017,0.034,0.339,capex_per_well_1987,2017,gas,,n
+NM,0.8014,0.137,5.839,0,0.532,1.07,capex_per_well_1987,2017,gas,,n
+OH,0.3081,0.038,8.122,0,0.234,0.382,capex_per_well_1987,2017,gas,,n
+OK,0.6134,0.062,9.87,0,0.492,0.735,capex_per_well_1987,2017,gas,,n
+PA,0.2779,0.031,9.094,0,0.218,0.338,capex_per_well_1987,2017,gas,,n
+TN,-2.79E-18,2.23E-17,-0.126,0.9,-4.64E-17,4.09E-17,capex_per_well_1987,2017,gas,,n
+TX,0.842,0.101,8.317,0,0.644,1.041,capex_per_well_1987,2017,gas,,n
+UT,0.0958,0.24,0.399,0.69,-0.375,0.567,capex_per_well_1987,2017,gas,,n
+VA,0.2122,0.174,1.216,0.224,-0.13,0.554,capex_per_well_1987,2017,gas,,n
+WV,0.3303,0.034,9.818,0,0.264,0.396,capex_per_well_1987,2017,gas,,n
+WY,-0.1312,0.054,-2.434,0.015,-0.237,-0.025,capex_per_well_1987,2017,gas,,n
+num_latlen,9.50E-05,2.70E-06,35.148,0,8.97E-05,0,capex_per_well_1987,2017,gas,,n
+num_vfeet,4.37E-05,4.20E-06,10.405,0,3.55E-05,5.20E-05,capex_per_well_1987,2017,gas,,n
+hist_cost_quantile_01,310223.9642,,,,,,capex_per_well_1987,2017,gas,,n
+hist_cost_median,3722687.57,,,,,,capex_per_well_1987,2017,gas,,n
+hist_cost_quantile_99,8565048.994,,,,,,capex_per_well_1987,2017,gas,,n
+avg_vfeet,9238.951282,,,,,,capex_per_well_1987,2017,gas,,n
+avg_latlen,6651.105616,,,,,,capex_per_well_1987,2017,gas,,n
+Anadarko Basin,0,0,0,0,0,0,capex_per_well_1987,2017,gas,5058,58
+Intercept,12.6245,0.03,417.637,0,12.565,12.684,capex_per_well_1987,2017,oil,,n
+Appalachian Basin (Marcellus),9.53E-12,1.03E-12,9.277,0,7.52E-12,1.15E-11,capex_per_well_1987,2017,oil,50671,671
+Appalachian Basin (Other),3.46E-12,7.86E-13,4.41,0,1.92E-12,5.00E-12,capex_per_well_1987,2017,oil,5067,67
+Appalachian Basin (Utica),0.5266,0.03,17.288,0,0.467,0.586,capex_per_well_1987,2017,oil,50672,672
+Arkoma Basin,-0.3913,0.142,-2.746,0.006,-0.671,-0.112,capex_per_well_1987,2017,oil,5062,62
+Bend Arch-Ft. Worth Basin,-0.3512,0.102,-3.427,0.001,-0.552,-0.15,capex_per_well_1987,2017,oil,5045,45
+Cherokee Platform,0.057,0.054,1.045,0.296,-0.05,0.164,capex_per_well_1987,2017,oil,5060,60
+Denver Basin,0.765,0.026,29.985,0,0.715,0.815,capex_per_well_1987,2017,oil,5039,39
+East Texas Basin/LA-MS Salt Basins (Haynesville),1.40E-15,1.51E-16,9.268,0,1.11E-15,1.70E-15,capex_per_well_1987,2017,oil,50471,471
+East Texas Basin/LA-MS Salt Basins (Other),0.0126,0.025,0.508,0.612,-0.036,0.061,capex_per_well_1987,2017,oil,5047,47
+Illinois Basin,-4.81E-16,8.93E-17,-5.385,0,-6.56E-16,-3.06E-16,capex_per_well_1987,2017,oil,5064,64
+Michigan Basin,0.4757,0.069,6.911,0,0.341,0.611,capex_per_well_1987,2017,oil,5063,63
+Permian Basin,-0.036,0.023,-1.543,0.123,-0.082,0.01,capex_per_well_1987,2017,oil,5044,44
+Powder River Basin,0.9719,0.048,20.294,0,0.878,1.066,capex_per_well_1987,2017,oil,5033,33
+San Juan Basin,0.327,0.059,5.497,0,0.21,0.444,capex_per_well_1987,2017,oil,5022,22
+Southwestern Wyoming,1.1628,0.051,22.926,0,1.063,1.262,capex_per_well_1987,2017,oil,5037,37
+Uinta-Piceance Basin,0.4931,0.075,6.559,0,0.346,0.64,capex_per_well_1987,2017,oil,5020,20
+Williston Basin,0.4859,0.017,27.976,0,0.452,0.52,capex_per_well_1987,2017,oil,5031,31
+Wind River Basin,0.9851,0.138,7.139,0,0.715,1.256,capex_per_well_1987,2017,oil,5035,35
+KS,0.7203,0.072,10.014,0,0.579,0.861,capex_per_well_1987,2017,oil,,n
+LA,1.3569,0.056,24.367,0,1.248,1.466,capex_per_well_1987,2017,oil,,n
+MI,0.4757,0.069,6.911,0,0.341,0.611,capex_per_well_1987,2017,oil,,n
+MS,1.4659,0.071,20.628,0,1.327,1.605,capex_per_well_1987,2017,oil,,n
+MT,0.1902,0.02,9.667,0,0.152,0.229,capex_per_well_1987,2017,oil,,n
+ND,0.2958,0.015,19.532,0,0.266,0.325,capex_per_well_1987,2017,oil,,n
+NM,1.1271,0.029,38.928,0,1.07,1.184,capex_per_well_1987,2017,oil,,n
+OH,0.5266,0.03,17.288,0,0.467,0.586,capex_per_well_1987,2017,oil,,n
+OK,1.0173,0.023,43.704,0,0.972,1.063,capex_per_well_1987,2017,oil,,n
+TX,1.0709,0.024,44.214,0,1.023,1.118,capex_per_well_1987,2017,oil,,n
+UT,0.6379,0.09,7.082,0,0.461,0.815,capex_per_well_1987,2017,oil,,n
+WY,0.0412,0.049,0.847,0.397,-0.054,0.137,capex_per_well_1987,2017,oil,,n
+num_latlen,0.0001,1.58E-06,79,0,0,0,capex_per_well_1987,2017,oil,,n
+num_vfeet,4.88E-05,2.57E-06,18.957,0,4.37E-05,5.38E-05,capex_per_well_1987,2017,oil,,n
+hist_cost_quantile_01,792445.2248,,,,,,capex_per_well_1987,2017,oil,,n
+hist_cost_median,3493878.941,,,,,,capex_per_well_1987,2017,oil,,n
+hist_cost_quantile_99,6602100.444,,,,,,capex_per_well_1987,2017,oil,,n
+avg_vfeet,9169.681373,,,,,,capex_per_well_1987,2017,oil,,n
+avg_latlen,7090.498316,,,,,,capex_per_well_1987,2017,oil,,n
+Anadarko Basin,0,0,0,0,0,0,capex_per_well_1987,2017,oil,5058,58

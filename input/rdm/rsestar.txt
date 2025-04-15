@@ -1,5 +1,5 @@
 FILE NAME:     RSESTAR
-DATE MODIFIED: July 23, 2017
+DATE MODIFIED: September 12, 2023
 USED BY:       RDESTARHOMES subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Efficiency choice logit parameter betas for benchmarking historical shares of new ENERGY STAR single-family homes and learning factors for all ENERGY STAR homes
 UNITS:         none
@@ -7,9 +7,9 @@ DIMENSION:     various
 SPECIAL CONSTRAINTS:  non-negative values
 ORGANIZATION OF DATA: 
                Data starts on row 21 of this file per RDM convention
+               First year of data is RECSyear+1
 SOURCES:       unknown
-COMMENT:       Updated for 2015 RECS; values start in first year after RECS (2016)
-
+COMMENT:       Updated for 2020 RECS; values are outdated placeholders
 
 
 
@@ -18,10 +18,10 @@ COMMENT:       Updated for 2015 RECS; values start in first year after RECS (201
 
 
 Last year of historical ENERGY STAR single-family housing start shares (ESTARHISTYR)
-2017
+2022
 
 Efficiency choice logit beta 1 parameter (HVBETA1)
-2016	2017	BT	Shell #	CD	Shell Package
+2021	2022	BT	Shell #	CD	Shell Package
 -0.0005	-0.0005	1	1	1	'No IECC'
 -0.0005	-0.0005	1	1	2	'No IECC'
 -0.0005	-0.0005	1	1	3	'No IECC'
@@ -159,7 +159,7 @@ Efficiency choice logit beta 1 parameter (HVBETA1)
 -0.0005	-0.0005	3	5	9	'PATH'
 
 Efficiency choice logit beta 2 parameter (HVBETA2)					
-2016	2017	BT	Shell #	CD	Shell Package
+2021	2022	BT	Shell #	CD	Shell Package
 -5	-5	1	1	1	'No IECC'
 -5	-5	1	1	2	'No IECC'
 -5	-5	1	1	3	'No IECC'

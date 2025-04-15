@@ -22,6 +22,9 @@
       include 'emmparm'
       include 'efpcntrl'
       include 'control'
+      include 'dsmdimen'
+      include 'dsmtfefp'
+      include 'dsmtoefd'
       include 'ncntrl'
       include 'macout'
       include 'efpgen'
@@ -34,10 +37,11 @@
       include 'uefdout'
       include 'udatout'
       include 'ecp_nuc'
+      include'cdsparms'
       include 'emm_aimms'
       LOGICAL NEW
       CHARACTER*8 FILENM
-      INTEGER II,ICHK,ISECT
+      INTEGER II,ICHK,ISECT,IS
       INTEGER I,IVLFLG     !FLAG TO IDENTIFY DOUBLE CONVERGENCE - adjust valcap output files
       INTEGER NRGN,FULLYR
       INTEGER FILE_MGR
@@ -51,6 +55,8 @@
       COMMON/ZECCST/ERZECCST
       REAL SV_PRGEN_ESRR(MNUMYR,MNUMNR)
       COMMON /STORE_ROR/SV_PRGEN_ESRR
+      REAL EFDPEAK(MNUMNR)
+      COMMON /EFD_PK/EFDPEAK
 ! FIRST TIME THROUGH -- READ INPUT DATA AND SET UP DATA STRUCTURES
 ! DATA FILES ARE:
 !   Run control file - EFPCNTL
@@ -84,6 +90,18 @@
         ENDDO
       END DO ! NRGN
 
+!  fill EFD peak load value for use in T&D cost calculations
+      DO NRGN = 1, UNRGNS
+          EFDPEAK(NRGN) = 0.0
+          DO IS = 1, EFDnS
+              IF (ULPEAK(IS,NRGN) .GT. EFDPEAK(NRGN)) THEN
+                  EFDPEAK(NRGN) = ULPEAK(IS,NRGN)
+              ENDIF
+          ENDDO
+          write(22,222) 'EFDPEAK ',CURIYR,CURITR,NRGN,EFDPEAK(NRGN),(SECANNUALPEAK(NRGN,ISECT,1),ISECT=1,4),(SECANNUALPEAK(NRGN,ISECT,2),ISECT=1,4)
+      ENDDO
+222    FORMAT(1x,A10,3I5,9F10.3)      
+      
 ! fill in costs of nuclear ZEC programs
       IF (CURITR .EQ. 1)THEN
          ERZECCST(MNUMNR) = 0.0
@@ -1096,7 +1114,7 @@
              call sqlite3_get_column( col4(4), XR_EOCOST(rgn,efpt,i))
              call sqlite3_get_column( col4(5), XR_EOVBK(rgn,efpt,i))
              call sqlite3_get_column( col4(6), XR_MORE_BK(rgn,efpt,i))
-             if (efpt .eq. 1) XR_MORE_BK(rgn,efpt,i) = XR_MORE_BK(rgn,efpt,i)
+!             if (efpt .eq. 1) XR_MORE_BK(rgn,efpt,i) = XR_MORE_BK(rgn,efpt,i)
 
           enddo
          
@@ -1449,7 +1467,8 @@
                 EOVBK(J,2) = XR_EOVBK(NRGN,J,2)   !copy contents of XR_EOVBK for public into EOVBK for public
             END DO
             EOVBK(EIDIST,1) =    EOVBK(EIDIST,1) + XR_MORE_BK(NRGN,EIDIST,1)
-            EOVBK(EIDIST,2) =    EOVBK(EIDIST,2) + XR_MORE_BK(NRGN,EIDIST,1)
+            EOVBK(EIDIST,2) =    EOVBK(EIDIST,2) + XR_MORE_BK(NRGN,EIDIST,2)
+           write(18,*) 'XR_MORE_BK ',NRGN,XR_MORE_BK(NRGN,EIDIST,1),XR_MORE_BK(NRGN,EIDIST,2)
 
     !
     ! READ IN FORM 1 FILE
@@ -3880,19 +3899,18 @@
       REAL*4 BKVL(2)
       REAL SALTOTOLD,SALTOTLAST
       COMMON /SALEOLD/ SALTOTOLD,SALTOTLAST
+      REAL EFDPEAK(MNUMNR)
+      COMMON /EFD_PK/EFDPEAK
+     
 ! Length of construction period for each build
       EDLCP = ESLCP(EIDIST) - 1
 ! CALCULATE THE COST OF NEW DISTRIBUTION EQUIPMENT AND CREATE A NEW
 ! DISTRIBUTION BUILD
 !     CPDCST = (CPDSLP * (EQTLSL(1) + EQTLSL(2))) + CPDCON
 !     CPDCST = (CPDSLP * (SALTOTLAST)) + CPDCON
-      CPDCST = ((CPDSLP * NCPNEMS(NRGN)) + CPDCON) * CAPDSCALE(NRGN,CURIYR)
-      WRITE(18,4025)'CPDCST ',NRGN,CURIYR,CPDCST,CPDSLP,NCPNEMS(NRGN), CPDCON, CAPDSCALE(NRGN,CURIYR)
+      CPDCST = ((CPDSLP * EFDPEAK(NRGN)) + CPDCON) * CAPDSCALE(NRGN,CURIYR)
+      WRITE(18,4025)'CPDCST ',NRGN,CURIYR,CPDCST,CPDSLP,EFDPEAK(NRGN), CPDCON, CAPDSCALE(NRGN,CURIYR)
 4025  FORMAT(A20,1x,2(I4,1x),10(F12.3,1x))      
-!     write(6,'(a,2i6,3f12.1)')'in eldist - NCPeak     ',CURIYR,NRGN,  &
-!             NCPNEMS(NRGN),CPDSLP,NCPNEMS(NRGN)*CPDSLP
-!     write(6,'(a,2i6,3f12.1)')'in eldist - SALTOTLAST ',CURIYR,NRGN,SALTOTLAST,CPDSLP,  &
-!              CPDSLP * SALTOTLAST
       IF (CPDCST .NE. 0.0) THEN
          PCST = CPDCST
          PTYP = EIDIST
@@ -3961,19 +3979,18 @@
       REAL*4 SERP
       REAL SALTOTOLD,SALTOTLAST
       COMMON /SALEOLD/ SALTOTOLD,SALTOTLAST
+      REAL EFDPEAK(MNUMNR)
+      COMMON /EFD_PK/EFDPEAK
+
 ! Length of construction period for each build
       ETLCP = ESLCP(EITRAN) - 1
 ! Calculate total capital costs of transmission (in millions of $)
 !     CPTCST = CPTSLP*(EQTLSL(1) + EQTLSL(2)) + CPTCON
 !     CPTCST = (CPTSLP*(SALTOTLAST) + CPTCON) * TSCALE(NRGN,CURIYR)
-      CPTCST =  (CPTSLP*NCPNEMS(NRGN) + CPTCON + CPTADDER(NRGN,CURIYR)) * CAPTSCALE(NRGN,CURIYR)
-      WRITE(18,4025)'CPDCST ',NRGN,CURIYR,CPTCST,CPTSLP,NCPNEMS(NRGN), CPTCON,CPTADDER(NRGN,CURIYR), CAPTSCALE(NRGN,CURIYR)
+      CPTCST =  (CPTSLP*EFDPEAK(NRGN) + CPTCON + CPTADDER(NRGN,CURIYR)) * CAPTSCALE(NRGN,CURIYR)
+      WRITE(18,4025)'CPTCST ',NRGN,CURIYR,CPTCST,CPTSLP,EFDPEAK(NRGN), CPTCON,CPTADDER(NRGN,CURIYR), CAPTSCALE(NRGN,CURIYR)
 4025  FORMAT(A20,1x,2(I4,1x),10(F12.3,1x))      
       
-!     write(6,'(a,2i6,3f12.1)') 'in eltran - NCPeak     ',CURIYR,NRGN,  &
-!               NCPNEMS(NRGN),CPTSLP,NCPNEMS(NRGN) * CPTSLP
-!     write(6,'(a,2i6,3f12.1)')'in eltran - SALTOTLAST ',CURIYR,NRGN,SALTOTLAST,CPTSLP,  &
-!                     CPTSLP * SALTOTLAST
 ! Calculate the COST OF NEW TRANSMISSION EQUIPMENT AND CREATE A NEW
 ! TRANSMISSION BUILD
       IF (CPTCST .NE. 0.0) THEN
@@ -4044,6 +4061,8 @@
       REAL BCHMRKSTEOPRICEADDER(MNUMCR,MNUMYR), BCHMRKSTEOPRC_N(MNUMNR,MNUMYR)  !STEO benchmark price adjustment adder --- by AKN
       REAL ERZECCST(MNUMNR)
       COMMON/ZECCST/ERZECCST
+      REAL EFDPEAK(MNUMNR)
+      COMMON /EFD_PK/EFDPEAK
 
 
 !
@@ -4185,14 +4204,11 @@
 !           EFPOM = OMTSLP(NRGN) * OMADJTR(CURIYR)
             EFPOM = (OMTSLP(NRGN) &
                * (EQTLSL(1) + EQTLSL(2)) + &
-               (OMTSLP2(NRGN) * NCPNEMS(NRGN)) + &
+               (OMTSLP2(NRGN) * EFDPEAK(NRGN)) + &
                OMTCON(NRGN) + OMTADDER(NRGN,CURIYR)) * OMTSCALE(NRGN,CURIYR)
              WRITE(18,2047)'OMTCLP ',NRGN,CURIYR,OMTSLP(NRGN),EQTLSL(1),EQTLSL(2), &
-               OMTSLP2(NRGN), NCPNEMS(NRGN), OMTCON(NRGN), OMTADDER(NRGN,CURIYR), OMTSCALE(NRGN,CURIYR)
+               OMTSLP2(NRGN), EFDPEAK(NRGN), OMTCON(NRGN), OMTADDER(NRGN,CURIYR), OMTSCALE(NRGN,CURIYR)
 2047  FORMAT(A20,1x,2(I4,1x),10(F12.3,1x))
-!     write(*,'(a,2i5,2f12.2)')"in GL, OMTSLP ",curiyr,nrgn,omtslp(nrgn)*  &
-!                 (EQTLSL(1)+EQTLSL(2))
-!     write(*,'(a,2i5,2f12.2)')"in GL, NCPeak ",curiyr,NRGN,NCPNEMS(NRGN)
 !
 !           DECREASE G&A EXPENSES FOR COMPETITION RUN for transmission
 !
@@ -4205,13 +4221,10 @@
 !           EFPOM = OMDSLP(NRGN) * OMADJDS(CURIYR)
             EFPOM = (OMDSLP(NRGN) &
                * (EQTLSL(1) + EQTLSL(2)) + &
-               (OMDSLP2(NRGN) * NCPNEMS(NRGN)) + &
+               (OMDSLP2(NRGN) * EFDPEAK(NRGN)) + &
                OMDCON(NRGN)) * OMDSCALE(NRGN,CURIYR)
              WRITE(18,2047)'OMDCLP ',NRGN,CURIYR,OMDSLP(NRGN),EQTLSL(1),EQTLSL(2), &
-               OMDSLP2(NRGN), NCPNEMS(NRGN), OMDCON(NRGN),OMDSCALE(NRGN,CURIYR)             
-!     write(*,'(a,2i5,2f12.2)')"in GL, OMDSLP ",curiyr,nrgn,omdslp(nrgn)*  &
-!                 (EQTLSL(1)+EQTLSL(2))
-!     write(*,'(a,2i5,2f12.2)')"in GL,NCPeak ",curiyr,NRGN,NCPNEMS(NRGN)
+               OMDSLP2(NRGN), EFDPEAK(NRGN), OMDCON(NRGN),OMDSCALE(NRGN,CURIYR)             
 !
 !           DECREASE G&A EXPENSES FOR COMPETITION RUN for distribution
 !
@@ -4523,44 +4536,8 @@
 
 
 !adjust energy cost for uplift charges
-
-
-! adjust energy cost for congestion charges
-  IF (UNRGNS .EQ. 22) THEN
-  ! PJM Regions 9 & 11
-         IF (NRGN .EQ. 9) THEN
-          ERMECC(CURIYR,NRGN,ISEA,ISLC)= ERMECC(CURIYR,NRGN,ISEA,ISLC) + 10
-         ENDIF
-
-         IF (NRGN .EQ. 11) THEN
-          ERMECC(CURIYR,NRGN,ISEA,ISLC)= ERMECC(CURIYR,NRGN,ISEA,ISLC) + 5.0
-         ENDIF
-
- !CA SURCHARGE applicable to customers buying competitive energy + 1.0 for CAISO uplift
-   !and ancillary services
-
-         IF ((CURIYR .lt. 34) .AND. (NRGN .EQ. 20)) THEN
-           ERMECC(CURIYR,NRGN,ISEA,ISLC)= (ERMECC(CURIYR,NRGN,ISEA,ISLC))+ 1.0
-         ENDIF
-  ELSEIF (UNRGNS .EQ. 25) THEN
-     ! PJM Regions 10 & 11 & 12 (leave out Dominion?)
-       IF (NRGN .EQ. 10 ) THEN
-             ERMECC(CURIYR,NRGN,ISEA,ISLC)= ERMECC(CURIYR,NRGN,ISEA,ISLC) + 10
-       ENDIF
-   
-       IF (NRGN .EQ. 11 .OR. NRGN .EQ. 12) THEN
-          ERMECC(CURIYR,NRGN,ISEA,ISLC)= ERMECC(CURIYR,NRGN,ISEA,ISLC) + 5.0
-       ENDIF
-   
-    !CA SURCHARGE applicable to customers buying competitive energy + 1.0 for CAISO uplift
-      !and ancillary services
-   
-            IF ((CURIYR .lt. 34) .AND. (NRGN .EQ. 21 .OR. NRGN .EQ. 22)) THEN
-              ERMECC(CURIYR,NRGN,ISEA,ISLC)= (ERMECC(CURIYR,NRGN,ISEA,ISLC))+ 1.0
-            ENDIF
-  ENDIF  !UNRGNS
-
-
+! ! adjust energy cost for congestion charges
+! deleted all hard-coded energy price adjustments - need to implement through input file/regional tool if needed
 !End of Regional ERMECC adders
 
       ORIGMECC(CURIYR,NRGN,ISEA,ISLC) = ERMECC(CURIYR,NRGN,ISEA,ISLC)
@@ -7989,7 +7966,6 @@
             END DO
             BPRICE(ICLS,4,NRGN) = EPRICE(ICLS,4,NRGN)
          END DO
-     ENDIF
 ! DETERMINE HISTORIC INTER-CUSTOMER CLASS SUBSIDIES FOR RESIDENTIAL,
 ! COMMERCIAL, AND INDUSTRIAL CUSTOMERS
 
@@ -8146,16 +8122,17 @@
 !    the forecast, this tends to exacerbate the subsidy
 !    We reduced the subsidy by the fraction reduction
 !    of the industrial share to total share
-          SLSRCI = 0.0
-          SALHRCI = 0.0
-          DO ICLS=1,3
-            SLSRCI=SLSRCI+SALCLS(NRGN,ICLS)
-          END DO
-          IF (SLSHRCI .GT. 0.0 .AND. HISINDRAT(NRGN) .GT. 0.0) THEN
-             INDRAT =(SALCLS(NRGN,3)/SLSRCI)/HISINDRAT(NRGN)
-          ELSE
+! 2024- commenting out this extra adjustment because industrial demand now includes H2 use and may go up significantly
+          ! SLSRCI = 0.0
+          ! SALHRCI = 0.0
+          ! DO ICLS=1,3
+            ! SLSRCI=SLSRCI+SALCLS(NRGN,ICLS)
+          ! END DO
+          ! IF (SLSHRCI .GT. 0.0 .AND. HISINDRAT(NRGN) .GT. 0.0) THEN
+             ! INDRAT =(SALCLS(NRGN,3)/SLSRCI)/HISINDRAT(NRGN)
+          ! ELSE
              INDRAT = 1.0
-          END IF
+          ! END IF
 
 !   write(6,*)' NERC INDRAT HISINDRAT CURIYR',NRGN,INDRAT,HISINDRAT(NRGN),CURIYR
 
@@ -8208,7 +8185,7 @@
             SUBPRFRC(ICLS,NRGN) = EPRICE(ICLS,4,NRGN)/EPRICE(3,4,NRGN)
 !           write(6,*)'subprfrc ICLS NRGN',SUBPRFRC(ICLS,NRGN),ICLS,NRGN
           ENDDO
-
+        ENDIF !(ISECT = 3 only do all this on the last time through)
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !         CALIFORNIA LONG TERM CONTRACT ADDERS
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -9273,15 +9250,21 @@
          PELWHRS(CENSUS,CURIYR) = 0.0;PELCKRS(CENSUS,CURIYR) = 0.0
          PELCDRS(CENSUS,CURIYR) = 0.0;PELRFRS(CENSUS,CURIYR) = 0.0
          PELFZRS(CENSUS,CURIYR) = 0.0;PELLTRS(CENSUS,CURIYR) = 0.0
-         PELH2RS(CENSUS,CURIYR) = 0.0;PELOTRS(CENSUS,CURIYR) = 0.0
+         PELOTRS(CENSUS,CURIYR) = 0.0
+         PELH2RS(CENSUS,CURIYR) = 0.0;PELVHRS(CENSUS,CURIYR) = 0.0
          PELSHCM(CENSUS,CURIYR) = 0.0;PELSCCM(CENSUS,CURIYR) = 0.0
          PELWHCM(CENSUS,CURIYR) = 0.0;PELVTCM(CENSUS,CURIYR) = 0.0
          PELCKCM(CENSUS,CURIYR) = 0.0;PELLTCM(CENSUS,CURIYR) = 0.0
          PELRFCM(CENSUS,CURIYR) = 0.0;PELOPCM(CENSUS,CURIYR) = 0.0
          PELONCM(CENSUS,CURIYR) = 0.0;PELOTCM(CENSUS,CURIYR) = 0.0
+         PELP2CM(CENSUS,CURIYR) = 0.0
+         PELPFCM(CENSUS,CURIYR) = 0.0;PELSBCM(CENSUS,CURIYR) = 0.0
+         PELTBCM(CENSUS,CURIYR) = 0.0;PELIBCM(CENSUS,CURIYR) = 0.0
+         PELFNCM(CENSUS,CURIYR) = 0.0
          PELINP(CENSUS,CURIYR) = 0.0;PELINS(CENSUS,CURIYR) = 0.0
          PELINM(CENSUS,CURIYR) = 0.0
-         PELLTTR(CENSUS,CURIYR) = 0.0;PELVHTR(CENSUS,CURIYR) = 0.0
+         PELINH2E(CENSUS,CURIYR) = 0.0
+         PELLTTR(CENSUS,CURIYR) = 0.0;
          PECRS(CENSUS,CURIYR) = 0.0
          PECCM(CENSUS,CURIYR) = 0.0
          PECIN(CENSUS,CURIYR) = 0.0
@@ -9382,6 +9365,14 @@
                   PELLTRS(CENSUS,CURIYR) = 20.0
                END IF
 
+               PELOTRS(CENSUS,CURIYR) = PELOTRS(CENSUS,CURIYR) + PELOTRSN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(RES))
+               IF (PELOTRS(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELOTRS(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_OT_RS"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(RES), PELOTRS(CENSUS,CURIYR), PELOTRSN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(RES))
+                  PELOTRS(CENSUS,CURIYR) = 20.0
+               END IF
+      
                PELH2RS(CENSUS,CURIYR) = PELH2RS(CENSUS,CURIYR) + PELH2RSN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(RES))
                IF (PELH2RS(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELH2RS(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
                   NM = "P_EL_H2_RS"
@@ -9389,13 +9380,13 @@
                      RVMappCtoN(NERC,CENSUS,SEC(RES))
                   PELH2RS(CENSUS,CURIYR) = 20.0
                END IF
-
-               PELOTRS(CENSUS,CURIYR) = PELOTRS(CENSUS,CURIYR) + PELOTRSN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(RES))
-               IF (PELOTRS(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELOTRS(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
-                  NM = "P_EL_OT_RS"
-                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(RES), PELOTRS(CENSUS,CURIYR), PELOTRSN(NERC,CURIYR), &
+      
+               PELVHRS(CENSUS,CURIYR) = PELVHRS(CENSUS,CURIYR) + PELVHRSN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(RES))
+               IF (PELVHRS(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELVHRS(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_VH_RS"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(RES), PELVHRS(CENSUS,CURIYR), PELVHRSN(NERC,CURIYR), &
                      RVMappCtoN(NERC,CENSUS,SEC(RES))
-                  PELOTRS(CENSUS,CURIYR) = 20.0
+                  PELVHRS(CENSUS,CURIYR) = 20.0
                END IF
 
 !              commercial end uses
@@ -9470,8 +9461,8 @@
                   WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELONCM(CENSUS,CURIYR), PELONCMN(NERC,CURIYR), &
                      RVMappCtoN(NERC,CENSUS,SEC(COM))
                   PELONCM(CENSUS,CURIYR) = 20.0
-               END IF
-
+              END IF
+      
                PELOTCM(CENSUS,CURIYR) = PELOTCM(CENSUS,CURIYR) + PELOTCMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
                IF (PELOTCM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELOTCM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
                   NM = "P_EL_OT_CM"
@@ -9479,6 +9470,56 @@
                      RVMappCtoN(NERC,CENSUS,SEC(COM))
                   PELOTCM(CENSUS,CURIYR) = 20.0
                END IF
+      
+               PELP2CM(CENSUS,CURIYR) = PELP2CM(CENSUS,CURIYR) + PELP2CMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
+               IF (PELP2CM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELP2CM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_P2_CM"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELP2CM(CENSUS,CURIYR), PELP2CMN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(COM))
+                  PELP2CM(CENSUS,CURIYR) = 20.0
+               END IF
+      
+               PELPFCM(CENSUS,CURIYR) = PELPFCM(CENSUS,CURIYR) + PELPFCMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
+               IF (PELPFCM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELPFCM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_PF_CM"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELPFCM(CENSUS,CURIYR), PELPFCMN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(COM))
+                  PELPFCM(CENSUS,CURIYR) = 20.0
+               END IF
+      
+               PELSBCM(CENSUS,CURIYR) = PELSBCM(CENSUS,CURIYR) + PELSBCMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
+               IF (PELSBCM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELSBCM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_SB_CM"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELSBCM(CENSUS,CURIYR), PELSBCMN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(COM))
+                  PELSBCM(CENSUS,CURIYR) = 20.0
+               END IF
+      
+               PELTBCM(CENSUS,CURIYR) = PELTBCM(CENSUS,CURIYR) + PELTBCMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
+               IF (PELTBCM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELTBCM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_TB_CM"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELTBCM(CENSUS,CURIYR), PELTBCMN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(COM))
+                  PELTBCM(CENSUS,CURIYR) = 20.0
+               END IF
+      
+               PELIBCM(CENSUS,CURIYR) = PELIBCM(CENSUS,CURIYR) + PELIBCMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
+               IF (PELIBCM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELIBCM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_IB_CM"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELIBCM(CENSUS,CURIYR), PELIBCMN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(COM))
+                  PELIBCM(CENSUS,CURIYR) = 20.0
+               END IF
+      
+               PELFNCM(CENSUS,CURIYR) = PELFNCM(CENSUS,CURIYR) + PELFNCMN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(COM))
+               IF (PELFNCM(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELFNCM(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_FN_CM"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(COM), PELFNCM(CENSUS,CURIYR), PELFNCMN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(COM))
+                  PELFNCM(CENSUS,CURIYR) = 20.0
+               END IF
+
+
 
 !              industrial
 
@@ -9506,6 +9547,15 @@
                   PELINM(CENSUS,CURIYR) = 20.0
                END IF
 
+               PELINH2E(CENSUS,CURIYR) = PELINH2E(CENSUS,CURIYR) + PELINH2EN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(IND))
+               IF (PELINH2E(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELINH2E(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
+                  NM = "P_EL_H2EIN"
+                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(IND), PELINH2E(CENSUS,CURIYR), PELINH2EN(NERC,CURIYR), &
+                     RVMappCtoN(NERC,CENSUS,SEC(IND))
+                  PELINH2E(CENSUS,CURIYR) = 20.0
+               END IF
+               
+               
 !              transportation
 
                PELLTTR(CENSUS,CURIYR) = PELLTTR(CENSUS,CURIYR) + PELLTTRN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(TRA))
@@ -9514,14 +9564,6 @@
                   WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(TRA), PELLTTR(CENSUS,CURIYR), PELLTTRN(NERC,CURIYR), &
                      RVMappCtoN(NERC,CENSUS,SEC(TRA))
                   PELLTTR(CENSUS,CURIYR) = 20.0
-               END IF
-
-               PELVHTR(CENSUS,CURIYR) = PELVHTR(CENSUS,CURIYR) + PELVHTRN(NERC,CURIYR) / 3.412 * RVMappCtoN(NERC,CENSUS,SEC(TRA))
-               IF (PELVHTR(CENSUS,CURIYR) .LT. 0.0 .OR. ISNAN(PELVHTR(CENSUS,CURIYR)) ) THEN   ! check for NaNQ this way
-                  NM = "P_EL_VH_TR"
-                  WRITE(6,3130) CURIRUN, CURIYR+1989, CURITR, NM, NERC, CENSUS, SEC(TRA), PELVHTR(CENSUS,CURIYR), PELVHTRN(NERC,CURIYR), &
-                     RVMappCtoN(NERC,CENSUS,SEC(TRA))
-                  PELVHTR(CENSUS,CURIYR) = 20.0
                END IF
 
 !              sector average competitive prices
@@ -9643,21 +9685,60 @@
             PELLTRS(MNUMCR,CURIYR) = num(8)/(3.412*den(8))
             PELOTRS(MNUMCR,CURIYR) = num(9)/(3.412*den(9))
             PELH2RS(MNUMCR,CURIYR) = num(10)/(3.412*den(10))
-            PELSHCM(MNUMCR,CURIYR) = num(11)/(3.412*den(11))
-            PELSCCM(MNUMCR,CURIYR) = num(12)/(3.412*den(12))
-            PELWHCM(MNUMCR,CURIYR) = num(13)/(3.412*den(13))
-            PELVTCM(MNUMCR,CURIYR) = num(14)/(3.412*den(14))
-            PELCKCM(MNUMCR,CURIYR) = num(15)/(3.412*den(15))
-            PELLTCM(MNUMCR,CURIYR) = num(16)/(3.412*den(16))
-            PELRFCM(MNUMCR,CURIYR) = num(17)/(3.412*den(17))
-            PELOPCM(MNUMCR,CURIYR) = num(18)/(3.412*den(18))
-            PELONCM(MNUMCR,CURIYR) = num(19)/(3.412*den(19))
-            PELOTCM(MNUMCR,CURIYR) = num(20)/(3.412*den(20))
-            PELINP(MNUMCR,CURIYR) = num(21)/(3.412*den(21))
-            PELINS(MNUMCR,CURIYR) = num(22)/(3.412*den(22))
-            PELINM(MNUMCR,CURIYR) = num(23)/(3.412*den(23))
-            PELVHTR(MNUMCR,CURIYR) = num(24)/(3.412*den(24))
-            PELLTTR(MNUMCR,CURIYR) = num(25)/(3.412*den(25))
+            If (den(11) .GT. 0) then
+              PELVHRS(MNUMCR,CURIYR) = num(11)/(3.412*den(11))
+            else
+              PELVHRS(MNUMCR,CURIYR) = 20.0
+            endif
+            PELSHCM(MNUMCR,CURIYR) = num(12)/(3.412*den(12))
+            PELSCCM(MNUMCR,CURIYR) = num(13)/(3.412*den(13))
+            PELWHCM(MNUMCR,CURIYR) = num(14)/(3.412*den(14))
+            PELVTCM(MNUMCR,CURIYR) = num(15)/(3.412*den(15))
+            PELCKCM(MNUMCR,CURIYR) = num(16)/(3.412*den(16))
+            PELLTCM(MNUMCR,CURIYR) = num(17)/(3.412*den(17))
+            PELRFCM(MNUMCR,CURIYR) = num(18)/(3.412*den(18))
+            PELOPCM(MNUMCR,CURIYR) = num(19)/(3.412*den(19))
+            PELONCM(MNUMCR,CURIYR) = num(20)/(3.412*den(20))
+            PELOTCM(MNUMCR,CURIYR) = num(21)/(3.412*den(21))
+            If (den(22) .GT. 0) then
+              PELP2CM(MNUMCR,CURIYR) = num(22)/(3.412*den(22))
+            else
+              PELP2CM(MNUMCR,CURIYR) = 20.0
+            endif
+            If (den(23) .GT. 0) then
+              PELPFCM(MNUMCR,CURIYR) = num(23)/(3.412*den(23))
+            else
+               PELPFCM(MNUMCR,CURIYR) = 20.0
+            endif
+            If (den(24) .GT. 0) then
+              PELSBCM(MNUMCR,CURIYR) = num(24)/(3.412*den(24))
+            else
+              PELSBCM(MNUMCR,CURIYR) = 20.0
+             endif
+            If (den(25) .GT. 0) then
+              PELTBCM(MNUMCR,CURIYR) = num(25)/(3.412*den(25))
+            else
+              PELTBCM(MNUMCR,CURIYR) = 20.0
+            endif
+            If (den(26) .GT. 0) then
+              PELIBCM(MNUMCR,CURIYR) = num(26)/(3.412*den(26))
+            else
+              PELIBCM(MNUMCR,CURIYR) = 20.0
+            endif
+            If (den(27) .GT. 0) then
+              PELFNCM(MNUMCR,CURIYR) = num(27)/(3.412*den(27))
+            else
+              PELFNCM(MNUMCR,CURIYR) = 20.0
+            endif
+            PELINP(MNUMCR,CURIYR) = num(28)/(3.412*den(28))
+            PELINS(MNUMCR,CURIYR) = num(29)/(3.412*den(29))
+            PELINM(MNUMCR,CURIYR) = num(30)/(3.412*den(30))
+            If (den(31) .GT. 0) then
+                PELINH2E(MNUMCR,CURIYR) = num(31)/(3.412*den(31))
+            else
+                PELINH2E(MNUMCR,CURIYR) = 20.0
+            endif
+            PELLTTR(MNUMCR,CURIYR) = num(32)/(3.412*den(32))
 
             NUM1 = 0.0;DEN1 = 0.0
             NUM2 = 0.0;DEN2 = 0.0

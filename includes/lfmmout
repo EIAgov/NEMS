@@ -38,13 +38,20 @@
       REAL LCFS_Waiver(LCFS_Cat,MNXYR)        ! LCFS Waivers Purchased - M mton CO2
       REAL LCFS_Offset_Prc(LCFS_Cat,MNXYR)    ! LCFS Offset Price (1987$ / mton CO2)
       REAL LCFS_Carb_Offset(LCFS_Cat,MNXYR)   ! LCFS Carbon Offset M mton CO2 - Excludes Waivers Purchased
-      REAL LCFS_PeToTrills(LCFS_Cat,MNXYR)    ! Total carbon in all trans fuels (1000 tons C) per DAY 
-	  REAL CFP_BaseLine(LCFS_Cat,MNXYR)        ! CFP Baseline Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
-      REAL CFP_Actual(LCFS_Cat,MNXYR)          ! CFP Actual Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
-      REAL CFP_Waiver(LCFS_Cat,MNXYR)          ! CFP Waivers Purchased - M mton CO2
-      REAL CFP_Offset_Prc(LCFS_Cat,MNXYR)      ! CFP Offset Price (1987$ / mton CO2)
-      REAL CFP_Carb_Offset(LCFS_Cat,MNXYR)     ! CFP Carbon Offset M mton CO2 - Excludes Waivers Purchased
-      REAL CFP_PeToTrills(LCFS_Cat,MNXYR)      ! Total carbon in all trans fuels (1000 tons C) per DAY
+      REAL LCFS_PeToTrills(LCFS_Cat,MNXYR)    ! LCFS Total carbon in all trans fuels (1000 tons C) per DAY 
+	  REAL CFP_BaseLine(LCFS_Cat,MNXYR)       ! CFP Baseline Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL CFP_Actual(LCFS_Cat,MNXYR)         ! CFP Actual Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL CFP_Waiver(LCFS_Cat,MNXYR)         ! CFP Waivers Purchased - M mton CO2
+      REAL CFP_Offset_Prc(LCFS_Cat,MNXYR)     ! CFP Offset Price (1987$ / mton CO2)
+      REAL CFP_Carb_Offset(LCFS_Cat,MNXYR)    ! CFP Carbon Offset M mton CO2 - Excludes Waivers Purchased
+      REAL CFP_PeToTrills(LCFS_Cat,MNXYR)     ! CFP Total carbon in all trans fuels (1000 tons C) per DAY
+      REAL WACFS_BaseLine(LCFS_Cat,MNXYR)     ! WACFS Baseline Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL WACFS_Actual(LCFS_Cat,MNXYR)       ! WACFS Actual Carbon Factors - Thousand metric tons CO2 (M mton CO2) / Trillion Btu
+      REAL WACFS_Waiver(LCFS_Cat,MNXYR)       ! WACFS Waivers Purchased - M mton CO2
+      REAL WACFS_Offset_Prc(LCFS_Cat,MNXYR)   ! WACFS Offset Price (1987$ / mton CO2)
+      REAL WCFS_Carb_Offset(LCFS_Cat,MNXYR)   ! WACFS Carbon Offset M mton CO2 - Excludes Waivers Purchased
+      REAL WACFS_PeToTrills(LCFS_Cat,MNXYR)   ! WACFS Total carbon in all trans fuels (1000 tons C) per DAY
+      REAL ETH_FERM_CO2(MNUMYR)               ! CO2 emissions from ethanol fermentation, 1000 mton CO2/year
       REAL REFGAIN(MNUMPR,2,MNUMYR)           ! Refinery gain by refining region and refinery type (1=coking,2=cracking) in Mbbl/day
       REAL RFIPQMG(MNUMPR,MNUMYR,2)           ! Imports - conventional motor gas - price/quantity
       REAL RFIPQRG(MNUMPR,MNUMYR,2)           ! Imports - reformulated motor gas - price/quantity
@@ -171,7 +178,9 @@
                        LCFS_BaseLine, LCFS_Actual, LCFS_Waiver, LCFS_Offset_Prc, LCFS_Carb_Offset,  &
                        LCFS_PeToTrills, &
 					   CFP_BaseLine, CFP_Actual, CFP_Waiver, CFP_Offset_Prc, CFP_Carb_Offset,  &
-                       CFP_PeToTrills, REFGAIN, &
+                       CFP_PeToTrills, &
+                       WACFS_BaseLine, WACFS_Actual, WACFS_Waiver, WACFS_Offset_Prc, WCFS_Carb_Offset,  &
+                       WACFS_PeToTrills, ETH_FERM_CO2, REFGAIN, &
                        RFIPQMG, RFIPQRG, RFIPQCBOB, RFIPQRBOB, RFIPQCG, &
                        RFIPQDS, RFIPQDL, RFIPQDU, RFIPQCD, RFIPQRL, RFIPQRH, &
                        RFIPQJF, RFIPQPF, RFIPQAS, RFIPQAG, RFIPQLU, RFIPQPC, &
@@ -215,7 +224,9 @@
                     5 * MNUMCR * MNUMYR +            &  ! RFSDSTR, RFSMGTR, RFSRBOB, RFSJFTR, RFSDSRS
                     2 * 57 * MNUMPR * MNUMYR +       &  ! REF_CAP AND REF_UTL
                     6 * LCFS_Cat * MNXYR +           &  ! LCFS Info
-                    6 * LCFS_Cat * MNXYR +            &  ! CFP Info
+                    6 * LCFS_Cat * MNXYR +           &  ! CFP Info
+                    6 * LCFS_Cat * MNXYR +           &  ! WACFS Info
+                    MNUMYR +                         &  ! ETH_FERM_CO2
                     MNUMPR * 2 * MNUMYR +            &  ! REFGAIN
                     26 * MNUMPR * MNUMYR * 2 +       &  ! price/quantity import variables
                     4 * 3 * MNUMYR +                 &  ! MOTOR_FUEL

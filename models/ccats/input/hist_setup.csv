@@ -1,0 +1,7 @@
+parameter,value,type,description,units
+co2_supply_history_div,co2_supply_history_div.csv,input_file,CO2 supply history by census division
+co2_supply_history_reg,co2_supply_history_reg.csv,input_file,CO2 supply history by census region
+co2_eor_history_div,co2_eor_history_div.csv,input_file,CO2 EOR demand history by census division
+co2_eor_history_reg,co2_eor_history_reg.csv,input_file,CO2 EOR demand history by census region
+co2_seq_history_div,co2_seq_history_div.csv,input_file,CO2 saline formation storage history by census division
+co2_seq_history_reg,co2_seq_history_reg.csv,input_file,CO2 saline formation storage history by census region

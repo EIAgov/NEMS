@@ -1,0 +1,10 @@
+region,gas_type,b3,b2,b1,b0,oilprc_high,oilprc_low
+Alberta,Shale,-0.00083,0.062036,-1.77661,35.32716,0.35,0.05
+Alberta,Coalbed Methane,-3.30E-05,0.00211,-0.04095,-0.2284,0.1,0.4
+Alberta,Tight,-0.02022,1.28619,-24.5374,229.0402,0.1,0.05
+Alberta,Non Associated,-0.00479,0.309085,-6.15591,61.02998,0.5,0.2
+British Columbia,Shale,-5.70E-05,0.000362,0.112329,-0.23764,0.2,0.65
+British Columbia,Tight,-0.00396,0.148023,0.32148,128.8547,0.1,0.05
+British Columbia,Non Associated,0.000141,-0.00855,0.14379,0.712753,0.5,0.65
+Saskatchewan,Tight,0.00002,0.0017,0.054,-0.0765,0.5,0
+Saskatchewan,Non Associated,0.000133,-0.00906,0.179254,0.392118,0.5,0.65

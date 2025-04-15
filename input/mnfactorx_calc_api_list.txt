@@ -1,0 +1,8 @@
+! This file content is used in both mnfactorx_parser.py and mnfactorx_parser.py files
+CFCRDDOM
+CFCRDEXP
+CFCRDIMP
+CFDSQT
+CFEXPRD
+CFIMPRD
+CFTPQ

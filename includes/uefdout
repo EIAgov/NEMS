@@ -213,7 +213,8 @@
       REAL UPDISPRC(MNUMNR,MNUMYR)           !  2 AVERAGE DISTILLATE FUEL OIL PRICE BY EMM REGION AND YEAR
       REAL UPRESPRC(MNUMNR,MNUMYR)           !  3 AVERAGE RESIDUAL FUEL OIL PRICE BY EMM REGION AND YEAR
       REAL UPCOLPRC(MNUMNR,MNUMYR)           !  4 AVERAGE COAL PRICE BY EMM REGION AND YEAR
-      REAL UPNUCPRC(MNUMNR,MNUMYR)           !  5 AVERAGE COAL PRICE BY EMM REGION AND YEAR
+      REAL UPNUCPRC(MNUMNR,MNUMYR)           !  5 AVERAGE NUCLEAR PRICE BY EMM REGION AND YEAR
+      REAL UPHYDPRC(MNUMNR,MNUMYR)           !  6 AVERAGE HYDROGEN PRICE BY EMM REGION AND YEAR
 
       REAL UPMAXCF(ECP_D_DSP,MNUMNR,MNUMYR)    !  1 MAX CAPACITY FACTOR BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
       REAL UP_XFOR(ECP_D_DSP,MNUMNR,MNUMYR)    !  2 Forced Outage Rate BY ECP TYPE (DISPATCHABLES ONLY), EMM REGION, AND YEAR
@@ -245,6 +246,8 @@
       REAL UGRD_RTG(MX_GRDSRC,MNUMNR,MNUMYR)    !  6 Grid Resiliency Rating (Generation) by Source, Region, and Year
       REAL UGRD_PRG(MX_GRDSRC,MNUMNR,MNUMYR)    !  7 Grid Resiliency Price (Generation) by Source, Region, and Year
       REAL UGRD_GEN(MX_GRDSRC,MNUMNR,MNUMYR)    !  8 Grid Resiliency Qualifying Generation by Source, Region, and Year
+      REAL SQH2EL(MNUMCR,3,MNUMYR)              ! H2 CONSUMPTION FROM ELECTRIC POWER SECTOR
+
       
       INTEGER*4 UNRGNS          ! # NERC REGIONS IN EMM (.LE. MNUMNR)
       INTEGER*4 IJUMPEMRGN      ! # NERC REGIONS TO READ IN FROM EMM INPUT FILES    
@@ -292,11 +295,11 @@
          UNOXOTR, UHGINR, UHGOTR, SQGFELGR, SQGIELGR, SQNGELGR, QNGELGR, &
          QBMELCL,  &
          UPMXGAS, UPMXOIL, UPMXCOL, UPMXGAS_MR, UPMXOIL_MR, UPMXCOL_MR, &
-         UPGASPRC, UPDISPRC, UPRESPRC, UPCOLPRC, UPNUCPRC, UPMAXCF, UP_XFOR, &
+         UPGASPRC, UPDISPRC, UPRESPRC, UPCOLPRC, UPNUCPRC, UPHYDPRC, UPMAXCF, UP_XFOR, &
          UP_XPMR, UOUNCP, UOUCCP, CTLNOXEM, &
          CTLSO2EM, CTLHGEM, UPCOALAVG, UCROTNR, UEFD_CAP, UEFD_GEN, &
          UGRD_STC, UGRD_RTC, UGRD_PRC, UGRD_CAP, UGRD_STG, UGRD_RTG, UGRD_PRG, UGRD_GEN, &
-         UGNSDNR, UGNPTNR, UGNWLNR, UCRPTNR, UCRWLNR, UPTPTNR, UPTWLNR,IJUMPEMRGN,UNRGNS, CO2_CCS, BTU_CCS
+         UGNSDNR, UGNPTNR, UGNWLNR, UCRPTNR, UCRWLNR, UPTPTNR, UPTWLNR,IJUMPEMRGN,UNRGNS, CO2_CCS, BTU_CCS, SQH2EL
 
 !     Equivalence for FILER used for data storage
 
@@ -309,8 +312,8 @@ REAL UEFDDAT(   &
           35   *    MNUMNR*MNUMYR +   &                      !  URPSCST through URETTLU   38
           18   *    MNUMNR*MNUMYR       +  &                 !  CTLGEN through UHGOTR     56
           1    *    MNUMNR*MNUMYR +  &                       !  UPCOALAVG                 57
-          5    *    MNUMNR*MNUMYR            +  &            !  UPGASPRC through UPNUCPRC 62
-          2    *    MNUMNR*MNUMYR            +  &            !  UOUNCP through UOUCCP     64
+          6    *    MNUMNR*MNUMYR            +  &            !  UPGASPRC through UPHYDPRC 63
+          2    *    MNUMNR*MNUMYR            +  &            !  UOUNCP through UOUCCP     65
           1    *    MNUMYR +  &                              !  URPSPRC                    1
           11   *    MNUMNR         +  &                      !  COALGEN through TOTCAP    12
           4    *    MNUMCR*MNUMYR +  &                       !  UPRWDCR through XRHEL
@@ -327,8 +330,9 @@ REAL UEFDDAT(   &
           2    *    ECP_D_DSP*NDREG*MNUMYR   + &               !  UEFD_CAP through UEFD_GEN
           1    *    (1+MAXNFR)*(2+MNLNP1)*3*MNUMYR + &       !  CO2_CCS
           1    *    5*(1+MAXNFR)*3*MNUMYR   + &             !  BTU_CCS
-          2      )                                           !  IJUMPEMRGN, UNRGNS
-          
+          2                                + &             !  IJUMPEMRGN, UNRGNS
+          MNUMCR*3*MNUMYR        + &                    ! SQH2EL
+          0)                                            !END
 !     Equivalence for MAIN to test convergence on natural gas to util
 
       REAL MUQTY(NNGEM,MNUMYR,3)

@@ -5069,7 +5069,7 @@ Model Main_efd {
         }
         Parameter EDSEL {
             IndexDomain: (MNUMYR);
-            Text: "36 Distillate - Electricity (+petroleum coke)";
+            Text: "36 Distillate - Electricity";
         }
         Parameter EEITAJ {
             IndexDomain: (Season,SupplyRegion);
@@ -5417,7 +5417,7 @@ Model Main_efd {
         }
         Parameter JDSEL {
             IndexDomain: (MNUMYR);
-            Text: "52 Distillate - Electricity (+petroleum coke)";
+            Text: "52 Distillate - Electricity";
         }
         Parameter JGFELGR {
             IndexDomain: (MNUMYR);
@@ -5643,7 +5643,7 @@ Model Main_efd {
         }
         Parameter QDSEL {
             IndexDomain: (CensusRegion,MNUMYR);
-            Text: "53 Distillate - Electricity (+petroleum coke)";
+            Text: "53 Distillate - Electricity";
         }
         Parameter QELAS {
             IndexDomain: (CensusRegion,MNUMYR);

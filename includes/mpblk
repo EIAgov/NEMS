@@ -5,7 +5,7 @@
       INTEGER MNUMP,MPSIZE,PMSIZE
       PARAMETER(MNUMP=84)   ! Number of NEMS price variables
       PARAMETER(MPSIZE=MNUMP*MNUMCR*MNUMYR) ! Size of price array
-      PARAMETER(PMSIZE=MNUMCR*MNUMYR*19)    ! Size of more prices array:  19 dimensioned MNUMCRxMNUMYR
+      PARAMETER(PMSIZE=MNUMCR*MNUMYR*22)    ! Size of more prices array:  22 dimensioned MNUMCRxMNUMYR
 ! PRICES
       REAL PELRS(MNUMCR,MNUMYR) !  1 Purchased Electricity - Residential
       REAL PELCM(MNUMCR,MNUMYR) !  2 Purchased Electricity - Commercial
@@ -48,7 +48,7 @@
       REAL PDSCM(MNUMCR,MNUMYR) ! 39 Distillate - Commercial
       REAL PDSTR(MNUMCR,MNUMYR) ! 40 Distillate - Transportation
       REAL PDSIN(MNUMCR,MNUMYR) ! 41 Distillate - Industrial
-      REAL PDSEL(MNUMCR,MNUMYR) ! 42 Distillate - Electricity (+petroleum coke)
+      REAL PDSEL(MNUMCR,MNUMYR) ! 42 Distillate - Electricity
       REAL PDSAS(MNUMCR,MNUMYR) ! 43 Distillate - All Sectors
       REAL PKSRS(MNUMCR,MNUMYR) ! 44 Kerosene - Residential
       REAL PKSCM(MNUMCR,MNUMYR) ! 45 Kerosene - Commercial
@@ -85,7 +85,7 @@
       REAL PTPEL(MNUMCR,MNUMYR) ! 76 Total Petroleum - Electricity
       REAL PTPAS(MNUMCR,MNUMYR) ! 77 Total Petroleum - All Sectors
       REAL PMETR(MNUMCR,MNUMYR) ! 78 Methanol - Transporation
-      REAL PETTR(MNUMCR,MNUMYR) ! 79 Ethanol - Transporation
+      REAL PETTR(MNUMCR,MNUMYR) ! 79 Ethanol - Transporation (sold as E85)
       REAL PHYTR(MNUMCR,MNUMYR) ! 80 Liquid Hydrogen - Transporation
       REAL PUREL(MNUMCR,MNUMYR) ! 81 Uranium - Electricity
       REAL PH1TR(MNUMCR,MNUMYR) ! 82 Large Cities Hydrogen - Transportation
@@ -132,13 +132,16 @@
       REAL PPRINPF(MNUMCR,MNUMYR)            !  Industrial propane feedstock
       REAL PISINPF(MNUMCR,MNUMYR)            !  Industrial isobutane feedstock
       REAL PPCIN(MNUMCR,MNUMYR)              !  Industrial petroleum coke
+	  REAL PH2IN(MNUMCR,MNUMYR)              !  price of h2 to industrial sector
+      REAL PH2EL(MNUMCR,MNUMYR)              !  price of H2 to electric power sector by census division, year
+      REAL PELHM(MNUMCR,MNUMYR)              !  price of electricity delivered to hydrogen production subsector
 
       COMMON /PMORE/ PLGINPF, PCLGAS, &
                      PPRRS, PPRCM, PPPIN, PETIN, PBUIN, &
                      PPRIN, PISIN, PLUIN, PPRTR, &
                      PPROLENERF, PSULFURIN, &
                      PPPINPF, PETINPF, PBUINPF, PPRINPF, PISINPF, &
-                     PPCIN
+                     PPCIN, PH2IN, PH2EL, PELHM
 
       REAL PMOREQ(PMSIZE)
       EQUIVALENCE(PMOREQ,PLGINPF)

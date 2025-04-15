@@ -1,8 +1,0 @@
-  Function: Trace flow, starting with submatrix
-  Syntax:   TRACE [row_conditional [,column_conditional] [//specs]
-            where specs can be:
-              MAXSUB=number ....specifies max size of submatrix
-                             (= number of rows = number of columns)
-
-   If conditionals are absent, current submatrix is used; otherwise,
-   new submatrix is determined by direct delineation by conditionals.

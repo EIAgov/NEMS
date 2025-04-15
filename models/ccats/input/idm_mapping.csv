@@ -1,0 +1,10 @@
+census_region,census_division,distribution_ratio
+1,1,0
+1,2,1
+2,3,0.3
+2,4,0.7
+3,5,0.4
+3,6,0.2
+3,7,0.4
+4,8,0.55
+4,9,0.45

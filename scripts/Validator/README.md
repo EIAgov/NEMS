@@ -29,8 +29,6 @@ Check that P2/rest/fromAIMMS folder has files for every yer 2018-2050.
 ### test_lfmm_gams_model_gdx_files_exist
 check that the P1 folder has lfmm_pYEAR.gdx files for all years 2010-2050.
 
-### test_ctus_gams_model_ctssoln_file_exists
-Check that P2 folder has a ctssoln.gdx file.
 
 
 

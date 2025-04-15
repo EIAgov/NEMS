@@ -54,6 +54,9 @@
       REAL*4 NGEXPVOL(4,MNUMYR)            ! Total export volumes (billion cubic feet)
       REAL*4 NGIMPPRC(4,MNUMYR)            ! Average import price (1987 dollars per thousand cubic feet)
       REAL*4 NGEXPPRC(4,MNUMYR)            ! Average export price (1987 dollars per thousand cubic feet)
+	  
+      REAL*4 OGPRRNG(MNUMYR)               ! TOTAL RNG PRODUCTION
+      REAL*4 LCFSRNGOS(MNUMYR)             !CO2 OFFSET BY RNG VIA LCFS
 
 
       COMMON /NGTDMREP/ OGWPRNG, OGPRSUP, OGPRDNG, NGSTRCAP, NGPIPCAP, GMD_ALB, GAK_ALB, &
@@ -62,7 +65,7 @@
         OGSUPGAS, ACGPR_RESCOM, UDTAR, ARESCOM, CNGAVAIL, NALNGEXP, &
         PINTLNG, PUSNG, PTRANSNG, OGPRCNG,  &
         NGRNAGPRD, NGIMPVOL, NGEXPVOL, NGIMPPRC, NGEXPPRC, &
-        NGSPOT_EMM
+        NGSPOT_EMM, OGPRRNG, LCFSRNGOS
 
 !   Equivalence for/FILER used for data storage
       REAL EQ_NTREP( &
@@ -86,5 +89,6 @@
               OGDIST * MNUMYR + &      ! NGRNAGPRD
               4 * 4 * MNUMYR  + &      ! NGIMPVOL, NGEXPVOL, NGIMPPRC, NGEXPPRC
               NNGEM * MNUMYR  + &      ! NGSPOT_EMM
+			  2 * MNUMYR      + &      ! OGPRRNG, LCFSRNGOS
               0)                       ! fin
       EQUIVALENCE (EQ_NTREP,OGWPRNG)

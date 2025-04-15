@@ -1,0 +1,13 @@
+# Mapping of coal regions into census divisions: CL_CDMAP
+census_1 = [1]
+census_2 = [2, 3, 4]
+census_3 = [9, 10]
+census_4 = [13, 14, 15]
+census_5 = [5, 6, 7, 8]
+census_6 = [11, 12]
+census_7 = [16, 17]
+census_8 = [18, 19, 20]
+census_9 = [21, 22, 23]
+
+# Number of coal regions in each census division: CL_CDNUM
+#     (use the length of each array above)

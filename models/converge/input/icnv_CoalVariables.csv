@@ -1,0 +1,4 @@
+Variable,FractionTolerance,AbsoluteTolerance,RelaxFactor,Test,Relax,PQType,QMATCH,Module,CVTAB ID,Variables_in_Group,Group_Name,Weight_Class_Name,Weight_Class,Weight_Start
+XCL_PCAP,0.01,5,0.5,0,1,Z,NA,CMM,,,,,,
+EMM_CL_CF,0.01,0,0.5,0,1,Z,NA,CMM,,,,,,
+EMM_CL_BTUS,0.01,5,0.5,0,1,Z,NA,CMM,,,,,,

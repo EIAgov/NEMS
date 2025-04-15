@@ -719,12 +719,10 @@
          CHARACTER*1 SPLIT_OG    ! SPLIT OIL AND GAS CONSTRAINTS
          CHARACTER*1 SPLIT_ED    ! SPLIT EXPLORATION AND DEVLOPMENT
          CHARACTER*1 DET_DRILLING ! detailed drilling constraint file
-         CHARACTER*1 NAT_SRCC02  ! USE NATURAL SOURCE OF CO2?
-         CHARACTER*1 IND_SRCC02  ! USE INDUSTRIAL SOURCE OF CO2?       
-         
+
          COMMON/DRILL_OPT/ USE_RDR, SPLIT_OG, SPLIT_ED, &
                            DET_DRILLING, REG_NAT, RESP, &
-                           NAT_SRCC02, IND_SRCC02, HOR_VERT
+                           HOR_VERT
 
          REAL*4  EXPL_FRAC    ! % OF EXPLORATION DRILLING FOR CONVENTIONAL (oil)
          real*4  expl_fracg   ! % of exploration drilling for conventional gas       !mc change ver 8
@@ -738,12 +736,11 @@
          REAL*4  EXPMUL       ! EXPLORATION CONSTRAINT MULTIPLIER
          REAL*4  TOTMUL       ! TOTAL DRILL CONSTRAINT MULTIPLIER
          REAL*4  HORMUL       ! HORIZ DRILL CONSTRAINT MULTIPLIER
-         REAL*4  CO2MUL       ! CO2 AVAIL CONSTRAINT MULTIPLIER
          REAL*4  H_GROWTH     ! HORIZONTAL GROWTH RATE
 
          COMMON/CONSTRAINTS/ DRILL_TRANS, DRILL_OVER, drill_res, RGR, &
                            RRR, CAPMUL, EXPMUL, &
-                           TOTMUL, HORMUL, CO2MUL, &
+                           TOTMUL, HORMUL, &
                            H_PERCENT, EXPL_FRAC, H_GROWTH,expl_fracg               !mc change ver 8
                           
          REAL*4  OILA0        ! OIL FOOTAGE A0
@@ -807,32 +804,10 @@
 
       COMMON/DRILL/PRO_REGOIL,PRO_REGGAS,PRO_REGEXP,SUCEXP,H_SUCCESS, &
          sucdevo,sucdevg,suco,sucg,sucexpd,sucdeve,pro_regexpg,pro_regexpd
-          
-      REAL*4  CO2BASE(max_reg,MAX_SRC)    ! EXISTING SOURCES OF CO2 
-      REAL*4  AARP(40,max_src)        ! CO2 SOURCE ACCEPTANCE RATE
-      REAL*4  UMPCO2(max_src)          ! CO2 ULTIMATE MARKET ACCEPTANCE
-      INTEGER YRDT(max_src)           ! YRS TO DEVELOP TECHNOLOGY
-      INTEGER YRDI(max_src)           ! YRS TO DEVELOP INFRASTRUCTURE
-      INTEGER YRMA(max_src)           ! YRS TO REACH FULL CAPACITY
 
-      INTEGER*4 MAX_IND_CO2
-      PARAMETER(MAX_IND_CO2 = 200)                                          
-      REAL*8 BIN_DOLAMT(8)                      ! UPPER BOUND DOLLAR AMOUNT FOR BIN BREAKPOIINTS
-      INTEGER*4 NS_PRC_NDX(max_reg,MAX_IND_CO2,MNUMYR) ! INDEX FOR SORTED PRICES
-      INTEGER*4 NS_ID(max_reg,MAX_IND_CO2)    ! ID FOR NEW SOURCES OF CO2
-      INTEGER*4 NS_SRC(max_reg,MAX_IND_CO2)   ! SOURCES FOR EACH RECORD
-      REAL*8    NS_PRICE(max_reg,MAX_IND_CO2,MNUMYR) ! PRICE FOR NEW SOURCES OF CO2
-      REAL*8    NS_QUANT(max_reg,MAX_IND_CO2) ! QUANTITY FOR NEW SOURCES OF CO2
-      INTEGER*4 NS_BIN(max_reg,MAX_IND_CO2,MNUMYR)   ! BIN FOR NEW SOURCES OF CO2
-      INTEGER*4 NS_SYR(max_reg,MAX_IND_CO2)   ! Start Year for Each Record
-
-      INTEGER*4 N_NS_RECS(max_reg)            ! Number of Records per Region
-      INTEGER*4 MAP_BINS_TO_SRC_INDEX(max_src)
       INTEGER*4 MAP_SRC_INDEX_TO_BINS(max_src)
 
-      COMMON/CO2SOURCES/ CO2BASE, &
-         AARP, UMPCO2, YRDT, BIN_DOLAMT, NS_PRICE, NS_QUANT, &
-         YRDI, YRMA, NS_ID, NS_PRC_NDX, NS_BIN, NS_SRC, N_NS_RECS, NS_SYR, MAP_BINS_TO_SRC_INDEX, MAP_SRC_INDEX_TO_BINS
+      COMMON/CO2SOURCES/ MAP_SRC_INDEX_TO_BINS
 
 
 !  these are the constraint values after application of the model levers
@@ -899,15 +874,12 @@
         real reg_expug(max_reg,max_yr)       ! regional unconventional gas exploratory drilling constraint  !mc change ver 8
         real reg_expcg(max_reg,max_yr)       ! regional conventional gas exploratory drilling constraint    !mc change ver 8
         REAL NAT_HOR(MAX_YR)                 ! HORIZONTAL DRILLING CONSTRAINT
-        real bse_availco2(max_reg,max_src,max_yr)    ! base annual volume of CO2 available by region (BCF) and price bin
-        real src_availco2(max_reg,max_src,max_yr)    ! base annual volume of CO2 available by region (BCF) and source
         real use_availco2(max_reg,max_src,max_yr)    ! used annual volume of CO2 by region (BCF)
         real pur_co2_at_eor(max_reg,max_src,max_yr)  ! purchased annual volume of CO2 by EOR site region (BCF)
         real co2_recycle(max_reg,max_src,max_yr)     ! recycled annual volume of CO2 by EOR site region (BCF)
         real co2_inject(max_reg,max_src,max_yr)      ! injected annual volume of CO2 by EOR site region (BCF)
         real eor_oil_prod(max_reg,max_src,max_yr)    ! Oil Production from EOR project by region and CO2 source (MBBL) ?
-        real eor_gas_prod(max_reg,max_src,max_yr)    ! Gas Production from EOR project by region and CO2 source (MBCF) ?
-        real co2avail(max_reg,max_yr)                ! total CO2 available in a region across all sources (BCF)
+        real eor_gas_prod(max_reg,max_src,max_yr)    ! Gas Production from EOR project by region and CO2 source (MBCF) 
         real basavail(max_reg,max_yr)                ! base annual CO2 available in a region across all sources (BCF)
         real useavail(max_reg,max_yr)                ! used annual CO2 volume by region across all sources (BCF)        
 
@@ -916,8 +888,8 @@
                              NAT_EXP, NAT_EXPU, NAT_EXPC, NAT_TOT, &
                              REG_OIL, REG_GAS, REG_EXP, reg_expg, reg_expd, REG_EXPC, &   !mc change ver 8
                              REG_EXPU, reg_expug, reg_expcg, NAT_HOR, &
-                             bse_availco2,use_availco2,co2avail, &
-                             basavail,useavail, pur_co2_at_eor, co2_recycle, co2_inject, eor_oil_prod, eor_gas_prod, src_availco2
+                             use_availco2, &
+                             basavail,useavail, pur_co2_at_eor, co2_recycle, co2_inject, eor_oil_prod, eor_gas_prod
 
         real nat_dmdgas(max_reg,max_yr)      ! annual gas demand in region (Bcf/yr)
         integer cotype(max_src)                      ! industrial/natural code for co2 source (0 - industrial, 1 - natural)
@@ -1097,8 +1069,6 @@
         real co2k,co2b                             ! constant and coefficient for natural CO2 cost equation - West Texas
         real co2pr(L48RGN)                         ! state/regional multipliers for natural CO2 cost
         real cregpr(max_reg,max_src)               ! the CO2 price by region and source ($/Mcf)
-        real cregpryr(max_reg,max_src,max_yr)      ! the CO2 price by region, step and year ($/Mcf)
-        real cregpryrS(max_reg,max_src,max_yr)     ! the CO2 price by region, source and year ($/Mcf)
         real co2om20                               ! the O&M cost for CO2 injection - >20Mmcf
         real co2om_20                              ! the O&M cost for CO2 injection - <20Mmcf
         real stimfac                               ! stimulation efficiency factor
@@ -1112,7 +1082,7 @@
 
         common/cost_param3/polycost,co2k,co2b,co2pr,cregpr,co2om20, &
           co2om_20,stimfac,stim_a,stim_b,cost_bhp,comp_oam,co2st, &
-          co2cost,poly,stim_yr, cregpryr, cregpryrS
+          co2cost,poly,stim_yr
 
 
 

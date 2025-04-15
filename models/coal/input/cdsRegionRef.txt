@@ -199,7 +199,6 @@ DReg                USImpShare
 COMPOSITE TABLE:
 e                   M11                      Map_e_M11                IntSplyName
 AU                  1                        1                        "Australia"
-UA                  2                        1                        "United States"
 UE                  2                        1                        "United States"
 UG                  2                        1                        "United States"
 UI                  2                        1                        "United States"
@@ -234,7 +233,6 @@ LA                  3                        1                        "Asia"
 MX                  3                        1                        "Asia"
 NE                  3                        1                        "Europe"
 NI                  3                        1                        "Europe"
-UA                  3                        1                        "Europe"
 UE                  3                        1                        "Europe"
 UG                  3                        1                        "Europe"
 UI                  3                        1                        "Europe"
@@ -252,7 +250,6 @@ PO                                           -1
 RA                                           -1
 RE                                           -1
 SF                                           -1
-UA                  -1
 UE                  -1
 UG                  -1
 UI                  -1
@@ -708,7 +705,6 @@ UI                  07EN                     -1
 UI                  10C1                     -1
 UI                  11C2                     -1
 UN                  16PC                     -1
-UA                  16PC                     -1
 UI                  02YP                     -1
 UI                  13MT                     -1
 UI                  14CU                     -1
@@ -779,22 +775,6 @@ UW                  14CU                     0
 UW                  15ZN                     0
 UW                  12WS                     0
 UW                  16PC                     -1
-UA                  01NE                     0
-UA                  02YP                     0
-UA                  06OH                     0
-UA                  07EN                     0
-UA                  10C1                     0
-UA                  11C2                     0
-UA                  03S1                     0
-UA                  04S2                     0
-UA                  05GF                     0
-UA                  08KT                     0
-UA                  09AM                     0
-UA                  13MT                     0
-UA                  14CU                     0
-UA                  15ZN                     0
-UA                  12WS                     0
-UA                  16PC                     -1
 ;
 COMPOSITE TABLE:
 yr                  VesselClass              DailyHireCost            PortCostPer_mTon                                  PortDays            BunkerFuelUseSea    DieselFuelUseSea    DieselFuelUsePort   SailingSpeedKn

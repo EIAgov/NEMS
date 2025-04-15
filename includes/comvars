@@ -1,8 +1,7 @@
-
 !
 !FILE NAME:      COMVARS
 !
-!DATE MODIFIED:  September 21, 2022
+!DATE MODIFIED:  October 21, 2024
 !
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
 !                Commercial Demand Module (CDM)
@@ -64,13 +63,13 @@
       REAL*4     KFossilHR          ! approximate heat rate (Btu per Kilowatthour) for fossil-fuel electricity generation (used to
       PARAMETER (KFossilHR = 9510.) !  calculate renewable fuel consumption); from Appendix A6 of Monthly Energy Review (accessed 2016-08-02)
       INTEGER*4  KSTEOYR
-      PARAMETER (KSTEOYR = 34)      ! bench exactly to STEO through 2023
+      PARAMETER (KSTEOYR = 35)      ! bench exactly to STEO through 2024
 	  INTEGER*4  LastYr2pct
-      PARAMETER (LastYr2pct = 35)   ! get within 2% of STEO through 2024
+      PARAMETER (LastYr2pct = 36)   ! get within 2% of STEO through 2025
       INTEGER*4  CMBaseYear         ! base year for input data
-      PARAMETER (CMBaseYear = 2012)
+      PARAMETER (CMBaseYear = 2019)
       INTEGER*4  CBECSyear          ! survey year of CBECS base data
-      PARAMETER (CBECSyear = 2012)
+      PARAMETER (CBECSyear = 2018)
 
       INTEGER*4 CMnumHeatPumpTechs
       PARAMETER (CMnumHeatPumpTechs=5)
@@ -90,10 +89,10 @@
 
       INTEGER*4 CMCogHstYr      ! index of last year of historical commercial
                                 ! cogeneration data.
-      PARAMETER (CMCogHstYr=31) ! Last year of historical data is 2020
+      PARAMETER (CMCogHstYr=32) ! Last year of historical data is 2021
 	  
 	  INTEGER*4  SolarBMYr      ! index of last year of STEO small-scale non-residential solar projections
-      PARAMETER (SolarBMYr=35) ! Last year of STEO data plus 2 years of smoothing is 2024
+      PARAMETER (SolarBMYr=38)  ! Last year of STEO data plus 2 years of smoothing is 2027
 	  
       INTEGER*4 CMFirstYr       ! index of first year to forecast; assigned in source code
       INTEGER*4 CMLastYr        ! index of last year of forecast and assumption data; assigned in source code
@@ -354,7 +353,7 @@
              ServDmdSurv(CMnumServ,CMnumBldg,MNUMCR,23:MNUMYR),   &
              ServDmdExBldg (CMnumServ,CMnumBldg,MNUMCR,23:MNUMYR)
 
-      REAL*4 EquipSD(MNUMCR,CMnumBldg,CMnumTechs,CMnumEqVint,CMDecision,23:MNUMYR) ! sw10-95 !add b to ksdout
+!      REAL*4 EquipSD(MNUMCR,CMnumBldg,CMnumTechs,CMnumEqVint,CMDecision,23:MNUMYR) ! sw10-95 !add b to ksdout
       ! EquipSD (r,b,t,v,d,y) is the amount of service demand satisfied by equipment for reg r, building type b, of tech t,
       !  model v, for decision type d in year y.  Regions 1-9 are Census division, 11 is national.
 
@@ -409,8 +408,7 @@
                          ComEUI,                & ! Energy Use Intensities
                          Kscale,                & ! KTEK share scale factor
                          SolarRenewableContrib, & ! SD decrement amounts
-                         SunlightEfficacy,      & ! solar lighting efficacy
-                         EquipSD                  ! satisfied SD by r,b,t,v,d,y
+                         SunlightEfficacy         ! solar lighting efficacy
 
 
       COMMON /CMTechCh1/ EffGrowthRate          ! annual growth rate of minor service efficiencies

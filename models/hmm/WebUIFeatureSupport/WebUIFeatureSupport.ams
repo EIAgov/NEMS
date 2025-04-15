@@ -1,0 +1,1123 @@
+## ams_version=1.0
+
+LibraryModule WebuiFeatureSupport {
+	Prefix: wfs;
+	Interface: WebuiFeatureSupport;
+	Property: NoSave;
+	StringParameter sp_UnsetDefault {
+		Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+	}
+	Section Side_Panels {
+		Section Side_Panel_Procedural {
+			Procedure pr_CreateSidePanel {
+				Arguments: (_sp_SidePanel,_ep_Order,_ep_PageId,_sp_DisplayText,_sp_ToolTip);
+				Body: {
+					if _ep_Order = '' then
+						raise error "PR_CreateSidePanel requires non-empty _ep_order argument";
+					endif;
+					
+					_sp_SidePanel(_ep_Order, 'PageId') := _ep_PageId;
+					
+					if _sp_DisplayText <> sp_UnsetDefault then
+						_sp_SidePanel(_ep_Order, 'displayText') := _sp_DisplayText;
+					endif;
+					
+					if _sp_ToolTip <> sp_UnsetDefault then
+						_sp_SidePanel(_ep_order, 'tooltip') := _sp_ToolTip;
+					endif;
+				}
+				Comment: {
+					"This function fills in the specs for the side panel (webui::indexSidePanelSpec)
+					_sp_SidePanel	: (Input/Output) The side panel string which needs to be filled in the webui. Required dimensions (webui::indexPageExtension, webui::indexSidePanelSpec)
+					_ep_Order		: (Input) The order of the side panel tab
+					_ep_PageId		: (Input) When a page or side panel is created it is has a unique pageId. You can find all the side panel pageIds in the set AllSidePanelPages.
+					_sp_DisplayText	: (Optional) The text/label you would like the side panel tab and header to have.
+					_sp_ToolTip		: (Optional) The text here would be displayed when the user hovers over that respective side panel tab
+					
+					Example:
+					pr_CreateSidePanel(_sp_SidePanel, \'1\', _sp_DisplayText: \"Test\");"
+				}
+				StringParameter _sp_SidePanel {
+					IndexDomain: (webui::indexPageExtension, webui::indexSidePanelSpec);
+				}
+				ElementParameter _ep_Order {
+					Range: Integers;
+					Default: '';
+					Property: Input;
+				}
+				ElementParameter _ep_PageId {
+					Range: webui::AllPageIds;
+					Property: Input;
+				}
+				StringParameter _sp_DisplayText {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_ToolTip {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+			}
+		}
+		Section Side_Panel_Definition {
+			DeclarationSection Side_Panel_Example_Declaration {
+				StringParameter sp_SidePanelExample_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexSidePanelSpec);
+					Definition: {
+						if sp_SidePaneExampleDynamicSpecs_d(webui::indexPageExtension, webui::indexSidePanelSpec) <> "" then
+							sp_SidePaneExampleDynamicSpecs_d(webui::indexPageExtension, webui::indexSidePanelSpec)
+						else
+							sp_SidePanelExampleStaticInitiation_d(webui::indexPageExtension, webui::indexSidePanelSpec)
+						endif ;
+					}
+					Comment: "Combine static and dynamic (if any) specs of a side panel.";
+				}
+				StringParameter sp_SidePanelExampleStaticInitiation_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexSidePanelSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						data {
+							( 1, displayText) : "first display text"				,
+						  	( 1, pageId     ) : "side_tab_1"           		        ,
+						  	( 1, tooltip    ) : "long explanation tooltip"			,
+						  	( 1, state	 	) : "active"							,
+							( 2, displayText) : "solution summary"					,
+						  	( 2, pageId     ) : "side_tab_sol_sum"      	        ,
+						  	( 2, tooltip    ) : "long explanation tooltip"			,
+						  	( 2, state	 	) : "hidden"							
+						}
+					}
+					Comment: "Initiate specifications of each tab in a side panel.";
+				}
+				StringParameter sp_SidePaneExampleDynamicSpecs_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexSidePanelSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexPageExtension = '2'
+							AND webui::indexSidePanelSpec = 'state'
+							AND 0 ) then !e.g. parameter indicating that the model is solved optimally
+							"active"
+						endif
+					}
+					Comment: {
+						"						\"Specify dynamic (if any) specs of a side panel.
+												For the tabs and specs not affected by this parameter, the static initiation values will persist.\""
+					}
+				}
+			}
+		}
+	}
+	Section Widget_Actions {
+		Section Widget_Actions_Procedural {
+			Procedure pr_CreateWidgetAction {
+				Arguments: (_sp_WidgetAction,_ep_Order,_sp_DisplayText,_sp_Icon,_ep_Procedure,_sp_State);
+				Body: {
+					if _ep_Order = '' then
+						raise error "PR_CreateWidgetAction requires non-empty _ep_order argument";
+					endif;
+					
+					if _sp_DisplayText <> sp_UnsetDefault then
+						_sp_WidgetAction(_ep_Order, 'displayText') := _sp_DisplayText;
+					endif;
+					
+					if _sp_Icon <> sp_UnsetDefault then
+						_sp_WidgetAction(_ep_Order, 'icon') := _sp_Icon;
+					endif;
+					
+					if _ep_Procedure <> 'webui::NoOp' then
+						_sp_WidgetAction(_ep_Order, 'procedure') := _ep_Procedure;
+					endif;
+					
+					if _sp_State <> sp_UnsetDefault then
+						_sp_WidgetAction(_ep_Order, 'state') := _sp_State;
+					endif;
+				}
+				Comment: {
+					"This function fills in the specs for the action panel (webui::indexWidgetActionSpec)
+					_sp_WidgetAction: (Input/Output) The widget action string which needs to be filled in the webui. Required dimensions (webui::indexPageExtension, webui::indexWidgetActionSpec)
+					_ep_Order		: (Input) The order of the side panel tab
+					_sp_DisplayText	: (Optional) The text/label you would like to give the action.
+					_sp_Icon		: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+										(https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+					_ep_Procedure	: (Optional) The procedure you want to call when the respective action is clicked.
+					_sp_State		: (Optional) This is the state for the action, i.e. Active (displayed and clickable), Inactive (displayed and not clickable) and Hidden. By default, the state is Hidden.
+					
+					Example:
+					pr_CreateWidgetAction(sp_WidgetActions, \'1\', _sp_state: \"inactive\");"
+				}
+				StringParameter _sp_WidgetAction {
+					IndexDomain: (webui::indexPageExtension, webui::indexWidgetActionSpec);
+					Property: InOut;
+				}
+				ElementParameter _ep_Order {
+					Range: Integers;
+					Default: '';
+					Property: Input;
+				}
+				StringParameter _sp_DisplayText {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Icon {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_Procedure {
+					Range: AllProcedures;
+					Default: 'webui::NoOp';
+					Property: Optional;
+				}
+				StringParameter _sp_State {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+			}
+		}
+		Section Widget_Actions_Definition {
+			DeclarationSection Widget_Actions_Menu_Example_Declaration {
+				StringParameter sp_WidgetActionsMenuExample_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Definition: {
+						if sp_WidgetActionMenuExampleDynamicSpecs_d(webui::indexPageExtension, webui::indexWidgetActionSpec) <> "" then
+							sp_WidgetActionMenuExampleDynamicSpecs_d(webui::indexPageExtension, webui::indexWidgetActionSpec)
+						else
+							sp_WidgetActionMenuExampleStaticInitiation_d(webui::indexPageExtension, webui::indexWidgetActionSpec)
+						endif ;
+					}
+					Comment: "Combine static and dynamic (if any) specs of a widget actions menu.";
+				}
+				StringParameter sp_WidgetActionMenuExampleStaticInitiation_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						data {
+							( 1, displayText) : "first display text"				,
+						  	( 1, icon		) : "my-icon"           		        ,
+						  	( 1, procedure	) : "MyFavoriteProcedure" 				,
+						  	( 1, state	 	) : "active"							,
+							( 2, displayText) : "second display text"				,
+						  	( 2, icon		) : "another-icon"         		        ,
+						  	( 2, procedure	) : "webui::NoOp"						,
+						  	( 2, state	 	) : "inactive"							
+						}
+					}
+					Comment: "Initiate specifications of each action in a widget menu.";
+				}
+				StringParameter sp_WidgetActionMenuExampleDynamicSpecs_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexPageExtension = '2'
+							AND webui::indexWidgetActionSpec = 'state'
+							AND 0 ) then !e.g. parameter indicating that the specific data is loaded into the model
+							"active"
+						endif
+					}
+					Comment: {
+						"						\"Specify dynamic (if any) specs of a widget actions menu.
+												For the actions and specs not affected by this parameter, the static initiation values will persist.\""
+					}
+				}
+			}
+		}
+	}
+	Section Page_Actions {
+		Section Page_Acions_Procedural {
+			Procedure pr_CreatePrimaryPageActions {
+				Arguments: (_sp_PageAction, _sp_DisplayText, _sp_Icon, _ep_Procedure, _sp_State);
+				Body: {
+					if _sp_DisplayText <> sp_UnsetDefault then
+						_sp_PageAction('displayText') := _sp_DisplayText;
+					endif;
+					
+					if _sp_Icon <> sp_UnsetDefault then
+						_sp_PageAction('icon') := _sp_Icon;
+					endif;
+					
+					if _ep_Procedure <> 'webui::NoOp' then
+						_sp_PageAction('procedure') := _ep_Procedure;
+					endif;
+					
+					if _sp_State <> sp_UnsetDefault then
+						_sp_PageAction('state') := _sp_State;
+					endif;
+				}
+				Comment: {
+					"This function fills in the specs for the primary page action (webui::indexWidgetActionSpec)
+					_sp_PageAction	: (Input/Output) The primary action string which needs to be filled in the webui. Required dimensions (webui::indexWidgetActionSpec)
+					_sp_DisplayText	: (Optional) The text/label you would like the side panel tab and header to have.
+					_sp_Icon		: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+										(https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+					_ep_Procedure	: (Optional) The procedure you want to call when the respective action is clicked.
+					_sp_State		: (Optional) This is the state for the action, i.e. Active (displayed and clickable), Inactive (displayed and not clickable) and Hidden. By default, the state is Hidden.
+					
+					Example:
+					pr_CreatePrimaryPageActions(_sp_PageAction, _sp_state: \"inactive\");"
+				}
+				StringParameter _sp_PageAction {
+					IndexDomain: (webui::indexWidgetActionSpec);
+					Property: InOut;
+				}
+				StringParameter _sp_DisplayText {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Icon {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_Procedure {
+					Range: AllProcedures;
+					Default: 'webui::NoOp';
+					Property: Optional;
+				}
+				StringParameter _sp_State {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+			}
+			Procedure pr_CreateSecondaryPageActions {
+				Arguments: (_sp_PageAction, _ep_Order, _sp_DisplayText, _sp_Icon, _ep_Procedure, _sp_State);
+				Body: {
+					if _ep_Order = '' then
+						raise error "PR_CreateSecondaryPageAction requires non-empty _ep_order argument";
+					endif;
+					
+					if _sp_DisplayText <> sp_UnsetDefault then
+						_sp_PageAction(_ep_Order, 'displayText') := _sp_DisplayText;
+					endif;
+					
+					if _sp_Icon <> sp_UnsetDefault then
+						_sp_PageAction(_ep_Order, 'icon') := _sp_Icon;
+					endif;
+					
+					if _ep_Procedure <> 'webui::NoOp' then
+						_sp_PageAction(_ep_Order, 'procedure') := _ep_Procedure;
+					endif;
+					
+					if _sp_State <> sp_UnsetDefault then
+						_sp_PageAction(_ep_Order, 'state') := _sp_State;
+					endif;
+				}
+				Comment: {
+					"This function fills in the specs for the action panel (webui::indexWidgetActionSpec)
+					_sp_PageAction	: (Input/Output) The secondary page action string which needs to be filled in the webui. Required dimensions (webui::indexPageExtension, webui::indexPageActionSpec)
+					_ep_Order		: (Input) The order of the secondary action
+					_sp_DisplayText	: (Optional) The text/label you would like to give the action.
+					_sp_Icon		: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+										(https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+					_ep_Procedure	: (Optional) The procedure you want to call when the respective action is clicked.
+					_sp_State		: (Optional) This is the state for the action, i.e. Active (displayed and clickable), Inactive (displayed and not clickable) and Hidden. By default, the state is Hidden.
+					
+					Example:
+					pr_CreateSecondaryPageActions(_sp_PageAction, \'1\', _sp_state: \"inactive\");"
+				}
+				StringParameter _sp_PageAction {
+					IndexDomain: (webui::indexPageExtension, webui::indexPageActionSpec);
+					Property: InOut;
+				}
+				ElementParameter _ep_Order {
+					Range: Integers;
+					Default: '';
+					Property: Input;
+				}
+				StringParameter _sp_DisplayText {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Icon {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_Procedure {
+					Range: AllProcedures;
+					Default: 'webui::NoOp';
+					Property: Optional;
+				}
+				StringParameter _sp_State {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+			}
+		}
+		Section Page_Actions_Definition {
+			DeclarationSection Primary_Page_Action_Example_Declaration {
+				StringParameter sp_PrimaryPageActionExample_d {
+					IndexDomain: webui::indexPageActionSpec;
+					Definition: {
+						if sp_PrimaryPageActionExampleDynamicSpecs_d(webui::indexPageActionSpec) <> "" then
+							sp_PrimaryPageActionExampleDynamicSpecs_d(webui::indexPageActionSpec)
+						else
+							sp_PrimaryPageActionExampleStaticInitiation_d(webui::indexPageActionSpec)
+						endif ;
+					}
+					Comment: "Combine static and dynamic (if any) specs of a primary page action.";
+				}
+				StringParameter sp_PrimaryPageActionExampleStaticInitiation_d {
+					IndexDomain: webui::indexPageActionSpec;
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						data {
+							displaytext : "primary action"		, 
+							icon : "my-icon"					, 
+							procedure : "optimize"				,
+							state : "inactive"
+						}
+					}
+					Comment: "Initiate specifications of a primary page action.";
+				}
+				StringParameter sp_PrimaryPageActionExampleDynamicSpecs_d {
+					IndexDomain: webui::indexPageActionSpec;
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexPageActionSpec = 'state'
+							AND 0 ) then !e.g. parameter indicating all the settings for optimization are correctly defined
+							"active"
+						endif
+					}
+					Comment: {
+						"						\"Specify dynamic (if any) specs of a primary page action.
+												For the specs not affected by this parameter, the static initiation values will persist.\""
+					}
+				}
+			}
+			DeclarationSection Secondary_Page_Actions_Menu_Example_Declaration {
+				StringParameter sp_SecondaryPageActionsMenuExample_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexPageActionSpec);
+					Definition: {
+						if sp_SecondaryPageActionsMenuExampleDynamicSpecs_d(webui::indexPageExtension, webui::indexPageActionSpec) <> "" then
+							sp_SecondaryPageActionsMenuExampleDynamicSpecs_d(webui::indexPageExtension, webui::indexPageActionSpec)
+						else
+							sp_SecondaryPageActionsMenuExampleStaticInitiation_d(webui::indexPageExtension, webui::indexPageActionSpec)
+						endif ;
+					}
+					Comment: "Combine static and dynamic (if any) specs of a secondary page actions menu.";
+				}
+				StringParameter sp_SecondaryPageActionsMenuExampleStaticInitiation_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexPageActionSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						data {
+							( 1, displayText) : "first display text"				,
+						  	( 1, icon		) : "my-icon"           		        ,
+						  	( 1, procedure	) : "MyFavoriteProcedure" 				,
+						  	( 1, state	 	) : "active"							,
+							( 2, displayText) : "second display text"				,
+						  	( 2, icon		) : "another-icon"         		        ,
+						  	( 2, procedure	) : "webui::NoOp"						,
+						  	( 2, state	 	) : "inactive"							
+						}
+					}
+					Comment: "Initiate specifications of each action in a secondary page menu.";
+				}
+				StringParameter sp_SecondaryPageActionsMenuExampleDynamicSpecs_d {
+					IndexDomain: (webui::indexPageExtension,webui::indexPageActionSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexPageExtension = '2'
+							AND webui::indexPageActionSpec = 'state'
+							AND 0 ) then !e.g. parameter indicating that the specific data is loaded into the model
+							"active"
+						endif
+					}
+					Comment: {
+						"						\"Specify dynamic (if any) specs of a page actions menu.
+												For the actions and specs not affected by this parameter, the static initiation values will persist.\""
+					}
+				}
+			}
+		}
+	}
+	Section Item_Actions {
+		Section Item_Actions_Procedural {
+			Procedure pr_CreateItemAction {
+				Arguments: (_sp_ItemAction,_ep_Identifier,_ep_Order,_sp_DisplayText,_sp_Icon,_ep_Procedure,_sp_State);
+				Body: {
+					if _ep_Identifier = '' then
+						raise error "PR_CreateItemAction requires non-empty _EP_Identifier argument";
+					endif;
+					
+					if _ep_Order = '' then
+						raise error "PR_CreateItemAction requires non-empty _EP_Order argument";
+					endif;
+					
+					if _sp_DisplayText <> sp_UnsetDefault then
+						_sp_ItemAction(_ep_Identifier, _ep_Order, 'displayText') := _sp_DisplayText;
+					endif;
+					
+					if _sp_Icon <> sp_UnsetDefault then
+						_sp_ItemAction(_ep_Identifier, _ep_Order, 'icon') := _sp_Icon;
+					endif;
+					
+					if _ep_Procedure <> 'webui::NoOp' then
+						_sp_ItemAction(_ep_Identifier, _ep_Order, 'procedure') := _ep_Procedure;
+					endif;
+					
+					if _sp_State <> sp_UnsetDefault then
+						_sp_ItemAction(_ep_Identifier, _ep_Order, 'state') := _sp_State;
+					endif;
+				}
+				Comment: {
+					"This function fills in the specs for the item action - right click on a datapoint (webui::indexWidgetActionSpec)
+					_sp_ItemAction	: (Input/Output) The item action string which needs to be filled in the webui. Required dimensions (webui::indexWidgetItemActionSpec,webui::indexPageExtension,webui::indexWidgetActionSpec)
+					_ep_Identifier	: (Input) Identifier for which you want to create a context menu
+					_ep_Order		: (Input) The order of the context menu tab
+					_sp_DisplayText	: (Optional) The text/label you would like to give the action.
+					_sp_Icon		: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+										(https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+					_ep_Procedure	: (Optional) The procedure you want to call when the respective action is clicked.
+					_sp_State		: (Optional) This is the state for the action, i.e. Active (displayed and clickable), Inactive (displayed and not clickable) and Hidden. By default, the state is Hidden.
+					
+					Example:
+					pr_CreateItemAction(_sp_ItemAction, \'1\', _sp_state: \"inactive\");"
+				}
+				StringParameter _sp_ItemAction {
+					IndexDomain: (webui::indexWidgetItemActionSpec,webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Property: InOut;
+				}
+				ElementParameter _ep_Identifier {
+					Range: AllIdentifiers;
+					Property: Input;
+				}
+				ElementParameter _ep_Order {
+					Range: Integers;
+					Property: Input;
+				}
+				StringParameter _sp_DisplayText {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Icon {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_Procedure {
+					Range: AllProcedures;
+					Default: 'webui::NoOp';
+					Property: Optional;
+				}
+				StringParameter _sp_State {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+			}
+		}
+		Section Item_Actions_Definition {
+			DeclarationSection Item_Actions_Menu_Example_Declaration {
+				StringParameter sp_ItemActionsMenuExample_d {
+					IndexDomain: (webui::indexWidgetItemActionSpec,webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Definition: {
+						if sp_ItemActionsMenuExampleDynamicSpecs_d(
+								webui::indexWidgetItemActionSpec, 
+								webui::indexPageExtension, 
+								webui::indexWidgetActionSpec) 
+						<> "" 
+						then
+							sp_ItemActionsMenuExampleDynamicSpecs_d(
+								webui::indexWidgetItemActionSpec, 
+								webui::indexPageExtension, 
+								webui::indexWidgetActionSpec)
+						else
+							sp_ItemActionsMenuExampleStaticInitiation_d(
+								webui::indexWidgetItemActionSpec, 
+								webui::indexPageExtension, 
+								webui::indexWidgetActionSpec)
+						endif ;
+					}
+				}
+				StringParameter sp_ItemActionsMenuExampleStaticInitiation_d {
+					IndexDomain: (webui::indexWidgetItemActionSpec,webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Definition: {
+						data 
+						{ ( 'choose your identifier', 1, displaytext ) : "Display text",
+						  ( 'choose your identifier', 1, icon        ) : "aimms-bin",
+						  ( 'choose your identifier', 1, procedure   ) : "PR_DoSomething",
+						  ( 'choose your identifier', 1, state       ) : "Active" }
+					}
+				}
+				StringParameter sp_ItemActionsMenuExampleDynamicSpecs_d {
+					IndexDomain: (webui::indexWidgetItemActionSpec,webui::indexPageExtension,webui::indexWidgetActionSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexWidgetItemActionSpec = 'Choose your identifier'
+							AND webui::indexPageExtension = '1'
+							AND webui::indexWidgetActionSpec = 'state'
+							AND 0 ) then !e.g. parameter indicating that the specific data is loaded into the model
+							"active"
+						endif
+					}
+				}
+			}
+		}
+	}
+	Section List_Widget_Actions {
+		Section List_Group_Order {
+			Section List_Group_Order_Procedural {
+				Procedure pr_CreateListGroupOrder {
+					Arguments: (_sp_ListGroupOrder,_ep_Order,_sp_Title,_sp_ToolTip);
+					Body: {
+						if _ep_Order = '' then
+							raise error "PR_CreateListGroupOrder requires non-empty _ep_order argument";
+						endif;
+						
+						if _sp_Title = '' then
+							raise error "PR_CreateListGroupOrder requires non-empty _sp_Title argument";
+						endif;
+						
+						_sp_ListGroupOrder(_ep_Order, 'title') := _sp_Title;
+						
+						if _sp_ToolTip <> sp_UnsetDefault then
+							_sp_ListGroupOrder(_ep_Order, 'tooltip') := _sp_ToolTip;
+						endif;
+					}
+					Comment: {
+						"This function fills in the specs for the list group (webui::indexListGroupSpec)
+						_sp_ListGroupOrder	: (Input/Output) The list group string which needs to be filled in the webui. Required dimensions (webui::indexListGroupOrder, webui::indexListGroupSpec)
+						_ep_Order			: (Input) The order of the list group
+						_sp_Title			: (Input) The text of header for the group list
+						_sp_ToolTip			: (Optional) The text here would be displayed when the user hovers over that respective side panel tab
+						
+						Example:
+						pr_CreateListGroupOrder(_sp_ListGroupOrder, \'1\', \"Test\");"
+					}
+					StringParameter _sp_ListGroupOrder {
+						IndexDomain: (webui::indexListGroupOrder, webui::indexListGroupSpec);
+					}
+					ElementParameter _ep_Order {
+						Range: Integers;
+						Default: '';
+						Property: Input;
+					}
+					StringParameter _sp_Title {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Input;
+					}
+					StringParameter _sp_ToolTip {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Optional;
+					}
+				}
+			}
+			Section List_Group_Order_Definition {
+				DeclarationSection List_Group_Order_Definition_Example {
+					StringParameter sp_ListGroupOrderDefinitionExample_d {
+						IndexDomain: (webui::indexListGroupOrder, webui::indexListGroupSpec);
+						Definition: {
+							data 
+							{ ( 1, title   ) : "This weeks task" ,  ( 1, tooltip ) : "This week tasks",  
+							  ( 2, title   ) : "next week task"  ,  ( 2, tooltip ) : "Next week tasks"  }
+						}
+					}
+				}
+			}
+		}
+		Section List_Group_Items {
+			Section List_Group_Items_Procedural {
+				Procedure pr_CreateListGroupItems {
+					Arguments: {
+						(_sp_ListGroupItems,_ep_GroupOrder,_ep_GroupItemOrder,_sp_DisplayText,_sp_Icon,_sp_Color,_sp_ToolTip,
+						 _ep_Procedure,_sp_External,_sp_State)
+					}
+					Body: {
+						if _ep_GroupOrder = '' then
+							raise error "PR_CreateListGroupItems requires non-empty _ep_GroupOrder argument";
+						endif;
+						
+						if _ep_GroupItemOrder = '' then
+							raise error "PR_CreateListGroupItems requires non-empty _ep_GroupItemOrder argument";
+						endif;
+						
+						if _sp_DisplayText = '' then
+							raise error "PR_CreateListGroupItems requires non-empty _sp_DisplayText argument";
+						endif;
+						
+						_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'text') := _sp_DisplayText;
+						
+						if _sp_Icon <> sp_UnsetDefault then
+							_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'icon') := _sp_Icon;
+						endif;
+						
+						if _sp_Color <> sp_UnsetDefault then
+							_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'color') := _sp_Color;
+						endif;
+						
+						if _sp_ToolTip <> sp_UnsetDefault then
+							_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'tooltip') := _sp_ToolTip;
+						endif;
+						
+						if _ep_Procedure <> 'webui::NoOp' then
+							_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'procedure') := _ep_Procedure;
+						endif;
+						
+						if _sp_External <> "False" then
+							_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'external') := _sp_External;
+						endif;
+						
+						if _sp_State <> sp_UnsetDefault then
+							_sp_ListGroupItems(_ep_GroupOrder, _ep_GroupItemOrder, 'state') := _sp_State;
+						endif;
+					}
+					Comment: {
+						"This function fills in the specs for the group item for a list widget (webui::indexListGroupItemsSpec)
+						_sp_ListGroupItems	: (Input/Output) The group item string which needs to be filled in the webui. Required dimensions (webui::indexListGroupOrder, webui::indexNoOfListItems, webui::indexListGroupItemsSpec)
+						_ep_GroupOrder		: (Input) The order of the group
+						_ep_GroupItemOrder	: (Input) The order of the item with in the group
+						_sp_DisplayText		: (Input) The text you want to display for the list item.
+						_sp_Icon			: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+											  (https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+						_sp_Color			: (Optional) The color you want to display for the icon.
+						_ep_Procedure		: (Optional) The procedure you want to call when the respective action is clicked.
+						_sp_External		: (Optional) Boolean value to indicate the list item procedure leads to an external link. By default, this option is 0/false.
+						_sp_State			: (Optional) This is the state for the action, i.e. Active (displayed and clickable), Inactive (displayed and not clickable) and Hidden. By default, the state is Hidden.
+						
+						Example:
+						pr_CreateListGroupItems(_sp_PageAction, \'1\', \'1\', _sp_state: \"inactive\");"
+					}
+					StringParameter _sp_ListGroupItems {
+						IndexDomain: (webui::indexListGroupOrder, webui::indexNoOfListItems, webui::indexListGroupItemsSpec);
+						Property: InOut;
+					}
+					ElementParameter _ep_GroupOrder {
+						Range: Integers;
+						Default: '';
+						Property: Input;
+					}
+					ElementParameter _ep_GroupItemOrder {
+						Range: Integers;
+						Default: '';
+						Property: Input;
+					}
+					StringParameter _sp_DisplayText {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Input;
+					}
+					StringParameter _sp_Icon {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Optional;
+					}
+					StringParameter _sp_Color {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Optional;
+					}
+					StringParameter _sp_ToolTip {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Optional;
+					}
+					ElementParameter _ep_Procedure {
+						Range: AllProcedures;
+						Default: 'webui::NoOp';
+						Property: Optional;
+					}
+					StringParameter _sp_External {
+						Default: "False";
+						Property: Optional;
+					}
+					StringParameter _sp_State {
+						Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+						Property: Optional;
+					}
+				}
+			}
+			Section List_Group_Items_Definition {
+				DeclarationSection List_Group_Items_Definition_Example {
+					StringParameter sp_ListGroupItemsExample_d {
+						IndexDomain: (webui::indexListGroupOrder, webui::indexNoOfListItems, webui::indexListGroupItemsSpec);
+						Definition: {
+							if sp_ListGroupItemsExampleDynamicSpecs_d(webui::indexListGroupOrder,webui::indexNoOfListItems,webui::indexListGroupItemsSpec) <> "" then
+								sp_ListGroupItemsExampleDynamicSpecs_d(webui::indexListGroupOrder,webui::indexNoOfListItems,webui::indexListGroupItemsSpec)
+							else
+								sp_ListGroupItemsExampleStaticInitiation_d(webui::indexListGroupOrder,webui::indexNoOfListItems,webui::indexListGroupItemsSpec)
+							endif ;
+						}
+						Comment: "Combine static and dynamic (if any) specs of a widget actions menu.";
+					}
+					StringParameter sp_ListGroupItemsExampleStaticInitiation_d {
+						IndexDomain: (webui::indexListGroupOrder, webui::indexNoOfListItems, webui::indexListGroupItemsSpec);
+						Definition: {
+							data 
+							{ ( 1, 1, icon    ) : "MyIcon",  
+							  ( 1, 1, color   ) : "Red"   ,  
+							  ( 1, 1, text    ) : "item1" ,  
+							  ( 1, 1, tooltip ) : "item1" ,
+							  ( 1, 1, state   ) : "Active",  
+							  ( 2, 1, icon    ) : "Icon2" ,  
+							  ( 2, 1, color   ) : "Green" ,  
+							  ( 2, 1, text    ) : "Item2" ,
+							  ( 2, 1, tooltip ) : "Item2" ,  
+							  ( 2, 1, state   ) : "Active" }
+						}
+						Comment: "Initiate specifications of each action in a widget menu.";
+					}
+					StringParameter sp_ListGroupItemsExampleDynamicSpecs_d {
+						IndexDomain: (webui::indexListGroupOrder, webui::indexNoOfListItems, webui::indexListGroupItemsSpec);
+						Definition: {
+							! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+							if (webui::indexListGroupOrder = '2'
+								AND webui::indexListGroupItemsSpec = 'state'
+								AND 0 ) then !e.g. parameter indicating that the specific data is loaded into the model
+								"active"
+							endif
+						}
+						Comment: {
+							"						\"Specify dynamic (if any) specs of a widget actions menu.
+													For the actions and specs not affected by this parameter, the static initiation values will persist.\""
+						}
+					}
+				}
+			}
+		}
+	}
+	Section Workflow_Panels {
+		Section Workflow_Panels_Procedural {
+			Procedure pr_CreateWorkFlowSteps {
+				Arguments: {
+					(_sp_WorkFlowStep,_ep_WorkFlowOrder,_ep_WorkFlowOrderStep,_ep_PageId,_sp_DisplayText,
+					 _sp_Icon,_sp_ToolTip,_sp_PageState,_sp_DataState,_ep_RedirectPage)
+				}
+				Body: {
+					if _ep_WorkFlowOrder = '' then
+						raise error "PR_CreateWorkFlowSteps requires nonempty _ep_workfloworder argument";
+					endif;
+					
+					if _ep_WorkFlowOrderStep = '' then
+						raise error "PR_CreateWorkFlowSteps requires nonempty _ep_workfloworderstep argument";
+					endif;
+					
+					if _ep_WorkFlowOrderStep <> '' then
+						_sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'pageid') := _ep_PageId;
+					endif;
+					
+					if _sp_DisplayText <> sp_UnsetDefault then
+						_sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'displayText') := _sp_DisplayText;
+					endif;
+					
+					if _sp_Icon <> sp_UnsetDefault then
+						_sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'icon') := _sp_Icon;
+					endif;
+					
+					if _sp_ToolTip <> sp_UnsetDefault then
+						_sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'tooltip') := _sp_ToolTip;
+					endif;
+					
+					if _sp_PageState <> sp_UnsetDefault then
+						_sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'workflowPageState') := _sp_PageState;
+					endif;
+					
+					if _sp_DataState <> sp_UnsetDefault then
+						_sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'pageDataState') := _sp_DataState;
+					endif;
+					
+					 _sp_WorkFlowStep(_ep_WorkFlowOrder, _ep_WorkFlowOrderStep, 'redirectPageId') := _ep_RedirectPage;
+				}
+				Comment: {
+					"This function fills in the specs for the workflow steps in a workflow panel (webui::indexWorkflowPageSpec)
+					_sp_WorkFlowStep		: (Input/Output) The workflow step string which needs to be filled in the webui. Required dimensions (webui::indexWorkflowOrder,webui::indexNoOfPages,webui::indexWorkflowPageSpec)
+					_ep_WorkFlowOrder		: (Input) The order of Workflow
+					_ep_WorkFlowOrderStep	: (Input) The order of the item with in the group
+					_ep_PageId				: (Input) The pageId of Regular Pages (from the AllRegularPages set) this step should be associated with. Ideally, every page in a Workflow is a step in the Workflow Panel.
+					_sp_DisplayText			: (Input) The text you want to display for the list item.
+					_sp_Icon				: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+										  	  (https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+					_sp_ToolTip				: (Optional) 
+					_sp_PageState			: (Optional) The state for a step in the Workflow Panel. Can hold the values: Active (displayed and clickable), Inactive (displayed and not clickable) or Hidden (not displayed). By default, the state is Hidden.
+					_sp_DataState			: (Optional) The data state of the step. Can hold the vaules: Complete (indicated with a tick mark on the step), Incomplete (indicated with blue colour) or Error (indicated with red colour). If not defined, by default it has an Empty state (the step has no colour).
+					_ep_RedirectPage		: (Optional) The pageId (from the AllRegularPages set) of the page the user should be redirected to when the workflowPageState is Inactive or Hidden.
+					
+					Example:
+					pr_CreateWorkFlowSteps(_sp_PageAction, \'1\', \'1\', \'home\' _sp_PageState: \"inactive\");"
+				}
+				StringParameter _sp_WorkFlowStep {
+					IndexDomain: (webui::indexWorkflowOrder,webui::indexNoOfPages,webui::indexWorkflowPageSpec);
+					Property: InOut;
+				}
+				ElementParameter _ep_WorkFlowOrder {
+					Range: webui::ExtensionOrder;
+					Property: Input;
+				}
+				ElementParameter _ep_WorkFlowOrderStep {
+					Range: webui::ExtensionOrder;
+					Property: Input;
+				}
+				StringParameter _sp_DisplayText {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Icon {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_PageId {
+					Range: webui::AllPageIds;
+					Default: 'home';
+					Property: Input;
+				}
+				StringParameter _sp_ToolTip {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_PageState {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_DataState {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_RedirectPage {
+					Range: webui::AllPageIds;
+					Property: Optional;
+				}
+			}
+		}
+		Section Workflow_Panels_Definition {
+			DeclarationSection Workflows_Example_Declaration {
+				StringParameter sp_WorkflowsExample_d {
+					IndexDomain: (webui::indexWorkflowOrder,webui::indexWorkflowSpec);
+					Definition: {
+						data {
+							( 1, title ) : "Demand planning"			,
+							( 2, title ) : "Supply planning"			
+						}
+					}
+					Comment: "Configure all the workflows in the application.";
+				}
+				StringParameter sp_WorkflowStepsExample_d {
+					IndexDomain: (webui::indexWorkflowOrder,webui::indexNoOfPages,webui::indexWorkflowPageSpec);
+					Definition: {
+						if sp_WorkflowStepsExampleDynamicSpecs_d(webui::indexWorkflowOrder, webui::indexNoOfPages, webui::indexWorkflowPageSpec) <> "" then
+							sp_WorkflowStepsExampleDynamicSpecs_d(webui::indexWorkflowOrder, webui::indexNoOfPages, webui::indexWorkflowPageSpec)
+						else
+							sp_WorkflowStepsExampleStaticInitiation_d(webui::indexWorkflowOrder, webui::indexNoOfPages, webui::indexWorkflowPageSpec)
+						endif
+					}
+					Comment: "Combine static and dynamic (if any) specs of all workflows in the application.";
+				}
+				StringParameter sp_WorkflowStepsExampleStaticInitiation_d {
+					IndexDomain: (webui::indexWorkflowOrder,webui::indexNoOfPages,webui::indexWorkflowPageSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						data {
+							( 1, 1, displayText       ) : "Review data"           	,
+							( 1, 1, icon              ) : "my-icon"               	,
+						 	( 1, 1, pageId            ) : "data_page"             	,
+						 	( 1, 1, tooltip           ) : "Explanation text"      	,
+						  	( 1, 1, workflowPageState ) : "active"                	,
+						  	( 1, 1, pageDataState     ) : "incomplete"          	,
+						!  	( 1, 1, redirectPageId    ) : ""            			,
+						  	( 1, 2, displayText       ) : "Forecast"              	,
+						  	( 1, 2, icon              ) : "other-icon"            	,
+						  	( 1, 2, pageId            ) : "forecast_page"         	,
+						  	( 1, 2, tooltip           ) : "Sophisticated forecats"	,
+						  	( 1, 2, workflowPageState ) : "inactive"              	,
+						!  	( 1, 2, pageDataState     ) : ""			          	,
+						  	( 1, 2, redirectPageId    ) : "data_page"              
+						}
+					}
+					Comment: "Initiate specifications of all steps in all workflows in the application.";
+				}
+				StringParameter sp_WorkflowStepsExampleDynamicSpecs_d {
+					IndexDomain: (webui::indexWorkflowOrder,webui::indexNoOfPages,webui::indexWorkflowPageSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexWorkflowOrder = '1'
+							AND webui::indexNoOfPages = '1'
+							AND webui::indexWorkflowPageSpec = 'pageDataState'
+							AND 0 ) then !e.g. parameter indicating that the specific data is loaded into the model
+							"complete"
+						endif
+					}
+					Comment: {
+						"						\"Specify dynamic (if any) specs of all steps in all workflows in the application.
+												For the steps and specs not affected by this parameter, the static initiation values will persist.\""
+					}
+				}
+			}
+		}
+	}
+	Section Status_Bar {
+		Section Status_Bar_Procedural {
+			Procedure pr_CreateStatusBarMessage {
+				Arguments: (_sp_StatusBar, _ep_Order, _sp_Text, _sp_Header, _sp_Icon, _sp_Color, _sp_ToolTip, _ep_Procedure, _sp_State);
+				Body: {
+					if _ep_Order = '' then
+						raise error "PR_CreateStatusBarMessage requires non-empty _ep_order argument";
+					endif;
+					
+					_sp_StatusBar(_ep_Order, 'text') := _sp_Text;
+					
+					if _sp_Header <> sp_UnsetDefault then
+						_sp_StatusBar(_ep_Order, 'header') := _sp_Header;
+					endif;
+					
+					if _sp_Color <> sp_UnsetDefault then
+						_sp_StatusBar(_ep_Order, 'color') := _sp_Color;
+					endif;
+					
+					if _sp_Icon <> sp_UnsetDefault then
+						_sp_StatusBar(_ep_Order, 'icon') := _sp_Icon;
+					endif;
+					
+					if _sp_ToolTip <> sp_UnsetDefault then
+						_sp_StatusBar(_ep_Order, 'tooltip') := _sp_ToolTip;
+					endif;
+					
+					if _ep_Procedure <> 'webui::NoOp' then
+						_sp_StatusBar(_ep_Order, 'procedure') := _ep_Procedure;
+					endif;
+					
+					if _sp_State <> sp_UnsetDefault then
+						_sp_StatusBar(_ep_Order, 'state') := _sp_State;
+					endif;
+				}
+				Comment: {
+					"This function fills in the specs for the statusbar (webui::indexStatusBarSpec)
+					_sp_StatusBar		: (Input/Output) The group item string which needs to be filled in the webui. Required dimension (webui::indexPageExtension, webui::indexStatusBarSpec);
+					_ep_Order			: (Input) The order in the statusbar
+					_sp_Text			: (Input) The text you want to display for the status message.
+					_sp_Header			: (Optional) The Header/Title text you want to display for the status message.
+					_sp_Icon			: (Optional) The icon you want to associate with the respective action. You can select from a list of 1600+ icons, the reference can be found in the icon list 
+										  (https://documentation.aimms.com/_static/aimms-icons/icons-reference.html).
+					_sp_Color			: (Optional) The color you want to display for the icon.
+					_sp_ToolTip			: (Optional) Tooltip to be displayed when the user hovers over the respective status message.
+					_ep_Procedure		: (Optional) The procedure you want to call when the respective action is clicked.
+					_sp_State			: (Optional) This is the state for the action, i.e. Active (displayed and clickable), Inactive (displayed and not clickable) and Hidden. By default, the state is Hidden.
+					
+					Example:
+					pr_CreateStatusBarMessage(_sp_PageAction, \'1\', \"Test\", _sp_state: \"inactive\");"
+				}
+				StringParameter _sp_StatusBar {
+					IndexDomain: (webui::indexPageExtension, webui::indexStatusBarSpec);
+					Property: InOut;
+				}
+				ElementParameter _ep_Order {
+					Range: Integers;
+					Default: '';
+					Property: Input;
+				}
+				StringParameter _sp_Text {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Input;
+				}
+				StringParameter _sp_Header {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Icon {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_Color {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				StringParameter _sp_ToolTip {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+				ElementParameter _ep_Procedure {
+					Range: AllProcedures;
+					Default: 'webui::NoOp';
+					Property: Optional;
+				}
+				StringParameter _sp_State {
+					Default: "a-default-value-that-is-definitely-not-accidentally-chosen";
+					Property: Optional;
+				}
+			}
+		}
+		Section Status_Bar_Definition {
+			DeclarationSection Status_Bar_Example_Declaration {
+				StringParameter sp_StatusBarExample_d {
+					IndexDomain: (webui::indexApplicationExtension,webui::indexStatusBarSpec);
+					Definition: {
+						if sp_StatusBarExampleDynamicSpecs_d(webui::indexApplicationExtension, webui::indexStatusBarSpec) <> "" then
+							sp_StatusBarExampleDynamicSpecs_d(webui::indexApplicationExtension, webui::indexStatusBarSpec)
+						else
+							sp_StatusBarExampleStaticInitiation_d(webui::indexApplicationExtension, webui::indexStatusBarSpec)
+						endif
+					}
+					Comment: "Combine static and dynamic (if any) specs of the status bar.";
+				}
+				StringParameter sp_StatusBarExampleStaticInitiation_d {
+					IndexDomain: (webui::indexApplicationExtension,webui::indexStatusBarSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						data {
+							( 1, header    ) : "One"         	,
+							( 1, icon      ) : "best-icon"    	,
+							( 1, color     ) : "Blue"         	,
+						  	( 1, text      ) : "First message"	,
+						  	( 1, tooltip   ) : "Click me"     	,
+						  	( 1, procedure ) : "RunModel"     	,
+						  	( 1, state     ) : "Active"       	,
+						  	( 2, header    ) : "Two"          	,
+						  	( 2, icon      ) : "icon-icon"    	,
+						  	( 2, color     ) : "Black"        	,
+						  	( 2, text      ) : "Long message" 	,
+						!  	( 2, tooltip   ) : ""		     	,
+						!  	( 2, procedure ) : ""     			,
+						  	( 2, state     ) : "Active"        
+						}
+					}
+					Comment: "Initiate specifications of each message of the status bar.";
+				}
+				StringParameter sp_StatusBarExampleDynamicSpecs_d {
+					IndexDomain: (webui::indexApplicationExtension,webui::indexStatusBarSpec);
+					Definition: {
+						! EXAMPLE DECLARATION - REPLACE WITH MODEL-SPECIFIC CODE
+						if (webui::indexApplicationExtension = '2'
+							AND webui::indexStatusBarSpec = 'text'
+							AND 1 ) then !e.g. parameter indicating solution is in order
+							"Solution within bounds"
+						endif
+					}
+					Comment: {
+						"						\"Specify dynamic (if any) specs of the status bar.
+												For the messages and specs not affected by this parameter, the static initiation values will persist.\""
+					}
+				}
+			}
+		}
+	}
+	Section Dialog_Actions {
+		Set s_DialogOkCancelActions_d {
+			Definition: Data{ Ok, Cancel };
+		}
+		Set s_DialogOkActions_d {
+			Definition: Data{ Ok };
+		}
+		Set s_DialogYesNoActions_d {
+			Definition: Data{ Yes, No };
+		}
+	}
+	Procedure LibraryInitialization {
+		Comment: "Add initialization statements here that do not require any other library being initialized already.";
+	}
+	Procedure PostLibraryInitialization {
+		Comment: {
+			"			\"Add initialization statements here that require another library to be initialized already,
+						or add statements that require the Data Management module to be initialized.\""
+		}
+	}
+	Procedure PreLibraryTermination {
+		Body: {
+			return 1;
+		}
+		Comment: {
+			"			\"Add termination statements here that require all other libraries to be still alive.
+						Return 1 if you allow the termination sequence to continue.
+						Return 0 if you want to cancel the termination sequence.\""
+		}
+	}
+	Procedure LibraryTermination {
+		Body: {
+			return 1;
+		}
+		Comment: {
+			"			\"Add termination statements here that do not require other libraries to be still alive.
+						Return 1 to allow the termination sequence to continue.
+						Return 0 if you want to cancel the termination sequence.
+						It is recommended to only use the procedure PreLibraryTermination to cancel the termination sequence and let this procedure always return 1.\""
+		}
+	}
+}

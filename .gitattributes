@@ -13,3 +13,4 @@
 *.mdb filter=lfs diff=lfs merge=lfs -text
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.daf filter=lfs diff=lfs merge=lfs -text
+*.rlx filter=lfs diff=lfs merge=lfs -text

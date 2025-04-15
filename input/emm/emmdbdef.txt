@@ -32,8 +32,7 @@
   '3'  'Third Fuel    '
 %EFD DWFVIN % 
 # EFD Plant File Vintage Table
-  0  'Cancelled/Retire Pre-1990'
-  1  'On Line by or before 1990'
+  1  'On Line by first ECP year'
   2  'Planned Additions        '
   3  'Unplanned Additions      '
   4  'Repowering - Before      '
@@ -42,9 +41,8 @@
   7  'Planned Retrofit - After '
   8  'Unplanned Retrofit-Before'
   9  'Unplanned Retrofit-After '
- 10  'Renewable Set-Asides     '
- 11  'Renewable Set-Asides     '
- 12  'Renewable Set-Asides     '
+ 15  'End Use Solar PV in EMM  '
+ 20  'Vin3 add from WFLOORS/LFG'
 %EFD DVIN   % 
 # EFD Vintage Table
   '1'  'Existing'
@@ -99,7 +97,7 @@
  '21 - Gas Combined Cycle               '    5
  '22 - Oil/Gas Combined Cycle           '    5
  '23 - Advanced Combined Cycle          '    5
- '24 - New Advanced Combined Cycle      '    5
+ '24 - Combined Cycle with CCS Retrofit '    5
  '25 - Adv. Combined Cyc w/Sequestration'    5
  '26 - Fuel Cell                        '    5
  '27 - Conventional Nuclear             '   10
@@ -107,7 +105,7 @@
  '29 - SMR Advanced Nuclear             '   10
  '30 - Greenfield Nuclear               '   10
  '31 - Wood/Biomass                     '    4
- '32 - Biomass IGCC                     '    4
+ '32 - Biomass CCS                      '    4
  '33 - Geothermal                       '    4
  '34 - Advanced Geothermal              '    4
  '35 - Municipal Solid Waste            '    4
@@ -159,21 +157,28 @@
   '8'  'Residential - Lighting          '
   '9'  'Residential - Appliances/Other  '
  '10'  'Residential - Secondary Heating '
- '11'  'Commercial - Space Heating      '
+ '11'  'Residential - EV Charging       '
+ '12'  'Commercial - Space Heating      '
  '12'  'Commercial - Space Cooling      '
- '13'  'Commercial - Water Heating      '
- '14'  'Commercial - Ventilation        '
- '15'  'Commercial - Cooking            '
- '16'  'Commercial - Lighting           '
- '17'  'Commercial - Refrigeration      '
- '18'  'Commercial - Office Equip, PC   '
- '19'  'Commercial - Office Equip, NonPC'
- '20'  'Commercial - Other              '
- '21'  'Industrial - Primary            '
- '22'  'Industrial - Shift              '
- '23'  'Industrial - Miscellaneous      '
- '24'  'Transportation - Light Trains   '
- '25'  'Transportation - Vehicle        '
+ '14'  'Commercial - Water Heating      '
+ '15'  'Commercial - Ventilation        '
+ '16'  'Commercial - Cooking            '
+ '17'  'Commercial - Lighting           '
+ '18'  'Commercial - Refrigeration      '
+ '19'  'Commercial - Office Equip, PC   '
+ '20'  'Commercial - Office Equip, NonPC'
+ '21'  'Commercial - Other              '
+ '22'  'Commercial - EV Public L2 Chrgng'
+ '23'  'Commercial - EV Fast DC Charging'
+ '24'  'Commercial - Elec School Bus Chg'
+ '25'  'Commercial - Elec Transt Bus Chg'
+ '26'  'Commercial - Elec Fleet Charging'
+ '27'  'Commercial - Elec Non-fleet Chg '
+ '28'  'Industrial - Primary            '
+ '29'  'Industrial - Shift              '
+ '30'  'Industrial - Miscellaneous      '
+ '31'  'Industrial - Hydrogen           '
+ '32'  'Transportation - Light Trains   '
 %EFP DSECT  %
 # EFP Demand Sector Index
   '1'  'Residential   '

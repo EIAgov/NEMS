@@ -38,7 +38,7 @@
 
 !           IF (ICAP .LE. ECP_D_DSP)THEN
 
-               IYS = CURIYR - 10
+               IYS = CURIYR - 5
                IYE = CURIYR - 1
 
 !           ELSE
@@ -241,7 +241,6 @@
       INTEGER*4  DEBUGGING
       INTEGER*4  BASE_YEAR          !BASE YEAR DO LEARNING AND INITIAL CAPITAL COSTS
                                     ! EX.  = 1999 IN AEO2000
-      INTEGER*4  MNLYR              ! LAST YEAR FOR MINIMUM LEARNING CALCULATION
 !     REAL*4   CAPCOMPWT(ECP$COMP,ECP_D_CAP)          ! capacity weight matrix -plt typ vs component
 !     REAL*4   CSTCOMPWT(ECP$COMP,ECP_D_CAP)          ! cost weight per component
 
@@ -252,12 +251,15 @@
 !DSB***************************************************************
 !     BASE_YEAR = YEARPR+1
       BASE_YEAR = ULRSYR
-      MNLYR = 2035
 !DSB***************************************************************
 !     IF SWITCH FOR OPTIMISM AND LEARNING IS OFF, THEN SET FACTORS
 !     TO 1.0
       IF (ECP_D_LFCC .LE. 0) THEN  !Set Opt. and Learning Factors
          DO J = 1 , ECP$COMP
+            UPLROPTC(J) = 1.0
+            UPLRLCC(J) = 1.0
+         END DO
+         DO J = 1 , ECP_D_CAP
             UPLROPT(J) = 1.0
             UPLRLC(J) = 1.0
          END DO
@@ -471,8 +473,8 @@
 
 !DSB        *************** CALCULATE LEARNING FACTOR **************
 
-!DSB        CALCULATE ANNUAL LEARNING MINIMUM
-            MN_LRN  =  (UPMNLRN(J) / (MNLYR - BASE_YEAR))
+!           SET ANNUAL LEARNING MINIMUM TO INPUT VALUE
+            MN_LRN  =  UPMNLRN(J)
 
             IF ((CURIYR + 1989) .GT. BASE_YEAR) THEN
                ANNLRN = UPLRLCC(J) - OC_CURRENT
@@ -536,8 +538,15 @@
       WRITE(UF_MSG,106) CURIYR+1989,J,UPLNTCD(J),NEW_CAP(J,CURIYR),&
             UPLRLC(J),UPLROPT(J)
       ENDDO
-      ENDIF   !Calculate Optimism and Learning Factors
+    ENDIF   !Calculate Optimism and Learning Factors
 
+! Calculate updated share of CCS component of total cost
+     DO J = 1, ECP_D_CAP
+         IF (UPLCSTWT(J,WISEQ) .GT. 0.0) THEN          !CCS plant - update OVR share for learning
+             UPCCS_INVSH(J) = UPCCS_INVSH0(J) * UPLRLCC(WISEQ)/UPLRLC(J) !update based on relative learning
+         ENDIF
+      WRITE(UF_MSG,107) CURIYR+1989,J,UPLNTCD(J),UPCCS_VOMSH(J),UPCCS_FOMSH(J),UPCCS_INVSH(J)
+     ENDDO
 !     *** END COMPUTE OPTIMISM AND LEARNING FACTORS **************
 101    FORMAT ('UCAPE_OUT_FACTORS1',':',I4,':',I2,':', &
               F4.2,':',I2,':',I2,':',F12.3,':',I3,':',I3,':',I3,':', &
@@ -550,7 +559,7 @@
 
 106    FORMAT ('UCAPE_OUT_NEW2',':',I4,':',I2,':',A2,':',F12.4,':', &
                F6.3,':',f6.3)
-
+107    FORMAT ('UCAPE_OUT_CCS',':',I4,':',I2,':',A2,':',F12.4,':', F12.4)
        RETURN
        END
 
@@ -920,18 +929,19 @@
       include'ecpcntl'
       include 'bildin'
       include 'bildout'
-      include 'omlall.fi'
       include 'wrenew'
       include 'emshrin'
       include 'emshrout'
       include 'cdsparms'
       include 'uso2grp'
       include 'uefdout'
+      include 'ecp_nuc'
+      include'emm_aimms'
 !
-      COMMON /VARCOST/ VARCOL,VAROTH,CFCPLT
-      REAL*4 VARCOL(MAXNFR,ECP_D_CAP)
-      REAL*4 VAROTH(MNUMNR,ECP_D_CAP)
-      REAL*4 CFCPLT(MNUMNR,ECP_D_CAP)
+!      COMMON /VARCOST/ VARCOL,VAROTH,CFCPLT
+!      REAL*4 VARCOL(MAXNFR,ECP_D_CAP)
+!      REAL*4 VAROTH(MNUMNR,ECP_D_CAP)
+!      REAL*4 CFCPLT(MNUMNR,ECP_D_CAP)
 !
       INTEGER*4 NERC,YEAR,STYR,OLYR,OLYEAR,OWN,IRET,IS
       INTEGER*4 PLANT,IECP
@@ -1100,7 +1110,7 @@
 !
 !                             DETERMINE EXPORT REGIONS (1 -> EXPORT = IMPORT REGION)
 
-                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                  N_FLRG = 0
                                  DO FRG = 1 , UNFRGN
                                     IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -1118,7 +1128,7 @@
                                  CLRG = EPCLMP(FRG)
                                  GSRG = EPGSMP(FRG)
                                  CSRG = EPCSMP(FRG)
-                                 IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                 IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                     JRG = 1
                                  ELSE
                                     JRG = NRG
@@ -1147,7 +1157,7 @@
 !
                                  DO IRG = 1 , NREG(NERC)
 !
-                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                        TRG = FRG
                                        T_RG = FLRG
                                     ELSE
@@ -1163,7 +1173,7 @@
                                           IF (PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) THEN
                                              BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // EPFLCD(FLRG) // SSTEP(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , EPFLCD(FLRG) , SSTEP(STEP) , UPYRCD(STYR))
                                              VAROBJ = VARCOL(FLRG,PLANT) * CFCPLT(NERC,PLANT) * 8.76
-                                          ELSE IF (PLANT .EQ. WIWD) THEN
+                                          ELSE IF (PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                              BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // EPFLCD(FLRG) // SSTEP(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , EPFLCD(FLRG) , SSTEP(STEP) , UPYRCD(STYR))
                                              VAROBJ = VARCOL(FLRG,PLANT) * CFCPLT(NERC,PLANT) * 8.76
                                           ELSE
@@ -1215,7 +1225,7 @@
 !
                            DO NERC = 1 , UNRGNS
 
-                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                  N_FLRG = 0
                                  DO FRG = 1 , UNFRGN
                                     IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -1234,7 +1244,7 @@
                                  GSRG = EPGSMP(FRG)
                                  CSRG = EPCSMP(FRG)
                                  DO IRG = 1 , NREG(NERC)
-                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                        TRG = FRG
                                        T_RG = FLRG
                                     ELSE
@@ -1284,7 +1294,6 @@
       include'ecpcntl'
       include 'bildin'
       include 'bildout'
-      include 'omlall.fi'
       include 'wrenew'
       include 'entcntl'
       include 'emshrin'
@@ -1298,10 +1307,10 @@
       include'emm_aimms'
       
 !
-      COMMON /VARCOST/ VARCOL,VAROTH,CFCPLT
-      REAL*4 VARCOL(MAXNFR,ECP_D_CAP)
-      REAL*4 VAROTH(MNUMNR,ECP_D_CAP)
-      REAL*4 CFCPLT(MNUMNR,ECP_D_CAP)
+!      COMMON /VARCOST/ VARCOL,VAROTH,CFCPLT
+!      REAL*4 VARCOL(MAXNFR,ECP_D_CAP)
+!      REAL*4 VAROTH(MNUMNR,ECP_D_CAP)
+!      REAL*4 CFCPLT(MNUMNR,ECP_D_CAP)
 !
       INTEGER NUMTABS
       INTEGER, INTENT(IN) :: MSHR_PLT_GRP
@@ -1338,11 +1347,6 @@
       !INTEGER RTOVALUE ! declared in ecp_row_col.mod, code in uecp.f
       !EXTERNAL RTOVALUE
       
-! EDT <Edward.Thomas@eia.gov> 07/08/21
-! Modifications:
-!      I'm not the author of this routine, but need to make changes because we are seeing some undesired behavior in different side-cases. We would like to better control the type of dispatch technologies when calling this routine. 
-!      This will be done by modifying the plant loops over the ECP types, by adding to the argument list, and using the arguments as the start and end points in the loops. Thus, splitting out the call structure. 
-!
 ! Overall Idea of this Routine:
 !      This routine, uses a cost-competitiveness array by initializing it to negative -1. Then it looks at the basic (Reduced Cost = zero) and non-basic (Reduced Cost > 0) vectors in the solution file. 
 !      Where the basic vectors were 'dominant' or 'selected' by the solution, and the non-basic were not selected. The algorithm attempts to take capacity from the basic/selected vectors and donate them to the
@@ -1457,8 +1461,8 @@
 !                  UCPDSPI(UCPDSPIS(PLANT)), 99, 99, 99, 99, 99, 99
 !            END IF
 ! 4781       FORMAT(1X,"ECP_TYPE_INDEXES",7(":",I6),":",A2,13(":",I6))
-            IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD) .OR. (PLANT .EQ. WICN) .OR. (PLANT .EQ. WIAN) .OR. (PLANT .EQ. WISM)  .OR. (UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ.1))) THEN
-               IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+            IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD .AND. PLANT .NE. WIBI) .OR. (PLANT .EQ. WICN) .OR. (PLANT .EQ. WIAN) .OR. (PLANT .EQ. WISM)  .OR. (UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ.1))) THEN
+               IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                   N_FLRG = 0
                   DO FRG = 1 , UNFRGN
                      IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -1684,7 +1688,7 @@
                                     IF (IRG .EQ. 1) THEN
                                        IF (PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) THEN
                                           BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // EPFLCD(FLRG) // SSTEP(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , EPFLCD(FLRG) , SSTEP(STEP) , UPYRCD(STYR))
-                                       ELSE IF (PLANT .EQ. WIWD) THEN
+                                       ELSE IF (PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                           BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // EPFLCD(FLRG) // SSTEP(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , EPFLCD(FLRG) , SSTEP(STEP) , UPYRCD(STYR))
                                        ELSE
                                           BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // 'X' // SSTEP(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , ':X:' , SSTEP(STEP) , UPYRCD(STYR))
@@ -1699,7 +1703,7 @@
                                     IF (IRG .EQ. 1) THEN
                                        IF (PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) THEN
                                           BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // EPFLCD(FLRG) //SUB_CODE(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , EPFLCD(FLRG) , SUB_CODE(STEP) , UPYRCD(STYR))
-                                       ELSE IF (PLANT .EQ. WIWD) THEN
+                                       ELSE IF (PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                           BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // EPFLCD(FLRG) //SUB_CODE(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , EPFLCD(FLRG) , SUB_CODE(STEP) , UPYRCD(STYR))
                                        ELSE
                                           BUILDNM = BLD_TYP // UPRGCD(NERC) // PLNT_CD // UPOWNCD(OWN) // 'S' // SSTEP(STEP) // UPYRCD(STYR); call makmsk(BUILDNM_mask,':'//BLD_TYP//':' , UPRGCD(NERC) , PLNT_CD , UPOWNCD(OWN) , ':S:' , SSTEP(STEP) , UPYRCD(STYR))
@@ -1753,13 +1757,13 @@
 !                                SAVE SOLUTION DATA INTO PERMANENT ARRAY
 
                                  DO TYPE = 1 , 5
-                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                        SOLDATA(FRG,PLANT,STEP,OWN,STYR,TYPE) = CVALUE(TYPE)
                                     ELSE
                                        SOLDATA(IRG,PLANT,STEP,OWN,STYR,TYPE) = CVALUE(TYPE)
                                     END IF
                                  END DO
-                                 IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                 IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                     SOLSTAT(FRG,PLANT,STEP,OWN,STYR) = STATUS
                                  ELSE
                                     SOLSTAT(IRG,PLANT,STEP,OWN,STYR) = STATUS
@@ -1768,7 +1772,7 @@
 !                                EXCLUDE MSW FROM MARKET-SHARING SINCE IT IS FORCED IN.  ALSO, IGNORE BASIC VECTORS AT LOWER OR UPPER BOUND &
 !                                   (I.E., LEAVE AT CURRENT VALUE) ALSO EXCLUDE TECHNOLOGY IF PART OF RENEWABLE PORTFOLIO STANDARD
 !
-                                 IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                 IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                     EPMSBLD(FRG,PLANT,STEP,OWN,STYR) = ACT
                                  ELSE
                                     EPMSBLD(IRG,PLANT,STEP,OWN,STYR) = ACT
@@ -1792,7 +1796,7 @@
 !
 !                                      INCLUDE FROM MARKET SHARING IF ADDITION IS AT LEAST ONE FULL UNIT
 !
-                                       IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                       IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                           MS_BLD = EPMSBLD(FRG,PLANT,STEP,OWN,STYR)
                                        ELSE
                                           MS_BLD = EPMSBLD(IRG,PLANT,STEP,OWN,STYR)
@@ -1800,7 +1804,7 @@
                                        IF (MS_BLD .GE. DBLE(UPLRMIN(PLANT) * UPMSSIZ(PLANT) * 0.001)) THEN
                                           NUMBAS = NUMBAS + 1
                                           TOTBAS = TOTBAS + (ACT - MAX(LL , 0.5 * DBLE(UPLRMIN(PLANT) * UPMSSIZ(PLANT) * 0.001)))
-                                          IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                          IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                              CSTRATIO(FRG,PLANT,STEP,OWN,STYR) = 1.0
                                           ELSE
                                              CSTRATIO(IRG,PLANT,STEP,OWN,STYR) = 1.0
@@ -1813,7 +1817,7 @@
                                        IF (RC .GT. 0.0) THEN
 !                                        ONLY COMPETE STEP 1 SO MULTIPLE STEPS OF SAME TECHNOLOGY AREN'T SHARING
                                          IF (STEP .EQ. 1)THEN
-                                          IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                          IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                              CSTRATIO(FRG,PLANT,STEP,OWN,STYR) = 0.0
                                           ELSE
                                              CSTRATIO(IRG,PLANT,STEP,OWN,STYR) = 0.0
@@ -1853,8 +1857,8 @@
          DO IRG = 1 , NRG
             EXP = EXPORT(IRG)
             DO PLANT = 1, ECP_D_CAP
-               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD))))) THEN
-                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD .AND. PLANT .NE. WIBI))))) THEN
+                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                      N_FLRG = 0
                      DO FRG = 1 , UNFRGN
                         IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -1894,7 +1898,7 @@
                               GSRG = EPGSMP(FRG)
                               CSRG = EPCSMP(FRG)
                               VAROBJ = 0.0
-                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                  TRG = FRG
                                  T_RG = FLRG
                                  VAROBJ = VARCOL(FLRG,PLANT) * CFCPLT(NERC,PLANT) * 8.76
@@ -1962,7 +1966,7 @@
                                  END IF
                               END DO       ! OWN
                            END DO          ! FRG
-                           IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                           IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                               DO OWN = 1, ECP_D_OWN
                                  IF (MAX_RATIO(OWN) .GT. 0) THEN
                                     DO FRG = 1 , N_FLRG
@@ -1987,8 +1991,8 @@
          DO IRG = 1 , NRG
             EXP = EXPORT(IRG)
             DO PLANT = 1, ECP_D_CAP
-               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD))))) THEN
-                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD .AND. PLANT .NE. WIBI))))) THEN
+                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                      N_FLRG = 0
                      DO FRG = 1 , UNFRGN
                         IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -2034,7 +2038,7 @@
                               CLRG = EPCLMP(FRG)
                               GSRG = EPGSMP(FRG)
                               CSRG = EPCSMP(FRG)
-                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                  TRG = FRG
                                  T_RG = FLRG
                               ELSE
@@ -2103,8 +2107,8 @@
          DO IRG = 1 ,NRG
             EXP = EXPORT(IRG)
             DO PLANT = 1, ECP_D_CAP
-               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD))))) THEN
-                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD .AND. PLANT .NE. WIBI))))) THEN
+                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                      N_FLRG = 0
                      DO FRG = 1 , UNFRGN
                         IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -2150,7 +2154,7 @@
                               CLRG = EPCLMP(FRG)
                               GSRG = EPGSMP(FRG)
                               CSRG = EPCSMP(FRG)
-                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                              IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                  TRG = FRG
                                  T_RG = FLRG
                               ELSE
@@ -2205,8 +2209,8 @@
       DO IRG = 1 ,NRG
          EXP = EXPORT(IRG)
          DO PLANT = 1, ECP_D_CAP
-            IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD))))) THEN
-               IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+            IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD .AND. PLANT .NE. WIBI))))) THEN
+               IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                   N_FLRG = 0
                   DO FRG = 1 , UNFRGN
                      IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -2253,7 +2257,7 @@
                            CLRG = EPCLMP(FRG)
                            GSRG = EPGSMP(FRG)
                            CSRG = EPCSMP(FRG)
-                           IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                           IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                               TRG = FRG
                               T_RG = FLRG
                            ELSE
@@ -2280,8 +2284,8 @@
          IF ((USW_DBS .GT. 0) .OR. ((ORCLECP .EQ. 1) .AND. (FNRUN .EQ. 1)) )  THEN
 !
             DO PLANT = 1, ECP_D_CAP                                        !//EMMDB//
-               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD))))) THEN
-                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+               IF (UPMSHSW(PLANT) .EQ. MSHR_PLT_GRP .AND. ((UPVTYP(PLANT) .GT. 0 .AND. IRG .EQ. 1) .OR. (UPVTYP(PLANT) .GT. 0 .AND. (PLANT .EQ. WICN .OR. PLANT .EQ. WIAN .OR. PLANT .EQ. WISM .OR. (PLANT .GT. ECP_D_DSP .AND. PLANT .NE. WIWD .AND. PLANT .NE. WIBI))))) THEN
+                  IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                      N_FLRG = 0
                      DO FRG = 1 , UNFRGN
                         IF (FL_CNXT_CST(NERC,FRG) .GT. 0.0) THEN
@@ -2328,7 +2332,7 @@
                                     CLRG = EPCLMP(FRG)
                                     GSRG = EPGSMP(FRG)
                                     CSRG = EPCSMP(FRG)
-                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD) THEN
+                                    IF ((PLANT .LE. ECP_D_DSP .AND. PLANT .NE. WICN .AND. PLANT .NE. WIAN .AND. PLANT .NE. WISM) .OR. PLANT .EQ. WIWD .OR. PLANT .EQ. WIBI) THEN
                                        TRG = FRG
                                        T_RG = FLRG
                                        T_RG = CLRG

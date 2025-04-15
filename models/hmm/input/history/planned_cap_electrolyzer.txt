@@ -1,0 +1,6 @@
+! Note: US on grid electrolyzers with start year 2024 and later. Data is new capacity coming online, not cumulative
+! Unit: Annual kg of hydrogen. Max theoretical assuming 8760 hours of production a year
+Composite Table:
+i_calYear    regNERC    prodTech    planned_cap
+2024         NYUP       PEM         2.84833e+07
+;

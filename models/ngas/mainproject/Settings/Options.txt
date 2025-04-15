@@ -1,0 +1,23 @@
+﻿* AIMMS
+case_compression_level 0
+constraint_listing 2
+Global_error_handler "NGMM_Error_Handler"
+maximal_number_of_warnings_reported 200
+number_of_logfile_backups 10
+warning_comparing_elements_different_sets off
+warning_not_initialized off
+* CBC 2.9
+* CPLEX 22.1
+"CPLEX 22.1".barrier_crossover_algorithm 2
+* IPOPT 3.11
+* CPLEX 12.10
+"CPLEX 12.10".barrier_crossover_algorithm 2
+* CPLEX 12.6.3
+"CPLEX 12.6.3".barrier_crossover_algorithm 2
+"CPLEX 12.6.3".parallel_mode 1
+* CPLEX 12.7.1
+"CPLEX 12.7.1".barrier_crossover_algorithm 2
+* NETSOL
+* Environment
+Startup_Page "Natural Gas Market Module (NGMM)"
+Startup_Case "data\cases\restart.data"

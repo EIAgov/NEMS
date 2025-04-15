@@ -15,7 +15,7 @@
       COMMON /REVSYR/ EOTH_RYRS,ECL_RYRS,ENUC_RYRS
       INTEGER EOTH_RYRS(WPLT_D_REC)               ! Non-Revenue Years by Oth  Group
       INTEGER ECL_RYRS(MAX_CL)                  ! Non-Revenue Years by Coal  Group
-      INTEGER ENUC_RYRS(MAX_NUC)                ! Non-Revenue Years by Nuc  Group
+      INTEGER ENUC_RYRS(MAXNUC)                ! Non-Revenue Years by Nuc  Group
 !
       COMMON /ZEC_OUT/EPZECGEN,EPZECPRC,EPZECSUB
       REAL*4 EPZECGEN(MNUMNR,MNUMYR)            ! ZEC Generation by Region and Year
@@ -82,3 +82,64 @@
 
 	  COMMON /TRADE_EFD/ NET_XPORT_EFD
       REAL*8 NET_XPORT_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)
+
+	  COMMON /CALC_STOR/ BATTERY_USED
+	  REAL*8 BATTERY_USED(3,MNUMNR)
+
+	  COMMON /STOR_OUT1/ STO_OUT_CF2_AVG,STO_IN_COST2,STO_OUT_GEN2
+      REAL*8 STO_OUT_CF2_AVG(MNUMNR),STO_OUT_GEN2(MNUMNR),STO_IN_COST2(MNUMNR)
+
+	  COMMON /EFD_CURTAIL/ EFDCURT
+      REAL*8 EFDCURT(MNUMNR,ECP_D_INT,MNUMYR)
+
+	  COMMON /VARCOST/ VARCOL,VAROTH,CFCPLT
+      REAL*4 VARCOL(MAXNFR,ECP_D_CAP)
+      REAL*4 VAROTH(MNUMNR,ECP_D_CAP)
+      REAL*4 CFCPLT(MNUMNR,ECP_D_CAP)
+
+      INTEGER SUPPLY_SLOTS
+      PARAMETER(SUPPLY_SLOTS=10)    
+
+      INTEGER RIC
+      PARAMETER(RIC=4)
+      REAL*4 ECP_RIC_Split(MNUMNR,MX_NCOALS+MX_ISCV,RIC)
+
+	  ! ephrts.f90 contains routine that sets these vars below to be passed into emm aimms
+	  COMMON /EPHRTS_AIMMS_TRANSFER_VARS/ EPHRTS_PRICES,EPHRTS_QUANTITY
+	  REAL*8 EPHRTS_PRICES(MNUMYR, MNUMCR, ECP_D_MSP, SUPPLY_SLOTS) ! (YEARS, CENSUS REGIONS, 3 EMM SEASONS, MAXIUMUM OF 10 STEP SLOTS) 
+      REAL*8 EPHRTS_QUANTITY(MNUMYR, MNUMCR, ECP_D_MSP, SUPPLY_SLOTS) ! (YEARS, CENSUS REGIONS, 3 EMM SEASONS, MAXIUMUM OF 10 STEP SLOTS) 
+
+      REAL*8 BANK_HG(NDREG),BANK_NOX(NOX_D_GRP)
+      COMMON /BANKS/ BANK_HG,BANK_NOX
+
+      COMMON /TMP_COAL/ ECL_SYR
+      REAL ECL_SYR(MAX_CL)
+
+      COMMON /ECPAMS_SWITCH/ SKIP_ECPAMS
+      INTEGER SKIP_ECPAMS      !flag to indicate using all cpass_ values from Fortran and to skip all procedures in AIMMS
+
+      COMMON /FLLEV/FLLFLC,FLLCAP,FLLFCF,FLLTRN     !levelized cost variables stored by fuel region for those that have multiple region builds
+      REAL*8 FLLFLC(ECP_D_DSP,MAXNFR,ECP_D_XPH)     !levelized fuel cost for dispatchable plants by fuel region
+      REAL*4 FLLCAP(MNUMNR,MAXNFR,ECP_D_DSP,2)      !levelized capital cost for disp plants by EMM and fuel region
+      REAL*4 FLLFCF(MNUMNR,MAXNFR,ECP_D_DSP,2)      !levelized FCF for disp plants by EMM and fuel region
+      REAL*4 FLLTRN(MNUMNR,MAXNFR,ECP_D_DSP)        !levelized interconnection cost for disp plants by EMM and fuel region
+
+      COMMON /WDLEV/WDLFLC,WDLCAP,WDLFCF,WDLTRN  !levelized cost variables stored by fuel region for WD builds
+      REAL*8 WDLFLC(MAXNFR,ECP_D_XPH)     !levelized fuel cost for new WD builds by fuel region
+      REAL*4 WDLCAP(MNUMNR,MAXNFR,2)      !levelized capital cost for new WD builds by EMM and fuel region
+      REAL*4 WDLFCF(MNUMNR,MAXNFR,2)      !levelized FCF for new WD builds by EMM and fuel region
+      REAL*4 WDLTRN(MNUMNR,MAXNFR)        !levelized interconnection cost for new WD builds by EMM and fuel region
+
+      COMMON /BILEV/BILFLC,BILCAP,BILFCF,BILTRN !levelized cost variables stored by fuel region for BI (BECCS) builds
+      REAL*8 BILFLC(MAXNFR,ECP_D_XPH)     !levelized fuel cost for new BECCS builds by fuel region
+      REAL*4 BILCAP(MNUMNR,MAXNFR,2)      !levelized capital cost for new BECCS builds by EMM and fuel region
+      REAL*4 BILFCF(MNUMNR,MAXNFR,2)      !levelized FCF for new BECCS builds by EMM and fuel region
+      REAL*4 BILTRN(MNUMNR,MAXNFR)        !levelized interconnection cost for new BECCS builds by EMM and fuel region
+
+      COMMON /TRANEMSR/ ECP_PSO2CL
+      REAL*4 ECP_PSO2CL(MNUMYR,NDREG)
+
+      COMMON/COFTMP/UCF_TCAP1,UCF_RCAP1,CPCTNSH
+      REAL*4 UCF_TCAP1(ECP_D_RCF,MNUMNR,NDREG,MNUMYR+ECP_D_XPH)
+      REAL*4 UCF_RCAP1(ECP_D_RCF,MNUMNR,NDREG,MNUMYR+ECP_D_XPH)
+      REAL*4 CPCTNSH(MAXNFR,EFD_D_NFL)

@@ -1,0 +1,7 @@
+Variable,FractionTolerance,AbsoluteTolerance,RelaxFactor,Test,Relax,PQType,QMATCH,Module,CVTAB ID,Variables_in_Group,Group_Name,Weight_Class_Name,Weight_Class,Weight_Start
+SQNGELGR,0.01,10,0.6,0,1,QS,NA,EMM,,,,,,
+SPNGELGR,0.01,0,0.3,0,1,PS,SQNGELGR,EMM,,,,,,
+SQGFELGR,0.01,10,0.8,1,1,QS,NA,EMM,,,,,,
+SQGIELGR,0.01,10,0.8,1,1,QS,NA,EMM,,,,,,
+SPGFELGR,0.01,0,0.5,1,1,PS,SQGFELGR,EMM,,,,,,
+SPGIELGR,0.01,0,0.5,1,1,PS,SQGIELGR,EMM,,,,,,

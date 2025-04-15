@@ -13,11 +13,10 @@ DUMMYX_INC  = none
 DUMPACK_INC  = none
 ECP_ROW_COL_INC  = none
 EFD_ROW_COL_INC  = none
-EPM_INC  = ab32 bifurc calshr cdsparms coalemm cogen control convfact \
-      ecpcntl emablk emeblk emission emmparm emoblk epmbank epmcntl epmmpblk \
-      epmngtdm ghgrep hmmblk indout lfmmout macout mpblk ncntrl ngtdmout \
-      parametr pmmftab pmmout pmmrpt qblk qsblk udatout uecpout uefdout \
-      uefpout uettout wrenew
+EPM_INC  = ab32 bifurc calshr cdsparms coalemm cogen convfact ecpcntl emablk \
+      emeblk emission emmparm emoblk epmbank epmmpblk epmngtdm ghgrep hmmblk \
+      indepm indout lfmmout macout mpblk ncntrl ngtdmout parametr pmmftab \
+      pmmout pmmrpt qblk qsblk udatout uecpout uefdout uefpout uettout wrenew
 FILEMGR_INC  = fmgr
 FILER_INC  = ab32 acoalprc aeusprc ampblk angtdm aponroad bifurc \
       bldglrn cdsparms coalemm coalout coalprc coalrep cogen commrep comparm \
@@ -44,9 +43,9 @@ HMM_INC = aponroad cogen control ecpcntl emablk emeblk emission emmparm \
       hmmblk macout mpblk ncntrl omlall.fi parametr pmmrpt qblk tranrep \
       uefpout wrenew wwdcomon
 IND_INC  = ab32 bifurc cdsparms coalout coalrep cogen comparm convfact \
-      emeblk emission emmparm epmmpblk eusprc ghgrep indout indrep lfmmout \
-      macout mpblk ncntrl ngtdmrep ogsmout parametr pmmout pmmrpt qblk \
-      qsblk steoblock tranrep wrenew
+      emeblk emission emmparm epmmpblk eusprc ghgrep indepm indout indrep \
+      lfmmout macout mpblk ncntrl ngtdmrep ogsmout parametr pmmout pmmrpt \
+      qblk qsblk steoblock tranrep wrenew
 INTERCV_INC  = acoalprc ampblk angtdm cdsparms coalemm coalprc continew \
       converge emission emmparm intout macout mpblk ncntrl ngtdmout ngtdmrep \
       ogsmout parametr pmmout pmmrpt qblk uefdout uso2grp wrenew
@@ -201,9 +200,6 @@ PREPPLT_INC  = bildin control dispin ecpcntl elcntl elout emmparm \
 PREPETT_INC  = control dispett dsmdimen dsmnemsc dsmtfecp dsmtoefd \
       dsmunits elcntl elout emmparm ncntrl parametr uefdout wrenew
 PREPDSMD_INC  = lsrcaldr lsrmgpar
-OMLANAL_INC  = dcflip dcgetmat ncntrl omlall.fi parametr
-PACK_ALL_INC  = omlall.fi
-
 
 
 SRC=  \

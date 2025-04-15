@@ -683,32 +683,32 @@
 !
 !        Adjust cost variables for new historical inflation
 !
-         CCSROV = CCSROV * GDPADJ2012
-         CCSF   = CCSF   * GDPADJ2012
-         CCSV   = CCSV   * GDPADJ2012
-         TSCBCST= TSCBCST* GDPADJ2012
-         T_VOM  = T_VOM  * GDPADJ2012
-         T_FOM  = T_FOM  * GDPADJ2012
-         T_CAPAD= T_CAPAD* GDPADJ2012
-         TCOMB_O= TCOMB_O* GDPADJ2012
-         TCOMB_F= TCOMB_F* GDPADJ2012
-         TCOMB_V= TCOMB_V* GDPADJ2012
-         TSNCR_O= TSNCR_O* GDPADJ2012
-         TSNCR_F= TSNCR_F* GDPADJ2012
-         TSNCR_V= TSNCR_V* GDPADJ2012
-         TSCR_O = TSCR_O* GDPADJ2012
-         TSCR_F = TSCR_F* GDPADJ2012
-         TSCR_V = TSCR_V* GDPADJ2012
-         T_DSIOV= T_DSIOV * GDPADJ2012
-         T_DSIF = T_DSIF  * GDPADJ2012
-         T_DSIV = T_DSIV  * GDPADJ2012
-         T_FFOV = T_FFOV  * GDPADJ2012
-         T_FFF  = T_FFF   * GDPADJ2012
-         T_FFV  = T_FFV   * GDPADJ2012
-         T_ESPU = T_ESPU  * GDPADJ2012
-         T_CFBU = T_CFBU  * GDPADJ2012
-         T_CFBUV= T_CFBUV * GDPADJ2012
-         T_CFBUF= T_CFBUF * GDPADJ2012
+         !CCSROV = CCSROV * GDPADJ2012
+         !CCSF   = CCSF   * GDPADJ2012
+         !CCSV   = CCSV   * GDPADJ2012
+         !TSCBCST= TSCBCST* GDPADJ2012
+         !T_VOM  = T_VOM  * GDPADJ2012
+         !T_FOM  = T_FOM  * GDPADJ2012
+         !T_CAPAD= T_CAPAD* GDPADJ2012
+         !TCOMB_O= TCOMB_O* GDPADJ2012
+         !TCOMB_F= TCOMB_F* GDPADJ2012
+         !TCOMB_V= TCOMB_V* GDPADJ2012
+         !TSNCR_O= TSNCR_O* GDPADJ2012
+         !TSNCR_F= TSNCR_F* GDPADJ2012
+         !TSNCR_V= TSNCR_V* GDPADJ2012
+         !TSCR_O = TSCR_O* GDPADJ2012
+         !TSCR_F = TSCR_F* GDPADJ2012
+         !TSCR_V = TSCR_V* GDPADJ2012
+         !T_DSIOV= T_DSIOV * GDPADJ2012
+         !T_DSIF = T_DSIF  * GDPADJ2012
+         !T_DSIV = T_DSIV  * GDPADJ2012
+         !T_FFOV = T_FFOV  * GDPADJ2012
+         !T_FFF  = T_FFF   * GDPADJ2012
+         !T_FFV  = T_FFV   * GDPADJ2012
+         !T_ESPU = T_ESPU  * GDPADJ2012
+         !T_CFBU = T_CFBU  * GDPADJ2012
+         !T_CFBUV= T_CFBUV * GDPADJ2012
+         !T_CFBUF= T_CFBUF * GDPADJ2012
 !        TNUCA_O= TNUCA_O* GDPADJ2012
 !        T_NG_COST= T_NG_COST * GDPADJ2012
 !        T_NG_TRAN= T_NG_TRAN * GDPADJ2012
@@ -765,16 +765,16 @@
          ENDIF
 
 !compute T_CCSHR from THRATE for all EC plants
-         IF (TECPT .EQ. WIEC) THEN
-           IF (T_CCSHR .GT. 0) THEN
-             IF (THRATE.GT.0.0) THEN
-                T_CCSHR = 1/(1-AC2*AC4*AC1*THRATE/1000000)*THRATE
-             ENDIF
-                WRITE(6,7392)'T_CCSHR ', T_IGRP,T_GRP,T_GRP2,T_PID,T_UID,T_PNM,ECPcd,TECPT,T_CCSHR
-7392       FORMAT(1X,A25,3(":",I5),2(":",A5),":",A20,":",A2,":",I4,":",F14.4)    
+         ! IF (TECPT .EQ. WIEC) THEN
+           ! IF (T_CCSHR .GT. 0) THEN
+             ! IF (THRATE.GT.0.0) THEN
+                ! T_CCSHR = 1/(1-AC2*AC4*AC1*THRATE/1000000)*THRATE
+             ! ENDIF
+                ! WRITE(6,7392)'T_CCSHR ', T_IGRP,T_GRP,T_GRP2,T_PID,T_UID,T_PNM,ECPcd,TECPT,T_CCSHR
+! 7392       FORMAT(1X,A25,3(":",I5),2(":",A5),":",A20,":",A2,":",I4,":",F14.4)    
 
-            ENDIF
-         ENDIF
+            ! ENDIF
+         ! ENDIF
 
 ! ensure all CC plants have CCS retrofit costs
          IF (TECPT .EQ. WIEC .OR. TECPT .EQ. WICC) THEN
@@ -835,7 +835,7 @@
 !
 !           Identify Coal Units and Create mapping to wigrp
 !
-         IF (TECPT .LE. TST_FOR_CL_ECP .AND. TNOPER .LE.UNRGNS .AND. TFOWN .LE. 4) THEN
+         IF ((TECPT .LE. TST_FOR_CL_ECP .OR. (TECPT .EQ. WING .AND. TFL(2) .GT. 0)) .AND. TNOPER .LE.UNRGNS .AND. TFOWN .LE. 4) THEN !include converted plants that use coal
             IF (TNOX_R .LE. 0.0001) THEN
                T_COMB = 1
                T_POST = 2
@@ -875,7 +875,12 @@
                   JPART = TPART1(IFL)
                END IF
             END DO
-            JECPT = TECPT
+      
+            IF (TECPT .LE. TST_FOR_CL_ECP) THEN
+               JECPT = TECPT
+            ELSE
+               JECPT = TFL(2)
+            ENDIF
 !
             IF (INITIAL_ECP_TYPE(I_TST) .EQ. 0) THEN
                INITIAL_ECP_TYPE(I_TST) = JECPT

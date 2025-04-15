@@ -8,7 +8,7 @@
       INTEGER NSTEO
       INTEGER NYEAR
       PARAMETER(HSTYEAR=2010)         ! Start Year for Historical Overwrites
-      PARAMETER(NHIST=12)
+      PARAMETER(NHIST=14)
       PARAMETER(NSTEO=2)
       PARAMETER(NYEAR=NHIST + NSTEO + (HSTYEAR-1990))
 !

@@ -1,6 +1,6 @@
 AEO Name,STEO Name,Electricity Generation (billion kwh),Tolerance,Tolerance_EndYear,Multiplier,Multiplier_LeapYear,Notes
 CSD000:fa_CokePlants,clkcpus_ton,Coal Consumption - Coke Plants,2%,2%,1,1,
-NGS000:ea_Industrial,NGINX,Natural gas industrial consumption (tcf),2%,2%,0.365,0.366,
+NGS000:ea_Industrial+NGS000:fa_Gas2LiqLiqPrd,NGINX,Natural gas industrial consumption (tcf),2%,2%,0.365,0.366,
 QUA000:ea_NaturalGas,nginbus,Natural gas industrial consumption (quads),2%,2%,1,1,
 ESD000:ia_Industrial,exicpus,Electricity industrial sales (bkwh),2%,2%,365,366,
 IKI000:da_Petrochemical,fetcbus,Petrochemical feedstocks (quads),2%,2%,1,1,

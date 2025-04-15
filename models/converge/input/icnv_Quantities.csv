@@ -1,0 +1,134 @@
+Variable,FractionTolerance,AbsoluteTolerance,RelaxFactor,Test,Relax,PQType,QMATCH,Module,CVTAB ID,Variables_in_Group,Group_Name,Weight_Class_Name,Weight_Class,Weight_Start
+QELRS,0.01,10,1,0,1,Q,NA,RDM,1,QELRS QELCM QELIN QELTR,Electricity Demand,End-Use Quantity,1,24.5
+QELCM,0.01,10,1,0,1,Q,NA,CDM,1,QELRS QELCM QELIN QELTR,Electricity Demand,End-Use Quantity,1,24.5
+QELTR,0.01,10,1,0,1,Q,NA,TDM,1,QELRS QELCM QELIN QELTR,Electricity Demand,End-Use Quantity,1,24.5
+QELIN,0.01,10,1,0,1,Q,NA,IDM,1,QELRS QELCM QELIN QELTR,Electricity Demand,End-Use Quantity,1,24.5
+QELRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QELHM,0.01,10,1,0,1,Q,NA,HYDROGEN,,,,,,
+QGFRS,0.01,10,1,-1,1,Q,NA,RDM,,,,,,
+QGFCM,0.01,10,1,-1,1,Q,NA,CDM,,,,,,
+QGFTR,0.01,10,1,-1,1,Q,NA,TDM,,,,,,
+QGFIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QGFRF,0.01,10,1,-1,1,Q,NA,LFMM,,,,,,
+QGFEL,0.01,10,0.8,0,1,Q,NA,EMM,,,,,,
+QGFHM,0.01,10,0.8,-1,1,Q,NA,HYDROGEN,,,,,,
+QGIRS,0.01,10,1,-1,1,Q,NA,RDM,,,,,,
+QGICM,0.01,10,1,-1,1,Q,NA,CDM,,,,,,
+QGITR,0.01,10,1,-1,1,Q,NA,TDM,,,,,,
+QGIIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QGIRF,0.01,10,1,-1,1,Q,NA,LFMM,,,,,,
+QGIEL,0.01,10,0.8,0,1,Q,NA,EMM,,,,,,
+QGIHM,0.01,10,0.8,-1,1,Q,NA,HYDROGEN,,,,,,
+QNGRS,0.01,10,1,0,1,Q,NA,RDM,2,QNGRS QNGCM QNGIN QNGTR,Natural Gas Demand,End-Use Quantity,1,24.5
+QNGCM,0.01,10,1,0,1,Q,NA,CDM,2,QNGRS QNGCM QNGIN QNGTR,Natural Gas Demand,End-Use Quantity,1,24.5
+QNGTR,0.01,10,1,0,1,Q,NA,TDM,2,QNGRS QNGCM QNGIN QNGTR,Natural Gas Demand,End-Use Quantity,1,24.5
+QNGIN,0.01,10,1,0,1,Q,NA,IDM,2,QNGRS QNGCM QNGIN QNGTR,Natural Gas Demand,End-Use Quantity,1,24.5
+QNGRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QNGEL,0.01,10,0.8,0,1,Q,NA,EMM,10,QNGEL,Natural Gas,Electricity Quantity,2,24.5
+QNGHM,0.01,10,0.8,0,1,Q,NA,HYDROGEN,,,,,,
+QGPTR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QLPIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QCLRS,0.01,10,1,0,1,Q,NA,RDM,8,QCLRS QCLCM QCLIN,Steam Coal Demand,End-Use Quantity,1,24.5
+QCLCM,0.01,10,1,0,1,Q,NA,CDM,8,QCLRS QCLCM QCLIN,Steam Coal Demand,End-Use Quantity,1,24.5
+QCLIN,0.01,10,1,0,1,Q,NA,IDM,8,QCLRS QCLCM QCLIN,Steam Coal Demand,End-Use Quantity,1,24.5
+QCLRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QCLEL,0.01,10,0.8,0,1,Q,NA,EMM,13,QCLEL,Steam Coal,Electricity Quantity,2,24.5
+QCLHM,0.01,10,1,0,1,Q,NA,HYDROGEN,,,,,,
+QMCIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QMGCM,0.01,10,1,0,1,Q,NA,CDM,6,QMGCM QMGTR QMGIN,Motor Gasoline Demand,End-Use Quantity,1,24.5
+QMGTR,0.01,10,1,0,1,Q,NA,TDM,6,QMGCM QMGTR QMGIN,Motor Gasoline Demand,End-Use Quantity,1,24.5
+QMGIN,0.01,10,1,0,1,Q,NA,IDM,6,QMGCM QMGTR QMGIN,Motor Gasoline Demand,End-Use Quantity,1,24.5
+QJFTR,0.01,10,1,0,1,Q,NA,TDM,7,QJFTR,Jet Fuel Demand,End-Use Quantity,1,24.5
+QDSRS,0.01,10,1,0,1,Q,NA,RDM,4,QDSRS QDSCM QDSTR QDSIN,Distillate Fuel Demand,End-Use Quantity,1,24.5
+QDSCM,0.01,10,1,0,1,Q,NA,CDM,4,QDSRS QDSCM QDSTR QDSIN,Distillate Fuel Demand,End-Use Quantity,1,24.5
+QDSTR,0.01,10,1,0,1,Q,NA,TDM,4,QDSRS QDSCM QDSTR QDSIN,Distillate Fuel Demand,End-Use Quantity,1,24.5
+QDSIN,0.01,10,1,0,1,Q,NA,IDM,4,QDSRS QDSCM QDSTR QDSIN,Distillate Fuel Demand,End-Use Quantity,1,24.5
+QDSRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QDSEL,0.01,10,0.8,0,1,Q,NA,EMM,11,QDSEL,Distillate,Electricity Quantity,2,24.5
+QKSRS,0.01,10,1,0,1,Q,NA,RDM,,,,,,
+QKSCM,0.01,10,1,0,1,Q,NA,CDM,,,,,,
+QKSIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QLGRS,0.01,10,1,0,1,Q,NA,RDM,3,QLGRS QLGCM QLGTR QLGIN,Liquid Petroleum Gas Dmd,End-Use Quantity,1,24.5
+QLGCM,0.01,10,1,0,1,Q,NA,CDM,3,QLGRS QLGCM QLGTR QLGIN,Liquid Petroleum Gas Dmd,End-Use Quantity,1,24.5
+QLGTR,0.01,10,1,0,1,Q,NA,TDM,3,QLGRS QLGCM QLGTR QLGIN,Liquid Petroleum Gas Dmd,End-Use Quantity,1,24.5
+QLGIN,0.01,10,1,0,1,Q,NA,IDM,3,QLGRS QLGCM QLGTR QLGIN,Liquid Petroleum Gas Dmd,End-Use Quantity,1,24.5
+QLGRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QRLCM,0.01,10,1,0,1,Q,NA,CDM,,,,,,
+QRLTR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QRLIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QRLRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QRLEL,0.01,10,0.8,0,1,Q,NA,EMM,,,,,,
+QRHTR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QRHEL,0.01,10,0.8,0,1,Q,NA,EMM,,,,,,
+QRSCM,0.01,10,1,-1,1,Q,NA,CDM,5,QRSCM QRSTR QRSIN,Residual Fuel Demand,End-Use Quantity,1,24.5
+QRSTR,0.01,10,1,-1,1,Q,NA,TDM,5,QRSCM QRSTR QRSIN,Residual Fuel Demand,End-Use Quantity,1,24.5
+QRSIN,0.01,10,1,-1,1,Q,NA,IDM,5,QRSCM QRSTR QRSIN,Residual Fuel Demand,End-Use Quantity,1,24.5
+QRSRF,0.01,10,1,-1,1,Q,NA,LFMM,,,,,,
+QRSEL,0.01,10,0.8,-1,1,Q,NA,EMM,12,QRSEL,Residual Fuel,Electricity Quantity,2,24.5
+QPFIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QSGIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QSGRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QPCIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QPCRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QPCEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QASIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QOTTR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QOTIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QOTRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QTPRS,0.01,10,1,-1,1,Q,NA,RDM,,,,,,
+QTPCM,0.01,10,1,-1,1,Q,NA,CDM,,,,,,
+QTPTR,0.01,10,1,-1,1,Q,NA,TDM,,,,,,
+QTPIN,0.01,10,1,-1,1,Q,NA,IDM,,,,,,
+QTPRF,0.01,10,1,-1,1,Q,NA,LFMM,,,,,,
+QTPEL,0.01,10,1,-1,1,Q,NA,EMM,,,,,,
+QMETR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QETTR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QETHM,0.01,10,1,0,1,Q,NA,HYDROGEN,,,,,,
+QHYTR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QUREL,0.01,10,1,0,1,Q,NA,EMM,49,QUREL,Uranium,Electricity Quantity,2,24.5
+QURHM,0.01,10,1,0,1,Q,NA,HYDROGEN,,,,,,
+QHOIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QHOEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QGERS,0.01,10,1,0,1,Q,NA,RDM,,,,,,
+QGEIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QGEEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QBMRS,0.01,10,1,0,1,Q,NA,RDM,,,,,,
+QBMCM,0.01,10,1,0,1,Q,NA,CDM,,,,,,
+QBMIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QBMRF,0.01,10,1,0,1,Q,NA,LFMM,,,,,,
+QBMEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QBMHM,0.01,10,1,0,1,Q,NA,HYDROGEN,,,,,,
+QMSIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QMSEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QSTRS,0.01,10,1,0,1,Q,NA,RDM,,,,,,
+QSTCM,0.01,10,1,0,1,Q,NA,CDM,,,,,,
+QSTIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QSTEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QPVRS,0.01,10,1,0,1,Q,NA,RDM,,,,,,
+QPVCM,0.01,10,1,0,1,Q,NA,CDM,,,,,,
+QPVIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QPVEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QWIIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QWIEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QTRRS,0.01,10,1,-1,1,Q,NA,RDM,,,,,,
+QTRCM,0.01,10,1,-1,1,Q,NA,CDM,,,,,,
+QTRTR,0.01,10,1,-1,1,Q,NA,TDM,,,,,,
+QTRIN,0.01,10,1,-1,1,Q,NA,IDM,,,,,,
+QTREL,0.01,10,1,-1,1,Q,NA,EMM,,,,,,
+QTRHM,0.01,10,1,-1,1,Q,NA,HYDROGEN,,,,,,
+QEIEL,0.01,10,1,0,1,Q,NA,EMM,,,,,,
+QCIIN,0.01,10,1,0,1,Q,NA,IDM,,,,,,
+QTSRS,0.01,10,1,-1,1,Q,NA,RDM,9,QTSRS QTSCM QTSTR QTSIN,Total Sector Fuel,No class,0,0
+QTSCM,0.01,10,1,-1,1,Q,NA,CDM,9,QTSRS QTSCM QTSTR QTSIN,Total Sector Fuel,No class,0,0
+QTSTR,0.01,10,1,-1,1,Q,NA,TDM,9,QTSRS QTSCM QTSTR QTSIN,Total Sector Fuel,No class,0,0
+QTSIN,0.01,10,1,-1,1,Q,NA,IDM,9,QTSRS QTSCM QTSTR QTSIN,Total Sector Fuel,No class,0,0
+QTSRF,0.01,10,1,-1,1,Q,NA,LFMM,,,,,,
+QTSEL,0.01,10,1,-1,1,Q,NA,EMM,50,QTSEL,Total Electricity Sector,No class,0,0
+QTSHM,0.01,10,1,-1,1,Q,NA,HYDROGEN,,,,,,
+QTSAS,0.01,10,1,8,0,Q,NA,,51,QTSAS,"Total Primary Fuel, all Sectors",No class,0,0
+QH1TR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QH2TR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QH3TR,0.01,10,1,0,1,Q,NA,TDM,,,,,,
+QH2IN,0.05,20,0.666,0,1,Q,NA,IDM,,,,,,
+QH2INPF,0.05,20,0.666,0,1,Q,NA,IDM,,,,,,
+QH2INHP,0.05,20,0.666,0,1,Q,NA,IDM,,,,,,

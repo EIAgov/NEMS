@@ -5,7 +5,10 @@
 !
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !
+   
       SUBROUTINE UTIL
+      USE EPHRTS_SWTICHES
+      USE EPHRTS_FILE_UNIT_NUMBERS
 !
       IMPLICIT NONE
 !
@@ -48,6 +51,7 @@
       include 'dsmsectr'
       include 'dsmhelm'
       include 'dsmtfecp'
+      include 'dsmcaldr'
       include 'edbdef'
       include 'plntctl'
       include 'emoblk'
@@ -61,6 +65,9 @@
       include 'csapr'
       include 'steoblock' !<< include file to access ESTCU_ ----AKN
       include 'emmemis'
+      include 'fuelin'
+      include 'hmmblk'
+
 !
       COMMON /RSVMRG/ EPMRMIN
       REAL EPMRMIN(MNUMNR)
@@ -75,6 +82,9 @@
       REAL multprs,multpcm,multpin,multptr
 !
       CHARACTER*80 FILENM,DUMMY
+      CHARACTER*18 FNAMEI18     
+      CHARACTER*10 TEMP_CL_UNITS(MX_UNITS)      
+      INTEGER*4 FUNITI, ENDUNIT      
       REAL*8 SF,GEN,GEN_SP(6)
       REAL*8 CL_GEN(MAX_CL),CL_CAP(MAX_CL),TGEN(ECP_D_CAP,MNUMNR),TCON(ECP_D_CAP,MNUMNR)
       INTEGER IY,JROW,IFILE,DTYP,ICENSUS,CRG,ICNFG,I_COAL,XYR,XFR, I_TEST, ICL
@@ -83,9 +93,10 @@
       INTEGER*4 CYR_INDEX, LYR_INDEX
       REAL  HRSFAC,HCMFAC,HINFAC,HTRFAC
       INTEGER MAXHRZN
-      INTEGER I,F,J,KRG,IGRP,IFPP
+      INTEGER I,F,J,KRG,IGRP,IFPP,K
 !TIME      INTEGER CPU_TIME_BEGIN,CPU_TIME_END,IHR,IMN,ISEC,I100TH
       LOGICAL WHOOPS ! ERROR FLAG
+      LOGICAL FIRSTSPACE
 
       INTEGER CR,XY,DLTA,IV,ISP,ITMP,IBBN,IOWN
       INTEGER NEWUNIT,NFRST,IFRST,NLAST,ILAST,ITYP
@@ -98,6 +109,7 @@
       REAL*8 PRMEQ_ORIG(ECP_D_CAP),PRMDT_ORIG(ECP_D_CAP)
       REAL OLDITC
       INTEGER h1,i1,j1,k2,k3,l1,IRGN, ICR
+      integer regions, seasons, steps, year
 
       INTEGER RTOVALUE
       EXTERNAL RTOVALUE
@@ -122,6 +134,24 @@
       DATA NEWUNIT/3/
       DATA NUMCH/'1','2','3','4','5','6','7','8','9','0'/
 
+      ! LOCAL H2 VARS
+      REAL H2_TURBINE_GENERATION_VALUE, H2_TURBINE_CONSUMPTION_VALUE
+      INTEGER itr_season, itr_region, previous_year
+      LOGICAL E_DEBUG_EXIST
+      
+      !do year = 20,60
+      !  write(*,*) 'util', 'regions ', 'seasons ','steps ', 'H2SCRV_P ', 'H2SCRV_Q '
+      !    do regions = 1, 11
+      !      do steps = 1, 7
+      !          do seasons = 1, 3
+	  !
+      !              write(*,*) regions, seasons, steps, H2SCRV_P(regions, steps, seasons, curiyr), H2SCRV_Q(regions, steps, seasons, curiyr), curiyr+1989
+      !
+      !         enddo
+      !     enddo
+      !   enddo
+      ! enddo
+      
       COL=':'
       FNRUN = 1
 
@@ -155,13 +185,15 @@
 !     CGNTGEN = 0
 
 !
-         OPEN(UNIT=22,FILE='EMMDBUG',BUFFERED='YES', BUFFERCOUNT=10)
-         OPEN(UNIT=13,FILE='EMMREPT',BUFFERED='YES', BUFFERCOUNT=10)
-         OPEN(UNIT=18,FILE='EMMPRNT',BUFFERED='YES', BUFFERCOUNT=10)
+         OPEN(UNIT=22,FILE='EMM_EMMDBUG',BUFFERED='YES', BUFFERCOUNT=10)
+         OPEN(UNIT=13,FILE='EMM_EMMREPT',BUFFERED='YES', BUFFERCOUNT=10)
+         OPEN(UNIT=18,FILE='EMM_EMMPRNT',BUFFERED='YES', BUFFERCOUNT=10)
+
+         CURTAIL = 0.0
 
 !        Initialize array which specifies if plants with CO2 capture technology must store captured CO2, i.e. Carbon Cap, Carbon Tax, etc.
 
-         MUST_STORE = 0
+         MUST_STORE = 1
 
 !        Open the LDSM report file
 
@@ -193,7 +225,13 @@
             WRITE(6,*)'<))) Control returned to UTIL'
             RETURN
          END IF
-
+         
+         ! skip if HMM is on, use if ephrts is turned on
+         if (EPHRTS .eq. 1) then  
+             ! POPULATE EPHRTS HYDROGEN DATA WITH NEW SUPPLY CURVE DATA 
+             CALL GET_HYDROGEN_DATA(CURIYR+1989)
+             !ENDIF
+         end if
 !
 !        READ THE CONTROL FILE
 !
@@ -450,11 +488,49 @@
       IF ( (( USW_DMLSADJ .GE. 1 ) .OR. ( USW_SGRID .GE. 1 )) .AND. CURITR .EQ. 1 ) THEN
          CALL SGRIDADJ
       ENDIF
-!
+
+
+!     RECEIVE HYDROGEN FUEL PRICES AND ELECTROLYZER LOAD FROM HMM
+      if (curitr .eq. 1) then    
+        annual_h2_mwh_consumed = 0.0
+        h2_elec_consumed = 0.0
+        h2_mwh_consumed = 0.0
+        
+        call receive_from_hmm
+      end if
+        
+      ! Use EPHRTS to supply hydrogen fuel to EMM instead of HMM
+      if (EPHRTS .eq. 1) then  
+          IF (CURITR .EQ. 1) THEN
+              IF (CURIYR+1989 .GT. UPSTYR+2) THEN 
+                  CALL EPHRTS_AIMMS_WRAPPER(CURIYR+1989,UPSTYR+2)                
+              ENDIF
+          END IF
+      
+          ! EPHRTS - FETCH HYDROGEN DATA
+          CALL GET_HYDROGEN_DATA(CURIYR+1989)
+
+          ! populate transfer variables for emm aimms 
+          call populate_efd_ecp_aimms_vars      
+
+          IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+             INQUIRE(FILE="EPHRTS_Load_FILE.TXT", EXIST=E_DEBUG_EXIST)
+             IF (E_DEBUG_EXIST) THEN
+                OPEN(unit_num_ephrts_load_debug_file, FILE="EPHRTS_Load_FILE.TXT", STATUS="REPLACE", ACTION="WRITE")
+             ELSE
+                OPEN(unit_num_ephrts_load_debug_file, FILE="EPHRTS_Load_FILE.TXT", STATUS="NEW", ACTION="WRITE")
+             END IF
+          END IF
+      end if
+      
 !        CALL THE LDSM MODULE (IDSM=1 INDICATES SET UP LOAD CURVES)
 !
          IDSM = 1
          CALL ELLDSM(IDSM)
+
+         IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+            CLOSE(unit_num_ephrts_load_debug_file)
+         END IF
 
       IF (FCRL .EQ. 1) THEN
       DO IRGN = 1, UNRGNS
@@ -546,6 +622,12 @@
 !
                   CALL RDBD_UECP(IRG)
 
+!     CALL ROUTINE FOR EPA TOXICS RULE, IF APPROPRIATE - updates UPPSEF which was just read in from ecpdaty
+!     Copied this call here for case when UESTYR is after UDSI_YR (update to 2020 start year)               
+                  IF (FULLYR .GT. UDSI_YR) THEN
+                      CALL EPA$DSIRMV
+                  END IF
+
 !
                ELSE
 !
@@ -589,6 +671,16 @@
 !                 WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
 !              END IF
 !           END DO
+            
+			! NEED TO RUN THIS BEFORE CRPGRP SO INT CFsARE UPDATED IF CLASS CHANGES
+           IF (FULLYR .GE. UESTYR)  THEN
+               IF(USW_XP .EQ. 0) THEN                       !OFF FOR CANADA
+                  IF(USW_RNW .GE. 1) THEN
+                      CALL CFCOVR(IRG)
+                  ENDIF
+               ENDIF
+           ENDIF
+           
 
             CALL CRPGRP(FULLYR,IRG,MAXHRZN)
 
@@ -614,7 +706,6 @@
                IF(USW_XP .EQ. 0) THEN                       !OFF FOR CANADA
                   IF(USW_RNW .GE. 1) THEN
                      CALL RENOVR(IRG)
-                     CALL CFCOVR(IRG)
 
 !                    I_TEST = I_TEST + 1
 !                    DO IECP = 1 , ECP_D_DSP
@@ -769,12 +860,16 @@
           BSWNGEN  = BSWNGEN + UGNWNNR(1,MNUMNR-2,CURIYR) + UGNWNNR(2,MNUMNR-2,CURIYR) &    ! wind
                              + UGNWNNR(1,MNUMNR-1,CURIYR) + UGNWNNR(2,MNUMNR-1,CURIYR) &
                              + UGNWLNR(1,MNUMNR-2,CURIYR) + UGNWLNR(2,MNUMNR-2,CURIYR) &    ! wind low speed
-                             + UGNWLNR(1,MNUMNR-1,CURIYR) + UGNWLNR(2,MNUMNR-1,CURIYR)
+                             + UGNWLNR(1,MNUMNR-1,CURIYR) + UGNWLNR(2,MNUMNR-1,CURIYR) & 
+                             + UGNWFNR(1,MNUMNR-2,CURIYR) + UGNWFNR(2,MNUMNR-2,CURIYR) &    ! offshore wind
+                             + UGNWFNR(1,MNUMNR-1,CURIYR) + UGNWFNR(2,MNUMNR-1,CURIYR)
           EXSGEN(WIWN,MNUMNR) = EXSGEN(WIWN,MNUMNR) + UGNWNNR(1,MNUMNR-2,CURIYR) + UGNWNNR(2,MNUMNR-2,CURIYR) &
                                 + UGNWNNR(1,MNUMNR-1,CURIYR) + UGNWNNR(2,MNUMNR-1,CURIYR)
           EXSGEN(WIWL,MNUMNR) = EXSGEN(WIWL,MNUMNR) + UGNWLNR(1,MNUMNR-2,CURIYR) + UGNWLNR(2,MNUMNR-2,CURIYR) &
                                 + UGNWLNR(1,MNUMNR-1,CURIYR) + UGNWLNR(2,MNUMNR-1,CURIYR)
-         IF (BMWNGEN(CURIYR) .GT. 0.0) THEN
+          EXSGEN(WIWL,MNUMNR) = EXSGEN(WIWF,MNUMNR) + UGNWFNR(1,MNUMNR-2,CURIYR) + UGNWFNR(2,MNUMNR-2,CURIYR) &
+                                + UGNWFNR(1,MNUMNR-1,CURIYR) + UGNWFNR(2,MNUMNR-1,CURIYR)
+          IF (BMWNGEN(CURIYR) .GT. 0.0) THEN
           URWNCFA(CURIYR) = BMWNGEN(CURIYR) / BSWNGEN
          ENDIF
 !   implement phase out if used
@@ -811,6 +906,7 @@
           EXSGEN(WIPT,JRG) = EXSGEN(WIPT,JRG) * URSOCFA(CURIYR)
           EXSGEN(WIWN,JRG) = EXSGEN(WIWN,JRG) * URWNCFA(CURIYR)
           EXSGEN(WIWL,JRG) = EXSGEN(WIWL,JRG) * URWNCFA(CURIYR)
+          EXSGEN(WIWF,JRG) = EXSGEN(WIWF,JRG) * URWNCFA(CURIYR)
         END DO
 
           IF (FULLYR .GT. UESTYR) write(22,2230) CURIYR,CURITR,BSNCGEN,BSHYGEN,BSGTGEN,BSSOGEN,BSWNGEN
@@ -846,7 +942,7 @@
 !     Change array which specifies if plants with CO2 capture technology must store captured CO2 given a Carbon Cap or Carbon Tax
 
       DO XYR = 1 , UNYEAR
-         IF (EMETAX(1,XYR) .GT. 0.0 .AND. NOT(TRAN_FLAG)) THEN
+         IF (EMETAX(1,XYR) .GT. 0.0 .AND. (TRAN_FLAG .EQ. 0)) THEN
             DO XFR = 1 , UNFRGN
                MUST_STORE(XFR,XYR) = 1
             END DO
@@ -1026,7 +1122,8 @@
               IF ((USW_CAR .EQ. 1 .OR. USW_CAR .EQ. 3) .AND. (CURIYR + UHBSYR) .GE. UYR_CAR .AND. USW_CAREMM .EQ. 1) THEN
                EMTAX(CURIYR) = ECP_PCAR(0,CURIYR) * 0.001
                EMETAX(1,CURIYR) = ECP_PCAR(0,CURIYR) * 0.001
-               CALL SUM_EMISSIONS
+			   ! Claire 01/16 epm.f removal - temp disable 
+               !CALL SUM_EMISSIONS
               END IF
             ELSE
 !
@@ -1070,21 +1167,60 @@
 !     CAPTURE FUEL DATA
 !
       CALL GETFUEL(FULLYR)
-!
-!     CALL THE LDSM MODULE (IDSM=2 INDICATES GET DSM OUTPUTS FROM ECP)
-!
-      IF(USW_XP .EQ. 0) THEN                             !NOT FOR CANADA
-         IDSM = 2
-         CALL ELLDSM(IDSM)
-      ENDIF
-!
+      
 !     EXECUTE THE ECONOMIC FUEL DISPATCH MODULE (ELEFD)
 !
 !TIME          CALL MPTIM2(CPU_TIME_BEGIN)
 !TIME      WRITE(22,60) '***CALLING  ELEFD',
 !TIME     +       FLOAT(CPU_TIME_BEGIN)/100.
 !
+       ! only initailize for the current year, not previous years, ! YEARPR
+      
+         ! EPHRTS - this code checks the hydrogen consumption and generation values and ensures that in the use case of generation > 0 that NEMS will crash. Ditto for consumption > 0, generation = 0.
+         !          it also initalizes the turbine consumption and generation values and sets them to zero.
+      
+         H2_TURBINE_CONSUMPTION_VALUE = 0.0
+         H2_TURBINE_GENERATION_VALUE = 0.0
+         DO ITR_SEASON = 1, 3
+            DO ITR_REGION = 1, 25
+               H2_TURBINE_CONSUMPTION(CURIYR+1989, ITR_SEASON, ITR_REGION) = 0.0 
+               H2_TURBINE_GENERATION(CURIYR+1989, ITR_SEASON, ITR_REGION) = 0.0
+               
+               
+               ! WHILE WE ARE HERE, DO DATA CHECK - IN THE PREVIOUS YEAR, CHECK TO SEE IF THERE'S CONSUMPTION BUT NO GENERATION
+               PREVIOUS_YEAR = (CURIYR+1989) - 1
+               
+               H2_TURBINE_CONSUMPTION_VALUE = H2_TURBINE_CONSUMPTION(PREVIOUS_YEAR, ITR_SEASON, ITR_REGION) 
+               H2_TURBINE_GENERATION_VALUE = H2_TURBINE_GENERATION(PREVIOUS_YEAR, ITR_SEASON, ITR_REGION) 
+
+               ! GEN > 0, CONS = 0
+               IF (H2_TURBINE_GENERATION_VALUE .GT. 0.0 ) THEN
+                   IF (  H2_TURBINE_CONSUMPTION_VALUE .EQ. 0.0) THEN
+                     WRITE(*,*) "CRASH ERROR : H2 TURBINE POWER GENERATED WITHOUT FUEL CONSUMPTION "  
+                     WRITE(*,*)  " YEAR ", PREVIOUS_YEAR, " REGION ", ITR_REGION, " SEASON ",  ITR_SEASON, " GEN " , H2_TURBINE_GENERATION_VALUE, " CONSUMED ", H2_TURBINE_CONSUMPTION_VALUE
+                     STOP
+                   END IF
+               END IF
+               
+               ! CONS > 0, GEN = 0
+               IF (H2_TURBINE_CONSUMPTION_VALUE .GT. 0.0 ) THEN
+                   IF (  H2_TURBINE_GENERATION_VALUE .EQ. 0.0) THEN
+                     WRITE(*,*) "CRASH ERROR : H2 TURBINE FUEL CONSUMED WITHOUT POWER GENERATION "  
+                     WRITE(*,*)  " YEAR ", PREVIOUS_YEAR, " REGION ", ITR_REGION, " SEASON ",  ITR_SEASON, " GEN " , H2_TURBINE_GENERATION_VALUE, " CONSUMED ", H2_TURBINE_CONSUMPTION_VALUE
+                     STOP
+                   END IF
+               END IF
+               
+            END DO
+         END DO
+         
+         
+
       CALL ELEFD(CURIYR)
+      
+      
+      ! EDT 4/16/24 Turning off switch so EPHRTS and HMM can run at the same time
+      
 !
 !     OVERWRITE NEMS CARBON FEE WITH EFD RESULT, IF SWITCHES TURNED ON
 !
@@ -1114,6 +1250,9 @@
 !
       CALL EMMCAPO
 !
+      ! send emm data to hmm 
+      call send_to_hmm(curitr, curirun)
+      
 !
 !     STORE FUEL QUANTITIES IN NEMS GLOBAL ARRAYS
 !
@@ -1261,7 +1400,6 @@
                PELINOUT(IRG,CURIYR,IINEU) = PELIN(IRG,CURIYR)
              ENDDO
              PELLTTR(IRG,CURIYR) = PELTR(IRG,CURIYR)
-             PELVHTR(IRG,CURIYR) = PELTR(IRG,CURIYR)
 
 !  write(6,8546) ' prctestrs ',curiyr,curitr,irg,(pelrsout(irg,curiyr,irseu),irseu=1,mneursgrp)
 !  write(6,8546) ' prctestcm ',curiyr,curitr,irg,(pelcmout(irg,curiyr,icmeu),icmeu=1,mneucmgrp)
@@ -1272,9 +1410,55 @@
          ENDIF
       ENDIF
  8546 format(1x,a,3I4,10(F8.4))
- 8547 format(1x,a,3I4,3(F8.4))
- 8548 format(1x,a,3I4,2(F8.4))
-!
+ 8547 format(1x,a,3I4,3(F8.4)) 
+8548  format(1x,a,3I4,2(F8.4))
+
+! write COALUNITSO.txt file to update coal plant list for CMM (when new plant file)
+      
+      IF (CURIYR .EQ. LASTYR .AND. FCRL .EQ. 1) THEN
+         FNAMEI18='COALUNITO'
+         NEW=.TRUE.
+         FUNITI=FILE_MGR('O',FNAMEI18,NEW)
+      IF (NUM_CMM_UNITS .GT. 0) THEN
+         TEMP_CL_UNITS='          '
+! replace space in name with '_'; i.e., "3 3" becomes "3_3"
+         DO I=1,NUM_CMM_UNITS
+            ENDUNIT=LEN_TRIM(EMM_CL_UNITS(I))
+            FIRSTSPACE=.FALSE.
+            K=0
+            DO J=1,ENDUNIT
+               IF (EMM_CL_UNITS(I)(J:J) .EQ. ' ' .AND. .NOT. FIRSTSPACE)  THEN
+                   K=K+1
+                   TEMP_CL_UNITS(I)(K:K)='_'
+                   FIRSTSPACE=.TRUE.
+               ELSEIF (EMM_CL_UNITS(I)(J:J) .NE. ' ') THEN
+                   K=K+1
+                   TEMP_CL_UNITS(I)(K:K)=EMM_CL_UNITS(I)(J:J)
+               ENDIF
+            ENDDO
+         ENDDO
+!  write output coal unit file for cycling.  this is in AIMMS data statement format
+         WRITE(FUNITI,'(A)') 'Plantid_unitid := Data {'
+         WRITE(FUNITI,'(A)') TRIM(TEMP_CL_UNITS(1))
+         DO I=2,NUM_CMM_UNITS
+            WRITE(FUNITI,'(A,A)') ',',TRIM(TEMP_CL_UNITS(I))
+         ENDDO
+         WRITE(FUNITI,'(A/)') '} ;'
+         WRITE(FUNITI,'(A)') 'COALEMM_EMM_CL_UNITS := Data {'
+         WRITE(FUNITI,'(A,A,A)') '1:"',TRIM(TEMP_CL_UNITS(1)),'"'
+         DO I=2,NUM_CMM_UNITS
+            WRITE(FUNITI,'(A,I4,A,A,A)') ',',I,':"',TRIM(TEMP_CL_UNITS(I)),'"'
+         ENDDO
+         WRITE(FUNITI,'(A/)') '} ;'
+      ELSE
+         WRITE(6,'("  Warning:  No coal units to output to cycle file COALUNITO.txt")')
+         WRITE(FUNITI,'(A)') 'Plantid_unitid := Data { };'
+         WRITE(FUNITI,'(A)') 'COALEMM_EMM_CL_UNITS := Data { };'
+      ENDIF
+         FUNITI=FILE_MGR('C',FNAMEI18,NEW)
+      ENDIF
+      
+      !
 !     RESERVE MARGIN INFO
 !
       IF (CURIYR .EQ. LASTYR .AND. (FCRL .EQ. 1 .OR. CURITR .GT. MAXITR))THEN
@@ -1361,6 +1545,7 @@
                               uplntcd(wian),  &
                               uplntcd(wism),  &
                               uplntcd(wiwd),  &
+                              uplntcd(wibi),  &
                               uplntcd(wigt),  &
                               uplntcd(wiwn),  &
                               uplntcd(wiso),  &
@@ -1380,6 +1565,7 @@
                               upannadj(wian,kyr),  &
                               upannadj(wism,kyr),  &
                               upannadj(wiwd,kyr),  &
+                              upannadj(wibi,kyr),  &
                               upannadj(wigt,kyr),  &
                               upannadj(wiwn,kyr),  &
                               upannadj(wiso,kyr),  &
@@ -1795,6 +1981,7 @@
            IF (((CURIYR + UHBSYR) .LE. UYR_OVER)     &
              .AND. ((CURIYR + UHBSYR) .GE. HSTYEAR)) THEN
              US_AVG_HTRT(WIWD) = HWODHR(CURIYR)
+             US_AVG_HTRT(WIBI) = HWODHR(CURIYR)
              US_AVG_HTRT(WIMS) = HMSWHR(CURIYR)
            ENDIF
          ENDIF
@@ -1806,26 +1993,32 @@
 !     IF ( CURITR .EQ. 1 ) THEN
       IF ( (CURIYR + UHBSYR) .GT. UYR_OVER) THEN
 !
-        DO IC = 1 , MNUMCR - 2
-          IF ( TFOSSGENCR(IC) .GT. 0.0 ) THEN
-                  WHRFOSS(IC,CURIYR) = TFOSSCONCR(IC) / (TFOSSGENCR(IC) * 0.001)
-          ENDIF
-        ENDDO
+         IF (CURIYR + UHBSYR .EQ. UYR_OVER + 1) THEN
+              WHRFOSS(:,CURIYR) = WHRFOSS(:,CURIYR-1)
+         ELSEIF (CURIYR + 1 .LE. MNUMYR) THEN                           !store in CURIYR+1 to be consistent with when EPHTRT_AER is used (not until next year)
+            DO IC = 1 , MNUMCR - 2
+                IF ( TFOSSGENCR(IC) .GT. 0.0 ) THEN
+                  WHRFOSS(IC,CURIYR+1) = TFOSSCONCR(IC) / (TFOSSGENCR(IC) * 0.001)
+                ENDIF
+            ENDDO
 
-        WHRFOSS(10,CURIYR) = TFOSSCON / (TFOSSGEN * 0.001)
-        WHRFOSS(11,CURIYR) = TFOSSCON / (TFOSSGEN * 0.001)
+            WHRFOSS(10,CURIYR+1) = TFOSSCON / (TFOSSGEN * 0.001)
+            WHRFOSS(11,CURIYR+1) = TFOSSCON / (TFOSSGEN * 0.001)
+         ENDIF
 
  1294   FORMAT(1X,a,i4,i4,3(F12.4))
 
         DO KRG = 1 , UNRGNS
           CALL GETBLD(1,KRG)
-          IF (TFOSSGEN.GT.0.0) EPHTRT_AER(WIGT) = TFOSSCON / (TFOSSGEN * 0.001)
-          IF (TFOSSGEN.GT.0.0 )EPHTRT_AER(WIHY) = TFOSSCON / (TFOSSGEN * 0.001)
-          IF (TFOSSGEN.GT.0.0) EPHTRT_AER(WIPS) = TFOSSCON / (TFOSSGEN * 0.001)
-          IF (TFOSSGEN.GT.0.0) EPHTRT_AER(WIWN) = TFOSSCON / (TFOSSGEN * 0.001)
-          IF (TFOSSGEN.GT.0.0) EPHTRT_AER(WIWF) = TFOSSCON / (TFOSSGEN * 0.001)
-          IF (TFOSSGEN.GT.0.0) EPHTRT_AER(WISO) = TFOSSCON / (TFOSSGEN * 0.001)
-          IF (TFOSSGEN.GT.0.0) EPHTRT_AER(WIPV) = TFOSSCON / (TFOSSGEN * 0.001)
+!  AEO2025 update to use 3412 for renewable consumption
+           EPHTRT_AER(WIGT) = 3412.0 
+           EPHTRT_AER(WIHY) = 3412.0 
+           EPHTRT_AER(WIPS) = 3412.0 
+           EPHTRT_AER(WIWN) = 3412.0 
+           EPHTRT_AER(WIWF) = 3412.0 
+           EPHTRT_AER(WISO) = 3412.0 
+           EPHTRT_AER(WIPV) = 3412.0 
+           EPHTRT_AER(WIPT) = 3412.0 
           CALL STRBLD(1,KRG)
         ENDDO
 !
@@ -1881,14 +2074,14 @@
 !
          Carbon_Rev(MNUMNR,CURIYR) = (EMEL(1,1,CURIYR) + EMEL(2,1,CURIYR) + EMEL(3,1,CURIYR)) * EMETAX(1,CURIYR) * 1000.0
          if (PCAP_CAR .EQ. 2) then
-            if (TAX_FLAG .OR. OFFSET_FLAG) then
+            if ((TAX_FLAG /= 0) .OR. (OFFSET_FLAG /= 0)) then
                caralloc = EMLIM(1,CURIYR) * EMETAX(1,CURIYR) * 1000.0
                Carbon_Rev(MNUMNR,CURIYR) = Carbon_Rev(MNUMNR,CURIYR) - caralloc
             else
                Carbon_Rev(MNUMNR,CURIYR) = 0.0
             endif
          endif
-         if(BANK_FLAG .AND. CURCALYR .LT. BANK_STARTYR) then
+         if((BANK_FLAG /= 0) .AND. CURCALYR .LT. BANK_STARTYR) then
             Carbon_Rev(MNUMNR,CURIYR) = 0.0
          endif
          write(18,2332) CURIYR,CURITR,VCSTTOT,FCSTTOT,SO2PTOT,NOXPTOT,RPSPTOT,HGPTOT
@@ -1969,6 +2162,14 @@
          ENDIF
       ENDIF
 !
+      IF (FCRL .EQ. 1 .AND. CURIYR .EQ. LASTYR) THEN !close output units so data gets flushed
+         CLOSE(22)
+         CLOSE(13)
+         CLOSE(18)
+        IMSG = FILE_MGR('C','LDSMRPT',NEW)  !Open LDSM REPORT FILE
+      ENDIF	  
+ 
+ 
       RETURN
       END
 !
@@ -2203,13 +2404,13 @@
 !
 !        READ EFD PLANT FILE VINTAGE DEFINITION TABLE
 !
-         RET_CODE = RD$TBL(UF_TMP,'%EFD DWFVIN %',12,UF_DBG,UF_MSG)
-         RET_CODE = RD$I1(EFDPVINI,1,12)                     ! EFD PLANT VINTAGE INDEX
-         RET_CODE = RD$C1(EFDPVIND,1,12)                     ! EFD PLANT VINTAGE DEF
+         RET_CODE = RD$TBL(UF_TMP,'%EFD DWFVIN %',11,UF_DBG,UF_MSG)
+         RET_CODE = RD$I1(EFDPVINI,1,11)                     ! EFD PLANT VINTAGE INDEX
+         RET_CODE = RD$C1(EFDPVIND,1,11)                     ! EFD PLANT VINTAGE DEF
 !
 !        WRITE EFD PLANT FILE VINTAGE DEFINITION TABLE
 !
-         DO I = 1 , 12
+         DO I = 1 , 11
            WRITE(UF_DBS,1100) COL,EFDPVINI(I),COL,EFDPVIND(I),COL,TRIM(SCEN_DATE)
  1100 FORMAT(1X,'DWFVIN',A2,I2,A2,A25,A2,A)
          ENDDO
@@ -2446,6 +2647,8 @@
       include 'dispout'
       include 'ncntrl'
       include 'emission'
+      include 'eusprc'
+      include 'edbdef'
 !
       INTEGER IYR,IRG,ISP,I,J,IOWN,K,IVIN
       REAL*8 CF,DUMMY,QPGN,QFGN,QHGN,SCAP,QFFL,DMY(EFD_D_OWN)
@@ -2487,7 +2690,7 @@
          END IF
 !
          WRITE(UF_RPT,2000) URGNME(IRG),IRG,USYEAR(IYR),CURITR, &
-            ENPGRP(J),J,CF,EQPCP(J),SCAP,EQPFL(J)*0.001, &
+            EFDNAME(J),J,CF,EQPCP(J),SCAP,EQPFL(J)*0.001, &
             EQPSO2(J)*0.001,(EQPGN(J,IOWN)*0.001,ERTOMF(J,IOWN), &
             ERPOM(J,IOWN),ERPFL(J,IOWN),IOWN=1,USW_OWN),TRIM(SCEN_DATE)
  2000    FORMAT(1X,A4,":",I3,":",I4,":",I2,":",A32,":",I3, &
@@ -2508,7 +2711,7 @@
          IF(EQHCP(J) .GT. 0.0) CF = QHGN / &
              (EQHCP(J) * 0.001 * 8760)
          WRITE(UF_RPT,2000) URGNME(IRG),IRG,USYEAR(IYR),CURITR, &
-            ENHGRP(J),K,CF,EQHCP(J),SCAP,DUMMY,DUMMY, &
+            EFDNAME(K),K,CF,EQHCP(J),SCAP,DUMMY,DUMMY, &
             (EQHGN(J,IOWN)*0.001,ERTOMF(K,IOWN),ERHOM(J,IOWN), &
             DMY(IOWN),IOWN=1,USW_OWN),TRIM(SCEN_DATE)
       END DO  ! J
@@ -2822,10 +3025,11 @@
 !  GAS
 !
       DO IRG = 1 , NNGEM
-      QNGELGR(IRG,CURIYR) = (UQFUEL(UIGF,IRG,ICR) + UQFUEL(UIGI,IRG,ICR) + UQFUEL(UIDG,IRG,ICR) + UQFUEL(UIGC,IRG,ICR)) * FACT2
+      QNGELGR(IRG,CURIYR) = (UQFUEL(UIGF,IRG,ICR) + UQFUEL(UIGI,IRG,ICR) + UQFUEL(UIDG,IRG,ICR)) * FACT2
+      !+ UQFUEL(UIGC,IRG,ICR))       
       QGFELGR(IRG,CURIYR) = UQFUEL(UIGF,IRG,ICR) * FACT2
       QGIELGR(IRG,CURIYR) = ( UQFUEL(UIGI,IRG,ICR)  + UQFUEL(UIDG,IRG,ICR) ) * FACT2
-      QGCELGR(IRG,CURIYR) = UQFUEL(UIGC,IRG,ICR) * FACT2
+      QGCELGR(IRG,CURIYR) = 0.0 ! UQFUEL(UIGC,IRG,ICR) * FACT2
 !
 !  STORE EMM GAS CONSUMPTION FOR HISTORICAL/STEO YEARS
 !
@@ -2850,9 +3054,9 @@
             END IF
 
             SQGFELGR(IRG,CURIYR,UNGSSN(ISP)) = SQGFELGR(IRG,CURIYR,UNGSSN(ISP)) + SQFUEL(UIGF,IRG,ISP) * FACT2
-            SQGIELGR(IRG,CURIYR,UNGSSN(ISP)) = SQGIELGR(IRG,CURIYR,UNGSSN(ISP)) + (SQFUEL(UIGI,IRG,ISP) + SQFUEL(UIGC,IRG,ISP) + SQFUEL(UIDG,IRG,ISP)) * FACT2
+            SQGIELGR(IRG,CURIYR,UNGSSN(ISP)) = SQGIELGR(IRG,CURIYR,UNGSSN(ISP)) + (SQFUEL(UIGI,IRG,ISP)  + SQFUEL(UIDG,IRG,ISP)) * FACT2 !+ SQFUEL(UIGC,IRG,ISP)
             SQNGELGR(IRG,CURIYR,ISP) = SQNGELGR(IRG,CURIYR,ISP) +  &
-                                       (SQFUEL(UIGF,IRG,ISP) + SQFUEL(UIGI,IRG,ISP) + SQFUEL(UIGC,IRG,ISP) + SQFUEL(UIDG,IRG,ISP)) * FACT2
+                                       (SQFUEL(UIGF,IRG,ISP) + SQFUEL(UIGI,IRG,ISP)  + SQFUEL(UIDG,IRG,ISP)) * FACT2 !+ SQFUEL(UIGC,IRG,ISP)
         END DO
 !
 !  STORE CARBON REMOVAL RATES
@@ -2867,8 +3071,10 @@
          ELSE
             XQGIELGR(IRG,CURIYR) = 0.00
          END IF
+         
+         ! HYDROGEN (COMPETITIVE NATURAL GAS SLOT)
          IF (UQFUEL(UIGC,IRG,ICR) .GT. 0.000) THEN
-            XQGCELGR(IRG,CURIYR) = UXFUEL(UIGC,IRG) / UQFUEL(UIGC,IRG,ICR)
+            XQGCELGR(IRG,CURIYR) = 0.0 ! UXFUEL(UIGC,IRG) / UQFUEL(UIGC,IRG,ICR)
          ELSE
             XQGCELGR(IRG,CURIYR) = 0.00
          END IF
@@ -3149,7 +3355,7 @@
             QPCEL(ICENSUS,CURIYR)
          QGFEL(ICENSUS,CURIYR) = UQFUEL(UIGF,ICENSUS,ICR) * FACT2
          QGIEL(ICENSUS,CURIYR) = (UQFUEL(UIGI,ICENSUS,ICR) + &
-         UQFUEL(UIGC,ICENSUS,ICR) + UQFUEL(UIDG,ICENSUS,ICR) ) * FACT2
+         UQFUEL(UIDG,ICENSUS,ICR) ) * FACT2 ! UQFUEL(UIGC,ICENSUS,ICR) +
          QNGEL(ICENSUS,CURIYR) = QGFEL(ICENSUS,CURIYR) + &
             QGIEL(ICENSUS,CURIYR)
          QUREL(ICENSUS,CURIYR) = UQFGENC(UIUF,ICENSUS) * NUCHRT * FACT3
@@ -3238,8 +3444,8 @@
 !
       EMEL(1,1,CURIYR) = EMEL(1,1,CURIYR) + &
          (UTCARC(UIGF,ICENSUS) + &
-         UTCARC(UIGI,ICENSUS) + UTCARC(UIDG,ICENSUS) + &
-         UTCARC(UIGC,ICENSUS)) * FACTE
+         UTCARC(UIGI,ICENSUS) + UTCARC(UIDG,ICENSUS) ) * FACTE
+         !UTCARC(UIGC,ICENSUS)) * FACTE
       EMEL(2,1,CURIYR) = EMEL(2,1,CURIYR) + &
          (UTCARC(UIDS,ICENSUS) + UTCARC(UIDD,ICENSUS) + &
          UTCARC(UIRL,ICENSUS) + &
@@ -3285,8 +3491,8 @@
       EMEL(4,1,CURIYR) = EMEL(4,1,CURIYR) + RNWEMS(ICENSUS,1,CURIYR)
       EMEL(1,2,CURIYR) = EMEL(1,2,CURIYR) + &
          (UTCO1C(UIGF,ICENSUS) + UTCO1C(UIDG,ICENSUS) + &
-         UTCO1C(UIGI,ICENSUS) + &
-         UTCO1C(UIGC,ICENSUS)) * FACTE
+         UTCO1C(UIGI,ICENSUS) ) * FACTE
+         !        UTCO1C(UIGC,ICENSUS)) * FACTE
       EMEL(2,2,CURIYR) = EMEL(2,2,CURIYR) + &
          (UTCO1C(UIDS,ICENSUS) + UTCO1C(UIDD,ICENSUS) + &
          UTCO1C(UIRL,ICENSUS) + &
@@ -3331,8 +3537,8 @@
       EMEL(4,2,CURIYR) = EMEL(4,2,CURIYR) + RNWEMS(ICENSUS,2,CURIYR)
       EMEL(1,3,CURIYR) = EMEL(1,3,CURIYR) + &
          (UTCO2C(UIGF,ICENSUS) + UTCO2C(UIDG,ICENSUS) + &
-         UTCO2C(UIGI,ICENSUS) + &
-         UTCO2C(UIGC,ICENSUS)) * FACTE
+         UTCO2C(UIGI,ICENSUS) ) * FACTE
+ !        UTCO2C(UIGC,ICENSUS)) * FACTE
       EMEL(2,3,CURIYR) = EMEL(2,3,CURIYR) + &
          (UTCO2C(UIDS,ICENSUS) + UTCO2C(UIDD,ICENSUS) + &
          UTCO2C(UIRL,ICENSUS) + &
@@ -3378,8 +3584,8 @@
       RNWEMS(ICENSUS,3,CURIYR)
       EMEL(1,4,CURIYR) = EMEL(1,4,CURIYR) + &
       (UTSO2C(UIGF,ICENSUS) + UTSO2C(UIDG,ICENSUS) + &
-      UTSO2C(UIGI,ICENSUS) + &
-      UTSO2C(UIGC,ICENSUS)) * FACTE
+      UTSO2C(UIGI,ICENSUS) ) * FACTE
+!      UTSO2C(UIGC,ICENSUS)) * FACTE
       EMEL(2,4,CURIYR) = EMEL(2,4,CURIYR) + &
       (UTSO2C(UIDS,ICENSUS) + UTSO2C(UIDD,ICENSUS) + &
       UTSO2C(UIRL,ICENSUS) + &
@@ -3425,8 +3631,8 @@
       RNWEMS(ICENSUS,4,CURIYR)
       EMEL(1,5,CURIYR) = EMEL(1,5,CURIYR) + &
       (UTNOXC(UIGF,ICENSUS) + UTNOXC(UIDG,ICENSUS) + &
-      UTNOXC(UIGI,ICENSUS) + &
-      UTNOXC(UIGC,ICENSUS)) * FACTE
+      UTNOXC(UIGI,ICENSUS)) * FACTE
+!      UTNOXC(UIGC,ICENSUS)) * FACTE
       EMEL(2,5,CURIYR) = EMEL(2,5,CURIYR) + &
       (UTNOXC(UIDS,ICENSUS) + UTNOXC(UIDD,ICENSUS) + &
       UTNOXC(UIRL,ICENSUS) + &
@@ -3472,8 +3678,8 @@
       RNWEMS(ICENSUS,5,CURIYR)
       EMEL(1,6,CURIYR) = EMEL(1,6,CURIYR) + &
       (UTVOCC(UIGF,ICENSUS) + UTVOCC(UIDG,ICENSUS) + &
-      UTVOCC(UIGI,ICENSUS) + &
-      UTVOCC(UIGC,ICENSUS)) * FACTE
+      UTVOCC(UIGI,ICENSUS) ) * FACTE
+ !     UTVOCC(UIGC,ICENSUS)) * FACTE
       EMEL(2,6,CURIYR) = EMEL(2,6,CURIYR) + &
       (UTVOCC(UIDS,ICENSUS) + UTVOCC(UIDD,ICENSUS) + &
       UTVOCC(UIRL,ICENSUS) + &
@@ -3567,8 +3773,7 @@
              UTSO2C(UIRH,ICENSUS) + &
              UTSO2C(UIGF,ICENSUS) + &
              UTSO2C(UIGI,ICENSUS) + &
-             UTSO2C(UIGC,ICENSUS) + &
-             UTSO2C(UIDG,ICENSUS) + &
+ !            UTSO2C(UIGC,ICENSUS) + &
              UTSO2C(UIDD,ICENSUS) + &
              UTSO2C(UIUF,ICENSUS) + &
              RNWEMS(ICENSUS,4,CURIYR) / FACTE) * SO2_SHR_BY_OLRG(ICENSUS,ISO2)
@@ -3583,7 +3788,7 @@
                UTSO2C(UIRH,ICENSUS) + &
                UTSO2C(UIGF,ICENSUS) + &
                UTSO2C(UIGI,ICENSUS) + &
-               UTSO2C(UIGC,ICENSUS) + &
+ !              UTSO2C(UIGC,ICENSUS) + &
                UTSO2C(UIDG,ICENSUS) + &
                UTSO2C(UIDD,ICENSUS) + &
                UTSO2C(UIUF,ICENSUS)) * TSO2_OSH_BY_OLCL(ICENSUS,ISO2,1)
@@ -3742,8 +3947,8 @@
 
 !  ACCOUNT FOR BIOMASS COFIRING IN FOSSIL PLANTS
       UGNCFNR(1,IRG,CURIYR) = UGNWDNR(1,IRG,CURIYR) - &
-          (UQPGENN(UIBMS,IRG,1) + UQPGENN(UIBMS,IRG,2)) * FACT2
-      UGNCFNR(2,IRG,CURIYR) = UGNWDNR(2,IRG,CURIYR) - UQPGENN(UIBMS,IRG,3) * FACT2 + &
+          (UQPGENN(UIBMS,IRG,1) + UQPGENN(UIBMS,IRG,2) + UQPGENN(UIBIG,IRG,1) + UQPGENN(UIBIG,IRG,2)) * FACT2
+      UGNCFNR(2,IRG,CURIYR) = UGNWDNR(2,IRG,CURIYR) - (UQPGENN(UIBMS,IRG,3) + UQPGENN(UIBIG,IRG,3)) * FACT2 + &
          (UQFGENN(UIWD,IRG,4) - UQPGENN(UIBMS,IRG,4)) * FACT2
 !  INSURE THAT ROUNDING DOES NOT GIVE NEGATIVE COFIRING
       UGNCFNR(1,IRG,CURIYR) = MAX(UGNCFNR(1,IRG,CURIYR),0.0)
@@ -4092,7 +4297,7 @@
       UTSO2(IRG,CURIYR) = UTSO2(IRG,CURIYR) + &
          (UTSO2N(UIGF,IRG) +             &
           UTSO2N(UIGI,IRG) +             &
-          UTSO2N(UIGC,IRG) +             &
+!          UTSO2N(UIGC,IRG) +             &
           UTSO2N(UIDG,IRG) +             &
           UTSO2N(UIDD,IRG) +             &
           UTSO2N(UIDS,IRG) +             &
@@ -4139,7 +4344,7 @@
       UTNOX(IRG,CURIYR) = UTNOX(IRG,CURIYR) + &
          (UTNOXN(UIGF,IRG) +             &
           UTNOXN(UIGI,IRG) +             &
-          UTNOXN(UIGC,IRG) +             &
+ !         UTNOXN(UIGC,IRG) +             &
           UTNOXN(UIDG,IRG) +             &
           UTNOXN(UIDD,IRG) +             &
           UTNOXN(UIDS,IRG) +             &
@@ -4186,7 +4391,7 @@
       UTCO2(IRG,CURIYR) = UTCO2(IRG,CURIYR) + &
          (UTCO2N(UIGF,IRG) +             &
           UTCO2N(UIGI,IRG) +             &
-          UTCO2N(UIGC,IRG) +             &
+!          UTCO2N(UIGC,IRG) +             &
           UTCO2N(UIDS,IRG) +             &
           UTCO2N(UIDG,IRG) +             &
           UTCO2N(UIDD,IRG) +             &
@@ -4233,7 +4438,7 @@
       UTCO1(IRG,CURIYR) = UTCO1(IRG,CURIYR) + &
          (UTCO1N(UIGF,IRG) +             &
           UTCO1N(UIGI,IRG) +             &
-          UTCO1N(UIGC,IRG) +             &
+ !         UTCO1N(UIGC,IRG) +             &
           UTCO1N(UIDS,IRG) +             &
           UTCO1N(UIDG,IRG) +             &
           UTCO1N(UIDD,IRG) +             &
@@ -4280,7 +4485,7 @@
       UTCAR(IRG,CURIYR) = UTCAR(IRG,CURIYR) + &
          (UTCARN(UIGF,IRG) +             &
           UTCARN(UIGI,IRG) +             &
-          UTCARN(UIGC,IRG) +             &
+ !         UTCARN(UIGC,IRG) +             &
           UTCARN(UIDS,IRG) +             &
           UTCARN(UIDD,IRG) +             &
           UTCARN(UIDG,IRG) +             &
@@ -4327,7 +4532,7 @@
       UTHG(IRG,CURIYR) = UTHG(IRG,CURIYR) + &
          (UTHGN(UIGF,IRG) +             &
           UTHGN(UIGI,IRG) +             &
-          UTHGN(UIGC,IRG) +             &
+  !        UTHGN(UIGC,IRG) +             &
           UTHGN(UIDG,IRG) +             &
           UTHGN(UIDD,IRG) +             &
           UTHGN(UIDS,IRG) +             &
@@ -4404,7 +4609,7 @@
          UTHGN(UIRH,IRG) + &
          UTHGN(UIGF,IRG) + &
          UTHGN(UIGI,IRG) + &
-         UTHGN(UIGC,IRG) + &
+!         UTHGN(UIGC,IRG) + &
          UTHGN(UIDG,IRG) + &
          UTHGN(UIDD,IRG) + &
          UTHGN(UIUF,IRG)
@@ -4463,7 +4668,7 @@
       CGNTGEN(IRG,CURIYR,2,1) =(UQFGENN(UIDS,IRG,4) + UQFGENN(UIRL,IRG,4) + UQFGENN(UIRH,IRG,4))
 !
 !  SOLD TO GRID - GAS GENERATION
-      CGNTGEN(IRG,CURIYR,3,1) =(UQFGENN(UIGF,IRG,4) + UQFGENN(UIGC,IRG,4) + UQFGENN(UIGI,IRG,4))
+      CGNTGEN(IRG,CURIYR,3,1) =(UQFGENN(UIGF,IRG,4)  + UQFGENN(UIGI,IRG,4)) !+ UQFGENN(UIGC,IRG,4)
 !
 !  RENEWABLE NON-TRADITIONAL COGEN
 !
@@ -4565,8 +4770,7 @@
          UQFCONN(UIRH,IRG,4)) /1000.
 !     GAS CONSUMPTION AT NONTRADITIONAL COGENERATORS
       CGNTQ(IRG,CURIYR,3) = (UQFCONN(UIGF,IRG,4) + &
-         UQFCONN(UIGI,IRG,4) + &
-         UQFCONN(UIGC,IRG,4)) /1000.
+         UQFCONN(UIGI,IRG,4)) /1000. !         UQFCONN(UIGC,IRG,4)
 !
 !     CONSUMPTION EQUIVALENT AT RENEWABLE SOURCES
       CGNTQ(IRG,CURIYR,4) = (UQFCONN(UIWA,IRG,4) + UQFCONN(UITI,IRG,4)) / 1000.
@@ -4575,9 +4779,9 @@
       CGNTQ(IRG,CURIYR,7) = UQFCONN(UIWD,IRG,4) / 1000.
       CGNTQ(IRG,CURIYR,8) = (UQFCONN(UIPV,IRG,4) + UQFCONN(UIPT,IRG,4)) / 1000.
       CGNTQ(IRG,CURIYR,9) = (CGNTGEN(IRG,CURIYR,9,1) + &
-          CGNTGEN(IRG,CURIYR,9,2)) * WHRFOSS(MNUMCR,CURIYR)/1000000.
+          CGNTGEN(IRG,CURIYR,9,2)) * 3412.0/1000000.
       CGNTQ(IRG,CURIYR,10) = (CGNTGEN(IRG,CURIYR,10,1) + &
-          CGNTGEN(IRG,CURIYR,10,2)) * WHRFOSS(MNUMCR,CURIYR)/1000000.
+          CGNTGEN(IRG,CURIYR,10,2)) * 3412.0/1000000.
 !
       END IF
       DO IFL = 1,10
@@ -4911,7 +5115,9 @@
                UGENIG(IRG,CURIYR) = HGENIG(4,IRG,CURIYR)
                UGENIS(IRG,CURIYR) = HGENIS(4,IRG,CURIYR)
                UGENIS_ALT(IRG,CURIYR) = 0.0
-               UGENOS(IRG,CURIYR) = HGENST(4,IRG,CURIYR)
+               UGENOS(IRG,CURIYR) = HGENST(4,IRG,CURIYR) !for now, overwrites have all generation in HGENST
+               UGENNG(IRG,CURIYR) = 0.0            ! zero out model calulation of any existing coal/gas cofiring/conversions
+               UGENNGCF(IRG,CURIYR) = 0.0    
                UGENCC(IRG,CURIYR) = HGENCC(4,IRG,CURIYR)
                UGENAC(IRG,CURIYR) = HGENAC(4,IRG,CURIYR)
                UGENCS(IRG,CURIYR) = HGENAS(4,IRG,CURIYR)
@@ -4959,15 +5165,15 @@
 !         CONSUMPTION EQUIVALENT AT RENEWABLE SOURCES
 !
           CGNTQ(IRG,CURIYR,4) = (CGNTGEN(IRG,CURIYR,4,1) + &
-             CGNTGEN(IRG,CURIYR,4,2)) * HFOSHR(CURIYR)/1000000.
+             CGNTGEN(IRG,CURIYR,4,2)) * 3412.0/1000000.
           CGNTQ(IRG,CURIYR,5) = (CGNTGEN(IRG,CURIYR,5,1) + &
-             CGNTGEN(IRG,CURIYR,5,2)) * HFOSHR(CURIYR)/1000000.
+             CGNTGEN(IRG,CURIYR,5,2)) * 3412.0/1000000.
           CGNTQ(IRG,CURIYR,6) = (CGNTGEN(IRG,CURIYR,6,1) + &
              CGNTGEN(IRG,CURIYR,6,2)) * HMSWHR(CURIYR)/1000000.
           CGNTQ(IRG,CURIYR,7) = (CGNTGEN(IRG,CURIYR,7,1) + &
              CGNTGEN(IRG,CURIYR,7,2)) * HWODHR(CURIYR)/1000000.
           CGNTQ(IRG,CURIYR,8) = (CGNTGEN(IRG,CURIYR,8,1) + &
-             CGNTGEN(IRG,CURIYR,8,2)) * HFOSHR(CURIYR)/1000000.
+             CGNTGEN(IRG,CURIYR,8,2)) * 3412.0/1000000.
 
 !
 !         IPP Generation own-use
@@ -5007,18 +5213,18 @@
 !     SHARE TOTAL GAS GENERATION AMONG TYPES USING EMM SHARES
 !
          TOTCON = UFLGFNR(IOWNER,IRG,CURIYR) + &
-           UFLGINR(IOWNER,IRG,CURIYR) + UFLGCNR(IOWNER,IRG,CURIYR)
+           UFLGINR(IOWNER,IRG,CURIYR) !+ UFLGCNR(IOWNER,IRG,CURIYR)
          IF(TOTCON .GT. 0.0) THEN
            UFLGFNR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR) * &
             UFLGFNR(IOWNER,IRG,CURIYR) / TOTCON
            UFLGINR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR) * &
             UFLGINR(IOWNER,IRG,CURIYR) / TOTCON
-           UFLGCNR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR) * &
-            UFLGCNR(IOWNER,IRG,CURIYR) / TOTCON
+!           UFLGCNR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR) * &
+!            UFLGCNR(IOWNER,IRG,CURIYR) / TOTCON
          ELSE
-           UFLGFNR(IOWNER,IRG,CURIYR) = 0.0
+           UFLGFNR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR)
            UFLGINR(IOWNER,IRG,CURIYR) = 0.0
-           UFLGCNR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR)
+!           UFLGCNR(IOWNER,IRG,CURIYR) = HFLNGNR(IOWNER,IRG,CURIYR)
          END IF
 !
 !        SHARE TOTAL OIL GENERATION AMONG PRODUCTS USING EMM SHARES
@@ -5039,27 +5245,28 @@
          UFLURNR(IOWNER,IRG,CURIYR) = UGNURNR(IOWNER,IRG,CURIYR) * &
              HNUCHR(CURIYR) * FACT2
          UFLGTNR(IOWNER,IRG,CURIYR) = (UGNGENR(IOWNER,IRG,CURIYR) * &
-             HFOSHR(CURIYR) * FACT2)
+             3412.0 * FACT2)
          UFLWDNR(IOWNER,IRG,CURIYR) = (UGNWDNR(IOWNER,IRG,CURIYR) * &
              HWODHR(CURIYR) * FACT2)
          UFLMSNR(IOWNER,IRG,CURIYR) = (UGNMSNR(IOWNER,IRG,CURIYR) * &
              HMSWHR(CURIYR) * FACT2)
          UFLHYNR(IOWNER,IRG,CURIYR) = (UGNHYNR(IOWNER,IRG,CURIYR) * &
-             HFOSHR(CURIYR) * FACT2)
+             3412.0 * FACT2)
          UFLWNNR(IOWNER,IRG,CURIYR) = ((UGNWNNR(IOWNER,IRG,CURIYR) + UGNWLNR(IOWNER,IRG,CURIYR)) * &
-             HFOSHR(CURIYR) * FACT2)
+             3412.0 * FACT2)
          UFLWFNR(IOWNER,IRG,CURIYR) = (UGNWFNR(IOWNER,IRG,CURIYR) * &
-             HFOSHR(CURIYR) * FACT2)
+             3412.0 * FACT2)
          UFLSONR(IOWNER,IRG,CURIYR) = (UGNSONR(IOWNER,IRG,CURIYR) * &
-             HFOSHR(CURIYR) * FACT2)
+             3412.0 * FACT2)
          UFLPVNR(IOWNER,IRG,CURIYR) = ((UGNPVNR(IOWNER,IRG,CURIYR) + UGNPTNR(IOWNER,IRG,CURIYR)) * &
-             HFOSHR(CURIYR) * FACT2)
+             3412.0 * FACT2)
 !
 !       add nonbio back in to ms cons for ftab balancing
 !
+       IF ( (UFLMSNR(1,IRG,CURIYR) + UFLMSNR(2,IRG,CURIYR) ) .GT. 0.0 ) THEN
          UFLMSNR(IOWNER,IRG,CURIYR) = UFLMSNR(IOWNER,IRG,CURIYR) +   &
              (WNCMSELN(CURIYR,IRG) * 1000. * (UFLMSNR(IOWNER,IRG,CURIYR)/(UFLMSNR(1,IRG,CURIYR) + UFLMSNR(2,IRG,CURIYR))))
-
+       ENDIF
 
        END DO
 
@@ -5602,7 +5809,6 @@
       WRITE(18,1813) CURIRUN,CURIYR+UHBSYR,CURITR,IRG, &
       UPFUEL(UIGF,IRG), &
       UPFUEL(UIGI,IRG), &
-      UPFUEL(UIGC,IRG), &
       UQFUEL(UIGF,IRG,1) * FACT2, &
       UQFUEL(UIGI,IRG,1) * FACT2, &
       UQFUEL(UIGC,IRG,1) * FACT2, &
@@ -5614,7 +5820,7 @@
       DO NERC = 1 , UNRGNS
          CALL GETBLD(1,NERC)
          DO IRG = 1 , NNGEM
-            IF (EPFLRG(UIGF,IRG) + EPFLRG(UIGI,IRG) + EPFLRG(UIGC,IRG) .GT. 0.0) THEN
+            IF (EPFLRG(UIGF,IRG) + EPFLRG(UIGI,IRG) .GT. 0.0) THEN
                WRITE(22,5813) CURIYR+UHBSYR,CURITR,NERC,IRG, EPFLRG(UIGF,IRG) * FACT2, EPFLRG(UIGI,IRG) * FACT2, EPFLRG(UIGC,IRG) * FACT2
  5813          FORMAT(1X,'EMM_GR_NGQ',4(":",I5),3(":",F8.2))
             END IF
@@ -5733,7 +5939,7 @@
       AB_OFFSET_USED(CURIYR) = AB32OUSE
       AB_CSTCONT_USE(CURIYR) = AB32RUSE
       IF ((CURIYR + UHBSYR) .EQ. UESTYR .AND. CURITR .EQ. 1)THEN
-         AB_ALLBANK_AVL = 0.0
+         AB_ALLBANK_AVL = 370.0 * 12.0 / 44.0    !temporary fix to set to current model value when we move UESTYR to 2020
          AB_RSVYR = 9999
       END IF
       IF (AB_RSVYR .EQ. 9999 .AND. (AB_CSTCONT_AVL(CURIYR) .GT. 0.0 .OR. AB_CSTCONT_FRAC(CURIYR) .GT. 0.0))AB_RSVYR = CURIYR + UHBSYR
@@ -5806,312 +6012,6 @@
                            ucarprc(cargrp_ca,curiyr)*(12.0/44.0)*scalpr
  3456 format(1h ,'!ab32efd',t10,i4,t15,i4,t21,10f10.1)
          END IF
-         IF (CURIYR .EQ. LASTYR)THEN
-!           State Level Carbon -- Coal
-            write(13,4000) ((USYEAR(IYR),USYEAR(IYR)), IYR = 22 , 31)
- 4000 format(1h ,'!stcarcl',T15,'  ',3X,20I6)
-            write(13,4050)
- 4050 format(1h ,'!stcarcl',T15,'ST',3X,10('   EFD','   ECP'))
-            DO IRG = 1 , UNSTAS
-               write(13,4100) USTNME(IRG),((ECARCLS(IRG,IYR),PCARCLS(IRG,IYR)),IYR = 22 , 31)
- 4100 format(1h ,'!stcarcl',T15,A2,3X,20F6.1)
-            END DO
-               write(13,4150) ((ECARCLS(EMM_D_ST + 1,IYR),PCARCLS(EMM_D_ST + 1,IYR)),IYR = 22 , 31)
- 4150 format(1h ,'!stcarcl',T15,'US',3X,20F6.1)
-               write(13,4200)
- 4200 format(1h ,'!stcarcl')
-            write(13,4000) ((USYEAR(IYR),USYEAR(IYR)), IYR = 32 , 41)
-            write(13,4050)
-            DO IRG = 1 , UNSTAS
-               write(13,4100) USTNME(IRG),((ECARCLS(IRG,IYR),PCARCLS(IRG,IYR)),IYR = 32 , 41)
-            END DO
-               write(13,4150) ((ECARCLS(EMM_D_ST + 1,IYR),PCARCLS(EMM_D_ST + 1,IYR)),IYR = 32 , 41)
-               write(13,4200)
-            write(13,4000) ((USYEAR(IYR),USYEAR(IYR)), IYR = 42 , 51)
-            write(13,4050)
-            DO IRG = 1 , UNSTAS
-               write(13,4100) USTNME(IRG),((ECARCLS(IRG,IYR),PCARCLS(IRG,IYR)),IYR = 42 , 51)
-            END DO
-               write(13,4150) ((ECARCLS(EMM_D_ST + 1,IYR),PCARCLS(EMM_D_ST + 1,IYR)),IYR = 42 , 51)
-               write(13,4200)
-               write(13,4200)
-!           State Level Carbon -- Gas/Oil
-            write(13,5000) ((USYEAR(IYR),USYEAR(IYR)), IYR = 22 , 31)
- 5000 format(1h ,'!stcarog',T15,'  ',3X,20I6)
-            write(13,5050)
- 5050 format(1h ,'!stcarog',T15,'ST',3X,10('   EFD','   ECP'))
-            DO IRG = 1 , UNSTAS
-               write(13,5100) USTNME(IRG),((ECAROGS(IRG,IYR),PCAROGS(IRG,IYR)),IYR = 22 , 31)
- 5100 format(1h ,'!stcarog',T15,A2,3X,20F6.1)
-            END DO
-               write(13,5150) ((ECAROGS(EMM_D_ST + 1,IYR),PCAROGS(EMM_D_ST + 1,IYR)),IYR = 22 , 31)
- 5150 format(1h ,'!stcarog',T15,'US',3X,20F6.1)
-               write(13,5200)
- 5200 format(1h ,'!stcarog')
-            write(13,5000) ((USYEAR(IYR),USYEAR(IYR)), IYR = 32 , 41)
-            write(13,5050)
-            DO IRG = 1 , UNSTAS
-               write(13,5100) USTNME(IRG),((ECAROGS(IRG,IYR),PCAROGS(IRG,IYR)),IYR = 32 , 41)
-            END DO
-               write(13,5150) ((ECAROGS(EMM_D_ST + 1,IYR),PCAROGS(EMM_D_ST + 1,IYR)),IYR = 32 , 41)
-               write(13,5200)
-            write(13,5000) ((USYEAR(IYR),USYEAR(IYR)), IYR = 42 , 51)
-            write(13,5050)
-            DO IRG = 1 , UNSTAS
-               write(13,5100) USTNME(IRG),((ECAROGS(IRG,IYR),PCAROGS(IRG,IYR)),IYR = 42 , 51)
-            END DO
-               write(13,5150) ((ECAROGS(EMM_D_ST + 1,IYR),PCAROGS(EMM_D_ST + 1,IYR)),IYR = 42 , 51)
-               write(13,5200)
-               write(13,5200)
-
-!           State Level Carbon -- Total
-
-            write(13,5500) ((USYEAR(IYR),USYEAR(IYR)), IYR = 22 , 31)
- 5500 format(1h ,'!stcartl',T15,'  ',3X,20I6)
-            write(13,5550)
- 5550 format(1h ,'!stcartl',T15,'ST',3X,10('   EFD','   ECP'))
-            DO IRG = 1 , UNSTAS
-               write(13,5600) USTNME(IRG),(((ECARCLS(IRG,IYR) + ECAROGS(IRG,IYR)),(PCARCLS(IRG,IYR) + PCAROGS(IRG,IYR))),IYR = 22 , 31)
- 5600 format(1h ,'!stcartl',T15,A2,3X,20F6.1)
-            END DO
-               write(13,5650) (((ECARCLS(EMM_D_ST + 1,IYR) + ECAROGS(EMM_D_ST + 1,IYR)),(PCARCLS(EMM_D_ST + 1,IYR) + PCAROGS(EMM_D_ST + 1,IYR))),IYR = 22 , 31)
- 5650 format(1h ,'!stcartl',T15,'US',3X,20F6.1)
-               write(13,5700)
- 5700 format(1h ,'!stcartl')
-            write(13,5500) ((USYEAR(IYR),USYEAR(IYR)), IYR = 32 , 41)
-            write(13,5550)
-            DO IRG = 1 , UNSTAS
-               write(13,5600) USTNME(IRG),(((ECARCLS(IRG,IYR) + ECAROGS(IRG,IYR)),(PCARCLS(IRG,IYR) + PCAROGS(IRG,IYR))),IYR = 32 , 41)
-            END DO
-               write(13,5650) (((ECARCLS(EMM_D_ST + 1,IYR) + ECAROGS(EMM_D_ST + 1,IYR)),(PCARCLS(EMM_D_ST + 1,IYR) + PCAROGS(EMM_D_ST + 1,IYR))),IYR = 32 , 41)
-               write(13,5700)
-            write(13,5500) ((USYEAR(IYR),USYEAR(IYR)), IYR = 42 , 51)
-            write(13,5550)
-            DO IRG = 1 , UNSTAS
-               write(13,5600) USTNME(IRG),(((ECARCLS(IRG,IYR) + ECAROGS(IRG,IYR)),(PCARCLS(IRG,IYR) + PCAROGS(IRG,IYR))),IYR = 42 , 51)
-            END DO
-               write(13,5650) (((ECARCLS(EMM_D_ST + 1,IYR) + ECAROGS(EMM_D_ST + 1,IYR)),(PCARCLS(EMM_D_ST + 1,IYR) + PCAROGS(EMM_D_ST + 1,IYR))),IYR = 42 , 51)
-               write(13,5700)
-               write(13,5700)
-!
-!           FlRgn Level Carbon and Fuel Consumption
-!
-            write(13,6000) (USYEAR(IYR), IYR = 22 , 36)
- 6000 format(1h ,'!flcarcl',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,6100) FLRGCODE(IRG),(ECARCLF(IRG,IYR),IYR = 22 , 36)
- 6100 format(1h ,'!flcarcl',T15,A2,3X,15F8.1)
-            END DO
-               write(13,6150) (ECARCLF(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 6150 format(1h ,'!flcarcl',T15,'US',3X,15F8.1)
-               write(13,6200)
- 6200 format(1h ,'!flcarcl')
-               write(13,6300) (USYEAR(IYR), IYR = 37 , 51)
- 6300 format(1h ,'!flcarcl',T15,'ST',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,6400) FLRGCODE(IRG),(ECARCLF(IRG,IYR),IYR = 37 , 51)
- 6400 format(1h ,'!flcarcl',T15,A2,3X,15F8.1)
-            END DO
-               write(13,6500) (ECARCLF(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 6500 format(1h ,'!flcarcl',T15,'US',3X,15F8.1)
-               write(13,6200)
-               write(13,6200)
-!
-               write(13,7000) (USYEAR(IYR), IYR = 22 , 36)
- 7000 format(1h ,'!flcarog',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,7100) FLRGCODE(IRG),(ECAROGF(IRG,IYR),IYR = 22 , 36)
- 7100 format(1h ,'!flcarog',T15,A2,3X,15F8.1)
-            END DO
-               write(13,7150) (ECAROGF(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 7150 format(1h ,'!flcarog',T15,'US',3X,15F8.1)
-               write(13,7200)
- 7200 format(1h ,'!flcarog')
-               write(13,7300) (USYEAR(IYR), IYR = 37 , 51)
- 7300 format(1h ,'!flcarog',T15,'ST',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,7400) FLRGCODE(IRG),(ECAROGF(IRG,IYR),IYR = 37 , 51)
- 7400 format(1h ,'!flcarog',T15,A2,3X,15F8.1)
-            END DO
-               write(13,7500) (ECAROGF(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 7500 format(1h ,'!flcarog',T15,'US',3X,15F8.1)
-               write(13,7200)
-               write(13,7200)
-         END IF
-         DO IFL = 1 , ECP_D_CAP + 2
-            IF (IFL .EQ. WICN .OR. IFL .EQ. WIAN  .OR. IFL .EQ. WISM .OR. IFL .EQ. WIWD .OR.  &
-                IFL .EQ. WIHY .OR. IFL .EQ. WIWN .OR. IFL .EQ. WISO .OR.  &
-                IFL .EQ. WIPV .OR. IFL .EQ. WIGT .OR. IFL .GE. (ECP_D_CAP + 1))THEN
-               write(13,8000) CURIYR + UHBSYR,PLTTYP(IFL),(URGNME(IYR)(1:4),IYR = 1 , UNRGNS)
- 8000 format(1h ,'!nrfrg',I4,A3,T17,2X,<unrgns>A6,'     US')
-               DO IRG = 1 , UNFRGN
-                  write(13,8100) CURIYR + UHBSYR,PLTTYP(IFL),FLRGCODE(IRG),(EGEN_NRFR(IFL,IYR,IRG),IYR = 1 , UNRGNS),EGEN_NRFR(IFL,MNUMNR,IRG)
- 8100 format(1h ,'!nrfrg',I4,A3,T17,A2,<unrgns>F6.1,F7.1)
-               END DO
-               write(13,8200) CURIYR + UHBSYR,PLTTYP(IFL),(EGEN_NRFR(IFL,IYR,IRG),IYR = 1 , UNRGNS),EGEN_NRFR(IFL,MNUMNR,IRG)
- 8200 format(1h ,'!nrfrg',I4,A3,T17,'US',<unrgns>F6.1,F7.1)
-               write(13,8500) CURIYR + UHBSYR,PLTTYP(IFL),(URGNME(IYR)(1:4),IYR = 1 , UNRGNS)
- 8500 format(1h ,'!nrstg',I4,A3,T17,2X,<unrgns>A6,'     US')
-               DO IRG = 1 , EMM_D_ST
-                  write(13,8600) CURIYR + UHBSYR,PLTTYP(IFL),USTNME(IRG),(EGEN_NRST(IFL,IYR,IRG),IYR = 1 , UNRGNS),EGEN_NRST(IFL,MNUMNR,IRG)
- 8600 format(1h ,'!nrstg',I4,A3,T17,A2,<unrgns>F6.1,F7.1)
-               END DO
-               write(13,8700) CURIYR + UHBSYR,PLTTYP(IFL),(EGEN_NRST(IFL,IYR,IRG),IYR = 1 , UNRGNS),EGEN_NRST(IFL,MNUMNR,IRG)
- 8700 format(1h ,'!nrstg',I4,A3,T17,'US',<unrgns>F6.1,F7.1)
-               write(13,9000) CURIYR + UHBSYR,PLTTYP(IFL),(FLRGCODE(IYR),IYR = 1 , UNFRGN)
- 9000 format(1h ,'!frstg',I4,A3,T17,2X,23A6,'     US')
-               DO IRG = 1 , EMM_D_ST
-                  write(13,9100) CURIYR + UHBSYR,PLTTYP(IFL),USTNME(IRG),(EGEN_FRST(IFL,IYR,IRG),IYR = 1 , UNFRGN + 1)
- 9100 format(1h ,'!frstg',I4,A3,T17,A2,23F6.1,F7.1)
-               END DO
-               write(13,9200) CURIYR + UHBSYR,PLTTYP(IFL),(EGEN_FRST(IFL,IYR,IRG),IYR = 1 , UNFRGN + 1)
- 9200 format(1h ,'!frstg',I4,A3,T17,'US',23F6.1,F7.1)
-            END IF
-         END DO
-         IF (CURIYR .EQ. LASTYR)THEN
-!
-!           111d CO2 Target Performance Standards
-!
-            write(13,9400) (USYEAR(IYR), IYR = 22 , 36)
- 9400 format(1h ,'!111dstd',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9410) FLRGCODE(IRG),(CO2_STDRF(IRG,IYR),IYR = 22 , 36)
- 9410 format(1h ,'!111dstd',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9420)
- 9420 format(1h ,'!111dstd')
-               write(13,9430) (USYEAR(IYR), IYR = 37 , 51)
- 9430 format(1h ,'!111dstd',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9440) FLRGCODE(IRG),(CO2_STDRF(IRG,IYR),IYR = 37 , 51)
- 9440 format(1h ,'!111dstd',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9420)
-               write(13,9420)
-!
-!           111d CO2 Performance Intensity Results
-!
-            write(13,9500)
- 9500 format(1h ,'!111drte',T25,'CO2 Performance Intensity Results (lbs CO2/Mwh)')
-               write(13,9520)
-            write(13,9505) (USYEAR(IYR), IYR = 22 , 36)
- 9505 format(1h ,'!111drte',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9510) FLRGCODE(IRG),(ECO2FRQF(IRG,IYR) * 1000.0 / EGENFRQF(IRG,IYR),IYR = 22 , 36)
- 9510 format(1h ,'!111drte',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9520)
- 9520 format(1h ,'!111drte')
-               write(13,9530) (USYEAR(IYR), IYR = 37 , 51)
- 9530 format(1h ,'!111drte',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9540) FLRGCODE(IRG),(ECO2FRQF(IRG,IYR) * 1000.0 / EGENFRQF(IRG,IYR),IYR = 37 , 51)
- 9540 format(1h ,'!111drte',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9520)
-               write(13,9520)
-!
-!           111d CO2 Intensity Standard Allowance Prices
-!
-            write(13,9600)
- 9600 format(1h ,'!111dprc',T25,'CO2 Performance Intensity Standards Allowance Prices (1000$ Per (lb/CO2/Mwh))')
-               write(13,9620)
-            write(13,9605) (USYEAR(IYR), IYR = 22 , 36)
- 9605 format(1h ,'!111dprc',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9610) FLRGCODE(IRG),(ECO2FRPR(IRG,IYR) * 1000.0 * SCALPR,IYR = 22 , 36)
- 9610 format(1h ,'!111dprc',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9620)
- 9620 format(1h ,'!111dprc')
-               write(13,9630) (USYEAR(IYR), IYR = 37 , 51)
- 9630 format(1h ,'!111dprc',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9640) FLRGCODE(IRG),(ECO2FRPR(IRG,IYR) * 1000.0 * SCALPR,IYR = 37 , 51)
- 9640 format(1h ,'!111dprc',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9620)
-               write(13,9620)
-!
-!           111d CO2 Emissions from Affected Plants
-!
-            write(13,9700)
- 9700 format(1h ,'!111deqf',T25,'CO2 Emissions from Affected Plants (MM Metric Tons CO2)')
-            write(13,9705) (USYEAR(IYR), IYR = 22 , 36)
- 9705 format(1h ,'!111deqf',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9710) FLRGCODE(IRG),(ECO2FRQF(IRG,IYR) / 2.204,IYR = 22 , 36)
- 9710 format(1h ,'!111deqf',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9715) (ECO2FRQF(EFD_D_MFRG + 1,IYR) / 2.204,IYR = 22 , 36)
- 9715 format(1h ,'!111deqf',T15,'US',3X,15F8.0)
-               write(13,9720)
- 9720 format(1h ,'!111deqf')
-               write(13,9730) (USYEAR(IYR), IYR = 37 , 51)
- 9730 format(1h ,'!111deqf',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9740) FLRGCODE(IRG),(ECO2FRQF(IRG,IYR) / 2.204,IYR = 37 , 51)
- 9740 format(1h ,'!111deqf',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9745) (ECO2FRQF(EFD_D_MFRG + 1,IYR) / 2.204,IYR = 37 , 51)
- 9745 format(1h ,'!111deqf',T15,'US',3X,15F8.0)
-               write(13,9720)
-               write(13,9720)
-!
-!           111d CO2 Emissions from All Plants
-!
-            write(13,9800)
- 9800 format(1h ,'!111deqf',T25,'CO2 Emissions from All Plants (MM Metric Tons CO2)')
-            write(13,9805) (USYEAR(IYR), IYR = 22 , 36)
- 9805 format(1h ,'!111detl',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9810) FLRGCODE(IRG),(ECO2FRTL(IRG,IYR) / 2.204,IYR = 22 , 36)
- 9810 format(1h ,'!111detl',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9815) (ECO2FRTL(EFD_D_MFRG + 1,IYR) / 2.204,IYR = 22 , 36)
- 9815 format(1h ,'!111detl',T15,'US',3X,15F8.0)
-               write(13,9820)
- 9820 format(1h ,'!111detl')
-               write(13,9830) (USYEAR(IYR), IYR = 37 , 51)
- 9830 format(1h ,'!111detl',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9840) FLRGCODE(IRG),(ECO2FRTL(IRG,IYR) / 2.204,IYR = 37 , 51)
- 9840 format(1h ,'!111detl',T15,A2,3X,15F8.0)
-            END DO
-               write(13,9845) (ECO2FRTL(EFD_D_MFRG + 1,IYR) / 2.204,IYR = 37 , 51)
- 9845 format(1h ,'!111detl',T15,'US',3X,15F8.0)
-               write(13,9820)
-               write(13,9820)
-!
-!           FlRgn Level Heat Rate Improvements
-!
-            HRTF = 0.0
-            DO IRG = 1 , UNFRGN
-               DO IYR = (UPSTYR - UHBSYR) , MNUMYR
-                  HRTF(IRG,IYR) = HRTF(IRG,IYR - 1) + ECAPFRHR(IRG,IYR)
-                  IF (IRG .EQ. UNFRGN)HRTF(EFD_D_MFRG + 1,IYR) = HRTF(EFD_D_MFRG + 1,IYR - 1) + ECAPFRHR(EFD_D_MFRG + 1,IYR)
-               END DO
-            END DO
-            write(13,9900) (USYEAR(IYR), IYR = 22 , 36)
- 9900 format(1h ,'!flhri',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9910) FLRGCODE(IRG),(HRTF(IRG,IYR),IYR = 22 , 36)
- 9910 format(1h ,'!flhri',T15,A2,3X,15F8.1)
-            END DO
-               write(13,9920) (HRTF(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 9920 format(1h ,'!flhri',T15,'US',3X,15F8.1)
-               write(13,9925)
- 9925 format(1h ,'!flhri')
-               write(13,9930) (USYEAR(IYR), IYR = 37 , 51)
- 9930 format(1h ,'!flhri',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,9940) FLRGCODE(IRG),(HRTF(IRG,IYR),IYR = 37 , 51)
- 9940 format(1h ,'!flhri',T15,A2,3X,15F8.1)
-            END DO
-               write(13,9945) (HRTF(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 9945 format(1h ,'!flhri',T15,'US',3X,15F8.1)
-               write(13,9925)
-               write(13,9925)
 !
 !           EMM Level Heat Rate Improvements
 !
@@ -6142,229 +6042,6 @@
  9995 format(1h ,'!nrhri',T15,'US  ',1X,15F8.1)
                write(13,9975)
                write(13,9975)
-!
-!           FlRgn Level Efficiency Savings
-!
-!           Residential
-            write(13,4205) (USYEAR(IYR), IYR = 22 , 36)
- 4205 format(1h ,'!fleer',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4210) FLRGCODE(IRG),(EERF(IRG,IYR),IYR = 22 , 36)
- 4210 format(1h ,'!fleer',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4220) (EERF(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 4220 format(1h ,'!fleer',T15,'US',3X,15F8.1)
-               write(13,4225)
- 4225 format(1h ,'!fleer')
-               write(13,4230) (USYEAR(IYR), IYR = 37 , 51)
- 4230 format(1h ,'!fleer',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4240) FLRGCODE(IRG),(EERF(IRG,IYR),IYR = 37 , 51)
- 4240 format(1h ,'!fleer',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4245) (EERF(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 4245 format(1h ,'!fleer',T15,'US',3X,15F8.1)
-               write(13,4225)
-               write(13,4225)
-!           Commercial
-            write(13,4305) (USYEAR(IYR), IYR = 22 , 36)
- 4305 format(1h ,'!fleec',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4310) FLRGCODE(IRG),(EECF(IRG,IYR),IYR = 22 , 36)
- 4310 format(1h ,'!fleec',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4320) (EECF(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 4320 format(1h ,'!fleec',T15,'US',3X,15F8.1)
-               write(13,4325)
- 4325 format(1h ,'!fleec')
-               write(13,4330) (USYEAR(IYR), IYR = 37 , 51)
- 4330 format(1h ,'!fleec',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4340) FLRGCODE(IRG),(EECF(IRG,IYR),IYR = 37 , 51)
- 4340 format(1h ,'!fleec',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4345) (EECF(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 4345 format(1h ,'!fleec',T15,'US',3X,15F8.1)
-               write(13,4325)
-               write(13,4325)
-!           Industrial
-            write(13,4405) (USYEAR(IYR), IYR = 22 , 36)
- 4405 format(1h ,'!fleei',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4410) FLRGCODE(IRG),(EEIF(IRG,IYR),IYR = 22 , 36)
- 4410 format(1h ,'!fleei',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4420) (EEIF(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 4420 format(1h ,'!fleei',T15,'US',3X,15F8.1)
-               write(13,4425)
- 4425 format(1h ,'!fleei')
-               write(13,4430) (USYEAR(IYR), IYR = 37 , 51)
- 4430 format(1h ,'!fleei',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4440) FLRGCODE(IRG),(EEIF(IRG,IYR),IYR = 37 , 51)
- 4440 format(1h ,'!fleei',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4445) (EEIF(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 4445 format(1h ,'!fleei',T15,'US',3X,15F8.1)
-               write(13,4425)
-               write(13,4425)
-!           Total
-            write(13,4805) (USYEAR(IYR), IYR = 22 , 36)
- 4805 format(1h ,'!fleet',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4810) FLRGCODE(IRG),(EGENFREE(IRG,IYR),IYR = 22 , 36)
- 4810 format(1h ,'!fleet',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4820) (EGENFREE(EFD_D_MFRG + 1,IYR),IYR = 22 , 36)
- 4820 format(1h ,'!fleet',T15,'US',3X,15F8.1)
-               write(13,4825)
- 4825 format(1h ,'!fleet')
-               write(13,4830) (USYEAR(IYR), IYR = 37 , 51)
- 4830 format(1h ,'!fleet',T15,'FR',3X,15I8)
-            DO IRG = 1 , UNFRGN
-               write(13,4840) FLRGCODE(IRG),(EGENFREE(IRG,IYR),IYR = 37 , 51)
- 4840 format(1h ,'!fleet',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4845) (EGENFREE(EFD_D_MFRG + 1,IYR),IYR = 37 , 51)
- 4845 format(1h ,'!fleet',T15,'US',3X,15F8.1)
-               write(13,4825)
-               write(13,4825)
-!
-!           EMM Rgn Level Efficiency Savings
-!
-!           Residential
-            write(13,4505) (USYEAR(IYR), IYR = 22 , 36)
- 4505 format(1h ,'!nreer',T15,'NR  ',1X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4510) URGNME(IRG)(1:4),(EERN(IRG,IYR),IYR = 22 , 36)
- 4510 format(1h ,'!nreer',T15,A4,1X,15F8.1)
-            END DO
-               write(13,4520) (EERN(MNUMNR,IYR),IYR = 22 , 36)
- 4520 format(1h ,'!nreer',T15,'US  ',1X,15F8.1)
-               write(13,4525)
- 4525 format(1h ,'!nreer')
-               write(13,4530) (USYEAR(IYR), IYR = 37 , 51)
- 4530 format(1h ,'!nreer',T15,'NR  ',1X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4540) URGNME(IRG)(1:4),(EERN(IRG,IYR),IYR = 37 , 51)
- 4540 format(1h ,'!nreer',T15,A4,1X,15F8.1)
-            END DO
-               write(13,4545) (EERN(MNUMNR,IYR),IYR = 37 , 51)
- 4545 format(1h ,'!nreer',T15,'US  ',1X,15F8.1)
-               write(13,4525)
-               write(13,4525)
-!           Commercial
-            write(13,4605) (USYEAR(IYR), IYR = 22 , 36)
- 4605 format(1h ,'!nreec',T15,'NR  ',1X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4610) URGNME(IRG)(1:4),(EECN(IRG,IYR),IYR = 22 , 36)
- 4610 format(1h ,'!nreec',T15,A4,1X,15F8.1)
-            END DO
-               write(13,4620) (EECN(MNUMNR,IYR),IYR = 22 , 36)
- 4620 format(1h ,'!nreec',T15,'US  ',1X,15F8.1)
-               write(13,4625)
- 4625 format(1h ,'!nreec')
-               write(13,4630) (USYEAR(IYR), IYR = 37 , 51)
- 4630 format(1h ,'!nreec',T15,'NR  ',1X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4640) URGNME(IRG)(1:4),(EECN(IRG,IYR),IYR = 37 , 51)
- 4640 format(1h ,'!nreec',T15,A4,1X,15F8.1)
-            END DO
-               write(13,4645) (EECN(MNUMNR,IYR),IYR = 37 , 51)
- 4645 format(1h ,'!nreec',T15,'US  ',1X,15F8.1)
-               write(13,4625)
-               write(13,4625)
-!           Industrial
-            write(13,4705) (USYEAR(IYR), IYR = 22 , 36)
- 4705 format(1h ,'!nreei',T15,'NR',3X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4710) URGNME(IRG)(1:4),(EEIN(IRG,IYR),IYR = 22 , 36)
- 4710 format(1h ,'!nreei',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4720) (EEIN(MNUMNR,IYR),IYR = 22 , 36)
- 4720 format(1h ,'!nreei',T15,'US',3X,15F8.1)
-               write(13,4725)
- 4725 format(1h ,'!nreei')
-               write(13,4730) (USYEAR(IYR), IYR = 37 , 51)
- 4730 format(1h ,'!nreei',T15,'NR',3X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4740) URGNME(IRG)(1:4),(EEIN(IRG,IYR),IYR = 37 , 51)
- 4740 format(1h ,'!nreei',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4745) (EEIN(MNUMNR,IYR),IYR = 37 , 51)
- 4745 format(1h ,'!nreei',T15,'US',3X,15F8.1)
-               write(13,4725)
-               write(13,4725)
-!           Total
-            write(13,4905) (USYEAR(IYR), IYR = 22 , 36)
- 4905 format(1h ,'!nreet',T15,'NR',3X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4910) URGNME(IRG)(1:4),(EGENNREE(IRG,IYR),IYR = 22 , 36)
- 4910 format(1h ,'!nreet',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4920) (EGENNREE(MNUMNR,IYR),IYR = 22 , 36)
- 4920 format(1h ,'!nreet',T15,'US',3X,15F8.1)
-               write(13,4925)
- 4925 format(1h ,'!nreet')
-               write(13,4930) (USYEAR(IYR), IYR = 37 , 51)
- 4930 format(1h ,'!nreet',T15,'NR',3X,15I8)
-            DO IRG = 1 , UNRGNS
-               write(13,4940) URGNME(IRG)(1:4),(EGENNREE(IRG,IYR),IYR = 37 , 51)
- 4940 format(1h ,'!nreet',T15,A2,3X,15F8.1)
-            END DO
-               write(13,4945) (EGENNREE(MNUMNR,IYR),IYR = 37 , 51)
- 4945 format(1h ,'!nreet',T15,'US',3X,15F8.1)
-               write(13,4925)
-               write(13,4925)
-!
-            DO IYR = 31 , LASTYR
-              IF (CO2_STDRS(1,IYR) .GT. 0.0) THEN
-               IF (CO2_STDSW .EQ. 2) THEN          !fuel regions
-                 DO IRG = 1 , UNFRGN
-                  write(13,3434) iyr+1989,irg,flrgcode(irg),eco2frpr(irg,iyr) * 2204.0 * scalpr, &
-                                 ecpco2fy(irg,iyr) * 2.204 * scalpr,ecpco2fl(irg,iyr) * 2.204 * scalpr
-                  IF (IRG .eq. UNFRGN) &
-                    write(13,3434) iyr+1989,EFD_D_MFRG+1,'US',eco2frpr(EFD_D_MFRG+1,iyr) * 2204.0 * scalpr, &
-                                 ecpco2fy(EFD_D_MFRG+1,iyr) * 2.204 * scalpr,ecpco2fl(EFD_D_MFRG+1,iyr) * 2.204 * scalpr
-
- 3434 format(1h ,'!efdpfr',i4,i3,a4,3f10.1)
-                 END DO
-               ELSEIF (CO2_STDSW .EQ. 3) THEN     !EMM regions
-                 DO IRG = 1, UNRGNS
-                  write(13,3434) iyr+1989,irg,urgnme(irg)(6:7),eco2nrpr(irg,iyr) * 2204.0 * scalpr, &
-                                 ecpco2ny(irg,iyr) * 2.204 * scalpr,ecpco2nl(irg,iyr) * 2.204 * scalpr
-                  IF (IRG .eq. UNRGNS) &
-                    write(13,3434) iyr+1989,MNUMNR,'US',eco2nrpr(mnumnr,iyr) * 2204.0 * scalpr, &
-                                 ecpco2ny(mnumnr,iyr) * 2.204 * scalpr,ecpco2nl(mnumnr,iyr) * 2.204 * scalpr
-                 ENDDO
-               ENDIF
-              ENDIF
-            END DO
-         END IF
-         IF (CO2_STDSW .EQ. 3 .AND. CO2_ERCSW .GT. 0)THEN
-!        EMISSION REDUCTION CREDIT (ERC) TRADING -- RATE BASE
-            DO IRG = 1 , UNRGNS
-               if (irg .eq. 1)then
-                  write(13,4950) curiyr+uhbsyr,(urgnme(reg)(1:4),reg = 1 , unrgns)
- 4950  format(1h ,'!ercrt',i4,'   REG',22a6,' TLSAL',' TLAVL',' PRICE')
-               end if
-               write(13,4955) curiyr+1989,urgnme(irg)(1:4),(eercnrqr(irg,reg,curiyr),reg = 1 , unrgns),eercnrqr(irg,mnumnr,curiyr),ercqavln(irg,curiyr),eercnrpr(irg,curiyr) * scalpr
- 4955  format(1h ,'!ercrt',i4,a6,25f6.1)
-            END DO
-            write(13,4960) curiyr+1989,(eercnrqr(mnumnr,reg,curiyr),reg = 1 , unrgns),eercnrqr(mnumnr,mnumnr,curiyr),ercqavln(mnumnr,curiyr),eercnrpr(mnumnr,curiyr) * scalpr
- 4960  format(1h ,'!ercrt',i4,' TLPUR',25f6.1)
-!           EMISSION REDUCTION CREDIT (ERC) TRADING - MASS BASE
-            DO IRG = 1 , UNRGNS
-               if (irg .eq. 1)then
-                  write(13,4970) curiyr+uhbsyr,(urgnme(reg)(1:4),reg = 1 , unrgns)
- 4970  format(1h ,'!ercms',i4,'   REG',22a6,' TLSAL',' PRICE')
-               end if
-               write(13,4980) curiyr+1989,urgnme(irg)(1:4),(eercnrqm(irg,reg,curiyr),reg = 1 , unrgns),eercnrqm(irg,mnumnr,curiyr),eercnrpm(irg,curiyr) * scalpr
- 4980  format(1h ,'!ercms',i4,a6,25f6.1)
-            END DO
-            write(13,4990) curiyr+1989,(eercnrqm(mnumnr,reg,curiyr),reg = 1 , unrgns),eercnrqm(mnumnr,mnumnr,curiyr),eercnrpm(mnumnr,curiyr) * scalpr
- 4990  format(1h ,'!ercms',i4,' TLPUR',25f6.1)
-         END IF
       END IF
 !
       RETURN
@@ -6424,7 +6101,7 @@
                 BO_DGPVGEN = DPVTOTGENNR(IRG,CURIYR) * 0.001
               ENDIF
               BO_GENUS = BO_GENUS + BO_DGPVGEN
-              BO_CONNR = BO_DGPVGEN * WHRFOSS(MNUMCR,CURIYR)* 0.001
+              BO_CONNR = BO_DGPVGEN * 3412.0* 0.001
               BO_CONNRUS = BO_CONNRUS + BO_CONNR
 
               UGNPVNR(1,IRG,CURIYR) = UGNPVNR(1,IRG,CURIYR) - BO_DGPVGEN
@@ -6443,7 +6120,7 @@
           IF (USW_OVER .GT. 0 .AND. CURIYR .GT. (UYR_OVER - UHBSYR)) THEN
 ! back out if past overwrite year
             DO ICENSUS = 1,MNUMCR - 1
-              QPVELCYR = ((DPVCOMMGEN(ICENSUS,CURIYR) + DPVRESGEN(ICENSUS,CURIYR)))  * WHRFOSS(MNUMCR,CURIYR)*0.000001
+              QPVELCYR = ((DPVCOMMGEN(ICENSUS,CURIYR) + DPVRESGEN(ICENSUS,CURIYR)))  * 3412.0*0.000001
 
               IF (QPVELCYR .GT. QPVEL(ICENSUS,CURIYR)) THEN
                  BO_DGPVCON(ICENSUS) = QPVEL(ICENSUS,CURIYR)
@@ -6491,7 +6168,8 @@
       include 'uefdout'
       include 'cdsparms'
       include 'coalemm'
-      include 'dsmtoefd'
+      include 'dsmtoefd' 
+      include 'cogen'
 !
       INTEGER NERC,ICENSUS,ALASKA,IYR,IRG,ISP,IOWNER
       REAL FACTO
@@ -6653,8 +6331,8 @@
 !
                      IF (HGNHYNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIHYC,HGNHYNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNHYNR(IOWNER,IRG,CURIYR) = HGNHYNR(IOWNER,IRG,IYR) * FACTO
-                     UFLHYNR(IOWNER,IRG,CURIYR) = HGNHYNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001
-                     QHOEL(ICENSUS,CURIYR) = QHOEL(ICENSUS,CURIYR) + (HGNHYNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001)
+                     UFLHYNR(IOWNER,IRG,CURIYR) = HGNHYNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001
+                     QHOEL(ICENSUS,CURIYR) = QHOEL(ICENSUS,CURIYR) + (HGNHYNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001)
 !
 !                    Pump Storage Hydro
 !
@@ -6666,8 +6344,8 @@
 !
                      IF (HGNGENR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIGTH,HGNGENR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNGENR(IOWNER,IRG,CURIYR) = HGNGENR(IOWNER,IRG,IYR) * FACTO
-                     UFLGTNR(IOWNER,IRG,CURIYR) = HGNGENR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001
-                     QGEEL(ICENSUS,CURIYR) = QGEEL(ICENSUS,CURIYR) + (HGNGENR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001)
+                     UFLGTNR(IOWNER,IRG,CURIYR) = HGNGENR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001
+                     QGEEL(ICENSUS,CURIYR) = QGEEL(ICENSUS,CURIYR) + (HGNGENR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001)
 !
 !                    Municiple Solid Waste
 !
@@ -6687,29 +6365,29 @@
 !
                      IF (HGNSONR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UISTH,HGNSONR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNSONR(IOWNER,IRG,CURIYR) =  HGNSONR(IOWNER,IRG,IYR) * FACTO
-                     UFLSONR(IOWNER,IRG,CURIYR) = HGNSONR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001
-                     QSTEL(ICENSUS,CURIYR) = QSTEL(ICENSUS,CURIYR) + (HGNSONR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001)
+                     UFLSONR(IOWNER,IRG,CURIYR) = HGNSONR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001
+                     QSTEL(ICENSUS,CURIYR) = QSTEL(ICENSUS,CURIYR) + (HGNSONR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001)
 !
 !                    Solar PV
 !
                      IF (HGNPVNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UISPV,HGNPVNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNPVNR(IOWNER,IRG,CURIYR) =  HGNPVNR(IOWNER,IRG,IYR) * FACTO
-                     UFLPVNR(IOWNER,IRG,CURIYR) = HGNPVNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001
-                     QPVEL(ICENSUS,CURIYR) = QPVEL(ICENSUS,CURIYR) + (HGNPVNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001)
+                     UFLPVNR(IOWNER,IRG,CURIYR) = HGNPVNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001
+                     QPVEL(ICENSUS,CURIYR) = QPVEL(ICENSUS,CURIYR) + (HGNPVNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001)
 !
 !                    Wind
 !
                      IF (HGNWNNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIWND,HGNWNNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNWNNR(IOWNER,IRG,CURIYR) = HGNWNNR(IOWNER,IRG,IYR) * FACTO
-                     UFLWNNR(IOWNER,IRG,CURIYR) = HGNWNNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001
-                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (HGNWNNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001)
+                     UFLWNNR(IOWNER,IRG,CURIYR) = HGNWNNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001
+                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (HGNWNNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001)
 !
 !                    OffShore Wind
 !
                      IF (HGNWFNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIWFS,HGNWFNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNWFNR(IOWNER,IRG,CURIYR) = HGNWFNR(IOWNER,IRG,IYR) * FACTO
-                     UFLWFNR(IOWNER,IRG,CURIYR) = HGNWFNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001
-                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (HGNWFNR(IOWNER,IRG,IYR) * FACTO * HFOSHR(IYR) * .001)
+                     UFLWFNR(IOWNER,IRG,CURIYR) = HGNWFNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001
+                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (HGNWFNR(IOWNER,IRG,IYR) * FACTO * 3412.0 * .001)
                   END DO
             ELSE
                WRITE(6,'(A,I4,A)') '** EMMDSPO ERR CENSUS= ',ICENSUS,' QELAS(ICENSUS,IYR) IS 0.0'
@@ -6741,6 +6419,7 @@
       include 'uefdout'
       include 'cdsparms'
       include 'coalemm'
+      include 'cogen'
 !
       INTEGER NERC,ICENSUS,HAWAII,IYR,IRG,IOWNER,IOWN
       REAL FACTO
@@ -6993,8 +6672,8 @@
 !
                      IF (HGNHYNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIHYC,HGNHYNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNHYNR(IOWNER,IRG,CURIYR) = GENHYY(IOWNER)
-                     UFLHYNR(IOWNER,IRG,CURIYR) = GENHYY(IOWNER) * HFOSHR(IYR) * .001
-                     QHOEL(ICENSUS,CURIYR) = QHOEL(ICENSUS,CURIYR) + (GENHYY(IOWNER) * HFOSHR(IYR) * .001)
+                     UFLHYNR(IOWNER,IRG,CURIYR) = GENHYY(IOWNER) * 3412.0 * .001
+                     QHOEL(ICENSUS,CURIYR) = QHOEL(ICENSUS,CURIYR) + (GENHYY(IOWNER) * 3412.0 * .001)
 !
 !                    Pump Storage Hydro
 !
@@ -7006,8 +6685,8 @@
 !
                      IF (HGNGENR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIGTH,HGNGENR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNGENR(IOWNER,IRG,CURIYR) = GENGEY(IOWNER)
-                     UFLGTNR(IOWNER,IRG,CURIYR) = GENGEY(IOWNER) * HFOSHR(IYR) * .001
-                     QGEEL(ICENSUS,CURIYR) = QGEEL(ICENSUS,CURIYR) + (GENGEY(IOWNER) * HFOSHR(IYR) * .001)
+                     UFLGTNR(IOWNER,IRG,CURIYR) = GENGEY(IOWNER) * 3412.0 * .001
+                     QGEEL(ICENSUS,CURIYR) = QGEEL(ICENSUS,CURIYR) + (GENGEY(IOWNER) * 3412.0 * .001)
 !
 !                    Municiple Solid Waste
 !
@@ -7027,29 +6706,29 @@
 !
                      IF (HGNSONR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UISTH,HGNSONR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNSONR(IOWNER,IRG,CURIYR) =  GENSOY(IOWNER)
-                     UFLSONR(IOWNER,IRG,CURIYR) = GENSOY(IOWNER) * HFOSHR(IYR) * .001
-                     QSTEL(ICENSUS,CURIYR) = QSTEL(ICENSUS,CURIYR) + (GENSOY(IOWNER) * HFOSHR(IYR) * .001)
+                     UFLSONR(IOWNER,IRG,CURIYR) = GENSOY(IOWNER) * 3412.0 * .001
+                     QSTEL(ICENSUS,CURIYR) = QSTEL(ICENSUS,CURIYR) + (GENSOY(IOWNER) * 3412.0 * .001)
 !
 !                    Solar PV
 !
                      IF (HGNPVNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UISPV,HGNPVNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNPVNR(IOWNER,IRG,CURIYR) =  GENPVY(IOWNER)
-                     UFLPVNR(IOWNER,IRG,CURIYR) = GENPVY(IOWNER) * HFOSHR(IYR) * .001
-                     QPVEL(ICENSUS,CURIYR) = QPVEL(ICENSUS,CURIYR) + (GENPVY(IOWNER) * HFOSHR(IYR) * .001)
+                     UFLPVNR(IOWNER,IRG,CURIYR) = GENPVY(IOWNER) * 3412.0 * .001
+                     QPVEL(ICENSUS,CURIYR) = QPVEL(ICENSUS,CURIYR) + (GENPVY(IOWNER) * 3412.0 * .001)
 !
 !                    Wind
 !
                      IF (HGNWNNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIWND,HGNWNNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNWNNR(IOWNER,IRG,CURIYR) = GENWNY(IOWNER)
-                     UFLWNNR(IOWNER,IRG,CURIYR) = GENWNY(IOWNER) * HFOSHR(IYR) * .001
-                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (GENWNY(IOWNER) * HFOSHR(IYR) * .001)
+                     UFLWNNR(IOWNER,IRG,CURIYR) = GENWNY(IOWNER) * 3412.0 * .001
+                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (GENWNY(IOWNER) * 3412.0 * .001)
 !
 !                    OffShore Wind
 !
                      IF (HGNWFNR(IOWNER,IRG,IYR) .GT. 0.0) WRITE(UF_DBS,1353) CURIYR+UHBSYR,CURITR,IRG,IOWNER,UIWFS,HGNWFNR(IOWNER,IRG,IYR)*FACTO,0.0
                      UGNWFNR(IOWNER,IRG,CURIYR) = GENWFY(IOWNER)
-                     UFLWFNR(IOWNER,IRG,CURIYR) = GENWFY(IOWNER) * HFOSHR(IYR) * .001
-                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (GENWFY(IOWNER) * HFOSHR(IYR) * .001)
+                     UFLWFNR(IOWNER,IRG,CURIYR) = GENWFY(IOWNER) * 3412.0 * .001
+                     QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (GENWFY(IOWNER) * 3412.0 * .001)
 
 !                    if (curitr .eq. 1 .and. iowner .eq. 2)then
 !                       write(6,4400) curiyr+1989, HFOSHR(IYR),GENHYY(1),GENHYY(2),(GENHYY(1) + GENHYY(2)) * HFOSHR(IYR) * .001
@@ -7123,7 +6802,7 @@
               IFL .EQ. UIIG .OR. IFL .EQ. UIPQ .OR. IFL .EQ. UIIS) THEN
                 TYP = 1
 ! GAS
-            ELSE IF (IFL .EQ. UIGF .OR. IFL .EQ. UIGI .OR. IFL .EQ. UIGC) THEN
+            ELSE IF (IFL .EQ. UIGF .OR. IFL .EQ. UIGI) THEN
                 TYP = 2
 ! RESID
             ELSE IF (IFL .EQ. UIRL .OR. IFL .EQ. UIRH) THEN
@@ -7290,6 +6969,7 @@
          UCAPSQU(IRG,CURIYR) = 0.0
          UCAPIGU(IRG,CURIYR) = 0.0
          UCAPISU(IRG,CURIYR) = 0.0
+         UCAPNGU(IRG,CURIYR) = 0.0
          UCAPOSU(IRG,CURIYR) = 0.0
          UCAPICU(IRG,CURIYR) = 0.0
          UCAPCTU(IRG,CURIYR) = 0.0
@@ -7318,12 +6998,14 @@
          UCAPWLU(IRG,CURIYR) = 0.0
          UCAPWFU(IRG,CURIYR) = 0.0
          UCAPDSU(IRG,CURIYR) = 0.0
+         UCAPBIU(IRG,CURIYR) = 0.0 !-kc
 !
          UCAPCSN(IRG,CURIYR) = 0.0
          UCAPPQN(IRG,CURIYR) = 0.0
          UCAPSQN(IRG,CURIYR) = 0.0
          UCAPIGN(IRG,CURIYR) = 0.0
          UCAPISN(IRG,CURIYR) = 0.0
+         UCAPNGN(IRG,CURIYR) = 0.0
          UCAPOSN(IRG,CURIYR) = 0.0
          UCAPICN(IRG,CURIYR) = 0.0
          UCAPCTN(IRG,CURIYR) = 0.0
@@ -7352,6 +7034,7 @@
          UCAPWLN(IRG,CURIYR) = 0.0
          UCAPWFN(IRG,CURIYR) = 0.0
          UCAPDSN(IRG,CURIYR) = 0.0
+         UCAPBIN(IRG,CURIYR) = 0.0 !-kc
 !
          UCAPCSC(IRG,CURIYR) = 0.0
          UCAPIGC(IRG,CURIYR) = 0.0
@@ -7426,6 +7109,7 @@
          URETSSU(IRG,CURIYR) = 0.0
          URETTIU(IRG,CURIYR) = 0.0
          URETZSU(IRG,CURIYR) = 0.0
+         URETBIU(IRG,CURIYR) = 0.0 !-kc
 
          NUCADJ(IRG) = 0.0
 !
@@ -7463,6 +7147,7 @@
             UADDDBU(IVIN,IRG,CURIYR) = 0.0
             UADDDPU(IVIN,IRG,CURIYR) = 0.0
             UADDTLU(IVIN,IRG,CURIYR) = 0.0
+            UADDBIU(IVIN,IRG,CURIYR) = 0.0 !-kc
 !
             UADDCSN(IVIN,IRG,CURIYR) = 0.0
             UADDPQN(IVIN,IRG,CURIYR) = 0.0
@@ -7495,6 +7180,7 @@
             UADDDBN(IVIN,IRG,CURIYR) = 0.0
             UADDDPN(IVIN,IRG,CURIYR) = 0.0
             UADDTLN(IVIN,IRG,CURIYR) = 0.0
+            UADDBIN(IVIN,IRG,CURIYR) = 0.0 !-kc
 
             UADDP2(IVIN,IRG,CURIYR) = 0.0
          END DO
@@ -7774,9 +7460,10 @@
 !                       -- CALCULATE OIL/GAS STEAM CAPACITY (PLANTS 6-8)
 !                       NON-TRAD COGEN ASSIGNED TO OIL
 !
-                     ELSEIF (EPPLCD(IPT) .EQ. 'STO' .OR. &           ! else EPPLCD main group
+                            ELSEIF (EPPLCD(IPT) .EQ. 'STO' .OR. &           ! else EPPLCD main group
                              EPPLCD(IPT) .EQ. 'STG' .OR. &
-                             EPPLCD(IPT) .EQ. 'STX') THEN
+                             EPPLCD(IPT) .EQ. 'STX' .OR. &
+                             EPPLCD(IPT) .EQ. 'CTN') THEN
 
 !                       IF (IVIN .EQ. 1 .AND. IOWN .LE. 3 .AND.  &
 
@@ -7786,8 +7473,13 @@
                         END IF
 
                         IF(IOWN .LE. 2) THEN
-                           UCAPOSU(IRG,CURIYR) = UCAPOSU(IRG,CURIYR) + CAP
-                           UCAPOSU(MNUMNR,CURIYR) = UCAPOSU(MNUMNR,CURIYR) + CAP
+                           IF (EPPLCD(IPT) .EQ. 'CTN') THEN
+                             UCAPNGU(IRG,CURIYR) = UCAPNGU(IRG,CURIYR) + CAP
+                             UCAPNGU(MNUMNR,CURIYR) = UCAPNGU(MNUMNR,CURIYR) + CAP
+                           ELSE
+                             UCAPOSU(IRG,CURIYR) = UCAPOSU(IRG,CURIYR) + CAP
+                             UCAPOSU(MNUMNR,CURIYR) = UCAPOSU(MNUMNR,CURIYR) + CAP
+                           ENDIF
                            IF(IVIN .EQ. 2) THEN
                               UADDOSU(1,IRG,CURIYR) = UADDOSU(1,IRG,CURIYR) + ADD
                               UADDOSU(1,MNUMNR,CURIYR) = UADDOSU(1,MNUMNR,CURIYR) + ADD
@@ -7796,8 +7488,13 @@
                               UADDOSU(2,MNUMNR,CURIYR) = UADDOSU(2,MNUMNR,CURIYR) + ADD
                            END IF
                         ELSEIF(IOWN .EQ. 3) THEN
-                           UCAPOSN(IRG,CURIYR) = UCAPOSN(IRG,CURIYR) + CAP
-                           UCAPOSN(MNUMNR,CURIYR) = UCAPOSN(MNUMNR,CURIYR) + CAP
+                           IF (EPPLCD(IPT) .EQ. 'CTN') THEN
+                             UCAPNGN(IRG,CURIYR) = UCAPNGN(IRG,CURIYR) + CAP
+                             UCAPNGN(MNUMNR,CURIYR) = UCAPNGN(MNUMNR,CURIYR) + CAP
+                           ELSE
+                             UCAPOSN(IRG,CURIYR) = UCAPOSN(IRG,CURIYR) + CAP
+                             UCAPOSN(MNUMNR,CURIYR) = UCAPOSN(MNUMNR,CURIYR) + CAP
+                           ENDIF
                            IF(IVIN .EQ. 2) THEN
                               UADDOSN(1,IRG,CURIYR) = UADDOSN(1,IRG,CURIYR) + ADD
                               UADDOSN(1,MNUMNR,CURIYR) = UADDOSN(1,MNUMNR,CURIYR) + ADD
@@ -7810,8 +7507,7 @@
 !                          IF(IVIN .LE. 2) THEN
 
                            CGNTCAP(IRG,CURIYR,2) = CGNTCAP(IRG,CURIYR,2) + (CAP * 1000)
-                           CGNTCAP(MNUMNR,CURIYR,2) = CGNTCAP(MNUMNR,CURIYR,2) + &
-						   (CAP * 1000)
+                           CGNTCAP(MNUMNR,CURIYR,2) = CGNTCAP(MNUMNR,CURIYR,2) + (CAP * 1000)
 
 !                          ELSEIF(IVIN .EQ. 3) THEN
 
@@ -7826,12 +7522,53 @@
                            END IF
                         END IF                                    ! IOWN
 !
+
+!                       -- CALCULATE HYDROGEN TURBINE CAPACITY (PREVIOUSLY INTERNAL COMBUSTION ENGINE)
+!
+                        ELSEIF (EPPLCD(IPT) .EQ. 'ICE')  THEN         ! Hydrogen Turbine capacity
+!                         IF (IVIN .EQ. 1 .AND. IOWN .LE. 3 .AND.  &
+                          IF (IVIN .EQ. 1 .AND. IOWN .LE. 4 .AND.  &
+                              RCAP .GT. 0.0) THEN
+                            URETICU(IRG,CURIYR) = URETICU(IRG,CURIYR) + RCAP
+                            URETICU(MNUMNR,CURIYR) = URETICU(MNUMNR,CURIYR) + RCAP
+                          END IF
+                        IF(IOWN .LE. 2) THEN
+                           UCAPICU(IRG,CURIYR) = UCAPICU(IRG,CURIYR) + CAP
+                           UCAPICU(MNUMNR,CURIYR) = UCAPICU(MNUMNR,CURIYR) + CAP
+                           IF(IVIN .EQ. 2) THEN
+                              UADDICU(1,IRG,CURIYR) = UADDICU(1,IRG,CURIYR) + ADD
+                              UADDICU(1,MNUMNR,CURIYR) = UADDICU(1,MNUMNR,CURIYR) + ADD
+                           ELSEIF(IVIN .EQ. 3) THEN
+                              UADDICU(2,IRG,CURIYR) = UADDICU(2,IRG,CURIYR) + ADD
+                              UADDICU(2,MNUMNR,CURIYR) = UADDICU(2,MNUMNR,CURIYR) + ADD
+                           END IF
+                        ELSEIF(IOWN .EQ. 3) THEN
+                           UCAPICN(IRG,CURIYR) = UCAPICN(IRG,CURIYR) + CAP
+                           UCAPICN(MNUMNR,CURIYR) = UCAPICN(MNUMNR,CURIYR) + CAP
+                           IF(IVIN .EQ. 2) THEN
+                              UADDICN(1,IRG,CURIYR) = UADDICN(1,IRG,CURIYR) + ADD
+                              UADDICN(1,MNUMNR,CURIYR) = UADDICN(1,MNUMNR,CURIYR) + ADD
+                           ELSEIF(IVIN .EQ. 3) THEN
+                              UADDICN(2,IRG,CURIYR) = UADDICN(2,IRG,CURIYR) + ADD
+                              UADDICN(2,MNUMNR,CURIYR) = UADDICN(2,MNUMNR,CURIYR) + ADD
+                           END IF
+!!                      ELSEIF(IOWN .EQ. 4) THEN
+!                          IF(IVIN .EQ. 3) THEN
+!!                            UCAPICC(IRG,CURIYR) = UCAPICC(IRG,CURIYR) + CAP
+!!                            UCAPICC(MNUMNR,CURIYR) = UCAPICC(MNUMNR,CURIYR) + CAP
+!                          END IF
+!!                         IF(IVIN .EQ. 2) THEN
+!!                            UADDICC(IRG,CURIYR) = UADDICC(IRG,CURIYR) + ADD
+!!                            UADDICC(MNUMNR,CURIYR) = UADDICC(MNUMNR,CURIYR) + ADD
+!!                         END IF
+                        END IF                                    ! IOWN
+                        
+
 !                       -- CALCULATE COMBUSTION TURBINE CAPACITY (PLANTS 14-19)
 !
                      ELSEIF (EPPLCD(IPT) .EQ. 'CTO' .OR. &           ! else EPPLCD main group
                              EPPLCD(IPT) .EQ. 'CTG' .OR. &
                              EPPLCD(IPT) .EQ. 'CTX' .OR. &
-                             EPPLCD(IPT) .EQ. 'ICE' .OR. &
                              EPPLCD(IPT) .EQ. 'CTA' .OR. &
                              EPPLCD(IPT) .EQ. 'ACT') THEN
 !                         IF (IVIN .EQ. 1 .AND. IOWN .LE. 3 .AND.  &
@@ -7915,46 +7652,7 @@
                         END IF                                    ! IOWN
                         END IF                                    ! ACT
 !
-!                       -- CALCULATE INTERNAL COMBUSTION ENGINE  CAPACITY
-!
-                        IF (EPPLCD(IPT) .EQ. 'ICE') THEN           ! combustion turbine EPPLCD subgroup
-!                         IF (IVIN .EQ. 1 .AND. IOWN .LE. 3 .AND.  &
-                          IF (IVIN .EQ. 1 .AND. IOWN .LE. 4 .AND.  &
-                              RCAP .GT. 0.0) THEN
-                            URETICU(IRG,CURIYR) = URETICU(IRG,CURIYR) + RCAP
-                            URETICU(MNUMNR,CURIYR) = URETICU(MNUMNR,CURIYR) + RCAP
-                          END IF
-                        IF(IOWN .LE. 2) THEN
-                           UCAPICU(IRG,CURIYR) = UCAPICU(IRG,CURIYR) + CAP
-                           UCAPICU(MNUMNR,CURIYR) = UCAPICU(MNUMNR,CURIYR) + CAP
-                           IF(IVIN .EQ. 2) THEN
-                              UADDICU(1,IRG,CURIYR) = UADDICU(1,IRG,CURIYR) + ADD
-                              UADDICU(1,MNUMNR,CURIYR) = UADDICU(1,MNUMNR,CURIYR) + ADD
-                           ELSEIF(IVIN .EQ. 3) THEN
-                              UADDICU(2,IRG,CURIYR) = UADDICU(2,IRG,CURIYR) + ADD
-                              UADDICU(2,MNUMNR,CURIYR) = UADDICU(2,MNUMNR,CURIYR) + ADD
-                           END IF
-                        ELSEIF(IOWN .EQ. 3) THEN
-                           UCAPICN(IRG,CURIYR) = UCAPICN(IRG,CURIYR) + CAP
-                           UCAPICN(MNUMNR,CURIYR) = UCAPICN(MNUMNR,CURIYR) + CAP
-                           IF(IVIN .EQ. 2) THEN
-                              UADDICN(1,IRG,CURIYR) = UADDICN(1,IRG,CURIYR) + ADD
-                              UADDICN(1,MNUMNR,CURIYR) = UADDICN(1,MNUMNR,CURIYR) + ADD
-                           ELSEIF(IVIN .EQ. 3) THEN
-                              UADDICN(2,IRG,CURIYR) = UADDICN(2,IRG,CURIYR) + ADD
-                              UADDICN(2,MNUMNR,CURIYR) = UADDICN(2,MNUMNR,CURIYR) + ADD
-                           END IF
-!!                      ELSEIF(IOWN .EQ. 4) THEN
-!                          IF(IVIN .EQ. 3) THEN
-!!                            UCAPICC(IRG,CURIYR) = UCAPICC(IRG,CURIYR) + CAP
-!!                            UCAPICC(MNUMNR,CURIYR) = UCAPICC(MNUMNR,CURIYR) + CAP
-!                          END IF
-!!                         IF(IVIN .EQ. 2) THEN
-!!                            UADDICC(IRG,CURIYR) = UADDICC(IRG,CURIYR) + ADD
-!!                            UADDICC(MNUMNR,CURIYR) = UADDICC(MNUMNR,CURIYR) + ADD
-!!                         END IF
-                        END IF                                    ! IOWN
-                        END IF                                    ! ICE
+
 !
 !                       -- CALCULATE AERODERIVATIVE CAPACITY
 !
@@ -8377,6 +8075,48 @@
                               UADDRNC(IRG,CURIYR) = UADDRNC(IRG,CURIYR) + ADD
                               UADDRNC(MNUMNR,CURIYR) = UADDRNC(MNUMNR,CURIYR) + ADD
                            END IF
+                        END IF                                    ! IOWN
+                                          ELSEIF(EPPLCD(IPT).EQ.'BIG') THEN           ! else EPPLCD main group !-kc
+!                         IF (IVIN .EQ. 1 .AND. IOWN .LE. 3 .AND.  &
+                          IF (IVIN .EQ. 1 .AND. IOWN .LE. 4 .AND.  &
+                              RCAP .GT. 0.0) THEN
+                            URETBIU(IRG,CURIYR) = URETBIU(IRG,CURIYR) + RCAP
+                            URETBIU(MNUMNR,CURIYR) = URETBIU(MNUMNR,CURIYR) + RCAP
+                            URETRNU(IRG,CURIYR) = URETRNU(IRG,CURIYR) + RCAP
+                            URETRNU(MNUMNR,CURIYR) = URETRNU(MNUMNR,CURIYR) + RCAP
+                          END IF
+                        IF(IOWN .LE. 2) THEN
+                           UCAPBIU(IRG,CURIYR) = UCAPBIU(IRG,CURIYR) + CAP
+                           UCAPBIU(MNUMNR,CURIYR) = UCAPBIU(MNUMNR,CURIYR) + CAP
+                           UCAPRNU(IRG,CURIYR) = UCAPRNU(IRG,CURIYR) + CAP
+                           UCAPRNU(MNUMNR,CURIYR) = UCAPRNU(MNUMNR,CURIYR) + CAP
+                            IF(IVIN .EQ. 2) THEN
+                              UADDBIU(1,IRG,CURIYR) = UADDBIU(1,IRG,CURIYR) + ADD
+                              UADDBIU(1,MNUMNR,CURIYR) = UADDBIU(1,MNUMNR,CURIYR) + ADD
+                              UADDRNU(1,IRG,CURIYR) = UADDRNU(1,IRG,CURIYR) + ADD
+                              UADDRNU(1,MNUMNR,CURIYR) = UADDRNU(1,MNUMNR,CURIYR) + ADD
+                            ELSEIF(IVIN .EQ. 3) THEN
+                              UADDBIU(2,IRG,CURIYR) = UADDBIU(2,IRG,CURIYR) + ADD
+                              UADDBIU(2,MNUMNR,CURIYR) = UADDBIU(2,MNUMNR,CURIYR) + ADD
+                              UADDRNU(2,IRG,CURIYR) = UADDRNU(2,IRG,CURIYR) + ADD
+                              UADDRNU(2,MNUMNR,CURIYR) = UADDRNU(2,MNUMNR,CURIYR) + ADD
+                            END IF
+                        ELSEIF(IOWN .EQ. 3) THEN
+                           UCAPBIN(IRG,CURIYR) = UCAPBIN(IRG,CURIYR) + CAP
+                           UCAPBIN(MNUMNR,CURIYR) = UCAPBIN(MNUMNR,CURIYR) + CAP
+                           UCAPRNN(IRG,CURIYR) = UCAPRNN(IRG,CURIYR) + CAP
+                           UCAPRNN(MNUMNR,CURIYR) = UCAPRNN(MNUMNR,CURIYR) + CAP
+                            IF(IVIN .EQ. 2) THEN
+                              UADDBIN(1,IRG,CURIYR) = UADDBIN(1,IRG,CURIYR) + ADD
+                              UADDBIN(1,MNUMNR,CURIYR) = UADDBIN(1,MNUMNR,CURIYR) + ADD
+                              UADDRNN(1,IRG,CURIYR) = UADDRNN(1,IRG,CURIYR) + ADD
+                              UADDRNN(1,MNUMNR,CURIYR) = UADDRNN(1,MNUMNR,CURIYR) + ADD
+                            ELSEIF(IVIN .EQ. 3) THEN
+                              UADDBIN(2,IRG,CURIYR) = UADDBIN(2,IRG,CURIYR) + ADD
+                              UADDBIN(2,MNUMNR,CURIYR) = UADDBIN(2,MNUMNR,CURIYR) + ADD
+                              UADDRNN(2,IRG,CURIYR) = UADDRNN(2,IRG,CURIYR) + ADD
+                              UADDRNN(2,MNUMNR,CURIYR) = UADDRNN(2,MNUMNR,CURIYR) + ADD
+                            END IF
                         END IF                                    ! IOWN
                      ELSE             ! fell through, no matching EPPLCD IF
                         write(6,'("  Warn DSP:  Plant type ",A," with capacity, addtions= ",F12.5,F9.5," fell through.")') EPPLCD(IPT), CAP, ADD
@@ -9216,6 +8956,7 @@
 !     WRITE(22,100)UADDPVU(1,MNUMNR,CURIYR),(UADDPVU(1,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWNU(1,MNUMNR,CURIYR),(UADDWNU(1,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWFU(1,MNUMNR,CURIYR),(UADDWFU(1,IRG,CURIYR),IRG = 1,UNRGNS)
+!     WRITE(22,100)UADDBIU(1,MNUMNR,CURIYR),(UADDBIU(1,IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       WRITE(22,100)UADDDBU(1,MNUMNR,CURIYR),(UADDDBU(1,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDDPU(1,MNUMNR,CURIYR),(UADDDPU(1,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDTLU(1,MNUMNR,CURIYR),(UADDTLU(1,IRG,CURIYR),IRG = 1,UNRGNS)
@@ -9241,6 +8982,7 @@
 !     WRITE(22,100)UADDPVU(2,MNUMNR,CURIYR),(UADDPVU(2,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWNU(2,MNUMNR,CURIYR),(UADDWNU(2,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWFU(2,MNUMNR,CURIYR),(UADDWFU(2,IRG,CURIYR),IRG = 1,UNRGNS)
+!     WRITE(22,100)UADDBIU(2,MNUMNR,CURIYR),(UADDBIU(2,IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       WRITE(22,100)UADDDBU(2,MNUMNR,CURIYR),(UADDDBU(2,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDDPU(2,MNUMNR,CURIYR),(UADDDPU(2,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDTLU(2,MNUMNR,CURIYR),(UADDTLU(2,IRG,CURIYR),IRG = 1,UNRGNS)
@@ -9261,6 +9003,7 @@
       WRITE(22,100)UCAPRNU(MNUMNR,CURIYR),(UCAPRNU(IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UCAPDBU(MNUMNR,CURIYR),(UCAPDBU(IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UCAPDPU(MNUMNR,CURIYR),(UCAPDPU(IRG,CURIYR),IRG = 1,UNRGNS)
+      WRITE(22,100)UCAPBIU(MNUMNR,CURIYR),(UCAPBIU(IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       WRITE(22, * )
       WRITE(22,*) ' 5. NON-UTILITY TOTAL CAPACITY CHECKS'
       WRITE(22, * )
@@ -9299,6 +9042,7 @@
 !     WRITE(22,100)UADDPVN(1,MNUMNR,CURIYR),(UADDPVN(1,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWNN(1,MNUMNR,CURIYR),(UADDWNN(1,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWFN(1,MNUMNR,CURIYR),(UADDWFN(1,IRG,CURIYR),IRG = 1,UNRGNS)
+!     WRITE(22,100)UADDBIN(1,MNUMNR,CURIYR),(UADDBIN(1,IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       WRITE(22,100)UADDDBN(1,MNUMNR,CURIYR),(UADDDBN(1,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDDPN(1,MNUMNR,CURIYR),(UADDDPN(1,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDTLN(1,MNUMNR,CURIYR),(UADDTLN(1,IRG,CURIYR),IRG = 1,UNRGNS)
@@ -9324,6 +9068,7 @@
 !     WRITE(22,100)UADDPVN(2,MNUMNR,CURIYR),(UADDPVN(2,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWNN(2,MNUMNR,CURIYR),(UADDWNN(2,IRG,CURIYR),IRG = 1,UNRGNS)
 !     WRITE(22,100)UADDWFN(2,MNUMNR,CURIYR),(UADDWFN(2,IRG,CURIYR),IRG = 1,UNRGNS)
+!     WRITE(22,100)UADDBIN(2,MNUMNR,CURIYR),(UADDBIN(2,IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       WRITE(22,100)UADDDBN(2,MNUMNR,CURIYR),(UADDDBN(2,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDDPN(2,MNUMNR,CURIYR),(UADDDPN(2,IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UADDTLN(2,MNUMNR,CURIYR),(UADDTLN(2,IRG,CURIYR),IRG = 1,UNRGNS)
@@ -9342,6 +9087,7 @@
       WRITE(22,100)UCAPWLN(MNUMNR,CURIYR),(UCAPWLN(IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UCAPWFN(MNUMNR,CURIYR),(UCAPWFN(IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)UCAPRNN(MNUMNR,CURIYR),(UCAPRNN(IRG,CURIYR),IRG = 1,UNRGNS)
+      WRITE(22,100)UCAPBIN(MNUMNR,CURIYR),(UCAPBIN(IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       WRITE(22, * )
       WRITE(22,*) ' 9. NON-TRAD COGEN EXIST+PLN CAP BY FUEL TYPE'
       WRITE(22, * )
@@ -9461,6 +9207,7 @@
       WRITE(22,100)URETWLU(MNUMNR,CURIYR),(URETWLU(IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)URETWFU(MNUMNR,CURIYR),(URETWFU(IRG,CURIYR),IRG = 1,UNRGNS)
       WRITE(22,100)URETRNU(MNUMNR,CURIYR),(URETRNU(IRG,CURIYR),IRG = 1,UNRGNS)
+      WRITE(22,100)URETBIU(MNUMNR,CURIYR),(URETBIU(IRG,CURIYR),IRG = 1,UNRGNS) !-kc
       END IF
  100  FORMAT(2X,<MNUMNR-2>(F9.3))
  101  FORMAT(2X,A8,I4,<MNUMNR-2>(F9.3))
@@ -9531,7 +9278,7 @@
                    'SMR Nuc        ',  &
                    'Grn Fld Nuc    ',  &
                    'Biomass        ',  &
-                   'Biomass IGCC   ',  &
+                   'Biomass CCS   ',  & !Changed IGCC to CCS
                    'Geothermal     ',  &
                    'Adv Geothermal ',  &
                    'MSW            ',  &
@@ -9605,6 +9352,8 @@
          UGENFC(IRG,CURIYR) = 0.0
          UGENRN(IRG,CURIYR) = 0.0
          UGENDG(IRG,CURIYR) = 0.0
+         UGENBI(IRG,CURIYR) = 0.0 !-kc
+         UGENNG(IRG,CURIYR) = 0.0
       END DO
 
       DO IRG = 1 , MNUMNR
@@ -9642,11 +9391,16 @@
                       UGENPC(IRG,CURIYR) = UGENPC(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
                       UGENPC(MNUMNR,CURIYR) = UGENPC(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
                     ENDIF
-                 ELSE IF (PLT .EQ. UISTO .OR. PLT .EQ. UISTG .OR. PLT .EQ. UISTX)THEN
+                 ELSE IF (PLT .EQ. UISTO .OR. PLT .EQ. UISTG .OR. PLT .EQ. UISTX) THEN  
                     SGEN(IRG,CURIYR) = SGEN(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
                     SGEN(MNUMNR,CURIYR) = SGEN(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
-                    UGENOS(IRG,CURIYR) = UGENOS(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                    UGENOS(IRG,CURIYR) = UGENOS(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001               
                     UGENOS(MNUMNR,CURIYR) = UGENOS(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                 ELSE IF (PLT .EQ. UICTN) THEN           ! coal to gas conversion type CTN - this will include gas only and coal/gas cofiring combined
+                    SGEN(IRG,CURIYR) = SGEN(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                    SGEN(MNUMNR,CURIYR) = SGEN(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                    UGENNG(IRG,CURIYR) = UGENNG(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001               
+                    UGENNG(MNUMNR,CURIYR) = UGENNG(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001                    
                  ELSE IF (PLT .EQ. UICTO .OR. PLT .EQ. UICTG .OR. PLT .EQ. UICTX .OR. PLT .EQ. UIACT .OR.  &
                           PLT .EQ. UIICE .OR. PLT .EQ. UICTA) THEN
                     TGEN(IRG,CURIYR) = TGEN(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
@@ -9699,6 +9453,11 @@
                     UGENFC(IRG,CURIYR) = UGENFC(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
                     UGENFC(MNUMNR,CURIYR) = UGENFC(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
                  ELSE IF ((PLT .EQ. UIGTH) .OR. (PLT .EQ. UIBMS)) THEN
+                    UGENRN(IRG,CURIYR) = UGENRN(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                    UGENRN(MNUMNR,CURIYR) = UGENRN(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                 ELSE IF ((PLT .EQ. UIBIG)) THEN !-kc
+                    UGENBI(IRG,CURIYR) = UGENBI(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
+                    UGENBI(MNUMNR,CURIYR) = UGENBI(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
                     UGENRN(IRG,CURIYR) = UGENRN(IRG,CURIYR) + EQPGN(TYP,OWN) * 0.001
                     UGENRN(MNUMNR,CURIYR) = UGENRN(MNUMNR,CURIYR) + EQPGN(TYP,OWN) * 0.001
                  END IF
@@ -9965,6 +9724,10 @@
               DO PLT = UIBMS , UIBMS
                  WRITE(13,1300) PLTNAME(PLT),(PGEN(PLT,IRG,IYR),IYR = 2015 - UHBSYR , 2030 - UHBSYR)
               END DO
+!			     BIOMASS CCS
+              DO PLT = UIBIG , UIBIG
+                 WRITE(13,1300) PLTNAME(PLT),(PGEN(PLT,IRG,IYR),IYR = 2015 - UHBSYR , 2030 - UHBSYR)
+              END DO
 !             GEOTHERMAL
               DO PLT = UIGTH , UIGTH
                  WRITE(13,1300) PLTNAME(PLT),(PGEN(PLT,IRG,IYR),IYR = 2015 - UHBSYR , 2030 - UHBSYR)
@@ -10050,6 +9813,10 @@
               DO PLT = UIBMS , UIBMS
                  WRITE(13,3300) PLTNAME(PLT),(PGEN(PLT,IRG,IYR),IYR = 2031 - UHBSYR , 2050 - UHBSYR)
               END DO
+!             BIOMASS CCS
+              DO PLT = UIBIG , UIBIG
+                 WRITE(13,3300) PLTNAME(PLT),(PGEN(PLT,IRG,IYR),IYR = 2031 - UHBSYR , 2050 - UHBSYR)
+              END DO
 !             GEOTHERMAL
               DO PLT = UIGTH , UIGTH
                  WRITE(13,3300) PLTNAME(PLT),(PGEN(PLT,IRG,IYR),IYR = 2031 - UHBSYR , 2050 - UHBSYR)
@@ -10112,7 +9879,9 @@
                UGENIG(IRG,CURIYR) = HGENIG(4,IRG,CURIYR)
                UGENIS(IRG,CURIYR) = HGENIS(4,IRG,CURIYR)
                UGENIS_ALT(IRG,CURIYR) = 0.0
-               UGENOS(IRG,CURIYR) = HGENST(4,IRG,CURIYR)
+               UGENOS(IRG,CURIYR) = HGENST(4,IRG,CURIYR) !for now, overwrites have all generation in HGENST
+               UGENNG(IRG,CURIYR) = 0.0            ! zero out model calulation of any existing coal/gas cofiring/conversions
+               UGENNGCF(IRG,CURIYR) = 0.0    
                UGENCC(IRG,CURIYR) = HGENCC(4,IRG,CURIYR)
                UGENAC(IRG,CURIYR) = HGENAC(4,IRG,CURIYR)
                UGENCS(IRG,CURIYR) = HGENAS(4,IRG,CURIYR)
@@ -10127,6 +9896,7 @@
                UGENRN(IRG,CURIYR) = HGENRN(4,IRG,CURIYR) - WNGMSEL(CURIYR,IRG)
                UGENPS(IRG,CURIYR) = HGENPS(4,IRG,CURIYR) + WNGMSEL(CURIYR,IRG)
                UGENDS(IRG,CURIYR) = HGENDS(4,IRG,CURIYR)
+               UGENBI(IRG,CURIYR) = 0.0 !-kc
 !
           ENDIF
         ENDIF
@@ -12491,8 +12261,8 @@
       include 'dsmsectr'
 !
       INTEGER*4 DEMADJ
-      INTEGER*4 JYR,KYR,BYR,JRG,IFL
-      REAL*4 DELRS(MNUMCR),DELCM(MNUMCR),DELIN(MNUMCR),DELTR(MNUMCR),DELAS(MNUMCR)
+      INTEGER*4 JYR,KYR,BYR,JRG,IFL,EXY
+      REAL*4 DELRS(MNUMCR),DELCM(MNUMCR),DELIN(MNUMCR),DELTR(MNUMCR),DELHY(MNUMCR),DELAS(MNUMCR)
       REAL*4 DFAC
       IF(DEMADJ .EQ. 1)THEN
        IF (USW_DSM .GT. 0) THEN
@@ -12768,7 +12538,11 @@
           DO IFL = 1 , UNFUELS
 !
             IF ( (IRG .EQ. HAWAII) .OR. (IRG .EQ. ALASKA) ) THEN
-              IF ( IOWN .LE. 2 ) THEN
+              IF ((CURIYR + UHBSYR) .GT. UYR_OVER) THEN   
+!                 Only write this table for projection years, because it is inconsistent during historical overwrites (use EFD_HISTOVR for history)
+!                 In this table, owner 1 = utility and owner 2 = IPP + NTC for both generation and consumption         
+
+                IF ( IOWN .LE. 2 ) THEN
 !
                 TNUM = 1
                 IF (LOOPING(TNUM) .EQ. 0) THEN
@@ -12850,7 +12624,8 @@
                   LOOPING(TNUM) = 0
                 ENDIF
 !
-              ENDIF                                          ! end owner if
+                ENDIF                                          ! end owner if
+              ENDIF                                              ! end curiyr if
             ENDIF                                                     ! end if alaska/hawaii
 !
 !           IF Historical Year then write historical overwrites to database
@@ -12871,13 +12646,22 @@
                 COLV(TNUM,4,LOOPING(TNUM)) = IOWN
                 COLV(TNUM,5,LOOPING(TNUM)) = IFL
 !
+! modify this table so that generation and consumption variables are consistent by owner: 1 = util, 2 = IPP, 3 = nontrad cogen
                 IF ( IOWN .LE. 2 ) THEN
                   IF ( IFL .EQ. UIH1 ) THEN
                     COLV(TNUM,6,LOOPING(TNUM)) = UGNCLNR(IOWN,IRG,CURIYR)
-                    COLV(TNUM,7,LOOPING(TNUM)) = UFLCLNR(IOWN,IRG,CURIYR)
+                    IF (IOWN .EQ. 2) THEN 
+                        COLV(TNUM,7,LOOPING(TNUM)) = UFLCLNR(IOWN,IRG,CURIYR) - CGNTQ(IRG,CURIYR,1)
+                    ELSE
+                        COLV(TNUM,7,LOOPING(TNUM)) = UFLCLNR(IOWN,IRG,CURIYR) 
+                    ENDIF
                   ELSEIF ( IFL .EQ. UIDS) THEN
                     COLV(TNUM,6,LOOPING(TNUM)) = UGNDSNR(IOWN,IRG,CURIYR)
-                    COLV(TNUM,7,LOOPING(TNUM)) = UFLDSNR(IOWN,IRG,CURIYR)
+                    IF (IOWN .EQ. 2) THEN
+                       COLV(TNUM,7,LOOPING(TNUM)) = UFLDSNR(IOWN,IRG,CURIYR) - CGNTQ(IRG,CURIYR,2)
+                    ELSE
+                       COLV(TNUM,7,LOOPING(TNUM)) = UFLDSNR(IOWN,IRG,CURIYR)
+                    ENDIF
                   ELSEIF ( IFL .EQ. UIRL) THEN
                     COLV(TNUM,6,LOOPING(TNUM)) = UGNRLNR(IOWN,IRG,CURIYR)
                     COLV(TNUM,7,LOOPING(TNUM)) = UFLRLNR(IOWN,IRG,CURIYR)
@@ -12886,7 +12670,11 @@
                     COLV(TNUM,7,LOOPING(TNUM)) = UFLRHNR(IOWN,IRG,CURIYR)
                   ELSEIF ( IFL .EQ. UIGF) THEN
                     COLV(TNUM,6,LOOPING(TNUM)) = UGNGFNR(IOWN,IRG,CURIYR)
-                    COLV(TNUM,7,LOOPING(TNUM)) = UFLGFNR(IOWN,IRG,CURIYR)
+                    IF (IOWN .EQ. 2) THEN
+                       COLV(TNUM,7,LOOPING(TNUM)) = UFLGFNR(IOWN,IRG,CURIYR) - CGNTQ(IRG,CURIYR,3) 
+                    ELSE
+                       COLV(TNUM,7,LOOPING(TNUM)) = UFLGFNR(IOWN,IRG,CURIYR)
+                    ENDIF
                   ELSEIF ( IFL .EQ. UIGI) THEN
                     COLV(TNUM,6,LOOPING(TNUM)) = UGNGINR(IOWN,IRG,CURIYR)
                     COLV(TNUM,7,LOOPING(TNUM)) = UFLGINR(IOWN,IRG,CURIYR)
@@ -13769,7 +13557,7 @@
          DYNSTM(TNUM) = 'INSERT INTO EFD_DWFVIN_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DWFVIN_DEF'
         ENDIF
-        DO I = 1, 12
+        DO I = 1, 11
           LOOPING(TNUM) = LOOPING(TNUM) + 1
           COLV(TNUM,1,LOOPING(TNUM))   = EFDPVINI(I)
           CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDPVIND(I)

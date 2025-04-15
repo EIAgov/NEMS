@@ -1,0 +1,151 @@
+TableID,Region,Caption,Program
+TN 001,NATNAM," Total Energy Supply, Disposition, and Price Summary",fill_table_base_001
+TN 002,REGNAM, Energy Consumption by Sector and Source,fill_table_base_002
+TN 003,REGNAM, Energy Prices by Sector and Source,fill_table_base_003
+TN 004,NATNAM, Residential Sector Key Indicators and Consumption,fill_table_base_004
+TN 005,NATNAM, Commercial Sector Key Indicators and Consumption,fill_table_base_005
+TN 006,NATNAM, Industrial Sector Key Indicators and Consumption,fill_table_base_006
+TN 007,NATNAM, Transportation Sector Key Indicators and Delivered Energy Consumption,fill_table_base_007
+TN 008,NATNAM," Electricity Supply, Disposition, Prices, and Emissions",fill_table_base_008
+TN 009,NATNAM, Electricity Generating Capacity,fill_table_base_009
+TN 010,NATNAM, Electricity Trade,fill_table_base_010
+TN 011,NATNAM, Liquid Fuels Supply and Disposition,fill_table_base_011
+TN 012,NATNAM, Petroleum Product Prices,fill_table_base_012
+TN 013,NATNAM," Natural Gas Supply, Disposition, and Prices",fill_table_base_013
+TN 014,NATNAM, Oil and Gas Supply,fill_table_base_014
+TN 015,NATNAM," Coal Supply, Disposition, and Prices",fill_table_base_015
+TN 016,NATNAM, Renewable Energy Generating Capacity and Generation,fill_table_base_016
+TN 017,REGNAM, Energy-Related Carbon Dioxide Emissions by Sector and Source,fill_table_base_017
+TN 018,NATNAM, Macroeconomic Indicators,fill_table_base_018
+TN 019,NATNAM, International Liquids Supply and Disposition,fill_table_base_019
+TN 020,NATNAM, Conversion Factors,fill_table_base_020
+TN 021,NATNAM, Liquid Fuels Supply and Disposition,fill_table_base_021
+TN 022,NATNAM, Energy-Related Carbon Dioxide Emissions by End Use,fill_table_base_022
+TN 023,NATNAM, Blank table,fill_table_base_023
+TN 024,NATNAM, Renewable Energy Consumption by Sector and Source,fill_table_base_024
+TN 025,NATNAM, Carbon Dioxide Enhanced Oil Recovery Operations by Source,fill_table_base_025
+TN 026,NATNAM, Non-Utility Electricity Generation,fill_table_base_026
+TN 027,NATNAM, Non-Utility Electricity Capacity,fill_table_base_027
+TN 028,NATNAM, Non-Utility Fuel Consumption,fill_table_base_028
+TN 029,NATNAM, Refinery Process Unit Capacity and Utilization,fill_table_base_029
+TN 030,NATNAM, Residential Sector Equipment Stock and Efficiency,fill_table_base_030
+TN 031,NATNAM, Energy and Energy Efficiency Indices,fill_table_base_031
+TN 032,NATNAM," Commercial Sector Energy Consumption, Floorspace, and Equipment Efficiency",fill_table_base_032
+TN 033,NATNAM, Other Commercial Sector Consumption,fill_table_base_033
+TN 034,REGNAM, Industrial Sector Macroeconomic Indicators,fill_table_base_034
+TN 035,NATNAM, Refining Industry Energy Consumption,fill_table_base_035
+TN 036,NATNAM, Food Industry Energy Consumption,fill_table_base_036
+TN 037,NATNAM, Paper Industry Energy Consumption,fill_table_base_037
+TN 038,NATNAM, Bulk Chemical Industry Energy Consumption,fill_table_base_038
+TN 039,NATNAM, Glass Industry Energy Consumption,fill_table_base_039
+TN 040,NATNAM, Cement and Lime Industry Energy Consumption,fill_table_base_040
+TN 041,NATNAM, Iron and Steel Industry Energy Consumption,fill_table_base_041
+TN 042,NATNAM, Aluminum Industry Energy Consumption,fill_table_base_042
+TN 043,NATNAM, Nonmanufacturing Sector Energy Consumption,fill_table_base_043
+TN 044,NATNAM, Industrial Consumption by Sector,fill_table_base_044
+TN 045,NATNAM, Transportation Sector Energy Use by Mode and Type,fill_table_base_045
+TN 046,NATNAM, Transportation Sector Energy Use by Fuel Type Within a Mode,fill_table_base_046
+TN 047,NATNAM, Light-Duty Vehicle Energy Consumption by Technology Type and Fuel Type,fill_table_base_047
+TN 048,REGNAM, Light-Duty Vehicle Sales by Technology Type,fill_table_base_048
+TN 049,NATNAM, Light-Duty Vehicle Stock by Technology Type,fill_table_base_049
+TN 050,NATNAM, Light-Duty Vehicle Miles per Gallon by Technology Type,fill_table_base_050
+TN 051,NATNAM, Light-Duty Vehicle Miles Traveled by Technology Type,fill_table_base_051
+TN 052,NATNAM, Summary of New Light-Duty Vehicle Size Class Attributes,fill_table_base_052
+TN 053,NATNAM, Transportation Fleet Car and Truck Fuel Consumption by Type and Technology,fill_table_base_053
+TN 054,NATNAM, Transportation Fleet Car and Truck Sales by Type and Technology,fill_table_base_054
+TN 055,NATNAM, Transportation Fleet Car and Truck Stock by Type and Technology,fill_table_base_055
+TN 056,NATNAM, Transportation Fleet Car and Truck Vehicle Miles Traveled by Type and Technology,fill_table_base_056
+TN 057,NATNAM, Air Travel Energy Use,fill_table_base_057
+TN 058,NATNAM, Freight Transportation Energy Use,fill_table_base_058
+TN 059,NERCNAM, Electric Power Sector Generating Capacity and Generation by Plant Type and Technology,fill_table_base_059
+TN 060,NATNAM, Technology Market Penetration in Light-Duty Vehicles,fill_table_base_060
+TN 061,NERCNAM, Competitive Electricity Prices,fill_table_base_061
+TN 062,NERCNAM, Electric Power Projections by Electricity Market Module Region,fill_table_base_062
+TN 063,NATNAM, Electricity Generation by Electricity Market Module Region and Source,fill_table_base_063
+TN 064,NATNAM, Electricity Generation Capacity by Electricity Market Module Region and Source,fill_table_base_064
+TN 065,NATNAM, Technically Recoverable Crude Oil Resources by Region,fill_table_base_065
+TN 066,NATNAM, Technically Recoverable Natural Gas Resources by Region,fill_table_base_066
+TN 067,NERCNAM, Renewable Energy Generation by Fuel,fill_table_base_067
+TN 068,NATNAM," Domestic Refinery Distillation Base Capacity, Expansion, and Utilization",fill_table_base_068
+TN 069,NATNAM, Carbon Dioxide Emissions by Category and Sector,fill_table_base_069
+TN 070,REGNAM, Components of Selected Petroleum Product Prices,fill_table_base_070
+TN 071,NATNAM, Lower 48 Crude Oil Production and Wellhead Prices by Supply Region,fill_table_base_071
+TN 072,NATNAM, Lower 48 Natural Gas Production and Spot Prices by Supply Region,fill_table_base_072
+TN 073,REGNAM, Hydrogen Market Projections by Census division,fill_table_base_073
+TN 074,NATNAM, Lower 48 Oil and Gas Well Completions,fill_table_base_074
+TN 075,NATNAM, Average Technology Cost for Light-Duty Vehicles,fill_table_base_075
+TN 076,NATNAM, Natural Gas Imports and Exports,fill_table_base_076
+TN 077,NATNAM, Natural Gas Consumption by End-Use Sector and Census Division,fill_table_base_077
+TN 078,NATNAM, Natural Gas Delivered Prices by End-Use Sector and Census Division,fill_table_base_078
+TN 079,NATNAM, Lower 48 Onshore Crude Oil Production by Region and Type,fill_table_base_079
+TN 080,NATNAM, Lower 48 Onshore Natural Gas Production by Region and Type,fill_table_base_080
+TN 081,NATNAM, Annual Natural Gas Underground Storage and Pipeline Capacity,fill_table_base_081
+TN 082,NATNAM," Natural Gas Consumption by End-Use Sector, Region, and Service Type",fill_table_base_082
+TN 083,NATNAM, Trace Report for Gas Price to the Electric Power Sector,fill_table_base_083
+TN 084,NATNAM, Natural Gas Pipeline Capacity by NGTDM Region,fill_table_base_084
+TN 085,NATNAM, Natural Gas Pipeline Flows by NGTDM Region,fill_table_base_085
+TN 086,NATNAM, Natural Gas Pipeline Capacity Utilization by NGTDM Region,fill_table_base_086
+TN 087,NATNAM, Natural Gas Pipeline Capacity by Census Division,fill_table_base_087
+TN 088,NATNAM, Natural Gas Pipeline Flows by Census Division,fill_table_base_088
+TN 089,NATNAM, Natural Gas Pipeline Capacity Utilization by Census Division,fill_table_base_089
+TN 090,NATNAM, Primary Natural Gas Flows Entering NGTDM Region from Neighboring Regions,fill_table_base_090
+TN 091,NATNAM, Primary Natural Gas Capacity Entering NGTDM Region from Neighboring Regions,fill_table_base_091
+TN 092,NATNAM, Blank table,fill_table_base_092
+TN 093,REGNAM," Domestic Coal Supply, Disposition, and Prices",fill_table_base_093
+TN 094,NATNAM, Coal Production and Minemouth Prices by Region,fill_table_base_094
+TN 095,NATNAM, Coal Production by Region and Type,fill_table_base_095
+TN 096,NATNAM, World Steam Coal Flows By Importing Regions and Exporting Countries,fill_table_base_096
+TN 097,NATNAM, World Metallurgical Coal Flows By Importing Regions and Exporting Countries,fill_table_base_097
+TN 098,NATNAM, World Total Coal Flows By Importing Regions and Exporting Countries,fill_table_base_098
+TN 099,NATNAM, Coal Minemouth Prices by Region and Type,fill_table_base_099
+TN 100,NATNAM," Employment and Shipments by Industry, and Income and Employment by Region",fill_table_base_100
+TN 101,NATNAM, Imported Liquids by Source,fill_table_base_101
+TN 102,REGNAM, Alternative Liquid Fuels,fill_table_base_102
+TN 103,NATNAM, Renewable Fuel Standard and Low Carbon Fuel Standard Results,fill_table_base_103
+TN 104,NATNAM, blank table,fill_table_base_104
+TN 105,NATNAM, Domestic Crude Oil Production and Prices by Refinery Region,fill_table_base_105
+TN 106,NATNAM, Crude Oil Refinery Inputs by Refinery Region,fill_table_base_106
+TN 107,NATNAM, Supply and Disposition Balances by Fuel,fill_table_base_107
+TN 108,NATNAM, Domestic Crude Oil Production by Region and Type,fill_table_base_108
+TN 109,NATNAM, Impacts of Clean Power Plan (111d) by Electricity Market Module Region,fill_table_base_109
+TN 110,NATNAM, Impacts of Clean Power Plan (111d) by Fuel Region,fill_table_base_110
+TN 111,NATNAM," Biomass Prices by Coal Region, Sector, and Type",fill_table_base_111
+TN 112,NATNAM," Biomass Quantities by Coal Region, Sector, and Type",fill_table_base_112
+TN 113,NATNAM, New Light-Duty Vehicle Fuel Economy,fill_table_base_113
+TN 114,NATNAM, New Light-Duty Vehicle Prices,fill_table_base_114
+TN 115,NATNAM, New Light-Duty Vehicle Range,fill_table_base_115
+TN 116,NERCNAM, Total Resource Costs in the Electric Power Sector,fill_table_base_116
+TN 117,NATNAM, National Impacts of the Clean Air Act Amendments of 1990 (CAAA90),fill_table_base_117
+TN 118,NATNAM, Greenhouse Gas Compliance Results,fill_table_base_118
+TN 119,REGNAM, Unadjusted Energy Prices by Sector and Source,fill_table_base_119
+TN 120,NATNAM, International Energy Agency Submission,fill_table_base_120
+TN 121,NATNAM, blank table,fill_table_base_121
+TN 122,NERCNAM, National Impacts of Renewable or Carbon Portfolio Standards (RPS/CPS) and Production Tax Credits (PTC),fill_table_base_122
+TN 123,NERCNAM, Overnight Capital Costs for New Electricity Generating Plants,fill_table_base_123
+TN 124,NATNAM, Key Results for Residential and Commercial Sector Technology Cases,fill_table_base_124
+TN 125,REGNAM, Hydrogen Model Results,fill_table_base_125
+TN 126,NATNAM, Crude Oil Import Volumes by Region,fill_table_base_126
+TN 127,NATNAM, Crude Oil Import Prices by Region,fill_table_base_127
+TN 128,NATNAM, Petroleum Product Import Volumes by Region,fill_table_base_128
+TN 129,NATNAM, Petroleum Product Import Prices by Region,fill_table_base_129
+TN 130,NATNAM, Crude Oil Export Volumes by Region,fill_table_base_130
+TN 131,NATNAM, Crude Oil Export Prices by Region,fill_table_base_131
+TN 132,NATNAM, Crude Oil Refinery Input Price by Refinery Region,fill_table_base_132
+TN 133,NATNAM, Capacity with Carbon Capture and Carbon Flows,fill_table_base_133
+TN 134,NATNAM," Pipeline, Transport, and Storage Costs for Captured Carbon",fill_table_base_134
+TN 135,NATNAM, Key Results for Coal Mining Cost Cases,fill_table_base_135
+TN 136,NATNAM, Key Results for Nuclear Cost Cases,fill_table_base_136
+TN 137,NATNAM, Key Results for Renewable Energy Technology Cases,fill_table_base_137
+TN 138,NATNAM, Key Results for Electric Power Sector Technology Cases,fill_table_base_138
+TN 139,NATNAM, Metal Based Durables Industry Energy Consumption,fill_table_base_139
+TN 140,NATNAM, Other Manufacturing Industry Energy Consumption,fill_table_base_140
+TN 141,NATNAM, Summary of the U,fill_table_base_141
+TN 142,NATNAM, Real Composition of Gross Domestic Product,fill_table_base_142
+TN 143,NATNAM, Nominal Composition of Gross Domestic Product,fill_table_base_143
+TN 144,NATNAM," Distribution of GDP, GNP, and National Income",fill_table_base_144
+TN 145,NATNAM, GDP Composition and Other Assorted Macro Topics,fill_table_base_145
+TN 146,NATNAM, Freight Truck Technology Penetration,fill_table_base_146
+TN 147,NATNAM, Transportation Sector Criteria Pollutants Emissions,fill_table_base_147
+TN 148,NATNAM, Aircraft Stock,fill_table_base_148
+TN 149,NATNAM, Energy Prices for FEMP by Census Region,fill_table_base_149
+TN 150,NATNAM, Convergence Indicators,fill_table_base_150

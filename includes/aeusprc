@@ -2,11 +2,11 @@
 !  Utility end-use service prices
 !   Utility end-use service prices Common Block Parameters
       INTEGER MNEUGRP,MUEUSIZE,MNEURSGRP,MNEUCMGRP,MNEUINGRP,MNEUTRGRP
-      PARAMETER(MNEURSGRP=10)   ! Number of residential end-use price variables
-      PARAMETER(MNEUCMGRP=10)   ! Number of commercial end-use price variables
-      PARAMETER(MNEUINGRP=3)   ! Number of industrial end-use price variables
-      PARAMETER(MNEUTRGRP=2)   ! Number of transportation end-use price variables
-      PARAMETER(MNEUGRP=25)     ! TOTAL Number of end-use price variables
+      PARAMETER(MNEURSGRP=11)   ! Number of residential end-use price variables
+      PARAMETER(MNEUCMGRP=16)   ! Number of commercial end-use price variables
+      PARAMETER(MNEUINGRP=4)   ! Number of industrial end-use price variables
+      PARAMETER(MNEUTRGRP=1)   ! Number of transportation end-use price variables
+      PARAMETER(MNEUGRP=32)     ! TOTAL Number of end-use price variables
       PARAMETER(MUEUSIZE=MNEUGRP*MNUMCR*MNUMYR) ! Size of EU price array
 ! PRICES
       REAL PELSHRS(MNUMCR,MNUMYR) !   space heating RS
@@ -19,6 +19,7 @@
       REAL PELLTRS(MNUMCR,MNUMYR) !   lighting RS
       REAL PELOTRS(MNUMCR,MNUMYR) !   appliances/other RS
       REAL PELH2RS(MNUMCR,MNUMYR) !   secondary heating RS
+      REAL PELVHRS(MNUMCR,MNUMYR) !   vehicle RS
       REAL PELSHCM(MNUMCR,MNUMYR) !   space heating CM
       REAL PELSCCM(MNUMCR,MNUMYR) !   space cooling CM
       REAL PELWHCM(MNUMCR,MNUMYR) !   water heating CM
@@ -29,17 +30,26 @@
       REAL PELOPCM(MNUMCR,MNUMYR) !   office equipment PCs CM
       REAL PELONCM(MNUMCR,MNUMYR) !   office equipment, nonPCs CM8
       REAL PELOTCM(MNUMCR,MNUMYR) !   other commercial
+      REAL PELP2CM(MNUMCR,MNUMYR) !   vehicle CM – public L2
+      REAL PELPFCM(MNUMCR,MNUMYR) !   vehicle CM – public DCFC
+      REAL PELSBCM(MNUMCR,MNUMYR) !   vehicle CM – school bus
+      REAL PELTBCM(MNUMCR,MNUMYR) !   vehicle CM – transit bus
+      REAL PELIBCM(MNUMCR,MNUMYR) !   vehicle CM – intercity bus + CLT + freight (fleet)
+      REAL PELFNCM(MNUMCR,MNUMYR) !   vehicle CM – freight truck non-fleet
       REAL PELINP(MNUMCR,MNUMYR) !   industrial primary
       REAL PELINS(MNUMCR,MNUMYR) !   industrial shift
       REAL PELINM(MNUMCR,MNUMYR) !   industrial miscellaneous
+      REAL PELINH2E(MNUMCR,MNUMYR) !   industrial hydrogen
       REAL PELLTTR(MNUMCR,MNUMYR) !   light trains TR
-      REAL PELVHTR(MNUMCR,MNUMYR) !   vehicle TR
 
 
       COMMON /AEUSPRC/PELSHRS,PELCLRS,PELWHRS,PELCKRS,PELCDRS,PELRFRS, &
-       PELFZRS,PELLTRS,PELOTRS,PELH2RS,PELSHCM,PELSCCM,PELWHCM,PELVTCM, &
-       PELCKCM,PELLTCM,PELRFCM,PELOPCM,PELONCM,PELOTCM,PELINP,PELINS, &
-       PELINM,PELLTTR,PELVHTR
+       PELFZRS,PELLTRS,PELOTRS,PELH2RS,PELVHRS,&
+       PELSHCM,PELSCCM,PELWHCM,PELVTCM, &
+       PELCKCM,PELLTCM,PELRFCM,PELOPCM,PELONCM,PELOTCM, &
+       PELP2CM,PELPFCM,PELSBCM,PELTBCM,PELIBCM,PELFNCM, &
+       PELINP,PELINS, &
+       PELINM,PELINH2E,PELLTTR
 
 !    equivalence for residential
       REAL PELRSOUT(MNUMCR,MNUMYR,MNEURSGRP) !   equivalenced sector prices

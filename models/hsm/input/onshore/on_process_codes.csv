@@ -1,0 +1,26 @@
+notes,,,,,(gas = NA gas),,(gas = AD gas),,,,,,,,,
+process_code,dev_type,dev_type_number,resource_type,prime_resource_type,prime_fuel_type,prime_fuel_type_number,sec_fuel_type,sec_fuel_type_number,max_drill_rate_frac,well_type_number,well_type,conv_or_unconv,oil_type_number,oil_type,gas_type_number,gas_type
+0,legacy,1,oil,oil,Conventional (Oil),1,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,1,all other oil (not 2-4),1,all other gas (not 2-4)
+1,legacy,1,gas,gas,Conventional (Gas),2,Conventional (Oil),1,0.1,3,Conventional (Gas),Conventional,1,all other oil (not 2-4),1,all other gas (not 2-4)
+2,legacy,1,oil,oil,CO2 EOR,3,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,3,carbon dioxide enhanced oil recovery,1,all other gas (not 2-4)
+3,legacy,1,oil,oil,Other EOR,4,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,4,other enhanced oil recovery,1,all other gas (not 2-4)
+4,legacy,1,oil,oil,Tight Oil,5,Shale Gas,6,0.1,2,Tight Oil,Unconventional,2,tight oil,3,shale gas
+5,legacy,1,gas,gas,Shale Gas,6,Tight Oil,5,0.1,5,Shale Gas,Unconventional,2,tight oil,3,shale gas
+6,legacy,1,gas,gas,Tight Gas,7,Tight Oil,5,0.1,4,Tight Gas,Unconventional,2,tight oil,2,tight gas
+7,legacy,1,gas,gas,Coalbed Methane,8,Tight Oil,5,0.1,6,Coalbed Methane,Unconventional,2,tight oil,4,coalbed methane
+8,developing,2,oil,oil,Conventional (Oil),1,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,1,all other oil (not 2-4),1,all other gas (not 2-4)
+9,developing,2,gas,gas,Conventional (Gas),2,Conventional (Oil),1,0.1,3,Conventional (Gas),Conventional,1,all other oil (not 2-4),1,all other gas (not 2-4)
+10,developing,2,oil,oil,CO2 EOR,3,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,3,carbon dioxide enhanced oil recovery,1,all other gas (not 2-4)
+11,developing,2,oil,oil,Other EOR,4,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,4,other enhanced oil recovery,1,all other gas (not 2-4)
+12,developing,2,oil,oil,Tight Oil,5,Shale Gas,6,0.06,2,Tight Oil,Unconventional,2,tight oil,3,shale gas
+13,developing,2,gas,gas,Shale Gas,6,Tight Oil,5,0.06,5,Shale Gas,Unconventional,2,tight oil,3,shale gas
+14,developing,2,gas,gas,Tight Gas,7,Tight Oil,5,0.06,4,Tight Gas,Unconventional,2,tight oil,2,tight gas
+15,developing,2,gas,gas,Coalbed Methane,8,Tight Oil,5,0.03,6,Coalbed Methane,Unconventional,2,tight oil,4,coalbed methane
+16,undiscovered,3,oil,oil,Conventional (Oil),1,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,1,all other oil (not 2-4),1,all other gas (not 2-4)
+17,undiscovered,3,gas,gas,Conventional (Gas),2,Conventional (Oil),1,0.1,3,Conventional (Gas),Conventional,1,all other oil (not 2-4),1,all other gas (not 2-4)
+18,undiscovered,3,oil,oil,CO2 EOR,3,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,3,carbon dioxide enhanced oil recovery,1,all other gas (not 2-4)
+19,undiscovered,3,oil,oil,Other EOR,4,Conventional (Gas),2,0.1,1,Conventional (Oil),Conventional,4,other enhanced oil recovery,1,all other gas (not 2-4)
+20,undiscovered,3,oil,oil,Tight Oil,5,Shale Gas,6,0.06,2,Tight Oil,Unconventional,2,tight oil,3,shale gas
+21,undiscovered,3,gas,gas,Shale Gas,6,Tight Oil,5,0.06,5,Shale Gas,Unconventional,2,tight oil,3,shale gas
+22,undiscovered,3,gas,gas,Tight Gas,7,Tight Oil,5,0.06,4,Tight Gas,Unconventional,2,tight oil,2,tight gas
+23,undiscovered,3,gas,gas,Coalbed Methane,8,Tight Oil,5,0.03,6,Coalbed Methane,Unconventional,2,tight oil,4,coalbed methane

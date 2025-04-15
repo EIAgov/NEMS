@@ -44,17 +44,8 @@ tfiler.exe : $(TFILER_OBJS)
 	echo $(SOURCE_DIR)
 	$(LINKER) /subsystem:console /force /out:tfiler.exe /NODEFAULTLIB:libc $(TFILER_OBJS)
 	
-readmat.exe : ../scripts/readmat.exe ;
-readaimlis.exe : ../scripts/readaimlis.exe ;
 arraycode.exe : ../scripts/arraycode.exe ;
 
-../scripts/readmat.exe : readmat.f90
-	$(COMPILER) -o ../scripts/readmat.exe /fpconstant /Qsave /Qzero /include:$(INCLUDES) $^ /heap-arrays0 /link /force 
-
-../scripts/readaimlis.exe : readaimlis.f90 ecp_row_col.obj efd_row_col.obj tran.obj tranair.obj tranfrt.obj udaf.obj
-	echo $^
-	$(COMPILER) -o ../scripts/readaimlis.exe /fpconstant /Qsave /Qzero /include:$(INCLUDES) $^  /heap-arrays0 /link /force
-	
 ../scripts/arraycode.exe : arraycode.f
 	echo $^
 	$(COMPILER) -o ../scripts/arraycode.exe /free /include:$(INCLUDES) $^  /link /force
@@ -73,8 +64,6 @@ $(BUILD_DIR)/%.d : %.f
 	@$(COMPILER) $(FFLAGS) $(MAKEDEPEND) $*.f /include:$(INCLUDES) -o $*.obj
 	@$(SHELL) -ec "../scripts/gen_dep_to_makefile.py $(BUILD_DIR)/$*.d $(COMPILER) $(FFLAGS) $*.f /include:$(INCLUDES) -o $*.obj"
 	
-.PHONY : readmat.exe readaimlis.exe
-.PRECIOUS : $(D_FILES) ../scripts/readmat.exe ../scripts/readaimlis.exe
 
 clean: 
 	rm -rf $(BUILD_DIR) $(OBJECTS) *.mod

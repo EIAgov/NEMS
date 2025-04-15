@@ -805,10 +805,11 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
       CALL FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
 
 ! debug - check variable PASIN, RFSCREDPRC
-       WRITE(6,1013) CURIRUN,CURCALYR,CURITR,NCRL,(PASIN(I,CURIYR),I=1,MNUMCR)
-       WRITE(6,1013) CURIRUN,CURCALYR,CURITR,NCRL,(PDSCM(I,CURIYR),I=1,MNUMCR)
-       WRITE(6,1013) CURIRUN,CURCALYR,CURITR,NCRL,(RFSCREDPRC(I,CURIYR),I=1,4)
-1013   FORMAT(1X,"CHECK RUN TO LFMM",4(":",I4),11(1x,F9.4))
+
+!       WRITE(6,1013) CURIRUN,CURCALYR,CURITR,NCRL,(PASIN(I,CURIYR),I=1,MNUMCR)
+!       WRITE(6,1013) CURIRUN,CURCALYR,CURITR,NCRL,(PDSCM(I,CURIYR),I=1,MNUMCR)
+!       WRITE(6,1013) CURIRUN,CURCALYR,CURITR,NCRL,(RFSCREDPRC(I,CURIYR),I=1,4)
+!1013   FORMAT(1X,"CHECK RUN TO LFMM",4(":",I4),11(1x,F9.4))
 
       End subroutine
 
@@ -1797,9 +1798,9 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
       call WriteGDXElement(pgdxB, 1, 'LCFSOPT', 'LCFS SWITCH', LCFSOPT, 1,1,1,1,1,  i2,j2,k,l,m,'I')
       call WriteGDXElement(pgdxB, 1, 'AB32SW', 'AB32 SWITCH', AB32SW, 1,1,1,1,1,  i2,j2,k,l,m,'I')
       call WriteGDXElement(pgdxB, 1, 'LEGIRA', 'IRA SWITCH', LEGIRA, 1,1,1,1,1,  i2,j2,k,l,m,'I')
-      call WriteGDXElement(pgdxB, 1, 'TAX_FLAG', 'EPMCNTL MAIN TAX SWITCH', TAX_FLAG, 1,1,1,1,1,  i2,j2,k,l,m,'I')
-      call WriteGDXElement(pgdxB, 1, 'ELEC_FLAG', 'EPMCNTL EMM ONLY TAX SWITCH', ELEC_FLAG, 1,1,1,1,1,  i2,j2,k,l,m,'I')
-      call WriteGDXElement(pgdxB, 1, 'TRAN_FLAG', 'EPMCNTL TRAN ONLY TAX SWITCH', TRAN_FLAG, 1,1,1,1,1,  i2,j2,k,l,m,'I')
+      call WriteGDXElement(pgdxB, 1, 'TAX_FLAG', 'EPMCNTL MAIN TAX SWITCH', TAX_FLAG .NE. 0, 1,1,1,1,1,  i2,j2,k,l,m,'I')
+      call WriteGDXElement(pgdxB, 1, 'ELEC_FLAG', 'EPMCNTL EMM ONLY TAX SWITCH', ELEC_FLAG .NE. 0, 1,1,1,1,1,  i2,j2,k,l,m,'I')
+      call WriteGDXElement(pgdxB, 1, 'TRAN_FLAG', 'EPMCNTL TRAN ONLY TAX SWITCH', TRAN_FLAG .NE. 0, 1,1,1,1,1,  i2,j2,k,l,m,'I')
       call WriteGDXElement(pgdxB, 1, 'CO2PLFMM', 'CO2PLFMM SWITCH', CO2PLFMM, 1,1,1,1,1,  i2,j2,k,l,m,'I')
       call WriteGDXElement(pgdxB, 1, 'CRUDEXP', 'CRUDEXP SWITCH', CRUDEXP, 1,1,1,1,1,  i2,j2,k,l,m,'I')
 
@@ -2177,7 +2178,7 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
       READ(IUNIT1,*)  LFadjhistON, HISTCALFYR, HISTCALLYR    ! first and last hist year used for calibration
 
       RLHISTYR=MIN(HISTLYR,2008-1989)
-      WRITE(6,*)'HISTLYR ',HISTLYR,RLHISTYR,HISTCALFYR,HISTCALLYR,LFadjhistON,LFadjsteoON,LFadjvolON
+!      WRITE(6,*)'HISTLYR ',HISTLYR,RLHISTYR,HISTCALFYR,HISTCALLYR,LFadjhistON,LFadjsteoON,LFadjvolON
 
 
       IF ((CURIYR .EQ. 1) .AND. (CURITR.EQ.1)) THEN
@@ -3120,14 +3121,14 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
       CALL PMM_NEXTDATA(IUNIT1)
 !      WRITE(6,*) 'Refinery fuel use...'
 ! 3/8/16 em4 read through STEO years for side case overwrites
-      DO J =1,STEOLYR
+      DO J =1,STEOLYR-2 
        READ(IUNIT1,35) (QCLRF(I,J),I = 1,DMDRGNS)  ! REFINERY FUEL USE
        READ(IUNIT1,35) (QDSRF(I,J),I = 1,DMDRGNS)
        READ(IUNIT1,35) (QELRF(I,J),I = 1,DMDRGNS)
        READ(IUNIT1,35) (QLGRF(I,J),I = 1,DMDRGNS)
        READ(IUNIT1,35) (QNGRF(I,J),I = 1,DMDRGNS)
        READ(IUNIT1,35) (QOTRF(I,J),I = 1,DMDRGNS)
-       READ(IUNIT1,35) (QCCRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QCCRF(I,J),I = 1,DMDRGNS) 
        READ(IUNIT1,35) (QRSRF(I,J),I = 1,DMDRGNS)
        READ(IUNIT1,35) (QSGRF(I,J),I = 1,DMDRGNS)
         QCLRF(MNUMCR,J) = 0.0
@@ -3174,7 +3175,46 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
 !        ENDDO
 !      ENDIF
 
-      ENDDO      ! end year loop
+      ENDDO      ! end hist year loop
+
+!Duplicate above but remove QCCRF
+      DO J =STEOLYR-1,STEOLYR 
+       READ(IUNIT1,35) (QCLRF(I,J),I = 1,DMDRGNS)  ! REFINERY FUEL USE
+       READ(IUNIT1,35) (QDSRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QELRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QLGRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QNGRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QOTRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QRSRF(I,J),I = 1,DMDRGNS)
+       READ(IUNIT1,35) (QSGRF(I,J),I = 1,DMDRGNS)
+        QCLRF(MNUMCR,J) = 0.0
+        QDSRF(MNUMCR,J) = 0.0
+        QELRF(MNUMCR,J) = 0.0
+        QLGRF(MNUMCR,J) = 0.0
+        QNGRF(MNUMCR,J) = 0.0
+        QOTRF(MNUMCR,J) = 0.0
+        QRSRF(MNUMCR,J) = 0.0
+        QSGRF(MNUMCR,J) = 0.0
+       DO I =1,DMDRGNS
+        QCLRF(MNUMCR,J) = QCLRF(MNUMCR,J) + QCLRF(I,J)
+        QDSRF(MNUMCR,J) = QDSRF(MNUMCR,J) + QDSRF(I,J)
+        QELRF(MNUMCR,J) = QELRF(MNUMCR,J) + QELRF(I,J)
+        QLGRF(MNUMCR,J) = QLGRF(MNUMCR,J) + QLGRF(I,J)
+        QNGRF(MNUMCR,J) = QNGRF(MNUMCR,J) + QNGRF(I,J)
+        QOTRF(MNUMCR,J) = QOTRF(MNUMCR,J) + QOTRF(I,J)
+        QRSRF(MNUMCR,J) = QRSRF(MNUMCR,J) + QRSRF(I,J)
+        QSGRF(MNUMCR,J) = QSGRF(MNUMCR,J) + QSGRF(I,J)
+       ENDDO
+       DO I=1,MNUMCR
+         QPCRF(I,J) = 0.0
+       ENDDO
+
+       QNGRF(MNUMCR,J) = QNGRF(MNUMCR,J) + RFQNGPF(MNUMCR,J)
+       DO I=1,DMDRGNS
+         QNGRF(I,J) = QNGRF(I,J) * ( QNGRF(MNUMCR,J) / (QNGRF(MNUMCR,J) - RFQNGPF(MNUMCR,J)) )
+       ENDDO
+
+      ENDDO      ! end steo year loop
 
 !   SHOULD WE STILL BE USING QRLRF INSTEAD OF QRSRF???
       DO I=1,DMDRGNS                             ! Census Division loop
@@ -3197,6 +3237,13 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
         SIDE_QSGRF(I,J) = QSGRF(I,J)
         SIDE_QRLRF(I,J) = QRLRF(I,J)
        ENDDO
+      ENDDO
+
+!Begin QCCRF STEO data added 8-7-24
+      CALL PMM_NEXTDATA(IUNIT1)                  !
+!      WRITE(6,*) 'QCCRF...'
+      DO J= HISTLYR-1,HISTLYR
+       READ(IUNIT1,46) QCCRF(MNUMCR,J)          !  PRODUCT SUPPLIED
       ENDDO
 
 ! IF BENCHMARK YEARS, SAVE MODEL RESULTS AND BEFORE READING IN HISTORICAL END-USE PRICE DATA

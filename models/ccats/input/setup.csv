@@ -1,0 +1,45 @@
+parameter,value,type,description
+threads,4,int,number of threads to use (Python code + optimization)
+hist_setup,hist_setup.csv,input_file,Historical Data setup file
+fin_setup,fin_setup.csv,input_file,Financial Assumptions setup file
+preproc_setup,preproc_setup.csv,input_file,Preprocessor setup file
+opt_setup,opt_setup.csv,input_file,Optimization setup file
+postproc_setup,postproc_setup.csv,input_file,Postprocessor setup file
+restart_in,restart_CCATSin.unf,input_file,Restart file input for local standalone CCATS runs
+restart_out,restart_CCATSo.unf,output_file,Restart file output by CCATS
+preproc_switch,TRUE,switch,Run CCATS Preprocessor if True
+ccats_opt_switch,TRUE,switch,Run CCATS Optimization if True
+postproc_switch,TRUE,switch,Run CCATS Postprocessor if True
+output_switch,TRUE,switch,Run CCATS Output Processor if True
+update_45q_switch,TRUE,switch,Update the 45Q policy path with input from setup.txt "eor_45q" and "saline_45q" variables if True
+debug_switch,FALSE,switch,Output debug files if True (will result in longer model runtime)
+debug_restart_itr_switch,FALSE,switch,Output the restart file debug file every iteration if True (will result in slightly longer model runtime)
+write_restart_before_run_switch,FALSE,switch,Output the restart file debug received by CCATS before running if True
+output_restart_unf_switch,FALSE,switch,Output the restart file as a .unf after running CCATS if True
+visualize_preproc_switch,FALSE,switch,Output folium visualizations of optimization inputs if True
+visualize_postproc_switch,FALSE,switch,Output folium visualizations of optimization outputs if True
+pytest_switch,FALSE,switch,Perform pytest internal validation tests if True
+price_reset_switch,FALSE,switch,Reset CO2 prices to produce endogenous CO2 prices from models which would otherwise have 0 CO2 capture if True
+price_reset_value_45q,-35,input_variable,CO2 price reset value when "price_reset_switch" == True
+price_reset_value_ntc,-9.52,input_variable,CO2 price reset value when "price_reset_switch" == True
+price_average_switch,TRUE,switch,CO2 prices are set as a weighted average of duals by CD if True
+price_marginal_switch,FALSE,switch,CO2 prices are set as the marginal CO2 price by CD if True
+linear_model_switch,TRUE,switch,Model is run as a linear model (vs. a MIP) if True
+mapping,mapping.csv,input_file,Regionl NEMS mapping (i.e. census divisions to census regions)
+co2_eor_mapping,co2_eor_mapping.csv,input_file,Mapping of CO2 EOR plays to census divisions/census regions
+idm_mapping,idm_mapping.csv,input_file,Mapping of IDM CO2 capture volumes from cenesus regions to census divisions based on historical production ratios
+co2_supply_index,co2_supply_index.csv,input_file,Mapping of CO2 capture facility types to NEMS Restart variable index
+co2_seq_index,co2_seq_index.csv,input_file,Mapping of CO2 sequestration types to NEMS Restart variable index
+year_start,2024,input_variable,First model run year
+year_aeo,2025,input_variable,AEO year
+year_final,2050,input_variable,Final model run year
+year_base_price,1987,input_variable,Base $ year
+eor_45q,60,input_variable,Current 45Q tax credit value for CO2 EOR
+saline_45q,85,input_variable,Current 45Q tax credit value for saline formation storage
+year_new_45q,2022,input_variable,Year current 45Q tax credit policy took effect
+year_45q_duration,12,45Q tax credit policy duration,years
+year_45q_last_new,2038,Final year for which new 45Q-eligible facilities can be retrofit/built,year
+legacy_eor_45q,35,Legacy 45Q tax credit value for CO2 EOR
+legacy_saline_45q,50,Legacy 45Q tax credit value for saline formation storage
+year_leg_45q,2017,Year legacy tax credit value took effect
+supply_select_ts_penalty,1,input_variable,Penalty for ts node costs in the model

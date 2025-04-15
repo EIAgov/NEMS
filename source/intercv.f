@@ -1,6 +1,7 @@
 ! $Header: m:/default/source/RCS/intercv.f,v 1.63 2019/06/20 20:36:49 pkc Exp $
       PROGRAM INTERCV
       USE DFLIB
+	  use ifport, only: getenv
 
       IMPLICIT NONE
 
@@ -28,7 +29,7 @@
       include 'wrenew'
       include 'continew'
 
-      INTEGER IRESTART,FMT(2),FIRST_YEAR,LAST_YEAR,TOTAL_NOT_CONVERGED
+      INTEGER IRESTART,FMT(2),FIRST_YEAR,LAST_YEAR,TOTAL_NOT_CONVERGED, NOW
 
       LOGICAL FILE_EXIST
       CHARACTER*100 DICTNAME,RESTART(2),CONVERGE_FILE, FILERNAME,VARLISTNAME
@@ -127,7 +128,7 @@
        'QTRRS','QTRCM','QTRTR','QTRIN','QTREL','QTRSN','QTRHM','QTRAS', &
        'QEIEL','QCIIN', &
        'QTSRS','QTSCM','QTSTR','QTSIN','QTSRF','QTSEL','QTSSN','QTSHM','QTSAS', &
-       'QH1TR','QH2TR','QH3TR'/
+       'QH1TR','QH2TR','QH3TR','QH2IN','QH2INPF','QH2INHP'/
 
 ! +++ PRICE Variables:
       DATA MPVARSL/ &
@@ -169,7 +170,7 @@
 ! Check for command line argument for min_score to consider as convergence
       min_score=2.7
       CALL GETARG (1, min_score_c)
-
+	  NOW=1
       if(len_trim(min_score_c).eq.0) then
         min_score=2.7
       else
@@ -180,7 +181,7 @@
       debug_flag='debug'
       
 ! get environment strings n and nruns that are set in cycle.sh which usually runs this program.
-
+      CALL TIME(NOW)
       irun=3
       nruns=3
       n_envstr=' '
@@ -191,14 +192,18 @@
       call getenv('doemall',doemall_envstr)
       if(n_envstr.ne.' ') then
          read(n_envstr,*,err=16,end=16) irun
+		 CALL TIME(NOW)
       endif
 16 continue
       if(nruns_envstr.ne.' ') then
          read(nruns_envstr,*,err=17,end=17) nruns
+		 CALL TIME(NOW)
       endif
 17 continue
       if(doemall_envstr.ne.' ') then
          read(doemall_envstr,*,err=18,end=18) doemall
+		 WRITE(6,*) "LINE 205 INTERCV"
+		 CALL TIME(NOW)
       endif
 18 continue
 
@@ -247,6 +252,7 @@
           CALL RELAX      ! Apply relaxation between cycles.  
           CALL OUTPUT_RESTART('restart.rlx')
           write(6,*) 'Relaxed convergence variables written to restart.rlx'
+		  CALL TIME(NOW)
       ENDIF
 
       REASONMOD = 'Other '
@@ -255,14 +261,16 @@
       IF (CONTINH .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONH
-         REASONMOD=SUBR_NAMES(13)
+         REASONMOD=SUBR_NAMES(14)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINW .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONW
          REASONMOD=SUBR_NAMES(1)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINN .EQ. 0) THEN              !  0 is fail
          REASONYES=0
@@ -275,83 +283,100 @@
          REASONCHR=REASONR
          REASONMOD=SUBR_NAMES(3)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINK .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONK
          REASONMOD=SUBR_NAMES(4)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINT .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONT
          REASONMOD=SUBR_NAMES(6)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINI .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONI
          REASONMOD=SUBR_NAMES(5)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINL .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONL
          REASONMOD=SUBR_NAMES(9)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTING .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONG
          REASONMOD=SUBR_NAMES(10)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINC .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONC
          REASONMOD=SUBR_NAMES(8)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINM .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONM
          REASONMOD=SUBR_NAMES(2)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINO .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONO
          REASONMOD=SUBR_NAMES(11)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (CONTINE .EQ. 0) THEN              !  0 is fail
          REASONYES=0
          REASONCHR=REASONE
          REASONMOD=SUBR_NAMES(7)
          write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+		 CALL TIME(NOW)
       ENDIF
       IF (AVE_SCORE .GT. MIN_SCORE) PFGPA = 1
       if(irun.lt.nruns) then
         if(pfgpa .eq. 1 .and. reasonyes .eq. 1) then
           write(6,'(a)') 'A passing GPA and no model events.   We can stop early.'
+		    CALL TIME(NOW)
           stop 1   ! cycle.sh can pick this return code up and exit loop
+
         else if (reasonyes .eq. 0) then
           write (6,'(" We continue cycling.   GPA:",a8,a8,a20)') &
       PASSFAIL(PFGPA),trim(REASONMOD)//":",trim(REASONCHR)
+	      CALL TIME(NOW)
         else
           write (6,'(" We continue cycling.   GPA:",a8,a8,a8)') &
       PASSFAIL(PFGPA),trim(REASONMOD)//":",PASSFAIL(REASONYES)
+	  	  CALL TIME(NOW)
         endif
       else         ! if last cycle, including if only cycle
         if(pfgpa .eq. 1 .and. reasonyes .eq. 1) then
           write(6,'("Congratulations for passing our rigorous testing standards.   GPA:",a8,a20,a8)') &
       PASSFAIL(PFGPA),trim(REASONCHR)//":",PASSFAIL(REASONYES)
+	      CALL TIME(NOW)
         else if (reasonyes .eq. 0) then
           write (6,'(" Warning:  additional run cycles may be needed.   GPA:",a8,a8,a20)') &
       PASSFAIL(PFGPA),trim(REASONMOD)//":",trim(REASONCHR)
+	  	  CALL TIME(NOW)
         else
           write (6,'(" Warning:  additional run cycles may be needed.   GPA:",a8,a8,a8)') &
       PASSFAIL(PFGPA),trim(REASONMOD)//":",PASSFAIL(REASONYES)
+	  	  CALL TIME(NOW)
         endif
       endif
       stop
@@ -374,7 +399,9 @@
       FNAMEO=' '
       FRETCD=0
       FUNFMT=0
+	  CALL TIME(NOW)
       CALL FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
+	  CALL TIME(NOW)
 
       RETURN
       END SUBROUTINE INITIALIZE_FILER
@@ -1087,9 +1114,7 @@
        ' PUREL' ,                  & !  99 Uranium
        'EMETAX',                   & ! 100 CO2 ALLOWANCE
        'EMELPSO2',                 & ! 101 SO2 Allowance
-       'ECP_PHG',                  & ! 102 Mercury Allowance
-! future?       'OGWPRNG',                  & ! 103 Natural Gas Wellhead Price
-       ' ',' ', ' ', ' '/
+       'ECP_PHG'/                    ! 102 Mercury Allowance
 
       character*27 tempa
 ! Assign a grade score to intercycle converge, ala GPA:  4:A, ..0:F
@@ -1104,7 +1129,7 @@
 ! SO2 ALlowance            1     6: EMELPSO2 (101)
 ! Mercury                  1     7: ecp_phg (102)   
 
-       integer weight_cl(MNUMCVTST)/8*1,0,4*2,35*0,2,0,0,8*3,4*4,35*0,4,5,6,7,4*0/
+       integer weight_cl(MNUMCVTST)/8*1,0,4*2,35*0,2,0,0,8*3,4*4,35*0,4,5,6,7/
        real*4 weight_start(7)/24.5,24.5,24.5,24.5,0.,1.,1./,weight(7)
        real*4 weight_sum(7),weight_count(7),score
      real*4 frcchg2,abschg2,rev1,rev2,ave
@@ -1522,7 +1547,7 @@ implicit none
       INTEGER NUMQ_AS
       INTEGER MNUMQ,IQUAN
       INTEGER NQ
-      PARAMETER (NQ=157)
+      PARAMETER (NQ=160)
       INTEGER NUMQAS(NQ)
 
       DATA NUMQAS/ &
@@ -1557,7 +1582,7 @@ implicit none
            -1,-1,-1,-1,-1,-1,-1, 7,     & ! QTRRS,QTRCM,QTRTR,QTRIN,QTREL,QTRSN,QTRHM,QTRAS,
             0, 0,                       & ! QEIEL,QCIIN,
            -1,-1,-1,-1,-1,-1,-1,-1, 8,  & ! QTSRS,QTSCM,QTSTR,QTSIN,QTSRF,QTSEL,QTSSN,QTSHM,QTSAS
-            0, 0, 0/                      ! QH1TR,QH2TR,QH3TR
+            0, 0, 0, 0, 0, 0/             ! QH1TR,QH2TR,QH3TR,QH2IN,QH2INPF,QH2INHP
 
       IF (NQ.NE.MNUMQ) THEN
          WRITE(*,*) ' PARAMETER MNUMQ (DIMENSION OF MAIN QUANTITY ARRAY' &
@@ -1728,3 +1753,29 @@ implicit none
 
       RETURN
       END SUBROUTINE COPY_TO_LOCAL_ADJUSTED
+
+      SUBROUTINE TIME(NOW)
+      integer*1 now
+	  integer :: values(8)
+      real    :: rTime
+
+  ! Get the values
+      call date_and_time(values=values)
+
+  ! From https://gcc.gnu.org/onlinedocs/gfortran/DATE_005fAND_005fTIME.html
+  ! values(5) ... The hour of the day
+  ! values(6) ... The minutes of the hour
+  ! values(7) ... The seconds of the minute
+  ! values(8) ... The milliseconds of the second 
+
+  ! Calculate time since midnight
+      rTime = ( values(5) )*60.         ! Hours to minutes
+      rTime = ( rTime + values(6) )*60. ! Minutes to seconds
+      rTime = ( rTime + values(7) )*1e3 ! Seconds to milliseconds
+      rTime = rTime + values(8)         ! Add milliseconds
+
+  ! Time in seconds 
+      WRITE(6,*) 'Time (ms) since midnight', rTime
+	  write(6,'("Time (ms) since midnight:",I4)') rTime
+	  !write(6,'("Pass/Fail:",I4,"  Reason: ",A20,"  Model: ",A6)') REASONYES,REASONCHR,REASONMOD
+      END SUBROUTINE TIME

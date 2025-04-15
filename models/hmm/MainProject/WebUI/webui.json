@@ -1,0 +1,732 @@
+{
+  "version": "4.67.0",
+  "application": {
+    "aimms.widget.type": {
+      "literal": "application"
+    },
+    "browsername": {
+      "aimms": {
+        "contents": [
+          "webui::ClientBrowserName"
+        ]
+      }
+    },
+    "browsertimezone": {
+      "aimms": {
+        "contents": [
+          "webui::BrowserTimeZone"
+        ]
+      }
+    },
+    "ignoredst": {
+      "aimms": {
+        "contents": [
+          "webui::IgnoreDST"
+        ]
+      }
+    },
+    "pages": {
+      "literal": {
+        "name": "root",
+        "slug": "root",
+        "children": [
+          {
+            "name": "Main Project",
+            "slug": "main_project",
+            "children": [
+              {
+                "name": "home",
+                "slug": "home",
+                "type": "pagev2-grid",
+                "children": [
+                  {
+                    "name": "HourlyElectrolyzerLCOE",
+                    "type": "pagev2-grid",
+                    "slug": "hourlyelectrolyzerlcoe",
+                    "children": []
+                  },
+                  {
+                    "name": "LCOH",
+                    "type": "pagev2-grid",
+                    "slug": "new_page_1",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "name": "new side panel page",
+                "type": "pagev2-grid-sidepanel",
+                "slug": "new_side_panel_page",
+                "children": [
+                  {
+                    "name": "new page",
+                    "type": "pagev2-grid",
+                    "slug": "new_page",
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "name": "H2Demand",
+                "type": "pagev2-grid",
+                "slug": "h_2_demand",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "theme.classic": {
+      "literal": "NOT_ALLOWED"
+    },
+    "timezone": {
+      "aimms": {
+        "contents": [
+          "webui::DisplayTimeZone"
+        ]
+      }
+    },
+    "timezone.dst.readonly": {
+      "aimms": {
+        "contents": [
+          "webui::DefaultDSTSettingForDisplayTimeZone"
+        ]
+      }
+    }
+  },
+  "pages/h_2_demand": {
+    "aimms.widget.type": {
+      "literal": "pagev2-grid"
+    },
+    "layoutId": {
+      "literal": "Layout10"
+    }
+  },
+  "pages/home": {
+    "aimms.widget.type": {
+      "literal": "pagev2-grid"
+    },
+    "bindings": {
+      "literal": [
+        {
+          "widgetUri": "Select NERC Region",
+          "gridArea": "area-b",
+          "dndId": "area-bSelect NERC Region0"
+        },
+        {
+          "widgetUri": "ui_YearSelect",
+          "gridArea": "area-b",
+          "dndId": "area-aui_YearSelect2"
+        },
+        {
+          "widgetUri": "HourlyElectrolyzerChart",
+          "gridArea": "area-a",
+          "dndId": "area-aHourlyElectrolyzerChart1"
+        }
+      ]
+    },
+    "layoutId": {
+      "literal": "Layout10"
+    },
+    "widgets": {
+      "literal": [
+        {
+          "uri": "HourlyElectrolyzerChart",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        },
+        {
+          "uri": "ui_YearSelect",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        },
+        {
+          "uri": "Select NERC Region",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        }
+      ]
+    }
+  },
+  "pages/hourlyelectrolyzerlcoe": {
+    "bindings": {
+      "literal": [
+        {
+          "widgetUri": "ElectrolyzerHourlyDebug",
+          "gridArea": "area-a",
+          "dndId": "Unassigned widgetsElectrolyzerHourlyDebug"
+        }
+      ]
+    },
+    "widgets": {
+      "literal": [
+        {
+          "uri": "ElectrolyzerHourlyDebug",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        }
+      ]
+    },
+    "aimms.widget.type": {
+      "literal": "pagev2-grid"
+    }
+  },
+  "pages/new_page_1": {
+    "aimms.widget.type": {
+      "literal": "pagev2-grid"
+    },
+    "bindings": {
+      "literal": [
+        {
+          "widgetUri": "legend_hourly_lcoh",
+          "gridArea": "area-c",
+          "dndId": "area-clegend_hourly_lcoh4"
+        },
+        {
+          "widgetUri": "year_select",
+          "gridArea": "area-b",
+          "dndId": "area-byear_select0"
+        },
+        {
+          "widgetUri": "region_select",
+          "gridArea": "area-b",
+          "dndId": "area-bregion_select1"
+        },
+        {
+          "widgetUri": "season_select",
+          "gridArea": "area-b",
+          "dndId": "area-bseason_select2"
+        },
+        {
+          "widgetUri": "hourly_lcoh",
+          "gridArea": "area-a",
+          "dndId": "area-ahourly_lcoh3"
+        }
+      ]
+    },
+    "layoutId": {
+      "literal": "Layout10"
+    },
+    "widgets": {
+      "literal": [
+        {
+          "uri": "year_select",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        },
+        {
+          "uri": "region_select",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        },
+        {
+          "uri": "season_select",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        },
+        {
+          "uri": "hourly_lcoh",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        },
+        {
+          "uri": "legend_hourly_lcoh",
+          "layoutInfo": {
+            "width": "2",
+            "height": "1"
+          }
+        }
+      ]
+    }
+  },
+  "widgets/ElectrolyzerHourlyDebug": {
+    "aimms.widget.type": {
+      "literal": "barchart"
+    },
+    "contents": {
+      "aimms": {
+        "slices": [
+          {
+            "identifier": "ui_fixedOMElectrolyzer",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "fixed-element",
+                "value": "CASO"
+              },
+              {
+                "index": "seas",
+                "type": "fixed-element",
+                "value": "1"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_hourlyfuelcost",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "fixed-element",
+                "value": "CASO"
+              },
+              {
+                "index": "seas",
+                "type": "fixed-element",
+                "value": "1"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_varOMElectrolyzer",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "fixed-element",
+                "value": "CASO"
+              },
+              {
+                "index": "seas",
+                "type": "fixed-element",
+                "value": "1"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_45VTaxCredit",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "fixed-element",
+                "value": "CASO"
+              },
+              {
+                "index": "seas",
+                "type": "fixed-element",
+                "value": "1"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              }
+            ]
+          }
+        ],
+        "contents": [
+          "ui_hourlyfuelcost",
+          "ui_varOMElectrolyzer",
+          "ui_fixedOMElectrolyzer",
+          "ui_45VTaxCredit"
+        ],
+        "prefix": "aimms"
+      }
+    },
+    "contents.partition": {
+      "literal": {
+        "header": [
+          "hr"
+        ],
+        "grouped": [
+          "regNERC"
+        ],
+        "stacked": [
+          "seas",
+          "<IDENTIFIER-SET>"
+        ],
+        "aggregated": []
+      }
+    },
+    "name": {
+      "literal": "ElectrolyzerHourlyDebug"
+    }
+  },
+  "widgets/hourly_lcoh": {
+    "aimms.widget.type": {
+      "literal": "barlinechart"
+    },
+    "contents": {
+      "aimms": {
+        "slices": [
+          {
+            "identifier": "ui_fixedOMElectrolyzer",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelectNERC"
+              },
+              {
+                "index": "seas",
+                "type": "element-parameter",
+                "value": "ui_seasonSelect"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "year",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_hourlyfuelcost",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelectNERC"
+              },
+              {
+                "index": "seas",
+                "type": "element-parameter",
+                "value": "ui_seasonSelect"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "year",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_totalElectrolyzerLCOH",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelectNERC"
+              },
+              {
+                "index": "seas",
+                "type": "element-parameter",
+                "value": "ui_seasonSelect"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "year",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              },
+              {
+                "index": "creditStep",
+                "type": "fixed-element",
+                "value": "45V"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_varOMElectrolyzer",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelectNERC"
+              },
+              {
+                "index": "seas",
+                "type": "element-parameter",
+                "value": "ui_seasonSelect"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "year",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              }
+            ]
+          },
+          {
+            "identifier": "ui_45VTaxCredit",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelectNERC"
+              },
+              {
+                "index": "seas",
+                "type": "element-parameter",
+                "value": "ui_seasonSelect"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "year",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              }
+            ]
+          }
+        ],
+        "contents": [
+          "ui_totalElectrolyzerLCOH",
+          "ui_varOMElectrolyzer",
+          "ui_hourlyfuelcost",
+          "ui_fixedOMElectrolyzer",
+          "ui_45VTaxCredit"
+        ],
+        "prefix": "aimms"
+      }
+    },
+    "contents.partition": {
+      "literal": {
+        "header": [
+          "hr"
+        ],
+        "grouped": [
+          "seas"
+        ],
+        "stacked": [
+          "creditStep",
+          "regNERC",
+          "<IDENTIFIER-SET>"
+        ],
+        "aggregated": [
+          "year"
+        ]
+      }
+    },
+    "name": {
+      "literal": "hourly_lcoh"
+    }
+  },
+  "widgets/HourlyElectrolyzerChart": {
+    "aimms.widget.type": {
+      "literal": "linechart"
+    },
+    "contents": {
+      "aimms": {
+        "slices": [
+          {
+            "identifier": "HourlyElectricityConsumedElectrolyzer",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelect"
+              },
+              {
+                "index": "seas",
+                "type": "free",
+                "value": "seas"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "year",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              }
+            ]
+          },
+          {
+            "identifier": "ElecCurtailedByYear",
+            "slice": [
+              {
+                "index": "regNERC",
+                "type": "element-parameter",
+                "value": "ui_regionSelectNERC"
+              },
+              {
+                "index": "seas",
+                "type": "free",
+                "value": "seas"
+              },
+              {
+                "index": "hr",
+                "type": "free",
+                "value": "hr"
+              },
+              {
+                "index": "i_calYear",
+                "type": "element-parameter",
+                "value": "ui_yearSelect"
+              }
+            ]
+          }
+        ],
+        "contents": [
+          "ElecCurtailedByYear",
+          "HourlyElectricityConsumedElectrolyzer"
+        ],
+        "prefix": "aimms"
+      }
+    },
+    "contents.displaydomain": {
+      "literal": {
+        "hourlyelectricityconsumedelectrolyzer": "hr"
+      }
+    },
+    "contents.partition": {
+      "literal": {
+        "header": [
+          "hr"
+        ],
+        "stacked": [
+          "seas"
+        ],
+        "overlays": [
+          "<IDENTIFIER-SET>"
+        ],
+        "aggregated": []
+      }
+    },
+    "name": {
+      "literal": "HourlyElectrolyzerChart"
+    }
+  },
+  "widgets/legend_hourly_lcoh": {
+    "aimms.widget.type": {
+      "literal": "legend"
+    },
+    "contents": {
+      "aimms": {
+        "contents": [
+          "ui_45VTaxCredit",
+          "ui_fixedOMElectrolyzer",
+          "ui_hourlyfuelcost",
+          "ui_totalElectrolyzerLCOH",
+          "ui_varOMElectrolyzer"
+        ]
+      }
+    },
+    "name": {
+      "literal": "legend_hourly_lcoh"
+    }
+  },
+  "widgets/region_select": {
+    "aimms.widget.type": {
+      "literal": "selectionbox-v2"
+    },
+    "contents": {
+      "aimms": {
+        "contents": [
+          "ui_regionSelectNERC"
+        ],
+        "slices": []
+      }
+    },
+    "name": {
+      "literal": "region_select"
+    }
+  },
+  "widgets/season_select": {
+    "aimms.widget.type": {
+      "literal": "selectionbox-v2"
+    },
+    "contents": {
+      "aimms": {
+        "contents": [
+          "ui_seasonSelect"
+        ],
+        "slices": []
+      }
+    },
+    "name": {
+      "literal": "season_select"
+    }
+  },
+  "widgets/Select NERC Region": {
+    "aimms.widget.type": {
+      "literal": "selectionbox-v2"
+    },
+    "contents": {
+      "aimms": {
+        "contents": [
+          "ui_regionSelectNERC"
+        ],
+        "slices": []
+      }
+    },
+    "name": {
+      "literal": "Select NERC Region"
+    }
+  },
+  "widgets/ui_YearSelect": {
+    "aimms.widget.type": {
+      "literal": "selectionbox-v2"
+    },
+    "contents": {
+      "aimms": {
+        "contents": [
+          "ui_yearSelect"
+        ],
+        "slices": []
+      }
+    },
+    "name": {
+      "literal": "ui_YearSelect"
+    }
+  },
+  "widgets/year_select": {
+    "aimms.widget.type": {
+      "literal": "selectionbox-v2"
+    },
+    "contents": {
+      "aimms": {
+        "contents": [
+          "ui_yearSelect"
+        ],
+        "slices": []
+      }
+    },
+    "name": {
+      "literal": "year_select"
+    }
+  }
+}

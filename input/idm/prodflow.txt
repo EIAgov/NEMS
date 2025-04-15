@@ -1,663 +1,791 @@
-* comment,,,,,,
-* comment.,,,,,,
+* comment,,
+* comment.,,
 1,1,'Number of Steps and Rpt. Groups:',3,0,,
-1,1,1,'AGCROP BLDG','# DownSteps',1,0
-1,1,2,'AGCROP VEH','# DownSteps',1,0
-1,1,3,'AGCROP IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-1,1,1,'AGCROP BLDG','Retire Rate',0.01,
-1,1,2,'AGCROP VEH','Retire Rate',0.01,
-1,1,3,'AGCROP IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-1,1,1,1,'AGCROP BLDG',1,
-1,1,3,1,'AGCROP BLDG',1,
-1,1,1,2,'AGCROP VEH',1,
-1,1,3,2,'AGCROP VEH',1,
-1,1,1,3,'AGCROP IRR',1,
-1,1,3,3,'AGCROP IRR',1,
+1,1,1,'BLDG','# DownSteps',1,0
+1,1,2,'VEH','# DownSteps',1,0
+1,1,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+1,1,1,'BLDG','Retire Rate',0.01,
+1,1,2,'VEH','Retire Rate',0.01,
+1,1,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+1,1,1,1,'BLDG',1,
+1,1,3,1,'BLDG',1,
+1,1,1,2,'VEH',1,
+1,1,3,2,'VEH',1,
+1,1,1,3,'IRR',1,
+1,1,3,3,'IRR',1,
 1,2,'Number of Steps and Rpt. Groups:',3,0,,
-1,2,1,'AGCROP BLDG','# DownSteps',1,0
-1,2,2,'AGCROP VEH','# DownSteps',1,0
-1,2,3,'AGCROP IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-1,2,1,'AGCROP BLDG','Retire Rate',0.01,
-1,2,2,'AGCROP VEH','Retire Rate',0.01,
-1,2,3,'AGCROP IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-1,2,1,1,'AGCROP BLDG',1,
-1,2,3,1,'AGCROP BLDG',1,
-1,2,1,2,'AGCROP VEH',1,
-1,2,3,2,'AGCROP VEH',1,
-1,2,1,3,'AGCROP IRR',1,
-1,2,3,3,'AGCROP IRR',1,
+1,2,1,'BLDG','# DownSteps',1,0
+1,2,2,'VEH','# DownSteps',1,0
+1,2,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+1,2,1,'BLDG','Retire Rate',0.01,
+1,2,2,'VEH','Retire Rate',0.01,
+1,2,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+1,2,1,1,'BLDG',1,
+1,2,3,1,'BLDG',1,
+1,2,1,2,'VEH',1,
+1,2,3,2,'VEH',1,
+1,2,1,3,'IRR',1,
+1,2,3,3,'IRR',1,
 1,3,'Number of Steps and Rpt. Groups:',3,0,,
-1,3,1,'AGCROP BLDG','# DownSteps',1,0
-1,3,2,'AGCROP VEH','# DownSteps',1,0
-1,3,3,'AGCROP IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-1,3,1,'AGCROP BLDG','Retire Rate',0.01,
-1,3,2,'AGCROP VEH','Retire Rate',0.01,
-1,3,3,'AGCROP IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-1,3,1,1,'AGCROP BLDG',1,
-1,3,3,1,'AGCROP BLDG',1,
-1,3,1,2,'AGCROP VEH',1,
-1,3,3,2,'AGCROP VEH',1,
-1,3,1,3,'AGCROP IRR',1,
-1,3,3,3,'AGCROP IRR',1,
+1,3,1,'BLDG','# DownSteps',1,0
+1,3,2,'VEH','# DownSteps',1,0
+1,3,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+1,3,1,'BLDG','Retire Rate',0.01,
+1,3,2,'VEH','Retire Rate',0.01,
+1,3,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+1,3,1,1,'BLDG',1,
+1,3,3,1,'BLDG',1,
+1,3,1,2,'VEH',1,
+1,3,3,2,'VEH',1,
+1,3,1,3,'IRR',1,
+1,3,3,3,'IRR',1,
 1,4,'Number of Steps and Rpt. Groups:',3,0,,
-1,4,1,'AGCROP BLDG','# DownSteps',1,0
-1,4,2,'AGCROP VEH','# DownSteps',1,0
-1,4,3,'AGCROP IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-1,4,1,'AGCROP BLDG','Retire Rate',0.01,
-1,4,2,'AGCROP VEH','Retire Rate',0.01,
-1,4,3,'AGCROP IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-1,4,1,1,'AGCROP BLDG',1,
-1,4,3,1,'AGCROP BLDG',1,
-1,4,1,2,'AGCROP VEH',1,
-1,4,3,2,'AGCROP VEH',1,
-1,4,1,3,'AGCROP IRR',1,
-1,4,3,3,'AGCROP IRR',1,
-*,,,,,,
+1,4,1,'BLDG','# DownSteps',1,0
+1,4,2,'VEH','# DownSteps',1,0
+1,4,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+1,4,1,'BLDG','Retire Rate',0.01,
+1,4,2,'VEH','Retire Rate',0.01,
+1,4,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+1,4,1,1,'BLDG',1,
+1,4,3,1,'BLDG',1,
+1,4,1,2,'VEH',1,
+1,4,3,2,'VEH',1,
+1,4,1,3,'IRR',1,
+1,4,3,3,'IRR',1,
+*,,
 2,1,'Number of Steps and Rpt. Groups:',3,0,,
-2,1,1,'AGOTHR BLDG','# DownSteps',1,0
-2,1,2,'AGOTHR VEH','# DownSteps',1,0
-2,1,3,'AGOTHR IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-2,1,1,'AGOTHR BLDG','Retire Rate',0.01,
-2,1,2,'AGOTHR VEH','Retire Rate',0.01,
-2,1,3,'AGOTHR IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-2,1,1,1,'AGOTHR BLDG',1,
-2,1,3,1,'AGOTHR BLDG',1,
-2,1,1,2,'AGOTHR VEH',1,
-2,1,3,2,'AGOTHR VEH',1,
-2,1,1,3,'AGOTHR IRR',1,
-2,1,3,3,'AGOTHR IRR',1,
+2,1,1,'BLDG','# DownSteps',1,0
+2,1,2,'VEH','# DownSteps',1,0
+2,1,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+2,1,1,'BLDG','Retire Rate',0.01,
+2,1,2,'VEH','Retire Rate',0.01,
+2,1,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+2,1,1,1,'BLDG',1,
+2,1,3,1,'BLDG',1,
+2,1,1,2,'VEH',1,
+2,1,3,2,'VEH',1,
+2,1,1,3,'IRR',1,
+2,1,3,3,'IRR',1,
 2,2,'Number of Steps and Rpt. Groups:',3,0,,
-2,2,1,'AGOTHR BLDG','# DownSteps',1,0
-2,2,2,'AGOTHR VEH','# DownSteps',1,0
-2,2,3,'AGOTHR IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-2,2,1,'AGOTHR BLDG','Retire Rate',0.01,
-2,2,2,'AGOTHR VEH','Retire Rate',0.01,
-2,2,3,'AGOTHR IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-2,2,1,1,'AGOTHR BLDG',1,
-2,2,3,1,'AGOTHR BLDG',1,
-2,2,1,2,'AGOTHR VEH',1,
-2,2,3,2,'AGOTHR VEH',1,
-2,2,1,3,'AGOTHR IRR',1,
-2,2,3,3,'AGOTHR IRR',1,
+2,2,1,'BLDG','# DownSteps',1,0
+2,2,2,'VEH','# DownSteps',1,0
+2,2,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+2,2,1,'BLDG','Retire Rate',0.01,
+2,2,2,'VEH','Retire Rate',0.01,
+2,2,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+2,2,1,1,'BLDG',1,
+2,2,3,1,'BLDG',1,
+2,2,1,2,'VEH',1,
+2,2,3,2,'VEH',1,
+2,2,1,3,'IRR',1,
+2,2,3,3,'IRR',1,
 2,3,'Number of Steps and Rpt. Groups:',3,0,,
-2,3,1,'AGOTHR BLDG','# DownSteps',1,0
-2,3,2,'AGOTHR VEH','# DownSteps',1,0
-2,3,3,'AGOTHR IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-2,3,1,'AGOTHR BLDG','Retire Rate',0.01,
-2,3,2,'AGOTHR VEH','Retire Rate',0.01,
-2,3,3,'AGOTHR IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-2,3,1,1,'AGOTHR BLDG',1,
-2,3,3,1,'AGOTHR BLDG',1,
-2,3,1,2,'AGOTHR VEH',1,
-2,3,3,2,'AGOTHR VEH',1,
-2,3,1,3,'AGOTHR IRR',1,
-2,3,3,3,'AGOTHR IRR',1,
+2,3,1,'BLDG','# DownSteps',1,0
+2,3,2,'VEH','# DownSteps',1,0
+2,3,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+2,3,1,'BLDG','Retire Rate',0.01,
+2,3,2,'VEH','Retire Rate',0.01,
+2,3,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+2,3,1,1,'BLDG',1,
+2,3,3,1,'BLDG',1,
+2,3,1,2,'VEH',1,
+2,3,3,2,'VEH',1,
+2,3,1,3,'IRR',1,
+2,3,3,3,'IRR',1,
 2,4,'Number of Steps and Rpt. Groups:',3,0,,
-2,4,1,'AGOTHR BLDG','# DownSteps',1,0
-2,4,2,'AGOTHR VEH','# DownSteps',1,0
-2,4,3,'AGOTHR IRR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-2,4,1,'AGOTHR BLDG','Retire Rate',0.01,
-2,4,2,'AGOTHR VEH','Retire Rate',0.01,
-2,4,3,'AGOTHR IRR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
-2,4,1,1,'AGOTHR BLDG',1,
-2,4,3,1,'AGOTHR BLDG',1,
-2,4,1,2,'AGOTHR VEH',1,
-2,4,3,2,'AGOTHR VEH',1,
-2,4,1,3,'AGOTHR IRR',1,
-2,4,3,3,'AGOTHR IRR',1,
-*,,,,,,
+2,4,1,'BLDG','# DownSteps',1,0
+2,4,2,'VEH','# DownSteps',1,0
+2,4,3,'IRR','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+2,4,1,'BLDG','Retire Rate',0.01,
+2,4,2,'VEH','Retire Rate',0.01,
+2,4,3,'IRR','Retire Rate',0.01,
+* 'Flow Rates by Step',,
+2,4,1,1,'BLDG',1,
+2,4,3,1,'BLDG',1,
+2,4,1,2,'VEH',1,
+2,4,3,2,'VEH',1,
+2,4,1,3,'IRR',1,
+2,4,3,3,'IRR',1,
+*,,
 3,1,'Number of Steps and Rpt. Groups:',1,0,,
 3,1,1,'COALMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 3,1,1,'COALMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 3,1,1,1,'COALMN',1,
 3,1,3,1,'COALMN',1,
 3,2,'Number of Steps and Rpt. Groups:',1,0,,
 3,2,1,'COALMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 3,2,1,'COALMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 3,2,1,1,'COALMN',1,
 3,2,3,1,'COALMN',1,
 3,3,'Number of Steps and Rpt. Groups:',1,0,,
 3,3,1,'COALMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 3,3,1,'COALMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 3,3,1,1,'COALMN',1,
 3,3,3,1,'COALMN',1,
 3,4,'Number of Steps and Rpt. Groups:',1,0,,
 3,4,1,'COALMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 3,4,1,'COALMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 3,4,1,1,'COALMN',1,
 3,4,3,1,'COALMN',1,
-*,,,,,,
+*,,
 4,1,'Number of Steps and Rpt. Groups:',1,0,,
 4,1,1,'OILGAS','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 4,1,1,'OILGAS','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 4,1,1,1,'OILGAS',1,
 4,1,3,1,'OILGAS',1,
 4,2,'Number of Steps and Rpt. Groups:',1,0,,
 4,2,1,'OILGAS','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 4,2,1,'OILGAS','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 4,2,1,1,'OILGAS',1,
 4,2,3,1,'OILGAS',1,
 4,3,'Number of Steps and Rpt. Groups:',1,0,,
 4,3,1,'OILGAS','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 4,3,1,'OILGAS','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 4,3,1,1,'OILGAS',1,
 4,3,3,1,'OILGAS',1,
 4,4,'Number of Steps and Rpt. Groups:',1,0,,
 4,4,1,'OILGAS','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 4,4,1,'OILGAS','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 4,4,1,1,'OILGAS',1,
 4,4,3,1,'OILGAS',1,
-*,,,,,,
+*,,
 5,1,'Number of Steps and Rpt. Groups:',1,0,,
 5,1,1,'METLMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 5,1,1,'METLMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 5,1,1,1,'METLMN',1,
 5,1,3,1,'METLMN',1,
 5,2,'Number of Steps and Rpt. Groups:',1,0,,
 5,2,1,'METLMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 5,2,1,'METLMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 5,2,1,1,'METLMN',1,
 5,2,3,1,'METLMN',1,
 5,3,'Number of Steps and Rpt. Groups:',1,0,,
 5,3,1,'METLMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 5,3,1,'METLMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 5,3,1,1,'METLMN',1,
 5,3,3,1,'METLMN',1,
 5,4,'Number of Steps and Rpt. Groups:',1,0,,
 5,4,1,'METLMN','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 5,4,1,'METLMN','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 5,4,1,1,'METLMN',1,
 5,4,3,1,'METLMN',1,
-*,,,,,,
+*,,
 6,1,'Number of Steps and Rpt. Groups:',1,0,,
 6,1,1,'CONSTR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 6,1,1,'CONSTR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 6,1,1,1,'CONSTR',1,
 6,1,3,1,'CONSTR',1,
 6,2,'Number of Steps and Rpt. Groups:',1,0,,
 6,2,1,'CONSTR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 6,2,1,'CONSTR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 6,2,1,1,'CONSTR',1,
 6,2,3,1,'CONSTR',1,
 6,3,'Number of Steps and Rpt. Groups:',1,0,,
 6,3,1,'CONSTR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 6,3,1,'CONSTR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 6,3,1,1,'CONSTR',1,
 6,3,3,1,'CONSTR',1,
 6,4,'Number of Steps and Rpt. Groups:',1,0,,
 6,4,1,'CONSTR','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 6,4,1,'CONSTR','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 6,4,1,1,'CONSTR',1,
 6,4,3,1,'CONSTR',1,
-*,,,,,,
-7,1,'Number of Steps and Rpt. Groups:',16,4,,
+*,,
+7,1,'Number of Steps and Rpt. Groups:',24,4,,
 7,1,1,'M/HEAT   ','# DownSteps',1,0
 7,1,2,'M/REFRIG ','# DownSteps',1,0
 7,1,3,'M/MACHDRV','# DownSteps',1,0
-7,1,4,'M/OTHER  ','# DownSteps',1,0
-7,1,5,'D/HEAT   ','# DownSteps',1,0
-7,1,6,'D/REFRIG ','# DownSteps',1,0
-7,1,7,'D/MACHDRV','# DownSteps',1,0
-7,1,8,'D/OTHER  ','# DownSteps',1,0
-7,1,9,'S/HEAT   ','# DownSteps',1,0
-7,1,10,'S/REFRIG ','# DownSteps',1,0
-7,1,11,'S/MACHDRV','# DownSteps',1,0
-7,1,12,'S/OTHER  ','# DownSteps',1,0
-7,1,13,'A/HEAT   ','# DownSteps',1,0
-7,1,14,'A/REFRIG ','# DownSteps',1,0
-7,1,15,'A/MACHDRV','# DownSteps',1,0
-7,1,16,'A/OTHER  ','# DownSteps',1,0
-* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,,,,,,,,,,,,,,,,,
-7,1,1,'Milling    ',4,1,2,3,4,    'Heat','Refrig','MachDrv','Other'
-7,1,2,'Dairy      ',4,5,6,7,8,    'Heat','Refrig','MachDrv','Other'
-7,1,3,'Slaughter  ',4,9,10,11,12, 'Heat','Refrig','MachDrv','Other'
-7,1,4,'AllElse    ',4,13,14,15,16,'Heat','Refrig','MachDrv','Other'
-* 'Retirement Rates by Step',,,,,,
+7,1,4,'M/ELECTRO','# DownSteps',1,0
+7,1,5,'M/OTHER  ','# DownSteps',1,0
+7,1,6,'M/FEEDSTK','# DownSteps',1,0
+7,1,7,'D/HEAT   ','# DownSteps',1,0
+7,1,8,'D/REFRIG ','# DownSteps',1,0
+7,1,9,'D/MACHDRV','# DownSteps',1,0
+7,1,10,'D/ELECTRO','# DownSteps',1,0
+7,1,11,'D/OTHER  ','# DownSteps',1,0
+7,1,12,'D/FEEDSTK','# DownSteps',1,0
+7,1,13,'S/HEAT   ','# DownSteps',1,0
+7,1,14,'S/REFRIG ','# DownSteps',1,0
+7,1,15,'S/MACHDRV','# DownSteps',1,0
+7,1,16,'S/ELECTRO','# DownSteps',1,0
+7,1,17,'S/OTHER  ','# DownSteps',1,0
+7,1,18,'S/FEEDSTK','# DownSteps',1,0
+7,1,19,'A/HEAT   ','# DownSteps',1,0
+7,1,20,'A/REFRIG ','# DownSteps',1,0
+7,1,21,'A/MACHDRV','# DownSteps',1,0
+7,1,22,'A/ELECTRO','# DownSteps',1,0
+7,1,23,'A/OTHER  ','# DownSteps',1,0
+7,1,24,'A/FEEDSTK','# DownSteps',1,0
+* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,
+7,1,1,'Milling    ',6,1,2,3,4,5,6,       'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,1,2,'Dairy      ',6,7,8,9,10,11,12,    'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,1,3,'Slaughter  ',6,13,14,15,16,17,18, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,1,4,'AllElse    ',6,19,20,21,22,23,24, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+* 'Retirement Rates by Step',,
 7,1,1,'M/HEAT   ','Retire Rate',0.017,
 7,1,2,'M/REFRIG ','Retire Rate',0.017,
 7,1,3,'M/MACHDRV','Retire Rate',0.017,
-7,1,4,'M/OTHER  ','Retire Rate',0.017,
-7,1,5,'D/HEAT   ','Retire Rate',0.017,
-7,1,6,'D/REFRIG ','Retire Rate',0.017,
-7,1,7,'D/MACHDRV','Retire Rate',0.017,
-7,1,8,'D/OTHER  ','Retire Rate',0.017,
-7,1,9,'S/HEAT   ','Retire Rate',0.017,
-7,1,10,'S/REFRIG ','Retire Rate',0.017,
-7,1,11,'S/MACHDRV','Retire Rate',0.017,
-7,1,12,'S/OTHER  ','Retire Rate',0.017,
-7,1,13,'A/HEAT   ','Retire Rate',0.017,
-7,1,14,'A/REFRIG ','Retire Rate',0.017,
-7,1,15,'A/MACHDRV','Retire Rate',0.017,
-7,1,16,'A/OTHER  ','Retire Rate',0.017,
-* 'Flow Rates by Step',,,,,,
+7,1,4,'M/ELECTRO','Retire Rate',0.017,
+7,1,5,'M/OTHER  ','Retire Rate',0.017,
+7,1,6,'M/FEEDSTK','Retire Rate',0.017,
+7,1,7,'D/HEAT   ','Retire Rate',0.017,
+7,1,8,'D/REFRIG ','Retire Rate',0.017,
+7,1,9,'D/MACHDRV','Retire Rate',0.017,
+7,1,10,'D/ELECTRO','Retire Rate',0.017,
+7,1,11,'D/OTHER  ','Retire Rate',0.017,
+7,1,12,'D/FEEDSTK','Retire Rate',0.017,
+7,1,13,'S/HEAT   ','Retire Rate',0.017,
+7,1,14,'S/REFRIG ','Retire Rate',0.017,
+7,1,15,'S/MACHDRV','Retire Rate',0.017,
+7,1,16,'S/ELECTRO','Retire Rate',0.017,
+7,1,17,'S/OTHER  ','Retire Rate',0.017,
+7,1,18,'S/FEEDSTK','Retire Rate',0.017,
+7,1,19,'A/HEAT   ','Retire Rate',0.017,
+7,1,20,'A/REFRIG ','Retire Rate',0.017,
+7,1,21,'A/MACHDRV','Retire Rate',0.017,
+7,1,22,'A/ELECTRO','Retire Rate',0.017,
+7,1,23,'A/OTHER  ','Retire Rate',0.017,
+7,1,24,'A/FEEDSTK','Retire Rate',0.017,
+* 'Flow Rates by Step',,
 7,1,1,1,'M/HEAT   ',1,
 7,1,1,2,'M/REFRIG ',1,
 7,1,1,3,'M/MACHDRV',1,
-7,1,1,4,'M/OTHER  ',1,
-7,1,1,5,'D/HEAT   ',1,
-7,1,1,6,'D/REFRIG ',1,
-7,1,1,7,'D/MACHDRV  ',1,
-7,1,1,8,'D/OTHER  ',1,
-7,1,1,9,'S/HEAT   ',1,
-7,1,1,10,'S/REFRIG ',1,
-7,1,1,11,'S/MACHDRV',1,
-7,1,1,12,'S/OTHER  ',1,
-7,1,1,13,'A/HEAT   ',1,
-7,1,1,14,'A/REFRIG ',1,
-7,1,1,15,'A/MACHDRV',1,
-7,1,1,16,'A/OTHER  ',1,
+7,1,1,4,'M/ELECTRO',1,
+7,1,1,5,'M/OTHER  ',1,
+7,1,1,6,'M/FEEDSTK',1,
+7,1,1,7,'D/HEAT   ',1,
+7,1,1,8,'D/REFRIG ',1,
+7,1,1,9,'D/MACHDRV',1,
+7,1,1,10,'D/ELECTRO',1,
+7,1,1,11,'D/OTHER  ',1,
+7,1,1,12,'D/FEEDSTK',1,
+7,1,1,13,'S/HEAT   ',1,
+7,1,1,14,'S/REFRIG ',1,
+7,1,1,15,'S/MACHDRV',1,
+7,1,1,16,'S/ELECTRO',1,
+7,1,1,17,'S/OTHER  ',1,
+7,1,1,18,'S/FEEDSTK',1,
+7,1,1,19,'A/HEAT   ',1,
+7,1,1,20,'A/REFRIG ',1,
+7,1,1,21,'A/MACHDRV',1,
+7,1,1,22,'A/ELECTRO',1,
+7,1,1,23,'A/OTHER  ',1,
+7,1,1,24,'A/FEEDSTK',1,
 7,1,3,1,'M/HEAT   ',1,
 7,1,3,2,'M/REFRIG ',1,
 7,1,3,3,'M/MACHDRV',1,
-7,1,3,4,'M/OTHER  ',1,
-7,1,3,5,'D/HEAT   ',1,
-7,1,3,6,'D/REFRIG ',1,
-7,1,3,7,'D/MACHDRV',1,
-7,1,3,8,'D/OTHER  ',1,
-7,1,3,9,'S/HEAT   ',1,
-7,1,3,10,'S/REFRIG ',1,
-7,1,3,11,'S/MACHDRV',1,
-7,1,3,12,'S/OTHER  ',1,
-7,1,3,13,'A/HEAT   ',1,
-7,1,3,14,'A/REFRIG ',1,
-7,1,3,15,'A/MACHDRV',1,
-7,1,3,16,'A/OTHER  ',1,
-7,2,'Number of Steps and Rpt. Groups:',16,4,,
+7,1,3,4,'M/ELECTRO',1,
+7,1,3,5,'M/OTHER  ',1,
+7,1,3,6,'M/FEEDSTK',1,
+7,1,3,7,'D/HEAT   ',1,
+7,1,3,8,'D/REFRIG ',1,
+7,1,3,9,'D/MACHDRV',1,
+7,1,3,10,'D/ELECTRO',1,
+7,1,3,11,'D/OTHER  ',1,
+7,1,3,12,'D/FEEDSTK',1,
+7,1,3,13,'S/HEAT   ',1,
+7,1,3,14,'S/REFRIG ',1,
+7,1,3,15,'S/MACHDRV',1,
+7,1,3,16,'S/ELECTRO',1,
+7,1,3,17,'S/OTHER  ',1,
+7,1,3,18,'S/FEEDSTK',1,
+7,1,3,19,'A/HEAT   ',1,
+7,1,3,20,'A/REFRIG ',1,
+7,1,3,21,'A/MACHDRV',1,
+7,1,3,22,'A/ELECTRO',1,
+7,1,3,23,'A/OTHER  ',1,
+7,1,3,24,'A/FEEDSTK',1,
+7,2,'Number of Steps and Rpt. Groups:',24,4,,
 7,2,1,'M/HEAT   ','# DownSteps',1,0
 7,2,2,'M/REFRIG ','# DownSteps',1,0
 7,2,3,'M/MACHDRV','# DownSteps',1,0
-7,2,4,'M/OTHER  ','# DownSteps',1,0
-7,2,5,'D/HEAT   ','# DownSteps',1,0
-7,2,6,'D/REFRIG ','# DownSteps',1,0
-7,2,7,'D/MACHDRV','# DownSteps',1,0
-7,2,8,'D/OTHER  ','# DownSteps',1,0
-7,2,9,'S/HEAT   ','# DownSteps',1,0
-7,2,10,'S/REFRIG ','# DownSteps',1,0
-7,2,11,'S/MACHDRV','# DownSteps',1,0
-7,2,12,'S/OTHER  ','# DownSteps',1,0
-7,2,13,'A/HEAT   ','# DownSteps',1,0
-7,2,14,'A/REFRIG ','# DownSteps',1,0
-7,2,15,'A/MACHDRV','# DownSteps',1,0
-7,2,16,'A/OTHER  ','# DownSteps',1,0
-* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,,,,,,,,,,,,,,,,,
-7,2,1,'Milling    ',4,1,2,3,4,    'Heat','Refrig','MachDrv','Other'
-7,2,2,'Dairy      ',4,5,6,7,8,    'Heat','Refrig','MachDrv','Other'
-7,2,3,'Slaughter  ',4,9,10,11,12, 'Heat','Refrig','MachDrv','Other'
-7,2,4,'AllElse    ',4,13,14,15,16,'Heat','Refrig','MachDrv','Other'
-* 'Retirement Rates by Step',,,,,,
+7,2,4,'M/ELECTRO','# DownSteps',1,0
+7,2,5,'M/OTHER  ','# DownSteps',1,0
+7,2,6,'M/FEEDSTK','# DownSteps',1,0
+7,2,7,'D/HEAT   ','# DownSteps',1,0
+7,2,8,'D/REFRIG ','# DownSteps',1,0
+7,2,9,'D/MACHDRV','# DownSteps',1,0
+7,2,10,'D/ELECTRO','# DownSteps',1,0
+7,2,11,'D/OTHER  ','# DownSteps',1,0
+7,2,12,'D/FEEDSTK','# DownSteps',1,0
+7,2,13,'S/HEAT   ','# DownSteps',1,0
+7,2,14,'S/REFRIG ','# DownSteps',1,0
+7,2,15,'S/MACHDRV','# DownSteps',1,0
+7,2,16,'S/ELECTRO','# DownSteps',1,0
+7,2,17,'S/OTHER  ','# DownSteps',1,0
+7,2,18,'S/FEEDSTK','# DownSteps',1,0
+7,2,19,'A/HEAT   ','# DownSteps',1,0
+7,2,20,'A/REFRIG ','# DownSteps',1,0
+7,2,21,'A/MACHDRV','# DownSteps',1,0
+7,2,22,'A/ELECTRO','# DownSteps',1,0
+7,2,23,'A/OTHER  ','# DownSteps',1,0
+7,2,24,'A/FEEDSTK','# DownSteps',1,0
+* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,
+7,2,1,'Milling    ',6,1,2,3,4,5,6,       'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,2,2,'Dairy      ',6,7,8,9,10,11,12,    'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,2,3,'Slaughter  ',6,13,14,15,16,17,18, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,2,4,'AllElse    ',6,19,20,21,22,23,24, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+* 'Retirement Rates by Step',,
 7,2,1,'M/HEAT   ','Retire Rate',0.017,
 7,2,2,'M/REFRIG ','Retire Rate',0.017,
 7,2,3,'M/MACHDRV','Retire Rate',0.017,
-7,2,4,'M/OTHER  ','Retire Rate',0.017,
-7,2,5,'D/HEAT   ','Retire Rate',0.017,
-7,2,6,'D/REFRIG ','Retire Rate',0.017,
-7,2,7,'D/MACHDRV','Retire Rate',0.017,
-7,2,8,'D/OTHER  ','Retire Rate',0.017,
-7,2,9,'S/HEAT   ','Retire Rate',0.017,
-7,2,10,'S/REFRIG ','Retire Rate',0.017,
-7,2,11,'S/MACHDRV','Retire Rate',0.017,
-7,2,12,'S/OTHER  ','Retire Rate',0.017,
-7,2,13,'A/HEAT   ','Retire Rate',0.017,
-7,2,14,'A/REFRIG ','Retire Rate',0.017,
-7,2,15,'A/MACHDRV','Retire Rate',0.017,
-7,2,16,'A/OTHER  ','Retire Rate',0.017,
-* 'Flow Rates by Step',,,,,,
+7,2,4,'M/ELECTRO','Retire Rate',0.017,
+7,2,5,'M/OTHER  ','Retire Rate',0.017,
+7,2,6,'M/FEEDSTK','Retire Rate',0.017,
+7,2,7,'D/HEAT   ','Retire Rate',0.017,
+7,2,8,'D/REFRIG ','Retire Rate',0.017,
+7,2,9,'D/MACHDRV','Retire Rate',0.017,
+7,2,10,'D/ELECTRO','Retire Rate',0.017,
+7,2,11,'D/OTHER  ','Retire Rate',0.017,
+7,2,12,'D/FEEDSTK','Retire Rate',0.017,
+7,2,13,'S/HEAT   ','Retire Rate',0.017,
+7,2,14,'S/REFRIG ','Retire Rate',0.017,
+7,2,15,'S/MACHDRV','Retire Rate',0.017,
+7,2,16,'S/ELECTRO','Retire Rate',0.017,
+7,2,17,'S/OTHER  ','Retire Rate',0.017,
+7,2,18,'S/FEEDSTK','Retire Rate',0.017,
+7,2,19,'A/HEAT   ','Retire Rate',0.017,
+7,2,20,'A/REFRIG ','Retire Rate',0.017,
+7,2,21,'A/MACHDRV','Retire Rate',0.017,
+7,2,22,'A/ELECTRO','Retire Rate',0.017,
+7,2,23,'A/OTHER  ','Retire Rate',0.017,
+7,2,24,'A/FEEDSTK','Retire Rate',0.017,
+* 'Flow Rates by Step',,
 7,2,1,1,'M/HEAT   ',1,
 7,2,1,2,'M/REFRIG ',1,
 7,2,1,3,'M/MACHDRV',1,
-7,2,1,4,'M/OTHER  ',1,
-7,2,1,5,'D/HEAT   ',1,
-7,2,1,6,'D/REFRIG ',1,
-7,2,1,7,'D/MACHDRV',1,
-7,2,1,8,'D/OTHER  ',1,
-7,2,1,9,'S/HEAT   ',1,
-7,2,1,10,'S/REFRIG ',1,
-7,2,1,11,'S/MACHDRV',1,
-7,2,1,12,'S/OTHER  ',1,
-7,2,1,13,'A/HEAT   ',1,
-7,2,1,14,'A/REFRIG ',1,
-7,2,1,15,'A/MACHDRV',1,
-7,2,1,16,'A/OTHER  ',1,
+7,2,1,4,'M/ELECTRO',1,
+7,2,1,5,'M/OTHER  ',1,
+7,2,1,6,'M/FEEDSTK',1,
+7,2,1,7,'D/HEAT   ',1,
+7,2,1,8,'D/REFRIG ',1,
+7,2,1,9,'D/MACHDRV',1,
+7,2,1,10,'D/ELECTRO',1,
+7,2,1,11,'D/OTHER  ',1,
+7,2,1,12,'D/FEEDSTK',1,
+7,2,1,13,'S/HEAT   ',1,
+7,2,1,14,'S/REFRIG ',1,
+7,2,1,15,'S/MACHDRV',1,
+7,2,1,16,'S/ELECTRO',1,
+7,2,1,17,'S/OTHER  ',1,
+7,2,1,18,'S/FEEDSTK',1,
+7,2,1,19,'A/HEAT   ',1,
+7,2,1,20,'A/REFRIG ',1,
+7,2,1,21,'A/MACHDRV',1,
+7,2,1,22,'A/ELECTRO',1,
+7,2,1,23,'A/OTHER  ',1,
+7,2,1,24,'A/FEEDSTK',1,
 7,2,3,1,'M/HEAT   ',1,
 7,2,3,2,'M/REFRIG ',1,
 7,2,3,3,'M/MACHDRV',1,
-7,2,3,4,'M/OTHER  ',1,
-7,2,3,5,'D/HEAT   ',1,
-7,2,3,6,'D/REFRIG ',1,
-7,2,3,7,'D/MACHDRV',1,
-7,2,3,8,'D/OTHER  ',1,
-7,2,3,9,'S/HEAT   ',1,
-7,2,3,10,'S/REFRIG ',1,
-7,2,3,11,'S/MACHDRV',1,
-7,2,3,12,'S/OTHER  ',1,
-7,2,3,13,'A/HEAT   ',1,
-7,2,3,14,'A/REFRIG ',1,
-7,2,3,15,'A/MACHDRV',1,
-7,2,3,16,'A/OTHER  ',1,
-7,3,'Number of Steps and Rpt. Groups:',16,4,,
+7,2,3,4,'M/ELECTRO',1,
+7,2,3,5,'M/OTHER  ',1,
+7,2,3,6,'M/FEEDSTK',1,
+7,2,3,7,'D/HEAT   ',1,
+7,2,3,8,'D/REFRIG ',1,
+7,2,3,9,'D/MACHDRV',1,
+7,2,3,10,'D/ELECTRO',1,
+7,2,3,11,'D/OTHER  ',1,
+7,2,3,12,'D/FEEDSTK',1,
+7,2,3,13,'S/HEAT   ',1,
+7,2,3,14,'S/REFRIG ',1,
+7,2,3,15,'S/MACHDRV',1,
+7,2,3,16,'S/ELECTRO',1,
+7,2,3,17,'S/OTHER  ',1,
+7,2,3,18,'S/FEEDSTK',1,
+7,2,3,19,'A/HEAT   ',1,
+7,2,3,20,'A/REFRIG ',1,
+7,2,3,21,'A/MACHDRV',1,
+7,2,3,22,'A/ELECTRO',1,
+7,2,3,23,'A/OTHER  ',1,
+7,2,3,24,'A/FEEDSTK',1,
+7,3,'Number of Steps and Rpt. Groups:',24,4,,
 7,3,1,'M/HEAT   ','# DownSteps',1,0
 7,3,2,'M/REFRIG ','# DownSteps',1,0
 7,3,3,'M/MACHDRV','# DownSteps',1,0
-7,3,4,'M/OTHER  ','# DownSteps',1,0
-7,3,5,'D/HEAT   ','# DownSteps',1,0
-7,3,6,'D/REFRIG ','# DownSteps',1,0
-7,3,7,'D/MACHDRV','# DownSteps',1,0
-7,3,8,'D/OTHER  ','# DownSteps',1,0
-7,3,9,'S/HEAT   ','# DownSteps',1,0
-7,3,10,'S/REFRIG ','# DownSteps',1,0
-7,3,11,'S/MACHDRV','# DownSteps',1,0
-7,3,12,'S/OTHER  ','# DownSteps',1,0
-7,3,13,'A/HEAT   ','# DownSteps',1,0
-7,3,14,'A/REFRIG ','# DownSteps',1,0
-7,3,15,'A/MACHDRV','# DownSteps',1,0
-7,3,16,'A/OTHER  ','# DownSteps',1,0
-* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,,,,,,,,,,,,,,,,,
-7,3,1,'Milling    ',4,1,2,3,4,    'Heat','Refrig','MachDrv','Other'
-7,3,2,'Dairy      ',4,5,6,7,8,    'Heat','Refrig','MachDrv','Other'
-7,3,3,'Slaughter  ',4,9,10,11,12, 'Heat','Refrig','MachDrv','Other'
-7,3,4,'AllElse    ',4,13,14,15,16,'Heat','Refrig','MachDrv','Other'
-* 'Retirement Rates by Step',,,,,,
+7,3,4,'M/ELECTRO','# DownSteps',1,0
+7,3,5,'M/OTHER  ','# DownSteps',1,0
+7,3,6,'M/FEEDSTK','# DownSteps',1,0
+7,3,7,'D/HEAT   ','# DownSteps',1,0
+7,3,8,'D/REFRIG ','# DownSteps',1,0
+7,3,9,'D/MACHDRV','# DownSteps',1,0
+7,3,10,'D/ELECTRO','# DownSteps',1,0
+7,3,11,'D/OTHER  ','# DownSteps',1,0
+7,3,12,'D/FEEDSTK','# DownSteps',1,0
+7,3,13,'S/HEAT   ','# DownSteps',1,0
+7,3,14,'S/REFRIG ','# DownSteps',1,0
+7,3,15,'S/MACHDRV','# DownSteps',1,0
+7,3,16,'S/ELECTRO','# DownSteps',1,0
+7,3,17,'S/OTHER  ','# DownSteps',1,0
+7,3,18,'S/FEEDSTK','# DownSteps',1,0
+7,3,19,'A/HEAT   ','# DownSteps',1,0
+7,3,20,'A/REFRIG ','# DownSteps',1,0
+7,3,21,'A/MACHDRV','# DownSteps',1,0
+7,3,22,'A/ELECTRO','# DownSteps',1,0
+7,3,23,'A/OTHER  ','# DownSteps',1,0
+7,3,24,'A/FEEDSTK','# DownSteps',1,0
+* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,
+7,3,1,'Milling    ',6,1,2,3,4,5,6,       'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,3,2,'Dairy      ',6,7,8,9,10,11,12,    'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,3,3,'Slaughter  ',6,13,14,15,16,17,18, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,3,4,'AllElse    ',6,19,20,21,22,23,24, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+* 'Retirement Rates by Step',,
 7,3,1,'M/HEAT   ','Retire Rate',0.017,
 7,3,2,'M/REFRIG ','Retire Rate',0.017,
 7,3,3,'M/MACHDRV','Retire Rate',0.017,
-7,3,4,'M/OTHER  ','Retire Rate',0.017,
-7,3,5,'D/HEAT   ','Retire Rate',0.017,
-7,3,6,'D/REFRIG ','Retire Rate',0.017,
-7,3,7,'D/MACHDRV','Retire Rate',0.017,
-7,3,8,'D/OTHER  ','Retire Rate',0.017,
-7,3,9,'S/HEAT   ','Retire Rate',0.017,
-7,3,10,'S/REFRIG ','Retire Rate',0.017,
-7,3,11,'S/MACHDRV','Retire Rate',0.017,
-7,3,12,'S/OTHER  ','Retire Rate',0.017,
-7,3,13,'A/HEAT   ','Retire Rate',0.017,
-7,3,14,'A/REFRIG ','Retire Rate',0.017,
-7,3,15,'A/MACHDRV','Retire Rate',0.017,
-7,3,16,'A/OTHER  ','Retire Rate',0.017,
-* 'Flow Rates by Step',,,,,,
+7,3,4,'M/ELECTRO','Retire Rate',0.017,
+7,3,5,'M/OTHER  ','Retire Rate',0.017,
+7,3,6,'M/FEEDSTK','Retire Rate',0.017,
+7,3,7,'D/HEAT   ','Retire Rate',0.017,
+7,3,8,'D/REFRIG ','Retire Rate',0.017,
+7,3,9,'D/MACHDRV','Retire Rate',0.017,
+7,3,10,'D/ELECTRO','Retire Rate',0.017,
+7,3,11,'D/OTHER  ','Retire Rate',0.017,
+7,3,12,'D/FEEDSTK','Retire Rate',0.017,
+7,3,13,'S/HEAT   ','Retire Rate',0.017,
+7,3,14,'S/REFRIG ','Retire Rate',0.017,
+7,3,15,'S/MACHDRV','Retire Rate',0.017,
+7,3,16,'S/ELECTRO','Retire Rate',0.017,
+7,3,17,'S/OTHER  ','Retire Rate',0.017,
+7,3,18,'S/FEEDSTK','Retire Rate',0.017,
+7,3,19,'A/HEAT   ','Retire Rate',0.017,
+7,3,20,'A/REFRIG ','Retire Rate',0.017,
+7,3,21,'A/MACHDRV','Retire Rate',0.017,
+7,3,22,'A/ELECTRO','Retire Rate',0.017,
+7,3,23,'A/OTHER  ','Retire Rate',0.017,
+7,3,24,'A/FEEDSTK','Retire Rate',0.017,
+* 'Flow Rates by Step',,
 7,3,1,1,'M/HEAT   ',1,
 7,3,1,2,'M/REFRIG ',1,
 7,3,1,3,'M/MACHDRV',1,
-7,3,1,4,'M/OTHER  ',1,
-7,3,1,5,'D/HEAT   ',1,
-7,3,1,6,'D/REFRIG ',1,
-7,3,1,7,'D/MACHDRV',1,
-7,3,1,8,'D/OTHER  ',1,
-7,3,1,9,'S/HEAT   ',1,
-7,3,1,10,'S/REFRIG ',1,
-7,3,1,11,'S/MACHDRV',1,
-7,3,1,12,'S/OTHER  ',1,
-7,3,1,13,'A/HEAT   ',1,
-7,3,1,14,'A/REFRIG ',1,
-7,3,1,15,'A/MACHDRV',1,
-7,3,1,16,'A/OTHER  ',1,
+7,3,1,4,'M/ELECTRO',1,
+7,3,1,5,'M/OTHER  ',1,
+7,3,1,6,'M/FEEDSTK',1,
+7,3,1,7,'D/HEAT   ',1,
+7,3,1,8,'D/REFRIG ',1,
+7,3,1,9,'D/MACHDRV',1,
+7,3,1,10,'D/ELECTRO',1,
+7,3,1,11,'D/OTHER  ',1,
+7,3,1,12,'D/FEEDSTK',1,
+7,3,1,13,'S/HEAT   ',1,
+7,3,1,14,'S/REFRIG ',1,
+7,3,1,15,'S/MACHDRV',1,
+7,3,1,16,'S/ELECTRO',1,
+7,3,1,17,'S/OTHER  ',1,
+7,3,1,18,'S/FEEDSTK',1,
+7,3,1,19,'A/HEAT   ',1,
+7,3,1,20,'A/REFRIG ',1,
+7,3,1,21,'A/MACHDRV',1,
+7,3,1,22,'A/ELECTRO',1,
+7,3,1,23,'A/OTHER  ',1,
+7,3,1,24,'A/FEEDSTK',1,
 7,3,3,1,'M/HEAT   ',1,
 7,3,3,2,'M/REFRIG ',1,
 7,3,3,3,'M/MACHDRV',1,
-7,3,3,4,'M/OTHER  ',1,
-7,3,3,5,'D/HEAT   ',1,
-7,3,3,6,'D/REFRIG ',1,
-7,3,3,7,'D/MACHDRV',1,
-7,3,3,8,'D/OTHER  ',1,
-7,3,3,9,'S/HEAT   ',1,
-7,3,3,10,'S/REFRIG ',1,
-7,3,3,11,'S/MACHDRV',1,
-7,3,3,12,'S/OTHER  ',1,
-7,3,3,13,'A/HEAT   ',1,
-7,3,3,14,'A/REFRIG ',1,
-7,3,3,15,'A/MACHDRV',1,
-7,3,3,16,'A/OTHER  ',1,
-7,4,'Number of Steps and Rpt. Groups:',16,4,,
+7,3,3,4,'M/ELECTRO',1,
+7,3,3,5,'M/OTHER  ',1,
+7,3,3,6,'M/FEEDSTK',1,
+7,3,3,7,'D/HEAT   ',1,
+7,3,3,8,'D/REFRIG ',1,
+7,3,3,9,'D/MACHDRV',1,
+7,3,3,10,'D/ELECTRO',1,
+7,3,3,11,'D/OTHER  ',1,
+7,3,3,12,'D/FEEDSTK',1,
+7,3,3,13,'S/HEAT   ',1,
+7,3,3,14,'S/REFRIG ',1,
+7,3,3,15,'S/MACHDRV',1,
+7,3,3,16,'S/ELECTRO',1,
+7,3,3,17,'S/OTHER  ',1,
+7,3,3,18,'S/FEEDSTK',1,
+7,3,3,19,'A/HEAT   ',1,
+7,3,3,20,'A/REFRIG ',1,
+7,3,3,21,'A/MACHDRV',1,
+7,3,3,22,'A/ELECTRO',1,
+7,3,3,23,'A/OTHER  ',1,
+7,3,3,24,'A/FEEDSTK',1,
+7,4,'Number of Steps and Rpt. Groups:',24,4,,
 7,4,1,'M/HEAT   ','# DownSteps',1,0
 7,4,2,'M/REFRIG ','# DownSteps',1,0
 7,4,3,'M/MACHDRV','# DownSteps',1,0
-7,4,4,'M/OTHER  ','# DownSteps',1,0
-7,4,5,'D/HEAT   ','# DownSteps',1,0
-7,4,6,'D/REFRIG ','# DownSteps',1,0
-7,4,7,'D/MACHDRV','# DownSteps',1,0
-7,4,8,'D/OTHER  ','# DownSteps',1,0
-7,4,9,'S/HEAT   ','# DownSteps',1,0
-7,4,10,'S/REFRIG ','# DownSteps',1,0
-7,4,11,'S/MACHDRV','# DownSteps',1,0
-7,4,12,'S/OTHER  ','# DownSteps',1,0
-7,4,13,'A/HEAT   ','# DownSteps',1,0
-7,4,14,'A/REFRIG ','# DownSteps',1,0
-7,4,15,'A/MACHDRV','# DownSteps',1,0
-7,4,16,'A/OTHER  ','# DownSteps',1,0
-* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,,,,,,,,,,,,,,,,,
-7,4,1,'Milling    ',4,1,2,3,4,    'Heat','Refrig','MachDrv','Other'
-7,4,2,'Dairy      ',4,5,6,7,8,    'Heat','Refrig','MachDrv','Other'
-7,4,3,'Slaughter  ',4,9,10,11,12, 'Heat','Refrig','MachDrv','Other'
-7,4,4,'AllElse    ',4,13,14,15,16,'Heat','Refrig','MachDrv','Other'
-* 'Retirement Rates by Step',,,,,,
+7,4,4,'M/ELECTRO','# DownSteps',1,0
+7,4,5,'M/OTHER  ','# DownSteps',1,0
+7,4,6,'M/FEEDSTK','# DownSteps',1,0
+7,4,7,'D/HEAT   ','# DownSteps',1,0
+7,4,8,'D/REFRIG ','# DownSteps',1,0
+7,4,9,'D/MACHDRV','# DownSteps',1,0
+7,4,10,'D/ELECTRO','# DownSteps',1,0
+7,4,11,'D/OTHER  ','# DownSteps',1,0
+7,4,12,'D/FEEDSTK','# DownSteps',1,0
+7,4,13,'S/HEAT   ','# DownSteps',1,0
+7,4,14,'S/REFRIG ','# DownSteps',1,0
+7,4,15,'S/MACHDRV','# DownSteps',1,0
+7,4,16,'S/ELECTRO','# DownSteps',1,0
+7,4,17,'S/OTHER  ','# DownSteps',1,0
+7,4,18,'S/FEEDSTK','# DownSteps',1,0
+7,4,19,'A/HEAT   ','# DownSteps',1,0
+7,4,20,'A/REFRIG ','# DownSteps',1,0
+7,4,21,'A/MACHDRV','# DownSteps',1,0
+7,4,22,'A/ELECTRO','# DownSteps',1,0
+7,4,23,'A/OTHER  ','# DownSteps',1,0
+7,4,24,'A/FEEDSTK','# DownSteps',1,0
+* reporting groups for subindustry summaries in indreg.csv and indusa.csv,,
+7,4,1,'Milling    ',6,1,2,3,4,5,6,       'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,4,2,'Dairy      ',6,7,8,9,10,11,12,    'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,4,3,'Slaughter  ',6,13,14,15,16,17,18, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+7,4,4,'AllElse    ',6,19,20,21,22,23,24, 'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
+* 'Retirement Rates by Step',,
 7,4,1,'M/HEAT   ','Retire Rate',0.017,
 7,4,2,'M/REFRIG ','Retire Rate',0.017,
 7,4,3,'M/MACHDRV','Retire Rate',0.017,
-7,4,4,'M/OTHER  ','Retire Rate',0.017,
-7,4,5,'D/HEAT   ','Retire Rate',0.017,
-7,4,6,'D/REFRIG ','Retire Rate',0.017,
-7,4,7,'D/MACHDRV','Retire Rate',0.017,
-7,4,8,'D/OTHER  ','Retire Rate',0.017,
-7,4,9,'S/HEAT   ','Retire Rate',0.017,
-7,4,10,'S/REFRIG ','Retire Rate',0.017,
-7,4,11,'S/MACHDRV','Retire Rate',0.017,
-7,4,12,'S/OTHER  ','Retire Rate',0.017,
-7,4,13,'A/HEAT   ','Retire Rate',0.017,
-7,4,14,'A/REFRIG ','Retire Rate',0.017,
-7,4,15,'A/MACHDRV','Retire Rate',0.017,
-7,4,16,'A/OTHER  ','Retire Rate',0.017,
-* 'Flow Rates by Step',,,,,,
+7,4,4,'M/ELECTRO','Retire Rate',0.017,
+7,4,5,'M/OTHER  ','Retire Rate',0.017,
+7,4,6,'M/FEEDSTK','Retire Rate',0.017,
+7,4,7,'D/HEAT   ','Retire Rate',0.017,
+7,4,8,'D/REFRIG ','Retire Rate',0.017,
+7,4,9,'D/MACHDRV','Retire Rate',0.017,
+7,4,10,'D/ELECTRO','Retire Rate',0.017,
+7,4,11,'D/OTHER  ','Retire Rate',0.017,
+7,4,12,'D/FEEDSTK','Retire Rate',0.017,
+7,4,13,'S/HEAT   ','Retire Rate',0.017,
+7,4,14,'S/REFRIG ','Retire Rate',0.017,
+7,4,15,'S/MACHDRV','Retire Rate',0.017,
+7,4,16,'S/ELECTRO','Retire Rate',0.017,
+7,4,17,'S/OTHER  ','Retire Rate',0.017,
+7,4,18,'S/FEEDSTK','Retire Rate',0.017,
+7,4,19,'A/HEAT   ','Retire Rate',0.017,
+7,4,20,'A/REFRIG ','Retire Rate',0.017,
+7,4,21,'A/MACHDRV','Retire Rate',0.017,
+7,4,22,'A/ELECTRO','Retire Rate',0.017,
+7,4,23,'A/OTHER  ','Retire Rate',0.017,
+7,4,24,'A/FEEDSTK','Retire Rate',0.017,
+* 'Flow Rates by Step',,
 7,4,1,1,'M/HEAT   ',1,
 7,4,1,2,'M/REFRIG ',1,
 7,4,1,3,'M/MACHDRV',1,
-7,4,1,4,'M/OTHER  ',1,
-7,4,1,5,'D/HEAT   ',1,
-7,4,1,6,'D/REFRIG ',1,
-7,4,1,7,'D/MACHDRV',1,
-7,4,1,8,'D/OTHER  ',1,
-7,4,1,9,'S/HEAT   ',1,
-7,4,1,10,'S/REFRIG ',1,
-7,4,1,11,'S/MACHDRV',1,
-7,4,1,12,'S/OTHER  ',1,
-7,4,1,13,'A/HEAT   ',1,
-7,4,1,14,'A/REFRIG ',1,
-7,4,1,15,'A/MACHDRV',1,
-7,4,1,16,'A/OTHER  ',1,
+7,4,1,4,'M/ELECTRO',1,
+7,4,1,5,'M/OTHER  ',1,
+7,4,1,6,'M/FEEDSTK',1,
+7,4,1,7,'D/HEAT   ',1,
+7,4,1,8,'D/REFRIG ',1,
+7,4,1,9,'D/MACHDRV',1,
+7,4,1,10,'D/ELECTRO',1,
+7,4,1,11,'D/OTHER  ',1,
+7,4,1,12,'D/FEEDSTK',1,
+7,4,1,13,'S/HEAT   ',1,
+7,4,1,14,'S/REFRIG ',1,
+7,4,1,15,'S/MACHDRV',1,
+7,4,1,16,'S/ELECTRO',1,
+7,4,1,17,'S/OTHER  ',1,
+7,4,1,18,'S/FEEDSTK',1,
+7,4,1,19,'A/HEAT   ',1,
+7,4,1,20,'A/REFRIG ',1,
+7,4,1,21,'A/MACHDRV',1,
+7,4,1,22,'A/ELECTRO',1,
+7,4,1,23,'A/OTHER  ',1,
+7,4,1,24,'A/FEEDSTK',1,
 7,4,3,1,'M/HEAT   ',1,
 7,4,3,2,'M/REFRIG ',1,
 7,4,3,3,'M/MACHDRV',1,
-7,4,3,4,'M/OTHER  ',1,
-7,4,3,5,'D/HEAT   ',1,
-7,4,3,6,'D/REFRIG ',1,
-7,4,3,7,'D/MACHDRV',1,
-7,4,3,8,'D/OTHER  ',1,
-7,4,3,9,'S/HEAT   ',1,
-7,4,3,10,'S/REFRIG ',1,
-7,4,3,11,'S/MACHDRV',1,
-7,4,3,12,'S/OTHER  ',1,
-7,4,3,13,'A/HEAT   ',1,
-7,4,3,14,'A/REFRIG ',1,
-7,4,3,15,'A/MACHDRV',1,
-7,4,3,16,'A/OTHER  ',1,
-*,,,,,,
+7,4,3,4,'M/ELECTRO',1,
+7,4,3,5,'M/OTHER  ',1,
+7,4,3,6,'M/FEEDSTK',1,
+7,4,3,7,'D/HEAT   ',1,
+7,4,3,8,'D/REFRIG ',1,
+7,4,3,9,'D/MACHDRV',1,
+7,4,3,10,'D/ELECTRO',1,
+7,4,3,11,'D/OTHER  ',1,
+7,4,3,12,'D/FEEDSTK',1,
+7,4,3,13,'S/HEAT   ',1,
+7,4,3,14,'S/REFRIG ',1,
+7,4,3,15,'S/MACHDRV',1,
+7,4,3,16,'S/ELECTRO',1,
+7,4,3,17,'S/OTHER  ',1,
+7,4,3,18,'S/FEEDSTK',1,
+7,4,3,19,'A/HEAT   ',1,
+7,4,3,20,'A/REFRIG ',1,
+7,4,3,21,'A/MACHDRV',1,
+7,4,3,22,'A/ELECTRO',1,
+7,4,3,23,'A/OTHER  ',1,
+7,4,3,24,'A/FEEDSTK',1,
+*,,
 8,1,'Number of Steps and Rpt. Groups:',7,0,,
-8,1,1,'PAPER_M','# DownSteps',1,0,,,,,,,,,,,
-8,1,2,'BLEACH ','# DownSteps',1,1,,,,,,,,,,,
-8,1,3,'WASTE_P','# DownSteps',2,1,2,,,,,,,,,
-8,1,4,'MECH_P ','# DownSteps',3,1,2,3,,,,,,,
-8,1,5,'CHEM_P ','# DownSteps',3,1,2,3,,,,,,,
-8,1,6,'KRAFT_P','# DownSteps',3,1,2,3,,,,,,,
-8,1,7,'WOOD   ','# DownSteps',3,4,5,6,,,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,,,,,,
-8,1,1,'PAPER_M','Retire Rate',0.023,,,,,,,,,
-8,1,2,'BLEACH ','Retire Rate',0.023,,,,,,,,,
-8,1,3,'WASTE_P','Retire Rate',0.023,,,,,,,,,
-8,1,4,'MECH_P ','Retire Rate',0.023,,,,,,,,,
-8,1,5,'CHEM_P ','Retire Rate',0.023,,,,,,,,,
-8,1,6,'KRAFT_P','Retire Rate',0.023,,,,,,,,,
-8,1,7,'WOOD   ','Retire Rate',0.023,,,,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,,,,,,,,,,,,
-8,1,1,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,1,1,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,1,1,3,'WASTE_P',0.297,0.439,,,,,,,,,,,,,,,
-8,1,1,4,'MECH_P ',0.024,0.052,0.023,,,,,,,,,
-8,1,1,5,'CHEM_P ',0.001,0.039,0.001,,,,,,,,,
-8,1,1,6,'KRAFT_P',0.075,0.560,0.074,,,,,,,,,
-8,1,1,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
-8,1,3,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,1,3,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,1,3,3,'WASTE_P',0.297,0.439,,,,,,,,,,,,,,,
-8,1,3,4,'MECH_P ',0.024,0.052,0.023,,,,,,,,,
-8,1,3,5,'CHEM_P ',0.001,0.039,0.001,,,,,,,,,
-8,1,3,6,'KRAFT_P',0.075,0.560,0.074,,,,,,,,,
-8,1,3,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
+8,1,1,'PAPER_M','# DownSteps',1,0,,
+8,1,2,'BLEACH ','# DownSteps',1,1,,
+8,1,3,'WASTE_P','# DownSteps',2,1,2,,
+8,1,4,'MECH_P ','# DownSteps',3,1,2,3,,
+8,1,5,'CHEM_P ','# DownSteps',3,1,2,3,,
+8,1,6,'KRAFT_P','# DownSteps',3,1,2,3,,
+8,1,7,'WOOD   ','# DownSteps',3,4,5,6,,
+* 'Retirement Rates by Step',,
+8,1,1,'PAPER_M','Retire Rate',0.023,,
+8,1,2,'BLEACH ','Retire Rate',0.023,,
+8,1,3,'WASTE_P','Retire Rate',0.023,,
+8,1,4,'MECH_P ','Retire Rate',0.023,,
+8,1,5,'CHEM_P ','Retire Rate',0.023,,
+8,1,6,'KRAFT_P','Retire Rate',0.023,,
+8,1,7,'WOOD   ','Retire Rate',0.023,,
+* 'Flow Rates by Step',,
+8,1,1,1,'PAPER_M',1,,
+8,1,1,2,'BLEACH ',0.543,,
+8,1,1,3,'WASTE_P',0.297,0.439,,
+8,1,1,4,'MECH_P ',0.024,0.052,0.023,,
+8,1,1,5,'CHEM_P ',0.001,0.039,0.001,,
+8,1,1,6,'KRAFT_P',0.075,0.560,0.074,,
+8,1,1,7,'WOOD   ',1.075,1.429,1.818,,
+8,1,3,1,'PAPER_M',1,,
+8,1,3,2,'BLEACH ',0.543,,
+8,1,3,3,'WASTE_P',0.297,0.439,,
+8,1,3,4,'MECH_P ',0.024,0.052,0.023,,
+8,1,3,5,'CHEM_P ',0.001,0.039,0.001,,
+8,1,3,6,'KRAFT_P',0.075,0.560,0.074,,
+8,1,3,7,'WOOD   ',1.075,1.429,1.818,,
 8,2,'Number of Steps and Rpt. Groups:',7,0,,
-8,2,1,'PAPER_M','# DownSteps',1,0,,,,,,,,,,,
-8,2,2,'BLEACH ','# DownSteps',1,1,,,,,,,,,,,
-8,2,3,'WASTE_P','# DownSteps',2,1,2,,,,,,,,,
-8,2,4,'MECH_P ','# DownSteps',3,1,2,3,,,,,,,
-8,2,5,'CHEM_P ','# DownSteps',3,1,2,3,,,,,,,
-8,2,6,'KRAFT_P','# DownSteps',3,1,2,3,,,,,,,
-8,2,7,'WOOD   ','# DownSteps',3,4,5,6,,,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,,,,,,
-8,2,1,'PAPER_M','Retire Rate',0.023,,,,,,,,,
-8,2,2,'BLEACH ','Retire Rate',0.023,,,,,,,,,
-8,2,3,'WASTE_P','Retire Rate',0.023,,,,,,,,,
-8,2,4,'MECH_P ','Retire Rate',0.023,,,,,,,,,
-8,2,5,'CHEM_P ','Retire Rate',0.023,,,,,,,,,
-8,2,6,'KRAFT_P','Retire Rate',0.023,,,,,,,,,
-8,2,7,'WOOD   ','Retire Rate',0.023,,,,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,,,,,,,,,,,,
-8,2,1,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,2,1,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,2,1,3,'WASTE_P',0.494,0.494,,,,,,,,,,,,,,,
-8,2,1,4,'MECH_P ',0.012,0.053,0.008,,,,,,,,,
-8,2,1,5,'CHEM_P ',0.016,0.069,0.010,,,,,,,,,
-8,2,1,6,'KRAFT_P',0.065,0.278,0.042,,,,,,,,,
-8,2,1,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
-8,2,3,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,2,3,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,2,3,3,'WASTE_P',0.494,0.494,,,,,,,,,,,,,,,
-8,2,3,4,'MECH_P ',0.012,0.053,0.008,,,,,,,,,
-8,2,3,5,'CHEM_P ',0.016,0.069,0.010,,,,,,,,,
-8,2,3,6,'KRAFT_P',0.065,0.278,0.042,,,,,,,,,
-8,2,3,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
+8,2,1,'PAPER_M','# DownSteps',1,0,,
+8,2,2,'BLEACH ','# DownSteps',1,1,,
+8,2,3,'WASTE_P','# DownSteps',2,1,2,,
+8,2,4,'MECH_P ','# DownSteps',3,1,2,3,,
+8,2,5,'CHEM_P ','# DownSteps',3,1,2,3,,
+8,2,6,'KRAFT_P','# DownSteps',3,1,2,3,,
+8,2,7,'WOOD   ','# DownSteps',3,4,5,6,,
+* 'Retirement Rates by Step',,
+8,2,1,'PAPER_M','Retire Rate',0.023,,
+8,2,2,'BLEACH ','Retire Rate',0.023,,
+8,2,3,'WASTE_P','Retire Rate',0.023,,
+8,2,4,'MECH_P ','Retire Rate',0.023,,
+8,2,5,'CHEM_P ','Retire Rate',0.023,,
+8,2,6,'KRAFT_P','Retire Rate',0.023,,
+8,2,7,'WOOD   ','Retire Rate',0.023,,
+* 'Flow Rates by Step',,
+8,2,1,1,'PAPER_M',1,,
+8,2,1,2,'BLEACH ',0.543,,
+8,2,1,3,'WASTE_P',0.494,0.494,,
+8,2,1,4,'MECH_P ',0.012,0.053,0.008,,
+8,2,1,5,'CHEM_P ',0.016,0.069,0.010,,
+8,2,1,6,'KRAFT_P',0.065,0.278,0.042,,
+8,2,1,7,'WOOD   ',1.075,1.429,1.818,,
+8,2,3,1,'PAPER_M',1,,
+8,2,3,2,'BLEACH ',0.543,,
+8,2,3,3,'WASTE_P',0.494,0.494,,
+8,2,3,4,'MECH_P ',0.012,0.053,0.008,,
+8,2,3,5,'CHEM_P ',0.016,0.069,0.010,,
+8,2,3,6,'KRAFT_P',0.065,0.278,0.042,,
+8,2,3,7,'WOOD   ',1.075,1.429,1.818,,
 8,3,'Number of Steps and Rpt. Groups:',7,0,,
-8,3,1,'PAPER_M','# DownSteps',1,0,,,,,,,,,,,
-8,3,2,'BLEACH ','# DownSteps',1,1,,,,,,,,,,,
-8,3,3,'WASTE_P','# DownSteps',2,1,2,,,,,,,,,
-8,3,4,'MECH_P ','# DownSteps',3,1,2,3,,,,,,,
-8,3,5,'CHEM_P ','# DownSteps',3,1,2,3,,,,,,,
-8,3,6,'KRAFT_P','# DownSteps',3,1,2,3,,,,,,,
-8,3,7,'WOOD   ','# DownSteps',3,4,5,6,,,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,,,,,,
-8,3,1,'PAPER_M','Retire Rate',0.023,,,,,,,,,
-8,3,2,'BLEACH ','Retire Rate',0.023,,,,,,,,,
-8,3,3,'WASTE_P','Retire Rate',0.023,,,,,,,,,
-8,3,4,'MECH_P ','Retire Rate',0.023,,,,,,,,,
-8,3,5,'CHEM_P ','Retire Rate',0.023,,,,,,,,,
-8,3,6,'KRAFT_P','Retire Rate',0.023,,,,,,,,,
-8,3,7,'WOOD   ','Retire Rate',0.023,,,,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,,,,,,,,,,,,
-8,3,1,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,3,1,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,3,1,3,'WASTE_P',0.231,0.278,,,,,,,,,,,,,,,
-8,3,1,4,'MECH_P ',0.010,0.035,0.013,,,,,,,,,
-8,3,1,5,'CHEM_P ',0.013,0.044,0.017,,,,,,,,,
-8,3,1,6,'KRAFT_P',0.212,0.711,0.271,,,,,,,,,
-8,3,1,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
-8,3,3,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,3,3,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,3,3,3,'WASTE_P',0.231,0.278,,,,,,,,,,,,,,,
-8,3,3,4,'MECH_P ',0.010,0.035,0.013,,,,,,,,,
-8,3,3,5,'CHEM_P ',0.013,0.044,0.017,,,,,,,,,
-8,3,3,6,'KRAFT_P',0.212,0.711,0.271,,,,,,,,,
-8,3,3,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
+8,3,1,'PAPER_M','# DownSteps',1,0,,
+8,3,2,'BLEACH ','# DownSteps',1,1,,
+8,3,3,'WASTE_P','# DownSteps',2,1,2,,
+8,3,4,'MECH_P ','# DownSteps',3,1,2,3,,
+8,3,5,'CHEM_P ','# DownSteps',3,1,2,3,,
+8,3,6,'KRAFT_P ','# DownSteps',3,1,2,3,,
+8,3,7,'WOOD    ','# DownSteps',3,4,5,6,,
+* 'Retirement Rates by Step',,
+8,3,1,'PAPER_M','Retire Rate',0.023,,
+8,3,2,'BLEACH ','Retire Rate',0.023,,
+8,3,3,'WASTE_P','Retire Rate',0.023,,
+8,3,4,'MECH_P ','Retire Rate',0.023,,
+8,3,5,'CHEM_P ','Retire Rate',0.023,,
+8,3,6,'KRAFT_P','Retire Rate',0.023,,
+8,3,7,'WOOD   ','Retire Rate',0.023,,
+* 'Flow Rates by Step',,
+8,3,1,1,'PAPER_M',1,,
+8,3,1,2,'BLEACH ',0.543,,
+8,3,1,3,'WASTE_P',0.231,0.278,,
+8,3,1,4,'MECH_P ',0.010,0.035,0.013,,
+8,3,1,5,'CHEM_P ',0.013,0.044,0.017,,
+8,3,1,6,'KRAFT_P',0.212,0.711,0.271,,
+8,3,1,7,'WOOD   ',1.075,1.429,1.818,,
+8,3,3,1,'PAPER_M',1,,
+8,3,3,2,'BLEACH ',0.543,,
+8,3,3,3,'WASTE_P',0.231,0.278,,
+8,3,3,4,'MECH_P ',0.010,0.035,0.013,,
+8,3,3,5,'CHEM_P ',0.013,0.044,0.017,,
+8,3,3,6,'KRAFT_P',0.212,0.711,0.271,,
+8,3,3,7,'WOOD   ',1.075,1.429,1.818,,
 8,4, 'Number of Steps and Rpt. Groups:' ,7,0,,
-8,4,1,'PAPER_M','# DownSteps',1,0,,,,,,,,,,,
-8,4,2,'BLEACH ','# DownSteps',1,1,,,,,,,,,,,
-8,4,3,'WASTE_P','# DownSteps',2,1,2,,,,,,,,,
-8,4,4,'MECH_P ','# DownSteps',3,1,2,3,,,,,,,
-8,4,5,'CHEM_P ','# DownSteps',3,1,2,3,,,,,,,
-8,4,6,'KRAFT_P','# DownSteps',3,1,2,3,,,,,,,
-8,4,7,'WOOD   ','# DownSteps',3,4,5,6,,,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,,,,,,
-8,4,1,'PAPER_M','Retire Rate',0.023,,,,,,,,,
-8,4,2,'BLEACH ','Retire Rate',0.023,,,,,,,,,
-8,4,3,'WASTE_P','Retire Rate',0.023,,,,,,,,,
-8,4,4,'MECH_P ','Retire Rate',0.023,,,,,,,,,
-8,4,5,'CHEM_P ','Retire Rate',0.023,,,,,,,,,
-8,4,6,'KRAFT_P','Retire Rate',0.023,,,,,,,,,
-8,4,7,'WOOD   ','Retire Rate',0.023,,,,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,,,,,,,,,,,,
-8,4,1,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,4,1,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,4,1,3,'WASTE_P',0.290,0.273,,,,,,,,,,,,,,,
-8,4,1,4,'MECH_P ',0.034,0.088,0.034,,,,,,,,,
-8,4,1,5,'CHEM_P ',0.006,0.016,0.006,,,,,,,,,
-8,4,1,6,'KRAFT_P',0.131,0.346,0.134,,,,,,,,,
-8,4,1,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
-8,4,3,1,'PAPER_M',1,,,,,,,,,,,,,,,,,,,,,,,,,
-8,4,3,2,'BLEACH ',0.543,,,,,,,,,,,,,,,,,,,,,
-8,4,3,3,'WASTE_P',0.290,0.273,,,,,,,,,,,,,,,
-8,4,3,4,'MECH_P ',0.034,0.088,0.034,,,,,,,,,
-8,4,3,5,'CHEM_P ',0.006,0.016,0.006,,,,,,,,,
-8,4,3,6,'KRAFT_P',0.131,0.346,0.134,,,,,,,,,
-8,4,3,7,'WOOD   ',1.075,1.429,1.818,,,,,,,,,
-*,,,,,,,,,,
-9,1,'Number of Steps and Rpt. Groups:',24,10,,,,,,
-9,1,1,'Inorganic/HEAT    ','# DownSteps',1,0,,,,
-9,1,2,'Inorganic/REFRIG  ','# DownSteps',1,0,,,,
-9,1,3,'Inorganic/MACHDRV ','# DownSteps',1,0,,,,
-9,1,4,'Inorganic/ELECTRO ','# DownSteps',1,0,,,,
-9,1,5,'Inorganic/OTHER   ','# DownSteps',1,0,,,,
+8,4,1,'PAPER_M','# DownSteps',1,0,,
+8,4,2,'BLEACH ','# DownSteps',1,1,,
+8,4,3,'WASTE_P','# DownSteps',2,1,2,,
+8,4,4,'MECH_P ','# DownSteps',3,1,2,3,,
+8,4,5,'CHEM_P ','# DownSteps',3,1,2,3,,
+8,4,6,'KRAFT_P','# DownSteps',3,1,2,3,,
+8,4,7,'WOOD   ','# DownSteps',3,4,5,6,,
+* 'Retirement Rates by Step',,
+8,4,1,'PAPER_M','Retire Rate',0.023,,
+8,4,2,'BLEACH ','Retire Rate',0.023,,
+8,4,3,'WASTE_P','Retire Rate',0.023,,
+8,4,4,'MECH_P ','Retire Rate',0.023,,
+8,4,5,'CHEM_P ','Retire Rate',0.023,,
+8,4,6,'KRAFT_P','Retire Rate',0.023,,
+8,4,7,'WOOD   ','Retire Rate',0.023,,
+* 'Flow Rates by Step',,
+8,4,1,1,'PAPER_M',1,,
+8,4,1,2,'BLEACH ',0.543,,
+8,4,1,3,'WASTE_P',0.290,0.273,,
+8,4,1,4,'MECH_P ',0.034,0.088,0.034,,
+8,4,1,5,'CHEM_P ',0.006,0.016,0.006,,
+8,4,1,6,'KRAFT_P',0.131,0.346,0.134,,
+8,4,1,7,'WOOD   ',1.075,1.429,1.818,,
+8,4,3,1,'PAPER_M',1,,
+8,4,3,2,'BLEACH ',0.543,,
+8,4,3,3,'WASTE_P',0.290,0.273,,
+8,4,3,4,'MECH_P ',0.034,0.088,0.034,,
+8,4,3,5,'CHEM_P ',0.006,0.016,0.006,,
+8,4,3,6,'KRAFT_P',0.131,0.346,0.134,,
+8,4,3,7,'WOOD   ',1.075,1.429,1.818,,
+*,,
+9,1,'Number of Steps and Rpt. Groups:',24,10,,
+9,1,1,'Inorganic/HEAT    ','# DownSteps',1,0,,
+9,1,2,'Inorganic/REFRIG  ','# DownSteps',1,0,,
+9,1,3,'Inorganic/MACHDRV ','# DownSteps',1,0,,
+9,1,4,'Inorganic/ELECTRO ','# DownSteps',1,0,,
+9,1,5,'Inorganic/OTHER   ','# DownSteps',1,0,,
 9,1,6,'Inorganic/FEED    ','# DownSteps',1,0,,
 9,1,7,'Organic/HEAT      ','# DownSteps',1,0,,
 9,1,8,'Organic/REFRIG    ','# DownSteps',1,0,,
@@ -671,35 +799,35 @@
 9,1,16,'ResinSynth/ELECTRO','# DownSteps',1,0,,
 9,1,17,'ResinSynth/OTHER  ','# DownSteps',1,0,,
 9,1,18,'ResinSynth/FEED   ','# DownSteps',1,0,,
-9,1,19,'AgriChem/HEAT     ','# DownSteps',1,0,,,,,,,,,,,,
-9,1,20,'AgriChem/REFRIG   ','# DownSteps',1,0,,,,,,,,,,,,
-9,1,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,,,,,,,,,,,
-9,1,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,,,,,,,,,,,
-9,1,23,'AgriChem/OTHER    ','# DownSteps',1,0,,,,,,,,,,,,
-9,1,24,'AgriChem/FEED     ','# DownSteps',1,0,,,,,,,,,,,,
-* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,,,,,,,,,,,,,,,,,
-9,1,1,'Inorganic ',6,1,2,3,4,5,6,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,1,2,'Organic   ',6,7,8,9,10,11,12,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,1,3,'ResinSynth',6,13,14,15,16,17,18,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,1,4,'AgriChem  ',6,19,20,21,22,23,24,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,1,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,1,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,1,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,1,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,1,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem'
-9,1,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem'
-* 'Retirement Rates by Step',,,,,,,,,,,,
-9,1,1,'Inorganic/HEAT    ','Retire Rate',0.017,,,,,,,
-9,1,2,'Inorganic/REFRIG  ','Retire Rate',0.017,,,,,,,
-9,1,3,'Inorganic/MACHDRV ','Retire Rate',0.017,,,,,,,
-9,1,4,'Inorganic/ELECTRO ','Retire Rate',0.017,,,,,,,
-9,1,5,'Inorganic/OTHER   ','Retire Rate',0.017,,,,,,,
-9,1,6,'Inorganic/FEED    ','Retire Rate',0.017,,,,,,,
-9,1,7,'Organic/HEAT      ','Retire Rate',0.017,,,,,,,
-9,1,8,'Organic/REFRIG    ','Retire Rate',0.017,,,,,,,
-9,1,9,'Organic/MACHDRV   ','Retire Rate',0.017,,,,,,,
-9,1,10,'Organic/ELECTRO   ','Retire Rate',0.017,,,,,,,
-9,1,11,'Organic/OTHER     ','Retire Rate',0.017,,,,,,,
+9,1,19,'AgriChem/HEAT     ','# DownSteps',1,0,,
+9,1,20,'AgriChem/REFRIG   ','# DownSteps',1,0,,
+9,1,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,
+9,1,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,
+9,1,23,'AgriChem/OTHER    ','# DownSteps',1,0,,
+9,1,24,'AgriChem/FEED     ','# DownSteps',1,0,,
+* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,
+9,1,1,'Inorganic ',6,1,2,3,4,5,6,'Heat','Refrig','MachDrv','Electro','Other','Feedstock',,
+9,1,2,'Organic   ',6,7,8,9,10,11,12,'Heat','Refrig','MachDrv','Electro','Other','Feedstock',,
+9,1,3,'ResinSynth',6,13,14,15,16,17,18,'Heat','Refrig','MachDrv','Electro','Other','Feedstock',,
+9,1,4,'AgriChem  ',6,19,20,21,22,23,24,'Heat','Refrig','MachDrv','Electro','Other','Feedstock',,
+9,1,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,1,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,1,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,1,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,1,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,1,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem',,
+* 'Retirement Rates by Step',,
+9,1,1,'Inorganic/HEAT    ','Retire Rate',0.017,,
+9,1,2,'Inorganic/REFRIG  ','Retire Rate',0.017,,
+9,1,3,'Inorganic/MACHDRV ','Retire Rate',0.017,,
+9,1,4,'Inorganic/ELECTRO ','Retire Rate',0.017,,
+9,1,5,'Inorganic/OTHER   ','Retire Rate',0.017,,
+9,1,6,'Inorganic/FEED    ','Retire Rate',0.017,,
+9,1,7,'Organic/HEAT      ','Retire Rate',0.017,,
+9,1,8,'Organic/REFRIG    ','Retire Rate',0.017,,
+9,1,9,'Organic/MACHDRV   ','Retire Rate',0.017,,
+9,1,10,'Organic/ELECTRO   ','Retire Rate',0.017,,
+9,1,11,'Organic/OTHER     ','Retire Rate',0.017,,
 9,1,12,'Organic/FEED      ','Retire Rate',0.017
 9,1,13,'ResinSynth/HEAT   ','Retire Rate',0.017
 9,1,14,'ResinSynth/REFRIG ','Retire Rate',0.017
@@ -713,7 +841,7 @@
 9,1,22,'AgriChem/ELECTRO  ','Retire Rate',0.017
 9,1,23,'AgriChem/OTHER    ','Retire Rate',0.017
 9,1,24,'AgriChem/FEED     ','Retire Rate',0.017
-* 'Flow Rates by Step',,,,,,,
+* 'Flow Rates by Step',,
 9,1,1,1,'Inorganic/HEAT    ',1,,
 9,1,1,2,'Inorganic/REFRIG  ',1,,
 9,1,1,3,'Inorganic/MACHDRV ',1,,
@@ -762,7 +890,7 @@
 9,1,3,22,'AgriChem/ELECTRO  ',1,,
 9,1,3,23,'AgriChem/OTHER    ',1,,
 9,1,3,24,'AgriChem/FEED     ',1,
-9,2,'Number of Steps and Rpt. Groups:',24,10,,,
+9,2,'Number of Steps and Rpt. Groups:',24,10,,
 9,2,1,'Inorganic/HEAT    ','# DownSteps',1,0,
 9,2,2,'Inorganic/REFRIG  ','# DownSteps',1,0,
 9,2,3,'Inorganic/MACHDRV ','# DownSteps',1,0,
@@ -782,35 +910,35 @@
 9,2,17,'ResinSynth/OTHER  ','# DownSteps',1,0,,
 9,2,18,'ResinSynth/FEED   ','# DownSteps',1,0,,
 9,2,19,'AgriChem/HEAT     ','# DownSteps',1,0,,
-9,2,20,'AgriChem/REFRIG   ','# DownSteps',1,0,,,,,,,,,,,,
-9,2,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,,,,,,,,,,,
-9,2,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,,,,,,,,,,,
-9,2,23,'AgriChem/OTHER    ','# DownSteps',1,0,,,,,,,,,,,,
-9,2,24,'AgriChem/FEED     ','# DownSteps',1,0,,,,,,,,,,,,
-* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,,,,,,,,,,,,,,,,,
+9,2,20,'AgriChem/REFRIG   ','# DownSteps',1,0,,
+9,2,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,
+9,2,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,
+9,2,23,'AgriChem/OTHER    ','# DownSteps',1,0,,
+9,2,24,'AgriChem/FEED     ','# DownSteps',1,0,,
+* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,
 9,2,1,'Inorganic ',6,1,2,3,4,5,6,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,2,2,'Organic   ',6,7,8,9,10,11,12,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,2,3,'ResinSynth',6,13,14,15,16,17,18,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,2,4,'AgriChem  ',6,19,20,21,22,23,24,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,2,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,2,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,2,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,2,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,2,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
+9,2,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,2,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,2,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,2,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,2,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,
 9,2,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem'
-* 'Retirement Rates by Step',,,,,,,,,,,,
-9,2,1,'Inorganic/HEAT    ','Retire Rate',0.017,,,,,,,
-9,2,2,'Inorganic/REFRIG  ','Retire Rate',0.017,,,,,,,
-9,2,3,'Inorganic/MACHDRV ','Retire Rate',0.017,,,,,,,
-9,2,4,'Inorganic/ELECTRO ','Retire Rate',0.017,,,,,,,
-9,2,5,'Inorganic/OTHER   ','Retire Rate',0.017,,,,,,,
-9,2,6,'Inorganic/FEED    ','Retire Rate',0.017,,,,,,,
-9,2,7,'Organic/HEAT      ','Retire Rate',0.017,,,,,,,
-9,2,8,'Organic/REFRIG    ','Retire Rate',0.017,,,,,,,
-9,2,9,'Organic/MACHDRV   ','Retire Rate',0.017,,,,,,,
-9,2,10,'Organic/ELECTRO   ','Retire Rate',0.017,,,,,,,
-9,2,11,'Organic/OTHER     ','Retire Rate',0.017,,,,,,,
-9,2,12,'Organic/FEED      ','Retire Rate',0.017,,,,,,,
+* 'Retirement Rates by Step',,
+9,2,1,'Inorganic/HEAT    ','Retire Rate',0.017,,
+9,2,2,'Inorganic/REFRIG  ','Retire Rate',0.017,,
+9,2,3,'Inorganic/MACHDRV ','Retire Rate',0.017,,
+9,2,4,'Inorganic/ELECTRO ','Retire Rate',0.017,,
+9,2,5,'Inorganic/OTHER   ','Retire Rate',0.017,,
+9,2,6,'Inorganic/FEED    ','Retire Rate',0.017,,
+9,2,7,'Organic/HEAT      ','Retire Rate',0.017,,
+9,2,8,'Organic/REFRIG    ','Retire Rate',0.017,,
+9,2,9,'Organic/MACHDRV   ','Retire Rate',0.017,,
+9,2,10,'Organic/ELECTRO   ','Retire Rate',0.017,,
+9,2,11,'Organic/OTHER     ','Retire Rate',0.017,,
+9,2,12,'Organic/FEED      ','Retire Rate',0.017,,
 9,2,13,'ResinSynth/HEAT   ','Retire Rate',0.017
 9,2,14,'ResinSynth/REFRIG ','Retire Rate',0.017
 9,2,15,'ResinSynth/MACHDRV','Retire Rate',0.017
@@ -823,7 +951,7 @@
 9,2,22,'AgriChem/ELECTRO  ','Retire Rate',0.017
 9,2,23,'AgriChem/OTHER    ','Retire Rate',0.017
 9,2,24,'AgriChem/FEED     ','Retire Rate',0.017
-* 'Flow Rates by Step',,,,,
+* 'Flow Rates by Step',,
 9,2,1,1,'Inorganic/HEAT    ',1,,
 9,2,1,2,'Inorganic/REFRIG  ',1,,
 9,2,1,3,'Inorganic/MACHDRV ',1,,
@@ -866,13 +994,13 @@
 9,2,3,16,'ResinSynth/ELECTRO',1,,
 9,2,3,17,'ResinSynth/OTHER  ',1,,
 9,2,3,18,'ResinSynth/FEED   ',1,,
-9,2,3,19,'AgriChem/HEAT     ',1,,,
-9,2,3,20,'AgriChem/REFRIG   ',1,,,
-9,2,3,21,'AgriChem/MACHDRV  ',1,,,
-9,2,3,22,'AgriChem/ELECTRO  ',1,,,
-9,2,3,23,'AgriChem/OTHER    ',1,,,
-9,2,3,24,'AgriChem/FEED     ',1,,,
-9,3,'Number of Steps and Rpt. Groups:',24,10,,,,
+9,2,3,19,'AgriChem/HEAT     ',1,,
+9,2,3,20,'AgriChem/REFRIG   ',1,,
+9,2,3,21,'AgriChem/MACHDRV  ',1,,
+9,2,3,22,'AgriChem/ELECTRO  ',1,,
+9,2,3,23,'AgriChem/OTHER    ',1,,
+9,2,3,24,'AgriChem/FEED     ',1,,
+9,3,'Number of Steps and Rpt. Groups:',24,10,,
 9,3,1,'Inorganic/HEAT    ','# DownSteps',1,0,,
 9,3,2,'Inorganic/REFRIG  ','# DownSteps',1,0,,
 9,3,3,'Inorganic/MACHDRV ','# DownSteps',1,0,,
@@ -893,34 +1021,34 @@
 9,3,18,'ResinSynth/FEED   ','# DownSteps',1,0,,
 9,3,19,'AgriChem/HEAT     ','# DownSteps',1,0,,
 9,3,20,'AgriChem/REFRIG   ','# DownSteps',1,0,,
-9,3,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,,,,,,,,,,,
-9,3,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,,,,,,,,,,,
-9,3,23,'AgriChem/OTHER    ','# DownSteps',1,0,,,,,,,,,,,,
-9,3,24,'AgriChem/FEED     ','# DownSteps',1,0,,,,,,,,,,,,
-* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,,,,,,,,,,,,,,,,,
+9,3,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,
+9,3,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,
+9,3,23,'AgriChem/OTHER    ','# DownSteps',1,0,,
+9,3,24,'AgriChem/FEED     ','# DownSteps',1,0,,
+* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,
 9,3,1,'Inorganic ',6,1,2,3,4,5,6,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,3,2,'Organic   ',6,7,8,9,10,11,12,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,3,3,'ResinSynth',6,13,14,15,16,17,18,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,3,4,'AgriChem  ',6,19,20,21,22,23,24,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,3,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,3,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,3,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,3,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,3,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,3,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,,
-9,3,1,'Inorganic/HEAT    ','Retire Rate',0.017,,,,,,,
-9,3,2,'Inorganic/REFRIG  ','Retire Rate',0.017,,,,,,,
-9,3,3,'Inorganic/MACHDRV ','Retire Rate',0.017,,,,,,,
-9,3,4,'Inorganic/ELECTRO ','Retire Rate',0.017,,,,,,,
-9,3,5,'Inorganic/OTHER   ','Retire Rate',0.017,,,,,,,
-9,3,6,'Inorganic/FEED    ','Retire Rate',0.017,,,,,,,
-9,3,7,'Organic/HEAT      ','Retire Rate',0.017,,,,,,,
-9,3,8,'Organic/REFRIG    ','Retire Rate',0.017,,,,,,,
-9,3,9,'Organic/MACHDRV   ','Retire Rate',0.017,,,,,,,
-9,3,10,'Organic/ELECTRO   ','Retire Rate',0.017,,,,,,,
-9,3,11,'Organic/OTHER     ','Retire Rate',0.017,,,,,,,
-9,3,12,'Organic/FEED      ','Retire Rate',0.017,,,,,,,
+9,3,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,3,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,3,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,3,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,3,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,3,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem',,
+* 'Retirement Rates by Step',,
+9,3,1,'Inorganic/HEAT    ','Retire Rate',0.017,,
+9,3,2,'Inorganic/REFRIG  ','Retire Rate',0.017,,
+9,3,3,'Inorganic/MACHDRV ','Retire Rate',0.017,,
+9,3,4,'Inorganic/ELECTRO ','Retire Rate',0.017,,
+9,3,5,'Inorganic/OTHER   ','Retire Rate',0.017,,
+9,3,6,'Inorganic/FEED    ','Retire Rate',0.017,,
+9,3,7,'Organic/HEAT      ','Retire Rate',0.017,,
+9,3,8,'Organic/REFRIG    ','Retire Rate',0.017,,
+9,3,9,'Organic/MACHDRV   ','Retire Rate',0.017,,
+9,3,10,'Organic/ELECTRO   ','Retire Rate',0.017,,
+9,3,11,'Organic/OTHER     ','Retire Rate',0.017,,
+9,3,12,'Organic/FEED      ','Retire Rate',0.017,,
 9,3,13,'ResinSynth/HEAT   ','Retire Rate',0.017
 9,3,14,'ResinSynth/REFRIG ','Retire Rate',0.017
 9,3,15,'ResinSynth/MACHDRV','Retire Rate',0.017
@@ -933,7 +1061,7 @@
 9,3,22,'AgriChem/ELECTRO  ','Retire Rate',0.017
 9,3,23,'AgriChem/OTHER    ','Retire Rate',0.017
 9,3,24,'AgriChem/FEED     ','Retire Rate',0.017
-* 'Flow Rates by Step',,,,,
+* 'Flow Rates by Step',,
 9,3,1,1,'Inorganic/HEAT    ',1
 9,3,1,2,'Inorganic/REFRIG  ',1,,
 9,3,1,3,'Inorganic/MACHDRV ',1,,
@@ -976,13 +1104,13 @@
 9,3,3,16,'ResinSynth/ELECTRO',1,,
 9,3,3,17,'ResinSynth/OTHER  ',1,,
 9,3,3,18,'ResinSynth/FEED   ',1,,
-9,3,3,19,'AgriChem/HEAT     ',1,,,
-9,3,3,20,'AgriChem/REFRIG   ',1,,,
-9,3,3,21,'AgriChem/MACHDRV  ',1,,,
-9,3,3,22,'AgriChem/ELECTRO  ',1,,,
-9,3,3,23,'AgriChem/OTHER    ',1,,,
-9,3,3,24,'AgriChem/FEED     ',1,,,
-9,4,'Number of Steps and Rpt. Groups:',24,10,,,,
+9,3,3,19,'AgriChem/HEAT     ',1,,
+9,3,3,20,'AgriChem/REFRIG   ',1,,
+9,3,3,21,'AgriChem/MACHDRV  ',1,,
+9,3,3,22,'AgriChem/ELECTRO  ',1,,
+9,3,3,23,'AgriChem/OTHER    ',1,,
+9,3,3,24,'AgriChem/FEED     ',1,,
+9,4,'Number of Steps and Rpt. Groups:',24,10,,
 9,4,1,'Inorganic/HEAT    ','# DownSteps',1,0,,
 9,4,2,'Inorganic/REFRIG  ','# DownSteps',1,0,,
 9,4,3,'Inorganic/MACHDRV ','# DownSteps',1,0,,
@@ -1004,21 +1132,21 @@
 9,4,19,'AgriChem/HEAT     ','# DownSteps',1,0,,
 9,4,20,'AgriChem/REFRIG   ','# DownSteps',1,0,,
 9,4,21,'AgriChem/MACHDRV  ','# DownSteps',1,0,,
-9,4,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,,,,,,,,,,,
-9,4,23,'AgriChem/OTHER    ','# DownSteps',1,0,,,,,,,,,,,,
-9,4,24,'AgriChem/FEED     ','# DownSteps',1,0,,,,,,,,,,,,
-* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,,,,,,,,,,,,,,,,,
+9,4,22,'AgriChem/ELECTRO  ','# DownSteps',1,0,,
+9,4,23,'AgriChem/OTHER    ','# DownSteps',1,0,,
+9,4,24,'AgriChem/FEED     ','# DownSteps',1,0,,
+* reporting groups for subindustry summaries in indreg.wk1 and indusa.wk1,,
 9,4,1,'Inorganic ',6,1,2,3,4,5,6,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,4,2,'Organic   ',6,7,8,9,10,11,12,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,4,3,'ResinSynth',6,13,14,15,16,17,18,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
 9,4,4,'AgriChem  ',6,19,20,21,22,23,24,'Heat','Refrig','MachDrv','Electro','Other','Feedstock'
-9,4,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,4,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,4,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,4,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,4,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-9,4,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem',,,,,,
-* 'Retirement Rates by Step',,,,,
+9,4,5,'Heat      ',4,1,7,13,19,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,4,6,'Refrig    ',4,2,8,14,20,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,4,7,'MachDrv   ',4,3,9,15,21,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,4,8,'Electro   ',4,4,10,16,22,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,4,9,'Other     ',4,5,11,17,23,'Inorganic','Organic','ResinSynth','AgriChem',,
+9,4,10,'Feedstock ',4,6,12,18,24,'Inorganic','Organic','ResinSynth','AgriChem',,
+* 'Retirement Rates by Step',,
 9,4,1,'Inorganic/HEAT    ','Retire Rate',0.017
 9,4,2,'Inorganic/REFRIG  ','Retire Rate',0.017
 9,4,3,'Inorganic/MACHDRV ','Retire Rate',0.017
@@ -1043,7 +1171,7 @@
 9,4,22,'AgriChem/ELECTRO  ','Retire Rate',0.017
 9,4,23,'AgriChem/OTHER    ','Retire Rate',0.017
 9,4,24,'AgriChem/FEED     ','Retire Rate',0.017
-* 'Flow Rates by Step',,,,,
+* 'Flow Rates by Step',,
 9,4,1,1,'Inorganic/HEAT    ',1
 9,4,1,2,'Inorganic/REFRIG  ',1
 9,4,1,3,'Inorganic/MACHDRV ',1,,
@@ -1087,352 +1215,352 @@
 9,4,3,17,'ResinSynth/OTHER  ',1,,
 9,4,3,18,'ResinSynth/FEED   ',1,,
 9,4,3,19,'AgriChem/HEAT     ',1,,
-9,4,3,20,'AgriChem/REFRIG   ',1,,,,
-9,4,3,21,'AgriChem/MACHDRV  ',1,,,,
-9,4,3,22,'AgriChem/ELECTRO  ',1,,,,
-9,4,3,23,'AgriChem/OTHER    ',1,,,,
-9,4,3,24,'AgriChem/FEED     ',1,,,,
-*,,,,,,,,,
-10,1,'Number of Steps and Rpt. Groups:',6,0,,,,,
-10,1,1,'P_FORM ','# DownSteps',1,0,,,
-10,1,2,'FORM   ','# DownSteps',1,1,,,
-10,1,3,'M_RCYL ','# DownSteps',1,2,,,
-10,1,4,'M_VRGN ','# DownSteps',1,2,,,
-10,1,5,'B_RCYL ','# DownSteps',1,3,,,
-10,1,6,'B_VRGN ','# DownSteps',1,4,,,
-* 'Retirement Rates by Step',,,,,,,,,
-10,1,1,'P_FORM ','Retire Rate',0.013,,,
-10,1,2,'FORM   ','Retire Rate',0.013,,,
-10,1,3,'M_RCYL ','Retire Rate',0.013,,,
-10,1,4,'M_VRGN ','Retire Rate',0.013,,,
-10,1,5,'B_RCYL ','Retire Rate',0.013,,,
-10,1,6,'B_VRGN ','Retire Rate',0.013,,,
-* 'Flow Rates by Step',,,,,,,,
-10,1,1,1,'P_FORM ',0.971,,,
-10,1,1,2,'FORM   ',1,,,
-10,1,1,3,'M_RCYL ',0.141,,,
-10,1,1,4,'M_VRGN ',0.859,,,
-10,1,1,5,'B_RCYL ',0.859,,,
-10,1,1,6,'B_VRGN ',1,,,
-10,1,3,1,'P_FORM ',0.971,,,
-10,1,3,2,'FORM   ',1,,,,
-10,1,3,3,'M_RCYL ',0.141,,,,
-10,1,3,4,'M_VRGN ',0.859,,,,
-10,1,3,5,'B_RCYL ',0.859,,,,
-10,1,3,6,'B_VRGN ',1,,,,
-10,2,'Number of Steps and Rpt. Groups:',6,0,,,,,
-10,2,1,'P_FORM ','# DownSteps',1,0,,,
-10,2,2,'FORM   ','# DownSteps',1,1,,,
-10,2,3,'M_RCYL ','# DownSteps',1,2,,,
-10,2,4,'M_VRGN ','# DownSteps',1,2,,,
-10,2,5,'B_RCYL ','# DownSteps',1,3,,,
-10,2,6,'B_VRGN ','# DownSteps',1,4,,,
-* 'Retirement Rates by Step',,,,,,,,,
-10,2,1,'P_FORM ','Retire Rate',0.013,,,,
-10,2,2,'FORM   ','Retire Rate',0.013,,,
-10,2,3,'M_RCYL ','Retire Rate',0.013,,,
-10,2,4,'M_VRGN ','Retire Rate',0.013,,,
-10,2,5,'B_RCYL ','Retire Rate',0.013,,,
-10,2,6,'B_VRGN ','Retire Rate',0.013,,,
-* 'Flow Rates by Step',,,,,,,,
-10,2,1,1,'P_FORM ',0.971,,,
-10,2,1,2,'FORM   ',1,,,
-10,2,1,3,'M_RCYL ',0.141,,,
-10,2,1,4,'M_VRGN ',0.859,,,
-10,2,1,5,'B_RCYL ',0.859,,,
-10,2,1,6,'B_VRGN ',1,,,
-10,2,3,1,'P_FORM ',0.971,,,
-10,2,3,2,'FORM   ',1,,,
-10,2,3,3,'M_RCYL ',0.141,,,,
-10,2,3,4,'M_VRGN ',0.859,,,,
-10,2,3,5,'B_RCYL ',0.859,,,,
-10,2,3,6,'B_VRGN ',1,,,,
-10,3,'Number of Steps and Rpt. Groups:',6,0,,,,,
-10,3,1,'P_FORM ','# DownSteps',1,0,,,
-10,3,2,'FORM   ','# DownSteps',1,1,,,
-10,3,3,'M_RCYL ','# DownSteps',1,2,,,
-10,3,4,'M_VRGN ','# DownSteps',1,2,,,
-10,3,5,'B_RCYL ','# DownSteps',1,3,,,
-10,3,6,'B_VRGN ','# DownSteps',1,4,,,
-* 'Retirement Rates by Step',,,,,,,,,
-10,3,1,'P_FORM ','Retire Rate',0.013,,,,
-10,3,2,'FORM   ','Retire Rate',0.013,,,,
-10,3,3,'M_RCYL ','Retire Rate',0.013,,,
-10,3,4,'M_VRGN ','Retire Rate',0.013,,,
-10,3,5,'B_RCYL ','Retire Rate',0.013,,,
-10,3,6,'B_VRGN ','Retire Rate',0.013,,,
-* 'Flow Rates by Step',,,,,,,,
-10,3,1,1,'P_FORM ',0.971,,,
-10,3,1,2,'FORM   ',1,,,
-10,3,1,3,'M_RCYL ',0.141,,,
-10,3,1,4,'M_VRGN ',0.859,,,
-10,3,1,5,'B_RCYL ',0.859,,,
-10,3,1,6,'B_VRGN ',1,,,
-10,3,3,1,'P_FORM ',0.971,,,
-10,3,3,2,'FORM   ',1,,,
-10,3,3,3,'M_RCYL ',0.141,,,
-10,3,3,4,'M_VRGN ',0.859,,,,
-10,3,3,5,'B_RCYL ',0.859,,,,
-10,3,3,6,'B_VRGN ',1,,,,
-10,4,'Number of Steps and Rpt. Groups:',6,0,,,,,
-10,4,1,'P_FORM ','# DownSteps',1,0,,,
-10,4,2,'FORM   ','# DownSteps',1,1,,,
-10,4,3,'M_RCYL ','# DownSteps',1,2,,,
-10,4,4,'M_VRGN ','# DownSteps',1,2,,,
-10,4,5,'B_RCYL ','# DownSteps',1,3,,,
-10,4,6,'B_VRGN ','# DownSteps',1,4,,,
-* 'Retirement Rates by Step',,,,,,,,,
-10,4,1,'P_FORM ','Retire Rate',0.013,,,,
-10,4,2,'FORM   ','Retire Rate',0.013,,,,
-10,4,3,'M_RCYL ','Retire Rate',0.013,,,,
-10,4,4,'M_VRGN ','Retire Rate',0.013,,,
-10,4,5,'B_RCYL ','Retire Rate',0.013,,,
-10,4,6,'B_VRGN ','Retire Rate',0.013,,,
-* 'Flow Rates by Step',,,,,,,,
-10,4,1,1,'P_FORM ',0.971,,,
-10,4,1,2,'FORM   ',1,,,
-10,4,1,3,'M_RCYL ',0.141,,,
-10,4,1,4,'M_VRGN ',0.859,,,
-10,4,1,5,'B_RCYL ',0.859,,,
-10,4,1,6,'B_VRGN ',1,,,
-10,4,3,1,'P_FORM ',0.971,,,
-10,4,3,2,'FORM   ',1,,,
-10,4,3,3,'M_RCYL ',0.141,,,
-10,4,3,4,'M_VRGN ',0.859,,,
-10,4,3,5,'B_RCYL ',0.859,,,
-10,4,3,6,'B_VRGN ',1,,,
-*,,,,,,,,
-11,1,'Number of Steps and Rpt. Groups:',5,0,,,,
+9,4,3,20,'AgriChem/REFRIG   ',1,,
+9,4,3,21,'AgriChem/MACHDRV  ',1,,
+9,4,3,22,'AgriChem/ELECTRO  ',1,,
+9,4,3,23,'AgriChem/OTHER    ',1,,
+9,4,3,24,'AgriChem/FEED     ',1,,
+*,,
+10,1,'Number of Steps and Rpt. Groups:',6,0,,
+10,1,1,'P_FORM ','# DownSteps',1,0,,
+10,1,2,'FORM   ','# DownSteps',1,1,,
+10,1,3,'M_RCYL ','# DownSteps',1,2,,
+10,1,4,'M_VRGN ','# DownSteps',1,2,,
+10,1,5,'B_RCYL ','# DownSteps',1,3,,
+10,1,6,'B_VRGN ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+10,1,1,'P_FORM ','Retire Rate',0.013,,
+10,1,2,'FORM   ','Retire Rate',0.013,,
+10,1,3,'M_RCYL ','Retire Rate',0.013,,
+10,1,4,'M_VRGN ','Retire Rate',0.013,,
+10,1,5,'B_RCYL ','Retire Rate',0.013,,
+10,1,6,'B_VRGN ','Retire Rate',0.013,,
+* 'Flow Rates by Step',,
+10,1,1,1,'P_FORM ',0.971,,
+10,1,1,2,'FORM   ',1,,
+10,1,1,3,'M_RCYL ',0.141,,
+10,1,1,4,'M_VRGN ',0.859,,
+10,1,1,5,'B_RCYL ',0.859,,
+10,1,1,6,'B_VRGN ',1,,
+10,1,3,1,'P_FORM ',0.971,,
+10,1,3,2,'FORM   ',1,,
+10,1,3,3,'M_RCYL ',0.141,,
+10,1,3,4,'M_VRGN ',0.859,,
+10,1,3,5,'B_RCYL ',0.859,,
+10,1,3,6,'B_VRGN ',1,,
+10,2,'Number of Steps and Rpt. Groups:',6,0,,
+10,2,1,'P_FORM ','# DownSteps',1,0,,
+10,2,2,'FORM   ','# DownSteps',1,1,,
+10,2,3,'M_RCYL ','# DownSteps',1,2,,
+10,2,4,'M_VRGN ','# DownSteps',1,2,,
+10,2,5,'B_RCYL ','# DownSteps',1,3,,
+10,2,6,'B_VRGN ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+10,2,1,'P_FORM ','Retire Rate',0.013,,
+10,2,2,'FORM   ','Retire Rate',0.013,,
+10,2,3,'M_RCYL ','Retire Rate',0.013,,
+10,2,4,'M_VRGN ','Retire Rate',0.013,,
+10,2,5,'B_RCYL ','Retire Rate',0.013,,
+10,2,6,'B_VRGN ','Retire Rate',0.013,,
+* 'Flow Rates by Step',,
+10,2,1,1,'P_FORM ',0.971,,
+10,2,1,2,'FORM   ',1,,
+10,2,1,3,'M_RCYL ',0.141,,
+10,2,1,4,'M_VRGN ',0.859,,
+10,2,1,5,'B_RCYL ',0.859,,
+10,2,1,6,'B_VRGN ',1,,
+10,2,3,1,'P_FORM ',0.971,,
+10,2,3,2,'FORM   ',1,,
+10,2,3,3,'M_RCYL ',0.141,,
+10,2,3,4,'M_VRGN ',0.859,,
+10,2,3,5,'B_RCYL ',0.859,,
+10,2,3,6,'B_VRGN ',1,,
+10,3,'Number of Steps and Rpt. Groups:',6,0,,
+10,3,1,'P_FORM ','# DownSteps',1,0,,
+10,3,2,'FORM   ','# DownSteps',1,1,,
+10,3,3,'M_RCYL ','# DownSteps',1,2,,
+10,3,4,'M_VRGN ','# DownSteps',1,2,,
+10,3,5,'B_RCYL ','# DownSteps',1,3,,
+10,3,6,'B_VRGN ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+10,3,1,'P_FORM ','Retire Rate',0.013,,
+10,3,2,'FORM   ','Retire Rate',0.013,,
+10,3,3,'M_RCYL ','Retire Rate',0.013,,
+10,3,4,'M_VRGN ','Retire Rate',0.013,,
+10,3,5,'B_RCYL ','Retire Rate',0.013,,
+10,3,6,'B_VRGN ','Retire Rate',0.013,,
+* 'Flow Rates by Step',,
+10,3,1,1,'P_FORM ',0.971,,
+10,3,1,2,'FORM   ',1,,
+10,3,1,3,'M_RCYL ',0.141,,
+10,3,1,4,'M_VRGN ',0.859,,
+10,3,1,5,'B_RCYL ',0.859,,
+10,3,1,6,'B_VRGN ',1,,
+10,3,3,1,'P_FORM ',0.971,,
+10,3,3,2,'FORM   ',1,,
+10,3,3,3,'M_RCYL ',0.141,,
+10,3,3,4,'M_VRGN ',0.859,,
+10,3,3,5,'B_RCYL ',0.859,,
+10,3,3,6,'B_VRGN ',1,,
+10,4,'Number of Steps and Rpt. Groups:',6,0,,
+10,4,1,'P_FORM ','# DownSteps',1,0,,
+10,4,2,'FORM   ','# DownSteps',1,1,,
+10,4,3,'M_RCYL ','# DownSteps',1,2,,
+10,4,4,'M_VRGN ','# DownSteps',1,2,,
+10,4,5,'B_RCYL ','# DownSteps',1,3,,
+10,4,6,'B_VRGN ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+10,4,1,'P_FORM ','Retire Rate',0.013,,
+10,4,2,'FORM   ','Retire Rate',0.013,,
+10,4,3,'M_RCYL ','Retire Rate',0.013,,
+10,4,4,'M_VRGN ','Retire Rate',0.013,,
+10,4,5,'B_RCYL ','Retire Rate',0.013,,
+10,4,6,'B_VRGN ','Retire Rate',0.013,,
+* 'Flow Rates by Step',,
+10,4,1,1,'P_FORM ',0.971,,
+10,4,1,2,'FORM   ',1,,
+10,4,1,3,'M_RCYL ',0.141,,
+10,4,1,4,'M_VRGN ',0.859,,
+10,4,1,5,'B_RCYL ',0.859,,
+10,4,1,6,'B_VRGN ',1,,
+10,4,3,1,'P_FORM ',0.971,,
+10,4,3,2,'FORM   ',1,,
+10,4,3,3,'M_RCYL ',0.141,,
+10,4,3,4,'M_VRGN ',0.859,,
+10,4,3,5,'B_RCYL ',0.859,,
+10,4,3,6,'B_VRGN ',1,,
+*,,
+11,1,'Number of Steps and Rpt. Groups:',5,0,,
 11,1,1,'FGRIND ','# DownSteps',1,0,,
 11,1,2,'KILN   ','# DownSteps',2,1,5,,
 11,1,3,'RGRIND ','# DownSteps',2,1,3,
 11,1,4,'LIME   ','# DownSteps',2,1,5,
 11,1,5,'IMPORT ','# DownSteps',2,1,4,
-* 'Retirement Rates by Step',,,,,,,,
-11,1,1,'FGRIND ','Retire Rate',0.012,,,
-11,1,2,'KILN   ','Retire Rate',0.012,,,
-11,1,3,'RGRIND ','Retire Rate',0.024,,,
-11,1,4,'LIME   ','Retire Rate',0.012,,,
-11,1,5,'IMPORT ','Retire Rate',0.0,,,
-* 'Flow Rates by Step',,,,,,,,
-11,1,1,1,'FGRIND ',1,,,
+* 'Retirement Rates by Step',,
+11,1,1,'FGRIND ','Retire Rate',0.012,,
+11,1,2,'KILN   ','Retire Rate',0.012,,
+11,1,3,'RGRIND ','Retire Rate',0.024,,
+11,1,4,'LIME   ','Retire Rate',0.012,,
+11,1,5,'IMPORT ','Retire Rate',0.0,,
+* 'Flow Rates by Step',,
+11,1,1,1,'FGRIND ',1,,
 11,1,1,2,'KILN   ',0.4852,0.0,
 11,1,1,3,'RGRIND ',0.4228,0,
 11,1,1,4,'LIME   ',0.0910,0.0
-11,1,1,5,'IMPORT ',0.0910,0.0
+11,1,1,5,'IMPORT ',0.1,0.0
 11,1,3,1,'FGRIND ',1,
-11,1,3,2,'KILN   ',0.9090,1.000
+11,1,3,2,'KILN   ',0.92,1.000
 11,1,3,3,'RGRIND ',0,99999,
 11,1,3,4,'LIME   ',0.0910,99999
-11,1,3,5,'IMPORT ',0.0910,99999
+11,1,3,5,'IMPORT ',0.13,88888
 11,2,'Number of Steps and Rpt. Groups:',5,0,,
 11,2,1,'FGRIND ','# DownSteps',1,0
 11,2,2,'KILN   ','# DownSteps',2,1,5
 11,2,3,'RGRIND ','# DownSteps',2,1,3
 11,2,4,'LIME   ','# DownSteps',2,1,5,
 11,2,5,'IMPORT ','# DownSteps',2,1,4,
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 11,2,1,'FGRIND ','Retire Rate',0.012,
 11,2,2,'KILN   ','Retire Rate',0.012,
 11,2,3,'RGRIND ','Retire Rate',0.024,
-11,2,4,'LIME   ','Retire Rate',0.012,,,
-11,2,5,'IMPORT ','Retire Rate',0.0,,,
-* 'Flow Rates by Step',,,,,,
+11,2,4,'LIME   ','Retire Rate',0.012,,
+11,2,5,'IMPORT ','Retire Rate',0.0,,
+* 'Flow Rates by Step',,
 11,2,1,1,'FGRIND ',1,
 11,2,1,2,'KILN   ',0.6985,0.0
 11,2,1,3,'RGRIND ',0.2105,0,
 11,2,1,4,'LIME   ',0.0910,0.0
-11,2,1,5,'IMPORT ',0.0910,0.0
+11,2,1,5,'IMPORT ',0.95,0.05
 11,2,3,1,'FGRIND ',1,
 11,2,3,2,'KILN   ',0.9090,1.000
 11,2,3,3,'RGRIND ',0,99999,
-11,2,3,4,'LIME   ',0.0910,99999
-11,2,3,5,'IMPORT ',0.0910,99999
+11,2,3,4,'LIME   ',0.1,99999
+11,2,3,5,'IMPORT ',0.15,88888
 11,3,'Number of Steps and Rpt. Groups:',5,0,,
 11,3,1,'FGRIND ','# DownSteps',1,0
 11,3,2,'KILN   ','# DownSteps',2,1,5
 11,3,3,'RGRIND ','# DownSteps',2,1,3
 11,3,4,'LIME   ','# DownSteps',2,1,5,
 11,3,5,'IMPORT ','# DownSteps',2,1,4,
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 11,3,1,'FGRIND ','Retire Rate',0.012,
 11,3,2,'KILN   ','Retire Rate',0.012,
 11,3,3,'RGRIND ','Retire Rate',0.024,
-11,3,4,'LIME   ','Retire Rate',0.012,,,
-11,3,5,'IMPORT ','Retire Rate',0.0,,,
-* 'Flow Rates by Step',,,,,,
+11,3,4,'LIME   ','Retire Rate',0.012,,
+11,3,5,'IMPORT ','Retire Rate',0.0,,
+* 'Flow Rates by Step',,
 11,3,1,1,'FGRIND ',1,
-11,3,1,2,'KILN   ',0.6885,0.0,
-11,3,1,3,'RGRIND ',0.2205,0,
+11,3,1,2,'KILN   ',0.6885,0.0
+11,3,1,3,'RGRIND ',0.2205,0
 11,3,1,4,'LIME   ',0.0910,0.0
-11,3,1,5,'IMPORT ',0.0910,0.0
+11,3,1,5,'IMPORT ',0.1,0.05
 11,3,3,1,'FGRIND ',1,
 11,3,3,2,'KILN   ',0.9090,1.000
 11,3,3,3,'RGRIND ',0,99999,
-11,3,3,4,'LIME   ',0.0910,99999
-11,3,3,5,'IMPORT ',0.0910,99999
+11,3,3,4,'LIME   ',0.0910,88888
+11,3,3,5,'IMPORT ',0.15,88888
 11,4,'Number of Steps and Rpt. Groups:',5,0,,
 11,4,1,'FGRIND ','# DownSteps',1,0
 11,4,2,'KILN   ','# DownSteps',2,1,5
 11,4,3,'RGRIND ','# DownSteps',2,1,3
 11,4,4,'LIME   ','# DownSteps',2,1,5,
 11,4,5,'IMPORT ','# DownSteps',2,1,4,
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 11,4,1,'FGRIND ','Retire Rate',0.012,
 11,4,2,'KILN   ','Retire Rate',0.012,
 11,4,3,'RGRIND ','Retire Rate',0.024,
-11,4,4,'LIME   ','Retire Rate',0.012,,,
-11,4,5,'IMPORT ','Retire Rate',0.0,,,
-* 'Flow Rates by Step',,,,,,
+11,4,4,'LIME   ','Retire Rate',0.012,,
+11,4,5,'IMPORT ','Retire Rate',0.0,,
+* 'Flow Rates by Step',,
 11,4,1,1,'FGRIND ',1,
 11,4,1,2,'KILN   ',0.8417,0.0,
 11,4,1,3,'RGRIND ',0.0673,0,
 11,4,1,4,'LIME   ',0.0910,0.0
-11,4,1,5,'IMPORT ',0.0910,0.0
+11,4,1,5,'IMPORT ',0.15,0.05
 11,4,3,1,'FGRIND ',1,
-11,4,3,2,'KILN   ',0.9090,1.000
+11,4,3,2,'KILN   ',0.92,1.000
 11,4,3,3,'RGRIND ',0,99999,
 11,4,3,4,'LIME   ',0.0910,99999,
-11,4,3,5,'IMPORT ',0.0910,99999,
-*,,,,,,,,,,,
-12,1,'Number of Steps and Rpt. Groups:',7,0,,,,,,,
-12,1,1,'HOT_RL  ','# DownSteps',1,0,,,,,  
-12,1,2,'COLD_RL ','# DownSteps',1,0,,,,,
-12,1,3,'CONTIN  ','# DownSteps',1,1,,,,,
-12,1,4,'BF/BOF  ','# DownSteps',1,3,,,,,
-12,1,5,'EAF     ','# DownSteps',1,3,,,,,
-12,1,6,'DRI    ','# DownSteps',2,4,5,,,,
-12,1,7,'COKE    ','# DownSteps',1,4,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,
-12,1,1,'HOT_RL  ','Retire Rate',0.029,,,,,,
-12,1,2,'COLD_RL ','Retire Rate',0.029,,,,,,
-12,1,3,'CONTIN  ','Retire Rate',0.029,,,,,,
-12,1,4,'BF/BOF  ','Retire Rate',0.015,,,,,,
-12,1,5,'EAF     ','Retire Rate',0.015,,,,,,
-12,1,6,'DRI    ','Retire Rate',0.015,,,,,,
-12,1,7,'COKE    ','Retire Rate',0.025,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,
-12,1,1,1,'HOT_RL  ',1.047,,,,,,
-12,1,1,2,'COLD_RL ',0.448550098,,,,,,
-12,1,1,3,'CONTIN  ',0.954,,,,,,
-12,1,1,4,'BF/BOF  ',0.31,,,,,,
-12,1,1,5,'EAF     ',0.754,,,,,,
-12,1,1,6,'DRI    ',0,0,,,,,
-12,1,1,7,'COKE    ',2.146,,,,,,
-12,1,3,1,'HOT_RL  ',1.047,,,,,,
-12,1,3,2,'COLD_RL ',0.448550098,,,,,,
-12,1,3,3,'CONTIN  ',0.954,,,,,,
-12,1,3,4,'BF/BOF  ',0.31,,,,,,
-12,1,3,5,'EAF     ',0.754,,,,,,
-12,1,3,6,'DRI    ',0,0,,,,,
-12,1,3,7,'COKE    ',2.146,,,,,,
-12,2,'Number of Steps and Rpt. Groups:',7,0,,,,,,,
-12,2,1,'HOT_RL  ','# DownSteps',1,0,,,,,
-12,2,2,'COLD_RL ','# DownSteps',1,0,,,,,
-12,2,3,'CONTIN  ','# DownSteps',1,1,,,,,
-12,2,4,'BF/BOF  ','# DownSteps',1,3,,,,,
-12,2,5,'EAF     ','# DownSteps',1,3,,,,,
-12,2,6,'DRI    ','# DownSteps',2,4,5,,,,
-12,2,7,'COKE    ','# DownSteps',1,4,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,
-12,2,1,'HOT_RL  ','Retire Rate',0.029,,,,,,
-12,2,2,'COLD_RL ','Retire Rate',0.029,,,,,,
-12,2,3,'CONTIN  ','Retire Rate',0.029,,,,,,
-12,2,4,'BF/BOF  ','Retire Rate',0.015,,,,,,
-12,2,5,'EAF     ','Retire Rate',0.015,,,,,,
-12,2,6,'DRI    ','Retire Rate',0.015,,,,,,
-12,2,7,'COKE    ','Retire Rate',0.025,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,
-12,2,1,1,'HOT_RL  ',1.047,,,,,,
-12,2,1,2,'COLD_RL ',0.418208548,,,,,,
-12,2,1,3,'CONTIN  ',0.954,,,,,,
-12,2,1,4,'BF/BOF  ',0.778,,,,,,
-12,2,1,5,'EAF     ',0.335,,,,,,
-12,2,1,6,'DRI    ',0,0,,,,,
-12,2,1,7,'COKE    ',0.193,,,,,,
-12,2,3,1,'HOT_RL  ',1.047,,,,,,
-12,2,3,2,'COLD_RL ',0.418208548,,,,,,
-12,2,3,3,'CONTIN  ',0.954,,,,,,
-12,2,3,4,'BF/BOF  ',0.778,,,,,,
-12,2,3,5,'EAF     ',0.335,,,,,,
-12,2,3,6,'DRI    ',0,0,,,,,
-12,2,3,7,'COKE    ',0.193,,,,,,
-12,3,'Number of Steps and Rpt. Groups:',7,0,,,,,,,
-12,3,1,'HOT_RL  ','# DownSteps',1,0,,,,,
-12,3,2,'COLD_RL ','# DownSteps',1,0,,,,,
-12,3,3,'CONTIN  ','# DownSteps',1,1,,,,,
-12,3,4,'BF/BOF  ','# DownSteps',1,3,,,,,
-12,3,5,'EAF     ','# DownSteps',1,3,,,,,
-12,3,6,'DRI    ','# DownSteps',2,4,5,,,,
-12,3,7,'COKE    ','# DownSteps',1,4,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,
-12,3,1,'HOT_RL  ','Retire Rate',0.029,,,,,,
-12,3,2,'COLD_RL ','Retire Rate',0.029,,,,,,
-12,3,3,'CONTIN  ','Retire Rate',0.029,,,,,,
-12,3,4,'BF/BOF  ','Retire Rate',0.015,,,,,,
-12,3,5,'EAF     ','Retire Rate',0.015,,,,,,
-12,3,6,'DRI    ','Retire Rate',0.015,,,,,,
-12,3,7,'COKE    ','Retire Rate',0.025,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,
-12,3,1,1,'HOT_RL  ',1.047,,,,,,
-12,3,1,2,'COLD_RL ',0.452818959,,,,,,
-12,3,1,3,'CONTIN  ',0.954,,,,,,
-12,3,1,4,'BF/BOF  ',0.389,,,,,,
-12,3,1,5,'EAF     ',0.724,,,,,,
-12,3,1,6,'DRI    ',0,0,,,,,
-12,3,1,7,'COKE    ',0.492,,,,,,
-12,3,3,1,'HOT_RL  ',1.047,,,,,,
-12,3,3,2,'COLD_RL ',0.452818959,,,,,,
-12,3,3,3,'CONTIN  ',0.954,,,,,,
-12,3,3,4,'BF/BOF  ',0.389,,,,,,
-12,3,3,5,'EAF     ',0.724,,,,,,
-12,3,3,6,'DRI    ',0,0,,,,,
-12,3,3,7,'COKE    ',0.492,,,,,,
-12,4,'Number of Steps and Rpt. Groups:',7,0,,,,,,,
-12,4,1,'HOT_RL  ','# DownSteps',1,0,,,,,
-12,4,2,'COLD_RL ','# DownSteps',1,0,,,,,
-12,4,3,'CONTIN  ','# DownSteps',1,1,,,,,
-12,4,4,'BF/BOF  ','# DownSteps',1,3,,,,,
-12,4,5,'EAF     ','# DownSteps',1,3,,,,,
-12,4,6,'DRI    ','# DownSteps',2,4,5,,,,
-12,4,7,'COKE    ','# DownSteps',1,4,,,,,
-* 'Retirement Rates by Step',,,,,,,,,,,
-12,4,1,'HOT_RL  ','Retire Rate',0.029,,,,,,
-12,4,2,'COLD_RL ','Retire Rate',0.029,,,,,,
-12,4,3,'CONTIN  ','Retire Rate',0.029,,,,,,
-12,4,4,'BF/BOF  ','Retire Rate',0.015,,,,,,
-12,4,5,'EAF     ','Retire Rate',0.015,,,,,,
-12,4,6,'DRI    ','Retire Rate',0.015,,,,,,
-12,4,7,'COKE    ','Retire Rate',0.025,,,,,,
-* 'Flow Rates by Step',,,,,,,,,,,
-12,4,1,1,'HOT_RL  ',1.047,,,,,,
-12,4,1,2,'COLD_RL ',0.442894828,,,,,,
-12,4,1,3,'CONTIN  ',0.954,,,,,,
-12,4,1,4,'BF/BOF  ',0,,,,,,
-12,4,1,5,'EAF     ',1,,,,,,
-12,4,1,6,'DRI    ',0,0,,,,,
-12,4,1,7,'COKE    ',0,,,,,,
-12,4,3,1,'HOT_RL  ',1.047,,,,,,
-12,4,3,2,'COLD_RL ',0.442894828,,,,,,
-12,4,3,3,'CONTIN  ',0.954,,,,,,
-12,4,3,4,'BF/BOF  ',0,,,,,,
-12,4,3,5,'EAF     ',1,,,,,,
-12,4,3,6,'DRI    ',0,0,,,,,
-12,4,3,7,'COKE    ',0,,,,,,
-*,,,,,,,,,,
-13,1,'Number of Steps and Rpt. Groups:',5,0,,,,,,
-13,1,1,'SEMI_SHEET','# DownSteps',1,0,,,,
+11,4,3,5,'IMPORT ',0.15,88888,
+*,,
+12,1,'Number of Steps and Rpt. Groups:',7,0,,
+12,1,1,'HOT_RL  ','# DownSteps',1,0,,  
+12,1,2,'COLD_RL ','# DownSteps',1,0,,
+12,1,3,'CONTIN  ','# DownSteps',1,1,,
+12,1,4,'BF/BOF  ','# DownSteps',1,3,,
+12,1,5,'EAF     ','# DownSteps',1,3,,
+12,1,6,'DRI    ','# DownSteps',2,4,5,,
+12,1,7,'COKE    ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+12,1,1,'HOT_RL  ','Retire Rate',0.029,,
+12,1,2,'COLD_RL ','Retire Rate',0.029,,
+12,1,3,'CONTIN  ','Retire Rate',0.029,,
+12,1,4,'BF/BOF  ','Retire Rate',0.015,,
+12,1,5,'EAF     ','Retire Rate',0.015,,
+12,1,6,'DRI    ','Retire Rate',0.015,,
+12,1,7,'COKE    ','Retire Rate',0.025,,
+* 'Flow Rates by Step',,
+12,1,1,1,'HOT_RL  ',1.047,,
+12,1,1,2,'COLD_RL ',0.448550098,,
+12,1,1,3,'CONTIN  ',0.954,,
+12,1,1,4,'BF/BOF  ',0.31,,
+12,1,1,5,'EAF     ',0.754,,
+12,1,1,6,'DRI    ',0,0,,
+12,1,1,7,'COKE    ',2.146,,
+12,1,3,1,'HOT_RL  ',1.047,,
+12,1,3,2,'COLD_RL ',0.448550098,,
+12,1,3,3,'CONTIN  ',0.954,,
+12,1,3,4,'BF/BOF  ',0.31,,
+12,1,3,5,'EAF     ',0.754,,
+12,1,3,6,'DRI    ',0,0,,
+12,1,3,7,'COKE    ',2.146,,
+12,2,'Number of Steps and Rpt. Groups:',7,0,,
+12,2,1,'HOT_RL  ','# DownSteps',1,0,,
+12,2,2,'COLD_RL ','# DownSteps',1,0,,
+12,2,3,'CONTIN  ','# DownSteps',1,1,,
+12,2,4,'BF/BOF  ','# DownSteps',1,3,,
+12,2,5,'EAF     ','# DownSteps',1,3,,
+12,2,6,'DRI    ','# DownSteps',2,4,5,,
+12,2,7,'COKE    ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+12,2,1,'HOT_RL  ','Retire Rate',0.029,,
+12,2,2,'COLD_RL ','Retire Rate',0.029,,
+12,2,3,'CONTIN  ','Retire Rate',0.029,,
+12,2,4,'BF/BOF  ','Retire Rate',0.015,,
+12,2,5,'EAF     ','Retire Rate',0.015,,
+12,2,6,'DRI    ','Retire Rate',0.015,,
+12,2,7,'COKE    ','Retire Rate',0.025,,
+* 'Flow Rates by Step',,
+12,2,1,1,'HOT_RL  ',1.047,,
+12,2,1,2,'COLD_RL ',0.418208548,,
+12,2,1,3,'CONTIN  ',0.954,,
+12,2,1,4,'BF/BOF  ',0.778,,
+12,2,1,5,'EAF     ',0.335,,
+12,2,1,6,'DRI    ',0,0,,
+12,2,1,7,'COKE    ',0.193,,
+12,2,3,1,'HOT_RL  ',1.047,,
+12,2,3,2,'COLD_RL ',0.418208548,,
+12,2,3,3,'CONTIN  ',0.954,,
+12,2,3,4,'BF/BOF  ',0.778,,
+12,2,3,5,'EAF     ',0.335,,
+12,2,3,6,'DRI    ',0,0,,
+12,2,3,7,'COKE    ',0.193,,
+12,3,'Number of Steps and Rpt. Groups:',7,0,,
+12,3,1,'HOT_RL  ','# DownSteps',1,0,,
+12,3,2,'COLD_RL ','# DownSteps',1,0,,
+12,3,3,'CONTIN  ','# DownSteps',1,1,,
+12,3,4,'BF/BOF  ','# DownSteps',1,3,,
+12,3,5,'EAF     ','# DownSteps',1,3,,
+12,3,6,'DRI    ','# DownSteps',2,4,5,,
+12,3,7,'COKE    ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+12,3,1,'HOT_RL  ','Retire Rate',0.029,,
+12,3,2,'COLD_RL ','Retire Rate',0.029,,
+12,3,3,'CONTIN  ','Retire Rate',0.029,,
+12,3,4,'BF/BOF  ','Retire Rate',0.015,,
+12,3,5,'EAF     ','Retire Rate',0.015,,
+12,3,6,'DRI    ','Retire Rate',0.015,,
+12,3,7,'COKE    ','Retire Rate',0.025,,
+* 'Flow Rates by Step',,
+12,3,1,1,'HOT_RL  ',1.047,,
+12,3,1,2,'COLD_RL ',0.452818959,,
+12,3,1,3,'CONTIN  ',0.954,,
+12,3,1,4,'BF/BOF  ',0.389,,
+12,3,1,5,'EAF     ',0.724,,
+12,3,1,6,'DRI    ',0,0,,
+12,3,1,7,'COKE    ',0.492,,
+12,3,3,1,'HOT_RL  ',1.047,,
+12,3,3,2,'COLD_RL ',0.452818959,,
+12,3,3,3,'CONTIN  ',0.954,,
+12,3,3,4,'BF/BOF  ',0.389,,
+12,3,3,5,'EAF     ',0.724,,
+12,3,3,6,'DRI    ',0,0,,
+12,3,3,7,'COKE    ',0.492,,
+12,4,'Number of Steps and Rpt. Groups:',7,0,,
+12,4,1,'HOT_RL  ','# DownSteps',1,0,,
+12,4,2,'COLD_RL ','# DownSteps',1,0,,
+12,4,3,'CONTIN  ','# DownSteps',1,1,,
+12,4,4,'BF/BOF  ','# DownSteps',1,3,,
+12,4,5,'EAF     ','# DownSteps',1,3,,
+12,4,6,'DRI    ','# DownSteps',2,4,5,,
+12,4,7,'COKE    ','# DownSteps',1,4,,
+* 'Retirement Rates by Step',,
+12,4,1,'HOT_RL  ','Retire Rate',0.029,,
+12,4,2,'COLD_RL ','Retire Rate',0.029,,
+12,4,3,'CONTIN  ','Retire Rate',0.029,,
+12,4,4,'BF/BOF  ','Retire Rate',0.015,,
+12,4,5,'EAF     ','Retire Rate',0.015,,
+12,4,6,'DRI    ','Retire Rate',0.015,,
+12,4,7,'COKE    ','Retire Rate',0.025,,
+* 'Flow Rates by Step',,
+12,4,1,1,'HOT_RL  ',1.047,,
+12,4,1,2,'COLD_RL ',0.442894828,,
+12,4,1,3,'CONTIN  ',0.954,,
+12,4,1,4,'BF/BOF  ',0,,
+12,4,1,5,'EAF     ',1,,
+12,4,1,6,'DRI    ',0,0,,
+12,4,1,7,'COKE    ',0,,
+12,4,3,1,'HOT_RL  ',1.047,,
+12,4,3,2,'COLD_RL ',0.442894828,,
+12,4,3,3,'CONTIN  ',0.954,,
+12,4,3,4,'BF/BOF  ',0,,
+12,4,3,5,'EAF     ',1,,
+12,4,3,6,'DRI    ',0,0,,
+12,4,3,7,'COKE    ',0,,
+*,,
+13,1,'Number of Steps and Rpt. Groups:',5,0,,
+13,1,1,'SEMI_SHEET','# DownSteps',1,0,,
 13,1,2,'SEMI_OTHER','# DownSteps',1,0,
 13,1,3,'SECONDARY','# DownSteps',2,1,2
 13,1,4,'PRIMARY','# DownSteps',2,1,2
 13,1,5,'BAUXITE','# DownSteps',1,4,
-* 'Retirement Rates by Step',,,,,,,
+* 'Retirement Rates by Step',,
 13,1,1,'SEMI_SHEET','Retire Rate',0.01,,
 13,1,2,'SEMI_OTHER','Retire Rate',0.01,,
 13,1,3,'SECONDARY','Retire Rate',0.01,,
 13,1,4,'PRIMARY','Retire Rate',0.01,,
 13,1,5,'BAUXITE','Retire Rate',0.01,,
-* 'Flow Rates by Step',,,,,,,
+* 'Flow Rates by Step',,
 13,1,1,1,'SEMI_SHEET',1.541,,
 13,1,1,2,'SEMI_OTHER',0.571,,
 13,1,1,3,'SECONDARY',0.243,0.243,
@@ -1443,19 +1571,19 @@
 13,1,3,3,'SECONDARY',0.384,0.384,
 13,1,3,4,'PRIMARY',0,0,
 13,1,3,5,'BAUXITE',0,,
-13,2,'Number of Steps and Rpt. Groups:',5,0,,,
+13,2,'Number of Steps and Rpt. Groups:',5,0,,
 13,2,1,'SEMI_SHEET','# DownSteps',1,0,
 13,2,2,'SEMI_OTHER','# DownSteps',1,0,
 13,2,3,'SECONDARY','# DownSteps',2,1,2
 13,2,4,'PRIMARY','# DownSteps',2,1,2
 13,2,5,'BAUXITE','# DownSteps',1,4,
-* 'Retirement Rates by Step',,,,,,
+* 'Retirement Rates by Step',,
 13,2,1,'SEMI_SHEET','Retire Rate',0.01,
 13,2,2,'SEMI_OTHER','Retire Rate',0.01,
 13,2,3,'SECONDARY','Retire Rate',0.01,
 13,2,4,'PRIMARY','Retire Rate',0.01,
 13,2,5,'BAUXITE','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 13,2,1,1,'SEMI_SHEET',0.502,
 13,2,1,2,'SEMI_OTHER',0.353,
 13,2,1,3,'SECONDARY',0.7,0.7
@@ -1466,19 +1594,19 @@
 13,2,3,3,'SECONDARY',1.027,1.027,
 13,2,3,4,'PRIMARY',0,0,
 13,2,3,5,'BAUXITE',0,,
-13,3,'Number of Steps and Rpt. Groups:',5,0,,,
+13,3,'Number of Steps and Rpt. Groups:',5,0,,
 13,3,1,'SEMI_SHEET','# DownSteps',1,0,
 13,3,2,'SEMI_OTHER','# DownSteps',1,0,
 13,3,3,'SECONDARY','# DownSteps',2,1,2
 13,3,4,'PRIMARY','# DownSteps',2,1,2
 13,3,5,'BAUXITE','# DownSteps',1,4,
-* 'Retirement Rates by Step',,,,,,,
+* 'Retirement Rates by Step',,
 13,3,1,'SEMI_SHEET','Retire Rate',0.01,,
 13,3,2,'SEMI_OTHER','Retire Rate',0.01,,
 13,3,3,'SECONDARY','Retire Rate',0.01,,
 13,3,4,'PRIMARY','Retire Rate',0.01,,
 13,3,5,'BAUXITE','Retire Rate',0.01,
-* 'Flow Rates by Step',,,,,,
+* 'Flow Rates by Step',,
 13,3,1,1,'SEMI_SHEET',0.93,
 13,3,1,2,'SEMI_OTHER',0.304,
 13,3,1,3,'SECONDARY',0.267,0.267
@@ -1495,13 +1623,13 @@
 13,4,3,'SECONDARY','# DownSteps',2,1,2
 13,4,4,'PRIMARY','# DownSteps',2,1,2
 13,4,5,'BAUXITE','# DownSteps',1,4,
-* 'Retirement Rates by Step',,,,,,,
+* 'Retirement Rates by Step',,
 13,4,1,'SEMI_SHEET','Retire Rate',0.01,,
 13,4,2,'SEMI_OTHER','Retire Rate',0.01,,
 13,4,3,'SECONDARY','Retire Rate',0.01,,
 13,4,4,'PRIMARY','Retire Rate',0.01,,
 13,4,5,'BAUXITE','Retire Rate',0.01,,
-* 'Flow Rates by Step',,,,,,,
+* 'Flow Rates by Step',,
 13,4,1,1,'SEMI_SHEET',0.14,,
 13,4,1,2,'SEMI_OTHER',0.205,,
 13,4,1,3,'SECONDARY',1.029,1.029
@@ -1512,747 +1640,1202 @@
 13,4,3,3,'SECONDARY',2.964,2.964
 13,4,3,4,'PRIMARY',0,0
 13,4,3,5,'BAUXITE',0,
-*,,,,,,
-14,1,'Number of Steps and Rpt. Groups:',5,0,,
+*,,
+14,1,'Number of Steps and Rpt. Groups:',6,0,,
 14,1,1,'HEAT   ','# DownSteps',1,0
 14,1,2,'REFRIG ','# DownSteps',1,0
 14,1,3,'MACHDRV','# DownSteps',1,0
 14,1,4,'ELECTRO','# DownSteps',1,0
 14,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+14,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 14,1,1,'HEAT   ','Retire Rate',0.013,
 14,1,2,'REFRIG ','Retire Rate',0.013,
 14,1,3,'MACHDRV','Retire Rate',0.013,
 14,1,4,'ELECTRO','Retire Rate',0.013,
 14,1,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+14,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 14,1,1,1,'HEAT   ',1,
 14,1,1,2,'REFRIG ',1,
 14,1,1,3,'MACHDRV',1,
 14,1,1,4,'ELECTRO',1,
 14,1,1,5,'OTHER  ',1,
+14,1,1,6,'FEEDSTK',1,
 14,1,3,1,'HEAT   ',1,
 14,1,3,2,'REFRIG ',1,
 14,1,3,3,'MACHDRV',1,
 14,1,3,4,'ELECTRO',1,
 14,1,3,5,'OTHER  ',1,
-14,2,'Number of Steps and Rpt. Groups:',5,0,,
+14,1,3,6,'FEEDSTK',1,
+14,2,'Number of Steps and Rpt. Groups:',6,0,,
 14,2,1,'HEAT   ','# DownSteps',1,0
 14,2,2,'REFRIG ','# DownSteps',1,0
 14,2,3,'MACHDRV','# DownSteps',1,0
 14,2,4,'ELECTRO','# DownSteps',1,0
 14,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+14,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 14,2,1,'HEAT   ','Retire Rate',0.013,
 14,2,2,'REFRIG ','Retire Rate',0.013,
-14,2,3,'MACHDRV','Retire Rate',0.013
-14,2,4,'ELECTRO','Retire Rate',0.013
-14,2,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-14,2,1,1,'HEAT   ',1
-14,2,1,2,'REFRIG ',1
-14,2,1,3,'MACHDRV',1
-14,2,1,4,'ELECTRO',1
-14,2,1,5,'OTHER  ',1
-14,2,3,1,'HEAT   ',1
-14,2,3,2,'REFRIG ',1
-14,2,3,3,'MACHDRV',1
-14,2,3,4,'ELECTRO',1
-14,2,3,5,'OTHER  ',1
-14,3,'Number of Steps and Rpt. Groups:',5,0,,
+14,2,3,'MACHDRV','Retire Rate',0.013,
+14,2,4,'ELECTRO','Retire Rate',0.013,
+14,2,5,'OTHER  ','Retire Rate',0.013,
+14,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+14,2,1,1,'HEAT   ',1,
+14,2,1,2,'REFRIG ',1,
+14,2,1,3,'MACHDRV',1,
+14,2,1,4,'ELECTRO',1,
+14,2,1,5,'OTHER  ',1,
+14,2,1,6,'FEEDSTK',1,
+14,2,3,1,'HEAT   ',1,
+14,2,3,2,'REFRIG ',1,
+14,2,3,3,'MACHDRV',1,
+14,2,3,4,'ELECTRO',1,
+14,2,3,5,'OTHER  ',1,
+14,2,3,6,'FEEDSTK',1,
+14,3,'Number of Steps and Rpt. Groups:',6,0,,
 14,3,1,'HEAT   ','# DownSteps',1,0
 14,3,2,'REFRIG ','# DownSteps',1,0
 14,3,3,'MACHDRV','# DownSteps',1,0
 14,3,4,'ELECTRO','# DownSteps',1,0
 14,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+14,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 14,3,1,'HEAT   ','Retire Rate',0.013,
 14,3,2,'REFRIG ','Retire Rate',0.013,
 14,3,3,'MACHDRV','Retire Rate',0.013,
 14,3,4,'ELECTRO','Retire Rate',0.013,
 14,3,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+14,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 14,3,1,1,'HEAT   ',1,
 14,3,1,2,'REFRIG ',1,
 14,3,1,3,'MACHDRV',1,
 14,3,1,4,'ELECTRO',1,
 14,3,1,5,'OTHER  ',1,
+14,3,1,6,'FEEDSTK',1,
 14,3,3,1,'HEAT   ',1,
 14,3,3,2,'REFRIG ',1,
 14,3,3,3,'MACHDRV',1,
 14,3,3,4,'ELECTRO',1,
 14,3,3,5,'OTHER  ',1,
-14,4,'Number of Steps and Rpt. Groups:',5,0,,
+14,3,3,6,'FEEDSTK',1,
+14,4,'Number of Steps and Rpt. Groups:',6,0,,
 14,4,1,'HEAT   ','# DownSteps',1,0
 14,4,2,'REFRIG ','# DownSteps',1,0
 14,4,3,'MACHDRV','# DownSteps',1,0
 14,4,4,'ELECTRO','# DownSteps',1,0
 14,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+14,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 14,4,1,'HEAT   ','Retire Rate',0.013,
 14,4,2,'REFRIG ','Retire Rate',0.013,
 14,4,3,'MACHDRV','Retire Rate',0.013,
 14,4,4,'ELECTRO','Retire Rate',0.013,
 14,4,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+14,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 14,4,1,1,'HEAT   ',1,
 14,4,1,2,'REFRIG ',1,
 14,4,1,3,'MACHDRV',1,
 14,4,1,4,'ELECTRO',1,
 14,4,1,5,'OTHER  ',1,
+14,4,1,6,'FEEDSTK',1,
 14,4,3,1,'HEAT   ',1,
 14,4,3,2,'REFRIG ',1,
 14,4,3,3,'MACHDRV',1,
 14,4,3,4,'ELECTRO',1,
 14,4,3,5,'OTHER  ',1,
-*,,,,,,
-15,1,'Number of Steps and Rpt. Groups:',5,0,,
+14,4,3,6,'FEEDSTK',1,
+*,,
+15,1,'Number of Steps and Rpt. Groups:',6,0,,
 15,1,1,'HEAT   ','# DownSteps',1,0
 15,1,2,'REFRIG ','# DownSteps',1,0
 15,1,3,'MACHDRV','# DownSteps',1,0
 15,1,4,'ELECTRO','# DownSteps',1,0
 15,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-15,1,1,'HEAT   ','Retire Rate',0.013
-15,1,2,'REFRIG ','Retire Rate',0.013
-15,1,3,'MACHDRV','Retire Rate',0.013
-15,1,4,'ELECTRO','Retire Rate',0.013
-15,1,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-15,1,1,1,'HEAT   ',1
-15,1,1,2,'REFRIG ',1
-15,1,1,3,'MACHDRV',1
-15,1,1,4,'ELECTRO',1
-15,1,1,5,'OTHER  ',1
-15,1,3,1,'HEAT   ',1
-15,1,3,2,'REFRIG ',1
-15,1,3,3,'MACHDRV',1
+15,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+15,1,1,'HEAT   ','Retire Rate',0.013,
+15,1,2,'REFRIG ','Retire Rate',0.013,
+15,1,3,'MACHDRV','Retire Rate',0.013,
+15,1,4,'ELECTRO','Retire Rate',0.013,
+15,1,5,'OTHER  ','Retire Rate',0.013,
+15,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+15,1,1,1,'HEAT   ',1,
+15,1,1,2,'REFRIG ',1,
+15,1,1,3,'MACHDRV',1,
+15,1,1,4,'ELECTRO',1,
+15,1,1,5,'OTHER  ',1,
+15,1,1,6,'FEEDSTK',1,
+15,1,3,1,'HEAT   ',1,
+15,1,3,2,'REFRIG ',1,
+15,1,3,3,'MACHDRV',1,
 15,1,3,4,'ELECTRO',1,
 15,1,3,5,'OTHER  ',1,
-15,2,'Number of Steps and Rpt. Groups:',5,0,,
+15,1,3,6,'FEEDSTK',1,
+15,2,'Number of Steps and Rpt. Groups:',6,0,,
 15,2,1,'HEAT   ','# DownSteps',1,0
 15,2,2,'REFRIG ','# DownSteps',1,0
 15,2,3,'MACHDRV','# DownSteps',1,0
 15,2,4,'ELECTRO','# DownSteps',1,0
 15,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+15,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 15,2,1,'HEAT   ','Retire Rate',0.013,
 15,2,2,'REFRIG ','Retire Rate',0.013,
 15,2,3,'MACHDRV','Retire Rate',0.013,
 15,2,4,'ELECTRO','Retire Rate',0.013,
 15,2,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+15,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 15,2,1,1,'HEAT   ',1,
 15,2,1,2,'REFRIG ',1,
 15,2,1,3,'MACHDRV',1,
 15,2,1,4,'ELECTRO',1,
 15,2,1,5,'OTHER  ',1,
+15,2,1,6,'FEEDSTK',1,
 15,2,3,1,'HEAT   ',1,
 15,2,3,2,'REFRIG ',1,
 15,2,3,3,'MACHDRV',1,
 15,2,3,4,'ELECTRO',1,
 15,2,3,5,'OTHER  ',1,
-15,3,'Number of Steps and Rpt. Groups:',5,0,,
+15,2,3,6,'FEEDSTK',1,
+15,3,'Number of Steps and Rpt. Groups:',6,0,,
 15,3,1,'HEAT   ','# DownSteps',1,0
 15,3,2,'REFRIG ','# DownSteps',1,0
 15,3,3,'MACHDRV','# DownSteps',1,0
 15,3,4,'ELECTRO','# DownSteps',1,0
 15,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+15,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 15,3,1,'HEAT   ','Retire Rate',0.013,
 15,3,2,'REFRIG ','Retire Rate',0.013,
 15,3,3,'MACHDRV','Retire Rate',0.013,
 15,3,4,'ELECTRO','Retire Rate',0.013,
 15,3,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+15,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 15,3,1,1,'HEAT   ',1,
 15,3,1,2,'REFRIG ',1,
 15,3,1,3,'MACHDRV',1,
 15,3,1,4,'ELECTRO',1,
 15,3,1,5,'OTHER  ',1,
+15,3,1,6,'FEEDSTK',1,
 15,3,3,1,'HEAT   ',1,
 15,3,3,2,'REFRIG ',1,
 15,3,3,3,'MACHDRV',1,
 15,3,3,4,'ELECTRO',1,
 15,3,3,5,'OTHER  ',1,
-15,4,'Number of Steps and Rpt. Groups:',5,0,,
+15,3,3,6,'FEEDSTK',1,
+15,4,'Number of Steps and Rpt. Groups:',6,0,,
 15,4,1,'HEAT   ','# DownSteps',1,0
 15,4,2,'REFRIG ','# DownSteps',1,0
 15,4,3,'MACHDRV','# DownSteps',1,0
 15,4,4,'ELECTRO','# DownSteps',1,0
 15,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,
-15,4,1,'HEAT   ','Retire Rate',0.013
-15,4,2,'REFRIG ','Retire Rate',0.013
-15,4,3,'MACHDRV','Retire Rate',0.013
-15,4,4,'ELECTRO','Retire Rate',0.013
-15,4,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-15,4,1,1,'HEAT   ',1
-15,4,1,2,'REFRIG ',1
-15,4,1,3,'MACHDRV',1
-15,4,1,4,'ELECTRO',1
-15,4,1,5,'OTHER  ',1
-15,4,3,1,'HEAT   ',1
-15,4,3,2,'REFRIG ',1
+15,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+15,4,1,'HEAT   ','Retire Rate',0.013,
+15,4,2,'REFRIG ','Retire Rate',0.013,
+15,4,3,'MACHDRV','Retire Rate',0.013,
+15,4,4,'ELECTRO','Retire Rate',0.013,
+15,4,5,'OTHER  ','Retire Rate',0.013,
+15,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+15,4,1,1,'HEAT   ',1,
+15,4,1,2,'REFRIG ',1,
+15,4,1,3,'MACHDRV',1,
+15,4,1,4,'ELECTRO',1,
+15,4,1,5,'OTHER  ',1,
+15,4,1,6,'FEEDSTK',1,
+15,4,3,1,'HEAT   ',1,
+15,4,3,2,'REFRIG ',1,
 15,4,3,3,'MACHDRV',1,
 15,4,3,4,'ELECTRO',1,
 15,4,3,5,'OTHER  ',1,
-*,,,,,,
-16,1,'Number of Steps and Rpt. Groups:',5,0,,
+15,4,3,6,'FEEDSTK',1,
+*,,
+16,1,'Number of Steps and Rpt. Groups:',6,0,,
 16,1,1,'HEAT   ','# DownSteps',1,0
 16,1,2,'REFRIG ','# DownSteps',1,0
 16,1,3,'MACHDRV','# DownSteps',1,0
 16,1,4,'ELECTRO','# DownSteps',1,0
 16,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+16,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 16,1,1,'HEAT   ','Retire Rate',0.013,
 16,1,2,'REFRIG ','Retire Rate',0.013,
 16,1,3,'MACHDRV','Retire Rate',0.013,
-16,1,4,'ELECTRO','Retire Rate',0.013
-16,1,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-16,1,1,1,'HEAT   ',1
-16,1,1,2,'REFRIG ',1
-16,1,1,3,'MACHDRV',1
-16,1,1,4,'ELECTRO',1
-16,1,1,5,'OTHER  ',1
-16,1,3,1,'HEAT   ',1
-16,1,3,2,'REFRIG ',1
-16,1,3,3,'MACHDRV',1
-16,1,3,4,'ELECTRO',1
-16,1,3,5,'OTHER  ',1
-16,2,'Number of Steps and Rpt. Groups:',5,0,,
+16,1,4,'ELECTRO','Retire Rate',0.013,
+16,1,5,'OTHER  ','Retire Rate',0.013,
+16,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+16,1,1,1,'HEAT   ',1,
+16,1,1,2,'REFRIG ',1,
+16,1,1,3,'MACHDRV',1,
+16,1,1,4,'ELECTRO',1,
+16,1,1,5,'OTHER  ',1,
+16,1,1,6,'FEEDSTK',1,
+16,1,3,1,'HEAT   ',1,
+16,1,3,2,'REFRIG ',1,
+16,1,3,3,'MACHDRV',1,
+16,1,3,4,'ELECTRO',1,
+16,1,3,5,'OTHER  ',1,
+16,1,3,6,'FEEDSTK',1,
+16,2,'Number of Steps and Rpt. Groups:',6,0,,
 16,2,1,'HEAT   ','# DownSteps',1,0
 16,2,2,'REFRIG ','# DownSteps',1,0
 16,2,3,'MACHDRV','# DownSteps',1,0
 16,2,4,'ELECTRO','# DownSteps',1,0
 16,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+16,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 16,2,1,'HEAT   ','Retire Rate',0.013,
 16,2,2,'REFRIG ','Retire Rate',0.013,
 16,2,3,'MACHDRV','Retire Rate',0.013,
 16,2,4,'ELECTRO','Retire Rate',0.013,
 16,2,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+16,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 16,2,1,1,'HEAT   ',1,
 16,2,1,2,'REFRIG ',1,
 16,2,1,3,'MACHDRV',1,
 16,2,1,4,'ELECTRO',1,
 16,2,1,5,'OTHER  ',1,
+16,2,1,6,'FEEDSTK',1,
 16,2,3,1,'HEAT   ',1,
 16,2,3,2,'REFRIG ',1,
 16,2,3,3,'MACHDRV',1,
 16,2,3,4,'ELECTRO',1,
 16,2,3,5,'OTHER  ',1,
-16,3,'Number of Steps and Rpt. Groups:',5,0,,
+16,2,3,6,'FEEDSTK',1,
+16,3,'Number of Steps and Rpt. Groups:',6,0,,
 16,3,1,'HEAT   ','# DownSteps',1,0
 16,3,2,'REFRIG ','# DownSteps',1,0
 16,3,3,'MACHDRV','# DownSteps',1,0
 16,3,4,'ELECTRO','# DownSteps',1,0
 16,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+16,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 16,3,1,'HEAT   ','Retire Rate',0.013,
 16,3,2,'REFRIG ','Retire Rate',0.013,
 16,3,3,'MACHDRV','Retire Rate',0.013,
 16,3,4,'ELECTRO','Retire Rate',0.013,
 16,3,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+16,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 16,3,1,1,'HEAT   ',1,
 16,3,1,2,'REFRIG ',1,
 16,3,1,3,'MACHDRV',1,
 16,3,1,4,'ELECTRO',1,
 16,3,1,5,'OTHER  ',1,
+16,3,1,6,'FEEDSTK',1,
 16,3,3,1,'HEAT   ',1,
 16,3,3,2,'REFRIG ',1,
 16,3,3,3,'MACHDRV',1,
 16,3,3,4,'ELECTRO',1,
 16,3,3,5,'OTHER  ',1,
-16,4,'Number of Steps and Rpt. Groups:',5,0,,
+16,3,3,6,'FEEDSTK',1,
+16,4,'Number of Steps and Rpt. Groups:',6,0,,
 16,4,1,'HEAT   ','# DownSteps',1,0
 16,4,2,'REFRIG ','# DownSteps',1,0
 16,4,3,'MACHDRV','# DownSteps',1,0
 16,4,4,'ELECTRO','# DownSteps',1,0
 16,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+16,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 16,4,1,'HEAT   ','Retire Rate',0.013,
 16,4,2,'REFRIG ','Retire Rate',0.013,
-16,4,3,'MACHDRV','Retire Rate',0.013
-16,4,4,'ELECTRO','Retire Rate',0.013
-16,4,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-16,4,1,1,'HEAT   ',1
-16,4,1,2,'REFRIG ',1
-16,4,1,3,'MACHDRV',1
-16,4,1,4,'ELECTRO',1
-16,4,1,5,'OTHER  ',1
-16,4,3,1,'HEAT   ',1
-16,4,3,2,'REFRIG ',1
-16,4,3,3,'MACHDRV',1
-16,4,3,4,'ELECTRO',1
-16,4,3,5,'OTHER  ',1
-*,,,,,,
-17,1,'Number of Steps and Rpt. Groups:',5,0,,
+16,4,3,'MACHDRV','Retire Rate',0.013,
+16,4,4,'ELECTRO','Retire Rate',0.013,
+16,4,5,'OTHER  ','Retire Rate',0.013,
+16,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+16,4,1,1,'HEAT   ',1,
+16,4,1,2,'REFRIG ',1,
+16,4,1,3,'MACHDRV',1,
+16,4,1,4,'ELECTRO',1,
+16,4,1,5,'OTHER  ',1,
+16,4,1,6,'FEEDSTK',1,
+16,4,3,1,'HEAT   ',1,
+16,4,3,2,'REFRIG ',1,
+16,4,3,3,'MACHDRV',1,
+16,4,3,4,'ELECTRO',1,
+16,4,3,5,'OTHER  ',1,
+16,4,3,6,'FEEDSTK',1,
+*,,
+17,1,'Number of Steps and Rpt. Groups:',6,0,,
 17,1,1,'HEAT   ','# DownSteps',1,0
 17,1,2,'REFRIG ','# DownSteps',1,0
 17,1,3,'MACHDRV','# DownSteps',1,0
 17,1,4,'ELECTRO','# DownSteps',1,0
 17,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+17,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 17,1,1,'HEAT   ','Retire Rate',0.013,
 17,1,2,'REFRIG ','Retire Rate',0.013,
 17,1,3,'MACHDRV','Retire Rate',0.013,
 17,1,4,'ELECTRO','Retire Rate',0.013,
 17,1,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+17,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 17,1,1,1,'HEAT   ',1,
 17,1,1,2,'REFRIG ',1,
 17,1,1,3,'MACHDRV',1,
 17,1,1,4,'ELECTRO',1,
 17,1,1,5,'OTHER  ',1,
+17,1,1,6,'FEEDSTK',1,
 17,1,3,1,'HEAT   ',1,
 17,1,3,2,'REFRIG ',1,
 17,1,3,3,'MACHDRV',1,
 17,1,3,4,'ELECTRO',1,
 17,1,3,5,'OTHER  ',1,
-17,2,'Number of Steps and Rpt. Groups:',5,0,,
+17,1,3,6,'FEEDSTK',1,
+17,2,'Number of Steps and Rpt. Groups:',6,0,,
 17,2,1,'HEAT   ','# DownSteps',1,0
 17,2,2,'REFRIG ','# DownSteps',1,0
 17,2,3,'MACHDRV','# DownSteps',1,0
 17,2,4,'ELECTRO','# DownSteps',1,0
 17,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+17,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 17,2,1,'HEAT   ','Retire Rate',0.013,
 17,2,2,'REFRIG ','Retire Rate',0.013,
 17,2,3,'MACHDRV','Retire Rate',0.013,
 17,2,4,'ELECTRO','Retire Rate',0.013,
 17,2,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+17,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 17,2,1,1,'HEAT   ',1,
 17,2,1,2,'REFRIG ',1,
 17,2,1,3,'MACHDRV',1,
 17,2,1,4,'ELECTRO',1,
 17,2,1,5,'OTHER  ',1,
+17,2,1,6,'FEEDSTK',1,
 17,2,3,1,'HEAT   ',1,
 17,2,3,2,'REFRIG ',1,
 17,2,3,3,'MACHDRV',1,
 17,2,3,4,'ELECTRO',1,
 17,2,3,5,'OTHER  ',1,
-17,3,'Number of Steps and Rpt. Groups:',5,0,,
+17,2,3,6,'FEEDSTK',1,
+17,3,'Number of Steps and Rpt. Groups:',6,0,,
 17,3,1,'HEAT   ','# DownSteps',1,0
 17,3,2,'REFRIG ','# DownSteps',1,0
 17,3,3,'MACHDRV','# DownSteps',1,0
 17,3,4,'ELECTRO','# DownSteps',1,0
 17,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
-17,3,1,'HEAT   ','Retire Rate',0.013
-17,3,2,'REFRIG ','Retire Rate',0.013
-17,3,3,'MACHDRV','Retire Rate',0.013
-17,3,4,'ELECTRO','Retire Rate',0.013
-17,3,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-17,3,1,1,'HEAT   ',1
-17,3,1,2,'REFRIG ',1
-17,3,1,3,'MACHDRV',1
-17,3,1,4,'ELECTRO',1
-17,3,1,5,'OTHER  ',1
-17,3,3,1,'HEAT   ',1
-17,3,3,2,'REFRIG ',1
-17,3,3,3,'MACHDRV',1
+17,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+17,3,1,'HEAT   ','Retire Rate',0.013,
+17,3,2,'REFRIG ','Retire Rate',0.013,
+17,3,3,'MACHDRV','Retire Rate',0.013,
+17,3,4,'ELECTRO','Retire Rate',0.013,
+17,3,5,'OTHER  ','Retire Rate',0.013,
+17,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+17,3,1,1,'HEAT   ',1,
+17,3,1,2,'REFRIG ',1,
+17,3,1,3,'MACHDRV',1,
+17,3,1,4,'ELECTRO',1,
+17,3,1,5,'OTHER  ',1,
+17,3,1,6,'FEEDSTK',1,
+17,3,3,1,'HEAT   ',1,
+17,3,3,2,'REFRIG ',1,
+17,3,3,3,'MACHDRV',1,
 17,3,3,4,'ELECTRO',1,
 17,3,3,5,'OTHER  ',1,
-17,4,'Number of Steps and Rpt. Groups:',5,0,,
+17,3,3,6,'FEEDSTK',1,
+17,4,'Number of Steps and Rpt. Groups:',6,0,,
 17,4,1,'HEAT   ','# DownSteps',1,0
 17,4,2,'REFRIG ','# DownSteps',1,0
 17,4,3,'MACHDRV','# DownSteps',1,0
 17,4,4,'ELECTRO','# DownSteps',1,0
 17,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+17,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 17,4,1,'HEAT   ','Retire Rate',0.013,
 17,4,2,'REFRIG ','Retire Rate',0.013,
 17,4,3,'MACHDRV','Retire Rate',0.013,
 17,4,4,'ELECTRO','Retire Rate',0.013,
 17,4,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,
-17,4,1,1,'HEAT   ',1
-17,4,1,2,'REFRIG ',1
-17,4,1,3,'MACHDRV',1
-17,4,1,4,'ELECTRO',1
-17,4,1,5,'OTHER  ',1
-17,4,3,1,'HEAT   ',1
-17,4,3,2,'REFRIG ',1
-17,4,3,3,'MACHDRV',1
-17,4,3,4,'ELECTRO',1
-17,4,3,5,'OTHER  ',1
-*,,,,,
-18,1,'Number of Steps and Rpt. Groups:',5,0,
+17,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+17,4,1,1,'HEAT   ',1,
+17,4,1,2,'REFRIG ',1,
+17,4,1,3,'MACHDRV',1,
+17,4,1,4,'ELECTRO',1,
+17,4,1,5,'OTHER  ',1,
+17,4,1,6,'FEEDSTK',1,
+17,4,3,1,'HEAT   ',1,
+17,4,3,2,'REFRIG ',1,
+17,4,3,3,'MACHDRV',1,
+17,4,3,4,'ELECTRO',1,
+17,4,3,5,'OTHER  ',1,
+17,4,3,6,'FEEDSTK',1,
+*,,
+18,1,'Number of Steps and Rpt. Groups:',6,0,,
 18,1,1,'HEAT   ','# DownSteps',1,0
 18,1,2,'REFRIG ','# DownSteps',1,0
 18,1,3,'MACHDRV','# DownSteps',1,0
 18,1,4,'ELECTRO','# DownSteps',1,0
 18,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+18,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 18,1,1,'HEAT   ','Retire Rate',0.013,
 18,1,2,'REFRIG ','Retire Rate',0.013,
 18,1,3,'MACHDRV','Retire Rate',0.013,
 18,1,4,'ELECTRO','Retire Rate',0.013,
 18,1,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+18,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 18,1,1,1,'HEAT   ',1,
 18,1,1,2,'REFRIG ',1,
 18,1,1,3,'MACHDRV',1,
 18,1,1,4,'ELECTRO',1,
 18,1,1,5,'OTHER  ',1,
+18,1,1,6,'FEEDSTK',1,
 18,1,3,1,'HEAT   ',1,
 18,1,3,2,'REFRIG ',1,
 18,1,3,3,'MACHDRV',1,
 18,1,3,4,'ELECTRO',1,
 18,1,3,5,'OTHER  ',1,
-18,2,'Number of Steps and Rpt. Groups:',5,0,,
+18,1,3,6,'FEEDSTK',1,
+18,2,'Number of Steps and Rpt. Groups:',6,0,,
 18,2,1,'HEAT   ','# DownSteps',1,0
 18,2,2,'REFRIG ','# DownSteps',1,0
 18,2,3,'MACHDRV','# DownSteps',1,0
 18,2,4,'ELECTRO','# DownSteps',1,0
 18,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+18,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 18,2,1,'HEAT   ','Retire Rate',0.013,
 18,2,2,'REFRIG ','Retire Rate',0.013,
 18,2,3,'MACHDRV','Retire Rate',0.013,
 18,2,4,'ELECTRO','Retire Rate',0.013,
 18,2,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+18,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 18,2,1,1,'HEAT   ',1,
 18,2,1,2,'REFRIG ',1,
 18,2,1,3,'MACHDRV',1,
 18,2,1,4,'ELECTRO',1,
 18,2,1,5,'OTHER  ',1,
+18,2,1,6,'FEEDSTK',1,
 18,2,3,1,'HEAT   ',1,
 18,2,3,2,'REFRIG ',1,
 18,2,3,3,'MACHDRV',1,
 18,2,3,4,'ELECTRO',1,
 18,2,3,5,'OTHER  ',1,
-18,3,'Number of Steps and Rpt. Groups:',5,0,,
+18,2,3,6,'FEEDSTK',1,
+18,3,'Number of Steps and Rpt. Groups:',6,0,,
 18,3,1,'HEAT   ','# DownSteps',1,0
 18,3,2,'REFRIG ','# DownSteps',1,0
 18,3,3,'MACHDRV','# DownSteps',1,0
 18,3,4,'ELECTRO','# DownSteps',1,0
 18,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+18,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 18,3,1,'HEAT   ','Retire Rate',0.013,
 18,3,2,'REFRIG ','Retire Rate',0.013,
 18,3,3,'MACHDRV','Retire Rate',0.013,
-18,3,4,'ELECTRO','Retire Rate',0.013
-18,3,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-18,3,1,1,'HEAT   ',1
-18,3,1,2,'REFRIG ',1
-18,3,1,3,'MACHDRV',1
-18,3,1,4,'ELECTRO',1
-18,3,1,5,'OTHER  ',1
-18,3,3,1,'HEAT   ',1
-18,3,3,2,'REFRIG ',1
-18,3,3,3,'MACHDRV',1
-18,3,3,4,'ELECTRO',1
-18,3,3,5,'OTHER  ',1
-18,4,'Number of Steps and Rpt. Groups:',5,0,,
+18,3,4,'ELECTRO','Retire Rate',0.013,
+18,3,5,'OTHER  ','Retire Rate',0.013,
+18,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+18,3,1,1,'HEAT   ',1,
+18,3,1,2,'REFRIG ',1,
+18,3,1,3,'MACHDRV',1,
+18,3,1,4,'ELECTRO',1,
+18,3,1,5,'OTHER  ',1,
+18,3,1,6,'FEEDSTK',1,
+18,3,3,1,'HEAT   ',1,
+18,3,3,2,'REFRIG ',1,
+18,3,3,3,'MACHDRV',1,
+18,3,3,4,'ELECTRO',1,
+18,3,3,5,'OTHER  ',1,
+18,3,3,6,'FEEDSTK',1,
+18,4,'Number of Steps and Rpt. Groups:',6,0,,
 18,4,1,'HEAT   ','# DownSteps',1,0
 18,4,2,'REFRIG ','# DownSteps',1,0
 18,4,3,'MACHDRV','# DownSteps',1,0
 18,4,4,'ELECTRO','# DownSteps',1,0
 18,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+18,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 18,4,1,'HEAT   ','Retire Rate',0.013,
 18,4,2,'REFRIG ','Retire Rate',0.013,
 18,4,3,'MACHDRV','Retire Rate',0.013,
 18,4,4,'ELECTRO','Retire Rate',0.013,
 18,4,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+18,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 18,4,1,1,'HEAT   ',1,
 18,4,1,2,'REFRIG ',1,
 18,4,1,3,'MACHDRV',1,
 18,4,1,4,'ELECTRO',1,
 18,4,1,5,'OTHER  ',1,
+18,4,1,6,'FEEDSTK',1,
 18,4,3,1,'HEAT   ',1,
 18,4,3,2,'REFRIG ',1,
 18,4,3,3,'MACHDRV',1,
 18,4,3,4,'ELECTRO',1,
 18,4,3,5,'OTHER  ',1,
-*,,,,,,
-19,1,'Number of Steps and Rpt. Groups:',5,0,,
+18,4,3,6,'FEEDSTK',1,
+*,,
+19,1,'Number of Steps and Rpt. Groups:',6,0,,
 19,1,1,'HEAT   ','# DownSteps',1,0
 19,1,2,'REFRIG ','# DownSteps',1,0
 19,1,3,'MACHDRV','# DownSteps',1,0
 19,1,4,'ELECTRO','# DownSteps',1,0
 19,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+19,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 19,1,1,'HEAT   ','Retire Rate',0.013,
 19,1,2,'REFRIG ','Retire Rate',0.013,
 19,1,3,'MACHDRV','Retire Rate',0.013,
 19,1,4,'ELECTRO','Retire Rate',0.013,
 19,1,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+19,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 19,1,1,1,'HEAT   ',1,
 19,1,1,2,'REFRIG ',1,
 19,1,1,3,'MACHDRV',1,
 19,1,1,4,'ELECTRO',1,
 19,1,1,5,'OTHER  ',1,
+19,1,1,6,'FEEDSTK',1,
 19,1,3,1,'HEAT   ',1,
 19,1,3,2,'REFRIG ',1,
 19,1,3,3,'MACHDRV',1,
 19,1,3,4,'ELECTRO',1,
 19,1,3,5,'OTHER  ',1,
-19,2,'Number of Steps and Rpt. Groups:',5,0,,
+19,1,3,6,'FEEDSTK',1,
+19,2,'Number of Steps and Rpt. Groups:',6,0,,
 19,2,1,'HEAT   ','# DownSteps',1,0
 19,2,2,'REFRIG ','# DownSteps',1,0
 19,2,3,'MACHDRV','# DownSteps',1,0
 19,2,4,'ELECTRO','# DownSteps',1,0
 19,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+19,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 19,2,1,'HEAT   ','Retire Rate',0.013,
-19,2,2,'REFRIG ','Retire Rate',0.013
-19,2,3,'MACHDRV','Retire Rate',0.013
-19,2,4,'ELECTRO','Retire Rate',0.013
-19,2,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-19,2,1,1,'HEAT   ',1
-19,2,1,2,'REFRIG ',1
-19,2,1,3,'MACHDRV',1
-19,2,1,4,'ELECTRO',1
-19,2,1,5,'OTHER  ',1
-19,2,3,1,'HEAT   ',1
-19,2,3,2,'REFRIG ',1
-19,2,3,3,'MACHDRV',1
-19,2,3,4,'ELECTRO',1
+19,2,2,'REFRIG ','Retire Rate',0.013,
+19,2,3,'MACHDRV','Retire Rate',0.013,
+19,2,4,'ELECTRO','Retire Rate',0.013,
+19,2,5,'OTHER  ','Retire Rate',0.013,
+19,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+19,2,1,1,'HEAT   ',1,
+19,2,1,2,'REFRIG ',1,
+19,2,1,3,'MACHDRV',1,
+19,2,1,4,'ELECTRO',1,
+19,2,1,5,'OTHER  ',1,
+19,2,1,6,'FEEDSTK',1,
+19,2,3,1,'HEAT   ',1,
+19,2,3,2,'REFRIG ',1,
+19,2,3,3,'MACHDRV',1,
+19,2,3,4,'ELECTRO',1,
 19,2,3,5,'OTHER  ',1,
-19,3,'Number of Steps and Rpt. Groups:',5,0,,
+19,2,3,6,'FEEDSTK',1,
+19,3,'Number of Steps and Rpt. Groups:',6,0,,
 19,3,1,'HEAT   ','# DownSteps',1,0
 19,3,2,'REFRIG ','# DownSteps',1,0
 19,3,3,'MACHDRV','# DownSteps',1,0
 19,3,4,'ELECTRO','# DownSteps',1,0
 19,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+19,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 19,3,1,'HEAT   ','Retire Rate',0.013,
 19,3,2,'REFRIG ','Retire Rate',0.013,
 19,3,3,'MACHDRV','Retire Rate',0.013,
 19,3,4,'ELECTRO','Retire Rate',0.013,
 19,3,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+19,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 19,3,1,1,'HEAT   ',1,
 19,3,1,2,'REFRIG ',1,
 19,3,1,3,'MACHDRV',1,
 19,3,1,4,'ELECTRO',1,
 19,3,1,5,'OTHER  ',1,
+19,3,1,6,'FEEDSTK',1,
 19,3,3,1,'HEAT   ',1,
 19,3,3,2,'REFRIG ',1,
 19,3,3,3,'MACHDRV',1,
 19,3,3,4,'ELECTRO',1,
 19,3,3,5,'OTHER  ',1,
-19,4,'Number of Steps and Rpt. Groups:',5,0,,
+19,3,3,6,'FEEDSTK',1,
+19,4,'Number of Steps and Rpt. Groups:',6,0,,
 19,4,1,'HEAT   ','# DownSteps',1,0
 19,4,2,'REFRIG ','# DownSteps',1,0
 19,4,3,'MACHDRV','# DownSteps',1,0
 19,4,4,'ELECTRO','# DownSteps',1,0
 19,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+19,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 19,4,1,'HEAT   ','Retire Rate',0.013,
 19,4,2,'REFRIG ','Retire Rate',0.013,
 19,4,3,'MACHDRV','Retire Rate',0.013,
 19,4,4,'ELECTRO','Retire Rate',0.013,
 19,4,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+19,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 19,4,1,1,'HEAT   ',1,
 19,4,1,2,'REFRIG ',1,
 19,4,1,3,'MACHDRV',1,
 19,4,1,4,'ELECTRO',1,
 19,4,1,5,'OTHER  ',1,
+19,4,1,6,'FEEDSTK',1,
 19,4,3,1,'HEAT   ',1,
 19,4,3,2,'REFRIG ',1,
 19,4,3,3,'MACHDRV',1,
 19,4,3,4,'ELECTRO',1,
 19,4,3,5,'OTHER  ',1,
-*,,,,,,
-20,1,'Number of Steps and Rpt. Groups:',5,0,,
+19,4,3,6,'FEEDSTK',1,
+*,,
+20,1,'Number of Steps and Rpt. Groups:',6,0,,
 20,1,1,'HEAT   ','# DownSteps',1,0
 20,1,2,'REFRIG ','# DownSteps',1,0
 20,1,3,'MACHDRV','# DownSteps',1,0
 20,1,4,'ELECTRO','# DownSteps',1,0
 20,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,
-20,1,1,'HEAT   ','Retire Rate',0.013
-20,1,2,'REFRIG ','Retire Rate',0.013
-20,1,3,'MACHDRV','Retire Rate',0.013
-20,1,4,'ELECTRO','Retire Rate',0.013
-20,1,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-20,1,1,1,'HEAT   ',1
-20,1,1,2,'REFRIG ',1
-20,1,1,3,'MACHDRV',1
-20,1,1,4,'ELECTRO',1
-20,1,1,5,'OTHER  ',1
-20,1,3,1,'HEAT   ',1
-20,1,3,2,'REFRIG ',1
+20,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+20,1,1,'HEAT   ','Retire Rate',0.013,
+20,1,2,'REFRIG ','Retire Rate',0.013,
+20,1,3,'MACHDRV','Retire Rate',0.013,
+20,1,4,'ELECTRO','Retire Rate',0.013,
+20,1,5,'OTHER  ','Retire Rate',0.013,
+20,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+20,1,1,1,'HEAT   ',1,
+20,1,1,2,'REFRIG ',1,
+20,1,1,3,'MACHDRV',1,
+20,1,1,4,'ELECTRO',1,
+20,1,1,5,'OTHER  ',1,
+20,1,1,6,'FEEDSTK',1,
+20,1,3,1,'HEAT   ',1,
+20,1,3,2,'REFRIG ',1,
 20,1,3,3,'MACHDRV',1,
 20,1,3,4,'ELECTRO',1,
 20,1,3,5,'OTHER  ',1,
-20,2,'Number of Steps and Rpt. Groups:',5,0,,
+20,1,3,6,'FEEDSTK',1,
+20,2,'Number of Steps and Rpt. Groups:',6,0,,
 20,2,1,'HEAT   ','# DownSteps',1,0
 20,2,2,'REFRIG ','# DownSteps',1,0
 20,2,3,'MACHDRV','# DownSteps',1,0
 20,2,4,'ELECTRO','# DownSteps',1,0
 20,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+20,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 20,2,1,'HEAT   ','Retire Rate',0.013,
 20,2,2,'REFRIG ','Retire Rate',0.013,
 20,2,3,'MACHDRV','Retire Rate',0.013,
 20,2,4,'ELECTRO','Retire Rate',0.013,
-20,2,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-20,2,1,1,'HEAT   ',1
-20,2,1,2,'REFRIG ',1
-20,2,1,3,'MACHDRV',1
-20,2,1,4,'ELECTRO',1
-20,2,1,5,'OTHER  ',1
-20,2,3,1,'HEAT   ',1
-20,2,3,2,'REFRIG ',1
-20,2,3,3,'MACHDRV',1
-20,2,3,4,'ELECTRO',1
-20,2,3,5,'OTHER  ',1
-20,3,'Number of Steps and Rpt. Groups:',5,0,
+20,2,5,'OTHER  ','Retire Rate',0.013,
+20,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+20,2,1,1,'HEAT   ',1,
+20,2,1,2,'REFRIG ',1,
+20,2,1,3,'MACHDRV',1,
+20,2,1,4,'ELECTRO',1,
+20,2,1,5,'OTHER  ',1,
+20,2,1,6,'FEEDSTK',1,
+20,2,3,1,'HEAT   ',1,
+20,2,3,2,'REFRIG ',1,
+20,2,3,3,'MACHDRV',1,
+20,2,3,4,'ELECTRO',1,
+20,2,3,5,'OTHER  ',1,
+20,2,3,6,'FEEDSTK',1,
+20,3,'Number of Steps and Rpt. Groups:',6,0,,
 20,3,1,'HEAT   ','# DownSteps',1,0
 20,3,2,'REFRIG ','# DownSteps',1,0
 20,3,3,'MACHDRV','# DownSteps',1,0
 20,3,4,'ELECTRO','# DownSteps',1,0
 20,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+20,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 20,3,1,'HEAT   ','Retire Rate',0.013,
 20,3,2,'REFRIG ','Retire Rate',0.013,
 20,3,3,'MACHDRV','Retire Rate',0.013,
 20,3,4,'ELECTRO','Retire Rate',0.013,
 20,3,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+20,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 20,3,1,1,'HEAT   ',1,
 20,3,1,2,'REFRIG ',1,
 20,3,1,3,'MACHDRV',1,
 20,3,1,4,'ELECTRO',1,
 20,3,1,5,'OTHER  ',1,
+20,3,1,6,'FEEDSTK',1,
 20,3,3,1,'HEAT   ',1,
 20,3,3,2,'REFRIG ',1,
 20,3,3,3,'MACHDRV',1,
 20,3,3,4,'ELECTRO',1,
 20,3,3,5,'OTHER  ',1,
-20,4,'Number of Steps and Rpt. Groups:',5,0,,
+20,3,3,6,'FEEDSTK',1,
+20,4,'Number of Steps and Rpt. Groups:',6,0,,
 20,4,1,'HEAT   ','# DownSteps',1,0
 20,4,2,'REFRIG ','# DownSteps',1,0
 20,4,3,'MACHDRV','# DownSteps',1,0
 20,4,4,'ELECTRO','# DownSteps',1,0
 20,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+20,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 20,4,1,'HEAT   ','Retire Rate',0.013,
 20,4,2,'REFRIG ','Retire Rate',0.013,
 20,4,3,'MACHDRV','Retire Rate',0.013,
 20,4,4,'ELECTRO','Retire Rate',0.013,
 20,4,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+20,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 20,4,1,1,'HEAT   ',1,
 20,4,1,2,'REFRIG ',1,
 20,4,1,3,'MACHDRV',1,
 20,4,1,4,'ELECTRO',1,
 20,4,1,5,'OTHER  ',1,
+20,4,1,6,'FEEDSTK',1,
 20,4,3,1,'HEAT   ',1,
 20,4,3,2,'REFRIG ',1,
 20,4,3,3,'MACHDRV',1,
 20,4,3,4,'ELECTRO',1,
 20,4,3,5,'OTHER  ',1,
-*,,,,,,
-21,1,'Number of Steps and Rpt. Groups:',5,0,,
+20,4,3,6,'FEEDSTK',1,
+*,,
+21,1,'Number of Steps and Rpt. Groups:',6,0,,
 21,1,1,'HEAT   ','# DownSteps',1,0
 21,1,2,'REFRIG ','# DownSteps',1,0
 21,1,3,'MACHDRV','# DownSteps',1,0
 21,1,4,'ELECTRO','# DownSteps',1,0
 21,1,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+21,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 21,1,1,'HEAT   ','Retire Rate',0.013,
 21,1,2,'REFRIG ','Retire Rate',0.013,
-21,1,3,'MACHDRV','Retire Rate',0.013
-21,1,4,'ELECTRO','Retire Rate',0.013
-21,1,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-21,1,1,1,'HEAT   ',1
-21,1,1,2,'REFRIG ',1
-21,1,1,3,'MACHDRV',1
-21,1,1,4,'ELECTRO',1
-21,1,1,5,'OTHER  ',1
-21,1,3,1,'HEAT   ',1
-21,1,3,2,'REFRIG ',1
-21,1,3,3,'MACHDRV',1
-21,1,3,4,'ELECTRO',1
-21,1,3,5,'OTHER  ',1
-21,2,'Number of Steps and Rpt. Groups:',5,0,,
+21,1,3,'MACHDRV','Retire Rate',0.013,
+21,1,4,'ELECTRO','Retire Rate',0.013,
+21,1,5,'OTHER  ','Retire Rate',0.013,
+21,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+21,1,1,1,'HEAT   ',1,
+21,1,1,2,'REFRIG ',1,
+21,1,1,3,'MACHDRV',1,
+21,1,1,4,'ELECTRO',1,
+21,1,1,5,'OTHER  ',1,
+21,1,1,6,'FEEDSTK',1,
+21,1,3,1,'HEAT   ',1,
+21,1,3,2,'REFRIG ',1,
+21,1,3,3,'MACHDRV',1,
+21,1,3,4,'ELECTRO',1,
+21,1,3,5,'OTHER  ',1,
+21,1,3,6,'FEEDSTK',1,
+21,2,'Number of Steps and Rpt. Groups:',6,0,,
 21,2,1,'HEAT   ','# DownSteps',1,0
 21,2,2,'REFRIG ','# DownSteps',1,0
 21,2,3,'MACHDRV','# DownSteps',1,0
 21,2,4,'ELECTRO','# DownSteps',1,0
 21,2,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+21,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 21,2,1,'HEAT   ','Retire Rate',0.013,
 21,2,2,'REFRIG ','Retire Rate',0.013,
 21,2,3,'MACHDRV','Retire Rate',0.013,
 21,2,4,'ELECTRO','Retire Rate',0.013,
 21,2,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+21,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 21,2,1,1,'HEAT   ',1,
 21,2,1,2,'REFRIG ',1,
 21,2,1,3,'MACHDRV',1,
 21,2,1,4,'ELECTRO',1,
 21,2,1,5,'OTHER  ',1,
+21,2,1,6,'FEEDSTK',1,
 21,2,3,1,'HEAT   ',1,
 21,2,3,2,'REFRIG ',1,
 21,2,3,3,'MACHDRV',1,
 21,2,3,4,'ELECTRO',1,
 21,2,3,5,'OTHER  ',1,
-21,3,'Number of Steps and Rpt. Groups:',5,0,,
+21,2,3,6,'FEEDSTK',1,
+21,3,'Number of Steps and Rpt. Groups:',6,0,,
 21,3,1,'HEAT   ','# DownSteps',1,0
 21,3,2,'REFRIG ','# DownSteps',1,0
 21,3,3,'MACHDRV','# DownSteps',1,0
 21,3,4,'ELECTRO','# DownSteps',1,0
 21,3,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+21,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 21,3,1,'HEAT   ','Retire Rate',0.013,
 21,3,2,'REFRIG ','Retire Rate',0.013,
 21,3,3,'MACHDRV','Retire Rate',0.013,
 21,3,4,'ELECTRO','Retire Rate',0.013,
 21,3,5,'OTHER  ','Retire Rate',0.013,
-* 'Flow Rates by Step',,,,,,
+21,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
 21,3,1,1,'HEAT   ',1,
 21,3,1,2,'REFRIG ',1,
 21,3,1,3,'MACHDRV',1,
 21,3,1,4,'ELECTRO',1,
 21,3,1,5,'OTHER  ',1,
+21,3,1,6,'FEEDSTK',1,
 21,3,3,1,'HEAT   ',1,
 21,3,3,2,'REFRIG ',1,
 21,3,3,3,'MACHDRV',1,
 21,3,3,4,'ELECTRO',1,
 21,3,3,5,'OTHER  ',1,
-21,4,'Number of Steps and Rpt. Groups:',5,0,,
+21,3,3,6,'FEEDSTK',1,
+21,4,'Number of Steps and Rpt. Groups:',6,0,,
 21,4,1,'HEAT   ','# DownSteps',1,0
 21,4,2,'REFRIG ','# DownSteps',1,0
 21,4,3,'MACHDRV','# DownSteps',1,0
 21,4,4,'ELECTRO','# DownSteps',1,0
 21,4,5,'OTHER  ','# DownSteps',1,0
-* 'Retirement Rates by Step',,,,,,
+21,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
 21,4,1,'HEAT   ','Retire Rate',0.013,
-21,4,2,'REFRIG ','Retire Rate',0.013
-21,4,3,'MACHDRV','Retire Rate',0.013
-21,4,4,'ELECTRO','Retire Rate',0.013
-21,4,5,'OTHER  ','Retire Rate',0.013
-* 'Flow Rates by Step',,,,,
-21,4,1,1,'HEAT   ',1
-21,4,1,2,'REFRIG ',1
-21,4,1,3,'MACHDRV',1
-21,4,1,4,'ELECTRO',1
-21,4,1,5,'OTHER  ',1
-21,4,3,1,'HEAT   ',1
-21,4,3,2,'REFRIG ',1
-21,4,3,3,'MACHDRV',1
-21,4,3,4,'ELECTRO',1
-21,4,3,5,'OTHER  ',1
+21,4,2,'REFRIG ','Retire Rate',0.013,
+21,4,3,'MACHDRV','Retire Rate',0.013,
+21,4,4,'ELECTRO','Retire Rate',0.013,
+21,4,5,'OTHER  ','Retire Rate',0.013,
+21,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+21,4,1,1,'HEAT   ',1,
+21,4,1,2,'REFRIG ',1,
+21,4,1,3,'MACHDRV',1,
+21,4,1,4,'ELECTRO',1,
+21,4,1,5,'OTHER  ',1,
+21,4,1,6,'FEEDSTK',1,
+21,4,3,1,'HEAT   ',1,
+21,4,3,2,'REFRIG ',1,
+21,4,3,3,'MACHDRV',1,
+21,4,3,4,'ELECTRO',1,
+21,4,3,5,'OTHER  ',1,
+21,4,3,6,'FEEDSTK',1,
+*,, INDUSTRY 22
+22,1,'Number of Steps and Rpt. Groups:',6,0,,
+22,1,1,'HEAT   ','# DownSteps',1,0
+22,1,2,'REFRIG ','# DownSteps',1,0
+22,1,3,'MACHDRV','# DownSteps',1,0
+22,1,4,'ELECTRO','# DownSteps',1,0
+22,1,5,'OTHER  ','# DownSteps',1,0
+22,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+22,1,1,'HEAT   ','Retire Rate',0.013,
+22,1,2,'REFRIG ','Retire Rate',0.013,
+22,1,3,'MACHDRV','Retire Rate',0.013,
+22,1,4,'ELECTRO','Retire Rate',0.013,
+22,1,5,'OTHER  ','Retire Rate',0.013,
+22,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+22,1,1,1,'HEAT   ',1,
+22,1,1,2,'REFRIG ',1,
+22,1,1,3,'MACHDRV',1,
+22,1,1,4,'ELECTRO',1,
+22,1,1,5,'OTHER  ',1,
+22,1,1,6,'FEEDSTK',1,
+22,1,3,1,'HEAT   ',1,
+22,1,3,2,'REFRIG ',1,
+22,1,3,3,'MACHDRV',1,
+22,1,3,4,'ELECTRO',1,
+22,1,3,5,'OTHER  ',1,
+22,1,3,6,'FEEDSTK',1,
+22,2,'Number of Steps and Rpt. Groups:',6,0,,
+22,2,1,'HEAT   ','# DownSteps',1,0
+22,2,2,'REFRIG ','# DownSteps',1,0
+22,2,3,'MACHDRV','# DownSteps',1,0
+22,2,4,'ELECTRO','# DownSteps',1,0
+22,2,5,'OTHER  ','# DownSteps',1,0
+22,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+22,2,1,'HEAT   ','Retire Rate',0.013,
+22,2,2,'REFRIG ','Retire Rate',0.013,
+22,2,3,'MACHDRV','Retire Rate',0.013,
+22,2,4,'ELECTRO','Retire Rate',0.013,
+22,2,5,'OTHER  ','Retire Rate',0.013,
+22,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+22,2,1,1,'HEAT   ',1,
+22,2,1,2,'REFRIG ',1,
+22,2,1,3,'MACHDRV',1,
+22,2,1,4,'ELECTRO',1,
+22,2,1,5,'OTHER  ',1,
+22,2,1,6,'FEEDSTK',1,
+22,2,3,1,'HEAT   ',1,
+22,2,3,2,'REFRIG ',1,
+22,2,3,3,'MACHDRV',1,
+22,2,3,4,'ELECTRO',1,
+22,2,3,5,'OTHER  ',1,
+22,2,3,6,'FEEDSTK',1,
+22,3,'Number of Steps and Rpt. Groups:',6,0,,
+22,3,1,'HEAT   ','# DownSteps',1,0
+22,3,2,'REFRIG ','# DownSteps',1,0
+22,3,3,'MACHDRV','# DownSteps',1,0
+22,3,4,'ELECTRO','# DownSteps',1,0
+22,3,5,'OTHER  ','# DownSteps',1,0
+22,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+22,3,1,'HEAT   ','Retire Rate',0.013,
+22,3,2,'REFRIG ','Retire Rate',0.013,
+22,3,3,'MACHDRV','Retire Rate',0.013,
+22,3,4,'ELECTRO','Retire Rate',0.013,
+22,3,5,'OTHER  ','Retire Rate',0.013,
+22,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+22,3,1,1,'HEAT   ',1,
+22,3,1,2,'REFRIG ',1,
+22,3,1,3,'MACHDRV',1,
+22,3,1,4,'ELECTRO',1,
+22,3,1,5,'OTHER  ',1,
+22,3,1,6,'FEEDSTK',1,
+22,3,3,1,'HEAT   ',1,
+22,3,3,2,'REFRIG ',1,
+22,3,3,3,'MACHDRV',1,
+22,3,3,4,'ELECTRO',1,
+22,3,3,5,'OTHER  ',1,
+22,3,3,6,'FEEDSTK',1,
+22,4,'Number of Steps and Rpt. Groups:',6,0,,
+22,4,1,'HEAT   ','# DownSteps',1,0
+22,4,2,'REFRIG ','# DownSteps',1,0
+22,4,3,'MACHDRV','# DownSteps',1,0
+22,4,4,'ELECTRO','# DownSteps',1,0
+22,4,5,'OTHER  ','# DownSteps',1,0
+22,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+22,4,1,'HEAT   ','Retire Rate',0.013,
+22,4,2,'REFRIG ','Retire Rate',0.013,
+22,4,3,'MACHDRV','Retire Rate',0.013,
+22,4,4,'ELECTRO','Retire Rate',0.013,
+22,4,5,'OTHER  ','Retire Rate',0.013,
+22,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+22,4,1,1,'HEAT   ',1,
+22,4,1,2,'REFRIG ',1,
+22,4,1,3,'MACHDRV',1,
+22,4,1,4,'ELECTRO',1,
+22,4,1,5,'OTHER  ',1,
+22,4,1,6,'FEEDSTK',1,
+22,4,3,1,'HEAT   ',1,
+22,4,3,2,'REFRIG ',1,
+22,4,3,3,'MACHDRV',1,
+22,4,3,4,'ELECTRO',1,
+22,4,3,5,'OTHER  ',1,
+22,4,3,6,'FEEDSTK',1,
+*,, INDUSTRY 23
+23,1,'Number of Steps and Rpt. Groups:',6,0,,
+23,1,1,'HEAT   ','# DownSteps',1,0
+23,1,2,'REFRIG ','# DownSteps',1,0
+23,1,3,'MACHDRV','# DownSteps',1,0
+23,1,4,'ELECTRO','# DownSteps',1,0
+23,1,5,'OTHER  ','# DownSteps',1,0
+23,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+23,1,1,'HEAT   ','Retire Rate',0.013,
+23,1,2,'REFRIG ','Retire Rate',0.013,
+23,1,3,'MACHDRV','Retire Rate',0.013,
+23,1,4,'ELECTRO','Retire Rate',0.013,
+23,1,5,'OTHER  ','Retire Rate',0.013,
+23,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+23,1,1,1,'HEAT   ',1,
+23,1,1,2,'REFRIG ',1,
+23,1,1,3,'MACHDRV',1,
+23,1,1,4,'ELECTRO',1,
+23,1,1,5,'OTHER  ',1,
+23,1,1,6,'FEEDSTK',1,
+23,1,3,1,'HEAT   ',1,
+23,1,3,2,'REFRIG ',1,
+23,1,3,3,'MACHDRV',1,
+23,1,3,4,'ELECTRO',1,
+23,1,3,5,'OTHER  ',1,
+23,1,3,6,'FEEDSTK',1,
+23,2,'Number of Steps and Rpt. Groups:',6,0,,
+23,2,1,'HEAT   ','# DownSteps',1,0
+23,2,2,'REFRIG ','# DownSteps',1,0
+23,2,3,'MACHDRV','# DownSteps',1,0
+23,2,4,'ELECTRO','# DownSteps',1,0
+23,2,5,'OTHER  ','# DownSteps',1,0
+23,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+23,2,1,'HEAT   ','Retire Rate',0.013,
+23,2,2,'REFRIG ','Retire Rate',0.013,
+23,2,3,'MACHDRV','Retire Rate',0.013,
+23,2,4,'ELECTRO','Retire Rate',0.013,
+23,2,5,'OTHER  ','Retire Rate',0.013,
+23,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+23,2,1,1,'HEAT   ',1,
+23,2,1,2,'REFRIG ',1,
+23,2,1,3,'MACHDRV',1,
+23,2,1,4,'ELECTRO',1,
+23,2,1,5,'OTHER  ',1,
+23,2,1,6,'FEEDSTK',1,
+23,2,3,1,'HEAT   ',1,
+23,2,3,2,'REFRIG ',1,
+23,2,3,3,'MACHDRV',1,
+23,2,3,4,'ELECTRO',1,
+23,2,3,5,'OTHER  ',1,
+23,2,3,6,'FEEDSTK',1,
+23,3,'Number of Steps and Rpt. Groups:',6,0,,
+23,3,1,'HEAT   ','# DownSteps',1,0
+23,3,2,'REFRIG ','# DownSteps',1,0
+23,3,3,'MACHDRV','# DownSteps',1,0
+23,3,4,'ELECTRO','# DownSteps',1,0
+23,3,5,'OTHER  ','# DownSteps',1,0
+23,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+23,3,1,'HEAT   ','Retire Rate',0.013,
+23,3,2,'REFRIG ','Retire Rate',0.013,
+23,3,3,'MACHDRV','Retire Rate',0.013,
+23,3,4,'ELECTRO','Retire Rate',0.013,
+23,3,5,'OTHER  ','Retire Rate',0.013,
+23,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+23,3,1,1,'HEAT   ',1,
+23,3,1,2,'REFRIG ',1,
+23,3,1,3,'MACHDRV',1,
+23,3,1,4,'ELECTRO',1,
+23,3,1,5,'OTHER  ',1,
+23,3,1,6,'FEEDSTK',1,
+23,3,3,1,'HEAT   ',1,
+23,3,3,2,'REFRIG ',1,
+23,3,3,3,'MACHDRV',1,
+23,3,3,4,'ELECTRO',1,
+23,3,3,5,'OTHER  ',1,
+23,3,3,6,'FEEDSTK',1,
+23,4,'Number of Steps and Rpt. Groups:',6,0,,
+23,4,1,'HEAT   ','# DownSteps',1,0
+23,4,2,'REFRIG ','# DownSteps',1,0
+23,4,3,'MACHDRV','# DownSteps',1,0
+23,4,4,'ELECTRO','# DownSteps',1,0
+23,4,5,'OTHER  ','# DownSteps',1,0
+23,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+23,4,1,'HEAT   ','Retire Rate',0.013,
+23,4,2,'REFRIG ','Retire Rate',0.013,
+23,4,3,'MACHDRV','Retire Rate',0.013,
+23,4,4,'ELECTRO','Retire Rate',0.013,
+23,4,5,'OTHER  ','Retire Rate',0.013,
+23,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+23,4,1,1,'HEAT   ',1,
+23,4,1,2,'REFRIG ',1,
+23,4,1,3,'MACHDRV',1,
+23,4,1,4,'ELECTRO',1,
+23,4,1,5,'OTHER  ',1,
+23,4,1,6,'FEEDSTK',1,
+23,4,3,1,'HEAT   ',1,
+23,4,3,2,'REFRIG ',1,
+23,4,3,3,'MACHDRV',1,
+23,4,3,4,'ELECTRO',1,
+23,4,3,5,'OTHER  ',1,
+23,4,3,6,'FEEDSTK',1,
+*,,
+24,1,'Number of Steps and Rpt. Groups:',6,0,,
+24,1,1,'HEAT   ','# DownSteps',1,0
+24,1,2,'REFRIG ','# DownSteps',1,0
+24,1,3,'MACHDRV','# DownSteps',1,0
+24,1,4,'ELECTRO','# DownSteps',1,0
+24,1,5,'OTHER  ','# DownSteps',1,0
+24,1,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+24,1,1,'HEAT   ','Retire Rate',0.013,
+24,1,2,'REFRIG ','Retire Rate',0.013,
+24,1,3,'MACHDRV','Retire Rate',0.013,
+24,1,4,'ELECTRO','Retire Rate',0.013,
+24,1,5,'OTHER  ','Retire Rate',0.013,
+24,1,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+24,1,1,1,'HEAT   ',1,
+24,1,1,2,'REFRIG ',1,
+24,1,1,3,'MACHDRV',1,
+24,1,1,4,'ELECTRO',1,
+24,1,1,5,'OTHER  ',1,
+24,1,1,6,'FEEDSTK',1,
+24,1,3,1,'HEAT   ',1,
+24,1,3,2,'REFRIG ',1,
+24,1,3,3,'MACHDRV',1,
+24,1,3,4,'ELECTRO',1,
+24,1,3,5,'OTHER  ',1,
+24,1,3,6,'FEEDSTK',1,
+24,2,'Number of Steps and Rpt. Groups:',6,0,,
+24,2,1,'HEAT   ','# DownSteps',1,0
+24,2,2,'REFRIG ','# DownSteps',1,0
+24,2,3,'MACHDRV','# DownSteps',1,0
+24,2,4,'ELECTRO','# DownSteps',1,0
+24,2,5,'OTHER  ','# DownSteps',1,0
+24,2,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+24,2,1,'HEAT   ','Retire Rate',0.013,
+24,2,2,'REFRIG ','Retire Rate',0.013,
+24,2,3,'MACHDRV','Retire Rate',0.013,
+24,2,4,'ELECTRO','Retire Rate',0.013,
+24,2,5,'OTHER  ','Retire Rate',0.013,
+24,2,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+24,2,1,1,'HEAT   ',1,
+24,2,1,2,'REFRIG ',1,
+24,2,1,3,'MACHDRV',1,
+24,2,1,4,'ELECTRO',1,
+24,2,1,5,'OTHER  ',1,
+24,2,1,6,'FEEDSTK',1,
+24,2,3,1,'HEAT   ',1,
+24,2,3,2,'REFRIG ',1,
+24,2,3,3,'MACHDRV',1,
+24,2,3,4,'ELECTRO',1,
+24,2,3,5,'OTHER  ',1,
+24,2,3,6,'FEEDSTK',1,
+24,3,'Number of Steps and Rpt. Groups:',6,0,,
+24,3,1,'HEAT   ','# DownSteps',1,0
+24,3,2,'REFRIG ','# DownSteps',1,0
+24,3,3,'MACHDRV','# DownSteps',1,0
+24,3,4,'ELECTRO','# DownSteps',1,0
+24,3,5,'OTHER  ','# DownSteps',1,0
+24,3,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+24,3,1,'HEAT   ','Retire Rate',0.013,
+24,3,2,'REFRIG ','Retire Rate',0.013,
+24,3,3,'MACHDRV','Retire Rate',0.013,
+24,3,4,'ELECTRO','Retire Rate',0.013,
+24,3,5,'OTHER  ','Retire Rate',0.013,
+24,3,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+24,3,1,1,'HEAT   ',1,
+24,3,1,2,'REFRIG ',1,
+24,3,1,3,'MACHDRV',1,
+24,3,1,4,'ELECTRO',1,
+24,3,1,5,'OTHER  ',1,
+24,3,1,6,'FEEDSTK',1,
+24,3,3,1,'HEAT   ',1,
+24,3,3,2,'REFRIG ',1,
+24,3,3,3,'MACHDRV',1,
+24,3,3,4,'ELECTRO',1,
+24,3,3,5,'OTHER  ',1,
+24,3,3,6,'FEEDSTK',1,
+24,4,'Number of Steps and Rpt. Groups:',6,0,,
+24,4,1,'HEAT   ','# DownSteps',1,0
+24,4,2,'REFRIG ','# DownSteps',1,0
+24,4,3,'MACHDRV','# DownSteps',1,0
+24,4,4,'ELECTRO','# DownSteps',1,0
+24,4,5,'OTHER  ','# DownSteps',1,0
+24,4,6,'FEEDSTK','# DownSteps',1,0
+* 'Retirement Rates by Step',,
+24,4,1,'HEAT   ','Retire Rate',0.013,
+24,4,2,'REFRIG ','Retire Rate',0.013,
+24,4,3,'MACHDRV','Retire Rate',0.013,
+24,4,4,'ELECTRO','Retire Rate',0.013,
+24,4,5,'OTHER  ','Retire Rate',0.013,
+24,4,6,'FEEDSTK','Retire Rate',0.013,
+* 'Flow Rates by Step',,
+24,4,1,1,'HEAT   ',1,
+24,4,1,2,'REFRIG ',1,
+24,4,1,3,'MACHDRV',1,
+24,4,1,4,'ELECTRO',1,
+24,4,1,5,'OTHER  ',1,
+24,4,1,6,'FEEDSTK',1,
+24,4,3,1,'HEAT   ',1,
+24,4,3,2,'REFRIG ',1,
+24,4,3,3,'MACHDRV',1,
+24,4,3,4,'ELECTRO',1,
+24,4,3,5,'OTHER  ',1,
+24,4,3,6,'FEEDSTK',1,

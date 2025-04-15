@@ -1,5 +1,5 @@
 FILE NAME:     RSEFF01
-DATE MODIFIED: August 21, 2018
+DATE MODIFIED: July 11, 2024
 USED BY:       RDEFF subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Average efficiencies of existing RECS-year equipment expected to retire from the initial RECS stock in each projection year
 UNITS:         Same units as shown in RSCLASS tab of RSMESS.xlsx
@@ -9,45 +9,45 @@ ORGANIZATION OF DATA:
                Data starts on row 21 of this file as per RDM convention
                First data year is RECSYEAR+1
                Variable: EQCEFF (same as xlRTBASEFF in RSMESS)
-SOURCES:       Navigant Consulting, Final EIA - Technology Forecast Updates – Residential and Commercial Building Technologies – Reference Case, April, 2018
-COMMENT:       Updated for 2015 RECS and latest technology report
+SOURCES:       Guidehouse and Leidos, EIA - Technology Forecast Updates – Residential and Commercial Building Technologies – Reference Case, March, 2023 (https://www.eia.gov/analysis/studies/buildings/equipcosts/)
+COMMENT:       Updated for 2020 RECS; revised base efficiencies based on latest technology report
 
 
 
 
 
 
-2016	2017	2018	2019	2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040	2041	2042	2043	2044	2045	2046	2047	2048	2049	2050
-35*0.98
-35*2.32
-35*0.80
-35*0.82
-35*0.83
-35*0.80
-35*0.83
-35*0.84
-35*0.63
-35*3.10
-35*1.30
-35*3.19
-35*3.66
-35*3.84
-35*13.30
-35*0.60
-35*0.25
-35*0.62
-35*0.58
-35*0.88
-35*0.51
-35*0.58
-35*1.00
-35*0.40
-35*0.40
-35*228
-35*3.18
-35*3.59
-35*668
-35*483
+2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040	2041	2042	2043	2044	2045	2046	2047	2048	2049	2050
+30*0.98
+30*2.32
+30*0.80
+30*0.82
+30*0.83
+30*0.80
+30*0.83
+30*0.84
+30*0.63
+30*3.10
+30*1.30
+30*3.19
+30*3.66
+30*3.84
+30*13.30
+30*0.60
+30*0.25
+30*0.73
+30*0.58
+30*0.88
+30*0.51
+30*0.58
+30*1.00
+30*0.40
+30*0.40
+30*510
+30*3.18
+30*3.59
+30*640
+30*483
 
 
 ==========ROWS CORRESPOND TO TECHNOLOGIES LISTED BELOW==========

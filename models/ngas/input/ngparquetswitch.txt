@@ -1,0 +1,2 @@
+ParquetReadSwitch := 0; !Switch to read restart file data using Parquet method
+ParquetWriteSwitch := 0; !Switch to write restart file data using Parquet method

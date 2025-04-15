@@ -4,7 +4,7 @@
 #FLAGS= -c -g -C -qcharlen=16384 -qmaxmem=-1 -qnoprint \
 #-qflttrap=zerodivide -qsave $(FCFLAGS) 
 #  include "/check:bounds" to do array subscript checking
-FLAGS=/compile_only /debug:full /optimize:0 /nopdbfile /free /traceback /assume:byterecl /assume:source_include /nolist /static /include:'.' /include:'n:\default\includes\' 
+FLAGS=/compile-only /debug:full /optimize:0 /nopdbfile /free /traceback /assume:byterecl /assume:source_include /nolist /static /include:'.' /include:'n:\default\includes\' 
   
 .SUFFIXES :	.f .pfo .obj
 

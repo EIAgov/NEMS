@@ -2,7 +2,7 @@ Industrial Model Control File $Header: m:/default/input/RCS/indrun.txt,v 1.26 20
 Write out the subroutine trace information (0=no, 1=yes)?
    0
 The total number of industries in this run:
-  21
+  24
 Should the debug file be written (0=no, 1=yes)?
    0
 Benchmark to SEDS (0=no, 1=yes)?

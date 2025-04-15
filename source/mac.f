@@ -1,14 +1,25 @@
-! $Header: M:/default/source/RCS/mac.f,v 1.203 2021/05/25 14:09:49 RT2 Exp $
-!**************************************************************************
-!**************************************************************************
-!   Macroeconomic Module
-!**************************************************************************
+! -----------------------------------------------------------------------
+! NEMS Macroeconomic Activity Module (MAM)                              *
+!                                                                       *
+! A component of the U.S. Energy Information Administration of the      *
+!  Department of Energy's National Energy Modeling System (NEMS)        *
+!                                                                       *
+! LANGUAGE:      FORTRAN                                                *
+! CALLED BY:     PROGRAM NEMS (Integrating Module)                      *
+!                                                                       *
+! ANALYSIS:      AEO2025                                                *
+! CASE:          Reference                                              *
+! DATE:          November 19, 2024                                      *
+!                                                                       *
+!************************************************************************
+! AEO2025 CHANGES                                                       *
+! -Revise driver.prg to read in updated historical housing start/       *
+!   shipment shares from residential tab of commfloor.xlsx (!ResShares) *
+!************************************************************************
 
-
-!**************************************************************************
        SUBROUTINE MAC
        USE DFLIB
-!**************************************************************************
+!************************************************************************
 !  The MAC subroutine directs the execution of the Macroeconomic
 !   Activity Module (MAM). It calls the following subroutines:
 !
@@ -28,14 +39,14 @@
 !   TRANC      - EIA transportation size class model for the US
 !   MACOUTPUT  - writes to output directory the following files containing
 !                at solution and base values of variables contained
-!                in MAM: MC_COMMON.CVS, MC_REGIONAL.CSV, MC_INDUSTRIAL.CSV,
+!                in MAM: MC_COMMON.CVS, MC_REGIONAL.CSV, egioINDUSTRIAL.CSV,
 !                MC_EMPLOYMENT.CSV and MC_NATIONAL.CSV,
 !
 !   The MAC subroutine also writes the MC_ENERGY.CSV file containing the
 !   bridged energy variables and their components.  It also writes to the
 !   global data structure MAM solutions.
 !
-!**************************************************************************
+!************************************************************************
 
        IMPLICIT NONE
 
@@ -131,7 +142,7 @@
 !  Prod_Hydro
            nlink(16,iyr)  = qhoas(11,iyr)*.001
            nlink(17,iyr)  = qhoas(11,iyr)
-!  Prod_Biomass 
+!  Prod_Biomass
            nlink(18,iyr) = (qbmas(11,iyr) - qbmrf(11,iyr))/1000.                                                         &
                          + corncd(3,11,iyr)*cfcorn/1000000000.                                                           &
                          + sum(bimqtycd(1:4,11,iyr))/1000000.*rdays*cfveggie(iyr)                                        &
@@ -187,8 +198,6 @@
 !+RFIPQRBOB(MNUMPR,IY,2)*CFRBOB(IY)/1000.
 !+RFMTBI(MNUMPR,IY)*4.24
 !+RFPQUFC(MNUMPR,IY,2)*CFIMUO(IY))*RDAYS*.001
-
-
            nlink(52,iyr)  = ((rfqicrd(mnumpr,iyr)+rfsprim(iyr))*cfcrdimp(iyr) &
                           +   rfpqiprdt(mnumpr,iyr,2)*cfimprd(iyr)            &
                           +   rfipqcbob(mnumpr,iyr,2)*cfcbob(iyr)/1000.       &
@@ -281,7 +290,6 @@
 !          T2(94,IR,IY,IS)=QRSAS(IR,IY)
 !          T2(95,IR,IY,IS)=QOTAS(IR,IY) + QSGIN(IR,IY) + QPCIN(IR,IY) + QASIN(IR,IY)
 !          T2(96,IR,IY,IS)=FSUM(T2(88,IR,IY,IS),8)
-
            nlink(110,iyr) = (qdsas(11,iyr)                                &
                           + qksas(11,iyr)                                 &
                           + qjftr(11,iyr)                                 &
@@ -290,11 +298,6 @@
                           + qpfin(11,iyr)                                 &
                           + qrsas(11,iyr)                                 &
                           + qotas(11,iyr) + qsgin(11,iyr) + qpcin(11,iyr) + qasin(11,iyr))*.001
-
-
-
-
-!           nlink(110,iyr) = (qtpas(11,iyr)+qettr(11,iyr)+qmetr(11,iyr))/1000
            nlink(111,iyr) = qtpas(11,iyr)
            nlink(112,iyr) = qettr(11,iyr)
            nlink(113,iyr) = qmetr(11,iyr)
@@ -312,16 +315,10 @@
 !          T2(100,IR,IY,IS)=QCIIN(IR,IY)
 !          T2(119,IR,IY,IS)=QCTLRF(IR,IY)
 !          T2(101,IR,IY,IS)=FSUM(T2(98,IR,IY,IS),3) + T2(119,IR,IY,IS)
-
            nlink(121,iyr) = (qmcin(11,iyr)                                                   &
                           + qclas(11,iyr) - qctlrf(11,iyr) - ogsupgas(1,11,iyr) * cfngc(iyr) &
                           + qciin(11,iyr)                                                    &
                           + qctlrf(11,iyr))*.001
-
-
-
-!           nlink(121,iyr) =(qclas(11,iyr)+qmcin(11,iyr)+qciin(11,iyr))*.001 &
-!                          - ogsupgas(1,11,iyr)*cfngc(iyr)*.001
            nlink(122,iyr) = qclas(11,iyr)
            nlink(123,iyr) = qmcin(11,iyr)
            nlink(124,iyr) = qciin(11,iyr)
@@ -390,20 +387,10 @@
 !          T2(70,IR,IY,IS)=QCIIN(IR,IY)
 !          T2(119,IR,IY,IS)=QCTLRF(IR,IY)
 !          T2(71,IR,IY,IS)=FSUM(T2(68,IR,IY,IS),3) + T2(119,IR,IY,IS)
-
            nlink(169,iyr) = (QMCIN(11,IYr)                                                                   &
                           + QCLAS(11,IYr) - QCLEL(11,IYr) - QCTLRF(11,IYr) - OGSUPGAS(1,11,IYr) * CFNGC(IYr) &
                           + QCIIN(11,IYr)                                                                    &
                           + QCTLRF(11,IYr))*.001
-
-
-
-
-
-!           nlink(169,iyr) =(qmcin(11,iyr)                                                                 &
-!                          + qclas(11,iyr)-qclel(11,iyr)-qctlrf(11,iyr)-ogsupgas(1,11,iyr)*cfngc(iyr)*.001 &
-!                          + qctlrf(11,iyr)                                                                &
-!                          + qciin(11,iyr)) * .001
            nlink(170,iyr) = qmcin(11,iyr)
            nlink(171,iyr) = qclas(11,iyr)
            nlink(172,iyr) = qclel(11,iyr)
@@ -419,31 +406,16 @@
 !           T2(116,IR,IY,IS)=QLPIN(IR,IY)
 !           T2(49,IR,IY,IS)=QGPTR(IR,IY)
 !           T2(52,IR,IY,IS)=0.0
-
 !          QNGAS(IR,IY) - QNGEL(IR,IY) - QHYTR(IR,IY) / .7 +QNGLQ(IR,IY)+QLPIN(IR,IY)+QGPTR(IR,IY)
-           
-           
-           
-           
-           
-           
 !          T2(97,IR,IY,IS)=T2(118,IR,IY,IS) + T2(120,IR,IY,IS) + T2(128,IR,IY,IS) +   &
 !                          T2(116,IR,IY,IS) + T2( 52,IR,IY,IS) + T2( 49,IR,IY,IS)
-
 !          T2(118,IR,IY,IS)=QNGAS(IR,IY) - QHYTR(IR,IY) / .7 - QGTLRF(IR,IY)
 !          T2(120,IR,IY,IS)=QGTLRF(IR,IY)
 !          T2(128,IR,IY,IS)=QNGLQ(IR,IY)
 !          T2(116,IR,IY,IS)=QLPIN(IR,IY)
 !          T2(52,IR,IY,IS)=0.0
 !          T2(49,IR,IY,IS)=QGPTR(IR,IY)
-
            nlink(176,iyr) = (qngas(11,iyr) - qngel(11,iyr) - qhytr(11,iyr)/0.7 + qnglq(11,iyr) + qlpin(11,iyr) + qgptr(11,iyr))*.001
-
-
-
-
-!           nlink(176,iyr) =(qngas(11,iyr) + qgptr(11,iyr) + qlpin(11,iyr) + qnglq(11,iyr) &
-!                          - qngel(11,iyr)) * .001
            nlink(177,iyr) = qngas(11,iyr)
            nlink(178,iyr) = qgptr(11,iyr)
            nlink(179,iyr) = qlpin(11,iyr)+qnglq(11,iyr)
@@ -458,12 +430,6 @@
 !          T2(64,IR,IY,IS)=QRSAS(IR,IY) - QRSEL(IR,IY)
 !          T2(65,IR,IY,IS)=QOTAS(IR,IY) + QSGIN(IR,IY) + QPCIN(IR,IY) + QASIN(IR,IY)
 !          T2(66,IR,IY,IS)=FSUM(T2(58,IR,IY,IS),8)
-
-
-
-
-
-
           nlink(181,iyr) =(qdsas(11,iyr) - qdsel(11,iyr)                  &
                          + qksas(11,iyr)                                  &
                          + qjftr(11,iyr)                                  &
@@ -581,14 +547,13 @@
            nlink(256,iyr) = emetax(1,iyr) * 1000. * scaleprice
            nlink(257,iyr) = emetax(1,iyr)
 !  TranPrice_AvgVehicle (Converting base year of price to 2012 for GI model from 1990 base year in TRAN.F)
-           nlink(258,iyr) = avg_prc_veh(iyr) * 1.570444239414224
-
+           nlink(258,iyr) = avg_prc_veh(iyr) * 1.57144765324523
            nlink(259,iyr) = avg_prc_veh(iyr)
 !  TranPrice_AvgCar (Converting base year of price to 2012 for GI model from 1990 base year in TRAN.F)
-           nlink(260,iyr) = avg_prc_car(iyr) * 1.570444239414224
+           nlink(260,iyr) = avg_prc_car(iyr) * 1.57144765324523
            nlink(261,iyr) = avg_prc_car(iyr)
 !  TranPrice_AvgTruck (Converting base year of price to 2012 for GI model from 1990 base year in TRAN.F)
-           nlink(262,iyr) = avg_prc_trk(iyr) * 1.570444239414224
+           nlink(262,iyr) = avg_prc_trk(iyr) * 1.57144765324523
            nlink(263,iyr) = avg_prc_trk(iyr)
 !  Incremental tax on petroleum based highway fuels
            nlink(264,iyr) = hfueltax(iyr) * scaleprice
@@ -734,13 +699,9 @@
 !  RINRevenue
            nlink(357,iyr) = rfs_rev(iyr) * scaleprice
            nlink(358,iyr) = rfs_rev(iyr)
-
-
 !  Ethanol_IP
            nlink(359,iyr)   = 0.9751*(crnethcd(11,iyr)+cllethcd(11,iyr)+othethcd(11,iyr)+grnethcd(11,iyr))*rdays*42/1000.
            nlink(360,iyr)   = pethm(11,iyr)/42*scaleprice
-
-
 !  Miscellaneous parameters
            nlink(361,iyr) = rdays
            nlink(362,iyr) = scaleprice
@@ -824,7 +785,7 @@
 !  START DO I: Loop through number of national and regional macro variables.
        DO i = 1,mcnmmac+mcnmnatreg
 !  START IF ((baseyr+curiyr-1) .GE. 1990): Compute a forecast beginning in
-!   2023. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
+!   2025. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
          IF ((baseyr+curiyr-1) .GE. 1990) THEN
 !  START IF (i .LE. mcnmmac): Copy EViews model solutions to esmac matrix from
 !   epmac matrix. 'mcnmmac' is the number of national macro variables.
@@ -832,31 +793,16 @@
              esmac(i,curiyr) = epmac(i,curiyr)
 !  START ELSE (i .LE. mcnmmac): Writing US forecast to esmacreg from mc_regmac.
            ELSE
-             esmacreg(11,i-mcnmmac,curiyr) = mc_regmac(126+(i-mcnmmac),curiyr)
+             esmacreg(11,i-mcnmmac,curiyr) = mc_regmac(99+(i-mcnmmac),curiyr)
 !  END IF (i .LE. mcnmmac): Copy EViews model solutions to esmac matrix from
 !   epmac matrix. 'mcnmmac' is the number of national macro variables.
            END IF
-!  START EASE ((baseyr+curiyr-1) .GE. 1990): Return historical values prior
-!   to 2023. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
-         ELSE
-
-!  START IF ((i-mcnmmac) .LE. 10): Write US history to esmacreg from mc_regmac
-           IF ((i-mcnmmac) .LE. 10) THEN
-             esmacreg(11,i-mcnmmac,curiyr) = mc_regmac(248+(i-mcnmmac),curiyr)
-!  START ELSE IF ((i-mcnmmac) .GE. 11 .AND. (i-mcnmmac) .LE. 12): Write US history
-!   for populations np and np16a to esmacreg from mc_regmac.
-           ELSE IF ((i-mcnmmac) .GE. 11 .AND. (i-mcnmmac) .LE. 12) THEN
-             esmacreg(11,i-mcnmmac,curiyr) = mc_regmac(126+(i-mcnmmac),curiyr)
-!  START ELSE: Write history for wages rwm and rwnm to esmacreg from mc_regmac
-           ELSE
-             esmacreg(11,i-mcnmmac,curiyr) = mc_regmac(126+(i-mcnmmac),curiyr)
-!  END IF ((i-mcnmmac) .LE. 10): Write US history to esmacreg from mc_regmac
-           END IF
 !  END IF ((baseyr+curiyr-1) .GE. 1990): Compute a forecast beginning in
-!   2023. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
+!   2025. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
          END IF
 !  END DO I: Loop through number of national and regional macro variables.
        END DO
+
 
 !  Call the Interindustry Submodule.
        WRITE(*,*) "MAC.F: Calling industsub"
@@ -889,8 +835,8 @@
        mc_engdompet(curiyr)    = nlink(1,curiyr)+nlink(4,curiyr)
        mamenergy(1,curiyr)     = mc_engdompet(curiyr)
 
-!  prod_other = 
-!  prod_nuclear + prod_hydro + prod_othrenew
+!  prod_other =
+!    prod_nuclear + prod_hydro + prod_othrenew
        mc_engdomoo(curiyr)     = nlink(14,curiyr)+nlink(16,curiyr) &
                                + nlink(29,curiyr)
        mamenergy(2,curiyr)     = mc_engdomoo(curiyr)
@@ -903,11 +849,10 @@
        mc_engdomcoal(curiyr)   = nlink(11,curiyr)
        mamenergy(4,curiyr)     = mc_engdomcoal(curiyr)
 
-!  prod_naturalgas = 
-!  prod_naturalgas + prod_drynaturalgas
+!  prod_naturalgas =
+!    prod_naturalgas + prod_drynaturalgas
        mc_engdomng(curiyr)     = nlink(4,curiyr)+nlink(7,curiyr)
        mamenergy(5,curiyr)     = mc_engdomng(curiyr)
-
 
 !  imports of biofuels (quads)
        mc_engimpbio(curiyr)   = (ethimp(11,curiyr)/1000*cfpet+biodimp(11,curiyr)/1000*cfbiod(curiyr))*rdays*0.001
@@ -940,7 +885,6 @@
                                + mc_engimpoo(curiyr)  + mc_engimppet(curiyr)
        mamenergy(11,curiyr)    = mc_engimp(curiyr)
 
-
 !  exports of fuels
        mc_engexp(curiyr)    = ((rfqexcrd(mnumpr,curiyr)*.001*cfcrdexp(curiyr)  &
                             +   rfqexprdt(mnumpr,curiyr)*cfexprd(curiyr)       &
@@ -972,7 +916,6 @@
        mc_engexpoo(curiyr)   = 0
        mamenergy(17,curiyr)  = mc_engexpoo(curiyr)
 
-
 !  cons_petroleum + cons_natgas + cons_coal + cons_nuclear + cons_hydro + cons_biofuels + cons_othrenew + cons_other
        mc_dallfuels(curiyr)    = nlink(110,curiyr)  + nlink(114,curiyr) + nlink(121,curiyr) &
                                + nlink(127,curiyr) + nlink(129,curiyr)+ nlink(131,curiyr)   &
@@ -1000,7 +943,6 @@
        mc_dallfuelspet(curiyr) = nlink(110,curiyr)
        mamenergy(23,curiyr)    = mc_dallfuelspet(curiyr)
 
-
 !  deleng_coal
        mc_denducoal(curiyr)    = nlink(169,curiyr)
        mamenergy(24,curiyr)    = mc_denducoal(curiyr)
@@ -1020,7 +962,6 @@
 !  deleng_bio
        mc_dendubio(curiyr)     = nlink(195,curiyr)
        mamenergy(28,curiyr)    = mc_dendubio(curiyr)
-
 
 !  trancon_distillate + trancon_motorgas + trancon_ethanol
        mc_qgasasf(curiyr)      = nlink(202,curiyr)+nlink(331,curiyr)+nlink(341,curiyr)
@@ -1164,7 +1105,6 @@
        mc_poilwti(curiyr)      = nlink(345,curiyr)*nlink(282,curiyr)
        mamenergy(46,curiyr)    = mc_poilwti(curiyr)
 
-
 !  Energy investment variables.
        mc_consr(curiyr)       = esmac(3,curiyr)
        maminvest(1,curiyr)    = esmac(3,curiyr)
@@ -1280,6 +1220,7 @@
        mc_wpisop3200(curiyr) = esmac(59,curiyr)
        mc_wpi10(curiyr)      = esmac(60,curiyr)
        mc_gslgisnhwyr(curiyr)= esmac(61,curiyr)
+       mc_ypdr(11,curiyr)    = epmac(77,curiyr)
 
 !  START IF (curiyr .GT. 3): Compute real utility bond interest rate starting
 !   in 1992 using a three year moving average of gdp deflator.
@@ -1461,30 +1402,26 @@
        mc_zbivarw(curiyr)       = mcxtabs(157,curiyr)
        mc_wpiind05(curiyr)      = mcxtabs(158,curiyr)
 
-
 !  START DO i: Write to common block macro variables that are regionalized.
        DO i = 1,mcnumregs
          mc_cpi(i,curiyr)       = esmacreg(i,1,curiyr)
          mc_ypdr(i,curiyr)      = esmacreg(i,2,curiyr)
-         mc_ypcompwsd(i,curiyr) = esmacreg(i,3,curiyr)
-         mc_yp(i,curiyr)        = esmacreg(i,4,curiyr)
-         mc_husmfg(i,curiyr)    = esmacreg(i,5,curiyr)
-         mc_husps1(i,curiyr)    = esmacreg(i,6,curiyr)
-         mc_husps2a(i,curiyr)   = esmacreg(i,7,curiyr)
-         mc_khumfg(i,curiyr)    = esmacreg(i,8,curiyr)
-         mc_khups1(i,curiyr)    = esmacreg(i,9,curiyr)
-         mc_khups2a(i,curiyr)   = esmacreg(i,10,curiyr)
-         mc_np(i,curiyr)        = esmacreg(i,11,curiyr)
-         mc_np16a(i,curiyr)     = esmacreg(i,12,curiyr)
-         mc_mfgwgrt(i,curiyr)   = esmacreg(i,13,curiyr)
-         mc_nmfgwgrt(i,curiyr)  = esmacreg(i,14,curiyr)
+         mc_yp(i,curiyr)        = esmacreg(i,3,curiyr)
+         mc_husmfg(i,curiyr)    = esmacreg(i,4,curiyr)
+         mc_husps1(i,curiyr)    = esmacreg(i,5,curiyr)
+         mc_husps2a(i,curiyr)   = esmacreg(i,6,curiyr)
+         mc_khumfg(i,curiyr)    = esmacreg(i,7,curiyr)
+         mc_khups1(i,curiyr)    = esmacreg(i,8,curiyr)
+         mc_khups2a(i,curiyr)   = esmacreg(i,9,curiyr)
+         mc_np(i,curiyr)        = esmacreg(i,10,curiyr)
+         mc_np16a(i,curiyr)     = esmacreg(i,11,curiyr)
 
 !  START DO j: Write to common block first 48 industrial variables that are
 !    also regionalized. This spans manufacturing and non-manufacturing industries:
 !    Food Products (NAICS 311) to Construction (NAICS 23) and includes
 !    aggregations for chemicals and allied products; petroleum and coal products;
 !    stone, clay, and glass products; and primary metals industries.
-         DO j = 1,mcnmind+4
+         DO j = 1,mcnmind+7
            mc_revind(i,j,curiyr) = esind(i,j,curiyr)
 !  END DO j: Write to common block first 48 industrial variables that are
 !    also regionalized. This spans manufacturing and non-manufacturing industries:
@@ -1504,7 +1441,7 @@
 !  START DO j: Write to common block commercial floor space forecast by type
 !    within region.
          DO j = 1,mcnmfltype
-           mc_commflsp(i,j,curiyr) = esmacreg(i,14+j,curiyr)
+           mc_commflsp(i,j,curiyr) = esmacreg(i,11+j,curiyr)
 !  END DO j: Write to common block commercial floor space forecast by type
 !    within region.
          END DO
@@ -1540,11 +1477,6 @@
        mc_empna(11,23,curiyr) = esemp(11,23,curiyr)
 ! Petroleum Refining, E291 NAICS 324 (Millions of Persons)
        mc_empna(11,10,curiyr) = esemp(11,10,curiyr)
-! Blast Furnace  Basic Steel, E331 (Millions of Persons)
-!       mc_empna(11,25,curiyr) = esemp(11,25,curiyr)
-! Primary Aluminum, E3334 (Millions of Persons)
-!       mc_empna(11,26,curiyr) = esemp(11,26,curiyr)
-
 
 !  START IF (fcrl .EQ. 1 .AND. lastyr .EQ. curiyr .AND. giswitch .LT. 0): Call on macoutput subroutine.
        IF (fcrl .EQ. 1 .AND. lastyr .EQ. curiyr .AND. giswitch .LT. 0) THEN
@@ -1644,9 +1576,6 @@
 !  Read value of Commercial Floor Space growth rate table switch; 1=ON 0=OFF
        READ(INUNIT,2004) cfdiagx
 
-!  Read value of lever for turning on Commercial Floor Space model; 1=ON 0=OFF
-       READ(INUNIT,2004) cflever
-
 !  Read value of lever for running Linkage Model; 1=ON 0=OFF
        READ(INUNIT,2004) linkrun
 
@@ -1676,13 +1605,10 @@
        USE DFLIB
 !***********************************************************************
 !  This subroutine reads baseline, pessimistic, optimistic or cyclical
-!  forecast from a Global Insight forecast. The switch setting is
-!  in the mcparms.txt file, giswitch:
+!  forecast from US forecast. The switch setting is in the mcparms.txt 
+!  file, giswitch:
 !  -1 = off
 !   0 = baseline
-!   1 = pessimistic
-!   2 = optimistic
-!   3 = cyclical
 !
 !September 2010
 !***********************************************************************
@@ -1747,7 +1673,6 @@
 
 !  Query last year
        mamlastyr = RTOVALUE('AEOLSTYR',0)
-
 
 !  Query present working directory and drive.
        pwd  = FILE$CURDRIVE
@@ -1959,7 +1884,7 @@
           mc_csvu(i)          = mcgixtab(63,i)
           mc_csvur(i)         = mcgixtab(64,i)
           mc_eea(i)           = mcgixtab(65,i)
-!          mc_emf(i)           = mcgixtab(66,i)
+ !         mc_emf(i)           = mcgixtab(66,i)
           mc_g(i)             = mcgixtab(67,i)
           mc_gdp(i)           = mcgixtab(68,i)
           mc_gdpfer(i)        = mcgixtab(69,i)
@@ -2180,7 +2105,6 @@
        CHARACTER*255  pwd,filen,fimcevwork,fimceviomd,fimcevepmd,fimcevrgmd,fimcevsubs
        CHARACTER*3500 line,label
 
-
 ! Declares for OSCall  to invoke EViews.
         CHARACTER*80 args
         INTEGER*4    iWaitMS/-1/ ! Wait for OSCall in milliseconds. if -1, infinite wait
@@ -2340,7 +2264,7 @@
          dlink(69,iyr)   = nlink(279,iyr)
 !  EmisAuct_Share - NEMS Share of allowances that are auctioned.
          dlink(70,iyr)   = nlink(281,iyr)
-!  JPGDP (Converting base year of deflator to 2012 for GI model from 1987 base year in NEMS)
+!  JPGDP (Converting base year of deflator to 2012 for US model from 1987 base year in NEMS)
          dlink(71,iyr)   = nlink(282,iyr)
 
 !  The following seven series are industrial outputs and employment whose forecast are 
@@ -2427,10 +2351,8 @@
 !  RINRevenue - NEMS RIN Revenue
          dlink(109,iyr)   = nlink(357,iyr)
 
-
 !  Ethanol_IP - NEMS Value of Ethanol Production
          dlink(110,iyr)     =  nlink(359,iyr)*nlink(360,iyr)/1000.
-
 
 !  Producer price indexes at the Census division level where:
 !   New England - 01, Middle Atlantic - 02, East North Central - 03,
@@ -2541,18 +2463,6 @@
        INQUIRE(UNIT=inunit,name=fimcevwork)
        CLOSE(inunit,STATUS='keep')
 
-!  MCEVIOMD.WF1 file for GI IO model.
-!       fimceviomd='MCEVIOMD'
-!       inunit=FILE_MGR('O',fimceviomd,new)
-!       INQUIRE(UNIT=inunit,name=fimceviomd)
-!       CLOSE(inunit,STATUS='keep')
-
-!  MCEVEPMD.WF1 file for GI EMPLOYMENT model.
-!       fimcevepmd='MCEVEPMD'
-!       inunit=FILE_MGR('O',fimcevepmd,new)
-!       INQUIRE(UNIT=inunit,name=fimcevepmd)
-!       CLOSE(inunit,STATUS='keep')
-
 !  MCEVRGMD.WF1 file for EIA Regional model.
        fimcevrgmd='MCEVRGMD'
        inunit=FILE_MGR('O',fimcevrgmd,new)
@@ -2597,7 +2507,7 @@
             myline = 'read "'//TRIM(filen)//'\altdata.csv"'
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4)') myline,scennum+1
-            myline = 'read(s=residential,t) '//TRIM(filen)//'\comfloor.xls 27'
+            myline = 'read(s=residential,t) '//TRIM(filen)//'\comfloor.xls 32'  !ResShares - If number at end refers to a year index (1=1990), then 32=2020 (first year RDM runs)
             charc  = LEN(TRIM(myline))
             WRITE(3,1011) myline
             taxmode = RTOVALUE('MACTAX  ',0)
@@ -2608,7 +2518,7 @@
             myline  = 'scalar mac111d='
             charc   = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,I2)') myline,mac111d
-            myline = 'sample s_fcst 2023'
+            myline = 'sample s_fcst 2025'
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4)') myline,mamlastyr
             myline = 'scalar macmode='
@@ -2672,10 +2582,10 @@
             charc     = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,I2)') myline,ogtechmode
 !  Import transportation size class data.
-            myline = 'smpl 1967:1 2021:4'
+            myline = 'smpl 1967:1 2024:4'
             charc  = LEN(TRIM(myline))
             WRITE(3,1011) myline
-            myline = 'read(s=TranC,b3) '//TRIM(filen)//'\mchighlo.xls 5'
+            myline = 'read(s=TranC,b3) '//TRIM(filen)//'\mchighlo.xls 7'
             charc  = LEN(TRIM(myline))
             WRITE(3,1011) myline
 !  START ELSE IF (TRIM(myline) .EQ. "INSERT_4"): Write replacement block to drivers.prg
@@ -2690,7 +2600,7 @@
             myline = 'scalar mamlastyr = '
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4)') myline,mamlastyr
-            myline = 'sample s_fcst 2023:1'
+            myline = 'sample s_fcst 2025:1'
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4,A2)') myline,mamlastyr,':4'
 !  START ELSE IF (TRIM(myline) .EQ. "INSERT_5A"): Write replacement block to drivers.prg
@@ -2740,12 +2650,6 @@
             myline = 'smpl 1970'
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4)') myline,mamlastyr
-            myline  = 'scalar macmode='
-            charc   = LEN(TRIM(myline))
-            WRITE(3,'(A<charc>,I2)') myline,mmac
-            myline  = 'scalar cflever='
-            charc   = LEN(TRIM(myline))
-            WRITE(3,'(A<charc>,I2)') myline,cflever
 !  START ELSE IF (TRIM(myline) .EQ. "INSERT_13D"): Write replacement block to drivers.prg
 !    if myline is "INSERT_13D".
           ELSE IF (TRIM(myline) .EQ. "INSERT_13D") THEN
@@ -2767,7 +2671,7 @@
 !  START ELSE IF (TRIM(myline) .EQ. "INSERT_16"): Write replacement block to drivers.prg
 !    if myline is "INSERT_16".
           ELSE IF (TRIM(myline) .EQ. "INSERT_16") THEN
-            myline = 'write(t=txt,d=c,t,id) '//TRIM(filen)//'\epmac.csv epmac rwm rwnm epio epep'
+            myline = 'write(t=txt,d=c,t,id) '//TRIM(filen)//'\epmac.csv epmac epio epep'
             charc  = LEN(TRIM(myline))
             WRITE(3,1011) myline
             myline = 'write(t=txt,d=c,t,id) '//TRIM(filen)//'\mc_xtabs.csv mc_xtabs'
@@ -2982,7 +2886,7 @@
 !  Read year column labels.
         READ(2,*) label
 !  Read model solution into mc_regmac matrix.
-        DO i = 1,260
+        DO i = 1,110
           READ(2,'(a)') line
           DO WHILE (index(line,',NA,').gt.0)
             is=index(line,',NA,')
@@ -2998,7 +2902,7 @@
 !  Read year column labels.
         READ(2,*) label
 !  Read model solution into mc_regio matrix.
-        DO i = 1,432
+        DO i = 1,495
           READ(2,'(a)') line
           DO WHILE (index(line,',NA,').gt.0)
             is=index(line,',NA,')
@@ -3080,41 +2984,41 @@
 !    Coal Mining (NAICS 2121), Oil and Gas Extraction and Support Activities (NAICS 211, 213),
 !    Electric Power Generation and Distribution (NAICS 2211) and Natural Gas Distribution (NAICS 2212).
          IF ((i .EQ. 25 .OR. i .EQ. 45 .OR. i .EQ. 46) &
-           .AND. ((baseyr+curiyr-1) .GE. 2021) .AND. (macfdbk .EQ. 1)) THEN
+           .AND. ((baseyr+curiyr-1) .GE. 2025) .AND. (macfdbk .EQ. 1)) THEN
 !  START IF for NEMS Industrial Output 25: Petroleum Refining (NAICS 32411), manufacturing.
            IF (i .EQ. 25)  THEN
-             esind(11,i,curiyr) = epmac(i+89,curiyr)
+             esind(11,i,curiyr) = epmac(i+87,curiyr)
 !  START ELSE IF for NEMS Industrial Output 45: Coal Mining (NAICS 2121), non-manufacturing.
            ELSE IF (i .EQ. 45) THEN
-             esind(11,i,curiyr) = epmac(i+89,curiyr)
+             esind(11,i,curiyr) = epmac(i+87,curiyr)
 !  START ELSE IF for NEMS Industrial Output 46: Oil and Gas Extraction and Support Activities (NAICS 211, 213), non-manufacturing.
            ELSE IF (i .EQ. 46) THEN
-             esind(11,i,curiyr) = epmac(i+89,curiyr)
+             esind(11,i,curiyr) = epmac(i+87,curiyr)
+
 !  END IF for NEMS Industrial Output 25, 45 and 46.
            END IF
 !  START ELSE IF for NEMS Industrial Output for Electric Power Generation and Distribution (NAICS 2211)
 !    and Natural Gas Distribution (NAICS 2212).
-         ELSE IF ((i .EQ. 51 .OR. i .EQ. 52) &
-           .AND. ((baseyr+curiyr-1) .GE. 2021) .AND. (macfdbk .EQ. 1)) THEN
-!  START IF for NEMS Industrial Output 51: Electric Power Generation and Distribution (NAICS 2211), non-industrial/services.
-           IF (i .EQ. 51) THEN
-             esserv(i-mcnmind,curiyr) = epmac(i+89,curiyr)
-!  START ELSE IF for NEMS Industrial Output 52: Natural Gas Distribution (NAICS 2212), non-industrial/services.
-           ELSE IF (i .EQ. 52) THEN
-             esserv(i-mcnmind,curiyr) = epmac(i+89,curiyr)
-!  END IF for NEMS Industrial Output 51: Electric Power Generation and Distribution (NAICS 2211), non-industrial/services.
+         ELSE IF ((i .EQ. 58 .OR. i .EQ. 59) &
+           .AND. ((baseyr+curiyr-1) .GE. 2025) .AND. (macfdbk .EQ. 1)) THEN
+!  START IF for NEMS Industrial Output 58: Electric Power Generation and Distribution (NAICS 2211), non-industrial/services.
+           IF (i .EQ. 58) THEN
+             esserv(i-mcnmind,curiyr) = epmac(i+87,curiyr)
+!  START ELSE IF for NEMS Industrial Output 59: Natural Gas Distribution (NAICS 2212), non-industrial/services.
+           ELSE IF (i .EQ. 59) THEN
+             esserv(i-mcnmind,curiyr) = epmac(i+87,curiyr)
+!  END IF for NEMS Industrial Output 59: Electric Power Generation and Distribution (NAICS 2211), non-industrial/services.
            END IF
 !  START ELSE for all other industries not covered in NEMS.
          ELSE
 
-!  START IF (i .LE. mcnmind): Copy industrial output forecast for 48 industries.
+!  START IF (i .LE. mcnmind): Copy industrial output forecast for 55 industries.
            IF (i .LE. mcnmind) THEN
-             esind(11,i,curiyr) = epmac(i+89,curiyr)
-
+             esind(11,i,curiyr) = epmac(i+87,curiyr)
 !  START ELSE: Copy service output forecast for 10 industries.
            ELSE
-             esserv(i-mcnmind,curiyr)=epmac(i+89,curiyr)
-!  END IF (i .LE. mcnmind): Copy industrial output forecast for 48 industries.
+             esserv(i-mcnmind,curiyr)=epmac(i+87,curiyr)
+!  END IF (i .LE. mcnmind): Copy industrial output forecast for 55 industries.
            END IF
 
 !  END IF for five industries covered in NEMS: Petroleum Refineries (NAICS 32411),
@@ -3144,11 +3048,11 @@
 
 !  START IF (i .LE. mcnmind): Aggregate solution values for the 48 
 !   industrial categories for total industrial output.
-         IF (i .LE. mcnmind) THEN
+         IF (i .LE. mcnmind-7) THEN
            esind(11,mcnmind+6,curiyr) = esind(11,mcnmind+6,curiyr) &
                                       + esind(11,i,curiyr)
 
-!  END IF (i .LE. mcnmind): Aggregate solution values for the 48 
+!  END IF (i .LE. mcnmind): Aggregate solution values for the 55 
 !   industrial categories for total industrial output.
          END IF
 
@@ -3167,7 +3071,6 @@
                                   - esind(11,23,curiyr) - esind(11,24,curiyr) &
                                   - esind(11,29,curiyr)
 
-
 !  Adjustment to total industrial output computed above. Revind 2 through 5, 11 through 
 !  13, 17, 21 through 24, and 29 are components of totals revind 1, 10, 18, 20, and 28 respectively.
        esind(11,mcnmind+6,curiyr) = esind(11,mcnmind+6,curiyr) &
@@ -3183,11 +3086,11 @@
 !   total gross output.
        esind(11,mcnmind+7,curiyr) = esind(11,mcnmind+6,curiyr) &
                                   + esserv(mcnmserv+1,curiyr)
-
+                                  
 !  START DO i: Sum industrial categories 15, 16, 18, and 19: Basic Organic Chemicals (NAICS 32511,32519),
 !   Basic Inorganic Chemicals (NAICS 32512-32518), Plastic and Synthetic Rubber Materials (NAICS 3252),
 !   Agricultural Chemicals (NAICS 3253) and Other Chemical Products (NAICS 3254-3259), skip Ethanol (325193),
-!   for total chemicals solution, ESIND position immediately following 48 industries.
+!   for total chemicals solution, ESIND position immediately following 55 industries.
 
        DO i = 1,6
          IF (i .EQ. 3) THEN
@@ -3199,17 +3102,17 @@
 !  END DO i: Sum industrial categories 15, 16, 18, and 19: Basic Organic Chemicals (NAICS 32511,32519),
 !   Basic Inorganic Chemicals (NAICS 32512-32518), Plastic and Synthetic Rubber Materials (NAICS 3252),
 !   Agricultural Chemicals (NAICS 3253) and Other Chemical Products (NAICS 3254-3259), skip Ethanol (325193),
-!   for total chemicals solution, ESIND position immediately following 48 industries.
+!   for total chemicals solution, ESIND position immediately following 55 industries.
        END DO
 
 !  Sum industry categories 25 and 26: Petroleum Refineries (NAICS 32411) and Other Petroleum and 
-!   Coal Products (NAICS 32412, 32419) for solution petroleum and coal solution, ESIND second position following 48 industries.
+!   Coal Products (NAICS 32412, 32419) for solution petroleum and coal solution, ESIND second position following 55 industries.
        esind(11,mcnmind+2,curiyr) = esind(11,25,curiyr) &
                                   + esind(11,26,curiyr)
 
 !  Sum industry categories 28, 30, 31, and 32: Glass and Glass Products (NAICS 3272), Cement Manufacturing
-!   (NAICS 32731), Lime (3274),  and Other Nonmetallic Mineral Products (NAICS 327 less 3272, 32731, & 3274), 
-!   skip Flat Glass (327211), for stone, cement and glass solution, ESIND third position following 48 industries.
+!   (NAICS 32731), Lime (32741), and Other Nonmetallic Mineral Products (NAICS 327 less 3272, 32731 & 32742), 
+!   skip Flat Glass (327211), for stone, cement and glass solution, ESIND third position following 55 industries.
        esind(11,mcnmind+3,curiyr) = esind(11,28,curiyr) &
                                   + esind(11,30,curiyr) &
                                   + esind(11,31,curiyr) &
@@ -3217,7 +3120,7 @@
 
 !  Sum industry categories 33 through 35: Iron and Steel Mills, Ferroalloy and Steel Products (NAICS 3311,3312),
 !   Alumina and Aluminum Products (NAICS 3313), and Other Primary Metals (NAICS 3314, 3315) for primary
-!   metals solution, ESIND fourth position following 48 industries.
+!   metals solution, ESIND fourth position following 55 industries.
        esind(11,mcnmind+4,curiyr) = esind(11,33,curiyr) &
                                   + esind(11,34,curiyr) &
                                   + esind(11,35,curiyr)
@@ -3256,13 +3159,14 @@
 !    second position following the industries; stone, clay, and glass products, third position following the
 !    industries, and primary metals industries, fourth position following the industries. In addition there
 !    are two aggregates at the regional level: total manufacturing output and total industrial output.
-         DO j = 1,6
+         DO j = 1,7
            esind(r,mcnmind+j,curiyr) = 0.0
 !  END DO LOOP j: Initialize portion of forecast matrix esind containing the following aggregates:
 !    chemicals and allied products, first position following the industries; petroleum and coal products,
 !    second position following the industries; stone, clay, and glass products, third position following the
 !    industries, and primary metals industries, fourth position following the industries. In addition there
-!    are two aggregates at the regional level: total manufacturing output and total industrial output.
+!    are three aggregates at the regional level: total manufacturing output, total industrial output
+!    and total gross output.
          END DO
 
 !  START DO LOOP i: Loop through number regional macro variables and number of industrial
@@ -3287,8 +3191,19 @@
              IF (j .LE. mcnummnf) THEN
                esind(r,mcnmind+5,curiyr) = esind(r,mcnmind+5,curiyr) &
                                          + esind(r,j,curiyr)
+
 !  END IF (j .LE. mcnummnf): Aggregate industrial outputs representing
 !    manufacturing as total manufacturing output.
+             END IF
+
+!  START IF (j .LE. mcnummnf): Aggregate industrial outputs representing
+!    manufacturing as total industrial output.
+             IF (j .LE. mcnmind-7) THEN
+               esind(r,mcnmind+6,curiyr) = esind(r,mcnmind+6,curiyr) &
+                                         + esind(r,j,curiyr)
+
+!  END IF (j .LE. mcnummnf): Aggregate industrial outputs representing
+!    manufacturing as total industrial output.
              END IF
 
 !  START IF (j .GE. 15 .AND. j .LE. 20): Aggregate industrial outputs 
@@ -3306,8 +3221,8 @@
                                          + esind(r,j,curiyr)
 
 !  START ELSE IF (j .GE. 28 .AND. j .LE. 32): Aggregate industrial outputs
-!    Glass and Glass Products (3272), Cement Manufacturing (32731), Lime (3274), and
-!    Other Nonmetallic Mineral Products (327 less 3272, 32731, & 3274), skip Flat Glass (327211).
+!    Glass and Glass Products (3272), Cement Manufacturing (32731), Lime (32741), and
+!    Other Nonmetallic Mineral Products (327 less 3272, 32731 & 32742), skip Flat Glass (327211).
              ELSE IF (j .GE. 28 .AND. j .LE. 32 .AND. j .NE. 29) THEN
                esind(r,mcnmind+3,curiyr) = esind(r,mcnmind+3,curiyr) &
                                          + esind(r,j,curiyr)
@@ -3324,13 +3239,6 @@
 !    Other Chemical Products (3254-3259), skip Ethanol (325193).
              END IF
 
-!  Aggregate all industrial outputs as total industrial output. Note that
-!   total gross output is not computed at the regional level.
-!   This is the sum of manufacturing, non-manufacturing, and services/non-industrial output
-!   and is available only at the national level.
-             esind(r,mcnmind+6,curiyr)   = esind(r,mcnmind+6,curiyr) &
-                                         + esind(r,j,curiyr)
-
 !  END IF (i .LE. mcnmmacreg): Compute regional forecast by variable for each
 !    of the Census Division regions excluding California and National.
            END IF
@@ -3340,9 +3248,8 @@
          END DO
 
 !  Adjustment to total manufacturing output for region r computed above. Revind 2 through
-!  5, 11 through 13, 17, 21 through 24, 29, and 31 are components of totals revind 1, 10,
-!  18, 20, 28, and 30 respectively.
-
+!  5, 11 through 13, 17, 21 through 24, and 29 are components of totals revind 1, 10,
+!  18, 20, and 28 respectively.
          esind(r,mcnmind+5,curiyr) = esind(r,mcnmind+5,curiyr)               &
                                    - esind(r,2, curiyr) - esind(r,3, curiyr) &
                                    - esind(r,4, curiyr) - esind(r,5, curiyr) &
@@ -3350,12 +3257,11 @@
                                    - esind(r,13,curiyr) - esind(r,17,curiyr) &
                                    - esind(r,21,curiyr) - esind(r,22,curiyr) &
                                    - esind(r,23,curiyr) - esind(r,24,curiyr) &
-                                   - esind(r,29,curiyr) - esind(r,31,curiyr)
+                                   - esind(r,29,curiyr)
 
 !  Adjustment to total industrial output for region r computed above. Revind 2 through
-!  5, 11 through 13, 17, 21 through 24, 29, and 31 are components of totals revind 1, 10,
-!  18, 20, 28, and 30 respectively.
-
+!  5, 11 through 13, 17, 21 through 24, and 29 are components of totals revind 1, 10,
+!  18, 20, and 28 respectively.
          esind(r,mcnmind+6,curiyr) = esind(r,mcnmind+6,curiyr)               &
                                    - esind(r,2, curiyr) - esind(r,3, curiyr) &
                                    - esind(r,4, curiyr) - esind(r,5, curiyr) &
@@ -3363,7 +3269,8 @@
                                    - esind(r,13,curiyr) - esind(r,17,curiyr) &
                                    - esind(r,21,curiyr) - esind(r,22,curiyr) &
                                    - esind(r,23,curiyr) - esind(r,24,curiyr) &
-                                   - esind(r,29,curiyr) - esind(r,31,curiyr)
+                                   - esind(r,29,curiyr)
+
 
 !  END DO Loop r: Loop through number of Census regions less California.
        END DO
@@ -3396,96 +3303,96 @@
 !  This is the sector employment forecast. Five of the
 !   energy-related industries are forecasted by NEMS.
 ! Food Products,E20 NAICS 311 (Millions of Persons)
-      esemp(11,1,curiyr) = epmac(148,curiyr)
+      esemp(11,1,curiyr) = epmac(153,curiyr)
 ! Beverage and Tobacco Manufactures,E21 NAICS 312 (Millions of Persons)
-      esemp(11,2,curiyr) = epmac(149,curiyr)
+      esemp(11,2,curiyr) = epmac(154,curiyr)
 ! Textiles, Apparel and Leather NAICS 313-316 (Millions of Persons)
-      esemp(11,3,curiyr) = epmac(150,curiyr)
+      esemp(11,3,curiyr) = epmac(155,curiyr)
 ! Wood Products,E24 NAICS 321 (Millions of Persons)
-      esemp(11,4,curiyr) = epmac(151,curiyr)
+      esemp(11,4,curiyr) = epmac(156,curiyr)
 ! Furniture  and Related,E25 NAICS 337 (Millions of Persons)
-      esemp(11,5,curiyr) = epmac(152,curiyr)
+      esemp(11,5,curiyr) = epmac(157,curiyr)
 ! Paper  Products,E26 NAICS 322 (Millions of Persons)
-      esemp(11,6,curiyr) = epmac(153,curiyr)
+      esemp(11,6,curiyr) = epmac(158,curiyr)
 ! Printing  Publishing,E27 NAICS 323 (Millions of Persons)
-      esemp(11,7,curiyr) = epmac(154,curiyr)
+      esemp(11,7,curiyr) = epmac(159,curiyr)
 ! Bulk Chemicals, E281-7 NAICS 3251-3 (Millions of Persons)
-      esemp(11,8,curiyr) = epmac(155,curiyr)
+      esemp(11,8,curiyr) = epmac(160,curiyr)
 ! Other Chemicals, E28 nec NAICS 3254-9 (Millions of Persons)
-      esemp(11,9,curiyr) = epmac(156,curiyr)
+      esemp(11,9,curiyr) = epmac(161,curiyr)
 ! Petroleum and Coal Products, E29 NAIICS 324 (Millions of Persons)
-      esemp(11,10,curiyr) = epmac(157,curiyr)
+      esemp(11,10,curiyr) = epmac(162,curiyr)
 ! Rubber  and Plastic Products, E30 NAICS 326 (Millions of Persons)
-      esemp(11,11,curiyr) = epmac(158,curiyr)
+      esemp(11,11,curiyr) = epmac(163,curiyr)
 ! Nonmetallic Minerals, E32  NAICS 327 (Millions of Persons)
-      esemp(11,12,curiyr) = epmac(159,curiyr)
+      esemp(11,12,curiyr) = epmac(164,curiyr)
 ! Primary Metals, E33 NAICS 331 (Millions of Persons)
-      esemp(11,13,curiyr) = epmac(160,curiyr)
+      esemp(11,13,curiyr) = epmac(165,curiyr)
 ! Fabricated Metal Products, E34 NAICS 332 (Millions of Persons)
-      esemp(11,14,curiyr) = epmac(161,curiyr)
+      esemp(11,14,curiyr) = epmac(166,curiyr)
 ! Machinery, E35 NAICS 333 (Millions of Persons)
-      esemp(11,15,curiyr) = epmac(162,curiyr)
+      esemp(11,15,curiyr) = epmac(167,curiyr)
 ! Computers and Electronic Equipment, E36 NAICS 334 (Millions of Persons)
-      esemp(11,16,curiyr) = epmac(163,curiyr)
+      esemp(11,16,curiyr) = epmac(168,curiyr)
 ! Transportation Equipment, E37 NAICS 336 (Millions of Persons)
-      esemp(11,17,curiyr) = epmac(164,curiyr)
-! Appliance and Electrical Equipment, E38 NAICS 335 (Millions of Persons)
-      esemp(11,18,curiyr) = epmac(165,curiyr)
+      esemp(11,17,curiyr) = epmac(169,curiyr)
+! Appliance and Electrical Equip6ment, E38 NAICS 335 (Millions of Persons)
+      esemp(11,18,curiyr) = epmac(170,curiyr)
 ! Miscellaneous Manufacturing Industries, E39 NAICS 339 (Millions of Persons)
-      esemp(11,19,curiyr) = epmac(166,curiyr)
+      esemp(11,19,curiyr) = epmac(171,curiyr)
 ! Agricultural Production, Crops; E01 NAICS 111 (Millions of Persons)
-      esemp(11,20,curiyr) = epmac(167,curiyr)
+      esemp(11,20,curiyr) = epmac(172,curiyr)
 ! Other Agriculture, E07-09 NAICS 112-5 (Millions of Persons)
-      esemp(11,21,curiyr) = epmac(168,curiyr)
+      esemp(11,21,curiyr) = epmac(173,curiyr)
 ! Coal Mining and Oil and Gas Mining employment from NEMS
 ! Coal Mining, E11,12 NAICS 2121 (Millions of Persons)
-      esemp(11,22,curiyr) = epmac(169,curiyr)
+      esemp(11,22,curiyr) = epmac(174,curiyr)
 ! Oil  Gas Mining, E13 NAICS 211, 213 (Millions of Persons)
-      esemp(11,23,curiyr) = epmac(170,curiyr)
+      esemp(11,23,curiyr) = epmac(175,curiyr)
 ! Metal  Other Non-metallic Mining, E10,14 NAICS 2122-3 (Millions of Persons)
-      esemp(11,24,curiyr) = epmac(171,curiyr)
+      esemp(11,24,curiyr) = epmac(176,curiyr)
 ! Construction of Buildings, E15 NAICS 236 (Millions of Persons)
-      esemp(11,25,curiyr) = epmac(172,curiyr)
+      esemp(11,25,curiyr) = epmac(177,curiyr)
 ! Heavy and Civ. Eng. Construction, E16 NAICS 237 (Millions of Persons)
-      esemp(11,26,curiyr) = epmac(173,curiyr)
+      esemp(11,26,curiyr) = epmac(178,curiyr)
 ! Specialty Trade Contractors, E17 NAICS 238 (Millions of Persons)
-      esemp(11,27,curiyr) = epmac(174,curiyr)
+      esemp(11,27,curiyr) = epmac(179,curiyr)
 ! Electric Utilities; E491,part 493 NAICS 2211 (Millions of Persons)
 ! empser1
-      esemp(11,28,curiyr) = epmac(175,curiyr)
+      esemp(11,28,curiyr) = epmac(180,curiyr)
 ! Natural Gas Utilities; E492,part 493 NAICS 2212 (Millions of Persons)
 ! empser2
-      esemp(11,29,curiyr) = epmac(176,curiyr)
+      esemp(11,29,curiyr) = epmac(181,curiyr)
 ! Water  Sewer Services; E494-497,part 493 NAICS 2213 (Millions of Persons)
 ! empser3
-      esemp(11,30,curiyr) = epmac(177,curiyr)
+      esemp(11,30,curiyr) = epmac(182,curiyr)
 ! Wholesale Trade; E50,51 NAICS 42 (Millions of Persons)
 ! empser4
-      esemp(11,31,curiyr) = epmac(178,curiyr)
+      esemp(11,31,curiyr) = epmac(183,curiyr)
 ! Retail Trade; E52-57,59,739 NAICS 44-5 (Millions of Persons)
 ! empser5
-      esemp(11,32,curiyr) = epmac(179,curiyr)
+      esemp(11,32,curiyr) = epmac(184,curiyr)
 ! Transportation Services, E40-47 NAICS 48-9 (Millions of Persons)
 ! empser6
-      esemp(11,33,curiyr) = epmac(180,curiyr)
+      esemp(11,33,curiyr) = epmac(185,curiyr)
 ! Publishing, E48x NAICS 511 (Millions of Persons)
 ! empser 7
-      esemp(11,34,curiyr) = epmac(181,curiyr)
+      esemp(11,34,curiyr) = epmac(186,curiyr)
 ! Broadcasting, E48x NAICS 515 (Millions of Persons)
 ! empser 8
-      esemp(11,35,curiyr) = epmac(182,curiyr)
+      esemp(11,35,curiyr) = epmac(187,curiyr)
 ! Telecommunications, E48x NAICS 517 (Millions of Persons)
 ! empser 9
-      esemp(11,36,curiyr) = epmac(183,curiyr)
+      esemp(11,36,curiyr) = epmac(188,curiyr)
 ! Finance and Insurance; E60-63 NAICS 52 (Millions of Persons)
 ! empser 10
-      esemp(11,37,curiyr) = epmac(184,curiyr)
+      esemp(11,37,curiyr) = epmac(189,curiyr)
 ! Real Estate and Retal/Leasing; E65-66,153 NAICS 53 (Millions of Persons)
 ! empser 11
-      esemp(11,38,curiyr) = epmac(185,curiyr)
+      esemp(11,38,curiyr) = epmac(190,curiyr)
 ! All Other Services, Retail; E58,70,73,75-91 NAICS 54-81, 92 (Millions of Persons) and
 ! empser12
-      esemp(11,39,curiyr) = epmac(186,curiyr)
+      esemp(11,39,curiyr) = epmac(191,curiyr)
 
 
 !  START DO LOOP i: Initialize aggregates holding totals for solution and base.
@@ -3498,6 +3405,7 @@
 !    of solution and base; total employment categories minus 12 serv & 7 non-manufacturing.
       DO i = 1,NUMEMPL-20
         esemp(11,NUMEMPL+1,curiyr)=esemp(11,NUMEMPL+1,curiyr)+esemp(11,i,curiyr)
+
 !  END DO LOOP i: Loop through number of manufacturing industries for total 
 !    of solution and base.
       END DO
@@ -3564,11 +3472,10 @@
 
 !  START DO LOOP j: Loop through Census Division Regions including Pacific but not National.
        DO j=1,9
-       
-!  START DO LOOP k: Loop through k floorspace types.
-         DO k=15,23
 
-           esmacreg(j,k,curiyr) = mc_commflr((j-1)*9 +(k-14),curiyr)
+!  START DO LOOP k: Loop through k floorspace types.
+         DO k=12,23
+           esmacreg(j,k,curiyr) = mc_commflr((j-1)*9 +(k-11),curiyr)
 
 !  END DO LOOP k: Loop through k floorspace types.
          END DO
@@ -3852,11 +3759,11 @@
        'MC_NP65A (Millions of Persons)','MC_JQPCMHNF (2012=1.0)','MC_WPISOP3200 (1982=1.0)', 'MC_WPI10 (1982=1.0)',  &
        'MC_GSLGISNHWYR (Billions of Chained 2012 Dollars)','MC_RLRMCORPPUAA (Percent per Annum)'/
 
-       DATA (mamregionlabel(i),i=1,117) /'MC_CPI (1982-84=1.0)','MC_YPDR (Billions of Chained 2012 Dollars)',      &
-       'MC_YPCOMPWSD (Billions of Dollars)','MC_YP (Billions of Dollars)','MC_HUSMFG (Millions of Units)',         &
+       DATA (mamregionlabel(i),i=1,121) /'MC_CPI (1982-84=1.0)','MC_YPDR (Billions of Chained 2012 Dollars)',      &
+       'MC_YP (Billions of Dollars)','MC_HUSMFG (Millions of Units)',                                              &
        'MC_HUSPS1 (Millions of Units)','MC_HUSPS2A (Millions of Units)','MC_KHUMFG (Millions of Units)',           &
        'MC_KHUPS1 (Millions of Units)','MC_KHUPS2A (Millions of Units)','MC_NP (Millions of Persons)',             &
-       'MC_NP16A (Millions of Persons)','MC_RWM (Dollars per Hour)','MC_RWNM (Dollars per Hour)',                  &
+       'MC_NP16A (Millions of Persons)',                                                                           &
        'AMUSE_REL (Rate of Growth)','EDUC (Rate of Growth)','HEALTH (Rate of Growth)',                             &
        'HOTEL_DORM (Rate of Growth)','OFFICE (Rate of Growth)','AUTO (Rate of Growth)',                            &
        'STORES (Rate of Growth)','WARE (Rate of Growth)','PUB_MISCNR (Rate of Growth)',                            &
@@ -3900,9 +3807,9 @@
        'EMPSER11 Real Estate and Rental/Leasing (Millions of Persons)',                                            &
        'EMPSER12 Other Services (Millions of Persons)',                                                            &
        'REVIND1 Food Products (Billions of Fixed 2012 Dollars)',                                                   &
-       'REVIND2 Grain and Oil Seed Milling (Billions of Fixed 2012 Dollars)',                                      &
+       'REVIND2 Grain and Oilseed Milling (Billions of Fixed 2012 Dollars)',                                       &
        'REVIND3 Dairy Products (Billions of Fixed 2012 Dollars)',                                                  &
-       'REVIND4 Animal Slaughter and Seafood Products (Billions of Fixed 2012 Dollars)',                           &
+       'REVIND4 Meat Poultry and Seafood Product Processing (Billions of Fixed 2012 Dollars)',                     &
        'REVIND5 Other Food Products (Billions of Fixed 2012 Dollars)',                                             &
        'REVIND6 Beverage and Tobacco Products (Billions of Fixed 2012 Dollars)',                                   &
        'REVIND7 Textiles, Apparel, and Leather (Billions of Fixed 2012 Dollars)',                                  &
@@ -3947,6 +3854,13 @@
        'REVIND46 Oil & Gas Extraction & Support Activities (Bil of Fixed 2012 Dollars)',                           &
        'REVIND47 Other Mining and Quarrying (Billions of Fixed 2012 Dollars)',                                     &
        'REVIND48 Construction (Billions of Fixed 2012 Dollars)',                                                   &
+       'REVIND49 Petrochemical Manufacturing (Billions of 2012 Dollars)',                                          &
+       'REVIND50 All Other Basic Organic Chemical Manufacturing (Bil of 2012 Dollars)',                            &
+       'REVIND51 Industrial Gas Manufacturing (Billions of 2012 Dollars)',                                         &
+       'REVIND52 Synthetic Dye and Pigment and Other Manufacturing (Bil 2012 Dollars)',                            &
+       'REVIND53 Container Glass (Billions of Fixed 2012 Dollars)',                                                &
+       'REVIND54 Glass & Glass Product Man Exc. Flat & Container Glass (Bil 2012 Dol)',                            &
+       'REVIND55 Lime Manufacturing (Billions of Fixed 2012 Dollars)',                                             &
        'Sum of All Chemicals; NAICS 325 (Billions of Fixed 2012 Dollars)',                                         &
        'Sum of All Petroleum; NAICS 324 (Billions of Fixed 2012 Dollars)',                                         &
        'Sum of All Stone, Clay, Glass & Cement; NAICS 327 (Bil of Fixed 2012 Dollars)',                            &
@@ -4013,7 +3927,7 @@
        'EMPSER12 Other Services (Millions of Persons)',                                     &
        'Total Manufacturing (Millions of Persons)',                                         &
        'Total Non-Manufacturing (Millions of Persons)',                                     &
-       'Total Services (Millions of Persons)',                               &
+       'Total Services (Millions of Persons)',                                              &
        'Total Non-Agricultural (Millions of Persons)'/
 
        END BLOCK DATA MACLABELS
@@ -4143,10 +4057,11 @@
        WRITE(3,'(A<charc>)') line
 !  Write variable name and data.
        DO j = 1,62
+         IF (j .eq. 57) GOTO 200
          line = '"'//TRIM(mamnationlabel(j))//'"'
          DO i = 1,mamlastyr-1990+1
            IF (j .LT. 62) THEN
-             WRITE(label,'(F15.5)') esmac(j,i)
+               WRITE(label,'(F15.5)') esmac(j,i)
            ELSE
              WRITE(label,'(F15.5)') mc_rlrmcorppuaa(i)
            END IF
@@ -4154,7 +4069,7 @@
          END DO
          charc = LEN(TRIM(line))
          WRITE(3,'(A<charc>)') line
-       END DO
+200    END DO
        WRITE(3,*) ' '
 !  Write section title.
        line = '"'//"Regional Variables"//'"'
@@ -4169,16 +4084,16 @@
        charc = LEN(TRIM(line))
        WRITE(3,'(A<charc>)') line
 !  Write variable name and data.
-       DO j = 1,117
+       DO j = 1,120
          DO k = 1,9
            line = '"'//TRIM(mamregionlabel(j))//' '//TRIM(mamcensuslabel(k))//'"'
            DO i = 1,mamlastyr-1990+1
-             IF (j .le. 23) THEN
+             IF (j .le. 20) THEN
                WRITE(label,'(F15.5)') esmacreg(k,j,i)
-             ELSE IF (j .GE. 24 .AND. j .LE. 62) THEN
-               WRITE(label,'(F15.5)') mc_empna(k,j-23,i)
+             ELSE IF (j .GE. 21 .AND. j .LE. 59) THEN
+               WRITE(label,'(F15.5)') mc_empna(k,j-20,i)
              ELSE
-               WRITE(label,'(F15.5)') mc_revind(k,j-62,i)
+               WRITE(label,'(F15.5)') mc_revind(k,j-59,i)
              END IF
              line = TRIM(line)//',"'//TRIM(label)//'"'
            END DO
@@ -4210,24 +4125,26 @@
          charc = LEN(TRIM(line))
          WRITE(3,'(A<charc>)') line
 !  Write variable name and data.
-         DO k = 1,117
+         DO k = 1,121
+           IF (j .eq. 11 .and. k .eq. 10 .or. j .eq. 11 .and. k .eq. 11 .or. j .lt. 11 .and. k .eq. 121) GOTO 300
+           
            line = '"'//TRIM(mamregionlabel(k))//'"'
            DO i = 1,mamlastyr-1990+1
 !  Regional macro.
-             IF (k .le. 23) THEN
-               WRITE(label,'(F15.5)') esmacreg(j,k,i)
+             IF (k .le. 20) THEN
+                 WRITE(label,'(F15.5)') esmacreg(j,k,i)
 !  Regional employment by industry.
-             ELSE IF (k .GE. 24 .AND. k .LE. 62) THEN
-               WRITE(label,'(F15.5)') mc_empna(j,k-23,i)
+             ELSE IF (k .GE. 21 .AND. k .LE. 59) THEN
+               WRITE(label,'(F15.5)') mc_empna(j,k-20,i)
 !  Regional industrial output.
              ELSE
-               WRITE(label,'(F15.5)') mc_revind(j,k-62,i)
+               WRITE(label,'(F15.5)') mc_revind(j,k-59,i)
              END IF
              line =  TRIM(line)//',"'//TRIM(label)//'"'
            END DO
            charc = LEN(TRIM(line))
            WRITE(3,'(A<charc>)') line
-         END DO
+300      END DO
 !  Regional services.
          IF (j .EQ. mcnumregs) THEN
            DO l = 1,11
@@ -4266,8 +4183,8 @@
          charc = LEN(TRIM(line))
          WRITE(3,'(A<charc>)') line
 !  Write variable name and data, manufacturing.
-         DO k = 1,54
-           line = '"'//TRIM(mamregionlabel(k+62))//'"'
+         DO k = 1,mcnmind
+           line = '"'//TRIM(mamregionlabel(k+59))//'"'
            DO i = 1,mamlastyr-1990+1
              WRITE(label,'(F15.5)') esind(j,k,i)
              line =  TRIM(line)//',"'//TRIM(label)//'"'
@@ -4289,9 +4206,9 @@
        END DO
        WRITE(3,*) ' '
 !  Write variable name and data for total gross output.
-       line = '"'//TRIM(mamregionlabel(117))//'"'
+       line = '"'//TRIM(mamregionlabel(121))//'"'
        DO i = 1,mamlastyr-1990+1
-         WRITE(label,'(F15.5)') esind(11,54+1,i)
+         WRITE(label,'(F15.5)') esind(11,mcnmind+7,i)
          line = TRIM(line)//',"'//TRIM(label)//'"'
        END DO
        charc = LEN(TRIM(line))
@@ -4354,10 +4271,11 @@
        WRITE(3,'(A<charc>)') line
 !  Write variable name and data.
        DO k = 1,62
+         IF (K .EQ.57) GOTO 400
          line = '"'//TRIM(mamnationlabel(k))//'"'
          DO i = 1,mamlastyr-1990+1
            IF (k .LT. 62) THEN
-             WRITE(label,'(F15.5)') esmac(k,i)
+               WRITE(label,'(F15.5)') esmac(k,i)
            ELSE
              WRITE(label,'(F15.5)') mc_rlrmcorppuaa(i)
            END IF
@@ -4365,7 +4283,7 @@
          END DO
          charc = LEN(TRIM(line))
          WRITE(3,'(A<charc>)') line
-       END DO
+400    END DO
 !  Close MC_NATIONAL.CSV for writes of national employment.
        CLOSE(3)
 

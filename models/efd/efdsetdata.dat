@@ -4,13 +4,14 @@
  nHGCODE_ := data {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, A, B, C, D, E, F};
 !SupplyRegion_ALT2_ := data {tr, fr, mi, m2, m3, m4, is, n5, ny, p8, pj, p6, p7, s2, s4, s3, sp, s9, s1, sr, c1, ca, nw, rm, ba, ak, hi, us};
  PlantType_ECP_ := data {B1, B2, B3, B4, B5, B6, B7, B8, C1, C2, C3, C4, C5, C6, C7, C8, C9, CX, CY, CZ, H1, H2, H3, H4, H5, H6, H7, H8, H9, HA, HB, HC, PC, OC, IG, I2, PQ, IS, NG, ST, ET, IC, CT, T2, AT, EC, CC, AC, A2, CS, FC, CN, AN, SM, GN, WD, BI, GT, AG, MS, HY, HO, HI, TI, PS, P2, SQ, DS, OS, WN, WL, WF, SO, SS, S2, PV, PT, IN, DB, DP};
+ IntermittentECP_ := data {WN, WL, WF, SO, SS, S2, PV, PT, IN};
  DistillateProductionStep_ := data {01};
  PlantGroup_ := data {00001..20000};
  Season_ := data {1, 2, 3};
  Season_SUP_ := data {0, 1, 2, 3};
  Slice_ := data {A, B, C, D, E};
- CoalSupplyCurve_ := data {01..53};
- CoalSupplyCurve_Dom_ := data {01..41};
+ CoalSupplyCurve_ := data {01..26};
+ CoalSupplyCurve_Dom_ := data {01..14};
  CoalSupplyCurve_Int_ := data {01..12};
  CoalType_ := data {BL, BM, BH, SL, SM, LG};
  CoalProductionStep_ := data {01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12};
@@ -19,7 +20,6 @@
 !CoalDemandRegion_ALT2_ := data {01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16};
  BiomassSector_ := data {RS, CM, IN, H2, ET, BT};
  BiomassType_ := data {UM, FR, AG, EC};
- OGSMSector_ := data {HY, AM, ET, NA, CE, HR, P1, P2, NG, C1, C2, S1, S2};
  OGSMRegion_ := data {NE, GC, MC, SW, MT, WC, GP};
  SeasonCCS_ := data {X, Y, Z};
  OperatingMode_ := data {1, 2, 3, 4, 5};
@@ -80,7 +80,7 @@
  DistGenPlantGroup_ := data {001..600};
  int_fuel_region_ := data {01..25};
  int_fuel_region1_ := data {01..26};
- RenewPlantGroup_ := data {0001..1300};
+ RenewPlantGroup_ := data {0001..1400};
  DispPlantGroup_ := data {0001..1200};
  SliceSorted_ := data {1, 2, 3, 4, 5};
  FuelType_ := data {B1, B2, B3, B4, B5, B6, B7, B8, C1, C2, C3, C4, C5, C6, C7, C8, C9, CX, CY, CZ, H1, H2, H3, H4, H5, H6, H7, H8, H9, HA, HB, HC, PC, OC, IG, I2, PQ, IS, DS, RL, RH, GF, GI, GC, UF, OG, WD, SW, WA, TI, PS, WN, WL, WF, GT, SO, PV, PT, DD, DG};
@@ -108,3 +108,4 @@
  FuelRegion_SUP_ := data {0, NE, YJ, PA, OH, EN, WI, C1, C2, C3, DM, DW, VA, CR, GA, FL, KT, AM, WS, N1, N2, ZN, OW, CA, US};
  OGSMRegionEX_ := data {NE, GC, MC, SW, MT, WC, GP, 8};
  !OGSMRegionEX_ALTTo_ := data {NE, GC, MC, SW, MT, WC, GP, 8};
+ H2SupplyStep_ := data {01..07};

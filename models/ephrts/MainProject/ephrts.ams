@@ -1,0 +1,541 @@
+## ams_version=1.0
+
+Model Main_Ephrts {
+	DeclarationSection Objective_Function {
+		MathematicalProgram ephrts {
+			Objective: TotalCost;
+			Direction: minimize;
+			Constraints: AllConstraints;
+			Variables: AllVariables;
+			Type: LP;
+		}
+		Variable TotalCost {
+			Range: free;
+			Definition: {
+				! production
+				sum( (season,region,hour,tech),  cost_hydrogen(season,region,hour,tech) * H(season, region, hour, tech) ) + sum((region,tech), ( (h2_production_capacity(region,tech)-h2_production_capacity_int(region,tech)) * hydrogen_capacity_additions_cost(tech)*cost_factor ) )
+				
+				!transport
+				+ sum( (season,region_export,region_import), transfer_cost(region_import,region_export) * T(season, region_export, region_import) )
+				
+				! storage
+				+ sum( (season,region), storage_cost*S(season, region) ) + sum(region, (SCAPMAX(region)-SCAPMAX_INT(region) ) * storage_capacity_additions_cost * cost_factor)
+			}
+			Comment: "Objective function: total cost ($) to be minimized";
+		}
+	}
+	DeclarationSection Sets_Declarations {
+		Set hours {
+			Index: hour;
+		}
+		Set technology {
+			Index: tech;
+		}
+		Set seasons {
+			Index: season;
+			OrderBy: val(season);
+		}
+		Set regionimport {
+			SubsetOf: regions;
+			Index: region_import;
+		}
+		Set regionexport {
+			SubsetOf: regions;
+			Index: region_export;
+		}
+		Set regions {
+			Index: region;
+		}
+	}
+	DeclarationSection Input_Parameters_Declarations {
+		Parameter hourweights {
+			IndexDomain: season;
+			Definition: {
+				{1: 61, 2: 122, 3: 61, 4: 122}
+			}
+			Comment: "The weights given to specific seasons";
+		}
+		Parameter cost_factor {
+			Comment: "fixed cost factor from ecp used to compute annual project finances (unitless)";
+		}
+		Parameter transport_switch {
+			Comment: "transport switch. 1=on, 0=off. Currently, turned off.";
+		}
+		Parameter SCAPMAX_INT_census {
+			IndexDomain: region;
+			Comment: "Initial storage capacity by census region (kg)";
+		}
+		Parameter SCAPMAX_INT_nerc {
+			IndexDomain: region;
+			Comment: "Initial storage capacity by EMM reigon (kg)";
+		}
+		Parameter SCAPMAX_INT {
+			IndexDomain: region;
+			Definition: {
+				if (iteration=2) then
+					SCAPMAX_INT_nerc(region)
+				else 
+					SCAPMAX_INT_census(region)
+				endif
+			}
+			Comment: "Initial storage capacity (kg)";
+		}
+		Parameter h2_production_capacity_int_census {
+			IndexDomain: (region,tech);
+			Comment: "initial hydrogen production capacity by census region (kW)";
+		}
+		Parameter h2_production_capacity_int_nerc {
+			IndexDomain: (region,tech);
+			Comment: "initial hydrogen production capacity by EMM region (kW)";
+		}
+		Parameter h2_production_capacity_int {
+			IndexDomain: (region,tech);
+			Definition: {
+				if (iteration=2) then
+					h2_production_capacity_int_nerc(region,tech)
+				else 
+					h2_production_capacity_int_census(region,tech)
+				endif
+			}
+			Comment: "initial hydrogen production capacity (kW)";
+		}
+		Parameter load_ratio_0 {
+			IndexDomain: region;
+			Comment: "The maximum ratio of total electricity load that hydrogen can supply in the 0th call of ephrts. (unitless)";
+		}
+		Parameter load_ratio_1 {
+			IndexDomain: region;
+			Comment: "The maximum ratio of total electricity load that hydrogen can supply in the 1st call of ephrts. (unitless)";
+		}
+		Parameter load_ratio_2 {
+			IndexDomain: region;
+			Comment: "The maximum ratio of total electricity load that hydrogen can supply in the 2nd call of ephrts. (unitless)";
+		}
+		Parameter load {
+			IndexDomain: (season,region,hour);
+			Comment: "Hourly electrical load from RESTORE (GWh)";
+		}
+		Parameter iteration {
+			Comment: {
+				"0=initialization call in first year of ephrts; 
+				1= first call in year, by census regions and determines suply curves; 
+				2=second call in year, by EMM region and determines production and storage capacity"
+			}
+		}
+		StringParameter param;
+		StringParameter location;
+		Parameter hydrogen_capacity_additions_cost {
+			IndexDomain: tech;
+			Comment: "Production capacity additions cost ($/kW)";
+		}
+		Parameter storage_capacity_additions_cost {
+			Comment: "Storage capaciy additions cost ($/kg)";
+		}
+		Parameter eff {
+			IndexDomain: tech;
+			Comment: {
+				"! efficiency. (MWhr/KG)
+				.06 Mwhr/KG of H2 for the electrolyzer"
+			}
+		}
+		Parameter transfer_cost {
+			IndexDomain: (region_export,region_import);
+			Comment: {
+				"Cost of transfer ($/kg)
+				Currently set high, another assurance that we have no transfer (although we also have a switch in place)."
+			}
+		}
+		Parameter fuelcost {
+			IndexDomain: (season,region,hour,tech);
+			Comment: "Cost of hydrogen fuel ($/MWhr)";
+		}
+		Parameter demand_hydrogen {
+			IndexDomain: (season,region);
+			Comment: "hydrogen demand (kg). This is determined by EFD, how much hydrogen fuel the turbines utilize.";
+		}
+		Parameter cost_hydrogen {
+			IndexDomain: (season,region,hour,tech);
+			Definition: (FOM(tech) / 4) + (fuelcost(season, region, hour, tech) * eff(tech));
+			Comment: {
+				"! Cost of hydrogen fuel ($/kg)
+				! Converting $/MWhr to $/kg with cost_hydrogen. That is why eff is in MWhr/KG which is what is doing the conversion
+				! I believe eff should be applies to FOM too."
+			}
+		}
+		Parameter storage_cost {
+			Comment: "Cost to store a kg of hydrogen fuel for a season ($/kg-season)";
+		}
+		Parameter FOM {
+			IndexDomain: tech;
+			Comment: "Fixed Operating & Maintenance Cost for production capacity (currently in $/kg, make sure this shouldn\'t be MW-year)";
+		}
+	}
+	ExternalProcedure CSVExport {
+		Arguments: (param,location);
+		DllName: "CSVExport64.dll";
+		BodyCall: {
+			CSVExport(
+			        scalar string : param,
+			        scalar string : location
+			        )
+		}
+		ElementParameter param {
+			Range: AllIdentifiers;
+			Property: Input;
+		}
+		StringParameter location {
+			Default: ".";
+			Property: Optional;
+		}
+	}
+	DeclarationSection Variables_Declarations {
+		Variable S {
+			IndexDomain: (season,region);
+			Range: nonnegative;
+			Definition: {
+				
+				!if (season = 1.0) then
+				
+				!sum((hour,tech),H(season, region, hour, tech)) + sum(region_export,T(season,region_export,region)) - sum(region_import,T(season,region,region_import))- demand_hydrogen(season,region)
+				
+				!else
+				
+				sum((hour,tech),
+				H(season, region, hour, tech)) 
+				+ sum(region_export,T(season,region_export,region)) - sum(region_import,T(season,region,region_import))
+				- demand_hydrogen(season,region)
+				+ S(season-1,region)
+				
+				!endif
+			}
+			Comment: "Storage Level quantity (kg): includes balance of all variables";
+		}
+		Variable T {
+			IndexDomain: (season,region_export,region_import);
+			Range: nonnegative;
+			Comment: "Quantity (kg) of Transport of hydrogen between regions";
+		}
+		Variable H {
+			IndexDomain: (season,region,hour,tech);
+			Range: nonnegative;
+			Definition: All_D_Fuel(season, region, hour, tech) / eff(tech);
+			Comment: "Quantity (kg) of hydrogen produced constrained by hydrogen production capacity, where eff is in MWhrs/KG and ALL_D_FUEL is Mwhrs. So mwhrs/(mwhrs/kg) give kgs";
+		}
+		Variable SCAPMAX {
+			IndexDomain: (region);
+			Comment: "Storage capacity (kg)";
+		}
+		Variable All_D_Fuel {
+			IndexDomain: (season,region,hour,tech);
+			Range: nonnegative;
+			Comment: "Demand for fuels needed to produce hydrogen (MWh)";
+		}
+		Variable h2_production_capacity {
+			IndexDomain: (region,tech);
+			Comment: "Total production capacity (kW)";
+		}
+	}
+	DeclarationSection Constraint_Declarations {
+		Constraint MaxStorage {
+			IndexDomain: (season,region);
+			Definition: S(season, region) <= SCAPMAX(region);
+		}
+		Constraint MaxElectricCons {
+			IndexDomain: (season,region,hour,tech);
+			Definition: All_D_Fuel(season, region, hour, tech) / hourweights(season) <= h2_production_capacity(region, tech) / 1000;
+			Comment: "h2 production capacity is in KW and then we divide by a 1000 to get MW";
+		}
+		Constraint MaxElecLoadRatio {
+			IndexDomain: (season,region,hour);
+			Definition: {
+				if (iteration = 0) then
+					( All_D_Fuel(season, region, hour, 'electrolysis') + All_D_Fuel(season, region, hour, 'electrolysis_sec45v') ) <= (load(season, region, hour)) * 1000.0 * load_ratio_0(region) ! GWhrs to MWhrs, then 20 percent
+				elseif (iteration = 1) then
+					(All_D_Fuel(season, region, hour, 'electrolysis') + All_D_Fuel(season, region, hour, 'electrolysis_sec45v') )  <= (load(season, region, hour)) * 1000.0 * load_ratio_1(region) ! GWhrs to MWhrs, then 20 percent
+				elseif(iteration = 2) then
+					(All_D_Fuel(season, region, hour, 'electrolysis') + All_D_Fuel(season, region, hour, 'electrolysis_sec45v') ) <= (load(season, region, hour)) * 1000.0 * load_ratio_2(region) ! GWhrs to MWhrs, then 20 percent
+				else
+					(All_D_Fuel(season, region, hour, 'electrolysis') + All_D_Fuel(season, region, hour, 'electrolysis_sec45v') ) <= -10000.0 ! force ephrts to break in this case, since iteration should be 0,1,2 and nothing else.
+				endif
+			}
+			Comment: "We added this because, we observed that the electrolyzer was consuming too much electricity within a given hour. For example, the entire season\'s worth of electricity. And when the amount of electricity (D_FUEL) was output to EMM, EMM crashed due to the spikes in electricity consumptino for a given 864 hour. This implementation, forces the amount of electricity consumed by the electrolyzer to be less than 20% of the load from restore.";
+		}
+		Constraint SameRegionTransport {
+			IndexDomain: (season,region_export,region_import);
+			Definition: T(season,region_export,region_import) = T(season,region_export,region_import);
+		}
+	}
+	DeclarationSection PostProcessing_Parameters_Declarations {
+		Parameter total_cost_noadd {
+			Range: free;
+			Comment: {
+				"! Total operation costs ($)
+				! Used in validator check in supply_curve_algo"
+			}
+		}
+		Parameter total_cost_add {
+			Range: free;
+			Comment: {
+				"! Total capital costs of additional capacity ($)"
+			}
+		}
+		Parameter ProductionCost {
+			IndexDomain: (season,region,hour,tech);
+			Range: free;
+			Comment: "Total production operation cost ($)";
+		}
+		Parameter StorageCost {
+			IndexDomain: (season,region);
+			Range: nonnegative;
+			Comment: "Total storage operating cost ($)";
+		}
+		Parameter TransportCost {
+			IndexDomain: (season,region_export,region_import);
+			Range: nonnegative;
+			Comment: "Total transport cost ($)";
+		}
+		Parameter ProductionCapacityAdditionsCost {
+			IndexDomain: (region,tech);
+			Range: nonnegative;
+			Comment: {
+				"! Production capacity additions capital cost ($)"
+			}
+		}
+		Parameter StorageCapacityAdditionsCost {
+			IndexDomain: (region);
+			Range: nonnegative;
+			Comment: {
+				"! Storage capacity additions capital cost ($)"
+			}
+		}
+		Parameter h2_production_capacity_additions {
+			IndexDomain: (region,tech);
+			Range: free;
+			InitialData: 0.0;
+			Comment: {
+				"! Additions to next year\'s capacity (kW)"
+			}
+		}
+		Parameter h2_production_capacity_nxtyr {
+			IndexDomain: (region,tech);
+			Range: free;
+			InitialData: 0.0;
+			Comment: "Total production capacity next year (kW)";
+		}
+		Parameter D_Fuel {
+			IndexDomain: (season,region,hour);
+			Range: nonnegative;
+			Comment: "Demand for fuels needed to produce hydrogen (MWh)";
+		}
+		Parameter SCAPMAX_nxtyr {
+			IndexDomain: region;
+			Range: free;
+			Comment: "Next year\'s total storage capacity (kg)";
+		}
+		Parameter TotalSec45VCredit {
+			IndexDomain: region;
+			InitialData: 0.0;
+			Comment: {
+				"Annual average Sec45V credit ($/kg) of each region\'s eligible H2. 
+				Example: 0.7=that region recieves an average of a $/kg 0.70 credit."
+			}
+		}
+	}
+	Procedure MainInitialization {
+		Body: {
+			! This runs first
+			
+			empty AllParameters; 
+			empty AllVariables;
+			! no longer works reliably
+			!if DirectoryExists("output") then
+			!	DirectoryDelete("output");
+			!endif;
+			!DirectoryCreate("output");
+			read from file  "input/ephrts_inputs.txt";
+			read from file  "input/fuel_costs.txt";
+			read from file  "input/restore_load.txt";
+			
+			read from file  "input/load_ratio_2.txt";
+			read from file  "input/load_ratio_1.txt";
+			read from file  "input/load_ratio_0.txt";
+		}
+		Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+	}
+	Procedure MainExecution {
+		Body: {
+			! MainInitialization runs first
+			
+			! Sets up some bounds depending on certain switches
+			PreProcessing;
+			
+			option postsolve_continuous_variables := 'round_to_nearest_bound';
+			
+			Solve ephrts;
+			
+			! Fill post-processing parameters
+			PostProcessing; 
+			
+			! Used in supply_curve_algorithm.py post-processor script to validate data
+			! prints out total capacity cost and operation costs
+			display total_cost_noadd;
+			display total_cost_add;
+			
+			WriteVars;
+			CaseFileSave('debug.data',AllIdentifiers);
+		}
+	}
+	Procedure PreProcessing {
+		Body: {
+			! transport switch currently off
+			! Set transport to 0 if switch off
+			if transport_switch = 0 then
+				T(season,region_export,region_import) := 0.0;
+				T(season,region_export,region_import).nonvar:=1;
+			else
+				! Set same region import and export to 0 transport
+				T(season,region_export,region_export) := 0.0;
+				T(season,region_export,region_export).nonvar:=1;
+			endif;
+			
+			! Set min (lower bound) of production capacity and storage capacity
+			SCAPMAX(region).Lower := SCAPMAX_INT(region);
+			h2_production_capacity(region,tech).Lower := h2_production_capacity_int(region, tech);
+			
+			! OldCapacity 45V
+			!The purpose of this bound is to make sure all newly built capacity receives the 45V credit where we treat tech_v45 label is new and the rest is old. 
+			!Future work - if other technologies than electrolyzers are added, need to make a new sub-set for 45v technologies here
+			! in previous step, set Lower bound, setting this upper bound freezes the variable
+			h2_production_capacity(region, 'electrolysis').Upper := h2_production_capacity_int(region, 'electrolysis');
+			
+			
+			
+			! Set storage SOC at the end of the year to 0 (this forces material balance)
+			! TODO (this would need fixes in supply_curve_algorithm): allow starting SOC = ending SOC.
+			S('4',region) := 0.0;
+			S('4',region).nonvar:=1;
+		}
+	}
+	Procedure PostProcessing {
+		Body: {
+			! These are cost values
+			ProductionCost(season,region,hour,tech) := cost_hydrogen(season,region,hour,tech) * H(season, region, hour, tech);
+			StorageCost(season,region) := storage_cost*S(season, region);
+			TransportCost(season,region_export,region_import) := transfer_cost(region_import,region_export) * T(season, region_export, region_import);
+			
+			! Total operation costs
+			! Used in supply_curve_algorithm.py post-processor script to validate data
+			total_cost_noadd := 
+			! production
+			sum( (season,region,hour,tech), ProductionCost(season,region,hour,tech) )
+			!transport
+			+ sum( (season,region_export,region_import), TransportCost(season,region_export,region_import) )
+			! storage
+			+ sum( (season,region), StorageCost(season,region) );
+			
+			! Production capacity additions capital cost
+			ProductionCapacityAdditionsCost(region,tech) := (h2_production_capacity(region,tech)-h2_production_capacity_int(region,tech)) * hydrogen_capacity_additions_cost(tech) * cost_factor ;
+			
+			! Storage capacity additions capital cost
+			StorageCapacityAdditionsCost(region) := (SCAPMAX(region)-SCAPMAX_INT(region) ) * storage_capacity_additions_cost * cost_factor;
+			
+			! Total capacity costs
+			total_cost_add :=  
+			! production
+			 sum((region,tech), ProductionCapacityAdditionsCost(region,tech) )
+			! storage
+			+ sum(region, StorageCapacityAdditionsCost(region));
+			
+			! Total fuel
+			D_Fuel(season,region,hour) := All_D_Fuel(season, region, hour, 'electrolysis') + All_D_Fuel(season, region, hour, 'electrolysis_sec45v');
+			
+			if (iteration=2) then
+				! Next year's production capacity
+				h2_production_capacity_nxtyr(region,tech) := h2_production_capacity(region,tech);
+				! Additions to next year's capacity
+				h2_production_capacity_additions(region,tech) := h2_production_capacity_nxtyr(region, tech) - h2_production_capacity_int_nerc(region, tech);
+				! Next year's storage capacity
+				SCAPMAX_nxtyr(region) := SCAPMAX(region);
+			else 
+				! Next year's production capacity, does not change in first iteration
+				h2_production_capacity_nxtyr(region,tech) := h2_production_capacity_int_nerc(region,tech); ! check this
+			
+				! Next year's production capacity, does not change in first iteration
+				SCAPMAX_nxtyr(region) := SCAPMAX_INT_nerc(region);
+			endif;
+			
+			! Post-processing: calculate average annualSec45V credit received.
+			TotalSec45VCredit(region)|(not sum( (season,hour), H(season, region, hour, 'electrolysis_sec45v')) = 0) := 
+				! This next line produces the Sec45V credit by hour * amount of H2 produced
+				sum((season,hour),(cost_hydrogen(season,region,hour,'electrolysis')-cost_hydrogen(season,region,hour,'electrolysis_sec45v'))*
+				H(season, region, hour, 'electrolysis_sec45v')) / 
+				! divide by the total H2 produced
+				sum( (season,hour), H(season, region, hour, 'electrolysis_sec45v'));
+		}
+	}
+	Procedure WriteVars {
+		Body: {
+			
+			CSVExport('demand_hydrogen',"\output");
+			CSVExport('H',"\output");
+			CSVExport('S',"\output");
+			CSVExport('T',"\output");
+			CSVExport('h2_production_capacity',"\output");
+			CSVExport('cost_hydrogen',"\output");
+			CSVExport('transfer_cost',"\output");
+			CSVExport('SCAPMAX',"\output");
+			CSVExport('hydrogen_capacity_additions_cost',"\output");
+			CSVExport('storage_capacity_additions_cost',"\output"); !read from input file in python post processing script
+			CSVExport('D_Fuel',"\output"); 
+			CSVExport('h2_production_capacity_nxtyr',"\output");
+			CSVExport('SCAPMAX_nxtyr',"\output");
+			CSVExport('SCAPMAX_INT',"\output"); 
+			CSVExport('h2_production_capacity_int',"\output");
+			CSVExport('load_ratio_0',"\input");
+			CSVExport('load_ratio_1',"\input");
+			CSVExport('load_ratio_2',"\input");
+			CSVExport('h2_production_capacity_additions',"\output");
+			
+			!    "/demand_hydrogen.csv"
+			!    "/H.csv"
+			!    "/S.csv"
+			!    "/T.csv"
+			!    "/h2_production_capacity.csv"
+			!    "/cost_hydrogen.csv"
+			!    "/transfer_cost.csv"
+			!    'hydrogen_capacity_additions_cost = 1.0'
+			!    'storage_capacity_additions_cost = 1.0'
+				!CSVExport('SCAPMAX_INT',"\output"); 
+				!CSVExport('h2_production_capacity_int',"\output");
+		}
+	}
+	Procedure PostMainInitialization {
+		Comment: {
+			"Add initialization statements here that require that the libraries are already initialized properly,
+			or add statements that require the Data Management module to be initialized."
+		}
+	}
+	Procedure PreMainTermination {
+		Body: {
+			
+			
+			return DataManagementExit();
+		}
+		Comment: {
+			"Add termination statements here that require all libraries to be still alive.
+			Return 1 if you allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence."
+		}
+	}
+	Procedure MainTermination {
+		Body: {
+			return 1;
+		}
+		Comment: {
+			"Add termination statements here that do not require all libraries to be still alive.
+			Return 1 to allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence.
+			It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1."
+		}
+	}
+}

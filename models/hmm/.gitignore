@@ -1,0 +1,18 @@
+# These files/directories are made by AIMMS
+*.aimmslockfile
+.edited/
+backup/
+log/
+PROTemp/
+# By default let us ignore [Data Pages] (this allows you to always save them
+# without worrying about accidentally committing them)
+MainProject/Pages/All\ Data\ Pages.xml
+MainProject/Pages/\[Data\ Page\]\ *.xml
+# By default ignore case files to prevent accidentally committing (possibly)
+# large binary files.
+data/**/*.data
+# No need to version crash logs/reports from AIMMS
+aimms.sig
+crashes.log
+# ignore the automatic translation file as it automatically generated
+MainProject/WebUI/resources/automatic_translations.properties

@@ -1,0 +1,6 @@
+variable,value,notes
+debt_ratio,0.4,fraction
+fed_tax_rate,0.21,fraction
+industry_beta,1.5,
+market_risk_premium,7.5,
+return_over_capital_cost,0.05,fraction

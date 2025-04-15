@@ -83,7 +83,10 @@ def save_to_excel():
 
     # now write to the file
     excel_filename='validator_' + ('FAIL' if isFailed else 'PASS') + '.xlsx'
-    writer = ExcelWriter(os.path.join(os.getcwd(), excel_filename))
+    # write to parent directory
+    output_root_dir = os.path.dirname(os.getcwd())
+    writer = ExcelWriter(os.path.join(output_root_dir, excel_filename))
+
     df.to_excel(writer, sheet_name="All Tests", index=False)
 
     # color the result for each test case
@@ -135,8 +138,7 @@ def delete_csv_files():
 
 
 def main():
-    cwd = os.getcwd()
-    report_path = os.path.join(cwd, 'validator_report.xml')
+    report_path = os.path.join(os.getcwd(), 'validator_report.xml')
     xml = JUnitXml.fromfile(report_path)
 
     save_to_csv(xml, 'validator_report.csv')

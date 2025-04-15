@@ -75,7 +75,7 @@
 ####   UPLRYR: INITIAL YEAR TO START LEARNING (NO LONGER SET TO ECP_FYR - 1 IN UDAT)
 ####   EFPSYR: BASE YEAR FOR EFP FINANCIAL DATA INPUTS
 ####         UHBSYR  UESTYR  UISTYR  UPSTYR  ULRSYR   EFPSYR
-'EXEC YEARS'   1989    2010    2000    2022    2019     2011
+'EXEC YEARS'   1989    2020    2000    2024    2023     2020
 %NUM OF YRS%
 ####          UNYEAR (MUST BE .LE. MNUMYR, CURRENTLY 46 = 2035)
 'NUM OF YRS'    61
@@ -633,7 +633,7 @@ t'11 US:                          '      0.0000               0.0000
  '11'  'STO'    'Oil Steam                        '   1  1   8  0  0  0  0  0   2
  '12'  'STG'    'Gas Steam                        '   1  1   9  0  0  0  0  0   2
  '13'  'STX'    'Oil/Gas Steam                    '   1  1   8  9  0  0  0  0   2
- '14'  'ICE'    'Internal Combustion Engine       '   1  1  10  7  0  0  0  0   4
+ '14'  'ICE'    'Hydrogen Turbine                 '   1  1  16  0  0  0  0  0   8
  '15'  'CTO'    'Oil Turbine                      '   1  1   7  0  0  0  0  0   4
  '16'  'CTG'    'Gas Turbine                      '   1  1  10  0  0  0  0  0   4
  '17'  'CTX'    'Oil/Gas Turbine                  '   1  1  10  7  0  0  0  0   4
@@ -643,7 +643,7 @@ t'11 US:                          '      0.0000               0.0000
  '21'  'CCG'    'Gas Combined Cycle               '   1  1  11  0  0  0  0  0   3
  '22'  'CCX'    'Oil/Gas Combined Cycle           '   1  1  11  7  0  0  0  0   3
  '23'  'ACC'    'Advanced Combined Cycle          '   1  1  11  7  0  0  0  0   3
- '24'  'AC2'    'New Advanced Combined Cycle      '   1  1  11  7  0  0  0  0   3
+ '24'  'AC2'    'Combined Cycle with CCS Retrofit '   1  1  11  7  0  0  0  0   3
  '25'  'ACS'    'Adv. Combined Cyc w/Sequestration'   1  1  11  7  0  0  0  0   3
  '26'  'FCG'    'Fuel Cell                        '   1  1   9  0  0  0  0  0   7
  '27'  'CNU'    'Conventional Nuclear             '   1  1  13  0  0  0  0  0   5
@@ -651,7 +651,7 @@ t'11 US:                          '      0.0000               0.0000
  '29'  'SMR'    'SMR Advanced Nuclear             '   1  1  13  0  0  0  0  0   5
  '30'  'GFN'    'Greenfield Nuclear               '   1  1  13  0  0  0  0  0   5
  '31'  'BMS'    'Wood/Biomass                     '   3  0   0  0  0  0  0  0   8
- '32'  'BIG'    'Biomass IGCC                     '   3  0   0  0  0  0  0  0   8
+ '32'  'BIG'    'Biomass CCS                      '   3  0   0  0  0  0  0  0   8
  '33'  'GTH'    'Geothermal                       '   3  0   0  0  0  0  0  0   8
  '34'  'AGT'    'Advanced Geothermal              '   3  0   0  0  0  0  0  0   8
  '35'  'MSW'    'Municipal Solid Waste            '   3  0   0  0  0  0  0  0   8
@@ -870,7 +870,7 @@ t'11 US:                          '      0.0000               0.0000
 '41' 'Residual High Sulfur'              3     'RH'  'CR' 'CR' 'NR' END
 '42' 'Natural Gas Firm'                  3     'GF'  'GR' 'CR' 'NR' END
 '43' 'Natural Gas Interruptible'         3     'GI'  'GR' 'CR' 'NR' END
-'44' 'Natural Gas Competitive'           3     'GC'  'GR' 'CR' 'NR' END
+'44' 'Hydrogen Electrolysis - EPHRTS'    3     'GC'  'CR' 'CR' 'NR' END
 '45' 'Nuclear'                           3     'UF'  'NR' 'CR' 'NR' END
 '46' 'Other Gaseous Fuels'               3     'OG'  'CR' 'CR' 'NR' END
 '47' 'Biomass / Wood'                    3     'WD'  'CL' 'CR' 'NR' END
@@ -933,7 +933,7 @@ t'11 US:                          '      0.0000               0.0000
 '41 RH'    0.010   6.2850  1.0400
 '42 GF'    0.001   1.0350  0.0000
 '43 GI'    0.001   1.0350  0.0000
-'44 GC'    0.001   1.0350  0.0000
+'44 GC'    0.000   1.0000  0.0000
 '45 UF'    0.000   1.0000  0.0000
 '46 OG'    0.000   1.0000  0.0000
 '47 WD'    0.000   1.0000  0.0000
@@ -1327,6 +1327,17 @@ t'11 US:                          '      0.0000               0.0000
 '14 CU: CO,NV,UT          '      0.0000              0.0000               1.0000
 '15 ZN: AZ,NM             '      0.0000              0.0000               1.0000
 '16 PC: CA,OR,WA          '      0.0000              0.0000               1.0000
+%EPA 111 SW%
+#### Inputs for EPA 111 rule finalized in 2024 - all CO2 STD/CPP inputs further below are obsolete!
+####           USW_EPA111 - Switch to indicate EPA 111 rule is in place (0=no, 1=yes)
+####           UEPA_GSYR - Last year coal can switch to natural gas
+####           UEPA_CGSH - Max coal share for coal-gas cofiring plants
+####           UEPA_CLCFYR - Last year for coal-gas cofiring
+####           UEPA_CLYR - Year that existing coal plants must retire/add CCS (end of year)
+####           UEPA_NWGSYR - Year that new gas CC plants must limit emissions (CF max or use CCS)
+####           UEPA_NWGSCF - Maximum capacity factor allowed for new gas CC starting in NWGSYR
+####           USW_EPA111    UEPA_GSYR     UEPA_CGSH    UEPA_CLCFYR   UEPA_CLYR   UEPA_NWGSYR   UEPA_NWGSCF
+'EPA111 SW'        1           2030           0.6           2038        2031         2029          0.4
 %CO2 STD SW%
 ####           CO2_STDSW - Switch to Indicate State Grouping (0=No Std,1=No longer active,2=No longer active,3=EMM)
 ####           CO2_STDBY - Year Data to Use for State Grouping of Standards
@@ -1482,7 +1493,7 @@ t'11 US:                          '      0.0000               0.0000
  '39 NG'   1.000       1.000       0.000
  '40 ST'   1.000       1.000       0.000
  '41 ET'   0.000       0.000       0.000
- '42 IC'   0.000       0.000       0.000
+ '42 IC'   0.000       0.000       1.000
  '43 CT'   0.000       0.000       0.000
  '44 T2'   0.000       0.000       0.000
  '45 AT'   0.000       0.000       0.000
@@ -2525,7 +2536,7 @@ t'11 US:                          '      0.0000               0.0000
 '41 Residual High Sulfur'             0  0  0  0  0  0    0     1     0     0     0   2
 '42 Natural Gas Firm'                 9 11 12  0  0  0    1     0     0     0     0   3
 '43 Natural Gas Interrupt.'          10  0  0  0  0  0    1     0     0     0     0   3
-'44 Natural Gas Competitive'          0  0  0  0  0  0    1     0     0     0     0   3
+'44 Natural Gas Competitive'         16  0  0  0  0  0    2     0     0     0     0   3
 '45 Nuclear'                         13  0  0  0  0  0    0     0     0     0     1   4
 '46 Other'                            0  0  0  0  0  0    0     0     0     0     0   6
 '47 Biomass / Wood'                   0  0  0  0  0  0    0     0     0     0     0   6
@@ -2827,7 +2838,7 @@ t'11 US:                          '      0.0000               0.0000
  '39'   'NG'  'Coal to Natural Gas Steam'     1  1  0  0  0  0  1  2 1.000 1.000  1.000 'NG'
  '40'   'ST'  'Gas/Oil Steam Turbine'         1  1  0  0  0  0  2  2 1.000 1.000  1.000 'ST'
  '41'   'ET'  'Existing Combustion Turbine'   1  1  0  0  0  0  4  3 1.000 1.000  1.000 'ET'
- '42'   'IC'  'Internal Combustion Engine'    1  1  0  0  0  0  4  3 1.000 1.000  1.000 'IC'
+ '42'   'IC'  'Hydrogen Turbine'              1  1  0  0  0  0  4 15 1.000 1.000  1.000 'IC'
  '43'   'CT'  'Conv Combustion Turbine'       1  1  0  0  0  0  4  3 1.000 1.000  1.000 'CT'
  '44'   'T2'  'Aeroderivative Turbine'        1  1  0  0  0  0  4  3 1.000 1.000  1.000 'T2'
  '45'   'AT'  'Adv Combustion Turbine'        1  1  0  0  0  0  4  3 1.000 1.000  1.000 'AT'
@@ -2842,7 +2853,7 @@ t'11 US:                          '      0.0000               0.0000
  '54'   'SM'  'SMR Nuclear'                   1  1  0  0  0  0  5  6 1.000 1.000  1.000 'SM'
  '55'   'GN'  'Greenfield Nuclear'            1  1  0  0  0  0  5  6 1.000 1.000  1.000 'GN'
  '56'   'WD'  'Biomass (Wood)'                1  0  0  1  0  0  8  7 1.000 1.000  1.000 'WD'
- '57'   'BI'  'Biomass IGCC (Wood)'           1  0  0  1  0  0  8  7 1.000 1.000  1.000 'BI'
+ '57'   'BI'  'Biomass CCS  (Wood)'           1  0  0  1  0  0  8  7 1.000 1.000  1.000 'BI'
  '58'   'GT'  'Geothermal'                    1  0  0  1  0  0  8  8 1.000 1.000  1.000 'GT'
  '59'   'AG'  'Advanced Geothermal'           1  0  0  1  0  0  8  8 1.000 1.000  1.000 'AG'
  '60'   'MS'  'Mun Solid Waste'               1  0  0  1  0  0  8  9 1.000 1.000  1.000 'MS'
@@ -2856,7 +2867,7 @@ t'11 US:                          '      0.0000               0.0000
  '68'   'DS'  'Diurnal Storage'               1  0  0  0  0  1  6 13 1.000 1.000  1.000 'DS'
  '69'   'OS'  'Other Storage'                 1  0  0  0  0  1  6 13 1.000 1.000  1.000 'OS'
  '70'   'WN'  'Conventional Wind'             1  0  1  0  0  0  8 14 1.000 1.000  1.000 'WN'
- '71'   'WL'  'Wind Low Speed'                1  0  1  0  0  0  8 15 1.000 1.000  1.000 'WL'
+ '71'   'WL'  'Wind Low Speed'                1  0  1  0  0  0  8 19 1.000 1.000  1.000 'WL'
  '72'   'WF'  'Wind Off Shore'                1  0  1  0  0  0  8 16 1.000 1.000  1.000 'WF'
  '73'   'SO'  'Solar Thermal (no storage)'    1  0  1  0  0  0  8 17 1.000 1.000  1.000 'SO'
  '74'   'SS'  'Solar Thermal w/Storage'       1  0  1  0  0  0  8 18 1.000 1.000  1.000 'SS'
@@ -2877,29 +2888,31 @@ t'11 US:                          '      0.0000               0.0000
 #### StorageCodes : 2 Character Plant Type Codes for 864 Storage Model
 #### UCPVSTOR : Maps ECP Type to Plant Types for 864 Storage Model
 #### NUM_STEPS_PER_TYPE : Number of Price Bins Per Storage Plant Type
- 'Coal'                 'CL'   1  3
- 'Oil_Gas_Steam'        'ST'   2  3
- 'Turbines'             'CT'   3  3
- 'Combined_Cycles'      'CC'   4  3
- 'Fuel_Celss'           'FC'   5  1
- 'Nuclear'              'NC'   6  1
- 'Biomass'              'WD'   7  1
- 'Geothermal'           'GT'   8  1
- 'MSW'                  'MS'   9  1
- 'Hydro'                'HY'  10  2
- 'Pump_Storage'         'PS'  11  1
- 'Demand_Management_P2' 'P2'  12  1
- 'Storage'              'BT'  13  2
- 'Wind_Conventional'    'WN'  14  1
- 'Wind_Low_Speed'       'WL'  15  1
- 'Wind_Offshore'        'WF'  16  1
- 'Solar_No_Storage'     'SO'  17  1
- 'Solar_With_Storage'   'SS'  18  1
- 'Solar_With_Storage2'  'S2'  19  1
- 'PV_Axis_Tracking'     'PV'  20  1
- 'PV_With_Storage'      'PT'  21  1
- 'Other_Intermittent'   'IN'  22  1
- 'Distributed_Gen'      'DG'  23  1
+#### CurtTypMap : Maps Plant Types for 864 Storage Model to curtailment type index for restart file
+#### StoTypMap : Maps Plant Types for 864 Storage Model to storage type index for restart file
+ 'Coal'                 'CL'   1  3  0  0
+ 'Oil_Gas_Steam'        'ST'   2  3  0  0
+ 'Turbines'             'CT'   3  3  0  0
+ 'Combined_Cycles'      'CC'   4  3  0  0
+ 'Fuel_Celss'           'FC'   5  1  0  0
+ 'Nuclear'              'NC'   6  1  0  0
+ 'Biomass'              'WD'   7  1  0  0
+ 'Geothermal'           'GT'   8  1  0  0
+ 'MSW'                  'MS'   9  1  0  0
+ 'Hydro'                'HY'  10  2  1  0
+ 'Pump_Storage'         'PS'  11  1  0  1
+ 'Demand_Management_P2' 'P2'  12  1  0  0
+ 'Storage'              'BT'  13  2  0  2
+ 'Wind_Conventional'    'WN'  14  1  2  0
+ 'Hydrogen Turbine'     'HT'  15  3  3  0
+ 'Wind_Offshore'        'WF'  16  1  4  0
+ 'Solar_No_Storage'     'SO'  17  1  5  0
+ 'Solar_With_Storage'   'SS'  18  1  6  0
+ 'Solar_With_Storage2'  'S2'  19  1  7  0
+ 'PV_Axis_Tracking'     'PV'  20  2  8  0
+ 'PV_With_Storage'      'PT'  21  1  9  3
+ 'Other_Intermittent'   'IN'  22  1  0  0
+ 'Distributed_Gen'      'DG'  23  1  0  0
 %CL RET  VN%
 # Coal Plant Retrofit Vintages
 #
@@ -3061,8 +3074,8 @@ t'11 US:                          '      0.0000               0.0000
  92  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' '  ' '  ' 34  1
  93  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' '  ' '  ' 35  1
  94  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' '  ' '  ' 36  1
- 95  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' '  ' '  ' 37  1
- 96  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' '  ' '  ' 38  1
+ 95  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' 'SC' '  ' 37  1
+ 96  'B100' 'NEW' 'FGD' 'COMB' '    ' 'SCR' 'SC' '  ' 38  1
  97  'B100' ' BH' 'FGD' 'COMB' 'SNCR' '   ' 'SC' '  '  6  1
  98  'B100' ' BH' 'FGD' 'COMB' '    ' 'SCR' 'SC' '  '  6  1
  99  'B100' ' BH' 'Dry' 'COMB' 'SNCR' '   ' 'SC' '  '  8  1
@@ -3217,7 +3230,7 @@ t'11 US:                          '      0.0000               0.0000
  'D44' 'T2' 2 0.000 1  9 'CTA' 0  18 1 1  3
  'D45' 'AT' 2 0.000 1  9 'ACT' 0  19 0 1  3
  'D46' 'EC' 0 0.000 0  5 'CCX' 1  20 0 1  4
- 'D47' 'CC' 2 0.000 1  5 'CCX' 1  20 0 1  4
+ 'D47' 'CC' 2 0.000 1  5 'CCX' 1  21 0 1  4
  'D48' 'AC' 2 0.000 1  5 'ACC' 1  21 0 1  4
  'D49' 'A2' 0 0.000 0  5 'AC2' 1  20 0 1  4
  'D50' 'CS' 2 0.000 1  5 'ACS' 1  22 0 1  4
@@ -3296,7 +3309,7 @@ t'11 US:                          '      0.0000               0.0000
  'NG' 'COAL T' 'O GAS ' 'STEAM '
  'ST' 'GASOIL' 'STEAM ' '      '
  'ET' 'EXIST ' 'COMBST' 'TURBNE'
- 'IC' 'Intern' 'al Com' 'b Eng '
+ 'IC' 'HYDRGN' 'TURBNE' '      '
  'CT' 'CONVNT' 'COMBST' 'TURBNE'
  'T2' 'Aerode' 'rivati' 've Tur'
  'AT' 'ADVNCD' 'COMBST' 'TURBNE'
@@ -3311,7 +3324,7 @@ t'11 US:                          '      0.0000               0.0000
  'SM' 'SMR Nu' 'clear ' '      '
  'GN' 'Greenf' 'ield N' 'uclear'
  'WD' 'BIO   ' 'MASS  ' '      '
- 'BI' 'Biomas' 's IGCC' '      '
+ 'BI' 'Biomas' 's CCS ' '      '
  'GT' 'GEOTHR' 'STEAM ' '      '
  'AG' 'Advanc' 'ed Geo' 'thr   '
  'MS' 'MUN.  ' 'SOLID ' 'WASTE '
@@ -3885,27 +3898,29 @@ t'11 US:                          '      0.0000               0.0000
 ####                       UPFGAS    ! INDEX FOR GAS         USE
 ####                       UPFRES    ! INDEX FOR RESID       USE
 ####                       UPFDIS    ! INDEX FOR DISTILLATE  USE
-####                                U     U     U     U     U     U
-####                                P     P     P     P     P     P
-####                                F     F     F     F     F     F
-####                                L     N     C     G     R     D
-####                                C     U     O     A     E     I
-####                                D     C     L     S     S     S
-'01' 'Low Sulfur Bituminous     ' 'BL'    0     1     0     0     0
-'02' 'Medium Sulfur Bituminous  ' 'BM'    0     1     0     0     0
-'03' 'High Sulfur Bituminous    ' 'BH'    0     1     0     0     0
-'04' 'Low Sulfur Subbituminous  ' 'SL'    0     1     0     0     0
-'05' 'Medium Sulfur Subbituminou' 'SM'    0     1     0     0     0
-'06' 'Lignite                   ' 'LG'    0     1     0     0     0
-'07' 'Distillate                ' 'DS'    0     0     2     0     1
-'08' 'Low/Hi Sulfur Resid       ' 'RS'    0     0     2     1     0
-'09' 'Max Gas/Min Resid Steam   ' 'GS'    0     0     1     2     0
-'10' 'Max Gas/Min Dist Turbines ' 'GT'    0     0     1     0     2
-'11' 'Max Gas/Min Dist Comb Cyc ' 'GC'    0     0     1     0     2
-'12' 'Gas Fuel Cells            ' 'GF'    0     0     1     0     0
-'13' 'Uranium                   ' 'UR'    1     0     0     0     0
-'14' 'Distributed Gen -- Dist   ' 'DD'    0     0     0     0     1
-'15' 'Distributed Gen -- Gas    ' 'DG'    0     0     1     0     0
+####                       UPFHYT    ! INDEX FOR HYDROGEN USE
+####                                U     U     U     U     U     U     U   
+####                                P     P     P     P     P     P     P
+####                                F     F     F     F     F     F     F
+####                                L     N     C     G     R     D     H
+####                                C     U     O     A     E     I     Y
+####                                D     C     L     S     S     S     T
+'01' 'Low Sulfur Bituminous     ' 'BL'    0     1     0     0     0     0
+'02' 'Medium Sulfur Bituminous  ' 'BM'    0     1     0     0     0     0 
+'03' 'High Sulfur Bituminous    ' 'BH'    0     1     0     0     0     0
+'04' 'Low Sulfur Subbituminous  ' 'SL'    0     1     0     0     0     0
+'05' 'Medium Sulfur Subbituminou' 'SM'    0     1     0     0     0     0
+'06' 'Lignite                   ' 'LG'    0     1     0     0     0     0
+'07' 'Distillate                ' 'DS'    0     0     2     0     1     0
+'08' 'Low/Hi Sulfur Resid       ' 'RS'    0     0     2     1     0     0
+'09' 'Max Gas/Min Resid Steam   ' 'GS'    0     0     1     2     0     0
+'10' 'Max Gas/Min Dist Turbines ' 'GT'    0     0     1     0     2     0
+'11' 'Max Gas/Min Dist Comb Cyc ' 'GC'    0     0     1     0     2     0
+'12' 'Gas Fuel Cells            ' 'GF'    0     0     1     0     0     0
+'13' 'Uranium                   ' 'UR'    1     0     0     0     0     0
+'14' 'Distributed Gen -- Dist   ' 'DD'    0     0     0     0     1     0
+'15' 'Distributed Gen -- Gas    ' 'DG'    0     0     1     0     0     0
+'16' 'Hydrogen                  ' 'HY'    0     0     0     0     0     1
 %ECP OWN CD%
 ####                  UPOWNCD   ! ECP OWNERSHIP CODES
 '01' 'Utility Owned     ' 'U'
@@ -4034,6 +4049,7 @@ t'11 US:                          '      0.0000               0.0000
  '13 UR'   0.00      'Uranium                  '
  '14 DD'   0.00      'Dist Gen -- Dist         '
  '15 DG'   0.00      'Dist Gen -- Gas          '
+ '16 HY'   0.00      'Hydrogen                 '
 %HYDRO ADJ SW%
 ####   USW_HYD  ! YEAR TO START REVISING HYDRO GENERATION
 'SW'      1
@@ -4570,12 +4586,12 @@ t'11 US:                          '      0.0000               0.0000
 '2017     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
 '2018     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
 '2019     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
-'2020     '          1.0          1.0         1.0          1.0         0.0          0.0          1.0           1.0       1.0       0.0       1.0       1.0      0.0      0.0
+'2020     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
 '2021     '          1.0          1.0         1.0          1.0         0.0          0.0          1.0           1.0       1.0       0.0       1.0       1.0      0.0      1.0
 '2022     '          1.0          1.0         1.0          1.0         0.0          0.0          1.0           1.0       1.0       0.0       1.0       1.0      0.0      1.0
 '2023     '          1.0          1.0         1.0          1.0         0.0          0.0          1.0           1.0       1.0       0.0       1.0       1.0      0.0      1.0
-'2024     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
-'2025     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
+'2024     '          1.0          1.0         1.0          1.0         0.0          0.0          1.0           1.0       1.0       0.0       1.0       1.0      0.0      1.0
+'2025     '          1.0          1.0         1.0          1.0         0.0          0.0          1.0           1.0       1.0       0.0       1.0       1.0      0.0      1.0
 '2026     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
 '2027     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
 '2028     '          0.0          0.0         0.0          0.0         0.0          0.0          0.0           0.0       0.0       0.0       0.0       0.0      0.0      0.0
@@ -4956,3 +4972,7 @@ t'11 US:                          '      0.0000               0.0000
 '2048'   2021   6.9164
 '2049'   2021   6.9158
 '2050'   2021   6.9151
+%NUCLEAR RETIREMENT SMOOTHING%
+#    USW_NUCRETSM: SWITCH TO MAKE NUCLEAR ECP UTILIZATION FOR RETIREMENT SMOOTHED OVER CYCLES (0=NO SMOOTH,2=SMOOTHING USING CURRENT AND 1 PREVIOUS CYCLE, 3=SMOOTHING USING CURRENT AND 2 PREVIOUS CYCLES)
+####          USW_NUCRETSM
+'NUC RET'                3

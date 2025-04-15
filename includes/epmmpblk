@@ -48,7 +48,7 @@
       REAL ADSCM(MNUMCR,MNUMYR) ! 39 Distillate - Commercial
       REAL ADSTR(MNUMCR,MNUMYR) ! 40 Distillate - Transportation
       REAL ADSIN(MNUMCR,MNUMYR) ! 41 Distillate - Industrial
-      REAL ADSEL(MNUMCR,MNUMYR) ! 42 Distillate - Electricity (+petroleum coke)
+      REAL ADSEL(MNUMCR,MNUMYR) ! 42 Distillate - Electricity
       REAL ADSAS(MNUMCR,MNUMYR) ! 43 Distillate - All Sectors
       REAL AKSRS(MNUMCR,MNUMYR) ! 44 Kerosene - Residential
       REAL AKSCM(MNUMCR,MNUMYR) ! 45 Kerosene - Commercial
@@ -85,7 +85,7 @@
       REAL ATPEL(MNUMCR,MNUMYR) ! 76 Total Petroleum - Electricity
       REAL ATPAS(MNUMCR,MNUMYR) ! 77 Total Petroleum - All Sectors
       REAL AMETR(MNUMCR,MNUMYR) ! 78 Methanol - Transporation
-      REAL AETTR(MNUMCR,MNUMYR) ! 79 Ethanol - Transporation
+      REAL AETTR(MNUMCR,MNUMYR) ! 79 Ethanol - Transporation (sold as E85)
       REAL AHYTR(MNUMCR,MNUMYR) ! 80 Liquid Hydrogen - Transporation
       REAL AUREL(MNUMCR,MNUMYR) ! 81 Uranium - Electricity
       REAL AH1TR(MNUMCR,MNUMYR) ! 82 Large Cities Hydrogen - Transportation

@@ -1,0 +1,1012 @@
+## ams_version=1.0
+
+Section S6_Output {
+	Section EMM_Supply_Curve {
+		Procedure LPStatusNotOptimalEMMSupplyCurve {
+			Body: {
+				!Display error message when LP is not optimal during standalone execution
+				LPErrorString := FormatString("Mathematical program is not optimal solving EMM Supply Curve in year %e, step %e", CurrentModelYear, SupplyStep);
+				if (SolveHMM.ProgramStatus <> 'Optimal') then
+					write LPErrorString to file HMMLogFile in merge mode;
+				
+					! If the Supply Curve step is infeasible, HMM will increment through lower demand factors so that it solves as feasible.
+					! It will do this up to 5 times, lowering the demand factor by 0.025 each attempt.
+				
+					! Need to empty to Flag so that prior attempts are not carried over and so that the loop starts with a zero value.
+					empty SupplyCurveFeasibleFlag;
+				
+					! Set initial attempt to 1 to start the loop .
+					SupplyCurveAttempt := 1;
+					while SupplyCurveFeasibleFlag = 0 and SupplyCurveAttempt <= 5 do
+				
+						! Calculate demand/byproduct supply step using the new demand factor.
+						EMM_SupplyCurve_Q(lpd, SupplyStep, seas, CurrentModelYear) := (H2DemandByYear(lpd, CurrentModelYear) * 
+							(H2DemandFactors(SupplyStep) - (SupplyCurveAttempt*SupplyCurveAdjustIncrement))) * SeasonalFraction(seas);
+						Byproduct_SupplyCurve_Q(lpd, SupplyStep, seas, CurrentModelYear) := (ByproductSupplyByYear(lpd, CurrentModelYear) *	
+							(H2DemandFactors(SupplyStep) - (SupplyCurveAttempt*SupplyCurveAdjustIncrement))) * SeasonalFraction(seas);
+				
+						! Assign H2 Demand/Byproduct using demand factor
+						H2Demand(seas, lpd, FirstPlanningPeriod) := EMM_SupplyCurve_Q(lpd, SupplyStep, seas, CurrentModelYear);
+						ByproductSupply(lpd, seas, FirstPlanningPeriod) := Byproduct_SupplyCurve_Q(lpd, SupplyStep, seas, CurrentModelYear);
+				
+						! Make adjustments to discrepancy
+						CheckByproductInfeasibility;
+				
+						! Solve the model
+						solve solveHMM;
+				
+						! If not optimal, increment the attempt and try again. Otherwise, exit the loop.
+						if (SolveHMM.ProgramStatus <> 'Optimal') then
+								SupplyCurveAttempt += 1;
+							else
+								SupplyCurveFeasibleFlag := 1; 
+						endif;
+					endwhile;
+				
+				endif;
+			}
+		}
+		ElementParameter SkipStep {
+			Range: H2STEP_;
+		}
+		Parameter SupplyCurveTotalDemand {
+			IndexDomain: (lpd,H2STEP,seas,year);
+		}
+		Parameter IncrementalDemandPerStep {
+			IndexDomain: (lpd,H2STEP,seas,year);
+		}
+		Parameter SupplyCurveAttempt;
+		Parameter SupplyCurveAdjustIncrement {
+			Definition: .025;
+		}
+		Parameter SupplyCurveFeasibleFlag {
+			Range: binary;
+			Comment: "0=EMM Supply Curve infeasible";
+		}
+		ElementParameter SupplyStep {
+			Range: H2STEP_;
+		}
+		Parameter Byproduct_SupplyCurve_Q {
+			IndexDomain: (lpd,H2STEP,seas,year);
+		}
+		Parameter Temp_H2Demand {
+			IndexDomain: (seas,lpd,pp);
+		}
+		ElementParameter Step1 {
+			Range: Integers;
+			Definition: '1';
+		}
+		ElementParameter Step2 {
+			Range: Integers;
+			Definition: '2';
+		}
+		ElementParameter Step3 {
+			Range: Integers;
+			Definition: '3';
+		}
+		ElementParameter Step4 {
+			Range: Integers;
+			Definition: '4';
+		}
+		ElementParameter Step5 {
+			Range: Integers;
+			Definition: '5';
+		}
+		ElementParameter Step6 {
+			Range: Integers;
+			Definition: '6';
+		}
+		ElementParameter Step7 {
+			Range: Integers;
+			Definition: '7';
+		}
+		Parameter EMM_SupplyCurve_P {
+			IndexDomain: (regCen,H2STEP,seas,year);
+		}
+		Parameter EMM_SupplyCurve_Q {
+			IndexDomain: (regCen,H2STEP,seas,year);
+		}
+		Parameter H2DemandFactors {
+			IndexDomain: H2STEP;
+		}
+	}
+	Section PostProcessing {
+		DeclarationSection ZCT_Declarations {
+			Set ZTCTech {
+				SubsetOf: ProductionTechs_;
+			}
+			Parameter LowZTCReductionToDate {
+				IndexDomain: year;
+			}
+			ElementParameter LowZTCReductionYear {
+				Range: cal_Year;
+			}
+			Parameter LowZTCReduction;
+			File ReferenceCapitalCostFile {
+				Name: "data/CapitalCostsByYearReference.txt";
+				Device: Disk;
+				Mode: replace;
+			}
+		}
+		Procedure ZCT_CapitalCostReduction {
+			Body: {
+				LowZTCReduction := ZTCCOSTM;
+				LowZTCReductionYear := '2050';
+				LowZTCReductionToDate(NextModelYear) := (LowZTCReduction /$ (LowZTCReductionYear - FirstModelYear)) * ((NextModelYear - FirstModelYear));
+				
+				CapitalCostsByYear(NextModelYear, reg, prodtech_elec) := CapitalCostsByYearReference(NextModelYear, reg, prodtech_elec) * (1-LowZTCReductionToDate(NextModelYear));
+			}
+		}
+		Section Extracted_Model_Results {
+			DeclarationSection Hydrogen_Storage_and_Transportation_Quantities {
+				Parameter HydrogenTransportationByYearSeason {
+					IndexDomain: (i_calYear,lph,lph1,seas);
+				}
+				Parameter HydrogenStorageWithdrawalByYearSeason {
+					IndexDomain: (i_calYear,lph,seas);
+				}
+				Parameter HydrogenStorageInjectionByYearSeason {
+					IndexDomain: (i_calYear,lph,seas);
+				}
+				Parameter ElectricityConsumedForTransAndStorage {
+					IndexDomain: (i_calYear, lph);
+				}
+				Parameter HydrogenStorageWithdrawalsByYear {
+					IndexDomain: (i_calYear,lph);
+				}
+				Parameter ElectricityConsumedForStorageByYear {
+					IndexDomain: (i_calYear,lph);
+				}
+				Parameter ElectricityConsumedForTransportationByYear {
+					IndexDomain: (i_calYear,regCen);
+				}
+				Parameter HydrogenTransportationByYear {
+					IndexDomain: (i_calYear,lph,lph1);
+				}
+				Parameter HydrogenNetStorageBySeason {
+					IndexDomain: (seas,lph,lpstorage,storageTech,pp);
+					Comment: "Net storage, where positive indicates withdrawal, and negative indicate net injection. (MMTON H2)";
+				}
+				Parameter HydrogenTransportationBySeason {
+					IndexDomain: (seas,lph,lph1,pp);
+				}
+			}
+			DeclarationSection Hydrogen_Prices_and_Demand {
+				Parameter CapitalCostAdder {
+					IndexDomain: (regCen,i_calYear);
+				}
+				Parameter CombinedCapacity {
+					IndexDomain: (regCen,prodTech,i_calYear);
+				}
+				Parameter CombinedCapitalCosts {
+					IndexDomain: (regCen,prodTech,pp,i_calYear);
+				}
+				Parameter SlackVarValues {
+					IndexDomain: (year,seas, lps,pp);
+				}
+				Parameter AnnualH2Demand {
+					IndexDomain: year;
+				}
+				Parameter HydrogenPriceAnnual {
+					IndexDomain: (lph,year);
+					Comment: "Annual hydrogen price by census division. (1987$/kg H2)";
+				}
+				Parameter HydrogenPrice {
+					IndexDomain: (seas,regCen,year);
+					Comment: "Hydrogen price ($/kg)";
+				}
+			}
+			DeclarationSection Natural_Gas_and_Electricity_Results {
+				Parameter AnnualElectricityConsumedElectrolyzerCensus {
+					IndexDomain: (regCen,year);
+					Comment: "Annual electricity consumed by electrolyzers by Census Divison (mmbtus)";
+				}
+				Parameter ElecConsReforming {
+					IndexDomain: (regCen,year);
+					Comment: "Electrcitiy consumed for non-electrolysis H2 Production (MMBTUs)";
+				}
+				Parameter ElecConsAllProd {
+					IndexDomain: (regCen,year);
+				}
+				Parameter ElecConsTransAndStorage {
+					IndexDomain: (regCen,year);
+					Comment: "Electricity consumed by transportation and storage (MMBTUs)";
+				}
+				Parameter NaturalGasHPConsumption {
+					IndexDomain: (regCen,seas,year);
+					Comment: "Natural Gas Consumed for Heat and Power during H2 Production (MMBTU)";
+				}
+				Parameter NaturalGasFeedstockConsumption {
+					IndexDomain: (regCen,seas,year);
+					Comment: "Natural gas consumed as feedstock during h2 production (MMBTU)";
+				}
+				Parameter HourlyElectricityConsumedElectrolyzer {
+					IndexDomain: (regNERC,seas, hr, year);
+					Comment: "Electricity consumed by electrolyzers for every hour/region/season (MMBTUs)";
+				}
+				Parameter AnnualElectricityConsumedElectrolyzer {
+					IndexDomain: year;
+				}
+				Parameter ui_ConsumedElectrolyzerByCreditStep {
+					IndexDomain: (year,regNERC,hr,seas,capYear, creditStep);
+				}
+				Parameter AnnualElecCurtailment {
+					IndexDomain: year;
+				}
+			}
+			DeclarationSection Hydrogen_Production_and_Capacity_Declarations {
+				Parameter SeasonalRegionalElectrolyzerProductionByTech {
+					IndexDomain: (regNERC,seas,prodTech,year);
+				}
+				Parameter SeasonalRegionalH2ProductionByTech {
+					IndexDomain: (regCen,seas,prodTech,year);
+				}
+				Parameter SeasonalRegionalByproductSupply {
+					IndexDomain: (regCen,seas,year);
+				}
+				Parameter ElectrolyzerProductionByCredit {
+					IndexDomain: (i_calYear,regNERC,seas,hr,prodTech_elec,capYear,creditStep);
+				}
+				Parameter AnnualH2ProductionByTech_EMMRegion {
+					IndexDomain: (regNERC,prodTech_elec,year);
+				}
+				Parameter PUCExpansionElectrolyzerByStep {
+					IndexDomain: (prodStep,regNERC,prodTech_elec,pp,capYear,year);
+				}
+				Parameter SeasonalHourlyRegionalH2ProductionByTech {
+					IndexDomain: (regCen, seas, hr, prodTech);
+				}
+				Parameter AnnualRegionalH2ProductionByTech {
+					IndexDomain: (regCen, prodTech,year);
+				}
+				Parameter PUCExpansionsElectrolyzer {
+					IndexDomain: (regNERC,prodTech_elec,i_calYear);
+				}
+				Parameter PUCExpansionsNonElectrolyzer {
+					IndexDomain: (regCen,prodTech_nonElec, i_calYear);
+				}
+				Parameter AnnualH2ProductionByTech {
+					IndexDomain: (prodTech,year);
+				}
+			}
+			DeclarationSection CO2_Declarations {
+				Parameter CO2OMCostsBySeason {
+					IndexDomain: (regCen,seas,year);
+				}
+				Parameter CO2OMCosts {
+					IndexDomain: (regCen,year);
+				}
+				Parameter CO2InvestmentCosts {
+					IndexDomain: (regCen,year);
+					Comment: "Investment/capital cost for carbon capture from hydrogen production. (1987$/tonne CO2)";
+				}
+				Parameter CO2Eligible45Q {
+					IndexDomain: (regCen,year);
+					Comment: "Tonns of of CO2 captured by H2 production facilities that are eligible for 45Q credit.";
+				}
+				Parameter CO2NonEligible45Q {
+					IndexDomain: (regCen,year);
+					Comment: "Tonns of of CO2 captured by H2 production facilities that are NOT eligible for 45Q credit.";
+				}
+			}
+		}
+		DeclarationSection Enduse_Prices_and_Markups {
+			Parameter EndUseMarkup {
+				IndexDomain: sec;
+				Comment: "End-use markups by sector (1987$/kg H2)";
+			}
+			Parameter HydrogenEndUsePrices {
+				IndexDomain: (regCen,sec,year);
+				Comment: "Price of hydrogen delivered to end-use consumers (1987$/kg H2)";
+			}
+			Parameter IndustrialPriceMarkup;
+		}
+		DeclarationSection Endogenous_Learning {
+			Parameter CapitalCostsByYearReference {
+				IndexDomain: (i_calYear,reg,prodTech_elec);
+			}
+			Parameter CapitalCostsByYearMinimumLearning {
+				IndexDomain: (i_calYear, reg, prodTech);
+			}
+			ElementParameter VintageTypeRevolutionary {
+				Range: VintageTypes_;
+			}
+			ElementParameter VintageTypeEvolutionary {
+				Range: VintageTypes_;
+			}
+			ElementParameter VintageTypeConventional {
+				Range: VintageTypes_;
+			}
+			Parameter ChangeInBreak {
+				IndexDomain: prodTech;
+				Range: binary;
+			}
+			ElementParameter LearningStepByTechOld {
+				IndexDomain: prodTech;
+				Range: LearningRateSteps_;
+			}
+			Parameter TotalCapacityForLearning {
+				IndexDomain: (i_calYear,prodTech);
+			}
+			Parameter NewCapacityForLearning {
+				IndexDomain: (i_calYear,prodTech);
+			}
+			Parameter ExistingCapacityForLearning {
+				IndexDomain: (i_calYear,prodTech);
+			}
+			Parameter CapitalCostsByYear {
+				IndexDomain: (i_calYear,reg,prodTech);
+				Comment: "Total capacity costs, deflated to 1987$ / million metric ton";
+			}
+			Set VintageTypes_;
+			ElementParameter LearningVintageType {
+				IndexDomain: prodTech;
+				Range: VintageTypes_;
+				Comment: "Production technology by learning vintage type. 3 Steps = \'Revolutionary\', 2 Steps = \'Evolutionary\', 1 Step = \'Conventional\'.";
+			}
+			Parameter BreakpointCapacities {
+				IndexDomain: (lr_step,prodTech);
+				Comment: "Bounds for learning steps (kg). Step 1 is the initial capacity for learning. Subsequent steps are calculated by applying an assumed number of doublings.";
+			}
+			Parameter LearningAlpha {
+				IndexDomain: (lr_step,prodTech);
+				Comment: "Learning coeffiicent used to calculate the learning factor.";
+			}
+			Parameter LearningBeta {
+				IndexDomain: (lr_step,prodTech);
+				Comment: "Learning expontent used in calculating the learning factor and learning alpha.";
+			}
+			Parameter MinimumLearningFactor {
+				IndexDomain: prodTech;
+			}
+			ElementParameter MinimumLearningEndYear {
+				Range: cal_Year;
+				Comment: "Year in which minimum learning ends";
+			}
+			Parameter MinimumLearningReductionToDate {
+				IndexDomain: prodTech;
+			}
+			ElementParameter LearningStepByTech {
+				IndexDomain: prodTech;
+				Range: LearningRateSteps_;
+				Comment: "The learning rate step each prodTech falls is currently on.";
+			}
+			Parameter LearningCostReduction {
+				IndexDomain: (lr_step,prodTech);
+				Comment: "Learning cost reductions, by step, in a single array.";
+			}
+			Parameter LearningFactor {
+				IndexDomain: prodTech;
+				Comment: "This is the number that ultimately gets multiplied by the base year capital cost to determine new capital costs.";
+			}
+			Parameter LRCapacityBySteps {
+				IndexDomain: (LR_step,prodTech);
+				Comment: "The upper bound of capacity for each learning step (kg), based on doublings from the initial capacity.";
+			}
+			Parameter LR1CapacitySteps {
+				IndexDomain: prodTech;
+			}
+			Parameter InitialCapacityForLearning {
+				IndexDomain: prodTech;
+				Comment: "Initial capacities for use in the learning algorithim (million metric tons)";
+			}
+			Parameter minimum_learning {
+				IndexDomain: prodTech;
+			}
+			Parameter P2_doublings {
+				IndexDomain: prodTech;
+				Comment: "The number of doublings that occur in period 2 of the learning curve.";
+			}
+			Parameter P1_doublings {
+				IndexDomain: prodTech;
+				Comment: "The number of doublings that occur in period 1 of the learning curve.";
+			}
+			Parameter LR3 {
+				IndexDomain: prodTech;
+				Comment: "Learning reduction rate for step 3 of the learning curve.";
+			}
+			Parameter LR2 {
+				IndexDomain: prodTech;
+				Comment: "Learning reduction rate for step 2 of the learning curve.";
+			}
+			Parameter LR1 {
+				IndexDomain: prodTech;
+				Comment: "Learning reduction rate for step 1 of the learning curve.";
+			}
+		}
+		DeclarationSection Extracted_Model_Declarations {
+			Parameter TotalGDSDemand {
+				IndexDomain: (MNUMCR,MNUMYR);
+			}
+			Parameter TEST_curtailment_hours {
+				IndexDomain: (regNERC,seas,pp);
+			}
+			Parameter TEST_electrolyzerUtilization {
+				IndexDomain: (regNERC,prodTech_elec,pp,capYearMod);
+			}
+		}
+		Procedure Calculate_EMM_SupplyCurve {
+			Body: {
+				! Calculate seasonal/regional quantities for supply curve. (See h2config.txt for values of supply curve.)
+				SupplyCurveTotalDemand(lpd, H2STEP, seas, CurrentModelYear) := (H2DemandByYear(lpd, CurrentModelYear) * H2DemandFactors(H2STEP)) * SeasonalFraction(seas);
+				Byproduct_SupplyCurve_Q(lpd, H2STEP, seas, CurrentModelYear) := (ByproductSupplyByYear(lpd, CurrentModelYear) * H2DemandFactors(H2STEP)) * SeasonalFraction(seas);
+				
+				! Calculate difference in supply curve between each demand step
+				IncrementalDemandPerStep(lpd, H2STEP, seas, CurrentModelYear) | H2STEP > 1 and H2STEP <> card(H2STEP_)  := SupplyCurveTotalDemand(lpd, H2STEP, seas, CurrentModelYear) - SupplyCurveTotalDemand(lpd, H2STEP - 1, seas, CurrentModelYear);
+				
+				! Make the first supply step equal to the amount of electricity demand HMM is currently seeing
+				IncrementalDemandPerStep(lpd, '1', seas, CurrentModelYear) := H2DemandBySectorAnnual(lpd, ElectricitySector, CurrentModelYear) * (CONVFACT_CFH2Q_KG('1')/1000) * SeasonalFraction(seas);
+				
+				EMM_SupplyCurve_Q(lpd, H2STEP, seas, CurrentModelYear) := IncrementalDemandPerStep(lpd, H2STEP, seas, CurrentModelYear);
+				
+				for H2STEP do
+					SupplyStep := H2STEP;
+				
+					! If the demand factors are the same as the main LP solution, then skip as it was calculated earlier.
+				!	if H2DemandFactors(SupplyStep) = 1 then
+				!		skip;
+				!	endif; 
+				
+					! Always run this one less than the cardinality of the H2STEP_ set so the last step can be used as escape vector.
+					if SupplyStep <= (card(H2STEP_)-1) then
+						H2Demand(seas, lpd, FirstPlanningPeriod) := SupplyCurveTotalDemand(lpd, H2STEP, seas, CurrentModelYear);
+						ByproductSupply(lpd, seas, FirstPlanningPeriod) := Byproduct_SupplyCurve_Q(lpd, H2STEP, seas, CurrentModelYear);
+						CheckByproductInfeasibility;
+						solve solveHMM;
+						LPStatusNotOptimalEMMSupplyCurve;
+						EMM_SupplyCurve_P(lph, H2STEP, seas, CurrentModelYear) := (HubBalance.ShadowPrice(seas, lph, FirstPlanningPeriod)/kg_to_mMton) +  EndUseMarkup(ElectricitySector) + CapitalCostAdder(lph, CurrentModelYear);
+				
+					endif;
+				
+				
+				! The last step of the EMM supply curve should be an arbitrarily large value. This is used by EMM as an escape vector.
+					if SupplyStep = card(H2STEP_) then
+						EMM_SupplyCurve_Q(regCen, SupplyStep, seas, CurrentModelYear) := 999999;
+						EMM_SupplyCurve_P(regCen, SupplyStep, seas, CurrentModelYear) := 999999;
+					endif;
+				
+				endfor;
+				
+				! Adjust supply curves is there is no net demand in the region and the supply curve price through all steps (except for last) is zero.
+				! If those conditions are met, set to SMR supply price for that region.
+				EMM_SupplyCurve_P(lph, H2StepCalc, seas, CurrentModelYear) 
+					| (FlowHubToDemand(seas, lph, lph, FirstPlanningPeriod) = 0)
+					and (EMM_SupplyCurve_P(lph, (card(H2STEP_)-1), seas, CurrentModelYear) <= 0) := 
+						(((sum(fuel, FuelCost(seas, lph, fuel, FirstPlanningPeriod) * (FeedstockConsumption(SMRTEch, fuel) + HPConsumption(SMRTEch, fuel))))
+					! Non-Electrolyzer O&M Costs
+					+ FixedOMCostNonElectrolyzer(seas, lph, SMRTEch, FirstPlanningPeriod) + VarOMCostNonElectrolyzer(seas, lph, SMRTEch, FirstPlanningPeriod))/kg_to_mMton) + EndUseMarkup(ElectricitySector);
+				
+				! Do we need a very small value for first step of supply curve if demand is otherwise 0? It depends on if NEMS knows what to do with it.
+				!EMM_SupplyCurve_Q(regCen, '1', seas, CurrentModelYear) |  EMM_SupplyCurve_Q(regCen, '1', seas, CurrentModelYear) = 0 := .000000001;
+			}
+		}
+		Procedure ExtractModelResults {
+			Body: {
+				
+				! Calculate capital cost adder by determining the weighted average cost of existing H2 capacity.
+				CombinedCapitalCosts(regCen, prodTech_nonElec, pp, CurrentModelYear) := PUCCostNonElectrolyzer(regCen, prodTech_nonElec, pp);
+				CombinedCapitalCosts(regCen, prodTech_elec, pp, CurrentModelYear) := Average(regNERC | map_regNERCToRegCEN(regNERC, regCen) , PUCCostElectrolyzer(regNERC, prodTech_elec, pp));
+				CombinedCapacity(regCen, prodtech_nonElec, CurrentModelYear) := sum(capyear, ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, FirstPlanningPeriod, capYear));
+				CapitalCostAdder(regCen, CurrentModelYear) := sum(prodtech , CombinedCapitalCosts(regCen, prodTech, FirstPlanningPeriod, CurrentModelYear) * CombinedCapacity(regCen, prodTech, CurrentModelYear)) /$ sum(prodtech, CombinedCapacity(regCen, prodTech, CurrentModelYear));
+				CapitalCostAdder(regCen, CurrentModelYear) := CapitalCostAdder(regCen, CurrentModelYear) / kg_to_mMton;
+				
+				! Extract shadow price in the first planning period to be the hydrogen market price.
+				HydrogenPrice(seas, lph, CurrentModelYear) := HubBalance.ShadowPrice(seas, lph, FirstPlanningPeriod) / kg_to_mMton;
+				
+				! Add capital cost adder
+				HydrogenPrice(seas, regCen, CurrentModelYear) | HydrogenPrice(seas, regCen, CurrentModelYear) += CapitalCostAdder(regCen, CurrentModelYear);
+				
+				HydrogenPriceAnnual(regCen, CurrentModelYear) := sum(seas, (HydrogenPrice(seas, regCen, CurrentModelYear) * H2Demand(seas, regCen, FirstPlanningPeriod))) / sum(seas, H2Demand(seas, regCen, FirstPlanningPeriod));
+				
+				! Extract slack variable values
+				SlackVarValues(CurrentModelYear,seas, lps, pp) := SlackVar(seas, lps, pp);
+				
+				! Only Extract capacities if FCRL=1 or if HMM is being run in AIMMS standalone mode.
+				! This prevents AIMMS from adding capacity expansions every iteration HMM runs. We only want to extract these once per model year, in the FCRL iteration.
+				if NCNTRL_FCRL('1') = 1 OR AIMMS_Standalone_Switch =1 then
+					PUCExpansionsNonElectrolyzer(regCen, prodTech_nonElec, NextModelYear) := sum(prodStep, PUCByStepNonElectrolyzer(prodStep, regCen, prodTech_nonElec, SecondPlanningPeriod, NextModelYear));
+				
+					PUCExpansionsElectrolyzer(regNERC, prodTech_elec, NextModelYear) := sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, SecondPlanningPeriod,NextModelYear) | PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, SecondPlanningPeriod, NextModelYear) > 0);
+				
+					PUCExpansionElectrolyzerByStep(prodStep, regNERC, prodTech_elec, pp, capYear, CurrentModelYear) := PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, pp,capYear) | PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp, capYear) > 0;
+				
+					! Add capacity expansions to existing capacity so that they are available the following model year.
+					CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec, NextModelYear) | (i_calYear >= NextModelYear) += PUCExpansionsNonElectrolyzer(regCEN, prodTech_Nonelec, NextModelYear);
+					CapacityElecVintage(i_calYear, regNERC, prodTech_Elec, NextModelYear) | (i_calYear >= NextModelYear) += PUCExpansionsElectrolyzer(regNERC, prodTech_elec, NextModelYear);
+				
+					! Extract Pipeline Capacity Builds
+					TransportationCapacityByYear(lph, lph1, NextModelYear)  += sum(TranStep, TUCByStep(tranStep, lph, lph1, SecondPlanningPeriod));
+				
+					! Extract storage capacity builds
+					HistoricalStorageCapacityByYear(i_calYear, lph, storageTech) | i_calYear >= NextModelYear  += sum(storStep, SUCByStep(storStep, lph, storageTech, secondPlanningPeriod));
+				
+				endif;
+				
+				
+				
+				! Storage and transportation results
+				HydrogenNetStorageBySeason(seas, lph, lpstorage, storageTech, pp) := NetStorageToHub(seas, lpstorage, lph, storageTech, pp);
+				HydrogenStorageWithdrawalsByYear(CurrentModelYear, lph) := sum((seas, lpstorage, storageTech), FlowHubToStorage(seas, lph, lpstorage, storageTech, FirstPlanningPeriod));
+				
+				ElectricityConsumedForStorageByYear(CurrentModelYear, lph) := HydrogenStorageWithdrawalsByYear(CurrentModelYear, lph) * (StorageElecConsRate * kg_to_mMton);
+				
+				HydrogenTransportationBySeason(seas, lph, lph1, pp) := FlowHubToHub(seas, lph, lph1, pp);
+				HydrogenTransportationByYear(CurrentModelYear, lph, lph1) := sum(seas, FlowHubToHub(seas, lph, lph1, FirstPlanningPeriod)) ;
+				! Calculate electricity consumed by pipeline for transportation.
+				! NOTE: Assume that half the electricity is consumed in the origin hub, and the other half consumed by destination hub, so divide by 2.
+				! Additional NOTE: sparsity modeifier :=$ is needed so that results don't get overwritten in second assignemnt.
+				ElectricityConsumedForTransportationByYear(CurrentModelYear, lph) :=$ sum(lph1, HydrogenTransportationByYear(CurrentModelYear, lph, lph1) * pipe_energy_intensity(lph, lph1))/2; ! Origin consumption
+				ElectricityConsumedForTransportationByYear(CurrentModelYear, lph1) :=$ sum(lph, HydrogenTransportationByYear(CurrentModelYear, lph, lph1) * pipe_energy_intensity(lph, lph1))/2; ! Destimation consumption
+				
+				ElectricityConsumedForTransAndStorage(CurrentModelYear, lph) := ElectricityConsumedForStorageByYear(CurrentModelYear, lph) + ElectricityConsumedForTransportationByYear(CurrentModelYear, lph);
+				
+				
+				!!! Seasonal storage and transportation parameters for Ed and Vik !!!
+				HydrogenStorageWithdrawalByYearSeason(CurrentModelYear, lph, seas) := sum((lpstorage, storageTech), FlowStorageToHub(seas, lph, lpstorage, storageTech, FirstPlanningPeriod));
+				HydrogenStorageInjectionByYearSeason(CurrentModelYear, lph, seas) := sum((lpstorage, storageTech), FlowHubToStorage(seas, lph, lpstorage, storageTech, FirstPlanningPeriod));
+				HydrogenTransportationByYearSeason(CurrentModelYear, lph, lph1, seas) := FlowHubToHub(seas, lph, lph1, FirstPlanningPeriod);
+				SeasonalRegionalH2ProductionByTech(regCen, seas, prodTech_nonElec, CurrentModelYear) := sum((capYear), H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYear));
+				SeasonalRegionalElectrolyzerProductionByTech(regNERC, seas, prodTech_elec, CurrentModelYear) := sum((hr, CapYearModE, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, CapYearModE, creditStep));
+				SeasonalRegionalH2ProductionByTech(regCen, seas, prodTech_elec, CurrentModelYear) := sum(regNERC, SeasonalRegionalElectrolyzerProductionByTech(regNERC, seas, prodTech_elec, CurrentModelYear) * map_regNERCToRegCEN(regNERC, regCen));
+				SeasonalRegionalByproductSupply(regCen,seas,CurrentModelYear) := ByproductSupplyByYear(regCen, CurrentModelYear) * SeasonalFraction(seas);
+				
+				! Extract transportation and storage consumption of electricity.	
+				!ElecConsTransAndStorage(lph1, CurrentModelYear) := sum((seas, lph), FlowHubToHub(seas, lph, lph1, FirstPlanningPeriod) * (pipe_energy_intensity(lph, lph1) * FuelCost(seas, lph, FuelElec, FirstPlanningPeriod)))
+				!+ sum((seas, lph, storageTech), FlowHubToStorage(seas, lph, lph1, storageTech, FirstPlanningPeriod) * (FuelCost(seas, lph1, FuelElec, FirstPlanningPeriod) * StorageElecConsRate)) ;
+				
+				!!! HYDROGEN PRODUCTION PARAMETERS
+				
+				AnnualH2ProductionByTech(prodTech_elec, CurrentModelYear) := sum((hr, seas, regNERC, capYear, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep));
+				AnnualH2ProductionByTech(prodTech_nonElec, CurrentModelYear) := sum((seas, regCEN, capYear), H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYear));
+				
+				AnnualRegionalH2ProductionByTech(regCen, prodTech, CurrentModelYear) := sum((hr, seas, regNERC, capYearMod, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech, FirstPlanningPeriod, capYearMod, creditStep) * map_regNERCToRegCEN(regNERC, regCen))
+				+ sum((seas, capYearMod), H2ProdNonElectrolyzer(regCen, seas, prodtech, FirstPlanningPeriod, capYearMod));
+				
+				AnnualH2ProductionByTech_EMMRegion(regNERC, prodTech_elec, CurrentModelYear) := sum((hr, seas, capYear, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep));
+				
+				ElectrolyzerProductionByCredit(CurrentModelYear, regNERC, seas, hr, prodTech_elec, capYear, creditStep)  := H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep);
+				
+				
+				!!! HYDROGEN DEMAND
+				AnnualH2Demand(CurrentModelYear) := sum((seas, regCen), H2Demand(seas, regCen, FirstPlanningPeriod));
+				
+				ui_AnnualH2DemandRegion(i_calYear, regCen) := sum(seas, H2Demand(seas, regCEN, FirstPlanningPeriod));
+				
+				AnnualElecCurtailment(CurrentModelYear) := sum((regNERC, seas, hr), ElecCurtailed(regNERC, seas, hr, FirstPlanningPeriod));
+				AnnualElectricityConsumedElectrolyzer(CurrentModelYear) := sum((hr, seas, regNERC, prodTech_elec, capYear, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep) 
+					* ElectrolyzerFuelConsumption(prodTech_elec, FuelElec));
+				
+				ui_ConsumedElectrolyzerByCreditStep(CurrentModelYear, regNERC, hr, seas, capYear, creditStep) := sum((prodTech_elec), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep) 
+					* ElectrolyzerFuelConsumption(prodTech_elec, FuelElec));
+				
+				! Hourly Electricity consumption. (by EMM region)
+				if LoadRestrictionSwitch = 1 then
+				! If the LoadRestrictionDebug switch is one, then only send EMM  electrolyzer consumption that uses 45V credits.
+				! Otherwise, send them the normal electrolyzer load.
+				
+					! Hourly electrolyzer load
+					HourlyElectricityConsumedElectrolyzer(regNERC, seas, hr, CurrentModelYear) := sum((prodTech_elec, capYear, creditStep45V ), (H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep45V)
+					 * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)));
+				
+					! Annual electrolyzer electricity consumption for hydrogen production
+					AnnualElectricityConsumedElectrolyzerCensus(regCen, CurrentModelYear) := (sum((prodtech_elec, capYear, creditStep45V, seas, hr, regNERC), (H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep45V) 
+						* ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) * map_regNERCToRegCEN(regNERC, regCen)));
+				
+				else
+					! Hourly electrolyzer load
+					HourlyElectricityConsumedElectrolyzer(regNERC, seas, hr, CurrentModelYear) := sum((prodTech_elec, capYear, creditStep), (H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep)
+						* ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)));
+				
+					 	! Annual electrolyzer electricity consumption for hydrogen production
+					AnnualElectricityConsumedElectrolyzerCensus(regCen, CurrentModelYear) := (sum((prodtech_elec, capYear, creditStep, seas, hr, regNERC), (H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep) 
+						* ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) * map_regNERCToRegCEN(regNERC, regCen)));
+				endif;
+				
+				TEST_electrolyzerUtilization(regNERC, prodTech_elec, pp, capYearMod) := sum((hr, seas, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearMod, creditStep)) /$ 
+					(ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, capYearMod) + sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp, capYearMod)));
+				
+				!empty TEST_electrolyzerUtilization;
+				
+				TEST_curtailment_hours(regNerc, seas, pp) := count(hr | ElecCurtailed(regNERC, seas, hr, pp));
+				
+				
+				! Natural gas consumption
+				NaturalGasFeedstockConsumption(regCen, seas, CurrentModelYear) := sum((capYearMod,prodTech_nonelec), H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYearMod)
+					 * FeedstockConsumption(prodTech_nonelec, FuelNG));
+				NaturalGasHPConsumption(regCen, seas, CurrentModelYear) := sum((capYearMod,prodTech_nonelec), H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYearMod) 
+					* HPConsumption(prodTech_nonelec, FuelNG));
+				
+				
+				!!! CO2 RELATED PARAMETERS
+				CO2Eligible45Q(regCen, CurrentModelYear) := sum((seas, prodTech_nonElec, capYearMod) | Credit45QEligibility(CurrentModelYear, capYearMod) , H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYearMod)
+				 * CO2CaptureRate(prodTech_nonElec))/kg_to_tons;
+				
+				CO2NonEligible45Q(regCen, CurrentModelYear) := sum((seas, prodTech_nonElec, capYearMod) | Credit45QEligibility(CurrentModelYear, capYearMod) <> 1 , H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYearMod)
+				 * CO2CaptureRate(prodTech_nonElec))/kg_to_tons;
+				
+				 ! CO2 investment costs. ((We assume the CCS cost is the difference between the SMR and SMR w/CCS capital costs.)
+				 CO2InvestmentCosts(regCen, CurrentModelYear) := ((PUCCostNonElectrolyzer(regCen, SMRCCSTech, FirstPlanningPeriod) - PUCCostNonElectrolyzer(regCen, SMRTech, FirstPlanningPeriod))
+				 	 / CO2CaptureRate(SMRCCSTech))*kg_to_tons;
+				
+				
+				 CO2OMCostsBySeason(regCEN, seas, CurrentModelYear) := 
+				 ! Fixed OM + Var OM
+				 ! @TODO TAKE DIFFERENCE BETWEEN SMR AND SMR CCS IN FIXED OM AND VAR OM.
+				 (
+				 (FixedOMCostNonElectrolyzerNoCapex(seas, regCen, SMRCCSTech, FirstPlanningPeriod) + VarOMCostNonElectrolyzer(seas, regCen, SMRCCSTech, FirstPlanningPeriod)
+				 ! Feedstock Costs
+				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (FeedstockConsumption(SMRCCSTech, fuel) - FeedstockConsumption(SMRTech, fuel))))
+				 ! HP Costs
+				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (HPconsumption(SMRCCSTech, fuel) - HPconsumption(SMRTech, fuel))))
+				  )) /CO2CaptureRate(SMRCCSTech) * kg_to_tons;
+				
+				CO2OMCosts(regCEN, CurrentModelYear) := (sum(seas, CO2OMCostsBySeason(regCen, seas, CurrentModelYear) * H2Demand(seas, regCen, FirstPlanningPeriod))) /$
+					sum(seas, H2Demand(seas, regCen, FirstPlanningPeriod));
+				
+				! Add in end-use markups.
+				HydrogenEndUsePrices(regCen, sec, CurrentModelYear) := HydrogenPriceAnnual(regCen, CurrentModelYear) + EndUseMarkup(sec);
+				
+				! Extract electricity from facilities that use natural gas as feedstock (i.e. SMR)
+				ElecConsReforming(regCen, CurrentModelYear) := sum((seas, prodTech_nonElec, capYearMod), H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYearMod) 
+					* HPConsumption(prodTech_nonElec, FuelElec));
+				
+				! Combine electricity consumption from all production technologies
+				ElecConsAllProd(regCen, year) := AnnualElectricityConsumedElectrolyzerCensus(regCen, year) + ElecConsReforming(regCen, year);
+				
+				ui_NERCtoCEN(CurrentModelYear, regNERC, regCen) := sum((seas, hr, prodTech_elec, capYearMod, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYearMod, creditStep)) * map_regNERCToRegCEN(regNERC, regCen);
+				
+				! Run additional LPs for EMM Supply curve
+				option 
+					"CPLEX 22.1".LP_method := "Dual Simplex";
+				Calculate_EMM_SupplyCurve;
+				
+				! If is less than 1, but not zero, that means the Low ZCT case is being run, and the capital costs need to be a specified reduction from the Reference case.
+					! When ZTCCOSTM = 1 (Reference case), we run capital costs and learning like normal. 
+				
+				!!! Run endogenous learning.
+				Run_Learning_Capacity_Costs;
+				
+				! If it is the low ZTC case (ZTCCOSTM < 1, then overwrite capital costs with a percent reduction from the Reference case.
+				if (ZTCCOSTM > 0 and ZTCCOSTM < 1) then
+					ZCT_CapitalCostReduction;
+				endif;
+				
+					! When ZTCCOSTM = 0 (High ZCT Case), then we hold capital costs constant to whatever they are in the FirstModelYear
+				if	 ZTCCOSTM = 0 then
+						CapitalCostsByYear(NextModelYear, reg, prodTech_elec) := CapitalCostsByYear(FirstModelYear, reg, prodTech_elec);
+				
+				endif;
+			}
+		}
+		Procedure Run_Learning_Capacity_Costs {
+			Body: {
+				!!!!!!!!!!!
+				! LEARNING BY DOING
+				
+				ExistingCapacityForLearning(NextModelYear, prodTech_nonElec) := sum( (regCen,capYear), CapacityNonElecVintage(NextModelYear, regCen, prodTech_nonElec, capYear));
+				ExistingCapacityForLearning(NextModelYear, prodTech_elec) := sum((regNERC, capYear), CapacityElecVintage(NextModelYear, regNERC, prodTech_elec, capYear));
+				! Final capacity used for learning algo.
+				TotalCapacityForLearning(NextModelYear, prodTech) := (NewCapacityForLearning(NextModelYear, prodTech)+ExistingCapacityForLearning(NextModelYear, prodTech));
+				
+				
+				TotalCapacityForLearning(NextModelYear, PEMTech) := ExistingCapacityForLearning(NextModelYear, PEMTech) + NewCapacityForLearning(NextModelYear, PEMTech) + InitialCapacityForLearning(PEMTech);
+				
+				! @TODO, remove when these when done testing/debugging.
+				empty LRCapacityBySteps;
+				empty LearningStepByTech;
+				empty MinimumLearningReductionToDate;
+				empty MinimumLearningFactor;
+				empty learningbeta;
+				empty LearningAlpha;
+				empty LearningVintageType;
+				empty LearningFactor;
+				
+				
+				! Move to an initialization procedure?
+				! Assign learning percentages by step.
+				LearningCostReduction(LearningRateStepOne, prodTech) := LR1(prodTech);
+				LearningCostReduction(LearningRateStepTwo, prodTech) := LR2(prodTech);
+				LearningCostReduction(LearningRateStepThree, prodTech) := LR3(prodTech);
+				
+				LearningVintageType(prodTech) | (LR3(prodTech)) := 'Conventional';
+				LearningVintageType(prodTech) | (LR2(prodTech) and LR3(prodTech)) := 'Evolutionary';
+				LearningVintageType(prodTech) | (LR1(prodTech) and LR2(prodTech) and LR3(prodTech)) := 'Revolutionary';
+				
+				! Construct bounds of each step.
+				! Step 1 Breakpoints (Use the formula Initial_Capacity*2^(# of doublings) to determine upper bound of step.)
+				BreakpointCapacities(LearningRateStepOne, prodTech) := InitialCapacityForLearning(prodTech);
+				! Step 2 Breakpoints
+				BreakpointCapacities(LearningRateStepTwo, prodTech) | (LearningVintageType(prodTech) = VintageTypeRevolutionary) := InitialCapacityForLearning(prodTech) * 2^P1_doublings(prodTech);
+				BreakpointCapacities(LearningRateStepTwo, prodTech) | (LearningVintageType(prodTech) <> VintageTypeRevolutionary) := InitialCapacityForLearning(prodTech);
+				! Step 3 Breakpoints
+				BreakpointCapacities(LearningRateStepThree, prodTech) | (LearningVintageType(prodTech) = VintageTypeRevolutionary) :=  InitialCapacityForLearning(prodTech) * 2^(P1_doublings(prodTech) +  P2_doublings(prodTech)); 
+				BreakpointCapacities(LearningRateStepThree, prodTech) | (LearningVintageType(prodTech) = VintageTypeEvolutionary) := InitialCapacityForLearning(prodTech) * 2^P2_doublings(prodTech);
+				BreakpointCapacities(LearningRateStepThree, prodTech) | (LearningVintageType(prodTech) = VintageTypeConventional) := InitialCapacityForLearning(prodTech);
+				
+				! Calculate Betas (i.e., the expontent that gets plugged into the equation to calculate the learning factor.
+				LearningBeta(lr_step, prodTech) := -(log(1-LearningCostReduction(lr_step, prodTech))/log(2));
+				
+				! Calculate Alphas
+				! Step 1 Alphas
+				LearningAlpha(LearningRateStepOne, prodTech) | (LearningVintageType(prodTech) = VintageTypeRevolutionary) := 1 /$ (InitialCapacityForLearning(prodTech)^(-LearningBeta(LearningRateStepOne, prodTech)));
+				LearningAlpha(LearningRateStepOne, prodTech) | (LearningVintageType(prodTech) = VintageTypeEvolutionary) := 1 /$ (InitialCapacityForLearning(prodTech)^(-LearningBeta(LearningRateStepTwo, prodTech))) ;
+				LearningAlpha(LearningRateStepOne, prodTech) | (LearningVintageType(prodTech) = VintageTypeConventional) := 1 /$ (InitialCapacityForLearning(prodTech)^(-LearningBeta(LearningRateStepThree, prodTech))) ;
+				
+				! Step 2 Alphas
+				LearningAlpha(LearningRateStepTwo, prodTech) | (LearningVintageType(prodTech) = VintageTypeRevolutionary) := (LearningAlpha(LearningRateStepOne, prodTech) * BreakpointCapacities(LearningRateStepTwo, prodTech)^(-LearningBeta(LearningRateStepOne, prodTech))) /$ 
+					(BreakpointCapacities(LearningRateStepTwo, prodTech) ^ (-LearningBeta(LearningRateStepTwo, prodTech)));
+				
+				LearningAlpha(LearningRateStepTwo, prodTech) | (LearningVintageType(prodTech) = VintageTypeEvolutionary) := 1 /$ (InitialCapacityForLearning(prodTech)^(-LearningBeta(LearningRateStepTwo, prodTech)));
+				LearningAlpha(LearningRateStepTwo, prodTech) | (LearningVintageType(prodTech) = VintageTypeConventional) := 1 /$ (InitialCapacityForLearning(prodTech)^(-LearningBeta(LearningRateStepThree, prodTech)));
+				
+				! Step 3 Alphas
+				LearningAlpha(LearningRateStepThree, prodTech) | (LearningVintageType(prodTech) = VintageTypeRevolutionary) := (LearningAlpha(LearningRateStepTwo, prodTech) * BreakpointCapacities(LearningRateStepThree, prodTech)^(-LearningBeta(LearningRateStepTwo, prodTech)))/
+					(BreakpointCapacities(LearningRateStepThree, prodTech)^(-LearningBeta(LearningRateStepThree, prodTech)));
+				
+				LearningAlpha(LearningRateStepThree, prodTech) | (LearningVintageType(prodTech) = VintageTypeEvolutionary) := (LearningAlpha(LearningRateStepTwo, prodTech) * BreakpointCapacities(LearningRateStepThree, prodTech)^(-LearningBeta(LearningRateStepTwo, prodTech)))/
+					(BreakpointCapacities(LearningRateStepThree, prodTech)^(-LearningBeta(LearningRateStepThree, prodTech)));
+				
+				LearningAlpha(LearningRateStepThree, prodTech) | (LearningVintageType(prodTech) = VintageTypeConventional) := 	1 / (InitialCapacityForLearning(prodTech)^(-LearningBeta(LearningRateStepThree, prodTech)));
+				
+				! Determine Learning steps to decide which alphas/betas to use. (Using Total capacity, including additions)
+				for prodTech do
+					! If capacity is between breakpoint one and two, step one.
+					if (TotalCapacityForLearning(NextModelYear, prodTech) >= BreakpointCapacities(LearningRateStepOne, prodTech) and 
+						TotalCapacityForLearning(NextModelYear, prodTech) <= BreakpointCapacities(LearningRateStepTwo, prodTech))
+					 then
+						LearningStepByTech(prodTech) := LearningRateStepOne;
+					! If capacity is greater than step two breakpoint, but less than step three breakpoint, step two.
+					elseif (TotalCapacityForLearning(NextModelYear, prodTech) > BreakpointCapacities(LearningRateStepTwo, prodTech) and
+						TotalCapacityForLearning(NextModelYear, prodTech) <= BreakpointCapacities(LearningRateStepThree, prodTech))
+					 then 
+						LearningStepByTech(prodTech) := LearningRateStepTwo;
+					! If both prior conditions are not true, then it is step three.
+					else LearningStepByTech(prodTech) := LearningRateStepThree;
+					endif;
+				endfor;
+				
+				! Calculate learning factor
+				LearningFactor(prodTech) := LearningAlpha(LearningStepByTech(prodTech), prodTech) * TotalCapacityForLearning(NextModelYear, prodTech)^(-LearningBeta(LearningStepByTech(prodTech), prodTech));
+				
+				! Multiply learning factor by original capital costs to calculate the capital cost for the next model year.
+				CapitalCostsByYear(NextModelYear, reg, prodTech) := LearningFactor(prodTech) * CapitalCostsByYear(FirstModelYear, reg, prodTech);
+				
+				! Calculate what minimum learning should be after a given year:
+				MinimumLearningReductionToDate(prodTech) := (minimum_learning(prodTech) /$ (MinimumLearningEndYear - FirstModelYear)) * ((NextModelYear - FirstModelYear));
+				!MinimumLearningFactor(prodTech) | (MinimumLearningReductionToDate(prodTech)) :=  MinimumLearningReductionToDate(prodTech);
+				if(NextModelYear <= MinimumLearningEndYear) then
+					CapitalCostsByYearMinimumLearning(NextModelYear, reg, prodTech) := (1-MinimumLearningReductionToDate(prodTech)) *  CapitalCostsByYear(FirstModelYear, reg, prodTech);
+					 !If the capital costs via minimum learning is less than the capital cost from endogenous learning, replace the capital cost with minimum learning.
+					CapitalCostsByYear(NextModelYear, reg, prodTech) | (CapitalCostsByYearMinimumLearning(NextModelYear, reg, prodTech) < CapitalCostsByYear(NextModelYear, reg, prodTech)) := CapitalCostsByYearMinimumLearning(NextModelYear, reg, prodTech);
+				else CapitalCostsByYear(NextModelYear, reg, prodTech) | (CapitalCostsByYear(NextModelYear, reg, prodTech) > CapitalCostsByYearMinimumLearning(MinimumLearningEndYear, reg, prodTech)) := CapitalCostsByYearMinimumLearning(MinimumLearningEndYear, reg, prodTech);
+				endif;
+				
+				! Write out annual capital costs if it is the final model year for loading in ZCT cases.
+				if (CurrentModelYear = LastModelYear and ZTCCOSTM = 1) then
+					CapitalCostsByYearReference(i_calYear, reg, prodTech_elec) := CapitalCostsByYear(i_calYear, reg, prodTech_elec);
+					write CapitalCostsByYearReference to file ReferenceCapitalCostFile;
+				endif;
+			}
+		}
+	}
+	Section NEMS_Output {
+		Procedure SendGlobalDataToNEMS {
+			Body: {
+				! Testing values of parameters
+				!ncntrl_curcalyr(1) := 2050;
+				!ncntrl_curitr(1) := 1;
+				
+				sDataYearFile := "fromAIMMS\\GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+				
+				! Note the "FILE" identifier GlobalDataToNEMS is linked to the string parameter sDataYearFile
+				put GlobalDataToNEMS; ! opens the file (sDataYearFile) and sets stage for subsequent display and/or put statements
+					if  ncntrl_curcalyr(1) <= Val(FirstModelYear) then
+						YearForGlobalVariables:={1..61}; ! @TODO, maybe there's a better way of doing this that doesn't hard code 1-61?
+					else
+						YearForGlobalVariables:=ncntrl_curiyr(1);
+					endif;
+					display {INDOUT_QELINH2E(MNUMCR,globalyr)} where decimals:=22;
+					display {QBLK_QNGHM(MNUMCR,globalyr)} where decimals:=22;
+					display {QBLK_QELHM(MNUMCR,globalyr)} where decimals:=22;
+					display {PMORE_PH2IN(MNUMCR,globalyr)} where decimals:=22;
+					display {PMORE_PH2EL(MNUMCR,globalyr)} where decimals:=22;
+					display {HMMBLK_PRDH2NG(MNUMCR,globalyr)} where decimals:=22;
+					display {HMMBLK_PRDH2EL(MNUMCR,globalyr)} where decimals:=22;
+					display {HMMBLK_QELHM_HR(MNUMNR, M4, M24, globalyr)} where decimals:=22;
+					display {HMMBLK_H2SCRV_Q(MNUMCR, H2STEP, M3, globalyr)} where decimals:=22;
+					display {HMMBLK_H2SCRV_P(MNUMCR, H2STEP, M3, globalyr)} where decimals:=22;
+					display {HMMBLK_H2STEP(M1)} where decimals:=22;
+					display {HMMBLK_QNGHMPF(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_QNGHMHP(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_PH2RF(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_QELINH2NG(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_QELTRH2(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_PRDH2NG_CCS(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_PRDH2EL_NR(MNUMNR, globalyr)} where decimals:=22;
+					display {HMMBLK_PH2_SPOT(MNUMCR, globalyr)} where decimals:=22;
+					display {MPBLK_PH2TR(MNUMCR, globalyr)} where decimals:=22;
+					display {CCATSDAT_SUP_H2_45Q(MNUMCR, globalyr)} where decimals:=22;
+					display {CCATSDAT_SUP_H2_NTC(MNUMCR, globalyr)} where decimals:=22;
+					display {CCATSDAT_CST_H2_INV(MNUMCR, globalyr)} where decimals:=22;
+					display {CCATSDAT_CST_H2_OM(MNUMCR, globalyr)} where decimals:=22;
+				putclose;
+			}
+			Comment: "send global data back to nems via a text file.";
+		}
+		Procedure Write_To_NEMS {
+			Body: {
+				! Price of H2 to Industrial Sector
+				PMORE_PH2IN(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), HydrogenEndUsePrices(regCen, IndustrialSector, CurrentModelYear)) * CONVFACT_CFH2Q_KG(ep_M1); 
+				PMORE_PH2IN(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, PMORE_PH2IN(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) * QBLK_QH2IN(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear))) /$
+											QBLK_QH2IN(TotalUS, NEMSmap_MNUMYR(CurrentModelYear));
+				! Price of H2 to Transportation Sector
+				MPBLK_PH2TR(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), HydrogenEndUsePrices(regCen, TransportationSector, CurrentModelYear)) * CONVFACT_CFH2Q_KG(ep_M1); 
+				MPBLK_PH2TR(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, MPBLK_PH2TR(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) * QBLK_QH2TR(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear))) /$
+											QBLK_QH2TR(TotalUS, NEMSmap_MNUMYR(CurrentModelYear));
+				
+				! Price of H2 to Refining Sector
+				HMMBLK_PH2RF(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), HydrogenEndUsePrices(regCen, RefiningSector, CurrentModelYear)) * CONVFACT_CFH2Q_KG(ep_M1); 
+				HMMBLK_PH2RF(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, HMMBLK_PH2RF(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) * QMORE_QH2RF(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear))) /$
+											sum(MNUMCR | (MNUMCR <> TotalUS), QMORE_QH2RF(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				
+				! Price of H2 to Refining Sector
+				PMORE_PH2EL(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), HydrogenEndUsePrices(regCen, ElectricitySector, CurrentModelYear)) * CONVFACT_CFH2Q_KG(ep_M1); 
+				PMORE_PH2EL(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, PMORE_PH2EL(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) * QMORE_QH2EL(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear))) /$
+											sum(MNUMCR | (MNUMCR <> TotalUS), QMORE_QH2EL(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				
+				! If there is no demand for a given sector, how to weigh regions for MNUMCR 11 is unclear. Instead, fill with industrial end use price
+				PMORE_PH2EL(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) | PMORE_PH2EL(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) = 0 := PMORE_PH2IN(TotalUS, NEMSmap_MNUMYR(CurrentModelYear));
+				
+				TotalGDSDemand(MNUMCR, MNUMYR) := QBLK_QH2IN(MNUMCR, MNUMYR) + QBLK_QH2TR(MNUMCR, MNUMYR) + QMORE_QH2EL(MNUMCR, MNUMYR);
+				
+				HMMBLK_PH2_SPOT(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), HydrogenPriceAnnual(regCEN, CurrentModelYear)) * CONVFACT_CFH2Q_KG(ep_M1); 
+				HMMBLK_PH2_SPOT(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, HMMBLK_PH2_SPOT(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) * TotalGDSDemand(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear))) /$
+											sum(MNUMCR | (MNUMCR <> TotalUS), TotalGDSDemand(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear))) ;
+				
+				!!!! H2 Production Variables
+				! SMR
+				HMMBLK_PRDH2NG(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  AnnualRegionalH2ProductionByTech(regCen, SMRTech, CurrentModelYear));
+				HMMBLK_PRDH2NG(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  AnnualRegionalH2ProductionByTech(regCen, SMRTech, CurrentModelYear)));
+				
+				!SMR with CCS 
+				HMMBLK_PRDH2NG_CCS(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN| NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), AnnualRegionalH2ProductionByTech(regCen, SMRCCSTech, CurrentModelYear));
+				HMMBLK_PRDH2NG_CCS(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN, AnnualRegionalH2ProductionByTech(regCen, SMRCCSTech, CurrentModelYear));
+				
+				! PEM
+				HMMBLK_PRDH2EL(MNUMCR,NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN, prodTech_elec) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  AnnualRegionalH2ProductionByTech(regCen, prodTech_elec, CurrentModelYear));
+				HMMBLK_PRDH2EL(TotalUS,NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, sum((regCEN, prodTech_elec) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  AnnualRegionalH2ProductionByTech(regCen, prodTech_elec, CurrentModelYear)));
+				
+				! Electrolyzer production by NERC region
+				HMMBLK_PRDH2EL_NR(MNUMNR, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regNERC, prodTech_elec) | NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC), AnnualH2ProductionByTech_EMMRegion(regNERC, prodTech_elec, CurrentModelYear));
+				! @todo, does this need a US total? If so, what element should it be written to? 26, 27, and 28 are not used by the 25 regions. 28 would be my guess.
+				
+				! Hourly electricity consumption from electrolyzers
+				HMMBLK_QELHM_HR(MNUMNR, M4, M24, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regNERC, seas, hr) | ((NEMSmap_MNUMNR_toNERCRegion(MNUMNR, regNERC))
+					and (NEMSmap_M4_to_seas(M4, seas)) and (NEMSmap_M24_ToHr(M24, hr))), HourlyElectricityConsumedElectrolyzer(regNERC, seas, hr, CurrentModelYear)) * (1/Mwh_to_MMBtu);
+				
+				! Total electricity consumption across all h2 production technologies
+				QBLK_QELHM(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ElecConsAllProd(regCen, CurrentModelYear)/mmbtu_to_tbtu);
+				QBLK_QELHM(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ElecConsAllProd(regCen, CurrentModelYear))/mmbtu_to_tbtu);
+				
+				! Electricity consumption from transportation and storage of hydrogen
+				HMMBLK_QELTRH2(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ElectricityConsumedForTransAndStorage(CurrentModelYear,regCen))/mmbtu_to_tbtu;
+				HMMBLK_QELTRH2(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ElectricityConsumedForTransAndStorage(CurrentModelYear, regCen))/mmbtu_to_tbtu);
+				
+				!!! NATURAL GAS CONSUMPTION DURING H2 PRODUCTION
+				! Feedstock
+				HMMBLK_QNGHMPF(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN, seas) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)), NaturalGasFeedstockConsumption(regCen, seas, CurrentModelYear))/mmbtu_to_tbtu;
+				HMMBLK_QNGHMPF(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN, seas), NaturalGasFeedstockConsumption(regCen, seas, CurrentModelYear))/mmbtu_to_tbtu;
+				
+				! Heat and Power
+				HMMBLK_QNGHMHP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN, seas) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR)), NaturalGasHPConsumption(regCen, seas, CurrentModelYear))/mmbtu_to_tbtu;
+				HMMBLK_QNGHMHP(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN, seas), NaturalGasHPConsumption(regCen, seas, CurrentModelYear))/mmbtu_to_tbtu;
+				
+				! Total natural gas consumed in the hydrogen sector
+				QBLK_QNGHM(MNUMCR, MNUMYR) := HMMBLK_QNGHMPF(MNUMCR, MNUMYR) + HMMBLK_QNGHMHP(MNUMCR, MNUMYR);
+				
+				! Electricity consumption from non-electrolyzers
+				HMMBLK_QELINH2NG(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ElecConsReforming(regCen, CurrentModelYear))/mmbtu_to_tbtu;
+				HMMBLK_QELINH2NG(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)):= sum(MNUMCR, sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ElecConsReforming(regCen, CurrentModelYear))/mmbtu_to_tbtu);
+				
+				! Electricity consumption from electrolyzers
+				INDOUT_QELINH2E(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), AnnualElectricityConsumedElectrolyzerCensus(regCen, CurrentModelYear))/mmbtu_to_tbtu; 
+				INDOUT_QELINH2E(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), AnnualElectricityConsumedElectrolyzerCensus(regCen, CurrentModelYear))/mmbtu_to_tbtu); 
+				!!!! EMM SUPPLY CURVE
+				! @TODO: UNITS FOR SUPPLY CURVE? CURRENTLY IN MMTON AND $/kg.
+				! Quantites on supply curve
+				HMMBLK_H2SCRV_Q(MNUMCR, H2STEP, M3, NEMSmap_MNUMYR(CurrentModelYear)) := sum((REGCEN, seas) | (NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR) and NEMSmap_M3_to_seas(M3, seas)),EMM_SupplyCurve_Q(regCen, H2STEP, seas, CurrentModelYear));
+				
+				! Price on supply curve (take weighted average of seas 1 and 3 to calculate shoulder (M3=3) price.
+				HMMBLK_H2SCRV_P(MNUMCR, H2STEP, M3, NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),
+					(sum(seas | NEMSmap_M3_to_seas(M3, seas), EMM_SupplyCurve_P(regCen, H2STEP, seas, CurrentModelYear) * EMM_SupplyCurve_Q(regCen, H2STEP, seas, CurrentModelYear)))
+					/$ sum(seas | NEMSmap_M3_to_seas(M3, seas), EMM_SupplyCurve_Q(regCen, H2STEP, seas, CurrentModelYear)));
+				
+				HMMBLK_H2STEP(M1) := card(H2Step_);
+				
+				! VARIABLES FOR CCATS
+				! Captured CO2 volumes
+				CCATSDAT_SUP_H2_45Q(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), CO2Eligible45Q(regCen, CurrentModelYear));
+				CCATSDAT_SUP_H2_45Q(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, CCATSDAT_SUP_H2_45Q(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				CCATSDAT_SUP_H2_NTC(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN |  NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), CO2NonEligible45Q(regCen, CurrentModelYear));
+				CCATSDAT_SUP_H2_NTC(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, CCATSDAT_SUP_H2_NTC(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				
+				! Investment cost for carbon capture from hydrogen production
+				CCATSDAT_CST_H2_INV(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), CO2InvestmentCosts(regCen, CurrentModelYear));
+				
+				! CCATS needs weighted average cost of investment based on existing capacity
+				CCATSDAT_CST_H2_INV(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, (CCATSDAT_CST_H2_INV(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) 
+				* sum((regCen, prodtech_ccs, capYear) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ExistingCapacityNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod, capYear)))) /$
+				sum(MNUMCR, sum((regCEN, prodtech_ccs, capYear) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ExistingCapacityNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod, capYear)));
+				
+				! O&M cost for carbon capture from hydrogen production
+				CCATSDAT_CST_H2_OM(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), CO2OMCosts(regCen, CurrentModelYear));
+				CCATSDAT_CST_H2_OM(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, (CCATSDAT_CST_H2_OM(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) 
+				* sum((regCen, prodtech_ccs, capYear) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ExistingCapacityNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod, capYear)))) /$
+				sum(MNUMCR, sum((regCEN, prodtech_ccs, capYear) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ExistingCapacityNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod, capYear)));
+				
+				! if current model year is the first year, write history consumption variables for IDM
+				if (CurrentModelYear = FirstModelYear) then
+					QBLK_QNGHM(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_ng_consumption(regCen, idm_histyear)/ mmbtu_to_tbtu);
+					QBLK_QNGHM(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(regCen, hist_ng_consumption(regCen, idm_histyear))/ mmbtu_to_tbtu;
+				
+					HMMBLK_QNGHMHP(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_ng_heat_power(regCen, idm_histyear)/ mmbtu_to_tbtu);
+					HMMBLK_QNGHMHP(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(regCen, hist_ng_heat_power(regCen, idm_histyear))/ mmbtu_to_tbtu;
+				
+					HMMBLK_QNGHMPF(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_ng_feedstock(regCen, idm_histyear)/ mmbtu_to_tbtu);
+					HMMBLK_QNGHMPF(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(regCen, hist_ng_feedstock(regCen, idm_histyear))/ mmbtu_to_tbtu;
+				
+					QBLK_QELHM(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_elec_consumption(regCen, idm_histyear)/ mmbtu_to_tbtu);
+					QBLK_QELHM(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(regCen, hist_elec_consumption(regCen, idm_histyear))/ mmbtu_to_tbtu;
+				
+					HMMBLK_QELINH2NG(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_elec_smrs(regCen, idm_histyear)/ mmbtu_to_tbtu);
+					HMMBLK_QELINH2NG(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(regCen, hist_elec_smrs(regCen, idm_histyear))/ mmbtu_to_tbtu;
+				
+					INDOUT_QELINH2E(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_elec_electrolyzers(regCen, idm_histyear)/ mmbtu_to_tbtu);
+					INDOUT_QELINH2E(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(regCen, hist_elec_electrolyzers(regCen, idm_histyear))/ mmbtu_to_tbtu;
+				
+					PMORE_PH2IN(MNUMCR, NEMSmap_MNUMYR(idm_histyear)):= sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), hist_h2_price(regCen, idm_histyear)) * CONVFACT_CFH2Q_KG(ep_M1); 
+					PMORE_PH2IN(TotalUS, NEMSmap_MNUMYR(idm_histyear)) := sum(MNUMCR, PMORE_PH2IN(MNUMCR, NEMSmap_MNUMYR(idm_histyear)) * QBLK_QH2IN(MNUMCR, NEMSmap_MNUMYR(idm_histyear))) /$
+											QBLK_QH2IN(TotalUS, NEMSmap_MNUMYR(idm_histyear));
+				endif;
+			}
+			Comment: {
+				"All overwrites of NEMS variables is done in this procedure.
+				This procedure is run in MainExecution after all processing (but before case saving)."
+			}
+		}
+		Procedure WriteDebugInfo {
+			Body: {
+				! there might be another way to do this where one would assign HMMBLK_QELHM_HR to a single variable that saves the data each year
+				CSVExport('HMMBLK_QELHM_HR', "\debugINFO"); 
+				FileCopy("./debugINFO/HMMBLK_QELHM_HR.csv","./debugINFO/HMMBLK_QELHM_HR_"+formatstring("%i",ncntrl_curcalyr(1))+".csv"); 
+				
+				! Electrolzer H2 production by season, hour (mmtons)
+				SeasonalHourlyRegionalH2ProductionByTech(regCen, seas, hr, prodTech) := sum((regNERC, capYearMod, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech, FirstPlanningPeriod, capYearMod, creditStep) * map_regNERCToRegCEN(regNERC, regCen))
+				+ sum((capYearMod), H2ProdNonElectrolyzer(regCen, seas, prodtech, FirstPlanningPeriod, capYearMod));
+				CSVExport('SeasonalHourlyRegionalH2ProductionByTech', "\debugINFO"); 
+				FileCopy("./debugINFO/SeasonalHourlyRegionalH2ProductionByTech.csv","./debugINFO/SeasonalHourlyRegionalH2ProductionByTech_"+formatstring("%i",ncntrl_curcalyr(1))+".csv"); 
+				
+				CSVExport('QBLK_QNGHM', "\debugINFO"); 
+				FileCopy("./debugINFO/QBLK_QNGHM.csv","./debugINFO/QBLK_QNGHM_"+formatstring("%i",ncntrl_curcalyr(1))+".csv"); 
+				
+				CSVExport('SeasonalRegionalByproductSupply',"\debugINFO");
+				FileCopy("./debugINFO/SeasonalRegionalByproductSupply.csv","./debugINFO/SeasonalRegionalByproductSupply"+formatstring("%i",ncntrl_curcalyr(1))+".csv"); 
+				
+				! Convert Ttbus to MMtons
+				H2DemandBySectorSeasonalMMTons(regCen, sec, seas, i_calYear) := (H2DemandBySectorSeasonal(regCen, sec, seas, i_calYear) * CONVFACT_CFH2Q_KG('1')/1000);
+				
+				! write debug information to csv files only for the lastModelYear (for now...change as needed)
+				if  ncntrl_curcalyr(1) = Val(LastModelYear) then
+					CSVExport('HydrogenStorageWithdrawalByYearSeason',"\debugINFO");
+					CSVExport('HydrogenStorageInjectionByYearSeason',"\debugINFO");
+					CSVExport('HydrogenTransportationByYearSeason',"\debugINFO");
+					CSVExport('SeasonalRegionalH2ProductionByTech',"\debugINFO");
+					CSVExport('SeasonalRegionalElectrolyzerProductionByTech',"\debugINFO");
+					CSVExport('SeasonalRegionalH2ProductionByTech',"\debugINFO");
+					CSVExport('H2DemandBySectorSeasonalMMTons',"\debugINFO");
+				endif;
+			}
+			Comment: "write debug information used by python script to generate graphs/charts for analyst";
+		}
+	}
+}

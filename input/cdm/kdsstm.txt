@@ -1,12 +1,8 @@
 FILE NAME:      KDSSTM
 
-DATE MODIFIED:  July 17, 2018 - Updated to reflect 2018 market characterization report
+DATE MODIFIED:  July 12, 2023 
                 
 
-CONTACT:        Meera Fickling
-                NEMS Commercial Buildings Analyst
-                Meera.fickling@eia.gov
-                (202)586-0765
 
 USED BY:        Service Demand subroutine of the National Energy Modeling System
                 (NEMS) Commercial Demand Module (CDM)
@@ -25,7 +21,7 @@ SPECIAL CONSTRAINTS:    None
 
 ORGANIZATION OF DATA:
 
-                Data starts on row 101 of this file as per CDM convention.
+                EUI array starts on row 101 of this file as per CDM convention.
 
                 Each block corresponds to a Census division, as follows:  New England,
                 Middle Atlantic, East North Central, West North Central, South Atlantic,
@@ -42,8 +38,12 @@ SOURCES:       "U.S. District Energy Services Market Characterization: Commercia
                 Analysis for EIA's National Energy Modeling System (NEMS)," completed for
 		EIA by ICF International, January 2018
 
-                Energy Information Administration, 2012 Commercial Buildings
-                  Energy Consumption Survey Public Use Data.  May 2016.
+                Energy Information Administration, 2018 Commercial Buildings
+                  Energy Consumption Survey Public Use Data. December 2022.
+
+
+
+
 
 
 NonCHP SCD Index	
@@ -79,7 +79,7 @@ NonCHP SCD Index
 
 
 
-NonCHP
+
 
 	
 
@@ -98,113 +98,110 @@ NonCHP
 
 SpHeat	SpCool	WaterHt	
 			
-1.456	0.000	0.021	Assembly - New England
-4.053	0.000	0.695	Education
+9.092	0.000	0.012	Assembly - New England
+10.175	0.000	0.510	Education
 0.000	0.000	0.000	FdSales
-19.006	0.000	0.000	FdService
-10.179	2.545	3.240	Healthcare
-1.146	0.000	3.351	Lodging
-20.311	0.343	0.968	Off-Lg
-1.437	0.000	0.000	Off-Sm
-0.271	0.000	0.000	MercServ
+0.000	0.000	0.000	FdService
+23.123	0.000	1.734	Healthcare
+5.163	0.000	4.191	Lodging
+3.712	0.000	0.212	Off-Lg
+0.000	0.000	0.000	Off-Sm
+0.349	0.000	0.003	MercServ
 0.000	0.000	0.000	Warehouse
-5.158	0.000	0.113	Other
+3.509	0.000	0.080	Other
 			
-3.871	2.193	0.078	Assembly - Middle Atlantic
-1.681	0.116	0.188	Education
+3.389	0.000	0.042	Assembly - Middle Atlantic
+3.101	0.162	1.107	Education
 0.000	0.000	0.000	FdSales
-4.534	0.000	0.824	FdService
-11.653	0.799	4.014	Healthcare
-2.489	0.201	3.995	Lodging
-4.508	0.340	0.569	Off-Lg
-0.347	0.000	0.014	Off-Sm
-0.740	0.000	0.064	MercServ
+6.998	0.000	0.000	FdService
+20.320	0.021	9.251	Healthcare
+7.309	0.593	4.881	Lodging
+11.419	1.398	0.438	Off-Lg
+1.046	0.000	0.004	Off-Sm
+0.424	0.000	0.000	MercServ
+0.060	0.000	0.000	Warehouse
+6.214	0.465	0.090	Other
+			
+9.485	0.000	0.009	Assembly - East North Central
+3.525	0.000	0.224	Education
+0.000	0.000	0.000	FdSales
+0.000	0.000	0.000	FdService
+23.305	0.111	1.722	Healthcare
+0.414	0.000	0.413	Lodging
+4.663	0.000	0.177	Off-Lg
+0.259	0.000	0.000	Off-Sm
+0.000	0.000	0.000	MercServ
 0.000	0.000	0.000	Warehouse
-7.394	0.000	2.403	Other
-		
-2.132	0.000	0.047	Assembly - East North Central
-1.013	0.000	0.082	Education
+13.164	0.000	3.118	Other
+			
+7.297	0.050	0.271	Assembly - West North Central
+0.226	0.000	0.000	Education
 0.000	0.000	0.000	FdSales
 0.000	0.000	0.000	FdService
-12.044	0.000	4.593	Healthcare
-0.544	0.000	1.960	Lodging
-2.112	0.021	0.203	Off-Lg
-0.032	0.000	0.015	Off-Sm
-0.032	0.027	0.104	MercServ
-0.160	0.000	0.000	Warehouse
-1.178	0.000	0.632	Other
-		
-4.117	0.000	0.114	Assembly - West North Central
-5.563	0.000	0.999	Education
+9.667	0.000	0.800	Healthcare
+2.424	0.000	0.000	Lodging
+3.806	0.000	0.078	Off-Lg
+0.000	0.000	0.000	Off-Sm
+2.315	0.000	0.002	MercServ
+0.000	0.000	0.000	Warehouse
+0.000	0.000	0.000	Other
+			
+3.162	0.000	0.114	Assembly - South Atlantic
+4.621	0.000	0.239	Education
+0.000	0.000	0.000	FdSales
+1.890	0.000	0.000	FdService
+7.829	0.000	0.387	Healthcare
+2.200	0.000	1.080	Lodging
+4.456	0.000	0.118	Off-Lg
+0.000	0.000	0.000	Off-Sm
+0.000	0.000	0.000	MercServ
+0.140	0.000	0.000	Warehouse
+11.038	0.000	0.180	Other
+			
+1.471	0.000	0.011	Assembly - East South Central
+1.849	0.000	0.115	Education
 0.000	0.000	0.000	FdSales
 0.000	0.000	0.000	FdService
-9.885	0.000	4.256	Healthcare
-3.768	0.000	7.481	Lodging
-0.803	0.000	0.045	Off-Lg
+4.339	0.000	0.000	Healthcare
+0.311	0.000	0.385	Lodging
+3.825	0.000	0.042	Off-Lg
+1.245	0.000	0.000	Off-Sm
+0.000	0.000	0.000	MercServ
+0.000	0.000	0.000	Warehouse
+3.811	0.000	0.026	Other
+			
+4.054	0.000	0.033	Assembly - West South Central
+6.774	0.000	1.004	Education
+0.000	0.000	0.000	FdSales
+0.000	0.000	0.000	FdService
+11.413	0.000	1.891	Healthcare
+0.434	0.000	0.749	Lodging
+1.360	0.000	0.082	Off-Lg
+0.000	0.000	0.000	Off-Sm
+0.000	0.000	0.000	MercServ
+0.013	0.000	0.000	Warehouse
+8.990	0.000	0.039	Other
+			
+3.944	0.256	0.018	Assembly - Mountain
+2.885	0.000	0.090	Education
+0.000	0.000	0.000	FdSales
+0.000	0.000	0.000	FdService
+7.864	0.000	0.551	Healthcare
+1.934	0.000	0.874	Lodging
+1.098	0.000	0.043	Off-Lg
 0.000	0.000	0.000	Off-Sm
 0.000	0.000	0.000	MercServ
 0.000	0.000	0.000	Warehouse
-0.130	0.000	0.000	Other
-		
-4.841	0.000	0.020	Assembly - South Atlantic
-4.148	0.000	0.827	Education
+1.472	0.000	0.004	Other
+			
+3.848	0.000	0.029	Assembly - Pacific
+2.898	0.000	1.106	Education
 0.000	0.000	0.000	FdSales
-0.046	0.000	0.035	FdService
-10.320	0.000	3.670	Healthcare
-0.010	0.000	0.031	Lodging
-2.674	0.000	0.342	Off-Lg
-0.099	0.000	0.035	Off-Sm
+15.477	0.000	1.085	FdService
+3.787	0.000	2.238	Healthcare
+0.359	0.000	1.179	Lodging
+2.821	0.000	0.173	Off-Lg
+0.000	0.000	0.004	Off-Sm
 0.000	0.000	0.000	MercServ
 0.000	0.000	0.000	Warehouse
-1.522	0.000	0.000	Other
-		
-3.152	0.000	0.049	Assembly - East South Central
-4.058	0.000	0.015	Education
-0.000	0.000	0.000	FdSales
-0.000	0.000	0.000	FdService
-12.646	0.000	21.317	Healthcare
-0.749	0.000	1.692	Lodging
-11.243	0.000	0.028	Off-Lg
-0.000	0.000	0.000	Off-Sm
-0.000	0.000	0.000	MercServ
-0.000	0.000	0.000	Warehouse
-0.727	0.000	0.013	Other
-		
-9.737	0.000	0.102	Assembly - West South Central
-1.818	0.000	0.632	Education
-0.000	0.000	0.000	FdSales
-0.608	0.000	0.000	FdService
-4.644	0.893	4.163	Healthcare
-0.117	0.000	0.437	Lodging
-0.815	0.000	0.076	Off-Lg
-0.058	0.000	0.008	Off-Sm
-0.085	1.532	0.018	MercServ
-0.000	0.000	0.000	Warehouse
-0.079	0.000	0.005	Other
-		
-2.885	0.000	0.026	Assembly - Mountain
-2.559	0.000	0.668	Education
-0.000	0.000	0.000	FdSales
-0.000	0.000	0.000	FdService
-9.393	0.000	4.993	Healthcare
-2.497	0.000	9.350	Lodging
-4.254	0.000	0.394	Off-Lg
-3.185	0.000	0.231	Off-Sm
-0.000	0.000	0.000	MercServ
-0.000	0.000	0.000	Warehouse
-0.031	0.000	0.000	Other
-		
-0.918	0.013	0.023	Assembly - Pacific
-4.183	0.000	0.899	Education
-0.000	0.000	0.000	FdSales
-0.121	0.000	0.000	FdService
-3.043	0.005	4.982	Healthcare
-0.144	0.000	0.187	Lodging
-0.793	0.000	0.068	Off-Lg
-0.948	0.000	0.000	Off-Sm
-0.000	0.000	0.001	MercServ
-0.000	0.000	0.000	Warehouse
-1.205	0.000	0.099	Other
-
-
-	
+8.188	0.000	0.692	Other

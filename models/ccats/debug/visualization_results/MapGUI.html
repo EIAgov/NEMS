@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<style>
+.container {
+  display: flex;
+}
+
+#col-1 {
+  background-color: rgb(134, 241, 131);
+  flex: 1;
+  border:1px solid black;
+}
+
+#col-2 {
+  background-color: lightcyan;
+  flex: 1;
+  border:1px solid black;
+}       
+</style>
+    
+
+<p>Select two run  folders to compare run results.</p>
+
+
+<section class="container">
+    <div id="col-1">
+    <h1>Select a folder</h1>
+    
+  
+
+    <input type="file" name="inputfileLeft" id="inputfileLeft"  onchange="getfolder(event,this.id)" webkitdirectory multiple>
+    <br>
+
+    <p>Selected Folder: </p><p id="selectedfolderLeft"></p>
+
+        <p>select a map</p>
+
+        <select id="mapSelectLeft" onchange="selectMap(this.id)">
+            <option value="" selected disabled hidden>Choose here</option>
+        </select>
+
+       
+
+
+        <embed id = "mapLeft" width="800" height="700"
+                type="text/html" />
+
+
+
+        <embed id = "dataLeft" width="800" height="700"
+                type="text/html" />
+</div>
+
+<div id="col-2">
+    <h1>Select a folder</h1>
+    
+    <input type="file" name="inputfileRight" id="inputfileRight"  onchange="getfolder(event,this.id)" webkitdirectory multiple>
+
+    <p>Selected Folder: </p><p id="selectedfolderRight"></p>
+
+        <p>select a map</p>
+
+        <select id="mapSelectRight" onchange="selectMap(this.id)">
+            <option value="" selected disabled hidden>Choose here</option>
+        </select>
+
+       
+
+
+        <embed id = "mapRight" width="800" height="700"
+                type="text/html" />
+
+
+
+        <embed id = "dataRight" width="800" height="700"
+                type="text/html" />
+</div>
+</section>
+
+
+<script type="text/javascript">
+let runfolderLeft = ""
+let runfolderRight = ""
+function setfolder(id, file){
+    var fr = new FileReader();
+   
+    fr.onload = readme;
+    function readme(e) {
+    folder = fr.result;
+    folder = folder.split('run folder:')[1]
+    var sel = "";
+  
+    if (id.includes("Left")){
+    sel = document.getElementById("mapSelectLeft");
+    runfolderLeft = folder
+    document.getElementById("selectedfolderLeft").innerHTML = folder;
+    }else{
+    runfolderRight = folder
+    document.getElementById("selectedfolderRight").innerHTML = folder;
+    }
+
+    };
+    fr.readAsText(file);
+                
+    }
+
+
+    function getfolder(e, id) {
+
+        var files = e.target.files;
+        var path = files[0].webkitRelativePath;
+        var sel = "";
+        
+        if (id.includes("Left")){
+            sel = document.getElementById("mapSelectLeft");
+        if (document.getElementById("mapSelectLeft").options.length > 1){
+            sel.options.length = 0;
+            var option = document.createElement("option");
+            option.value = "";
+            option.text = "choose a map";
+            option.selected = true;
+            option.disabled = true;
+            option.hidden;
+            sel.add(option);
+        }
+       
+        }else{
+        sel = document.getElementById("mapSelectRight");
+        if (document.getElementById("mapSelectRight").options.length > 1){
+            sel.options.length = 0;
+            var option = document.createElement("option");
+            option.value = "choose a map";
+            option.text = "";
+            option.selected = true;
+            option.disabled = true;
+            option.hidden;
+            sel.add(option);
+        }
+        }
+     
+      for (var i = 0; i < files.length; i++) {
+          if (files[i].name.includes('map') && !files[i].name.includes('datatable') ){
+            if(files[i].name == 'map.run'){
+                setfolder(id, files[i]);
+            }else{
+              var option = document.createElement("option");
+              option.value = files[i].name;
+              option.text = files[i].name;
+              sel.add(option);
+            }
+          }
+      }
+      
+    }
+  </script>
+
+
+<script>
+    function selectMap(id) {
+    var map = "";
+    if (id.includes("Left")){
+        map = document.getElementById("mapSelectLeft").value;
+        map = folder + '/' + map;
+        document.getElementById('mapLeft').src = map;
+
+    }else{
+        map = document.getElementById("mapSelectRight").value;
+        map = folder + '/' + map;
+        document.getElementById('mapRight').src = map;
+    }
+      
+      loadDataTable(id)
+    }
+</script>
+
+
+<script>
+function loadDataTable(id){
+    if (id.includes("Left")){
+        map = document.getElementById("mapSelectLeft").value;
+        var year = map.slice(-12)
+        folder = document.getElementById("selectedfolderLeft").innerHTML;
+        datafile = folder + '/datatable_postproc_pipeline_map_' + year;
+        document.getElementById("dataLeft").src = datafile;
+    }else{
+        map = document.getElementById("mapSelectRight").value;
+        var year = map.slice(-12)
+        datafile = folder + '/datatable_postproc_pipeline_map_' + year;
+        document.getElementById("dataRight").src = datafile;
+    }
+
+}
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-! $Header: m:/default/input/RCS/nglngexp.txt,v 1.24 2020/11/12 16:53:56 KDL Exp $
+﻿! $Header: m:/default/input/RCS/nglngexp.txt,v 1.24 2020/11/12 16:53:56 KDL Exp $
 
 !Updated 8/16/18	KDL	Lowered LNG shipping costs
 !___________________________________________________________________________________________
@@ -72,10 +72,10 @@ LNG_HighPriceRatio := 1.0;
 LNG_LowPriceRatio := 0.7;
 
 !Number of trains allowed to be built per year
-LNG_MaxTrainsYr :=3;
+LNG_MaxTrainsYr :=4;
 
 !First year new LNG builds (not under construction) allowed
-LNG_FirstBuildYear := '2027';
+LNG_FirstBuildYear := '2029';
 
 !number of years after end of year of planning before train can be built
 LNG_YrsUntilBuild := 4;	
@@ -464,54 +464,54 @@ September, 2020	0.9
 October, 2020	0.9
 November, 2020	0.9
 December, 2020	0.9
-January, 2021	1.05
-February, 2021	1.05
-March, 2021	1.05
-April, 2021	1.05
-May, 2021	1.05
-June, 2021	1.05
-July, 2021	1.05
-August, 2021	1.05
-September, 2021	1.05
-October, 2021	1.05
-November, 2021	1.05
-December, 2021	1.05
-January, 2022	1.05
-February, 2022	1.05
-March, 2022	1.05
-April, 2022	1.05
-May, 2022	1.05
-June, 2022	1.05
-July, 2022	1.05
-August, 2022	1.05
-September, 2022	1.05
-October, 2022	1.05
-November, 2022	1.05
-December, 2022	1.05
-January, 2023	1.00
-February, 2023	1.00
-March, 2023	1.00
-April, 2023	1.00
-May, 2023	1.00
-June, 2023	1.00
-July, 2023	1.00
-August, 2023	1.00
-September, 2023	1.00
-October, 2023	1.00
-November, 2023	1.00
-December, 2023	1.00
-January, 2024	1.00
-February, 2024	1.02
-March, 2024	1.02
-April, 2024	1.02
-May, 2024	1.02
-June, 2024	1.02
-July, 2024	1.02
-August, 2024	1.02
-September, 2024	1.02
-October, 2024	1.02
-November, 2024	1.02
-December, 2024	1.02
+January, 2021	0.9
+February, 2021	0.9
+March, 2021	0.9
+April, 2021	0.9
+May, 2021	0.9
+June, 2021	0.9
+July, 2021	0.9
+August, 2021	0.9
+September, 2021	0.9
+October, 2021	0.9
+November, 2021	0.9
+December, 2021	0.9
+January, 2022	0.9
+February, 2022	0.9
+March, 2022	0.9
+April, 2022	0.9
+May, 2022	0.9
+June, 2022	0.9
+July, 2022	0.9
+August, 2022	0.9
+September, 2022	0.9
+October, 2022	0.9
+November, 2022	0.9
+December, 2022	0.9
+January, 2023	0.9
+February, 2023	0.9
+March, 2023	0.9
+April, 2023	0.9
+May, 2023	0.9
+June, 2023	0.9
+July, 2023	0.9
+August, 2023	0.9
+September, 2023	0.9
+October, 2023	0.9
+November, 2023	0.9
+December, 2023	0.9
+January, 2024	0.9
+February, 2024	0.9
+March, 2024	0.9
+April, 2024	0.9
+May, 2024	0.9
+June, 2024	0.9
+July, 2024	0.9
+August, 2024	0.9
+September, 2024	0.9
+October, 2024	0.9
+November, 2024	0.9
+December, 2024	0.9
 January, 2025	0.9
 February, 2025	0.9
 March, 2025	0.9
@@ -524,18 +524,18 @@ September, 2025	0.9
 October, 2025	0.9
 November, 2025	0.9
 December, 2025	0.9
-January, 2026	0.9
-February, 2026	0.9
-March, 2026	0.9
-April, 2026	0.9
-May, 2026	0.9
-June, 2026	0.9
-July, 2026	0.9
-August, 2026	0.9
-September, 2026	0.9
-October, 2026	0.9
-November, 2026	0.9
-December, 2026	0.9
+January, 2026	0.95
+February, 2026	0.95
+March, 2026	0.95
+April, 2026	0.95
+May, 2026	0.95
+June, 2026	0.95
+July, 2026	0.95
+August, 2026	0.95
+September, 2026	0.95
+October, 2026	0.95
+November, 2026	0.95
+December, 2026	0.95
 January, 2027	0.9
 February, 2027	0.9
 March, 2027	0.9
@@ -853,6 +853,10 @@ December, 2050	0.9
 !		Since only year for Golden Pass is provided, those months are estimates.
 !		Added Plaquemines LNG
 !9/8/22	SYK	Adding Corpus Christi Stage III (CCStageIII)
+!7/24/23 SYK    Updating based on the liquefaction capacity tracker dated 6/29/2023 
+!		Includes: updates to phase 1 of Calcasieu Pass, delaying Golden Pass, adding Plaquemines phase 2. 
+!		When no specific month is given, I will assume it is the last month of that quarter/year.
+!7/27/24 SYK 	Updating based on 2024Q2 version of liquefaction tracker. 
 
 composite table:
 
@@ -864,8 +868,8 @@ SabinePass	4	0.59  			'August, 2017'
 SabinePass	5	0.59  			'November, 2018'			
 SabinePass	6	0.59 			'December, 2021'	
 CovePoint	1	0.69 			'March, 2018'			
-ElbaIsland	1	0.17 			'September, 2019'	!Trains 1-5
-ElbaIsland	2	0.17 			'May, 2020'		!Trains 6-10				
+ElbaIsland	1	0.16 			'September, 2019'	!Trains 1-5
+ElbaIsland	2	0.16 			'May, 2020'		!Trains 6-10				
 CorpusChristi	1	0.60 			'December, 2018'
 CorpusChristi	2	0.60 			'July, 2019'		
 CorpusChristi	3	0.60 			'December, 2020'	
@@ -875,13 +879,18 @@ Cameron		3	0.59 			'August, 2020'
 Freeport	1	0.66 			'September, 2019'
 Freeport	2	0.66 			'December, 2019'
 Freeport	3	0.66 			'March, 2020'
-CalcasieuPass	1	0.66			'December, 2021'	!Trains 1-9
+CalcasieuPass	1	0.66			'March, 2022'		!Trains 1-9
 CalcasieuPass	2	0.66			'September, 2022'	!Trains 10-18	
-GoldenPass	1	0.68			'December, 2023'
-GoldenPass	2	0.68			'July, 2024'
-GoldenPass	3	0.68			'December, 2024'
-Plaquemines	1	1.58			'December, 2024'	!Trains 1-24
-CCStageIII	1	1.32			'December, 2025'	!Trains 1-14
+GoldenPass	1	0.68			'December, 2026'
+GoldenPass	2	0.68			'June, 2027'
+GoldenPass	3	0.68			'December, 2027'
+Plaquemines	1	1.32			'December, 2024'	!Trains 1-18
+Plaquemines	2	1.32			'September, 2025'	!Trains 19-36
+PortArthur	1	1.58			'December, 2027'	!Trains 1-2
+CCStageIII	1	1.32			'December, 2024'	!Trains 1-14
+RioGrande	1	0.72			'December, 2027'	!Train 1
+RioGrande	2	0.72			'December, 2028'	!Train 2
+RioGrande	3	0.72			'December, 2029'	!Train 3
 ;
 
 !map projects to LNG export regions
@@ -898,7 +907,9 @@ Freeport	TX_E		1
 CalcasieuPass	LA		1
 GoldenPass	TX_E		1
 Plaquemines	LA		1
+PortArthur	TX_E		1
 CCStageIII	TX_E		1
+RioGrande	TX_E		1
 ;
 
 !Define ramp-up for new facilities by month and train
@@ -937,10 +948,10 @@ LNG_CostsYrDollars := '2021';
 composite table:
 
 lngexp	LNG_MaxExports	LNG_FirstYear	LNG_Liquefaction	LNG_SunkCost	LNG_PctFuelCharge	LNG_PeakExports		LNG_Regasification		
-MD	407.9		2027		3.30			3.00		0.15			0.38			0.1
-GA	119.9		2027		3.30			3.00		0.15			0.38			0.1
-LA	9999.9		2027		3.00			3.00		0.15			0.34			0.1
-TX_E	9999.9		2027		3.00			3.00		0.15			0.34			0.1
+MD	407.9		2029		3.30			3.00		0.15			0.38			0.1
+GA	119.9		2029		3.30			3.00		0.15			0.38			0.1
+LA	9999.9		2029		3.00			3.00		0.15			0.34			0.1
+TX_E	9999.9		2029		3.00			3.00		0.15			0.34			0.1
 ;
 
 LNG_AKMaxExports:=799.9;
@@ -993,33 +1004,41 @@ Europe		2.00  			0.041			!1.392  		   3.65
 !For Europe, use NBP.  For Asia, use Japan.
 !NBP from https://ycharts.com/indicators/uk_heren_nbp_index_natural_gas_prices
 !Japanese price from https://ycharts.com/indicators/japan_liquefied_natural_gas_import_price
+!TTF from here: https://www.energyinst.org/statistical-review/resources-and-data-downloads
 !MUST CONVERT TO 87$/Mcf IN CODE
 !Note to check for using IHS data, which has these prices
 
+!7/26/24	SYK	The NBP source has been discontinued on ycharts. Changing to the prices listed here for Europe (TTF):
+!			https://www.energyinst.org/statistical-review/resources-and-data-downloads
+!			NOTE: Pre-2005 data is NBP
+
 HistoricalLNGPrice := data table    
 
-year	Europe	   Asia				
+year	Europe	   Asia	
 2000 	 2.711     4.680
 2001 	 3.175     4.590
 2002 	 2.373     4.265
 2003 	 3.332     4.768
 2004 	 4.457     5.163
-2005 	 7.383     5.989
-2006 	 7.872     7.083
-2007 	 6.006     7.704
-2008 	10.790     12.603
-2009 	 4.850     8.994
-2010 	 6.556     10.925
-2011 	 9.042     14.709
-2012 	 9.464     16.613
-2013 	10.640     15.956
-2014 	 8.253     16.036 
-2015 	 6.526     10.402
-2016	 4.69	   6.89
-2017	 5.805	   8.043
-2018	 8.061	   10.67
-2019	 4.467	   10.565
-2020	 3.420	   8.314
+2005 	 5.808     5.989
+2006 	 7.258     7.083
+2007 	 5.897     7.704
+2008 	10.675     12.603
+2009 	 4.915     8.994
+2010 	 6.686     10.925
+2011 	 9.183     14.709
+2012 	 9.366     16.613
+2013 	10.520     15.956
+2014 	 8.110     16.036 
+2015 	 6.449     10.402
+2016	 4.528	   6.89	
+2017	 5.712	   8.043
+2018	 7.883	   10.67
+2019	 4.459	   10.565
+2020	 3.133	   8.314
+2021    15.665     10.761
+2022    36.094     17.678
+2023	12.865     14.386
 ;
 
 !Parameters to calculate price
@@ -1033,12 +1052,15 @@ year	Europe	   Asia
 !9/14/20	KDL	Changed both LNG_ExpOil to align with recent (last 10 yrs) history
 !10/721		SYK	Changed LNG_ExpOil to align with 15 yr history. Reverted LNG_ExpFlexLNG(Asia) back to -0.6
 !10/11/22	SYK	Updated LNG_ExpOil to align with new 15 yr history.
+!7/26/23	SYK	Updated LNGExpOil to align with new 15 year history. Switched data coefficient is based on to TTF price instead of NBP.
+!7/29/24	SYK	Updated LNGExpOil to new oil and and interantional lng prices.
+
 
 composite table:
 
 d_lng	LNG_PctFlex	LNG_ExpOil	LNG_ExpFlexLNG
-Europe	1.0		0.7248		-0.4
-Asia	1.0		0.9385		-0.6
+Europe	1.0		0.7759		-0.4
+Asia	1.0		0.9612		-0.6
 ;
 
 Convert_barrel_MMBtu := 5.8;
@@ -1074,73 +1096,71 @@ step_wop	LNG_step_OilPrice	LNG_ExpFlexLNG_adj	! LNG_step_OilPrice	LNG_ExpFlexLNG
 !			Updated production to match all Asia from IEO 2019.
 !			Consumption growth rates consistent with IEO 2019.
 !8/12/21	SYK		Updated Europe/Asia Cons and Asia production values from IEO 2021
+!7/29/24	SYK	Updated Europe consumption and Asia cons/production values from IEO2023.
 
 composite table:
-
-
-xyear   LNG_WorldFlex   	Cons_EuropeOECD  		Cons_Japan	Prod_China        
-2010	2013			20320				19100		15070
-2011	2927			18800				20490		14960
-2012	2838			18090				21560		15320
-2013	3124			18060				22220		15410
-2014	3382			16540				22710		16000
-2015	3272			17070				22840		16380
-2016	3489			18080				23860		16780
-2017	3343			18900				25190		17370
-2018	4132			18490				27420		17890
-2019	3906			19230				28210		18710
-2020	3550			18970				28990		18690
-2021	4083			19540				29800		19350
-2022	4185			19660				30790		20000
-2023	4489			19780				31720		20300
-2024	4851			19880				32620		20540
-2025	5032			19950				33430		20370
-2026	5450			20010				34300		20770
-2027	5984			20020				34990		21160
-2028	6278			20010				35740		21560
-2029	6755			20230				36480		21750
-2030	7293			20260				37210		22230
-2031	7870			20160				37550		22220
-2032	8366			20150				37910		22160
-2033	8469			20170				38330		22460
-2034	8893			20200				38790		22600
-2035	9429			20230				39160		22420
-2036	9886			20220				39650		21630
-2037	10670			20210				40000		21510
-2038	11142			20210				40650		21990
-2039	11457			20180				40880		21940
-2040	11305			20210				41610		22290
-2041	12876			20300				41840		21620
-2042	13811			20390				42360		22070
-2043	15137			20460				43180		22760
-2044	14972			20570				43780		23260
-2045	16098			20670				44140		23490
-2046	16351			20780				44780		24110
-2047	16485			20870				45460		24710
-2048	16611			21020				46080		25230
-2049	16753			21110				46650		25710
-2050	16889			21320				47240		26190
-2051	17047			21403				48084		26486
-2052	17205			21487				48947		26785
-2053	17363			21570				49828		27088
-2054	17521			21655				50729		27394
-2055	17679			21739				51650		27704
-2056	17837			21824				52590		28017
-2057	17996			21909				53552		28333
-2058	18154			21994				54534		28653
-2059	18312			22080				55537		28977
-2060	18470			22166				56562		29305
-2061	18628			22253				57610		29636
-2062	18786			22339				58680		29971
-2063	18944			22427				59773		30309
-2064	19102			22514				60890		30652
-2065	19260			22602				62031		30998
-2066	19418			22690				63196		31348
-2067	19576			22778				64387		31703
-2068	19735			22867				65603		32061
-2069	19893			22957				66845		32423
-2070	20051			23046				68114		32790
-      
+xyear	LNG_WorldFlex	Cons_EuropeOECD	Cons_Japan	Prod_China        
+2010	2013		20927		19097		15070
+2011	2927		19465		20536		14960
+2012	2838		18836		21610		15320
+2013	3124		18587		22285		15410
+2014	3382		16885		22987		16000
+2015	3272		17432		23132		16380
+2016	3489		18430		24039		16780
+2017	3343		19338		25474		17370
+2018	4132		18957		27533		17890
+2019	3906		19208		28238		18710
+2020	3550		18526		28225		18690
+2021	4083		19599		30169		19350
+2022	4185		19802		32902		20000
+2023	4489		19806		33931		20300
+2024	4851		20261		34406		20540
+2025	5032		20561		35126		20370
+2026	5450		20729		35689		20770
+2027	5984		20967		36187		21160
+2028	6278		21198		36703		21560
+2029	6755		21466		37210		21750
+2030	7293		21765		37732		22230
+2031	7870		21709		38253		22220
+2032	8366		21663		38737		22160
+2033	8469		21641		39298		22460
+2034	8893		21666		39769		22600
+2035	9429		21650		40249		22420
+2036	9886		21681		40865		21630
+2037	10670		21679		41467		21510
+2038	11142		21716		42071		21990
+2039	11457		21721		42681		21940
+2040	11305		21746		43312		22290
+2041	12876		21751		44120		21620
+2042	13811		21775		44921		22070
+2043	15137		21789		45718		22760
+2044	14972		21853		46519		23260
+2045	16098		21880		47330		23490
+2046	16351		21918		48134		24110
+2047	16485		21984		48933		24710
+2048	16611		22085		49712		25230
+2049	16753		22142		50491		25710
+2050	16889		22233		51295		26190
+2051	17047		22325		52141		26432
+2052	17205		22418		53003		26677
+2053	17363		22510		53883		26924
+2054	17521		22604		54780		27173
+2055	17679		22697		55696		27424
+2056	17837		22791		56630		27678
+2057	17996		22886		57582		27934
+2058	18154		22981		58554		28193
+2059	18312		23076		59545		28454
+2060	18470		23172		60556		28717
+2061	18628		23268		61587		28983
+2062	18786		23364		62639		29251
+2063	18944		23461		63711		29521
+2064	19102		23558		64805		29795
+2065	19260		23656		65921		30070
+2066	19418		23754		67059		30348
+2067	19576		23852		68219		30629
+2068	19735		23951		69403		30913
+2069	19893		24050		70610		31199
+2070	20051		24150		71841		31487  
 ;
 
 

@@ -684,13 +684,14 @@ module P_
 !           WRITE(6,*) 'HMSWHR ',MNUMNR,nr,curiyr,curitr,WHRMSEL(nr,CURIYR), HMSWHR(CURIYR)
            WCFMSEL(nr,CURIYR) = UPMCF(WIMS)
  !          WRITE(6,*) 'UPMCF GETEMVAL ',MNUMNR,nr,curiyr,curitr, WCFMSEL(nr,CURIYR), UPMCF(WIMS)
-           WHRGPEL(nr,CURIYR) = HFOSHR(CURIYR)
-           WHRHYEL(nr,CURIYR) = HFOSHR(CURIYR)
-           WHRWIEL(nr,CURIYR) = HFOSHR(CURIYR)
-           WHRWLEL(nr,CURIYR) = HFOSHR(CURIYR)
-           WHRSTEL(nr,CURIYR) = HFOSHR(CURIYR)
-           WHRPVEL(nr,CURIYR) = HFOSHR(CURIYR)
-           WHRPTEL(nr,CURIYR) = HFOSHR(CURIYR)
+!    AEO2025 update to use 3412 for renewable consumption reporting 
+           WHRGPEL(nr,CURIYR) = 3412.00
+           WHRHYEL(nr,CURIYR) = 3412.00
+           WHRWIEL(nr,CURIYR) = 3412.00
+           WHRWLEL(nr,CURIYR) = 3412.00
+           WHRSTEL(nr,CURIYR) = 3412.00
+           WHRPVEL(nr,CURIYR) = 3412.00
+           WHRPTEL(nr,CURIYR) = 3412.00
       enddo
         ENDIF
       ELSE
@@ -1235,8 +1236,10 @@ module P_
 
       do ny=1, mnumyr
          do nr=1,unrgns
-            WRITE(18,5913) CURIRUN, CURIYR+1989, nr, curiyr+ny+1988, windinputCF(nr,ny), windinputCF_WL(nr,ny)
- 5913       FORMAT(1X,"RENEW_WindInputCF",4(":",I5),2(":",F21.6))
+!            WRITE(18,5913) CURIRUN, CURIYR+1989, nr, curiyr+ny+1988, windinputCF(nr,ny), windinputCF_WL(nr,ny)
+            WRITE(18,5913) CURIRUN, CURIYR+1989, nr, curiyr+ny+1988, windinputCF(nr,ny)
+! 5913       FORMAT(1X,"RENEW_WindInputCF",4(":",I5),2(":",F21.6))
+ 5913       FORMAT(1X,"RENEW_WindInputCF",4(":",I5),1(":",F21.6))
          end do
       end do
 
@@ -1552,10 +1555,10 @@ module P_
 
 !     Write out the multipliers to the debug file.
 
-      write(IORNREPT,'(a3,1x,a7,<2*mnumcl>(a9,i1))'),'Yr','ICCMeth_WL',(('ICCMult_WL',7-wc),('ICCCost_WL',7-wc),wc=1,mnumcl)
-      do y=1,MNUMYR+5
-         write(IORNREPT,'(i4,i6,<2*mnumcl>f10.1)') y+1989,ICCMeth_WL(y),(ICCMult_WL(wc,y),ICCCost_WL(wc,y),wc=1,mnumcl)
-      end do
+!      write(IORNREPT,'(a3,1x,a7,<2*mnumcl>(a9,i1))'),'Yr','ICCMeth_WL',(('ICCMult_WL',7-wc),('ICCCost_WL',7-wc),wc=1,mnumcl)
+!      do y=1,MNUMYR+5
+!         write(IORNREPT,'(i4,i6,<2*mnumcl>f10.1)') y+1989,ICCMeth_WL(y),(ICCMult_WL(wc,y),ICCCost_WL(wc,y),wc=1,mnumcl)
+!      end do
 
 !     Land area is constant in all years so copy it over the years (actually as waste of space).
 
@@ -1710,8 +1713,8 @@ module P_
 
          CFLrn_WL = WL_FixedX * log(CFAtx / CFUlt_WL(1))
 
-         write( * ,'(a,3i4,7f12.2)')'WINDDBG4 - y,i,overrideCF,cflrn_WL,WL_FixedX,cfatx,CFUlt_WL,log: ', &
-            curiyr,curitr,OverRideCF,CFLrn_WL,WL_FixedX,CFAtx,CFUlt_WL(1),log(CFAtx / CFUlt_WL(1))
+!         write( * ,'(a,3i4,7f12.2)')'WINDDBG4 - y,i,overrideCF,cflrn_WL,WL_FixedX,cfatx,CFUlt_WL,log: ', &
+!            curiyr,curitr,OverRideCF,CFLrn_WL,WL_FixedX,CFAtx,CFUlt_WL(1),log(CFAtx / CFUlt_WL(1))
 
 !        Calcualte the capacity factor based upon the amount of installed capacity for new technology.
 
@@ -1733,8 +1736,8 @@ module P_
                CF_WL(curiyr,wc) = CFUlt_WL(wc) * exp(CFLrn_WL / NatWLCap)
             ELSE
 
-               write( * ,'(a,4(":",i4),4(":",f12.2))')'WINDDBG3 - y,i,c,CFUlt_WL,CFlrn,NatWLCap: ',  &
-                  curirun,curiyr,curitr,wc,CFUlt_WL(wc),CFLrn,NatWLCap,CF_WL(curiyr,wc)
+!               write( * ,'(a,4(":",i4),4(":",f12.2))')'WINDDBG3 - y,i,c,CFUlt_WL,CFlrn,NatWLCap: ',  &
+!                  curirun,curiyr,curitr,wc,CFUlt_WL(wc),CFLrn,NatWLCap,CF_WL(curiyr,wc)
 
             END IF
          end do
@@ -1827,8 +1830,8 @@ module P_
             CapAdded (nr,curiyr), CapCommit(nr,curiyr), CapInstall(nr,curiyr), UCAPWNR(nr,curiyr-1), UCAPWNR(nr,curiyr), UADDWND(nr,curiyr), UADDWND(nr,curiyr+NLead)
  3515    FORMAT (1X, "WINDMISC3_Capacity",":WN",7(":",I5),11(":",F21.6))
 
-         WRITE (18,3516) CURIRUN, CURIYR+1989, CURITR, nr, WIWL, WTECH_WL, NLead_WL, CapIandC_WL(nr,curiyr), CapCmtTot_WL(nr,curiyr), CapPlnBld_WL(nr,curiyr), CapNewBld_WL(nr,curiyr), &
-            CapAdded_WL (nr,curiyr), CapCommit_WL(nr,curiyr), CapInstall_WL(nr,curiyr), UCAPWLR(nr,curiyr-1), UCAPWLR(nr,curiyr), UADDWLD(nr,curiyr), UADDWLD(nr,curiyr+NLead)
+ !        WRITE (18,3516) CURIRUN, CURIYR+1989, CURITR, nr, WIWL, WTECH_WL, NLead_WL, CapIandC_WL(nr,curiyr), CapCmtTot_WL(nr,curiyr), CapPlnBld_WL(nr,curiyr), CapNewBld_WL(nr,curiyr), &
+ !           CapAdded_WL (nr,curiyr), CapCommit_WL(nr,curiyr), CapInstall_WL(nr,curiyr), UCAPWLR(nr,curiyr-1), UCAPWLR(nr,curiyr), UADDWLD(nr,curiyr), UADDWLD(nr,curiyr+NLead)
  3516    FORMAT (1X, "WINDMISC3_Capacity",":WL",7(":",I5),11(":",F21.6))
 
 
@@ -1952,7 +1955,7 @@ module P_
                      ICapAvl(nr,curiyr,wc,bf) = 0.0
                   endif
 
-                  WRITE(18,3518) CURIRUN, CURIYR+1989, CURITR, nr, WIWL, WTECH_WL, n, 7-wc, bf, AvlDiff, CapAdded_WL(nr,curiyr), CapOut_WL, ICapAvl(nr,curiyr,wc,bf), ICapInc_WL(nr,curiyr,wc,bf)
+!                  WRITE(18,3518) CURIRUN, CURIYR+1989, CURITR, nr, WIWL, WTECH_WL, n, 7-wc, bf, AvlDiff, CapAdded_WL(nr,curiyr), CapOut_WL, ICapAvl(nr,curiyr,wc,bf), ICapInc_WL(nr,curiyr,wc,bf)
  3518             FORMAT (1X,"WINDMISC3_INCCAP",":WL",9(":",I5),5(":",F21.6))
 
                endif
@@ -1969,7 +1972,7 @@ module P_
                   CapOut_WL = 0.0
                   ICapAvl(nr,curiyr,wc,bf) = ICapAvl(nr,curiyr,wc,bf) - ICapInc_WL(nr,curiyr,wc,bf)
 
-                  WRITE(6,3518) CURIRUN, CURIYR+1989, CURITR, nr, WIWL, WTECH_WL, n, 7-wc, bf, AvlDiff, CapAdded_WL(nr,curiyr), CapOut_WL, ICapAvl(nr,curiyr,wc,bf), ICapInc_WL(nr,curiyr,wc,bf)
+!                  WRITE(6,3518) CURIRUN, CURIYR+1989, CURITR, nr, WIWL, WTECH_WL, n, 7-wc, bf, AvlDiff, CapAdded_WL(nr,curiyr), CapOut_WL, ICapAvl(nr,curiyr,wc,bf), ICapInc_WL(nr,curiyr,wc,bf)
 
                endif
             end do
@@ -2019,12 +2022,12 @@ module P_
             end do
          end do
 
-         do wc = 1 , mnumcl
-            do bf = 1 , mnumbf
-               WCapAvl(nr,curiyr,wc,bf) = ICapAvl(nr,curiyr,wc,bf)
-               WCapInc_WL(nr,curiyr,wc,bf) = 0.0
-            end do
-         end do
+         ! do wc = 1 , mnumcl
+            ! do bf = 1 , mnumbf
+               ! WCapAvl(nr,curiyr,wc,bf) = ICapAvl(nr,curiyr,wc,bf)   ! mas (10/11/24) if we ever turn WL on, this will need to be fixed
+               ! WCapInc_WL(nr,curiyr,wc,bf) = 0.0                     ! WCapAvl and ICapAvl here probably should be specific to WL
+            ! end do                                                   ! As is now, it's resetting WCapAvl for WN, when then causes overbuilding
+         ! end do
          do i = NLead_WL,1, - 1
             CapOut_WL = CapCommit_WL(nr,curiyr - (i - 1))
             do n = 1,RNum_WL
@@ -2493,8 +2496,8 @@ module P_
                   WCurCl_WL(nr,curiyr) = wc
                   WCurBf_WL(nr,curiyr) = bf
 
-                  WRITE(18,3521) CURIRUN, CURIYR+1989, CURITR, nr, n, 7-wc, 7-WCurCL_WL(nr,curiyr), bf, WCurBF_WL(nr,curiyr), Done_WL, ConsNum_WL(nr), XSwitch, &
-                     ConsCap_WL(nr), WCapAvl(nr,curiyr,wc,bf), ConsLT_WL(nr), XLTElas(nr,wc), ConsCC_WL(nr), ICCMultR_WL(nr,wc,curiyr), ConsCF_WL(nr), CF_WL(curiyr,wc), ConsTD_WL(nr), WNTDBFCS(nr,bf)
+!                  WRITE(18,3521) CURIRUN, CURIYR+1989, CURITR, nr, n, 7-wc, 7-WCurCL_WL(nr,curiyr), bf, WCurBF_WL(nr,curiyr), Done_WL, ConsNum_WL(nr), XSwitch, &
+!                     ConsCap_WL(nr), WCapAvl(nr,curiyr,wc,bf), ConsLT_WL(nr), XLTElas(nr,wc), ConsCC_WL(nr), ICCMultR_WL(nr,wc,curiyr), ConsCF_WL(nr), CF_WL(curiyr,wc), ConsTD_WL(nr), WNTDBFCS(nr,bf)
  3521             FORMAT(1X,"ConsCF",":WL",12(":",I4),10(":",F24.6))
 
                end if
@@ -2621,8 +2624,10 @@ module P_
 
       do nr = 1 ,UNRGNS  !  maxnrg !mnumnr
 
-         WRITE(18,2515) CURIRUN, CURIYR+1989, CURITR, nr, ConsCF(nr), WindInputCF(nr,curiyr), ConsCF_WL(nr), WindInputCF_WL(nr,curiyr)
- 2515    FORMAT(1X,"RENEW_CONS_CF",4(":",I5),4(":",F21.6))
+!         WRITE(18,2515) CURIRUN, CURIYR+1989, CURITR, nr, ConsCF(nr), WindInputCF(nr,curiyr), ConsCF_WL(nr), WindInputCF_WL(nr,curiyr)
+         WRITE(18,2515) CURIRUN, CURIYR+1989, CURITR, nr, ConsCF(nr), WindInputCF(nr,curiyr)
+! 2515    FORMAT(1X,"RENEW_CONS_CF",4(":",I5),4(":",F21.6))
+ 2515    FORMAT(1X,"RENEW_CONS_CF",4(":",I5),2(":",F21.6))
 
          do m = 1,12
             do d = 1,3
@@ -2642,9 +2647,6 @@ module P_
                   s=hrtoecpgrp(m,d,h) !this maps current slice to time period under consideration
                   wc = WCurCl(nr,curiyr)
 
-!                 Capacity factors are transferred to ECP via the first wind class, WSFWIEL(r,y,c = 1,s).
-
-!                 WSFWIEL(nr,curiyr,1,s) = SubPer(nr,s) / Slice(nr,s) * ConsCF(nr)
 
 !                 For debugging purposes, JDoCFB = 0 don't do this, JDoCFB = 1 do this.
 
@@ -3265,7 +3267,7 @@ module P_
                      do b=1,mnumbf
                         if (Used(w,b).eq.0.and.AnnCost_WL(nr,curiyr,w,b).lt.XCost) then
 
-                           WRITE(18,4817) CURIRUN, CURIYR+1989, nr, n, wc, w, bf, b, XCOST, AnnCost_WL(nr,curiyr,w,b)
+!                           WRITE(18,4817) CURIRUN, CURIYR+1989, nr, n, wc, w, bf, b, XCOST, AnnCost_WL(nr,curiyr,w,b)
  4817                      FORMAT(1X,"Renew_windrank3:WL",8(":",I5),2(":",F21.6))
 
                            XCost=AnnCost_WL(nr,curiyr,w,b)
@@ -3281,7 +3283,7 @@ module P_
                      do w=1,mnumcl
                         do b=1,mnumbf
 
-                           WRITE(6,1003) curcalyr,nr,n,w,b,AnnCost_WL(nr,curiyr,w,b)
+!                           WRITE(6,1003) curcalyr,nr,n,w,b,AnnCost_WL(nr,curiyr,w,b)
  1003                      format(1X,"Oops_used",5(":",I4),":",F20.6)
 
                         end do
@@ -3336,9 +3338,9 @@ module P_
          write(IORNREPT,'(1X,"WN",1x,i3,2x,F10.2,<mnumcl>F6.2,<mnumcl>F10.2)') nr, CapCostR(nr), (ICCMultR(nr,wc,curiyr),wc=1,mnumcl), (ICCCostR(nr,wc,curiyr),wc=1,mnumcl)
       enddo
 
-      do nr=1,unrgns
-         write(IORNREPT,'(1X,"WL",1x,i3,2x,F10.2,<mnumcl>F6.2,<mnumcl>F10.2)') nr, CapCostR_WL(nr), (ICCMultR_WL(nr,wc,curiyr),wc=1,mnumcl), (ICCCostR_WL(nr,wc,curiyr),wc=1,mnumcl)
-      enddo
+!      do nr=1,unrgns
+!         write(IORNREPT,'(1X,"WL",1x,i3,2x,F10.2,<mnumcl>F6.2,<mnumcl>F10.2)') nr, CapCostR_WL(nr), (ICCMultR_WL(nr,wc,curiyr),wc=1,mnumcl), (ICCCostR_WL(nr,wc,curiyr),wc=1,mnumcl)
+!      enddo
 
       write(IORNREPT,'(1X,"WI",/,a)') 'Cost of Electricity (with Cost Rank) (Annualized Cost per Kwh in $87)'
       write(IORNREPT,'(1X,"WI",5x,a)') rept_head
@@ -3350,55 +3352,55 @@ module P_
          end do
  end do
 
-      do wc=1,mnumcl
-         do bf=1,mnumbf
-            IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-               write(IORNREPT,'(1X,"WL",a1,i1,a1,i1,1x,<unrgns>(f10.4,i3))') 'C',7-wc,'Z',bf,(AnnCost_WL(nr,curiyr,wc,bf),Rank_WL(nr,wc,bf),nr=1,unrgns)
-         end do
-      end do
+!      do wc=1,mnumcl
+!         do bf=1,mnumbf
+!            IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!               write(IORNREPT,'(1X,"WL",a1,i1,a1,i1,1x,<unrgns>(f10.4,i3))') 'C',7-wc,'Z',bf,(AnnCost_WL(nr,curiyr,wc,bf),Rank_WL(nr,wc,bf),nr=1,unrgns)
+!         end do
+!      end do
 
       write(IORNREPT,'(1X,"WI",/,a)') 'Current "Best" Wind Class and "Best" Buffer Zone'
       write(IORNREPT,'(1X,"WI",20x,a)') rept_head
       write(IORNREPT,'(1X,"WN",a,<unrgns>i10)') 'Best Wind Class       ',(7-WCurCl(nr,curiyr),nr=1,unrgns)
       write(IORNREPT,'(1X,"WN",a,<unrgns>i10)') 'Best Buffer Zone      ',(WCurBf(nr,curiyr),nr=1,unrgns)
-      write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Wind Class       ',(7-WCurCl_WL(nr,curiyr),nr=1,unrgns)
-      write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Buffer Zone      ',(WCurBf_WL(nr,curiyr),nr=1,unrgns)
+!      write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Wind Class       ',(7-WCurCl_WL(nr,curiyr),nr=1,unrgns)
+!      write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Buffer Zone      ',(WCurBf_WL(nr,curiyr),nr=1,unrgns)
 
 !     if(curiyr.eq.6) then
 
-      if (curiyr.eq.UESTYR-UHBSYR) then
+      if (curiyr .eq. UESTYR-UHBSYR) then
 
 !        Write out the first year of land area to the debug file.
 
          write(IORNREPT,'(1X,"WI",/,a,i2)') 'Land Area Available by Region, Class, and Zone'
-         write(IORNREPT,'(1X,"WI",a4,1x,<mnumcl*mnumbf>(a5,i1,a1,i1),a10)') 'NERC', ((('C',7-wc,'Z',bf),wc=1,mnumcl),bf=1,mnumbf),'Total'
+         write(IORNREPT,'(1X,"WI",a4,1x,<mnumcl*mnumbf>(a5,i1,a1,i1),a10)') 'NERC', ((('C',7-wc,'Z',bf),bf=1,mnumbf),wc=1,mnumcl),'Total'
 
-         do nr=1,unrgns
-            XTot=0.0
-            do wc=1,mnumcl
-               do bf=1,mnumbf
-                  XTot=XTot+LdArea(nr,6,wc,bf)
+         do nr = 1,unrgns
+            XTot = 0.0
+            do wc = 1,mnumcl
+               do bf = 1,mnumbf
+                  XTot = XTot+LdArea(nr,UESTYR-UHBSYR,wc,bf)
                end do
             end do
-            write(IORNREPT,'(1X,"WI",i4,2x,<mnumcl*mnumbf>f8.0,f10.0)') nr,((LdArea(nr,6,wc,bf),bf=1,mnumbf),wc=1,mnumcl),XTot
+            write(IORNREPT,'(1X,"WI",i4,2x,<mnumcl*mnumbf>f8.0,f10.0)') nr,((LdArea(nr,UESTYR-UHBSYR,wc,bf),bf=1,mnumbf),wc=1,mnumcl),XTot
          end do
 
 !        Write out the maximum potential capacity for all years and one sample region to the debug file.
 
-         nr=21
+         ! nr=21
 
-         write(IORNREPT,'(1X,"WI",/,a,i2)') 'Maximum Wind Capacity Available by Year, Class, and Zone, Region ',nr
-         write(IORNREPT,'(1X,"WI",a4,1x,<mnumcl*mnumbf>(a7,i1,a1,i1),a10)') 'Year', ((('C',7-wc,'Z',bf),wc=1,mnumcl),bf=1,mnumbf),'Total'
+         ! write(IORNREPT,'(1X,"WI",/,a,i2)') 'Maximum Wind Capacity Available by Year, Class, and Zone, Region ',nr
+         ! write(IORNREPT,'(1X,"WI",a4,1x,<mnumcl*mnumbf>(a7,i1,a1,i1),a10)') 'Year', ((('C',7-wc,'Z',bf),wc=1,mnumcl),bf=1,mnumbf),'Total'
 
-         do yr=1,MNUMYR
-            XTot=0.0
-            do wc=1,mnumcl
-               do bf=1,mnumbf
-                  XTot=XTot+WCapMax(nr,yr,wc,bf)
-               end do
-            end do
-            write(IORNREPT,'(1X,"WI",i4,2x,<mnumcl*mnumbf>f10.0,2x,f10.0)') yr+1989,((WCapMax(nr,yr,wc,bf),bf=1,mnumbf),wc=1,mnumcl),XTot
-         end do
+         ! do yr=1,MNUMYR
+            ! XTot=0.0
+            ! do wc=1,mnumcl
+               ! do bf=1,mnumbf
+                  ! XTot=XTot+WCapMax(nr,yr,wc,bf)
+               ! end do
+            ! end do
+            ! write(IORNREPT,'(1X,"WI",i4,2x,<mnumcl*mnumbf>f10.0,2x,f10.0)') yr+1989,((WCapMax(nr,yr,wc,bf),bf=1,mnumbf),wc=1,mnumcl),XTot
+         ! end do
 
       else
 
@@ -3409,26 +3411,26 @@ module P_
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Planned Builds      ',(CapPlnBld(nr,curiyr),nr=1,unrgns),CapPlnBld(mnumnr,curiyr)
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed-Now Built ',(CapNewBld(nr,curiyr),nr=1,unrgns),CapNewBld(mnumnr,curiyr)
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total New           ',(CapAdded(nr,curiyr),nr=1,unrgns),CapAdded(mnumnr,curiyr)
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Planned Builds      ',(CapPlnBld_WL(nr,curiyr),nr=1,unrgns),CapPlnBld_WL(mnumnr,curiyr)
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed-Now Built ',(CapNewBld_WL(nr,curiyr),nr=1,unrgns),CapNewBld_WL(mnumnr,curiyr)
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total New           ',(CapAdded_WL(nr,curiyr),nr=1,unrgns),CapAdded_WL(mnumnr,curiyr)
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Planned Builds      ',(CapPlnBld_WL(nr,curiyr),nr=1,unrgns),CapPlnBld_WL(mnumnr,curiyr)
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed-Now Built ',(CapNewBld_WL(nr,curiyr),nr=1,unrgns),CapNewBld_WL(mnumnr,curiyr)
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total New           ',(CapAdded_WL(nr,curiyr),nr=1,unrgns),CapAdded_WL(mnumnr,curiyr)
          write(IORNREPT,'(1X,"WI",a,a)') 'Na>','Cumulative Installed Capacity'
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total Cumulative    ',(CapInstall(nr,curiyr),nr=1,unrgns),CapInstall(mnumnr,curiyr)
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total Cumulative    ',(CapInstall_WL(nr,curiyr),nr=1,unrgns),CapInstall_WL(mnumnr,curiyr)
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total Cumulative    ',(CapInstall_WL(nr,curiyr),nr=1,unrgns),CapInstall_WL(mnumnr,curiyr)
          write(IORNREPT,'(1X,"WI",a,a)') 'Na>','Committed Capacity'
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed This Year ',(CapCommit(nr,curiyr),nr=1,unrgns),CapCommit(mnumnr,curiyr)
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed This Year ',(CapCommit_WL(nr,curiyr),nr=1,unrgns),CapCommit_WL(mnumnr,curiyr)
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed This Year ',(CapCommit_WL(nr,curiyr),nr=1,unrgns),CapCommit_WL(mnumnr,curiyr)
          do i=1,NLead-1
             write(IORNREPT,'(1X,"WN",a,a,i1,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed Year-',i,'    ',(CapCommit(nr,curiyr-i),nr=1,unrgns),CapCommit(mnumnr,curiyr-i)
          end do
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total Committed     ',(CapCmtTot(nr,curiyr),nr=1,unrgns),CapCmtTot(mnumnr,curiyr)
-         do i=1,NLead-1
-            write(IORNREPT,'(1X,"WL",a,a,i1,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed Year-',i,'    ',(CapCommit_WL(nr,curiyr-i),nr=1,unrgns),CapCommit_WL(mnumnr,curiyr-i)
-         end do
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total Committed     ',(CapCmtTot_WL(nr,curiyr),nr=1,unrgns),CapCmtTot_WL(mnumnr,curiyr)
+!         do i=1,NLead-1
+!            write(IORNREPT,'(1X,"WL",a,a,i1,a,<unrgns>f10.1,f11.1)') 'Na>','  Committed Year-',i,'    ',(CapCommit_WL(nr,curiyr-i),nr=1,unrgns),CapCommit_WL(mnumnr,curiyr-i)
+!         end do
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total Committed     ',(CapCmtTot_WL(nr,curiyr),nr=1,unrgns),CapCmtTot_WL(mnumnr,curiyr)
          write(IORNREPT,'(1X,"WI",a,a)') 'Na>','Cumulative Installed Plus Committed Capacity'
          write(IORNREPT,'(1X,"WN",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total               ',(CapIandC(nr,curiyr),nr=1,unrgns),CapIandC(mnumnr,curiyr)
-         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total               ',(CapIandC_WL(nr,curiyr),nr=1,unrgns),CapIandC_WL(mnumnr,curiyr)
+!         write(IORNREPT,'(1X,"WL",a,a,<unrgns>f10.1,f11.1)') 'Na>','  Total               ',(CapIandC_WL(nr,curiyr),nr=1,unrgns),CapIandC_WL(mnumnr,curiyr)
 
          write(IORNREPT,'(1X,"WI",a,a)') 'Nc>'
          write(IORNREPT,'(1X,"WI",a,a,i4)') 'Nc>','Current Year Ranking by Cost (Rank) - Year ',curcalyr
@@ -3441,12 +3443,12 @@ module P_
             end do
          end do
 
-         do wc=1,mnumcl
-            do bf=1,mnumbf
-               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>i10)') 'Nc>','C',7-wc,'Z',bf,(Rank_WL(nr,wc,bf),nr=1,unrgns)
-            end do
-         end do
+!         do wc=1,mnumcl
+!            do bf=1,mnumbf
+!               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>i10)') 'Nc>','C',7-wc,'Z',bf,(Rank_WL(nr,wc,bf),nr=1,unrgns)
+!            end do
+!         end do
 
          write(IORNREPT,'(1X,"WI",a,a)') 'Nb>'
          write(IORNREPT,'(1X,"WI",a,a,i4)') 'Nb>','Increment in Installed Capacity (ICapInc) - Year ',curcalyr
@@ -3465,22 +3467,22 @@ module P_
             end do
          end do
 
-         write(IORNREPT,'(1X,"WN",a,2x,a,15x,14f8.1)') 'Nb>','Total',(RDisp(nr),nr=1,13),RDisp(16)
+         write(IORNREPT,'(1X,"WN",a,2x,a,15x,14f8.1)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(16)
 
          do nr=1,mnumnr
             RDisp(nr)=0.0
          end do
          do wc=1,mnumcl
             do bf=1,mnumbf
-               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(ICapInc_WL(nr,curiyr,wc,bf),nr=1,unrgns),ICapInc_WL(mnumnr,curiyr,wc,bf)
+!               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(ICapInc_WL(nr,curiyr,wc,bf),nr=1,unrgns),ICapInc_WL(mnumnr,curiyr,wc,bf)
                do nr=1,mnumnr
                   RDisp(nr)=RDisp(nr)+ICapInc_WL(nr,curiyr,wc,bf)
                end do
             end do
          end do
 
-         write(IORNREPT,'(1X,"WL",a,2x,a,15x,<unrgns>f10.0,f11.0)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(mnumnr)
+!         write(IORNREPT,'(1X,"WL",a,2x,a,15x,<unrgns>f10.0,f11.0)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(mnumnr)
 
          write(IORNREPT,'(1X,"WI",a,a)') 'Nb>'
          write(IORNREPT,'(1X,"WI",a,a,i4)') 'Nb>','Cumulative Installed Capacity (ICapCum) - Year ',curcalyr
@@ -3506,15 +3508,15 @@ module P_
          end do
          do wc=1,mnumcl
             do bf=1,mnumbf
-               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(ICapCum_WL(nr,curiyr,wc,bf),nr=1,unrgns),ICapCum_WL(mnumnr,curiyr,wc,bf)
+!               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(ICapCum_WL(nr,curiyr,wc,bf),nr=1,unrgns),ICapCum_WL(mnumnr,curiyr,wc,bf)
                do nr=1,mnumnr
                   RDisp(nr)=RDisp(nr)+ICapCum_WL(nr,curiyr,wc,bf)
                end do
             end do
          end do
 
-         write(IORNREPT,'(1X,"WL",a,2x,a,15x,<unrgns>f10.0,f11.0)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(mnumnr)
+!         write(IORNREPT,'(1X,"WL",a,2x,a,15x,<unrgns>f10.0,f11.0)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(mnumnr)
 
          write(IORNREPT,'(1X,"WI",a,a)') 'Nb>'
          write(IORNREPT,'(1X,"WI",a,a,i4)') 'Nb>','Capacity Available (Accounting for Installed Only) (ICapAvl) - Year ',curcalyr
@@ -3558,8 +3560,8 @@ module P_
          end do
          do wc=1,mnumcl
             do bf=1,mnumbf
-               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(WCapInc_WL(nr,curiyr,wc,bf),nr=1,unrgns),WCapInc_WL(mnumnr,curiyr,wc,bf)
+!               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(WCapInc_WL(nr,curiyr,wc,bf),nr=1,unrgns),WCapInc_WL(mnumnr,curiyr,wc,bf)
                do nr=1,mnumnr
                   RDisp(nr)=RDisp(nr)+WCapInc_WL(nr,curiyr,wc,bf)
                end do
@@ -3590,14 +3592,14 @@ module P_
          end do
          do wc=1,mnumcl
             do bf=1,mnumbf
-               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(WCapCum_WL(nr,curiyr,wc,bf),nr=1,unrgns),WCapCum_WL(mnumnr,curiyr,wc,bf)
+!               IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!                  write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<unrgns>f10.0,f11.0)') 'Nb>','C',7-wc,'Z',bf,(WCapCum_WL(nr,curiyr,wc,bf),nr=1,unrgns),WCapCum_WL(mnumnr,curiyr,wc,bf)
                do nr=1,mnumnr
                   RDisp(nr)=RDisp(nr)+WCapCum_WL(nr,curiyr,wc,bf)
                end do
             end do
          end do
-         write(IORNREPT,'(1X,"WL",a,2x,a,15x,<unrgns>f10.0,f11.0)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(mnumnr)
+!         write(IORNREPT,'(1X,"WL",a,2x,a,15x,<unrgns>f10.0,f11.0)') 'Nb>','Total',(RDisp(nr),nr=1,unrgns),RDisp(mnumnr)
 
          write(IORNREPT,'(1X,"WI",a,a)') 'Nb>'
          write(IORNREPT,'(1X,"WI",a,a,i4)') 'Nb>','Capacity Available (Accounting for Installed Plus Committed) (WCapAvl) - Year ',curcalyr
@@ -3642,10 +3644,10 @@ module P_
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.1)') 'Capacity Increment    ',(CapIncr(nr,curiyr),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.1)') 'Category Tolerance    ',(ConsTol(nr),nr=1,unrgns)
 
-         write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Wind Class       ',(7-WCurCl_WL(nr,curiyr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Buffer Zone      ',(WCurBf_WL(nr,curiyr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Capacity Increment    ',(CapIncr_WL(nr,curiyr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Category Tolerance    ',(ConsTol_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Wind Class       ',(7-WCurCl_WL(nr,curiyr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Best Buffer Zone      ',(WCurBf_WL(nr,curiyr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Capacity Increment    ',(CapIncr_WL(nr,curiyr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Category Tolerance    ',(ConsTol_WL(nr),nr=1,unrgns)
 
          write(IORNREPT,'(1X,"WI",/,a)') 'Potential Category Weighting - Available Capacity, Weighted Average Costs and CFs'
          write(IORNREPT,'(1X,"WI",20x,a)') rept_head
@@ -3656,12 +3658,12 @@ module P_
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'WgtAvg Capacity Factor',(ConsCF(nr),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.2)') 'WgtAvg T&D Cost       ',(ConsTD(nr),nr=1,unrgns)
 
-         write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Number of Categories  ',(ConsNum_WL(nr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Available Capacity    ',(ConsCap_WL(nr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'WgtAvg LT Multiplier  ',(ConsLT_WL(nr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'WgtAvg CC Multiplier  ',(ConsCC_WL(nr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'WgtAvg Capacity Factor',(ConsCF_WL(nr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.2)') 'WgtAvg T&D Cost       ',(ConsTD_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>i10)') 'Number of Categories  ',(ConsNum_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Available Capacity    ',(ConsCap_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'WgtAvg LT Multiplier  ',(ConsLT_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'WgtAvg CC Multiplier  ',(ConsCC_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'WgtAvg Capacity Factor',(ConsCF_WL(nr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.2)') 'WgtAvg T&D Cost       ',(ConsTD_WL(nr),nr=1,unrgns)
 
 !        Write the long term elasticities by wind class.
 
@@ -3674,7 +3676,7 @@ module P_
                write(IORNREPT,'(1X,"WI",a,<unrgns>f10.0)') ' Maximum Capacity     ',(XCapMax(nr,wc),nr=1,unrgns)
                write(IORNREPT,'(1X,"WI",a,<unrgns>f10.3)') ' Ratio                ',(XRatio(nr,wc),nr=1,unrgns)
                write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') ' LT Elasticity        ',(XLTElas(nr,wc),nr=1,unrgns)
-               write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') ' LT Elasticity        ',(XLTElas_WL(nr,wc),nr=1,unrgns)
+!               write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') ' LT Elasticity        ',(XLTElas_WL(nr,wc),nr=1,unrgns)
             end do
          end if
 
@@ -3687,10 +3689,10 @@ module P_
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.1)') 'Step 3                ',(UTCACA(3),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.1)') 'Total                 ',(UTCACA(1)+UTCACA(2)+UTCACA(3),nr=1,unrgns)
 
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Step 1                ',(UTCACA_WL(1),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Step 2                ',(UTCACA_WL(2),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Step 3                ',(UTCACA_WL(3),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Total                 ',(UTCACA_WL(1)+UTCACA_WL(2)+UTCACA_WL(3),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Step 1                ',(UTCACA_WL(1),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Step 2                ',(UTCACA_WL(2),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Step 3                ',(UTCACA_WL(3),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.1)') 'Total                 ',(UTCACA_WL(1)+UTCACA_WL(2)+UTCACA_WL(3),nr=1,unrgns)
 
 !        Preserve      this year's long term multiplier for "Sx" report
 
@@ -3713,32 +3715,32 @@ module P_
          write(IORNREPT,'(1X,"WI",a)') 'Long-Term Multipliers for "Best" Wind Class'
          if(XSwitch.eq.0) then
             write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Long-Term Multiplier  ',(LTElas(nr),nr=1,unrgns)
-            write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Long-Term Multiplier  ',(LTElas_WL(nr),nr=1,unrgns)
+!            write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Long-Term Multiplier  ',(LTElas_WL(nr),nr=1,unrgns)
          else
             write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Long-Term Multiplier  ',(XLTElas(nr,WCurCl(nr,curiyr)),nr=1,unrgns)
-            write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Long-Term Multiplier  ',(XLTElas_WL(nr,WCurCl_WL(nr,curiyr)),nr=1,unrgns)
+!            write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Long-Term Multiplier  ',(XLTElas_WL(nr,WCurCl_WL(nr,curiyr)),nr=1,unrgns)
          end if
          write(IORNREPT,'(1X,"WI",a)') 'Capital Cost Multipliers for "Best" Wind Class'
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Capital Cost Mult.    ',(ICCMultR(nr,WCurCl(nr,curiyr),curiyr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Capital Cost Mult.    ',(ICCMultR_WL(nr,WCurCl_WL(nr,curiyr),curiyr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Capital Cost Mult.    ',(ICCMultR_WL(nr,WCurCl_WL(nr,curiyr),curiyr),nr=1,unrgns)
 
          write(IORNREPT,'(1X,"WI",a)') 'Short-Term Multipliers by Supply Curve Step'
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Short-Term, Step 1    ',(STElas(1),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Short-Term, Step 2    ',(STElas(2),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Short-Term, Step 3    ',(STElas(3),nr=1,unrgns)
 
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Short-Term, Step 1    ',(STElas_WL(1),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Short-Term, Step 2    ',(STElas_WL(2),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Short-Term, Step 3    ',(STElas_WL(3),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Short-Term, Step 1    ',(STElas_WL(1),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Short-Term, Step 2    ',(STElas_WL(2),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Short-Term, Step 3    ',(STElas_WL(3),nr=1,unrgns)
 
          write(IORNREPT,'(1X,"WI",a)') 'Resulting, Combined Multipliers for "Best" Wind Class and by Supply Curve Step'
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Combined, Step 1      ',(UTCSFN(nr,WTech,1),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Combined, Step 2      ',(UTCSFN(nr,WTech,2),nr=1,unrgns)
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.3)') 'Combined, Step 3      ',(UTCSFN(nr,WTech,3),nr=1,unrgns)
 
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Combined, Step 1      ',(UTCSFN(nr,WTech_WL,1),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Combined, Step 2      ',(UTCSFN(nr,WTech_WL,2),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Combined, Step 3      ',(UTCSFN(nr,WTech_WL,3),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Combined, Step 1      ',(UTCSFN(nr,WTech_WL,1),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Combined, Step 2      ',(UTCSFN(nr,WTech_WL,2),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.3)') 'Combined, Step 3      ',(UTCSFN(nr,WTech_WL,3),nr=1,unrgns)
 
 !        Write out where (which wind classes and buffer zones) the supply curve capacities come from.
 
@@ -3755,8 +3757,8 @@ module P_
 
             do wc=1,mnumcl
                do bf=1,mnumbf
-                  IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                     write(IORNREPT,'(1X,"WL",a1,i1,a1,i1,1x,<unrgns>(f10.0,i3))') 'C',7-wc,'Z',bf,(SCapInc_WL(stp,nr,wc,bf),Rank_WL(nr,wc,bf),nr=1,unrgns)
+!                  IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+!                     write(IORNREPT,'(1X,"WL",a1,i1,a1,i1,1x,<unrgns>(f10.0,i3))') 'C',7-wc,'Z',bf,(SCapInc_WL(stp,nr,wc,bf),Rank_WL(nr,wc,bf),nr=1,unrgns)
                end do
             end do
          end do
@@ -3764,17 +3766,8 @@ module P_
          write(IORNREPT,'(1X,"WI",/,a)') 'Transmission & Distribution Costs in "Best" Buffer Zone'
          write(IORNREPT,'(1X,"WI",20x,a)') rept_head
          write(IORNREPT,'(1X,"WN",a,<unrgns>f10.2)') 'T&D Costs             ',(WWNTD(nr,curiyr),nr=1,unrgns)
-         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.2)') 'T&D Costs             ',(WWLTD(nr,curiyr),nr=1,unrgns)
+!         write(IORNREPT,'(1X,"WL",a,<unrgns>f10.2)') 'T&D Costs             ',(WWLTD(nr,curiyr),nr=1,unrgns)
 
-         write(IORNREPT,'(1X,"WI",/,a)') 'Capacity Factors for Each Time Slice in the "Best" Wind Class'
-         write(IORNREPT,'(1X,"WI",20x,a)') rept_head
-         do s=1,mnumwi
-            write(IORNREPT,'(1X,"WN",a,i2,15x,<unrgns>f10.3)') 'Slice',s,(WSFWIEL(nr,curiyr,1,s),nr=1,unrgns)
-         end do
-
-         do s=1,mnumwi
-            write(IORNREPT,'(1X,"WL",a,i2,15x,<unrgns>f10.3)') 'Slice',s,(WSFWLEL(nr,curiyr,1,s),nr=1,unrgns)
-         end do
 
       end if
 
@@ -3807,31 +3800,31 @@ module P_
                write(IORNREPT,'(1X,"WN",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total               ',(CapIandC(nr,yr),yr=FYR,LASTYR)
             endif
          end do
-         do nr=1,mnumnr
-            if(nr.ne.ALASKA.and.nr.ne.HAWAII) then
-               if(nr.le.unrgns) then
-                  write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>i10)') 'Sx>',  'Best Wind Class                   ',(7-WCurCl_WL(nr,yr),yr=FYR,LASTYR)
-                  write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>i10)')'Sx>',   'Best Buff Zone                    ',(WCurBf_WL(nr,yr),yr=FYR,LASTYR)
-                  write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.4)') 'Sx>','Cost Of Electricity               ',(AnnCost_WL(nr,yr,WCurCl(nr,yr),WCurBf(nr,yr)),yr=FYR,LASTYR)
-                  write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.0)') 'Sx>','Cap Seen by ECP                   ',(WCAWLEL(nr,yr),yr=FYR,LASTYR)
-                  write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.4)') 'Sx>','Long-Term Mult                    ',(LTMult_WL(nr,yr),yr=FYR,LASTYR)
-               endif
-               write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','New Installed Capacity'
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Planned Builds      ',(CapPlnBld_WL(nr,yr),yr=FYR,LASTYR)
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Committed-Now Built ',(CapNewBld_WL(nr,yr),yr=FYR,LASTYR)
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total New           ',(CapAdded_WL(nr,yr),yr=FYR,LASTYR)
-               write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','Cumulative Installed Capacity'
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total Cumulative    ',(CapInstall_WL(nr,yr),yr=FYR,LASTYR)
-               write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','Committed Capacity'
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Committed This Year ',(CapCommit_WL(nr,yr),yr=FYR,LASTYR)
-               do i=1,NLead-1
-                  write(IORNREPT,'(1X,"WL",a,a,i1,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Committed Year-',i,'    ',(CapCommit_WL(nr,yr-i),yr=FYR,LASTYR)
-               end do
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total Committed     ',(CapCmtTot_WL(nr,yr),yr=FYR,LASTYR)
-               write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','Cumulative Installed Plus Committed Capacity'
-               write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total               ',(CapIandC_WL(nr,yr),yr=FYR,LASTYR)
-            endif
-         end do
+         ! do nr=1,mnumnr
+            ! if(nr.ne.ALASKA.and.nr.ne.HAWAII) then
+               ! if(nr.le.unrgns) then
+                  ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>i10)') 'Sx>',  'Best Wind Class                   ',(7-WCurCl_WL(nr,yr),yr=FYR,LASTYR)
+                  ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>i10)')'Sx>',   'Best Buff Zone                    ',(WCurBf_WL(nr,yr),yr=FYR,LASTYR)
+                  ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.4)') 'Sx>','Cost Of Electricity               ',(AnnCost_WL(nr,yr,WCurCl(nr,yr),WCurBf(nr,yr)),yr=FYR,LASTYR)
+                  ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.0)') 'Sx>','Cap Seen by ECP                   ',(WCAWLEL(nr,yr),yr=FYR,LASTYR)
+                  ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.4)') 'Sx>','Long-Term Mult                    ',(LTMult_WL(nr,yr),yr=FYR,LASTYR)
+               ! endif
+               ! write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','New Installed Capacity'
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Planned Builds      ',(CapPlnBld_WL(nr,yr),yr=FYR,LASTYR)
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Committed-Now Built ',(CapNewBld_WL(nr,yr),yr=FYR,LASTYR)
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total New           ',(CapAdded_WL(nr,yr),yr=FYR,LASTYR)
+               ! write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','Cumulative Installed Capacity'
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total Cumulative    ',(CapInstall_WL(nr,yr),yr=FYR,LASTYR)
+               ! write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','Committed Capacity'
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Committed This Year ',(CapCommit_WL(nr,yr),yr=FYR,LASTYR)
+               ! do i=1,NLead-1
+                  ! write(IORNREPT,'(1X,"WL",a,a,i1,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Committed Year-',i,'    ',(CapCommit_WL(nr,yr-i),yr=FYR,LASTYR)
+               ! end do
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total Committed     ',(CapCmtTot_WL(nr,yr),yr=FYR,LASTYR)
+               ! write(IORNREPT,'(1X,"WL",a,a)') 'Sx>','Cumulative Installed Plus Committed Capacity'
+               ! write(IORNREPT,'(1X,"WL",a,a,<LASTYR-FYR+1>f10.1)') 'Sx>','  Total               ',(CapIandC_WL(nr,yr),yr=FYR,LASTYR)
+            ! endif
+         ! end do
 
          do nr=1,mnumnr
             if(nr.ne.ALASKA.and.nr.ne.HAWAII) then
@@ -3846,13 +3839,13 @@ module P_
                end do
                write(IORNREPT,'(1X,"WN",a,2x,a,i2,3x,<LASTYR-FYR+1>f10.1)') 'Nd>','Total - Region ',nr,(CapInstall(nr,yr),yr=FYR,LASTYR)
 
-               do wc=1,mnumcl
-                  do bf=1,mnumbf
-                     IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
-                        write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<LASTYR-FYR+1>f10.1)') 'Nd>','C',7-wc,'Z',bf,(ICapCum_WL(nr,yr,wc,bf),yr=FYR,LASTYR)
-                  end do
-               end do
-               write(IORNREPT,'(1X,"WL",a,2x,a,i2,3x,<LASTYR-FYR+1>f10.1)') 'Nd>','Total - Region ',nr,(CapInstall_WL(nr,yr),yr=FYR,LASTYR)
+               ! do wc=1,mnumcl
+                  ! do bf=1,mnumbf
+                     ! IF (WCapMax(mnumnr,curiyr,wc,bf) .GT. 0.00001) &
+                        ! write(IORNREPT,'(1X,"WL",a,2x,a,i1,a,i1,16x,<LASTYR-FYR+1>f10.1)') 'Nd>','C',7-wc,'Z',bf,(ICapCum_WL(nr,yr,wc,bf),yr=FYR,LASTYR)
+                  ! end do
+               ! end do
+               ! write(IORNREPT,'(1X,"WL",a,2x,a,i2,3x,<LASTYR-FYR+1>f10.1)') 'Nd>','Total - Region ',nr,(CapInstall_WL(nr,yr),yr=FYR,LASTYR)
             endif   !not rgns Alaska and Hawaii
          end do   ! nr loop
       end if
@@ -6043,13 +6036,6 @@ module P_
          end do
          write(IORNREPT,'(1X,"SO",/,a,i4)') 'Miscellaneous Solar Variables by Region for ',curcalyr
 
-         write(IORNREPT,'(1X,"SO",/,a)') 'Capacity Factors for Each Time Slice in the "Best" Solar Class'
-         write(IORNREPT,'(1X,"SO",20x,a)') rept_head
-
-         do s=1,mnumsl
-            write(IORNREPT,'(1X,"SO",a,i2,15x,<unrgns>f10.3)') 'Slice',s,(WSSSTEL(nr,curiyr,s),nr=1,unrgns)
-         end do
-
       end if
 
       if (curiyr.eq.LASTYR)      then
@@ -6438,11 +6424,6 @@ module P_
            end do
            write(IORNREPT,'(1X,"PV",/,a,i4)') 'Miscellaneous PV Variables by Region for ',curcalyr
 
-           write(IORNREPT,'(1X,"PV",/,a)') 'Capacity Factors for Each Time Slice in the "Best" PV Class'
-           write(IORNREPT,'(1X,"PV",20x,a)') rept_head
-           do s=1,mnumsl
-              write(IORNREPT,'(1X,"PV",a,i2,15x,<unrgns>f10.3)') 'Slice',s,(WSSPVEL(nr,curiyr,s),nr=1,unrgns)
-           end do
         end if
 
         if (curiyr.eq.LASTYR)      then
@@ -6842,14 +6823,6 @@ module P_
          end do
 
          write(IORNREPT,'(1X,"PT",/,a,i4)') 'Miscellaneous PT Variables by Region for ',curcalyr
-
-         write(IORNREPT,'(1X,"PT",/,a)') &
-                   'Capacity Factors for Each Time Slice in the "Best" PT Class'
-         write(IORNREPT,'(1X,"PT",20x,a)') rept_head
-
-         do s=1,mnumsl
-            write(IORNREPT,'(1X,"PT",a,i2,15x,<unrgns>f10.3)') 'Slice',s,(WSSPTEL(nr,curiyr,s),nr=1,unrgns)
-         end do
 
       end if
 
@@ -8578,11 +8551,6 @@ else
  write(IORNREPT,'(/,a)') 'Transmission & Distribution Costs in "Best" Offshore Wind Buffer Zone'
  write(IORNREPT,'(20x,a)') rept_head
  write(IORNREPT,'(a,<unrgns>f10.2)') 'T&D Costs             ',(WWFTD(nr,curiyr),nr=1,unrgns)
- write(IORNREPT,'(/,a)') 'Capacity Factors for Each Time Slice in the "Best" Offshore Wind Class'
- write(IORNREPT,'(20x,a)') rept_head
- do s=1,mnumwi
-  write(IORNREPT,'(a,i2,15x,<unrgns>f10.5)') 'Slice',s,(WSFWFEL(nr,curiyr,1,s),nr=1,unrgns)
- end do
 
 end if
 
@@ -11587,20 +11555,15 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 !
 ! 1. input file: contains all data on cost/performance and resource
 !                availability, except for the supply schedules
-!
 ! 2. input file: contains the regional supply schedule for wood.
 !
-!
 ! Input variables:
-!
 !  Integer:
 !      WDDBG      : Wood debug flag.
 !                    if WDDBG=1 then   write input data to standart output
 !                    if WDDBG=0 then   No reporting
 !
-!
 ! Local Variables:
-!
 !   Integer:
 !     INUNIT      : Fortran Unit no for input file
 !     WDiodbg     : unit no for debug file
@@ -11648,7 +11611,7 @@ END SUBROUTINE PRINT_LFG_CAPACITY
       include 'intout'
       include 'uefdout'
 
-! ...... Decleration of local variables
+! ....Decleration of local variables
       REAL*8 TOT
       Integer INUNIT,WDDBG,WDIODBG,ITECHNO,i,j,k,IWCLTWD,NCST
       Integer NCEN,NRow,IYread, I_First, I_Last
@@ -11825,27 +11788,24 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 !    write(6,*) ' runpoly rtovalue ',wdpolysw
 
 !     Read in Biomass Supply Schedules - 1990
-
 !     cna - need to cycle through 4 supply schedules here
-
 !     Create Variables which Determine First Year and Last Year of Schedules in WODSUP file
-!
 !     IF using polysys values from restart file do not overwrite wdsup AG variables with wodsup.txt values
-!
 !     IF not first run of cycle for a polysys run set polysys restart file switch to 1
+
       IF ( ( CURIRUN .NE. 1 ) .AND. ( WDPOLYSW .NE. 0 ) ) WDRDWDSUP = 1
-            write(IORNDUMP,*) ' curirun wdpolysw wdrdwdsup polyres ',curirun,wdpolysw,wdrdwdsup,polyres
+         write(IORNDUMP,*) ' curirun wdpolysw wdrdwdsup polyres ',curirun,wdpolysw,wdrdwdsup,polyres
 
       IF ( WDRDWDSUP .EQ. 0 ) THEN
-        WDSUP_Q = 0.0
-        WDSUP_P = 99.999
+         WDSUP_Q = 0.0
+         WDSUP_P = 99.999
       ELSE
-        WDSUP_Q(:,:,:,1) = 0.0
-        WDSUP_P(:,:,:,1) = 99.999
-        WDSUP_Q(:,:,:,2) = 0.0
-        WDSUP_P(:,:,:,2) = 99.999
-        WDSUP_Q(:,:,:,4) = 0.0
-        WDSUP_P(:,:,:,4) = 99.999
+         WDSUP_Q(:,:,:,1) = 0.0
+         WDSUP_P(:,:,:,1) = 99.999
+         WDSUP_Q(:,:,:,2) = 0.0
+         WDSUP_P(:,:,:,2) = 99.999
+         WDSUP_Q(:,:,:,4) = 0.0
+         WDSUP_P(:,:,:,4) = 99.999
       ENDIF
 
       RET_CD = RD$TBL(INUNIT,'%BM Supply %',1,WDiodbg,6)
@@ -11858,10 +11818,9 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 
       NM_BM_SUP_STP = NRow
 
-      do fsource=1,mnumfs
-        POLYRES = 0
-
-         IYread=1
+      do fsource = 1,mnumfs
+         POLYRES = 0
+         IYread = 1
          fstock = BM_TYP_CD(fsource)
          tabname='%'//fstock//'SUP1990 %'
 
@@ -11869,183 +11828,128 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 !        IF ( ( fstock .eq. 'UM') .and. ( WDRDWDSUP .eq. 1 ) ) polyres = 1
             write(IORNDUMP,*) ' curirun wdpolysw wdrdwdsup polyres ',fstock,curirun,wdpolysw,wdrdwdsup,polyres
 
-         RET_CD=RD$TBL(INUNIT,tabname,NRow,WDiodbg,6)
-         RET_CD=RD$R1(SWAPAR2,1,NWDSUPP)
-!        Read in for 16 Coal regions ..............
-         RET_CD=RD$R2(SWAPAR3,1,NCST,NCEN-NCST+1,NWDSUPP,NDREG)
-
+         RET_CD = RD$TBL(INUNIT,tabname,NRow,WDiodbg,6)
+         RET_CD = RD$R1(SWAPAR2,1,NWDSUPP)
+         RET_CD = RD$R2(SWAPAR3,1,NCST,NCEN-NCST+1,NWDSUPP,NDREG)   ! Read in for 16 Coal regions
 !
          IF ( POLYRES .EQ. 0 ) THEN
-    write(iorndump,*) ' inside woodsup overwrite if curirun wdpolysw wdrdwdsup ',fstock,curirun,wdpolysw,wdrdwdsup
-
-           do j = NCST , NDREG
-             do i = 1 , NRow
-                WDSUP_Q(i,j,IYread,fsource) = SWAPAR3(i,j)
-                WDSUP_P(i,j,IYread,fsource) = SWAPAR2(i)
-             enddo !i
-           enddo !j
-
+            write(iorndump,*) ' inside woodsup overwrite if curirun wdpolysw wdrdwdsup ',fstock,curirun,wdpolysw,wdrdwdsup
+            do j = NCST , NDREG
+               do i = 1 , NRow
+                  WDSUP_Q(i,j,IYread,fsource) = SWAPAR3(i,j)
+                  WDSUP_P(i,j,IYread,fsource) = SWAPAR2(i)
+               enddo !i
+            enddo !j
 
 !          Fill up the Supply arrays for the years 1991 - 2009 with 1990 values
 !          cna - cycle through supply shedules here (outer loop)
-
-           do i = 2 , I_First - 1
-             do j=1,NWDSUPP
-               do k = NCST , NCEN
-                 WDSUP_P(j,k,i,fsource) = WDSUP_P(j,k,1,fsource)
-               enddo !k
-             enddo !j
-             do j=1,NWDSUPQ
-               do k = NCST , NCEN
-                  WDSUP_Q(j,k,i,fsource) = WDSUP_Q(j,k,1,fsource)
-               enddo !k
-             enddo !j
-           enddo !i
-
+            do i = 2 , I_First - 1
+               do j = 1,NWDSUPP
+                  do k = NCST , NCEN
+                     WDSUP_P(j,k,i,fsource) = WDSUP_P(j,k,1,fsource)
+                  enddo !k
+               enddo !j
+               do j = 1,NWDSUPQ
+                  do k = NCST , NCEN
+                     WDSUP_Q(j,k,i,fsource) = WDSUP_Q(j,k,1,fsource)
+                  enddo !k
+               enddo !j
+            enddo !i
          ENDIF                               ! end polysys restart file if
 
-!        Read in NERC supply schedule .. for 2010 through 2025 - NEMS years 21 - 36
-
+!        Read in NERC supply schedule from I_First and I_Last as defined in WODSUPP.txt
          do IYread = I_First , I_Last
             nemsyr = 1989 + IYread
             write(tname2,'(I4)')nemsyr
-
             tabname='%'//fstock//'SUP'//tname2//' %'
-
-            RET_CD=RD$TBL(INUNIT,tabname,NRow,WDiodbg,6)
-            RET_CD=RD$R1(SWAPAR2,1,NWDSUPP)
-            RET_CD=RD$R2(SWAPAR3,1,NCST,NCEN-NCST+1,NWDSUPP,NDREG)
-!
-!           do i = 1 , NRow
-!             WDSUP_P(i,:,IYread,fsource) = SWAPAR2(i)
-!           enddo
+            RET_CD = RD$TBL(INUNIT,tabname,NRow,WDiodbg,6)
+            RET_CD = RD$R1(SWAPAR2,1,NWDSUPP)
+            RET_CD = RD$R2(SWAPAR3,1,NCST,NCEN-NCST+1,NWDSUPP,NDREG)
 
 !         IF using polysys values from restart file do not overwrite wdsup AG variables with wodsup.txt values
-
-          IF ( POLYRES .EQ. 0 ) THEN
-!
-              do j = NCST , NDREG
-                do i = 1 , NRow
-                  WDSUP_Q(i,j,IYread,fsource) = SWAPAR3(i,j)
-                  WDSUP_P(i,j,IYread,fsource) = SWAPAR2(i)
-                enddo
-              enddo
-
-          ENDIF                               ! end polysys restart file if
-
+            IF ( POLYRES .EQ. 0 ) THEN
+               do j = NCST , NDREG
+                  do i = 1 , NRow
+                     WDSUP_Q(i,j,IYread,fsource) = SWAPAR3(i,j)
+                     WDSUP_P(i,j,IYread,fsource) = SWAPAR2(i)
+                  enddo
+               enddo
+            ENDIF                               ! end polysys restart file if
          enddo
 
-!         Fill up supply arrays for years after 2035
-
+!         Fill up supply arrays for years after I_Last
 !         IF using polysys values from restart file do not overwrite wdsup AG variables with wodsup.txt values
-
-          IF ( POLYRES .EQ. 0 ) THEN
-!
+         IF ( POLYRES .EQ. 0 ) THEN
             DO I = I_Last , MNUMYR + ECP_D_FPH
-!             DO J = 1 , NRow
-!               WDSUP_P(J,:,I,fsource) = WDSUP_P(J,:,I_Last,fsource)
-!             ENDDO
-              DO J = 1 , NRow
-                DO K = NCST , NCEN
-                  WDSUP_Q(J,K,I,fsource) = WDSUP_Q(j,k,I_Last,fsource)
-                  WDSUP_P(J,K,I,fsource) = WDSUP_P(J,k,I_Last,fsource)
-                ENDDO
-              ENDDO
+               DO J = 1 , NRow
+                  DO K = NCST , NCEN
+                     WDSUP_Q(J,K,I,fsource) = WDSUP_Q(j,k,I_Last,fsource)
+                     WDSUP_P(J,K,I,fsource) = WDSUP_P(J,k,I_Last,fsource)
+                  ENDDO
+               ENDDO
             ENDDO
 
-
 !           Revise Supply Price as Function of World Oil Price
-
-!            BASE_YEAR = 2008
-!            BASE_YR = 2008 - 1989
-!            DIST_CST = 12.0         ! 2008 $ / Ton
-!            PRCNT_OIL = 0.5         ! Percent of Distribution Cost Indexed by Oil Price
-!            CNV_FACT = 17.2         ! MMBtu / Ton
-!            CST_87_MMBtu = (DIST_CST / MC_JPGDP(BASE_YR) * PRCNT_OIL) / CNV_FACT
-!!
-!            DO I = BASE_YR + 1 , MNUMYR
-!              DO J = 1 , NRow
-!                DO K = NCST , NCEN
-!!          write(6,*) ' before trans add ',i,k,j,wdsup_p(j,k,i,fsource)
-!               WDSUP_P(J,k,I,fsource) = WDSUP_P(J,k,I,fsource) + CST_87_MMBtu *     &
-!                                       ((BRENT_PRICE(I) / BRENT_PRICE(I)) - 1.0)
-!!                                      ((CRUDEPOINTS(I,5,1) / CRUDEPOINTS(BASE_YR,5,1)) - 1.0)
-!         !  write(6,*) ' after trans add ',i,k,j,wdsup_p(j,k,i,fsource),cst_87_mmbtu,        &
-!                                       !CRUDEPOINTS(I,5,1),CRUDEPOINTS(BASE_YR,5,1)
-!
-!!                WDSUP_P(J,k,I,fsource) = WDSUP_P(J,k,I,fsource) + CST_87_MMBtu *      &
-!!                                         (BRENT_PRICE(I) / BRENT_PRICE(BASE_YR))
-!!          write(6,*) ' after trans add ',i,k,j,wdsup_p(j,k,i,fsource),cst_87_mmbtu,        &
-!!                                          brent_price(i),brent_price(base_yr)
-!                END DO
-!              END DO
-!            END DO
-
-           BASE_YEAR = 2008
-           BASE_YR = 2008 - 1989
-           DIST_CST = 12.0         ! 2008 $ / Ton
-           PRCNT_OIL = 0.5         ! Percent of Distribution Cost Indexed by Oil Price
-           CNV_FACT = 17.2         ! MMBtu / Ton
-           C2 = (DIST_CST / MC_JPGDP(BASE_YR)) / CNV_FACT
-           CST_87_MMBtu = (DIST_CST / MC_JPGDP(BASE_YR) * PRCNT_OIL) / CNV_FACT
+            BASE_YEAR = 2008
+            BASE_YR = 2008 - 1989
+            DIST_CST = 12.0         ! 2008 $ / Ton
+            PRCNT_OIL = 0.5         ! Percent of Distribution Cost Indexed by Oil Price
+            CNV_FACT = 17.2         ! MMBtu / Ton
+            C2 = (DIST_CST / MC_JPGDP(BASE_YR)) / CNV_FACT
+            CST_87_MMBtu = (DIST_CST / MC_JPGDP(BASE_YR) * PRCNT_OIL) / CNV_FACT
 !          write(iorndump,*) ' c2 ',c2
-!
 !          write(iorndump,*) ' adding transportation costs to all biomass supply costs '
             DO I = BASE_YR + 1 , MNUMYR
-              DO J = 1 , NRow
-                DO K = NCST , NCEN
+               DO J = 1 , NRow
+                  DO K = NCST , NCEN
 !            write(iorndump,*) ' before trans add ',i,k,j,wdsup_p(j,k,i,fsource),cst_87_mmbtu,c2,     &
 !                                          brent_price(i),brent_price(base_yr)
-               TRANSADD = (C2 * (1 - PRCNT_OIL)) + (C2 * PRCNT_OIL *       &
+                     TRANSADD = (C2 * (1 - PRCNT_OIL)) + (C2 * PRCNT_OIL *       &
                                         (BRENT_PRICE(I) / BRENT_PRICE(base_yr)) )
-               TRANADD1 = CST_87_MMBtu *      &
+                     TRANADD1 = CST_87_MMBtu *      &
                                           (BRENT_PRICE(I) / BRENT_PRICE(BASE_YR))
-               TRANADD2 = CST_87_MMBtu *      &
+                     TRANADD2 = CST_87_MMBtu *      &
                                        ((BRENT_PRICE(I) / BRENT_PRICE(base_yr)) - 1.0)
-               IF (WDSUP_P(j,k,I,fsource) .NE. 0.0 ) THEN
-                 WDSUP_P(j,k,I,fsource) = WDSUP_P(j,k,I,fsource) + TRANSADD
-               ENDIF
-
+                     IF (WDSUP_P(j,k,I,fsource) .NE. 0.0 ) THEN
+                        WDSUP_P(j,k,I,fsource) = WDSUP_P(j,k,I,fsource) + TRANSADD
+                     ENDIF
 !            write(iorndump,*) ' after trans add ',i,k,j,wdsup_p(j,k,i,fsource),transadd,tranadd1,tranadd2
-                END DO
-              END DO
-            END DO
+                  END DO !K
+               END DO    !J
+            END DO       !I
 !
             DO I = MNUMYR + 1 , MNUMYR + ECP_D_FPH
-              DO J = 1 , NRow
-                DO K = NCST , NCEN
-                 WDSUP_P(J,k,I,fsource) = WDSUP_P(J,k,MNUMYR,fsource)
-                END DO
-              END DO
+               DO J = 1 , NRow
+                  DO K = NCST , NCEN
+                     WDSUP_P(J,k,I,fsource) = WDSUP_P(J,k,MNUMYR,fsource)
+                  END DO
+               END DO
             END DO
+         ENDIF                               ! end polysys restart file if
 
-          ENDIF                               ! end polysys restart file if
-
-!         write out supply schedules
-
-          if (WDDBG .eq. 1) Then
+!        write out supply schedules
+         if (WDDBG .eq. 1) Then
             do i = 1 , MNUMYR + ECP_D_FPH !years
-               write(IORNDUMP,1000) fstock, 1989+i
+!               write(IORNDUMP,1000) fstock, 1989+i   ! mas, 4/12/2024
                do j = 1 , NWDSUPQ                    !supply tranches
-                  write(IORNDUMP,1001) j, (WDSUP_P(j,k,i,fsource),k=1,16)
-                  write(IORNDUMP,1003) j, (WDSUP_Q(j,k,i,fsource),k=1,16)
+                  write(IORNDUMP,1001) fstock, 1989+i, j, (WDSUP_P(j,k,i,fsource),k=1,16)
+                  write(IORNDUMP,1003) fstock, 1989+i, j, (WDSUP_Q(j,k,i,fsource),k=1,16)
                enddo !j
             enddo !i
             do i = 1 , mnumfs
                write(IORNDUMP,1002) i, BM_TYP_CD(i), MP_BM_RS(i), MP_BM_CM(i), MP_BM_IN(i), MP_BM_PW(i), MP_BM_ET(i), MP_BM_BT(i)
 1002  format('Feedstock Utilization:',I2,':',A2,':RS=',F8.3,':CM=',F8.3,':IN=',F8.3,':PW=',F8.3,':ET=',F8.3,':BT=',F8.3)
             enddo !i
-          endif
-        enddo !fsource
+         endif
+      enddo !fsource
 
 !         write out supply schedules
-
           if (WDDBG .eq. 1) Then
             do i = 1 , MNUMYR + ECP_D_FPH !years
-            write(IORNDUMP,1010) 'UM',1989+i
+!            write(IORNDUMP,1010) 'UM',1989+i
                do j = 1 , NWDSUPQ                    !supply tranches
-                  write(IORNDUMP,1011) j, (WDSUP_P_UM(j,k,i),k=1,16)
-                  write(IORNDUMP,1013) j, (WDSUP_Q_UM(j,k,i),k=1,16)
+                  write(IORNDUMP,1011) 'UM', 1989+i, j, (WDSUP_P_UM(j,k,i),k=1,16)
+                  write(IORNDUMP,1013) 'UM', 1989+i, j, (WDSUP_Q_UM(j,k,i),k=1,16)
                enddo !j
             enddo !i
           endif
@@ -12071,13 +11975,11 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 
 
 1000  format(//,A2,' Year=',I6)
-
-1001  format(1x,' Step Prices     ',I3,16(F10.3))
-1003  format(1x,' Step Quantities ',I3,16(F10.3))
+1001  format('WDSUP_P:', A2,' Year=',I6,1x,' Step Prices     ',I3,16(F10.3))
+1003  format('WDSUP_Q:', A2,' Year=',I6,1x,' Step Quantities ',I3,16(F10.3))
 1010  format(//,'_',A2,' Year=',I6)
-
-1011  format(1x,' _UM Step Prices     ',I3,16(F10.3))
-1013  format(1x,' _UM Step Quantities ',I3,16(F10.3))
+1011  format('WDSUP_P_UM', A2,' Year=',I6,1x,' _UM Step Prices     ',I3,16(F10.3))
+1013  format('WDSUP_Q_UM', A2,' Year=',I6,1x,' _UM Step Quantities ',I3,16(F10.3))
 
       INUNIT=FILE_MGR('C',NAME2,.FALSE.)
 
@@ -13010,7 +12912,7 @@ END SUBROUTINE PRINT_LFG_CAPACITY
         ny = 27
         DO m = 1, 12
            DO d = 1, 3
-              WRITE(6,1517) CURIRUN, CURIYR+1989, ny+1989, nr, m, d, (WSSPTEL_CF_CLIP(nr,ny,d,m,h),h=1,24)
+              WRITE(18,1517) CURIRUN, CURIYR+1989, ny+1989, nr, m, d, (WSSPTEL_CF_CLIP(nr,ny,d,m,h),h=1,24)
 1517          FORMAT(1X,"CF_PT_CLIP",6(":",I4),24(":",F6.3))
            END DO
         END DO

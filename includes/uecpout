@@ -158,6 +158,11 @@
       REAL*4 URELPRC(3,MNUMNR)          !Low/High Reliability Price
 !
       REAL*4 UCAPADJ(MNUMNR,MNUMYR)     !Capacity Adjustments for Trade/Cogen
+      REAL*4 PRICE_EL_HR(MNUMNR,4,24,MNUMYR) ! HOURLY ELECTRICITY PRICE BY HMM SEASON
+      REAL*4 LOADMAXH2EL(MNUMNR,4,24,MNUMYR) ! MAX HOUR
+      REAL*4 QELCUR(MNUMNR,4,24,MNUMYR)  ! HOURLY CURTAILMENT BY HMM SEASON
+
+
      
 !CCS VARIABLES FOR FTAB    
       REAL*4 CAPCCS(4,MAXNFR,MNUMYR)
@@ -340,13 +345,30 @@
       REAL*4 ST_RPS_NW_CRD(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Credits from new units used to satisfy state RPS requirements
       REAL*4 ST_RPS_XP_CRD(MNUMNR,ECP_D_CAP,MNUMYR+ECP_D_XPH)      ! Credits exported and used to satisfy state RPS requirements associated with the import region
 
+! Nuclear smoothing variables
+		REAL*4 USED_last(MNUMYR,MAXNUC)
+		REAL*4 USED_last2(MNUMYR,MAXNUC)
+		REAL*4 UNUSED_last(MNUMYR,MAXNUC)
+		REAL*4 UNUSED_last2(MNUMYR,MAXNUC)
+
+!     ReStore Hourly Outputs
+	  REAL*4 DispatchTot(MNUMNR,MaxPtypesP,12,24,MNUMYR)		! ReStore hourly generation by Nerc region GWhrs
+	  REAL*4 ExistStoTot(MNUMNR,3,12,24,MNUMYR)		! ReStore hourly storage by Nerc region
+	  REAL*4 CurtailsTot(MNUMNR,9,12,24,MNUMYR)		! ReStore hourly curtailment by Nerc region
+	  REAL*4 HourlyLoadTot(MNUMNR,12,24,MNUMYR)				! ReStore hourly load by Nerc region GWhrs
+	  REAL*4 ElecPriceTot(MNUMNR,12,24,MNUMYR)				! ReStore hourly electricity price by Nerc region
+	  
+!     HMM Sec45V Eligible Generation
+	  REAL*4 QELGEN(3,MNUMNR,24,4,MNUMYR)					! ReStore generation by renewable technology (1=wind, 2-solar, 3=other), EMM region, hour, season, model year
+	  REAL*4 QELGEN_VINT(3,MNUMNR,MNUMYR,MNUMYV)			! Vintage ratios of renewable generation by technology, EMM region, model year, vintage year
+
+!     IRA TAX PHASE OUT YEAR
+      INTEGER UPIRA_APPYR                   !Applicable year to start phase out of IRA tax credits that are triggered by electricity emission target
+
 !   UECP OUTPUT COMMON BLOCK
 
       COMMON/UECPOUT/UADDCSU,UADDIGU,UADDISU,UADDOSU,UADDCCU,UADDACU,UADDASU,UADDCTU,   &
                      UADDATU,UADDNUU,UADDFCU,UADDRNU,UADDPSU,UADDDBU,UADDDPU,UADDTLU,   &
-
-! this set is in a slightly different order:
-
                      UADDCSN,UADDIGN,UADDISN,UADDOSN,UADDCCN,UADDACN,UADDASN,           &
                      UADDFCN,UADDCTN,UADDATN,UADDNUN,        UADDRNN,UADDPSN,UADDDBN,UADDDPN,UADDTLN,   &
                      UADDP2,                                                            &
@@ -387,7 +409,12 @@
                      UADDSSU, UADDSSN, UPSSCCST, UADDS2U, UADDS2N, UPS2CCST, &
                      UADDPTU, UADDPTN, UPPTCCST, UADDINU, UADDINN, UPINCCST, UTCO2PEM, UTCO2QEM, &
                      UADDWLT, UADDPTT, UADDWLD, UADDPTD, &
-                     ST_RPS_EMM_Q, ST_RPS_EMM_P, ST_RPS_DUALS, ST_RPS_PRC_87, ST_RPS_EX_GEN, ST_RPS_NW_GEN, ST_RPS_XP_GEN, ST_RPS_EX_CRD, ST_RPS_NW_CRD, ST_RPS_XP_CRD
+                     ST_RPS_EMM_Q, ST_RPS_EMM_P, ST_RPS_DUALS, ST_RPS_PRC_87, ST_RPS_EX_GEN, ST_RPS_NW_GEN, ST_RPS_XP_GEN, ST_RPS_EX_CRD, ST_RPS_NW_CRD, ST_RPS_XP_CRD, &
+                     USED_last, USED_last2, UNUSED_last, UNUSED_last2, &
+                     DispatchTot, ExistStoTot, CurtailsTot, HourlyLoadTot, ElecPriceTot, PRICE_EL_HR, &
+                     LOADMAXH2EL, QELCUR, &
+                     QELGEN, QELGEN_VINT, UPIRA_APPYR
+
 
 !   Equivalence for FILER used for data storage
 
@@ -439,5 +466,14 @@
                     (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_EX_CRD
                     (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_NW_CRD
                     (MNUMNR * ECP_D_CAP * (MNUMYR+ECP_D_XPH)) + & ! ST_RPS_XP_CRD
-                    0 )                                      !  the end
+                    4 * (MNUMYR * MAXNUC)  + &                    ! EMM Convergence Project, POC: Nina Vincent
+                    (MNUMNR * MaxPtypesP * 12 * 24 * MNUMYR) + &  ! DispatchTot
+                    (MNUMNR * MaxStotyp * 12 * 24 * MNUMYR) + &   ! ExistStoTot
+                    (MNUMNR * MaxCurttyp * 12 * 24 * MNUMYR) + &  ! CurtailsTot
+                    2*(MNUMNR *            12 * 24 * MNUMYR) + &  ! HourlyLoadTot & ElecPriceTot
+                    3*(MNUMNR *            4 * 24 * MNUMYR) + &  ! PRICE_EL_HR & QELCUR
+                    (3*MNUMNR*24*4*MNUMYR) + &                   ! QELGEN
+                    (3*MNUMNR*MNUMYR*MNUMYV) + &                 ! QELGEN_VINT
+                    1 +                    &                     ! UPIRA_APPYR                   
+				   0 )                                      !  the end
       EQUIVALENCE (UECPDAT,UADDCSU)

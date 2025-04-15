@@ -25,7 +25,7 @@ integer,parameter::max_set(2)=(/6,5/) ! 6 for ecp, 5 for efd
 integer nlist
 integer narray, ArrayIndex
 integer ifound,Laimdim
-integer t(7)
+integer t(8)
 
 character*1 apy(3)
 character*3 ver
@@ -62,7 +62,9 @@ character*5 posttag(0:3)/' ','_pass','_pass','_pass'/       ! prefix for text st
 character*5 post 
 
 integer passed(maxarray)! indicator whether to use the passed coefficient array (cpass_ or the calculated array in assigning values to coeff_ array
+integer range_flag(maxarray) ! indicator to set the range for either _LBOUND or _UBOUND coefficient to 'free' instead of default 'nonnegative'
 integer ipass ! moved to passed(numarray)
+integer irange !moved to range(numarray)
  
 logical lexist, USE_AIM_SLNADJ
 
@@ -80,14 +82,14 @@ logical isBounded(max_cols)
 integer numBounds(max_cols)        ! count 1 for a nonzero lower and an upper bound.  if count is 2 (both bounds found, such as with a fixed column), set AIMMS attribute nonvarStatus to -1 to force appearance in mps file
 logical First_Time,DoSafety
 
-integer row_id,col_id,L,nsumsets,LT,k,nj,ibm,m,itest
+integer row_id,col_id,L,nsumsets,LT,k,nj,ibm,m,itest, DAFentryCounter
 integer nsets
 character*50 setnames(maxdim)
 
 character*20 rowname(max_rows),colname(max_cols)
 character*30 rowmask(max_rows),colmask(max_cols) ! OML row and column masks to pass to AIMMS code as comments
 character*1 rowtype(max_rows)
-integer ireplace, nreplace
+integer ireplace, nreplace,ixlsx
 type scard
   character*50 sname
   integer card
@@ -117,8 +119,7 @@ integer num_inter(max_rows)
   character(LEN=38), allocatable :: xparamname(:)     ! xlsx AIMMS parameter names 
   character(LEN=30), allocatable :: xparsetnam(:,:)   ! xlsx AIMMS parameter set names 
   character(LEN=16) rname
-  character(LEN=32) setZero_passback
-  integer ixlsx
+  character(LEN=150) setZero_passback
   integer SetLookCount
   character(LEN=50), allocatable :: xSetLook(:,:)     ! xlsx Additional sets in dimension look up table for transfer variables
   
@@ -136,13 +137,15 @@ integer num_inter(max_rows)
   character(LEN=35), allocatable :: tFortDim3(:)     ! xlsx 	
   character(LEN=35), allocatable :: tFortDim4(:)     ! xlsx 	
   character(LEN=35), allocatable :: tFortDim5(:)     ! xlsx 	
+  character(LEN=35), allocatable :: tFortDim6(:)     ! xlsx 
   character(LEN=35), allocatable :: tDAFDim1(:)     ! xlsx 	
   character(LEN=35), allocatable :: tDAFDim2(:)     ! xlsx 	
   character(LEN=35), allocatable :: tAimDim1(:)     ! xlsx 	
   character(LEN=35), allocatable :: tAimDim2(:)     ! xlsx 	
   character(LEN=35), allocatable :: tAimDim3(:)     ! xlsx 	
   character(LEN=35), allocatable :: tAimDim4(:)     ! xlsx 	
-  character(LEN=35), allocatable :: tAimDim5(:)     ! xlsx 	
+  character(LEN=35), allocatable :: tAimDim5(:)     ! xlsx 
+  character(LEN=35), allocatable :: tAimDim6(:)     ! xlsx 	
   character(LEN=35), allocatable :: tAimDAF1(:)     ! xlsx 	
   character(LEN=35), allocatable :: tAimDAF2(:)     ! xlsx 	
   character(LEN=90), allocatable :: tAimmsVariable(:)     ! xlsx 	
@@ -153,6 +156,7 @@ integer num_inter(max_rows)
   integer,allocatable :: NumEMMDim(:,:)
   integer numRegularDim,numDAFDim
   character(LEN=150),allocatable :: AimDimNames(:)
+  character(LEN=300),allocatable :: PassToNemsLines(:,:)
 ! ParamBySub WorkSheet
   character(LEN=50), allocatable :: ParamBySub_Subr(:)     ! xlsx 
   character(LEN=50), allocatable :: ParamBySub_Parm(:)     ! xlsx 
@@ -164,14 +168,16 @@ integer num_inter(max_rows)
   integer num_subs
   
   integer,parameter :: max_trans=3000
-  integer nuniq
+  integer nuniq, IndexOffStart,IndexOffSet,absIndexOffSet
+  character(LEN=30)  IndexOffsetStr
   character(LEN=50) transfer(max_trans)    ! list of unique arrays in tFortranVariable
   integer           tUnique(max_trans)     ! index to each unique fortran variable in tFortranVariable
   integer           transfer_usage(max_trans)  ! indicator for how to treat a variable, 0: RHS usage only so only transfered to AIMMS, 1: LHS usage, to be passed back to NEMS, 2: LHS usage, omit calculated version declaration because aimms code already has declaration
   integer           DoNotGenerate_Code(max_trans)
   logical           write_historicalyears(max_trans) !flag to write out all historical years up to the current year
-  transfer=' '
   
+  transfer=' '
+ 
   
 ! end of local xlsx data  
 
@@ -213,7 +219,7 @@ read(5,'(a)') ver
    DoSafety=.true.
  endif
 ! read AIMMS row and column settings from aimVER.xlsx, also used as an input file for nems/uVER.f
-     open(unit=ixlsx,file ='aim'//ver//'.xlsx',status='old') ! this is just to pass the file name via the unit number to the next subroutine
+     open(ixlsx,file ='aim'//ver//'.xlsx',status='old') ! this is just to pass the file name via the unit number to the next subroutine
      call readRngXLSX(ixlsx,'col_row')  ! read sheet "col_row" range names and the data in them
      close(ixlsx)
      rname='C_COUNT'
@@ -361,6 +367,7 @@ read(5,'(a)') ver
     allocate(tFortDim3(TransferCount)       ) 	
     allocate(tFortDim4(TransferCount)       ) 	
     allocate(tFortDim5(TransferCount)       ) 	
+    allocate(tFortDim6(TransferCount)       ) 
     allocate(tDAFDim1(TransferCount)        ) 
     allocate(tDAFDim2(TransferCount)        ) 
     allocate(tAimDim1(TransferCount)        ) 
@@ -368,15 +375,18 @@ read(5,'(a)') ver
     allocate(tAimDim3(TransferCount)        ) 
     allocate(tAimDim4(TransferCount)        ) 
     allocate(tAimDim5(TransferCount)        ) 
+    allocate(tAimDim6(TransferCount)        ) 
     allocate(tAimDAF1(TransferCount)        ) 
     allocate(tAimDAF2(TransferCount)        ) 
     allocate(tAimmsVariable(TransferCount)  ) 
     allocate(tAimSetDomain(TransferCount)   ) 
-    allocate(emmvar_start(7,TransferCount) )
-    allocate(emmvar_end(7,TransferCount) )
+    allocate(emmvar_start(8,TransferCount) )
+    allocate(emmvar_end(8,TransferCount) )
     allocate(emmtype(TransferCount))
     allocate(NumEMMDim(2,TransferCount))
     allocate(AimDimNames(TransferCount))
+    
+    allocate(PassToNemsLines(TransferCount,4))
 
     rname='FortranVariable ';call getrngc(rname,  tFortranVariable       , 1,TransferCount,1)
     rname='INCLUDEFILE     ';call getrngc(rname,  tIncludeFile           , 1, TransferCount , 1 )
@@ -390,6 +400,7 @@ read(5,'(a)') ver
     rname='FORTDIM3        ';call getrngc(rname,  tFortDim3              , 1, TransferCount , 1 )
     rname='FORTDIM4        ';call getrngc(rname,  tFortDim4              , 1, TransferCount , 1 )
     rname='FORTDIM5        ';call getrngc(rname,  tFortDim5              , 1, TransferCount , 1 )
+    rname='FORTDIM6        ';call getrngc(rname,  tFortDim6              , 1, TransferCount , 1 )
     rname='DAFDIM1         ';call getrngc(rname,  tDAFDim1               , 1, TransferCount , 1 )
     rname='DAFDIM2         ';call getrngc(rname,  tDAFDim2               , 1, TransferCount , 1 )
     rname='AIMDIM1         ';call getrngc(rname,  tAimDim1               , 1, TransferCount , 1 )
@@ -397,6 +408,7 @@ read(5,'(a)') ver
     rname='AIMDIM3         ';call getrngc(rname,  tAimDim3               , 1, TransferCount , 1 )
     rname='AIMDIM4         ';call getrngc(rname,  tAimDim4               , 1, TransferCount , 1 )
     rname='AIMDIM5         ';call getrngc(rname,  tAimDim5               , 1, TransferCount , 1 )
+    rname='AIMDIM6         ';call getrngc(rname,  tAimDim6               , 1, TransferCount , 1 )
     rname='AIMDAF1         ';call getrngc(rname,  tAimDAF1               , 1, TransferCount , 1 )
     rname='AIMDAF2         ';call getrngc(rname,  tAimDAF2               , 1, TransferCount , 1 )
     rname='AIMMSVARIABLE   ';call getrngc(rname,  tAimmsVariable         , 1, TransferCount , 1 )
@@ -440,6 +452,7 @@ read(5,'(a)') ver
          call mreplace(tFortDim3(j),"'","")
          call mreplace(tFortDim4(j),"'","")
          call mreplace(tFortDim5(j),"'","")
+         call mreplace(tFortDim6(j),"'","")
          
          call Mreplace(tFortranVariable(j),char(0)," ")
     enddo
@@ -539,8 +552,8 @@ read(5,'(a)') ver
       enddo
     
     do j=1,TransferCount
-      emmvar_start(1:7,j)='1'
-      emmvar_end(1:7,j)  ='1'  
+      emmvar_start(1:8,j)='1'
+      emmvar_end(1:8,j)  ='1'  
       numRegularDim=0
       numDafDim=0    
       AimDimNames(j)=' '
@@ -556,7 +569,8 @@ read(5,'(a)') ver
           dim(1)=tAimDim1(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numRegularDim=1
-          call vrange(tFortranVariable(j),tFortDim1(j),tAimDim1(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tFortDim1(j),tAimDim1(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tFortDim1(j),tAimDim1(j),ver,emmvar_start(:,j),emmvar_end(:,j),0,NumRegularDim+numDAFDIM)
           Laimdim=1
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDim1(j))//'",'
         endif
@@ -564,7 +578,8 @@ read(5,'(a)') ver
           dim(1)=tAimDim2(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numRegularDim=2
-          call vrange(tFortranVariable(j),tFortDim2(j),tAimDim2(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tFortDim2(j),tAimDim2(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tFortDim2(j),tAimDim2(j),ver,emmvar_start(:,j),emmvar_end(:,j),0,NumRegularDim+numDAFDIM)
           Laimdim=max(len_trim(AimDimNames(j))+2,15)
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDim2(j))//'",'
         endif
@@ -572,7 +587,8 @@ read(5,'(a)') ver
           dim(1)=tAimDim3(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numRegularDim=3
-          call vrange(tFortranVariable(j),tFortDim3(j),tAimDim3(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tFortDim3(j),tAimDim3(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tFortDim3(j),tAimDim3(j),ver,emmvar_start(:,j),emmvar_end(:,j),0,NumRegularDim+numDAFDIM)
           Laimdim=max(len_trim(AimDimNames(j))+2,30)
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDim3(j))//'",'
         endif
@@ -580,7 +596,8 @@ read(5,'(a)') ver
           dim(1)=tAimDim4(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numRegularDim=4
-          call vrange(tFortranVariable(j),tFortDim4(j),tAimDim4(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tFortDim4(j),tAimDim4(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tFortDim4(j),tAimDim4(j),ver,emmvar_start(:,j),emmvar_end(:,j),0,NumRegularDim+numDAFDIM)
           Laimdim=max(len_trim(AimDimNames(j))+2,45)
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDim4(j))//'",'
         endif
@@ -588,15 +605,26 @@ read(5,'(a)') ver
           dim(1)=tAimDim5(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numRegularDim=5
-          call vrange(tFortranVariable(j),tFortDim5(j),tAimDim5(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tFortDim5(j),tAimDim5(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tFortDim5(j),tAimDim5(j),ver,emmvar_start(:,j),emmvar_end(:,j),0,NumRegularDim+numDAFDIM)
           Laimdim=max(len_trim(AimDimNames(j))+2,60)
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDim5(j))//'",'
+        endif
+        if(tAimDim6(j).ne.' ') then
+          dim(1)=tAimDim6(j)
+          call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
+          numRegularDim=6
+          !call vrange(tFortranVariable(j),tFortDim6(j),tAimDim6(j),ver,emmvar_start(1,j),emmvar_end(1,j),0,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tFortDim6(j),tAimDim6(j),ver,emmvar_start(:,j),emmvar_end(:,j),0,NumRegularDim+numDAFDIM)
+          Laimdim=max(len_trim(AimDimNames(j))+2,75)
+          AimDimNames(j)(Laimdim:)='"'//trim(tAimDim6(j))//'",'
         endif
         if(tAimDAF1(j).ne.' ') then
           dim(1)=tAimDAF1(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numDafDim=numDafDim+1
-          call vrange(tFortranVariable(j),tDAFDim1(j),tAimDAF1(j),ver,emmvar_start(1,j),emmvar_end(1,j),1,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tDAFDim1(j),tAimDAF1(j),ver,emmvar_start(1,j),emmvar_end(1,j),1,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tDAFDim1(j),tAimDAF1(j),ver,emmvar_start(:,j),emmvar_end(:,j),1,NumRegularDim+numDAFDIM)
           Laimdim=max(len_trim(AimDimNames(j))+2,(numRegularDim-1)*15)
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDAF1(j))//'",'
         endif
@@ -604,13 +632,14 @@ read(5,'(a)') ver
           dim(1)=tAimDAF2(j)
           call dimlist(alldims,superset,maxdims,nlist,dim,1,empty)
           numDafDim=numDafDim+1
-          call vrange(tFortranVariable(j),tDAFDim2(j),tAimDAF2(j),ver,emmvar_start(1,j),emmvar_end(1,j),1,NumRegularDim+numDAFDIM)
+          !call vrange(tFortranVariable(j),tDAFDim2(j),tAimDAF2(j),ver,emmvar_start(1,j),emmvar_end(1,j),1,NumRegularDim+numDAFDIM)
+          call vrange(tFortranVariable(j),tDAFDim2(j),tAimDAF2(j),ver,emmvar_start(:,j),emmvar_end(:,j),1,NumRegularDim+numDAFDIM)
           Laimdim=max(len_trim(AimDimNames(j))+2,(numRegularDim+numDAFDim-1)*15)
           AimDimNames(j)(Laimdim:)='"'//trim(tAimDAF2(j))//'",'
         endif
         numEmmDim(1,j)=numRegularDim
         numEMMDim(2,j)=numDAFDim
-        do k=numRegularDim+numDafDim+1,7
+        do k=numRegularDim+numDafDim+1,8
           laimdim=max(len_trim(AimDimNames(j))+2,(k-1)*15)
           AimDimNames(j)(laimdim:)='"",'
         enddo
@@ -634,7 +663,7 @@ read(5,'(a)') ver
       j=tunique(i)
        if(tDAFDim1(j).ne.'mnumnr'.and.tDAFDim2(j).ne.'mnumyr' .and. (tIncludeFile(j).ne.'wwind') .and.DoNotGenerate_Code(i).eq. 0) then
         t(1)=11
-        do k=2,7
+        do k=2,8
           t(k)=t(k-1)+ max(15,len_trim(emmvar_end(k-1,j))+2)
         enddo
         post=' '
@@ -643,8 +672,8 @@ read(5,'(a)') ver
           post=posttag(Transfer_Usage(i))
             write(29,'(5x,11a,i1,3a)')       '  call AIMMS_TransArray_out_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),numEmmDim(1,j)+numEMMDim(2,j), &
                 ',"',trim(tAIMMSVariable(j)),'", &'  ! AKN this is to creates AIMMS output variable names containing post LP solve values .
-            write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-            write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+            write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+            write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
             write(29,'(10x,2a)')     trim(AimDimNames(j)),'  &'
             !if (ver.eq.'ecp')  then
                 if (write_historicalyears(j) .eq. .TRUE.) then
@@ -660,8 +689,8 @@ read(5,'(a)') ver
         endif
         write(29,'(5x,11a,i1,3a)')       '  call AIMMS_TransArray_out_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),numEmmDim(1,j)+numEMMDim(2,j), &
             ',"',trim(tAIMMSVariable(j))//trim(post),'", &'  ! AKN this appends "pass_" to the AIMMS output variable names to pass values obtains only durig pre-LP solve stage.
-        write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-        write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+        write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+        write(29,'(11x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
         write(29,'(10x,2a)')     trim(AimDimNames(j)),'  &'
         !if (ver.eq.'ecp')  then
             if (write_historicalyears(j) .eq. .TRUE.) then
@@ -688,7 +717,7 @@ read(5,'(a)') ver
       j=tunique(i) 
       if(tIncludeFile(j).eq.'dispett3'.and.DoNotGenerate_Code(i).eq. 0) then
         t(1)=13
-        do k=2,7
+        do k=2,8
           t(k)=t(k-1)+ max(15,len_trim(emmvar_end(k-1,j))+2)
         enddo
         post=' '
@@ -696,8 +725,8 @@ read(5,'(a)') ver
           post=posttag(Transfer_Usage(i))
           write(29,'(7x,11a,i1,3a)')       '  call AIMMS_TransArray_out_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),numEmmDim(1,j)+numEMMDim(2,j), & 
             ',"',trim(tAIMMSVariable(j)),'", &'  ! ! AKN this is to creates AIMMS output variable names containing post LP solve values .
-          write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-          write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+          write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+          write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
           write(29,'(12x,2a)')     trim(AimDimNames(j)),'  &'
               !if (ver.eq.'ecp')  then
                     if (write_historicalyears(j) .eq. .TRUE.) then
@@ -713,8 +742,8 @@ read(5,'(a)') ver
         endif
         write(29,'(7x,11a,i1,3a)')       '  call AIMMS_TransArray_out_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),numEmmDim(1,j)+numEMMDim(2,j), & 
             ',"',trim(tAIMMSVariable(j))//trim(post),'", &'  ! AKN this appends "pass_" to the AIMMS output variable names to pass values obtains only durig pre-LP solve stage.
-        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
         write(29,'(12x,2a)')     trim(AimDimNames(j)),'  &'
             !if (ver.eq.'ecp')  then
                     if (write_historicalyears(j) .eq. .TRUE.) then
@@ -748,19 +777,29 @@ read(5,'(a)') ver
       j=tunique(i) 
       if((tDAFDim1(j).eq.'mnumnr'.or.tDAFDim2(j).eq.'mnumyr') .and. tIncludeFile(j).ne.'dispett3'.and.DoNotGenerate_Code(i).eq. 0) then
         t(1)=13
-        do k=2,7
+        do k=2,8
           t(k)=t(k-1)+ max(15,len_trim(emmvar_end(k,j))+2)
         enddo
         post=' '
         if(transfer_usage(i).gt.0.and.transfer_usage(i).le.3) then
           post=posttag(Transfer_Usage(i))
+          write(29,'(7x,11a,i1,3a)')       '  call AIMMS_TransArray_out_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),numEmmDim(1,j)+numEMMDim(2,j), & 
+            ',"',trim(tAIMMSVariable(j)),'", &'  ! ! AKN this is to creates AIMMS output variable names containing post LP solve values .
+          write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+          write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
+          write(29,'(12x,2a)')     trim(AimDimNames(j)),'  &'
+                    if (write_historicalyears(j) .eq. .TRUE.) then
+                         write(29,'(10x,30a)')     '"',emmtype(j),'",iyr,.TRUE.)'
+                    else
+                         write(29,'(10x,30a)')     '"',emmtype(j),'",iyr,.FALSE.)'
+                    endif
         elseif(transfer_usage(i).gt.3.or.transfer_usage(i).lt.0) then
           write(6,*)' error in transfer_usage, i=',i,trim(tAIMMSVariable(j))
         endif
         write(29,'(7x,11a,i1,3a)')       '  call AIMMS_TransArray_out_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),numEmmDim(1,j)+numEMMDim(2,j), &
             ',"',trim(tAIMMSVariable(j))//trim(post),'", &'
-        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+        write(29,'(13x,t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
         write(29,'(12x,2a)')     trim(AimDimNames(j)),'  &'
             !if (ver.eq.'ecp')  then
                     if (write_historicalyears(j) .eq. .TRUE.) then
@@ -789,20 +828,21 @@ read(5,'(a)') ver
       if(transfer_usage(i).gt.0 .and.DoNotGenerate_Code(i).eq. 0) then
         if(tDAFDim1(j).ne.'mnumnr'.and.tAimDAF2(j).ne.'mnumyr' .and. (tIncludeFile(j).ne.'wwind')) then
           t(1)=21
-          do k=2,7
+          do k=2,8
             t(k)=t(k-1)+ max(15,len_trim(emmvar_end(k-1,j))+2)
           enddo
           !write(29,'(30a)') "     CASE('",trim(tFortranVariable(j)),"')"  
           if(transfer_usage(i).eq.3) then
              write(29,'(30a)') "     CASE('",trim(tAIMMSVariable(j))//'_calc',"')" 
+              setZero_passback = ''
               !**************************************************
               if (trim(ADJUSTL(emmvar_end  (1,j))).eq. 'SCALAR') then
                   setZero_passback = trim(tFortranVariable(j))//'=0.0'
               else
                 setZero_passback = trim(tFortranVariable(j))//'('
-                do k=1,7
+                do k=1,8
                     if (trim(ADJUSTL(emmvar_end  (k,j))) .ne. '1') then
-                        if (trim(ADJUSTL(emmvar_end  (k,j))) .ne. 'MNUMYR') then
+                        if (index(trim(ADJUSTL(emmvar_end  (k,j))),'MNUMYR') .eq. 0) then
                             if (k .eq. 1) then
                                 setZero_passback = trim(setZero_passback)//':'
                             else
@@ -811,8 +851,16 @@ read(5,'(a)') ver
                         else
                             if (k .eq. 1) then
                                 setZero_passback = trim(setZero_passback)//'iyr'
+                                if (ver .eq. 'ecp' .and. index(trim(ADJUSTL(emmvar_end  (k,j))),'+') .gt. 0) then
+                                   setZero_passback = trim(setZero_passback)//':'//trim(ADJUSTL(emmvar_end  (k,j)))
+                                   call mreplace(setZero_passback,'MNUMYR','iyr')
+                                endif
                             else
                                 setZero_passback = trim(setZero_passback)//',iyr'
+                                if (ver .eq. 'ecp' .and. index(trim(ADJUSTL(emmvar_end  (k,j))),'+') .gt. 0) then
+                                   setZero_passback = trim(setZero_passback)//':'//trim(ADJUSTL(emmvar_end  (k,j)))
+                                   call mreplace(setZero_passback,'MNUMYR','iyr')
+                                endif
                             endif
                         endif
                     else
@@ -821,15 +869,16 @@ read(5,'(a)') ver
                 enddo
                 setZero_passback = trim(setZero_passback)//')=0.0'
               endif
-              write(29,'(20x,32a)') setZero_passback
+
+              write(29,'(20x,150a)') setZero_passback
               write(29,'(20x,32a)') 'if (emptyTable) goto 10'
               !*************************************************
           else
              write(29,'(30a)') "     CASE('",trim(tAIMMSVariable(j)),"')" 
           endif
           write(29,'(20x,32a)')  'call AIMMS_Transfer_in_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),' &'  
-          write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-          write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+          write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+          write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
           write(29,'(20x,30a)')     '"',emmtype(j),'",LcolumnStart,LcolumnEnd,FieldName,nfields,iunit)'
          endif
        endif
@@ -843,7 +892,7 @@ read(5,'(a)') ver
       if(transfer_usage(i).gt.0 .and. (tDAFDim1(j).eq.'mnumnr'.or.tDAFDim2(j).eq.'mnumyr') .and. tIncludeFile(j).ne.'dispett3'.and.DoNotGenerate_Code(i).eq. 0) then
 
 ! remove the dummy dimensions used for looping over DAF region or yearly records to create the AIMMS variables. Not used when reading in to fortran variables.        
-        do k=1,7
+        do k=1,8
           if(emmvar_start(k,j).eq.'irg') then
              emmvar_start(k,j)='1'
           endif
@@ -859,48 +908,59 @@ read(5,'(a)') ver
         
         enddo
         t(1)=23
-        do k=2,7
+        do k=2,8
           t(k)=t(k-1)+ max(15,len_trim(emmvar_end(k,j))+2)
         enddo
         !write(29,'(30a)') "     CASE('",trim(tFortranVariable(j)),"')" ! assume supply region number IRG is read separately and that each array is written for a single region at a time  
         if(transfer_usage(i).eq.3) then
         
           write(29,'(30a)') "     CASE('",trim(tAIMMSVariable(j))//'_calc',"')"
+          setZero_passback = ''
           !**************************************************
           if (trim(ADJUSTL(emmvar_end  (1,j))).eq. 'SCALAR') then
               setZero_passback = trim(tFortranVariable(j))//'=0.0'
           else
             setZero_passback = trim(tFortranVariable(j))//'('
-            do k=1,7
+            do k=1,8
                 if (trim(ADJUSTL(emmvar_end  (k,j))) .ne. '1') then
-                    if (trim(ADJUSTL(emmvar_end  (k,j))) .ne. 'MNUMYR') then
+                    if (index(trim(ADJUSTL(emmvar_end  (k,j))),'MNUMYR') .eq. 0) then
                         if (k .eq. 1) then
                             setZero_passback = trim(setZero_passback)//':'
                         else
                             setZero_passback = trim(setZero_passback)//',:'
+
                         endif
                     else
                         if (k .eq. 1) then
-                            setZero_passback = trim(setZero_passback)//'iyr'
-                        else
-                            setZero_passback = trim(setZero_passback)//',iyr'
-                        endif
+                                setZero_passback = trim(setZero_passback)//'iyr'
+                                if (index(trim(ADJUSTL(emmvar_end  (k,j))),'+') .gt. 0) then
+                                   setZero_passback = trim(setZero_passback)//':'//trim(ADJUSTL(emmvar_end  (k,j)))
+                                   call mreplace(setZero_passback,'MNUMYR','iyr')
+                                endif
+                            else if (k .lt. 7) then  !do this only if MNUMYR does not appear in one of DAF dimensions, DAFDIM1 or DAMDIM2
+                                setZero_passback = trim(setZero_passback)//',iyr'
+                                if (index(trim(ADJUSTL(emmvar_end  (k,j))),'+') .gt. 0) then
+                                   setZero_passback = trim(setZero_passback)//':'//trim(ADJUSTL(emmvar_end  (k,j)))
+                                   call mreplace(setZero_passback,'MNUMYR','iyr')
+                                endif
+                            endif
                     endif
                 else
                     exit
                 endif
             enddo
             setZero_passback = trim(setZero_passback)//')=0.0'
-          endif
-          write(29,'(20x,32a)') setZero_passback
+          endif 
+      
+          write(29,'(20x,150a)') setZero_passback
           write(29,'(20x,32a)') 'if (emptyTable) goto 10'
           !*************************************************
         else
           write(29,'(30a)') "     CASE('",trim(tAIMMSVariable(j)),"')"
         endif
         write(29,'(20x,32a)')  'call AIMMS_Transfer_in_'//ver//'(',(trim(tFortranVariable(j)),',',k=1,5),' &'
-        write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,7),'  &'
-        write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,7),'  &'
+        write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_start(k,j)),',',k=1,8),'  &'
+        write(29,'(t<t(1)>,2a,t<t(2)>,2a,t<t(3)>,2a,t<t(4)>,2a,t<t(5)>,2a,t<t(6)>,2a,t<t(7)>,2a,t<t(8)>,3a)')     (trim(emmvar_end  (k,j)),',',k=1,8),'  &'
         write(29,'(20x,30a)')     '"',emmtype(j),'",LcolumnStart,LcolumnEnd,FieldName,nfields,iunit)'
 
       endif
@@ -937,12 +997,24 @@ narray=0
   read(8,*,end=99) array
   if(array(1:1).eq.'#') go to 10
   backspace(8)
-  read(8,*) array,ipass
-  
+  read(8,'(a)') array
+  is=index(array,',')
+  array = array(is+1:)
+  irange = 0
+  if(index(array,',') .GT. 0) then
+      backspace(8)
+      read(8,*) array,ipass,irange
+  else
+      backspace(8)
+      read(8,*) array,ipass
+  endif
+
   if(narray.le.maxarray) then
     narray=narray+1
     allArrays(narray)=trim(array)
     passed(narray)=ipass
+    range_flag(narray)=irange
+    irange = 0
     allArrays_coeff(narray)=trim(array)    
     allArrays_calc(narray)=trim(array)    
     allArrays_pass(narray)=trim(array) 
@@ -1216,7 +1288,6 @@ enddo
       if(superset(i).ne.' ') then
          write(9,'(3a)' )'       SubsetOf: ',trim(superset(i)),'_;'        
       endif
-     
       write(9,'(2a,$)' )   '         Index: ',trim(alldims(i)) ! start index line but write without CR to possibly add aliases
       do k=1,nlist  ! look for any alias names and add them to the Index line
         if (k.ne.i) then
@@ -1631,7 +1702,15 @@ enddo
         if(nj.gt.0) then
           write(line,'(30a)' )    '         IndexDomain: (',(trim(colSets(i,j)),',',j=1,nj-1),trim(colSets(i,nj)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
         endif
-        write(9,'(30a)' )    '         Range: nonnegative;'  
+        do k=1,maxarray
+            if ((index(allArrays_pass(k),trim(colname(i))) .GT. 0) .AND.(index(allArrays_pass(k),'_LBOUND') .GT. 0) .AND. (range_flag(k).EQ. 1))  then
+                 write(9,'(30a)' )    '         Range: free;'
+                 exit
+           elseif ((index(allArrays_pass(k),trim(colname(i))) .GT. 0) .AND. ((index(allArrays_pass(k),'_LBOUND') .GT. 0) .OR.(index(allArrays_pass(k),'_UBOUND') .GT. 0)).AND. (range_flag(k).EQ. 0))  then
+                 write(9,'(30a)' )    '         Range: nonnegative;' 
+                 exit
+            endif
+        enddo 
 
 ! declare coefficient parameters that hold the bounds
         ifound=0
@@ -1663,7 +1742,15 @@ enddo
         if(nj.gt.0) then
           write(line,'(30a)' )    '         IndexDomain: (',(trim(colSets(i,j)),',',j=1,nj-1),trim(colSets(i,nj)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
         endif
-        write(9,'(30a)' )    '         Range: nonnegative;'  
+        do k=1,maxarray
+            if ((index(allArrays_pass(k),trim(colname(i))) .GT. 0) .AND.(index(allArrays_pass(k),'_UBOUND') .GT. 0) .AND. (range_flag(k).EQ. 1))  then
+                 write(9,'(30a)' )    '         Range: free;'
+                 exit
+            elseif ((index(allArrays_pass(k),trim(colname(i))) .GT. 0) .AND.(index(allArrays_pass(k),'_UBOUND') .GT. 0) .AND. (range_flag(k).EQ. 0))  then
+                 write(9,'(30a)' )    '         Range: nonnegative;' 
+                 exit
+            endif
+        enddo  
         write(9,'(30a)' )    '         Default: inf;'  
         ifound=0
         param='coeff_'//trim(colname(i))//'_UBOUND'
@@ -2102,10 +2189,18 @@ write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
          if(rowtype(i).eq.'N') then ! for free rows implemented as AIMMS Parameters. just write value
               write(9,'(20a)') '      display {',trim(rowname(i)),'} where decimals := 10 ;'  ! free rows implemented as parameters, so just display parameter values
          else
-           write(9,'(20a)') '      display {',trim(rowname(i)),'.level, ',  &
+           if (needsol_rows(i) .eq. 1) then
+             write(9,'(20a)') '      display {',trim(rowname(i)),'.level, ',  &
                                             trim(rowname(i)),'.lower, ',  &
                                             trim(rowname(i)),'.upper, ',  &
                                             trim(rowname(i)),'.ShadowPrice} where decimals := 10  ;'
+           elseif (needsol_rows(i) .eq. 2) then
+             write(9,'(20a)') '      display {',trim(rowname(i)),'.level, ',  &
+                                            trim(rowname(i)),'.lower, ',  &
+                                            trim(rowname(i)),'.upper, ',  &
+                                            trim(rowname(i)),'.ShadowPrice, ',  &
+                                            trim(rowname(i)),'.basic} where decimals := 10  ;'
+           endif
          endif
        endif
      enddo
@@ -2170,15 +2265,14 @@ write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
      write(9,'(a)') '        Range: integer;'
      write(9,'(a)') '    }'
      write(9,'(a)') '}'
-     write(9,'(a)') '  Procedure PassBackToNEMS {' 
-     write(9,'(a)') '    Body: {'
-     if(ver.eq.'ecp') then
+!**********************************************************************************************************************************
+     if(ver.eq.'ecp') then   ! EFD has removed this old method LC2 11/2023
+       write(9,'(a)') '  Procedure PassBackToNEMS_old {' 
+       write(9,'(a)') '    Body: {'
        write(9,'(a)') '      OutToNEMS_FileName:="PassBack_"+formatstring("%i",curcalyr(1))+".txt";'
        write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
-     else
-       write(9,'(a)') '      OutToNEMS_FileName:="PassBack_"+formatstring("%i",curcalyr(1))+"_"+formatstring("%>02i",curitr(1))+".txt";'
-       write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
-     endif
+       write(9,'(a)') '      display ECP_WithoutSafety.ProgramStatus ;'
+       write(9,'(a)') '      display ECP_WithSafety.ProgramStatus ;'
 !     following do loop was added to permanently map transfer variables with their _calc versions  commented out by AKN on 5/25/22
 !     do i=1,nuniq
 !       J=tUnique(i)
@@ -2220,12 +2314,581 @@ write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
            else
               write(9,'(30a)' )    '        display {',trim(tAIMMSVariable(J)),trim(tAIMSetDomain(j)),'} where decimals := 10 ;'
            endif
-       endif
+      endif
      enddo
      write(9,'(a)') '      endfor;'
      write(9,'(20a)') '      putclose;'          
      write(9,'(a)') '    }' 
-     write(9,'(a)') '  }' 
+     write(9,'(a)') '  }'
+    endif  
+!********************************************************PassBack_temp*********************************************************
+     if(ver.eq.'ecp') then
+       write(9,'(a)') '  Procedure PassBackToNEMS_new {' 
+       write(9,'(a)') '    Body: {'
+       write(9,'(a)') '      OutToNEMS_FileName:="PassBack_new_"+formatstring("%i",curcalyr(1))+".txt";'
+       write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
+       write(9,'(a)') '      display ECP_WithoutSafety.ProgramStatus ;'
+       write(9,'(a)') '      display ECP_WithSafety.ProgramStatus ;'
+     else  ! EFD removed the old/new and only uses one 11/2023
+       write(9,'(a)') '  Procedure PassBackToNEMS {' 
+       write(9,'(a)') '    Body: {'
+       write(9,'(a)') '      OutToNEMS_FileName:="PassBack_"+formatstring("%i",curcalyr(1))+"_"+formatstring("%>02i",curitr(1))+".txt";'
+       write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
+       write(9,'(a)') '      display EFD_WithoutSafety.ProgramStatus ;'
+       write(9,'(a)') '      display EFD_WithSafety.ProgramStatus ;'
+     endif
+!     following do loop was added to permanently map transfer variables with their _calc versions  commented out by AKN on 5/25/22
+!     do i=1,nuniq
+!       J=tUnique(i)
+!       if(transfer_usage(i).eq.3) then
+!          if(tAIMSetDomain(J).ne.'(SCALAR)') then
+!              write(9,'(30a)' )    '      ',trim(tAIMMSVariable(J)),trim(tAIMSetDomain(J)),':= ', trim(tAIMMSVariable(J)),'_calc',trim(tAIMSetDomain(J)),';'
+!          else
+!              write(9,'(30a)' )    '      ',trim(tAIMMSVariable(J)),':= ',trim(tAIMMSVariable(J)),'_calc;'
+!          endif
+!       endif
+!     enddo
+     write(9,'(a)'  ) '! output the non-DAF EMM variables derived from the LP solution values'
+     do i=1,nuniq
+       J=tUnique(i)
+       if((transfer_usage(i).gt.0) .and. ((tDAFDim1(j).ne.'mnumnr').and.(tDAFDim2(j).ne.'mnumyr')))  then
+           PassToNemsLines(J,1)='      put @5,'
+           PassToNemsLines(J,2)='      put "!",@5,'
+           PassToNemsLines(J,3)='      put @5,'
+           PassToNemsLines(J,4)='('    
+           K=1
+           if ((K .eq. 1).AND.(tAimDim1(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                if (tAimDim1(J) .ne. 'SCALARSet') Then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index1":<10,'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim1(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"SCALARSet":<13,'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"---------":<13,'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim1(J))//')'//trim(adjustl(IndexOffsetStr))//':<13:0,'                
+                endif
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//trim(tAimDim1(J))
+                K= k + 1
+           endif
+           if ((K .eq. 2).AND.(tAimDim2(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index2":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim2(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim2(J))
+                K= k + 1
+           endif
+           if ((K .eq. 3).AND.(tAimDim3(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index3":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim3(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim3(J))
+                K= k + 1
+           endif
+           if ((K .eq. 4).AND.(tAimDim4(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index4":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim4(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim4(J))//','
+                K= k + 1
+           endif
+           if ((K .eq. 5).AND.(tAimDim5(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index5":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim5(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim5(J))//','
+                K= k + 1
+           endif
+           if ((K .eq. 6).AND.(tAimDim6(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index6":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim6(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim6(J))//','
+                K= k + 1
+           endif
+           if (tAimDim1(J) .eq. 'SCALARSet') Then
+                if(transfer_usage(i).eq.3) then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'_calc":>16,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"----------------":>16,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//':>16:10,/;'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'":>16/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"----------------":>16,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//':>16:10,/;'
+                endif 
+           else
+                if(transfer_usage(i).eq.3) then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'_calc":>18,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------------------":>18,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//':>18:10,/;'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'":>18,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------------------":>18,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//':>18:10,/;'
+                endif 
+           endif
+           PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//')'
+      
+           write(9,'(30a)' )    '      put "Composite table:",/;'
+           write(9,'(30a)' )  trim(PassToNemsLines(J,1)(1:))
+           write(9,'(30a)' )  trim(PassToNemsLines(J,2)(1:))   
+       
+
+           write(9,'(30a)') '         for '//trim(tAimSetDomain(J))//' do'
+             
+           
+           if(transfer_usage(i).eq.3) then
+              write(9,'(30a)') '            if '//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//' then'
+           else
+              write(9,'(30a)') '            if '//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//' then'
+           endif 
+           write(9,'(30a)' )  '        '//trim(PassToNemsLines(J,3)(1:))  
+           write(9,'(a)') '            endif; '
+           write(9,'(a)') '          endfor; '
+           write(9,'(a)') '      put @5,";",/; '
+           write(9,'(a)') '      put "",/;'
+       endif !if(transfer_usage(i).gt.0)  the
+     enddo   !do i=1,nuniq
+      ! following loop is to handle DAF based output transfer variables
+     DAFentryCounter = 1
+     do i=1,nuniq
+       J=tUnique(i)
+       ! following if clause is to handle only 
+       if((transfer_usage(i).gt.0) .and. ((tDAFDim1(j).eq.' ').and.(tDAFDim2(j).eq.'mnumyr')))  then
+           PassToNemsLines(J,1)='      put @5,'
+           PassToNemsLines(J,2)='      put "!",@5,'
+           PassToNemsLines(J,3)='      put @5,'
+           PassToNemsLines(J,4)='('    
+           K=1
+           if ((K .eq. 1).AND.(tAimDim1(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                if (tAimDim1(J) .ne. 'SCALARSet') Then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index1":<10,'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim1(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"SCALARSet":<13,'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"---------":<13,'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim1(J))//')'//trim(adjustl(IndexOffsetStr))//':<13:0,'                
+                endif
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//trim(tAimDim1(J))
+                K= k + 1
+           endif
+           if ((K .eq. 2).AND.(tAimDim2(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index2":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim2(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim2(J))
+                K= k + 1
+           endif
+           if ((K .eq. 3).AND.(tAimDim3(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index3":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim3(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim3(J))
+                K= k + 1
+           endif
+           if ((K .eq. 4).AND.(tAimDim4(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index4":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim4(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim4(J))//','
+                K= k + 1
+           endif
+           if ((K .eq. 5).AND.(tAimDim5(J).ne.' ')) then 
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index5":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                !PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim5(J))//')+('//trim(adjustl(emmvar_start(K,J)))//'-1):<10:0,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim5(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim5(J))//','
+                K= k + 1
+           endif
+           if ((K .eq. 6).AND.(tAimDim6(J).ne.' ')) then 
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index6":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                !PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim6(J))//')+('//trim(adjustl(emmvar_start(K,J)))//'-1):<10:0,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim6(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim6(J))//','
+                K= k + 1
+           endif
+           if (tAimDim1(J) .eq. 'SCALARSet') Then
+                if(transfer_usage(i).eq.3) then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'_calc":>16,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"----------------":>16,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//':>16:10,/;'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'":>16/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"----------------":>16,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//':>16:10,/;'
+                endif 
+           else
+                if(transfer_usage(i).eq.3) then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'_calc":>18,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------------------":>18,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//':>18:10,/;'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'":>18,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------------------":>18,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//':>18:10,/;'
+                endif 
+           endif
+           PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//')'
+           ! Construct a for loop over SupplyRegion so that all the data for each region is displayed in groups.
+           if (DAFentryCounter .eq. 1) then
+               write(9,'(a)') '! write variables with implicit year index as implemented via direct access files in nems.'
+               write(9,'(a)') '! use NEMSYearIndex to set the Year    '   
+               write(9,'(a)') '      NEMSYearIndex:=stringtoelement(mnumyr_,FormatString("%02i",' // " CURCALYR('1')-1989));"
+               write(9,'(a)') '      put "",/;'
+           endif
+           write(9,'(30a)' )    '      put "Composite table:",/;'
+           write(9,'(30a)' )  trim(PassToNemsLines(J,1)(1:))
+           write(9,'(30a)' )  trim(PassToNemsLines(J,2)(1:))   
+           write(9,'(30a)') '      for '//trim(PassToNemsLines(J,4)(1:))//' do'
+            if(transfer_usage(i).eq.3) then
+                write(9,'(30a)') '        if '//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//' then'
+            else
+                write(9,'(30a)') '        if '//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//' then'
+            endif 
+           write(9,'(30a)' )  '       '//trim(PassToNemsLines(J,3)(1:))  
+           write(9,'(a)') '        endif; '
+           write(9,'(a)') '      endfor; '
+           write(9,'(a)') '      put @5,";",/; '
+           write(9,'(a)') '      put "",/;'
+           DAFentryCounter = DAFentryCounter + 1
+       endif !if(transfer_usage(i).gt.0)  the
+     enddo   !do i=1,nuniq
+     
+     DAFentryCounter = 1
+     do i=1,nuniq
+       J=tUnique(i)     
+       if((transfer_usage(i).gt.0) .and. (tDAFDim1(j).eq.'mnumnr'))   then
+           PassToNemsLines(J,1)='      put @5,'
+           PassToNemsLines(J,2)='      put "!",@5,'
+           PassToNemsLines(J,3)='      put @5,'
+           PassToNemsLines(J,4)='('    
+           K=1
+           if ((K .eq. 1).AND.(tAimDim1(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                if (tAimDim1(J) .ne. 'SCALARSet') Then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index1":<10,'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim1(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"SCALARSet":<13,'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"---------":<13,'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim1(J))//')'//trim(adjustl(IndexOffsetStr))//':<13:0,'                
+                endif
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//trim(tAimDim1(J))
+                K= k + 1
+           endif
+           if ((K .eq. 2).AND.(tAimDim2(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index2":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim2(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim2(J))
+                K= k + 1
+           endif
+           if ((K .eq. 3).AND.(tAimDim3(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index3":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim3(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim3(J))
+                K= k + 1
+           endif
+           if ((K .eq. 4).AND.(tAimDim4(J).ne.' ')) then
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index4":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim4(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim4(J))//','
+                K= k + 1
+           endif
+           if ((K .eq. 5).AND.(tAimDim5(J).ne.' ')) then 
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index5":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                !PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim5(J))//')+('//trim(adjustl(emmvar_start(K,J)))//'-1):<10:0,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim5(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim5(J))//','
+                K= k + 1
+           endif
+           if ((K .eq. 6).AND.(tAimDim6(J).ne.' ')) then 
+                IndexOffsetStr = trim(adjustl(emmvar_start(K,J)))
+                read (IndexOffsetStr,*) IndexOffStart
+                IndexOffSet = IndexOffStart - 1
+                IndexOffsetstr = ''
+                write (IndexOffsetstr,*)  IndexOffSet
+                if (IndexOffSet .eq. 0) then
+                  IndexOffsetStr = ''
+                elseif (IndexOffset .gt. 0) then
+                  IndexOffsetStr = '+'// trim(adjustl(IndexOffsetStr))
+                elseif (IndexOffset .lt. 0) then
+                  IndexOffsetStr = trim(adjustl(IndexOffsetStr))
+                endif
+                PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"Index6":<10,'
+                PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------":<10,'
+                !PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim6(J))//')+('//trim(adjustl(emmvar_start(K,J)))//'-1):<10:0,'
+                PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//'ord('//trim(tAimDim6(J))//')'//trim(adjustl(IndexOffsetStr))//':<10:0,'
+                PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//','//trim(tAimDim6(J))//','
+                K= k + 1
+           endif
+           if (tAimDim1(J) .eq. 'SCALARSet') Then
+                if(transfer_usage(i).eq.3) then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'_calc":>16,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"----------------":>16,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//':>16:10,/;'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'":>16/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"----------------":>16,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//':>16:10,/;'
+                endif 
+           else
+                if(transfer_usage(i).eq.3) then
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'_calc":>18,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------------------":>18,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//':>18:10,/;'
+                else
+                    PassToNemsLines(J,1)=trim(PassToNemsLines(J,1))//'"'//trim(tAIMMSVariable(J))//'":>18,/;'
+                    PassToNemsLines(J,2)=trim(PassToNemsLines(J,2))//'"------------------":>18,/;'
+                    PassToNemsLines(J,3)=trim(PassToNemsLines(J,3))//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//':>18:10,/;'
+                endif 
+           endif
+           PassToNemsLines(J,4)=trim(PassToNemsLines(J,4))//')'
+           ! Construct a for loop over SupplyRegion so that all the data for each region is displayed in groups.
+           if (DAFentryCounter .eq. 1) then
+               write(9,'(a)') '! write variables with implicit year and region indices as implemented via direct access files in nems.'
+               write(9,'(a)') '! use NEMSYearIndex to set the Year and SupplyRegionNumber to set the Region   '   
+               write(9,'(a)') '      NEMSYearIndex:=stringtoelement(mnumyr_,FormatString("%02i",' // " CURCALYR('1')-1989));"
+               write(9,'(a)') '      for (SupplyRegion in SupplyRegion_) do'
+               write(9,'(a)') '        SupplyRegionNumber:=ord(SupplyRegion);'
+               write(9,'(a)') '        display SupplyRegionNumber;'
+               write(9,'(a)') '        put "",/;'
+           endif
+           write(9,'(30a)' )    '        put "Composite table:",/;'
+           write(9,'(30a)' )  '  '//trim(PassToNemsLines(J,1)(1:))
+           write(9,'(30a)' )  '  '//trim(PassToNemsLines(J,2)(1:))   
+           write(9,'(30a)') '        for '//trim(PassToNemsLines(J,4)(1:))//' do'
+            if(transfer_usage(i).eq.3) then
+                write(9,'(30a)') '            if '//trim(tAIMMSVariable(J))//'_calc'//trim(tAimSetDomain(J))//' then'
+            else
+                write(9,'(30a)') '            if '//trim(tAIMMSVariable(J))//trim(tAimSetDomain(J))//' then'
+            endif 
+            write(9,'(30a)' )  '             '//trim(PassToNemsLines(J,3)(1:))  
+            write(9,'(a)') '            endif; '
+           write(9,'(a)') '        endfor; '    
+           write(9,'(a)') '        put @5,";",/; '
+           write(9,'(a)') '        put "",/;'
+           
+           DAFentryCounter = DAFentryCounter + 1
+       endif !if(transfer_usage(i).gt.0)  the
+       if ((i .eq. nuniq) .AND. (DAFentryCounter .GT. 1))  then
+              write(9,'(a)') '      endfor; '
+       endif
+     enddo   !do i=1,nuniq
+     
+     write(9,'(20a)') '      putclose;'          
+     write(9,'(a)') '    }' 
+     write(9,'(a)') '  }'
+!**********************************************************************************************************************************************
      write(9,'(a)') '}' 
      close(9)
     !  done with the AIMMS code. Tell user what to do next:
@@ -2341,7 +3004,7 @@ end
           subroutine vrange(FortranVariable,fortdim,aimdim,ver,emmvar_start,emmvar_end,daf,ipos)
 ! set up starting and ending arguments for call to transfer_out
           implicit none
-          character(len=*) FortranVariable,fortdim,aimdim,ver,emmvar_start(7),emmvar_end(7)
+          character(len=*) FortranVariable,fortdim,aimdim,ver,emmvar_start(8),emmvar_end(8)
           integer daf,ipos
           if(FortDim(1:2).eq.'0:')then
              emmvar_start(ipos)='0'

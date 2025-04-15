@@ -1,9 +1,0 @@
-$ WOODUNBD.....an unbounded network problem.
-$ Try to diagnose the cause of unboundedness. Use the
-$ EXPLAIN command to put your explanation into English.
- SW MSG=F
-   READ P WOODUNBD
-   READ S WOODNET
- SW MSG=T
- _DIC M WOODNET
- RETURN Q

@@ -7,10 +7,41 @@
 ! LANGUAGE:      FORTRAN                                           *
 ! CALLED BY:     PROGRAM NEMS (Integrating Module)                 *
 !                                                                  *
-! ANALYSIS:      AEO2022                                           *
+! ANALYSIS:      AEO2025                                           *
 ! CASE:          Reference                                         *
-! DATE:          September 26, 2022                                 *
+! DATE:          March 13, 2025                                   *
 !                                                                  *
+!*******************************************************************
+! AEO2025 CHANGES                                                  *
+! -Cleaned up various code comments and formatting                 *
+! -Remove calculation of geothermal energy consumption (!GeoFix)   *
+! -Remove deprecated !DYN code and errant tab spacing              *
+! -Revise hard-coded EQT values that correspond to xlRTEQTYPE values*
+!   from RSMEQP tab of RSMESS.xlsx; specifically affects clothes washer,*
+!   water heater, refrigerator, and freezer equipment (!techupdate)*
+! -Revise SVRTE function to use delay function per DOE standards   *
+! -Remove unused RTMINLIF and RTMAXLIF variables                   *
+! -Updated BASEMEF using top-load clothes washer base-year efficiency*
+!   from latest major end-use technology report                    *
+! -Revised technology Type parameters to based on revised technology*
+!   menu ranges in RSMEQP tab of RSMESS.xlsx (!EqpParam)           *
+! -Remove 'DOT2' (distillate other) from HQT list to align with RSMEQP* 
+! -Removed average fossil fuel heat rate conversion from solar PV  *
+!   and wind distributed generation (!3412project)                 *
+! -Revised MaxNiche value to accommodate more distributed generation*
+!   niches when updating to 2020 RECS microdata and ZIP code-level *
+!   solar PV insolation rates (!DGniches)                          *
+! -Updated WASHNEW and NEWDRYSAT average annual penetration rate   *
+!   into new homes based on 2020 RECS data                         *
+! -Adjusted cost for ASHP compared with central AC (!ACcost)       *
+! -Updated average natural gas water heating UEC (XWATERHTGMMBTU)  *
+! -Updated penetration rate of diswashers into new construction    *
+!   (!DISHNEWpen)                                                  *
+! -Updated share of homes with propane grills (LPGGRILL)           *
+! -Updated shares of natural gas water-heated homes that also      *
+!   have natural gas cooking ranges by housing type (NGNGFACT)     *
+! -Revise PV hurdle model to accommodate increased adoption under  *
+!   alternative assumption scenarios (!ONLmod)                     *
 !*******************************************************************
 ! AEO2023 CHANGES                                                  *
 ! -Close RSSTK input file after reading values (!close_RSSTK)      *
@@ -79,7 +110,7 @@
 ! -Updated shares of natural gas water-heated homes that also      *
 !   have natural gas cooking ranges by housing type (NGNGFACT)     *
 ! -Combine kerosene with distillate fuel oil inputs and            *
-!   benchmarking (!KeroBench)                                      *	!kj - currently keeping placeholders in RSSTK, RSUEC, RSCLASS, RSMEQP, RSMSHL, RSSTEO
+!   benchmarking (!KeroBench)                                      *	!TODO - currently keeping placeholders in RSSTK, RSUEC, RSCLASS, RSMEQP, RSMSHL, RSSTEO
 ! -Standardize use of CACPR, DWPR, and ELDRYPR penetration rate    *
 !   inputs from RSMISC.txt and prevent greater than 90%            *
 !   penetration of central ACs, dishwashers, and electric clothes  *
@@ -304,24 +335,24 @@
       PARAMETER (nRefrClasses=1)  !EqpParam
       PARAMETER (nFrezClasses=1)  !EqpParam
 
-      PARAMETER (nHeatTypes=36)  !EqpParam
-      PARAMETER (nCoolTypes=17)  !EqpParam
-      PARAMETER (nClWashTypes=8)  !EqpParam
-      PARAMETER (nDishTypes=4)  !EqpParam
-      PARAMETER (nWatHtTypes=18)  !EqpParam
-      PARAMETER (nCookTypes=5)  !EqpParam
-      PARAMETER (nClDryTypes=8)  !EqpParam
+      PARAMETER (nHeatTypes=35)  !EqpParam
+      PARAMETER (nCoolTypes=16)  !EqpParam
+      PARAMETER (nClWashTypes=6)  !EqpParam
+      PARAMETER (nDishTypes=3)  !EqpParam
+      PARAMETER (nWatHtTypes=15)  !EqpParam
+      PARAMETER (nCookTypes=7)  !EqpParam
+      PARAMETER (nClDryTypes=6)  !EqpParam
       PARAMETER (nRefrTypes=12)  !EqpParam
-      PARAMETER (nFrezTypes=8)  !EqpParam
+      PARAMETER (nFrezTypes=7)  !EqpParam
 
       PARAMETER (nShellTypes=5)
-
+  
 ! Parameters for RSMLGT lighting menu and arrays
       INTEGER NLRec,MaxApps,MaxTypes,MaxBins
       PARAMETER (NLRec=100)  !Number of lighting records in the technology database
       PARAMETER (MaxApps=4)  !Maximum number of applications
       PARAMETER (MaxTypes=4) !Maximum number of bulb types within an application
-      PARAMETER (MaxBins=6)  !Maximum number of hours per day usage bins per applications
+      PARAMETER (MaxBins=6)  !Maximum number of hours-per-day usage bins per applications
 
 ! Parameters for Price-Induced Technical Change
 !   These parameters allow first years of availability to be advanced when energy price increases are large.
@@ -339,7 +370,7 @@
       COMMON/EQREP/EQCREP(RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR)
       COMMON/EQSUR/EQCSUR(RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR)
       COMMON/RFCON/NHTRFL,NCLFL,NWHFL,NSTVFL,NDRYFL,NREFFL,NFRZFL, &
-       FHTRCON(10),FCLCON(10),FWHCON(10),FSTVCON(10), &	!kj - what does the 10 signify? Max number of fuels for each consumption type?
+       FHTRCON(10),FCLCON(10),FWHCON(10),FSTVCON(10), &	!TODO - What does the 10 signify? Max number of fuels for each consumption type?
        FDRYCON(10),FREFCON(10),FFRZCON(10), &
        FCSWCON(10),FDSWCON(10),NCSWFL,NDSWFL,NSHTRFL
       COMMON/LFE/  HDRfy,HDRly,HDR(mNumBldg),HDQ((BaseYr-BaseYr+2):(EndYr-BaseYr+1),mNumCR,mNumBldg),HDi((BaseYr-BaseYr+2):(EndYr-BaseYr+1),mNumCR,mNumBldg), &  !HDRendog
@@ -389,7 +420,7 @@
       COMMON/SQRFLTS/ELASTIC(5,mNumCR-2)
       COMMON/SQFTDATA/SQRFOOT(RECSYear:EndYr,mNumBldg,mNumCR-2),EXSQRFOOT(RECSYear:EndYr,mNumBldg,mNumCR-2),STOCKSQRFOOT(RECSYear:EndYr,mNumBldg,mNumCR-2)
       COMMON/PRI/PRICES(MNUMFUEL,mNumCR,BaseYr:EndYr)
-      COMMON/DRYER/DRYSHR(8,mNumBldg,mNumCR)  !NG_DRY1, NG_DRY2, NG_DRY3, NG_DRY4, ELEC_DRY1, ELEC_DRY2, ELEC_DRY3, ELEC_DRY4	!kj - Was 4; should this be 8 now? Is it even used? If so, find a way to make this value dynamic?
+      COMMON/DRYER/DRYSHR(8,mNumBldg,mNumCR)  !NG_DRY1, NG_DRY2, NG_DRY3, NG_DRY4, ELEC_DRY1, ELEC_DRY2, ELEC_DRY3, ELEC_DRY4	!TODO - Was 4; should this be 8 now? Is it even used? If so, find a way to make this value dynamic.
       COMMON/DRYSA/DRYSAT(mNumBldg,mNumCR)
       COMMON/HOTWATER/HOTWATQ(RECSYear:EndYr,mNumBldg,mNumCR-2), &
         CWLOAD(RECSYear), &
@@ -440,9 +471,8 @@
       COMMON/NWHTR/HSYSSHR(RECSYear:EndYr+1,nHeatClasses,mNumBldg,mNumCR)
       COMMON/HTSHRYR/HTSHRYR  !HtShrYr
       COMMON/ESTARHISTYR/ESTARHISTYR  !RSESTARbetas
-     !  Dynamically ALLOCATE these large arrays:                          !DYN
-     ! COMMON/EQTSH/NEQTSHR(RECSYear:EndYr+1,MNUMRTTY,mNumBldg,mNumCR) &  !DYN
-     !   ,REQTSHR(RECSYear:EndYr+1,MNUMRTTY,mNumBldg,mNumCR)              !DYN
+      COMMON/GASCUST/WATERTOT,COOKTOT,DRYERTOT
+      !Dynamically ALLOCATE these large arrays:                           !DYN
       REAL*4,ALLOCATABLE::NEQTSHR(:,:,:,:)                                !DYN
       REAL*4,ALLOCATABLE::REQTSHR(:,:,:,:)                                !DYN
       COMMON/WEQCEF/ WTEQCEFFN(RECSYear:EndYr+1,mNumRTCl,mNumBldg,mNumCR) &
@@ -454,20 +484,14 @@
       COMMON/DISCRATE/BETA1DR(MNUMRTTY)
       COMMON/EQCND/EQCND90(RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR)       !LOCAL
       COMMON/HEATOT/HEATOT(RECSYear:EndYr+1,nHeatClasses,mNumBldg,mNumCR)
-!  Dynamically ALLOCATE these large arrays:                                         !DYN
-!      COMMON/EQPFUT/ &                                                             !DYN
-!        EQR90FUT  (RECSYear:EndYr,RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR-2) &     !DYN
-!       ,EQREPFUT  (RECSYear:EndYr,RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR-2) &     !DYN
-!       ,EQADDFUT  (RECSYear:EndYr,RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR-2) &     !DYN
-!       ,EQR90RPFUT(RECSYear:EndYr,RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR-2) &     !DYN
-!       ,EQCESEFUT (RECSYear:EndYr,RECSYear:EndYr,mNumRTCl,mNumBldg,mNumCR-2)       !DYN
+      !Dynamically ALLOCATE these large arrays:                                      !DYN
       REAL*4,ALLOCATABLE::EQR90FUT  (:,:,:,:,:)                                     !DYN
       REAL*4,ALLOCATABLE::EQREPFUT  (:,:,:,:,:)                                     !DYN
       REAL*4,ALLOCATABLE::EQADDFUT  (:,:,:,:,:)                                     !DYN
       REAL*4,ALLOCATABLE::EQR90RPFUT(:,:,:,:,:)                                     !DYN
       REAL*4,ALLOCATABLE::EQCESEFUT (:,:,:,:,:)                                     !DYN
       COMMON/EQCEQ/EQCEQCN(RECSYear-BaseYr:mNumYr,mNumRTCl,mNumBldg,mNumCR)
-      COMMON/GOEQ/GEEQCN(RECSYear-BaseYr:mNumYr,4,mNumBldg,mNumCR),SLEQCN(RECSYear-BaseYr:mNumYr,1,mNumBldg,mNumCR) !4 refers to max number of end-use classes; space heating=1; space cooling=2	!kj
+      COMMON/SLEQ/SLEQCN(RECSYear-BaseYr:mNumYr,1,mNumBldg,mNumCR) !GeoFix - renamed "GOEQ" to "SLEQ"
       COMMON/FANEQ/FANEQCN(RECSYear-BaseYr:mNumYr,1,mNumBldg,mNumCR-2)
       COMMON/NH2O/NH2OSH(RECSYear:EndYr+1,5,mNumBldg,mNumCR) !5 water heating fuel types
       COMMON/NWCK/NCKSH(RECSYear:EndYr+1,3,mNumBldg,mNumCR)
@@ -496,34 +520,20 @@
       COMMON/COOLVAC/ACICOST(MNUMRTTY,RECSYear:EndYr,mNumCR-2) &
         ,ACEFF(MNUMRTTY,RECSYear:EndYr,mNumCR-2) &
         ,HTRCOST(RECSYear:EndYr,mNumCR-2)
-      !  Dynamically ALLOCATE these large arrays:                                   !DYN
-          ! COMMON/DBEFFOUT/RSNEFDB1(mNumYr,MNUMRTTY,mNumBldg,mNumCR-2),            !DYN
-          !                 RSEEFDB1(mNumYr,MNUMRTTY,mNumBldg,mNumCR-2)             !DYN
-        REAL*4,ALLOCATABLE::RSNEFDB1(:,:,:,:)                                       !DYN
-        REAL*4,ALLOCATABLE::RSEEFDB1(:,:,:,:)                                       !DYN
-      !  Dynamically ALLOCATE these large arrays:                                   !DYN
-      !COMMON/SHELLEFF/ &                                                           !DYN
-      !   HTSHELLEFFWT(RECSYear:EndYr,nHeatTypes,nShellTypes,mNumBldg,mNumCR-2) &     !DYN
-      !  ,HTSHELLWT(RECSYear:EndYr,nHeatTypes,nShellTypes,mNumBldg,mNumCR-2) &        !DYN
-      !  ,HSHELL(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR-2) &                     !DYN
-      !  ,CSHELL(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR-2) &                     !DYN
-      !  ,SHELLBUILDS(RECSYear:EndYr,nHeatTypes,nShellTypes,mNumBldg,mNumCR-2) &      !DYN
-      !  ,SHELLINVEST (RECSYear:EndYr,nHeatClasses,nShellTypes,mNumBldg,mNumCR) &     !DYN
-      !  ,SHELLSUBSIDY(RECSYear:EndYr,nHeatClasses,nShellTypes,mNumBldg,mNumCR) &     !DYN
-      !  ,SHELLSUBSIDY111D(RECSYear:EndYr,nHeatClasses,nShellTypes,mNumBldg,mNumCR) & !DYN
-      !  ,CLSHELLWT(RECSYear:EndYr,nCoolTypes,mNumBldg,mNumCR-2) &                    !DYN
-      !  ,SHLEVELH(RECSYear:EndYr,nHeatClasses,nShellTypes,mNumBldg,mNumCR-2)         !DYN
-
-        REAL*4,ALLOCATABLE::HTSHELLEFFWT(:,:,:,:,:)     !DYN
-        REAL*4,ALLOCATABLE::HTSHELLWT(:,:,:,:,:)        !DYN
-        REAL*4,ALLOCATABLE::HSHELL(:,:,:,:)             !DYN
-        REAL*4,ALLOCATABLE::CSHELL(:,:,:,:)             !DYN
-        REAL*4,ALLOCATABLE::SHELLBUILDS(:,:,:,:,:)      !DYN
-        REAL*4,ALLOCATABLE::SHELLINVEST (:,:,:,:,:)     !DYN
-        REAL*4,ALLOCATABLE::SHELLSUBSIDY(:,:,:,:,:)     !DYN
-        REAL*4,ALLOCATABLE::SHELLSUBSIDY111D(:,:,:,:,:) !DYN
-        REAL*4,ALLOCATABLE::CLSHELLWT(:,:,:,:)
-        REAL*4,ALLOCATABLE::SHLEVELH(:,:,:,:,:)
+      !Dynamically ALLOCATE these large arrays:       !DYN
+      REAL*4,ALLOCATABLE::RSNEFDB1(:,:,:,:)           !DYN
+      REAL*4,ALLOCATABLE::RSEEFDB1(:,:,:,:)           !DYN
+      !Dynamically ALLOCATE these large arrays:       !DYN
+      REAL*4,ALLOCATABLE::HTSHELLEFFWT(:,:,:,:,:)     !DYN
+      REAL*4,ALLOCATABLE::HTSHELLWT(:,:,:,:,:)        !DYN
+      REAL*4,ALLOCATABLE::HSHELL(:,:,:,:)             !DYN
+      REAL*4,ALLOCATABLE::CSHELL(:,:,:,:)             !DYN
+      REAL*4,ALLOCATABLE::SHELLBUILDS(:,:,:,:,:)      !DYN
+      REAL*4,ALLOCATABLE::SHELLINVEST (:,:,:,:,:)     !DYN
+      REAL*4,ALLOCATABLE::SHELLSUBSIDY(:,:,:,:,:)     !DYN
+      REAL*4,ALLOCATABLE::SHELLSUBSIDY111D(:,:,:,:,:) !DYN
+      REAL*4,ALLOCATABLE::CLSHELLWT(:,:,:,:)
+      REAL*4,ALLOCATABLE::SHLEVELH(:,:,:,:,:)
 
       COMMON/OTHEREQP/FANEQP(RECSYear:EndYr,mNumBldg,mNumCR-2),&
         EAEQP(RECSYear:EndYr,mNumBldg,mNumCR-2),APPEQP(RECSYear:EndYr,mNumBldg,mNumCR-2,3),&
@@ -541,14 +551,11 @@
         SPKEQP(RECSYear:EndYr,mNumBldg,mNumCR-2),PHNEQP(RECSYear:EndYr,mNumBldg,mNumCR-2),&  !MELs21
         TABEQP(RECSYear:EndYr,mNumBldg,mNumCR-2),KITEQP(RECSYear:EndYr,mNumBldg,mNumCR-2)  !MELs21
       COMMON/DISPINC/INCOME(mNumCR-2,RECSYear:EndYr,30) !DISPOSABLE INCOME VARIABLE  !IncEff - 30 is an arbitrary value meant to exceed the current number of MELs end uses (aligns with MELsIncomeEffect)
-      !  Dynamically ALLOCATE these large arrays:                                               !DYN
-     ! COMMON/HVACEQPSHARE/HVEQSHR(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR-2),                !DYN
-         ! HEATINGTYPEPURCH(RECSYear:EndYr,MNUMRTTY,mNumBldg,mNumCR-2,2),&                      !DYN
-         ! NEQTSHRC(RECSYear:EndYr,nCoolTypes,mNumBldg,mNumCR),LEARNFACT(mNumBldg,mNumCR-2)     !DYN
-        REAL*4,ALLOCATABLE::HVEQSHR(:,:,:,:)             !DYN
-        REAL*4,ALLOCATABLE::HEATINGTYPEPURCH(:,:,:,:,:)  !DYN
-        REAL*4,ALLOCATABLE::NEQTSHRC(:,:,:,:)            !DYN
-        REAL*4,ALLOCATABLE::LEARNFACT(:,:)               !DYN
+      !Dynamically ALLOCATE these large arrays:        !DYN
+      REAL*4,ALLOCATABLE::HVEQSHR(:,:,:,:)             !DYN
+      REAL*4,ALLOCATABLE::HEATINGTYPEPURCH(:,:,:,:,:)  !DYN
+      REAL*4,ALLOCATABLE::NEQTSHRC(:,:,:,:)            !DYN
+      REAL*4,ALLOCATABLE::LEARNFACT(:,:)               !DYN
 
       COMMON/LTUEC/LTUEC(MaxApps,mNumCR-2,mNumBldg),LTEQP(MaxApps,RECSYear:EndYr,mNumBldg,mNumCR-2), &
         LTNUEC(MaxApps,RECSYear:EndYr,mNumCR-2,mNumBldg), LTNUECly(MaxApps,RECSYear:EndYr,mNumCR-2,mNumBldg), &
@@ -587,7 +594,6 @@
       REAL*4 BASELINEBKWH
       REAL*4 Driver,Driver2
       REAL*4 WTHRZTN
-!      REAL*4 HVEQSHR,HEATINGTYPEPURCH,NEQTSHRC,LEARNFACT !DYN
       REAL*4 INCOME
       REAL*4 FANEQP,EAEQP,APPEQP,SHTEQP
       REAL*4 TVSEQP,STBEQP,HTSEQP,OTTEQP,VGCEQP  !MELs21
@@ -601,8 +607,8 @@
       REAL*4 BATPEN,CFNPEN,COFPEN,DEHPEN,MCOPEN,PLPPEN,PLHPEN,SECPEN,SPAPEN,WCLPEN  !winecool  !MELs21
       REAL*4 SPKPEN,PHNPEN,TABPEN,KITPEN  !MELs21
       REAL*4 ACICOST,ACEFF,HTRCOST
-      REAL*4 Units, Cap, Trills, TrillsOwnUse, GasUsage, HwBtu, Invest
-      REAL*4 x111dRenSub             !111dren
+      REAL*8 Units, Cap, Trills, TrillsOwnUse, GasUsage, HwBtu, Invest
+      REAL*8 x111dRenSub             !111dren
       INTEGER iGenCapCostYr          !111dren
       REAL*4 BNCHFCT, BNCHFCTAVG    !STEOread-avg
       REAL*4 HSESHR,HSETOT
@@ -616,9 +622,8 @@
       REAL*4 NCKSH
       REAL*4 NH2OSH
       REAL*4 EQCEQCN
-      REAL*4 GEEQCN,SLEQCN
+      REAL*4 SLEQCN
       REAL*4 FANEQCN
-!      REAL*4 EQR90FUT,EQREPFUT,EQADDFUT,EQR90RPFUT,EQCESEFUT  !DYN
       REAL*4 EQCRP90RP,EQCRET
       REAL*4 BETA1DR
       REAL*4 EQCND90
@@ -627,7 +632,7 @@
       INTEGER HTSHRYR  !HtShrYr
       INTEGER ESTARHISTYR  !RSESTARbetas
       REAL*4,ALLOCATABLE::HVBETA1(:,:,:,:),HVBETA2(:,:,:,:) ! LOGIT PARAMETER 1 (INSTALLED COST) and 2 (OPERATING COST)  !RSESTARbetas
-      REAL*4 HSYSSHR  !,REQTSHR,NEQTSHR  !DYN
+      REAL*4 HSYSSHR  !DYN
       REAL*4 WTEQCEFFN,WTEQCEFFR,WTEQCEFFA,WTEQCEFFHV,WTEQCSQFHV
       REAL*4 SWITCHES,SWITCHESR,SWITCHTO,SWITCHTOR,SWTOTAL,SWFTOTAL
       REAL*4 EQCSW90,EQCSW90R
@@ -649,7 +654,6 @@
       REAL*4 PRICES ! 1=Distillate Fuel Oil 2=Propane/LPG 3=Natural Gas 4=Electricity 5=Kerosene 6=Wood 7=Coal
       REAL*4 SQFTADJ,SQRFOOT,SQNEW,STOCKSQRFOOT,EXSQRFOOT,EXSQFTADJ,ELASTIC
       REAL*4 NEWHEATUEC,NEWCOOLUEC,BASELOAD
-!      REAL*4 HTSHELLEFFWT,HTSHELLWT,HSHELL,CSHELL,CLSHELLWT,SHLEVELH,SHELLBUILDS,shellinvest,shellsubsidy,SHELLSUBSIDY111D  !DYN
       REAL*4 TVSEFF,STBEFF,HTSEFF,OTTEFF,VGCEFF  !MELs21
       REAL*4 DPCEFF,LPCEFF,MONEFF,NETEFF
       REAL*4 BATEFF,CFNEFF,COFEFF,DEHEFF,MCOEFF,PLPEFF,PLHEFF,SECEFF,SPAEFF,WCLEFF    !winecool  !MELs21
@@ -673,6 +677,7 @@
       CHARACTER*30 TITLE
       INTEGER RSYR,PREVYR,EU,RTOVALUE,STEOBM,NRGBILL,NRGBILL07,STIMULUS,EPA111D
       EXTERNAL RTOVALUE
+      REAL*4 WATERTOT(RECSYear:EndYr,mNumCR-2),COOKTOT(RECSYear:EndYr,mNumCR-2),DRYERTOT(RECSYear:EndYr,mNumCR-2)
       END MODULE R_
 
 !*******************************************************************
@@ -735,7 +740,7 @@
        LEARNFACT=0.0
 
 2     CONTINUE
-      ! End of dynamic array dimension assignments  !DYN
+      !End of dynamic array dimension assignments  !DYN
 
       RSYR=CurIYr+(BaseYr-1)
       PREVYR=CurIYr-1
@@ -843,7 +848,7 @@
          CALL REUADD
 
 !*******************************************************************
-!     DRYING EQUIPMENT SUBROUTINES
+!     CLOTHES DRYING EQUIPMENT SUBROUTINES
 !*******************************************************************
          CALL RDRYTEC
          CALL RDRYADD
@@ -924,7 +929,7 @@ SUBROUTINE RTEKREAD
 
   INTEGER*4 ClsRecords,EqpRecords,NewEqpRecords,ShlRecords !number/count of records in the RSCLASS, RSMEQP, and RSMSHL tabs of input file, calculated and read-in from input file
 
-  INTEGER*2, ALLOCATABLE :: xlRTCLENDU(:),xlRTCLEQCL(:),xlRTCLTYPT(:),xlRTCLPNTR(:),xlRTCLREPL(:),xlRTFUEL(:),xlRTFFAN(:),xlRTMINLIF(:),xlRTMAXLIF(:), & !RSCLASS
+  INTEGER*2, ALLOCATABLE :: xlRTCLENDU(:),xlRTCLEQCL(:),xlRTCLTYPT(:),xlRTCLPNTR(:),xlRTCLREPL(:),xlRTFUEL(:),xlRTFFAN(:),                             & !RSCLASS
                             xlRTTYENDU(:),xlRTTYEQCL(:),xlRTEQTYPE(:),xlRTINITYR(:),xlRTLASTYR(:),xlRTCENDIV(:),xlHVACPNTR(:),xlRTTYPNTR(:),           & !RSMEQP
                             xlRSCENDIV(:),xlRSBTYPE(:),xlHVHTEQCL(:),xlHVHTEQTY(:),xlHVCLEQCL(:),xlHVCLEQTY(:),xlHVFYEAR(:),xlHVLYEAR(:),xlHVPACKG(:)    !RSMSHL
 
@@ -941,8 +946,8 @@ SUBROUTINE RTEKREAD
 
   ! ALLOCATE dynamic arrays
   ALLOCATE (xlRTCLENDU(mNumRTCl),xlRTCLEQCL(mNumRTCl),xlRTCLTYPT(mNumRTCl),xlRTCLPNTR(mNumRTCl),xlRTCLREPL(mNumRTCl),xlRTFUEL(mNumRTCl),xlRTFFAN(mNumRTCl),          & !RSCLASS
-             xlRTMINLIF(mNumRTCl),xlRTMAXLIF(mNumRTCl),xlRTCLNAME(mNumRTCl),xlRTALPHA(mNumRTCl),xlRTBASEFF(mNumRTCl),xlRTK(mNumRTCl),xlRTLAMBDA(mNumRTCl),xlRTFCBETA(mNumRTCl), & !RSCLASS
-             xlRTSWFACT(mNumRTCl),xlRTSWBETA(mNumRTCl),xlRTSWBIAS(mNumRTCl),                                                                                         & !RSCLASS
+             xlRTCLNAME(mNumRTCl),xlRTALPHA(mNumRTCl),xlRTBASEFF(mNumRTCl),xlRTK(mNumRTCl),xlRTLAMBDA(mNumRTCl),xlRTFCBETA(mNumRTCl),xlRTSWFACT(mNumRTCl),           & !RSCLASS
+             xlRTSWBETA(mNumRTCl),xlRTSWBIAS(mNumRTCl),                                                                                                              & !RSCLASS
             xlRTTYENDU(MNUMRTTY),xlRTTYEQCL(MNUMRTTY),xlRTEQTYPE(MNUMRTTY),xlRTINITYR(MNUMRTTY),xlRTLASTYR(MNUMRTTY),xlRTCENDIV(MNUMRTTY),xlHVACPNTR(MNUMRTTY)       & !RSMEQP
              ,xlRTTYPNTR(MNUMRTTY),xlRTTYNAME(MNUMRTTY),xlRTMATURE(MNUMRTTY),xlCWMEF(MNUMRTTY),xlLOADADJ(MNUMRTTY),xlRTEQEFF(MNUMRTTY),xlRTEQCOST(MNUMRTTY),         & !RSMEQP
              xlRTRECOST(MNUMRTTY),xlRTEQSUB(MNUMRTTY),xlRTRESUB(MNUMRTTY),xlRTEQSUBN(MNUMRTTY),xlRTRESUBN(MNUMRTTY),xlRTEQSUB111D(MNUMRTTY),xlRTRESUB111D(MNUMRTTY), & !RSMEQP
@@ -952,7 +957,7 @@ SUBROUTINE RTEKREAD
              xlHTSHBASE(MNUMHVAC),xlCLSHBASE(MNUMHVAC),xlSHELCOST(MNUMHVAC),xlSHELSUB(MNUMHVAC),xlSHELSUB111D(MNUMHVAC))                                               !RSMSHL
 
   ! Initialize ALLOCATED arrays to zero; otherwise, you get what is in the assigned memory
-  xlRTCLENDU=0; xlRTCLEQCL=0; xlRTCLTYPT=0; xlRTCLPNTR=0; xlRTCLREPL=0; xlRTFUEL=0; xlRTFFAN=0; xlRTMINLIF=0; xlRTMAXLIF=0 !RSCLASS
+  xlRTCLENDU=0; xlRTCLEQCL=0; xlRTCLTYPT=0; xlRTCLPNTR=0; xlRTCLREPL=0; xlRTFUEL=0; xlRTFFAN=0 !RSCLASS
    xlRTCLNAME=""; xlRTALPHA=0; xlRTBASEFF=0; xlRTK=0; xlRTLAMBDA=0; xlRTFCBETA=0; xlRTSWFACT=0; xlRTSWBETA=0; xlRTSWBIAS=0 !RSCLASS
   xlRTTYENDU=0; xlRTTYEQCL=0; xlRTEQTYPE=0; xlRTINITYR=0; xlRTLASTYR=0; xlRTCENDIV=0; xlHVACPNTR=0; xlRTTYPNTR=0; xlRTTYNAME=""; xlRTMATURE=""      !RSMEQP
    xlCWMEF=0; xlLOADADJ=0; xlRTEQEFF=0; xlRTEQCOST=0; xlRTRECOST=0; xlRTEQSUB=0; xlRTRESUB=0; xlRTEQSUBN=0; xlRTRESUBN=0              !RSMEQP
@@ -1019,8 +1024,6 @@ SUBROUTINE RTEKREAD
   CALL GETRNGI('xlRTFFAN          ',xlRTFFAN  ,ClsRecords,1,1) !RSCLASS
   CALL GETRNGR('xlRTBASEFF        ',xlRTBASEFF,ClsRecords,1,1) !RSCLASS
   CALL GETRNGR('xlRTALPHA         ',xlRTALPHA ,ClsRecords,1,1) !RSCLASS
-  CALL GETRNGI('xlRTMINLIF        ',xlRTMINLIF,ClsRecords,1,1) !RSCLASS
-  CALL GETRNGI('xlRTMAXLIF        ',xlRTMAXLIF,ClsRecords,1,1) !RSCLASS
   CALL GETRNGR('xlRTK             ',xlRTK     ,ClsRecords,1,1) !RSCLASS
   CALL GETRNGR('xlRTLAMBDA        ',xlRTLAMBDA,ClsRecords,1,1) !RSCLASS
   CALL GETRNGR('xlRTFCBETA        ',xlRTFCBETA,ClsRecords,1,1) !RSCLASS
@@ -1041,8 +1044,6 @@ SUBROUTINE RTEKREAD
     RTFFAN(I) = xlRTFFAN(I)     !RSCLASS
     RTBASEFF(RECSYear,I) = xlRTBASEFF(I) !RSCLASS
     RTALPHA(I) = xlRTALPHA(I)   !RSCLASS
-    RTMINLIF(I) = xlRTMINLIF(I) !RSCLASS
-    RTMAXLIF(I) = xlRTMAXLIF(I) !RSCLASS
     RTK(I) = xlRTK(I)           !RSCLASS
     RTLAMBDA(I) = xlRTLAMBDA(I) !RSCLASS
     RTFCBETA(I) = xlRTFCBETA(I) !RSCLASS
@@ -1316,7 +1317,7 @@ SUBROUTINE RTEKREAD
   ENDIF
 
   ! DEALLOCATE dynamic arrays
-    DEALLOCATE (xlRTCLENDU,xlRTCLEQCL,xlRTCLTYPT,xlRTCLPNTR,xlRTCLREPL,xlRTFUEL,xlRTFFAN,xlRTMINLIF,xlRTMAXLIF, & !RSCLASS
+    DEALLOCATE (xlRTCLENDU,xlRTCLEQCL,xlRTCLTYPT,xlRTCLPNTR,xlRTCLREPL,xlRTFUEL,xlRTFFAN,                       & !RSCLASS
                  xlRTCLNAME,xlRTALPHA,xlRTBASEFF,xlRTK,xlRTLAMBDA,xlRTFCBETA,xlRTSWFACT,xlRTSWBETA,xlRTSWBIAS,  & !RSCLASS
                 xlRTTYENDU,xlRTTYEQCL,xlRTEQTYPE,xlRTINITYR,xlRTLASTYR,xlRTCENDIV,xlHVACPNTR,xlRTTYPNTR,      & !RSMEQP
                  xlRTTYNAME,xlRTMATURE,xlCWMEF,xlLOADADJ,xlRTEQEFF,xlRTEQCOST,xlRTRECOST,xlRTEQSUB,xlRTRESUB, & !RSMEQP
@@ -1341,7 +1342,7 @@ END SUBROUTINE RTEKREAD
           IOS,                    & ! READ ERROR NUMBER
           YEAR,DIV,D,Y              ! GENERAL INDICES
 
-!  Initialize HDD and CDD variables as zero	!kj
+!  Initialize HDD and CDD variables as zero
       DO YEAR=BaseYr,IJUMPCALYR
         DO D=1,mNumCR
           HDDADJ(YEAR,D) = 0.0
@@ -1405,12 +1406,12 @@ END SUBROUTINE RTEKREAD
 
       READ(INFILE,'(99(/))')                 ! SKIP 100 LINE HEADER PER CDM CONVENTION + SKIP YEARS BEFORE RECS YEAR
 
-      !Write baseline electricity consumption to unit 9 (RESOUT.txt)
+      !Write baseline electricity consumption to unit 9 (RDM_OUT.txt)
       WRITE (9,*) 'division, divcheck, year, yearcheck, baseline Trills converted to bkWh'
 
           DO D=1,mNumCR-2
            DO y=1,mNumYr
-        READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) Div, Year, baselinebkwh(d,y), TEMP ! upon read, these data are in Trills
+            READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) Div, Year, baselinebkwh(d,y), TEMP ! upon read, these data are in Trills
             BASELINEBKWH(d,y)=(BASELINEBKWH(d,y)/3412.)*10**3  !convert quads (trills?) to bkWh  !DGreport
             WRITE(9,5) D,Div,Y,Year,BASELINEBKWH(D,Y)
            ENDDO
@@ -1585,7 +1586,7 @@ END SUBROUTINE RTEKREAD
 
       READ(INFILE,'(19(/))')                ! SKIP 20 LINE HEADER
 
-!   Read in counter for number of MELs end uses in RSMELS.txt  !IncEff	!kj - will be used more once MELs read-in/calculations are streamlined
+!   Read in counter for number of MELs end uses in RSMELS.txt  !IncEff	!TODO - will be used more once MELs read-in/calculations are streamlined
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) NumMELs  !IncEff
 
       READ(INFILE,'(2(/))')                ! SKIP 3 LINE HEADER  !IncEff
@@ -1700,8 +1701,8 @@ END SUBROUTINE RTEKREAD
       READ(INFILE,'(2(/))')                ! SKIP 3 LINE HEADER  !HDRendog
 
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS)HDRfy,HDRly  !HDRendog
-	  
-	  IF (HDRfy.LE.BaseYr) THEN  !HDRendog
+
+      IF (HDRfy.LE.BaseYr) THEN  !HDRendog
         HDRfy=BaseYr+1 !Because HDR calculations require a previous year (i.e., Y-1), the first year must be later than the base year  !HDRendog
         WRITE(9,'("Warning: HDRfy modified from RSMISC.txt value")')  !HDRendog
       ENDIF  !HDRendog
@@ -1710,12 +1711,12 @@ END SUBROUTINE RTEKREAD
         WRITE(9,'("Warning: HDRly modified from RSMISC.txt value")')  !HDRendog
       ENDIF  !HDRendog
 
-      !Write input HDR years to unit 9 (RESOUT.txt) to compare with input years  !HDRendog
+      !Write input HDR years to unit 9 (RDM_OUT.txt) to compare with input years  !HDRendog
       WRITE(9,'(a)') 'Housing demolition/decay rate (HDR) years to compare with RSMISC.txt'  !HDRendog
       WRITE(9,'("HDRfy ",i4)') HDRfy  !HDRendog
       WRITE(9,'("HDRly ",i4)') HDRly  !HDRendog
 
-      !Write input HDRs to unit 9 (RESOUT.txt) to compare with calculated HDRs  !HDRendog
+      !Write input HDRs to unit 9 (RDM_OUT.txt) to compare with calculated HDRs  !HDRendog
       WRITE(9,'(a)') 'Input housing demolition/decay rates (HDR) from RSMISC.txt'  !HDRendog
       WRITE(9,'("HDR_input_SF ",f6.4)') HDR(1)  !HDRendog
       WRITE(9,'("HDR_input_MF ",f6.4)') HDR(2)  !HDRendog
@@ -1748,7 +1749,7 @@ END SUBROUTINE RTEKREAD
             HDQ(Y,D,2)=MC_KHUPS2A(D,Y-1)-MC_KHUPS2A(D,Y)+MC_HUSPS2A(D,Y-1)  !HDRendog
             HDQ(Y,D,3)=MC_KHUMFG(D,Y-1)-MC_KHUMFG(D,Y)+MC_HUSMFG(D,Y-1)  !HDRendog
             IF (PRTDBGR.EQ.1) THEN  !HDRendog
-              !Write MAM housing stocks/starts to unit 9 (RESOUT.txt) to verify  !HDRendog
+              !Write MAM housing stocks/starts to unit 9 (RDM_OUT.txt) to verify  !HDRendog
               WRITE(9,*) 'SF_stock,',Y+BaseYr-1,',',D,',',MC_KHUPS1(D,Y),',',Y+BaseYr-2,',',MC_KHUPS1(D,Y-1)  !HDRendog
               WRITE(9,*) 'SF_starts,',Y+BaseYr-1,',',D,',',MC_HUSPS1(D,Y)  !HDRendog
               WRITE(9,*) 'MF_stock,',Y+BaseYr-1,',',D,',',MC_KHUPS2A(D,Y),',',Y+BaseYr-2,',',MC_KHUPS2A(D,Y-1)  !HDRendog
@@ -1763,7 +1764,7 @@ END SUBROUTINE RTEKREAD
             HDi(Y,D,2)=1-(HDQ(Y,D,2)/MC_KHUPS2A(D,Y))  !HDRendog
             HDi(Y,D,3)=1-(HDQ(Y,D,3)/MC_KHUMFG(D,Y))  !HDRendog
             IF (PRTDBGR.EQ.1) THEN  !HDRendog
-              !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+              !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
               WRITE(9,*) 'HDi,',Y+BaseYr-1,',',D,',',HDi(Y,D,1),',',HDi(Y,D,2),',',HDi(Y,D,3)  !HDRendog
             ENDIF  !HDRendog
 
@@ -1772,14 +1773,14 @@ END SUBROUTINE RTEKREAD
             HDiAve(D,2)=HDiAve(D,2)+HDi(Y,D,2)  !HDRendog
             HDiAve(D,3)=HDiAve(D,3)+HDi(Y,D,3)  !HDRendog
             IF (PRTDBGR.EQ.1) THEN  !HDRendog
-              !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+              !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
               IF (Y.EQ.HDRly-BaseYr+1) THEN  !HDRendog
                 WRITE(9,*) 'HDiAveTot,',Y+BaseYr-1,',',D,',',HDiAve(D,1),',',HDiAve(D,2),',',HDiAve(D,3)  !HDRendog
               ENDIF  !HDRendog
-			ENDIF  !HDRendog
+            ENDIF  !HDRendog
 
             IF (PRTDBGR.EQ.1) THEN  !HDRendog
-              !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+              !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
               IF (D.EQ.mNumCR-2) THEN  !HDRendog
                 WRITE(9,*) 'Total_Housing_Units,',Y+BaseYr-1,',',D,',',MC_KHUPS1(11,Y),',',MC_KHUPS2A(11,Y),',',MC_KHUMFG(11,Y)  !HDRendog
               ENDIF  !HDRendog
@@ -1790,7 +1791,7 @@ END SUBROUTINE RTEKREAD
             HCDshr(Y,D,2)=MC_KHUPS2A(D,Y)/MC_KHUPS2A(11,Y)  !HDRendog
             HCDshr(Y,D,3)=MC_KHUMFG(D,Y)/MC_KHUMFG(11,Y)  !HDRendog
             IF (PRTDBGR.EQ.1) THEN  !HDRendog
-              !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+              !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
               WRITE(9,*) 'HCDshr,',Y+BaseYr-1,',',D,',',HCDshr(Y,D,1),',',HCDshr(Y,D,2),',',HCDshr(Y,D,3)  !HDRendog
             ENDIF  !HDRendog
 
@@ -1799,7 +1800,7 @@ END SUBROUTINE RTEKREAD
             HCDshrAve(D,2)=HCDshrAve(D,2)+HCDshr(Y,D,2)  !HDRendog
             HCDshrAve(D,3)=HCDshrAve(D,3)+HCDshr(Y,D,3)  !HDRendog
             IF (PRTDBGR.EQ.1) THEN  !HDRendog
-              !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+              !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
               IF (Y.EQ.HDRly-BaseYr+1) THEN  !HDRendog
                 WRITE(9,*) 'HCDshrAveTot,',Y+BaseYr-1,',',D,',',HCDshrAve(D,1),',',HCDshrAve(D,2),',',HCDshrAve(D,3)  !HDRendog
               ENDIF  !HDRendog
@@ -1813,7 +1814,7 @@ END SUBROUTINE RTEKREAD
           HDiAve(D,2)=HDiAve(D,2)/(HDRly-HDRfy+1)  !HDRendog
           HDiAve(D,3)=HDiAve(D,3)/(HDRly-HDRfy+1)  !HDRendog
           IF (PRTDBGR.EQ.1) THEN  !HDRendog
-            !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+            !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
             WRITE(9,*) 'HDiAve,',D,',',HDiAve(D,1),',',HDiAve(D,2),',',HDiAve(D,3)  !HDRendog
           ENDIF  !HDRendog
 
@@ -1822,7 +1823,7 @@ END SUBROUTINE RTEKREAD
           HCDshrAve(D,2)=HCDshrAve(D,2)/(HDRly-HDRfy+1)  !HDRendog
           HCDshrAve(D,3)=HCDshrAve(D,3)/(HDRly-HDRfy+1)  !HDRendog
           IF (PRTDBGR.EQ.1) THEN  !HDRendog
-            !Write to unit 9 (RESOUT.txt) to verify  !HDRendog
+            !Write to unit 9 (RDM_OUT.txt) to verify  !HDRendog
             WRITE(9,*) 'HCDshrAve,',D,',',HCDshrAve(D,1),',',HCDshrAve(D,2),',',HCDshrAve(D,3)  !HDRendog
           ENDIF  !HDRendog
         ENDDO !D  !HDRendog
@@ -1833,9 +1834,9 @@ END SUBROUTINE RTEKREAD
           ENDDO !D  !HDRendog
         ENDDO !B  !HDRendog
 
-        !Write calculated HDRs to unit 9 (RESOUT.txt) to compare with input HDRs  !HDRendog
+        !Write calculated HDRs to unit 9 (RDM_OUT.txt) to compare with input HDRs  !HDRendog
         !!!If input HDR values in RSMISC.txt differ from integrated run-calculated values, RDM outputs will differ between standalone and integrated test runs!!!  !HDRendog
-        !!!Can use these values written to RESOUT.txt as inputs to RSMISC.txt for standalone testing, though values may change in side cases (e.g., economic growth cases or oil/fuel prices affecting mobile home shipments)!!!!  !HDRendog
+        !!!Can use these values written to RDM_OUT.txt as inputs to RSMISC.txt for standalone testing, though values may change in side cases (e.g., economic growth cases or oil/fuel prices affecting mobile home shipments)!!!!  !HDRendog
         WRITE(9,'(a)') 'Calculated housing demolition/decay rates (HDR) for integrated runs'  !HDRendog
         WRITE(9,'("HDR_calculated_SF ",f6.4)') HDR(1)  !HDRendog
         WRITE(9,'("HDR_calculated_MF ",f6.4)') HDR(2)  !HDRendog
@@ -1843,8 +1844,8 @@ END SUBROUTINE RTEKREAD
 
         DO B=1,mNumBldg  !HDRendog
           IF (HDR(B).GT.1.0) THEN  !HDRendog
-		    HDR(B)=1.0  !HDRendog	!kj - should 1.0 max be reconsidered? Set to value less than 1.0 (0.9999?) to ensure some removal of housing stock?
-            !Write warning to both NOHUP.OUT and RESOUT.txt that HDR has been overwritten
+            HDR(B)=1.0  !HDRendog	!TODO - should 1.0 max be reconsidered? Set to value less than 1.0 (0.9999?) to ensure some removal of housing stock?
+            !Write warning to both NOHUP.OUT and RDM_OUT.txt that HDR has been overwritten
             !HDR=1.0 means that housing stock does not decrease (no demolitions, or conversions into residential housing units exceed demolitions)  !HDRendog
             WRITE(6,'("Warning: calculated residential HDR value greater than 1.0000; overwritten to 1.0000 for housing type ",i2)') B  !HDRendog
             WRITE(9,'("Warning: calculated residential HDR value greater than 1.0000; overwritten to 1.0000 for housing type ",i2)') B  !HDRendog
@@ -1988,7 +1989,7 @@ END SUBROUTINE RTEKREAD
       DO y=ModYear,EndModYear                                  ! elastruns
         DO d= 1, mNumCR-2                                      ! elastruns
           PELRS (d,y) =  PELRS (d,y) * ELfactor                ! elastruns
-           DO s=1,10                                           ! elastruns	!kj - what are S=1-10? see above for S=1,5
+           DO s=1,10                                           ! elastruns	!TODO - what are S=1-10? see above for S=1,5
              pelrsout(d,y,s)=pelrsout(d,y,s)*Elfactor          ! elastruns
            ENDDO ! s                                           ! elastruns
             PNGRS (d,y) =  PNGRS (d,y) * NGfactor              ! elastruns
@@ -1997,7 +1998,7 @@ END SUBROUTINE RTEKREAD
         ENDDO  !divisions                                      ! elastruns
        ENDDO  !years                                           ! elastruns
 
-!   READ SUCESSFUL.  CLOSE THE FILE.
+!   READ SUCCESSFUL. CLOSE THE FILE.
       INFILE=FILE_MGR('C','RSMISC',.FALSE.)
       WRITE(6,*) 'RESDMSG SUB_RSMISCREAD: RSMISC data set read successfully'
 
@@ -2011,15 +2012,15 @@ END SUBROUTINE RTEKREAD
       ENDDO  !Y
 
       OLDHSES(RECSYear)=0.0
-      DO D=1,mNumCR-2	!kj - Was DO-CONTINUE loop
+      DO D=1,mNumCR-2  !Was DO-CONTINUE loop
         DO B=1,mNumBldg
           OLDHSES(RECSYear)=OLDHSES(RECSYear)+EH(RECSYear,B,D)  ! COMMON/ALLHOUSES/
         ENDDO  !B
       ENDDO  !D
 
-       LIMIT=0.30  !Maximum shell efficiency index of 0.3 (i.e., maximum shell efficiency is limited to a 70% improvement on the base-year value); applies to existing, new, heating, cooling	!kj
+      LIMIT=0.30  !Maximum shell efficiency index of 0.3 (i.e., maximum shell efficiency is limited to a 70% improvement on the base-year value); applies to existing, new, heating, cooling	!TODO - Update?
 
-      DO Y1=RECSYear+1,LastYr+BaseYr-1  !represents the annual increase in existing shell integrity due to technology improvements	!kj - Identify source; subtracted from existing shell index, so is this possibly tech degradation?
+      DO Y1=RECSYear+1,LastYr+BaseYr-1  !represents the annual increase in existing shell efficiency due to technology improvements	!TODO - Identify source; subtracted from existing shell index
         DO B=1,mNumBldg
          TECHG(Y1,1,B)=TECHG(Y1-1,1,B)+0.005
          TECHG(Y1,2,B)=TECHG(Y1-1,2,B)+0.003
@@ -2053,7 +2054,7 @@ END SUBROUTINE RTEKREAD
 
 
 !********************************************************************
-!   READ RESIDENTIAL Lighting DATA
+!   READ RESIDENTIAL LIGHTING DATA
 !     RSMLGT.TXT
 !********************************************************************
       SUBROUTINE RSMLGTREAD
@@ -2066,42 +2067,41 @@ END SUBROUTINE RTEKREAD
           D,B,E,BIN,Y1,I,app
       INTEGER LightDiag
 
-     !Reverse the order of these statements to switch diagnostics on or off; used to test read-in of RSMLGT	!kj - move this to RSMLGT.txt input file as first variable to read in
+     !Reverse the order of these statements to switch diagnostics on or off; used to test read-in of RSMLGT	!TODO - move this to RSMLGT.txt input file as first variable to read in
      LightDiag=0 !1=Print diagnostics; 0=don't print diagnostics
 
      !READ RSMLGT.TXT -- residential lighting technology and usage data file
       INFILE=FILE_MGR('O','RSMLGT',.FALSE.) ! OPEN THE RSMLGT DATA SET
 
-      READ(INFILE,'(19(/))')                ! SKIP 20 LINE HEADER
+      READ(INFILE,'(19(/))')              ! SKIP 20 LINE HEADER
 
 ! Control Variables
-!   dollar year for lighting technology costs
+!   Dollar year for lighting technology costs
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) RLGTDOLLARYR    !lightmenu
-      IF(LightDiag .NE. 0) WRITE(9,*) 'Read of Lighting data and Test Print'
+      IF(LightDiag .NE. 0) WRITE(9,*) 'Read of Lighting Data and Test Print'
       IF(LightDiag .NE. 0) WRITE(9,*) RLGTDOLLARYR
 
-!   Number of lighting application types (currently 4 types: general service,
-!     reflectors, linear fluorescent and exterior)
+!   Number of lighting application types (currently 4 types: general service lamps, reflectors, linear fluorescent, and exterior)
       READ(INFILE,'((/))')                ! SKIP 2 LINE HEADER
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) NumApps
       IF(LightDiag .NE. 0) WRITE(9,*) 'Number of Lighting Apps'
-      IF(LightDiag .NE. 0) WRITE(9,*) numapps
+      IF(LightDiag .NE. 0) WRITE(9,*) NumApps
 
-! Application IDs - 3-character codes and order of index which map to the lighting technology data later
+! Application IDs - three-character codes and order of index which map to the lighting technology data later
       READ(INFILE,'((/))')                ! SKIP 2 LINE HEADER
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (AppID(i),i=1,NumApps)
-      IF(LightDiag .NE. 0) WRITE(9,'(5a5)') (appid(i),i=1,NumApps)
+      IF(LightDiag .NE. 0) WRITE(9,'(5a5)') (AppID(i),i=1,NumApps)
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (AppIndex(i),i=1,NumApps)
-      IF(LightDiag .NE. 0) WRITE(9,'(5i5)') (appindex(i),i=1,NumApps)
+      IF(LightDiag .NE. 0) WRITE(9,'(5i5)') (AppIndex(i),i=1,NumApps)
 
 ! Number of bulbs per application types
       READ(INFILE,'(2(/))')                ! SKIP 3 LINE HEADER
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (NumTypes(i),i=1,NumApps)
-      IF(LightDiag .NE. 0) WRITE(9,'(5i5)') (numtypes(i),i=1,NumApps)
+      IF(LightDiag .NE. 0) WRITE(9,'(5i5)') (NumTypes(i),i=1,NumApps)
 
 ! Number of bins (i.e., hours used) by application
       READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (NumAppBins(i),i=1,NumApps)
-      IF(LightDiag .NE. 0) WRITE(9,'(5i5)') (numappbins(i),i=1,NumApps)
+      IF(LightDiag .NE. 0) WRITE(9,'(5i5)') (NumAppBins(i),i=1,NumApps)
 
       READ(INFILE,'(3(/))')                ! SKIP 4 LINE HEADER
 ! Technology Data - read until a first year of 9999 is found
@@ -2118,9 +2118,9 @@ END SUBROUTINE RTEKREAD
  5    CONTINUE
 
       READ(INFILE,'(2(/))')                ! SKIP 3 LINE HEADER
-      DO app=1,NumApps !maximum 5 lighting applications, currently 4
+      DO app=1,NumApps
        READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (BulbsPerHH(app,B),B=1,3)
-       IF(LightDiag .NE. 0) WRITE(9,'("bulbs per hh",i5,3f8.2)') app,(BulbsPerHH(app,B),B=1,3)
+       IF(LightDiag .NE. 0) WRITE(9,'("BulbsPerHH",i5,3f8.2)') app,(BulbsPerHH(app,B),B=1,3)
        READ(INFILE,'(1x)')
       ENDDO
 
@@ -2139,8 +2139,8 @@ END SUBROUTINE RTEKREAD
          READ(INFILE,'(1x)')
          IF(LightDiag .NE. 0) WRITE(9,*) 'app, type, BULBBINSHARES (by type)'
          DO e=1,NumTypes(app)
-            READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (BulbBinShares(app,e,BIN),BIN=1,NumAppBins(app))
-            IF(LightDiag .NE. 0) WRITE(9,'(2I4,6f10.1)') app,e,(BulbBinSHAREs(app,e,BIN),BIN=1,NumAppBins(app))
+           READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (BulbBinShares(app,e,BIN),BIN=1,NumAppBins(app))
+           IF(LightDiag .NE. 0) WRITE(9,'(2I4,6f10.1)') app,e,(BulbBinSHAREs(app,e,BIN),BIN=1,NumAppBins(app))
          ENDDO !e
          READ(INFILE,'(1x)')
          READ(INFILE,*,ERR=10,END=95,IOSTAT=IOS) (BaseWattsBulbs(app,e),e=1,numtypes(app))
@@ -2148,7 +2148,6 @@ END SUBROUTINE RTEKREAD
          IF(app .NE. NumApps) READ(INFILE,'(1x)')   !lgtbetas
 
       ENDDO
-
 
 !Compute RECS-year base watts per bulb weight averaged across bulb types
       DO app=1,numapps
@@ -2265,45 +2264,45 @@ END SUBROUTINE RTEKREAD
 !    ELECTRICITY       2        4
 !    DFO+KEROSENE      3        1 (DFO=Distillate Fuel Oil)
 !    PROPANE           4        2
-!    KEROSENE          5        5 (Combined with distillate fuel oil in AEO2019)	!kj
+!    KEROSENE          5        5 (Combined with distillate fuel oil in AEO2019)
 !    WOOD              6        1 (Priced to distillate fuel oil)
-!    GEOTHERMAL        7        4 (Priced to electricity)
-!    SOLAR             8        4
+!    GEOTHERMAL        7        4 (Priced to electricity) !GeoFix	!TODO - Remove and re-number solar?
+!    SOLAR             8        4 !GeoFix	!TODO - re-number?
 
-      NHTRFL=7 !number of space heating fuels
+      NHTRFL=7 !number of space heating fuels !GeoFix	!TODO - Reduce to 6?
       FHTRCON(1)=3 !natural gas
       FHTRCON(2)=4 !electricity
       FHTRCON(3)=1 !distillate fuel oil
       FHTRCON(4)=2 !propane
-      FHTRCON(5)=5 !kerosene (Combined with distillate fuel oil in AEO2019)	!kj
+      FHTRCON(5)=5 !kerosene (Combined with distillate fuel oil in AEO2019)
       FHTRCON(6)=6 !wood
-      FHTRCON(7)=7 !geothermal
+      FHTRCON(7)=7 !geothermal !GeoFix	!TODO - remove?
 
 !    MAP RTEK FUEL NUMBERS INTO CLCON FUEL NUMBERS
 !                   CLCON     RTEK
 !                   FUEL #    FUEL #
 !    FUEL NAME       FCON       F
 !    ELECTRICITY       1        4
-!    GEOTHERMAL        2        4 (Priced to electricity; use 7)
-!    NATURAL GAS       3        3
-      NCLFL=3 !number of space cooling (air conditioning) fuels
-      FCLCON(3)=3 !natural gas
+!    GEOTHERMAL        2        4 (Priced to electricity; use 7) !GeoFix	!TODO - remove?
+!    NATURAL GAS       3        3	!TODO - If eliminating NG_HP, remove
+      NCLFL=3 !number of space cooling (air conditioning) fuels !GeoFix	!TODO - Reduce to 2? If eliminating NG_HP, reduce to 1?
+      FCLCON(3)=3 !natural gas	!TODO - If eliminating NG_HP, remove
       FCLCON(4)=1 !electricity
-      FCLCON(7)=2 !geothermal
+      FCLCON(7)=2 !geothermal !GeoFix	!TODO - remove?
 
 ! Water Heaters
       NWHFL=5 !number of water heating fuels
       FWHCON(1)=3 !natural gas
       FWHCON(2)=4 !electricity
-      FWHCON(3)=1
-      FWHCON(4)=2
+      FWHCON(3)=1 !distillate fuel oil/kerosene
+      FWHCON(4)=2 !propane
       FWHCON(8)=5 !solar
 
 ! Cooking
       NSTVFL=3 !number of cooking fuels
-      FSTVCON(2)=2
-      FSTVCON(3)=1
-      FSTVCON(4)=3
+      FSTVCON(3)=1 !natural gas
+      FSTVCON(2)=2 !propane
+      FSTVCON(4)=3 !electricity
 
 ! Clothes Dryers
       NDRYFL=2 !number of clothes dryer fuels
@@ -2311,19 +2310,19 @@ END SUBROUTINE RTEKREAD
       FDRYCON(4)=2 !electricity
 
 ! Refrigerators
-      NREFFL=1 !number of refrigeration fuels (i.e., electricity)	!kj - not used?
+      NREFFL=1 !number of refrigeration fuels (i.e., electricity)	!TODO - still used?
 
 ! Standalone Freezers
-      NFRZFL=1 !number of standalone freezer fuels (i.e., electricity)	!kj - not used?
+      NFRZFL=1 !number of standalone freezer fuels (i.e., electricity)	!TODO - still used?
 
 ! Clothes Washers
-      NCSWFL=1 !number of clothes washer fuels (i.e., electricity)	!kj - not used?
+      NCSWFL=1 !number of clothes washer fuels (i.e., electricity)	!TODO - still used?
 
 ! Dishwashers
-      NDSWFL=1 !number of dishwasher fuels (i.e., electricity)	!kj - not used?
+      NDSWFL=1 !number of dishwasher fuels (i.e., electricity)	!TODO - still used?
 
-! Secondary Space HEATING
-      NSHTRFL=4 !number of secondary space heating fuels (natural gas, electricity, distillate fuel oil/kerosene, propane)	!kj - not used?
+! Secondary Space Heating
+      NSHTRFL=4 !number of secondary space heating fuels (natural gas, electricity, distillate fuel oil/kerosene, propane)	!TODO - still used?
 
   RETURN
 END SUBROUTINE RCONSFL
@@ -2351,7 +2350,7 @@ END SUBROUTINE RCONSFL
          ENDDO
       ENDDO
       IUNIT1=FILE_MGR('C',FNAME,NEW)
-      FNAME='RESOUT.TXT'
+      FNAME='RDM_OUT.TXT'
       OPEN(9,FILE=FNAME,FORM='FORMATTED')
 ! 100  FORMAT(1X,3(F6.4))
       END SUBROUTINE RDSQFOOT
@@ -2388,7 +2387,7 @@ END SUBROUTINE RCONSFL
           PRICES(5,D,CurCalYr)=PKSRS(D,CurIYr)*(MC_JPGDP(RTEKDOLLARYR-BaseYr+1)/MC_JPGDP(-2))
           ! WOOD PRICE IS LINKED TO GAS PRICE LESS ANY CARBON TAX
 
-!bookmark  !!!NOTE IN REVIEWING RESOUT.TXT, THE WOOD PRICE IS THE DISTILLATE PRICE IN RECS YEAR BUT NATURAL GAS PRICE LESS CARBON TAX IN OTHER YEARS!
+!bookmark  !!!NOTE IN REVIEWING RDM_OUT.TXT, THE WOOD PRICE IS THE DISTILLATE PRICE IN RECS YEAR BUT NATURAL GAS PRICE LESS CARBON TAX IN OTHER YEARS!
           PRICES(6,D,CurCalYr)=(PNGRS(D,CurIYr)-JNGRS(CurIYr))*(MC_JPGDP(RTEKDOLLARYR-BaseYr+1)/MC_JPGDP(-2))
           PRICES(7,D,CurCalYr)=PCLRS(D,CurIYr)*(MC_JPGDP(RTEKDOLLARYR-BaseYr+1)/MC_JPGDP(-2))
 
@@ -2624,13 +2623,13 @@ END SUBROUTINE RCONSFL
           READ(IUNIT1,*) (EAEQP(RECSYear,B,D),B=1,mNumBldg)
          ENDDO
 
-         DO E=1,7  !secondary heating equipment (natural gas, electric, distillate fuel oil + kerosene, propane, blank, blank, wood)	!kj - kerosene and coal values are placeholders; delete those columns	!kj - replace 7 with variable?
+         DO E=1,7  !secondary heating equipment (natural gas, electric, distillate fuel oil + kerosene, propane, blank, blank, wood)	!TODO - kerosene and coal values are placeholders; delete those columns	!TODO - replace 7 with variable?
           DO D=1,mNumCR-2
            READ(IUNIT1,*) (SHTEQP(RECSYear,B,D,E), B=1,mNumBldg)
           ENDDO
          ENDDO
 
-         DO E=1,3  !other appliances (natural gas, propane, distillate fuel oil + kerosene)	!kj - replace 3 with variable?
+         DO E=1,3  !other appliances (natural gas, propane, distillate fuel oil + kerosene)	!TODO - replace 3 with variable?
           DO D=1,mNumCR-2
            READ(IUNIT1,*) (APPEQP(RECSYear,B,D,E), B=1,mNumBldg)
           ENDDO
@@ -2790,16 +2789,8 @@ END SUBROUTINE RCONSFL
       IUNIT1=FILE_MGR('O',FNAME,NEW)
       READ(IUNIT1,'(19(/))')
       DO 50 RECCL=1,RTCLCNT
-      READ(IUNIT1,*) &
-        (EQCEFF(Y,RECCL), Y=RECSYear+1,ijumpcalyr)
+        READ(IUNIT1,*) (EQCEFF(Y,RECCL), Y=RECSYear+1,ijumpcalyr)
  50   CONTINUE
-
-! Freeze retiring efficiency at the level 8 years out to approximate
-!      DO Y=RECSYear+1,ijumpcalyr
-!        DO RECCL=1,rtclcnt
-!         eqceff(y,RECCL)=eqceff(RECSYear+8,RECCL)
-!        ENNDO
-!      ENNDO
 
       IUNIT1=FILE_MGR('C',FNAME,NEW)
       END SUBROUTINE RDEFF
@@ -2821,8 +2812,7 @@ END SUBROUTINE RCONSFL
       IUNIT1=FILE_MGR('O',FNAME,NEW)
       READ(IUNIT1,'(19(/))')
       DO 50 RECCL=1,RTCLCNT
-      READ(IUNIT1,*) &
-        (STKEFF(Y,RECCL), Y=RECSYear,ijumpcalyr)
+        READ(IUNIT1,*) (STKEFF(Y,RECCL), Y=RECSYear,ijumpcalyr)
  50   CONTINUE
 
       IUNIT1=FILE_MGR('C',FNAME,NEW)
@@ -3103,7 +3093,7 @@ END SUBROUTINE RCONSFL
           READ(IUNIT1,*) (EAUEC(D,B),B=1,mNumBldg)
          ENDDO
 
-         DO E=1,7  !secondary heating equipment (natural gas, electric, distillate fuel oil, propane, kerosene, coal, wood)	!kj - kerosene (and coal) values are placeholders; combined with distillate fuel oil
+         DO E=1,7  !secondary heating equipment (natural gas, electric, distillate fuel oil, propane, kerosene, coal, wood)	!TODO - kerosene (and coal) values are placeholders; combined with distillate fuel oil	!TODO - replace 7 with variable?
           DO D=1,mNumCR-2
            READ(IUNIT1,*) (SHTUEC(D,E,B), B=1,mNumBldg)
           ENDDO
@@ -3126,6 +3116,7 @@ END SUBROUTINE RCONSFL
 !*******************************************************************
       SUBROUTINE EXCONS
       IMPLICIT NONE
+      include 'tranrep'
       REAL*4  TVSCON(mNumYr,mNumCR-2),STBCON(mNumYr,mNumCR-2),HTSCON(mNumYr,mNumCR-2),OTTCON(mNumYr,mNumCR-2),&  !MELs21
               VGCCON(mNumYr,mNumCR-2)
       REAL*4  DPCCON(mNumYr,mNumCR-2),LPCCON(mNumYr,mNumCR-2),MONCON(mNumYr,mNumCR-2),NETCON(mNumYr,mNumCR-2)
@@ -3144,17 +3135,17 @@ END SUBROUTINE RCONSFL
       INTEGER D,E,F,B,FCON,EU,EQC,RECCL,EQCGHP,EQCEHP,EQCEWH,EQCSWH,y
       INTEGER RECCLGHP,RECCLEHP,RECCLEWH,RECCLSWH
 
-          ! 111(d) - initialize sales based on input restart file, against which to track savings (written to RESOUT.txt)
+          ! 111(d) - initialize sales based on input restart file, against which to track savings (written to RDM_OUT.txt)
           WRITE(9,*) 'RESTART FILE baseline electricity data (Trills) d, y, QELRS(d,y), QELCM(d,y)'
           DO D=1,mNumCR-2
            DO y=1,mNumYr
-           ! QELRS,QELCM in Trills	!kj - QELRS and QELCM are normally in quads, but these aren't multiplied by 1000 here. But this is legacy EPA 111D code, so not really used.
+           ! QELRS,QELCM in Trills	!TODO - QELRS and QELCM are normally in quads, but these aren't multiplied by 1000 here. This is legacy EPA 111D code, so not really used by the RDM, but is still used by CDM for AB32 calculations
            WRITE(9,5) D,Y,QELRS(d,y),QELCM(d,y)
            ENDDO
           ENDDO
  5    FORMAT(2i5,2F12.5)
 
-!  SET HOT WATER LOAD ADDITIONS FOR CLOTHESWASHERS AND DISHWASHERS	!kj -  Load adjustment of clothes washers with respect to water heating load in RECSyear
+!  SET HOT WATER LOAD ADDITIONS FOR CLOTHESWASHERS AND DISHWASHERS	!TODO -  verify/update: load adjustment of clothes washers with respect to water heating load in RECSyear
       CWLOAD(RECSYear)=0.2047
 
 !CALCULATE HEATING CONSUMPTION RECSYear,F,D,B
@@ -3168,7 +3159,7 @@ END SUBROUTINE RCONSFL
       ! SET EU = 1 FOR SPACE HEATING IN RSCLASS
       EU = 1
       ! CALCULATE HEATING CONSUMPTION FOR THE IDENTIFIED FUELS IN RSCLASS
-      ! AT THE SAME TIME IDENTIFY ELECTRIC AIR-SOURCE HEAT PUMPS AND GEOTHERMAL HEAT PUMPS FOR LATER USE
+      ! AT THE SAME TIME IDENTIFY ELECTRIC AIR-SOURCE HEAT PUMPS AND GEOTHERMAL HEAT PUMPS FOR LATER USE !GeoFix - is this still necessary to do?
       ! LOOP OVER ALL HEATING EQUIPMNENT TYPES
       DO RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1) !ALL RECORDS IN RSCLASS
         EQC=RTCLEQCL(RECCL)
@@ -3182,7 +3173,7 @@ END SUBROUTINE RCONSFL
             IF(RTCLNAME(RECCL).EQ.'ELEC_HP')THEN
               EQCEHP=RTCLEQCL(RECCL)
               RECCLEHP=EQCEHP
-             ELSEIF(RTCLNAME(RECCL).EQ.'GEO_HP')THEN
+             ELSEIF(RTCLNAME(RECCL).EQ.'GEO_HP')THEN !GeoFix - is this still necessary to do?
               EQCGHP=RTCLEQCL(RECCL)
               RECCLGHP=EQCGHP
             ENDIF
@@ -3194,18 +3185,6 @@ END SUBROUTINE RCONSFL
           ENDDO !BUILDING TYPES, B
         ENDDO !CENSUS DIVISIONS, D
       ENDDO !HEATING EQUIPMENT TYPES, RECCL
-
-      ! FINALLY, AGGREGATE GEOTHERMAL NOW THAT RSCLASS HAS BEEN PROCESSED
-      FCON = FHTRCON(7)  !7 FOR HEATING
-      DO D=1,mNumCR-2
-        DO B=1,mNumBldg
-         ! NOW THAT ELEC_HP AND GEO_HP ARE IDENTIFIED, CALCULATE CONSUMPTION.
-         ! FOR GEOTHERMAL (FUEL 7) AS THE DIFFERENCE BETWEEN THE ELEC_HP AND GEO_HP UEC
-         ! WHRFOSS/3412 USED TO CONVERT ELECTRICITY INTO PRIMARY GEOTHERMAL USE BASED ON AVERAGE FOSSIL FUEL HEAT RATE.  !STEOhr
-         HTRCON(CurIYr,FCON,D)=HTRCON(CurIYr,FCON,D)+ &
-          EQCESE(RECSYear,RECCLGHP,B,D)*(EQCUEC(D,RECCLEHP,B)-EQCUEC(D,RECCLGHP,B))*WHRFOSS(D,CurIYr)/3412.  !STEOhr
-        ENDDO !BUILDING TYPES, B
-      ENDDO !CENSUS DIVISIONS, D
 
 !CALCULATE COOLING CONSUMPTION
       DO D=1,mNumCR-2
@@ -3242,15 +3221,6 @@ END SUBROUTINE RCONSFL
         ENDDO !CENSUS DIVISIONS, D
       ENDDO !COOLING EQUIPMENT TYPES, RECCL
 
-      ! FINALLY, AGGREGATE GEOTHERMAL NOW THAT RSCLASS HAS BEEN PROCESSED
-      FCON = FCLCON(7) !=2 FOR GEOTHERMAL COOLING
-      DO D=1,mNumCR-2
-        DO B=1,mNumBldg
-        COOLCN(CurIYr,FCON,D)=COOLCN(CurIYr,FCON,D)+ &
-         EQCESE(RECSYear,RECCLGHP,B,D)*(EQCUEC(D,RECCLEHP,B)-EQCUEC(D,RECCLGHP,B))*WHRFOSS(D,CurIYr)/3412.  !STEOhr
-        ENDDO !BUILDING TYPES, B
-      ENDDO !CENSUS DIVISIONS, D
-
 !CALCULATE CLOTHES WASHER CONSUMPTION
 !   SET EU = 3 TO SEARCH THE CLOTHES WASHER SECTION OF THE DATA
       EU = 3
@@ -3276,7 +3246,7 @@ END SUBROUTINE RCONSFL
  170  CONTINUE
 
 !CALCULATE WATER HEATING CONSUMPTION
-!ALSO CALCULATE SOLAR CONSUMPTION - USES EL UEC (55 PERCENT)	!kj
+!ALSO CALCULATE SOLAR CONSUMPTION - USES EL UEC (55 PERCENT)	!TODO - verify "55 PERCENT" comment
 !   SET EU = 5 TO SEARCH THE WATER HEATING SECTION OF THE DATA
       EU = 5
 
@@ -3624,7 +3594,7 @@ END SUBROUTINE RCONSFL
           FRZCON(CurIYr,D)+LTCON(CurIYr,D)+APCON(CurIYr,D)+CKCON(CurIYr,3,D)+ &
           DRYCON(CurIYr,2,D)+SHTCON(CurIYr,2,D)+PCRCON(CurIYr,D)+TVRCON(CurIYr,D)+ &
           CSWCON(CurIYr,D)+DSWCON(CurIYr,D)+FANCON(CurIYr,D))/1000000.
-         QELRS(D,CurIYr)=RSFLCN(CurIYr,2,D)  !DGreport - No change because EXCONS subroutine is only called in RECSyear (so TrillsOwnUse not calculated yet)
+         QELRS(D,CurIYr)=RSFLCN(CurIYr,2,D)+TRQ_ELEC(1,D,CurIYr) !DGreport - No change because EXCONS subroutine is only called in RECSyear (so TrillsOwnUse not calculated yet)
 ! DISTILLATE FUEL OIL
          RSFLCN(CurIYr,3,D)= &
          (HTRCON(CurIYr,3,D)+H2OCON(CurIYr,3,D)+APLCON(CurIYr,3,D)+SHTCON(CurIYr,3,D)) &
@@ -3636,8 +3606,8 @@ END SUBROUTINE RCONSFL
          CKCON(CurIYr,2,D)+SHTCON(CurIYr,4,D))/1000000.
          QLGRS(D,CurIYr)=RSFLCN(CurIYr,4,D)
          QPRRS(D,CurIYr)=QLGRS(D,CurIYr)
-! KEROSENE	!kj - kerosene combined with distillate fuel oil but still in published Table 4
-         QKSRS(D,CurIYr)=0.0	!kj - kerosene combined with distillate fuel oil but still in published Table 4
+! KEROSENE	!TODO - still needed? kerosene combined with distillate fuel oil but still in published Table 4
+         QKSRS(D,CurIYr)=0.0	!TODO - still needed? kerosene combined with distillate fuel oil but still in published Table 4
 ! BIOMASS (WOOD)
          RSFLCN(CurIYr,7,D)=(HTRCON(CurIYr,6,D)+SHTCON(CurIYr,7,D))/1000000.
          QBMRS(D,CurIYr)=RSFLCN(CurIYr,7,D)
@@ -3647,29 +3617,31 @@ END SUBROUTINE RCONSFL
  750   CONTINUE
 
 !********************************************************************
-!     CALCULATE US (DIVISION 10) FUEL CONSUMPTION IN QUADRILLION BTU	!kj - D=10 is technically reserved for CA per PARAMETR include file; US/National should otherwise be 11
+!     CALCULATE US (DIVISION 10) FUEL CONSUMPTION IN QUADRILLION BTU	!TODO - D=10 is technically reserved for CA per PARAMETR include file; US/National should otherwise be 11; verify use of D=10 versus D=11 across RDM
 !********************************************************************
       DO 775 F=1,8
-        RSFLCN(CurIYr,F,10)=0.0
+        RSFLCN(CurIYr,F,MNUMCR-1)=0.0
+        TRQ_ELEC(1,MNUMCR,CurIYr)=0.0
         DO 775 D=1,mNumCR-2
-          RSFLCN(CurIYr,F,10)=RSFLCN(CurIYr,F,10)+RSFLCN(CurIYr,F,D)
+          RSFLCN(CurIYr,F,MNUMCR-1)=RSFLCN(CurIYr,F,MNUMCR-1)+RSFLCN(CurIYr,F,D)
+          TRQ_ELEC(1,MNUMCR,CurIYr) = TRQ_ELEC(1,MNUMCR,CurIYr) + TRQ_ELEC(1,D,CurIYr)
  775  CONTINUE
 
-      QELRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,2,10)  !DGreport - No change because EXCONS subroutine is only called in RECSyear (so TrillsOwnUse not calculated yet)
-      QNGRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,1,10)
-      QGFRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,1,10)*1.0  !FIRM GAS	!kj - still used?
-      QGIRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,1,10)*0.0  !INTERRUPTIBLE GAS	!kj - still used?
-      QDSRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,3,10)
-      QLGRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,4,10)
+      QELRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,2,MNUMCR-1) + TRQ_ELEC(1,MNUMCR,CurIYr) !DGreport - No change because EXCONS subroutine is only called in RECSyear (so TrillsOwnUse not calculated yet)
+      QNGRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,1,MNUMCR-1)
+      QGFRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,1,MNUMCR-1)*1.0  !FIRM GAS	!TODO - still used?
+      QGIRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,1,MNUMCR-1)*0.0  !INTERRUPTIBLE GAS	!TODO - still used?
+      QDSRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,3,MNUMCR-1)
+      QLGRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,4,MNUMCR-1)
       QPRRS(NATIONALPTR,CurIYr)=QLGRS(NATIONALPTR,CurIYr)
       QKSRS(NATIONALPTR,CurIYr)=0.0  !KeroBench
-      QBMRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,7,10)
-      QGERS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,8,10)
+      QBMRS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,7,MNUMCR-1)
+      QGERS(NATIONALPTR,CurIYr)=RSFLCN(CurIYr,8,MNUMCR-1)
       END SUBROUTINE EXCONS
 
 
 !******************************************************************
-!     CALCULATE EPACT WINDOW LABELING IMPACT	!kj - Is this still relevant?
+!     CALCULATE EPACT WINDOW LABELING IMPACT	!TODO - Is this still relevant?
 !*******************************************************************
       SUBROUTINE EPACTWD
       IMPLICIT NONE
@@ -3747,7 +3719,7 @@ END SUBROUTINE RCONSFL
 
       Y=CurCalYr  !calendar year
       Y1=CurIYr   !NEMS index for calendar year
-      RENOVATE=7.18 !THIS IS DERIVED FROM THE % OF HOMES ADDING A ROOM X THE SIZE ADDED (1.2% X 1/3 FLOOR AREA).	!kj
+      RENOVATE=7.18 !THIS IS DERIVED FROM THE % OF HOMES ADDING A ROOM X THE SIZE ADDED (1.2% X 1/3 FLOOR AREA).	!TODO - Update
 
 
 ! Initialize RECS Year Values
@@ -3959,15 +3931,14 @@ END SUBROUTINE RCONSFL
              EFFWEIGHTC(RECSYear:EndYr,nCoolTypes,mNumBldg,mNumCR),EQWTNCA(RECSYear:EndYr,nCoolTypes,mNumBldg,mNumCR)
       REAL*4 COOLSHWT(nCoolTypes,mNumBldg,mNumCR)
       REAL*4 TOTEWTN(nHeatClasses,mNumBldg,mNumCR),HVEQWTN,HVBETA2A(MNUMHVAC)
-      REAL*4 WTDEFF(nHeatClasses),EFFWEIGHT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR),SQFTWEIGHT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR)	!kj - WTDEFF not really used (set to 0 later but that's it)
-      REAL*4 TOTEWTNC(RECSYear:EndYr,nCoolClasses,mNumBldg,mNumCR)  !EqpParam	!kj - why is TOTEWTNC annualized but TOTEWTN isn't?
+      REAL*4 WTDEFF(nHeatClasses),EFFWEIGHT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR),SQFTWEIGHT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR)	!TODO - WTDEFF not used (set to 0 later but that's it); remove?
+      REAL*4 TOTEWTNC(RECSYear:EndYr,nCoolClasses,mNumBldg,mNumCR)  !EqpParam	!TODO - why is TOTEWTNC annualized but TOTEWTN isn't?
       REAL*4 EQFSHRNC(nCoolTypes),SHLLEARN(RECSYear:EndYr,mNumBldg,mNumCR-2)
-      REAL*4 EQFSHRN(nHeatTypes),EFFWT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR),EQPEFF(nHeatTypes)  !EqpParam	!kj - EFFWT not used?
-      REAL*4 WeightTot(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR),TOTEFFWT(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR)	!kj - WeightTot and TOTEFFWT not used?
+      REAL*4 EQFSHRN(nHeatTypes),EFFWT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR),EQPEFF(nHeatTypes)  !EqpParam	!TODO - EFFWT not used?
+      REAL*4 WeightTot(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR),TOTEFFWT(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR)	!TODO - WeightTot and TOTEFFWT not used?
       REAL*4 EPRICE(mNumCR-2,RECSYear:EndYr),ESHR(RECSYear:EndYr)
-      !These variables are involved in the efficiency choice calculation.	!kj - bookmark to clarify comment
-      ! RECAR and EQTAR are dimensioned for the number of choices
-      ! across efficiency types in any single year.
+      !These variables are involved in the efficiency choice calculation.	!TODO - clarify comment?
+      ! RECAR and EQTAR are dimensioned for the number of choices across efficiency types in any single year.	!TODO - clarify comment?
       INTEGER EU,EUPR,RECTY,RECCL,R,B,F,T,EQT,EQC,TYPE,COUNT,L,HCNT,Y,Y1,HC,EV,RECCL1
       INTEGER RECAR(nHeatTypes),EQTAR(nHeatTypes),S,HVRCTY,HVC,HVT,FS,HVCC,HVCT,HVTYCNT,HE,HS,CS  !EqpParam
 
@@ -3981,8 +3952,8 @@ END SUBROUTINE RCONSFL
 
      DO R=1,mNumCR-2
       DO B=1,mNumBldg
-       IF (CurCalYr.GT.RECSYear+1) THEN  !RSESTARbetas	!kj - (RECSYear+1) should be changed to ESTARHISTYR once betas in RSESTAR.txt are readjusted for historical ENERGY STAR housing start shares
-        SHLLEARN(CurCalYr,B,R)=SHLLEARN(CurCalYr-1,B,R)*(LEARNFACT(B,R)**(CurCalYr-(RECSYear+1)))  !RSESTARbetas	!kj - (RECSYear+1) should be changed to ESTARHISTYR once betas in RSESTAR.txt are readjusted for historical ENERGY STAR housing start shares
+       IF (CurCalYr.GT.RECSYear+1) THEN  !RSESTARbetas	!TODO - (RECSYear+1) should be changed to ESTARHISTYR once betas in RSESTAR.txt are readjusted for historical ENERGY STAR housing start shares
+        SHLLEARN(CurCalYr,B,R)=SHLLEARN(CurCalYr-1,B,R)*(LEARNFACT(B,R)**(CurCalYr-(RECSYear+1)))  !RSESTARbetas	!TODO - (RECSYear+1) should be changed to ESTARHISTYR once betas in RSESTAR.txt are readjusted for historical ENERGY STAR housing start shares
        ELSE
         SHLLEARN(CurCalYr,B,R)=1.0
        ENDIF
@@ -4069,7 +4040,7 @@ END SUBROUTINE RCONSFL
                  ELSEIF (RECCL.EQ.10) THEN
                    RECCL1=15   !nHeatClasses + RTCLEQCL(GEO_HP) = 11 + 4 = 15
                  ELSEIF (RECCL.EQ.11) THEN
-                   RECCL1=16   !nHeatClasses + RTCLEQCL(NG_HP) = 11 + 5 = 16
+                   RECCL1=16   !nHeatClasses + RTCLEQCL(NG_HP) = 11 + 5 = 16	!TODO - update if repurposing NG_HP inputs for MS_HP
                  ELSE
                    RECCL1=13   !central AC (RECCL1=13) for all other; room air conditioner (RECCL1=12) not considered here
                ENDIF  !RECCL
@@ -4095,14 +4066,12 @@ END SUBROUTINE RCONSFL
               HTSHELLFAC(CurCalYr,R,B)=HTSHEFF(HVRCTY)/HTSHBASE(HVRCTY)
               CLSHELLFAC(CurCalYr,R,B)=CLSHEFF(HVRCTY)/CLSHBASE(HVRCTY)
 
-              ! COMPUTE SQUARE FOOTAGE EFFECT FOR NEW CONSTRUCTION (CHANGES FROM INITIAL NEW CONTRUCTION VALUE)	!kj
-              ! These factors are estimated from building simulations for 10% increases in floor area.
-              !  The inputs are total effects and thus must be divided by 1.10 to produce a percentage
+              ! COMPUTE SQUARE FOOTAGE EFFECT FOR NEW CONSTRUCTION (CHANGES FROM INITIAL NEW CONTRUCTION VALUE)
+              ! These factors are estimated from building simulations for 10% increases in floor area.	!TODO - revisit 10% assumption
+              !  The inputs are total effects and thus must be divided by 1.10 to produce a percentage	!TODO - revisit 10% assumption
               !  change in HVAC use per percentage change in floor area.
-              HTSQRFOOTFAC(CurCalYr,HVT,R,B)=1.+(((SQRFOOT(CurCalYr,B,R)/SQRFOOT(RECSYear+1,B,R))-1.) &
-                *(HVHEATFACTOR(HVRCTY)/1.10))
-              CLSQRFOOTFAC(CurCalYr,HVCT,R,B)=1.+(((SQRFOOT(CurCalYr,B,R)/SQRFOOT(RECSYear+1,B,R))-1.)&
-                *(HVCOOLFACTOR(HVRCTY)/1.10))
+              HTSQRFOOTFAC(CurCalYr,HVT,R,B)=1.+(((SQRFOOT(CurCalYr,B,R)/SQRFOOT(RECSYear+1,B,R))-1.)*(HVHEATFACTOR(HVRCTY)/1.10))	!TODO - revisit 10% assumption
+              CLSQRFOOTFAC(CurCalYr,HVCT,R,B)=1.+(((SQRFOOT(CurCalYr,B,R)/SQRFOOT(RECSYear+1,B,R))-1.)*(HVCOOLFACTOR(HVRCTY)/1.10))	!TODO - revisit 10% assumption
 
              !COST TREND CALCULATIONS
              ! If COSTTRSW = 1, use function EQCOST to compute capital cost of new equipment.
@@ -4148,7 +4117,7 @@ END SUBROUTINE RCONSFL
               IF (B.NE.1) THEN
                  ! For multifamily and mobile homes, compute shares here
                  HVEQWTN(CurCalYr,HVT,S,B,R)=EXP(HVBETA2A(HVRCTY)+(HVBETA1(MIN(CurCalYr,ESTARHISTYR),B,S,R)*HVLFCY))  !RSESTARbetas
-               ELSEIF ((B.EQ.1).AND.(CurCalYr.GT.RECSYear)) THEN            ! HVAC Historical  !RSESTARbetas	!kj - RECSYear should be ESTARHISTYR?
+               ELSEIF ((B.EQ.1).AND.(CurCalYr.GT.RECSYear)) THEN            ! HVAC Historical  !RSESTARbetas	!TODO - Should RECSYear be ESTARHISTYR?
                  ! If beyond the historical ENERGY STAR housing share benchmarking period also compute shares here
                  HVEQWTN(CurCalYr,HVT,S,B,R)=EXP(HVBETA2A(HVRCTY)+(HVBETA1(MIN(CurCalYr,ESTARHISTYR),B,S,R)*HVLFCY))  !RSESTARbetas
               ENDIF !B<>1
@@ -4285,13 +4254,13 @@ END SUBROUTINE RCONSFL
 
       DO 190 B=1,mNumBldg
         DO 190 R=1,mNumCR-2
-          DO HC=5,nCoolTypes !skips over room air conditioners; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes
+          DO HC=4,nCoolTypes !skips over room air conditioners; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes !techupdate - update hard-coded value
             EQFSHRNC(HC)=0.0
             NEQTSHRC(CurCalYr,HC,B,R)=0.0
-            IF (HC.LT.9)               HVCC=2 !CENT_AIR  !CoolTypes
-            IF (HC.GT.8.AND.HC.LT.13)  HVCC=3 !ELEC_HP  !CoolTypes
-            IF (HC.GT.12.AND.HC.LT.17) HVCC=4 !GEO_HP  !CoolTypes
-            IF (HC.EQ.17)              HVCC=5 !NG_HP  !CoolTypes
+            IF (HC.LT.8)               HVCC=2 !CENT_AIR; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes !techupdate - update hard-coded value
+            IF (HC.GT.7.AND.HC.LT.12)  HVCC=3 !ELEC_HP; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes !techupdate - update hard-coded value
+            IF (HC.GT.11.AND.HC.LT.16) HVCC=4 !GEO_HP; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes !techupdate - update hard-coded value
+            IF (HC.EQ.16)              HVCC=5 !NG_HP; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes !techupdate - update hard-coded value
             IF (TOTEWTNC(CurCalYr,HVCC,B,R).GT.0.0) THEN
               CLSHELLWT(CurCalYr,HC,B,R)=COOLSHWT(HC,B,R)/TOTEWTNC(CurCalYr,HVCC,B,R)
             ELSE
@@ -4306,7 +4275,7 @@ END SUBROUTINE RCONSFL
             NEQTSHRC(CurCalYr,HC,B,R)=EQFSHRNC(HC)
          ENDDO !HC
 
-         DO HVCT=5,nCoolTypes !skips over room air conditioners; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes
+         DO HVCT=4,nCoolTypes !skips over room air conditioners; HC numbers may need to change if xlRTEQTYPE changes in RSMEQP tab of RSMESS.xlsx  !CoolTypes !techupdate - update hard-coded EQT value
            IF(ACEFF(HVCT,CurCalYr,R).GT.0.) EFFWEIGHTC(CurCalYr,HVCT,B,R)=NEQTSHRC(CurCalYr,HVCT,B,R)/ACEFF(HVCT,CurCalYr,R)
 !             EFFWEIGHTC(CurCalYr,HVCT,B,R)=NEQTSHRC(CurCalYr,HVCT,B,R)*ACEFF(HVCT,CurCalYr,R)
              SQFTWEIGHTC(CurCalYr,HVCT,B,R)=NEQTSHRC(CurCalYr,HVCT,B,R)*CLSQRFOOTFAC(CurCalYr,HVCT,R,B)
@@ -4381,11 +4350,11 @@ END SUBROUTINE RSHVAC
       REAL*4 HEATSYS(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR-2),SYSTOT
       REAL*4 EQCOST,CAPITAL,RETAIL,CAPITAL1
       REAL*4 HDDFACT(mNumCR)
-      REAL*4 EQFSHRR,EQFSHRN,OPCOST(3),BLDRWT !OPCOST(3) represents 1)replacement equipment for housing unit existing in RECS year, 2)new equipment in post-RECS-built housing unit, and 3)replacement equipment in post-RECS-built housing unit	!kj - should EQFSHRR and EQFSHRN be declared with(nHeatTypes), or is that no longer necessary because they've already been populated once?
+      REAL*4 EQFSHRR,EQFSHRN,OPCOST(3),BLDRWT !OPCOST(3) represents 1)replacement equipment for housing unit existing in RECS year, 2)new equipment in post-RECS-built housing unit, and 3)replacement equipment in post-RECS-built housing unit	!TODO - should EQFSHRR and EQFSHRN be declared with(nHeatTypes), or is that no longer necessary because they've already been populated once?
       REAL*4 RTEFFAC(2),DECAY,ECTEMP,DENOM,SUM,DENOM2,e
       REAL*4 HTYSSHR,OTSHRT,HSYSTOT,LAGFACTOR,tmplogit
-      !These variables are involved in the efficiency choice calculation.	!kj - bookmark to clarify comment
-      ! RECAR and EQTAR are dimensioned for the number of choices across efficiency types in any single year.
+      !These variables are involved in the efficiency choice calculation.	!TODO - clarify comment?
+      ! RECAR and EQTAR are dimensioned for the number of choices across efficiency types in any single year.	!TODO - clarify comment?
      INTEGER EU,EUPR,RECTY,RECCL,R,B,F,EQT,EQC,TYPE,COUNT,L
      INTEGER RECAR(nHeatTypes),EQTAR(nHeatTypes)  !EqpParam
 
@@ -4396,7 +4365,7 @@ END SUBROUTINE RSHVAC
       EU=1
       EUPR=1
       ALPHA1=-0.50
-      BLDRWT=6.0 ! FACTOR TO DISCOUNT FUEL PRICE IMPACT IN BUILDERS' FUEL CHOICE DECISION	!kj
+      BLDRWT=6.0 ! FACTOR TO DISCOUNT FUEL PRICE IMPACT IN BUILDERS' FUEL CHOICE DECISION	!TODO - Revise? Source?
 
       ! MAP ELECTRICITY PRICE ARRAY INTO RESIDENTIAL PRICE ARRAY
       DO R=1,mNumCR-2
@@ -4413,7 +4382,21 @@ END SUBROUTINE RSHVAC
         DECAY = (1-((1+ResDiscountRate)**(-Tenure)))/ResDiscountRate
       ENDIF
 
-      !  OUTTER LOOPS ARE CENSUS DIVISION AND BUILDING TYPE
+      IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.EQ.RECSYear+1)) THEN  !AppBetaData File Initialization/header
+        OPEN(unit = 661, file = "AppBetaData.txt") !creates the file
+          WRITE(661,61) 'Betacodes, EU,EQC,EQT,B,R,CurCalYr,RECTY,TYPE,RECCL,EQWTN(EQT;B;R),EQWTR(EQT;B;R),ECTEMP,BETA1DR(RECTY),CAPITAL,RTECBIAS(RECTY),OPCOST(1),OPCOST(2),OPCOST(3),RTECBTA2(RECTY),RTECBTA3(RECTY),LFCY(EQT;B;R;1),LFCY(EQT;B;R;2),TOTEWTR(EQC;B;R),TOTEWTN(EQC;B;R),NEQTSHR(CurCalYr;TYPE;B;R),EQFSHRR,REQTSHR(CurCalYr;TYPE;B;R),EQCADD(Y;RECCL;B;r),HEATINGTYPEPURCH(Y;TYPE;B;R;1),HEATINGTYPEPURCH(Y;TYPE;B;R;2),EQCREP(Y;RECCL;B;r),EQCRP90RP(Y;RECCL;B;r),EQCRP90(Y;RECCL;B;r),TCWSHR(B;R),FCWSHR(B;R),FCW_SHR,TCW_SHR,UPSHR(B;R)'  !RAD writes the header; BetaCodeSection = radref
+          61 FORMAT(a) !formats the header
+        CLOSE(661) !closing it, so that it can be reopened with an "append" function, hoping that each time this iterates, as new variables are calculated it adds to the bottom instead of replacing
+      ENDIF !Appbetadata file initialization complete
+
+      !IF (curitr .eq. 1) THEN
+      !  OPEN(unit = 667, file = "pv_hh.txt",position = "append") !creates the file
+      !    WRITE(667,93) "if", ",", "year", ",", "cd", ",", "xExogPen", ",", "exogpvmistie", ",", "cap", ",", "units", ",", "xcalckw", ",", "xinvest", ",", "x111d", ",", "trills"
+      !    93 FORMAT(       A,   A,      A,   A,    A,   A,  A,A,            A,   A,     A,   A,       A,   A,         A,   A,         A,   A,       A,   A, A)
+      !  CLOSE(667) !closing it, so that it can be reopened with an "append" function, hoping that each time this iterates, as new variables are calculated it adds to the bottom instead of replacing
+      !ENDIF
+
+      !  OUTER LOOPS ARE CENSUS DIVISION AND BUILDING TYPE
       DO 90 R=1,mNumCR-2
         DO 90 B=1,mNumBldg
 
@@ -4451,7 +4434,7 @@ END SUBROUTINE RSHVAC
               IF(RTEQEFF(RECTY).NE.0.0) THEN
                 ! RTEFFAC(1) is used to adjust UECs for replacements from the original stock of equipment from RECSYear
                 RTEFFAC(1)=EQCEFF(CurCalYr,RECCL)/RTEQEFF(RECTY)    !eqceff is retiring stock efficiency
-                ! RTEFFACt(2) is used to adjust RECSYear UECs for new construction decisions
+                ! RTEFFAC(2) is used to adjust RECSYear UECs for new construction decisions
                 RTEFFAC(2)=RTBASEFF(RECSYear,RECCL)/RTEQEFF(RECTY)  !rtbaseff is stock efficiency at RECSYear
                ELSE
                 WRITE(9,'("shouldnt see",3i5,3e15.4)') CurCalYr,RECCL,eqt,eqceff(CurCalYr,RECCL),rteqeff(recty),rtbaseff(RECSYear,RECCL)
@@ -4460,15 +4443,13 @@ END SUBROUTINE RSHVAC
               ENDIF
 
               ! SET CAPITAL COSTS
-              !  If COSTTRSW = 1, use function EQCOST to compute capital
-              !     cost of new equipment.
-              !  If COSTTRSW = 0, use constant value from RSMEQP file for capital
-              !     cost of new equipment.
+              !  If COSTTRSW = 1, use function EQCOST to compute capital cost of new equipment.
+              !  If COSTTRSW = 0, use constant value from RSMEQP file for capital cost of new equipment.
               IF (COSTTRSW.EQ.1) THEN
                 CAPITAL =  EQCOST(RECTY,CurCalYr,"CAP")
                 IF ((EQC.NE.2).AND.(EQC.NE.10).AND.(EQC.NE.11)) THEN
                    ! If not a HP technology, then add typical retail cost for central air conditioning
-                   CAPITAL1= RTRECOST(RECTY)+2200.  !updated using April 2018 tech report (using 2015 installed base retail equipment cost in RTEKDOLLARYR dollars)  !ACcost
+                   CAPITAL1= RTRECOST(RECTY)+2760.  !updated using March 2023 tech report (using Central AC South 2020 installed base retail equipment cost in RTEKDOLLARYR dollars)  !ACcost
                   ELSE
                    CAPITAL1= RTRECOST(RECTY)
                 ENDIF
@@ -4476,7 +4457,7 @@ END SUBROUTINE RSHVAC
                 CAPITAL =  RTEQCOST(RECTY)
                 IF ((EQC.NE.2).AND.(EQC.NE.10).AND.(EQC.NE.11)) THEN
                   ! If not a HP technology, then add typical retail cost for central air conditioning
-                  CAPITAL1= RTRECOST(RECTY)+2200.  !updated using April 2018 tech report (using 2015 installed base retail equipment cost in RTEKDOLLARYR dollars)  !ACcost
+                  CAPITAL1= RTRECOST(RECTY)+2760.  !updated using March 2023 tech report (using Central AC South 2020 installed base retail equipment cost in RTEKDOLLARYR dollars)  !ACcost
                  ELSE
                   CAPITAL1= RTRECOST(RECTY)
                 ENDIF
@@ -4484,10 +4465,10 @@ END SUBROUTINE RSHVAC
 
               ! CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
               !  i.e., reduce implicit discount rates as real prices increase
-              IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
+              IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
                 (PRICES(F,R,CurCalYr).GT.PRICES(F,R,RECSYear))) THEN
                 HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
-                ELIGBLE=HRDRATE - 0.07	!kj
+                ELIGBLE=HRDRATE - 0.07	!TODO - source of 7% assumption? Revise?
                 IF (ELIGBLE.GT.0.0) THEN
                   HRDADJ= ELIGBLE * &
                     ((PRICES(F,R,CurCalYr)/PRICES(F,R,RECSYear))**ALPHA1 )
@@ -4500,7 +4481,7 @@ END SUBROUTINE RSHVAC
               ENDIF
 
               ! COMPUTE THE PART OF THE EQUIMENT CHOICE WEIGHT NOT DEPENDENT ON REGION AND BUILDING TYPE
-              ECTEMP = RTECBIAS(RECTY) + (BETA1DR(RECTY)*CAPITAL)	!kj - reincorporate into EQWTN and EQWTR equations below (similar to other end uses?)
+              ECTEMP = RTECBIAS(RECTY) + (BETA1DR(RECTY)*CAPITAL)	!TODO - reincorporate into EQWTN and EQWTR equations below (similar to other end uses)? There are a few EUs that use this ECTEMP variable, the math ends up being the same, so it would be easy to incorporate back 
 
              ! CALCULATE OPERATING COST FOR 3 DECISION TYPES
              ! UECS: EQCUEC = RECSYear UEC FROM RSUEC.TXT
@@ -4534,9 +4515,15 @@ END SUBROUTINE RSHVAC
 
              ! COMPUTE WEIGHTS FOR POST-RECS YEAR REPLACEMENT(?) EQUIPMENT TYPES
              ! OPCOST(3) represents 1)replacement equipment for housing unit existing in RECS year, 2)new equipment in post-RECS-built housing unit, and 3)replacement equipment in post-RECS-built housing unit
-             EQWTN(EQT,B,R)= EXP(ECTEMP+(RTECBTA2(RECTY)*OPCOST(3)) + (RTECBTA3(RECTY)*LFCY(EQT,B,R,3)))	!kj - Other major end uses (except refrigeration, freezing, and lighting) use OPCOST(2) rather than OPCOST(3)
+             EQWTN(EQT,B,R)= EXP(ECTEMP+(RTECBTA2(RECTY)*OPCOST(3)) + (RTECBTA3(RECTY)*LFCY(EQT,B,R,3)))	!TODO - Clarify? Other major end uses (except refrigeration, freezing, and lighting) use OPCOST(2) rather than OPCOST(3)
              TOTEWTN(EQC,B,R)=TOTEWTN(EQC,B,R)+EQWTN(EQT,B,R)
 
+               IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 1
+                 OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                   WRITE(661,62)'1,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',',ECTEMP,',',BETA1DR(RECTY), ',',CAPITAL,',','X,',OPCOST(1),',','X,',OPCOST(3),',',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',','X,',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !RAD writing the variables i need
+                   62 FORMAT(a,I,a,I,a,a,I,a,I,a,I,a,I,a,a,a,f,a,f,a,f,a,f,a,  f,a,  a,  f,a,a,  f,a,f,a,f,a,f,a,a,  f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                 CLOSE(661) !close file
+              ENDIF !Appliance Beta writeout complete
              ENDIF !filter census division
             ENDIF  !filter year availability
           ENDDO    !for all RSMEQP records this enduse
@@ -4572,6 +4559,12 @@ END SUBROUTINE RSHVAC
 
               REQTSHR(CurCalYr,TYPE,B,R)=EQFSHRR
 
+             IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 2
+               OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                WRITE(661,63) '2,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',',EQFSHRR,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+                63 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+               CLOSE(661) !close file
+             ENDIF !Appliance Beta writeout complete
             ENDIF
            ENDIF
           ENDDO
@@ -4638,7 +4631,7 @@ END SUBROUTINE RSHVAC
           ! COMPUTE LOGIT VALUES FOR EACH HEATING SYSTEM AND SUM OVER TYPE
           OTSHRT=0.0
           SYSTOT=0.0
-          LAGFACTOR=0.9	!kj - does this need to be updated?
+          LAGFACTOR=0.9	!TODO - Update? Source?
           ! COMPUTE PERCENT ELIGIBLE FOR FUEL CHOICE SIMULATION
           DO RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
               EQC=RTCLEQCL(RECCL)
@@ -4650,7 +4643,7 @@ END SUBROUTINE RSHVAC
               SYSTOT=SYSTOT+HEATSYS(CurCalYr,EQT,B,R)
 
           !Diagnostics only:
-          IF ((CurCalYr.GT.RECSYear) .AND. (B.EQ.1) .AND. (R.EQ.5)) THEN	!kj - what is R=5? CD 5?
+          IF ((CurCalYr.GT.RECSYear) .AND. (B.EQ.1) .AND. (R.EQ.5)) THEN	!TODO - what is R=5? CD 5? delete this entire section diagnostic?
 !             WRITE(9,'("parm checks",3i5,3e15.4)') CurCalYr,RECCL,EQT,HEATSYS(CurCalYr-1,EQT,B,R),tmplogit,HEATSYS(CurCalYr,EQT,B,R)
           ENDIF
 
@@ -4859,12 +4852,12 @@ END SUBROUTINE RSHVAC
 
        !   ADD TOTAL HEATERS AND COMPUTE NEW SHELL EFFICIENCY
        DO R=1,mNumCR-2
-           DO B=1,mNumBldg
-                 DO F=1,6  !Distillate fuel oil, propane, natural gas, electricity, kerosene, wood	!kj - kerosene being combined with distillate fuel oil for AEO2019
-              NHSHELL(CurCalYr,F,R,B)=0.0
-              NEWSHELLWT(CurCalYr,F,B,R)=0.0
-              NEWADDWT(CurCalYr,F,B,R)=0.0
-             ENDDO
+         DO B=1,mNumBldg
+           DO F=1,6  !Distillate fuel oil, propane, natural gas, electricity, kerosene, wood; kerosene combined with distillate fuel oil starting in AEO2019	!TODO - renumber when removing kerosene; replace 6 with a variable?
+             NHSHELL(CurCalYr,F,R,B)=0.0
+             NEWSHELLWT(CurCalYr,F,B,R)=0.0
+             NEWADDWT(CurCalYr,F,B,R)=0.0
+           ENDDO
          ENDDO
        ENDDO
 
@@ -4885,7 +4878,7 @@ END SUBROUTINE RSHVAC
           DO 32 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
             IF (RECCL.LE.2.OR.RECCL.EQ.10) F=4 !ELEC_RAD, ELEC_HP, and GEO_HP
                 IF (RECCL.EQ.3.OR.RECCL.EQ.4.OR.RECCL.EQ.11) F=3 !NG_FA, NG_RAD, and NG_HP
-                IF (RECCL.EQ.5) F=1 !KERO_FA	!kj - switched tech menu kerosene (RTFUEL=5) equipment/shells to distillate fuel oil (RTFUEL=1) for now
+                IF (RECCL.EQ.5) F=1 !KERO_FA	!TODO - revise once kerosene fully removed/combined with DFO; switched tech menu kerosene (RTFUEL=5) equipment/shells to distillate fuel oil (RTFUEL=1) for now
                 IF (RECCL.EQ.6) F=2 !LPG_FA
             IF (RECCL.EQ.7.OR.RECCL.EQ.8) F=1 !DIST_FA and DIST_RAD
             IF (RECCL.EQ.9) F=6 !WOOD_HT
@@ -4898,43 +4891,43 @@ END SUBROUTINE RSHVAC
             NEWSHELLWT(CurCalYr,F,B,R)=NEWSHELLWT(CurCalYr,F,B,R)+ &
               EQCADD(CurCalYr,RECCL,B,R)*HSHELL(CurCalYr,RECCL,B,R)
               NEWADDWT(CurCalYr,F,B,R)=NEWADDWT(CurCalYr,F,B,R)+EQCADD(CurCalYr,RECCL,B,R)
-              DO 32 S=1,nShellTypes
-! bookmark               SHLEVELWT(CurCalYr,EQC,S,B,R)= &
-! bookmark                 EQCADD(CurCalYr,EQC,B,R)*SHLEVELH(CurCalYr,EQC,S,B,R)
-! bookmark               SHELLTOTALInvest(CurCalYr)=SHELLTOTALInvest(CurCalYr) + &
-! bookmark                 SHLEVELWT(CurCalYr,EQC,S,B,R)*SHELLInvest(CurCalYr,EQC,S,B,R)
+              DO 32 S=1,nShellTypes	!TODO - remove?
+               !SHLEVELWT(CurCalYr,EQC,S,B,R)= &	!TODO - remove?
+               !EQCADD(CurCalYr,EQC,B,R)*SHLEVELH(CurCalYr,EQC,S,B,R)	!TODO - remove?
+               !SHELLTOTALInvest(CurCalYr)=SHELLTOTALInvest(CurCalYr) + &	!TODO - remove?
+               !SHLEVELWT(CurCalYr,EQC,S,B,R)*SHELLInvest(CurCalYr,EQC,S,B,R)	!TODO - remove?
  32   CONTINUE ! End loop compute shell investment
 
 
-!      DO S=1,nShellTypes
-! bookmark        SHWTNUM(CurCalYr,S)=0.0
-!          DO B=1,mNumBldg
-! bookmark           SHWTNUMB(CurCalYr,S,B)=0.0
-!             DO R=1,mNumCR-2
+!      DO S=1,nShellTypes	!TODO - remove this block of code?
+!        SHWTNUM(CurCalYr,S)=0.0
+!        DO B=1,mNumBldg
+!          SHWTNUMB(CurCalYr,S,B)=0.0
+!          DO R=1,mNumCR-2
 !            DO RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
-! bookmark             SHWTNUM(CurCalYr,S)=SHWTNUM(CurCalYr,S)+SHLEVELWT(CurCalYr,RECCL,S,B,R)
-! bookmark             SHWTNUMB(CurCalYr,S,B)=SHWTNUMB(CurCalYr,S,B)+SHLEVELWT(CurCalYr,RECCL,S,B,R)
+!              SHWTNUM(CurCalYr,S)=SHWTNUM(CurCalYr,S)+SHLEVELWT(CurCalYr,RECCL,S,B,R)
+!              SHWTNUMB(CurCalYr,S,B)=SHWTNUMB(CurCalYr,S,B)+SHLEVELWT(CurCalYr,RECCL,S,B,R)
 !            ENDDO !RECCL
-!           ENDDO !r
-!            ENDDO !b
-!        ENDDO !s
+!          ENDDO !r
+!        ENDDO !b
+!      ENDDO !s
 
-      ! Initialize Energy Star Shells (by assumption for higher efficiencies)	!kj
-! bookmark      CUMSHWTNUM(RECSYear,3)=57515.
-! bookmark      CUMSHWTNUM(RECSYear,4)=5752.
-! bookmark      CUMSHWTNUM(RECSYear,5)=575.
-! bookmark      SHWTNUM(RECSYear,3)=27359.
-! bookmark      SHWTNUM(RECSYear,4)=2736.
-! bookmark      SHWTNUM(RECSYear,5)=274.
+      ! Initialize ENERGY STAR shells (by assumption for higher efficiencies)	!TODO - remove this block of code?
+!     CUMSHWTNUM(RECSYear,3)=57515.
+!     CUMSHWTNUM(RECSYear,4)=5752.
+!     CUMSHWTNUM(RECSYear,5)=575.
+!     SHWTNUM(RECSYear,3)=27359.
+!     SHWTNUM(RECSYear,4)=2736.
+!     SHWTNUM(RECSYear,5)=274.
 
-!      DO S=3,5
-!bookmark       CUMSHWTNUM(CurCalYr,S)=CUMSHWTNUM(CurCalYr-1,S)+SHWTNUM(CurCalYr,S)
-!      ENDDO
+!     DO S=3,5	!TODO - remove this block of code?
+!       CUMSHWTNUM(CurCalYr,S)=CUMSHWTNUM(CurCalYr-1,S)+SHWTNUM(CurCalYr,S)
+!     ENDDO
 
       ! COMPUTE SHELL AVERAGE FOR EACH FUEL TYPE
       DO R=1,mNumCR-2
         DO B=1,mNumBldg
-          DO F=1,6  !Distillate fuel oil, propane, natural gas, electricity, kerosene, wood	!kj - kerosene being combined with distillate fuel oil for AEO2019
+          DO F=1,6  !Distillate fuel oil, propane, natural gas, electricity, kerosene, wood; kerosene combined with distillate fuel oil for AEO2019	!TODO - renumber when removing kerosene; replace 6 with a variable?
             IF (NEWADDWT(CurCalYr,F,B,R).GT.0.0) THEN
               NHSHELL(CurCalYr,F,R,B)=NEWSHELLWT(CurCalYr,F,B,R)/NEWADDWT(CurCalYr,F,B,R)
             ELSE
@@ -4964,7 +4957,7 @@ END SUBROUTINE RSHVAC
         DO R=1,mNumCR-2
           DO RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
             EQC=RTCLEQCL(RECCL)
-              DO Y=CurCalYr,EndYr       ! VINTAGE EQUIPMENT FOR AVERAGE STOCK ACCOUNTING
+              DO Y=CurCalYr,EndYr  ! VINTAGE EQUIPMENT FOR AVERAGE STOCK ACCOUNTING
                 TEMP=Y-CurCalYr
                 HSR=HDR(B)**(TEMP)
                 ESR=SVRTE(RTALPHA(RECCL),TEMP,RTK(RECCL),RTLAMBDA(RECCL))
@@ -4983,51 +4976,57 @@ END SUBROUTINE RSHVAC
       NUMEQT=RTTYPECT(EU+1)-RTTYPECT(EU)
 
         DO B=1,mNumBldg
-         DO r=1,mNumCR-2
-          TYPE = RTTYPECT(EU)
-           DO RECTY=RTTYEUPT(EU)+1,RTTYEUPT(EU+1)
-
-           ! CHECK TO SEE IF RECORD IS VALID FOR CURRENT YEAR
-           IF(CurCalYr.GE.RTINITYR(RECTY).AND. &
-             CurCalYr.LE.RTLASTYR(RECTY)) THEN
-             IF (RTCENDIV(RECTY).EQ.R) THEN
-
-            TYPE=TYPE+1    ! INDEX to count the 'TYPE' records in RSMEQP
-            EQT=RTEQTYPE(RECTY)
-            EQC=RTTYEQCL(RECTY)
-            RECCL=RTCLEUPT(EU)+EQC
-                HEATINGTYPEPURCH(T,EQT,B,R,1)=(HVEQSHR(T,EQT,B,r)*EQCADD(T,RECCL,B,r))
-                HEATINGTYPEPURCH(T,EQT,B,R,2)=(NEQTSHR(T,EQT,B,r)*(EQCREP(T,RECCL,B,r) + &
+          DO r=1,mNumCR-2
+            TYPE = RTTYPECT(EU)
+            DO RECTY=RTTYEUPT(EU)+1,RTTYEUPT(EU+1)
+              ! CHECK TO SEE IF RECORD IS VALID FOR CURRENT YEAR
+              IF(CurCalYr.GE.RTINITYR(RECTY).AND.CurCalYr.LE.RTLASTYR(RECTY)) THEN
+                IF (RTCENDIV(RECTY).EQ.R) THEN
+                  TYPE=TYPE+1    ! INDEX to count the 'TYPE' records in RSMEQP
+                  EQT=RTEQTYPE(RECTY)
+                  EQC=RTTYEQCL(RECTY)
+                  RECCL=RTCLEUPT(EU)+EQC
+                  HEATINGTYPEPURCH(T,EQT,B,R,1)=(HVEQSHR(T,EQT,B,r)*EQCADD(T,RECCL,B,r))
+                  HEATINGTYPEPURCH(T,EQT,B,R,2)=(NEQTSHR(T,EQT,B,r)*(EQCREP(T,RECCL,B,r) + &
                    EQCRP90RP(T,RECCL,B,r)) + REQTSHR(T,EQT,B,r)*EQCRP90(T,RECCL,B,r) )
-               DO S=1,nShellTypes
-                SHELLBUILDS(T,EQT,S,B,R)=HTSHELLWT(T,EQT,S,B,R)*EQCADD(T,RECCL,B,r)
+                  IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 8
+                    OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,69) '8,',EU, ',',T,',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',HVEQSHR(T,EQT,B,r), ',',EQCADD(T,RECCL,B,r), ',',HEATINGTYPEPURCH(T,EQT,B,R,1), ',', HEATINGTYPEPURCH(T,EQT,B,R,2), ',',EQCREP(T,RECCL,B,r), ',',EQCRP90RP(T,RECCL,B,r), ',',EQCRP90(T,RECCL,B,r), ',','X,','X,','X,','X,',REQTSHR(T,EQT,B,r)!writing the variables i need
+                    69 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  f)
+                    CLOSE(661) !close file
+                  ENDIF !Appliance Beta writeout complete
+                  DO S=1,nShellTypes
+                    SHELLBUILDS(T,EQT,S,B,R)=HTSHELLWT(T,EQT,S,B,R)*EQCADD(T,RECCL,B,r)
 !bookmark                shellinvdb(T,EQT,S,B,R)=shellInvest(t,RECCL,s,b,r)*ifix(shellbuilds(T,EQT,S,B,R))
 !bookmark                shellsubdb(T,EQT,S,B,R)=shellsubsidy(t,RECCL,s,b,r)*ifix(shellbuilds(T,EQT,S,B,R))
-               ENDDO
-           ENDIF
-           ENDIF
-           ENDDO
-         ENDDO
+                  ENDDO
+                ENDIF
+              ENDIF
+            ENDDO
+          ENDDO
         ENDDO
 
-         ! RSGASCUST tracks the number of natural gas customers by looking across end uses.
-         !  Note: it is not a constraint on hookups...
+        ! Natural gas space heating equipment defined in RSCLASS (e.g., furnaces, boilers, heat pumps) are proxy for number of natural gas customers	!TODO - Remove ",heat pumps" if replacing NG_HP inputs with MS_HP
+        ! RSGASCUST tracks the number of natural gas customers by looking across end uses (i.e., if number of natural gas water heaters, cooking ranges,
+        !  or clothes dryers exceeds number of space heaters, that value becomes the number of natural gas customers for that year/census division/building type
+        ! Note: this is not a constraint on hookups...
+
+!        !Zero out old values
          DO R=1,mNumCR-2
            RSGASCUST(CurCalYr,R)=0.0
          ENDDO
 
-        ! Natural gas space heating equipment defined in RSCLASS  (e.g., furnaces, boilers, heat pumps) are proxy for number of natural gas customers
         IF ((CurCalYr.EQ.RECSYear+1).AND.(CURITR.EQ.1)) THEN
          DO R=1,mNumCR-2
           RSGASCUST(RECSYear,R)=0.0
           DO B=1,mNumBldg
-           RSGASCUST(RECSYear,R)=RSGASCUST(RECSYear,R)+EQCESE(RECSYear,3,B,R)+EQCESE(RECSYear,4,B,R)+EQCESE(RECSYear,11,B,R)
+           RSGASCUST(RECSYear,R)=RSGASCUST(RECSYear,R)+EQCESE(RECSYear,3,B,R)+EQCESE(RECSYear,4,B,R)+EQCESE(RECSYear,11,B,R)	!TODO - Remove +EQCESE(RECSYear,11,B,R) if replacing NG_HP inputs with MS_HP
           ENDDO
          ENDDO
         ELSE
          DO R=1,mNumCR-2
           DO B=1,mNumBldg
-           RSGASCUST(CurCalYr,R)=RSGASCUST(CurCalYr,R)+HEATOT(CurCalYr,3,B,R)+HEATOT(CurCalYr,4,B,R)+HEATOT(CurCalYr,11,B,R)
+           RSGASCUST(CurCalYr,R)=RSGASCUST(CurCalYr,R)+HEATOT(CurCalYr,3,B,R)+HEATOT(CurCalYr,4,B,R)+HEATOT(CurCalYr,11,B,R)	!TODO - Remove +HEATOT(CurCalYr,11,B,R) if replacing NG_HP inputs with MS_HP
           ENDDO
          ENDDO
         ENDIF
@@ -5050,11 +5049,11 @@ END SUBROUTINE RSHVAC
       INTEGER EU,EUPR,EQC,RECCL,Y,R,B,EQCEHP,EQCGHP,D,S
       INTEGER RECCLEHP, RECCLGHP
 ! PRICES 1=Distillate Fuel Oil 2=Propane 3=Natural Gas 4=Electricity 5=Kerosene 6=Coal
-! SHELL 1=Distillate Fuel Oil/Wood 2=Propane 3=Natural Gas 4=Electricity/Geothermal 5=Kerosene
+! SHELL 1=Distillate Fuel Oil/Wood 2=Propane 3=Natural Gas 4=Electricity/Geothermal 5=Kerosene !GeoFix - remove reference to geothermal?
 !*******************************************************************
 !  F    = FUEL NUMBER FROM RSCLASS FILE
 !  FCON = FUEL NUMBER FOR CONSUMPTION (AS FOLLOWS)
-!         1=Natural Gas 2=Electricity 3=Distillate Fuel Oil + Kerosene 4=Propane 5=N/A 6=Wood 7=Geothermal
+!         1=Natural Gas 2=Electricity 3=Distillate Fuel Oil + Kerosene 4=Propane 5=N/A 6=Wood 7=Geothermal !GeoFix - remove reference to geothermal?
 !*******************************************************************
 
 !  SET EU = 1 TO SEARCH THE SPACE HEATING SECTION OF THE DATA
@@ -5076,11 +5075,11 @@ END SUBROUTINE RSHVAC
 
       IF (CurCalYr.EQ.RECSYear+1) THEN
        DO 1 Y=RECSyear,EndYr
-        IF (Y.LE.2018) THEN  !Furnace fan standard effective 2019	!kj - update when new standard available
+        IF (Y.LE.2018) THEN  !Furnace fan standard effective 2019  !FurnFanStandard	!TODO - update when new standard available
          NFANEFF(Y)=1.0
          FANEFF(Y)=1.0
         ELSE
-         NFANEFF(Y)=0.75 !Furance fans expected to be 25% more efficient due to 2019 standard?
+         NFANEFF(Y)=0.75 !Furance fans expected to be 25% more efficient due to 2019 standard?  !FurnFanStandard
          FANEFF(Y)=1.0
         ENDIF
  1    CONTINUE
@@ -5123,7 +5122,7 @@ END SUBROUTINE RSHVAC
               ENDIF
             ENDDO
 
-            ! Compute composite cooling shell by R & B based on 3 fuels	!kj - verify source of shares
+            ! Compute composite cooling shell by R & B based on 3 fuels	!TODO - verify source of shares
             ECSHELL(CurCalYr,R,B)=ECSHELL(RECSYear,R,B)- &
             ((EHSHELL(RECSYear,1,R,B)-EHSHELL(CurCalYr,1,R,B))*0.1 + &  !Natural Gas?
              (EHSHELL(RECSYear,3,R,B)-EHSHELL(CurCalYr,3,R,B))*0.6 + &  !Distillate Fuel Oil?
@@ -5384,9 +5383,9 @@ END SUBROUTINE RSHVAC
          !    ELECTRICITY       2        4
          !    DFO+KEROSENE      3        1 (DFO=Distillate Fuel Oil)
          !    PROPANE           4        2
-         !    KEROSENE          5        5 (Combined with distillate fuel oil in AEO2019)	!kj
+         !    KEROSENE          5        5 (Combined with distillate fuel oil in AEO2019)	!TODO - revisit once kerosene removed/fully combined with DFO
          !    WOOD              6        1 (Priced to distillate fuel oil)
-         !    GEOTHERMAL        7        4 (Priced to electricity)
+         !    GEOTHERMAL        7        4 (Priced to electricity) !GeoFix	!TODO - remove?
 
           DO RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
             EQC=RTCLEQCL(RECCL)
@@ -5550,37 +5549,6 @@ END SUBROUTINE RSHVAC
 
           ENDDO
 
-!GEOTHERMAL IS CALCULATED DIFFERENTLY FROM OTHER FUELS
-! Set FCON=7 for geothermal and calculate outside of the RSCLASS loop because it is not encountered in RSCLASS.
-! UEC of ground-source heat pump (RECCL=15) is subtracted from air-source heat pump (RECCL=14) to differentiate amount of electricity used versus geothermal energy	!kj
-          FCON = FHTRCON(7)  ! FCON = 7
-          HTRCON(CurIYr,FCON,R)=HTRCON(CurIYr,FCON,R)+HDDFACT(R)*LEAPYR* &
-           (EQCESE(CurCalYr,RECCLGHP,B,R)* &
-           (EQCUEC(R,RECCLEHP,B)-EQCUEC(R,RECCLGHP,B))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-            EQCRP90(CurCalYr,RECCLGHP,B,R)* &
-           (EQCRUEC(CurCalYr,RECCLEHP,B,R)-EQCRUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-            EQCADD(CurCalYr,RECCLGHP,B,R)*&
-           (EQCHVUEC(CurCalYr,RECCLEHP,B,R)-EQCHVUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-            EQCSUR(CurCalYr,RECCLGHP,B,R)*&
-           (EQCAHVUEC(CurCalYr,RECCLEHP,B,R)-EQCAHVUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           (EQCREP(CurCalYr,RECCLGHP,B,R)+EQCRP90RP(CurCalYr,RECCLGHP,B,R))* &
-           (EQCNUEC(CurCalYr,RECCLEHP,B,R)-EQCNUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           (EQCSUR(CurCalYr,RECCLGHP,B,R))* &
-           (EQCAUEC(CurCalYr,RECCLEHP,B,R)-EQCAUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.)  !STEOhr
-
-          GEEQCN(CurIYr,1,B,R)= HDDFACT(R)*LEAPYR* &
-           (EQCESE(CurCalYr,RECCLGHP,B,R)* &
-           (EQCUEC(R,RECCLEHP,B)-EQCUEC(R,RECCLGHP,B))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           EQCRP90(CurCalYr,RECCLGHP,B,R)* &
-           (EQCRUEC(CurCalYr,RECCLEHP,B,R)-EQCRUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           EQCADD(CurCalYr,RECCLGHP,B,R)*&
-           (EQCHVUEC(CurCalYr,RECCLEHP,B,R)-EQCHVUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           EQCSUR(CurCalYr,RECCLGHP,B,R)*&
-           (EQCAHVUEC(CurCalYr,RECCLEHP,B,R)-EQCAHVUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           (EQCREP(CurCalYr,RECCLGHP,B,R)+EQCRP90RP(CurCalYr,RECCLGHP,B,R))* &
-           (EQCNUEC(CurCalYr,RECCLEHP,B,R)-EQCNUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.+ &  !STEOhr
-           EQCSR90(CurCalYr,RECCLGHP,B,R)* &
-           (EQCAUEC(CurCalYr,RECCLEHP,B,R)-EQCAUEC(CurCalYr,RECCLGHP,B,R))*WHRFOSS(R,CurIYr)/3412.)  !STEOhr
  100  CONTINUE
 
       ! CALCULATION OF INTENSITY VARIABLE FOR FTAB, ADJUSTING FOR DRIVER IN DENOMINATOR
@@ -5612,8 +5580,8 @@ END SUBROUTINE RHTRCON
       REAL*4 EQCOST,CAPITAL,RETAIL
       INTEGER EU,EUPR,EUHT,RECTY,RECTYHT,RECCL,R,B,F,EQT,EQC,TYPE, &
         TYPEHT,RECCLHHP,COUNT,CNT,L,IND
-!      INTEGER RECAR(nCoolTypes),EQTAR(nCoolTypes)  !EqpParam	!kj - revert back to this?
-      INTEGER RECAR(nHeatTypes),EQTAR(nHeatTypes)  !EqpParam	!kj - doing this to use same values as heating, which seems to work correctly
+!      INTEGER RECAR(nCoolTypes),EQTAR(nCoolTypes)  !EqpParam	!TODO - revert back to this?
+      INTEGER RECAR(nHeatTypes),EQTAR(nHeatTypes)  !EqpParam	!TODO - doing this to use same values as heating, which seems to work correctly
 
 !*******************************************************************
 !   THE GENERAL FORM OF THIS SUBROUTINE APPLIES TO ALL END USES
@@ -5701,7 +5669,7 @@ END SUBROUTINE RHTRCON
         ENDIF
 
 !     CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
-      IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks first year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
+      IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
                (PRICES(F,R,CurCalYr).GT.PRICES(F,R,RECSYear))) THEN
         HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
         ELIGBLE=HRDRATE - 0.07
@@ -5747,11 +5715,16 @@ END SUBROUTINE RHTRCON
                 EQWTR(EQT,B,R)= EXP(ECTEMP+(RTECBTA2(RECTY)*OPCOST(1)) + &
                      ( RTECBTA3(RECTY)*LFCY(EQT,B,R,1) ) )
                 TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
-
-              ENDIF
-            ENDIF
+                 IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 3
+                   OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                   WRITE(661,64) '3,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',',ECTEMP,',','X,',CAPITAL,',','X,',OPCOST(1),',',OPCOST(2),',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',','X,',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                   64 FORMAT( a,I,a,I,a,a,  I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,f,a,a,  f,a,  a,  f,a,f,a,a,  f,a,f,a,f,a,a,  f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                   CLOSE(661) !close file
+                 ENDIF !Appliance Beta writeout complete
+               ENDIF
+             ENDIF
            ENDIF
-          ENDDO
+         ENDDO
 
 !*******************************************************************
           TYPE = RTTYPECT(EU)
@@ -5793,8 +5766,14 @@ END SUBROUTINE RHTRCON
                 ENDIF
               ENDIF
             ENDIF
-           ENDIF
-          ENDDO
+           ENDIF 
+           IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 4
+              OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                WRITE(661,65) '4,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+                65 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+              CLOSE(661) !close file
+           ENDIF !Appliance Beta writeout complete
+         ENDDO
 
 !*******************************************************************
 !     CALCULATE WEIGHTED EFFICIENCY FOR NEW EQUIPMENT AND
@@ -6172,8 +6151,8 @@ END SUBROUTINE RHTRCON
                  EQC=RTTYEQCL(RECTY)
                  RECCL=RTCLEUPT(EU)+EQC
                  X=1.0
-                 IF (RECCL.EQ.12) THEN !nHeatClasses + RTCLEQCL(ROOM_AIR) = 11 + 1 = 12
-                   X=1.0	!kj - Is this necessary?
+                 IF (RECCL.EQ.12) THEN !nHeatClasses + RTCLEQCL(ROOM_AIR) = 11 + 1 = 12	!TODO - replace 12 with variable (number of heating classes + 1)
+                   X=1.0	!TODO - Is this necessary?
                    HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                    HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                     REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r))
@@ -6182,6 +6161,12 @@ END SUBROUTINE RHTRCON
                    HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                     REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r))
                  ENDIF
+                 IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 5
+                   OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                     WRITE(661,66)'5,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',',EQCADD(Y,RECCL,B,r),',',HEATINGTYPEPURCH(Y,TYPE,B,R,1),',',HEATINGTYPEPURCH(Y,TYPE,B,R,2),',',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X' !writing the variables i need
+                     66 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a)
+                   CLOSE(661) !close file
+                 ENDIF !Appliance Beta writeout complete  
                ENDIF
              ENDIF
            ENDDO
@@ -6681,44 +6666,13 @@ END SUBROUTINE RCLADD
           ENDIF
         ENDDO
 
-!GEOTHERMAL IS CALCULATED DIFFERENTLY FROM OTHER FUELS
-! Set FCON=7 for geothermal and calculate outside of the RSCLASS loop because it is not encountered in RSCLASS.
-! UEC of ground-source heat pump (RECCL=15) is subtracted from air-source heat pump (RECCL=14) to differentiate amount of electricity used versus geothermal energy	!kj
-            FCON = FCLCON(7)   ! FCON = 2	!kj - Why =2 in comment?
-            COOLCN(CurIYr,FCON,D)=COOLCN(CurIYr,FCON,D)+CDDFACT(D)* &
-             (EQCESE(CurCalYr,RECCLGHP,B,D)* &
-            ((EQCUEC(D,RECCLEHP,B)-EQCUEC(D,RECCLGHP,B))*WHRFOSS(D,CurIYr)/3412.)+ &  !STEOhr
-              EQCRP90(CurCalYr,RECCLGHP,B,D)* &
-            ((EQCRUEC(CurCalYr,RECCLEHP,B,D)-EQCRUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) &  !STEOhr
-            + EQCADD(CurCalYr,RECCLGHP,B,D)* &
-                   ((EQCHVUEC(CurCalYr,RECCLEHP,B,D)-EQCHVUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) &  !STEOhr
-            + EQCSUR(CurCalYr,RECCLGHP,B,D)* &
-                   ((EQCAHVUEC(CurCalYr,RECCLEHP,B,D)-EQCAHVUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) + &  !STEOhr
-          (EQCREP(CurCalYr,RECCLGHP,B,D)+EQCRP90RP(CurCalYr,RECCLGHP,B,D))* &
-            ((EQCNUEC(CurCalYr,RECCLEHP,B,D)-EQCNUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) &  !STEOhr
-            +(EQCSR90(CurCalYr,RECCLGHP,B,D))*&
-            ((EQCAUEC(CurCalYr,RECCLEHP,B,D)-EQCAUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.))  !STEOhr
-
-            GEEQCN(CurIYr,2,B,D)=CDDFACT(D)*&
-             (EQCESE(CurCalYr,RECCLGHP,B,D)* &
-            ((EQCUEC(D,RECCLEHP,B)-EQCUEC(D,RECCLGHP,B))*WHRFOSS(D,CurIYr)/3412.)+ &  !STEOhr
-              EQCRP90(CurCalYr,RECCLGHP,B,D)* &
-            ((EQCRUEC(CurCalYr,RECCLEHP,B,D)-EQCRUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) &  !STEOhr
-            + EQCADD(CurCalYr,RECCLGHP,B,D)* &
-                   ((EQCHVUEC(CurCalYr,RECCLEHP,B,D)-EQCHVUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) &  !STEOhr   !kj - this calculation is negative!
-            + EQCSUR(CurCalYr,RECCLGHP,B,D)* &
-                   ((EQCAHVUEC(CurCalYr,RECCLEHP,B,D)-EQCAHVUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) + &  !STEOhr   !kj - this calculation is negative!
-          (EQCREP(CurCalYr,RECCLGHP,B,D)+EQCRP90RP(CurCalYr,RECCLGHP,B,D))* &
-            ((EQCNUEC(CurCalYr,RECCLEHP,B,D)-EQCNUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.) &  !STEOhr
-            +(EQCSR90(CurCalYr,RECCLGHP,B,D))* &
-            ((EQCAUEC(CurCalYr,RECCLEHP,B,D)-EQCAUEC(CurCalYr,RECCLGHP,B,D))*WHRFOSS(D,CurIYr)/3412.))  !STEOhr
  100  CONTINUE
 
       DO R=1,mNumCR-2
         DO FCON=1,NCLFL
          DO B=1,mNumBldg
-          IF (Driver(CurIYr,FCON,R,B).GT.0)   &
-           COOLCNIN(CurIYr,FCON,R,B)=                &
+          IF (Driver(CurIYr,FCON,R,B).GT.0) &
+           COOLCNIN(CurIYr,FCON,R,B)= &
            COOLCNIN(CurIYr,FCON,R,B)/Driver(CurIYr,FCON,R,B)
          ENDDO
         ENDDO
@@ -6755,8 +6709,8 @@ END SUBROUTINE RCLADD
       ENDDO
 
       ALPHA1=-0.50
-      BASEMEF=1.14 !RECS base-year stock-average efficiency (clothes washer Modified Energy Factor, or MEF)	!kj - should be 1.14 for top-loading (59% in 2015)or 2.16 for front-loading (41% in 2015)->1.56 weighted average; RSEFF01.txt and RSSTKEFF.txt use top-loading clothes washer machine energy, so using TCW installed base efficiency here
-      BASEUSE=4.0125 !Annual energy use (MMBtu) of clothes washers (+ clothes dryers?) in RECS base year, or just average UEC of a single clothes washer?	!kj; used since AEO2008
+      BASEMEF=1.57 !RECS base-year stock-average efficiency [clothes washer (Integrated) Modified Energy Factor, or MEF]; 1.57 for top-loading (72% TCW_SHR in 2020)or 2.76 for front-loading (28% FCW_SHR in 2020)->1.90 weighted average; RSEFF01.txt and RSSTKEFF.txt use top-loading clothes washer machine energy, so using TCW installed base efficiency here
+      BASEUSE=4.0125 !Annual energy use (MMBtu) of clothes washers (+ clothes dryers?) in RECS base year, or just average UEC of a single clothes washer?	!TODO - update; used since AEO2008
 
 !     COMPUTE DECAY RATE USED TO COMPUTE LIFE CYCLE COST (FIRST ITERATION ONLY)
       IF(CURITR.EQ.1) THEN
@@ -6812,11 +6766,11 @@ END SUBROUTINE RCLADD
           CAPITAL = RTEQCOST(RECTY)
         ENDIF
 
-        OPCOST(1)=PRICES(F,R,CurCalYr)*(BASEUSE*(BASEMEF/CWMEF(RECTY))) !new
+        OPCOST(1)=PRICES(F,R,CurCalYr)*(BASEUSE*(BASEMEF/CWMEF(RECTY))) !new	!TODO - Is this the same as equation B-67 in 2022 RDM documentation? If so, why hard-coded BASEFF and not EQCUEC[r,eg,b] values from RSUEC.txt input file?
         OPCOST(2)=PRICES(F,R,CurCalYr)*(BASEUSE*(BASEMEF/CWMEF(RECTY))) !existing
 
 !     CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
-      IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks first year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
+      IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
        (PRICES(4,R,CurCalYr).GT.PRICES(4,R,RECSYear))) THEN
         HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
         ELIGBLE=HRDRATE - 0.07
@@ -6843,6 +6797,13 @@ END SUBROUTINE RCLADD
                 EQWTR(EQT,B,R)=EXP(RTECBIAS(RECTY)+(BETA1DR(RECTY)*CAPITAL)+ &
                  (RTECBTA2(RECTY)*OPCOST(1))+(RTECBTA3(RECTY)*LFCY(EQT,B,R,1)))
                 TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
+
+              IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 6  
+                OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                   WRITE(661,67)'6,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',','X,',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',',OPCOST(1),',',OPCOST(2),',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',',LFCY(EQT,B,R,2),',',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+                   67 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                CLOSE(661) !close file
+              ENDIF !Appliance Beta writeout complete
             ENDIF
           ENDIF
  50   CONTINUE
@@ -6868,7 +6829,7 @@ END SUBROUTINE RCLADD
                 EQT=RTEQTYPE(RECTY)
                 EQC=RTTYEQCL(RECTY)
                 RECCL=RTCLEUPT(EU)+EQC
-                IF(EQT.LE.4) THEN  !refers to instances of CL_WASH_T in RSMEQP
+                IF(EQT.LE.3) THEN  !refers to instances of CL_WASH_T in RSMEQP !techupdate - update hard-coded EQT value
                   TCWSHR(B,R) = TCWSHR(B,R) + EQWTN(EQT,B,R)
                 ELSE  !refers to instances of CL_WASH_F in RSMEQP
                   FCWSHR(B,R) = FCWSHR(B,R) + EQWTN(EQT,B,R)
@@ -6898,13 +6859,19 @@ END SUBROUTINE RCLADD
                 EQT=RTEQTYPE(RECTY)
                 EQC=RTTYEQCL(RECTY)
                 RECCL=RTCLEUPT(EU)+EQC
-                IF(EQT.LE.4) THEN  !refers to instances of CL_WASH_T in RSMEQP
+                IF(EQT.LE.3) THEN  !refers to instances of CL_WASH_T in RSMEQP !techupdate - update hard-coded EQT value
                   NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/TCWSHR(B,R))*TCW_SHR
                   REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) ! choices the same for CL_WASH
                 ELSE  !refers to instances of CL_WASH_F in RSMEQP
                   NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/FCWSHR(B,R))*FCW_SHR
                   REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) ! choices the same for CL_WASH
                 ENDIF !EQT
+                IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 7
+                  OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,68)'7,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',','X,',EQWTN(EQT,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,',TCWSHR(B,R),',',FCWSHR(B,R),',',FCW_SHR,',',TCW_SHR,',','X' !writing the variables i need
+                    68 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  a,  a,  a,  a,  a,  f,a,f,a,f,a,f,a,a)
+                  CLOSE(661) !close file
+                ENDIF !Appliance Beta writeout complete
               ENDIF !RTCENDIV
             ENDIF !CurCalYr
           ENDDO !RECTY
@@ -7117,6 +7084,12 @@ END SUBROUTINE RCLADD
                HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                 REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r) )
+               IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 9
+                 OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                   WRITE(661,69)'9,',EU, ',',EQC, ',','X,',B,',',R,',',Y,',','X,',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',EQCADD(Y,RECCL,B,r),',','X,','X,',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X' !writing the variables i need
+                   69 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,a,  I,a,  I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  a,  f,a,f,a,f,a,a,  a,  a,  a,  a)
+                 CLOSE(661) !close file
+               ENDIF !Appliance Beta writeout complete
              ENDIF
            ENDIF
           ENDDO
@@ -7433,7 +7406,7 @@ END SUBROUTINE RCWCON
 
 !     CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
 
-      IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks first year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
+      IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
                (PRICES(4,R,CurCalYr).GT.PRICES(4,R,RECSYear))) THEN
        HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
        ELIGBLE=HRDRATE - 0.07
@@ -7464,8 +7437,15 @@ END SUBROUTINE RCWCON
                  (RTECBTA2(RECTY)*OPCOST(1))+ &
                  (RTECBTA3(RECTY)*LFCY(EQT,B,R,1)))
                 TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
-            ENDIF
+  
+             IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 10
+               OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+               WRITE(661,75)'10,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',','X,',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',',OPCOST(1),',',OPCOST(2),',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',',LFCY(EQT,B,R,2),',',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+               75 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+               CLOSE(661) !close file
+             ENDIF !Appliance Beta writeout complete
            ENDIF
+         ENDIF
  50   CONTINUE
 !*******************************************************************
 !     CALCULATE NEW AND REPLACEMENT MARKET SHARES
@@ -7492,9 +7472,16 @@ END SUBROUTINE RCWCON
                   TOTEWTN(EQC,B,R))
                   REQTSHR(CurCalYr,TYPE,B,R)=(EQWTR(EQT,B,R)/ &
                   TOTEWTR(EQC,B,R))
+
+               IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 11
+                 OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                 WRITE(661,76)'11,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                 76 FORMAT( a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                 CLOSE(661) !close file
+               ENDIF !Appliance Beta writeout complete
              ENDIF
-            ENDIF
-          ENDDO
+           ENDIF
+         ENDDO
 
 !*******************************************************************
 !     CALCULATE WEIGHTED EFFICIENCY FOR NEW EQUIPMENT AND
@@ -7604,7 +7591,7 @@ END SUBROUTINE RCWCON
           ENDDO
 
           IF (CurCalYr.GT.RECSYear+1) THEN
-            DISHNEW(CurCalYr,B,R)=DISHNEW(CurCalYr-1,B,R)*1.0055 !Average annual penetration rate of dishwashers into new homes (based on newest homes in RECS)  !DISHNEWpen
+            DISHNEW(CurCalYr,B,R)=DISHNEW(CurCalYr-1,B,R)*1.0048 !Average annual penetration rate of dishwashers into new homes (based on newest homes in RECS)  !DISHNEWpen
           ENDIF
 
           IF (DISHNEW(CurCalYr,B,R).GT.1.0000) THEN
@@ -7724,6 +7711,12 @@ END SUBROUTINE RCWCON
                 HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                 HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                                                REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r) )
+               IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 12
+                 OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                 WRITE(661,77)'12,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',',EQCADD(Y,RECCL,B,r),',',HEATINGTYPEPURCH(Y,TYPE,B,R,1),',',HEATINGTYPEPURCH(Y,TYPE,B,R,2),',',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X'!writing the variables i need
+                 77 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a)
+                 CLOSE(661) !close file   
+               ENDIF !Appliance Beta writeout complete   
              ENDIF
            ENDIF
          ENDDO
@@ -8112,10 +8105,15 @@ END SUBROUTINE RCWCON
                         CAPITAL)+(RTECBTA2(RECTY)*OPCOST(1)) + &
                         ( RTECBTA3(RECTY)*LFCY(EQT,B,R,1) ) )
               TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
-
+              IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 13
+                OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                WRITE(661,78)'13,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',','X,',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',',OPCOST(1),',',OPCOST(2),',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',',LFCY(EQT,B,R,2),',',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                78 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                CLOSE(661) !close file   
+              ENDIF !Appliance Beta writeout complete
             ENDIF
-           ENDIF
-          ENDDO
+          ENDIF
+        ENDDO
 
 !*******************************************************************
 
@@ -8153,63 +8151,64 @@ END SUBROUTINE RCWCON
               REQTSHR(CurCalYr,TYPE,B,R)=EQFSHRR(EQT,B,R)
 
           !Diagnostics only:
-!          IF ((CurCalYr.GE.2015) .AND. (B.EQ.1) .AND. (B.EQ.1)) THEN	!kj - updated standard due in 2018
+!          IF ((CurCalYr.GE.2015) .AND. (B.EQ.1) .AND. (B.EQ.1)) THEN	!TODO - revise if updated !WHStandard
 !           WRITE(9,'("Water heater new and replacement shares, before revision for 2015 water heater standard",4i5,2e15.4)') CurCalYr, EQC, EQT, TYPE, EQFSHRN(EQT,B,R),EQFSHRR(EQT,B,R)
 !          ENDIF
-
+              IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 14
+                OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                WRITE(661,79)'14,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                79 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                CLOSE(661) !close file
+              ENDIF !Appliance Beta writeout complete
             ENDIF
-           ENDIF
-          ENDDO
+          ENDIF
+       ENDDO
 
          !Revise weights for 2015 water heater standard  !WHStandard
 
-            IF(CurCalYr.GE.2015) THEN	!kj - updated standard due in 2018
+            IF(CurCalYr.GE.2015) THEN	!TODO - check for updated standard
               ! Adjustments for Natural Gas Water Heating (EQC=1); xlRTCLEQCL in RSCLASS
               ! The standard requires a condensing natural gas water heater for capacities greater than 56 gallons, which comprise
-              !  approximately 4% of the existing market; if purchased share is less than 4%, revise shares.	!kj - source of 4% share? TSD?
+              !  approximately 4% of the existing market; if purchased share is less than 4%, revise shares.	!TODO - identify source of 4% share (TSD)?
               EQC=1
 
-              IF(EQFSHRN(4,B,R) .LT. .04) THEN  !Values 1-4 represent the current NG_WH xlRTEQTYPE values in RSMEQP, with 4 being the highest efficiency available  !WHStandard
-                Temp=(1+(EQFSHRN(4,B,R)-.04)/(1.-EQFSHRN(4,B,R)))
+              IF(EQFSHRN(3,B,R) .LT. .04) THEN  !Values 1-3 represent the current NG_WH xlRTEQTYPE values in RSMEQP, with 3 being the highest efficiency available  !WHStandard !techupdate - update hard-coded EQT value
+                Temp=(1+(EQFSHRN(3,B,R)-.04)/(1.-EQFSHRN(3,B,R))) !techupdate - update hard-coded EQT value
                 EQFSHRN(1,B,R)=EQFSHRN(1,B,R)*temp
                 EQFSHRN(2,B,R)=EQFSHRN(2,B,R)*temp
-                EQFSHRN(3,B,R)=EQFSHRN(3,B,R)*temp
-                EQFSHRN(4,B,R)=.04
+                EQFSHRN(3,B,R)=.04 !techupdate - update hard-coded EQT value
               ENDIF
 
-              IF(EQFSHRR(4,B,R) .LT. .04) THEN  !Values 1-4 represent the current NG_WH xlRTEQTYPE values in RSMEQP, with 4 being the highest efficiency available  !WHStandard
-                Temp=(1+(EQFSHRR(4,B,R)-.04)/(1.-EQFSHRR(4,B,R)))
+              IF(EQFSHRR(3,B,R) .LT. .04) THEN  !Values 1-3 represent the current NG_WH xlRTEQTYPE values in RSMEQP, with 3 being the highest efficiency available  !WHStandard !techupdate - update hard-coded EQT value
+                Temp=(1+(EQFSHRR(3,B,R)-.04)/(1.-EQFSHRR(3,B,R))) !techupdate - update hard-coded EQT value
                 EQFSHRR(1,B,R)=EQFSHRR(1,B,R)*temp
                 EQFSHRR(2,B,R)=EQFSHRR(2,B,R)*temp
-                EQFSHRR(3,B,R)=EQFSHRR(3,B,R)*temp
-                EQFSHRR(4,B,R)=.04
+                EQFSHRR(3,B,R)=.04 !techupdate - update hard-coded EQT value
               ENDIF
 
-              ! Adjustments for Electric Water Heating (EQC=2); xlRTCLEQCL in RSCLASS	!kj - updated standard due in 2018
+              ! Adjustments for Electric Water Heating (EQC=2); xlRTCLEQCL in RSCLASS	!TODO - revise if updated standard
               ! The standard requires a heat pump water heater for capacities greater than 56 gallons which comprise
-              !  approximately 9% of the existing market; if purchased share is less than 9%, revise shares.	!kj - source of 9% share? TSD?
+              !  approximately 9% of the existing market; if purchased share is less than 9%, revise shares.	!TODO - source of 9% share? TSD?
               EQC=2
 
-              IF(EQFSHRN(8,B,R)+EQFSHRN(9,B,R)+EQFSHRN(10,B,R) .LT. .09) THEN  !Values 5-10 represent the current ELEC_WH and HP_WH xlRTEQTYPE values in RSMEQP, with 8-10 being the heat pump water heaters  !WHStandard
-                Temp=(1+(EQFSHRN(8,B,R)+EQFSHRN(9,B,R)+EQFSHRN(10,B,R)-.09)/(1.-EQFSHRN(8,B,R)-EQFSHRN(9,B,R)-EQFSHRN(10,B,R)))
-                EQFSHRN(5,B,R)=EQFSHRN(5,B,R)*Temp
-                EQFSHRN(6,B,R)=EQFSHRN(6,B,R)*Temp
-                EQFSHRN(7,B,R)=EQFSHRN(7,B,R)*Temp
-                Temp=.09/(EQFSHRN(8,B,R)+EQFSHRN(9,B,R)+EQFSHRN(10,B,R))
-                EQFSHRN(8,B,R)=EQFSHRN(8,B,R)*Temp
-                EQFSHRN(9,B,R)=EQFSHRN(9,B,R)*Temp
-                EQFSHRN(10,B,R)=EQFSHRN(10,B,R)*Temp
+              IF(EQFSHRN(6,B,R)+EQFSHRN(7,B,R)+EQFSHRN(8,B,R) .LT. .09) THEN  !Values 4-8 represent the current ELEC_WH and HP_WH xlRTEQTYPE values in RSMEQP, with 6-8 being the heat pump water heaters  !WHStandard !techupdate - update hard-coded EQT value
+                Temp=(1+(EQFSHRN(6,B,R)+EQFSHRN(7,B,R)+EQFSHRN(8,B,R)-.09)/(1.-EQFSHRN(6,B,R)-EQFSHRN(7,B,R)-EQFSHRN(8,B,R))) !techupdate - update hard-coded EQT value
+                EQFSHRN(4,B,R)=EQFSHRN(5,B,R)*Temp !techupdate - update hard-coded EQT value
+                EQFSHRN(5,B,R)=EQFSHRN(6,B,R)*Temp !techupdate - update hard-coded EQT value
+                Temp=.09/(EQFSHRN(6,B,R)+EQFSHRN(7,B,R)+EQFSHRN(8,B,R)) !techupdate - update hard-coded EQT value
+                EQFSHRN(6,B,R)=EQFSHRN(8,B,R)*Temp !techupdate - update hard-coded EQT value
+                EQFSHRN(7,B,R)=EQFSHRN(9,B,R)*Temp !techupdate - update hard-coded EQT value
+                EQFSHRN(8,B,R)=EQFSHRN(10,B,R)*Temp !techupdate - update hard-coded EQT value
               ENDIF
 
-              IF(EQFSHRR(8,B,R)+EQFSHRR(9,B,R)+EQFSHRR(10,B,R) .LT. .09) THEN  !Values 5-10 represent the current ELEC_WH and HP_WH xlRTEQTYPE values in RSMEQP, with 8-10 being the heat pump water heaters
-                Temp=(1+(EQFSHRR(8,B,R)+EQFSHRR(9,B,R)+EQFSHRR(10,B,R)-.09)/(1.-EQFSHRR(8,B,R)-EQFSHRR(9,B,R)-EQFSHRR(10,B,R)))
-                EQFSHRR(5,B,R)=EQFSHRR(5,B,R)*Temp
-                EQFSHRR(6,B,R)=EQFSHRR(6,B,R)*Temp
-                EQFSHRR(7,B,R)=EQFSHRR(7,B,R)*Temp
-                Temp=.09/(EQFSHRR(8,B,R)+EQFSHRR(9,B,R)+EQFSHRR(10,B,R))
-                EQFSHRR(8,B,R)=EQFSHRR(8,B,R)*Temp
-                EQFSHRR(9,B,R)=EQFSHRR(9,B,R)*Temp
-                EQFSHRR(10,B,R)=EQFSHRR(10,B,R)*Temp
+              IF(EQFSHRR(6,B,R)+EQFSHRR(7,B,R)+EQFSHRR(8,B,R) .LT. .09) THEN  !Values 4-8 represent the current ELEC_WH and HP_WH xlRTEQTYPE values in RSMEQP, with 6-8 being the heat pump water heaters !techupdate - update hard-coded EQT value
+                Temp=(1+(EQFSHRR(6,B,R)+EQFSHRR(7,B,R)+EQFSHRR(8,B,R)-.09)/(1.-EQFSHRR(6,B,R)-EQFSHRR(7,B,R)-EQFSHRR(8,B,R))) !techupdate - update hard-coded EQT value
+                EQFSHRR(4,B,R)=EQFSHRR(5,B,R)*Temp
+                EQFSHRR(5,B,R)=EQFSHRR(6,B,R)*Temp !techupdate - update hard-coded EQT value
+                Temp=.09/(EQFSHRR(6,B,R)+EQFSHRR(7,B,R)+EQFSHRR(8,B,R)) !techupdate - update hard-coded EQT value
+                EQFSHRR(6,B,R)=EQFSHRR(8,B,R)*Temp !techupdate - update hard-coded EQT value
+                EQFSHRR(7,B,R)=EQFSHRR(9,B,R)*Temp !techupdate - update hard-coded EQT value
+                EQFSHRR(8,B,R)=EQFSHRR(10,B,R)*Temp !techupdate - update hard-coded EQT value
               ENDIF
 
               ! Reset Shares
@@ -8223,14 +8222,21 @@ END SUBROUTINE RCWCON
                     NEQTSHR(CurCalYr,TYPE,B,R)=EQFSHRN(EQT,B,R)
                     REQTSHR(CurCalYr,TYPE,B,R)=EQFSHRR(EQT,B,R)
                     !Diagnostics only:
-!                    IF ((CurCalYr.GE.2015) .AND. (B.EQ.1) .AND. (R.EQ.1)) THEN	!kj - updated standard due in 2018
+!                    IF ((CurCalYr.GE.2015) .AND. (B.EQ.1) .AND. (R.EQ.1)) THEN	!TODO - revise if updated standard !WHStandard
 !                      WRITE(9,'("Water heater new and replacement shares, revised for 2015 water heater standard",4i5,2e15.4)') CurCalYr, EQC, EQT, TYPE, EQFSHRN(EQT,B,R),EQFSHRR(EQT,B,R)
 !                    ENDIF
+
+                    IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 15
+                      OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                      WRITE(661,83)'15,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+                      83 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                      CLOSE(661) !close file
+                    ENDIF !Appliance Beta writeout complete
                   ENDIF
                 ENDIF
               ENDDO
 
-            ENDIF !Revised WH for 2015 standard
+            ENDIF !Revised WH for 2015 standard  !WHStandard
 
 !*******************************************************************
 !     CALCULATE WEIGHTED EFFICIENCY FOR NEW EQUIPMENT AND
@@ -8298,7 +8304,7 @@ END SUBROUTINE RCWCON
 !*******************************************************************
       SUBROUTINE REUADD
       IMPLICIT NONE
-      REAL*4 SWT(RECSYear:EndYr),SWF(RECSYear:EndYr),WATERTOT(RECSYear:EndYr,mNumCR-2),COOKTOT(RECSYear:EndYr,mNumCR-2)
+      REAL*4 SWT(RECSYear:EndYr),SWF(RECSYear:EndYr)
       REAL*4 SA, HSR, ESR, SVRTE, SHARE  ,SWFT
       REAL*4 EQSRT(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR-2),EQSR90T(RECSYear:EndYr,nHeatTypes,mNumBldg,mNumCR-2)
       INTEGER EQC,RECCL,TEMP,RECCLSW
@@ -8507,10 +8513,17 @@ END SUBROUTINE RCWCON
                 HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                 HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                                                REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r) )
-              ENDIF
+
+                  IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 16
+                    OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,84)'16,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',',EQCADD(Y,RECCL,B,r),',',HEATINGTYPEPURCH(Y,TYPE,B,R,1),',',HEATINGTYPEPURCH(Y,TYPE,B,R,2),',',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X' !writing the variables i need
+                    84 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a)
+                    CLOSE(661) !close file
+                  ENDIF !Appliance Beta writeout complete
+                ENDIF
               ENDIF
             ENDDO
-           ENDDO
+          ENDDO
         ENDDO
 
        IF (EU.EQ.5) THEN
@@ -8596,8 +8609,8 @@ END SUBROUTINE RCWCON
 !   SET EU = 5 TO SEARCH THE WATER HEATING SECTON OF THE DATA
       EU     = 5
       EUPR=3
-      ALPHA=-.15;ef1=.5;ef2=.35;ef3=.15
-      HHSELAS=.315  ! People per house elasticity for hot water use (lbl)	!kj
+      ALPHA=-.15;ef1=.5;ef2=.35;ef3=.15	!TODO - revise?
+      HHSELAS=.315  ! People per house elasticity for hot water use (lbl)	!TODO - Revise?
 
 !   MAP ELECTRICITY PRICE ARRAY INTO RESIDENTIAL PRICE ARRAY
       DO R=1,mNumCR-2
@@ -9026,10 +9039,10 @@ END SUBROUTINE RCWCON
         DECAY = (1-((1+ResDiscountRate)**(-Tenure)))/ResDiscountRate
       ENDIF
 
-! Set share of homes with natural gas water heaters that also have natural gas cooking ranges (based on RECS)	!kj
-      NGNGFACT(1)= 0.50
-      NGNGFACT(2)= 0.48
-      NGNGFACT(3)= 0.75
+! Set share of homes with natural gas water heaters that also have natural gas cooking ranges (based on RECS)	!TODO - revise anytime RECS base year is updated
+      NGNGFACT(1)= 0.46
+      NGNGFACT(2)= 0.46
+      NGNGFACT(3)= 0.64
 
 !*******************************************************************
 !   THE SAME GENERAL FORM OF THIS SUBROUTINE WORKS FOR ALL END USES
@@ -9114,7 +9127,7 @@ END SUBROUTINE RCWCON
         ENDIF
 
 !     CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
-      IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks first year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
+      IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
                (PRICES(F,R,CurCalYr).GT.PRICES(F,R,RECSYear))) THEN
        HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
        ELIGBLE=HRDRATE - 0.07
@@ -9151,9 +9164,15 @@ END SUBROUTINE RCWCON
                         ( RTECBTA3(RECTY)*LFCY(EQT,B,R,1) ) )
               TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
 
-            ENDIF
+             IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 17
+               OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                WRITE(661,85)'17,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',','X,',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',',OPCOST(1),',',OPCOST(2),',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',',LFCY(EQT,B,R,2),',',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+                85 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+               CLOSE(661) !close file
+             ENDIF !Appliance Beta writeout complete  
            ENDIF
-          ENDDO
+         ENDIF
+       ENDDO
 
 !*******************************************************************
 
@@ -9186,6 +9205,13 @@ END SUBROUTINE RCWCON
 
               NEQTSHR(CurCalYr,TYPE,B,R)=EQFSHRN(EQT,B,R)
               REQTSHR(CurCalYr,TYPE,B,R)=EQFSHRR(EQT,B,R)
+
+              IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 18
+                OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                WRITE(661,86)'18,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                86 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                CLOSE(661) !close file
+              ENDIF !Appliance Beta writeout complete  
             ENDIF
            ENDIF
           ENDDO
@@ -9508,7 +9534,7 @@ END SUBROUTINE RSTOVCON
 !*******************************************************************
 !     SET CONVERSION FACTOR FOR COMPUTING NEQTSHR FOR CLOTHES DRYERS
 !*******************************************************************
-      CONVFACT=100.0	!kj - not used?
+      CONVFACT=100.0	!TODO - not used?
       ALPHA1=-0.50
 
 !     COMPUTE DECAY RATE USED TO COMPUTE LIFE CYCLE COST (FIRST ITERATION ONLY)
@@ -9585,7 +9611,7 @@ END SUBROUTINE RSTOVCON
 
 !     CALCULATE OPERATING COST
 !       CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
-      IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks first year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
+      IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
                (PRICES(F,R,CurCalYr).GT.PRICES(F,R,RECSYear))) THEN
        HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
        ELIGBLE=HRDRATE - 0.07
@@ -9616,8 +9642,14 @@ END SUBROUTINE RSTOVCON
         EQWTR(EQT,B,R)= EXP(ECTEMP+(RTECBTA2(RECTY)*OPCOST(1)) + ( RTECBTA3(RECTY)*LFCY(EQT,B,R,1) ) )
         TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
 
+         IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 19
+           OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+           WRITE(661,87)'19,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',',ECTEMP,',',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',',OPCOST(1),',',OPCOST(2),',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',','X,',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+           87 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  f,a,f,a,f,a,a,  f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+           CLOSE(661) !close file
+         ENDIF !Appliance Beta writeout complete
        ENDIF
-      ENDIF
+     ENDIF
  40   CONTINUE
 
 !*******************************************************************
@@ -9650,7 +9682,13 @@ END SUBROUTINE RSTOVCON
             NEQTSHR(CurCalYr,TYPE,B,R)=0.0
             REQTSHR(CurCalYr,TYPE,B,R)=0.0
           ENDIF
-      ENDIF
+          IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 20
+            OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+            WRITE(661,88)'20,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X' !writing the variables i need
+            88 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+            CLOSE(661) !close file
+          ENDIF !Appliance Beta writeout complete
+        ENDIF
       ENDIF
 45    CONTINUE
 
@@ -9717,7 +9755,7 @@ END SUBROUTINE RSTOVCON
 !*******************************************************************
       SUBROUTINE RDRYADD
       IMPLICIT NONE
-      REAL*4 SWT(RECSYear:EndYr),SWF(RECSYear:EndYr),DRYERTOT(RECSYear:EndYr,mNumCR-2)
+      REAL*4 SWT(RECSYear:EndYr),SWF(RECSYear:EndYr)
       REAL*4 SA, HSR, ESR, SVRTE, P
       INTEGER EV,NUMEQT,RECCLSW
       INTEGER EU,EQC,EQT,RECCL,RECTY,TYPE,Y,R,B,TEMP,V,Y1
@@ -9772,7 +9810,7 @@ END SUBROUTINE RSTOVCON
               EQT=RTEQTYPE(RECTY)
               RECCL=RTCLEUPT(EU)+EQC
        IF (CurCalYr.GT.RECSYear+1) THEN
-          NEWDRYSAT(CurCalYr,2,B,R)=NEWDRYSAT(CurCalYr-1,2,B,R)*1.0069  !Average annual penetration rate of electric clothes dryers (E=2) into new homes
+          NEWDRYSAT(CurCalYr,2,B,R)=NEWDRYSAT(CurCalYr-1,2,B,R)*1.0064  !Average annual penetration rate of electric clothes dryers (E=2) into new homes
           NEWDRYSAT(CurCalYr,1,B,R)=NEWDRYSAT(CurCalYr-1,1,B,R)  !Average annual penetration rate of natural gas clothes dryers (E=1) into new homes; natural gas dryer penetration not assumed to increase over time like electric
        ENDIF
        IF ((NEWDRYSAT(CurCalYr,1,B,R)+NEWDRYSAT(CurCalYr,2,B,R)).GT.1.0000) THEN
@@ -9897,7 +9935,7 @@ END SUBROUTINE RSTOVCON
         DO RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
           EQCRP90(CurCalYr,RECCL,B,R)= EQCRP90(CurCalYr,RECCL,B,R)-SWITCHES(CurCalYr,RECCL,B,R)
           EQCRP90RP(CurCalYr,RECCL,B,R)= EQCRP90RP(CurCalYr,RECCL,B,R)-SWITCHESR(CurCalYr,RECCL,B,R)+ &
-		   SWITCHTOR(CurCalYr,RECCL,B,R)+SWITCHTO(CurCalYr,RECCL,B,R)
+          SWITCHTOR(CurCalYr,RECCL,B,R)+SWITCHTO(CurCalYr,RECCL,B,R)
         ENDDO
       ENDDO
 
@@ -9948,6 +9986,13 @@ END SUBROUTINE RSTOVCON
                       HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                       HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                        REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r)  )
+
+                      IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 21
+                        OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                        WRITE(661,89)'21,',EU, ',',EQC, ',','X,',B,',',R,',',Y,',',RECTY,',',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(Y,TYPE,B,r),',','X,',REQTSHR(Y,TYPE,B,r),',',EQCADD(Y,RECCL,B,r),',',HEATINGTYPEPURCH(Y,TYPE,B,R,1),',',HEATINGTYPEPURCH(Y,TYPE,B,R,2),',',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X'!writing the variables i need
+                        89 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a)
+                        CLOSE(661) !close file
+                      ENDIF !Appliance Beta writeout complete   
                     ENDIF
                   ENDIF
                 ENDDO
@@ -10295,33 +10340,27 @@ END SUBROUTINE RSTOVCON
               F    =RTFUEL(RECCL)
               UEC(RECTY)=RTEQEFF(RECTY)*FACTOR
 
-                !  If COSTTRSW = 1, use function EQCOST to compute capital
-                !     cost of new equipment.
-                !  If COSTTRSW = 0, use constant value from RSMEQP file for capital
-                !     cost of new equipment.
-
+                     ! If COSTTRSW = 1, use function EQCOST to compute capital cost of new equipment.
+                     ! If COSTTRSW = 0, use constant value from RSMEQP file for capital cost of new equipment.
                      IF (COSTTRSW.EQ.1) THEN
                        CAPITAL = EQCOST(RECTY,CurCalYr,"CAP")
                      ELSE
                        CAPITAL = RTEQCOST(RECTY)
                      ENDIF
 
-                     !     CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
-
-                     IF ((CurCalYr.GT.2008).AND. &	!kj - 2008 marks first year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)?
-                              (PRICES(F,R,CurCalYr).GT.PRICES(F,R,RECSYear))) THEN
-                      HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
-                      ELIGBLE=HRDRATE - 0.07
-                          IF (ELIGBLE.GT.0.0) THEN
-                            HRDADJ= ELIGBLE * &
-                              ((PRICES(4,R,CurCalYr)/PRICES(4,R,RECSYear))**ALPHA1 )
-
-                            BETA1DR(RECTY) = (HRDADJ+0.07) * RTECBTA2(RECTY)
-                           ELSE
-                            BETA1DR(RECTY)=RTECBTA1(RECTY)
-                          ENDIF  !eligible .GT.0
+                     ! CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES
+                     IF ((CurCalYr.GT.2008).AND. &	!TODO - 2008 marks last year before American Clean Energy and Security Act of 2009 (Waxman-Markey bill)? Remove legacy code energy bill code as necessary
+                      (PRICES(F,R,CurCalYr).GT.PRICES(F,R,RECSYear))) THEN
+                       HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
+                       ELIGBLE=HRDRATE - 0.07	!TODO - verify source/ update 7%?
+                       IF (ELIGBLE.GT.0.0) THEN
+                         HRDADJ= ELIGBLE * ((PRICES(4,R,CurCalYr)/PRICES(4,R,RECSYear))**ALPHA1 )
+                         BETA1DR(RECTY) = (HRDADJ+0.07) * RTECBTA2(RECTY)
                        ELSE
-                        BETA1DR(RECTY)=RTECBTA1(RECTY)
+                         BETA1DR(RECTY)=RTECBTA1(RECTY)
+                       ENDIF  !eligible .GT.0
+                     ELSE
+                       BETA1DR(RECTY)=RTECBTA1(RECTY)
                      ENDIF    !CurCalYr .GT. 2008
 
 
@@ -10338,6 +10377,12 @@ END SUBROUTINE RSTOVCON
                          (RTECBTA2(RECTY)*OPCOST1)+ &
                          (RTECBTA3(RECTY)*LFCYCLE))
                         TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
+                 IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 22
+                   OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                     WRITE(661,91)'22,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',','X,','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',','X,',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',',OPCOST1,',','X,','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',','X,',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                     91FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  f,a,f,a,a,  f,a,f,a,f,a,f,a,a,  a,  f,a,f,a,f,a,a,  f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                   CLOSE(661) !close file
+                 ENDIF !Appliance Beta writeout complete
 !              ENDIF  !.NE.'REF_TTD'
             ENDIF   !census division check
           ENDIF   !year validity check
@@ -10403,12 +10448,28 @@ END SUBROUTINE RSTOVCON
                IF(EQT.LE.4) THEN  !refers to xlRTEQTYPE instances of REFR_TF in RSMEQP
                  NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/TMFSHR(B,R))*TMF_SHR
                  REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for refrigerators
-                ELSEIF (EQT.GE.5 .AND. EQT.LE.8) THEN  !refers to xlRTEQTYPE instances of REFR_SF in RSMEQP
-                 NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/SMFSHR(B,R))*SMF_SHR
-                 REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for refrigerators
-                ELSE  !refers to instances xlRTEQTYPE of REFR_BF in RSMEQP
-                 NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/BMFSHR(B,R))*BMF_SHR
-                 REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for refrigerators
+                 IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 23  
+                    OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,92)'23,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',',TMF_SHR,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                    92 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,f,a,a,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                    CLOSE(661) !close file
+                 ENDIF !Appliance Beta writeout complete
+                 ELSEIF (EQT.GE.5 .AND. EQT.LE.8) THEN  !refers to xlRTEQTYPE instances of REFR_SF in RSMEQP  
+                   NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/SMFSHR(B,R))*SMF_SHR
+                   REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for refrigerators
+                 IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 23  
+                   OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                   WRITE(661,92)'23,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',',SMF_SHR,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                   CLOSE(661) !close file
+                 ENDIF !Appliance Beta writeout complete 
+                 ELSE  !refers to instances xlRTEQTYPE of REFR_BF in RSMEQP
+                   NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/BMFSHR(B,R))*BMF_SHR
+                   REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for refrigerators
+                 IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 23  
+                   OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                   WRITE(661,92)'23,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',',BMF_SHR,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                   CLOSE(661) !close file
+                 ENDIF !Appliance Beta writeout complete 
                ENDIF ! EQT filters for different types of refrigerators
             ENDIF
            ENDIF
@@ -10601,6 +10662,12 @@ END SUBROUTINE RSTOVCON
                    HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                    HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                                                    REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r) )
+                   IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 24
+                     OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                     WRITE(661,93)'24,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',',EQCADD(Y,RECCL,B,r),',',HEATINGTYPEPURCH(Y,TYPE,B,R,1),',',HEATINGTYPEPURCH(Y,TYPE,B,R,2),',',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X'!writing the variables i need
+                     93 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a)
+                     CLOSE(661) !close file
+                   ENDIF !Appliance Beta writeout complete
                  ENDIF !RTCENDIV
                ENDIF !CurCalYr
              ENDDO !RECTY
@@ -10911,10 +10978,10 @@ END SUBROUTINE RSTOVCON
       IF ((CurCalYr.GT.2008).AND. &
        (PRICES(4,R,CurCalYr).GT.PRICES(4,R,RECSYear))) THEN
         HRDRATE=RTECBTA1(RECTY)/RTECBTA2(RECTY)
-        ELIGBLE=HRDRATE - 0.07	!kj - source for 0.07?
+        ELIGBLE=HRDRATE - 0.07	!TODO - source for 0.07?
         IF (ELIGBLE.GT.0.0) THEN
           HRDADJ= ELIGBLE *((PRICES(4,R,CurCalYr)/PRICES(4,R,RECSYear))**ALPHA1 )
-          BETA1DR(RECTY) = (HRDADJ+0.07) * RTECBTA2(RECTY)	!kj - source for 0.07?
+          BETA1DR(RECTY) = (HRDADJ+0.07) * RTECBTA2(RECTY)	!TODO - source for 0.07?
         ELSE
           BETA1DR(RECTY)=RTECBTA1(RECTY)
         ENDIF
@@ -10935,6 +11002,12 @@ END SUBROUTINE RSTOVCON
                  (RTECBTA2(RECTY)*OPCOST2)+ &
                  (RTECBTA3(RECTY)*LFCYCLE1))
                 TOTEWTR(EQC,B,R)=TOTEWTR(EQC,B,R)+EQWTR(EQT,B,R)
+                IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 25
+                  OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,94)'25,',EU, ',',EQC, ',',EQT,',',B,',',R,',',CurCalYr,',',RECTY,',','X,','X,',EQWTN(EQT,B,R),',',EQWTR(EQT,B,R),',','X,',BETA1DR(RECTY),',',CAPITAL,',',RTECBIAS(RECTY),',','X,',OPCOST2,',','X,',RTECBTA2(RECTY),',',RTECBTA3(RECTY),',',LFCY(EQT,B,R,1),',','X,',TOTEWTR(EQC,B,R),',',TOTEWTN(EQC,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X'!writing the variables i need
+                    94 FORMAT(a,I,a,I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  f,a,f,a,a,  f,a,f,a,f,a,a,  f,a,a,  f,a,f,a,f,a,a,  f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a)
+                  CLOSE(661) !close file
+                ENDIF !Appliance Beta writeout complete
               ENDIF
            ENDIF
        50  CONTINUE
@@ -10960,7 +11033,7 @@ END SUBROUTINE RSTOVCON
                 EQT=RTEQTYPE(RECTY)
                 EQC=RTTYEQCL(RECTY)
                 RECCL=RTCLEUPT(EU)+EQC
-                IF(EQT.LE.4) THEN  !refers to xlRTEQTYPE instances of FREZ_C in RSMEQP
+                IF(EQT.LE.3) THEN  !refers to xlRTEQTYPE instances of FREZ_C in RSMEQP !techupdate - update hard-coded EQT value
                   CHSHR(B,R) = CHSHR(B,R) + EQWTN(EQT,B,R)
                 ELSE  !refers to xlRTEQTYPE instances of FREZ_U in RSMEQP
                   UPSHR(B,R) = UPSHR(B,R) + EQWTN(EQT,B,R)
@@ -10990,12 +11063,23 @@ END SUBROUTINE RSTOVCON
                 EQT=RTEQTYPE(RECTY)
                 EQC=RTTYEQCL(RECTY)
                 RECCL=RTCLEUPT(EU)+EQC
-                IF(EQT.LE.4) THEN  !refers to xlRTEQTYPE instances of FREZ_C in RSMEQP
+                IF(EQT.LE.3) THEN  !refers to xlRTEQTYPE instances of FREZ_C in RSMEQP !techupdate - update hard-coded EQT value
                   NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/CHSHR(B,R))*CH_SHR
                   REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for freezers
-                ELSE  !refers to xlRTEQTYPE instances of FREZ_U in RSMEQP
-                  NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/UPSHR(B,R))*UP_SHR
-                  REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for freezers
+                  IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 26
+                    OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,95)'26,',EU, ',','X,','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',','X,',EQWTN(EQT,B,R),',',UP_SHR,',',CHSHR(B,R),',',CH_SHR,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',UPSHR(B,R)!writing the variables i need
+                    95 FORMAT(a,I,a,a,a,I,a,I, a, I,a, I,a,I,a, a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f)
+                    CLOSE(661) !close file  
+                  ENDIF !Appliance Beta writeout complete
+                  ELSE  !refers to xlRTEQTYPE instances of FREZ_U in RSMEQP
+                    NEQTSHR(CurCalYr,TYPE,B,R)=(EQWTN(EQT,B,R)/UPSHR(B,R))*UP_SHR
+                    REQTSHR(CurCalYr,TYPE,B,R)= NEQTSHR(CurCalYr,TYPE,B,R) !choices the same for freezers
+                  IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 26
+                    OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                    WRITE(661,95)'26,',EU, ',','X,','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',','X,',EQWTN(EQT,B,R),',',UP_SHR,',',CHSHR(B,R),',',CH_SHR,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',UPSHR(B,R)!writing the variables i need
+                    CLOSE(661) !close file
+                  ENDIF !Appliance Beta writeout complete
                 ENDIF !EQT
               ENDIF !RTCENDIV
             ENDIF !CurCalYr
@@ -11014,7 +11098,7 @@ END SUBROUTINE RSTOVCON
 !     TYPE = INDEX FOR TYPE ARRAYS NEQTSHR AND REQTSHR
 !            INITIALIZE TO LAST ARRAY POSTION IN PREVIOUS END USE AND THEN COUNT VALID TYPES IN CURRENT END USE
             TYPE = RTTYPECT(EU)
-	
+
 !*******************************************************************
 !     RECTY          = RECORD NUMBER IN RSMEQP FILE
 !     RTTYEUPT(EU)   = LAST RECORD IN REFRIGERATION (EU=8)
@@ -11205,6 +11289,12 @@ END SUBROUTINE RSTOVCON
                    HEATINGTYPEPURCH(Y,TYPE,B,R,1)=(NEQTSHR(Y,TYPE,B,r)*EQCADD(Y,RECCL,B,r))
                    HEATINGTYPEPURCH(Y,TYPE,B,R,2)=(NEQTSHR(Y,TYPE,B,r)*(EQCREP(Y,RECCL,B,r) + EQCRP90RP(Y,RECCL,B,r)) + &
                     REQTSHR(Y,TYPE,B,r)*EQCRP90(Y,RECCL,B,r)  )
+                   IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 27
+                     OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                     WRITE(661,96) '27,',EU, ',',EQC, ',','X,',B,',',R,',',CurCalYr,',',RECTY,',',TYPE,',',RECCL,',','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,','X,',NEQTSHR(CurCalYr,TYPE,B,R),',','X,',REQTSHR(CurCalYr,TYPE,B,R),',',EQCADD(Y,RECCL,B,r),',',HEATINGTYPEPURCH(Y,TYPE,B,R,1),',',HEATINGTYPEPURCH(Y,TYPE,B,R,2),',',EQCREP(Y,RECCL,B,r),',',EQCRP90RP(Y,RECCL,B,r),',',EQCRP90(Y,RECCL,B,r),',','X,','X,','X,','X,','X' !writing the variables i need
+                     96 FORMAT(a,I,a,I,a,a,  I,a,I,a,I,a,I,a,I,a,I,a,a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  a,  f,a,a,  f,a,f,a,f,a,f,a,f,a,f,a,f,a,a,  a,  a,  a,  a)
+                     CLOSE(661) !close file
+                   ENDIF !Appliance Beta writeout complete
                  ENDIF
                ENDIF
              ENDDO
@@ -11458,32 +11548,32 @@ END SUBROUTINE RFRZADD
              LTREPcons(MaxApps,RECSYear:EndYr,MaxTypes,mNumBldg,mNumCR-2,MaxBins), &
              LTstockexcons(MaxApps,RECSYear:EndYr,MaxTypes,mNumBldg,mNumCR-2,MaxBins), &
              LightBeta1(MaxApps,RECSYear:EndYr,MaxTypes), &      !lgtbetas
-             LightBeta2(MaxApps,RECSYear:EndYr,MaxTypes)         !lgtbetas
+             LightBeta2(MaxApps,RECSYear:EndYr,MaxTypes), &         !lgtbetas
+             LightCalcA(MaxApps,RECSYear:EndYr,MaxTypes,mNumBldg,mNumCR-2,MaxBins), &   !For lighting beta calculation
+             LightCalcB(MaxApps,RECSYear:EndYr,MaxTypes,mNumBldg,mNumCR-2,MaxBins), &
+             LightCalcC(MaxApps,RECSYear:EndYr,MaxTypes,mNumBldg,mNumCR-2,MaxBins)
 
-     REAL*4 temp, rep, cumrep, maxrep, annrep, &
-              ef1,ef2,ef3,FACTOR,LTLBeta1DR,ALPHA,alpha1, &
-            LHRATE,ELIGL,LHRDADJ,LGTBeta1,LGTBeta2,LGTBETA1DR
-
+     REAL*4 temp, rep, cumrep, maxrep, annrep, ef1,ef2,ef3,FACTOR,LTLBeta1DR,ALPHA,alpha1, LHRATE,ELIGL,LHRDADJ,LGTBeta1,LGTBeta2,LGTBETA1DR
      INTEGER Y,B,D,EUPR,Y1,R,E,T,BIN,y2,diagnostics,LightDiag,i,indx,app,ilife,iLastYr
 
-      ! reverse these statements to switch diagnostics on or off
-     LightDiag=1 !print diagnostics
-     LightDiag=0 !DOn't print diagnostics
+     !Reverse these statements to switch diagnostics on or off
+     LightDiag=1 !Print diagnostics
+     LightDiag=0 !Don't print diagnostics
 
      !-----------------------------------------------------
      !  Lighting Consumption Initialization, All Iterations
      !-----------------------------------------------------
-         y=CurCalYr
-       DO d=1,mNumCR-2
-         LTCON(Y-(BaseYr-1),D)=0.0
-!             LTCONly(Y,D)=0.0
-         DO B=1,mNumBldg
-          LTCONwt(Y-(BaseYr-1),D,B)=0.0
-          LTCONin(Y-(BaseYr-1),D,B)=0.0
-!          LTCONwtly(Y-(BaseYr-1),D,B)=0.0
-!          LTCONinly(Y-(BaseYr-1),D,B)=0.0
-         ENDDO
+     y=CurCalYr
+     DO d=1,mNumCR-2
+       LTCON(Y-(BaseYr-1),D)=0.0
+!       LTCONly(Y,D)=0.0
+       DO B=1,mNumBldg
+         LTCONwt(Y-(BaseYr-1),D,B)=0.0
+         LTCONin(Y-(BaseYr-1),D,B)=0.0
+!         LTCONwtly(Y-(BaseYr-1),D,B)=0.0
+!         LTCONinly(Y-(BaseYr-1),D,B)=0.0
        ENDDO
+     ENDDO
 
      !-----------------------------------------------------
      !  Lighting Initializations & Consumption Calculation
@@ -11676,7 +11766,7 @@ END SUBROUTINE RFRZADD
      !  Operating Cost and Logit Shares
      DO d=1,mNumCR-2
        DO B=1,mNumBldg
-             !  lighting diagnostics	!kj - check significance of years below; otherwise, comment out?
+             !  lighting diagnostics	!TODO - check significance of years below; otherwise, comment out?
              diagnostics=0
                IF(d==1 .AND. b==1 .AND. CurCalYr==2006) diagnostics=1
                IF(d==1 .AND. b==1 .AND. CurCalYr==2010) diagnostics=1
@@ -11694,17 +11784,17 @@ END SUBROUTINE RFRZADD
          DO BIN=1,NumAppBins(app)
             TOTEWTN(B,d,BIN)=0.0
            DO E=1,numtypes(app)
-            !      CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES	!kj
+            !      CHANGE BETA1 TO REFLECT PRICE INDUCED BEHAVIOR CHANGES	!TODO - still needed?
             !         Note: to temporarily disable discount rate adjustment -- uncomment the following line and comment the one below
             !IF ((CurCalYr.GT.EndYr).AND. &  !yr
             IF ((CurCalYr.GT.2008).AND. &
                    (PRICES(4,d,CurCalYr).GT.PRICES(4,d,RECSYear))) THEN
              LHRATE=LightBeta1(app,CurCalYr,e)/LightBeta2(app,CurCalYr,e)    !lgtbetas (also note that this whole calculation is moved to within this DO loop).
-             ELIGL=LHRATE - 0.07	!kj - 0.07 reference?
+             ELIGL=LHRATE - 0.07	!TODO - 0.07 reference?
              IF (ELIGL.GT.0.0) THEN
                   LHRDADJ= ELIGL * &
                   ((PRICES(4,d,CurCalYr)/PRICES(4,d,RECSYear))**ALPHA1 )
-                  LTLBeta1DR = (LHRDADJ+0.07) * LightBeta2(app,CurCalYr,e)    !lgtbetas	!kj - 0.07 reference?
+                  LTLBeta1DR = (LHRDADJ+0.07) * LightBeta2(app,CurCalYr,e)    !lgtbetas	!TODO - 0.07 reference?
              ELSE
                 LTLBeta1DR=LightBeta1(app,CurCalYr,e)    !lgtbetas
              ENDIF
@@ -11716,7 +11806,14 @@ END SUBROUTINE RFRZADD
              EQWTN(E,B,d,BIN)=exp(LTLBeta1dr*LTLCap(e,d,bin)+LightBeta2(app,CurCalYr,e)*opcost(e))    !lgtbetas
              TOTEWTN(B,d,BIN)=TOTEWTN(B,d,BIN)+EQWTN(E,B,d,BIN)
 
-             !  lighting diagnostics	!kj - check significance of years below; otherwise, comment out?
+             IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 30
+               OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+               WRITE(661,81)'30,', OPCOST(E), ',', E, ',',  EQWTN(E,B,d,BIN), ',', B, ',', d, ',', BIN, ',', LTLBeta1dr, ',',LTLCap(e,d,bin), ',',LightBeta2(app,CurCalYr,e), ',', opcost(e), ',', TOTEWTN(B,d,BIN), ',', CurCalYr, ',', app !RAD writing the variables i need
+               81 FORMAT(a,f,a,i,a,f,a,i,a,i,a,i,a,f,a,f,a,f,a,f,a,f,a,i,a,i)
+               CLOSE(661) !close file
+             ENDIF !lighting Beta writeout complete
+
+             !  lighting diagnostics	!TODO - check significance of years below; otherwise, comment out?
              diagnostics=0
                IF(d==1 .AND. b==1 .AND. CurCalYr==2006) diagnostics=1
                IF(d==1 .AND. b==1 .AND. CurCalYr==2010) diagnostics=1
@@ -11738,7 +11835,7 @@ END SUBROUTINE RFRZADD
        DO d=1,mNumCR-2
          DO B=1,mNumBldg
            DO E=1,NumTypes(app)
-             DO BIN=1,6  !6 usage bins for lighting technologies (based on hours of use)	!kj
+             DO BIN=1,6  !6 usage bins for lighting technologies (based on hours of use)	!TODO - replace 6 with a variable?
                IF(TOTEWTN(B,d,BIN).NE.0.0) THEN
                   LTMSHR(CurCalYr,E,B,d,BIN)=(EQWTN(E,B,d,BIN)/ &
                     TOTEWTN(B,d,BIN))
@@ -11752,7 +11849,7 @@ END SUBROUTINE RFRZADD
        ENDDO
 
             !Diagnostics
-            IF (CurCalYr.GT.RECSYear .OR. CurCalYr.LE.2025) THEN	!kj - why 2025? AEO2005 was the last one to project through 2025, though even AEO2006 resd.f didn't include this code
+            IF (CurCalYr.GT.RECSYear .OR. CurCalYr.LE.2025) THEN	!TODO - why 2025? AEO2005 was the last one to project through 2025, though even AEO2006 resd.f didn't include this code
              DO BIN=1,NumAppBins(app)
               IF(LightDiag==1)WRITE (18,442) 'SHR',CurCalYr,app,bin,(LTMSHR(CurCalYr,E,1,1,BIN),E=1,numtypes(app))
              ENDDO
@@ -11795,17 +11892,28 @@ END SUBROUTINE RFRZADD
        !  in existing homes that remain from the original RECSYear stock of homes.
        !  This is ALLOCATED by purchases and represents current year requirements only.
        DO BIN=1,NumAppBins(app)
-        DO d=1,mNumCR-2
-         DO B=1,mNumBldg
-          DO E=1,NumTypes(app)
+         DO d=1,mNumCR-2
+           DO B=1,mNumBldg
+             DO E=1,NumTypes(app)
 
-            LTNEEDED(app,CurCalYr,E,B,d,BIN)=(HSEADD(CurCalYr,B,d)*(SQRFOOT(CurCalYr,B,d)/SQRFOOT(RECSYear,B,d)) &
-                               *bulbsperhh(app,b)*LTMSHR(CurCalYr,E,B,d,BIN)*binshares(app,BIN) &
-                               +EH(CurCalYr,B,d)*((EXSQRFOOT(CurCalYr,B,d)/EXSQRFOOT(CurCalYr-1,B,d))-1.0) &
-                               *bulbsperhh(app,b)*LTMSHR(CurCalYr,E,B,d,BIN)*binshares(app,BIN))
-          ENDDO
+               LTNEEDED(app,CurCalYr,E,B,d,BIN)=(HSEADD(CurCalYr,B,d)*(SQRFOOT(CurCalYr,B,d)/SQRFOOT(RECSYear,B,d)) &
+                                                *bulbsperhh(app,b)*LTMSHR(CurCalYr,E,B,d,BIN)*binshares(app,BIN) &
+                                                +EH(CurCalYr,B,d)*((EXSQRFOOT(CurCalYr,B,d)/EXSQRFOOT(CurCalYr-1,B,d))-1.0) &
+                                                *bulbsperhh(app,b)*LTMSHR(CurCalYr,E,B,d,BIN)*binshares(app,BIN))
+
+               IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 31
+                 LightCalcA(app,CurCalYr,E,B,d,BIN) = 0
+                 LightCalcB(app,CurCalYr,E,B,d,BIN) = 0
+                 LightCalcA(app,CurCalYr,E,B,d,BIN) = HSEADD(CurCalYr,B,d)*(SQRFOOT(CurCalYr,B,d)/SQRFOOT(RECSYear,B,d))*bulbsperhh(app,b)*binshares(app,BIN)  !multiplying the independant variables so that we get to Ax+Bx to simplify calculations later
+                 LightCalcB(app,CurCalYr,E,B,d,BIN) = EH(CurCalYr,B,d)*((EXSQRFOOT(CurCalYr,B,d)/EXSQRFOOT(CurCalYr-1,B,d))-1.0)*bulbsperhh(app,b)*binshares(app,BIN)
+                 OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+                 WRITE(661,82)'31,', LTNEEDED(app,CurCalYr,E,B,d,BIN), ',' , app, ',', CurCalYr, ',', E, ',', B, ',', d, ',', BIN, ',',LightCalcA(app,CurCalYr,E,B,d,BIN), ',', LightCalcB(app,CurCalYr,E,B,d,BIN), ',', LTMSHR(CurCalYr,E,B,d,BIN)!RAD writing the variables i need
+                 82 FORMAT(a,f,a,i,a,i,a,i,a,i,a,i,a,i,a,f,a,f,a,f) 
+                 CLOSE(661) !close file
+               ENDIF !lighting Beta writeout complete
+             ENDDO
+           ENDDO
          ENDDO
-        ENDDO
        ENDDO
 
        ! Bulbs needed this year for all reasons
@@ -11825,6 +11933,15 @@ END SUBROUTINE RFRZADD
                                            +LTREPFUT(app,CurCalYr,E,B,d,BIN) &
                                            +LTneeded(app,CurCalYr,e,b,d,bin)
 
+            IF ((ApplianceBetaSwitch.EQ.1).AND.(CurCalYr.GT.RECSYear).AND.(CurCalYr.LE.ApplianceBetaEndYr)) THEN !Appbetadata writeout, betacode = 32
+              LightCalcC(app,CurCalYr,E,B,d,BIN) = 0
+              LightCalcC(app,CurCalYr,E,B,d,BIN) = LTSTOCKEX(app,CurCalYr-1,E,B,d,BIN)*hdr(b)-LTSTOCKEX(app,CurCalYr,E,B,d,BIN)+ LTREPFUT(app,CurCalYr,E,B,d,BIN)    !adding the independant variables so that we get to C+x to simplify calculations later
+              OPEN(unit = 661, file = "AppBetaData.txt", action="write", position="append") !reopen the file, with append
+              WRITE(661,83)'32,', LTNEEDED(app,CurCalYr,E,B,d,BIN), ',' , app, ',', CurCalYr, ',', E, ',', B, ',', d, ',', BIN, ',',LightCalcC(app,CurCalYr,E,B,d,BIN), ',',  LTREPTOT(app,CurCalYr,B,d,BIN)!RAD writing the variables i need
+              83 FORMAT(a,f,a,i,a,i,a,i,a,i,a,i,a,i,a,f,a,f) 
+              CLOSE(661) !close file
+            ENDIF !lighting Beta writeout complete
+
           ENDDO
          ENDDO
         ENDDO
@@ -11833,18 +11950,16 @@ END SUBROUTINE RFRZADD
 
        ! Distribute purchases to bulb types based on purchase shares (LTMSHR), accumulate stocks and consumption
        DO d=1,mNumCR-2
-        DO B=1,mNumBldg
-         DO BIN=1,NumAppBins(app)
-          DO e=1,NumTypes(app)
-           LTREP(app,CurCalYr,e,B,d,BIN)=LTREPTOT(app,CurCalYr,B,d,BIN)*LTMSHR(CurCalYr,E,B,d,BIN)
-           LTREPstk(app,CurCalYr,E,B,d,BIN)=LTREPstk(app,CurCalYr,E,B,d,BIN)+ LTREP(app,CurCalYr,e,B,d,BIN)
-           LTrepcons(app,CurCalYr,e,B,d,BIN)=LTrepcons(app,CurCalYr,e,B,d,BIN) &
-                       +LTrep(app,CurCalYr,e,B,d,BIN)*365.*appbinhours(app,bin)*watts(e)*3.412/10**6
-          ENDDO
+         DO B=1,mNumBldg
+           DO BIN=1,NumAppBins(app)
+             DO e=1,NumTypes(app)
+               LTREP(app,CurCalYr,e,B,d,BIN)=LTREPTOT(app,CurCalYr,B,d,BIN)*LTMSHR(CurCalYr,E,B,d,BIN)
+               LTREPstk(app,CurCalYr,E,B,d,BIN)=LTREPstk(app,CurCalYr,E,B,d,BIN)+LTREP(app,CurCalYr,e,B,d,BIN)
+               LTrepcons(app,CurCalYr,e,B,d,BIN)=LTrepcons(app,CurCalYr,e,B,d,BIN)+LTrep(app,CurCalYr,e,B,d,BIN)*365.*appbinhours(app,bin)*watts(e)*3.412/10**6
+             ENDDO
+           ENDDO
          ENDDO
-        ENDDO
        ENDDO
-
 
        ! Extend this year's bulb purchases (LTREP) into the future replacement purchase requirements
        ! Also extend this years purchased bulbs into future purchased-bulb remaining stocks
@@ -11858,7 +11973,7 @@ END SUBROUTINE RFRZADD
            rep=LTREP(app,CurCalYr,E,B,d,BIN)/max(1.,bulbbinlife(E,BIN)) !bulbs per year decaying from LTREP
 
            ! restricting the looping will save some amount of execution time
-           ilife=ifix(bulbbinlife(E,BIN)+.5)+1 !round up bulblife as an INTEGER and add a year for looping	!kj - what is .5?
+           ilife=nint(bulbbinlife(E,BIN)+.5)+1 !round up bulblife as an INTEGER and add a year for looping	!TODO - what is .5?
            iLastYr=min(LastYr+BaseYr-1,CurCalYr+ilife)
            DO Y1=CurCalYr+1,iLastYr
 
@@ -11980,7 +12095,7 @@ END SUBROUTINE RFRZADD
 
 ! this might be preferred        + LTBinShare(app,BIN)*LTUEC(app,d,b)*(WTLEFF(app,CurCalYr,b,d,BIN)/WTLEFF(app,RECSYear+1,b,d,BIN))**(1+alpha)
 ! 0613 switch from basewatts     + LTBinShare(app,BIN)*LTUEC(app,d,b)*(WTLEFF(app,CurCalYr,b,d,BIN)/basewattbins(app,bin))**(1+alpha)
-!      this caused an unexpected jump in 2006 consumption -- NEED TO INVESTIGATE FURTHER	!kj
+!      this caused an unexpected jump in 2006 consumption	!TODO - need to investigate further or remove
 
           ENDDO !Bins
         ENDDO !Building Types
@@ -12214,10 +12329,10 @@ END SUBROUTINE RFRZADD
         DO D=1,mNumCR-2
           IF (MELsIncomeEffect(I).LT.1) THEN  !IncEff
             INCOME(D,CurCalYr,I)=1.  !IncEff
-		  ELSE  !IncEff
+          ELSE  !IncEff
             INCOME(D,CurCalYr,I)=(MC_YPDR(D,CurIYr)/MC_YPDR(D,RECSYear-BaseYr+1))**.05  !IncEff
           ENDIF  !IncEff
-		ENDDO
+        ENDDO
       ENDDO  !IncEff
 
 !********************************************************************
@@ -12258,7 +12373,7 @@ END SUBROUTINE RFRZADD
           NETNIUEC(CurCalYr,D,B)= NETUEC(D,B)*NETEFF(CurCalYr)
           BATNUEC(CurCalYr,D,B)=  BATUEC(D,B)*BATEFF(CurCalYr)*INCOME(D,CurCalYr,10)  !IncEff
           BATNIUEC(CurCalYr,D,B)= BATUEC(D,B)*BATEFF(CurCalYr)
-          CFNNUEC(CurCalYr,D,B)=  CFNUEC(D,B)*CFNEFF(CurCalYr)*(CDDADJ(CurCalYr,D)/CDDADJ(RECSYear,D))**(2.0)*INCOME(D,CurCalYr,11)  !IncEff	!kj - only including for consistency; need to differentiate ceiling fans from other income-affected MELs
+          CFNNUEC(CurCalYr,D,B)=  CFNUEC(D,B)*CFNEFF(CurCalYr)*(CDDADJ(CurCalYr,D)/CDDADJ(RECSYear,D))**(2.0)*INCOME(D,CurCalYr,11)  !IncEff	!TODO - only including for consistency; need to differentiate ceiling fans from other income-affected MELs
           CFNNIUEC(CurCalYr,D,B)= CFNUEC(D,B)*CFNEFF(CurCalYr)
           COFNUEC(CurCalYr,D,B)=  COFUEC(D,B)*COFEFF(CurCalYr)*INCOME(D,CurCalYr,12)  !IncEff
           COFNIUEC(CurCalYr,D,B)= COFUEC(D,B)*COFEFF(CurCalYr)
@@ -12640,8 +12755,8 @@ END SUBROUTINE RFRZADD
             IF (F.EQ.2) F2=4 !electricity
             IF (F.EQ.3) F2=1 !distillate fuel oil
             IF (F.EQ.4) F2=2 !propane
-            IF (F.EQ.5) F2=0 !kerosene combined with distillate fuel oil, so setting F2 to zero to turn off elasticity	!kj - was 5
-            IF (F.EQ.6) F2=0 !coal !setting F2 to zero turns off price elasticity	!kj - no longer reporting coal
+            IF (F.EQ.5) F2=0 !kerosene combined with distillate fuel oil, so setting F2 to zero to turn off elasticity	!TODO - was 5; remove when removing kerosene/completely combining with DFO
+            IF (F.EQ.6) F2=0 !coal !setting F2 to zero turns off price elasticity	!TODO - no longer reporting coal
             IF (F.EQ.7) THEN !wood; priced to distillate fuel oil
              F2=1
              FShell=3 !There is no shell for wood, so use distillate
@@ -12653,18 +12768,18 @@ END SUBROUTINE RFRZADD
 
                 SHTEQP(CurCalYr,B,D,F)=(SHTSHR(B,D,F)*EH(CurCalYr,B,D)+NSHTSHR(B,D,F)*NH(CurCalYr,B,D))
 
-                ! Special Treatment for Natural Gas and propane due to secondary heating standard after 2012
+                ! Special Treatment for Natural Gas and propane due to secondary heating standard after 2012	!TODO - This section probably not needed; replace NHtoUse with NH?
                 ! In October 2016, DOE determined that updated standards for direct heating equipment were not currently economically justified (Federal Register # 2016-24866)
                 NHtoUse=NH(CurCalYr,B,D) !replace NH(...) with "discounted" value for standard
-!                IF (F.EQ.1 .OR. F.EQ.4) THEN	!kj - commented out because 2012 is prior to 2015 RECS base year
-!                  IF(CurCalYr .GT. 2012) THEN	!kj - commented out because 2012 is prior to 2015 RECS base year
+!                IF (F.EQ.1 .OR. F.EQ.4) THEN  !commented out because 2012 is prior to 2020 RECS base year
+!                  IF(CurCalYr .GT. 2012) THEN  !commented out because 2012 is prior to 2020 RECS base year
                     ! Houses added to the stock after 2012 have increased efficiency
-!                    SHTEFF=.5003 !calculated effect of efficiency on UEC for houses post-2012	!kj - commented out because 2012 is prior to 2015 RECS base year
+!                    SHTEFF=.5003 !calculated effect of efficiency on UEC for houses post-2012  !commented out because 2012 is prior to 2020 RECS base year
                     ! Do weighted calculation for NH, "discounting" post-2012 to account for
                     !  increased efficiency requirements
-!                    NHtoUse=(NH(CurCalYr,B,D)-NH(2012,B,D))*SHTEFF + NH(2012,B,D)	!kj - commented out because 2012 is prior to 2015 RECS base year
-!                  ENDIF !CurCalYr > 2012	!kj - commented out because 2012 is prior to 2015 RECS base year
-!                ENDIF !F=1 or F=4 and CurCalYr>2012	!kj - commented out because 2012 is prior to 2015 RECS base year
+!                    NHtoUse=(NH(CurCalYr,B,D)-NH(2012,B,D))*SHTEFF + NH(2012,B,D)  !commented out because 2012 is prior to 2020 RECS base year
+!                  ENDIF !CurCalYr > 2012  !commented out because 2012 is prior to 2020 RECS base year
+!                ENDIF !F=1 or F=4 and CurCalYr>2012  !commented out because 2012 is prior to 2020 RECS base year
 
                 SHTCON(Y,F,D)=SHTCON(Y,F,D)+LEAPYR*(SHTSHR(B,D,F)* &
                  EH(CurCalYr,B,D)*SHTUEC(D,F,B)* &
@@ -12717,8 +12832,8 @@ END SUBROUTINE RFRZADD
 !********************************************************************
 ! APPL= G,L,D
 !********************************************************************
-      LPGGRILL(RECSYear)=0.36  !share of homes with propane grills in the RECS year
-      LPGGRILL(ijumpcalyr)=0.60  !share of homes with propane grills by end of projection (source unknown)	!kj
+      LPGGRILL(RECSYear)=0.34  !share of homes with propane grills in the RECS year
+      LPGGRILL(ijumpcalyr)=0.60  !share of homes with propane grills by end of projection	!TODO - verify source/ revise assumption?
       IF (CurCalYr.EQ.(RECSYear+1)) THEN
       DO 30 D=1,mNumCR-2
        DO 30 B=1,mNumBldg
@@ -12802,6 +12917,7 @@ END SUBROUTINE RFRZADD
 !********************************************************************
       SUBROUTINE NEMSCN
       IMPLICIT NONE
+      include 'tranrep'
       INTEGER Y,D,F
 
       Y=CurCalYr-(BaseYr-1)
@@ -12815,10 +12931,10 @@ END SUBROUTINE RFRZADD
 ! RENEWABLES
 !      SOLAR CHANGED FOR DISTRIBUTED GENERATION BY PV
          IF(CurIYr.LT.RECSYear-BaseYr+1) THEN
-            QPVRS(D,Y)=QPVRS(D,Y-1)*WHRFOSS(D,Y)/3412.  !STEOhr
+            QPVRS(D,Y)=QPVRS(D,Y-1)  !STEOhr  !3412project
 !      SOLAR KWH GENERATION BY PV IN QUADS
           ELSE
-            QPVRS(D,Y)=Trills(Y,D,1)*WHRFOSS(D,Y)/3412.  !STEOhr
+            QPVRS(D,Y)=Trills(Y,D,1)  !STEOhr  !3412project
          ENDIF
             QPVRS(NationalPtr,y)=QPVRS(NationalPtr,y)+QPVRS(d,y)
 
@@ -12826,10 +12942,10 @@ END SUBROUTINE RFRZADD
          QSTRS(D,Y)=SLCON(Y,D)/1000000.
 ! NATURAL GAS
          QNGRS(D,Y)=RSFLCN(Y,1,D)
-         QGFRS(D,Y)=QNGRS(D,Y)*1.0
-         QGIRS(D,Y)=QNGRS(D,Y)*0.0	!kj - is this still necessary if multiplied by zero?
+         QGFRS(D,Y)=QNGRS(D,Y)*1.0	!TODO - is this variable/calculation still necessary?
+         QGIRS(D,Y)=QNGRS(D,Y)*0.0	!TODO - is this still necessary if multiplied by zero?
 ! ELECTRICITY
-         QELRS(D,Y)=RSFLCN(Y,2,D)-(TrillsOwnUse(Y,D,1)+TrillsOwnUse(Y,D,2)+TrillsOwnUse(Y,D,3))/1000.  !Subtract all onsite own-use generation; QELRS = quads purchased electricity from grid  !DGreport
+         QELRS(D,Y)=RSFLCN(Y,2,D) -(TrillsOwnUse(Y,D,1)+TrillsOwnUse(Y,D,2)+TrillsOwnUse(Y,D,3))/1000.  + TRQ_ELEC(1,D,Y)!Subtract all onsite own-use generation; QELRS = quads purchased electricity from grid  !DGreport
 ! DISTILLATE FUEL OIL + KEROSENE
          IF (RSFLCN(Y,3,D).LT.0.) THEN
            QDSRS(D,Y)=0.
@@ -12883,7 +12999,7 @@ END SUBROUTINE RFRZADD
  15   CONTINUE
 
 !*******************************************************************
-!  COMPUTE HOUSING SHARES FOR "FROZEN HOUSING STARTS" ANALYSIS	!kj - is this used by MAM or elsewhere in NEMS, or can this be removed?
+!  COMPUTE HOUSING SHARES FOR "FROZEN HOUSING STARTS" ANALYSIS	!TODO - is this used by MAM or elsewhere in NEMS, or can this be removed?
 !*******************************************************************
         DO 17 D=1,mNumCR-2
           DO 17 B=1,mNumBldg
@@ -12893,7 +13009,7 @@ END SUBROUTINE RFRZADD
 !*******************************************************************
 !  AGGREGATE HEATING CONSUMPTION
 !*******************************************************************
-        DO 20 F=1,8	!kj - should this be tired to NHTRFL, though that current value is 7 because coal (8) was removed
+        DO 20 F=1,7	!TODO - maybe this should be tied to NHTRFL, though that current value is 7 because coal (8) was removed; remove geothermal (7) too? !GeoFix
           RSHTRCON(Y,F)=0.0
           DO 20 D=1,mNumCR-2
             IF (F.EQ.7) THEN
@@ -12901,7 +13017,7 @@ END SUBROUTINE RFRZADD
             ELSEIF (F.EQ.6) THEN
               RSHTRCON(Y,6)=RSHTRCON(Y,6)+HTRCON(Y,6,D)+SHTCON(Y,7,D)
             ELSEIF (F.EQ.8) THEN
-!              RSHTRCON(Y,8)=RSHTRCON(Y,8)+SHTCON(Y,6,D)  !removing coal from consumption totals	!kj - do same for kerosene?
+!              RSHTRCON(Y,8)=RSHTRCON(Y,8)+SHTCON(Y,6,D)  !removing coal from consumption totals	!TODO - do same for kerosene?
               RSHTRCON(Y,8)=0.0
             ELSE
               RSHTRCON(Y,F)=RSHTRCON(Y,F)+HTRCON(Y,F,D)+SHTCON(Y,F,D)
@@ -12914,7 +13030,7 @@ END SUBROUTINE RFRZADD
            RSCOOLCN(Y,1:NCLFL)=0.0 !DGreport - general cleanup
 
          DO D=1,mNumCR-2 !DGreport
-		   DO F=1,NCLFL !DGreport
+           DO F=1,NCLFL !DGreport
              RSCOOLCN(Y,F)=RSCOOLCN(Y,F)+COOLCN(Y,F,D) !DGreport
            ENDDO !DGreport
          ENDDO !DGreport
@@ -12952,7 +13068,7 @@ END SUBROUTINE RFRZADD
 !*******************************************************************
 !  AGGREGATE APPLIANCE CONSUMPTION
 !*******************************************************************
-            RSAPCON(Y,1:4)=0.0 !DGreport - general cleanup	!kj - find variable to replace 4
+            RSAPCON(Y,1:4)=0.0 !DGreport - general cleanup	!TODO - find variable to replace 4
 
        DO 40 D=1,mNumCR-2
             RSAPCON(Y,1)=RSAPCON(Y,1)+APLCON(Y,1,D) !Natural Gas
@@ -12992,10 +13108,8 @@ END SUBROUTINE RFRZADD
 !*******************************************************************
       SUBROUTINE RESDRP2
       IMPLICIT NONE
-      ! COMMON/DBEFFOUT/RSNEFDB1(mNumYr,MNUMRTTY,mNumBldg,mNumCR-2),RSEEFDB1(mNumYr,MNUMRTTY,mNumBldg,mNumCR-2)  !DYN
-      ! REAL*4 RSNEFDB1,RSEEFDB1  !DYN
+
       REAL*4 EHANDNH(RECSYear:EndYr,mNumBldg,mNumCR-2)
-!      REAL*4 TBENCH(RECSYear:EndYr,6),ABENCH(RECSYear:EndYr,6),TRSCON(RECSYear:EndYr,6)
       REAL*4 RACUnits(mNumBldg,mNumCR-2), X, TEMP
       REAL*4 NUME(RECSYear:EndYr+1,15), DEN(RECSYear:EndYr+1,15),NUME1(RECSYear:EndYr+1,15,mNumBldg,mNumCR-2), DEN1(RECSYear:EndYr+1,15,mNumBldg,mNumCR-2)
       REAL*4 RSCLUSR(RECSYear:EndYr+1)
@@ -13016,13 +13130,13 @@ END SUBROUTINE RFRZADD
                   'Clothes Drying','Refrigeration','Freezing','Lighting', &
                   'Appliances','Secondary Heat'/
       CHARACTER*40 FN
-      CHARACTER*18 HEN(9),CEN(5),WEN(5), CKEN(3), DRYEN(2)	!kj - not used?
-      DATA HEN/'Electric HP','Other Electric','Gas HP','Gas Other', &	!kj - why does this exclude natural gas and distillate furnaces? not used?
-      'Distillate','Propane','Kerosene','Wood Stoves','Geothermal HP'/	!kj - why does this exclude natural gas and distillate furnaces? not used?
-      DATA CEN/'Room AC','Central Air','Heat Pump','GSHP','GHP'/	!kj - these are mapped in a different order as RSCOOLERS; not used?
-      DATA WEN/'Natural Gas','Electric','Distillate','Propane','Solar'/	!kj - not used?
-      DATA CKEN/'Natural Gas','Propane','Electric'/	!kj - not used?
-      DATA DRYEN/'Natural Gas','Electric'/	!kj - not used?
+      CHARACTER*18 HEN(9),CEN(5),WEN(5), CKEN(3), DRYEN(2)	!TODO - verify use
+      DATA HEN/'Electric HP','Other Electric','Gas HP','Gas Other', &	!TODO - why does this exclude natural gas and distillate furnaces? not used?
+      'Distillate','Propane','Kerosene','Wood Stoves','Geothermal HP'/	!TODO - why does this exclude natural gas and distillate furnaces? not used? !GeoFix - remove 'Geothermal HP'?
+      DATA CEN/'Room AC','Central Air','Heat Pump','GSHP','GHP'/	!TODO - these are mapped in a different order as RSCOOLERS; not used? !GeoFix - remove 'GSHP'?
+      DATA WEN/'Natural Gas','Electric','Distillate','Propane','Solar'/	!TODO - verify use
+      DATA CKEN/'Natural Gas','Propane','Electric'/	!TODO - verify use
+      DATA DRYEN/'Natural Gas','Electric'/	!TODO - verify use
 
 !*******************************************************************
 !   AGGREGATE HEATING SYSTEMS
@@ -13032,20 +13146,20 @@ END SUBROUTINE RFRZADD
 
       DO 2 Y=RECSYear,LastYr+BaseYr-1
          Y1=Y-BaseYr+1
-       DO 2 E2=1,9	!kj - is there a variable to refer to the 9 heating tech equipments listed below? Why aren't all 11 heating classes included?
+       DO 2 E2=1,9	!TODO - is there a variable to refer to the 9 heating tech equipments listed below? Why aren't all 11 heating classes included?
           RSHTRS(Y1,E2)=0.0
  2    CONTINUE
       DO 4 Y=RECSYear,LastYr+BaseYr-1
         Y1=Y-BaseYr+1
         DO 4 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
-          EQC=RTCLEQCL(RECCL)	!kj - where is EQC 3 (NG_FA) and 7 (DIST_FA)?
+          EQC=RTCLEQCL(RECCL)	!TODO - where is EQC 3 (NG_FA) and 7 (DIST_FA)?
           IF (EQC.EQ.1)  THEN  !ELEC_RAD
              E2=2
           ELSEIF (EQC.EQ.2) THEN  !ELEC_HP
              E2=1
           ELSEIF (EQC.LE.4) THEN  !NG_RAD
              E2=4
-          ELSEIF (EQC.EQ.5) THEN  !KERO_FA	!kj - kerosene is being combined with distillate (DIST_FA)
+          ELSEIF (EQC.EQ.5) THEN  !KERO_FA  !kerosene combined with distillate (DIST_FA) for AEO2019	!TODO - remove and adjust all EQC values when kerosene fully removed/combined with DIST
              E2=7
           ELSEIF (EQC.EQ.6) THEN  !LPG_FA
              E2=6
@@ -13157,62 +13271,74 @@ END SUBROUTINE RFRZADD
  10   CONTINUE
 
 !*******************************************************************
-!   WRITE OUT VARIABLES OF SPECIAL INTEREST TO UNIT 9 (RESOUT.TXT)
+!   WRITE OUT VARIABLES OF SPECIAL INTEREST TO UNIT 9 (RDM_OUT.TXT)
 !*******************************************************************
-        WRITE(9,*) 'fuel prices'
-        DO D=1,mNumCR-2
-          WRITE(9,*) 'D=', D
-          WRITE(9,*) 'Dist   Prop    NatGas    Elec    Kero   Wood'
+        IF (PRTDBGR.EQ.1) THEN
+          WRITE(9,*) 'Estimated number of natural gas customers based on equipment count by end use (maximum of space heating->water heating->cooking->clothes drying); used by NGMM'
+          WRITE(9,*) 'YEAR  CD  RSGASCUST    WATERTOT    COOKTOT    DRYERTOT'
           DO Y=RECSYear,LastYr+BaseYr-1
-            WRITE(9,223) Y,(PRICES(F,D,Y),F=1,6)
+            DO D=1,mNumCR-2
+              WRITE(9,222) Y,D,RSGASCUST(Y,D),WATERTOT(Y,D),COOKTOT(Y,D),DRYERTOT(Y,D)
+            ENDDO
           ENDDO
-        ENDDO
- 223    FORMAT(3X,I5,6(3X,F5.2))
+ 222      FORMAT(I4,I2,4(1X,F14.0))
+        ENDIF
+ 
+!        WRITE(9,*) 'fuel prices'	!TODO - These fuel prices are in RSMESS.xls (RSMEQP tab) RTEKDOLLARYR dollars, so different from regional FTAB Table 2 prices (in scedes YEARPR dollars?)
+!        DO D=1,mNumCR-2
+!          WRITE(9,*) 'D=', D
+!          WRITE(9,*) 'Dist   Prop    NatGas    Elec    Kero   Wood'
+!          DO Y=RECSYear,LastYr+BaseYr-1
+!            WRITE(9,223) Y,(PRICES(F,D,Y),F=1,6)
+!          ENDDO
+!        ENDDO
+! 223    FORMAT(3X,I5,6(3X,F5.2))
 
-        WRITE(9,*) 'ALL HOUSING STARTS'
-        DO D=1,mNumCR-2
-          WRITE(9,*) 'D=', D
-          DO Y=RECSYear,LastYr+BaseYr-1
-            WRITE(9,224) Y,(HSEADD(Y,B,D),B=1,mNumBldg)
-          ENDDO
-        ENDDO
-224    FORMAT(3X,I5,3(3X,F9.2))
+!        WRITE(9,*) 'ALL HOUSING STARTS'	!TODO - Total number of housing starts; comparable to 10^6 times MC_HUSPS1, MC_HUSPS2A, and MC_KHUMFG in MC_COMMON.csv in p1 folder; different due to rounding(?)
+!        DO D=1,mNumCR-2
+!          WRITE(9,*) 'D=', D
+!          DO Y=RECSYear+1,LastYr+BaseYr-1
+!            WRITE(9,224) Y,(HSEADD(Y,B,D),B=1,mNumBldg)
+!          ENDDO
+!        ENDDO
+!224    FORMAT(3X,I5,3(3X,F9.2))
 
-        WRITE(9,*) 'average squarefootage all housing types and divisions'
-        DO Y=RECSYear-BaseYr+1,LastYr
-         WRITE(9,*) Y+BaseYr-1, SQFTAVG(Y)
-        ENDDO
+        !Also printed to FTAB Table 4
+!        DO Y=RECSYear-BaseYr+1,LastYr
+!        WRITE(9,*) 'average squarefootage all housing types and divisions'
+!         WRITE(9,'(I4,F4.1)') Y+BaseYr-1, SQFTAVG(Y)
+!        ENDDO
 
-        WRITE(9,*) 'single-family replacement uecs - heating'
+        WRITE(9,*) 'single-family replacement UECs - heating'
         DO d=1,mNumCR-2
           WRITE(9,*) 'D=',D
           WRITE(9,1140)(RTCLNAME(E),E=1,nHeatClasses)
-          DO Y=RECSYear,LastYr+BaseYr-1
+          DO Y=RECSYear+1,LastYr+BaseYr-1
             WRITE(9,1141) Y,(EQCRUEC(Y,E,1,D),E=1,nHeatClasses)
           ENDDO
         ENDDO
  1140   FORMAT(6X,11(1X,a9))
  1141   FORMAT(I6,11(1X,F9.4))
 
-        WRITE(9,*) 'single-family average uecs - heating'
+        WRITE(9,*) 'single-family average UECs - heating'
         DO d=1,mNumCR-2
           WRITE(9,*) 'D=',D
           WRITE(9,1140)(RTCLNAME(E),E=1,nHeatClasses)
-          DO Y=RECSYear,LastYr+BaseYr-1
+          DO Y=RECSYear+1,LastYr+BaseYr-1
             WRITE(9,1141) Y,(EQCAUEC(Y,E,1,D),E=1,nHeatClasses)
           ENDDO
         ENDDO
 
-        WRITE(9,*) 'single-family new uecs - heating'
+        WRITE(9,*) 'single-family new UECs - heating'
         DO d=1,mNumCR-2
           WRITE(9,*) 'D=',D
           WRITE(9,1140)(RTCLNAME(E),E=1,nHeatClasses)
-          DO Y=RECSYear,LastYr+BaseYr-1
+          DO Y=RECSYear+1,LastYr+BaseYr-1
             WRITE(9,1141) Y,(EQCNUEC(Y,E,1,D),E=1,nHeatClasses)
           ENDDO
         ENDDO
 
-      WRITE(9,*) 'BNCHFCT(trills?)'	!kj - is this actually in quads? output values in RESOUT.txt seem much too high to be quads, but the variables used to calculate BNCHFCT appear to be in quads
+      WRITE(9,*) 'BNCHFCT(trills?)'	!TODO - is this actually in quads? output values in RDM_OUT.txt seem much too high to be quads, but the variables used to calculate BNCHFCT appear to be in quads
       DO Y=(RECSYear-BaseYr+1),(LASTSTEOYR-BaseYr+3)  !BNCHFCT adjustment for RECS through first two years after hard-bench STEO year  !STEOread-avg
                                                       !(last two years of factors should be same and carried through projection)       !STEOread-avg
         WRITE(9,*) Y+BaseYr-1
@@ -13371,7 +13497,7 @@ END SUBROUTINE RFRZADD
  30   CONTINUE
 
 !*******************************************************************
-!   WRITE OUT WATER HEATING MARKET SHARES	!kj - is this still needed? not shares; quantity of equipment
+!   WRITE OUT WATER HEATING MARKET SHARES	!TODO - is this still needed? not shares; quantity of equipment
 !*******************************************************************
       WRITE(9,*) 'rswater shares?'
       DO Y=RECSYear,LastYr+BaseYr-1
@@ -13409,7 +13535,7 @@ END SUBROUTINE RFRZADD
       NUMEQT=RTTYPECT(EU+1)-RTTYPECT(EU)
 
 !*******************************************************************
-!   WRITE OUT COOKING MARKET SHARES	!kj - is this still needed? not shares; quantity of equipment
+!   WRITE OUT COOKING MARKET SHARES	!TODO - is this still needed? not shares; quantity of equipment
 !*******************************************************************
       WRITE(9,*) ' '
       WRITE(9,*) 'rscook'
@@ -13444,7 +13570,7 @@ END SUBROUTINE RFRZADD
  50   CONTINUE
 
 !*******************************************************************
-!   WRITE OUT DRYER MARKET SHARES	!kj - is this still needed? not shares; quantity of equipment
+!   WRITE OUT DRYER MARKET SHARES	!TODO - is this still needed? not shares; quantity of equipment
 !*******************************************************************
       NUMEQC=RTCLEUPT(EU+1)-RTCLEUPT(EU)
       WRITE(9,*) 'rsdry'
@@ -13475,16 +13601,6 @@ END SUBROUTINE RFRZADD
                 EQCREP(Y,RECCL,B,D)  + EQCSUR(Y,RECCL,B,D)
              ENDIF
 60    CONTINUE
-
-!*******************************************************************
-!   WRITE OUT REFRIGERATOR MARKET SHARES	!kj - is this still needed? not shares; quantity of equipment
-!*******************************************************************
-      WRITE(9,*) 'Refrigerator Equipment Stock'
-      DO y=RECSYear-BaseYr+1,LastYr
-       WRITE(9,*) RSREF(Y)
-      ENDDO
-
-      WRITE(9,*) 'Refrigerator Equipment Shares'	!kj - is this still needed? shares not actually written; this is followed by weighted efficiencies
 
 !*******************************************************************
 !   AGGREGATE STANDALONE FREEZING SYSTEMS
@@ -13927,7 +14043,7 @@ END SUBROUTINE RFRZADD
         IF (DEN1(Y,1,B,D).GT.0.0) RSNEFDB1(Y1,RECCL,B,D)=NUME1(Y,1,B,D)/DEN1(Y,1,B,D)   !FRZ
 103      CONTINUE
 !*******************************************************************
-!   !   WRITE OUT NEW WEIGHTED EFFICIENCIES	!kj - is this still needed? not shares; quantity of equipment
+!   !   WRITE OUT NEW WEIGHTED EFFICIENCIES	!TODO - is this still needed? not shares; quantity of equipment
 !*******************************************************************
        WRITE(9,*) 'rsnefht'
        DO 6666 Y=RECSYear+1,LastYr+BaseYr-1
@@ -14637,15 +14753,15 @@ END SUBROUTINE RFRZADD
         ENDIF
  186  CONTINUE
 
-      WRITE(9,*) 'END-USE ELECTRICITY PRICES BY CD'	!kj - still needed? add switch to turn on?
+      WRITE(9,*) 'END-USE ELECTRICITY PRICES BY CD (PELRSOUT_1987$)'	!TODO - still needed? add switch to turn on?
       DO 190 EU=1,10
-       WRITE(9,*) 'EU= ', eu,' ', EUPRNAMES(eu)
+       WRITE(9,*) 'EU= ', EU,' ', EUPRNAMES(EU)
        DO 190 Y=RECSYear-BaseYr+1,LastYr
         WRITE(9,191) Y+(BaseYr-1),(PELRSOUT(D,Y,EU),D=1,mNumCR-2)
  190  CONTINUE
  191   FORMAT (I4,9(1X,F5.2))
 
-       WRITE(9,*) 'AVERAGE ELECTRICITY PRICES'	!kj - still needed? add switch to turn on?
+       WRITE(9,*) 'AVERAGE ELECTRICITY PRICES BY CD (PELRS_1987$)'	!TODO - still needed? add switch to turn on?
        DO 193 Y=RECSYear-BaseYr+1,LastYr
         WRITE(9,191) Y+(BaseYr-1),(PELRS(d,y),D=1,mNumCR-2)
  193  CONTINUE
@@ -14725,11 +14841,11 @@ END SUBROUTINE RFRZADD
           ENDIF
  20   CONTINUE
 
-      WRITE(9,*) ' '
-      WRITE(9,*) ' '
-      WRITE(9,*)' Residential New Heating Report '
-      WRITE(9,*)' New Home Heating System Shares (percent)'
-      WRITE(9,*) ' '
+      WRITE(9,*) ''
+      WRITE(9,*) ''
+      WRITE(9,*) 'Residential New Heating Report'
+      WRITE(9,*) 'New Home Heating System Shares (percent)'
+      WRITE(9,*) ''
       WRITE(9,6)(RTCLNAME(E),E=1,NUMEQC)
   6   FORMAT(6x,11(1X,A7))
       DO 200 Y=RECSYear+1,LastYr+BaseYr-1
@@ -14767,11 +14883,11 @@ END SUBROUTINE RFRZADD
         READ(IUNIT1,'(1(/))')       !STEObenchX
         READ(IUNIT1,*) STEObenchEL  !STEObenchX
         READ(IUNIT1,'(1(/))')       !STEObenchX
-        DO 50 F=3,4	 !STEOgasElecBench !Natural gas and electricity (F=1,2) are pulled directly from common steoblock below
+        DO 50 F=3,4  !STEOgasElecBench !Natural gas and electricity (F=1,2) are pulled directly from common steoblock below
           READ(IUNIT1,*)  !skip header
           DO 50 D=1,mNumCR-2
             READ(IUNIT1,*) (STEOCN(Y1,F,D),Y1=RECSYear+1,LastSTEOYrAvail)
-!            WRITE(9,*) (STEOCN(Y1,F,D),Y1=RECSYear+1,LastSTEOYrAvail)  !Write RSSTEO.txt inputs to RESOUT.txt
+!            WRITE(9,*) (STEOCN(Y1,F,D),Y1=RECSYear+1,LastSTEOYrAvail)  !Write RSSTEO.txt inputs to RDM_OUT.txt
         50  CONTINUE
         IUNIT1=FILE_MGR('C',FNAME,NEW)
 !        WRITE(9,'("rsbench,steobm,iLastSTEOYr,LastSTEOYr,LastSEDSyr,msedyr,GLOBALBENCHON,BENCHALLYRS")')
@@ -14867,7 +14983,7 @@ END SUBROUTINE RFRZADD
 
          !Post-STEO Period Factors
         ELSEIF (CurCalYr.GT.iLastSTEOYr) THEN
-          DO F=1,4	!kj - Reading in through propane (4) instead of kerosene (5) now that kerosene combined with distillate fuel oil (3)
+          DO F=1,4  !Reading in through propane (4) instead of kerosene (5) now that kerosene combined with distillate fuel oil (3)	!TODO - replace 4 with variable?
            DO D=1,mNumCR-2
             IF (F.LE.2) THEN
              !Post-STEO period benchmarking option for gas and electricity
@@ -14914,7 +15030,7 @@ END SUBROUTINE RFRZADD
           DO D=1,mNumCR-2
             DO F=1,4  !KeroBench
               BNCHFCT(Y,F,D)= BNCHFCT(Y-1,F,D)
-!              WRITE(9,'("rsNObench Y F D ",3i5,f7.1)') y,f,d,bnchfct(y,f,d)	!kj - add switch to print these?
+!              WRITE(9,'("rsNObench Y F D ",3i5,f7.1)') y,f,d,bnchfct(y,f,d)	!TODO - add switch to print these?
             ENDDO
           ENDDO
        ENDIF
@@ -14923,7 +15039,7 @@ END SUBROUTINE RFRZADD
       IF (GLOBALBENCHON==1) THEN
           DO D=1,mNumCR-2
             DO F=1,4  !KeroBench
-!              WRITE(9,'("rsbenchfactors Y F D ",3i5,f12.2)') y,f,d,bnchfct(y,f,d)	!kj - add switch to print these?
+!              WRITE(9,'("rsbenchfactors Y F D ",3i5,f12.2)') y,f,d,bnchfct(y,f,d)	!TODO - add switch to print these?
             ENDDO
           ENDDO
        ENDIF
@@ -14997,9 +15113,6 @@ END SUBROUTINE RFRZADD
 !      PARAMETER (MaxBins=6)  !Maximum number of bulb bins within an application
       INTEGER app, bin
       REAL*4 temp
-
-      !COMMON/DBEFFOUT/RSNEFDB1(mNumYr,MNUMRTTY,mNumBldg,mNumCR-2),RSEEFDB1(mNumYr,MNUMRTTY,mNumBldg,mNumCR-2)  !DYN
-      !REAL*4 RSNEFDB1,RSEEFDB1
       REAL*4 bb
       REAL*4 HEATERS(RECSYear:EndYr,nHeatClasses,mNumBldg,mNumCR-2)
       REAL*4 COOLERS(RECSYear:EndYr,5,mNumBldg,mNumCR-2)
@@ -15017,47 +15130,32 @@ END SUBROUTINE RFRZADD
       INTEGER EQCGHP,EQCEHP,RECCLGHP,RECCLEHP,EQCSWH,EQCEWH,RECCLSWH,RECCLEWH
       INTEGER FILE_MGR       ! FILE MANAGER
       INTEGER*4  OUTFILE     ! FILE HANDLE
-      CHARACTER*18 FN,CNAME(mNumRTCl),TNAME(MNUMRTTY),LTNAME(4)	!kj - replace values with variables?
+      CHARACTER*18 FN,CNAME(mNumRTCl),TNAME(MNUMRTTY),LTNAME(4)	!TODO - replace values with variables?
       CHARACTER*18 REGION(mNumCR+1)  !EqpParam
       CHARACTER*3 FL,HQ(nHeatClasses+1),CQ(nCoolClasses+1),WQ(nWatHtClasses),KQ(nCookClasses),DQ(nClDryClasses)  !EqpParam
       CHARACTER*4 HQT(nHeatTypes),SR    !eu
-      CHARACTER*8 EUNAME(9),SN(nShellTypes)  !EqpParam	!kj - replace values with variables?
+      CHARACTER*8 EUNAME(9),SN(nShellTypes)  !EqpParam	!TODO - replace values with variables?
       CHARACTER*13 HTYPES(mNumBldg+1)  !Number of building types plus Total  !EqpParam
-!*******************************************************************
       INTEGER DUM, zero
-!      REAL*4 TH(RECSYear:EndYr,3)
-!      REAL*4 THD(RECSYear:EndYr,mNumBldg,mNumCR-2)
-      DATA ff/3,4,1,2,5,6/   ! pointers to benchmarking fuels from rtfuel	!kj
-      DATA EUNAME/'HEAT','COOL','CWASH','DWASH','HOTWATER','COOK','DRYERS','FRIDG','FREEZE'/	!kj - for some reason, these all print out to RESDEQP as 4 spaces and 4 characters despite being CHARACTER*8 and formatted as A8 in the write statement
-      DATA HQ/'EFN','EHP','GFN','GOT','KER','LPG','DFN','DOT','WST','GE1','GHP','GE2'/  !correspond to nHeatClasses+1 (for geothermal energy GE2)	!kj
-      DATA CQ/'RAC','CAC','EHP','GE1','GHP','GE2'/  !correspond to nCoolClasses+1 (for geothermal energy GE2)	!kj
-      DATA WQ/'GAS','ELE','DIS','LPG','SOL'/  !water heater fuels
-      DATA HQT/'EFN2','EHP1','EHP2','EHP3','EHP4','GFN1','GFN2','GFN3','GFN4','GOT1','GOT2','GOT3','GOT4','KER1','KER2','KER3','KER4',&	!kj - corresponde to nHeatTypes; not used?
-       'LPG1','LPG2','LPG3','LPG4','DFN1','DFN2','DFN3','DFN4','DOT1','DOT2','DOT3','DOT4','WST2','WST4','GEO1','GEO2','GEO3','GEO4','GHP2'/	!kj - corresponde to nHeatTypes; not used?
-      DATA LTNAME/'LT-GSL','LT-REFL','LT-FLUOR','LT-EXT'/	!kj - based on current RSMLGT.txt order; not used?
-      DATA KQ/'GAS','LPG','ELE'/	!kj - not used?
-      DATA DQ/'GAS','ELE'/	!kj - not used?
-      DATA SN/'NoCode','IECC','ESTAR','IECC+40','PATH'/	!kj - not used?
-      DATA HTYPES/'Single-Family',' Multifamily',' Mobile Homes','        Total'/	!kj - not used?
-      DATA REGION/'New England    ','Mid Atlantic    ','E North Central','W North Central','South Atlantic  ','E South Central', &	!kj - not used?
-       'W South Central','Mountain        ','Pacific        ',' United States ','Less CA         ','United States  '/	!kj - not used?
-
-!                  DO 649 f=1,6
-!                 DO 649 d=1,mNumCR-2
-! 649       bnchfct(4,f,d)=1.0
+      DATA ff/3,4,1,2,5,6/   ! pointers to benchmarking fuels from rtfuel	!TODO - replace values with variables?
+      DATA EUNAME/'HEAT','COOL','CWASH','DWASH','HOTWATER','COOK','DRYERS','FRIDG','FREEZE'/	!TODO - for some reason, these all print out to RESDEQP as 4 spaces and 4 characters despite being CHARACTER*8 and formatted as A8 in the write statement
+      DATA HQ/'EFN','EHP','GFN','GOT','KER','LPG','DFN','DOT','WST','GE1','GHP','GE2'/  !EqpParam  !correspond to nHeatClasses+1 (for geothermal energy GE2) !GeoFix - remove 'GE1' and/or 'GE2'?
+      DATA CQ/'RAC','CAC','EHP','GE1','GHP','GE2'/  !EqpParam  !correspond to nCoolClasses+1 (for geothermal energy GE2) !GeoFix - remove 'GE1' and/or 'GE2'?
+      DATA WQ/'GAS','ELE','DIS','LPG','SOL'/  !EqpParam  !water heater fuels
+      DATA HQT/'EFN2','EHP1','EHP2','EHP3','EHP4','GFN1','GFN2','GFN3','GFN4','GOT1','GOT2','GOT3','GOT4','KER1','KER2','KER3','KER4',&  !EqpParam	!TODO - corresponds to nHeatTypes; not used?
+       'LPG1','LPG2','LPG3','LPG4','DFN1','DFN2','DFN3','DFN4','DOT1','DOT3','DOT4','WST2','WST4','GEO1','GEO2','GEO3','GEO4','GHP2'/  !EqpParam	!TODO - corresponds to nHeatTypes; not used?
+      DATA LTNAME/'LT-GSL','LT-REFL','LT-FLUOR','LT-EXT'/	!TODO - based on current RSMLGT.txt order; not used?
+      DATA KQ/'GAS','LPG','ELE'/  !EqpParam	!TODO - not used?
+      DATA DQ/'GAS','ELE'/  !EqpParam	!TODO - not used?
+      DATA SN/'NoCode','IECC','ESTAR','IECC+40','PATH'/	!TODO - not used?
+      DATA HTYPES/'Single-Family',' Multifamily',' Mobile Homes','        Total'/	!TODO - not used?
+      DATA REGION/'New England    ','Mid Atlantic    ','E North Central','W North Central','South Atlantic  ','E South Central', &	!TODO - not used?
+       'W South Central','Mountain        ','Pacific        ',' United States ','Less CA         ','United States  '/	!TODO - not used?
 
       zero=0
 
- !      DO 650 Y=RECSyear,EndYr
- !       DO 650 B=1,mNumBldg
- !         TH(Y,B)=0.0
- !         DO 650 D=1,mNumCR-2
- !           TH(Y,B)=TH(Y,B)+ (EH(Y,B,D)+NH(Y,B,D))
- !           THD(Y,B,D)=EH(Y,B,D)+NH(Y,B,D)
- !650   CONTINUE
-
 !*******************************************************************
-!  AGGREGATE EQUIPMENT	!kj - Perhaps convert this section of code into CASE statement?
+!  AGGREGATE EQUIPMENT	!TODO - Perhaps convert this section of code into CASE statement?
 !*******************************************************************
       DO 800 Y=RECSyear,EndYr
         Z=Y
@@ -15188,7 +15286,7 @@ END SUBROUTINE RFRZADD
  800  CONTINUE
 
 !*******************************************************************
-!  CALCULATE EQUIPMENT CONSUMPTION FOR RECSYear	!kj - Seems like these could probably be combined into a better loop (EU=1,9) or CASE statement
+!  CALCULATE EQUIPMENT CONSUMPTION FOR RECSYear	!TODO - Seems like these could probably be combined into a better loop (EU=1,9) or CASE statement
 !*******************************************************************
       DO 100 D=1,mNumCR-2
         DO 100 B=1,mNumBldg
@@ -15199,13 +15297,10 @@ END SUBROUTINE RFRZADD
             EQC=RTCLEQCL(RECCL)
             EQCEQCN(RECSYear-BaseYr+1,RECCL,B,D)=EQCESE(RECSYear,RECCL,B,D)*EQCUEC(D,RECCL,B)
 
-!   FIND THE RECORD NUMBERS FOR THE GROUND-SOURCE AND ELECTRIC AIR-SOURCE HEAT PUMPS FOR HEATING
+            ! FIND THE RECORD NUMBERS FOR THE GROUND-SOURCE AND ELECTRIC AIR-SOURCE HEAT PUMPS FOR HEATING !GeoFix - is this still necessary?
             IF(RTCLNAME(RECCL).EQ.'GEO_HP') RECCLGHP=RECCL
             IF(RTCLNAME(RECCL).EQ.'ELEC_HP') RECCLEHP=RECCL
  10       CONTINUE
-
-! GEOTHERMAL HP
-          GEEQCN(RECSYear-BaseYr+1,1,B,D)=(EQCESE(RECSYear,RECCLGHP,B,D)*EQCUEC(D,RECCLGHP,B)*.2)*WHRFOSS(D,RECSYear-BaseYr+1)/3412.  !STEOhr	!kj - Why *0.2?
 
           EU = 2             ! SPACE COOLING SECTION OF THE DATA
 
@@ -15213,7 +15308,7 @@ END SUBROUTINE RFRZADD
             EQC=RTCLEQCL(RECCL)
             EQCEQCN(RECSYear-BaseYr+1,RECCL,B,D)=EQCESE(RECSYear,RECCL,B,D)*EQCUEC(D,RECCL,B)
 
-!   FIND THE EQUIPMENT CLASS NUMBERS FOR GEOTHERMAL AND ELECTRIC AIR-SOURCE HEAT PUMPS FOR COOLING
+            ! FIND THE EQUIPMENT CLASS NUMBERS FOR GEOTHERMAL AND ELECTRIC AIR-SOURCE HEAT PUMPS FOR COOLING
             IF(RTCLNAME(RECCL).EQ.'GEO_HP') THEN
               EQCGHP=RECCL
 !              RECCLGHP=EQCGHP+RTCLEUPT(EU)
@@ -15225,9 +15320,6 @@ END SUBROUTINE RFRZADD
                RECCLEHP=RECCL
             ENDIF
  20       CONTINUE
-
-         !GEOTHERMAL HEAT PUMP
-          GEEQCN(RECSYear-BaseYr+1,2,B,D)= (EQCESE(RECSYear,RECCLGHP,B,D)*EQCUEC(D,RECCLGHP,B)*.2)*WHRFOSS(D,RECSYear-BaseYr+1)/3412.  !STEOhr	!kj - why *0.2?
 
          EU = 3             ! CLOTHES WASHER SECTION OF THE DATA
          DO 21 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
@@ -15299,7 +15391,8 @@ END SUBROUTINE RFRZADD
  984  FORMAT(A4,',',I2,',',I2,',',A2,',',A8,',',I4,',',F12.0,',',I13,',',I3,',',A5)    !eu
  985  FORMAT(A7,A5,A5,A5,A9,A5,A8,A12,A11,A8)
  986  FORMAT(A7,A5,A5,A5,A9,A8,A5,A7,A6,A12,A12,6A10,A12,A13,A11,A13,A9,10a13)    !Utility_invest
- 987  FORMAT(A8,',',I4,',',I4,',',A2,',',A8,',',A10,',',I4,2(',',F9.4),23(',',I11))    !Utility_invest
+ ! attempt to get rid of excess whitespace in enduse and issues with REPINVEST
+ 987  FORMAT(A,',',I4,',',I4,',',A2,',',A8,',',A10,',',I4,2(',',F9.4),4(',',F12.0),19(',',I11))    !Utility_invest
  988  FORMAT(1X,A8,1X,I4,1X,I4,1X,A2,1X,A8,1X,A8,1X,I4,2(1X,I11))
  989  FORMAT(A4,',',I2,',',I2,',',A2,',',A8,',',I4,',',F12.0,',',I13,',',A5)    !eu
  990  FORMAT(A8,',',I4,',',I4,',',A2,',',A8,',',A8,',',I4,2(',',F9.4),11(',',f11.0))    !Utility_invest
@@ -15322,7 +15415,7 @@ END SUBROUTINE RFRZADD
        DO 150 B=1,mNumBldg
 !       DO 150 Y=RECSYear+1,EndYr
         DO 150 Y=RECSYear+1,LastYr+BaseYr-1
-          DO 140 EU = 1,9	!kj - replace 9 with variable for last end use number
+          DO 140 EU = 1,9	!TODO - replace 9 with variable for last end use number
           SR=EUNAME(EU)
           TYPE = RTTYPECT(EU)
           DO 140 RECTY=RTTYEUPT(EU)+1,RTTYEUPT(EU+1)
@@ -15361,21 +15454,23 @@ END SUBROUTINE RFRZADD
 
                 IF(EU.EQ.1) THEN !Calculate shell investment and subsidies with heating system records only
                   WRITE(OUTFILE,987) SR,D,B,FL,RTCLNAME(RECCL),RTTYNAME(RECTY),Y , RSNEFDB1(Y1,RECCL,B,D), RSEEFDB1(Y1,RECCL,B,D),&
-                  INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)),INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)),&
-                  INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty))),   & !Utility_invest  Investment excludes installation costs, so use rtresub for investment only
-                  INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty))),   & !Utility_invest  Investment excludes installation costs for retrofit equipment because of way heat pump costs are split between heating & cooling (and replacement versus new)
+                  HEATINGTYPEPURCH(Y,TYPE,B,D,1),HEATINGTYPEPURCH(Y,TYPE,B,D,2),&
+                  HEATINGTYPEPURCH(Y,TYPE,B,D,1)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty)),   & !Utility_invest  Investment excludes installation costs, so use rtresub for investment only
+                  ! 1381 REPINVEST
+                  HEATINGTYPEPURCH(Y,TYPE,B,D,2)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty)),   & !Utility_invest  Investment excludes installation costs for retrofit equipment because of way heat pump costs are split between heating & cooling (and replacement versus new)
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)*rtresub(recty)), &  ! New federal subsidy  !CPPinvest
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)*rteqsub(recty)), &  ! Replacement federal subsidy  !CPPinvest
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)*(rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty))), & !Utility_invest  New non-federal subsidy  !CPPinvest
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)*(rteqsubn(recty)+FLOAT(EPA111D)*RTEQSUB111D(recty))), & !Utility_invest  Replacement non-federal subsidy  !CPPinvest
                   (INT(SHELLBUILDS(Y,EQTYPE,S,B,D)),S=1,nShellTypes), &
-                  (INT((shellinvest (y,RECCL,s,b,d)+shellsubsidy (y,RECCL,s,b,d))*ifix(shellbuilds(Y,EQTYPE,S,B,D))),S=1,nShellTypes), &  !add the subsidy back in for investment includes 111D subsidies
-                  (INT(shellsubsidy(y,RECCL,s,b,d)*ifix(shellbuilds(Y,EQTYPE,S,B,D))),S=1,nShellTypes)
+                  (INT((shellinvest (y,RECCL,s,b,d)+shellsubsidy (y,RECCL,s,b,d))*nint(shellbuilds(Y,EQTYPE,S,B,D))),S=1,nShellTypes), &  !add the subsidy back in for investment includes 111D subsidies
+                  (INT(shellsubsidy(y,RECCL,s,b,d)*nint(shellbuilds(Y,EQTYPE,S,B,D))),S=1,nShellTypes)
                  ELSE  !other equipment
                   WRITE(OUTFILE,987) SR,D,B,FL,RTCLNAME(RECCL),RTTYNAME(RECTY),Y , RSNEFDB1(Y1,RECCL,B,D), RSEEFDB1(Y1,RECCL,B,D),&
-                  INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)),INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)),&
-                  INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty))),   & !Utility_invest   Add back in the subsidy, which was taken out earlier ((..1) is new construction (..2) replacements)
-                  INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty))),   & !Utility_invest   Investment excludes installation costs for retrofit equipment because of way heat pump costs are split between heating & cooling (and replacement versus new)
+                  HEATINGTYPEPURCH(Y,TYPE,B,D,1),HEATINGTYPEPURCH(Y,TYPE,B,D,2),&
+                  HEATINGTYPEPURCH(Y,TYPE,B,D,1)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty)),   & !Utility_invest   Add back in the subsidy, which was taken out earlier ((..1) is new construction (..2) replacements)
+                  ! 1381 REPINVEST
+                  HEATINGTYPEPURCH(Y,TYPE,B,D,2)*(rtrecost(recty)+rtresub(recty)+rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty)),   & !Utility_invest   Investment excludes installation costs for retrofit equipment because of way heat pump costs are split between heating & cooling (and replacement versus new)
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)*rtresub(recty)),&                    !New federal subsidy. For subsidies, account for all components - here new construction, just capital subsidies  !CPPinvest
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,2)*rteqsub(recty)),&                    !Replacement federal subsidy. For replacement purchases, include rteqsub which includes subsidies for total installed costs (including labor)  !CPPinvest
                   INT(HEATINGTYPEPURCH(Y,TYPE,B,D,1)*(rtresubn(recty)+FLOAT(EPA111D)*RTRESUB111D(recty))),&                   !Utility_invest  New non-federal subsidy  !CPPinvest
@@ -15398,7 +15493,7 @@ END SUBROUTINE RFRZADD
       OUTFILE=FILE_MGR('C','RESDEQP',.FALSE.) !Close the output file
 
 !*******************************************************************
-      FN='RESDBOUT.TXT'
+      FN='RDM_DBOUT.TXT'
       OPEN(23,FILE=FN,FORM='FORMATTED')
 !*******************************************************************
 !*******************************************************************
@@ -15407,8 +15502,8 @@ END SUBROUTINE RFRZADD
       EU = 1             ! SPACE HEATING SECTION OF THE DATA
       SR='HT'
       WRITE(23,985) 'ENDUSE,','CDIV,','BLDG,','FUEL,','EQPCLASS,','YEAR,','EQSTOCK,','CONSUMPTION,','HOUSEHOLDS,','BULBTYPE'
-      DO 151 D=1,mNumCR-2
-       DO 151 B=1,mNumBldg
+      DO 141 D=1,mNumCR-2 !GeoFix
+       DO 141 B=1,mNumBldg !GeoFix
          DO 141 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
             E=RTCLEQCL(RECCL)
 
@@ -15441,34 +15536,25 @@ END SUBROUTINE RFRZADD
               IF ((RECCL.EQ.6).AND.(B.EQ.1)) bb=BNCHFCT(Y1,4,D)*1000000.  !LPG_FA
               IF ((RECCL.EQ.7).AND.(B.EQ.1)) bb=BNCHFCT(Y1,3,D)*1000000.  !DIST_FA
                 IF (bb+EQCEQCN(Y1,RECCL,B,D).LE.0.) THEN !Set negative consumption equal to zero
-			      bb=0.
-			      EQCEQCN(Y1,RECCL,B,D)=0.
-			    ENDIF
-                WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y, &
-                  HEATERS(Y,E,B,D),INT(bb+EQCEQCN(Y1,RECCL,B,D))
-              IF ((RECCL.EQ.5).AND.(B.EQ.1)) THEN  !KERO_FA
-               bb=BNCHFCT(Y1,3,D)  !KeroBench	!kj - Should this be changed? F=3 for distillate + kerosene; F=5 for kerosene (no longer used)
-               WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y, &
-                  HEATERS(Y,E,B,D),INT(bb*EQCEQCN(Y1,RECCL,B,D))
+                  bb=0.
+                  EQCEQCN(Y1,RECCL,B,D)=0.
               ENDIF
-             ENDIF
+              WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,HEATERS(Y,E,B,D),INT(bb+EQCEQCN(Y1,RECCL,B,D))
+              IF ((RECCL.EQ.5).AND.(B.EQ.1)) THEN  !KERO_FA
+                bb=BNCHFCT(Y1,3,D)  !KeroBench	!TODO - Should this be changed? F=3 for distillate + kerosene; F=5 for kerosene (no longer used)
+                WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,HEATERS(Y,E,B,D),INT(bb*EQCEQCN(Y1,RECCL,B,D))
+              ENDIF
+            ENDIF
  141     CONTINUE
-
-         FL='GE'
-         DO Y=RECSYear,LastYr+(BaseYr-1)
-            Y1=Y-BaseYr+1
-            WRITE(23,989) SR,D,B,FL,HQ(nHeatClasses+1),Y,HEATERS(Y,RECCLGHP,B,D),INT(GEEQCN(Y1,1,B,D))
-         ENDDO
- 151  CONTINUE
 
 !*******************************************************************
 !  COOLING EQUIPMENT
 !*******************************************************************
       EU = 2             ! SPACE COOLING SECTION OF THE DATA
       SR='CL'
-      DO 180 D=1,mNumCR-2
-       DO 180 B=1,mNumBldg
-        DO 170 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
+      DO 170 D=1,mNumCR-2 !GeoFix
+        DO 170 B=1,mNumBldg !GeoFix
+          DO 170 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
             E=RTCLEQCL(RECCL)
 
 !   FIND THE EQ CLASS NUMBER FOR THE GROUND-SOURCE HEAT PUMP FOR COOLING
@@ -15502,13 +15588,6 @@ END SUBROUTINE RFRZADD
         WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,COOLERS(Y,E,B,D),INT(EQCEQCN(Y1,RECCL,B,D)+bb)
  170    CONTINUE
 
-         FL='GE'
-         DO Y=RECSYear,LastYr+(BaseYr-1)
-           Y1=Y-BaseYr+1
-           WRITE(23,989) SR,D,B,FL,CQ(nCoolClasses+1),Y,COOLERS(Y,EQCGHP,B,D),INT(GEEQCN(Y1,2,B,D))
-         ENDDO
- 180  CONTINUE
-
 !*******************************************************************
 !  CLOTHES WASHERS
 !*******************************************************************
@@ -15516,11 +15595,11 @@ END SUBROUTINE RFRZADD
       SR='CW'
       FL='EL'
       DO 171 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
-      DO 171 D=1,mNumCR-2
-       DO 171 B=1,mNumBldg
-         DO 171 Y=RECSYear,LastYr+(BaseYr-1)
-            Y1=Y-BaseYr+1
-               WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,CLOTHE(Y,B,D),INT(EQCEQCN(Y1,RECCL,B,D))
+        DO 171 D=1,mNumCR-2
+          DO 171 B=1,mNumBldg
+            DO 171 Y=RECSYear,LastYr+(BaseYr-1)
+              Y1=Y-BaseYr+1
+              WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,CLOTHE(Y,B,D),INT(EQCEQCN(Y1,RECCL,B,D))
 171  CONTINUE
 
 !*******************************************************************
@@ -15530,11 +15609,11 @@ END SUBROUTINE RFRZADD
       SR='DW'
       FL='EL'
       DO 172 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
-      DO 172 D=1,mNumCR-2
-       DO 172 B=1,mNumBldg
-         DO 172 Y=RECSYear,LastYr+(BaseYr-1)	!kj - LastYr+(BaseYr-1) had been EndYr
-           Y1=Y-BaseYr+1
-           WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,DISHW(Y,B,D),INT(EQCEQCN(Y1,RECCL,B,D))
+        DO 172 D=1,mNumCR-2
+          DO 172 B=1,mNumBldg
+            DO 172 Y=RECSYear,LastYr+(BaseYr-1)	!TODO - verify; LastYr+(BaseYr-1) had been EndYr
+              Y1=Y-BaseYr+1
+              WRITE(23,989) SR,D,B,FL,RTCLNAME(RECCL),Y,DISHW(Y,B,D),INT(EQCEQCN(Y1,RECCL,B,D))
  172  CONTINUE
 
 !*******************************************************************
@@ -15543,8 +15622,8 @@ END SUBROUTINE RFRZADD
       EU = 5             ! WATER HEATING SECTION OF THE DATA
       SR='HW'
       DO 200 D=1,mNumCR-2
-       DO 200 B=1,mNumBldg
-       DO 190 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
+        DO 200 B=1,mNumBldg
+          DO 190 RECCL=RTCLEUPT(EU)+1,RTCLEUPT(EU+1)
             E=RTCLEQCL(RECCL)
             IF (RTFUEL(RECCL).EQ.4) THEN
               FL='EL'
@@ -16025,16 +16104,16 @@ END SUBROUTINE RFRZADD
 
       DO 361 D=1,mNumCR-2
         DO 361 B=1,mNumBldg
-          DO 361 E=4,7	!kj - remove 5 and 6 from write statement because kerosene and coal no longer used; may require removing two placeholder columns from RSMISC.txt secondary heating inputs
+          DO 361 E=4,7	!TODO - remove 5 and 6 from write statement because kerosene and coal no longer used; may require removing two placeholder columns from RSMISC.txt secondary heating inputs
             DO 361 Y=RECSYear,LastYr+(BaseYr-1)
               Y1=Y-BaseYr+1
               IF (E .EQ. 4) THEN
                 FL='LG'
                 bb=1.0 ! bnchfct(y1,e,d)
-              ELSEIF (E .EQ. 5) THEN	!kj - remove from write statement (but maintain correct fuel numbering)
+              ELSEIF (E .EQ. 5) THEN	!TODO - remove from write statement (but maintain correct fuel numbering)
                 FL='KS'
                 bb=bnchfct(y1,e,d)
-              ELSEIF (E .EQ. 6) THEN	!kj - remove from write statement (but maintain correct fuel numbering)
+              ELSEIF (E .EQ. 6) THEN	!TODO - remove from write statement (but maintain correct fuel numbering)
                 FL='CL'
                 bb=bnchfct(y1,e,d)
               ELSEIF (E .EQ. 7) THEN
@@ -16186,12 +16265,12 @@ END SUBROUTINE RFRZADD
          !Y1=Y-BaseYr+1
          Y1=CurIYr
 
-         IF(CurCalYr .LT. 2017) THEN  !comment this block out out so savings can be calculated in years prior to 2017 for EE runs?	!kj - should the 2017 be changed?
+         IF(CurCalYr .LT. 2017) THEN  !comment this block out out so savings can be calculated in years prior to 2017 for EE runs?	!TODO - should the 2017 be changed?
           DO D=1,mNumCR-2
            SAVE111RES(D,Y1)=0. !Residential sector savings in billions of kilowatthours
            COST111RES(D,Y1)=0. !Residential costs billions of 1987$
           ENDDO
-         RETURN  ! DON'T RETURN DURING TESTING MODE
+         RETURN  !DON'T RETURN DURING TESTING MODE
          ENDIF
 
 !        Calculate savings and initialize cost to zero
@@ -16202,7 +16281,7 @@ END SUBROUTINE RFRZADD
 
        DO 150 D=1,mNumCR-2
          DO 150 B=1,mNumBldg
-           DO 140 EU = 1,9	!kj - replace 9 with variable for last end use number
+           DO 140 EU = 1,9	!TODO - replace 9 with variable for last end use number
              TYPE = RTTYPECT(EU)
              DO 140 RECTY=RTTYEUPT(EU)+1,RTTYEUPT(EU+1)
                !CHECK TO SEE IF RECORD IS VALID FOR CURRENT YEAR, CurCalYr
@@ -16241,7 +16320,7 @@ END SUBROUTINE RFRZADD
 
          ! Before exit convert to billions of 1987$ & multiply incentive payments for approximate direct and indirect costs (slightly higher costs than EIA-861 for 2012)
          DO D=1,mNumCR-2
-           COST111RES(D,Y1)= 1.5*(COST111RES(D,Y1)*MC_JPGDP(-2)/MC_JPGDP(RTEKDOLLARYR-BaseYr+1) )/10**9  ! scale the incentive payment costs here to account for program administration	!kj
+           COST111RES(D,Y1)= 1.5*(COST111RES(D,Y1)*MC_JPGDP(-2)/MC_JPGDP(RTEKDOLLARYR-BaseYr+1) )/10**9  ! scale the incentive payment costs here to account for program administration	!TODO - revist use; update or remove as necessary
          ENDDO
 
  !    Add subsidies for distributed generation and deflate from iGenCapCostYr (generally not the same as rsmeqp) as well as convert from $mill to $bill
@@ -16250,11 +16329,13 @@ END SUBROUTINE RFRZADD
           COST111RES(D,Y1)=COST111RES(D,Y1)+ FLOAT(EPA111D)*x111dRenSub(y1,d,nt)*( MC_JPGDP(-2)/MC_JPGDP(iGenCapCostYr-BaseYr+1) )/1000.   !111dren  !EEcosts - costs only accumulate in CPP runs
       152  CONTINUE
 
-      WRITE(9,*)'111d year, division, cost (bill 87$), savings (bkWh)'
+     IF ((PRTDBGR.EQ.1).AND.(EPA111D.EQ.1)) THEN
+      WRITE(9,*)'111d year, division, cost (billion 1987$), savings (bkWh)'
       !Print exactly what gets passed on for integrated debugging only
       DO D=1,mNumCR-2
         WRITE(9,160) Y, D, COST111RES(D,Y1), SAVE111RES(D,Y1)
       ENDDO
+     ENDIF
       160  FORMAT(2I5,2f12.5)
 
 END SUBROUTINE CALC111D
@@ -16275,10 +16356,11 @@ SUBROUTINE RDISTGEN
   !   NEMS VARIABLES FROM RESD AND LDSM/EMM
   !*******************************************
   INTEGER MaxNiche
-  PARAMETER (MaxNiche=16) !Maximum number of distributed generation niches per census division (i.e., maximum iNiche) from RSGENTK.txt !DGniches
+  PARAMETER (MaxNiche=26) !Maximum number of distributed generation niches per census division (i.e., maximum iNiche) from RSGENTK.txt !DGniches
   REAL*4 xExistPen
 
   !----LOCAL VARIABLES AND PARAMETERS INTERNAL TO RDISTGEN
+  
 
    !DGrate variables for switching between retail space cooling end-use electricity rates and weighted marginal/retail electricity rates for solar PV calculations
     LOGICAL DGrateBlend  !DGrate - switch to turn on blending of retail and wholesale electricity rate
@@ -16287,8 +16369,8 @@ SUBROUTINE RDISTGEN
     REAL*4 DGretWt(MNUMCR)  !DGrate - CD-level weight for retail electricity rate
 
    !DATA FOR PAYBACK COMPUTATION
-    INTEGER iPayback(30),iSimplePayback	!kj - iSimplePayback variable not used?
-    REAL*4  xMaxPen,xSimplePayback,xPen,xTemp,xTempHH,xTest
+    INTEGER iPayback(30),iSimplePayback	!TODO - iSimplePayback variable not used?
+    REAL*8  xMaxPen,xSimplePayback,xPen,xTemp,xTempHH,xTest
 
     !DATA FOR INTERCONNECTION LIMITATION
     REAL*4  XINX(mNumCR-2),xInxDecay(mNumCR-2,mNumYr)
@@ -16309,7 +16391,7 @@ SUBROUTINE RDISTGEN
     REAL*4 xAnnualKWh,XGASINPUT,XWATERHTGMMBTU
     REAL*4 XBTUWASTEHEAT,XEXCESSKWH,xElecAvgUEC
     REAL*4 xSalestoGridPR, xRetailElecPR, xSizefromTaxOptim
-    REAL*4 xUnits, xTrills, xCapacity, xTrillsOwnUse, xfuelusage, xhwbtu, xInvest
+    REAL*8 xUnits, xTrills, xCapacity, xTrillsOwnUse, xfuelusage, xhwbtu, xInvest
 
 !  FOR RPS MODELING
        REAL*4 xRetailElecPRnoRPS, xSalestoGridPrnoRPS, xRPS(nTek,mNumYr)
@@ -16332,7 +16414,7 @@ SUBROUTINE RDISTGEN
        REAL*4 xTxCrPct_Div(mNumYr,mNumCR,nTek)                                            !111dren
        REAL*4 xKW(nTek,mNumYr),xOperHours(nTek),xLossFac(nTek,mNumYr)
        REAL*4 xIntervalCst(nTek,mNumYr)
-       REAL*4 xAlpha,xPenParm,xExogPen(mNumYr,mNumCR,nTek),ExogPVMistie(mNumYr,mNumCR)    !PVzipcalib
+       REAL*8 xAlpha,xPenParm,xExogPen(mNumYr,mNumCR,nTek),ExogPVMistie(mNumYr,mNumCR)    !PVzipcalib
        INTEGER iFirstYr(nTek,mNumYr),iLastYr(nTek,mNumYr), iIntervalYrs(nTek,mNumYr)
        INTEGER iFuelType(nTek),NumTechs,NumYears,NumDiv, iIntervalYrstoUse
        INTEGER iExogHistYr(nTek)                                                          !ExogHist Last year of historical exogenous capacity data
@@ -16355,14 +16437,14 @@ SUBROUTINE RDISTGEN
     REAL*4 xAvgKWH(mNumCR,MaxNiche,3)              !Dimensions: Census Division, MaxNiche, RateLevel (i.e., high, mid/average, and low)
     REAL*4 xRoofAreaPerHH(mNumCR,MaxNiche,3)       !Dimensions: Census Division, MaxNiche, RateLevel (i.e., high, mid/average, and low)
     REAL*4 xRuralPctHH(mNumCR,MaxNiche,3)          !Dimensions: Census Division, MaxNiche, RateLevel (i.e., high, mid/average, and low)
-    REAL*4 xSizefromRoofArea,xSizefromAnnualKWH,xSizeMax,xSizeMin,xCalcKW,xCalcEqCost,xSolarIns    !PVgen
+    REAL*8 xSizefromRoofArea,xSizefromAnnualKWH,xSizeMax,xSizeMin,xCalcKW,xCalcEqCost,xSolarIns    !PVgen
     REAL*4 SolarPVTechPotentialMW(mNumYr,mNumCR)
     REAL*4 SolarPVAvailRoofArea(mNumYr,mNumCR)
-    REAL*4 SolarPVInstalledMW(mNumYr,mNumCR)
+    REAL*8 SolarPVInstalledMW(mNumYr,mNumCR)
     REAL*4 SolarPVUsedRoofArea(mNumYr,mNumCR)
     REAL*4 xSqftPerKW
     REAL*4 xpctPVSuitable             !Percentage of households with a suitable south-facing roof (technical potential)
-    REAL*4 xpctWindSuitable           !Assumed percentage of HH for which wind could be appropriate	!kj - not used
+    REAL*4 xpctWindSuitable           !Assumed percentage of HH for which wind could be appropriate	!TODO - not used
 
 !Distributed Wind Niche Variables
     REAL*4 xWindSpeed(mNumCR,MaxNiche,3)           !Dimensions: Census Division, MaxNiche, RateLevel (i.e., high, mid/average, and low)
@@ -16393,7 +16475,7 @@ SUBROUTINE RDISTGEN
     REAL*4, ALLOCATABLE:: PopDensity (:)            ! PopDensity in ZIP
     REAL*4, ALLOCATABLE:: ElecRate(:)               ! Electric Rate in ZIP
     REAL*4, ALLOCATABLE:: Income_L(:)               ! Initial Value for Iteration Control
-    REAL*4, ALLOCATABLE:: Households_L(:)           ! Initial Value for Iteration Control
+    REAL*8, ALLOCATABLE:: Households_L(:)           ! Initial Value for Iteration Control
     REAL*4, ALLOCATABLE:: PopDensity_L(:)           ! Initial Value for Iteration Control
     REAL*4, ALLOCATABLE:: ElecRate_L(:)             ! Initial Value for Iteration Control
     REAL*4, ALLOCATABLE:: Insol(:)                  !
@@ -16402,31 +16484,32 @@ SUBROUTINE RDISTGEN
     REAL*4 PVPrice                                  ! National level variable
     REAL*4 InputPVPrice                             ! National level variable; used to store unmodified PV price as input from RGENTK.txt  !PVmultiplier
     REAL*4 MonthlyPayment                           ! National level variable
-    REAL*4, ALLOCATABLE:: Lag1Installs(:)           ! Initial Lag1 Installs from Input File
-    REAL*4, ALLOCATABLE:: Lag2Installs(:)           ! Initial Lag2 Installs from Input File
-    REAL*4, ALLOCATABLE:: ProjectedInstalls(:)      ! Contains model projections, used to set lagged installs for subsequent projection years
+    REAL*8, ALLOCATABLE:: Lag1Installs(:)           ! Initial Lag1 Installs from Input File
+    REAL*8, ALLOCATABLE:: Lag2Installs(:)           ! Initial Lag2 Installs from Input File
+    REAL*8, ALLOCATABLE:: ProjectedInstalls(:)      ! Contains model projections, used to set lagged installs for subsequent projection years
     INTEGER, ALLOCATABLE:: PureHurdle(:)            ! PureHurdle in combination with RuralZip determine model coefficient values
     INTEGER, ALLOCATABLE:: RuralZip(:)              ! Density less than 10 HH per square mile
-    REAL*4, ALLOCATABLE:: ModelInstalls(:)          ! For verification that results = R Code values in First Year, for Last Year's Projections Subsequently
-    REAL*4, ALLOCATABLE:: CumUnits(:)               ! For constraining penetration
+    REAL*8, ALLOCATABLE:: ModelInstalls(:)          ! For verification that results = R Code values in First Year, for Last Year's Projections Subsequently
+    REAL*8, ALLOCATABLE:: CumUnits(:)               ! For constraining penetration
+    REAL*8, ALLOCATABLE:: CumUnits_L(:)             ! For constraining penetration; Initial Value for Iteration Control !ONLmod
     REAL*4 CINT(2,3),CHH(2,3),CPD(2,3),CINC(2,3),CINS(2,3), &
             CER(2,3),CCDD(2,3),CPMT(2,3),CIR(2,3),CLAG1(2,3),CLAG2(2,3),CPVP(2,3)  !Sets of model coefficients
     REAL*16 xLogit, xNegBinom                      ! Temporary variables
     INTEGER j                                      ! Index variable for model selection
-    REAL*8 factor0, factor, factor1, factor2, factor3, factor4, factor5, factor6  !PVcontagion
-    INTEGER*2 NumYearsPV                                                 !PVcontagion
+    REAL*8 factor0, factor, factor1, factor2, factor3, factor4, factor5, factor6, factor7  !PVcontagion
+    INTEGER*2 NumYearsPV, lyear                                                 !PVcontagion
     !End of Additional Variable Assignments for Econometric PV Penetration Model    !PVPen
 
 
 !------------------------------------------------------------
 !   TEST FOR TRIGGER TO READ FILE AND BEGIN CALCULATIONS
 !------------------------------------------------------------
-     DGDAT=23  !Unit 23 is RDGENOUT.txt
-     !Unit 23 is also used for the RESDBOUT file and is closed when RDGENOUT is written	!kj - are RDGENOUT and RESDBOUT both referred to as unit 23?
+     DGDAT=23  !Unit 23 is RDM_DGENOUT.txt
+     !Unit 23 is also used for the RDM_DBOUT file and is closed when RDM_DGENOUT.txt is written	!TODO - are RDM_DGENOUT.txt and RDM_DBOUT both referred to as unit 23?
 
 !  NO CALCULATIONS PRIOR TO RECSYear+1
       IF(CurCalYr.LT.RECSYear) RETURN
-      IF(RSYR.EQ.RECSYear) OPEN(DGDAT,FILE='RDGENOUT.txt',FORM='FORMATTED')
+      IF(RSYR.EQ.RECSYear) OPEN(DGDAT,FILE='RDM_DGENOUT.txt',FORM='FORMATTED')
       iCurIYr=RSYR-(BaseYr-1)
       IF(CurCalYr.NE.RECSYear.OR.CURITR.NE.1) GOTO 95
 
@@ -16482,6 +16565,7 @@ SUBROUTINE RDISTGEN
         IF(ALLOCATED(RuralZip)) DEALLOCATE(RuralZip); ALLOCATE(RuralZip(NumZIPs))
         IF(ALLOCATED(ModelInstalls)) DEALLOCATE(ModelInstalls); ALLOCATE(ModelInstalls(NumZIPs))
         IF(ALLOCATED(CumUnits)) DEALLOCATE(CumUnits); ALLOCATE(CumUnits(NumZIPs))
+        IF(ALLOCATED(CumUnits_L)) DEALLOCATE(CumUnits_L); ALLOCATE(CumUnits_L(numzips)) !ONLmod
 
         ZipCode(:)=0
         State(:)=" "
@@ -16503,6 +16587,7 @@ SUBROUTINE RDISTGEN
         RuralZip(:)=0
         ModelInstalls(:)=0
         CumUnits(:)=0
+        CumUnits_L(:)=0 !ONLmod
         IntRate=0
         PVPrice=0
         MonthlyPayment=0
@@ -16529,7 +16614,7 @@ SUBROUTINE RDISTGEN
 !--------------------------------------------------------------
 !   OPEN FILE AND READ/WRITE DATA
       INFILE=FILE_MGR('O','RSGENTK',.FALSE.) !OPEN THE DISTRIBUTED GENERATION TECHNOLOGY MENU
-!      Unit 23 is also used for the ResDBOut file and is closed when ResDBOut is written	!kj - unit 23 is used for both RESDBOUT and RDGENOUT? Doesn't seem to be the case.
+!      Unit 23 is also used for the RDM_DBOUT file and is closed when RDM_DBOUT is written	!TODO - unit 23 is used for both RDM_DBOUT and RDM_DGENOUT? Doesn't seem to be the case.
 
  ! SKIP 20-LINE HEADER AND READ GENERAL CONTROL PARAMETERS AND INPUTS
       READ(INFILE,'(19(/))')
@@ -16538,7 +16623,7 @@ SUBROUTINE RDISTGEN
 
 !  -- NUMBER OF TECHNOLOGIES (3), NUMBER OF MODEL YEARS (mNumYr), AND NUMBER OF MODELED CENSUS DIVISIONS (9)
       READ(INFILE, '(/)')
-      READ(INFILE,*) NumTechs,NumYears,NumDiv	!kj - NumYears and NumDiv could/should be same as other NEMS variables and not read in here
+      READ(INFILE,*) NumTechs,NumYears,NumDiv	!TODO - NumYears and NumDiv could/should be same as other NEMS variables and not read in here
       IF(LPRINT)WRITE(DGDAT,*) NumTechs,NumYears,NumDiv
 
       READ(INFILE,'(/)')
@@ -16654,8 +16739,8 @@ SUBROUTINE RDISTGEN
 !         FUELS
 !  --  iFirstYr IS THE FIRST YEAR A TECHNOLOGY CAN BE PURCHASED
 !  --  iLastYr IS THE LAST YEAR A TECHNOLOGY CAN BE PURCHASED (DON'T
-!         ALLOW TECHNOLOGIES TO "OVERLAP" OR "GAP" (E.G., VINTAGE 1 2015-2019;
-!         VINTAGE 2 2020-2029; VINTAGE 3 2030-2039; VINTAGE 4 2040-2050)
+!         ALLOW TECHNOLOGIES TO "OVERLAP" OR "GAP" (E.G., VINTAGE 1 2020-2029;
+!          VINTAGE 2 2030-2039; VINTAGE 3 2040-2050)
 !  --  xElEff IS THE ELECTRICAL CONVERSION EFFICIENCY OF THE TECHNOLOGY
 !  --  xLossFac IS THE LOSS FACTOR FROM GENERATION TO END USE 'INCLUDES LINE LOSS,
 !         INVERTER LOSSES, ETC....
@@ -16678,7 +16763,7 @@ SUBROUTINE RDISTGEN
                     iIntervalYrs(NT,NV), xAvail(NT,NV), xTxCrPct(NT,NV), xTXCrMaxPerKW(NT,NV), xTXCrMaxPerSys(NT,NV), &
                     (xTxCrPct_Div(nv,iDiv,nt),iDiv=1,mNumCR-2), xTemp, iTemp1, iTemp2  !111dren
 
-             ! Immediately populate the RPS variable mapping vintages to iCurIYr	!kj - why use the temp variable names at all when annualized RPS values are read-in from file?
+             ! Immediately populate the RPS variable mapping vintages to iCurIYr	!TODO - why use the temp variable names at all when annualized RPS values are read-in from file?
              DO iyr=iFirstYr(nt,nv),iLastYr(nt,nv)
               xRPS(nt,iyr-(BaseYr-1))=xTemp
               iNumYrsatRPSBaseRate(nt,iyr-(BaseYr-1))=iTemp1
@@ -16753,7 +16838,7 @@ SUBROUTINE RDISTGEN
       DO iDiv=1,NumDiv  !DGrate
         READ(INFILE,*,END=99) DGmargWt(iDiv),DGretWt(iDiv)  !DGrate
       ENDDO !NumDiv  !DGrate
-	  IF(LPRINT) THEN
+      IF(LPRINT) THEN
         WRITE(DGDAT,*) 'DGmargWt ','DGretWt ','CD'  !DGrate
         DO iDiv=1,NumDiv  !DGrate
           WRITE(DGDAT,*) DGmargWt(iDiv),' ',DGretWt(iDiv),' ',iDiv  !DGrate
@@ -16791,7 +16876,7 @@ SUBROUTINE RDISTGEN
          ENDDO
         ENDDO
 
-        !Assumptions for developing technical potential for PV	!kj
+        !Assumptions for developing technical potential for PV	!TODO - review/update
         ! Based on orientation alone, approximately 50% of HH would have a suitable southwest- to southeast-facing roof surface.
         ! Next, assume that, of the suitably oriented single-family households, only 50% of the roof area is facing south.
         ! Also assume that 40% of this area is unavailable due to shading and other issues like roof impediments.
@@ -16866,6 +16951,8 @@ SUBROUTINE RDISTGEN
               IF (globallearn)THEN
                  ! globallearn=True indicates to include electric generator PV installs in the learning calculations for buildings
                  cumship=CPV_MW(iCurIYr-1) +RPV_MW(iCurIYr-1)+ UPV_MW(iCurIYr-1)
+                 IF (LPRINT) WRITE(DGDAT,*) 'learning cumship is ', cumship
+                 IF (LPRINT) WRITE(DGDAT,*) 'Utility ship is ', UPV_MW(iCurIYr-1)
                 ELSE
                  cumship=CPV_MW(iCurIYr-1) +RPV_MW(iCurIYr-1)
               ENDIF
@@ -16928,7 +17015,7 @@ SUBROUTINE RDISTGEN
             ! Calculate Grid Sales Price
             ! Units are in $/kWh in year dollars of capital costs
             ! Assumed not to be "niche" related
-             xSalestoGridPR=PELME(iDiv,iCurIYr)*.003412*MC_JPGDP(iGenCapCostYr-BaseYr+1)/MC_JPGDP(-2)	!kj - need to update PELME? !DGrate
+             xSalestoGridPR=PELME(iDiv,iCurIYr)*.003412*MC_JPGDP(iGenCapCostYr-BaseYr+1)/MC_JPGDP(-2)	!TODO - need to update PELME? !DGrate
 
             DO iNiche=1,NumPVNiche(iDiv)          !Add Insolation and Wind Niches
             DO iRateLevel=1,3                     !Add Niches for High=1, Mid=2 and Low=3 Average Rates
@@ -16943,13 +17030,13 @@ SUBROUTINE RDISTGEN
             IF(NT.EQ.2)GOTO 150  ! Fuel Cells
 
               ! CALCULATION OF KWH SUPPLIED FOR Solar
-              !  The quantity "77.*(.14/xElEff)*xKW" represents the estimated module square footage.
+              !  The quantity "77.*(.14/xElEff)*xKW" represents the estimated module square footage.	!TODO - review/update values?
               !  Thus the kWh supplied is:
               !      annualkwh=eff*insolation*sqftperkw*systemkw*lossadj
               !  where lossadj represents average non-optimality factor (orientation effects, etc.)
               !  Notes: Future efficiency gains will result in a smaller collector footprint for a given kW capacity.
               !         Solar insolation is in kWh/m^2/day convert to annual per square foot (365.25/10.8)
-              xSqftperKW=77.*.14/xElEff(NT,NV)	!kj
+              xSqftperKW=77.*.14/xElEff(NT,NV)	!TODO - review/update values?
 
               ! Optimize capacity: set maximums based on 80% of the optimally oriented roof surface area is available (e.g., non-shaded)         !PVgen
               !  Assume only 40% of roof area is suitable for PV to allow for non-optimal orientation and/or complex roof angles.                !PVgen
@@ -16957,9 +17044,9 @@ SUBROUTINE RDISTGEN
               IF (CurCalYr>=RECSYear) THEN                                                                                                       !PVgen
                  xSolarIns=xSolarInsolation(iDiv,iNiche,IRateLevel)                                                                              !PVgen
                  ! transform solar insolation to account for unknown orientations                                                                !PVgen
-                 xSolarIns= -1.0533 + 1.4325*xSolarIns - 0.0652*xSolarIns**2                                                                     !PVgen	!kj
-                 xSizefromRoofArea= (xRoofAreaPerHH(iDiv,iNiche,iRateLevel)*0.8*0.4*0.75/xSqftperKW)                                             !PVgen	!kj
-                 xSizefromAnnualKWH=xElecAvgUEC/(xElEff(nt,nv)*xSolarIns*365.25/10.8*xSqftperKW*xLossFac(NT,NV))                                 !PVgen	!kj
+                 xSolarIns= -1.0533 + 1.4325*xSolarIns - 0.0652*xSolarIns**2                                                                     !PVgen	!TODO - review/update values?
+                 xSizefromRoofArea= (xRoofAreaPerHH(iDiv,iNiche,iRateLevel)*0.8*0.4*0.75/xSqftperKW)                                             !PVgen	!TODO - review/update values?
+                 xSizefromAnnualKWH=xElecAvgUEC/(xElEff(nt,nv)*xSolarIns*365.25/10.8*xSqftperKW*xLossFac(NT,NV))                                 !PVgen	!TODO - replace 365.25 with reference to LEAPYR? check for other instances of 365.25
 
                  ! also optimize to maximize the after tax cost per kW based on credits
                  xSizefromTaxOptim=xSizeMax !set to max size if no cap on tax credit
@@ -16971,12 +17058,12 @@ SUBROUTINE RDISTGEN
                  IF(xTaxCreditPct>0. .AND. xtaxcreditmax>0.) xSizefromTaxOptim = (xtaxcreditmax/xTaxCreditPct)/(xAdjCost+xInstCost(NT,NV))
                  xSizeMax=10.      !set absolute maximum size
                  xSizeMin=1.       !set absolute minimum size
-                 xCalcKW=FLOAT(ifix(max(min(xSizefromRoofArea,xSizefromTaxOptim,xSizeMax),xSizeMin)))    !removed RECS average generation constraint
+                 xCalcKW=FLOAT(nint(max(min(xSizefromRoofArea,xSizefromTaxOptim,xSizeMax),xSizeMin)))    !removed RECS average generation constraint
               ELSE
                  xCalcKW=xKW(nt,nv)  !set size to menu capacity
               ENDIF
 
-              xAnnualKWh=xElEff(NT,NV)*xSolarIns*365.25/10.8*xSqftperKW*xCalcKW*xLossFac(NT,NV)    !PVgen	!kj
+              xAnnualKWh=xElEff(NT,NV)*xSolarIns*365.25/10.8*xSqftperKW*xCalcKW*xLossFac(NT,NV)    !PVgen	!TODO - replace 365.25 with reference to LEAPYR?
 
               !   The internal NEMS energy prices are converted to "current year" dollars (the
               !    dollar year for the DG capacity costs) from the internal NEMS year of 1987 dollars.
@@ -17084,7 +17171,7 @@ SUBROUTINE RDISTGEN
               !  wind speed (.0645 -0.0670*xMpS +.0210*xMpS**2 -.0011*xMpS**3).
               xMpS=xWindSpeed(iDiv,iNiche,iRateLevel)
               xAnnualKWh=xElEff(NT,NV)/xElEff(nt,1)* &
-               (.0645 -0.0670*xMpS +.0210*xMpS**2 -.0011*xMpS**3)*xKW(NT,NV)*8760.*xLossFac(NT,NV)	!kj
+               (.0645 -0.0670*xMpS +.0210*xMpS**2 -.0011*xMpS**3)*xKW(NT,NV)*8760.*xLossFac(NT,NV)	!TODO - review/update values?
 
               ! Compare annual Wind generation to building use, value own-use at the retail price
               !  and grid sales at the grid price
@@ -17138,7 +17225,7 @@ SUBROUTINE RDISTGEN
               ! COMPUTE ANNUAL KWH GENERATION
               xAnnualKWh=xOperHours(NT) * xAvail(NT,NV) * xKW(NT,NV) * xLossFac(NT,NV)
               ! Average UEC for natural gas water heating (main & secondary) from RECS (Annual MMBtu per household)
-              XWATERHTGMMBTU=18.1
+              XWATERHTGMMBTU=17.5
 
               ! COMPUTE FUEL INPUT IN MMBTU
               XGASINPUT=.003412 * xKW(NT,NV)/xElEff(NT,NV) * xOperHours(NT) * xAvail(NT,NV)
@@ -17279,7 +17366,7 @@ SUBROUTINE RDISTGEN
  10   FORMAT(1X,I4,8F10.2,i4,f10.2)
 
             xSimplePayback=29.
-            ilife=ifix(xlife)
+            ilife=nint(xlife)
             DO IYR=1,30
               IF(iPayback(iyr).EQ.0)THEN
                 xSimplePayback=FLOAT(IYR-1)  !Allow 1-year and less simple paybacks
@@ -17304,11 +17391,11 @@ SUBROUTINE RDISTGEN
 !--------------------------------------------------
 11          CONTINUE
             xMaxPen=xPenParm/xSimplePayback
-            ! Maximum penetration into new construction capped at 75%.
+            ! Maximum penetration into new construction capped at 75%.	!TODO - review/update values?
             ! The cap would affect projects with paybacks of less than approximately 5 months.
             XValue=FLOAT(CurCalYr-(RECSYear+1))
-            IF(XValue.GT.25.0) XValue=25.0  ! currently limit penetration beyond 2030	!kj - hasn't been updated since 2005 was base year; 25 needs to be changed, or this line needs to be removed
-            xPen=min(0.75,xMaxPen-xMaxPen/(1.+xMaxPen*EXP(xAlpha*(XValue-xSimplePayback))))	!kj
+            IF(XValue.GT.25.0) XValue=25.0  ! currently limit penetration beyond 2030	!TODO - hasn't been updated since 2005 was base year; 25 needs to be changed, or this line needs to be removed
+            xPen=min(0.75,xMaxPen-xMaxPen/(1.+xMaxPen*EXP(xAlpha*(XValue-xSimplePayback))))	!TODO - review/update values?
 
             IF(LPRINT) WRITE(DGDAT,*) 'CurCalYr,NT,NV,iDiv',CurCalYr,NT,NV,iDiv,'EQ CLASS ', & !DGrate - turned off for DGrate testing
               aEquipName(NT,NV),'1ST YEAR ',iFirstYr(NT,NV),'PAYBACK=',xSimplePayback,'xPen= ',xPen !DGrate - turned off for DGrate testing
@@ -17329,13 +17416,13 @@ SUBROUTINE RDISTGEN
 
             !  Account for penetration into existing housing units
             !  Penetration into existing is based on penetration into new construction with an assumed upper bound
-            xExistPen=min(xPen/40.0,0.005)  !Penetration cap for existing	!kj
+            xExistPen=min(xPen/40.0,0.005)  !Penetration cap for existing	!TODO - review/update values?
 
             xTemp=xPen*xInxDecay(iDiv,iCurIYr)*HSEADD(CurCalYr,1,iDiv) &             !Penetration into New Construction !INXLIMIT
                +(xExogPen(iCurIYr,iDiv,NT)-xExogPen(iCurIYr-1,iDiv,NT))/xCalcKW  &   !Add Current Year Exogenous Units  !convert to kW
                +xExistPen*xInxDecay(iDiv,iCurIYr)*(EH(CurCalYr,1,iDiv)-Units(iCurIYr-1,iDiv,NT))  !Existing Construction
             xTemp=xTemp*xHHShare(iDiv,iNiche,iRateLevel)                 !Scale down to suitable HH for niche share of HH
-            xTemp = FLOAT(ifix(xTemp*100.+.5))/100.                      !Eliminate fractional units < 0.01
+            xTemp = FLOAT(nint(xTemp*100.+.5))/100.                      !Eliminate fractional units < 0.01
             xTempHH=(HSEADD(CurCalYr,1,iDiv)+EH(CurCalYr,1,iDiv))*xHHShare(iDiv,iNiche,iRateLevel)  !HH in niche
             !--END OF PENETRATION
 
@@ -17384,7 +17471,6 @@ SUBROUTINE RDISTGEN
 !--------------------------------------------
 !  NEW ZIP CODE-BASED PV MODEL        !PVPen
 !--------------------------------------------
-
           ! THIS IS JUST OUTSIDE OF THE RATE LEVEL, CLIMATE ZONE NICHE LOOPS
           !  ALL RESULTS HERE ARE FOR CENSUS DIVISIONS
           ! USEZIPMODEL IF HERE
@@ -17400,21 +17486,22 @@ SUBROUTINE RDISTGEN
                !IF (LPRINT) WRITE(DGDAT,*) 'PVmultiplier_calc', InputPVPrice/(xCapCost(1,EstYear-RECSYear+1)/1000*(1-xTxCrPct(1,EstYear-RECSYear+1))), 'EstYear-RECSYear+1', EstYear-RECSYear+1, &    !PVmultiplier
                !'xCapCost(1,EstYear-RECSYear+1)', xCapCost(1,EstYear-RECSYear+1), 'xTxCrPct(1,EstYear-RECSYear+1)', xTxCrPct(1,EstYear-RECSYear+1)                                    !PVmultiplier
 
-!             PVPrice=(xAdjCost+xInstCost(NT,NV))*(1.-xTaxCreditPct-xTxCrPct_Div(nv,iDiv,nt) )*InputPVPrice/((xCapCost(1,EstYear-RECSYear+1)+xInstCost(1,EstYear-RECSYear+1))/1000*(1-xTxCrPct(1,EstYear-RECSYear+1)))  !PVmultiplier	!kj - The line above should use total installed cost, not just capital cost. Test this code further, but verify costs to sum)
-               !IF (LPRINT) WRITE(DGDAT,*) 'PVmultiplier_calc', InputPVPrice/((xCapCost(1,EstYear-RECSYear+1)+xInstCost(1,EstYear-RECSYear+1))/1000*(1-xTxCrPct(1,EstYear-RECSYear+1))), 'EstYear-RECSYear+1', EstYear-RECSYear+1, &    !PVmultiplier	!kj - The line above should use total installed cost, not just capital cost. Test this code further, but verify costs to sum)
-               !'xCapCost(1,EstYear-RECSYear+1)', xCapCost(1,EstYear-RECSYear+1), 'xInstCost(1,EstYear-RECSYear+1)', xInstCost(1,EstYear-RECSYear+1), 'xTxCrPct(1,EstYear-RECSYear+1)', xTxCrPct(1,EstYear-RECSYear+1)  !PVmultiplier	!kj - The line above should use total installed cost, not just capital cost. Test this code further, but verify costs to sum)
+!             PVPrice=(xAdjCost+xInstCost(NT,NV))*(1.-xTaxCreditPct-xTxCrPct_Div(nv,iDiv,nt) )*InputPVPrice/((xCapCost(1,EstYear-RECSYear+1)+xInstCost(1,EstYear-RECSYear+1))/1000*(1-xTxCrPct(1,EstYear-RECSYear+1)))  !PVmultiplier	!TODO - The line above should use total installed cost, not just capital cost. Test this code further, but verify costs to sum)
+               !IF (LPRINT) WRITE(DGDAT,*) 'PVmultiplier_calc', InputPVPrice/((xCapCost(1,EstYear-RECSYear+1)+xInstCost(1,EstYear-RECSYear+1))/1000*(1-xTxCrPct(1,EstYear-RECSYear+1))), 'EstYear-RECSYear+1', EstYear-RECSYear+1, &    !PVmultiplier	!TODO - The line above should use total installed cost, not just capital cost. Test this code further, but verify costs to sum)
+               !'xCapCost(1,EstYear-RECSYear+1)', xCapCost(1,EstYear-RECSYear+1), 'xInstCost(1,EstYear-RECSYear+1)', xInstCost(1,EstYear-RECSYear+1), 'xTxCrPct(1,EstYear-RECSYear+1)', xTxCrPct(1,EstYear-RECSYear+1)  !PVmultiplier	!TODO - The line above should use total installed cost, not just capital cost. Test this code further, but verify costs to sum)
 
-			   MonthlyPayment= ( PVPRICE * (INTRATE/12.) / (1.-(1.+INTRATE/12.)**(-360.)) ) !assume a 360 month mortgage
+             MonthlyPayment= ( PVPRICE * (INTRATE/12.) / (1.-(1.+INTRATE/12.)**(-360.)) ) !assume a 360 month mortgage
             !IF (LPRINT) WRITE(DGDAT,*) 'USING NEW MODEL National Level Variables ', IntRate, PVPrice, MonthlyPayment
           ENDIF
 
           !Process ZIP codes
+
            DO i=1,NumZIPs
              IF(CenDiv(i) .NE. iDiv) CYCLE
-             CumUnits(i) = 0.0
+!             CumUnits(i) = 0.0 !ONLmod: remove since this keeps it from accumulating within each ZIP code
              xSolarIns=INSOL(i)                                                 !PVgen
              !Transform solar insolation to account for unknown orientations    !PVgen
-             xSolarIns= -1.0533 + 1.4325*xSolarIns - 0.0652*xSolarIns**2        !PVgen	!kj - update values using PVwatts?
+             xSolarIns= -1.0533 + 1.4325*xSolarIns - 0.0652*xSolarIns**2        !PVgen	!TODO - update values using PVwatts?
 
              xCalcKW=xKW(nt,nv)  !set size to menu capacity
 
@@ -17437,26 +17524,27 @@ SUBROUTINE RDISTGEN
                   PopDensity_L(i)=PopDensity(i)
                   Lag2Installs(i)=Lag1Installs(i)
                   Lag1Installs(i)=ProjectedInstalls(i)
+                  CumUnits_L(i)=CumUnits(i) !ONLmod
                 ENDIF !curitr=1 for years after econometric model estimation year
 
                 IF(CurCalYr.GT.EstYear) THEN  !Subsequent to the estimation year update ZIP code level variables
                   Income(i)=Income_L(i)*(MC_YPDR(CenDiv(i),iCurIYr)/MC_YPDR(CenDiv(i),iCurIYr-1)) / &
                    ( ( EH(CurCalYr,1,iDiv)+NH(CurCalYr,1,iDiv)+EH(CurCalYr,2,iDiv)+NH(CurCalYr,2,iDiv)+EH(CurCalYr,3,iDiv)+NH(CurCalYr,3,iDiv) ) &
                    / ( EH(CurCalYr-1,1,iDiv)+NH(CurCalYr-1,1,iDiv)+EH(CurCalYr-1,2,iDiv)+NH(CurCalYr-1,2,iDiv)+EH(CurCalYr-1,3,iDiv)+NH(CurCalYr-1,3,iDiv) ) )
-                  Households(i)=Households_L(i)*(EH(CurCalYr,1,iDiv)+NH(CurCalYr,1,iDiv)+EH(CurCalYr,2,iDiv)+NH(CurCalYr,2,iDiv)+EH(CurCalYr,3,iDiv)+NH(CurCalYr,3,iDiv)) &
-                   /(EH(CurCalYr-1,1,iDiv)+NH(CurCalYr-1,1,iDiv)+EH(CurCalYr-1,2,iDiv)+NH(CurCalYr-1,2,iDiv)+EH(CurCalYr-1,3,iDiv)+NH(CurCalYr-1,3,iDiv))
-				  PopDensity(i)=PopDensity_L(i)*MC_NP65A(iCurIYr)/MC_NP65A(iCurIYr-1)
+                  Households(i)=Households_L(i) * (EH(CurCalYr,1,iDiv)+  NH(CurCalYr,1,iDiv)+  EH(CurCalYr,2,iDiv)+  NH(CurCalYr,2,iDiv)+  EH(CurCalYr,3,iDiv)+  NH(CurCalYr,3,iDiv)) &
+                                                 /(EH(CurCalYr-1,1,iDiv)+NH(CurCalYr-1,1,iDiv)+EH(CurCalYr-1,2,iDiv)+NH(CurCalYr-1,2,iDiv)+EH(CurCalYr-1,3,iDiv)+NH(CurCalYr-1,3,iDiv))
+                  PopDensity(i)=PopDensity_L(i)*MC_NP65A(iCurIYr)/MC_NP65A(iCurIYr-1)
                   !THIS CODE IS USED TO SWITCH FROM RETAIL COOLING ELECTRICITY RATES (PELRSOUT(iDiv,iCurIYr,2)) TO WEIGHTED MARGINAL/WHOLESALE (PELME(iDiv,ICURIYR)) AND RETAIL RATE BLEND  !DGrate
                   IF (DGrateBlend) THEN  !DGrate - If set to TRUE in RSGENTK.txt, then use blended electricity rate starting in DGrateYr
                     IF (CURCALYR.LT.DGrateYr) THEN  !DGrate
                       ElecRate(i)=ElecRate_L(i)*( (PELRSOUT(CenDiv(iDiv),iCurIYr,2)*.003412+xRPS(nt,iCurIYr)*EPRPSPR(iCurIYr)/1000. ) ) / &    !own-use including scaled RPS credit  !DGrate
                        ( (PELRSOUT(CenDiv(iDiv),iCurIYr-1,2)*.003412+xRPS(nt,iCurIYr-1)*EPRPSPR(iCurIYr-1)/1000. ) )  !DGrate
-					ELSEIF (CURCALYR.EQ.DGrateYr) THEN  !DGrate - This is a transition where where the prior year uses 100% retail space cooling electricity rate [PELRSOUT(D,Y,2)] and the current year uses weighted retail/marginal electricity rate
+                    ELSEIF (CURCALYR.EQ.DGrateYr) THEN  !DGrate - This is a transition where where the prior year uses 100% retail space cooling electricity rate [PELRSOUT(D,Y,2)] and the current year uses weighted retail/marginal electricity rate
                       ElecRate(i)=ElecRate_L(i)*( (((PELME(iDiv,iCurIYr)*DGmargWt(iDiv)) + (PELRSOUT(iDiv,iCurIYr,2)*DGretWt(iDiv)))*.003412+xRPS(nt,iCurIYr)*EPRPSPR(iCurIYr)/1000. ) ) / &    !own-use including scaled RPS credit  !DGrate
                        ( (PELRSOUT(CenDiv(iDiv),iCurIYr-1,2)*.003412+xRPS(nt,iCurIYr-1)*EPRPSPR(iCurIYr-1)/1000. ) )  !DGrate
-					ELSEIF (CURCALYR.GT.DGrateYr) THEN  !DGrate
+                    ELSEIF (CURCALYR.GT.DGrateYr) THEN  !DGrate
                       ElecRate(i)=ElecRate_L(i)*( (((PELME(iDiv,iCurIYr)*DGmargWt(iDiv)) + (PELRSOUT(iDiv,iCurIYr,2)*DGretWt(iDiv)))*.003412+xRPS(nt,iCurIYr)*EPRPSPR(iCurIYr)/1000. ) ) / &    !own-use including scaled RPS credit  !DGrate
-                       ( (((PELME(iDiv,iCurIYr-1)*DGmargWt(iDiv)) + (PELRSOUT(iDiv,iCurIYr-1,2)*DGretWt(iDiv)))*.003412+xRPS(nt,iCurIYr-1)*EPRPSPR(iCurIYr-1)/1000. ) )  !DGrate
+                      ( (((PELME(iDiv,iCurIYr-1)*DGmargWt(iDiv)) + (PELRSOUT(iDiv,iCurIYr-1,2)*DGretWt(iDiv)))*.003412+xRPS(nt,iCurIYr-1)*EPRPSPR(iCurIYr-1)/1000. ) )  !DGrate
                     ENDIF  !DGrate
                   ELSE  !DGrate
                     ElecRate(i)=ElecRate_L(i)*( (PELRSOUT(CenDiv(iDiv),iCurIYr,2)*.003412+xRPS(nt,iCurIYr)*EPRPSPR(iCurIYr)/1000. ) ) / &    !own-use including scaled RPS credit  !DGrate
@@ -17479,61 +17567,89 @@ SUBROUTINE RDISTGEN
              factor2 = 1/(NumYearsPV**0.055)  !PVcontagion
              factor3 = 1/(NumYearsPV**0.060)  !PVcontagion
              factor4 = 1/(NumYearsPV**0.090)  !PVcontagion !DeepSolar
+             factor5 = 1/(NumYearsPV**0.12) !EES added to curb growth after the ITC incentive expiration
+             factor6 = 1/(NumYearsPV**0.18)
+             factor7 = 1/(NumYearsPV**0.5)
              !factor5 = exp(-NumYearsPV)  !compiler doesn't appear to like negative exponential argument  !PVcontagion
              !factor6 = exp(2*(-NumYearsPV))  !compiler doesn't appear to like negative exponential argument  !PVcontagion
              ENDIF
 
-             ! For each individual test, we set factor equal to one of the test values  !PVcontagion
-
-             factor = factor4  !PVcontagion !DeepSolar
+            !For each individual test, we set factor equal to one of the test values  !PVcontagion
+            factor = factor4
+            IF(CurCalYr .GE. EstYear) THEN
+              IF(xTxCrPct(1,CurCalYr - EstYear + 3) .GT. 0.0) THEN 
+                lyear = CurCalYr
+              ELSE
+                factor = factor5
+              ENDIF
+            ENDIF
 
              !Calculate numerator and denominator components for projections (these are REAL*8 to prevent overflows)
-               xLogit= cint (1,j) + chh (1,j)*HouseHolds(i) +cpd  (1,j)*PopDensity(i)   +factor*cinc (1,j)*Income(i) + &  !PVcontagion
-                       factor*cer (1,j)*ElecRate(i)   +ccdd (1,j)*LagCDD(i)       +cpmt (1,j)*MonthlyPayment  + &  !PVcontagion
-                       cir (1,j)*INTRATE       +factor*clag1(1,j)*Lag1Installs(i) +factor*clag2(1,j)*lag2Installs(i) + &  !PVcontagion
-                       cpvp(1,j)*PVPRICE       +cins (1,j)*Insol(i)
-               xNegBinom= cint (2,j) + chh (2,j)*HouseHolds(i) +cpd  (2,j)*PopDensity(i)   +factor*cinc (2,j)*Income(i) + &  !PVcontagion
-                       factor*cer (2,j)*ElecRate(i)   +ccdd (2,j)*LagCDD(i)       +cpmt (2,j)*MonthlyPayment  + &  !PVcontagion
-                       cir (2,j)*INTRATE       +factor*clag1(2,j)*Lag1Installs(i) +factor*clag2(2,j)*lag2Installs(i) + &  !PVcontagion
-                       cpvp(2,j)*PVPRICE       +cins (2,j)*Insol(i)
+               xLogit= cint (1,j) + &
+                        chh (1,j)*HouseHolds(i) +           &
+                        cpd (1,j)*PopDensity(i) +           &
+                        factor*cinc (1,j)*Income(i) +       & 
+                        factor*cer (1,j)*ElecRate(i) +      &
+                        ccdd (1,j)*LagCDD(i) +              &
+                        cpmt (1,j)*MonthlyPayment +         &
+                        cir (1,j)*INTRATE +                 &
+                        factor*clag1(1,j)*Lag1Installs(i) + &
+                        factor*clag2(1,j)*lag2Installs(i) + &  
+                        cpvp(1,j)*PVPRICE +                 &
+                        cins (1,j)*Insol(i)
+               xNegBinom= cint (2,j) + &
+                        chh (2,j)*HouseHolds(i) + &
+                        cpd  (2,j)*PopDensity(i)   + &
+                        factor*cinc (2,j)*Income(i) + &  
+                        factor*cer (2,j)*ElecRate(i)   + &
+                        ccdd (2,j)*LagCDD(i)       + &
+                        cpmt (2,j)*MonthlyPayment  + & 
+                        cir (2,j)*INTRATE       + &
+                        factor*clag1(2,j)*Lag1Installs(i) + &
+                        factor*clag2(2,j)*lag2Installs(i) + &  
+                        cpvp(2,j)*PVPRICE       + &
+                        cins (2,j)*Insol(i)
 
-             !Compute hurdle model additions to PV households with a test for overflows
-               IF(IsNaN(exp(xLogit+xNegBinom) / ( 1. + exp(xLogit) )) ) THEN
-                 xTemp=0.
-                 !IF (LPRINT) WRITE(DGDAT,*) 'USING NEW MODEL :: NAN encountered at ZIP ', state(i),zipcode(i),xLogit,xNegBinom,xTemp
-                 !IF (LPRINT) WRITE(DGDAT,*) '    Model, HH, PopDens, Insol, ElecRate ',   j,households(i),popdensity(i),insol(i),elecrate(i)
-                 !IF (LPRINT) WRITE(DGDAT,*) '    Coefficients logit',  chh(1,j), cpd(1,j),cins(1,j),cer(1,j)
-                 !IF (LPRINT) WRITE(DGDAT,*) '    Coefficients binom',  chh(2,j), cpd(2,j),cins(2,j),cer(2,j)
-               ELSE
-                 xTemp= REAL(  exp(xLogit+xNegBinom) / ( 1. + exp(xLogit) )  )
-                 IF(CurCalYr .GT. EstYear) xTemp= xTemp*xInxDecay(iDiv,iCurIYr)
-                 ENDIF
-                 IF(IsNaN(xTemp)) THEN
-                   !print warning message somewhere, for now:
-                   !IF (LPRINT) WRITE(DGDAT,*) ':: NAN encountered at ZIP ',zipcode(i)
-                   xTemp=0.   !reset xTemp before additional use
-                 ENDIF
-                 ProjectedInstalls(i)=xTemp  !save this year's projected installs for setting lags in next projection year
-                 xUnits=xUnits + xTemp       !accumulate ZIP code results to the census division level
-                 CumUnits(i)=CumUnits(i)+xTemp !also accumulate units within a ZIP code for testing penetration level
-              !If penetration exceeds a particular value back out additional units
-                IF(CumUnits(i)/Households(i) .GT. 0.80) THEN !80% is limit on share of households that can have PV in each ZIP code
-                  xUnits=xUnits-xTemp
-                  CumUnits(i)=CumUnits(i)-xTemp
-                  xTemp=0.
+                ! Note that Logit(18) = 1; we use this to prevent overflow when we exponentiate
+                IF(xLogit .GE. 18.) THEN 
+                  xLogit = 1.
+                ELSE
+                  xLogit = exp(xLogit)/(1.+exp(xLogit))
                 ENDIF
 
-             !Temporary Test for Consistency with R Coded Model
-			 IF(LPRINT .AND. CurCalYr .GE. EstYear .AND. CurCalYr .LE. DGrateYr) THEN  !DGrate
-               IF (xTemp-ModelInstalls(i) .GT. .001) THEN
-!                 WRITE(DGDAT,*) ' Model disagreement for ZIP ',state(i),zipcode(i), xTemp, modelinstalls(i)
-!                 WRITE(DGDAT,949) 'CenDiv(i), zipcode(i), CurCalYr, xLogit, xNegBinom, xTemp, xUnits ', CenDiv(i),zipcode(i),CurCalYr,xLogit,xNegBinom,xTemp,xUnits  !DGrate
-!                 949  FORMAT(A,1X,I2,1X,I8,1X,I8,1X,4F12.4)  !DGrate				   
-!                 WRITE(DGDAT,*) ' Model, HH, PopDens, Insol, ElecRate ',   j,households(i),popdensity(i),insol(i),elecrate(i)
-!                 WRITE(DGDAT,*) ' Coefficients logit',  chh(1,j), cpd(1,j),cins(1,j),cer(1,j)
-!                 WRITE(DGDAT,*) ' Coefficients binom',  chh(2,j), cpd(2,j),cins(2,j),cer(2,j)
-               ENDIF
-             ENDIF
+                ! This is "enforcing the hurdle," where we say that if there is a zipcode with a low probability
+                ! of install, we set the expectation to be zero. This helps curtail explosion.
+                IF(xLogit .LT. 0.25) xLogit = 0
+
+                ! Compute the predicted number of installs.
+                IF(xNegBinom .GE. 50.) THEN
+                  xTemp = REAL(xLogit * exp(50.))
+                ELSE
+                  xTemp = REAL(xLogit * exp(xNegBinom))
+                ENDIF
+
+                ! Final null check, just in case 
+                IF(CurCalYr .GT. EstYear) xTemp= xTemp*xInxDecay(iDiv,iCurIYr)
+                IF(ISNaN(xTemp)) xTemp = 0.
+
+                ! Cap at 80% of households 
+                IF((CumUnits_L(i) + xTemp)/(HouseHolds(i)) .GE. 0.80) THEN 
+                  xTemp = 0.80*HouseHolds(i) - CumUnits_L(i)
+                  IF (xTemp .LE. 0) xTemp = 1.
+                ENDIF
+
+                ! If a household has achieved near 80% of households, set to 80% and keep it that way
+                ! for the rest of the model
+                IF(CumUnits_L(i) .GE. .78 * HouseHolds_L(i)) THEN
+                  CumUnits(i) = .8 * HouseHolds(i)
+                  ProjectedInstalls(i) = HouseHolds(i)
+                  xTemp = CumUnits(i) - CumUnits_L(i)
+                  IF (xTemp .LE. 0) xTemp = 1.
+                ELSE
+                  ProjectedInstalls(i) = xTemp
+                  CumUnits(i) = CumUnits_L(i) + xTemp
+                ENDIF
+                xUnits = xUnits + xTemp
 
              !Add tax credit for penetration calculation of payment (?)
               xTrills= xTrills + xTemp*xAnnualKWh*3412./10.**12  !beware of mixed mode: bad results if coded as "/10**12" !!!
@@ -17561,7 +17677,7 @@ SUBROUTINE RDISTGEN
 
            ENDDO !Process ZIP codes
 
-        !Print DGrate variables to RDGENOUT.txt
+        !Print DGrate variables to RDM_DGENOUT.txt
           IF (LPRINT .AND. CURITR.EQ.1 .AND. IDIV.EQ.1) THEN  !DGrate - Write header only during first iteration and before first census division
             WRITE(DGDAT,*) 'CD ICURIYR Cal_Year Blended_ElecRate PELRSOUT PELME'  !DGrate
           ENDIF  !DGrate
@@ -17586,15 +17702,19 @@ SUBROUTINE RDISTGEN
 
           Invest(iCurIYr,iDiv,NT)=xInvest  !($mill)
 
-          IF (iCurIYr .LE. EstYear-BaseYr+2 .AND. PVzipcalib .AND. NT .EQ. 1) THEN    !Used to calibrate to historical exogenous PV capacity in EstYear and the following year    !PVzipcalib	!kj - should the +2 be set to <PVzipcalibyear, or ExogPVlastDataYear/ExogPVhistYear>-ESTYEAR?
+          IF (iCurIYr .LE. EstYear-BaseYr+2 .AND. PVzipcalib .AND. NT .EQ. 1) THEN    !Used to calibrate to historical exogenous PV capacity in EstYear and the following year    !PVzipcalib	!TODO - should the +2 be set to <PVzipcalibyear, or ExogPVlastDataYear/ExogPVhistYear>-ESTYEAR?
            ExogPVMistie(iCurIYr,iDiv)= 0.                                                                                                                        !PVzipcalib
-           !xExogPen is exogenous PV capacity (NT=1) in kW from RSGENTK in index year (EstYear-BaseYr+1; 2015=26)                                                !PVzipcalib
+           !xExogPen is exogenous PV capacity (NT=1) in kW from RSGENTK in index year (EstYear-BaseYr+1; 2020=31)                                                !PVzipcalib
            ExogPVMistie(iCurIYr,iDiv)= xExogPen(iCurIYr,iDiv,1) - Cap(iCurIYr,iDiv,1)                                                                            !PVzipcalib
 !           WRITE(DGDAT,*)  'ExogPVMistie_Test_1', iCurIYr, iDiv, xExogPen(iCurIYr,iDiv,1), Cap(iCurIYr,iDiv,1), ExogPVMistie(iCurIYr,iDiv), xUnits, &            !PVzipcalib
 !            xCalcKW, xAnnualKWh, xElecAvgUEC, ( EH(CurCalYr,1,iDiv) + NH(CurCalYr,1,iDiv) + EH(CurCalYr,2,iDiv) + NH(CurCalYr,2,iDiv) + EH(CurCalYr,3,iDiv) + &  !PVzipcalib
 !            NH(CurCalYr,3,iDiv)), QELRS(iDiv,iCurIYr), Trills(iCurIYr,iDiv,1), TrillsOwnUse(iCurIYr,iDiv,1)                                                      !PVzipcalib
-           Cap(iCurIYr,iDiv,1)= Cap(iCurIYr,iDiv,1) + ExogPVMistie(iCurIYr,iDiv)                                                                                 !PVzipcalib
+           !Cap(iCurIYr,iDiv,1)= Cap(iCurIYr,iDiv,1) + ExogPVMistie(iCurIYr,iDiv)                                                                                 !PVzipcalib
+           Cap(iCurIYr,iDiv,1) = xExogPen(iCurIYr,iDiv,1) ! These two are identical, but this is more clear about what is going on
+           ! Adjust units based on what we want the capacity to be
            Units(iCurIYr,iDiv,1)= Units(iCurIYr,iDiv,1) + (ExogPVMistie(iCurIYr,iDiv) / xCalcKW)                                                                 !PVzipcalib
+           
+           ! Adjust trills as well 
            xUnits=Units(iCurIYr,iDiv,1)-Units(iCurIYr-1,iDiv,1)  !PVinvest
            xCapacity=xUnits*xCalcKW                                                                                                                              !PVzipcalib
            xInvest=xUnits*xEqCost/10.**6                         !PVinvest
@@ -17602,36 +17722,27 @@ SUBROUTINE RDISTGEN
            Trills(iCurIYr,iDiv,1)= Trills(iCurIYr,iDiv,1) + (ExogPVMistie(iCurIYr,iDiv) / xCalcKW) *xAnnualKWh*3412./10.**12                                     !PVzipcalib
 
            !Test for negative generation after exogenous PV calibration                                                                                          !PVzipcalib
-           IF (Trills(iCurIYr,iDiv,1) .LT. 0.) THEN                                                                                                              !PVzipcalib
-            Trills(iCurIYr,iDiv,1)=0.                                                                                                                            !PVzipcalib
-           ENDIF                                                                                                                                                 !PVzipcalib
+           IF (Trills(iCurIYr,iDiv,1) .LT. 0.) Trills(iCurIYr,iDiv,1)=0.                                                                                         !PVzipcalib
 
            !Share out generation of ExogPVMistie to own-use generation rather than putting it all into both Trills and TrillsOwnUse                              !PVzipcalib
            TrillsOwnUse(iCurIYr,iDiv,1)= TrillsOwnUse(iCurIYr,iDiv,1) + (TrillsOwnUse(iCurIYr,iDiv,1)/Trills(iCurIYr,iDiv,1)) * &                                !PVzipcalib
             (ExogPVMistie(iCurIYr,iDiv) / xCalcKW) *xAnnualKWh*3412./10.**12                                                                                     !PVzipcalib
 
            !Test for negative own-use generation after exogenous PV calibration                                                                                  !PVzipcalib
-           IF (TrillsOwnUse(iCurIYr,iDiv,1) .LT. 0.) THEN                                                                                                        !PVzipcalib
-            TrillsOwnUse(iCurIYr,iDiv,1)=0.                                                                                                                      !PVzipcalib
-           ENDIF                                                                                                                                                 !PVzipcalib
+           IF (TrillsOwnUse(iCurIYr,iDiv,1) .LT. 0.) TrillsOwnUse(iCurIYr,iDiv,1)=0.                          !PVzipcalib
 
-           Invest(iCurIYr,iDiv,NT)=xInvest  !($mill)                                                                                                             !PVzipcalib
-          ENDIF                                                                                                                                                  !PVzipcalib
-
-          IF (iCurIYr .GT. EstYear-BaseYr+2 .AND. NT .EQ. 1) THEN    !Apply historical exogenous PV capacity mistie to remainder of projection years             !PVzipcalib
-           Cap(iCurIYr,iDiv,1)= Cap(iCurIYr,iDiv,1) + ExogPVMistie(EstYear-BaseYr+2,iDiv)                                                                        !PVzipcalib
-           Units(iCurIYr,iDiv,1)= Units(iCurIYr,iDiv,1) + (ExogPVMistie(EstYear-BaseYr+2,iDiv) / xCalcKW)                                                        !PVzipcalib
-           xUnits=Units(iCurIYr,iDiv,1)-Units(iCurIYr-1,iDiv,1)                                                                                                  !PVinvest
-           xCapacity=xUnits*xCalcKW                                                                                                                              !PVzipcalib
-           xInvest=xUnits*xEqCost/10.**6                                                                                                                         !PVinvest
-           x111dRenSub(iCurIYr,iDiv,1)=xInvest*xTxCrPct_Div(NV,iDiv,1)                                                                                        !PVzipcalib
-           Trills(iCurIYr,iDiv,1)= Trills(iCurIYr,iDiv,1) + (ExogPVMistie(EstYear-BaseYr+2,iDiv) / xCalcKW) *xAnnualKWh*3412./10.**12                            !PVzipcalib
-           !Share out generation of ExogPVMistie to self-use generation rather than putting it all into both Trills and TrillsOwnUse                             !PVzipcalib
-           TrillsOwnUse(iCurIYr,iDiv,1)= TrillsOwnUse(iCurIYr,iDiv,1) + (TrillsOwnUse(iCurIYr,iDiv,1)/Trills(iCurIYr,iDiv,1)) * &                                !PVzipcalib
-            (ExogPVMistie(EstYear-BaseYr+2,iDiv) / xCalcKW) *xAnnualKWh*3412./10.**12                                                                            !PVzipcalib
-           Invest(iCurIYr,iDiv,NT)=xInvest  !($mill)                                                                                                             !PVzipcalib
-          ENDIF                                                                                                                                                  !PVzipcalib
-
+           Invest(iCurIYr,iDiv,NT)=xInvest  !($mill)  
+                    !IF (curitr .eq. 1) THEN
+                    !  OPEN(unit = 667, file = "pv_hh.txt", action="write", position="append") !reopen the file, with append
+                    !    WRITE(667,94) 1, ",", iCurIYr, ",", iDiv, ",", xExogPen(iCurIYr,iDiv,1), ",", ExogPVMistie(iCurIYr, iDiv), ",", Cap(iCurIYr,iDiv,1), ",", Units(iCurIYr,iDiv,1), ",", xCalcKW, ",", xInvest, ",", x111dRenSub(iCurIYr,iDiv,1), ",", Trills(iCurIYr,iDiv,1)
+                    !    94 FORMAT(    I,   A,       I,  A,     I,   A,                 F,A,          F,   A,                   F,   A,                     F,   A,       F,   A,       F,   A,                           F,   A,  F)
+                    !  CLOSE(667) !close file
+                    !ENDIF !PVzipcalib
+          ENDIF !PVzipcalib
+           
+           ! The PV model is additive, so once it has been benchmarked to historical capacity in 2022 and 2023, we don't need to contin
+           ! to adjust the output to exogenous capacity -- it has already been bumped up or down enough
+          
       GOTO 82  !DON'T REDO DIVISION LEVEL CALCULATIONS FOR PV IF USING ECONOMETRIC MODEL
 
 !--------------------------------------------------
@@ -17830,10 +17941,10 @@ SUBROUTINE RDISTGEN
              + GasUsage(iCurIYr,r,2)
 
            CGRESQ (r,iCurIYr,8)= CGRESQ(r,iCurIYr,8)              & ! Solar PV
-             + Trills(iCurIYr,r,1)*WHRFOSS(R,iCurIYr)/3412.                              ! report "fuel usage" as generation in Trills  !STEOhr
+             + Trills(iCurIYr,r,1)                                  ! report "fuel usage" as generation in Trills  !STEOhr  !3412project
 
            CGRESQ (r,iCurIYr,11)= CGRESQ(r,iCurIYr,11)            & ! Wind
-             + Trills(iCurIYr,r,3)*WHRFOSS(R,iCurIYr)/3412.                              ! report "fuel usage" as generation in Trills  !STEOhr
+             + Trills(iCurIYr,r,3)                                  ! report "fuel usage" as generation in Trills  !STEOhr  !3412project
 
        ENDDO !Census Division Loop for Populating Arrays for Utility Module
 
@@ -17896,7 +18007,7 @@ SUBROUTINE RDISTGEN
  73   FORMAT(1X,I4,F15.1,10X,F15.1)
 
 !---------------------------------------------------------
-!  PRINT THE DISTRIBUTED GENERATION DATABASE (RDGENOUT)
+!  PRINT THE DISTRIBUTED GENERATION DATABASE (RDM_DGENOUT)
 !---------------------------------------------------------
       IF (iCurIYr.EQ.LastYr .AND. FCRL.EQ.1) THEN
         WRITE(DGDAT,69)
@@ -17908,7 +18019,7 @@ SUBROUTINE RDISTGEN
            IF(xUnits>0. .AND. nt==1) THEN
              xCalcKW=(Cap(IYR,iDiv,NT)-Cap(IYR-1,iDiv,NT))/xUnits
             ELSE
-             xCalcKW=xKW(nt,iyr-10)  !iyr started in 1990, data in 2000 (no longer relevant?)	!kj
+             xCalcKW=xKW(nt,iyr-10)  !iyr started in 1990, data in 2000 (no longer relevant?)	!TODO - still relevant?
            ENDIF
            WRITE(DGDAT,70) aEquipName(nt,1),IYR+(BaseYr-1),iDiv, & !BldgType added in FORMAT below
             Units(IYR,iDiv,NT), xCalcKW,       &
@@ -17924,13 +18035,13 @@ SUBROUTINE RDISTGEN
  70     FORMAT(1X,A14,',',I5,',',I5,',','SF',3(',',F12.3),4(',',F12.5),', 0.',2(',',F12.5))  !OwnUseOut
       ENDIF !Check for final convergence
 
-         IF (CurCalYr .EQ. ESTYEAR+2) THEN  !Test-write ExogPVMistie data to RESOUT.txt to verify                   !PVzipcalib  !DGrate
+         IF (CurCalYr .EQ. ESTYEAR+2) THEN  !Test-write ExogPVMistie data to RDM_OUT.txt to verify                   !PVzipcalib  !DGrate
            WRITE(9,*)  'ExogPVMistie_Test_2'                                                                        !PVzipcalib
            WRITE(9,*)  'IYR  ', 'CalYr  ', 'CD  ', 'xExogPen  ', 'Cap  ', 'ExogPVMistie  ', 'Units  ', 'Trills  ', 'TrillsOwnUse  '  !PVzipcalib  !DGrate
            DO IYR= (RECSYear-BaseYr+1),(DGrateYr-BASEYR+2)                                                         !PVzipcalib  !DGrate - Prints through year after DGrateYr (hence +2); ExogPVMistie should be 0.0 in years before EstYear
             DO iDiv= 1,mNumCR-2                                                                                     !PVzipcalib
              WRITE(9,919)  IYR, IYR+BaseYr-1, iDiv, xExogPen(IYR,iDiv,1), Cap(IYR,iDiv,1), ExogPVMistie(IYR,iDiv), Units(IYR,iDiv,1), Trills(IYR,iDiv,1), TrillsOwnUse(IYR,iDiv,1)  !PVzipcalib  !DGrate
-             919   FORMAT(I4,1X,I4,1X,I2,1X,F12.0,1X,F12.4,1X,F12.4,1X,F12.4,1X,F12.4,1X,F12.4)  !DGrate
+             919   FORMAT(I2,1X,I4,1X,I1,1X,F20.0,5(1X,F20.4))  !DGrate
             ENDDO                                                                                                   !PVzipcalib
            ENDDO                                                                                                    !PVzipcalib
          ENDIF                                                                                                      !PVzipcalib
@@ -18017,7 +18128,7 @@ SUBROUTINE RDISTGEN
           IFWD=IFWDPREVYR(F)
 
 !       SET MINIMUM SHIFT TO WHAT IT WAS LAST YEAR OR TO A GREATER SHIFT
-          IFORWARD(F) = MIN(IFWD,-IFIX(((PRICEDELTA(F)-1.0)/.10)))
+          IFORWARD(F) = MIN(IFWD,-nint(((PRICEDELTA(F)-1.0)/.10)))
 
 !       SET MAXIMUM SHIFT TO IFMAX FROM RSMISC? FILE
           IFORWARD(F) = MAX(IFMAX,IFORWARD(F))
@@ -18026,7 +18137,7 @@ SUBROUTINE RDISTGEN
 
 !  APPLY SHIFTS TO INDIVIDUAL TECHNOLOGIES BASED ON NEARNESS TO LAST BENCHMARKING YEAR
 
-! THIS DO LOOP INDEX AND LIMITS ARE LIKELY WRONG!!!!!!	!kj - noting this old comment, should probably be updated
+! THIS DO LOOP INDEX AND LIMITS MAY BE INCORRECT	!TODO - review
        DO 10 RECNO=1,RTTYCNT  ! DO FOR ALL RTEK RECORDS
          EQC= RTTYEQCL(RECNO) ! EQUIPMENT CLASS NUMBER FROM RSMEQP
          EU = RTTYENDU(RECNO) ! END USE NUMBER FROM RSMEQP
@@ -18103,7 +18214,7 @@ SUBROUTINE RDISTGEN
 
       RSELAST=FAC1*FAC2*FAC3
 
-      ! WRITE(DGDAT,*) "rselast=(i),rselast,CurCalYr,PRICES(F,R,CurCalYr),RECSYear,prices(f,r,RECSYear)!produces copious output in rdgenout
+      ! WRITE(DGDAT,*) "rselast=(i),rselast,CurCalYr,PRICES(F,R,CurCalYr),RECSYear,prices(f,r,RECSYear)!produces copious output in RDM_DGENOUT
 
       RETURN
       END FUNCTION RSELAST
@@ -18114,25 +18225,22 @@ SUBROUTINE RDISTGEN
 !     SURVIVING FRACTION OF EQUIPMENT STOCK IN YEAR Y
 !*******************************************************************
       REAL FUNCTION SVRTE(ALPHA,Y,K,LAMBDA)
+
+      INTEGER Y
       REAL*4 ALPHA
-      REAL*4 K
       REAL*4 LAMBDA
       REAL*4 KLAMBDA1
       REAL*4 KLAMBDA2
-!      INTEGER MIN, MAX, Y
-      INTEGER Y
-      IF (Y.LT.0) THEN  ! calling y less than zero is to the left of Weibull curve
-         y=0            ! y=0 means current year, too new to decay;  survival rate will be 1.0
+      REAL*4 K
+
+      IF (FLOAT(Y)-ALPHA.LT.0) THEN  ! Y minus ALPHA is to the left of Weibull curve, so no equipment expected to retire yet
+        SVRTE=1.0
+      ELSE
+        KLAMBDA1=(FLOAT(Y)-ALPHA)/LAMBDA
+        KLAMBDA2=KLAMBDA1**K
+        SVRTE=EXP(-KLAMBDA2)
       ENDIF
-!      IF (Y.LE.MIN) THEN
-         KLAMBDA1=FLOAT(Y)/LAMBDA
-         KLAMBDA2=KLAMBDA1**K
-         SVRTE=EXP(-KLAMBDA2)
-!      ELSEIF(Y.LT.MAX) THEN
-!         SVRTE=1.0-FLOAT(Y-MIN)/FLOAT(MAX-MIN)
-!      ELSE
-!         SVRTE=0.0
-!      ENDIF
+
       RETURN
       END FUNCTION SVRTE
 

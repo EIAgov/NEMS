@@ -1,7 +1,7 @@
 ! $Header: M:/default/includes/RCS/steoblock,v 1.15 2020/03/09 12:36:26 jpg Exp $
 
       INTEGER STEOVR            ! number of STEO variables to be held for NEMS use in this common block
-      PARAMETER (STEOVR=442)
+      PARAMETER (STEOVR=419)
 
 !  implementing the incredibly insane idea of using this as an input file, too,
 !  to build the list of variables to retain in NEMS.
@@ -24,7 +24,6 @@
       REAL BDPRPUS(MNUMYR)       !  biomass-based production, million barrels per day
       REAL BDTCBUS(MNUMYR)       !  biomass-based diesel consumption, quadrillion btu
       REAL BDTCPUS(MNUMYR)       !  biomass-based diesel consumption, million barrels per day
-      REAL BMEP_US(MNUMYR)       !  electricity generation from all biomass in the electric power sector, million kilowatthours per day
       REAL BMCMGEN_US(MNUMYR)    !  commercial sector (all) biomass generation, billion kilowatthours
       REAL BMEPGEN_US(MNUMYR)    !  electric power sector (all) biomass generation, billion kilowatthours
       REAL BMINGEN_US(MNUMYR)    !  industrial sector (all) biomass generation, billion kilowatthours
@@ -43,7 +42,6 @@
       REAL CLAJPUS_TON(MNUMYR)   !  coal supply-demand discrepancy, million short tons
       REAL CLEPCON_TON(MNUMYR)   !  electric power sector coal consumption, million short tons
       REAL CLEPCONB(MNUMYR)      !  electric power sector coal consumption, quadrillion Btu
-      REAL CLEP_US(MNUMYR)       !  electric power sector coal generation, million kilowatthours per day
       REAL CLCMGEN_US(MNUMYR)    !  commercial sector coal generation, billion kilowatthours
       REAL CLEPGEN_US(MNUMYR)    !  electric power sector coal generation, billion kilowatthours
       REAL CLINGEN_US(MNUMYR)    !  industrial sector coal generation, billion kilowatthours
@@ -53,7 +51,7 @@
       REAL CLEXPSC_TON(MNUMYR)   !  coal steam coal exports, million short tons
       REAL CLEXPUS_TON(MNUMYR)   !  coal gross exports, million short tons
       REAL CLHCPUS_TON(MNUMYR)   !  residential and commercial coal consumption, million short tons
-      REAL CLIMPUS_TON(MNUMYR)   !  coal gross imports, million short tons
+      REAL CLIMP48_TON(MNUMYR)   !  coal gross imports, million short tons
       REAL CLKCBUS(MNUMYR)       !  metallurgical coal consumption, quadrillion btu
       REAL CLKCPUS_TON(MNUMYR)   !  coke plants coal consumption, million short tons
       REAL CLPRPAR_TON(MNUMYR)   !  coal production appalachia region, million short tons
@@ -80,15 +78,15 @@
       REAL COUNPUS(MNUMYR)       !  crude oil adjustment, million barrels per day
       REAL CXTCCO2(MNUMYR)       !  carbon dioxide emissions from coal, million metric tons
       REAL D2RCAUS(MNUMYR)       !  heating oil retail price including taxes, cents per gallon
+      REAL DATCPUS(MNUMYR)       !  distillate fuel oil product supplied includes ALL petroleum, renewable, and biodiesel, million barrels per day
+      REAL DFEPDEL(MNUMYR)       !  power sector, million barrels per day
       REAL DFNIPUS(MNUMYR)       !  distillate fuel oil net imports, million barrels per day
       REAL DFROPUS(MNUMYR)       !  distillate fuel refinery output, million barrels per day
       REAL DFTCBUS(MNUMYR)       !  distillate fuel oil consumption, quadrillion btu
       REAL DFTCPUS(MNUMYR)       !  distillate fuel oil product supplied, million barrels per day
       REAL DFTCZUS(MNUMYR)       !  distillate fuel oil conversion factor, million btu per barrel
-      REAL DKCHCON_US(MNUMYR)    !  industrial consumption; steo comm/ind gen and thermal only, quadrillion btu
       REAL DKEPCONB(MNUMYR)      !  distillate consumption in the electric power sector, million barrels per day
       REAL DSRTUUS(MNUMYR)       !  diesel fuel retail price including taxes, u.s. average, cents per gallon
-      REAL DSTCPUS(MNUMYR)       !  diesel fuel consumption, million barrels per day
       REAL ELDUPUS(MNUMYR)       !  direct use of electricity by non-electric power facilities, billion kilowatthours per day
       REAL ELNIPUS(MNUMYR)       !  net imports of electricity into the united states, billion kilowatthours per day
       REAL EMNFPUS(MNUMYR)       !  non-farm employment, millions
@@ -174,21 +172,17 @@
       REAL FETCBUS(MNUMYR)       !  petrochemical feedstock consumption, quadrillion btu
       REAL FETCPUS(MNUMYR)       !  petrochemical feedstock product supplied, million barrels per day
       REAL FETCZUS(MNUMYR)       !  petrochemical feedstock conversion factor, million btu per barrel
-      REAL FFEOKUS(MNUMYR)       !  average fossil fuel heat rate, thousand Btu per kilowatthour
       REAL GDPDIUS(MNUMYR)       !  gdp implicit price deflator, index, 2012 = 100
       REAL GDPQXUS(MNUMYR)       !  real gross domestic product, billion chain-weighted 2012 dollars
-      REAL GEEP_US(MNUMYR)       !  electric power sector generation from geothermal, million kilowatthours per day
       REAL GECMGEN_US(MNUMYR)    !  commercial sector geothermal generation, billion kilowatthours
       REAL GEEPGEN_US(MNUMYR)    !  electric power sector geothermal generation, billion kilowatthours
       REAL GEINGEN_US(MNUMYR)    !  industrial sector geothermal generation, billion kilowatthours
       REAL GEEPCAP_US(MNUMYR)    !  electric power sector geothermal net summer capacity, megawatts
       REAL GETOPUS(MNUMYR)       !  total electricity generated from geothermal, billion kilowatthours per day
       REAL HPTOPUS(MNUMYR)       !  total electricity generated from pumped storage, billion kilowatthours per day
-      REAL HPEP_US(MNUMYR)       !  electricity generated by pumped storage in the electric power sector, million kilowatthours per day
       REAL HPCMGEN_US(MNUMYR)    !  commercial sector pumped storage generation, billion kilowatthours
       REAL HPEPGEN_US(MNUMYR)    !  electric power sector pumped storage generation, billion kilowatthours
       REAL HPINGEN_US(MNUMYR)    !  industrial sector pumped storage generation, billion kilowatthours
-      REAL HVEP_US(MNUMYR)       !  electric power sector generation from conventional hydropower, million kilowatthours per day
       REAL HVCCBUS(MNUMYR)       !  commercial sector consumption of conventional hydroelectric energy
 	  REAL HVCMGEN_US(MNUMYR)    !  commercial sector conventional hydropower generation, billion kilowatthours
       REAL HVEPGEN_US(MNUMYR)    !  electric power sector conventional hydropower generation, billion kilowatthours
@@ -220,7 +214,6 @@
       REAL MGTCBUS(MNUMYR)       !  motor gasoline consumption, quadrillion btu
       REAL MGTCPUS(MNUMYR)       !  motor gasoline product supplied, million barrels per day
       REAL MGTCZUS(MNUMYR)       !  motor gasoline conversion factor, million btu per barrel
-      REAL MLEP_US(MNUMYR)       !  electricity generation from municipal solid waste in the electric power sector, million kilowatthours per day
       REAL MLCMGEN_US(MNUMYR)    !  electric power sector biogenic municipal solid waste generation, billion kilowatthours
       REAL MLEPGEN_US(MNUMYR)    !  electric power sector biogenic municipal solid waste generation, billion kilowatthours
       REAL MLINGEN_US(MNUMYR)    !  electric power sector biogenic municipal solid waste generation, billion kilowatthours
@@ -255,7 +248,6 @@
       REAL NGECKUS(MNUMYR)       !  natural gas conversion factor, electric power sector, Btu per cubic feet
       REAL NGEPCON(MNUMYR)       !  natural gas consumption electric power sector, billion cubic feet per day
       REAL NGEPCONB(MNUMYR)      !  natural gas consumption electric power sector, quadrillion btu
-      REAL NGEP_US(MNUMYR)       !  electric power sector generation from natural gas, million kilowatthours per day
       REAL NGCMGEN_US(MNUMYR)    !  commercial sector natural gas generation, billion kilowatthours
       REAL NGEPGEN_US(MNUMYR)    !  electric power sector natural gas generation, billion kilowatthours
       REAL NGINGEN_US(MNUMYR)    !  industrial sector natural gas generation, billion kilowatthours
@@ -312,7 +304,6 @@
       REAL NGVHBUS(MNUMYR)       !  natural gas vehicle use, quadrillion btu
       REAL NGVHPUS(MNUMYR)       !  natural gas vehicle use, billion cubic feet per day
       REAL NLPRPUS(MNUMYR)       !  natural gas plant liquids production, million barrels per day
-      REAL NUEP_US(MNUMYR)       !  electricity generation from nuclear power, million kilowatthours per day
       REAL NUCMGEN_US(MNUMYR)    !  commercial sector nuclear generation, billion kilowatthours
       REAL NUEPGEN_US(MNUMYR)    !  electric power sector nuclear generation, billion kilowatthours
       REAL NUINGEN_US(MNUMYR)    !  industrial sector nuclear generation, billion kilowatthours
@@ -322,13 +313,11 @@
       REAL OREPGEN_US(MNUMYR)    !  electric power sector nonbiogenic generation, billion kilowatthours
       REAL ORINGEN_US(MNUMYR)    !  industrial sector nonbiogenic generation, billion kilowatthours
       REAL ORUTCUS(MNUMYR)       !  refinery distillation utilization factor, fraction (not percent)
-      REAL OGEP_US(MNUMYR)       !  electricity generated from other gaseous fuels, million kilowatthours per day
       REAL OGCMGEN_US(MNUMYR)    !  electric power sector other gaseous fuel generation, billion kilowatthours
       REAL OGEPGEN_US(MNUMYR)    !  electric power sector other gaseous fuel generation, billion kilowatthours
       REAL OGINGEN_US(MNUMYR)    !  electric power sector other gaseous fuel generation, billion kilowatthours
       REAL OHNIPUS(MNUMYR)       !  other hydrocarbons net imports, million barrels per day
       REAL OHRIPUS(MNUMYR)       !  other hydrocarbons refinery inputs, million barrels per day
-      REAL OTEP_US(MNUMYR)       !  other generation from other (not listed in MER; this shows up as the difference between the total and the shown fuels), million kilowatthours per day
       REAL OTCMGEN_US(MNUMYR)    !  commercial sector other generation (not listed in MER; this shows up as the difference between the total and the shown fuels), billion kilowatthours
       REAL OTEPGEN_US(MNUMYR)    !  electric power sector other generation (not listed in MER; this shows up as the difference between the total and the shown fuels), billion kilowatthours
       REAL OTINGEN_US(MNUMYR)    !  industrial sector other generation (not listed in MER; this shows up as the difference between the total and the shown fuels), billion kilowatthours
@@ -337,7 +326,6 @@
       REAL OWINGEN_US(MNUMYR)    !  industrial sector other biomass generation (waste), billion kilowatthours
       REAL OWICBUS(MNUMYR)       !  industrial sector consumption of non-wood biomass, quadrillion Btus
       REAL P3TCPUS(MNUMYR)       !  propylene consumption, million barrels per day
-      REAL PAEP_US(MNUMYR)       !  electric power sector electricity generation from petroleum, million kilowatthours per day
       REAL PACMGEN_US(MNUMYR)    !  commercial sector petroleum generation, billion kilowatthours
       REAL PAEPGEN_US(MNUMYR)    !  electric power sector petroleum generation, billion kilowatthours
       REAL PAINGEN_US(MNUMYR)    !  industrial sector petroleum generation, billion kilowatthours
@@ -358,6 +346,7 @@
       REAL PCTCBUS(MNUMYR)       !  petroleum coke product supplied, quadrillion Btus
       REAL PCTCPUS(MNUMYR)       !  petroleum coke product supplied, million barrels per day
       REAL PCTCZUS(MNUMYR)       !  petroleum coke conversion factor, million btu per barrel
+      REAL PMTCPUS(MNUMYR)       !  marketable petroleum coke product supplied, millon barrels per day
       REAL PPFPPUS(MNUMYR)       !  natural gasoline (pentanes plus) production at natural gas processing plants, million barrels per day
       REAL PPNIPUS(MNUMYR)       !  natural gasoline (pentanes plus)net imports, million barrels per day
       REAL PPRIPUS(MNUMYR)       !  natural gasoline (pentanes plus) refinery and blender net input, million barrels per day
@@ -381,26 +370,20 @@
       REAL RFTCUUS(MNUMYR)       !  no. 6 residual fuel oil price, cents per gallon
       REAL RFTCZUS(MNUMYR)       !  residual fuel conversion factor, million btu per barrel
       REAL RMPTPUS(MNUMYR)       !  available seat miles ( aeo billion; steo million ton miles/day), ?
-      REAL RNCH_US(MNUMYR)       !  electricity generation in the electric power sector from renewables excluding hydropower, million kilowatthours per day
-      REAL RNEP_US(MNUMYR)       !  electricity generation in the electric power sector from renewables excluding hydropower, million kilowatthours per day
       REAL RNCMGEN_US(MNUMYR)    !  commercial sector renewable generation excluding hydropower, billion kilowatthours
       REAL RNEPGEN_US(MNUMYR)    !  electric power sector renewable generation excluding hydropower, billion kilowatthours
       REAL RNINGEN_US(MNUMYR)    !  industrial sector renewable generation excluding hydropower, billion kilowatthours
       REAL SGTCBUS(MNUMYR)       !  still gas consumption, quadrillion btu
       REAL SGTCPUS(MNUMYR)       !  still gas product supplied, million barrels per day
       REAL SGTCZUS(MNUMYR)       !  still gas conversion factor, million btu per barrel
-      REAL SNTCBUS(MNUMYR)       !  special naphthas consumption, 
+      REAL SNTCBUS(MNUMYR)       !  special naphthas consumption,
       REAL SNTCPUS(MNUMYR)       !  special naphthas product supplied, million btu per barrel
       REAL SNTCZUS(MNUMYR)       !  special naphthas conversion factor, million btu per barrel
       REAL SOTOPUS(MNUMYR)       !  total electricity generation from solar, billion kilowatthours per day
-      REAL SOCH_US(MNUMYR)       !  utility-scale solar generation in commercial and industrial sectors, million kilowatthours per day, old variable
       REAL SODTP_US(MNUMYR)      !  small-scale solar generation in residential, commercial, and industrial sectors, million kilowatthours per day
-      REAL SOEP_US(MNUMYR)       !  electricity generation from solar in the electric power sector, million kilowatthours per day, old variable
       REAL SOCMGEN_US(MNUMYR)    !  commercial sector solar generation, billion kilowatthours
       REAL SOEPGEN_US(MNUMYR)    !  electric power sector solar generation, billion kilowatthours
       REAL SOINGEN_US(MNUMYR)    !  industrial sector solar generation, billion kilowatthours
-      REAL SOPV_US(MNUMYR)       !  electricity generation from solar photovoltaic in the electric power sector generation, million kilowatthours per day
-      REAL SOTH_US(MNUMYR)       !  electricity generation from solar thermal in the electric power sector generation, million kilowatthours per day
       REAL TDLOPUS(MNUMYR)       !  transmission & distribution losses and unaccounted for, billion kilowatthours per day
       REAL TSEOPUS(MNUMYR)       !  total electricity generation, billion kilowatthours per day
       REAL UONIPUS(MNUMYR)       !  unfinished oils net imports, million barrels per day
@@ -408,9 +391,7 @@
       REAL UOTCBUS(MNUMYR)       !  unfinished oils consumption, quadrillion Btu
       REAL UOTCPUS(MNUMYR)       !  unfinished oils product supplied, million barrels per day
       REAL UOTCZUS(MNUMYR)       !  unfinished oils conversion factor, million btu per barrel
-      REAL WNTOPUS(MNUMYR)       !  total electricity generation from wind, 
-      REAL WNCH_US(MNUMYR)       !  electricity generation from wind not in the electric power sector, million kilowatthours per day
-      REAL WNEP_US(MNUMYR)       !  electric power sector generation from wind, million kilowatthours per day
+      REAL WNTOPUS(MNUMYR)       !  total electricity generation from wind,
       REAL WNCMGEN_US(MNUMYR)    !  commercial sector wind generation, billion kilowatthours
       REAL WNEPGEN_US(MNUMYR)    !  electric power sector wind generation, billion kilowatthours
       REAL WNINGEN_US(MNUMYR)    !  industrial sector wind generation, billion kilowatthours
@@ -420,8 +401,6 @@
       REAL WWICBUS(MNUMYR)       !  industrial sector eneration from wood and other biomass, billion kilowatthours per day
       REAL WWTOPUS(MNUMYR)       !  total electricity generation from wood and other biomass, billion kilowatthours per day
       REAL WWEPCAP_US(MNUMYR)    !  wood and other biomass capacity, megawatts
-      REAL WWCH_US(MNUMYR)       !  electricity generation wood and other biomass not in the electric power sector, million kilowatthours per day
-      REAL WWEP_US(MNUMYR)       !  electricity generation wood and other biomass in the electric power sector, million kilowatthours per day
       REAL WWCMGEN_US(MNUMYR)    !  commercial sector wood and other biomass generation, billion kilowatthours
       REAL WWEPGEN_US(MNUMYR)    !  electric power sector wood and other biomass generation, billion kilowatthours
       REAL WWINGEN_US(MNUMYR)    !  industrial sector wood and other biomass generation, billion kilowatthours
@@ -473,24 +452,24 @@
                   ABTCBUS, ABTCPUS,                                            &
                   ARTCBUS, ARTCPUS, ARTCZUS, AVTCBUS, AVTCPUS, AVTCZUS,        &
                   BALIT, BDNIPUS, BDPRPUS, BDTCBUS, BDTCPUS,                   &
-                  BMEP_US, BMCMGEN_US, BMEPGEN_US, BMINGEN_US,                 &
+                  BMCMGEN_US, BMEPGEN_US, BMINGEN_US,                          &
                   BREPUUS,                                                     &
                   C3TCPUS, C4FPPUS, C4NIPUS, C4RIPUS, C4ROPUS, C4TCBUS,        &
                   C4TCPUS, C4TCZUS,                                            &
                   CCNIBUS, CCNIPUS, CICPIUS, CLAJPUS_TON, CLEPCON_TON,         &
-                  CLEPCONB, CLEP_US, CLCMGEN_US, CLEPGEN_US, CLINGEN_US,       &
+                  CLEPCONB, CLCMGEN_US, CLEPGEN_US, CLINGEN_US,                &
                   CLTOPUS, CLEUDUS,                                            &
                   CLEXPMC_TON, CLEXPSC_TON, CLEXPUS_TON,                       &
                   CLHCPUS_TON,                                                 &
-                  CLIMPUS_TON, CLKCBUS, CLKCPUS_TON, CLPRPAR_TON, CLPRPIR_TON, &
+                  CLIMP48_TON, CLKCBUS, CLKCPUS_TON, CLPRPAR_TON, CLPRPIR_TON, &
                   CLPRPUS_TON, CLPRPWR_TON,                                    &
                   CLPS_EP, CLPS_EP_NE, CLPS_EP_MW, CLPS_EP_SO, CLPS_EP_WE,     &
                   CLSDPUS, CLSTPUS,                                            &
                   CLTCPUS_TON, CLWCPUS_TON, CLYCBUS,                           &
                   CLYCPUS_TON, CODIPUS, CONIPUS, COPRPUS, CORIPUS, COSQ_DRAW,  &
-                  COSX_DRAW, COUNPUS, CXTCCO2, D2RCAUS, DFNIPUS, DFROPUS,      &
-                  DFTCBUS, DFTCPUS, DFTCZUS, DKCHCON_US, DKEPCONB, DSRTUUS,    &
-                  DSTCPUS,                                                     &
+                  COSX_DRAW, COUNPUS, CXTCCO2, D2RCAUS, DATCPUS, DFEPDEL,      &
+                  DFNIPUS, DFROPUS,                                            &
+                  DFTCBUS, DFTCPUS, DFTCZUS, DKEPCONB, DSRTUUS,                &
                   ELDUPUS, ELNIPUS, EMNFPUS, EONIPUS, EOPRBUS,                 &
                   EOPRPUS, EOTCBUS, EOTCPUS, EOTCZUS, EPEOPUS,                 &
                   ESCMU_ENC, ESCMU_ESC, ESCMU_MAC, ESCMU_MTN, ESCMU_NEC,       &
@@ -509,11 +488,11 @@
                   EXRCP_ENC, EXRCP_ESC, EXRCP_HAK, EXRCP_MAC, EXRCP_MTN,       &
                   EXRCP_NEC, EXRCP_PAC, EXRCP_SAC, EXRCP_WNC, EXRCP_WSC,       &
                   EXRCPUS, EXTCPUS,                                            &
-                  FETCBUS, FETCPUS, FETCZUS, FFEOKUS, GDPDIUS, GDPQXUS,        &
-                  GEEP_US, GECMGEN_US, GEEPGEN_US, GEINGEN_US,                 &
+                  FETCBUS, FETCPUS, FETCZUS, GDPDIUS, GDPQXUS,                 &
+                  GECMGEN_US, GEEPGEN_US, GEINGEN_US,                          &
                   GEEPCAP_US, GETOPUS, HPTOPUS,                                &
-                  HPEP_US, HPCMGEN_US, HPEPGEN_US, HPINGEN_US,                 &
-                  HVEP_US, HVCCBUS, HVCMGEN_US, HVEPGEN_US, HVINGEN_US,        &
+                  HPCMGEN_US, HPEPGEN_US, HPINGEN_US,                          &
+                  HVCCBUS, HVCMGEN_US, HVEPGEN_US, HVINGEN_US,                 &
                   HVEPCAP_US, HVICBUS, HVTOPUS, JFFAAUS, JFNIPUS,              &
                   JFROPUS, JFTCBUS, JFTCPUS, JFTCZUS, JKTCUUS,                 &
                   KSTCPUS, KSTCZUS,                                            &
@@ -521,7 +500,7 @@
                   MBFPPUS, MBNIPUS, MBRIPUS,                                   &
                   MGEIAUS, MGFPPUS, MGNIPUS,                                   &
                   MGRARUS, MGROPUS, MGTCBUS, MGTCPUS, MGTCZUS,                 &
-                  MLEP_US, MLCMGEN_US, MLEPGEN_US, MLINGEN_US,                 &
+                  MLCMGEN_US, MLEPGEN_US, MLINGEN_US,                          &
                   MLEPCAP_US, MPG, MVVMPUS, MSTCBUS, MSTCPUS, MZTCZUS,         &
                   NGACPUS, NGCCBUS,                                            &
                   NGCCP_ENC, NGCCP_ESC, NGCCP_MAC, NGCCP_MTN, NGCCP_NEC,       &
@@ -531,7 +510,7 @@
                   NGCCU_PAC, NGCCU_SAC, NGCCU_WNC, NGCCU_WSC,                  &
                   NGCCUUS,                                                     &
                   NGECKUS, NGEPCON,                                            &
-                  NGEPCONB, NGEP_US, NGCMGEN_US, NGEPGEN_US, NGINGEN_US,       &
+                  NGEPCONB, NGCMGEN_US, NGEPGEN_US, NGINGEN_US,                &
                   NGEUDUS, NGEXPUS_LNG, NGEXPUS_PIPE,                          &
                   NGEXPUS, NGHHUUS,                                            &
                   NGICU_ENC, NGICU_ESC, NGICU_MAC, NGICU_MTN, NGICU_NEC,       &
@@ -546,34 +525,35 @@
                   NGRCU_PAC, NGRCU_SAC, NGRCU_WNC, NGRCU_WSC, NGRCUUS,         &
                   NGSFPUS,                                                     &
                   NGTCCO2, NGTCPUS, NGTOPUS, NGVHBUS, NGVHPUS, NLPRPUS,        &
-                  NUEP_US, NUCMGEN_US, NUEPGEN_US, NUINGEN_US,                 &
+                  NUCMGEN_US, NUEPGEN_US, NUINGEN_US,                          &
                   NUTOPUS, OPEPCONB,                                           &
                   ORCMGEN_US, OREPGEN_US, ORINGEN_US,                          &
-                  ORUTCUS, OGEP_US, OGCMGEN_US, OGEPGEN_US, OGINGEN_US,        &
+                  ORUTCUS, OGCMGEN_US, OGEPGEN_US, OGINGEN_US,                 &
                   OHNIPUS, OHRIPUS,                                            &
-                  OTEP_US, OTCMGEN_US, OTEPGEN_US, OTINGEN_US,                 &
+                  OTCMGEN_US, OTEPGEN_US, OTINGEN_US,                          &
                   OWCMGEN_US, OWEPGEN_US, OWINGEN_US, OWICBUS, P3TCPUS,        &
-                  PAEP_US, PACMGEN_US, PAEPGEN_US, PAINGEN_US,                 &
+                  PACMGEN_US, PAEPGEN_US, PAINGEN_US,                          &
                   PAEPCONB,                                                    &
                   PAGLPUS, PANIPUS, PAPR48NGOM, PAPRP48, PAPRPAK, PAPRPGLF,    &
                   PARIPUS, PARNPUS, PAROPUS, PATCCO2, PATCPUS, PATOPUS,        &
                   PCEPCONB,                                                    &
-                  PCTCBUS, PCTCPUS, PCTCZUS, PPFPPUS, PPNIPUS, PPRIPUS,        &
+                  PCTCBUS, PCTCPUS, PCTCZUS, PMTCPUS,                          &
+                  PPFPPUS, PPNIPUS, PPRIPUS,                                   &
                   PPTCBUS, PPTCPUS, PPTCZUS, PRFPPUS, PRNIPUS, PRROPUS,        &
                   PRTCBUS, PROD_DRAW, PRTCPUS, QHALLC_US,                      &
                   RAIMUUS, RFEPCONB, RFNIPUS, RFNPPUS, RFROPUS,                &
                   RFTCBUS, RFTCPUS, RFTCUUS, RFTCZUS, RMPTPUS,                 &
-                  RNCH_US, RNEP_US, RNCMGEN_US, RNEPGEN_US, RNINGEN_US,        &
+                  RNCMGEN_US, RNEPGEN_US, RNINGEN_US,                          &
                   SGTCBUS, SGTCPUS, SGTCZUS,                                   &
                   SNTCBUS, SNTCPUS, SNTCZUS, SOTOPUS,                          &
-                  SOCH_US, SODTP_US,                                           &
-                  SOEP_US, SOCMGEN_US, SOEPGEN_US, SOINGEN_US,                 &
-                  SOPV_US, SOTH_US, TDLOPUS, TSEOPUS, UONIPUS,                 &
-                  UORIPUS, UOTCBUS, UOTCPUS, UOTCZUS, WNTOPUS, WNCH_US,        &
-                  WNEP_US, WNCMGEN_US, WNEPGEN_US, WNINGEN_US,                 &
+                  SODTP_US,                                                    &
+                  SOCMGEN_US, SOEPGEN_US, SOINGEN_US,                          &
+                  TDLOPUS, TSEOPUS, UONIPUS,                                   &
+                  UORIPUS, UOTCBUS, UOTCPUS, UOTCZUS, WNTOPUS,                 &
+                  WNCMGEN_US, WNEPGEN_US, WNINGEN_US,                          &
                   WNEPCAPX_US, WPCPIUS, WTIPUUS,                               &
                   WWICBUS, WWTOPUS, WWEPCAP_US,                                &
-                  WWCH_US, WWEP_US, WWCMGEN_US, WWEPGEN_US, WWINGEN_US,        &
+                  WWCMGEN_US, WWEPGEN_US, WWINGEN_US,                          &
                   WXTCBUS, WXTCPUS, WXTCZUS, XRUNR, YD87OUS, ZSAJQUS,          &
                   ZWCD_ENC, ZWCD_ESC, ZWCD_MAC, ZWCD_MTN, ZWCD_NEC, ZWCD_PAC,  &
                   ZWCD_SAC, ZWCD_WNC, ZWCD_WSC, ZWCDPUS, ZWHD_ENC, ZWHD_ESC,   &

@@ -1,0 +1,125 @@
+!  PARAMETERS
+      INTEGER MNUMYR,MNUMCR,MNUMPR,MNUMGR,MNUMXR,MNUMLR,NDREG
+      INTEGER MNL48N, MNLNP1, MNL48F, MNL48A, MNL48T, MNALAS, MNUMOR         !  OGSM regions
+      INTEGER MNUMNR,MNSICM,MNSICNM,MNOGCAT,MNOGCRO,MNCLTYPE,MNGRADCR
+      INTEGER MNDSMPRS,MNDSMPCM,MNPOLLUT,MNXYR,FLTYPE
+      INTEGER MNETOH,MNCROP,MNUMBX,MSEDYR,NNGEM,BASEYR,ENDYR
+      INTEGER PRDSTEPS,CRDSTEPS,MCANRG,MCANRR,MAXNFR
+      INTEGER MNCRUD, MNPROD, CRSTEP, CISTEP, MCSTEP, EUSTEP, REFREG, NGPLRG, OGDIST, WTIREG
+      INTEGER JUMPCALYR, MJUMPYR, MNUMCGF, NLNGTER
+      INTEGER EPAREG
+      INTEGER WELLTYPES, GASTYPES, OILTYPES, MAXNUC
+!  PARAMETERS
+      PARAMETER(MNUMYR=61)   ! Years=1990-2050
+      PARAMETER(MJUMPYR=41)  ! Years=1990-2030
+      PARAMETER(JUMPCALYR=2030)  ! Calendar version of MJUMPYR
+      PARAMETER(MNUMCR=11)   ! Census regions (9+CA+US)
+      PARAMETER(MNUMPR=10)   ! PADD regions (8 + Canada/Caribbean + US)
+!  OGSM regions:
+!     onshore:   East Coast, Gulf Coast, Midcontinent, Southwest (Permian Basin)
+!                Rocky Mountain, West Coast, Northern Great Plains
+!     offshore:  Atlantic, Gulf of Mexico, Pacific
+!     Alaska:    North Slope offshore, North Slope onshore, South Alaska
+      PARAMETER(MNL48N=7)   ! Lower 48 onshore OGSM regions
+      PARAMETER(MNLNP1=MNL48N+1)   ! Lower 48 onshore OGSM regions with a spot for total
+      PARAMETER(MNL48F=3)   ! Lower 48 offshore OGSM regions
+      PARAMETER(MNL48A=MNL48N+MNL48F)     ! All Lower 48 (onshore and offshore)
+      PARAMETER(MNL48T=MNL48N+MNL48F+1)   ! Lower 48 onshore and offshore, includes spot for total
+      PARAMETER(MNALAS=3)   ! Alaska OGSM regions
+      PARAMETER(MNUMOR=14)   ! Oil & Gas (OGSM) regions
+                             !     (6 onshore+3 offshore+3 Alaska+US)
+      PARAMETER(MNUMBX=26)   ! No. NG border crossings (Canada-6,
+                             !    Mexico-3, Japan, LNG (MA,MD,GA,LA,r1,r2,r5,r10,r6,r7,r9,r12),
+                             !    Can Tot, Mex Tot, LNG Tot, Total
+      PARAMETER(MNUMGR=15)   ! NGTDM regions {9(census)+3(west)+AL+HW+US}
+      PARAMETER(MNUMXR=11)   ! Coal export regions (10+US)
+      PARAMETER(MNUMLR=17)   ! Coal supply regions (16+US)
+      PARAMETER(NDREG=16)    ! Coal demand regions
+      PARAMETER(MNUMNR=28)   ! NERC regions (25+Alaska+Hawaii+US Total)
+! these next two represent NAICS industry classifications; they were SIC classifications originally
+      PARAMETER(MNSICM=60)   ! Number of manufacturing and nonmanufacturing industries
+                             !         nonmanufacturing = agriculture, mining, construction
+      PARAMETER(MNSICNM=12)  ! Number of services:  transportation, broadcasting, electric power,
+                             !         natural gas distribution, water and sewage, wholesale trade,
+                             !         retail trade, finance, other, public administration, total all services, placeholder
+      PARAMETER(MNOGCAT=12)  ! Oil & Gas categories (Convential + EOR + tar sands + shale +
+                             !    ... + synthetic gas from liquids and coal + other supplemental gas)
+      PARAMETER(MNOGCRO=6)   ! (EOR+Conventional+Offshore+Ak+US)
+      PARAMETER(MNCLTYPE=16) ! Coal type
+      PARAMETER(MNGRADCR=5)  ! Grades of crude oil {3(API gravity)+2(sulfur)}
+      PARAMETER(PRDSTEPS=5)  ! # of STEPS on product import supply curve
+      PARAMETER(CRDSTEPS=5)  ! # of STEPS on crude import supply curve
+      PARAMETER(MNDSMPRS=10) ! Number of DSM programs - residential
+      PARAMETER(MNDSMPCM=10) ! Number of DSM programs - commercial
+      PARAMETER(MNPOLLUT=8)  ! Air Pollutants (C,CO,CO2,SOx,NOx,VOC,CH4,PART)
+      PARAMETER(MNXYR=91)    ! No of Expectation years (1990-2050, 2051-2080)
+      PARAMETER(FLTYPE=6)    ! Fuel type (Oil, NG, MCL, SCL, Ren, Al)
+      PARAMETER(MNETOH=5)    ! Emissions of Ethanol, 5 Volume steps
+      PARAMETER(MNCROP=2)    ! Emissions (Corn & Biomass)
+      PARAMETER(MSEDYR=32)   ! Number of Historical SEDS years
+      PARAMETER(NNGEM=17)    ! Number of NG - Electricity Regions
+      PARAMETER(BASEYR=1990) ! Base calendar year corresponding to curiyr=1
+      PARAMETER(ENDYR=2050)  ! End calendar year corresponding to curiyr=mnumyr
+      PARAMETER(MAXNFR=24)   ! Max number of combined fuel regions (census,gas,coal,carbon)
+      PARAMETER(MCANRG=12)   ! Canadian regions
+      PARAMETER(MCANRR=4)    ! Canadian refinery regions (3 + Canada total)
+      PARAMETER(MNUMCGF=12)  ! Number of combined heat and power fuels
+      PARAMETER(MNCRUD=11)   ! Crude oil types:  1=Light sweet  2=Light sour   3=Medium medium sour
+                                         !       4=Medium sour  5=Heavy sweet  6=Heavy sour
+                                         !       7=California   8=Syncrude     9=Dilbit/Synbit
+                                         !       10=Ultra-light sweet  11=Condensate 
+      PARAMETER(MNPROD=20)   ! Number of petroleum product available for importing:
+            !  1=Asphalt        2=Aviation gas   3=CarBOB        4=Conv motor gas  5=Petroleum coke
+            !  6=Distill, low   7=Distill, ultra 8=Jet fuel      9=LPG            10=Lubricants
+            ! 11=Heating oil   12=Resid, low    13=Resid, high  14=Petrochem feed 15=Pgs
+            ! 16=Ref motor gas 17=Sulfur        18=Unfinished   19=Nps            20=
+! Note that the new OGDIST will supplant NGPLRG once everyone is convinced to switch
+      PARAMETER(NGPLRG=63)   ! Natural gas plant liquid regions
+      PARAMETER(OGDIST=84)   ! OGSM districts
+! OGSM districts (OGDIST):
+!   1. Alabama North        29. Missouri             57. Texas RRC 8A
+!   2. Alabama South        30. Montana              58. Texas RRC 9
+!   3. Alaska               31. Nebraska             59. Texas RRC 10
+!   4. Arizona              32. Nevada               60. Utah
+!   5. Arkansas             33. New Hampshire        61. Vermont
+!   6. California           34. New Jersey           62. Virginia
+!   7. Colorado             35. New Mexico East      63. Washington
+!   8. Connecticut          36. New Mexico West      64. West Virginia
+!   9. Delaware             37. New York             65. Wisconsin
+!  10. Washington DC        38. North Carolina       66. Wyoming
+!  11. Florida              39. North Dakota         67. North Atlantic State Offshore
+!  12. Georgia              40. Ohio                 68. Mid Atlantic State Offshore
+!  13. Hawaii               41. Oklahoma             69. South Atlantic State Offshore
+!  14. Idaho                42. Oregon               70. Alabama State Offshore
+!  15. Illinois             43. Pennsylvania         71. Louisiana State Offshore
+!  16. Indiana              44. Rhode Island         72. Texas State Offshore
+!  17. Iowa                 45. South Carolina       73. California State Offshore
+!  18. Kansas               46. South Dakota         74. Northern Pacific State Offshore
+!  19. Kentucky             47. Tennessee            75. Alaska State Offshore
+!  20. Louisiana North      48. Texas RRC 1          76. North Atlantic Federal Offshore
+!  21. Louisiana South      49. Texas RRC 2          77. Mid Atlantic Federal Offshore
+!  22. Maine                50. Texas RRC 3          78. South Atlantic Federal Offshore
+!  23. Maryland             51. Texas RRC 4          79. Eastern GOM Federal Offshore
+!  24. Massachusetts        52. Texas RRC 5          80. Central GOM Federal Offshore
+!  25. Michigan             53. Texas RRC 6          81. Western GOM Federal Offshore
+!  26. Minnesota            54. Texas RRC 7B         82. California Federal Offshore
+!  27. Mississippi North    55. Texas RRC 7C         83. Northern Pacific Federal Offshore
+!  28. Mississippi South    56. Texas RRC 8          84. Alaska Federal Offshore
+      PARAMETER(CRSTEP=14)   ! Crude oil supply steps
+      PARAMETER(CISTEP=14)   ! Incremental crude oil supply steps
+      PARAMETER(MCSTEP=14)   ! Caribbean and Maritime Canada product demand steps
+      PARAMETER(EUSTEP=14)   ! European gasoline import steps
+      PARAMETER(REFREG=9)    ! LFMM refinery regions
+      PARAMETER(WTIREG=2)    ! PADD region for official low sulfur light world oil price
+      PARAMETER(NLNGTER=11)  ! Number of LNG terminals
+      PARAMETER(EPAREG=9)    ! Regions for EPA rule 111d: 6 + Alaska + Hawaii + national
+!  Well types:  1. oil that is not tight          2. tight oil          3. all other gas
+!               4. tight gas     5. shale gas     6. coalbed methane    7. dry holes
+      PARAMETER(WELLTYPES=7) ! Types of oil and natural gas wells
+!  Gas types:  1. all other gas (not 2-4)   2. tight gas   3. shale gas   4. coalbed methane   5. total
+      PARAMETER(GASTYPES=5)  ! Types of oil and natural gas wells
+!  Oil types:  1. all other oil (not 2-4)       2. tight oil   3. carbon dioxide enhanced oil recovery
+!              4. other enhanced oil recovery   5. total
+      PARAMETER(OILTYPES=5)  ! Types of oil and natural gas wells
+	  PARAMETER(MAXNUC=900)  ! Maximum Number of Existing Nuclear Units + MNUMNR * 2 New Units
+

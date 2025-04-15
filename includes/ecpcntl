@@ -15,6 +15,7 @@
        UPRSK,    UPVOM,    UPVSB,    UPHTRT,   UPCTRM,   UPPCFB,  &
        UPPSEF,   UPPSRT,   UPDCFB,   UPDSEF,   UPDSRT,   UPDCEF,   &
        UPPHRT0,  UPPHRTN,  UPICCF,   UPINTLOW, UPINTEXP, UPGSUB, UPGSUBYR, UPGSMX,  &
+       UPIRAYR0, UPIRA_EMYR, UPIRA_EMPCT, &
        UPIBND,   UPINTZ,   UECP_HTRT_ADJ,      UECP_CPEN_ADJ, ALT_UECP_CPEN_ADJ,    UPSCPR,   UPSHPEN, UPSCPEN,  UPSRSK, &
        UPSQMAX,  UPSRMAX,  UPCFCPR,  UPCFHPEN, UPCFCPEN, UPNCPR,  LEVRMD, LEVRMD2, LEVRMD2C, LEVRMC, ECP_PCT,  &
        UPCALPHA, UPCARBND, UPCO2EOR, UPSO2PRC, &
@@ -55,8 +56,8 @@
        ECP_D_INIT, ECP_D_LFCC, ECP_D_LFHR, ECP_D_OVCC, ECP_D_OVHR, ECP_D_OVFX,  &
        ECP_D_OVVR, ECP_D_PACK, ECP_D_MODE, ECP_D_MSHR, ECP_D_PRNT, ECP_D_RSK,  &
        ECP_D_AMB,  EFP_D_SCR,  EFP_D_TRN,  UCPDSPIS, UCPINTIS, UCPRNWIS, &
-       UCPDGNIS, UCPSTOIS, UCPFTABI, UCPVSTOR,  UCPDSPI,  UCPINTI,  UCPRNWI,  UCPDGNI,  &
-       UCPSTOI,  UPFNUC,   UPFCOL,   UPFGAS,   UPFRES,   UPFDIS,   UFL_D_ECP,  &
+       UCPDGNIS, UCPSTOIS, UCPFTABI, UCPVSTOR,  UCPDSPI,  UCPINTI,  UCPRNWI,  UCPDGNI, StoTypMap, CurtTypMap,  &
+       UCPSTOI,  UPFNUC,   UPFCOL,   UPFGAS,   UPFRES,   UPFDIS, UPFHYT,  UFL_D_ECP,  &
        UIRINTI,  UIRRNWI,  UIRSTOI,  UNFPH,    UNXPH,    UNAPH,    UPCENSUS, UPCIMP,  &
        UPCLRG,   UPETTSW,  UPGTRN,   UPLNTIDX, UPMSHSW,  &
        UPNGRG,   UPCARG,   UPNUGSW,  UPTOPR,   UPTMRM,   UPEFDT,   UPCPTRSW,  &
@@ -286,8 +287,6 @@
       INTEGER*4 MaxPtypes                     ! Maximum number of ReStore Plant Types
       INTEGER*4 MaxNumBins                    ! Maximum number of bins per Storage Group 
 
-      INTEGER*4 MaxPtypesP                    ! Maximum number of ReStore Plant Types PARAMETER
-      PARAMETER(MaxPtypesP = 23)
       INTEGER*4 MaxNumBinsP                   ! Maximum number of bins per Storage Group PARAMETER
       PARAMETER(MaxNumBinsP = 4)
 
@@ -419,6 +418,12 @@
       REAL*4    ALT_UECP_CPEN_ADJ(ECP_D_CAP)        ! Minimum Capacity Derate Adjustment Factor
       CHARACTER*2 NO_CCS_PLNTCD(ECP_D_CAP)          ! For units with carbon capture identify plant code for associated plants without capture
       INTEGER*4 NO_CCS_PLNT_NDX(ECP_D_CAP)          ! For units with carbon capture identify plant index for associated plants without capture
+
+!     IRA Phase out parameters - used with dynamic phase out of IRA tax credits (PTC and ITC)
+
+      INTEGER*4 UPIRAYR0                ! YEAR TO TRIGGER CHECKING FOR DYNAMIC PHASE OUT OF IRA TAX CREDITS (use 9999 for no dynamic check)
+      INTEGER*4 UPIRA_EMYR              ! BASE YEAR FOR EMISSIONS TARGET FOR IRA TAX CREDIT PHASE OUT 
+      REAL*4    UPIRA_EMPCT             ! REQUIRED REDUCTION IN EMISSISONS FROM TARGET YEAR TO TRIGGER PHASE OUT
 
 !
 !     SCRUBBER RETROFITS
@@ -632,6 +637,8 @@
       INTEGER*4 NUM_864_TYPES                 ! Number of Plant Types Consdered by the 864 Model
       INTEGER*4 NUM_STEPS_PER_TYPE(ECP_D_CAP)   ! Number of Price Bins per 864 Plant Typep
       INTEGER*4 Sto_Cap_Indx(ECP_D_CAP)         ! Value of Storage Index      
+	  INTEGER*4 StoTypMap(ECP_D_CAP)            ! Map of storage plant type to restore storage type for restart file
+	  INTEGER*4 CurtTypMap(ECP_D_CAP)           ! Map of Storage Plant types to restore curtailment type for restart file
       INTEGER*4 UCPDSPI(ECP_D_DSP)              ! Map of DSP to CAP technology indices
       INTEGER*4 UCPINTI(ECP_D_INT)              ! Map of INT to CAP technology indices
       INTEGER*4 UCPRNWI(ECP_D_RNW)              ! Map of RNW to CAP technology indices
@@ -646,6 +653,7 @@
       INTEGER*4 UPFGAS(ECP_D_NFL)               ! Map of ECP Fuel Type to Gas         (0 = no, 1 = primary, 2 = secondary)
       INTEGER*4 UPFRES(ECP_D_NFL)               ! Map of ECP Fuel Type to Resid       (0 = no, 1 = primary, 2 = secondary)
       INTEGER*4 UPFDIS(ECP_D_NFL)               ! Map of ECP Fuel Type to Distillate  (0 = no, 1 = primary, 2 = secondary)
+      INTEGER*4 UPFHYT(ECP_D_NFL)               ! Map of ECP Fuel Type to Hydrogen    (0 = no, 1 = primary, 2 = secondary)
       INTEGER*4 UNFPH                         ! LENGTH OF FULL PLANNING HORIZON
       INTEGER*4 UNXPH                         ! LENGTH OF EXPL. PLANNING HORIZON
       INTEGER*4 UNAPH                         ! NUMBER OF YEARS FOR ANNUAL ADJUSTMENT COMPOUNDING IN LAST ECP YEAR
@@ -748,8 +756,8 @@
  
  !     Keep Track of Units that have choosen the heatrate improvement
  
-       REAL*8 HTRT_CAP(MNUMNR,ECP_D_DSP,MAXNFR)
-       REAL*8 HTRT_CAP_MR(MNUMNR,ECP_D_DSP,MAXNFR)
+       REAL*8 HTRT_CAP(MNUMNR,ECP_D_DSP,MAXNFR,ECP_D_XPH)
+       REAL*8 HTRT_CAP_MR(MNUMNR,ECP_D_DSP,MAXNFR,ECP_D_XPH)
        REAL*8 HTRT_EPGCAP(0:EFD_D_MFRG,ECP_D_RET,ECP_D_CAP,MNUMNR)       
        INTEGER*4 HTRT_RESULTS(EMM_D_GRP) ! 0 if option has not been selected - otherwise year selected    
        INTEGER*4 HTRT_FRST(ECP_D_RET,ECP_D_CAP,MNUMNR)
@@ -826,7 +834,8 @@
 
       REAL*8 NUC_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR),FOS_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR)
       REAL*8 NUC_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR),FOS_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)
-      COMMON /BASE_CF_FROM_M864/ NUC_CF_ECP, FOS_CF_ECP, NUC_CF_EFD, FOS_CF_EFD
+	  INTEGER*4 USW_NUCRETSM
+      COMMON /BASE_CF_FROM_M864/ NUC_CF_ECP, FOS_CF_ECP, NUC_CF_EFD, FOS_CF_EFD, USW_NUCRETSM
 
       COMMON /INTGEN/ UPINTLAG,UPINTINC,UPINTMAX,ITOTGEN,IRNWGEN,IRNWPCT,IRNWACT
       REAL*4 UPINTLAG
@@ -873,3 +882,7 @@
 
       COMMON /STORAGE_CAP_CREDIT/ DINURAL_STORAGE_CAPACITY_CREDIT, PT_STORAGE_CAPACITY_CREDIT
       REAL DINURAL_STORAGE_CAPACITY_CREDIT(MNUMYR, MNUMNR), PT_STORAGE_CAPACITY_CREDIT(MNUMYR, MNUMNR)
+
+      ! total restore generation
+	  REAL*4 TOT_GEN_RES(ECP_D_INT,4,MNUMNR,MNUMYR), CURTAILSUB(ECP_D_INT,4,MNUMNR,MNUMYR)
+	  COMMON /TOT_GEN/ TOT_GEN_RES, CURTAILSUB

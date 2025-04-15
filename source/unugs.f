@@ -18,7 +18,6 @@
       include 'dispinyr'
       include 'dispuse'
       include 'uefdout'
-      include 'hmmblk'
 !
       INTEGER*4 I,J,IECP,IFL,JFL,ISEC,ICN
       INTEGER*4 IRG,CRG,IYR
@@ -213,35 +212,12 @@
          IF (JFL .GT. 0) THEN
            DO ICN = 1, MNUMCR - 2
 
-              IF (IFL .EQ. 1) THEN      ! There is currently only H2 cogen with coal gasification
-
-                GN_to_Grid(S_IND,IFL) = GN_to_Grid(S_IND,IFL) + &
-                   ( CGINDLGEN(ICN,IYR,JFL,1) + CGHMMGEN(ICN,IYR,JFL,1) ) * MPCGCtoN(IRG,ICN,IFL)        ! Add in cogen to grid from HMM
-                GN_Own_Use(S_IND,IFL) = GN_Own_Use(S_IND,IFL) + CGINDLGEN(ICN,IYR,JFL,2) * &             ! No own-use cogen in HMM
-                   MPCGCtoN(IRG,ICN,IFL)
-                CP_Total(S_IND,IFL) = CP_Total(S_IND,IFL) + &
-                   MPCGCtoN(IRG,ICN,IFL) * ( CGINDLCAP(ICN,IYR,JFL) + CGHMMCAP(ICN,IYR,JFL) )            ! Add in cogen capacity from HMM
-                Con_Total(S_IND,IFL) = Con_Total(S_IND,IFL) + &
-                   MPCGCtoN(IRG,ICN,IFL) * ( CGINDLQ(ICN,IYR,JFL) + HMCLHP(IYR,ICN) )                    ! Add in hydrogen H+P
-!                IF (IRG.EQ.1.and.IYR.EQ.20) WRITE(6,*)'cgindlgen, mpcgton ', CGINDLGEN(ICN,IYR,JFL,1), MPCGCtoN(IRG,ICN,IFL)
-                !if (fcrl.eq.1) write(*,'(a,7i6,8f15.6)')  &
-                !   'CGHMMGENinUNUGS,y,i,r,cr,JFL,IFL,S_IND:',  &
-                !   iyr,curitr,IRG,ICN,JFL,IFL,S_IND,CGHMMGEN(ICN,IYR,JFL,1),CGHMMCAP(ICN,IYR,JFL),  &
-                !   CGINDLGEN(ICN,IYR,JFL,1),GN_to_Grid(S_IND,IFL),HMCLHP(IYR,ICN),Con_Total(S_IND,IFL), &
-                !   CP_Total(S_IND,IFL),MPCGCtoN(IRG,ICN,IFL)
-
-              ELSE
-
                  GN_to_Grid(S_IND,IFL) = GN_to_Grid(S_IND,IFL) + CGINDLGEN(ICN,IYR,JFL,1) * &
                     MPCGCtoN(IRG,ICN,IFL)
                  GN_Own_Use(S_IND,IFL) = GN_Own_Use(S_IND,IFL) + CGINDLGEN(ICN,IYR,JFL,2) * &
                     MPCGCtoN(IRG,ICN,IFL)
                  CP_Total(S_IND,IFL) = CP_Total(S_IND,IFL) + MPCGCtoN(IRG,ICN,IFL) * CGINDLCAP(ICN,IYR,JFL)
                  Con_Total(S_IND,IFL) = Con_Total(S_IND,IFL) + MPCGCtoN(IRG,ICN,IFL) * CGINDLQ(ICN,IYR,JFL)
-
-!                IF (IRG.EQ.1.and.IYR.EQ.20) WRITE(6,*)'cgindlgen, mpcgton ', CGINDLGEN(ICN,IYR,JFL,1), MPCGCtoN(IRG,ICN,IFL)
-
-              ENDIF
 
            ENDDO
            CGTOTGENNR(IRG,CURIYR,IFL,1) = CGTOTGENNR(IRG,CURIYR,IFL,1) + GN_to_Grid(S_IND,IFL)

@@ -12,7 +12,7 @@
       REAL XPNGEL(MNUMCR,MNXYR)
       REAL XPCLEL(MNUMCR,MNXYR)
       REAL XPDSCM(MNUMCR,MNXYR) ! 39 Distillate - Commercial
-      REAL XPDSEL(MNUMCR,MNXYR) ! 42 Distillate - Electricity (+petroleum coke)
+      REAL XPDSEL(MNUMCR,MNXYR) ! 42 Distillate - Electricity
       REAL XPRLEL(MNUMCR,MNXYR) ! 56 Residual Fuel, Low Sulfur - Electricity
       REAL XPRHEL(MNUMCR,MNXYR) ! 59 Residual Fuel, High Sulfur - Electricity
       REAL XPRSEL(MNUMCR,MNXYR)
@@ -30,7 +30,7 @@
       REAL XPASIN(MNUMCR,MNXYR) ! 67 Asphalt, Road Oil - Industrial
       REAL XPOTAS(MNUMCR,MNXYR) ! 70 Other Petroleum- Industrial
       REAL XPMETR(MNUMCR,MNXYR) ! 78 Methanol - Transporation
-      REAL XPETTR(MNUMCR,MNXYR) ! 79 Ethanol - Transporation
+      REAL XPETTR(MNUMCR,MNXYR) ! 79 Ethanol - Transporation (sold as E85)
       REAL XIT_WOP(MNXYR,2)             ! WORLD OIL PRICE (2--UNITS)
       REAL XOGWPRNG(MNUMOR,MNXYR)       !NG WELLHEAD PRICE ($87/MCF)
       REAL XOGWPRNGPF(2,MNUMOR,MNXYR)   !PF NG WELLHEAD PRICE EXP GUESS ($87/MCF) - (1 = current, 2 = previous)

@@ -1,0 +1,32 @@
+! Note: Sourced from H2A. discounted over lifetime with financials factored in
+! Unit: $/kg H2
+Composite Table:
+regCen           prodTech         base_PUCCostNonElectrolyzer
+NewEngland       SMR              2.24014
+NewEngland       SMR_CCS          4.99671
+NewEngland       SMR_CCS_OFF      4.99671
+MidAtlantic      SMR              2.24014
+MidAtlantic      SMR_CCS          4.99671
+MidAtlantic      SMR_CCS_OFF      4.99671
+ENCentral        SMR              2.24014
+ENCentral        SMR_CCS          4.99671
+ENCentral        SMR_CCS_OFF      4.99671
+WNCentral        SMR              2.24014
+WNCentral        SMR_CCS          4.99671
+WNCentral        SMR_CCS_OFF      4.99671
+SAtlantic        SMR              2.24014
+SAtlantic        SMR_CCS          4.99671
+SAtlantic        SMR_CCS_OFF      4.99671
+ESCentral        SMR              2.24014
+ESCentral        SMR_CCS          4.99671
+ESCentral        SMR_CCS_OFF      4.99671
+WSCentral        SMR              2.24014
+WSCentral        SMR_CCS          4.99671
+WSCentral        SMR_CCS_OFF      4.99671
+Mountain         SMR              2.24014
+Mountain         SMR_CCS          4.99671
+Mountain         SMR_CCS_OFF      4.99671
+Pacific          SMR              2.24014
+Pacific          SMR_CCS          4.99671
+Pacific          SMR_CCS_OFF      4.99671
+;

@@ -7,8 +7,8 @@ ScaleCalib:= '0.1';
 ConvTolerCalib:= '0.05';
 
 !Start year to run historical QP
-FirstHQPYear:='2015';
-LastHQPYear:='2019';
+FirstHQPYear:='2017';
+LastHQPYear:='2021';
 
 !Calibration switch 1: Iterative approach; 2: Cost factors
 !Calibration_Switch:='1'; moved to code

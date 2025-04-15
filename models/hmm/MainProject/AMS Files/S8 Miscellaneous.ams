@@ -1,0 +1,377 @@
+## ams_version=1.0
+
+Section S8_Miscellaneous {
+	DeclarationSection EMM_Testing_Switches_and_Parameters {
+		Parameter LoadRestrictionSwitch {
+			Range: binary;
+		}
+		Parameter ElectrolyzerCostFactorDebug;
+		Parameter LowerElectrolyzerCapitalSwitch {
+			Range: binary;
+		}
+	}
+	Procedure SaveProfilerResults {
+		Body: {
+			! Fills parameter `Results~ with profiler measurements for which gross time is larger than 0.5 seconds
+			ProfilerCollectAllData(Results, GrossTimeThreshold: 0.1);
+			sDataYearFile := "log\\ProfilerResults\\Profiler"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+formatstring("%>02i",CYCLEINFO_CURIRUN(1))+".txt";
+			write Results to file sDataYearFile;
+		}
+	}
+	DeclarationSection Profiler_Declarations {
+		StringParameter ProfilerResultsFile;
+		Parameter Results {
+			IndexDomain: {
+				(IndexProcedures,line,IndexProfilerTypes);
+			}
+		}
+		Set Lines_ {
+			SubsetOf: Integers;
+			Index: line;
+		}
+	}
+	Procedure TestCase {
+		Body: {
+			!CaseFileLoad("data/cases/hmm_data_orig.data");
+			
+			CaseFileSave("data/cases/hmm_data_orig_compressed.data", AllIdentifiers);
+			
+			CaseFileLoad("data/cases/hmm_data_orig_compressed.data");
+		}
+	}
+	DeclarationSection Test_Declarations {
+		Parameter Vintage_New {
+			IndexDomain: (MNUMYR,MNUMNR,MNUMYRVIN,M3);
+		}
+		Parameter Vintage_Original {
+			IndexDomain: (MNUMYR,MNUMNR,MNUMYRVIN,M3);
+		}
+		Parameter p_test {
+			IndexDomain: (M3,MNUMYR,MNUMYRVIN);
+		}
+	}
+	Procedure Test_Read {
+		Body: {
+			READ FROM FILE "TEST_READ.TXT" IN replace MODE;
+			
+			READ FROM FILE "GDS_VINTAGE45V.TXT" IN REPLACE MODE; 
+			
+			READ FROM FILE "GDS_VINTAGE45V_NEW.TXT" IN REPLACE MODE;
+		}
+	}
+	DeclarationSection Tuning {
+		Parameter HMMGenerationTime;
+		Set FixedOptions_ {
+			SubsetOf: AllOptions;
+		}
+	}
+	Procedure TuneHMM {
+		Body: {
+			GMP::Tuning::TuneMultipleMPS(
+				DirectoryName      : "MPSFiles/SingeMPS" , 
+				Solver             :  'CPLEX 22.1', 
+				FixedOptions       :  FixedOptions_, 
+				ApplyTunedSettings :  1, 
+				OptionFileName     :  "HMMTuneOptions");
+		}
+	}
+	Section Error_Handling {
+		Procedure ForceError {
+			Body: {
+				AIMMS_Standalone_Switch := 0;
+				CurrentModelYear := '2023';
+				DivideZero := 1/0;
+			}
+			Comment: "Divide by zero to force an error. This procedure is used to test the HMM_Error_Handler procedure.";
+		}
+		DeclarationSection Declarations {
+			File HMMLogFile {
+				Name: "HMM Log.txt";
+				Device: Disk;
+				Mode: replace;
+			}
+			StringParameter ErrorString;
+			Parameter DivideZero;
+			StringParameter err_attribute;
+			StringParameter err_node;
+			ElementParameter err_code {
+				Range: errh::ErrorCodes;
+			}
+			StringParameter err_filename;
+		}
+		Procedure HMM_Error_Handler {
+			Arguments: (err);
+			Body: {
+				if AIMMS_Standalone_Switch=0 then
+					put HMMLogFile;
+				        put "error trapped, invoked externally, error was " + errh::message(err) + "CODE:" + errh::Severity(err);
+				
+				        ! Only save case file when there is a true error, not a warning. 
+				        if errh::Severity(err) = "error" then 
+					SaveAll( FormatString("HMMErrorDetected%e_%i", CurrentModelYear,ncntrl_curitr(1)));
+					endif;
+				endif;
+			}
+			Comment: "This procedure saves a case that contains all identifiers anytime an error is created when HMM is *not* set to its standalone mode.";
+			ElementParameter err {
+				Range: errh::PendingErrors;
+				Property: Input;
+			}
+		}
+	}
+	Section DEX_Section {
+		DeclarationSection EMM_Testing_Declarations {
+			Parameter TotalGenerationByVintage {
+				IndexDomain: (curiyr,r,hrs,s,vintage,tech);
+			}
+			Set EMM_VINTAGE {
+				Index: vintage;
+			}
+			Parameter RATIO {
+				IndexDomain: (curiyr,r,vintage,tech);
+				dex::Dataset: ;
+				dex::TableName: ;
+			}
+			File Gen45V_File {
+				Name: "ToAIMMS/EMM_Files/Gen45V.txt";
+				Device: Disk;
+				Mode: replace;
+			}
+			Parameter GEN45v {
+				IndexDomain: (curiyr, r, hrs, s, tech);
+				dex::Dataset: ;
+				dex::TableName: ;
+			}
+			File DenseGen45V_File {
+				Name: "ToAIMMS/EMM_Files/Gen45V_dense.txt";
+				Device: Disk;
+				Mode: replace;
+			}
+			Set EMM_S {
+				Index: s;
+			}
+			Parameter Dense_GEN45v {
+				IndexDomain: (curiyr, r, hrs, s, tech);
+				dex::Dataset: ;
+				dex::TableName: ;
+			}
+			Set EMM_TECH {
+				Index: tech;
+			}
+			Set EMM_CURIYR {
+				Index: curiyr;
+			}
+			Set EMM_HRS {
+				SubsetOf: Integers;
+				Index: hrs;
+				Definition: {
+					{1..24}
+				}
+			}
+			Set EMM_R {
+				Index: r;
+			}
+		}
+		Procedure EMM_Testing {
+			Body: {
+				!dex::PrefixAutoTableWithDataset := 1;
+				dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
+				dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
+				dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
+				!dex::DatasetGeneratorFilter('CSV', 'Dense') := 1;
+				!dex::DatasetGeneratorFilter('Parquet', 'Dense') := 1;
+				DEX::PrefixAutoTableWithDataset := 1;
+				dex::GenerateDatasetMappings();
+				
+				empty Gen45V;
+				
+				! Add mapping
+				dex::AddMapping("Gen45V_Mapping_CSV", "Mappings/Generated/HMMLargeDataFiles-ToAIMMS_45V_generation_by_tech-CSV.xml");
+				
+				! Read the CSV
+				dex::ReadFromFile("ToAIMMS/EMM_files/ToAIMMS_45V_generation_by_tech.csv", "Gen45V_Mapping_CSV");
+				
+				! Write out to composite file
+				put Gen45V_File;
+					display{GEN45v(curiyr, r, hrs, s, tech)} where decimals :=22;
+				putclose;
+				
+				Dense_GEN45v(curiyr, r, hrs, s, tech) := GEN45v(curiyr, r, hrs, s, tech);
+				
+				for (curiyr, r, hrs, s, tech) do
+					if Dense_GEN45v(curiyr, r, hrs, s, tech) = 0 then
+						Dense_GEN45v(curiyr, r, hrs, s, tech) := 1;
+					endif;
+				endfor;
+				
+				put DenseGen45V_File;
+					display {Dense_GEN45v(curiyr, r, hrs, s, tech)} where decimals := 22;
+				putclose ;	
+				
+				empty GEN45v;
+				empty Dense_GEN45v(curiyr, r, hrs, s, tech);
+				
+				read from file "ToAIMMS/EMM_Files/GEN45V.txt" in merge mode;
+				read from file "ToAIMMS/EMM_Files/Gen45V_Dense.txt" in merge mode;
+				
+				dex::AddMapping("VintageRatio_Mapping_CSV", "Mappings/Generated/HMMLargeDataFiles-ToAIMMS_VintageRatio-CSV.xml");
+				dex::ReadFromFile("ToAIMMS/EMM_files/ToAIMMS_VintageRatio.csv", "VintageRatio_Mapping_CSV");
+				
+				TotalGenerationByVintage(curiyr, r, hrs, s, vintage, tech) := Gen45V(curiyr, r, hrs, s, tech) * RATIO(curiyr, r, vintage, tech);
+			}
+		}
+		Procedure TEST_read_GDS {
+			Body: {
+				NCNTRL_CURCALYR(M1) := 2050;
+				NCNTRL_CURITR(M1) := 3;
+				
+				! reads global data from NEMS
+				sDataYearFile:="toAIMMS\\GlobalDataToAimms_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+				put formatstring("the global data transfer file name is %s\n", sDataYearFile);
+				if fileexists(sDataYearFile) then
+				   read from file sDataYearFile in merge mode;
+				else
+					put "the global data transfer file not found \n ";
+				endif;
+			}
+		}
+		Procedure Write_Parquet {
+			Body: {
+				!dex::ReadAllMappings();
+				! Parquet
+				dex::AddMapping("UECPOUT_CurtailsTot_Mapping", "M:/ogs/syk/git/NEMS_Ash/models/hmm/Mappings/Generated/HMMLargeDataFiles-UECPOUT_CurtailsTot-Parquet.xml");
+				dex::AddMapping("UECPOUT_ElecPriceTot_Mapping", "M:/ogs/syk/git/NEMS_Ash/models/hmm/Mappings/Generated/HMMLargeFileTransfer-UECPOUT_ElecPriceTot-Parquet.xml");
+				
+				! CSV
+				dex::AddMapping("UECPOUT_CurtailsTot_Mapping_CSV", "M:/ogs/syk/git/NEMS_Ash/models/hmm/Mappings/Generated/HMMLargeDataFiles-UECPOUT_CurtailsTot-CSV.xml");
+				dex::AddMapping("UECPOUT_ElecPriceTot_Mapping_CSV", "M:/ogs/syk/git/NEMS_Ash/models/hmm/Mappings/Generated/HMMLargeFileTransfer-UECPOUT_ElecPriceTot-CSV.xml");
+				
+				! Write Parquet
+				dex::WriteToFile("UECPOUT_CurtailsTot.parquet", "UECPOUT_CurtailsTot_Mapping");
+				dex::WriteToFile("UECPOUT_ElecPriceTot.parquet", "UECPOUT_ElecPriceTot_Mapping");
+				
+				! Write CSV
+				dex::WriteToFile("UECPOUT_CurtailsTot.csv", "UECPOUT_CurtailsTot_Mapping_CSV");
+				dex::WriteToFile("UECPOUT_ElecPriceTot.csv", "UECPOUT_ElecPriceTot_Mapping_CSV");
+				
+				empty UECPOUT_CurtailsTot;
+				empty UECPOUT_ElecPriceTot;
+				
+				!dex::Mappings;
+			}
+		}
+		Procedure Generate_Mappings {
+			Body: {
+				!dex::PrefixAutoTableWithDataset := 1;
+				dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
+				dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
+				dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
+				!dex::DatasetGeneratorFilter('CSV', 'Dense') := 1;
+				!dex::DatasetGeneratorFilter('Parquet', 'Dense') := 1;
+				dex::GenerateDatasetMappings();
+			}
+		}
+		Procedure Read_Parquet {
+			Body: {
+				dex::AddMapping("UECPOUT_CurtailsTot_Mapping", "Mappings/Generated/HMMLargeDataFiles-UECPOUT_CurtailsTot-Parquet.xml");
+				dex::AddMapping("UECPOUT_ElecPriceTot_Mapping", "Mappings/Generated/HMMLargeFileTransfer-UECPOUT_ElecPriceTot-Parquet.xml");
+				
+				! read csv
+				dex::ReadFromFile("UECPOUT_CurtailsTot.csv", "UECPOUT_CurtailsTot_Mapping_CSV");
+				dex::ReadFromFile("UECPOUT_ElecPriceTot.csv", "UECPOUT_ElecPriceTot_Mapping_CSV");
+				
+				empty UECPOUT_CurtailsTot;
+				empty UECPOUT_ElecPriceTot;
+				
+				! read parquet
+				dex::ReadFromFile("UECPOUT_CurtailsTot.parquet", "UECPOUT_CurtailsTot_Mapping");
+				dex::ReadFromFile("UECPOUT_ElecPriceTot.parquet", "UECPOUT_ElecPriceTot_Mapping");
+			}
+		}
+	}
+	Procedure pr_WriteIdentifierTranslations {
+		Body: {
+			! We can now use the text attribute of model identifiers to generate the translation 
+			! (automatic_translations.properties) file, which contains the "pretty names" of 
+			! parameters for display in the WebUI, automatically. This allows us to control it 
+			! from within the model, in stead of having to update this file separately.
+			!
+			! This procedure is run in 'PostMainInitialization'. If you want to update the file during 
+			! development, simply run 'pr_WriteIdentifierTranslation' manually.
+			!
+			! In case you want to hide the translation of an identifier (i.e. display nothing), put the
+			! string "no-display" as text attribute of an identifier.
+			!
+			! Note: the file automatic_translations.properties will be re-generated completely each 
+			! time the procedure is run. If you want to control some translations within a .properties 
+			! file manually, create a new file.
+			!
+			! In the case that multiple .properties files contain a translation for the same identifier, 
+			! the last translation in the file with the last alphabetical order (in terms of filename) 
+			! will be displayed.
+			
+			If ProjectDeveloperMode Then
+				_sp_WebUIDirectory := "MainProject/WebUI";
+				If DirectoryExists(_sp_WebUIDirectory) Then
+					_s_AllIdentifiersSorted := sort(IndexIdentifiers | AttributeToString(IndexIdentifiers, 'text'), IndexIdentifiers);
+					if Card(_s_AllIdentifiersSorted) = 0 then
+						return 0;  ! Nothing to be done.
+					endif;
+			
+					! If the webUI folder exists, make sure to create the resources folder if it doesn't exist (yet)
+					_sp_ResourcesDirectory := _sp_WebUIDirectory + "/resources";
+					If not DirectoryExists(_sp_ResourcesDirectory) Then
+						DirectoryCreate(_sp_ResourcesDirectory);
+					EndIf;
+			
+					_sp_TranslationFile := _sp_ResourcesDirectory + "/automatic_translations.properties";
+			
+					_p_MaximumLineLength :=
+						Max(
+							IndexIdentifiers in _s_AllIdentifiersSorted,
+							4  ! for " = " and "\n"
+							+ StringLength(IndexIdentifiers)
+							+ StringLength(AttributeToString(IndexIdentifiers, 'text')));
+					block where listing_page_width := _P_MaximumLineLength;
+						put _f_TranslationFile;
+			
+						for IndexIdentifiers in _s_AllIdentifiersSorted do
+							if AttributeToString(IndexIdentifiers, 'text') = "no-display" Then
+								! Write a non-breaking space (character 160, < >), because AIMMS 4.78+ does not
+								! recognize empty properties.
+								put FormatString("%e = \160\n", IndexIdentifiers);
+							Else
+								put FormatString("%e = %s\n", IndexIdentifiers, AttributeToString(IndexIdentifiers, 'text'));
+							endif;
+						endfor;
+						putclose;
+					endblock;
+				EndIf;
+			EndIf;
+		}
+		Set _s_AllIdentifiersSorted {
+			SubsetOf: AllIdentifiers;
+			OrderBy: user;
+		}
+		StringParameter _sp_WebUIDirectory;
+		StringParameter _sp_ResourcesDirectory;
+		StringParameter _sp_TranslationFile;
+		File _f_TranslationFile {
+			Name: _sp_TranslationFile;
+			Device: Disk;
+			Mode: replace;
+		}
+		Parameter _p_MaximumLineLength;
+	}
+	Procedure pr_MakeIdentifiersReadOnly {
+		Body: {
+			CurrentInputs
+				:= AllUpdatableIdentifiers
+					- {};
+		}
+		Comment: {
+			"Identifiers can be made read-only by removing them from the set \'CurrentInputs\'. You can refer to identifiers directly (e.g. \'p_Test\'), or
+			make entire sections read only (e.g. {IndexIdentifiers | IndexIdentifiers in S1_Data}."
+		}
+	}
+}

@@ -1,0 +1,11 @@
+parameter,value,type,description
+opt_check_solver_status,FALSE,switch,Check solver status and attempt to troubleshoot cause for solve fail if TRUE
+troubleshoot_datatypes,FALSE,switch,Log datatypes to support troubleshooting if TRUE
+debug_opt_log,FALSE,switch,Output solver output log if TRUE
+use_solver_xpress_persistent,TRUE,bool,Use the xpress persistent solver (NEMS default - note: the first solver selected is used)
+use_solver_xpress_direct,FALSE,bool,Use the xpress direct solver (note: the first solver selected is used)
+use_solver_xpress,FALSE,bool,Use the default version of the xpress solver (note: the first solver selected is used)
+use_solver_highs,FALSE,bool,Use the HiGHS solver (note: the first solver selected is used)
+xpress_path,C:/xpress8_12/bin/xpauth.xpr,str,path to xpress' xpauth.xpr license file
+soltimelimit,600,int,solution time limit per iteration (seconds)
+maxmemorysoft,16000,int,MB available for solve

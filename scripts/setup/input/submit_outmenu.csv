@@ -1,0 +1,11 @@
+Rank,Category,Drive,Output,Note
+1,custom,,zzz/output/user,store on the testing drive with most available space 
+2,custom,,other directory,you specify the location
+3,important,k,k:/output/user,for important runs; drive backed up
+4,important,n,n:/output/user,for important runs; drive backed up
+5,important,o,o:/output/user,for important runs; drive backed up
+6,important,p,p:/output/user,for important runs; drive backed up
+7,testing,q,q:/output/user,for testing and other noncritical runs; drive not backed up
+8,testing,r,r:/output/user,for testing and other noncritical runs; drive not backed up
+9,testing,s,s:/output/user,for testing and other noncritical runs; drive not backed up
+10,testing,u,u:/output/user,for testing and other noncritical runs; drive not backed up

@@ -47,6 +47,10 @@
 
       REAL*4 ULSCAP_EFD(EMM_D_GRP,EFD_D_MSP)      ! Average EFD Seasonal Capacity by Plant Group
       REAL*4 ULHTRT_EFD(EMM_D_GRP,EFD_D_MSP)      ! Average EFD Seasonal Heatrate (Normalized) by Plant Group
+
+      REAL*4 ULCCS_INV(EMM_D_GRP)                 !Investment annuity for CCS build (retrofit or portion of new build) - annual nominal $
+      REAL*4 ULCCS_FOM(EMM_D_GRP)                 !FOM for CCS build (retrofit adder or portion of new build) - annual 1987$
+      REAL*4 ULCCS_VOM(EMM_D_GRP)                 !VOM for CCS build (retrofit adder or portion of new build) - 1987 $/kWh
 !
 !     Trade Data
 !
@@ -95,12 +99,13 @@
              ULLOSE, ULELRS, ULELCM, ULELIN, ULELTR, ULEPRS, ULEPCM, &
              ULEPIN, ULEPTR, ULEPAS, ULEPCP, ULEPFL, ULEPOM, ULEPWP, &
              ULREVS, ULENGREVS, ULVCST, ULFCST, ULSO2P, ULHGP,  ULCCST, ULTGEN, ELSO2P, ELHGP, &
-             ELGENE, ELGENP, ELFLSH, ULNOXP, ELNOXP, ULRPSP, ELRPSP, ULSCAP_ECP, ULHTRT_ECP, ULSCAP_EFD, ULHTRT_EFD, ULTGEN_ECP
+             ELGENE, ELGENP, ELFLSH, ULNOXP, ELNOXP, ULRPSP, ELRPSP, ULSCAP_ECP, ULHTRT_ECP, ULSCAP_EFD, ULHTRT_EFD, ULTGEN_ECP, &
+             ULCCS_INV, ULCCS_FOM, ULCCS_VOM
 !
 !     Calculate Storage Requirement
 !
       INTEGER*4 ULSIZE
-      PARAMETER (ULSIZE =  12 * 4 * EMM_D_GRP + &
+      PARAMETER (ULSIZE =  15 * 4 * EMM_D_GRP + &
                             3 * 4 * EMM_D_GRP * ECP_D_XPH + &
                             2 * 4 * EMM_D_GRP * EFD_D_MSP + &
                             6 * 4 * EFD_D_MSP * EMM_D_GRP + &
@@ -109,7 +114,8 @@
                             8 * 4 * EFD_D_FPP * EMM_D_GRP + &
                             1 * 4 * EFD_D_FPP * EMM_D_GRP * EFD_D_MSP + &
                            31 * 4 * MNUMNR + &
-                            1 * 4 * EFD_D_OWN * MNUMNR)
+                            1 * 4 * EFD_D_OWN * MNUMNR + &
+							0)
 
 !     Heatrate Adjustment Factors
 
@@ -121,3 +127,10 @@
       INTEGER*4 FLRG_HR_KNOTS(EFD_D_MFRG,ECP_D_CAP)
 
       COMMON/FLRG_HR_ADJ/FLRG_HR_EFF, FLRG_HR_LL, FLRG_HR_KNOTS
+      
+!    h2 turbines
+      REAL H2_TURBINE_CONSUMPTION(3000,3,25),H2_TURBINE_GENERATION(3000,3,25) ! WHERE H2_TURBINE_CONSUMPTION IS MOLECULAR HYDROGEN BEING CONSUMED IN TURBINE, AND H2_TURBINE_GENERATION IS ELECTRICITY GENERATED OUTPUT
+      REAL SQFUEL_YR(3000,EFD_D_NFL,EFD_D_MFRG,EFD_D_MSP) ! SSN FUEL CONS IN FUEL REGIONS by year
+      REAL SQFUEL_YR_FOR_EFP(100,EFD_D_NFL,EFD_D_MFRG,EFD_D_MSP)
+      REAL EPHRTS_H2_SUPPLY(100,EFD_D_MFRG,EFD_D_MSP, 10), EPHRTS_H2_PRICES(100,EFD_D_MFRG,EFD_D_MSP, 10) ! indexes = year, region, season, steps
+	  COMMON/H2_TURBINES/ H2_TURBINE_CONSUMPTION,H2_TURBINE_GENERATION, SQFUEL_YR, SQFUEL_YR_FOR_EFP, EPHRTS_H2_SUPPLY, EPHRTS_H2_PRICES

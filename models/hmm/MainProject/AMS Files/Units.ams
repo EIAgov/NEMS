@@ -1,0 +1,132 @@
+## ams_version=1.0
+
+Section Units {
+	DeclarationSection Units_Declaration {
+		Parameter kg_to_tons {
+			Definition: 1000;
+		}
+		Parameter mmbtu_to_tbtu {
+			Definition: 1000000;
+		}
+		Parameter mills_to_dollar {
+			Definition: 1000;
+		}
+		Parameter Kwh_to_MMBtu {
+			Definition: {
+				sum(M1, CONVFACT_CFELQ(M1))/1000000;
+			}
+		}
+		Parameter Mwh_to_MMBtu {
+			Definition: {
+				(1000*sum(M1, CONVFACT_CFELQ(M1))) / btu_to_mmbtu;
+			}
+		}
+		Parameter bkwh_to_mmbtu {
+			Definition: {
+				(1000000000*sum(M1, CONVFACT_CFELQ(M1))) / btu_to_mmbtu;
+			}
+		}
+		Parameter mwh_to_kwh {
+			Definition: 1000;
+		}
+		Parameter btu_to_mmbtu {
+			Definition: 1000000;
+		}
+		Parameter bkwh_to_kwh {
+			Definition: 1000000000;
+		}
+		Parameter kg_to_mMton {
+			Definition: 1000000000;
+		}
+		Quantity q_Distance {
+			BaseUnit: m;
+			Conversions: {
+				cm -> m : # -> # / 100,
+				mm -> m : # -> # / 1000,
+				km -> m : # -> # * 1000
+			}
+		}
+		Quantity q_Area {
+			BaseUnit: m2 = m^2;
+			Conversions: {
+				sqm -> m2 : # -> #,
+				km2 -> m2 : # -> #*1000000
+			}
+		}
+		Quantity q_Currency {
+			BaseUnit: EUR;
+			Conversions: {
+				€ -> EUR : # -> #,
+				kEUR -> EUR : # -> # * 1000,
+				k€ -> EUR : # -> # * 1000,
+				mioEUR -> EUR : # -> # * 1000000
+			}
+		}
+		Quantity q_CurrencyDollar {
+			BaseUnit: USD;
+			Conversions: {
+				$ -> USD : # -> #,
+				k$ -> USD : # -> # * 1000,
+				kUSD -> USD : # -> # * 1000,
+				mmUSD -> USD : # -> # * 1000000
+			}
+		}
+		Quantity q_Pieces {
+			BaseUnit: pcs;
+			Conversions: {
+				miopcs 	-> pcs : # -> #*1000000,
+				kpcs 	-> pcs : # -> #*1000
+			}
+		}
+		Quantity q_Unitless {
+			BaseUnit: -;
+			Conversions: {
+				% 	-> - : 	# -># / 100,
+				thou 	-> - : 	# -> # * 1000,
+				mio 	-> - : 	# -> # * 1000000
+			}
+		}
+		Quantity q_TimeUnit {
+			BaseUnit: year;
+			Conversions: {
+				quarter->year : #-># / 4,
+				month->year : #-># / 12,
+				week->year : #-># / 52,
+				day->year : #-># / 365,
+				s->year : #-># / 31536000
+			}
+			Comment: "The unit s has been added automatically because it is a required unit for AimmsWebUI.";
+		}
+		Quantity q_TimeHourMinuteSeconds {
+			BaseUnit: hour;
+			Conversions: {
+				minute 	-> hour : # -> #/60,
+				min 	-> hour : # -> #/60,
+				h 	-> hour : # -> #,
+				sec 	-> hour : # -> #/3600,
+				second 	-> hour : # -> #/3600
+			}
+		}
+		Quantity q_Volume {
+			BaseUnit: m3 = m^3;
+			Conversions: {
+				l  	-> m3 : #-># / 1000,
+				dm3  	-> m3 : #-># / 1000,
+				gal	-> m3 : #-># * 0.003785412,
+				cm3  	-> m3 : #-># / 1000000,
+				CD3  	-> m3 : #-># / 1000,
+				CCM  	-> m3 : #-># / 1000000,
+				HL  	-> m3 : #-># / 10
+			}
+		}
+		Quantity q_Weight {
+			BaseUnit: kg;
+			Conversions: {
+				g   -> kg : #-># / 1000,
+				lb  -> kg : #-># * 0.4535924,
+				ton -> kg : #-># * 1000,
+				oz  -> kg : #-># * 0.02834952
+			}
+		}
+	}
+}

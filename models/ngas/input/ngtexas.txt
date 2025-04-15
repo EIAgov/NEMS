@@ -1,4 +1,4 @@
-!___________________________________________________________________________________________
+﻿!___________________________________________________________________________________________
 !
 !                               NGMM Texas Inputs
 !
@@ -43,8 +43,9 @@ TXRegion_ := {TX_W, TX_N, TX_E};
 TXBorderCrossings_ := {TX_E-MX_NE, TX_W-MX_NE, TX_E-MX_SS};
 
 !Most of these outputs are copied/pasted information from this folder:
-!\\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\Texas_data\preprocessing\outputs
+!NGMM_preprocessing\texas\outputs
 
+! SYK	7/19/23	 Updating from results of tx_process_elec.py
 ! Residential, Commercial, Industrial, and Electric share splits by region
 Composite Table:
 state     	sec              TexasConsShares
@@ -54,19 +55,20 @@ TX_E      	Residential      0.428205
 TX_W      	Commercial       0.167184
 TX_N     	Commercial       0.487569
 TX_E      	Commercial       0.344993
-TX_W		Electric	 0.088
+TX_W		Electric	 0.054
 TX_N		Electric	 0.209
-TX_E		Electric	 0.703
+TX_E		Electric	 0.737
 TX_W		Industrial	 0.0421
 TX_N		Industrial	 0.0666
 TX_E		Industrial	 0.8913
 ;
 
+! SYK	7/20/23	 Updated storage shares
 Composite Table:
 storage    TexasStorageShares
-TX_W       0.0197328
-TX_N       0.155965
-TX_E       0.824303
+TX_W       0.019746
+TX_N       0.156478
+TX_E       0.823776
 ;
 
 ! 2011 regional shares to split pre-2011 history of Texas Trade. (Done in AIMMS)
@@ -77,338 +79,391 @@ TX_E-MX_NE 	0.71
 TX_W-MX_NE 	0.29
 ;
 
-! Historical Interstate/International Flows
-! Units: Bcf
+
+! SYK	7/20/23   Updated after running Texas pre-processor.
+! SYK	7/9/24   Updated after running Texas pre-processor.
 Composite Table:
-reg       reg1            year        HistoricalFlowAnnual
-AR        TX_E            1990        9.626
-AR        TX_E            1991        10.543
-AR        TX_E            1992        4.93
-AR        TX_E            1993        4.458
-AR        TX_E            1994        3.2
-AR        TX_E            1995        3.7
-AR        TX_E            1996        4.3
-AR        TX_E            1997        3.5
-AR        TX_E            1998        3.67
-AR        TX_E            1999        3.353
-AR        TX_E            2000        3.411
-AR        TX_E            2001        2.576
-AR        TX_E            2002        2.503
-AR        TX_E            2003        2.605
-AR        TX_E            2004        1.75
-AR        TX_E            2005        1.9
-AR        TX_E            2006        1.7
-AR        TX_E            2007        2.3
-AR        TX_E            2008        24
-AR        TX_E            2009        21.374
-AR        TX_E            2012        0
-AR        TX_E            2014        0
-AR        TX_E            2015        0
-AR        TX_E            2017        0
-AR        TX_E            2018        0
-AR        TX_E            2019        0
-AR        TX_E            2020        32.238
-LA        TX_E            1990        68.547
-LA        TX_E            1991        37.179
-LA        TX_E            1992        10.135
-LA        TX_E            1993        74.574
-LA        TX_E            1994        72.413
-LA        TX_E            1995        4.87
-LA        TX_E            1996        6.712
-LA        TX_E            1997        8.652
-LA        TX_E            1998        24.635
-LA        TX_E            1999        14.732
-LA        TX_E            2000        32.104
-LA        TX_E            2001        46.842
-LA        TX_E            2002        1.722
-LA        TX_E            2003        8.513
-LA        TX_E            2004        5.831
-LA        TX_E            2005        6.293
-LA        TX_E            2006        6.042
-LA        TX_E            2007        2
-LA        TX_E            2012        80.728
-LA        TX_E            2013        128.552
-LA        TX_E            2014        63.434
-LA        TX_E            2015        50.569
-LA        TX_E            2016        123.13
-LA        TX_E            2017        265.556
-LA        TX_E            2018        403.725
-LA        TX_E            2019        240.666
-LA        TX_E            2020        562.194
-NM        TX_W            1990        43.37
-NM        TX_W            1991        54.691
-NM        TX_W            1992        81.093
-NM        TX_W            1993        92.309
-NM        TX_W            1994        182.912
-NM        TX_W            1995        476.43
-NM        TX_W            1996        568.446
-NM        TX_W            1997        471.549
-NM        TX_W            1998        389.821
-NM        TX_W            1999        372.845
-NM        TX_W            2000        255.43
-NM        TX_W            2001        316.344
-NM        TX_W            2002        528.568
-NM        TX_W            2003        517.599
-NM        TX_W            2004        493.136
-NM        TX_W            2005        510.995
-NM        TX_W            2006        457.875
-NM        TX_W            2007        294.545
-NM        TX_W            2008        217.791
-NM        TX_W            2009        150.39
-NM        TX_W            2010        281.881
-NM        TX_W            2011        243.327
-NM        TX_W            2012        225.623
-NM        TX_W            2013        244.938
-NM        TX_W            2014        217.569
-NM        TX_W            2015        216.04
-NM        TX_W            2016        270.49
-NM        TX_W            2017        280.575
-NM        TX_W            2018        316.877
-NM        TX_W            2019        319.828
-NM        TX_W            2020        497.771
-OK        TX_N            1990        0
-OK        TX_N            1994        0
-OK        TX_N            1995        0
-OK        TX_N            1996        0
-OK        TX_N            1997        0
-OK        TX_N            1998        0
-OK        TX_N            1999        0
-OK        TX_N            2000        0
-OK        TX_N            2001        0
-OK        TX_N            2002        0
-OK        TX_N            2003        0
-OK        TX_N            2004        0
-OK        TX_N            2005        0
-OK        TX_N            2006        0
-OK        TX_N            2007        0
-OK        TX_N            2008        0
-OK        TX_N            2009        319.963
-OK        TX_N            2010        431.085
-OK        TX_N            2011        444.389
-OK        TX_N            2012        413.507
-OK        TX_N            2013        441.907
-OK        TX_N            2014        426.912
-OK        TX_N            2015        447.514
-OK        TX_N            2016        455.843
-OK        TX_N            2017        466.765
-OK        TX_N            2018        472.269
-OK        TX_N            2019        481.947
-OK        TX_N            2020        406.499
-OK        TX_W            1990        531.788
-OK        TX_W            1994        345.299
-OK        TX_W            1995        368.805
-OK        TX_W            1996        361.63
-OK        TX_W            1997        341.03
-OK        TX_W            1998        316.414
-OK        TX_W            1999        107.006
-OK        TX_W            2000        126.409
-OK        TX_W            2001        175.364
-OK        TX_W            2002        310.298
-OK        TX_W            2003        524.596
-OK        TX_W            2004        586.95
-OK        TX_W            2005        509.175
-OK        TX_W            2006        377.777
-OK        TX_W            2007        373.718
-OK        TX_W            2008        393.72
-OK        TX_W            2009        326.836
-OK        TX_W            2010        403.226
-OK        TX_W            2011        415.67
-OK        TX_W            2012        386.785
-OK        TX_W            2013        413.348
-OK        TX_W            2014        399.323
-OK        TX_W            2015        418.594
-OK        TX_W            2016        426.384
-OK        TX_W            2017        436.601
-OK        TX_W            2018        494.827
-OK        TX_W            2019        504.968
-OK        TX_W            2020        425.915
-TX_E      AR              1990        341.492
-TX_E      AR              1991        357.334
-TX_E      AR              1992        290.257
-TX_E      AR              1993        407.017
-TX_E      AR              1994        471.238
-TX_E      AR              1995        483.366
-TX_E      AR              1996        492.373
-TX_E      AR              1997        507.425
-TX_E      AR              1998        443.415
-TX_E      AR              1999        403.378
-TX_E      AR              2000        350.105
-TX_E      AR              2001        290.361
-TX_E      AR              2002        230.647
-TX_E      AR              2003        227.061
-TX_E      AR              2004        196.205
-TX_E      AR              2005        239.413
-TX_E      AR              2006        316.616
-TX_E      AR              2007        319.885
-TX_E      AR              2008        264.753
-TX_E      AR              2009        169.431
-TX_E      AR              2010        220.477
-TX_E      AR              2011        407.665
-TX_E      AR              2012        262.397
-TX_E      AR              2013        426.976
-TX_E      AR              2014        409.458
-TX_E      AR              2015        231.017
-TX_E      AR              2016        157.844
-TX_E      AR              2017        54.92
-TX_E      AR              2018        43.867
-TX_E      AR              2019        49.166
-TX_E      AR              2020        2.836
-TX_E      LA              1990        1681.66
-TX_E      LA              1991        1587.3
-TX_E      LA              1992        1732.78
-TX_E      LA              1993        1696.51
-TX_E      LA              1994        1732.44
-TX_E      LA              1995        2013.38
-TX_E      LA              1996        2174.96
-TX_E      LA              1997        1920.33
-TX_E      LA              1998        1515.81
-TX_E      LA              1999        1426.22
-TX_E      LA              2000        1465.93
-TX_E      LA              2001        1488.05
-TX_E      LA              2002        1532.76
-TX_E      LA              2003        1608.78
-TX_E      LA              2004        1697.33
-TX_E      LA              2005        1903
-TX_E      LA              2006        1945.83
-TX_E      LA              2007        2547.39
-TX_E      LA              2008        3051.97
-TX_E      LA              2009        3087.87
-TX_E      LA              2010        2825.25
-TX_E      LA              2011        2579.54
-TX_E      LA              2012        2663.82
-TX_E      LA              2013        2407.2
-TX_E      LA              2014        2311.94
-TX_E      LA              2015        2116.8
-TX_E      LA              2016        1746.47
-TX_E      LA              2017        1699.25
-TX_E      LA              2018        1761.83
-TX_E      LA              2019        1861.51
-TX_E      LA              2020        1755.76
-TX_E      TX_E-MX_NE      1996        0.942
-TX_E      TX_E-MX_NE      1997        1.26
-TX_E      TX_E-MX_NE      1998        1.471
-TX_E      TX_E-MX_NE      1999        1.99
-TX_E      TX_E-MX_NE      2000        6.405
-TX_E      TX_E-MX_NE      2001        47.373
-TX_E      TX_E-MX_NE      2002        78.259
-TX_E      TX_E-MX_NE      2003        124.43
-TX_E      TX_E-MX_NE      2004        165.978
-TX_E      TX_E-MX_NE      2005        107.14
-TX_E      TX_E-MX_NE      2006        101.657
-TX_E      TX_E-MX_NE      2007        84.191
-TX_E      TX_E-MX_NE      2008        93.419
-TX_E      TX_E-MX_NE      2009        88.572
-TX_E      TX_E-MX_NE      2010        122.145
-TX_E      TX_E-MX_NE      2011        199.549
-TX_E      TX_E-MX_NE      2012        280.545
-TX_E      TX_E-MX_NE      2013        297.516
-TX_E      TX_E-MX_NE      2014        322.191
-TX_E      TX_E-MX_NE      2015        626.841
-TX_E      TX_E-MX_NE      2016        861.172
-TX_E      TX_E-MX_NE      2017        1047.71
-TX_E      TX_E-MX_NE      2018        1082.2
-TX_E      TX_E-MX_NE      2019        1180.15
-TX_E      TX_E-MX_NE      2020        1277.48
-TX_E      TX_E-MX_NE      2021        1276.38
-TX_W      NM              1990        610.717
-TX_W      NM              1991        557.716
-TX_W      NM              1992        278.127
-TX_W      NM              1993        47.934
-TX_W      NM              1994        20.235
-TX_W      NM              1995        10.771
-TX_W      NM              1996        4.089
-TX_W      NM              1997        4.966
-TX_W      NM              1998        4.47
-TX_W      NM              1999        5.104
-TX_W      NM              2000        6.721
-TX_W      NM              2001        75.142
-TX_W      NM              2002        3.185
-TX_W      NM              2003        3.835
-TX_W      NM              2004        4.84
-TX_W      NM              2005        10.605
-TX_W      NM              2006        11.517
-TX_W      NM              2007        2.984
-TX_W      NM              2008        173.465
-TX_W      NM              2009        125.358
-TX_W      NM              2010        36.848
-TX_W      NM              2011        44.156
-TX_W      NM              2012        143.779
-TX_W      NM              2013        177.728
-TX_W      NM              2014        308.856
-TX_W      NM              2015        316.749
-TX_W      NM              2016        256.374
-TX_W      NM              2017        228.558
-TX_W      NM              2018        365.722
-TX_W      NM              2019        497.056
-TX_W      NM              2020        488.955
-TX_W      OK              1990        249.21
-TX_W      OK              1991        239.879
-TX_W      OK              1992        446.921
-TX_W      OK              1993        420.463
-TX_W      OK              1994        448.187
-TX_W      OK              1995        696.313
-TX_W      OK              1996        741.733
-TX_W      OK              1997        739.589
-TX_W      OK              1998        598.571
-TX_W      OK              1999        539.403
-TX_W      OK              2000        515.363
-TX_W      OK              2001        454.059
-TX_W      OK              2002        485.572
-TX_W      OK              2003        765.091
-TX_W      OK              2004        808.471
-TX_W      OK              2005        848.03
-TX_W      OK              2006        600.79
-TX_W      OK              2007        557.452
-TX_W      OK              2008        270.078
-TX_W      OK              2009        431.285
-TX_W      OK              2010        712.311
-TX_W      OK              2011        869.044
-TX_W      OK              2012        835.322
-TX_W      OK              2013        860.029
-TX_W      OK              2014        836.956
-TX_W      OK              2015        701.605
-TX_W      OK              2016        692.796
-TX_W      OK              2017        730.094
-TX_W      OK              2018        886.328
-TX_W      OK              2019        926.212
-TX_W      OK              2020        735.939
-TX_W      TX_W-MX_NE      1996        13.406
-TX_W      TX_W-MX_NE      1997        17.89
-TX_W      TX_W-MX_NE      1998        38.238
-TX_W      TX_W-MX_NE      1999        48.513
-TX_W      TX_W-MX_NE      2000        52.97
-TX_W      TX_W-MX_NE      2001        43.313
-TX_W      TX_W-MX_NE      2002        66.85
-TX_W      TX_W-MX_NE      2003        70.304
-TX_W      TX_W-MX_NE      2004        74.65
-TX_W      TX_W-MX_NE      2005        71.845
-TX_W      TX_W-MX_NE      2006        79.594
-TX_W      TX_W-MX_NE      2007        93.166
-TX_W      TX_W-MX_NE      2008        92.011
-TX_W      TX_W-MX_NE      2009        96.393
-TX_W      TX_W-MX_NE      2010        94.492
-TX_W      TX_W-MX_NE      2011        104.103
-TX_W      TX_W-MX_NE      2012        107.823
-TX_W      TX_W-MX_NE      2013        114.23
-TX_W      TX_W-MX_NE      2014        127.724
-TX_W      TX_W-MX_NE      2015        129.397
-TX_W      TX_W-MX_NE      2016        149.08
-TX_W      TX_W-MX_NE      2017        116.578
-TX_W      TX_W-MX_NE      2018        180.259
-TX_W      TX_W-MX_NE      2019        218.962
-TX_W      TX_W-MX_NE      2020        278.649
-TX_W      TX_W-MX_NE      2021        450.606
+reg        reg1            year        HistoricalFlowAnnual
+AR         TX_E            1990        9.626
+AR         TX_E            1991        10.543
+AR         TX_E            1992        4.93
+AR         TX_E            1993        4.458
+AR         TX_E            1994        3.2
+AR         TX_E            1995        3.7
+AR         TX_E            1996        4.3
+AR         TX_E            1997        3.5
+AR         TX_E            1998        3.67
+AR         TX_E            1999        3.353
+AR         TX_E            2000        3.411
+AR         TX_E            2001        2.576
+AR         TX_E            2002        2.503
+AR         TX_E            2003        2.605
+AR         TX_E            2004        1.75
+AR         TX_E            2005        1.9
+AR         TX_E            2006        1.7
+AR         TX_E            2007        2.3
+AR         TX_E            2008        24
+AR         TX_E            2009        21.374
+AR         TX_E            2012        0
+AR         TX_E            2014        0
+AR         TX_E            2015        0
+AR         TX_E            2017        0
+AR         TX_E            2018        0
+AR         TX_E            2019        0
+AR         TX_E            2020        32.238
+AR         TX_E            2021        0
+AR         TX_E            2022        0
+LA         TX_E            1990        68.547
+LA         TX_E            1991        37.179
+LA         TX_E            1992        10.135
+LA         TX_E            1993        74.574
+LA         TX_E            1994        72.413
+LA         TX_E            1995        4.87
+LA         TX_E            1996        6.712
+LA         TX_E            1997        8.652
+LA         TX_E            1998        24.635
+LA         TX_E            1999        14.732
+LA         TX_E            2000        32.104
+LA         TX_E            2001        46.842
+LA         TX_E            2002        1.722
+LA         TX_E            2003        8.513
+LA         TX_E            2004        5.831
+LA         TX_E            2005        6.293
+LA         TX_E            2006        6.042
+LA         TX_E            2007        2
+LA         TX_E            2012        80.728
+LA         TX_E            2013        128.552
+LA         TX_E            2014        63.434
+LA         TX_E            2015        50.569
+LA         TX_E            2016        123.13
+LA         TX_E            2017        265.556
+LA         TX_E            2018        403.725
+LA         TX_E            2019        240.666
+LA         TX_E            2020        562.194
+LA         TX_E            2021        266.661
+LA         TX_E            2022        10.494
+MX_NE      MX_NE-TX_E      1996        13.862
+MX_NE      MX_NE-TX_E      1997        17.243
+MX_NE      MX_NE-TX_E      1998        13.536
+MX_NE      MX_NE-TX_E      1999        54.53
+MX_NE      MX_NE-TX_E      2000        11.601
+MX_NE      MX_NE-TX_E      2001        10.276
+MX_NE      MX_NE-TX_E      2002        1.755
+MX_NE      MX_NE-TX_E      2003        0
+MX_NE      MX_NE-TX_E      2004        0
+MX_NE      MX_NE-TX_E      2005        9.32
+MX_NE      MX_NE-TX_E      2006        12.749
+MX_NE      MX_NE-TX_E      2007        54.061
+MX_NE      MX_NE-TX_E      2008        41.969
+MX_NE      MX_NE-TX_E      2009        26.343
+MX_NE      MX_NE-TX_E      2010        7.492
+MX_NE      MX_NE-TX_E      2011        0.501
+MX_NE      MX_NE-TX_E      2012        0.314
+MX_NE      MX_NE-TX_E      2013        1.046
+MX_NE      MX_NE-TX_E      2014        1.426
+MX_NE      MX_NE-TX_E      2015        0.933
+MX_NE      MX_NE-TX_E      2016        0.748
+MX_NE      MX_NE-TX_E      2017        0.591
+MX_NE      MX_NE-TX_E      2018        0.503
+MX_NE      MX_NE-TX_E      2019        1.071
+MX_NE      MX_NE-TX_E      2020        0.369
+MX_NE      MX_NE-TX_E      2021        0.299
+MX_NE      MX_NE-TX_E      2022        0.277
+MX_NE      MX_NE-TX_E      2023        0.258
+NM         TX_W            1990        43.37
+NM         TX_W            1991        54.691
+NM         TX_W            1992        81.093
+NM         TX_W            1993        92.309
+NM         TX_W            1994        182.912
+NM         TX_W            1995        476.43
+NM         TX_W            1996        568.446
+NM         TX_W            1997        471.549
+NM         TX_W            1998        389.821
+NM         TX_W            1999        372.845
+NM         TX_W            2000        255.43
+NM         TX_W            2001        316.344
+NM         TX_W            2002        528.568
+NM         TX_W            2003        517.599
+NM         TX_W            2004        493.136
+NM         TX_W            2005        510.995
+NM         TX_W            2006        457.875
+NM         TX_W            2007        294.545
+NM         TX_W            2008        217.791
+NM         TX_W            2009        150.39
+NM         TX_W            2010        281.881
+NM         TX_W            2011        243.327
+NM         TX_W            2012        225.623
+NM         TX_W            2013        244.938
+NM         TX_W            2014        217.569
+NM         TX_W            2015        216.04
+NM         TX_W            2016        270.49
+NM         TX_W            2017        280.575
+NM         TX_W            2018        316.877
+NM         TX_W            2019        319.828
+NM         TX_W            2020        497.771
+NM         TX_W            2021        546.098
+NM         TX_W            2022        569.525
+OK         TX_N            1990        0
+OK         TX_N            1994        0
+OK         TX_N            1995        0
+OK         TX_N            1996        0
+OK         TX_N            1997        0
+OK         TX_N            1998        0
+OK         TX_N            1999        0
+OK         TX_N            2000        0
+OK         TX_N            2001        0
+OK         TX_N            2002        0
+OK         TX_N            2003        0
+OK         TX_N            2004        0
+OK         TX_N            2005        0
+OK         TX_N            2006        0
+OK         TX_N            2007        0
+OK         TX_N            2008        0
+OK         TX_N            2009        319.963
+OK         TX_N            2010        431.085
+OK         TX_N            2011        444.389
+OK         TX_N            2012        413.507
+OK         TX_N            2013        441.907
+OK         TX_N            2014        426.912
+OK         TX_N            2015        447.514
+OK         TX_N            2016        455.843
+OK         TX_N            2017        466.765
+OK         TX_N            2018        472.269
+OK         TX_N            2019        481.947
+OK         TX_N            2020        406.499
+OK         TX_N            2021        388.502
+OK         TX_N            2022        397.565
+OK         TX_W            1990        531.788
+OK         TX_W            1994        345.299
+OK         TX_W            1995        368.805
+OK         TX_W            1996        361.63
+OK         TX_W            1997        341.03
+OK         TX_W            1998        316.414
+OK         TX_W            1999        107.006
+OK         TX_W            2000        126.409
+OK         TX_W            2001        175.364
+OK         TX_W            2002        310.298
+OK         TX_W            2003        524.596
+OK         TX_W            2004        586.95
+OK         TX_W            2005        509.175
+OK         TX_W            2006        377.777
+OK         TX_W            2007        373.718
+OK         TX_W            2008        393.72
+OK         TX_W            2009        326.836
+OK         TX_W            2010        403.226
+OK         TX_W            2011        415.67
+OK         TX_W            2012        386.785
+OK         TX_W            2013        413.348
+OK         TX_W            2014        399.323
+OK         TX_W            2015        418.594
+OK         TX_W            2016        426.384
+OK         TX_W            2017        436.601
+OK         TX_W            2018        494.827
+OK         TX_W            2019        504.968
+OK         TX_W            2020        425.915
+OK         TX_W            2021        407.059
+OK         TX_W            2022        416.556
+TX_E       AR              1990        341.492
+TX_E       AR              1991        357.334
+TX_E       AR              1992        290.257
+TX_E       AR              1993        407.017
+TX_E       AR              1994        471.238
+TX_E       AR              1995        483.366
+TX_E       AR              1996        492.373
+TX_E       AR              1997        507.425
+TX_E       AR              1998        443.415
+TX_E       AR              1999        403.378
+TX_E       AR              2000        350.105
+TX_E       AR              2001        290.361
+TX_E       AR              2002        230.647
+TX_E       AR              2003        227.061
+TX_E       AR              2004        196.205
+TX_E       AR              2005        239.413
+TX_E       AR              2006        316.616
+TX_E       AR              2007        319.885
+TX_E       AR              2008        264.753
+TX_E       AR              2009        169.431
+TX_E       AR              2010        220.477
+TX_E       AR              2011        407.665
+TX_E       AR              2012        262.397
+TX_E       AR              2013        426.976
+TX_E       AR              2014        409.458
+TX_E       AR              2015        231.017
+TX_E       AR              2016        157.844
+TX_E       AR              2017        54.92
+TX_E       AR              2018        43.867
+TX_E       AR              2019        49.166
+TX_E       AR              2020        2.836
+TX_E       AR              2021        27.981
+TX_E       AR              2022        86.055
+TX_E       LA              1990        1681.66
+TX_E       LA              1991        1587.3
+TX_E       LA              1992        1732.78
+TX_E       LA              1993        1696.51
+TX_E       LA              1994        1732.44
+TX_E       LA              1995        2013.38
+TX_E       LA              1996        2174.96
+TX_E       LA              1997        1920.33
+TX_E       LA              1998        1515.81
+TX_E       LA              1999        1426.22
+TX_E       LA              2000        1465.93
+TX_E       LA              2001        1488.05
+TX_E       LA              2002        1532.76
+TX_E       LA              2003        1608.78
+TX_E       LA              2004        1697.33
+TX_E       LA              2005        1903
+TX_E       LA              2006        1945.83
+TX_E       LA              2007        2547.39
+TX_E       LA              2008        3051.97
+TX_E       LA              2009        3087.87
+TX_E       LA              2010        2825.25
+TX_E       LA              2011        2579.54
+TX_E       LA              2012        2663.82
+TX_E       LA              2013        2407.2
+TX_E       LA              2014        2311.94
+TX_E       LA              2015        2116.8
+TX_E       LA              2016        1746.47
+TX_E       LA              2017        1699.25
+TX_E       LA              2018        1761.83
+TX_E       LA              2019        1861.51
+TX_E       LA              2020        1755.76
+TX_E       LA              2021        1803.81
+TX_E       LA              2022        2587.67
+TX_E       TX_E-MX_NE      1996        17.028
+TX_E       TX_E-MX_NE      1997        16.272
+TX_E       TX_E-MX_NE      1998        8.694
+TX_E       TX_E-MX_NE      1999        4.747
+TX_E       TX_E-MX_NE      2000        30.298
+TX_E       TX_E-MX_NE      2001        65.751
+TX_E       TX_E-MX_NE      2002        150.068
+TX_E       TX_E-MX_NE      2003        208.371
+TX_E       TX_E-MX_NE      2004        235.24
+TX_E       TX_E-MX_NE      2005        135.988
+TX_E       TX_E-MX_NE      2006        125.714
+TX_E       TX_E-MX_NE      2007        85.731
+TX_E       TX_E-MX_NE      2008        117.73
+TX_E       TX_E-MX_NE      2009        96.522
+TX_E       TX_E-MX_NE      2010        150.995
+TX_E       TX_E-MX_NE      2011        255.27
+TX_E       TX_E-MX_NE      2012        355.09
+TX_E       TX_E-MX_NE      2013        382.854
+TX_E       TX_E-MX_NE      2014        415.919
+TX_E       TX_E-MX_NE      2015        704.926
+TX_E       TX_E-MX_NE      2016        980.15
+TX_E       TX_E-MX_NE      2017        1163.57
+TX_E       TX_E-MX_NE      2018        1249.12
+TX_E       TX_E-MX_NE      2019        1391.41
+TX_E       TX_E-MX_NE      2020        1468.12
+TX_E       TX_E-MX_NE      2021        1466.61
+TX_E       TX_E-MX_NE      2022        1364.11
+TX_E       TX_E-MX_NE      2023        1438.93
+TX_W       NM              1990        610.717
+TX_W       NM              1991        557.716
+TX_W       NM              1992        278.127
+TX_W       NM              1993        47.934
+TX_W       NM              1994        20.235
+TX_W       NM              1995        10.771
+TX_W       NM              1996        4.089
+TX_W       NM              1997        4.966
+TX_W       NM              1998        4.47
+TX_W       NM              1999        5.104
+TX_W       NM              2000        6.721
+TX_W       NM              2001        75.142
+TX_W       NM              2002        3.185
+TX_W       NM              2003        3.835
+TX_W       NM              2004        4.84
+TX_W       NM              2005        10.605
+TX_W       NM              2006        11.517
+TX_W       NM              2007        2.984
+TX_W       NM              2008        173.465
+TX_W       NM              2009        125.358
+TX_W       NM              2010        36.848
+TX_W       NM              2011        44.156
+TX_W       NM              2012        143.779
+TX_W       NM              2013        177.728
+TX_W       NM              2014        308.856
+TX_W       NM              2015        316.749
+TX_W       NM              2016        256.374
+TX_W       NM              2017        228.558
+TX_W       NM              2018        365.722
+TX_W       NM              2019        497.056
+TX_W       NM              2020        488.955
+TX_W       NM              2021        292.984
+TX_W       NM              2022        213.37
+TX_W       OK              1990        249.21
+TX_W       OK              1991        239.879
+TX_W       OK              1992        446.921
+TX_W       OK              1993        420.463
+TX_W       OK              1994        448.187
+TX_W       OK              1995        696.313
+TX_W       OK              1996        741.733
+TX_W       OK              1997        739.589
+TX_W       OK              1998        598.571
+TX_W       OK              1999        539.403
+TX_W       OK              2000        515.363
+TX_W       OK              2001        454.059
+TX_W       OK              2002        485.572
+TX_W       OK              2003        765.091
+TX_W       OK              2004        808.471
+TX_W       OK              2005        848.03
+TX_W       OK              2006        600.79
+TX_W       OK              2007        557.452
+TX_W       OK              2008        270.078
+TX_W       OK              2009        431.285
+TX_W       OK              2010        712.311
+TX_W       OK              2011        869.044
+TX_W       OK              2012        835.322
+TX_W       OK              2013        860.029
+TX_W       OK              2014        836.956
+TX_W       OK              2015        701.605
+TX_W       OK              2016        692.796
+TX_W       OK              2017        730.094
+TX_W       OK              2018        886.328
+TX_W       OK              2019        926.212
+TX_W       OK              2020        735.939
+TX_W       OK              2021        521.56
+TX_W       OK              2022        610.023
+TX_W       TX_W-MX_NE      1996        13.406
+TX_W       TX_W-MX_NE      1997        17.89
+TX_W       TX_W-MX_NE      1998        38.238
+TX_W       TX_W-MX_NE      1999        48.513
+TX_W       TX_W-MX_NE      2000        52.97
+TX_W       TX_W-MX_NE      2001        43.313
+TX_W       TX_W-MX_NE      2002        66.85
+TX_W       TX_W-MX_NE      2003        70.304
+TX_W       TX_W-MX_NE      2004        74.65
+TX_W       TX_W-MX_NE      2005        71.845
+TX_W       TX_W-MX_NE      2006        79.594
+TX_W       TX_W-MX_NE      2007        93.166
+TX_W       TX_W-MX_NE      2008        92.011
+TX_W       TX_W-MX_NE      2009        96.393
+TX_W       TX_W-MX_NE      2010        94.492
+TX_W       TX_W-MX_NE      2011        104.103
+TX_W       TX_W-MX_NE      2012        107.823
+TX_W       TX_W-MX_NE      2013        114.23
+TX_W       TX_W-MX_NE      2014        127.724
+TX_W       TX_W-MX_NE      2015        129.397
+TX_W       TX_W-MX_NE      2016        149.08
+TX_W       TX_W-MX_NE      2017        116.578
+TX_W       TX_W-MX_NE      2018        180.259
+TX_W       TX_W-MX_NE      2019        218.962
+TX_W       TX_W-MX_NE      2020        278.649
+TX_W       TX_W-MX_NE      2021        450.606
+TX_W       TX_W-MX_NE      2022        514.705
+TX_W       TX_W-MX_NE      2023        612.497
 ;
 
 !First year for which TX regional export/import volumes are avilable.
 !Would like to eventually move this over to AIMMS code and have it done programatically.
 !TXTradeFirstYear := '2011';
 
+! SYK	7/19/23	 Updating based on Texas pre-processor.
+! SYK	7/9/24	 Updating based on Texas pre-processor.
 ! Historical Export Volumes
 ! NOTE: These values do not include prices for CNG & small LNG exports
 ! Units: Bcf
 HistoricalExports := data table
-		       TX_E-MX_NE    TX_W-MX_NE
+                       TX_E-MX_NE    TX_W-MX_NE
 (January, 2011)        21.096        9.046
 (February, 2011)       20.185        7.262
 (March, 2011)          23.574        7.805
@@ -541,16 +596,43 @@ HistoricalExports := data table
 (October, 2021)        126.128       41.034
 (November, 2021)       113.854       36.347
 (December, 2021)       111.476       40.242
-(January, 2022)        115.828       41.919
-(February, 2022)       106.96        35.288
-(March, 2022)          116.861       37.29
+(January, 2022)        116.404       41.919
+(February, 2022)       107.508       35.288
+(March, 2022)          117.475       37.29
+(April, 2022)          118.345       44.409
+(May, 2022)            119.848       49.7
+(June, 2022)           114.806       48.902
+(July, 2022)           118.016       50.536
+(August, 2022)         114.853       47.656
+(September, 2022)      109.131       41.671
+(October, 2022)        114.222       40.389
+(November, 2022)       109.523       36.341
+(December, 2022)       103.979       40.603
+(January, 2023)        110.255       42.94
+(February, 2023)       99.48         41.172
+(March, 2023)          116.935       46.816
+(April, 2023)          109.526       47.36
+(May, 2023)            123.022       54.318
+(June, 2023)           133.253       55.061
+(July, 2023)           128.198       60.253
+(August, 2023)         131.648       60.736
+(September, 2023)      127.631       57.57
+(October, 2023)        128.06        53.715
+(November, 2023)       116.916       46.186
+(December, 2023)       114.01        46.366
+(January, 2024)        123.601       46.738
+(February, 2024)       110.133       43.908
+(March, 2024)          118.065       46.048
+(April, 2024)          121.845       52.414
 ;
 
+! SYK	7/19/23	 Updating based on Texas pre-processor.
+! SYK	7/9/24	 Updating based on Texas pre-processor.
 ! Historical Import Volumes
 ! NOTE: These values do not include prices for CNG & small LNG exports
 ! Units: Bcf
 HistoricalImports := data table
-		       TX_E-MX_NE
+                       TX_E-MX_NE
 (January, 2011)        0.012
 (February, 2011)       0.04
 (March, 2011)          0.077
@@ -686,13 +768,39 @@ HistoricalImports := data table
 (January, 2022)        0.024
 (February, 2022)       0.021
 (March, 2022)          0.025
+(April, 2022)          0.024
+(May, 2022)            0.024
+(June, 2022)           0.024
+(July, 2022)           0.022
+(August, 2022)         0.024
+(September, 2022)      0.02
+(October, 2022)        0.024
+(November, 2022)       0.022
+(December, 2022)       0.023
+(January, 2023)        0.02
+(February, 2023)       0.016
+(March, 2023)          0.024
+(April, 2023)          0.023
+(May, 2023)            0.023
+(June, 2023)           0.021
+(July, 2023)           0.022
+(August, 2023)         0.022
+(September, 2023)      0.021
+(October, 2023)        0.023
+(November, 2023)       0.021
+(December, 2023)       0.022
+(January, 2024)        0.023
+(February, 2024)       0.02
+(March, 2024)          0.021
+(April, 2024)          0.02
 ;
 
-
+! SYK	7/19/23	 Updating based on Texas pre-processor.
+! SYK	7/9/24	 Updating based on Texas pre-processor.
 ! NOTE: These values do not include prices for CNG & small LNG exports
 ! Units: Nominal USD / thousand cubic feet
 HistoricalExportsPrice := data table
-		       TX_E-MX_NE              TX_W-MX_NE
+                       TX_E-MX_NE              TX_W-MX_NE
 (January, 2011)        4.51002                 4.52694
 (February, 2011)       4.32276                 4.6375
 (March, 2011)          3.99519                 4.11457
@@ -825,15 +933,42 @@ HistoricalExportsPrice := data table
 (October, 2021)        5.73757                 5.16948
 (November, 2021)       5.57435                 5.11138
 (December, 2021)       4.53703                 4.06685
-(January, 2022)        4.52949                 4.35155
-(February, 2022)       5.4511                  4.56507
-(March, 2022)          4.71889                 4.20859
+(January, 2022)        4.53662                 4.35155
+(February, 2022)       5.46176                 4.56507
+(March, 2022)          4.72353                 4.20859
+(April, 2022)          6.22149                 5.65272
+(May, 2022)            7.90109                 7.05507
+(June, 2022)           8.09489                 7.50479
+(July, 2022)           6.91715                 6.46977
+(August, 2022)         8.57078                 7.86508
+(September, 2022)      7.87982                 6.78487
+(October, 2022)        5.25098                 3.448
+(November, 2022)       4.65135                 3.94188
+(December, 2022)       5.44784                 3.81017
+(January, 2023)        3.62408                 2.8951
+(February, 2023)       2.55505                 2.26595
+(March, 2023)          2.46936                 1.67219
+(April, 2023)          2.17181                 1.10522
+(May, 2023)            2.19875                 1.4071
+(June, 2023)           2.32945                 2.01996
+(July, 2023)           2.67288                 2.32456
+(August, 2023)         2.6586                  2.3626
+(September, 2023)      2.71226                 2.12112
+(October, 2023)        2.77372                 1.75713
+(November, 2023)       2.74854                 1.5945
+(December, 2023)       2.5751                  1.85865
+(January, 2024)        3.2998                  2.84582
+(February, 2024)       2.30077                 1.70852
+(March, 2024)          1.61287                 0.245943
+(April, 2024)          1.51196                 0.0551454
 ;
 
+! SYK	7/19/23	 Updating based on Texas pre-processor.
+! SYK	7/9/24	 Updating based on Texas pre-processor.
 ! NOTE: These values do not include prices for CNG & small LNG exports
 ! Units: Nominal USD / thousand cubic feet
 HistoricalImportsPrice := data table
-datamon                TX_E-MX_NE
+                       TX_E-MX_NE
 (January, 2011)        3.27
 (February, 2011)       3.34
 (March, 2011)          2.85
@@ -955,7 +1090,7 @@ datamon                TX_E-MX_NE
 (November, 2020)       2.08
 (December, 2020)       1.97
 (January, 2021)        1.58
-(February, 2021)       2.63
+(February, 2021)       2.63036
 (March, 2021)          1.94
 (April, 2021)          1.66
 (May, 2021)            2.05
@@ -966,9 +1101,34 @@ datamon                TX_E-MX_NE
 (October, 2021)        4.89
 (November, 2021)       5.17
 (December, 2021)       4.51
-(January, 2022)        3.16
+(January, 2022)        3.12
 (February, 2022)       5.3
-(March, 2022)          3.61
+(March, 2022)          3.57
+(April, 2022)          4.2
+(May, 2022)            6.16
+(June, 2022)           7.81
+(July, 2022)           5.52
+(August, 2022)         7.51
+(September, 2022)      7.77
+(October, 2022)        4.59
+(November, 2022)       3.61
+(December, 2022)       5.26
+(January, 2023)        3.6
+(February, 2023)       1.85
+(March, 2023)          1.4
+(April, 2023)          0.88
+(May, 2023)            1.05
+(June, 2023)           1.23
+(July, 2023)           1.68
+(August, 2023)         1.41
+(September, 2023)      1.54
+(October, 2023)        1.62
+(November, 2023)       1.81
+(December, 2023)       1.67
+(January, 2024)        1.56
+(February, 2024)       1.45
+(March, 2024)          0.54
+(April, 2024)          0.53
 ;
 
 !TX related pipeline fuel factors

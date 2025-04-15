@@ -1,361 +1,299 @@
-GreaterSupRegions:= data{'Appalachia', 'Interior', 'West: Northern Great Plains', 'Wesst: Other West'};
+GreaterSupRegions:= data{'Appalachia                 ', 'All Interior and Lignite   ','West: All West             '};
 E_W_MississippiRegs:= data{'East of Mississippi River', 'West of Mississippi River'};
 US_Total:=data{'US Total'};
-SupReg_NameTot:=data{'Northern Appalachia','Central Appalachia ','Southern Appalachia','East Interior      ','West Interior      ','Gulf Lignite       ','Dakota Lignite     ','Western Montana    ',
-'WY Northern PRB    ','WY Southern PRB    ','Western Wyoming    ','Rocky Mountain     ','Arizona/New Mexico ','Alaska/Washington  ','US Total'};
+SupReg_NameTot:=data{'Northern Appalachia ','Rest of Appalachia  ','Interior            ','All Lignite         ','Powder River Basin  ', 'Western Region      ','US Total'};
 USTotal:='US Total';
 
+
 map_SupRegions_Aggregated := data table
-                               01NA 02CA 03SA 04EI 05WI 06GL 07DL 08WM 09NW 10SW 11WW 12RM 13ZN 14AW
-Appalachia                       1    1    1  
-Interior                                        1    1    1
-'West: Northern Great Plains'                                  1    1    1    1    1
-'Wesst: Other West'                                                                     1    1    1
-'East of Mississippi River'      1    1    1    1
-'West of Mississippi River'                          1    1    1    1    1    1    1    1    1    1
-'US Total'                       1    1    1    1    1    1    1    1    1    1    1    1    1    1
+                                                    1APN                                           2APR                 3INR             4LGN               5PRB    6WSR
+'Appalachia                 '                       1                                              1
+'All Interior and Lignite   '                                                                                           1                1
+'West: All West             '                                                                                                                               1       1
+'East of Mississippi River'                         1                                              1                    1
+'West of Mississippi River'                                                                                                              1                  1       1
+'US Total'                                          1                                              1                    1                1                  1       1
+;
+
+
+Composite table:
+sreg_name                                           SReg                                           map_SupRegions
+'Northern Appalachia '                              1APN                                           1
+'Rest of Appalachia  '                              2APR                                           1
+'Interior            '                              3INR                                           1
+'All Lignite         '                              4LGN                                           1
+'Powder River Basin  '                              5PRB                                           1
+'Western Region      '                              6WSR                                           1
 ;
 
 Composite table:
-sreg_name               SReg  map_SupRegions                                    
-'Northern Appalachia'   01NA  1   
-'Central Appalachia '   02CA  1         
-'Southern Appalachia'   03SA  1              
-'East Interior      '   04EI  1                    
-'West Interior      '   05WI  1                             
-'Gulf Lignite       '   06GL  1                                
-'Dakota Lignite     '   07DL  1                                         
-'Western Montana    '   08WM  1                                            
-'WY Northern PRB    '   09NW  1                                                  
-'WY Southern PRB    '   10SW  1                                                    
-'Western Wyoming    '   11WW  1                                                         
-'Rocky Mountain     '   12RM  1                                                              
-'Arizona/New Mexico '   13ZN  1                                                                  
-'Alaska/Washington  '   14AW  1                                                                       
+rank                                                rank_name                                      map_rank_CoalRankName
+1B                                                  'Bituminous   '                                1
+2S                                                  'Subbituminous'                                1
+3L                                                  'Lignite      '                                1
+4P                                                  'Premium      '                                1
+5G                                                  'Waste Coal   '                                1
 ;
 
 Composite table:
-rank rank_name     map_rank_CoalRankName 
-1B   Bituminous     1
-2S   Subbituminous  1
-3L   Lignite        1
-4P   Premium        1
-5G   'Waste Coal'   1
+Sulf                                                sulf_name                                      map_Sulf_SulfName
+1A                                                  'All'                                          1
 ;
 
 Composite table:
-Sulf sulf_name  map_Sulf_SulfName
-1C   'Low   '     1
-2M   'Medium'     1
-3H   'High  '     1
-;
-
-Composite table:
-Mtyp  mtyp_name      map_Mtyp_MtypName
-1S    'Surface    '   1
-2D    'Underground'   1
+Mtyp                                                mtyp_name                                      map_Mtyp_MtypName
+1S                                                  'Surface    '                                  1
+2D                                                  'Underground'                                  1
 ;
 
 Composite Table:
-Scrv1   SReg    Sulf    Mtyp    rank   map_scrv1_types  
-1       01NA    2M      2D      1B      1                  
-2       01NA    3H      2D      1B      1               
-3       01NA    2M      2D      4P      1               
-4       01NA    2M      1S      1B      1               
-5       01NA    3H      1S      1B      1               
-6       01NA    3H      1S      5G      1               
-7       02CA    1C      2D      1B      1               
-8       02CA    2M      2D      1B      1               
-9       02CA    2M      2D      4P      1               
-10      02CA    1C      1S      1B      1               
-11      02CA    2M      1S      1B      1               
-12      03SA    1C      2D      1B      1               
-13      03SA    2M      2D      1B      1               
-14      03SA    1C      2D      4P      1               
-15      03SA    1C      1S      1B      1               
-16      03SA    2M      1S      1B      1               
-17      04EI    2M      2D      1B      1               
-18      04EI    3H      2D      1B      1               
-19      04EI    2M      1S      1B      1               
-20      04EI    3H      1S      1B      1               
-21      04EI    2M      1S      3L      1               
-22      05WI    3H      1S      1B      1               
-23      06GL    2M      1S      3L      1               
-24      06GL    3H      1S      3L      1               
-25      07DL    2M      1S      3L      1               
-26      08WM    1C      2D      1B      1               
-27      08WM    1C      1S      2S      1               
-28      08WM    2M      1S      2S      1               
-29      09NW    1C      1S      2S      1               
-30      09NW    2M      1S      2S      1               
-31      10SW    1C      1S      2S      1               
-32      11WW    1C      2D      2S      1               
-33      11WW    1C      1S      2S      1               
-34      11WW    2M      1S      2S      1               
-35      12RM    1C      2D      1B      1               
-36      12RM    1C      2D      4P      1               
-37      12RM    1C      1S      2S      1               
-38      13ZN    2M      2D      1B      1               
-39      13ZN    1C      1S      1B      1               
-40      13ZN    2M      1S      2S      1               
-41      14AW    1C      1S      2S      1               
+Scrv1                                               SReg                                           Sulf                 Mtyp             rank               map_scrv1_types
+1                                                   1APN                                           1A                   1S               1B                        1
+2                                                   1APN                                           1A                   2D               1B                        1
+3                                                   1APN                                           1A                   1S               5G                        1
+4                                                   1APN                                           1A                   2D               4P                        1
+5                                                   2APR                                           1A                   1S               1B                        1
+6                                                   2APR                                           1A                   2D               1B                        1
+7                                                   2APR                                           1A                   2D               4P                        1
+8                                                   3INR                                           1A                   2D               1B                        1
+9                                                   3INR                                           1A                   1S               1B                        1
+10                                                  4LGN                                           1A                   1S               3L                        1
+11                                                  5PRB                                           1A                   1S               2S                        1
+12                                                  6WSR                                           1A                   2D               1B                        1
+13                                                  6WSR                                           1A                   1S               2S                        1
+14                                                  6WSR                                           1A                   1S               1B                        1
+;
+
+Composite Table:
+Scrv1                                               sreg_name                                      sulf_name            mtyp_name        rank_name          map_scrv1_names
+1                                                   'Northern Appalachia '                         'All'                'Surface    '    'Bituminous   '           1
+2                                                   'Northern Appalachia '                         'All'                'Underground'    'Bituminous   '           1
+3                                                   'Northern Appalachia '                         'All'                'Surface    '    'Waste Coal   '           1
+4                                                   'Northern Appalachia '                         'All'                'Underground'    'Premium      '           1
+5                                                   'Rest of Appalachia  '                         'All'                'Surface    '    'Bituminous   '           1
+6                                                   'Rest of Appalachia  '                         'All'                'Underground'    'Bituminous   '           1
+7                                                   'Rest of Appalachia  '                         'All'                'Underground'    'Premium      '           1
+8                                                   'Interior            '                         'All'                'Underground'    'Bituminous   '           1
+9                                                   'Interior            '                         'All'                'Surface    '    'Bituminous   '           1
+10                                                  'All Lignite         '                         'All'                'Surface    '    'Lignite      '           1
+11                                                  'Powder River Basin  '                         'All'                'Surface    '    'Subbituminous'           1
+12                                                  'Western Region      '                         'All'                'Underground'    'Bituminous   '           1
+13                                                  'Western Region      '                         'All'                'Surface    '    'Subbituminous'           1
+14                                                  'Western Region      '                         'All'                'Surface    '    'Bituminous   '           1
+;
+
+Composite Table:
+subsec_name                                                                                        Subsec               map_SubSectorNames
+'Residential/Commercial Demand 1'                                                                  R1                   1
+'Residential/Commercial Demand 2'                                                                  R2                   1
+'Stoker Fired Indust Steam Coal Demand'                                                            I1                   1
+'Pulverized Coal Indust Steam Coal'                                                                I2                   1
+'Other Indust Steam Coal Demand'                                                                   I3                   1
+'Metall 1 - Coking Coal'                                                                           C1                   1
+'Metall 2 - Coking Coal'                                                                           C2                   1
+'Export Met Demand 1'                                                                              X1                   1
+'Export Met Demand 2'                                                                              X2                   1
+'Export Met Demand 3'                                                                              X3                   1
+'Export Steam Demand 1'                                                                            X4                   1
+'Export Steam Demand 2'                                                                            X5                   1
+'Export Steam Demand 3'                                                                            X6                   1
+'Liquids'                                                                                          L1                   1
+'Electric Gen B1 - BagH-No SOx-Any NOx-'                                                           15                   1
+'Electric Gen B2 - BagH-No SOx-Any NOx-CCS'                                                        16                   1
+'Electric Gen B3 - BagH-WetScrub-No NOx-'                                                          17                   1
+'Electric Gen B4 - BagH-WetScrub-No NOx-CCS'                                                       18                   1
+'Electric Gen B5 - BagH-WetScrub-SCR-'                                                             19                   1
+'Electric Gen B6 - BagH-WetScrub-SCR-CCS'                                                          20                   1
+'Electric Gen B7 - BagH-DryScrub-Any NOx-'                                                         21                   1
+'Electric Gen B8 - BagH-DryScrub-Any NOx-CCS'                                                      22                   1
+'Electric Gen C1 - ColdESP-No SOx-Any NOx-'                                                        23                   1
+'Electric Gen C2 - ColdESP-No SOx-Any NOx-FF'                                                      24                   1
+'Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS'                                                     25                   1
+'Electric Gen C4 - ColdESP-WetScrub-No NOx-'                                                       26                   1
+'Electric Gen C5 - ColdESP-WetScrub-No NOx-FF'                                                     27                   1
+'Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS'                                                    28                   1
+'Electric Gen C7 - ColdESP-WetScrub-SCR-'                                                          29                   1
+'Electric Gen C8 - ColdESP-WetScrub-SCR-FF'                                                        30                   1
+'Electric Gen C9 - ColdESP-WetScrub-SCR-CCS'                                                       31                   1
+'Electric Gen CX - ColdESP-DryScrub-Any NOx-'                                                      32                   1
+'Electric Gen CY - ColdESP-DryScrub-Any NOx-FF'                                                    33                   1
+'Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS'                                                   34                   1
+'Electric Gen H1 - HotESP-No SOx-Any NOx-'                                                         35                   1
+'Electric Gen H2 - HotESP-No SOx-Any NOx-FF'                                                       36                   1
+'Electric Gen H3 - HotESP-No SOx-Any NOx-CCS'                                                      37                   1
+'Electric Gen H4 - HotESP-WetScrub-No NOx-'                                                        38                   1
+'Electric Gen H5 - HotESP-WetScrub-No NOx-FF'                                                      39                   1
+'Electric Gen H6 - HotESP-WetScrub-No NOx-CCS'                                                     40                   1
+'Electric Gen H7 - HotESP-WetScrub-SCR-'                                                           41                   1
+'Electric Gen H8 - HotESP-WetScrub-SCR-FF'                                                         42                   1
+'Electric Gen H9 - HotESP-WetScrub-SCR-SCR'                                                        43                   1
+'Electric Gen HA - HotESP-DryScrub-Any NOx-'                                                       44                   1
+'Electric Gen HB - HotESP-DryScrub-Any NOx-FF'                                                     45                   1
+'Electric Gen HC - HotESP-DryScrub-Any NOx-CCS'                                                    46                   1
+'Electric Gen PC - PulvCoal-WetScrub-SCR-FF'                                                       47                   1
+'Electric Gen OC - Other New Coal'                                                                 48                   1
+'Electric Gen IG - IGCC-AGR-SCR-'                                                                  49                   1
+'Electric Gen I2 - IGCC NGcofiring'                                                                50                   1
+'Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF'                                                51                   1
+'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF'                                                52                   1
 ;
 Composite Table:
-Scrv1    sreg_name                sulf_name        mtyp_name         rank_name      map_scrv1_names
-1        'Northern Appalachia'    'Medium'        'Underground'     Bituminous       1   
-2        'Northern Appalachia'    'High  '        'Underground'     Bituminous       1   
-3        'Northern Appalachia'    'Medium'        'Underground'     Premium          1   
-4        'Northern Appalachia'    'Medium'        'Surface    '     Bituminous       1   
-5        'Northern Appalachia'    'High  '        'Surface    '     Bituminous       1   
-6        'Northern Appalachia'    'High  '        'Surface    '     'Waste Coal'     1   
-7        'Central Appalachia '    'Low   '        'Underground'     Bituminous       1   
-8        'Central Appalachia '    'Medium'        'Underground'     Bituminous       1   
-9        'Central Appalachia '    'Medium'        'Underground'     Premium          1   
-10       'Central Appalachia '    'Low   '        'Surface    '     Bituminous       1   
-11       'Central Appalachia '    'Medium'        'Surface    '     Bituminous       1   
-12       'Southern Appalachia'    'Low   '        'Underground'     Bituminous       1   
-13       'Southern Appalachia'    'Medium'        'Underground'     Bituminous       1   
-14       'Southern Appalachia'    'Low   '        'Underground'     Premium          1   
-15       'Southern Appalachia'    'Low   '        'Surface    '     Bituminous       1   
-16       'Southern Appalachia'    'Medium'        'Surface    '     Bituminous       1   
-17       'East Interior      '    'Medium'        'Underground'     Bituminous       1   
-18       'East Interior      '    'High  '        'Underground'     Bituminous       1   
-19       'East Interior      '    'Medium'        'Surface    '     Bituminous       1   
-20       'East Interior      '    'High  '        'Surface    '     Bituminous       1   
-21       'East Interior      '    'Medium'        'Surface    '     Lignite          1   
-22       'West Interior      '    'High  '        'Surface    '     Bituminous       1   
-23       'Gulf Lignite       '    'Medium'        'Surface    '     Lignite          1   
-24       'Gulf Lignite       '    'High  '        'Surface    '     Lignite          1   
-25       'Dakota Lignite     '    'Medium'        'Surface    '     Lignite          1   
-26       'Western Montana    '    'Low   '        'Underground'     Bituminous       1   
-27       'Western Montana    '    'Low   '        'Surface    '     Subbituminous    1   
-28       'Western Montana    '    'Medium'        'Surface    '     Subbituminous    1   
-29       'WY Northern PRB    '    'Low   '        'Surface    '     Subbituminous    1   
-30       'WY Northern PRB    '    'Medium'        'Surface    '     Subbituminous    1   
-31       'WY Southern PRB    '    'Low   '        'Surface    '     Subbituminous    1   
-32       'Western Wyoming    '    'Low   '        'Underground'     Subbituminous    1   
-33       'Western Wyoming    '    'Low   '        'Surface    '     Subbituminous    1   
-34       'Western Wyoming    '    'Medium'        'Surface    '     Subbituminous    1   
-35       'Rocky Mountain     '    'Low   '        'Underground'     Bituminous       1   
-36       'Rocky Mountain     '    'Low   '        'Underground'     Premium          1   
-37       'Rocky Mountain     '    'Low   '        'Surface    '     Subbituminous    1   
-38       'Arizona/New Mexico '    'Medium'        'Underground'     Bituminous       1   
-39       'Arizona/New Mexico '    'Low   '        'Surface    '     Bituminous       1   
-40       'Arizona/New Mexico '    'Medium'        'Surface    '     Subbituminous    1   
-41       'Alaska/Washington  '    'Low   '        'Surface    '     Subbituminous    1   
-;  
+subsec_name                                                                                    pt3                      map_pt2SubsecNames
+'Electric Gen B1 - BagH-No SOx-Any NOx-'                                                         15                     1
+'Electric Gen B2 - BagH-No SOx-Any NOx-CCS'                                                      16                     1
+'Electric Gen B3 - BagH-WetScrub-No NOx-'                                                        17                     1
+'Electric Gen B4 - BagH-WetScrub-No NOx-CCS'                                                     18                     1
+'Electric Gen B5 - BagH-WetScrub-SCR-'                                                           19                     1
+'Electric Gen B6 - BagH-WetScrub-SCR-CCS'                                                        20                     1
+'Electric Gen B7 - BagH-DryScrub-Any NOx-'                                                       21                     1
+'Electric Gen B8 - BagH-DryScrub-Any NOx-CCS'                                                    22                     1
+'Electric Gen C1 - ColdESP-No SOx-Any NOx-'                                                      23                     1
+'Electric Gen C2 - ColdESP-No SOx-Any NOx-FF'                                                    24                     1
+'Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS'                                                   25                     1
+'Electric Gen C4 - ColdESP-WetScrub-No NOx-'                                                     26                     1
+'Electric Gen C5 - ColdESP-WetScrub-No NOx-FF'                                                   27                     1
+'Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS'                                                  28                     1
+'Electric Gen C7 - ColdESP-WetScrub-SCR-'                                                        29                     1
+'Electric Gen C8 - ColdESP-WetScrub-SCR-FF'                                                      30                     1
+'Electric Gen C9 - ColdESP-WetScrub-SCR-CCS'                                                     31                     1
+'Electric Gen CX - ColdESP-DryScrub-Any NOx-'                                                    32                     1
+'Electric Gen CY - ColdESP-DryScrub-Any NOx-FF'                                                  33                     1
+'Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS'                                                 34                     1
+'Electric Gen H1 - HotESP-No SOx-Any NOx-'                                                       35                     1
+'Electric Gen H2 - HotESP-No SOx-Any NOx-FF'                                                     36                     1
+'Electric Gen H3 - HotESP-No SOx-Any NOx-CCS'                                                    37                     1
+'Electric Gen H4 - HotESP-WetScrub-No NOx-'                                                      38                     1
+'Electric Gen H5 - HotESP-WetScrub-No NOx-FF'                                                    39                     1
+'Electric Gen H6 - HotESP-WetScrub-No NOx-CCS'                                                   40                     1
+'Electric Gen H7 - HotESP-WetScrub-SCR-'                                                         41                     1
+'Electric Gen H8 - HotESP-WetScrub-SCR-FF'                                                       42                     1
+'Electric Gen H9 - HotESP-WetScrub-SCR-SCR'                                                      43                     1
+'Electric Gen HA - HotESP-DryScrub-Any NOx-'                                                     44                     1
+'Electric Gen HB - HotESP-DryScrub-Any NOx-FF'                                                   45                     1
+'Electric Gen HC - HotESP-DryScrub-Any NOx-CCS'                                                  46                     1
+'Electric Gen PC - PulvCoal-WetScrub-SCR-FF'                                                     47                     1
+'Electric Gen OC - Other New Coal'                                                               48                     1
+'Electric Gen IG - IGCC-AGR-SCR-'                                                                49                     1
+'Electric Gen I2 - IGCC NGcofiring'                                                              50                     1
+'Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF'                                              51                     1
+'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF'                                              52                     1
+;
+
 Composite Table:
-subsec_name                                         Subsec   map_SubSectorNames
-'Residential/Commercial Demand 1'                   R1        1
-'Residential/Commercial Demand 2'                   R2        1
-'Stoker Fired Indust Steam Coal Demand'             I1        1
-'Pulverized Coal Indust Steam Coal'                 I2        1
-'Other Indust Steam Coal Demand'                    I3        1
-'Metall 1 - Coking Coal'                            C1        1
-'Metall 2 - Coking Coal'                            C2        1
-'Export Met Demand 1'                               X1        1
-'Export Met Demand 2'                               X2        1
-'Export Met Demand 3'                               X3        1
-'Export Steam Demand 1'                             X4        1
-'Export Steam Demand 2'                             X5        1
-'Export Steam Demand 3'                             X6        1
-'Liquids'                                           L1        1
-'Electric Gen B1 - BagH-No SOx-Any NOx-'            15        1
-'Electric Gen B2 - BagH-No SOx-Any NOx-CCS'         16        1
-'Electric Gen B3 - BagH-WetScrub-No NOx-'           17        1
-'Electric Gen B4 - BagH-WetScrub-No NOx-CCS'        18        1
-'Electric Gen B5 - BagH-WetScrub-SCR-'              19        1
-'Electric Gen B6 - BagH-WetScrub-SCR-CCS'           20        1
-'Electric Gen B7 - BagH-DryScrub-Any NOx-'          21        1
-'Electric Gen B8 - BagH-DryScrub-Any NOx-CCS'       22        1
-'Electric Gen C1 - ColdESP-No SOx-Any NOx-'         23        1
-'Electric Gen C2 - ColdESP-No SOx-Any NOx-FF'       24        1
-'Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS'      25        1
-'Electric Gen C4 - ColdESP-WetScrub-No NOx-'        26        1
-'Electric Gen C5 - ColdESP-WetScrub-No NOx-FF'      27        1
-'Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS'     28        1
-'Electric Gen C7 - ColdESP-WetScrub-SCR-'           29        1
-'Electric Gen C8 - ColdESP-WetScrub-SCR-FF'         30        1
-'Electric Gen C9 - ColdESP-WetScrub-SCR-CCS'        31        1
-'Electric Gen CX - ColdESP-DryScrub-Any NOx-'       32        1
-'Electric Gen CY - ColdESP-DryScrub-Any NOx-FF'     33        1
-'Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS'    34        1
-'Electric Gen H1 - HotESP-No SOx-Any NOx-'          35        1
-'Electric Gen H2 - HotESP-No SOx-Any NOx-FF'        36        1
-'Electric Gen H3 - HotESP-No SOx-Any NOx-CCS'       37        1
-'Electric Gen H4 - HotESP-WetScrub-No NOx-'         38        1
-'Electric Gen H5 - HotESP-WetScrub-No NOx-FF'       39        1
-'Electric Gen H6 - HotESP-WetScrub-No NOx-CCS'      40        1
-'Electric Gen H7 - HotESP-WetScrub-SCR-'            41        1
-'Electric Gen H8 - HotESP-WetScrub-SCR-FF'          42        1
-'Electric Gen H9 - HotESP-WetScrub-SCR-SCR'         43        1
-'Electric Gen HA - HotESP-DryScrub-Any NOx-'        44        1
-'Electric Gen HB - HotESP-DryScrub-Any NOx-FF'      45        1
-'Electric Gen HC - HotESP-DryScrub-Any NOx-CCS'     46        1
-'Electric Gen PC - PulvCoal-WetScrub-SCR-FF'        47        1
-'Electric Gen OC - Other New Coal'                  48        1
-'Electric Gen IG - IGCC-AGR-SCR-'                   49        1
-'Electric Gen I2 - IGCC NGcofiring'                 50        1
-'Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF' 51        1
-'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF' 52        1
-; 
-Composite Table:
-subsec_name                                         pt3   map_pt2SubsecNames
-'Electric Gen B1 - BagH-No SOx-Any NOx-'            15        1
-'Electric Gen B2 - BagH-No SOx-Any NOx-CCS'         16        1
-'Electric Gen B3 - BagH-WetScrub-No NOx-'           17        1
-'Electric Gen B4 - BagH-WetScrub-No NOx-CCS'        18        1
-'Electric Gen B5 - BagH-WetScrub-SCR-'              19        1
-'Electric Gen B6 - BagH-WetScrub-SCR-CCS'           20        1
-'Electric Gen B7 - BagH-DryScrub-Any NOx-'          21        1
-'Electric Gen B8 - BagH-DryScrub-Any NOx-CCS'       22        1
-'Electric Gen C1 - ColdESP-No SOx-Any NOx-'         23        1
-'Electric Gen C2 - ColdESP-No SOx-Any NOx-FF'       24        1
-'Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS'      25        1
-'Electric Gen C4 - ColdESP-WetScrub-No NOx-'        26        1
-'Electric Gen C5 - ColdESP-WetScrub-No NOx-FF'      27        1
-'Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS'     28        1
-'Electric Gen C7 - ColdESP-WetScrub-SCR-'           29        1
-'Electric Gen C8 - ColdESP-WetScrub-SCR-FF'         30        1
-'Electric Gen C9 - ColdESP-WetScrub-SCR-CCS'        31        1
-'Electric Gen CX - ColdESP-DryScrub-Any NOx-'       32        1
-'Electric Gen CY - ColdESP-DryScrub-Any NOx-FF'     33        1
-'Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS'    34        1
-'Electric Gen H1 - HotESP-No SOx-Any NOx-'          35        1
-'Electric Gen H2 - HotESP-No SOx-Any NOx-FF'        36        1
-'Electric Gen H3 - HotESP-No SOx-Any NOx-CCS'       37        1
-'Electric Gen H4 - HotESP-WetScrub-No NOx-'         38        1
-'Electric Gen H5 - HotESP-WetScrub-No NOx-FF'       39        1
-'Electric Gen H6 - HotESP-WetScrub-No NOx-CCS'      40        1
-'Electric Gen H7 - HotESP-WetScrub-SCR-'            41        1
-'Electric Gen H8 - HotESP-WetScrub-SCR-FF'          42        1
-'Electric Gen H9 - HotESP-WetScrub-SCR-SCR'         43        1
-'Electric Gen HA - HotESP-DryScrub-Any NOx-'        44        1
-'Electric Gen HB - HotESP-DryScrub-Any NOx-FF'      45        1
-'Electric Gen HC - HotESP-DryScrub-Any NOx-CCS'     46        1
-'Electric Gen PC - PulvCoal-WetScrub-SCR-FF'        47        1
-'Electric Gen OC - Other New Coal'                  48        1
-'Electric Gen IG - IGCC-AGR-SCR-'                   49        1
-'Electric Gen I2 - IGCC NGcofiring'                 50        1
-'Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF' 51        1
-'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF' 52        1
-;                                                              
-                                                             
-Composite Table:
-Dreg_name                                           DReg     map_DmdRegs              
-'New England'                                       01NE      1
-'Middle Atlantic'                                   02YP      1
-'South Atlantic 1'                                  03S1      1
-'South Atlantic 2'                                  04S2      1
-'Georgia & Florida'                                 05GF      1
-'Ohio'                                              06OH      1
-'East North Central'                                07EN      1
-'Kentucky and Tennessee'                            08KT      1
-'Alabama and Mississippi'                           09AM      1
-'West North Central 1'                              10C1      1
-'West North Central 2'                              11C2      1
-'West South Central'                                12WS      1
-'Mountain'                                          13MT      1
-'Colorado, Utah, NV'                                14CU      1
-'Arizona and New Mexico'                            15ZN      1
-'Pacific'                                           16PC      1
-;                                                              
-Composite Table:        
-cd_name                                            CensDiv   map_CensDivNames
-'New England'                                       01NEN     1
-'Middle Atlantic'                                   02MAT     1
-'East North Central'                                03ENC     1
-'West North Central'                                04WNC     1
-'South Atlantic'                                    05SAT     1
-'East South Central'                                06ESC     1
-'West South Central'                                07WSC     1
-'Mountain'                                          08MTN     1
-'Pacific'                                           09PAC     1
-'United States'                                     11USA     1
-;  
-Composite Table:
-cd_name                 DReg_name                  map_CDname_DRegname	
-'New England'       	'New England'             	1
-'Middle Atlantic'   	'Middle Atlantic'         	1
-'East North Central'	'Ohio'                    	1
-'East North Central'	'East North Central'      	1
-'West North Central'	'West North Central 1'    	1
-'West North Central'	'West North Central 2'    	1
-'South Atlantic'     	'South Atlantic 1'        	1
-'South Atlantic'     	'South Atlantic 2'        	1
-'South Atlantic'     	'Georgia & Florida'       	1
-'East South Central' 	'Kentucky and Tennessee'  	1
-'East South Central' 	'Alabama and Mississippi' 	1
-'West South Central' 	'West South Central'      	1
-'Mountain'           	'Mountain'                	1
-'Mountain'           	'Colorado, Utah, NV'      	1
-'Mountain'           	'Arizona and New Mexico'  	1
-'Pacific'            	'Pacific'                 	1
-;		
-                                                            
-Composite Table:
-Sec_name                    subsec_name                                            map_SectorNames
-'Residential/Commercial'    'Residential/Commercial Demand 1'                       1
-'Residential/Commercial'    'Residential/Commercial Demand 2'                       1
-'Industrial Steam'          'Stoker Fired Indust Steam Coal Demand'                 1
-'Industrial Steam'          'Pulverized Coal Indust Steam Coal'                     1
-'Industrial Steam'          'Other Indust Steam Coal Demand'                        1
-'Industrial Coking'         'Metall 1 - Coking Coal'                                1
-'Industrial Coking'         'Metall 2 - Coking Coal'                                1
-'Export'                    'Export Met Demand 1'                                   1
-'Export'                    'Export Met Demand 2'                                   1
-'Export'                    'Export Met Demand 3'                                   1
-'Export'                    'Export Steam Demand 1'                                 1
-'Export'                    'Export Steam Demand 2'                                 1
-'Export'                    'Export Steam Demand 3'                                 1
-'Liquids'                   'Liquids'                                               1
-'Electricity'               'Electric Gen B1 - BagH-No SOx-Any NOx-'                1
-'Electricity'               'Electric Gen B2 - BagH-No SOx-Any NOx-CCS'             1
-'Electricity'               'Electric Gen B3 - BagH-WetScrub-No NOx-'               1
-'Electricity'               'Electric Gen B4 - BagH-WetScrub-No NOx-CCS'            1
-'Electricity'               'Electric Gen B5 - BagH-WetScrub-SCR-'                  1
-'Electricity'               'Electric Gen B6 - BagH-WetScrub-SCR-CCS'               1
-'Electricity'               'Electric Gen B7 - BagH-DryScrub-Any NOx-'              1
-'Electricity'               'Electric Gen B8 - BagH-DryScrub-Any NOx-CCS'           1
-'Electricity'               'Electric Gen C1 - ColdESP-No SOx-Any NOx-'             1
-'Electricity'               'Electric Gen C2 - ColdESP-No SOx-Any NOx-FF'           1
-'Electricity'               'Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS'          1
-'Electricity'               'Electric Gen C4 - ColdESP-WetScrub-No NOx-'            1
-'Electricity'               'Electric Gen C5 - ColdESP-WetScrub-No NOx-FF'          1
-'Electricity'               'Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS'         1
-'Electricity'               'Electric Gen C7 - ColdESP-WetScrub-SCR-'               1
-'Electricity'               'Electric Gen C8 - ColdESP-WetScrub-SCR-FF'             1
-'Electricity'               'Electric Gen C9 - ColdESP-WetScrub-SCR-CCS'            1
-'Electricity'               'Electric Gen CX - ColdESP-DryScrub-Any NOx-'           1
-'Electricity'               'Electric Gen CY - ColdESP-DryScrub-Any NOx-FF'         1
-'Electricity'               'Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS'        1
-'Electricity'               'Electric Gen H1 - HotESP-No SOx-Any NOx-'              1
-'Electricity'               'Electric Gen H2 - HotESP-No SOx-Any NOx-FF'            1
-'Electricity'               'Electric Gen H3 - HotESP-No SOx-Any NOx-CCS'           1
-'Electricity'               'Electric Gen H4 - HotESP-WetScrub-No NOx-'             1
-'Electricity'               'Electric Gen H5 - HotESP-WetScrub-No NOx-FF'           1
-'Electricity'               'Electric Gen H6 - HotESP-WetScrub-No NOx-CCS'          1
-'Electricity'               'Electric Gen H7 - HotESP-WetScrub-SCR-'                1
-'Electricity'               'Electric Gen H8 - HotESP-WetScrub-SCR-FF'              1
-'Electricity'               'Electric Gen H9 - HotESP-WetScrub-SCR-SCR'             1
-'Electricity'               'Electric Gen HA - HotESP-DryScrub-Any NOx-'            1
-'Electricity'               'Electric Gen HB - HotESP-DryScrub-Any NOx-FF'          1
-'Electricity'               'Electric Gen HC - HotESP-DryScrub-Any NOx-CCS'         1
-'Electricity'               'Electric Gen PC - PulvCoal-WetScrub-SCR-FF'            1
-'Electricity'               'Electric Gen OC - Other New Coal'                      1
-'Electricity'               'Electric Gen IG - IGCC-AGR-SCR-'                       1
-'Electricity'               'Electric Gen I2 - IGCC NGcofiring'                     1
-'Electricity'               'Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF'     1
-'Electricity'               'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF'     1
+Dreg_name                                           DReg                                           map_DmdRegs
+'New England'                                       01NE                                           1
+'Middle Atlantic'                                   02YP                                           1
+'South Atlantic 1'                                  03S1                                           1
+'South Atlantic 2'                                  04S2                                           1
+'Georgia & Florida'                                 05GF                                           1
+'Ohio'                                              06OH                                           1
+'East North Central'                                07EN                                           1
+'Kentucky and Tennessee'                            08KT                                           1
+'Alabama and Mississippi'                           09AM                                           1
+'West North Central 1'                              10C1                                           1
+'West North Central 2'                              11C2                                           1
+'West South Central'                                12WS                                           1
+'Mountain'                                          13MT                                           1
+'Colorado, Utah, NV'                                14CU                                           1
+'Arizona and New Mexico'                            15ZN                                           1
+'Pacific'                                           16PC                                           1
 ;
 Composite Table:
-Sec_name                    Sec     map_MajorSectorNames
-'Residential/Commercial'    R        1
-'Industrial Steam'          I        1
-'Industrial Coking'         C        1
-'Export'                    X        1
-'Electricity'               E        1
-'Liquids'                   L        1
+cd_name                                             CensDiv                                        map_CensDivNames
+'New England'                                       01NEN                                          1
+'Middle Atlantic'                                   02MAT                                          1
+'East North Central'                                03ENC                                          1
+'West North Central'                                04WNC                                          1
+'South Atlantic'                                    05SAT                                          1
+'East South Central'                                06ESC                                          1
+'West South Central'                                07WSC                                          1
+'Mountain'                                          08MTN                                          1
+'Pacific'                                           09PAC                                          1
+'United States'                                     11USA                                          1
+;
+Composite Table:
+cd_name                                             DReg_name                                      map_CDname_DRegname
+'New England'                                       'New England'                                  1
+'Middle Atlantic'                                   'Middle Atlantic'                              1
+'East North Central'                                'Ohio'                                         1
+'East North Central'                                'East North Central'                           1
+'West North Central'                                'West North Central 1'                         1
+'West North Central'                                'West North Central 2'                         1
+'South Atlantic'                                    'South Atlantic 1'                             1
+'South Atlantic'                                    'South Atlantic 2'                             1
+'South Atlantic'                                    'Georgia & Florida'                            1
+'East South Central'                                'Kentucky and Tennessee'                       1
+'East South Central'                                'Alabama and Mississippi'                      1
+'West South Central'                                'West South Central'                           1
+'Mountain'                                          'Mountain'                                     1
+'Mountain'                                          'Colorado, Utah, NV'                           1
+'Mountain'                                          'Arizona and New Mexico'                       1
+'Pacific'                                           'Pacific'                                      1
+;
+
+Composite Table:
+Sec_name                                            subsec_name                                                         map_SectorNames
+'Residential/Commercial'                            'Residential/Commercial Demand 1'                                   1
+'Residential/Commercial'                            'Residential/Commercial Demand 2'                                   1
+'Industrial Steam'                                  'Stoker Fired Indust Steam Coal Demand'                             1
+'Industrial Steam'                                  'Pulverized Coal Indust Steam Coal'                                 1
+'Industrial Steam'                                  'Other Indust Steam Coal Demand'                                    1
+'Industrial Coking'                                 'Metall 1 - Coking Coal'                                            1
+'Industrial Coking'                                 'Metall 2 - Coking Coal'                                            1
+'Export'                                            'Export Met Demand 1'                                               1
+'Export'                                            'Export Met Demand 2'                                               1
+'Export'                                            'Export Met Demand 3'                                               1
+'Export'                                            'Export Steam Demand 1'                                             1
+'Export'                                            'Export Steam Demand 2'                                             1
+'Export'                                            'Export Steam Demand 3'                                             1
+'Liquids'                                           'Liquids'                                                           1
+'Electricity'                                       'Electric Gen B1 - BagH-No SOx-Any NOx-'                            1
+'Electricity'                                       'Electric Gen B2 - BagH-No SOx-Any NOx-CCS'                         1
+'Electricity'                                       'Electric Gen B3 - BagH-WetScrub-No NOx-'                           1
+'Electricity'                                       'Electric Gen B4 - BagH-WetScrub-No NOx-CCS'                        1
+'Electricity'                                       'Electric Gen B5 - BagH-WetScrub-SCR-'                              1
+'Electricity'                                       'Electric Gen B6 - BagH-WetScrub-SCR-CCS'                           1
+'Electricity'                                       'Electric Gen B7 - BagH-DryScrub-Any NOx-'                          1
+'Electricity'                                       'Electric Gen B8 - BagH-DryScrub-Any NOx-CCS'                       1
+'Electricity'                                       'Electric Gen C1 - ColdESP-No SOx-Any NOx-'                         1
+'Electricity'                                       'Electric Gen C2 - ColdESP-No SOx-Any NOx-FF'                       1
+'Electricity'                                       'Electric Gen C3 - ColdESP-No SOx-Any NOx-CCS'                      1
+'Electricity'                                       'Electric Gen C4 - ColdESP-WetScrub-No NOx-'                        1
+'Electricity'                                       'Electric Gen C5 - ColdESP-WetScrub-No NOx-FF'                      1
+'Electricity'                                       'Electric Gen C6 - ColdESP-WetScrub-No NOx-CCS'                     1
+'Electricity'                                       'Electric Gen C7 - ColdESP-WetScrub-SCR-'                           1
+'Electricity'                                       'Electric Gen C8 - ColdESP-WetScrub-SCR-FF'                         1
+'Electricity'                                       'Electric Gen C9 - ColdESP-WetScrub-SCR-CCS'                        1
+'Electricity'                                       'Electric Gen CX - ColdESP-DryScrub-Any NOx-'                       1
+'Electricity'                                       'Electric Gen CY - ColdESP-DryScrub-Any NOx-FF'                     1
+'Electricity'                                       'Electric Gen CZ - ColdESP-DryScrub-Any NOx-CCS'                    1
+'Electricity'                                       'Electric Gen H1 - HotESP-No SOx-Any NOx-'                          1
+'Electricity'                                       'Electric Gen H2 - HotESP-No SOx-Any NOx-FF'                        1
+'Electricity'                                       'Electric Gen H3 - HotESP-No SOx-Any NOx-CCS'                       1
+'Electricity'                                       'Electric Gen H4 - HotESP-WetScrub-No NOx-'                         1
+'Electricity'                                       'Electric Gen H5 - HotESP-WetScrub-No NOx-FF'                       1
+'Electricity'                                       'Electric Gen H6 - HotESP-WetScrub-No NOx-CCS'                      1
+'Electricity'                                       'Electric Gen H7 - HotESP-WetScrub-SCR-'                            1
+'Electricity'                                       'Electric Gen H8 - HotESP-WetScrub-SCR-FF'                          1
+'Electricity'                                       'Electric Gen H9 - HotESP-WetScrub-SCR-SCR'                         1
+'Electricity'                                       'Electric Gen HA - HotESP-DryScrub-Any NOx-'                        1
+'Electricity'                                       'Electric Gen HB - HotESP-DryScrub-Any NOx-FF'                      1
+'Electricity'                                       'Electric Gen HC - HotESP-DryScrub-Any NOx-CCS'                     1
+'Electricity'                                       'Electric Gen PC - PulvCoal-WetScrub-SCR-FF'                        1
+'Electricity'                                       'Electric Gen OC - Other New Coal'                                  1
+'Electricity'                                       'Electric Gen IG - IGCC-AGR-SCR-'                                   1
+'Electricity'                                       'Electric Gen I2 - IGCC NGcofiring'                                 1
+'Electricity'                                       'Electric Gen PQ - AdvCoal 30PctSeq-WetScrb-SCR-FF'                 1
+'Electricity'                                       'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF'                 1
+;
+Composite Table:
+Sec_name                                            Sec                                            map_MajorSectorNames
+'Residential/Commercial'                            R                                              1
+'Industrial Steam'                                  I                                              1
+'Industrial Coking'                                 C                                              1
+'Export'                                            X                                              1
+'Electricity'                                       E                                              1
+'Liquids'                                           L                                              1
 ;
 ResName:='Residential/Commercial';
 IndName:='Industrial Steam';
@@ -366,58 +304,55 @@ LiquName:='Liquids';
 CD_US:='United States';
 
 Composite Table:
-e   EReg_name                           map_ExportRegionNames
-UA	'U.S. Noncontiguous'                1
-UG	'U.S. Gulf'                         1
-UI	'U.S. Interior'                     1
-UW	'U.S. West coast'                   1
-UE	'U.S. East coast'                   1
-NW	'West Coast Canada'                 1
-NI	'Interior Canada (thermal only)'    1
-CL	'Colombia (thermal only)'           1
-VZ	'Venezuela (thermal only)'          1
-VT	'Vietnam'                           1
-PO	'Poland'                            1
-RE	'Eurasia (exports to Europe)'       1
-RA	'Eurasia (exports to Asia)'         1
-SF	'Southern Africa'                   1
-IN	'Indonesia'                         1
-HI	'China'                             1
-AU	'Australia'                         1
+e                                                   EReg_name                                      map_ExportRegionNames
+UG                                                  'U.S. Gulf'                                    1
+UI                                                  'U.S. Interior'                                1
+UW                                                  'U.S. West coast'                              1
+UE                                                  'U.S. East coast'                              1
+NW                                                  'West Coast Canada'                            1
+NI                                                  'Interior Canada (thermal only)'               1
+CL                                                  'Colombia (thermal only)'                      1
+VZ                                                  'Venezuela (thermal only)'                     1
+VT                                                  'Vietnam'                                      1
+PO                                                  'Poland'                                       1
+RE                                                  'Eurasia (exports to Europe)'                  1
+RA                                                  'Eurasia (exports to Asia)'                    1
+SF                                                  'Southern Africa'                              1
+IN                                                  'Indonesia'                                    1
+HI                                                  'China'                                        1
+AU                                                  'Australia'                                    1
 ;
 
 Composite Table:
-i   IReg_name                           map_ImportRegionNames
-NE	'East Coast Canada'                 1
-NI	'Interior Canada'                   1
-SC	'Scandinavia'                       1
-BT	'United Kingdom, Ireland'           1
-GY	'Germany, Austria, Poland'          1
-OW	'Other Northern Europe'             1
-PS	'Iberian Peninsula'                 1
-TL	'Italy'                             1
-RM	'E. Europe and Mediterranean'       1
-MX	'Mexico'                            1
-LA	'South America'                     1
-JA	'Japan'                             1
-EA	'East Asia'                         1
-CH	'China, Hong Kong'                  1
-AS	'ASEAN'                             1
-IN	'Indian Subcontinent, S. Asia'      1
-UA	'U.S. All'                          1
-UG	'U.S. Gulf'                         1
-UI	'U.S. Interior'                     1
-UN	'U.S. Noncontiguous'                1
-UW	'U.S. West coast'                   1
-UE	'U.S. East coast'                   1
+i                                                   IReg_name                                      map_ImportRegionNames
+NE                                                  'East Coast Canada'                            1
+NI                                                  'Interior Canada'                              1
+SC                                                  'Scandinavia'                                  1
+BT                                                  'United Kingdom, Ireland'                      1
+GY                                                  'Germany, Austria, Poland'                     1
+OW                                                  'Other Northern Europe'                        1
+PS                                                  'Iberian Peninsula'                            1
+TL                                                  'Italy'                                        1
+RM                                                  'E. Europe and Mediterranean'                  1
+MX                                                  'Mexico'                                       1
+LA                                                  'South America'                                1
+JA                                                  'Japan'                                        1
+EA                                                  'East Asia'                                    1
+CH                                                  'China, Hong Kong'                             1
+AS                                                  'ASEAN'                                        1
+IN                                                  'Indian Subcontinent, S. Asia'                 1
+UG                                                  'U.S. Gulf'                                    1
+UI                                                  'U.S. Interior'                                1
+UN                                                  'U.S. Noncontiguous'                           1
+UW                                                  'U.S. West coast'                              1
+UE                                                  'U.S. East coast'                              1
 ;
 Composite Table:
-tc     tc_name    map_ThermalorCoking
-1      'Coking'   1
-2      'Thermal'  1
+tc                                                  tc_name                                        map_ThermalorCoking
+1                                                   'Coking'                                       1
+2                                                   'Thermal'                                      1
 ;
- 
+
 CokingName:='Coking';
 ThermalName:='Thermal'
-;    
-                                    
+;

@@ -1,0 +1,96 @@
+﻿!=====================================================
+!EMM TESTING SWITCHES AND PARAMETERS
+
+! Electrolyzer costs debug
+LowerElectrolyzerCapitalSwitch := 0; ! 0 = Use normal capital costs, 1 = Use debug capital cost factor.
+ElectrolyzerCostFactorDebug := .7; ! Multiplies capital cost by this factor during debug mode.
+
+! Load restriction debug
+LoadRestrictionSwitch := 0; ! 0 = send normal electrolyzer load to EMM, 1 = only send 45V load to EMM.
+
+!=====================================================
+
+FirstHistoricalYear := '1990';
+FirstModelYear := '2023';
+LastModelYear := '2050';
+NumberFutureYears := 20;
+
+! First year that pipelines and storage facilities are allowed to be built.
+FirstPipelineBuildYear := '2030';
+FirstStorageBuildYear := '2030';
+
+! MECS vintage being used for initial capacity estimations
+MECSYear := '2018'; !
+
+! TECHNOLOGY ASSUMPTIONS
+! Electricity consumed during compression for storage
+! Source: https://www.cell.com/iscience/pdf/S2589-0042(23)02848-1.pdf, page
+! Originally 2.2 kwh/kg H2, but I converted it to MMBtu/kg h2.
+StorageElecConsRate := 0.0075064; !MMBtu/kg H2
+
+! Financial Parameters
+projectLifetime := 20; ! Lifetime of a hydrogen project. (Used in the Capital Recovery Factor formula).
+volatility_beta := 1.75; ! Measure of volatility of an security compared to the market. (Greater 2 means asset is twice as volatile as S&P 500 index).
+EquityShare := .40; ! Percentage of financing raised through equity
+CorporateTaxRate := .24; ! Assumed corporate tax rate
+
+! Production assumptions
+CapacityReserveRatio := 1.1;
+
+! Capacity Build Steps
+StorageStepCostMultiplier(storStep) := DATA {1 : 1, 2 : 1.5, 3 : 2};
+TransportationStepCostMultiplier(tranStep) := DATA {1 : 1, 2 : 1.5, 3 : 2};
+ProductionStepCostMultiplier(prodStep) := DATA {1 : 1, 2 : 2.25, 3 : 4.5};
+
+! 
+ProductionStepSize(prodStep) := DATA {1 : .2, 2 : 0.06, 3 : .03};
+
+! Learning (move to pre-processor?)
+Composite table:
+prodTech	LR1	LR2	LR3	P1_doublings	P2_doublings	minimum_learning
+PEM		0.15	0.07	0.01	1		4		0.25
+SMR				0.01					0.01
+SMR_CCS		0.08	0.04	0.01	1		2		0.05
+;
+MinimumLearningEndYear := '2035'; 
+
+!================================================================
+! 45Q AND 45V TAX CREDITS
+
+! 45V Credit Value (2024$/million metric tons)
+Credit45VDollarYear := '2022';
+Credit45VValue := 3000000000;
+ProjectBuildTime := 3;
+Credit45VNumYearsEligible := 10;
+Credit45VStartYear := '2023';
+Credit45VEndYear := '2033';
+
+! Define credit steps
+CreditSteps_ := DATA {'45V', '45VCurtail', 'No45V', 'No45VCurtail'};
+CreditSteps45V_ := DATA {'45V', '45VCurtail'};
+CreditStepsCurtail_ := DATA {'45VCurtail', 'No45VCurtail'};
+CreditStepsNoCurtail_ := DATA {'45V', 'No45V'};
+
+! 45Q TAX CREDIT PARAMETERS
+Credit45QStartYear := '2000';
+Credit45QEndYear := '2032';
+ProjectBuildtime45Q := 3;
+Credit45QNumYearsEligible := 12;
+
+!===============================================================
+
+! EMM Supply Curve Steps
+H2STEP_ := {1..7}; ! Number of steps on EMM Supply Curve
+H2DemandFactors(H2STEP) := DATA {
+	1: 1.0,
+	2: 1.02,
+	3: 1.04,
+	4: 1.06, 
+	5: 1.08, 
+	6: 1.095}; ! Factors to scale H2 Demand
+
+! Time fractions/weights
+
+! Debug switches
+SaveEachIterationSwitch := 0;
+ExtraDebugSwitch := 1;

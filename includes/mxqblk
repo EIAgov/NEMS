@@ -24,7 +24,7 @@
       REAL XQDSCM(MNUMCR,MNXYR) ! 49 Distillate - Commercial
       REAL XQDSTR(MNUMCR,MNXYR) ! 50 Distillate - Transportation
       REAL XQDSIN(MNUMCR,MNXYR) ! 51 Distillate - Industrial
-      REAL XQDSEL(MNUMCR,MNXYR) ! 53 Distillate - Electricity (+petroleum coke)
+      REAL XQDSEL(MNUMCR,MNXYR) ! 53 Distillate - Electricity
       REAL XQKSAS(MNUMCR,MNXYR) ! 58 Kerosene - All Sectors
       REAL XQLGRF(MNUMCR,MNXYR) ! 63 Liquid Petroleum Gases - Refinery
       REAL XQLGAS(MNUMCR,MNXYR) ! 64 Liquid Petroleum Gases - All Sectors
@@ -42,7 +42,7 @@
       REAL XQOTRF(MNUMCR,MNXYR) ! 90 Other Petroleum - Refinery
       REAL XQOTAS(MNUMCR,MNXYR) ! 91 Other Petroleum - All Sectors
       REAL XQMETR(MNUMCR,MNXYR) ! 99 Methanol - Transporation
-      REAL XQETTR(MNUMCR,MNXYR) !100 Ethanol - Transporation
+      REAL XQETTR(MNUMCR,MNXYR) !100 Ethanol - Transporation (sold as E85)
       REAL XQOTTR(MNUMCR,MNXYR) !    Other - Transporation
       REAL XQOTIN(MNUMCR,MNXYR) !    Other - Industrial
       REAL XQNGTR(MNUMCR,MNXYR) !    Natural Gas - Transportation

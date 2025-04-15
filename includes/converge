@@ -2,7 +2,7 @@
 ! $header$
 ! Variables for the Ftab Converge Summary Table
       INTEGER MNUMCVTST
-      PARAMETER (MNUMCVTST=106)
+      PARAMETER (MNUMCVTST=102)
       integer MAXCYCLES
       PARAMETER (MAXCYCLES=10)
       REAL*4 CVTAB(MNUMCVTST,4,MNUMYR)   ! Convergence Summary Table:  (106 items, cur/bef/abs} , year)

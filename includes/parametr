@@ -8,7 +8,9 @@
       INTEGER MNCRUD, MNPROD, CRSTEP, CISTEP, MCSTEP, EUSTEP, REFREG, NGPLRG, OGDIST, WTIREG
       INTEGER JUMPCALYR, MJUMPYR, MNUMCGF, NLNGTER
       INTEGER EPAREG
-      INTEGER WELLTYPES, GASTYPES, OILTYPES
+      INTEGER WELLTYPES, GASTYPES, OILTYPES, MAXNUC, H2STEP
+      INTEGER NUM_CON_FUELS
+      INTEGER MNUMYV
 !  PARAMETERS
       PARAMETER(MNUMYR=61)   ! Years=1990-2050
       PARAMETER(MJUMPYR=41)  ! Years=1990-2030
@@ -37,7 +39,7 @@
       PARAMETER(NDREG=16)    ! Coal demand regions
       PARAMETER(MNUMNR=28)   ! NERC regions (25+Alaska+Hawaii+US Total)
 ! these next two represent NAICS industry classifications; they were SIC classifications originally
-      PARAMETER(MNSICM=60)   ! Number of manufacturing and nonmanufacturing industries
+      PARAMETER(MNSICM=62)   ! Number of manufacturing and nonmanufacturing industries
                              !         nonmanufacturing = agriculture, mining, construction
       PARAMETER(MNSICNM=12)  ! Number of services:  transportation, broadcasting, electric power,
                              !         natural gas distribution, water and sewage, wholesale trade,
@@ -56,7 +58,7 @@
       PARAMETER(FLTYPE=6)    ! Fuel type (Oil, NG, MCL, SCL, Ren, Al)
       PARAMETER(MNETOH=5)    ! Emissions of Ethanol, 5 Volume steps
       PARAMETER(MNCROP=2)    ! Emissions (Corn & Biomass)
-      PARAMETER(MSEDYR=31)   ! Number of Historical SEDS years
+      PARAMETER(MSEDYR=33)   ! Number of Historical SEDS years
       PARAMETER(NNGEM=17)    ! Number of NG - Electricity Regions
       PARAMETER(BASEYR=1990) ! Base calendar year corresponding to curiyr=1
       PARAMETER(ENDYR=2050)  ! End calendar year corresponding to curiyr=mnumyr
@@ -121,3 +123,7 @@
 !  Oil types:  1. all other oil (not 2-4)       2. tight oil   3. carbon dioxide enhanced oil recovery
 !              4. other enhanced oil recovery   5. total
       PARAMETER(OILTYPES=5)  ! Types of oil and natural gas wells
+      PARAMETER(MAXNUC=900)  ! Maximum Number of Existing Nuclear Units + MNUMNR * 2 New Units
+      PARAMETER(H2STEP=7)    ! H2 Supply Steps
+      PARAMETER (NUM_CON_FUELS=20)
+      PARAMETER(MNUMYV=61) ! Year vintages for EMM/HMM Sec 45V Eligible Generation

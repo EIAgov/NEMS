@@ -1,7 +1,42 @@
-!  CTUS shared data
+!  ctus shared data
 
-! Need to include 'ogsmparm' for: max_reg,max_src,max_yr
+! need to include 'ogsmparm' for: max_reg,max_src,max_yr
 
-real nat_availco2(max_reg,max_src,max_yr)  ! Annual CO2 availibilty by Region (BCF) - includes industrial and natural
+integer*4 max_ind_co2
+parameter(max_ind_co2 = 200)
 
-common /ctus_ogsm/ nat_availco2
+real nat_availco2(max_reg,max_src,max_yr)  ! annual co2 availibilty by region (bcf) - includes industrial and natural
+integer*4 ns_prc_ndx(max_reg,max_ind_co2,mnumyr) ! index for sorted prices
+integer*4 ns_id(max_reg,max_ind_co2)    ! id for new sources of co2
+integer*4 ns_src(max_reg,max_ind_co2)   ! sources for each record
+real*8    ns_price(max_reg,max_ind_co2,mnumyr) ! price for new sources of co2
+real*8    ns_quant(max_reg,max_ind_co2) ! quantity for new sources of co2
+integer*4 ns_bin(max_reg,max_ind_co2,mnumyr)   ! bin for new sources of co2
+integer*4 ns_syr(max_reg,max_ind_co2)   ! start year for each record
+integer*4 n_ns_recs(max_reg)            ! number of records per region
+REAL*4  CO2BASE(max_reg,MAX_SRC)    ! EXISTING SOURCES OF CO2
+REAL*8 BIN_DOLAMT(8)    ! UPPER BOUND DOLLAR AMOUNT FOR BIN BREAKPOIINTS
+REAL*4  CO2MUL       ! CO2 AVAIL CONSTRAINT MULTIPLIER
+REAL*4  AARP(40,max_src)        ! CO2 SOURCE ACCEPTANCE RATE
+REAL*4  UMPCO2(max_src)          ! CO2 ULTIMATE MARKET ACCEPTANCE
+INTEGER YRDT(max_src)           ! YRS TO DEVELOP TECHNOLOGY
+INTEGER YRDI(max_src)           ! YRS TO DEVELOP INFRASTRUCTURE
+INTEGER YRMA(max_src)           ! YRS TO REACH FULL CAPACITY
+real src_availco2(max_reg,max_src,max_yr)    ! base annual volume of CO2 available by region (BCF) and source
+INTEGER*4 MAP_BINS_TO_SRC_INDEX(max_src)
+real cregpryr(max_reg,max_src,max_yr)      ! the CO2 price by region, step and year ($/Mcf)
+real cregpryrS(max_reg,max_src,max_yr)     ! the CO2 price by region, source and year ($/Mcf)
+real bse_availco2(max_reg,max_src,max_yr)    ! base annual volume of CO2 available by region (BCF) and price bin
+
+common /ctus_ogsm/ nat_availco2, ns_prc_ndx, ns_id, ns_src, ns_price, &
+                    ns_quant, ns_bin, ns_syr, n_ns_recs, CO2BASE, BIN_DOLAMT, &
+                    CO2MUL, YRDT, YRDI, YRMA, AARP, UMPCO2, src_availco2, &
+                    MAP_BINS_TO_SRC_INDEX, cregpryr, cregpryrS, &
+                    bse_availco2
+
+
+character*1 nat_srcc02  ! use natural source of co2?
+character*1 ind_srcc02  ! use industrial source of co2?
+
+common /ctus_drill_opt/ nat_srcc02, ind_srcc02
+

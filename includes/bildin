@@ -13,12 +13,12 @@
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       COMMON /BILDIN/    EP$LF,   EPFPM,   EPHGHT,  EPPEAK,  EP_NET_PEAK, EPSPK,    & !REAL*8
        EPWDTH,  EPNOX_G, &
-       EPECAP,  EPECAP_MR, EPNCAP, EPRGM, EPHTRT_AER, EPPHRT0, EPPHRTN, & !REAL*4
+       EPECAP,  EPECAP_MR, EPECAP_UPV, EPNCAP, EPRGM, EPHTRT_AER, EPPHRT0, EPPHRTN, & !REAL*4
        EPWDCOF, EPEXT, &
        EPBLDBND,EPCH4RT, EPCO1RT, EPCO2RT, EPCRBRT, EPNOXRT, EPSOXRT, &
        EPVOCRT, EPIROVR, EPIRFOM, EPIRVOM, EPIRCCR, EPIRCCS, EPCPADJ, EPBDSUP, &
        EPCCSUP, EPFXSUP, EPVRSUP, &
-       EPIACF,  EPICFC,  UPICFC,  EPISCF,  EPIGCF,  EPRCFC,  EPFMAP,  EPFLRG,  EPCRMP,  &
+       EPIACF,  EPICFC,  UPICFC,  UPICFC_DPV, EPISCF,  EPIGCF,  EPRCFC,  EPFMAP,  EPFLRG,  EPCRMP,  &
        EPSOVR,  EPSCAP,  EPALSO2, EPALNOX, EPALCO2, &
        UPDNOXL, EOUNCP,  EOUCCP,  EPRPSRG, EPRPSTG, EPRPSRO, EPRPSTO, &
        EPDSCRT, EPUTDSCRT,EPUROR,  EPUIRT,  EPUFDT,  EPUFPE,  EPUCRE, &
@@ -26,7 +26,7 @@
        EPRTBS,  EPMRM,   EPACM,   EPXPRT,  EPCOVR,  EPRSCFC,  EPCRBPEN, &
        EPCTRM,  EPCCRF,  EPCFOM,  EPTCST,  EPTCRF,  EPTLOSS, EPUPCLF, &
        EPNPCLF, EPPCLRHS,EPUNIT,  EPFOM,   EPGFOM,  EPVOM,   EPGCAP, &
-       EPECFC,  EPESCFC, EPDPCT,  EPDAVD,  EP_SP_CAP_FAC, &
+       EPECFC,  EPESCFC, EPECFC_UPV, EPDPCT,  EPDAVD,  EP_SP_CAP_FAC, &
        EORDER,  EPFRST,  EPGECP,  EPGETT,  EPLDGR,  EPGECPS, EPLDSG,  EPLMAP,    & !INT
        EPNEXT,  EPNGRP,  EPNMSP,  EPNSPG,  EPNSTP,  EPSETT, &
        EPNSCR,  EPSREC, &
@@ -47,9 +47,9 @@
        ( 1 * 4 * ELD_D_DAY) + &
        ( 8 * 4 * ECP_D_XPH) + &
        ( 1 * 4 * ECP_D_MSP) + &
-       ( 2 * 4 * ECP_D_CAP * ECP_D_XPH) + &
+       ( 3 * 4 * ECP_D_CAP * ECP_D_XPH) + &
        ( 1 * 4 * ECP_D_MSP * ECP_D_CAP * ECP_D_XPH) + &
-       ( 2 * 4 * (EFD_D_MFRG + 1) * ECP_D_CAP * ECP_D_XPH) + &
+       ( 3 * 4 * (EFD_D_MFRG + 1) * ECP_D_CAP * ECP_D_XPH) + &
        ( 2 * 4 * ECP_D_DSP) + &
        ( 1 * 4 * ECP_D_DSP * ECP_D_XPH) + &
        (11 * 4 * ECP_D_CAP) + &
@@ -61,7 +61,7 @@
        ( 5 * 4 * ECP_D_I_R * 3) + &
        ( 1 * 4 * ECP_D_I_R * ECP_D_XPH) + &
        ( 1 * 4 * ECP_D_INT * ECP_D_VLS) + &
-       ( 1 * 4 * (MX_STO_INC + 1) * ECP_D_INT * ECP_D_STP * ECP_D_SSZ) + &
+       ( 2 * 4 * (MX_STO_INC + 1) * ECP_D_INT * ECP_D_STP * ECP_D_SSZ) + &
        ( 1 * 4 * ECP_D_INT * ECP_D_MSP) + &
        ( 1 * 4 * ECP_D_INT * ECP_D_STP) + &
        ( 1 * 4 * ECP_D_RNW * ECP_D_VLS * 3) + &
@@ -117,6 +117,7 @@
 !
       REAL*4    EPECAP(0:EFD_D_MFRG,ECP_D_CAP,ECP_D_XPH)        ! Existing Generation Capacity by Year (excludes epgcap) - All Capacity
       REAL*4    EPECAP_MR(0:EFD_D_MFRG,ECP_D_CAP,ECP_D_XPH)     ! Existing Generation Capacity by Year (excludes epgcap) - Must Run Only
+      REAL*4    EPECAP_UPV(0:EFD_D_MFRG,ECP_D_CAP,ECP_D_XPH)    ! Existing Generation Capacity by Year (excludes epgcap) - UPV
       REAL*4    EPGCAP(0:EFD_D_MFRG,ECP_D_RET,ECP_D_CAP)        ! Existing Generation Capacity by Retirement Group
       REAL*4    EP_SP_CAP_FAC(ECP_D_MSP,ECP_D_CAP,ECP_D_XPH)    ! Ratio of Average Seasonal Capacity to Summer Capacity
       REAL*4    EPGFOM(ECP_D_RET,ECP_D_CAP)                   ! Fixed O&M by Retirement Group
@@ -130,6 +131,7 @@
       REAL*4    EPUNIT(ECP_D_CAP,ECP_D_XPH)                   ! Number of Units in Plant Category
       REAL*4    EPECFC(ECP_D_CAP,ECP_D_XPH)                   ! Avg. Capacity Factor for Existing Plants
       REAL*4    EPESCFC(ECP_D_MSP,ECP_D_CAP,ECP_D_XPH)          ! Avg. Seasonal Capacity Factor for Existing Plants
+      REAL*4    EPECFC_UPV(ECP_D_CAP,ECP_D_XPH)                   ! Avg. Capacity Factor for Existing UPV Plants
 !
 !     DISPATCHABLE CAPACITY
 !
@@ -163,6 +165,7 @@
       REAL*4    EPIACF(ECP_D_INT)                ! AVERAGE CAPACITY FACTOR
       REAL*4    EPICFC(ECP_D_INT,ECP_D_VLS)        ! Maximum Capacity Factor by load slice
       REAL*4    UPICFC(0:MX_STO_INC,ECP_D_INT,ECP_D_STP,ECP_D_SSZ)        ! Maximum Capacity Factor by Load Group and Load Segment
+      REAL*4    UPICFC_DPV(0:MX_STO_INC,ECP_D_INT,ECP_D_STP,ECP_D_SSZ)        ! Maximum Capacity Factor by Load Group and Load Segment for DPV capacity
       REAL*4    EPISCF(ECP_D_INT,ECP_D_MSP)        ! AVERAGE CAPACITY FACTOR by season
       REAL*4    EPIGCF(ECP_D_INT,ECP_D_STP)        ! AVERAGE CAPACITY FACTOR by load group
 !

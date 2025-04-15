@@ -1,0 +1,806 @@
+## ams_version=1.0
+
+Section S5_Optimization {
+	DeclarationSection Infeasibility_Checking {
+		Parameter TotalSeasonalCapacity {
+			IndexDomain: (regCen,seas,pp);
+		}
+		Parameter SeasonalExistingPEMCapacity {
+			IndexDomain: (regNERC,seas,pp);
+		}
+		Parameter NetDemand {
+			IndexDomain: (seas,lpd,pp);
+		}
+		Parameter CapacityDiscrepancy {
+			IndexDomain: (lpd,seas,pp);
+			Comment: "Discrepancy that arises from not enough capacity to meet demand.";
+		}
+		Parameter CapacityMinusDemand {
+			IndexDomain: (regCen,seas,pp);
+		}
+		Parameter SeasonalExistingSMRCapacity {
+			IndexDomain: (regCen,seas,pp);
+		}
+		Parameter DemandDiscrepancy {
+			IndexDomain: (seas,lpd,pp);
+			Comment: "Discrepancy that arises from too much byproduct supply. Prevents the model from going infeasible if byproduct supply happens to be higher than demand in a census divion.";
+		}
+		Parameter DemandMinusByproduct {
+			IndexDomain: (seas,lpd,pp);
+		}
+	}
+	DeclarationSection LP_Error_Handling {
+		StringParameter LPErrorString;
+	}
+	DeclarationSection LP_Structure {
+		Parameter NonElectrolyzerRegionalDomainRestriction {
+			IndexDomain: (regCen,capYear,pp);
+			Range: binary;
+		}
+		Parameter ElectrolyzerRegionalDomainRestriction {
+			IndexDomain: (regNERC,capyear,pp);
+			Range: binary;
+		}
+		MathematicalProgram solveHMM {
+			Objective: TotalCost;
+			Direction: minimize;
+			Constraints: OptimizationConstraints_;
+			Variables: OptimizationVariables_;
+			Type: Automatic;
+		}
+		Set OptimizationVariables_ {
+			SubsetOf: AllVariables;
+			Definition: {
+				AllVariables *
+				(Optimization_Variables)
+			}
+		}
+		Set OptimizationConstraints_ {
+			SubsetOf: AllConstraints;
+			Definition: {
+				AllConstraints *
+				(Optimization_Constraints)
+			}
+		}
+	}
+	Section LP_Parameters {
+		DeclarationSection Demand_LP_Parameters {
+			Parameter H2Demand {
+				IndexDomain: (seas,regCen,pp);
+			}
+		}
+		DeclarationSection General_LP_Parameters {
+			Parameter SlackPriceDemand {
+				IndexDomain: (seas,lpd,pp);
+				Definition: {
+					((sum(fuel, FuelCost(seas, lpd, fuel, pp) * (FeedstockConsumption(SMRTEch, fuel) + HPConsumption(SMRTEch, fuel))))
+					! Non-Electrolyzer O&M Costs
+					+ FixedOMCostNonElectrolyzer(seas, lpd, SMRTEch, pp) + VarOMCostNonElectrolyzer(seas, lpd, SMRTEch, pp)) * 1.5;
+				}
+			}
+			Parameter SlackPrice {
+				IndexDomain: (seas, lps, pp);
+				Definition: {
+					((sum(fuel, FuelCost(seas, lps, fuel, pp) * (FeedstockConsumption(SMRTEch, fuel) + HPConsumption(SMRTEch, fuel))))
+					! Non-Electrolyzer O&M Costs
+					+ FixedOMCostNonElectrolyzer(seas, lps, SMRTEch, pp) + VarOMCostNonElectrolyzer(seas, lps, SMRTEch, pp)) * 20;
+				}
+				Comment: "Slack cost equals twice the SMR supply price.";
+			}
+			Parameter CapacityReserveRatio {
+				Comment: {
+					"Additional capacity to have as reserve. A reserve ratio of 1.1 means capacity would be around 10% more than demand, making the model keep things at around 90% utilization of total capacity. This is also the parameter HMM uses
+					to solve for \"extra\" demand in the 2nd Planning Period so that capacity is built above and beyond demand."
+				}
+			}
+			Parameter ByproductSupply {
+				IndexDomain: (regCen,seas,pp);
+			}
+			Parameter LoadRatioLimit {
+				IndexDomain: (hr,seas,regNERC);
+			}
+			Parameter ProductionStepCostMultiplier {
+				IndexDomain: prodStep;
+			}
+		}
+		DeclarationSection NonElectrolysis_LP_Parameters {
+			Parameter CO2PriceNoCreditByYear {
+				IndexDomain: (regCen,year);
+			}
+			Parameter VarOMCostNonElectrolyzer {
+				IndexDomain: (seas,regCen,prodTech,pp);
+				Comment: "Non-electrolyzer variable costs by planning period (1987$/million metric ton)";
+			}
+			Parameter ExistingCapacityNonElectrolyzer {
+				IndexDomain: (regCen,prodTech_nonElec,pp,capYear);
+				Comment: "Existing capacity for non-electrolyzers by planning period (million metric tons)";
+			}
+			Parameter PUCCostNonElectrolyzer {
+				IndexDomain: (regCen,prodTech,pp);
+				Comment: "Unplanned capacity expansion costs for non-electrolyzer by planning period. (NPV adjusted). (1987$ / million metric ton H2)";
+			}
+			Parameter CO2Price {
+				IndexDomain: (regCen,pp);
+			}
+			Parameter CO2CaptureRate {
+				IndexDomain: prodTech;
+				Comment: "Number of kg of CO2 captured per million metric ton of H2.";
+			}
+			Parameter TaxCredit45Q {
+				IndexDomain: (regCen,prodTech,pp,capYear);
+			}
+			Parameter FixedOMCostNonElectrolyzer {
+				IndexDomain: (seas,regCen,prodTech,pp);
+				Comment: "Non-electrolyzer OM costs by planning period (1987$/million metric ton)";
+			}
+			Parameter FuelCost {
+				IndexDomain: (seas,regCen,fuel,pp);
+				Comment: "Annual fuel costs ($/MMBtu)";
+			}
+			Parameter FeedstockConsumption {
+				IndexDomain: (prodTech,fuel);
+				Comment: "MMBtus of feedstock consumption consumed to produce one million metric ton of H2.";
+			}
+			Parameter HPConsumption {
+				IndexDomain: (prodTech, fuel);
+				Comment: "MMBTUs of Heat and Power consumpion needed to produce one million metric ton of H2.";
+			}
+		}
+		DeclarationSection Electrolysis_LP_Parameters {
+			Parameter HourlyFuelCostCredit {
+				IndexDomain: (regNERC,seas,hr,fuel,creditStep,pp);
+			}
+			Parameter Credit45VSteps;
+			Parameter VarOMCostElectrolyzer {
+				IndexDomain: (seas,regNERC,prodTech,pp);
+				Comment: "Variable OM Costs for electrolyzers by planning period (1987$/million metric ton)";
+			}
+			Parameter TotalElectricityGen {
+				IndexDomain: (hr,seas,regNERC,pp);
+			}
+			Parameter PUCCostElectrolyzer {
+				IndexDomain: (regNERC,prodTech,pp);
+				Comment: "Unplanned capacity expansion costs for electrolyzer by planning period. (NPV adjusted). (1987$ / million metric ton H2)";
+			}
+			Parameter ExistingCapacityElectrolyzer {
+				IndexDomain: (regNERC,prodTech,pp,capYear);
+			}
+			Parameter TaxCredit45V {
+				IndexDomain: (pp,capYear, creditStep);
+				Comment: "45V Tax Credit in model (1987$ / million metric tons of H2)";
+			}
+			Parameter FixedOMCostElectrolyzer {
+				IndexDomain: (seas,regNERC,prodTech,pp);
+				Comment: "Fixed OM Costs for electrolyzers by planning period (1987$ / million metric ton)";
+			}
+			Parameter HourlyFuelCost {
+				IndexDomain: (regNERC,seas,hr,fuel,pp);
+				Comment: "Hourly fuel costs by planning period (1987$/MMBtu)";
+			}
+			Parameter ElectrolyzerFuelConsumption {
+				IndexDomain: (prodTech,fuel);
+				Comment: "MMBTUs consumed per million metric ton of H2 production.";
+			}
+		}
+		DeclarationSection Storage_LP_Parameters {
+			Parameter ExistingStorageCapacity {
+				IndexDomain: (lpstorage,storageTech,pp);
+				Comment: "Existing working hydrogen storage capacity (million metric tons H2). This includes historical capacity, unplanned capacity builds, and planned caapacity builds. NOTE: By \"existing\" I mean from the model\'s perspective, not necessarily how much capacity exists historically.";
+			}
+			Parameter StorageElecConsRate {
+				Comment: "The amount of electricity (in MMBTU) needed for compression for a kg of H2. (MMBtu/kg H2)";
+			}
+			Parameter StorageStepCostMultiplier {
+				IndexDomain: storStep;
+			}
+			Parameter SUCCost {
+				IndexDomain: (regCen, storagetech, pp);
+				Comment: "Unplanned storage capacity expansion costs by planning period (1987$/million metric ton)";
+			}
+			Parameter StorageInjCost {
+				IndexDomain: (regCen, storageTech,pp);
+				Comment: "Storage injection costs by planning period (1987$/million metric tons H2)";
+			}
+			Parameter StorageWthCost {
+				IndexDomain: (regCen, storageTech, pp);
+				Comment: "Storage withdrawal costs by planning period (1987$/million metric tons H2)";
+			}
+		}
+		DeclarationSection Transportation_LP_Parameters {
+			Parameter InterTransCost {
+				IndexDomain: (regCen,regCen_j,pp);
+			}
+			Parameter IntraTransCost {
+				IndexDomain: (lps, lph,prodTech,pp);
+			}
+			Parameter TUCCost {
+				IndexDomain: (regCen,regCen_j,pp);
+				Comment: "Unplanned transportation capacity costs by planning period. (1987$/million metric tons H2)";
+			}
+			Parameter ExistingTransportationCapacity {
+				IndexDomain: (regCen,regCen_j,pp);
+			}
+			Parameter TransportationStepCostMultiplier {
+				IndexDomain: tranStep;
+			}
+			Parameter TransportationCost {
+				IndexDomain: (regCen,regCen_j,prodTech, pp);
+			}
+		}
+	}
+	Section Optimization_Variables {
+		DeclarationSection Credit_45V_Variables {
+			Variable ElectricityConsumedIncrementality {
+				IndexDomain: (regNERC,CapYearModE,elecYearmod,hr,seas,pp) | EligibleGeneration45V(regNERC, CapYearModE, elecYearmod, hr, seas, pp) and ElectrolyzerRegionalDomainRestriction(regNERC, CapYearModE, pp);
+				Range: nonnegative;
+				Comment: "Amount of electricity consumed from electricity vintage (elecyear) for each electrolyzer vintage (capYearModE)";
+			}
+		}
+		DeclarationSection Transportation_Variables {
+			Variable FlowHubToHub {
+				IndexDomain: (seas,lph,lph1,pp) | map_regCENarcs(lph, lph1) and CurrentModelYear >= FirstPipelineBuildYear;
+				Range: nonnegative;
+			}
+			Variable TUCByStep {
+				IndexDomain: (tranStep,lph,lph1,SecondThird_pp) | TUCCost(lph, lph1, SecondThird_pp);
+				Range: nonnegative;
+			}
+		}
+		DeclarationSection Production_Variables {
+			Variable PUCByStepElectrolyzer {
+				IndexDomain: {
+					(prodStep,regNERC,prodTech_elec,SecondThird_pp, capYearMod)  | 
+					(if SecondThird_pp = SecondPlanningPeriod then capYearMod = NextModelYear 
+					elseif SecondThird_pp = ThirdPlanningPeriod then (capYearMod = Last(thirdPeriodYears)) endif)
+				}
+				Range: nonnegative;
+			}
+			Variable PUCByStepNonElectrolyzer {
+				IndexDomain: {
+					(prodStep,regCen,prodTech_nonElec,SecondThird_pp, capYearMod)  | (prodTech_nonElec <> 'SMR_CCS_OFF') and
+					(if SecondThird_pp = SecondPlanningPeriod then capYearMod = NextModelYear 
+					elseif SecondThird_pp = ThirdPlanningPeriod then (capYearMod = Last(thirdPeriodYears)) endif)
+				}
+				Range: nonnegative;
+			}
+			Variable H2ProdNonElectrolyzer {
+				IndexDomain: (regCen,seas, prodTech_nonElec,pp,capYearModNE) | NonElectrolyzerRegionalDomainRestriction(regCen, capYearModNE, pp);
+				Range: nonnegative;
+			}
+			Variable H2ProdElectrolyzer {
+				IndexDomain: (regNERC,seas, hr, prodTech_elec,pp,capyearModE, creditStep) | ElectrolyzerRegionalDomainRestriction(regNERC, capyearModE, pp);
+				Range: nonnegative;
+			}
+		}
+		DeclarationSection Storage_Variables {
+			Variable NetStorageToHub {
+				IndexDomain: (seas,lpstorage, lph, storageTech,pp) | map_StorageArcs(lpstorage, lph);
+				Range: free;
+			}
+			Variable SUCByStep {
+				IndexDomain: (storStep,regCen,storageTech,SecondThird_pp) | SUCCost(regCen, storageTech, SecondThird_pp);
+				Range: nonnegative;
+			}
+			Variable FlowHubToStorage {
+				IndexDomain: (seas,lph,lpstorage, storageTech,pp) | map_StorageArcs(lpstorage, lph);
+				Range: nonnegative;
+			}
+			Variable FlowStorageToHub {
+				IndexDomain: (seas,lph,lpstorage,storageTech,pp) | map_StorageArcs(lpstorage, lph);
+				Range: nonnegative;
+			}
+		}
+		DeclarationSection Supply_Variables {
+			Variable FlowHubToDemand {
+				IndexDomain: (seas,lph, lpd,pp) | map_DemandArcs(lpd, lph);
+				Range: nonnegative;
+			}
+			Variable FlowSupplyToHub {
+				IndexDomain: (seas,lps, lph,pp) | map_SupplyArcs(lps, lph);
+				Range: nonnegative;
+			}
+		}
+		DeclarationSection Objective_Function {
+			Variable SlackVar {
+				IndexDomain: (seas, lps, pp) | pp = FirstPlanningPeriod;
+				Range: nonnegative;
+			}
+			Variable TotalCost {
+				Range: free;
+				Definition: {
+					
+					! Electrolyzer Production Costs
+					sum((regNERC, seas, hr, prodTech_elec, pp, capYearModE, creditStep),
+						! Fuel costs for electrolyzer
+						((sum(fuel, HourlyFuelCostCredit(regNERC, seas, hr, fuel, creditStep, pp) * ElectrolyzerFuelConsumption(prodTech_elec, fuel)))
+						! Electrolyzer O&M Costs
+						+ FixedOMCostElectrolyzer(seas, regNERC, prodTech_elec, pp) + VarOMCostElectrolyzer(seas, regNERC, prodTech_elec, pp)
+						! Subtract 45V Tax Credit
+						- TaxCredit45V(pp, capYearModE, creditStep))
+						* H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, creditStep))
+					
+					
+					! Additional cost for utilization.
+					!+ 
+					!sum((regNERC, prodtech_elec, pp, capYearMod),
+					!(sum((hr, seas), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearMod)) /$ 
+					!	(ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, capYearMod) + sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp, capYearMod))) * 4.11-3.96) 
+					!	* sum((hr, seas), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearMod)))
+					
+					
+					! Non-Electrolyzer Production Costs
+					+ sum((regCEN,seas,prodTech_nonElec,pp,capYearModNE),
+						! Fuel costs for non-electrolyzer
+						((sum(fuel, FuelCost(seas, regCen, fuel, pp) * (FeedstockConsumption(prodTech_nonElec, fuel) + HPConsumption(prodTech_nonElec, fuel))))
+						! Non-Electrolyzer O&M Costs
+						+ FixedOMCostNonElectrolyzer(seas, regCen, prodTech_nonElec, pp) + VarOMCostNonElectrolyzer(seas, regCen, prodTech_nonElec, pp)
+						! CO2Price is a cost incurred to a CO2 capturer when positive, and a net income to the capturer when negative. The TaxCredit45Q is then added on top 
+						! (where a negative TaxCredit45Q means revenue to the CO2 capturer)
+						+ ((CO2CaptureRate(prodTech_nonElec)/kg_to_tons) * (CO2Price(regCen, pp) + TaxCredit45Q(regCen, prodtech_nonelec, pp, capYearModNE)))
+						) * H2ProdNonElectrolyzer(regCen,seas, prodTech_nonElec, pp, capYearModNE)
+						)
+					! Electrolyzer Capacity Expansion
+					+ sum((prodStep, regNERC, prodTech_elec, SecondThird_pp,capYearModE), 
+						((PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, SecondThird_pp, capYearModE) * PUCCostElectrolyzer(regNERC, prodTech_elec, SecondThird_pp)))
+						* ProductionStepCostMultiplier(prodStep))
+					
+					!@TODO, adjust index domain so that CCS_OFF is not built during capacity expansion decisions.
+					!@TODO adjust Unplanned capacity variables so that in the third period they sum, and take into account capacity build in the second period.
+					! Non-Electrolyzer Capacity Expansion
+					+ sum((prodStep, regCEN, prodTech_nonElec, SecondThird_pp, capYearModNE),
+						((PUCByStepNonElectrolyzer(prodStep, regCEN, prodTech_nonElec, SecondThird_pp, capYearModNE) * PUCCostNonElectrolyzer(regCen, prodTech_nonElec, SecondThird_pp))
+						* ProductionStepCostMultiplier(prodStep)))	
+					
+					! Storage Transfer Costs
+					+ sum((seas, lpstorage, lph, pp, storageTech) | map_StorageArcs(lpstorage, lph),
+						FlowHubToStorage(seas, lph, lpstorage, storageTech, pp) * (FuelCost(seas, lpstorage, FuelElec, pp) * StorageElecConsRate) 
+						+ FlowStorageToHub(seas, lpstorage, lph, storageTech, pp) * StorageWthCost(lpstorage, storageTech,pp)
+						)
+					
+					! Unplanned Storage Capacity costs
+					+ sum((storStep, lpstorage, SecondThird_pp, storageTech),
+						((SUCByStep(storStep, lpstorage, storageTech, SecondThird_pp) * SUCCost(lpstorage, StorageTech, SecondThird_pp))
+						 * StorageStepCostMultiplier(storStep))
+						 )
+					
+					!!! Transportation Costs
+					! Inter-regional transportation costs
+					+ sum((seas, lph, lph1, pp),
+						FlowHubToHub(seas, lph, lph1, pp) * (pipe_energy_intensity(lph, lph1) * FuelCost(seas, lph, FuelElec, pp))
+						)
+					! Add Slack costs
+					 + sum((seas, lps, pp), SlackVar(seas, lps, FirstPlanningPeriod) * SlackPrice(seas, lps, FirstPlanningPeriod))
+					! Unplanned Transportation Capacity Costs
+					+sum((TranStep, lph, lph1, SecondThird_pp),
+						((TUCByStep(tranStep, lph, lph1, SecondThird_pp) * TUCCost(lph, lph1, SecondThird_pp))
+						* TransportationStepCostMultiplier(tranStep)))
+						;
+				}
+			}
+		}
+	}
+	Section Optimization_Constraints {
+		DeclarationSection Credit_45V_Constraints {
+			Constraint IncSumTotalElecYear {
+				IndexDomain: (regNERC,CapYearModE,seas,hr,pp) | exists(elecYearmod, IncrementalityEligibility(elecYearmod, CapYearModE));
+				Definition: sum(elecYearmod, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecYearmod, hr, seas, pp)) <= sum(elecYearmod, EligibleGeneration45V(regNERC, CapYearModE, elecYearmod, hr, seas, pp));
+				Comment: "For each capacity vintage, the sum of the electricity used by the electrolyzer capacity vintage has to be less than or equal to the total electircity the capacity vintage is eligible for.";
+			}
+			Constraint IncSumCapYear {
+				IndexDomain: (regNERC,elecYearmod,seas,hr,pp) | exists(capyearmode, IncrementalityEligibility(elecYearmod, CapYearModE));
+				Definition: sum(CapYearModE, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecYearmod, hr, seas, pp)) <= sum(CapYearModE, EligibleGeneration45V(regNERC, CapYearModE, elecYearmod, hr, seas, pp));
+				Comment: "For each electricity vintage, the sum of the electricity used by all of the electrolyzer capacity vintages must be less than the eligible generation for that electricity vintage.";
+			}
+			Constraint ElectricityConsumption {
+				IndexDomain: (regNERC,CapYearModE,hr,seas,pp);
+				Definition: sum(elecYearmod, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecYearmod, hr, seas, pp)) = sum((prodTech_elec), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, '45V') * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec));
+			}
+			Constraint Curtailment {
+				IndexDomain: (regNERC, seas, hr, pp);
+				Definition: {
+					sum((prodTech_elec, capYearModE,CreditStepCurtail), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, CreditStepCurtail) * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) 
+						<= ElecCurtailed(regNERC, seas, hr, pp)
+				}
+			}
+		}
+		DeclarationSection Node_Constraints {
+			Constraint HubBalance {
+				IndexDomain: (seas, lph, pp);
+				Property: ShadowPrice;
+				Definition: {
+					! Inflows to hub
+					sum((storageTech, lpstorage) | map_StorageArcs(lpstorage, lph) , FlowStorageToHub(seas, lpstorage, lph, storageTech, pp)) +
+					sum((lps) | map_SupplyArcs(lps, lph) , FlowSupplyToHub(seas, lps, lph, pp)) +
+					sum(lph1 | map_regCENarcs(lph1, lph), FlowHubToHub(seas, lph1, lph, pp))
+					 =
+					 ! Outflows from hub
+					sum(lpd | map_DemandArcs(lpd, lph),  FlowHubToDemand(seas, lpd, lph, pp)) +
+					sum((storageTech, lpstorage) | map_StorageArcs(lpstorage, lph) , FlowHubToStorage(seas, lpstorage, lph, storageTech, pp)) +
+					sum(lph2 | map_regCENarcs(lph, lph2), FlowHubToHub(seas, lph, lph2, pp))
+					;
+				}
+				Comment: "Quantity of flows into a hub (h) must equal all flows out of a hub.";
+			}
+			Constraint SupplyMassBalance {
+				IndexDomain: (seas,lps,pp);
+				Definition: {
+					! TODO: Again, check if regCEN_j is being handled correctly.
+					sum(lph | map_SupplyArcs(lps, lph),  FlowSupplyToHub(seas, lps, lph, pp)) =
+					! Electrolyzer hyrogen supply 
+					sum(regCEN | map_supply(regCen, lps),
+					(sum(regNERC, 
+						sum((hr, capYearModE, creditStep, prodtech_elec), H2ProdElectrolyzer(regNERC, seas, hr, prodtech_elec, pp, capYearModE, creditStep ) * map_regNERCToRegCEN(regNERC, regCen))))
+					! Non-electrolyzer hydrogen supply	
+					+ sum((capYearModNE, prodTech_nonElec), H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, pp, capYearModNE)))
+					
+					+ SlackVar(seas, lps, FirstPlanningPeriod)
+					
+					;
+				}
+				Comment: "Total amount of supply going to hub must be equal to the sum of volume produced by electrolyzers, non-electrolyzers, and from storage.";
+			}
+			Constraint DemandMassBalance {
+				IndexDomain: (seas,lpd,pp);
+				Definition: H2Demand(seas, lpd, pp) - ByproductSupply(lpd, seas, pp) - DemandDiscrepancy(seas, lpd, pp) + CapacityDiscrepancy(lpd, seas, FirstPlanningPeriod) = sum(lph | map_DemandArcs(lpd, lph), FlowHubToDemand(seas, lpd, lph, pp));
+				Comment: "For all demand nodes, the flow from the hub to the demand region must equal demand for that region.";
+			}
+		}
+		DeclarationSection Transportation_Constraints {
+			Constraint MaxTransportation {
+				IndexDomain: (seas, lph, lph1, pp);
+				Definition: {
+					FlowHubToHub(seas, lph, lph1, pp) <= 
+					(ExistingTransportationCapacity(lph, lph1, pp) + sum(pp_j | pp_j <= pp, sum(TranStep, TUCByStep(tranStep, lph, lph1, pp_j))) * SeasonalFraction(seas))
+				}
+				Comment: "Maximum transportation flows must be less than or equal to the transportation capacity between those regions.";
+			}
+		}
+		DeclarationSection Storage_Constraints {
+			Constraint MaxStorageInj {
+				IndexDomain: (seas, lpstorage,storageTech, pp);
+				Definition: {
+					sum(lph | map_StorageArcs(lpstorage, lph), FlowHubToStorage(seas, lpstorage, lph,storageTech, pp)) <= 
+					ExistingStorageCapacity(lpstorage, storageTech, pp) + sum(pp_j | pp_j <= pp, sum(StorStep, SUCByStep(storStep, lpstorage, storageTech, pp_j)))
+				}
+			}
+			Constraint MaxStorageWth {
+				IndexDomain: (seas, lpstorage,storageTech, pp);
+				Definition: {
+					sum(lph | map_StorageArcs(lpstorage, lph),  FlowStorageToHub(seas, lpstorage, lph, storageTech, pp)) <= 
+					ExistingStorageCapacity(lpstorage, storageTech, pp) + sum(pp_j | pp_j <= pp, sum(StorStep, SUCByStep(storStep, lpstorage, storageTech, pp_j)));
+				}
+			}
+			Constraint StorageMassBalance {
+				IndexDomain: (seas,lpstorage,storageTech,pp);
+				Definition: {
+					sum(lph | map_StorageArcs(lpstorage, lph), FlowStorageToHub(seas, lpstorage, lph, storageTech, pp)
+					 -  FlowHubToStorage(seas, lpstorage, lph, storageTech, pp)) = 
+					sum(lph | map_StorageArcs(lpstorage, lph), NetStorageToHub(seas, lpstorage, lph, storageTech, pp))
+				}
+				Comment: {
+					"Total amount of storage flowing to Census Region hub is the difference between the amount of hydrogen withdrawn from storage and the amount of hydrogen injected. 
+					When NetStorageToHub is positive, there is net storage withdrawal, and if NetStorageToHub is negative, there is a net storage injection."
+				}
+			}
+			Constraint SeasonalStorageBalance {
+				IndexDomain: (lpstorage,storageTech, pp);
+				Definition: {
+					sum((seas,lph) | map_StorageArcs(lpstorage, lph), FlowHubToStorage(seas, lpstorage, lph, storageTech, pp)) =
+					sum((seas, lph) | map_StorageArcs(lpstorage, lph) , FlowStorageToHub(seas, lpstorage, lph, storageTech, pp))
+				}
+				Comment: "The total quantity of hydrogen that gets injected to storage must be withdrawn from storage in that planning period.";
+			}
+			Constraint CumulativeStorageInjection {
+				IndexDomain: (seas, lpstorage,storageTech,pp);
+				Definition: {
+					sum(lph | map_StorageArcs(lpstorage, lph),
+					sum(seas_j | seas_j < seas, -NetStorageToHub(seas_j, lpstorage, lph, storageTech, pp))) <= 
+					ExistingStorageCapacity(lpstorage, storageTech, pp) + sum(pp_j | pp_j <= pp, sum(storStep, SUCByStep(storStep, lpstorage, storageTech, pp_j)))
+					;
+				}
+				Comment: {
+					"The cumulative net injections into storage through a given season must be less than or equal to planned plus existing storage capacity. 
+					This constraint ensures that consecutive storage injections do not result in total hydrogen in storage exceeding capacity."
+				}
+			}
+			Constraint StorageWithdrawalAvailability {
+				IndexDomain: (seas,lpstorage,storageTech,pp);
+				Definition: {
+					sum(lph | map_StorageArcs(lpstorage, lph), FlowStorageToHub(seas, lpstorage, lph, storageTech, pp)) <= 
+					sum(lph | map_StorageArcs(lpstorage, lph),sum(seas_j | seas_j < seas, 
+						(FlowStorageToHub(seas, lpstorage, lph, storageTech, pp) - FlowHubToStorage(seas, lpstorage, lph, storageTech, pp)) ))
+					;
+				}
+				Comment: "The quantity of hydrogen withdrawn from storage in a season (seas) must be available in that season from prior seasonal (seasj) injections.";
+			}
+		}
+		DeclarationSection Production_Constraints {
+			Constraint MaxNonElectrolyzerProduction {
+				IndexDomain: (regCen, seas, prodTech_nonElec, pp, capYearModNE);
+				Definition: {
+					H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, pp, capYearModNE) <= 
+					(ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capYearModNE | capYearModNE <= CurrentModelYear)
+					 + sum(pp_j | pp_j <= pp, sum(prodStep, PUCByStepNonElectrolyzer(prodStep, regCen, prodTech_nonElec, pp_j, capYearModNE)))) * SeasonalFraction(seas)
+					 ! NOTE: the pp_j | pp_j <= p is needed so that planning period 3 is aware of the capacity that was built in planning period 2. That way, the capacity is not built twice.
+				}
+				Comment: "Maximum amount of hydrogen production from non-electrolyzers must be less than existing plus planned non-electrolyzer capacity for a given season.";
+			}
+			Constraint MaxElectrolyzerProduction {
+				IndexDomain: (regNERC, seas, hr, prodTech_elec, pp, CapYearModE);
+				Definition: {
+					sum(creditStep, H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, CapYearModE, creditStep)) <= 
+					( ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, CapYearModE | CapYearModE <= CurrentModelYear) 
+					+ sum(pp_j | pp_j <= pp, sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp_j, CapYearModE)))) 
+					* SeasonalFraction(seas) * HourlyFraction(hr)
+					;
+				}
+				Comment: "Maximum amount of hydrogen production from electrolysis must be less than existing plus planned electrolyzer capacity for a given hour.";
+			}
+			Constraint ElectrolyzerLoadLimit {
+				IndexDomain: (regNERC,hr,seas,pp) | MaxElectrolyzerLoad(regNERC, hr, seas, pp);
+				Definition: sum((prodTech_elec, CapYearModE, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, CapYearModE, creditStep)  * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) <= MaxElectrolyzerLoad(regNERC, hr, seas, pp);
+				Comment: "Constarint to limit the amount of load electrolzers can draw from EMM in a given hour";
+			}
+		}
+		DeclarationSection Supply_Constraints;
+		DeclarationSection Demand_Constraints;
+	}
+	Section Unused_Variables {
+		DeclarationSection Unused_Slack_Variables {
+			Variable DemandSlack {
+				IndexDomain: (seas,lpd,pp) | pp = FirstPlanningPeriod;
+				Range: nonnegative;
+			}
+		}
+		DeclarationSection Unused_45V_variables {
+			Constraint Copy_Curtailment {
+				IndexDomain: (regNERC, seas, hr, pp);
+				Definition: {
+					sum((prodTech_elec, capYearModE), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, '45VCurtail') * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) 
+						<= ElecCurtailed(regNERC, seas, hr, pp)
+				}
+			}
+		}
+		DeclarationSection Unused_Production_Variables {
+			Variable SupplyToHub {
+				IndexDomain: (seas,regCen,regCen_j,prodTech,pp) | map_regCENarcs(regCen, regCen_j);
+				Range: nonnegative;
+			}
+			Variable ElectrolyzerUtilization {
+				IndexDomain: (regNERC, prodtech_elec, pp, capYearMod);
+				Range: nonnegative;
+				Definition: {
+					sum((hr, seas, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearMod, creditStep)) / 
+						(ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, capYearMod) + sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp, capYearMod)))
+				}
+			}
+			Parameter Apply45VCredit {
+				IndexDomain: (regNERC,seas,hr,pp,capYearMod);
+				Range: binary;
+				Definition: {
+					1;
+				}
+			}
+		}
+	}
+	Section Unused_Constraints {
+		DeclarationSection MaxElectrolyzerLoadConstraint {
+			Constraint CapacityStepConstraint {
+				IndexDomain: (prodStep, secondThird_pp, prodTech_elec);
+				Definition: {
+					sum((regNERC, CapYearModE), PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, SecondThird_pp, CapYearModE)) <= CapacityBuildLimitElectrolyzer(prodStep);
+				}
+			}
+		}
+		DeclarationSection Temp_unusued {
+			Constraint Copy_Copy1_IncrementalityGenerationVintage {
+				IndexDomain: (regNERC, capYearModE, seas, hr, pp);
+				Definition: {
+					sum((prodTech_elec), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, '45V') * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) 
+						<= sum(elecYear, EligibleGeneration45V(regNERC, capYearModE, elecYear, hr, seas, pp));
+				}
+				Comment: "This constraint limits the electricity consumption from 45V-directed electrolyzers to be less than or equal to the sum of the incremental renewable generation available to those electrolyzers.";
+			}
+		}
+		DeclarationSection So_many_attempts {
+			Constraint Inc2 {
+				IndexDomain: (regNERC,CapYearModE,seas,hr,pp);
+				Definition: sum(elecyear, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecYear, hr, seas, pp)) <= sum(elecYear, EligibleGeneration45V(regNERC, CapYearModE, elecYear, hr, seas, pp));
+			}
+			Constraint Inc1 {
+				IndexDomain: (regNERC,elecyear,seas,hr,pp) |  TestMatrix(elecYear, pp);
+				Definition: sum(CapYearModE, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecyear, hr, seas, pp)) <= sum(CapYearModE, EligibleGeneration45V(regNERC, CapYearModE, elecYear, hr, seas, pp));
+			}
+		}
+		DeclarationSection Unusued_45V_that_work_but_are_wrong {
+			Constraint Copy1_IncrementalityGenerationVintage {
+				IndexDomain: (regNERC, capYearModE, seas, hr, pp);
+				Definition: {
+					sum(elecYear, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecYear, hr, seas, pp))	<= sum(elecYear, EligibleGeneration45V(regNERC, capYearModE, elecYear, hr, seas, pp));
+				}
+				Comment: "This constraint limits the electricity consumption from 45V-directed electrolyzers to be less than or equal to the sum of the incremental renewable generation available to those electrolyzers.";
+			}
+		}
+		DeclarationSection Unused_45V_Constraints_and_Variables {
+			Constraint IncrementalityElecVintage {
+				IndexDomain: (regNERC,elecYear,hr,seas,pp);
+				Definition: {
+					sum((prodTech_elec, capYearModE), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, '45V') * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec))  <= TotalIncrementalGenerationByPeriod(regNERC, elecyear, hr, seas, pp);
+				}
+				Comment: {
+					"For each electricity vintage year, the sum of the electricity consumed for each capacity vintage must be less than 
+					the total eligible beneration for that region/peruid."
+				}
+			}
+			Constraint Copy_Copy_IncrementalityElecVintage {
+				IndexDomain: (regNERC,elecyear,hr,seas,pp);
+				Definition: {
+					sum(CapYearModE, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecyear, hr, seas, pp)) <= TotalIncrementalGenerationByPeriod(regNERC, elecyear, hr, seas, pp);
+				}
+				Comment: {
+					"For each electricity vintage year, the sum of the electricity consumed for each capacity vintage must be less than 
+					the total eligible beneration for that region/peruid."
+				}
+			}
+			Constraint Copy_Copy_IncrementalityGenerationVintage {
+				IndexDomain: (regNERC, capYearModE, seas, hr, pp);
+				Definition: {
+					sum(elecyear, ElectricityConsumedIncrementality(regNERC, CapYearModE, elecyear, hr, seas, pp))
+						<=  sum(elecyear, EligibleGeneration45V(regNERC, capYearModE, elecyear, hr, seas, pp));
+				}
+				Comment: "This constraint limits the electricity consumption from 45V-directed electrolyzers to be less than or equal to the sum of the incremental renewable generation available to those electrolyzers.";
+			}
+			Constraint IncrementalityGenerationVintage {
+				IndexDomain: (regNERC, capYearModE, seas, hr, pp);
+				Definition: {
+					sum((prodTech_elec), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, capYearModE, '45V') * ElectrolyzerFuelConsumption(prodTech_elec, FuelElec)) 
+						<=  sum(elecyear, EligibleGeneration45V(regNERC, capYearModE, elecyear, hr, seas, pp));
+				}
+				Comment: "This constraint limits the electricity consumption from 45V-directed electrolyzers to be less than or equal to the sum of the incremental renewable generation available to those electrolyzers.";
+			}
+		}
+		DeclarationSection Unusued_Storage_Constraints;
+		DeclarationSection Unusued_Production_Constraints {
+			Parameter CapacityBuildLimitElectrolyzer {
+				IndexDomain: prodStep;
+			}
+			Constraint LoadRatioConstraint {
+				IndexDomain: (hr,seas,regNERC,pp);
+				Definition: {
+					sum((prodTech,capYear, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech, pp, capYear, creditStep) * ElectrolyzerFuelConsumption(prodTech, FuelElec))
+					/ TotalElectricityGen(hr, seas, regNERC, pp)  <= LoadRatioLimit(hr, seas, regNERC)
+				}
+			}
+			Constraint ElectrolyzerUtilizationConstraint {
+				IndexDomain: (regNERC, prodTech_elec, capYear)  |  sum((hr, seas), ElecCurtailed(regNERC, seas, hr, FirstPlanningPeriod));
+				Definition: {
+					sum((hr, seas, creditStep) | (ElecCurtailed(regNERC, seas, hr, FirstPlanningPeriod) > 0), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep)) /$
+					 ExistingCapacityElectrolyzer(regNERC, prodTech_elec, FirstPlanningPeriod, capYear) >= 0.01
+				}
+			}
+			Constraint UtilizationConstraint {
+				IndexDomain: (regNERC,prodTech_elec, capYear) | ExistingCapacityElectrolyzer(regNERC, prodTech_elec, FirstPlanningPeriod, capYear) > 0;
+				Definition: {
+					if sum((hr, seas, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep)) > 0 then
+						(sum((hr, seas, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep)) /$ ExistingCapacityElectrolyzer(regNERC, prodTech_elec, FirstPlanningPeriod, capYear)) >= 0.01
+					else
+						(sum((hr, seas, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYear, creditStep)) /$ ExistingCapacityElectrolyzer(regNERC, prodTech_elec, FirstPlanningPeriod, capYear)) >= 0.00
+					endif;
+				}
+			}
+			Variable TotalAvailableProductionNonElec {
+				IndexDomain: (seas, regCen, prodTech_nonElec, pp, capYear);
+				Range: free;
+			}
+			Constraint NewBuildCapacityVintage {
+				IndexDomain: (seas, regCen, prodTech_nonElec, pp,capYear);
+				Definition: {
+					TotalAvailableProductionNonElec(seas, regCen, prodTech_nonElec, pp, capYear) = sum(prodStep, PUCByStepNonElectrolyzer(prodStep, regCen, prodTech_nonElec, pp, '2024')) * SeasonalFraction(seas);
+				}
+			}
+		}
+	}
+	Procedure CheckByproductInfeasibility {
+		Body: {
+			
+			empty DemandMinusByproduct;
+			empty CapacityMinusDemand;
+			empty DemandDiscrepancy;
+			empty NetDemand;
+			!empty CapacityDiscrepancy;
+			!empty TotalSeasonalCapacity;
+			!empty SeasonalExistingPEMCapacity;
+			empty CapacityDiscrepancy;
+			
+			DemandMinusByproduct(seas, lpd, pp) := H2Demand(seas, lpd, pp)  - ByproductSupply(lpd, seas, pp);
+			!H2Demand(seas, lpd, pp) | DemandMinusByproduct(seas, lpd, pp) < 0 += (DemandMinusByproduct(seas, lpd, pp) *-1) ;
+			DemandDiscrepancy(seas,lpd,pp) | DemandMinusByproduct(seas, lpd, pp) < 0 := DemandMinusByproduct(seas, lpd, pp);
+			
+			NetDemand(seas, lpd, pp) := H2Demand(seas, lpd, pp) - ByproductSupply(lpd, seas, pp) - DemandDiscrepancy(seas, lpd, pp);
+			
+			!SeasonalExistingSMRCapacity(regCen, seas, pp) := sum((prodtech_nonElec, capyear), ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capyear) | capyear <= FirstModelYear) * SeasonalFraction(seas);
+			!SeasonalExistingPEMCapacity(regNERC, seas, pp) := sum((prodtech_elec,capyear),  ExistingCapacityElectrolyzer(regNERC, prodtech_elec, pp, capyear) | capyear <= FirstModelYear)* SeasonalFraction(seas);
+			!TotalSeasonalCapacity(regCen, seas, pp) := SeasonalExistingSMRCapacity(regCen, seas, pp) + sum(regNERC, SeasonalExistingPEMCapacity(regNERC, seas, pp) * Map_NERCToCEN(regNERC, regCen));
+			
+			if CurrentModelYear = FirstModelYear then
+			! compare against SMR capacity
+			empty CapacityDiscrepancy;
+			
+			SeasonalExistingSMRCapacity(regCen, seas, pp) := sum((prodtech_nonElec, capyear), ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capyear) | capyear <= FirstModelYear) * SeasonalFraction(seas);
+			SeasonalExistingPEMCapacity(regNERC, seas, pp) := sum((prodtech_elec,capyear),  ExistingCapacityElectrolyzer(regNERC, prodtech_elec, pp, capyear) | capyear <= FirstModelYear)* SeasonalFraction(seas);
+			TotalSeasonalCapacity(regCen, seas, pp) := SeasonalExistingSMRCapacity(regCen, seas, pp) + sum(regNERC, SeasonalExistingPEMCapacity(regNERC, seas, pp) * Map_NERCToCEN(regNERC, regCen));
+			
+			!SeasonalExistingSMRCapacity(regCen, seas, pp, FirstModelYear) := sum(prodtech_nonElec, ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, FirstModelYear)) * SeasonalFraction(seas);
+			!SeasonalExistingPEMCapacity(regNERC, seas, pp, FirstModelYear) := sum(prodtech_elec, ExistingCapacityElectrolyzer(regNERC, prodtech_elec, pp, FirstModelYear))* SeasonalFraction(seas);
+			!TotalSeasonalCapacity(regCen, seas, pp, year) := SeasonalExistingSMRCapacity(regCen, seas, pp, FirstModelYear) + SeasonalExistingPEMCapacity(regNERC, seas, pp, year) * Map_NERCToCEN(regNERC, regCen);
+			CapacityMinusDemand(lpd, seas, pp) := TotalSeasonalCapacity(lpd, seas, pp) - NetDemand(seas, lpd, pp);
+			CapacityDiscrepancy(lpd, seas, FirstPlanningPeriod) | CapacityMinusDemand(lpd, seas, FirstPlanningPeriod) < 0  := CapacityMinusDemand(lpd, seas, FirstPlanningPeriod);
+			endif;
+		}
+	}
+	Procedure Optimize {
+		Body: {
+			! ad hoc testing parameters:
+			!empty ExistingTransportationCapacity;
+			!empty H2ProdNonElectrolyzer;
+			!empty PUCByStepNonElectrolyzer;
+			
+			! Set active capacity vintage years for modeling purposes.
+			CapYearModel_ := {capYear | (Exists((regNERC, prodTech_elec, pp) | ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, capYear)))}
+			+ {capYear | (Exists((regCEN, prodTech_nonElec, pp) | ExistingCapacityNonElectrolyzer(regCEN, prodTech_nonElec, pp, capYear)))}
+			+ NextModelYear
+			+ Last(YearsInThirdPlanningPeriod_)
+			;
+			
+			CapYearModelElectrolyzer_ := {capYear | (Exists((regNERC, prodTech_elec, pp) | ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, capYear)))}+ NextModelYear
+			+ Last(YearsInThirdPlanningPeriod_);
+			
+			CapYearModelNonElectrolyzer_ := {capYear | (Exists((regCEN, prodTech_nonElec, pp) | ExistingCapacityNonElectrolyzer(regCEN, prodTech_nonElec, pp, capYear)))} + NextModelYear
+			+ Last(YearsInThirdPlanningPeriod_);
+			
+			ElecYearsMod_ := {elecyear | (Exists((regNERC, prodTech_elec,capYearModE,hr,seas, pp) | EligibleGeneration45V(regNERC, capYearModE, elecYear, hr, seas, pp) ))}+ NextModelYear
+			+ Last(YearsInThirdPlanningPeriod_);
+			
+			!electrolyzerRegional(regNERC, capyear, FirstPlanningPeriod) := [(capYear, regNERC) | Exists((prodTech_elec, pp) | ExistingCapacityElectrolyzer(regNERC, prodTech_elec, FirstPlanningPeriod, capYear))];
+			
+			ElectrolyzerRegionalDomainRestriction(regNERC, capYear, FirstPlanningPeriod) := Exists(prodtech_elec, ExistingCapacityElectrolyzer(regNERC, prodtech_elec, FirstPlanningPeriod, capYear));
+			ElectrolyzerRegionalDomainRestriction(regNERC, capYear, SecondThird_pp) := 1;
+			
+			NonElectrolyzerRegionalDomainRestriction(regCen, capYear, FirstPlanningPeriod) := Exists(prodTech_nonElec, ExistingCapacityNonElectrolyzer(regCEN, prodTech_nonElec, FirstPlanningPeriod, capYear));
+			NonElectrolyzerRegionalDomainRestriction(regCen, capYear, SecondThird_pp) := 1;
+			
+			! Set Capacity Steps
+			PUCByStepNonElectrolyzer.Upper('1', regCen, prodTech_nonElec, SecondThird_pp, capYearMod) := 1000000000 / kg_to_mMton;
+			PUCByStepNonElectrolyzer.Upper('2', regCen, prodTech_nonElec, SecondThird_pp, capYearMod) := 2000000000 / kg_to_mMton;
+			PUCByStepNonElectrolyzer.Upper('3', regCen, prodTech_nonElec, SecondThird_pp, capYearMod) := 3000000000 / kg_to_mMton;
+			
+			PUCByStepElectrolyzer.Upper('1', regNERC, prodTech_elec, SecondThird_pp, capYearMod) := .075;
+			PUCByStepElectrolyzer.Upper('2', regNERC, prodTech_elec, SecondThird_pp, capYearMod) := .2;
+			PUCByStepElectrolyzer.Upper('3', regNERC, prodTech_elec, SecondThird_pp, capYearMod) := .4;
+			
+			CapacityBuildLimitElectrolyzer(prodStep) := DATA {'1' : 0.5, '2' : 1, '3' : 1.5};
+			
+			CheckByproductInfeasibility;
+			
+			Process_EMM45V;
+			Process_Electrolyzer_Limits;
+			
+			!TUCCost(regCen, regCen_j, pp) := 9999;
+			option 
+				"CPLEX 22.1".LP_method := "Barrier";
+			solve solveHMM;
+			LPStatusNotOptimal;
+		}
+	}
+	Procedure LPStatusNotOptimal {
+		Body: {
+			!Display error message when LP is not optimal during standalone execution
+			LPErrorString := FormatString("Mathematical program is not optimal in year %e", CurrentModelYear);
+			if (SolveHMM.ProgramStatus <> 'Optimal') then
+			write LPErrorString to file HMMLogFile in merge mode;
+			SaveAll( FormatString("HMMNotOptimalCycle_%i_%e_%i",CYCLEINFO_CURIRUN(1), CurrentModelYear,ncntrl_curitr(1)));
+			halt with LPErrorString;
+			endif;
+		}
+	}
+}

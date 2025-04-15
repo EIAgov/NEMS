@@ -1,0 +1,14 @@
+region,gas_type,ipr,b,dr,tech,new_prod_scalar
+Alberta,Solution,0.0,0.001,0.1,0.01,0
+Alberta,Non Associated,0.0046389,0.001,0.7,0.005,0
+Alberta,Tight,0.0037067,0.2,0.5,0.01,0
+Alberta,Shale,0.0033317,0.4,0.6,0.01,0
+Alberta,Coalbed Methane,0.0082,0.001,0.6,0.01,0
+British Columbia,Solution,0.0,0.25,1.0,0.01,0
+British Columbia,Non Associated,0.001,0.001,0.5,0.005,0
+British Columbia,Tight,0.00225,1.0,0.25,0.01,0
+British Columbia,Shale,0.0001,0.6,0.6,0.01,0
+British Columbia,Coalbed Methane,0.0,0.0,0.0,0.01,0
+Saskatchewan,Solution,0.0,0.0,0.5,0.01,0
+Saskatchewan,Non Associated,0.001,0.02,0.5,0.005,0
+Saskatchewan,Tight,0.0,0.0,0.0,0.01,0

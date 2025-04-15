@@ -1,5 +1,5 @@
 !FILE NAME:      COMPARM
-!DATE MODIFIED:  November 30, 2022
+!DATE MODIFIED:  November 5, 2024
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
 !                  Commercial Demand Module (CDM)
 !                  Industrial Demand Module (IDM)
@@ -29,15 +29,15 @@ PARAMETER (CMnumMinFl=5)          ! Number of commercial minor fuels
 PARAMETER (CMnumAllFl=8)          ! Number of (non-renewable) commercial fuels
 PARAMETER (CMnumServ=10)          ! Number of commercial end-use services
 PARAMETER (CMnumBldg=11)          ! Number of commercial building types
-PARAMETER (CMnumTechs=60)         ! Number of commercial technologies
+PARAMETER (CMnumTechs=62)         ! Number of commercial technologies
 PARAMETER (CMnumVintage=10)       ! Number of commercial building vintages
 PARAMETER (CMDecision=3)          ! Number of commercial decision types
-PARAMETER (CMnumEqVint=52)        ! Number of commercial equipment vintages
+PARAMETER (CMnumEqVint=44)        ! Number of commercial equipment vintages
 
-PARAMETER (KTMAX=5420)            ! Maximum number of data rows in KTEK
+PARAMETER (KTMAX=5900)            ! Maximum number of data rows in KTEK
 
 INTEGER*4 CMOldestBldgVint
-PARAMETER (CMOldestBldgVint = 1831)
+PARAMETER (CMOldestBldgVint = 1824)
 
 REAL*4 EndUseConsump(CMnumMajFl,CMnumServ,CMnumBldg,MNUMCR,MNUMYR)
 

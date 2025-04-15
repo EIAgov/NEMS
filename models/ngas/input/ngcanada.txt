@@ -1,4 +1,4 @@
-! $Header: m:/default/input/RCS/ngcanada.txt,v 1.6 2020/08/03 20:16:42 KDL Exp $
+﻿! $Header: m:/default/input/RCS/ngcanada.txt,v 1.6 2020/08/03 20:16:42 KDL Exp $
 !
 !
 ! 8/14/18 KDL	Final update; all Canada data has been updated through 2017
@@ -346,82 +346,106 @@ HistoricalDemand := data table
 (October, 2015, Residential)           14.408    16.082
 (November, 2015, Residential)          28.801    32.406
 (December, 2015, Residential)          41.763    40.871
-(January, 2016, Residential)	       55.703	 42.753
-(February, 2016, Residential)	       51.208	 32.988
-(March, 2016, Residential)	       45.085	 26.466
-(April, 2016, Residential)	       32.793	 18.238
-(May, 2016, Residential)	       19.929	  9.746
-(June, 2016, Residential)	       10.354	  6.549
-(July, 2016, Residential)	        7.810	  6.591
-(August, 2016, Residential)	        7.400	  5.632
-(September, 2016, Residential)      	7.501     8.023
-(October, 2016, Residential)	       12.731	 17.204
-(November, 2016, Residential)	       25.676	 25.153
-(December, 2016, Residential)	       42.908	 41.465
-(January, 2017, Residential)	       55.383	 47.528
-(February, 2017, Residential)	       48.321	 37.873
-(March, 2017, Residential)	       48.733	 34.930
-(April, 2017, Residential)	       32.460	 23.637
-(May, 2017, Residential)	       21.522	 14.863
-(June, 2017, Residential)	       11.430	  8.227
-(July, 2017, Residential)	        8.221	  6.333
-(August, 2017, Residential)	        7.714	  5.601
-(September, 2017, Residential)	        9.112	  7.654
-(October, 2017, Residential)	       12.735	 16.891
-(November, 2017, Residential)	       26.405	 31.602
-(December, 2017, Residential)	       49.599	 43.048
-(January, 2018, Residential)	       67.748	 45.423
-(February, 2018, Residential)	       58.407	 44.245
-(March, 2018, Residential)	       56.062	 37.619
-(April, 2018, Residential)	       42.029	 28.679
-(May, 2018, Residential)	       24.222	 11.181
-(June, 2018, Residential)	       13.149	  7.615
-(July, 2018, Residential)	        9.123	  6.533
-(August, 2018, Residential)	        9.046	  6.069
-(September, 2018, Residential)	       10.054	 10.660
-(October, 2018, Residential)	       14.899	 20.503
-(November, 2018, Residential)	       31.868	 28.744
-(December, 2018, Residential)	       53.042	 36.154
-(January, 2019, Residential)	       63.272	 42.228
-(February, 2019, Residential)	       47.611	 50.505
-(March, 2019, Residential)	       45.811	 39.057
-(April, 2019, Residential)	       28.273	 20.584
-(May, 2019, Residential)	       17.167	 14.750
-(June, 2019, Residential)	        9.199	  9.352
-(July, 2019, Residential)	        7.967	  6.612
-(August, 2019, Residential)	        6.405	  6.145
-(September, 2019, Residential)	        7.650     8.134
-(October, 2019, Residential)	       16.977	 20.120
-(November, 2019, Residential)	       36.364	 31.103
-(December, 2019, Residential)	       46.465	 38.553
-(January, 2020, Residential)	       47.828	 45.809
-(February, 2020, Residential)	       47.204	 39.592
-(March, 2020, Residential)	       37.502	 35.012
-(April, 2020, Residential)	       29.559	 28.645
-(May, 2020, Residential)	       18.457	 14.184
-(June, 2020, Residential)	        8.828	 10.613
-(July, 2020, Residential)	        7.636	  7.159
-(August, 2020, Residential)	        6.553	  6.100
-(September, 2020, Residential)	        9.892	  8.117
-(October, 2020, Residential)	       19.649	 18.146
-(November, 2020, Residential)	       27.749	 30.652
-(December, 2020, Residential)	       43.228	 36.576
-(January, 2021, Residential)	       50.312	 39.992
-(February, 2021, Residential)	       49.225	 45.051
-(March, 2021, Residential)	       35.761	 34.254
-(April, 2021, Residential)	       25.226	 23.476
-(May, 2021, Residential)	       16.477	 14.526
-(June, 2021, Residential)	       10.073	  8.814
-(July, 2021, Residential)	        8.169	  5.821
-(August, 2021, Residential)	        7.680	  5.650
-(September, 2021, Residential)	        8.140	  7.792
-(October, 2021, Residential)	       13.137	 15.895
-(November, 2021, Residential)	       26.877	 27.530
-(December, 2021, Residential)	       41.997	 42.784
-(January, 2022, Residential)	       61.219	 53.697
-(February, 2022, Residential)	       51.159	 38.006
-(March, 2022, Residential)	       37.577	 34.616
-(April, 2022, Residential)	       26.084	 25.221
+(January, 2016, Residential)	       48.186	 42.756
+(February, 2016, Residential)	       48.685	 32.989
+(March, 2016, Residential)	       44.371	 26.468
+(April, 2016, Residential)	       36.006	 18.246
+(May, 2016, Residential)	       21.114	  9.756
+(June, 2016, Residential)	       10.001	  6.554
+(July, 2016, Residential)	        7.699	  6.592
+(August, 2016, Residential)             7.167	  5.641
+(September, 2016, Residential)	        7.168	  8.024
+(October, 2016, Residential)	       10.960	 17.205
+(November, 2016, Residential)	       22.814	 25.154
+(December, 2016, Residential)	       37.394	 41.470
+(January, 2017, Residential)	       51.298	 47.533
+(February, 2017, Residential)	       47.133	 37.874
+(March, 2017, Residential)	       45.156	 34.934
+(April, 2017, Residential)             33.094	 23.643
+(May, 2017, Residential)	       21.576	 14.868
+(June, 2017, Residential)	       11.417	  8.232
+(July, 2017, Residential)	        7.517	  6.336
+(August, 2017, Residential)	        7.396	  5.604
+(September, 2017, Residential)	        8.579	  7.654
+(October, 2017, Residential)	        9.509	 16.891
+(November, 2017, Residential)	       20.230	 31.614
+(December, 2017, Residential)	       41.444	 43.065
+(January, 2018, Residential)	       51.246	 45.433
+(February, 2018, Residential)	       45.151	 44.245
+(March, 2018, Residential)	       40.375	 37.619
+(April, 2018, Residential)             33.461	 28.685
+(May, 2018, Residential)               13.963	 11.186
+(June, 2018, Residential)	        9.298	  7.620
+(July, 2018, Residential)	        7.291	  6.536
+(August, 2018, Residential)	         7.255	  6.070
+(September, 2018, Residential)	       11.240	 10.663
+(October, 2018, Residential)	       23.362	 20.504
+(November, 2018, Residential)	       38.479	 28.761
+(December, 2018, Residential)	       43.726	 36.172
+(January, 2019, Residential)	       56.472	 42.228
+(February, 2019, Residential)	       51.166	 50.506
+(March, 2019, Residential)	       43.492	 39.057
+(April, 2019, Residential)	       28.973	 20.584
+(May, 2019, Residential)	       19.424	 14.753
+(June, 2019, Residential)	       10.245	  9.357
+(July, 2019, Residential)	        6.623	  6.612
+(August, 2019, Residential)	        7.204	  6.148
+(September, 2019, Residential)	       10.807	  8.135
+(October, 2019, Residential)	       21.799	 20.121
+(November, 2019, Residential)	       38.524	 31.121
+(December, 2019, Residential)	       44.047	 38.578
+(January, 2020, Residential)	       49.377	 45.814
+(February, 2020, Residential)	       48.745	 39.595
+(March, 2020, Residential)	       38.704	 35.014
+(April, 2020, Residential)	       30.524	 28.648
+(May, 2020, Residential)	       19.055	 14.193
+(June, 2020, Residential)	        9.112	 10.613
+(July, 2020, Residential)	        7.883	  7.160
+(August, 2020, Residential)	        6.768	  6.101
+(September, 2020, Residential)	       10.219	  8.118
+(October, 2020, Residential)	       20.298	 18.149
+(November, 2020, Residential)	       28.653	 30.670
+(December, 2020, Residential)	       44.645	 36.598
+(January, 2021, Residential)	       52.870	 39.992
+(February, 2021, Residential)	       51.718	 45.051
+(March, 2021, Residential)	       37.534	 34.254
+(April, 2021, Residential)	       26.480	 23.476
+(May, 2021, Residential)	       17.271	 14.534
+(June, 2021, Residential)	        9.599	  8.814
+(July, 2021, Residential)	        8.569	  5.821
+(August, 2021, Residential)	        8.068	  5.650
+(September, 2021, Residential)	        8.543	  7.797
+(October, 2021, Residential)	       13.791	 15.906
+(November, 2021, Residential)	       28.221	 27.549
+(December, 2021, Residential)	       44.053	 42.788
+(January, 2022, Residential)	       61.011	 53.709
+(February, 2022, Residential)	       48.805	 37.946
+(March, 2022, Residential)	       41.005	 34.553
+(April, 2022, Residential)	       28.857	 26.247
+(May, 2022, Residential)	       12.899	 16.406
+(June, 2022, Residential)	        8.968	  9.073
+(July, 2022, Residential)	        8.281	  6.447
+(August, 2022, Residential)	        7.336	  5.668
+(September, 2022, Residential)	        8.728	  6.430
+(October, 2022, Residential)	       17.300	 12.898
+(November, 2022, Residential)	       30.366	 30.505
+(December, 2022, Residential)	       42.513	 48.259
+(January, 2023, Residential)	       45.315    44.471
+(February, 2023, Residential)	       48.249	 37.622
+(March, 2023, Residential)	       40.340	 38.547
+(April, 2023, Residential)	       25.491	 26.206
+(May, 2023, Residential)	       13.541	 10.582
+(June, 2023, Residential)		8.084	  6.703
+(July, 2023, Residential)		8.037	  6.045
+(August, 2023, Residential)		7.464	  5.513
+(September, 2023, Residential)	        8.126	  6.843
+(October, 2023, Residential)	       15.794	 14.779
+(November, 2023, Residential)	       31.880	 28.012
+(December, 2023, Residential)	       37.928	 33.657
+(January, 2024, Residential)	       50.517	 44.796
+(February, 2024, Residential)	       39.940	 37.395
+(March, 2024, Residential)	       35.344	 35.612
+(April, 2024, Residential)	       22.145	 23.232
 (January, 1990, Commercial)            34.218    27.842
 (February, 1990, Commercial)           29.923    26.096
 (March, 1990, Commercial)              27.864    20.993
@@ -734,82 +758,106 @@ HistoricalDemand := data table
 (October, 2015, Commercial)            13.729    10.843
 (November, 2015, Commercial)           23.334    20.708
 (December, 2015, Commercial)           32.264    26.101
-(January, 2016, Commercial)	       42.273	 29.775
-(February, 2016, Commercial)	       41.401	 24.837
-(March, 2016, Commercial)	       40.662	 22.068
-(April, 2016, Commercial)	       30.058	 17.374
-(May, 2016, Commercial)	               18.736	 10.162
-(June, 2016, Commercial)	       10.185	  6.293
-(July, 2016, Commercial)	        8.686	  6.267
-(August, 2016, Commercial)	        9.734	  5.264
-(September, 2016, Commercial)	        9.253     7.835
-(October, 2016, Commercial)	       15.647	 15.240
-(November, 2016, Commercial)	       24.756	 21.483
-(December, 2016, Commercial)	       36.112	 32.576
-(January, 2017, Commercial)	       44.433	 35.611
-(February, 2017, Commercial)	       41.369	 30.114
-(March, 2017, Commercial)	       41.749	 29.493
-(April, 2017, Commercial)	       28.789	 19.358
-(May, 2017, Commercial)	               19.114	 12.235
-(June, 2017, Commercial)	       11.418	  7.723
-(July, 2017, Commercial)	        9.655	  6.046
-(August, 2017, Commercial)	       10.175	  5.176
-(September, 2017, Commercial)	       10.026	  7.370
-(October, 2017, Commercial)	       15.422	 13.886
-(November, 2017, Commercial)	       26.566	 25.539
-(December, 2017, Commercial)	       42.981	 30.900
-(January, 2018, Commercial)	       52.250	 36.350
-(February, 2018, Commercial)	       44.235	 36.143
-(March, 2018, Commercial)	       43.616	 30.028
-(April, 2018, Commercial)	       32.687	 24.548
-(May, 2018, Commercial)	               14.834	 10.517
-(June, 2018, Commercial)	       9.541	  7.145
-(July, 2018, Commercial)	       8.642	  5.747
-(August, 2018, Commercial)	       7.699	  5.949
-(September, 2018, Commercial)	       10.712	  9.611
-(October, 2018, Commercial)            22.665	 17.036
-(November, 2018, Commercial)	       41.509	 24.338
-(December, 2018, Commercial)	       45.749	 28.048
-(January, 2019, Commercial)	       55.661	 35.053
-(February, 2019, Commercial)	       48.326	 40.771
-(March, 2019, Commercial)	       44.205	 32.421
-(April, 2019, Commercial)	       32.619	 16.972
-(May, 2019, Commercial)	               18.107	 14.982
-(June, 2019, Commercial)	       10.036	  8.472
-(July, 2019, Commercial)	        8.820	  6.609
-(August, 2019, Commercial)	        8.398	  5.538
-(September, 2019, Commercial)	       11.052	  7.691
-(October, 2019, Commercial)	       22.570	 17.004
-(November, 2019, Commercial)	       36.560	 25.658
-(December, 2019, Commercial)	       45.540	 31.273
-(January, 2020, Commercial)	       52.628  	 37.870
-(February, 2020, Commercial)	       52.743	 32.665
-(March, 2020, Commercial)	       43.284	 29.819
-(April, 2020, Commercial)	       32.099	 23.936
-(May, 2020, Commercial)	               20.221	 11.887
-(June, 2020, Commercial)	        9.997	  8.806
-(July, 2020, Commercial)	        8.778	  6.367
-(August, 2020, Commercial)	        9.172	  5.477
-(September, 2020, Commercial)	       11.997	  6.827
-(October, 2020, Commercial)	       24.112	 15.338
-(November, 2020, Commercial)	       32.300	 24.440
-(December, 2020, Commercial)	       45.766	 29.775
-(January, 2021, Commercial)	       54.585	 31.700
-(February, 2021, Commercial)	       52.542	 37.060
-(March, 2021, Commercial)	       40.670	 27.101
-(April, 2021, Commercial)	       29.388	 20.432
-(May, 2021, Commercial)	               19.760	 14.059
-(June, 2021, Commercial)	       12.623	  8.061
-(July, 2021, Commercial)	        9.243	  5.388
-(August, 2021, Commercial)	       10.645	  5.567
-(September, 2021, Commercial)	       11.457	  7.969
-(October, 2021, Commercial)	       18.473	 13.498
-(November, 2021, Commercial)	       30.588	 22.785
-(December, 2021, Commercial)	       44.629	 34.593
-(January, 2022, Commercial)	       66.133	 42.292
-(February, 2022, Commercial)	       54.111	 33.710
-(March, 2022, Commercial)	       42.757	 30.168
-(April, 2022, Commercial)	       32.807	 22.772
+(January, 2016, Commercial)	       47.234	 29.777
+(February, 2016, Commercial)	       49.841	 24.837
+(March, 2016, Commercial)	       46.953	 22.068
+(April, 2016, Commercial)	       36.155	 17.378
+(May, 2016, Commercial)	               24.225	 10.166
+(June, 2016, Commercial)	       12.258	  6.294
+(July, 2016, Commercial)	       10.095	  6.267
+(August, 2016, Commercial)	       11.196	  5.267
+(September, 2016, Commercial)	       10.362	  7.835
+(October, 2016, Commercial)	       16.239	 15.240
+(November, 2016, Commercial)	       26.179	 21.483
+(December, 2016, Commercial)	       37.129	 32.578
+(January, 2017, Commercial)	       51.035	 35.620
+(February, 2017, Commercial)	       49.350	 30.115
+(March, 2017, Commercial)	       47.435	 29.495
+(April, 2017, Commercial)	       35.810	 19.361
+(May, 2017, Commercial)	               22.752	 12.237
+(June, 2017, Commercial)	       12.333	  7.725
+(July, 2017, Commercial)	       11.093	  6.048
+(August, 2017, Commercial)	       11.347	  5.178
+(September, 2017, Commercial)	       11.274	  7.370
+(October, 2017, Commercial)	       14.884	 13.886
+(November, 2017, Commercial)	       25.455	 25.545
+(December, 2017, Commercial)	       44.810	 30.907
+(January, 2018, Commercial)	       53.823	 36.355
+(February, 2018, Commercial)	       46.835	 36.143
+(March, 2018, Commercial)	       42.169	 30.028
+(April, 2018, Commercial)	       34.860	 24.551
+(May, 2018, Commercial)	               15.189	 10.519
+(June, 2018, Commercial)	       10.955	  7.147
+(July, 2018, Commercial)	        8.812	  5.748
+(August, 2018, Commercial)	        8.807	  5.949
+(September, 2018, Commercial)	       13.209	  9.612
+(October, 2018, Commercial)	       25.426	 17.037
+(November, 2018, Commercial)	       41.554	 24.345
+(December, 2018, Commercial)	       47.919	 28.057
+(January, 2019, Commercial)	       59.165	 35.053
+(February, 2019, Commercial)	       52.667	 40.771
+(March, 2019, Commercial)	       45.679	 32.421
+(April, 2019, Commercial)	       30.979	 16.972
+(May, 2019, Commercial)	               20.989	 14.983
+(June, 2019, Commercial)	       12.085	  8.475
+(July, 2019, Commercial)	        8.258	  6.609
+(August, 2019, Commercial)	        8.721	  5.539
+(September, 2019, Commercial)	       12.138	  7.691
+(October, 2019, Commercial)	       22.878	 17.004
+(November, 2019, Commercial)	       39.732	 25.665
+(December, 2019, Commercial)	       45.965	 31.284
+(January, 2020, Commercial)	       49.224	 37.872
+(February, 2020, Commercial)	       49.572	 32.666
+(March, 2020, Commercial)	       40.963	 29.820
+(April, 2020, Commercial)	       29.481	 23.938
+(May, 2020, Commercial)	               18.644	 11.890
+(June, 2020, Commercial)	        9.233	  8.806
+(July, 2020, Commercial)	        8.337	  6.367
+(August, 2020, Commercial)	        8.440	  5.477
+(September, 2020, Commercial)	       11.258	  6.827
+(October, 2020, Commercial)	       22.748	 15.339
+(November, 2020, Commercial)	       30.099	 24.448
+(December, 2020, Commercial)	       43.559	 29.784
+(January, 2021, Commercial)	       44.162	 31.701
+(February, 2021, Commercial)	       42.721	 37.061
+(March, 2021, Commercial)	       33.649	 27.101
+(April, 2021, Commercial)	       26.407	 20.432
+(May, 2021, Commercial)	               15.891	 14.062
+(June, 2021, Commercial)	       10.491	  8.061
+(July, 2021, Commercial)	        7.603	  5.388
+(August, 2021, Commercial)	        8.896	  5.567
+(September, 2021, Commercial)	       10.320	  7.970
+(October, 2021, Commercial)	       16.062	 13.502
+(November, 2021, Commercial)	       27.883	 22.793
+(December, 2021, Commercial)	       39.792	 34.595
+(January, 2022, Commercial)	       56.318	 42.297
+(February, 2022, Commercial)	       46.639	 33.647
+(March, 2022, Commercial)	       36.185	 30.113
+(April, 2022, Commercial)	       27.026	 23.757
+(May, 2022, Commercial)	               14.100	 14.696
+(June, 2022, Commercial)	        8.384	  9.207
+(July, 2022, Commercial)	        7.467	  6.763
+(August, 2022, Commercial)	        7.278	  5.707
+(September, 2022, Commercial)	        8.463	  6.713
+(October, 2022, Commercial)	       17.659	 11.897
+(November, 2022, Commercial)	       29.252	 25.264
+(December, 2022, Commercial)	       37.378	 40.010
+(January, 2023, Commercial)	       37.205	 37.362
+(February, 2023, Commercial)	       53.525	 32.232
+(March, 2023, Commercial)	       44.379	 34.367
+(April, 2023, Commercial)	       24.916	 23.576
+(May, 2023, Commercial)		        4.899	 10.856
+(June, 2023, Commercial)	        7.333	  7.178
+(July, 2023, Commercial)		7.636	  5.413
+(August, 2023, Commercial)		7.069	  6.024
+(September, 2023, Commercial)		7.721	  6.865
+(October, 2023, Commercial)		6.664	 13.842
+(November, 2023, Commercial)	       30.347	 24.045
+(December, 2023, Commercial)	       36.369	 28.716
+(January, 2024, Commercial)	        4.873	 36.595
+(February, 2024, Commercial)	       39.723	 31.154
+(March, 2024, Commercial)	        4.777	 30.585
+(April, 2024, Commercial)	        4.414	 21.588
 (January, 1990, Industrial)            43.949    42.644
 (February, 1990, Industrial)           42.809    38.906
 (March, 1990, Industrial)              45.054    42.400
@@ -1122,82 +1170,106 @@ HistoricalDemand := data table
 (October, 2015, Industrial)            42.456   120.775
 (November, 2015, Industrial)           44.840   129.379
 (December, 2015, Industrial)           48.351   141.271
-(January, 2016, Industrial)            56.856	166.760
-(February, 2016, Industrial)	       49.941	151.609
-(March, 2016, Industrial)	       50.734	159.283
-(April, 2016, Industrial)	       39.170	149.557
-(May, 2016, Industrial)	               39.454	136.404
-(June, 2016, Industrial)	       35.803	190.021
-(July, 2016, Industrial)	       41.566	201.496
-(August, 2016, Industrial)	       46.136	197.565
-(September, 2016, Industrial)	       38.186	150.125
-(October, 2016, Industrial)	       39.147	162.460
-(November, 2016, Industrial)	       44.357	162.930
-(December, 2016, Industrial)	       50.959	178.597
-(January, 2017, Industrial)	       46.700	178.015
-(February, 2017, Industrial)	       43.648	159.510
-(March, 2017, Industrial)	       47.165	175.458
-(April, 2017, Industrial)	       35.828	163.986
-(May, 2017, Industrial)	               35.163	156.188
-(June, 2017, Industrial)	       31.619	181.816
-(July, 2017, Industrial)	       34.151	218.524
-(August, 2017, Industrial)	       35.095	222.451
-(September, 2017, Industrial)	       36.307	177.385
-(October, 2017, Industrial)	       36.328	179.094
-(November, 2017, Industrial)	       44.235	189.574
-(December, 2017, Industrial)	       52.667	200.156
-(January, 2018, Industrial)	       55.569	206.698
-(February, 2018, Industrial)	       46.817	184.608
-(March, 2018, Industrial)	       47.274	198.889
-(April, 2018, Industrial)	       42.934	181.014
-(May, 2018, Industrial)	               36.998	191.985
-(June, 2018, Industrial)	       38.007	183.797
-(July, 2018, Industrial)	       42.605	187.325
-(August, 2018, Industrial)	       43.729	189.300
-(September, 2018, Industrial)	       39.370	185.695
-(October, 2018, Industrial)	       34.113	201.573
-(November, 2018, Industrial)	       46.797	197.234
-(December, 2018, Industrial)	       51.584	200.329
-(January, 2019, Industrial)	       56.846	202.383
-(February, 2019, Industrial)	       55.253	190.069
-(March, 2019, Industrial)	       51.898	197.144
-(April, 2019, Industrial)	       39.809	179.497
-(May, 2019, Industrial)	               38.730	178.617
-(June, 2019, Industrial)	       39.501	185.781
-(July, 2019, Industrial)	       43.926	185.972
-(August, 2019, Industrial)	       41.709	191.395
-(September, 2019, Industrial)	       38.554	178.041
-(October, 2019, Industrial)	       42.749	182.101
-(November, 2019, Industrial)	       53.618	185.200
-(December, 2019, Industrial)	       54.711	197.732
-(January, 2020, Industrial)	       52.152	204.179
-(February, 2020, Industrial)	       51.276	189.224
-(March, 2020, Industrial)	       46.663	199.798
-(April, 2020, Industrial)	       37.947	178.347
-(May, 2020, Industrial)	               36.089	173.424
-(June, 2020, Industrial)	       38.614	170.809
-(July, 2020, Industrial)	       45.122	176.441
-(August, 2020, Industrial)	       42.189	166.407
-(September, 2020, Industrial)	       37.127	170.234
-(October, 2020, Industrial)	       46.046	186.559
-(November, 2020, Industrial)	       46.487	187.292
-(December, 2020, Industrial)	       57.409	200.908
-(January, 2021, Industrial)	       57.182	203.993
-(February, 2021, Industrial)	       59.326	188.219
-(March, 2021, Industrial)	       51.526	199.540
-(April, 2021, Industrial)	       36.453	179.332
-(May, 2021, Industrial)	               36.279	184.764
-(June, 2021, Industrial)	       41.414	186.629
-(July, 2021, Industrial)	       43.210	202.961
-(August, 2021, Industrial)	       55.751	198.144
-(September, 2021, Industrial)	       39.458	179.805
-(October, 2021, Industrial)	       45.555	199.195
-(November, 2021, Industrial)	       54.364	197.084
-(December, 2021, Industrial)	       60.925	218.185
-(January, 2022, Industrial)	       74.846	213.459
-(February, 2022, Industrial)	       65.002	192.529
-(March, 2022, Industrial)	       60.354	209.859
-(April, 2022, Industrial)	       46.983	192.368
+(January, 2016, Industrial)	       53.817	166.760
+(February, 2016, Industrial)	       47.755	151.609
+(March, 2016, Industrial)	       48.119	159.283
+(April, 2016, Industrial)	       37.684	149.557
+(May, 2016, Industrial)	               37.855	136.404
+(June, 2016, Industrial)	       34.277	190.021
+(July, 2016, Industrial)       	       39.726	201.496
+(August, 2016, Industrial)	       43.872	197.565
+(September, 2016, Industrial)	       36.321	150.125
+(October, 2016, Industrial)	       37.099	162.460
+(November, 2016, Industrial)	       42.112	162.930
+(December, 2016, Industrial)	       48.804	178.597
+(January, 2017, Industrial)	       49.202	178.015
+(February, 2017, Industrial)	       46.242	159.510
+(March, 2017, Industrial)	       49.525	175.458
+(April, 2017, Industrial)	       38.223	163.986
+(May, 2017, Industrial)	               37.290	156.188
+(June, 2017, Industrial)	       33.588	181.816
+(July, 2017, Industrial)	       36.006	218.524
+(August, 2017, Industrial)	       36.754	222.451
+(September, 2017, Industrial)	       37.828	177.385
+(October, 2017, Industrial)	       37.622	179.094
+(November, 2017, Industrial)	       45.664	189.574
+(December, 2017, Industrial)	       54.487	200.156
+(January, 2018, Industrial)	       56.196	206.698
+(February, 2018, Industrial)	       51.239	184.608
+(March, 2018, Industrial)	       48.996	198.889
+(April, 2018, Industrial)	       45.752	181.014
+(May, 2018, Industrial)	               39.661	191.985
+(June, 2018, Industrial)	       39.933	183.797
+(July, 2018, Industrial)	       42.025	187.325
+(August, 2018, Industrial)	       42.457	189.300
+(September, 2018, Industrial)	       42.060	185.695
+(October, 2018, Industrial)	       39.553	201.573
+(November, 2018, Industrial)	       51.208	197.234
+(December, 2018, Industrial)	       54.777	200.329
+(January, 2019, Industrial)	       55.932	202.383
+(February, 2019, Industrial)	       54.816	190.069
+(March, 2019, Industrial)	       52.403	197.144
+(April, 2019, Industrial)	       43.650	179.497
+(May, 2019, Industrial)	               41.267	178.617
+(June, 2019, Industrial)	       39.232	185.781
+(July, 2019, Industrial)	       43.271	185.972
+(August, 2019, Industrial)	       41.002	191.395
+(September, 2019, Industrial)	       39.715	178.041
+(October, 2019, Industrial)	       43.268	182.101
+(November, 2019, Industrial)	       51.553	185.200
+(December, 2019, Industrial)	       51.404	197.732
+(January, 2020, Industrial)	       54.863	204.179
+(February, 2020, Industrial)	       53.959	189.224
+(March, 2020, Industrial)	       49.205	199.798
+(April, 2020, Industrial)	       40.172	178.347
+(May, 2020, Industrial)	               38.227	173.424
+(June, 2020, Industrial)	       39.280	170.809
+(July, 2020, Industrial)	       46.074	176.441
+(August, 2020, Industrial)	       42.853	166.407
+(September, 2020, Industrial)	       39.018	170.234
+(October, 2020, Industrial)	       47.182	186.559
+(November, 2020, Industrial)	       48.562	187.292
+(December, 2020, Industrial)	       58.913	200.908
+(January, 2021, Industrial)	       59.312	203.993
+(February, 2021, Industrial)	       61.010	188.219
+(March, 2021, Industrial)	       53.169	199.540
+(April, 2021, Industrial)	       42.640	179.332
+(May, 2021, Industrial)	               40.746	184.764
+(June, 2021, Industrial)	       44.197	186.629
+(July, 2021, Industrial)	       45.327	202.961
+(August, 2021, Industrial)	       59.174	198.144
+(September, 2021, Industrial)	       45.965	179.805
+(October, 2021, Industrial)	       50.150	199.195
+(November, 2021, Industrial)	       59.393	197.084
+(December, 2021, Industrial)	       65.447	218.185
+(January, 2022, Industrial)	       81.181	213.459
+(February, 2022, Industrial)	       68.003	192.519
+(March, 2022, Industrial)	       67.050	209.836
+(April, 2022, Industrial)	       49.284	192.216
+(May, 2022, Industrial)	               44.267	198.558
+(June, 2022, Industrial)	       42.351	182.217
+(July, 2022, Industrial)	       47.513	194.414
+(August, 2022, Industrial)	       55.452	207.552
+(September, 2022, Industrial)	       48.759	203.091
+(October, 2022, Industrial)	       52.815	213.022
+(November, 2022, Industrial)	       55.613	214.972
+(December, 2022, Industrial)	       70.224	231.010
+(January, 2023, Industrial)	       67.520	223.275
+(February, 2023, Industrial)	       57.187	200.399
+(March, 2023, Industrial)	       58.307	223.029
+(April, 2023, Industrial)              50.749	198.770
+(May, 2023, Industrial)		       49.252	203.065
+(June, 2023, Industrial)	       56.505	196.846
+(July, 2023, Industrial)	       63.839	216.384
+(August, 2023, Industrial)	       59.836	223.522
+(September, 2023, Industrial)	       54.546	204.715
+(October, 2023, Industrial)            55.072	219.701
+(November, 2023, Industrial)	       70.824	219.971
+(December, 2023, Industrial)	       75.676	228.982
+(January, 2024, Industrial)	       89.554	239.183
+(February, 2024, Industrial)	       75.147	217.006
+(March, 2024, Industrial)	       71.568	235.383
+(April, 2024, Industrial)	       56.651	211.830
 (January, 1990, Electric)               0.000     0.000
 (February, 1990, Electric)              0.000     0.000
 (March, 1990, Electric)                 0.000     0.000
@@ -1510,78 +1582,102 @@ HistoricalDemand := data table
 (October, 2015, Electric)              12.289    17.197
 (November, 2015, Electric)             11.893    16.642
 (December, 2015, Electric)             12.289    17.197
-(January, 2016, Electric)	       12.159	 18.889
-(February, 2016, Electric)	       11.002	 15.824
-(March, 2016, Electric)	               10.731	 16.838
-(April, 2016, Electric)	                9.413	 14.801
-(May, 2016, Electric)	                9.797	 13.974
-(June, 2016, Electric)	                9.126	 14.713
-(July, 2016, Electric)	               11.432	 16.417
-(August, 2016, Electric)	       13.462	 16.680
-(September, 2016, Electric)	        9.872	 15.354
-(October, 2016, Electric)	        9.016	 16.199
-(November, 2016, Electric)	       10.393	 16.203
-(December, 2016, Electric)	       12.327	 18.351
-(January, 2017, Electric)	        7.201	 20.377
-(February, 2017, Electric)	        6.288	 18.382
-(March, 2017, Electric)	                6.721	 19.090
-(April, 2017, Electric)	                5.200	 16.361
-(May, 2017, Electric)	                4.577	 16.151
-(June, 2017, Electric)	                4.066	 15.362
-(July, 2017, Electric)	                4.879	 18.666
-(August, 2017, Electric)	        5.573	 19.176
-(September, 2017, Electric)	        5.912	 17.170
-(October, 2017, Electric)	        4.219	 17.758
-(November, 2017, Electric)	        5.476	 19.948
-(December, 2017, Electric)	        7.581	 20.869
-(January, 2018, Electric)	       11.587	 24.728
-(February, 2018, Electric)	        8.546	 22.288
-(March, 2018, Electric)	                7.991	 23.386
-(April, 2018, Electric)	                7.339	 20.064
-(May, 2018, Electric)	                5.919	 19.433
-(June, 2018, Electric)	                6.137	 18.791
-(July, 2018, Electric)	               10.169	 22.815
-(August, 2018, Electric)	       10.731	 23.327
-(September, 2018, Electric)	        8.065	 22.321
-(October, 2018, Electric)	        5.915	 22.250
-(November, 2018, Electric)	        7.492	 23.624
-(December, 2018, Electric)	        9.232	 24.969
-(January, 2019, Electric)	       10.804	 26.838
-(February, 2019, Electric)	       10.743	 26.505
-(March, 2019, Electric)	               10.728	 27.411
-(April, 2019, Electric)	                6.022	 23.151
-(May, 2019, Electric)	                5.301	 22.611
-(June, 2019, Electric)	                4.069	 21.640
-(July, 2019, Electric)	               10.554    24.193
-(August, 2019, Electric)	        8.284	 24.020
-(September, 2019, Electric)	        6.286	 23.509
-(October, 2019, Electric)	        5.973	 24.827
-(November, 2019, Electric)	        8.435	 25.190
-(December, 2019, Electric)	        9.051	 26.402
-(January, 2020, Electric)	       10.985	 30.458
-(February, 2020, Electric)	       10.088	 27.849
-(March, 2020, Electric)	                8.795	 28.323
-(April, 2020, Electric)	                5.060	 25.263
-(May, 2020, Electric)	                5.380	 21.200
-(June, 2020, Electric)	                6.532	 22.237
-(July, 2020, Electric)	               11.761	 23.217
-(August, 2020, Electric)	       10.704	 25.615
-(September, 2020, Electric)	        7.442	 25.301
-(October, 2020, Electric)	        7.681	 26.774
-(November, 2020, Electric)	        7.584	 27.853
-(December, 2020, Electric)	       10.068	 28.797
-(January, 2021, Electric)	        9.860	 26.613
-(February, 2021, Electric)	        11.631	 26.267
-(March, 2021, Electric)	                8.069	 25.114
-(April, 2021, Electric)	                4.938	 23.634
-(May, 2021, Electric)	                4.758	 24.112
-(June, 2021, Electric)	                7.783	 25.422
-(July, 2021, Electric)	                7.529	 26.367
-(August, 2021, Electric)	       12.106	 27.189
-(September, 2021, Electric)	        6.271	 25.136
-(October, 2021, Electric)	        8.336	 26.751
-(November, 2021, Electric)	        9.776	 26.786
-(December, 2021, Electric)	       11.024	 29.496
+(January, 2016, Electric)	       12.156	 18.896
+(February, 2016, Electric)	       10.999	 15.816
+(March, 2016, Electric)	               10.726 	 16.840
+(April, 2016, Electric)	                9.406	 14.799
+(May, 2016, Electric)			9.795	 13.957
+(June, 2016, Electric)			9.124	 14.716
+(July, 2016, Electric)		       11.444	 16.433
+(August, 2016, Electric)	       13.491	 16.690
+(September, 2016, Electric)	        9.871	 15.361
+(October, 2016, Electric)	        9.006	 16.192
+(November, 2016, Electric)	       10.387	 16.196
+(December, 2016, Electric)	       12.326	 18.349
+(January, 2017, Electric)	        7.206	 20.362
+(February, 2017, Electric)	        6.290	 18.369
+(March, 2017, Electric)		        6.727	 19.081
+(April, 2017, Electric)			5.196	 16.367
+(May, 2017, Electric)			4.572	 16.150
+(June, 2017, Electric)			4.060	 15.364
+(July, 2017, Electric)			4.879	 18.684
+(August, 2017, Electric)		5.575	 19.191
+(September, 2017, Electric)		5.917	 17.160
+(October, 2017, Electric)		4.208	 17.757
+(November, 2017, Electric)		5.472	 19.955
+(December, 2017, Electric)		7.590	 20.869
+(January, 2018, Electric)	       11.603	 24.714
+(February, 2018, Electric)		8.548	 22.274
+(March, 2018, Electric)			7.987	 23.383
+(April, 2018, Electric)			7.334	 20.058
+(May, 2018, Electric)			5.910	 19.432
+(June, 2018, Electric)			6.133	 18.797
+(July, 2018, Electric)		       10.192	 22.843
+(August, 2018, Electric)	       10.756	 23.346
+(September, 2018, Electric)	        8.072	 22.347
+(October, 2018, Electric)	        5.902	 22.255
+(November, 2018, Electric)	        7.485	 23.603
+(December, 2018, Electric)	        9.235	 24.946
+(January, 2019, Electric)	       10.813	 26.819
+(February, 2019, Electric)	       10.758	 26.491
+(March, 2019, Electric)	               10.736	 27.404
+(April, 2019, Electric)	                6.011	 23.122
+(May, 2019, Electric)	                5.287	 22.585
+(June, 2019, Electric)	                4.051	 21.646
+(July, 2019, Electric)	               10.579	 24.225
+(August, 2019, Electric)	        8.292	 24.052
+(September, 2019, Electric)	        6.279	 23.537
+(October, 2019, Electric)	        5.959	 24.833
+(November, 2019, Electric)	        8.436	 25.193
+(December, 2019, Electric)	        9.050	 26.391
+(January, 2020, Electric)	       10.944	 30.313
+(February, 2020, Electric)	       10.051	 27.737
+(March, 2020, Electric)	                8.752	 28.207
+(April, 2020, Electric)	                5.014	 25.159
+(May, 2020, Electric)	                5.393	 21.251
+(June, 2020, Electric)	                6.548	 22.290
+(July, 2020, Electric)	               11.790	 23.273
+(August, 2020, Electric) 	       10.731	 25.676
+(September, 2020, Electric)	        7.461	 25.361
+(October, 2020, Electric)	        7.701	 26.838
+(November, 2020, Electric)	        7.602	 27.919
+(December, 2020, Electric)	       10.094	 28.865
+(January, 2021, Electric)	       11.147	 28.931
+(February, 2021, Electric)	       13.149	 28.555
+(March, 2021, Electric)	                9.122	 27.301
+(April, 2021, Electric)	                5.583	 25.692
+(May, 2021, Electric)	                5.380	 26.212
+(June, 2021, Electric)	                8.799	 27.636
+(July, 2021, Electric)	                8.512	 28.663
+(August, 2021, Electric) 	       13.686	 29.557
+(September, 2021, Electric)	        7.090	 27.325
+(October, 2021, Electric)	        9.424	 29.081
+(November, 2021, Electric)	       11.052	 29.119
+(December, 2021, Electric)	       12.463	 32.065
+(January, 2022, Electric)	       16.588	 32.606
+(February, 2022, Electric)	       12.134	 28.356
+(March, 2022, Electric)	               10.211	 29.880
+(April, 2022, Electric)	                6.422	 27.842
+(May, 2022, Electric)	                6.929	 28.261
+(June, 2022, Electric)	                6.784	 26.235
+(July, 2022, Electric)	               10.762	 29.888
+(August, 2022, Electric)               11.766	 31.626
+(September, 2022, Electric)	        7.740	 30.774
+(October, 2022, Electric)	        7.695	 31.745
+(November, 2022, Electric)	        7.732	 32.950
+(December, 2022, Electric)	       13.326	 35.401
+(January, 2023, Electric)	       10.669 	 34.824
+(February, 2023, Electric)	        9.085    28.750
+(March, 2023, Electric)	                8.042	 31.871
+(April, 2023, Electric)	                6.117	 28.775
+(May, 2023, Electric)	                6.880	 27.479
+(June, 2023, Electric)                 10.299	 26.752
+(July, 2023, Electric)	               13.937	 30.888
+(August, 2023, Electric)	       11.374	 31.268
+(September, 2023, Electric)	        9.714    28.874
+(October, 2023, Electric)	        7.697	 31.006
+(November, 2023, Electric)	       11.150	 32.443
+(December, 2023, Electric)	       13.125	 32.636
 ;
 
 ! Data: Underground natural gas storage withdrawals
@@ -1976,6 +2072,30 @@ HistoricalStorageWithdrawals := data table
 (February, 2022)	76.459	  67.064
 (March, 2022)	    	12.850	  38.249
 (April, 2022)	    	0.000	  12.088
+(May, 2022)	        0.015	   1.265
+(June, 2022)	        0.016	   3.166
+(July, 2022)	        0.000	   0.635
+(August, 2022)	        0.000	   0.408
+(September, 2022)	0.000	   0.847
+(October, 2022)	        0.000	   2.221
+(November, 2022)	8.324	  31.747
+(December, 2022)	51.787	  79.533
+(January, 2023)		40.581	  47.513
+(February, 2023)	33.410	  42.709
+(March, 2023)		12.311	  24.652
+(April, 2023)		0.930	   2.450
+(May, 2023)		0.000	   1.550
+(June, 2023)		0.000	   0.724
+(July, 2023)		0.000	   0.411
+(August, 2023)		0.000	   0.402
+(September, 2023)	0.000	   0.519
+(October, 2023)		0.000	   1.126
+(November, 2023)	23.373	  15.051
+(December, 2023)	5.647	  29.497
+(January, 2024)	        82.751	  84.133
+(February, 2024)	20.039	  38.172
+(March, 2024)	         3.547	  22.025
+(April, 2024)	         0.000	  1.490
 
 ;
 
@@ -2372,6 +2492,31 @@ HistoricalStorageInjections := data table
 (February, 2022)	0.637	  0.223
 (March, 2022)		0.597	  2.300
 (April, 2022)		4.882	  7.349
+(May, 2022)	        48.124	 41.010
+(June, 2022)	        43.415	 46.468
+(July, 2022)	        34.774	 56.081
+(August, 2022)	        39.908	 57.797
+(September, 2022)	35.901	 38.773
+(October, 2022)	        15.232	 30.270
+(November, 2022)	0.272	 12.809
+(December, 2022)	0.023	 0.486
+(January, 2023)		0.000	 2.986
+(February, 2023)	0.000	 6.600
+(March, 2023)		0.000	 9.250
+(April, 2023)		10.478	 49.043
+(May, 2023)		37.372	 48.033
+(June, 2023)		30.198	 44.079
+(July, 2023)		20.614	 50.703
+(August, 2023)		15.524	 63.538
+(September, 2023)	38.329	 49.908
+(October, 2023)		2.372	 42.116
+(November, 2023)	0.288	 7.624
+(December, 2023)	0.025	 2.181
+(January, 2024)		0.314	 0.201
+(February, 2024)	0.331	 1.928
+(March, 2024)		22.502	 9.281
+(April, 2024)		13.104	 48.528
+
 
 
 ;
@@ -2380,7 +2525,7 @@ HistoricalStorageInjections := data table
 !				2.  NEB:  LNG Import Data
 !___________________________________________________________________________________________
 ! LNG Imports via CAN National Energy Board
-! Marine only via Canaport, NB; both short and long term vessels/contracts
+! Marine only via Canaport, NB (now re-named "Saint John"); both short and long term vessels/contracts
 ! units of billion cubic feet
 ! https: //apps.neb-one.gc.ca/CommodityStatistics/Statistics.aspx?language=english
 ! Go to "LNG - Shipment Details"
@@ -2500,6 +2645,11 @@ HistoricalSupply := data table
 (October, 2021, LNG)	1.472
 (November, 2021, LNG)	2.628
 (January, 2022, LNG)	5.277
+(April, 2023, LNG)	1.391
+(May, 2023, LNG)	2.715
+(September, 2023, LNG)	2.727
+(January, 2024, LNG)	6.481
+(February, 2024, LNG)	3.464
 
 ;
 
@@ -2756,6 +2906,8 @@ Composite table:
     CN_W      CN_E      2019                  3427.296
     CN_W      CN_E      2020                  3428.459
     CN_W      CN_E      2021                  3428.271
+    CN_W      CN_E      2022                  3428.271
+    CN_W      CN_E      2023                  3428.271
     ;
 
 ! Sum of flows at Northern Ontario Line (Bcf/yr)
@@ -2778,5 +2930,7 @@ Composite table:
     CN_W      CN_E      2019                     478.15
     CN_W      CN_E      2020                     473.336
     CN_W      CN_E      2021                     480.356
+    CN_W      CN_E      2022                     551.56
+    CN_W      CN_E      2023                     659.07
     ;
  

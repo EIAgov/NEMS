@@ -7,7 +7,6 @@ scripts/backups
 scripts/backup_12_4
 source/backups
 p1/
-p2/
 p3/
 source/build/
 ERROR
@@ -30,7 +29,7 @@ models/ngas/mainproject/Main.DeveloperState
 models/ngas/mainproject/PageManager.xml
 models/ngas/mainproject/TemplateManager.xml
 models/ngas/mainproject/Pages/*
-models/ngas/mainproject/Settings/*
+models/ngas/mainproject/Settings/*.xml
 models/ngas/mainproject/Templates/*
 models/ngas/mainproject/Tools/*
 models/ngas/mainproject/User*Files/*
@@ -46,11 +45,13 @@ models/rest/log/*
 !models/rest/log/leave_blank.txt
 models/rest/monitor*.txt
 
-models/efd/log/*
-!models/efd/log/leave_blank.txt
+models/efd/data/*
+models/ecp/data/*
 
-models/ecp/log/*
-!models/ecp/log/leave_blank.txt
-models/ecp/DLL_*.*
-models/ecp/OutToNEMS_*.txt
-models/ecp/monitor*.txt
+models/ecp_g/ecp_ge/data/*
+models/ecp_g/ecp_gsw/data/*
+
+tmp_debug.bat
+scripts/setup/lib/tmp-*.*
+
+**/.vscode/

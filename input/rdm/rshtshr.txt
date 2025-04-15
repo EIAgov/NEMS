@@ -1,5 +1,5 @@
 FILE NAME:     RSHTSHR
-DATE MODIFIED: August 1, 2022
+DATE MODIFIED: October 21, 2024
 USED BY:       INTEQT subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Market share of general space heating equipment for new homes in the RECS base year and all years
                 for which Survey of Construction data is available
@@ -13,706 +13,409 @@ ORGANIZATION OF DATA: First value represents HtShrYr, the year through which dat
                 These values were then divided by the number of new houses in each census division and building type.
                Data starts on row 21 of this file as per RDM convention
 SOURCES:       U.S. Census Bureau, Characteristics of New Housing, Survey of Construction (SOC) microdata: http://www.census.gov/construction/chars/microdata.html
-               2015 Residential Energy Consumption Survey (RECS) microdata: https://www.eia.gov/consumption/residential/data/2015/index.php?view=microdata
-COMMENT:       Updated with 2021 historical data
+               2020 Residential Energy Consumption Survey (RECS) microdata: https://www.eia.gov/consumption/residential/data/2020/index.php?view=microdata
+COMMENT:       Revised to 2020 base year; updated through 2023 historical data
 
 
 Final year of data (HtShrYr)
-2021
+2023
                                         |<------------------- Comments ------------------->|
 Single-         Multi-          Mobile   Census         Data    Equipment
 Family          family          Home     Division       Year    Type
 --------        --------        -------- --------       ----    ---------------------------
-0.000000	0.000000	0.000000	1	2015	Electric Heating Other Than Heat Pumps
-0.022797	0.000000	0.000000	1	2015	Air-Source Heat Pumps (heating)
-0.440010	0.000000	1.000000	1	2015	Natural Gas Furnaces
-0.043763	0.000000	0.000000	1	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	1	2015	Kerosene Furnaces (unused placeholder)
-0.436476	1.000000	0.000000	1	2015	Propane Furnaces & Other
-0.019279	0.000000	0.000000	1	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.030075	0.000000	0.000000	1	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2015	Wood Stoves & Other
-0.007599	0.000000	0.000000	1	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2015	Natural Gas Heat Pumps (heating)
-0.016484	0.298904	0.350711	2	2015	Electric Heating Other Than Heat Pumps
-0.069575	0.083231	0.000000	2	2015	Air-Source Heat Pumps (heating)
-0.807750	0.282310	0.649289	2	2015	Natural Gas Furnaces
-0.014877	0.186844	0.000000	2	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	2	2015	Kerosene Furnaces (unused placeholder)
-0.060699	0.000000	0.000000	2	2015	Propane Furnaces & Other
-0.000000	0.047113	0.000000	2	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.007423	0.000000	0.000000	2	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2015	Wood Stoves & Other
-0.023192	0.011890	0.000000	2	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2015	Natural Gas Heat Pumps (heating)
-0.036866	0.572375	0.000000	3	2015	Electric Heating Other Than Heat Pumps
-0.071988	0.041015	0.000000	3	2015	Air-Source Heat Pumps (heating)
-0.707879	0.364036	1.000000	3	2015	Natural Gas Furnaces
-0.024176	0.013784	0.000000	3	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	3	2015	Kerosene Furnaces (unused placeholder)
-0.141094	0.000000	0.000000	3	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	3	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	3	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	3	2015	Wood Stoves & Other
-0.017997	0.008789	0.000000	3	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2015	Natural Gas Heat Pumps (heating)
-0.105156	0.848847	1.000000	4	2015	Electric Heating Other Than Heat Pumps
-0.098843	0.000000	0.000000	4	2015	Air-Source Heat Pumps (heating)
-0.547018	0.088498	0.000000	4	2015	Natural Gas Furnaces
-0.190566	0.062655	0.000000	4	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	4	2015	Kerosene Furnaces (unused placeholder)
-0.033706	0.000000	0.000000	4	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	4	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	4	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	4	2015	Wood Stoves & Other
-0.024711	0.000000	0.000000	4	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	4	2015	Natural Gas Heat Pumps (heating)
-0.020051	0.868763	0.635883	5	2015	Electric Heating Other Than Heat Pumps
-0.674966	0.092254	0.263914	5	2015	Air-Source Heat Pumps (heating)
-0.216314	0.016477	0.062235	5	2015	Natural Gas Furnaces
-0.044491	0.021592	0.000000	5	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	5	2015	Kerosene Furnaces (unused placeholder)
-0.034889	0.000000	0.037968	5	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	5	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	5	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2015	Wood Stoves & Other
-0.009289	0.000913	0.000000	5	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2015	Natural Gas Heat Pumps (heating)
-0.047363	0.630529	0.481392	6	2015	Electric Heating Other Than Heat Pumps
-0.668622	0.245375	0.170397	6	2015	Air-Source Heat Pumps (heating)
-0.195641	0.121667	0.000000	6	2015	Natural Gas Furnaces
-0.070666	0.000000	0.000000	6	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	6	2015	Kerosene Furnaces (unused placeholder)
-0.008506	0.000000	0.348211	6	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	6	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	6	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	6	2015	Wood Stoves & Other
-0.009201	0.002429	0.000000	6	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2015	Natural Gas Heat Pumps (heating)
-0.109937	1.000000	0.452655	7	2015	Electric Heating Other Than Heat Pumps
-0.296408	0.000000	0.042115	7	2015	Air-Source Heat Pumps (heating)
-0.431512	0.000000	0.231197	7	2015	Natural Gas Furnaces
-0.143019	0.000000	0.000000	7	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	7	2015	Kerosene Furnaces (unused placeholder)
-0.015045	0.000000	0.274034	7	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	7	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	7	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	7	2015	Wood Stoves & Other
-0.004079	0.000000	0.000000	7	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2015	Natural Gas Heat Pumps (heating)
-0.026905	0.533249	0.029374	8	2015	Electric Heating Other Than Heat Pumps
-0.094727	0.000000	0.000000	8	2015	Air-Source Heat Pumps (heating)
-0.831650	0.466751	0.056539	8	2015	Natural Gas Furnaces
-0.020866	0.000000	0.000000	8	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	8	2015	Kerosene Furnaces (unused placeholder)
-0.020866	0.000000	0.615657	8	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	8	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	8	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2015	Wood Stoves & Other
-0.004986	0.000000	0.000000	8	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	8	2015	Natural Gas Heat Pumps (heating)
-0.031366	0.680979	0.198597	9	2015	Electric Heating Other Than Heat Pumps
-0.078690	0.000000	0.000000	9	2015	Air-Source Heat Pumps (heating)
-0.771528	0.184125	0.670043	9	2015	Natural Gas Furnaces
-0.080321	0.042258	0.000000	9	2015	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	9	2015	Kerosene Furnaces (unused placeholder)
-0.033952	0.000000	0.000000	9	2015	Propane Furnaces & Other
-0.000000	0.000000	0.000000	9	2015	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2015	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2015	Wood Stoves & Other
-0.004142	0.000000	0.000000	9	2015	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2015	Natural Gas Heat Pumps (heating)
-0.003495	0.000000	0.000000	1	2016	Electric Heating Other Than Heat Pumps
-0.028478	0.000000	0.000000	1	2016	Air-Source Heat Pumps (heating)
-0.422232	0.000000	1.000000	1	2016	Natural Gas Furnaces
-0.094318	0.000000	0.000000	1	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	1	2016	Kerosene Furnaces (unused placeholder)
-0.386750	1.000000	0.000000	1	2016	Propane Furnaces & Other
-0.026691	0.000000	0.000000	1	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.028544	0.000000	0.000000	1	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2016	Wood Stoves & Other
-0.009493	0.000000	0.000000	1	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2016	Natural Gas Heat Pumps (heating)
-0.021185	0.298904	0.350711	2	2016	Electric Heating Other Than Heat Pumps
-0.047727	0.083231	0.000000	2	2016	Air-Source Heat Pumps (heating)
-0.824651	0.282310	0.649289	2	2016	Natural Gas Furnaces
-0.022203	0.186844	0.000000	2	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	2	2016	Kerosene Furnaces (unused placeholder)
-0.058548	0.000000	0.000000	2	2016	Propane Furnaces & Other
-0.006107	0.047113	0.000000	2	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.003669	0.000000	0.000000	2	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2016	Wood Stoves & Other
-0.015909	0.011890	0.000000	2	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2016	Natural Gas Heat Pumps (heating)
-0.047118	0.572375	0.000000	3	2016	Electric Heating Other Than Heat Pumps
-0.076135	0.041015	0.000000	3	2016	Air-Source Heat Pumps (heating)
-0.736779	0.364036	1.000000	3	2016	Natural Gas Furnaces
-0.020017	0.013784	0.000000	3	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	3	2016	Kerosene Furnaces (unused placeholder)
-0.102036	0.000000	0.000000	3	2016	Propane Furnaces & Other
-0.000000	0.000000	0.000000	3	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	3	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	3	2016	Wood Stoves & Other
-0.017914	0.008789	0.000000	3	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2016	Natural Gas Heat Pumps (heating)
-0.087096	0.848847	1.000000	4	2016	Electric Heating Other Than Heat Pumps
-0.069947	0.000000	0.000000	4	2016	Air-Source Heat Pumps (heating)
-0.580471	0.088498	0.000000	4	2016	Natural Gas Furnaces
-0.204877	0.062655	0.000000	4	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	4	2016	Kerosene Furnaces (unused placeholder)
-0.041150	0.000000	0.000000	4	2016	Propane Furnaces & Other
-0.000000	0.000000	0.000000	4	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	4	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	4	2016	Wood Stoves & Other
-0.016458	0.000000	0.000000	4	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	4	2016	Natural Gas Heat Pumps (heating)
-0.033692	0.868763	0.635883	5	2016	Electric Heating Other Than Heat Pumps
-0.686192	0.092254	0.263914	5	2016	Air-Source Heat Pumps (heating)
-0.235576	0.016477	0.062235	5	2016	Natural Gas Furnaces
-0.027539	0.021592	0.000000	5	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	5	2016	Kerosene Furnaces (unused placeholder)
-0.006065	0.000000	0.037968	5	2016	Propane Furnaces & Other
-0.000000	0.000000	0.000000	5	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	5	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2016	Wood Stoves & Other
-0.010935	0.000913	0.000000	5	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2016	Natural Gas Heat Pumps (heating)
-0.058925	0.630529	0.481392	6	2016	Electric Heating Other Than Heat Pumps
-0.589527	0.245375	0.170397	6	2016	Air-Source Heat Pumps (heating)
-0.199042	0.121667	0.000000	6	2016	Natural Gas Furnaces
-0.131712	0.000000	0.000000	6	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	6	2016	Kerosene Furnaces (unused placeholder)
-0.011398	0.000000	0.348211	6	2016	Propane Furnaces & Other
-0.000000	0.000000	0.000000	6	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	6	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	6	2016	Wood Stoves & Other
-0.009395	0.002429	0.000000	6	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2016	Natural Gas Heat Pumps (heating)
-0.092588	1.000000	0.452655	7	2016	Electric Heating Other Than Heat Pumps
-0.290033	0.000000	0.042115	7	2016	Air-Source Heat Pumps (heating)
-0.450036	0.000000	0.231197	7	2016	Natural Gas Furnaces
-0.149139	0.000000	0.000000	7	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	7	2016	Kerosene Furnaces (unused placeholder)
-0.013581	0.000000	0.274034	7	2016	Propane Furnaces & Other
-0.000000	0.000000	0.000000	7	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	7	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	7	2016	Wood Stoves & Other
-0.004622	0.000000	0.000000	7	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2016	Natural Gas Heat Pumps (heating)
-0.020527	0.533249	0.029374	8	2016	Electric Heating Other Than Heat Pumps
-0.097149	0.000000	0.000000	8	2016	Air-Source Heat Pumps (heating)
-0.836317	0.466751	0.056539	8	2016	Natural Gas Furnaces
-0.010497	0.000000	0.000000	8	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	8	2016	Kerosene Furnaces (unused placeholder)
-0.027656	0.000000	0.615657	8	2016	Propane Furnaces & Other
-0.002741	0.000000	0.000000	8	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	8	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2016	Wood Stoves & Other
-0.005113	0.000000	0.000000	8	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	8	2016	Natural Gas Heat Pumps (heating)
-0.026312	0.680979	0.198597	9	2016	Electric Heating Other Than Heat Pumps
-0.066139	0.000000	0.000000	9	2016	Air-Source Heat Pumps (heating)
-0.805236	0.184125	0.670043	9	2016	Natural Gas Furnaces
-0.074641	0.042258	0.000000	9	2016	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	9	2016	Kerosene Furnaces (unused placeholder)
-0.023466	0.000000	0.000000	9	2016	Propane Furnaces & Other
-0.000725	0.000000	0.000000	9	2016	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2016	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2016	Wood Stoves & Other
-0.003481	0.000000	0.000000	9	2016	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2016	Natural Gas Heat Pumps (heating)
-0.002982	0.000000	0.000000	1	2017	Electric Heating Other Than Heat Pumps
-0.026596	0.000000	0.000000	1	2017	Air-Source Heat Pumps (heating)
-0.447991	0.000000	1.000000	1	2017	Natural Gas Furnaces
-0.093268	0.000000	0.000000	1	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	1	2017	Kerosene Furnaces (unused placeholder)
-0.407592	1.000000	0.000000	1	2017	Propane Furnaces & Other
-0.002436	0.000000	0.000000	1	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.013816	0.000000	0.000000	1	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2017	Wood Stoves & Other
-0.005319	0.000000	0.000000	1	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2017	Natural Gas Heat Pumps (heating)
-0.017578	0.298904	0.350711	2	2017	Electric Heating Other Than Heat Pumps
-0.070350	0.083231	0.000000	2	2017	Air-Source Heat Pumps (heating)
-0.796748	0.282310	0.649289	2	2017	Natural Gas Furnaces
-0.038965	0.186844	0.000000	2	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	2	2017	Kerosene Furnaces (unused placeholder)
-0.049116	0.000000	0.000000	2	2017	Propane Furnaces & Other
-0.005235	0.047113	0.000000	2	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.007938	0.000000	0.000000	2	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2017	Wood Stoves & Other
-0.014070	0.011890	0.000000	2	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2017	Natural Gas Heat Pumps (heating)
-0.049903	0.572375	0.000000	3	2017	Electric Heating Other Than Heat Pumps
-0.069037	0.041015	0.000000	3	2017	Air-Source Heat Pumps (heating)
-0.709099	0.364036	1.000000	3	2017	Natural Gas Furnaces
-0.020277	0.013784	0.000000	3	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	3	2017	Kerosene Furnaces (unused placeholder)
-0.143054	0.000000	0.000000	3	2017	Propane Furnaces & Other
-0.000000	0.000000	0.000000	3	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	3	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	3	2017	Wood Stoves & Other
-0.008630	0.008789	0.000000	3	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2017	Natural Gas Heat Pumps (heating)
-0.116413	0.848847	1.000000	4	2017	Electric Heating Other Than Heat Pumps
-0.081919	0.000000	0.000000	4	2017	Air-Source Heat Pumps (heating)
-0.602301	0.088498	0.000000	4	2017	Natural Gas Furnaces
-0.140586	0.062655	0.000000	4	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	4	2017	Kerosene Furnaces (unused placeholder)
-0.048541	0.000000	0.000000	4	2017	Propane Furnaces & Other
-0.000000	0.000000	0.000000	4	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	4	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	4	2017	Wood Stoves & Other
-0.010240	0.000000	0.000000	4	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	4	2017	Natural Gas Heat Pumps (heating)
-0.035206	0.868763	0.635883	5	2017	Electric Heating Other Than Heat Pumps
-0.650543	0.092254	0.263914	5	2017	Air-Source Heat Pumps (heating)
-0.231037	0.016477	0.062235	5	2017	Natural Gas Furnaces
-0.050148	0.021592	0.000000	5	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	5	2017	Kerosene Furnaces (unused placeholder)
-0.008252	0.000000	0.037968	5	2017	Propane Furnaces & Other
-0.000172	0.000000	0.000000	5	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	5	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2017	Wood Stoves & Other
-0.024642	0.000913	0.000000	5	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2017	Natural Gas Heat Pumps (heating)
-0.089072	0.630529	0.481392	6	2017	Electric Heating Other Than Heat Pumps
-0.520483	0.245375	0.170397	6	2017	Air-Source Heat Pumps (heating)
-0.188118	0.121667	0.000000	6	2017	Natural Gas Furnaces
-0.173823	0.000000	0.000000	6	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	6	2017	Kerosene Furnaces (unused placeholder)
-0.008789	0.000000	0.348211	6	2017	Propane Furnaces & Other
-0.000000	0.000000	0.000000	6	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	6	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	6	2017	Wood Stoves & Other
-0.019715	0.002429	0.000000	6	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2017	Natural Gas Heat Pumps (heating)
-0.104295	1.000000	0.452655	7	2017	Electric Heating Other Than Heat Pumps
-0.288855	0.000000	0.042115	7	2017	Air-Source Heat Pumps (heating)
-0.443192	0.000000	0.231197	7	2017	Natural Gas Furnaces
-0.138474	0.000000	0.000000	7	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	7	2017	Kerosene Furnaces (unused placeholder)
-0.013381	0.000000	0.274034	7	2017	Propane Furnaces & Other
-0.000861	0.000000	0.000000	7	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	7	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	7	2017	Wood Stoves & Other
-0.010941	0.000000	0.000000	7	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2017	Natural Gas Heat Pumps (heating)
-0.030268	0.533249	0.029374	8	2017	Electric Heating Other Than Heat Pumps
-0.119970	0.000000	0.000000	8	2017	Air-Source Heat Pumps (heating)
-0.800003	0.466751	0.056539	8	2017	Natural Gas Furnaces
-0.008605	0.000000	0.000000	8	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	8	2017	Kerosene Furnaces (unused placeholder)
-0.033878	0.000000	0.615657	8	2017	Propane Furnaces & Other
-0.002278	0.000000	0.000000	8	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	8	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2017	Wood Stoves & Other
-0.004999	0.000000	0.000000	8	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	8	2017	Natural Gas Heat Pumps (heating)
-0.039681	0.680979	0.198597	9	2017	Electric Heating Other Than Heat Pumps
-0.077613	0.000000	0.000000	9	2017	Air-Source Heat Pumps (heating)
-0.753890	0.184125	0.670043	9	2017	Natural Gas Furnaces
-0.082860	0.042258	0.000000	9	2017	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	9	2017	Kerosene Furnaces (unused placeholder)
-0.041913	0.000000	0.000000	9	2017	Propane Furnaces & Other
-0.000810	0.000000	0.000000	9	2017	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2017	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2017	Wood Stoves & Other
-0.003234	0.000000	0.000000	9	2017	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2017	Natural Gas Heat Pumps (heating)
-0.014279	0.000000	0.000000	1	2018	Electric Heating Other Than Heat Pumps
-0.036312	0.000000	0.000000	1	2018	Air-Source Heat Pumps (heating)
-0.446349	0.000000	1.000000	1	2018	Natural Gas Furnaces
-0.054041	0.000000	0.000000	1	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	1	2018	Kerosene Furnaces (unused placeholder)
-0.404815	1.000000	0.000000	1	2018	Propane Furnaces & Other
-0.008182	0.000000	0.000000	1	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.026943	0.000000	0.000000	1	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2018	Wood Stoves & Other
-0.009078	0.000000	0.000000	1	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2018	Natural Gas Heat Pumps (heating)
-0.025461	0.298904	0.350711	2	2018	Electric Heating Other Than Heat Pumps
-0.062674	0.083231	0.000000	2	2018	Air-Source Heat Pumps (heating)
-0.787233	0.282310	0.649289	2	2018	Natural Gas Furnaces
-0.040275	0.186844	0.000000	2	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	2	2018	Kerosene Furnaces (unused placeholder)
-0.062784	0.000000	0.000000	2	2018	Propane Furnaces & Other
-0.003062	0.047113	0.000000	2	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.002841	0.000000	0.000000	2	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2018	Wood Stoves & Other
-0.015669	0.011890	0.000000	2	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2018	Natural Gas Heat Pumps (heating)
-0.032531	0.572375	0.000000	3	2018	Electric Heating Other Than Heat Pumps
-0.078025	0.041015	0.000000	3	2018	Air-Source Heat Pumps (heating)
-0.732119	0.364036	1.000000	3	2018	Natural Gas Furnaces
-0.016100	0.013784	0.000000	3	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	3	2018	Kerosene Furnaces (unused placeholder)
-0.132554	0.000000	0.000000	3	2018	Propane Furnaces & Other
-0.000000	0.000000	0.000000	3	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	3	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	3	2018	Wood Stoves & Other
-0.008669	0.008789	0.000000	3	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2018	Natural Gas Heat Pumps (heating)
-0.074082	0.848847	1.000000	4	2018	Electric Heating Other Than Heat Pumps
-0.094759	0.000000	0.000000	4	2018	Air-Source Heat Pumps (heating)
-0.624415	0.088498	0.000000	4	2018	Natural Gas Furnaces
-0.149711	0.062655	0.000000	4	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	4	2018	Kerosene Furnaces (unused placeholder)
-0.046504	0.000000	0.000000	4	2018	Propane Furnaces & Other
-0.000000	0.000000	0.000000	4	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	4	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	4	2018	Wood Stoves & Other
-0.010529	0.000000	0.000000	4	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	4	2018	Natural Gas Heat Pumps (heating)
-0.023206	0.868763	0.635883	5	2018	Electric Heating Other Than Heat Pumps
-0.680372	0.092254	0.263914	5	2018	Air-Source Heat Pumps (heating)
-0.221734	0.016477	0.062235	5	2018	Natural Gas Furnaces
-0.047943	0.021592	0.000000	5	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	5	2018	Kerosene Furnaces (unused placeholder)
-0.006471	0.000000	0.037968	5	2018	Propane Furnaces & Other
-0.000262	0.000000	0.000000	5	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	5	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2018	Wood Stoves & Other
-0.020011	0.000913	0.000000	5	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2018	Natural Gas Heat Pumps (heating)
-0.101792	0.630529	0.481392	6	2018	Electric Heating Other Than Heat Pumps
-0.610124	0.245375	0.170397	6	2018	Air-Source Heat Pumps (heating)
-0.175680	0.121667	0.000000	6	2018	Natural Gas Furnaces
-0.085411	0.000000	0.000000	6	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	6	2018	Kerosene Furnaces (unused placeholder)
-0.008019	0.000000	0.348211	6	2018	Propane Furnaces & Other
-0.001029	0.000000	0.000000	6	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	6	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	6	2018	Wood Stoves & Other
-0.017945	0.002429	0.000000	6	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2018	Natural Gas Heat Pumps (heating)
-0.105690	1.000000	0.452655	7	2018	Electric Heating Other Than Heat Pumps
-0.254235	0.000000	0.042115	7	2018	Air-Source Heat Pumps (heating)
-0.508351	0.000000	0.231197	7	2018	Natural Gas Furnaces
-0.113877	0.000000	0.000000	7	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	7	2018	Kerosene Furnaces (unused placeholder)
-0.010369	0.000000	0.274034	7	2018	Propane Furnaces & Other
-0.000000	0.000000	0.000000	7	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	7	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	7	2018	Wood Stoves & Other
-0.007477	0.000000	0.000000	7	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2018	Natural Gas Heat Pumps (heating)
-0.030305	0.533249	0.029374	8	2018	Electric Heating Other Than Heat Pumps
-0.098309	0.000000	0.000000	8	2018	Air-Source Heat Pumps (heating)
-0.822660	0.466751	0.056539	8	2018	Natural Gas Furnaces
-0.004844	0.000000	0.000000	8	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	8	2018	Kerosene Furnaces (unused placeholder)
-0.039894	0.000000	0.615657	8	2018	Propane Furnaces & Other
-0.000597	0.000000	0.000000	8	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	8	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2018	Wood Stoves & Other
-0.003390	0.000000	0.000000	8	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	8	2018	Natural Gas Heat Pumps (heating)
-0.047422	0.680979	0.198597	9	2018	Electric Heating Other Than Heat Pumps
-0.099026	0.000000	0.000000	9	2018	Air-Source Heat Pumps (heating)
-0.713382	0.184125	0.670043	9	2018	Natural Gas Furnaces
-0.091987	0.042258	0.000000	9	2018	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	9	2018	Kerosene Furnaces (unused placeholder)
-0.044009	0.000000	0.000000	9	2018	Propane Furnaces & Other
-0.000760	0.000000	0.000000	9	2018	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2018	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2018	Wood Stoves & Other
-0.003415	0.000000	0.000000	9	2018	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2018	Natural Gas Heat Pumps (heating)
-0.008614	0.000000	0.000000	1	2019	Electric Heating Other Than Heat Pumps
-0.037772	0.000000	0.000000	1	2019	Air-Source Heat Pumps (heating)
-0.432775	0.000000	1.000000	1	2019	Natural Gas Furnaces
-0.056235	0.000000	0.000000	1	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	1	2019	Kerosene Furnaces (unused placeholder)
-0.416231	1.000000	0.000000	1	2019	Propane Furnaces & Other
-0.005475	0.000000	0.000000	1	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.035343	0.000000	0.000000	1	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2019	Wood Stoves & Other
-0.007554	0.000000	0.000000	1	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2019	Natural Gas Heat Pumps (heating)
-0.069747	0.298904	0.350711	2	2019	Electric Heating Other Than Heat Pumps
-0.057142	0.083231	0.000000	2	2019	Air-Source Heat Pumps (heating)
-0.757638	0.282310	0.649289	2	2019	Natural Gas Furnaces
-0.052647	0.186844	0.000000	2	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	2	2019	Kerosene Furnaces (unused placeholder)
-0.041479	0.000000	0.000000	2	2019	Propane Furnaces & Other
-0.006797	0.047113	0.000000	2	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.003122	0.000000	0.000000	2	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2019	Wood Stoves & Other
-0.011428	0.011890	0.000000	2	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2019	Natural Gas Heat Pumps (heating)
-0.023322	0.572375	0.000000	3	2019	Electric Heating Other Than Heat Pumps
-0.040894	0.041015	0.000000	3	2019	Air-Source Heat Pumps (heating)
-0.772368	0.364036	1.000000	3	2019	Natural Gas Furnaces
-0.024670	0.013784	0.000000	3	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	3	2019	Kerosene Furnaces (unused placeholder)
-0.131930	0.000000	0.000000	3	2019	Propane Furnaces & Other
-0.000000	0.000000	0.000000	3	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	3	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	3	2019	Wood Stoves & Other
-0.006816	0.008789	0.000000	3	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2019	Natural Gas Heat Pumps (heating)
-0.092753	0.848847	1.000000	4	2019	Electric Heating Other Than Heat Pumps
-0.071525	0.000000	0.000000	4	2019	Air-Source Heat Pumps (heating)
-0.627951	0.088498	0.000000	4	2019	Natural Gas Furnaces
-0.135587	0.062655	0.000000	4	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	4	2019	Kerosene Furnaces (unused placeholder)
-0.060263	0.000000	0.000000	4	2019	Propane Furnaces & Other
-0.000000	0.000000	0.000000	4	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	4	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	4	2019	Wood Stoves & Other
-0.011921	0.000000	0.000000	4	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	4	2019	Natural Gas Heat Pumps (heating)
-0.047535	0.868763	0.635883	5	2019	Electric Heating Other Than Heat Pumps
-0.703119	0.092254	0.263914	5	2019	Air-Source Heat Pumps (heating)
-0.182039	0.016477	0.062235	5	2019	Natural Gas Furnaces
-0.039158	0.021592	0.000000	5	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	5	2019	Kerosene Furnaces (unused placeholder)
-0.006985	0.000000	0.037968	5	2019	Propane Furnaces & Other
-0.000000	0.000000	0.000000	5	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	5	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2019	Wood Stoves & Other
-0.021164	0.000913	0.000000	5	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2019	Natural Gas Heat Pumps (heating)
-0.064286	0.630529	0.481392	6	2019	Electric Heating Other Than Heat Pumps
-0.641965	0.245375	0.170397	6	2019	Air-Source Heat Pumps (heating)
-0.166865	0.121667	0.000000	6	2019	Natural Gas Furnaces
-0.103836	0.000000	0.000000	6	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	6	2019	Kerosene Furnaces (unused placeholder)
-0.003725	0.000000	0.348211	6	2019	Propane Furnaces & Other
-0.000000	0.000000	0.000000	6	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	6	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	6	2019	Wood Stoves & Other
-0.019323	0.002429	0.000000	6	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2019	Natural Gas Heat Pumps (heating)
-0.183774	1.000000	0.452655	7	2019	Electric Heating Other Than Heat Pumps
-0.251879	0.000000	0.042115	7	2019	Air-Source Heat Pumps (heating)
-0.501819	0.000000	0.231197	7	2019	Natural Gas Furnaces
-0.045186	0.000000	0.000000	7	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	7	2019	Kerosene Furnaces (unused placeholder)
-0.009760	0.000000	0.274034	7	2019	Propane Furnaces & Other
-0.000000	0.000000	0.000000	7	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	7	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	7	2019	Wood Stoves & Other
-0.007582	0.000000	0.000000	7	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2019	Natural Gas Heat Pumps (heating)
-0.027598	0.533249	0.029374	8	2019	Electric Heating Other Than Heat Pumps
-0.125692	0.000000	0.000000	8	2019	Air-Source Heat Pumps (heating)
-0.785610	0.466751	0.056539	8	2019	Natural Gas Furnaces
-0.011163	0.000000	0.000000	8	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	8	2019	Kerosene Furnaces (unused placeholder)
-0.046174	0.000000	0.615657	8	2019	Propane Furnaces & Other
-0.000271	0.000000	0.000000	8	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	8	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2019	Wood Stoves & Other
-0.003491	0.000000	0.000000	8	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	8	2019	Natural Gas Heat Pumps (heating)
-0.038894	0.680979	0.198597	9	2019	Electric Heating Other Than Heat Pumps
-0.134235	0.000000	0.000000	9	2019	Air-Source Heat Pumps (heating)
-0.694133	0.184125	0.670043	9	2019	Natural Gas Furnaces
-0.091751	0.042258	0.000000	9	2019	Natural Gas Boilers & Other
-0.000000	0.000000	0.000000	9	2019	Kerosene Furnaces (unused placeholder)
-0.036872	0.000000	0.000000	9	2019	Propane Furnaces & Other
-0.000385	0.000000	0.000000	9	2019	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2019	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2019	Wood Stoves & Other
-0.003729	0.000000	0.000000	9	2019	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2019	Natural Gas Heat Pumps (heating)
-0.011966	0.000000	0.000000	1	2020	Electric Heating Other Than Heat Pumps
-0.032823	0.000000	0.000000	1	2020	Air-Source Heat Pumps (heating)
-0.477723	0.000000	1.000000	1	2020	Natural Gas Furnaces
-0.098335	0.000000	0.000000	1	2020	Natural Gas Boilers & Other
+0.011966	0.317539	0.000000	1	2020	Electric Heating Other Than Heat Pumps
+0.032823	0.037629	0.000000	1	2020	Air-Source Heat Pumps (heating)
+0.477723	0.464952	0.084833	1	2020	Natural Gas Furnaces
+0.098335	0.047940	0.000000	1	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	1	2020	Kerosene Furnaces (unused placeholder)
-0.356074	1.000000	0.000000	1	2020	Propane Furnaces & Other
-0.011745	0.000000	0.000000	1	2020	Distillate Fuel Oil & Kerosene Furnaces
-0.004769	0.000000	0.000000	1	2020	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2020	Wood Stoves & Other
+0.356074	0.012758	0.262554	1	2020	Propane Furnaces & Other
+0.011745	0.009660	0.346739	1	2020	Distillate Fuel Oil & Kerosene Furnaces
+0.004769	0.006739	0.000000	1	2020	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.035727	0.305874	1	2020	Wood Stoves & Other
 0.006565	0.000000	0.000000	1	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2020	Natural Gas Heat Pumps (heating)
-0.027510	0.298904	0.350711	2	2020	Electric Heating Other Than Heat Pumps
-0.079649	0.083231	0.000000	2	2020	Air-Source Heat Pumps (heating)
-0.772708	0.282310	0.649289	2	2020	Natural Gas Furnaces
-0.054346	0.186844	0.000000	2	2020	Natural Gas Boilers & Other
+0.000000	0.067055	0.000000	1	2020	Natural Gas Heat Pumps (heating)
+0.027264	0.470865	0.149066	2	2020	Electric Heating Other Than Heat Pumps
+0.078938	0.037970	0.000000	2	2020	Air-Source Heat Pumps (heating)
+0.774738	0.258743	0.000000	2	2020	Natural Gas Furnaces
+0.053861	0.125768	0.000000	2	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	2	2020	Kerosene Furnaces (unused placeholder)
-0.045689	0.000000	0.000000	2	2020	Propane Furnaces & Other
-0.004168	0.047113	0.000000	2	2020	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	2	2020	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2020	Wood Stoves & Other
-0.015930	0.011890	0.000000	2	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2020	Natural Gas Heat Pumps (heating)
-0.045904	0.572375	0.000000	3	2020	Electric Heating Other Than Heat Pumps
-0.030680	0.041015	0.000000	3	2020	Air-Source Heat Pumps (heating)
-0.776340	0.364036	1.000000	3	2020	Natural Gas Furnaces
-0.021256	0.013784	0.000000	3	2020	Natural Gas Boilers & Other
+0.045281	0.009156	0.751123	2	2020	Propane Furnaces & Other
+0.004131	0.013258	0.000000	2	2020	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.009884	0.000000	2	2020	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.099811	2	2020	Wood Stoves & Other
+0.015788	0.000000	0.000000	2	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.074357	0.000000	2	2020	Natural Gas Heat Pumps (heating)
+0.045615	0.428420	0.148091	3	2020	Electric Heating Other Than Heat Pumps
+0.030487	0.080681	0.000000	3	2020	Air-Source Heat Pumps (heating)
+0.775295	0.435669	0.681509	3	2020	Natural Gas Furnaces
+0.021123	0.024889	0.000000	3	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	3	2020	Kerosene Furnaces (unused placeholder)
-0.122828	0.000000	0.000000	3	2020	Propane Furnaces & Other
-0.000435	0.000000	0.000000	3	2020	Distillate Fuel Oil & Kerosene Furnaces
+0.124507	0.018931	0.106356	3	2020	Propane Furnaces & Other
+0.000433	0.000000	0.000000	3	2020	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	3	2020	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	3	2020	Wood Stoves & Other
-0.002557	0.008789	0.000000	3	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2020	Natural Gas Heat Pumps (heating)
-0.094926	0.848847	1.000000	4	2020	Electric Heating Other Than Heat Pumps
-0.061274	0.000000	0.000000	4	2020	Air-Source Heat Pumps (heating)
-0.641223	0.088498	0.000000	4	2020	Natural Gas Furnaces
-0.145706	0.062655	0.000000	4	2020	Natural Gas Boilers & Other
+0.002541	0.000000	0.064044	3	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.011410	0.000000	3	2020	Natural Gas Heat Pumps (heating)
+0.095356	0.390137	0.246039	4	2020	Electric Heating Other Than Heat Pumps
+0.063673	0.108636	0.188898	4	2020	Air-Source Heat Pumps (heating)
+0.637379	0.415632	0.257704	4	2020	Natural Gas Furnaces
+0.145832	0.053972	0.000000	4	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	4	2020	Kerosene Furnaces (unused placeholder)
-0.051765	0.000000	0.000000	4	2020	Propane Furnaces & Other
+0.052454	0.031623	0.307358	4	2020	Propane Furnaces & Other
 0.000000	0.000000	0.000000	4	2020	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	4	2020	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	4	2020	Wood Stoves & Other
-0.005106	0.000000	0.000000	4	2020	Ground-Source Heat Pumps (heating)
+0.005306	0.000000	0.000000	4	2020	Ground-Source Heat Pumps (heating)
 0.000000	0.000000	0.000000	4	2020	Natural Gas Heat Pumps (heating)
-0.059064	0.868763	0.635883	5	2020	Electric Heating Other Than Heat Pumps
-0.684173	0.092254	0.263914	5	2020	Air-Source Heat Pumps (heating)
-0.190062	0.016477	0.062235	5	2020	Natural Gas Furnaces
-0.046694	0.021592	0.000000	5	2020	Natural Gas Boilers & Other
+0.058894	0.499057	0.419509	5	2020	Electric Heating Other Than Heat Pumps
+0.683307	0.279786	0.398934	5	2020	Air-Source Heat Pumps (heating)
+0.191167	0.187064	0.026596	5	2020	Natural Gas Furnaces
+0.046559	0.011323	0.000000	5	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	5	2020	Kerosene Furnaces (unused placeholder)
-0.005779	0.000000	0.037968	5	2020	Propane Furnaces & Other
+0.005863	0.004609	0.031006	5	2020	Propane Furnaces & Other
 0.000000	0.000000	0.000000	5	2020	Distillate Fuel Oil & Kerosene Furnaces
-0.000121	0.000000	0.000000	5	2020	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2020	Wood Stoves & Other
-0.014107	0.000913	0.000000	5	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2020	Natural Gas Heat Pumps (heating)
-0.037672	0.630529	0.481392	6	2020	Electric Heating Other Than Heat Pumps
-0.662434	0.245375	0.170397	6	2020	Air-Source Heat Pumps (heating)
-0.175763	0.121667	0.000000	6	2020	Natural Gas Furnaces
-0.103329	0.000000	0.000000	6	2020	Natural Gas Boilers & Other
+0.000120	0.000000	0.000000	5	2020	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.008791	5	2020	Wood Stoves & Other
+0.014089	0.000000	0.084409	5	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.018160	0.030755	5	2020	Natural Gas Heat Pumps (heating)
+0.037243	0.452048	0.490485	6	2020	Electric Heating Other Than Heat Pumps
+0.665030	0.365175	0.390760	6	2020	Air-Source Heat Pumps (heating)
+0.174389	0.069250	0.047748	6	2020	Natural Gas Furnaces
+0.102152	0.021060	0.000000	6	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	6	2020	Kerosene Furnaces (unused placeholder)
-0.007143	0.000000	0.348211	6	2020	Propane Furnaces & Other
+0.007473	0.000000	0.055230	6	2020	Propane Furnaces & Other
 0.000000	0.000000	0.000000	6	2020	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	6	2020	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	6	2020	Wood Stoves & Other
-0.013658	0.002429	0.000000	6	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2020	Natural Gas Heat Pumps (heating)
-0.295295	1.000000	0.452655	7	2020	Electric Heating Other Than Heat Pumps
-0.217402	0.000000	0.042115	7	2020	Air-Source Heat Pumps (heating)
-0.453157	0.000000	0.231197	7	2020	Natural Gas Furnaces
-0.017750	0.000000	0.000000	7	2020	Natural Gas Boilers & Other
+0.013712	0.043106	0.000000	6	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.049361	0.015776	6	2020	Natural Gas Heat Pumps (heating)
+0.295359	0.627365	0.592313	7	2020	Electric Heating Other Than Heat Pumps
+0.216558	0.227383	0.265974	7	2020	Air-Source Heat Pumps (heating)
+0.454158	0.105306	0.085708	7	2020	Natural Gas Furnaces
+0.017628	0.012256	0.000000	7	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	7	2020	Kerosene Furnaces (unused placeholder)
-0.011915	0.000000	0.274034	7	2020	Propane Furnaces & Other
+0.011833	0.000000	0.056005	7	2020	Propane Furnaces & Other
 0.000000	0.000000	0.000000	7	2020	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	7	2020	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	7	2020	Wood Stoves & Other
-0.004483	0.000000	0.000000	7	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2020	Natural Gas Heat Pumps (heating)
-0.043307	0.533249	0.029374	8	2020	Electric Heating Other Than Heat Pumps
-0.103515	0.000000	0.000000	8	2020	Air-Source Heat Pumps (heating)
-0.801950	0.466751	0.056539	8	2020	Natural Gas Furnaces
-0.021325	0.000000	0.000000	8	2020	Natural Gas Boilers & Other
+0.004465	0.016420	0.000000	7	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.011270	0.000000	7	2020	Natural Gas Heat Pumps (heating)
+0.043323	0.457455	0.272771	8	2020	Electric Heating Other Than Heat Pumps
+0.103087	0.122909	0.100112	8	2020	Air-Source Heat Pumps (heating)
+0.802826	0.320973	0.395923	8	2020	Natural Gas Furnaces
+0.021125	0.098662	0.037581	8	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	8	2020	Kerosene Furnaces (unused placeholder)
-0.027029	0.000000	0.615657	8	2020	Propane Furnaces & Other
+0.026776	0.000000	0.186279	8	2020	Propane Furnaces & Other
 0.000000	0.000000	0.000000	8	2020	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	8	2020	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2020	Wood Stoves & Other
-0.002875	0.000000	0.000000	8	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.000000	0.007333	8	2020	Wood Stoves & Other
+0.002864	0.000000	0.000000	8	2020	Ground-Source Heat Pumps (heating)
 0.000000	0.000000	0.000000	8	2020	Natural Gas Heat Pumps (heating)
-0.078489	0.680979	0.198597	9	2020	Electric Heating Other Than Heat Pumps
-0.148347	0.000000	0.000000	9	2020	Air-Source Heat Pumps (heating)
-0.640379	0.184125	0.670043	9	2020	Natural Gas Furnaces
-0.090959	0.042258	0.000000	9	2020	Natural Gas Boilers & Other
+0.077675	0.590416	0.564243	9	2020	Electric Heating Other Than Heat Pumps
+0.146808	0.120589	0.053741	9	2020	Air-Source Heat Pumps (heating)
+0.641707	0.192513	0.370020	9	2020	Natural Gas Furnaces
+0.092416	0.036750	0.000000	9	2020	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	9	2020	Kerosene Furnaces (unused placeholder)
-0.037126	0.000000	0.000000	9	2020	Propane Furnaces & Other
-0.000581	0.000000	0.000000	9	2020	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2020	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2020	Wood Stoves & Other
-0.004121	0.000000	0.000000	9	2020	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2020	Natural Gas Heat Pumps (heating)
-0.005733	0.000000	0.000000	1	2021	Electric Heating Other Than Heat Pumps
-0.025877	0.000000	0.000000	1	2021	Air-Source Heat Pumps (heating)
-0.378787	0.000000	1.000000	1	2021	Natural Gas Furnaces
-0.055365	0.000000	0.000000	1	2021	Natural Gas Boilers & Other
+0.036741	0.008521	0.000000	9	2020	Propane Furnaces & Other
+0.000575	0.000983	0.000000	9	2020	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.011996	9	2020	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.013273	0.000000	9	2020	Wood Stoves & Other
+0.004078	0.007449	0.000000	9	2020	Ground-Source Heat Pumps (heating)
+0.000000	0.029506	0.000000	9	2020	Natural Gas Heat Pumps (heating)
+0.005674	0.317539	0.000000	1	2021	Electric Heating Other Than Heat Pumps
+0.025610	0.037629	0.000000	1	2021	Air-Source Heat Pumps (heating)
+0.380505	0.464952	0.084833	1	2021	Natural Gas Furnaces
+0.054793	0.047940	0.000000	1	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	1	2021	Kerosene Furnaces (unused placeholder)
-0.503722	1.000000	0.000000	1	2021	Propane Furnaces & Other
-0.011638	0.000000	0.000000	1	2021	Distillate Fuel Oil & Kerosene Furnaces
-0.012408	0.000000	0.000000	1	2021	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	1	2021	Wood Stoves & Other
-0.006469	0.000000	0.000000	1	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	1	2021	Natural Gas Heat Pumps (heating)
-0.027933	0.298904	0.350711	2	2021	Electric Heating Other Than Heat Pumps
-0.044245	0.083231	0.000000	2	2021	Air-Source Heat Pumps (heating)
-0.852369	0.282310	0.649289	2	2021	Natural Gas Furnaces
-0.034865	0.186844	0.000000	2	2021	Natural Gas Boilers & Other
+0.503218	0.012758	0.262554	1	2021	Propane Furnaces & Other
+0.011518	0.009660	0.346739	1	2021	Distillate Fuel Oil & Kerosene Furnaces
+0.012280	0.006739	0.000000	1	2021	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.035727	0.305874	1	2021	Wood Stoves & Other
+0.006402	0.000000	0.000000	1	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.067055	0.000000	1	2021	Natural Gas Heat Pumps (heating)
+0.025079	0.470865	0.149066	2	2021	Electric Heating Other Than Heat Pumps
+0.047859	0.037970	0.000000	2	2021	Air-Source Heat Pumps (heating)
+0.847621	0.258743	0.000000	2	2021	Natural Gas Furnaces
+0.039988	0.125768	0.000000	2	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	2	2021	Kerosene Furnaces (unused placeholder)
-0.027432	0.000000	0.000000	2	2021	Propane Furnaces & Other
-0.002094	0.047113	0.000000	2	2021	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.000000	0.000000	2	2021	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	2	2021	Wood Stoves & Other
-0.011061	0.011890	0.000000	2	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.089708	0.000000	2	2021	Natural Gas Heat Pumps (heating)
-0.069564	0.572375	0.000000	3	2021	Electric Heating Other Than Heat Pumps
-0.023080	0.041015	0.000000	3	2021	Air-Source Heat Pumps (heating)
-0.747999	0.364036	1.000000	3	2021	Natural Gas Furnaces
-0.033103	0.013784	0.000000	3	2021	Natural Gas Boilers & Other
+0.025608	0.009156	0.751123	2	2021	Propane Furnaces & Other
+0.001880	0.013258	0.000000	2	2021	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.009884	0.000000	2	2021	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.099811	2	2021	Wood Stoves & Other
+0.011965	0.000000	0.000000	2	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.074357	0.000000	2	2021	Natural Gas Heat Pumps (heating)
+0.070295	0.428420	0.148091	3	2021	Electric Heating Other Than Heat Pumps
+0.022681	0.080681	0.000000	3	2021	Air-Source Heat Pumps (heating)
+0.748743	0.435669	0.681509	3	2021	Natural Gas Furnaces
+0.032531	0.024889	0.000000	3	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	3	2021	Kerosene Furnaces (unused placeholder)
-0.123156	0.000000	0.000000	3	2021	Propane Furnaces & Other
-0.000534	0.000000	0.000000	3	2021	Distillate Fuel Oil & Kerosene Furnaces
+0.122705	0.018931	0.106356	3	2021	Propane Furnaces & Other
+0.000524	0.000000	0.000000	3	2021	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	3	2021	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	3	2021	Wood Stoves & Other
-0.002564	0.008789	0.000000	3	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	3	2021	Natural Gas Heat Pumps (heating)
-0.100639	0.848847	1.000000	4	2021	Electric Heating Other Than Heat Pumps
-0.058813	0.000000	0.000000	4	2021	Air-Source Heat Pumps (heating)
-0.683032	0.088498	0.000000	4	2021	Natural Gas Furnaces
-0.103767	0.062655	0.000000	4	2021	Natural Gas Boilers & Other
+0.002520	0.000000	0.064044	3	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.011410	0.000000	3	2021	Natural Gas Heat Pumps (heating)
+0.097298	0.390137	0.246039	4	2021	Electric Heating Other Than Heat Pumps
+0.062836	0.108636	0.188898	4	2021	Air-Source Heat Pumps (heating)
+0.681152	0.415632	0.257704	4	2021	Natural Gas Furnaces
+0.106086	0.053972	0.000000	4	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	4	2021	Kerosene Furnaces (unused placeholder)
-0.047214	0.000000	0.000000	4	2021	Propane Furnaces & Other
+0.045647	0.031623	0.307358	4	2021	Propane Furnaces & Other
 0.000000	0.000000	0.000000	4	2021	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	4	2021	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	4	2021	Wood Stoves & Other
-0.006535	0.000000	0.000000	4	2021	Ground-Source Heat Pumps (heating)
+0.006982	0.000000	0.000000	4	2021	Ground-Source Heat Pumps (heating)
 0.000000	0.000000	0.000000	4	2021	Natural Gas Heat Pumps (heating)
-0.059237	0.868763	0.635883	5	2021	Electric Heating Other Than Heat Pumps
-0.687550	0.092254	0.263914	5	2021	Air-Source Heat Pumps (heating)
-0.187680	0.016477	0.062235	5	2021	Natural Gas Furnaces
-0.051415	0.021592	0.000000	5	2021	Natural Gas Boilers & Other
+0.058232	0.499057	0.419509	5	2021	Electric Heating Other Than Heat Pumps
+0.689870	0.279786	0.398934	5	2021	Air-Source Heat Pumps (heating)
+0.184855	0.187064	0.026596	5	2021	Natural Gas Furnaces
+0.052903	0.011323	0.000000	5	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	5	2021	Kerosene Furnaces (unused placeholder)
-0.005245	0.000000	0.037968	5	2021	Propane Furnaces & Other
+0.005238	0.004609	0.031006	5	2021	Propane Furnaces & Other
 0.000000	0.000000	0.000000	5	2021	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	5	2021	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.000000	5	2021	Wood Stoves & Other
-0.008872	0.000913	0.000000	5	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	5	2021	Natural Gas Heat Pumps (heating)
-0.041183	0.630529	0.481392	6	2021	Electric Heating Other Than Heat Pumps
-0.672944	0.245375	0.170397	6	2021	Air-Source Heat Pumps (heating)
-0.192486	0.121667	0.000000	6	2021	Natural Gas Furnaces
-0.080241	0.000000	0.000000	6	2021	Natural Gas Boilers & Other
+0.000000	0.000000	0.008791	5	2021	Wood Stoves & Other
+0.008902	0.000000	0.084409	5	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.018160	0.030755	5	2021	Natural Gas Heat Pumps (heating)
+0.041060	0.452048	0.490485	6	2021	Electric Heating Other Than Heat Pumps
+0.672670	0.365175	0.390760	6	2021	Air-Source Heat Pumps (heating)
+0.192399	0.069250	0.047748	6	2021	Natural Gas Furnaces
+0.080447	0.021060	0.000000	6	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	6	2021	Kerosene Furnaces (unused placeholder)
-0.004463	0.000000	0.348211	6	2021	Propane Furnaces & Other
+0.004746	0.000000	0.055230	6	2021	Propane Furnaces & Other
 0.000000	0.000000	0.000000	6	2021	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	6	2021	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	6	2021	Wood Stoves & Other
-0.008683	0.002429	0.000000	6	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	6	2021	Natural Gas Heat Pumps (heating)
-0.363825	1.000000	0.452655	7	2021	Electric Heating Other Than Heat Pumps
-0.171708	0.000000	0.042115	7	2021	Air-Source Heat Pumps (heating)
-0.427174	0.000000	0.231197	7	2021	Natural Gas Furnaces
-0.025304	0.000000	0.000000	7	2021	Natural Gas Boilers & Other
+0.008680	0.043106	0.000000	6	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.049361	0.015776	6	2021	Natural Gas Heat Pumps (heating)
+0.367178	0.627365	0.592313	7	2021	Electric Heating Other Than Heat Pumps
+0.178839	0.227383	0.265974	7	2021	Air-Source Heat Pumps (heating)
+0.417864	0.105306	0.085708	7	2021	Natural Gas Furnaces
+0.024309	0.012256	0.000000	7	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	7	2021	Kerosene Furnaces (unused placeholder)
-0.009774	0.000000	0.274034	7	2021	Propane Furnaces & Other
+0.009502	0.000000	0.056005	7	2021	Propane Furnaces & Other
 0.000000	0.000000	0.000000	7	2021	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	7	2021	Distillate Fuel Oil & Kerosene Boilers & Other
 0.000000	0.000000	0.000000	7	2021	Wood Stoves & Other
-0.002216	0.000000	0.000000	7	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.000000	0.000000	7	2021	Natural Gas Heat Pumps (heating)
-0.022523	0.533249	0.029374	8	2021	Electric Heating Other Than Heat Pumps
-0.121426	0.000000	0.000000	8	2021	Air-Source Heat Pumps (heating)
-0.781852	0.466751	0.056539	8	2021	Natural Gas Furnaces
-0.037362	0.000000	0.000000	8	2021	Natural Gas Boilers & Other
+0.002308	0.016420	0.000000	7	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.011270	0.000000	7	2021	Natural Gas Heat Pumps (heating)
+0.021783	0.457455	0.272771	8	2021	Electric Heating Other Than Heat Pumps
+0.123857	0.122909	0.100112	8	2021	Air-Source Heat Pumps (heating)
+0.780841	0.320973	0.395923	8	2021	Natural Gas Furnaces
+0.037727	0.098662	0.037581	8	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	8	2021	Kerosene Furnaces (unused placeholder)
-0.033054	0.000000	0.615657	8	2021	Propane Furnaces & Other
-0.000669	0.000000	0.000000	8	2021	Distillate Fuel Oil & Kerosene Furnaces
+0.031968	0.000000	0.186279	8	2021	Propane Furnaces & Other
+0.000647	0.000000	0.000000	8	2021	Distillate Fuel Oil & Kerosene Furnaces
 0.000000	0.000000	0.000000	8	2021	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.298430	8	2021	Wood Stoves & Other
-0.003113	0.000000	0.000000	8	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.000000	0.007333	8	2021	Wood Stoves & Other
+0.003176	0.000000	0.000000	8	2021	Ground-Source Heat Pumps (heating)
 0.000000	0.000000	0.000000	8	2021	Natural Gas Heat Pumps (heating)
-0.055895	0.680979	0.198597	9	2021	Electric Heating Other Than Heat Pumps
-0.126620	0.000000	0.000000	9	2021	Air-Source Heat Pumps (heating)
-0.723761	0.184125	0.670043	9	2021	Natural Gas Furnaces
-0.061216	0.042258	0.000000	9	2021	Natural Gas Boilers & Other
+0.055416	0.590416	0.564243	9	2021	Electric Heating Other Than Heat Pumps
+0.126913	0.120589	0.053741	9	2021	Air-Source Heat Pumps (heating)
+0.725777	0.192513	0.370020	9	2021	Natural Gas Furnaces
+0.059905	0.036750	0.000000	9	2021	Natural Gas Boilers & Other
 0.000000	0.000000	0.000000	9	2021	Kerosene Furnaces (unused placeholder)
-0.028673	0.000000	0.000000	9	2021	Propane Furnaces & Other
-0.000589	0.000000	0.000000	9	2021	Distillate Fuel Oil & Kerosene Furnaces
-0.000000	0.050380	0.000000	9	2021	Distillate Fuel Oil & Kerosene Boilers & Other
-0.000000	0.000000	0.131360	9	2021	Wood Stoves & Other
-0.003247	0.000000	0.000000	9	2021	Ground-Source Heat Pumps (heating)
-0.000000	0.042258	0.000000	9	2021	Natural Gas Heat Pumps (heating)
+0.028166	0.008521	0.000000	9	2021	Propane Furnaces & Other
+0.000569	0.000983	0.000000	9	2021	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.011996	9	2021	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.013273	0.000000	9	2021	Wood Stoves & Other
+0.003254	0.007449	0.000000	9	2021	Ground-Source Heat Pumps (heating)
+0.000000	0.029506	0.000000	9	2021	Natural Gas Heat Pumps (heating)
+0.001775	0.317539	0.000000	1	2022	Electric Heating Other Than Heat Pumps
+0.066795	0.037629	0.000000	1	2022	Air-Source Heat Pumps (heating)
+0.403551	0.464952	0.084833	1	2022	Natural Gas Furnaces
+0.044386	0.047940	0.000000	1	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	1	2022	Kerosene Furnaces (unused placeholder)
+0.475768	0.012758	0.262554	1	2022	Propane Furnaces & Other
+0.001775	0.009660	0.346739	1	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.005950	0.006739	0.000000	1	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.035727	0.305874	1	2022	Wood Stoves & Other
+0.000000	0.000000	0.000000	1	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.067055	0.000000	1	2022	Natural Gas Heat Pumps (heating)
+0.029237	0.470865	0.149066	2	2022	Electric Heating Other Than Heat Pumps
+0.051875	0.037970	0.000000	2	2022	Air-Source Heat Pumps (heating)
+0.802966	0.258743	0.000000	2	2022	Natural Gas Furnaces
+0.054188	0.125768	0.000000	2	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	2	2022	Kerosene Furnaces (unused placeholder)
+0.056844	0.009156	0.751123	2	2022	Propane Furnaces & Other
+0.003970	0.013258	0.000000	2	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000920	0.009884	0.000000	2	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.099811	2	2022	Wood Stoves & Other
+0.000000	0.000000	0.000000	2	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.074357	0.000000	2	2022	Natural Gas Heat Pumps (heating)
+0.073411	0.428420	0.148091	3	2022	Electric Heating Other Than Heat Pumps
+0.017921	0.080681	0.000000	3	2022	Air-Source Heat Pumps (heating)
+0.757255	0.435669	0.681509	3	2022	Natural Gas Furnaces
+0.014782	0.024889	0.000000	3	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	3	2022	Kerosene Furnaces (unused placeholder)
+0.135139	0.018931	0.106356	3	2022	Propane Furnaces & Other
+0.000000	0.000000	0.000000	3	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	3	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	3	2022	Wood Stoves & Other
+0.001493	0.000000	0.064044	3	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.011410	0.000000	3	2022	Natural Gas Heat Pumps (heating)
+0.068265	0.390137	0.246039	4	2022	Electric Heating Other Than Heat Pumps
+0.054612	0.108636	0.188898	4	2022	Air-Source Heat Pumps (heating)
+0.685961	0.415632	0.257704	4	2022	Natural Gas Furnaces
+0.127980	0.053972	0.000000	4	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	4	2022	Kerosene Furnaces (unused placeholder)
+0.058630	0.031623	0.307358	4	2022	Propane Furnaces & Other
+0.000000	0.000000	0.000000	4	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	4	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	4	2022	Wood Stoves & Other
+0.004551	0.000000	0.000000	4	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.000000	0.000000	4	2022	Natural Gas Heat Pumps (heating)
+0.048011	0.499057	0.419509	5	2022	Electric Heating Other Than Heat Pumps
+0.762083	0.279786	0.398934	5	2022	Air-Source Heat Pumps (heating)
+0.140766	0.187064	0.026596	5	2022	Natural Gas Furnaces
+0.037907	0.011323	0.000000	5	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	5	2022	Kerosene Furnaces (unused placeholder)
+0.004800	0.004609	0.031006	5	2022	Propane Furnaces & Other
+0.000100	0.000000	0.000000	5	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	5	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.008791	5	2022	Wood Stoves & Other
+0.006333	0.000000	0.084409	5	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.018160	0.030755	5	2022	Natural Gas Heat Pumps (heating)
+0.064832	0.452048	0.490485	6	2022	Electric Heating Other Than Heat Pumps
+0.649603	0.365175	0.390760	6	2022	Air-Source Heat Pumps (heating)
+0.196331	0.069250	0.047748	6	2022	Natural Gas Furnaces
+0.077936	0.021060	0.000000	6	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	6	2022	Kerosene Furnaces (unused placeholder)
+0.005901	0.000000	0.055230	6	2022	Propane Furnaces & Other
+0.000000	0.000000	0.000000	6	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	6	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	6	2022	Wood Stoves & Other
+0.005398	0.043106	0.000000	6	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.049361	0.015776	6	2022	Natural Gas Heat Pumps (heating)
+0.317789	0.627365	0.592313	7	2022	Electric Heating Other Than Heat Pumps
+0.201435	0.227383	0.265974	7	2022	Air-Source Heat Pumps (heating)
+0.415201	0.105306	0.085708	7	2022	Natural Gas Furnaces
+0.048866	0.012256	0.000000	7	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	7	2022	Kerosene Furnaces (unused placeholder)
+0.015036	0.000000	0.056005	7	2022	Propane Furnaces & Other
+0.000000	0.000000	0.000000	7	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	7	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	7	2022	Wood Stoves & Other
+0.001674	0.016420	0.000000	7	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.011270	0.000000	7	2022	Natural Gas Heat Pumps (heating)
+0.030123	0.457455	0.272771	8	2022	Electric Heating Other Than Heat Pumps
+0.139836	0.122909	0.100112	8	2022	Air-Source Heat Pumps (heating)
+0.731842	0.320973	0.395923	8	2022	Natural Gas Furnaces
+0.046281	0.098662	0.037581	8	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	8	2022	Kerosene Furnaces (unused placeholder)
+0.049465	0.000000	0.186279	8	2022	Propane Furnaces & Other
+0.000000	0.000000	0.000000	8	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	8	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.007333	8	2022	Wood Stoves & Other
+0.002453	0.000000	0.000000	8	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.000000	0.000000	8	2022	Natural Gas Heat Pumps (heating)
+0.043671	0.590416	0.564243	9	2022	Electric Heating Other Than Heat Pumps
+0.287549	0.120589	0.053741	9	2022	Air-Source Heat Pumps (heating)
+0.557035	0.192513	0.370020	9	2022	Natural Gas Furnaces
+0.068796	0.036750	0.000000	9	2022	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	9	2022	Kerosene Furnaces (unused placeholder)
+0.037905	0.008521	0.000000	9	2022	Propane Furnaces & Other
+0.000000	0.000983	0.000000	9	2022	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.011996	9	2022	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.013273	0.000000	9	2022	Wood Stoves & Other
+0.005045	0.007449	0.000000	9	2022	Ground-Source Heat Pumps (heating)
+0.000000	0.029506	0.000000	9	2022	Natural Gas Heat Pumps (heating)
+0.019670	0.317539	0.000000	1	2023	Electric Heating Other Than Heat Pumps
+0.061638	0.037629	0.000000	1	2023	Air-Source Heat Pumps (heating)
+0.402287	0.464952	0.084833	1	2023	Natural Gas Furnaces
+0.025014	0.047940	0.000000	1	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	1	2023	Kerosene Furnaces (unused placeholder)
+0.471415	0.012758	0.262554	1	2023	Propane Furnaces & Other
+0.003373	0.009660	0.346739	1	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.007798	0.006739	0.000000	1	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.035727	0.305874	1	2023	Wood Stoves & Other
+0.008805	0.000000	0.000000	1	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.067055	0.000000	1	2023	Natural Gas Heat Pumps (heating)
+0.026084	0.470865	0.149066	2	2023	Electric Heating Other Than Heat Pumps
+0.072667	0.037970	0.000000	2	2023	Air-Source Heat Pumps (heating)
+0.741205	0.258743	0.000000	2	2023	Natural Gas Furnaces
+0.059099	0.125768	0.000000	2	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	2	2023	Kerosene Furnaces (unused placeholder)
+0.079276	0.009156	0.751123	2	2023	Propane Furnaces & Other
+0.010176	0.013258	0.000000	2	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.001111	0.009884	0.000000	2	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.099811	2	2023	Wood Stoves & Other
+0.010381	0.000000	0.000000	2	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.074357	0.000000	2	2023	Natural Gas Heat Pumps (heating)
+0.076779	0.428420	0.148091	3	2023	Electric Heating Other Than Heat Pumps
+0.050485	0.080681	0.000000	3	2023	Air-Source Heat Pumps (heating)
+0.682263	0.435669	0.681509	3	2023	Natural Gas Furnaces
+0.036882	0.024889	0.000000	3	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	3	2023	Kerosene Furnaces (unused placeholder)
+0.144412	0.018931	0.106356	3	2023	Propane Furnaces & Other
+0.000000	0.000000	0.000000	3	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	3	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	3	2023	Wood Stoves & Other
+0.009179	0.000000	0.064044	3	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.011410	0.000000	3	2023	Natural Gas Heat Pumps (heating)
+0.159713	0.390137	0.246039	4	2023	Electric Heating Other Than Heat Pumps
+0.073624	0.108636	0.188898	4	2023	Air-Source Heat Pumps (heating)
+0.595436	0.415632	0.257704	4	2023	Natural Gas Furnaces
+0.096023	0.053972	0.000000	4	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	4	2023	Kerosene Furnaces (unused placeholder)
+0.061818	0.031623	0.307358	4	2023	Propane Furnaces & Other
+0.000000	0.000000	0.000000	4	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	4	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	4	2023	Wood Stoves & Other
+0.013386	0.000000	0.000000	4	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.000000	0.000000	4	2023	Natural Gas Heat Pumps (heating)
+0.054015	0.499057	0.419509	5	2023	Electric Heating Other Than Heat Pumps
+0.790051	0.279786	0.398934	5	2023	Air-Source Heat Pumps (heating)
+0.113910	0.187064	0.026596	5	2023	Natural Gas Furnaces
+0.034176	0.011323	0.000000	5	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	5	2023	Kerosene Furnaces (unused placeholder)
+0.003424	0.004609	0.031006	5	2023	Propane Furnaces & Other
+0.000083	0.000000	0.000000	5	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	5	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.008791	5	2023	Wood Stoves & Other
+0.004341	0.000000	0.084409	5	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.018160	0.030755	5	2023	Natural Gas Heat Pumps (heating)
+0.083500	0.452048	0.490485	6	2023	Electric Heating Other Than Heat Pumps
+0.603246	0.365175	0.390760	6	2023	Air-Source Heat Pumps (heating)
+0.253611	0.069250	0.047748	6	2023	Natural Gas Furnaces
+0.050729	0.021060	0.000000	6	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	6	2023	Kerosene Furnaces (unused placeholder)
+0.005599	0.000000	0.055230	6	2023	Propane Furnaces & Other
+0.000000	0.000000	0.000000	6	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	6	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	6	2023	Wood Stoves & Other
+0.003315	0.043106	0.000000	6	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.049361	0.015776	6	2023	Natural Gas Heat Pumps (heating)
+0.279604	0.627365	0.592313	7	2023	Electric Heating Other Than Heat Pumps
+0.239804	0.227383	0.265974	7	2023	Air-Source Heat Pumps (heating)
+0.451461	0.105306	0.085708	7	2023	Natural Gas Furnaces
+0.014587	0.012256	0.000000	7	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	7	2023	Kerosene Furnaces (unused placeholder)
+0.012938	0.000000	0.056005	7	2023	Propane Furnaces & Other
+0.000289	0.000000	0.000000	7	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	7	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.000000	7	2023	Wood Stoves & Other
+0.001318	0.016420	0.000000	7	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.011270	0.000000	7	2023	Natural Gas Heat Pumps (heating)
+0.041070	0.457455	0.272771	8	2023	Electric Heating Other Than Heat Pumps
+0.181492	0.122909	0.100112	8	2023	Air-Source Heat Pumps (heating)
+0.669504	0.320973	0.395923	8	2023	Natural Gas Furnaces
+0.061055	0.098662	0.037581	8	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	8	2023	Kerosene Furnaces (unused placeholder)
+0.040089	0.000000	0.186279	8	2023	Propane Furnaces & Other
+0.000637	0.000000	0.000000	8	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.000000	8	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.000000	0.007333	8	2023	Wood Stoves & Other
+0.006152	0.000000	0.000000	8	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.000000	0.000000	8	2023	Natural Gas Heat Pumps (heating)
+0.044174	0.590416	0.564243	9	2023	Electric Heating Other Than Heat Pumps
+0.301120	0.120589	0.053741	9	2023	Air-Source Heat Pumps (heating)
+0.542521	0.192513	0.370020	9	2023	Natural Gas Furnaces
+0.060386	0.036750	0.000000	9	2023	Natural Gas Boilers & Other
+0.000000	0.000000	0.000000	9	2023	Kerosene Furnaces (unused placeholder)
+0.041592	0.008521	0.000000	9	2023	Propane Furnaces & Other
+0.000000	0.000983	0.000000	9	2023	Distillate Fuel Oil & Kerosene Furnaces
+0.000000	0.000000	0.011996	9	2023	Distillate Fuel Oil & Kerosene Boilers & Other
+0.000000	0.013273	0.000000	9	2023	Wood Stoves & Other
+0.010207	0.007449	0.000000	9	2023	Ground-Source Heat Pumps (heating)
+0.000000	0.029506	0.000000	9	2023	Natural Gas Heat Pumps (heating)

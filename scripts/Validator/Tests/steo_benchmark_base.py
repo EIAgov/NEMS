@@ -2,14 +2,13 @@ from DataModel.Model import Model
 import pandas as pd
 
 class STEOBenchmarkBase:
-    #column_headers=['AEO Name', 'STEO Name', 'Tolerance', 'Multiplier', 'Multiplier_LeapYear', 'grpby_sign_aeo', 'n_steo']
     column_headers=['AEO Name', 'STEO Name', 'Tolerance', 'Tolerance_EndYear', 'Multiplier', 'Multiplier_LeapYear', 'grpby_sign_aeo', 'n_steo']
     rpt_header = 'Group By'
     # group_by_flag: (0, -1) for AEO group, 1 for multiple STEO group
     # grpby_sign_aeo = (1, -1) for AEO group
     # n_steo = 0/1 for 1 or many STEO for the mapping record
 
-    def __init__(self, catg='ngmm', start_year=2020, end_year=2023):
+    def __init__(self, catg='ngmm', start_year=2023, end_year=2025):
         self.mapping_catg = catg
         self.start_year = start_year
         self.end_year = end_year
@@ -155,8 +154,8 @@ class STEOBenchmarkBase:
             df = Model.getInstance().files.csv_aeo2steo_itg.load_table()
         elif self.mapping_catg == 'liq':
             df = Model.getInstance().files.csv_aeo2steo_liq.load_table()
-        elif self.mapping_catg == 'ogsm':
-            df = Model.getInstance().files.csv_aeo2steo_ogsm.load_table()
+        elif self.mapping_catg == 'hsm':
+            df = Model.getInstance().files.csv_aeo2steo_hsm.load_table()
         elif self.mapping_catg == 'mco':
             df = Model.getInstance().files.csv_aeo2steo_mco.load_table()
         else:

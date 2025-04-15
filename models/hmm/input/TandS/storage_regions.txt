@@ -1,0 +1,11 @@
+! Note: binary flag marking salt cavern eligble census regions
+Composite Table:
+regCEN           storage_flag
+Mountain         1
+Pacific          1
+WNCentral        1
+WSCentral        1
+ESCentral        1
+ENCentral        1
+MidAtlantic      1
+;

@@ -5,8 +5,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 219,Alaska Power and Telephone Co,,AK,F860,ASCC,ASCC
 221,"Alaska Village Elec Coop, Inc",,AK,F860,ASCC,ASCC
 221,"Alaska Village Elec Coop, Inc",NA,AK,F860,ASCC,ASCC
-599,Anchorage Municipal Light and Power,AMPL,AK,F861,ASCC,ASCC
-599,Anchorage Municipal Light and Power,,AK,F860,ASCC,ASCC
 1276,"Barrow Utils & Elec Coop, Inc",,AK,F860,ASCC,ASCC
 3522,Chugach Electric Assn Inc,CEA,AK,F861,ASCC,ASCC
 3522,Chugach Electric Assn Inc,,AK,F860,ASCC,ASCC
@@ -63,6 +61,9 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 6342,First Electric Coop Corp,MISO,AR,F860,MISO,MISS
 9879,City Water and Light Plant,MISO,AR,F861,MISO,MISS
 13718,City of North Little Rock - (AR),MISO,AR,F861,MISO,MISS
+14238,Ouachita Electric Coop Corp,MISO,AR,F860,MISO,MISS
+20963,Woodruff Electric Coop Corp,MISO,AR,F860,MISO,MISS
+814,Entergy Arkansas LLC,SWPP,AR,F860,SPP,SPPS
 3705,Clarksville Light & Water Co,SPA,AR,F860,SPP,SPPS
 3705,Clarksville Light & Water Co,SWPP,AR,F860,SPP,SPPS
 5860,Empire District Electric Co,SWPP,AR,F861,SPP,SPPS
@@ -85,7 +86,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 803,Arizona Public Service Co,WALC,AZ,F860,SRSG,SRSG
 3990,Colorado River Indian Irr Proj,WALC,AZ,F860,SRSG,SRSG
 5729,Electrical Dist No8 Maricopa,AZPS,AZ,F861,SRSG,SRSG
-6957,"Garkane Energy Coop, Inc",WALC,AZ,F860,SRSG,SRSG
 12351,City of Mesa - (AZ),WALC,AZ,F861,SRSG,SRSG
 13314,Navajo Tribal Utility Authority,WALC,AZ,F860,SRSG,SRSG
 13318,"Navopache Electric Coop, Inc",AZPS,AZ,F860,SRSG,SRSG
@@ -105,8 +105,8 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 27000,Western Area Power Administration,WALC,AZ,F861,SRSG,SRSG
 27000,Western Area Power Administration,GRIF,AZ,F860,SRSG,SRSG
 30518,Electrical Dist No3 Pinal County,AZPS,AZ,F861,SRSG,SRSG
-17166,Sierra Pacific Power Co,NEVP,CA,F860,BASN,BASN
 19840,"Valley Electric Assn, Inc",NEVP,CA,F861,BASN,BASN
+27000,Western Area Power Administration,NVE,CA,F860,BASN,BASN
 57483,Liberty Utilities,NEVP,CA,F860,BASN,BASN
 207,City of Alameda,CISO,CA,F860,CISO,CANO
 590,City of Anaheim - (CA),CISO,CA,F861,CISO,CASO
@@ -128,6 +128,8 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 12745,Modesto Irrigation District,CISO,CA,F860,CISO,CANO
 14328,Pacific Gas & Electric Co.,CISO,CA,F861,CISO,CANO
 14328,Pacific Gas & Electric Co.,BANC,CA,F860,CISO,CANO
+14328,Pacific Gas & Electric Co.,LDWP,CA,F860,CISO,CANO
+14354,PacifiCorp,CISO,CA,F860,CISO,NWPP
 14401,City of Palo Alto - (CA),CISO,CA,F861,CISO,CANO
 14534,City of Pasadena - (CA),CISO,CA,F861,CISO,CASO
 15308,Plumas-Sierra Rural Elec Coop,CISO,CA,F860,CISO,CANO
@@ -139,7 +141,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 16609,San Diego Gas & Electric Co,CISO,CA,F861,CISO,CASO
 16612,City & County of San Francisco,CISO,CA,F861,CISO,CANO
 16655,City of Santa Clara - (CA),CISO,CA,F861,CISO,CANO
-16740,Scenic Rivers Energy Coop,BANC,CA,F860,CISO,CANO
 17609,Southern California Edison Co,CISO,CA,F861,CISO,CASO
 17609,Southern California Edison Co,LDWP,CA,F860,CISO,CASO
 17612,Bear Valley Electric Service,CISO,CA,F861,CISO,CANO
@@ -159,7 +160,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 9216,Imperial Irrigation District,IID,CA,F861,SRSG,SRSG
 27000,Western Area Power Administration,WALC,CA,F861,SRSG,SRSG
 56146,Black Hills/Colorado Elec.Util,PACE,CO,F860,BASN,BASN
-3227,City of Center - (CO),PSCO,CO,F860,RMRG,RMRG
 3989,Colorado Springs City of,PSCO,CO,F861,RMRG,RMRG
 3989,Colorado Springs City of,WACM,CO,F860,RMRG,RMRG
 5086,Delta Montrose Electric Assn,WACM,CO,F860,RMRG,RMRG
@@ -169,13 +169,15 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 8570,Highline Electric Assn,WACM,CO,F860,RMRG,RMRG
 8751,Town of Holly - (CO),WACM,CO,F860,RMRG,RMRG
 8773,"Holy Cross Electric Assn, Inc",PSCO,CO,F861,RMRG,RMRG
+8773,"Holy Cross Electric Assn, Inc",WACM,CO,F860,RMRG,RMRG
+9216,Imperial Irrigation District,PSCO,CO,F860,RMRG,RMRG
 9336,Intermountain Rural Elec Assn,PSCO,CO,F861,RMRG,RMRG
 9336,Intermountain Rural Elec Assn,WACM,CO,F860,RMRG,RMRG
 10539,"La Plata Electric Assn, Inc",WACM,CO,F860,RMRG,RMRG
 10633,City of Lamar - (CO),PSCO,CO,F860,RMRG,RMRG
 10730,City of Las Animas - (CO),WACM,CO,F860,RMRG,RMRG
 11256,City of Loveland - (CO),PSCO,CO,F861,RMRG,RMRG
-12866,Moon Lake Electric Assn Inc,WACM,CO,F860,RMRG,RMRG
+12866,Moon Lake Electric Assn Inc,WACM,CO,F861,RMRG,RMRG
 13050,"Mountain Parks Electric, Inc",PSCO,CO,F860,RMRG,RMRG
 13050,"Mountain Parks Electric, Inc",WACM,CO,F860,RMRG,RMRG
 13781,Northern States Power Co - Minnesota,PSCO,CO,F860,RMRG,RMRG
@@ -191,7 +193,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 17592,Southeast Colorado Power Assn,PSCO,CO,F860,RMRG,RMRG
 19499,"United Power, Inc",WACM,CO,F861,RMRG,RMRG
 19499,"United Power, Inc",PSCO,CO,F860,RMRG,RMRG
-19545,"Black Hills Power, Inc. d/b/a",WACM,CO,F860,RMRG,RMRG
+19545,"Black Hills Power, Inc.",WACM,CO,F860,RMRG,RMRG
 20576,"White River Electric Assn, Inc",WACM,CO,F861,RMRG,RMRG
 27000,Western Area Power Administration,WACM,CO,F861,RMRG,RMRG
 27000,Western Area Power Administration,PSCO,CO,F860,RMRG,RMRG
@@ -205,6 +207,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 4176,Connecticut Light & Power Co,ISNE,CT,F861,ISNE,ISNE
 7716,Groton Dept of Utilities - (CT),ISNE,CT,F860,ISNE,ISNE
 9734,City of Jewett City - (CT),ISNE,CT,F860,ISNE,ISNE
+13573,Niagara Mohawk Power Corp.,ISNE,CT,F860,ISNE,ISNE
 13831,City of Norwich - (CT),ISNE,CT,F861,ISNE,ISNE
 19497,United Illuminating Co,ISNE,CT,F861,ISNE,ISNE
 20038,Town of Wallingford - (CT),ISNE,CT,F861,ISNE,ISNE
@@ -238,6 +241,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 10623,City of Lakeland - (FL),FMPP,FL,F861,FRCC,FRCC
 10623,City of Lakeland - (FL),TEC,FL,F860,FRCC,FRCC
 10868,City of Leesburg - (FL),FPC,FL,F860,FRCC,FRCC
+13485,New Smyrna Beach City of,FPL,FL,F861,FRCC,FRCC
 13485,New Smyrna Beach City of,NSB,FL,F861,FRCC,FRCC
 14610,Orlando Utilities Comm,FMPP,FL,F861,FRCC,FRCC
 14610,Orlando Utilities Comm,FPC,FL,F860,FRCC,FRCC
@@ -250,7 +254,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 58124,City of Winter Park - (FL),FPC,FL,F861,FRCC,FRCC
 7801,Gulf Power Co,SOCO,FL,F861,SRSE,SRSE
 20371,"West Florida El Coop Assn, Inc",AEC,FL,F860,SRSE,SRSE
-17539,South Carolina Electric&Gas Company,SCEG,GA,F860,SRCA,SRCA
+17539,"Dominion Energy South Carolina, Inc",SCEG,GA,F860,SRCA,SRCA
 18642,Tennessee Valley Authority,TVA,GA,F860,SRCE,SRCE
 195,Alabama Power Co,SOCO,GA,F860,SRSE,SRSE
 3916,Cobb Electric Membership Corp,SOCO,GA,F861,SRSE,SRSE
@@ -268,7 +272,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 13962,Oconee Electric Member Corp,SOCO,GA,F860,SRSE,SRSE
 15257,"Poudre Valley REA, Inc",SOCO,GA,F860,SRSE,SRSE
 16674,Satilla Rural Elec Member Corporation,SOCO,GA,F860,SRSE,SRSE
-18956,Tri-County Elec Member Corp,SOCO,GA,F860,SRSE,SRSE
+18956,Tri-County Elec Member Corp (GA),SOCO,GA,F860,SRSE,SRSE
 20065,Walton Electric Member Corp,SOCO,GA,F860,SRSE,SRSE
 40212,Colquitt Electric Membership Corp,SOCO,GA,F860,SRSE,SRSE
 8287,Hawaii Electric Light Co Inc,NA,HI,F861,HECO,HECO
@@ -282,7 +286,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 19547,Hawaiian Electric Co Inc,HECO,HI,F861,HECO,HECO
 19547,Hawaiian Electric Co Inc,,HI,F860,HECO,HECO
 19547,Hawaiian Electric Co Inc,NA,HI,F860,HECO,HECO
-471,Amana Society Service Co,MISO,IA,F860,MISO,MISW
+471,Amana Society Service Co,MISO,IA,F861,MISO,MISW
 554,City of Ames - (IA),MISO,IA,F861,MISO,MISW
 682,City of Anita - (IA),MISO,IA,F860,MISO,MISW
 965,Atlantic Municipal Utilities,MISO,IA,F860,MISO,MISW
@@ -330,6 +334,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 15349,City of Preston,MISO,IA,F860,MISO,MISW
 15377,City of Primghar - (IA),MISO,IA,F860,MISO,MISW
 16211,City of Rockford- (IA),MISO,IA,F860,MISO,MISW
+16611,Access Energy Coop,MISO,IA,F860,MISO,MISW
 17783,City of Spencer - (IA),MISO,IA,F860,MISO,MISW
 18177,City of Story City - (IA),MISO,IA,F860,MISO,MISW
 18204,City of Strawberry Point,MISO,IA,F860,MISO,MISW
@@ -362,7 +367,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 9187,City of Idaho Falls - (ID),PACE,ID,F860,BASN,BASN
 9191,Idaho Power Co,IPCO,ID,F861,BASN,BASN
 14354,PacifiCorp,PACE,ID,F861,BASN,BASN
-14711,Pennsylvania Electric Co,PACE,ID,F860,BASN,BASN
 1738,PacifiCorp,AVA,ID,F860,NWPP,NWPP
 1738,PacifiCorp,BPAT,ID,F860,NWPP,NWPP
 1956,City of Bonners Ferry,BPAT,ID,F860,NWPP,NWPP
@@ -381,7 +385,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 3153,City of Casey - (IL),MISO,IL,F860,MISO,MISC
 4110,Commonwealth Edison Co,MISO,IL,F860,MISO,MISC
 4362,Corn Belt Energy Corporation,MISO,IL,F861,MISO,MISC
-5748,Electric Energy Inc,EEI,IL,F860,MISO,MISC
+5748,Electric Energy Inc,GLHB,IL,F860,MISO,MISC
 6192,City of Farmer City - (IL),MISO,IL,F860,MISO,MISC
 6417,City of Flora - (IL),MISO,IL,F860,MISO,MISC
 6764,Village of Freeburg - (IL),MISO,IL,F860,MISO,MISC
@@ -393,11 +397,12 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 12167,City of McLeansboro - (IL),MISO,IL,F860,MISO,MISC
 12341,MidAmerican Energy Co,MISO,IL,F861,MISO,MISC
 13032,Mt Carmel Public Utility Co,MISO,IL,F861,MISO,MISC
+13799,Prairie Land Electric Coop Inc,MISO,IL,F860,MISO,MISC
 14840,City of Peru - (IL),MISO,IL,F860,MISO,MISC
 15388,City of Princeton - (IL),MISO,IL,F860,MISO,MISC
 15772,City of Red Bud - (IL),MISO,IL,F860,MISO,MISC
 16198,City of Rock Falls - (IL),MISO,IL,F860,MISO,MISC
-17585,"Southeastern IL Elec Coop, Inc",MISO,IL,F860,MISO,MISC
+17631,Southern Illinois Elec Coop,MISO,IL,F860,MISO,MISC
 17697,Southwestern Electric Coop Inc - (IL),MISO,IL,F861,MISO,MISC
 17828,City of Springfield - (IL),MISO,IL,F861,MISO,MISC
 18277,City of Sullivan - (IL),MISO,IL,F860,MISO,MISC
@@ -405,7 +410,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 20180,City of Waterloo - (IL),MISO,IL,F860,MISO,MISC
 40307,"Prairie Power, Inc",MISO,IL,F860,MISO,MISC
 56697,Ameren Illinois Company,MISO,IL,F861,MISO,MISC
-56697,Ameren Illinois Company,EEI,IL,F860,MISO,MISC
+56697,Ameren Illinois Company,GLHB,IL,F860,MISO,MISC
 4110,Commonwealth Edison Co,PJM,IL,F861,PJM,PJMC
 6641,4-County Electric Power Assn,PJM,IL,F860,PJM,PJMC
 7096,City of Geneva- (IL),PJM,IL,F861,PJM,PJMC
@@ -414,7 +419,8 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 16179,Rochelle Municipal Utilities,PJM,IL,F861,PJM,PJMC
 20824,Village of Winnetka - (IL),PJM,IL,F860,PJM,PJMC
 56697,Ameren Illinois Company,PJM,IL,F860,PJM,PJMC
-261,AGC Division of APG Inc,MISO,IN,F861,MISO,MISC
+261,AGC Division of APGI Inc,MISO,IN,F861,MISO,MISC
+4007,City of Columbia City - (IN),MISO,IN,F860,MISO,MISC
 4508,"Crawfordsville Elec, Lgt & Pwr",MISO,IN,F861,MISO,MISC
 4960,Decatur County Rural E M C,MISO,IN,F860,MISO,MISC
 5416,"Duke Energy Carolinas, LLC",MISO,IN,F860,MISO,MISC
@@ -423,13 +429,11 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 8447,Hendricks County Rural E M C,MISO,IN,F860,MISO,MISC
 8466,Henry County Rural E M C,MISO,IN,F860,MISO,MISC
 9088,City of Huntingburg - (IN),MISO,IN,F860,MISO,MISC
-9234,Indiana Municipal Power Agency,MISO,IN,F860,MISO,MISC
 9267,"Hoosier Energy R E C, Inc",MISO,IN,F860,MISO,MISC
 9273,Indianapolis Power & Light Co,MISO,IN,F861,MISO,MISC
 9324,Indiana Michigan Power Co,MISO,IN,F860,MISO,MISC
 9576,Jackson County Rural E M C - (IN),MISO,IN,F860,MISO,MISC
 9665,Jasper County Rural E M C,MISO,IN,F860,MISO,MISC
-9666,Jay County Rural E M C,MISO,IN,F860,MISO,MISC
 9778,Johnson County Rural E M C,MISO,IN,F860,MISO,MISC
 11142,City of Logansport - (IN),MISO,IN,F860,MISO,MISC
 12377,Midwest Energy Cooperative,MISO,IN,F860,MISO,MISC
@@ -443,6 +447,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 16830,City of Scottsburg - (IN),MISO,IN,F860,MISO,MISC
 17633,Southern Indiana Gas & Elec Co,MISO,IN,F861,MISO,MISC
 18538,City of Tell City - (IN),MISO,IN,F860,MISO,MISC
+18942,Tipton Municipal Electric Util,MISO,IN,F860,MISO,MISC
 19445,"Southern Indiana R E C, Inc",MISO,IN,F860,MISO,MISC
 19667,Utilities Dist-Western IN REMC,MISO,IN,F860,MISO,MISC
 20139,City of Washington - (IN),MISO,IN,F860,MISO,MISC
@@ -454,8 +459,9 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 3278,AEP Texas Central Company,PJM,IN,F860,PJM,PJMW
 6735,Town of Frankton - (IN),PJM,IN,F860,PJM,PJMW
 7627,City of Greenfield - (IN),PJM,IN,F860,PJM,PJMW
-9269,Indiana-Kentucky Electric Corp,OVEC,IN,F860,PJM,PJMW
+9269,Indiana-Kentucky Electric Corp,PJM,IN,F860,PJM,PJMW
 9324,Indiana Michigan Power Co,PJM,IN,F861,PJM,PJMW
+9666,Jay County Rural E M C,PJM,IN,F860,PJM,PJMW
 15470,"Duke Energy Indiana, LLC",PJM,IN,F860,PJM,PJMW
 15989,City of Richmond - (IN),PJM,IN,F860,PJM,PJMW
 27000,Western Area Power Administration,WACM,KS,F861,RMRG,RMRG
@@ -514,6 +520,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 5580,"East Kentucky Power Coop, Inc",PJM,KY,F860,PJM,PJMW
 9575,Jackson Energy Coop Corp - (KY),PJM,KY,F860,PJM,PJMW
 10171,Kentucky Utilities Co,PJM,KY,F860,PJM,PJMW
+11011,Licking Valley Rural E C C,PJM,KY,F861,PJM,PJMW
 18498,Taylor County Rural E C C,PJM,KY,F860,PJM,PJMW
 19446,Duke Energy Kentucky,PJM,KY,F861,PJM,PJMW
 22053,Kentucky Power Co,PJM,KY,F861,PJM,PJMW
@@ -566,7 +573,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 15371,Town of Princeton - (MA),ISNE,MA,F860,ISNE,ISNE
 15472,Public Service Co of NH,ISNE,MA,F860,ISNE,ISNE
 15748,Town of Reading - (MA),ISNE,MA,F860,ISNE,ISNE
-17127,Town of Shrewsbury - (MA),ISNE,MA,F860,ISNE,ISNE
+17127,Town of Shrewsbury - (MA),ISNE,MA,F861,ISNE,ISNE
 17609,Southern California Edison Co,ISNE,MA,F860,ISNE,ISNE
 18087,Town of Sterling - (MA),ISNE,MA,F860,ISNE,ISNE
 18488,City of Taunton,ISNE,MA,F861,ISNE,ISNE
@@ -596,6 +603,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 17637,Southern Maryland Elec Coop Inc,PJM,MD,F861,PJM,PJME
 1179,Versant Power,ISNE,ME,F861,ISNE,ISNE
 1179,Versant Power,NBSO,ME,F861,ISNE,ISNE
+3226,"Central Rural Electric Cooperative, Inc",ISNE,ME,F860,ISNE,ISNE
 3266,Central Maine Power Co,ISNE,ME,F861,ISNE,ISNE
 5609,Eastern Maine Electric Coop,NBSO,ME,F861,ISNE,ISNE
 6641,4-County Electric Power Assn,NBSO,ME,F860,ISNE,ISNE
@@ -631,7 +639,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 19125,City of Traverse City - (MI),MISO,MI,F860,MISO,MISE
 19578,Upper Peninsula Power Company,MISO,MI,F861,MISO,MISW
 20845,Wolverine Power Marketing Coop,MISO,MI,F861,MISO,MISE
-20847,Wisconsin Electric Power Co,MISO,MI,F861,MISO,MISW
+20847,Wisconsin Electric Power Co,MISO,MI,F860,MISO,MISW
 20860,Wisconsin Public Service Corp,MISO,MI,F860,MISO,MISW
 20910,Wolverine Power Supply Coop,MISO,MI,F860,MISO,MISE
 21048,Wyandotte Municipal Serv Comm,MISO,MI,F861,MISO,MISE
@@ -704,6 +712,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 17836,Springfield Public Utils Comm - (MN),MISO,MN,F860,MISO,MISW
 17876,City of St James - (MN),MISO,MN,F860,MISO,MISW
 18820,City of Thief River Falls,MISO,MN,F860,MISO,MISW
+19157,MiEnergy Cooperative,MISO,MN,F860,MISO,MISW
 19237,Truman Public Utilities Comm,MISO,MN,F860,MISO,MISW
 19883,City of Virginia - (MN),MISO,MN,F860,MISO,MISW
 20430,City of Westbrook,MISO,MN,F860,MISO,MISW
@@ -717,6 +726,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 40580,Southern Minnesota Mun P Agny,MISO,MN,F860,MISO,MISW
 56068,International Transmission Company DBA I,MISO,MN,F860,MISO,MISW
 56161,ITC Midwest LLC,MISO,MN,F860,MISO,MISW
+689,Connexus Energy,PJM,MN,F860,PJM,MISW
 150,Adrian Public Utilities Comm,SWPP,MN,F860,SPP,SPPN
 11332,City of Luverne - (MN),SWPP,MN,F860,SPP,SPPN
 12894,City of Moorhead - (MN),SWPP,MN,F861,SPP,SPPN
@@ -729,13 +739,11 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 6205,City of Farmington - (MO),MISO,MO,F861,MISO,MISC
 6839,City of Fulton - (MO),AECI,MO,F860,MISO,MISC
 8055,City of Hannibal - (MO),MISO,MO,F861,MISO,MISC
-8055,City of Hannibal - (MO),AECI,MO,F860,MISO,MISC
 10603,"Laclede Electric Coop, Inc",AECI,MO,F860,MISO,MISC
 10832,City of Lebanon - (MO),AECI,MO,F861,MISO,MISC
 11626,City of Marceline - (MO),MISO,MO,F860,MISO,MISC
 12294,City of Memphis - (MO),AECI,MO,F860,MISO,MISC
 12341,MidAmerican Energy Co,MISO,MO,F860,MISO,MISC
-12802,City of Monroe City - (MO),AECI,MO,F860,MISO,MISC
 13190,"N W Electric Power Coop, Inc",AECI,MO,F860,MISO,MISC
 13738,Northeast Missouri El Pwr Coop,AECI,MO,F860,MISO,MISC
 16259,City of Rolla - (MO),MISO,MO,F861,MISO,MISC
@@ -747,8 +755,8 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 56697,Ameren Illinois Company,MISO,MO,F860,MISO,MISC
 924,"Associated Electric Coop, Inc",SPA,MO,F860,SPP,SPPC
 2647,City of Butler - (MO),SWPP,MO,F860,SPP,SPPC
-3113,City of Carthage - (MO),SPA,MO,F861,SPP,SPPC
 3113,City of Carthage - (MO),SWPP,MO,F861,SPP,SPPC
+3278,AEP Texas Central Company,SWPP,MO,F860,SPP,SPPC
 3486,Chillicothe Municipal Utils,SWPP,MO,F860,SPP,SPPC
 3634,City of Nixa - (MO),SWPP,MO,F860,SPP,SPPC
 5860,Empire District Electric Co,SWPP,MO,F861,SPP,SPPC
@@ -801,8 +809,9 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 20169,Avista Corp,AVA,MT,F861,NWPP,NWPP
 21513,"Fergus Electric Coop, Inc",WAUW,MT,F861,NWPP,NWPP
 27000,Western Area Power Administration,WAUW,MT,F860,NWPP,NWPP
-19545,"Black Hills Power, Inc. d/b/a",WACM,MT,F861,RMRG,RMRG
+19545,"Black Hills Power, Inc.",WACM,MT,F861,RMRG,RMRG
 1307,Basin Electric Power Coop,SWPP,MT,F860,SPP,SPPN
+12087,McKenzie Electric Coop Inc,SWPP,MT,F861,SPP,SPPN
 12199,Montana-Dakota Utilities Co,SWPP,MT,F861,SPP,SPPN
 12899,Mor-Gran-Sou Electric Coop Inc,SWPP,MT,F860,SPP,SPPN
 27000,Western Area Power Administration,SWPP,MT,F861,SPP,SPPN
@@ -810,6 +819,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 5416,"Duke Energy Carolinas, LLC",PJM,NC,F860,PJM,PJMD
 5656,Edgecombe-Martin County E M C,PJM,NC,F861,PJM,PJMD
 6710,Town of Edenton - (NC),PJM,NC,F860,PJM,PJMD
+7978,Halifax Electric Member Corp,PJM,NC,F860,PJM,PJMD
 16101,Roanoke Electric Member Corp,PJM,NC,F861,PJM,PJMD
 16788,Town of Scotland Neck - (NC),PJM,NC,F860,PJM,PJMD
 19108,Tideland Electric Member Corp,PJM,NC,F860,PJM,PJMD
@@ -861,7 +871,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 17451,Town of Smithfield - (NC),CPLE,NC,F860,SRCA,SRCA
 17572,South River Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
 18022,City of Statesville - (NC),DUK,NC,F860,SRCA,SRCA
-18956,Tri-County Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
+18956,Tri-County Elec Member Corp (GA),CPLE,NC,F860,SRCA,SRCA
 18957,Tri-County Elec Member Corp,CPLE,NC,F860,SRCA,SRCA
 19435,Union Electric Membership Corp - (NC),DUK,NC,F860,SRCA,SRCA
 19876,Virginia Electric & Power Co,DUK,NC,F860,SRCA,SRCA
@@ -888,7 +898,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 1307,Basin Electric Power Coop,WACM,ND,F860,RMRG,RMRG
 1307,Basin Electric Power Coop,SWPP,ND,F861,SPP,SPPN
 2394,Burke-Divide Electric Coop Inc,SWPP,ND,F861,SPP,SPPN
-12087,McKenzie Electric Coop Inc,SWPP,ND,F860,SPP,SPPN
+12087,McKenzie Electric Coop Inc,SWPP,ND,F861,SPP,SPPN
 12199,Montana-Dakota Utilities Co,SWPP,ND,F860,SPP,SPPN
 20413,Mountrail-Williams Elec Coop,SWPP,ND,F861,SPP,SPPN
 27000,Western Area Power Administration,SWPP,ND,F861,SPP,SPPN
@@ -925,6 +935,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 15773,City of Red Cloud - (NE),SWPP,NE,F860,SPP,SPPN
 16667,City of Sargent - (NE),SWPP,NE,F860,SPP,SPPN
 16953,City of Seward - (NE),SWPP,NE,F860,SPP,SPPN
+17577,City of South Sioux City,SWPP,NE,F860,SPP,SPPN
 17642,Southern Public Power District,SWPP,NE,F861,SPP,SPPN
 17692,Southwest Public Power Dist,SWPP,NE,F860,SPP,SPPN
 17727,Village of Spalding - (NE),SWPP,NE,F860,SPP,SPPN
@@ -950,6 +961,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 963,Atlantic City Electric Co,PJM,NJ,F861,PJM,PJME
 6342,First Electric Coop Corp,PJM,NJ,F860,PJM,PJME
 9726,Jersey Central Power & Lt Co,PJM,NJ,F861,PJM,PJME
+11171,Long Island Power Authority,PJM,NJ,F860,PJM,PJME
 13119,City of Murfreesboro,PJM,NJ,F860,PJM,PJME
 14154,Orange & Rockland Utils Inc,PJM,NJ,F860,PJM,PJME
 14328,Pacific Gas & Electric Co.,PJM,NJ,F860,PJM,PJME
@@ -976,12 +988,14 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 4265,Continental Divide El Coop Inc,PNM,NM,F860,SRSG,SRSG
 5701,El Paso Electric Co,EPE,NM,F861,SRSG,SRSG
 5701,El Paso Electric Co,PNM,NM,F860,SRSG,SRSG
+5701,El Paso Electric Co,TEPC,NM,F860,SRSG,SRSG
 9699,"Jemez Mountains Elec Coop, Inc",PNM,NM,F860,SRSG,SRSG
 10378,"Kit Carson Electric Coop, Inc",PNM,NM,F860,SRSG,SRSG
 11204,Los Alamos County,PNM,NM,F861,SRSG,SRSG
 12901,Mora-San Miguel Elec Coop,PNM,NM,F860,SRSG,SRSG
 15473,Public Service Co of NM,PNM,NM,F861,SRSG,SRSG
 15473,Public Service Co of NM,GRIS,NM,F860,SRSG,SRSG
+15473,Public Service Co of NM,TEPC,NM,F860,SRSG,SRSG
 16057,"Rio Grande Electric Coop, Inc",EPE,NM,F861,SRSG,SRSG
 17826,"Springer Electric Coop, Inc",PNM,NM,F860,SRSG,SRSG
 19160,"Tri-County Electric Coop, Inc (OK)",PNM,NM,F860,SRSG,SRSG
@@ -1002,6 +1016,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 3249,Central Hudson Gas & Elec Corp,ISNE,NY,F860,ISNE,ISNE
 6369,Fishers Island Utility Co Inc,ISNE,NY,F860,ISNE,ISNE
 7601,Green Mountain Power Corp,ISNE,NY,F860,ISNE,ISNE
+11804,Massachusetts Electric Co,ISNE,NY,F860,ISNE,ISNE
 13573,Niagara Mohawk Power Corp.,ISNE,NY,F860,ISNE,ISNE
 14154,Orange & Rockland Utils Inc,ISNE,NY,F860,ISNE,ISNE
 122,Village of Arcade - (NY),NYIS,NY,F860,NYIS,NYUP
@@ -1021,13 +1036,13 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 16183,Rochester Gas & Electric Corp,NYIS,NY,F861,NYIS,NYUP
 16217,Village of Rockville Centre - (NY),NYIS,NY,F860,NYIS,NYCW
 14711,Pennsylvania Electric Co,PJM,NY,F861,PJM,PJME
+15270,Potomac Electric Power Co,PJM,NY,F860,PJM,PJME
 659,American Transmission Co,PJM,OH,F860,PJM,PJMW
 733,Appalachian Power Co,PJM,OH,F860,PJM,PJMW
 768,City of Arcanum - (OH),PJM,OH,F860,PJM,PJMW
 2054,City of Bowling Green - (OH),PJM,OH,F860,PJM,PJMW
 2205,Village of Brewster - (OH),PJM,OH,F860,PJM,PJMW
 2439,City of Bryan - (OH),PJM,OH,F860,PJM,PJMW
-2502,"Buckeye Rural Elec Coop, Inc",PJM,OH,F861,PJM,PJMW
 3216,City of Celina - (OH),PJM,OH,F860,PJM,PJMW
 3542,Duke Energy Ohio Inc,PJM,OH,F861,PJM,PJMW
 3755,Cleveland Electric Illum Co,PJM,OH,F860,PJM,PJMW
@@ -1054,7 +1069,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 13949,City of Oberlin - (OH),PJM,OH,F860,PJM,PJMW
 13998,Ohio Edison Co,PJM,OH,F860,PJM,PJMW
 14006,Ohio Power Co,PJM,OH,F861,PJM,PJMW
-14015,Ohio Valley Electric Corp,OVEC,OH,F860,PJM,PJMW
 14015,Ohio Valley Electric Corp,PJM,OH,F860,PJM,PJMW
 14194,City of Orrville - (OH),PJM,OH,F861,PJM,PJMW
 14381,City of Painesville,PJM,OH,F860,PJM,PJMW
@@ -1098,7 +1112,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 1736,Blachly-Lane County Coop El Assn,BPAT,OR,F860,NWPP,NWPP
 1738,PacifiCorp,BPAT,OR,F861,NWPP,NWPP
 1738,PacifiCorp,AVRN,OR,F860,NWPP,NWPP
-1738,PacifiCorp,CSTO,OR,F860,NWPP,NWPP
+1738,PacifiCorp,GRID,OR,F860,NWPP,NWPP
 1738,PacifiCorp,PACW,OR,F860,NWPP,NWPP
 1738,PacifiCorp,PGE,OR,F860,NWPP,NWPP
 3264,Central Lincoln People's Ut Dt,BPAT,OR,F860,NWPP,NWPP
@@ -1145,6 +1159,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 40167,"Somerset Rural Elec Coop, Inc",PJM,PA,F860,PJM,PJMW
 56162,American Transmission Systems Inc,PJM,PA,F860,PJM,PJME
 1857,Block Island Power Co,ISNE,RI,F860,ISNE,ISNE
+11804,Massachusetts Electric Co,ISNE,RI,F860,ISNE,ISNE
 13100,Municipal Electric Authority,ISNE,RI,F860,ISNE,ISNE
 13206,Nantucket Electric Co,ISNE,RI,F860,ISNE,ISNE
 13214,The Narragansett Electric Co,ISNE,RI,F860,ISNE,ISNE
@@ -1157,9 +1172,9 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 3046,Duke Energy Progress - (NC),SCEG,SC,F860,SRCA,SRCA
 3844,"Coastal Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
 5416,"Duke Energy Carolinas, LLC",DUK,SC,F861,SRCA,SRCA
-5416,"Duke Energy Carolinas, LLC",CPLE,SC,F860,SRCA,SRCA
 5416,"Duke Energy Carolinas, LLC",SC,SC,F860,SRCA,SRCA
 6894,City of Gaffney - (SC),DUK,SC,F861,SRCA,SRCA
+7646,Greenwood CPW,DUK,SC,F861,SRCA,SRCA
 8786,Horry Electric Coop Inc,SC,SC,F860,SRCA,SRCA
 11019,Little River Electric Coop Inc,DUK,SC,F860,SRCA,SRCA
 11118,Lockhart Power Co,DUK,SC,F860,SRCA,SRCA
@@ -1168,11 +1183,13 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 14175,"Tri-County Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
 16606,"Santee Electric Coop, Inc",SC,SC,F860,SRCA,SRCA
 16921,City of Seneca - (SC),DUK,SC,F860,SRCA,SRCA
-17539,South Carolina Electric&Gas Company,SCEG,SC,F861,SRCA,SRCA
+17539,"Dominion Energy South Carolina, Inc",SCEG,SC,F861,SRCA,SRCA
+17539,"Dominion Energy South Carolina, Inc",CPLE,SC,F860,SRCA,SRCA
 17543,South Carolina Public Service Authority,SC,SC,F861,SRCA,SRCA
 21002,York Electric Coop Inc,DUK,SC,F860,SRCA,SRCA
 5416,"Duke Energy Carolinas, LLC",SEPA,SC,F860,SRSE,SRSE
 1738,PacifiCorp,MISO,SD,F860,MISO,MISW
+4720,Dakota Energy Coop Inc,MISO,SD,F860,MISO,MISW
 12199,Montana-Dakota Utilities Co,MISO,SD,F861,MISO,MISW
 12341,MidAmerican Energy Co,MISO,SD,F861,MISO,MISW
 12710,Missouri Basin Muni Power Agny,MISO,SD,F860,MISO,MISW
@@ -1181,15 +1198,17 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 17585,"Southeastern IL Elec Coop, Inc",MISO,SD,F860,MISO,MISC
 27000,Western Area Power Administration,MISO,SD,F860,MISO,MISW
 1307,Basin Electric Power Coop,WACM,SD,F860,RMRG,RMRG
-19545,"Black Hills Power, Inc. d/b/a",WACM,SD,F861,RMRG,RMRG
+19545,"Black Hills Power, Inc.",WACM,SD,F861,RMRG,RMRG
 25177,Dakota Electric Association,WACM,SD,F860,RMRG,RMRG
 27000,Western Area Power Administration,WACM,SD,F861,RMRG,RMRG
 1307,Basin Electric Power Coop,SWPP,SD,F860,SPP,SPPN
 1769,"Black Hills Electric Coop, Inc",SWPP,SD,F861,SPP,SPPN
+3279,"Central Power Elec Coop, Inc",SWPP,SD,F860,SPP,SPPN
 5552,"East River Elec Pwr Coop, Inc",SWPP,SD,F860,SPP,SPPN
 6615,City of Fort Pierre - (SD),SWPP,SD,F860,SPP,SPPN
 13337,Nebraska Public Power District,SWPP,SD,F861,SPP,SPPN
 13809,NorthWestern Energy - (SD),SWPP,SD,F861,SPP,SPPN
+14232,Otter Tail Power Co,SWPP,SD,F860,SPP,SPPN
 27000,Western Area Power Administration,SWPP,SD,F860,SPP,SPPN
 814,Entergy Arkansas LLC,MISO,TN,F861,MISO,MISS
 10331,Kingsport Power Co,PJM,TN,F861,PJM,PJMW
@@ -1197,7 +1216,8 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 1578,Benton County,TVA,TN,F860,SRCE,SRCE
 3408,City of Chattanooga - (TN),TVA,TN,F860,SRCE,SRCE
 4624,Cumberland Elec Member Corp,TVA,TN,F860,SRCE,SRCE
-10171,Kentucky Utilities Co,LGEE,TN,F861,SRCE,SRCE
+6784,French Broad Elec Member Corp,TVA,TN,F861,SRCE,SRCE
+9777,Johnson City - (TN),TVA,TN,F860,SRCE,SRCE
 10421,Knoxville Utilities Board,TVA,TN,F860,SRCE,SRCE
 12293,City of Memphis - (TN),TVA,TN,F861,SRCE,SRCE
 13119,City of Murfreesboro,TVA,TN,F860,SRCE,SRCE
@@ -1241,7 +1261,6 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 5078,"Denton County Elec Coop, Inc",ERCO,TX,F860,TRE,TRE
 6427,City of Floresville,ERCO,TX,F861,TRE,TRE
 6958,City of Garland - (TX),ERCO,TX,F861,TRE,TRE
-7129,City of Georgetown - (TX),ERCO,TX,F861,TRE,TRE
 7370,City of Gonzales - (TX),ERCO,TX,F860,TRE,TRE
 7559,"Grayson-Collin Elec Coop, Inc",ERCO,TX,F861,TRE,TRE
 7634,City of Greenville - (TX),ERCO,TX,F861,TRE,TRE
@@ -1250,6 +1269,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 8901,CenterPoint Energy,ERCO,TX,F860,TRE,TRE
 10649,Lamar County Elec Coop Assn,ERCO,TX,F861,TRE,TRE
 11269,Lower Colorado River Authority,ERCO,TX,F860,TRE,TRE
+11292,City of Lubbock - (TX),ERCO,TX,F861,TRE,TRE
 13418,City of New Braunfels - (TX),ERCO,TX,F861,TRE,TRE
 14354,PacifiCorp,ERCO,TX,F860,TRE,TRE
 14626,"Pedernales Electric Coop, Inc",ERCO,TX,F861,TRE,TRE
@@ -1262,6 +1282,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 17583,"South Texas Electric Coop, Inc",ERCO,TX,F860,TRE,TRE
 17716,Southwestern Power Administration,ERCO,TX,F860,TRE,TRE
 17718,Southwestern Public Service Co,ERCO,TX,F860,TRE,TRE
+18589,"Rayburn Country Elec Coop, Inc",ERCO,TX,F860,TRE,TRE
 19490,United Electric Coop Service Inc - (TX),ERCO,TX,F860,TRE,TRE
 20404,AEP Texas North Company,ERCO,TX,F860,TRE,TRE
 20948,Wise Electric Coop Inc,ERCO,TX,F860,TRE,TRE
@@ -1272,6 +1293,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 50174,Electric Transmission Texas LLC,ERCO,TX,F860,TRE,TRE
 60065,Cross Texas Transmission,ERCO,TX,F860,TRE,TRE
 60066,Wind Energy Transmission Texas LLC,ERCO,TX,F860,TRE,TRE
+ ,,ERCO,TX,F860,TRE,TRE
 2010,City of Bountiful,PACE,UT,F860,BASN,BASN
 2220,Brigham City Corporation,PACE,UT,F860,BASN,BASN
 5932,City of Ephraim - (UT),PACE,UT,F860,BASN,BASN
@@ -1297,7 +1319,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 22814,Raft Rural Elec Coop Inc,BPAT,UT,F861,NWPP,NWPP
 27000,Western Area Power Administration,WAUW,UT,F860,NWPP,NWPP
 6957,"Garkane Energy Coop, Inc",WACM,UT,F860,RMRG,RMRG
-12866,Moon Lake Electric Assn Inc,WACM,UT,F860,RMRG,RMRG
+12866,Moon Lake Electric Assn Inc,WACM,UT,F861,RMRG,RMRG
 14354,PacifiCorp,WACM,UT,F860,RMRG,RMRG
 27000,Western Area Power Administration,WALC,UT,F861,SRSG,SRSG
 84,A & N Electric Coop,PJM,VA,F860,PJM,PJME
@@ -1326,7 +1348,9 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 10171,Kentucky Utilities Co,LGEE,VA,F861,SRCE,SRCE
 1299,"Barton Village, Inc",ISNE,VT,F860,ISNE,ISNE
 2548,City of Burlington Electric - (VT),ISNE,VT,F861,ISNE,ISNE
+7570,Great River Energy,ISNE,VT,F860,ISNE,ISNE
 7601,Green Mountain Power Corp,ISNE,VT,F861,ISNE,ISNE
+8104,Town of Hardwick,ISNE,VT,F860,ISNE,ISNE
 11359,Village of Lyndonville - (VT),ISNE,VT,F860,ISNE,ISNE
 12989,Village of Morrisville - (VT),ISNE,VT,F860,ISNE,ISNE
 13433,New England Power Company,ISNE,VT,F860,ISNE,ISNE
@@ -1346,6 +1370,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 1738,PacifiCorp,SCL,WA,F860,NWPP,NWPP
 3295,City of Centralia - (WA),BPAT,WA,F861,NWPP,NWPP
 3413,PUD No 1 of Chelan County,CHPD,WA,F861,NWPP,NWPP
+3413,PUD No 1 of Chelan County,PSEI,WA,F861,NWPP,NWPP
 3660,PUD No 1 of Clark County - (WA),BPAT,WA,F860,NWPP,NWPP
 4041,"Columbia Rural Elec Assn, Inc",BPAT,WA,F860,NWPP,NWPP
 4442,PUD No 1 of Cowlitz County,BPAT,WA,F860,NWPP,NWPP
@@ -1363,6 +1388,7 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 13758,"Northern Lights, Inc",BPAT,WA,F861,NWPP,NWPP
 14055,PUD No 1 of Okanogan County,DOPD,WA,F861,NWPP,NWPP
 14354,PacifiCorp,PACW,WA,F861,NWPP,NWPP
+14354,PacifiCorp,BPAT,WA,F860,NWPP,NWPP
 14624,PUD No 2 of Grant County,GCPD,WA,F861,NWPP,NWPP
 14653,PUD No 1 of Pend Oreille County,AVA,WA,F861,NWPP,NWPP
 14668,Peninsula Light Company,BPAT,WA,F861,NWPP,NWPP
@@ -1388,6 +1414,8 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 5417,Dunn County Electric Coop,MISO,WI,F860,MISO,MISW
 5632,Eau Claire Electric Coop,MISO,WI,F860,MISO,MISW
 6274,City of Fennimore - (WI),MISO,WI,F860,MISO,MISW
+8574,"Jackson Electric Coop, Inc - (WI)",MISO,WI,F860,MISO,MISW
+9575,Jackson Energy Coop Corp - (KY),MISO,WI,F860,MISO,MISW
 9690,Jefferson Utilities,MISO,WI,F860,MISO,MISW
 9922,Jump River Electric Coop Inc,MISO,WI,F860,MISO,MISW
 10056,City of Kaukauna,MISO,WI,F860,MISO,MISW
@@ -1402,7 +1430,9 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 13815,Northwestern Wisconsin Elec Co,MISO,WI,F861,MISO,MISW
 13936,Oakdale Electric Coop,MISO,WI,F860,MISO,MISW
 13964,Oconto Electric Cooperative,MISO,WI,F860,MISO,MISW
+16060,Riverland Energy Cooperative,MISO,WI,F860,MISO,MISW
 16740,Scenic Rivers Energy Coop,MISO,WI,F860,MISO,MISW
+17811,City of Spooner - (WI),MISO,WI,F860,MISO,MISW
 17868,St Croix Electric Coop,MISO,WI,F860,MISO,MISW
 18383,Taylor Electric Coop - (WI),MISO,WI,F860,MISO,MISW
 19813,Vernon Electric Coop,MISO,WI,F860,MISO,MISW
@@ -1426,11 +1456,11 @@ UTIL_ID,NAME,BA_CD,STATE,FORM,STAGE_1_RGN,STAGE_2_RGN
 11273,Lower Valley Energy Inc,BPAT,WY,F861,NWPP,NWPP
 12825,NorthWestern Energy LLC - (MT),NWMT,WY,F861,NWPP,NWPP
 27000,Western Area Power Administration,WAUW,WY,F860,NWPP,NWPP
-1307,Basin Electric Power Coop,WACM,WY,F861,RMRG,RMRG
-3461,Cheyenne Light Fuel & Power d/b/a Black,WACM,WY,F861,RMRG,RMRG
+1307,Basin Electric Power Coop,WACM,WY,F860,RMRG,RMRG
+3461,Cheyenne Light Fuel & Power,WACM,WY,F861,RMRG,RMRG
 8566,High Plains Power Inc,WACM,WY,F860,RMRG,RMRG
 12199,Montana-Dakota Utilities Co,WACM,WY,F861,RMRG,RMRG
 15143,Platte River Power Authority,WACM,WY,F860,RMRG,RMRG
 19156,Powder River Energy Corp,WACM,WY,F860,RMRG,RMRG
-19545,"Black Hills Power, Inc. d/b/a",WACM,WY,F861,RMRG,RMRG
+19545,"Black Hills Power, Inc.",WACM,WY,F861,RMRG,RMRG
 27000,Western Area Power Administration,WACM,WY,F861,RMRG,RMRG

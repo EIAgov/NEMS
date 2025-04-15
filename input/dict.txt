@@ -1,4 +1,3 @@
-* $Header: M:/default/input/RCS/dict.txt,v 1.560 2021/05/18 14:10:31 avk Exp $
 * "FILER" DICTIONARY FILE.  CONTAINS LAYOUT OF COMMON BLOCKS USED FOR THE FILER PROGRAM.
 * RECORDS IN THIS FILE STARTING WITH A NON-BLANK CHARACTER ARE COMMENTS.
 * THIS DICTIONARY FILE IS FORMATTED AS FOLLOWS:
@@ -102,7 +101,7 @@
  DIMD MINDCR     3        South
  DIMD MINDCR     4        West
  DIMD MINDCR     5        United States
- DIM  NMODEL    13      Number of Modules
+ DIM  NMODEL    14      Number of Modules
  DIM  MNUMOR    14      Oil & Gas Regions
  DIM  MNUMBX    26      NG Border Crossings
  DIM  MNUMGR    15      NGTDM Regions
@@ -111,6 +110,9 @@
  DIM  NSREGN    14      Number of Coal Supply Regions (NSREG in cdsparms)
  DIM  NCLTYP     8      Number of Coal Types (NCOALTYP in cdsparms)
  DIM  MNUMNR    28      Electricity Supply (NERC) Regions
+ DIM  MaxPty    23      Electricity RESTORE number of plant types
+ DIM  MAXDTP     3      Electricity RESTORE number of daytypes
+ DIM  MAXMON    12      Electricity RESTORE number of months
  DIM  NUTSEC    38      Utility demand sectors
  DIM  MNUMLR    17      Coal Supply Regions
  DIM  NDREGN    16      Coal Demand Regions
@@ -119,8 +121,8 @@
  DIM  HG_CLS     3      Mercury Compliance Classes
  DIM  MX_SO2     2      SO2 Compliance Groups
  DIM  MXSO2T     3      SO2 Compliance Groups (CSAPR)
- DIM  MX_NCL    41      Domestic Coal Supply Curves
- DIM  MX_NCI    53      Coal Supply Curves (Domestic + Thermal Import Supply Records)
+ DIM  MX_NCL    14      Domestic Coal Supply Curves
+ DIM  MX_NCI    26      Coal Supply Curves (Domestic + Thermal Import Supply Records)
  DIM  MX_IMP    35      Thermal Coal Import Supply Curves and Step Combinations
  DIM  MX_ISC    12      Coal Import Supply Curves (Thermal or Metallurgical)
  DIM  MX_IST    10      Coal Import Supply Steps
@@ -137,9 +139,10 @@
  DIM  MNMYRF    91      Years=1990-2050  + ECPFPH
  DIMD MNMYRF     0 1990 0 causes autogeneration of numeric year names starting at 1990, or 1990_MNMYRF
  DIM  MECPYR    71      MNUMYR + 10 yrs (horizon)
+ DIM  MNUMYV    61      Year vintages for EMM/HMM Sec 45V Eligible Generation
  DIM  NOXGRP     5      NOX Cap and Trade Groups
  DIM  CO2GRP     5      CO2 Cap and Trade Groups
- DIM  MNSICM    60      Manufacturing industries
+ DIM  MNSICM    62      Manufacturing industries
  DIM  MNSICN    12      Nonmanufacturing industries
  DIM  MNXYRS    91      Expectation Years
  DIMD MNXYRS     0 1990 0 causes autogeneration of numeric year names starting at 1990, or 1990_MNXYRS
@@ -162,6 +165,9 @@
  DIM  ECPINT     9      ECP Intermittent Plant Types
  DIM  ST_RPS   100      Number of state RPS tranches
  DIM  ECPDSP    55      ECP Dispatchable Plant Types
+ DIM  MAXNUC   900      Maximum Number of Existing Nuclear Units + MNUMNR * 2 New Units
+ DIM  MAXSEC     4      EPHRTS Number of Sectors
+ DIM  H2STEP     7      H2 Supply Step
  DIM  MXGRDS     6      Maximum Number of Grid Resiliency Sources
  DIM  MAXNFR    24      Maximum Number of EMM Fuel Regions
  DIM  MAXNF2    25      Maximum Number of EMM Fuel Regions + 1
@@ -226,7 +232,7 @@
  DIMD CORNTO     1        Ethanol
  DIMD CORNTO     2        Biobutanol
  DIMD CORNTO     3        Total
- DIM  FRFUEL    10      Freight truck fuels
+ DIM  FRFUEL    12      Freight truck fuels
  DIMD FRFUEL    01        Diesel
  DIMD FRFUEL    02        Motor gasoline
  DIMD FRFUEL    03        Propane
@@ -236,18 +242,9 @@
  DIMD FRFUEL    07        Plug-in diesel
  DIMD FRFUEL    08        Plug-in gasoline
  DIMD FRFUEL    09        Fuel cell
- DIMD FRFUEL    10        Total
- DIM  CTFUEL    10      Commercial light truck fuels
- DIMD CTFUEL    01        Motor gasoline
- DIMD CTFUEL    02        Diesel
- DIMD CTFUEL    03        Propane
- DIMD CTFUEL    04        Natural gas
- DIMD CTFUEL    05        Ethanol flex
- DIMD CTFUEL    06        Electric
- DIMD CTFUEL    07        Plug-in diesel
- DIMD CTFUEL    08        Plug-in gasoline
- DIMD CTFUEL    09        Fuel cell
- DIMD CTFUEL    10        Total
+ DIMD FRFUEL    10        Fuel cell - Batt. dominant
+ DIMD FRFUEL    11        Gasoline hybrid
+ DIMD FRFUEL    12        Hydrogen ICE
  DIM  MAXZEV     3      Number of zero emission vehicle categories
  DIMD MAXZEV    01        Adv tech partial
  DIMD MAXZEV    02        Transitional
@@ -309,7 +306,8 @@
  ATT   MILES   miles
  ATT   MWATT   Megawatts
  ATT   tMWATT  Thousand Megawatts
- ATT   2013$u  2013 dollars per unit service demand
+ ATT   2013$   2013 dollars per unit service demand
+ ATT   MWH     Megawatt Hours
  ATT   GWTHRS  Gigawatt hours
  ATT   SCALAR
  ATT   BLANK
@@ -353,6 +351,7 @@
  ATT   $/BBL   Dollars per barrel
  ATT   kgmBTU  Kilograms per million Btu (Carbon)
  ATT   87$MW   1987 dollars per Megawatt
+ ATT   87$MWH  1987 dollars per Megawatthour
  ATT   87$KW   1987 dollars per Kilowatt
  ATT   87$KWH  1987 dollars per Kilowatthour
  ATT   87mKWH  1987 mills per Kilowatthour
@@ -368,6 +367,7 @@
  ATT   BilCrd  billion credits
  ATT   BFOE    barrels of fuel oil equivalent
  ATT   90$kWh  1990 $ per kWh
+ ATT   GIGWAT  Gigawatts (just Gigawatts)
  ATT L FUEL
  ATT   AG      Aviation gasoline
  ATT   AS      Asphalt and road oil
@@ -507,7 +507,7 @@
  QBLK             QDSTR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS     TRANSP Distillate - Transportation
  QBLK             QDSIN            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS     INDUST Distillate - Industrial
  QBLK             QDSRF            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS     REFINE Distillate - Refinery
- QBLK             QDSEL            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS     ELECTR Distillate - Electricity (+petroleum coke)
+ QBLK             QDSEL            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS     ELECTR Distillate - Electricity
  QBLK             QDSAS            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS     ALLSEC Distillate - All Sectors
  QBLK             QKSRS            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   KS     RESIDN Kerosene - Residential
  QBLK             QKSCM            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   KS     COMMER Kerosene - Commercial
@@ -554,7 +554,7 @@
  QBLK             QTPEL            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   TP     ELECTR Total Petroleum - Electric Power
  QBLK             QTPAS            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   TP     ALLSEC Total Petroleum - All Sectors
  QBLK             QMETR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   ME     TRANSP Methanol - Transportation
- QBLK             QETTR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   ET     TRANSP Ethanol - Transportation
+ QBLK             QETTR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   ET     TRANSP Ethanol - Transportation (sold as E85)
  QBLK             QETHM            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   ET     HYDROG Ethanol - Hydrogen
  QBLK             QHYTR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     TRANSP Liquid Hydrogen - Transportation
  QBLK             QUREL            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   UR     ELECTR Uranium - Electric Power
@@ -612,6 +612,9 @@
  QBLK             QH1TR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     TRANSP Hydrogen, Large Citites - Transportation
  QBLK             QH2TR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     TRANSP Hydrogen, Small Citites - Transportation
  QBLK             QH3TR            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     TRANSP Hydrogen, Rural - Transportation
+ QBLK             QH2IN            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     INDUST Hydrogen total - Industrial
+ QBLK             QH2INPF          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     INDUST Hydrogen feedstock - Industrial
+ QBLK             QH2INHP          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     INDUST Hydrogen fuel - Industrial
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * PRICES Common Block
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -694,7 +697,7 @@
  MPBLK            PTPEL            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU TP     ELECTR Total Petroleum - Electric Power
  MPBLK            PTPAS            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU TP     ALLSEC Total Petroleum - All Sectors
  MPBLK            PMETR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU ME     TRANSP Methanol - Transportation
- MPBLK            PETTR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU ET     TRANSP Ethanol - Transportation
+ MPBLK            PETTR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU ET     TRANSP Ethanol - Transportation (sold as E85)
  MPBLK            PHYTR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU HY     TRANSP Liquid Hydrogen - Transportation
  MPBLK            PUREL            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU UR     ELECTR Uranium - Electric Power
  MPBLK            PH1TR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU UR     TRANSP Large Cities, Hydrogen - Transportation
@@ -782,7 +785,7 @@
  AMPBLK           PTPEL            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU TP     ELECTR Total Petroleum - Electric Power
  AMPBLK           PTPAS            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU TP     ALLSEC Total Petroleum - All Sectors
  AMPBLK           PMETR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU ME     TRANSP Methanol - Transportation
- AMPBLK           PETTR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU ET     TRANSP Ethanol - Transportation
+ AMPBLK           PETTR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU ET     TRANSP Ethanol - Transportation (sold as E85)
  AMPBLK           PHYTR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU HY     TRANSP Liquid Hydrogen - Transportation
  AMPBLK           PUREL            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU UR     ELECTR Uranium - Electric Power
  AMPBLK           PH1TR            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU UR     TRANSP Large Cities, Hydrogen - Transportation
@@ -813,7 +816,7 @@
  MXQBLK           XQDSCM           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   DS     COMMER Distillate - Commercial
  MXQBLK           XQDSTR           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   DS     TRANSP Distillate - Transportation
  MXQBLK           XQDSIN           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   DS     INDUST Distillate - Industrial
- MXQBLK           XQDSEL           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   DS     ELECTR Distillate - Electricity (+petroleum coke)
+ MXQBLK           XQDSEL           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   DS     ELECTR Distillate - Electricity
  MXQBLK           XQKSAS           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   KS     ALLSEC Kerosene - All Sectors
  MXQBLK           XQLGRF           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   LG     REFINE Liquid Petroleum Gases - Refinery
  MXQBLK           XQLGAS           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   LG     ELECTR Liquid Petroleum Gases - All Sectors
@@ -831,7 +834,7 @@
  MXQBLK           XQOTRF           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   OT     REFINE Other Petroleum - Refinery
  MXQBLK           XQOTAS           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   OT     ALLSEC Other Petroleum - All Sectors
  MXQBLK           XQMETR           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   ME     TRANSP Methanol - Transporation
- MXQBLK           XQETTR           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   ET     TRANSP Ethanol - Transporation
+ MXQBLK           XQETTR           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   ET     TRANSP Ethanol - Transporation (sold as E85)
  MXQBLK           XQOTTR           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   OT     TRANSP Other Petroleum - Transportation
  MXQBLK           XQOTIN           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   OT     INDUST Other Petroleum - Industrial
  MXQBLK           XQNGTR           R    4 2 (MNUMCR,MNXYRS)                     XQUNTY tBTU   NG     TRANSP Natural Gas - Transportation
@@ -866,7 +869,7 @@
  MXPBLK           XPNGEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU NG     ELECTR Natural Gas.  Electricity
  MXPBLK           XPCLEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU CL     ELECTR Coal.  Electricity
  MXPBLK           XPDSCM           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU DS     COMMER Distillate.  Commercial
- MXPBLK           XPDSEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU DS     ELECTR Distillate.  Electricity (incl. petroleum coke)
+ MXPBLK           XPDSEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU DS     ELECTR Distillate.  Electricity
  MXPBLK           XPRLEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU RS     ELECTR Residual Fuel, Low Sulfur.  Electricity
  MXPBLK           XPRHEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU RS     ELECTR Residual Fuel, High Sulfur.  Electricity
  MXPBLK           XPRSEL           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU RS     ELECTR Residual Fuel.  Electricity
@@ -884,7 +887,7 @@
  MXPBLK           XPASIN           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU AS     INDUST Asphalt, Roal Oil - industrial
  MXPBLK           XPOTAS           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU OT     INDUST Other Petroleum - Industrial
  MXPBLK           XPMETR           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU ME     TRANSP Methanol - Transportation
- MXPBLK           XPETTR           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU ET     TRANSP Ethanol - Transportation
+ MXPBLK           XPETTR           R    4 2 (MNUMCR,MNXYRS)                     XPRICE 87$BTU ET     TRANSP Ethanol - Transportation (sold as E85)
  MXPBLK           XIT_WOP          R    4 2 (MNXYRS,     2)                     XPRICE 87$BTU CR     INTERN Refiners acquisition cost of imported crude oil
  MXPBLK           XOGWPRNG         R    4 2 (MNUMOR,MNXYRS)                     XPRICE 87$BTU NG     PIPELN NATURAL GAS WELLHEAD PRICE ($87/MCF)
  MXPBLK           XOGWPRNGPF       R    4 3 (     2,MNUMOR,MNXYRS)              XPRICE 87$BTU NG     PIPELN NATURAL GAS WELLHEAD PRICE PF EXP GUESS ($87/MCF)
@@ -951,7 +954,7 @@
  QSBLK            QSDSTR           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   DS     TRANSP Distillate - Transportation
  QSBLK            QSDSIN           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   DS     INDUST Distillate - Industrial
  QSBLK            QSDSRF           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   DS     REFINE Distillate - Refinery
- QSBLK            QSDSEL           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   DS     ELECTR Distillate - Electricity (incl. petroleum coke)
+ QSBLK            QSDSEL           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   DS     ELECTR Distillate - Electricity
  QSBLK            QSDSAS           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   DS     ALLSEC Distillate - All Sectors
  QSBLK            QSKSRS           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   KS     RESIDN Kerosene - Residential
  QSBLK            QSKSCM           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   KS     COMMER Kerosene - Commercial
@@ -998,7 +1001,7 @@
  QSBLK            QSTPEL           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   TP     ELECTR Total Petroleum - Electric Power
  QSBLK            QSTPAS           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   TP     ALLSEC Total Petroleum - All Sectors
  QSBLK            QSMETR           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   ME     TRANSP Methanol - Transportation
- QSBLK            QSETTR           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   ET     TRANSP Ethanol - Transportation
+ QSBLK            QSETTR           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   ET     TRANSP Ethanol - Transportation (sold as E85)
  QSBLK            QSETHM           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   ET     HYDROG Ethanol - Hydrogen
  QSBLK            QSHYTR           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   HY     TRANSP Hydrogen - Transportation
  QSBLK            QSUREL           R    4 2 (MNUMCR,MNUMYR)                     HISTOR tBTU   UR     ELECTR Uranium - Electric Power
@@ -1085,6 +1088,7 @@
  NCNTRL           EXO              I    4 1 (     1)                            CNTROL ON_OFF               EXECUTE REFINERY
  NCNTRL           EXN              I    4 1 (     1)                            CNTROL ON_OFF               EXECUTE RENEWABLE
  NCNTRL           EXH              I    4 1 (     1)                            CNTROL ON_OFF               EXECUTE Hydrogen
+ NCNTRL           EXQ              I    4 1 (     1)                            CNTROL ON_OFF               EXECUTE CCATS
  NCNTRL           RUNMOD           I    4 1 (NMODEL)                            CNTROL ON_OFF               FLAGS FOR WHETHER EACH MODEL IS BEING RUN
  NCNTRL           FIRSYR           I    4 1 (     1)                            CNTROL BLANK                FIRST FORECAST YEAR INDEX (EG. 2)
  NCNTRL           LASTYR           I    4 1 (     1)                            CNTROL BLANK                LAST FORECAST YEAR INDEX  (EG. 29)
@@ -1131,6 +1135,7 @@
  NCNTRL           PRTDBGO          I    4 1 (     1)                            CNTROL ON_OFF               PRINT DEBUG, REFINERY
  NCNTRL           PRTDBGN          I    4 1 (     1)                            CNTROL ON_OFF               PRINT DEBUG, RENEWABLE
  NCNTRL           PRTDBGH          I    4 1 (     1)                            CNTROL ON_OFF               PRINT DEBUG, Hydrogen
+ NCNTRL           PRTDBGQ          I    4 1 (     1)                            CNTROL ON_OFF               PRINT DEBUG, CCATS
  NCNTRL           IJUMPYR          I    4 1 (     1)                            CNTROL BLANK                End of forecast horizon - index
  NCNTRL           IJUMPCALYR       I    4 1 (     1)                            CNTROL BLANK                End of forecast horizon - calendar year
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -1191,6 +1196,13 @@
  LFMMOUT          CFP_Offset_Prc   R    4 2 (LCFS_C,MNXYRS)                     PRICE  87$TON        REFINE CFP Offset Price
  LFMMOUT          CFP_Carb_Offset  R    4 2 (LCFS_C,MNXYRS)                     QUNTY  mMTONS        REFINE CFP Carbon Offset
  LFMMOUT          CFP_PeToTrills   R    4 2 (LCFS_C,MNXYRS)                     QUNTY  mMTONS        REFINE Total carbon in all trans fuels (1000 tons C) per DAY
+ LFMMOUT          WACFS_BaseLine   R    4 2 (LCFS_C,MNXYRS)                     RATE   FRACT         REFINE WACFS Baseline Carbon Factors - M mton CO2/Trill
+ LFMMOUT          WACFS_Actual     R    4 2 (LCFS_C,MNXYRS)                     RATE   FRACT         REFINE WACFS Actual Carbon Factors - M mton CO2/Trill
+ LFMMOUT          WACFS_Waiver     R    4 2 (LCFS_C,MNXYRS)                     QUNTY  mMTONS        REFINE WACFS Waivers Purchased
+ LFMMOUT          WACFS_Offset_Prc R    4 2 (LCFS_C,MNXYRS)                     PRICE  87$TON        REFINE WACFS Offset Price
+ LFMMOUT          WCFS_Carb_Offset R    4 2 (LCFS_C,MNXYRS)                     QUNTY  mMTONS        REFINE WACFS Carbon Offset
+ LFMMOUT          WACFS_PeToTrills R    4 2 (LCFS_C,MNXYRS)                     QUNTY  mMTONS        REFINE Total carbon in all trans fuels (1000 tons C) per DAY
+ LFMMOUT          ETH_FERM_CO2     R    4 1 (MNUMYR)                            QUNTY  mMTONS        REFINE CO2 emissions from ethanol fermentation, 1000 mton CO2/year
  LFMMOUT          REFGAIN          R    4 3 (MNUMPR,     2,MNUMYR)              QUNTY  MBCD          REFINE Refinery gain by region and refinery type (1=coking,2=cracking)
  LFMMOUT          RFIPQMG          R    4 3 (MNUMPR,MNUMYR,     2)              QTYPRC BBL$$$ MG     REFINE Import price/quantity - conventional motor gas
  LFMMOUT          RFIPQRG          R    4 3 (MNUMPR,MNUMYR,     2)              QTYPRC BBL$$$ MG     REFINE Import price/quantity - reformulated motor gas
@@ -1435,8 +1447,10 @@
  OGSMOUT                                                                        TYPE   UNITS  FUEL   SECTOR
  OGSMOUT          OGRESNGON        R    4 2 (    17,MNUMYR)                     QUNTY  BCF                  NA dry gas reserves onshore
  OGSMOUT          OGPRRNGON        R    4 2 (    17,MNUMYR)                     PARAM  SCALAR               NA dry gas p/r ratio onshore
+ OGSMOUT          OGRADNGON        R    4 2 (    17,MNUMYR)                     QUNTY  BCF                  Nonass dry gas reserve additions onshore
  OGSMOUT          OGRESNGOF        R    4 2 (MNL48F,MNUMYR)                     QUNTY  BCF                  NA dry gas reserves offsfore
  OGSMOUT          OGPRRNGOF        R    4 2 (MNL48F,MNUMYR)                     PARAM  SCALAR               NA dry gas p/r ratio onshore
+ OGSMOUT          OGRADNGOF        R    4 2 (MNL48F,MNUMYR)                     QUNTY  BCF                  Nonass dry gas reserve additions offshore
  OGSMOUT          OGPRDAD          R    4 2 (MNL48A,MNUMYR)                     QUNTY  BCF                  Associated Dissolved Gas Prod
  OGSMOUT          OGQNGEXP         R    4 2 (MNUMBX,MNUMYR)                     QUNTY  BCF                  NG EXPORTS  (BILL. CU FT)
  OGSMOUT          OGQNGIMP         R    4 2 (MNUMBX,MNUMYR)                     QUNTY  BCF                  NG IMPORTS  (BILL. CU FT)
@@ -1450,6 +1464,9 @@
  OGSMOUT          OGQNGRSV         R    4 1 (MNUMYR)                            QUNTY  BCF                  NG RESERVES
  OGSMOUT          OGNOWELL         R    4 1 (MNUMYR)                            QUNTY  SCALAR               WELLS COMPLETED
  OGSMOUT          OGTECHON         R    4 3 (     3,     6,MNUMYR)              QUNTY  SCALAR               TECH FACTORS BY COSTCAT/FUEL/YEAR
+ OGSMOUT          CNENAGPRD        R    4 2 (NUMCAN,MNUMYR)                     QUNTY  MMCF   NG     OILGAS Expected Canada nonassociated gas production
+ OGSMOUT          CNRNAGPRD        R    4 2 (NUMCAN,MNUMYR)                     QUNTY  MMCF   NG     OILGAS Realized Canada nonassociated gas production
+ OGSMOUT          CNADGPRD         R    4 2 (NUMCAN,MNUMYR)                     QUNTY  MMCF   NG     OILGAS Associated-dissolved Canada gas production
  OGSMOUT          OGPRRCAN         R    4 2 (NUMCAN,MNUMYR)                     QUNTY  SCALAR               (OMEGA) GAS EXTRACTION RATE; P/R RATIOS.
  OGSMOUT          OGRESCAN         R    4 2 (NUMCAN,MNUMYR)                     QUNTY  SCALAR               (R) END-OF-YEAR RESERVES.
  OGSMOUT          OGCNQPRD         R    4 2 (NUMCAN,MNUMYR)                     QUNTY  SCALAR               Total Canada gas production
@@ -1457,8 +1474,8 @@
  OGSMOUT          OGCORSV          R    4 2 (NOGCRO,MNUMYR)                     QUNTY  MMBBL                CRUDE RESERVES BY OIL CATEGORY
  OGSMOUT          OGNGRSV          R    4 2 (NOGCAT,MNUMYR)                     QUNTY  BCF                  NG RESERVES BY GAS CATEGORY
  OGSMOUT          OGCOPRD          R    4 2 (MNL48T,MNUMYR)                     QUNTY  MMBBL                CRUDE PRODUCTION BY OIL CATEGORY
- OGSMOUT          OGNGPRD          R    4 2 (MNL48T,MNUMYR)                     QUNTY  BCF                  NG PRODUCTION BY GAS CATEGORY
  OGSMOUT          OGCOWHP          R    4 2 (MNL48T,MNUMYR)                     PRICE  87$BBL               CRUDE WELLHEAD PRICE BY OIL CATEGORY
+ OGSMOUT          OGNGPRD          R    4 2 (MNL48T,MNUMYR)                     QUNTY  BCF                  NG PRODUCTION BY GAS CATEGORY
  OGSMOUT          OGNGWHP          R    4 2 (MNL48T,MNUMYR)                     PRICE  87$MCF               NG WELLHEAD  PRICE BY GAS CATEGORY
  OGSMOUT          EXSPEND          R    4 2 (NOGDTP,MNUMYR)                     PRICE  mm87$                EXPLORATORY EXPENDITURES
  OGSMOUT          DVSPEND          R    4 2 (NOGDTP,MNUMYR)                     PRICE  mm87$                DEVELOPMENT EXPENDITURES
@@ -1478,11 +1495,15 @@
  OGSMOUT          OGWPTDM          R    4 2 (    20,MNUMYR)                     PRICE  87$MCF               NG WELLHEAD PRICE BY OGSM/NGTDM REGS
  OGSMOUT          OGPRCEXP         R    4 1 (MNUMYR)                            LEVEL  SCALAR               Adjust last yrs price to reflect diff expectation
  OGSMOUT          OGGROWFAC        R    4 1 (MNUMYR)                            LEVEL  SCALAR               Factor reflects expected future cons growth
- OGSMOUT          OGRADNGON        R    4 2 (    17,MNUMYR)                     QUNTY  BCF                  Nonass dry gas reserve additions onshore
- OGSMOUT          OGRADNGOF        R    4 2 (MNL48F,MNUMYR)                     QUNTY  BCF                  Nonass dry gas reserve additions offshore
  OGSMOUT          OGCOPRDGOM       R    4 2 (     2,MNUMYR)                     QUNTY  MBCD                 Offshore crude oil production, shallow and deep
  OGSMOUT          OGNGPRDGOM       R    4 2 (     2,MNUMYR)                     QUNTY  BCF                  Offshore natural gas production, shallow and deep
  OGSMOUT          OGPRCOAK         R    4 2 (MNALAS,MNUMYR)                     QUNTY  BCF                  Alaska production by region
+ OGSMOUT          OGCOPRD_FED      R    4 2 (MNUMOR,MNUMYR)                     QUNTY  MMBBL                Crude oil production federal 
+ OGSMOUT          OGCOPRD_NONFED   R    4 2 (MNUMOR,MNUMYR)                     QUNTY  MMBBL                Crude oil production non-federal
+ OGSMOUT          OGNGPRD_FED      R    4 2 (MNUMOR,MNUMYR)                     QUNTY  BCF                  Natural gas production federal
+ OGSMOUT          OGNGPRD_NONFED   R    4 2 (MNUMOR,MNUMYR)                     QUNTY  BCF                  Natural gas production non-federal
+ OGSMOUT          OGNGPLPRD_FED    R    4 2 (MNUMOR,MNUMYR)                     QUNTY  MMBBL                Natural gas plant liquids production federal
+ OGSMOUT          OGNGPLPRD_NONFED R    4 2 (MNUMOR,MNUMYR)                     QUNTY  MMBBL                Natural gas plant liquids production federal
  OGSMOUT          OGELSHALE        R    4 1 (MNUMYR)                            QUNTY  tBTU                 Electricity consumed by oil shale plants
  OGSMOUT          OGSHALENG        R    4 1 (MNUMYR)                            QUNTY  BCF                  Natural gas produced by oil shale plants
  OGSMOUT          OGPRDUGR         R    4 3 (MNL48N,     3,MNUMYR)              QUNTY  BCF                  Marketed unconventional lower 48 natural gas production
@@ -1490,7 +1511,17 @@
  OGSMOUT          OGCO2INJ         R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 injected (mmcf)
  OGSMOUT          OGCO2REC         R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 recycled (mmcf)
  OGSMOUT          OGCO2PUR         R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 purchased (mmcf)
+ OGSMOUT          OGCO245Q         R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 purchased (mmcf) and recieves 45Q credit
+ OGSMOUT          OGCO2PUR2        R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 purchased at the EOR sites (mmcf)
  OGSMOUT          OGCO2AVL         R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 available (mmcf) by Price Bin
+ OGSMOUT          OGCO2AVLs        R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 available (mmcf) by source
+ OGSMOUT          OGCO2PRC         R    4 3 (     8,    13,MNUMYR)              PRICE  87$MCF               CO2 price ($/mmcf)
+ OGSMOUT          OGCO2PRCs        R    4 3 (     8,    13,MNUMYR)              PRICE  87$MCF               CO2 price ($/mmcf) by source
+ OGSMOUT          OGCO2PEM         R    4 2 (     8,MNUMYR)                     PRICE  87$MCF               CO2 price  from EMM($/mmcf)
+ OGSMOUT          OGCO2PLF         R    4 2 (     8,MNUMYR)                     PRICE  87$MCF               CO2 price  from LFMM($/mmcf)
+ OGSMOUT          OGCO2QEM         R    4 2 (     8,MNUMYR)                     QUNTY  MMCF                 CO2 quantity from EMM (mmcf)
+ OGSMOUT          OGCO2QLF         R    4 2 (     8,MNUMYR)                     QUNTY  MMCF                 CO2 quantity from LFMM (mmcf)
+ OGSMOUT          OGCO2TAR         R    4 2 (     8,     8)                     PRICE  87$MCF               CO2 transport price from OGSM ($/mmcf)
  OGSMOUT          OGDNGPRD         R    4 3 (OGDIST,GASTYP,MNUMYR)              QUNTY  BCF                  Dry natural gas production by state/district and gas type
  OGSMOUT          OGPRDOFF         R    4 3 (     6,     2,MNUMYR)              STUFF                       Lower 48 offshore production by Federal/State category
  OGSMOUT          OGEOYURR         R    4 3 (MNUMOR,     2,MNUMYR)              STUFF                       Undiscovered technically recoverable oil and conventional NA gas
@@ -1507,36 +1538,21 @@
  OGSMOUT          OGNGPLPRD        R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS                Natural gas plant liquids by many regions
  OGSMOUT          OGSRL48          R    4 3 (MNL48T,     7,MNUMYR)              RATE   FRACT                Lower 48 drilling success rates
  OGSMOUT          OGWELLSL48       R    4 3 (MNL48T,     7,MNUMYR)                                          Lower 48 successful and dry well counts
- OGSMOUT          OGCO2PRC         R    4 3 (     8,    13,MNUMYR)              PRICE  87$MCF               CO2 price ($/mmcf)
- OGSMOUT          OGCO2PEM         R    4 2 (     8,MNUMYR)                     PRICE  87$MCF               CO2 price  from EMM($/mmcf)
- OGSMOUT          OGCO2PLF         R    4 2 (     8,MNUMYR)                     PRICE  87$MCF               CO2 price  from LFMM($/mmcf)
- OGSMOUT          OGCO2QEM         R    4 2 (     8,MNUMYR)                     QUNTY  MMCF                 CO2 quantity from EMM (mmcf)
- OGSMOUT          OGCO2QLF         R    4 2 (     8,MNUMYR)                     QUNTY  MMCF                 CO2 quantity from LFMM (mmcf)
- OGSMOUT          OGCO2TAR         R    4 2 (     8,     8)                     PRICE  87$MCF               CO2 transport price from OGSM ($/mmcf)
- OGSMOUT          OGCO2PUR2        R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 purchased at the EOR sites (mmcf)
  OGSMOUT          OGCRUDEREF       R    4 3 (MNUMPR,MNCRUD,MNUMYR)              QUNTY  MBCD   CR            Crude oil production by refinery region and crude type
- OGSMOUT          OGNGPLET         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  ET     OILGAS Ethane production from natural gas processing plants
- OGSMOUT          OGNGPLPR         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  PR     OILGAS Propane production from natural gas processing plants
- OGSMOUT          OGNGPLBU         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  BU     OILGAS Butane production from natural gas processing plants
- OGSMOUT          OGNGPLIS         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  IS     OILGAS Isobutane production from natural gas processing plants
- OGSMOUT          OGNGPLPP         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  PP     OILGAS Pentanes plus production from natural gas processing plants
  OGSMOUT          OGOGWELLS        R    4 3 (OGDIST,WELTYP,MNUMYR)                                   OILGAS Oil and natural gas wells
  OGSMOUT          OGENAGPRD        R    4 3 (OGDIST,GASTYP,MNUMYR)              QUNTY  BCF    NG     OILGAS Expected non-associated natural gas production
  OGSMOUT          OGRNAGPRD        R    4 3 (OGDIST,GASTYP,MNUMYR)              QUNTY  BCF    NG     OILGAS Realized non-associated natural gas production
  OGSMOUT          OGOILPRD         R    4 3 (OGDIST,OILTYP,MNUMYR)              QUNTY  MMBD   CR     OILGAS Crude oil production
  OGSMOUT          OGADGPRD         R    4 3 (OGDIST,OILTYP,MNUMYR)              QUNTY  BCF    NG     OILGAS Associated-dissolved natural gas production
  OGSMOUT          OGCRUDEPRD       R    4 3 (OGDIST,MNCRUD,MNUMYR)              QUNTY  MMBD   CR     OILGAS Crude oil production
- OGSMOUT          OGCO2AVLs        R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 available (mmcf) by source
- OGSMOUT          OGCO2PRCs        R    4 3 (     8,    13,MNUMYR)              PRICE  87$MCF               CO2 price ($/mmcf) by source
- OGSMOUT          CNENAGPRD        R    4 2 (NUMCAN,MNUMYR)                     QUNTY  MMCF   NG     OILGAS Expected Canada nonassociated gas production
- OGSMOUT          CNRNAGPRD        R    4 2 (NUMCAN,MNUMYR)                     QUNTY  MMCF   NG     OILGAS Realized Canada nonassociated gas production
- OGSMOUT          CNADGPRD         R    4 2 (NUMCAN,MNUMYR)                     QUNTY  MMCF   NG     OILGAS Associated-dissolved Canada gas production
+ OGSMOUT          OGNGPLET         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  ET     OILGAS Ethane production from natural gas processing plants
+ OGSMOUT          OGNGPLPR         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  PR     OILGAS Propane production from natural gas processing plants
+ OGSMOUT          OGNGPLBU         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  BU     OILGAS Butane production from natural gas processing plants
+ OGSMOUT          OGNGPLIS         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  IS     OILGAS Isobutane production from natural gas processing plants
+ OGSMOUT          OGNGPLPP         R    4 2 (OGDIST,MNUMYR)                     QUNTY  MBBLS  PP     OILGAS Pentanes plus production from natural gas processing plants
  OGSMOUT          NS_START         I    4 2 (     8,   200)                     CNTROL BLANK                Year Project selected 
- OGSMOUT          OGCO245Q         R    4 3 (     8,    13,MNUMYR)              QUNTY  MMCF                 CO2 purchased (mmcf) and recieves 45Q credit
- OGSMOUT          OGCOPRD_FED      R    4 2 (MNL48T,MNUMYR)                     QUNTY  MMBBL                Crude oil production federal 
- OGSMOUT          OGCOPRD_NONFED   R    4 2 (MNL48T,MNUMYR)                     QUNTY  MMBBL                Crude oil production non-federal
- OGSMOUT          OGNGPRD_FED      R    4 2 (MNL48T,MNUMYR)                     QUNTY  BCF                  Natural gas production federal
- OGSMOUT          OGNGPRD_NONFED   R    4 2 (MNL48T,MNUMYR)                     QUNTY  BCF                  Natural gas production non-federal
+ OGSMOUT          PLAY_MAP         I    4 1 (   200)                            QUNTY                       Map of Geological Formations (Plays) Helps MAP to CCATS
+ OGSMOUT          NGPCO2EM         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 emitted by natural gas processing plants (metric tons CO2)
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Natural Gas Transmission & Distribution Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -1570,6 +1586,7 @@
  NGTDMOUT         PGLTRSHIP        R    4 3 (     3,MNUMCR,MNUMYR)              PRICE  87$BTU               Shipping liqeufied natural gas
  NGTDMOUT         SPNGELGR         R    4 3 (NNGEMM,MNUMYR,     3)              PRICE  87$BTU NG            Natural gas price to electric power sector, 3 seasons
  NGTDMOUT         PNGELGR          R    4 2 (NNGEMM,MNUMYR)                     PRICE  87$BTU NG            Natural gas price to electric power sector, national average of seasons
+ NGTDMOUT         SPNGIN           R    4 3 (MNUMCR,MNUMYR,     4)              PRICE  87$BTU NG            Natural gas delivered price to industrial sector by HMM season
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Emission Tax -Natural Gas Transmission & Distribution Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -1631,6 +1648,8 @@
  NGTDMREP         NGIMPPRC         R    4 2 (     4,MNUMYR)                     QUNTY  87$MCF NG            Average import price; 1=Can, 2=Mex, 3=LNG, 4=Total
  NGTDMREP         NGEXPPRC         R    4 2 (     4,MNUMYR)                     QUNTY  87$MCF NG            Average export price; 1=Can, 2=Mex, 3=LNG, 4=Total
  NGTDMREP         NGSPOT_EMM       R    4 2 (NNGEMM,MNUMYR)                     PRICE  87$MCF NG     ELECTR State electric-power-weighted natural gas spot price
+ NGTDMREP         OGPRRNG          R    4 1 (MNUMYR)                            QUNTY  BCF    NG            TOTAL RNG PRODUCTION
+ NGTDMREP         LCFSRNGOS        R    4 1 (MNUMYR)                            QUNTY  mMTONS               CO2 OFFSET BY RNG VIA LCFS
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Natural Gas report Writer outputs
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -1848,6 +1867,7 @@
  UEFDOUT          UPRESPRC         R    4 2 (MNUMNR,MNUMYR)                     PRICE  87$BTU RS     ELECTR Average fuel price by EMM region
  UEFDOUT          UPCOLPRC         R    4 2 (MNUMNR,MNUMYR)                     PRICE  87$BTU CL     ELECTR Average fuel price by EMM region
  UEFDOUT          UPNUCPRC         R    4 2 (MNUMNR,MNUMYR)                     PRICE  87$BTU NU     ELECTR Average fuel price by EMM region
+ UEFDOUT          UPHYDPRC         R    4 2 (MNUMNR,MNUMYR)                     PRICE  87$BTU HY     ELECTR Average fuel price by EMM region
  UEFDOUT          UPMAXCF          R    4 3 (ECPDSP,MNUMNR,MNUMYR)              LEVEL  FRACT         ELECTR Max capacity factor by ECP type
  UEFDOUT          UP_XFOR          R    4 3 (ECPDSP,MNUMNR,MNUMYR)              LEVEL  FRACT         ELECTR Forced outage rate by ECP type
  UEFDOUT          UP_XPMR          R    4 3 (ECPDSP,MNUMNR,MNUMYR)              LEVEL  FRACT         ELECTR Planned maintenance rate by ECP type
@@ -1879,6 +1899,7 @@
  UEFDOUT          UNRGNS           I    4 1 (     1)                            CNTROL BLANK         ELECTR Number of EMM regions to run model - index
  UEFDOUT          CO2_CCS          R    4 4 (MAXNF2,MNL482,     3,MNUMYR)       QUNTY  MMCF          ELECTR Captured CO2
  UEFDOUT          BTU_CCS          R    4 4 (     5,MAXNF2,     3,MNUMYR)       QUNTY  tBTU          ELECTR BTUs from plants with CO2 capture times removal rate
+ UEFDOUT          SQH2EL           R    4 3 (MNUMCR,     3,MNUMYR)              QUNTY  BLANK         ELECTR H2 CONSUMPTION FROM ELECTRIC POWER SECTOR 
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Utility DAT Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2080,6 +2101,8 @@
  UDATOUT          UGENPQ_ALT       R    4 2 (MNUMNR,MNUMYR)                     QUNTY  bKWH          ELECTR Total IGCC w/PartSeq generation by NERC w/o capture
  UDATOUT          UGENCS_ALT       R    4 2 (MNUMNR,MNUMYR)                     QUNTY  bKWH          ELECTR Total Adv. CC w/seq generation by NERC w/o capture
  UDATOUT          UGENA2_ALT       R    4 2 (MNUMNR,MNUMYR)                     QUNTY  bKWH          ELECTR Total Retro CC w/seq generation by NERC w/o capture
+ UDATOUT          UCAPNGCF         R    4 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT        ELECTR Subset of Natural Gas conversions that are coal/gas cofiring
+ UDATOUT          UGENNGCF         R    4 2 (MNUMNR,MNUMYR)                     QUNTY  bKWH          ELECTR Generation from subset of conversions that are coal/gas cofiring
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Utility ECP Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2339,6 +2362,21 @@
  UECPOUT          ST_RPS_EX_CRD    R    4 3 (MNUMNR,ECPCAP,MECPYR)              QUNTY  mmKWH         ELECTR Credits from existing units used to satisfy state RPS requirements
  UECPOUT          ST_RPS_NW_CRD    R    4 3 (MNUMNR,ECPCAP,MECPYR)              QUNTY  mmKWH         ELECTR Credits from new units used to satisfy state RPS requirements
  UECPOUT          ST_RPS_XP_CRD    R    4 3 (MNUMNR,ECPCAP,MECPYR)              QUNTY  mmKWH         ELECTR Credits exported and used to satisfy state RPS requirements associated with the import region
+ UECPOUT          USED_last        R    4 2 (MNUMYR,MAXNUC)                     QUNTY  GIGWAT        ELECTR Nuclear ECP capacity utilization save current cycle
+ UECPOUT          USED_last2       R    4 2 (MNUMYR,MAXNUC)                     QUNTY  GIGWAT        ELECTR Nuclear ECP capacity utilization in previous cycle
+ UECPOUT          UNUSED_last      R    4 2 (MNUMYR,MAXNUC)                     QUNTY  GIGWAT        ELECTR Nuclear ECP capacity NOT utilized save current cycle
+ UECPOUT          UNUSED_last2     R    4 2 (MNUMYR,MAXNUC)                     QUNTY  GIGWAT        ELECTR Nuclear ECP capacity NOT utilized in previous cycle
+ UECPOUT          DispatchTot      R    4 5 (MNUMNR,MaxPty,    12,    24,MNUMYR)QUNTY  bKWH          ELECTR ReStore hourly generation by Nerc
+ UECPOUT          ExistStoTot      R    4 5 (MNUMNR,     3,    12,    24,MNUMYR)QUNTY  bKWH          ELECTR ReStore hourly storage by Nerc
+ UECPOUT          CurtailsTot      R    4 5 (MNUMNR,     9,    12,    24,MNUMYR)QUNTY  bKWH          ELECTR ReStore hourly curtailment by Nerc
+ UECPOUT          HourlyLoadTot    R    4 4 (MNUMNR,    12,    24,MNUMYR)       QUNTY  bKWH          ELECTR ReStore hourly load by Nerc
+ UECPOUT          ElecPriceTot     R    4 4 (MNUMNR,    12,    24,MNUMYR)       PRICE  87$MWH        ELECTR ReStore hourly electricity price by per MWH
+ UECPOUT          PRICE_EL_HR      R    4 4 (MNUMNR,     4,    24,MNUMYR)       QUNTY  87$MWH        ELECTR Hourly electricity price by HMM season
+ UECPOUT          LOADMAXH2EL      R    4 4 (MNUMNR,     4,    24,MNUMYR)       QUNTY  BLANK         ELECTR Hourly electrolyzer load limit for HMM
+ UECPOUT          QELCUR           R    4 4 (MNUMNR,     4,    24,MNUMYR)       QUNTY  bKWH          ELECTR Hourly curtailment by HMM season
+ UECPOUT          QELGEN           R    4 5 (     3,MNUMNR,    24,     4,MNUMYR)QUNTY  BLANK         ELECTR REStore generation by renewable technology (1=wind, 2-solar, 3=other), EMM region, hour, season, model year
+ UECPOUT          QELGEN_VINT      R    4 4 (     3,MNUMNR,MNUMYR,MNUMYV)       QUNTY  BLANK         ELECTR Vintage ratios of renewable generation by technology, EMM region, model year, vintage year
+ UECPOUT          UPIRA_APPYR      I    4 1 (     1)                            CNTROL BLANK         ELECTR Applicable year to start phase out of IRA tax credits that are triggered by electricity emission target 
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * LDSM to EFP Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2350,6 +2388,7 @@
  DSMTFEFP         SecAnnPeaAvPCP   R    4 2 (MNUMNR,     4)                     QUNTY  mmKWH         ELECTR Avereges of sectorial loads from top NpeakH hours
  DSMTFEFP         SysPeakHour      I    2 1 (    20)                            QUNTY  mmKWH         ELECTR NSPEAKH system peal load hrs in descending order
  DSMTFEFP         NpeakH           I    2 1 (     1)                            QUNTY  mmKWH         ELECTR num of hrs used for calc of SecAnnPeakAvPCP value
+ DSMTFEFP         MappNtoC         R    4 3 (MNUMNR,MNUMCR,MAXSEC)              QUNTY  BLANK         ELECTR matrix used for mapping NERC to CENSUS div
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Utility ETT Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2429,8 +2468,8 @@
  COALREP          WMCF             R    4 3 (     4,    11,MNUMYR)              QUNTY  mSTONS CL            Metallurgical Coal World Flows
  COALREP          WTCF             R    4 3 (     4,    11,MNUMYR)              QUNTY  mSTONS CL            Total Coal World Flows
  COALREP          PCLEX            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU CL            Coal Export Price
- COALREP          CLSULF           R    4 4 (    14,     4,     3,MNUMYR)       QUNTY  mSTONS CL            Coal Production by Region
- COALREP          PCLSULF          R    4 4 (    14,     4,     3,MNUMYR)       PRICE  $/TON  CL            Coal Price by Region
+ COALREP          CLSULF           R    4 4 (NSREGN,     4,     3,MNUMYR)       QUNTY  mSTONS CL            Coal Production by Region
+ COALREP          PCLSULF          R    4 4 (NSREGN,     4,     3,MNUMYR)       PRICE  $/TON  CL            Coal Price by Region
  COALREP          PABSULF          R    4 2 (     4,MNUMYR)                     PRICE  $/TON  CL            Price of App Bit Coal
  COALREP          PALSULF          R    4 2 (     4,MNUMYR)                     PRICE  $/TON  CL            Price of App Lig Coal
  COALREP          PIBSULF          R    4 2 (     4,MNUMYR)                     PRICE  $/TON  CL            Price of Int Bit Coal
@@ -2446,7 +2485,7 @@
  COALREP          WBSULF_BTU       R    4 2 (     4,MNUMYR)                     QUNTY  tBTU   CL            West Bituminous Coal
  COALREP          WSSULF_BTU       R    4 2 (     4,MNUMYR)                     QUNTY  tBTU   CL            West Sub-Bituminous Coal
  COALREP          WLSULF_BTU       R    4 2 (     4,MNUMYR)                     QUNTY  tBTU   CL            West Lignite Coal
- COALREP          CLSULF_BTU       R    4 4 (    14,     4,     3,MNUMYR)       QUNTY  tBTU   CL            Coal Production by Region
+ COALREP          CLSULF_BTU       R    4 4 (NSREGN,     4,     3,MNUMYR)       QUNTY  tBTU   CL            Coal Production by Region
  COALREP          PMTD             R    4 2 (NSREGN,MNUMYR)                     QUNTY  mSTONS CL            Underground Coal Production by Region
  COALREP          PMTS             R    4 2 (NSREGN,MNUMYR)                     QUNTY  mSTONS CL            Surface Coal Production by Region
  COALREP          PMTD_BTU         R    4 2 (NSREGN,MNUMYR)                     QUNTY  tBTU   CL            Underground Coal Production by Region
@@ -2483,55 +2522,61 @@
  INDOUT           QELINP           R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   EL     INDUST Primary Industrial Electricity
  INDOUT           QELINS           R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   EL     INDUST Shift industrial electricity
  INDOUT           QELINM           R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   EL     INDUST Miscellaneous industrial electricity
+ INDOUT           QELINH2E         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   EL     INDUST Hydrogen industrial electricity
  INDOUT           MWIN             R    4 2 (     4,MNUMYR)                     QUNTY  tBTU          INDUST Waste from mills
  INDOUT           INQLGHP          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   LG     INDUST Consumption of LPG for heat and power (excludes refining use)
  INDOUT           LIMEOUTPUT       R    4 1 (MNUMYR)                            LEVEL  mmfr$         INDUST Lime industry output
  INDOUT           HYDROGEN2REF     R    4 1 (MNUMYR)                            QUNTY  BFOE   HY     INDUST Hydrogen sent to refineries
+ INDOUT           BYPRDH2IN        R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   HY     INDUST Industrial sector byproduct/self-consumed hydrogen supply
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
-* Industrial Module Report
+* Industrial Module Report 
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  INDREP                                                                         TYPE   UNITS  FUEL   SECTOR
- INDREP           MANHP            R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST MFG, HEAT & POWER, 18 Fuels, Regions 1:4 and US:5
- INDREP           NONHP            R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST NON-MFG, HEAT & POWER, 18 Fuels, Regions 1:4 and US:5
- INDREP           FOODCON          R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST FOOD INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           PAPERCON         R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST PAPER INDUSTRY CONSUMPTION , 18 Fuels, Regions 1:4 and US:5
- INDREP           CHEMCON          R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST CHEMICAL INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           GLASSCON         R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST GLASS INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           CEMENTCON        R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST CEMENT INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           STEELCON         R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST STEEL INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           ALUMCON          R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST ALUMINUM INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           REFCON           R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST REFINERY INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           AGCON            R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST AGRICULTURE INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           CONSTCON         R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST CONSTRUCTION INDUSTRY CONSUMPTION, 18 Fuels, Regions 1:4 and US:5
- INDREP           MINECON          R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST MINING INDUSTRY CONSUMPTION , 18 Fuels, Regions 1:4 and US:5
- INDREP           FABMETALCON      R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST fabricated metal products, 18 Fuels, Regions 1:4 and US:5
- INDREP           MACHINECON       R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST machinery, 18 Fuels, Regions 1:4 and US:5
- INDREP           COMPUTECON       R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST computer & electronics , 18 Fuels, Regions 1:4 and US:5
- INDREP           TRANEQUIPCON     R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST transport equipment, 18 Fuels, Regions 1:4 and US:5
- INDREP           ELECEQUIPON      R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST electrical equipment, 18 Fuels, Regions 1:4 and US:5
- INDREP           WOODPRODCON      R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST BOM-wood products, 18 Fuels, Regions 1:4 and US:5
- INDREP           PLASTICCON       R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST BOM-plastics , 18 Fuels, Regions 1:4 and US:5
- INDREP           BOMOTHCON        R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST BOM-other, 18 Fuels, Regions 1:4 and US:5
+ INDREP           MANHP            R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST MFG, HEAT & POWER, 20 Fuels, Regions 1:4 and US:5
+ INDREP           NONHP            R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST NON-MFG, HEAT & POWER, 20 Fuels, Regions 1:4 and US:5
+ INDREP           FOODCON          R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST FOOD INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           PAPERCON         R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST PAPER INDUSTRY CONSUMPTION , 20 Fuels, Regions 1:4 and US:5
+ INDREP           CHEMCON          R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST CHEMICAL INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           GLASSCON         R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST GLASS INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           CEMENTCON        R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST CEMENT INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           STEELCON         R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST STEEL INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           ALUMCON          R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST ALUMINUM INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           REFCON           R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST REFINERY INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           AGCON            R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST AGRICULTURE INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           CONSTCON         R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST CONSTRUCTION INDUSTRY CONSUMPTION, 20 Fuels, Regions 1:4 and US:5
+ INDREP           MINECON          R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST MINING INDUSTRY CONSUMPTION , 20 Fuels, Regions 1:4 and US:5
+ INDREP           FABMETALCON      R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST fabricated metal products, 20 Fuels, Regions 1:4 and US:5
+ INDREP           MACHINECON       R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST machinery, 20 Fuels, Regions 1:4 and US:5
+ INDREP           COMPUTECON       R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST computer & electronics , 20 Fuels, Regions 1:4 and US:5
+ INDREP           TRANEQUIPCON     R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST transport equipment, 20 Fuels, Regions 1:4 and US:5
+ INDREP           ELECEQUIPON      R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST electrical equipment, 20 Fuels, Regions 1:4 and US:5
+ INDREP           WOODPRODCON      R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST BOM-wood products, 20 Fuels, Regions 1:4 and US:5
+ INDREP           PLASTICCON       R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST BOM-plastics , 20 Fuels, Regions 1:4 and US:5
+ INDREP           LTCHEMCON        R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Light Chemicals, 20 Fuels, Regions 1:4 and US:5
+ INDREP           OTHRNMMCON       R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Other non-Metallic Minerals, 20 Fuels, Regions 1:4 and US:5
+ INDREP           OTHRPRIMCON      R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Other Primary Metals, 20 Fuels, Regions 1:4 and US:5
+ INDREP           MISCFINCON       R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Miscellaneous Finished Goods, 20 Fuels, Regions 1:4 and US:5
  INDREP           QCCRF            R    4 2 (    11,MNUMYR)                     QUNTY  tBTU          INDUST REFINERY cat coke consumption
  INDREP           REPPRODORG       R    4 2 (    17,CHEMYR)                     QUNTY  LBS           INDUST Organic chemical production
  INDREP           REPPRODINORG     R    4 2 (     6,CHEMYR)                     QUNTY  LBS           INDUST Inorganic chemical production
  INDREP           REPPRODRESINS    R    4 2 (     6,CHEMYR)                     QUNTY  LBS           INDUST Resins chemical production
  INDREP           REPPRODAGRICHEM  R    4 2 (     3,CHEMYR)                     QUNTY  LBS           INDUST Agricultural chemical production
- INDREP           OILGASMINECON    R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Oil and gas mining consumption, 18 Fuels, Regions 1:4 and US:5
- INDREP           COALMINECON      R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Coal mining consumption, 18 Fuels, Regions 1:4 and US:5
- INDREP           OTHERMINECON     R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Other mining consumption, 18 Fuels, Regions 1:4 and US:5
- INDREP           BLASTFURNACECON  R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Blast furnace consumption, 18 Fuels, Regions 1:4 and US:5
- INDREP           COKEOVENCON      R    4 3 (    18,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Coke oven consumption, 18 Fuels, Regions 1:4 and US:5
- INDREP           GHG_PROCESSIN    R    4 2 (    21,MNUMYR)                     QUNTY  MTONS         INDUST Process emissions in metric tonnes CO2, for industries 1:21
+ INDREP           OILGASMINECON    R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Oil and gas mining consumption, 20 Fuels, Regions 1:4 and US:5
+ INDREP           COALMINECON      R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Coal mining consumption, 20 Fuels, Regions 1:4 and US:5
+ INDREP           OTHERMINECON     R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Other mining consumption, 20 Fuels, Regions 1:4 and US:5
+ INDREP           BLASTFURNACECON  R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Blast furnace consumption, 20 Fuels, Regions 1:4 and US:5
+ INDREP           COKEOVENCON      R    4 3 (    20,MINDCR,MNUMYR)              QUNTY  tBTU          INDUST Coke oven consumption, 20 Fuels, Regions 1:4 and US:5
+ INDREP           GHG_PROCESSIN    R    4 2 (    24,MNUMYR)                     QUNTY  MTONS         INDUST Process emissions in metric tonnes CO2, for industries 1:24
+ INDREP           H2CON            R    4 2 (    20,MINDCR,MNUMYR)              QUNTY  BLANK         INDUST Hydrogen "industry consumption by fuel, census region, year 
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Industrial Module Report
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  INDREP2                                                                        TYPE   UNITS  FUEL   SECTOR
- INDREP2          CHPINDCAP        R    4 3 (     7,    21,MNUMYR)              QUNTY  MWATT         INDUST CHP Capacity,      MW    by 6 fuels and total, 21 industries
- INDREP2          CHPINDGEN        R    4 3 (     7,    21,MNUMYR)              QUNTY  GWTHRS        INDUST CHP Generation  ,  GWH   by 6 fuels and total, 21 industries
- INDREP2          CHPINDCON        R    4 3 (     7,    21,MNUMYR)              QUNTY  tBTU          INDUST CHP Energy Input,  trBtu by 6 fuels and total, 21 industries
- INDREP2          CHPINDSTM        R    4 3 (     7,    21,MNUMYR)              QUNTY  tBTU          INDUST CHP Thermal output,trBtu by 6 fuels and total, 21 industries
- INDREP2          CHPGRDSHR        R    4 2 (    21,MNUMYR)                     RATE   BLANK         INDUST CHP Share of Generation sold to the grid
+ INDREP2          CHPINDCAP        R    4 3 (     7,    24,MNUMYR)              QUNTY  MWATT         INDUST CHP Capacity,      MW    by 6 fuels and total, 24 industries
+ INDREP2          CHPINDGEN        R    4 3 (     7,    24,MNUMYR)              QUNTY  GWTHRS        INDUST CHP Generation  ,  GWH   by 6 fuels and total, 24 industries
+ INDREP2          CHPINDCON        R    4 3 (     7,    24,MNUMYR)              QUNTY  tBTU          INDUST CHP Energy Input,  trBtu by 6 fuels and total, 24 industries
+ INDREP2          CHPINDSTM        R    4 3 (     7,    24,MNUMYR)              QUNTY  tBTU          INDUST CHP Thermal output,trBtu by 6 fuels and total, 24 industries
+ INDREP2          CHPGRDSHR        R    4 2 (    24,MNUMYR)                     RATE   BLANK         INDUST CHP Share of Generation sold to the grid
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Residential Module Output Common Block
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2593,8 +2638,8 @@
  RESDREP          SQFTAVG          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Average U.S. floorspace (sqft)
  RESDREP          RSCSWCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Clothes Washer Consumption
  RESDREP          RSDSWCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Dishwasher Consumption
- RESDREP          RSTVRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Television Consumption
- RESDREP          RSPCRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN PC Consumption
+ RESDREP          RSTVRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Television & Related Consumption
+ RESDREP          RSPCRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN PC & Related Consumption
  RESDREP          RSFANCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Furnace Fan Consumption
  RESDREP          RSHOUSES         R    4 2 (MNUMYR,MNUMC2)                     LEVEL  MILL          RESIDN Number of households
  RESDREP          RSGASCUST        R    4 2 (MNUMYR,MNUMC2)                     LEVEL  SCALAR        RESIDN Proxy for number of natural gas customers (households)
@@ -2606,9 +2651,9 @@
  COMPARM                                                                        TYPE   UNITS  FUEL   SECTOR
  COMPARM          EndUseConsump    R    4 5 (     3,    10,    11,MNUMCR,MNUMYR)QUNTY  tBTU          COMMER End-use consumption
  COMPARM          CapacityFactor   R    4 3 (MNUMC2,    11,    10)              CAPFAC FRACT         COMMER Capacity factors
- COMPARM          TechEff          R    4 4 (MNUMCR,    10,    60,    52)       RATE   FRACT         COMMER Equipment efficiencies
- COMPARM          TechCost         R    4 4 (MNUMCR,    60,    52,     4)       COST   2013$u        COMMER Capital and O&M cost of equipment by technology
- COMPARM          TechLife         R    4 2 (    60,    52)                     LEVEL  YEARS         COMMER Average life expectancy of equipment
+ COMPARM          TechEff          R    4 4 (MNUMCR,    10,    62,    44)       RATE   FRACT         COMMER Equipment efficiencies
+ COMPARM          TechCost         R    4 4 (MNUMCR,    62,    44,     4)       COST   2013$         COMMER Capital and O&M cost of equipment by technology
+ COMPARM          TechLife         R    4 2 (    62,    44)                     LEVEL  YEARS         COMMER Average life expectancy of equipment
  COMPARM          WHSE_SHELLINDEX  R    4 2 (     4,MNUMYR)                     INDEX  FRACT         COMMER Warehouse shell index
  COMPARM          WHSE_LIGHTINDEX  R    4 2 (     4,MNUMYR)                     INDEX  FRACT         COMMER Warehouse lighting index
  COMPARM          WHSE_VENTINDEX   R    4 2 (     4,MNUMYR)                     INDEX  FRACT         COMMER Warehouse ventilation index
@@ -2621,8 +2666,8 @@
  COMMREP          CMUSSurvFloorTot R    4 1 (MNUMYR)                            LEVEL  MILL          COMMER Surviving Floorspace
  COMMREP          CMUSNewFloorTot  R    4 1 (MNUMYR)                            LEVEL  MILL          COMMER Floorspace - New Additions
  COMMREP          CMUSConsumption  R    4 3 (    11,     3,MNUMYR)              QUNTY  tBTU          COMMER Consumption by end use, fuel
- COMMREP          CMSurvFloorTot   R    4 2 (    11,MNUMYR)                     QUNTY  tBTU          COMMER Surviving floorspace by building type
- COMMREP          CMNewFlrSpace    R    4 2 (    11,MNUMYR)                     QUNTY  tBTU          COMMER New floorspace by building type
+ COMMREP          CMSurvFloorTot   R    4 2 (    11,MNUMYR)                     LEVEL  MILL          COMMER Surviving floorspace by building type
+ COMMREP          CMNewFlrSpace    R    4 2 (    11,MNUMYR)                     LEVEL  MILL          COMMER New floorspace by building type
  COMMREP          CMFinalEndUseCon R    4 2 (    11,MNUMYR)                     QUNTY  tBTU          COMMER Consumption by building type
  COMMREP          CMUSAvgEff       R    4 3 (     9,     3,MNUMYR)              QUNTY  tBTU          COMMER Average technology efficiency by end use, fuel
  COMMREP          CMUSCogen        R    4 2 (     4,MNUMYR)                     QUNTY  tBTU          COMMER Consumption for cogeneration
@@ -2632,11 +2677,11 @@
  COMMREP          CMEffInd         R    4 5 (     3,    10,    11,     9,MNUMYR)INDEX  FRACT         COMMER Indexed energy intensity
  COMMREP          CEffGrowth       R    4 1 (    10)                            INDEX  FRACT         COMMER Efficiency growth rates by end use
  COMMREP          DegreeDays       R    4 3 (     2,MNUMCR,MNUMYR)              LEVEL  SCALAR        COMMER Heating (D1=1) and cooling (D1=2) degree days
- COMMREP          SurvFloorTotal   R    4 3 (MNUMCR,    11,MNUMYR)              LEVEL  SCALAR        COMMER Moved this and the next 4 for McGraw Hill substitute
- COMMREP          AgedNew          R    4 3 (MNUMCR,    11,MNUMYR)              LEVEL  SCALAR        COMMER
- COMMREP          CMNewFloorSpace  R    4 3 (MNUMCR,    11,   220)              LEVEL  SCALAR        COMMER
- COMMREP          CMTotalFlspc     R    4 3 (MNUMCR,    12,MNUMYR)              LEVEL  SCALAR        COMMER
- COMMREP          CMNonBldgUse     R    4 3 (     8,MNUMCR,MNUMYR)              LEVEL  SCALAR        COMMER
+ COMMREP          SurvFloorTotal   R    4 3 (MNUMCR,    11,MNUMYR)              LEVEL  MILL          COMMER Surviving floorspace by census division, building type
+ COMMREP          AgedNew          R    4 3 (MNUMCR,    11,MNUMYR)              LEVEL  MILL          COMMER Surviving base year stock by census division, building type
+ COMMREP          CMNewFloorSpace  R    4 3 (MNUMCR,    11,   220)              LEVEL  MILL          COMMER New Floorspace by census division, building type
+ COMMREP          CMTotalFlspc     R    4 3 (MNUMCR,    12,MNUMYR)              LEVEL  MILL          COMMER Total floorspace by census division, building type
+ COMMREP          CMNonBldgUse     R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tBTU          COMMER Non-building energy use by fuel, census division
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Transportation Module Report Variables
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2699,12 +2744,12 @@
  TRANREP          MPG              R    4 4 (     2,    16,     6,MNUMYR)       QUNTY  MPG           TRANSP MPG (vehicle type, tech, size class, year)
  TRANREP          PRI              R    4 4 (     2,    16,     6,MNUMYR)       QUNTY  m90$          TRANSP Prices(vehicle type, tech, size class, year)
  TRANREP          RNG              R    4 4 (     2,    16,     6,MNUMYR)       QUNTY  MILES         TRANSP Ranges(vehicle type, tech, size class, year)
- TRANREP          BCLTBTUT         R    4 2 (CTFUEL,MNUMYR)                     QUNTY  tBTU          TRANSP Total Comm.Light.Truck Btu fuel consumption
- TRANREP          BCLTVMT          R    4 2 (CTFUEL,MNUMYR)                     QUNTY  MILL          TRANSP Total CLT Benchmarked VMT
- TRANREP          CLTSTKT          R    4 2 (CTFUEL,MNUMYR)                     QUNTY  MILL          TRANSP Total CLT Stock
+ TRANREP          BCLTBTUT         R    4 2 (FRFUEL,MNUMYR)                     QUNTY  tBTU          TRANSP Total Comm.Light.Truck Btu fuel consumption
+ TRANREP          BCLTVMT          R    4 2 (FRFUEL,MNUMYR)                     QUNTY  MILL          TRANSP Total CLT Benchmarked VMT
+ TRANREP          CLTSTKT          R    4 2 (FRFUEL,MNUMYR)                     QUNTY  MILL          TRANSP Total CLT Stock
  TRANREP          NCLTMPGT         R    4 1 (MNUMYR)                            QUNTY  MPG           TRANSP Aggregate new CLT MPG
  TRANREP          CLTMPGT          R    4 1 (MNUMYR)                            QUNTY  MPG           TRANSP Aggregate stock CLT MPG
- TRANREP          CLTSALT          R    4 2 (CTFUEL,MNUMYR)                     QUNTY  MILL          TRANSP Total CLT Sales
+ TRANREP          CLTSALT          R    4 2 (FRFUEL,MNUMYR)                     QUNTY  MILL          TRANSP Total CLT Sales
  TRANREP          NEWMPG           R    4 2 (     3,MNUMYR)                     QUNTY  MPG           TRANSP Avg New vehicle efficiency
  TRANREP          AVG_PRC_CAR      R    4 1 (MNUMYR)                            LEVEL  m90$          TRANSP Average price of cars
  TRANREP          AVG_PRC_TRK      R    4 1 (MNUMYR)                            LEVEL  m90$          TRANSP Average price of trucks
@@ -2722,8 +2767,8 @@
  TRANREP          TFR_FTMPG_S      R    4 3 (MNUMYR,     3,     2)              QUNTY  MPG           TRANSP freight truck MPG by size class,new/stock
  TRANREP          TFR_FTMPG_TR     R    4 2 (MNUMYR,     2)                     QUNTY  MPG           TRANSP freight truck MPG by new/stock
  TRANREP          TFR_INVEST_TR    R    4 1 (MNUMYR)                            LEVEL  mm87$         TRANSP Total freight investment
- TRANREP          TECHSHARE        R    4 4 (MNUMYR,   106,     5,     2)       QUNTY  FRACT         TRANSP Tech shares by technology, class, 2 fuels
- TRANREP          MKT$P            R    4 3 (     3,TRTECH,MNUMYR)              QUNTY  mMTONS        TRANSP Market penetration
+ TRANREP          TECHSHARE        R    4 4 (MNUMYR,    83,     5,     2)       QUNTY  FRACT         TRANSP Tech shares by technology, class, 2 fuels
+ TRANREP          MKT_D_P          R    4 3 (     3,TRTECH,MNUMYR)              QUNTY  mMTONS        TRANSP Market penetration
  TRANREP          AVGCOST          R    4 3 (     3,TRTECH,MNUMYR)              QUNTY  mMTONS        TRANSP Technology cost
  TRANREP          TRWTCAR_STOCK    R    4 1 (MNUMYR)                            QUNTY  LBS           TRANSP Car Average Weight, Stock
  TRANREP          TRWTTRK_STOCK    R    4 1 (MNUMYR)                            QUNTY  LBS           TRANSP Light Truck Average Weight, Stock
@@ -2751,7 +2796,7 @@
  TRANREP          FCLOGIT2         R    4 1 (     1)                            COEFF  SCALAR        TRANSP Fuel availability logit constant
  TRANREP          FCLOGIT3         R    4 1 (     1)                            COEFF  SCALAR        TRANSP Fuel availability logit term
  TRANREP          FCLOGIT4         R    4 1 (     1)                            COEFF  SCALAR        TRANSP Fuel price logit term
- TRANREP          CLTFUELBTU       R    4 2 (CTFUEL,MNUMYR)                     QUNTY  tBTU          TRANSP Commercial light truck consumption by fuel
+ TRANREP          CLTFUELBTU       R    4 2 (FRFUEL,MNUMYR)                     QUNTY  tBTU          TRANSP Commercial light truck consumption by fuel
  TRANREP          PAS_RPM          R    4 2 (     3,MNUMYR)                                          TRANSP Passenger miles:  1=2-3 wheel, 2=Bus, 3=rail
  TRANREP          TRK_TMT          R    4 2 (     3,MNUMYR)                     QUNTY  TON_ML        TRANSP Freight truck ton miles traveled:  1=Light, 2=Medium, 3=Heavy
  TRANREP          LDV_MPG          R    4 2 (     3,MNUMYR)                     QUNTY  MPG           TRANSP Fuel economy (car + truck + class 2B):  1=CAFE, 2=New, 3=Stock
@@ -2764,8 +2809,10 @@
  TRANREP          LDVMPG           R    4 4 (     2,    16,     8,MNUMYR)       QUNTY  MPG           TRANSP MPG (vehicle type, tech, size class, year)
  TRANREP          LDVPRI           R    4 4 (     2,    16,     8,MNUMYR)       QUNTY  m90$          TRANSP Prices(vehicle type, tech, size class, year)
  TRANREP          LDVRNG           R    4 4 (     2,    16,     8,MNUMYR)       QUNTY  MILES         TRANSP Ranges(vehicle type, tech, size class, year)
- TRANREP          TRQ_ELEC         R    4 3 (     5,MNUMCR,MNUMYR)              QUNTY  tBTU          TRANSP Electricity consumption for EMM (1:LDV,2:Bus,3:CLT,4:freight truck,5:pass rail)
+ TRANREP          TRQ_ELEC         R    4 3 (    10,MNUMCR,MNUMYR)              QUNTY  tBTU          TRANSP Electricity consumption for EMM (1:LDV,2:Bus,3:CLT,4:freight truck,5:pass rail)
  TRANREP          Li_ion_cost      R    4 2 (    16,MNUMYR)                     QUNTY  90$kWh        TRANSP Lithium-ion battery cost ($/kWhr) by vehicle type
+ TRANREP          COST_BATTKWH_TRK R    4 2 (     5,MNUMYR)                     QUNTY  90$kWh        TRANSP Lithium-ion battery cost ($/kWhr) by vehicle type (freight trucks)
+ TRANREP          AdjMpg           R    4 2 (     3,MNUMYR)                     QUNTY  MPG           TRANSP Adjusted light-duty vehicle fuel economy 
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Macroeconomic Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2952,7 +2999,6 @@
  MACOUT           MC_KHUPS2A       R    4 2 (MNUMCR,MNUMYR)                     LEVEL  MILL                 Stock of multi-family housing units
  MACOUT           MC_KHUMFG        R    4 2 (MNUMCR,MNUMYR)                     LEVEL  MILL                 Stock of mobile homes
  MACOUT           MC_M             R    4 1 (MNUMYR)                            LEVEL  bNOM$                Imports
- MACOUT           MC_MFGWGRT       R    4 2 (MNUMCR,MNUMYR)                     RATE   $/HR                 Manufacturing wage rate
  MACOUT           MC_MFY           R    4 1 (MNUMYR)                            LEVEL  bNOM$                Factor service imports
  MACOUT           MC_MG            R    4 1 (MNUMYR)                            LEVEL  bNOM$                Imports of goods
  MACOUT           MC_MGAUTOR       R    4 1 (MNUMYR)                            LEVEL  bcr$                 Real imports of motor vehicles & parts
@@ -2968,7 +3014,6 @@
  MACOUT           MC_NETCFIVA      R    4 1 (MNUMYR)                            LEVEL  bNOM$                Corporate cashflow with inventory valuation adjustment and dividends
  MACOUT           MC_NETSAVGFUNIFY R    4 1 (MNUMYR)                            LEVEL  bNOM$                Fiscal year unified Federal budget surplus
  MACOUT           MC_NLFC          R    4 1 (MNUMYR)                            LEVEL  MILL                 Civilian labor force as measured by the household survey
- MACOUT           MC_NMFGWGRT      R    4 2 (MNUMCR,MNUMYR)                     LEVEL  $/HR                 Non-manufacturing wage rate
  MACOUT           MC_NNP           R    4 1 (MNUMYR)                            LEVEL  bNOM$                Net national product
  MACOUT           MC_NP            R    4 2 (MNUMCR,MNUMYR)                     LEVEL  MILL                 Total population, including armed forces overseas
  MACOUT           MC_NP16A         R    4 2 (MNUMCR,MNUMYR)                     LEVEL  MILL                 Population aged 16 & over
@@ -3216,7 +3261,7 @@
  EMISSION         EMHM             R    4 3 (     3,MNPOLL,MNUMYR)              QUNTY  mMTONS               Hydrogen emissions by fuel and pollutant
  EMISSION         EXTRARISK        R    4 1 (MNUMYR)                            RATE   PERCNT               Extra risk premium above and beyond
  EMISSION         HG_MEFNC         R    4 2 (NDREGN,MNUMYR)                     LEVEL  FRACT                Hg MEF If No CAMR
- EMISSION         CCS_PMM          R    4 3 (     5,MNUMPR,MNUMYR)              QUNTY  tMTONS               Carbon capture and storage from PMM
+ EMISSION         CCS_PMM          R    4 3 (     5,MNUMPR,MNUMYR)              QUNTY  mMTONS               Carbon capture and storage from PMM
  EMISSION         HEMNGTL          R    4 2 (MNPOLL,MNUMYR)                     QUNTY  mMTONS               HISTORICAL GAS (C,CO,CO2,SO2,NOX,VOC)
  EMISSION         HEMOLTL          R    4 2 (MNPOLL,MNUMYR)                     QUNTY  mMTONS               HISTORICAL OIL (C,CO,CO2,SO2,NOX,VOC)
  EMISSION         HEMCLTL          R    4 2 (MNPOLL,MNUMYR)                     QUNTY  mMTONS               HISTORICAL COL (C,CO,CO2,SO2,NOX,VOC)
@@ -3290,7 +3335,7 @@
  EMABLK           JRSEL            R    4 1 (MNUMYR)                            PRICE  87$BTU RS     ELECTR Residual Fuel
  EMABLK           JOTTR            R    4 1 (MNUMYR)                            PRICE  87$BTU OT     TRANSP Other Petroleum
  EMABLK           JMETR            R    4 1 (MNUMYR)                            PRICE  87$BTU ME     TRANSP Methanol
- EMABLK           JETTR            R    4 1 (MNUMYR)                            PRICE  87$BTU ET     TRANSP Ethanol
+ EMABLK           JETTR            R    4 1 (MNUMYR)                            PRICE  87$BTU ET     TRANSP Ethanol (sold as E85)
  EMABLK           JETHM            R    4 1 (MNUMYR)                            PRICE  87$BTU ET     HYDROG Ethanol
  EMABLK           JPFIN            R    4 1 (MNUMYR)                            PRICE  87$BTU PF     INDUST Tax/allowance price adder
  EMABLK           JPCIN            R    4 1 (MNUMYR)                            PRICE  87$BTU PC     INDUST Tax/allowance price adder
@@ -3380,9 +3425,6 @@
  COGEN            CGTOTCAPNR       R    4 3 (MNUMNR,MNUMYR,NUMCGF)              CAPCTY MWATT         ENDUSE All combined heat and power fuel capacity by EMM region
  COGEN            CGTOTGENNR       R    4 4 (MNUMNR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        ENDUSE All combined heat and power generation by EMM region
  COGEN            CGEPGEN          R    4 3 (MNUMNR,MNUMYR,     2)              QUNTY  GWTHRS               Electric power sector generation for own use
- COGEN            CGHMMQ           R    4 3 (MNUMCR,MNUMYR,     5)              QUNTY  tBTU                 Consumption of fuel - hydrogen sector
- COGEN            CGHMMCAP         R    4 3 (MNUMCR,MNUMYR,     5)              CAPCTY MWATT                Generating capacity - hydrogen sector
- COGEN            CGHMMGEN         R    4 4 (MNUMCR,MNUMYR,     5,     2)       QUNTY  GWTHRS               Generation of electricity - hydrogen sector
  COGEN            CGCPVRES         R    4 2 (MNUMCR,MNUMYR)                     COEFF  SCALAR SO     RESIDN RPS Credits / kwh of PV Cogen
  COGEN            CGCWNRES         R    4 2 (MNUMCR,MNUMYR)                     COEFF  SCALAR WI     RESIDN RPS Credits / kwh of Wind Cogen
  COGEN            CGCPVCOM         R    4 2 (MNUMCR,MNUMYR)                     COEFF  SCALAR SO     COMMER RPS Credits / kwh of PV Cogen
@@ -3537,6 +3579,7 @@
  WRENEW           WSSPTEL          R    4 3 (MNUMNR,MNUMYR,MNUMSO)              QUNTY  BLANK  SO     ELECTR Photovoltaics w/ Storage Supply Shape (by time pd)
  WRENEW           EFFMULPT         R    4 1 (MNUMYR)                            RATE   SCALAR               PV Tilt Efficiency multiplier
  WRENEW           WSSPTEL_CF       R    4 5 (MNUMNR,MNUMYR,     3,    12,    24)CAPFAC FRACT  SO            Hourly solar photovoltaic w/ storage capacity factor
+ WRENEW           WSSPTEL_CF_CLIP  R    4 5 (MNUMNR,MNUMYR,     3,    12,    24)CAPFAC FRACT  SO            Hourly PV w/ storage capacity factor - amount of inverter clipped energy
  WRENEW           WSFWLEL_CF       R    4 5 (MNUMNR,MNUMYR,     3,    12,    24)CAPFAC FRACT  WI            Hourly onshore wind capacity factor
  WRENEW           WCAPTEL          R    4 2 (MNUMNR,MNUMYR)                     QUNTY  BLANK  SO     ELECTR UTIL PHOTOV Tilt GENER CAPACITY MW
  WRENEW           WHRPTEL          R    4 2 (MNUMNR,MNUMYR)                     QUNTY  BLANK  SO     ELECTR UTIL PHOTOV Tilt HEAT RATE BTU/KWH
@@ -3709,6 +3752,9 @@
  CONVFACT         APIAVG           R    4 2 (     2,MNUMYR)                     CONFAC        AG     REFINE API and factor for aviation gas
  CONVFACT         APILUB           R    4 2 (     2,MNUMYR)                     CONFAC        LU     REFINE API and factor for lubricants
  CONVFACT         APIWAX           R    4 2 (     2,MNUMYR)                     CONFAC        WX     REFINE API and factor for waxes
+ CONVFACT         CFH2Q_BBL        R    4 1 (     1)                            CONFAC                      CONVERSION FACTOR BTUBBL FOR H2, MILLION BTU PER Barrel
+ CONVFACT         CFH2Q_KG         R    4 1 (     1)                            CONFAC                      CONVERSION FACTOR KILOGRAMS PER MILLION BTU
+ CONVFACT         CFH2Q_CF         R    4 1 (     1)                            CONFAC                      CONVERSION FACTOR THOUSAND BTU PER CUBIC FOOT
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * EMM / Coal Module Interface
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -3822,6 +3868,7 @@
  EUSPRC           PELLTRS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            lighting RS
  EUSPRC           PELOTRS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            other RS
  EUSPRC           PELH2RS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            secondary heating RS
+ EUSPRC           PELVHRS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle RS
  EUSPRC           PELSHCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            space heating CM
  EUSPRC           PELSCCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            space cooling CM
  EUSPRC           PELWHCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            water heating CM
@@ -3832,11 +3879,17 @@
  EUSPRC           PELOPCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment PCs CM
  EUSPRC           PELONCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment, nonPCs CM8
  EUSPRC           PELOTCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            other commercial
+ EUSPRC           PELP2CM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public L2
+ EUSPRC           PELPFCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public DCFC
+ EUSPRC           PELSBCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  school bus
+ EUSPRC           PELTBCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  transit bus
+ EUSPRC           PELIBCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  intercity bus + CLT + freight (fleet)
+ EUSPRC           PELFNCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  freight truck non-fleet
  EUSPRC           PELINP           R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Primary Industrial Electricity
  EUSPRC           PELINS           R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Shift industrial electricity
  EUSPRC           PELINM           R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Miscellaneous industrial electricity
+ EUSPRC           PELINH2E         R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Hydrogen electricity
  EUSPRC           PELLTTR          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            light trains TR
- EUSPRC           PELVHTR          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle TR
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Carbon Emissions Factors
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -3846,13 +3899,11 @@
  EMEBLK           EGFTR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GF     TRANSP Natural Gas, Core - Transportation
  EMEBLK           EGFIN            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GF     INDUST Natural Gas, Core - Industrial
  EMEBLK           EGFEL            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GF     ELECTR Natural Gas, Core - Electric Power
- EMEBLK           EGFHM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GF     HYDROG Natural Gas, Core - Hydrogen
  EMEBLK           EGIRS            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     RESIDN Natural Gas, Noncore - Residential
  EMEBLK           EGICM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     COMMER Natural Gas, Noncore - Commercial
  EMEBLK           EGITR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     TRANSP Natural Gas, Noncore - Transportation
  EMEBLK           EGIIN            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     INDUST Natural Gas, Noncore - Industrial
  EMEBLK           EGIEL            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     ELECTR Natural Gas, Noncore - Electric Power
- EMEBLK           EGIHM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     HYDROG Natural Gas, Noncore - Hydrogen
  EMEBLK           ENGRS            R    4 1 (MNUMYR)                            CONFAC mMTC/Q NG     RESIDN Natural Gas - Residential
  EMEBLK           ENGCM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q NG     COMMER Natural Gas - Commercial
  EMEBLK           ENGTR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q NG     TRANSP Natural Gas - Transportation
@@ -3876,7 +3927,7 @@
  EMEBLK           EDSCM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q DS     COMMER Distillate - Commercial
  EMEBLK           EDSTR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q DS     TRANSP Distillate - Transportation
  EMEBLK           EDSIN            R    4 1 (MNUMYR)                            CONFAC mMTC/Q DS     INDUST Distillate - Industrial
- EMEBLK           EDSEL            R    4 1 (MNUMYR)                            CONFAC mMTC/Q DS     ELECTR Distillate - Electricity (+petroleum coke)
+ EMEBLK           EDSEL            R    4 1 (MNUMYR)                            CONFAC mMTC/Q DS     ELECTR Distillate - Electricity
  EMEBLK           EKSRS            R    4 1 (MNUMYR)                            CONFAC mMTC/Q KS     RESIDN Kerosene - Residential
  EMEBLK           EKSCM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q KS     COMMER Kerosene - Commercial
  EMEBLK           EKSIN            R    4 1 (MNUMYR)                            CONFAC mMTC/Q KS     INDUST Kerosene - Industrial
@@ -3902,8 +3953,7 @@
  EMEBLK           EOTIN            R    4 1 (MNUMYR)                            CONFAC mMTC/Q        INDUST Other petroleum - Industrial
  EMEBLK           EPCEL            R    4 1 (MNUMYR)                            CONFAC mMTC/Q PC     ELECTR Petroleum coke   - Electricity
  EMEBLK           EMETR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q ME     TRANSP Methanol - Transporation
- EMEBLK           EETTR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q ET     TRANSP Ethanol - Transporation
- EMEBLK           EETHM            R    4 1 (MNUMYR)                            CONFAC mMTC/Q ET     HYDROG Ethanol - Hydrogen
+ EMEBLK           EETTR            R    4 1 (MNUMYR)                            CONFAC mMTC/Q ET     TRANSP Ethanol - Transporation (sold as E85)
  EMEBLK           EMSEL            R    4 1 (MNUMYR)                            CONFAC mMTC/Q MS     ELECTR Municipal Solid Waste - Electric Power
  EMEBLK           EGFELGR          R    4 1 (MNUMYR)                            CONFAC mMTC/Q GF     ELECTR Natural gas, electric power firm
  EMEBLK           EGIELGR          R    4 1 (MNUMYR)                            CONFAC mMTC/Q GI     ELECTR Natural gas, electric power interruptible
@@ -4065,7 +4115,7 @@
 * Convergence Summary from intercv.f for FTAB
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  CONVERGE                                                                       TYPE   UNITS  FUEL   SECTOR
- CONVERGE         CVTAB            R    4 3 (   106,     4,MNUMYR)              QUNTY  tBTU                 Convergence Summary: 50 vars, (bef/aft/abschg/% aft), year
+ CONVERGE         CVTAB            R    4 3 (   102,     4,MNUMYR)              QUNTY  tBTU                 Convergence Summary: 50 vars, (bef/aft/abschg/% aft), year
  CONVERGE         CVSCORE          R    4 1 (MNUMYR)                                   INDEX  none          Convergence Test Score (GPA), 4:A, 3:B,,,0:F)
  CONVERGE         CVSCORE_US       R    4 1 (MNUMYR)                                   INDEX  none          Convergence Test Score, US Aggregates Only (GPA), 4:A, 3:B,,,0:F)
  CONVERGE         CVSCOREHIST      R    4 2 (MNUMYR,    10)                            INDEX  none          Convergence Test Score (GPA), 4:A, 3:B,,,0:F)
@@ -4096,6 +4146,7 @@
  BIFURC           QE2ASIN          R    4 3 (MNUMCR,MNUMYR,     2)              QUNTY  tBTU   AS     INDUST Asphalt and Road Oil.  Industrial
  BIFURC           QE2OTIN          R    4 3 (MNUMCR,MNUMYR,     2)              QUNTY  tBTU   OT     INDUST Other Petroleum.  Industrial
  BIFURC           QE2CIIN          R    4 3 (MNUMCR,MNUMYR,     2)              QUNTY  tBTU   CI     INDUST Net Coal Coke Imports.  Industrial
+ BIFURC           QE2H2IN          R    4 3 (MNUMCR,MNUMYR,     2)              QUNTY  tBTU   HY     INDUST Hydrogen fuel.  Industrial
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Emissions Policy Module Carbon fee banking option solution variables
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4182,6 +4233,9 @@
  QMORE            QDSBS            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   DS            Uncounted distillate use
  QMORE            QJFBS            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   JF            Uncounted jet fuel use
  QMORE            QNGLQ            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   NG            Natural gas used for liquefaction such as for exporting
+ QMORE            QH2RF            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   NG            Market H2 Consumption in refineries by census division
+ QMORE            QH2EL            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 H2 consumed in electric power sector by census division, year
+ QMORE            QNGPIN           R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU   EL            Natural Gas Processing Plant Electricity Consumption
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Unadjusted price variable overflow (new variables so we don't have to change MPBLK)
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4205,6 +4259,9 @@
  PMORE            PPRINPF          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU        INDUST Industrial propane feedstock
  PMORE            PISINPF          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU        INDUST Industrial isobutane feedstock
  PMORE            PPCIN            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU        INDUST Industrial petroleum coke
+ PMORE            PH2IN            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               Price of H2 to industrial sector
+ PMORE            PH2EL            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               price of H2 to electric power sector by census division, year
+ PMORE            PELHM            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               price of electricity delivered to hydrogen production subsector
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Adjusted price variable overflow (new variables so we don't have to change AMPBLK)
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4228,50 +4285,44 @@
  APMORE           PPRINPF          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU        INDUST Industrial propane feedstock
  APMORE           PISINPF          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU        INDUST Industrial isobutane feedstock
  APMORE           PPCIN            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU        INDUST Industrial petroleum coke
+ APMORE           PH2IN            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               Price of H2 to industrial sector
+ APMORE           PH2EL            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               price of H2 to electric power sector by census division, year
+ APMORE           PELHM            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               price of electricity delivered to hydrogen production subsector
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 *Hydrogen Market Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  HMMBLK                                                                         TYPE   UNITS  FUEL   SECTOR
- HMMBLK           PHMM             R    4 4 (MNUMYR,MNUMCR,     3,    26)       PRICE  87$KG                Hydrogen Prices ($/kg)
- HMMBLK           HMMPRD           R    4 4 (MNUMYR,MNUMCR,     3,    26)       QUNTY  TONS                 Hydrogen Quantities (bil. kg)
- HMMBLK           HMGSCNS          R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  QUADS                Fuel Consumption Natural Gas
- HMMBLK           HMCLCNS          R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  QUADS                Fuel Consumption Coal
- HMMBLK           HMBICNS          R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  QUADS                Fuel Consumption Biomass
- HMMBLK           HMELCNS          R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  QUADS                Fuel Consumption Electricity
- HMMBLK           HMURCNS          R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  QUADS                Fuel Consumption Nuclear
- HMMBLK           HMETCNS          R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  QUADS                Fuel Consumption Ethanol
- HMMBLK           HMGSPRD          R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Produced Hydrogen Natural Gas
- HMMBLK           HMCLPRD          R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Produced Hydrogen Coal
- HMMBLK           HMBIPRD          R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Produced Hydrogen Biomass
- HMMBLK           HMELPRD          R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Produced Hydrogen Electricity
- HMMBLK           HMURPRD          R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Produced Hydrogen Nuclear
- HMMBLK           HMETPRD          R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Produced Hydrogen Ethanol
- HMMBLK           HMGSHP           R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Hydrogen Heat and Power Natural Gas
- HMMBLK           HMCLHP           R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Hydrogen Heat and Power Coal
- HMMBLK           HMBIHP           R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Hydrogen Heat and Power Biomass
- HMMBLK           HMELHP           R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Hydrogen Heat and Power Electricity
- HMMBLK           HMURHP           R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Hydrogen Heat and Power Nuclear
- HMMBLK           HMETHP           R    4 2 (MNUMYR,MNUMCR)                     QUNTY  tBTU                 Hydrogen Heat and Power Ethanol
- HMMBLK           MSHARE           R    4 2 (MNUMCR,     3)                     QUNTY  MILES                VMT Shares (miles)
- HMMBLK           PCFCP            R    4 2 (MNUMYR,     8)                     LEVEL  SCALAR               Central Production Carbon Removal Rate
- HMMBLK           PGFCP            R    4 2 (MNUMYR,     2)                     LEVEL  SCALAR               Citygate Production Carbon Removal Rate
- HMMBLK           PFFCP            R    4 2 (MNUMYR,     3)                     LEVEL  SCALAR               Forecourt Production Carbon Removal Rate
- HMMBLK           HCNSTECH         R    4 3 (MNUMYR,MNUMCR,    13)              QUNTY  QUADS                Fuel Consumption By Production Tech
- HMMBLK           HSTAT            R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  BLANK                Number of H2 fueling stations by region and market
+ HMMBLK           HSTAT            R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  BLANK                HOLDING PLACE FOR FUTURE VARIABLES
+ HMMBLK           QNGHMHP          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 natural gas heat and power energy used in hydrogen production
+ HMMBLK           QNGHMPF          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 natural gas feedstock consumed in hydrogen production
+ HMMBLK           PH2RF            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  87$BTU               Price of H2 to refineries by Census division
+ HMMBLK           QELHM_HR         R    4 4 (MNUMNR,     4,    24,MNUMYR)       QUNTY  MWH                  hourly electrolyzer load by 4 seasons, NERC region
+ HMMBLK           H2SCRV_Q         R    4 4 (MNUMCR,H2STEP,     3,MNUMYR)       QUNTY  mMTONS               H2 supply quantity for each curve step by season
+ HMMBLK           H2SCRV_P         R    4 4 (MNUMCR,H2STEP,     3,MNUMYR)       QUNTY  87$KG                H2 supply price for each curve step by season
+ HMMBLK           PRDH2NG          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from SMR/ATR w/o CCS
+ HMMBLK           PRDH2NG_CCS      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from SMR/ATR w/ CCS
+ HMMBLK           PRDH2EL          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from electrolysis, Census division
+ HMMBLK           PRDH2EL_NR       R    4 2 (MNUMNR,MNUMYR)                     QUNTY  mMTONS               H2 production from electrolysis, EMM NERC-based division
+ HMMBLK           QELTRH2          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 Electricity consumed in transmission and distribution of H2, including pipelines, storage, dispensing, and compression
+ HMMBLK           QELINH2NG        R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 Electricity consumed in hydrogen production by facilities using natural gas as a feedstock (e.g. SMR)
+ HMMBLK           PH2_SPOT         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  87$BTU               H2 market spot price by census division, year
+ HMMBLK           QH2_DISC         R    4 1 (MNUMYR)                            QUNTY  mMTONS               National total discrepancy between supply and demand
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Regional CO2 Report Info
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  REGCO2                                                                         TYPE   UNITS  FUEL   SECTOR
- REGCO2           EM_RESD          R    4 3 (     6,MNUMCR,MNUMYR)              QUNTY  tMTONS               Regional Residential CO2 by fuel
- REGCO2           EM_COMM          R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tMTONS               Regional Commercial CO2 by fuel
- REGCO2           EM_INDY          R    4 3 (    17,MNUMCR,MNUMYR)              QUNTY  tMTONS        INDUST Regional Industrial CO2 by fuel
- REGCO2           EM_TRAN          R    4 3 (    12,MNUMCR,MNUMYR)              QUNTY  tMTONS               Regional Transportation CO2 by fuel
- REGCO2           EM_ELEC          R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tMTONS               Regional Electric Power CO2 by fuel
- REGCO2           FL_RESD          R    4 3 (     6,MNUMCR,MNUMYR)              QUNTY  tBTU                 Regional Residential BTU by fuel
- REGCO2           FL_COMM          R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tBTU                 Regional Commercial BTU by fuel
- REGCO2           FL_INDY          R    4 3 (    17,MNUMCR,MNUMYR)              QUNTY  tBTU          INDUST Regional Industrial BTU by fuel
- REGCO2           FL_TRAN          R    4 3 (    12,MNUMCR,MNUMYR)              QUNTY  tBTU                 Regional Transportation BTU by fuel
- REGCO2           FL_ELEC          R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tBTU                 Regional Electric Power BTU by fuel
+ REGCO2           EM_RESD          R    4 3 (     6,MNUMCR,MNUMYR)              QUNTY  tMTONS        RESIDN Regional Residential CO2 by fuel
+ REGCO2           EM_COMM          R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tMTONS        COMMER Regional Commercial CO2 by fuel
+ REGCO2           EM_INDY          R    4 3 (    20,MNUMCR,MNUMYR)              QUNTY  tMTONS        INDUST Regional Industrial CO2 by fuel
+ REGCO2           EM_TRAN          R    4 3 (    12,MNUMCR,MNUMYR)              QUNTY  tMTONS        TRANSP Regional Transportation CO2 by fuel
+ REGCO2           EM_ELEC          R    4 3 (     9,MNUMCR,MNUMYR)              QUNTY  tMTONS        ELECTR Regional Electric Power CO2 by fuel
+ REGCO2           FL_RESD          R    4 3 (     6,MNUMCR,MNUMYR)              QUNTY  tBTU          RESIDN Regional Residential BTU by fuel
+ REGCO2           FL_COMM          R    4 3 (     8,MNUMCR,MNUMYR)              QUNTY  tBTU          COMMER Regional Commercial BTU by fuel
+ REGCO2           FL_INDY          R    4 3 (    20,MNUMCR,MNUMYR)              QUNTY  tBTU          INDUST Regional Industrial BTU by fuel
+ REGCO2           FL_TRAN          R    4 3 (    12,MNUMCR,MNUMYR)              QUNTY  tBTU          TRANSP Regional Transportation BTU by fuel
+ REGCO2           FL_ELEC          R    4 3 (     9,MNUMCR,MNUMYR)              QUNTY  tBTU          ELECTR Regional Electric Power BTU by fuel
+ REGCO2           CC_INDY          R    4 3 (    10,MNUMCR,MNUMYR)              QUNTY  tMTONS        INDUST Regional Industrial CCS by fuel
+ REGCO2           CC_ELEC          R    4 3 (     5,MNUMCR,MNUMYR)              QUNTY  tMTONS        ELECTR Regional Electric Power CCS by fuel
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Adjusted end-use electricity prices by end use
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4286,6 +4337,7 @@
  AEUSPRC          PELLTRS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            lighting RS
  AEUSPRC          PELOTRS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            other RS
  AEUSPRC          PELH2RS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            secondary heating RS
+ AEUSPRC          PELVHRS          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle RS
  AEUSPRC          PELSHCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            space heating CM
  AEUSPRC          PELSCCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            space cooling CM
  AEUSPRC          PELWHCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            water heating CM
@@ -4296,11 +4348,17 @@
  AEUSPRC          PELOPCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment PCs CM
  AEUSPRC          PELONCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment, nonPCs CM8
  AEUSPRC          PELOTCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            other commercial
+ AEUSPRC          PELP2CM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public L2
+ AEUSPRC          PELPFCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public DCFC
+ AEUSPRC          PELSBCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  school bus
+ AEUSPRC          PELTBCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  transit bus
+ AEUSPRC          PELIBCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  intercity bus + CLT + freight (fleet)
+ AEUSPRC          PELFNCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  freight truck non-fleet
  AEUSPRC          PELINP           R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Primary Industrial Electricity
  AEUSPRC          PELINS           R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Shift industrial electricity
  AEUSPRC          PELINM           R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Miscellaneous industrial electricity
+ AEUSPRC          PELINH2E         R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL     INDUST Hydrogen industrial electricity
  AEUSPRC          PELLTTR          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            light trains TR
- AEUSPRC          PELVHTR          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle TR
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Reasons to not stop this run at the current cycle if it passes all other tests
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4451,3 +4509,166 @@
  TCS45Q           I_45Q_LYR_RET    I    4 1 (     1)                            CNTROL BLANK                End year of tax code section 45Q subsidy for retrofits
  TCS45Q           I_45Q_LYR_NEW    I    4 1 (     1)                            CNTROL BLANK                End year of tax code section 45Q subsidy for new builds
  TCS45Q           I_45Q_DURATION   I    4 1 (     1)                            CNTROL BLANK                Tax code section 45Q subsidy duration
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+* EMOBLK Emissions policy flags and prices used by EPM and EMM
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+ EMOBLK                                                                         TYPE   UNITS  FUEL   SECTOR
+ EMOBLK           DBUGEPM          I    4 1 (     1)                            CNTROL ON_OFF               DEBUG SWITCH FOR THE EPM (0=OFF, 1=ON, 2=VERBOSE)
+ EMOBLK           NOMINAL_FLAG     I    4 1 (     1)                            CNTROL ON_OFF               NOMINAL OR 87 DOLLARS
+ EMOBLK           TAX_FLAG         I    4 1 (     1)                            CNTROL ON_OFF               TAX ONLY
+ EMOBLK           PERMIT_FLAG      I    4 1 (     1)                            CNTROL ON_OFF               AUCTION FOR PERMITS
+ EMOBLK           MARKET_FLAG      I    4 1 (     1)                            CNTROL ON_OFF               FULL MARKET FOR PERMITS
+ EMOBLK           OFFSET_FLAG      I    4 1 (     1)                            CNTROL ON_OFF               MARKET FOR PERMITS WITH OFFSETS
+ EMOBLK           ETAX_FLAG        I    4 1 (     1)                            CNTROL ON_OFF               ENERGY TAX ONLY
+ EMOBLK           TRAN_FLAG        I    4 1 (     1)                            CNTROL ON_OFF               Cap/Fee applies to Tran Only
+ EMOBLK           ELEC_FLAG        I    4 1 (     1)                            CNTROL ON_OFF               Cap Applies to Elec Only
+ EMOBLK           RESD_FLAG        I    4 1 (     1)                            CNTROL ON_OFF               Cap/fee excludes RESiDential 
+ EMOBLK           COMM_FLAG        I    4 1 (     1)                            CNTROL ON_OFF               Cap/fee excludes COMMercial
+ EMOBLK           BANK_FLAG        I    4 1 (     1)                            CNTROL ON_OFF               Escalated Fee with banking to meet cap over long period. (see include epmbank)
+ EMOBLK           EMTAX            R    4 1 (MNUMYR)                            PRICE  87$KG                TAX OR PRICE OF PERMIT
+ EMOBLK           TOTAL_EMISSIONS  R    4 1 (MNUMYR)                            QUNTY  mMTONS               COUNTRY EMISSIONS BY YR
+ EMOBLK           EMISSIONS_GOAL   R    4 1 (MNUMYR)                            QUNTY  mMTONS               GOAL BY YEAR
+ EMOBLK           MAX_TAX          R    4 1 (MNUMYR)                            PRICE  87$KG                MAX PENALTY IN ANY YEAR
+ EMOBLK           MIN_TAX          R    4 1 (MNUMYR)                            PRICE  87$KG                MIN PENALTY IN ANY YEAR
+ EMOBLK           INIT_ALLOC       R    4 2 (     5,MNUMYR)                     QUNTY  mMTONS               INITIAL PERMIT ALLOCATION
+ EMOBLK           CL_CDNUM         I    4 1 (     9)                            CNTROL SCALAR               NUMBER OF COAL REGIONS FOR EACH CENSUS DIVISION
+ EMOBLK           CL_CDMAP         I    4 2 (     9,     5)                     CNTROL SCALAR               MAPPING OF COAL REGIONS TO CENSUS DIVISION
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+* CALSHR Assumed California shares of the Pacific Region for estimating AB32 covered emissions for fuel suppliers
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+ CALSHR                                                                         TYPE   UNITS  FUEL   SECTOR
+ CALSHR           ELRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EL     RESIDN Purchased Electricity - Residential
+ CALSHR           ELCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EL     COMMER Purchased Electricity - Commercial
+ CALSHR           ELTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EL     TRANSP Purchased Electricity - Transportation
+ CALSHR           ELIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EL     INDUST Purchased Electricity - Industrial
+ CALSHR           ELRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EL     REFINE Purchased Electricity - Refinery
+ CALSHR           ELHM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EL     HYDROG Purchased Electricity - Hydrogen
+ CALSHR           NGRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     RESIDN Natural Gas - Residential
+ CALSHR           NGCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     COMMER Natural Gas - Commercial
+ CALSHR           NGTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     TRANSP Natural Gas - Transportation
+ CALSHR           NGIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     INDUST Natural Gas - Industrial
+ CALSHR           NGRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     REFINE Natural Gas - Refinery
+ CALSHR           NGEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     ELECTR Natural Gas - Electricity
+ CALSHR           NGHM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  NG     HYDROG Natural Gas - Hydrogen
+ CALSHR           GPTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  GP     PIPELN Natural Gas - Pipeline
+ CALSHR           LPIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  LP     PLANT  Natural Gas - Lease and Plant Fuel
+ CALSHR           CLRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     RESIDN Coal - Residential
+ CALSHR           CLCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     COMMER Coal - Commercial
+ CALSHR           CLIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     INDUST Coal - Industrial
+ CALSHR           CLRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     REFINE Coal - Refinery
+ CALSHR           CLEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     ELECTR Coal - Electricity
+ CALSHR           CLSN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     SYNTHE Coal - Synthetics
+ CALSHR           CLHM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CL     HYDROG Coal - Hydrogen
+ CALSHR           MCIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  MC     INDUST Metallurgical Coal - Industrial
+ CALSHR           MGCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  MG     COMMER Motor Gasoline - Commercial
+ CALSHR           MGTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  MG     TRANSP Motor Gasoline - Transportation
+ CALSHR           MGIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  MG     INDUST Motor Gasoline - Industrial
+ CALSHR           JFTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  JF     TRANSP Jet Fuel - Transportation
+ CALSHR           DSRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  DS     RESIDN Distillate - Residential
+ CALSHR           DSCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  DS     COMMER Distillate - Commercial
+ CALSHR           DSTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  DS     TRANSP Distillate - Transportation
+ CALSHR           DSIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  DS     INDUST Distillate - Industrial
+ CALSHR           DSRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  DS     REFINE Distillate - Refinery
+ CALSHR           DSEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  DS     ELECTR Distillate - Electricity
+ CALSHR           KSRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  KS     RESIDN Kerosene - Residential
+ CALSHR           KSCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  KS     COMMER Kerosene - Commercial
+ CALSHR           KSIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  KS     INDUST Kerosene - Industrial
+ CALSHR           LGRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  LG     RESIDN Liquid Petroleum Gases - Residential
+ CALSHR           LGCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  LG     COMMER Liquid Petroleum Gases - Commercial
+ CALSHR           LGTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  LG     TRANSP Liquid Petroleum Gases - Transportation
+ CALSHR           LGIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  LG     INDUST Liquid Petroleum Gases - Industrial
+ CALSHR           LGRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  LG     REFINE Liquid Petroleum Gases - Refinery
+ CALSHR           RSCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  RS     COMMER Residual Fuel - Commercial
+ CALSHR           RSTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  RS     TRANSP Residual Fuel - Transportation
+ CALSHR           RSIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  RS     INDUST Residual Fuel - Industrial
+ CALSHR           RSRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  RS     REFINE Residual Fuel - Refinery
+ CALSHR           RSEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  RS     ELECTR Residual Fuel - Electricity
+ CALSHR           PFIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  PF     INDUST Petrochemical Feedstocks - Industrial
+ CALSHR           SGIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SG     INDUST Still Gas - Industrial
+ CALSHR           SGRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SG     REFINE Still Gas - Refinery
+ CALSHR           PCIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  PC     INDUST Petroleum Coke - Industrial
+ CALSHR           PCRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  PC     REFINE Petroleum Coke - Refinery
+ CALSHR           PCEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  PC     ELECTR Petroleum Coke - Electricity
+ CALSHR           PCAS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  PC     ALLSEC Petroleum Coke - All Sectors
+ CALSHR           ASIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  AS     INDUST Asphalt and Road Oil - Industrial
+ CALSHR           OTTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  OT     TRANSP Other Petroleum - Transportation
+ CALSHR           OTIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  OT     INDUST Other Petroleum - Industrial
+ CALSHR           OTRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  OT     REFINE Other Petroleum - Refinery
+ CALSHR           METR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  ME     TRANSP Methanol - Transporation
+ CALSHR           ETTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  ET     TRANSP Ethanol - Transporation
+ CALSHR           ETHM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  ET     HYDROG Ethanol - Hydrogen
+ CALSHR           HYTR_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  HY     TRANSP Liquid Hydrogen - Transportation
+ CALSHR           UREL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  UR     ELECTR Uranium - Electricity
+ CALSHR           URHM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  UR     HYDROG Uranium - Hydrogen
+ CALSHR           HOIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  HO     INDUST Hydropower - Industrial
+ CALSHR           HOEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  HO     ELECTR Hydropower - Electricity
+ CALSHR           GERS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  GE     RESIDN Geothermal - Residential
+ CALSHR           GEIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  GE     INDUST Geothermal - Industrial
+ CALSHR           GEEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  GE     ELECTR Geothermal - Electricity
+ CALSHR           BMRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     RESIDN Biomass - Residential
+ CALSHR           BMCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     COMMER Biomass - Commercial
+ CALSHR           BMIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     INDUST Biomass - Industrial
+ CALSHR           BMRF_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     REFINE Biomass - Refinery
+ CALSHR           BMEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     ELECTR Biomass - Electricity
+ CALSHR           BMSN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     SYNTHE Biomass - Synthetics
+ CALSHR           BMHM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  BM     HYDROG Biomass - Hydrogen
+ CALSHR           MSIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  MS     INDUST Municipal Solid Waste - Industrial
+ CALSHR           MSEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  MS     ELECTR Municipal Solid Waste - Electricity
+ CALSHR           STRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     RESIDN Solar Thermal - Residential
+ CALSHR           STCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     COMMER Solar Thermal - Commercial
+ CALSHR           STIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     INDUST Solar Thermal - Industrial
+ CALSHR           STEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     ELECTR Solar Thermal - Electricity
+ CALSHR           PVRS_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     RESIDN Photovoltaic - Residential
+ CALSHR           PVCM_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     COMMER Photovoltaic - Commercial
+ CALSHR           PVIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     INDUST Photovoltaic - Industrial
+ CALSHR           PVEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     ELECTR Photovoltaic - Electricity
+ CALSHR           PTEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  SO     ELECTR Photovoltaic Tilt - Electricity
+ CALSHR           WIIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  WI     INDUST Wind - Industrial
+ CALSHR           WIEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  WI     ELECTR Wind - Electricity
+ CALSHR           EIEL_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  EI     ELECTR Net Electricity Imports - Electricity
+ CALSHR           CIIN_SHR         R    4 1 (MNUMYR)                            LEVEL  FRACT  CI     INDUST Net Coal Coke Imports - Industrial
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+* INDEPM Cement-related CO2 process emissions passed from IND to EPM for use in GHG accounting
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+ INDEPM                                                                         TYPE   UNITS  FUEL   SECTOR
+ INDEPM           CO2_CLINK        R    4 2 (MNUMYR,     5)                     QUNTY  tMTONS        INDUST Clinker process CO2 emissions by year and region
+ INDEPM           CO2_LIME         R    4 2 (MNUMYR,     5)                     QUNTY  tMTONS        INDUST Lime production process CO2 emissions by year and region
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+* CCATSDAT CCATS Data for Carbon Capture Tax Credits
+*================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
+ CCATSDAT                                                                       TYPE   UNITS  FUEL   SECTOR
+ CCATSDAT         SUP_REC_45Q      R    4 2 (   200,MNUMYR)                     QUNTY  BLANK                CO2 volumes from recycled CO2 that are 45Q eligible - project-level
+ CCATSDAT         SUP_REC_NTC      R    4 2 (   200,MNUMYR)                     QUNTY  BLANK                CO2 volumes from recycled CO2, no tax credit - project-level
+ CCATSDAT         SUP_NGP_45Q      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 volumes from natural gas processing facilities that are 45Q eligible
+ CCATSDAT         SUP_NGP_NTC      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 volumes from natural gas processing facilities, no tax credit
+ CCATSDAT         SUP_EMM_45Q      R    4 3 (     5,MNUMCR,MNUMYR)              QUNTY  BLANK                CO2 volumes from power plants that are 45Q eligible
+ CCATSDAT         SUP_EMM_NTC      R    4 3 (     5,MNUMCR,MNUMYR)              QUNTY  BLANK                CO2 volumes from power plants, no tax credit
+ CCATSDAT         SUP_CMT_45Q      R    4 2 (     4,MNUMYR)                     QUNTY  BLANK                CO2 volumes from cement plants that are 45Q eligible
+ CCATSDAT         SUP_CMT_NTC      R    4 2 (     4,MNUMYR)                     QUNTY  BLANK                CO2 volumes from cement plants, no tax credit
+ CCATSDAT         SUP_ETH_45Q      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 volumes from ethanol production that are 45Q eligible
+ CCATSDAT         SUP_ETH_NTC      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 volumes from ethanol production, no tax credit
+ CCATSDAT         SUP_H2_45Q       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 volumes from hydrogen production that are 45Q eligible
+ CCATSDAT         SUP_H2_NTC       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 volumes from hydrogen production, no tax credit
+ CCATSDAT         CST_REC_INV      R    4 2 (   200,MNUMYR)                     QUNTY  BLANK                Investment cost for recyled CO2 - project-level
+ CCATSDAT         CST_REC_OM       R    4 2 (   200,MNUMYR)                     QUNTY  BLANK                O&M cost for recyled CO2 - project-level
+ CCATSDAT         CST_NGP_INV      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                Investment cost for CO2 capture from natural gas processing facilities
+ CCATSDAT         CST_NGP_OM       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                O&M cost for CO2 capture from natural gas processing facilities
+ CCATSDAT         CST_EMM_INV      R    4 3 (     5,MNUMCR,MNUMYR)              QUNTY  BLANK                Investment costs for CO2 capture from power plants
+ CCATSDAT         CST_EMM_OM       R    4 3 (     5,MNUMCR,MNUMYR)              QUNTY  BLANK                O&M cost for CO2 capture from power plants
+ CCATSDAT         CST_CMT_INV      R    4 2 (     4,MNUMYR)                     QUNTY  BLANK                Investment cost for CO2 capture from cement plants
+ CCATSDAT         CST_CMT_OM       R    4 2 (     4,MNUMYR)                     QUNTY  BLANK                O&M cost for CO2 capture from cement plants
+ CCATSDAT         CST_ETH_INV      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                Investment cost for carbon capture from ethanol production
+ CCATSDAT         CST_ETH_OM       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                O&M cost for carbon capture from ethanol production
+ CCATSDAT         CST_H2_INV       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                Investment cost for carbon capture from hydrogen production
+ CCATSDAT         CST_H2_OM        R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                O&M cost for carbon capture from hydrogen production
+ CCATSDAT         DEM_EOR          R    4 2 (   200,MNUMYR)                     QUNTY  BLANK                CO2 demand from EOR volumes - project-level
+ CCATSDAT         CST_EOR          R    4 2 (   200,MNUMYR)                     QUNTY  BLANK                CO2 price CO2 EOR projects are willing to offer for CO2 - project-level
+ CCATSDAT         CO2_PRC_DIS_45Q  R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 net cost output after optimization, 45Q eligible CO2, Census Division
+ CCATSDAT         CO2_PRC_DIS_NTC  R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 net cost output after optimization, no tax credit, Census Division
+ CCATSDAT         CO2_PRC_REG_45Q  R    4 2 (     4,MNUMYR)                     QUNTY  BLANK                CO2 net cost output after optimization, 45Q eligible CO2, Census Region
+ CCATSDAT         CO2_PRC_REG_NTC  R    4 2 (     4,MNUMYR)                     QUNTY  BLANK                CO2 net cost output after optimization, no tax credit, Census Region
+ CCATSDAT         CO2_SUP_OUT      R    4 3 (MNUMCR,     9,MNUMYR)              QUNTY  BLANK                CO2 supply output after optimization, by census division
+ CCATSDAT         CO2_SEQ_OUT      R    4 3 (MNUMCR,     2,MNUMYR)              QUNTY  BLANK                CO2 sequestration output after optimization, by census division
+ CCATSDAT         CO2_SUP_OUT_R    R    4 3 (MNUMCR,     9,MNUMYR)              QUNTY  BLANK                CO2 supply output after optimization, by census region
+ CCATSDAT         CO2_SEQ_OUT_R    R    4 3 (MNUMCR,     2,MNUMYR)              QUNTY  BLANK                CO2 sequestration output after optimization, by census region
+ CCATSDAT         CO2_ELEC         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 electricity consumption by CCATS

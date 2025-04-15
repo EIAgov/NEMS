@@ -1,0 +1,16 @@
+NMODEL,Model,Description
+1,IEM,International
+2,MAM,Macroeconomic
+3,RDM,Residential
+4,CDM,Commercial
+5,IDM,Industrial
+6,TDM,Transportation
+7,EMM,Electric Utility
+8,CMM,Coal Supply
+9,HSM,Oil and Gas Supply
+10,NGMM,Natural Gas Market
+11,LFMM,Petroleum Refinery
+12,RFM,Renewables
+13,HMM,Hydrogen
+14,CCATS,Carbon Capture ATS
+15,ALL,All Models

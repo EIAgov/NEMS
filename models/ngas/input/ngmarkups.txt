@@ -3159,6 +3159,24 @@ year	fuel	r_cen		HistoricalAnnualPriceEERE
 2020	CNG	WSCentral	15.372
 2020	CNG	Mountain	14.785
 2020	CNG	Pacific		18.629
+2021	CNG	NewEngland	20.976
+2021	CNG	MidAtlantic	18.508
+2021	CNG	ENCentral	15.797
+2021	CNG	WNCentral	15.797
+2021	CNG	SAtlantic	15.008
+2021	CNG	ESCentral	15.797
+2021	CNG	WSCentral	16.566
+2021	CNG	Mountain	16.343
+2021	CNG	Pacific		18.993
+2022	CNG	NewEngland	25.326
+2022	CNG	MidAtlantic	20.369
+2022	CNG	ENCentral	18.751
+2022	CNG	WNCentral	18.751
+2022	CNG	SAtlantic	18.690
+2022	CNG	ESCentral	18.751
+2022	CNG	WSCentral	19.681
+2022	CNG	Mountain	18.083
+2022	CNG	Pacific		22.615
 ;
 
 composite table:
@@ -3379,6 +3397,42 @@ year	fuel	vehicle_r	r_cen		HistoricalAnnualRoadPriceEERE
 2020	CNG	fleet		WSCentral	15.004
 2020	CNG	fleet		Mountain	13.062
 2020	CNG	fleet		Pacific		13.520
+2021	CNG	personal	NewEngland	22.517
+2021	CNG	personal	MidAtlantic	19.320
+2021	CNG	personal	ENCentral	16.548
+2021	CNG	personal	WNCentral	16.548
+2021	CNG	personal	SAtlantic	16.184
+2021	CNG	personal	ESCentral	16.548
+2021	CNG	personal	WSCentral	17.398
+2021	CNG	personal	Mountain	17.520
+2021	CNG	personal	Pacific		20.291
+2021	CNG	fleet		NewEngland	13.311
+2021	CNG	fleet		MidAtlantic	18.774
+2021	CNG	fleet		ENCentral	16.771
+2021	CNG	fleet		WNCentral	16.771
+2021	CNG	fleet		SAtlantic	8.476
+2021	CNG	fleet		ESCentral	16.771
+2021	CNG	fleet		WSCentral	15.213
+2021	CNG	fleet		Mountain	15.306
+2021	CNG	fleet		Pacific		15.618
+2022	CNG	personal	NewEngland	27.635
+2022	CNG	personal	MidAtlantic	22.011
+2022	CNG	personal	ENCentral	20.190
+2022	CNG	personal	WNCentral	20.190
+2022	CNG	personal	SAtlantic	20.574
+2022	CNG	personal	ESCentral	20.190
+2022	CNG	personal	WSCentral	20.898
+2022	CNG	personal	Mountain	20.008
+2022	CNG	personal	Pacific		24.641
+2022	CNG	fleet		NewEngland	17.378
+2022	CNG	fleet		MidAtlantic	20.494
+2022	CNG	fleet		ENCentral	19.178
+2022	CNG	fleet		WNCentral	19.178
+2022	CNG	fleet		SAtlantic	12.158
+2022	CNG	fleet		ESCentral	19.178
+2022	CNG	fleet		WSCentral	23.245
+2022	CNG	fleet		Mountain	15.618
+2022	CNG	fleet		Pacific		19.381
 ;                                               
 
                                             

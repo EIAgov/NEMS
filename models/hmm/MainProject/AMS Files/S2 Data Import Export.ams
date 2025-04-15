@@ -1,0 +1,835 @@
+## ams_version=1.0
+
+Section S2_Data_Import_Export {
+	Procedure Read_Input_Data {
+		Body: {
+			! Only needs to be done first model year and then save data to a restart.data case file to load up for future years?
+			
+			! Get list of files in "operations" folder.
+			DirectoryGetFiles(
+			        "input/operations",     ! (input) scalar string expression
+			        "*.txt",         ! (input) scalar string expression
+			        OperationInputs      ! (output) a one-dimensional string parameter
+			        );
+			
+			! Get list of files in "other" folder.
+			DirectoryGetFiles(
+			        "input/other",      ! (input) scalar string expression
+			        "*.txt",         ! (input) scalar string expression
+			        OtherInputs      ! (output) a one-dimensional string parameter
+			        );
+			
+			! Get list of files in the "TAndS" (transportation and storage) folder
+			DirectoryGetFiles(
+			        "input/TAndS",      ! (input) scalar string expression
+			        "*.txt",         ! (input) scalar string expression
+			        TandSInputs      ! (output) a one-dimensional string parameter
+			        );
+			
+			! Get list of files in the "history"  folder
+			DirectoryGetFiles(
+			        "input/history",      ! (input) scalar string expression
+			        "*.txt",         ! (input) scalar string expression
+			        HistoryInputs      ! (output) a one-dimensional string parameter
+			        );
+			
+			! Read files
+			for (op_input_fn in OperationInputFileNumbers_) do
+				inputFile := "input/operations/" + OperationInputs(op_input_fn);
+				read from file inputFile in merge mode;
+			endfor;
+			
+			
+			for (oth_input_fn in OtherInputFileNumbers_) do
+				inputFile := "input/other/" + OtherInputs(oth_input_fn);
+				read from file inputFile in merge mode;
+			endfor;
+			
+			for (tands_input_fn in TAndSInputFileNumbers_) do
+				inputFile := "input/TAndS/" + TandSInputs(tands_input_fn);
+				read from file inputFile in merge mode;
+			endfor;
+			
+			for (history_input_fn in HistoryInputFileNumbers_) do
+				inputFile := "input/history/" + HistoryInputs(history_input_fn);
+				read from file inputFile in merge mode;
+			endfor;
+		}
+	}
+	Section Input_Text_Files {
+		DeclarationSection Transportation_and_Storage_Input_File_Declarations {
+			Parameter base_StorageCapex {
+				Comment: "Capital Costs for storage facility from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Parameter working_gas_capacity {
+				Comment: {
+					"! Note: Source: several papers. based on 580,000 cubic meter salt cavern, 30\"%\" cushion gas percentage
+					! Unit: kg"
+				}
+			}
+			Parameter storage_flag {
+				IndexDomain: regCEN;
+				Range: binary;
+				Comment: {
+					"! Note: binary flag marking salt cavern eligble census regions"
+				}
+			}
+			Parameter storage_capex {
+				Comment: {
+					"! Note: Source: several papers. based on 580,000 cubic meter salt cavern
+					! Unit: last history year dollars"
+				}
+			}
+			Parameter non_energy_opex {
+				IndexDomain: (regCen,regCen_j);
+			}
+			Parameter pipe_tcc {
+				IndexDomain: (regCen,regCen_j);
+				Comment: "Total pipeline capacity costs based on representative pipeline. ($, using dollar year provided by pre-processor)";
+			}
+			Parameter pipe_energy_intensity {
+				IndexDomain: (regCen,regCen_j);
+				Comment: "Amount of electricity consumed to transfer H2 from regCen to regCen_j for the given represenative pipeline. (MMBtu/million metric tons H2)";
+			}
+			Parameter pipe_cap {
+				IndexDomain: (regCen,regCen_j);
+				Comment: "Pipeline capacity of representative pipeline asset (million metric tons H2/d)";
+			}
+			Parameter base_TUCCost {
+				IndexDomain: (regCen,regCen_j);
+				Comment: "Unplanned transportation capacity capital costs ($/million metric ton) Using dollar year as specified by the pre-processor.";
+			}
+			Parameter base_TransportationCost {
+				IndexDomain: (regCen,regCen_j);
+				Comment: {
+					"Transportation costs ($/million metric tons)
+					@TODO: DELETE???"
+				}
+			}
+			Parameter base_SUCCost {
+				IndexDomain: (regCen,storageTech);
+				Comment: "Unplanned storage capacity expansion costs ($/million metric ton)";
+			}
+			Parameter base_StorageWthCost {
+				IndexDomain: (regCen,storageTech);
+				Comment: "Storage withdrawal cost ($/million metric ton)";
+			}
+			Parameter base_StorageINJCost {
+				IndexDomain: (regCen,storageTech);
+				Comment: "Storage injection costs ($/million metric ton)";
+			}
+			Set TandSInputFileNumbers_ {
+				SubsetOf: Integers;
+				Index: tands_input_fn;
+			}
+			StringParameter TandSInputs {
+				IndexDomain: tands_input_fn;
+				Comment: "String parameter of .txt files in the /inputs/TAndS folder. Values populated from the DirectoryGetFiles() function.";
+			}
+		}
+		DeclarationSection General_Input_File_Parameters {
+			StringParameter inputFile {
+				Comment: "Input .txt file to read data from.";
+			}
+		}
+		DeclarationSection Other_Input_Files {
+			Parameter TEMP_H2DemandIndustrial {
+				IndexDomain: (MNUMCR,MNUMYR);
+			}
+			Parameter smr_ng_feedstock_prc;
+			ElementParameter base_dollar_year {
+				Range: NEMSYears_;
+			}
+			StringParameter OtherInputs {
+				IndexDomain: oth_input_fn;
+				Comment: "String parameter of .txt files in the /inputs/other folder. Values populated from the DirectoryGetFiles() function.";
+			}
+			Set OtherInputFileNumbers_ {
+				SubsetOf: Integers;
+				Index: oth_input_fn;
+			}
+		}
+		DeclarationSection Operation_Input_Files {
+			Parameter base_VarOM_NonElectrolyzer {
+				IndexDomain: (seas,regCen,prodTech);
+				Comment: "Variable O&M Costs for Non-Electrolyzers from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Parameter base_VarOM_Electrolyzer {
+				IndexDomain: (seas,regNERC,prodTech);
+				Comment: "Variable O&M Costs for Electrolyzers from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Parameter base_PUCCostNonElectrolyzer {
+				IndexDomain: (regCen,prodTech);
+				Comment: "Unplanned Capacity Capital Costs for Non-Electrolyzers from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Parameter base_PUCCostElectrolyzer {
+				IndexDomain: (regNERC,prodTech);
+				Comment: "Unplanned Capacity Capital Costs for Electrolyzers from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Parameter base_FixedOM_Electrolyzer {
+				IndexDomain: (seas,regNERC,prodTech);
+				Comment: "Fixed O&M Costs for Electrolyzers from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Parameter base_FixedOM_NonElectrolyzer {
+				IndexDomain: (seas,regCen,prodTech);
+				Comment: "Fixed O&M Costs for Non-Electrolyzers from the pre-processor ($/million metric ton, where dollar year is based on value of `base_dollar_year`)";
+			}
+			Set OperationInputFileNumbers_ {
+				SubsetOf: Integers;
+				Index: op_input_fn;
+				Comment: "index for operational input file numbers.";
+			}
+			StringParameter OperationInputs {
+				IndexDomain: op_input_fn;
+				Comment: "String parameter of .txt files in the /inputs/operations folder. Values populated from the DirectoryGetFiles() function.";
+			}
+		}
+	}
+	Section Historical_Data {
+		DeclarationSection History_Input_File_Declarations {
+			Parameter planned_cap {
+				IndexDomain: (i_calYear,reg,prodTech);
+				Comment: {
+					"Note: From refined frame a announced projects
+					Unit: Annual NEW capacity in million metric tons of hydrogen. Not cumulative"
+				}
+			}
+			Parameter electrolyzer_learning_cap {
+				Comment: "Global PEM With Estimated start construction <= 2023 (million metric tons). Assuming max theoretical assuming 8760 hours of production a year";
+			}
+			Parameter hist_storage_cap {
+				IndexDomain: (histyear,regCen,storageTech);
+				Comment: "Historical storage capacity from input folder. (million metric tons of useable hydrogen)";
+			}
+			Parameter hist_prod_cap {
+				IndexDomain: (histyear,reg,prodTech);
+				Comment: "Historical production capacity (million metric tons)";
+			}
+			Parameter h2_chem_feed_supply_reg {
+				IndexDomain: (subindustry,icr);
+			}
+			Set ICR_ {
+				Index: icr;
+				Comment: "census region number 1=Northeast, 2=Midwest, 3=South, 4=West";
+			}
+			Set HistoryInputFileNumbers_ {
+				SubsetOf: Integers;
+				Index: history_input_fn;
+			}
+			StringParameter HistoryInputs {
+				IndexDomain: history_input_fn;
+				Comment: "String parameter of .txt files in the /inputs/TAndS folder. Values populated from the DirectoryGetFiles() function.";
+			}
+		}
+		DeclarationSection Pricing_Declarations {
+			Parameter markup {
+				IndexDomain: sec;
+				Comment: "End-use sector markups (last history year $/kg H2)";
+			}
+		}
+	}
+	Procedure Read_GDS_Initial {
+		Body: {
+			!read from file "ToAIMMS/GlobalDataToHMM_init_old.txt" in merge mode;
+			read from file "ToAIMMS/GlobalDataToHMM_init.txt" in merge mode;
+		}
+		Comment: "Procedure for reading in initial GDS data from ToAIMMS/GlobalDataToHMM_Init.txt. This procedure is only necessary during initial model development, and should be deprecated when the model is complete.";
+	}
+	Section Global_Data_Structure {
+		Section NEMS_Mappings {
+			DeclarationSection NEMS_Mapping_Declarations {
+				Parameter NEMSmap_M3_to_seas {
+					IndexDomain: (M3,seas);
+					Range: binary;
+				}
+				Parameter NEMSmap_M4_to_seas {
+					IndexDomain: (M4,seas);
+					Range: binary;
+				}
+				Parameter NEMSmap_M24_ToHr {
+					IndexDomain: (M24, hr);
+					Range: binary;
+				}
+				Parameter NEMSmap_MNUMNR_toNERCRegion {
+					IndexDomain: (MNUMNR,regNERC);
+					Range: binary;
+				}
+				Parameter NEMSmap_seasToM12 {
+					IndexDomain: (seas,M12);
+					Range: binary;
+				}
+				ElementParameter NEMSmap_MNUMYR {
+					IndexDomain: year;
+					Range: MNUMYR_;
+					Definition: Val(year)-1989;
+				}
+				Parameter NEMSmap_MNUMCRToCensusRegion {
+					IndexDomain: (regCen, MNUMCR);
+					Range: binary;
+					Comment: "Maps MNUMCR to Census Regions";
+				}
+				Parameter NEMSmap_MNUMYRToYear {
+					IndexDomain: (MNUMYR,year);
+					Definition: {
+						if Val(year)-1989= MNUMYR then
+						1
+						endif;
+					}
+					Comment: "Maps MNUMYR to the year index.";
+				}
+				Parameter NEMSmap_MNUMYRVINToYear {
+					IndexDomain: (MNUMYRVIN,capYear);
+					Definition: {
+						if Val(capyear)-1989= MNUMYRVIN then
+						1
+						endif;
+					}
+					Comment: "Maps MNUMYR to the year index.";
+				}
+				Parameter NEMSmap_MNUMY3ToCalYear {
+					IndexDomain: (MNUMY3,i_calYear);
+					Definition: {
+						if Val(i_calYear)-1986= MNUMY3 then
+						1
+						endif;
+					}
+				}
+				Parameter NEMSmap_MNUMY3ToYear {
+					IndexDomain: (MNUMY3,year);
+					Definition: {
+						if Val(year)-1986= MNUMY3 then
+						1
+						endif;
+					}
+					Comment: "Map from GDS index MNUMY3 to year";
+				}
+				Parameter NEMSmap_MNSICMToSubIndustry {
+					IndexDomain: (MNSICM,subindustry);
+					Definition: {
+						data 
+						{ ( 18, resins                 ) : 1,  ( 19, agricultural_chemicals ) : 1,  ( 49, petrochemicals         ) : 1,
+						  ( 50, other_organics         ) : 1,  ( 51, industrial_gases       ) : 1,  ( 52, other_inorganics       ) : 1 }
+					}
+				}
+			}
+		}
+		Section GDS_Parameters {
+			Section UDATOUT {
+				DeclarationSection UDATOUT_Declarations {
+					Parameter UDATOUT_UCAPICU {
+						IndexDomain: (MNUMYR,MNUMNR);
+					}
+					Parameter UDATOUT_UCAPICN {
+						IndexDomain: (MNUMYR,MNUMNR);
+					}
+				}
+			}
+			Section DSMTFEFP {
+				DeclarationSection DSMTFEFP_Declarations;
+			}
+			Section UEFDOUT {
+				DeclarationSection UEFDOUT_Declarations {
+					Parameter UEFDOUT_SQH2EL {
+						IndexDomain: (MNUMCR,M3,MNUMYR);
+					}
+				}
+			}
+			Section CCATSDAT {
+				DeclarationSection CCATSDAT__Declarations {
+					Parameter CCATSDAT_CO2_PRC_DIS_NTC {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "CO2 price output after optimization, no tax credit, Census Division ($/tonne CO2)";
+					}
+					Parameter CCATSDAT_CO2_PRC_DIS_45Q {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "CO2 price output after optimization, 45Q eligible CO2, Census Division ($/ tonne CO2)";
+					}
+					Parameter CCATSDAT_SUP_H2_NTC {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "CO2 volumes from hydrogen production, no tax credit";
+					}
+					Parameter CCATSDAT_SUP_H2_45Q {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "CO2 volumes from hydrogen production that are 45Q eligible (tons of CO2)";
+					}
+					Parameter CCATSDAT_CST_H2_OM {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "O&M cost for carbon capture from hydrogen production ($/TONNE CO2)";
+					}
+					Parameter CCATSDAT_CST_H2_INV {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "Investment cost for carbon capture from hydrogen production ($/tonne CO2)";
+					}
+				}
+			}
+			Section TCS45Q {
+				DeclarationSection TCS45Q_Declarations {
+					Parameter I_45Q_LYR_NEW {
+						IndexDomain: M1;
+						Comment: "End year of tax code section 45Q subsidy for new builds";
+					}
+					Parameter TCS45Q_CCS_SALINE_45Q {
+						IndexDomain: M1;
+						Comment: "45Q tax credit for saline injection ($/tonne CO2)";
+					}
+					Parameter TCS45Q_CCS_EOR_45Q {
+						IndexDomain: M1;
+						Comment: "45Q tax credit for enhanced oil recovery ($/tonne CO2)";
+					}
+				}
+			}
+			Section INDOUT {
+				DeclarationSection INDOUT_Declarations {
+					Parameter INDOUT_QELINH2E {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "Hydrogen industrial electricity from electrolyzers (trillion btu)";
+					}
+					Parameter INDOUT_BYPRDH2IN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "Industrial sector byproduct/self-consumed hydrogen supply (TBtu)";
+					}
+				}
+			}
+			Section NGTDMOUT {
+				DeclarationSection NGTDMOUT_declarations {
+					Parameter NGTDMOUT_SPNGIN {
+						IndexDomain: (MNUMCR,MNUMYR,M4);
+						Comment: "Natural gas delivered price to industrial sector by HMM season (1987$/MMBtu)";
+					}
+				}
+			}
+			Section EFPOUT {
+				DeclarationSection EFPOUT_Declarations {
+					Parameter EFPOUT_PECINTDN {
+						IndexDomain: (MNUMNR,MNUMYR);
+						Comment: "INDUST (Competitive) Reliability component by EMM region (1987$/kwh)";
+					}
+					Parameter EFPOUT_PECINRLN {
+						IndexDomain: (MNUMNR,MNUMYR);
+						Comment: "INDUST (Competitive) T&D component by EMM region (1987$/kwh)";
+					}
+				}
+			}
+			Section CONVFACT {
+				DeclarationSection CONVFACT_Declarations {
+					Parameter CONVFACT_CFH2Q_CF {
+						IndexDomain: M1;
+						Comment: "Conversion factor- thousand btu per cubic foot";
+					}
+					Parameter CONVFACT_CFH2Q_KG {
+						IndexDomain: M1;
+						Comment: "CONVERSION FACTOR KILOGRAMS PER MILLION BTU";
+					}
+					Parameter CONVFACT_CFH2Q_BBL {
+						IndexDomain: M1;
+						Comment: "CONVERSION FACTOR BTUBBL FOR H2, MILLION BTU PER Barrel";
+					}
+					Parameter CONVFACT_CFELQ {
+						IndexDomain: M1;
+						Comment: "BTU to Kwh electricity conversion factor";
+					}
+					Parameter CONVFACT_CFNGC {
+						IndexDomain: MNUMYR;
+						Text: "Conversion factor, Natural Gas - Consumption";
+						Comment: "Conversion factor, Natural Gas - Consumption";
+					}
+					Parameter CONVFACT_CFNGCL {
+						IndexDomain: MNUMYR;
+						Text: "Conversion factor, Natural gas (synthetic) from coal";
+						Comment: "Conversion factor, Natural gas (synthetic) from coal";
+					}
+					Parameter CONVFACT_CFNGN {
+						IndexDomain: MNUMYR;
+						Text: "Conversion factor, Natural Gas - Nonutility consumption";
+						Comment: "Conversion factor, Natural Gas - Nonutility consumption";
+					}
+					Parameter CONVFACT_CFNGU {
+						IndexDomain: MNUMYR;
+						Text: "Conversion factor, Natural Gas - Utility consumption";
+						Comment: "Conversion factor, Natural Gas - Utility consumption";
+					}
+				}
+			}
+			Section CYCLEINFO {
+				DeclarationSection CYCLEINFO_Declarations {
+					Parameter CYCLEINFO_CURIRUN {
+						IndexDomain: M1;
+						Text: "Current run cycle number";
+						InitialData: 1;
+						Comment: "Current run cycle number";
+					}
+				}
+			}
+			Section HMMBLK {
+				DeclarationSection HMMBLK_Declarations {
+					Parameter HMMBLK_H2STEP {
+						IndexDomain: M1;
+						Range: integer;
+					}
+					Parameter HMMBLK_QELINH2NG {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "Electricity consumed in hydrogen production by facilities using natural gas as a feedstock (e.g. SMR) (TBtu)";
+					}
+					Parameter HMMBLK_QELTRH2 {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "Electricity consumed in transmission and distribution of H2, including pipelines, storage, and dispensing (Tbtu)";
+					}
+					Parameter HMMBLK_PRDH2EL_NR {
+						IndexDomain: (MNUMNR,MNUMYR);
+						Comment: "H2 production from electrolysis, EMM NERC-based regions (million metric tons)";
+					}
+					Parameter HMMBLK_PRDH2EL {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "H2 Production from electrolysis, Census division (million metric tons)";
+					}
+					Parameter HMMBLK_PRDH2NG_CCS {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "H2 production from SMR/ATR w/CCS (million metric tons)";
+					}
+					Parameter HMMBLK_PRDH2NG {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "H2 production from SMR/ATR without CCS (million metric tons)";
+					}
+					Parameter HMMBLK_QELHM_HR {
+						IndexDomain: (MNUMNR,M4,M24,MNUMYR);
+						Text: "hourly electrolyzer load by 4 seasons, NERC region (Mwh)";
+						Comment: "hourly electrolyzer load by 4 seasons, NERC region (Mwh)";
+					}
+					Parameter HMMBLK_PH2RF {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "price of H2 to refineries by Census division (Tbtu)";
+						Comment: "price of H2 to refineries by Census division ($1987/MMBTU)";
+					}
+					Parameter HMMBLK_QNGHMPF {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "natural gas feedstock consumed in hydrogen production (Tbtu)";
+						Comment: "natural gas feedstock consumed in hydrogen production (Tbtu)";
+					}
+					Parameter HMMBLK_QNGHMHP {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "natural gas heat and power energy used in hydrogen production (tBTU)";
+						Comment: "natural gas heat and power energy used in hydrogen production (tBTU)";
+					}
+					Parameter HMMBLK_H2SCRV_Q {
+						IndexDomain: (MNUMCR,H2STEP,M3,MNUMYR);
+						Comment: "H2 supply quantity for each curve step by season (MMTON)";
+					}
+					Parameter HMMBLK_H2SCRV_P {
+						IndexDomain: (MNUMCR,H2STEP,M3,MNUMYR);
+						Comment: "H2  supply price for each curve step by seasonn ($/kg)";
+					}
+					Parameter HMMBLK_PH2_SPOT {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "H2 market spot price by census division, year ($/MMBTU)";
+					}
+				}
+			}
+			Section MACOUT {
+				DeclarationSection MACOUT_Declarations {
+					Parameter MACOUT_MC_RMCORPBAA {
+						IndexDomain: MNUMYR;
+						Text: "Rate on industrial BAA bonds";
+						Comment: "Rate on industrial BAA bonds";
+					}
+					Parameter MACOUT_MC_SP500 {
+						IndexDomain: MNUMYR;
+						Text: "S&P 500 common stock index";
+						Comment: "S&P 500 common stock index";
+					}
+					Parameter MACOUT_MC_RMGBLUSREAL {
+						IndexDomain: MNUMYR;
+						Text: "Real yield on us treasury long-term bonds";
+						Comment: "Real yield on us treasury long-term bonds";
+					}
+					Parameter MACOUT_MC_JPGDP {
+						IndexDomain: MNUMY3;
+						Text: "Chained price index-gross domestic product";
+						Comment: "Chained price index-gross domestic product";
+					}
+					Parameter MACOUT_MC_REVIND {
+						IndexDomain: (MNUMCR,MNSICM,MNUMYR);
+						Comment: "Indexed by census division, industrial sub-division, and index year";
+					}
+				}
+			}
+			Section MPBLK {
+				DeclarationSection MPBLK_Declarations {
+					Parameter MPBLK_PELIN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Price of electricity to industrial consumers (1987$/MMBtu)";
+						Comment: "Price of electricity to industrial consumers (1987$/MMBtu)";
+					}
+					Parameter MPBLK_PH2TR {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "price of h2 to transportation (1987$/MMBtu)";
+						Comment: "price of h2 to transportation (1987$/MMBtu)";
+					}
+					Parameter MPBLK_PGFIN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Price, Natural Gas, Core - Industrial (87$/MCF)";
+						Comment: "Price, Natural Gas, Core - Industrial (87$/MCF)";
+					}
+					Parameter MPBLK_PGIIN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Price, Natural Gas, Noncore - Industrial (87$/MCF)";
+						Comment: "Price, Natural Gas, Noncore - Industrial (87$/MCF)";
+					}
+					Parameter MPBLK_PNGIN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Price, Natural Gas - Industrial (87$/MMBTU)";
+						Comment: "Price, Natural Gas - Industrial (87$/MMBTU)";
+					}
+				}
+			}
+			Section NCNTRL {
+				DeclarationSection NCNTRL_Declarations {
+					Parameter NCNTRL_CURCALYR {
+						IndexDomain: M1;
+						Text: "Current Calendar Year for NEMS simulation, such as 2040";
+						InitialData: 2015;
+					}
+					Parameter NCNTRL_FCRL {
+						IndexDomain: M1;
+						Text: "Final convergence and reporting loop switch (1=ON)";
+						Property: NoSave;
+						InitialData: 0;
+						Comment: "Final convergence and reporting loop switch (1=ON)";
+					}
+					Parameter NCNTRL_NCRL {
+						IndexDomain: M1;
+						Text: "Reporting Loop Switch (1=ON)";
+						InitialData: 0;
+						Comment: "Reporting Loop Switch (1=ON)";
+					}
+					Parameter NCNTRL_CURIYR {
+						IndexDomain: M1;
+						Text: "rrent year index for NEMS simulation where 1990=1";
+						InitialData: 26;
+						Comment: "rrent year index for NEMS simulation where 1990=1";
+					}
+					Parameter NCNTRL_CURITR {
+						IndexDomain: M1;
+						Text: "Iteration number of NEMS gauss-seidel solution";
+						InitialData: 1;
+						Comment: "Iteration number of NEMS gauss-seidel solution";
+					}
+				}
+			}
+			Section NGTDMREP {
+				DeclarationSection NGTDMREP_Declarations {
+					Parameter NGTDMREP_OGHHPRNG {
+						IndexDomain: MNUMYR;
+						Text: "price of natural gas at Henry Hub (87$/MCF)";
+						Comment: "price of natural gas at Henry Hub (87$/MCF)";
+					}
+				}
+			}
+			Section PMORE {
+				DeclarationSection PMORE_declarations {
+					Parameter PMORE_PH2EL {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "price of H2 to electric power sector by census division, year (1987$/mmbTU)";
+						Comment: "price of H2 to electric power sector by census division, year (1987$/mmbTU)";
+					}
+					Parameter PMORE_PELHM {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "price of electricity delivered to hydrogen production subsector (1987$/mmbTU)";
+						Comment: "price of electricity delivered to hydrogen production subsector (1987$/mmbTU)";
+					}
+					Parameter PMORE_PH2IN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Price of H2 to industrial sector (1987$/MMBTU)";
+						Comment: "Price of H2 to industrial sector (1987$/MMBTU)";
+					}
+				}
+			}
+			Section QBLK {
+				DeclarationSection QBLK_Declarations {
+					Parameter QBLK_QH2IN {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Quantity of h2 consumed from industrial";
+						Comment: "Quantity of h2 consumed from industrial (Tbtu)";
+					}
+					Parameter QBLK_QELHM {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "electricity consumed in h2 production (TBTU)";
+						Comment: "electricity consumed in h2 production (TBTU)";
+					}
+					Parameter QBLK_QH2TR {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "quantity of h2 from transportation (tbtu)";
+					}
+					Parameter QBLK_QNGHM {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "Quantity, Natural Gas - Hydrogen (tBTU)";
+						Comment: "Quantity, Natural Gas - Hydrogen (tBTU)";
+					}
+				}
+			}
+			Section QMORE {
+				DeclarationSection QMORE_Declarations {
+					Parameter QMORE_QH2EL {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "H2 consumed in electric power sector by census division, year (Tbtu)";
+						Comment: "H2 consumed in electric power sector by census division, year (Tbtu)";
+					}
+					Parameter QMORE_QH2RF {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "market h2 consumption In refineries by census division (TBtu)";
+						Comment: "market h2 consumption In refineries by census division (TBtu)";
+					}
+				}
+			}
+			Section UECPOUT {
+				DeclarationSection UECPOUT_Declarations {
+					Parameter UECPOUT_LOADMAXH2EL {
+						IndexDomain: (MNUMNR, M4, M24, MNUMYR);
+						Comment: "EMM constraint on electrolyzer load by hour.";
+					}
+					Parameter UECPOUT_QELGEN {
+						IndexDomain: (M3,MNUMNR,M24,M4,MNUMYR);
+						Comment: "REStore generation by renewable technology (1=wind, 2-solar, 3=other), EMM region, hour, season, model year";
+					}
+					Parameter UECPOUT_QELGEN_VINT {
+						IndexDomain: (M3,MNUMNR,MNUMYR,MNUMYV);
+						Comment: "Vintage ratios of renewable generation by technology, EMM region, model year, vintage year";
+					}
+					Parameter UECPOUT_QELCUR {
+						IndexDomain: (MNUMNR,M4,M24,MNUMYR);
+						Comment: "Hourly curtailment by HMM season";
+					}
+					Parameter UECPOUT_PRICE_EL_HR {
+						IndexDomain: (MNUMNR,M4,M24,MNUMYR);
+						Comment: "Hourly electricity price by HMM season (1987$/Mwh)";
+					}
+					Parameter UECPOUT_ElecPriceTot {
+						IndexDomain: (MNUMNR,M12,M24,MNUMYR);
+						Comment: "ReStore hourly electricity price by per MWH";
+						dex::Dataset: HMMLargeFileTransfer;
+						dex::TableName: UECPOUT_ElecPriceTot;
+					}
+					Parameter UECPOUT_CurtailsTot {
+						IndexDomain: (MNUMNR, M9, M12, M24, MNUMYR);
+						Text: "ReStore hourly curtailment by Nerc (bKWH)";
+						Comment: "ReStore hourly curtailment by Nerc (GW)";
+						dex::Dataset: HMMLargeDataFiles;
+						dex::TableName: UECPOUT_CurtailsTot;
+					}
+				}
+			}
+		}
+		DeclarationSection GDS_Sets {
+			Set HSTEPCalc_ {
+				SubsetOf: H2STEP_;
+				Index: H2StepCalc;
+				Definition: {
+					{1..(card(H2STEP_)-1) }
+				}
+			}
+			Set MAXSEC;
+			Set H2STEP_ {
+				SubsetOf: Integers;
+				Index: H2STEP;
+			}
+			Set MNUMNR_ {
+				SubsetOf: Integers;
+				Text: "EMM Regions";
+				Index: MNUMNR;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..28}
+				}
+			}
+			Set M1_ {
+				SubsetOf: Integers;
+				Index: M1;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1}
+				}
+			}
+			Set M3_ {
+				SubsetOf: Integers;
+				Index: M3;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..3}
+				}
+			}
+			Set M4_ {
+				SubsetOf: Integers;
+				Index: M4;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..4}
+				}
+			}
+			Set M9_ {
+				SubsetOf: Integers;
+				Index: M9;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..9}
+				}
+			}
+			Set M12_ {
+				SubsetOf: Integers;
+				Index: M12;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..12}
+				}
+			}
+			Set M24_ {
+				SubsetOf: Integers;
+				Index: M24;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..24}
+				}
+			}
+			Set MNUMCR_ {
+				SubsetOf: Integers;
+				Text: "Census Regions";
+				Index: MNUMCR;
+				Property: ElementsAreLabels;
+				Definition: {
+					{1..0011}
+				}
+				Comment: "Census Regions";
+			}
+			Set MNUMY3_ {
+				SubsetOf: Integers;
+				Text: "MNUMYR + 1987-1989";
+				Index: MNUMY3;
+				Property: ElementsAreNumerical;
+				Definition: {
+					{1..0064}
+				}
+				Comment: "MNUMYR + 1987-1989";
+			}
+			Set MNUMYR_ {
+				SubsetOf: Integers;
+				Text: "Years=1990-2050";
+				Index: MNUMYR, MNUMYRVIN, MNUMYV;
+				Property: ElementsAreNumerical;
+				InitialData: {
+					{1..0061}
+				}
+				Comment: "Years=1990-2050";
+			}
+			Set MNSICM_ {
+				Index: MNSICM;
+			}
+		}
+	}
+	Section Excel {
+		SourceFile: "Excel.ams";
+	}
+	Section DBase {
+		SourceFile: "DBase.ams";
+	}
+	Section Cases {
+		SourceFile: "Cases.ams";
+	}
+}

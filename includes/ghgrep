@@ -41,34 +41,46 @@
                                               ! 2) not covered, domestic, included in OGHG emissions total, 
                                               ! 3) not covered, domestic, not in OGHG emissions total (eg Carbon sequest)
                                               ! 4) not covered, international offset (not in OGHG emissions total)
- Real         GHG_OffsetP(mnumyr)             ! Market Clearing Offset price (maybe less than C price when offsets limited)
- Real         GHG_OffsetPInt(mnumyr)          ! Market Clearing Int'l Offset price if OFFSETI=1 and int'l offsets limited (OFFSETINT>0)
- Real         GHG_Rev(4,mnumyr)               ! GHG revenue (p*q) for the 4 groups
+ real         GHG_OffsetP(mnumyr)             ! Market Clearing Offset price (maybe less than C price when offsets limited)
+ real         GHG_OffsetPInt(mnumyr)          ! Market Clearing Int'l Offset price if OFFSETI=1 and int'l offsets limited (OFFSETINT>0)
+ real         GHG_Rev(4,mnumyr)               ! GHG revenue (p*q) for the 4 groups
  real         banking(mnumyr)
  integer      MAC_PRICEYR                   ! 4-digit Calender year for real$ prices of MAC Steps
  real         OFF_LIMITS(4,mnumyr)
- common/ghg/GHG_NCat,GHG_BL,GHG_OGHG,GHG_Abate,GHG_MACQ,GHG_MACP,GHG_Steps,GHG_Class, &
+
+ common/ghgrep/GHG_NCat,GHG_BL,GHG_OGHG,GHG_Abate,GHG_MACQ,GHG_MACP,GHG_Steps,GHG_Class, &
   GHG_OffsetP,GHG_Rev,GHG_Names,banking,MAC_PRICEYR,GHG_OffsetPInt,OFF_LIMITS
 
  real eq_ghgrep(8200)
  equivalence(ghg_ncat,eq_ghgrep(1)) ! equivalence for filer
 
 ! Regional CO2
-      integer iel_R,iel_C,iel_I,iel_T,etot,endcalyr
-      parameter(iel_R=6,iel_C=8,iel_I=17,iel_T=12,etot=8,endcalyr=baseyr+mnumyr-1)
+integer iel_R, iel_C, iel_I, iel_T, etot, endcalyr
+parameter(iel_R=6, iel_C=8, iel_I=20, iel_T=12, etot=9, endcalyr=baseyr+mnumyr-1)
 
-      real em_resd(iel_R,11,BASEYR:ENDCALYR) 
-      real em_comm(iel_C,11,BASEYR:ENDCALYR)
-      real em_indy(iel_I,11,BASEYR:ENDCALYR)
-      real em_tran(iel_T,11,BASEYR:ENDCALYR)
-      real em_elec( etot,11,BASEYR:ENDCALYR)
-      real fl_resd(iel_R,11,BASEYR:ENDCALYR) 
-      real fl_comm(iel_C,11,BASEYR:ENDCALYR)
-      real fl_indy(iel_I,11,BASEYR:ENDCALYR)
-      real fl_tran(iel_T,11,BASEYR:ENDCALYR)
-      real fl_elec(etot, 11,BASEYR:ENDCALYR)
-      common/regco2/  em_resd , em_comm , em_indy , em_tran , em_elec , &
-                      fl_resd , fl_comm , fl_indy , fl_tran , fl_elec
-      
-real eq_regco2(2*51*11*MNUMYR)
+real em_resd(iel_R, MNUMCR, BASEYR:ENDCALYR)  ! Residential emissions
+real em_comm(iel_C, MNUMCR, BASEYR:ENDCALYR)  ! Commerical emissions
+real em_indy(iel_I, MNUMCR, BASEYR:ENDCALYR)  ! Industrial emissions
+real em_tran(iel_T, MNUMCR, BASEYR:ENDCALYR)  ! Transportation emissions
+real em_elec(etot, MNUMCR, BASEYR:ENDCALYR)  ! Electric power emissions
+real fl_resd(iel_R, MNUMCR, BASEYR:ENDCALYR)  ! Residential emissive fuel consumption
+real fl_comm(iel_C, MNUMCR, BASEYR:ENDCALYR)  ! Commercial emissive fuel consumption
+real fl_indy(iel_I, MNUMCR, BASEYR:ENDCALYR)  ! Industrial emissive fuel consumption
+real fl_tran(iel_T, MNUMCR, BASEYR:ENDCALYR)  ! Transportation emissive fuel consumption
+real fl_elec(etot, MNUMCR, BASEYR:ENDCALYR)  ! Electric power emissive fuel consumption
+real cc_indy(10, MNUMCR, BASEYR:ENDCALYR)  ! Industrial carbon capture by fuel
+real cc_elec(5, MNUMCR, BASEYR:ENDCALYR)  ! Electric power carbon capture by fuel
+
+common/regco2/  em_resd, em_comm, em_indy, em_tran, em_elec, &
+                fl_resd, fl_comm, fl_indy, fl_tran, fl_elec, &
+                cc_indy, cc_elec
+
+real eq_regco2( &
+    2 * iel_R * MNUMCR * MNUMYR &  ! em_resd, fl_resd
+    + 2 * iel_C * MNUMCR * MNUMYR &  ! em_comm, fl_comm
+    + 2 * iel_I * MNUMCR * MNUMYR &  ! em_indy, fl_indy
+    + 2 * iel_T * MNUMCR * MNUMYR &  ! em_tran, fl_tran
+    + 2 * etot * MNUMCR * MNUMYR &  ! em_elec, fl_elec
+    + (10 + 5) * MNUMCR * MNUMYR &  ! cc_indy, cc_elec
+)
 equivalence(em_resd(1,1,BASEYR),eq_regco2) ! equivalence for filer

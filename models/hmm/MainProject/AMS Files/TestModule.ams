@@ -1,0 +1,21 @@
+## ams_version=1.0
+
+Module TestModule {
+	Prefix: tm;
+	Procedure pr_Test {
+		Body: {
+			p_test(year,prodTech) := 1;
+			
+			p_test2(i_calYear) := 5;
+			
+			test_date := FormatString("%n-01-01", 1987);
+		}
+	}
+	StringParameter test_date;
+	Parameter p_Test {
+		IndexDomain: (year,prodTech);
+	}
+	Parameter p_test2 {
+		IndexDomain: i_calYear;
+	}
+}

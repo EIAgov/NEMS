@@ -175,9 +175,8 @@ module efd_row_col
   integer AIMMKEFD                  ! set via runtime option from scedes file. if 1, set make_efd_aimms to .true.
   logical SKIP_EFDOML /.false./     ! flag to bypass passing fortran caculated EFD coefficients to AIMMS EFD and OML based on all 0 status found in efdarrays_all.txt
   
-  external rtovalue ! function to get run-time option value AIMMSEFD
+  external rtovalue ! function to get run-time options
   integer rtovalue
-  integer AIMMSEFD  ! run-time option to invoke AIMMS EFD LP 
   character*25 filen_efdcoeff
   integer iOutTxt
   integer colunit ! I-O unit for column solution retrieval debug file
@@ -237,7 +236,7 @@ module efd_row_col
       character*30 ROW_DS_mask
       character*30 ROW_EOR_CO2_mask
       character*30 ROW_ERC_mask
-      character*30 ROW_FLRG_mask
+      character*30 ROW_CSRG_mask
       character*30 ROW_FLRS_mask
       character*30 ROW_FR_mask
       character*30 ROW_G_mask
@@ -305,8 +304,8 @@ integer,parameter :: CoalDemandRegion_ALTfrom = 16
 integer,parameter :: CoalDemandRegion = 16
 integer,parameter :: CoalDiversityType = 2 ! {L Lignite and S subbituminous}
 integer,parameter :: CoalProductionStep = 12
-integer,parameter :: CoalSupplyCurve = 53
-integer,parameter :: CoalSupplyCurve_Dom = 41
+integer,parameter :: CoalSupplyCurve = 26
+integer,parameter :: CoalSupplyCurve_Dom = 14
 integer,parameter :: CoalSupplyCurve_Int = 12
 integer,parameter :: CoalType = 6
 integer,parameter :: DistillateProductionStep = 1
@@ -324,6 +323,7 @@ integer,parameter :: GasProductionStep = 41
 integer,parameter :: GasRegion = 17 ! =NNGEM
 integer,parameter :: GasSeason = 3
 integer,parameter :: GenerationSeason = 4
+integer,parameter :: H2SupplyStep = 7
 integer,parameter :: INOXP = 5
 integer,parameter :: JustOne =1
 integer,parameter :: nHGCODE = 16 
@@ -364,7 +364,7 @@ integer,parameter :: CHPFuel=12            ! MNUMCGF: combined heat and power fu
 integer,parameter :: CO2CapGroup=5         ! CO2_D_GRP MAXIMUM NUMBER OF CO2 CAP GROUPS
 integer,parameter :: CPPRegion=9           ! EPAREG, Regions for EPA rule 111d: 6 + Alaska + Hawaii + national
 integer,parameter :: DispPlantGroup=1200   ! EFD_D_MPG EFD Dispatchable plant group, do index is typically ECNTP
-integer,parameter :: RenewPlantGroup=1300   ! EFD_D_MHG EFD Renewable plant group, do index is typically EHNTP
+integer,parameter :: RenewPlantGroup=1400   ! EFD_D_MHG EFD Renewable plant group, do index is typically EHNTP
 integer,parameter :: GroupSet=8          ! NUMBER OF periods per day
 integer,parameter :: DemandSectors=4       ! MAXSEC=4: RES=1,COM=2,IND=3,TRA=4
 integer,parameter :: DispatchableECP=55    ! ECP_D_DSP
@@ -386,6 +386,7 @@ integer,parameter :: int_fuel_region=25    ! EFD_D_MFRG max number of fuel regio
 integer,parameter :: int_fuel_region_ALT1=25    ! alias for int_fuel_region
 integer,parameter :: int_fuel_region1=26   ! EFDE$MFRG+1
 integer,parameter :: int_fuel_region1_ALT1=26   ! alias for int_fuel_region1 
+integer,parameter :: IntermittentECP = 9    ! ECP_D_INT - number of intermittent ECP types
 integer,parameter :: Knots=11              ! MAX_KNOTS max of these: FLRG_HR_KNOTS(FUEL_RGN,ECPt), heat-rate-related
 integer,parameter :: LoadGroup = 12
 integer,parameter :: MercuryClass=3        ! EPM_HG_CLS mercury class

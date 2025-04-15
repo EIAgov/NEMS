@@ -1,0 +1,3 @@
+! Note: Source: several papers. based on 580,000 cubic meter salt cavern
+! Unit: last history year dollars
+storage_capex := 100079902.5086938

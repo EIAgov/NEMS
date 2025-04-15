@@ -9,18 +9,20 @@
       REAL QELINP(MNUMCR,MNUMYR)    !   Industrial primary electricity
       REAL QELINS(MNUMCR,MNUMYR)    !   Industrial shift electricity
       REAL QELINM(MNUMCR,MNUMYR)    !   Industrial miscellaneous electricity
+      REAL QELINH2E(MNUMCR,MNUMYR)    !   Industrial hydrogen electricity
       REAL MWIN(4,MNUMYR)           !   Waste from mills
       REAL INQLGHP(MNUMCR,MNUMYR)   !   Consumption of LPG for heat and power (excludes refining use)
       REAL LIMEOUTPUT(MNUMYR)       !   Lime industry output
       REAL HYDROGEN2REF(MNUMYR)     !   Hydrogen sent to refineries
+	  REAL BYPRDH2IN(MNUMCR,MNUMYR) !   Industrial sector byproduct/self-consumed hydrogen supply
 !   Industrial Module output Common block
-      COMMON/INDOUT/INQNGPF,INQLGPF,QELINP,QELINS,QELINM,MWIN,INQLGHP, LIMEOUTPUT, HYDROGEN2REF
+      COMMON/INDOUT/INQNGPF,INQLGPF,QELINP,QELINS,QELINM,QELINH2E,MWIN,INQLGHP, LIMEOUTPUT, HYDROGEN2REF, BYPRDH2IN
 !   Equivalence for FILER used for data storage
-      REAL EQ_INOUT(6*MNUMCR*MNUMYR + &   ! INQNGPF, INQLGPF, QELINP, QELINS, QELINM, and INQLGHP
+      REAL EQ_INOUT(8*MNUMCR*MNUMYR + &   ! INQNGPF, INQLGPF, QELINP, QELINS, QELINM, QELINH, INQLGHP, BYPRDH2IN
                     4*MNUMYR + &    ! MWIN
                     2*MNUMYR + &    ! LIMEOUTPUT and HYDROGEN2REF
                     0)
       EQUIVALENCE (EQ_INOUT,INQNGPF)
 !   Equivalence for uldsm
-      REAL QELINOUT(MNUMCR,MNUMYR,3)
+      REAL QELINOUT(MNUMCR,MNUMYR,4)
       EQUIVALENCE (QELINOUT,QELINP)

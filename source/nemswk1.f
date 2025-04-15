@@ -1,5 +1,6 @@
 ! $Header: m:/default/source/RCS/nemswk1.f,v 1.54 2019/10/01 20:31:41 pkc Exp $
       subroutine wk1init
+!      use fm
       implicit none
 ! this routine reads a file containing various wk1 codes for
 ! various record types.  It must be called before the other routines
@@ -8,26 +9,27 @@
 ! ranges to arrays in your code.
       include 'wk1block'
 
-      integer i
       LOGICAL NEW
       CHARACTER*18 FNAME
-      integer FILE_MGR
-      EXTERNAL FILE_MGR
       integer funit
+	  
+	  INTEGER	   I
+	  INTEGER      FILE_MGR
+	  EXTERNAL     FILE_MGR
 
-
+write(*,*) 'Claire test -inside wk1init(), 1.before call FILE_MGR()'
 !  open worksheet record-codes file using file manager; read it in.
       NEW=.FALSE.
       FNAME='CODES123'
       funit = FILE_MGR('O',FNAME,NEW)
-
-5     read(funit,'(i3,1x,a9,1x,a26)',end=6) i,record(i),recnam(i)
+write(*,*) 'Claire test -inside wk1init(), 2.after call FILE_MGR()'
+5     read(funit,'(i3,1x,a9,1x,a26)',end=6) I,record(I),recnam(I)
       goto 5
 6     continue
 
 !  close file
       funit = FILE_MGR('C',FNAME,NEW)
-
+write(*,*) 'Claire test -inside wk1init(), 3.close FILE_MGR()'
       return
       end
 
@@ -1959,7 +1961,9 @@
       end
 !
 Subroutine Unwrap_xlsx(filen)
+!use fm
 use dfport
+!use unit_open
 implicit none
 ! Routine creates a bat file and invokes it to unzip the contents of an excel file, like workbook.xlsx,
 ! into a subfolder called workbook.  The folder contains various xml-format files,
@@ -1971,16 +1975,21 @@ character*(*) filen
 logical bat_written/.false./
 integer b_unit
 logical lexist
+
+INTEGER		I
+INTEGER 	IRET
+
 character*300 cmd
-integer iret,i
 ! Below is the text of a bat file to unzip an xlsx file.
-! The bat file uses the powershell command line program to unzip files.
+! The bat file uses the winzip command line program wzunzip.exe. Winzip is assumed
+! to be installed in c:\progra~1\winzip\. The command line
+! winzip utilities are an extra install requirement of winzip.
 ! To overwride this bat file, put an alternative version of it in the output folder.
 !
 integer, parameter :: nlines=42
 character*100 unwrap_bat(nlines)/  &
 '@echo off                                                                                          ', &
-'REM   Uses powershell command line program powershell to unzip an .xlsx file after copying it to   ', &
+'REM   Uses winzip command line program "wzunzip.exe" to unzip an .xlsx file after copying it to    ', &
 'REM   a file with the zip extension. The name can include a child folder, "input\aimefd.xlsx" ,    ', &
 'REM   or it may be the name of the xlsx file in the current folder, as in "aimefd.xlsx".           ', &
 'REM   A child folder using the worksheet basename, like "aimefd" is created to hold the            ', &
@@ -1999,12 +2008,12 @@ character*100 unwrap_bat(nlines)/  &
 ':replace                                                                                           ', &
 '  if exist %folder% rd /s /q %folder%                                                              ', &
 'mkdir %folder%                                                                                     ', &
-'REM copying %xslx% to %folder%_copy.zip to make powershell recognize it as a zip file.             ', &
+'REM copying %xslx% to %folder%_copy.zip to make wzunzip recognize it as a zip file.                ', &
 'set cname=%folder%_copy.zip                                                                        ', &
 'copy %xlsx% %cname% > nul                                                                          ', &
 'set xlsx=%cname%                                                                                   ', &
 'echo Unzipping %xlsx% into %folder% using this command:                                            ', &
-'echo powershell -Command "Expand-Archive /od %xlsx% %folder%                                       ', &
+'echo powershell %xlsx% %folder%                                                                    ', &
 'powershell -Command "Expand-Archive %xlsx% -DestinationPath %folder%"  > nul                       ', &
 'rem echo removing %xlsx%                                                                           ', &
 'del %xlsx%                                                                                         ', &
@@ -2023,8 +2032,6 @@ character*100 unwrap_bat(nlines)/  &
 ':end                                                                                               '/
 
 
-
-
 inquire(file='unwrap.bat',exist=lexist)
 if( .not. lexist) then                  ! may want to have unwrap.bat modified outside this program to implement other unzip command.  so don't overwrite it.
   if (.not. bat_written) then
@@ -2033,8 +2040,8 @@ if( .not. lexist) then                  ! may want to have unwrap.bat modified o
   !   Write batfile
     open(unit=b_unit,file='unwrap.bat',status='unknown')
     rewind b_unit    ! it may exist, so this causes the output to overwrite rather than append
-    do i=1,nlines
-      write(b_unit,'(a)') trim(unwrap_bat(i))
+    do I=1,nlines
+      write(b_unit,'(a)') trim(unwrap_bat(I))
     enddo
     close(b_unit)
     bat_written=.true.
@@ -2049,7 +2056,7 @@ inquire(file=trim(filen),exist=lexist)
 if(.not. lexist) then
   inquire(file='input\'//trim(filen),exist=lexist)
   if(lexist) then
-    xsubfolder='input\'
+    xsubfolder='input\\'  !one more backslash was needed to work for Visual Studio fortran debugger run
   else
     write(6,'(a)') ' Error. '//trim(filen)//' not found in current folder or in input subfolder.'
     return
@@ -2070,6 +2077,8 @@ return
 end subroutine Unwrap_xlsx
 ! -----------------------------------------------------------
   subroutine ReadRngXLSX(funit_in,Sheet)
+  !use fm
+  !use unit_open
   implicit none
 
 !  This subroutine reads all defined ranges from the XLSX WorkBook that apply to worksheet "Sheet".
@@ -2087,7 +2096,7 @@ end subroutine Unwrap_xlsx
     character*80 sheetname ! excel sheetname generated as sheet//sheetid
     character*4 sheetID,rID*8
     integer*4 funit_in,funit,w_unit    ! worksheet file unit number and its flat working file unit number
-    integer*4 i,j,iret,iline,is,ie
+    integer*4 iline,is,ie
     integer*4 irow,icol,numlines,oldcol
     integer*4 iscol,isrow,iecol,ierow,L1,L2
     character*1 byte1,RANGE*16,LAB*254,string*16,rowjmp*16
@@ -2119,6 +2128,9 @@ end subroutine Unwrap_xlsx
     integer lline
     integer islash ! file name character position of the last slash in the file name
     integer dot ! file name character position of the dot in ".xlsx" or ".xlsm"
+	
+	INTEGER 	IRET
+	
     funit=funit_in
     call unitunopened(funit_in,999,funit)
 
@@ -2129,7 +2141,7 @@ end subroutine Unwrap_xlsx
     islash=0
     islash=scan(fname,'/\',.true.)  ! scan backwards for position of last slash
     basename=fname(islash+1:)       ! file name without the path
-
+	
     call unwrap_xlsx(basename)
 
     dot=index(basename,'.xlsx')+index(basename,'.xlsm') ! can be either type
@@ -2470,18 +2482,19 @@ end subroutine Unwrap_xlsx
 
 
     subroutine FlattenXML(funit,w_unit,original,flatter,iret)
+    !use unit_open
     implicit none
 ! reads non-record-formatted XML file and writes a new one with tags on new lines
     integer funit            ! input unit
     integer w_unit           ! output unit
     character*(*) original   ! input file
     character*(*) flatter    ! output file
-    integer iret    ! return code of 1 if problem
     character*1 bchar,lf,cr,oldchar
     integer ByteLoc
-    integer lline
+    integer lline,iret
     integer, parameter :: maxLineLength=2048
     character*(maxLineLength) line
+   
     iret=0
       open(funit,file=original,status='old',access='direct',form='binary',recl=1,buffered='yes')
       call unitunopened(100,999,w_unit)

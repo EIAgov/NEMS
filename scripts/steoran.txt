@@ -1,7 +1,0 @@
-* steoran.txt:  contains names of input/output files for steoran.exe.  
-* 1) Input Ran File, InFileName(1)
-ref2019.1116a.RAN
-* 2) STEO/AEO Spreadsheet in csv format, InFileName(2)
-sortedA.csv
-* 3) Output Ran File, OutFileName
-steo2019A.0119a.RAN

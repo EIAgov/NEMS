@@ -1,0 +1,233 @@
+## ams_version=1.0
+
+Section S4_Calculations {
+	Section Credit_45Q_Section {
+		Procedure Calculate_45Q_Weights {
+			Body: {
+				! SEE H2CONFIG.TXT for input parameters relating to this procedure.
+				
+				empty Credit45QPlanningPeriodWeights;
+				empty Credit45QEligibility;
+				empty EligibleYearsByVintage45Q_;
+				
+				! Process value for 45V credit
+				! @TODO: I think this can be part of a FirstYearInitialization Procedure. Can't think of any reason why we'd ever need to
+				! calculate this matrix more than once per run?
+				for (capYear) do
+					! NOTE: An additional number of years is added on to the Credit45VEndYear parameter to represent facilities that have started construction by the end of Credit45VEndYear, which are eligible for the credit.
+					if (capYear >= Credit45QStartYear and capYear <= (Credit45QEndYear+ProjectBuildTime)) then
+				
+						! Why *Credit45VNumYearsEligible-1*??? Because we want to make sure the credit is applied for Credit45VNumYearsEligible
+						! For example, if capacity enters in 2025, then its 10 eligible years should be 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034
+						! BUT, 2025 + 10 = 2035, which would be 11 years. So needs to be (Credit45VNumYearsEligible-1) to accurately reflect a set of ten years 
+						EligibleYearsByVintage45Q_ := SubRange(CapacityYears_, capYear, (capYear+(Credit45QNumYearsEligible-1)));
+						Credit45QEligibility(Vintage45QEligible, capYear) := 1;
+				
+					endif;
+				endfor;
+				
+				! This part can NOT be in FirstYearInitialization. IT changes based on the year.
+				Credit45QPlanningPeriodWeights(FirstPlanningPeriod, capYear) := Credit45QEligibility(CurrentModelYear, capYear);
+				Credit45QPlanningPeriodWeights(SecondPlanningPeriod, capYear) := Credit45QEligibility(NextModelYear, capYear);
+				
+				Credit45QPlanningPeriodWeights(ThirdPlanningPeriod, capYear ) := sum(thirdPeriodYears, Credit45QEligibility(thirdPeriodYears, capYear)) / card(YearsInThirdPlanningPeriod_);
+				
+				! Now take average of only third period years, and apply to all cap years in third period. 
+				Credit45QPlanningPeriodWeights(ThirdPlanningPeriod, thirdPeriodYears) := sum(capYear | (capYear in YearsInThirdPlanningPeriod_), Credit45QPlanningPeriodWeights(ThirdPlanningPeriod, capYear)) / card(YearsInThirdPlanningPeriod_);
+			}
+		}
+		Procedure Calculate_45Q_Eligiblity {
+			Body: {
+				for (capYear) do
+					! NOTE: An additional number of years is added on to the Credit45VEndYear parameter to represent facilities that have started construction by the end of Credit45VEndYear, which are eligible for the credit.
+					if (capYear >= Credit45QStartYear and capYear <= (Credit45QEndYear+ProjectBuildtime45Q)) then
+				
+						! Why *Credit45VNumYearsEligible-1*??? Because we want to make sure the credit is applied for Credit45VNumYearsEligible
+						! For example, if capacity enters in 2025, then its 10 eligible years should be 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034
+						! BUT, 2025 + 10 = 2035, which would be 11 years. So needs to be (Credit45VNumYearsEligible-1) to accurately reflect a set of ten years 
+						EligibleYearsByVintage45Q_ := SubRange(CapacityYears_, capYear, (capYear+(Credit45QNumYearsEligible-1)));
+						Credit45QEligibility(Vintage45QEligible, capYear) := 1;
+				
+					endif;
+				endfor;
+			}
+		}
+		DeclarationSection Credit_45Q_Declarations {
+			Parameter Credit45QPlanningPeriodWeights {
+				IndexDomain: (pp,capYear);
+			}
+			Parameter Credit45QNumYearsEligible;
+			Parameter ProjectBuildTime45Q;
+			Set EligibleYearsByVintage45Q_ {
+				SubsetOf: CapacityYears_;
+				Index: Vintage45QEligible;
+			}
+			ElementParameter Credit45QEndYear {
+				Range: cal_Year;
+			}
+			ElementParameter Credit45QStartYear {
+				Range: cal_Year;
+			}
+			Parameter Credit45QEligibility {
+				IndexDomain: (i_calYear,capYear);
+				Range: binary;
+			}
+		}
+	}
+	Section Financial_Calculations {
+		Procedure Calculate_Financial_Parameters {
+			Body: {
+				! Average 10-Yr Treasury bond rate over the model time horizon
+				RiskFreeRate := (sum(year, Treasury10yrYield(year))/card(year));
+				
+				! Calculate the S&P 500 rate of return for each year
+				sp500rate(year | year > first(year)) := (SP500Index(year) - SP500Index(year-1))/SP500Index(year-1);
+				
+				! Calculate the average S&P 500 return rate for all historical years
+				! @TODO: Seems too low. As is. EMM assumes something much higher. Something closer to 8.
+				sp500rate_avg := sum(year , sp500rate(year)) / card(year);
+				
+				! The CAPM Finance Model is used to calculate an "equity cost rate"
+				! This equity cost rate represents the minimum rate of return from the viewpoint of an equity shareholder.
+				! It is calculated by the following formula:
+				! Cost of Equity = Risk-free rate + Volatility Beta * (Equity Risk Premium)
+				! where the "Equity Risk Premimum" is the difference between investing in the stock market vs. investing in a safe investment
+				! For HMM, the Equity Risk Premium is represented as the difference between the average S&P 500 return and the average 10yr treasury return.
+				
+				! Calculate Cost of Equity, which can be used as a discount rate
+				!@TODO: Consider using an exogenous assumption for the expected market rate (currently some kind of average for SP500). Using SP500 from MACOUT might be far too low.
+				! HSM assumes  Market Risk Premium of = 7.5%, EMM assumes it is 5.75%, that implies expected market rates of 9.75% and 7.75%, respecitvely.
+				! FECM HMM assumed an expected market rate of ~8%. 
+				!sp500rate_avg := .08;
+				
+				EquityCostRate := RiskFreeRate + volatility_beta * (sp500rate_avg - RiskFreeRate);
+				
+				! Calculate cost of debt.
+				!Cost of Debt Rate is the average of Industrial Bond Rate
+				DebtCostRate := sum(year, IndustrialBondRate(year)) / card(year);
+				
+				! Caclulate the weighted average cost of capital
+				WACC := (1-EquityShare)*DebtCostRate * (1-CorporateTaxRate)+EquityShare*EquityCostRate;
+				
+				! Calculate Capital Recovery Factor
+				CapitalRecoveryFactor := WACC / $(1 - 1/power(1 + WACC,projectLifetime));
+			}
+			Comment: "Calculate the discount rate (WACC) and the Capital Recovery Factor.";
+		}
+		DeclarationSection Financial_Parameter_Declarations {
+			Parameter projectLifetime {
+				Comment: "Lifetime of a hydrogen project. (Used in the Capital Recovery Factor formula).";
+			}
+			Parameter CorporateTaxRate {
+				Text: "Assumed corporate tax rate";
+			}
+			Parameter WACC {
+				Text: "Weighted Average Cost of Capital";
+				Comment: "WACC = Share Financed through Debt * Cost of Debt * (1 - Corporate Tax Rate) + Share Financed through Equity * Cost of Equtiy";
+			}
+			Parameter DebtCostRate {
+				Text: "Interest rate of debt";
+			}
+			Parameter EquityShare {
+				Comment: "Percentage of financing raised through equity";
+			}
+			Parameter IndustrialBondRate {
+				IndexDomain: year;
+				Text: "Rate on industrial BAA bonds";
+				Comment: "Rate on industrial BAA bonds";
+			}
+			Parameter AverageDeflatorGrowth {
+				Text: "Average growth rate of the GDP Price Deflator";
+			}
+			Parameter RecoveryYears {
+				Definition: 30;
+			}
+			Parameter CapitalRecoveryFactor {
+				Text: "Capital Recovery Factor";
+				Comment: "Ratio used to calculate the PV of annual payments for a given length of time.";
+			}
+			Parameter EquityCostRate {
+				Text: "The cost of equity";
+				Comment: " (implied opportunity cost for an investor, or the required rate of return for an investment)";
+			}
+			Parameter volatility_beta {
+				Comment: "Measure of volatility of an security compared to the market. Securities with a beta grater than 1 are seen as more volatile than the S&P500, while securities with betas less than 1 are seen as less volatile.";
+			}
+			Parameter sp500rate {
+				IndexDomain: year;
+				Comment: "Return of the S&P 500 by year";
+			}
+			Parameter sp500rate_avg {
+				Comment: "Average rate of return for the S&P 500.";
+			}
+			Parameter RiskFreeRate {
+				Text: "The assumed rate of return on a risk-free investment.";
+				Comment: "The assumed rate of return on a \"risk-free\" investment.";
+			}
+		}
+	}
+	Section Credit_45V_Section {
+		Procedure Calculate_45V_Weights {
+			Body: {
+				! SEE H2CONFIG.TXT for input parameters relating to this procedure.
+				
+				empty Credit45VPlanningPeriodWeights;
+				empty Credit45VEligibility;
+				empty EligibleYearsByVintage45V_;
+				
+				! Process value for 45V credit
+				! @TODO: I think this can be part of a FirstYearInitialization Procedure. Can't think of any reason why we'd ever need to
+				! calculate this matrix more than once per run?
+				for (capYear) do
+					! NOTE: An additional number of years is added on to the Credit45VEndYear parameter to represent facilities that have started construction by the end of Credit45VEndYear, which are eligible for the credit.
+					if (capYear >= Credit45VStartYear and capYear <= (Credit45VEndYear+ProjectBuildTime)) then
+				
+						! Why *Credit45VNumYearsEligible-1*??? Because we want to make sure the credit is applied for Credit45VNumYearsEligible
+						! For example, if capacity enters in 2025, then its 10 eligible years should be 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034
+						! BUT, 2025 + 10 = 2035, which would be 11 years. So needs to be (Credit45VNumYearsEligible-1) to accurately reflect a set of ten years 
+						EligibleYearsByVintage45V_ := SubRange(CapacityYears_, capYear, (capYear+(Credit45VNumYearsEligible-1)));
+						Credit45VEligibility(Vintage45VEligible, capYear) := 1;
+				
+					endif;
+				endfor;
+				
+				! This part can NOT be in FirstYearInitialization. IT changes based on the year.
+				Credit45VPlanningPeriodWeights(FirstPlanningPeriod, capYear) := Credit45VEligibility(CurrentModelYear, capYear);
+				Credit45VPlanningPeriodWeights(SecondPlanningPeriod, capYear) := Credit45VEligibility(NextModelYear, capYear);
+				
+				Credit45VPlanningPeriodWeights(ThirdPlanningPeriod, capYear ) := sum(thirdPeriodYears, Credit45VEligibility(thirdPeriodYears, capYear)) / card(YearsInThirdPlanningPeriod_);
+				
+				! Now take average of only third period years, and apply to all cap years in third period. 
+				Credit45VPlanningPeriodWeights(ThirdPlanningPeriod, thirdPeriodYears) := sum(capYear | (capYear in YearsInThirdPlanningPeriod_), Credit45VPlanningPeriodWeights(ThirdPlanningPeriod, capYear)) / card(YearsInThirdPlanningPeriod_);
+			}
+		}
+		DeclarationSection Credit_45V_Declarations {
+			ElementParameter Credit45VDollarYear {
+				Range: cal_Year;
+			}
+			Parameter Credit45VValue {
+				Comment: "Value of the 45V Credit ($/ million metric tons)";
+			}
+			Parameter Credit45VPlanningPeriodWeights {
+				IndexDomain: (pp,capYear);
+				Comment: "Weights to apply for the 45V credit for correpsonding planning period/capacity vintage combinations.";
+			}
+			ElementParameter Credit45VEndYear {
+				Range: cal_Year;
+			}
+			Set EligibleYearsByVintage45V_ {
+				SubsetOf: CapacityYears_;
+				Index: Vintage45VEligible;
+			}
+			ElementParameter Credit45VStartYear {
+				Range: cal_Year;
+			}
+			Parameter Credit45VEligibility {
+				IndexDomain: (i_calYear,capYear);
+				Range: binary;
+			}
+			Parameter Credit45VNumYearsEligible;
+			Parameter ProjectBuildTime;
+		}
+	}
+}

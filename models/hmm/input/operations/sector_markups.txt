@@ -1,0 +1,9 @@
+! Note: markup assumes .1 km of pipeline connecting production to demand source
+! Unit: last history year $/kg H2
+Composite Table:
+sec                 markup
+Industrial          0.311902
+Electricity         0.311902
+Transportation      6.65391
+Refining            0.311902
+;

@@ -83,7 +83,7 @@
 
       ELSEIF(FUNCTION .EQ. 'O') THEN        !OPEN
 !.......OPEN FILE
-        write(6,*) ' open ',unique_name
+        ! write(6,*) ' open ',unique_name
         FILE_MGR=FMGR_OPEN(UNIQUE_NAME,DD_NAME,PDS_NAME,PDS_FLAG,NEW)
 
       ELSEIF(FUNCTION .EQ. 'C') THEN        !CLOSE
@@ -132,6 +132,7 @@
       INTEGER*4 FINDCHAR                !FUNCTION FINDCHAR DEFINE
       INTEGER*4 FMGR_TABLE              !FMGR_TABLE FUNCTION DEFINE
       INTEGER*4 IUNIT                   !UNIT NUMBER FOR FILELIST FILE
+      INTEGER   MIN_UNIT2
 
       INTEGER*4 RETCODE                 !RETURN CODE FOR FUNCTION CALLS
       LOGICAL   IEXIST                  !LOGICAL FOR INQUIRE EXIST
@@ -141,9 +142,9 @@
       integer ipos,ii
       character*20 filen
       FMGR_INIT=0                       !INITIALIZE RETURN VALUE
-
+      MIN_UNIT2=200
       if(new) then
-         filen='FMGROUT.txt'            ! for nems
+         filen='ITG_FMGROUT.txt'            ! for nems
       else
          filen='FMGROUT.tfiler.txt'     ! for tfiler
       endif
@@ -153,13 +154,13 @@
       ENDIF
 
 !.....ASSIGN .TRUE. FLAGS TO UNIT_AVAIL FOR PC UNIT NUMBER ASSIGNS
-      DO II=MIN_UNIT,MAX_UNIT,1
+      DO II=MIN_UNIT2,MAX_UNIT,1
         UNIT_AVAIL(II)=.TRUE.
       ENDDO
 
 !.....ASSIGN UNIT NUMBER TO FILE_MGR DATA FILE
       ii=-1
-      CALL UNTNOFD(RETCODE,MIN_UNIT,ii,IUNIT)
+      CALL UNTNOFD(RETCODE,MIN_UNIT2,ii,IUNIT)
         IF(RETCODE.NE.0) THEN
           FMGR_INIT=-7                  !SET RETURN TO ASSIGN ERROR
           WRITE(MSG_STRING,'(3A,I4,1A,I4)') 'UNABLE TO ASSIGN UNIT', &
@@ -332,13 +333,14 @@
                              !NECESSARY FOR GETINDEX FUNCTION
       integer*4 ii
       integer*4 ios
+      INTEGER      MIN_UNIT2
 !.....INITIALIZE
       IUNIT=0
       FUNCTION='O'
       FMGR_OPEN=0
       IRCODE = 0
 
-
+      MIN_UNIT2=200
 !.....GET INDEX NUMBER FOR UNIQUE_NAME REFERENCE FROM COMMAN ARRAYS
 !.....GETINDEX() WILL ADD RECORD IF REQUEST IS FOR A NEW PDS
       INDEX=GETINDEX(UNIQUE_NAME,DD_NAME,PDS_NAME,PDS_FLAG,FUNCTION)
@@ -360,7 +362,7 @@
 !.....ASSIGN UNIT NUMBER FOR FILE TO OPEN
       IF(.NOT. ISOPEN) THEN !FILE IS NOT PREVIOUSLY OPENED
         ii=-1
-        CALL UNTNOFD(IRCODE,MIN_UNIT,ii,IUNIT)
+        CALL UNTNOFD(IRCODE,MIN_UNIT2,ii,IUNIT)
         IF(IRCODE .EQ. 0) THEN    !UNIT NUMBER ASSIGNED SUCCESSFULLY
           FMGR_OPEN=IUNIT
           F_UNIT(INDEX)=FMGR_OPEN

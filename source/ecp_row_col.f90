@@ -48,6 +48,7 @@ module ecp_row_col
     integer*2    numsets                    ! number of sets
     integer*4    idxFirst                   ! position in ecp_sortidx with first coefficient
     integer*4    idxLast                    ! position in ecp_sortidx with last coefficient
+    integer*4    status                     ! status of parameter (0=ccalc, 1 or 2=cpass)
   end type
   type (aimms_parameter) :: aimparm(max_aimms_param)
   
@@ -172,9 +173,9 @@ module ecp_row_col
   integer AIMMKECP                  ! set via runtime option from scedes file. if 1, set make_ecp_aimms to .true. 
   logical SKIP_ECPOML /.false./     ! flag to bypass passing fortran caculated ECP coefficients to AIMMS ECP and OML based on all 0 status found in ecparrays_all.txt
   
-  external rtovalue ! function to get run-time option value AIMMSECP
+  external rtovalue ! function to get run-time options
   integer rtovalue
-  integer AIMMSECP  ! run-time option to invoke AIMMS ECP LP if = 1
+  integer AIMECPPAR  ! run-time option to invoke parallel version of AIMMS ECP LP if = 1
   character*25 filen_ecpcoeff
   integer iOutTxt
   integer colunit ! I-O unit for column solution retrieval debug file
@@ -211,7 +212,9 @@ module ecp_row_col
       character*30 COLUMN_USE_BNK_mask
       character*30 COLUMN_mask
       character*30 COL_CL_NG_mask
+      character*30 COL_CL_CL_mask
       character*30 COL_CLtNG_mask
+      character*30 COL_CLtNG_CL_mask
       character*30 COL_CREATE_BNK_mask
       character*30 COL_HTRT_mask
       character*30 COL_OTHER_mask
@@ -243,7 +246,7 @@ module ecp_row_col
       character*30 ROW_COF_mask
       character*30 ROW_ERC_mask
       character*30 ROW_FLDV_mask
-      character*30 ROW_FLRG_mask
+      character*30 ROW_CSRG_mask
       character*30 ROW_FR_mask
       character*30 ROW_F_mask
       character*30 ROW_FUEL_mask
@@ -273,6 +276,7 @@ module ecp_row_col
       character*30 ROW_WD_mask
       character*30 ROW_XC_mask
       character*30 ROW_mask
+      character*30 ROW_mask_gcf
 
 ! set cardinalities
 integer,parameter :: SupplyRegion = 28 ! like NERC Region mnumnr. First in list because it is used to define other parameters below
@@ -290,6 +294,7 @@ integer,parameter :: CanProvince = 3
 integer,parameter :: CarbonEmissionType = 10  ! 10 (bnk, esc, fue, ind, lim, off, oth, ref, rsv, utl)
 integer,parameter :: CarbonRegion = 3
 integer,parameter :: CensusRegion = 11
+integer,parameter :: CensusRegion_ALT1 = 11
 integer,parameter :: CoalDemandRegion = 16
 integer,parameter :: CoalDemandRegion_ALT1 = 16
 integer,parameter :: CoalDemandRegion_ALT2 = 16
@@ -299,8 +304,8 @@ integer,parameter :: CoalDiversityType = 2     ! {L Lignite and S subbituminous}
 integer,parameter :: CoalGroup = 1800 
 integer,parameter :: NaturalGasGroup = 1800
 integer,parameter :: CoalProductionStep = 11
-integer,parameter :: CoalSupplyCurve = 53
-integer,parameter :: CoalSupplyCurve_Dom = 41
+integer,parameter :: CoalSupplyCurve = 26
+integer,parameter :: CoalSupplyCurve_Dom = 14
 integer,parameter :: CoalSupplyCurve_Int = 12
 integer,parameter :: CoalSupplyStep = 24       ! I01, I02, ..., I11, OTH, DN1, DN2..UP1, UP2, ..UP5,ZR0
 integer,parameter :: CoalType = 6
@@ -313,12 +318,13 @@ integer,parameter :: FuelRegion_ALT1 = 24
 integer,parameter :: FuelShareOption = 4
 integer,parameter :: FuelSupplyStep = 18 ! 9 upper priced steps, A-I from center, 9 lower priced steps 1..9 from center
 integer,parameter :: FuelType = 60 ! ECP_D_NFL=60.  but 13 is maximum integer found in "UPFLTP(IP,FPP), IP=1,ECP_D_DSP, FPP=1,ECP_D_FPP)
-integer,parameter :: ECPFuelType = 15 !ECP_D_NFL=15  ECP NUMBER OF FUEL TYPES
+integer,parameter :: ECPFuelType = 16 !ECP_D_NFL=15  ECP NUMBER OF FUEL TYPES
 integer,parameter :: GasProductionStep = 41
 integer,parameter :: GasRegion = 17 ! =NNGEM
-integer,parameter :: GasSeason = 2
+integer,parameter :: GasSeason = 3
 integer,parameter :: GasSupplyStep = 41 
 integer,parameter :: GenerationSeason = 3
+integer,parameter :: H2SupplyStep = 7
 integer,parameter :: HTRTYear = 3   ! should equal PlanYear...same as UNXPH read from  emmcntl.txt
 integer,parameter :: ImportStep = 5 ! INTEGER, Parameter EFD_D_CSS=5    maximum number of Canadian Supply steps
 integer,parameter :: JustOne =1
@@ -330,9 +336,10 @@ integer,parameter :: nHGCODE = 1  ! mercury (Hg)
 integer,parameter :: nHGCODEFrom = 1
 integer,parameter :: nHGCODETo = 1
 integer,parameter :: nIFGD = 2
-integer,parameter :: NOXRegion = 6  !  emmparm: PARAMETER(NOX_D_GRP = 5).  region IDs differ under TRANRULE, so upping to 6
+integer,parameter :: NOXRegion = 3  !  emmparm: PARAMETER(NOX_D_GRP = 5).  region IDs only under TRANRULE
 integer,parameter :: nRCF=1
-integer,parameter :: Nuclear=450 ! max_nuc, parameter in includes/ecp_nuc
+integer,parameter :: NuclearUnit=900             ! MAXNUC
+integer,parameter :: Nuclear=NuclearUnit ! maxnuc, parameter in includes/ecp_nuc
 integer,parameter :: numACI=8  ! 0,1..7   ! activated carbon types
 integer,parameter :: numACSS=1  ! num_ACSS number of aci supply steps.  1 
 integer,parameter :: OGSMRegion = 7
@@ -345,14 +352,13 @@ integer,parameter :: OperatingMode = 12  ! one for each vertical load segment, E
 integer,parameter :: PlantGroup = 20000       ! based on EMM_D_GRP=20000. 
 integer,parameter :: PlantType=80  
 integer,parameter :: PlantType_ALT2=80     ! used for retrofit from one plant in row to another in column
-integer,parameter :: PlanttypeW=PlantType    ! same as plantype, used for combining on/offshore wind into one wind category
 integer,parameter :: PlanYear=3              ! should be same as UNXPH read from  emmcntl.txt
 integer,parameter :: PlanYear_ALTB=3         ! should be same as UNXPH read from  emmcntl.txt
 integer,parameter :: CommitYearSR = 3  ! should equal PlanYear...same as UNXPH read from  emmcntl.txt
 integer,parameter :: RelyStep = 5
 integer,parameter :: ResidProductionStep = 1
 integer,parameter :: RetireGroup = 4       ! for IGRP=1,ECP_D_RET
-integer,parameter :: RetrofitCFG = 107     ! NOT SURE ABOUT NUMBER of elements.  "COL" and then "001", "002",..."106" 
+integer,parameter :: RetrofitCFG = 109     ! NOT SURE ABOUT NUMBER of elements.  "COL" and then "001", "002",..."108" 
 integer,parameter :: RPSRegion = SupplyRegion
 integer,parameter :: RPSRegion_ALT1 = SupplyRegion
 integer,parameter :: RPSRegion_ALT2 = SupplyRegion
@@ -401,6 +407,7 @@ integer,parameter :: Fifteen=15
 integer,parameter :: DepreciationYears = 26 ! 
 integer,parameter :: DepreciationOptions = 6 !
 integer,parameter :: Four=4
+integer,parameter :: Five=5
 integer,parameter :: FuelRegion26=26
 integer,parameter :: FuelsPerPlant=6       ! ECP_D_FPP Fuels per Plant, ECP
 integer,parameter :: HoursADay=24
@@ -451,15 +458,15 @@ integer,parameter :: IntermittenRenStor=23       ! ECP_D_I_R  =  ECP_D_INT(9) + 
 integer,parameter :: LDCBlocks=192               ! MAXECTB=MAXECPB (8) * MAXECPSG (24)
 integer,parameter :: NewPrice=38                 ! NCLPR2
 integer,parameter :: NGBaseLoad=1800             ! MX_NGBS
-integer,parameter :: NuclearUnit=900             ! MAX_NUC
 integer,parameter :: OtherRenewable=11           ! ECP_D_RNW
 integer,parameter :: PlantGrpReg=3100            ! WPLT_D_GRP
 !integer,parameter :: PlantRec=27000              ! WPLT_D_REC
 integer,parameter :: PlanReg=28                  ! WPLT_D_RGN
 integer,parameter :: RetrofitCombinations=47     ! MX_ROPT
 integer,parameter :: RetrofitComponent=6         ! MX_RCMB
+integer,parameter :: RetrofitComponent_SUP=8         ! MX_RCMB
 integer,parameter :: StateCodes=54               ! MX_ST_CODES 0:mx_st_codes
-integer,parameter :: SupplyCurves=53             ! MX_SUPPLY_CURVES (41) + MX_INTL_CURVES (12)
+integer,parameter :: SupplyCurves=26             ! MX_SUPPLY_CURVES (14) + MX_INTL_CURVES (12)
 integer,parameter :: Thousand=1000               
 integer,parameter :: TradCogenFuelType=12        ! TC_FUELS
 integer,parameter :: UtilityType=11              ! MX_TYPE  0:mx_type
@@ -469,6 +476,7 @@ integer,parameter :: UtilityType=11              ! MX_TYPE  0:mx_type
  integer, parameter :: BiomassProductionStep=50 ! nwdsupp=50 in wrenew
  integer, parameter :: BiomassSector=6          ! fstpmx
  integer, parameter :: BoilerType=3             ! ECP_D_BTP boiler types per plant, up to 3
+ integer, parameter :: CapacityType=55          ! UPTTYP
 !integer, parameter :: CanadianSupplyImport=100 ! ECP$CS2  Import project counter
 !integer, parameter :: CoalConfiguration=144    ! MX_CNFG
 !integer, parameter :: ConstructionPeriod=10    ! ECP_D_LCP 
@@ -503,7 +511,7 @@ integer,parameter :: UtilityType=11              ! MX_TYPE  0:mx_type
 !integer, parameter :: LDCBlocks=192            ! MAXECTB =MAXECPB (8 *MAXECPSG (24)
 !integer, parameter :: NewPrice=38              ! NCLPR2 
 !integer, parameter :: NGBaseLoad=1800          ! MX_NGBS 
-!integer, parameter :: NuclearUnit=900          ! MAX_NUC 
+!integer, parameter :: NuclearUnit=900          ! MAXNUC 
 !integer, parameter :: OtherRenewable=11        ! ECP_D_RNW 
  integer, parameter :: OwnerShipType=2          ! ECP_D_OWN 
  integer, parameter :: PlantGroupOrd=20000      ! M_EFD_GRPS = EMM_D_GRP = 20000
@@ -531,6 +539,7 @@ integer,parameter :: UtilityType=11              ! MX_TYPE  0:mx_type
  integer,parameter :: OGSMRegionEX = 8           ! for CO2 EOR, not same as OGSMReg=13 (MNUMOR)
  integer,parameter :: OGSMRegionEX_ALTTo = 8
  integer,parameter :: Season_SUP = 5  ! plus 0 index for total
+ integer,parameter :: EmissionType_SUP=9        ! MNPOLLUT+1: Air Pollutants (C,CO,CO2,SOx,NOx,VOC,CH4,PART)
 !=================================================================================================================
   interface                                      
 ! this allows a number of optional arguments so it can build the mask for a variable number of components.

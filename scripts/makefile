@@ -3,7 +3,7 @@
 # FLAGB is set to either " /nocheck" or " /check:bounds" in nfort
 # FLAGO is set to either " /debug:full /optimize:0" or " /nodebug /optimize:2" in nfort
 # FLAGIO is set to either "" or "/iface:cvf /fpscomp:ldio_spacing" , the latter for CVF compatibility when Intel is being used
-FLAGS1=/compile_only /nopdbfile /free /traceback /fpconstant /assume:byterecl /assume:source_include /nolist /static /Qsave /Qzero /heap-arrays0
+FLAGS1=/compile-only /nopdbfile /free /traceback /fpconstant /assume:byterecl /assume:source_include /nolist /static /Qsave /Qzero /heap-arrays0
 FLAGI=/include:.
   
 .SUFFIXES :	.f .obj .f90

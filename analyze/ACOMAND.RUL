@@ -1,7 +1,0 @@
-* ACOMAND.RUL
-This tests ANALYZE command (from rule file).  Spec is:
-$TEXT
- %%2 %%3 %%4 %%5 %%6 %%7 %%8 %%9
-$TEXT
-$ANALYZE  %%2 %%3 %%4 %%5 %%6 %%7 %%8 %%9
-$EXIT

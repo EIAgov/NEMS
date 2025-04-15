@@ -44,7 +44,7 @@
       REAL JDSCM(MNUMYR) ! 49 Distillate - Commercial
       REAL JDSTR(MNUMYR) ! 50 Distillate - Transportation
       REAL JDSIN(MNUMYR) ! 51 Distillate - Industrial
-      REAL JDSEL(MNUMYR) ! 52 Distillate - Electricity (+petroleum coke)
+      REAL JDSEL(MNUMYR) ! 52 Distillate - Electricity
       REAL JKSRS(MNUMYR) ! 54 Kerosene - Residential
       REAL JKSCM(MNUMYR) ! 55 Kerosene - Commercial
       REAL JKSIN(MNUMYR) ! 56 Kerosene - Industrial
@@ -64,7 +64,7 @@
       REAL JRSEL(MNUMYR) ! 74 Residual Fuel - Electricity
       REAL JOTTR(MNUMYR) ! 78 Other Petroleum Transportation
       REAL JMETR(MNUMYR) ! 88 Methanol - Transporation
-      REAL JETTR(MNUMYR) ! 89 Ethanol - Transporation
+      REAL JETTR(MNUMYR) ! 89 Ethanol - Transporation (sold as E85)
       REAL JETHM(MNUMYR) ! 89 Ethanol - Electric Power
 
 

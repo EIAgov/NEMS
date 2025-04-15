@@ -1,0 +1,12 @@
+Notes - See code for metrics,,,
+cost_type,a,b,c
+water_handling_plant,40,0,0
+chemical_handling_plant,0.1,1,0.6
+polymer_handling_plant,0.1,1000,0.6
+co2_recycling_plant,0.177,1.45,0
+steam_pipes,19.8,0,0
+steam_generators,650,0,0
+compressor,1200,0,0
+injectant,1.96,0,0
+natural_co2,1,0.008,0
+co2_trans,0.4,0,0

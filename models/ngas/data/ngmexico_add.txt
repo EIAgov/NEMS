@@ -667,92 +667,275 @@
     'December, 2016'   NA         MX_SS                       10.923
     'December, 2016'   AD         MX_SS                       65.169
     'January, 2017'    NA         MX_NE                       21.860
-    'January, 2017'    NA         MX_SS                       10.753
-    'January, 2017'    AD         MX_SS                       65.650
+    'January, 2017'    NA         MX_SS                       10.744
+    'January, 2017'    AD         MX_SS                       65.346
     'February, 2017'   NA         MX_NE                       19.551
-    'February, 2017'   NA         MX_SS                        9.312
-    'February, 2017'   AD         MX_SS                       61.749
+    'February, 2017'   NA         MX_SS                        9.305
+    'February, 2017'   AD         MX_SS                       61.653
     'March, 2017'      NA         MX_NE                       21.512
-    'March, 2017'      NA         MX_SS                       10.293
-    'March, 2017'      AD         MX_SS                       67.642
+    'March, 2017'      NA         MX_SS                       10.284
+    'March, 2017'      AD         MX_SS                       67.527
     'April, 2017'      NA         MX_NE                       20.951
-    'April, 2017'      NA         MX_SS                        9.975
-    'April, 2017'      AD         MX_SS                       65.859
+    'April, 2017'      NA         MX_SS                        9.965
+    'April, 2017'      AD         MX_SS                       65.609
     'May, 2017'        NA         MX_NE                       21.519
-    'May, 2017'        NA         MX_SS                       10.198
-    'May, 2017'        AD         MX_SS                       66.550
+    'May, 2017'        NA         MX_SS                       10.185
+    'May, 2017'        AD         MX_SS                       66.485
     'June, 2017'       NA         MX_NE                       21.189
-    'June, 2017'       NA         MX_SS                        9.726
-    'June, 2017'       AD         MX_SS                       64.515
+    'June, 2017'       NA         MX_SS                        9.712
+    'June, 2017'       AD         MX_SS                       64.032
     'July, 2017'       NA         MX_NE                       21.715
-    'July, 2017'       NA         MX_SS                        9.747
-    'July, 2017'       AD         MX_SS                       65.791
+    'July, 2017'       NA         MX_SS                        9.733
+    'July, 2017'       AD         MX_SS                       65.716
     'August, 2017'     NA         MX_NE                       21.730
-    'August, 2017'     NA         MX_SS                        9.437
-    'August, 2017'     AD         MX_SS                       64.222
+    'August, 2017'     NA         MX_SS                        9.444
+    'August, 2017'     AD         MX_SS                       64.215
     'September, 2017'  NA         MX_NE                       21.057
-    'September, 2017'  NA         MX_SS                        8.737
-    'September, 2017'  AD         MX_SS                       59.423
+    'September, 2017'  NA         MX_SS                        8.731
+    'September, 2017'  AD         MX_SS                       59.407
     'October, 2017'    NA         MX_NE                       21.776
-    'October, 2017'    NA         MX_SS                        8.819
-    'October, 2017'    AD         MX_SS                       59.500
+    'October, 2017'    NA         MX_SS                        8.804
+    'October, 2017'    AD         MX_SS                       59.488
     'November, 2017'   NA         MX_NE                       21.060
-    'November, 2017'   NA         MX_SS                        8.311
-    'November, 2017'   AD         MX_SS                       53.026
+    'November, 2017'   NA         MX_SS                        8.323
+    'November, 2017'   AD         MX_SS                       53.006
     'December, 2017'   NA         MX_NE                       21.292
-    'December, 2017'   NA         MX_SS                        8.417
-    'December, 2017'   AD         MX_SS                       53.337
+    'December, 2017'   NA         MX_SS                        8.407
+    'December, 2017'   AD         MX_SS                       53.303
     'January, 2018'    NA         MX_NE                       20.899
-    'January, 2018'    NA         MX_SS                        9.242
-    'January, 2018'    AD         MX_SS                       54.261
+    'January, 2018'    NA         MX_SS                        9.676
+    'January, 2018'    AD         MX_SS                       54.207
     'February, 2018'   NA         MX_NE                       18.683
-    'February, 2018'   NA         MX_SS                        8.165
-    'February, 2018'   AD         MX_SS                       47.700
+    'February, 2018'   NA         MX_SS                        8.557
+    'February, 2018'   AD         MX_SS                       47.696
     'March, 2018'      NA         MX_NE                       20.546
-    'March, 2018'      NA         MX_SS                        9.125
-    'March, 2018'      AD         MX_SS                       55.428
+    'March, 2018'      NA         MX_SS                        9.559
+    'March, 2018'      AD         MX_SS                       55.442
     'April, 2018'      NA         MX_NE                       19.554
-    'April, 2018'      NA         MX_SS                        8.728
-    'April, 2018'      AD         MX_SS                       52.367
+    'April, 2018'      NA         MX_SS                        9.148
+    'April, 2018'      AD         MX_SS                       52.372
     'May, 2018'        NA         MX_NE                       19.929
-    'May, 2018'        NA         MX_SS                        8.865
-    'May, 2018'        AD         MX_SS                       55.189
+    'May, 2018'        NA         MX_SS                        9.299
+    'May, 2018'        AD         MX_SS                       54.328
     'June, 2018'       NA         MX_NE                       18.764
-    'June, 2018'       NA         MX_SS                        8.206
-    'June, 2018'       AD         MX_SS                       53.406
+    'June, 2018'       NA         MX_SS                        8.626
+    'June, 2018'       AD         MX_SS                       53.415
     'July, 2018'       NA         MX_NE                       18.955
-    'July, 2018'       NA         MX_SS                        7.950
-    'July, 2018'       AD         MX_SS                       55.378
+    'July, 2018'       NA         MX_SS                        8.384
+    'July, 2018'       AD         MX_SS                       55.386
     'August, 2018'     NA         MX_NE                       18.775
-    'August, 2018'     NA         MX_SS                        8.033
-    'August, 2018'     AD         MX_SS                       53.845
+    'August, 2018'     NA         MX_SS                        8.467
+    'August, 2018'     AD         MX_SS                       53.667
     'September, 2018'  NA         MX_NE                       18.077
-    'September, 2018'  NA         MX_SS                        7.824
-    'September, 2018'  AD         MX_SS                       52.822
+    'September, 2018'  NA         MX_SS                        8.244
+    'September, 2018'  AD         MX_SS                       52.826
     'October, 2018'    NA         MX_NE                       18.816
-    'October, 2018'    NA         MX_SS                        7.856
-    'October, 2018'    AD         MX_SS                      122.329
+    'October, 2018'    NA         MX_SS                        8.289
+    'October, 2018'    AD         MX_SS                       53.523
     'November, 2018'   NA         MX_NE                       18.280
-    'November, 2018'   NA         MX_SS                        7.267
-    'November, 2018'   AD         MX_SS                      112.493
+    'November, 2018'   NA         MX_SS                        7.687
+    'November, 2018'   AD         MX_SS                       49.337
     'December, 2018'   NA         MX_NE                       18.966
-    'December, 2018'   NA         MX_SS                        7.058
-    'December, 2018'   AD         MX_SS                      119.873
+    'December, 2018'   NA         MX_SS                        7.492
+    'December, 2018'   AD         MX_SS                       50.516
     'January, 2019'    NA         MX_NE                       18.911
-    'January, 2019'    NA         MX_SS                        7.229
-    'January, 2019'    AD         MX_SS                      112.941
+    'January, 2019'    NA         MX_SS                        7.663
+    'January, 2019'    AD         MX_SS                       52.595
     'February, 2019'   NA         MX_NE                       16.920
-    'February, 2019'   NA         MX_SS                        6.696
-    'February, 2019'   AD         MX_SS                      108.323
+    'February, 2019'   NA         MX_SS                        7.088
+    'February, 2019'   AD         MX_SS                       45.669
     'March, 2019'      NA         MX_NE                       18.670
-    'March, 2019'      NA         MX_SS                        6.952
-    'March, 2019'      AD         MX_SS                      120.173
+    'March, 2019'      NA         MX_SS                        7.386
+    'March, 2019'      AD         MX_SS                       49.533
     'April, 2019'      NA         MX_NE                       17.839
-    'April, 2019'      NA         MX_SS                        6.480
-    'April, 2019'      AD         MX_SS                      115.526
+    'April, 2019'      NA         MX_SS                        6.899
+    'April, 2019'      AD         MX_SS                       47.377
     'May, 2019'        NA         MX_NE                       18.583
-    'May, 2019'        NA         MX_SS                        6.677
-    'May, 2019'        AD         MX_SS                      119.977
+    'May, 2019'        NA         MX_SS                        7.111
+    'May, 2019'        AD         MX_SS                       47.731
+    'June, 2019'       NA         MX_NE                       18.368
+    'June, 2019'       NA         MX_SS                        6.551
+    'June, 2019'       AD         MX_SS                       47.433
+    'July, 2019'       NA         MX_NE                       19.402
+    'July, 2019'       NA         MX_SS                        7.864
+    'July, 2019'       AD         MX_SS                       51.561
+    'August, 2019'     NA         MX_NE                       19.932
+    'August, 2019'     NA         MX_SS                        7.626
+    'August, 2019'     AD         MX_SS                       51.323
+    'September, 2019'  NA         MX_NE                       19.199
+    'September, 2019'  NA         MX_SS                        7.417
+    'September, 2019'  AD         MX_SS                       48.877
+    'October, 2019'    NA         MX_NE                       19.981
+    'October, 2019'    NA         MX_SS                        7.691
+    'October, 2019'    AD         MX_SS                       48.276
+    'November, 2019'   NA         MX_NE                       19.372
+    'November, 2019'   NA         MX_SS                        7.465
+    'November, 2019'   AD         MX_SS                       48.833
+    'December, 2019'   NA         MX_NE                       19.682
+    'December, 2019'   NA         MX_SS                        7.636
+    'December, 2019'   AD         MX_SS                       47.924
+    'January, 2020'    NA         MX_NE                       19.765
+    'January, 2020'    NA         MX_SS                        7.569
+    'January, 2020'    AD         MX_SS                       47.174
+    'February, 2020'   NA         MX_NE                       18.378
+    'February, 2020'   NA         MX_SS                        7.041
+    'February, 2020'   AD         MX_SS                       41.867
+    'March, 2020'      NA         MX_NE                       19.623
+    'March, 2020'      NA         MX_SS                        7.197
+    'March, 2020'      AD         MX_SS                       46.995
+    'April, 2020'      NA         MX_NE                       18.810
+    'April, 2020'      NA         MX_SS                        9.646
+    'April, 2020'      AD         MX_SS                       44.256
+    'May, 2020'        NA         MX_NE                       19.287
+    'May, 2020'        NA         MX_SS                        9.368
+    'May, 2020'        AD         MX_SS                       44.425
+    'June, 2020'       NA         MX_NE                       18.269
+    'June, 2020'       NA         MX_SS                       10.274
+    'June, 2020'       AD         MX_SS                       42.129
+    'July, 2020'       NA         MX_NE                       17.966
+    'July, 2020'       NA         MX_SS                       11.261
+    'July, 2020'       AD         MX_SS                       45.621
+    'August, 2020'     NA         MX_NE                       17.479
+    'August, 2020'     NA         MX_SS                       11.828
+    'August, 2020'     AD         MX_SS                       46.221
+    'September, 2020'  NA         MX_NE                       16.826
+    'September, 2020'  NA         MX_SS                       11.206
+    'September, 2020'  AD         MX_SS                       43.063
+    'October, 2020'    NA         MX_NE                       17.317
+    'October, 2020'    NA         MX_SS                       11.221
+    'October, 2020'    AD         MX_SS                       41.789
+    'November, 2020'   NA         MX_NE                       14.924
+    'November, 2020'   NA         MX_SS                       11.440
+    'November, 2020'   AD         MX_SS                       40.652
+    'December, 2020'   NA         MX_NE                       15.320
+    'December, 2020'   NA         MX_SS                       13.190
+    'December, 2020'   AD         MX_SS                       39.147
+    'January, 2021'    NA         MX_NE                       15.589
+    'January, 2021'    NA         MX_SS                       13.618
+    'January, 2021'    AD         MX_SS                       37.945
+    'February, 2021'   NA         MX_NE                       14.082
+    'February, 2021'   NA         MX_SS                       12.551
+    'February, 2021'   AD         MX_SS                       32.409
+    'March, 2021'      NA         MX_NE                       16.006
+    'March, 2021'      NA         MX_SS                       13.376
+    'March, 2021'      AD         MX_SS                       35.080
+    'April, 2021'      NA         MX_NE                       15.228
+    'April, 2021'      NA         MX_SS                       12.311
+    'April, 2021'      AD         MX_SS                       33.411
+    'May, 2021'        NA         MX_NE                       15.240
+    'May, 2021'        NA         MX_SS                       12.852
+    'May, 2021'        AD         MX_SS                       37.646
+    'June, 2021'       NA         MX_NE                       14.563
+    'June, 2021'       NA         MX_SS                       12.639
+    'June, 2021'       AD         MX_SS                       38.719
+    'July, 2021'       NA         MX_NE                       14.926
+    'July, 2021'       NA         MX_SS                       12.945
+    'July, 2021'       AD         MX_SS                       40.137
+    'August, 2021'     NA         MX_NE                       15.066
+    'August, 2021'     NA         MX_SS                       12.879
+    'August, 2021'     AD         MX_SS                       43.145
+    'September, 2021'  NA         MX_NE                       14.895
+    'September, 2021'  NA         MX_SS                       12.583
+    'September, 2021'  AD         MX_SS                       42.724
+    'October, 2021'    NA         MX_NE                       15.215
+    'October, 2021'    NA         MX_SS                       14.027
+    'October, 2021'    AD         MX_SS                       40.299
+    'November, 2021'   NA         MX_NE                       14.765
+    'November, 2021'   NA         MX_SS                       13.719
+    'November, 2021'   AD         MX_SS                       38.800
+    'December, 2021'   NA         MX_NE                       15.059
+    'December, 2021'   NA         MX_SS                       14.597
+    'December, 2021'   AD         MX_SS                       44.388
+    'January, 2022'    NA         MX_NE                       14.927
+    'January, 2022'    NA         MX_SS                       14.742
+    'January, 2022'    AD         MX_SS                       47.838
+    'February, 2022'   NA         MX_NE                       13.340
+    'February, 2022'   NA         MX_SS                       13.472
+    'February, 2022'   AD         MX_SS                       42.772
+    'March, 2022'      NA         MX_NE                       14.685
+    'March, 2022'      NA         MX_SS                       15.369
+    'March, 2022'      AD         MX_SS                       50.054
+    'April, 2022'      NA         MX_NE                       13.956
+    'April, 2022'      NA         MX_SS                       14.795
+    'April, 2022'      AD         MX_SS                       45.762
+    'May, 2022'        NA         MX_NE                       14.457
+    'May, 2022'        NA         MX_SS                       15.178
+    'May, 2022'        AD         MX_SS                       48.201
+    'June, 2022'       NA         MX_NE                       14.104
+    'June, 2022'       NA         MX_SS                       14.793
+    'June, 2022'       AD         MX_SS                       47.809
+    'July, 2022'       NA         MX_NE                       14.500
+    'July, 2022'       NA         MX_SS                       15.774
+    'July, 2022'       AD         MX_SS                       51.277
+    'August, 2022'     NA         MX_NE                       14.330
+    'August, 2022'     NA         MX_SS                       15.777
+    'August, 2022'     AD         MX_SS                       49.967
+    'September, 2022'  NA         MX_NE                       14.118
+    'September, 2022'  NA         MX_SS                       15.241
+    'September, 2022'  AD         MX_SS                       45.841
+    'October, 2022'    NA         MX_NE                       14.590
+    'October, 2022'    NA         MX_SS                       15.677
+    'October, 2022'    AD         MX_SS                       47.466
+    'November, 2022'   NA         MX_NE                       14.223
+    'November, 2022'   NA         MX_SS                       14.978
+    'November, 2022'   AD         MX_SS                       47.518
+    'December, 2022'   NA         MX_NE                       14.563
+    'December, 2022'   NA         MX_SS                       15.792
+    'December, 2022'   AD         MX_SS                       50.319
+    'January, 2023'    NA         MX_NE                       14.678
+    'January, 2023'    NA         MX_SS                       16.267
+    'January, 2023'    AD         MX_SS                       49.971
+    'February, 2023'   NA         MX_NE                       13.090
+    'February, 2023'   NA         MX_SS                       14.471
+    'February, 2023'   AD         MX_SS                       44.688
+    'March, 2023'      NA         MX_NE                       14.647
+    'March, 2023'      NA         MX_SS                       17.015
+    'March, 2023'      AD         MX_SS                       46.538
+    'April, 2023'      NA         MX_NE                       14.160
+    'April, 2023'      NA         MX_SS                       16.143
+    'April, 2023'      AD         MX_SS                       48.572
+    'May, 2023'        NA         MX_NE                       14.424
+    'May, 2023'        NA         MX_SS                       16.212
+    'May, 2023'        AD         MX_SS                       48.717
+    'June, 2023'       NA         MX_NE                       13.847
+    'June, 2023'       NA         MX_SS                       15.489
+    'June, 2023'       AD         MX_SS                       44.327
+    'July, 2023'       NA         MX_NE                       14.335
+    'July, 2023'       NA         MX_SS                       16.103
+    'July, 2023'       AD         MX_SS                       39.603
+    'August, 2023'     NA         MX_NE                       14.279
+    'August, 2023'     NA         MX_SS                       16.130
+    'August, 2023'     AD         MX_SS                       39.421
+    'September, 2023'  NA         MX_NE                       13.527
+    'September, 2023'  NA         MX_SS                       16.036
+    'September, 2023'  AD         MX_SS                       38.172
+    'October, 2023'    NA         MX_NE                       13.966
+    'October, 2023'    NA         MX_SS                       17.528
+    'October, 2023'    AD         MX_SS                       38.107
+    'November, 2023'   NA         MX_NE                       13.710
+    'November, 2023'   NA         MX_SS                       16.994
+    'November, 2023'   AD         MX_SS                       37.645
+    'December, 2023'   NA         MX_NE                       14.044
+    'December, 2023'   NA         MX_SS                       17.161
+    'December, 2023'   AD         MX_SS                       40.366
+    'January, 2024'    NA         MX_NE                       14.263
+    'January, 2024'    NA         MX_SS                       17.527
+    'January, 2024'    AD         MX_SS                       40.561
+    'February, 2024'   NA         MX_NE                       12.990
+    'February, 2024'   NA         MX_SS                       17.438
+    'February, 2024'   AD         MX_SS                       38.047
+    'March, 2024'      NA         MX_NE                       13.724
+    'March, 2024'      NA         MX_SS                       19.662
+    'March, 2024'      AD         MX_SS                       40.794
+    'April, 2024'      NA         MX_NE                       13.076
+    'April, 2024'      NA         MX_SS                       20.206
+    'April, 2024'      AD         MX_SS                       36.951
+    'May, 2024'        NA         MX_NE                       13.159
+    'May, 2024'        NA         MX_SS                       20.878
+    'May, 2024'        AD         MX_SS                       37.325
+    'June, 2024'       NA         MX_NE                       12.504
+    'June, 2024'       NA         MX_SS                       21.019
+    'June, 2024'       AD         MX_SS                       37.455
     ;
  
 Composite table:
@@ -793,9 +976,19 @@ Composite table:
     2016  MX_NE                            316.453
     2016  MX_SS                            989.475
     2017  MX_NE                            255.212
-    2017  MX_SS                            860.986
+    2017  MX_SS                            859.422
     2018  MX_NE                            230.244
-    2018  MX_SS                            933.408
+    2018  MX_SS                            736.144
+    2019  MX_NE                            226.858
+    2019  MX_SS                            675.530
+    2020  MX_NE                            213.965
+    2020  MX_SS                            644.580
+    2021  MX_NE                            180.634
+    2021  MX_SS                            622.798
+    2022  MX_NE                            171.793
+    2022  MX_SS                            756.414
+    2023  MX_NE                            168.708
+    2023  MX_SS                            711.675
     ;
  
 Composite table:
@@ -818,7 +1011,12 @@ Composite table:
     2014                                1603.388
     2015                                1484.388
     2016                                1305.929
-    2017                                1116.198
-    2018                                1163.652
+    2017                                1114.634
+    2018                                 966.388
+    2019                                 902.388
+    2020                                 858.545
+    2021                                 803.432
+    2022                                 928.207
+    2023                                 880.383
     ;
  

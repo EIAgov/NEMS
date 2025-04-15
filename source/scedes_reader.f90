@@ -1,0 +1,137 @@
+!module scedes_reader
+!use FM
+!      IMPLICIT NONE
+!      INTEGER PLACE
+!      INTEger VVALUE
+!      CHARACTER FILENM*18
+!      INTEGER MAXRTOPTS,NUMRTOPTS
+!      PARAMETER (MAXRTOPTS=220)
+!      CHARACTER*8 RTOPTS(MAXRTOPTS),RESTOFLINE(MAXRTOPTS)*80
+!      INTEGER RTOPTSV(MAXRTOPTS),OPT_USED(MAXRTOPTS),IFOUND
+!      LOGICAL READYET/.FALSE./
+!      LOGICAL NEW,FINDRTO
+!      COMMON /RTOOPTIONS/ RTOPTS,RTOPTSV,RESTOFLINE,NUMRTOPTS 
+!contains
+
+Integer FUNCTION RTOVALUE(RTONAME,RTODEFVAL)
+IMPLICIT NONE
+
+Integer, Intent(IN):: RTODEFVAL
+CHARACTER*8, Intent(IN):: RTONAME
+
+INTEGER PLACE
+INTEGER VVALUE
+CHARACTER FILENM*18
+INTEGER MAXRTOPTS,NUMRTOPTS
+PARAMETER (MAXRTOPTS=220)
+CHARACTER*8 RTOPTS(MAXRTOPTS),RESTOFLINE(MAXRTOPTS)*80
+INTEGER RTOPTSV(MAXRTOPTS),OPT_USED(MAXRTOPTS),IFOUND
+LOGICAL READYET/.FALSE./
+LOGICAL NEW,FINDRTO
+COMMON /RTOOPTIONS/ RTOPTS,RTOPTSV,RESTOFLINE,NUMRTOPTS 
+
+INTEGER      FILE_MGR
+EXTERNAL     FILE_MGR
+
+INTEGER 	 I
+
+! ---------------------------------------------------------------*
+
+!   THIS FUNCTION SEARCHES THE MOREOPT FILE FOR THE
+!   RUN TIME OPTION (RTO) NAME SET IN THE FIRST FUNCTION INVOCATION,
+!   AND RETURNS THE VALUE SET FOR THE RUN.
+!   Used for obtaining integer values from options in the scedes file via the
+!   moreopt options file.
+! IF RTONAME NOT FOUND, THE
+!   FUNCTION RETURNS the default value.
+
+! ---------------------------------------------------------------*
+
+
+      FINDRTO=.FALSE.
+      IF (.NOT. READYET) THEN
+         READYET=.TRUE.
+         NEW=.FALSE.
+         FILENM = 'MOREOPT'
+         place=FILE_MGR('O',FILENM,NEW) 
+         NUMRTOPTS=1
+         WRITE(6,*) '##  Moreopt Runtime Options File'
+         WRITE(6,*) '##  Name    Value and  Description or String Value'
+         WRITE(6,*) '##========  ============================================================'
+10       CONTINUE
+         READ(PLACE,900,END=100)RTOPTS(NUMRTOPTS),RTOPTSV(NUMRTOPTS),RESTOFLINE(NUMRTOPTS)
+900      FORMAT(A8,1X,I4,1X,A)
+         WRITE(6,'(1X,A2,A8,I8,1x,A)')'##',RTOPTS(NUMRTOPTS),RTOPTSV(NUMRTOPTS),TRIM(RESTOFLINE(NUMRTOPTS))
+         NUMRTOPTS=NUMRTOPTS+1
+         OPT_USED(NUMRTOPTS)=0
+         IF(NUMRTOPTS.LE.MAXRTOPTS) GOTO 10
+100      NUMRTOPTS=NUMRTOPTS-1
+         PLACE = FILE_MGR('C',FILENM,NEW)
+      ENDIF
+      FINDRTO=.FALSE.
+      IFOUND=0
+      DO I=1,NUMRTOPTS
+         IF (RTONAME .EQ. RTOPTS(I)) THEN
+             RTOVALUE = RTOPTSV(I)
+             FINDRTO = .TRUE.
+             OPT_USED(I)=OPT_USED(I)+1
+             IFOUND=I
+             GOTO 101
+         ENDIF
+      ENDDO
+101   CONTINUE
+      IF(FINDRTO) THEN
+         IF(OPT_USED(IFOUND).EQ.1) &
+         WRITE(6,*) '##RUN TIME OPTION ',RTONAME,' SET TO ',RTOPTSV(IFOUND)
+      ELSE
+         WRITE(6,*) '##RUN TIME OPTION ',RTONAME,' NOT FOUND IN LIST'
+         RTOVALUE = RTODEFVAL
+      ENDIF
+      End Function RTOVALUE
+!      End Module
+
+!------------ RTOSTRING()------------------
+      SUBROUTINE RTOSTRING(RTONAME,RTOVALUE)
+
+! ---------------------------------------------------------------*
+
+!   THIS SUBROUTINE SEARCHES THE MOREOPT FILE FOR THE RUN TIME OPTION (RTO) NAME SENT
+!   AS THE FIRST ARGUMENT RETURNS THE VALUE, WHICH IS TECHNICALLY IN THE DESCRIPTION FIELD
+!   Used for obtaining string values from the scedes file.
+! ---------------------------------------------------------------*
+
+      IMPLICIT NONE
+      CHARACTER*(*) RTOVALUE
+      CHARACTER RTONAME*8
+      INTEGER MAXRTOPTS,NUMRTOPTS,I
+      PARAMETER (MAXRTOPTS=220)
+      CHARACTER*8 RTOPTS(MAXRTOPTS),RESTOFLINE(MAXRTOPTS)*80
+      INTEGER RTOPTSV(MAXRTOPTS),OPT_USED(MAXRTOPTS),IFOUND
+
+      LOGICAL NEW,FINDRTO
+
+      COMMON /RTOOPTIONS/ RTOPTS,RTOPTSV,RESTOFLINE,NUMRTOPTS
+      FINDRTO=.FALSE.
+      IFOUND=0
+
+
+      RTOVALUE=' '
+      DO I=1,NUMRTOPTS
+         IF (RTONAME .EQ. RTOPTS(I)) THEN
+             RTOVALUE = RESTOFLINE(I)
+             FINDRTO = .TRUE.
+             OPT_USED(I)=OPT_USED(I)+1
+             IFOUND=I
+             EXIT
+         ENDIF
+      ENDDO
+      IF(FINDRTO) THEN
+         IF(OPT_USED(IFOUND).EQ.1) &
+         WRITE(6,'(4a)') '##RUN TIME OPTION ',RTONAME,' SET TO ',trim(RTOVALUE)
+      ELSE
+         WRITE(6,'(4a)') '##RUN TIME OPTION ',RTONAME,' NOT FOUND IN LIST'
+
+      ENDIF
+      RETURN
+      END
+!-----------------end of RTOSTRING()-----------------

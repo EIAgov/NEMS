@@ -114,9 +114,11 @@
 
       REAL UCAPNGU(MNUMNR,MNUMYR)   !  96 Util Natural Gas Steam Capacity from Coal Steam by NERC
       REAL UCAPNGN(MNUMNR,MNUMYR)   !  97 NonUtil Natural Gas Steam Capacity from Coal Steam by NERC
+      REAL UCAPNGCF(MNUMNR,MNUMYR)  ! 198 Subset of Natural Gas conversions that are coal/gas cofiring
 
       REAL URETNGU(MNUMNR,MNUMYR)   !  98 Retirements Coal to NG by NERC
       REAL UGENNG(MNUMNR,MNUMYR)    !  99 Total Coal to NG generation by NERC
+      REAL UGENNGCF(MNUMNR,MNUMYR)  ! 199 Generation from subset of conversions that are coal/gas cofiring
  
       REAL UCAPOCU(MNUMNR,MNUMYR)   ! 100 Util Other New Coal Capacity by NERC
       REAL UCAPOCN(MNUMNR,MNUMYR)   ! 101 NonUtil Other New Coal Capacity by NERC
@@ -263,9 +265,9 @@
                      UCAPSSU, UCAPSSN, URETSSU, UGENSS, UCAPS2U, UCAPS2N, URETS2U, UGENS2, &
                      UCAPPTU, UCAPPTN, URETPTU, UGENPT, UCAPINU, UCAPINN, URETINU, UGENIN, UCAPWLR, &
                      UNRVCOL, UNRVCCY, UNRVSTM, UNRVNUC,UNCPCOL, UNCPCCY, UNCPSTM, UNCPNUC, &
-                     UGENSQ_ALT, UGENIS_ALT, UGENPQ_ALT, UGENCS_ALT, UGENA2_ALT
+                     UGENSQ_ALT, UGENIS_ALT, UGENPQ_ALT, UGENCS_ALT, UGENA2_ALT, UCAPNGCF, UGENNGCF
 
 !   Equivalence for FILER used for data storage
 
-      REAL UDATDAT(MNUMYR*(197*MNUMNR))
+      REAL UDATDAT(MNUMYR*(199*MNUMNR))
       EQUIVALENCE (UDATDAT,UCAPCSU)

@@ -237,6 +237,7 @@
       REAL PELLTRSN(MNUMNR,MNUMYR) !   lighting RS
       REAL PELOTRSN(MNUMNR,MNUMYR) !   other RS
       REAL PELH2RSN(MNUMNR,MNUMYR) !   secondary heating RS
+      REAL PELVHRSN(MNUMNR,MNUMYR) !   vehicle RS
       REAL PELSHCMN(MNUMNR,MNUMYR) !   space heating CM
       REAL PELSCCMN(MNUMNR,MNUMYR) !   space cooling CM
       REAL PELWHCMN(MNUMNR,MNUMYR) !   water heating CM
@@ -247,10 +248,16 @@
       REAL PELOPCMN(MNUMNR,MNUMYR) !   office equipment PCs CM
       REAL PELONCMN(MNUMNR,MNUMYR) !   office equipment, nonPCs CM8
       REAL PELOTCMN(MNUMNR,MNUMYR) !   other commercial
+      REAL PELP2CMN(MNUMNR,MNUMYR) !   vehicle CM – public L2 
+      REAL PELPFCMN(MNUMNR,MNUMYR) !   vehicle CM – public DCFC
+      REAL PELSBCMN(MNUMNR,MNUMYR) !   vehicle CM – school bus
+      REAL PELTBCMN(MNUMNR,MNUMYR) !   vehicle CM – transit bus
+      REAL PELIBCMN(MNUMNR,MNUMYR) !   vehicle CM – intercity bus + CLT + freight (fleet)
+      REAL PELFNCMN(MNUMNR,MNUMYR) !   vehicle CM – freight truck non-fleet
       REAL PELINPN(MNUMNR,MNUMYR) !   industrial primary
       REAL PELINSN(MNUMNR,MNUMYR) !   industrial shift
       REAL PELINMN(MNUMNR,MNUMYR) !   industrial miscellaneous
-      REAL PELVHTRN(MNUMNR,MNUMYR) !   vehicle TR
+      REAL PELINH2EN(MNUMNR,MNUMYR) !   industrial hydrogen
       REAL PELLTTRN(MNUMNR,MNUMYR) !   light trains TR
 
 ! temporary - average competitive prices by census region - not in restart right now!
@@ -262,9 +269,12 @@
 
       COMMON/EFPOUT2/ &
         PELSHRSN,PELCLRSN,PELWHRSN,PELCKRSN,PELCDRSN,PELRFRSN, &
-        PELFZRSN,PELLTRSN,PELOTRSN,PELH2RSN,PELSHCMN,PELSCCMN, &
+        PELFZRSN,PELLTRSN,PELOTRSN,PELH2RSN,PELVHRSN,&
+        PELSHCMN,PELSCCMN, &
         PELWHCMN,PELVTCMN,PELCKCMN,PELLTCMN,PELRFCMN,PELOPCMN, &
-        PELONCMN,PELOTCMN,PELINPN,PELINSN,PELINMN,PELLTTRN,PELVHTRN, &
+        PELONCMN,PELOTCMN,&
+        PELP2CMN,PELPFCMN,PELSBCMN,PELTBCMN,PELIBCMN,PELFNCMN,&
+        PELINPN,PELINSN,PELINMN,PELINH2EN,PELLTTRN,&
         PECRSNR,PECCMNR,PECTRNR,PECINNR,PECASNR,PECRLNR, &
         PECMENR,PECFXNR,PECTXNR,PECTLNR, &
         PECRS,PECCM,PECTR,PECIN,PECAS

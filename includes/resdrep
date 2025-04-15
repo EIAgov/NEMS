@@ -1,7 +1,5 @@
-
-
 !FILE NAME:      RESDREP
-!DATE MODIFIED:  September 21, 2022
+!DATE MODIFIED:  July 9, 2024
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
 !                Residential Demand Module (RDM)
 !DEFINITION:     RDM parameters and COMMON blocks
@@ -10,16 +8,17 @@
 !SPECIAL CONSTRAINTS:  None
 !ORGANIZATION OF DATA:  Residential benchmarking controls listed first
 !SOURCES:        Not applicable
+!COMMENT:        Added appliance beta writeout section 
 
 !Set parameters
   INTEGER RECSYear
-  PARAMETER (RECSYear=2015)
+  PARAMETER (RECSYear=2020)
   INTEGER NUMHDDYR,NUMCDDYR
   PARAMETER (NUMHDDYR=ENDYR)
   PARAMETER (NUMCDDYR=ENDYR)
-  INTEGER NTEK
-  PARAMETER (NTEK=3)
-
+  INTEGER nTek
+  PARAMETER (nTek=3)                !Number of distributed generation technologies as characterized in RSGENTK.txt inputs
+  
 !BENCHMARKING CONTROL-------------------------------------------------------------------------------------------------
 !Parameters for historical SEDS/MER, and short-term (STEO) benchmarking control
   INTEGER LastSEDSyr                !Last year of SEDS data, when benchmarking we assume MER data shared to
@@ -38,10 +37,10 @@
 
   INTEGER LastSTEOYr                !Last year for benchmarking to STEO, after which the STEO benchmarking for
                                     ! fuels 1,2 (natural gas and electric) is discontinued. Other fuels get STEO adjustment.
-  PARAMETER (LastSTEOYr=2023)       !This year is often 1 less than what STEO projects.
+  PARAMETER (LastSTEOYr=2024)       !This year is often 1 less than what STEO projects.
 
   INTEGER LastSTEOYrAvail           !Last projection year for STEO through which data will be read from RSSTEO.txt
-  PARAMETER (LastSTEOYrAvail=2024)  !The RSSTEO.txt input file is populated with STEO data through this year.
+  PARAMETER (LastSTEOYrAvail=2025)  !The RSSTEO.txt input file is populated with STEO data through this year.
 
   REAL*4 BENCHALLYRS                !With UEC adjustments for SEDS/MER, benchmarking of electric and gas matches
                                     ! last MER historical year.
@@ -54,6 +53,14 @@
   INTEGER GLOBALBENCHON             !Setting this to 0.0 turns off ALL SEDS/MER/STEO benchmarking.
                                     ! Intended to be used for testing only.
   PARAMETER (GLOBALBENCHON=1)       ! =1 == benchmarking on == normal model usage
+  
+!Appliance Beta Writeout Controls--------------------------------------------------------------------------------------
+  
+  
+  INTEGER ApplianceBetaSwitch
+  PARAMETER (ApplianceBetaSwitch=0) !Set to one to turn on the writeout used for appliance betas
+  INTEGER ApplianceBetaEndYr
+  PARAMETER (ApplianceBetaEndYr=2024) !Writeouts start at RECSYr+1, and go through this year. Likely should be the most recent year of available shipment data. 
 !---------------------------------------------------------------------------------------------------------------------
 
   REAL RSEH(MNUMYR,3)       !Existing Housing (single-family, multifamily, mobile)

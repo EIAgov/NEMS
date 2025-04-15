@@ -1,15 +1,13 @@
 !  $Header: N:/default/includes/RCS/ECP_NUC
 !
-      INTEGER*4 MAX_NUC    ! Maximum Number of Existing Nuclear Units + MNUMNR * 2 New Units
-      PARAMETER(MAX_NUC    = 900)
 !
       INTEGER ECP_NUC_SIZE
       PARAMETER (ECP_NUC_SIZE =  3 * 4                               + &
-                                15 * 4 * MAX_NUC                     + &
-                                 1 * 4 * MNUMNR  * MAX_NUC           + &
-                                 2 * 4 * ECP_D_XPH * MAX_NUC           + &
-                                 1 * 4 * ECP_D_FPH * MAX_NUC           + &
-                                 1 * 4 * ECP_D_MSP * MAX_NUC           + &
+                                15 * 4 * MAXNUC                     + &
+                                 1 * 4 * MNUMNR  * MAXNUC           + &
+                                 2 * 4 * ECP_D_XPH * MAXNUC           + &
+                                 1 * 4 * ECP_D_FPH * MAXNUC           + &
+                                 1 * 4 * ECP_D_MSP * MAXNUC           + &
                                  1 * 4 * EMM_D_GRP                     + &
                                  2 * 4 * MNUMNR                      + &
                                  1 * MNUMNR * EFD_D_PROV               + &
@@ -25,29 +23,29 @@
       INTEGER*4   UNUC_CGRP(WPLT_D_REC)                 ! Nuclear Group each Plant Record Belongs to
       INTEGER*4   UNUC_WGRP(EMM_D_GRP)                  ! Nuclear Group each Initial Plant Group (W_IGRP) Belongs to
       INTEGER*4   NUM_NUC                             ! Number of Nuclear Units
-      REAL*4      ENUC_RG(MNUMNR,MAX_NUC)             ! Share of Nuclear unit owned by each EMM Region
-      REAL*4      ENUC_SP_CAP_FAC(ECP_D_MSP,MAX_NUC)    ! Ratio of Average Seasonal Capacity to Summer Capacity
-      INTEGER*4   ENUC_GRP(MAX_NUC)                   ! Plant Group Number
-      INTEGER*4   ENUC_IGRP(MAX_NUC)                  ! Initial Plant Group Number
-      REAL*4      ENUC_RVAL(MAX_NUC)                  ! Profit Margin in Previous Forecast Year
-      REAL*4      ENUC_CAP(ECP_D_XPH,MAX_NUC)           ! Capacity
-      INTEGER*4   ENUC_ECP(MAX_NUC)                   ! ECP Type
-      INTEGER*4   ENUC_FREC(MAX_NUC)                  ! First Record for Each Nuclear Group
+      REAL*4      ENUC_RG(MNUMNR,MAXNUC)             ! Share of Nuclear unit owned by each EMM Region
+      REAL*4      ENUC_SP_CAP_FAC(ECP_D_MSP,MAXNUC)    ! Ratio of Average Seasonal Capacity to Summer Capacity
+      INTEGER*4   ENUC_GRP(MAXNUC)                   ! Plant Group Number
+      INTEGER*4   ENUC_IGRP(MAXNUC)                  ! Initial Plant Group Number
+      REAL*4      ENUC_RVAL(MAXNUC)                  ! Profit Margin in Previous Forecast Year
+      REAL*4      ENUC_CAP(ECP_D_XPH,MAXNUC)           ! Capacity
+      INTEGER*4   ENUC_ECP(MAXNUC)                   ! ECP Type
+      INTEGER*4   ENUC_FREC(MAXNUC)                  ! First Record for Each Nuclear Group
       INTEGER*4   ENUC_NREC(WPLT_D_REC)                 ! Next Record for Each Nuclear Group
-      REAL*4      ENUC_VOM(MAX_NUC)                   ! Variable O&M
-      REAL*4      ENUC_PTC(MAX_NUC)                   ! Production Tax Credit
-      REAL*4      ENUC_FOM(ECP_D_FPH,MAX_NUC)           ! Fixed O&M
-      REAL*4      ENUC_CF(ECP_D_XPH,MAX_NUC)            ! Expected Utilization Rate
-      REAL*4      ENUC_HTRT(MAX_NUC)                  ! Heatrate
+      REAL*4      ENUC_VOM(MAXNUC)                   ! Variable O&M
+      REAL*4      ENUC_PTC(MAXNUC)                   ! Production Tax Credit
+      REAL*4      ENUC_FOM(ECP_D_FPH,MAXNUC)           ! Fixed O&M
+      REAL*4      ENUC_CF(ECP_D_XPH,MAXNUC)            ! Expected Utilization Rate
+      REAL*4      ENUC_HTRT(MAXNUC)                  ! Heatrate
       INTEGER*4   UNUC_SYR                            ! First Year for Retirement Decisions
       INTEGER*4   UNUC_RLT                            ! Nuclear Retirement Leadtime
-      INTEGER*4   ENUC_ASYR(MAX_NUC)                  ! Start Date for Nuclear Aging Retrofits
-      REAL*4      ENUC_ACST(MAX_NUC)                  ! Capital Cost ($/kw) for Nuclear Aging Retrofits
-      INTEGER*4   ENUC_ZECST(MAX_NUC)                 ! State/Region for Nuclear ZEC Subsidy (0=all regions w/State)
-      INTEGER*4   ENUC_ZECY1(MAX_NUC)                 ! Start Date for Nuclear ZEC Subsidy (0=no ZEC)
-      INTEGER*4   ENUC_ZECYR(MAX_NUC)                 ! End Date for Nuclear ZEC Subsidy (0=no ZEC)
-      INTEGER*4   ENUC_ZECRN(MAX_NUC)                 ! Renewal Years for Nuclear ZEC Subsidy (0=no ZEC)
-      INTEGER*4   ENUC_ZECNM(MAX_NUC)                 ! Number of Neg Rev Years for Nuclear ZEC Subsidy
+      INTEGER*4   ENUC_ASYR(MAXNUC)                  ! Start Date for Nuclear Aging Retrofits
+      REAL*4      ENUC_ACST(MAXNUC)                  ! Capital Cost ($/kw) for Nuclear Aging Retrofits
+      INTEGER*4   ENUC_ZECST(MAXNUC)                 ! State/Region for Nuclear ZEC Subsidy (0=all regions w/State)
+      INTEGER*4   ENUC_ZECY1(MAXNUC)                 ! Start Date for Nuclear ZEC Subsidy (0=no ZEC)
+      INTEGER*4   ENUC_ZECYR(MAXNUC)                 ! End Date for Nuclear ZEC Subsidy (0=no ZEC)
+      INTEGER*4   ENUC_ZECRN(MAXNUC)                 ! Renewal Years for Nuclear ZEC Subsidy (0=no ZEC)
+      INTEGER*4   ENUC_ZECNM(MAXNUC)                 ! Number of Neg Rev Years for Nuclear ZEC Subsidy
 
       real*4 NUC9013(MNUMNR),NUC9025(MNUMNR)
       CHARACTER*1 CHCOD(MNUMNR+EFD_D_PROV)  

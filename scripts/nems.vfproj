@@ -2,46 +2,52 @@
 <VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="11.0" ProjectIdGuid="{E7957D73-5C5C-4345-8723-5C43B4D67084}">
 	<Platforms>
 		<Platform Name="Win32"/>
-		<Platform Name="x64"/></Platforms>
+		<Platform Name="x64"/>
+	</Platforms>
 	<Configurations>
 		<Configuration Name="Release|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/ind.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/ind.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib"/>
-				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/></Configuration>
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
+			<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/ind.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/ind.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib"/>
+			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+		</Configuration>
 		<Configuration Name="Debug|Win32" OutputDirectory="." IntermediateDirectory="." DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile=".\BuildLog.htm">
-				<Tool Name="VFFortranCompilerTool" AdditionalOptions="/static" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories=".;M:\default\includes" SourceFileFormat="fileFormatFree" FPS4LDIOSpacing="true" DebugParameter="debugParameterAll" LocalVariableStorage="localStorageSave" ByteRECL="true" LocalSavedScalarsZero="true" ExtendSinglePrecisionConstants="true" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" WarnArgMismatch="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions=" /FORCE " OutputFile="nems.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="c:\xpressmp\lib;c:\oml\ver43c16x;m:\default\scripts;l:\main\dsa\aimms\sdk\src\aimmslink\vc\win32\release" IgnoreDefaultLibraryNames="libc" DelayLoadDLLs="aimmslink.dll" GenerateDebugInformation="true" GenerateMapFile="true" MapFileName="$(INTDIR)/nems.map" SubSystem="subSystemConsole" AdditionalDependencies="m:/default/objects/gdxf9glu.v1.4.obj m:/default/objects/gdxf9def.v1.3.obj kernel32.lib f90sql.lib OMLDB32.LIB OMLLIB32.LIB OMLLP32.LIB OMLWIN32.LIB OMLXPR32.LIB CRP32DLL.LIB user32.lib gdi32.lib xprs.lib gdxf9glu.lib aimmslink.lib delayimp.lib"/>
-				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/static" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories=".;M:\default\includes" SourceFileFormat="fileFormatFree" FPS4LDIOSpacing="true" DebugParameter="debugParameterAll" LocalVariableStorage="localStorageSave" ByteRECL="true" LocalSavedScalarsZero="true" ExtendSinglePrecisionConstants="true" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" WarnArgMismatch="true"/>
+			<Tool Name="VFLinkerTool" AdditionalOptions=" /FORCE " OutputFile="nems.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="c:\xpressmp\lib;c:\oml\ver43c16x;m:\default\scripts;l:\main\dsa\aimms\sdk\src\aimmslink\vc\win32\release" IgnoreDefaultLibraryNames="libc" DelayLoadDLLs="aimmslink.dll" GenerateDebugInformation="true" GenerateMapFile="true" MapFileName="$(INTDIR)/nems.map" SubSystem="subSystemConsole" AdditionalDependencies="m:/default/objects/gdxf9glu.v1.4.obj m:/default/objects/gdxf9def.v1.3.obj kernel32.lib f90sql.lib OMLDB32.LIB OMLLIB32.LIB OMLLP32.LIB OMLWIN32.LIB OMLXPR32.LIB CRP32DLL.LIB user32.lib gdi32.lib xprs.lib gdxf9glu.lib aimmslink.lib delayimp.lib"/>
+			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
 		<Configuration Name="Release|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/ind.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/ind.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib"/>
-				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/></Configuration>
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" CallingConvention="callConventionCVF" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/"/>
+			<Tool Name="VFLinkerTool" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/ind.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/ind.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib"/>
+			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+		</Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\source" IntermediateDirectory="..\source" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;$(TargetPath)" BuildLogFile=".\BuildLog.htm">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" HeapArrays="0" AdditionalIncludeDirectories="..\includes" SourceFileFormat="fileFormatFree" FPS4LDIOSpacing="true" DebugParameter="debugParameterAll" LocalVariableStorage="localStorageSave" ByteRECL="true" LocalSavedScalarsZero="true" ExtendSinglePrecisionConstants="true" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" WarnArgMismatch="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE" OutputFile="..\source\nems.exe" ShowProgress="linkProgressAll" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc" ManifestFile="$(TargetExt).intermediate.manifest" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetName).pdb" GenerateMapFile="true" MapFileName="nems.map" SubSystem="subSystemConsole" HeapReserveSize="10" HeapCommitSize="10" AdditionalDependencies="../source/gdxf9glu.obj  ../oml/oml64/omllib64.lib ../oml/oml64/omllp64.lib ../oml/oml64/omlwin64.lib ../oml/oml64/omlxpr64.lib ../oml/oml64/omldb64.lib ../scripts/aimmslink64.lib ../scripts/delayimp64.lib ../scripts/libfsqlite.lib "/>
-				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="clean_up.bat"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" HeapArrays="0" AdditionalIncludeDirectories="..\includes" SourceFileFormat="fileFormatFree" FPS4LDIOSpacing="true" DebugParameter="debugParameterAll" LocalVariableStorage="localStorageSave" ByteRECL="true" LocalSavedScalarsZero="true" ExtendSinglePrecisionConstants="true" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" WarnArgMismatch="true"/>
+			<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE" OutputFile="..\source\nems.exe" ShowProgress="linkProgressAll" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc" ManifestFile="$(TargetExt).intermediate.manifest" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetName).pdb" GenerateMapFile="true" MapFileName="nems.map" SubSystem="subSystemConsole" HeapReserveSize="10" HeapCommitSize="10" AdditionalDependencies="../source/gdxf9glu.obj  ../oml/oml64/omllib64.lib ../oml/oml64/omllp64.lib ../oml/oml64/omlwin64.lib ../oml/oml64/omlxpr64.lib ../oml/oml64/omldb64.lib ../scripts/aimmslink64.lib ../scripts/delayimp64.lib ../scripts/libfsqlite.lib "/>
+			<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(OUTDIR)/ind.tlb"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool" CommandLine="clean_up.bat"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+	</Configurations>
 	<Files>
 		<Filter Name="Include Files">
 		<File RelativePath="..\includes\123temp.dat"/>
@@ -161,6 +167,7 @@
 		<File RelativePath="..\includes\gdxiface"/>
 		<File RelativePath="..\includes\ghgrep"/>
 		<File RelativePath="..\includes\hmmblk"/>
+		<File RelativePath="..\includes\indepm"/>
 		<File RelativePath="..\includes\indout"/>
 		<File RelativePath="..\includes\indrep"/>
 		<File RelativePath="..\includes\intllocl"/>
@@ -318,14 +325,6 @@
 		<File RelativePath="..\input\cps.mdb.dsn"/>
 		<File RelativePath="..\input\cre8invest.gms"/>
 		<File RelativePath="..\input\cre8mps.gms"/>
-		<File RelativePath="..\input\ctscheck.gms"/>
-		<File RelativePath="..\input\ctsindat.gms"/>
-		<File RelativePath="..\input\ctsinput.gdx"/>
-		<File RelativePath="..\input\ctsmodel.gms"/>
-		<File RelativePath="..\input\ctsprep.gms"/>
-		<File RelativePath="..\input\ctsreprt.gms"/>
-		<File RelativePath="..\input\ctsshell.gms"/>
-		<File RelativePath="..\input\ctssoln.gdx"/>
 		<File RelativePath="..\input\demgetvars.txt"/>
 		<File RelativePath="..\input\demputvars.txt"/>
 		<File RelativePath="..\input\dict.txt"/>
@@ -379,7 +378,6 @@
 		<File RelativePath="..\input\indmotorx.xlsx"/>
 		<File RelativePath="..\input\indrun.txt"/>
 		<File RelativePath="..\input\indsteo.txt"/>
-		<File RelativePath="..\input\inp_cmm_input.txt"/>
 		<File RelativePath="..\input\intallin.xml"/>
 		<File RelativePath="..\input\intallin_hogs.xml"/>
 		<File RelativePath="..\input\intallin_hp.xml"/>
@@ -455,7 +453,6 @@
 		<File RelativePath="..\input\mchighlo.xls"/>
 		<File RelativePath="..\input\mcparms.txt"/>
 		<File RelativePath="..\input\mncnvrg.txt"/>
-		<File RelativePath="..\input\mnexsteo.txt"/>
 		<File RelativePath="..\input\mnfactorx.xlsx"/>
 		<File RelativePath="..\input\mnrisk.txt"/>
 		<File RelativePath="..\input\mpsshell.gms"/>
@@ -494,7 +491,6 @@
 		<File RelativePath="..\input\ngvartar.txt"/>
 		<File RelativePath="..\input\nugpipe.txt"/>
 		<File RelativePath="..\input\ogsdbdef.txt"/>
-		<File RelativePath="..\input\omsinput.wk1"/>
 		<File RelativePath="..\input\phasein.txt"/>
 		<File RelativePath="..\input\plancap.txt"/>
 		<File RelativePath="..\input\plntdaf.daf"/>
@@ -560,16 +556,12 @@
 		<File RelativePath="..\input\rsuec11.txt"/>
 		<File RelativePath="..\input\rsuecshl.txt"/>
 		<File RelativePath="..\input\salelb.txt"/>
-		<File RelativePath="..\input\sicgen.txt"/>
 		<File RelativePath="..\input\so2cntl.txt"/>
 		<File RelativePath="..\input\solarin.txt"/>
-		<File RelativePath="..\input\sprflrt.txt"/>
 		<File RelativePath="..\input\steolist.txt"/>
 		<File RelativePath="..\input\steovars.csv"/>
 		<File RelativePath="..\input\stifdata.txt"/>
 		<File RelativePath="..\input\tabreq.txt"/>
-		<File RelativePath="..\input\tcs45qin.txt"/>
-		<File RelativePath="..\input\temfctr.txt"/>
 		<File RelativePath="..\input\trnairx.xlsx"/>
 		<File RelativePath="..\input\trnfemx.xlsx"/>
 		<File RelativePath="..\input\trnhdvx.xlsx"/>
@@ -617,11 +609,11 @@
 		<Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
 		<File RelativePath="..\source\cio4wk1.f"/>
 		<File RelativePath="..\source\comm.f"/>
-		<File RelativePath="..\source\ctus.f"/>
 		<File RelativePath="..\source\dummyx.f"/>
 		<File RelativePath="..\source\dumpack.f"/>
 		<File RelativePath="..\source\ecp_row_col.f90"/>
 		<File RelativePath="..\source\efd_row_col.f90"/>
+		<File RelativePath="..\source\ephrts.f90"/>
 		<File RelativePath="..\source\epm.f"/>
 		<File RelativePath="..\source\filemgr.f"/>
 		<File RelativePath="..\source\filer.f"/>
@@ -659,16 +651,7 @@
 		<File RelativePath="..\source\unugs.f"/>
 		<File RelativePath="..\source\uread.f"/>
 		<File RelativePath="..\source\util.f"/>
-		<File RelativePath="..\source\wellak.f"/>
-		<File RelativePath="..\source\wellcost.f"/>
-		<File RelativePath="..\source\welldcf.f"/>
-		<File RelativePath="..\source\welleor.f"/>
-		<File RelativePath="..\source\wellexp.f"/>
-		<File RelativePath="..\source\wellimp.f"/>
-		<File RelativePath="..\source\welloff.f"/>
-		<File RelativePath="..\source\wellogs.f"/>
-		<File RelativePath="..\source\wellon.f"/>
-		<File RelativePath="..\source\wellrep.f"/>
-		<File RelativePath="..\source\wellugr.f"/>
-		<File RelativePath="..\source\world.f"/></Filter></Files>
-	<Globals/></VisualStudioProject>
+		<File RelativePath="..\source\world.f"/></Filter>
+	</Files>
+	<Globals/>
+</VisualStudioProject>

@@ -1,47 +1,71 @@
-!  $Header: m:/default/includes/RCS/rseff,v 1.6 2013/09/16 20:08:48 pkc Exp $
+!FILE NAME:      RSEFF
+!DATE MODIFIED:  September 7, 2023
+!USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
+!                Residential Demand Module (RDM)
+!DEFINITION:     RDM variable declarations and COMMON blocks
+!UNITS:          Unitless
+!DIMENSION:      Various
+!SPECIAL CONSTRAINTS:  None
+!ORGANIZATION OF DATA:  Not applicable
+!SOURCES:        Not applicable
+!COMMENT:        Added header, reorganized variables to align with other residential files, cleaned up formatting, and clarified comments
 
-! Cooking End Use Consumption for the Residential Module
-      REAL*4 CKCONWT(MNUMYR,3,MNUMCR-2,3),CKCONIN(MNUMYR,3,MNUMCR-2,3)
-! Cooling End Use Consumption for the Residential Module
-      REAL*4 COOLCNWT(MNUMYR,3,MNUMCR-2,3),COOLCNIN(MNUMYR,3,MNUMCR-2,3)
-! Washer End Use Consumption for the Residential Module
-      REAL*4 CSWCONWT(MNUMYR,MNUMCR-2,3),CSWCONIN(MNUMYR,MNUMCR-2,3)
-! End Use Consumption for the Residential Module
-      REAL*4 DRYCONWT(MNUMYR,2,MNUMCR-2,3),DRYCONIN(MNUMYR,2,MNUMCR-2,3)
-! Dish Washer End Use Consumption for the Residential Module
-      REAL*4 DSWCONWT(MNUMYR,MNUMCR-2,3),DSWCONIN(MNUMYR,MNUMCR-2,3)
-! Freezer End Use Consumption for the Residential Module
-      REAL*4 FRZCONWT(MNUMYR,MNUMCR-2,3),FRZCONIN(MNUMYR,MNUMCR-2,3)
-! Heating End Use Consumption for the Residential Module
-      REAL*4 HTRCONWT(MNUMYR,8,MNUMCR-2,3),HTRCONIN(MNUMYR,8,MNUMCR-2,3)
-! Hot Water Consumption for the Residential Module
-      REAL*4 H2OCONWT(MNUMYR,5,MNUMCR-2,3),H2OCONIN(MNUMYR,5,MNUMCR-2,3)
-! Refrigerator Consumption for the Residential Module
-      REAL*4 REFCONWT(MNUMYR,MNUMCR-2,3),REFCONIN(MNUMYR,MNUMCR-2,3)
-! Electric Appliance End Use Consumption for the Residential Module
-      REAL*4 APCONWT(MNUMYR,MNUMCR-2,3),APCONIN(MNUMYR,MNUMCR-2,3)
-! Other Appliance End Use Consumption for the Residential Module  ! added sw
-      REAL*4 APLCONWT(MNUMYR,3,MNUMCR-2,3),APLCONIN(MNUMYR,3,MNUMCR-2,3)
-! Furnace Fan End Use Consumption for the Residential Module
-      REAL*4 FANCONWT(MNUMYR,MNUMCR-2,3),FANCONIN(MNUMYR,MNUMCR-2,3)
-! Lighting End Use Consumption for the Residential Module
-      REAL*4 LTCONWT(MNUMYR,MNUMCR-2,3),LTCONIN(MNUMYR,MNUMCR-2,3)
-! PC End Use Consumption for the Residential Module
-      REAL*4 PCRCONWT(MNUMYR,MNUMCR-2,3),PCRCONIN(MNUMYR,MNUMCR-2,3)
-! Secondary Heat Consumption for the Residential Module
-      REAL*4 SHTCONWT(MNUMYR,7,MNUMCR-2,3),SHTCONIN(MNUMYR,7,MNUMCR-2,3)
-! TV End Use Consumption for the Residential Module
-      REAL*4 TVRCONWT(MNUMYR,MNUMCR-2,3),TVRCONIN(MNUMYR,MNUMCR-2,3)
+! Existing and new households
+    REAL*4 TOTALHOUSES(MNUMYR,3,MNUMCR-2)
 
-! Existing and New Households
-      REAL*4 TOTALHOUSES(MNUMYR,3,MNUMCR-2)
+! Space heating
+    REAL*4 HTRCONWT(MNUMYR,8,MNUMCR-2,3),HTRCONIN(MNUMYR,8,MNUMCR-2,3)
 
-      COMMON/RSEFF/CKCONWT,CKCONIN,COOLCNWT,COOLCNIN,CSWCONWT,CSWCONIN, &
-         DRYCONWT,DRYCONIN,DSWCONWT,DSWCONIN,FRZCONWT,FRZCONIN,HTRCONWT,HTRCONIN, &
-         H2OCONWT,H2OCONIN,REFCONWT,REFCONIN,APCONWT,APCONIN,aplconwt,aplconin, &
-         FANCONWT,FANCONIN, &
-         LTCONWT,LTCONIN,PCRCONWT,PCRCONIN,SHTCONWT,SHTCONIN,TVRCONWT,TVRCONIN, &
-         TOTALHOUSES
+! Space cooling
+    REAL*4 COOLCNWT(MNUMYR,3,MNUMCR-2,3),COOLCNIN(MNUMYR,3,MNUMCR-2,3)
 
-      REAL*4 EQ_RSEFF(2*3*MNUMYR*(MNUMCR-2)*(3+3+1+2+1+1+8+5+1+1+3+1+1+1+7+1) + MNUMYR*3*(MNUMCR-2))
-      EQUIVALENCE (EQ_RSEFF,CKCONWT)
+! Water heating
+    REAL*4 H2OCONWT(MNUMYR,5,MNUMCR-2,3),H2OCONIN(MNUMYR,5,MNUMCR-2,3)
+
+! Clothes washing
+    REAL*4 CSWCONWT(MNUMYR,MNUMCR-2,3),CSWCONIN(MNUMYR,MNUMCR-2,3)
+
+! Dishwashing
+    REAL*4 DSWCONWT(MNUMYR,MNUMCR-2,3),DSWCONIN(MNUMYR,MNUMCR-2,3)
+
+! Cooking
+    REAL*4 CKCONWT(MNUMYR,3,MNUMCR-2,3),CKCONIN(MNUMYR,3,MNUMCR-2,3)
+
+! Clothes drying
+    REAL*4 DRYCONWT(MNUMYR,2,MNUMCR-2,3),DRYCONIN(MNUMYR,2,MNUMCR-2,3)
+
+! Refrigeration
+    REAL*4 REFCONWT(MNUMYR,MNUMCR-2,3),REFCONIN(MNUMYR,MNUMCR-2,3)
+
+! Freezing
+    REAL*4 FRZCONWT(MNUMYR,MNUMCR-2,3),FRZCONIN(MNUMYR,MNUMCR-2,3)
+
+! Lighting
+    REAL*4 LTCONWT(MNUMYR,MNUMCR-2,3),LTCONIN(MNUMYR,MNUMCR-2,3)
+
+! Televisions and related equipment
+    REAL*4 TVRCONWT(MNUMYR,MNUMCR-2,3),TVRCONIN(MNUMYR,MNUMCR-2,3)
+
+! Computers and related equipment
+    REAL*4 PCRCONWT(MNUMYR,MNUMCR-2,3),PCRCONIN(MNUMYR,MNUMCR-2,3)
+
+! Furnace fans and boiler circulation pumps
+    REAL*4 FANCONWT(MNUMYR,MNUMCR-2,3),FANCONIN(MNUMYR,MNUMCR-2,3)
+
+! Miscellaneous electric loads (MELs) and other electric appliances
+    REAL*4 APCONWT(MNUMYR,MNUMCR-2,3),APCONIN(MNUMYR,MNUMCR-2,3)
+
+! Other appliances (natural gas, propane, distillate fuel oil/kerosene)
+    REAL*4 APLCONWT(MNUMYR,3,MNUMCR-2,3),APLCONIN(MNUMYR,3,MNUMCR-2,3)
+
+! Secondary space heating
+    REAL*4 SHTCONWT(MNUMYR,7,MNUMCR-2,3),SHTCONIN(MNUMYR,7,MNUMCR-2,3)
+
+COMMON/RSEFF/CKCONWT,CKCONIN,COOLCNWT,COOLCNIN,CSWCONWT,CSWCONIN, &
+   DRYCONWT,DRYCONIN,DSWCONWT,DSWCONIN,FRZCONWT,FRZCONIN,HTRCONWT,HTRCONIN, &
+   H2OCONWT,H2OCONIN,REFCONWT,REFCONIN,APCONWT,APCONIN,APLCONWT,APLCONIN, &
+   FANCONWT,FANCONIN,LTCONWT,LTCONIN,PCRCONWT,PCRCONIN,SHTCONWT,SHTCONIN, &
+   TVRCONWT,TVRCONIN,TOTALHOUSES
+
+REAL*4 EQ_RSEFF(2*3*MNUMYR*(MNUMCR-2)*(3+3+1+2+1+1+8+5+1+1+3+1+1+1+7+1) + MNUMYR*3*(MNUMCR-2))
+EQUIVALENCE (EQ_RSEFF,CKCONWT)

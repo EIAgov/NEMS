@@ -1,5 +1,6 @@
 ! $Header: m:/default/source/RCS/uldsm.f,v 1.79 2021/03/02 20:30:37 LC2 Exp $
 
+  
 !   uldsm.f contains the routines that make up the Load and Demand Side Management part of EMM
 !   all routines written by Adam Kreczko, ICF Resources, Inc.
 !       except DSMSHFT written by Pete Whitman
@@ -7,6 +8,9 @@
 !          and sort routines from public domain
 
       SUBROUTINE ELLDSM(LDSMmode)
+      
+      USE EPHRTS_SWTICHES
+      USE EPHRTS_FILE_UNIT_NUMBERS 
 
       IMPLICIT NONE
 
@@ -36,12 +40,13 @@
       include 'dsmtoefd'
       include 'dsmnemsc' !<< results of ldsm to be passed to the rest of nems
       include 'wrenew'    ! mapping vars for ecp and efd hours to group number
+      include 'eusprc'
 
       INTEGER*4 LDSMmode ! -1 - prepare data for ECP  every iteration
                          !  1 - prepare data for ECP only on first iteration
                          !  2 - process ECP solution
       LOGICAL WHOOPS ! ERROR FLAG
-      INTEGER TMPRNB,I,J,K,L,M,b1,b2,SECT,d,h
+      INTEGER TMPRNB,I,J,K,L,M,b1,b2,SECT,d,h,CNB
       INTEGER CPUTIME1,CPUTIME2,CPUTSTRT,CPUTSTOP
       REAL Qdem,Histdem
       REAL CensusValues(MNUMCR),demout
@@ -56,7 +61,16 @@
       real*8 pi,discr
       data pi/3.141592635/
       integer iprob
-
+      LOGICAL E_DEBUG_EXIST
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+         INQUIRE(FILE="EPHRTS_DEBUG_FILE.TXT", EXIST=E_DEBUG_EXIST)
+         IF (E_DEBUG_EXIST) THEN
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="OLD", POSITION="APPEND", ACTION="WRITE")
+         ELSE
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="NEW", ACTION="WRITE")
+         END IF
+      END IF
+      
 !     Initializing Variables
 
       WHOOPS = .FALSE.
@@ -86,8 +100,8 @@
          
 !        Get system load percentages from sqlitedatabase here 
          write(6,*)'Calling callsysload'
-         CALL CALLSYSLOAD    
-                  
+         CALL CALLSYSLOAD  
+               
 !
 !        The Call to DSMRST has moved to UTIL so that the Load Shape Definitions are Available Before RDCNTRL is Called
 !
@@ -113,7 +127,7 @@
 
          ULGRP = 0
          ULSEG = 0
-
+         
          DO RNB = 1,nNERCreg
 
 !           Do for each NERC region to be processed.
@@ -175,7 +189,9 @@
                WRITE(6,*)'<))) Control returned to UTIL'
                RETURN
             END IF
-
+            IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+               WRITE(unit_num_ephrts_debug_file,*) "CURIYR : ", CURIYR + 1989, " MAIN CALL FOR DSMHLM"
+            END IF
             CALL DSMHLM   ! Run procedures which develop system load
 
 ! New prints to get 864 load shapes out
@@ -217,7 +233,7 @@
 
       IF (((RNB.eq. 9).or. (RNB .eq. 20)) .and. ((CURIYR.eq. 21).or. (CURIYR .eq. 46)) .and. (fcrl .EQ. 1)) THEN
 !          WRITE(IMSG,*) RNB,CURIYR+1989,' Energy by EU'
-          DO J = 1, 25               ! neusgrp(icls)?  total number of end-uses
+          DO J = 1, MNEUGRP               ! neusgrp(icls)?  total number of end-uses
             DO L=1,EFD_D_MSP    ! seasons
                 WRITE(IMSG,13) RNB,CURIYR+1989,J,L, (efdblkserv(b1,L,RNB,J),b1=1,3)
             ENDDO
@@ -283,7 +299,9 @@
       WRITE(IMSG,*)'<))) Execution successfully completed'
       CALL MPTIM2(CPUTSTOP)
       WRITE(IMSG,*)'LDSM TOTAL CPUTIME = ',CPUTSTOP-CPUTSTRT
-
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+         CLOSE(unit_num_ephrts_debug_file)
+      END IF
       RETURN
       END
 
@@ -346,6 +364,8 @@
       END
 
       SUBROUTINE DSMECP1(WHOOPS)
+      USE EPHRTS_SWTICHES
+      USE EPHRTS_FILE_UNIT_NUMBERS 
 
       IMPLICIT NONE
 
@@ -378,9 +398,21 @@
       REAL CensusValues(MNUMCR),demout
       INTEGER C
       INTEGER*2 i,j,n ! counter
+      LOGICAL E_DEBUG_EXIST
+
 !****************** Initializing Variables *************************************
       ECPLastYearIndex=CURIYR+UNFPH-1 ! Calculate last year index for ECP run
 !****************** Body of the Program/Subprogram *****************************
+
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+         INQUIRE(FILE="EPHRTS_DEBUG_FILE.TXT", EXIST=E_DEBUG_EXIST)
+         IF (E_DEBUG_EXIST) THEN
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="OLD", POSITION="APPEND", ACTION="WRITE")
+         ELSE
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="NEW", ACTION="WRITE")
+         END IF
+      END IF      
+      
       DO K1 = CURIYR , ECPLastYearIndex ! do for all future years of ECP horizon
                                         ! Because K1 is used by many levels of routines within
                                         ! the loop, it is defined in a common block in dsmhelm
@@ -442,6 +474,9 @@
          CALL DSMFOR(WHOOPS)   ! Prepare load forecast
 
          CALL DSMDLT
+         IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+            WRITE(unit_num_ephrts_debug_file,*) "CURRENT YEAR", CURIYR, " FORESIGHT YEAR", K1, " CALL FOR DSMHLM"
+         END IF
          CALL DSMHLM   ! Run procedures which develop system load
          IF (K1 .EQ. CURIYR)  CALL DSMTOR   ! Prepare sectorial variables for reports - adjust totsecload for DGPV
          CALL DSMLCP(1)   ! Develop LDC for ECP
@@ -462,7 +497,9 @@
 !     Ensure ubaseyr reset to curiyr just in case
 
       UBASEYR = CURIYR
-
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+         CLOSE(unit_num_ephrts_debug_file)
+      END IF
       RETURN
       END
 
@@ -665,6 +702,7 @@
       include 'dsmnercr' !<< nerc region data
       include 'dsmhelm' !<< helm algorithm variables
       include 'dsmsectr' !<< sector secific data and other associated variables
+      include 'tranrep'
 !********************** Declaring local variables *****************************
       REAL*4 load ! total load
       REAL*4 adjload
@@ -734,11 +772,33 @@
           l=l+1
         ENDDO
       ENDDO
+
+          ! EV loops
+          DO i=2,9 !number of ev types
+              if (i .EQ. 7 .OR. i .EQ. 8) then !IB type = 6,7,8, will add cumulatively if > 
+                  DO k=1,nCENSUSreg
+                      CENSUSvalues(k)= CENSUSvalues(k) + TRQ_ELEC(i,k,UBASEYR)
+                  enddo
+              else
+                  DO k=1,nCENSUSreg
+                      CENSUSvalues(k)= TRQ_ELEC(i,k,UBASEYR)
+                  enddo
+              endif
+                  
+              if (i .LT. 6 .OR. i .GT. 7) then !if IB type, final=8
+                  LFinum=LFinum+1
+                  CALL DSMEMMV(CENSUSvalues,RNB,SEC(COM),load)
+                  LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj
+                  l=l+1
+              endif
+          ENDDO
+      
       WRITE(18,1005) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(ComDemAdjFac(k,1,UBASEYR),k=1,nCENSUSREG)
 1005  FORMAT(1X,"CM_AF_1",T20,3(":",I4),10(":",F12.3))
       WRITE(18,1006) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(ComDemAdjFac(k,2,UBASEYR),k=1,nCENSUSREG)
 1006  FORMAT(1X,"CM_AF_2",T20,3(":",I4),10(":",F12.3))
       l=l-1
+      
       IF(l.NE.EUINDEX(SEC(COM),2)) GOTO 999
 !****************** Termination of the Program/Subprogram **********************
 1009  FORMAT(1x,A12,3I6,9F15.3)
@@ -772,6 +832,7 @@
       include 'dsmsectr' !<< sector secific data and other associated variables
       include 'dsmnercr' !<< nerc region data
       include 'dsmhelm' !<< helm algorithm variables
+      include 'dsmcaldr'
 !********************** Declaring local variables *****************************
       REAL*4 load ! total load
       INTEGER*2 i,k,l ! universal counters
@@ -833,8 +894,9 @@
       DO i=1,NEUSES(SEC(IND))
         DO k=1,nCENSUSreg
 !
-           IF (i.eq.1) THEN
-             CENSUSvalues(k)=QELINOUT(k,UBASEYR,i)+QELHM(k,UBASEYR)
+           IF (i.eq.4) THEN  !This takes care of the new Hydrogen end use from EPHRTS (can be removed once HMM/IDM populates QELINH variable (part of QELINOUT equivalence), or uses different HMM NERC region variable)
+               !load = annual_h2_mwh_consumed(RNB) * (3.41214 / 1000000.0) !converting mwh to tbtu (same as QELIN)
+               load = annual_h2_mwh_consumed(RNB)/ (1000.0 * UNCONFA)! mwhrs to tbtu, where UNCONFA is 1 tbu equals 292 Gwhrs 
            ELSE
              CENSUSvalues(k)=QELINOUT(k,UBASEYR,i)
            ENDIF
@@ -846,7 +908,9 @@
 
         ENDDO
         LFinum=LFinum+1
-        CALL DSMEMMV(CENSUSvalues,RNB,SEC(IND),load)
+        IF (i.ne.4) THEN !HMM populates QELHM_HR variable (and thus annual_h2_mwh_consumed) in NERC regions, so doesn't need this mapping. QELHM (part QELINOUT equivalence) not used becasue of iterational variation
+          CALL DSMEMMV(CENSUSvalues,RNB,SEC(IND),load) 
+        ENDIF
 
         WRITE(IMSG,2003) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,CURITR, i, LFinum, ind, SEC(IND), RNB, load, UNCONFA, FORESIGHTadj
  2003   FORMAT(1X,"IN_EU_2",9(":",I4),10(":",F12.3))
@@ -862,7 +926,8 @@
         l=l+1
       ENDDO
       l=l-1
-      IF(l.NE.EUINDEX(SEC(IND),2)) GOTO 999
+      
+      IF(l.NE.EUINDEX(SEC(IND),2) .AND. I .LT. 5) GOTO 999 ! I EXITS AS I + 1, SO IF THERE'S FOUR SECTORS, IT WILL BE SET TO FIVE
 !****************** Termination of the Program/Subprogram **********************
       RETURN
 999   WRITE(IMSG,*)'<))) Message from subroutine DSMAIN'
@@ -892,6 +957,7 @@
       include 'dsmnercr' !<< nerc region data
       include 'dsmsectr' !<< sector secific data and other associated variables
       include 'dsmhelm' !<< helm algorithm variables
+      include 'tranrep'
 !********************** Declaring local variables *****************************
       REAL*4 load ! temporary value with EMM region load
       REAL*4 adjload
@@ -1081,6 +1147,20 @@
       tgn=10
       LoadForec(LFinum,1)=load*UNCONFAR*FORESIGHTadj
       ResTGdem(tgn)=LoadForec(LFinum,1)
+! RES EV
+      l=l+1
+      DO k=1,nCENSUSreg
+        CENSUSvalues(k)=TRQ_ELEC(1,k,UBASEYR)
+      ENDDO
+!     WRITE(18,1012) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
+!1012 FORMAT(1X,"SHTCON",T20,3(":",I4),10(":",E15.0))
+!        if(RNB.eq.7.and.CURITR.eq.1)
+!     write(imsg,*)'SEC.HEA:',(CENSUSvalues(k),k=1,9)
+      LFinum=LFinum+1
+      CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
+      tgn=11
+      LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj       !use different conversion factor for tran demand, different units
+      ResTGdem(tgn)=LoadForec(LFinum,1)
       IF(l.NE.EUINDEX(SEC(RES),2)) GOTO 999
 !****************** Termination of the Program/Subprogram **********************
 
@@ -1154,27 +1234,31 @@
       ELSE
          FORESIGHTadj=TraLK1/TraLUBASEYR * DEMCETR (k1 - CURIYR + 1)
       ENDIF
-! Aggregate CENSUS regions load forecast into NERC region forecasts by end-use
-! LIGHT DUTY ELECTRIC VEHICLES ! AEO2022 - new variable by fuel and vehicle type, add all vehicles - {1:LDV,2:Bus,3:CLT,4:freight truck,5:pass rail}
-      DO k=1,nCENSUSreg
-!        CENSUSvalues(k)=TRQLDV(ELLDVHX,k,UBASEYR)
-        CENSUSvalues(k)=TRQ_ELEC(1,k,UBASEYR) + TRQ_ELEC(2,k,UBASEYR) + TRQ_ELEC(3,k,UBASEYR) + TRQ_ELEC(4,k,UBASEYR)
-      ENDDO
+!! Aggregate CENSUS regions load forecast into NERC region forecasts by end-use
+!! LIGHT DUTY ELECTRIC VEHICLES ! AEO2022 - new variable by fuel and vehicle type, add all vehicles
+!!      - {1:LDV-home,2:LDV-public,3:LDV-fast,4:Bus school,5:Bus transit,6:Bus intercity,7:CLT,8:Freight depot,9:Freight nondepot,10:pass rail}
+!      DO k=1,nCENSUSreg
+!!        CENSUSvalues(k)=TRQLDV(ELLDVHX,k,UBASEYR)
+!        CENSUSvalues(k)=TRQ_ELEC(1,k,UBASEYR) + TRQ_ELEC(2,k,UBASEYR) + TRQ_ELEC(3,k,UBASEYR) + TRQ_ELEC(4,k,UBASEYR) + &
+!              TRQ_ELEC(5,k,UBASEYR) + TRQ_ELEC(6,k,UBASEYR) + TRQ_ELEC(7,k,UBASEYR) + TRQ_ELEC(8,k,UBASEYR) + TRQ_ELEC(9,k,UBASEYR)
+!      ENDDO
 !     WRITE(18,1003) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1003 FORMAT(1X,"TRQLDV",T20,3(":",I4),10(":",F12.3))
-      LFinum=LFinum+1
-      CALL DSMEMMV(CENSUSvalues,RNB,SEC(TRA),load)
-      LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj
+!      LFinum=LFinum+1
+!      CALL DSMEMMV(CENSUSvalues,RNB,SEC(TRA),load)
+!      LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj
 ! ELECTRIC TRAINS! AEO2022 - new variable by fuel and vehicle type, same value as old TRQRAILR
       l=l+1
       DO k=1,nCENSUSreg
-        CENSUSvalues(k)=TRQ_ELEC(5,k,UBASEYR)
+        CENSUSvalues(k)=TRQ_ELEC(10,k,UBASEYR)
       ENDDO
 !     WRITE(18,1004) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1004 FORMAT(1X,"TRQRAILR",T20,3(":",I4),10(":",F12.3))
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(TRA),load)
       LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj
+      
+      l=l-1
       IF(l.NE.EUINDEX(SEC(TRA),2)) GOTO 999
 !****************** Termination of the Program/Subprogram **********************
       RETURN
@@ -1198,6 +1282,7 @@
       include 'control'
       include 'qblk'
       include 'cogen'
+      include 'tranrep'
 !**********Declaring LDSM variables and common blocks via NEMS include files********
       include 'dsmdimen' !<< all ldsm parameter declarations
       include 'dsmunits' !<< include file with unit number for ldsm message file
@@ -1230,6 +1315,9 @@
              DO i=1,CMnumBldg
                  load=load+EndUseConsump(ELINDEX,j,i,k,KYR)
              ENDDO
+           ENDDO
+           DO j=2,9 !commercial ev load
+              load=load+ TRQ_ELEC(j,k,KYR)
            ENDDO
            IF(loadoth.GT.0.0) THEN
              ComDemAdjFac(k,1,KYR)=(QELCMwDG-load)/loadoth
@@ -1909,7 +1997,7 @@
       endif
 
 ! On first year and first iteration calculate base year system load
-      IF(K1.LE. MSEDYR + 2) THEN
+      IF(K1.LE. MSEDYR + 3) THEN
           DO I=1,Neu
             BaseYrLd(I,RNB)=LoadForec(I,1)
           ENDDO
@@ -1933,6 +2021,8 @@
       END
 
       SUBROUTINE DSMHLM
+      USE EPHRTS_SWTICHES
+      USE EPHRTS_FILE_UNIT_NUMBERS 
 
 !****************** Description of the Program/Subprogram **********************
 ! THIS SUBROUTINE RUNS THE HOURLY ELECTRICITY LOAD ALGORITHM
@@ -1967,6 +2057,18 @@
       REAL*4 SYLOAD1(MAXHOUR) !matrix with system load sorted in descending ord.
       INTEGER*2 Hindex(MAXHOUR) ! indexes of hours
       CHARACTER*6 WHENQSR
+      LOGICAL CHECK
+      real sysload_debug, h2_elec_consumed_debug
+      LOGICAL E_DEBUG_EXIST
+
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+         INQUIRE(FILE="EPHRTS_DEBUG_FILE.TXT", EXIST=E_DEBUG_EXIST)
+         IF (E_DEBUG_EXIST) THEN
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="OLD", POSITION="APPEND", ACTION="WRITE")
+         ELSE
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="NEW", ACTION="WRITE")
+         END IF
+      END IF
 !****************** Initializing Variables *************************************
       IF (K1.EQ.CURIYR) THEN
         DO I=1,MAXHOUR
@@ -2007,12 +2109,69 @@
         DO J=1,NEUSES(I) ! do for each end-use in a sector
           K=K+1
 !         write(IMSG,*)'NumSec',I,'NEUSE',J,EUrecNUM(K,RNB)
-          CALL DSMNWS(EUrecNUM(K,RNB),K,I)
+          ! SKIP THE CALL TO DSMNWS FOR THE HYDROGEN END-USE (J=4) IF SECTOR IS INDUSTRIAL, THIS IS HANDLED DIFFERENTLY BY USING THE VARIABLES FROM HMM DIRECTLY INSTEAD.
+		  CHECK = .TRUE.          
+		  IF (I .EQ. SEC(IND) .AND. J .EQ. 4) THEN
+              CHECK = .FALSE.
+          END IF
+          
+          IF (CHECK .EQ. .TRUE.) THEN
+            CALL DSMNWS(EUrecNUM(K,RNB),K,I)
+          END IF
         ENDDO
         SystLo=SystLo+TotSecLoad(RNB,I)
       ENDDO
+      
+      SYSLOAD_DEBUG = 0.0
+      H2_ELEC_CONSUMED_DEBUG = 0.0
+      
+      if (curiyr .eq. UPSTYR) then 
+         IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+            if ( annual_h2_mwh_consumed(rnb) .gt. 0.0) then
+               write (unit_num_ephrts_debug_file,*) " warning - expected zero hydrogen consumption at start year for h2 submodule, received - ", annual_h2_mwh_consumed(rnb)
+               write (unit_num_ephrts_debug_file,*) " warning - expected zero hydrogen consumption at start year for h2 submodule, received - ", annual_h2_mwh_consumed(rnb)
+               write (unit_num_ephrts_debug_file,*) " warning - expected zero hydrogen consumption at start year for h2 submodule, received - ", annual_h2_mwh_consumed(rnb)
+               write (unit_num_ephrts_debug_file,*) " warning - expected zero hydrogen consumption at start year for h2 submodule, received - ", annual_h2_mwh_consumed(rnb)
+               write (unit_num_ephrts_debug_file,*) " warning - expected zero hydrogen consumption at start year for h2 submodule, received - ", annual_h2_mwh_consumed(rnb)
+             end if
+         END IF
+      end if
+
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+         write(unit_num_ephrts_load_debug_file,*) "yr",curiyr+1989,"region",rnb
+      END IF
+      do i=1,nhour
+        IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+            write(unit_num_ephrts_load_debug_file,*) "hour", i, "previous syload", syload(i)
+        END IF
+        !sysload_debug = sysload_debug + syload(i)
+        ! mw to gw
+        syload(i) = syload(i) + (h2_elec_consumed(rnb,i)/1000.0) 
+        
+        IF(K1.EQ.CURIYR) THEN
+            SectorLoad(i,SEC(IND))= SectorLoad(i,SEC(IND)) + (h2_elec_consumed(rnb,i)/1000.0)       
+            TotSecLoad(RNB,SEC(IND)) = TotSecLoad(RNB,SEC(IND)) + h2_mwh_consumed(rnb,i)/1000.0
+			systlo = systlo + h2_mwh_consumed(rnb,i)/1000.0
+        END IF
+            
+        !h2_elec_consumed_debug = h2_elec_consumed_debug + h2_elec_consumed(rnb,i)/1000.0 ! h2_elec_consumed+debug is the total cumulative load added from h2 for the year
+        IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
+            write(unit_num_ephrts_load_debug_file,*) "debug_ld",curiyr+1989,",", rnb,",", ",", i, ",", syload(i), ", ", h2_elec_consumed(rnb,i) / 1000.0,",",h2_mwh_consumed(rnb,i)/1000.0,",",SectorLoad(i,SEC(IND)),",",TotSecLoad(RNB,SEC(IND)),",",systlo,",",Annual_H2_MWH_Consumed(rnb)
+        END IF
+        sysload_debug = sysload_debug + (syload(I) * IDAYTQ(DAYT864(i),MON864(i))) 
+        h2_elec_consumed_debug = h2_elec_consumed_debug + ( h2_elec_consumed(rnb,i) / 1000.0 ) * IDAYTQ(DAYT864(i),MON864(i)) 
+      enddo
+      
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+         if (annual_h2_mwh_consumed(rnb) .gt. 0.0 ) then
+            write(unit_num_ephrts_debug_file,*) "yr", curiyr+1989,"region",rnb
+            write(unit_num_ephrts_debug_file,*) "systlo before h2, h2_elec_total (GWh): ", systlo, ", ", annual_h2_mwh_consumed(rnb) / 1000
+            write(unit_num_ephrts_debug_file,*) "syload before h2, tot_h2_elec (GWh)  : ", sysload_debug, ", ", h2_elec_consumed_debug
+         end if
+      END IF
+        
       if (curiyr .eq. 3 .and. RNB .eq. 1) then
-       write(IMSG,*)' FIrst 50 system load '
+       write(IMSG,*)' First 50 system load '
       WRITE(IMSG,'(8H SYLOAD=/8F10.3)')(SYLOAD(I),I=1,50)
       endif
 ! Expand load by t&d loss factor and find system peak, total system load, and system load factor
@@ -2062,6 +2221,9 @@
       WHENQSR='after '
       CALL DSMHLC(SYLOAD1,WHENQSR)
 !****************** Termination of the Program/Subprogram **********************
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+         CLOSE(unit_num_ephrts_debug_file)
+      END IF
       RETURN
       END
 
@@ -2368,7 +2530,7 @@
       REAL*4 DistLo_s(MNUMNR,MAXHOUR)
       CHARACTER*8 LSRname_s(MNUMNR)
       
-      write(6,*)'made it into callsysload'
+      
       
       call sqlite3_open( 'emm_db/NEMS_INPUT.db', db )          
     
@@ -2406,7 +2568,7 @@
                    
                     if (Month_sq .EQ. 12 .and. Day_sq .EQ. 3 .and. Hour_sq .EQ. 24) q = 0
                  end do
-                 write(6,*)'done writing hourly data to db'
+                 !write(6,*)'done writing hourly data to db'
                     
                  do p =1,25
  !                  write(6,135) LSRname_s(p) , (DistLo_s(p,Hour_sq), Hour_sq = 1,864)
@@ -2452,23 +2614,31 @@
       LOGICAL EUorECM ! flag depicting if the item is an eu (T) or ecm (F)
 !****************** Initializing Variables *************************************
 !****************** Body of the Program/Subprogram *****************************
-
+!      real sysload_debug, h2_elec_consumed_debug
 
       COMMON /REGSYSLD/LSRname_s,DistLo_s
       REAL*4 DistLo_s(MNUMNR,MAXHOUR)
       CHARACTER*8 LSRname_s(MNUMNR)
+	  
+	  CHARACTER*8 LSReuname_s(MAXEU)
+	  REAL*4 DistLo_eu_s(MAXEU,MAXHOUR) 
+	  INTEGER*4 DBnr  ! DB number of records
+	  COMMON /EUSYSLD/LSReuname_s,DistLo_eu_s, DBnr
       
 ! If(curiyr+1989.le.2009) Write(6,*)'in DSMNWS ',RNB,Numrec,Lfpointer,Sector
 
 ! Read a record from the Sqlite DB
       IF (Numrec.eq.0) THEN 
-        Do m=1,nhour
-          DistLo(M) =  DistLo_s(RNB,m)
+         Do m=1,nhour
+           DistLo(M) =  DistLo_s(RNB,m)
 !            if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1) Write(6,*)'test distlo db ',LSRname_s(RNB),RNB,m,DistLo(M)
-        Enddo
+         Enddo
       Else
-! Read a record from the Direct Access File
-         READ(IODB,REC=NUMREC)LSRname,(DistLo(M),M=1,nhour)
+         do m=1,nhour
+           DistLo(m)=DistLo_eu_s(NUMREC,m)
+		 enddo
+		
+
          Do m=1,nhour
 !             if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1)  Write(6,*)'test distlo daf ',LSRname,RNB,m,DistLo(M)
          Enddo
@@ -2492,8 +2662,8 @@
             load2 = 0.000
       endif     
       DO M=1,nhour
-        SYLOAD(M)=SYLOAD(M)+DistLo(M)*load2
-!          if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1)  Write(6,*)'test syload ',SYLOAD(M),DistLo(M), load2             
+        SYLOAD(M)=SYLOAD(M)+DistLo(M)*load2 !VLA Here total annual laod is disaggregated into hourly load where load2 is total system load
+        
       ENDDO
 !  if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1) THEN
 !  write(IMSG,*)'LSRNAME   ',LSRname
@@ -2862,6 +3032,7 @@
       INTEGER*4 l,iyr,ireg,icls     ! pw2
       INTEGER*4 FILE   ! I/O unit for struct file
       INTEGER*4 DAFnr  ! DAF-LSR-DB number of records
+	  
       INTEGER*4 RRFnr  ! RESIDENTIAL RESTART FILE NUMBER OF RECORDS
       INTEGER*4 CRFnr  ! COMMERCIAL RESTART FILE NUMBER OF RECORDS
       CHARACTER*8 dafil ! DAF-LSR-DB file name
@@ -2877,7 +3048,7 @@
       CHARACTER*12 MonNam(MAXMON,864) ! month names used to define LDC's
       CHARACTER*12 DtpNam(MAXDTP) ! day-type names used to define ECP LDC's
       EXTERNAL DSMCMP ! subroutine for comapring character strings
-      LOGICAL DSMCMP ! as above
+      LOGICAL DSMCMP,CHECK ! as above
       INTEGER*2 ECPsgDmonth(MAXMON) ! months numbers in a ECP LDC segments
       INTEGER*2 EFDsgDmonth(MAXMON) ! months numbers in a EFD LDC segments
       INTEGER*2 ETTsgDmonth(MAXMON) ! months numbers in a ETT LDC segments
@@ -2931,6 +3102,13 @@
       Character*8 LSRnam_sq(MNUMNR,MAXSEC,MAXEU), LSRnam2, y_sq
       real x_sq(MNUMNR,MAXSEC,MAXEU)
       Integer*4 ID,IK,JK,MNUMNR_sq
+	  
+	 
+      
+      CHARACTER*8 LSReuname_s(MAXEU)
+	  REAL*4 DistLo_eu_s(MAXEU,MAXHOUR) 
+	  INTEGER*4 DBnr  ! DB number of records
+	  COMMON /EUSYSLD/LSReuname_s,DistLo_eu_s, DBnr
       
 !     ****************** Initializing Variables *************************************
 !     Define character strings which identify sectors
@@ -3029,7 +3207,9 @@
                 call sqlite3_get_column( col(7), y_sq )
               enddo	                                
           deallocate ( col )
-          call sqlite3_close( db )      
+          call sqlite3_close( db ) 
+		  
+          call CALLSYSLOAD_EU	!TD	  
       
 !      write(6,*)'Can read everything in EMM_LDSM'
 !     ****************** Body of the Program/Subprogram *****************************
@@ -3045,10 +3225,17 @@
          (MONTYP(I),I=1,NMONTH),((IDAYTQ(I,J),I=1,NODAYS(J)),J=1,NMONTH), &
          ((JDAYTP(I,J),i=1,NODAYS(J)),J=1,NMONTH),(SENAME(I),I=1,NOSEA), &
          (DTNAME(I),I=1,NODAYT),(MONAME(i),i=1,NMONTH)
-
+		
+ ! this reads DbLSRname from the DAF file. See LC2 note in the code just after format 2793. May not be needed but leaving it alone for now.- TD
+ ! DAFnr=         544 (from current DAF file)
       DO l=2,DAFnr
-         READ(IODB,REC=l)DbLSRname(l)
+         READ(IODB,REC=l)DbLSRname(l)		 
       ENDDO
+! overwrite ldsmdaf inuts with calendar data from the database 
+      CALL LOAD_LDSM_CAL
+
+
+	 
 !
 !     Open the structure file
 
@@ -4187,15 +4374,24 @@
 ! For each end-use read its name
 !           CALL DSMSKP(FILE,WHOOPS)
 !           IF(WHOOPS) RETURN
-          Neu=Neu+1
-          IF(FlagEU) THEN
-            EUINDEX(I,1)=Neu
-            FlagEU=.FALSE.
-          ENDIF
-!          READ(FILE,*)EUNAM(Neu),EUGRP(Neu)
+        
+         CHECK = .TRUE.
+         
+         ! ONLY WHEN THE INDUSTRIAL IS ON AND H2 IS ON, FLIP CHECK TO FALSE
+         IF ( I .EQ. SEC(IND) .AND. J .EQ. 4) THEN ! I = 3 IS INDUSTRIAL AND J = 4 IS H2
+            CHECK = .FALSE.
+         END IF
+         
+         Neu=Neu+1
+         
+         IF (CHECK) THEN 
+              IF(FlagEU) THEN
+                EUINDEX(I,1)=Neu
+                FlagEU=.FALSE.
+              ENDIF
+    !          READ(FILE,*)EUNAM(Neu),EUGRP(Neu)
                     
 
-!
 ! Read LSR name associated with an end-use in each region and the base year load
 !
           DO K=1,nNERCreg
@@ -4206,21 +4402,17 @@
 !      write(imsg,*)'baseyrld,neu,rgn,lsr,x,unconfa',
 !    +     BaseYrLd(Neu,K),Neu,K,LSRnam,x,UNCONFA
             IF (K.gt.nNERCreg) GOTO 110
-            DO l=2,DAFnr
-              IF(LSRnam2.EQ.DbLSRname(l)) THEN
+		    DO l=1,DBnr 
+               IF(LSRnam2.EQ.LSReuname_s(l)) THEN
                 EUrecNUM(Neu,K)=l
-                Write(IMSG,*)'EUrecNUM ',LSRnam2,K,I,J,l,EUrecNUM(Neu,K)
                 GOTO 110
-              ENDIF
+               ENDIF
             ENDDO
-            GOTO 997 ! no match for LSR write message and stop the program
+			GOTO 997 ! no match for LSR write message and stop the program
 110         CONTINUE
           ENDDO
-        ENDDO
-
-
-        
-
+        ENDIF
+        ENDDO       
 
         IF(EUINDEX(I,1).GT.0) EUINDEX(I,2)=Neu
       ENDDO
@@ -4271,8 +4463,10 @@
 !2792       FORMAT(1X,"MappNtoC",7(":",I4),2(":",F21.6))
             IF (MappCtoN(l,MNUMCR,J) .GT. 0.0) THEN
                MappNtoC(l,K,J) = MappCtoN(l,K,J) / MappCtoN(l,MNUMCR,J)
+ !              MappNtoCRestart(l,K,J) = MappCtoN(l,K,J) / MappCtoN(l,MNUMCR,J)
             ELSE
                MappNtoC(l,K,J) = 0.0
+ !              MappNtoCRestart(l,K,J) = 0.0
             ENDIF
           ENDDO
         ENDDO
@@ -4285,7 +4479,11 @@
           ENDDO
         ENDDO
       ENDDO
-      
+ 
+
+!!LC2 - sections further down related to DSM still seem to be using the DAF. I don't think any of this is relevant in the current
+!!  model, but I would just leave this alone for now - so don't reuse DAFnr or DbLSRname variables.  
+
 ! Read Payback-acceptance curves
       CALL DSMSKP(FILE,WHOOPS)
       IF(WHOOPS) RETURN
@@ -4907,6 +5105,8 @@
       END
 
       SUBROUTINE DSMTOR
+      USE EPHRTS_SWTICHES
+      USE EPHRTS_FILE_UNIT_NUMBERS 
 
 !****************** Description of the Program/Subprogram **********************
 ! THIS SUBROUTINE FILLS VARIAZBLES REPRESENTING SECTORAL ELECTRICITY DEMAND BY EMM REGION
@@ -4929,11 +5129,22 @@
       include 'dsmtfefp' !<< communication with efp
       include 'dsmunits' !   unit for ldsmrpt dbg
       include 'dsmnercr' !<< nerc region data
+      include 'dsmcaldr'    
 !********************** Declaring local variables *****************************
       INTEGER*2 SECTOR ! sector number or 0 if not to process sectorial loads
       INTEGER I
       REAL CENSUSVAL_RS(MNUMCR),CENSUSVAL_CM(MNUMCR)
       REAL load
+      LOGICAL E_DEBUG_EXIST
+
+      IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+         INQUIRE(FILE="EPHRTS_DEBUG_FILE.TXT", EXIST=E_DEBUG_EXIST)
+         IF (E_DEBUG_EXIST) THEN
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="OLD", POSITION="APPEND", ACTION="WRITE")
+         ELSE
+            OPEN(unit_num_ephrts_debug_file, FILE="EPHRTS_DEBUG_FILE.TXT", STATUS="NEW", ACTION="WRITE")
+         END IF
+      END IF
 !****************** Initializing Variables *************************************
 !****************** Body of the Program/Subprogram *****************************
 
@@ -4952,13 +5163,15 @@
         QELINN(RNB,CURIYR)=TotSecLoad(RNB,SEC(IND))
         QELTRN(RNB,CURIYR)=TotSecLoad(RNB,SEC(TRA))
         QELASN(RNB,CURIYR)=QELRSN(RNB,CURIYR) + QELCMN(RNB,CURIYR) &
-                         + QELINN(RNB,CURIYR) + QELTRN(RNB,CURIYR)
+                         + QELINN(RNB,CURIYR) + QELTRN(RNB,CURIYR) ! Don't include hydrogen electrolyzer load (Annual_H2_MWH_Consumed(RNB)* 3.41214/1000000) when only power sector hydrogen is used
+          
         ULELRS(RNB) = TotSecLoad(RNB,SEC(RES))
         ULELCM(RNB) = TotSecLoad(RNB,SEC(COM))
         ULELIN(RNB) = TotSecLoad(RNB,SEC(IND))
         ULELTR(RNB) = TotSecLoad(RNB,SEC(TRA))
-
-
+        IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN
+            CLOSE(unit_num_ephrts_debug_file)
+         END IF
 !****************** Termination of the Program/Subprogram **********************
       RETURN
       END
@@ -5109,7 +5322,7 @@
 !********************** Declaring local variables *****************************
       REAL*8 SYLOAD2(MAXHOUR) !temporary variable
       REAL*4 area ! area of the block
-      INTEGER*4 NUMREC ! record number
+	  INTEGER*4 NUMREC ! record number
       CHARACTER*8 LSRNAME ! LSR name
       INTEGER*4 EUGRPLAST ! previous end-use group number
       REAL*4 DistLo(MAXHOUR),CALEN(MAXHOUR)! distribution of load over the hours
@@ -5130,6 +5343,14 @@
       INTEGER*2 BlockNumEFD(MAXEFTB) ! Numbers of blocks
       INTEGER*2 HourSegNumEFD(nhour) ! Numbers of blocks from DSMEFD
       REAL*4 SYLOAD3(nhour)       !  put in segment order
+	  
+	 
+	  
+	  CHARACTER*8 LSReuname_s(MAXEU)
+	  REAL*4 DistLo_eu_s(MAXEU,MAXHOUR) 
+	  INTEGER*4 DBnr  ! DB number of records
+	  COMMON /EUSYSLD/LSReuname_s,DistLo_eu_s, DBnr
+	  !******
 !****************** Initializing Variables *************************************
 !****************** Body of the Program/Subprogram *****************************
 !     write(imsg,*)'total load, sectoral loads'
@@ -5150,17 +5371,28 @@
         SYLOAD2(i) = 0.0
         CALEN(i) = 0.0
       enddo
-      DO LL=1,neu   ! loop through all end-uses
+      DO LL=1,neu   ! loop through all end-uses (126 TOTAL WHERE H2 IS NEUSES(1)+NEUSES(2)+NEUSES(3))
           EULOAD = LoadForec(EUGRPNDX(LL),1)     ! end-use load by service
 !  originally 1
 !         write(IMSG,*)'EULOAD',EULOAD
           K = EUGRP(LL)    ! ordered list of end-uses
+          if (ll .ne. NEUSES(1)+NEUSES(2)+NEUSES(3)) then ! skip hydrogen end-use here (124), read in directly from hmm model
           NUMREC=EUrecNUM(EUGRPNDX(LL),RNB)
-          READ(IODB,REC=NUMREC)LSRname,(DistLo(m),M=1,nhour)
+		   DO m=1,nhour
+		     DistLo(m) = DistLo_eu_s(NUMREC,m)
+		   enddo
+		   end if
+		  !****************************************************
+		
 !         write(IMSG,*)'neu, name, group,dst',K,EUGRPNDX(LL),DISTLO(1)
 ! sort to segment level
          DO m=1,nhour
-             SYLOAD3(m) = Distlo(m)
+             ! if not hydrogen (end-use NEUSES(1)+NEUSES(2)+NEUSES(3)) from hmm, then skip and assign distlo normally, else add from hmm directly.
+             if (ll .ne. NEUSES(1)+NEUSES(2)+NEUSES(3)) then
+                SYLOAD3(m) = Distlo(m)  
+             else
+                SYLOAD3(m) = h2_elec_consumed(rnb,m)/1000.0  
+             end if
          enddo
         IF (K .ne. EUGRPLAST ) then
 
@@ -5183,14 +5415,18 @@
             DO w=1,w1
               l=l+1 ! time coordinate in real hours
               area=area+SYLOAD2(h)
+			  
               IF(bls.NE.EFDsgDnB(sgn)) THEN !if this is not last block in segmen
                 IF(l.GT.EFDblockx(sgn,bls)) THEN !if time coordinate beyond
                   dh=l-EFDblockx(sgn,bls)
                   BlockEnergy(blk)=area-dh*SYLOAD2(h)
+				  
                   area=dh*SYLOAD2(h) ! this portion belongs to the next block
+				 
                   bls=bls+1
 !  sum total energy for all ldc in group
                     TOTBLK = TOTBLK + BLockEnergy(blk)
+					
                   blk=blk+1
                 ENDIF
               ENDIF
@@ -5249,7 +5485,15 @@
             ! the first hour in the LDC (the peak hour,in the last season's LDC)
             ! Multiply by total load for this end-use so we weight end-uses in
             ! a group correctly
-             SYLOAD2(i)=SYLOAD2(i)+SYLOAD3(HourNumberEFD(i)) * EULOAD
+              
+            ! note: if end-use is not hydrogen then do the syload calculation normally, 
+            !       else if hydrogen (NEUSES(1)+NEUSES(2)+NEUSES(3)) then add it directly from hmm  
+            if (ll .ne. NEUSES(1)+NEUSES(2)+NEUSES(3)) then 
+                SYLOAD2(i)=SYLOAD2(i)+SYLOAD3(HourNumberEFD(i)) * EULOAD
+            else
+                SYLOAD2(i)=SYLOAD2(i)+ SYLOAD3(HourNumberEFD(i))  ! No need to use EULOAD since we're not using the fractional/convertor method Distlo * EULOAD, instead we directly add load here hourly     
+            end if
+			! write(991,*) 'syload2',SYLOAD3(HourNumberEFD(i)),SYLOAD3_tst(HourNumberEFD(i)),HourNumberEFD(i)
 !       if (CURIYR .eq. 3 .and. RNB .eq. 1 .and. LL .eq. 1) THEN
 !          write(IMSG,*)'SYLOAD2,HOURSEGNUM',SYLOAD2(i),HourNumberEFD(I)
 !       endif
@@ -5283,6 +5527,8 @@
             DO w=1,w1
               l=l+1 ! time coordinate in real hours
               area=area+SYLOAD2(h)
+			 
+			
               IF(bls.NE.EFDsgDnB(sgn)) THEN !if this is not last block in segmen
                 IF(l.GT.EFDblockx(sgn,bls)) THEN !if time coordinate beyond
                   dh=l-EFDblockx(sgn,bls)
@@ -5297,7 +5543,7 @@
             ENDDO
           ENDDO
           BlockEnergy(blk)=area ! for last block
-            TOTBLK = TOTBLK + BLockEnergy(blk)
+          TOTBLK = TOTBLK + BLockEnergy(blk)
           blk=blk+1
           bls=1
           area=0.0
@@ -5695,3 +5941,206 @@
 
       RETURN
       END
+
+!************************************ new stuff TD ****************
+!****************************************************************************************************************************
+SUBROUTINE CALLSYSLOAD_EU
+!****************** Description of the Program/Subprogram **********************
+! THIS SUBROUTINE gets the enduse sysload from SQLite table
+!*******************************************************************************
+      
+      USE SQLITE
+      IMPLICIT NONE
+!**********Declaring variables and common blocks via NEMS include files********
+      include 'parametr' !<< nems parameter declarations
+      include 'ncntrl' !<< acces to nems global variables like
+      include 'emmparm'
+      include 'dsmdimen' !<< calendar data
+      
+      type(sqlite_database)                      :: db
+      type(sqlite_statement)                     :: stmt
+      type(sqlite_column), dimension(:), pointer :: col
+      character(len=40), pointer, dimension(:)   :: result
+      character(len=80)                          :: errmsg
+      logical                                    :: finished
+
+      integer                                    :: p
+      integer                                    :: q
+      integer                                    :: Month_sq,Day_sq,Hour_sq
+      integer                                    :: id 
+      Real                                       :: DistLo_sq
+
+      INTEGER*4 EUNUM
+
+    !  COMMON /REGSYSLD/LSReuname_s,DistLo_eu_s
+	  CHARACTER*8 LSReuname_s(MAXEU)
+	  REAL*4 DistLo_eu_s(MAXEU,MAXHOUR) 
+	  INTEGER*4 DBnr  ! DB number of records
+	  COMMON /EUSYSLD/LSReuname_s,DistLo_eu_s, DBnr
+      
+        
+      call sqlite3_open( 'emm_db/NEMS_INPUT.db', db )          
+    
+             allocate ( col(7) )
+               ! QUERY THE DATABASE TABLE
+			  
+                 call sqlite3_column_query( col(1), 'ID', sqlite_int ) 
+                 call sqlite3_column_query( col(2), 'LS_INDEX', sqlite_int )
+                 call sqlite3_column_query( col(3), 'LS_Name', sqlite_char )
+                 call sqlite3_column_query( col(4), 'Month', sqlite_int )
+                 call sqlite3_column_query( col(5), 'DAY', sqlite_int )
+                 call sqlite3_column_query( col(6), 'HOUR', sqlite_int )
+                 call sqlite3_column_query( col(7), 'PCT', sqlite_real )
+                 
+                 call sqlite3_prepare_select( db, 'V_SYS_LOAD_by_EndUse', col, stmt )
+    
+               ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
+                 q = 0
+				 DBnr=0
+                 do
+                   call sqlite3_next_row( stmt, col, finished )
+                   if ( finished ) exit
+    
+                   call sqlite3_get_column( col(1), ID )
+                   call sqlite3_get_column( col(2), EUNUM )
+                   call sqlite3_get_column( col(3), LSReuname_s(EUNUM) )
+                   call sqlite3_get_column( col(4), Month_sq )
+                   call sqlite3_get_column( col(5), Day_sq )
+                   call sqlite3_get_column( col(6), Hour_sq )
+                   call sqlite3_get_column( col(7), DistLo_sq)
+                   
+                   q = ((Month_sq-1)*3+(Day_sq-1))*24 + Hour_sq
+                   
+                   DistLo_eu_s(EUNUM,q) = DistLo_sq
+				   if (EUNUM.gt.DBnr) DBnr=EUNUM
+                   
+                    if (Month_sq .EQ. 12 .and. Day_sq .EQ. 3 .and. Hour_sq .EQ. 24) q = 0
+                 end do
+                 !!write(6,*)'done writing hourly data to db'
+                 
+                       
+
+                deallocate ( col ) 
+                
+       call sqlite3_close( db ) 
+
+      RETURN      
+      END
+!****************************************************************************	  
+	 SUBROUTINE LOAD_LDSM_CAL
+!****************** Description of the Program/Subprogram **********************
+! THIS SUBROUTINE gets the ldsm calendar data from the database and assigns it to nems variables
+!*******************************************************************************
+! replace this read from ldsmdaf:(did not replace SENAME or DAFnr)
+!         READ(IODB,REC=1)DAFnr,NMONTH,(NODAYS(I),I=1,NMONTH), &
+!         ((WEIGHT(J,K),J=1,NODAYS(K)),K=1,NMONTH),NODAYT,NOSEA, &
+!         (MONTYP(I),I=1,NMONTH),((IDAYTQ(I,J),I=1,NODAYS(J)),J=1,NMONTH), &
+!         ((JDAYTP(I,J),i=1,NODAYS(J)),J=1,NMONTH),(SENAME(I),I=1,NOSEA), &
+!         (DTNAME(I),I=1,NODAYT),(MONAME(i),i=1,NMONTH)
+    
+
+	  USE SQLITE
+      IMPLICIT NONE
+
+      include 'parametr' !<< nems parameter declarations
+      include 'ncntrl' !<< acces to nems global variables like
+      include 'emmparm'
+      include 'dsmdimen' !<< calendar data
+	  include 'dsmcaldr' !<< calendar data
+      
+      type(sqlite_database)                      :: db
+      type(sqlite_statement)                     :: stmt
+      type(sqlite_column), dimension(:), pointer :: col
+      character(len=40), pointer, dimension(:)   :: result
+      character(len=80)                          :: errmsg
+      logical                                    :: finished
+
+      integer                                    :: Month,Day
+      integer                                    :: id 
+	  integer                                    :: num_mo
+	  integer                                    :: lNODAYS(MAXMON),lMONTYP(MAXMON)
+	  integer                                    :: MOINDEX,Day_type
+	  integer                                    :: lWEIGHT(MAXDAY,MAXMON)
+      
+      
+      call sqlite3_open( 'emm_db/NEMS_INPUT.db', db )          
+    
+      allocate ( col(4) )
+      ! QUERY THE DATABASE TABLE
+     call sqlite3_column_query( col(1), 'ID', sqlite_int ) 
+     call sqlite3_column_query( col(2), 'NMONTH', sqlite_int ) 
+     call sqlite3_column_query( col(3), 'NODAYT', sqlite_int )
+     call sqlite3_column_query( col(4), 'NOSEA', sqlite_int )
+                              
+     call sqlite3_prepare_select( db, 'V_SYS_LOAD_CalParam', col, stmt )
+    
+     ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
+     do
+        call sqlite3_next_row( stmt, col, finished )
+        if ( finished ) exit
+    
+        call sqlite3_get_column( col(1), ID )
+        call sqlite3_get_column( col(2), num_mo )
+		NMONTH=num_mo
+        call sqlite3_get_column( col(3), num_mo )
+		NODAYT=num_mo
+        call sqlite3_get_column( col(4), num_mo )
+		NOSEA=num_mo
+	 enddo
+
+     deallocate ( col ) 
+					
+	 allocate ( col(5) )
+     ! QUERY THE DATABASE TABLE  
+			  
+     call sqlite3_column_query( col(1), 'ID', sqlite_int ) 
+	 call sqlite3_column_query( col(2), 'MOINDEX', sqlite_int ) 
+     call sqlite3_column_query( col(3), 'MONAME', sqlite_char ) 
+     call sqlite3_column_query( col(4), 'NODAYS', sqlite_int )
+     call sqlite3_column_query( col(5), 'MONTYPE', sqlite_int )
+                     
+     call sqlite3_prepare_select( db, 'V_SYS_LOAD_CalMo', col, stmt )
+    
+     ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
+     do
+        call sqlite3_next_row( stmt, col, finished )
+        if ( finished ) exit
+    
+        call sqlite3_get_column( col(1), ID )
+	    call sqlite3_get_column( col(2), MOINDEX )
+        call sqlite3_get_column( col(3), MONAME(MOINDEX) )
+		call sqlite3_get_column( col(4), lNODAYS(MOINDEX) )
+		NODAYS=lNODAYS
+        call sqlite3_get_column( col(5), lMONTYP(MOINDEX) )
+		MONTYP=lMONTYP
+     enddo
+     deallocate ( col ) 
+             
+	 allocate ( col(6) )
+     ! QUERY THE DATABASE TABLE  
+			
+     call sqlite3_column_query( col(1), 'ID', sqlite_int ) 
+	 call sqlite3_column_query( col(2), 'Month', sqlite_int ) 
+     call sqlite3_column_query( col(3), 'Day', sqlite_int ) 
+     call sqlite3_column_query( col(4), 'Weight', sqlite_int )
+                                         
+     call sqlite3_prepare_select( db, 'V_SYS_LOAD_WEIGHTS', col, stmt )
+    
+     ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
+     do
+        call sqlite3_next_row( stmt, col, finished )
+        if ( finished ) exit
+    
+        call sqlite3_get_column( col(1), ID )
+	    call sqlite3_get_column( col(2), Month )
+        call sqlite3_get_column( col(3), Day )
+        call sqlite3_get_column( col(4), lWeight(Day,Month) )
+		WEIGHT=lWEIGHT
+        IDAYTQ=lWeight
+		JDAYTP(Day,Month)=Day
+     enddo
+     deallocate ( col ) 
+     call sqlite3_close( db )         
+
+     RETURN      
+     END

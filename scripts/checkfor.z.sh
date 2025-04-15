@@ -11,12 +11,12 @@
    else
      file2="$file.gz"
      if [ -r "$file2" ] ; then
-       uncompress $file2
+       gzip -d $file2
        exit 0
      else
        file2="$file.Z"
        if [ -r "$file2" ] ; then
-         uncompress $file2
+         gzip -d $file2
          exit 0
        else
          if [ -n "$2" ] ; then

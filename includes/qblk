@@ -3,9 +3,9 @@
 
 !  NEMS Quantity Common Block Parameters
       INTEGER MNUMQ,MQSIZE,QMSIZE
-      PARAMETER(MNUMQ=157)  ! Number of NEMS quantity variables
+      PARAMETER(MNUMQ=160)  ! Number of NEMS quantity variables
       PARAMETER(MQSIZE=MNUMQ*MNUMCR*MNUMYR) ! Size of quantity array
-      PARAMETER(QMSIZE=MNUMCR*MNUMYR*29)    ! Size of more quantities array
+      PARAMETER(QMSIZE=MNUMCR*MNUMYR*32)    ! Size of more quantities array
 !  NEMS Quantity varaiables
       REAL QELRS(MNUMCR,MNUMYR) !  1 Purchased Electricity - Residential
       REAL QELCM(MNUMCR,MNUMYR) !  2 Purchased Electricity - Commercial
@@ -59,7 +59,7 @@
       REAL QDSTR(MNUMCR,MNUMYR) ! 50 Distillate - Transportation
       REAL QDSIN(MNUMCR,MNUMYR) ! 51 Distillate - Industrial
       REAL QDSRF(MNUMCR,MNUMYR) ! 52 Distillate - Refinery
-      REAL QDSEL(MNUMCR,MNUMYR) ! 53 Distillate - Electricity (+petroleum coke)
+      REAL QDSEL(MNUMCR,MNUMYR) ! 53 Distillate - Electricity
       REAL QDSAS(MNUMCR,MNUMYR) ! 54 Distillate - All Sectors
       REAL QKSRS(MNUMCR,MNUMYR) ! 55 Kerosene - Residential
       REAL QKSCM(MNUMCR,MNUMYR) ! 56 Kerosene - Commercial
@@ -106,7 +106,7 @@
       REAL QTPEL(MNUMCR,MNUMYR) ! 97 Total Petroleum - Electricity
       REAL QTPAS(MNUMCR,MNUMYR) ! 98 Total Petroleum - All Sectors
       REAL QMETR(MNUMCR,MNUMYR) ! 99 Methanol - Transporation
-      REAL QETTR(MNUMCR,MNUMYR) !100 Ethanol - Transporation
+      REAL QETTR(MNUMCR,MNUMYR) !100 Ethanol - Transporation (sold as E85)
       REAL QETHM(MNUMCR,MNUMYR) !101 Ethanol - Hydrogen
       REAL QHYTR(MNUMCR,MNUMYR) !102 Liquid Hydrogen - Transportation
       REAL QUREL(MNUMCR,MNUMYR) !103 Uranium - Electricity
@@ -164,6 +164,9 @@
       REAL QH1TR(MNUMCR,MNUMYR) !155 Hydrogen, Large Citites - Transportation
       REAL QH2TR(MNUMCR,MNUMYR) !156 Hydrogen, Small Citites - Transportation
       REAL QH3TR(MNUMCR,MNUMYR) !157 Hydrogen, Rural - Transportation
+      REAL QH2IN(MNUMCR,MNUMYR) !158 Hydrogen total - Industrial
+      REAL QH2INPF(MNUMCR,MNUMYR)!159 Hydrogen feedstock - Industrial
+      REAL QH2INHP(MNUMCR,MNUMYR)!160 Hydrogen fuel - Industrial	  
 !  NEMS Price Quantity Common Block
       COMMON/QBLK/ &
        QELRS,QELCM,QELTR,QELIN,QELRF,QELHM,QELAS, &
@@ -188,7 +191,7 @@
        QTRRS,QTRCM,QTRTR,QTRIN,QTREL,QTRSN,QTRHM,QTRAS, &
        QEIEL,QCIIN, &
        QTSRS,QTSCM,QTSTR,QTSIN,QTSRF,QTSEL,QTSSN,QTSHM,QTSAS, &
-       QH1TR,QH2TR,QH3TR
+       QH1TR,QH2TR,QH3TR,QH2IN,QH2INPF,QH2INHP
 
       REAL MQTY(MNUMCR,MNUMYR,MNUMQ)
       EQUIVALENCE(MQTY,QELRS)
@@ -226,6 +229,9 @@
       REAL QDSBS(MNUMCR,MNUMYR)              !  Distillate, unspecified (balance) sector
       REAL QJFBS(MNUMCR,MNUMYR)              !  Jet fuel, unspecified (balance) sector
       REAL QNGLQ(MNUMCR,MNUMYR)              !  Natural gas used for liquefaction, such as for exporting natural gas in liquid form
+      REAL QH2RF(MNUMCR,MNUMYR)              !  market h2 consumption In refineries by census dvision
+      REAL QH2EL(MNUMCR,MNUMYR)              !  H2 consumed in electric power sector by census division, year
+      REAL QNGPIN(MNUMCR,MNUMYR)             !  Natural Gas Processing Plant Electricity Consumption
 
       COMMON /QMORE/ QPRRS, QPRCM, QPPIN, QETIN, QBUIN, &
                      QPRIN, QISIN, QLUIN, QPRTR, &
@@ -233,7 +239,8 @@
                      QPPINPF, QETINPF, QBUINPF, QPRINPF, QISINPF, &
                      QCTLRF, QGTLRF, QGTLSN, &
                      QPPRF, QETRF, QPRRF, QBURF, QISRF, QPYRF, &
-                     QMGBS, QDSBS, QJFBS, QNGLQ
+                     QMGBS, QDSBS, QJFBS, QNGLQ, QH2RF, QH2EL, &
+                     QNGPIN
 
       REAL QMOREQ(QMSIZE)
       EQUIVALENCE(QMOREQ,QPRRS)

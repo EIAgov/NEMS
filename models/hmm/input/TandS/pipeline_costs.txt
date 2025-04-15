@@ -1,0 +1,29 @@
+! Note: Calculated as representative 18 inch pipelines
+! Unit: TCC in 2023 USD, energy intensity in kWh/kg h2, cap is kg h2/d, non_energy_opex is $/kg h2 and covers labor and fixed O&M 
+Composite Table:
+regCen           regCen_j         pipe_cap                pipe_energy_intensity    non_energy_opex          pipe_tcc
+NewEngland       MidAtlantic      1.11448e+06             0.627333                 0.0626315                7.87166e+08
+MidAtlantic      NewEngland       1.11448e+06             0.627333                 0.0626315                7.87166e+08
+MidAtlantic      ENCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+ENCentral        MidAtlantic      1.4648e+06              1.2118                   0.114701                 1.95659e+09
+MidAtlantic      SAtlantic        1.4648e+06              1.35792                  0.136121                 2.33826e+09
+SAtlantic        MidAtlantic      1.4648e+06              1.35792                  0.136121                 2.33826e+09
+ENCentral        WNCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+WNCentral        ENCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+ENCentral        SAtlantic        1.4648e+06              1.35792                  0.136121                 2.33826e+09
+SAtlantic        ENCentral        1.4648e+06              1.35792                  0.136121                 2.33826e+09
+ENCentral        ESCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+ESCentral        ENCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+WNCentral        WSCentral        1.4648e+06              1.79627                  0.200382                 3.48325e+09
+WSCentral        WNCentral        1.4648e+06              1.79627                  0.200382                 3.48325e+09
+WNCentral        Mountain         1.4648e+06              1.65015                  0.178962                 3.10159e+09
+Mountain         WNCentral        1.4648e+06              1.65015                  0.178962                 3.10159e+09
+SAtlantic        ESCentral        1.4648e+06              0.919566                 0.0718604                1.19326e+09
+ESCentral        SAtlantic        1.4648e+06              0.919566                 0.0718604                1.19326e+09
+ESCentral        WSCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+WSCentral        ESCentral        1.4648e+06              1.2118                   0.114701                 1.95659e+09
+WSCentral        Mountain         1.4648e+06              2.23462                  0.264643                 4.62825e+09
+Mountain         WSCentral        1.4648e+06              2.23462                  0.264643                 4.62825e+09
+Mountain         Pacific          1.4648e+06              1.35792                  0.136121                 2.33826e+09
+Pacific          Mountain         1.4648e+06              1.35792                  0.136121                 2.33826e+09
+;

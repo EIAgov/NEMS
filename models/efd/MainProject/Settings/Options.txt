@@ -12,10 +12,12 @@ warning_duplicate_column off
 * AOA
 * CBC 2.9
 "CBC 2.9".LP_method 2
+* CPLEX 12.10
+"CPLEX 12.10".advanced_start 1
+* IPOPT 3.11
 * CPLEX 12.6.3
 "CPLEX 12.6.3".LP_method 4
 "CPLEX 12.6.3".MPS 2
-* IPOPT 3.11
 * CPLEX 12.6.2
 "CPLEX 12.6.2".LP_method 4
 "CPLEX 12.6.2".MPS 1

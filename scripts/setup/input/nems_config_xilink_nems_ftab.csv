@@ -1,0 +1,49 @@
+key,value
+PATHDOS,C:\Program Files (x86)\Intel\oneAPI\compiler\2023.2.1\windows\bin\intel64
+PATHDOS,C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE
+PATHDOS,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64
+PATHDOS,C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools
+PATHDOS,C:\Program Files (x86)\Windows Kits\10\bin\x64
+PATHDOS,C:\xpress8_12\bin
+PATHDOS,C:\xpress8_12\workbench
+PATHDOS,C:\Windows\System32
+PATHDOS,C:\Windows
+PATHDOS,C:\Windows\System32\wbem
+PATHDOS,C:\Windows\System32\WindowsPowerShell\v1.0
+PATHDOS,C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit
+INCLUDE,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\include
+INCLUDE,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\atlmfc\include
+INCLUDE,C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt
+INCLUDE,C:\Windows\system32
+INCLUDE,C:\Windows
+INCLUDE,C:\Windows\System32\Wbem
+INCLUDE,C:\Windows\System32\WindowsPowerShell\v1.0\
+LIB,C:\Program Files (x86)\Intel\oneAPI\compiler\2023.2.1\windows\compiler\lib\intel64_win
+LIB,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\lib\x64
+LIB,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64
+LIB,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\atlmfc\lib\x64
+LIB,C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\ucrt\x64
+LIB,###\scripts
+LIB,C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64
+IFORT_COMPILER23,C:\Program Files (x86)\Intel\oneAPI\compiler\2023.2.1\windows\
+IFORT_COMPILER18,C:\PROGRA~2\IntelSWTools\Compilers_and_libraries_2018.1.156\windows
+VSINSTALLDIR,C:\Program Files\Microsoft Visual Studio\2022\Community
+VCINSTALLDIR,C:\Program Files\Microsoft Visual Studio\2022\Community\VC
+WINDOWSSDKINSTALLDIR,C:\Program Files (x86)\Windows Kits\10
+WINDOWSSDKVERSION,10.0.10240.0
+PATH,C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow
+PATH,C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE
+PATH,C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64
+PATH,C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools
+PATH,C:\Windows\Microsoft.NET\Framework\v4.0.30319
+PATH,C:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\Performance Tools
+PATH,C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86
+PATH,C:\xpress8_12\bin
+PATH,C:\xpress8_12\workbench
+PATH,C:\Windows\System32
+PATH,C:\Windows
+PATH,C:\Windows\System32\wbem
+PATH,C:\Windows\System32\WindowsPowerShell\v1.0
+PATH,C:\Program Files (x86)\Windows Kits\8.1\WindowsPerformance Toolkit\
+PATH,C:\Program Files (x86)\Intel\oneAPI\compiler\2023.2.1\windows\bin\intel64
+IFORTVARS_PATH,C:\Program Files (x86)\Intel\oneAPI\setvars.bat

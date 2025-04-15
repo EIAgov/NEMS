@@ -1,0 +1,16 @@
+# The run will be stored in $OUTDIR/$scenario/$datekey
+TK_ECHO_USE_BASH_BEHAVIOR=1
+if [ "$OSTYPE" = "cygwin" ] ; then
+  shopt -s nocaseglob
+fi
+
+OUTDIR=?OUTDIR@
+scenario=?SCEN@
+datekey=?DATE@
+HOSTPC=?HOSTPC@
+nemspyenv=?NEMSPYENV@
+copyem=?COPYINP@
+export OUTDIR scenario datekey HOSTPC nemspyenv copyem
+
+COPYDIR=?COPYDIR@
+export COPYDIR

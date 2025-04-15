@@ -1,0 +1,22 @@
+﻿* AIMMS
+case_compression_level 0
+Global_error_handler "HMM_Error_Handler"
+initial_column_reservation 10000000
+warning_comparing_elements_different_sets off
+warning_duplicate_column off
+warning_duplicate_row off
+* CBC 2.9
+* CPLEX 22.1
+"CPLEX 22.1".advanced_start 1
+"CPLEX 22.1".LP_method 6
+"CPLEX 22.1".updates_batch_size 10000000
+"CPLEX 22.1".barrier_crossover_algorithm 2
+"CPLEX 22.1".global_thread_limit 32
+"CPLEX 22.1".parallel_mode 1
+"CPLEX 22.1".feasibility 1e-08
+"CPLEX 22.1".optimality 0.0001
+* IPOPT 3.11
+* NETSOL
+* Environment
+Number_1000_separator 3
+Number_decimal_separator 2

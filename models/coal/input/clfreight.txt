@@ -4,8 +4,7 @@ COMPOSITE TABLE:
   UI      UI   2       0   
   UE      UI   2       0   
   UG      UI   2       0   
-  UW      UI   2       0   
-  UA      UI   2       0   
+  UW      UI   2       0    
   NI      UI   2       5   
   NW      UI   2       0.1   
   CL      UI   2       0   
@@ -22,7 +21,6 @@ COMPOSITE TABLE:
   UE      UE   2       0   
   UG      UE   2       0   
   UW      UE   2       0   
-  UA      UE   2       0   
   NI      UE   2       5   
   NW      UE   2       0   
   CL      UE   2       5.7   
@@ -39,7 +37,6 @@ COMPOSITE TABLE:
   UE      UG   2       0   
   UG      UG   2       0   
   UW      UG   2       0   
-  UA      UG   2       0   
   NI      UG   2       0   
   NW      UG   2       0   
   CL      UG   2       3.4   
@@ -56,7 +53,6 @@ COMPOSITE TABLE:
   UE      UN   2       0   
   UG      UN   2       0   
   UW      UN   2       0   
-  UA      UN   2       0   
   NI      UN   2       0   
   NW      UN   2       6.5   
   CL      UN   2       8   
@@ -73,7 +69,6 @@ COMPOSITE TABLE:
   UE      NE   2       0   
   UG      NE   2       0   
   UW      NE   2       0   
-  UA      NE   2       0   
   NI      NE   2       0   
   NW      NE   2       0   
   CL      NE   2       6.1   
@@ -90,7 +85,6 @@ COMPOSITE TABLE:
   UE      NI   2       0   
   UG      NI   2       0   
   UW      NI   2       0   
-  UA      NI   2       0   
   NI      NI   2       0   
   NW      NI   2       0   
   CL      NI   2       0   
@@ -107,7 +101,6 @@ COMPOSITE TABLE:
   UE      SC   2       4.3   
   UG      SC   2       5.1   
   UW      SC   2       0   
-  UA      SC   2       0   
   NI      SC   2       0   
   NW      SC   2       8.7   
   CL      SC   2       5.1   
@@ -124,7 +117,6 @@ COMPOSITE TABLE:
   UE      BT   2       5.2   
   UG      BT   2       6.5   
   UW      BT   2       0   
-  UA      BT   2       0   
   NI      BT   2       0   
   NW      BT   2       8.2   
   CL      BT   2       6.6   
@@ -141,7 +133,6 @@ COMPOSITE TABLE:
   UE      GY   2       4.1   
   UG      GY   2       5   
   UW      GY   2       0   
-  UA      GY   2       0   
   NI      GY   2       0   
   NW      GY   2       8.6   
   CL      GY   2       5.1   
@@ -158,7 +149,6 @@ COMPOSITE TABLE:
   UE      OW   2       3.9   
   UG      OW   2       4.9   
   UW      OW   2       0   
-  UA      OW   2       0   
   NI      OW   2       0   
   NW      OW   2       10.4    
   CL      OW   2       4.9   
@@ -175,7 +165,6 @@ COMPOSITE TABLE:
   UE      PS   2       3.7   
   UG      PS   2       4.5   
   UW      PS   2       0   
-  UA      PS   2       0   
   NI      PS   2       0   
   NW      PS   2       8   
   CL      PS   2       4.6   
@@ -192,7 +181,6 @@ COMPOSITE TABLE:
   UE      TL   2       4.8   
   UG      TL   2       5.2   
   UW      TL   2       0   
-  UA      TL   2       0   
   NI      TL   2       0   
   NW      TL   2       8.9   
   CL      TL   2       5.5   
@@ -209,7 +197,6 @@ COMPOSITE TABLE:
   UE      RM   2       6.9   
   UG      RM   2       7.5   
   UW      RM   2       0   
-  UA      RM   2       0   
   NI      RM   2       0   
   NW      RM   2       12.7   
   CL      RM   2       8.1   
@@ -226,7 +213,6 @@ COMPOSITE TABLE:
   UE      MX   2       4.6   
   UG      MX   2       4.4   
   UW      MX   2       4.3   
-  UA      MX   2       8.3   
   NI      MX   2       0   
   NW      MX   2       8.8   
   CL      MX   2       3.9   
@@ -243,7 +229,6 @@ COMPOSITE TABLE:
   UE      LA   2       6.6   
   UG      LA   2       6.9   
   UW      LA   2       9.2   
-  UA      LA   2       11.9   
   NI      LA   2       0   
   NW      LA   2       10.8   
   CL      LA   2       7.4   
@@ -260,7 +245,6 @@ COMPOSITE TABLE:
   UE      JA   2       9.7  
   UG      JA   2       9.7  
   UW      JA   2       4.2  
-  UA      JA   2       4  
   NI      JA   2       0  
   NW      JA   2       3.1  
   CL      JA   2       10.9  
@@ -277,7 +261,6 @@ COMPOSITE TABLE:
   UE      EA   2       10  
   UG      EA   2       9.9  
   UW      EA   2       4.4  
-  UA      EA   2       0.2  
   NI      EA   2       0  
   NW      EA   2       3.7  
   CL      EA   2       11  
@@ -294,7 +277,6 @@ COMPOSITE TABLE:
   UE      CH   2       10  
   UG      CH   2       10  
   UW      CH   2       6.9  
-  UA      CH   2       5.4  
   NI      CH   2       0  
   NW      CH   2       2.5  
   CL      CH   2       11.5  
@@ -311,7 +293,6 @@ COMPOSITE TABLE:
   UE      AS   2       16.4  
   UG      AS   2       16.4  
   UW      AS   2       9.6  
-  UA      AS   2       10.2  
   NI      AS   2       0  
   NW      AS   2       5.4  
   CL      AS   2       17.6  
@@ -328,7 +309,6 @@ COMPOSITE TABLE:
   UE      IN   2       11.4  
   UG      IN   2       7.4  
   UW      IN   2       7.6  
-  UA      IN   2       10.2  
   NI      IN   2       0  
   NW      IN   2       5.4  
   CL      IN   2       17.6  
@@ -347,7 +327,6 @@ COMPOSITE TABLE:
   UE      NI   1       0
   UG      NI   1       0
   UW      NI   1       0
-  UA      NI   1       0
   NI      NI   1       0
   NW      NI   1       0
   CL      NI   1       0
@@ -364,7 +343,6 @@ COMPOSITE TABLE:
   UE      SC   1       5.6
   UG      SC   1       6.7
   UW      SC   1       0
-  UA      SC   1       0
   NI      SC   1       0
   NW      SC   1       11.9
   CL      SC   1       0
@@ -381,7 +359,6 @@ COMPOSITE TABLE:
   UE      BT   1       4
   UG      BT   1       4.9
   UW      BT   1       0
-  UA      BT   1       0
   NI      BT   1       0
   NW      BT   1       8
   CL      BT   1       0
@@ -398,7 +375,6 @@ COMPOSITE TABLE:
   UE      GY   1       4.1
   UG      GY   1       5
   UW      GY   1       0
-  UA      GY   1       0
   NI      GY   1       0
   NW      GY   1       10.6
   CL      GY   1       0
@@ -415,7 +391,6 @@ COMPOSITE TABLE:
   UE      OW   1       4.9
   UG      OW   1       4.9
   UW      OW   1       0
-  UA      OW   1       0
   NI      OW   1       0
   NW      OW   1       10.4
   CL      OW   1       0
@@ -432,7 +407,6 @@ COMPOSITE TABLE:
   UE      PS   1       3.7
   UG      PS   1       4.5
   UW      PS   1       0
-  UA      PS   1       0
   NI      PS   1       0
   NW      PS   1       10
   CL      PS   1       0
@@ -449,7 +423,6 @@ COMPOSITE TABLE:
   UE      TL   1       4.8
   UG      TL   1       5.2
   UW      TL   1       0
-  UA      TL   1       0
   NI      TL   1       0
   NW      TL   1       10.9
   CL      TL   1       0
@@ -466,7 +439,6 @@ COMPOSITE TABLE:
   UE      RM   1       5.2
   UG      RM   1       5.6
   UW      RM   1       0
-  UA      RM   1       0
   NI      RM   1       0
   NW      RM   1       10.2
   CL      RM   1       0
@@ -483,7 +455,6 @@ COMPOSITE TABLE:
   UE      MX   1       4.6
   UG      MX   1       4.4
   UW      MX   1       0
-  UA      MX   1       0
   NI      MX   1       0
   NW      MX   1       8.3
   CL      MX   1       0
@@ -500,7 +471,6 @@ COMPOSITE TABLE:
   UE      LA   1       6.6
   UG      LA   1       6.9
   UW      LA   1       0
-  UA      LA   1       0
   NI      LA   1       0
   NW      LA   1       10.8
   CL      LA   1       0
@@ -517,7 +487,6 @@ COMPOSITE TABLE:
   UE      JA   1       3.7
   UG      JA   1       9.7
   UW      JA   1       6.2
-  UA      JA   1       0
   NI      JA   1       0
   NW      JA   1       4.6
   CL      JA   1       0
@@ -534,7 +503,6 @@ COMPOSITE TABLE:
   UE      EA   1       3.7
   UG      EA   1       9.9
   UW      EA   1       6.7
-  UA      EA   1       0
   NI      EA   1       0
   NW      EA   1       5.2
   CL      EA   1       0
@@ -551,7 +519,6 @@ COMPOSITE TABLE:
   UE      CH   1       10
   UG      CH   1       10
   UW      CH   1       6.9
-  UA      CH   1       0
   NI      CH   1       0
   NW      CH   1       5.0
   CL      CH   1       0
@@ -568,7 +535,6 @@ COMPOSITE TABLE:
   UE      AS   1       16.4
   UG      AS   1       16.4
   UW      AS   1       9.6
-  UA      AS   1       0
   NI      AS   1       0
   NW      AS   1       6.9
   CL      AS   1       0
@@ -585,7 +551,6 @@ COMPOSITE TABLE:
   UE      IN   1       10.4
   UG      IN   1       7.4
   UW      IN   1       0
-  UA      IN   1       0
   NI      IN   1       0
   NW      IN   1       7.9
   CL      IN   1       0

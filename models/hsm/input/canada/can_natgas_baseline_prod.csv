@@ -1,0 +1,1243 @@
+year,region,gas_type,baseline_prod
+2005,Alberta,Shale,0.0
+2006,Alberta,Shale,0.0
+2007,Alberta,Shale,0.0
+2008,Alberta,Shale,0.0
+2009,Alberta,Shale,0.0
+2010,Alberta,Shale,0.0
+2011,Alberta,Shale,0.0
+2012,Alberta,Shale,3.65
+2013,Alberta,Shale,10.95
+2014,Alberta,Shale,25.55
+2015,Alberta,Shale,47.45
+2016,Alberta,Shale,91.25
+2017,Alberta,Shale,105.85
+2018,Alberta,Shale,124.10000000000001
+2019,Alberta,Shale,153.29999999999998
+2020,Alberta,Shale,160.6
+2021,Alberta,Shale,167.9
+2022,Alberta,Shale,211.7
+2023,Alberta,Shale,222.65
+2024,Alberta,Shale,178.66260241272752
+2025,Alberta,Shale,130.4474783127576
+2026,Alberta,Shale,100.74134330887861
+2027,Alberta,Shale,78.412777512331
+2028,Alberta,Shale,66.1415703870414
+2029,Alberta,Shale,50.49755893743722
+2030,Alberta,Shale,46.128384331627025
+2031,Alberta,Shale,40.21979537404527
+2032,Alberta,Shale,34.32235269209573
+2033,Alberta,Shale,32.368490660721115
+2034,Alberta,Shale,30.61691039889005
+2035,Alberta,Shale,28.48252620059374
+2036,Alberta,Shale,29.449070338056913
+2037,Alberta,Shale,30.048863790718215
+2038,Alberta,Shale,30.425547044320602
+2039,Alberta,Shale,30.608377426274174
+2040,Alberta,Shale,27.03486393638965
+2041,Alberta,Shale,23.484256539039396
+2042,Alberta,Shale,16.323443492178402
+2043,Alberta,Shale,16.383169466147212
+2044,Alberta,Shale,12.68298777708267
+2045,Alberta,Shale,12.605696607197363
+2046,Alberta,Shale,12.607650673580116
+2047,Alberta,Shale,12.718910580582753
+2048,Alberta,Shale,12.916608145355271
+2049,Alberta,Shale,13.241648651407697
+2050,Alberta,Shale,17.373990925946146
+2005,Alberta,Coalbed Methane,105.85
+2006,Alberta,Coalbed Methane,204.4
+2007,Alberta,Coalbed Methane,262.8
+2008,Alberta,Coalbed Methane,284.7
+2009,Alberta,Coalbed Methane,299.29999999999995
+2010,Alberta,Coalbed Methane,324.85
+2011,Alberta,Coalbed Methane,317.55
+2012,Alberta,Coalbed Methane,299.29999999999995
+2013,Alberta,Coalbed Methane,288.35
+2014,Alberta,Coalbed Methane,277.4
+2015,Alberta,Coalbed Methane,277.4
+2016,Alberta,Coalbed Methane,255.49999999999997
+2017,Alberta,Coalbed Methane,229.95
+2018,Alberta,Coalbed Methane,204.4
+2019,Alberta,Coalbed Methane,167.9
+2020,Alberta,Coalbed Methane,164.25
+2021,Alberta,Coalbed Methane,167.9
+2022,Alberta,Coalbed Methane,156.95
+2023,Alberta,Coalbed Methane,142.35
+2024,Alberta,Coalbed Methane,127.74999999999999
+2025,Alberta,Coalbed Methane,116.8
+2026,Alberta,Coalbed Methane,105.85
+2027,Alberta,Coalbed Methane,94.9
+2028,Alberta,Coalbed Methane,87.6
+2029,Alberta,Coalbed Methane,76.64999999999999
+2030,Alberta,Coalbed Methane,69.35
+2031,Alberta,Coalbed Methane,65.7
+2032,Alberta,Coalbed Methane,58.4
+2033,Alberta,Coalbed Methane,51.1
+2034,Alberta,Coalbed Methane,47.45
+2035,Alberta,Coalbed Methane,43.8
+2036,Alberta,Coalbed Methane,40.15
+2037,Alberta,Coalbed Methane,36.5
+2038,Alberta,Coalbed Methane,32.85
+2039,Alberta,Coalbed Methane,29.2
+2040,Alberta,Coalbed Methane,25.55
+2041,Alberta,Coalbed Methane,21.9
+2042,Alberta,Coalbed Methane,21.9
+2043,Alberta,Coalbed Methane,18.25
+2044,Alberta,Coalbed Methane,18.25
+2045,Alberta,Coalbed Methane,14.6
+2046,Alberta,Coalbed Methane,14.6
+2047,Alberta,Coalbed Methane,14.6
+2048,Alberta,Coalbed Methane,10.95
+2049,Alberta,Coalbed Methane,10.95
+2050,Alberta,Coalbed Methane,10.95
+2005,Alberta,Tight,1310.35
+2006,Alberta,Tight,1401.6
+2007,Alberta,Tight,1460.0
+2008,Alberta,Tight,1445.4
+2009,Alberta,Tight,1387.0
+2010,Alberta,Tight,1365.1000000000001
+2011,Alberta,Tight,1350.5
+2012,Alberta,Tight,1310.35
+2013,Alberta,Tight,1281.1499999999999
+2014,Alberta,Tight,1354.15
+2015,Alberta,Tight,1503.8
+2016,Alberta,Tight,1675.35
+2017,Alberta,Tight,1887.05
+2018,Alberta,Tight,1971.0000000000002
+2019,Alberta,Tight,1930.85
+2020,Alberta,Tight,1843.25
+2021,Alberta,Tight,1898.0
+2022,Alberta,Tight,2065.9
+2023,Alberta,Tight,2062.25
+2024,Alberta,Tight,1820.8295297762822
+2025,Alberta,Tight,1580.1873430014089
+2026,Alberta,Tight,1417.4540163837569
+2027,Alberta,Tight,1290.3265824530333
+2028,Alberta,Tight,1202.458401581395
+2029,Alberta,Tight,1110.5835026440493
+2030,Alberta,Tight,1051.9562680256765
+2031,Alberta,Tight,1002.5212251983768
+2032,Alberta,Tight,963.3062517098084
+2033,Alberta,Tight,934.1775903185633
+2034,Alberta,Tight,909.5788850480976
+2035,Alberta,Tight,891.5519752841888
+2036,Alberta,Tight,876.0530075461068
+2037,Alberta,Tight,866.884398374748
+2038,Alberta,Tight,863.0457878160344
+2039,Alberta,Tight,861.046689808426
+2040,Alberta,Tight,857.8467344438014
+2041,Alberta,Tight,854.250340764912
+2042,Alberta,Tight,846.9805034767379
+2043,Alberta,Tight,850.2035525177251
+2044,Alberta,Tight,856.0754358074752
+2045,Alberta,Tight,864.6562323799529
+2046,Alberta,Tight,876.6637471662947
+2047,Alberta,Tight,888.7632439185261
+2048,Alberta,Tight,900.902544700689
+2049,Alberta,Tight,916.7054901123648
+2050,Alberta,Tight,932.5091397135172
+2005,Alberta,Non Associated,2890.8
+2006,Alberta,Non Associated,2774.0
+2007,Alberta,Non Associated,2591.5
+2008,Alberta,Non Associated,2354.25
+2009,Alberta,Non Associated,2095.1
+2010,Alberta,Non Associated,1854.2
+2011,Alberta,Non Associated,1675.35
+2012,Alberta,Non Associated,1438.1
+2013,Alberta,Non Associated,1346.85
+2014,Alberta,Non Associated,1284.8
+2015,Alberta,Non Associated,1193.55
+2016,Alberta,Non Associated,1047.55
+2017,Alberta,Non Associated,956.3000000000001
+2018,Alberta,Non Associated,828.55
+2019,Alberta,Non Associated,700.8
+2020,Alberta,Non Associated,646.05
+2021,Alberta,Non Associated,638.75
+2022,Alberta,Non Associated,602.25
+2023,Alberta,Non Associated,562.1
+2024,Alberta,Non Associated,479.6129226377869
+2025,Alberta,Non Associated,406.62978721652905
+2026,Alberta,Non Associated,352.99039192539465
+2027,Alberta,Non Associated,314.7109478513595
+2028,Alberta,Non Associated,284.84799942336434
+2029,Alberta,Non Associated,257.3616296686068
+2030,Alberta,Non Associated,236.38751567627043
+2031,Alberta,Non Associated,215.3614115156738
+2032,Alberta,Non Associated,196.49521249155882
+2033,Alberta,Non Associated,180.7503463652147
+2034,Alberta,Non Associated,164.53113838766924
+2035,Alberta,Non Associated,147.44666760194048
+2036,Alberta,Non Associated,132.95258493932744
+2037,Alberta,Non Associated,118.14324456511288
+2038,Alberta,Non Associated,106.61540949730845
+2039,Alberta,Non Associated,95.11585842619606
+2040,Alberta,Non Associated,83.41866427191108
+2041,Alberta,Non Associated,71.83476415277498
+2042,Alberta,Non Associated,60.09553967632002
+2043,Alberta,Non Associated,51.720174383748514
+2044,Alberta,Non Associated,39.55255226066594
+2045,Alberta,Non Associated,35.034683364334164
+2046,Alberta,Non Associated,26.829036967894844
+2047,Alberta,Non Associated,18.395712340302467
+2048,Alberta,Non Associated,10.269733474091176
+2049,Alberta,Non Associated,5.73491365502639
+2050,Alberta,Non Associated,1.3824601728996484
+2005,British Columbia,Shale,0.0
+2006,British Columbia,Shale,0.0
+2007,British Columbia,Shale,0.0
+2008,British Columbia,Shale,0.0
+2009,British Columbia,Shale,29.2
+2010,British Columbia,Shale,58.4
+2011,British Columbia,Shale,131.4
+2012,British Columbia,Shale,149.64999999999998
+2013,British Columbia,Shale,189.8
+2014,British Columbia,Shale,171.54999999999998
+2015,British Columbia,Shale,127.74999999999999
+2016,British Columbia,Shale,113.15
+2017,British Columbia,Shale,102.2
+2018,British Columbia,Shale,87.6
+2019,British Columbia,Shale,58.4
+2020,British Columbia,Shale,47.45
+2021,British Columbia,Shale,40.15
+2022,British Columbia,Shale,36.5
+2023,British Columbia,Shale,29.2
+2024,British Columbia,Shale,25.55
+2025,British Columbia,Shale,25.40788452406845
+2026,British Columbia,Shale,28.942236819225787
+2027,British Columbia,Shale,25.288508772678608
+2028,British Columbia,Shale,21.618148480786672
+2029,British Columbia,Shale,25.14112392955565
+2030,British Columbia,Shale,28.65245197394077
+2031,British Columbia,Shale,25.003685096158726
+2032,British Columbia,Shale,25.015985630711224
+2033,British Columbia,Shale,24.95804320487586
+2034,British Columbia,Shale,24.914110553952153
+2035,British Columbia,Shale,24.892542512051655
+2036,British Columbia,Shale,24.894406306247248
+2037,British Columbia,Shale,24.91662226083448
+2038,British Columbia,Shale,21.286281801388245
+2039,British Columbia,Shale,21.29835353199286
+2040,British Columbia,Shale,21.30581626626013
+2041,British Columbia,Shale,21.31032897057317
+2042,British Columbia,Shale,21.312881867893942
+2043,British Columbia,Shale,21.314097273303496
+2044,British Columbia,Shale,17.664382130947867
+2045,British Columbia,Shale,17.664011033378213
+2046,British Columbia,Shale,17.663174002703574
+2047,British Columbia,Shale,17.662005264522175
+2048,British Columbia,Shale,17.660601236774802
+2049,British Columbia,Shale,17.659032135609593
+2050,British Columbia,Shale,17.657349666643942
+2005,British Columbia,Tight,266.45
+2006,British Columbia,Tight,284.7
+2007,British Columbia,Tight,292.0
+2008,British Columbia,Tight,313.9
+2009,British Columbia,Tight,295.65000000000003
+2010,British Columbia,Tight,423.4
+2011,British Columbia,Tight,598.5999999999999
+2012,British Columbia,Tight,675.25
+2013,British Columbia,Tight,795.7
+2014,British Columbia,Tight,949.0
+2015,British Columbia,Tight,1109.6
+2016,British Columbia,Tight,1292.1
+2017,British Columbia,Tight,1346.85
+2018,British Columbia,Tight,1624.25
+2019,British Columbia,Tight,1675.35
+2020,British Columbia,Tight,1748.35
+2021,British Columbia,Tight,1934.5
+2022,British Columbia,Tight,2127.95
+2023,British Columbia,Tight,2219.2
+2024,British Columbia,Tight,2082.8644999999997
+2025,British Columbia,Tight,1966.9244999999996
+2026,British Columbia,Tight,1889.4909285714286
+2027,British Columbia,Tight,1731.825267857143
+2028,British Columbia,Tight,1592.0341785714288
+2029,British Columbia,Tight,1539.2799464285717
+2030,British Columbia,Tight,1510.5408603896108
+2031,British Columbia,Tight,1397.82164935065
+2032,British Columbia,Tight,1271.8281155094908
+2033,British Columbia,Tight,1211.7296986763238
+2034,British Columbia,Tight,1161.381649725275
+2035,British Columbia,Tight,1096.5171615259742
+2036,British Columbia,Tight,1026.455716371863
+2037,British Columbia,Tight,950.2549747568607
+2038,British Columbia,Tight,883.8944046387054
+2039,British Columbia,Tight,827.3795748492997
+2040,British Columbia,Tight,779.6032762788684
+2041,British Columbia,Tight,732.9710870787495
+2042,British Columbia,Tight,689.0194358146815
+2043,British Columbia,Tight,645.4884190928616
+2044,British Columbia,Tight,606.0251780160902
+2045,British Columbia,Tight,568.7596002474711
+2046,British Columbia,Tight,533.1407728957184
+2047,British Columbia,Tight,496.0647182750368
+2048,British Columbia,Tight,464.9992257778727
+2049,British Columbia,Tight,432.77550541602017
+2050,British Columbia,Tight,399.82610867344033
+2005,British Columbia,Non Associated,667.95
+2006,British Columbia,Non Associated,646.05
+2007,British Columbia,Non Associated,646.05
+2008,British Columbia,Non Associated,646.05
+2009,British Columbia,Non Associated,642.4
+2010,British Columbia,Non Associated,562.1
+2011,British Columbia,Non Associated,514.65
+2012,British Columbia,Non Associated,419.74999999999994
+2013,British Columbia,Non Associated,365.0
+2014,British Columbia,Non Associated,321.2
+2015,British Columbia,Non Associated,273.75
+2016,British Columbia,Non Associated,197.10000000000002
+2017,British Columbia,Non Associated,164.25
+2018,British Columbia,Non Associated,127.74999999999999
+2019,British Columbia,Non Associated,116.8
+2020,British Columbia,Non Associated,127.74999999999999
+2021,British Columbia,Non Associated,87.6
+2022,British Columbia,Non Associated,76.64999999999999
+2023,British Columbia,Non Associated,69.35
+2024,British Columbia,Non Associated,62.050000000000004
+2025,British Columbia,Non Associated,58.4
+2026,British Columbia,Non Associated,51.1
+2027,British Columbia,Non Associated,47.45
+2028,British Columbia,Non Associated,43.8
+2029,British Columbia,Non Associated,40.15
+2030,British Columbia,Non Associated,36.5
+2031,British Columbia,Non Associated,32.85
+2032,British Columbia,Non Associated,29.2
+2033,British Columbia,Non Associated,25.55
+2034,British Columbia,Non Associated,25.55
+2035,British Columbia,Non Associated,21.9
+2036,British Columbia,Non Associated,21.9
+2037,British Columbia,Non Associated,18.25
+2038,British Columbia,Non Associated,18.25
+2039,British Columbia,Non Associated,14.6
+2040,British Columbia,Non Associated,14.6
+2041,British Columbia,Non Associated,14.6
+2042,British Columbia,Non Associated,10.839294321867955
+2043,British Columbia,Non Associated,10.704951215802536
+2044,British Columbia,Non Associated,10.62341712459202
+2045,British Columbia,Non Associated,10.573920984385456
+2046,British Columbia,Non Associated,6.893866341481689
+2047,British Columbia,Non Associated,6.875612265915642
+2048,British Columbia,Non Associated,6.864522661844149
+2049,British Columbia,Non Associated,6.857783900817784
+2050,British Columbia,Non Associated,6.85368797785056
+2005,Saskatchewan,Tight,142.35
+2006,Saskatchewan,Tight,146.0
+2007,Saskatchewan,Tight,135.05
+2008,Saskatchewan,Tight,127.74999999999999
+2009,Saskatchewan,Tight,113.15
+2010,Saskatchewan,Tight,76.64999999999999
+2011,Saskatchewan,Tight,62.050000000000004
+2012,Saskatchewan,Tight,65.7
+2013,Saskatchewan,Tight,58.4
+2014,Saskatchewan,Tight,51.1
+2015,Saskatchewan,Tight,47.45
+2016,Saskatchewan,Tight,43.8
+2017,Saskatchewan,Tight,40.15
+2018,Saskatchewan,Tight,36.5
+2019,Saskatchewan,Tight,32.85
+2020,Saskatchewan,Tight,29.2
+2021,Saskatchewan,Tight,25.55
+2022,Saskatchewan,Tight,25.55
+2023,Saskatchewan,Tight,25.55
+2024,Saskatchewan,Tight,21.9
+2025,Saskatchewan,Tight,21.9
+2026,Saskatchewan,Tight,21.9
+2027,Saskatchewan,Tight,18.25
+2028,Saskatchewan,Tight,18.25
+2029,Saskatchewan,Tight,18.25
+2030,Saskatchewan,Tight,18.25
+2031,Saskatchewan,Tight,14.6
+2032,Saskatchewan,Tight,14.6
+2033,Saskatchewan,Tight,14.6
+2034,Saskatchewan,Tight,14.6
+2035,Saskatchewan,Tight,14.6
+2036,Saskatchewan,Tight,10.95
+2037,Saskatchewan,Tight,10.95
+2038,Saskatchewan,Tight,10.95
+2039,Saskatchewan,Tight,10.95
+2040,Saskatchewan,Tight,10.95
+2041,Saskatchewan,Tight,10.95
+2042,Saskatchewan,Tight,10.95
+2043,Saskatchewan,Tight,7.3
+2044,Saskatchewan,Tight,7.3
+2045,Saskatchewan,Tight,7.3
+2046,Saskatchewan,Tight,7.3
+2047,Saskatchewan,Tight,7.3
+2048,Saskatchewan,Tight,7.3
+2049,Saskatchewan,Tight,7.3
+2050,Saskatchewan,Tight,7.3
+2005,Saskatchewan,Non Associated,80.3
+2006,Saskatchewan,Non Associated,76.64999999999999
+2007,Saskatchewan,Non Associated,65.7
+2008,Saskatchewan,Non Associated,54.75
+2009,Saskatchewan,Non Associated,47.45
+2010,Saskatchewan,Non Associated,21.9
+2011,Saskatchewan,Non Associated,18.25
+2012,Saskatchewan,Non Associated,14.6
+2013,Saskatchewan,Non Associated,14.6
+2014,Saskatchewan,Non Associated,10.95
+2015,Saskatchewan,Non Associated,10.95
+2016,Saskatchewan,Non Associated,7.3
+2017,Saskatchewan,Non Associated,7.3
+2018,Saskatchewan,Non Associated,7.3
+2019,Saskatchewan,Non Associated,7.3
+2020,Saskatchewan,Non Associated,3.65
+2021,Saskatchewan,Non Associated,3.65
+2022,Saskatchewan,Non Associated,3.65
+2023,Saskatchewan,Non Associated,3.65
+2024,Saskatchewan,Non Associated,3.65
+2025,Saskatchewan,Non Associated,0.0
+2026,Saskatchewan,Non Associated,0.0
+2027,Saskatchewan,Non Associated,0.0
+2028,Saskatchewan,Non Associated,0.0
+2029,Saskatchewan,Non Associated,0.0
+2030,Saskatchewan,Non Associated,0.0
+2031,Saskatchewan,Non Associated,0.0
+2032,Saskatchewan,Non Associated,0.0
+2033,Saskatchewan,Non Associated,0.0
+2034,Saskatchewan,Non Associated,0.0
+2035,Saskatchewan,Non Associated,0.0
+2036,Saskatchewan,Non Associated,0.0
+2037,Saskatchewan,Non Associated,0.0
+2038,Saskatchewan,Non Associated,0.0
+2039,Saskatchewan,Non Associated,0.0
+2040,Saskatchewan,Non Associated,0.0
+2041,Saskatchewan,Non Associated,0.0
+2042,Saskatchewan,Non Associated,0.0
+2043,Saskatchewan,Non Associated,0.0
+2044,Saskatchewan,Non Associated,0.0
+2045,Saskatchewan,Non Associated,0.0
+2046,Saskatchewan,Non Associated,0.0
+2047,Saskatchewan,Non Associated,0.0
+2048,Saskatchewan,Non Associated,0.0
+2049,Saskatchewan,Non Associated,0.0
+2050,Saskatchewan,Non Associated,0.0
+2005,Newfoundland and Labrador,Total,0.0
+2006,Newfoundland and Labrador,Total,0.0
+2007,Newfoundland and Labrador,Total,0.0
+2008,Newfoundland and Labrador,Total,0.0
+2009,Newfoundland and Labrador,Total,0.0
+2010,Newfoundland and Labrador,Total,0.0
+2011,Newfoundland and Labrador,Total,0.0
+2012,Newfoundland and Labrador,Total,0.0
+2013,Newfoundland and Labrador,Total,0.0
+2014,Newfoundland and Labrador,Total,0.0
+2015,Newfoundland and Labrador,Total,0.0
+2016,Newfoundland and Labrador,Total,0.0
+2017,Newfoundland and Labrador,Total,0.0
+2018,Newfoundland and Labrador,Total,0.0
+2019,Newfoundland and Labrador,Total,0.0
+2020,Newfoundland and Labrador,Total,0.0
+2021,Newfoundland and Labrador,Total,0.0
+2022,Newfoundland and Labrador,Total,0.0
+2023,Newfoundland and Labrador,Total,0.0
+2024,Newfoundland and Labrador,Total,0.0
+2025,Newfoundland and Labrador,Total,0.0
+2026,Newfoundland and Labrador,Total,0.0
+2027,Newfoundland and Labrador,Total,0.0
+2028,Newfoundland and Labrador,Total,0.0
+2029,Newfoundland and Labrador,Total,0.0
+2030,Newfoundland and Labrador,Total,0.0
+2031,Newfoundland and Labrador,Total,0.0
+2032,Newfoundland and Labrador,Total,0.0
+2033,Newfoundland and Labrador,Total,0.0
+2034,Newfoundland and Labrador,Total,0.0
+2035,Newfoundland and Labrador,Total,0.0
+2036,Newfoundland and Labrador,Total,0.0
+2037,Newfoundland and Labrador,Total,0.0
+2038,Newfoundland and Labrador,Total,0.0
+2039,Newfoundland and Labrador,Total,0.0
+2040,Newfoundland and Labrador,Total,0.0
+2041,Newfoundland and Labrador,Total,0.0
+2042,Newfoundland and Labrador,Total,0.0
+2043,Newfoundland and Labrador,Total,0.0
+2044,Newfoundland and Labrador,Total,0.0
+2045,Newfoundland and Labrador,Total,0.0
+2046,Newfoundland and Labrador,Total,0.0
+2047,Newfoundland and Labrador,Total,0.0
+2048,Newfoundland and Labrador,Total,0.0
+2049,Newfoundland and Labrador,Total,0.0
+2050,Newfoundland and Labrador,Total,0.0
+2005,Nova Scotia,Total,142.35
+2006,Nova Scotia,Total,127.74999999999999
+2007,Nova Scotia,Total,146.0
+2008,Nova Scotia,Total,149.64999999999998
+2009,Nova Scotia,Total,120.45
+2010,Nova Scotia,Total,109.5
+2011,Nova Scotia,Total,91.25
+2012,Nova Scotia,Total,69.35
+2013,Nova Scotia,Total,62.050000000000004
+2014,Nova Scotia,Total,116.8
+2015,Nova Scotia,Total,69.35
+2016,Nova Scotia,Total,62.050000000000004
+2017,Nova Scotia,Total,43.8
+2018,Nova Scotia,Total,25.55
+2019,Nova Scotia,Total,0.0
+2020,Nova Scotia,Total,0.0
+2021,Nova Scotia,Total,0.0
+2022,Nova Scotia,Total,0.0
+2023,Nova Scotia,Total,0.0
+2024,Nova Scotia,Total,0.0
+2025,Nova Scotia,Total,0.0
+2026,Nova Scotia,Total,0.0
+2027,Nova Scotia,Total,0.0
+2028,Nova Scotia,Total,0.0
+2029,Nova Scotia,Total,0.0
+2030,Nova Scotia,Total,0.0
+2031,Nova Scotia,Total,0.0
+2032,Nova Scotia,Total,0.0
+2033,Nova Scotia,Total,0.0
+2034,Nova Scotia,Total,0.0
+2035,Nova Scotia,Total,0.0
+2036,Nova Scotia,Total,0.0
+2037,Nova Scotia,Total,0.0
+2038,Nova Scotia,Total,0.0
+2039,Nova Scotia,Total,0.0
+2040,Nova Scotia,Total,0.0
+2041,Nova Scotia,Total,0.0
+2042,Nova Scotia,Total,0.0
+2043,Nova Scotia,Total,0.0
+2044,Nova Scotia,Total,0.0
+2045,Nova Scotia,Total,0.0
+2046,Nova Scotia,Total,0.0
+2047,Nova Scotia,Total,0.0
+2048,Nova Scotia,Total,0.0
+2049,Nova Scotia,Total,0.0
+2050,Nova Scotia,Total,0.0
+2005,New Brunswick,Total,0.0
+2006,New Brunswick,Total,0.0
+2007,New Brunswick,Total,7.3
+2008,New Brunswick,Total,10.95
+2009,New Brunswick,Total,7.3
+2010,New Brunswick,Total,7.3
+2011,New Brunswick,Total,7.3
+2012,New Brunswick,Total,3.65
+2013,New Brunswick,Total,3.65
+2014,New Brunswick,Total,3.65
+2015,New Brunswick,Total,3.65
+2016,New Brunswick,Total,3.65
+2017,New Brunswick,Total,0.0
+2018,New Brunswick,Total,3.65
+2019,New Brunswick,Total,0.0
+2020,New Brunswick,Total,0.0
+2021,New Brunswick,Total,3.65
+2022,New Brunswick,Total,0.0
+2023,New Brunswick,Total,0.0
+2024,New Brunswick,Total,0.0
+2025,New Brunswick,Total,0.0
+2026,New Brunswick,Total,0.0
+2027,New Brunswick,Total,0.0
+2028,New Brunswick,Total,0.0
+2029,New Brunswick,Total,0.0
+2030,New Brunswick,Total,0.0
+2031,New Brunswick,Total,0.0
+2032,New Brunswick,Total,0.0
+2033,New Brunswick,Total,0.0
+2034,New Brunswick,Total,0.0
+2035,New Brunswick,Total,0.0
+2036,New Brunswick,Total,0.0
+2037,New Brunswick,Total,0.0
+2038,New Brunswick,Total,0.0
+2039,New Brunswick,Total,0.0
+2040,New Brunswick,Total,0.0
+2041,New Brunswick,Total,0.0
+2042,New Brunswick,Total,0.0
+2043,New Brunswick,Total,0.0
+2044,New Brunswick,Total,0.0
+2045,New Brunswick,Total,0.0
+2046,New Brunswick,Total,0.0
+2047,New Brunswick,Total,0.0
+2048,New Brunswick,Total,0.0
+2049,New Brunswick,Total,0.0
+2050,New Brunswick,Total,0.0
+2005,Quebec,Total,0.0
+2006,Quebec,Total,0.0
+2007,Quebec,Total,0.0
+2008,Quebec,Total,0.0
+2009,Quebec,Total,0.0
+2010,Quebec,Total,0.0
+2011,Quebec,Total,0.0
+2012,Quebec,Total,0.0
+2013,Quebec,Total,0.0
+2014,Quebec,Total,0.0
+2015,Quebec,Total,0.0
+2016,Quebec,Total,0.0
+2017,Quebec,Total,0.0
+2018,Quebec,Total,0.0
+2019,Quebec,Total,0.0
+2020,Quebec,Total,0.0
+2021,Quebec,Total,0.0
+2022,Quebec,Total,0.0
+2023,Quebec,Total,0.0
+2024,Quebec,Total,0.0
+2025,Quebec,Total,0.0
+2026,Quebec,Total,0.0
+2027,Quebec,Total,0.0
+2028,Quebec,Total,0.0
+2029,Quebec,Total,0.0
+2030,Quebec,Total,0.0
+2031,Quebec,Total,0.0
+2032,Quebec,Total,0.0
+2033,Quebec,Total,0.0
+2034,Quebec,Total,0.0
+2035,Quebec,Total,0.0
+2036,Quebec,Total,0.0
+2037,Quebec,Total,0.0
+2038,Quebec,Total,0.0
+2039,Quebec,Total,0.0
+2040,Quebec,Total,0.0
+2041,Quebec,Total,0.0
+2042,Quebec,Total,0.0
+2043,Quebec,Total,0.0
+2044,Quebec,Total,0.0
+2045,Quebec,Total,0.0
+2046,Quebec,Total,0.0
+2047,Quebec,Total,0.0
+2048,Quebec,Total,0.0
+2049,Quebec,Total,0.0
+2050,Quebec,Total,0.0
+2005,Ontario,Total,10.95
+2006,Ontario,Total,10.95
+2007,Ontario,Total,7.3
+2008,Ontario,Total,7.3
+2009,Ontario,Total,7.3
+2010,Ontario,Total,7.3
+2011,Ontario,Total,7.3
+2012,Ontario,Total,3.65
+2013,Ontario,Total,3.65
+2014,Ontario,Total,3.65
+2015,Ontario,Total,3.65
+2016,Ontario,Total,3.65
+2017,Ontario,Total,3.65
+2018,Ontario,Total,3.65
+2019,Ontario,Total,3.65
+2020,Ontario,Total,3.65
+2021,Ontario,Total,3.65
+2022,Ontario,Total,3.65
+2023,Ontario,Total,3.65
+2024,Ontario,Total,0.0
+2025,Ontario,Total,0.0
+2026,Ontario,Total,0.0
+2027,Ontario,Total,0.0
+2028,Ontario,Total,0.0
+2029,Ontario,Total,0.0
+2030,Ontario,Total,0.0
+2031,Ontario,Total,0.0
+2032,Ontario,Total,0.0
+2033,Ontario,Total,0.0
+2034,Ontario,Total,0.0
+2035,Ontario,Total,0.0
+2036,Ontario,Total,0.0
+2037,Ontario,Total,0.0
+2038,Ontario,Total,0.0
+2039,Ontario,Total,0.0
+2040,Ontario,Total,0.0
+2041,Ontario,Total,0.0
+2042,Ontario,Total,0.0
+2043,Ontario,Total,0.0
+2044,Ontario,Total,0.0
+2045,Ontario,Total,0.0
+2046,Ontario,Total,0.0
+2047,Ontario,Total,0.0
+2048,Ontario,Total,0.0
+2049,Ontario,Total,0.0
+2050,Ontario,Total,0.0
+2005,Alberta,Total,4828.95
+2006,Alberta,Total,4887.35
+2007,Alberta,Total,4781.5
+2008,Alberta,Total,4515.049999999999
+2009,Alberta,Total,4193.85
+2010,Alberta,Total,3960.25
+2011,Alberta,Total,3792.3500000000004
+2012,Alberta,Total,3580.65
+2013,Alberta,Total,3544.15
+2014,Alberta,Total,3653.65
+2015,Alberta,Total,3774.1
+2016,Alberta,Total,3744.9
+2017,Alberta,Total,3832.5
+2018,Alberta,Total,3847.1
+2019,Alberta,Total,3708.4
+2020,Alberta,Total,3544.15
+2021,Alberta,Total,3671.9
+2022,Alberta,Total,3934.7
+2023,Alberta,Total,3887.25
+2024,Alberta,Total,3664.6
+2025,Alberta,Total,3533.2
+2026,Alberta,Total,3445.6
+2027,Alberta,Total,3361.65
+2028,Alberta,Total,3303.2500000000005
+2029,Alberta,Total,3233.8999999999996
+2030,Alberta,Total,3186.4500000000003
+2031,Alberta,Total,3135.35
+2032,Alberta,Total,3098.85
+2033,Alberta,Total,3076.95
+2034,Alberta,Total,3066.0
+2035,Alberta,Total,3062.3500000000004
+2036,Alberta,Total,3069.65
+2037,Alberta,Total,3084.2499999999995
+2038,Alberta,Total,3109.7999999999997
+2039,Alberta,Total,3139.0
+2040,Alberta,Total,3168.2
+2041,Alberta,Total,3190.1
+2042,Alberta,Total,3215.65
+2043,Alberta,Total,3252.15
+2044,Alberta,Total,3292.2999999999997
+2045,Alberta,Total,3332.4500000000003
+2046,Alberta,Total,3372.6
+2047,Alberta,Total,3412.75
+2048,Alberta,Total,3460.2000000000003
+2049,Alberta,Total,3504.0
+2050,Alberta,Total,3555.1
+2005,Alberta,Solution,521.9499999999999
+2006,Alberta,Solution,507.34999999999997
+2007,Alberta,Solution,467.2
+2008,Alberta,Solution,430.7
+2009,Alberta,Solution,412.45
+2010,Alberta,Solution,419.74999999999994
+2011,Alberta,Solution,448.95
+2012,Alberta,Solution,529.25
+2013,Alberta,Solution,616.85
+2014,Alberta,Solution,708.1
+2015,Alberta,Solution,748.2499999999999
+2016,Alberta,Solution,675.25
+2017,Alberta,Solution,653.35
+2018,Alberta,Solution,719.05
+2019,Alberta,Solution,755.55
+2020,Alberta,Solution,730.0
+2021,Alberta,Solution,795.7
+2022,Alberta,Solution,894.2500000000001
+2023,Alberta,Solution,897.9
+2024,Alberta,Solution,857.75
+2025,Alberta,Solution,843.15
+2026,Alberta,Solution,843.15
+2027,Alberta,Solution,850.45
+2028,Alberta,Solution,857.75
+2029,Alberta,Solution,872.35
+2030,Alberta,Solution,883.3
+2031,Alberta,Solution,897.9
+2032,Alberta,Solution,905.2
+2033,Alberta,Solution,916.15
+2034,Alberta,Solution,927.1
+2035,Alberta,Solution,938.05
+2036,Alberta,Solution,952.65
+2037,Alberta,Solution,963.6
+2038,Alberta,Solution,974.55
+2039,Alberta,Solution,985.5000000000001
+2040,Alberta,Solution,996.45
+2041,Alberta,Solution,1007.4
+2042,Alberta,Solution,1014.6999999999999
+2043,Alberta,Solution,1025.65
+2044,Alberta,Solution,1032.95
+2045,Alberta,Solution,1036.6
+2046,Alberta,Solution,1036.6
+2047,Alberta,Solution,1032.95
+2048,Alberta,Solution,1032.95
+2049,Alberta,Solution,1029.3
+2050,Alberta,Solution,1029.3
+2005,British Columbia,Total,959.9499999999999
+2006,British Columbia,Total,952.65
+2007,British Columbia,Total,956.3000000000001
+2008,British Columbia,Total,978.2
+2009,British Columbia,Total,974.55
+2010,British Columbia,Total,1054.8500000000001
+2011,British Columbia,Total,1255.6
+2012,British Columbia,Total,1259.25
+2013,British Columbia,Total,1365.1000000000001
+2014,British Columbia,Total,1456.3500000000001
+2015,British Columbia,Total,1533.0
+2016,British Columbia,Total,1627.9
+2017,British Columbia,Total,1642.5
+2018,British Columbia,Total,1876.1
+2019,British Columbia,Total,1879.7500000000002
+2020,British Columbia,Total,1952.7499999999998
+2021,British Columbia,Total,2091.4500000000003
+2022,British Columbia,Total,2263.0
+2023,British Columbia,Total,2339.65
+2024,British Columbia,Total,2292.2000000000003
+2025,British Columbia,Total,2478.35
+2026,British Columbia,Total,2704.65
+2027,British Columbia,Total,2704.65
+2028,British Columbia,Total,2708.3
+2029,British Columbia,Total,2905.4
+2030,British Columbia,Total,3146.2999999999997
+2031,British Columbia,Total,3160.9
+2032,British Columbia,Total,3131.7
+2033,British Columbia,Total,3230.25
+2034,British Columbia,Total,3332.4500000000003
+2035,British Columbia,Total,3401.8
+2036,British Columbia,Total,3441.95
+2037,British Columbia,Total,3452.9
+2038,British Columbia,Total,3471.15
+2039,British Columbia,Total,3507.6499999999996
+2040,British Columbia,Total,3551.4500000000003
+2041,British Columbia,Total,3598.8999999999996
+2042,British Columbia,Total,3650.0
+2043,British Columbia,Total,3697.4500000000003
+2044,British Columbia,Total,3752.2
+2045,British Columbia,Total,3814.2499999999995
+2046,British Columbia,Total,3879.9500000000003
+2047,British Columbia,Total,3945.65
+2048,British Columbia,Total,4018.65
+2049,British Columbia,Total,4087.9999999999995
+2050,British Columbia,Total,4161.0
+2005,British Columbia,Solution,21.9
+2006,British Columbia,Solution,21.9
+2007,British Columbia,Solution,18.25
+2008,British Columbia,Solution,18.25
+2009,British Columbia,Solution,10.95
+2010,British Columbia,Solution,14.6
+2011,British Columbia,Solution,10.95
+2012,British Columbia,Solution,14.6
+2013,British Columbia,Solution,14.6
+2014,British Columbia,Solution,18.25
+2015,British Columbia,Solution,18.25
+2016,British Columbia,Solution,25.55
+2017,British Columbia,Solution,29.2
+2018,British Columbia,Solution,32.85
+2019,British Columbia,Solution,32.85
+2020,British Columbia,Solution,29.2
+2021,British Columbia,Solution,25.55
+2022,British Columbia,Solution,25.55
+2023,British Columbia,Solution,21.9
+2024,British Columbia,Solution,21.9
+2025,British Columbia,Solution,18.25
+2026,British Columbia,Solution,18.25
+2027,British Columbia,Solution,14.6
+2028,British Columbia,Solution,14.6
+2029,British Columbia,Solution,14.6
+2030,British Columbia,Solution,14.6
+2031,British Columbia,Solution,10.95
+2032,British Columbia,Solution,10.95
+2033,British Columbia,Solution,10.95
+2034,British Columbia,Solution,10.95
+2035,British Columbia,Solution,10.95
+2036,British Columbia,Solution,7.3
+2037,British Columbia,Solution,7.3
+2038,British Columbia,Solution,7.3
+2039,British Columbia,Solution,7.3
+2040,British Columbia,Solution,7.3
+2041,British Columbia,Solution,7.3
+2042,British Columbia,Solution,7.3
+2043,British Columbia,Solution,7.3
+2044,British Columbia,Solution,7.3
+2045,British Columbia,Solution,3.65
+2046,British Columbia,Solution,3.65
+2047,British Columbia,Solution,3.65
+2048,British Columbia,Solution,3.65
+2049,British Columbia,Solution,3.65
+2050,British Columbia,Solution,3.65
+2005,Saskatchewan,Total,255.49999999999997
+2006,Saskatchewan,Total,259.15
+2007,Saskatchewan,Total,240.9
+2008,Saskatchewan,Total,226.3
+2009,Saskatchewan,Total,208.04999999999998
+2010,Saskatchewan,Total,182.5
+2011,Saskatchewan,Total,167.9
+2012,Saskatchewan,Total,156.95
+2013,Saskatchewan,Total,149.64999999999998
+2014,Saskatchewan,Total,160.6
+2015,Saskatchewan,Total,156.95
+2016,Saskatchewan,Total,149.64999999999998
+2017,Saskatchewan,Total,146.0
+2018,Saskatchewan,Total,146.0
+2019,Saskatchewan,Total,142.35
+2020,Saskatchewan,Total,127.74999999999999
+2021,Saskatchewan,Total,116.8
+2022,Saskatchewan,Total,113.15
+2023,Saskatchewan,Total,116.8
+2024,Saskatchewan,Total,120.45
+2025,Saskatchewan,Total,124.10000000000001
+2026,Saskatchewan,Total,124.10000000000001
+2027,Saskatchewan,Total,124.10000000000001
+2028,Saskatchewan,Total,127.74999999999999
+2029,Saskatchewan,Total,127.74999999999999
+2030,Saskatchewan,Total,127.74999999999999
+2031,Saskatchewan,Total,127.74999999999999
+2032,Saskatchewan,Total,127.74999999999999
+2033,Saskatchewan,Total,127.74999999999999
+2034,Saskatchewan,Total,127.74999999999999
+2035,Saskatchewan,Total,124.10000000000001
+2036,Saskatchewan,Total,124.10000000000001
+2037,Saskatchewan,Total,124.10000000000001
+2038,Saskatchewan,Total,124.10000000000001
+2039,Saskatchewan,Total,124.10000000000001
+2040,Saskatchewan,Total,120.45
+2041,Saskatchewan,Total,120.45
+2042,Saskatchewan,Total,120.45
+2043,Saskatchewan,Total,120.45
+2044,Saskatchewan,Total,120.45
+2045,Saskatchewan,Total,120.45
+2046,Saskatchewan,Total,116.8
+2047,Saskatchewan,Total,116.8
+2048,Saskatchewan,Total,116.8
+2049,Saskatchewan,Total,116.8
+2050,Saskatchewan,Total,116.8
+2005,Saskatchewan,Solution,32.85
+2006,Saskatchewan,Solution,36.5
+2007,Saskatchewan,Solution,40.15
+2008,Saskatchewan,Solution,43.8
+2009,Saskatchewan,Solution,47.45
+2010,Saskatchewan,Solution,83.95
+2011,Saskatchewan,Solution,87.6
+2012,Saskatchewan,Solution,76.64999999999999
+2013,Saskatchewan,Solution,80.3
+2014,Saskatchewan,Solution,94.9
+2015,Saskatchewan,Solution,102.2
+2016,Saskatchewan,Solution,98.55000000000001
+2017,Saskatchewan,Solution,102.2
+2018,Saskatchewan,Solution,102.2
+2019,Saskatchewan,Solution,105.85
+2020,Saskatchewan,Solution,94.9
+2021,Saskatchewan,Solution,87.6
+2022,Saskatchewan,Solution,83.95
+2023,Saskatchewan,Solution,91.25
+2024,Saskatchewan,Solution,94.9
+2025,Saskatchewan,Solution,98.55000000000001
+2026,Saskatchewan,Solution,102.2
+2027,Saskatchewan,Solution,105.85
+2028,Saskatchewan,Solution,105.85
+2029,Saskatchewan,Solution,109.5
+2030,Saskatchewan,Solution,109.5
+2031,Saskatchewan,Solution,109.5
+2032,Saskatchewan,Solution,113.15
+2033,Saskatchewan,Solution,113.15
+2034,Saskatchewan,Solution,113.15
+2035,Saskatchewan,Solution,113.15
+2036,Saskatchewan,Solution,113.15
+2037,Saskatchewan,Solution,113.15
+2038,Saskatchewan,Solution,113.15
+2039,Saskatchewan,Solution,113.15
+2040,Saskatchewan,Solution,113.15
+2041,Saskatchewan,Solution,109.5
+2042,Saskatchewan,Solution,109.5
+2043,Saskatchewan,Solution,109.5
+2044,Saskatchewan,Solution,109.5
+2045,Saskatchewan,Solution,109.5
+2046,Saskatchewan,Solution,109.5
+2047,Saskatchewan,Solution,109.5
+2048,Saskatchewan,Solution,109.5
+2049,Saskatchewan,Solution,109.5
+2050,Saskatchewan,Solution,109.5
+2005,Yukon,Total,7.3
+2006,Yukon,Total,3.65
+2007,Yukon,Total,3.65
+2008,Yukon,Total,3.65
+2009,Yukon,Total,0.0
+2010,Yukon,Total,0.0
+2011,Yukon,Total,0.0
+2012,Yukon,Total,0.0
+2013,Yukon,Total,0.0
+2014,Yukon,Total,0.0
+2015,Yukon,Total,0.0
+2016,Yukon,Total,0.0
+2017,Yukon,Total,0.0
+2018,Yukon,Total,0.0
+2019,Yukon,Total,0.0
+2020,Yukon,Total,0.0
+2021,Yukon,Total,0.0
+2022,Yukon,Total,0.0
+2023,Yukon,Total,0.0
+2024,Yukon,Total,0.0
+2025,Yukon,Total,0.0
+2026,Yukon,Total,0.0
+2027,Yukon,Total,0.0
+2028,Yukon,Total,0.0
+2029,Yukon,Total,0.0
+2030,Yukon,Total,0.0
+2031,Yukon,Total,0.0
+2032,Yukon,Total,0.0
+2033,Yukon,Total,0.0
+2034,Yukon,Total,0.0
+2035,Yukon,Total,0.0
+2036,Yukon,Total,0.0
+2037,Yukon,Total,0.0
+2038,Yukon,Total,0.0
+2039,Yukon,Total,0.0
+2040,Yukon,Total,0.0
+2041,Yukon,Total,0.0
+2042,Yukon,Total,0.0
+2043,Yukon,Total,0.0
+2044,Yukon,Total,0.0
+2045,Yukon,Total,0.0
+2046,Yukon,Total,0.0
+2047,Yukon,Total,0.0
+2048,Yukon,Total,0.0
+2049,Yukon,Total,0.0
+2050,Yukon,Total,0.0
+2005,Northwest Territories,Total,14.6
+2006,Northwest Territories,Total,10.95
+2007,Northwest Territories,Total,10.95
+2008,Northwest Territories,Total,7.3
+2009,Northwest Territories,Total,7.3
+2010,Northwest Territories,Total,7.3
+2011,Northwest Territories,Total,7.3
+2012,Northwest Territories,Total,7.3
+2013,Northwest Territories,Total,3.65
+2014,Northwest Territories,Total,3.65
+2015,Northwest Territories,Total,3.65
+2016,Northwest Territories,Total,3.65
+2017,Northwest Territories,Total,0.0
+2018,Northwest Territories,Total,0.0
+2019,Northwest Territories,Total,3.65
+2020,Northwest Territories,Total,0.0
+2021,Northwest Territories,Total,3.65
+2022,Northwest Territories,Total,3.65
+2023,Northwest Territories,Total,3.65
+2024,Northwest Territories,Total,3.65
+2025,Northwest Territories,Total,0.0
+2026,Northwest Territories,Total,0.0
+2027,Northwest Territories,Total,0.0
+2028,Northwest Territories,Total,0.0
+2029,Northwest Territories,Total,0.0
+2030,Northwest Territories,Total,0.0
+2031,Northwest Territories,Total,0.0
+2032,Northwest Territories,Total,0.0
+2033,Northwest Territories,Total,0.0
+2034,Northwest Territories,Total,0.0
+2035,Northwest Territories,Total,0.0
+2036,Northwest Territories,Total,0.0
+2037,Northwest Territories,Total,0.0
+2038,Northwest Territories,Total,0.0
+2039,Northwest Territories,Total,0.0
+2040,Northwest Territories,Total,0.0
+2041,Northwest Territories,Total,0.0
+2042,Northwest Territories,Total,0.0
+2043,Northwest Territories,Total,0.0
+2044,Northwest Territories,Total,0.0
+2045,Northwest Territories,Total,0.0
+2046,Northwest Territories,Total,0.0
+2047,Northwest Territories,Total,0.0
+2048,Northwest Territories,Total,0.0
+2049,Northwest Territories,Total,0.0
+2050,Northwest Territories,Total,0.0
+2005,Alberta,Sum Total,4828.95
+2006,Alberta,Sum Total,4887.35
+2007,Alberta,Sum Total,4781.5
+2008,Alberta,Sum Total,4515.05
+2009,Alberta,Sum Total,4193.85
+2010,Alberta,Sum Total,3963.9
+2011,Alberta,Sum Total,3792.35
+2012,Alberta,Sum Total,3580.6499999999996
+2013,Alberta,Sum Total,3544.1499999999996
+2014,Alberta,Sum Total,3650.0
+2015,Alberta,Sum Total,3770.45
+2016,Alberta,Sum Total,3744.8999999999996
+2017,Alberta,Sum Total,3832.5
+2018,Alberta,Sum Total,3847.1000000000004
+2019,Alberta,Sum Total,3708.3999999999996
+2020,Alberta,Sum Total,3544.1499999999996
+2021,Alberta,Sum Total,3668.25
+2022,Alberta,Sum Total,3931.05
+2023,Alberta,Sum Total,3887.25
+2024,Alberta,Sum Total,3464.6050548267967
+2025,Alberta,Sum Total,3077.214608530696
+2026,Alberta,Sum Total,2820.18575161803
+2027,Alberta,Sum Total,2628.800307816724
+2028,Alberta,Sum Total,2498.797971391801
+2029,Alberta,Sum Total,2367.442691250093
+2030,Alberta,Sum Total,2287.122168033574
+2031,Alberta,Sum Total,2221.702432088096
+2032,Alberta,Sum Total,2157.7238168934628
+2033,Alberta,Sum Total,2114.546427344499
+2034,Alberta,Sum Total,2079.276933834657
+2035,Alberta,Sum Total,2049.331169086723
+2036,Alberta,Sum Total,2031.2546628234911
+2037,Alberta,Sum Total,2015.1765067305791
+2038,Alberta,Sum Total,2007.4867443576632
+2039,Alberta,Sum Total,2001.4709256608962
+2040,Alberta,Sum Total,1990.3002626521022
+2041,Alberta,Sum Total,1978.8693614567264
+2042,Alberta,Sum Total,1959.9994866452362
+2043,Alberta,Sum Total,1962.206896367621
+2044,Alberta,Sum Total,1959.5109758452238
+2045,Alberta,Sum Total,1963.4966123514844
+2046,Alberta,Sum Total,1967.3004348077695
+2047,Alberta,Sum Total,1967.4278668394113
+2048,Alberta,Sum Total,1967.9888863201354
+2049,Alberta,Sum Total,1975.9320524187988
+2050,Alberta,Sum Total,1991.515590812363
+2005,British Columbia,Sum Total,956.3000000000001
+2006,British Columbia,Sum Total,952.65
+2007,British Columbia,Sum Total,956.3
+2008,British Columbia,Sum Total,978.1999999999999
+2009,British Columbia,Sum Total,978.2
+2010,British Columbia,Sum Total,1058.5
+2011,British Columbia,Sum Total,1255.6
+2012,British Columbia,Sum Total,1259.25
+2013,British Columbia,Sum Total,1365.1
+2014,British Columbia,Sum Total,1460.0
+2015,British Columbia,Sum Total,1529.35
+2016,British Columbia,Sum Total,1627.9
+2017,British Columbia,Sum Total,1642.5
+2018,British Columbia,Sum Total,1872.4499999999998
+2019,British Columbia,Sum Total,1883.4
+2020,British Columbia,Sum Total,1952.75
+2021,British Columbia,Sum Total,2087.8
+2022,British Columbia,Sum Total,2266.6499999999996
+2023,British Columbia,Sum Total,2339.6499999999996
+2024,British Columbia,Sum Total,2192.6645
+2025,British Columbia,Sum Total,2069.882384524068
+2026,British Columbia,Sum Total,1989.6231653906543
+2027,British Columbia,Sum Total,1821.0037766298215
+2028,British Columbia,Sum Total,1673.8923270522155
+2029,British Columbia,Sum Total,1621.0110703581274
+2030,British Columbia,Sum Total,1592.5933123635514
+2031,British Columbia,Sum Total,1469.6253344468087
+2032,British Columbia,Sum Total,1340.674101140202
+2033,British Columbia,Sum Total,1276.8677418811997
+2034,British Columbia,Sum Total,1226.4757602792274
+2035,British Columbia,Sum Total,1157.9397040380259
+2036,British Columbia,Sum Total,1084.2301226781103
+2037,British Columbia,Sum Total,1004.4015970176952
+2038,British Columbia,Sum Total,935.1106864400936
+2039,British Columbia,Sum Total,875.9579283812926
+2040,British Columbia,Sum Total,828.1890925451285
+2041,British Columbia,Sum Total,781.5614160493227
+2042,British Columbia,Sum Total,733.8516120044434
+2043,British Columbia,Sum Total,690.8874675819676
+2044,British Columbia,Sum Total,648.6929772716301
+2045,British Columbia,Sum Total,607.7275322652348
+2046,British Columbia,Sum Total,568.4278132399038
+2047,British Columbia,Sum Total,531.3323358054746
+2048,British Columbia,Sum Total,500.25434967649164
+2049,British Columbia,Sum Total,468.02232145244756
+2050,British Columbia,Sum Total,435.0671463179348
+2005,Saskatchewan,Sum Total,255.5
+2006,Saskatchewan,Sum Total,259.15
+2007,Saskatchewan,Sum Total,240.9
+2008,Saskatchewan,Sum Total,226.29999999999998
+2009,Saskatchewan,Sum Total,208.05
+2010,Saskatchewan,Sum Total,182.5
+2011,Saskatchewan,Sum Total,167.9
+2012,Saskatchewan,Sum Total,156.95
+2013,Saskatchewan,Sum Total,153.3
+2014,Saskatchewan,Sum Total,156.95
+2015,Saskatchewan,Sum Total,160.60000000000002
+2016,Saskatchewan,Sum Total,149.65
+2017,Saskatchewan,Sum Total,149.65
+2018,Saskatchewan,Sum Total,146.0
+2019,Saskatchewan,Sum Total,146.0
+2020,Saskatchewan,Sum Total,127.75
+2021,Saskatchewan,Sum Total,116.8
+2022,Saskatchewan,Sum Total,113.15
+2023,Saskatchewan,Sum Total,120.45
+2024,Saskatchewan,Sum Total,120.45
+2025,Saskatchewan,Sum Total,120.45000000000002
+2026,Saskatchewan,Sum Total,124.1
+2027,Saskatchewan,Sum Total,124.1
+2028,Saskatchewan,Sum Total,124.1
+2029,Saskatchewan,Sum Total,127.75
+2030,Saskatchewan,Sum Total,127.75
+2031,Saskatchewan,Sum Total,124.1
+2032,Saskatchewan,Sum Total,127.75
+2033,Saskatchewan,Sum Total,127.75
+2034,Saskatchewan,Sum Total,127.75
+2035,Saskatchewan,Sum Total,127.75
+2036,Saskatchewan,Sum Total,124.10000000000001
+2037,Saskatchewan,Sum Total,124.10000000000001
+2038,Saskatchewan,Sum Total,124.10000000000001
+2039,Saskatchewan,Sum Total,124.10000000000001
+2040,Saskatchewan,Sum Total,124.10000000000001
+2041,Saskatchewan,Sum Total,120.45
+2042,Saskatchewan,Sum Total,120.45
+2043,Saskatchewan,Sum Total,116.8
+2044,Saskatchewan,Sum Total,116.8
+2045,Saskatchewan,Sum Total,116.8
+2046,Saskatchewan,Sum Total,116.8
+2047,Saskatchewan,Sum Total,116.8
+2048,Saskatchewan,Sum Total,116.8
+2049,Saskatchewan,Sum Total,116.8
+2050,Saskatchewan,Sum Total,116.8
+2005,WCSB,Sum Total,6040.75
+2006,WCSB,Sum Total,6099.15
+2007,WCSB,Sum Total,5978.7
+2008,WCSB,Sum Total,5719.55
+2009,WCSB,Sum Total,5380.1
+2010,WCSB,Sum Total,5204.9
+2011,WCSB,Sum Total,5215.849999999999
+2012,WCSB,Sum Total,4996.849999999999
+2013,WCSB,Sum Total,5062.55
+2014,WCSB,Sum Total,5266.95
+2015,WCSB,Sum Total,5460.4
+2016,WCSB,Sum Total,5522.449999999999
+2017,WCSB,Sum Total,5624.65
+2018,WCSB,Sum Total,5865.55
+2019,WCSB,Sum Total,5737.799999999999
+2020,WCSB,Sum Total,5624.65
+2021,WCSB,Sum Total,5872.85
+2022,WCSB,Sum Total,6310.849999999999
+2023,WCSB,Sum Total,6347.349999999999
+2024,WCSB,Sum Total,5777.719554826796
+2025,WCSB,Sum Total,5267.546993054763
+2026,WCSB,Sum Total,4933.9089170086845
+2027,WCSB,Sum Total,4573.904084446545
+2028,WCSB,Sum Total,4296.790298444017
+2029,WCSB,Sum Total,4116.203761608221
+2030,WCSB,Sum Total,4007.4654803971252
+2031,WCSB,Sum Total,3815.4277665349045
+2032,WCSB,Sum Total,3626.1479180336646
+2033,WCSB,Sum Total,3519.164169225699
+2034,WCSB,Sum Total,3433.5026941138844
+2035,WCSB,Sum Total,3335.020873124749
+2036,WCSB,Sum Total,3239.5847855016013
+2037,WCSB,Sum Total,3143.678103748274
+2038,WCSB,Sum Total,3066.6974307977566
+2039,WCSB,Sum Total,3001.528854042189
+2040,WCSB,Sum Total,2942.589355197231
+2041,WCSB,Sum Total,2880.880777506049
+2042,WCSB,Sum Total,2814.3010986496793
+2043,WCSB,Sum Total,2769.8943639495888
+2044,WCSB,Sum Total,2725.003953116854
+2045,WCSB,Sum Total,2688.0241446167192
+2046,WCSB,Sum Total,2652.5282480476735
+2047,WCSB,Sum Total,2615.560202644886
+2048,WCSB,Sum Total,2585.043235996627
+2049,WCSB,Sum Total,2560.7543738712466
+2050,WCSB,Sum Total,2543.3827371302978
+2005,Canada,Sum Total,6215.95
+2006,Canada,Sum Total,6252.45
+2007,Canada,Sum Total,6153.9
+2008,Canada,Sum Total,5898.400000000001
+2009,Canada,Sum Total,5522.450000000001
+2010,Canada,Sum Total,5336.299999999999
+2011,Canada,Sum Total,5328.999999999999
+2012,Canada,Sum Total,5080.799999999999
+2013,Canada,Sum Total,5135.55
+2014,Canada,Sum Total,5394.7
+2015,Canada,Sum Total,5540.7
+2016,Canada,Sum Total,5595.449999999999
+2017,Canada,Sum Total,5672.099999999999
+2018,Canada,Sum Total,5898.400000000001
+2019,Canada,Sum Total,5745.099999999999
+2020,Canada,Sum Total,5628.299999999999
+2021,Canada,Sum Total,5883.8
+2022,Canada,Sum Total,6318.15
+2023,Canada,Sum Total,6354.65
+2024,Canada,Sum Total,5781.369554826796
+2025,Canada,Sum Total,5267.546993054763
+2026,Canada,Sum Total,4933.9089170086845
+2027,Canada,Sum Total,4573.904084446545
+2028,Canada,Sum Total,4296.790298444017
+2029,Canada,Sum Total,4116.203761608221
+2030,Canada,Sum Total,4007.4654803971252
+2031,Canada,Sum Total,3815.4277665349045
+2032,Canada,Sum Total,3626.1479180336646
+2033,Canada,Sum Total,3519.164169225699
+2034,Canada,Sum Total,3433.5026941138844
+2035,Canada,Sum Total,3335.020873124749
+2036,Canada,Sum Total,3239.5847855016013
+2037,Canada,Sum Total,3143.678103748274
+2038,Canada,Sum Total,3066.6974307977566
+2039,Canada,Sum Total,3001.528854042189
+2040,Canada,Sum Total,2942.589355197231
+2041,Canada,Sum Total,2880.880777506049
+2042,Canada,Sum Total,2814.3010986496793
+2043,Canada,Sum Total,2769.8943639495888
+2044,Canada,Sum Total,2725.003953116854
+2045,Canada,Sum Total,2688.0241446167192
+2046,Canada,Sum Total,2652.5282480476735
+2047,Canada,Sum Total,2615.560202644886
+2048,Canada,Sum Total,2585.043235996627
+2049,Canada,Sum Total,2560.7543738712466
+2050,Canada,Sum Total,2543.3827371302978

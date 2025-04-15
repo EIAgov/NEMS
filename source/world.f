@@ -372,25 +372,25 @@ real cc
 aa=91
       !if (fdbk_sw.eq.0) then
               do iY=FFY-1989,aa
-                  XSTART_PRICE(iY)=XSTART_PRICE(iY)/MC_JPGDP(32)
+                  XSTART_PRICE(iY)=XSTART_PRICE(iY)/MC_JPGDP(35)
         end do
               do iY=FFY-1989,MNUMYR
-                  START_PRICE(iY)=START_PRICE(iY)/MC_JPGDP(32)
+                  START_PRICE(iY)=START_PRICE(iY)/MC_JPGDP(35)
         end do
       !endif
 
 write(DBGUNIT, '(//,A)') "Start Pricesa this is a new test AEO2017"
-write (DBGUNIT,1234) (START_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,1234) (START_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 
 write(DBGUNIT, '(//,A)') "XStart Pricesa"
-write (DBGUNIT,12345) (XSTART_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,12345) (XSTART_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 
 !write(DBGUNIT, '(//,A)') "Brent Pricesa"
-!write (DBGUNIT,1234) (BRENT_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+!write (DBGUNIT,1234) (BRENT_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 1234          format (2x, 43F10.2)
 
 !write(DBGUNIT, '(//,A)') "XBrent Pricesa"
-!write (DBGUNIT,12345) (XBRENT_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+!write (DBGUNIT,12345) (XBRENT_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 12345          format (2x, 73F10.2)
 
 
@@ -406,12 +406,12 @@ write (DBGUNIT,12345) (XSTART_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
       end do
 
             do iY=FFY-1989,aa
-                XWTI_PRICE(iY)=XWTI_PRICE(iY)/MC_JPGDP(32)
+                XWTI_PRICE(iY)=XWTI_PRICE(iY)/MC_JPGDP(35)
       end do
             do iY=FFY-1989,MNUMYR
-                WTI_PRICE(iY)=WTI_PRICE(iY)/MC_JPGDP(32)
+                WTI_PRICE(iY)=WTI_PRICE(iY)/MC_JPGDP(35)
             end do
-            !XWTI_PRICE(:) = XWTI_PRICE(:)/MC_JPGDP(32)      
+            !XWTI_PRICE(:) = XWTI_PRICE(:)/MC_JPGDP(35)      
             
             
 !This section retrieve initial crude exoprts which are also final crude exports in "No Crude Exports" case            
@@ -1052,7 +1052,7 @@ write(DBGUNIT, '(//,A)') "line 794"
 
       P_Heavy_Sour(1989+CURIYR) = P_Eql(1989+CURIYR)*P_hs_Ratio(1989+CURIYR)
 
-      !START_PRICE(CURIYR) = P_Eql(1989+CURIYR)/MC_JPGDP(32)
+      !START_PRICE(CURIYR) = P_Eql(1989+CURIYR)/MC_JPGDP(35)
       !WTI_PRICE(CURIYR) = START_PRICE(CURIYR)*(WTI_p(1989+CURIYR)/BRENT_p(1989+CURIYR))
 
 iFlag=2
@@ -1060,36 +1060,36 @@ iFlag=2
 if(iFlag .EQ.1) then
 
 write(DBGUNIT, '(//,A)') "Brent Prices1"
-write (DBGUNIT,1122) (BRENT_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,1122) (BRENT_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 1122          format (2x, 43F10.2)
 
 write(DBGUNIT, '(//,A)') "XBrent Prices1"
-write (DBGUNIT,3333) (XBRENT_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,3333) (XBRENT_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 3333          format (2x, 73F10.2)
 
-      START_PRICE(CURIYR) = P_Eql(1989+CURIYR)/MC_JPGDP(32)
+      START_PRICE(CURIYR) = P_Eql(1989+CURIYR)/MC_JPGDP(35)
       WTI_PRICE(CURIYR) = START_PRICE(CURIYR)*(WTI_p(1989+CURIYR)/BRENT_p(1989+CURIYR))
 
 write(DBGUNIT, '(//,A)') "Start Prices1"
-write (DBGUNIT,1122) (START_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,1122) (START_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 
 write(DBGUNIT, '(//,A)') "XStart Prices1"
-write (DBGUNIT,3333) (XSTART_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,3333) (XSTART_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 
 write(DBGUNIT, '(//,A)') "WTI Prices1"
-write (DBGUNIT,11222) (WTI_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,11222) (WTI_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 11222          format (2x, 43F10.2)
 
 write(DBGUNIT, '(//,A)') "XWTI Prices1"
-write (DBGUNIT,33333) (XWTI_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,33333) (XWTI_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 33333          format (2x, 73F10.2)
 
 end if
 
 
-      !BRENT_PRICE(CURIYR) = BRENT_PRICE(CURIYR)/MC_JPGDP(32)
-      !START_PRICE(CURIYR) = START_PRICE(CURIYR)/MC_JPGDP(32)
-      !WTI_PRICE(CURIYR) = WTI_PRICE(CURIYR)/MC_JPGDP(32)
+      !BRENT_PRICE(CURIYR) = BRENT_PRICE(CURIYR)/MC_JPGDP(35)
+      !START_PRICE(CURIYR) = START_PRICE(CURIYR)/MC_JPGDP(35)
+      !WTI_PRICE(CURIYR) = WTI_PRICE(CURIYR)/MC_JPGDP(35)
 
 
 
@@ -1140,7 +1140,7 @@ end if
 
       !Change to 1987 dollars
       do iSt = 1, CRSTEP
-        P_Total_Crude(iSt, 1989+CURIYR) = P_Total_Crude(iSt, 1989+CURIYR)/MC_JPGDP(32)
+        P_Total_Crude(iSt, 1989+CURIYR) = P_Total_Crude(iSt, 1989+CURIYR)/MC_JPGDP(35)
       end do
 
       !Fill up values from 2050 to 2080 with values from 2040
@@ -1466,7 +1466,7 @@ end if
       !Change P_Foreign_Crude to 1987 dollars
       do c=1,MNCRUD
         do t = 1, CISTEP
-            P_FOREIGN_CRUDE(c,Max_Crude_Source,t,1989+CURIYR) = P_FOREIGN_CRUDE(c,Max_Crude_Source,t,1989+CURIYR)/MC_JPGDP(32)
+            P_FOREIGN_CRUDE(c,Max_Crude_Source,t,1989+CURIYR) = P_FOREIGN_CRUDE(c,Max_Crude_Source,t,1989+CURIYR)/MC_JPGDP(35)
         end do
       end do
 
@@ -1707,7 +1707,7 @@ end if
 
       !Change P_Non_US_Demand to 1987 dollars 
       do c=1,MNCRUD
-        P_NON_US_DEMAND(c, Max_Crude_Source, Max_NonUS_Demand_Steps,1989+CURIYR)=P_NON_US_DEMAND(c, Max_Crude_Source, Max_NonUS_Demand_Steps,1989+CURIYR)/MC_JPGDP(32)
+        P_NON_US_DEMAND(c, Max_Crude_Source, Max_NonUS_Demand_Steps,1989+CURIYR)=P_NON_US_DEMAND(c, Max_Crude_Source, Max_NonUS_Demand_Steps,1989+CURIYR)/MC_JPGDP(35)
       end do
 
       !Buid NonUS crude demand curves curves into US from 2040 to 2080 with values from 2040
@@ -1853,16 +1853,16 @@ end do
 
            do t=1,INTLSTEP
 
-            P_Start = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t))
-            P_End   = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t+1))
+            P_Start = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t))
+            P_End   = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t+1))
 
             if (t .EQ.1) then
                 Q_Start = 0.0
             else
-                Q_Start = EXP_Q(iPr,1989+CURIYR)*(P_Start/( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(D_E(1989+CURIYR)-0.15)
+                Q_Start = EXP_Q(iPr,1989+CURIYR)*(P_Start/( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(D_E(1989+CURIYR)-0.15)
             end if
 
-            Q_End   = EXP_Q(iPr,1989+CURIYR)*(P_End/( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(D_E(1989+CURIYR)-0.15)
+            Q_End   = EXP_Q(iPr,1989+CURIYR)*(P_End/( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(D_E(1989+CURIYR)-0.15)
 
             Product_Export_P(iPr,1,t,CURIYR)=(P_Start+P_End)/2
             Product_Export_Q(iPr,1,t,CURIYR)=(Q_End-Q_Start)
@@ -1879,7 +1879,7 @@ end do
       !Change Product_Export_P to 1987 dollars
       do iPr=1,MNPROD !for each product
        do t=1,INTLSTEP !for each step
-        Product_Export_P(iPr,1,t,CURIYR)=Product_Export_P(iPr,1,t,CURIYR)/MC_JPGDP(32)
+        Product_Export_P(iPr,1,t,CURIYR)=Product_Export_P(iPr,1,t,CURIYR)/MC_JPGDP(35)
        end do         !end for each step
       end do          !end for each product
 
@@ -1946,11 +1946,11 @@ end do
       do iPr=1,MNPROD !for each product
        do t=1,INTLSTEP !for each step
 
-         P_Start = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1+BP(t))
-         P_End   = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1+BP(t+1))
+         P_Start = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1+BP(t))
+         P_End   = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1+BP(t+1))
 
-         Q_Start = IMP_Q(iPr,1989+CURIYR)*(P_Start/( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(S_E(1989+CURIYR)+0.15)
-         Q_End   = IMP_Q(iPr,1989+CURIYR)*(P_End/( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(S_E(1989+CURIYR)+0.15)
+         Q_Start = IMP_Q(iPr,1989+CURIYR)*(P_Start/( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(S_E(1989+CURIYR)+0.15)
+         Q_End   = IMP_Q(iPr,1989+CURIYR)*(P_End/( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**(S_E(1989+CURIYR)+0.15)
 
          
          
@@ -1978,7 +1978,7 @@ end do
      !Change Product_Import_P to 1987 dollars
       do iPr=1,MNPROD !for each product
        do t=1,INTLSTEP !for each step
-        Product_Import_P(iPr,1,t,CURIYR)=Product_Import_P(iPr,1,t,CURIYR)/MC_JPGDP(32)
+        Product_Import_P(iPr,1,t,CURIYR)=Product_Import_P(iPr,1,t,CURIYR)/MC_JPGDP(35)
        end do         !end for each step
       end do          !end for each product
 
@@ -2013,10 +2013,10 @@ end do
 !        Product_Import_Q(iPr,1,2,iYr) = IMP_Q(iPr,1989+iYr)*0.1
 !        Product_Export_Q(iPr,1,2,iYr) = EXP_Q(iPr,1989+iYr)*0.1
 !
-!        Product_Import_P(iPr,1,1,iYr) = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.01
-!        Product_Export_P(iPr,1,1,iYr) = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*100.0
-!        Product_Import_P(iPr,1,2,iYr) = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.02
-!        Product_Export_P(iPr,1,2,iYr) = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*90.0
+!        Product_Import_P(iPr,1,1,iYr) = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.01
+!        Product_Export_P(iPr,1,1,iYr) = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*100.0
+!        Product_Import_P(iPr,1,2,iYr) = ( IMP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.02
+!        Product_Export_P(iPr,1,2,iYr) = ( EXP_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*90.0
 !
 !    end do !end do iYr=1, MNXYR
 !   end if
@@ -2039,10 +2039,10 @@ end do
 !        Product_Import_Q(19,1,2,iYr) = IMP_Q(19,1989+iYr)*0.1 
 !         
 !
-!        Product_Import_P(13,1,1,iYr) = ( IMP_P(13,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.01    
-!        Product_Import_P(13,1,2,iYr) = ( IMP_P(13,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.02  
-!        Product_Import_P(19,1,1,iYr) = ( IMP_P(19,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.01   
-!        Product_Import_P(19,1,2,iYr) = ( IMP_P(19,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.02
+!        Product_Import_P(13,1,1,iYr) = ( IMP_P(13,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.01    
+!        Product_Import_P(13,1,2,iYr) = ( IMP_P(13,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.02  
+!        Product_Import_P(19,1,1,iYr) = ( IMP_P(19,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.01   
+!        Product_Import_P(19,1,2,iYr) = ( IMP_P(19,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*0.02
 !         
 !
 !    end do !end do iYr=1, MNXYR
@@ -2109,7 +2109,7 @@ end do
 !
 !      !Change P_Europe_Gas to 1987 dollars
 !      do t=1,EUSTEP
-!        P_Europe_Gas(t,1989+CURIYR)=P_Europe_Gas(t,1989+CURIYR)/MC_JPGDP(32)
+!        P_Europe_Gas(t,1989+CURIYR)=P_Europe_Gas(t,1989+CURIYR)/MC_JPGDP(35)
 !      end do
 !
 !       !Buid EU gasoline import supply curves into US from 2040 to 2080 with values from 2040
@@ -2131,17 +2131,17 @@ end do
 
 
 
-            P_Start = ( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t))
-            P_End   = ( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t+1))
+            P_Start = ( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t))
+            P_End   = ( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) )*(1-BP(t+1))
 
 
             if (t .EQ.1) then
                 Q_Start = 0.0
             else
-                Q_Start = C_MC_Q(iPr,1989+CURIYR)*(P_Start/( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**D_E(1989+CURIYR)
+                Q_Start = C_MC_Q(iPr,1989+CURIYR)*(P_Start/( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**D_E(1989+CURIYR)
             end if
 
-            Q_End   = C_MC_Q(iPr,1989+CURIYR)*(P_End/( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(32)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**D_E(1989+CURIYR)
+            Q_End   = C_MC_Q(iPr,1989+CURIYR)*(P_End/( C_MC_P(iPr,1989+CURIYR) + 0.96*MC_JPGDP(35)*(BRENT_PRICE(CURIYR) - START_PRICE(CURIYR)) ))**D_E(1989+CURIYR)
 
             P_C_MC_Demand(t,1989+CURIYR,iPr)=(P_Start+P_End)/2
             Q_C_MC_Demand(t,1989+CURIYR,iPr)=(Q_End-Q_Start)
@@ -2169,7 +2169,7 @@ end do
       !Change P_C_MC_Demand to 1987 dollars
       do iPr =1,MNPROD
            do t=1,MCSTEP
-             P_C_MC_Demand(t,1989+CURIYR,iPr)= P_C_MC_Demand(t,1989+CURIYR,iPr)/MC_JPGDP(32)
+             P_C_MC_Demand(t,1989+CURIYR,iPr)= P_C_MC_Demand(t,1989+CURIYR,iPr)/MC_JPGDP(35)
         end do
       end do
 
@@ -2291,32 +2291,32 @@ if (iFlag .EQ. 2) then  !REGULAR RUN
 
             do 91, c=1,MNCRUD
                 write (DBGUNIT,92) (P_Crude(c,ii) , ii = 2008, 2071)
-                !write (DBGUNIT,92) (P_Foreign_Crude(c,1,8,ii)*MC_JPGDP(32)+P_Crude(1,ii) , ii = 2008, 2071)     !P_Foreign_Crude(c,Max_Crude_Source,t,1989+CURIYR)
-                !write (DBGUNIT,92) (P_Total_Crude(8,ii)*MC_JPGDP(32) , ii = 2008, 2071)
-                write (DBGUNIT,92) (P_NON_US_DEMAND(c,1,1,ii)*MC_JPGDP(32) , ii = 2008, 2071)
+                !write (DBGUNIT,92) (P_Foreign_Crude(c,1,8,ii)*MC_JPGDP(35)+P_Crude(1,ii) , ii = 2008, 2071)     !P_Foreign_Crude(c,Max_Crude_Source,t,1989+CURIYR)
+                !write (DBGUNIT,92) (P_Total_Crude(8,ii)*MC_JPGDP(35) , ii = 2008, 2071)
+                write (DBGUNIT,92) (P_NON_US_DEMAND(c,1,1,ii)*MC_JPGDP(35) , ii = 2008, 2071)
 92          format (2x, 64F10.2)
 91          continue
 
 write(DBGUNIT, '(//,A)') "Brent Prices"
-write (DBGUNIT,99) (BRENT_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,99) (BRENT_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 99          format (2x, 43F10.2)
 
 write(DBGUNIT, '(//,A)') "XBrent Prices"
-write (DBGUNIT,100) (XBRENT_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,100) (XBRENT_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 100          format (2x, 73F10.2)
 
 write(DBGUNIT, '(//,A)') "Start Prices"
-write (DBGUNIT,99) (START_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,99) (START_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 
 write(DBGUNIT, '(//,A)') "XStart Prices"
-write (DBGUNIT,100) (XSTART_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,100) (XSTART_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 
 write(DBGUNIT, '(//,A)') "WTI Prices1"
-write (DBGUNIT,101) (WTI_PRICE(ii)*MC_JPGDP(32) , ii = 19, 61)
+write (DBGUNIT,101) (WTI_PRICE(ii)*MC_JPGDP(35) , ii = 19, 61)
 101          format (2x, 43F10.2)
 
 write(DBGUNIT, '(//,A)') "XWTI Prices1"
-write (DBGUNIT,102) (XWTI_PRICE(ii)*MC_JPGDP(32) , ii = 19, 91)
+write (DBGUNIT,102) (XWTI_PRICE(ii)*MC_JPGDP(35) , ii = 19, 91)
 102          format (2x, 73F10.2)
 
      end if

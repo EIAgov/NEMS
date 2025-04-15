@@ -56,7 +56,7 @@
       PARAMETER (CNCSET=10)               ! NUMBER OF COALS AVAILABLE W/IN SET
       PARAMETER (NCUTSET=12)              ! NUMBER OF COAL UTILITY SETS
       PARAMETER (NFYRS=MNUMYR)           ! NUMBER OF FORCASTED YEARS
-      PARAMETER (MX_NCOALS=41)            ! Maximum Number U.S. Coal Supply Curves
+      PARAMETER (MX_NCOALS=14)            ! Maximum Number U.S. Coal Supply Curves
       PARAMETER (MX_IMPCOAL=35)           ! Maximum Number Coal Import Supply Curve/Step Combinations for Thermal Coal
       PARAMETER (MX_ISCV=12)              ! Maximum Number Coal Import Supply Curves for Thermal 
       PARAMETER (MX_ISCST=58)             ! Total Supply Curve/step combinations for Import Supply Curves (clexsup)

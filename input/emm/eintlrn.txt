@@ -5,7 +5,7 @@
 #
 #NUMBER OF RECORDS IN THE INTERNATIONAL LEARNING TABLE
 %NREC INTLN%
-'NRECS'  98
+'NRECS'  160
 #
 # INTERNATIONAL LEARNING TABLE
 # This table was compiled using the plant data shown below.
@@ -36,108 +36,150 @@
 'Adv Combustion Turbine'          'AT'        2010  10000.00
 'Advanced Nuclear'                'AN'        2014   2200.00
 'Advanced Nuclear'                'AN'        2015   2200.00
-'Conventional Wind'               'WN'        2015  57130.00
-'Conventional Wind'               'WN'        2016  44020.00
-'Conventional Wind'               'WN'        2017  56970.00
-'Conventional Wind'               'WN'        2018  24890.00
-'Conventional Wind'               'WN'        2019  50424.00
-'Conventional Wind'               'WN'        2020   2318.00
-'Conventional Wind'               'WN'        2021   2318.00
-'Conventional Wind'               'WN'        2022  54840.00
-'Conventional Wind'               'WN'        2023  54820.00
-'Conventional Wind'               'WN'        2024  54830.00
-'Conventional Wind'               'WN'        2025  54830.00
-'Conventional Wind'               'WN'        2026  50220.00
-'Conventional Wind'               'WN'        2027  50220.00
-'Conventional Wind'               'WN'        2028  50210.00
-'Conventional Wind'               'WN'        2029  50220.00
-'Conventional Wind'               'WN'        2030  50220.00
-'Conventional Wind'               'WN'        2031  62190.00
-'Conventional Wind'               'WN'        2032  62200.00
-'Conventional Wind'               'WN'        2033  62190.00
-'Conventional Wind'               'WN'        2034  62180.00
-'Conventional Wind'               'WN'        2035  62200.00
-'Conventional Wind'               'WN'        2036  73950.00
-'Conventional Wind'               'WN'        2037  73940.00
-'Conventional Wind'               'WN'        2038  73960.00
-'Conventional Wind'               'WN'        2039  73940.00
-'Conventional Wind'               'WN'        2040  73950.00
-'Conventional Wind'               'WN'        2041  61040.00
-'Conventional Wind'               'WN'        2042  61050.00
-'Conventional Wind'               'WN'        2043  61030.00
-'Conventional Wind'               'WN'        2044  61040.00
-'Conventional Wind'               'WN'        2045  61040.00
-'Conventional Wind'               'WN'        2046  28300.00
-'Conventional Wind'               'WN'        2047  28310.00
-'Conventional Wind'               'WN'        2048  28310.00
-'Conventional Wind'               'WN'        2049  28310.00
-'Conventional Wind'               'WN'        2050  28300.00
-'Solar Thermal (no storage)'      'SO'        2015    251.00
-'Solar Thermal (no storage)'      'SO'        2016    100.00
-'Solar Thermal (no storage)'      'SO'        2017    103.00
-'Solar Thermal (no storage)'      'SO'        2018    513.00
-'Solar Thermal (no storage)'      'SO'        2020    209.00
-'PV w/axis tracking'              'PV'        2015  43190.00
-'PV w/axis tracking'              'PV'        2016  60620.00
-'PV w/axis tracking'              'PV'        2017  97810.00
-'PV w/axis tracking'              'PV'        2018  65320.00
-'PV w/axis tracking'              'PV'        2019  90603.00
-'PV w/axis tracking'              'PV'        2020  67778.50
-'PV w/axis tracking'              'PV'        2021  67778.50
-'PV w/axis tracking'              'PV'        2022  90170.00
-'PV w/axis tracking'              'PV'        2023  90180.00
-'PV w/axis tracking'              'PV'        2024  90180.00
-'PV w/axis tracking'              'PV'        2025  90180.00
-'PV w/axis tracking'              'PV'        2026 107640.00
-'PV w/axis tracking'              'PV'        2027 107650.00
-'PV w/axis tracking'              'PV'        2028 107650.00
-'PV w/axis tracking'              'PV'        2029 107630.00
-'PV w/axis tracking'              'PV'        2030 107650.00
-'PV w/axis tracking'              'PV'        2031 101050.00
-'PV w/axis tracking'              'PV'        2032 101040.00
-'PV w/axis tracking'              'PV'        2033 101060.00
-'PV w/axis tracking'              'PV'        2034 101040.00
-'PV w/axis tracking'              'PV'        2035 101050.00
-'PV w/axis tracking'              'PV'        2036 115270.00
-'PV w/axis tracking'              'PV'        2037 115270.00
-'PV w/axis tracking'              'PV'        2038 115270.00
-'PV w/axis tracking'              'PV'        2039 115270.00
-'PV w/axis tracking'              'PV'        2040 115270.00
-'PV w/axis tracking'              'PV'        2041 139760.00
-'PV w/axis tracking'              'PV'        2042 139760.00
-'PV w/axis tracking'              'PV'        2043 139760.00
-'PV w/axis tracking'              'PV'        2044 139750.00
-'PV w/axis tracking'              'PV'        2045 139770.00
-'PV w/axis tracking'              'PV'        2046 157630.00
-'PV w/axis tracking'              'PV'        2047 157630.00
-'PV w/axis tracking'              'PV'        2048 157640.00
-'PV w/axis tracking'              'PV'        2049 157630.00
-'PV w/axis tracking'              'PV'        2050 157630.00
-'Diurnal Storage'                 'DS'        2026   8580.00
-'Diurnal Storage'                 'DS'        2027   8580.00
-'Diurnal Storage'                 'DS'        2028   8590.00
-'Diurnal Storage'                 'DS'        2029   8580.00
-'Diurnal Storage'                 'DS'        2030   8580.00
-'Diurnal Storage'                 'DS'        2031  14960.00
-'Diurnal Storage'                 'DS'        2032  14960.00
-'Diurnal Storage'                 'DS'        2033  14960.00
-'Diurnal Storage'                 'DS'        2034  14960.00
-'Diurnal Storage'                 'DS'        2035  14960.00
-'Diurnal Storage'                 'DS'        2036  27140.00
-'Diurnal Storage'                 'DS'        2037  27150.00
-'Diurnal Storage'                 'DS'        2038  27150.00
-'Diurnal Storage'                 'DS'        2039  27140.00
-'Diurnal Storage'                 'DS'        2040  27150.00
-'Diurnal Storage'                 'DS'        2041  48370.00
-'Diurnal Storage'                 'DS'        2042  48360.00
-'Diurnal Storage'                 'DS'        2043  48370.00
-'Diurnal Storage'                 'DS'        2044  48360.00
-'Diurnal Storage'                 'DS'        2045  48370.00
-'Diurnal Storage'                 'DS'        2046  52340.00
-'Diurnal Storage'                 'DS'        2047  52340.00
-'Diurnal Storage'                 'DS'        2048  52330.00
-'Diurnal Storage'                 'DS'        2049  52340.00
-'Diurnal Storage'                 'DS'        2050  52340.00
+'Conventional Wind'               'WN'        2015  54925.04
+'Conventional Wind'               'WN'        2016  39263.47
+'Conventional Wind'               'WN'        2017  36971.87
+'Conventional Wind'               'WN'        2018  38382.74
+'Conventional Wind'               'WN'        2019  42709.24
+'Conventional Wind'               'WN'        2020 112025.72
+'Conventional Wind'               'WN'        2021  66218.28
+'Conventional Wind'               'WN'        2022  18840.47
+'Conventional Wind'               'WN'        2023  21268.93
+'Conventional Wind'               'WN'        2024  20977.92
+'Conventional Wind'               'WN'        2025  85357.68
+'Conventional Wind'               'WN'        2026  32382.64
+'Conventional Wind'               'WN'        2027  32382.64
+'Conventional Wind'               'WN'        2028  32382.62
+'Conventional Wind'               'WN'        2029  32382.64
+'Conventional Wind'               'WN'        2030  32382.63
+'Conventional Wind'               'WN'        2031  37190.63
+'Conventional Wind'               'WN'        2032  37190.60
+'Conventional Wind'               'WN'        2033  37190.57
+'Conventional Wind'               'WN'        2034  37190.63
+'Conventional Wind'               'WN'        2035  37190.60
+'Conventional Wind'               'WN'        2036  51635.18
+'Conventional Wind'               'WN'        2037  51635.18
+'Conventional Wind'               'WN'        2038  51635.20
+'Conventional Wind'               'WN'        2039  51635.17
+'Conventional Wind'               'WN'        2040  51635.17
+'Conventional Wind'               'WN'        2041  38322.29
+'Conventional Wind'               'WN'        2042  38322.30
+'Conventional Wind'               'WN'        2043  38322.30
+'Conventional Wind'               'WN'        2044  38322.31
+'Conventional Wind'               'WN'        2045  38322.28
+'Conventional Wind'               'WN'        2046  14243.55
+'Conventional Wind'               'WN'        2047  14243.55
+'Conventional Wind'               'WN'        2048  14243.56
+'Conventional Wind'               'WN'        2049  14243.55
+'Conventional Wind'               'WN'        2050  14243.55
+'Offshore Wind'                   'WF'        2015   3225.40
+'Offshore Wind'                   'WF'        2016   2624.38
+'Offshore Wind'                   'WF'        2017   4494.90
+'Offshore Wind'                   'WF'        2018   4788.85
+'Offshore Wind'                   'WF'        2019   4729.13
+'Offshore Wind'                   'WF'        2020   6012.72
+'Offshore Wind'                   'WF'        2021   4139.93
+'Offshore Wind'                   'WF'        2022   3169.30
+'Offshore Wind'                   'WF'        2023   3482.72
+'Offshore Wind'                   'WF'        2024      0.00
+'Offshore Wind'                   'WF'        2025      0.00
+'Offshore Wind'                   'WF'        2026    627.70
+'Offshore Wind'                   'WF'        2027    627.70
+'Offshore Wind'                   'WF'        2028    627.70
+'Offshore Wind'                   'WF'        2029    627.70
+'Offshore Wind'                   'WF'        2030    627.70
+'Offshore Wind'                   'WF'        2031      8.55
+'Offshore Wind'                   'WF'        2032      8.55
+'Offshore Wind'                   'WF'        2033      8.55
+'Offshore Wind'                   'WF'        2034      8.55
+'Offshore Wind'                   'WF'        2035      8.55
+'Offshore Wind'                   'WF'        2036     99.48
+'Offshore Wind'                   'WF'        2037     99.48
+'Offshore Wind'                   'WF'        2038     99.48
+'Offshore Wind'                   'WF'        2039     99.48
+'Offshore Wind'                   'WF'        2040     99.48
+'Offshore Wind'                   'WF'        2041    279.73
+'Offshore Wind'                   'WF'        2042    279.73
+'Offshore Wind'                   'WF'        2043    279.73
+'Offshore Wind'                   'WF'        2044    279.73
+'Offshore Wind'                   'WF'        2045    279.73
+'Offshore Wind'                   'WF'        2046      0.00
+'Offshore Wind'                   'WF'        2047      0.00
+'Offshore Wind'                   'WF'        2048      0.00
+'Offshore Wind'                   'WF'        2049      0.00
+'Offshore Wind'                   'WF'        2050      0.00
+'PV w/axis tracking'              'PV'        2015  42050.64
+'PV w/axis tracking'              'PV'        2016  60857.32
+'PV w/axis tracking'              'PV'        2017  86704.81
+'PV w/axis tracking'              'PV'        2018  84916.22
+'PV w/axis tracking'              'PV'        2019  93241.09
+'PV w/axis tracking'              'PV'        2020 129104.23
+'PV w/axis tracking'              'PV'        2021 112500.29
+'PV w/axis tracking'              'PV'        2022 122327.58
+'PV w/axis tracking'              'PV'        2023  95958.16
+'PV w/axis tracking'              'PV'        2024 104338.12
+'PV w/axis tracking'              'PV'        2025 160021.15
+'PV w/axis tracking'              'PV'        2026  76886.19
+'PV w/axis tracking'              'PV'        2027  76886.19
+'PV w/axis tracking'              'PV'        2028  76886.18
+'PV w/axis tracking'              'PV'        2029  76886.19
+'PV w/axis tracking'              'PV'        2030  76886.19
+'PV w/axis tracking'              'PV'        2031  61925.89
+'PV w/axis tracking'              'PV'        2032  61925.90
+'PV w/axis tracking'              'PV'        2033  61925.89
+'PV w/axis tracking'              'PV'        2034  61925.92
+'PV w/axis tracking'              'PV'        2035  61925.89
+'PV w/axis tracking'              'PV'        2036  81701.16
+'PV w/axis tracking'              'PV'        2037  81701.17
+'PV w/axis tracking'              'PV'        2038  81701.18
+'PV w/axis tracking'              'PV'        2039  81701.15
+'PV w/axis tracking'              'PV'        2040  81701.18
+'PV w/axis tracking'              'PV'        2041 103739.85
+'PV w/axis tracking'              'PV'        2042 103739.86
+'PV w/axis tracking'              'PV'        2043 103739.84
+'PV w/axis tracking'              'PV'        2044 103739.85
+'PV w/axis tracking'              'PV'        2045 103739.87
+'PV w/axis tracking'              'PV'        2046 110489.23
+'PV w/axis tracking'              'PV'        2047 110489.25
+'PV w/axis tracking'              'PV'        2048 110489.26
+'PV w/axis tracking'              'PV'        2049 110489.25
+'PV w/axis tracking'              'PV'        2050 110489.23
+'Diurnal Storage'                 'DS'        2015      0.00
+'Diurnal Storage'                 'DS'        2016      0.00
+'Diurnal Storage'                 'DS'        2017      0.00
+'Diurnal Storage'                 'DS'        2018      0.00
+'Diurnal Storage'                 'DS'        2019      0.00
+'Diurnal Storage'                 'DS'        2020      0.00
+'Diurnal Storage'                 'DS'        2021      0.00
+'Diurnal Storage'                 'DS'        2022  46071.06
+'Diurnal Storage'                 'DS'        2023      0.00
+'Diurnal Storage'                 'DS'        2024   1620.32
+'Diurnal Storage'                 'DS'        2025   4655.32
+'Diurnal Storage'                 'DS'        2026   8509.01
+'Diurnal Storage'                 'DS'        2027   8509.01
+'Diurnal Storage'                 'DS'        2028   8509.01
+'Diurnal Storage'                 'DS'        2029   8509.01
+'Diurnal Storage'                 'DS'        2030   8509.02
+'Diurnal Storage'                 'DS'        2031  18222.30
+'Diurnal Storage'                 'DS'        2032  18222.31
+'Diurnal Storage'                 'DS'        2033  18222.30
+'Diurnal Storage'                 'DS'        2034  18222.30
+'Diurnal Storage'                 'DS'        2035  18222.31
+'Diurnal Storage'                 'DS'        2036  20563.01
+'Diurnal Storage'                 'DS'        2037  20562.99
+'Diurnal Storage'                 'DS'        2038  20563.01
+'Diurnal Storage'                 'DS'        2039  20563.01
+'Diurnal Storage'                 'DS'        2040  20563.01
+'Diurnal Storage'                 'DS'        2041  47786.19
+'Diurnal Storage'                 'DS'        2042  47786.17
+'Diurnal Storage'                 'DS'        2043  47786.18
+'Diurnal Storage'                 'DS'        2044  47786.19
+'Diurnal Storage'                 'DS'        2045  47786.19
+'Diurnal Storage'                 'DS'        2046  50741.03
+'Diurnal Storage'                 'DS'        2047  50741.05
+'Diurnal Storage'                 'DS'        2048  50741.04
+'Diurnal Storage'                 'DS'        2049  50741.05
+'Diurnal Storage'                 'DS'        2050  50741.06
 ###
 ###
 #   International Learning Adds for AEO99

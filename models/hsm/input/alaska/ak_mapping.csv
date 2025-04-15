@@ -1,0 +1,5 @@
+notes,,,,,,
+region_number,crude_tariff_price,natgas_tariff_price,exp_drill_cost_rate,dev_drill_cost_rate,exp_dry_rate,dev_dry_rate
+11,7,3,25000000,20010000,,
+12,5.5,3,15300000,11550000,,
+13,2,3,12000000,7500000,,

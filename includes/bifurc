@@ -27,13 +27,14 @@
     REAL*4 QE2ASIN(MNUMCR,MNUMYR,2) ! Asphalt and Road Oil.  Industrial
     REAL*4 QE2OTIN(MNUMCR,MNUMYR,2) ! Other Petroleum.  Industrial
     REAL*4 QE2CIIN(MNUMCR,MNUMYR,2) ! Net Coal Coke Imports.  Industrial
+	REAL*4 QE2H2IN(MNUMCR,MNUMYR,2) ! Hydrogen fuel.  Industrial
 
     COMMON/BIFURC/ QE2NGCM,QE2CLCM,QE2MGCM,QE2DSCM,QE2KSCM,QE2LGCM, &
                    QE2RSCM,QE2NGIN,QE2LPIN,QE2CLIN,QE2MCIN,QE2MGIN, &
                    QE2DSIN,QE2KSIN,QE2LGIN,QE2RSIN,QE2PFIN,QE2SGIN, &
-                   QE2PCIN,QE2ASIN,QE2OTIN,QE2CIIN
+                   QE2PCIN,QE2ASIN,QE2OTIN,QE2CIIN,QE2H2IN
 
 
-    real*4 EQ_BIFURC(MNUMCR*MNUMYR*44) ! equivalence for filer and restart file
+    real*4 EQ_BIFURC(MNUMCR*MNUMYR*46) ! equivalence for filer and restart file
     equivalence(EQ_BIFURC(1),QE2NGCM(1,1,1))
       

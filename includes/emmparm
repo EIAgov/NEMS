@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/emmparm,v 1.48 2019/09/24 18:13:01 pkc Exp $
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !  EMMPARM DEFINES THE PARAMETERS WHICH DETERMINE THE SIZE OF THE EMM   
@@ -113,6 +114,10 @@
       INTEGER*4 MX_CL_UNIT ! Maximum Number of Coal Units
 
       INTEGER*4 MX_STO_INC ! Maximum Number of Storage Increments Allowed
+	  INTEGER*4 MaxPtypesP ! Maximum number of ReStore Plant Types
+	  INTEGER*4 MaxStoTyp  ! Maximum number of ReStore storage types
+	  INTEGER*4 MaxCurtTyp ! Maximum number of ReStore curtailment types
+      
 !                                                                       
 !  PARAMETERS                                                           
 !                                                                       
@@ -131,7 +136,7 @@
       PARAMETER(ECP_D_MSP =   4)         ! ECP SEASONAL PERIOD
       PARAMETER(ECP_D_MXP =   8)         ! MAXIMUM NUMBER OF IMPORT/EXPORT REGIONS
       PARAMETER(ECP_D_NCC =   5)         ! # COEFFICIENTS FOR COAL PRICE EXPECTATIONS EQUATIONS
-      PARAMETER(ECP_D_NFL =  15)         ! ECP NUMBER OF FUEL TYPES
+      PARAMETER(ECP_D_NFL =  16)         ! ECP NUMBER OF FUEL TYPES
       PARAMETER(ECP_D_OWN =   2)         ! ECP OWNERSHIP TYPE 1 = UTILITY 2 = NON-UTILITY
       PARAMETER(ECP_D_RNW =  11)         ! ECP NUMBER OF OTHER RENEWABLE CAPACITY TYPES
       PARAMETER(ECP_D_STO =   3)         ! ECP NUMBER OF STORAGE CAPACITY TYPES
@@ -164,7 +169,7 @@
       PARAMETER(EFD_D_FRG =   3)         ! SUPPLY/REPORTING REGIONS PER FUEL TYPE
       PARAMETER(EFD_D_LDG =   6)         ! NUMBER OF BUILDING BLOCKS PER SEASON
       PARAMETER(EFD_D_MFRG = 25)         ! MAXIMUM NUMBER OF REGIONS FOR ANY FUEL TYPE
-      PARAMETER(EFD_D_MHG =1300)         ! RENEWABLE EFD PLANT GROUPS
+      PARAMETER(EFD_D_MHG =1400)         ! RENEWABLE EFD PLANT GROUPS
       PARAMETER(EFD_D_MDG = 600)         ! DISTRIBUTED GENERATION EFD PLANT GROUPS
       PARAMETER(EFD_D_MPG =1200)         ! DISPATCHABLE EFD PLANT GROUPS
       PARAMETER(EFD_D_MSP =   4)         ! SEASONAL PERIODS
@@ -251,6 +256,25 @@
       PARAMETER(MX_TYPE=10)            ! Number of Utility Types 1) IOU 2) COOP 3) MUNI 4) OTHR
 
       PARAMETER(MX_STO_INC=3)          ! Maximum Number of Storage Increments Allowed
+	  PARAMETER(MaxPtypesP = 23)	   ! Maximum number of ReStore Plant Types
+	  PARAMETER(MaxStotyp = 3)	       ! Maximum number of ReStore storage Types
+	  PARAMETER(MaxCurttyp = 9)	       ! Maximum number of ReStore curtailment Types
 
       INTEGER*4 MX_GRDSRC              ! Maximum Number of Grid Resiliency Sources
       PARAMETER(MX_GRDSRC=6)           ! Maximum Number of Grid Resiliency Sources
+      
+      ! SEC45V VARIABLES 
+      REAL SEC45V_H2_PTC               ! SEC45V IRA HYDROGEN PTC CREDIT
+      PARAMETER(SEC45V_H2_PTC=0.6)     ! 2022$/KG OF H2
+
+      REAL WAGE_APP_MULTIPLIER            ! SEC45V PREVAILING WAGE AND APPRENTICESHIP MULTIPLER
+      PARAMETER(WAGE_APP_MULTIPLIER=5.0)  ! SEC45V SETS THIS MULTIPLER AT 5.0, WE ASSUME FULL REQUIREMENT MET
+      
+      REAL SEC45V_CO2_REQ(2,4)
+      COMMON/SEC45VPARMS/SEC45V_CO2_REQ
+
+      REAL ELECTROLYZER_EFFICIENCY ! MWHRS/KG H2 USED IN EPHRTS
+	  PARAMETER(ELECTROLYZER_EFFICIENCY=0.06)
+
+	  INTEGER SW_EPHRTS_SEC45V	! ephrts H2 SEC45V switch, 1=ON, 0=OFF.
+	  PARAMETER(SW_EPHRTS_SEC45V=1)

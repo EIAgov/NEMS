@@ -10,7 +10,7 @@ def test_steo_cmm_equals_aeo(record_property):
     h.skip_test(h.get_status('test_steo_cmm_equals_aeo'))
 
     catg = 'cmm'
-    base = STEOBenchmarkBase(catg, 2022, 2023)
+    base = STEOBenchmarkBase(catg, 2023, 2025)
     df_unifapi = base.load_table(1)
 
     df_unifapi = df_unifapi[df_unifapi['Geogr'].isin(['united states','united states territories'])]
@@ -38,7 +38,7 @@ def test_steo_emm_equals_aeo(record_property):
     h.skip_test(h.get_status('test_steo_emm_equals_aeo'))
 
     catg = 'emm'
-    base = STEOBenchmarkBase(catg, 2022, 2023)
+    base = STEOBenchmarkBase(catg, 2023, 2025)
     df_unifapi = base.load_table(1)
 
     df_unifapi = df_unifapi[df_unifapi['Geogr'].isin(['united states','united states territories'])]
@@ -215,11 +215,11 @@ def test_steo_total_liquids_equals_aeo(record_property):
     assert not errors
 
 
-def test_steo_ogsm_equals_aeo(record_property):
+def test_steo_hsm_equals_aeo(record_property):
     h = StatusHelper()
-    h.skip_test(h.get_status('test_steo_ogsm_equals_aeo'))
+    h.skip_test(h.get_status('test_steo_hsm_equals_aeo'))
 
-    catg = 'ogsm'
+    catg = 'hsm'
     base = STEOBenchmarkBase(catg)
     df_unifapi = base.load_table(1)
 

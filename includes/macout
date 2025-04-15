@@ -187,7 +187,6 @@
       REAL MC_KHUPS2A(MNUMCR,MNUMYR)  !STOCK OF MULTI-FAMILY HOUSING UNITS; Millions of Units
       REAL MC_KHUMFG(MNUMCR,MNUMYR)   !STOCK OF MOBILE HOMES; Millions of Units
       REAL MC_M(MNUMYR)               !Imports
-      REAL MC_MFGWGRT(MNUMCR,MNUMYR)  !MANUFACTURING WAGE RATE; Dollars per Hour
       REAL MC_MFY(MNUMYR)             !Factor service imports
       REAL MC_MG(MNUMYR)              !Imports of goods
       REAL MC_MGAUTOR(MNUMYR)         !Real imports of motor vehicles & parts; BEA; billions of chained 2012 dollars- annual rate
@@ -203,7 +202,6 @@
       REAL MC_NETCFIVA(MNUMYR)        !Corporate cashflow with inventory valuation adjustment and dividends
       REAL MC_NETSAVGFUNIFY(MNUMYR)   !Fiscal year unified Federal budget surplus
       REAL MC_NLFC(MNUMYR)            !Civilian labor force with adjustment for 2000 census; BLS; - millions
-      REAL MC_NMFGWGRT(MNUMCR,MNUMYR) !NON-MANUFACTURING WAGE RATE; Dollars per Hour
       REAL MC_NNP(MNUMYR)             !Net national product
       REAL MC_NP(MNUMCR,MNUMYR)       !Total population, including armed forces overseas; Census; millions- end of period
       REAL MC_NP16A(MNUMCR,MNUMYR)    !Population aged 16 & over; Census; millions- end of period
@@ -327,10 +325,10 @@
          MC_JCSMICH      , MC_JECIWSP      , MC_JECIWSSP     , MC_JEXCHMTP     , MC_JPCNEFAO     , &
          MC_JPCNEGAO     , MC_JPCSVUE      , MC_JPCSVUG      , MC_JPGDP        , MC_JQIND12      , &
          MC_JQIND13      , MC_JQPCMHNF     , MC_KHUPS1       , MC_KHUPS2A      , MC_KHUMFG       , &
-         MC_M            , MC_MFGWGRT      , MC_MFY          , &
+         MC_M            , MC_MFY          , &
          MC_MG           , MC_MGAUTOR      , MC_MGCR         , MC_MGFFBR       , MC_MGINAPETR    , &
          MC_MGKR         , MC_MGR          , MC_MR           , MC_MSVTOT       , MC_MSVTOTR      , &
-         MC_NETCAPTRF    , MC_NETCFIVA     , MC_NETSAVGFUNIFY, MC_NLFC         , MC_NMFGWGRT     , &
+         MC_NETCAPTRF    , MC_NETCFIVA     , MC_NETSAVGFUNIFY, MC_NLFC         , &
          MC_NNP          , MC_NP           , MC_NP16A        , MC_NP65A        , MC_POILIMP      , &
          MC_POILWTI      , &
          MC_QGASASF      , MC_REVIND       , MC_REVSER       , MC_RLRMCORPPUAA , MC_RMCORPAAA    , &
@@ -355,7 +353,7 @@
 
       REAL EQ_MCOUT(MNUMYR+3       &  ! MC_JPGDP(-2:MNUMYR)
       +260*MNUMYR                  &  ! arrays dimensioned (mnumyr)
-      +13*MNUMYR*MNUMCR            &  ! arrays dimensioned (mnumcr,mnumyr)
+      +11*MNUMYR*MNUMCR            &  ! arrays dimensioned (mnumcr,mnumyr)
       +26*MNUMYR                   &  ! MC_VEHICLES
       +14*MNUMYR*MNUMCR            &  ! MC_COMMFLSP
       +MNUMCR*MNSICM*MNUMYR        &  ! MC_EMPNA
@@ -366,7 +364,3 @@
       EQUIVALENCE (EQ_MCOUT,MC_BOPCRNTAC)
 
 !  Splitting out the variables referenced only by mac.f
-
-      REAL MC_YPCOMPWSD(MNUMCR,MNUMYR)         !WAGE & SALARY DISBURSEMENTS; Billions of Dollars
-
-      COMMON/MACINTRN/MC_YPCOMPWSD

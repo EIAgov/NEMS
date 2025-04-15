@@ -1,0 +1,41 @@
+Regionality,Region_ID,Region_Name
+NATNAM,0,United States
+REGNAM,1,New England
+REGNAM,2,Middle Atlantic
+REGNAM,3,East North Central
+REGNAM,4,West North Central
+REGNAM,5,South Atlantic
+REGNAM,6,East South Central
+REGNAM,7,West South Central
+REGNAM,8,Mountain
+REGNAM,9,Pacific
+REGNAM,10,California
+REGNAM,11,United States
+NERCNAM,1,Texas Reliability Entity
+NERCNAM,2,Florida Reliability Coordinating Council
+NERCNAM,3,Midcontinent / West
+NERCNAM,4,Midcontinent / Central
+NERCNAM,5,Midcontinent / East
+NERCNAM,6,Midcontinent / South
+NERCNAM,7,Northeast Power Coordinating Council / New England
+NERCNAM,8,Northeast Power Coordinating Council / New York City and Long Island
+NERCNAM,9,Northeast Power Coordinating Council / Upstate New York
+NERCNAM,10,PJM / East
+NERCNAM,11,PJM / West
+NERCNAM,12,PJM / Commonwealth Edison
+NERCNAM,13,PJM / Dominion
+NERCNAM,14,SERC Reliability Corporation / East
+NERCNAM,15,SERC Reliability Corporation / Southeastern
+NERCNAM,16,SERC Reliability Corporation / Central
+NERCNAM,17,Southwest Power Pool / South
+NERCNAM,18,Southwest Power Pool / Central
+NERCNAM,19,Southwest Power Pool / North
+NERCNAM,20,Western Electricity Coordinating Council / Southwest
+NERCNAM,21,Western Electricity Coordinating Council / California North
+NERCNAM,22,Western Electricity Coordinating Council / California South
+NERCNAM,23,Western Electricity Coordinating Council / Northwest Power Pool Area
+NERCNAM,24,Western Electricity Coordinating Council / Rockies
+NERCNAM,25,Western Electricity Coordinating Council / Basin
+NERCNAM,26,Alaska
+NERCNAM,27,Hawaii
+NERCNAM,28,United States

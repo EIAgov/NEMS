@@ -1272,3 +1272,39 @@
       RTOVALUE = 0
       RETURN
       END
+
+
+
+subroutine unitunopened(start,end,iunit)
+	implicit none
+	logical 	lopen
+	INTEGER 	start,end,iunit
+	INTEGER 	I
+	
+	iunit=-1
+	do I= start,end
+	  iunit=I
+	  inquire(unit=iunit,opened=lopen)
+	  if(.not. lopen) then
+		 return
+	  endif
+	enddo
+	return
+end
+
+!===================================================================================================================
+!******************************************************************
+! subroutine callsys(iret,cmd)
+!******************************************************************
+subroutine callsys(iret,cmd)
+use dfport
+character*(*) cmd
+integer iret
+write(6,'(a,a)') ' Calling system to do this:  ',trim(cmd)
+iret=system(cmd)
+if(iret.ne.0) then
+  write(6,'(a,I2,a,a)') '   Command failed with return code of ',iret,':  ',trim(cmd)
+endif
+return
+end
+!===================================================================================================================
