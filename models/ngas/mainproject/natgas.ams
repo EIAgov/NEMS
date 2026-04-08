@@ -1,11 +1,16 @@
 ## ams_version=1.0
 
-Model Main_NGTDM {
-	Comment: {
-		"Sections are commented to include which programmer is responsible for the code within that section.
-		
-		YDA:  Elena Dandurova 	YELENA.V.DANDUROVA@leidos.com
-		KDL:  Katie Dyl		Kathryn.Dyl@eia.gov"
+	Procedure PostMainInitialization {
+		Body: {
+			read from file "my_port.txt";
+			!my_port := 8050;
+			dex::api::ListenerPort := my_port;
+			dex::api::StartAPIService;
+		}
+		Comment: {
+			"Add initialization statements here that require that the libraries are already initialized properly,
+			or add statements that require the Data Management module to be initialized."
+		}
 	}
 	Procedure NEMS_Monitor {
 		Body: {
@@ -120,6 +125,16 @@ Model Main_NGTDM {
 	}
 	Procedure MainInitialization {
 		Body: {
+			if ProjectDeveloperMode then
+				ProfilerStart;
+			!	IdentifierShowAttributes('Main_Model');
+			endif;
+			
+			EnterNEMSMonitor := CurrentToString("%c%y-%m-%d %H:%M:%S") + "NGMM Began MainInitialization. Model Year, Cycle, or Iteration info not yet known. AIMMS has not yet recieved year/iteration signal.";
+			put ngStatusFile;
+			put EnterNEMSMonitor;
+			putclose;
+			
 			! This is used to initialize first model year and initial horizon-calendar link to use in pages
 			ModelYear := FirstModelYear;
 			!Might need to remove these
@@ -131,6 +146,13 @@ Model Main_NGTDM {
 			read from file "input\\ngparquetswitch.txt" in merge mode;
 			
 			SetSolverOptions;
+			
+			MainInitialization_Rest_API;
+			
+			EnterNEMSMonitor := CurrentToString("%c%y-%m-%d %H:%M:%S") + "NGMM Exiting MainInitialization. Model Year, Cycle, or Iteration info not yet known. AIMMS has not yet recieved year/iteration signal.";
+			put ngStatusFile;
+			put EnterNEMSMonitor;
+			putclose;
 		}
 		Comment: {
 			"This procedure is used for MainExecution_Standalone.
@@ -400,6 +422,324 @@ Model Main_NGTDM {
 			InitializeFirstModelYear;
 			FirstYearInitialization;
 			RunHQP;  !Run QP for historical years
+		}
+	}
+	Procedure EmptyIdentifiers {
+		Body: {
+			empty Cleared_Identifiers_;
+		}
+	}
+	Procedure SetModelControlParameters {
+		Body: {
+			ncntrl_curcalyr('1'):=2023;
+			ncntrl_curitr('1'):=1;
+			ncntrl_ncrl('1'):=0;
+			!ncntrl_fcrl('1'):= 0; ! Not currently using at all for testing.
+		}
+	}
+	Procedure MainExecution_Standalone_Rest_API {
+		Body: {
+			ProfilerRestart;
+						!MainInitialization_Rest_API;
+			EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM entered MainExecution. Model Year, Cycle, or Iteration info not yet known. AIMMS has not yet recieved year/iteration signal." +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +formatstring("%i, ",ncntrl_curcalyr(1));
+			put ngStatusFile;
+			put EnterMainExecution;
+			putclose;
+						_sp_input := dex::api::RequestAttribute('request-data-path') ; ! API path from NEMS
+						_sp_out := dex::api::RequestAttribute('response-data-path') ; ! API path to NEMS
+						!dex::DatasetGeneratorFilter(dex::gt, dex::mm, dex::amt) := data {(JSON,Table,Sparse):1}; ! Need to make sure DEX is updated to latest version to get dex::mm to work
+						dex::DatasetGeneratorFilter(dex::gt, dex::mm, dex::amt) := data { ( JSON  ,  Table  , Sparse           ) : 1 };
+						dex::GenerateDatasetMappings;
+						! Sometimes AIMMS tells me it can't find the mapping.
+						! For whatever reason, explicitly adding the mapping seems to help.
+						dex::AddMapping(mappingName : "json-request-mapping",
+								mappingFile : "Mappings/Generated/restinput-request-JSON-Sparse.xml");	
+			
+						! Read Year/Iteration/NCRL info from NEMS		
+						dex::ReadFromFile(_sp_input,"Generated/restinput-request-JSON-Sparse");
+			
+						helper_sp_input := _sp_input;  ! to aid debugging
+			
+						! Assign the values of what Python sent to these control parameters
+						ncntrl_curcalyr('1'):=curcalyr;
+						ncntrl_curitr('1'):=curitr;
+						ncntrl_ncrl('1'):=ncrl;
+			
+						!repeat
+			
+						! exit if year < 0 (magic number)  mc6
+						if ncntrl_curcalyr('1') < 0 then
+							dex::api::StopAPIService;
+							ExitAimms();
+						endif;
+			
+						! Establish some important paramaters to get NGMM to run. (Still needed)?
+						ncntrl_curiyr('1') := ncntrl_curcalyr('1') - 1989;
+			
+			!			if ncntrl_curitr('1') < 4 then
+			!				empty ncntrl_fcrl('1');
+			!			endif;
+			!
+			!			if ncntrl_curitr('1') <> 5 then
+			!				empty ncntrl_ncrl('1');
+			!			endif;
+			
+						! Read data in the ToAIMMS folder
+						ReadGlobalDataFromNEMS;
+			
+			EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM entered MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			put ngStatusFile;
+			put EnterMainExecution;
+			putclose;
+			
+						!Initialize ModelYear
+						ModelYear := StringToElement(Years_, FormatString("%n", NCNTRL_CURCALYR(1)));
+									ModelYear := StringToElement(Years_, FormatString("%n", NCNTRL_CURCALYR(1)));
+						MonthInPeriod(tmon) := Element( ModelYearMonths_, Ord(tmon));
+			
+						!Read in first model year (user-defined)
+						Read_FirstModelYear;
+						!Save updates to startup case "restart.data"
+						SaveGDS("restart");
+			
+						! Run First Year Initialization only on NGMM's first model year
+						if ModelYear = FirstModelYear then
+			
+						EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM running FirstYearInitialization - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+						formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+						formatstring("%i, ",ncntrl_curcalyr(1));
+						put ngStatusFile;
+						put EnterMainExecution;
+						putclose;
+			
+							FirstYearInitialization;
+			
+						EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM finished FirstYearInitialization - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+						formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+						formatstring("%i, ",ncntrl_curcalyr(1));
+						put ngStatusFile;
+						put EnterMainExecution;
+						putclose;
+			
+						endif;
+			
+						! Run NGMM as normal on all non-NCRL iterations
+						if (ModelYear >= FirstModelYear) and (ncntrl_ncrl(1) <> 1) then
+			
+						EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM running model - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+						formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+						formatstring("%i, ",ncntrl_curcalyr(1));
+						put ngStatusFile;
+						put EnterMainExecution;
+						putclose;
+			
+							NGMM;
+							Write_to_NEMS;
+			
+						EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM finished running model - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+						formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+						formatstring("%i, ",ncntrl_curcalyr(1));
+						put ngStatusFile;
+						put EnterMainExecution;
+						putclose;
+			
+						endif;
+			
+						! On NCRL iteration, run the LNG Capacity Expansion Routine
+						 if (ModelYear >= FirstModelYear and ncntrl_ncrl(1)=1 ) then
+						    	!Only run LNG export capacity expansion if it's the last NEMS iteration, we are determining builds in model, and facility will be fully built before last model year
+						   	if (LNG_FixedExports_Switch = 0) and ((NEMSmap_XYear(NEMSmap_MNXYRS(ModelYear))  + LNG_YrsUntilBuild) < (LastModelYear-LNG_PhaseInYrs)) then 
+			
+								EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM running LNG expansion - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+								formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+								formatstring("%i, ",ncntrl_curcalyr(1));
+								put ngStatusFile;
+								put EnterMainExecution;
+								putclose;
+			
+								NEMS_Report_Loop;
+								Write_to_NEMS_LNGExports;
+			
+								EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM finished with LNG expansion - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+								formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+								formatstring("%i, ",ncntrl_curcalyr(1));
+								put ngStatusFile;
+								put EnterMainExecution;
+								putclose;
+			
+						   	endif;
+							if (ModelYear < LastModelYear) then
+								PrepareDataForNextRoll;
+							else
+								if ModelYear = LastSTEOPhaseOutYear then STEOFactors_Write; endif;
+							endif;
+						endif;
+			
+						!if (ModelYear >= FirstModelYear and ncntrl_fcrl(1)=1 ) then
+						!	SaveNGTDM( "ngmm_fcrl");
+						!endif;
+			
+						SendGlobalDataToNEMS;
+						EnterMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM finished sending data to NEMS - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+						formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+						formatstring("%i, ",ncntrl_curcalyr(1));
+						put ngStatusFile;
+						put EnterMainExecution;
+						putclose;
+			
+						! Logic testing all iterations/years
+						!if  (ncntrl_ncrl('1')) = 1 and (ncntrl_curcalyr('1') = 2050) then
+						!	break;
+						!	else 
+						!		if ncntrl_ncrl('1') = 1 then
+						!		ncntrl_curcalyr('1') += 1;
+						!		ncntrl_curitr('1') := 1;
+						!		ncntrl_ncrl('1') := 0;
+						!		else
+						!			if ncntrl_curitr('1') = 5 then
+						!				ncntrl_ncrl('1') := 1;
+						!			else
+						!				empty ncntrl_ncrl;
+						!			endif;
+						!
+						!			if ncntrl_curitr('1') <= 4 then
+						!				ncntrl_curitr('1') += 1;
+						!			endif;
+						!		endif;
+						!endif;
+						!
+						!endrepeat;
+						!
+			
+						MNUMYR_complete := 1;
+						write MNUMYR_complete to file "done.txt";
+			
+						dex::WriteToFile(_sp_out,"Generated/restoutput-response-JSON-Sparse");
+			
+			! Save case file each iteration for deubbging purposes if "SaveEachIteration" switch is on
+			! Default off	
+			if ( SaveEachIteration_Switch=1) then	
+				SaveAll( FormatString("ngmm%e_%i", ModelYear,ncntrl_curitr(1)));
+			endif;
+			
+			! Save case file each iteration for deubbging purposes if "SaveEachCycle" switch is on	
+			! Default on
+			if (ModelYear = LastModelYear and ncntrl_ncrl(1)=1) then
+				if ( SaveEachCycle_Switch) then	
+					SaveAll( FormatString("cycle%i", CYCLEINFO_CURIRUN(1)));
+				endif; 
+			endif;
+			
+			SaveProfilerResults;
+			
+			ExitMainExecution := CurrentToString("%c%y-%m-%d %H:%M:%S") + " NGMM finished running MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			put ngStatusFile;
+			put ExitMainExecution;
+			putclose;
+		}
+		dex::ServiceName: call;
+		StringParameter _sp_input;
+		StringParameter _sp_out;
+	}
+	Procedure MainInitialization_Rest_API {
+		Body: {
+			ProfilerStart;
+			!empty Cleared_Identifiers_;
+			Read_FirstModelYear;
+			!LoadData("restart_initial");
+			LoadData("restart");
+			
+			ModelYear := StringToElement(Years_, FormatString("%n", NCNTRL_CURCALYR(1)));
+			
+			Read_Runtime_Parameters;
+			AIMMS_Standalone_Switch :=0;
+			CalibrationMode:=0;
+			
+			
+			InitializeFirstModelYear;
+		}
+	}
+	Section API_Call {
+		Procedure test_read_parquet {
+			Body: {
+				dex::GenerateDatasetMappings;
+				!dex::AddMapping(mappingName : "pq_price_mapping",
+				!		mappingFile : "Mappings/Generated/restinput-pq_price-Parquet.xml");
+				!
+				!
+				!!dex::WriteToFile("AIMMStoParquet_pq_price.parquet", "pq_price_mapping"); 
+				!
+				!dex::ReadFromFile(
+				!	dataFile         :  "python_to_aimms_parquet_price.parquet", 
+				!	mappingName      :  "pq_price_mapping", 
+				!	emptyIdentifiers :  0, 
+				!	emptySets        :  0, 
+				!	resetCounters    :  0);
+				!
+			}
+		}
+		Parameter out2 {
+			IndexDomain: (datarow, test);
+			dex::ColumnName: out2;
+			dex::Dataset: restoutput;
+			dex::TableName: out2;
+		}
+		Parameter out1 {
+			IndexDomain: (datarow, test);
+			dex::ColumnName: out1;
+			dex::Dataset: restoutput;
+			dex::TableName: out1;
+		}
+		Set TestRow_ {
+			Index: datarow;
+			Definition: {
+				{'row1', 'row2', 'row3'}
+			}
+		}
+		Parameter pq_price {
+			IndexDomain: (datarow, test);
+			Comment: "This connects tothe parquet file that Python (run_ngmm.py) sends to AIMMS";
+			dex::ColumnName: value;
+			dex::Dataset: restinput;
+			dex::TableName: pq_price;
+		}
+		Set TestSet_ {
+			Index: test;
+			Definition: {
+				{'A', 'B', 'C'};
+			}
+		}
+		Parameter ng_price {
+			dex::ColumnName: price;
+			dex::Dataset: restinput;
+			dex::TableName: ng_price;
+		}
+		Parameter curcalyr {
+			dex::ColumnName: year;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+		Parameter curitr {
+			dex::ColumnName: iteration;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+		Parameter ncrl {
+			dex::ColumnName: report;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+		StringParameter helper_sp_input;
+		Parameter my_port;
+		Parameter MNUMYR_complete {
+			dex::ColumnName: NGMM_year_completed;
+			dex::Dataset: restoutput;
+			dex::TableName: response;
 		}
 	}
 	Section Global_Data_Structure {
@@ -3781,12 +4121,6 @@ Model Main_NGTDM {
 					Property: NoSave;
 					Definition: 1;
 				}
-				Parameter map_month_year_adj {
-					IndexDomain: (mon,year)|MonthToYear(mon)=year;
-					Range: binary;
-					Property: NoSave;
-					Definition: 1;
-				}
 				Set Days_ {
 					SubsetOf: XDays_;
 					Index: days;
@@ -5465,7 +5799,7 @@ Model Main_NGTDM {
 		}
 		Procedure Historical_InitializeData {
 			Body: {
-				HistoricalDemand(datamon,sec,state | state in TXRegion_) := HistoricalDemand(datamon,sec,TexasState) * TexasConsShares(state | state in TXRegion_ ,sec);
+				HistoricalDemand(datamon,sec,r_tx) := HistoricalDemand(datamon,sec,TexasState) * TexasConsShares(r_tx,sec);
 				
 				!For Annual Demand, do not overwrite transportation sector with monthly data (does not exist)
 				HistoricalAnnualDemand((datayear, sec, reg)|not HistoricalAnnualDemand(datayear, sec, reg)):= sum(datamon |  map_month_year(datamon,datayear), HistoricalDemand(datamon, sec, reg));
@@ -5483,8 +5817,8 @@ Model Main_NGTDM {
 				HistoricalImportsPrice(datamon, bx )/= GDPPriceDeflator87(MonthToYear(datamon));
 				
 				!Assign pre-2011 import prices/volumes
-				HistoricalImportsPrice(datamon | datamon <= 'December, 2010', 'TX_E-MX_NE') := HistoricalImportsPrice(datamon | datamon <= 'December, 2010', 'TX-MX_NE');
-				HistoricalImports(datamon | datamon <= 'December, 2010', 'TX_E-MX_NE') := HistoricalImports(datamon | datamon <= 'December, 2010', 'TX-MX_NE');
+				HistoricalImportsPrice(datamon, 'TX_E-MX_NE') | (datamon <= 'December, 2010') := HistoricalImportsPrice(datamon, 'TX-MX_NE') $ (datamon <= 'December, 2010');
+				HistoricalImports(datamon, 'TX_E-MX_NE') | (datamon <= 'December, 2010') := HistoricalImports(datamon, 'TX-MX_NE') $ (datamon <= 'December, 2010');
 				
 				HistoricalLNGExportsPrice(datamon, reg )/= GDPPriceDeflator87(MonthToYear(datamon));
 				HistoricalCNGImportsPrice(datamon, reg) /= GDPPriceDeflator87(MonthToYear(datamon));
@@ -5517,23 +5851,8 @@ Model Main_NGTDM {
 				
 				!Set wellhead price in substates
 				HistoricalAnnualWellhdPrice(datayear, substate) := sum(l48 | map_SupplyArcs(substate, l48), HistoricalAnnualWellhdPrice(datayear, l48) );
-				
-				
 				!Calculate annual spot price by calculating straight average of monthly spot price
 				HistoricalAnnualSpotPrice(datayear, reg) := $ sum(datamon | map_month_year(datamon,datayear), HistoricalSpotPrice(datamon, reg))/12;
-				
-				
-				! AEO2025 ADJUSTMENT THAT OMITS SOME OUTLIER PRICES IN SPOT PRICE HISTORY THAT THROW OFF NEAR-TERM RESULTS.
-				! Manually setting to calculated prices outside of AIMMS
-				HistoricalAnnualSpotPrice('2023', 'CO') := 1.11988;
-				HistoricalAnnualSpotPrice('2023', 'UT') := 1.50946;
-				HistoricalAnnualSpotPrice('2023', 'WY') := 1.15922;
-				
-				!HistoricalAnnualSpotPrice('2023', 'CO') := $ sum(datamon | datamon <> 'January 2023' or datamon <> 'February 2023', HistoricalSpotPrice(datamon, 'CO'))/10;
-				!HistoricalAnnualSpotPrice('2023', 'UT') := $ sum(datamon | datamon <> 'January 2023' or datamon <> 'February 2023', HistoricalSpotPrice(datamon, 'UT'))/10;
-				!HistoricalAnnualSpotPrice('2023', 'WY') := $ sum(datamon | datamon <> 'January 2023' or datamon <> 'February 2023', HistoricalSpotPrice(datamon, 'WY'))/10;
-				
-				
 				!Set annual spot price for Canada and Mexico by calculating straight average of monthly spot price
 				!HistoricalAnnualSpotPrice(datayear, cn) := sum(datamon | map_month_year(datamon,datayear), HistoricalSpotPrice(datamon, cn))/12;
 				!Spot price in Mexico is set equal to spot price at border-crossing for now
@@ -6901,7 +7220,7 @@ Model Main_NGTDM {
 				HistoricalBalanceItem_Calc(datayear, l48) := sum(datamon |map_month_year(datamon,datayear), TotalConsumption(datamon,l48) + LNGExports(datamon, l48) +
 				         StorageInjections(datamon,l48) - StorageWithdrawals(datamon,l48) - sum((suptype,l48s)|map_SupplyArcs(l48s, l48) , Supply(datamon, suptype, l48s))) +
 				 !        StorageLosses(datamon,l48) + DistributionLosses(datamon, l48) +IntrastatePipeFuelLosses(datamon, l48)) +
-				         sum(h , HistoricalFlowAnnual(l48, h, datayear | h <> TexasState and l48 <> TexasState)) - sum(h, HistoricalFlowAnnual(h, l48, datayear | h <> TexasState and l48 <> TexasState))+
+				         sum(h , HistoricalFlowAnnual(l48, h, datayear) $ (h <> TexasState and l48 <> TexasState)) - sum(h, HistoricalFlowAnnual(h, l48, datayear) $ (h <> TexasState and l48 <> TexasState))+
 				         HistoricalAnnualPipeFuel(datayear,l48)+ LeaseAndPlantFuelAnnual(datayear,l48) + LNGFuelForLiquefaction(datayear, l48);
 				HistoricalBalanceItem_Diff(datayear,l48) := HistoricalBalanceItem_Calc(datayear, l48) - HistoricalBalanceItem(datayear, l48);
 				
@@ -7961,7 +8280,7 @@ Model Main_NGTDM {
 				Cons_State_Mon(datamon,sec,state):=	HistoricalDemand(datamon, sec, state) ;
 				
 				!Fill Texas History using historical shares
-				Cons_State_Mon(datamon,sec, state | state in TXRegion_)  := HistoricalDemand(datamon,sec,TexasState) * TexasConsShares(state | state in TXRegion_ ,sec);
+				Cons_State_Mon(datamon,sec, r_tx)  := HistoricalDemand(datamon,sec,TexasState) * TexasConsShares(r_tx ,sec);
 				
 				!Split TX historical transportation consumption based on ResCom demand by TX region
 				Cons_State_Mon(datamon, Sector_Transportation, r_tx) := Cons_State_Mon(datamon, Sector_Transportation, TexasState) * 
@@ -7970,7 +8289,7 @@ Model Main_NGTDM {
 				
 				Cons_State_Yr(datayear,sec,state ):= 	sum(datamon|map_month_year(datamon,datayear), Cons_State_Mon(datamon,sec,state));
 				
-				TotalConsumption(datamon, d) := sum(sec, HistoricalDemand(datamon, sec, d | d <> TexasState)) ;
+				TotalConsumption(datamon, d) := sum(sec, HistoricalDemand(datamon, sec, d) $ (d <> TexasState)) ;
 				!Fill in consumption parameters for historical years.  For QP, AK and HI are not demand regions.
 				
 				!Define Element Parameter MonthsInSeason(mon) yda:moved to definition
@@ -8020,7 +8339,7 @@ Model Main_NGTDM {
 				Cons_State_MonYr(mn,datayear,sec,l48) := 	sum(datamon|(map_Month_MonthinYear(datamon,mn) and map_month_year(datamon,datayear)), Cons_State_Mon(datamon,sec,l48));
 				
 				!Calculate historical national total annual consumption
-				TotalUSConsumptionAnnual(histyr):= sum((histmon, sec, state) | map_month_year(histmon, histyr), HistoricalDemand(histmon, sec, state | state <> TexasState));
+				TotalUSConsumptionAnnual(histyr):= sum((histmon, sec, state) | map_month_year(histmon, histyr), HistoricalDemand(histmon, sec, state) $ (state <> TexasState));
 				AnnualTotalConsumption(histyr,AKState) := sum(sec, AK_Cons_EndUse(histyr,sec));
 			}
 			Comment: {
@@ -9483,7 +9802,7 @@ Model Main_NGTDM {
 				! Point of Exit data for the TX subregions only goes back to 2011.
 				! Export history prior to 2011 will be based on the export shares TX_W/TX_E had in 2011.
 				! Need to eventually change in order to avoid all of the hardcoding.
-				AnnualExports(datayear | datayear <= '2011', tx_bx) := TX_ExportShares(tx_bx) * AnnualExports(datayear | datayear <= '2011', 'TX-MX_NE');
+				AnnualExports(datayear, tx_bx) | (datayear <= '2011') := TX_ExportShares(tx_bx) * AnnualExports(datayear, 'TX-MX_NE') $ (datayear <= '2011');
 				
 				Exports_Canada(datayear):= sum((cn,BX)|map_hubs_borderXings(cn,BX),AnnualExports(datayear,BX));
 				Exports_Mexico(datayear):= sum((mx,BX)|map_hubs_borderXings(mx,BX),AnnualExports(datayear,BX));
@@ -13223,7 +13542,16 @@ Model Main_NGTDM {
 		}
 	}
 	Section Reports_Section {
+		Procedure SaveProfilerResults {
+			Body: {
+				! Fills parameter `Results~ with profiler measurements for which gross time is larger than 0.5 seconds
+				ProfilerCollectAllData(Results, GrossTimeThreshold: 0.1);
+				sDataYearFile := "log\\ProfilerResults\\Profiler"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+formatstring("%>02i",CYCLEINFO_CURIRUN(1))+".txt";
+				write Results to file sDataYearFile;
+			}
+		}
 		DeclarationSection Profiling {
+			StringParameter ProfilerResultsFile;
 			Set IterationNumber_ {
 				Index: iteration;
 			}
@@ -14301,9 +14629,11 @@ Model Main_NGTDM {
 			}
 			Set available_rng_projects {
 				SubsetOf: id;
+				Index: avail_proj;
 			}
 			Set lcfs_projects {
 				SubsetOf: id;
+				Index: lcfs_proj;
 			}
 			ElementParameter rng_project_add {
 				Range: id;
@@ -14515,10 +14845,10 @@ Model Main_NGTDM {
 				!     sum((sec, r_tx),Cons_State_Yr(ModelYear-1, sec, r_tx));
 				
 				! Calculate $/MMBtu profit under various credit systems
-				 profit_lcfs(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, CaliforniaState | lcoe_lcfs_adj(proj_id, reg, rng_type)) - lcoe_lcfs_adj(proj_id, reg, rng_type);
-				 profit_rfs(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, reg | lcoe_rfs_adj(proj_id, reg, rng_type)) - lcoe_rfs_adj(proj_id, reg, rng_type);
-				 profit_lcfs_rfs(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, CaliforniaState | lcoe_lcfs_rfs_adj(proj_id, reg, rng_type)) - lcoe_lcfs_rfs_adj(proj_id, reg, rng_type);
-				 profit_noCredits(proj_id, reg, rng_type) := AnnualStateSpotPrice_RNG(ModelYear-1, reg | lcoe(proj_id, reg, rng_type)) - lcoe(proj_id, reg, rng_type);
+				 profit_lcfs(proj_id, reg, rng_type) := (AnnualStateSpotPrice_RNG(ModelYear-1, CaliforniaState) $ (lcoe_lcfs_adj(proj_id, reg, rng_type))) - lcoe_lcfs_adj(proj_id, reg, rng_type);
+				 profit_rfs(proj_id, reg, rng_type) := (AnnualStateSpotPrice_RNG(ModelYear-1, reg) $ (lcoe_rfs_adj(proj_id, reg, rng_type))) - lcoe_rfs_adj(proj_id, reg, rng_type);
+				 profit_lcfs_rfs(proj_id, reg, rng_type) := (AnnualStateSpotPrice_RNG(ModelYear-1, CaliforniaState) $ (lcoe_lcfs_rfs_adj(proj_id, reg, rng_type))) - lcoe_lcfs_rfs_adj(proj_id, reg, rng_type);
+				 profit_noCredits(proj_id, reg, rng_type) := (AnnualStateSpotPrice_RNG(ModelYear-1, reg) $ (lcoe(proj_id, reg, rng_type))) - lcoe(proj_id, reg, rng_type);
 			}
 		}
 		Procedure RNG_Production_Run {
@@ -14580,11 +14910,11 @@ Model Main_NGTDM {
 						! Use LCOE_RFS_LCFS
 				
 						! Determine value of most profitable project
-						max_profit_from_project := max((proj_id, reg, rng_type), profit_lcfs_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects and profit_lcfs_rfs(proj_id, reg, rng_type) > 0));
+						max_profit_from_project := max((avail_proj, reg, rng_type), profit_lcfs_rfs(avail_proj, reg, rng_type) $ (profit_lcfs_rfs(avail_proj, reg, rng_type) > 0));
 						! Use profit value to determine which project is associated with the profit value
-						rng_project_add := Element({proj_id | Exists(((reg, rng_type)) | profit_lcfs_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project ) }, 1);
+						rng_project_add := Element({avail_proj | Exists((reg, rng_type) | profit_lcfs_rfs(avail_proj, reg, rng_type) = max_profit_from_project ) }, 1);
 				
-						rng_project_add_type := Element({rng_type | Exists(((proj_id, reg)) | profit_lcfs_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project )}, 1);
+						rng_project_add_type := Element({rng_type | Exists((avail_proj, reg) | profit_lcfs_rfs(avail_proj, reg, rng_type) = max_profit_from_project )}, 1);
 				
 						annual_rng_capacity_flag(ModelYear, rng_project_add, rng_project_add_type) := 1;
 						available_rng_projects -= rng_project_add;
@@ -14592,27 +14922,27 @@ Model Main_NGTDM {
 						AnnualLCFSProjects += rng_project_add;
 				
 						ModelYearRNGProduction := sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
-						RNGProduction_LCFS := LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+						RNGProduction_LCFS := LatestLCFSVolume + sum( (lcfs_proj, rng_type, reg) | annual_rng_capacity_flag(ModelYear, lcfs_proj, rng_type) , rng_produced(lcfs_proj, reg, rng_type ));
 						!break;
 				
 						! Keep track of projects that are added in this section because of LCFS accounting
 					elseif (RNGProduction_LCFS > CAVehicleCons) then
 						! Use only RFS credits
 								! Determine value of most profitable project
-						max_profit_from_project := max((proj_id, reg, rng_type), profit_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects and  profit_rfs(proj_id, reg, rng_type) > 0));
+						max_profit_from_project := max((avail_proj, reg, rng_type), profit_rfs(avail_proj, reg, rng_type) $ (profit_rfs(avail_proj, reg, rng_type) > 0));
 				
 						if max_profit_from_project > 0 then
 							! Use profit value to determine which project is associated with the profit value
-							rng_project_add := Element({proj_id | Exists(((reg, rng_type)) | profit_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project ) }, 1);
+							rng_project_add := Element({avail_proj | Exists((reg, rng_type) | profit_rfs(avail_proj, reg, rng_type) = max_profit_from_project ) }, 1);
 				
-							rng_project_add_type := Element({rng_type | Exists(((proj_id, reg)) | profit_rfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project )}, 1);
+							rng_project_add_type := Element({rng_type | Exists((avail_proj, reg) | profit_rfs(avail_proj, reg, rng_type) = max_profit_from_project )}, 1);
 				
 							annual_rng_capacity_flag(ModelYear, rng_project_add, rng_project_add_type) := 1;
 							available_rng_projects -= rng_project_add;
 				
 				
 							ModelYearRNGProduction := sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
-							RNGProduction_LCFS := LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+							RNGProduction_LCFS := LatestLCFSVolume + sum( (lcfs_proj, rng_type, reg) | annual_rng_capacity_flag(ModelYear, lcfs_proj, rng_type) , rng_produced(lcfs_proj, reg, rng_type ));
 						else
 							break;
 						endif;
@@ -14627,14 +14957,14 @@ Model Main_NGTDM {
 				
 				! If the D3 RFS Mandate has already been reached, then only look at projects that use LCFS credits
 				while  CAVehicleCons > RNGProduction_LCFS and ModelYear > RNGYear do
-					max_profit_from_project := max((proj_id, reg, rng_type), profit_lcfs(proj_id, reg, rng_type | proj_id in available_rng_projects and profit_lcfs(proj_id, reg, rng_type) > 0));
+					max_profit_from_project := max((avail_proj, reg, rng_type), profit_lcfs(avail_proj, reg, rng_type) $ (profit_lcfs(avail_proj, reg, rng_type) > 0));
 				
 					if max_profit_from_project > 0 then
 				
 						! Use profit value to determine which project is associated with the profit value
-						rng_project_add := Element({proj_id | Exists(((reg, rng_type)) | profit_lcfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project ) }, 1);
+						rng_project_add := Element({avail_proj | Exists((reg, rng_type) | profit_lcfs(avail_proj, reg, rng_type) = max_profit_from_project ) }, 1);
 				
-						rng_project_add_type := Element({rng_type | Exists(((proj_id, reg)) | profit_lcfs(proj_id, reg, rng_type | proj_id in available_rng_projects) = max_profit_from_project )}, 1);
+						rng_project_add_type := Element({rng_type | Exists((avail_proj, reg) | profit_lcfs(avail_proj, reg, rng_type) = max_profit_from_project )}, 1);
 				
 						annual_rng_capacity_flag(ModelYear, rng_project_add, rng_project_add_type) := 1;
 						available_rng_projects -= rng_project_add;
@@ -14642,7 +14972,7 @@ Model Main_NGTDM {
 						AnnualLCFSProjects += rng_project_add;
 				
 						ModelYearRNGProduction := sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
-						RNGProduction_LCFS := LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+						RNGProduction_LCFS := LatestLCFSVolume + sum( (lcfs_proj, rng_type, reg) | annual_rng_capacity_flag(ModelYear, lcfs_proj, rng_type) , rng_produced(lcfs_proj, reg, rng_type ));
 					else
 						break;
 					endif;
@@ -14659,168 +14989,16 @@ Model Main_NGTDM {
 					! Dividy mass by 907200 to convert grams to tons.
 					!rng_carbon_offset(ModelYear) := (rng_lcfs_totalCI_difference_from_target(ModelYear)* (rng_lcfs_production(ModelYear)*1094.112682))/907200/1000;
 				
-					AnnualRNGCarbonOffset(ModelYear) := sum( (proj_id, reg, rng_type), LCFS_carbon_offset_project(proj_id, reg, rng_type | proj_id in lcfs_projects)) + AnnualRNGCarbonOffset('2021');
+					AnnualRNGCarbonOffset(ModelYear) := sum( (lcfs_proj, reg, rng_type), LCFS_carbon_offset_project(lcfs_proj, reg, rng_type)) + AnnualRNGCarbonOffset('2021');
 				
 					AnnualSupply(ModelYear, Supply_RNG, reg) := sum( (proj_id, rng_type) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type )) + ANL_rng_historicalProductionAnnual(RNGYear,'food_waste', reg) + ANL_rng_historicalProductionAnnual(RNGYear,'WRRF', reg) ;
-					LCFSProductionAnnual(ModelYear) :=  LatestLCFSVolume + sum( (proj_id, rng_type, reg) | annual_rng_capacity_flag(ModelYear, proj_id, rng_type | proj_id in lcfs_projects ) , rng_produced(proj_id, reg, rng_type ));
+					LCFSProductionAnnual(ModelYear) :=  LatestLCFSVolume + sum( (lcfs_proj, rng_type, reg) | annual_rng_capacity_flag(ModelYear, lcfs_proj, rng_type) , rng_produced(lcfs_proj, reg, rng_type ));
 					Supply(modelyrmn, Supply_RNG, reg)  := AnnualSupply(MonthToYear(modelyrmn), Supply_RNG, reg) * NumberOfDaysInMonth(modelyrmn)/ NumberOfDaysInYear(MonthToYear(modelyrmn));
 				
 					! For debug/report page
 					TotalAnnualRNGProduction(year) := sum(reg , AnnualSupply(year, Supply_RNG, reg));
 					TotalAnnualRNGProductionType(year, rng_type) := sum( (proj_id, reg) | annual_rng_capacity_flag(year, proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
 				endif;
-			}
-		}
-		Procedure Set_Historical_RNG_Capacity_old {
-			Body: {
-				
-				
-				! Calculate the amount of RNG, by type that history ends on
-				!RNG_prod_last_historical_year(rng_type)(rng_type) := sum((datamon, h), ANL_rng_historicalProduction(datamon, h, rng_type | datamon = 'December, 2022'));
-				
-				! Calculate historical production by year
-				ANL_rng_historicalProductionAnnual(datayear, rng_type, h) := sum((datamon) |map_month_year(datamon,datayear), ANL_rng_historicalProduction(datamon, h, rng_type));
-				
-				! Determine total natural gas production by type for last historical year
-				! Remove hardcoding to dynamically select last RNG year
-				RNG_prod_last_historical_year(rng_type) := sum((datayear, h), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = '2022'));
-				RNG_prod_last_historical_yearState(rng_type, h) := sum((datayear), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = '2022'));
-				
-				historical_capacity_flag(proj_id) := 0;
-				
-				! Right now, this is just for landfills
-				!rng_state_loop_iterator := Hubs_;
-				!rng_state_loop_iterator := { reg | Exists((proj_id, rng_type), lcoe(proj_id, reg, rng_type)) } ;
-				rng_state_loop_iterator := { h | Exists((rng_type | rng_type = 'landfill'), RNG_prod_last_historical_yearState(rng_type, h)) } ;
-				for rng_state_loop_i do
-					! Determine projects that are associated with a particular state
-					! Each state will have certain projects associated with it given a certain type of RNG source
-					! We will be looping through each of these projects, and turning the `historical_capacity_flag` to 1 UNTIL
-					! the cumulative sum of what is produced annually from those projects is at least equal to what the historical production is for that state.
-					! If the largest project is larger than what the state produced anually, then the largest project will be the first and only project turned on.
-					projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i, 'landfill')) } ;
-					rng_loop_iterator := projects_for_state;
-				
-					for rng_loop_i do
-				
-						! rng_state_sum_temp is the rolling cumulative sum of RNG production from the projects associated with the state.
-						rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type | rng_type = 'landfill' ));
-				
-						! IF the cumulative sum from the projects (including the project in question) is less than the historical RNG projection from the most recent year,
-						! then set that project as active. (historical_capacity_flag to 1)
-						if(rng_state_sum_temp <= RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
-							historical_capacity_flag(rng_loop_i) := 1;
-				
-						! IF the cumulative sum of the projects (including the project in question) is more than the historical production AND we're only on the first project,
-						! then set the first project as active and break out of the loop/move on to the next state 
-						elseif( (rng_state_sum_temp > RNG_prod_last_historical_yearState('landfill', rng_state_loop_i) ) and
-						rng_loop_i = Element(rng_loop_iterator, 1))  then
-							historical_capacity_flag(rng_loop_i) := 1;
-							break;
-				
-						! ! IF the cumulative sum of the projects (including the project in question) is more than the historical production and we're not on the first project
-						! THEN break out of the loop and move on to the next state.
-						elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
-							break;
-						endif;
-						endfor;
-					endfor;
-				
-				!RNG_from_historical_capacity(reg) := sum( (proj_id, rng_type) | historical_capacity_flag(proj_id) , rng_produced(proj_id, reg, rng_type ));
-				
-				! Set initial projects online to 
-				annual_rng_capacity_flag('2022', proj_id, 'landfill') := historical_capacity_flag(proj_id);
-				
-				! Now do farms
-				historical_capacity_flag(proj_id) := 0;
-				
-				! Right now, this is just for landfills
-				!rng_state_loop_iterator := Hubs_;
-				!rng_state_loop_iterator := { reg | Exists((proj_id, rng_type), lcoe(proj_id, reg, rng_type)) } ;
-				rng_state_loop_iterator := { h | Exists((rng_type | rng_type = 'farm'), RNG_prod_last_historical_yearState(rng_type, h)) } ;
-				for rng_state_loop_i do
-					! Determine projects that are associated with a particular state
-					! Each state will have certain projects associated with it given a certain type of RNG source
-					! We will be looping through each of these projects, and turning the `historical_capacity_flag` to 1 UNTIL
-					! the cumulative sum of what is produced annually from those projects is at least equal to what the historical production is for that state.
-					! If the largest project is larger than what the state produced anually, then the largest project will be the first and only project turned on.
-					projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i, 'farm')) } ;
-					rng_loop_iterator := projects_for_state;
-				
-					for rng_loop_i do
-				
-						! rng_state_sum_temp is the rolling cumulative sum of RNG production from the projects associated with the state.
-						rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type | rng_type = 'farm'));
-				
-						! IF the cumulative sum from the projects (including the project in question) is less than the historical RNG projection from the most recent year,
-						! then set that project as active. (historical_capacity_flag to 1)
-						if(rng_state_sum_temp <= RNG_prod_last_historical_yearState('farm', rng_state_loop_i)) then
-							historical_capacity_flag(rng_loop_i) := 1;
-				
-						! IF the cumulative sum of the projects (including the project in question) is more than the historical production AND we're only on the first project,
-						! then set the first project as active and break out of the loop/move on to the next state 
-						elseif( (rng_state_sum_temp > RNG_prod_last_historical_yearState('farm', rng_state_loop_i) ) and
-						rng_loop_i = Element(rng_loop_iterator, 1))  then
-							historical_capacity_flag(rng_loop_i) := 1;
-							break;
-				
-						! ! IF the cumulative sum of the projects (including the project in question) is more than the historical production and we're not on the first project
-						! THEN break out of the loop and move on to the next state.
-						elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState('farm', rng_state_loop_i)) then
-							break;
-						endif;
-						endfor;
-					endfor;
-				
-				annual_rng_capacity_flag('2022', proj_id, 'farm') := historical_capacity_flag(proj_id);
-				
-				!RNG_from_historical_capacity(reg, rng_type) := sum( (proj_id) | historical_capacity_flag(proj_id) , rng_produced(proj_id, reg, rng_type ));
-				
-				RNG_from_historical_capacity(reg, rng_type) := sum( (proj_id) | annual_rng_capacity_flag('2022', proj_id, rng_type) , rng_produced(proj_id, reg, rng_type ));
-				
-				!
-				!for rng_state_loop_i do
-				!
-				!	! Determine projects that are associated with a particular state
-				!	projects_for_state := { proj_id | Exists((reg, rng_type), lcoe(proj_id, rng_state_loop_i, rng_type)) } ;
-				!	rng_loop_iterator := projects_for_state;
-				!
-				!	project_id_ord_iterator := 1;
-				!	rng_state_sum_temp := 0;
-				!
-				!
-				!
-				!	while(rng_state_sum_temp <= sum((proj_id, rng_type) | proj_id <= Element(projects_for_state,project_id_ord_iterator) , proj_rng(proj_id ,rng_state_loop_i, rng_type))) do
-				!
-				!		rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= Element(projects_for_state,project_id_ord_iterator), proj_rng(proj_id ,rng_state_loop_i, rng_type));
-				!		if(rng_state_sum_temp <= RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
-				!			historical_capacity_flag(Element(projects_for_state,project_id_ord_iterator)) := 1;
-				!		elseif(rng_state_sum_temp > RNG_prod_last_historical_yearState('landfill', rng_state_loop_i)) then
-				!			break;
-				!		endif;
-				!		project_id_ord_iterator += 1;
-				!	endwhile;
-				!endfor;
-				!
-				!RNG_from_historical_capacity(reg) := sum( (proj_id | historical_capacity_flag(proj_id)) , proj_rng(proj_id, reg, rng_type));
-				!
-				!
-				!
-				!
-				!
-				!
-				!
-				!	rng_sum_temp := sum((reg, proj_id) | proj_id <= rng_loop_i, proj_rng(proj_id, reg)) ;
-				!	if (rng_sum_temp <= RNG_prod_last_historical_year('landfill') ) then
-				!		historical_capacity_flag(rng_loop_i) := 1;
-				!	elseif (rng_sum_temp >= RNG_prod_last_historical_year('landfill')) then
-				!		break;
-				!		endif;
-				!	endfor;
-				!
-				! Set initial projects online to 
-				!annual_rng_capacity_flag('2022', proj_id, 'landfill') := historical_capacity_flag(proj_id);
-				!
 			}
 		}
 		Procedure Set_Historical_RNG_Capacity {
@@ -14833,8 +15011,8 @@ Model Main_NGTDM {
 				
 				! Determine total natural gas production by type for last historical year
 				! Remove hardcoding to dynamically select last RNG year
-				RNG_prod_last_historical_year(rng_type) := sum((datayear, h), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = RNGYear));
-				RNG_prod_last_historical_yearState(rng_type, h) := sum((datayear), ANL_rng_historicalProductionAnnual(datayear, rng_type, h | datayear = RNGYear));
+				RNG_prod_last_historical_year(rng_type) := sum((datayear, h), ANL_rng_historicalProductionAnnual(datayear, rng_type, h) $ (datayear = RNGYear));
+				RNG_prod_last_historical_yearState(rng_type, h) := sum((datayear), ANL_rng_historicalProductionAnnual(datayear, rng_type, h) $ (datayear = RNGYear));
 				
 				for rng_source_i do
 				
@@ -14856,7 +15034,7 @@ Model Main_NGTDM {
 						for rng_loop_i do
 				
 							! rng_state_sum_temp is the rolling cumulative sum of RNG production from the projects associated with the state.
-							rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type | rng_type = rng_source_i));
+							rng_state_sum_temp := sum((proj_id, rng_type) | proj_id <= rng_loop_i, rng_produced(proj_id ,rng_state_loop_i, rng_type) $ (rng_type = rng_source_i));
 				
 							! IF the cumulative sum from the projects (including the project in question) is less than the historical RNG projection from the most recent year,
 							! then set that project as active. (historical_capacity_flag to 1)
@@ -14869,8 +15047,8 @@ Model Main_NGTDM {
 							rng_loop_i = Element(rng_loop_iterator, 1))  then
 				
 								! Find the proj_id that would at least be equal to the historical production
-								smallest_allowable_proj := First(proj_id | rng_produced(proj_id | rng_produced(proj_id, rng_state_loop_i, rng_source_i) <= 
-								RNG_prod_last_historical_yearState(rng_source_i, rng_state_loop_i),rng_state_loop_i, rng_source_i));
+								smallest_allowable_proj := First(proj_id | rng_produced(proj_id ,rng_state_loop_i, rng_source_i) | rng_produced(proj_id, rng_state_loop_i, rng_source_i) <= 
+								RNG_prod_last_historical_yearState(rng_source_i, rng_state_loop_i));
 								historical_capacity_flag(proj_small) := 1;
 								break;
 				
@@ -15129,6 +15307,8 @@ Model Main_NGTDM {
 			put ngStatusFile;
 			put EnterMainTermination;
 			putclose;
+			
+			SaveProfilerResults;
 			
 			sAction:="Exited";    ! Action message for NEMS
 			write sAction to file NEMSMessageOutFile in replace mode;  
@@ -16777,4 +16957,3 @@ Model Main_NGTDM {
 			}
 		}
 	}
-}

@@ -1,6 +1,103 @@
 ## ams_version=1.0
 
-Model Main_Coal {
+LibraryModule nems_coal {
+	Prefix: cl;
+	Interface: {
+		data {api_curitr, api_curcalyr, Coal_API_Call} + OutputReports + IndexesAKASets;
+	}
+	Procedure coal_API_Call {
+		Body: {
+			! Establishing API data location
+			_sp_input := dex::api::RequestAttribute('request-data-path') ; ! API path from NEMS
+			
+			! Sometimes AIMMS tells me it can't find the mapping.
+			! For whatever reason, explicitly adding the mapping seems to help.
+			dex::AddMapping(mappingName : "json-request-mapping_coal",
+			    mappingFile : "Mappings/Generated/restinput-request-JSON-Sparse_coal.xml");	
+			
+			! Read Year/Iteration info from NEMS		
+			dex::ReadFromFile(_sp_input,"json-request-mapping_coal");
+			
+			ncntrl_curcalyr(1) := cl::api_curcalyr;
+			ncntrl_curitr(1) := cl::api_curitr;
+			
+			ErrorOut_file_name := "../../coal/log/aimmsRunOnly.err";
+			if fileexists(ErrorOut_file_name) then
+			    FileDelete(ErrorOut_file_name, 0);
+			endif;
+			
+			block
+			!COALSetOptions;   commment it for now until we figure out what can cause a run to crash sometimes
+			NEMS_Monitor;
+			 Onerror err do
+			   COALResetOptions;
+			   ErrorHandler(err);
+			
+			endblock;
+			! Write done.txt when finished
+			write done to file "../../coal/done.txt";
+			COALResetOptions;
+		}
+		StringParameter _sp_input {
+			Property: Input;
+		}
+	}
+	DeclarationSection ErrorHandling {
+		File Pulse_check_file {
+			Name: Pulse_check_file_name;
+			Device: Disk;
+			Mode: merge;
+		}
+		StringParameter Pulse_check_file_name;
+		File ErrorOut_file {
+			Name: ErrorOut_file_name;
+			Device: Disk;
+			Mode: replace;
+		}
+		ElementParameter err {
+			Range: errh::PendingErrors;
+		}
+		StringParameter ErrorOut_file_name;
+	}
+	Section API_Call {
+		Parameter my_port;
+		Parameter done {
+			Definition: 1;
+		}
+		Parameter api_curitr {
+			dex::ColumnName: cl::iteration;
+			dex::Dataset: request;
+			dex::TableName: restinput;
+		}
+		Parameter api_curcalyr {
+			dex::ColumnName: cl::year;
+			dex::Dataset: request;
+			dex::TableName: restinput;
+		}
+	}
+	Procedure ErrorHandler {
+		Arguments: (err);
+		Body: {
+			err_code := errh::Message(err);
+			ErrorOut_file_name := "../../coal/log/aimmsRunOnly.err";
+			put ErrorOut_file;
+			if FindString(err_code, "Division by zero error",1,,)> 0  then
+			  put "Error : Division by zero error with 0 ";
+			elseif FindString(err_code,"CPLEX",1,,)> 0 then
+			  put "Error : The CPLEX ";
+			elseif FindString(err_code,"icense",1,,)> 0 then
+			  put "Error : solver license related issue ";
+			else
+			  put err_code;
+			endif;
+			putclose ErrorOut_file;
+		}
+		StringParameter err_code;
+		ElementParameter err {
+			Range: errh::PendingErrors;
+			Property: Input;
+		}
+	}
 	Section not_used_DbConn {
 		Comment: "Parameters to create Access Data Base connection string. Marked as not_used. 12/21/2023";
 		DeclarationSection DbConnStr {
@@ -89,19 +186,33 @@ Model Main_Coal {
 	}
 	Procedure MainExecution {
 		Body: {
+			                !make sure that ncntrl_curcalyr(1) and ncntrl_curitr(1) are insync with api_curcalyr and api_curitr under a REST API call
+			                    if cl::api_curcalyr > 0 then
+			                    	ncntrl_curcalyr(1) := cl::api_curcalyr;
+			                    endif;
+			                    if cl::api_curitr > 0 then
+					    	ncntrl_curitr(1) := cl::api_curitr;
+					    endif;
 			
-			
+					cl::ReadData;
 			                    ReadGlobalDataFromNEMS; ! read globaldatatoAIMMS_yyyy_ii.txt where yyyy is ncntrl_curcalyr(1) and ii is ncntrl_curitr(1)
 			
 			                    if ncntrl_curcalyr(1) = cpsbaseyr then
-			                                      SaveGlobal("cases\\global_data");
+			                                      SaveGlobal("../../coal/Cases/global_data");
 			                    endif;
 			
-			                    !loading the variables into memory that are lagged and needed for pricing equation
-			                    if ((ncntrl_curcalyr(1) = cpsbaseyr and (ncntrl_curitr('1') > 1)) or (ncntrl_curcalyr(1) > cpsbaseyr)) then
-			                                      CMMLagDataLoad("cases\\CMMLagData");
-			                    endif;  
+					!make sure that ncntrl_curcalyr(1) and ncntrl_curitr(1) are insync with api_curcalyr and api_curitr under a REST API call
+			!                    if cl::api_curcalyr > 0 then
+			!                    	ncntrl_curcalyr(1) := cl::api_curcalyr;
+			!                    endif;
+			!                    if cl::api_curitr > 0 then
+			!		    	ncntrl_curitr(1) := cl::api_curitr;
+			!		    endif;
 			
+			                    !loading the variables into memory that are lagged and needed for pricing equation
+			                    if (ncntrl_curcalyr(1) = cpsbaseyr ) and ncntrl_curitr(1) = 1 then
+			                                      CMMLagDataLoad("..\\..\\coal\\cases\\CMMLagData");
+			                     endif;  
 					SetUpRateEscalators;  !Added with convertions to new AIMMS version
 			
 			                    !If you need to be consistent with AEO2016 uncomment the following statement
@@ -115,7 +226,10 @@ Model Main_Coal {
 						AIMCLSolvDebug :=0;
 			                    if(AIMCLSolvDebug=1) then ! for validation/debugging, options vary
 			                                        option display_infeasibility_analysis:=1,
-			                                                linear_presolve:="off",
+			                                        	common_warning_default:="warning handle",
+			                                        	 disable_new_mathprog_generator := "on",
+			                                                linear_presolve:="on",
+			                                                presolve_feasibility_tolerance:=0.01,
 			                                                eliminate_nonvar_columns:="off",
 			                                                infeasibility_finder:="on",
 			                                                postsolve_continuous_variables:="no rounding",
@@ -125,9 +239,12 @@ Model Main_Coal {
 			      						"CPLEX_22_1".MPS := "at every solve";      						
 			                    else ! use speed-up options; effect of some options vary depending on the lp. presolve may increase total time with this LP; postsolve rounding seemed to speed it up a lot.
 			                                         option display_infeasibility_analysis:="off",
+			                                         	common_warning_default:="off",
 			                                                linear_presolve:="on", 
-			                                                eliminate_nonvar_columns:="automatic",
+			                                                disable_new_mathprog_generator := "on",
+			                                                eliminate_nonvar_columns:="off",
 			                                                infeasibility_finder:="off",
+			                                                presolve_feasibility_tolerance:=0.01,
 			                                                postsolve_continuous_variables:="round to nearest bound",                                                
 			                                                Store_complete_solver_solution:="no",
 			                                                solver_column_row_mapping:="never",
@@ -190,7 +307,7 @@ Model Main_Coal {
 			                                                                                    SupplyCurveStepBalShadow2(Scrv1,SReg, Sulf, Mtyp, Rank,cyr)
 			                                                                               endif;
 			
-			                   		ResultMessage(CurrentStudyYear,Itr_Element) := PartialLeastCostDomesticCoal.ProgramStatus;
+			                   		cl::ResultMessage(CurrentStudyYear,Itr_Element) := cl::PartialLeastCostDomesticCoal.ProgramStatus;
 			                            SupplyCurveStepBalShadow4((Scrv1,SReg, Sulf, Mtyp, Rank,cyr) |SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) 
 			                                                                                    :=SupplyCurveStepBalShadow3(Scrv1,SReg, Sulf, Mtyp, Rank,cyr)*Btu(Scrv1,SReg, Sulf, Mtyp, Rank);
 			                            SupplyCurveStepBalShadow5((Scrv1,SReg, Sulf, Mtyp, Rank,cyr) |SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) 
@@ -212,16 +329,16 @@ Model Main_Coal {
 			                            endif;
 			                            if ncntrl_curcalyr(1) > cpsbaseyr then
 			                                 qprods((SReg, Sulf, Mtyp, Rank) |SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) 
-			                                 	:= if ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,CurrentStudyYear) then
+			                                 	:= if  ncntrl_curitr(1)=1 then ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,PreviousYear)
+			                                 	   elseif     ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,CurrentStudyYear) then
 			                                     		ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,CurrentStudyYear)
-			                                     	  else   ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,PreviousYear)
-			                                     	  endif;
-			                                     	LAG_PROD((Scrv1,SReg,Sulf,Mtyp,Rank,cyr)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) := ProductionVolumeTons1(SReg,Sulf,Mtyp,Rank,cyr-1);
-			                                     	PriceAdjustment;
-			                                     	mcnt_prev((Scrv1,SReg,Sulf,Mtyp,Rank)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) := PMN(SReg,Sulf,Mtyp,Rank,CurrentStudyYear); !hopefully this is still in memory
+			                                     	   endif;
+			                                   LAG_PROD((Scrv1,SReg,Sulf,Mtyp,Rank,cyr)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) := ProductionVolumeTons1(SReg,Sulf,Mtyp,Rank,cyr-1);
+			                                   PriceAdjustment;
+			                                   mcnt_prev((Scrv1,SReg,Sulf,Mtyp,Rank)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) := PMN(SReg,Sulf,Mtyp,Rank,CurrentStudyYear); !hopefully this is still in memory
 			                             elseif ncntrl_curcalyr(1) = cpsbaseyr then
-			                                     			mcnt_prev((Scrv1,SReg,Sulf,Mtyp,Rank)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank))  := BY_MMP(Scrv1,SReg,Sulf,Mtyp,Rank)/$Btu(Scrv1,SReg,Sulf,Mtyp,Rank);
-			                                     			qprods((SReg,Sulf,Mtyp,Rank)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank))  := Sum(Scrv1|Btu(Scrv1,SReg,Sulf,Mtyp,Rank),BY_PROD(Scrv1,SReg,Sulf,Mtyp,Rank));
+			                                    mcnt_prev((Scrv1,SReg,Sulf,Mtyp,Rank)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank))  := BY_MMP(Scrv1,SReg,Sulf,Mtyp,Rank)/$Btu(Scrv1,SReg,Sulf,Mtyp,Rank);
+			                                    qprods((SReg,Sulf,Mtyp,Rank)|SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank))  := Sum(Scrv1|Btu(Scrv1,SReg,Sulf,Mtyp,Rank),BY_PROD(Scrv1,SReg,Sulf,Mtyp,Rank));
 			                            endif;	
 			                            if ncntrl_curitr(1)=1 then
 			                            	!CalcCoalReportingTotals;
@@ -251,7 +368,7 @@ Model Main_Coal {
 			                            if(AIMCLSolvDebug=0) then
 			             		    	if (ResultMessage(CurrentStudyYear,Itr_Element) <> 'Optimal' ) then		 
 			             			   block option Save_Data_Update_Definitions := 'off';              
-			                            		SaveAll( FormatString("cases\\debug%e_%i", CurrentStudyYear, ncntrl_curitr(1)));           
+			                            		!SaveAll( FormatString("..\\..\\coal\\cases\\debug%e_%i", CurrentStudyYear, ncntrl_curitr(1)));           
 			                            		empty ObjTotalCost;
 			                            	   endblock;
 			                             	endif;	   
@@ -261,7 +378,6 @@ Model Main_Coal {
 			
 			                   			! LaggedProductionPriceforCPS1(Scrv1,yr)     := Sum(Scrv,LaggedProductionPriceforCPS2(Scrv1,Scrv,yr));
 			
-			                    CoalOutProcedure();
 			
 			                                                 !for cyr | (val(cyr) = CurrentStudyYear) do
 			                                                 !	if cyr > cpsbaseyr then
@@ -279,11 +395,16 @@ Model Main_Coal {
 			                    USO2GRP_EFD_PROD_A2(Scrv1,cyr):=Sum((SReg,Sulf,Mtyp,Rank)|Btu(Scrv1,SReg,Sulf,Mtyp,Rank),FY_PROD_CAP3(SReg,Sulf,Mtyp,Rank,cyr));
 			
 			                    if PartialLeastCostDomesticCoal.ProgramStatus = 'Optimal' then
-			                                   	ResultObjTotalCost(cyr) :=  ObjTotalCost;
+			                    		!If ncntrl_curitr(1)=1 then
+							cl::Calculate_report_totals(); ! need supply related parameters for report variables
+					    		!Endif;
+			                    		cl::CoaloutProcedure();
+			                                        ResultObjTotalCost(cyr) :=  ObjTotalCost;
 			                                   	Initialize_Global();
 			                                   	Copy_Global();
 			                            !Not needed with text data transfer: !  SaveGlobal("cases\\global_data");
-			                                    CMMLagDataSave("cases\\CMMLagData");
+			                            !not needed with AIMMS Endpoint 8/04/2025 DAF
+			                            !           CMMLagDataSave("cases\\CMMLagData");
 			                    endif;
 			
 			                    if ncntrl_curcalyr(1) = cpsbaseyr then
@@ -294,13 +415,14 @@ Model Main_Coal {
 			                    endif;   ! Move the calulation of supply curves for ECP and EFD outside the If statement
 			                    	 ! Do these every itteration  11-09-18  DAF
 			                            CalculationOfElectricityPricingEquation;
-			                            CMMLagDataSave("cases\\CMMLagData");
+			                          !not needed with AIMMS Endpoint 8/04/2025 DAF  
+			                          !  CMMLagDataSave("cases\\CMMLagData");
 			                    !endif;   
 			                    ! following writes ouptut information to an Excel file (a case is also saved)
 			                    WriteMinePrices;
 			                    if (ncntrl_curcalyr(1)=2050 and ncntrl_fcrl(1)=1) then
-			                                    SaveGlobal("cases\\global_data");
-			                                    CMMLagDataSave("cases\\CMMLagData");
+			                                    SaveGlobal("..\\..\\coal\\cases\\global_data");
+			                                    CMMLagDataSave("..\\..\\coal\\cases\\CMMLagData");
 			                                    Calculate_report_totals;
 			                                    if (Switch_SaveEachCycle) then 
 			                                       CycleDataSave(FormatString("%s.%i", NCHAR_SCEN_DATE(1),CYCLEINFO_CURIRUN(1)));  !yda save a case file at the end of each NEMS cycle 
@@ -313,8 +435,52 @@ Model Main_Coal {
 			                    endif;
 			
 			             endif;
+			
+				     Pulse_check_file_name := "../../coal/log/pulse_check.log";
+				     put Pulse_check_file;
+				     PUT "Year: ", ncntrl_curcalyr(1),"Iternation: ",ncntrl_curitr(1), ".\n";
+				     putclose;
 			                                   ! output the global variables (as previously set up in coalGetVars.txt) to nems in a text file
-			                                   SendGlobalDataToNEMS;
+			             SendGlobalDataToNEMS;
+		}
+	}
+	Procedure COALSetOptions {
+		Body: {
+			option 
+			  display_infeasibility_analysis:="off",
+			  listing_and_temporary_files := "../../coal/log",
+			  disable_new_mathprog_generator := "on",
+			  linear_presolve:="on", 
+			  presolve_feasibility_tolerance:=0.01,
+			  eliminate_nonvar_columns:="off",
+			  infeasibility_finder:="off",
+			  postsolve_continuous_variables:="round to nearest bound",                                                
+			  Store_complete_solver_solution:="no",
+			  solver_column_row_mapping:="never",                                             
+			  "CPLEX_22_1".MPS := "never";
+		}
+	}
+	Procedure COALResetOptions {
+		Body: {
+			option 
+			  common_warning_default:="warning handle",
+			  listing_and_temporary_files := "log",
+			  display_infeasibility_analysis:="off",
+			  infeasibility_finder:="off",
+			  disable_new_mathprog_generator := "off",
+			  always_store_constraint_levels := "off",
+			  always_store_marginals := "off",
+			  eliminate_nonvar_columns:="automatic",
+			  presolve_feasibility_tolerance:=1e-08,
+			  Row_range_violation_left_hand_side:="on",
+			  Warning_duplicate_column:="common warning default",
+			  Warning_duplicate_row:="common warning default",
+			  maximal_number_of_warnings_reported:=20,
+			  Listing_number_precision:=3,
+			  linear_presolve:="off",                                             
+			  Store_complete_solver_solution:="no",
+			  solver_column_row_mapping:="never",                                                
+			  "CPLEX_22_1".MPS := "never";
 		}
 	}
 	Procedure OverwritesFixForHistory {
@@ -323,7 +489,7 @@ Model Main_Coal {
 			  CurrentStudyYear := ncntrl_curcalyr(1);
 			!  for cyr | (val(cyr) = CurrentStudyYear) do
 				Overwrites();
-			    SaveGlobal("cases\\global_data");
+			    SaveGlobal("..\\..\\coal\\cases\\global_data");
 			!  endfor;
 		}
 	}
@@ -331,22 +497,22 @@ Model Main_Coal {
 		Body: {
 			AIMCLSolvDebug :=0;  !Changing solver settings for debugging using YearLoop procedure
 					     !! Value of 1 will generate MPS files and skip debug file output on infeasibility
-			ncntrl_curitr(1):=1;
-			ncntrl_fcrl(1):=0;
-			for (iy in {30..31}) do
-			  ncntrl_curitr(1):=1;
-			  ncntrl_curiyr(1):=val(iy);
-			  ncntrl_curcalyr(1):=1989+val(iy);
-			  MainExecution();
-			  ncntrl_curitr(1):=2;
-			  MainExecution();
-			  ncntrl_curitr(1):=3;
-			  MainExecution();
-			  ncntrl_curitr(1):=4;
-			  MainExecution();
-			  ncntrl_curitr(1):=5;
-			  MainExecution();
-			endfor;
+			!ncntrl_curitr(1):=1;
+			!ncntrl_fcrl(1):=0;
+			!for (iy in {30..31}) do
+			!  ncntrl_curitr(1):=1;
+			!  ncntrl_curiyr(1):=val(iy);
+			!  ncntrl_curcalyr(1):=1989+val(iy);
+			!  MainExecution();
+			!  ncntrl_curitr(1):=2;
+			!  MainExecution();
+			!  ncntrl_curitr(1):=3;
+			!  MainExecution();
+			!  ncntrl_curitr(1):=4;
+			!  MainExecution();
+			!  ncntrl_curitr(1):=5;
+			!  MainExecution();
+			!endfor;
 			
 			
 			
@@ -368,6 +534,25 @@ Model Main_Coal {
 			Marked as not_used. 12/21/2023"
 		}
 	}
+	Procedure Empty_Results {
+		Body: {
+			empty cl::ResultMessage;
+			empty cl::EscpTrigSupCrv;
+			empty cl::EscpTrigThermExp;
+			empty cl::EscpTrigCokeExp;
+			empty cl::EscpTrigImports;
+			empty cl::EscapeTrigRC;
+			empty cl::EscapeTrigProdBalance;
+			empty cl::EscapeNeeded;
+			empty cl::EscapeVector;
+			empty cl::EscapeTrigRC;
+			empty cl::EscapeTrigExportBounds;
+			empty cl::SolveStatus;
+			empty cl::ResultObjTotalCost;
+			!empty cl::ProductionVolumeStepsDetail;
+			CMMLagDataSave("..\\..\\coal\\cases\\CMMLagData");
+		}
+	}
 	Procedure YearLoop_new {
 		Body: {
 			!read from file "coalmapping.txt";
@@ -380,15 +565,21 @@ Model Main_Coal {
 			ncntrl_curcalyr(1):=val(Start_iyr);
 			!MaxIter := 5; ! maximum iteration to run; can be connected to NCNTRL_MAXITR; moved to definition
 			Cur_iyr := Start_iyr;
+			ReadGlobalDataFromNEMS;
+			Empty_Results;
 			
 			repeat
 			  if (ncntrl_curitr(1)<MaxIter) then
 			   if IterationFlag(Element(SelectIterations,ncntrl_curitr(1))) then
+			    if ncntrl_curitr(1) = 1 then   !this is added because Startup_Procedure "ReadData" is no longer working under endpoint
+			      readdata;
+			    endif;
 			    MainExecution();
 			    endif;
 			    ncntrl_curitr(1)+=1;
 			  else
 			   if IterationFlag(Element(SelectIterations,ncntrl_curitr(1))) then
+			
 			    MainExecution();  
 			    endif;  
 			    break when (Cur_iyr = End_iyr);
@@ -409,7 +600,7 @@ Model Main_Coal {
 			ncntrl_fcrl(1):=0;
 			
 			
-			for (iy in {25..32}) do
+			for (iy in {25..34}) do
 			  ncntrl_curiyr(1):=val(iy);
 			  ncntrl_curcalyr(1):=1989+val(iy);
 			  CurrentStudyYear := ncntrl_curcalyr(1);
@@ -418,6 +609,8 @@ Model Main_Coal {
 			   !  USO2GRP_XCL_OTHER_A(MX_NCI,MNUMYR) := USO2GRP_XCL_OTHER_A_History(MX_NCI,MNUMYR);
 			     USO2GRP_XCL_PCAP_A(MX_NCL,MNUMYR) := USO2GRP_XCL_PCAP_A_History(MX_NCL,MNUMYR);
 			  EMM_CL_BTUs_A(pu_id,yr) := Sum((mnumyr)|MAP_mnumyr_yr(MNUMYR,yr),EMM_CL_BTUs_B(pu_id,MNUMYR));
+			  COALREP_WAGEPHOUR_A(MNUMYR) := 25.00;
+			  COALREP_WAGEGROWTH_A(MNUMYR) := 0.001;
 			  Copy_Global();
 			  Overwrites();
 			
@@ -476,6 +669,7 @@ Model Main_Coal {
 				+999*ContractEscape2(SReg, Sulf, Mtyp, Rank,DReg,cyr))
 				!E +Sum((pt2,DReg,cyr),999*SubbitEscape(pt2,DReg,cyr)
 				!E +999*LigniteEscape(pt2,DReg,cyr))
+				+sum((cyr), ExtraWasteCoal(cyr)*10 + MissingWasteCoal(cyr)*10)
 				+ sum((USe,tc,cyr), 999*TestICMMEscape(USe,tc,cyr) ) ! added 8/17/2021 to test using US export constraints from the new International Coal Market Model
 				!!                       International Trade
 				+ sum[ (nUS,s,tc,cyr), (InternationalFOBScalintbTU(nUS,s,tc,cyr)*ExpSupply(NUS,s,tc,cyr))] ! int'l FOB price
@@ -788,7 +982,7 @@ Model Main_Coal {
 				EscapeNeedLessIndustImportsTons,
 				EscapeNeedMoreCokingImportsTons,
 				EscapeNeedLessCokingImportsTons,
-				
+				MissingWasteCoal, ExtraWasteCoal,
 				!                         Domestic Production Variables
 				ProductionVolume,
 				ProductionVolumeSteps,
@@ -825,6 +1019,7 @@ Model Main_Coal {
 			Index: cyr;
 			CurrentPeriod: CurrentStudyYear;
 			IntervalLength: 1;
+			Property: ElementsAreNumerical;
 			Definition: {
 				Data {                2003,2004,2005,2006,2007,2008,2009,2010,
 				        2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,
@@ -836,8 +1031,9 @@ Model Main_Coal {
 		Set InternationalYears {
 			SubsetOf: ndYear;
 			Index: Intlyear;
+			Property: ElementsAreNumerical;
 			Definition: {
-				Data {                                                          2009,2010,
+				Data {                                          2009,2010,
 				        2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,
 				        2021,2022,2023,2024,2025,2026,2027,2028,2029,2030,
 				        2031,2032,2033,2034,2035,2036,2037,2038,2039,2040,
@@ -879,6 +1075,7 @@ Model Main_Coal {
 		}
 		ElementParameter CurrentStudyYear {
 			Range: ndYear;
+			InitialData: 2020;
 		}
 		ElementParameter PreviousYear {
 			Range: ndYear;
@@ -1467,7 +1664,7 @@ Model Main_Coal {
 		Parameter MAP_ecpfph_globalyr {
 			IndexDomain: (ECPFPH,cyr);
 			Text: "for expected prices sent to the electricity model, this will be the last year that will represent a calculation (all later years will copy the last calc\'ed value)";
-			Definition: ecpfph|ecpfph<=ncntrl_lastyr('1')-cyr+1990;
+			Definition: ecpfph $ (ecpfph <= ncntrl_lastyr('1')-cyr+1990);
 		}
 		Parameter MAP_ecpxph_pyr {
 			IndexDomain: {
@@ -2848,9 +3045,6 @@ Model Main_Coal {
 			StringParameter DataRange6;
 			StringParameter ExcelErrorMessage;
 			Parameter ExcelStatus;
-			ElementParameter err {
-				Range: errh::PendingErrors;
-			}
 		}
 		Procedure WriteEMMDBTables {
 			Body: {
@@ -3077,214 +3271,159 @@ Model Main_Coal {
 			Body: {
 				!! Set the name of the workbook with the cycle information 
 				if (Switch_SaveEachCycle) then
-					WorkbookName := FormatString("CoalOutput-%i.xls", CYCLEINFO_CURIRUN(1));
+					WorkbookName := FormatString("../../coal/CoalOutput-%i.xls", CYCLEINFO_CURIRUN(1));
 				else
-					WorkbookName := "CoalOutput.xls";
+					WorkbookName := "../../coal/CoalOutput.xls";
 				endif;
 				
 				!! Assigning the variables to each of the sheet of the Excel file workbook 
-				Industrial := DATA{'IndustrialTransportTrills'};
-				Residential := DATA{'ResidentialTransportTrills'};
-				Coking := DATA{'CokingTransportTrills'};
-				Exports := DATA{'ExportsTransportTrills2a'};
-				Liquids := DATA{'LiquidsTransportTrills'};
-				ElectricityACTrills := DATA{'ElectricityTransportACSubtotalTrill'};
-				AllSectorsCombined := DATA{'AllSectorsTransportTrills'};
-				ElectricityT1Rate := DATA{'Trate2wSurch'};
-				ElectricityTier2TotalCost := DATA{'ElectricityTransport2CostScrvYr'};
-				RevisedRate := DATA{'Trate1RevisedBase'};
-				HeatContent := DATA{'Btu'};
-				Surcharge := DATA{'SurcharT1'};
-				TransMultiplier := DATA{'FinalWest',
-							'FinalEast',
-							'FinalRCAFindex',
-							'Indx_Labor',
-							'Indx_Fuel',
-							'Indx_Other'};
-				MinePrice := DATA{'PriceByYr'};
-				! The Exports From US has 3 tables (with different indexes), so each table is defined separately to be added to the same sheet
-				ExportsFromUS1 := DATA{'OutputExportFromUSTrils'};
-				ExportsFromUS2 := DATA{'OutputTonsTransportUSbyImporterCoking'};
-				ExportsFromUS3 := DATA{'OutputTonsTransportUSbyImporterThermal'};
-				InternationalTrade := DATA{'OutputTransportNonUS'};
-				ImportsElec := DATA{'ImportsElectricityTonsDetail2',
-							'ImportsElectricityTrillsDetail2'};
-				! The Imports Subtotal has 3 tables (with different indexes), so each table is defined separately to be added to the same sheet
-				ImportsSubtotal1 := DATA{'ImportsElectricitySubtotalReport'};
-				ImportsSubtotal2 := DATA{'ImportsIndustrialSubtotalReport'};
-				ImportsSubtotal3 := DATA{'ImportsCokingSubtotalReport'};
-				USCoalSupplyCurves := DATA{'SC_QUAN',
-							'SC_PRICE87',
-							'SC_PRICE_BYDollars'};
+				!Industrial := DATA{'IndustrialTransportTrills'};
+				!Residential := DATA{'ResidentialTransportTrills'};
+				!Coking := DATA{'CokingTransportTrills'};
+				!Exports := DATA{'ExportsTransportTrills2a'};
+				!Liquids := DATA{'LiquidsTransportTrills'};
+				!ElectricityACTrills := DATA{'ElectricityTransportACSubtotalTrill'};
+				!AllSectorsCombined := DATA{'AllSectorsTransportTrills'};
+				!ElectricityT1Rate := DATA{'Trate2wSurch'};
+				!ElectricityTier2TotalCost := DATA{'ElectricityTransport2CostScrvYr'};
+				!RevisedRate := DATA{'Trate1RevisedBase'};
+				!HeatContent := DATA{'Btu'};
+				!Surcharge := DATA{'SurcharT1'};
+				!TransMultiplier := DATA{'FinalWest',
+				!			'FinalEast',
+				!			'FinalRCAFindex',
+				!			'Indx_Labor',
+				!			'Indx_Fuel',
+				!			'Indx_Other'};
+				!MinePrice := DATA{'PriceByYr'};
+				!! The Exports From US has 3 tables (with different indexes), so each table is defined separately to be added to the same sheet
+				!ExportsFromUS1 := DATA{'OutputExportFromUSTrils'};
+				!ExportsFromUS2 := DATA{'OutputTonsTransportUSbyImporterCoking'};
+				!ExportsFromUS3 := DATA{'OutputTonsTransportUSbyImporterThermal'};
+				!InternationalTrade := DATA{'OutputTransportNonUS'};
+				!ImportsElec := DATA{'ImportsElectricityTonsDetail2',
+				!			'ImportsElectricityTrillsDetail2'};
+				!! The Imports Subtotal has 3 tables (with different indexes), so each table is defined separately to be added to the same sheet
+				!ImportsSubtotal1 := DATA{'ImportsElectricitySubtotalReport'};
+				!ImportsSubtotal2 := DATA{'ImportsIndustrialSubtotalReport'};
+				!ImportsSubtotal3 := DATA{'ImportsCokingSubtotalReport'};
+				!USCoalSupplyCurves := DATA{'SC_QUAN',
+				!			'SC_PRICE87',
+				!			'SC_PRICE_BYDollars'};
 				
 				!! If the workbook exist, it deletes it and then recreates the workbook
-				if fileexists(WorkbookName) then
-					filedelete(WorkbookName);
+				
+				if fileexists(cl::WorkbookName) then
+				        axll::OpenWorkBook(cl::WorkbookName);
+				else
+				      block
+					FileCopy("../../coal/CoalOutput.xls", FormatString("../../coal/CoalOutput-%i.xls", CYCLEINFO_CURIRUN(1))); ;
+					axll::OpenWorkBook(cl::WorkbookName);
+				      onerror err do
+				      endblock;
 				endif;
 				
+				!        endif;
+				!endblock;
 				!! Creates the workbook and the name of the first sheet
-				block
-					axll::CreateNewWorkBook(WorkbookName,"Industrial");
-				onerror err do
-				endblock;
+				!!	axll::OpenWorkBook(cl::WorkbookName);
 				
 				!! The following creates new sheets and fill in the sets of variables defined previously
 				block
 					axll::SelectSheet("Industrial");
-					axll::WriteCompositeTable(Industrial,"A1",1,1);
+					axll::WriteCompositeTable(cl::IndustrialTransportTrills,"A1",1,1);
 				
-					axll::CreateSheet("Residential");
+				
 					axll::SelectSheet("Residential");
-					axll::WriteCompositeTable(Residential,"A1",1,1);
+					axll::WriteCompositeTable(cl::ResidentialTransportTrills,"A1",1,1);
 				
-					axll::CreateSheet("Coking");
+				
 					axll::SelectSheet("Coking");
-					axll::WriteCompositeTable(Coking,"A1",1,1);
+					axll::WriteCompositeTable(cl::CokingTransportTrills,"A1",1,1);
 				
-					axll::CreateSheet("Exports");
+				
 					axll::SelectSheet("Exports");
-					axll::WriteCompositeTable(Exports,"A1",1,1);
+					axll::WriteCompositeTable(cl::ExportsTransportTrills2a,"A1",1,1);
 				
-					axll::CreateSheet("Liquids");
+				
 					axll::SelectSheet("Liquids");
-					axll::WriteCompositeTable(Liquids,"A1",1,1);
+					axll::WriteCompositeTable(cl::LiquidsTransportTrills,"A1",1,1);
 				
-					axll::CreateSheet("ElectricityACTrills");
+				
 					axll::SelectSheet("ElectricityACTrills");
-					axll::WriteCompositeTable(ElectricityACTrills,"A1",1,1);
+					axll::WriteCompositeTable(cl::ElectricityTransportACSubtotalTrill,"A1",1,1);
 				
-					axll::CreateSheet("AllSectorsCombined");
+				
 					axll::SelectSheet("AllSectorsCombined");
-					axll::WriteCompositeTable(AllSectorsCombined,"A1",1,1);
+					axll::WriteCompositeTable(cl::AllSectorsTransportTrills,"A1",1,1);
 				
-					axll::CreateSheet("ElectricityT1Rate");
+				
 					axll::SelectSheet("ElectricityT1Rate");
-					axll::WriteCompositeTable(ElectricityT1Rate,"A1",1,1);
+					axll::WriteCompositeTable(cl::Trate2wSurch,"A1",1,1);
 				
-					axll::CreateSheet("ElectricityTier2TotalCost");
+				
 					axll::SelectSheet("ElectricityTier2TotalCost");
-					axll::WriteCompositeTable(ElectricityTier2TotalCost,"A1",1,1);
+					axll::WriteCompositeTable(cl::ElectricityTransport2CostScrvYr,"A1",1,1);
 				
-					axll::CreateSheet("RevisedRate");
+				
 					axll::SelectSheet("RevisedRate");
-					axll::WriteCompositeTable(RevisedRate,"A1",1,1);
+					axll::WriteCompositeTable(cl::Trate1RevisedBase,"A1",1,1);
 				
-					axll::CreateSheet("HeatContent");
+				
 					axll::SelectSheet("HeatContent");
-					axll::WriteCompositeTable(HeatContent,"A1",1,1);
+					axll::WriteCompositeTable(cl::Btu,"A1",1,1);
 				
-					axll::CreateSheet("Surcharge");
+				
 					axll::SelectSheet("Surcharge");
-					axll::WriteCompositeTable(Surcharge,"A1",1,1);
+					axll::WriteCompositeTable(cl::SurcharT1,"A1",1,1);
 				
-					axll::CreateSheet("TransMultiplier");
+				
 					axll::SelectSheet("TransMultiplier");
-					axll::WriteCompositeTable(TransMultiplier,"A1",1,1);
+					axll::WriteCompositeTable(cl::FinalWest,"A1",1,1);
+					axll::WriteCompositeTable(cl::FinalEast,"D1",1,1);
+					axll::WriteCompositeTable(cl::FinalRCAFindex,"G1",1,1);
+					axll::WriteCompositeTable(cl::Indx_Labor,"J1",1,1);
+					axll::WriteCompositeTable(cl::Indx_Fuel,"M1",1,1);
+					axll::WriteCompositeTable(cl::Indx_Other,"P1",1,1);
 				
-					axll::CreateSheet("MinePrice");
+				
 					axll::SelectSheet("MinePrice");
-					axll::WriteCompositeTable(MinePrice,"A1",1,1);
+					axll::WriteCompositeTable(cl::PriceByYr,"A1",1,1);
 				
-					axll::CreateSheet("ImportsElec");
+				
 					axll::SelectSheet("ImportsElec");
-					axll::WriteCompositeTable(ImportsElec,"A1",1,1);
+					axll::WriteCompositeTable(cl::ImportsElectricityTonsDetail2,"A1",1,1);
+					axll::WriteCompositeTable(cl::ImportsElectricityTrillsDetail2,"H1",1,1);
 				
-					axll::CreateSheet("ImportsSubtotal");
+				
 					axll::SelectSheet("ImportsSubtotal");
-					axll::WriteCompositeTable(ImportsSubtotal1,"A1",1,1);
-					axll::WriteCompositeTable(ImportsSubtotal2,"D1",1,1);
-					axll::WriteCompositeTable(ImportsSubtotal3,"G1",1,1);
+					axll::WriteCompositeTable(cl::ImportsElectricitySubtotalReport,"A1",1,1);
+					axll::WriteCompositeTable(cl::ImportsIndustrialSubtotalReport,"E1",1,1);
+					axll::WriteCompositeTable(cl::ImportsCokingSubtotalReport,"I1",1,1);
 				
-					axll::CreateSheet("ExportsFromUS");
+				
 					axll::SelectSheet("ExportsFromUS");
-					axll::WriteCompositeTable(ExportsFromUS1,"A1",1,1);
-					axll::WriteCompositeTable(ExportsFromUS2,"G1",1,1);
-					axll::WriteCompositeTable(ExportsFromUS3,"L1",1,1);
+					axll::WriteCompositeTable(cl::OutputExportFromUSTrils,"A1",1,1);
+					axll::WriteCompositeTable(cl::OutputTonsTransportUSbyImporterCoking,"G1",1,1);
+					axll::WriteCompositeTable(cl::OutputTonsTransportUSbyImporterThermal,"L1",1,1);
 				
-					axll::CreateSheet("InternationalTrade");
+				
 					axll::SelectSheet("InternationalTrade");
-					axll::WriteCompositeTable(InternationalTrade,"A1",1,1);
+					axll::WriteCompositeTable(cl::OutputTransportNonUS,"A1",1,1);
 				
-					axll::CreateSheet("USCoalSupplyCurves");
+				
 					axll::SelectSheet("USCoalSupplyCurves");
-					axll::WriteCompositeTable(USCoalSupplyCurves,"A1",1,1);
+					axll::WriteCompositeTable(cl::SC_QUAN,"A1",1,1);
+					axll::WriteCompositeTable(cl::SC_PRICE87,"J1",1,1);
+					axll::WriteCompositeTable(cl::SC_PRICE_BYDollars,"S1",1,1);
 				
 				onerror err do
+				        axll::CloseWorkBook(WorkbookName);
 				endblock;
 				
 				!! Closes the workbook when finished
 				axll::CloseWorkBook(WorkbookName);
-			}
-		}
-		DeclarationSection ExcelSheets {
-			Set Industrial {
-				SubsetOf: AllIdentifiers;
-			}
-			Set Residential {
-				SubsetOf: AllIdentifiers;
-			}
-			Set Coking {
-				SubsetOf: AllIdentifiers;
-			}
-			Set Exports {
-				SubsetOf: AllIdentifiers;
-			}
-			Set Liquids {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ElectricityACTrills {
-				SubsetOf: AllIdentifiers;
-			}
-			Set AllSectorsCombined {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ElectricityT1Rate {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ElectricityTier2TotalCost {
-				SubsetOf: AllIdentifiers;
-			}
-			Set RevisedRate {
-				SubsetOf: AllIdentifiers;
-			}
-			Set HeatContent {
-				SubsetOf: AllIdentifiers;
-			}
-			Set Surcharge {
-				SubsetOf: AllIdentifiers;
-			}
-			Set TransMultiplier {
-				SubsetOf: AllIdentifiers;
-			}
-			Set MinePrice {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ExportsFromUS1 {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ExportsFromUS2 {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ExportsFromUS3 {
-				SubsetOf: AllIdentifiers;
-			}
-			Set InternationalTrade {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ImportsElec {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ImportsSubtotal1 {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ImportsSubtotal2 {
-				SubsetOf: AllIdentifiers;
-			}
-			Set ImportsSubtotal3 {
-				SubsetOf: AllIdentifiers;
-			}
-			Set USCoalSupplyCurves {
-				SubsetOf: AllIdentifiers;
+				!
 			}
 		}
 		Procedure CheckExcelError {
@@ -4698,10 +4837,6 @@ Model Main_Coal {
 					IndexDomain: (M1);
 					Text: "MODELS NEVER OFF SWITCH(0->OFF,1->ON)(DE";
 				}
-				Parameter NCNTRL_ECPSTART {
-					IndexDomain: (M1);
-					Text: "START YEAR FOR ECP MODULE (DEF=1)";
-				}
 				Parameter NCNTRL_CNVTST {
 					IndexDomain: (NMODEL,MNUMYR);
 					Text: "CONVERGENCE TEST FLAGS FOR EACH MODEL";
@@ -5229,7 +5364,7 @@ Model Main_Coal {
 				Parameter CONVFACT_CFRSQ {
 					IndexDomain: M1;
 					Text: "Residual Fuel BTU to BBL convertion factor (same for all years)";
-					Definition: 6.28700017929077;
+					InitialData: 6.28700017929077;
 				}
 				Parameter CONVFACT_CFDSTR {
 					IndexDomain: (MNUMYR);
@@ -5543,19 +5678,19 @@ Model Main_Coal {
 						Text: "Count of active EMM units -";
 						Definition: {
 							
-							sum((pu_id),COALEMM_EMM_CL_ECPT_Active_FLAG_PUID(pu_id,MNUMYR)|map_pltnum_puid(pu_id,pltnum))
+							sum((pu_id),COALEMM_EMM_CL_ECPT_Active_FLAG_PUID(pu_id,MNUMYR) $ map_pltnum_puid(pu_id,pltnum))
 						}
 						Comment: "Added in Jun 2022 when Laura now passes NUTSEC code of 99 for retired units";
 					}
 					Parameter COALEMM_EMM_CL_BTUs_withPUID {
 						IndexDomain: (pu_id,MNUMYR);
 						Text: "BTUs of Demand for Each Coal Unit From Restart/EMM in pu_id for non-retired/Active units";
-						Definition: sum((MX_UNT),COALEMM_EMM_CL_BTUs_ActiveUnits(MX_UNT,MNUMYR) |Map_MX_UNT_pu_id(MX_UNT,pu_id));
+						Definition: sum((MX_UNT),COALEMM_EMM_CL_BTUs_ActiveUnits(MX_UNT,MNUMYR) $ Map_MX_UNT_pu_id(MX_UNT,pu_id));
 					}
 					Parameter EMM_PlantBtus {
 						IndexDomain: (pltnum,MNUMYR);
 						Text: "Sum all active units to get BTUs by Plant - Need for coal contracts";
-						Definition: sum((pu_id),COALEMM_EMM_CL_BTUs_withPUID(pu_id,MNUMYR)|map_pltnum_puid(pu_id,pltnum));
+						Definition: sum((pu_id),COALEMM_EMM_CL_BTUs_withPUID(pu_id,MNUMYR) $ map_pltnum_puid(pu_id,pltnum));
 					}
 					Parameter EMM_Plant_NumberOActiveUnitsAtPlant_In2019 {
 						IndexDomain: pltnum;
@@ -5583,10 +5718,10 @@ Model Main_Coal {
 							!EMM_CL_BTUs_ForContactsC(MX_NCI,pu_id,pltnum,MNUMYR) / $ sum((pltnum), EMM_CL_BTUs_ForContactsC(MX_NCI,pu_id,pltnum,MNUMYR))
 						}
 					}
-					Parameter EMM_PlantBtus_2019 {
+					Parameter EMM_PlantBtus_2022 {
 						IndexDomain: pltnum;
 						Text: "Used to compute contracts in AnalyseEIA923Deliveries.xls";
-						Definition: EMM_PlantBtus(pltnum,'30');
+						Definition: EMM_PlantBtus(pltnum,'33');
 					}
 					Parameter COALEMM_NUM_CMM_UNITS {
 						IndexDomain: (M1);
@@ -5602,7 +5737,7 @@ Model Main_Coal {
 					}
 					Parameter COALEMM_CMM_CL_BTUS_Alt2 {
 						IndexDomain: (MX_NCI,MX_UNT,MNUMYR);
-						Definition: sum((pu_id), UnitBTUs_MX_NCI(pu_id,MX_NCI,MNUMYR) |Map_MX_UNT_pu_id(MX_UNT,pu_id));
+						Definition: sum((pu_id), UnitBTUs_MX_NCI(pu_id,MX_NCI,MNUMYR) $ Map_MX_UNT_pu_id(MX_UNT,pu_id));
 					}
 					Parameter COALEMM_NUM_CONT_PRF {
 						IndexDomain: (M1);
@@ -5704,6 +5839,7 @@ Model Main_Coal {
 				Parameter USO2GRP_XCL_QECP {
 					IndexDomain: (MX_NCL,ECPFPH,MNUMYR);
 					Text: "Expected Coal Supply Quantities";
+					Comment: "This is restart variable that CMM writes out to pass coal supply quantities by supply curve (MX_NCL) with ECP planning years (ECPFPH)";
 				}
 				Parameter USO2GRP_XCL_PECP {
 					IndexDomain: (MX_NCL,M11,ECPFPH,MNUMYR);
@@ -6141,6 +6277,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Maximum Number of Years i";
 				Index: ECPFPH;
+				Property: ElementsAreNumerical;
 				InitialData: {
 					{1..0031}
 				}
@@ -6294,7 +6431,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M1;
-				InitialData: {
+				Definition: {
 					{1..0001}
 				}
 			}
@@ -6302,7 +6439,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M2;
-				InitialData: {
+				Definition: {
 					{1..0002}
 				}
 			}
@@ -6326,7 +6463,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M5;
-				InitialData: {
+				Definition: {
 					{1..0005}
 				}
 			}
@@ -6334,7 +6471,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M6;
-				InitialData: {
+				Definition: {
 					{1..0006}
 				}
 			}
@@ -6342,7 +6479,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M7;
-				InitialData: {
+				Definition: {
 					{1..0007}
 				}
 			}
@@ -6350,7 +6487,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M8;
-				InitialData: {
+				Definition: {
 					{1..0008}
 				}
 			}
@@ -6358,7 +6495,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M9;
-				InitialData: {
+				Definition: {
 					{1..0009}
 				}
 			}
@@ -6374,7 +6511,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M12;
-				InitialData: {
+				Definition: {
 					{1..0012}
 				}
 			}
@@ -6390,7 +6527,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M15;
-				InitialData: {
+				Definition: {
 					{1..0015}
 				}
 			}
@@ -6398,7 +6535,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M17;
-				InitialData: {
+				Definition: {
 					{1..0017}
 				}
 			}
@@ -6406,7 +6543,7 @@ Model Main_Coal {
 				SubsetOf: Integers;
 				Text: "Unnamed";
 				Index: M31;
-				InitialData: {
+				Definition: {
 					{1..0031}
 				}
 			}
@@ -6458,7 +6595,7 @@ Model Main_Coal {
 				Definition: "monitor.in.txt";
 			}
 			StringParameter sMessageOutFile {
-				Definition: "monitor.out.txt";
+				Definition: "../../coal/monitor.out.txt";
 			}
 			StringParameter sAction;
 			StringParameter sStatusMessage;
@@ -6535,7 +6672,7 @@ Model Main_Coal {
 				Hours(SReg,yr)				:=sum[(Sulf,Mtyp,Rank)|Btu2(Sreg,Sulf,Mtyp,Rank) and Btu2(Sreg,Sulf,Mtyp,Rank),
 				                			(1.0/$FY_TPH1(Sreg,Sulf,Mtyp,Rank,yr))
 				                			*TotalProduction(SReg,Sulf,Mtyp,Rank,yr)/Btu2(Sreg,Sulf,Mtyp,Rank)*1000000];  !This should be total labor hours by Supply region
-				                					!*Btu2(Sreg,Sulf,Mtyp,Rank)*TotalProduction(SReg,Sulf,Mtyp,Rank,yr)];
+				
 				MinersbySupplyRegionYr(SReg,cyr)	:=if cyr > val(CPSBaseYr) and MinersbySupplyRegionYr(SReg,cyr-1)and hours(sreg,cyr-1) and hours(sreg,cyr) then
 				                				MinersbySupplyRegionYr(SReg,cyr-1)*hours(sreg,cyr)/hours(sreg,cyr-1)
 				                			elseif cyr = val(cpsbaseyr) then
@@ -6557,6 +6694,23 @@ Model Main_Coal {
 									elseif mnumpr < 6 and mx_so2 = 2 THEN                !  LFMM:   ELSE
 				               				EMISSION_EMELPSO2(globalyr,MX_SO2)*.00003
 									endif);
+				COALREP_TOTLABPROD_A1(globalyr)		:= sum( (scrv1,yr)|map_globalyr_cyr(globalyr,yr), AnnualCoalProduction_supcrv1_tons(Scrv1,yr)  );
+				COALREP_TOTLABPROD_A2(globalyr) 	:= sum( (scrv1,yr)|map_globalyr_cyr(globalyr,yr), FY_MineLaborHours(yr,Scrv1)  );
+				COALREP_TOTLABPROD_A(globalyr)		:= COALREP_TOTLABPROD_A1(globalyr) /$ COALREP_TOTLABPROD_A2(globalyr);
+				COALREP_WAGEPHOUR_A(globalyr) 		:=Sum(cyr|globalyr=cyr-1989, COALREP_WAGEPHOUR_B1(cyr) / $COALREP_WAGEPHOUR_C(cyr)) ;
+				
+				
+				
+				USMINELABPROD(globalyr+1989)		:=  COALREP_TOTLABPROD_A(globalyr) ;
+				COALREP_LABPRODGROWTH_A(globalyr)	:=  if USMINELABPROD(globalyr+1989-1) then
+										(USMINELABPROD(globalyr+1989) / $ USMINELABPROD(globalyr+1989-1) - 1.0) * 100
+									    else 0.0001
+									    endif;
+				USAvgCoalMineHRWAGE(globalyr+1989)	:= COALREP_WAGEPHOUR_A(globalyr) ;
+				COALREP_WAGEGROWTH_A(globalyr)		:=  if USAvgCoalMineHRWAGE(globalyr+1989-1) then
+										(USAvgCoalMineHRWAGE(globalyr+1989) / $ USAvgCoalMineHRWAGE(globalyr+1989-1) - 1.0) * 100
+									    else 0.0001
+									    endif;		    	
 				L_HGBTU(PADD,yr)			:=If LiquidsBtus(PADD,yr)>0 then
 									MercuryEmissionsfromLiquids(PADD,yr)/
 									LiquidsBtus(PADD,yr)
@@ -8723,28 +8877,20 @@ Model Main_Coal {
 				Text: "App Premium Coal";
 				Definition: {
 					If (M4 = 1)then
-					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '2APR'
-					 ) and
-					Btu2(SReg,Sulf,Mtyp,Rank)
-					and map_globalyr_cyr(globalyr,cyr) and Sulf = '1A' and Rank = '4P',
+					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '2APR' ) and
+					Btu2(SReg,Sulf,Mtyp,Rank) and map_globalyr_cyr(globalyr,cyr) and Sulf = '1A' and Rank = '4P',
 					ProductionVolume(SReg,Sulf,Mtyp,Rank,cyr)/Btu2(SReg,Sulf,Mtyp,Rank))
 					elseif (M4 = 2)then
-					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '2APR'
-					 ) and
-					Btu2(SReg,Sulf,Mtyp,Rank)
-					and map_globalyr_cyr(globalyr,cyr) and Sulf = '2M' and Rank = '4P',
+					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '2APR' ) and
+					Btu2(SReg,Sulf,Mtyp,Rank) and map_globalyr_cyr(globalyr,cyr) and Sulf = '2M' and Rank = '4P',
 					 ProductionVolume(SReg,Sulf,Mtyp,Rank,cyr)/Btu2(SReg,Sulf,Mtyp,Rank))
 					 elseif (M4 = 3)then
-					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '02NA'
-					 ) and
-					Btu2(SReg,Sulf,Mtyp,Rank)
-					and map_globalyr_cyr(globalyr,cyr) and Sulf = '3H' and Rank = '4P',
+					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '02NA') and
+					Btu2(SReg,Sulf,Mtyp,Rank) and map_globalyr_cyr(globalyr,cyr) and Sulf = '3H' and Rank = '4P',
 					 ProductionVolume(SReg,Sulf,Mtyp,Rank,cyr)/Btu2(SReg,Sulf,Mtyp,Rank))
 					elseif (M4 = 4)then
-					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '2APR'
-					  )
-					and Btu2(SReg,Sulf,Mtyp,Rank)
-					and map_globalyr_cyr(globalyr,cyr) and Rank = '4P',
+					Sum((SReg,Sulf,Mtyp,Rank,cyr)|(SReg = '1APN' or SReg = '2APR'  )
+					and Btu2(SReg,Sulf,Mtyp,Rank) and map_globalyr_cyr(globalyr,cyr) and Rank = '4P',
 					 ProductionVolume(SReg,Sulf,Mtyp,Rank,cyr)/Btu2(SReg,Sulf,Mtyp,Rank))
 					 endif
 				}
@@ -8954,21 +9100,77 @@ Model Main_Coal {
 				IndexDomain: (globalyr);
 				Text: "Average mercury emissions in tons of hg";
 			}
-			Parameter Copy_COALREP_TOTLABPROD_A {
+			Parameter COALREP_TOTLABPROD_A {
 				IndexDomain: (globalyr);
-				Text: "total labor productivity";
+				Text: "total labor productivity calc - tons per minner hour";
+				Definition: {
+					!COALREP_TOTLABPROD_A1(MNUMYR) /$ COALREP_TOTLABPROD_A2(MNUMYR)
+				}
+				Comment: "In Coalout Procedure";
 			}
-			Parameter Copy_COALREP_WAGEPHOUR_A {
+			Parameter USMINELABPROD {
+				IndexDomain: (yr);
+				Text: "Calculated US Mine Labor Productivity (Tons per Hour)";
+			}
+			Parameter COALREP_TOTLABPROD_A1 {
 				IndexDomain: (globalyr);
+				Text: "total labor productivity calc - total US production in Million tons";
+				Definition: {
+					!sum( (scrv1,yr)|map_globalyr_cyr(globalyr,yr), AnnualCoalProduction_supcrv1_tons(Scrv1,yr)  )
+				}
+			}
+			Parameter COALREP_TOTLABPROD_A2 {
+				IndexDomain: (globalyr);
+				Text: "total labor productivity calc - total US Miner Labor Hours";
+				Definition: {
+					!sum( (scrv1,yr)|map_globalyr_cyr(globalyr,yr), FY_MineLaborHours(yr,Scrv1)  )
+				}
+			}
+			Parameter COALREP_WAGEPHOUR_A {
+				IndexDomain: (MNUMYR);
 				Text: "Total Wages per hour";
+				Comment: {
+					"Calculate in CoalOutProcedure
+					Set overwrite US miner wages to $25 per hour in 1987$ in  NEMS_OverwritesMake procedure."
+				}
 			}
-			Parameter Copy_COALREP_WAGEGROWTH_A {
-				IndexDomain: (globalyr);
-				Text: "Growth in wages from 1997";
+			Parameter COALREP_WAGEPHOUR_B {
+				IndexDomain: (Scrv1, yr);
+				Text: "Total Wage Cost by Supply Curve (Millions)";
+				Definition: Sum((SReg,Sulf,Mtyp,Rank), FY_WAGEperHOUR(Scrv1,SReg,Sulf,Mtyp,Rank,yr)) * FY_MineLaborHours(yr,Scrv1);
 			}
-			Parameter Copy_COALREP_LABPRODGROWTH_A {
+			Parameter COALREP_WAGEPHOUR_B1 {
+				IndexDomain: (yr);
+				Text: "Total Wage Cost by Supply Curve (Millions)";
+				Definition: Sum((Scrv1), COALREP_WAGEPHOUR_B(Scrv1,yr));
+			}
+			Parameter COALREP_WAGEPHOUR_C {
+				IndexDomain: (yr);
+				Text: "Total Mine Labor Hours (Millions)";
+				Definition: Sum((Scrv1), FY_MineLaborHours(yr,Scrv1));
+			}
+			Parameter Calc_LABORHOURS {
+				IndexDomain: (globalyr,Scrv1);
+				Text: "Mine labor hours by supply curve (Millions)";
+				Definition: {
+					If globalyr  <= (CPSBaseYr - 1989)  then
+						Sum((SReg,Sulf,Mtyp,Rank), BY_PROD(Scrv1,SReg,Sulf,Mtyp,Rank) /$ BY_TPH(Scrv1,SReg,Sulf,Mtyp,Rank))
+					else 	Sum((yr)|map_globalyr_cyr(globalyr,yr), FY_MineLaborHours(yr,Scrv1)  )
+					Endif;
+				}
+			}
+			Parameter COALREP_WAGEGROWTH_A {
+				IndexDomain: (MNUMYR);
+				Text: "Growth or change in US Mine wages (expressed as a percent)";
+			}
+			Parameter USAvgCoalMineHRWAGE {
+				IndexDomain: (yr);
+				Text: "US Average Coal Miner Wage caclulated (1992$ per hour)";
+			}
+			Parameter COALREP_LABPRODGROWTH_A {
 				IndexDomain: (globalyr);
-				Text: "Growth in labor productivity";
+				Text: "Growth or change in US labor productivity (expressed as a percent)";
+				Comment: "In CoaloutProcedure";
 			}
 			Parameter Copy_COALREP_COAL2GAS_A {
 				IndexDomain: (MNUMCR,globalyr);
@@ -9307,6 +9509,10 @@ Model Main_Coal {
 			}
 			Parameter MinersbySupplyRegionYr {
 				IndexDomain: (SReg,yr);
+				Definition: {
+					!  hours(sreg,cyr)/50/44  !assume 50 weeks per year at 45 hours per week
+				}
+				Comment: "Calculated in CoalOutProcedure";
 			}
 			Parameter MinersbySupplyRegion {
 				IndexDomain: (SReg,globalyr);
@@ -10223,7 +10429,7 @@ Model Main_Coal {
 				Text: "ECP Type for Each Coal Unit in Each Forecast Year - Value of Zero/NULL for retired unit";
 				Definition: {
 					
-					sum((MX_UNT), COALEMM_EMM_CL_ECPT_Active_FLAG(MX_UNT,MNUMYR)|Map_MX_UNT_pu_id(MX_UNT,pu_id))
+					sum((MX_UNT), COALEMM_EMM_CL_ECPT_Active_FLAG(MX_UNT,MNUMYR) $ Map_MX_UNT_pu_id(MX_UNT,pu_id))
 				}
 				Comment: "Laura";
 			}
@@ -10271,7 +10477,7 @@ Model Main_Coal {
 				IndexDomain: (MX_NCI,pu_id,MNUMYR);
 				Text: "BTUs of Demand for Each Coal Unit Using Pu_id";
 				Definition: {
-					sum((MX_UNT), COALEMM_EMM_CL_BTUs_ForCoalContacts(MX_NCI,MX_UNT,MNUMYR) |Map_MX_UNT_pu_id(MX_UNT,pu_id))
+					sum((MX_UNT), COALEMM_EMM_CL_BTUs_ForCoalContacts(MX_NCI,MX_UNT,MNUMYR) $ Map_MX_UNT_pu_id(MX_UNT,pu_id))
 					
 					!sum((pu_id), EMM_CL_BTUs_A_AltScrv(pu_id,MX_NCI,yr) |Map_MX_UNT_pu_id(MX_UNT,pu_id))
 				}
@@ -10320,7 +10526,7 @@ Model Main_Coal {
 			Parameter EMM_max_LigBtus_B {
 				IndexDomain: (DReg,pt2,MNUMYR);
 				Text: "Change index to DReg and CMM SubSec (p2)";
-				Definition: sum((NUTSEC,NDREGN),  EMM_max_LigBtus(NDREGN,NUTSEC,MNUMYR) | Map_nutsec_pt3(NUTSEC,pt2) and Map_ndregn_DReg(NDREGN,DReg));
+				Definition: sum((NUTSEC,NDREGN),  EMM_max_LigBtus(NDREGN,NUTSEC,MNUMYR) $ (Map_nutsec_pt3(NUTSEC,pt2) and Map_ndregn_DReg(NDREGN,DReg)) );
 			}
 			Parameter EMM_max_LigBtus_C {
 				IndexDomain: (DReg,pt2,MNUMYR,yr) | MAP_mnumyr_yr(MNUMYR,yr);
@@ -10343,7 +10549,7 @@ Model Main_Coal {
 			}
 			Parameter EMM_max_SubBitBtus_B {
 				IndexDomain: (DReg,pt2,MNUMYR);
-				Definition: sum((NUTSEC,NDREGN),  EMM_max_SubBitBtus(NDREGN,NUTSEC,MNUMYR) | Map_nutsec_pt3(NUTSEC,pt2) and Map_ndregn_DReg(NDREGN,DReg));
+				Definition: sum((NUTSEC,NDREGN),  EMM_max_SubBitBtus(NDREGN,NUTSEC,MNUMYR) $ (Map_nutsec_pt3(NUTSEC,pt2) and Map_ndregn_DReg(NDREGN,DReg)));
 			}
 			Parameter EMM_max_SubBitBtus_C {
 				IndexDomain: (DReg,pt2,MNUMYR,yr) | MAP_mnumyr_yr(MNUMYR,yr);
@@ -10877,7 +11083,7 @@ Model Main_Coal {
 				Definition: {
 					
 					sum ((IndSec,nUS,USi),
-					ImportsIndustrial(IndSec,DReg,nUS,USi,cyr) *( InternationalUnitTransportBtuNonUS87D(nUS,USi,'2',cyr) |USDRegImportMapping(USi,DReg)
+					ImportsIndustrial(IndSec,DReg,nUS,USi,cyr) *( InternationalUnitTransportBtuNonUS87D(nUS,USi,'2',cyr) $ USDRegImportMapping(USi,DReg)
 					+ InlandImportTranspRateBtu('I',nUs,DReg,USi) ))
 					+ sum((nUS), ImportsIndustrial_nUS_FOBDollars(DReg,NUS,cyr))
 				}
@@ -11358,7 +11564,7 @@ Model Main_Coal {
 			}
 			Parameter EMM_CL_BTUs_A_AltScrv2 {
 				IndexDomain: (pu_id,SReg,Sulf,Mtyp,Rank,yr);
-				Definition: sum((MX_NCI), EMM_CL_BTUs_A_AltScrv(pu_id,MX_NCI,yr) | Map_MXNCI_CoalType(MX_NCI,SReg,Sulf,Mtyp,Rank));
+				Definition: sum((MX_NCI), EMM_CL_BTUs_A_AltScrv(pu_id,MX_NCI,yr) $ Map_MXNCI_CoalType(MX_NCI,SReg,Sulf,Mtyp,Rank));
 			}
 			Parameter EMM_CL_BTUs_B {
 				IndexDomain: (pu_id,mnumyr);
@@ -11539,20 +11745,20 @@ Model Main_Coal {
 		}
 		Procedure RestartDataTestSavingcase {
 			Body: {
-				CMMLagDataSave("cases\\CMMLagData");
+				CMMLagDataSave("..\\..\\Coal\\Cases\\CMMLagData");
 			}
 		}
 		Procedure RestartDataTestloadingcase {
 			Body: {
 				
-				CMMLagDataLoad("cases\\CMMLagData");
+				CMMLagDataLoad("..\\..\\coal\\cases\\CMMLagData");
 			}
 		}
 		Procedure CalcCoalReportingTotals {
 			Body: {
 				!for yr | (val(yr) = CurrentStudyYear) do
 					ProductionVolumeStepsDetail(SReg,Sulf,Mtyp,Rank,Scrv1Step,cyr) := ProductionVolumeSteps(SReg,Sulf,Mtyp,Rank,Scrv1Step,cyr);
-					ExportsTransport3(Scrv1,SReg, Sulf, Mtyp, Rank,ExpSec,Use,DReg,cyr) := ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr) |Btu(Scrv1,SReg, Sulf, Mtyp, Rank) ;
+					ExportsTransport3(Scrv1,SReg, Sulf, Mtyp, Rank,ExpSec,Use,DReg,cyr) := ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr) $ Btu(Scrv1,SReg, Sulf, Mtyp, Rank) ;
 					ProductionVolumeTons((SReg, Sulf, Mtyp, Rank,cyr) |SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) := ProductionVolume(SReg, Sulf, Mtyp, Rank,cyr)/$Btu2(SReg, Sulf, Mtyp, Rank);
 					ProductionVolumeTons1((SReg,Sulf,Mtyp,Rank,cyr) |SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)) := ProductionVolume(SReg,Sulf,mtyp,rank,cyr)/$Btu2(SReg,Sulf,mtyp,rank);
 				
@@ -11588,7 +11794,7 @@ Model Main_Coal {
 					ExportsTransportTrills3(Scrv1,SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr)|Btu(Scrv1,SReg,Sulf,Mtyp,Rank) := ExportsTransport2(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr);
 					ExportsTransportTrills2(Scrv1,SReg,Sulf,Mtyp,Rank,ExpSec,DReg,cyr)|Btu(Scrv1,SReg,Sulf,Mtyp,Rank) := Sum(USe,ExportsTransport2(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr));
 					ImportsElectricityTrillsDetail2(nUS,USi,DReg,pt2,cyr)|USDRegIMportmapping(usi,dReg) := Sum(nsteps,ImportsElectricity(NSTEPS,nUS,USi,DReg,pt2,cyr));
-					OutputExportFromUSTrils(USe,NonUSi,tc,cyr) := TotalTransportUS(Use,NonUSi,tc,cyr) |USDRegIntlMapping2(Use,nonUSi,tc);
+					OutputExportFromUSTrils(USe,NonUSi,tc,cyr) := TotalTransportUS(Use,NonUSi,tc,cyr) $ USDRegIntlMapping2(Use,nonUSi,tc);
 					OutputTransportNonUS(nUS,i,tc,cyr) := TotalTransportNonUS(nUS,i,tc,cyr);
 					TotalNonUSExpTransportCost(nUS,cyr) := sum[ (i,tc) |InternationalUnitTransportBtuNonUS(nUS,i,tc) > 0,(InternationalUnitTransportBtuNonUS(nUS,i,tc)
 							* TotalTransportNonUS(nUS,i,tc,cyr))] ;
@@ -11661,7 +11867,7 @@ Model Main_Coal {
 			Arguments: (CaseName);
 			Body: {
 				CaseFileSave(
-				url: FormatString("cases\\%s.data",CaseName) ,
+				url: FormatString("..\\..\\coal\\cases\\%s.data",CaseName) ,
 				contents: CycleDataIdentifiers );
 			}
 			StringParameter CaseName {
@@ -11673,24 +11879,19 @@ Model Main_Coal {
 				SubsetOf: AllIdentifiers;
 				Definition: {
 					data 
-					    { ResultMessage                         , TotalProductionByYear                 , TotalProductionByYearScrv             ,
-					      EscpTrigSupCrv  ,  EscpTrigThermExp  ,  EscpTrigCokeExp  ,   EscpTrigImports  ,   EscapeTrigRC  ,	  EscapeTrigProdBalance,
-					      EscapeNeeded  ,	 EscapeVector  ,	EscapeTrigRC  , 	EscapeTrigExportBounds    ,	SolveStatus  ,			
-					      TotalExports                          , TotElectricTranportUSCoalTons         , TotalCommercialConsumption            ,
-					      TotalIndustrialConsumption            , TotalCokingConsumption                , TotalLiquidsConsumption               ,
-					      TotalImports                          , TotElecImportsTons                    , TotalConsumption                      ,
-					      PriceByScrv                           , ResultObjTotalCost                    , ElectTransportTier2Total              ,
+					     {TotalProductionByYear                 , TotalProductionByYearScrv             ,
+					      ResultMessage,	      EscpTrigSupCrv  ,  EscpTrigThermExp  ,  EscpTrigCokeExp  , 
+					      EscpTrigImports  ,   EscapeTrigRC  ,	  EscapeTrigProdBalance,
+					      EscapeNeeded  ,	 EscapeVector  ,	EscapeTrigRC  , 	EscapeTrigExportBounds    ,
+					      SolveStatus  , 	AnnualCoalProduction_supcrv1_tons , 	FY_MineLaborHours  ,
 					      ElectricityTransportACSubtotalTrill   , IndustrialTransportTrills             , ResidentialTransportTrills            ,
 					      CokingTransportTrills                 , ExportsTransportTrills2a              , ElectricityTransport2CostScrvYr       ,
 					      PriceByYr                             , COALOUT_TOTMINERS                     , COALOUT_TTONMILE                      ,
 					      COALREP_PALSULF                       , COALREP_UCMERC                        , COALREP_PWPSULF                       ,
 					      COALEMM_CCLCLNR                       , COALEMM_GCLCLNR                       , COALEMM_PSLCLNR                       ,
 					      COALEMM_PCACLNR                       , COALEMM_HCLCLNR                       , USO2GRP_XCL_QECP                      ,
-					      USO2GRP_XCL_PECP                      , USO2GRP_ECP_PECP                      , USO2GRP_XCL_PCAP                      ,
-					      USO2GRP_XCL_PCAP_LIMIT                , USO2GRP_EFD_PROD                      , USO2GRP_CL_CRV_PROD                   ,
 					      PriceSolutionBySC                     , MinersbySupplyRegionYr                , USO2GRP_XCL_QECP_A                    ,
-					      USO2GRP_XCL_PECP_A                    , USO2GRP_XCL_PECP_B1                   , USO2GRP_XCL_PECP_C                    ,
-					      USO2GRP_ECP_PECP_A                    , ProductionVolumeTons                  , ProductionVolumeTons1                 ,
+					      ProductionVolumeTons                  , ProductionVolumeTons1                 ,
 					      ProductionVolumeTons2                 , ProductionVolumeTons3                 , ProdVolSolutionPriorYr                ,
 					      LaggedProductionTonsforCPS1           , SupplyCurveStepBalShadow3             , TotalProduction                       ,
 					      ProductionVolumeStepsDetail           , ElectricityTransport1Tons             , ElectrTranspTrillsCR                  ,
@@ -11717,11 +11918,7 @@ Model Main_Coal {
 					      T_QUAN                                , SC_PRICE                              , SC_QUAN                               ,
 					      SC_PRICE87                            , FY_PROD_CAP2                          , FY_PROD_CAP3                          ,
 					      Mercury2                              , Carbon2                               , FY_TPH1                               ,
-					      Ecp_lag_prod_cap                      , Ecp_lag_prod_cap_a                    , Ecp_lag_prod                          ,
-					      Ecp_prod_cap                          , Xcl_qecp                              , Xcl_qecp_b2                           ,
-					      Xcl_qecp_b                            , S_ptarg_b                             , xcl_pecp_b                            ,
-					      max_ecpfph                            , xcl_pecp_b2                           , xcl_pecp_c                            ,
-					      xcl_pecp                              , Lag_pri_ecp_pecp                      , Lag_pri_ecp_pecp_1                    ,
+					      Lag_pri_ecp_pecp                      , Lag_pri_ecp_pecp_1                    ,
 					      Lag_pri_ecp_pecp_2                    , PMN                                   , StocksChangeEP                        ,
 					      StocksChangePrim                      , ExportMultCokeKeep                    , ExportMultSteamKeep                   ,
 					      BY_PROD1				    , QTarget				    , AllSectorsTransportCost               }
@@ -12306,7 +12503,7 @@ Model Main_Coal {
 				Definition: {
 					! Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg,ExpSec) |USDRegIntlMapping(Use,Dreg)
 					
-					Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg|USDRegIntlMapping(Use,Dreg) ,ExpSec)
+					Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg $ USDRegIntlMapping(Use,Dreg) ,ExpSec)
 				}
 			}
 			Parameter Trate1ExpwEscalator {
@@ -12620,20 +12817,20 @@ Model Main_Coal {
 			}
 			Parameter Plant_C_Prof1 {
 				IndexDomain: (pu_id,MX_NCI);
-				Definition: sum((pltnum),Plant_C_Prof(pltnum,MX_NCI)| map_pltnum_puid(pu_id,pltnum));
+				Definition: sum((pltnum),Plant_C_Prof(pltnum,MX_NCI) $ map_pltnum_puid(pu_id,pltnum));
 			}
 			Parameter Plant_C_Prof2 {
 				IndexDomain: (pu_id,SReg,Sulf,Mtyp,Rank);
 				Definition: {
 					
 					
-					sum((MX_NCI), Plant_C_Prof1(pu_id,MX_NCI) | Map_MXNCI_CoalType(MX_NCI,SReg, Sulf, Mtyp, Rank))
+					sum((MX_NCI), Plant_C_Prof1(pu_id,MX_NCI) $ Map_MXNCI_CoalType(MX_NCI,SReg, Sulf, Mtyp, Rank))
 				}
 			}
 			Parameter Plant_C_ProfActYrs {
 				IndexDomain: (pu_id,SReg,Sulf,Mtyp,Rank,yr);
 				Text: "This shows years with active coal contracts by puid (plant-unit)";
-				Definition: sum((cnum), ContractProfile(cnum,yr)|Map_ContProfileNum(pu_id,SReg,Sulf,Mtyp,Rank,cnum));
+				Definition: sum((cnum), ContractProfile(cnum,yr) $ Map_ContProfileNum(pu_id,SReg,Sulf,Mtyp,Rank,cnum));
 			}
 			ElementParameter Plant_S_Prof {
 				IndexDomain: (pu_id);
@@ -13880,8 +14077,8 @@ Model Main_Coal {
 			}
 			Variable ExportsTransport2 {
 				IndexDomain: {
-					(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)|USDRegIntlMapping(Use,Dreg) and Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg,ExpSec)
-					and USDRegIntlMapping3(USe,ExpSec) and SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)
+					(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)|(USDRegIntlMapping(Use,Dreg) and Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg,ExpSec)
+					and USDRegIntlMapping3(USe,ExpSec) and SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank))
 				}
 				Text: "U.S. exports";
 				Range: nonnegative;
@@ -13897,8 +14094,8 @@ Model Main_Coal {
 			}
 			Variable ExportsTranport2InTons {
 				IndexDomain: {
-					(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr)|USDRegIntlMapping(Use,Dreg) and Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg,ExpSec)
-					and USDRegIntlMapping3(USe,ExpSec) and SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank)
+					(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr)|(USDRegIntlMapping(Use,Dreg) and Trate1Exp(SReg, Sulf, Mtyp, Rank,DReg,ExpSec)
+					and USDRegIntlMapping3(USe,ExpSec) and SupplyCurveNumber_Map(SReg, Sulf, Mtyp, Rank))
 				}
 				Range: nonnegative;
 				Definition: {
@@ -14261,7 +14458,8 @@ Model Main_Coal {
 			}
 			Parameter Hours {
 				IndexDomain: (SReg,yr);
-				Text: "this formula needs to be fixed";
+				Text: "Mine labor hours by Coal Supply Region";
+				Comment: "Calculated in CoaloutProcedure";
 			}
 			Parameter CoalGroupFlag {
 				IndexDomain: (DReg,Subsec,Sreg,Sulf,Mtyp,Rank);
@@ -14463,9 +14661,8 @@ Model Main_Coal {
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					
-					sum((nsteps,SReg, Sulf, Mtyp, Rank)|Sdvconct_2(pt2,DReg,cyr) < 999and
-					Sdvconct_2(pt2,DReg,cyr) > 0 and
-					nsteps< 3 and SubbituminousSupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
+					sum((nsteps,SReg, Sulf, Mtyp, Rank) | (Sdvconct_2(pt2,DReg,cyr) < 999 and
+					Sdvconct_2(pt2,DReg,cyr) > 0 and  nsteps< 3 and SubbituminousSupplyCurves_Map(SReg, Sulf, Mtyp, Rank)),
 					ElectricityTransportAC(nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr)) <=
 					!Sdvconct(DReg,pt2)+ SubbitEscape(pt2,DReg,cyr)
 					! New method to create diveristy constraints  April 2022 DAF
@@ -14895,15 +15092,15 @@ Model Main_Coal {
 				Definition: Sum((ndrggn)|map_ndrggn_dreg(ndrggn,dreg),csapr_tso2_lim_by_clrg(ndrggn));
 			}
 			Parameter Tso2_lim_by_clrg2 {
-				IndexDomain: (DReg,MX_SO2,yr);
+				IndexDomain: (DReg,MX_SO2,cyr);
 				Definition: {
 					
-					if yr > '2013' then  !I wasn't quite sure how to specify this
-					        if yr >= TRANRULE2('1') then
+					if cyr > '2013' then  !I wasn't quite sure how to specify this
+					        if cyr >= '1' in TRANRULE2 then
 					                Sum((ndrggn)|map_ndrggn_dreg(ndrggn,dreg),csapr_tso2_lim_by_clrg(ndrggn))
-					        elseif yr >= TRANRULE1('1') then
+					        elseif cyr >= '1' in TRANRULE1 then
 					               Sum((ndrggn)|map_ndrggn_dreg(ndrggn,dreg),csapr_tso2_lm1_by_clrg(ndrggn))
-					        endif
+					       endif
 					endif
 				}
 			}
@@ -15075,59 +15272,29 @@ Model Main_Coal {
 				Comment: "CSAPR SO2 trading is inactive as MVso2out and MVsin are commented out of MyVariables list.";
 			}
 			Constraint SulfpenConstraint {
-				IndexDomain: (cyr,MX_SO2)|CSAPR_TSO2_YR_BY_CLRG('1')=9999 or (cyr < csapr_tranrule1a('1'));
+				IndexDomain: (cyr,MX_SO2)|(CSAPR_TSO2_YR_BY_CLRG('1')=9999 or cyr < csapr_tranrule1a('1'));
 				Property: ShadowPrice;
 				Definition: {
-					IF (cyr < '1995') THEN   !No constraint before 1995
-					  Sum((nsteps,SReg, Sulf, Mtyp, Rank,pt2,DReg)|ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank),Sulfur2(SReg, Sulf, Mtyp, Rank)*Ash(SReg, Sulf, Mtyp, Rank)*(1-Rclclnr(pt2))
-					  *ElectricityTransportAC(NSTEPS,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr))+
-					  Sum((nUS,pt2,usi,dreg,nsteps)|USDRegImportMapping(USi,DReg)=-1 and nsteps <3,
-					  InternationalSO2unit(NUs,'1')*Ashsulf('1B')*(1-rclclnr(pt2))*
-					  ImportsElectricity(nsteps,nus,USi,dreg,pt2,cyr)) <= 2.0e6
-					else
-					  Sum((nsteps,SReg, Sulf, Mtyp, Rank,pt2,DReg)|so2_shr_by_clreg(DReg,mx_so2) and nsteps <3 and ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
-					  Sulfur2(SReg, Sulf, Mtyp, Rank)*Ash(SReg, Sulf, Mtyp, Rank)*(1-Rclclnr(pt2))*
-					  so2_shr_by_clreg(DReg,mx_so2)*ElectricityTransportAC(nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr))
-					  +Sum((nUS,pt2,usi,DReg,nsteps)|so2_shr_by_clreg(DReg,mx_so2) and
-					  USDRegImportMapping(USi,DReg)=-1 and nsteps <3,
-					  InternationalSO2unit(nUS,'1')*Ashsulf('1B')*(1-rclclnr(pt2))*so2_shr_by_clreg(DReg,mx_so2)*
-					  ImportsElectricity(nsteps,NUS,usi,DReg,pt2,cyr))+so2_shr_alw_grp12(cyr,mx_so2)*MVso2outCAIR12(cyr)
-					  +so2_shr_alw_grp21(cyr,mx_so2)*MVso2outCAIR21(cyr)
-					  - sulfurescape1(cyr,mx_so2)
-					   <= (sulftemp(cyr,mx_so2)
-					  + so2other(cyr,MX_SO2))/1000.
-					endif
-				}
-			}
-			Constraint Copy_2SULFPENConstraint {
-				IndexDomain: (cyr,MX_SO2);
-				Property: ShadowPrice;
-				Definition: {
-					IF (cyr < '1995') THEN   !No constraint before 1995
-					  Sum((SReg, Sulf, Mtyp, Rank,pt2,DReg)|ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank),Sulfur2(SReg, Sulf, Mtyp, Rank)*Ash(SReg, Sulf, Mtyp, Rank)*(1-Rclclnr(pt2))
-					  *ElectricityTransportACSubtotal(SReg, Sulf, Mtyp, Rank,pt2,DReg,cyr))+
-					  Sum((nUS,pt2,usi,dreg,nsteps)|USDRegImportMapping(USi,DReg)=-1 and nsteps <3,
-					  InternationalSO2unit(NUs,'1')*(1-rclclnr(pt2))*
-					  ImportsElectricity(nsteps,nus,USi,dreg,pt2,cyr)) <= 2.0e6
-					else
-					  Sum((SReg, Sulf, Mtyp, Rank,pt2,DReg)|ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
-					  Sulfur2(SReg, Sulf, Mtyp, Rank)*Ash(SReg, Sulf, Mtyp, Rank)*(1-Rclclnr(pt2))*
-					  so2_shr_by_clreg(DReg,mx_so2)*ElectricityTransportACSubtotal(SReg, Sulf, Mtyp, Rank,pt2,DReg,cyr))
-					  +Sum((nUS,pt2,usi,DReg,nsteps)|USDRegImportMapping(USi,DReg)=-1 and nsteps <3,
-					  InternationalSO2unit(nUS,'1')*(1-rclclnr(pt2))*
-					  ImportsElectricity(nsteps,NUS,usi,DReg,pt2,cyr))
-					  - sulfurescape1(cyr,mx_so2)
-					   <= (sulftemp(cyr,mx_so2)
-					  + so2other(cyr,MX_SO2))
-					endif
+					
+					Sum((nsteps,SReg, Sulf, Mtyp, Rank,pt2,DReg)|so2_shr_by_clreg(DReg,mx_so2) and nsteps <3 and ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
+					Sulfur2(SReg, Sulf, Mtyp, Rank)*Ash(SReg, Sulf, Mtyp, Rank)*(1-Rclclnr(pt2))*
+					so2_shr_by_clreg(DReg,mx_so2)*ElectricityTransportAC(nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr))
+					+Sum((nUS,pt2,usi,DReg,nsteps)|so2_shr_by_clreg(DReg,mx_so2) and
+					USDRegImportMapping(USi,DReg)=-1 and nsteps <3,
+					InternationalSO2unit(nUS,'1')*Ashsulf('1B')*(1-rclclnr(pt2))*so2_shr_by_clreg(DReg,mx_so2)*
+					ImportsElectricity(nsteps,NUS,usi,DReg,pt2,cyr))+so2_shr_alw_grp12(cyr,mx_so2)*MVso2outCAIR12(cyr)
+					+so2_shr_alw_grp21(cyr,mx_so2)*MVso2outCAIR21(cyr)
+					- sulfurescape1(cyr,mx_so2)
+					 <= (sulftemp(cyr,mx_so2)
+					+ so2other(cyr,MX_SO2))/1000.0
 				}
 			}
 			Constraint Copy_SULFPNConstraint {
-				IndexDomain: (DReg,cyr)|CSAPR_TSO2_YR_BY_CLRG('1')<9999 and (cyr >= csapr_tranrule1a('1'));
+				IndexDomain: (DReg,cyr);
 				Text: "only for mx_so2=1";
 				Property: ShadowPrice;
 				Definition: {
-					Sum[(MX_SO2,SReg, Sulf, Mtyp, Rank,pt2)|mx_so2 = '1' and ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
+					Sum[(MX_SO2,SReg, Sulf, Mtyp, Rank,pt2) | (mx_so2 = '1' and ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank)), 
 					Tso2_shr_by_clreg(DReg,mx_so2)
 					*(Sulfur2(SReg, Sulf, Mtyp, Rank)*Ash(SReg, Sulf, Mtyp, Rank)*(1-Rclclnr(pt2))
 					*ElectricityTransportACSubtotal(SReg, Sulf, Mtyp, Rank,pt2,DReg,cyr))]!+
@@ -15135,9 +15302,9 @@ Model Main_Coal {
 					!  InternationalSO2unit(NUs,'1')*(1-rclclnr(pt2))*
 					!  ImportsElectricity(nsteps,nus,USi,dreg,pt2,cyr)))
 					-MVso2out(DReg,cyr) - sulfurescape2(DReg,cyr)
-					-Tso2_lim_by_clrg2(DReg,'1',cyr)*1000.
+					-Tso2_lim_by_clrg2(DReg,'1',cyr)*1000.0
 					+Sum(DReg2|DReg2 <> DReg,MVsin(DReg,DReg2,cyr))
-					<=0
+					<=0.0
 				}
 			}
 			ElementParameter CSAPR_TRANRULE1a {
@@ -15566,8 +15733,8 @@ Model Main_Coal {
 					!*.000001*
 					!ACI_QAC(nsteps,ElecRank,Dreg,pt2,cyr)*10.0) - 10.*acixss1y(nsteps) = 0
 					 ActivatedCarbonUseDomestic(cyr) +
-					 ActivatedCarbonUseImports(cyr)- 10.*acixss1y(cyr)
-					 <= 0
+					 ActivatedCarbonUseImports(cyr)- 10.0 *acixss1y(cyr)
+					 <= 0.0
 				}
 			}
 			Variable ActivatedCarbonUseDomestic {
@@ -15632,7 +15799,7 @@ Model Main_Coal {
 					Sum((usi,DReg,nUS,pt2)|USDRegImportMapping(USi,DReg)=-1,
 					InternationalMercuryUnit(nUS,'2')
 					*Copy_emm_mef('2','1B',DReg,pt2,cyr)*ImportsElectricity('2',nUS,usi,DReg,pt2,cyr))
-					- Mercev <= EMEL_QHG(cyr)*2000.
+					- Mercev <= EMEL_QHG(cyr)*2000.0
 				}
 				Comment: {
 					"  Transport volumes (Tbtus) * mercury content (lbs/Tbtu) * emission factor by plant type EMM_MEF(%) = mercury (lbs)
@@ -15668,8 +15835,9 @@ Model Main_Coal {
 			Parameter MercuryRemoval {
 				IndexDomain: (nsteps,Rank,DReg,pt2,cyr);
 				Text: "This creates a check to see if the transportation vector can comply with MATS";
+				Range: nonnegative;
 				Definition: {
-					if nsteps = '1' and copy_emm_mef(nsteps,rank,DReg,pt2,cyr) > .101 then
+					if nsteps = '1' and copy_emm_mef(nsteps,rank,DReg,pt2,cyr) > 0.101 then
 					1
 					else
 					2
@@ -15677,22 +15845,24 @@ Model Main_Coal {
 				}
 			}
 			Parameter MercuryRemovalUpperBound {
-				IndexDomain: (NSTEPS,Rank,DReg,pt2,cyr)|nsteps < 3;
+				IndexDomain: (NSTEPS,Rank,DReg,pt2,cyr) | nsteps < 3;
 				Text: "This creates a check to see if the transportation vector can comply with MATS";
+				Range: nonnegative;
 				Definition: {
 					!if cyr < '2016' then
 					!30000
 					!else
-					if cyr > 2015 and MercuryRemoval(nsteps,RAnk,DReg,pt2,cyr) = '1' then
-					0
+					if cyr > 2015 and MercuryRemoval(nsteps,RAnk,DReg,pt2,cyr) = 1 then
+					0.0
 					else
-					30000
+					30000.0
 					endif
 				}
 			}
 			Parameter MercuryRemovalUpperBoundTest {
 				IndexDomain: (nsteps,SReg,Sulf,Mtyp,Rank,DReg,pt2,cyr)|trate2flag(SReg,Sulf,Mtyp,Rank,DReg);
 				Text: "This creates a check to see if the transportation vector can comply with MATS";
+				Default: 0;
 				Definition: {
 					!if trate2flag(SReg,Sulf,Mtyp,Rank,DReg)then
 					MercuryRemovalUpperBound(NSTEPS,Rank,DReg,pt2,cyr)
@@ -16086,7 +16256,7 @@ Model Main_Coal {
 					"PPI rail equipment (national) base year; first year of calculation for escalator"
 				}
 				Range: AllYears;
-				Definition: 2021;
+				Definition: 2023;
 				Comment: "onl";
 			}
 			Parameter westsup {
@@ -17224,8 +17394,11 @@ Model Main_Coal {
 				Text: "commented stuff out temporarily";
 				Property: ShadowPrice, Level;
 				Definition: {
-					-Sum((SReg, Sulf, Mtyp, Rank,USe)|ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank),ExportsTransport2(SReg, Sulf, Mtyp, Rank,ThermExpSec,USe,DReg,cyr))
-					+Sum(USe,UxThermal(DReg,ThermExpSec,USe,cyr))  = 0;
+					-Sum((SReg, Sulf, Mtyp, Rank,USe) |ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
+					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ThermExpSec,USe,DReg,cyr) )
+					+Sum(USe,UxThermal(DReg,ThermExpSec,USe,cyr) ) =0
+					!+ EscapeRaiseThermExpUprBound(DReg,ThermExpSec,USe,cyr)
+					! - EscapeReduceThermExpLwrBound(DReg,ThermExpSec,USe,cyr)) =0
 				}
 			}
 			Variable EscapeRaiseThermExpUprBound {
@@ -17296,9 +17469,10 @@ Model Main_Coal {
 				Text: "commented stuff out temporarily";
 				Property: ShadowPrice, Level;
 				Definition: {
-					-Sum((SReg, Sulf, Mtyp, Rank,USe)|CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank),ExportsTransport2(SReg, Sulf, Mtyp, Rank,CokeExpSec,USe,DReg,cyr))
-					+Sum((USe),UxCoking(DReg,CokeExpSec,USe,cyr) + EscapeRaiseCokeExpUprBound(DReg,CokeExpSec,USe,cyr)
-					 - EscapeReduceCokeExpLwrBound(DReg,CokeExpSec,USe,cyr)) =0
+					
+					-Sum((SReg, Sulf, Mtyp, Rank,USe) | CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank), ExportsTransport2(SReg, Sulf, Mtyp, Rank,CokeExpSec,USe,DReg,cyr) )
+					+Sum((USe),UxCoking(DReg,CokeExpSec,USe,cyr) ) =0
+					!+ EscapeRaiseCokeExpUprBound(DReg,CokeExpSec,USe,cyr) - EscapeReduceCokeExpLwrBound(DReg,CokeExpSec,USe,cyr)) =0
 				}
 			}
 			Variable EscapeRaiseCokeExpUprBound {
@@ -17442,11 +17616,13 @@ Model Main_Coal {
 				Range: nonnegative;
 				Property: ReducedCost, Bound, ShadowPrice, Level;
 				Definition: {
-					Sum((SReg, Sulf, Mtyp, Rank,CokeExpSec,DReg)|
-					USDRegIntlMapping(Use,DReg) = -1 and Trate1exp(SReg, Sulf, Mtyp, Rank,DReg,CokeExpSec) and
-					CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
-					!and Btu2(Scrv)>0 ,
-					ExportsTransport2(SReg, Sulf, Mtyp, Rank,CokeExpSec,USe,DReg,cyr))
+					Sum((SReg, Sulf, Mtyp, Rank,CokeExpSec,DReg) | ((USDRegIntlMapping(Use,DReg)= -1)
+					 and Trate1exp(SReg, Sulf, Mtyp, Rank,DReg,CokeExpSec) and
+					CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank)),
+					ExportsTransport2(SReg, Sulf, Mtyp, Rank,CokeExpSec,USe,DReg,cyr) )
+					!$ ((USDRegIntlMapping(Use,DReg)= -1)
+					! and Trate1exp(SReg, Sulf, Mtyp, Rank,DReg,CokeExpSec) and
+					!CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank)) )
 				}
 			}
 			Variable ExportsSupplyByExportRegionThermal {
@@ -17454,13 +17630,13 @@ Model Main_Coal {
 				Range: nonnegative;
 				Property: ReducedCost, Bound, ShadowPrice, Level;
 				Definition: {
-					Sum((SReg, Sulf, Mtyp, Rank,ThermExpSec,DReg)|
-					USDRegIntlMapping(Use,DReg) = -1
-					!and Btu2(Scrv)>0
-					and Trate1exp(SReg, Sulf, Mtyp, Rank,DReg,ThermExpSec)
-					!and Rank <> '4P',
-					and ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank),
-					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ThermExpSec,USe,DReg,cyr))
+					Sum((SReg, Sulf, Mtyp, Rank,ThermExpSec,DReg) | ((USDRegIntlMapping(Use,DReg) = -1)
+							and Trate1exp(SReg, Sulf, Mtyp, Rank,DReg,ThermExpSec)
+							and ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank)), 
+					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ThermExpSec,USe,DReg,cyr) )
+						!	$ ((USDRegIntlMapping(Use,DReg) = -1)
+						!	and Trate1exp(SReg, Sulf, Mtyp, Rank,DReg,ThermExpSec)
+						!	and ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank)) )
 				}
 			}
 			Parameter Copy_SurcharTImp {
@@ -17602,14 +17778,9 @@ Model Main_Coal {
 				IndexDomain: (USe,tc,cyr);
 				Property: ShadowPrice, Level;
 				Definition: {
-					!Sum((nonUSi), TotalTransportUS(Use,nonUSi,tc,cyr)) 
-					!+ TestICMMEscape(USe,tc,cyr)  
-					!= USAexportTarget_ICMM_trills(cyr,USe,tc)
-					
-					sum((SReg,Sulf,Mtyp,Rank,ExpSec,DReg), ExportsTranport2InTons(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr)|map_Rank_tc(rank,tc)) 
+					sum((SReg,Sulf,Mtyp,Rank,ExpSec,DReg) , ExportsTranport2InTons(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr) $ (map_Rank_tc(rank,tc)=1) ) 
 					= USAexportTarget_ICMMwSTEO_tons(cyr,USe,tc)
 				}
-				Comment: "This constraint is currently inactive";
 			}
 			Variable EscapeExportsTransportTonsMinus {
 				IndexDomain: (USe,tc,cyr);
@@ -17624,7 +17795,7 @@ Model Main_Coal {
 				Property: ShadowPrice, Level;
 				Definition: {
 					
-					sum((SReg,Sulf,Mtyp,Rank,ExpSec,DReg), ExportsTranport2InTons(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr)|map_Rank_tc(rank,tc)) 
+					sum((SReg,Sulf,Mtyp,Rank,ExpSec,DReg), ExportsTranport2InTons(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr) $ map_Rank_tc(rank,tc)) 
 					- EscapeExportsTransportTonsMinus(USe,tc,cyr)
 					<= USAexportTarget_ICMMwSTEO_tons_Upper(cyr,USe,tc)
 				}
@@ -17634,7 +17805,7 @@ Model Main_Coal {
 				Property: ShadowPrice, Level;
 				Definition: {
 					
-					sum((SReg,Sulf,Mtyp,Rank,ExpSec,DReg), ExportsTranport2InTons(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr)|map_Rank_tc(rank,tc)) 
+					sum((SReg,Sulf,Mtyp,Rank,ExpSec,DReg), ExportsTranport2InTons(SReg,Sulf,Mtyp,Rank,ExpSec,USe,DReg,cyr) $ map_Rank_tc(rank,tc)) 
 					+ EscapeExportsTransportTonsPlus(USe,tc,cyr)
 					>= USAexportTarget_ICMMwSTEO_tons_Lower(cyr,USe,tc)
 				}
@@ -17811,11 +17982,11 @@ Model Main_Coal {
 				Comment: "converting metrictons of coalequivalent to Btu";
 			}
 			Parameter Minebyr {
-				Definition: 2022;
+				Definition: 2024;
 				Comment: "onl";
 			}
 			Parameter Minebyrexp {
-				InitialData: '2021';
+				InitialData: '2023';
 				Comment: "onl";
 			}
 			Parameter InternationalUnitTransport {
@@ -18307,7 +18478,7 @@ Model Main_Coal {
 					"all exports from non-US countries/regions; includes imports to U.S."
 				}
 				Range: nonnegative;
-				Definition: sum[ (s), Transport(nUS,i,s,tc,cyr) ];
+				Definition: sum( (s), Transport(nUS,i,s,tc,cyr) );
 			}
 			Parameter OutputTransportNonUS {
 				IndexDomain: (nUS,i,tc,yr);
@@ -18540,7 +18711,7 @@ Model Main_Coal {
 				Definition: {
 					Sum ((Ae)|AggExportingCode(USe,Ae),
 					TotalTransportfromCountrye(Use,tc,cyr)*
-					InternationalExportMaxShare(Ae)/100.)
+					InternationalExportMaxShare(Ae)/100.0)
 				}
 			}
 			Variable SubtotalforExportShareConstrNonUS1 {
@@ -18552,7 +18723,7 @@ Model Main_Coal {
 					
 					!TotalfromCountryetoibySector(Ae,tc,cyr)*
 					TotalfromCountrye(Ae,cyr)*
-					InternationalExportMaxShare(Ae)/100.
+					InternationalExportMaxShare(Ae)/100.0
 				}
 			}
 			Variable SubtotalforExportShareConstrUS2 {
@@ -18586,11 +18757,11 @@ Model Main_Coal {
 				}
 			}
 			Constraint ImportShareConstr {
-				IndexDomain: (Ae,nonUSi,tc,cyr)|cyr in InternationalYears and nonusi <> 'NI';
+				IndexDomain: (Ae,nonUSi,tc,cyr) |  nonusi <> 'NI';
 				Property: ShadowPrice;
 				Definition: {
 					PossibleAeToi(Ae,nonUSi)*[AggRegTransport(Ae,nonUSi,tc,cyr)-
-					InternationalImportMaxShare(Ae,nonUSi,tc)/100.*
+					InternationalImportMaxShare(Ae,nonUSi,tc)/100.0*
 					InternationalDemand(nonUSi,tc,cyr) * MtceToBtu] <=0
 				}
 			}
@@ -18620,7 +18791,7 @@ Model Main_Coal {
 			Parameter ImportShareConstrCheck {
 				IndexDomain: (Ae,NonUSi,tc,cyr);
 				Definition: {
-					InternationalImportMaxShare(Ae,nonUSi,tc)/100.*
+					InternationalImportMaxShare(Ae,nonUSi,tc)/100.0*
 					InternationalDemand(nonUSi,tc,cyr) * MtceToBtu
 				}
 			}
@@ -18691,14 +18862,13 @@ Model Main_Coal {
 				Range: nonnegative;
 			}
 			Constraint InternationalDemandRequirement {
-				IndexDomain: (nonusi,tc,cyr)|cyr in InternationalYears and nonusi <> 'NI';
+				IndexDomain: (nonusi,tc,cyr) | (nonusi <> 'NI');
 				Property: Bound, ShadowPrice, Level, Basic;
 				Definition: {
 					
 					Sum((nUS),TotalTransportNonUS(nUS,nonusi,tc,cyr))+
 					Sum((USe),TotalTransportUS(USe,nonusi,tc,cyr))
-					-InternationalDemand(nonusi,tc,cyr) * MtceToBtu=
-					0
+					-InternationalDemand(nonusi,tc,cyr) * MtceToBtu = 0
 				}
 			}
 			Parameter IntDemReqRHSTceCheck {
@@ -18723,7 +18893,7 @@ Model Main_Coal {
 				Property: Bound, ShadowPrice, Level, Basic;
 				Definition: {
 					TotalTransportfromCountrye(USe,'1',cyr)-
-					ExportsSupplyByExportRegionCoking(USe,cyr)=0
+					ExportsSupplyByExportRegionCoking(USe,cyr) =0
 				}
 			}
 			Constraint USImportThermalBalance {
@@ -18780,12 +18950,9 @@ Model Main_Coal {
 				
 				for yr | (val(yr) >= CurrentStudyYear) do
 				if (ncntrl_curitr('1') = 1)then
-					! Removed this TempFortan Read, it was confusing with the nested if statements DAF 10-19-18
-					!if TempFortranLagProd3Flag = 1 then
-					!	LAG_PROD3(Scrv1,SReg,Sulf,Mtyp,Rank,fyr) := TempFortranLag_Prod3(fyr,Scrv1,SReg,Sulf,Mtyp,Rank);
 				
 					LAG_PROD3((Scrv1,SReg,Sulf,Mtyp,Rank,yr)|Scrv1_Map(Scrv1, SReg, Sulf, Mtyp, Rank)) :=   !This should be whatever was solved for most recently regardless of year
-						if (yr <= CPSBaseYr+1) THEN
+						if (yr <= CPSBaseYr) THEN
 							BY_PROD(SCrv1,SReg,Sulf,MTyp,Rank)
 						else
 							ProdVolSolutionPriorYr(yr-1,Scrv1,Sreg,Sulf,Mtyp,Rank)
@@ -18796,7 +18963,8 @@ Model Main_Coal {
 					else LAG_PROD3((Scrv1,SReg,Sulf,Mtyp,Rank,yr)|Scrv1_Map(Scrv1, SReg, Sulf, Mtyp, Rank)) :=  qprods(SReg,Sulf,Mtyp,Rank);
 				
 					!if qprods(SReg,Sulf,Mtyp,Rank) then
-					!		qprods(SReg,Sulf,Mtyp,Rank)	
+					!		qprods(SReg,Sulf,Mtyp,Rank)
+				
 				endif;
 				if (ncntrl_curitr('1') = 1)then
 				
@@ -18846,6 +19014,7 @@ Model Main_Coal {
 				
 				
 				endif;
+				
 				endfor;
 				
 				
@@ -19011,39 +19180,39 @@ Model Main_Coal {
 				
 				!added on 081414, previously only u
 				  if printpricedebug('1')=1 then
-				        if ncntrl_curitr('1') = '1'  then
+				        if ncntrl_curitr('1') = 1  then
 				        write to table Sc_priceitr1;
 				        write to table Sc_priceitr1a;
 				        write to table Sc_priceitr1b;
 				        endif;
-					if ncntrl_curitr('1') = '2'  then
+					if ncntrl_curitr('1') = 2  then
 				        write to table Sc_priceitr2;
 				        write to table Sc_priceitr2a;
 				        write to table Sc_priceitr2extra;
 				        write to table Sc_priceitr2b;
 				        endif;
-				        if ncntrl_curitr('1') = '3'  then
+				        if ncntrl_curitr('1') = 3  then
 				        write to table Sc_priceitr3;
 				        write to table Sc_priceitr3a;
 				        write to table Sc_priceitr3extra;
 				        write to table Sc_priceitr3b;
 				        endif;
-				        if ncntrl_curitr('1') = '4'  then
+				        if ncntrl_curitr('1') = 4  then
 				        write to table Sc_priceitr4;
 				        write to table Sc_priceitr4a;
 				        write to table Sc_priceitr4b;
 				        endif;
-				        if ncntrl_curitr('1') = '5'  then
+				        if ncntrl_curitr('1') = 5  then
 				        write to table Sc_priceitr5;
 				        write to table Sc_priceitr5a;
 				        write to table Sc_priceitr5b;
 				        endif;
-				        if ncntrl_curitr('1') = '6'  then
+				        if ncntrl_curitr('1') = 6  then
 				        write to table Sc_priceitr6;
 				        write to table Sc_priceitr6a;
 				        write to table Sc_priceitr6b;
 				        endif;
-				        if ncntrl_curitr('1') = '7'   then
+				        if ncntrl_curitr('1') = 7   then
 				        write to table Sc_priceitr7;
 				        write to table Sc_priceitr7a;
 				        write to table Sc_priceitr7b;
@@ -19138,7 +19307,7 @@ Model Main_Coal {
 				
 				!Below:  for debugging purposes
 				if printpricedebug('1')=1 then
-				        if ncntrl_curitr('1') = '1'  then
+				        if ncntrl_curitr('1') = 1  then
 				        write to table Sc_priceitr1;
 				        write to table Sc_priceitr1a;
 				        write to table Sc_priceitr1b;
@@ -19420,7 +19589,7 @@ Model Main_Coal {
 			ElementParameter CPSBaseYr {
 				Text: "Base year for CPS Data Inputs and Model Calibration";
 				Range: AllYears;
-				Definition: 2022;
+				Definition: 2024;
 				Comment: "onl update";
 			}
 			ElementParameter CPSEndYr {
@@ -19700,7 +19869,17 @@ Model Main_Coal {
 			}
 			Parameter FY_WAGE {
 				IndexDomain: (SCrv1,SReg,Sulf,MTyp,Rank,Yr);
+				Text: "Forecaset year Coal Miner Annual Wages by Sypply Curve in 1992$";
 				Definition: BY_WAGE(SCrv1,SReg,Sulf,MTyp,Rank) * WAGE_MULTIPLIER(SCrv1,SReg,Sulf,MTyp,Rank,Yr) * (MC_JPGDP('1992')/MC_JPGDP('1987'));
+			}
+			Parameter FY_WAGEperHOUR {
+				IndexDomain: (SCrv1,SReg,Sulf,MTyp,Rank,Yr);
+				Text: "Forecaset year Coal Miner Wages Per Hour by Sypply Curve in 1992$";
+				Definition: {
+					if yr >= CPSBaseYr then
+					   FY_WAGE(Scrv1,SReg,Sulf,Mtyp,Rank,yr) /50/44  !assume 50 weeks per year at 45 hours per week
+					endif;
+				}
 			}
 			Parameter Usr_Cst_Capital {
 				IndexDomain: (SCrv1,SReg,Sulf,MTyp,Rank,Yr);
@@ -19734,6 +19913,13 @@ Model Main_Coal {
 				IndexDomain: (CensDiv,Yr);
 				Definition: {
 					PELIN(CensDiv,YR)  !* (MC_JPGDP('1992')/MC_JPGDP('1987'))
+				}
+			}
+			Parameter FY_MineLaborHours {
+				IndexDomain: (yr,SCrv1);
+				Text: "Calculated coal miner labor hours by supply curve (Millions)";
+				Definition: {
+					AnnualCoalProduction_supcrv1_tons(Scrv1,yr) / $ sum((SReg,Sulf,MTyp,Rank), FY_TPH(yr,Scrv1,SReg,Sulf,Mtyp,Rank) );
 				}
 			}
 			ElementParameter SelectedCensusDiv {
@@ -19976,10 +20162,6 @@ Model Main_Coal {
 				
 				Lag_pri_ecp_pecp(ECPXPH,Scrv1,yr) := Lag_pri_ecp_pecp_2(Scrv1,yr);
 				
-				Ecp_prod(Scrv1,SReg,Sulf,Mtyp,Rank,yr) := !TotalProductionByYearScrv(Scrv1,SReg,Sulf,Mtyp,Rank,yr);  changed this back to old way of getting from Restart file
-						Sum((mnumyr,mx_ncl)|MAP_mnumyr_yr(mnumyr,yr) and Map_Scrv1_MX_NCL(Scrv1,mx_ncl),    ! the production solution in ECPFPH position 1  11-20-18 DAF
-						USO2GRP_XCL_QECP(MX_NCL,'1',MNUMYR)/$Btu(Scrv1,SReg,Sulf,Mtyp,Rank));
-				
 				!T_QTARG_CMM(Scrv1,SReg,Sulf,Mtyp,Rank,cyr);!should be t_qtarg_ecp
 				
 				Ecp_lag_prod(Scrv1,SReg,Sulf,Mtyp,Rank,yr) := 
@@ -19987,13 +20169,6 @@ Model Main_Coal {
 					     BY_PROD(SCrv1,SReg,Sulf,MTyp,Rank)
 					else ProdVolSolutionPriorYr(yr-1,Scrv1,Sreg,Sulf,Mtyp,Rank)
 					endif; ! Fixed 8-01-2018
-				!Sum((mnumyr,mx_ncl)|MAP_mnumyr_yr(mnumyr,yr) and Map_Scrv1_MX_NCL(Scrv1,mx_ncl),
-				!USO2GRP_XCL_QECP(MX_NCL,'1',MNUMYR-1)/$Btu(Scrv1,SReg,Sulf,Mtyp,Rank));
-				!if (Val(cYr) <= Val(CPSBaseYr)) then
-				!T_QTARG_CMM(Scrv1,SReg,Sulf,Mtyp,Rank,cyr)!*Btu(Scrv1,SReg,Sulf,Mtyp,Rank)
-				!else
-				!T_QTARG_CMM(Scrv1,SReg,Sulf,Mtyp,Rank,cyr-1)!*Btu(Scrv1,SReg,Sulf,Mtyp,Rank)
-				!endif;
 				
 				! For run years after the CPS Base year, we want to update Ecp_prod_cap with FY_PROD_Cap from Coal Pricing Equation  DAf 12-15-17
 				if ncntrl_curcalyr(1) > CPSbaseyr then
@@ -20011,20 +20186,35 @@ Model Main_Coal {
 				
 				Ecp_lag_prod_cap(Scrv1,SReg,Sulf,Mtyp,Rank,yr)   :=max(.0001,Ecp_lag_prod_cap_a(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
 				
+				Expected_SCrv_Production(Scrv1,SReg,Sulf,Mtyp,Rank,yr) :=   				!changed for endpoint version 8-22-2015 DAF
+					if (ncntrl_curcalyr(1) = cpsbaseyr ) then BY_PROD(Scrv1,SReg,Sulf,Mtyp,Rank)  !This is base year production level in tons
+					elseif ncntrl_curitr(1) = 1 then
+						Sum((mnumyr,mx_ncl)|MAP_mnumyr_yr(mnumyr,yr) and Map_Scrv1_MX_NCL(Scrv1,mx_ncl),    ! the production solution in ECPFPH position 1  11-20-18 DAF
+						USO2GRP_XCL_QECP(MX_NCL,'1',MNUMYR-1)/$Btu(Scrv1,SReg,Sulf,Mtyp,Rank))		! prior year production level for the supply curve
+					else	Sum((mnumyr,mx_ncl)|MAP_mnumyr_yr(mnumyr,yr) and Map_Scrv1_MX_NCL(Scrv1,mx_ncl),    ! the production solution in ECPFPH position 1  11-20-18 DAF
+						USO2GRP_XCL_QECP(MX_NCL,'1',MNUMYR)/$Btu(Scrv1,SReg,Sulf,Mtyp,Rank))		! this year's production level for the supply curve
+					endif;
+				
+				  ! The parmeter Ecp_prod( ) has been set above to the production solution in ECPFPH position 1 of restart variable USO2GRP_XCL_QECP(MX_NCL,ECPFPH,MNUMYR)
 				T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr) :=  if BY_CAP_UTIL(SCrv1,SReg,Sulf,MTyp,Rank) > 0.0 then
+				  	 ! Base year target production value set at production capacity * capacity utilzation
 				  	if (Val(Yr) <= Val(CPSBaseYr)) then  BY_PROD_CAP(SCrv1,SReg,Sulf,MTyp,Rank) * BY_CAP_UTIL(SCrv1,SReg,Sulf,MTyp,Rank)
-				  	elseif ((Val(Yr) > Val(CPSBaseYr)) AND  ((Ecp_prod(Scrv1,SReg,Sulf,Mtyp,Rank,yr)/Ecp_prod_cap(yr,Scrv1,SReg,Sulf,Mtyp,Rank))
+				  	 ! If forecast year target production in previous output was less than minimum utilization floor then set target to production capacity * minimum utilzation  
+				  	elseif ((Val(Yr) > Val(CPSBaseYr)) AND  ((Expected_SCrv_Production(Scrv1,SReg,Sulf,Mtyp,Rank,yr)/Ecp_prod_cap(yr,Scrv1,SReg,Sulf,Mtyp,Rank))
 				  		 < util_min(SCrv1,SReg,Sulf,MTyp,Rank))) then    Ecp_prod_cap(yr,Scrv1,SReg,Sulf,Mtyp,Rank) * util_min(SCrv1,SReg,Sulf,MTyp,Rank)
-				  	elseif ((Val(Yr) > Val(CPSBaseYr)) AND   ((Ecp_prod(Scrv1,SReg,Sulf,Mtyp,Rank,yr)/Ecp_prod_cap(yr,Scrv1,SReg,Sulf,Mtyp,Rank))
+				  	 ! If forecast year target production in previous output was greater than maximum utilization ceiling then set target to production capacity * maximum utilzation  
+				  	elseif ((Val(Yr) > Val(CPSBaseYr)) AND   ((Expected_SCrv_Production(Scrv1,SReg,Sulf,Mtyp,Rank,yr)/Ecp_prod_cap(yr,Scrv1,SReg,Sulf,Mtyp,Rank))
 				  		 > util_max(SCrv1,SReg,Sulf,MTyp,Rank))) then Ecp_prod_cap(yr,Scrv1,SReg,Sulf,Mtyp,Rank) * Util_max(SCrv1,SReg,Sulf,MTyp,Rank)
+				         ! If previous output of supply curves was an acceptable value within the min and max levels, then use it at target
 				        elseif TotalProductionByYearScrv(Scrv1,SReg,Sulf,Mtyp,Rank,yr) then TotalProductionByYearScrv(Scrv1,SReg,Sulf,Mtyp,Rank,yr)
+				         !Otherwise use ECP values in USO2GRP_XCL_QECP (for postion 1 and converted to million tons) as the target
 				            else
-				       		Ecp_prod(Scrv1,SReg,Sulf,Mtyp,Rank,yr)  	    		
+				       		Expected_SCrv_Production(Scrv1,SReg,Sulf,Mtyp,Rank,yr)  	    		
 				 	endif
 				        endif;
 				
 				! ensure positive    
-				T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr) :=  max(.001, T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
+				!T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr) :=  max(.001, T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
 				
 				T_qtarg_ecp_a(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH):= Sum(yr|MAP_ecpfph_yr(ECPFPH,yr)=ecpfph,T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
 				
@@ -20264,20 +20454,23 @@ Model Main_Coal {
 				USO2GRP_XCL_PECP_A(globalyr,MX_NCL,M11,ECPFPH) :=
 				         Sum(cyr|Map_globalyr_cyr(globalyr,cyr),
 				         USO2GRP_XCL_PECP_C(MX_NCL,M11,ecpfph,cyr));
+				
 				!restricting the quantities to the years that are calculated
 				        xcl_qecp_b1(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr) :=Sum(yr|MAP_ecpfph_cyr_yr(cyr,ECPFPH,yr) and Btu(Scrv1,SReg,Sulf,Mtyp,Rank),
-				                                                      T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
+				                                                !      T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
+										 Max(0.01, Xcl_qecp_b0(Scrv1,SReg,Sulf,Mtyp,Rank,yr)));  !substitute production from last solved cycle
 				        !what is the last model year that has a calculated quantity?: max_ecpfph
 				        max_ecpfph(ecpfph,cyr):=ncntrl_lastyr('1')-cyr+1990;
 				
 				        !making the expected quantities equal to the last known calculated quantity if the 31 year horizon extends beyond model years
 				        xcl_qecp_b2(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr)  :=Sum((yr)|ecpfph > max_ecpfph(ecpfph,cyr) and yr=cyr+max_ecpfph(ecpfph,cyr)-1 and Btu(Scrv1,SReg,Sulf,Mtyp,Rank),
-				                                                      T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
+				                                                      !T_qtarg_ecp(Scrv1,SReg,Sulf,Mtyp,Rank,yr));
+				                                                 Max(0.01, Xcl_qecp_b0(Scrv1,SReg,Sulf,Mtyp,Rank,yr)));  !substitute production from last solved cycle
 				        !now merge xcl_qecp_b1bandbxcl_qecp_b2
 				        xcl_qecp_b(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr) := if ecpfph > max_ecpfph(ecpfph,cyr) then
-				        									xcl_qecp_b2(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr)*Btu(Scrv1,SReg,Sulf,Mtyp,Rank)
+				        									xcl_qecp_b2(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr)  !*Btu(Scrv1,SReg,Sulf,Mtyp,Rank)
 				        								else
-				        									xcl_qecp_b1(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr)*Btu(Scrv1,SReg,Sulf,Mtyp,Rank)
+				        									xcl_qecp_b1(Scrv1,SReg,Sulf,Mtyp,Rank,ECPFPH,cyr)  !*Btu(Scrv1,SReg,Sulf,Mtyp,Rank)
 				        								endif;
 				
 				USO2GRP_XCL_QECP_A(MX_NCL,ECPFPH,globalyr) := Sum((Scrv1,SReg,Sulf,Mtyp,Rank,cyr)|Btu(Scrv1,Sreg,Sulf,Mtyp,Rank) and
@@ -20287,7 +20480,6 @@ Model Main_Coal {
 				USO2GRP_XCL_QECP(MX_NCL,ECPFPH,GLOBALYR)    := USO2GRP_XCL_QECP_A(MX_NCL,ECPFPH,GLOBALYR)           ;
 				USO2GRP_XCL_PECP(MX_NCL,M11,ECPFPH,GLOBALYR)     := USO2GRP_XCL_PECP_A(globalyr,MX_NCL,M11,ECPFPH);
 			}
-			Comment: "pcw T_qtarg_ecp set minimum";
 		}
 		DeclarationSection Scrv1_Calculated_Parameters_DKE {
 			Parameter SC_QUAN1 {
@@ -20399,10 +20591,15 @@ Model Main_Coal {
 			Parameter T_qtarg_ecp {
 				IndexDomain: (Scrv1,SReg,Sulf,Mtyp,Rank,yr);
 				Text: "see CalculationOfElectricityPricingEquation procedure";
+				Range: nonnegative;
 			}
-			Parameter Ecp_prod {
+			Parameter Expected_SCrv_Production {
 				IndexDomain: (Scrv1,SReg,Sulf,Mtyp,Rank,yr);
 				Text: "See CalculationOfElectricityPricingEquation procedure";
+				Comment: {
+					"In CalculationOfElectricityPricingEquation procedure this is current year prouduction from USO2GRP_XCL_QECP for ECPFPH  position 1 
+					for each supply curve (scrv1) converted to short tons"
+				}
 			}
 			Parameter Xcl_qecp {
 				IndexDomain: (Scrv1,SReg,Sulf,Mtyp,Rank,ECPfPH,cyr);
@@ -20411,6 +20608,13 @@ Model Main_Coal {
 			Parameter Xcl_qecp_b1 {
 				IndexDomain: (Scrv1,SReg,Sulf,Mtyp,Rank,ECPfPH,cyr);
 				Text: "See CalculationOfElectricityPricingEquation procedure";
+			}
+			Parameter Xcl_qecp_b0 {
+				IndexDomain: (Scrv1,SReg,Sulf,MTyp,Rank,yr);
+				Text: "Supply curve Production for all years, from previous cycle reporting totals";
+				Definition: {
+					sum((Scrv1Step),   ProductionVolumeStepsDetail(SReg, Sulf, Mtyp, Rank, Scrv1Step, yr) );
+				}
 			}
 			Parameter Xcl_qecp_b2 {
 				IndexDomain: (Scrv1,SReg,Sulf,Mtyp,Rank,ECPfPH,cyr);
@@ -21218,7 +21422,7 @@ Model Main_Coal {
 			Parameter SteoFlagRT {
 				IndexDomain: (steoyr);
 				Text: {
-					"set to 1 indicates that STEO is in operation; set from input file clsteo.txt"
+					"set to 1 indicates that STEO is in operation for coal production regional totals (App, Interior, West); set from input file clsteo.txt"
 				}
 			}
 			Parameter SteoFlagIMP {
@@ -21269,25 +21473,25 @@ Model Main_Coal {
 				Definition: WasteCoalSTEO(steoyr)*(1+Tolerance(steoyr)*SideTolerance(steoyr));
 			}
 			Constraint STEOWasteCoalLower {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagW(cyr);
+				IndexDomain: (cyr) | ( steoflagW(cyr));
 				Text: "steoflagW must be 1 (set in clsteo.txt)";
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| WasteCoalSupplyCurve_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, 
-					ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank)) - ExtraWasteCoal(cyr)
+					ProductionVolume(SReg, Sulf, Mtyp, Rank,cyr)/$Btu2(SReg, Sulf, Mtyp, Rank)) - ExtraWasteCoal(cyr)
 					
-					>= sum(steoyr|steoyr=cyr,WasteCoalLower(steoyr));
+					>= sum(steoyr|steoyr=cyr,WasteCoalLower(cyr));
 				}
 			}
 			Constraint STEOWasteCoalUpper {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagW(cyr);
+				IndexDomain: (cyr) | ( steoflagW(cyr));
 				Text: "steoflagW must be 1 (set in clsteo.txt)";
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| WasteCoalSupplyCurve_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, 
-					ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank)) + MissingWasteCoal(cyr)
+					ProductionVolume(SReg, Sulf, Mtyp, Rank,cyr)/$Btu2(SReg, Sulf, Mtyp, Rank)) + MissingWasteCoal(cyr)
 					
-					<= sum(steoyr|steoyr=cyr,WasteCoalUpper(steoyr));
+					<= sum(steoyr|steoyr=cyr,WasteCoalUpper(cyr));
 				}
 			}
 			Parameter WasteCoalResult {
@@ -21316,10 +21520,11 @@ Model Main_Coal {
 				Definition: ElecTonsSTEO(steoyr)*(1+Tolerance(steoyr)*SideTolerance(steoyr));
 			}
 			Constraint STEOElecTonsLower {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagET(cyr);
+				IndexDomain: (cyr)| ( steoflagET(cyr));
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
-					Sum((nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,steoyr)| ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ElectricityTransportAC(nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
+					Sum((nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,steoyr)| ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr,
+					  ElectricityTransportAC(nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
 					+Sum((nUS,steoyr)|steoyr=cyr,ImportsElectricityTons(nUS,cyr)) >= sum(steoyr|steoyr=cyr,ElecTonsLower(steoyr))    !+StocksChangeEP(steoyr));
 				}
 				Comment: {
@@ -21328,7 +21533,7 @@ Model Main_Coal {
 				}
 			}
 			Constraint STEOElecTonsUpper {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagET(cyr);
+				IndexDomain: (cyr)| ( steoflagET(cyr));
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,steoyr)| ElectricitySupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ElectricityTransportAC(nsteps,SReg, Sulf, Mtyp, Rank,DReg,pt2,cyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21424,12 +21629,11 @@ Model Main_Coal {
 				Definition: (Sum((steoyr,Censdiv)|yr=steoyr,Qmcin(CensDiv,yr)))/$(CokeTranspTonsCR('11',yr) + ImportsCokingTonsCR('11',yr));
 			}
 			Constraint STEOCokeTonsStocks {
-				IndexDomain: cyr|cyr in STEOYears and steoflagC(cyr);
+				IndexDomain: cyr | ( steoflagC(cyr));
 				Definition: {
 					
 					Sum((CokSec,DReg),CokingDemand(CokSec,DReg,cyr))-Sum(steoyr|steoyr=cyr,(CokeTonsSTEO(steoyr)))
-					!*Sum(globalyr|Map_globalyr_cyr(globalyr,cyr),coalout_cqdbft('11','3',globalyr))
-					*Sum (globalyr|Map_globalyr_cyr(globalyr,cyr),
+					*Sum (globalyr | Map_globalyr_cyr(globalyr,cyr),
 					qblk_qmcin('11',globalyr)/$(CokeTranspTonsCR('11',cyr) + ImportsCokingTonsCR('11',cyr)))
 					+ CokeStocksTrills(cyr)
 					= 0
@@ -21449,7 +21653,14 @@ Model Main_Coal {
 			}
 			Parameter IndustrialStocksTons {
 				IndexDomain: (steoyr)|SteoFlagC(steoyr);
-				Definition: IndustrialTonsSTEO(steoyr)-IndustrialTonsResult(steoyr);
+				Text: "Change is industrial stockpiles";
+				Definition: {
+					if steoyr < cl::Start_iyr then
+					IndustrialTonsSTEO(steoyr) - cl::hclcon('I',steoyr)
+					else
+					IndustrialTonsSTEO(steoyr)-IndustrialTonsResult(steoyr)
+					endif;
+				}
 			}
 			Parameter IndustrialStocksTonsCR {
 				IndexDomain: (MNUMCR,steoyr);
@@ -21468,7 +21679,7 @@ Model Main_Coal {
 				}
 			}
 			Constraint STEOIndustrialTonsStocks {
-				IndexDomain: cyr|cyr in STEOYears and steoflagI(cyr);
+				IndexDomain: cyr | ( steoflagI(cyr));
 				Text: "This balance constraint is in TBtus";
 				Definition: {
 					
@@ -21567,7 +21778,7 @@ Model Main_Coal {
 				Definition: 1;
 			}
 			Constraint STEOAppalachiaLower {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagRT(cyr);
+				IndexDomain: (cyr)| steoflagRT(cyr);
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| AppalachiaSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21575,7 +21786,7 @@ Model Main_Coal {
 				}
 			}
 			Constraint STEOAppalachiaUpper {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagRT(cyr);
+				IndexDomain: (cyr)| steoflagRT(cyr);
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| AppalachiaSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr , ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21586,8 +21797,8 @@ Model Main_Coal {
 				IndexDomain: (steoyr);
 			}
 			Variable AppalachiaStocks {
-				IndexDomain: yr|yr in STEOYears and steoflagStocks(yr);
-				Definition: AppStocksLow(yr) + AppStocksHigh(yr);
+				IndexDomain: cyr;
+				Definition: AppStocksLow(cyr) + AppStocksHigh(cyr);
 			}
 			Variable AppStocksLow {
 				IndexDomain: cyr;
@@ -21648,7 +21859,7 @@ Model Main_Coal {
 				Definition: ((AppalachiaResult(steoyr)/AppalachiaLimit(steoyr))-1.)*100;
 			}
 			Constraint STEOInteriorLower {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagRT(cyr);
+				IndexDomain: (cyr)|steoflagRT(cyr);
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| InteriorSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21656,7 +21867,7 @@ Model Main_Coal {
 				}
 			}
 			Constraint STEOInteriorUpper {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagRT(cyr);
+				IndexDomain: (cyr)|steoflagRT(cyr);
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| InteriorSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21694,8 +21905,8 @@ Model Main_Coal {
 				Definition: Sum(cyr|Map_globalyr_cyr(globalyr,cyr),InteriorStocks(cyr));
 			}
 			Variable InteriorStocks {
-				IndexDomain: yr|yr in STEOYears and steoflagStocks(yr);
-				Definition: InteriorStocksLow(yr) + InteriorStocksHigh(yr);
+				IndexDomain: cyr;
+				Definition: InteriorStocksLow(cyr) + InteriorStocksHigh(cyr);
 			}
 			Variable InteriorStocksLow {
 				IndexDomain: cyr;
@@ -21737,7 +21948,7 @@ Model Main_Coal {
 				Definition: ((InteriorResult(steoyr)/InteriorLimit(steoyr))-1.)*100;
 			}
 			Constraint STEOWestLower {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagRT(cyr);
+				IndexDomain: (cyr)|steoflagRT(cyr);
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| WestSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21745,7 +21956,7 @@ Model Main_Coal {
 				}
 			}
 			Constraint STEOWestUpper {
-				IndexDomain: (cyr)|cyr in STEOYears and steoflagRT(cyr);
+				IndexDomain: (cyr)|steoflagRT(cyr);
 				Property: Bound, ShadowPrice, Level;
 				Definition: {
 					Sum((SReg, Sulf, Mtyp, Rank,steoyr)| WestSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr, ProductionVolume(SReg, Sulf, Mtyp, Rank,steoyr)/$Btu2(SReg, Sulf, Mtyp, Rank))
@@ -21787,8 +21998,8 @@ Model Main_Coal {
 				Definition: Sum(cyr|Map_globalyr_cyr(globalyr,cyr),WestStocks(cyr));
 			}
 			Variable WestStocks {
-				IndexDomain: yr|yr in STEOYears and steoflagStocks(yr);
-				Definition: WestStocksLow(yr) + WestStocksHigh(yr);
+				IndexDomain: cyr;
+				Definition: WestStocksLow(cyr) + WestStocksHigh(cyr);
 			}
 			Variable WestStocksLow {
 				IndexDomain: cyr;
@@ -21927,38 +22138,38 @@ Model Main_Coal {
 				Definition: SteamExpSTEO(steoyr)*(1+Tolerance(steoyr)*SideTolerance(steoyr));
 			}
 			Constraint STEOCokeExportsLower {
-				IndexDomain: cyr|cyr in STEOYears and steoflagExports(cyr);
-				Text: "steoflagIMP must be 1 (set in clsteo.txt)";
+				IndexDomain: cyr | ( steoflagExports(cyr));
+				Text: "steoflagExports must be 1 (set in clsteo.txt)";
 				Definition: {
-					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr)| CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr,
+					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr)| (CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr) ,
 					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)/Btu2(SReg, Sulf, Mtyp, Rank))
-					>= Sum((steoyr)|steoyr=cyr,CokeExpTonsLower(steoyr))
+					>= Sum((steoyr)|steoyr=cyr,CokeExpTonsLower(steoyr) )
 				}
 			}
 			Constraint STEOCokeExportsUpper {
-				IndexDomain: cyr|cyr in STEOYears and steoflagExports(cyr);
-				Text: "steoflagIMP must be 1 (set in clsteo.txt)";
+				IndexDomain: cyr| steoflagExports(cyr);
+				Text: "steoflagExports must be 1 (set in clsteo.txt)";
 				Definition: {
-					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr)| CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr,
+					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr) | (CokingSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr) ,
 					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)/Btu2(SReg, Sulf, Mtyp, Rank))
-					<= Sum((steoyr)|steoyr=cyr,CokeExpTonsUpper(steoyr))
+					<= Sum((steoyr)|steoyr=cyr,CokeExpTonsUpper(steoyr) )
 				}
 			}
 			Constraint STEOSteamExportsLower {
-				IndexDomain: cyr|cyr in STEOYears and steoflagExports(cyr);
-				Text: "steoflagIMP must be 1 (set in clsteo.txt)";
+				IndexDomain: cyr |  steoflagExports(cyr);
+				Text: "steoflagExports must be 1 (set in clsteo.txt)";
 				Definition: {
-					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr)| ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr,
-					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)/Btu2(SReg, Sulf, Mtyp, Rank))
-					>= Sum((steoyr)|steoyr=cyr,SteamExpTonsLower(steoyr))
+					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr)| (ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank)and steoyr=cyr) ,
+					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)/ $Btu2(SReg, Sulf, Mtyp, Rank))
+					>= Sum((steoyr)|steoyr=cyr,SteamExpTonsLower(steoyr) )
 				}
 			}
 			Constraint STEOSteamExportsUpper {
-				IndexDomain: cyr|cyr in STEOYears and steoflagExports(cyr);
-				Text: "steoflagIMP must be 1 (set in clsteo.txt)";
+				IndexDomain: cyr| (steoflagExports(cyr));
+				Text: "steoflagExports must be 1 (set in clsteo.txt)";
 				Definition: {
-					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr)| ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr,
-					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)/Btu2(SReg, Sulf, Mtyp, Rank))
+					Sum((SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,steoyr) | (ThermalSupplyCurves_Map(SReg, Sulf, Mtyp, Rank) and steoyr=cyr) ,
+					ExportsTransport2(SReg, Sulf, Mtyp, Rank,ExpSec,USe,DReg,cyr)/ $Btu2(SReg, Sulf, Mtyp, Rank))
 					<= Sum((steoyr)|steoyr=cyr,SteamExpTonsUpper(steoyr))
 				}
 			}
@@ -21982,7 +22193,7 @@ Model Main_Coal {
 				Definition: ImportsSTEO(steoyr)*(1+Tolerance(steoyr)*SideTolerance(steoyr));
 			}
 			Constraint STEOImportsLower {
-				IndexDomain: cyr|cyr in STEOYears and steoflagIMP(cyr);
+				IndexDomain: cyr | ( steoflagIMP(cyr));
 				Text: "steoflagIMP must be 1 (set in clsteo.txt)";
 				Definition: {
 					Sum((steoyr)| steoyr=cyr,
@@ -21993,7 +22204,7 @@ Model Main_Coal {
 				}
 			}
 			Constraint STEOImportsUpper {
-				IndexDomain: cyr|cyr in STEOYears and steoflagIMP(cyr);
+				IndexDomain: cyr | steoflagIMP(cyr);
 				Text: "steoflagIMP must be 1 (set in clsteo.txt)";
 				Definition: {
 					Sum((steoyr)| steoyr=cyr,
@@ -22804,12 +23015,12 @@ Model Main_Coal {
 		Body: {
 			           empty Plantid_unitid;
 			        !   read from file "..\\COALEMM_EMM_CL_UNITS.txt" ;   ! Try reading from coalunits.txt
-			           read from file "input/coalunits.txt" ;   !try reading alt file from input/ sub-directory  April 2022
+			           read from file "../../coal/input/coalunits.txt" ;   !try reading alt file from input/ sub-directory  April 2022
 			
 			
 			! All oal input files will now be read from /coal/input sub-directory of coal project. Use current location defined by "root" variable.
 			! DAF 3-14-2022
-			 	inputLocationCoal:=root + "\input" ;
+			 	!inputLocationCoal:=root + "../../coal/input" ;
 			! May not need path above.  Try direct reads from input sub-directory of current directory.
 			! August 2023 commented out this reads in favor of reads from path set in cl_runval.txt
 				!read from file "input/cmmUScoalImports.txt" ;   ! new file March 2022
@@ -22827,10 +23038,10 @@ Model Main_Coal {
 				!read from file "input/cmmCoalPlntData.txt" ; 	! new file April 2022
 				!read from file "input/cmmProfiles.txt" ; 	! new file May 2022
 			           !read in side case tolerance adjustment flag
-			           read from file "emmbench.txt" ;   !same location - may move read location but not yet
+			           read from file "../../coal/emmbench.txt" ;   !same location - may move read location but not yet
 			
 				!changed to read those files with SCEDES keys from handshake file created by Clair Su
-				read from file "cl_runval.txt" ;
+				read from file "../../coal/cl_runval.txt" ;
 				!new reads using string parameters filled in cl_runval.txt
 				read from file CLCDSRN ; 	! new path August 2023  DAF & Clair Su
 				read from file CLBYPRDN ; 	! new path August 2023  DAF & Clair Su  Prodparam
@@ -23097,7 +23308,7 @@ Model Main_Coal {
 			        !   read from file fullFilename;
 			        !read from file "input/clflags.txt" ; 	! new file March 2022  DAF
 			
-			   	   read from file "clsteo.txt";		! same location - may move read location but not yet
+			   	   read from file "../../coal/clsteo.txt";		! same location - may move read location but not yet
 			
 			           !fullFilename := inputLocation + "\cmm2.mdb.dsn" ;
 			           ! clrates...U.S. imports surcharge stuff
@@ -23371,7 +23582,7 @@ Model Main_Coal {
 	Procedure SendGlobalDataToNEMS {
 		Body: {
 			! send global data back to nems via a text file. The file is read by nems filer subroutine with funfmt=7
-			sDataYearFile:="fromAIMMS\\GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+			sDataYearFile:="../../coal/fromAIMMS/GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
 			! Note The "FILE" identifier GlobalDataToNEMS is linked to the string parameter sDataYearFile
 			put GlobalDataToNEMS; ! opens the file (sDataYearFile) and sets stage for subsequent display and/or put statements
 			
@@ -23543,7 +23754,7 @@ Model Main_Coal {
 	Procedure SendGlobalDataToNEMS_HistOverwrites {
 		Body: {
 			! send global data back to nems via a text file. The file is read by nems filer subroutine with funfmt=7
-			sDataYearFile:="fromAIMMS\\GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+			sDataYearFile:="../../coal/fromAIMMS/GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
 			! Note The "FILE" identifier GlobalDataToNEMS is linked to the string parameter sDataYearFile
 			put GlobalDataToNEMS; ! opens the file (sDataYearFile) and sets stage for subsequent display and/or put statements
 			
@@ -23613,14 +23824,14 @@ Model Main_Coal {
 			!display {COALREP_WSSULF_BTU(M4,globalyr)} where decimals:=10;
 			!display {COALREP_WLSULF_BTU(M4,globalyr)} where decimals:=10;
 			!display {COALREP_CLSULF_BTU(M14,M4,M3,globalyr)} where decimals:=10;
-			!display {COALREP_PMTD(NSREGN,globalyr)} where decimals:=10;
-			!display {COALREP_PMTS(NSREGN,globalyr)} where decimals:=10;
+			display {COALREP_PMTD(NSREGN,globalyr)} where decimals:=10;
+			display {COALREP_PMTS(NSREGN,globalyr)} where decimals:=10;
 			!display {COALREP_PMTD_BTU(NSREGN,globalyr)} where decimals:=10;
 			!display {COALREP_PMTS_BTU(NSREGN,globalyr)} where decimals:=10;
-			!display {COALREP_PMTDP(NSREGN,globalyr)} where decimals:=10;
-			!display {COALREP_PMTSP(NSREGN,globalyr)} where decimals:=10;
-			!display {COALREP_APSULF(M4,globalyr)} where decimals:=10;
-			!display {COALREP_PAPSULF(M4,globalyr)} where decimals:=10;
+			display {COALREP_PMTDP(NSREGN,globalyr)} where decimals:=10;
+			display {COALREP_PMTSP(NSREGN,globalyr)} where decimals:=10;
+			display {COALREP_APSULF(M4,globalyr)} where decimals:=10;
+			display {COALREP_PAPSULF(M4,globalyr)} where decimals:=10;
 			!display {COALREP_UTCONS(NUTSEC,globalyr)} where decimals:=10;
 			!display {COALREP_UTTSO2(NUTSEC,globalyr)} where decimals:=10;
 			!display {COALREP_UCSO2(NUTSEC,globalyr)} where decimals:=10;
@@ -23629,8 +23840,8 @@ Model Main_Coal {
 			!display {COALREP_TSPMBTU(globalyr)} where decimals:=10;
 			!display {COALREP_TMPMBTU(globalyr)} where decimals:=10;
 			!display {COALREP_TOTLABPROD(globalyr)} where decimals:=10;
-			!display {COALREP_WAGEPHOUR(globalyr)} where decimals:=10;
-			!display {COALREP_WAGEGROWTH(globalyr)} where decimals:=10;
+			display {COALREP_WAGEPHOUR(globalyr)} where decimals:=10;
+			display {COALREP_WAGEGROWTH(globalyr)} where decimals:=10;
 			!display {COALREP_LABPRODGROWTH(globalyr)} where decimals:=10;
 			!display {COALREP_COAL2GAS(MNUMCR,globalyr)} where decimals:=10;
 			!display {COALREP_WPSULF(M4,globalyr)} where decimals:=10;
@@ -23896,16 +24107,25 @@ Model Main_Coal {
 		Body: {
 			! the initial LoadGlobal is required because this procedure is invoked from the command line.
 			! Aimms doesn't load case files automatically, as specified in the project settings, when a procedure is invoked from 
-			! the command line.   
-			LoadGlobal("cases\\global_data"); 
-			ReadData;   
+			! the command line. 
+			! activate following line if you run this procedure interactive mode
+			
+			!ncntrl_curcalyr(1) := 2023;  !enable it for debugging only
+			
+			
+			if ncntrl_curcalyr(1) = cpsbaseyr then 
+			  ReadData;
+			  LoadGlobal("../../coal/cases/global_data"); 
+			endif;
+			!ncntrl_curcalyr(1) := 2023;  !enable it for debugging only
+			!ncntrl_curitr(1) := 1; !enable it for debugging only
 			
 			! the following allows the aimms project to be kept open (when keepopen=1) and to later Quit at direction of NEMS,
 			! or to run and exit immediately. NEMS is set up to wait for 
 			! an action message of "Exited" written by the MainTermination procedure right before aimms exits.
-			CountSleep := 0;
+			!CountSleep := 0;
 			! count sleep/wake cycles while waiting for direction from nems via sAction in the message file, monitor.in.txt
-			while ( CountSleep <= 2000 ) do
+			!while ( CountSleep <= 2000 ) do
 			   if fileexists(sMessageInFile) then
 			   ! read sAction, current model year, and current iteration from sMessageInFile
 			     sAction:=" ";
@@ -23913,15 +24133,16 @@ Model Main_Coal {
 			   else
 			     put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
 			   endif;
-			   if sAction = "MainExecution" then
-			     sAction:="executing";    ! Action message to tell NEMS I'm executing
-			     write sAction to file NEMSMessageOutFile in replace mode;  
+			!   if sAction = "MainExecution" then
+			!     sAction:="executing";    ! Action message to tell NEMS I'm executing
+			!     write sAction to file NEMSMessageOutFile in replace mode;  
+			!
+			!     dialogProgress(""); ! remove progress dialog
+			!     sStatusMessage := formatstring("Invoking MainExecution for %s",ncntrl_curcalyr('1')) + 
+			!                       formatstring(", iteration %s",ncntrl_curitr('1')) +
+			!                       formatstring(", reporting loop indicator=%s",ncntrl_ncrl('1'));
+			!     put sStatusMessage;
 			
-			     dialogProgress(""); ! remove progress dialog
-			     sStatusMessage := formatstring("Invoking MainExecution for %s",ncntrl_curcalyr('1')) + 
-			                       formatstring(", iteration %s",ncntrl_curitr('1')) +
-			                       formatstring(", reporting loop indicator=%s",ncntrl_ncrl('1'));
-			     put sStatusMessage;
 			     ReadGlobalDataFromNEMS; ! read globaldatatoAIMMS_yyyy_ii.txt where yyyy is ncntrl_curcalyr(1) and ii is ncntrl_curitr(1)
 			     !Initialize ModelYear
 			
@@ -23929,26 +24150,26 @@ Model Main_Coal {
 			     sAction:=formatstring("Completed %s,",ncntrl_curcalyr('1')) + 
 			              formatstring("iteration %s ",ncntrl_curitr('1')) ;    ! Action message to tell NEMS I'v completed this year, iteration
 			     write sAction to file NEMSMessageOutFile in replace mode;  
-			     CountSleep:=0;   
-			     sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
-			     put sStatusMessage;
-			     Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
-			   elseif sAction = "Quit" then ! NEMS says to exit aimms
-			     CountSleep:=2000;
-			   else
-			     sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
-			     Delay(.5);                  
-			   endif;
-			   dialogProgress(sStatusMessage,round(100*CountSleep/2000));
-			   CountSleep += 1;
+			!     CountSleep:=0;   
+			!     sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			!     put sStatusMessage;
+			!     Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
+			!   elseif sAction = "Quit" then ! NEMS says to exit aimms
+			!     CountSleep:=2000;
+			!   else
+			!     sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			!     Delay(.5);                  
+			!   endif;
+			!   dialogProgress(sStatusMessage,round(100*CountSleep/2000));
+			!   CountSleep += 1;
 			
-			endwhile;
-			if CountSleep>=2001 then
-			  put "Quit directive found in monitor.in.txt. Exiting AIMMS";
-			else
-			  put "Wait time exceeded. Exiting Aimms";
-			endif;
-			exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
+			!endwhile;
+			!if CountSleep>=2001 then
+			!  put "Quit directive found in monitor.in.txt. Exiting AIMMS";
+			!else
+			!  put "Wait time exceeded. Exiting Aimms";
+			!endif;
+			!exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
 		}
 		Comment: {
 			"For KEEPOPEN=1 option, This routines cause AIMMS to sleep and periodically wake to check a message input file from NEMS. If the file
@@ -23987,7 +24208,7 @@ Model Main_Coal {
 	Procedure PutGlobalData {
 		Body: {
 			                ! For debugging, output all parameters defined in section global_data_structure to a text file. 
-			                sDataYearFile:="GlobalData.txt";
+			                sDataYearFile:="../../coal/GlobalData.txt";
 			                ! Note The "FILE" identifier GlobalDataToNEMS is linked to the string parameter sDataYearFile
 			                put GlobalDataToNEMS; ! opens the file (sDataYearFile) and sets stage for subsequent display and/or put statements
 			display { not_used_QBLK_QELRS (MNUMCR,MNUMYR)} where decimals:=10;
@@ -24275,7 +24496,6 @@ Model Main_Coal {
 			display { NCNTRL_DSMSWTCH (M1)} where decimals:=10;
 			display { NCNTRL_DBDUMP (M1)} where decimals:=10;
 			display { NCNTRL_MODELON (M1)} where decimals:=10;
-			display { NCNTRL_ECPSTART (M1)} where decimals:=10;
 			display { NCNTRL_CNVTST (NMODEL,MNUMYR)} where decimals:=10;
 			display { NCNTRL_ITIMNG (M1)} where decimals:=10;
 			display { NCNTRL_YEARPR (M1)} where decimals:=10;
@@ -24549,13 +24769,13 @@ Model Main_Coal {
 			             else
 			                put "the global data transfer file not found \n ";
 			             endif;
-			             SaveGlobal("cases\\global_data");
+			             SaveGlobal("..\\..\\coal\\cases\\global_data");
 		}
 	}
 	Procedure ReadGlobalDataFromNEMS {
 		Body: {
 			! reads global data from NEMS, including "COALEMM_EMM_CL_UNITS"
-			             sDataYearFile:="toAIMMS\\GlobalDataToAimms_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+			             sDataYearFile:="..\\..\\coal\\toAIMMS\\GlobalDataToAimms_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
 			             put formatstring("the global data transfer file name is %s\n", sDataYearFile);
 			              if fileexists(sDataYearFile) then
 			             !  in first year, file has data for all years. replace all data for items read.
@@ -24593,7 +24813,7 @@ Model Main_Coal {
 			!COALOUT_APPSTOCKS(Start_iyr - 1989)	              := 0;  !overwrite stock for base year to match historical production
 			!COALOUT_INTSTOCKS(Start_iyr - 1989)	              := 0; !overwrite stock for base year to match historical production
 			!COALOUT_WESTSTOCKS(Start_iyr - 1989)	              := 0;  !overwrite stock for base year to match historical production
-			COALOUT_indsteambal(Start_iyr - 1989)		      := 0;  !overwrite to zero because heat content of model solution is different from historical year.
+			!COALOUT_indsteambal(Start_iyr - 1989)		      := 0;  !overwrite to zero because heat content of model solution is different from historical year.
 			
 			COALREP_COALPROD(TOTCEN,MNUMLR,globalyr)    :=Sum((NSREGN,M4,M3,M2,cyr)|Map_globalyr_cyr(globalyr,cyr)
 				and Map_NSREGN_mnumlr(NSREGN,MNUMLR), hclprd(NSREGN,m4,M3,M2,cyr));
@@ -24770,9 +24990,9 @@ Model Main_Coal {
 			!Fill consumption conversion variables
 			coalout_cqdbft(TOTCEN,1,globalyr)		:= Sum(cyr|Map_globalyr_cyr(globalyr,cyr)and hclcon('R',cyr)>0,
 								((qblk_qclrs(TOTCEN,globalyr)+qblk_qclcm(TOTCEN,globalyr))/hclcon('R',cyr)));
-			coalout_cqdbft(TOTCEN,2,globalyr)		:=Sum(cyr|Map_globalyr_cyr(globalyr,cyr) and hclcon('I',cyr)>0,
-								qblk_qclin(TOTCEN,globalyr)/
-								hclcon('I',cyr));
+			cl::coalout_cqdbft(TOTCEN,2,globalyr)		:=Sum(cyr|Map_globalyr_cyr(globalyr,cyr) and cl::hclcon('I',cyr)>0,
+								cl::QBLK_QCLIN(TOTCEN,globalyr)/
+								cl::hclcon('I',cyr));
 			coalout_cqdbft(TOTCEN,3,globalyr)		:=Sum(cyr|Map_globalyr_cyr(globalyr,cyr)and hclcon('C',cyr)>0,
 								(qblk_qmcin(TOTCEN,globalyr)/
 								hclcon('C',cyr)));
@@ -25096,7 +25316,7 @@ Model Main_Coal {
 										cqdbft_a(mnumcr,'2',globalyr)
 										endif;
 			COALOUT_INDSTEAMBAL(globalyr)			:=Sum(steoyr|Map_globalyr_steoyr(globalyr,steoyr)and SteoFlagI(steoyr),
-								CokeStocksTons(steoyr)*coalout_cqdbft('11','2',globalyr));
+								IndustrialStocksTons(steoyr)*coalout_cqdbft('11','2',globalyr));
 			
 			cqdbft_a(mnumcr,'3',globalyr) 		:= Sum (cyr|Map_globalyr_cyr(globalyr,cyr),
 									qblk_qmcin(mnumcr,globalyr)/$(CokeTranspTonsCR(MNUMCR,cyr) + ImportsCokingTonsCR(MNUMCR,cyr)));
@@ -25135,6 +25355,11 @@ Model Main_Coal {
 									  COALOUT_CPSB_B(globalyr)
 									  endif;
 			COALOUT_CPSBT(M3,globalyr)			:= COALOUT_CPSBT_A(M3,globalyr);
+			
+			COALREP_TOTLABPROD(globalyr)			:= COALREP_TOTLABPROD_A(globalyr);
+			COALREP_LABPRODGROWTH(globalyr)			:= COALREP_LABPRODGROWTH_A(globalyr);
+			COALREP_WAGEPHOUR(cl::globalyr)			:= COALREP_WAGEPHOUR_A(cl::globalyr);
+			COALREP_WAGEGROWTH(globalyr)			:= COALREP_WAGEGROWTH_A(globalyr);
 			
 			! only need sectors 5 (exports) and 7 Imports)
 			COALOUT_CQDBFB(mnumcr,clsect,globalyr) := Sum(cyr,
@@ -25255,6 +25480,7 @@ Model Main_Coal {
 			  COALREP_PMTS_BTU(NSREGN,GLOBALYR)           := COALREP_PMTS_BTU_A(NSREGN,GLOBALYR);
 			
 			  COALREP_APSULF(M4,GLOBALYR)                 := COALREP_APSULF_A(M4,GLOBALYR);
+			
 			
 			  COALREP_UTCONS(NUTSEC,GLOBALYR)             :=COALREP_UTCONS_A(NUTSEC,GLOBALYR);
 			  COALREP_UTTSO2(NUTSEC,GLOBALYR)             := COALREP_UTTSO2_A(NUTSEC,GLOBALYR);
@@ -25426,7 +25652,7 @@ Model Main_Coal {
 				   		solve PartialLeastCostDomesticCoal;
 				     		if (PartialLeastCostDomesticCoal.ProgramStatus <> 'Optimal' ) then
 				     			block option Save_Data_Update_Definitions := 'off';
-			                 	   		SaveAll( FormatString("cases\\debug%e_%i", CurrentStudyYear, ncntrl_curitr(1)));
+			                 	   		SaveAll( FormatString("..\\..\\coal\\cases\\debug%e_%i", CurrentStudyYear, ncntrl_curitr(1)));
 			                 	   	endblock;
 			        		coalout_coalcode(1) := 1;  !flag is infeasible
 			             		empty ObjTotalCost;
@@ -25512,7 +25738,7 @@ Model Main_Coal {
 			   !	  redoflg(cyr) := 1;
 			   !	  for redoflg(cyr) = 1 then
 			      		RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) :=SupplyCurveStepBalShadow2(Scrv1,SReg, Sulf, Mtyp, Rank,cyr)/$mcnt_prev(Scrv1,SReg, Sulf, Mtyp, Rank);
-			      		InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1|(RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank);
+			      		InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1 $((RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank));
 			      		if Sum ((Scrv1,SReg, Sulf, Mtyp, Rank),InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear)) > 0 then
 			      			Redoflg(cyr) := 1;
 			      			CalculationOfCoalPricingEquation;
@@ -25522,7 +25748,8 @@ Model Main_Coal {
 			      			qprods(SReg, Sulf, Mtyp, Rank) := ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,CurrentStudyYear);
 			      			mcnt_prev(Scrv1,SReg, Sulf, Mtyp, Rank) := SupplyCurveStepBalShadow2(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear);
 			
-			      		        InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1|(RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank);
+			      		        InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1 $ (RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear)
+			      		         < 0.985 and Btu(Scrv1,SReg, Sulf, Mtyp, Rank));
 			      			if Sum ((Scrv1,SReg, Sulf, Mtyp, Rank),InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear)) > 0 then
 			      				Redoflg(cyr) := 2;
 			      				CalculationOfCoalPricingEquation;
@@ -25533,7 +25760,7 @@ Model Main_Coal {
 			      				mcnt_prev(Scrv1,SReg, Sulf, Mtyp, Rank) := SupplyCurveStepBalShadow2(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear);
 			
 			
-			      		        	InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1|(RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank);
+			      		        	InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1 $((RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank));
 			      				if Sum ((Scrv1,SReg, Sulf, Mtyp, Rank),InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear)) > 0 then
 			      					Redoflg(cyr) := 3;
 			      					CalculationOfCoalPricingEquation;
@@ -25543,7 +25770,7 @@ Model Main_Coal {
 			 					qprods(SReg, Sulf, Mtyp, Rank) := ProductionVolumeTons(SReg, Sulf, Mtyp, Rank,CurrentStudyYear);
 			      					mcnt_prev(Scrv1,SReg, Sulf, Mtyp, Rank) := SupplyCurveStepBalShadow2(Scrv1,SReg, Sulf, Mtyp, Rank,CurrentStudyYear);
 			
-			      		        		InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1|(RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank);
+			      		        		InterimRedoflg(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) := 1 $ ((RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) > 1.015 or RedoTest(Scrv1,SReg, Sulf, Mtyp, Rank,cyr) < 0.985) and Btu(Scrv1,SReg, Sulf, Mtyp, Rank));
 			      				endif;
 			      			endif;
 			      		endif;
@@ -26176,7 +26403,7 @@ Model Main_Coal {
 		DeclarationSection Time_Declarations {
 			ElementParameter Start_iyr {
 				Range: Run_Years;
-				InitialData: '2022';
+				InitialData: '2024';
 				Comment: "First year for year loop onl update";
 			}
 			ElementParameter End_iyr {
@@ -26887,7 +27114,7 @@ Model Main_Coal {
 		Procedure Calculate_report_totals {
 			Body: {
 				
-				read from file "coalmapping.txt";
+				read from file "..\\..\\coal\\coalmapping.txt";
 				
 				if not DisplayDollarYear then
 				  DisplayDollarYear:='1987';
@@ -27277,8 +27504,8 @@ Model Main_Coal {
 		Procedure Load_Initial_CaseFile {
 			Body: {
 				if (Switch_LoadCycle) then
-				        CMMLagDataLoad(FormatString("cases\\cycle%i", CycleNum));
-					read from file "coalmapping.txt";
+				        CMMLagDataLoad(FormatString("..\\..\\Coal\\Cases\\cycle%i", CycleNum));
+					read from file "..\\..\\coal\\coalmapping.txt";
 					Calculate_report_totals;
 				
 				endif;
@@ -27433,7 +27660,7 @@ Model Main_Coal {
 		}
 		Procedure ReloadLagData {
 			Body: {
-				CMMLagDataLoad("cases\\CMMLagData");
+				CMMLagDataLoad("..\\..\\Coal\\Cases\\CMMLagData");
 				Calculate_report_totals;
 			}
 		}
@@ -27796,7 +28023,7 @@ Model Main_Coal {
 		}
 		Procedure GetCaseName {
 			Body: {
-				CaseStringBegin :=FindNthString(CaseFileURL(CurrentCase), "\\Cases\\", -1);
+				CaseStringBegin :=FindNthString(CaseFileURL(CurrentCase), "..\\..\\Coal\\Cases\\", -1);
 				CaseStringEnd:= StringLength(CaseFileURL(CurrentCase));
 				CaseStringBegin+=7;
 				CaseStringEnd-=5;
@@ -27806,7 +28033,7 @@ Model Main_Coal {
 		Procedure GetSelectedCaseNames {
 			Body: {
 				
-				SelectCaseStringBegin(IndexCurrentCaseSelection) :=FindNthString(CaseFileURL(IndexCurrentCaseSelection), "\\Cases\\", -1);
+				SelectCaseStringBegin(IndexCurrentCaseSelection) :=FindNthString(CaseFileURL(IndexCurrentCaseSelection), "..\\..\\Coal\\Cases\\", -1);
 				SelectCaseStringEnd(IndexCurrentCaseSelection):= StringLength(CaseFileURL(IndexCurrentCaseSelection));
 				SelectCaseStringBegin(IndexCurrentCaseSelection)+=7;
 				SelectCaseStringEnd(IndexCurrentCaseSelection)-=5;

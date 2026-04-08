@@ -2,8 +2,8 @@
 ! Unit: last history year $/kg H2
 Composite Table:
 sec                 markup
-Industrial          0.311902
-Electricity         0.311902
-Transportation      6.65391
-Refining            0.311902
+Industrial          0.3
+Electricity         0.3
+Transportation      6.4
+Refining            0.3
 ;

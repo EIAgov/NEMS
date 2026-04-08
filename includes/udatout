@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/udatout,v 1.16 2019/07/23 15:29:23 rsc Exp $
 !  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
@@ -217,10 +218,10 @@
       REAL URETS2U(MNUMNR,MNUMYR)   ! 174 Retirements Solar Thermal w/Storage2 by NERC
       REAL UGENS2(MNUMNR,MNUMYR)    ! 175 Total Solar Thermal w/Storage2 generation by NERC
 
-      REAL UCAPPTU(MNUMNR,MNUMYR)   ! 176 Util PV w/fixed tilt Capacity by NERC
-      REAL UCAPPTN(MNUMNR,MNUMYR)   ! 177 NonUtil PV w/fixed tilt Capacity by NERC
-      REAL URETPTU(MNUMNR,MNUMYR)   ! 178 Retirements PV w/fixed tilt by NERC
-      REAL UGENPT(MNUMNR,MNUMYR)    ! 179 Total PV w/fixed tilt generation by NERC
+      REAL UCAPPTU(MNUMNR,MNUMYR)   ! 176 Util Hybrid PV plus battery Capacity by NERC
+      REAL UCAPPTN(MNUMNR,MNUMYR)   ! 177 NonUtil Hybrid PV plus battery Capacity by NERC
+      REAL URETPTU(MNUMNR,MNUMYR)   ! 178 Retirements Hybrid PV plus battery by NERC
+      REAL UGENPT(MNUMNR,MNUMYR)    ! 179 Total Hybrid PV plus battery generation by NERC
 
       REAL UCAPINU(MNUMNR,MNUMYR)   ! 180 Util Other Intermittent Capacity by NERC
       REAL UCAPINN(MNUMNR,MNUMYR)   ! 181 NonUtil Other Intermittent Capacity by NERC

@@ -1301,6 +1301,9 @@ enddo
       enddo
       write(9,'(a)') ';'  ! finish Index line
       write(9,'(a)') '         OrderBy: user;'
+      if (trim(alldims(i)) .eq. 'SCALARSet') then
+          write(9,'(a)') '         Definition: data { 1 };'
+      endif 
       write(9,'(3a)' )   '     }'  
     endif
   enddo
@@ -1503,20 +1506,47 @@ enddo
 ! but include a commented line that could convert the expression to a relative difference
         write(9,'(30a)')     '           Definition: { '
          if(index(allArrays_diff(i),'UBOUND').gt.0) then
-            write(line,'(9x,30a)')    'if ( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf '     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-            write(line,'(11x,30a)')   'and ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf ) then' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+             if (allArraysDim(i) .gt. 0) then
+                write(line,'(9x,30a)')    'if ( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf '     ; write(9,'(a)') trim(line)
+                write(line,'(11x,30a)')   'and ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf ) then' ; write(9,'(a)') trim(line)
+             else
+                write(line,'(9x,30a)')    'if ( ',trim(allArrays_calc(i)),' <> inf '     ; write(9,'(a)') trim(line)
+                write(line,'(11x,30a)')   'and ', trim(allArrays_pass(i)),' <> inf ) then'  ; write(9,'(a)') trim(line)
+             endif
          endif
-        write(line,'(12x,30a)')    '( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') -'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(14x,30a)')         trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') )'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(9x, 30a)') '! /$ ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') *100'  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+        if (allArraysDim(i) .gt. 0) then
+            write(line,'(12x,30a)')    '( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') -'    ; write(9,'(a)') trim(line) 
+            write(line,'(14x,30a)')         trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') )'    ; write(9,'(a)') trim(line)
+            write(line,'(9x, 30a)') '! /$ ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') *100'  ; write(9,'(a)') trim(line)
+        else
+            write(line,'(12x,30a)')    '( ',trim(allArrays_calc(i)), ' -'     ; write(9,'(a)') trim(line) 
+            write(line,'(14x,30a)')         trim(allArrays_pass(i)),' )'      ; write(9,'(a)') trim(line)
+            write(line,'(9x, 30a)') '! /$ ',trim(allArrays_calc(i)),' *100'  ; write(9,'(a)') trim(line)
+        endif
          
          if(index(allArrays_diff(i),'UBOUND').gt.0) then
-             write(line,'(9x,30a)')    'elseif ( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf '     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-             write(line,'(11x,30a)')   'and ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf ) then' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+             if (allArraysDim(i) .gt. 0) then
+                write(line,'(9x,30a)')    'elseif ( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf '  ; write(9,'(a)') trim(line)   
+             else
+                write(line,'(9x,30a)')    'elseif ( ',trim(allArrays_calc(i)),' = inf '     ; write(9,'(a)') trim(line)
+             endif
+             if (allArraysDim(i) .gt. 0) then
+                write(line,'(11x,30a)')   'and ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf ) then' ; write(9,'(a)') trim(line)
+             else
+                write(line,'(11x,30a)')   'and ', trim(allArrays_pass(i)),' = inf ) then'  ; write(9,'(a)') trim(line)
+             endif
              write(9,'(30a)')     '                 0'
-             write(line,'(9x,30a)')    'elseif ( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf ) then'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+             if (allArraysDim(i) .gt. 0) then
+                write(line,'(9x,30a)')    'elseif ( ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf ) then'     ; write(9,'(a)') trim(line)
+             else
+                 write(line,'(9x,30a)')    'elseif ( ',trim(allArrays_calc(i)),' = inf ) then'     ; write(9,'(a)') trim(line)
+             endif
              write(9,'(30a)')     '                 inf'
-             write(line,'(9x,30a)')    'elseif ( ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf ) then'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+             if (allArraysDim(i) .gt. 0) then
+                write(line,'(9x,30a)')    'elseif ( ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') = inf ) then'     ;  write(9,'(a)') trim(line)
+             else
+                 write(line,'(9x,30a)')    'elseif ( ', trim(allArrays_pass(i)),' = inf ) then'     ;  write(9,'(a)') trim(line)
+             endif
              write(9,'(30a)')     '                 -inf'
              write(9,'(30a)')     '         endif'
          endif
@@ -1549,11 +1579,15 @@ enddo
         !endif
 ! add defintion as show cdiff values only if abs(cdiff) > cdiff_delta  
         write(9,'(30a)')     '           Definition: { '
-
-        write(line,'(12x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') $'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(14x,30a)')    '(Abs(',trim(allArrays_cdiffPct(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiffPct_Delta'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(14x,30a)')    ' and Abs(',trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiff_Delta)'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-
+        if (allArraysDim(i) .gt. 0) then
+           write(line,'(12x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') $'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    '(Abs(',trim(allArrays_cdiffPct(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiffPct_Delta'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    ' and Abs(',trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiff_Delta)'     ; write(9,'(a)') trim(line)
+        else
+           write(line,'(12x,30a)')    trim(allArrays_diff(i)),' $'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    '(Abs(',trim(allArrays_cdiffPct(i)),') > cdiffPct_Delta'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    ' and Abs(',trim(allArrays_diff(i)),') > cdiff_Delta)'     ; write(9,'(a)') trim(line)
+        endif
         write(9,'(30a)')     '           }'
 
         write(9,'(30a)' )    '       }'  
@@ -1583,10 +1617,15 @@ enddo
         !endif
 ! add defintion as show cdiffPct values only if abs(cdiffPct) > cdiffPct_delta and abs(cdiff) > cdiff_Delta
         write(9,'(30a)')     '           Definition: { '
-
-        write(line,'(12x,30a)')    trim(allArrays_cdiffPct(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') $'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(14x,30a)')    '(Abs(',trim(allArrays_cdiffPct(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiffPct_Delta'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-         write(line,'(14x,30a)')    'and Abs(',trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiff_Delta)'     ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+        if (allArraysDim(i) .gt. 0) then
+           write(line,'(12x,30a)')    trim(allArrays_cdiffPct(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') $'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    '(Abs(',trim(allArrays_cdiffPct(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiffPct_Delta'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    'and Abs(',trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')) > cdiff_Delta)'     ; write(9,'(a)') trim(line)
+        else
+           write(line,'(12x,30a)')    trim(allArrays_cdiffPct(i)),' $'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    '(Abs(',trim(allArrays_cdiffPct(i)),') > cdiffPct_Delta'     ; write(9,'(a)') trim(line)
+           write(line,'(14x,30a)')    'and Abs(',trim(allArrays_diff(i)),') > cdiff_Delta)'     ; write(9,'(a)') trim(line)
+        endif
         write(9,'(30a)')     '           }'
 
         write(9,'(30a)' )    '       }'  
@@ -1615,17 +1654,32 @@ enddo
         !endif
 ! add defintion as show cdiff values only if cdiff values > 0 
         write(9,'(30a)')     '           Definition: { '
-        write(line,'(12x,30a)')    'if (',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf '  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(12x,30a)')    ' and ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf ) then'  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(15x,30a)')    'if (', trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> 0 ) then'  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(17x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') /$ '  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(18x,30a)')    trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') *100' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(15x,30a)')    'elseif (', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> 0 ) then'  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(17x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') /$ '  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
-        write(line,'(18x,30a)')    trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') *100' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+        if (allArraysDim(i) .gt. 0) then
+            write(line,'(12x,30a)')    'if (',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf '  ; write(9,'(a)') trim(line)
+            write(line,'(12x,30a)')    ' and ', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> inf ) then'  ; write(9,'(a)') trim(line)
+            write(line,'(15x,30a)')    'if (', trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> 0 ) then'  ; write(9,'(a)') trim(line)
+            write(line,'(17x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') /$ '  ;  write(9,'(a)') trim(line)
+            write(line,'(18x,30a)')    trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') *100' ;  write(9,'(a)') trim(line)
+            write(line,'(15x,30a)')    'elseif (', trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') <> 0 ) then'  ;  write(9,'(a)') trim(line)
+            write(line,'(17x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') /$ '  ;  write(9,'(a)') trim(line)
+            write(line,'(18x,30a)')    trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') *100' ;  write(9,'(a)') trim(line)
+        else
+            write(line,'(12x,30a)')    'if (',trim(allArrays_calc(i)),' <> inf '  ; write(9,'(a)') trim(line)
+            write(line,'(12x,30a)')    ' and ', trim(allArrays_pass(i)),' <> inf ) then'  ; write(9,'(a)') trim(line)
+            write(line,'(15x,30a)')    'if (', trim(allArrays_calc(i)),' <> 0 ) then'  ; write(9,'(a)') trim(line)
+            write(line,'(17x,30a)')    trim(allArrays_diff(i)),' /$ '  ; write(9,'(a)') trim(line)
+            write(line,'(18x,30a)')    trim(allArrays_calc(i)),' *100' ; write(9,'(a)') trim(line)
+            write(line,'(15x,30a)')    'elseif (', trim(allArrays_pass(i)),' <> 0 ) then'  ; write(9,'(a)') trim(line)
+            write(line,'(17x,30a)')    trim(allArrays_diff(i)),' /$ '  ; write(9,'(a)') trim(line)
+            write(line,'(18x,30a)')    trim(allArrays_pass(i)),' *100' ; write(9,'(a)') trim(line)
+        endif
         write(line,'(15x,30a)')     'endif';write(9,'(a)') trim(line)
         write(line,'(12x,30a)')     'else';write(9,'(a)') trim(line)
-        write(line,'(15x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') '  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+        if (allArraysDim(i) .gt. 0) then
+            write(line,'(15x,30a)')    trim(allArrays_diff(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') '  ; write(9,'(a)') trim(line)
+        else
+            write(line,'(15x,30a)')    trim(allArrays_diff(i)) ; write(9,'(a)') trim(line)
+        endif
         write(line,'(12x,30a)')     'endif';write(9,'(a)') trim(line)
         write(9,'(30a)')     '           }'
 
@@ -1642,16 +1696,26 @@ enddo
       if(index(allArrays_pass(i),'!').eq.0  .and. index(allArrays_pass(i),'_LBOUND').eq.0  .and. index(allArrays_pass(i),'_UBOUND').eq.0) Then
 
         write(9,'(30a)' )    '       Parameter ',trim(allArrays_coeff(i)),' {'
-        write(line,'(30a)' )    '           IndexDomain: (',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') ;'  ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+        if (allArraysDim(i) .gt. 0) then
+            write(line,'(30a)' )    '           IndexDomain: (',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') ;'  ; write(9,'(a)') trim(line)
+        endif
         col_id=array_col_ID(i)
         row_id=array_row_ID(i)
         if(col_id.gt.0 .and. row_id.gt.0) then
           write(9,'(30a)')     '           Text: "OML Columns: ',trim(colmask(col_id)),' and OML Rows: ',trim(rowmask(row_id)),'";'
         endif
         if(passed(i).ge.1) then
-          write(line,'(30a)')     '           Definition: ',trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+            if (allArraysDim(i) .gt. 0) then
+                write(line,'(30a)')     '           Definition: ',trim(allArrays_pass(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') ;' ; write(9,'(a)') trim(line)
+            else
+                write(line,'(30a)')     '           Definition: ',trim(allArrays_pass(i)),' ;' ; write(9,'(a)') trim(line)
+            endif
         else
-          write(line,'(30a)')     '           Definition: ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+            if (allArraysDim(i) .gt. 0) then
+                write(line,'(30a)')     '           Definition: ',trim(allArrays_calc(i)),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),') ;' ; write(9,'(a)') trim(line)
+            else
+                write(line,'(30a)')     '           Definition: ',trim(allArrays_calc(i)),' ;' ; write(9,'(a)') trim(line)
+            endif
         endif
       
         write(9,'(30a)' )    '       }'  
@@ -1660,6 +1724,11 @@ enddo
     write(9,'(a)')       '     }'
 
 !   DeclarationSection VariableDeclare
+  if(ver.eq.'ecp') then
+     write(9,'(a)') ' Section ECP_Variables {'    ! beginning of "Section ECP_Variables" 
+  else
+     write(9,'(a)') ' Section EFD_Variables {'    ! beginning of "Section ECP_Variables"
+  endif
   write(9,'(5a)')          '   DeclarationSection Decision_Variable_Declare {'
   do i=1,num_cols
     nj=numColSets(i)
@@ -1725,15 +1794,23 @@ enddo
           k=ifound
           if(passed(ifound).ge.1) then
             if(nj.gt.0) then
-              write(line,'(30a)')     '           Definition: ',trim(allArrays_pass(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+                if (allArraysDim(k) .gt. 0) then
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; write(9,'(a)') trim(line)
+                else
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),' ;' ; write(9,'(a)') trim(line)
+                endif
             else
-              write(line,'(30a)')     '           Definition: ',trim(allArrays_pass(k)),' ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+              write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),' ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
             endif
           else
             if(nj.gt.0) then
-              write(line,'(30a)')     '           Definition: ',trim(allArrays_calc(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+                if (allArraysDim(k) .gt. 0) then
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; write(9,'(a)') trim(line)
+                else
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),' ;' ; write(9,'(a)') trim(line)
+                endif
             else
-              write(line,'(30a)')     '           Definition: ',trim(allArrays_calc(k)),' ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+              write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),' ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
             endif
           endif
         endif
@@ -1764,13 +1841,21 @@ enddo
           k=ifound
           if(passed(ifound).ge.1) then
             if(nj.gt.0) then
-              write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+                if (allArraysDim(k) .gt. 0) then
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; write(9,'(a)') trim(line)
+                else
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),' ;' ; write(9,'(a)') trim(line)
+                endif
             else
               write(line,'(30a)')     '         Definition: ',trim(allArrays_pass(k)),' ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
             endif
           else
             if(nj.gt.0) then
-              write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
+                if (allArraysDim(k) .gt. 0) then
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),'(',(trim(allSets(j,k)),',',j=1,allArraysDim(k)-1),trim(allSets(allArraysDim(k),k)),') ;' ; write(9,'(a)') trim(line)
+                else
+                    write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),' ;' ; write(9,'(a)') trim(line)
+                endif
             else
               write(line,'(30a)')     '         Definition: ',trim(allArrays_calc(k)),' ;' ; call Mreplace(line,'()',''); write(9,'(a)') trim(line)
             endif
@@ -1780,8 +1865,9 @@ enddo
       endif
     endif
   enddo
-  write(9,'(5a)')         '   }'
-
+  write(9,'(5a)')         '   }'    ! ending of DeclarationSection Decision_Variable_Declare
+  write(9,'(5a)')         ' }'      ! ending of "Section ECP_Variables" or "Section ECP_Variables"
+  
 
 ! Declare Safety Valve Variables.  The section name is used to define the set of all safety valve variables
 ! so they can be included or excluded from the model
@@ -1823,6 +1909,11 @@ endif
 write(9,'(a)')  '      }'
 
 !   DeclarationSection ObjectiveDeclare 
+  if(ver.eq.'ecp') then
+    write(9,'(a)') ' Section ECP_Objective {'    ! beginning of "Section ECP_Objective"
+  else
+    write(9,'(a)') ' Section EFD_Objective {'    ! beginning of "Section EFD_Objective"
+  endif
   write(9,'(a)') '   DeclarationSection Objective_Declaration {                                             '
   write(9,'(a)') '       Parameter K {'
   write(9,'(a)') '       Text: "safety valve OBJ coefficient";'
@@ -1849,9 +1940,15 @@ write(9,'(a)')  '      }'
        else
          write(9,'(/a/)')'           +'
        endif
-       write(9,'(30a)')  '           ',spaces(:L-4),                              'sum((',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),'),'
-       write(9,'(30a)')  '           ',                                  trim(array), '(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')'
-       write(9,'(30a)')  '           ','*',spaces(:L-len_trim(colnam)-1),trim(colnam),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),'))'
+       if (allArraysDim(i) .gt. 0) then
+           write(9,'(30a)')  '           ',spaces(:L-4),                              'sum((',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),'),'
+           write(9,'(30a)')  '           ',                                  trim(array), '(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),')'
+           write(9,'(30a)')  '           ','*',spaces(:L-len_trim(colnam)-1),trim(colnam),'(',(trim(allSets(j,i)),',',j=1,allArraysDim(i)-1),trim(allSets(allArraysDim(i),i)),'))'
+       else
+           write(9,'(30a)')  '           ',spaces(:L-4),                     trim(array)
+           write(9,'(30a)')  '           ','*',spaces(:L-len_trim(colnam)-1),trim(colnam)  
+       endif
+
     endif
   enddo
  ! add safety terms
@@ -1895,6 +1992,7 @@ endif
   write(9,'(a)')         '           }' ! end of "Definition :
   write(9,'(a)')         '       }'     ! end of "Variable VERCOSTS"
   write(9,'(a)') '   }'                 ! end of "DeclarationSection Objective_Declaration"
+  write(9,'(a)') ' }'                   ! end of "Section ECP_Objective" or "Section EFD_Objective"
 
 
 ! sample
@@ -1919,7 +2017,11 @@ endif
 !            }
 !            comment: "this is a comment";
 !        }
-
+if(ver.eq.'ecp') then
+    write(9,'(a)') ' Section ECP_Constraints {'    ! beginning of "Section ECP_Constraints"
+else
+    write(9,'(a)') ' Section EFD_Constraints {'    ! beginning of "Section EFD_Constraints"
+endif
 write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
  
   do i=1,num_rows
@@ -2147,18 +2249,19 @@ write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
   
   
   write(9,'(a)') '   }' ! end of "Declaration Section ConstraintDeclare
+  write(9,'(a)') ' }' ! end of "Section ECP_Constraints" or "Section ECP_Constraints"
  
  ! Produce WriteToNEMS procedure with display statements for all columns and rows for which solution values are needed by VER first; then display the others
  ! needed for Augustine's validation work
    write(9,'(a)') '  Procedure WriteToNEMS {' 
    write(9,'(a)') '    Body: {'
    if(ver.eq.'ecp') then
-     write(9,'(a)') '      OutToNEMS_FileName:="OutToNEMS_"+formatstring("%i",curcalyr(1))+".txt";'
+     write(9,'(a)') '      OutToNEMS_FileName:="../../ecp/OutToNEMS_"+formatstring("%i",curcalyr(1))+".txt";'
      write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
      write(9,'(a)') '      display ECP_WithoutSafety.ProgramStatus ;'
      write(9,'(a)') '      display ECP_WithSafety.ProgramStatus ;'
    else
-     write(9,'(a)') '      OutToNEMS_FileName:="OutToNEMS_"+formatstring("%i",curcalyr(1))+"_"+formatstring("%>02i",curitr(1))+".txt";'
+     write(9,'(a)') '      OutToNEMS_FileName:="../../efd/OutToNEMS_"+formatstring("%i",curcalyr(1))+"_"+formatstring("%>02i",curitr(1))+".txt";'
      write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
      write(9,'(a)') '      display EFD_WithoutSafety.ProgramStatus ;'
      write(9,'(a)') '      display EFD_WithSafety.ProgramStatus ;'
@@ -2269,7 +2372,7 @@ write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
      if(ver.eq.'ecp') then   ! EFD has removed this old method LC2 11/2023
        write(9,'(a)') '  Procedure PassBackToNEMS_old {' 
        write(9,'(a)') '    Body: {'
-       write(9,'(a)') '      OutToNEMS_FileName:="PassBack_"+formatstring("%i",curcalyr(1))+".txt";'
+       write(9,'(a)') '      OutToNEMS_FileName:="../../ecp/PassBack_"+formatstring("%i",curcalyr(1))+".txt";'
        write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
        write(9,'(a)') '      display ECP_WithoutSafety.ProgramStatus ;'
        write(9,'(a)') '      display ECP_WithSafety.ProgramStatus ;'
@@ -2325,14 +2428,14 @@ write(9,'(a)') '   DeclarationSection ConstraintDeclare {'
      if(ver.eq.'ecp') then
        write(9,'(a)') '  Procedure PassBackToNEMS_new {' 
        write(9,'(a)') '    Body: {'
-       write(9,'(a)') '      OutToNEMS_FileName:="PassBack_new_"+formatstring("%i",curcalyr(1))+".txt";'
+       write(9,'(a)') '      OutToNEMS_FileName:="../../ecp/PassBack_new_"+formatstring("%i",curcalyr(1))+".txt";'
        write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
        write(9,'(a)') '      display ECP_WithoutSafety.ProgramStatus ;'
        write(9,'(a)') '      display ECP_WithSafety.ProgramStatus ;'
      else  ! EFD removed the old/new and only uses one 11/2023
        write(9,'(a)') '  Procedure PassBackToNEMS {' 
        write(9,'(a)') '    Body: {'
-       write(9,'(a)') '      OutToNEMS_FileName:="PassBack_"+formatstring("%i",curcalyr(1))+"_"+formatstring("%>02i",curitr(1))+".txt";'
+       write(9,'(a)') '      OutToNEMS_FileName:="../../efd/PassBack_"+formatstring("%i",curcalyr(1))+"_"+formatstring("%>02i",curitr(1))+".txt";'
        write(9,'(a)') '      put OutToNEMS; ! opens the file and sets stage for subsequent display and put statements'
        write(9,'(a)') '      display EFD_WithoutSafety.ProgramStatus ;'
        write(9,'(a)') '      display EFD_WithSafety.ProgramStatus ;'

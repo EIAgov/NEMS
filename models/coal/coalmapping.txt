@@ -287,13 +287,13 @@ Sec_name                                            subsec_name                 
 'Electricity'                                       'Electric Gen IS - AdvCoal 90PctSeq-WetScrb-SCR-FF'                 1
 ;
 Composite Table:
-Sec_name                                            Sec                                            map_MajorSectorNames
-'Residential/Commercial'                            R                                              1
-'Industrial Steam'                                  I                                              1
-'Industrial Coking'                                 C                                              1
-'Export'                                            X                                              1
-'Electricity'                                       E                                              1
-'Liquids'                                           L                                              1
+cl::Sec_name                                            cl::Sec                                cl::map_MajorSectorNames
+    'Residential/Commercial'                                R                                      1
+    'Industrial Steam'                                      I                                      1
+    'Industrial Coking'                                     C                                      1
+    'Export'                                                X                                      1
+    'Electricity'                                           E                                      1
+    'Liquids'                                               L                                      1
 ;
 ResName:='Residential/Commercial';
 IndName:='Industrial Steam';

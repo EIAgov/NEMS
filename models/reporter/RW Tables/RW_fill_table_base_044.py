@@ -98,10 +98,7 @@ def fill_table_base_044(dfd, table_spec, table_id):
 
     #    Natural Gas
     # T44(8,IY,IS)=MANHP(IXNG,5,IY)-RFQNGPF(11,IY)
-    z[8] = (
-        dfd["MANHP"].loc[IXNG].loc[5]
-        #- dfd["RFQNGPF"].loc[11]
-    )
+    z[8] = dfd["MANHP"].loc[IXNG].loc[5] +  dfd["H2CON"].loc[IXNG].loc[5]    # add HMM heat and power natural gas
 
     #    Metallurgical Coal
     # T44(9,IY,IS)=MANHP(IXMC,5,IY)
@@ -164,7 +161,7 @@ def fill_table_base_044(dfd, table_spec, table_id):
 
     #    Purchased Electricity
     # T44(14,IY,IS)=MANHP(IXEL,5,IY)
-    z[14] = dfd["MANHP"].loc[IXEL].loc[5]
+    z[14] = dfd["MANHP"].loc[IXEL].loc[5] + dfd["H2CON"].loc[IXEL].loc[5]   # add HMM electricity
 
     #      Manufacturing Total
     # T44(15,IY,IS)=SUM(T44(12:14,IY,IS))+SUM(T44(7:8,IY,IS))+T44(56,IY,IS)
@@ -416,4 +413,53 @@ def fill_table_base_044(dfd, table_spec, table_id):
         + dfd["CGOGSGEN"].loc[11, 1:4, 2, :].sum()
     ) * 0.001
 
+    # Totals by industry
+
+    # Agriculture
+    z[60]=dfd["AGCON"].loc[1:20,5,:].sum()
+    # Mining
+    z[61]=dfd["MINECON"].loc[1:20,5,:].sum()+dfd["QLPIN"].loc[11]   # add lease and plant fuel to mining
+    # Construction
+    z[62]=dfd["CONSTCON"].loc[1:20,5,:].sum()
+    # Food
+    z[63]=dfd["FOODCON"].loc[1:20,5,:].sum()
+    # Pulp and paper
+    z[64]=dfd["PAPERCON"].loc[1:20,5,:].sum()
+    # Bulk chemicals
+    z[65]=dfd["CHEMCON"].loc[1:20,5,:].sum()
+    # Glass
+    z[66]=dfd["GLASSCON"].loc[1:20,5,:].sum()
+    # Cement and lime
+    z[67]=dfd["CEMENTCON"].loc[1:20,5,:].sum()
+    # Iron and steel
+    z[68]=dfd["STEELCON"].loc[1:20,5,:].sum()
+    # Aluminum
+    z[69]=dfd["ALUMCON"].loc[1:20,5,:].sum()
+    # Fabricated metals
+    z[70]=dfd["FABMETALCON"].loc[1:20,5,:].sum()
+    # Machinery
+    z[71]=dfd["MACHINECON"].loc[1:20,5,:].sum()
+    # Computers and electronics
+    z[72]=dfd["COMPUTECON"].loc[1:20,5,:].sum()
+    # Transportation equipment 
+    z[73]=dfd["TRANEQUIPCON"].loc[1:20,5,:].sum()
+    # Electrical equipment, appliances, and components 
+    z[74]=dfd["ELECEQUIPON"].loc[1:20,5,:].sum()
+    # Wood products
+    z[75]=dfd["WOODPRODCON"].loc[1:20,5,:].sum()
+    # Plastic and rubber products 
+    z[76]=dfd["PLASTICCON"].loc[1:20,5,:].sum()
+    # Light chemicals 
+    z[77]=dfd["LTCHEMCON"].loc[1:20,5,:].sum()
+    # Other non-metallic minerals
+    z[78]=dfd["OTHRNMMCON"].loc[1:20,5,:].sum()
+    # Other primary metals
+    z[79]=dfd["OTHRPRIMCON"].loc[1:20,5,:].sum()
+    # Miscellaneous finished goods
+    z[80]=dfd["MISCFINCON"].loc[1:20,5,:].sum()
+    # Refining
+    z[81]=dfd["REFCON"].loc[1:20,5,:].sum()+z[56]   # add biofuels heat and coproducts to refining
+    # Hydrogen production
+    z[82]=dfd["H2CON"].loc[1:2,5,:].sum()           # Only look at natural gas and electyricity for H2CON to avoid double-counting
+                                                    # (other -CON variables have H2 feedstock produced from HMM's natural gas feedstock)
     return z

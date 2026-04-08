@@ -6,15 +6,16 @@ Created on Mar 13 2024
 """
 
 import nexec
-import PyfilerToHDF5
+import PyfilerTo_conv
 import copy
 import conv_main
-import HDF5topyfiler
+import conv_topyfiler
 from logging_utilities import print_it
+import mnfactorx_calc
 
 MODULE_NAME = "nems_iteration_loop.py"
 
-def update_expectation_vars(pyfiler1, pyfiler2, loop_info, user):
+def update_expectation_vars(pyfiler1, loop_info, user):
     """Runs accounting functions for price and quantity variables before/after executing any NEMS model and calls to NEMS models
 
     This function executes a series of accounting functions for price and quantity variables that includes establishing a 
@@ -46,9 +47,6 @@ def update_expectation_vars(pyfiler1, pyfiler2, loop_info, user):
     Parameters
     ----------
     pyfiler1 : module
-        pyfiler fortran module
-
-    pyfiler2 : module
         pyfiler fortran module
 
     loop_info : dict
@@ -141,14 +139,17 @@ def update_expectation_vars(pyfiler1, pyfiler2, loop_info, user):
     #####################################
     # 4. Inter-Iteration Convergence Code - Before Running NEXEC, save convergence variable values as dictionary
     if current_iteration > 1 and curiyr >= 32:
-        datminus1 = copy.deepcopy(PyfilerToHDF5.main(pyfiler1,current_iteration,curiyr,user.CONV_VAR))
+        
+        # outputs 2 dict of dataframes, the skipdat = 1 doesn't output datminus1 (only have variablelisting), so only the processed datminus1 will have the dict
+        datminus1, datminus1_processed = copy.deepcopy(PyfilerTo_conv.export_restart_for_convergence(pyfiler1, user.CONV_VAR, user.NEMSVardf, adj_flag = 'Unadjusted', skipdat = 1))
+    
     # End of 4. Inter-Iteration Convergence Code - Before Running NEXEC, save convergence variable values as dictionary
     #####################################
 
 
     #####################################
     # 5. Call to NEMS models
-    nexec.nexec(imodel, pyfiler1, pyfiler2, curiyr, current_iteration, user, current_nems_module)
+    nexec.nexec(imodel, pyfiler1, curiyr, current_iteration, user, current_nems_module)
     # End of 5. Call to NEMS models
     #####################################
 
@@ -193,11 +194,16 @@ def update_expectation_vars(pyfiler1, pyfiler2, loop_info, user):
     if current_iteration > 1 and curiyr >= 32:
 
         # Copy convergence variables from CURRENT iteration from pyfiler into local variable as dict
-        datcur = copy.deepcopy(PyfilerToHDF5.main(pyfiler1,current_iteration,pyfiler1.ncntrl.curcalyr,user.CONV_VAR))
+        # there is two outputs for datcur (without processed, used in write_restart in conv_main) and the processed datcur
+        datcur, datcur_processed = copy.deepcopy(PyfilerTo_conv.export_restart_for_convergence(pyfiler1, user.CONV_VAR, user.NEMSVardf, adj_flag = 'Unadjusted'))
+        
         # Executes iteration convergence and relax function
-        df_conv_res, dat_upd = conv_main.main(datminus1, datcur, pyfiler1.cycleinfo.curirun, pyfiler1.ncntrl.fcrl, current_nems_module, user.CONV_DAT)
+        df_conv_res, dat_upd = conv_main.main(datminus1, datminus1_processed, datcur, datcur_processed, pyfiler1.cycleinfo.curirun, current_nems_module, user.CONV_DAT, user.CONV_IMODEL)
+        
         # Writes relaxed values back into pyfiler
-        HDF5topyfiler.values_back_to_pyfiler(pyfiler1, dat_upd)
+        if pyfiler1.ncntrl.irelax > 0:
+            conv_topyfiler.values_back_to_pyfiler(pyfiler1, dat_upd)
+        
         # Retrieve the index for current NEMS model running. Fortran to Python index, subtract 1
         model_index_number = df_conv_res.index[df_conv_res['Model'] == current_nems_module].tolist()[0] - 1
         # Write the convergence status (0 for fail, 1 for pass) to corresponding model and integer year index
@@ -217,7 +223,7 @@ def update_expectation_vars(pyfiler1, pyfiler2, loop_info, user):
     #! +++ COMPUTE ALL-SECTOR AVERAGES FOR NEMS ADJUSTED PRICE VARIABLES FOR EPM
     pyfiler1.avepasa()
     #! +++ CALCULATES SOME WEIGHTED AVERAGE CONVERSION FACTORS
-    pyfiler1.docvfacts()
+    pyfiler1=mnfactorx_calc.docvfacts(pyfiler1, user)
     # End of 9. Code block for: SUMQAS, AVEPAS, COPY_ADJUSTED, AVEPASA, DOCVFACTS
     #####################################
 
@@ -285,7 +291,7 @@ def act_ctest(CTEST, pyfiler, MAXITR, STABLE, current_iteration):
         elif pyfiler.ncntrl.fcrl==1:
             print_it(CURIRUN, f'##  Not converged on Final Convergence and Reporting Loop. CURIYR={current_iteration}', MODULE_NAME)
             print_it(CURIRUN, ' ##  Will not continue because the maximum iterations have been performed.', MODULE_NAME)
-    
+
     # If CURRENT iteration convergence passed (CTEST != 0) for CURRENT iteration
     else:
 
@@ -297,5 +303,5 @@ def act_ctest(CTEST, pyfiler, MAXITR, STABLE, current_iteration):
             print_it(CURIRUN, f'##   Convergence achieved on iteration {current_iteration}', MODULE_NAME)
             print_it(CURIRUN, ' ##   Entering Final Convergence and Reporting Loop.  Setting FCRL=1', MODULE_NAME)
             pyfiler.ncntrl.fcrl=1
-    
+
     return STABLE

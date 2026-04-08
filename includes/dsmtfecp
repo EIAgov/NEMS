@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/dsmtfecp,v 1.13 2020/11/06 20:41:16 LC2 Exp $
 !================================= (DSMTFECP) ==================================
 !         This INCLUDE file is used for communication with the ECP Module
@@ -33,12 +34,13 @@
       INTEGER*4 UNGSSN_ECP(MAXECPS)
       INTEGER*4 MAP_ECP_SP(MAXECPSG)
       INTEGER*4 HRTOECPSL(MNUMYR,MAXNRG,MAXMON,MAXDTP,24)
+      INTEGER*2 NL_SLICE_SW
       REAL*4 ECPLDCBH(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB)
       REAL*4 ECPLDCBW(MNUMYR+ECP_D_FPH,MAXNRG,MAXECTB)
       REAL*4 ECPsgDblock(MAXECPSG,MAXECPB)
       COMMON /DSMECr/ECPLDCBH,ECPLDCBW,ECPsgDblock,DSMPRCHOICE,UPPEAK
       COMMON /DSMECi/UNGSSN_ECP,MAP_ECP_SP,HRTOECPSL,ECPLDCBS,ECPnumSg,ECPsgDnB,BlockNum,ECPSEDEF,ECPnS
-      COMMON /DSMECc/ECPsgDbltyp
+      COMMON /DSMECc/ECPsgDbltyp,NL_SLICE_SW
 
       COMMON /DUCK_INFO/ DUCK_SYSTEM_LOAD
 
@@ -78,7 +80,8 @@
 
 
       COMMON /CURTAILMENT_PV/ PV_CAP, PT_CAP, SO_CAP, WN_CAP, WF_CAP, WL_CAP, PV_NEW, &
-         PV_CAP_ADJ, PT_CAP_ADJ, SO_CAP_ADJ, WN_CAP_ADJ, WF_CAP_ADJ, WL_CAP_ADJ, PV_NEW_ADJ, AVG_PV_CF, AVG_PT_CF, AVG_SO_CF, AVG_WN_CF, AVG_WL_CF, AVG_WF_CF
+         PV_NEW_ADJ, AVG_PV_CF, AVG_PT_CF, AVG_SO_CF, AVG_WN_CF, AVG_WL_CF, AVG_WF_CF, &
+         PV_CAP_ADJ_REST, PT_CAP_ADJ_REST, SO_CAP_ADJ_REST, WN_CAP_ADJ_REST, WL_CAP_ADJ_REST, WF_CAP_ADJ_REST
 
       REAL*8 PV_CAP(MNUMNR)                                 ! Cumulative PV capacity
       REAL*8 PT_CAP(MNUMNR)                                 ! Cumulative PT capacity
@@ -88,13 +91,13 @@
       REAL*8 WL_CAP(MNUMNR)                                 ! Cumulative WN capacity
       REAL*8 WF_CAP(MNUMNR)                                 ! Cumulative WF capacity
       REAL*8 PV_NEW(MNUMNR)                                 ! New PV capacity
-      REAL*8 PV_CAP_ADJ(MNUMNR)                             ! Cumulative PV capacity adjusted to be consistent with hourly capacity factors
-      REAL*8 PT_CAP_ADJ(MNUMNR)                             ! Cumulative PT capacity adjusted to be consistent with hourly capacity factors
-      REAL*8 SO_CAP_ADJ(MNUMNR)                             ! Cumulative SO capacity adjusted to be consistent with hourly capacity factors
-      REAL*8 WN_CAP_ADJ(MNUMNR)                             ! Cumulative WN capacity adjusted to be consistent with hourly capacity factors
-      REAL*8 WF_CAP_ADJ(MNUMNR)                             ! Cumulative WF capacity adjusted to be consistent with hourly capacity factors
-      REAL*8 WL_CAP_ADJ(MNUMNR)                             ! Cumulative WL capacity adjusted to be consistent with hourly capacity factors
-      REAL*8 PV_NEW_ADJ(MNUMNR)                             ! Cumulative new PV capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 PV_CAP_ADJ_REST(MNUMNR,MNUMYR)                             ! Cumulative PV capacity adjusted to be consistent with hourly capacity factors, save curiyr from restart file
+      REAL*8 PT_CAP_ADJ_REST(MNUMNR,MNUMYR)                             ! Cumulative PT capacity adjusted to be consistent with hourly capacity factors, save curiyr from restart file
+      REAL*8 SO_CAP_ADJ_REST(MNUMNR,MNUMYR)                             ! Cumulative SO capacity adjusted to be consistent with hourly capacity factors, save curiyr from restart file
+      REAL*8 WN_CAP_ADJ_REST(MNUMNR,MNUMYR)                             ! Cumulative WN capacity adjusted to be consistent with hourly capacity factors, save curiyr from restart file
+      REAL*8 WF_CAP_ADJ_REST(MNUMNR,MNUMYR)                             ! Cumulative WF capacity adjusted to be consistent with hourly capacity factors, save curiyr from restart file
+      REAL*8 WL_CAP_ADJ_REST(MNUMNR,MNUMYR)                             ! Cumulative WL capacity adjusted to be consistent with hourly capacity factors, save curiyr from restart file
+	  REAL*8 PV_NEW_ADJ(MNUMNR)                             ! Cumulative new PV capacity adjusted to be consistent with hourly capacity factors
       REAL*8 AVG_PV_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for PV
       REAL*8 AVG_PT_CF(MNUMNR,MNUMYR)                       ! Annual average capacity factor for PT
 	  REAL*8 AVG_PT_CF_NEW(MNUMNR,MNUMYR)                   ! Annual average capacity factor for PT (current year)

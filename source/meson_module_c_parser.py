@@ -4,7 +4,6 @@ def main():
     """Invoke process_module_c() to cut each module.c file, save the content in desired format, and print a message to indicate the entire process succeeded.
     """    
     process_module_c('pyfiler1module.c', 'pyfiler1module.c-org')
-    process_module_c('pyfiler2module.c', 'pyfiler2module.c-org')
     print("Done with module.c cut process!")
 
 def process_module_c(file, old):

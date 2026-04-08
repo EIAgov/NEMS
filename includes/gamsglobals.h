@@ -1,3 +1,4 @@
+! -*- f90 -*-
 /* $Header: M:/default/includes/RCS/gamsglobals.h,v 1.3 2011/02/23 13:53:08 DSA Exp $ */
 /* global constants (symbol dimensions, symbol layout, etc.)
  * created: Steve Dirkse, Sep 2007

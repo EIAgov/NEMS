@@ -1,10 +1,10 @@
 # EPM Carbon Tax or Carbon Cap Data
 # Version: this is the default version of this file
 #
-# Column 1: Carbon tax ($/kg) in fee run or starting tax in carbon cap run
-# Column 2: Carbon cap (million metric tons carbon equivalent) or covered greenhouse gas emission cap
-# Column 3: Maximum carbon fee
-# Column 4: Minimum carbon fee
+# Column 1: Carbon tax (1987$ per kilogram carbon equiv.) in fee run or starting tax in carbon cap run
+# Column 2: Carbon cap (million metric tons carbon equiv.) or covered greenhouse gas emission cap
+# Column 3: Maximum carbon fee (1987$ per kilogram carbon equiv.)
+# Column 4: Minimum carbon fee (1987$ per kilogram carbon equiv.)
 # Column 5: Year
 carbon tax,carbon cap,maximum fee,minimum fee,year
 0.0,1372.0,0.0,0.0,1990

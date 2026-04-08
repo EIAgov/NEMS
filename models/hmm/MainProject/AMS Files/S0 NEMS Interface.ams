@@ -1,7 +1,33 @@
 ## ams_version=1.0
 
 Section S0_NEMS_Interface {
+	DeclarationSection API_Declarations {
+		StringParameter my_modscendate;
+		StringParameter modscendate {
+			dex::ColumnName: modscendate;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+		StringParameter helper_input;
+		Parameter my_port;
+		Parameter ncrl {
+			dex::ColumnName: report;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+		Parameter curitr {
+			dex::ColumnName: iteration;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+		Parameter curcalyr {
+			dex::ColumnName: year;
+			dex::Dataset: restinput;
+			dex::TableName: request;
+		}
+	}
 	DeclarationSection HMM_Switches {
+		Parameter ProfileDebugSwitch;
 		Parameter ExtraDebugSwitch;
 		Parameter SaveEachIterationSwitch;
 		Parameter AIMMS_Standalone_Switch {
@@ -11,6 +37,7 @@ Section S0_NEMS_Interface {
 		}
 	}
 	DeclarationSection NEMS_Interface_Debug_Declarations {
+		StringParameter ExitAIMMS_HMM_NemsMonitor;
 		File HelloworldFile {
 			Name: "hmm_helloworld.txt";
 			Device: Disk;
@@ -19,7 +46,7 @@ Section S0_NEMS_Interface {
 	}
 	Procedure Read_Runtime_Parameters {
 		Body: {
-			read from file "h2_runval.txt" ;
+			read from file "../../hmm/h2_runval.txt" ;
 			
 			! If the value of ZTCCOSTM is greater than 1, we divide by 100 to get our % reduction.
 			if(ZTCCOSTM > 1) then
@@ -45,7 +72,7 @@ Section S0_NEMS_Interface {
 		Procedure ReadGlobalDataFromNEMS {
 			Body: {
 				! reads global data from NEMS
-				sDataYearFile:="toAIMMS\\GlobalDataToAimms_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+				sDataYearFile:="../../hmm\\toAIMMS\\GlobalDataToAimms_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
 				!Overwrite if debugging NEMS run output
 				!sDataYearFile:="toAIMMS\\GlobalDataToAIMMS_2023_01.txt";
 				put formatstring("the global data transfer file name is %s\n", sDataYearFile);
@@ -64,7 +91,7 @@ Section S0_NEMS_Interface {
 			StringParameter ExitNEMSMonitor;
 			StringParameter ExitMainExecution;
 			File h2StatusFile {
-				Name: "h2_status.txt";
+				Name: "../../hmm/h2_status.txt";
 				Device: Disk;
 				Mode: merge;
 			}

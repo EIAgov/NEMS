@@ -79,9 +79,8 @@ def fill_table_base_014(dfd, table_spec, table_id):
     # T14(44,IY,IS)=SUM(OGQSHLOIL(:,IY))
     z[44] = dfd["OGQSHLOIL"].loc[:, :].sum()
 
-    #            Carbon Dioxide Enhanced Oil Recovery
-    # T14(45,IY,IS)=SUM(OGEORPRD(8,1:13,IY))/1000./RDAYS
-    z[45] = dfd["OGEORPRD"].loc[8].loc[1:13].sum() / 1000.0 / (RDAYS)
+    #            Total Enhanced Oil Recovery
+    z[45] = dfd["OGEORPRD"].loc[8].loc[1:2].sum() / 1000.0 / (RDAYS)
 
     #            Other
     # T14(46,IY,IS)=T14(3,IY,IS)-T14(44,IY,IS)-T14(45,IY,IS)
@@ -91,6 +90,14 @@ def fill_table_base_014(dfd, table_spec, table_id):
     # T14(6,IY,IS)=OGQCRREP(3,IY)/RDAYS
     z[6] = dfd["OGQCRREP"].loc[3] / (RDAYS)
 
+    #            Federal
+    # T14(56,IY,IS)=T14(6,IY,IS)-T14(55,IY,IS)
+    z[56] = z[6] - (
+        dfd["OGPRDOFF"].loc[1].loc[1]
+        + dfd["OGPRDOFF"].loc[2].loc[1]
+        + dfd["OGPRDOFF"].loc[3].loc[1]
+    ) / (RDAYS)
+
     #            State
     # T14(55,IY,IS)=(OGPRDOFF(1,1,IY)+OGPRDOFF(2,1,IY)+OGPRDOFF(3,1,IY))/RDAYS
     z[55] = (
@@ -99,32 +106,23 @@ def fill_table_base_014(dfd, table_spec, table_id):
         + dfd["OGPRDOFF"].loc[3].loc[1]
     ) / (RDAYS)
 
-    #            Federal
-    # T14(56,IY,IS)=T14(6,IY,IS)-T14(55,IY,IS)
-    z[56] = z[6] - z[55]
-
     #         Alaska
     # T14(7,IY,IS)=OGQCRREP(4,IY)/RDAYS
     z[7] = dfd["OGQCRREP"].loc[4] / (RDAYS)
+
+    #            Onshore
+    # T14(57,IY,IS)=T14(7,IY,IS)-T14(58,IY,IS)-T14(59,IY,IS)
+    z[57] = z[7] - dfd["OGPRDOFF"].loc[5].loc[1] / (RDAYS) - dfd["OGPRDOFF"].loc[6].loc[1] / (RDAYS)
+    
+    #            Federal Offshore
+    # T14(59,IY,IS)=OGPRDOFF(4,1,IY)/RDAYS
+    z[59] = dfd["OGPRDOFF"].loc[6].loc[1] / (RDAYS)
 
     #            State Offshore
     # T14(58,IY,IS)=OGPRDOFF(5,1,IY)/RDAYS
     z[58] = dfd["OGPRDOFF"].loc[5].loc[1] / (RDAYS)
 
-    #            Federal Offshore
-    # T14(59,IY,IS)=OGPRDOFF(4,1,IY)/RDAYS
-    z[59] = dfd["OGPRDOFF"].loc[6].loc[1] / (RDAYS)
 
-    #            Onshore
-    # T14(57,IY,IS)=T14(7,IY,IS)-T14(58,IY,IS)-T14(59,IY,IS)
-    z[57] = z[7] - z[58] - z[59]
-
-    #   Federal Land Crude Oil Production
-    # No FTAB equivalent, new rows
-    z[76] = dfd["OGCOPRD_FED"].loc[14]
-
-    #   Non-Federal Land Crude Oil Production
-    z[77] = dfd["OGCOPRD_NONFED"].loc[14]
 
     #   Lower 48 End of Year Reserves 2/
 
@@ -221,7 +219,7 @@ def fill_table_base_014(dfd, table_spec, table_id):
 
     #            Shale Gas and Tight Oil Plays 3/
     # T14(26,IY,IS)=OGQNGREP(1,IY)/1000.
-    z[26] = dfd["OGQNGREP"].loc[1] / 1000.0
+    z[26] = dfd["OGQNGREP"].loc[1] / 1000.0 + z[15]
 
     #            Coalbed Methane
     # T14(27,IY,IS)=OGQNGREP(2,IY)/1000.
@@ -309,19 +307,15 @@ def fill_table_base_014(dfd, table_spec, table_id):
 
     #      Enhanced Oil Recovery
     # T14(35,IY,IS)=SUM(RFQTDCRD(1:MNL48N,IY))-SUM(RFQDCRD(1:MNL48N,IY))-OGQCRREP(1,IY)/RDAYS
-    z[35] = (
-        dfd["RFQTDCRD"].loc[1:MNL48N, :].sum()
-        - dfd["RFQDCRD"].loc[1:MNL48N, :].sum()
-        - dfd["OGQCRREP"].loc[1] / (RDAYS)
-    )
+    z[35] = dfd["OGEORPRD"].loc[8].loc[1:2].sum() / 1000.0 / (RDAYS)
 
     #         Carbon Dioxide
     # T14(33,IY,IS)=SUM(OGEORPRD(8,1:13,IY))/1000./RDAYS
-    z[33] = dfd["OGEORPRD"].loc[8, 1:13, :].sum() / 1000.0 / (RDAYS)
+    z[33] = dfd["OGEORPRD"].loc[8].loc[2] / 1000.0 / (RDAYS)
 
-    #         Other
+    #         Thermal/Other
     # T14(34,IY,IS)=T14(35,IY,IS)-T14(33,IY,IS)
-    z[34] = z[35] - z[33]
+    z[34] = dfd["OGEORPRD"].loc[8].loc[1] / 1000.0 / (RDAYS)
 
     #      from Oil Shale
     # T14(29,IY,IS)=OGQCRREP(1,IY)/RDAYS

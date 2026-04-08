@@ -113,9 +113,6 @@ def fill_table_base_038(dfd, table_spec, table_id):
     #       Hydrocarbon Gas Liquid Feedstocks 3/
     # T38(11,IY,IS)=CHEMCON(IXLF,5,IY)
     z[11] = dfd["CHEMCON"].loc[IXLF].loc[5]
-    #         Natural Gasoline
-    # T38(91,IY,IS)=QPPINPF(MNUMCR,IY)*1000.
-    z[91] = dfd["QPPINPF"].loc[MNUMCR]
     #         Ethane
     # T38(92,IY,IS)=QETINPF(MNUMCR,IY)*1000.
     z[92] = dfd["QETINPF"].loc[MNUMCR]
@@ -133,7 +130,7 @@ def fill_table_base_038(dfd, table_spec, table_id):
     z[96] = dfd["QISINPF"].loc[MNUMCR]
     
     # total Hydrocarbon Gas Liquid Feedstocks 3/
-    z[11] = z[91] + z[92] + z[93] + z[94] + z[95] + z[96]   
+    z[11] = z[92] + z[93] + z[94] + z[95] + z[96]   
     
     #       Petrochemical Feedstocks
     # T38(12,IY,IS)=CHEMCON(IXPF,5,IY)*1.

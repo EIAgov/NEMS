@@ -13,11 +13,11 @@ Updated on Jul 1, 2024: fixing data issues
 @author: SZO
 @author2: JMW
 """
-
 import sys
 import os
 import time
 import calendar
+import argparse
 
 import csv
 import tomllib
@@ -28,7 +28,6 @@ from sys import argv
 import pandas as pd
 import numpy as np
 import openpyxl
-import xlsxwriter
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Border
 
@@ -40,9 +39,11 @@ from RW_preprocessor import (
     insert_citation,
     sum_CarbCap_vars,
 )
+
 from RW_preprocessor_sme import preprocessor_sme
 from RW_postprocessor_base import postprocessor_base
 from RW_make_ran import make_ran
+from RW_replace_history import replace_history
 
 # Specify the path to the folder containing base table programs
 sys.path.append(os.path.join(os.getcwd(), "RW tables"))
@@ -218,19 +219,54 @@ from RW_fill_table_base_150 import fill_table_base_150
 
 from RW_debug import main_logger, log_execution
 
-# Get settings from config.ini
-config = ConfigParser()
-# print(os.getcwd())
-if os.getcwd()[-8:] != "reporter":
-    configpath = os.getcwd() + "\\reporter\\config.ini"
-else:
-    configpath = os.getcwd() + "\\config.ini"
-config.read(configpath)
-config.sections()
+import argparse
 
+
+def get_args() -> argparse.Namespace:
+    """Parses arguments passed via the command line of NEMS Report Writer.
+
+    Uses argparse to handle command line arguments.
+
+    Returns
+    -------
+    argparse.Namespace
+        Command line arguments saved into a namespace.
+    """
+        
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Parses command line arguments for NEMS."
+    )
+
+    parser.add_argument(
+        'rwcnfg',
+        nargs='?',
+        default="config.ini",
+        help='Location of config.ini file. If not specified, defaults to local config.ini inside reporter folder.'
+    )
+
+    # Assign arguments object
+    arguments = parser.parse_args()
+
+    return arguments
+    
+def configuration(user):
+    # Get settings from config.ini
+    config = ConfigParser()
+    #configfile = arguments.rwcnfg
+    if user.configfile == "config.ini":
+        if os.getcwd()[-8:] != "reporter":
+            configpath = os.getcwd() + "\\reporter\\config.ini"
+        else:
+            configpath = os.getcwd() + "\\config.ini"
+    else:
+        configpath = user.configfile
+    config.read(configpath)
+    config.sections()
+    return config
 
 @log_execution(main_logger, message="init")
-def init(user):
+def init(user, config):
     """Initializes and returns a dictionary called table_spec. This dictionary
     serves as metadata specifying various inputs and info related to tables,
     including interface (connection) to NEMS database restart.npz
@@ -383,19 +419,15 @@ def init(user):
     years_str = [str(year) for year in years]
 
     # Get print year from config.ini:
-    if SCEDES["SCEN"] != "ref2023":
-        first_print_year = int(settings["first_print_year"])
-        last_print_year = int(settings["last_print_year"])
-        print_years_range = range(
-            int(settings["first_print_year"]), int(settings["last_print_year"]) + 1
-            )
-    else:
-        first_print_year = int(settings["first_print_year"])-1
-        last_print_year = int(settings["last_print_year"])
-        print_years_range = range(
-            int(settings["first_print_year"])-1, int(settings["last_print_year"]) + 1
-            )
 
+    first_print_year = int(settings["first_print_year"])
+    if int(settings["last_print_year"]) < user.last_year:
+        last_print_year = int(settings["last_print_year"])
+    else:
+        last_print_year = user.last_year
+    print_years_range = range(
+        int(settings["first_print_year"]), last_print_year + 1
+        )
     # e.g., [2020, 2021, ..., 2050]
     print_years = list(print_years_range)
 
@@ -534,103 +566,28 @@ def init(user):
 
     # Set connection / interface to NEMS database restart.npzs
     global dfd, dfd1
+    dat = dfd = read_npz(user)
+    dfdkeys = pd.DataFrame(dfd.keys())
+    dfdkeys[["commonblock", "varname"]] = dfdkeys[0].str.split("/", expand=True)
+    duplicate_varsnames = dfdkeys["varname"].duplicated(keep=False)
+    dfdkeys[0] = dfdkeys[0].mask(duplicate_varsnames, dfdkeys[0])
+    dfdkeys[0] = dfdkeys[0].where(duplicate_varsnames, dfdkeys["varname"])
+    dfdkeys = dfdkeys.drop(columns=["commonblock", "varname"])
+    dfdkeys = dfdkeys.set_index([0], drop=False)
+    dfdhold = dfd.copy()
 
-    if SCEDES["SCEN"] != "ref2023":
-        dat = dfd = read_npz(user)
-        dfdkeys = pd.DataFrame(dfd.keys())
-        dfdkeys[["commonblock", "varname"]] = dfdkeys[0].str.split("/", expand=True)
-        duplicate_varsnames = dfdkeys["varname"].duplicated(keep=False)
-        dfdkeys[0] = dfdkeys[0].mask(duplicate_varsnames, dfdkeys[0])
-        dfdkeys[0] = dfdkeys[0].where(duplicate_varsnames, dfdkeys["varname"])
-        dfdkeys = dfdkeys.drop(columns=["commonblock", "varname"])
-        dfdkeys = dfdkeys.set_index([0], drop=False)
-        dfdhold = dfd.copy()
+    for i in list(dfd):
+        try:
+            dfdkeys.loc[i]
+        except KeyError:
+            parts = i.split("/")
+            dfdhold[parts[-1].upper()] = dfdhold.pop(i)
 
-        for i in list(dfd):
-            try:
-                dfdkeys.loc[i]
-            except KeyError:
-                parts = i.split("/")
-                dfdhold[parts[-1].upper()] = dfdhold.pop(i)
+    dfd = dfdhold.copy()
 
-        dfd = dfdhold.copy()
+    # Specifically used for AEO2025 for summing Carbon Capture Variables. Remove in AEO2026
+    dfd = sum_CarbCap_vars(dfd)
 
-        # Specifically used for AEO2025 for summing Carbon Capture Variables. Remove in AEO2026
-        dfd = sum_CarbCap_vars(dfd)
-
-        # Set connection / interface to NEMS database restart.npzs
-    else:
-        # In this piece of code, specifically for AEO2025, with NEMS Report Writer to .npz restart file,
-        # place the restart files for ref2025 and ref2023 in a location this can grab to generate the 
-        # necessary files from ref2023 from AEO2023. Remove this for AEO2026. 
-        restartnpzpath = "restartref2025.npz"
-        restartnpzpath1 = "restartref2023.npz"
-        user.file_map["RestartNPZ"] = restartnpzpath
-        dat = dfd = read_npz(user)
-        user.file_map["RestartNPZ"] = restartnpzpath1
-        dat1 = dfd1 = read_npz(user)
-        dfdkeys = pd.DataFrame(dfd.keys())
-        dfdkeys1 = pd.DataFrame(dfd1.keys())
-        dfdkeys[["commonblock", "varname"]] = dfdkeys[0].str.split("/", expand=True)
-        dfdkeys1[["commonblock", "varname"]] = dfdkeys1[0].str.split("/", expand=True)
-        duplicate_varsnames = dfdkeys["varname"].duplicated(keep=False)
-        duplicate_varsnames1 = dfdkeys1["varname"].duplicated(keep=False)
-        dfdkeys[0] = dfdkeys[0].mask(duplicate_varsnames, dfdkeys[0])
-        dfdkeys[0] = dfdkeys[0].where(duplicate_varsnames, dfdkeys["varname"])
-        dfdkeys1[0] = dfdkeys1[0].mask(duplicate_varsnames1, dfdkeys1[0])
-        dfdkeys1[0] = dfdkeys1[0].where(duplicate_varsnames1, dfdkeys1["varname"])
-        dfdkeys = dfdkeys.drop(columns=["commonblock", "varname"])
-        dfdkeys1 = dfdkeys1.drop(columns=["commonblock", "varname"])
-        dfdkeys = dfdkeys.set_index([0], drop=False)
-        dfdkeys1 = dfdkeys1.set_index([0], drop=False)
-        dfdhold = dfd.copy()
-        dfdhold1 = dfd1.copy()
-
-        for i in list(dfd):
-            try:
-                dfdkeys.loc[i]
-            except KeyError:
-                parts = i.split("/")
-                dfdhold[parts[-1].upper()] = dfdhold.pop(i)
-
-        for i in list(dfd1):
-            try:
-                dfdkeys1.loc[i]
-            except KeyError:
-                parts1 = i.split("/")
-                dfdhold1[parts1[-1].upper()] = dfdhold1.pop(i)
-
-        dfd = dfdhold.copy()
-        dfdorig = dfd
-        dfd1 = dfdhold1.copy()
-        count = 1
-        for key, df in dfd.items():
-            try:
-                dfd[key] *= 0
-            except:
-                pass
-        #dfd = sum_CarbCap_vars(dfd)
-        #dfd.update(dfd1)
-        # This code updates sections for EPM that due to variable resizing does not work with AEO2023 data. Remove after AEO2025.
-        for key, df in dfd1.items():
-            try:
-                hold1 = dfd1[key]
-                hold = dfd[key]
-                if hold1.shape == hold.shape:
-                    dfd[key] = dfd1[key]
-                elif hold1.shape < hold.shape:
-                    if key == "EM_INDY":
-                        dfd[key].loc[(slice(1, 16), slice(None)), :] = dfd1[key].loc[(slice(1, 16), slice(None)), :]
-                        dfd[key].loc[(slice(17, 19), slice(None)), :] = 0.0
-                        dfd[key].loc[(20, slice(None)), :] = dfd1[key].loc[(17,slice(None)),:].values
-                    elif key == "EM_ELEC":
-                        dfd[key].loc[(slice(1, 7), slice(None)), :] = dfd1[key].loc[(slice(1, 7), slice(None)), :]
-                        dfd[key].loc[(8, slice(None)), :] = 0.0
-                        dfd[key].loc[(9, slice(None)), :] = dfd1[key].loc[(8, slice(None)), :].values
-                else:
-                    print(key + ': this variable is resized but okay for AEO2025.')
-            except:
-                print(key + ": this is a new variable and will be left as zero.")
 
     # Add table print seetings:
     table_spec = {}
@@ -685,6 +642,7 @@ def init(user):
     table_spec["coefficients_path"] = coefficients_path
     table_spec["layin_ver"] = layin_ver
     table_spec["citation_path"] = user.citation_path
+    table_spec["MER_History"] = int(settings["last_print_year"])
     # table_spec['tabreq_path'] = user.tabreq_path
     table_spec["MACYR"] = MACYR
 
@@ -745,7 +703,7 @@ def fill_base_table(table_spec, table_id, dfd_sme):
 
 
 @log_execution(main_logger, message="make_base_tables")
-def make_base_tables(table_spec, dfd_sme, user):
+def make_base_tables(table_spec, dfd_sme, user, config):
     """
     Create base tables.
 
@@ -909,11 +867,13 @@ def format_table(d_base, table_id, table_spec):
 
         # Get region data
         df_reg = df_table.loc[(slice(None), region), :]
+        df_reg.infer_objects(copy=False)
 
-        # Merge table data with table format
-        merged_df = pd.merge(
-            df_reg, my_label, left_on="IROWS", right_on="IROWS", how="right"
-        ).fillna("")
+        with pd.option_context('future.no_silent_downcasting', True):
+            # Merge table data with table format
+            merged_df = pd.merge(
+                df_reg, my_label, left_on="IROWS", right_on="IROWS", how="right"
+            ).infer_objects(copy=False).fillna("")
 
         merged_df["Region"] = region
         merged_df["RegionNum"] = region
@@ -1057,7 +1017,7 @@ def make_formatted_tables(table_spec, d_base):
         val_last_y.replace(0,np.nan,inplace=True)
         val_first_y.replace(0,np.nan,inplace=True)
         avg_annual_change = (val_last_y / val_first_y) ** (
-            1 / (len(table_spec["print_years"]) - 1)
+            1 / (table_spec["last_print_year"] - table_spec["growth_rate_start"])
         ) - 1
 
         avg_annual_change = avg_annual_change.fillna("")
@@ -1174,16 +1134,18 @@ def add_style(workbook, sheet, df_all, col_num, stacked=False):
                     p: plain font (not bolded)
                     B: bold font
                     i or I: italic font
+        
         position 2:  Indent level for row label.
                     0: zero or no indent
                     1: 1st indent (1 character or 1/8th inch)
                     2. 2nd indent (2 characters or 2/8ths inch)
                     3. 3rd indent (3 characters of 3/8ths inch)
                     4. 4th indent etc
+        
         character 3:  Font size.  5: normal.  2: 70%, 3: 80% 4: 90%, 5: 111% 6: 125%  7: 143%
         character 4:  not used -> color !
-        character 5:  Attempting to use this position (set to '1') denoting row in table that
-                      table browser opens to. If no rows designated in table, browser defaults to first row.
+        character 5:  Attempting to use this position (set to '1') denoting row in table that table browser opens to. If no rows designated in table, browser defaults to first row.
+        
         character 6:  Indicates Bonus Rows - Internal Only in published tables.
                     0: regular publishable row
                     1: line is omitted in formal tables and xml output files
@@ -1225,7 +1187,10 @@ def add_style(workbook, sheet, df_all, col_num, stacked=False):
         "7": 12.0,  # Code 7 corresponds to 143%
     }
 
-    df_all["font_size"] = df_all["DRForm"].str[2].fillna("5").replace(sizes)
+    # Py3.12 Fix
+    with pd.option_context('future.no_silent_downcasting', True):
+        df_all["font_size"] = df_all["DRForm"].str[2].fillna("5").replace(sizes)
+        df_all.infer_objects(copy=False)
 
     # Get color: character 4
     colors = {
@@ -1247,7 +1212,9 @@ def add_style(workbook, sheet, df_all, col_num, stacked=False):
 
     # Apply formatting to each row and cell
     # NOTE: xlsx writer is 0-indexed
-    for i, row in enumerate(df_all.fillna("").to_dict("records")):
+    # Py3.12 Fix
+    pd.option_context('future.no_silent_downcasting', True)
+    for i, row in enumerate(df_all.infer_objects(copy=False).fillna("").to_dict("records")):
         fmtd = {prop: row[prop] for prop in props}
         if i == 0:  # First row formatting
             fmtd["bold"] = True
@@ -1284,6 +1251,7 @@ def add_style(workbook, sheet, df_all, col_num, stacked=False):
             {"type": "no_blanks", "format": pctfmt},
         )
     # END row formatting
+    pd.option_context('future.no_silent_downcasting', False) # GNM TODO Wrap for loop using with ...:
 
     # Set last column as % change
     sheet.set_column(col_num - 1, col_num - 1, options={"num_format": "0.0%"})
@@ -1376,7 +1344,7 @@ def stack_tables(
             sheet.write_url(
                 row=i + link_start_row,
                 col=link_start_col - 1,  # Column C, 0-indexed
-                url=f"#'{sheet.get_name()}'!B{first_row}",
+                url=f"internal:'{sheet.get_name()}'!B{first_row}",
                 cell_format=fmt,  # Apply hyperlink style
                 string=name,
             )
@@ -1527,18 +1495,20 @@ def write_tables(
                 ].copy()
                 df_data_reg.reset_index(drop=True, inplace=True)
 
-                # Merge data and format
-                df = pd.merge(
-                    df_data_reg,
-                    df_format,
-                    left_index=True,
-                    right_index=True,
-                    how="right",
-                ).fillna("")
-                df = df.rename(
-                    columns={"Label_x": "Label", "CM_x": "CM", "RowFmt_y": "RowFmt"}
-                )
-                df = df.reset_index(drop=True)
+                # Py3.12 fix
+                with pd.option_context('future.no_silent_downcasting', True):
+                    # Merge data and format
+                    df = pd.merge(
+                        df_data_reg,
+                        df_format,
+                        left_index=True,
+                        right_index=True,
+                        how="right",
+                    ).fillna("").infer_objects(copy=False)
+                    df = df.rename(
+                        columns={"Label_x": "Label", "CM_x": "CM", "RowFmt_y": "RowFmt"}
+                    )
+                    df = df.reset_index(drop=True)
 
                 # df structure example:
                 # -----------------------------------------------------------------------------------
@@ -1593,7 +1563,7 @@ def write_tables(
                 # RH row: RH Label + [1990-2050] + ['Avg Annual Change']
                 df_RH = df.loc[df["CM"] == "RH"].copy()
                 df_RH.loc[:, table_spec["print_years"]] = table_spec["print_years"]
-                columnsize = 37 + len(table_spec["print_years"])
+                columnsize = len(df_HD.columns)
                 new_rows_header = pd.DataFrame([[""]*columnsize]*6, columns=df_HD.columns)
                 df_HD = pd.concat([new_rows_header, df_HD], ignore_index=True)
                 df_HD.iloc[0,1] = table_spec["Scenario"] +"." + table_spec["DateKey"]
@@ -1621,10 +1591,14 @@ def write_tables(
 
                 # Remaining rows/ RL + FN
                 df_rst = df.loc[(df["CM"] == "RL") | (df["CM"] == "FN")].copy()
-                # Replace any blank cells, inf/-inf cells with '--'
-                df_rst_filtered = df_rst[(df_rst['uid'] != '') & (df_rst['Label'] != "") & (df_rst[2024] != "")]
-                df_rst_filtered.replace(to_replace=[np.nan, np.inf, -np.inf, ""], value="--",regex=True, inplace=True)
-                df_rst.loc[(df_rst['uid'] != '') & (df_rst['Label'] != "") & (df_rst[2024] != ""),:] = df_rst_filtered
+
+                # Py3.12 Fix
+                with pd.option_context('future.no_silent_downcasting', True):
+                    # Replace any blank cells, inf/-inf cells with '--'
+                    df_rst_filtered = df_rst[(df_rst['uid'] != '') & (df_rst['Label'] != "") & (df_rst[table_spec["first_print_year"]] != "")]
+                    df_rst_filtered.replace(to_replace=[np.nan, np.inf, -np.inf, ""], value="--",regex=True, inplace=True)
+                    df_rst_filtered.infer_objects(copy=False)
+                    df_rst.loc[(df_rst['uid'] != '') & (df_rst['Label'] != "") & (df_rst[table_spec["first_print_year"]] != ""),:] = df_rst_filtered
                 # Add logic to check first year, last year. If value is zero- replace growth with "--".
 
                 # Create table with desired structure
@@ -2487,15 +2461,13 @@ def read_tabreq(path):
     processes each line to determine whether the table described in that line is required.
 
     tabreq.txt (from line 7):
-        ----------------------------------------------------------
+        ---
         1   1. Total Energy Supply, Disposition, and Price Summary
         1   2. Energy Consumption by Sector and Source
         1   3. Energy Prices by Sector and Source
-               ...
         0  27. Non-Utility Electricity Capacity
-               ...
         1 150. Convergence Indicators
-        ----------------------------------------------------------
+        ---
         1: required
         0: not required
 
@@ -2534,7 +2506,7 @@ def read_tabreq(path):
 
 
 @log_execution(main_logger, message="report_main")
-def main(user):
+def main(user, config):
     """
     This is the main body of the NEMS RW Prototype, performing several tasks
     and returning three objects: d_base, d_formatted, and df_all_row.
@@ -2568,7 +2540,7 @@ def main(user):
 
     # 1. Init to create table spec (metadata)
     main_logger.info("\n============ init ============")
-    table_spec, dat = init(user)
+    table_spec, dat = init(user, config)
 
     # 2. Run preprocessor_sme
     main_logger.info("\n============ preprocessor_sme ============")
@@ -2583,7 +2555,7 @@ def main(user):
 
     # 3. Create base tables
     main_logger.info("\n============ make_base_tables ============")
-    d_base = make_base_tables(table_spec, dfd_sme, user)
+    d_base = make_base_tables(table_spec, dfd_sme, user, config)
 
     # 4. Post fix base tables
     main_logger.info("\n============ postprocessor_base ============")
@@ -2598,12 +2570,19 @@ def main(user):
 
     # 5. Create formatted tables
     main_logger.info("\n============ make_formatted_tables ============")
+    # 5.5 Replace History with MER Data
+    
+    #Check if history flag replacement on. If not, do not call new function
+    if int(table_spec["settings"]["history_replace"]) == 1:
+        main_logger.info("\n============ replace_history_called ============")
+        d_base_fixed = replace_history(d_base_fixed, user)
+        
     d_formatted = make_formatted_tables(table_spec, d_base_fixed)
 
     # 6. Create the all_row_csv table and write to csv file
     main_logger.info("\n============ make_all_row_table ============")
     df_all_row = make_all_row_table(table_spec, d_formatted,user)
-
+    
     # 7. Create all published AEO tables and write to Excel files
     main_logger.info("\n============ create_aeo_files ============")
     create_aeo_files(table_spec, d_formatted, user)  # , df_all_row)
@@ -2633,7 +2612,7 @@ def main(user):
     
     # 10. Respecify Columns for api.csv file to use with Validator
     # open table_spec["all_row_file_path"]
-    df = pd.read_csv(table_spec["all_row_file_path"])
+    df = pd.read_csv(table_spec["all_row_file_path"], dtype={"SubSrc":str})
     
     # change columns (insert columns here) to correct format and name
     df['TableNumber'] = df['TableNumber'].astype(int)
@@ -2673,6 +2652,7 @@ def get_vartable(arr):
         _variablelisting from restart file
     """
     columns = [
+        "Fortran Variable Name Upper",
         "Fortran Variable Name",
         "Common Block Name",
         "Dimension Params",
@@ -2846,7 +2826,6 @@ def load_NEMSVardf_from_file(locofdict):
     f.close()
     return eval(data)
 
-
 def run(SCEDES, curirun):
     """_summary_
 
@@ -2859,6 +2838,7 @@ def run(SCEDES, curirun):
     """
     sys.stdout.flush()
     sys.stderr.flush()
+
 
     # pass
     # print('Start running NEMS reporter. It may take five minutes ...')
@@ -2879,6 +2859,15 @@ def run(SCEDES, curirun):
     user.Scenario = SCEDES["SCEN"]
     user.DateKey = SCEDES["DATE"]
     user.ScenDate = SCEDES["SCEN"] + "." + SCEDES["DATE"]  # ref2024.d030424d'
+    try:
+        user.configfile = SCEDES["RWCNFG"]
+    except KeyError:
+        print("Not run in queue, using arg_parse instead.")
+        arguments = get_args()
+        user.configfile = arguments.rwcnfg
+        print(user.configfile)
+
+    config = configuration(user)
 
     # Projection years
     user.first_year = int(SCEDES["FIRSYR"])
@@ -2962,13 +2951,16 @@ def run(SCEDES, curirun):
 
     user.unavailable_tables = blank_tables + under_development_tables
 
-    NEMS_d_base, NEMS_d_formatted, NEMS_df_all_row = main(user)
+    NEMS_d_base, NEMS_d_formatted, NEMS_df_all_row = main(user, config)
 
     # TODO: return something meaningful
-
+    return
 
 if __name__ == "__main__":
     # Set these values if running standalone, else files will return test.d000000a
+    print("Running from console or from IDE")
+
     SCEDES = {"SCEN": "test", "DATE": "d000000a", "FIRSYR": 1990, "LASTYR": 2050}
     run(SCEDES, 1)
     print("Done!")
+

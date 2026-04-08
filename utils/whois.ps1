@@ -1,0 +1,1 @@
+net user /DOMAIN $args[0]

@@ -1,5 +1,7 @@
 """Class for handling the Restart File in CCATS.
 
+.. _restart:
+
 Restart: Summary
 ----------------
 The :ref:`restart` module reads in restart variables from the restart file, stores these variables in a class dictionary, and writes these CCATS
@@ -51,6 +53,15 @@ os.add_dll_directory(r"C:/Program Files (x86)/Intel/oneAPI/compiler/2023.2.1/win
 
 from ccats_common import common as com
 
+curdir = os.path.dirname(os.path.abspath(__file__))
+modeldir = os.path.dirname(curdir)
+maindir = os.path.join(modeldir, "main")
+
+if maindir not in sys.path:
+    sys.path.insert(0, maindir)
+import restart_load
+import NEMSRestartIO as nemsio
+import PyFilerWrapper as pfw
 
 class Restart:
     """Class for handling the Restart File in CCATS
@@ -97,7 +108,8 @@ class Restart:
         self.macout_mc_rmtcm10y     = self.add_df('macout_mc_rmtcm10y'     , self.parent.pyfiler1.macout.mc_rmtcm10y   , output=False, offset=[(0, self.parametr_baseyr)]) # 10 year Treasury note yield
 
         # Electricity_costs
-        self.mpblk_pelin            = self.add_df('mpblk_pelin', self.parent.pyfiler1.mpblk.pelin, output = False, offset= [(0, 1), (1, self.parametr_baseyr)]) # Purchased Electricity Price - Industrial
+        self.mpblk_pelin            = self.add_df('mpblk_pelin', self.parent.pyfiler1.mpblk.pelin, output = False, offset= [(0, 1), (1, self.parametr_baseyr)]) # Purchased Electricity Price - Industrial $/MMBtu
+        self.mpblk_pngin            = self.add_df('mpblk_pngin', self.parent.pyfiler1.mpblk.pngin, output = False, offset= [(0, 1), (1, self.parametr_baseyr)]) # Purchased Natural Gas Price - Industrial $/MMBtu
 
         # Electric Powerplant Retrofits
         self.udatout_ucapisn        = self.add_df('udatout_ucapisn', self.parent.pyfiler1.udatout.ucapisn, output = False, offset= [(0, 1), (1, self.parametr_baseyr)]) # ELECTR NonUtil Advanced Coal Steam W/Seq Capacity by EMM region
@@ -183,17 +195,29 @@ class Restart:
             Class dictionary of CCATS restart variables read in from the restart file.
         
         '''
+        import time
 
         if self.parent.integrated_switch == True:
             pass
         else:
             if os.path.exists(temp_rest):
-                self.parent.pyfiler1.utils.read_filer(temp_filename)
+                restart_load.read_restart_file(temp_rest, self.parent.pyfiler1)
             else:
-                restartunf = open(temp_rest, "w")
-                restartunf.write('')
-                restartunf.close()
-                self.parent.pyfiler1.utils.read_filer(temp_filename)
+                print("Uh Oh, Spaghettios")
+
+        for key, value in self.int_dict_in.items():
+            self.__dict__[key] = int(value)
+        for key, value in self.df_dict_in.items():
+            # sorting and (effectively) reindexing DataFrame being updated
+            df2 = self.__dict__[key].sort_index()
+            df1 = com.array_to_df(value)
+            temp_index = df2.index.copy()
+            df2.index = df1.index
+            df2.update(df1)
+            df2.index = temp_index
+            self.__dict__[key] = df2
+        pass
+
 
         self.parent.logger.info('running restart submodule')
         for key, value in self.int_dict_in.items():
@@ -317,9 +341,10 @@ class Restart:
             self.parent.logger.info('Debug Restart File End')
         else:
             pass
-
-        if self.parent.output_restart_unf_switch == True:
-            self.parent.pyfiler1.utils.write_filer(temp_filename)
+        NEMSFortTable, NEMSAttributesTable = pfw.ParseDict("input/dict.txt")
+        NEMSVardf = pfw.RetrieveVarDim(NEMSFortTable, NEMSAttributesTable)
+        if self.parent.output_restart_npz_switch == True:
+            nemsio.to_npz(self.parent.pyfiler1, "restartCCATS", NEMSVardf)
         else:
             pass
 

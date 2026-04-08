@@ -1,5 +1,5 @@
 FILE NAME:     RSTKEFF
-DATE MODIFIED: July 11, 2024
+DATE MODIFIED: September 2, 2025
 USED BY:       RDSTEFF subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Average efficiencies of existing RECS-year equipment surviving from the initial RECS stock in each projection year
 UNITS:         Same units as shown in RSCLASS tab of RSMESS.xlsx
@@ -10,7 +10,7 @@ ORGANIZATION OF DATA:
                First data year is RECSYEAR
                Variable: STKEFF (same as xlRTBASEFF in RSMESS)
 SOURCES:       Guidehouse and Leidos, EIA - Technology Forecast Updates – Residential and Commercial Building Technologies – Reference Case, March, 2023 (https://www.eia.gov/analysis/studies/buildings/equipcosts/)
-COMMENT:       Updated for 2020 RECS; revised base efficiencies based on latest technology report
+COMMENT:       Remove kerosene placeholder
 
 
 
@@ -22,7 +22,6 @@ COMMENT:       Updated for 2020 RECS; revised base efficiencies based on latest 
 31*2.32
 31*0.80
 31*0.82
-31*0.83
 31*0.80
 31*0.83
 31*0.84
@@ -55,7 +54,6 @@ Electric Heating Other Than Heat Pumps
 Air-Source Heat Pumps (heating)
 Natural Gas Furnaces
 Natural Gas Boilers & Other
-Kerosene Furnaces (unused placeholder)
 Propane Furnaces & Other
 Distillate Fuel Oil & Kerosene Furnaces
 Distillate Fuel Oil & Kerosene Boilers & Other

@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/emablk,v 1.7 2016/06/06 20:46:31 rsc Exp $
 !  NEMS PRICE ADJUSTMENTS
 !  NEEDS COALEMM block

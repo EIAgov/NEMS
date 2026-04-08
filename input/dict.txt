@@ -71,7 +71,7 @@
  DIM  MNUMSO     9      Renewables
  DIM  MNUMWI     9      Renewables
  DIM  MNUMPR    10      PADD Regions
- DIMD MNUMPR     0 1    0 causes autogeneration of numeric padd region names starting at 1_MNUMPR
+ DIMD MNUMPR     0 1    0 causes autogeneration of numeric PADD region names starting at 1_MNUMPR
  DIM  MNUMCR    11      Census Regions
  DIMD MNUMCR     1        New England
  DIMD MNUMCR     2        Middle Atlantic
@@ -84,7 +84,7 @@
  DIMD MNUMCR     9        Pacific
  DIMD MNUMCR    10        Unused
  DIMD MNUMCR    11        United States
- DIM  NUMCGF    12      Number of combined heat and power fuels
+ DIM  NUMCGF    13      Number of distributed generation and combined heat and power fuels, including behind-the-meter battery energy storage
  DIM  MNUMC2     9      Census Regions minus 2
  DIMD MNUMC2     1        New England
  DIMD MNUMC2     2        Middle Atlantic
@@ -1116,7 +1116,6 @@
  NCNTRL           DSMSWTCH         I    4 1 (     1)                            CNTROL ON_OFF               DEM SIDE MGMT SWITCH(0->OFF,1->ON)
  NCNTRL           DBDUMP           I    4 1 (     1)                            CNTROL ON_OFF               DATABASE DUMP/YR SW (0->OFF,1->ON) (DEF=0)
  NCNTRL           MODELON          I    4 1 (     1)                            CNTROL ON_OFF               MODELS NEVER OFF SWITCH(0->OFF,1->ON)(DEF=0)
- NCNTRL           ECPSTART         I    4 1 (     1)                            CNTROL BLANK                START YEAR FOR ECP MODULE (DEF=1)
  NCNTRL           CNVTST           I    4 2 (NMODEL,MNUMYR)                     CNTROL BLANK                CONVERGENCE TEST FLAGS FOR EACH MODEL
  NCNTRL           ITIMNG           I    4 1 (     1)                            CNTROL ON_OFF               TIMING SWITCH (ITIMNG=1 MEANS TIMING ON)
  NCNTRL           YEARPR           I    4 1 (     1)                            CNTROL BLANK                FOR REPORTING, YEAR DOLLARS
@@ -1171,6 +1170,7 @@
  LFMMOUT          BIMQTY           R    4 3 (     4,MNUMPR,MNUMYR)              QUNTY  MBCD   BD     REFINE Biodiesel production by type and PADD
  LFMMOUT          BIODIMPPD        R    4 2 (MNUMPR,MNUMYR)                     QUNTY  MBCD   BD     REFINE Biodiesel imports by PADD
  LFMMOUT          BIODEXPPD        R    4 2 (MNUMPR,MNUMYR)                     QUNTY  MBCD   BD     REFINE Biodiesel exports by PADD
+ LFMMOUT          BUILDS           R    4 5 (REFREG,    57,MNUMYR)              QUNTY  MBCD          REFINE Refinery process unit capacity builds by region, unit type, year
  LFMMOUT          RFSCREDPRC       R    4 2 (     4,MNUMYR)                     PRICE  87$BBL        REFINE RFS credit price by constraint category
  LFMMOUT          RFSCREDITS       R    4 3 (     4,    13,MNUMYR)              QUNTY  BilCrd        REFINE RFS credits by category
  LFMMOUT          RFSSAFETY        R    4 2 (     4,MNUMYR)                     PRICE  bGAL          REFINE RFS safety valve usage
@@ -1296,6 +1296,7 @@
  LFMMOUT          LFMMCODE         I    4 1 (     1)                            CNTROL BLANK         REFINE Return code from LFMM
  LFMMOUT          RenewDIMP        R    4 2 (MNUMCR,MNUMYR)                     QUNTY  MBCD          REFINE Renewable diesel imports by census in 1000 bbl per day
  LFMMOUT          RenewDImpPD      R    4 2 (MNUMPR,MNUMYR)                     QUNTY  MBCD          REFINE Renewable diesel import by subPADD in 1000 bbl per day
+ LFMMOUT          RenewDEXP        R    4 2 (MNUMCR,MNUMYR)                     QUNTY  MBCD          REFINE Renewable diesel exports by census in 1000 bbl per day
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Refinery Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -1553,6 +1554,11 @@
  OGSMOUT          NS_START         I    4 2 (     8,   200)                     CNTROL BLANK                Year Project selected 
  OGSMOUT          PLAY_MAP         I    4 1 (   200)                            QUNTY                       Map of Geological Formations (Plays) Helps MAP to CCATS
  OGSMOUT          NGPCO2EM         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  BLANK                CO2 emitted by natural gas processing plants (metric tons CO2)
+ OGSMOUT          CAPEX_PER_WELL   R    4 1 (MNUMYR)                            PRICE                       Capital Cost per well - Onshore
+ OGSMOUT          DRILL_COST       R    4 1 (MNUMYR)                            PRICE                       Exploratory Drilling Cost - Offshore
+ OGSMOUT          PLAT_COST        R    4 1 (MNUMYR)                            PRICE                       Platform Cost - Offshore 
+ OGSMOUT          FLOW_COST        R    4 1 (MNUMYR)                            PRICE                       Flowline Cost - Offshore
+ OGSMOUT          DEV_COST         R    4 1 (MNUMYR)                            PRICE                       Dev Drill Cost - Offshore
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Natural Gas Transmission & Distribution Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -1587,6 +1593,8 @@
  NGTDMOUT         SPNGELGR         R    4 3 (NNGEMM,MNUMYR,     3)              PRICE  87$BTU NG            Natural gas price to electric power sector, 3 seasons
  NGTDMOUT         PNGELGR          R    4 2 (NNGEMM,MNUMYR)                     PRICE  87$BTU NG            Natural gas price to electric power sector, national average of seasons
  NGTDMOUT         SPNGIN           R    4 3 (MNUMCR,MNUMYR,     4)              PRICE  87$BTU NG            Natural gas delivered price to industrial sector by HMM season
+ NGTDMOUT         PIPECAP          R    4 2 (     6,MNUMYR)                     QUNTY  BCF    NG            Pipeline capacity by cost region
+ NGTDMOUT         LNGCAP           R    4 1 (MNUMYR)                            QUNTY  BCF    NG            LNG Capacity
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Emission Tax -Natural Gas Transmission & Distribution Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2377,6 +2385,12 @@
  UECPOUT          QELGEN           R    4 5 (     3,MNUMNR,    24,     4,MNUMYR)QUNTY  BLANK         ELECTR REStore generation by renewable technology (1=wind, 2-solar, 3=other), EMM region, hour, season, model year
  UECPOUT          QELGEN_VINT      R    4 4 (     3,MNUMNR,MNUMYR,MNUMYV)       QUNTY  BLANK         ELECTR Vintage ratios of renewable generation by technology, EMM region, model year, vintage year
  UECPOUT          UPIRA_APPYR      I    4 1 (     1)                            CNTROL BLANK         ELECTR Applicable year to start phase out of IRA tax credits that are triggered by electricity emission target 
+ UECPOUT          PV_CAP_ADJ       R    8 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT SO     ELECTR Cumulative PV capacity adjusted to be consistent with hourly capacity factors
+ UECPOUT          PT_CAP_ADJ       R    8 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT SO     ELECTR Cumulative PT capacity adjusted to be consistent with hourly capacity factors
+ UECPOUT          SO_CAP_ADJ       R    8 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT SO     ELECTR Cumulative SO capacity adjusted to be consistent with hourly capacity factors
+ UECPOUT          WN_CAP_ADJ       R    8 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT WI     ELECTR Cumulative WN capacity adjusted to be consistent with hourly capacity factors
+ UECPOUT          WF_CAP_ADJ       R    8 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT WI     ELECTR Cumulative WF capacity adjusted to be consistent with hourly capacity factors
+ UECPOUT          WL_CAP_ADJ       R    8 2 (MNUMNR,MNUMYR)                     CAPCTY tMWATT WI     ELECTR Cumulative WL capacity adjusted to be consistent with hourly capacity factors
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * LDSM to EFP Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2581,21 +2595,21 @@
 * Residential Module Output Common Block
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  RSCON                                                                          TYPE   UNITS  FUEL   SECTOR
- RSCON            CKCON            R    4 3 (MNUMYR,     3,     9)              QUNTY  tBTU          RESIDN Cooking Consumption
- RSCON            COOLCN           R    4 3 (MNUMYR,     3,     9)              QUNTY  tBTU          RESIDN Space Cooling Consumption
+ RSCON            HTRCON           R    4 3 (MNUMYR,     5,     9)              QUNTY  tBTU          RESIDN Space Heating Consumption
+ RSCON            COOLCN           R    4 3 (MNUMYR,     2,     9)              QUNTY  tBTU          RESIDN Space Cooling Consumption
  RSCON            CSWCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Clothes Washer Consumption
- RSCON            DRYCON           R    4 3 (MNUMYR,     2,     9)              QUNTY  tBTU          RESIDN Clothes Dryer Consumption
  RSCON            DSWCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Dishwasher Consumption
- RSCON            FRZCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Standalone Freezer Consumption
- RSCON            HTRCON           R    4 3 (MNUMYR,     8,     9)              QUNTY  tBTU          RESIDN Space Heating Consumption
  RSCON            H2OCON           R    4 3 (MNUMYR,     5,     9)              QUNTY  tBTU          RESIDN Water Heating Consumption
+ RSCON            CKCON            R    4 3 (MNUMYR,     3,     9)              QUNTY  tBTU          RESIDN Cooking Consumption
+ RSCON            DRYCON           R    4 3 (MNUMYR,     2,     9)              QUNTY  tBTU          RESIDN Clothes Dryer Consumption
  RSCON            REFCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Refrigerator Consumption
- RSCON            APCON            R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Appliance Consumption
- RSCON            FANCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Furnace fan Consumption
+ RSCON            FRZCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Standalone Freezer Consumption
  RSCON            LTCON            R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Lighting Consumption
- RSCON            PCRCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN PC Consumption
- RSCON            SHTCON           R    4 3 (MNUMYR,     7,     9)              QUNTY  tBTU          RESIDN Secondary Heat Consumption
  RSCON            TVRCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Television Consumption
+ RSCON            PCRCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN PC Consumption
+ RSCON            FANCON           R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Furnace fan Consumption
+ RSCON            APCON            R    4 2 (MNUMYR,     9)                     QUNTY  tBTU          RESIDN Appliance Consumption
+ RSCON            SHTCON           R    4 3 (MNUMYR,     5,     9)              QUNTY  tBTU          RESIDN Secondary Heat Consumption
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Residential Module Report Variables
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -2603,8 +2617,8 @@
  RESDREP          RSEH             R    4 2 (MNUMYR,     3)                     LEVEL  MILL          RESIDN Existing Housing
  RESDREP          RSNH             R    4 2 (MNUMYR,     3)                     LEVEL  MILL          RESIDN New Housing
  RESDREP          RSHSEADD         R    4 2 (MNUMYR,     3)                     LEVEL  MILL          RESIDN Housing Starts
- RESDREP          RSHTRCON         R    4 2 (MNUMYR,     8)                     QUNTY  tBTU          RESIDN Space Heating Consumption
- RESDREP          RSCOOLCN         R    4 2 (MNUMYR,     3)                     QUNTY  tBTU          RESIDN Space Cooling Consumption
+ RESDREP          RSHTRCON         R    4 2 (MNUMYR,     5)                     QUNTY  tBTU          RESIDN Space Heating Consumption
+ RESDREP          RSCOOLCN         R    4 2 (MNUMYR,     2)                     QUNTY  tBTU          RESIDN Space Cooling Consumption
  RESDREP          RSH2OCON         R    4 2 (MNUMYR,     5)                     QUNTY  tBTU          RESIDN Water Heating Consumption
  RESDREP          RSCKCON          R    4 2 (MNUMYR,     3)                     QUNTY  tBTU          RESIDN Cooking Consumption
  RESDREP          RSDRYCON         R    4 2 (MNUMYR,     2)                     QUNTY  tBTU          RESIDN Clothes Dryer Consumption
@@ -2612,35 +2626,35 @@
  RESDREP          RSFRZCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Standalone Freezer Consumption
  RESDREP          RSLTCON          R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Lighting Consumption
  RESDREP          RSAPCON          R    4 2 (MNUMYR,     4)                     QUNTY  tBTU          RESIDN Appliance Consumption
- RESDREP          RSHTRS           R    4 2 (MNUMYR,     9)                     QUNTY  MILL          RESIDN Space Heating Equipment
- RESDREP          RSCOOLERS        R    4 2 (MNUMYR,     5)                     QUNTY  MILL          RESIDN Space Cooling Equipment
- RESDREP          RSWATER          R    4 2 (MNUMYR,     5)                     QUNTY  MILL          RESIDN Water Heating Equipment
- RESDREP          RSCOOK           R    4 2 (MNUMYR,     3)                     QUNTY  MILL          RESIDN Cooking Equipment
- RESDREP          RSDRY            R    4 2 (MNUMYR,     2)                     QUNTY  MILL          RESIDN Clothes Dryer Equipment
- RESDREP          RSREF            R    4 1 (MNUMYR)                            QUNTY  MILL          RESIDN Refrigerator Equipment
- RESDREP          RSFRZ            R    4 1 (MNUMYR)                            QUNTY  MILL          RESIDN Standalone Freezer Equipment
- RESDREP          RSEEFHT          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Heating Efficiency
- RESDREP          RSEEFCL          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Cooling Efficiency
- RESDREP          RSEEFHW          R    4 2 (MNUMYR,     4)                     HEATRT FRACT         RESIDN Water Heating Efficiency
- RESDREP          RSEEFRF          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Refrigerator efficiency
- RESDREP          RSEEFFZ          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Standalone Freezer Efficiency
- RESDREP          RSNEFHT          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Heating Efficiency
- RESDREP          RSNEFCL          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Cooling Efficiency
- RESDREP          RSNEFHW          R    4 2 (MNUMYR,     4)                     HEATRT FRACT         RESIDN Water Heating Efficiency
- RESDREP          RSNEFRF          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Refrigerator Efficiency
- RESDREP          RSNEFFZ          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Standalone Freezer Efficiency
- RESDREP          HSHELL1          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Heating Shell Efficiency: Existing construction
- RESDREP          HSHELL2          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Heating Shell Efficiency: New Construction
- RESDREP          HSHELL3          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Heating Shell Efficiency: Average
- RESDREP          CSHELL1          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Cooling Shell Efficiency: Existing construction
- RESDREP          CSHELL2          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Cooling Shell Efficiency: New Construction
- RESDREP          CSHELL3          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Cooling Shell Efficiency: Average
- RESDREP          SQFTAVG          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Average U.S. floorspace (sqft)
  RESDREP          RSCSWCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Clothes Washer Consumption
  RESDREP          RSDSWCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Dishwasher Consumption
  RESDREP          RSTVRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Television & Related Consumption
- RESDREP          RSPCRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN PC & Related Consumption
+ RESDREP          RSPCRCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Computer & Related Consumption
  RESDREP          RSFANCON         R    4 1 (MNUMYR)                            QUNTY  tBTU          RESIDN Furnace Fan Consumption
+ RESDREP          RSHTRS           R    4 2 (MNUMYR,     8)                     QUNTY  MILL          RESIDN Space Heating Equipment Stock
+ RESDREP          RSCOOLERS        R    4 2 (MNUMYR,     5)                     QUNTY  MILL          RESIDN Space Cooling Equipment Stock
+ RESDREP          RSWATER          R    4 2 (MNUMYR,     5)                     QUNTY  MILL          RESIDN Water Heating Equipment Stock
+ RESDREP          RSCOOK           R    4 2 (MNUMYR,     3)                     QUNTY  MILL          RESIDN Cooking Equipment Stock
+ RESDREP          RSDRY            R    4 2 (MNUMYR,     2)                     QUNTY  MILL          RESIDN Clothes Dryer Equipment Stock
+ RESDREP          RSREF            R    4 1 (MNUMYR)                            QUNTY  MILL          RESIDN Refrigerator Equipment Stock
+ RESDREP          RSFRZ            R    4 1 (MNUMYR)                            QUNTY  MILL          RESIDN Standalone Freezer Equipment Stock
+ RESDREP          RSEEFHT          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Heating Existing Equipment Efficiency
+ RESDREP          RSEEFCL          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Cooling Existing Equipment Efficiency
+ RESDREP          RSEEFHW          R    4 2 (MNUMYR,     4)                     HEATRT FRACT         RESIDN Water Heating Existing Equipment Efficiency
+ RESDREP          RSEEFRF          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Refrigerator Existing Equipment Efficiency
+ RESDREP          RSEEFFZ          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Standalone Freezer Existing Equipment Efficiency
+ RESDREP          RSNEFHT          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Heating New Equipment Efficiency
+ RESDREP          RSNEFCL          R    4 2 (MNUMYR,     5)                     HEATRT FRACT         RESIDN Space Cooling New Equipment Efficiency
+ RESDREP          RSNEFHW          R    4 2 (MNUMYR,     4)                     HEATRT FRACT         RESIDN Water Heating New Equipment Efficiency
+ RESDREP          RSNEFRF          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Refrigerator New Equipment Efficiency
+ RESDREP          RSNEFFZ          R    4 1 (MNUMYR)                            HEATRT FRACT         RESIDN Standalone Freezer New Equipment Efficiency
+ RESDREP          HSHELL1          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Heating Shell Efficiency: Existing Construction
+ RESDREP          HSHELL2          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Heating Shell Efficiency: New Construction
+ RESDREP          HSHELL3          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Heating Shell Efficiency: Average
+ RESDREP          CSHELL1          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Cooling Shell Efficiency: Existing Construction
+ RESDREP          CSHELL2          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Cooling Shell Efficiency: New Construction
+ RESDREP          CSHELL3          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Cooling Shell Efficiency: Average
+ RESDREP          SQFTAVG          R    4 1 (MNUMYR)                            INDEX  FRACT         RESIDN Average U.S. floorspace per housing unit (sqft)
  RESDREP          RSHOUSES         R    4 2 (MNUMYR,MNUMC2)                     LEVEL  MILL          RESIDN Number of households
  RESDREP          RSGASCUST        R    4 2 (MNUMYR,MNUMC2)                     LEVEL  SCALAR        RESIDN Proxy for number of natural gas customers (households)
  RESDREP          HDDADJ           R    4 2 (MNUMYR,MNUMCR)                     LEVEL  SCALAR        RESIDN Heating Degree Days
@@ -2813,6 +2827,7 @@
  TRANREP          Li_ion_cost      R    4 2 (    16,MNUMYR)                     QUNTY  90$kWh        TRANSP Lithium-ion battery cost ($/kWhr) by vehicle type
  TRANREP          COST_BATTKWH_TRK R    4 2 (     5,MNUMYR)                     QUNTY  90$kWh        TRANSP Lithium-ion battery cost ($/kWhr) by vehicle type (freight trucks)
  TRANREP          AdjMpg           R    4 2 (     3,MNUMYR)                     QUNTY  MPG           TRANSP Adjusted light-duty vehicle fuel economy 
+ TRANREP          global_batt_prod R    4 3 (     6,     2,MNUMYR)              QUNTY  GWTHRS        TRANSP Global cumulative li-ion battery demand (sector, US/non-US)
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Macroeconomic Module Output
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -3190,7 +3205,7 @@
  EMISSION         EMTR             R    4 3 (     5,MNPOLL,MNUMYR)              QUNTY  mMTONS               Transportation Emissions by Fuel
  EMISSION         EMTRC            R    4 3 (MNUMCR,MNPOLL,MNUMYR)              QUNTY  mMTONS               Trans Emissions by Region
  EMISSION         EMTRS            R    4 3 (     5,MNPOLL,MNUMYR)              QUNTY  mMTONS               Trans Emissions by Trans Modes
- EMISSION         EMNT             R    4 3 (MNUMCR,MNPOLL,MNUMYR)              QUNTY  mMTONS               NGTDM Emissions by Region
+ EMISSION         EMNT             R    4 3 (MNUMCR,MNPOLL,MNUMYR)              QUNTY  tMTONS               NGTDM Emissions by Region
  EMISSION         EMOGC            R    4 3 (MNUMCR,MNPOLL,MNUMYR)              QUNTY  mMTONS               Oil&Gas Emissions by Region
  EMISSION         EMOGCS           R    4 3 (     2,MNPOLL,MNUMYR)              QUNTY  mMTONS               O&G Emis by Activity (Onshore/Offshore)
  EMISSION         EMOGF            R    4 3 (     2,MNPOLL,MNUMYR)              QUNTY  mMTONS               O&G Emis by Fuel (Oil, NG)
@@ -3406,21 +3421,21 @@
  COGEN            UADDWNC          R    4 2 (MNUMNR,MNUMYR)                     CAPCTY MWATT  WI            NON-TRAD PLANNED CAPACITY
  COGEN            UADDWFC          R    4 2 (MNUMNR,MNUMYR)                     CAPCTY MWATT  WI            NON-TRAD PLANNED Offshore CAPACITY
  COGEN            UADDTLC          R    4 2 (MNUMNR,MNUMYR)                     CAPCTY MWATT         ELECTR NON-TRAD PLANNED TOTAL
- COGEN            CGRESGEN         R    4 4 (MNUMCR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS               NONUTIL GENERATION OF ELEC(1=grid sales,2=own use)
- COGEN            CGRESQ           R    4 3 (MNUMCR,MNUMYR,NUMCGF)              QUNTY  tBTU                 NONUTIL CONSUMPTION
- COGEN            CGRESCAP         R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT                NONUTIL CAPACITY
+ COGEN            CGRESQ           R    4 3 (MNUMCR,MNUMYR,NUMCGF)              QUNTY  tBTU          RESIDN Combined heat and power fuel consumption
+ COGEN            CGRESCAP         R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         RESIDN Combined heat and power capacity
+ COGEN            CGRESGEN         R    4 4 (MNUMCR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        RESIDN Combined heat and power generation (1=grid sales,2=own use)
  COGEN            CGREFQ           R    4 3 (MNUMCR,MNUMYR,NUMCGF)              QUNTY  tBTU          REFINE Combined heat and power fuel consumption
- COGEN            CGREFCAP         R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         REFINE Combined heat and power fuel capacity
+ COGEN            CGREFCAP         R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         REFINE Combined heat and power capacity
  COGEN            CGREFGEN         R    4 4 (MNUMCR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        REFINE Combined heat and power generation
  COGEN            CGOGSQ           R    4 3 (MNUMCR,MNUMYR,     4)              QUNTY  tBTU          OILGAS Combined heat and power fuel consumption
- COGEN            CGOGSCAP         R    4 3 (MNUMCR,MNUMYR,     4)              CAPCTY MWATT         OILGAS Combined heat and power fuel capacity
+ COGEN            CGOGSCAP         R    4 3 (MNUMCR,MNUMYR,     4)              CAPCTY MWATT         OILGAS Combined heat and power capacity
  COGEN            CGOGSGEN         R    4 4 (MNUMCR,MNUMYR,     4,     2)       QUNTY  GWTHRS        OILGAS Combined heat and power generation
  COGEN            CGINDLQ          R    4 3 (MNUMCR,MNUMYR,NUMCGF)              QUNTY  tBTU          INDUST Combined heat and power fuel consumption
- COGEN            CGINDLCAP        R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         INDUST Combined heat and power fuel capacity
+ COGEN            CGINDLCAP        R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         INDUST Combined heat and power capacity
  COGEN            CGINDLGEN        R    4 4 (MNUMCR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        INDUST Combined heat and power generation
  COGEN            CGCOMMQ          R    4 3 (MNUMCR,MNUMYR,NUMCGF)              QUNTY  tBTU          COMMER Combined heat and power fuel consumption
- COGEN            CGCOMMCAP        R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         COMMER Combined heat and power fuel capacity
- COGEN            CGCOMMGEN        R    4 4 (MNUMCR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        COMMER Combined heat and power generation
+ COGEN            CGCOMMCAP        R    4 3 (MNUMCR,MNUMYR,NUMCGF)              CAPCTY MWATT         COMMER Combined heat and power capacity
+ COGEN            CGCOMMGEN        R    4 4 (MNUMCR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        COMMER Combined heat and power generation (1=grid sales,2=own use)
  COGEN            CGTOTQNR         R    4 3 (MNUMNR,MNUMYR,NUMCGF)              QUNTY  tBTU          ENDUSE All combined heat and power fuel consumption by EMM region
  COGEN            CGTOTCAPNR       R    4 3 (MNUMNR,MNUMYR,NUMCGF)              CAPCTY MWATT         ENDUSE All combined heat and power fuel capacity by EMM region
  COGEN            CGTOTGENNR       R    4 4 (MNUMNR,MNUMYR,NUMCGF,     2)       QUNTY  GWTHRS        ENDUSE All combined heat and power generation by EMM region
@@ -3591,7 +3606,7 @@
  WRENEW           EPCURCL_SO       I    4 2 (MNUMNR,MNUMYR)                                                 Current Class SO
  WRENEW           EPCURCL_PV       I    4 2 (MNUMNR,MNUMYR)                                                 Current Class PV
  WRENEW           EPCURCL_PT       I    4 2 (MNUMNR,MNUMYR)                                                 Current Class PT
- WRENEW           CURTAIL          R    4 3 (ECPINT,MNUMNR,MNUMYR)              QUNTY  bKWH                 Capture Curtailments for intermittent capacity
+ WRENEW           CURTAIL          R    4 3 (ECPINT,MNUMNR,MNUMYR)              QUNTY  bKWH                 Capture Curtailments for intermittent capacity: efd + restore
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Conversion Factors
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -3844,6 +3859,462 @@
  COALEMM          EG_PLTS          R    4 1 (     1)                            CNTROL SCALAR               Number of retrofitted gas plants from ECP     
  COALEMM          EG_RG            R    4 1 (  2000)                            CNTROL SCALAR               Fuel region for retrofitted gas in ECP
  COALEMM          EG_PTP           R    4 1 (  2000)                            CNTROL SCALAR               Plant type retrofitted gas in ECP                  
+ COALEMM          QCLB1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          QCLB2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Unscb-BH -Any-SC    Coal Generators - ECP Code B2
+ COALEMM          QCLB3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-BH -   -      Coal Generators - ECP Code B3
+ COALEMM          QCLB4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-BH -   -SC    Coal Generators - ECP Code B4
+ COALEMM          QCLB5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-BH -SCR-      Coal Generators - ECP Code B5
+ COALEMM          QCLB6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-BH -SCR-SC    Coal Generators - ECP Code B6
+ COALEMM          QCLB7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Dry  -BH -Any-      Coal Generators - ECP Code B7
+ COALEMM          QCLB8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Dry  -BH -Any-SC    Coal Generators - ECP Code B8
+ COALEMM          QCLC1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Unscb-CSE-Any-      Coal Generators - ECP Code C1
+ COALEMM          QCLC2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Unscb-CSE-Any-   FF Coal Generators - ECP Code C2
+ COALEMM          QCLC3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at Unscb-CSE-Any-SC/FF Coal Generators - ECP Code C3
+ COALEMM          QCLC4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-CSE-   -      Coal Generators - ECP Code C4
+ COALEMM          QCLC5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-CSE-   -   FF Coal Generators - ECP Code C5
+ COALEMM          QCLC6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-CSE-   -SC/FF Coal Generators - ECP Code C6
+ COALEMM          QCLC7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-CSE-SCR-      Coal Generators - ECP Code C7
+ COALEMM          QCLC8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-CSE-SCR-   FF Coal Generators - ECP Code C8
+ COALEMM          QCLC9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Demand for Coal at W_scb-CSE-SCR-SC/FF Coal Generators - ECP Code C9
+ COALEMM          QCLCXNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLCYNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLCZNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLH9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLHANR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLHBNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLHCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLPCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLOCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLIGNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLI2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLPQNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          QCLISNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          RCLB1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT               Percent Removal of SO2 at Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          RCLB2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLB3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLB4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLB5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLB6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLB7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLB8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLC9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLCXNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLCYNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLCZNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLH9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLHANR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLHBNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLHCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLPCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLOCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLIGNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLI2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLPQNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          RCLISNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          SCLB1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU                 Average SO2 Content of Coal to Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          SCLB2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLB3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLB4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLB5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLB6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLB7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLB8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLC9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLCXNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLCYNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLCZNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLH9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLHANR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLHBNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLHCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLPCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLOCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLIGNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLI2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLPQNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          SCLISNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  tBTU
+ COALEMM          CCLB1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q               Average Carbon Content of Coal to Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          CCLB2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLB3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLB4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLB5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLB6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLB7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLB8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLC9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLCXNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLCYNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLCZNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLH9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLHANR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLHBNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLHCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLPCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLOCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLIGNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLI2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLPQNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          CCLISNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  mMTC/Q
+ COALEMM          XCLB1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT               Percent Removal of Carbon at Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          XCLB2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLB3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLB4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLB5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLB6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLB7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLB8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLC9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLCXNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLCYNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLCZNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLH9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLHANR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLHBNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLHCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLPCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLOCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLIGNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLI2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLPQNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          XCLISNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          BCLB1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON               Average Btu Content of Coal to Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          BCLB2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLB3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLB4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLB5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLB6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLB7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLB8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLC9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLCXNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLCYNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLCZNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLH9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLHANR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLHBNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLHCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLPCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLOCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLIGNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLI2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLPQNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          BCLISNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON               HG Content tby ECP Coal Plant
+ COALEMM          HCLB2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLB8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLC9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLCXNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLCYNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLCZNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH1NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH3NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH4NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH5NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH6NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH7NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH8NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLH9NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLHANR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLHBNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLHCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLPCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLOCNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLIGNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLI2NR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLPQNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          HCLISNR          R    4 2 (NDREGN,MNUMYR)                     QUNTY  BTUTON
+ COALEMM          GCLB1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT               HG Removal Rate by ECP Coal Plant
+ COALEMM          GCLB2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLB3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLB4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLB5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLB6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLB7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLB8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLC9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLCXNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLCYNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLCZNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLH9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLHANR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLHBNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLHCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLPCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLOCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLIGNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLI2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLPQNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          GCLISNR          R    4 2 (NDREGN,MNUMYR)                     RATE   PERCNT
+ COALEMM          PSLB1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU               Price Component for SO2 Compliance at Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          PSLB2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLB3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLB4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLB5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLB6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLB7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLB8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLC9NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLCXNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLCYNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLCZNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLH9NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLHANR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLHBNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLHCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLPCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLOCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLIGNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLI2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLPQNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PSLISNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU               HG Comp Prc by ECP Coal Plant
+ COALEMM          PHGB2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGB8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGC9NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGCXNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGCYNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGCZNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGH9NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGHANR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGHBNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGHCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGPCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGOCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGIGNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGI2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGPQNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PHGISNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAB8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAC9NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCACXNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCACYNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCACZNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH1NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH3NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH4NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH5NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH6NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH7NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH8NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAH9NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAHANR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAHBNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAHCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAPCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAOCNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAIGNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAI2NR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAPQNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          PCAISNR          R    4 2 (NDREGN,MNUMYR)                     PRICE  87$BTU
+ COALEMM          HRTB1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR               Average Heatrate for Unscb-BH -Any-      Coal Generators - ECP Code B1
+ COALEMM          HRTB2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTB3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTB4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTB5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTB6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTB7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTB8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTC9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTCXNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTCYNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTCZNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH1NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH3NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH4NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH5NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH6NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH7NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH8NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTH9NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTHANR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTHBNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTHCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTPCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTOCNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTIGNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTI2NR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTPQNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
+ COALEMM          HRTISNR          R    4 2 (NDREGN,MNUMYR)                     RATE   SCALAR
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Additional coal prices
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -3876,8 +4347,8 @@
  EUSPRC           PELCKCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            cooking CM
  EUSPRC           PELLTCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            lighting CM
  EUSPRC           PELRFCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            refrigeration CM
- EUSPRC           PELOPCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment PCs CM
- EUSPRC           PELONCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment, nonPCs CM8
+ EUSPRC           PELOPCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            data center servers CM
+ EUSPRC           PELONCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            computers and office equipment CM
  EUSPRC           PELOTCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            other commercial
  EUSPRC           PELP2CM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public L2
  EUSPRC           PELPFCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public DCFC
@@ -4078,39 +4549,39 @@
 * Residential Output for Efficiency Calculation
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  RSEFF                                                                          TYPE   UNITS  FUEL   SECTOR
- RSEFF            CKCONWT          R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Cooking Consumption
- RSEFF            CKCONIN          R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Cooking Consumption for Intensity Index
- RSEFF            COOLCNWT         R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Space Cooling Consumption
- RSEFF            COOLCNIN         R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Space Cooling Consumption for Intensity Index
- RSEFF            CSWCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Clothes Washer Consumption
- RSEFF            CSWCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Clothes Washer Consumption for Intensity Index
- RSEFF            DRYCONWT         R    4 4 (MNUMYR,     2,     9,     3)       QUNTY  tBTU                 Dryer Consumption
- RSEFF            DRYCONIN         R    4 4 (MNUMYR,     2,     9,     3)       QUNTY  tBTU                 Dryer Consumption for Intensity Index
- RSEFF            DSWCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Dishwasher Consumption
- RSEFF            DSWCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Dishwasher Consumption for Intensity Index
- RSEFF            FRZCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Freezer Consumption
- RSEFF            FRZCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Freezer Consumption for Intensity Index
- RSEFF            HTRCONWT         R    4 4 (MNUMYR,     8,     9,     3)       QUNTY  tBTU                 Space Heating Consumption
- RSEFF            HTRCONIN         R    4 4 (MNUMYR,     8,     9,     3)       QUNTY  tBTU                 Space Heating Consumption for Intensity Index
+ RSEFF            TOTALHOUSES      R    4 3 (MNUMYR,     3,     9)              QUNTY  tBTU                 New + Existing Houses
+ RSEFF            HTRCONWT         R    4 4 (MNUMYR,     5,     9,     3)       QUNTY  tBTU                 Space Heating Consumption
+ RSEFF            HTRCONIN         R    4 4 (MNUMYR,     5,     9,     3)       QUNTY  tBTU                 Space Heating Consumption for Intensity Index
+ RSEFF            COOLCNWT         R    4 4 (MNUMYR,     2,     9,     3)       QUNTY  tBTU                 Space Cooling Consumption
+ RSEFF            COOLCNIN         R    4 4 (MNUMYR,     2,     9,     3)       QUNTY  tBTU                 Space Cooling Consumption for Intensity Index
  RSEFF            H2OCONWT         R    4 4 (MNUMYR,     5,     9,     3)       QUNTY  tBTU                 Hot Water Heat Consumption
  RSEFF            H2OCONIN         R    4 4 (MNUMYR,     5,     9,     3)       QUNTY  tBTU                 Hot Water Heat Consumption for Intensity Index
+ RSEFF            CSWCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Clothes Washer Consumption
+ RSEFF            CSWCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Clothes Washer Consumption for Intensity Index
+ RSEFF            DSWCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Dishwasher Consumption
+ RSEFF            DSWCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Dishwasher Consumption for Intensity Index
+ RSEFF            CKCONWT          R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Cooking Consumption
+ RSEFF            CKCONIN          R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Cooking Consumption for Intensity Index
+ RSEFF            DRYCONWT         R    4 4 (MNUMYR,     2,     9,     3)       QUNTY  tBTU                 Dryer Consumption
+ RSEFF            DRYCONIN         R    4 4 (MNUMYR,     2,     9,     3)       QUNTY  tBTU                 Dryer Consumption for Intensity Index
  RSEFF            REFCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Refrigeration Consumption
  RSEFF            REFCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Refrigeration Consumption for Intensity Index
+ RSEFF            FRZCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Freezer Consumption
+ RSEFF            FRZCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Freezer Consumption for Intensity Index
+ RSEFF            LTCONWT          R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Lighting Consumption
+ RSEFF            LTCONIN          R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Lighting Consumption for Intensity Index
+ RSEFF            TVRCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 TV Consumption
+ RSEFF            TVRCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 TV Consumption for Intensity Index
+ RSEFF            PCRCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 PC Consumption
+ RSEFF            PCRCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 PC Consumption for Intensity Index
+ RSEFF            FANCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Furnace fan Consumption
+ RSEFF            FANCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Furnace fan Consumption for Intensity Index
  RSEFF            APCONWT          R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Electric Appliance Consumption
  RSEFF            APCONIN          R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Electric Appliance Consumption for Intensity Index
  RSEFF            APLCONWT         R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Other fuel Appliance Consumption
  RSEFF            APLCONIN         R    4 4 (MNUMYR,     3,     9,     3)       QUNTY  tBTU                 Other fuel Appliance Consumption for Intensity Index
- RSEFF            FANCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Furnace fan Consumption
- RSEFF            FANCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Furnace fan Consumption for Intensity Index
- RSEFF            LTCONWT          R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Lighting Consumption
- RSEFF            LTCONIN          R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 Lighting Consumption for Intensity Index
- RSEFF            PCRCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 PC Consumption
- RSEFF            PCRCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 PC Consumption for Intensity Index
- RSEFF            SHTCONWT         R    4 4 (MNUMYR,     7,     9,     3)       QUNTY  tBTU                 Secondary Heat Consumption
- RSEFF            SHTCONIN         R    4 4 (MNUMYR,     7,     9,     3)       QUNTY  tBTU                 Secondary Heat Consumption for Intensity Index
- RSEFF            TVRCONWT         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 TV Consumption
- RSEFF            TVRCONIN         R    4 3 (MNUMYR,     9,     3)              QUNTY  tBTU                 TV Consumption for Intensity Index
- RSEFF            TOTALHOUSES      R    4 3 (MNUMYR,     3,     9)              QUNTY  tBTU                 New + Existing Houses
+ RSEFF            SHTCONWT         R    4 4 (MNUMYR,     5,     9,     3)       QUNTY  tBTU                 Secondary Heat Consumption
+ RSEFF            SHTCONIN         R    4 4 (MNUMYR,     5,     9,     3)       QUNTY  tBTU                 Secondary Heat Consumption for Intensity Index
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Convergence Summary from intercv.f for FTAB
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4151,39 +4622,39 @@
 * Emissions Policy Module Carbon fee banking option solution variables
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  EPMBANK                                                                        TYPE   UNITS  FUEL   SECTOR
- EPMBANK          LOW_SUM          R    4 1 (     1)                                                        Bracket quantity, -balance on low tax side
- EPMBANK          HIGH_SUM         R    4 1 (     1)                                                        Bracket quantity, -balance on high tax side
- EPMBANK          LOW_TAX          R    4 1 (     1)                                                        Bracket tax on low side, $/kg Cequiv
- EPMBANK          HIGH_TAX         R    4 1 (     1)                                                        Bracket tax on high side, $/kg Cequiv
- EPMBANK          SLOPE            R    4 1 (     1)
+ EPMBANK          LOW_SUM          R    4 1 (     1)                            QUNTY  mMTONS               Bracket quantity, -balance on low tax side
+ EPMBANK          HIGH_SUM         R    4 1 (     1)                            QUNTY  mMTONS               Bracket quantity, -balance on high tax side
+ EPMBANK          LOW_TAX          R    4 1 (     1)                            PRICE  87$KG                Bracket tax on low side, $/kg Cequiv
+ EPMBANK          HIGH_TAX         R    4 1 (     1)                            PRICE  87$KG                Bracket tax on high side, $/kg Cequiv
+ EPMBANK          SLOPE            R    4 1 (     1)                                                        
  EPMBANK          ITER             I    4 1 (     1)                                                        Iteration count for the regula-falsi trials in the fee-banking case
  EPMBANK          BRACKET          I    4 1 (     1)                                                        Bracket Indicator. If 1, then the upper and lower BRACKETING points have been established
- EPMBANK          BANK_STARTYR     I    4 1 (     1)                                                        Banking Start year , calendar format
- EPMBANK          BANK_ENDYR       I    4 1 (     1)                                                        Banking End year, 4-digit calendar format
- EPMBANK          NEWSUM           R    4 1 (   100)                                                        Record of end-year bank balances by trial iteration
- EPMBANK          NEWTAX           R    4 1 (   100)                                                        Record of emission fees by trial iteration
- EPMBANK          BALANCE          R    4 1 (MNUMYR)                                                        Cumulative covered-sector banking balance.
+ EPMBANK          BANK_STARTYR     I    4 1 (     1)                            CNTROL BLANK                Banking Start year , calendar format
+ EPMBANK          BANK_ENDYR       I    4 1 (     1)                            CNTROL BLANK                Banking End year, 4-digit calendar format
+ EPMBANK          NEWSUM           R    4 1 (   100)                            QUNTY  mMTONS               Record of end-year bank balances by trial iteration
+ EPMBANK          NEWTAX           R    4 1 (   100)                            PRICE  87$KG                Record of emission fees by trial iteration
+ EPMBANK          BALANCE          R    4 1 (MNUMYR)                                   mMTONS               Cumulative covered-sector banking balance.
  EPMBANK          OFFSET           R    4 2 (     5,MNUMYR)                                                 Offsets used (by 5 possible classes, 2 used-- 1:other ghgs, 2:carbon sequestration)
- EPMBANK          BANK_PRICEYR     I    4 1 (     1)                                                        Year in which pre-compliance pricing begins
+ EPMBANK          BANK_PRICEYR     I    4 1 (     1)                            CNTROL BLANK                Year in which pre-compliance pricing begins
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Emissions Policy Module Other Greenhouse Gases Stuff
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
  GHGREP                                                                         TYPE   UNITS  FUEL   SECTOR
  GHGREP           GHG_NCat         I    4 1 (     1)                                                        Number of categories of Other GHGes with baselines and MACs
- GHGREP           GHG_BL           R    4 2 (MNUMYR,    18)                                                 Other GHG Baseline emissions by category
- GHGREP           GHG_OGHG         R    4 2 (MNUMYR,    18)                                                 Other GHG Controlled emissions by category
- GHGREP           GHG_Abate        R    4 2 (MNUMYR,    18)                                                 Amount of GHGes abated from sales via MAC/Offsets
- GHGREP           GHG_MACQ         R    4 3 (    20,    10,    18)                                          MAC Quantity by step at 5-year intervals starting with 2005
- GHGREP           GHG_MACP         R    4 2 (    20,    18)                                                 MAC Price    by step, assumed to be same for all years
+ GHGREP           GHG_BL           R    4 2 (MNUMYR,    18)                     QUNTY  mMTONS               Other GHG Baseline emissions by category (million metric tons carbon equiv.)
+ GHGREP           GHG_OGHG         R    4 2 (MNUMYR,    18)                     QUNTY  mMTONS               Other GHG Controlled emissions by category (million metric tons carbon equiv.)
+ GHGREP           GHG_Abate        R    4 2 (MNUMYR,    18)                     QUNTY  mMTONS               Amount of GHGes abated from sales via MAC/Offsets (million metric tons carbon equiv.)
+ GHGREP           GHG_MACQ         R    4 3 (    20,    10,    18)              QUNTY  mMTONS               MAC Quantity by step at 5-year intervals starting with 2005 (million metric tons carbon equiv.)
+ GHGREP           GHG_MACP         R    4 2 (    20,    18)                     PRICE  87$KG                MAC Price by step, assumed to be same for all years (1987$ per kilogram carbon equiv.)
  GHGREP           GHG_STEPS        I    4 1 (    18)                                                        number of steps for each category
  GHGREP           GHG_CLASS        I    2 1 (    18)                                                        Classifier for GHG: 1) covered 2) not covered, domestic, 3) not covered, sequestration 4) not covered, int'l offset
- GHGREP           GHG_OFFSETP      R    4 1 (MNUMYR)                                                        Market Clearing Offset price (maybe less than C price when offsets limited)
- GHGREP           GHG_REV          R    4 2 (     4,MNUMYR)                                                 GHG revenue (p*q) for the 4 groups
+ GHGREP           GHG_OFFSETP      R    4 1 (MNUMYR)                            PRICE  87$KG                Market Clearing Offset price (maybe less than C price when offsets limited) (1987$ per kilogram carbon equiv.)
+ GHGREP           GHG_REV          R    4 2 (     4,MNUMYR)                            b87$                 GHG revenue (p*q) for the 4 groups (billion 1987$)
  GHGREP           GHG_NAMES        R    4 2 (     8,    18)                                                 Names of OGHG Categories (stored as real but really char*32)
  GHGREP           BANKING          R    4 1 (MNUMYR)                                                        Amount of exogenous Banking (input from offsets.wk1)
- GHGREP           MAC_PRICEYR      I    4 1 (     1)                                                        4-digit Calender year for -digit Calender year for
- GHGREP           GHG_OFFSETPINT   R    4 1 (MNUMYR)                                                        Market Clearing International Offset price (If OFFSETI=1 and OFFSETINT>0)
- GHGREP           OFF_LIMITS       R    4 2 (     4,MNUMYR)                                                 Offset Limits HR2454 (1:% covered,2:total,3:Domestic,4:international0
+ GHGREP           MAC_PRICEYR      I    4 1 (     1)                            CNTROL BLANK                4-digit Calender year for -digit Calender year for
+ GHGREP           GHG_OFFSETPINT   R    4 1 (MNUMYR)                            PRICE  87$KG                Market Clearing International Offset price (If OFFSETI=1 and OFFSETINT>0) (1987$ per kilogram carbon equiv.)
+ GHGREP           OFF_LIMITS       R    4 2 (     4,MNUMYR)                                                 Offset Limits HR2454 (1:% covered,2:total,3:Domestic,4:international)
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * On-road transportation sector distillate quantities
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4295,18 +4766,27 @@
  HMMBLK           HSTAT            R    4 3 (MNUMYR,MNUMCR,     3)              QUNTY  BLANK                HOLDING PLACE FOR FUTURE VARIABLES
  HMMBLK           QNGHMHP          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 natural gas heat and power energy used in hydrogen production
  HMMBLK           QNGHMPF          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 natural gas feedstock consumed in hydrogen production
- HMMBLK           PH2RF            R    4 2 (MNUMCR,MNUMYR)                     QUNTY  87$BTU               Price of H2 to refineries by Census division
+ HMMBLK           PH2RF            R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               Price of H2 to refineries by Census division
  HMMBLK           QELHM_HR         R    4 4 (MNUMNR,     4,    24,MNUMYR)       QUNTY  MWH                  hourly electrolyzer load by 4 seasons, NERC region
  HMMBLK           H2SCRV_Q         R    4 4 (MNUMCR,H2STEP,     3,MNUMYR)       QUNTY  mMTONS               H2 supply quantity for each curve step by season
- HMMBLK           H2SCRV_P         R    4 4 (MNUMCR,H2STEP,     3,MNUMYR)       QUNTY  87$KG                H2 supply price for each curve step by season
- HMMBLK           PRDH2NG          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from SMR/ATR w/o CCS
- HMMBLK           PRDH2NG_CCS      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from SMR/ATR w/ CCS
+ HMMBLK           H2SCRV_P         R    4 4 (MNUMCR,H2STEP,     3,MNUMYR)       PRICE  87$KG                H2 supply price for each curve step by season
+ HMMBLK           PRDH2NG          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from SMR w/o CCS
+ HMMBLK           PRDH2NG_CCS      R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from SMR w/ CCS
  HMMBLK           PRDH2EL          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from electrolysis, Census division
  HMMBLK           PRDH2EL_NR       R    4 2 (MNUMNR,MNUMYR)                     QUNTY  mMTONS               H2 production from electrolysis, EMM NERC-based division
  HMMBLK           QELTRH2          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 Electricity consumed in transmission and distribution of H2, including pipelines, storage, dispensing, and compression
  HMMBLK           QELINH2NG        R    4 2 (MNUMCR,MNUMYR)                     QUNTY  tBTU                 Electricity consumed in hydrogen production by facilities using natural gas as a feedstock (e.g. SMR)
- HMMBLK           PH2_SPOT         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  87$BTU               H2 market spot price by census division, year
+ HMMBLK           PH2_SPOT         R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU               H2 market spot price by census division, year
  HMMBLK           QH2_DISC         R    4 1 (MNUMYR)                            QUNTY  mMTONS               National total discrepancy between supply and demand
+ HMMBLK           PRDH2NGATR_CCS   R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               H2 production from ATR w/CCS
+ HMMBLK           SMR_CAP          R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               SMR w/o CCS production capacity
+ HMMBLK           SMRCCS_CAP       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               SMR w/CCS production capacity
+ HMMBLK           ATRCCS_CAP       R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               ATR w/CCS production capacity
+ HMMBLK           ELEC_CAP         R    4 2 (MNUMCR,MNUMYR)                     QUNTY  mMTONS               Electrolysis production capacity
+ HMMBLK           SMRCAPCOST       R    4 1 (MNUMYR)                            PRICE  87$KG                SMR w/o CCS capital cost
+ HMMBLK           SMRCCSCAPCOST    R    4 1 (MNUMYR)                            PRICE  87$KG                SMR w/CCS capital cost
+ HMMBLK           ATRCCSCAPCOST    R    4 1 (MNUMYR)                            PRICE  87$KG                ATR w/CCS capital cost
+ HMMBLK           ELECCAPCOST      R    4 1 (MNUMYR)                            PRICE  87$KG                electrolyzer capital cost
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
 * Regional CO2 Report Info
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================
@@ -4345,8 +4825,8 @@
  AEUSPRC          PELCKCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            cooking CM
  AEUSPRC          PELLTCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            lighting CM
  AEUSPRC          PELRFCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            refrigeration CM
- AEUSPRC          PELOPCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment PCs CM
- AEUSPRC          PELONCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            office equipment, nonPCs CM8
+ AEUSPRC          PELOPCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            data center servers CM
+ AEUSPRC          PELONCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            computers and office equipment CM
  AEUSPRC          PELOTCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            other commercial
  AEUSPRC          PELP2CM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public L2
  AEUSPRC          PELPFCM          R    4 2 (MNUMCR,MNUMYR)                     PRICE  87$BTU EL            vehicle CM  public DCFC
@@ -4530,7 +5010,7 @@
  EMOBLK           EMISSIONS_GOAL   R    4 1 (MNUMYR)                            QUNTY  mMTONS               GOAL BY YEAR
  EMOBLK           MAX_TAX          R    4 1 (MNUMYR)                            PRICE  87$KG                MAX PENALTY IN ANY YEAR
  EMOBLK           MIN_TAX          R    4 1 (MNUMYR)                            PRICE  87$KG                MIN PENALTY IN ANY YEAR
- EMOBLK           INIT_ALLOC       R    4 2 (     5,MNUMYR)                     QUNTY  mMTONS               INITIAL PERMIT ALLOCATION
+ EMOBLK           INIT_ALLOC       R    4 2 (     5,MNUMYR)                     QUNTY  tMTONS               INITIAL PERMIT ALLOCATION
  EMOBLK           CL_CDNUM         I    4 1 (     9)                            CNTROL SCALAR               NUMBER OF COAL REGIONS FOR EACH CENSUS DIVISION
  EMOBLK           CL_CDMAP         I    4 2 (     9,     5)                     CNTROL SCALAR               MAPPING OF COAL REGIONS TO CENSUS DIVISION
 *================ ================ = ==== =  ====== ====== ====== ====== ====== ====== ====== ====== ====== ==================================================

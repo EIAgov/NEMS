@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/tcs45q,v 1.1 2019/05/09 14:59:36 pkc Exp $
 
 ! Variables for implementing tax incentives included in U.S. tax code section 45q

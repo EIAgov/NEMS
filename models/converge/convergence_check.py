@@ -1,18 +1,23 @@
-# 
-import os
 import pandas as pd
 
 def set_change(df_prev, df_cur):
-    """
-    Set fractional and absolute change variables, given current and previous values.
+    """Set fractional and absolute change variables, given current and previous values.
 
-    Parameters:
-        df_prev: variable dataframe of the previous iteration.
-        df_cur:  variable dataframe of the current iteration.
-        
-    Returns:
-        abs_cng: absolute change variable.
-        frc_cng: fractional change variable.
+    Parameters
+    ----------
+    df_prev : DataFrame
+        variable dataframe series of the previous iteration.
+
+    df_cur : DataFrame
+        variable dataframe series of the current iteration.
+
+    Returns
+    -------
+    pandas.core.series.Series
+        variable dataframe series of absolute changes.
+
+    pandas.core.series.Series
+        variable dataframe series of fractional changes.
     
     """    
     abs_cng = abs(df_cur - df_prev)
@@ -24,33 +29,48 @@ def set_change(df_prev, df_cur):
     return abs_cng, frc_cng
 
 def check_conv(dfd_old, dfd_cur, my_vars, df_conv, fyear, RegRepFlag):
-    """
-    Check convergences between previous and current data based on specified tolerances.
+    """Check convergences between previous and current data based on specified tolerances.
 
-    Parameters:
-        dfd_old (dict): containing variable dataframes of the previous iteration data.
-        dfd_cur (dict): containing variable dataframes of the current iteration data.
-        my_vars (list): A list of variables to check for convergences.
-        df_conv (pandas.DataFrame): containing convergence parameters.
-        fyear: first year of data to be checked
-        lyear: last year of data to be checked
+    Parameters
+    ----------
+    dfd_old : dict
+        containing variable dataframes of the previous iteration data.
 
-    Returns:
-        pandas.DataFrame: containing the convergence results.
+    dfd_cur : dict
+        containing variable dataframes of the current iteration data.
 
-    Note:
-     
+    my_vars : list
+        A list of variables to check for convergences.
+    
+    df_conv : pandas.DataFrame
+        containing convergence parameters. input data from .csv files from model/converge/input
+        
+    fyear : int
+        first year of data to be checked
+    
+    RegRepFlag : int
+        flag to write regional report (0 = OFF; 1 = ON)
+
+    Returns
+    -------
+    pandas.DataFrame
+        variable dataframe with convergence results updated in column "NonconvVar" (0 = Converged; 1 = Not Converged)
+
+    pandas.DataFrame
+        variable dataframe with "not converged" variable entries
+
     """
     
-    RegCD = 9
+
+    RegCD = 9       # Number of census Region, MNUMCR = 9 
     df_regConv=pd.DataFrame()
-    #TODO: Set up the TRIGGER. Need to get MNDBGCN RTOValue for that
     for var in my_vars:
         
         #Find the type of variable for convergence test
-        PQType = df_conv.loc[var, 'PQType']
+        df_conv_series=df_conv.loc[var]
+        PQType = df_conv_series.at['PQType']
 
-        #exclude MNUMCR and reg=10 from P and Q data and get a slice for specified years
+        #Exclude MNUMCR and reg=10 from P and Q data and get a slice for specified years
         if PQType == 'Q' or PQType == 'P':
             
             df_cur = dfd_cur[var].iloc[0:RegCD, fyear]
@@ -58,29 +78,28 @@ def check_conv(dfd_old, dfd_cur, my_vars, df_conv, fyear, RegRepFlag):
             
             if PQType == 'P':
                 #find matching Q value
-                PQmatch = df_conv.loc[var, 'QMATCH']
+                PQmatch = df_conv_series.at['QMATCH']
                 dfQ_cur = dfd_cur[PQmatch].iloc[0:RegCD, fyear]
                 dfQ_old = dfd_old[PQmatch].iloc[0:RegCD, fyear]
         else:
             df_cur = dfd_cur[var].iloc[:, fyear]
             df_old = dfd_old[var].iloc[:, fyear]
-            #print(df_cur)
             if PQType == 'PU' or PQType == 'PS':
                 #find matching Q value
-                PQmatch = df_conv.loc[var, 'QMATCH']
+                PQmatch = df_conv_series['QMATCH']
                 dfQ_cur = dfd_cur[PQmatch].iloc[:, fyear]
                 dfQ_old = dfd_old[PQmatch].iloc[:, fyear]
 
 
         abs_cng, frc_cng = set_change(df_old, df_cur)
-        AbsTol = df_conv.loc[var, 'AbsoluteTolerance']
-        FrcTol = df_conv.loc[var, 'FractionTolerance']
+        AbsTol = df_conv_series.at['AbsoluteTolerance']  # find Absolute Toloterance Set from input files
+        FrcTol = df_conv_series.at['FractionTolerance']  # find Fraction Toloterance Set from input files
         
         
         if PQType == 'P' or PQType == 'PU' or PQType == 'PS': #if Prices
             
             #find matching Q value
-            PQmatch = df_conv.loc[var, 'QMATCH']
+            PQmatch = df_conv_series.at['QMATCH']
             QAbsTol = df_conv.loc[PQmatch, 'AbsoluteTolerance']
             
             
@@ -94,8 +113,6 @@ def check_conv(dfd_old, dfd_cur, my_vars, df_conv, fyear, RegRepFlag):
                 df_conv.loc[var, 'NonconvVar'] = 1
             #create a dataframe for the regional output/debug file 
             if RegRepFlag == 1:
-                #print(var)
-                #print(df_cur)
                 if isinstance(df_cur,pd.DataFrame):
                     df_temp = pd.concat([df_cur.stack(), df_old.stack(), frc_cng.stack()], axis=1)
                     df_temp.columns = ['cur', 'prev', 'prcng']
@@ -175,11 +192,9 @@ def check_conv(dfd_old, dfd_cur, my_vars, df_conv, fyear, RegRepFlag):
                                  'Limit']]
         df_regConv["Year"] += 1989
         df_regConv["Percent Change"] *= 100
-    #print(df_regConv)
-    #df_regConv = df_regConv.sort_values(by=['Percent Change'], ascending= False)
-    #df_regConv = df_regConv.sort_values(by=['Year','Variable'])
+
     
     #Filter non-converged variables and sort by the model
     df_conv = df_conv[df_conv['NonconvVar']==1].sort_values(by=['Module'])
-    #df_regConv.to_csv('conv_debug.csv')    
+   
     return df_conv, df_regConv

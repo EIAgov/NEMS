@@ -21,7 +21,6 @@
         3. *write_pkl_vars* is called from **module_unf.py** in all model years. In this method all required local, iterative dataframes
            are written to .pkl files.
 
-    Pickle library documentation: https://docs.python.org/3/library/pickle.html
 """
 
 import pandas as pd

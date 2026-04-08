@@ -1,36 +1,37 @@
+! -*- f90 -*-
 !FILE NAME:      RTEK
-!DATE MODIFIED:  May 30, 2023
+!DATE MODIFIED:  December 29, 2025
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
 !                Residential Demand Module (RDM)
-!DEFINITION:     Technology data inputs sourced from RSMESS.xlsx (RSCLASS, RSMEQP, and RSMSHL) & RSSWITCH.txt input files
+!DEFINITION:     Technology data inputs sourced from RSMESS.xlsx (RSCLASS, RSMEQP, RSSWITCH, and RSMSHL) input file
 !UNITS:          Unitless
 !DIMENSION:      Various
 !SPECIAL CONSTRAINTS:  None
 !ORGANIZATION OF DATA:  Various non-RSMESS inputs listed at end
 !SOURCES:        Not applicable
-!COMMENT:        Revise RTBASEFF range to 2020 for new RECS base year
+!COMMENT:        Turn off COSTTRSW cost trend function; decrement MNUMFUEL to accommodate kerosene and coal removal
 
 
 !PARAMETERS
 
   INTEGER MNUMRTCL,       & ! PARAMETER: MAX # RSCLASS RECORDS
           MNUMRTTY,       & ! PARAMETER: MAX # RSMEQP RECORDS
+          MNUMHVAC,       & ! PARAMETER: MAX # HVAC RECORDS
           MNUMENDU,       & ! PARAMETER: MAX # END USES + 1
           MNUMBLDG,       & ! PARAMETER: EXACT # OF BUILDING TYPES
           MNUMCENDIV,     & ! PARAMETER: 9 U.S. CENSUS DIVISIONS
           MNUMFUEL,       & ! PARAMETER: EXACT # OF RTEK FUELS
-          MNUMHVAC,       & ! PARAMETER: MAX # HVAC RECORDS
-          COSTTRSW          ! PARAMETER: = 1, USE COST TREND FUNCTION
-                            !            = 0, DON'T USE FUNCTION
+          COSTTRSW          ! PARAMETER: = 1, USE COST TREND FUNCTION EQCOST
+                            !            = 0, DON'T USE FUNCTION EQCOST
 
-  PARAMETER(MNUMRTCL=50)   ! INCREASE IF RSCLASS HAS >  50 RECORDS
-  PARAMETER(MNUMRTTY=3200) ! INCREASE IF RSMEQP HAS > 3200 RECORDS
+  PARAMETER(MNUMRTCL=40)   ! INCREASE IF RSCLASS HAS >  40 RECORDS
+  PARAMETER(MNUMRTTY=3500) ! INCREASE IF RSMEQP HAS > 3500 RECORDS
   PARAMETER(MNUMHVAC=3500) ! INCREASE IF RSMSHL HAS > 3500 RECORDS
   PARAMETER(MNUMENDU=13)   ! INCREASE IF > 13 END USES
   PARAMETER(MNUMBLDG=3)    ! INCREASE IF > 3 BUILDING TYPES
   PARAMETER(MNUMCENDIV=9)  ! 9 U.S. CENSUS DIVISIONS
-  PARAMETER(MNUMFUEL=8)    ! INCREASE IF >  8 RTEK FUELS
-  PARAMETER(COSTTRSW=1)    ! SET = 0 TO TURN OFF FUNCTION EQCOST
+  PARAMETER(MNUMFUEL=5)    ! INCREASE IF > 5 RTEK FUELS (NATURAL GAS, ELECTRICITY, DISTILLATE FUEL OIL/KEROSENE, PROPANE, WOOD)
+  PARAMETER(COSTTRSW=0)    ! SET = 0 TO TURN OFF FUNCTION EQCOST
 
 
 !COUNTERS AND POINTERS (COMPUTED IN SUBROUTINE RTEKREAD)
@@ -68,8 +69,7 @@
                              !   2 = PROPANE
                              !   3 = NATURAL GAS
                              !   4 = ELECTRICITY
-                             !   5 = KEROSENE (NOW INCLUDED WITH DISTILLATE FUEL OIL)
-                             !   6 = WOOD
+                             !   5 = WOOD
     RTFFAN(MNUMRTCL),      & ! FLAG: = 1 HAS FURNACE FAN
                              !       = 0 NO FURNACE FAN
     RTMINLIF(MNUMRTCL),    & ! MINIMUM LIFE FOR THIS EQUIPMENT CLASS

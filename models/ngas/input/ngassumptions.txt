@@ -77,7 +77,7 @@
 !___________________________________________________________________________________________
 
 !Last data year for any data and last year of full data (aka NGA year)
-LastDataYear:='2024'; 
+LastDataYear:='2025'; 
 !LastNGAYear:= '2020';
 
 !Swtiches
@@ -89,7 +89,7 @@ OilSands_Switch :=0; !0=Do no calculate additional natural gas consumed in oil s
 Calibration_Option:=2;
 
 !Year after which capacity builds are allowed
-NoBuildYear := '2026';
+NoBuildYear := '2027';
 
 !Number of years used to calculate averages/historical shares
 NumberOfYearsForAverage_Demand_ := data {1..5};
@@ -145,9 +145,10 @@ STEOCNExportPercent:=	DATA{	2016    :0.3589,
                                 2020	:0.311,	
                                 2021	:0.312,
                                 2022	:0.316,
-                                2023	:0.3164,
-                                2024	:0.289,
-                                2025	:0.285	};
+                                2023	:0.3137,
+                                2024	:0.2984,
+                                2025	:0.2984,	
+                                2026	:0.2984	};
                                 
                                 
 !Percentage of total pipeline imports attributed to Canada for STEO
@@ -161,12 +162,13 @@ STEOCNImportPercent:= DATA{	2016    :1,
                                 2022	:1,	
                                 2023	:1,
                                 2024	:1,
-                                2025	:1};
+                                2025	:1,
+                                2026	:1};
 
 ! Flags to indicate whether to phaseout STEO benchmarking factors for certain variables
 STEOMXExportsPhaseOutFlag := 1;
-STEOCANEXportsPhaseOutFlag := 1;
-STEOPipelineImportPhaseOutFlag := 1;
+STEOCANEXportsPhaseOutFlag := 0;
+STEOPipelineImportPhaseOutFlag := 0;
 
 
 !___________________________________________________________________________________________
@@ -354,100 +356,100 @@ step3               1                     1
 
 
 Composite table:
-reg    GatheringCharge  GatherCharge_Add   PriceSpot_Add
-AL       0.15
-AZ       0.15
-AR       0.15              
-CA       0.15
-CO       0.15
-CT       0.15
-DE       0.15
-DC       0.15
-FL       0.15
-GA       0.15
-ID       0.15
-IL       0.15
-IN       0.15
-IA       0.15
-KS       0.15
-KY       0.15
-LA       0.15
-ME       0.15
-MD       0.15
-MA       0.15
-MI       0.15
-MN       0.15
-MS       0.15
-MO       0.15
-MT       0.15
-NE       0.15
-NV       0.15
-NH       0.15
-NJ       0.15
-NM       0.15
-NY       0.15
-NC       0.15
-ND       0.15
-OH       0.15
-OK       0.15
-OR       0.15
-PA       0.15
-RI       0.15
-SC       0.15
-SD       0.15
-TN       0.15
-TX       0.15
-UT       0.15
-VT       0.15
-VA       0.15
-WA       0.15
-WV       0.15
-WI       0.15
-WY       0.15
-CN_E     0.15
-CN_W     0.15
-MX_NE    0.15
-MX_NW    0.15
-MX_IW    0.15
-MX_CE    0.15
-MX_SS    0.15
-TX_1     0.15
-TX_2     0.15
-TX_3     0.15
-TX_4     0.15
-TX_5     0.15
-TX_6     0.15
-TX_7B    0.15
-TX_7C    0.15
-TX_8     0.15
-TX_8A    0.15
-TX_9     0.15
-TX_10    0.15
-NM_E     0.15
-NM_W     0.15
-LA_N     0.15
-LA_S     0.15
-AL_N     0.15
-AL_S     0.15
-MS_N     0.15
-MS_S     0.15
-MA_ST    0.15
-VA_ST    0.15
-GA_ST    0.15
-AL_ST    0.15
-LA_ST    0.15
-TX_ST    0.15
-CA_ST    0.15
-OR_ST    0.15
-MA_FD    0.15
-VA_FD    0.15
-GA_FD    0.15
-AL_FD    0.15
-LA_FD    0.15
-MS_FD    0.15
-TX_FD    0.15
-CA_FD    0.15
-OR_FD    0.15
+    nn::reg    GatheringCharge  GatherCharge_Add   PriceSpot_Add
+	AL       0.15
+	AZ       0.15
+	AR       0.15              
+	CA       0.15
+	CO       0.15
+	CT       0.15
+	DE       0.15
+	DC       0.15
+	FL       0.15
+	GA       0.15
+	ID       0.15
+	IL       0.15
+	IN       0.15
+	IA       0.15
+	KS       0.15
+	KY       0.15
+	LA       0.15
+	ME       0.15
+	MD       0.15
+	MA       0.15
+	MI       0.15
+	MN       0.15
+	MS       0.15
+	MO       0.15
+	MT       0.15
+	NE       0.15
+	NV       0.15
+	NH       0.15
+	NJ       0.15
+	NM       0.15
+	NY       0.15
+	NC       0.15
+	ND       0.15
+	OH       0.15
+	OK       0.15
+	OR       0.15
+	PA       0.15
+	RI       0.15
+	SC       0.15
+	SD       0.15
+	TN       0.15
+	TX       0.15
+	UT       0.15
+	VT       0.15
+	VA       0.15
+	WA       0.15
+	WV       0.15
+	WI       0.15
+	WY       0.15
+	CN_E     0.15
+	CN_W     0.15
+	MX_NE    0.15
+	MX_NW    0.15
+	MX_IW    0.15
+	MX_CE    0.15
+	MX_SS    0.15
+	TX_1     0.15
+	TX_2     0.15
+	TX_3     0.15
+	TX_4     0.15
+	TX_5     0.15
+	TX_6     0.15
+	TX_7B    0.15
+	TX_7C    0.15
+	TX_8     0.15
+	TX_8A    0.15
+	TX_9     0.15
+	TX_10    0.15
+	NM_E     0.15
+	NM_W     0.15
+	LA_N     0.15
+	LA_S     0.15
+	AL_N     0.15
+	AL_S     0.15
+	MS_N     0.15
+	MS_S     0.15
+	MA_ST    0.15
+	VA_ST    0.15
+	GA_ST    0.15
+	AL_ST    0.15
+	LA_ST    0.15
+	TX_ST    0.15
+	CA_ST    0.15
+	OR_ST    0.15
+	MA_FD    0.15
+	VA_FD    0.15
+	GA_FD    0.15
+	AL_FD    0.15
+	LA_FD    0.15
+	MS_FD    0.15
+	TX_FD    0.15
+	CA_FD    0.15
+	OR_FD    0.15
 ;
 !___________________________________________________________________________________________
 !
@@ -478,58 +480,58 @@ WeatherFactor2 := data table
 
 ! Fractions of gas used- used to calculate pipeline fuel loss factors
 COMPOSITE TABLE:
-reg   StorageLossFactor       DistributionLossFactor  
-AK    0.0036                  0.0092                  
-AL    0.0036                  0.0298                  
-AR    0.0036                  0.0293                  
-AZ    0.0036                  0.0062                  
-CA    0.0036                  0.0346                  
-CO    0.0036                  0.0053                  
-CT    0.0036                  0.0144                  
-DC    0.0036                  0.0411                  
-DE    0.0036                  0.0445                  
-FL    0.0036                  0.0059                  
-GA    0.0036                  0.0033                  
-HI                                                    
-IA    0.0036                  0.0093                  
-ID    0.0036                  0.0116                  
-IL    0.0036                  0.0253                  
-IN    0.0036                  0.0103                  
-KS    0.0036                  0.0149                  
-KY    0.0036                  0.0464                  
-LA    0.0036                  0.0171                  
-MA    0.0036                  0.0256                  
-MD    0.0036                  0.0166                  
-ME    0.0036                  0.0202                  
-MI    0.0036                  0.0132                  
-MN    0.0036                  0.0030                  
-MO    0.0036                  0.0054                  
-MS    0.0036                  0.0154                  
-MT    0.0036                  0.0133                  
-NC    0.0036                  0.0143                  
-ND    0.0036                  0.0039                  
-NE    0.0036                  0.0242                  
-NH    0.0036                  0.0037                  
-NJ    0.0036                  0.0082                  
-NM    0.0036                  0.0110                  
-NV    0.0036                  0.0096                  
-NY    0.0036                  0.0183                  
-OH    0.0036                  0.0135                  
-OK    0.0036                  0.0339                  
-OR    0.0036                  0.0065                  
-PA    0.0036                  0.0171                  
-RI    0.0036                  0.0617                  
-SC    0.0036                  0.0059                  
-SD    0.0036                  0.0076                  
-TN    0.0036                  0.0098                  
-TX    0.0036                  0.0285                  
-UT    0.0036                  0.0274                  
-VA    0.0036                  0.0230                  
-VT    0.0036                  0.0144                  
-WA    0.0036                  0.0130                  
-WI    0.0036                  0.0102                  
-WV    0.0036                  0.0341                  
-WY    0.0036                  0.0211                  
+    nn::reg   StorageLossFactor       DistributionLossFactor  
+	AK    0.0036                  0.0092                  
+	AL    0.0036                  0.0298                  
+	AR    0.0036                  0.0293                  
+	AZ    0.0036                  0.0062                  
+	CA    0.0036                  0.0346                  
+	CO    0.0036                  0.0053                  
+	CT    0.0036                  0.0144                  
+	DC    0.0036                  0.0411                  
+	DE    0.0036                  0.0445                  
+	FL    0.0036                  0.0059                  
+	GA    0.0036                  0.0033                  
+	HI                                                    
+	IA    0.0036                  0.0093                  
+	ID    0.0036                  0.0116                  
+	IL    0.0036                  0.0253                  
+	IN    0.0036                  0.0103                  
+	KS    0.0036                  0.0149                  
+	KY    0.0036                  0.0464                  
+	LA    0.0036                  0.0171                  
+	MA    0.0036                  0.0256                  
+	MD    0.0036                  0.0166                  
+	ME    0.0036                  0.0202                  
+	MI    0.0036                  0.0132                  
+	MN    0.0036                  0.0030                  
+	MO    0.0036                  0.0054                  
+	MS    0.0036                  0.0154                  
+	MT    0.0036                  0.0133                  
+	NC    0.0036                  0.0143                  
+	ND    0.0036                  0.0039                  
+	NE    0.0036                  0.0242                  
+	NH    0.0036                  0.0037                  
+	NJ    0.0036                  0.0082                  
+	NM    0.0036                  0.0110                  
+	NV    0.0036                  0.0096                  
+	NY    0.0036                  0.0183                  
+	OH    0.0036                  0.0135                  
+	OK    0.0036                  0.0339                  
+	OR    0.0036                  0.0065                  
+	PA    0.0036                  0.0171                  
+	RI    0.0036                  0.0617                  
+	SC    0.0036                  0.0059                  
+	SD    0.0036                  0.0076                  
+	TN    0.0036                  0.0098                  
+	TX    0.0036                  0.0285                  
+	UT    0.0036                  0.0274                  
+	VA    0.0036                  0.0230                  
+	VT    0.0036                  0.0144                  
+	WA    0.0036                  0.0130                  
+	WI    0.0036                  0.0102                  
+	WV    0.0036                  0.0341                  
+	WY    0.0036                  0.0211                  
 ;
 
 
@@ -538,65 +540,65 @@ WY    0.0036                  0.0211
 !7/18/2022	SYK	Adjusted to add TX sub-regions.
 
 COMPOSITE TABLE:
-reg       reg1      PercentOfProductionMovedForPlantFuel
-AL        AL        1.00
-AL_ST     AL        1.00
-AL_FD     AL        1.00
-AK        AK        1.00
-AK_ST     AK        1.00
-AK_FD     AK        1.00
-AR        AR        1.00
-CA        CA        1.00
-CA_ST     CA        1.00
-CA_FD     CA        1.00
-CO        CO        0.999448
-CO        KS        0.000153
-CO        UT        0.000399
-FL        FL        1.00
-GA_ST     GA        1.00
-GA_FD     GA        1.00
-IL        IL        1.00
-KS        KS        0.998850
-KS        OK        0.000424
-KS        TX_W      0.000726
-KY        KY        0.7736
-KY        WV        0.2264
-LA_ST     LA        1.00
-LA_FD     LA        1.00
-LA        LA        0.99046
-LA        TX_E      0.00954
-MI        MI        1.00
-MS        MS        1.00
-MT        MT        0.8024
-MT        ND        0.1814
-MT        WY        0.0162
-NM        NM        0.9915
-NM        TX_W      0.0085
-ND        IL        0.0412
-ND        ND        0.9588
-OH        OH        1.00
-OK        KS        0.003856
-OK        OK        0.981815
-OK        TX_W      0.014329
-PA        OH        0.00865
-PA        PA        0.63288
-PA        WV        0.35847
-SD        ND        1.00
-TN        TN        1.00
-TX_W      KS        0.00912
-TX_W      OK        0.01081
-TX_W      TX_W      0.98007
-TX_E      TX_E      0.98007
-TX_N      TX_N      0.98007
-TX_ST     TX_E      1.00
-TX_FD     TX_E      1.00
-UT        UT        0.974855
-UT        WY        0.025145
-VA_ST     VA        1.00
-VA_FD     VA        1.00
-WV        WV        1.00
-WY        CO        0.208856
-WY        WY        0.791144
+    nn::reg   nn::reg1      PercentOfProductionMovedForPlantFuel
+	AL        AL        1.00
+	AL_ST     AL        1.00
+	AL_FD     AL        1.00
+	AK        AK        1.00
+	AK_ST     AK        1.00
+	AK_FD     AK        1.00
+	AR        AR        1.00
+	CA        CA        1.00
+	CA_ST     CA        1.00
+	CA_FD     CA        1.00
+	CO        CO        0.999448
+	CO        KS        0.000153
+	CO        UT        0.000399
+	FL        FL        1.00
+	GA_ST     GA        1.00
+	GA_FD     GA        1.00
+	IL        IL        1.00
+	KS        KS        0.998850
+	KS        OK        0.000424
+	KS        TX_W      0.000726
+	KY        KY        0.7736
+	KY        WV        0.2264
+	LA_ST     LA        1.00
+	LA_FD     LA        1.00
+	LA        LA        0.99046
+	LA        TX_E      0.00954
+	MI        MI        1.00
+	MS        MS        1.00
+	MT        MT        0.8024
+	MT        ND        0.1814
+	MT        WY        0.0162
+	NM        NM        0.9915
+	NM        TX_W      0.0085
+	ND        IL        0.0412
+	ND        ND        0.9588
+	OH        OH        1.00
+	OK        KS        0.003856
+	OK        OK        0.981815
+	OK        TX_W      0.014329
+	PA        OH        0.00865
+	PA        PA        0.63288
+	PA        WV        0.35847
+	SD        ND        1.00
+	TN        TN        1.00
+	TX_W      KS        0.00912
+	TX_W      OK        0.01081
+	TX_W      TX_W      0.98007
+	TX_E      TX_E      0.98007
+	TX_N      TX_N      0.98007
+	TX_ST     TX_E      1.00
+	TX_FD     TX_E      1.00
+	UT        UT        0.974855
+	UT        WY        0.025145
+	VA_ST     VA        1.00
+	VA_FD     VA        1.00
+	WV        WV        1.00
+	WY        CO        0.208856
+	WY        WY        0.791144
 ;
 
 
@@ -623,7 +625,6 @@ mx_ieo_industrial_switch := 1;
 
 !8/13		SYK	CER data for Canada
 !7/29/24	SYK	Used IEO data to update canada demands (in quadrillion BTUs)
-
 IEO_CN_Consumption := data table                                        
         Residential     Commercial      Industrial      Transportation  Electric
 2010	0.597		0.4642		2.0058		0.1108		0.3744
@@ -667,8 +668,13 @@ IEO_CN_Consumption := data table
 2048	0.6925		0.8086		3.886		0.074		1.1991
 2049	0.6959		0.8161		3.9571		0.0762		1.2262
 2050	0.6993		0.8237		4.0298		0.0799		1.2533
-
 ;
+
+! Tells NGMM to adjust IEO projected industrial demand based on a certain value
+! (Useful if IEO doesn't seem to be syncing up with historical Canada demand)
+! Note, for the value, we assume that Transportation volumes are counted as industrial.
+IEO_Canada_TrueUp_Switch := 1;
+IEO_Canada_TrueUp_INDValue := 901.473856;
 
 !10/19/17 	KDL 	updated industrial and electric (VZ); industrial constant at 2013 value through 2040, smoothed after
 !8/29/19	KDL	updated residential, commercial, and transportation to align with IEO 2019
@@ -878,74 +884,74 @@ IEO_CN_Bitumen := data table
 !AK NGTDM Variable Declaration
 !AK price used to evaluate LNG export build; in 1987$
 AK_ANGTS_Min_WHPrice :=0.78; 	!0.52; Currently equals $1.50 in 2018 dollars; 0.52 equals $1.00
-Pct_Liquifaction_Fuel :=0.081
+Pct_Liquifaction_Fuel :=0.105096372
 ;
 !AK Consumption and AK Consumption Coefficient Declaration
 
 COMPOSITE TABLE:
-year            Population     
+    nn::year            Population     
 !------------------------------
-1990             553.290
-1991             570.193
-1992             588.736
-1993             599.432
-1994             603.308
-1995             604.412
-1996             608.589
-1997             612.968
-1998             619.932
-1999             624.779
-2000             626.932
-2001             633.714
-2002             642.337
-2003             648.414
-2004             659.286
-2005             666.946
-2006             675.302
-2007             680.300
-2008             687.455
-2009             698.895
-2010             710.231
-2011             713.985
-2012             720.798
-2013             724.692
-2014             728.608
-2015             732.544
-2016             740.734
-2017             749.016
-2018             757.390
-2019             765.858
-2020             774.421
-2021             783.498
-2022             792.681
-2023             801.972
-2024             811.371
-2025             820.881
-2026             830.033
-2027             839.288
-2028             848.645
-2029             858.107
-2030             867.674
-2031             877.522
-2032             887.482
-2033             897.555
-2034             907.743
-2035             918.046
-2036             928.466
-2037             939.004
-2038             949.662
-2039             960.440
-2040             971.342
-2041             982.366
-2042             993.516
-2043            1004.793
-2044            1016.198
-2045            1027.732
-2046            1039.396
-2047            1051.194
-2048            1063.125
-2049            1075.192
-2050            1087.395;
+	1990             553.290
+	1991             570.193
+	1992             588.736
+	1993             599.432
+	1994             603.308
+	1995             604.412
+	1996             608.589
+	1997             612.968
+	1998             619.932
+	1999             624.779
+	2000             626.932
+	2001             633.714
+	2002             642.337
+	2003             648.414
+	2004             659.286
+	2005             666.946
+	2006             675.302
+	2007             680.300
+	2008             687.455
+	2009             698.895
+	2010             710.231
+	2011             713.985
+	2012             720.798
+	2013             724.692
+	2014             728.608
+	2015             732.544
+	2016             740.734
+	2017             749.016
+	2018             757.390
+	2019             765.858
+	2020             774.421
+	2021             783.498
+	2022             792.681
+	2023             801.972
+	2024             811.371
+	2025             820.881
+	2026             830.033
+	2027             839.288
+	2028             848.645
+	2029             858.107
+	2030             867.674
+	2031             877.522
+	2032             887.482
+	2033             897.555
+	2034             907.743
+	2035             918.046
+	2036             928.466
+	2037             939.004
+	2038             949.662
+	2039             960.440
+	2040             971.342
+	2041             982.366
+	2042             993.516
+	2043            1004.793
+	2044            1016.198
+	2045            1027.732
+	2046            1039.396
+	2047            1051.194
+	2048            1063.125
+	2049            1075.192
+	2050            1087.395;
 
 AK_Cons_Industrial := 6.0;
 x_AK_Cons_Commercial1 := .024;
@@ -970,7 +976,7 @@ x_AK_N_LAP3 :=-0.4;
 !AK Prices Calculations
 x_AK_Citygate1 := -1.82;
 x_AK_Citygate2 :=0.82;
-PriceMarkup(sec)        := DATA{Residential     :1.638,
+PriceMarkup(nn::sec)        := DATA{Residential     :1.638,
                                 Commercial      :1.416,
                                 Industrial      :-0.836,
                                 Transportation  :1.416,
@@ -1056,41 +1062,41 @@ MX_Sector_Industrial := 'Industrial';
 ! SYK Updated 8/13/21 using latest historical/IEO estimates from oil_all_fsf in Eviews
 composite table:
 
-year	MX_Oil_Production
-1990	930.0232
-1991	976.6820
-1992	973.7193
-1993	975.7911
-1994	980.0622
-1995	955.2778
-1996	1043.291
-1997	1103.110
-1998	1120.715
-1999	1060.700
-2000	1099.367
-2001	1141.368
-2002	1159.641
-2003	1230.377
-2004	1234.757
-2005	1216.672
-2006	1188.286
-2007	1122.634
-2008	1018.925
-2009	949.5406
-2010	940.6120
-2011	931.7046
-2012	929.9877
-2013	920.5763
-2014	886.5001
-2015	827.3934
-2016	786.0370
-2017	711.1160
-2018	669.1527
-2019	620.7548
-2020	607.1922
-2021	579.2194
-2022	551.1243
-2023	521.8622
-2024	473.4587
-2025	607.3490
+    nn::year	MX_Oil_Production
+	1990	930.0232
+	1991	976.6820
+	1992	973.7193
+	1993	975.7911
+	1994	980.0622
+	1995	955.2778
+	1996	1043.291
+	1997	1103.110
+	1998	1120.715
+	1999	1060.700
+	2000	1099.367
+	2001	1141.368
+	2002	1159.641
+	2003	1230.377
+	2004	1234.757
+	2005	1216.672
+	2006	1188.286
+	2007	1122.634
+	2008	1018.925
+	2009	949.5406
+	2010	940.6120
+	2011	931.7046
+	2012	929.9877
+	2013	920.5763
+	2014	886.5001
+	2015	827.3934
+	2016	786.0370
+	2017	711.1160
+	2018	669.1527
+	2019	620.7548
+	2020	607.1922
+	2021	579.2194
+	2022	551.1243
+	2023	521.8622
+	2024	473.4587
+	2025	607.3490
 ;

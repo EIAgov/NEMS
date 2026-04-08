@@ -12,6 +12,7 @@ import pyf_duplicates_remover
 import csv
 import pandas as pd
 import filecmp
+from pathlib import Path
 
 print(os.getcwd())
 sys.path.append('../models')
@@ -25,10 +26,9 @@ def make_pyd_files(FULL_BUILD_FLAG, env, work_dir,uscedes):
 
     Args:
         FULL_BUILD_FLAG (_int_): full build indicator flag.
-            -when the flag = 0: start the process from PyFilerf2py_build.py execution. This mode takes the longest process time.
-            -when the flag = 1: start the meson process from pyfiler1.pyf and pyfiler2.pyf execution. Also trim the duplicates
-                                and parse wrapper and module.c files in desired format.
-            -when the flag = 2: directly run meson build to generate pyfiler1.pyd and pyfiler2.pyd files.
+            * when the flag = 0: start the process from PyFilerf2py_build.py execution. This mode takes the longest process time.
+            * when the flag = 1: start the meson process from pyfiler1.pyf execution. Also trim the duplicates and parse wrapper and module.c files in desired format.
+            * when the flag = 2: directly run meson build to generate pyfiler1.pyd files.
 
         env (_str_): the Python virtrul environment path
         work_dir (_str_): the working directory where the Fortran files locate
@@ -39,7 +39,7 @@ def make_pyd_files(FULL_BUILD_FLAG, env, work_dir,uscedes):
 
     # Activate virtual environment where numpy and other modules are installed to avoid the "ModuleNotFoundError"
     # env=r'O:\python_environments\aeo2025_py311\Scripts'
-    call_p= os.path.join(env, 'scripts\python.exe')
+    call_p= os.path.join(env, r'scripts\python.exe')
     current_directory = os.getcwd()
     os.chdir(work_dir)
 
@@ -53,10 +53,9 @@ def make_pyd_files(FULL_BUILD_FLAG, env, work_dir,uscedes):
 
     # Processes the existing pyf via F2Py,format the secondary files and run the meson build process
     if FULL_BUILD_FLAG in (0, 1):
-        pyfs=("pyfiler1.pyf","pyfiler2.pyf")
-        for pyf in pyfs:
-            result=subprocess.run([call_p, "-m", "numpy.f2py", pyf])
-            capture_error_and_exit(result,pyf)
+        pyf="pyfiler1.pyf"
+        result=subprocess.run([call_p, "-m", "numpy.f2py", pyf])
+        capture_error_and_exit(result,pyf)
 
         # remove the duplicates in pyf:
         pyf_duplicates_remover.main()
@@ -106,7 +105,7 @@ def capture_error_and_exit(result,msg):
         os.sys.exit()
 
 def copy_pyd_to_pyfiler(work_dir):
-    """The method to copy the pyd files to $NEMS\scripts\Pyfiler folder.
+    """The method to copy the pyd files to $NEMS\\scripts\\Pyfiler folder.
 
     Args:
         work_dir (_str_): the working directory where the Fortran files locate. i.e. $NEMS\source
@@ -116,39 +115,35 @@ def copy_pyd_to_pyfiler(work_dir):
     os.chdir(work_dir)
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    # files to copy
-    files_to_copy = [r"pyfiler1.cp311-win_amd64.pyd", r"pyfiler2.cp311-win_amd64.pyd"]
-    folddir = [r"builddir", r"builddir"]
+    # search for the python environment in builddir and append it to the arraycode.exe in the files to copy list
+    search_file = "pyfiler1.cp*-win_amd64.pyd"
+    search_path = Path.cwd()/"builddir"
+    files_to_copy = [r"arraycode.exe"]
+    for file_path in search_path.glob(search_file):
+        files_to_copy.append(file_path.name)
+    
+    # copies the files over
+    folddir = [r"builddir",r"builddir"]
     for foldername, file_name in zip(folddir, files_to_copy):
         # source and destination path relative to NEMS folder or directory
         source_path = os.path.join("..", "source", foldername, file_name)
-        destination_path = os.path.join("..", "scripts", "PyFiler", file_name)
-        # check if source file exists
-        if os.path.exists(source_path):
-            shutil.copy(source_path, destination_path)
-            print(file_name,":File copied successfully.")
+        if file_name == "arraycode.exe":
+            destination_path = [os.path.join("..", "scripts", file_name)]
         else:
-            print(file_name,":File does not exist.")
-
-    # files to copy
-    files_to_copy = ["intercv.exe","tfiler.exe"]
-    folddir = [r"builddir",r"builddir",r"builddir"]
-    for foldername, file_name in zip(folddir, files_to_copy):
-        # source and destination path relative to NEMS folder or directory
-        source_path = os.path.join("..", "source", foldername, file_name)
-        destination_path = os.path.join("..", "source", file_name)
+            destination_path = [os.path.join("..", "scripts", "PyFiler", file_name),os.path.join("..", "source", file_name)]
         # check if source file exists
-        if os.path.exists(source_path):
-            shutil.copy(source_path, destination_path)
-            print(file_name,"File copied successfully.")
-        else:
-            print(file_name,":File does not exist.")
+        for path in destination_path:
+            if os.path.exists(source_path):
+                shutil.copy(source_path, path)
+                print(file_name,"File copied successfully.")
+            else:
+                print(file_name,":File does not exist.")
 
     os.chdir(current_directory)
 
 
 def get_ifort_executible_path(NEMS_PATH):
-    """Read ifort command file path from $NEMS\scripts\setup\input\nems_config_xilink_nems_ftab.csv and return the parsed command string.
+    """Read ifort command file path from $NEMS\\scripts\\setup\\input\\nems_config_xilink_nems_ftab.csv and return the parsed command string.
 
     Args:
         NEMS_PATH (_str_): the directory path of NEMS source code folder.
@@ -179,8 +174,6 @@ def load_meson_data(SCEDES,NEMS_PATH):
     files_df=pd.read_csv('../scripts/setup/input/meson_file_configuration.csv')
     #create three lists that will be used to populate meson
     pyfiler1_file_list=[]
-    pyfiler2_file_list=[]
-    tfiler_file_list=[]
     #if its a scedes key, look it up, and replace $nems with the nems_path.  Otherwise, use the path.
     for i in files_df.iterrows():
         a=i[1]['list']
@@ -194,10 +187,6 @@ def load_meson_data(SCEDES,NEMS_PATH):
                 final_path=os.path.join(NEMS_PATH,"/".join(temp_file_name.split('/')[1:]))
         if a=='pyfiler1':
             pyfiler1_file_list.append(final_path)
-        if a=='pyfiler2':
-            pyfiler2_file_list.append(final_path)
-        if a=='tfiler':
-            tfiler_file_list.append(final_path)
 
     #write it into meson, looking for the three places these lists go.
 
@@ -208,16 +197,6 @@ def load_meson_data(SCEDES,NEMS_PATH):
         fileout.write(line)
         if "py.extension_module('pyfiler1'," in line:
             for i in pyfiler1_file_list:
-                fileout.write("'")
-                fileout.write(i)
-                fileout.write("',\n")
-        if "py.extension_module('pyfiler2'," in line:
-            for i in pyfiler2_file_list:
-                fileout.write("'")
-                fileout.write(i)
-                fileout.write("',\n")
-        if "executable('tfiler'," in line:
-            for i in tfiler_file_list:
                 fileout.write("'")
                 fileout.write(i)
                 fileout.write("',\n")

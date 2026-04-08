@@ -206,7 +206,7 @@ def fill_table_base_003(dfd, table_spec, table_id):
     z[21] = dfd["AMPBLK/PNGIN"] * SCALPR2
     z[22] = dfd["AMPBLK/PMCIN"] * SCALPR2
     z[23] = dfd["AMPBLK/PCLIN"] * SCALPR2
-    z[3] = dfd["PH2IN"] * SCALPR2
+    z[3] = dfd["APMORE/PH2IN"] * SCALPR2
     z[24] = dfd["AMPBLK/PELIN"] * SCALPR2
     z[46] = z[24] * 0.0
 
@@ -264,7 +264,7 @@ def fill_table_base_003(dfd, table_spec, table_id):
         - dfd["AMPBLK/PMGTR"] * dfd["QMGBS"]
     ) / (dfd["QTPTR"] - dfd["QDSBS"] - dfd["QJFBS"] - dfd["QMGBS"])
     z[32] = dfd["APMORE/PPRTR"] * SCALPR2
-    z[10] = dfd["PH2TR"] * SCALPR2
+    z[10] = dfd["AMPBLK/PH2TR"] * SCALPR2
     z[34] = dfd["AMPBLK/PETTR"] * SCALPR2
     z[30] = dfd["AMPBLK/PMGTR"] * SCALPR2
     z[29] = dfd["AMPBLK/PJFTR"] * SCALPR2
@@ -323,7 +323,7 @@ def fill_table_base_003(dfd, table_spec, table_id):
         + z[16] * (dfd["QTPIN"] + dfd["QNGIN"] + dfd["QCLIN"] + dfd["QMCIN"])
         + z[26] * (dfd["QTPTR"] + dfd["QNGTR"] + dfd["QETTR"])
     ) / DENOM
-    z[39] = dfd["AMPBLK/PELAS"] * SCALPR2
+    #z[39] = dfd["AMPBLK/PELAS"] * SCALPR2
 
     # Electric Power 8/
     #   Distillate Fuel Oil     T3(42,IR,IY,IS)=PDSEL(IR,IY)
@@ -347,7 +347,7 @@ def fill_table_base_003(dfd, table_spec, table_id):
     z[44] = dfd["AMPBLK/PNGEL"] * SCALPR2
     z[45] = dfd["AMPBLK/PCLEL"] * SCALPR2
     z[35] = dfd["AMPBLK/PUREL"] * SCALPR2
-    z[17] = dfd["PH2EL"] * SCALPR2
+    z[17] = dfd["APMORE/PH2EL"] * SCALPR2
     z[64] = dfd["UPRWDCR"] * SCALPR2
     #
     # Average Price to All Users
@@ -392,9 +392,9 @@ def fill_table_base_003(dfd, table_spec, table_id):
     # Average Hydrogen Price
     z[27] = (
         (
-            dfd["QH2IN"] * dfd["PH2IN"]
-            + dfd["QH2TR"] * dfd["PH2TR"]
-            + dfd["QH2EL"] * dfd["PH2EL"]
+            dfd["QH2IN"] * dfd["APMORE/PH2IN"]
+            + dfd["QH2TR"] * dfd["AMPBLK/PH2TR"]
+            + dfd["QH2EL"] * dfd["APMORE/PH2EL"]
         )
         / (dfd["QH2IN"] + dfd["QH2TR"] + dfd["QH2EL"])
     ) * SCALPR2
@@ -471,7 +471,7 @@ def fill_table_base_003(dfd, table_spec, table_id):
     z[77] = z[21] / SCALPR2 * MC_JPGDP.values
     z[78] = z[22] / SCALPR2 * MC_JPGDP.values
     z[79] = z[23] / SCALPR2 * MC_JPGDP.values
-    z[39] = z[23] / SCALPR2 * MC_JPGDP.values
+    z[39] = z[3] / SCALPR2 * MC_JPGDP.values
     z[81] = z[24] / SCALPR2 * MC_JPGDP.values
     z[82] = z[46] / SCALPR2 * MC_JPGDP.values
     z[83] = z[32] / SCALPR2 * MC_JPGDP.values

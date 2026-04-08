@@ -96,11 +96,5 @@ def fill_table_base_114(dfd, table_spec, table_id):
     z[257] = dfd["AVG_PRC_CAR"] / SCALPR90 * SCALPR2
     z[258] = dfd["AVG_PRC_TRK"] / SCALPR90 * SCALPR2
     z[259] = dfd["AVG_PRC_VEH"] / SCALPR90 * SCALPR2
-    z[260] = dfd["FULL_PRC_CAR"] / SCALPR90 * SCALPR2
-    z[261] = dfd["FULL_PRC_TRK"] / SCALPR90 * SCALPR2
-    z[262] = dfd["FULL_PRC_VEH"] / SCALPR90 * SCALPR2
-    z[263] = dfd["LI_ION_COST"].loc[15] / SCALPR90 * SCALPR2
-    z[264] = dfd["LI_ION_COST"].loc[5] / SCALPR90 * SCALPR2
-    z[265] = dfd["LI_ION_COST"].loc[16] / SCALPR90 * SCALPR2
 
     return z

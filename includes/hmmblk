@@ -22,6 +22,15 @@
       REAL*4 QELINH2NG(MNUMCR,MNUMYR)                         ! 13 COMMENT
       REAL*4 PH2_SPOT(MNUMCR,MNUMYR)                          ! 14 COMMENT
       REAL*4 QH2_DISC(MNUMYR)                                 ! 15 COMMENT
+	  REAL*4 PRDH2NGATR_CCS(MNUMCR,MNUMYR)                    ! 16 COMMENT
+	  REAL*4 SMR_CAP(MNUMCR,MNUMYR)                           ! 17 COMMENT
+	  REAL*4 SMRCCS_CAP(MNUMCR,MNUMYR)                        ! 18 COMMENT
+	  REAL*4 ATRCCS_CAP(MNUMCR,MNUMYR)                        ! 19 COMMENT
+	  REAL*4 ELEC_CAP(MNUMCR,MNUMYR)                          ! 20 COMMENT
+	  REAL*4 SMRCAPCOST(MNUMYR)                               ! 21 COMMENT
+	  REAL*4 SMRCCSCAPCOST(MNUMYR)                            ! 22 COMMENT
+	  REAL*4 ATRCCSCAPCOST(MNUMYR)                            ! 23 COMMENT
+	  REAL*4 ELECCAPCOST(MNUMYR)                              ! 24 COMMENT
 
       
       COMMON/HMMBLK/ HSTAT,QNGHMHP,QNGHMPF,PH2RF, &
@@ -31,9 +40,9 @@
 		
 ! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
       REAL HMARRY(MNUMYR*MNUMCR*HMKT +                       &  ! HSTAT
-          3*(MNUMCR*MNUMYR) + (MNUMNR*4*24*MNUMYR) +         &  ! (QNGHMHP, QNGHMPF, PH2RF), QELHM_HR
+          8*(MNUMCR*MNUMYR) + (MNUMNR*4*24*MNUMYR) +         &  ! (QNGHMHP, QNGHMPF, PH2RF), QELHM_HR,PRDH2NGATR_CCS, SMR_CAP, SMRCCS_CAP, ATRCCS_CAP, ELEC_CAP
           2*(MNUMCR*H2STEP*3*MNUMYR) + 3*(MNUMCR*MNUMYR) +   &  ! H2SCRV_Q, H2SCRV_P, (PRDH2NG, PRDH2NG_CCS, PRDH2EL)
-          1*(MNUMNR*MNUMYR) + 3*(MNUMCR*MNUMYR) + 1*MNUMYR + &  ! PRDH2EL_NR, QELTRH2, QELINH2NG, PH2_SPOT), QH2_DISC
+          1*(MNUMNR*MNUMYR) + 3*(MNUMCR*MNUMYR) + 5*MNUMYR + &  ! PRDH2EL_NR, QELTRH2, QELINH2NG, PH2_SPOT), QH2_DISC, SMRCAPCOST, SMRCCSCAPCOST, ATRCCSCAPCOST, ELECCAPCOST
           0)                                                 ! the end
            
       EQUIVALENCE (HMARRY,HSTAT)

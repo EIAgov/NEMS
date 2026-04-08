@@ -284,10 +284,7 @@
       DO IRECL = 1 , EBLK$PCTL
          READ (UF_PLT,REC = IRECL) WPCNTL(IRECL)
       END DO
-!
-!     IF ECP used in this run
-!
-      IF (ECPSTART .GT. 0) THEN
+
          WREC_NXT = WREC_INT
          WGRP_NXT = WGRP_INT
          DO IGRP = WGRP_INT + 1 , EMM_D_GRP
@@ -327,7 +324,6 @@
                CALL STRPLT(IRECL)
             END IF
          END DO
-      END IF
 !
 !     For Coal Units Move PID-UID Strings and Mapping to WIGRP to Restart File
 !

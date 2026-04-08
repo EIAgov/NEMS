@@ -78,7 +78,7 @@ def fill_table_base_024(dfd, table_spec, table_id):
 
     #       Biomass
     # T24(6,IY,IS)=QBMIN(11,IY)-QBMRF(11,IY)
-    z[6] = (dfd["QBMIN"].loc[MNUMCR] - dfd["QBMRF"].loc[MNUMCR]) * TRIL_TO_QUAD
+    z[6] = (dfd["QBMIN"].loc[MNUMCR]) * TRIL_TO_QUAD
 
     #       Biofuels Heat and Coproducts
     # T24(35,IY,IS)=((CORNCD(3,11,IY)*CFCORN/1000.-0.9751*(CRNETHCD(11,IY)+OTHETHCD(11,IY))*
@@ -154,12 +154,13 @@ def fill_table_base_024(dfd, table_spec, table_id):
     )
 
     #       Renewable Diesel and Gasoline 5/
-    # T24(44,IY,IS)=(GRD2DSQTY(MNUMPR,IY)*CFDSQ+GRN2MGQTY(MNUMPR,IY)*CFNPQ+RENEWDIMP(MNUMPR,IY)*CFDSQ)*RDAYS/1000000.
+    # T24(44,IY,IS)=(GRD2DSQTY(MNUMPR,IY)*CFDSQ+GRN2MGQTY(MNUMPR,IY)*CFNPQ+RENEWDIMP(MNUMPR,IY)*CFDSQ-RENEWDEXP(MNUMPR,IY)*CFDSQ)*RDAYS/1000000.
     z[44] = (
         (
             dfd["GRD2DSQTY"].loc[MNUMPR] * dfd["CFDSQ"].iloc[0]
             + dfd["GRN2MGQTY"].loc[MNUMPR] * dfd["CFNPQ"].iloc[0]
             + dfd["RENEWDIMP"].loc[MNUMPR] * dfd["CFDSQ"].iloc[0]
+            - dfd["RENEWDEXP"].loc[MNUMPR] * dfd["CFDSQ"].iloc[0]
         )
         * RDAYS
         / 1000000.0
@@ -194,6 +195,9 @@ def fill_table_base_024(dfd, table_spec, table_id):
     z[14] = dfd["QBMEL"].loc[MNUMCR] * TRIL_TO_QUAD
 
     #         Dedicated Plants    Note: What is 13500?    bKWH to  quad Btu?
+    #  AEO2026 - The dedicated/cofiring lines have been commented out in layin.csv because the values are incorrect. 
+    #  13500 is an assumed heatrate to estimate consumption from dedicated plants, but not consistent with what is used in EMM
+    #  TODO: determine if split is still desired and populate new EMM consumption variable if necessary
     # T24(15,IY,IS)=13500.0*0.000001*(UGNWDNR(1,MNUMNR,IY)+UGNWDNR(2,MNUMNR,IY)+(CGNTGEN(MNUMNR,IY,7,1)+CGNTGEN(MNUMNR,IY,7,2))*0.001-UGNCFNR(1,MNUMNR,IY)-UGNCFNR(2,MNUMNR,IY))
     z[15] = (
         13500.0

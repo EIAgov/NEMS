@@ -1,7 +1,10 @@
 parameter,value,type,description,units
 price_limit,1000,input_variable,Maximum price (+/-) returned by CCATS,$1987
-price_peg,0.30,input_variable,Maximum price (+/-) movement allowed per cycle relative to the previous cycle,$1987
-slack_threshold,1.0,input_variable,Threshold at which slack infeasibilities are recorded in debug outputs,tonnes
-log_b1_infeasibilities,TRUE,switch,Log b1 infeasibilties if TRUE
-log_b2_infeasibilities,FALSE,switch,Log b2 infeasibilties if TRUE
+price_peg,0.3,input_variable,Maximum price (+/-) movement allowed per cycle relative to the previous cycle,$1987
+price_peg_debug_switch,FALSE,input_variable,Writes to debug log warnings related to when the price_peg is applied,none
+slack_threshold,2500000,input_variable,Threshold at which slack infeasibilities are recorded in debug outputs,tonnes
+log_b1_infeasibilities,TRUE,switch,Log b1 infeasibilties if TRUE,none
+log_b2_infeasibilities,FALSE,switch,Log b2 infeasibilties if TRUE,none
 infeasibility_threshold_pct,0.5,input_variable,Log infeasibilities if greater than provided percentage of total flow,%
+source_duals_switch,TRUE,switch,Process duals for endogenous sources of CO2 if TRUE,none
+filename_census_div,census_division_names.csv,filename,File containing census division details to help with debugging,none

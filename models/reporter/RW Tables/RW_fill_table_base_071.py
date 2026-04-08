@@ -58,30 +58,58 @@ def fill_table_base_071(dfd, table_spec, table_id):
     #      East
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[1] = dfd["OGCOPRD"].loc[1]
+    #       Federal Lands
+    z[118] = dfd["OGCOPRD_FED"].loc[1]
+    #       Non-Federal Lands
+    z[133] = dfd["OGCOPRD_NONFED"].loc[1]
 
     #      Gulf Coast
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[2] = dfd["OGCOPRD"].loc[2]
+    #       Federal Lands
+    z[119] = dfd["OGCOPRD_FED"].loc[2]
+    #       Non-Federal Lands
+    z[134] = dfd["OGCOPRD_NONFED"].loc[2]
 
     #      Midcontinent
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[3] = dfd["OGCOPRD"].loc[3]
+    #       Federal Lands
+    z[120] = dfd["OGCOPRD_FED"].loc[3]
+    #       Non-Federal Lands
+    z[135] = dfd["OGCOPRD_NONFED"].loc[3]
 
     #      Southwest
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[4] = dfd["OGCOPRD"].loc[4]
+    #       Federal Lands
+    z[121] = dfd["OGCOPRD_FED"].loc[4]
+    #       Non-Federal Lands
+    z[136] = dfd["OGCOPRD_NONFED"].loc[4]
 
     #      Rocky Mountain
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[5] = dfd["OGCOPRD"].loc[5]
+    #       Federal Lands
+    z[122] = dfd["OGCOPRD_FED"].loc[5]
+    #       Non-Federal Lands
+    z[137] = dfd["OGCOPRD_NONFED"].loc[5]
 
     #      Northern Great Plains
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[6] = dfd["OGCOPRD"].loc[6]
+    #       Federal Lands
+    z[123] = dfd["OGCOPRD_FED"].loc[6]
+    #       Non-Federal Lands
+    z[138] = dfd["OGCOPRD_NONFED"].loc[6]
 
     #      West Coast
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[7] = dfd["OGCOPRD"].loc[7]
+    #       Federal Lands
+    z[124] = dfd["OGCOPRD_FED"].loc[7]
+    #       Non-Federal Lands
+    z[139] = dfd["OGCOPRD_NONFED"].loc[7]
 
     # T71(23,IY,IS)=FSUM(T71(1,IY,IS),7)
     z[23] = z[1] + z[2] + z[3] + z[4] + z[5] + z[6] + z[7]
@@ -92,80 +120,45 @@ def fill_table_base_071(dfd, table_spec, table_id):
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[8] = dfd["OGCOPRD"].loc[8]
 
-    #        Shallow (State), less than 200 meters
+    #        Federal (Deep + Shallow)
+    # T71(22,IY,IS)=OGCOPRDGOM(2,IY)
+    z[22] = dfd["OGCOPRDGOM"].loc[2] + dfd["OGCOPRDGOM"].loc[1] - dfd["OGPRDOFF"].loc[1].loc[1] / (RDAYS)
+
+    #        State
     # T71(21,IY,IS)=OGPRDOFF(1,1,IY)/RDAYS
     z[21] = dfd["OGPRDOFF"].loc[1].loc[1] / (RDAYS)
 
-    #        Shallow (Federal), less than 200 meters
-    # T71(25,IY,IS)=OGCOPRDGOM(1,IY)-OGPRDOFF(1,1,IY)/RDAYS
-    z[25] = dfd["OGCOPRDGOM"].loc[1] - dfd["OGPRDOFF"].loc[1].loc[1] / (RDAYS)
 
-    #        Deep (Federal)
-    # T71(22,IY,IS)=OGCOPRDGOM(2,IY)
-    z[22] = dfd["OGCOPRDGOM"].loc[2]
 
     #      Pacific
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[9] = dfd["OGCOPRD"].loc[9]
 
+    #        Federal
+    # T71(27,IY,IS)=T71(9,IY,IS)-T71(26,IY,IS)
+    z[27] = z[9] - dfd["OGPRDOFF"].loc[2].loc[1] / (RDAYS)
+
     #        State
     # T71(26,IY,IS)=OGPRDOFF(2,1,IY)/RDAYS
     z[26] = dfd["OGPRDOFF"].loc[2].loc[1] / (RDAYS)
-
-    #        Federal
-    # T71(27,IY,IS)=T71(9,IY,IS)-T71(26,IY,IS)
-    z[27] = z[9] - z[26]
 
     #      Atlantic
     # T71(1:10,IY,IS)=OGCOPRD(1:MNL48T-1,IY)
     z[10] = dfd["OGCOPRD"].loc[10]
 
+    #        Federal
+    # T71(29,IY,IS)=T71(10,IY,IS)-T71(28,IY,IS)
+    z[29] = z[10] - dfd["OGPRDOFF"].loc[3].loc[1] / (RDAYS)
+
     #        State
     # T71(28,IY,IS)=OGPRDOFF(3,1,IY)/RDAYS
     z[28] = dfd["OGPRDOFF"].loc[3].loc[1] / (RDAYS)
 
-    #        Federal
-    # T71(29,IY,IS)=T71(10,IY,IS)-T71(28,IY,IS)
-    z[29] = z[10] - z[28]
 
     ##T71(115,IY,IS)=FSUM(T71(1,IY,IS),10)
     z[115] = z[1] + z[2] + z[3] + z[4] + z[5] + z[6] + z[7] + z[8] + z[9] + z[10]
     # T71(24,IY,IS)=FSUM(T71(8,IY,IS),3)
     z[24] = z[8] + z[9] + z[10]
-
-    # Federal Land Crude Production
-    z[117] = dfd["OGCOPRD_FED"].loc[14]
-    z[118] = dfd["OGCOPRD_FED"].loc[1]
-    z[119] = dfd["OGCOPRD_FED"].loc[2]
-    z[120] = dfd["OGCOPRD_FED"].loc[3]
-    z[121] = dfd["OGCOPRD_FED"].loc[4]
-    z[122] = dfd["OGCOPRD_FED"].loc[5]
-    z[123] = dfd["OGCOPRD_FED"].loc[6]
-    z[124] = dfd["OGCOPRD_FED"].loc[7]
-    z[125] = dfd["OGCOPRD_FED"].loc[8]
-    z[126] = dfd["OGCOPRD_FED"].loc[9]
-    z[127] = dfd["OGCOPRD_FED"].loc[10]
-    z[128] = dfd["OGCOPRD_FED"].loc[11]
-    z[129] = dfd["OGCOPRD_FED"].loc[12]
-    z[130] = dfd["OGCOPRD_FED"].loc[13]
-    z[131] = dfd["OGCOPRD_FED"].loc[14]
-
-    # Non-Federal Land Crude Production
-    z[132] = dfd["OGCOPRD_NONFED"].loc[14]
-    z[133] = dfd["OGCOPRD_NONFED"].loc[1]
-    z[134] = dfd["OGCOPRD_NONFED"].loc[2]
-    z[135] = dfd["OGCOPRD_NONFED"].loc[3]
-    z[136] = dfd["OGCOPRD_NONFED"].loc[4]
-    z[137] = dfd["OGCOPRD_NONFED"].loc[5]
-    z[138] = dfd["OGCOPRD_NONFED"].loc[6]
-    z[139] = dfd["OGCOPRD_NONFED"].loc[7]
-    z[140] = dfd["OGCOPRD_NONFED"].loc[8]
-    z[141] = dfd["OGCOPRD_NONFED"].loc[9]
-    z[142] = dfd["OGCOPRD_NONFED"].loc[10]
-    z[143] = dfd["OGCOPRD_NONFED"].loc[11]
-    z[144] = dfd["OGCOPRD_NONFED"].loc[12]
-    z[145] = dfd["OGCOPRD_NONFED"].loc[13]
-    z[146] = dfd["OGCOPRD_NONFED"].loc[14]
 
     #   Production by OGSM District 1/
 

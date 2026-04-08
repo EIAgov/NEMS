@@ -3,6 +3,7 @@
 Composite Table:
 prodTech         CO2CaptureRate
 SMR              0
-SMR_CCS          9.96
+SMR_CCS          9.57
 SMR_CCS_OFF      0
+ATR_CCS          8.85465
 ;

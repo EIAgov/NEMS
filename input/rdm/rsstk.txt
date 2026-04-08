@@ -1,9 +1,9 @@
 FILE NAME:     RSSTK
-DATE MODIFIED: September 6, 2023
+DATE MODIFIED: December 23, 2025
 USED BY:       RDHTREQC subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Physical number of equipment stock for all residential equipment classes (29 major and the rest minor classes)
 UNITS:         Number of equipment/appliances/devices in the base year
-DIMENSION:     housing type, U.S. Census division, equipment class
+DIMENSION:     housing type (each column), U.S. census division (each row, 1-9), equipment class (each group of 9 rows)
 SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
 ORGANIZATION OF DATA:
                Variables: EQCESE (for major end uses in RSCLASS),FANEQP,TVSEQP,STBEQP,HTSEQP,OTTEQP,VGCEQP,DPCEQP,LPCEQP,MONEQP,NETEQP,BATEQP,
@@ -11,595 +11,1129 @@ ORGANIZATION OF DATA:
 SOURCES:       2020 RECS microdata (https://www.eia.gov/consumption/residential/data/2020/index.php?view=microdata)
                "Analysis and Representation of Miscellaneous Electric Loads in NEMS": https://www.eia.gov/analysis/studies/demand/miscelectric/
                U.S. Census Bureau Characteristics of New Housing: https://www.census.gov/construction/chars/historical_data/
-COMMENT:       Revised for 2020 RECS base year (except natural gas heat pumps, which will be replaced by mini-split heat pumps)
+COMMENT:       Remove kerosene and coal placeholders; move data row labels to end of file for streamlined input reading
 
 
 
 
 
-SF	MF	MOBILE	EQUIPMENT_CLASS	CD
-140646	583637	3895	Electric Heating Other Than Heat Pumps	1
-583619	1607303	43537	Electric Heating Other Than Heat Pumps	2
-811216	1744254	90703	Electric Heating Other Than Heat Pumps	3
-628682	666137	97404	Electric Heating Other Than Heat Pumps	4
-3445511	2196281	712406	Electric Heating Other Than Heat Pumps	5
-1033393	503904	330048	Electric Heating Other Than Heat Pumps	6
-2421140	1654634	551972	Electric Heating Other Than Heat Pumps	7
-673961	817887	143885	Electric Heating Other Than Heat Pumps	8
-1327858	2318565	250772	Electric Heating Other Than Heat Pumps	9
-28552	61089	0	Air-Source Heat Pumps (heating)	1
-289472	319627	6245	Air-Source Heat Pumps (heating)	2
-267470	141082	12781	Air-Source Heat Pumps (heating)	3
-191347	136234	40078	Air-Source Heat Pumps (heating)	4
-5040432	1217484	815761	Air-Source Heat Pumps (heating)	5
-1400298	434019	232682	Air-Source Heat Pumps (heating)	6
-1434145	876531	235695	Air-Source Heat Pumps (heating)	7
-566077	228540	33409	Air-Source Heat Pumps (heating)	8
-528212	248787	77643	Air-Source Heat Pumps (heating)	9
-919979	631494	14775	Natural Gas Furnaces	1
-4527746	1367774	59983	Natural Gas Furnaces	2
-9941868	1780976	338640	Natural Gas Furnaces	3
-4341433	622045	128228	Natural Gas Furnaces	4
-5351088	849352	73743	Natural Gas Furnaces	5
-2142380	186844	42859	Natural Gas Furnaces	6
-5173250	349885	194961	Natural Gas Furnaces	7
-4377947	497706	318536	Natural Gas Furnaces	8
-7586154	1112715	324490	Natural Gas Furnaces	9
-408674	500940	0	Natural Gas Boilers & Other	1
-1696324	2088385	23048	Natural Gas Boilers & Other	2
-592101	606692	11954	Natural Gas Boilers & Other	3
-230417	209901	4847	Natural Gas Boilers & Other	4
-386124	191224	6617	Natural Gas Boilers & Other	5
-157931	24467	0	Natural Gas Boilers & Other	6
-323236	73402	10600	Natural Gas Boilers & Other	7
-303921	249923	22944	Natural Gas Boilers & Other	8
-750579	560734	21614	Natural Gas Boilers & Other	9
-0	0	0	Kerosene Furnaces (unused placeholder)	1
-0	0	0	Kerosene Furnaces (unused placeholder)	2
-0	0	0	Kerosene Furnaces (unused placeholder)	3
-0	0	0	Kerosene Furnaces (unused placeholder)	4
-0	0	0	Kerosene Furnaces (unused placeholder)	5
-0	0	0	Kerosene Furnaces (unused placeholder)	6
-0	0	0	Kerosene Furnaces (unused placeholder)	7
-0	0	0	Kerosene Furnaces (unused placeholder)	8
-0	0	0	Kerosene Furnaces (unused placeholder)	9
-269554	42781	29212	Propane Furnaces & Other	1
-510676	30009	103697	Propane Furnaces & Other	2
-1158159	15318	106843	Propane Furnaces & Other	3
-711795	48393	75892	Propane Furnaces & Other	4
-553899	13623	126967	Propane Furnaces & Other	5
-262387	0	89167	Propane Furnaces & Other	6
-283988	0	58294	Propane Furnaces & Other	7
-252089	15073	62176	Propane Furnaces & Other	8
-327637	26493	37497	Propane Furnaces & Other	9
-1129329	99322	70815	Distillate Fuel Oil & Kerosene Furnaces	1
-983527	147823	78681	Distillate Fuel Oil & Kerosene Furnaces	2
-126586	16046	0	Distillate Fuel Oil & Kerosene Furnaces	3
-32657	0	0	Distillate Fuel Oil & Kerosene Furnaces	4
-295948	6178	30065	Distillate Fuel Oil & Kerosene Furnaces	5
-21360	0	0	Distillate Fuel Oil & Kerosene Furnaces	6
-0	0	0	Distillate Fuel Oil & Kerosene Furnaces	7
-4806	15458	0	Distillate Fuel Oil & Kerosene Furnaces	8
-38787	1969	942	Distillate Fuel Oil & Kerosene Furnaces	9
-517502	126334	0	Distillate Fuel Oil & Kerosene Boilers & Other	1
-520387	382290	11146	Distillate Fuel Oil & Kerosene Boilers & Other	2
-57593	32448	0	Distillate Fuel Oil & Kerosene Boilers & Other	3
-7340	5873	2289	Distillate Fuel Oil & Kerosene Boilers & Other	4
-79634	4851	19732	Distillate Fuel Oil & Kerosene Boilers & Other	5
-4551	0	10954	Distillate Fuel Oil & Kerosene Boilers & Other	6
-0	0	0	Distillate Fuel Oil & Kerosene Boilers & Other	7
-0	0	0	Distillate Fuel Oil & Kerosene Boilers & Other	8
-40418	4457	6848	Distillate Fuel Oil & Kerosene Boilers & Other	9
-162611	14934	16526	Wood Stoves & Other	1
-252741	0	20027	Wood Stoves & Other	2
-298301	13852	46470	Wood Stoves & Other	3
-156043	0	0	Wood Stoves & Other	4
-292981	0	46194	Wood Stoves & Other	5
-96715	0	10006	Wood Stoves & Other	6
-138003	0	16853	Wood Stoves & Other	7
-202249	6318	26524	Wood Stoves & Other	8
-378726	12135	42059	Wood Stoves & Other	9
-9558	0	0	Ground-Source Heat Pumps (heating)	1
-54055	13251	0	Ground-Source Heat Pumps (heating)	2
-190214	0	17684	Ground-Source Heat Pumps (heating)	3
-80742	13051	0	Ground-Source Heat Pumps (heating)	4
-313183	15671	70458	Ground-Source Heat Pumps (heating)	5
-207815	46725	30794	Ground-Source Heat Pumps (heating)	6
-117962	26974	4702	Ground-Source Heat Pumps (heating)	7
-16865	0	0	Ground-Source Heat Pumps (heating)	8
-31538	6810	0	Ground-Source Heat Pumps (heating)	9
-11015	0	0	Natural Gas Heat Pumps (heating)	1
-74638	39086	0	Natural Gas Heat Pumps (heating)	2
-12965	12424	0	Natural Gas Heat Pumps (heating)	3
-78882	0	0	Natural Gas Heat Pumps (heating)	4
-367238	110698	0	Natural Gas Heat Pumps (heating)	5
-175483	13385	0	Natural Gas Heat Pumps (heating)	6
-111371	0	0	Natural Gas Heat Pumps (heating)	7
-86360	34039	0	Natural Gas Heat Pumps (heating)	8
-133656	19970	18688	Natural Gas Heat Pumps (heating)	9
-3568617	2058663	78691	Room/Window/Wall Air Conditioners (excludes portable ACs)	1
-6785633	7109005	335530	Room/Window/Wall Air Conditioners (excludes portable ACs)	2
-2786227	2979653	283982	Room/Window/Wall Air Conditioners (excludes portable ACs)	3
-1172424	638512	201488	Room/Window/Wall Air Conditioners (excludes portable ACs)	4
-2277992	556680	903460	Room/Window/Wall Air Conditioners (excludes portable ACs)	5
-957225	146200	482887	Room/Window/Wall Air Conditioners (excludes portable ACs)	6
-2724881	403770	1000499	Room/Window/Wall Air Conditioners (excludes portable ACs)	7
-512357	455498	250059	Room/Window/Wall Air Conditioners (excludes portable ACs)	8
-1902790	1729487	388659	Room/Window/Wall Air Conditioners (excludes portable ACs)	9
-1202799	341073	33763	Central Air Conditioners	1
-5094984	1375957	99251	Central Air Conditioners	2
-10457393	2000517	357583	Central Air Conditioners	3
-5150791	958017	201163	Central Air Conditioners	4
-12288480	4295010	984216	Central Air Conditioners	5
-3734477	887728	400789	Central Air Conditioners	6
-8011408	2543672	647493	Central Air Conditioners	7
-4571965	1100481	254395	Central Air Conditioners	8
-6276075	1446107	271777	Central Air Conditioners	9
-28552	61089	0	Air-Source Heat Pumps (cooling)	1
-289472	319627	6245	Air-Source Heat Pumps (cooling)	2
-267470	141082	12781	Air-Source Heat Pumps (cooling)	3
-191347	136234	40078	Air-Source Heat Pumps (cooling)	4
-5040432	1217484	815761	Air-Source Heat Pumps (cooling)	5
-1400298	434019	232682	Air-Source Heat Pumps (cooling)	6
-1434145	876531	235695	Air-Source Heat Pumps (cooling)	7
-566077	228540	33409	Air-Source Heat Pumps (cooling)	8
-528212	248787	77643	Air-Source Heat Pumps (cooling)	9
-9558	0	0	Ground-Source Heat Pumps (cooling)	1
-54055	13251	0	Ground-Source Heat Pumps (cooling)	2
-190214	0	17684	Ground-Source Heat Pumps (cooling)	3
-80742	13051	0	Ground-Source Heat Pumps (cooling)	4
-313183	15671	70458	Ground-Source Heat Pumps (cooling)	5
-207815	46725	30794	Ground-Source Heat Pumps (cooling)	6
-117962	26974	4702	Ground-Source Heat Pumps (cooling)	7
-16865	0	0	Ground-Source Heat Pumps (cooling)	8
-31538	6810	0	Ground-Source Heat Pumps (cooling)	9
-11015	0	0	Natural Gas Heat Pumps (cooling)	1
-74638	39086	0	Natural Gas Heat Pumps (cooling)	2
-12965	12424	0	Natural Gas Heat Pumps (cooling)	3
-78882	0	0	Natural Gas Heat Pumps (cooling)	4
-367238	110698	0	Natural Gas Heat Pumps (cooling)	5
-175483	13385	0	Natural Gas Heat Pumps (cooling)	6
-111371	0	0	Natural Gas Heat Pumps (cooling)	7
-86360	34039	0	Natural Gas Heat Pumps (cooling)	8
-133656	19970	18688	Natural Gas Heat Pumps (cooling)	9
-3542398	887768	128593	Clothes Washers	1
-9176132	2152770	321684	Clothes Washers	2
-13223951	1844973	601207	Clothes Washers	3
-6289515	734062	321465	Clothes Washers	4
-16599403	3741283	1799366	Clothes Washers	5
-5191696	815623	702364	Clothes Washers	6
-9906251	2024380	1036580	Clothes Washers	7
-6448217	1197365	588894	Clothes Washers	8
-11671285	2335633	677332	Clothes Washers	9
-2980874	934904	73119	Dishwashers	1
-7419534	2596402	163422	Dishwashers	2
-9865652	2391822	221684	Dishwashers	3
-4971634	1036148	184628	Dishwashers	4
-14277415	4351708	826667	Dishwashers	5
-4070168	846328	408983	Dishwashers	6
-7834814	2630835	597354	Dishwashers	7
-5736330	1448025	290614	Dishwashers	8
-9800758	3299615	526420	Dishwashers	9
-1258051	1219268	5588	Natural Gas water heaters (storage & tankless)	1
-5779410	3503773	45220	Natural Gas water heaters (storage & tankless)	2
-9124429	2339565	210446	Natural Gas water heaters (storage & tankless)	3
-3970424	795118	92068	Natural Gas water heaters (storage & tankless)	4
-5008642	1124593	27222	Natural Gas water heaters (storage & tankless)	5
-1833171	224479	28958	Natural Gas water heaters (storage & tankless)	6
-5807057	812262	174548	Natural Gas water heaters (storage & tankless)	7
-4624930	943913	273067	Natural Gas water heaters (storage & tankless)	8
-9046766	2940543	459671	Natural Gas water heaters (storage & tankless)	9
-1122927	735699	116520	Electric water heaters (storage & tankless)	1
-2775651	2356508	304599	Electric water heaters (storage & tankless)	2
-4008435	2123961	379018	Electric water heaters (storage & tankless)	3
-2321715	952903	248177	Electric water heaters (storage & tankless)	4
-12308621	4614332	1934389	Electric water heaters (storage & tankless)	5
-3812947	1012584	723226	Electric water heaters (storage & tankless)	6
-5170392	2525566	922179	Electric water heaters (storage & tankless)	7
-2003434	1014978	294310	Electric water heaters (storage & tankless)	8
-3151904	2742918	289238	Electric water heaters (storage & tankless)	9
-1043304	126546	2185	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	1
-822641	445291	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	2
-38953	44479	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	3
-799	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	4
-61329	10611	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	5
-0	0	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	6
-4814	16331	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	7
-0	24598	0	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	8
-32679	5527	10895	Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	9
-266658	69935	15806	Propane water heaters (storage & tankless)	1
-453523	42184	13267	Propane water heaters (storage & tankless)	2
-636540	26103	59448	Propane water heaters (storage & tankless)	3
-380692	4745	8493	Propane water heaters (storage & tankless)	4
-566724	21185	38026	Propane water heaters (storage & tankless)	5
-176129	11933	30889	Propane water heaters (storage & tankless)	6
-504318	55908	29328	Propane water heaters (storage & tankless)	7
-246778	33162	106413	Propane water heaters (storage & tankless)	8
-444369	56881	62579	Propane water heaters (storage & tankless)	9
-19287	3892	0	Solar water heaters (storage & tankless)	1
-6102	24535	0	Solar water heaters (storage & tankless)	2
-29471	10661	0	Solar water heaters (storage & tankless)	3
-0	1150	0	Solar water heaters (storage & tankless)	4
-35425	13311	0	Solar water heaters (storage & tankless)	5
-0	0	0	Solar water heaters (storage & tankless)	6
-0	0	0	Solar water heaters (storage & tankless)	7
-24500	0	0	Solar water heaters (storage & tankless)	8
-102265	35417	0	Solar water heaters (storage & tankless)	9
-1182489	828370	13432	Natural Gas Cooking Ranges/Cooktops/Ovens	1
-5645969	4033134	109713	Natural Gas Cooking Ranges/Cooktops/Ovens	2
-7247946	1884723	297041	Natural Gas Cooking Ranges/Cooktops/Ovens	3
-2009559	263864	132937	Natural Gas Cooking Ranges/Cooktops/Ovens	4
-4450724	1052919	196848	Natural Gas Cooking Ranges/Cooktops/Ovens	5
-1129441	155404	94197	Natural Gas Cooking Ranges/Cooktops/Ovens	6
-5288367	373188	301777	Natural Gas Cooking Ranges/Cooktops/Ovens	7
-2961823	365604	344297	Natural Gas Cooking Ranges/Cooktops/Ovens	8
-8781503	2492679	520275	Natural Gas Cooking Ranges/Cooktops/Ovens	9
-525395	53893	47866	Propane Cooking Ranges/Cooktops/Ovens	1
-844189	69360	108481	Propane Cooking Ranges/Cooktops/Ovens	2
-696776	0	98471	Propane Cooking Ranges/Cooktops/Ovens	3
-410063	0	49008	Propane Cooking Ranges/Cooktops/Ovens	4
-903555	19498	191760	Propane Cooking Ranges/Cooktops/Ovens	5
-274521	0	86558	Propane Cooking Ranges/Cooktops/Ovens	6
-587743	10689	92756	Propane Cooking Ranges/Cooktops/Ovens	7
-215746	0	126319	Propane Cooking Ranges/Cooktops/Ovens	8
-610740	96332	63529	Propane Cooking Ranges/Cooktops/Ovens	9
-3065551	1339578	86259	Electric Cooking Ranges/Cooktops/Ovens	1
-5906957	2459090	157853	Electric Cooking Ranges/Cooktops/Ovens	2
-8953041	2914102	238677	Electric Cooking Ranges/Cooktops/Ovens	3
-5669966	1520595	204972	Electric Cooking Ranges/Cooktops/Ovens	4
-17134372	5131700	1791024	Electric Cooking Ranges/Cooktops/Ovens	5
-5537212	1156318	653663	Electric Cooking Ranges/Cooktops/Ovens	6
-9165903	3282428	796284	Electric Cooking Ranges/Cooktops/Ovens	7
-5743197	1711805	256952	Electric Cooking Ranges/Cooktops/Ovens	8
-7646170	3423420	400750	Electric Cooking Ranges/Cooktops/Ovens	9
-469975	83303	3316	Natural Gas Clothes Dryers	1
-3016218	483868	32971	Natural Gas Clothes Dryers	2
-4187307	440698	60480	Natural Gas Clothes Dryers	3
-1056116	18162	11989	Natural Gas Clothes Dryers	4
-848197	116422	4625	Natural Gas Clothes Dryers	5
-212779	0	15499	Natural Gas Clothes Dryers	6
-1275204	84418	49920	Natural Gas Clothes Dryers	7
-1074148	118305	25578	Natural Gas Clothes Dryers	8
-4628918	378745	196321	Natural Gas Clothes Dryers	9
-2918963	726768	119183	Electric Clothes Dryers	1
-5782040	1470059	252834	Electric Clothes Dryers	2
-8591692	1342258	484661	Electric Clothes Dryers	3
-5115863	721983	302437	Electric Clothes Dryers	4
-15460647	3586410	1751393	Electric Clothes Dryers	5
-4909824	794495	680481	Electric Clothes Dryers	6
-8350534	1943391	925925	Electric Clothes Dryers	7
-5278873	1067099	514502	Electric Clothes Dryers	8
-6800385	1839634	475614	Electric Clothes Dryers	9
-5453667	2394664	163126	Refrigerators	1
-15465420	6743027	440440	Refrigerators	2
-21380239	4767540	792921	Refrigerators	3
-10454152	1853520	452371	Refrigerators	4
-26608164	6246028	2449623	Refrigerators	5
-8274425	1294012	1008942	Refrigerators	6
-15805618	3577705	1501767	Refrigerators	7
-10477079	2141661	890310	Refrigerators	8
-19288279	5885345	1033962	Refrigerators	9
-1288617	288696	45574	Standalone Freezers	1
-4088150	557171	172281	Standalone Freezers	2
-7368022	656048	262034	Standalone Freezers	3
-4552789	234451	231671	Standalone Freezers	4
-6892998	555034	812972	Standalone Freezers	5
-3108278	113033	412469	Standalone Freezers	6
-5057292	457298	514209	Standalone Freezers	7
-3221472	159686	280553	Standalone Freezers	8
-4424517	413407	314975	Standalone Freezers	9
-3364344	1589291	125584	Furnace Fans & Boiler Pumps	1
-8973327	4826723	332883	Furnace Fans & Boiler Pumps	2
-13203824	3485476	609068	Furnace Fans & Boiler Pumps	3
-6135585	1467924	319265	Furnace Fans & Boiler Pumps	4
-16383246	5266126	1727247	Furnace Fans & Boiler Pumps	5
-5060654	1111437	654483	Furnace Fans & Boiler Pumps	6
-9385100	2936248	901834	Furnace Fans & Boiler Pumps	7
-6164856	1597960	512008	Furnace Fans & Boiler Pumps	8
-9901584	2591898	588178	Furnace Fans & Boiler Pumps	9
-8789342	3571712	292283	Televisions	1
-25043336	9965844	702021	Televisions	2
-34676941	7077126	1388640	Televisions	3
-16430010	2779960	825520	Televisions	4
-45237528	10053566	4343826	Televisions	5
-13957922	2220220	1740647	Televisions	6
-27186473	5826072	2645785	Televisions	7
-16065518	3162122	1339131	Televisions	8
-27280977	8367130	1745033	Televisions	9
-5555611	1380520	180418	Set-top Boxes	1
-16358721	5337413	358186	Set-top Boxes	2
-17413298	3001578	548458	Set-top Boxes	3
-7711327	974519	466465	Set-top Boxes	4
-25058606	4987840	2319990	Set-top Boxes	5
-7568140	814334	833377	Set-top Boxes	6
-14764507	1844245	1320421	Set-top Boxes	7
-7741564	1207801	597580	Set-top Boxes	8
-16263463	3600836	957938	Set-top Boxes	9
-1213943	452348	30408	Home Audio Equipment	1
-2752379	1367128	58025	Home Audio Equipment	2
-4455352	796372	129387	Home Audio Equipment	3
-2060166	259140	67356	Home Audio Equipment	4
-5935186	1050718	349971	Home Audio Equipment	5
-1515241	118275	179432	Home Audio Equipment	6
-3612619	543817	271281	Home Audio Equipment	7
-2569295	413714	174682	Home Audio Equipment	8
-4384242	1199561	192939	Home Audio Equipment	9
-4154353	1829252	102962	OTT Streaming Devices	1
-10714573	4479488	290105	OTT Streaming Devices	2
-15445779	3596194	448447	OTT Streaming Devices	3
-7745780	1375308	233715	OTT Streaming Devices	4
-21709228	5286056	1757020	OTT Streaming Devices	5
-6091768	1225060	579631	OTT Streaming Devices	6
-12277604	3239470	994003	OTT Streaming Devices	7
-7903564	1571330	530814	OTT Streaming Devices	8
-13131017	4593988	714249	OTT Streaming Devices	9
-1721902	1030248	38268	Video Game Consoles	1
-4886010	2233168	175076	Video Game Consoles	2
-7596168	1742224	268907	Video Game Consoles	3
-3251309	605710	97892	Video Game Consoles	4
-8742076	1781406	947505	Video Game Consoles	5
-2476754	477186	371533	Video Game Consoles	6
-5487556	1505305	680782	Video Game Consoles	7
-3903280	948854	311007	Video Game Consoles	8
-5750294	2543670	504250	Video Game Consoles	9
-2214757	649235	41902	Desktop PCs	1
-6053454	2093026	162984	Desktop PCs	2
-7505455	1469167	223334	Desktop PCs	3
-3606368	467872	133701	Desktop PCs	4
-9943625	1887054	647661	Desktop PCs	5
-2797589	285881	170827	Desktop PCs	6
-5643177	1203127	353526	Desktop PCs	7
-4439823	671669	282586	Desktop PCs	8
-8925482	2299403	360691	Desktop PCs	9
-6148461	2779292	114047	Laptop PCs	1
-14532264	7739940	326118	Laptop PCs	2
-19145221	4716550	305356	Laptop PCs	3
-8511486	1717675	288008	Laptop PCs	4
-26296916	6494592	1871027	Laptop PCs	5
-6443810	1169265	732806	Laptop PCs	6
-14478221	3520923	1118499	Laptop PCs	7
-10288646	2403677	567174	Laptop PCs	8
-20080461	7378190	830579	Laptop PCs	9
-2359705	751186	75796	Monitors	1
-7972649	3127002	298921	Monitors	2
-9828800	1399668	294689	Monitors	3
-4677941	516406	194132	Monitors	4
-12693513	2118360	1025954	Monitors	5
-2917386	488336	306739	Monitors	6
-6496023	1061360	574781	Monitors	7
-4919705	976860	283311	Monitors	8
-9629592	2281807	353322	Monitors	9
-4364106	2267098	132939	Network Equipment	1
-11872664	6631355	498814	Network Equipment	2
-16110058	4752073	670245	Network Equipment	3
-7835456	1717100	301720	Network Equipment	4
-19518311	5865571	2008175	Network Equipment	5
-5567397	1154026	777673	Network Equipment	6
-11083371	3019490	1151292	Network Equipment	7
-7555969	1784767	575316	Network Equipment	8
-14902249	6147296	735470	Network Equipment	9
-25617473	8274440	1525115	Non-PC Rechargables	1
-56036334	37992695	2845680	Non-PC Rechargables	2
-102546384	20644600	6705052	Non-PC Rechargables	3
-41523964	7449224	2006118	Non-PC Rechargables	4
-118529418	32515038	18401456	Non-PC Rechargables	5
-43524046	8733063	10027011	Non-PC Rechargables	6
-68768846	16334288	5850603	Non-PC Rechargables	7
-45347304	16641509	6818545	Non-PC Rechargables	8
-82697687	36022100	8805867	Non-PC Rechargables	9
-6296113	1344575	188923	Ceiling Fans	1
-21132892	3288445	586815	Ceiling Fans	2
-33948773	3556086	908873	Ceiling Fans	3
-16911305	1518615	497591	Ceiling Fans	4
-57416662	7288643	3791414	Ceiling Fans	5
-17152413	1532637	1566640	Ceiling Fans	6
-38337086	5403357	2508820	Ceiling Fans	7
-18662615	1828696	1084703	Ceiling Fans	8
-24411039	3589969	811420	Ceiling Fans	9
-2996378	1406044	114184	Coffee Makers	1
-7676853	3631584	330526	Coffee Makers	2
-11063559	2877081	482439	Coffee Makers	3
-5238086	1116850	252717	Coffee Makers	4
-13792941	3658910	1380419	Coffee Makers	5
-4307168	814915	597878	Coffee Makers	6
-8114331	2049460	780894	Coffee Makers	7
-5023597	1238750	515784	Coffee Makers	8
-9180704	3239988	604322	Coffee Makers	9
-1750514	157177	21807	Dehumidifiers	1
-4410670	379804	21558	Dehumidifiers	2
-5488545	175417	55146	Dehumidifiers	3
-2119324	54777	29737	Dehumidifiers	4
-2751345	294282	87666	Dehumidifiers	5
-705429	61234	76876	Dehumidifiers	6
-541610	37305	58312	Dehumidifiers	7
-167198	70519	21169	Dehumidifiers	8
-633178	287102	84076	Dehumidifiers	9
-3733548	2056024	140099	Microwave Ovens	1
-9848519	5588575	361899	Microwave Ovens	2
-14067088	4243887	594404	Microwave Ovens	3
-6668689	1693810	344915	Microwave Ovens	4
-17603409	5500746	2000410	Microwave Ovens	5
-5538652	1178640	766991	Microwave Ovens	6
-10468178	3133488	1110424	Microwave Ovens	7
-6816918	1838346	669535	Microwave Ovens	8
-12396634	5201924	802087	Microwave Ovens	9
-371921	0	5173	Pool Pump	1
-1149686	0	0	Pool Pump	2
-869240	0	40925	Pool Pump	3
-238224	0	8161	Pool Pump	4
-2340584	0	57854	Pool Pump	5
-510866	0	63877	Pool Pump	6
-930376	0	49499	Pool Pump	7
-762431	0	4809	Pool Pump	8
-1112908	0	4231	Pool Pump	9
-42231	0	0	Pool Heaters	1
-74542	0	0	Pool Heaters	2
-84081	0	0	Pool Heaters	3
-17950	0	0	Pool Heaters	4
-440057	0	0	Pool Heaters	5
-31088	0	13569	Pool Heaters	6
-53736	0	0	Pool Heaters	7
-42010	0	0	Pool Heaters	8
-47700	0	0	Pool Heaters	9
-952116	131406	8432	Residential Security Systems	1
-2498613	383008	23703	Residential Security Systems	2
-3588059	281261	41283	Residential Security Systems	3
-1705894	109020	22995	Residential Security Systems	4
-4390804	351179	130880	Residential Security Systems	5
-1414844	78829	52435	Residential Security Systems	6
-2630005	198448	71213	Residential Security Systems	7
-1646405	119141	42696	Residential Security Systems	8
-3200148	350132	51371	Residential Security Systems	9
-148741	8446	0	Portable Electric Spas	1
-458413	21769	0	Portable Electric Spas	2
-552624	68088	5496	Portable Electric Spas	3
-236576	13424	2107	Portable Electric Spas	4
-755808	59016	43751	Portable Electric Spas	5
-198613	16034	23734	Portable Electric Spas	6
-336887	13489	47248	Portable Electric Spas	7
-425991	60084	11325	Portable Electric Spas	8
-794748	71308	32122	Portable Electric Spas	9
-188045	39079	0	Miscellaneous Refrigeration Products	1
-580518	173850	0	Miscellaneous Refrigeration Products	2
-696269	90914	8739	Miscellaneous Refrigeration Products	3
-227104	39847	0	Miscellaneous Refrigeration Products	4
-947149	150690	28685	Miscellaneous Refrigeration Products	5
-198288	0	0	Miscellaneous Refrigeration Products	6
-665866	82552	6198	Miscellaneous Refrigeration Products	7
-446137	9243	2400	Miscellaneous Refrigeration Products	8
-1024998	68607	13022	Miscellaneous Refrigeration Products	9
-3018092	884807	33009	Smart Speakers	1
-7323766	3088974	177170	Smart Speakers	2
-8952745	1619927	202356	Smart Speakers	3
-4006176	626088	66337	Smart Speakers	4
-13714627	2939764	507720	Smart Speakers	5
-2870460	520116	257683	Smart Speakers	6
-6718693	1301132	426930	Smart Speakers	7
-5811689	1017758	296388	Smart Speakers	8
-9277341	2536300	491398	Smart Speakers	9
-7642468	3725192	165255	Smartphones	1
-19440734	10117867	641950	Smartphones	2
-26734094	6783664	957309	Smartphones	3
-12495954	2558961	582125	Smartphones	4
-35574138	8953685	3294780	Smartphones	5
-10145805	1844966	1547322	Smartphones	6
-21827460	5731070	2372876	Smartphones	7
-14009827	3287088	1096456	Smartphones	8
-27949601	9947370	1457191	Smartphones	9
-4513137	1787717	112909	Tablets	1
-10992933	4613017	203505	Tablets	2
-15082014	2896840	425532	Tablets	3
-6954332	1093267	245482	Tablets	4
-19288032	3906983	1422070	Tablets	5
-5208293	767511	551533	Tablets	6
-10918475	2037487	1030628	Tablets	7
-7819386	1337983	569232	Tablets	8
-15436800	4599867	739311	Tablets	9
-7178875	3845547	246568	Small Kitchen Appliances	1
-18408014	10425896	692443	Small Kitchen Appliances	2
-25526226	7184617	1069866	Small Kitchen Appliances	3
-11823163	2777566	571685	Small Kitchen Appliances	4
-32748363	9672733	3436577	Small Kitchen Appliances	5
-9459283	2109514	1319178	Small Kitchen Appliances	6
-20396802	5234468	2291214	Small Kitchen Appliances	7
-13836780	3279506	1380746	Small Kitchen Appliances	8
-26432199	10676563	1554548	Small Kitchen Appliances	9
-3637502	2098565	140099	Electric Other	1
-9541561	6144683	357259	Electric Other	2
-13498851	4422986	625075	Electric Other	3
-6417005	1730073	348737	Electric Other	4
-17169669	5673955	1999637	Electric Other	5
-5361237	1248996	770484	Electric Other	6
-10231867	3267791	1119436	Electric Other	7
-6559193	1989740	668981	Electric Other	8
-12101984	5600868	802791	Electric Other	9
-126507	40077	0	Natural Gas Secondary Heating	1
-763487	73998	11816	Natural Gas Secondary Heating	2
-1115186	65465	17656	Natural Gas Secondary Heating	3
-699585	51829	1914	Natural Gas Secondary Heating	4
-1032255	54557	33541	Natural Gas Secondary Heating	5
-526175	10859	18363	Natural Gas Secondary Heating	6
-892670	0	18719	Natural Gas Secondary Heating	7
-845008	44070	23237	Natural Gas Secondary Heating	8
-1281042	105302	27300	Natural Gas Secondary Heating	9
-1002914	527054	48338	Electric Secondary Heating	1
-2847231	1390673	100767	Electric Secondary Heating	2
-4038779	737901	253710	Electric Secondary Heating	3
-2144208	357662	102063	Electric Secondary Heating	4
-4708060	738045	605541	Electric Secondary Heating	5
-1666952	228775	215415	Electric Secondary Heating	6
-2569964	497045	267711	Electric Secondary Heating	7
-1683928	414561	224308	Electric Secondary Heating	8
-3065260	910886	219975	Electric Secondary Heating	9
-58749	13218	4198	Distillate Fuel Oil & Kerosene Secondary Heating	1
-135307	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	2
-87848	0	6244	Distillate Fuel Oil & Kerosene Secondary Heating	3
-6826	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	4
-78114	0	19557	Distillate Fuel Oil & Kerosene Secondary Heating	5
-34868	0	12669	Distillate Fuel Oil & Kerosene Secondary Heating	6
-0	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	7
-4536	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	8
-13437	0	0	Distillate Fuel Oil & Kerosene Secondary Heating	9
-156989	2914	3099	Propane Secondary Heating	1
-289063	45451	23901	Propane Secondary Heating	2
-297888	0	12016	Propane Secondary Heating	3
-197924	13539	0	Propane Secondary Heating	4
-881124	0	103415	Propane Secondary Heating	5
-373318	0	55630	Propane Secondary Heating	6
-218032	0	24421	Propane Secondary Heating	7
-85877	14710	3542	Propane Secondary Heating	8
-206334	0	0	Propane Secondary Heating	9
-0	0	0	Kerosene Secondary Heating (unused placeholder)	1
-0	0	0	Kerosene Secondary Heating (unused placeholder)	2
-0	0	0	Kerosene Secondary Heating (unused placeholder)	3
-0	0	0	Kerosene Secondary Heating (unused placeholder)	4
-0	0	0	Kerosene Secondary Heating (unused placeholder)	5
-0	0	0	Kerosene Secondary Heating (unused placeholder)	6
-0	0	0	Kerosene Secondary Heating (unused placeholder)	7
-0	0	0	Kerosene Secondary Heating (unused placeholder)	8
-0	0	0	Kerosene Secondary Heating (unused placeholder)	9
-0	0	0	Coal Secondary Heating (unused placeholder)	1
-0	0	0	Coal Secondary Heating (unused placeholder)	2
-0	0	0	Coal Secondary Heating (unused placeholder)	3
-0	0	0	Coal Secondary Heating (unused placeholder)	4
-0	0	0	Coal Secondary Heating (unused placeholder)	5
-0	0	0	Coal Secondary Heating (unused placeholder)	6
-0	0	0	Coal Secondary Heating (unused placeholder)	7
-0	0	0	Coal Secondary Heating (unused placeholder)	8
-0	0	0	Coal Secondary Heating (unused placeholder)	9
-714692	48222	17483	Wood Secondary Heating	1
-992780	12181	14698	Wood Secondary Heating	2
-1049493	97939	18452	Wood Secondary Heating	3
-523098	10421	7154	Wood Secondary Heating	4
-1308337	44711	96252	Wood Secondary Heating	5
-410601	40776	76271	Wood Secondary Heating	6
-1075011	104165	80680	Wood Secondary Heating	7
-624738	46265	44262	Wood Secondary Heating	8
-1221459	112475	36186	Wood Secondary Heating	9
-239363	102031	2576	Natural Gas Other	1
-1224649	494122	17980	Natural Gas Other	2
-1472323	125223	53500	Natural Gas Other	3
-440180	49880	29964	Natural Gas Other	4
-1279625	210704	36799	Natural Gas Other	5
-422033	38906	27518	Natural Gas Other	6
-1568076	80319	40913	Natural Gas Other	7
-1047773	58578	48798	Natural Gas Other	8
-1974636	301522	9908	Natural Gas Other	9
-251485	17977	7177	Propane Other	1
-399744	37873	40158	Propane Other	2
-442195	0	33218	Propane Other	3
-187286	12700	12990	Propane Other	4
-378202	17413	89622	Propane Other	5
-101289	0	32631	Propane Other	6
-231423	0	22200	Propane Other	7
-73582	0	45469	Propane Other	8
-298651	34623	27649	Propane Other	9
-203721	50788	6783	Distillate Fuel Oil & Kerosene Other	1
-241943	99909	0	Distillate Fuel Oil & Kerosene Other	2
-55440	0	0	Distillate Fuel Oil & Kerosene Other	3
-0	0	0	Distillate Fuel Oil & Kerosene Other	4
-28788	0	7867	Distillate Fuel Oil & Kerosene Other	5
-11674	0	12699	Distillate Fuel Oil & Kerosene Other	6
-0	0	0	Distillate Fuel Oil & Kerosene Other	7
-2268	0	0	Distillate Fuel Oil & Kerosene Other	8
-1286	0	0	Distillate Fuel Oil & Kerosene Other	9
+SF	MF	MOBILE
+140646	583637	3895
+583619	1607303	43537
+811216	1744254	90703
+628682	666137	97404
+3445511	2196281	712406
+1033393	503904	330048
+2421140	1654634	551972
+673961	817887	143885
+1327858	2318565	250772
+28552	61089	0
+289472	319627	6245
+267470	141082	12781
+191347	136234	40078
+5040432	1217484	815761
+1400298	434019	232682
+1434145	876531	235695
+566077	228540	33409
+528212	248787	77643
+919979	631494	14775
+4527746	1367774	59983
+9941868	1780976	338640
+4341433	622045	128228
+5351088	849352	73743
+2142380	186844	42859
+5173250	349885	194961
+4377947	497706	318536
+7586154	1112715	324490
+408674	500940	0
+1696324	2088385	23048
+592101	606692	11954
+230417	209901	4847
+386124	191224	6617
+157931	24467	0
+323236	73402	10600
+303921	249923	22944
+750579	560734	21614
+269554	42781	29212
+510676	30009	103697
+1158159	15318	106843
+711795	48393	75892
+553899	13623	126967
+262387	0	89167
+283988	0	58294
+252089	15073	62176
+327637	26493	37497
+1129329	99322	70815
+983527	147823	78681
+126586	16046	0
+32657	0	0
+295948	6178	30065
+21360	0	0
+0	0	0
+4806	15458	0
+38787	1969	942
+517502	126334	0
+520387	382290	11146
+57593	32448	0
+7340	5873	2289
+79634	4851	19732
+4551	0	10954
+0	0	0
+0	0	0
+40418	4457	6848
+162611	14934	16526
+252741	0	20027
+298301	13852	46470
+156043	0	0
+292981	0	46194
+96715	0	10006
+138003	0	16853
+202249	6318	26524
+378726	12135	42059
+9558	0	0
+54055	13251	0
+190214	0	17684
+80742	13051	0
+313183	15671	70458
+207815	46725	30794
+117962	26974	4702
+16865	0	0
+31538	6810	0
+11015	0	0
+74638	39086	0
+12965	12424	0
+78882	0	0
+367238	110698	0
+175483	13385	0
+111371	0	0
+86360	34039	0
+133656	19970	18688
+3568617	2058663	78691
+6785633	7109005	335530
+2786227	2979653	283982
+1172424	638512	201488
+2277992	556680	903460
+957225	146200	482887
+2724881	403770	1000499
+512357	455498	250059
+1902790	1729487	388659
+1202799	341073	33763
+5094984	1375957	99251
+10457393	2000517	357583
+5150791	958017	201163
+12288480	4295010	984216
+3734477	887728	400789
+8011408	2543672	647493
+4571965	1100481	254395
+6276075	1446107	271777
+28552	61089	0
+289472	319627	6245
+267470	141082	12781
+191347	136234	40078
+5040432	1217484	815761
+1400298	434019	232682
+1434145	876531	235695
+566077	228540	33409
+528212	248787	77643
+9558	0	0
+54055	13251	0
+190214	0	17684
+80742	13051	0
+313183	15671	70458
+207815	46725	30794
+117962	26974	4702
+16865	0	0
+31538	6810	0
+11015	0	0
+74638	39086	0
+12965	12424	0
+78882	0	0
+367238	110698	0
+175483	13385	0
+111371	0	0
+86360	34039	0
+133656	19970	18688
+3542398	887768	128593
+9176132	2152770	321684
+13223951	1844973	601207
+6289515	734062	321465
+16599403	3741283	1799366
+5191696	815623	702364
+9906251	2024380	1036580
+6448217	1197365	588894
+11671285	2335633	677332
+2980874	934904	73119
+7419534	2596402	163422
+9865652	2391822	221684
+4971634	1036148	184628
+14277415	4351708	826667
+4070168	846328	408983
+7834814	2630835	597354
+5736330	1448025	290614
+9800758	3299615	526420
+1258051	1219268	5588
+5779410	3503773	45220
+9124429	2339565	210446
+3970424	795118	92068
+5008642	1124593	27222
+1833171	224479	28958
+5807057	812262	174548
+4624930	943913	273067
+9046766	2940543	459671
+1122927	735699	116520
+2775651	2356508	304599
+4008435	2123961	379018
+2321715	952903	248177
+12308621	4614332	1934389
+3812947	1012584	723226
+5170392	2525566	922179
+2003434	1014978	294310
+3151904	2742918	289238
+1043304	126546	2185
+822641	445291	0
+38953	44479	0
+799	0	0
+61329	10611	0
+0	0	0
+4814	16331	0
+0	24598	0
+32679	5527	10895
+266658	69935	15806
+453523	42184	13267
+636540	26103	59448
+380692	4745	8493
+566724	21185	38026
+176129	11933	30889
+504318	55908	29328
+246778	33162	106413
+444369	56881	62579
+19287	3892	0
+6102	24535	0
+29471	10661	0
+0	1150	0
+35425	13311	0
+0	0	0
+0	0	0
+24500	0	0
+102265	35417	0
+1182489	828370	13432
+5645969	4033134	109713
+7247946	1884723	297041
+2009559	263864	132937
+4450724	1052919	196848
+1129441	155404	94197
+5288367	373188	301777
+2961823	365604	344297
+8781503	2492679	520275
+525395	53893	47866
+844189	69360	108481
+696776	0	98471
+410063	0	49008
+903555	19498	191760
+274521	0	86558
+587743	10689	92756
+215746	0	126319
+610740	96332	63529
+3065551	1339578	86259
+5906957	2459090	157853
+8953041	2914102	238677
+5669966	1520595	204972
+17134372	5131700	1791024
+5537212	1156318	653663
+9165903	3282428	796284
+5743197	1711805	256952
+7646170	3423420	400750
+469975	83303	3316
+3016218	483868	32971
+4187307	440698	60480
+1056116	18162	11989
+848197	116422	4625
+212779	0	15499
+1275204	84418	49920
+1074148	118305	25578
+4628918	378745	196321
+2918963	726768	119183
+5782040	1470059	252834
+8591692	1342258	484661
+5115863	721983	302437
+15460647	3586410	1751393
+4909824	794495	680481
+8350534	1943391	925925
+5278873	1067099	514502
+6800385	1839634	475614
+5453667	2394664	163126
+15465420	6743027	440440
+21380239	4767540	792921
+10454152	1853520	452371
+26608164	6246028	2449623
+8274425	1294012	1008942
+15805618	3577705	1501767
+10477079	2141661	890310
+19288279	5885345	1033962
+1288617	288696	45574
+4088150	557171	172281
+7368022	656048	262034
+4552789	234451	231671
+6892998	555034	812972
+3108278	113033	412469
+5057292	457298	514209
+3221472	159686	280553
+4424517	413407	314975
+3364344	1589291	125584
+8973327	4826723	332883
+13203824	3485476	609068
+6135585	1467924	319265
+16383246	5266126	1727247
+5060654	1111437	654483
+9385100	2936248	901834
+6164856	1597960	512008
+9901584	2591898	588178
+8789342	3571712	292283
+25043336	9965844	702021
+34676941	7077126	1388640
+16430010	2779960	825520
+45237528	10053566	4343826
+13957922	2220220	1740647
+27186473	5826072	2645785
+16065518	3162122	1339131
+27280977	8367130	1745033
+5555611	1380520	180418
+16358721	5337413	358186
+17413298	3001578	548458
+7711327	974519	466465
+25058606	4987840	2319990
+7568140	814334	833377
+14764507	1844245	1320421
+7741564	1207801	597580
+16263463	3600836	957938
+1213943	452348	30408
+2752379	1367128	58025
+4455352	796372	129387
+2060166	259140	67356
+5935186	1050718	349971
+1515241	118275	179432
+3612619	543817	271281
+2569295	413714	174682
+4384242	1199561	192939
+4154353	1829252	102962
+10714573	4479488	290105
+15445779	3596194	448447
+7745780	1375308	233715
+21709228	5286056	1757020
+6091768	1225060	579631
+12277604	3239470	994003
+7903564	1571330	530814
+13131017	4593988	714249
+1721902	1030248	38268
+4886010	2233168	175076
+7596168	1742224	268907
+3251309	605710	97892
+8742076	1781406	947505
+2476754	477186	371533
+5487556	1505305	680782
+3903280	948854	311007
+5750294	2543670	504250
+2214757	649235	41902
+6053454	2093026	162984
+7505455	1469167	223334
+3606368	467872	133701
+9943625	1887054	647661
+2797589	285881	170827
+5643177	1203127	353526
+4439823	671669	282586
+8925482	2299403	360691
+6148461	2779292	114047
+14532264	7739940	326118
+19145221	4716550	305356
+8511486	1717675	288008
+26296916	6494592	1871027
+6443810	1169265	732806
+14478221	3520923	1118499
+10288646	2403677	567174
+20080461	7378190	830579
+2359705	751186	75796
+7972649	3127002	298921
+9828800	1399668	294689
+4677941	516406	194132
+12693513	2118360	1025954
+2917386	488336	306739
+6496023	1061360	574781
+4919705	976860	283311
+9629592	2281807	353322
+4364106	2267098	132939
+11872664	6631355	498814
+16110058	4752073	670245
+7835456	1717100	301720
+19518311	5865571	2008175
+5567397	1154026	777673
+11083371	3019490	1151292
+7555969	1784767	575316
+14902249	6147296	735470
+25617473	8274440	1525115
+56036334	37992695	2845680
+102546384	20644600	6705052
+41523964	7449224	2006118
+118529418	32515038	18401456
+43524046	8733063	10027011
+68768846	16334288	5850603
+45347304	16641509	6818545
+82697687	36022100	8805867
+6296113	1344575	188923
+21132892	3288445	586815
+33948773	3556086	908873
+16911305	1518615	497591
+57416662	7288643	3791414
+17152413	1532637	1566640
+38337086	5403357	2508820
+18662615	1828696	1084703
+24411039	3589969	811420
+2996378	1406044	114184
+7676853	3631584	330526
+11063559	2877081	482439
+5238086	1116850	252717
+13792941	3658910	1380419
+4307168	814915	597878
+8114331	2049460	780894
+5023597	1238750	515784
+9180704	3239988	604322
+1750514	157177	21807
+4410670	379804	21558
+5488545	175417	55146
+2119324	54777	29737
+2751345	294282	87666
+705429	61234	76876
+541610	37305	58312
+167198	70519	21169
+633178	287102	84076
+3733548	2056024	140099
+9848519	5588575	361899
+14067088	4243887	594404
+6668689	1693810	344915
+17603409	5500746	2000410
+5538652	1178640	766991
+10468178	3133488	1110424
+6816918	1838346	669535
+12396634	5201924	802087
+371921	0	5173
+1149686	0	0
+869240	0	40925
+238224	0	8161
+2340584	0	57854
+510866	0	63877
+930376	0	49499
+762431	0	4809
+1112908	0	4231
+42231	0	0
+74542	0	0
+84081	0	0
+17950	0	0
+440057	0	0
+31088	0	13569
+53736	0	0
+42010	0	0
+47700	0	0
+952116	131406	8432
+2498613	383008	23703
+3588059	281261	41283
+1705894	109020	22995
+4390804	351179	130880
+1414844	78829	52435
+2630005	198448	71213
+1646405	119141	42696
+3200148	350132	51371
+148741	8446	0
+458413	21769	0
+552624	68088	5496
+236576	13424	2107
+755808	59016	43751
+198613	16034	23734
+336887	13489	47248
+425991	60084	11325
+794748	71308	32122
+188045	39079	0
+580518	173850	0
+696269	90914	8739
+227104	39847	0
+947149	150690	28685
+198288	0	0
+665866	82552	6198
+446137	9243	2400
+1024998	68607	13022
+3018092	884807	33009
+7323766	3088974	177170
+8952745	1619927	202356
+4006176	626088	66337
+13714627	2939764	507720
+2870460	520116	257683
+6718693	1301132	426930
+5811689	1017758	296388
+9277341	2536300	491398
+7642468	3725192	165255
+19440734	10117867	641950
+26734094	6783664	957309
+12495954	2558961	582125
+35574138	8953685	3294780
+10145805	1844966	1547322
+21827460	5731070	2372876
+14009827	3287088	1096456
+27949601	9947370	1457191
+4513137	1787717	112909
+10992933	4613017	203505
+15082014	2896840	425532
+6954332	1093267	245482
+19288032	3906983	1422070
+5208293	767511	551533
+10918475	2037487	1030628
+7819386	1337983	569232
+15436800	4599867	739311
+7178875	3845547	246568
+18408014	10425896	692443
+25526226	7184617	1069866
+11823163	2777566	571685
+32748363	9672733	3436577
+9459283	2109514	1319178
+20396802	5234468	2291214
+13836780	3279506	1380746
+26432199	10676563	1554548
+3637502	2098565	140099
+9541561	6144683	357259
+13498851	4422986	625075
+6417005	1730073	348737
+17169669	5673955	1999637
+5361237	1248996	770484
+10231867	3267791	1119436
+6559193	1989740	668981
+12101984	5600868	802791
+126507	40077	0
+763487	73998	11816
+1115186	65465	17656
+699585	51829	1914
+1032255	54557	33541
+526175	10859	18363
+892670	0	18719
+845008	44070	23237
+1281042	105302	27300
+1002914	527054	48338
+2847231	1390673	100767
+4038779	737901	253710
+2144208	357662	102063
+4708060	738045	605541
+1666952	228775	215415
+2569964	497045	267711
+1683928	414561	224308
+3065260	910886	219975
+58749	13218	4198
+135307	0	0
+87848	0	6244
+6826	0	0
+78114	0	19557
+34868	0	12669
+0	0	0
+4536	0	0
+13437	0	0
+156989	2914	3099
+289063	45451	23901
+297888	0	12016
+197924	13539	0
+881124	0	103415
+373318	0	55630
+218032	0	24421
+85877	14710	3542
+206334	0	0
+714692	48222	17483
+992780	12181	14698
+1049493	97939	18452
+523098	10421	7154
+1308337	44711	96252
+410601	40776	76271
+1075011	104165	80680
+624738	46265	44262
+1221459	112475	36186
+239363	102031	2576
+1224649	494122	17980
+1472323	125223	53500
+440180	49880	29964
+1279625	210704	36799
+422033	38906	27518
+1568076	80319	40913
+1047773	58578	48798
+1974636	301522	9908
+251485	17977	7177
+399744	37873	40158
+442195	0	33218
+187286	12700	12990
+378202	17413	89622
+101289	0	32631
+231423	0	22200
+73582	0	45469
+298651	34623	27649
+203721	50788	6783
+241943	99909	0
+55440	0	0
+0	0	0
+28788	0	7867
+11674	0	12699
+0	0	0
+2268	0	0
+1286	0	0
+
+================================================================
+<EQUIPMENT CLASS DESCRIPTION>	<EQUIPMENT CLASS INDEX>	<CD>
+Electric Heating Other Than Heat Pumps	1	1
+Electric Heating Other Than Heat Pumps	1	2
+Electric Heating Other Than Heat Pumps	1	3
+Electric Heating Other Than Heat Pumps	1	4
+Electric Heating Other Than Heat Pumps	1	5
+Electric Heating Other Than Heat Pumps	1	6
+Electric Heating Other Than Heat Pumps	1	7
+Electric Heating Other Than Heat Pumps	1	8
+Electric Heating Other Than Heat Pumps	1	9
+Air-Source Heat Pumps (heating)	2	1
+Air-Source Heat Pumps (heating)	2	2
+Air-Source Heat Pumps (heating)	2	3
+Air-Source Heat Pumps (heating)	2	4
+Air-Source Heat Pumps (heating)	2	5
+Air-Source Heat Pumps (heating)	2	6
+Air-Source Heat Pumps (heating)	2	7
+Air-Source Heat Pumps (heating)	2	8
+Air-Source Heat Pumps (heating)	2	9
+Natural Gas Furnaces	3	1
+Natural Gas Furnaces	3	2
+Natural Gas Furnaces	3	3
+Natural Gas Furnaces	3	4
+Natural Gas Furnaces	3	5
+Natural Gas Furnaces	3	6
+Natural Gas Furnaces	3	7
+Natural Gas Furnaces	3	8
+Natural Gas Furnaces	3	9
+Natural Gas Boilers & Other	4	1
+Natural Gas Boilers & Other	4	2
+Natural Gas Boilers & Other	4	3
+Natural Gas Boilers & Other	4	4
+Natural Gas Boilers & Other	4	5
+Natural Gas Boilers & Other	4	6
+Natural Gas Boilers & Other	4	7
+Natural Gas Boilers & Other	4	8
+Natural Gas Boilers & Other	4	9
+Propane Furnaces & Other	5	1
+Propane Furnaces & Other	5	2
+Propane Furnaces & Other	5	3
+Propane Furnaces & Other	5	4
+Propane Furnaces & Other	5	5
+Propane Furnaces & Other	5	6
+Propane Furnaces & Other	5	7
+Propane Furnaces & Other	5	8
+Propane Furnaces & Other	5	9
+Distillate Fuel Oil & Kerosene Furnaces	6	1
+Distillate Fuel Oil & Kerosene Furnaces	6	2
+Distillate Fuel Oil & Kerosene Furnaces	6	3
+Distillate Fuel Oil & Kerosene Furnaces	6	4
+Distillate Fuel Oil & Kerosene Furnaces	6	5
+Distillate Fuel Oil & Kerosene Furnaces	6	6
+Distillate Fuel Oil & Kerosene Furnaces	6	7
+Distillate Fuel Oil & Kerosene Furnaces	6	8
+Distillate Fuel Oil & Kerosene Furnaces	6	9
+Distillate Fuel Oil & Kerosene Boilers & Other	7	1
+Distillate Fuel Oil & Kerosene Boilers & Other	7	2
+Distillate Fuel Oil & Kerosene Boilers & Other	7	3
+Distillate Fuel Oil & Kerosene Boilers & Other	7	4
+Distillate Fuel Oil & Kerosene Boilers & Other	7	5
+Distillate Fuel Oil & Kerosene Boilers & Other	7	6
+Distillate Fuel Oil & Kerosene Boilers & Other	7	7
+Distillate Fuel Oil & Kerosene Boilers & Other	7	8
+Distillate Fuel Oil & Kerosene Boilers & Other	7	9
+Wood Stoves & Other	8	1
+Wood Stoves & Other	8	2
+Wood Stoves & Other	8	3
+Wood Stoves & Other	8	4
+Wood Stoves & Other	8	5
+Wood Stoves & Other	8	6
+Wood Stoves & Other	8	7
+Wood Stoves & Other	8	8
+Wood Stoves & Other	8	9
+Ground-Source Heat Pumps (heating)	9	1
+Ground-Source Heat Pumps (heating)	9	2
+Ground-Source Heat Pumps (heating)	9	3
+Ground-Source Heat Pumps (heating)	9	4
+Ground-Source Heat Pumps (heating)	9	5
+Ground-Source Heat Pumps (heating)	9	6
+Ground-Source Heat Pumps (heating)	9	7
+Ground-Source Heat Pumps (heating)	9	8
+Ground-Source Heat Pumps (heating)	9	9
+Natural Gas Heat Pumps (heating)	10	1
+Natural Gas Heat Pumps (heating)	10	2
+Natural Gas Heat Pumps (heating)	10	3
+Natural Gas Heat Pumps (heating)	10	4
+Natural Gas Heat Pumps (heating)	10	5
+Natural Gas Heat Pumps (heating)	10	6
+Natural Gas Heat Pumps (heating)	10	7
+Natural Gas Heat Pumps (heating)	10	8
+Natural Gas Heat Pumps (heating)	10	9
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	1
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	2
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	3
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	4
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	5
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	6
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	7
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	8
+Room/Window/Wall Air Conditioners (excludes portable ACs)	11	9
+Central Air Conditioners	12	1
+Central Air Conditioners	12	2
+Central Air Conditioners	12	3
+Central Air Conditioners	12	4
+Central Air Conditioners	12	5
+Central Air Conditioners	12	6
+Central Air Conditioners	12	7
+Central Air Conditioners	12	8
+Central Air Conditioners	12	9
+Air-Source Heat Pumps (cooling)	13	1
+Air-Source Heat Pumps (cooling)	13	2
+Air-Source Heat Pumps (cooling)	13	3
+Air-Source Heat Pumps (cooling)	13	4
+Air-Source Heat Pumps (cooling)	13	5
+Air-Source Heat Pumps (cooling)	13	6
+Air-Source Heat Pumps (cooling)	13	7
+Air-Source Heat Pumps (cooling)	13	8
+Air-Source Heat Pumps (cooling)	13	9
+Ground-Source Heat Pumps (cooling)	14	1
+Ground-Source Heat Pumps (cooling)	14	2
+Ground-Source Heat Pumps (cooling)	14	3
+Ground-Source Heat Pumps (cooling)	14	4
+Ground-Source Heat Pumps (cooling)	14	5
+Ground-Source Heat Pumps (cooling)	14	6
+Ground-Source Heat Pumps (cooling)	14	7
+Ground-Source Heat Pumps (cooling)	14	8
+Ground-Source Heat Pumps (cooling)	14	9
+Natural Gas Heat Pumps (cooling)	15	1
+Natural Gas Heat Pumps (cooling)	15	2
+Natural Gas Heat Pumps (cooling)	15	3
+Natural Gas Heat Pumps (cooling)	15	4
+Natural Gas Heat Pumps (cooling)	15	5
+Natural Gas Heat Pumps (cooling)	15	6
+Natural Gas Heat Pumps (cooling)	15	7
+Natural Gas Heat Pumps (cooling)	15	8
+Natural Gas Heat Pumps (cooling)	15	9
+Clothes Washers	16	1
+Clothes Washers	16	2
+Clothes Washers	16	3
+Clothes Washers	16	4
+Clothes Washers	16	5
+Clothes Washers	16	6
+Clothes Washers	16	7
+Clothes Washers	16	8
+Clothes Washers	16	9
+Dishwashers	17	1
+Dishwashers	17	2
+Dishwashers	17	3
+Dishwashers	17	4
+Dishwashers	17	5
+Dishwashers	17	6
+Dishwashers	17	7
+Dishwashers	17	8
+Dishwashers	17	9
+Natural Gas water heaters (storage & tankless)	18	1
+Natural Gas water heaters (storage & tankless)	18	2
+Natural Gas water heaters (storage & tankless)	18	3
+Natural Gas water heaters (storage & tankless)	18	4
+Natural Gas water heaters (storage & tankless)	18	5
+Natural Gas water heaters (storage & tankless)	18	6
+Natural Gas water heaters (storage & tankless)	18	7
+Natural Gas water heaters (storage & tankless)	18	8
+Natural Gas water heaters (storage & tankless)	18	9
+Electric water heaters (storage & tankless)	19	1
+Electric water heaters (storage & tankless)	19	2
+Electric water heaters (storage & tankless)	19	3
+Electric water heaters (storage & tankless)	19	4
+Electric water heaters (storage & tankless)	19	5
+Electric water heaters (storage & tankless)	19	6
+Electric water heaters (storage & tankless)	19	7
+Electric water heaters (storage & tankless)	19	8
+Electric water heaters (storage & tankless)	19	9
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	1
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	2
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	3
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	4
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	5
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	6
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	7
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	8
+Distillate Fuel Oil & Kerosene water heaters (storage & tankless)	20	9
+Propane water heaters (storage & tankless)	21	1
+Propane water heaters (storage & tankless)	21	2
+Propane water heaters (storage & tankless)	21	3
+Propane water heaters (storage & tankless)	21	4
+Propane water heaters (storage & tankless)	21	5
+Propane water heaters (storage & tankless)	21	6
+Propane water heaters (storage & tankless)	21	7
+Propane water heaters (storage & tankless)	21	8
+Propane water heaters (storage & tankless)	21	9
+Solar water heaters (storage & tankless)	22	1
+Solar water heaters (storage & tankless)	22	2
+Solar water heaters (storage & tankless)	22	3
+Solar water heaters (storage & tankless)	22	4
+Solar water heaters (storage & tankless)	22	5
+Solar water heaters (storage & tankless)	22	6
+Solar water heaters (storage & tankless)	22	7
+Solar water heaters (storage & tankless)	22	8
+Solar water heaters (storage & tankless)	22	9
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	1
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	2
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	3
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	4
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	5
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	6
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	7
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	8
+Natural Gas Cooking Ranges/Cooktops/Ovens	23	9
+Propane Cooking Ranges/Cooktops/Ovens	24	1
+Propane Cooking Ranges/Cooktops/Ovens	24	2
+Propane Cooking Ranges/Cooktops/Ovens	24	3
+Propane Cooking Ranges/Cooktops/Ovens	24	4
+Propane Cooking Ranges/Cooktops/Ovens	24	5
+Propane Cooking Ranges/Cooktops/Ovens	24	6
+Propane Cooking Ranges/Cooktops/Ovens	24	7
+Propane Cooking Ranges/Cooktops/Ovens	24	8
+Propane Cooking Ranges/Cooktops/Ovens	24	9
+Electric Cooking Ranges/Cooktops/Ovens	25	1
+Electric Cooking Ranges/Cooktops/Ovens	25	2
+Electric Cooking Ranges/Cooktops/Ovens	25	3
+Electric Cooking Ranges/Cooktops/Ovens	25	4
+Electric Cooking Ranges/Cooktops/Ovens	25	5
+Electric Cooking Ranges/Cooktops/Ovens	25	6
+Electric Cooking Ranges/Cooktops/Ovens	25	7
+Electric Cooking Ranges/Cooktops/Ovens	25	8
+Electric Cooking Ranges/Cooktops/Ovens	25	9
+Natural Gas Clothes Dryers	26	1
+Natural Gas Clothes Dryers	26	2
+Natural Gas Clothes Dryers	26	3
+Natural Gas Clothes Dryers	26	4
+Natural Gas Clothes Dryers	26	5
+Natural Gas Clothes Dryers	26	6
+Natural Gas Clothes Dryers	26	7
+Natural Gas Clothes Dryers	26	8
+Natural Gas Clothes Dryers	26	9
+Electric Clothes Dryers	27	1
+Electric Clothes Dryers	27	2
+Electric Clothes Dryers	27	3
+Electric Clothes Dryers	27	4
+Electric Clothes Dryers	27	5
+Electric Clothes Dryers	27	6
+Electric Clothes Dryers	27	7
+Electric Clothes Dryers	27	8
+Electric Clothes Dryers	27	9
+Refrigerators	28	1
+Refrigerators	28	2
+Refrigerators	28	3
+Refrigerators	28	4
+Refrigerators	28	5
+Refrigerators	28	6
+Refrigerators	28	7
+Refrigerators	28	8
+Refrigerators	28	9
+Standalone Freezers	29	1
+Standalone Freezers	29	2
+Standalone Freezers	29	3
+Standalone Freezers	29	4
+Standalone Freezers	29	5
+Standalone Freezers	29	6
+Standalone Freezers	29	7
+Standalone Freezers	29	8
+Standalone Freezers	29	9
+Furnace Fans & Boiler Pumps	30	1
+Furnace Fans & Boiler Pumps	30	2
+Furnace Fans & Boiler Pumps	30	3
+Furnace Fans & Boiler Pumps	30	4
+Furnace Fans & Boiler Pumps	30	5
+Furnace Fans & Boiler Pumps	30	6
+Furnace Fans & Boiler Pumps	30	7
+Furnace Fans & Boiler Pumps	30	8
+Furnace Fans & Boiler Pumps	30	9
+Televisions	31	1
+Televisions	31	2
+Televisions	31	3
+Televisions	31	4
+Televisions	31	5
+Televisions	31	6
+Televisions	31	7
+Televisions	31	8
+Televisions	31	9
+Set-top Boxes	32	1
+Set-top Boxes	32	2
+Set-top Boxes	32	3
+Set-top Boxes	32	4
+Set-top Boxes	32	5
+Set-top Boxes	32	6
+Set-top Boxes	32	7
+Set-top Boxes	32	8
+Set-top Boxes	32	9
+Home Audio Equipment	33	1
+Home Audio Equipment	33	2
+Home Audio Equipment	33	3
+Home Audio Equipment	33	4
+Home Audio Equipment	33	5
+Home Audio Equipment	33	6
+Home Audio Equipment	33	7
+Home Audio Equipment	33	8
+Home Audio Equipment	33	9
+OTT Streaming Devices	34	1
+OTT Streaming Devices	34	2
+OTT Streaming Devices	34	3
+OTT Streaming Devices	34	4
+OTT Streaming Devices	34	5
+OTT Streaming Devices	34	6
+OTT Streaming Devices	34	7
+OTT Streaming Devices	34	8
+OTT Streaming Devices	34	9
+Video Game Consoles	35	1
+Video Game Consoles	35	2
+Video Game Consoles	35	3
+Video Game Consoles	35	4
+Video Game Consoles	35	5
+Video Game Consoles	35	6
+Video Game Consoles	35	7
+Video Game Consoles	35	8
+Video Game Consoles	35	9
+Desktop PCs	36	1
+Desktop PCs	36	2
+Desktop PCs	36	3
+Desktop PCs	36	4
+Desktop PCs	36	5
+Desktop PCs	36	6
+Desktop PCs	36	7
+Desktop PCs	36	8
+Desktop PCs	36	9
+Laptop PCs	37	1
+Laptop PCs	37	2
+Laptop PCs	37	3
+Laptop PCs	37	4
+Laptop PCs	37	5
+Laptop PCs	37	6
+Laptop PCs	37	7
+Laptop PCs	37	8
+Laptop PCs	37	9
+Monitors	38	1
+Monitors	38	2
+Monitors	38	3
+Monitors	38	4
+Monitors	38	5
+Monitors	38	6
+Monitors	38	7
+Monitors	38	8
+Monitors	38	9
+Network Equipment	39	1
+Network Equipment	39	2
+Network Equipment	39	3
+Network Equipment	39	4
+Network Equipment	39	5
+Network Equipment	39	6
+Network Equipment	39	7
+Network Equipment	39	8
+Network Equipment	39	9
+Non-PC Rechargables	40	1
+Non-PC Rechargables	40	2
+Non-PC Rechargables	40	3
+Non-PC Rechargables	40	4
+Non-PC Rechargables	40	5
+Non-PC Rechargables	40	6
+Non-PC Rechargables	40	7
+Non-PC Rechargables	40	8
+Non-PC Rechargables	40	9
+Ceiling Fans	41	1
+Ceiling Fans	41	2
+Ceiling Fans	41	3
+Ceiling Fans	41	4
+Ceiling Fans	41	5
+Ceiling Fans	41	6
+Ceiling Fans	41	7
+Ceiling Fans	41	8
+Ceiling Fans	41	9
+Coffee Makers	42	1
+Coffee Makers	42	2
+Coffee Makers	42	3
+Coffee Makers	42	4
+Coffee Makers	42	5
+Coffee Makers	42	6
+Coffee Makers	42	7
+Coffee Makers	42	8
+Coffee Makers	42	9
+Dehumidifiers	43	1
+Dehumidifiers	43	2
+Dehumidifiers	43	3
+Dehumidifiers	43	4
+Dehumidifiers	43	5
+Dehumidifiers	43	6
+Dehumidifiers	43	7
+Dehumidifiers	43	8
+Dehumidifiers	43	9
+Microwave Ovens	44	1
+Microwave Ovens	44	2
+Microwave Ovens	44	3
+Microwave Ovens	44	4
+Microwave Ovens	44	5
+Microwave Ovens	44	6
+Microwave Ovens	44	7
+Microwave Ovens	44	8
+Microwave Ovens	44	9
+Pool Pump	45	1
+Pool Pump	45	2
+Pool Pump	45	3
+Pool Pump	45	4
+Pool Pump	45	5
+Pool Pump	45	6
+Pool Pump	45	7
+Pool Pump	45	8
+Pool Pump	45	9
+Pool Heaters	46	1
+Pool Heaters	46	2
+Pool Heaters	46	3
+Pool Heaters	46	4
+Pool Heaters	46	5
+Pool Heaters	46	6
+Pool Heaters	46	7
+Pool Heaters	46	8
+Pool Heaters	46	9
+Residential Security Systems	47	1
+Residential Security Systems	47	2
+Residential Security Systems	47	3
+Residential Security Systems	47	4
+Residential Security Systems	47	5
+Residential Security Systems	47	6
+Residential Security Systems	47	7
+Residential Security Systems	47	8
+Residential Security Systems	47	9
+Portable Electric Spas	48	1
+Portable Electric Spas	48	2
+Portable Electric Spas	48	3
+Portable Electric Spas	48	4
+Portable Electric Spas	48	5
+Portable Electric Spas	48	6
+Portable Electric Spas	48	7
+Portable Electric Spas	48	8
+Portable Electric Spas	48	9
+Miscellaneous Refrigeration Products	49	1
+Miscellaneous Refrigeration Products	49	2
+Miscellaneous Refrigeration Products	49	3
+Miscellaneous Refrigeration Products	49	4
+Miscellaneous Refrigeration Products	49	5
+Miscellaneous Refrigeration Products	49	6
+Miscellaneous Refrigeration Products	49	7
+Miscellaneous Refrigeration Products	49	8
+Miscellaneous Refrigeration Products	49	9
+Smart Speakers	50	1
+Smart Speakers	50	2
+Smart Speakers	50	3
+Smart Speakers	50	4
+Smart Speakers	50	5
+Smart Speakers	50	6
+Smart Speakers	50	7
+Smart Speakers	50	8
+Smart Speakers	50	9
+Smartphones	51	1
+Smartphones	51	2
+Smartphones	51	3
+Smartphones	51	4
+Smartphones	51	5
+Smartphones	51	6
+Smartphones	51	7
+Smartphones	51	8
+Smartphones	51	9
+Tablets	52	1
+Tablets	52	2
+Tablets	52	3
+Tablets	52	4
+Tablets	52	5
+Tablets	52	6
+Tablets	52	7
+Tablets	52	8
+Tablets	52	9
+Small Kitchen Appliances	53	1
+Small Kitchen Appliances	53	2
+Small Kitchen Appliances	53	3
+Small Kitchen Appliances	53	4
+Small Kitchen Appliances	53	5
+Small Kitchen Appliances	53	6
+Small Kitchen Appliances	53	7
+Small Kitchen Appliances	53	8
+Small Kitchen Appliances	53	9
+Electric Other	54	1
+Electric Other	54	2
+Electric Other	54	3
+Electric Other	54	4
+Electric Other	54	5
+Electric Other	54	6
+Electric Other	54	7
+Electric Other	54	8
+Electric Other	54	9
+Natural Gas Secondary Heating	55	1
+Natural Gas Secondary Heating	55	2
+Natural Gas Secondary Heating	55	3
+Natural Gas Secondary Heating	55	4
+Natural Gas Secondary Heating	55	5
+Natural Gas Secondary Heating	55	6
+Natural Gas Secondary Heating	55	7
+Natural Gas Secondary Heating	55	8
+Natural Gas Secondary Heating	55	9
+Electric Secondary Heating	56	1
+Electric Secondary Heating	56	2
+Electric Secondary Heating	56	3
+Electric Secondary Heating	56	4
+Electric Secondary Heating	56	5
+Electric Secondary Heating	56	6
+Electric Secondary Heating	56	7
+Electric Secondary Heating	56	8
+Electric Secondary Heating	56	9
+Distillate Fuel Oil & Kerosene Secondary Heating	57	1
+Distillate Fuel Oil & Kerosene Secondary Heating	57	2
+Distillate Fuel Oil & Kerosene Secondary Heating	57	3
+Distillate Fuel Oil & Kerosene Secondary Heating	57	4
+Distillate Fuel Oil & Kerosene Secondary Heating	57	5
+Distillate Fuel Oil & Kerosene Secondary Heating	57	6
+Distillate Fuel Oil & Kerosene Secondary Heating	57	7
+Distillate Fuel Oil & Kerosene Secondary Heating	57	8
+Distillate Fuel Oil & Kerosene Secondary Heating	57	9
+Propane Secondary Heating	58	1
+Propane Secondary Heating	58	2
+Propane Secondary Heating	58	3
+Propane Secondary Heating	58	4
+Propane Secondary Heating	58	5
+Propane Secondary Heating	58	6
+Propane Secondary Heating	58	7
+Propane Secondary Heating	58	8
+Propane Secondary Heating	58	9
+Wood Secondary Heating	59	1
+Wood Secondary Heating	59	2
+Wood Secondary Heating	59	3
+Wood Secondary Heating	59	4
+Wood Secondary Heating	59	5
+Wood Secondary Heating	59	6
+Wood Secondary Heating	59	7
+Wood Secondary Heating	59	8
+Wood Secondary Heating	59	9
+Natural Gas Other	60	1
+Natural Gas Other	60	2
+Natural Gas Other	60	3
+Natural Gas Other	60	4
+Natural Gas Other	60	5
+Natural Gas Other	60	6
+Natural Gas Other	60	7
+Natural Gas Other	60	8
+Natural Gas Other	60	9
+Propane Other	61	1
+Propane Other	61	2
+Propane Other	61	3
+Propane Other	61	4
+Propane Other	61	5
+Propane Other	61	6
+Propane Other	61	7
+Propane Other	61	8
+Propane Other	61	9
+Distillate Fuel Oil & Kerosene Other	62	1
+Distillate Fuel Oil & Kerosene Other	62	2
+Distillate Fuel Oil & Kerosene Other	62	3
+Distillate Fuel Oil & Kerosene Other	62	4
+Distillate Fuel Oil & Kerosene Other	62	5
+Distillate Fuel Oil & Kerosene Other	62	6
+Distillate Fuel Oil & Kerosene Other	62	7
+Distillate Fuel Oil & Kerosene Other	62	8
+Distillate Fuel Oil & Kerosene Other	62	9

@@ -1,5 +1,7 @@
 """Parent module of the Carbon Capture, Allocation, Transportation and Sequestration (CCATS) Module.
 
+.. _module:
+
 Module: Summary
 _______________
 The **"Module"** class performs all key model setup functions and runs all sub-class processes (i.e. :ref:`restart`, :ref:`preprocessor` etc.).
@@ -72,7 +74,13 @@ logger.info('Import os')
 import os
 logger.info('Import Pathlib')
 from pathlib import Path
+logger.info('Import NumPy')
+import numpy as np
 
+# TODO GNM: remove this import and fix warnings
+logger.info('Import warnings')
+import warnings
+warnings.simplefilter('ignore', category=FutureWarning)
 
 class Module:
     """
@@ -119,10 +127,14 @@ class Module:
         self.years_steo         = [] # List of STEO years
         self.eor_45q            = 0  # 45Q tax credit value for CO2 EOR
         self.saline_45q         = 0  # 45Q tax credit value for saline storage
+        self.dac_eor_45q        = 0  # 45Q tax credit value for DAC to CO2 EOR
+        self.dac_saline_45q     = 0  # 45Q tax credit value for DAC to saline storage
         self.year_new_45q       = 0  # Year new policy provisions relating to 45Q start (i.e. inflation adjustment)
         self.legacy_eor_45q     = 0  # Legacy 45Q tax credit value for CO2 EOR
         self.legacy_saline_45q  = 0  # Legacy 45Q tax credit value for saline storage
         self.year_leg_45q       = 0  # Year legacy policy provisions relating to 45Q start (i.e. inflation adjustment)
+        self.LCFS_credit        = 0  # Low-carbon fuel standard (LCFS) credit (USD)
+        self.LCFS_dollar_year   = 0  # Dollar year of the LCFS credit
 
         ### Switches
         self.integrated_switch                  = False # False means standalone run, True means integrated run
@@ -136,7 +148,7 @@ class Module:
         self.linear_model_switch                = False # True means model is linear (LP), False means model is a mixed integer linear program (MILP)
         self.write_restart_before_run_switch    = False # True means "write restart" method in restart.py is called before CCATS runs
         self.debug_restart_itr_switch           = False # True means that the restart file debug in the "write_restart" method in restart.py is called every iteration
-        self.output_restart_unf_switch          = False # True means restart_CCATSo.unf file is generated
+        self.output_restart_npz_switch          = False # True means restartCCATS.npz file is generated
 
         ### Model control variables
         # Model control variables
@@ -180,6 +192,7 @@ class Module:
         self.new_built_pipes_df         = pd.DataFrame() # DataFrame of new pipelines built in previous model year b1
         self.new_aors_df                = pd.DataFrame() # DataFrame of new AORS in the previous storage year
         self.store_prev_b0_df           = pd.DataFrame() # DataFrame of previous model year store_b0
+        self.nat_co2_prev_b0            = pd.DataFrame() # Series of previous model year natural CO2 flows
 
         pass
 
@@ -194,6 +207,7 @@ class Module:
                year,
                pyfiler1,
                cycle,
+               iteration,
                scedes):
         """CCATS Setup method.
 
@@ -224,6 +238,9 @@ class Module:
 
         cycle : int
             Model run cycle from main.py.
+            
+        iteration : int
+            Model run iteration from main.py.
 
         scedes : None or scedes file inputs from **main.py**.
             NEMS Scenario Description data.
@@ -281,8 +298,8 @@ class Module:
         self.debug_restart_itr_switch : bool
             Output the restart file debug file every iteration if True (will result in slightly longer model runtime).
 
-        self.output_restart_unf_switch : bool
-            Output the restart file as a .unf after running CCATS if True.
+        self.output_restart_npz_switch : bool
+            Output the restart file as a .npz after running CCATS if True.
 
         self.year_aeo : int
             AEO vintage year.
@@ -304,6 +321,12 @@ class Module:
 
         self.saline_45q : float
             Saline Formation storage 45Q tax credit value.
+
+        self.dac_eor_45q : float
+            DAC to EOR 45Q tax credit value
+
+        self.dac_saline_45q : float
+            DAC to Saline Formation storage 45Q tax credit value
 
         self.year_new_45q : float
             Year in which most recent 45Q policy update occurred (2022 Inflation Reduction Act).
@@ -357,6 +380,12 @@ class Module:
         else:
             self.cycle_current = cycle
 
+        ### Get model iteration
+        if iteration == 'no load on iteration':
+            self.cycle_iteration = 0
+        else:
+            self.cycle_iteration = iteration
+            
         # Assign directories for stanalone vs. integrated run based on where setup.csv is located
         file_exists = os.path.exists(main_directory + 'CCATS\\input\\setup.csv')
         logger.info('parent input path: ' + main_directory)
@@ -391,9 +420,12 @@ class Module:
         self.price_average_switch               = str(self.setup_table.at['price_average_switch', 'value']).upper() == 'True'.upper()
         self.price_marginal_switch              = str(self.setup_table.at['price_marginal_switch', 'value']).upper() == 'True'.upper()
         self.linear_model_switch                = str(self.setup_table.at['linear_model_switch', 'value']).upper() == 'True'.upper()
+        self.natural_co2_switch                 = str(self.setup_table.at['natural_co2_switch', 'value']).upper() == 'True'.upper()
         self.write_restart_before_run_switch    = str(self.setup_table.at['write_restart_before_run_switch', 'value']).upper() == 'True'.upper()
         self.debug_restart_itr_switch           = str(self.setup_table.at['debug_restart_itr_switch', 'value']).upper() == 'True'.upper()
-        self.output_restart_unf_switch          = str(self.setup_table.at['output_restart_unf_switch', 'value']).upper() == 'True'.upper()
+        self.output_restart_npz_switch          = str(self.setup_table.at['output_restart_npz_switch', 'value']).upper() == 'True'.upper()
+        self.endogenous_source_switch           = str(self.setup_table.at['endogenous_source_switch', 'value']).upper() == 'True'.upper()
+        self.debug_integrated_switch            = str(self.setup_table.at['debug_integrated_switch', 'value']).upper() == 'True'.upper()
 
         # Assign base model parameters
         self.threads                    = int(self.setup_table.at['threads', 'value'])
@@ -404,6 +436,8 @@ class Module:
         self.years_steo                 = list(range(self.year_aeo - 1, self.year_aeo + 2))
         self.eor_45q                    = int(self.setup_table.at['eor_45q', 'value'])
         self.saline_45q                 = int(self.setup_table.at['saline_45q', 'value'])
+        self.dac_eor_45q                = int(self.setup_table.at['dac_eor_45q', 'value'])
+        self.dac_saline_45q             = int(self.setup_table.at['dac_saline_45q', 'value'])
         self.year_new_45q               = int(self.setup_table.at['year_new_45q', 'value'])
         self.year_45q_duration          = int(self.setup_table.at['year_45q_duration', 'value'])
         self.year_45q_last_new          = int(self.setup_table.at['year_45q_last_new', 'value'])
@@ -414,6 +448,9 @@ class Module:
         self.price_reset_value_45q      = float(self.setup_table.at['price_reset_value_45q', 'value'])
         self.price_reset_value_ntc      = float(self.setup_table.at['price_reset_value_ntc', 'value'])
         self.supply_select_ts_penalty   = float(self.setup_table.at['supply_select_ts_penalty', 'value'])
+        self.debug_integrated_year      = int(self.setup_table.at['debug_integrated_year', 'value'])
+        self.LCFS_credit                = float(self.setup_table.at['LCFS_credit', 'value'])
+        self.LCFS_dollar_year           = int(self.setup_table.at['LCFS_dollar_year', 'value'])
 
         # Load in regional mapping
         self.mapping                    = com.read_dataframe(self.input_path + self.setup_table.at['mapping', 'value'])
@@ -443,7 +480,7 @@ class Module:
         logger.info('Import Preprocessor')
         import preprocessor as prp
         logger.info('Import Model')
-        from models import ccats_optimization as ccats_opt
+        from opmodels import ccats_optimization as ccats_opt
 
         logger.info('Import Postprocessor')
         import postprocessor as pop
@@ -471,7 +508,7 @@ class Module:
         self.logger.info('Start Load Restart File')
         temp_filename   = self.main_directory + self.setup_table.at['restart_in', 'value']
         self.logger.info(temp_filename)
-        temp_rest       = self.main_directory + 'restart.unf'
+        temp_rest       = self.main_directory + 'restart.npz'
         self.restart.run(temp_filename, temp_rest)
         
         # Load parameters
@@ -482,6 +519,13 @@ class Module:
         self.logger.info('Create local copies of restart variables')
         self.copy_restart_variables()
 
+        # Debug an integrated run -> treat as an FCRL year (only applies if not an integrated run)
+        if (self.integrated_switch == False) & (self.debug_integrated_switch):
+            self.integrated_switch = True
+            self.year_current = self.debug_integrated_year
+            self.param_ncrl = 0
+            self.param_fcrl = 1
+
         # Localize and Reformat input restart files to improve data processing
         self.logger.info('Localize and reformat input restart files')
         self.loc_rst.setup_eor()
@@ -491,7 +535,7 @@ class Module:
         self.logger.info('End Load Restart File')
 
 
-        ###Load pickled local variables
+        ### Load pickled local variables
         self.logger.info('Start Load Intermediate Variables')
         self.read_pkl()
         self.logger.info('End Load Local Variables')
@@ -633,9 +677,8 @@ class Module:
         self.rest_ccs_saline_45q : DataFrame
             DataFrame of 45Q tax credits values for carbon capture from CO\ :sub:`2` EOR (1987$).
 
-
-        self.leg_ccs_eor_45q : df
-            DataFrame of legacy 45Q tax credit values for carbon capture from saline formation storage (1987$)
+        self.leg_ccs_eor_45q : DataFrame
+            DataFrame of legacy 45Q tax credit values for carbon capture from saline formation storage (1987$).
 
         self.rest_i_45q_duration : int
             Tax code section 45Q subsidy duration
@@ -746,11 +789,13 @@ class Module:
         if self.update_45q_switch == True:
             # Current law 45Q tax credits
             self.logger.info('Update current law 45Q tax credit values')
+
+            # TODO GNM: FutureWarning
             self.eor_45q = self.eor_45q * com.calculate_inflation(self.rest_mc_jpgdp.copy(), 2022)
             self.saline_45q = self.saline_45q * com.calculate_inflation(self.rest_mc_jpgdp.copy(), 2022)
 
-            self.rest_ccs_eor_45q.loc[list(range(self.year_new_45q, (self.year_final + 1)))] = self.eor_45q
-            self.rest_ccs_saline_45q.loc[list(range(self.year_new_45q, (self.year_final + 1)))] = self.saline_45q
+            self.rest_ccs_eor_45q.loc[list(range(self.year_new_45q, (self.year_final + 1)))] = np.float64(self.eor_45q)
+            self.rest_ccs_saline_45q.loc[list(range(self.year_new_45q, (self.year_final + 1)))] = np.float64(self.saline_45q)
             
             # 45Q is inflation adjusted, starts in 2027 from 2025
             for year in list(range(self.year_new_45q, self.year_new_45q + 5)):
@@ -1030,7 +1075,7 @@ class Module:
             self.output.run()
 
         if self.pytest_switch:
-            self.logger.info('Runnning Pytests')
+            self.logger.info('Running Pytests')
             self.pytest.logger = self.logger
             self.pytest.run()
 

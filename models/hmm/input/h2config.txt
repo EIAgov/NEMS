@@ -10,17 +10,21 @@ LoadRestrictionSwitch := 0; ! 0 = send normal electrolyzer load to EMM, 1 = only
 
 !=====================================================
 
-FirstHistoricalYear := '1990';
-FirstModelYear := '2023';
-LastModelYear := '2050';
+nh::FirstHistoricalYear := '1990';
+nh::FirstModelYear := '2022';
+nh::LastModelYear := '2050';
 NumberFutureYears := 20;
+nh::FirstLearningYear := '2025'; ! Year of which to extract capacities for learning.
 
 ! First year that pipelines and storage facilities are allowed to be built.
 FirstPipelineBuildYear := '2030';
 FirstStorageBuildYear := '2030';
 
 ! MECS vintage being used for initial capacity estimations
-MECSYear := '2018'; !
+MECSYear := '2022'; 
+
+! Basis year after which, to apply learning reduction in the LZTC case, or hold capital costs in the HZTC case.
+ZTCBasisYear := '2026';
 
 ! TECHNOLOGY ASSUMPTIONS
 ! Electricity consumed during compression for storage
@@ -37,6 +41,16 @@ CorporateTaxRate := .24; ! Assumed corporate tax rate
 ! Production assumptions
 CapacityReserveRatio := 1.1;
 
+! First Year of allowable builds
+Composite table:
+prodtech	nh::FirstBuildYear
+SMR_CCS		    2025
+ATR_CCS  	    2028
+;
+
+! CCS Cost fraction (share of capital cost attributed to CCS, used in learning.)
+ccs_cost_share := .15;
+
 ! Capacity Build Steps
 StorageStepCostMultiplier(storStep) := DATA {1 : 1, 2 : 1.5, 3 : 2};
 TransportationStepCostMultiplier(tranStep) := DATA {1 : 1, 2 : 1.5, 3 : 2};
@@ -48,9 +62,10 @@ ProductionStepSize(prodStep) := DATA {1 : .2, 2 : 0.06, 3 : .03};
 ! Learning (move to pre-processor?)
 Composite table:
 prodTech	LR1	LR2	LR3	P1_doublings	P2_doublings	minimum_learning
-PEM		0.15	0.07	0.01	1		4		0.25
+PEM		0.15	0.07	0.01	2		4		0.30
 SMR				0.01					0.01
-SMR_CCS		0.08	0.04	0.01	1		2		0.05
+SMR_CCS		0.08	0.04	0.01	2		4		0.08
+ATR_CCS		0.10	0.04	0.01	2		4		0.10			
 ;
 MinimumLearningEndYear := '2035'; 
 
@@ -63,7 +78,7 @@ Credit45VValue := 3000000000;
 ProjectBuildTime := 3;
 Credit45VNumYearsEligible := 10;
 Credit45VStartYear := '2023';
-Credit45VEndYear := '2033';
+Credit45VEndYear := '2027';
 
 ! Define credit steps
 CreditSteps_ := DATA {'45V', '45VCurtail', 'No45V', 'No45VCurtail'};
@@ -94,3 +109,4 @@ H2DemandFactors(H2STEP) := DATA {
 ! Debug switches
 SaveEachIterationSwitch := 0;
 ExtraDebugSwitch := 1;
+ProfileDebugSwitch := 1;

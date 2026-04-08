@@ -42,7 +42,7 @@
       LOGICAL NEW
       CHARACTER*8 FILENM
       INTEGER II,ICHK,ISECT,IS
-      INTEGER I,IVLFLG     !FLAG TO IDENTIFY DOUBLE CONVERGENCE - adjust valcap output files
+      INTEGER I
       INTEGER NRGN,FULLYR
       INTEGER FILE_MGR
       EXTERNAL FILE_MGR
@@ -57,6 +57,22 @@
       COMMON /STORE_ROR/SV_PRGEN_ESRR
       REAL EFDPEAK(MNUMNR)
       COMMON /EFD_PK/EFDPEAK
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+
+!  SET EFP ITERATION SWITCHES - if STEO benchmarking is on, there will be 2 EFP iterations, most output should only print on final one      
+      EFPFCRL = 0
+      EFPITPRT = 0
+      IF (FCRL .eq. 1) THEN
+        IF ((BMELPRC(CURIYR) .GT. 0.0 .and. EFPITR .eq. 2) .OR. (BMELPRC(CURIYR) .EQ. 0.0)) THEN
+            EFPFCRL = 1
+        ENDIF
+      ENDIF
+      IF ((BMELPRC(CURIYR) .GT. 0.0 .and. EFPITR .eq. 2) .OR. (BMELPRC(CURIYR) .EQ. 0.0)) THEN
+          EFPITPRT = 1
+      ENDIF
+      
+      
 ! FIRST TIME THROUGH -- READ INPUT DATA AND SET UP DATA STRUCTURES
 ! DATA FILES ARE:
 !   Run control file - EFPCNTL
@@ -103,7 +119,7 @@
 222    FORMAT(1x,A10,3I5,9F10.3)      
       
 ! fill in costs of nuclear ZEC programs
-      IF (CURITR .EQ. 1)THEN
+      IF (CURITR .EQ. 1 .AND. EFPITR .EQ. 1)THEN
          ERZECCST(MNUMNR) = 0.0
          DO NRGN =1,UNRGNS
             IF (USW_ZECSUB .EQ. 1) THEN    !use ECP unless 0, then use EFD
@@ -140,8 +156,8 @@
 !
 ! SAVE EFP RESULTS INTO NEMS VARIABLES (save electricity prices)
       CALL ELSET
-      IF (FCRL .eq. 1) CALL REVGAP
-      IF (FCRL .eq. 1) THEN
+      IF (EFPFCRL .eq. 1) CALL REVGAP
+      IF (EFPFCRL .eq. 1) THEN
         DO ISECT = 1,4
          DO NRGN = 1,MNUMNR
           COSTSERV(ISECT,NRGN,CURIYR) = COSTSERV(ISECT,NRGN,CURIYR) / MC_JPGDP(CURIYR)
@@ -149,16 +165,16 @@
          write(22,1668) CURIYR,ISECT,(COSTSERV(ISECT,NRGN,CURIYR),NRGN=1,MNUMNR)
         ENDDO
       ENDIF
-1668   FORMAT(1X,'COSTSV',2I5,<MNUMNR>F10.0)
+1668  FORMAT(1X,'COSTSV',2I5,<MNUMNR>F10.0)
 
-! write final prices each iteration
+! write final prices each iteration - keep EFPITR in this print to track STEO benchmarking change
       DO NRGN = 1, UNRGNS
-         WRITE(22,1343) CURIYR+UHBSYR,CURITR,NRGN, &
+         WRITE(22,1343) CURIYR+UHBSYR,CURITR,EFPITR,NRGN, &
             EPRICE(1,4,NRGN),PELRSNR(NRGN,CURIYR),SALCLS(NRGN,1),QELRSN(NRGN,CURIYR)/1000., &
             EPRICE(2,4,NRGN),PELCMNR(NRGN,CURIYR),SALCLS(NRGN,2),QELCMN(NRGN,CURIYR)/1000., &
             EPRICE(3,4,NRGN),PELINNR(NRGN,CURIYR),SALCLS(NRGN,3),QELINN(NRGN,CURIYR)/1000., &
             EPRICE(4,4,NRGN),PELTRNR(NRGN,CURIYR),SALCLS(NRGN,4),QELTRN(NRGN,CURIYR)/1000.
- 1343    FORMAT(1X,"ELPQ_NR",3(":",I4),4(":",F8.2,":",F8.2,":",F8.1,":",F8.1))
+ 1343    FORMAT(1X,"ELPQ_NR",4(":",I4),4(":",F8.2,":",F8.2,":",F8.1,":",F8.1))
          DO ISECT = 1 , 4
             IF ((EPRICE(ISECT,4,NRGN) .LE. 0.0) .OR. (ISNAN(EPRICE(ISECT,4,NRGN)))) THEN   ! check for NaNQ this way
 
@@ -171,21 +187,16 @@
       END DO
 
       DO NRGN=1,MNUMCR-1
-         WRITE(22,1344) CURIYR+UHBSYR,CURITR,NRGN, &
+         WRITE(22,1344) CURIYR+UHBSYR,CURITR,EFPITR,NRGN, &
             PELRS(NRGN,CURIYR),QELRS(NRGN,CURIYR), &
             PELCM(NRGN,CURIYR),QELCM(NRGN,CURIYR), &
             PELIN(NRGN,CURIYR),QELIN(NRGN,CURIYR), &
             PELTR(NRGN,CURIYR),QELTR(NRGN,CURIYR)
- 1344    FORMAT(1X,"ELPQ_CR",3(":",I4),4(":",F8.2,":",F8.1))
+ 1344    FORMAT(1X,"ELPQ_CR",4(":",I4),4(":",F8.2,":",F8.1))
       END DO
 
-     IF(ICHK.EQ.1) THEN
-        Write(6,*) 'this run is doomed, doomed.  writing out the restart file for posterity.'
-        call MNFLUSH        ! flush I/O buffers to make sure latest stuff out there
-        CALL NDATOT('   ')  ! write restart file
-      ENDIF
 ! PRINT REPORTS ON LAST YEAR AND LAST ITERATION
-      IF (FCRL .EQ. 1 .AND. CURIYR .GE. LASTYR) THEN
+      IF (EFPFCRL .EQ. 1 .AND. CURIYR .GE. LASTYR) THEN
 
          DO NRGN=1,UNRGNS
 ! Sum totals if reports are requested
@@ -212,8 +223,6 @@
          UF_EFPRPT = FILE_MGR('C',FILENM,NEW)
       ENDIF
 
-! if last iteration - set valcap/convergence flag to 1
-      IF (FCRL .EQ. 1) IVLFLG = 1
       RETURN
       END
 !
@@ -1003,6 +1012,12 @@
            GAADJ(:,:,i)=GAADJ(:,:,11)  
            COMPRM(i,:)=COMPRM(11,:)
            SCSREC(i,:)=SCSREC(11,:)  
+           CAPTSCALE(:,i) = 1.0
+           CAPDSCALE(:,i) = 1.0
+           OMTSCALE(:,i) = 1.0
+           OMDSCALE(:,i) = 1.0
+           ERMECLAG(i,:) = 0.0
+           
           enddo
          
           deallocate ( col )
@@ -1386,52 +1401,16 @@
       call getrngr('XN_NU               ',NU,size(NU, dim=1),1,1)  !Read elasticity (NU) to bypass
 !     write(6,*) 'nu - ', NU
 !
-! READ CAPTSCALE - capital transmission cost adjustment
+! write TD vars - read from SQLite database
 !
       do j=11,mnumyr
         write(18,25) 'CAPTSCALE in finreg',j+1989,(captscale(nrgn,j),nrgn=1,unrgns)
-25      format(1x,a20,2x,i6,22f6.2)
-      enddo
-
-! READ CAPDSCALE - capital distribution cost adjustment
-!
-      do j=11,mnumyr
         write(18,25) 'CAPDSCALE in finreg',j+1989,(capdscale(nrgn,j),nrgn=1,unrgns)
-      enddo
-!
-
-! READ OMTSCALE - O&M transmission cost adjustment
-!
-      do j=11,mnumyr
         write(18,25) 'OMTSCALE in finreg',j+1989,(OMTSCALE(nrgn,j),nrgn=1,unrgns)
-      enddo
-
-! READ OMDSCALE - O&M distribution cost adjustment
-!
-      do j=11,mnumyr
         write(18,25) 'OMDSCALE in finreg',j+1989,(OMDSCALE(nrgn,j),nrgn=1,unrgns)
-      enddo
-!!
-! READ ERMECLAG - lag amount for energy component of price
-!
-!!
- 
- 
-!      do j=11,mnumyr
-!        write(6,25) 'OMDSCALE in finreg',j+1989,(omdscale(nrgn,j),nrgn=1,unrgns)
-!      enddo
-      do j=1,10                   ! fill early years
-        do NRGN = 1,UNRGNS
-         CAPTSCALE(NRGN,j) = 1.0
-         CAPDSCALE(NRGN,j) = 1.0
-         OMTSCALE(NRGN,j) = 1.0
-         OMDSCALE(NRGN,j) = 1.0
-         ERMECLAG(j,NRGN) = 0.0
-        enddo
+25      format(1x,a20,2x,i6,<UNRGNS>f6.2)
       enddo
 
-!
-!
 !
 !  reading following XML input variables for those in the regional loop
 !
@@ -1598,15 +1577,6 @@
             END DO    ! IY = 1,MNUMYR
             XR_ROW = XR_ROW + 2
       END DO      ! NRGN - loop over regions
-!    do nrgn=1,unrgns
-!       write(6,'(a,i6,2f8.2)')'New Slopes,omd2,omt2 ',nrgn,  &
-!                  omdslp2(nrgn), omtslp2(nrgn)
-!    enddo
-!MPTIM3      CALL MPTIM3(CPU_END1,WALL_END1)
-!MPTIM3      WRITE (6,2323) '** TIMING ELREAD   ** ',
-!MPTIM3     2           FLOAT(CPU_END1)/100.-FLOAT(CPU_START1)/100.-OTHCPU,
-!MPTIM3     3           FLOAT(WALL_END1)/100.-FLOAT(WALL_START1)/100.-OTHWAL
-!MPTIM3      CALL MPTIM3(CPU_START1,WALL_START1)
 
          DEALLOCATE(XN_CAPTSCALE)
          DEALLOCATE(XN_CAPDSCALE)
@@ -1675,12 +1645,6 @@
          UF_TMP = FILE_MGR('C','FINREGY',NEW)
          XMLOUT = FILE_MGR('C','FINREGOUT',NEW)
 
-!MPTIM3      WRITE (6,2323) '** TIMING FILE_MGR ** ',
-!MPTIM3     2           FLOAT(CPU_END1)/100.-FLOAT(CPU_START1)/100.-OTHCPU,
-!MPTIM3     3           FLOAT(WALL_END1)/100.-FLOAT(WALL_START1)/100.-OTHWAL
-!MPTIM32323  FORMAT(10X,A,' CPU USED (SECONDS) = ',F10.3,', WALL USED =',F10.3)
-!
-!
       RETURN
       END
 !
@@ -2290,11 +2254,6 @@
 !                    TXRTYR(1) Is tax rate in 1985; TXRTYR(2) is 1986 etc.
 !
                      ACCEL = CONDR(IYEAR,ICONTP(J)) * UOASVL(IYR,J,N)
-!                    IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                       Label = "2CONDR"
-!                       L = ICONTP(J)
-!                       WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,CONDR(IYEAR,L),UOASVL(IYR,J,N),ACCEL
-!                    END IF
 !
 !                    CALCULATE DEFERRED TAXES
 !
@@ -2302,8 +2261,6 @@
                      JYR = MAX( JYR , 1 )
                      TR = TXRTYR(JYR)
                      PDT2(ISEC) = PDT2(ISEC) + TR * (ACCEL - SL) * (1 - ESFLPR(N))
-                     Label = "1RPDTB"
-!                    WRITE(6,2132) Label,CURIYR+UHBSYR,CURITR,IYR,IYEAR,JYR,NRGN,N,ISEC,J,SL,ACCEL,TR,ESFLPR(N),PDT2(ISEC)
                   END DO
                END DO
 !
@@ -2325,11 +2282,6 @@
 !
                      IF (IYR .LE. EFPSYR - 1987 + 1) THEN
                         ACCEL = CONDR(IYEAR,ICONTP(J)) * UOASVL(IYR,J,N)
-!                       IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                          Label = "2CONDR"
-!                          L = ICONTP(J)
-!                          WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,CONDR(IYEAR,L),UOASVL(IYR,J,N),ACCEL
-!                       END IF
 !
                      ELSE IF (IYR .LE. EFPSYR - 1981 + 1) THEN
 !
@@ -2342,10 +2294,6 @@
                         ELSE
                            ACCEL = 0.0
                         END IF
-!                       IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                          Label = "2ERTA_"
-!                          WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,ESTXRS(L,IYEAR),UOASVL(IYR,J,N),ACCEL
-!                       END IF
 !
                      ELSE
 !
@@ -2357,11 +2305,6 @@
                         SYDTDR = TEMP1 / TEMP2
                         SYDTDR = AMAX1( SYDTDR , 0.0 )
                         ACCEL = SYDTDR * UOASVL(IYR,J,N)
-!                       IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                          Label = "2SYD__"
-!                          L = EOTXLF(J,N)
-!                          WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,SYDTDR,UOASVL(IYR,J,N),ACCEL
-!                       END IF
                      END IF
 !
 !                    CALCULATE DEFERRED TAXES
@@ -2370,8 +2313,6 @@
                      JYR = MAX( JYR , 1 )
                      TR = TXRTYR(JYR)
                      PDT2(ISEC) = PDT2(ISEC) + TR * (ACCEL - SL) * (1 - ESFLPR(N))
-                     Label = "2RPDTB"
-!                    WRITE(6,2132) Label,CURIYR+UHBSYR,CURITR,IYR,IYEAR,JYR,NRGN,N,ISEC,J,SL,ACCEL,TR,ESFLPR(N),PDT2(ISEC)
                   END DO
 !
 !
@@ -2385,12 +2326,6 @@
 !
                      IF (IYR .LE. EFPSYR - 1987 + 1) THEN
                         ACCEL = CONDR(IYEAR,ICONTP(J)) * UOASVL(IYR,J,N)
-!                       IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                          Label = "3CONDR"
-!                          L = ICONTP(J)
-!                          WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,CONDR(IYEAR,L),UOASVL(IYR,J,N),ACCEL
-!2131                      FORMAT(1x,A6,10(":",I4),4(":",F11.3))
-!                       END IF
 !
 !                       USE ERTA, MODIFIED BY TEFRA,
 !                       IF VINTAGE YEAR IS 9-14 (1981-1986)
@@ -2402,11 +2337,6 @@
                         ELSE
                            ACCEL = 0.0
                         END IF
-!                       ACCEL = ESTXRS(L,IYEAR) * (0.95 * UOASVL(IYR,J,N))
-!                       IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                          Label = "3ERTA_"
-!                          WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,ESTXRS(L,IYEAR),UOASVL(IYR,J,N),ACCEL
-!                       END IF
                      ELSE
 !
 !                       USE SYD IF VINTAGE YEAR IS GREATER THAN 9 (BEFORE 1981)
@@ -2416,11 +2346,6 @@
                         SYDTDR = TEMP1/TEMP2
                         SYDTDR = AMAX1(SYDTDR,0.0)
                         ACCEL = SYDTDR*UOASVL(IYR,J,N)
-!                       IF (UOASVL(IYR,J,N) .GT. 0.0) THEN
-!                          Label = "3SYD__"
-!                          L = EOTXLF(J,N)
-!                          WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,IYEAR,NRGN,N,ISEC,J,L,SYDTDR,UOASVL(IYR,J,N),ACCEL
-!                       END IF
                      ENDIF
 !
 !                    CALCULATE DEFERRED TAXES
@@ -2429,9 +2354,6 @@
                      JYR = MAX( JYR , 1 )
                      TR = TXRTYR(JYR)
                      PDT(ISEC) = PDT(ISEC) + TR * (ACCEL - SL) * (1 - ESFLPR(N))
-                     Label = "3RPDTB"
-!                    WRITE(6,2132) Label,CURIYR+UHBSYR,CURITR,IYR,IYEAR,JYR,NRGN,N,ISEC,J,SL,ACCEL,TR,ESFLPR(N),PDT(ISEC)
- 2132                FORMAT(1x,A6,9(":",I4),5(":",F11.3))
                   END DO
                END DO
             END DO
@@ -2447,19 +2369,6 @@
                TOTAL2 = TOTAL2 + PDT2(ISEC)
             END DO
 !
-!           TOTAL2 = TRPRDF(N) - TOTAL2
-!           IF (TOTAL .GT. 0.0 .AND. TOTAL2 .GT. 0.0) THEN
-!              URPDTB(N,1) = TOTAL2 * PDT(1)/TOTAL
-!              URPDTB(N,2) = TOTAL2 * PDT(2)/TOTAL
-!              URPDTB(N,3) = TOTAL2 * PDT(3)/TOTAL
-!           ELSE
-!              URPDTB(N,1) = 0.0
-!              URPDTB(N,2) = 0.0
-!              URPDTB(N,3) = 0.0
-!           END IF
-!
-!           WRITE(*,8451) CURIYR+UHBSYR,NRGN,N,TOTAL,TRPRDF(N),TOTAL2,(PDT(ISEC),URPDTB(N,ISEC),PDT2(ISEC),ISEC=1,3)
- 8451       FORMAT(1X,'URPDTB',3(":",I4),12(":",F9.2))
          ENDIF
 !
 !        *** SPLIT UP THE ACCUMULATED DEPRECIATION AND
@@ -2968,11 +2877,6 @@
 ! SPLIT OUT SALES BY OWNERSHIP
       EQTLSL(1) = SALTOT*ESTSHR(1)
       EQTLSL(2) = SALTOT*ESTSHR(2)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,10)ESTSHR(1),ESTSHR(2),SALTOT,EQTLSL(1),EQTLSL(2),NRGN
-!10    FORMAT(' ALLFAC - ESTSHR(1&2):',F8.4,F8.4,' SALTOT:',F8.1,
-!     1       ' EQTLSL(1&2):',F8.1,F8.1,' NRGN:',I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 ! DO MARGINAL FUEL
       TOTAL = 0.0
       DO ICLS=1,NCLASS
@@ -3096,26 +3000,23 @@
       INTEGER IYR
       INTEGER N
       INTEGER ICOM,FULLYR
+
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+
 ! GET YEARLY INPUTS
       FULLYR = USYEAR(CURIYR)
       CALL GETRCY(NRGN,ICALL,CURIYR)
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
        DO N=1,2
         CALL CAPCOST(NRGN,ICALL,N)
-!         IF ((CURITR .EQ. 1) .AND. (NRGN .EQ. 9)) THEN
-!        WRITE(*,200)ESRTST(N),ESRTLT(N),ESRTCE(N),ESRTPS(N),
-!     1             NRGN,ICALL,N,CURIYR
-!200     FORMAT(' ELGLTR2 - ESRTST:',F6.4,
-!     1        ' ESRTLT:',F6.4,' ESRTCE:',F6.4,
-!     2        ' ESRTPS:',F6.4,' NRGN,ICALL,N,CURIYR:',I3,A3,I3,I3)
-!         ENDIF
        END DO
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 ! READ IN DEMAND FACTORS FROM THE LDSM - ONLY DO THIS FOR GEN,
 ! SINCE IT IS SAME FOR ALL COMPONENTS
       IF (ICALL .EQ. 'G') CALL ALLFAC(NRGN)
 ! IN FIRST ITERATION DO CAPITAL MODELING
-      IF (CURITR .EQ. 1) THEN
+      IF (CURITR .EQ. 1 .AND. EFPITR .EQ. 1) THEN
 ! CREATE A NEW BUILD TO RECORD THIS YEARS CAPITAL ADDITIONS, PHASE-IN
 ! ADJUSTMENTS, SALE LEASEBACKS, AND LIFE EXTENSION COSTS
          IF (ICALL .EQ. 'G' .and. curiyr+uhbsyr .gt. efpsyr) &
@@ -3296,8 +3197,12 @@
       INTEGER N
       INTEGER NRGN
       INTEGER ICOM
+      
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+
 ! SAVE CAPITAL RELATED STUFF THAT ONLY IS USED IN FIRST ITERATION
-      IF (CURITR .EQ. 1) THEN
+      IF (CURITR .EQ. 1 .AND. EFPITR .EQ. 1) THEN
          DO N=1,2
             DO I=1,NPTYP
                DO IYR=1,EOVYRS
@@ -3493,6 +3398,10 @@
       CHARACTER*1 ICALL
       REAL SV_PRGEN_ESRR(MNUMYR,MNUMNR)
       COMMON /STORE_ROR/SV_PRGEN_ESRR
+      
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+      
 !     real reftnote(MNUMYR),refaabond(MNUMYR),macadj(MNUMYR,3),wopadj(MNUMYR,3)
       REAL CORPPREM
       DATA CORPPREM /0.38/   ! pw2 as per Ron 8/26/99
@@ -3571,7 +3480,7 @@
 !     1ST ITERATION ONLY
 
       IF (FULLYR .GE. UESTYR) THEN
-         IF (CURITR .EQ. 1) THEN
+         IF (CURITR .EQ. 1 .AND. EFPITR .EQ. 1) THEN
 
 !           DO   IY=1,MNUMYR          Output deflator on FMGROUT
 !              WRITE(10,*) 'MC_JPGDP(', IY, ' )', MC_JPGDP(IY)
@@ -3658,7 +3567,9 @@
             ELSE
                EWGTCE = ESRTCE(1)
             ENDIF
-            WRITE(22,3811) CURIYR+UHBSYR,CURITR,NRGN,N,ICALL,EWGTCE,UPBETA,INTRFRT,MRKPRM,ESRTCE(1),UTBETA,INTROEU
+            IF (EFPITPRT .EQ. 1) THEN
+              WRITE(22,3811) CURIYR+UHBSYR,CURITR,NRGN,N,ICALL,EWGTCE,UPBETA,INTRFRT,MRKPRM,ESRTCE(1),UTBETA,INTROEU
+            ENDIF
  3811       FORMAT(1X,"EWGTCE",4(":",I4),":",A1,7(":",f9.3))
 
 !           SET COMMON EQUITY FOR PUBLICS EQUAL TO LT DEBT TO REPRESENT
@@ -3768,14 +3679,6 @@
          ESRTDA(ICOM)=ESRTD1/J
       END IF
 
-
-!     WRITE(*,20) ESRTDL(N,NRGN,ICOM),ESRTCL(N,NRGN,ICOM), &
-!        ESRTD1,ESRTDA(ICOM),N,NRGN,ICOM,CURIYR,CURITR, &
-!        MNUMNR
-!20   FORMAT(/' CAPCOST2 - ESRTDL:',F7.4,' ESRTCL:',F7.4, &
-!        ' ESRTD1:',F7.4,' ESRTDA:',F7.4, &
-!        ' N,NRGN,ICOM,CURIYR,CURITR:',I3,I3,I3,I3,I3, &
-!        ' MNUMNR:',I3/)
 
 !     SEND IOU GENERATION COST OF CAPITAL DATA TO CAPACITY PLANNING
 !     AFTER 1ST ITERATION (PREF STOCK RATE IS CALC'D IN 2ND ITERATION)
@@ -4050,7 +3953,6 @@
       INTEGER NRGN,ICLASS
       INTEGER CENSUS   !-- added by AKN
 
-      REAL LCVOM, LCFL, LCWS, LCFOM, LCGNA, OMFAC
       REAL SALTOTOLD,SALTOTLAST
       REAL*8 FOM_ALL,FOM_NUC
       COMMON /SALEOLD/ SALTOTOLD,SALTOTLAST
@@ -4063,7 +3965,8 @@
       COMMON/ZECCST/ERZECCST
       REAL EFDPEAK(MNUMNR)
       COMMON /EFD_PK/EFDPEAK
-
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
 
 !
 !     GET INFORMATION ON FUEL AND O&M
@@ -4071,9 +3974,6 @@
       IF (ICALL .EQ. 'G') THEN
          CALL GETOUT(CURIYR,NRGN)
          CALL GETIN(1,NRGN)
-
-!        WRITE(6,3979) CURIRUN, CURIYR+1989, CURITR, NRGN, EEITAJ(1), EEITAJ(2), EEITAJ(3)
-!3979    FORMAT(1X,"UEFP_03680_EEITAJ_GET",4(":",I4),3(":",F12.3))
 
          FOM_ALL = 0.0
          DO IEFD = 1,EFD_D_CAP
@@ -4083,8 +3983,6 @@
                          + ERTSO2(3) + ERTNOX(3) + ERTHG(3) - ERTGSUB(3) &
                          + ERTFL(4) + ERTOM(4)  &
                          + ERTSO2(4) + ERTNOX(4) + ERTHG(4) - ERTGSUB(4)
-!        write(6,3980) CURIYR, CURITR, NRGN, ERTFL(4), ERTOM(4), ERTSO2(4), ERTNOX(4), ERTHG(4), ERTGSUB(4)
-!3980    FORMAT(1x,'NT COGEN costs ',3I4,6F12.3)
          EFPBLK(1,1) =  ETDMDF
          EFPBLK(1,2) =  ETDMMF/1000.0
          EFPBLK(2,1) =  ETDMDE
@@ -4110,17 +4008,16 @@
          PPWRBLK(4) = EWGRCC + EWGRIC + &
                ETDMDE + ETIMPD - ETEXPD + ETDMDF
 
-         WRITE(18,7713) CURIRUN, CURIYR+1989, CURITR, NRGN, PPWRBLK(1), PPWRBLK(2), PPWRBLK(3), PPWRBLK(4), ERTFL(3), ERTSO2(3), ERTNOX(3), ERTHG(3), ERTGSUB(3), &
+         IF (EFPITPRT .EQ. 1) THEN
+           WRITE(18,7713) CURIRUN, CURIYR+1989, CURITR, NRGN, PPWRBLK(1), PPWRBLK(2), PPWRBLK(3), PPWRBLK(4), ERTFL(3), ERTSO2(3), ERTNOX(3), ERTHG(3), ERTGSUB(3), &
             ERTFL(4), ERTSO2(4), ERTNOX(4), ERTHG(4), ERTGSUB(4), ERTOM(3), ERTOM(4), FOM_ALL, EWGFIX, EWGRCC, EWGRIC, ETDMDE, ETIMPD, ETEXPD, ETDMDF
+         ENDIF
  7713    FORMAT(1X,"UEFP_PPWRBLK",4(":",I4),24(":",F21.6))
 
-!        write(*,*)'WHOL :',CURIYR,':',CURITR,':',NRGN,':', EWGRCC,':'
-!    +   ,EWGRIC,':',ETDMDE,':',ETIMPD,':',ETEXPD,':',ETDMDF
          BLKSUM = 0.0
          DO I=1,5
             BLKSUM = BLKSUM + EFPBLK(I,1)
          END DO
-         LCWS=BLKSUM
          EFPFL = ERTFL(1) + ERTFL(2)
 !  ADD COST OF RENEWABLE CREDITS TO FUEL COST
 !  ADD COSTS OF SO2 AND NOX ALLOWANCES TO FUEL COST
@@ -4134,21 +4031,17 @@
                                + ERCPPTR(NRGN,CURIYR)
 
 !      add STEO benchmark adjustment adders right here  (moved to generation component - LC2)
-            IF ((BMELPRC(CURIYR) .GT. 0.0) .AND.(CURITR .GE. 2)) THEN
- !                   write(6,*) 'EFPFL b4 STEO ',CURIYR,CURITR,EFPFL
+            IF (BMELPRC(CURIYR) .GT. 0.0) THEN 
               EFPFL = EFPFL - BCHMRKSTEOPRC_N(NRGN,CURIYR)/1000000
- !                   write(6,*) 'EFPFL af STEO ',CURIYR,CURITR,EFPFL
             ENDIF
 
-         if (FCRL .eq. 1) &
-         write(imsg,1668) ' PTC subsidy in EFP', CURIYR,NRGN,(ERTGSUB(I),I=1,3)
+         if (EFPFCRL .eq. 1) then
+          write(imsg,1668) ' PTC subsidy in EFP', CURIYR,NRGN,(ERTGSUB(I),I=1,3)
 1668     format(1x,a20,2I4,3F12.2)
-         if (FCRL .eq. 1) &
-         write(imsg,1669) ' RPS adjust in EFP', CURIYR,NRGN,ERRPS
-         if (FCRL .eq. 1) &
-         write(imsg,1669) ' CPP adjust in EFP', CURIYR,NRGN,ERCPPTR(NRGN,CURIYR)
+          write(imsg,1669) ' RPS adjust in EFP', CURIYR,NRGN,ERRPS
+          write(imsg,1669) ' CPP adjust in EFP', CURIYR,NRGN,ERCPPTR(NRGN,CURIYR)
 1669     format(1x,a20,2I4,F12.2)
-         LCFL=EFPFL
+         endif
 
 ! replace epfblk with nominal values
          DO I=1,5
@@ -4156,7 +4049,6 @@
          ENDDO
 
          EFPOM = ERTOM(1) + ERTOM(2)
-         LCVOM = EFPOM
          EFPNUC = ERFFL(UIUF)
 !        EFPNUC = 0.0
 !
@@ -4175,7 +4067,6 @@
             END DO
          END DO
 !
-         LCFOM = FOM_ALL - FOM_NUC
 !
 !        ADD IN PRODUCTION ALLOCATED GNA AND FIXED O&M
 !
@@ -4184,7 +4075,6 @@
 !
             EFPOM = EFPOM + (GAADJ(1,NRGN,CURIYR)*OVERPR(NRGN))* &
                SALTOTOLD
-            LCGNA = OVERPR(NRGN)*SALTOTOLD          ! no ga adj for valcap
 !
          EFPOM = EFPOM + FOM_ALL
 
@@ -4244,12 +4134,6 @@
 
 !      add 111d EE expenses to be recovered in distribution costs, ECSTNREE in 1987 billion $
                 EFPFL = EFPFL + ECSTNREE(NRGN,CURIYR) * 1000.0
-! !      add STEO benchmark adjustment adders right here  AKN - move to generation component - LC2
-                ! IF ((BMELPRC(CURIYR) .GT. 0.0) .AND.(CURITR .GE. 2)) THEN
-                        ! DO CENSUS = 1, MNUMCR-2
-                            ! EFPFL = EFPFL - MappCtoN(NRGN,CENSUS,4) * BCHMRKSTEOPRICEADDER(CENSUS,CURIYR)/1000000
-                        ! ENDDO
-                ! ENDIF
 
 !      add nuclear ZEC costs in distribution costs - 1987 million $, only nonzero if program is in place
                EFPFL = EFPFL + ERZECCST(NRGN)
@@ -4280,7 +4164,6 @@
       INTEGER NRGN
       CALL AVRPRC(NRGN,ICALL)
 ! new comp pricing routine - call for all regions just to have output
-!     IF ((USW_POL .eq. 4) .AND. (FRMARG(CURIYR,NRGN) .GT. 0.0))
       IF (USW_POL .eq. 4) &
           CALL COMPPRC(NRGN)
       RETURN
@@ -4301,7 +4184,10 @@
       include 'eusprc'
       include 'emmparm'
       include 'efpint'
-      IF (CURITR .EQ. 1) THEN
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+
+      IF (CURITR .EQ. 1 .AND. EFPITR .EQ. 1) THEN
          CALL ELADCR
          CALL ELCWIP(NRGN,ICALL)
          CALL ELND(NRGN,6,ICALL)
@@ -4319,7 +4205,7 @@
       CALL ELINEX(NRGN)
       CALL ELREVS(ICALL,NRGN)
       CALL ELRATE(ICALL,NRGN)
-      IF (FCRL .EQ. 1) CALL STMTS(NRGN,ICALL)
+      IF (EFPFCRL .EQ. 1) CALL STMTS(NRGN,ICALL)
       RETURN
       END
 !******************************************************************
@@ -4340,6 +4226,7 @@
       include 'efprp2'
       include 'efpout'
       include 'dispin'
+      include 'dispinyr'
       include 'dispett'
       include 'dispout'
       include 'dsmdimen'
@@ -4363,14 +4250,14 @@
 
 
       REAL*4 EMBCST(2)
-      REAL*4 TAXADJ(2),fixgna,tempadj(MNUMYR)
+      REAL*4 TAXADJ(2),fixgna
       REAL*4 MEC,REL,OTH,EMBC,SLCPRC,ADJ,SLS,tempmec,HRS
       INTEGER  ISEA,ISLC,IOWN,NRGN,I,J,IEFD
       INTEGER igrp,iseg,newslc,b1,b2,iblk,k,ise,MTOTEUSGRP
       INTEGER s,sblk,b,N,IY
       REAL*8 FOM_ALL,FOM_NUC
       REAL*4 tempprc(EFD_D_MSP,EFD_D_MVS,2)
-      REAL*4 temprev,stdcst,FINREV,totstd,inctax,othtax
+      REAL*4 temprev,FINREV,inctax,othtax
       REAL sortefdblk(EFD_D_MSP,EFD_D_MVS,MNEUGRP)
       REAL slcload(EFD_D_MSP,EFD_D_MVS)
       REAL totload,mrprc,co2prc,bmprc,STEOPRC_ADJ
@@ -4382,10 +4269,9 @@
       COMMON /BCHMRKSTEOPRICE/ BCHMRKSTEOPRICEADDER, BCHMRKSTEOPRC_N   !STEO Price benchmark feature --- by AKN
       REAL BCHMRKSTEOPRICEADDER(MNUMCR,MNUMYR), BCHMRKSTEOPRC_N(MNUMNR,MNUMYR)  !STEO benchmark price adjustment adder --- by AKN
 
-      DATA tempadj/ 1.00,1.00,1.00,1.00,1.00,1.00,0.98,0.95,0.93, &
-          0.90,0.88,0.85,0.83,0.80,0.77,0.75,0.75,0.75,0.75,0.75, &
-          0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,30*0.75/
-
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+      
 !  do regulated tax calculations (needed for stranded cost)
          DO N=1,2
             ERGNTX(N) = ERRVLG(N) &
@@ -4435,10 +4321,6 @@
           sortefdblk(ise,b,k) = efdblkserv(b,ise,NRGN,k)
           slcload(ise,b) = slcload(ise,b) + sortefdblk(ise,b,k)
           totload = totload + sortefdblk(ise,b,k)
-
-!            WRITE(6,3911) CURIRUN, CURIYR+1989, CURITR, NRGN, k, ISE, iblk, b, sblk, s, sortefdblk(ise,b,k), efdblkserv(b,ise,NRGN,k), slcload(ise,b), sortefdblk(ise,b,k), totload
-!3911        FORMAT(1X,"SLCLOAD_UEFP",10(":",I5),5(":",F21.5))
-
         ENDDO
       ENDDO
       ENDDO
@@ -4449,20 +4331,20 @@
      ELSE
       MRPRC = 0.0
      ENDIF
-     IF (FCRL .EQ. 1) write(22,326) CURIYR,NRGN,ULMRCST(NRGN),totload,QELASN(NRGN,CURIYR),MRPRC
+     IF (EFPFCRL .EQ. 1) write(22,326) CURIYR,NRGN,ULMRCST(NRGN),totload,QELASN(NRGN,CURIYR),MRPRC
 326  FORMAT(1X,'MRPRC ',2I6,3F10.2,F14.5)
 
 !  fill STEO benchmark price adjustment - based on impact of generation/consumption constraints on load row duals
       BMPRC = ULBMCST / QELASN(MNUMNR,CURIYR) * 1000.0       ! same adder for all regions based on national cost
-      IF (FCRL .EQ. 1 .AND. BMPRC .NE. 0.0) write(22,327) CURIYR,NRGN,ULBMCST,QELASN(MNUMNR,CURIYR),BMPRC
+      IF (EFPFCRL .EQ. 1 .AND. BMPRC .NE. 0.0) write(22,327) CURIYR,NRGN,ULBMCST,QELASN(MNUMNR,CURIYR),BMPRC
 327  FORMAT(1X,'BMPRC ',2I6,2F14.2,F14.5)
 
 ! add STEO price benchmarking adj - based on difference between EMM/STEO prices - added to both regulated fuel and competitive energy to show up in generation price
       STEOPRC_ADJ = 0.0
-      IF (CURITR .GE. 2 .AND. BMELPRC(CURIYR) .GT. 0) THEN
+      IF (BMELPRC(CURIYR) .GT. 0) THEN
          STEOPRC_ADJ = BCHMRKSTEOPRC_N(NRGN,CURIYR)/1000.0 / QELASN(NRGN,CURIYR)
       ENDIF
-      IF (FCRL .EQ. 1 .AND. STEOPRC_ADJ .NE. 0.0) write(22,328) CURIYR,NRGN,BCHMRKSTEOPRC_N(NRGN,CURIYR)/1000.0,QELASN(NRGN,CURIYR),STEOPRC_ADJ
+      IF (EFPFCRL .EQ. 1 .AND. STEOPRC_ADJ .NE. 0.0) write(22,328) CURIYR,NRGN,BCHMRKSTEOPRC_N(NRGN,CURIYR)/1000.0,QELASN(NRGN,CURIYR),STEOPRC_ADJ
 328  FORMAT(1X,'STEOPRC ',2I6,2F14.2,F14.5)
 !
       FOM_ALL = 0.0
@@ -4478,16 +4360,7 @@
 !
       DO IOWN = 1,2
 
-!        don't include fixed costs
-
-!        fixgna = (FOM_ALL-FOM_NUC)*ESTSHR(IOWN)/EQTLSL(IOWN) + &
-!            OVERPR(NRGN)*tempadj(CURIYR)
-!        ERFXGNAC(CURIYR,NRGN,IOWN) = fixgna*MC_JPGDP(CURIYR)
-
          ERFXGNAC(CURIYR,NRGN,IOWN) = 0.0
-
-!        EMBCST(IOWN) = ERTFLN(IOWN) + ERTOMN(IOWN) + ERNDFPMT(IOWN) +
-!           ERTDRG(IOWN) + (ERTIEX(IOWN) - ERCIDC(IOWN)) + ESLLP(IOWN)
 
          EMBCST(IOWN) = ERTFLN(IOWN) + ERTOMN(IOWN) + ERNDFPMT(IOWN) + &
             ERTDRG(IOWN) + ERTIEX(IOWN) + ESLLP(IOWN)
@@ -4495,17 +4368,6 @@
             ERFFDC(IOWN) + ERAFDC(IOWN)
       ENDDO
       IY = CURIYR
-      achvlev = RPSACHV(CURIYR)/QELASN(MNUMNR,CURIYR)
-      IF( FCRL .eq. 1)THEN
-        write(imsg,*)'RPSGOAL',RPSGOAL(CURIYR),' RPSACHV', &
-          RPSACHV(CURIYR), 'sales ',QELASN(MNUMNR,CURIYR)
-       if(nrgn .eq. 1)write(imsg,2222) CURIYR+1989,EPRPSPR(CURIYR), &
-        UPRNWBND(CURIYR),achvlev,renewcr(CURIYR),credcost(CURIYR)
-2222  format(1h ,'credit bound and calc cred',i4,f8.3,f8.3,f8.3, &
-        f8.3,f10.3)
-      ENDIF
-      if (achvlev .gt. UPRNWBND(CURIYR)) achvlev = UPRNWBND(CURIYR)
-
 
       DO ISEA = 1, EFDns
        DO ISLC = 1, ELNVCT(ISEA)
@@ -4514,31 +4376,13 @@
           tempmec = MARCST2(ISEA,ISLC)
        else
           tempmec = NMARCST(NRGN,ISEA,ISLC,CURIYR) + MRPRC + BMPRC - STEOPRC_ADJ
-         IF (CURIYR .GT. 30 .AND. CURIYR .LE. 35) write(22,329) CURIYR, CURITR, ISEA, ISLC, NRGN, NMARCST(NRGN,ISEA,ISLC,CURIYR), MRPRC, BMPRC, STEOPRC_ADJ         
+         IF (CURIYR + UHBSYR .GE. UYR_HIST .AND. CURIYR + UHBSYR .LE. UYR_HIST+3 ) write(22,329) CURIYR, CURITR,EFPITR, ISEA, ISLC, NRGN, NMARCST(NRGN,ISEA,ISLC,CURIYR), MRPRC, BMPRC, STEOPRC_ADJ         
        endif
-329  FORMAT(1X,'NMARCST ',5I6,4F14.5)
-
-!  NMARCST includes renewable credit, passed through EFD
-!       tempmec = tempmec + renewcr(CURIYR) * UPRNWBND(CURIYR)
-!       tempmec = tempmec + renewcr(CURIYR) * achvlev
-!  get correct slice number to match demand slices
-!      igrp = mod(ulgrp(ISLC,ISEA,NRGN),3)
-!      if (igrp .eq. 0) igrp = 3
-!      iseg = ulseg(ISLC,ISEA,NRGN)
-!      newslc = (igrp-1)*6 + iseg
-!      write(6,*) 'COMPPRC  yr rgn sea slc ',CURIYR,NRGN,ISEA,newslc
-!  convert to nominal $
-!      ERMECC(CURIYR,NRGN,ISEA,newslc) = tempmec*MC_JPGDP(CURIYR)
+329  FORMAT(1X,'NMARCST ',6I6,4F14.5)
 
 ! adjust energy for losses
       ERMECC(CURIYR,NRGN,ISEA,ISLC) = tempmec*MC_JPGDP(CURIYR)* &
        ( 1.0 +  NERCtdloss(NRGN)*ULOSSADJ(CURIYR))
-
-
-!adjust energy cost for uplift charges
-! ! adjust energy cost for congestion charges
-! deleted all hard-coded energy price adjustments - need to implement through input file/regional tool if needed
-!End of Regional ERMECC adders
 
       ORIGMECC(CURIYR,NRGN,ISEA,ISLC) = ERMECC(CURIYR,NRGN,ISEA,ISLC)
 
@@ -4575,7 +4419,6 @@
       ENDDO
       ENDDO
 
-      totstd = 0.0
       EWSPRCN(NRGN,CURIYR) = 0.0
       DO IOWN = 1,2
          OTH = ERFXGNAC(CURIYR,NRGN,IOWN)
@@ -4598,20 +4441,9 @@
                tempprc(ISEA,ISLC,IOWN) = REL + MEC + OTH
                temprev = temprev + tempprc(ISEA,ISLC,IOWN) * SLS
 
-!              WRITE(6,3711) CURIRUN, CURIYR+1989, CURITR, NRGN, IOWN, ISEA, ISLC, EWSPRCN(NRGN,CURIYR), ERMECC(CURIYR,NRGN,ISEA,ISLC), &
-!                 SLS, slcload(ISEA,ISLC), ESTSHR(IOWN), ULWDTH(ISLC,ISEA,NRGN), tempprc(ISEA,ISLC,IOWN), REL, MEC, OTH, temprev
-!3711          FORMAT(1X,"EWSPRCN_UEFP",7(":",I4),11(":",F21.6))
-
             ENDDO         !ISLC LOOP
          ENDDO         !ISEA LOOP
 
-
-
-
-         stdcst = temprev-(ERRVRQ(IOWN)-ERGNTX(IOWN)-BKITAX(IOWN))
-
-!        write(6,99) 'revs/costs ',CURIYR,NRGN,IOWN,temprev,EMBC,
-!        +      ERRVRQ(IOWN), ERGNTX(IOWN),BKITAX(IOWN)
 
 !        stranded costs in billion nominal dollars are now in finreg
 
@@ -4619,19 +4451,7 @@
 
   99     format(a15,3i4,5f10.2)
 
-!        c new 9/10/97 - no income tax in competitive price
-!        FINREV=(temprev - EMBC*ESFTXR(IOWN) -  ADJ +
-!           SCSANN(CURIYR,NRGN,IOWN))/
-!           (1.0 - ESFTXR(IOWN)*(1.0 - EGTXRT(IOWN)) - EGTXRT(IOWN))
-!        othtax = FINREV*EGTXRT(IOWN)
-!        inctax = (FINREV - (EMBC + othtax)) * ESFTXR(IOWN)  -  ADJ
-!        IF (inctax .lt. 0.0) then
-!           FINREV=(temprev + SCSANN(CURIYR,NRGN,IOWN))/(1.0-EGTXRT(IOWN))
-!           othtax = FINREV*EGTXRT(IOWN)
-!           inctax = 0.0
-!        ENDIF
-
-!        new 9/10 - use regulated income tax
+!        use regulated income tax
 
          inctax = BKITAX(IOWN)
          inctax=0.0
@@ -4653,10 +4473,6 @@
 
       ENDDO  ! IOWN LOOP
 
-      if (fcrl .eq. 1) &
-         write(imsg,*) 'full stdcst - 95$ ',CURIYR,NRGN, &
-         totstd*MC_JPGDP(6)/MC_JPGDP(CURIYR)
-
       EWSPRCN(NRGN,CURIYR) = EWSPRCN(NRGN,CURIYR) / 8760.0 / MC_JPGDP(CURIYR)
       write(18,*)'ewsprcn',EWSPRCN(NRGN,CURIYR) , RMAVG(CURIYR,NRGN)
       EWSPRCN(NRGN,CURIYR) = EWSPRCN(NRGN,CURIYR) + (RMAVG(CURIYR,NRGN) / 8.760 )
@@ -4669,25 +4485,6 @@
          DO ISLC = 1, ELNVCT(ISEA)
 
             DO IOWN = 1, 2
-
-!              IF (curiyr .lt. 18 .AND. nrgn .eq. 2 &
-!                 .OR. nrgn .eq. 3 .OR. nrgn .eq. 7 .OR. nrgn .eq. 11) then
-!                 ERSLCPRC(CURIYR,NRGN,ISEA,ISLC,IOWN)= &
-!                 ERMECC(CURIYR-1,NRGN,ISEA,ISLC) + &
-!                 ERRELC(CURIYR,NRGN,ISEA,ISLC) + ERFXGNAC(CURIYR,NRGN,IOWN)+ &
-!                 EROTAXC(CURIYR,NRGN,IOWN) + ERITAXC(CURIYR,NRGN,IOWN) + &
-!                 SCSPRC(CURIYR,NRGN,IOWN)
-!              else
-!                 ERSLCPRC(CURIYR,NRGN,ISEA,ISLC,IOWN)= &
-!                 (0.5 * ERMECC(CURIYR-1,NRGN,ISEA,ISLC)) + &
-!                 (0.5 * ERMECC(CURIYR,NRGN,ISEA,ISLC)) + &
-!                 ERRELC(CURIYR,NRGN,ISEA,ISLC) + ERFXGNAC(CURIYR,NRGN,IOWN)+ &
-!                 EROTAXC(CURIYR,NRGN,IOWN) + ERITAXC(CURIYR,NRGN,IOWN) + &
-!                 SCSPRC(CURIYR,NRGN,IOWN)
-!              endif
-
-!              commented code above assumes a lag in energy prices passed through to total prices
-!              current code (below) assumes no lag at all
 
                ERSLCPRC(CURIYR,NRGN,ISEA,ISLC,IOWN)= &
                   ERMECC(CURIYR,NRGN,ISEA,ISLC) + &
@@ -4721,7 +4518,7 @@
 
 !           slice price - too much output  - put on switch
 
-            IF ((FCRL.eq.1) .and. (CURIYR.gt.0) .and. (PRTDBGE.ge.3)) THEN
+            IF ((EFPFCRL.eq.1) .and. (CURIYR.gt.0) .and. (PRTDBGE.ge.3)) THEN
                write(imsg,1111) CURIYR,CURITR,NRGN,ISEA, &
                   (ERSLCPRC(CURIYR,NRGN,ISEA,ISLC,I)/MC_JPGDP(CURIYR),I=1,3), &
                   ERRELC(CURIYR,NRGN,ISEA,ISLC)/MC_JPGDP(CURIYR), &
@@ -4736,9 +4533,6 @@
             endif
 
 !           fill in slice price variable used for endogenous retirements
-!           ELGENP(ISLC,ISEA,NRGN) = ( ERSLCPRC(CURIYR,NRGN,ISEA,ISLC,3)
-!              +            - ERITAXC(CURIYR,NRGN,3) - EROTAXC(CURIYR,NRGN,3) )/
-!              +       MC_JPGDP(CURIYR)
 
             ELGENP(ISLC,ISEA,NRGN) = ERMECC(CURIYR,NRGN,ISEA,ISLC) &
                 / &
@@ -4793,6 +4587,9 @@
       real totallnr(5),demwtnr(MNEUGRP),relcomp(5),meccomp(5)
       real fixcomp(5),taxcomp(5),prcall(5)
       integer l,sectr,eu, MTOTEUSGRP
+      
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
 
 !     write(6,*) 'in rates2',CURIYR,NRGN,ERSLCPRC(CURIYR,NRGN,1,1,3)
 
@@ -4835,42 +4632,8 @@
      ELSE
       CO2PRC = 0.0
      ENDIF
-     IF (FCRL .EQ. 1) write(22,328) CURIYR,NRGN,ULCO2CST(NRGN,CURIYR),QELASN(NRGN,CURIYR),CO2PRC
+     IF (EFPFCRL .EQ. 1) write(22,328) CURIYR,NRGN,ULCO2CST(NRGN,CURIYR),QELASN(NRGN,CURIYR),CO2PRC
 328  FORMAT(1X,'CO2PRC ',2I6,2F10.2,F14.5)
-
-!     if (curiyr .eq. 6 .and. NRGN .eq. 7) then
-!     do k = 1,MNEUGRP
-!     write(6,1212) CURIYR,NRGN,k,
-!         ((sortefdblk(ise,b,k)/ULWDTH(b,ise,NRGN),b=1,18),ise=1,6),
-!          TOTEULOAD(k,NRGN)
-!c    write(6,1214) CURIYR,NRGN,k,
-!         ((efdblkserv(b,ise,NRGN,k),b=1,18),ise=1,6),TOTEULOAD(k,NRGN)
-!     write(6,1213) CURIYR,NRGN,k,
-!         (GBlockNumEFD(ise,NRGN),ise=1,108)
-!   write out sum of curve
-!       do ise=1,6
-!        do b = 1,18
-!      tmpsort(b,ise) = tmpsort(b,ise) + sortefdblk(ise,b,k)
-!          /ULWDTH(b,ise,NRGN)   ! sortefd contains load*   TOTEULOAD(k,NRGN)
-!       enddo
-!        enddo
-!        enddo   ! mneugrp
-!     write(6,1215) CURIYR,NRGN,
-!         ((ULHGHT(b,ise,NRGN),b=1,18),ise=1,6)
-!     write(6,1215) CURIYR,NRGN,
-!         ((tmpsort(b,ise),b=1,18),ise=1,6)
-
-1212  format('sortefd ',3i4,108e12.4,f20.4)
-1214  format('efdblkserv ',3i4,108e12.4,f20.4)
-1213  format('gblocknum ',111(i3,1x))
-1215  format('efd ldc  ',2i4,108(1x,e12.4,1x,e12.4))
-!     endif
-
-!     do k = 1,MNEUGRP
-!     write(6,1212) CURIYR,NRGN,k,
-!         ((sortefdblk(ise,b,k),b=1,18),ise=1,6)
-!     enddo
-!1212  format('sortefd ',3i4,108f7.4)
 
       DO icls = 1, NCLASS+1
         TMPPCP(icls) = 0.0
@@ -4887,7 +4650,7 @@
              WRITE(6,*)'secannpeaavgpcp less than zero ',NRGN,ICLS,TMPPCP(icls) , SECANNPEAAVPCP(NRGN,ICLS), TMPPCP(5)
              TMPPCP(icls) = 0.0
          ENDIF
-         IF (fcrl.EQ.1) WRITE(18,8401)'tmpcp1-4 ',CURIYR,NRGN,icls,TMPPCP(icls), SECANNPEAAVPCP(NRGN,ICLS), TMPPCP(5)
+         IF (EFPFCRL.EQ.1) WRITE(18,8401)'tmpcp1-4 ',CURIYR,NRGN,icls,TMPPCP(icls), SECANNPEAAVPCP(NRGN,ICLS), TMPPCP(5)
 8401  format(1x,A10,3I4,3F12.3)
       ENDDO
       k = 1
@@ -4908,14 +4671,14 @@
          TMPRM(ICLS) = 0.0
       ENDIF
 
-       IF (fcrl.EQ.1) WRITE(18,8402)'check tmprm ',CURIYR,NRGN,ICLS,K, TMPRM(ICLS), RMPOOL(CURIYR,NRGN), SRPOOL(CURIYR,NRGN), TMPPCP(icls),SALCLS(NRGN,ICLS),MC_JPGDP(CURIYR),CO2PRC
+       IF (EFPFCRL.EQ.1) WRITE(18,8402)'check tmprm ',CURIYR,NRGN,ICLS,K, TMPRM(ICLS), RMPOOL(CURIYR,NRGN), SRPOOL(CURIYR,NRGN), TMPPCP(icls),SALCLS(NRGN,ICLS),MC_JPGDP(CURIYR),CO2PRC
 8402  FORMAT(A25,1x,4(I4,1x),7(F12.6,1x))
 
        DO j = 1, neusgrp(icls)
         DO ise = 1, EFDns
          DO ISL = 1, ELNVCT(ISE)
            sortefdsum(ise,isl) = sortefdsum(ise,isl) + sortefdblk(ise,isl,k)
-           IF (fcrl.EQ.1) write(18,4014)'sortedsum ',curiyr,nrgn,K,ise,isl,sortefdsum(ise,isl),sortefdblk(ise,isl,k)
+           IF (EFPFCRL.EQ.1) write(18,4014)'sortedsum ',curiyr,nrgn,K,ise,isl,sortefdsum(ise,isl),sortefdblk(ise,isl,k)
          ENDDO
         ENDDO
        ENDDO
@@ -4927,7 +4690,7 @@
          DO ISL = 1, ELNVCT(ISE)
 
           IF (TOTEULOAD(K,NRGN) .GT. 0.0) THEN
-!           IF (fcrl.EQ.1) write(18,4014)'sortedload ',curiyr,nrgn,K,ise,isl,sortefdblk(ise,isl,k),TOTEULOAD(K,NRGN)
+           IF (EFPFCRL.EQ.1) write(18,4014)'sortedload ',curiyr,nrgn,K,ise,isl,sortefdblk(ise,isl,k),TOTEULOAD(K,NRGN)
 4014 format(A25,1x,5(I4,1x),2(F15.3,1x))
              sortefdblk(ise,isl,k) = sortefdblk(ise,isl,k)/TOTEULOAD(K,NRGN)
           ELSE
@@ -4943,9 +4706,6 @@
            ERRELC(CURIYR,NRGN,ise,isl)* &
            sortefdblk(ise,isl,k)
 
-!       IF (fcrl.EQ.1) WRITE(18,8403)'check avgrel1 ',CURIYR,NRGN,ICLS,k,ISE,ISL, TMPRM(ICLS), avgrelo(k),ERRELC(CURIYR,NRGN,ise,isl), sortefdblk(ise,isl,k)
-8403  FORMAT(A25,1x,6(I4,1x),4(F12.6,1x))
-
          avgmec(k) = avgmec(k) + &
            ERMECC(CURIYR,NRGN,ise,isl)* &
            sortefdblk(ise,isl,k)
@@ -4953,15 +4713,8 @@
 
          IF (isnan(TOTEULOAD(K,NRGN)) .OR. isnan(sortefdblk(ise,isl,k)) .OR. isnan(ERSLCPRC(CURIYR,NRGN,ise,isl,3)) .OR. &
             isnan(ERRELC(CURIYR,NRGN,ise,isl)) .OR. isnan(ERMECC(CURIYR,NRGN,ise,isl))) then
-!           WRITE(6,7301) CURIRUN, CURIYR+1989, CURITR, k, icls, j, ise, isl, NRGN, TOTEULOAD(K,NRGN), sortefdblk(ise,isl,k), &
-!              ERSLCPRC(CURIYR,NRGN,ise,isl,3), ERRELC(CURIYR,NRGN,ise,isl), ERMECC(CURIYR,NRGN,ise,isl)
- 7301       FORMAT(1X,"avg_prc_dbg_1", 9(":",I4),25(":",F12.3))
          END IF
 
-
-!        write(6,*) 'eprc2 ', k,EPRIC2(k,NRGN),
-!          ise,isl, ERSLCPRC(CURIYR,NRGN,ise,isl,3),
-!          sortefdblk(ise,isl,k)
 
          ENDDO
         ENDDO
@@ -4971,7 +4724,7 @@
         EPRIC2(k,NRGN) =  EPRIC2(k,NRGN) + &
                      TMPRM(ICLS)
 
-       IF (fcrl.EQ.1) WRITE(18,8408)'check avgrel2 ',CURIYR,NRGN,ICLS,k, TMPRM(ICLS), avgrelo(k)
+       IF (EFPFCRL.EQ.1) WRITE(18,8408)'check avgrel2 ',CURIYR,NRGN,ICLS,k, TMPRM(ICLS), avgrelo(k)
 8408  FORMAT(A25,1x,4(I4,1x),4(F12.6,1x))
 
         avgfix(k) = avgfix(k) + &
@@ -4983,15 +4736,6 @@
          avgotx(k) = avgotx(k) + &
            EROTAXC(CURIYR,NRGN,1)*ESTSHR(1) + &
            EROTAXC(CURIYR,NRGN,2)*ESTSHR(2)
-
-        IF (isnan(EPRIC2(k,NRGN)) .OR. EPRIC2(k,NRGN) .LE. 2.0 .OR. EPRIC2(k,NRGN) .GE. 200.0) THEN
-!          WRITE(6,7302) CURIRUN, CURIYR+1989, CURITR, k, icls, j, NRGN, TOTEULOAD(K,NRGN), &
-!             EPRIC2(k,NRGN), avgrel(k), avgmec(k), &
-!             avgfix(k), ERFXGNAC(CURIYR,NRGN,1), ERFXGNAC(CURIYR,NRGN,2), &
-!             avgitx(k), ERITAXC(CURIYR,NRGN,1), ERITAXC(CURIYR,NRGN,2), &
-!             avgotx(k), EROTAXC(CURIYR,NRGN,1), EROTAXC(CURIYR,NRGN,2), ESTSHR(1), ESTSHR(2)
- 7302         FORMAT(1X,"avg_prc_dbg_2", 7(":",I4),25(":",F12.3))
-        END IF
 
        k = k + 1
 
@@ -5074,15 +4818,6 @@
        prcall(5) = (prcall(1)*totallnr(1) + prcall(2)*totallnr(2) &
          + prcall(3)*totallnr(3) + prcall(4)*totallnr(4))/ &
             totallnr(5)
-
-!     if (fcrl .eq. 1) then
-!      do sectr = 1,5
-!     write(6,1313) ' comp nom$ gen ',CURIYR,NRGN,sectr,prcall(sectr),
-!         relcomp(sectr),meccomp(sectr),fixcomp(sectr),
-!         taxcomp(sectr)
-!      enddo
-1313  format (a15,3i4,5f7.2)
-!     endif
 
       RETURN
       END
@@ -5685,8 +5420,6 @@
                   ENDIF
                END DO
             END DO
-            write(22,9312) curiyr+uhbsyr,curitr,nrgn,n,ICALL,ERBL(1,N) + ERBL(2,N) + ERBL(3,N) + ERBL(4,N),ERBL(1,N),ERBL(2,N),ERBL(3,N),ERABDE(N)
- 9312       format(1x,"erbl_e",4(":",i4),":",A1,5(":",f14.2))
             DO K=1,NPTYP
                IF (K .LE. EIPROD) ERBL(1,N) = ERBL(1,N) + ERBVYE(K,N)
                IF (K .EQ. EIDIST) ERBL(3,N) = ERBL(3,N) + ERBVYE(K,N)
@@ -5697,8 +5430,6 @@
             ERCNBV(N) = ERBVYE(EICAN,N)
             ERTUP(N) = ERBL(1,N) + ERBL(2,N) + ERBL(3,N) + ERBL(4,N)
          ENDIF
-         write(22,9313) curiyr+uhbsyr,curitr,nrgn,n,ICALL,ERTUP(N),ERBL(1,N),ERBL(2,N),ERBL(3,N),ERABDE(N)
- 9313    format(1x,"erbl_t",4(":",i4),":",A1,5(":",f14.2))
       END DO
       RETURN
       END
@@ -5826,10 +5557,7 @@
 !
                   IF (IYR .LE. EFPSYR - 1987 + 1) THEN
                      ERTDE1(N) = ERTDE1(N) + CONDR(L,ICONTP(J)) * EOASVL(IYR,J,N)
-                     Label = "4CONDR"
                      K = ICONTP(J)
-!                    WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,NRGN,N,ICALL,J,L,K,K,CONDR(L,K),EOASVL(IYR,J,N),CONDR(L,ICONTP(J)) * EOASVL(IYR,J,N)
- 2131                FORMAT(1x,A5,6(":",I4),": ",A1,4(":",I4),4(":",F11.3))
 !
                   ELSE IF (IYR .LT. EFPSYR - 1981 + 2) THEN
 !
@@ -5839,10 +5567,7 @@
                      K = ESTXRC(J,N)
                      IF (L .LE. ESTXRP(K)) THEN
                         ERTDE1(N) = ERTDE1(N) + ESTXRS(K,L) * (0.95 * EOASVL(IYR,J,N))
-                        Label = "4ERTA_"
                         ITXRP = ESTXRP(K)
-!                       WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,NRGN,N,ICALL,J,L,K,ITXRP,ESTXRS(K,L),EOASVL(IYR,J,N), &
-!                          ESTXRS(K,L) * 0.95 * EOASVL(IYR,J,N)
                      END IF
                   ELSE
 !
@@ -5854,9 +5579,7 @@
                      SYDTDR = TEMP1 / TEMP2
                      SYDTDR = AMAX1( SYDTDR , 0.0)
                      ERTDE1(N) = ERTDE1(N) + SYDTDR * EOASVL(IYR,J,N)
-                     Label = "4SYD__"
                      K = EOTXLF(J,N)
-!                    WRITE(6,2131) Label,CURIYR+UHBSYR,CURITR,EFPSYR-IYR+1,IYR,NRGN,N,ICALL,J,L,K,K,SYDTDR,EOASVL(IYR,J,N),SYDTDR * EOASVL(IYR,J,N)
                   ENDIF
                ENDIF
             END DO
@@ -5876,9 +5599,6 @@
                ERPDTB(N) = 0.0
             END IF
          ENDIF
-         Label = "4RPDTB"
-!        WRITE(6,2132) Label,CURIYR+UHBSYR,CURITR,NRGN,N,ICALL,ERTDW1(N),ERTDE1(N),ESFTXR(N),ESFLPR(N),ERATSD(N),ERATSF(N),ERPDTB(N)
- 2132    FORMAT(1x,A6,4(":",I4),": ",A1,7(":",F11.3))
 !
 !        CALCULATE TAX DEPRECIATION FOR NEW ASSETS   ! use CONDRN variable to reflect alternate bonus depreciation based on online year, from Dec 2017 tax law
 !
@@ -6864,8 +6584,6 @@
                   ESEMPS(I) = (ESEMPL(I)*ERPRFL(I) - ESEMPB(I)* &
                         RETIRE + ESRTPS(I)*(ERPREF(I) - &
                         ERPRFL(I) + RETIRE))/ERPREF(I)
-!                write(6,10) CURIYR,CURITR,NRGN,I,ESEMPS(I),ESEMPL(I),ERPRFL(I),ESEMPB(I),RETIRE,ESRTPS(I),ERPREF(I)
-10    FORMAT(1x,4I6,7F15.5)
                ENDIF
             ENDIF
 
@@ -7039,8 +6757,8 @@
 !           CALCULATE THE RETURN ON RATE BASE
 !
             ESRR(I) = ESPRLT(I) * ESEMDT(I) + ESPRST(I) * ESRTST(I) + ESPRCE(I) * ESRTCE(I) + ESPRPS(I) * ESEMPS(I)
- !           WRITE(6,2041) 'CHECK ESRR ',CURIYR,CURITR,NRGN,I,ESRR(I), ESPRLT(I) , ESEMDT(I), ESPRST(I), ESRTST(I), ESPRCE(I) , ESRTCE(I), ESPRPS(I), ESEMPS(I)
-2041      FORMAT(A25,1x,4(I4,1x),9(F12.3,1x))
+ !           WRITE(6,2041) 'CHECK ESRR ',CURIYR,CURITR,EFPITR,NRGN,I,ESRR(I), ESPRLT(I) , ESEMDT(I), ESPRST(I), ESRTST(I), ESPRCE(I) , ESRTCE(I), ESPRPS(I), ESEMPS(I)
+2041      FORMAT(A25,1x,5(I4,1x),9(F12.3,1x))
 !
 !           lower return for regulated part of industry -
 !
@@ -7050,9 +6768,6 @@
 
             IF (ICALL .eq. 'G' .AND. I .eq. 1) &   ! store esrr for CAPCOST routine
                SV_PRGEN_ESRR(CURIYR,NRGN) = ESRR(I)
-!              WRITE(6,2433)'LODAD SV_PRGEN_ESHR ', CURIYR, CURITR, NRGN, ESRR(I)   ,SV_PRGEN_ESRR(CURIYR,NRGN)
-2433   FORMAT(A30,1x,3(I4,1x),2(F12.3,1x))
-
 !
 !           CALCULATE THE REVENUE REQUIREMENT.
 !           THE EQUATION SHOWN BELOW IS THE SOLUTION TO 4 SIMULTANEOUS EQUATIONS INVOLVING THE REVENUE REQUIREMENTS.
@@ -7523,11 +7238,6 @@
 
 ! STORE THE TOTAL CAPITALIZATION FOR SUMATION
         CAPTAL(N,INDOC)=BALSHT(15)+BALSHT(16)+BALSHT(19)+BALSHT(20)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!        WRITE(*,20)CAPTAL(N,INDOC),N,INDOC,NRGN,CURIYR,CURITR
-!20      FORMAT(' STMTS - CAPTAL:',F10.2,' N,INDOC,NRGN,CURIYR,
-!     1          CURITR:',I3,I3,I3,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 ! SEND THE TOTAL CAPITALIZATION FOR IOU'S TO CAPACITY PLANNING
       IF ((N .EQ. 2) .AND. (INDOC .EQ. 3)) THEN
         CALL GETBLD(1,NRGN)
@@ -7535,18 +7245,9 @@
          DO J=1,2
           DO K=1,3
         EPRTBS=EPRTBS+CAPTAL(J,K)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!       WRITE(*,30)EPRTBS,J,K
-!30      FORMAT(' STMTS - EPRTBS,J,K:',F10.2,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
           END DO
          END DO
         CALL STRBLD(1,NRGN)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!        WRITE(*,10)EPRTBS,NRGN,CURIYR,CURITR
-!10      FORMAT(' STMTS - EPRTBS:',F10.2,
-!     1         ' NRGN,CURIYR,CURITR:',I3,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       ENDIF
 ! PREPARATION OF SOURCES AND USES OF FUNDS
             FUNDS(1) = XINCST(16)
@@ -7584,15 +7285,6 @@
              PPCOST(2) = PPWRBLK(2) * ESTSHR(N)
              PPCOST(3) = PPWRBLK(3) * ESTSHR(N)
              PPCOST(4) = PPWRBLK(4) * ESTSHR(N)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,10)ESTSHR(N),N,NRGN
-!10    FORMAT(' STMTS - ESTSHR(N):',F8.4,' N,NRGN:',I3,I3)
-!          IF(NRGN.EQ.1) THEN
-!     WRITE(*,10)ESTSHR(N),N,NRGN,BLKSUM,SALES(2),PPWRBLK(1),PPWRBLK(2)
-!    +   ,PPCOST(1),PPCOST(2)
-!10    FORMAT(' STMTS - ESTSHR(N):',F8.4,' N,NRGN:',I3,I3,6(F8.3))
-!          ENDIF
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 ! PREPARATION OF CAPITAL REQUIREMENTS REPORT DATA
             DO K=1,NOCAP
                DO L=1,8
@@ -7608,11 +7300,7 @@
                   CAPREQ(K,6) = CAPREQ(K,6) + EPYCWP(CAPTYP(K,J),N,2)
                   CAPREQ(K,7) = CAPREQ(K,7) + EPISOC(CAPTYP(K,J),N)
                   CAPREQ(K,8) = CAPREQ(K,8) + EPADOC(CAPTYP(K,J),N)
-!     IF (NRGN .EQ. 1) WRITE(6,*) ICALL,K,J,EPISOC(CAPTYP(K,J),N),
-!    * EPADOC(CAPTYP(K,J),N),'HELLO'
                END DO
-!     IF (NRGN .EQ. 1) WRITE(6,*) ICALL,K,CAPREQ(K,7),CAPREQ(K,8)
-!    *  ,'HELLO1'
           IF ((ICALL .eq.'G').and. (CAPTIT(K).eq. 'TOTAL PROD.')) THEN
              COMPCAP(NRGN,CURIYR) = CAPREQ(K,3)+CAPREQ(K,6)+CAPREQ(K,4)
              IF(NRGN .LE. UNRGNS) &
@@ -7776,11 +7464,6 @@
       RETURN
       END
 
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,10)EFPFL,ERTFL(1),ERTFL(2),NRGN,ICALL
-!10    FORMAT(' GL - EFPFL,ERTFL(1),ERTFL(2),NRGN,ICALL:',
-!     1        F10.2,F10.2,F10.2,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       SUBROUTINE ALLOCT(ISECT,NRGN)
       IMPLICIT NONE
 !*******************************************************************
@@ -7810,6 +7493,8 @@
       INTEGER ICOST
       INTEGER ITECH
       INTEGER NRGN
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT     
 
       DO ICLS=1,NCLASS
          REV(ICLS,ISECT) = 0.0
@@ -7822,8 +7507,10 @@
             END DO
             REV(ICLS,ISECT) = REV(ICLS,ISECT) + COSTFC(ICOST,ICLS,ISECT) * COST(ICOST,ISECT)
 
-            WRITE(IMSG,2111) CURIRUN, CURIYR+1989, CURITR, NRGN, ISECT, ICLS, ICOST, COSTFC(ICOST,ICLS,ISECT), COST(ICOST,ISECT), REV(ICLS,ISECT)
- 2111       FORMAT(1X,"REV_DBG",7(":",I4),3(":",F15.6))
+            IF (EFPITPRT .EQ. 1) THEN
+              WRITE(IMSG,2111) CURIRUN, CURIYR+1989, CURITR, NRGN, ISECT, ICLS, ICOST, COSTFC(ICOST,ICLS,ISECT), COST(ICOST,ISECT), REV(ICLS,ISECT)
+            ENDIF
+2111        FORMAT(1X,"REV_DBG",7(":",I4),3(":",F15.6))
 
          END DO
       END DO
@@ -7891,6 +7578,9 @@
       REAL DIFFPCT(3)
       INTEGER HISYR1,HISYR2
       REAL SALHRCI,INDRAT,NYINDRAT
+      
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
 
 !  Need only CA transp price
       REAL TRANPRICE
@@ -7913,16 +7603,15 @@
       DO ICLS=1,NCLASS
          IF (SALCLS(NRGN,ICLS) .NE. 0.0) THEN
             EPRICE(ICLS,ISECT,NRGN) = REV(ICLS,ISECT) / SALCLS(NRGN,ICLS)
-
-            WRITE(IMSG,2111) CURIRUN, CURIYR+1989, CURITR, NRGN, ISECT, ICLS, EPRICE(ICLS,ISECT,NRGN), REV(ICLS,ISECT), SALCLS(NRGN,ICLS)
+            IF (EFPITPRT .EQ. 1) THEN
+              WRITE(IMSG,2111) CURIRUN, CURIYR+1989, CURITR, NRGN, ISECT, ICLS, EPRICE(ICLS,ISECT,NRGN), REV(ICLS,ISECT), SALCLS(NRGN,ICLS)
+            ENDIF
  2111       FORMAT(1X,"EPRICE_DBG",6(":",I4),3(":",F15.6))
 
             IF (REV(ICLS,ISECT) .NE. REV(ICLS,ISECT)) THEN
                write(6,*)'efp REV is NaNq', ICLS,NRGN
             ENDIF
          ELSE
-!           SALCLS(NRGN,ICLS) = 50.0
-!           REV(ICLS,ISECT) = 100.0
             EPRICE(ICLS,ISECT,NRGN) = 0.1
             write(6,*)'EPRICE .eq. 0 due to 0 sales',NRGN,ICLS,ISECT
          ENDIF
@@ -7955,14 +7644,6 @@
                EPRICE(ICLS,4,NRGN) = EPRICE(ICLS,JSECT,NRGN) + &
                                      EPRICE(ICLS,4,NRGN)
                IF (ICLS .LE. 4) REV(ICLS,4)=REV(ICLS,4)+REV(ICLS,JSECT)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!                IF (JSECT .EQ. 3) THEN
-!                 WRITE(*,20)EPRICE(ICLS,4,NRGN),ICLS,NRGN,CURIYR
-!20               FORMAT(/' RATES - EPRICE(1ST):',F10.4,
-!     2                  ' ICLS,NRGN,CURIYR:',I3,I3,I3)
-!                ENDIF
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
             END DO
             BPRICE(ICLS,4,NRGN) = EPRICE(ICLS,4,NRGN)
          END DO
@@ -8010,13 +7691,6 @@
          SLSRCI=SLSRCI+SALCLS(NRGN,ICLS)
       END DO
 
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,30)REVHRCI,REVRCI,SLSHRCI,SLSRCI,CURIYR,NRGN
-!30     FORMAT(' RATES - REVHRCI:',F10.2,' REVRCI:',F10.2, &
-!             ' SLSHRCI:',F10.2,' SLSRCI:',F10.2, &
-!             ' CURIYR,NRGN:',I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
 !     CALCULATE PROPORTION OF REVENUES AND SALES TO RES,COM,AND IND
 !     BASED ON HISTORIC DATA AND MODEL OUTPUT
       DO ICLS=1,3
@@ -8046,13 +7720,6 @@
          END IF
          SLSPCT(ICLS)=SALCLS(NRGN,ICLS)/SLSRCI
 
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,40)REVPCT(ICLS),REVHPCT(ICLS),SLSPCT(ICLS), &
-!                 SLSHPCT(ICLS),CURIYR,NRGN,ICLS
-!40     FORMAT(' RATES - REVPCT:',F8.4,' REVHPCT:',F8.4, &
-!             ' SLSPCT:',F8.4,' SLSHPCT:',F8.4, &
-!             ' CURIYR,NRGN,ICLS:',I3,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
           END DO
 
 ! CALCULATE THE DIFFERENCE BETWEEN THE PROPORTION OF REVENUES AND
@@ -8070,28 +7737,7 @@
 
       SUBPCT(ICLS,NRGN,CURIYR)=DIFFHPCT(ICLS)-DIFFPCT(ICLS)
 
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,50)DIFFPCT(ICLS),DIFFHPCT(ICLS),CURIYR,NRGN,ICLS
-!50    FORMAT(' RATES - DIFFPCT:',F6.4,' DIFFHPCT:',F6.4, &
-!             ' CURIYR,NRGN,ICLS:',I3,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
           END DO
-!  hardcode change to subsidies for New York, shift more away from industrial
-    IF (UNRGNS.EQ.13) THEN
-      IF ((CURIYR .EQ. HISYR2) .and. (NRGN .eq. 6)) THEN
-       SUBPCT(1,NRGN,CURIYR) = SUBPCT(1,NRGN,CURIYR) + .5*NYINDRAT
-       SUBPCT(2,NRGN,CURIYR) = SUBPCT(2,NRGN,CURIYR) + .5*NYINDRAT
-       SUBPCT(3,NRGN,CURIYR) = SUBPCT(3,NRGN,CURIYR) - NYINDRAT
-      ENDIF
-    ELSEIF (UNRGNS.EQ.22) THEN
-
-!DKG      IF ((CURIYR .EQ. HISYR2) .and. (NRGN .eq. 6)) THEN
-!DKG       SUBPCT(1,NRGN,CURIYR) = SUBPCT(1,NRGN,CURIYR) + .5*NYINDRAT
-!DKG       SUBPCT(2,NRGN,CURIYR) = SUBPCT(2,NRGN,CURIYR) + .5*NYINDRAT
-!DKG       SUBPCT(3,NRGN,CURIYR) = SUBPCT(3,NRGN,CURIYR) - NYINDRAT
-!DKG      ENDIF
-     ENDIF
 
 !    Since nationally the industrial share declines over
 !    the forecast, this tends to exacerbate the subsidy
@@ -8168,41 +7814,19 @@
                ENDIF
             ENDIF
 
-!           WRITE(6,10)EPRICE(ICLS,4,NRGN),SUBPCT(ICLS,NRGN,CURIYR), REV(ICLS,4),REVRCI,ICLS,NRGN, CURIYR,CURITR
-10          FORMAT(' RATES - EPRICE(NEW):',F10.4,' SUBPCT:',F10.4, ' REV(ICLS,4):',F8.2,' REVRCI:',F8.2, ' ICLS,NRGN,CURIYR:',I3,I3,I3,I3)
-
          END DO
 !  fill in fprice for classes 4 and 5 , set equal to eprice.
             DO ISCT = 1 , 4
               FPRICE(4,ISCT,NRGN) = EPRICE(4,ISCT,NRGN)
               FPRICE(5,ISCT,NRGN) = EPRICE(5,ISCT,NRGN)
             ENDDO
-!
-!   pw2 we store the fraction of the class price relative to industrial
-!    and use these for the competitive case
-!
-          DO ICLS=1,4
-            SUBPRFRC(ICLS,NRGN) = EPRICE(ICLS,4,NRGN)/EPRICE(3,4,NRGN)
-!           write(6,*)'subprfrc ICLS NRGN',SUBPRFRC(ICLS,NRGN),ICLS,NRGN
-          ENDDO
         ENDIF !(ISECT = 3 only do all this on the last time through)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!         CALIFORNIA LONG TERM CONTRACT ADDERS
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-
-!Region 13  *** removed this code *** need another method to adjust with dynamic region tool
-!
-         ! All CA customers must pay a Competition Transition Charge and a
-         ! Fixed Transition Amount.  Customers of the 3 largest IOUs must also pay a
-         ! an Energy Cost Recovery Amount and pay off a DWR Bond.  These are reflected
-         ! on customer distribution portion of the bill below and can differ among
-       ! customer classes.
-
+            
 !
 !     Write EFP EPRICE Output Table by Demand Sector and Stage of Productions (EFP_EPRICE)
 !
-       IF ( (ORCLEFP .EQ. 1) .AND. (FNRUN .EQ. 1) .AND. (FCRL .EQ. 1) ) THEN
+       IF ( (ORCLEFP .EQ. 1) .AND. (FNRUN .EQ. 1) .AND. (EFPFCRL .EQ. 1) ) THEN
             TNUM = 1
             IF (LOOPING(TNUM) .EQ. 0) THEN
               NUMCOLS(TNUM) = 8
@@ -8308,6 +7932,9 @@
       INTEGER I
       CHARACTER*1 ICALL
       INTEGER NRGN
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT     
+      
       NUM = 1
       IF (ICALL .EQ. 'G') THEN
          ILINK = BLDLNK(NRGN,1)
@@ -8330,9 +7957,11 @@
                             (EBABDE(NUM,I),I=1,2), &
                             EBPTYP(NUM),EBSYR(NUM)
 
-         WRITE(18,1301) CURIYR+1989, CURITR, NRGN, ICALL, ILINK, NUM, BLINK, EBPTYP(NUM), EBSYR(NUM) + 1989, EBPCST(NUM), EBSERP(NUM),  &
+         IF (EFPITPRT .eq. 1) THEN
+           WRITE(18,1301) CURIYR+1989, CURITR, NRGN, ICALL, ILINK, NUM, BLINK, EBPTYP(NUM), EBSYR(NUM) + 1989, EBPCST(NUM), EBSERP(NUM),  &
             EBPCAP(NUM,1), EBBKVL(NUM,1), EBASVL(NUM,1), EBAFDC(NUM,1), EBBCWP(NUM,1), EBRCWP(NUM,1), EBABDE(NUM,1),  &
             EBPCAP(NUM,2), EBBKVL(NUM,2), EBASVL(NUM,2), EBAFDC(NUM,2), EBBCWP(NUM,2), EBRCWP(NUM,2), EBABDE(NUM,2)
+         ENDIF
  1301    FORMAT(1X,"GETEB",3(":",I4),":",A1,5(":",I5),16(":",F9.3))
 
          NUM = NUM + 1
@@ -8377,6 +8006,9 @@
       REAL*4 TPCAP(O)  !TEMPORARY NAME PLATE CAPACITY
       REAL*4 TSERP     !TEMPORARY % OF FIRST YEAR IN SERVICE
       REAL*4 TABDE(O)  !TEMPORARY ACCUMULATED BOOK DEPRECIATION
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+
       IF (ICALL .EQ. 'G') THEN
          ILINK = BLDLNK(NRGN,1)
       ELSE
@@ -8405,9 +8037,11 @@
                                 (EBABDE(J,I),I=1,2), &
                                 EBPTYP(J),EBSYR(J)
 
-            WRITE(18,1301) CURIYR+1989, CURITR, NRGN, ICALL, ILINK, j, BLINK, EBPTYP(j), EBSYR(j) + 1989, EBPCST(j), EBSERP(j),  &
+            IF (EFPITPRT .EQ. 1) THEN
+              WRITE(18,1301) CURIYR+1989, CURITR, NRGN, ICALL, ILINK, j, BLINK, EBPTYP(j), EBSYR(j) + 1989, EBPCST(j), EBSERP(j),  &
                EBPCAP(j,1), EBBKVL(j,1), EBASVL(j,1), EBAFDC(j,1), EBBCWP(j,1), EBRCWP(j,1), EBABDE(j,1),  &
                EBPCAP(j,2), EBBKVL(j,2), EBASVL(j,2), EBAFDC(j,2), EBBCWP(j,2), EBRCWP(j,2), EBABDE(j,2)
+            ENDIF
  1301       FORMAT(1X,"STREB",3(":",I4),":",A1,5(":",I5),16(":",F9.3))
 
             ILINK = BLINK
@@ -8431,7 +8065,6 @@
       include 'dsmdimen'
       include 'pq'
       include 'elshrs'
-!     include 'emmout'
       include 'uefpout'     ! UEFP output variables
       include 'uefdout'     ! EFD output variables
       include 'udatout'     ! UDAT output variables
@@ -8515,30 +8148,15 @@
 
 !     real dgapold
 
-      real tempreg(MNEUGRP,MNUMNR),tempregold(MNEUGRP,MNUMNR)
-      COMMON /efpprcsmooth/tempregold
+      real tempreg(MNEUGRP,MNUMNR)
 
       REAL ERDSCAR2(MNUMNR)
       COMMON /WAX_PRC/ ERDSCAR2
+      
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
 
       FULLYR = USYEAR(CURIYR)
-
-!     assign tempregold for smoothing - not on first year, first iteration
-
-      do NERC = 1,UNRGNS
-         do l = 1,MNEUGRP
-            if ((FULLYR .EQ. UESTYR) .and. (CURITR .EQ. 1)) then
-               tempregold(l,NERC) = 0.0      !filler, we won't use this anyway
-            else
-               if (CURITR .eq. 1) then
-                  tempregold(l,NERC) = tempreg(l,NERC)* MC_JPGDP(CURIYR)/MC_JPGDP(CURIYR-1)
-               else
-                  tempregold(l,NERC) = tempreg(l,NERC)
-               endif
-            endif
-         enddo
-      enddo
-
 
 !     READ IN SECTORAL PRICES BY NERC REGION
 
@@ -8591,9 +8209,10 @@
                   demwtnr(l,NERC) = 0.0
                END IF
 
-!              IF (isnan(DEMWTNR(l,NERC))) &
-               WRITE(IMSG,3311) CURIRUN, CURIYR+1989, CURITR, NERC, sectr, eu, l, demwtnr(l,NERC), totallnr(sectr,NERC), TOTEULOAD(l,NERC)
- 3311          FORMAT(1X,"DEMWTNR_DBG",7(":",I4),3(":",F15.6))
+               IF (EFPITPRT .EQ. 1) THEN
+                 WRITE(IMSG,3311) CURIRUN, CURIYR+1989, CURITR, EFPITR, NERC, sectr, eu, l, demwtnr(l,NERC), totallnr(sectr,NERC), TOTEULOAD(l,NERC)
+               ENDIF
+ 3311          FORMAT(1X,"DEMWTNR_DBG",8(":",I4),3(":",F15.6))
 
             enddo
          enddo
@@ -8620,33 +8239,22 @@
         ENDDO
        ENDDO
       DO NERC = 1, UNRGNS
- !       write(IMSG,3315) 'rvmapp',NERC,sectr,(RVMappCtoN(NERC,CENSUS,sectr),CENSUS=1,MNUMCR-1)
+        write(IMSG,3315) 'rvmapp',NERC,sectr,(RVMappCtoN(NERC,CENSUS,sectr),CENSUS=1,MNUMCR-1)
       enddo
       ENDDO
 
 3315  format(1x,a15,2(i5,1x),10F13.5)
 
-!     create average nerc to census map from the sector mappings (MappCtoN)
-
-      DO NERC = 1,MNUMNR
-         do CENSUS = 1,MNUMCR
-            mapcnavg(NERC,CENSUS) = 0.0
+!   fill average nerc to census map from transportation mapping which is based on all sectors
+      DO NERC = 1,UNRGNS
+         do CENSUS = 1,MNUMCR-1
+            mapcnavg(NERC,CENSUS) = RVMappCtoN(NERC,CENSUS,4)
          enddo
       ENDDO
 
-      DO NERC = 1,UNRGNS
-         DO CENSUS = 1, MNUMCR-2
-            do sectr = 1, 4
-               mapcnavg(NERC,CENSUS) = mapcnavg(NERC,CENSUS) + RVMappCtoN(NERC,CENSUS,sectr)*SALCLS(NERC,sectr)
-            enddo
-            mapcnavg(NERC,CENSUS) = mapcnavg(NERC,CENSUS)/(SALCLS(NERC,1) + SALCLS(NERC,2) + SALCLS(NERC,3) + SALCLS(NERC,4))
-         ENDDO
-      ENDDO
-
       DO NERC = 1, UNRGNS
-         DO sectr = 1, 4
-!              write(IMSG,3315) 'rvmapp2',NERC,sectr,(RVMappCtoN(NERC,CENSUS,sectr),CENSUS=1,MNUMCR-1)
-         ENDDO
+         write(IMSG,3315) 'rvmapp2',NERC,0,(mapcnavg(NERC,CENSUS),CENSUS=1,MNUMCR-1)
+
       enddo
 
       ENDIF    ! revised mappings
@@ -8663,22 +8271,23 @@
       DENOM = MC_JPGDP(YEAR)
       DO NERC=1,MNUMNR
          IF (NERC .LE. UNRGNS) THEN
-
+            IF (EFPITPRT .EQ. 1) THEN
             WRITE(IMSG,7317) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
                FRMARG(YEAR,NERC), EPRICE(1,1,NERC), EPRICE(1,2,NERC), EPRICE(1,3,NERC), EPRICE(1,4,NERC)
  7317       FORMAT(1X,"NCLASS_DBG_11",8(":",I4),<NCLASS>(":",I2),20(":",F9.3))
 
-           WRITE(IMSG,7327) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
+            WRITE(IMSG,7327) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
                 FRMARG(YEAR,NERC), EPRICE(2,1,NERC), EPRICE(2,2,NERC), EPRICE(2,3,NERC), EPRICE(2,4,NERC)
  7327       FORMAT(1X,"NCLASS_DBG_12",8(":",I4),<NCLASS>(":",I2),20(":",F9.3))
 
-           WRITE(IMSG,7337) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
+            WRITE(IMSG,7337) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
                 FRMARG(YEAR,NERC), EPRICE(3,1,NERC), EPRICE(3,2,NERC), EPRICE(3,3,NERC), EPRICE(3,4,NERC)
  7337       FORMAT(1X,"NCLASS_DBG_13",8(":",I4),<NCLASS>(":",I2),20(":",F9.3))
 
-           WRITE(IMSG,7347) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
+            WRITE(IMSG,7347) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), &
                 FRMARG(YEAR,NERC), EPRICE(4,1,NERC), EPRICE(4,2,NERC), EPRICE(4,3,NERC), EPRICE(4,4,NERC)
  7347       FORMAT(1X,"NCLASS_DBG_14",8(":",I4),<NCLASS>(":",I2),20(":",F9.3))
+            ENDIF
 
             PELRSNR(NERC,YEAR) = (EPRICE(1,4,NERC)/DENOM)
             PELCMNR(NERC,YEAR) = (EPRICE(2,4,NERC)/DENOM)
@@ -8762,86 +8371,18 @@
                PECTRFXN(NERC,YEAR) = temp3/DENOM
                PECTRTXN(NERC,YEAR) = temp4/DENOM
 
-!  code commented out, cannot be used unless tfac/dfac are moved to new DB input
-!              if (FRMARG(YEAR,NERC) .gt. 0.0) then   
-!                 totrev = 0.0
-!                 totrevt = 0.0
-!                 totrevd = 0.0
-
-!                 DO I=1,NCLASS - 1
-!                    totrevt = totrevt +  salcls(NERC,I) * &
-!                       EPRICE(I,2,NERC)/DENOM
-!                    totrevd = totrevd +  salcls(NERC,I) * &
-!                       EPRICE(I,3,NERC)/DENOM
-!                    Q(I) = salcls(NERC,I)
-!                 END DO ! I
-!                 totrevd = totrevd + ERDSCAR2(NERC)
-
-!                 CALCSEC = 0.0
-!                 DO I=1,NCLASS - 1
-!                    newtp(I,NERC)=totrevt * tfac(I,NERC)
-!                    newdp(I,NERC)=totrevd * dfac(I,NERC)
-!                    IF (Q(I) .GT. 0.0) THEN
-!                       PSEC(I) = (newtp(I,NERC) + newdp(I,NERC)) / Q(I)
-!                       CALCSEC = CALCSEC + PSEC(I) * Q(I)
-!                    ELSE
-!                        PSEC(I) = 0.0
-!                    END IF
-
-!                    IF (isnan(PSEC(I)) .OR. PSEC(I) .LT. 0.0 .OR. PSEC(I) .GT. 1000.0) THEN
-!                       WRITE(6,1031) CURIRUN, CURIYR+1989, YEAR, CURITR, NERC, I, &
-!                          PSEC(I), newtp(I,NERC), newdp(I,NERC), totrevt, totrevd, tfac(I,NERC), dfac(I,NERC), Q(I)
-1031                    FORMAT(1X,"PSEC_DBG",6(":",I4),8(":",F12.3))
-!                    END IF
-
-!                 END DO
-
-!                 fill in transportation with regulated version
-!                 PSEC(NCLASS) = (EPRICE(NCLASS,2,NERC) + EPRICE(NCLASS,3,NERC))/DENOM
-!                 CALCSEC = CALCSEC + PSEC(NCLASS) * Q(NCLASS)
-
-!              endif  !frmarg
             endif    !USW_POL
 
-            WRITE(IMSG,7318) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), FRMARG(YEAR,NERC)
- 7318       FORMAT(1X,"NCLASS_DBG_2",8(":",I4),<NCLASS>(":",I2),":",F6.3)
+            IF (EFPITPRT .EQ. 1) THEN
+              WRITE(IMSG,7318) CURIRUN, CURIYR+1989, CURITR, YEAR+1989, NERC, USW_POL, NCLASS, COMPRM(YEAR,NERC), (neusgrp(I), I = 1,NCLASS), FRMARG(YEAR,NERC)
+            ENDIF
+7318        FORMAT(1X,"NCLASS_DBG_2",8(":",I4),<NCLASS>(":",I2),":",F6.3)
 
             K = 1
             DO I = 1, NCLASS
                DO J = 1, neusgrp(I)
 ! COMPRM is no longer used and all sectoral T&D prices are based on same regulated allocation methods
-!                 if (FRMARG(YEAR,NERC) .GT. 0.0 .AND. USW_POL .eq. 4 .AND.  COMPRM(YEAR,NERC) .EQ. 2 .AND. Q(I) .GT. 0.0) then
-
-!                     margprc = EPRIC2(K,NERC) + PSEC(I)*DENOM - (ERDSCAR2(NERC) * DENOM / SALTOTA(NERC))
-!                     tempreg(K,NERC) = FRMARG(YEAR,NERC) * margprc + (1.0 - FRMARG(YEAR,NERC)) * EPRICE(I,4,NERC)
-
-!                     COMPCOMP(5,K,NERC) = PSEC(I)*DENOM - (ERDSCAR2(NERC) * DENOM / SALTOTA(NERC))
-
  2031                 FORMAT(1X,"TEMPREG_",A1,"_",A3,":",F12.3,10(":",I4),11(":",F12.3))
-!                     IF (isnan(tempreg(K,NERC))) THEN
-!                        WRITE(6,2031) "A","NaN",tempreg(K,NERC),     &    ! featured output
-!                           CURIRUN, CURCALYR, YEAR, CURITR, NERC,    &    ! integers
-!                           I, J, K, USW_POL, COMPRM(YEAR,NERC),      &    ! more integers
-!                           DENOM, FRMARG(YEAR,NERC),                 &    ! the rest are real
-!                           margprc, EPRIC2(K,NERC), PSEC(I), ERDSCAR2(NERC), SALTOTA(NERC), &
-!                           EPRICE(I,2,NERC), EPRICE(I,3,NERC), EPRICE(I,4,NERC), EPRICE(I,1,NERC)
-!                     ELSEIF (tempreg(K,NERC) .LE. 0.0) THEN
-!                        WRITE(6,2031) "A","Neg",tempreg(K,NERC),     &    ! featured output
-!                           CURIRUN, CURCALYR, YEAR, CURITR, NERC,    &    ! integers
-!                           I, J, K, USW_POL, COMPRM(YEAR,NERC),      &    ! more integers
-!                           DENOM, FRMARG(YEAR,NERC),                 &    ! the rest are real
-!                           margprc, EPRIC2(K,NERC), PSEC(I), ERDSCAR2(NERC), SALTOTA(NERC), &
-!                           EPRICE(I,2,NERC), EPRICE(I,3,NERC), EPRICE(I,4,NERC), EPRICE(I,1,NERC)
-!                     ELSEIF (tempreg(K,NERC)/MC_JPGDP(YEAR) .GT. 350.0) THEN
-!                        WRITE(IMSG,2031) "A","Big",tempreg(K,NERC),  &    ! featured output
-!                           CURIRUN, CURCALYR, YEAR, CURITR, NERC,    &    ! integers
-!                           I, J, K, USW_POL, COMPRM(YEAR,NERC),      &    ! more integers
-!                           DENOM, FRMARG(YEAR,NERC),                 &    ! the rest are real
-!                           margprc, EPRIC2(K,NERC), PSEC(I), ERDSCAR2(NERC), SALTOTA(NERC), &
-!                           EPRICE(I,2,NERC), EPRICE(I,3,NERC), EPRICE(I,4,NERC), EPRICE(I,1,NERC)
-!                     END IF
-
-!                 elseif (FRMARG(YEAR,NERC) .GT. 0.0 .AND. USW_POL .eq. 4 .AND. (COMPRM(YEAR,NERC) .EQ. 1 .OR. Q(I) .EQ. 0.0)) then
                   if (FRMARG(YEAR,NERC) .GT. 0.0 .AND. USW_POL .eq. 4 ) then
                      margprc = EPRIC2(K,NERC)+ EPRICE(I,2,NERC) + EPRICE(I,3,NERC)
                      tempreg(K,NERC) = FRMARG(YEAR,NERC) * margprc + (1.0 - FRMARG(YEAR,NERC)) * EPRICE(I,4,NERC)
@@ -8930,12 +8471,6 @@
                l = l+1
                temp = temp + demwtnr(l,NERC)*tempreg(l,NERC)
                temp5 = temp5 + demwtnr(l,NERC)*COMPCOMP(5,l,NERC)
-
-!              IF (NERC .EQ. 7) THEN
-!                 WRITE(6,7033) CURIRUN, CURIYR+1989, YEAR, CURITR, NERC, eu, l, PECINNR(NERC,YEAR), demwtnr(l,NERC), tempreg(l,NERC)
-!7033             FORMAT(1X,"PECINNR_7",7(":",I4),25(":",F12.3))
-!              END IF
-
             enddo
             PECINTDN(NERC,YEAR) = temp5/DENOM
             PECINNR(NERC,YEAR) = temp/DENOM
@@ -8954,8 +8489,10 @@
                PELOUTN(NERC,YEAR,i) = tempreg(i,NERC)/DENOM
             enddo
 
-            write(imsg,102) CURIYR,CURITR,NERC,DENOM,(tempreg(i,NERC)/DENOM,i=1,MNEUGRP)
-  102       format('nerc prc real$',3i4,f9.5,<MNEUGRP>f7.2)
+            IF (EFPITPRT .EQ. 1) THEN
+              write(imsg,102) CURIYR,CURITR,NERC,DENOM,(tempreg(i,NERC)/DENOM,i=1,MNEUGRP)
+            ENDIF
+102         format('nerc prc real$',3i4,f9.5,<MNEUGRP>f7.2)
 
             PECASNR(NERC,YEAR) = (PECRSNR(NERC,YEAR)*SALCLS(NERC,1) &
              + PECCMNR(NERC,YEAR)*SALCLS(NERC,2) &
@@ -9005,7 +8542,7 @@
        ULEPAS(NERC) = PECASNR(NERC,YEAR)
 !
 
-      if ((fcrl .eq. 1) .and. (FRMARG(YEAR,NERC).gt. 0.0)) then
+      if ((EFPFCRL .eq. 1) .and. (FRMARG(YEAR,NERC).gt. 0.0)) then
       write(imsg,103) YEAR,NERC,'RS',PECRSNR(NERC,YEAR), &
          PECRSRLN(NERC,YEAR), &
          PECRSMEN(NERC,YEAR),PECRSFXN(NERC,YEAR),PECRSTXN(NERC,YEAR), &
@@ -9031,10 +8568,10 @@
          PECASMEN(NERC,YEAR),PECASFXN(NERC,YEAR),PECASTXN(NERC,YEAR), &
          SCSPRC(YEAR,NERC,3)/DENOM, &
          PECASTDN(NERC,YEAR)
-      endif  ! fcrl
+      endif  ! EFPFCRL
 
 103    format ('nerc avg real$',2i4,a4,7f7.2)
-!      if (fcrl .eq. 1) then
+!      if (EFPFCRL .eq. 1) then
 !            write(imsg,104) YEAR,NERC,PECGENN(NERC,YEAR),PECTRNN(NERC,YEAR),&
 !                             PECDISN(NERC,YEAR), PECASNR(NERC,YEAR)
 !      endif
@@ -9195,7 +8732,7 @@
             PECTRNN(MNUMNR,CURIYR) = NUMER5(9) / DEN5
             PECDISN(MNUMNR,CURIYR) = NUMER5(10) / DEN5
 
-      if ((fcrl .eq. 1).and.(USW_POL .eq. 4).and.(YEAR .gt. 8)) then
+      if ((EFPFCRL .eq. 1).and.(USW_POL .eq. 4).and.(YEAR .gt. 8)) then
       write(imsg,103) YEAR,NERC,'RS',PECRSNR(NERC,YEAR), &
          PECRSRLN(NERC,YEAR), &
          PECRSMEN(NERC,YEAR),PECRSFXN(NERC,YEAR),PECRSTXN(NERC,YEAR), &
@@ -9221,8 +8758,8 @@
          PECASMEN(NERC,YEAR),PECASFXN(NERC,YEAR),PECASTXN(NERC,YEAR), &
          SCSPRC(YEAR,NERC,3)/DENOM, &
          PECASTDN(NERC,YEAR)
-      endif  ! fcrl
-!     if (fcrl .eq. 1) then
+      endif  ! EFPFCRL
+!     if (EFPFCRL .eq. 1) then
 !       write(imsg,104) YEAR,NERC,PECGENN(NERC,YEAR),PECTRNN(NERC,YEAR),&
 !                        PECDISN(NERC,YEAR), PECASNR(NERC,YEAR)
 !     endif
@@ -9754,8 +9291,8 @@
                DEN3 = DEN3 + SALCLS(I,3)
                NUM4 = NUM4 + SALCLS(I,4) * PECTRNR(I,CURIYR)
                DEN4 = DEN4 + SALCLS(I,4)
-               NUM5 = NUM5 + SALTOTA(NERC) * PECASNR(I,CURIYR)
-               DEN5 = DEN5 + SALTOTA(NERC)
+               NUM5 = NUM5 + SALTOTA(I) * PECASNR(I,CURIYR)
+               DEN5 = DEN5 + SALTOTA(I)
             END DO
             PECRS(MNUMCR,CURIYR) = NUM1/(3.412*DEN1)
             PECCM(MNUMCR,CURIYR) = NUM2/(3.412*DEN2)
@@ -9773,59 +9310,16 @@
          ENDIF
       END DO
 
-      DO CENSUS = 1,11
-        WRITE(imsg,18) 'CS RES',CURIYR,CURITR,CENSUS,PECRS(CENSUS,CURIYR),(PELRSOUT(CENSUS,CURIYR,EUG),EUG=1,10)
-        WRITE(imsg,18) 'CS COM',CURIYR,CURITR,CENSUS,PECCM(CENSUS,CURIYR),(PELCMOUT(CENSUS,CURIYR,EUG),EUG=1,10)
-      ENDDO
-18    FORMAT(1x,a8,3I5,11F10.3)
-!     write(6,17) 'cs res',(PECRS(CENSUS,CURIYR),CENSUS=1,11)
-!     write(6,17) 'cs com',(PECCM(CENSUS,CURIYR),CENSUS=1,11)
-!     write(6,17) 'cs ind',(PECIN(CENSUS,CURIYR),CENSUS=1,11)
-!     write(6,17) 'cs tra',(PECTR(CENSUS,CURIYR),CENSUS=1,11)
-!     write(6,17) 'cs tot',(PECAS(CENSUS,CURIYR),CENSUS=1,11)
-17    format(a7,11f7.2)
-
-
-!   get rid of steo benchmarking for now
-        BYR1 = 1
-        BYR2 = 1
-
-      IF ((CURIYR .GT. 2) .AND. (CURIYR .LE. BYR1)) THEN
-! SET YEAR COUNTER, I
-        I=CURIYR-2
-! ENTER RESIDENTIAL PRICES IN NOMINAL CENTS/KWH (RIGHT FROM STEO)
-! FOR YEARS 1992 TO 1996 - FOR 1997, MAKE SOMETHING UP SO THE
-! PRICE PATH WILL BE SMOOTHED - STEO IS 8.31 FOR 1997
-        IF (CURIYR .LE. BYR2) THEN
-          STEOPRC(1)=8.2
-          STEOPRC(2)=8.3
-          STEOPRC(3)=8.4
-          STEOPRC(4)=8.41
-          STEOPRC(5)=8.36
-          STEOPRC(6)=8.5
-! TRANSLATE STEO PRICES FROM NOMINAL CENTS/KWH TO 1987 DOLLARS PER
-! MILLION BTU (CODE AT THIS POINT IS IN 1987 DOLLARS PER MILLION BTU)
-          STEOPRC(I)=(STEOPRC(I)/MC_JPGDP(CURIYR))/.3412
-! CALCULATE BENCHMARK FACTOR, BNCHFCTR, BASED ON NATIONAL PRICES -
-          BNCHFCTR(I)=STEOPRC(I)/PELRS(MNUMCR,CURIYR)
-        ENDIF
-!  IF NOT A COMPETITION RUN THEN AFTER 1995 PHASE OUT BENCHMARKING
-!  TO 2000 (YEAR 11). IF COMPETITION RUN BENCHMARKING ENDS IN 1994
-!  WITH NO PHASE OUT.
-!       IF ((USW_POL .EQ. 0) .AND. (CURIYR .GT. BYR2)) THEN
-        IF  (CURIYR .GT. BYR2) THEN
-         BNCHFCTR(I)=BNCHFCTR(6)-((BNCHFCTR(6)-1.0)*((CURIYR-8)/4.0))
-        ENDIF
-! ADJUST REGIONAL RESIDENTIAL PRICES BY NATIONAL BENCHMARK FACTOR
-        DO J = 1,MNUMCR
-          PELRS(J,CURIYR)=PELRS(J,CURIYR)*BNCHFCTR(I)
-        END DO
-! NOW GO BACK AND BENCHMARK THE NERC REGION RESIDENTIAL
-! PRICES TO THE SAME FACTOR
-        DO J = 1,MNUMNR
-          PELRSNR(J,CURIYR)=PELRSNR(J,CURIYR)*BNCHFCTR(I)
-        END DO
+      IF (EFPITPRT .EQ. 1) THEN
+       DO CENSUS = 1,11
+        WRITE(imsg,18) 'CS RES',CURIYR,CURITR,EFPITR,CENSUS,PECRS(CENSUS,CURIYR),(PELRSOUT(CENSUS,CURIYR,EUG),EUG=1,10)
+        WRITE(imsg,18) 'CS COM',CURIYR,CURITR,EFPITR,CENSUS,PECCM(CENSUS,CURIYR),(PELCMOUT(CENSUS,CURIYR,EUG),EUG=1,10)
+        WRITE(imsg,188) 'PEL__ ALL ',CURIYR,CURITR,EFPITR,CENSUS,PELRS(CENSUS,CURIYR),PELCM(CENSUS,CURIYR),PELTR(CENSUS,CURIYR),PELIN(CENSUS,CURIYR),PELAS(CENSUS,CURIYR)
+       ENDDO
       ENDIF
+18    FORMAT(1x,a8,4I5,11F10.3)
+188   FORMAT(1x,a10,4I5,5F10.3)      
+
       RETURN
       END
 
@@ -9932,6 +9426,9 @@
                   'PRIVATE SECTOR RESULTS - TOTAL', &
                   'PUBLIC SECTOR RESULTS - TOTAL', &
                   'PRIVATE & PUBLIC SECTORS - TOTAL'/
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+      
       NAMER='                '
       IF (NRGN .EQ. (NOPREG+1)) THEN
          NAME1 = NATNAM
@@ -9951,7 +9448,7 @@
               IF (IPRPT(2) .EQ. 1) CALL REPSML(ITYPE,NRGN,INDOC)
             ENDIF
 !      Call routine to write EFPRPT variables to database
-            IF ( (FCRL .EQ. 1) .AND. (CURIYR .EQ. LASTYR) .AND.          &
+            IF ( (EFPFCRL .EQ. 1) .AND. (CURIYR .EQ. LASTYR) .AND.          &
                 (ORCLEFP .EQ. 1) .AND. (FNRUN .EQ. 1) ) CALL WREFPDB(ITYPE,NRGN,INDOC)
          ENDIF
       END DO
@@ -10119,9 +9616,6 @@
             BAL12 = 0.0
             BAL10 = 0.0
          ENDIF
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!     WRITE(6,*) 'TMPSET - MC_JPGDP:', MC_JPGDP(IYRRL)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          GINFR(I) = MC_JPGDP(I)/MC_JPGDP(IYRRL)
          DO J=1,26    ! balance sheet rows
 ! FIRST - INITIALIZE SUMS TO ZERO
@@ -10264,11 +9758,6 @@
                                              (FRAC*ABS(EFPBLK(J,1)))
                         TEFPBL(J,2,I) = TEFPBL(J,2,I) + &
                                              (FRAC*ABS(EFPBLK(J,2)))
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!      WRITE(*,10)TEFPBL(J,2,I),EFPBLK(J,1),EFPBLK(J,2),FRAC,J,I,NRGN
-!10    FORMAT(' TMPSET - TEFPBL(J,2,I):',F8.2,' EFPBLK(J,1):',F8.2,
-!     1       ' EFPBLK(J,2):',F8.2,' FRAC,J,I,NRGN:',F4.2,I3,I3,I3)
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
                        ENDIF
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
                      ENDIF
@@ -10371,9 +9860,6 @@
 ! CALCULATE REGIONAL PRICE BY SECTOR AND COMPONENT
          DO J=1,4
             DO JJ=1,4
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-!     WRITE(6,*) 'TMPSET - TPRRRE,I,J,JJ:',TPRRRE(I,J,2,JJ),I,J,JJ
-!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
               IF (TPRRRE(I,J,2,JJ) .NE. 0.0) THEN
                TPRRRE(I,J,3,JJ) = TPRRRE(I,J,1,JJ)/TPRRRE(I,J,2,JJ)
               ELSE
@@ -12705,36 +12191,6 @@
 !
         ENDIF                    ! end if itype (owner) = 3 (private + public)
       ENDIF                    ! end if indoc = 4
-!
-!       IF (ITYPE .EQ. 3) THEN
-!     Write EFP EPRICE Output Table by Demand Sector and Stage of Productions (EFP_EPRICE)
-!
-!           TNUM = 6
-!           IF (LOOPING(TNUM) .EQ. 0) THEN
-!             NUMCOLS(TNUM) = 8
-!             DYNSTM(TNUM) = 'INSERT INTO EFP_EPRICE VALUES(?,?,?,?,?,?,?,?,?)'
-!           ENDIF
-!           DO IY = 1 , LASTYR
-!             CALL GETRP2(NRGN,IY)
-!             DO ISECT = 1 , 5
-!               LOOPING(TNUM) = LOOPING(TNUM) + 1
-!               COLV(TNUM,1,LOOPING(TNUM)) = IY
-!               COLV(TNUM,2,LOOPING(TNUM)) = NRGN
-!               COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!               COLV(TNUM,4,LOOPING(TNUM)) = ISECT
-!               COLV(TNUM,5,LOOPING(TNUM)) = INDOC
-!               COLV(TNUM,6,LOOPING(TNUM)) = EPRICE(ISECT,INDOC,NRGN)
-!               COLV(TNUM,7,LOOPING(TNUM)) = BPRICE(ISECT,INDOC,NRGN)
-!               COLV(TNUM,8,LOOPING(TNUM)) = FPRICE(ISECT,INDOC,NRGN)
-!               IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                 COLVALS(:,:) = COLV(TNUM,:,:)
-!                 CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                 LOOPING(TNUM) = 0
-!               ENDIF
-!             ENDDO
-!           ENDDO
-!       ENDIF
-!
 !
 !     Write EFP Pricing Output Table by Demand Sector (EFP_CAPCOMP) table to database
 !

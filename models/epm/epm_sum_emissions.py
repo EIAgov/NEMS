@@ -1559,6 +1559,12 @@ def sum_emissions_industrial(
         ) * (12.0 / 44.0) / 1000.0
     )
 
+    # Compute any national carbon capture totals that happen to be missing
+    mnumcr2 = restart.parametr_mnumcr - 2
+    restart.ghgrep_cc_indy[:, usa, j] = np.sum(
+        restart.ghgrep_cc_indy[:, :mnumcr2, j], axis=1
+    )
+
 
 def partition_cement_kiln_ccs(restart: Restart) -> dict[str, float]:
     """Split up captured cement kiln carbon from combustion and non-combustion.
@@ -2708,6 +2714,11 @@ def sum_emissions_electricity(
             * restart.ghgrep_fl_elec[7, :, j]
             / restart.ghgrep_fl_elec[7, usa, j]
         )
+
+    # Compute any national carbon capture totals that happen to be missing
+    restart.ghgrep_cc_elec[:, usa, j] = np.sum(
+        restart.ghgrep_cc_elec[:, :mnumcr2, j], axis=1
+    )
 
 
 def sum_emissions_regional(

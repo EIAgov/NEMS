@@ -162,8 +162,8 @@ def fill_table_base_004(dfd, table_spec, table_id):
     # T4(24,IY,IS)=RSHTRCON(IY,1)/1000000000.
     z[24] = dfd["RSHTRCON"].loc[1] / 1000000000
     # Space Cooling
-    # T4(25,IY,IS)=RSCOOLCN(IY,3)/1000000000.
-    z[25] = dfd["RSCOOLCN"].loc[3] / 1000000000
+    # T4(25,IY,IS)=RSCOOLCN(IY,2)/1000000000.
+    z[25] = dfd["RSCOOLCN"].loc[2] / 1000000000
     # Water Heating
     # T4(26,IY,IS)=RSH2OCON(IY,1)/1000000000.
     z[26] = dfd["RSH2OCON"].loc[1] / 1000000000
@@ -212,23 +212,21 @@ def fill_table_base_004(dfd, table_spec, table_id):
     z[39] = dfd["QLGRS"].loc[MNUMCR] * TRIL_TO_QUAD
 
     # Marketed Renewables (wood) 10/
-    # T4(40,IY,IS)=RSHTRCON(IY,6)/1000000000.
-    z[40] = dfd["RSHTRCON"].loc[6] / 1000000000
+    # T4(40,IY,IS)=RSHTRCON(IY,5)/1000000000.
+    z[40] = dfd["RSHTRCON"].loc[5] / 1000000000
     # Energy Consumption by End Use 1/
     # Space Heating
-    # T4(42,IY,IS)=(RSHTRCON(IY,1)+RSHTRCON(IY,2)+RSHTRCON(IY,3)+RSHTRCON(IY,4)+RSHTRCON(IY,5)+RSHTRCON(IY,6)+RSHTRCON(IY,8))/1000000000.
+    # T4(42,IY,IS)=(RSHTRCON(IY,1)+RSHTRCON(IY,2)+RSHTRCON(IY,3)+RSHTRCON(IY,4)+RSHTRCON(IY,5))/1000000000.
     z[42] = (
         dfd["RSHTRCON"].loc[1]
         + dfd["RSHTRCON"].loc[2]
         + dfd["RSHTRCON"].loc[3]
         + dfd["RSHTRCON"].loc[4]
         + dfd["RSHTRCON"].loc[5]
-        + dfd["RSHTRCON"].loc[6]
-        + dfd["RSHTRCON"].loc[8]
     ) / 1000000000
     # Space Cooling
-    # T4(43,IY,IS)=(RSCOOLCN(IY,1)+RSCOOLCN(IY,3))/1000000000.
-    z[43] = (dfd["RSCOOLCN"].loc[1] + dfd["RSCOOLCN"].loc[3]) / 1000000000
+    # T4(43,IY,IS)=(RSCOOLCN(IY,1)+RSCOOLCN(IY,2))/1000000000.
+    z[43] = (dfd["RSCOOLCN"].loc[1] + dfd["RSCOOLCN"].loc[2]) / 1000000000
     # Water Heating
     # T4(44,IY,IS)=(RSH2OCON(IY,1)+RSH2OCON(IY,2)+RSH2OCON(IY,3)+RSH2OCON(IY,4))/1000000000.
     z[44] = (
@@ -311,12 +309,12 @@ def fill_table_base_004(dfd, table_spec, table_id):
 
     # Total Energy Consumption by End Use 1/
     # Space Heating
-    # T4(58,IY,IS)=(RSHTRCON(IY,1)+RSHTRCON(IY,2)+RSHTRCON(IY,3)+RSHTRCON(IY,4)+RSHTRCON(IY,5)+RSHTRCON(IY,6)+RSHTRCON(IY,8))/1000000000.+RSHTRCON(IY,2)/1000000000./QELAS(11,IY)*ELECLOSS
-    # z[58]=(dfd['RSHTRCON'].loc[1]+dfd['RSHTRCON'].loc[2]+dfd['RSHTRCON'].loc[3]+dfd['RSHTRCON'].loc[4]+dfd['RSHTRCON'].loc[5]+dfd['RSHTRCON'].loc[6]+dfd['RSHTRCON'].loc[8])/1000000000+dfd['RSHTRCON'].loc[2]/1000000000/dfd['QELAS'].loc[MNUMCR]*ELECLOSS
+    # T4(58,IY,IS)=(RSHTRCON(IY,1)+RSHTRCON(IY,2)+RSHTRCON(IY,3)+RSHTRCON(IY,4)+RSHTRCON(IY,5))/1000000000.+RSHTRCON(IY,2)/1000000000./QELAS(11,IY)*ELECLOSS
+    # z[58]=(dfd['RSHTRCON'].loc[1]+dfd['RSHTRCON'].loc[2]+dfd['RSHTRCON'].loc[3]+dfd['RSHTRCON'].loc[4]+dfd['RSHTRCON'].loc[5])/1000000000+dfd['RSHTRCON'].loc[2]/1000000000/dfd['QELAS'].loc[MNUMCR]*ELECLOSS
     z[58] = z[42] + z[9] / z[110]  * z[57] * ((z[23] - z[109]) / z[23])
     # Space Cooling
-    # T4(59,IY,IS)=(RSCOOLCN(IY,1)+RSCOOLCN(IY,3))/1000000000.+RSCOOLCN(IY,1)/1000000000./QELAS(11,IY)*ELECLOSS
-    # z[59]=(dfd['RSCOOLCN'].loc[1]+dfd['RSCOOLCN'].loc[3])/ 1000000000 + dfd['RSCOOLCN'].loc[1] / 1000000000 / dfd['QELAS'].loc[MNUMCR]*ELECLOSS
+    # T4(59,IY,IS)=(RSCOOLCN(IY,1)+RSCOOLCN(IY,2))/1000000000.+RSCOOLCN(IY,1)/1000000000./QELAS(11,IY)*ELECLOSS
+    # z[59]=(dfd['RSCOOLCN'].loc[1]+dfd['RSCOOLCN'].loc[2])/ 1000000000 + dfd['RSCOOLCN'].loc[1] / 1000000000 / dfd['QELAS'].loc[MNUMCR]*ELECLOSS
     z[59] = z[43] + z[10] / z[110]  * z[57] * ((z[23] - z[109]) / z[23])
     # Water Heating
     # T4(60,IY,IS)=(RSH2OCON(IY,1)+RSH2OCON(IY,2)+RSH2OCON(IY,3)+RSH2OCON(IY,4))/1000000000.+RSH2OCON(IY,2)/1000000000./QELAS(11,IY)*ELECLOSS

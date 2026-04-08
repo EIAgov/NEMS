@@ -68,7 +68,7 @@ class NEMSBase:
 
     def parse_sced_vars(self, mode, p='p1'):
         '''
-        Load and parse the output keys.sed file. Assign the scedes key and value into the dictionary (NEMSBase.scedvars)
+        Load and parse the output scedes.all file. Assign the scedes key and value into the dictionary (NEMSBase.scedvars)
 
         Parameters
         ----------
@@ -84,20 +84,20 @@ class NEMSBase:
 
         '''
         scedvars = self.scedvars
-        file = os.path.join(self.path_datekey,p,'keys.sed')
+        file = os.path.join(self.path_datekey,p,'scedes.all')
         if mode != 'par':
-            file = os.path.join(self.path_datekey,'keys.sed')
+            file = os.path.join(self.path_datekey,'scedes.all')
 
         with open(file, 'r', encoding='utf-8') as f:
             # filter out blank lines
             lines = filter(None, (line.strip() for line in f.readlines()))
             for line in lines:
                 s = line.split('=')
-                s[1] = s[1].replace('nullstr','')
+                #s[1] = s[1].replace('nullstr','')
                 s[1] = s[1].replace('$NEMS',self.NEMS)
                 scedvars = self.set_sced_var(scedvars, s[0], s[1])
 
-        # explicitly set H (hydrogen) here. Due to H=nullstr is missing in keys.sed file
+        # explicitly set H (hydrogen) here. Due to H=nullstr is missing in scedes.all file
         # Remove the code once the hydrogen project is done.
         scedvars = self.set_sced_var(scedvars, 'H', '')
 
@@ -129,15 +129,20 @@ class NEMSBase:
 
         '''
         bashvars = self.bashvars
-        with open(file, 'r', encoding='utf-8') as f:
+        #with open(file, 'r', encoding='utf-8') as f:
             # filter out blank lines
-            lines = filter(None, (line.strip() for line in f.readlines()))
-            for line in lines:
-                s = line.split('=')
-                s[1] = s[1].replace('nullstr','')
-                s[1] = s[1].replace('$NEMS',self.NEMS)
-                if s[0] in ('RETAIN'):
-                    bashvars[s[0]] = s[1].replace('/', '\\')
+            #lines = filter(None, (line.strip() for line in f.readlines()))
+        sced = pd.read_csv(file, header=0)
+        retainkey = sced.loc[sced['Key'] == 'RETAIN', 'Value']
+        bashvars['RETAIN'] = retainkey.values[0]
+
+            # for line in lines:
+            #     print(line)
+            #     s = line.split('=')
+            #     s[1] = s[1].replace('nullstr','')
+            #     s[1] = s[1].replace('$NEMS',self.NEMS)
+            #     if s[0] in ('RETAIN'):
+            #         bashvars[s[0]] = s[1].replace('/', '\\')
                     #scedvars = self.set_sced_var(scedvars, s[0], s[1])
         return bashvars
 
@@ -158,11 +163,11 @@ class NEMSBase:
             os.sys.exit() # the later shell script shall naturally exit/crash later since no good filelist etc.
 
         # check the exsistence of keys.sed.$scenario.$datekey. If the file doesn not exist, print message and copy key.sed over.
-        f = 'keys.sed.' + self.dt_scenario
-        if (not os.path.exists(f)):
-            print(f'{self.log_prefix}'+f' NO keys.sed.{self.bashvars.get("scenario")}.{self.bashvars.get("datekey")} FILE !!!!! ')
-            print(f'{self.log_prefix}'+' using keys.sed ')
-            shutil.copy('keys.sed', f)
+        # f = 'keys.sed.' + self.dt_scenario
+        # if (not os.path.exists(f)):
+        #     print(f'{self.log_prefix}'+f' NO keys.sed.{self.bashvars.get("scenario")}.{self.bashvars.get("datekey")} FILE !!!!! ')
+        #     print(f'{self.log_prefix}'+' using keys.sed ')
+        #     shutil.copy('keys.sed', f)
     
         print(f'{self.log_prefix}'+f'setting up NEMS scenario {self.bashvars.get("scenario")}')
     
@@ -218,10 +223,37 @@ class NEMSBase:
                 # Write all content at once, followed by a newline
                 sced.write('\n'.join(content_lines) + '\n\n')
 
+    def _get_git_info(self, args, err, file):
+        """
+        Executes a Git command, writes its stdout to a file, and returns the output.
+
+        Args:
+            args (list): Git command arguments (e.g., `['git', 'log']`).
+            err (str): Error message prefix for failures.
+            file (file object): File to write command output or error.
+
+        Returns:
+            str or None: Command's stdout if successful, else `None`.
+        """
+        try:
+            result = subprocess.run(args,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    text=True, shell=True, check=True)
+            file.write(result.stdout)
+            return result.stdout
+        except subprocess.CalledProcessError as e:
+            print(f"Warning :: {err}")
+            file.write(f"{err}.\n")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred for command '{' '.join(args)}': {e}")
+            file.write(f"An unexpected error occurred: {e}\n")
+            return None
 
     def get_git_status(self):
         '''
-        The main method to get git status on $NEMS\source and $NEMS\input folder by calling write_scedeshash_log_via_ls_command()
+        The main method to get git status on $NEMS\\source and $NEMS\\input folder by calling
+        write_scedeshash_log_via_ls_command()
 
         Returns
         -------
@@ -229,21 +261,33 @@ class NEMSBase:
 
         '''
         os.chdir(self.NEMS)
-
         # git updates
         cmitfile = os.path.join(self.path_datekey,'commit_head')
         with open(cmitfile, 'w', encoding='utf-8') as f:
-            f.write("Last commit before this run was made:\n" )
-            result = subprocess.run(['git','log','--name-only','-n','1'],stdout=subprocess.PIPE,shell=True)
-            f.write(result.stdout.decode('utf-8'))
+            f.write("Local Branch Name:\n")
+            lbranch_output = self._get_git_info(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                                                "Failed to get local branch name", f)
+            if lbranch_output and 'HEAD' in lbranch_output:
+                f.seek(f.tell() - (len(lbranch_output) + 1))
+                f.write("You are in a detached HEAD state.\n")
 
-            f.write( "\nFiles modified but not committed:\n")
-            result = subprocess.run(['git','ls-files','-m'],stdout=subprocess.PIPE,shell=True)
-            f.write(result.stdout.decode('utf-8'))
+            f.write("\nRemote Branch Name:\n")
+            self._get_git_info(['git', 'rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'],
+                                "No Remote Branch detected", f)
+            if lbranch_output and 'HEAD' in lbranch_output:
+                f.write("This is expected for detached HEAD (gitrunner jobs).\n")
 
-            f.write( "\nAll commits from the last month:\n")
-            result = subprocess.run(['git','log','--name-only','--since="1 month ago"'],stdout=subprocess.PIPE,shell=True)
-            f.write(result.stdout.decode('utf-8'))
+            f.write("\nLast commit before this run was made:\n")
+            self._get_git_info(['git', 'log', '--name-only', '-n', '1'],
+                                "Failed to get latest commit", f)
+
+            f.write("\nFiles modified but not committed:\n")
+            self._get_git_info(['git', 'ls-files', '-m'],
+                                "Failed to get modified files", f)
+
+            f.write("\nAll commits from the last month:\n")
+            self._get_git_info(['git', 'log', '--name-only', '--since="1 month ago"'],
+                                "Failed to get latest commits", f)
 
         # write out scedeshash.all
         scedfile = os.path.join(self.path_datekey, "scedeshash.all")
@@ -325,6 +369,8 @@ class NEMSBase:
         os.makedirs('.\\input', mode = 0o777, exist_ok = False)
         ls=[{'src':self.scedvars.get('STEOVARSN'), 'dst':r'.\input\steovars.csv'}]
         ls.append({'src':self.scedvars.get('VLDCTLRN'), 'dst':r'.\input\validator_controller.csv'})
+        ls.append({'src':self.scedvars.get('VLDSUBN'), 'dst':r'.\input\validator_subset_keys.csv'})
+        ls.append({'src':self.scedvars.get('VLDIEQN'), 'dst':r'.\input\validator_inequality_keys.csv'})
         ls.append({'src':os.path.join(self.dir_input,'coal','steo_benchmark_cmm.csv'), 'dst':r'.\input\steo_benchmark_cmm.csv'})
         ls.append({'src':os.path.join(self.dir_input,'ngas','steo_benchmark_ngmm.csv'), 'dst':r'.\input\steo_benchmark_ngmm.csv'})
         ls.append({'src':os.path.join(self.dir_input,'emm','steo_benchmark_emm.csv'), 'dst':r'.\input\steo_benchmark_emm.csv'})
@@ -379,16 +425,12 @@ class NEMSBase:
             shutil.copy(os.path.join(src_script_dir,f), f)
 
         src_source_dir = os.path.join(self.NEMS, 'source')
-        files = ('nems_flow.py','nems_flow_wrapper.py','intercv.exe','tfiler.exe')
+        files = ('nems_flow.py','nems_flow_wrapper.py')
         for f in files:
             shutil.copy(os.path.join(src_source_dir,f), f)
 
         f = os.path.join(self.NEMS, 'models', 'main')
         shutil.copytree(f,'main')
-
-        # copy essentail files to one level up
-        files = "unf_to_npz.py"
-        shutil.copy(os.path.join(r'.\main',files), files)
 
         src_input_dir = os.path.join(self.NEMS, 'input')
         if (self.BoolM):

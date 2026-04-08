@@ -1,5 +1,7 @@
 """Submodule for Postprocessing CCATS results.
 
+.. _postprocessor:
+
 Postprocessor: Summary
 ______________________
 This submodule postprocesses CCATS model results and prepares results to be sent to the restart file:
@@ -165,9 +167,10 @@ class Postprocessor(subccats.Submodule):
         self.parent = parent  #: module.Module head module
 
         ### Postprocessor inputs
-        self.price_limit        = 0.0 # Min/Max price produced by CCATS
-        self.price_peg          = 0.0 # Price Peg
-        self.slack_threshold    = 0.0 # Volume threshold at which infeasibilities are recorded in debug outputs
+        self.price_limit                = 0.0 # Min/Max price produced by CCATS
+        self.price_peg                  = 0.0 # Price Peg
+        self.price_peg_debug_switch     = False # True means that the debug log will include warnings when the price peg is used
+        self.slack_threshold            = 0.0 # Volume threshold at which infeasibilities are recorded in debug outputs
 
         ### Model class objects
         self.m  = None # Overarching Pyomo model
@@ -232,6 +235,33 @@ class Postprocessor(subccats.Submodule):
         self.postproc_df = pd.DataFrame() # Reporting table
         self.new_pipes_existing_df = pd.DataFrame() # Accounting of net new pipelines to be read into existing network next model year
 
+        #============================
+        ### Endogenous sources of CO2
+        #============================
+
+        # switch
+        self.source_duals_switch            = False # Process dual variables related to endogenous sources of CO2
+ 
+        # data to help with debugging
+        self.census_divisions               = pd.DataFrame() # block 0 (used for analysis)
+
+        # capacity
+        self.source_capacity_new            = pd.DataFrame() # block 0 (used for analysis)
+        self.source_capacity_new_all_blocks = pd.DataFrame() # all blocks
+        self.source_capacity_summary        = pd.DataFrame() # by census division
+
+        # operation
+        self.source_operation               = pd.DataFrame() # block 0 (used for analysis)
+        self.source_operation_all_blocks    = pd.DataFrame() # all blocks
+        self.source_operation_summary       = pd.DataFrame() # by division
+        
+        # energy consumed
+        self.source_consumed_electricity    = pd.DataFrame()
+        self.source_consumed_natgas         = pd.DataFrame()
+
+        # duals
+        self.source_duals                   = pd.DataFrame()
+
 
     def setup(self, setup_filename):
         """Setup postprocessor Submodule for CCATS.
@@ -250,16 +280,19 @@ class Postprocessor(subccats.Submodule):
             Logger utility, declared in parent.
 
         self.setup_table : DataFrame
-            Setup table for Preprocessor.py, with input values and switches relating to the submodule
+            Setup table for Preprocessor.py, with input values and switches relating to the submodule.
 
         self.price_limit : float
             Maximum price (+/-) returned by CCATS in $1987.
+
+        self.price_peg_debug_switch : bool
+            Log warning when the price peg is used to set the price. 
 
         self.price_peg : float
             Maximum price (+/-) movement allowed per cycle relative to the previous cycle in $1987.
 
         self.slack_threshold : float
-            Volume threshold at which infeasibilities are recorded in debug outputs
+            Volume threshold at which infeasibilities are recorded in debug outputs.
 
         self.log_b1_infeasibilities : bool
             Determines whether or not to log infeasibilities for block 1.
@@ -287,10 +320,16 @@ class Postprocessor(subccats.Submodule):
         # Variables
         self.price_limit                 = float(self.setup_table.at['price_limit', 'value']) # Limit for CO2 price
         self.price_peg                   = float(self.setup_table.at['price_peg', 'value']) # Price peg
+        self.price_peg_debug_switch      = self.setup_table.at['price_peg_debug_switch', 'value'].upper() == 'True'.upper() # Option to log when the price peg is used to set the price
         self.slack_threshold             = float(self.setup_table.at['slack_threshold', 'value']) # Volume threshold at which infeasibilities are recorded in debug outputs
         self.log_b1_infeasibilities      = self.setup_table.at['log_b1_infeasibilities', 'value'].upper() == 'True'.upper() # Option to log block 1 infeasibilities (block 0 is always logged)
         self.log_b2_infeasibilities      = self.setup_table.at['log_b2_infeasibilities', 'value'].upper() == 'True'.upper() # Option to log block 2 infeasibilities (block 0 is always logged)
         self.infeasibility_threshold_pct = float(self.setup_table.at['infeasibility_threshold_pct', 'value']) # Log infeasibilities if greater than provided percentage of total flow
+        self.source_duals_switch         = self.setup_table.at['source_duals_switch', 'value'].upper() == 'True'.upper() # Switch - analyze dual variables related to endogenous sources of CO2.
+        filename_census_div              = str(self.setup_table.at['filename_census_div', 'value']) # Volume threshold at which infeasibilities are recorded in debug outputs
+
+        # Read in tables as DataFrames
+        self.census_divisions       = pd.read_csv(self.postproc_input_path + filename_census_div)
 
         pass
 
@@ -538,6 +577,27 @@ class Postprocessor(subccats.Submodule):
         self.logger.info('Save Storage Capacity Used for next model year')
         self.update_storage_volumes()
 
+        # Endogenous sources of CO2
+        if self.parent.endogenous_source_switch:
+            self.logger.info('Endogenous sources of CO2...')
+
+            self.logger.info('Get source results')
+            self.get_source_results()
+
+            self.logger.info('Determine energy consumed by CO2 sources')
+            self.determine_source_energy_consumption()
+
+            if self.source_duals_switch:
+                self.logger.info('Output source duals')
+                self.output_source_duals()
+
+            self.logger.info('Update source capacity')
+            self.update_source_capacity()
+
+            if self.parent.debug_switch:
+                self.logger.info('Debug source results')
+                self.debug_source_results()
+
         # Write results to local restart file variables
         self.logger.info('Write results to local restart file variables')
         self.write_restart_file()
@@ -545,6 +605,11 @@ class Postprocessor(subccats.Submodule):
         # Write data to pytest for unit testing and result reconciliation
         self.logger.info('Copy Variables for Pytest')
         self.copy_variables_for_pytest()
+        
+        # Write reduced costs
+        if self.parent.debug_switch == True:
+            self.logger.info('Get Reduced Costs')
+            self.write_reduced_costs()
 
         # Write Pickle
         if ((self.parent.integrated_switch == 1) & (self.parent.param_fcrl == 1)) | ((self.parent.integrated_switch == 1) & (self.parent.param_ncrl == 1)):
@@ -895,7 +960,7 @@ class Postprocessor(subccats.Submodule):
         '''
         self.duals_df = pd.DataFrame(columns = ['dual_value', 'nodes', 'constraint'])
 
-        #Instantiate duals
+        # Instantiate duals
         duals = self.b0.component_objects(pyo.Constraint, active=True)
 
         self.logger.info('Get Duals')
@@ -1070,10 +1135,8 @@ class Postprocessor(subccats.Submodule):
 
         # Determine infeasibility threshold based on Block 0 total CO2 supply
         temp_supply_flow_df = self.O_flows_b0_df.copy()
-        temp_supply_flow_df = temp_supply_flow_df.loc[temp_supply_flow_df['pipeline_type'].isin(['source_to_storage',
-                                                                                                'source_to_demand',
-                                                                                                'source_to_ts_node',
-                                                                                                'source_to_hsm_cent'])].copy()
+        supply_list  = [item for item in list(temp_supply_flow_df['pipeline_type'].unique()) if "ts_node_to_" not in item]
+        temp_supply_flow_df = temp_supply_flow_df.loc[temp_supply_flow_df['pipeline_type'].isin(supply_list)].copy()
         self.infeasibility_threshold = self.infeasibility_threshold_pct/100.0 * temp_supply_flow_df.co2_volume.sum()
 
         # Supply slack
@@ -1225,6 +1288,425 @@ class Postprocessor(subccats.Submodule):
 
         pass
 
+    def get_source_results(self):
+        """Get source optimization results.
+
+        * Results are based on block 0
+        self.source_capacity_new : DataFrame
+            DataFrame of new sources built used for analysis (block 0).
+        
+        self.source_capacity_new_all_blocks : DataFrame
+            DataFrame of new sources built during all blocks.
+
+        self.source_operation : DataFrame
+        Results use the following indices:
+
+        self.source_operation_all_blocks : DataFrame
+            DataFrame of source operation (CO\ :sub:`2` supplied to CCATS) during all blocks.
+
+        """
+
+        
+        # Select block to analyze, (Block 0)
+        block_to_analyze = 0
+
+        # Dictionary of blocks
+        blocks = {0: self.parent.postproc.b0, 1:self.parent.postproc.b1, 2:self.parent.postproc.b2}
+
+        # Dictionaries for renaming columns
+        d_capacity_cols  = {'variable value':'capacity',  0:'kind', 1:'node'}
+        d_operation_exist_cols = {'variable value':'operation', 0:'kind', 1:'node', 2:'policy', 3:'vintage'}
+        d_operation_new_cols = {'variable value':'operation', 0:'kind', 1:'node', 2:'policy'}
+
+        # re-initialize for current year
+        self.source_capacity_new_all_blocks = pd.DataFrame()
+        self.source_operation_all_blocks    = pd.DataFrame()
+
+        # Iterate through blocks
+        for i in blocks.keys():
+
+            # Extract variables of interest
+            capacity_new = com.unpack_pyomo(blocks[i].v_capacity_source_new, pyo.value, 2).drop(['index',2], axis = 1)
+            operation_exist = com.unpack_pyomo(blocks[i].v_supply_source_exist, pyo.value, 4).drop(['index',4], axis = 1)
+            operation_new = com.unpack_pyomo(blocks[i].v_supply_source_new, pyo.value, 3).drop(['index',3], axis = 1)
+
+            # Rename columns for easier processing
+            capacity_new    = capacity_new.rename(columns=d_capacity_cols)
+            operation_exist = operation_exist.rename(columns=d_operation_exist_cols)
+            operation_new   = operation_new.rename(columns=d_operation_new_cols)
+
+            # If block to analyze, store the block
+            if i==block_to_analyze:
+                self.source_capacity_new = capacity_new.copy()
+                self.source_operation = operation_exist.copy()
+
+            # store extra information for operation_new to make compatible with operation_exist 
+            operation_new.loc[:, 'vintage'] = 'new' 
+
+            # Add columns to store the block #, and current year
+            capacity_new.loc[:, 'block'] = i
+            capacity_new.loc[:, 'year_current'] = int(self.parent.year_current)
+            operation_exist.loc[:, 'block'] = i
+            operation_exist.loc[:, 'year_current'] = int(self.parent.year_current)
+            operation_new.loc[:, 'block'] = i
+            operation_new.loc[:, 'year_current'] = int(self.parent.year_current)
+
+            # Store the results
+            self.source_capacity_new_all_blocks = pd.concat([self.source_capacity_new_all_blocks, capacity_new])
+            self.source_operation_all_blocks    = pd.concat([self.source_operation_all_blocks, operation_exist, operation_new])
+
+            
+
+        pass
+
+    def determine_source_energy_consumption(self):
+        """Process source optimization results to determine energy consumed for operation.
+
+        Returns
+        -------
+        self.source_capacity_summary : DataFrame
+            DataFrame summarizing new builds of endogenous CO2 sources by technology and census division.
+
+        self.source_operation_summary : DataFrame
+            DataFrame summarizing endogenous CO2 source operation, electricity consumption and natural gas consumption by technology and census division.
+
+        self.source_consumed_electricity : Series
+            Series of electricity consumption by technology and census division.
+
+        self.source_consumed_natgas : Series
+            Series of natural gas consumption by technology and census division.
+        
+        """
+        # get
+        arcs = self.parent.preproc.pipeline_lookup_opt.copy()
+        source_arcs = arcs.loc[arcs['node_i_type'].isin(['source'])]
+        source_arcs = source_arcs.drop(columns=['node_i_id','node_j_id','pipe_segment']).reset_index()
+        source_nodes = source_arcs[['node_i_id','node_i_census_division']]
+        source_nodes = source_nodes.rename(columns={'node_i_id':'node','node_i_census_division':'census_division'})
+        
+        # -----------------
+        ## capacity_summary
+        # -----------------
+        if len(self.source_capacity_new)>0:
+            # combine withsource_nodes to identify the census division for each node
+            capacity_summary = pd.merge(left=self.source_capacity_new.copy(), right=source_nodes.copy(), 
+                                        how='left', on='node')
+            
+            # summarize to be by region and technology
+            capacity_summary = capacity_summary.groupby(['census_division', 'kind'])['capacity'].sum().reset_index()
+
+            # store
+            self.source_capacity_summary = capacity_summary
+        else:
+            self.source_capacity_summary = pd.DataFrame()
+
+        
+        # -----------------
+        ## operation_summary, consumed_electricity, and consumed_natgas
+        # -----------------
+        if len(self.source_operation)>0:
+            # combine with self.parent.preproc.source_nodes to identify the census division for each node
+            operation_summary = pd.merge(left=self.source_operation.copy(), right=source_nodes.copy(), 
+                                        how='left', on='node')
+            
+            # summarize to be by region and kind
+            operation_summary = operation_summary.groupby(['census_division', 'kind'])['operation'].sum().reset_index()
+
+            # use self.parent.preproc.i_source_data to determine the amount of natural gas or electricty consumed
+            i_source_data = self.parent.preproc.i_source_data.copy()
+            for i in i_source_data.index:
+                ind = operation_summary.loc[:,'kind'] == i_source_data.loc[i,'kind']
+                operation_summary.loc[ind, 'elec_GJ'] = operation_summary.loc[ind, 'operation'] * i_source_data.loc[i,'elec_GJ_t']
+                operation_summary.loc[ind, 'natgas_GJ'] = operation_summary.loc[ind, 'operation'] * i_source_data.loc[i,'natgas_GJ_t']
+            
+            # put into expected dataframes
+            self.source_operation_summary    = operation_summary
+            self.source_consumed_electricity = operation_summary['elec_GJ']
+            self.source_consumed_natgas      = operation_summary['natgas_GJ']
+        else:
+            self.source_operation_summary    = pd.DataFrame()
+            self.source_consumed_electricity = pd.DataFrame()
+            self.source_consumed_natgas      = pd.DataFrame()
+
+        pass
+
+    def output_source_duals(self):
+        """Analyze and save dual variables results related to endogenous sources of CO2.
+
+        These duals are not used for prices, but rather to understand the cost competitiveness of endogenous sources of CO\ :sub:`2`.
+
+        Returns
+        -------
+        self.source_duals : DataFrame
+            DataFrame of dual variables for source supply.
+
+        """
+        # Declare column names
+        self.source_duals = pd.DataFrame(columns = ['dual_value', 'node', 'policy', 'constraint'])
+
+        # Instantiate duals
+        duals = self.b0.component_objects(pyo.Constraint, active=True)
+
+        # Get duals
+        for c in duals:
+            if c.local_name == 'c_flow_balance_supply_source':
+                for index in c:
+                    self.source_duals.loc[len(self.source_duals.index)] = [self.m.dual[c[index]], index[0], index[1], c]
+            else:
+                pass
+
+        # Format dual constraint index
+        self.source_duals['constraint'] = self.source_duals['constraint'].astype('str').str.replace('blocks[0].','')
+
+        # Add year
+        self.source_duals.loc[:,'year'] = int(self.parent.year_current)
+
+        # Drop duals==0 (these constraints are not being used)
+        self.source_duals = self.source_duals.loc[self.source_duals.loc[:, 'dual_value'] != 0.0, :]
+
+        # Save to .csv
+        filename = self.output_path + 'source//source_duals.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            self.source_duals.to_csv(filename, index=False)
+        else:
+            self.source_duals.to_csv(filename, mode='a', header=False, index=False)
+        
+        pass
+        
+
+    def update_source_capacity(self):
+        """Store endogenous sources of CO2 capacity for the next model year.
+
+        Returns
+        -------
+        self.parent.preproc.source_annual_capacity_existing : Series
+            Series of existing source capacity.
+        
+        """
+        # -------------------------
+        ## Update existing capacity
+        # -------------------------
+        capacity_prev = self.parent.preproc.source_annual_capacity_existing # Previous years (including before first CCATS run)
+        capacity_new  = self.source_capacity_new.loc[self.source_capacity_new.loc[:, 'capacity'] > 0.0, :] # current year
+
+        if len(capacity_new)==0.0:
+            pass # no updates to make
+        else:
+            # add vintage to capacity_new
+            capacity_new.loc[:,'vintage'] = int(self.parent.year_current)
+
+            if len(capacity_prev)==0.0:
+                capacity_new = capacity_new.set_index(['kind','node','vintage']) # set indices
+                self.parent.preproc.source_annual_capacity_existing  = capacity_new['capacity'] # series
+            else:
+                capacity_prev = capacity_prev.reset_index()
+                capacity_comb = pd.concat([capacity_prev, capacity_new])
+                capacity_comb = capacity_comb.groupby(['kind','node','vintage']).sum() # set indices and aggregate
+                self.parent.preproc.source_annual_capacity_existing  = capacity_comb['capacity'] # Series
+
+
+        ### Update Remaining natural CO2 capacity
+        self.parent.nat_co2_prev_b0 = self.O_flows_b0_df.loc[self.O_flows_b0_df['node_i_type'] == 'nat_co2_field'].copy()
+        self.parent.nat_co2_prev_b0 = self.parent.nat_co2_prev_b0[['node_i_id','co2_volume']].groupby(['node_i_id']).sum()
+
+        pass
+
+
+    def debug_source_results(self):
+        """Debug source optimization results by writing to .csv.
+
+        Returns
+        -------
+        None
+        
+        """
+        # source node details
+        source_arcs = self.parent.preproc.pipeline_lookup_df.loc[self.parent.preproc.pipeline_lookup_df['node_i_type'].isin(['source'])].copy()
+        source_nodes = source_arcs[['node_i_id','node_i_census_division']]
+        source_nodes = source_nodes.rename(columns={'node_i_id':'node','node_i_census_division':'census_division'})
+
+
+        # ------------------
+        ## capacity_summary
+        # ------------------
+        # make a copy
+        capacity_summary = self.source_capacity_summary.copy()
+
+        if len(capacity_summary)>0:
+            # add year and census division names
+            capacity_summary.loc[:, 'year'] = int(self.parent.year_current)
+            capacity_summary = pd.merge(left=capacity_summary, right=self.census_divisions, how='left', on='census_division')
+
+            # reorder/rename columns
+            capacity_summary = capacity_summary[['year','census_division','division_name','kind','capacity']]
+            capacity_summary = capacity_summary.rename(columns={'capacity':'capacity_t'})
+        else:
+            capacity_summary = pd.DataFrame(columns=['year','census_division','division_name','kind','capacity_t'])
+
+        # save
+        filename = self.output_path + 'source//capacity_summary.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            capacity_summary.to_csv(filename, index=False)
+        else:
+            capacity_summary.to_csv(filename, mode='a', header=False, index=False)
+
+        # ------------------
+        ## operation_summary
+        # ------------------
+        # make a copy
+        operation_summary = self.source_operation_summary.copy()
+                
+        if len(operation_summary)>0:
+            # add year and census division names
+            operation_summary.loc[:, 'year'] = int(self.parent.year_current)
+            operation_summary = pd.merge(left=operation_summary, right=self.census_divisions, how='left', on='census_division')
+            
+            # reorder/rename columns
+            operation_summary = operation_summary.reset_index()
+            operation_summary = operation_summary[['year','census_division','division_name','kind','operation','natgas_GJ','elec_GJ']]
+            operation_summary = operation_summary.rename(columns={'operation':'operation_t'})
+
+        else:
+            operation_summary = pd.DataFrame(columns=['year','census_division','division_name','kind','operation_t','natgas_GJ','elec_GJ'])
+
+        # save
+        filename = self.output_path + 'source//operation_summary.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            operation_summary.to_csv(filename, index=False)
+        else:
+            operation_summary.to_csv(filename, mode='a', header=False, index=False)
+
+        # ------------------
+        ## capacity_new
+        # ------------------
+        # make a copy
+        capacity_new = self.source_capacity_new.copy()
+
+        if len(capacity_new)>0:
+        # add census division number/name and year
+            capacity_new = pd.merge(left=capacity_new, right=source_nodes, how='left', on='node')
+            capacity_new = pd.merge(left=capacity_new, right=self.census_divisions, how='left', on='census_division')
+            capacity_new.loc[:, 'year'] = int(self.parent.year_current)
+
+            # reorder/rename columns
+            capacity_new = capacity_new[['year','node','census_division','division_name','kind','capacity']]
+            capacity_new = capacity_new.rename(columns={'capacity':'capacity_t'})
+
+            # remove zero values
+            capacity_new = capacity_new.loc[capacity_new.loc[:,'capacity_t']>0.0,:]
+
+        else:
+            capacity_new = pd.DataFrame(columns=['year','node','census_division','division_name','kind','capacity_t'])
+
+        # save
+        filename = self.output_path + 'source//capacity_new.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            capacity_new.to_csv(filename, index=False)
+        else:
+            capacity_new.to_csv(filename, mode='a', header=False, index=False)
+
+        # ------------------
+        ## capacity_new_all_blocks
+        # ------------------
+        # make a copy
+        capacity_new_all_blocks = self.source_capacity_new_all_blocks.copy()
+
+        if len(capacity_new_all_blocks)>0:
+            # add census division number/name and remove zero values
+            capacity_new_all_blocks = pd.merge(left=capacity_new_all_blocks, right=source_nodes, how='left', on='node')
+            capacity_new_all_blocks = pd.merge(left=capacity_new_all_blocks, right=self.census_divisions, how='left', on='census_division')
+            capacity_new_all_blocks = capacity_new_all_blocks.loc[capacity_new_all_blocks.loc[:, 'capacity']!=0.0,:]
+
+            # reorder/rename columns
+            capacity_new_all_blocks = capacity_new_all_blocks[['year_current','block','node','census_division','division_name','kind','capacity']]
+            capacity_new_all_blocks = capacity_new_all_blocks.rename(columns={'year_current':'year','capacity':'capacity_t'})
+
+        else:
+            capacity_new_all_blocks = pd.DataFrame(columns=['year','block','node','census_division','division_name','kind','capacity_t'])
+
+        # save
+        filename = self.output_path + 'source//capacity_new_all_blocks.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            capacity_new_all_blocks.to_csv(filename, index=False)
+        else:
+            capacity_new_all_blocks.to_csv(filename, mode='a', header=False, index=False)
+
+        # ------------------
+        ## operation
+        # ------------------
+        # make a copy
+        operation = self.source_operation.copy()
+
+        if len(operation)>0:
+            # add census division number/name and year
+            operation = pd.merge(left=operation, right=source_nodes, how='left', on='node')
+            operation = pd.merge(left=operation, right=self.census_divisions, how='left', on='census_division')
+            operation.loc[:, 'year'] = int(self.parent.year_current)
+            
+            # add information and reorder/rename columns
+            operation = operation[['year','node','census_division','division_name','kind','policy','operation']]
+            operation = operation.rename(columns={'operation':'operation_t'})
+            
+            # remove zero values
+            operation = operation.loc[operation.loc[:,'operation_t']>0.0,:]
+
+        else:
+            operation = pd.DataFrame(columns=['year','node','census_division','division_name','kind','policy','operation_t'])
+
+        # save
+        filename = self.output_path + 'source//operation.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            operation.to_csv(filename, index=False)
+        else:
+            operation.to_csv(filename, mode='a', header=False, index=False)
+
+        # ------------------
+        ## operation_all_blocks
+        # ------------------
+        # make a copy
+        operation_all_blocks = self.source_operation_all_blocks.copy()
+
+        if len(operation_all_blocks)>0:
+            # add census division number/name and remove zero values
+            operation_all_blocks = pd.merge(left=operation_all_blocks, right=source_nodes, how='left', on='node')
+            operation_all_blocks = pd.merge(left=operation_all_blocks, right=self.census_divisions, how='left', on='census_division')
+            operation_all_blocks = operation_all_blocks.loc[operation_all_blocks.loc[:, 'operation']!=0.0,:]
+            
+            # reoder/rename columns
+            operation_all_blocks = operation_all_blocks[['year_current','block','node','census_division','division_name','kind','policy','operation']]
+            operation_all_blocks = operation_all_blocks.rename(columns={'year_current':'year','operation':'operation_t'})
+
+        else:
+            operation_all_blocks = pd.DataFrame(columns=['year','block','node','census_division','division_name','kind','policy','operation_t'])
+
+        # save
+        filename = self.output_path + 'source//operation_all_blocks.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            operation_all_blocks.to_csv(filename, index=False)
+        else:
+            operation_all_blocks.to_csv(filename, mode='a', header=False, index=False)
+
+        # ------------------
+        ## Natural CO2
+        # ------------------
+        nat_co2_debug = self.O_flows_b0_df.loc[self.O_flows_b0_df['node_i_type'] == 'nat_co2_field'].copy()
+        nat_co2_debug = nat_co2_debug[['node_i_id','co2_volume']].groupby(['node_i_id']).sum()
+        nat_co2_debug = self.parent.preproc.nat_co2_lookup_df.copy().merge(nat_co2_debug,
+                                            how = 'left',
+                                            left_on = 'node_id',
+                                            right_index = True)
+        nat_co2_debug['year'] = self.parent.year_current
+
+        # save
+        filename = self.output_path + 'source//nat_co2_debug.csv'
+        if int(self.parent.year_current) == int(self.parent.year_start):
+            nat_co2_debug.to_csv(filename, index=False)
+        else:
+            nat_co2_debug.to_csv(filename, mode='a', header=False, index=False)
+
+
+        pass
+
 
     def write_restart_file(self):
         '''Write results to local restart variable.
@@ -1287,10 +1769,8 @@ class Postprocessor(subccats.Submodule):
         '''
         ### CO2 Supply Output - Census Division
         temp_supply_flow_df = self.O_flows_b0_df.copy()
-        temp_supply_flow_df = temp_supply_flow_df.loc[temp_supply_flow_df['pipeline_type'].isin(['source_to_storage',
-                                                                                                'source_to_demand',
-                                                                                                'source_to_ts_node',
-                                                                                                'source_to_hsm_cent'])].copy()
+        supply_list  = [item for item in list(temp_supply_flow_df['pipeline_type'].unique()) if "ts_node_to_" not in item]
+        temp_supply_flow_df = temp_supply_flow_df.loc[temp_supply_flow_df['pipeline_type'].isin(supply_list)].copy()
 
         # Map supply types to restart file variable index
         temp_supply_flow_df['co2_sup_out_index'] = temp_supply_flow_df['node_i_type'].map(self.parent.co2_supply_index)
@@ -1320,11 +1800,8 @@ class Postprocessor(subccats.Submodule):
 
         ### CO2 Sequestration Output - Census Division
         temp_seq_flow_df = self.O_flows_b0_df.copy()
-        temp_seq_flow_df = temp_seq_flow_df.loc[temp_seq_flow_df['pipeline_type'].isin(['source_to_storage',
-                                                                                        'source_to_demand',
-                                                                                        'source_to_hsm_cent',
-                                                                                        'ts_node_to_storage',
-                                                                                        'ts_node_to_demand'])].copy()
+        seq_list  = [item for item in list(temp_seq_flow_df['pipeline_type'].unique()) if "_to_ts_node" not in item]
+        temp_seq_flow_df = temp_seq_flow_df.loc[temp_seq_flow_df['pipeline_type'].isin(seq_list)].copy()
 
         # Map supply types to restart file variable index
         temp_seq_flow_df['co2_seq_out_index'] = temp_seq_flow_df['node_j_type'].map(self.parent.co2_seq_index)
@@ -1354,10 +1831,8 @@ class Postprocessor(subccats.Submodule):
 
         ### CO2 Supply Output - Census Region
         temp_supply_flow_df = self.O_flows_b0_df.copy()
-        temp_supply_flow_df = temp_supply_flow_df.loc[temp_supply_flow_df['pipeline_type'].isin(['source_to_storage',
-                                                                                                 'source_to_demand',
-                                                                                                 'source_to_ts_node',
-                                                                                                 'source_to_hsm_cent'])].copy()
+        supply_list  = [item for item in list(temp_supply_flow_df['pipeline_type'].unique()) if "ts_node_to_" not in item]
+        temp_supply_flow_df = temp_supply_flow_df.loc[temp_supply_flow_df['pipeline_type'].isin(supply_list)].copy()
 
         # Map supply types to restart file variable index
         temp_supply_flow_df['co2_sup_out_index'] = temp_supply_flow_df['node_i_type'].map(self.parent.co2_supply_index)
@@ -1387,11 +1862,8 @@ class Postprocessor(subccats.Submodule):
 
         ### CO2 Sequestration Output - Census Region
         temp_seq_flow_df = self.O_flows_b0_df.copy()
-        temp_seq_flow_df = temp_seq_flow_df.loc[temp_seq_flow_df['pipeline_type'].isin(['source_to_storage',
-                                                                                        'source_to_demand',
-                                                                                        'source_to_hsm_cent',
-                                                                                        'ts_node_to_storage',
-                                                                                        'ts_node_to_demand'])].copy()
+        seq_list  = [item for item in list(temp_seq_flow_df['pipeline_type'].unique()) if "_to_ts_node" not in item]
+        temp_seq_flow_df = temp_seq_flow_df.loc[temp_seq_flow_df['pipeline_type'].isin(seq_list)].copy()
 
         # Map supply types to restart file variable index
         temp_seq_flow_df['co2_seq_out_index'] = temp_seq_flow_df['node_j_type'].map(self.parent.co2_seq_index)
@@ -1456,10 +1928,20 @@ class Postprocessor(subccats.Submodule):
                 temp_shadow_price['value_new'] = temp_shadow_price.mean(axis = 1)
                 temp_shadow_price = temp_shadow_price[['value_new']]
 
-            # Limit price movements to price peg
             temp_shadow_price = temp_shadow_price.merge(self.parent.rest_co2_prc_dis_45q, how = 'left',
                                                         left_index = True,
                                                         right_index = True)
+
+            # check price movements exceed price peg
+            for index, row in temp_shadow_price.dropna().iterrows():
+                lower_bound = row['value'] - self.price_peg
+                upper_bound = row['value'] + self.price_peg
+
+                if self.price_peg_debug_switch == True:
+                    if not (lower_bound <= row['value_new'] <= upper_bound):
+                        self.logger.warning(f"price_peg triggered: rest_co2_prc_dis_45q index {index}: value_new: ({row['value_new']}), value: ({row['value']})")
+                    
+            # Limit price movements to price peg
             temp_shadow_price.loc[temp_shadow_price['value_new'] > (temp_shadow_price['value'] + self.price_peg), 'value_new'] = (temp_shadow_price['value'] + self.price_peg)
             temp_shadow_price.loc[temp_shadow_price['value_new'] < (temp_shadow_price['value'] - self.price_peg), 'value_new'] = (temp_shadow_price['value'] - self.price_peg)
             temp_shadow_price = temp_shadow_price.drop(['value'], axis = 1)
@@ -1508,10 +1990,20 @@ class Postprocessor(subccats.Submodule):
                 temp_shadow_price['value_new'] = temp_shadow_price.mean(axis = 1)
                 temp_shadow_price = temp_shadow_price[['value_new']]
 
-            # Limit price movements to $5
             temp_shadow_price = temp_shadow_price.merge(self.parent.rest_co2_prc_dis_ntc, how = 'left',
                                                         left_index = True,
                                                         right_index = True)
+
+            # check price movements exceed price peg
+            for index, row in temp_shadow_price.dropna().iterrows():
+                lower_bound = row['value'] - self.price_peg
+                upper_bound = row['value'] + self.price_peg
+
+                if self.price_peg_debug_switch == True:
+                    if not (lower_bound <= row['value_new'] <= upper_bound):
+                        self.logger.warning(f"price_peg triggered: rest_co2_prc_dis_ntc index {index}: value_new: ({row['value_new']}), value: ({row['value']})")
+                    
+            # Limit price movements to price peg
             temp_shadow_price.loc[temp_shadow_price['value_new'] > (temp_shadow_price['value'] + self.price_peg), 'value_new'] = (temp_shadow_price['value'] + self.price_peg)
             temp_shadow_price.loc[temp_shadow_price['value_new'] < (temp_shadow_price['value'] - self.price_peg), 'value_new'] = (temp_shadow_price['value'] - self.price_peg)
             temp_shadow_price = temp_shadow_price.drop(['value'], axis = 1)
@@ -1559,10 +2051,20 @@ class Postprocessor(subccats.Submodule):
                 temp_shadow_price['value_new'] = temp_shadow_price.mean(axis = 1)
                 temp_shadow_price = temp_shadow_price[['value_new']]
 
-            # Limit price movements to price peg
             temp_shadow_price = temp_shadow_price.merge(self.parent.rest_co2_prc_reg_45q, how = 'left',
                                                         left_index = True,
                                                         right_index = True)
+
+            # check price movements exceed price peg
+            for index, row in temp_shadow_price.dropna().iterrows():
+                lower_bound = row['value'] - self.price_peg
+                upper_bound = row['value'] + self.price_peg
+
+                if self.price_peg_debug_switch == True:
+                    if not (lower_bound <= row['value_new'] <= upper_bound):
+                        self.logger.warning(f"price_peg triggered: rest_co2_prc_reg_45q index {index}: value_new: ({row['value_new']}), value: ({row['value']})")
+                    
+            # Limit price movements to price peg
             temp_shadow_price.loc[temp_shadow_price['value_new'] > (temp_shadow_price['value'] + self.price_peg), 'value_new'] = (temp_shadow_price['value'] + 5)
             temp_shadow_price.loc[temp_shadow_price['value_new'] < (temp_shadow_price['value'] - self.price_peg), 'value_new'] = (temp_shadow_price['value'] - 5)
             temp_shadow_price = temp_shadow_price.drop(['value'], axis = 1)
@@ -1599,10 +2101,20 @@ class Postprocessor(subccats.Submodule):
                 temp_shadow_price['value_new'] = temp_shadow_price.mean(axis = 1)
                 temp_shadow_price = temp_shadow_price[['value_new']]
 
-            # Limit price movements to price peg
             temp_shadow_price = temp_shadow_price.merge(self.parent.rest_co2_prc_reg_ntc, how = 'left',
                                                         left_index = True,
                                                         right_index = True)
+
+            # check price movements exceed price peg
+            for index, row in temp_shadow_price.dropna().iterrows():
+                lower_bound = row['value'] - self.price_peg
+                upper_bound = row['value'] + self.price_peg
+
+                if self.price_peg_debug_switch == True:
+                    if not (lower_bound <= row['value_new'] <= upper_bound):
+                        self.logger.warning(f"price_peg triggered: rest_co2_prc_reg_ntc index {index}: value_new: ({row['value_new']}), value: ({row['value']})")
+                    
+            # Limit price movements to price peg
             temp_shadow_price.loc[temp_shadow_price['value_new'] > (temp_shadow_price['value'] + self.price_peg), 'value_new'] = (temp_shadow_price['value'] + 5)
             temp_shadow_price.loc[temp_shadow_price['value_new'] < (temp_shadow_price['value'] - self.price_peg), 'value_new'] = (temp_shadow_price['value'] - 5)
             temp_shadow_price = temp_shadow_price.drop(['value'], axis = 1)
@@ -1731,10 +2243,14 @@ class Postprocessor(subccats.Submodule):
         
         self.parent.pkl.mod_new_built_pipes_df : DataFrame
             New built pipelines.
+
+        self.parent.pkl.mod_nat_co2_prev_b0_df : DataFrame
+            DataFrame of previous model year natural CO2 flows
         '''
-        self.parent.pkl.mod_new_aors_df             = self.parent.new_aors_df.copy()
-        self.parent.pkl.mod_store_prev_b0_df        = self.parent.store_prev_b0_df.copy()
-        self.parent.pkl.mod_new_built_pipes_df      = self.parent.new_built_pipes_df.copy()
+        self.parent.pkl.mod_new_aors_df                 = self.parent.new_aors_df.copy()
+        self.parent.pkl.mod_store_prev_b0_df            = self.parent.store_prev_b0_df.copy()
+        self.parent.pkl.mod_new_built_pipes_df          = self.parent.new_built_pipes_df.copy()
+        self.parent.pkl.mod_nat_co2_prev_b0_df          = self.parent.nat_co2_prev_b0.copy()
 
         pass
 
@@ -1815,6 +2331,29 @@ class Postprocessor(subccats.Submodule):
         pass
 
 
+    def write_reduced_costs(self):
+        v_df = []
+        # Iterate through all variables
+        for v in self.b0.component_objects(pyo.Var, active=True):
+            # Iterate through each index of the variable
+            for index in v:
+                var_name = f"{v.name}" # Form a readable name
+                var_value = pyo.value(v[index])
+                reduced_cost = self.m.rc.get(v[index], None)
+
+                v_df.append({
+                    'Variable': var_name,
+                    'Index': index, 
+                    'Value': var_value,
+                    'Reduced_Cost': reduced_cost
+                })
+
+        # Create the DataFrame
+        df = pd.DataFrame(v_df)
+        filename = self.output_path + 'variable_reduced_costs//' + 'var_b0_rc_' + str(self.year_current) + '_c' + str(self.parent.cycle_current)  + '.csv'
+        df.to_csv(filename, index=False)
+
+        
     def results_to_csv(self):
         '''Write Pyomo results to csv.
 
@@ -1853,7 +2392,7 @@ class Postprocessor(subccats.Submodule):
             temp_flows_b1_df['supply'] = 0
             temp_flows_b2_df['supply'] = 0
             
-            pipeline_types = ['source_to_demand', 'source_to_hsm_cent', 'source_to_storage', 'source_to_ts_node']
+            pipeline_types = ['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node']
 
             for pipeline_type in pipeline_types:
                 temp_flows_b0_df.loc[temp_flows_b0_df.loc[:,'pipeline_type']==pipeline_type, 'supply'] = temp_flows_b0_df.loc[temp_flows_b0_df.loc[:,'pipeline_type']==pipeline_type, 'co2_volume']
@@ -1865,7 +2404,7 @@ class Postprocessor(subccats.Submodule):
             temp_flows_b1_df['sequestration'] = 0
             temp_flows_b2_df['sequestration'] = 0
 
-            pipeline_types = ['source_to_demand', 'source_to_hsm_cent', 'source_to_storage', 'ts_node_to_demand', 'ts_node_to_storage']
+            pipeline_types = ['nat_co2_to_demand','source_to_demand', 'source_to_hsm_cent','source_to_storage','ts_node_to_demand','ts_node_to_storage']
 
             for pipeline_type in pipeline_types:
 
@@ -1937,23 +2476,23 @@ class Postprocessor(subccats.Submodule):
         arcs_total         = len(self.preproc.arcs)
 
         # Get selected nodes and arcs
-        supply_nodes_selected_b0 = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['source_to_storage','source_to_demand','source_to_ts_node', 'source_to_hsm_cent'])].copy()
+        supply_nodes_selected_b0 = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node'])].copy()
         supply_nodes_selected_b0 = supply_nodes_selected_b0.loc[supply_nodes_selected_b0['co2_volume'] > 1]
         supply_nodes_selected_b0 = len(supply_nodes_selected_b0['node_i_id'].unique())
         
-        supply_nodes_selected_b1 = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['source_to_storage','source_to_demand','source_to_ts_node', 'source_to_hsm_cent'])].copy()
+        supply_nodes_selected_b1 = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node'])].copy()
         supply_nodes_selected_b1 = supply_nodes_selected_b1.loc[supply_nodes_selected_b1['co2_volume'] > 1]
         supply_nodes_selected_b1 = len(supply_nodes_selected_b1['node_i_id'].unique())
         
-        supply_nodes_selected_b2 = self.O_flows_b2_df.loc[self.O_flows_b2_df['pipeline_type'].isin(['source_to_storage','source_to_demand','source_to_ts_node', 'source_to_hsm_cent'])].copy()
+        supply_nodes_selected_b2 = self.O_flows_b2_df.loc[self.O_flows_b2_df['pipeline_type'].isin(['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node'])].copy()
         supply_nodes_selected_b2 = supply_nodes_selected_b2.loc[supply_nodes_selected_b2['co2_volume'] > 1]
         supply_nodes_selected_b2 = len(supply_nodes_selected_b2['node_i_id'].unique())
 
-        demand_nodes_selected_b0 = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['source_to_storage','source_to_demand','ts_node_to_demand','ts_node_to_storage', 'source_to_hsm_cent'])].copy()
+        demand_nodes_selected_b0 = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['nat_co2_to_demand','source_to_demand', 'source_to_hsm_cent','source_to_storage','ts_node_to_demand','ts_node_to_storage'])].copy()
         demand_nodes_selected_b0 = demand_nodes_selected_b0.loc[demand_nodes_selected_b0['co2_volume'] > 1]
         demand_nodes_selected_b0 = len(demand_nodes_selected_b0['node_j_id'].unique())
         
-        demand_nodes_selected_b1 = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['source_to_storage','source_to_demand','ts_node_to_demand','ts_node_to_storage', 'source_to_hsm_cent'])].copy()
+        demand_nodes_selected_b1 = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['nat_co2_to_demand','source_to_demand', 'source_to_hsm_cent','source_to_storage','ts_node_to_demand','ts_node_to_storage'])].copy()
         demand_nodes_selected_b1 = demand_nodes_selected_b1.loc[demand_nodes_selected_b1['co2_volume'] > 1]
         demand_nodes_selected_b1 = len(demand_nodes_selected_b1['node_j_id'].unique())
 
@@ -1963,19 +2502,19 @@ class Postprocessor(subccats.Submodule):
         arcs_selected_b1 = self.O_flows_b1_df.loc[self.O_flows_b1_df['co2_volume'] > 1].copy()
         arcs_selected_b1 = len(arcs_selected_b1['node_j_id'].unique())
 
-        co2_volume_supply_b0_nodes = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['source_to_storage','source_to_demand','source_to_ts_node', 'source_to_hsm_cent'])].copy()
+        co2_volume_supply_b0_nodes = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node'])].copy()
         co2_volume_supply_b0_nodes = co2_volume_supply_b0_nodes['co2_volume'].sum()
         
-        co2_volume_supply_b1_nodes = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['source_to_storage','source_to_demand','source_to_ts_node', 'source_to_hsm_cent'])].copy()
+        co2_volume_supply_b1_nodes = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node'])].copy()
         co2_volume_supply_b1_nodes = co2_volume_supply_b1_nodes['co2_volume'].sum()
         
-        co2_volume_supply_b2_nodes = self.O_flows_b2_df.loc[self.O_flows_b2_df['pipeline_type'].isin(['source_to_storage','source_to_demand','source_to_ts_node', 'source_to_hsm_cent'])].copy()
+        co2_volume_supply_b2_nodes = self.O_flows_b2_df.loc[self.O_flows_b2_df['pipeline_type'].isin(['dac_to_ts_node','nat_co2_to_demand','nat_co2_to_ts_node','source_to_demand', 'source_to_hsm_cent','source_to_storage','source_to_ts_node'])].copy()
         co2_volume_supply_b2_nodes = co2_volume_supply_b2_nodes['co2_volume'].sum()
 
-        co2_volume_demand_b0_nodes = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['source_to_storage','source_to_demand','ts_node_to_demand','ts_node_to_storage', 'source_to_hsm_cent'])].copy()
+        co2_volume_demand_b0_nodes = self.O_flows_b0_df.loc[self.O_flows_b0_df['pipeline_type'].isin(['nat_co2_to_demand','source_to_demand', 'source_to_hsm_cent','source_to_storage','ts_node_to_demand','ts_node_to_storage'])].copy()
         co2_volume_demand_b0_nodes = co2_volume_demand_b0_nodes['co2_volume'].sum()
         
-        co2_volume_demand_b1_nodes = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['source_to_storage','source_to_demand','ts_node_to_demand','ts_node_to_storage', 'source_to_hsm_cent'])].copy()
+        co2_volume_demand_b1_nodes = self.O_flows_b1_df.loc[self.O_flows_b1_df['pipeline_type'].isin(['nat_co2_to_demand','source_to_demand', 'source_to_hsm_cent','source_to_storage','ts_node_to_demand','ts_node_to_storage'])].copy()
         co2_volume_demand_b1_nodes = co2_volume_demand_b1_nodes['co2_volume'].sum()
 
 

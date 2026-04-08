@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/emmemis,v 1.6 2019/07/23 15:28:58 rsc Exp $
 ! miscellaneous emm common block declarations moved from in-line code to an include file.
 ! much of these pertain to emission regulations, such as the transport rule and cpp.

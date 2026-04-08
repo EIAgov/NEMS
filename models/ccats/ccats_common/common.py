@@ -240,6 +240,9 @@ def unpack_pyomo(variable, values, levels):
     elif levels == 3:
         pyomo_dict = {(i, j, k, v.name): values(v) for (i, j, k), v in variable.items()}
 
+    elif levels == 4:
+        pyomo_dict = {(i, j, k, l, v.name): values(v) for (i, j, k, l), v in variable.items()}
+
     df = pd.DataFrame.from_dict(pyomo_dict, orient="index", columns=["variable value"])
     df = df.reset_index()
     temp = pd.DataFrame(df['index'].tolist())

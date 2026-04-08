@@ -1,23 +1,21 @@
-! $Header: M:/default/source/RCS/udat.f,v 1.741 2021/02/26 15:46:34 avk Exp $
-    
    module hourly_restore_data
     ! < vikram.linga@eia.gov > 08/06/2024
     ! This module contains the hourly dispatch output data from REStore
     ! Todo: Figure out how not to hardcode numbers
-           
+
     REAL*8 DISPATCH(2,28,23,4,12,3,24) !Real*8 DISPATCH(2,MNUMNR,MaxPtypesP,MaxNumbinsP,12,3,24)
     REAL*8 DispatchDelta(2,28,23,4,12,3,24) !Real*8 DISPATCH(2,MNUMNR,MaxPtypesP,MaxNumbinsP,12,3,24)
-    
+
     REAL*8 existsto(2,28,23,12,3,24)
-    
+
     ! hourly capacity factors from restore used to compute load electrolyzer consumption limits for hmm
     real supplytorestore(28,3,23,3) ! Region, Season, RestoreTech, Steps, Unit = GWs, CapacityPerSupplyStepFromRestore
     real pricetorestore(28,3,23,3) ! Region, Season, RestoreTech, Steps, Unit = $/GWhrs
     !real hourly_total_capacity(28,12,3,24) ! Region, Month, Day, Hour, year
     !real derate_m864(23,3) ! restore plantgroup, steps
     end module
-    
-    
+
+
    module ephrts_file_unit_numbers 
    ! < edward.thomas@eia.gov > 07/08/2023
    ! This module contains the unit numbers for the epphrts files,
@@ -316,12 +314,8 @@
       REAL*4  GRD_RATD2(ECP_D_CAP,4,MNUMNR) 
       REAL*4  GRD_RATD3(ECP_D_CAP,4,MNUMNR) 
 !
-!      COMMON /GRDSRC/ GRD_CASN,GRD_SRCN,GRD_SRCC
-!      INTEGER GRD_CASN                                       ! Number of grid resilience sources
       CHARACTER*15 tmp_GRD_SRCN                     ! Grid resilience source names
       CHARACTER*30 tmp_DESC                     ! Grid resilience source names
-!      CHARACTER*15 GRD_SRCN(MX_GRDSRC)                       ! Grid resilience source names
-!      CHARACTER*1  GRD_SRCC(MX_GRDSRC)                       ! Grid resilience source codes
       CHARACTER*2  tmp_GRD_CD                      ! Grid resilience source codes
 
 !     Fuel Indexes for Traditional Cogen
@@ -338,6 +332,7 @@
       F_PV  = 10   ! Solar PV
       F_OT  = 11   ! Other
       F_WN  = 12   ! Wind
+      F_BS  = 13   ! Battery Energy Storage
 
       TC_FUEL_CODES( 1) = 'CL'    ! Coal
       TC_FUEL_CODES( 2) = 'OL'    ! Oil
@@ -351,6 +346,7 @@
       TC_FUEL_CODES(10) = 'PV'    ! Solar PV
       TC_FUEL_CODES(11) = 'OT'    ! Other
       TC_FUEL_CODES(12) = 'WN'    ! Wind
+      TC_FUEL_CODES(13) = 'BS'    ! Battery Energy Storage
 
       TC_SECTOR_CODES(1) = 'IOU '
       TC_SECTOR_CODES(2) = 'COOP'
@@ -410,12 +406,9 @@
 !
       RET_CODE = RD$TBL(I_CNTL,'%RPT/DBG SW%',1,UF_DBG,UF_MSG)
       RET_CODE = RD$C1(DUMMY,1,DMSZ)
-      RET_CODE = RD$I1(UF_IN,1,1)                      ! UNIT # FOR FILE
       RET_CODE = RD$I1(UF_OUT,1,1)                     ! UNIT # FOR FILE
       RET_CODE = RD$I1(UF_PLT,1,1)                                     !
-      RET_CODE = RD$I1(UF_CRV,1,1)                                     !
       RET_CODE = RD$I1(IDUMMY,1,DMSZ)          ! ASSIGNED TO UF_DBG IF 0
-      RET_CODE = RD$I1(UF_SO2,1,1)                                     !
       RET_CODE = RD$I1(UF_LD,1,1)                                      !
       RET_CODE = RD$I1(UF_TMP,1,1)                                     !
       RET_CODE = RD$I1(UF_RPT,1,1)                                     !
@@ -426,7 +419,6 @@
       RET_CODE = RD$I1(UF_CNCT,1,1)                                    !
       RET_CODE = RD$I1(UF_ETDM,1,1)                                    !
       RET_CODE = RD$I1(UF_RP2,1,1)                                     !
-      RET_CODE = RD$I1(UF_MC,1,1)                                      !
 !
       IF (IDUMMY(1) .EQ. 0) UF_DBG = 0
 !
@@ -460,33 +452,6 @@
 !     END IF
 !
 
-!
-      IF (PRTDBGE .GT. 0) THEN
-         FILENM = 'MCRPT'
-         NEW = .TRUE.
-         UF_MC = FILE_MGR('O',FILENM,NEW)
-      ELSE
-         UF_MC = 0
-      END IF
-!
-      IF (PRTDBGE .GT. 1) THEN
-         FILENM = 'EFDLDCV'
-         NEW = .TRUE.
-         UF_CRV = FILE_MGR('O',FILENM,NEW)
-!CCC    UF_CRV = 15
-!CCC    OPEN(UF_CRV,FILE=FILENM,STATUS='UNKNOWN')
-      ELSE
-         UF_CRV = 0
-      END IF
-!
-!     ULCVSW ! SWITCH TO OUTPUT EFD LOAD CURVES IN EMMPRNT
-!     FOR INPUT TO OFF-LINE LOAD CURVE MODIFICATION MODULE
-!     OR FOR DEBUG/ANALYSIS
-!
-      RET_CODE = RD$TBL(I_CNTL,'%OUT LCV SW%',1,UF_DBG,UF_MSG)
-      RET_CODE = RD$C1(DUMMY,1,DMSZ)
-      RET_CODE = RD$I1(ULCVSW,1,1)
-!
 !     USW_DBS USER SWITCH TO DETERMINE LEVEL OF OUTPUT TO EMM DATABASE.
 !     0: NO DATABASE PRINTS
 !     1: DEFAULT PRINTS (DLOAD AND DOSPTS PRINTED FOR FIRST & LAST YEAR ONLY)
@@ -496,16 +461,6 @@
       RET_CODE = RD$C1(DUMMY,1,DMSZ)
       RET_CODE = RD$I1(USW_DBS,1,1)
 !
-!     READ IN SWITCHES TO DETERMINE IF DIRECT ACCESS FILES OR INCORE
-!     ARRAYS USED TO STORE DATA
-!
-      RET_CODE = RD$TBL(I_CNTL,'%DAF/CORE S%',1,UF_DBG,UF_MSG)
-      RET_CODE = RD$C1(DUMMY,1,DMSZ)
-      RET_CODE = RD$I1(USW_DISP,1,1)           ! SWITCH TO READ DISP DAF
-      RET_CODE = RD$I1(USW_BILD,1,1)           ! SWITCH TO READ BILD DAF
-      RET_CODE = RD$I1(USW_EIJ,1,1)             ! SWITCH TO READ EIJ DAF
-      RET_CODE = RD$I1(USW_ETTDF,1,1)           ! SWITCH TO READ ETT DAF
-!
 !     READ IN NUMBER OF 16384 BYTE BLOCKS NEEDED  FOR DISP_IN ,DISP_CRV AND
 !
       RET_CODE = RD$TBL(I_CNTL,'%NUM BLOCKS%',1,UF_DBG,UF_MSG)
@@ -513,28 +468,12 @@
       RET_CODE = RD$I1(LAST_STEO_YR,1,1)                                      !
       RET_CODE = RD$I1(EX_COAL,1,1)                                     !
       RET_CODE = RD$I1(NW_COAL,1,1)                                      !
-      RET_CODE = RD$I1(UZ_PLT,1,1)                                     !
-      RET_CODE = RD$I1(UZ_ETT,1,1)                                     !
 !
 !     READ IN FUEL PRICE TOLERANCE
 !
       RET_CODE = RD$TBL(I_CNTL,'%FUEL P TOL%',1,UF_DBG,UF_MSG)
       RET_CODE = RD$C1(DUMMY,1,DMSZ)
       RET_CODE = RD$R1(UFPTOL,1,1)                                     !
-!
-!     ETT AND READ IN ETT SWITCH 0=ON,1=OFF
-!
-      RET_CODE = RD$TBL(I_CNTL,'%ETT SWITCH%',1,UF_DBG,UF_MSG)
-      RET_CODE = RD$C1(DUMMY,1,DMSZ)
-      RET_CODE = RD$I1(USW_ETT,1,1)                                    !
-      RET_CODE = RD$I1(USW_XP,1,1)                                     !
-      RET_CODE = RD$I1(USW_CANACC,1,1)
-!
-!     READ LOAD CURVE OPTION 0 = NERC, 1 = LDSM
-!
-      RET_CODE = RD$TBL(I_CNTL,'%LOAD CR SW%',1,UF_DBG,UF_MSG)
-      RET_CODE = RD$C1(DUMMY,1,DMSZ)
-      RET_CODE = RD$I1(USW_LDC,1,1)                                    !
 !
 !     READ OVERWRITE SWITCH 0 = NO, 1 = HIST, 2 = HIST & STEO
 !
@@ -555,13 +494,6 @@
       RET_CODE = RD$TBL(I_CNTL,'%OWNERSHIP SW%',1,UF_DBG,UF_MSG)
       RET_CODE = RD$C1(DUMMY,1,DMSZ)
       RET_CODE = RD$I1(USW_OWN,1,1)
-!
-!     READ PLANNED MAINTENANCE SWITCH
-!
-      RET_CODE = RD$TBL(I_CNTL,'%EFD MAINTENANCE SW%',1,UF_DBG,UF_MSG)
-      RET_CODE = RD$C1(DUMMY,1,DMSZ)
-      RET_CODE = RD$I1(USW_PM,1,1)
-
 !
 !     READ IN DIURNAL STORAGE PERFORMANCE PARAMETERS
 !
@@ -1144,10 +1076,7 @@
       RET_CODE = RD$TBL(I_CNTL,'%NUM FUEL  %',1,UF_DBG,UF_MSG)
       RET_CODE = RD$C1(DUMMY,1,DMSZ)
       RET_CODE = RD$I1(UNFUELS,1,1)                    ! NUMBER OF FUELS
-      RET_CODE = RD$I1(FLBASE,1,1)             ! BASE YEAR FOR FUEL DATA
-      RET_CODE = RD$I1(FLLAST,1,1)             ! LAST YEAR FOR FUEL DATA
       RET_CODE = RD$I1(UIFPLT,1,1)     ! NUMBER OF FUELS PER PLANT GROUP
-      RET_CODE = RD$I1(UFLSTITR,1,1)  ! START ITERATION FOR FUEL PRICE SMOOTHING
 !
       RET_CODE = RD$TBL(I_CNTL,'%FUEL PARM %',UNFUELS,UF_DBG,UF_MSG)
       RET_CODE = RD$C1(DUMMY,1,DMSZ)
@@ -2279,9 +2208,6 @@
       RET_CODE = RD$I1(UINUC,1,UNFUELS)
       RET_CODE = RD$I1(EFLFTABI,1,EFD_D_NFL)                  ! map to ftab table 8 category
 
-!     do IFP = 1, EFD_D_NFL
-!     write(6,*) 'read efd fuels ',UIGAS(IFP),UIReS(IFP),UIDIS(IFP)
-!     enddo
 !
 !     READ IN EFD RPS ROW SWITCH 0 = OFF, 1 = ON
 !
@@ -2482,19 +2408,6 @@
       DO IYR = UNYEAR + 1, UNYEAR + UNFPH
          UPGNPD(IYR) = UPGNPD(IYR - 1) * GRW
       END DO
-!
-!     UPGNPD(1) = 1.0
-!     GNP$CUM = DBLE(1.0)
-!     DO IYR = 2 , UNYEAR + ECP_D_FPH
-!        GNP$CUM = GNP$CUM * (DBLE(1.0) + GNP$GRW)
-!        UPGNPD(IYR) = GNP$CUM
-!     ENDDO
-!     IF (UF_DBG .GT. 0) THEN
-!        DO IYR = 1,UNYEAR + UNXPH
-!           WRITE(UF_DBG,3302)'IYR',IYR,'GNP',UPGNPD(IYR)
-!3302       FORMAT(A4,1X,I4,1X,A4,1X,F8.3,1X)
-!        ENDDO
-!     END IF
 !
 !     TAX DEPRECIATION RATES
 !
@@ -3807,15 +3720,6 @@
       RET_CODE = RD$R1(TOL_FOM,1,1)
       RET_CODE = RD$R1(TOL_CAP,1,1)
 
-!     Write(6,'(a22,I6)')   'debug ngbs_sw',NGBS_SW
-!     Write(6,'(a22,F6.2)') 'debug TOL_SP_CAP_FAC',TOL_SP_CAP_FAC
-!     Write(6,'(a22,F6.2)') 'debug TOL_CF',TOL_CF
-!     Write(6,'(a22,F6.2)') 'debug TOL_VOM',TOL_VOM
-!     Write(6,'(a22,F6.2)') 'debug TOL_RVAL',TOL_RVAL
-!     Write(6,'(a22,F6.2)') 'debug TOL_HTRT_NGBS',TOL_HTRT_NGBS
-!     Write(6,'(a22,F6.2)') 'debug TOL_FOM',TOL_FOM
-!     Write(6,'(a22,F6.2)') 'debug TOL_CAP',TOL_CAP
-
 !     CL_to_NG:
 
       RET_CODE = RD$TBL(I_CNTL,'%CL_to_NG  %',1,UF_DBG,UF_MSG)
@@ -3824,11 +3728,6 @@
       RET_CODE = RD$R1(UCL_CL_NG_FOM_ADJ,1,1)   ! CL to NG Fixed O&M Adjustment Factor
       RET_CODE = RD$R1(UCL_CL_NG_VOM_ADJ,1,1)   ! CL to NG Variable O&M Adjustment Factor
       RET_CODE = RD$R1(UCL_CL_NG_HR_PEN,1,1)    ! CL to NG Heatrate Penalty
-
-!     Write(6,'(a25,I6)')   'debug UCL_CL_NG_SYR', UCL_CL_NG_SYR
-!     Write(6,'(a25,F6.2)') 'debug UCL_CL_NG_FOM_ADJ', UCL_CL_NG_FOM_ADJ
-!     Write(6,'(a25,F6.2)') 'debug UCL_CL_NG_VOM_ADJ', UCL_CL_NG_VOM_ADJ
-!     Write(6,'(a25,F6.2)') 'debug UCL_CL_NG_HR_PEN ', UCL_CL_NG_HR_PEN
 
 !     HRI Control Variables for Plant File Inputs
 
@@ -4925,25 +4824,6 @@
       FILENM='EMMCNTL'
       I_CNTL = FILE_MGR('C',FILENM,NEW)
 !
-!     GET VALUE FOR EMMRENEW (RUN OPTION) USING RTOVALUE FUNCTION.
-!     0 = NO INTEGRATION WITH RENEWABLES
-!     1 = INTEGRATE WITH RENEWABLES.
-!
-      USW_RNW = RTOVALUE('EMMRENEW',0)
-!!     GET VALUE OF ECPACT - FROM NEMS JCL FT06 USING FUNCTION RTOVALUE
-!     ECPACT = YEAR TO WRITE OUT ACTFILE, 1990,1991, ETC.
-!     DEFAULT = 0, WRITE OUT FIRST YEAR OF RUN
-      ECPACT = RTOVALUE('ECPACT  ',0)
-
-!     GET VALUE OF ECPBASIS - FROM NEMS JCL FT06 USING FUNCTION RTOVALUE
-!     IF ECPBASIS=0 THEN USE BASIS FROM PREVIOUS YEAR FROM CURRENT RUN
-!     IF ECPBASIS=1 THEN READ BASIS FOR CURRENT YEAR FROM BASEMMI
-      ECPBASIS = RTOVALUE('ECPBASIS',0)
-!
-!     WRITE(22,*) 'USW_RNW ',USW_RNW
-!     WRITE(22,*) 'ECPACT ',ECPACT
-!     WRITE(22,*) 'ECPBASIS ',ECPBASIS
-!
 !     INITIALIZE THE EXPORT/IMPORT ARRAY
 !
 !     UPXRGN = 0
@@ -5021,8 +4901,8 @@
       COMMON /TMP_CNTL/ UPCCSSYR
       REAL UPCCSSYR
 !
-      COMMON/COFSHR/COFCAP
-      REAL*4 COFCAP(ECP_D_RCF,ECP_D_DSP,MNUMNR,MAXNFR)
+      !COMMON/COFSHR/COFCAP
+      !REAL*4 COFCAP(ECP_D_RCF,ECP_D_DSP,MNUMNR,MAXNFR)   !moved to include file emm_aimms
 !
       COMMON/COFSHRP/COFGENPC,TOTGENPC,COFGENPN,TOTGENPN
       REAL*4 COFGENPC(ECP_D_CAP,NDREG)
@@ -5310,12 +5190,6 @@
 !
       IRG = URGNUM(JRG)
 
-!     if ((curiyr+1989) .ge. upstyr)then
-!        do iecp = 1 , ECP_D_DSP
-!        write(6,3321) curiyr+1989,irg,uplntcd(iecp),cfcplt(irg,iecp)
-!3321 format(1h ,'!cfcplt',i4,i3,1x,a2,f10.4)
-!        end do
-!     end if
 
       FULLCYR = USYEAR(CURIYR)
 
@@ -5332,11 +5206,9 @@
 !
 !     GET EFP DATA
 !
-      IF (USW_XP .EQ. 0)  THEN               !not for Canada
-         IF (FULLCYR .GT. UESTYR) THEN
-            CALL GETR(IRG)
-         END IF
-      ENDIF
+      IF (FULLCYR .GT. UESTYR) THEN
+         CALL GETR(IRG)
+      END IF
 !
 !     MAP CURRENT CAPACITY TYPE TO ALL POTENTIAL CAPACITY TYPES
 !
@@ -5538,12 +5410,12 @@
       WF_CAP(IRG) = 0.0                                  ! Cummulative WF Capacity
       PV_NEW(IRG) = 0.0                                  ! New PV Capacity
       WN_NEW(IRG) = 0.0                                  ! New WN Capacity
-      PV_CAP_ADJ(IRG) = 0.0                              ! Cummulative PV Capacity Adjusted to consistent with Hourly Capacity Factors
-      PT_CAP_ADJ(IRG) = 0.0                              ! Cummulative PT Capacity Adjusted to consistent with Hourly Capacity Factors
-      SO_CAP_ADJ(IRG) = 0.0                              ! Cummulative SO Capacity Adjusted to consistent with Hourly Capacity Factors
-      WN_CAP_ADJ(IRG) = 0.0                              ! Cummulative WN Capacity Adjusted to consistent with Hourly Capacity Factors
-      WL_CAP_ADJ(IRG) = 0.0                              ! Cummulative WL Capacity Adjusted to consistent with Hourly Capacity Factors
-      WF_CAP_ADJ(IRG) = 0.0                              ! Cummulative WF Capacity Adjusted to consistent with Hourly Capacity Factors
+      PV_CAP_ADJ(IRG,CURIYR) = 0.0                              ! Cummulative PV Capacity Adjusted to consistent with Hourly Capacity Factors
+      PT_CAP_ADJ(IRG,CURIYR) = 0.0                              ! Cummulative PT Capacity Adjusted to consistent with Hourly Capacity Factors
+      SO_CAP_ADJ(IRG,CURIYR) = 0.0                              ! Cummulative SO Capacity Adjusted to consistent with Hourly Capacity Factors
+      WN_CAP_ADJ(IRG,CURIYR) = 0.0                              ! Cummulative WN Capacity Adjusted to consistent with Hourly Capacity Factors
+      WL_CAP_ADJ(IRG,CURIYR) = 0.0                              ! Cummulative WL Capacity Adjusted to consistent with Hourly Capacity Factors
+      WF_CAP_ADJ(IRG,CURIYR) = 0.0                              ! Cummulative WF Capacity Adjusted to consistent with Hourly Capacity Factors
       PV_NEW_ADJ(IRG) = 0.0                              ! New PV Adjusted Capacity
       WN_NEW_ADJ(IRG) = 0.0                              ! New WN Adjusted Capacity
 
@@ -7089,41 +6961,8 @@
                CALL STRPLT(IRECL)
             ENDIF
 
-!           IF (CO2_PHS40 .GT. 0.0)THEN
-! remove all nt biomass mrun
-!              IF ((IECP .EQ. WIWD .AND. W_MRUN .GT. 0) .OR. (IECP .EQ. WIWD .AND. W_MRUN .GT. 0)) THEN
-!                  W_MRUN = 0
-!                  CALL STRPLT(IRECL)
-!              ENDIF
-
-!              IF CO2 PERFORMANCE STANDARD, PHASE OUT MUST RUN STATUS FOR CHP
-
-!              IF (W_MRUN .GT. 0 .AND. IOWN .EQ. 4 .AND. CO2_STDSW .GT. 0 .AND. CO2_STDRS(1,CURIYR) .GT. 0.0 .AND. CO2_PLTSW(IECP) .GT. 0.0) THEN
-!                 write(6,6767) curiyr+1989,irg,wstate,w_grp,iown,uplntcd(iecp),wc_sum,w_mrun
-!6767             format(1h ,'!mri',i4,i3,a3,i6,i3,a3,f10.1,i5)
-
-!                 IF (W_MRUN .GT. 2035) W_MRUN = 2035
-!                 CALL STRPLT(IRECL)
-!                 write(6,6768) curiyr+1989,irg,wstate,w_grp,iown,uplntcd(iecp),wc_sum,w_mrun
-!6768             format(1h ,'!mro',i4,i3,a3,i6,i3,a3,f10.1,i5)
-!              ENDIF
-!           ENDIF
             MRSW = W_MRUN
 
-!           IF (ITYP .LE. EX_COAL .AND. IOWN .LT. 4 .AND. MRSW .GT. 0)write(6,3344) curiyr+1989,w_igrp,w_grp,w_mrun,wc_sum
-!3344 format(1h ,'!ovec',i4,i6,i6,i5,f10.3)
-!
-!           IF CARBON LIMIT, THEN ELIMINATE MUST RUN STATUS
-!
-!           CARMIN = 1.0 * MC_JPGDP((UPSTYR - 1)-UHBSYR) / 1000.0  !carbon fee at least $1/mmton in current dollars
-!           IF (EMETAX(1,CURIYR) .GT. CARMIN .AND. IOWN .LE. 3 .AND. IEFD .NE. UIDGB .AND. IEFD .NE. UIDGP .AND. IEFD .NE. UIGTH) THEN
-!              IF ( (BANK_FLAG) .AND. (CURCALYR .LT. BANK_STARTYR) ) THEN
-!                 MRSW = MRSW
-!              ELSE
-!                 MRSW = 0
-!              ENDIF
-!           ENDIF
-!
 !           IF MACT or BACT Eliminate Must Run Status
 !
             ICLS = HG_CLASS(IECP)
@@ -7149,12 +6988,6 @@
 !           MAKE BIOMASS PLANTS MUST RUN, IF SWITCH IS SET (E.G., CECA RUNS)
 !
             IF (IEFD .EQ. UIBMS .AND. USW_BMYR .GT. 0 .AND. (CURIYR + UHBSYR) .GE. USW_BMYR) MRSW = 9999
-!
-!           SET CAPAD NUMBERS TO ZERO IF CANADIAN RUN
-!
-            IF (USW_XP .GT. 0) THEN              !Canadian run
-               W_CAPAD = 0.0
-            ENDIF
 !
 !           THESE FACTORS ARE USED TO ASSIGN UTILIZATION FACTORS FOR COAL PLANTS IN THE ECP.
 !           THEY ALSO ADJUST THE FACTORS FOR THE EFD - THEY ARE UPDATED TO MATCH STEO
@@ -7183,24 +7016,6 @@
             COAL_FACTOR(30) = 0.970
 !
 !
-!           CALIBRATE COAL GENERATION AND FUEL CONSUMPTION
-!
-!           phase out must runs based on switch  ** don't use this with must-run year setting
-!
-!           IF (MRSW .GT. 0) THEN
-!              IF (UPHMRY(MRSW) .GT. (UHBSYR + MNUMYR)) THEN
-!                 MRFAC = 1.0
-!              ELSE
-!                 IF ((CURIYR + UHBSYR) .LE. (UPSTYR - 1)) THEN
-!                    MRFAC = 1.0
-!                 ELSEIF ((CURIYR + UHBSYR) .LE. UPHMRY(MRSW)) THEN
-!                    MRFAC = 1.0 - DBLE(CURIYR + UHBSYR - (UPSTYR - 1)) / DBLE(UPHMRY(MRSW) - (UPSTYR - 1))
-!                 ELSE
-!                    MRFAC = 0.0
-!                 ENDIF
-!              ENDIF
-!           ELSE
-
             MRFAC = 1.0
 
 !           ENDIF
@@ -7963,49 +7778,49 @@
                            IF (IECP .EQ. WIPV) THEN
                               PV_CAP(IRG) = PV_CAP(IRG) + WC_SUM * 0.001              ! Cummulative PV Capacity
                               IF (AVG_PV_CF(IRG,CURIYR) .GT. 0.001) THEN
-                                 PV_CAP_ADJ(IRG) = PV_CAP_ADJ(IRG) + WC_SUM * W_CFA / AVG_PV_CF(IRG,CURIYR) * 0.001              ! Cummulative Adjusted PV Capacity
+                                 PV_CAP_ADJ(IRG,CURIYR) = PV_CAP_ADJ(IRG,CURIYR) + WC_SUM * W_CFA / AVG_PV_CF(IRG,CURIYR) * 0.001              ! Cummulative Adjusted PV Capacity
                               ELSE
-                                 PV_CAP_ADJ(IRG) = PV_CAP_ADJ(IRG) + WC_SUM * 0.001              ! Cummulative Adjusted PV Capacity
+                                 PV_CAP_ADJ(IRG,CURIYR) = PV_CAP_ADJ(IRG,CURIYR) + WC_SUM * 0.001              ! Cummulative Adjusted PV Capacity
                               END IF
                            END IF
                            IF (IECP .EQ. WIPT) THEN
                               PT_CAP(IRG) = PT_CAP(IRG) + WC_SUM * 0.001              ! Cummulative PT Capacity
                               IF (AVG_PT_CF(IRG,CURIYR) .GT. 0.001) THEN
-                                 PT_CAP_ADJ(IRG) = PT_CAP_ADJ(IRG) + WC_SUM * W_CFA / AVG_PT_CF(IRG,CURIYR) * 0.001              ! Cummulative Adjusted PT Capacity
+                                 PT_CAP_ADJ(IRG,CURIYR) = PT_CAP_ADJ(IRG,CURIYR) + WC_SUM * W_CFA / AVG_PT_CF(IRG,CURIYR) * 0.001              ! Cummulative Adjusted PT Capacity
                               ELSE
-                                 PT_CAP_ADJ(IRG) = PT_CAP_ADJ(IRG) + WC_SUM * 0.001              ! Cummulative Adjusted PT Capacity
+                                 PT_CAP_ADJ(IRG,CURIYR) = PT_CAP_ADJ(IRG,CURIYR) + WC_SUM * 0.001              ! Cummulative Adjusted PT Capacity
                               END IF
                            END IF
                            IF (IECP .EQ. WISO) THEN
                               SO_CAP(IRG) = SO_CAP(IRG) + WC_SUM * 0.001              ! Cummulative SO Capacity
                               IF (AVG_SO_CF(IRG,CURIYR) .GT. 0.001) THEN
-                                 SO_CAP_ADJ(IRG) = SO_CAP_ADJ(IRG) + WC_SUM * W_CFA / AVG_SO_CF(IRG,CURIYR) * 0.001              ! Cummulative SO Capacity
+                                 SO_CAP_ADJ(IRG,CURIYR) = SO_CAP_ADJ(IRG,CURIYR) + WC_SUM * W_CFA / AVG_SO_CF(IRG,CURIYR) * 0.001              ! Cummulative SO Capacity
                               ELSE
-                                 SO_CAP_ADJ(IRG) = SO_CAP_ADJ(IRG) + WC_SUM * 0.001              ! Cummulative SO Capacity
+                                 SO_CAP_ADJ(IRG,CURIYR) = SO_CAP_ADJ(IRG,CURIYR) + WC_SUM * 0.001              ! Cummulative SO Capacity
                               END IF
                            END IF
                            IF (IECP .EQ. WIWN) THEN
                               WN_CAP(IRG) = WN_CAP(IRG) + WC_SUM * 0.001              ! Cummulative WN Capacity
                               IF (AVG_WN_CF(IRG,CURIYR) .GT. 0.001) THEN
-                                 WN_CAP_ADJ(IRG) = WN_CAP_ADJ(IRG) + WC_SUM * W_CFA / AVG_WN_CF(IRG,CURIYR) * 0.001              ! Cummulative WN Capacity
+                                 WN_CAP_ADJ(IRG,CURIYR) = WN_CAP_ADJ(IRG,CURIYR) + WC_SUM * W_CFA / AVG_WN_CF(IRG,CURIYR) * 0.001              ! Cummulative WN Capacity
                               ELSE
-                                 WN_CAP_ADJ(IRG) = WN_CAP_ADJ(IRG) + WC_SUM * 0.001              ! Cummulative WN Capacity
+                                 WN_CAP_ADJ(IRG,CURIYR) = WN_CAP_ADJ(IRG,CURIYR) + WC_SUM * 0.001              ! Cummulative WN Capacity
                               END IF
                            END IF
                            IF (IECP .EQ. WIWL) THEN
                               WL_CAP(IRG) = WL_CAP(IRG) + WC_SUM * 0.001              ! Cummulative WL Capacity
                               IF (AVG_WL_CF(IRG,CURIYR) .GT. 0.001) THEN
-                                 WL_CAP_ADJ(IRG) = WL_CAP_ADJ(IRG) + WC_SUM * W_CFA / AVG_WL_CF(IRG,CURIYR) * 0.001              ! Cummulative WL Capacity
+                                 WL_CAP_ADJ(IRG,CURIYR) = WL_CAP_ADJ(IRG,CURIYR) + WC_SUM * W_CFA / AVG_WL_CF(IRG,CURIYR) * 0.001              ! Cummulative WL Capacity
                               ELSE
-                                 WL_CAP_ADJ(IRG) = WL_CAP_ADJ(IRG) + WC_SUM * 0.001              ! Cummulative WL Capacity
+                                 WL_CAP_ADJ(IRG,CURIYR) = WL_CAP_ADJ(IRG,CURIYR) + WC_SUM * 0.001              ! Cummulative WL Capacity
                               END IF
                            END IF
                            IF (IECP .EQ. WIWF) THEN
                               WF_CAP(IRG) = WF_CAP(IRG) + WC_SUM * 0.001              ! Cummulative WF Capacity
                               IF (AVG_WF_CF(IRG,CURIYR) .GT. 0.001) THEN
-                                 WF_CAP_ADJ(IRG) = WF_CAP_ADJ(IRG) + WC_SUM * W_CFA / AVG_WF_CF(IRG,CURIYR) * 0.001              ! Cummulative WF Capacity
+                                 WF_CAP_ADJ(IRG,CURIYR) = WF_CAP_ADJ(IRG,CURIYR) + WC_SUM * W_CFA / AVG_WF_CF(IRG,CURIYR) * 0.001              ! Cummulative WF Capacity
                               ELSE
-                                 WF_CAP_ADJ(IRG) = WF_CAP_ADJ(IRG) + WC_SUM * 0.001              ! Cummulative WF Capacity
+                                 WF_CAP_ADJ(IRG,CURIYR) = WF_CAP_ADJ(IRG,CURIYR) + WC_SUM * 0.001              ! Cummulative WF Capacity
                               END IF
                            END IF
                            IF (IECP .EQ. WIPV .AND. CURIYR+UHBSYR .EQ. W_SYR) THEN
@@ -8846,10 +8661,6 @@
                I_COAL = 0
                IF (UPTTYP(IECP) .LE. NW_COAL .AND. FULLCYR .EQ. UESTYR .AND. W_RYR .GE. UESTYR) THEN
 !
-!                 First insure that record is compliant with NOX CAA Regulations
-!
-!                 CALL NOX_CAA(IBTP,IRECL,IRG)
-!
                   IF (UPTTYP(IECP) .GT. EX_COAL) THEN
                      WPART = "0"
                      WSCBT = "W"
@@ -8990,9 +8801,6 @@
                       END IF
                       EWGFIX = EWGFIX + TMP_EWGFIX
 
-!                     write(6,9335) 'Add to EWGFIX ',CURIYR,W_IGRP,IECP,W_SYR,WRFURB,IOWN,WC_SUM,WPCST
-!9335                 FORMAT(1X,a15,6I5,2f10.2)
-
                   ENDIF
 !
                   CAP = 0.0
@@ -9127,17 +8935,9 @@
                                  WDSHR(IECP,YEAR,W_CLRG) = WDSHR(IECP,YEAR,W_CLRG) + WC_SUM * WDFSHR
                                  TOTGENPC(IECP,W_CLRG) = TOTGENPC(IECP,W_CLRG) + WC_SUM * W_CFA * 8.760
                                  TOTGENPN(IECP,IRG) = TOTGENPN(IECP,IRG) + WC_SUM * W_CFA * 8.760
-
-!                                CFSHR = MIN(W_FSHR(IFL),0.001)
-!                                CFSHR = W_FSHR(IFL)
-!                                COFGENPC(IECP,W_CLRG) = COFGENPC(IECP,W_CLRG) + WC_SUM * W_CFA * CFSHR * 8.760
-!                                COFGENPN(IECP,IRG) = COFGENPN(IECP,IRG) + WC_SUM * W_CFA * CFSHR * 8.760
-
                                  COFGENPC(IECP,W_CLRG) = COFGENPC(IECP,W_CLRG) + WC_SUM * W_CFA * WDFSHR* 8.760
                                  COFGENPN(IECP,IRG) = COFGENPN(IECP,IRG) + WC_SUM * W_CFA * WDFSHR* 8.760
 
-!                                write(6,4321) curiyr+1989,irg,wc_sum,w_cfa,w_fshr(ifl),wc_sum*w_cfa*wdfshr*8.76
-!4321                            format(1h ,'!cfgen',i4,i3,4f10.3)
                                END IF
                               END IF
                            END DO
@@ -9162,7 +8962,6 @@
 !
 !                 calculate PTC subsidy if appropriate
 !
-!                 IF ((WVIN .EQ. 2 .OR. WVIN .EQ.3 .OR. WVIN .GT. 9) .AND. WVIN .NE. 15) THEN
                   IF (WVIN .NE. 15) THEN
                    IF (UPGSUBPT(IECP) .GT. 0)THEN
                       IF (IYR .LE. (W_SYR + UPGSYR(IECP))) THEN
@@ -9228,14 +9027,6 @@
                                          ECLEL(CURIYR) * UPSEQBYR(CURIYR) * UPPCEF(IECP) *  &
                                          EMETAX(1,CURIYR) * UPGNPD(CURIYR) * 0.001
 
-!                             write(6,4321) curiyr+1989,irg,CAP , UPMCF(IECP) ,WHRATEA,  &
-!                                        ECLEL(CURIYR), UPSEQBYR(CURIYR) , UPPCEF(IECP) ,  &
-!                                        EMETAX(1,CURIYR) * 1000,0, UPGNPD(CURIYR) ,  &
-!                                        CAP * UPMCF(IECP) * 8.76 * (WHRATEA / 1000000.0) *  &
-!                                        ECLEL(CURIYR) * UPSEQBYR(CURIYR) * UPPCEF(IECP) *  &
-!                                        EMETAX(1,CURIYR) * UPGNPD(CURIYR) * 0.001,  &
-!                                        emrev(9,curiyr)
-!4321                         format(1h ,'!seqcrdi',i4,i3,12f10.3)
                            ELSE
                               CAPCSUB = CAPCSUB + CAP * (WHRATEA / 1000000.0) * ENGEL(CURIYR) * UPSEQBYR(CURIYR) * UPPCEF(IECP) *  &
                                         (EMETAX(1,CURIYR) * 1000.0)
@@ -9275,7 +9066,7 @@
  1978                   FORMAT(1X,'CRPGRP0',":",I4,":",I3,":",I5,":",I5,":",I5, &
                            ":",I5,":",I3,":",I3,":",I1,":",I2,":",I2,":",I2, &
                            ":",I2,":",I2, &
-                           ":",F7.1,":",F7.3,":",F7.3,":",F6.1,":",F6.1,":",F6.0, &
+                           ":",F10.1,":",F9.3,":",F9.3,":",F8.1,":",F8.1,":",F6.0, &
                            ":",I1,":",I1, &
                            2(":",F6.4),":",I4,":",I2,":",I4,":",I2,":",F6.3,":",I4,":",I4, &
                            3(":",I2),":",I2)
@@ -9288,7 +9079,7 @@
  1979                   FORMAT(1X,'CRPGRP+',":",I4,":",I3,":",I5,":",I5,":",I5, &
                            ":",I5,":",I3,":",I3,":",I1,":",I2,":",I2,":",I2, &
                            ":",I2,":",I2, &
-                           ":",F7.1,":",F7.3,":",F7.3,":",F6.1,":",F6.1,":",F6.0, &
+                           ":",F10.1,":",F9.3,":",F9.3,":",F8.1,":",F8.1,":",F6.0, &
                            ":",I1,":",I1, &
                            2(":",F6.4),":",I4,":",I2,":",I4,":",I2,":",F6.3,":",I4,":",I4, &
                            3(":",I2),":",I2)
@@ -9301,7 +9092,7 @@
  1980                   FORMAT(1X,'CRPGRP-',":",I4,":",I3,":",I5,":",I5,":",I5, &
                            ":",I5,":",I3,":",I3,":",I1,":",I2,":",I2,":",I2, &
                            ":",I2,":",I2, &
-                           ":",F7.1,":",F7.3,":",F7.3,":",F6.1,":",F6.1,":",F6.0, &
+                           ":",F10.1,":",F9.3,":",F9.3,":",F8.1,":",F8.1,":",F6.0, &
                            ":",I1,":",I1, &
                            2(":",F6.4),":",I4,":",I2,":",I4,":",I2,":",F6.3,":",I4,":",I4, &
                            3(":",I2),":",I2)
@@ -9396,10 +9187,8 @@
                      if (i_coal .gt. max_cl) print *,'!maxcl',curiyr+1989,irg,max_cl,i_coal,IRECL,W_SYR,W_IGRP,W_GRP,WC_SUM
 !
                      ECL_IGRP(I_COAL) = W_IGRP
-!                    ECL_RG(I_COAL) = WNOPER
                      ECL_RG(I_COAL) = WNOWN
                      ECL_RYR(I_COAL) = MAX(ECL_RYR(I_COAL),W_RYR)
-!                    ECL_CLRG(I_COAL) = EPNFLRG(W_CR,W_CLRG,W_GR)
                      ECL_CLRG(I_COAL) = EPNFLRG(W_CR,W_CLRG,W_GR,W_CAR)
                      C_CAP(I_COAL) = C_CAP(I_COAL) + WC_SUM
                      DO ISP = 1 , ECP_D_MSP
@@ -9451,10 +9240,6 @@
                         ECL_DSI_F(I_COAL) = ECL_DSI_F(I_COAL) + W_DSIF * WC_SUM
                         ECL_DSI_V(I_COAL) = ECL_DSI_V(I_COAL) + W_DSIV * WC_SUM
                         ECL_DSI_R(I_COAL) = ECL_DSI_R(I_COAL) + W_DSIR * WC_SUM
-!                       ECL_DSI_O(I_COAL) = ECL_DSI_O(I_COAL) + DSIOVR * WC_SUM
-!                       ECL_DSI_F(I_COAL) = ECL_DSI_F(I_COAL) + DSIFOM * WC_SUM
-!                       ECL_DSI_V(I_COAL) = ECL_DSI_V(I_COAL) + DSIVOM * WC_SUM
-!                       ECL_DSI_R(I_COAL) = ECL_DSI_R(I_COAL) + DSISEF * WC_SUM
                      ELSE
                         ECL_DSI_O(I_COAL) = ECL_DSI_O(I_COAL) + 999.99 * WC_SUM
                         ECL_DSI_F(I_COAL) = 0.0
@@ -9550,7 +9335,6 @@
                            GHGP = ULGHG(W_GRP) / TCAP
                            KRG = ULORGN(W_GRP)
                            IF (TST_TGEN(W_GRP) .GT. 0.0) THEN
-!                            REVS = (ULREVS(W_GRP)  - (ULCAPC(W_GRP) * RMAVG(CURIYR-1,KRG) *  MC_JPGDP(CURIYR))/1000 ) / TCAP
                              REVS = (ULREVS(W_GRP)  - (ULCAPC(W_GRP) * CAPCCR(IECP) * RMAVG(CURIYR-1,KRG) )/1000 ) / TCAP
                            ELSE
                            REVS = ULREVS(W_GRP) / TCAP
@@ -9574,12 +9358,6 @@
                       IF (USW_NRVTYP .EQ. 2)THEN
                         COLNET1 = ULREVS(W_GRP) - ULVCST(W_GRP) - ULFCST(W_GRP) - ULSO2P(W_GRP) - ULNOXP(W_GRP) - ULRPSP(W_GRP) - ULHGP(W_GRP) - ULGHG(W_GRP)
                         COLNET2 = ULENGREVS(W_GRP) - ULVCST(W_GRP) - ULFCST(W_GRP) - ULSO2P(W_GRP) - ULNOXP(W_GRP) - ULRPSP(W_GRP) - ULHGP(W_GRP) - ULGHG(W_GRP)
-!                       IF (ULTGEN(W_GRP) .GT. 0.0)THEN
-!                          COLNET2 = (ULREVS(W_GRP) - (ULCAPC(W_GRP) * CAPCCR(IECP) * RMAVG(CURIYR-1,ULORGN(W_GRP)))/1000.0)  &
-!                                 - ULVCST(W_GRP) - ULFCST(W_GRP) - ULSO2P(W_GRP) - ULNOXP(W_GRP) - ULRPSP(W_GRP) - ULHGP(W_GRP) - ULGHG(W_GRP)
-!                       ELSE
-!                          COLNET2 = COLNET1
-!                       END IF
                         IF (USW_NRVREV .EQ. 1 .AND. COLNET1 .LT. 0.0) THEN
                            UNRVCOL(IRG,CURIYR) = UNRVCOL(IRG,CURIYR) - COLNET1
                            UNRVCOL(MNUMNR,CURIYR) = UNRVCOL(MNUMNR,CURIYR) - COLNET1
@@ -9600,8 +9378,6 @@
 !
                      OVEC = 0
                      IF (ITYP .LE. EX_COAL .AND. IOWN .LT. 4 .AND. (CURIYR + UHBSYR) .LE. MRSW)OVEC = 1
-!                    IF (OVEC .EQ. 1)write(6,4455) curiyr+1989,w_igrp,w_grp,wc_sum
-!4455 format(1h ,'!ovec1',i4,i6,i6,f10.3)
                      IF (OVEC .EQ. 0)THEN
                       IF ((CURIYR + UHBSYR) .GE. MAX(UPSTYR,UNUC_SYR - UREV_NYR + 1))THEN
                         IF (ECL_RVAL(I_COAL) .LT. -0.001 .AND. I_COAL .NE. I_COALL)ECL_RYRS(I_COAL) = ECL_RYRS(I_COAL) + 1
@@ -9857,7 +9633,7 @@
                      (ENG_FOM(XYR,I_NGBS)/MAX(1.0,ENG_CAP(XYR,I_NGBS)), ENG_CAP(XYR,I_NGBS),XYR=1,UNXPH), &
                      WC_SUM, WHRATE, W_CF, W_CFA, ULTGEN(W_GRP), ULCAPC(W_GRP), &
                      ENG_RVAL(I_NGBS), VCST, FCST, REVS, WFOMA, W_CAPAD, UPPCEF(IECP), CCSROV, CCSF, CCSV, CCSHR, CCSADJ
- 3112            FORMAT(1X,"ENG_DATA",13(":",I5),30(":",F9.3))
+ 3112            FORMAT(1X,"ENG_DATA",13(":",I5),20(":",F9.3),5(":",F11.2))
 
                END IF
 
@@ -10494,7 +10270,7 @@
 
                   DO ISP = 1 , EENSP
                      
-                       IF (WVIN .EQ. 2 .AND. W_SYR .EQ. CURCALYR) THEN ! new planned build
+                       IF ((WVIN .EQ. 2 .AND. W_SYR .EQ. CURCALYR) .OR. (STORAGE_CST(W_GRP,ISP) .EQ. 0.0 .AND. W_SYR .EQ. CURCALYR)) THEN ! new planned build or coal-to-gas retrofit
                              STORAGE_CAP(W_GRP,ISP) = ECCAP(ECNTP,ISP) * 0.001 * (1.0 - ECFOR(W_GRP))*(1.0 - ECPMR(W_GRP))
                             STORAGE_GEN(W_GRP,ISP) = ECCAP(ECNTP,ISP) * 0.001 * INT(AVGCF / EFACTR) * EFACTR * EETIME(ISP) * 0.001
                              STORAGE_CST(W_GRP,ISP) = (0.001 * WHRATE * 2.0) + WVOMA
@@ -10569,11 +10345,6 @@
                   ENDIF
                END IF
 !
-!              IF (W_IGRP .EQ. 5375) THEN
-!                 WRITE(6,6313) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,W_GRP2,WVIN,W_SYR,W_SMO,W_RYR,W_RMO,W_CF,W_CFA,AVGCF,NUC_CFC,GCAP
-!6313             FORMAT(1X,"DAVIS-BESSE",10(":",I5),5(":",F12.3))
-!              END IF
-!
 !              Collect Info to Calculate Average Max Capacity Factor for Dispatchable Capacity
 !
                DO ISP = 1 , EENSP
@@ -10608,7 +10379,7 @@
                   END IF
                   IF (ICL .GT. 0) THEN
                      IF (IECP .NE. EMM_CL_ECPt(ICL,CURIYR)) THEN
-                        WRITE(6,2393) CURIYR+UHBSYR,CURITR,ICL,IECP,EMM_CL_ECPt(ICL,CURIYR),-1.0
+                        WRITE(13,2393) CURIYR+UHBSYR,CURITR,ICL,IECP,EMM_CL_ECPt(ICL,CURIYR),-1.0
  2393                   FORMAT(1X,"EMM_CL_ECPt_OOPS",5(":",I4),":",F12.3)
                      END IF
                   END IF
@@ -10694,38 +10465,8 @@
                   END DO
                END IF
 !
-!              IDENTIFY PHASE 1 UNITS
-!
-!              IF ( WPHS1 .EQ. 1 ) THEN
-!                 ECPHS1(ECNTP) = 1
-!              ELSE
-!                 ECPHS1(ECNTP) = 0
-!              END IF
-!
-!              ASSIGN NUMERIC BOILER TYPE TO EACH PLANT GROUP
-!
                ECBTP(ECNTP) = 0
-!              DO IBTP = 1 , NUM_BTP
-!                 IF ((W_BTP .EQ. BTP_FTCD(IBTP)) .AND.  &
-!                    (W_BTM .EQ. BTP_BTCD(IBTP))) ECBTP(ECNTP) = IBTP
-!              END DO
-!              IF (ECBTP(ECNTP) .EQ. 0) THEN
-!                 WRITE(6,6395) CURIYR,IRG,IGRP,IEFD,W_BTP,W_BTM
-!6395             FORMAT(1X,"ECBTP",4I6,1X,A2,1X,A1)
-!                 ECBTP(ECNTP) = 1
-!              END IF
-!
-!              ASSIGN NUMERIC NOX CONTROL TYPE TO EACH PLANT GROUP
-!
                ECNCT(ECNTP) = 0
-!              DO INCT = 1 , NUM_NCT
-!                 IF (W_NCT .EQ. NCT_CODE(INCT)) ECNCT(ECNTP) = INCT
-!              END DO
-!              IF (ECNCT(ECNTP) .EQ. 0) THEN
-!                 WRITE(6,6396) CURIYR,IRG,IGRP,IEFD,W_NCT
-!6396             FORMAT(1X,"ECNCT",4I6,1X,A2)
-!                 ECNCT(ECNTP) = 1
-!              END IF
                
                !this is a new array to hold CTN coal cofiring (w gas) capacity by fuel region and EFD fuel type
                IF (WEFDT .EQ. UICTN .AND. WFL(2) .GT. 0) THEN    
@@ -10735,12 +10476,12 @@
                
                IF (UF_DBG .GT. 0) THEN
                   INOX = 0
-                  WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,ECNTP,IRG,WSTATE,WC_SUM,GCAP,INOX,(ECFNOX(ECNTP,ISP),ISP=1,EENSP)
+                  WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,ECNTP,IRG,IEFD,WSTATE,WC_SUM,GCAP,INOX,(ECFNOX(ECNTP,ISP),ISP=1,EENSP)
                   DO INOX = 1 , NOX_GRP
-                     WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,ECNTP,IRG,WSTATE,WC_SUM,GCAP,INOX,(ECFNOXC(INOX,ECNTP,ISP),ISP=1,EENSP)
+                     WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,ECNTP,IRG,IEFD,WSTATE,WC_SUM,GCAP,INOX,(ECFNOXC(INOX,ECNTP,ISP),ISP=1,EENSP)
                   END DO
                END IF
- 9311          FORMAT(1X,"FNOX",6(":",I5),":",A2,2(":",F6.1),":",I2,6(":",F9.6))
+ 9311          FORMAT(1X,"FNOX",7(":",I5),":",A2,2(":",F8.1),":",I2,6(":",F9.6))
                ECNTP = ECNTP + 1
 !
 !           IF NON-DISPATCHABLE PLANT GROUP
@@ -10880,9 +10621,9 @@
                END DO
                IF (UF_DBG .GT. 0) THEN
                   INOX = 0
-                  WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EHNTP,IRG,WSTATE,WC_SUM,GCAP,INOX,(EHFNOX(EHNTP,ISP),ISP=1,EENSP)
+                  WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EHNTP,IRG,IEFD,WSTATE,WC_SUM,GCAP,INOX,(EHFNOX(EHNTP,ISP),ISP=1,EENSP)
                   DO INOX = 1 , NOX_GRP
-                     WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EHNTP,IRG,WSTATE,WC_SUM,GCAP,INOX,(EHFNOXC(INOX,EHNTP,ISP),ISP=1,EENSP)
+                     WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EHNTP,IRG,IEFD,WSTATE,WC_SUM,GCAP,INOX,(EHFNOXC(INOX,EHNTP,ISP),ISP=1,EENSP)
                   END DO
                END IF
 !
@@ -10994,9 +10735,9 @@
                EDNTP = EDNTP + 1
                IF (UF_DBG .GT. 0) THEN
                   INOX = 0
-                  WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EDNTP,IRG,WSTATE,WC_SUM,GCAP,INOX,(EDFNOX(EDNTP,ISP),ISP=1,EENSP)
+                  WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EDNTP,IRG,IEFD,WSTATE,WC_SUM,GCAP,INOX,(EDFNOX(EDNTP,ISP),ISP=1,EENSP)
                   DO INOX = 1 , NOX_GRP
-                     WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EDNTP,IRG,WSTATE,WC_SUM,GCAP,INOX,(EDFNOXC(INOX,EDNTP,ISP),ISP=1,EENSP)
+                     WRITE(UF_DBG,9311) CURIYR+UHBSYR,CURITR,W_IGRP,W_GRP,EDNTP,IRG,IEFD,WSTATE,WC_SUM,GCAP,INOX,(EDFNOXC(INOX,EDNTP,ISP),ISP=1,EENSP)
                   END DO
                END IF
             END IF                                                  ! IF IEFD is Dispatchable, Renewable or Distributed
@@ -12369,40 +12110,8 @@
                      TBTU_SHR_BY_CLRG(KRG,IECP,TRN) = TBTU_SHR_BY_CLRG(KRG,ECP_D_DSP + 1,TRN)
                   END IF
                END DO
-!              write(6,5431) curiyr+1989,krg,uplntcd(iecp),  &
-!              so2_shr_by_clrg(krg,1),tso2_shr_by_clrg(krg,1),tbtu_shr_by_clrg(krg,iecp,1),  &
-!              so2_shr_by_clrg(krg,2),tso2_shr_by_clrg(krg,2),tbtu_shr_by_clrg(krg,iecp,2)
-!5431 format(1h ,'!shrcl',i4,i3,1x,a2,6f10.4)
             END DO
-!           iecp = ECP_D_DSP + 1
-!           write(6,5432) curiyr+1989,krg,  &
-!                         ( so2_shr_by_clrg(krg,trn),trn=1,1),  &
-!                         (tso2_shr_by_clrg(krg,trn),trn=1,1),  &
-!                         (tbtu_shr_by_clrg(krg,iecp,trn),trn=1,1),  &
-!                         ( so2_shr_by_clrg(krg,trn),trn=2,2),  &
-!                         (tso2_shr_by_clrg(krg,trn),trn=2,2),  &
-!                         (tbtu_shr_by_clrg(krg,iecp,trn),trn=2,2)
-!5432 format(1h ,'!shrcl',i4,i3,1x,'TL',10f10.4)
          END DO
-!     print *,'!styr',curiyr+uhbsyr,uestyr
-!        IF ((CURIYR + 1989) .EQ. UESTYR)THEN
-!           DO KRG = 1 , EMM_D_ST
-!              write(6,4567) krg,ustnme(krg),est_frg(krg)
-!4567 format(1h ,'!stfrg',i4,a4,i4)
-!              write(6,4568) krg,ustnme(krg),est_frg(krg),(emap_stfr(iecp,krg),iecp=1,unfrgn)
-!4568 format(1h ,'!stmap',i4,a4,i4,23f4.0)
-!           END DO
-!              write(6,4569) krg,EFD_D_MFRG+1,(emap_stfr(iecp,krg),iecp=1,unfrgn)
-!4569 format(1h ,'!stmap',i4,'  TL',i4,23f4.0)
-!              write(6,4568) krg,(emap_stfr(iecp,krg),iecp=1,unfrgn)
-!4568 format(1h ,'!stmap',i3,50f3.0)
-!              write(6,4568) (ustnme(krg),krg=1,EMM_D_ST)
-!4568 format(1h ,'!stmap','Reg',49a3,' TL')
-!           DO IECP = 1 , UNFRGN
-!              write(6,4569) iecp,(emap_stfr(iecp,krg),krg=1,EMM_D_ST+1)
-!4569 format(1h ,'!stmap',i3,50f3.0)
-!           END DO
-!        END IF
       end if
 !
 !     FOR 111d, DETERMINE AVERAGE CO2 CONTENT FOR MUST-RUN CAPACITY
@@ -12423,33 +12132,12 @@
                END IF
             END DO
          END DO
-!        DO KRG = 1 , UNFRGN
-!           write(6,5678) curiyr+1989,krg,(mrgenf(krg,jyr),jyr = 2019 - uhbsyr, 2040 - uhbsyr)
-!5678 format(1h ,'!mrgenf',i4,i3,22f8.1)
-!           write(6,5679) curiyr+1989,krg,(mrco2f(krg,jyr),jyr = 2019 - uhbsyr, 2040 - uhbsyr)
-!5679 format(1h ,'!mrco2f',i4,i3,22f8.1)
-!        END DO
-!        DO KRG = 1 , UNRGNS
-!           write(6,6678) curiyr+1989,krg,(mrgenn(krg,jyr),jyr = 2019 - uhbsyr, 2040 - uhbsyr)
-!6678 format(1h ,'!mrgenn',i4,i3,22f8.1)
-!           write(6,6679) curiyr+1989,krg,(mrco2n(krg,jyr),jyr = 2019 - uhbsyr, 2040 - uhbsyr)
-!6679 format(1h ,'!mrco2n',i4,i3,22f8.1)
-!        END DO
       END IF
 
 !     STORE DISPOUT FOR CURRENT YEAR AND REGION TO SAVE FIXED O&M VALUES
 
       CALL STROUT(CURIYR,IRG)
 
-!     IF ((CURIYR + 1989) .EQ. 2020 .AND. IRG .EQ. UNRGNS)THEN
-!        do xyr = 21 , mnumyr
-!           write(6,4334) xyr + 1989,(nucplnf(krg,xyr),krg = 1 , 23)
-!4334 format(1h ,'!nucfr',i4,23f6.1)
-!           write(6,4335) xyr + 1989,(nucplnn(krg,xyr),krg = 1 , 22)
-!4335 format(1h ,'!nucnr',i4,23f6.1)
-!        end do
-!     end if
-!
       IF (IRG .EQ. UNRGNS)THEN
          DO FRG = 1 , UNSTAS
             IF (URG_ZECMAX(FRG) .GT. 0.0)THEN
@@ -12463,42 +12151,7 @@
                   END DO
                END IF
             END IF
-!           write(6,6677) curiyr+1989,frg,(elnucsbdy(frg,krg,curiyr) * scalpr,krg = 1 , unrgns),elnucsbdy(frg,mnumnr,curiyr) * scalpr
-!6677 format(1h ,'!zrv',i4,i3,23f6.0)
-!           write(6,6678) curiyr+1989,frg,(elnucsbgn(frg,krg),krg = 1 , unrgns),elnucsbgn(frg,mnumnr)
-!6678 format(1h ,'!zgn',i4,i3,23f6.0)
          END DO
-!           write(6,6677) curiyr+1989,frg,(elnucsbdy(frg,krg,curiyr) * scalpr,krg = 1 , unrgns),elnucsbdy(frg,mnumnr,curiyr) * scalpr
-!           write(6,6678) curiyr+1989,frg,(elnucsbgn(frg,krg),krg = 1 , unrgns),elnucsbgn(frg,mnumnr)
-
-!        if (curiyr .eq. lastyr)then
-!           do krg = 1 , mnumnr
-!              write(6,7700) (xyr,xyr = upstyr,2040)
-!7700 format(1h ,'!rev','rg',3x,30I7)
-!              if (krg .le. unrgns .or. krg .eq. mnumnr)then
-!              write(6,7710) krg,(unrvcol(krg,xyr),xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7710 format(1h ,'!rev$',i3,' cl',30f10.1)
-!              write(6,7720) krg,(unrvccy(krg,xyr),xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7720 format(1h ,'!rev$',i3,' cc',30f10.1)
-!              write(6,7730) krg,(unrvstm(krg,xyr),xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7730 format(1h ,'!rev$',i3,' st',30f10.1)
-!              write(6,7740) krg,(unrvnuc(krg,xyr),xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7740 format(1h ,'!rev$',i3,' nu',30f10.1)
-!              write(6,7750) krg,((unrvcol(krg,xyr) + unrvccy(krg,xyr) + unrvstm(krg,xyr) + unrvnuc(krg,xyr)),xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7750 format(1h ,'!rev$',i3,' tl',30f10.1)
-!              write(6,7760) krg,(uncpcol(krg,xyr) / 1000.0,xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7760 format(1h ,'!revc',i3,' cl',30f10.1)
-!              write(6,7770) krg,(uncpccy(krg,xyr) / 1000.0,xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7770 format(1h ,'!revc',i3,' cc',30f10.1)
-!              write(6,7780) krg,(uncpstm(krg,xyr) / 1000.0,xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7780 format(1h ,'!revc',i3,' st',30f10.1)
-!              write(6,7790) krg,(uncpnuc(krg,xyr) / 1000.0,xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7790 format(1h ,'!revc',i3,' nu',30f10.1)
-!              write(6,7800) krg,((uncpcol(krg,xyr) + uncpccy(krg,xyr) + uncpstm(krg,xyr) + uncpnuc(krg,xyr)) / 1000.0,xyr = upstyr - uhbsyr,2040 - uhbsyr)
-!7800 format(1h ,'!revc',i3,' tl',30f10.1)
-!              end if
-!           end do
-!        end if
       END IF
       
       IF (CURITR .EQ. 1 .AND. JRG .EQ. UNRGNS) THEN
@@ -12512,256 +12165,6 @@
       RETURN
       END
 !
-!
-      SUBROUTINE NOX_CAA(IBTP,IRECL,IRG)
-!
-      IMPLICIT NONE
-
-!     THIS SUBROUTINE DETERMINES IF CURRENT COAL UNIT IS COMPLIANT WITH NOX CAA REGULATION
-!      IF NOT: ADD REQUIRED NOX CONTROLS AND SAVE THE PLANT RECORD
-
-      include'parametr'
-      include'ncntrl'
-      include'emmparm'
-      include'control'
-      include'plntin'
-      include'plntctl'
-      include'ecp_coal'
-      include'elcntl'
-      include'ecpcntl'
-!
-      INTEGER*4 IBTP, NOXYR, IPHASE, IRECL, NRECL, JRECL, CHOICE, IRG, JGRP, IECP, I_CNFG, ITST, TEFPT, NERC
-      REAL*8 TFURB, NOX_CF, A_CST, C_CST, N_CST, S_CST, NOX_R, RNOX, CCST, FCST, VCST, NOXFCF, TPCST
-!
-      DATA NOXFCF/0.12/
-!
-!     IF ( WPHS1 .EQ. 1 ) THEN
-!        IPHASE = 1
-!     ELSE
-         IPHASE = 2
-!     END IF
-      IF (IPHASE .EQ. 1) THEN
-         NOXYR = 9999
-      ELSE
-         NOXYR = NOX_PH2(IBTP)
-      END IF
-!
-      IF (W_RYR .GE. NOXYR) THEN
-         IF (WNOX_R .GT. NOX_STD(IBTP,IPHASE)) THEN
-            IF (W_SYR .LT. NOXYR) THEN
-!
-!              RETIRE UNIT WITH INSUFFICIENT NOX CONTROLS
-!
-               WO_RYR(IRECL) = W_RYR
-               WO_RMO(IRECL) = W_RMO
-               WO_VIN(IRECL) = WVIN
-               W_RYR = NOXYR - 1
-               W_RMO = 12
-               WVIN = 8
-               TFURB = WRFURB
-               CALL STRPLT(IRECL)
-!
-!              INCREMENT COUNTER
-!
-               WREC_NXT = WREC_NXT + 1
-               NRECL = WREC_NXT
-               WRFURB = TFURB
-!
-!              ENSURE THAT NUMBER OF BUILDS DOESN'T EXCEED ALLOCATION
-!
-               IF (NRECL .GT. WPLT_D_REC) WRITE(6, * ) &
-                  ' NOX_STD ERROR: TOO MANY PLANT RECORDS', &
-                  ' (WPLT_D_REC) ',WPLT_D_REC
-!
-               WNGRPS(IRG) = WNGRPS(IRG) + 1
-               JGRP = WNGRPS(IRG)   ! Use New Group For Retros
-               JRECL = W_NXT(IRECL)
-               W_NXT(IRECL) = WREC_NXT
-               W_NXT(WREC_NXT) = JRECL
-               WGRP_NXT = WGRP_NXT + 1
-               W_GRP = WGRP_NXT
-               W_GRP2 = WNXT_SGRP(W_GRP) + 1
-               WTYPE(W_GRP) = JGRP
-               WNXT_SGRP(W_GRP) = W_GRP2
-               IF ((WO_VIN(IRECL) .NE. 8) .and. &
-                   (WO_VIN(IRECL) .NE. 6)) WVIN = 9
-               ULIGRP(W_GRP) = W_IGRP
-               W_SYR = NOXYR
-               W_SMO = 1
-               W_RYR = WO_RYR(IRECL)
-               W_RMO = WO_RMO(IRECL)
-            ELSE
-               NRECL = IRECL
-            END IF
-!
-!           Store Capacity with new NOX Controls
-!
-            NOX_CF = 0.5
-            A_CST = 0.0
-            C_CST = 0.0
-            N_CST = 0.0
-            S_CST = 0.0
-            NOX_R = 0.0
-            CHOICE = 0
-            RNOX = WNOX_R * ( 1.0 - WCOMB_R)
-            IF (RNOX .LE. NOX_STD(IBTP,IPHASE)+0.01) THEN
-               IF (RNOX .LE. NOX_STD(IBTP,IPHASE)) THEN
-                  NOX_R = WCOMB_R
-               ELSE
-                  NOX_R = 1.0 - (NOX_STD(IBTP,IPHASE) / WNOX_R)
-               END IF
-               C_CST = NOXFCF * WCOMB_O + WCOMB_F + WCOMB_V * NOX_CF * 8.76
-               A_CST = C_CST
-               CHOICE = 1
-            END IF
-!           RNOX = WNOX_R * ( 1.0 - WSNCR_R)
-!           RNOX2 = WNOX_R * ( 1.0 - WSNCR_R) * ( 1.0 - WCOMB_R)
-!           IF (RNOX .LE. NOX_STD(IBTP,IPHASE) .AND. RNOX2 .LE. 0.11) THEN
-!              N_CST = NOXFCF * WSNCR_O + WSNCR_F + WSNCR_V * NOX_CF * 8.76
-!              IF (CHOICE .EQ. 0 .OR. N_CST .LT. A_CST) THEN
-!                 A_CST = N_CST
-!                 NOX_R = WSNCR_R
-!                 CHOICE = 2
-!              END IF
-!           END IF
-            RNOX = WNOX_R * ( 1.0 - WSCR_R)
-            IF (RNOX .LE. NOX_STD(IBTP,IPHASE)) THEN
-               S_CST = NOXFCF * WSCR_O + WSCR_F + WSCR_V * NOX_CF * 8.76
-               IF (CHOICE .EQ. 0 .OR. S_CST .LT. A_CST) THEN
-                  A_CST = S_CST
-                  NOX_R = WSCR_R
-                  CHOICE = 3
-               END IF
-            END IF
-            IF (CHOICE .EQ. 0) THEN
-               NOX_R = WNOX_R
-               WNOX_R = NOX_STD(IBTP,IPHASE)
-               WNOX_B4 = NOX_STD(IBTP,IPHASE)
-               IF (CURIYR .EQ. NOXYR) &
-                  WRITE(18,2341) CURIYR,NOXYR,IRG,W_IGRP, &
-                  W_GRP,W_GRP2,IRECL,NRECL,WEFDT,IBTP, &
-                  W_COMB,W_POST,IPHASE,CHOICE,NOX_R, &
-                  NOX_STD(IBTP,IPHASE), &
-                  WNOX_R,WCOMB_R,WSNCR_R,WSCR_R, &
-                  A_CST,C_CST,N_CST,S_CST, &
-                  WCOMB_O,WSNCR_O,WSCR_O, &
-                  WCOMB_F,WSNCR_F,WSCR_F, &
-                  WCOMB_V,WSNCR_V,WSCR_V, &
-                  NOX_CF,WC_SUM
-            ELSE
-               RNOX = WNOX_R
-               WNOX_R = WNOX_R * ( 1.0 - NOX_R)
-               WNOX_B4 = WNOX_R
-               IF (CURIYR .EQ. NOXYR) &
-                  WRITE(18,2341) CURIYR,NOXYR,IRG,W_IGRP, &
-                  W_GRP,W_GRP2,IRECL,NRECL,WEFDT,IBTP, &
-                  W_COMB,W_POST,IPHASE,CHOICE,NOX_R, &
-                  NOX_STD(IBTP,IPHASE), &
-                  WNOX_R,WCOMB_R,WSNCR_R,WSCR_R, &
-                  A_CST,C_CST,N_CST,S_CST, &
-                  WCOMB_O,WSNCR_O,WSCR_O, &
-                  WCOMB_F,WSNCR_F,WSCR_F, &
-                  WCOMB_V,WSNCR_V,WSCR_V, &
-                  NOX_CF,WC_SUM
- 2341          FORMAT(1X,"NOX_STD1",2(":",I2),":",I3, &
-                  5(":",I5),2(":",I2),4(":",I1), &
-                  6(":",F6.3),4(":",F12.3),3(":",F6.1), &
-                  6(":",F6.2),":",F6.3,":",F6.0)
-!
-               IF (CHOICE .EQ. 1) THEN
-                  W_COMB = 2
-                  WCOMB_R = 0.0
-                  CCST = WCOMB_O
-                  FCST = WCOMB_F
-                  VCST = WCOMB_V
-               ELSE IF (CHOICE .EQ. 2) THEN
-                  W_POST = 3
-                  WSNCR_R = 0.0
-                  CCST = WSNCR_O
-                  FCST = WSNCR_F
-                  VCST = WSNCR_V
-               ELSE IF (CHOICE .EQ. 3) THEN
-                  W_POST = 4
-                  WSCR_R = 0.0
-                  CCST = WSCR_O
-                  FCST = WSCR_F
-                  VCST = WSCR_V
-               END IF
-!
-!              Find ECP Type for new Configuration
-!
-               IECP = WECPT
-               DO I_CNFG = 1 , NUM_CNFG
-                  IF (UPTTYP(IECP) .EQ. UPTTYP(UCL_ECP(I_CNFG))) THEN
-                     ITST = 0
-                     IF (WPART .EQ. "B" .AND. UCL_CNFG(2,I_CNFG) .EQ. 1 .OR. &
-                         WPART .EQ. "E" .AND. UCL_CNFG(2,I_CNFG) .EQ. 2 .OR. &
-                         WPART .EQ. "N" .AND. UCL_CNFG(2,I_CNFG) .EQ. 3 .OR. &
-                         WPART .EQ. "0" .AND. UCL_CNFG(2,I_CNFG) .EQ. 4) ITST = ITST + 1
-                     IF (WSCBT .EQ. "W" .AND. UCL_CNFG(3,I_CNFG) .EQ. 1 .OR. &
-                         WSCBT .EQ. "D" .AND. UCL_CNFG(3,I_CNFG) .EQ. 2 .OR. &
-                         WSCBT .EQ. "N" .AND. UCL_CNFG(3,I_CNFG) .EQ. 0) ITST = ITST + 1
-                     IF (W_COMB .GT. 0 .AND. UCL_CNFG(4,I_CNFG) .EQ. 1 .OR. &
-                         W_COMB .EQ. 0 .AND. UCL_CNFG(4,I_CNFG) .EQ. 0) ITST = ITST + 1
-                     IF (W_POST .EQ. 1 .AND. UCL_CNFG(5,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 3 .AND. UCL_CNFG(5,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 5 .AND. UCL_CNFG(5,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 0 .AND. UCL_CNFG(5,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 2 .AND. UCL_CNFG(5,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 4 .AND. UCL_CNFG(5,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 6 .AND. UCL_CNFG(5,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 7 .AND. UCL_CNFG(5,I_CNFG) .EQ. 0) ITST = ITST + 1
-                     IF (W_POST .EQ. 2 .AND. UCL_CNFG(6,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 4 .AND. UCL_CNFG(6,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 6 .AND. UCL_CNFG(6,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 7 .AND. UCL_CNFG(6,I_CNFG) .EQ. 1 .OR. &
-                         W_POST .EQ. 0 .AND. UCL_CNFG(6,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 1 .AND. UCL_CNFG(6,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 3 .AND. UCL_CNFG(6,I_CNFG) .EQ. 0 .OR. &
-                         W_POST .EQ. 5 .AND. UCL_CNFG(6,I_CNFG) .EQ. 0) ITST = ITST + 1
-                     IF (W_ACI .EQ. "N" .AND. UCL_CNFG(7,I_CNFG) .EQ. 0 .OR. &
-                         W_ACI .EQ. "A" .AND. UCL_CNFG(7,I_CNFG) .EQ. 0 .OR. &
-                         W_ACI .EQ. "S" .AND. UCL_CNFG(7,I_CNFG) .EQ. 1 .OR. &
-                         W_ACI .EQ. "F" .AND. UCL_CNFG(7,I_CNFG) .EQ. 0 .OR. &
-                         W_ACI .EQ. "B" .AND. UCL_CNFG(7,I_CNFG) .EQ. 1) ITST = ITST + 1
-                     IF (W_ACI .EQ. "N" .AND. UCL_CNFG(8,I_CNFG) .EQ. 0 .OR. &
-                         W_ACI .EQ. "A" .AND. UCL_CNFG(8,I_CNFG) .EQ. 0 .OR. &
-                         W_ACI .EQ. "S" .AND. UCL_CNFG(8,I_CNFG) .EQ. 0 .OR. &
-                         W_ACI .EQ. "F" .AND. UCL_CNFG(8,I_CNFG) .EQ. 1 .OR. &
-                         W_ACI .EQ. "B" .AND. UCL_CNFG(8,I_CNFG) .EQ. 1) ITST = ITST + 1
-                     IF (ITST .EQ. 7) THEN
-                        WECPT = UCL_ECP(I_CNFG)
-                     END IF
-!
-                  END IF
-               END DO
-!
-               WRITE(18,6313) CURIYR+UHBSYR,NOXYR,W_IGRP,W_GRP,W_SYR,W_RYR,IECP,WECPT,WPART,WSCBT,W_COMB,W_POST,W_ACI,WNOX_R,RNOX,WC_SUM
- 6313          FORMAT(1X,"NOX_STD2",8(":",I5),2(":",A1),2(":",I1),":",A1,3(":",F9.3))
-            END IF
-            IF (CCST .GT. DBLE(0.0)) THEN
-               W_FOM = W_FOM + FCST
-               W_VOM = W_VOM + VCST
-            END IF
-            CALL STRPLT(NRECL)
-            IF (CCST .GT. DBLE(0.0)) THEN
-               TPCST = WPCST
-               TEFPT = WEFPT
-               WPCST = CCST
-               WEFPT = 8
-               NERC = WNOWN
-               CALL UEXPBLD(NERC)
-               WPCST = TPCST
-               WEFPT = TEFPT
-            END IF
-            CALL GETPLT(IRECL)
-         END IF
-      END IF
-!
-      RETURN
-      END
-
-
       SUBROUTINE ECPLVCST(LVSWITCH,JYR,JRG,CFC,LVCSTMIN)
 !
       IMPLICIT NONE
@@ -12829,13 +12232,6 @@
                END IF
                END IF
             END DO
-
-!           IF(LVMINREG(IRG).LT.20.0) &
-!              PRINT *,'CNULOW',CURIYR+1989,IRG,PMIN,OMIN,UPMCF(UICNU), &
-!              EPLVCAP(PMIN,OMIN)*SCALPR,EPLVFOM(PMIN)*SCALPR, &
-!              EPLVFLC(PMIN)*SCALPR,EPLVVOM(PMIN)*SCALPR, &
-!              EPLVEXT(PMIN)*SCALPR,LVCSTMIN*SCALPR,SCALPR
-!           PRINT *,'LVCST1',CURIYR+1989,IRG,LVMINREG(IRG)
 
          END DO
       ELSE
@@ -13242,9 +12638,6 @@
       IEFD = UIUF
       DO INR = 1 , EFD_D_MFRG     !MNUMNR
          UPFUEL(IEFD,INR) = UPURELN(INR,KYR)
-         IF (USW_XP.GT.0  .AND. INR.EQ.14) THEN  !CANADA NUC FLRG=14
-              UPFUEL(IEFD,INR) = 7.0            !MAKE NUC FLCST=$7.00
-         ENDIF
 !
 ! USE CARBON FACTORS FROM EPM (CONVERT FROM MM MT/Q TO MM ST/TRILL)
 !
@@ -13264,14 +12657,6 @@
             ISC = ECP_SCRUB(IEFD,CURIYR)
          DO IRG = 1 , NDRG2
                UPFUEL(IEFD,IRG) = DBLE(PCLELCDR(ISC,IRG,KYR))
-
-!              UPFUEL(IEFD,IRG) = DBLE(PCLCLNR(IRG,KYR,IEFD))
-
-!              IF (FCRL .EQ. 1) THEN
-!                 WRITE(6,3711) CURIRUN, CURIYR+1989, CURITR, IRG, IEFD, ISC, KYR, UPFUEL(IEFD,IRG), PCLCLNR(IRG,KYR,IEFD), PCLELCDR(ISC,IRG,KYR)
-!3711             FORMAT(1X,"PCLELCDR",7(":",I4),3(":",E21.6))
-!              END IF
-
                UFRSO2(IEFD,IRG) = SCLCLNR(IRG,KYR,IEFD)
                UFHCNT(IEFD,IRG) = BCLCLNR(IRG,KYR,IEFD)
                UFRHG(IEFD,IRG) = HCLCLNR(IRG,KYR,IEFD) * (1.0 - GCLCLNR(IRG,KYR,IEFD))
@@ -13335,11 +12720,6 @@
                UFRCO2(UIOG,INR) = 0.0
                UFRCO1(UIOG,INR) = 0.0
                UPNCAR(UIOG,INR) = 0.0
-!        WOOD
-!              UFRCAR(UIWD,INR) = 0.0
-!              UFRCO2(UIWD,INR) = 0.0
-!              UFRCO1(UIWD,INR) = 0.0
-!              UPNCAR(UIWD,INR) = 0.0
 !        SOLID WASTE
                UFRCAR(UISW,INR) = 0.0
                UFRCO2(UISW,INR) = 0.0
@@ -13403,170 +12783,11 @@
       RETURN
       END
 !
-!
-      SUBROUTINE EMM$XPQ
-!
+      SUBROUTINE RDBD_UECP(NERC)
+		
+      USE EPHRTS_SWTICHES
+		
       IMPLICIT NONE
-
-!     THIS SUBROUTINE SETS UP THE PRICE EXPECTATION ARRAYS IF THEY ARE CURRENTLY EMPTY
-
-      include'parametr'
-      include'ncntrl'
-      include 'mxpblk'
-      include'emmparm'
-      include'control'
-      include 'ecpcntl'
-      include'dispin'
-      include'dispout'
-      include'dispuse'
-      include'fuelin'
-!
-      REAL*8 INDEX,ESC
-      INTEGER KYR,ICENSUS
-      INTEGER USW_EXP
-      REAL UCL_GRW,UNG_GRW,UOL_GRW,UUR_GRW
-!
-!     SET UP PRICE EXPECTATION ARRAYS IF THEY ARE CURRENTLY EMPTY
-!
-      USW_EXP = 1
-      UCL_GRW = 0.01
-      UNG_GRW = 0.015
-      UOL_GRW = 0.02
-      UUR_GRW = 0.01
-      DO 400 ICENSUS = 1 , MNUMCR
-!
-!        REAL XPCLEL(MNUMCR,MNXYR)
-!
-         IF ((XPCLEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-            INDEX = DBLE(1.0)
-            ESC = DBLE(UCL_GRW)
-            XPCLEL(ICENSUS,1) = INDEX
-            DO 300 KYR = 2 , UNYEAR + UNXPH
-               INDEX = INDEX * (DBLE(1.0) + ESC)
-               XPCLEL(ICENSUS,KYR) = INDEX
-  300       CONTINUE
-         END IF
-!
-!        REAL XPGFEL(MNUMCR,MNXYR)
-!
-!        IF ((XPGFEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UNG_GRW)
-!        XPGFEL(ICENSUS,1) = INDEX
-!        DO 310 KYR = 2 , UNYEAR + UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPGFEL(ICENSUS,KYR) = INDEX
-!        310       CONTINUE
-!        END IF
-!
-!        REAL XPGIEL(MNUMCR,MNXYR)
-!
-!        IF ((XPGIEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UNG_GRW)
-!        XPGIEL(ICENSUS,1) = INDEX
-!        DO 320 KYR = 2 , UNYEAR + UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPGIEL(ICENSUS,KYR) = INDEX
-!        320       CONTINUE
-!        END IF
-!
-!        REAL XPNGEL(MNUMCR,MNXYR)
-!
-!        IF ((XPNGEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UNG_GRW)
-!        XPNGEL(ICENSUS,1) = INDEX
-!        DO 330 KYR = 2 , UNYEAR + UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPNGEL(ICENSUS,KYR) = INDEX
-!        330       CONTINUE
-!        END IF
-!
-!        REAL XPDSEL(MNUMCR,MNXYR)
-!
-!        IF ((XPDSEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UOL_GRW)
-!        XPDSEL(ICENSUS,1) = INDEX
-!        DO 340 KYR = 2 , UNYEAR + UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPDSEL(ICENSUS,KYR) = INDEX
-!        340       CONTINUE
-!        END IF
-!
-!        REAL XPRHEL(MNUMCR,MNXYR)
-!
-!        IF ((XPRHEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UOL_GRW)
-!        XPRHEL(ICENSUS,1) = INDEX
-!        DO 350 KYR = 2 , UNYEAR + UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPRHEL(ICENSUS,KYR) = INDEX
-!        350       CONTINUE
-!        END IF
-!
-!        REAL XPRSEL(MNUMCR,MNXYR)
-!
-!        IF ((XPRSEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UOL_GRW)
-!        XPRSEL(ICENSUS,1) = INDEX
-!        DO 360 KYR = 2 , UNYEAR + UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPRSEL(ICENSUS,KYR) = INDEX
-!        360       CONTINUE
-!        END IF
-!
-!        REAL XPRLEL(MNUMCR,MNXYR)
-!
-!        IF ((XPRLEL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-!        INDEX = DBLE(1.0)
-!        ESC = DBLE(UOL_GRW)
-!        XPRLEL(ICENSUS,1) = INDEX
-!        DO 370 KYR = 2 , UNYEAR +UNXPH
-!        INDEX = INDEX * (DBLE(1.0) + ESC)
-!        XPRLEL(ICENSUS,KYR) = INDEX
-!        370       CONTINUE
-!        END IF
-!
-!        REAL XPUREL(MNUMCR,MNXYR)
-!
-         IF ((XPUREL(ICENSUS,1) .LT. 0.1 ).OR.(USW_EXP .EQ. 1)) THEN
-            INDEX = DBLE(1.0)
-            ESC = DBLE(UUR_GRW)
-            XPUREL(ICENSUS,1) = INDEX
-            DO 380 KYR = 2 , UNYEAR + UNXPH
-               INDEX = INDEX * (DBLE(1.0) + ESC)
-               XPUREL(ICENSUS,KYR) = INDEX
-  380       CONTINUE
-         END IF
-!
-  400 CONTINUE
-      RETURN
-      END
-!
-!This main program is used for testing subroutine RDBD_UECP outside of NEMS as a standalone program
-!        PROGRAM TESTECPDAT
-!        IMPLICIT NONE
-!        include 'parametr'
-!        include 'ncntrl'
-!        INTEGER IRG,UNRGNS
-!        call rdcntrl  (special test version with open statements instead of file_mgr calls
-!        UNRGNS=22 ! OR 23
-!        CURIYR=11 ! 2000 for testing
-!        DO IRG=1,UNRGNS
-!          CALL RDBD_UECP(IRG)
-!        ENDDO
-!
-!        END
-!
-        SUBROUTINE RDBD_UECP(NERC)
-		
-		USE EPHRTS_SWTICHES
-		
-         IMPLICIT NONE
 
 !      THIS SUBROUTINE READS CAPACITY EXPANSION INPUT DATA FROM ECPDATY.xlsx
 
@@ -13651,9 +12872,6 @@
         WRITE (UF_MSG,*)&
             '***BEGINNING RDBD_UECP FOR U.S. DATA - US00***'
       ENDIF
-    !  wkunit=699                                      ! for testing outside of NEMS
-    !  fname='m:\rec\cm1\emm_documentation\ECPDATX.XLSX' ! for testing outside of NEMS
-
 
       if(nerc.eq.1) then
       !
@@ -13675,11 +12893,6 @@
          NEW = .true.
          XMLOUT = FILE_MGR('O','ECPXMLOUT',NEW)      ! debug file to echo data read from xlsx file
 
-     !   open(wkunit,file=fname,status='old',readonly)  ! for testing outside of NEMS
-
-        !INITIALIZE FIRST DECISION YEAR FOR ECP AND RESET ECP START YEAR
-!       ECP_FYR=YEARPR
-!       UPSTYR=ECP_FYR
         ECP_FYR=UPSTYR
         !STORE EMM SO2 PRICE (READ IN) UNTIL ECP GENERATES IT
         DO IY=1, UPSTYR-UHBSYR-1
@@ -13761,10 +12974,6 @@
         call getrngi4('UPCLYR          ',UPCLYR,ECP_D_CAP,1,1)  !FINANCIAL CONSTRUCTION LEAD TIME IN YEARS
         !CONSTRUCTION PROFILE INPUT AND CALCULATIONS
         call getrngr('UPCPRO          ',UPCPRO,ECP_D_CAP,ECP_D_LCP,1)!CONSTRUCTION PROFILE
-!        INSURE THAT RETIREMENT LEAD TIME DOESN'T GO BEYOND PLANNING HORIZON
-!        DO JYR = 1 , UNXPH
-!          UCL_VIN(JYR) = MIN(UCL_VIN(JYR),UNXPH - UPPLYR(WIPC))
-!        END DO
 !        INSURE THAT RETIREMENT LEAD TIME DOESN'T EXCEED PLANNING HORIZON
            UNUC_RLT= MIN(UNUC_RLT,UNXPH - UPPLYR(WIAN))
 !        INSURE THAT OTHER RETIREMENT LEAD TIME DOESN'T EXCEED PLANNING HORIZON
@@ -13929,7 +13138,9 @@
         END DO
         call getrngi4('UPSUBFCF        ',UPSUBFCF,ECP_D_CAP,1,1)!SUBSIDY CAP LIMIT ON 1ST COME 1ST SERVE BASIS (0=YES, 1=NO)
 
-        call getrngr('UPGSUBYR        ',UPGSUBYR(1,UISTYR),ECP_D_CAP,MNUMYR-UISTYR+1,1)!PTC OVERRIDES
+!        call getrngr('UPGSUBYR        ',UPGSUBYR(1,UISTYR),ECP_D_CAP,MNUMYR-UISTYR+1,1)   !PTC OVERRIDES
+        !hardcode below here because PTC calc for existing plants depends on table going back at least 10 years
+		call getrngr('UPGSUBYR        ',UPGSUBYR(1,21),ECP_D_CAP,41,1)
 !
 !        CONVERT PTC FROM SPECIFIED YR $ TO MODEL YEAR $
 !
@@ -13969,7 +13180,9 @@
 !
 !     UPCSBYR: ITC OVERRIDES
 !
-        call getrngr('UPCSBYR         ',UPCSBYR(1,UISTYR),ECP_D_CAP,MNUMYR-UISTYR+1,1) !ITC OVERRIDES
+!        call getrngr('UPCSBYR         ',UPCSBYR(1,UISTYR),ECP_D_CAP,MNUMYR-UISTYR+1,1) !ITC OVERRIDES
+        !hardcode below here to keep symmetrical with UPGSUBYR
+        call getrngr('UPCSBYR         ',UPCSBYR(1,21),ECP_D_CAP,41,1)
 
         IF (UPIRAYR0 .LT. 9000) call IRAPHASE  ! calculate if phase out of tax credits is needed for IRA 
                                      ! can set UPIRAYR0 to 9999 to skip this and phaseout can be hardwired through annual inputs
@@ -14104,10 +13317,8 @@
          IF (ADJYRBS .NE. 0) THEN  !leave 0 value which indicates overwrite the values
              ADJYRBS = ULRSYR     !set equal to base year for learning (year of last capital cost update)
          ENDIF
-         call getrngr('UPADJYRWT       ',ADJYRWT(26),1,36,1)  !WEIGHTING FACTOR FOR MAKING ADJUSTMENTS
-
-         call getrngr('UPANNADJ        ',UPANNADJ(1,26),ECP_D_CAP,36,1) !ANNUAL ADJUSTMENTS
-
+         call getrngr('UPADJYRWT       ',ADJYRWT(UISTYR),1,MNUMYR-UISTYR+1,1)            !WEIGHTING FACTOR FOR MAKING ADJUSTMENTS
+         call getrngr('UPANNADJ        ',UPANNADJ(1,UISTYR),ECP_D_CAP,MNUMYR-UISTYR+1,1) !ANNUAL ADJUSTMENTS
 
         !cna- temporary overwrite of upannadj with macro data
            DO IP=1,ECP_D_CAP
@@ -14137,13 +13348,13 @@
            ENDDO
          ENDDO
 
-         call getrngr('EXTANNADJ       ',EXTANNADJ(1,16),ECP_D_CAP,31,1) !EXTRA ANNUAL ADJUSTMENTS FOR TARIFFS
+         call getrngr('EXTANNADJ       ',EXTANNADJ(1,UISTYR),ECP_D_CAP,MNUMYR-UISTYR+1,1) !EXTRA ANNUAL ADJUSTMENTS FOR TARIFFS
 
-         DO IY = 2035 - UHBSYR + 1, MNUMYR
-            DO IP = 1, ECP_D_CAP
-               EXTANNADJ(IP,IY) = EXTANNADJ(IP,2035 - UHBSYR)
-            ENDDO
-         ENDDO
+!         DO IY = 2035 - UHBSYR + 1, MNUMYR                      ! (mas, 10/1/2025 commented out because we need to read all values and not just through 2035)
+!            DO IP = 1, ECP_D_CAP
+!               EXTANNADJ(IP,IY) = EXTANNADJ(IP,2035 - UHBSYR)
+!            ENDDO
+!         ENDDO
 
 !   COMBINE FACTORS INTO UPANNADJ TO FLOW THROUGH TO CAPITAL COSTS
 
@@ -14191,12 +13402,15 @@
             IF (DUMMY(IP) .EQ. "FLC") WIFLC = IP
             IF (DUMMY(IP) .EQ. "CNU") WICNU = IP
             IF (DUMMY(IP) .EQ. "ANU") WIANU = IP
+            IF (DUMMY(IP) .EQ. "SMR") WISMR = IP            
             IF (DUMMY(IP) .EQ. "WDP") WIWDP = IP
             IF (DUMMY(IP) .EQ. "GTH") WIGTH = IP
             IF (DUMMY(IP) .EQ. "MSW") WIMSW = IP
             IF (DUMMY(IP) .EQ. "HYD") WIHYD = IP
             IF (DUMMY(IP) .EQ. "HPS") WIHPS = IP
             IF (DUMMY(IP) .EQ. "HP2") WIHP2 = IP
+            IF (DUMMY(IP) .EQ. "DST") WIDST = IP           
+            IF (DUMMY(IP) .EQ. "DSB") WIDSB = IP           
             IF (DUMMY(IP) .EQ. "WND") WIWND = IP
             IF (DUMMY(IP) .EQ. "WFS") WIWFS = IP
             IF (DUMMY(IP) .EQ. "STH") WISTH = IP
@@ -15094,113 +14308,6 @@
       RB(I) = RRB
       GO TO 10
       END
-!
-!
-!
-      SUBROUTINE ELDMND(JYR)
-!
-      IMPLICIT NONE
-
-!     THIS SUBROUTINE INITIALIZES NERC REGION DEMANDS
-
-      include'parametr'
-      include'ncntrl'
-      include'apq'
-      include'xpq'
-      include'emmparm'
-      include'ecpcntl'
-      include'control'
-      include'elshrs'
-!
-      INTEGER JYR,ICENSUS,IYR
-      REAL*8 FACTOR,GRWINDX
-      IF(USW_XP .EQ. 0) THEN
-         FACTOR = 0.003412
-      ELSE                                                       !CANADA
-         FACTOR = 1
-      ENDIF
-!
-!     CONVERT CENSUS REGION DEMANDS TO NERC REGION DEMANDS
-!
-      DO 30 ICENSUS = 1 , MNUMCR
-         EFD$CENSUS(ICENSUS) = QELAS(ICENSUS,JYR) / FACTOR
-!        IF (UF_DBG.GT.0)
-!        +   WRITE(UF_DBG,1432)'EFD$CENSUS',EFD$CENSUS(ICENSUS)
-!1432    FORMAT(2(A10,1X,F10.2))
-   30 CONTINUE
-!
-      IF (UF_DBG .GT. 0) THEN
-         WRITE(UF_DBG,334)'YEAR',JYR,'CURITR',CURITR
-334      FORMAT(2(A8,1X,I4,1X))
-      END IF
-      CALL CNV$CRNR(EFD$CENSUS,ELGNNRCR,EFD$NERC)
-!
-!     IF(UF_DBG.GT.0) WRITE(UF_DBG,1444)'EFD$NERC',EFD$NERC
-!1444    FORMAT(A8,1X,F10.2)
-
-      DO 200 IYR = 1 , UNFPH
-         DO 130 ICENSUS = 1 , MNUMCR
-            IF ( XQELAS(ICENSUS,JYR) .GT. 0.001) THEN
-               GRWINDX = XQELAS(ICENSUS,JYR + IYR - 1) / XQELAS(ICENSUS,JYR)
-               GRWINDX = MIN ( GRWINDX , DBLE(1.015 ** (IYR - 1)))
-            ELSE
-               GRWINDX = 1.0
-            END IF
-            ECP$CENSUS(ICENSUS,IYR) = QELAS(ICENSUS,JYR) * GRWINDX / FACTOR
-  130    CONTINUE
-!
-         CALL CNV$CRNR(ECP$CENSUS(1,IYR),ELGNNRCR,ECP$NERC(1,IYR))
-!
-  200 CONTINUE
-!
-      RETURN
-      END
-!
-!
-!
-      SUBROUTINE CNV$CRNR(CENSUS,SHARES,NERC)
-!
-      IMPLICIT NONE
-
-!     THIS SUBROUTINE CONVERTS DATA FROM CENSUS DIVISIONS TO EMM (NERC-BASED) REGIONS
-
-      include'parametr'
-      include'ncntrl'
-      include'emmparm'
-      include'control'
-!
-      INTEGER ICENSUS,INERC
-      REAL NERC(MNUMNR),CENSUS(MNUMCR)
-      REAL*8 SHARES(MNUMNR,MNUMCR)
-      REAL*8 TCENSUS,TNERC,TSHR,TTOT
-!
-!     CONVERT FROM CENSUS TO NERC DATA
-!
-      DO 10 INERC = 1 , MNUMNR
-         NERC(INERC) = 0.0
-         DO 20 ICENSUS = 1 , MNUMCR - 1
-            TCENSUS = CENSUS(ICENSUS)
-            TNERC = NERC(INERC)
-            TSHR = SHARES(INERC,ICENSUS)
-            TTOT = SHARES(MNUMNR,ICENSUS)
-            IF ( SHARES(MNUMNR,ICENSUS) .GT. 0.000001 ) THEN
-               NERC(INERC) = NERC(INERC) + CENSUS(ICENSUS) * &
-                (SHARES(INERC,ICENSUS) / SHARES(MNUMNR,ICENSUS))
-            END IF
-!           IF ((INERC.EQ.1).AND.(UF_DBG.GT.0)) THEN
-!           WRITE(UF_DBG,1343)' CENSUS',TCENSUS,'NERC',TNERC,'SHARES',TSHR,
-!           +   'SHAREST',TTOT
-!1343   FORMAT(4(A8,1X,F10.2))
-!           write(uf_dbg,242)'inerc',inerc,'nerc',nerc(inerc)
-!242      format(a8,1x,i4,1x,a8,1x,f11.1)
-!           ENDIF
-   20    CONTINUE
-   10 CONTINUE
-!
-      RETURN
-      END
-!
-!
 !
       SUBROUTINE ELDECP(IRG)
 !
@@ -15308,7 +14415,7 @@
             EPNEXT(I,IYR) = EPFRST(ISP,IYR)
             EPFRST(ISP,IYR) = I
 
-            IF (CURIYR+1989 .EQ. 2021) WRITE(18,7733) CURIRUN, CURIYR+1989, JYR+1989, IYR, IRG, ISP, IGRP, I, EPHGHT(I,IYR), EPWDTH(I,IYR), ECPLDCBH(JYR,IRG,I), QELASN(IRG,UNYEAR), QELASN(IRG,CURIYR)
+            IF (CURIYR+1989 .EQ. 2025) WRITE(18,7733) CURIRUN, CURIYR+1989, JYR+1989, IYR, IRG, ISP, IGRP, I, EPHGHT(I,IYR), EPWDTH(I,IYR), ECPLDCBH(JYR,IRG,I), QELASN(IRG,UNYEAR), QELASN(IRG,CURIYR)
  7733       FORMAT(1X,"EPHGHT_UECP",8(":",I5),5(":",F21.6))
          END DO
          DO I = 1 , EPNSTP(IYR)
@@ -15816,12 +14923,6 @@
       real                                       :: bkgain
       logical                                    :: finished
 
-!     OPEN FILE OF YEAR DATA
-!
-      FILENM = 'ELDATYR'
-      NEW = .FALSE.
-      UF_TMP = FILE_MGR('O',FILENM,NEW)
-!
       UYR_HIST = HSTYEAR + NHIST - 1                                         !
       UYR_STEO = UYR_HIST + NSTEO
       UYR_EMIS = UYR_HIST
@@ -15836,7 +14937,7 @@
 !     ALL ELDATYR DATA IS NOW READ IN FROM THE EMM REGION TOOL
 !
 !
-!  Obtain remaining eldatyr data from regional tool database
+!  Obtain all eldatyr data from regional tool database
 !
       call sqlite3_open( 'emm_db/NEMS_INPUT.db', db )
 !     QUERY THE DATABASE TABLE V_EMM_ELDATYR - GENERATION BY FUEL TYPE / RENEWABLE TYPE
@@ -16228,7 +15329,7 @@
            HFLOLCR(irg,iyr) = HFLDSCR(irg,iyr) + HFLRSCR(irg,iyr)
            NIMPCRSH(irg,iyr) = CR_SH
 
-         WRITE(18,2067) irg, year, iyr, HFLCLCR(irg,iyr), HFLDSCR(irg,iyr), HFLRSCR(irg,iyr), HFLNGCR(irg,iyr), NIMPCRSH(irg,iyr)
+         WRITE(18,2067) CURIRUN, CURCALYR, irg, year, iyr, HFLCLCR(irg,iyr), HFLDSCR(irg,iyr), HFLRSCR(irg,iyr), HFLNGCR(irg,iyr), NIMPCRSH(irg,iyr)
  2067    FORMAT(1X,"H_ELDATYR_CENSUS_AFT HFLCLCR DSCR RDCR NGCR ",5(",",I5),5(",",F21.6))
 
       end do
@@ -16990,6 +16091,8 @@
            DO INERC = 1 , MNUMNR - 3 
              MPCGCToN(INERC,ICENSUS,IFUEL) = MAPPCTON(INERC,ICENSUS,4)
            ENDDO
+             MPCGCToN(MNUMNR-1,ICENSUS,IFUEL) = MAPPCTON(MNUMNR-1,ICENSUS,4)
+             MPCGCToN(MNUMNR-2,ICENSUS,IFUEL) = MAPPCTON(MNUMNR-2,ICENSUS,4)             
          ENDIF
        ENDDO
       ENDIF
@@ -17012,11 +16115,15 @@
           ENDDO
         ENDIF
        ENDDO
-      ENDDO
-!
-!     UF_TMP = FILE_MGR('C',FILENM,NEW)
-
-      CLOSE (UF_TMP)
+     ENDDO
+     
+     !check values
+     DO IFUEL = 1, TC_FUELS
+         DO INERC = 1, UNRGNS
+             write(13,2004) 'MPCGCtoN final ',IFUEL,INERC,(MPCGCTON(INERC,ICENSUS,IFUEL),ICENSUS=1,MNUMCR-2)
+         ENDDO
+     ENDDO
+2004 FORMAT(1x,A15,2I4,9F12.4)     
 !
       RETURN
       END
@@ -18954,19 +18061,6 @@
 
             INT = IECP - ECP_D_DSP - ECP_D_RNW - ECP_D_STO
 
-            !INTAVGCF = 0.0
-            !INTAVGCAP = 0.0
-            !DO ISP = 1, EENSP
-            !   INTAVGCF = INTAVGCF + EHHYCF(IRNW,ISP) * EHCAP(IRNW,ISP) * EETIME(ISP) / 8760.0
-            !   INTAVGCAP = INTAVGCAP + EHCAP(IRNW,ISP) * EETIME(ISP) / 8760.0
-            !ENDDO
-            !IF (INTAVGCAP .NE. 0.0) THEN
-            !    INTAVGCF = INTAVGCF / INTAVGCAP
-            !ELSE
-            !    INTAVGCF = INTAVGCF / EENSP
-            !ENDIF
-
-            !AVGSEACF = 0.0
             DO LGRP = 1 , UTNGRP
                ISP = UTSEAS(LGRP)
                DO ISEG = 1 , UTNSEG

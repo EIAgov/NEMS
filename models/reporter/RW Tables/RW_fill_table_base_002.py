@@ -187,7 +187,7 @@ def fill_table_base_002(dfd, table_spec, table_id):
     )
 
     
-    z[37] = (dfd["QTRIN"] - dfd["QBMRF"]) * tril_to_quad # Industrial: Renewable Energy 10/
+    z[37] = (dfd["QTRIN"]) * tril_to_quad # Industrial: Renewable Energy 10/
     z[2] = dfd["QH2IN"] * tril_to_quad # Industrial: Hydrogen
     z[38] = (dfd["QELIN"] - dfd["QELHM"]) * tril_to_quad # Industiral: Purchased Electricity
     z[39] = z[31] + z[32] + z[36] + z[37] + z[2] + z[38] + z[73] # Add various industrial subtotals
@@ -197,9 +197,7 @@ def fill_table_base_002(dfd, table_spec, table_id):
     # Transportation
     z[46] = dfd["QLGTR"] * tril_to_quad # Transportation: Propane
     # Transportation: Motor Gasoline 3/
-    z[44] = (dfd["QMGTR"] - dfd["QMGBS"] + dfd["QETTR"] + dfd["QMETR"]) * dfd[
-        "TRIL_TO_QUAD_rwpre"
-    ]
+    z[44] = (dfd["QMGTR"] - dfd["QMGBS"] + dfd["QETTR"] + dfd["QMETR"]) * tril_to_quad
     z[51] = dfd["QETTR"] * tril_to_quad # Transportation: Motor Gasoline of which:  E85 11/
     z[43] = (dfd["QJFTR"] - dfd["QJFBS"]) * tril_to_quad  # Transportation: Jet Fuel 12/
     z[42] = (dfd["QDSTR"] - dfd["QDSBS"]) * tril_to_quad # Transportation: Distillate Fuel Oil 13/
@@ -255,16 +253,14 @@ def fill_table_base_002(dfd, table_spec, table_id):
     z[63] = dfd["QPFIN"] * tril_to_quad # Delivered Energy Consumption, All Sectors: Petrochemical Feedstocks
     
     # Delivered Energy Consumption, All Sectors: Other Petroleum 17/
-    z[65] = (dfd["QOTAS"] + dfd["QSGIN"] + dfd["QPCIN"] + dfd["QASIN"]) * dfd[
-        "TRIL_TO_QUAD_rwpre"
-    ]
+    z[65] = (dfd["QOTAS"] + dfd["QSGIN"] + dfd["QPCIN"] + dfd["QASIN"]) * tril_to_quad
     
     # Delivered Energy Consumption, All Sectors: Petroleum and Other Liquids Subtotal
     # Distillate Fuel Oil + Kerosene + Jet Fuel + Liquefied Petroleum Gases and Others + 
     # Motor Gasoline + Petrochemical Feedstocks 6 Residual Fuel Oil + Other Petroleum
     z[66] = z[58] + z[59] + z[60] + z[61] + z[62] + z[63] + z[64] + z[65]
     
-    z[117] = (dfd["QNGAS"] - dfd["QNGEL"] - dfd["QNGHM"]) * dfd["TRIL_TO_QUAD_rwpre"] # Delivered Energy Consumption, All Sectors: Natural Gas
+    z[117] = (dfd["QNGAS"] - dfd["QNGEL"] - dfd["QNGHM"]) * tril_to_quad # Delivered Energy Consumption, All Sectors: Natural Gas
     z[116] = dfd["QLPIN"] * tril_to_quad # Delivered Energy Consumption, All Sectors: Lease and Plant Fuel 8/
     z[128] = dfd["QNGLQ"] * tril_to_quad # Delivered Energy Consumption, All Sectors: Natural Gas to Liquefy Gas for Export 9/
     z[49] = dfd["QGPTR"] * tril_to_quad # Delivered Energy Consumption, All Sectors: Pipeline and Distribution Fuel Natural Gas
@@ -284,7 +280,7 @@ def fill_table_base_002(dfd, table_spec, table_id):
 
     # Delivered Energy Consumption, All Sectors: Renewable Energy 18/
     z[72] = (
-        dfd["QBMRS"] + dfd["QBMCM"] + dfd["QTRIN"] - dfd["QBMRF"] + dfd["QTRSN"]
+        dfd["QBMRS"] + dfd["QBMCM"] + dfd["QTRIN"] + dfd["QTRSN"]
     ) * tril_to_quad
     
     # Delivered Energy Consumption, All Sectors: Hydrogen
@@ -358,13 +354,13 @@ def fill_table_base_002(dfd, table_spec, table_id):
     z[77] = dfd["ELECLOSS"] * tril_to_quad - z[136]
     # Total: Transportation: Delivered Energy + Transportation: Electricity Related Losses +
     # Transportation Hydrogen Losses
-    z[57] = z[55] + z[56] + z[105]
+    z[57] = z[55] + z[56] + z[105].fillna(0)
     # Total: Delivered Energy Consumption, All Sectors: Delivered Energy + Electricity Related Loss
     # + Delivered Energy Consumption
     z[78] = z[76] + z[77] + z[119]
     # industrial total: Industrial: delivered energy + Industrial: electricity-related losses +
     # Industrial Hydrogen Losses
-    z[41] = z[39] + z[40] + z[52]
+    z[41] = z[39] + z[40] + z[52].fillna(0)
     
     # Total Energy Consumption
     z[91] = dfd["QLGAS"] * tril_to_quad # Liquefied Petroleum Gases and Other 6/
@@ -376,13 +372,11 @@ def fill_table_base_002(dfd, table_spec, table_id):
     z[94] = dfd["QRSAS"] * tril_to_quad # Residual Fuel Oil
     z[93] = dfd["QPFIN"] * tril_to_quad #  Petrochemical Feedstocks
     #   Other Petroleum 17/
-    z[95] = (dfd["QOTAS"] + dfd["QSGIN"] + dfd["QPCIN"] + dfd["QASIN"]) * dfd[
-        "TRIL_TO_QUAD_rwpre"
-    ]
+    z[95] = (dfd["QOTAS"] + dfd["QSGIN"] + dfd["QPCIN"] + dfd["QASIN"]) * tril_to_quad
      #     Petroleum and Other Liquids Subtotal
     z[96] = z[88] + z[89] + z[90] + z[91] + z[92] + z[93] + z[94] + z[95]
     
-    z[118] = dfd["QNGAS"] * dfd["TRIL_TO_QUAD_rwpre"] #   Natural Gas
+    z[118] = dfd["QNGAS"] * tril_to_quad #   Natural Gas
     
     z[116] = dfd["QLPIN"] * tril_to_quad #   Lease and Plant Fuel 8/
     
@@ -406,7 +400,6 @@ def fill_table_base_002(dfd, table_spec, table_id):
         dfd["QBMRS"]
         + dfd["QBMCM"]
         + dfd["QTRIN"]
-        - dfd["QBMRF"]
         + dfd["QTRSN"]
         + dfd["QTREL"]
     ) * tril_to_quad - dfd["WNCMSEL"]
@@ -455,7 +448,9 @@ def fill_table_base_002(dfd, table_spec, table_id):
     z[109] = z[108].copy()
 
     YR = 2002
-    for col in range(1990, 2051):
-        z[109][col] = 0 if col <= YR else -(z[108][col] - z[108][YR]) / z[108][YR] * 100
-
+    for col_key in sorted(z[109].keys()):
+        if col_key <= YR:
+            z[109][col_key] = 0
+        else:
+            z[109][col_key] = -(z[108][col_key] - z[108][YR]) / z[108][YR] * 100
     return z

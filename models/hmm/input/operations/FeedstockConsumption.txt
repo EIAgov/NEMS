@@ -2,10 +2,11 @@
 ! Unit: MMBtu/kg H2
 Composite Table:
 prodTech         fuel             FeedstockConsumption
-SMR              NG               0.1573
-SMR_CCS          NG               0.1678
-SMR_CCS_OFF      NG               0.1573
+SMR              NG               0.14525
+SMR_CCS          NG               0.15438
+SMR_CCS_OFF      NG               0.14525
 SMR              electricity      0
 SMR_CCS          electricity      0
 SMR_CCS_OFF      electricity      0
+ATR_CCS          NG               0.14525
 ;

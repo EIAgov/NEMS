@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/continew,v 1.2 2014/08/05 19:23:19 pkc Exp $
 
 !  This passes any information to not stop on the current cycle to intercv.

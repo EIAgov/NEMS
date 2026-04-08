@@ -1,0 +1,4 @@
+name,"capital costs,$/t","variable operation and maintenance,$/t","Dollar year of CAPEX and VOM, to be adjusted for inflation","natural gas consumption,kJ/t","electricity consumption,kWh/t",Node build limit for first model year,Fraction that the node build limit increases with each model year,Annual nationwide build limit for first model year,Fraction that the nationwide build limit increases with each model year,Multiplier to adjust investment and variable costs for testing,Direct Air Capture?,CCS (not DAC)?,
+kind,CAPEX_USD_t,VOM_USD_t,dollar_year,natgas_GJ_t,elec_GJ_t,init_build_limit_node,rate_build_limit_node,init_build_limit_total,rate_build_limit_total,cost_multiplier,45Q-DAC,45Q-CCS,LCFS_eligible
+DAC-HT,296,0,2020,5.3,1.3,0,0.1,1.00E+06,0.1,1,Y,N,Y
+DAC-LT,402,0,2020,0,2.5,0,0.1,1.00E+06,0.1,1,Y,N,Y

@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/rggi,v 1.3 2017/09/14 15:17:21 xj2 Exp $
 ! Regional Greenhouse Gas Initiative AB32 cap and trade variables
 real rg_covd_em_ele(mnumyr) ! Covered emissions, electric                         (tonnes Ceq)

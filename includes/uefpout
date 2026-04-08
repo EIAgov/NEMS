@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/uefpout,v 1.3 2007/10/03 11:48:48 pkc Exp $
 !  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR

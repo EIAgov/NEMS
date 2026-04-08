@@ -7,10 +7,22 @@
 ! LANGUAGE:      FORTRAN                                            *
 ! CALLED BY:     PROGRAM NEMS (Integrating Module)                  *
 !                                                                   *
-! ANALYSIS:      AEO2025                                            *
-! CASE:          Reference                                          *
-! DATE:          March 13,  2025                                    *
+! ANALYSIS:      AEO2026                                            *
+! DATE:          January 15, 2026                                   *
 !                                                                   *
+!********************************************************************
+! AEO2026 CHANGES                                                   *
+! -Move data center servers out of MELS and add data center servers *
+!    as an explicit end use; combine computers and office equipment *
+!   (!DataCtr26)                                                    *
+! -Replace heard-coded fuel numbers with MNUMCGF for future battery *
+!   energy storage system modeling (!BESSmodel)                     *
+! -Remove AEO2021/24 !indclprc/!usePCLCM, use of industrial         *
+!   coal price as proxy                                             *
+! -Cap coal final end use consumption (!CoalCap26)                  *                   
+! -Add optional functionality to gradually introduce incremental    *
+!   intensity increases in service demand due to data centers       *
+!   (!DCDmd26)                                                      *
 !********************************************************************
 ! AEO2025 CHANGES                                                   *
 !  -Cleaned up various code comments and formatting                 *
@@ -26,7 +38,7 @@
 !  -2018 CBECS code changes                                         *
 !    Updated floorspace growth rate coefficients (!MAM25)           *
 !    CMTotalFlspc update (!TFlsp25)                                 *
-!	 Update base year references (!BASEYR18)                        *
+!    Update base year references (!BASEYR18)                        *
 !  -Note: There was no AEO2024                                      *
 !********************************************************************
 ! AEO2023 CHANGES                                                   *
@@ -387,8 +399,7 @@ END MODULE COM_MEM
 !  Note: when doing elasticity runs, include PQ block instead of APQ  ! elastruns
 !      MUST also make this change in the Distributed Gen Subroutine   ! elastruns
 !      include'pq.'                                                   ! elastruns
-      include'qsblk'       ! seds values
-	  
+      include'qsblk'       ! seds values 
 
       REAL*4 BASELINEBKWHCM                                           ! 111(d) - Stores restart file values of electricity consumption by census division and year
       COMMON /BASE111DCM/ BASELINEBKWHCM(MNUMCR,MNUMYR)               ! 111(d)
@@ -413,6 +424,10 @@ END MODULE COM_MEM
       COMMON/NEMSWK1/XMLOUT
       INTEGER XMLOUT
 
+      INTEGER*2 ApplyRamp ! Switch to implement ramp factor smoothing
+      REAL*4 RampFactor ! DCDmd26
+	  COMMON /CMRamp/ ApplyRamp
+  
       INTEGER*2 DecayBM ! STEO Mistie Benchmarking Switch
       INTEGER*4 LastDecayYr ! Year in which STEO Benchmarking is 0
       INTEGER*2 NoHist ! Switch - set to 1 in KPARM to turn off calibration to history and STEO ! NoHistory
@@ -449,7 +464,7 @@ END MODULE COM_MEM
       
       !Determine if EQUIPSD is already allocated memory. If not, allocate memory to
       !EQUPSD variable based on the defined varible dimensions !EquipSD25
-      IF(.not. allocated(EquipSD)) allocate(EquipSD(MNUMCR,CMnumBldg,CMnumTechs,CMnumEqVint,CMDecision,23:MNUMYR))
+      IF(.not. allocated(EquipSD)) allocate(EquipSD(MNUMCR,CMnumBldg,CMnumTechs,CMnumEqVint,CMDecision,CBECSyear-BaseYr+1:MNUMYR))
 
 
       AEOLSTYR = RTOVALUE("AEOLSTYR  ",0)  ! Get calendar year for last year of AEO projection period
@@ -460,7 +475,7 @@ END MODULE COM_MEM
       !BASEYR=1990 (do not un-comment)
 
       ! Index corresponding to current AEO year (AEO report year - 1989); 1989=BASEYR-1
-      AEOYR = 33
+      AEOYR = 37          ! Not used; only used for potential technology side-case runs
 
       ! Index of the first year to project (first year after CBECSyear)
       CMFirstYr = CBECSyear - BASEYR + 2
@@ -528,8 +543,8 @@ END MODULE COM_MEM
        CMServices(5)= 'Cooking'
        CMServices(6)= 'Lighting'
        CMServices(7)= 'Refrigeration'
-       CMServices(8)= 'Office Equip-PCs'
-       CMServices(9)= 'Office Equip-NonPCs'
+       CMServices(8)= 'Data Center Servers' !DataCtr26
+       CMServices(9)= 'Office PCs and equip' !DatCtr26
        CMServices(10)='Other'
 
        CMMajor_Fuels(1)='Electricity'
@@ -593,11 +608,11 @@ END MODULE COM_MEM
          WRITE (RCDBG,100) SCEN, DATE
         ENDIF
 
-		IF (PRTDBGK.EQ.1) THEN
-		 OPEN(unit = 663, file = "CDM_DataCenters.txt") !creates the file
-		 WRITE(663,*) 'case building, NewServDmd (s,b,r,y) [mmBTU/sqft],  ServDmdExBldg (s,b,r,y) [mmBTU/sqft], s, b, r, y'
-		 CLOSE(663)
-		ENDIF
+        IF (PRTDBGK.EQ.1) THEN
+         OPEN(unit = 663, file = "CDM_DataCenters.txt") !creates the file
+         WRITE(663,*) 'case building, NewServDmd (s,b,r,y) [mmBTU/sqft],  ServDmdExBldg (s,b,r,y) [mmBTU/sqft], s, b, r, y'
+         CLOSE(663)
+        ENDIF
 
 ! Open Commercial I/O files:
 
@@ -611,9 +626,9 @@ END MODULE COM_MEM
         dbgy1= 0
         dbgy2= 0
 
-        BaseYrPCShrofOffEqEUI = 0.0
         ReportOption = 0
-        CoolingTechIndexHP= 0
+        CoolingTechIndexHP = 0
+        ApplyRamp = 0 ! DCDmd26
         DecayBM = 0
         LastDecayYr = 0
         STRetBehav = 0
@@ -623,34 +638,25 @@ END MODULE COM_MEM
 !
         count = 0
         NumErr = 0
-        InputCount = 14  !Number of rows of data inputs to be read in from KPARM (to test for premature EOF)
+        InputCount = 16  !Number of rows of data inputs to be read in from KPARM (to test for premature EOF)
 
         ! read key options and certain variables from KPARM:
         READ (RCPRM,'(99(/))')   ! skip header
         count = count + 1
-        READ (RCPRM,*,ERR=160,END=172,IOSTAT=IOS) &
+        READ (RCPRM,*,ERR=160,END=174,IOSTAT=IOS) &
                       dbgr, dbgb, dbgs, dbgy1, dbgy2
-         GOTO 161
+         GOTO 163
 160      CONTINUE
          NumErr = NumErr + 1
          IF(PRTDBGK.EQ.1) &
           WRITE(RCDBG,*) 'Comm_KPARM read err',IOS,' on record', &
                           count,'; skip record and continue read.'
-161     CONTINUE
-        READ (RCPRM,'(/)')   ! skip two lines after last read
-        count = count + 1
-        READ (RCPRM,*,ERR=162,END=172,IOSTAT=IOS) &
-                      BaseYrPCShrofOffEqEUI
-         GOTO 163
-162      CONTINUE
-         NumErr = NumErr + 1
-         IF(PRTDBGK.EQ.1) &
-          WRITE(RCDBG,*) 'Comm_KPARM read err',IOS,' on record', &
-                          count,'; skip record and continue read.'
+
+
 163     CONTINUE
         READ (RCPRM,'(/)')   ! skip two lines after last read
         count = count + 1
-        READ (RCPRM,*,ERR=164,END=172,IOSTAT=IOS) &
+        READ (RCPRM,*,ERR=164,END=174,IOSTAT=IOS) &
                       ReportOption  ! KRPT switch
          GOTO 165
 164      CONTINUE
@@ -662,7 +668,7 @@ END MODULE COM_MEM
 
         READ (RCPRM,'(/)')   ! skip two lines after last read
         count = count + 1
-        READ (RCPRM,*,ERR=166,END=172,IOSTAT=IOS) &
+        READ (RCPRM,*,ERR=166,END=174,IOSTAT=IOS) &
                       CoolingTechIndexHP ! cooling equip comparable
                                          ! to heatpumps
          GOTO 167
@@ -675,21 +681,34 @@ END MODULE COM_MEM
 
         READ (RCPRM,'(/)')   ! skip two lines after last read
         count = count + 1
-        READ (RCPRM,*,ERR=168,END=172,IOSTAT=IOS) &
-                      DecayBM ! Benchmarking to ramp STEO
-                              ! mistie down to 0
+        READ (RCPRM,*,ERR=168,END=174,IOSTAT=IOS) &
+                      ApplyRamp ! Switch to implement ramp factor smoothing ! DCDmd26
 
-        GOTO 169
-168     CONTINUE
-        NumErr = NumErr + 1
-        IF(PRTDBGK.EQ.1) &
-         WRITE(RCDBG,*) 'Comm_KPARM read err',IOS,' on record', &
+         GOTO 169
+168      CONTINUE
+         NumErr = NumErr + 1
+         IF(PRTDBGK.EQ.1) &
+          WRITE(RCDBG,*) 'Comm_KPARM read err',IOS,' on record', &
                           count,'; skip record and continue read.'
 169     CONTINUE
 
         READ (RCPRM,'(/)')   ! skip two lines after last read
         count = count + 1
-        READ (RCPRM,*,ERR=170,END=172,IOSTAT=IOS) &
+        READ (RCPRM,*,ERR=170,END=174,IOSTAT=IOS) &
+                      DecayBM ! Benchmarking to ramp STEO
+                              ! mistie down to 0
+
+        GOTO 171
+170     CONTINUE
+        NumErr = NumErr + 1
+        IF(PRTDBGK.EQ.1) &
+         WRITE(RCDBG,*) 'Comm_KPARM read err',IOS,' on record', &
+                          count,'; skip record and continue read.'
+171     CONTINUE
+
+        READ (RCPRM,'(/)')   ! skip two lines after last read
+        count = count + 1
+        READ (RCPRM,*,ERR=172,END=174,IOSTAT=IOS) &
                       LastDecayYr ! Yr where the final STEO
                                   ! mistie is ramped down to 0
         READ (RCPRM,'(///////)')   ! skip 7 lines after last read      ! sw10-95
@@ -758,26 +777,26 @@ END MODULE COM_MEM
                  ModYear, EndModYear, ELfactor, NGfactor, DSfactor       ! elastruns
 
 
-        GOTO 171
-170      CONTINUE
+        GOTO 173
+172      CONTINUE
          NumErr = NumErr + 1
          IF(PRTDBGK.EQ.1) &
           WRITE(RCDBG,*) 'Comm_KPARM read err',IOS,' on record', &
                           count,'; skip record and continue read.'
-171     CONTINUE
+173     CONTINUE
+        GOTO 175
 
-        GOTO 173
-172     NumErr = NumErr + 1
+174     NumErr = NumErr + 1
         IF(PRTDBGK.EQ.1) Write(RCDBG,*)'KPARM EOF reached prematurely.'
 
-173     CONTINUE           ! EOF reached in KPARM when expected
+175     CONTINUE           ! EOF reached in KPARM when expected
         ! Close KPARM
         RCPRM= FILE_MGR ('C','KPARM',.FALSE.)
 
         IF(PRTDBGK.EQ.1) Then
           WRITE(RCDBG,*) NumErr,' errors detected.'
-          WRITE(RCDBG,174)
-174       FORMAT(/,' KPARM data set error trapping complete!',/)
+          WRITE(RCDBG,176)
+176       FORMAT(/,' KPARM data set error trapping complete!',/)
          ENDIF
 
         ! Open KRPT if KPARM option ReportOption set to 1:
@@ -1023,7 +1042,7 @@ END MODULE COM_MEM
 !Initializing cmnewfloorspace
 
       CMNewFloorSpace= 0.00  ! new floorspace in million square feet   !Zero out for new CBECS kk
-	  CMTotalFlspc= 0.00     ! total floorspace in million square feet !TFlsp25
+      CMTotalFlspc= 0.00     ! total floorspace in million square feet !TFlsp25
 
 !  Calculate CBECS original stock for vintage years
 
@@ -1389,8 +1408,13 @@ END MODULE COM_MEM
                         ! into r. Also for refrigeration.
 
 !   Add Declarations for adjustment to intensities for data centers
+!   DCDmd26 use key benchmarking years to manage AEC index ramp
+      INTEGER*2 ApplyRamp ! Switch to implement ramp factor smoothing
+	  COMMON /CMRamp/ ApplyRamp
       REAL*4 DatCtrShare
-      REAL*4 dcf(CMnumBldg, CMnumServ)
+      REAL*4 dcf(CMnumBldg+1, CMnumServ) ! Set DCF to maximum possible allocation for ! DCDmd26
+      REAL*4 RampFactor ! DCDmd26      
+      
 
 !   Add Declarations for detailed miscellaneous end use calculations       ! miscdetail
       REAL*4 MarketPenetrationMels(CNUMMELS,CBECSyear-BaseYr+1:MNUMYR)  !MELs21
@@ -1400,7 +1424,7 @@ END MODULE COM_MEM
                KitchenVent,LabRefFrz,Televisions,LrgVidBoard, & ! miscdetail !MELs21
                ElVehicles,FumeHoods,Laundry,MedImaging,       & ! miscdetail !MELs21
                Elevators,Escalators,ITEquip,OfficeUPS,        & ! miscdetail !MELs21
-               UPSDataCtr,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
+               Shredder,OfficePBE,VOICEIP,      & ! miscdetail !MELs21 !DataCtr26
                POSsystems,WarehouseRobots,TotExplicitMisc,    & !MELs21
                xmisccalc                                        ! miscdetail  ! holding variable for curiyr-CMFirstYr to use in MELs equations   !TODO - not used (remove)?
 
@@ -1408,7 +1432,7 @@ END MODULE COM_MEM
                KitchenVent,LabRefFrz,Televisions,LrgVidBoard, & ! miscdetail !MELs21
                ElVehicles,FumeHoods,Laundry,MedImaging,       & ! miscdetail !MELs21
                Elevators,Escalators,ITEquip,OfficeUPS,        & ! miscdetail !MELs21
-               UPSDataCtr,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
+               DataCtrServer,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
                POSsystems,WarehouseRobots,TotExplicitMisc,    & !MELs21
                xmisccalc                                        ! miscdetail  ! holding variable for curiyr-CMFirstYr to use in MELs equations   !TODO - not used (remove)?
 
@@ -1416,7 +1440,7 @@ END MODULE COM_MEM
                 KitchenVentElq,LabRefFrzElq,TelevisionsElQ,LrgVidBoardElq, & ! miscdetail
                 ElVehiclesElQ,FumeHoodsElQ,LaundryElQ,MedImagingElQ,    & ! miscdetail
                 ElevatorsElQ,EscalatorsElQ,ITEquipELQ,OfficeUPSELQ,   & ! miscdetail
-                UPSDataCtrELQ,ShredderELQ,OfficePBEELQ,VOICEIPELQ,   & ! miscdetail
+                ShredderELQ,OfficePBEELQ,VOICEIPELQ,   & ! miscdetail
                 POSsystemsElQ,WarehouseRobotsElQ,TotExplicitMiscElQ     !MELs21
 
       REAL*4 CoffeeBrewersElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                   ! miscdetail
@@ -1433,8 +1457,7 @@ END MODULE COM_MEM
       REAL*4 ElevatorsElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
       REAL*4 EscalatorsElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                      ! miscdetail
       REAL*4 ITEquipElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                         ! miscdetail
-      REAL*4 OfficeUPSElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
-      REAL*4 UPSDataCtrElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                      ! miscdetail
+      REAL*4 OfficeUPSElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail !DataCtr26
       REAL*4 ShredderElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                        ! miscdetail
       REAL*4 OfficePBEElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
       REAL*4 VoiceIPElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                         ! miscdetail
@@ -1445,13 +1468,14 @@ END MODULE COM_MEM
 
       REAL*4 SurvFlrbsf,CMNewFlrbsf,BrewerFlrBase,LaundryFlrBase,    & ! miscdetail
                MedFlrBase,ElevatorFlrBase,EscalatorFlrBase,          & ! miscdetail
-               TotFlrNoWhse,LabFlrBase,KitchenFlrBase,OfficeFlrBase    ! miscdetail
+               TotFlrNoWhse,LabFlrBase,KitchenFlrBase,OfficeFlrBase    ! miscdetail !DataCtr26
+                                                                     
       REAL*4 BaseElTotR                                                 ! miscdetail
       INTEGER*4 nb        !  alternate index for building type
-       ! floorspace in current CD and building type in billion sf for calcs with national totals   !TODO - is this comment misplaced or does it apply to above?
+
       REAL*4 xplicitmiscshr(CMnumBldg)
+      REAL*4 DataCtrServPenetration(CBECSyear-BASEYR+1:MNUMYR)  !DataCtr26
       REAL*4 OfficePCPenetration(CBECSyear-BaseYr+1:MNUMYR)
-      REAL*4 OfficeNonPCPenetration(CBECSyear-BaseYr+1:MNUMYR)
 
       REAL*4 BASELINEBKWHCM                                             ! 111(d) - Stores restart file values of electricity consumption by census division and year
       COMMON/BASE111DCM/BASELINEBKWHCM(MNUMCR,MNUMYR)                     ! 111(d)
@@ -2256,14 +2280,6 @@ END MODULE COM_MEM
          count = count + 1
          READ (infile,*,ERR=199,END=201,IOSTAT=IOS) &
               (ComEUI (r,b,s,f),  s= 1, CMnumServ)
-         ! If BaseYrPCShrofOffEqEUI .GE. 0, (from KPARM), interpret KINTENS EUI in Office Equip - PCs slot as total office equipment EUI, and split according to BaseYrPCShrofOffEqEUI   !TODO - why use share of PC end use 8 to immediately overwrite non-PC end use 9 instead of using end use 9 input from KINTENS.txt?; BaseYrPCShrofOffEqEUI = -1.0 in KPARM.txt
-         IF (BaseYrPCShrofOffEqEUI .GE. 0.0) THEN
-          ComEUI (r,b,9,f)=   & ! (NonPC)
-           ComEUI (r,b,8,f) *  (1.0 - BaseYrPCShrofOffEqEUI)
-
-          ComEUI (r,b,8,f)=   & ! (PC)
-           ComEUI (r,b,8,f)  *  BaseYrPCShrofOffEqEUI
-         ENDIF
          ! EUI units are kBtu/sqft.  On conversion to SDI, lighting efficacy units of Lumen/Watt will be used to obtain lighting SDI units of LumenYrs/sqft;
          ! Therefore, a conversion factor of .03343 wattyr/kBtu must be applied first, and this is a good time to do so:
          ComEUI (r,b,6,f)= ComEUI (r,b,6,f) * .03343
@@ -2620,12 +2636,12 @@ END MODULE COM_MEM
           MelsElQ(I)=1.0
         ENDDO !y
       ENDDO !I
-
-      DO b=1, CMnumBldg             !DataCtr25
-        DO s=1,CMnumServ            ! data center shares
+    
+      DO b=1, CMnumBldg+1             !DataCtr25
+        DO s=1,CMnumServ        
           dcf(b,s)=1.0
         ENDDO !s
-      ENDDO !b 
+      ENDDO !b
 
       DO b=1,CMnumBldg            ! Share of miscellaneous electric end uses explicitly accounted for
         xplicitmiscshr(b)=1.0          ! in base year, based on TIAX August 2006 report, 2013 MELS, and 2012 CBECS [to be updated with new rpt). !BASEYR18
@@ -2635,18 +2651,18 @@ END MODULE COM_MEM
       Read(RCL2,'(99(/))') !Skip over 99 lines
       IF(PRTDBGK.EQ.1)WRITE(RCDBG,*)'KMELS data set error trapping:'
       NumErr = 0
-	   DO b=1, CMnumBldg !  
+       DO b=1, CMnumBldg+1 ! DCDmd26
         READ (RCL2,*,ERR=624,END=625,IOSTAT=IOS) &        !DataCtr25
         (dcf (b,s), s=1,CMnumServ)   !Shares of increased service for Data Center !DataCtr25
        ENDDO
-	   
-	  GOTO 626
-	  
+       
+      GOTO 626
+      
  624  CONTINUE    ! Report read error
       NumErr = 1
       IF(PRTDBGK.EQ.1) &
         WRITE(RCDBG,*) 'KMELS dcf read err',IOS, 'on record', s,'; skip record and continue read.'
-		! WRITE (RCDBG,*) 'dcf by building type and end use',(dcf(b,s), s=1,CMnumServ)
+        ! WRITE (RCDBG,*) 'dcf by building type and end use',(dcf(b,s), s=1,CMnumServ)
       GOTO 626
  625  CONTINUE   !Reached end of KMELS file prematurely; write message
       NumErr = 1
@@ -2683,10 +2699,11 @@ END MODULE COM_MEM
 
       READ (RCL2,'(//)')
       READ (RCL2,*,ERR=670,END=672,IOSTAT=IOS) &
-	  (OfficePCPenetration(y), y= cmfirstyr, MNUMYR)
-
+      (DataCtrServPenetration(y), y= cmfirstyr, MNUMYR)
+      
       READ (RCL2,'(//)')   ! skip line after last read
-      READ (RCL2,*) (OfficeNonPCPenetration(y), y= cmfirstyr, MNUMYR)
+      READ (RCL2,*) (OfficePCPenetration(y), y= cmfirstyr, MNUMYR)
+
 
    GOTO 671
 670      CONTINUE
@@ -2706,11 +2723,11 @@ END MODULE COM_MEM
 674       FORMAT(/,' KMELS office equipment data set error trapping complete!',/)
         ENDIF
 
-        READ (RCL2,'(/)')  ! Skip after last read
+        READ (RCL2,'(/)')  ! Skip line after last read
         IF (PRTDBGK.EQ.1) WRITE(RCDBG,*)'KMELS data set error trapping:'
         NumErr=0
         DO 650 I=1, CNumMels
-           READ (RCL2,*,ERR=649,END=650,IOSTAT=IOS) (MelsElQ (I))  !CBECS base-year annual energy consumption of MELs (trillion Btu per sqft per year)
+           READ (RCL2,*,ERR=649,END=650,IOSTAT=IOS) (MelsElQ (I))  ! CBECS base-year annual energy consumption of MELs (trillion Btu per sqft per year)
            IF(PRTDBGK.EQ.1) WRITE(RCDBG,'(A,I4,A,F12.3)') 'MelsElQ(',I,') =',MelsElQ(I)
            GOTO 650
 
@@ -3410,18 +3427,19 @@ END MODULE COM_MEM
 
  13   CONTINUE  !endshel
 
-! Calculate data center share of all buildings in preparation for incremental adjustment to intensities. !DataCtr25  !dcadjust   !TODO - update coefficients?
+! Calculate data center share of all buildings in preparation for incremental adjustment to intensities. !DataCtr25  !dcadjust   !TODO - update coefficients
 
        DatCtrShare=0.000002*(float(curiyr-cmfirstyr)**3.0) &              !dcadjust07 Updated equation for AEO07
                      -0.00002*(float(curiyr-cmfirstyr)**2.0) &            !dcadjust07 reset constant term for cmfirstyr
-                           + 0.0173 *(float(curiyr-cmfirstyr)) +  0.001626   !DataCtr25 update
+                           + 0.0173 *(float(curiyr-cmfirstyr)) +  0.001626   !DataCtr25 update !!!!! y = 1.7133x - 3439
+
 
 ! Calculate new and surviving service demands for the current year:
 
          ! Calculate U.S. total demand in each explicit miscellaneous electric loads (MELs) category
          ! (sub-categories of s = 10), will share to BT by CD in service demand calculation.
 
-         !zero out floor bases for misc KK
+         !zero out floor bases for miscellaneous electric loads
          y = CURIYR
          BrewerFlrBase=0.
          LaundryFlrBase=0.
@@ -3432,6 +3450,9 @@ END MODULE COM_MEM
          KitchenFlrBase=0.
          LabFlrBase=0.
          OfficeFlrBase=0.
+         
+         ! Floorbases define which building types operate explicit miscellaneous electric loads. For example, fumehoods will only operate in laboratories, so we define 
+         ! a LabFlrBase (education, health care, lg and sm offices, and other) as the types of floorspace where labs may exist.
 
          BrewerFlrBase = (CMSurvFloorTot(4,y) + CMSurvFloorTot(7,y)   & ! miscdetail - total food service and large/small office floorspace to share coffee brewers
           + CMSurvFloorTot(8,y) + CMNewFlrSpace(4,y)                  & ! miscdetail
@@ -3442,70 +3463,68 @@ END MODULE COM_MEM
          MedFlrBase = (CMSurvFloorTot(5,y) + CMSurvFloorTot(7,y)      & ! miscdetail - total health care, large office, small office space, and mercantile/service to share medical imaging equipment  !MELs21
           + CMSurvFloorTot(8,y) + CMSurvFloorTot(9,y)                 & !MELs21
           + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                   & !MELs21
-          + CMNewFlrSpace(8,y) + CMNewFlrSpace(8,y))* 1000.0            ! miscdetail - convert from billion sqft back to million sqft  !MELs21
-         ElevatorFlrBase = (CMUSSurvFloorTot(y)+CMUSNewFloorTot(y))*1000.0 ! miscdetail - convert from billion sqft back to million sqft  !MELs21 - Elevators present in all 2012 CBECS PBAs, so setting equal to total floorspace
-         EscalatorFlrBase = (CMUSSurvFloorTot(y)-CMSurvFloorTot(3,y)  & ! miscdetail - total floorspace excluding food sales, food service, small office, and warehouse to share escalators
-          - CMSurvFloorTot(4,y) -CMSurvFloorTot(8,y)                  & ! miscdetail
-          - CMSurvFloorTot(10,y)) * 1000.0                            & ! miscdetail - convert from billion sqft back to million sqft
-          + (CMUSNewFloorTot(y)-CMNewFlrSpace(3,y)-CMSurvFloorTot(4,y)& ! miscdetail
-          - CMSurvFloorTot(8,y) - CMSurvFloorTot(10,y)) * 1000.0        ! miscdetail - convert from billion sqft back to million sqft
-         TotFlrNoWhse = (CMUSSurvFloorTot(y)-CMSurvFloorTot(10,y)     & ! miscdetail - total floorspace excluding warehouses to share off-road electric vehicles
-          + CMUSNewFloorTot(y)-CMNewFlrSpace(10,y)) * 1000.0            ! miscdetail - convert from billion sqft back to million sqft
-         KitchenFlrBase = (CMUSSurvFloorTot(y)-CMSurvFloorTot(7,y)    & ! miscdetail - total floorspace excluding large office, small office, warehouse, and other to share kitchen ventilation
-          - CMSurvFloorTot(8,y) -CMSurvFloorTot(10,y)                 & ! miscdetail
-          - CMSurvFloorTot(11,y)) * 1000.0                            & ! miscdetail - convert from billion sqft back to million sqft
-          + (CMUSNewFloorTot(y)-CMNewFlrSpace(7,y)-CMSurvFloorTot(8,y)& ! miscdetail
-          - CMSurvFloorTot(10,y) - CMSurvFloorTot(11,y)) * 1000.0       ! miscdetail - convert from billion sqft back to million sqft
-         LabFlrBase = (CMSurvFloorTot(2,y) + CMSurvFloorTot(5,y)      & ! miscdetail - total education, health care, large office, small office, and other to share laboratory eqipment
-          + CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)                 & !MELs21
-          + CMSurvFloorTot(11,y) + CMNewFlrSpace(2,y)                 & ! miscdetail
-          + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                   & ! miscdetail  !MELs21
-          + CMNewFlrSpace(8,y) + CMNewFlrSpace(11,y))* 1000.0           ! miscdetail - convert from billion sqft back to million sqft  !MELs21
-         OfficeFlrBase = (CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)   & ! miscdetail - total large and small office floorspace to share PBX and VoIP telecommunications equipment
-          + CMNewFlrSpace(7,y)  + CMNewFlrSpace(8,y))* 1000.0           !convert from billion sqft back to million sqft
+          + CMNewFlrSpace(8,y) + CMNewFlrSpace(9,y))* 1000.0            ! miscdetail - convert from billion sqft back to million sqft  !MELs21
+         ElevatorFlrBase = (CMUSSurvFloorTot(y)+ CMUSNewFloorTot(y))*1000.0 ! miscdetail - convert from billion sqft back to million sqft  !MELs21 - Elevators present in all 2012 CBECS PBAs, so setting equal to total floorspace
+         EscalatorFlrBase = (CMUSSurvFloorTot(y)- CMSurvFloorTot(3,y)  & ! miscdetail - total floorspace excluding food sales, food service, small office, and warehouse to share escalators
+          - CMSurvFloorTot(4,y) - CMSurvFloorTot(8,y)                  & ! miscdetail
+          - CMSurvFloorTot(10,y)                                       & ! miscdetail - convert from billion sqft back to million sqft
+          + CMUSNewFloorTot(y)- CMNewFlrSpace(3,y) - CMSurvFloorTot(4,y)& ! miscdetail
+          - CMSurvFloorTot(8,y) - CMSurvFloorTot(10,y)) * 1000.0         ! miscdetail - convert from billion sqft back to million sqft
+         TotFlrNoWhse = (CMUSSurvFloorTot(y)- CMSurvFloorTot(10,y)     & ! miscdetail - total floorspace excluding warehouses to share off-road electric vehicles
+          + CMUSNewFloorTot(y) - CMNewFlrSpace(10,y)) * 1000.0             ! miscdetail - convert from billion sqft back to million sqft
+         KitchenFlrBase = (CMUSSurvFloorTot(y)- CMSurvFloorTot(7,y)    & ! miscdetail - total floorspace excluding large office, small office, warehouse, and other to share kitchen ventilation
+          - CMSurvFloorTot(8,y) - CMSurvFloorTot(10,y)                 & ! miscdetail
+          - CMSurvFloorTot(11,y)                                       & ! miscdetail - convert from billion sqft back to million sqft
+          + CMUSNewFloorTot(y)- CMNewFlrSpace(7,y) - CMSurvFloorTot(8,y)& ! miscdetail
+          - CMSurvFloorTot(10,y) - CMSurvFloorTot(11,y)) * 1000.0        ! miscdetail - convert from billion sqft back to million sqft
+         LabFlrBase = (CMSurvFloorTot(2,y) + CMSurvFloorTot(5,y)       & ! miscdetail - total education, health care, large office, small office, and other to share laboratory eqipment
+          + CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)                  & !MELs21
+          + CMSurvFloorTot(11,y) + CMNewFlrSpace(2,y)                  & ! miscdetail
+          + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                    & ! miscdetail  !MELs21
+          + CMNewFlrSpace(8,y) + CMNewFlrSpace(11,y))* 1000.0            ! miscdetail - convert from billion sqft back to million sqft  !MELs21
+         OfficeFlrBase = (CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)    & ! miscdetail - total large and small office floorspace to share PBX and VoIP telecommunications equipment
+          + CMNewFlrSpace(7,y)  + CMNewFlrSpace(8,y))* 1000.0            ! convert from billion sqft back to million sqft
 
          XfmrsDry = MarketPenetrationMels(1,y)*MelsELQ(1)                    ! miscdetail
          XfmrsDry = (XfmrsDry/1000.0) * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))     ! miscdetail
-         KitchenVent = MarketPenetrationMels(2,y)*MelsELQ(2)              ! miscdetail
-         KitchenVent = KitchenVent/1000.0 * (KitchenFlrBase/1000.0)       ! miscdetail - convert from million sqft back to billion sqft
-         Security = MarketPenetrationMels(3,y)*MelsELQ(3)                  ! miscdetail
+         KitchenVent = MarketPenetrationMels(2,y)*MelsELQ(2)                 ! miscdetail
+         KitchenVent = KitchenVent/1000.0 * (KitchenFlrBase/1000.0)          ! miscdetail - convert from million sqft back to billion sqft
+         Security = MarketPenetrationMels(3,y)*MelsELQ(3)                    ! miscdetail
          Security = (Security/1000.0 )* (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))    ! miscdetail
-         LabRefFrz = MarketPenetrationMels(4,y)*MelsELQ(4)                 ! miscdetail
-         LabRefFrz = LabRefFrz/1000.0 * (LabFlrBase/1000.0)               ! miscdetail - convert from million sqft back to billion sqft
-         MedImaging = MarketPenetrationMels(5,y)*MelsELQ(5)                ! miscdetaill
-         MedImaging = (MedImaging/1000.0) * (MedFlrBase/1000.0)           ! miscdetail - convert from million sqft back to billion sqft
-         LrgVidBoard = MarketPenetrationMels(6,y)*MelsELQ(6)                ! miscdetail
+         LabRefFrz = MarketPenetrationMels(4,y)*MelsELQ(4)                   ! miscdetail
+         LabRefFrz = LabRefFrz/1000.0 * (LabFlrBase/1000.0)                  ! miscdetail - convert from million sqft back to billion sqft
+         MedImaging = MarketPenetrationMels(5,y)*MelsELQ(5)                  ! miscdetaill
+         MedImaging = (MedImaging/1000.0) * (MedFlrBase/1000.0)              ! miscdetail - convert from million sqft back to billion sqft
+         LrgVidBoard = MarketPenetrationMels(6,y)*MelsELQ(6)                 ! miscdetail
          LrgVidBoard = LrgVidBoard/1000.0 * (CMsurvFloorTot(1,y) + CMNewFlrSpace(1,y))    ! miscdetail
          CoffeeBrewers = MarketPenetrationMels(7,y)*MelsELQ(7)
-         CoffeeBrewers=(CoffeeBrewers/1000.0)*(BrewerFLrBase/1000.0) !convert from million sqft back to billion sqft
-         ElVehicles = MarketPenetrationMels(8,y)*MelsELQ(8)              ! miscdetail
+         CoffeeBrewers=(CoffeeBrewers/1000.0)*(BrewerFLrBase/1000.0)         ! convert from million sqft back to billion sqft
+         ElVehicles = MarketPenetrationMels(8,y)*MelsELQ(8)                  ! miscdetail
          ElVehicles = ElVehicles/1000.0 * (0.6 * (CMsurvFloorTot(10,y)+CMNewFlrSpace(10,y)) +  & ! miscdetail
-          0.4 * TotFlrNoWhse/1000.0)                               ! miscdetail - convert from million sqft back to billion sqft
-         FumeHoods = MarketPenetrationMels(9,y)*MelsELQ(9)                  ! miscdetail
-         FumeHoods = FumeHoods/1000 * (LabFlrBase/1000.0) !convert from million sqft back to billion sqft
-         Laundry = MarketPenetrationMels(10,y)*MelsELQ(10)                  ! miscdetail
-         Laundry = (Laundry/1000.0) * (LaundryFlrBase/1000.0)              ! miscdetail - convert from million sqft back to billion sqft
-         Elevators = MarketPenetrationMels(11,y)*MelsELQ(11)                ! miscdetail
-         Elevators = (Elevators/1000.0) * (ElevatorFlrBase/1000.0)         ! miscdetail - convert from million sqft back to billion sqft
-         Escalators = MarketPenetrationMels(12,y)*MelsELQ(12)                 ! miscdetail
-         Escalators = (Escalators/1000.0) * (EscalatorFlrBase/1000.0)      ! miscdetail - convert from million sqft back to billion sqft
-         ITEquip = MarketPenetrationMels(13,y)*MelsELQ(13)                ! miscdetail
+          0.4 * TotFlrNoWhse/1000.0)                                         ! miscdetail - convert from million sqft back to billion sqft
+         FumeHoods = MarketPenetrationMels(9,y)*MelsELQ(9)                   ! miscdetail
+         FumeHoods = FumeHoods/1000 * (LabFlrBase/1000.0)                    ! convert from million sqft back to billion sqft
+         Laundry = MarketPenetrationMels(10,y)*MelsELQ(10)                   ! miscdetail
+         Laundry = (Laundry/1000.0) * (LaundryFlrBase/1000.0)                ! miscdetail - convert from million sqft back to billion sqft
+         Elevators = MarketPenetrationMels(11,y)*MelsELQ(11)                 ! miscdetail
+         Elevators = (Elevators/1000.0) * (ElevatorFlrBase/1000.0)           ! miscdetail - convert from million sqft back to billion sqft
+         Escalators = MarketPenetrationMels(12,y)*MelsELQ(12)                ! miscdetail
+         Escalators = (Escalators/1000.0) * (EscalatorFlrBase/1000.0)        ! miscdetail - convert from million sqft back to billion sqft
+         ITEquip = MarketPenetrationMels(13,y)*MelsELQ(13)                   ! miscdetail
          ITEquip = ITEquip/1000.0 * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))    ! miscdetail
-         OfficeUPS = MarketPenetrationMels(14,y)*MelsELQ(14)                  ! miscdetail
-         OfficeUPS = OfficeUPS/1000 * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))
-         UPSDataCtr = MarketPenetrationMels(15,y)*MelsELQ(15)                  ! miscdetail
-         UPSDataCtr = (UPSDataCtr/1000.0) * (CMsurvFloorTot(7,y) + CMNewFlrSpace(7,y))              ! miscdetail
-         Shredder = MarketPenetrationMels(16,y)*MelsELQ(16)                ! miscdetaill
+         OfficeUPS = MarketPenetrationMels(14,y)*MelsELQ(14)                 ! miscdetail
+         OfficeUPS = OfficeUPS/1000 * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y)) !DataCtr26
+         Shredder = MarketPenetrationMels(15,y)*MelsELQ(15)                  ! miscdetaill
          Shredder = (Shredder/1000.0) * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))          ! miscdetail
-         OfficePBE = MarketPenetrationMels(17,y)*MelsELQ(17)               ! miscdetail
+         OfficePBE = MarketPenetrationMels(16,y)*MelsELQ(16)               ! miscdetail
          OfficePBE = (OfficePBE/1000.0) * (OfficeFlrBase/1000.0)           ! miscdetail - convert from million sqft back to billion sqft
-         VoiceIP = MarketPenetrationMels(18,y)*MelsELQ(18)                 ! miscdetail
+         VoiceIP = MarketPenetrationMels(17,y)*MelsELQ(17)                 ! miscdetail
          VoiceIP = (VoiceIP/1000.0) * (OfficeFlrBase/1000.0)               ! miscdetail - convert from million sqft back to billion sqft
-         POSsystems = MarketPenetrationMels(19,y)*MelsELQ(19)             !MELs21
+         POSsystems = MarketPenetrationMels(18,y)*MelsELQ(18)              !MELs21
          POSsystems = (POSsystems/1000.0) * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))  !MELs21
-         WarehouseRobots = MarketPenetrationMels(20,y)*MelsELQ(20)             !MELs21
+         WarehouseRobots = MarketPenetrationMels(19,y)*MelsELQ(19)             !MELs21
          WarehouseRobots = (WarehouseRobots/1000.0) * (CMsurvFloorTot(10,y) + CMNewFlrSpace(10,y))  !MELs21
-         Televisions = MarketPenetrationMels(21,y)*MelsELQ(21)                 !MELs21
+         Televisions = MarketPenetrationMels(20,y)*MelsELQ(20)                 !MELs21
          Televisions = Televisions/1000.0 * (CMUSSurvFloorTot(y) + CMUSNewFloorTot(y))  !MELs21
 
       IF (PRTDBGK.eq.1 ) THEN                                              ! misctest
@@ -3514,11 +3533,11 @@ END MODULE COM_MEM
         WRITE(RCDBG,'(A,21A16)') " #", "XfmrsDry", "KitchenVent", "Security", & ! misctest  !MELs21 - Labels reorganized to match KMELS.txt input
          "LabRefFrz", "MedImaging", "LrgVidBoard", "CoffeeBrewers", "ElVehicles", & ! misctest  !MELs21
          "FumeHoods", "Laundry","Elevators", "Escalators", "ITEquip", "OfficeUPS", & ! misctest  !MELs21
-         "UPSDataCtr", "Shredder", "OfficePBE", "VoiceIP", "POSsystems", "WarehouseRobots", "Televisions"  !MELs21
+         "Shredder", "OfficePBE", "VoiceIP", "POSsystems", "WarehouseRobots", "Televisions"  !MELs21 !DataCtr26
         WRITE(RCDBG,'(A,21F12.5)') " #",XfmrsDry, KitchenVent, Security, & ! misctest  !MELs21 - Variables reorganized to match KMELS.txt input
          LabRefFrz, MedImaging, LrgVidBoard, CoffeeBrewers, ElVehicles, & ! misctest  !MELs21
          FumeHoods, Laundry,Elevators, Escalators, ITEquip, OfficeUPS, & ! misctest  !MELs21
-         UPSDataCtr, Shredder, OfficePBE, VoiceIP, POSsystems, WarehouseRobots, Televisions  !MELs21
+         Shredder, OfficePBE, VoiceIP, POSsystems, WarehouseRobots, Televisions  !MELs21 !DataCtr26
       ENDIF                                                               ! misctest
 
        DO 15 ISERV= 1,CMnumServ
@@ -3529,854 +3548,893 @@ END MODULE COM_MEM
           b = IBLDTP
           r = IREG
           y = CURIYR
+          
 
-          ! Treat major & minor services separately:
-          !   For major services, the market is assumed saturated, but service demand for space heating and space cooling is sensitive to shell efficiency.
-          !   For minor services, a market penetration projection for office equipment is used, and service demand is not sensitive to shell efficiency.
 
-          ! New for AEO2002, add penetration to end uses (space cooling, ventilation, and other) for data center requirements.
-          ! Data centers assumed to be growing percentage of large office space calculated as DatCtrShare.
+              ! Treat major & minor services separately:
+              !   For major services, the market is assumed saturated, but service demand for space heating and space cooling is sensitive to shell efficiency.
+              !   For minor services, a market penetration projection for office equipment is used, and service demand is not sensitive to shell efficiency.
 
-          ! Major Services:
-          IF (ISERV .LE. CMnumMajServ) THEN
+              ! AEO2002: add penetration to end uses (space cooling, ventilation, and other) for data center requirements.
+              ! AEO2025: Data centers assumed to be growing percentage of most building types, calculated as DatCtrShare.
+              ! AEO2026: Apply data center adjustments gradually in projection years.
 
-             ! service demand in surviving floorspace
-             ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)= &
-               ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
-               ! for lighting, -> 10**9 lumen yrs  / sqft
-               ServDmdIntenBASE (ISERV,IBLDTP,IREG) / 1000.0 * &
-               SurvFloorTotal (IREG,IBLDTP,CURIYR)
+              ! Major Services:
+              IF (ISERV .LE. CMnumMajServ) THEN
 
-             !Add incremental intensity-data centers dcadjust
-               ServDmdExBldg (s,b,r,y) = &                         !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) + &   !dcadjust
-               ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare         !dcadjust !DataCtr25
+                 ! service demand in surviving floorspace
+                 ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)= &
+                   ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
+                   ! for lighting, -> 10**9 lumen yrs  / sqft
+                   ServDmdIntenBASE (ISERV,IBLDTP,IREG) / 1000.0 * &
+                   SurvFloorTotal (IREG,IBLDTP,CURIYR)
+                   
+                   IF (IBLDTP.EQ.11 .AND. ApplyRamp.EQ.1) THEN
+                     IF (CURIYR .LE. KSTEOYR + 3) THEN
+                     ! For buildings in "Other" category do not implement non-server incremental intensity adjustment 
+					 !  due to data centers in near term (let service demand evolve gradually)
+                     ServDmdExBldg (s,b,r,y) = &
+                     ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                     ServDmdExBldg (s,b,r,y) * dcf(12,s) * DatCtrShare    !dcadjust !DataCtr25
+                  
+                    ELSEIF (CURIYR .GT. KSTEOYR + 3 .AND. CURIYR .LT. KSTEOYR + 10) THEN
+                      RampFactor = dcf(b,s) * (REAL(CURIYR - KSTEOYR) / 10.0)
+                      ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * RampFactor * DatCtrShare
+                      NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                            NewServDmd (s,b,r,y) * RampFactor * DatCtrShare
+                                            
+                    ELSEIF (CURIYR .GE. KSTEOYR + 10) THEN
+                      ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare
+                      NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                            NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare
+                                            
+                    ELSE
+                      ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare
+                      NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                            NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare
+                    ENDIF
+                   
+                 ELSE
+                   ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                             ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare
+                   NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                          NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare
+                 ENDIF ! DCDmd26
 
-             SSDnoShell(IREG,IBLDTP,ISERV)=ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)  !Efficiency Index
+                 SSDnoShell(IREG,IBLDTP,ISERV)=ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)  !Efficiency Index
 
-             IF ( ISERV .eq. 1 )    & ! apply shell to heating directly   !endshel
-               ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)= &
-               ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR) * &
-               ShellHeatFactor (IBLDTP,IREG,1,curiyr)                            !endshel-shlfactor
-             IF ( ISERV .eq. 2 )    & ! apply shell to cooling directly   !endshel-shlfactor
-               ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)=                & !endshel
-               ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR) *               & !endshel
-               ShellCoolFactor (IBLDTP,IREG,1,curiyr)                            !endshel-shlfactor
+                 IF ( ISERV .eq. 1 )    & ! apply shell to heating directly   !endshel
+                   ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)= &
+                   ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR) * &
+                   ShellHeatFactor (IBLDTP,IREG,1,curiyr)                            !endshel-shlfactor
+                 IF ( ISERV .eq. 2 )    & ! apply shell to cooling directly   !endshel-shlfactor
+                   ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)=                & !endshel
+                   ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR) *               & !endshel
+                   ShellCoolFactor (IBLDTP,IREG,1,curiyr)                            !endshel-shlfactor
 
-             ! service demand in new floorspace
-             NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &
-              ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
-              ! for lighting, -> 10**9 lumen yrs  / sqft
-              ServDmdIntenBASE (ISERV,IBLDTP,IREG) / 1000.0 * &
-              CMNewFloorSpace(IREG,IBLDTP,CURIYR)
-
-              !Add incremental intensity-data centers dcadjust
-              NewServDmd (s,b,r,y) = &                                     !dcadjust
-                 NewServDmd (s,b,r,y)* (1.0 - DatCtrShare) + &               !dcadjust
-                 NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                     !dcadjust !DataCtr25
-
-             NSDnoShell(IREG,IBLDTP,ISERV)=NewServDmd (ISERV,IBLDTP,IREG,CURIYR)  !Efficiency Index
-
-             ! Account for variation of SD intensity between new
-             ! and existing stock of buildings, due to different
-             ! proportions of serviced floorspace:
-             IF (ISERV .LE. CMnumVarSDI) &
-               NewServDmd (ISERV,IBLDTP,IREG,CURIYR)=    &
-                 NewServDmd (ISERV,IBLDTP,IREG,CURIYR) *   &
-                 ServicedFlrspcProp (IBLDTP,ISERV,2)  /   & !2->new
-                 ServicedFlrspcProp (IBLDTP,ISERV,1)        !1->existing
-               ! Account for effect of shell efficiency improvements:
-
-             IF ( ISERV .eq. 1 ) &
-               NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &
-                 NewServDmd (ISERV,IBLDTP,IREG,CURIYR) * &
-                 ShellHeatFactor(IBLDTP,IREG,2,curiyr)                     !endshel-shlfactor-shellkdbout (replace calc w stored value)
-             IF ( ISERV .eq. 2 ) &                                         !endshel
-               NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &                    !endshel
-                 NewServDmd (ISERV,IBLDTP,IREG,CURIYR) * &                 !endshel
-                 ShellCoolFactor(IBLDTP,IREG,2,curiyr)                     !endshel-shlfactor-shellkdbout (replace calc w stored value)
-                 
-             ! reduce service demand due to adoption of sensor and control technologies
-             ! savings are indexed to the CBECS year
-             DO ct = 1, CMNumCT !sensors 
-               ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)= &
-                 ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR) * &
-                 (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CURIYR)) / &
-                 (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CBECSyear-(BASEYR-1)))
-               NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &
-                 NewServDMD (ISERV,IBLDTP,IREG,CURIYR) * &
-                 (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CURIYR)) / &
-                 (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CBECSyear-(BASEYR-1)))
-             ENDDO
-             
-          ! Minor Services:
-          ELSE
-
-              IF (s .LT. CMnumServ) THEN  !PCs and Other Office Equipment   !miscdetail
-              ! service demand in surviving floorspace
-                ServDmdExBldg (s,b,r,y)= &
-                ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
-                  ServDmdIntenBASE (s,b,r)/1000.0 * SurvFloorTotal (r,b,y)
-
-                ! service demand in new floorspace
-                NewServDmd (s,b,r,y)= &
+                 ! service demand in new floorspace
+                 NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &
                   ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
-                  ServDmdIntenBASE (s,b,r)/1000.0 * CMNewFloorSpace(r,b,y)
+                  ! for lighting, -> 10**9 lumen yrs  / sqft
+                  ServDmdIntenBASE (ISERV,IBLDTP,IREG) / 1000.0 * &
+                  CMNewFloorSpace(IREG,IBLDTP,CURIYR)
 
-                !Add incremental intensity for data centers dcadjust
-                ServDmdExBldg (s,b,r,y) = &                         !dcadjust
-                  ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) + &   !dcadjust
-                  ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare         !dcadjust !DataCtr25
+                  !Add incremental intensity-data centers dcadjust
+                  NewServDmd (s,b,r,y) = &                                     !dcadjust
+                     NewServDmd (s,b,r,y)* (1.0 - DatCtrShare) + &               !dcadjust
+                     NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                     !dcadjust !DataCtr25
 
-                NewServDmd (s,b,r,y) = &                            !dcadjust
-                  NewServDmd (s,b,r,y)* (1.0 - DatCtrShare) + &      !dcadjust
-                  NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare            !dcadjust !DataCtr25
+                 NSDnoShell(IREG,IBLDTP,ISERV)=NewServDmd (ISERV,IBLDTP,IREG,CURIYR)  !Efficiency Index
 
-              ! Apply market penetration factor
-              IF (s .EQ. 8) THEN  ! Office PCs
-                ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * OfficePCPenetration(y)
-                NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * OfficePCPenetration(y)
-              ENDIF ! office PCs market penetration
+                 ! Account for variation of SD intensity between new
+                 ! and existing stock of buildings, due to different
+                 ! proportions of serviced floorspace:
+                 IF (ISERV .LE. CMnumVarSDI) &
+                   NewServDmd (ISERV,IBLDTP,IREG,CURIYR)=    &
+                     NewServDmd (ISERV,IBLDTP,IREG,CURIYR) *   &
+                     ServicedFlrspcProp (IBLDTP,ISERV,2)  /   & !2->new
+                     ServicedFlrspcProp (IBLDTP,ISERV,1)        !1->existing
+                   ! Account for effect of shell efficiency improvements:
 
-              IF (s .EQ. 9) THEN  ! Office Non-PCs
-                ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * OfficeNonPCPenetration (y)
-                NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * OfficeNonPCPenetration (y)
-              ENDIF ! office non-PCs market penetration
+                 IF ( ISERV .eq. 1 ) &
+                   NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &
+                     NewServDmd (ISERV,IBLDTP,IREG,CURIYR) * &
+                     ShellHeatFactor(IBLDTP,IREG,2,curiyr)                     !endshel-shlfactor-shellkdbout (replace calc w stored value)
+                 IF ( ISERV .eq. 2 ) &                                         !endshel
+                   NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &                    !endshel
+                     NewServDmd (ISERV,IBLDTP,IREG,CURIYR) * &                 !endshel
+                     ShellCoolFactor(IBLDTP,IREG,2,curiyr)                     !endshel-shlfactor-shellkdbout (replace calc w stored value)
+                     
+                 ! reduce service demand due to adoption of sensor and control technologies
+                 ! savings are indexed to the CBECS year
+                 DO ct = 1, CMNumCT !sensors 
+                   ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR)= &
+                     ServDmdExBldg (ISERV,IBLDTP,IREG,CURIYR) * &
+                     (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CURIYR)) / &
+                     (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CBECSyear-(BASEYR-1)))
+                   NewServDmd (ISERV,IBLDTP,IREG,CURIYR)= &
+                     NewServDMD (ISERV,IBLDTP,IREG,CURIYR) * &
+                     (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CURIYR)) / &
+                     (1 - CT_flag(ct,ISERV) * pctSCSavings(ct) * MarketPenetrationSC(ct,IBLDTP,CBECSyear-(BASEYR-1)))
+                 ENDDO
+                 
+               ! Minor Services:
+               ELSE
+                 IF (s .LT. CMnumServ) THEN  !PCs and Other Office Equipment   !miscdetail
+                     ! service demand in surviving floorspace
+                     ServDmdExBldg (s,b,r,y) = &
+                     ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
+                         ServDmdIntenBASE (s,b,r)/1000.0 * SurvFloorTotal (r,b,y)
 
-          ELSE  !Miscellaneous (Other) End Uses, s=10   !miscdetail
-            !Calculate service demand based on miscdetail categories, applying non-manufacturing service sector output index to uncategorized uses, i.e. "other miscellaneous"
+                     ! service demand in new floorspace
+                     NewServDmd (s,b,r,y) = &
+                     ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft;
+                     ServDmdIntenBASE (s,b,r)/1000.0 * CMNewFloorSpace(r,b,y)
+                 
+                 IF (s .EQ. 8) THEN  ! Data Center Servers !DatCtr26
+                   ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * DataCtrServPenetration(y)
+                   NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * DataCtrServPenetration(y)
+                 ENDIF ! Data center server market penetration
+                 
+                 IF (s .EQ. 9) THEN  ! Office PCs and non-PC equipment !DatCtr26
+                   ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * OfficePCPenetration(y)
+                   NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * OfficePCPenetration(y)
+                 ENDIF ! Office PCs and equipment market penetration
+                 
+                 ! Ramp up incremental intensity increases for computing equipment due 
+				 !  to data centers ! DCDmd26
+                 IF (IBLDTP .EQ. 11 .AND. ApplyRamp .EQ. 1) THEN    
+                   IF (CURIYR .LE. KSTEOYR + 3) THEN
+                     ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * dcf(12,s) * DatCtrShare
+                     NewServDmd(s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                           NewServDmd (s,b,r,y) * dcf(12,s) * DatCtrShare
+                                           
+                   ELSEIF (s .EQ. 9 .AND. CURIYR .GT. KSTEOYR + 3 .AND. CURIYR .LE. KSTEOYR + 10) THEN
+                     RampFactor = dcf(11,9) * (REAL(CURIYR - KSTEOYR) / 10.0)
+                     ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * RampFactor * DatCtrShare
+                     NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                            NewServDmd (s,b,r,y) * RampFactor * DatCtrShare
+                                            
+                   ELSEIF (CURIYR .GT. KSTEOYR + 10) THEN
+                     ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare
+                     NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                            NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare
+                                            
+                   ELSE
+                     ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                               ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare
+                     NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                            NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare
+                   ENDIF
+                   
+                 ELSE
+                   ServDmdExBldg (s,b,r,y) = ServDmdExBldg (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                             ServDmdExBldg (s,b,r,y) * dcf(b,s) * DatCtrShare
+                   NewServDmd (s,b,r,y) = NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) + &
+                                          NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare
+                 ENDIF ! DCDmd26
 
-            ! Non-explicit (other miscellaneous) service demand in surviving floorspace
-            ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft
-            ServDmdExBldg (s,b,r,y)=    &
-             ServDmdIntenBASE (s,b,r) / 1000.0         &
-             * (ServicesIndex(y) * (1-xplicitmiscshr(b))  & ! miscdetail
-             * FuelShareofServiceBASE(r,b,s,1)         & ! Misc
-             + FuelShareofServiceBASE(r,b,s,2)         & ! Misc
-             + FuelShareofServiceBASE(r,b,s,3))        & ! Misc
-             * SurvFloorTotal (r,b,y)
+                          
+               ELSE  !Miscellaneous (Other) End Uses, s=10   !miscdetail
+                !Calculate service demand based on miscdetail categories, applying non-manufacturing service sector output index to uncategorized uses, i.e. "other miscellaneous"
 
-            ! Non-explicit (other miscellaneous) service demand in new floorspace
-            ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft
-            NewServDmd (s,b,r,y)= &
-             ServDmdIntenBASE (s,b,r) / 1000.0        &
-             * (ServicesIndex(y) * (1-xplicitmiscshr(b))  & ! miscdetail  !MELs21
-             * FuelShareofServiceBASE(r,b,s,1)        & ! Misc
-             + FuelShareofServiceBASE(r,b,s,2)        & ! Misc
-             + FuelShareofServiceBASE(r,b,s,3))       & ! Misc
-             * CMNewFloorSpace(r,b,y)
+                ! Non-explicit (other miscellaneous) service demand in surviving floorspace
+                ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft
+                ServDmdExBldg (s,b,r,y)=    &
+                 ServDmdIntenBASE (s,b,r) / 1000.0         &
+                 * (ServicesIndex(y) * (1-xplicitmiscshr(b))  & ! miscdetail
+                 * FuelShareofServiceBASE(r,b,s,1)         & ! Misc
+                 + FuelShareofServiceBASE(r,b,s,2)         & ! Misc
+                 + FuelShareofServiceBASE(r,b,s,3))        & ! Misc
+                 * SurvFloorTotal (r,b,y)
 
-            IF (PRTDBGK.eq.1 .and. b.eq.1 .and. r.eq.1 ) THEN                 !misctest
-              WRITE (RCDBG,*) ' year ',CURIYR+(BASEYR-1), ' iteration ', CURITR     !misctest
-              WRITE (RCDBG,*) ' Miscellaneous demand before explicit adds'    !misctest
-              write(rcdbg,*) "ServDmdExBldg ", ServDmdExBldg (s,b,r,y)         !misctest
-              write(rcdbg,*) "NewServDmd ", NewServDmd (s,b,r,y)               !misctest
-            ENDIF                                                            !misctest
+                ! Non-explicit (other miscellaneous) service demand in new floorspace
+                ! 10**9 Btu/10**6 sqft /1000 -> trill/10**6 sqft
+                NewServDmd (s,b,r,y)= &
+                 ServDmdIntenBASE (s,b,r) / 1000.0        &
+                 * (ServicesIndex(y) * (1-xplicitmiscshr(b))  & ! miscdetail  !MELs21
+                 * FuelShareofServiceBASE(r,b,s,1)        & ! Misc
+                 + FuelShareofServiceBASE(r,b,s,2)        & ! Misc
+                 + FuelShareofServiceBASE(r,b,s,3))       & ! Misc
+                 * CMNewFloorSpace(r,b,y)
 
-           ! Add demand for each explicit miscellaneous category, shared by BT and CD
+                IF (PRTDBGK.eq.1 .and. b.eq.1 .and. r.eq.1 ) THEN                 !misctest
+                  WRITE (RCDBG,*) ' year ',CURIYR+(BASEYR-1), ' iteration ', CURITR     !misctest
+                  WRITE (RCDBG,*) ' Miscellaneous demand before explicit adds'    !misctest
+                  write(rcdbg,*) "ServDmdExBldg ", ServDmdExBldg (s,b,r,y)         !misctest
+                  write(rcdbg,*) "NewServDmd ", NewServDmd (s,b,r,y)               !misctest
+                ENDIF                                                            !misctest
 
-            SurvFlrbsf = SurvFloorTotal(r,b,y) / 1000.0                    ! miscdetail - surviving floorspace in billion square feet for ease of sharing
-            CMNewFlrbsf = CMNewFloorSpace(r,b,y) / 1000.0                  ! miscdetail - new floorspace in billion sf for ease of sharing
-            BrewerFlrBase = (CMSurvFloorTot(4,y) + CMSurvFloorTot(7,y)   & ! miscdetail - total food service, and office space to share brewers
-             + CMSurvFloorTot(8,y) + CMNewFlrSpace(4,y)                  & ! miscdetail
-             + CMNewFlrSpace(7,y) + CMNewFlrSpace(8,y))* 1000.0            ! miscdetail
-            LaundryFlrBase = (CMSurvFloorTot(5,y) + CMSurvFloorTot(6,y)  & ! miscdetail - total health care, lodging, and merc/service space to share laundry
-             + CMSurvFloorTot(9,y) + CMNewFlrSpace(5,y)                  & ! miscdetail
-             + CMNewFlrSpace(6,y) + CMNewFlrSpace(9,y))* 1000.0            ! miscdetail
-            MedFlrBase = (CMSurvFloorTot(5,y) + CMSurvFloorTot(7,y)      & ! miscdetail - total health care, large office, small office space, and mercantile/service to share medical imaging equipment  !MELs21
-             + CMSurvFloorTot(8,y) + CMSurvFloorTot(9,y)                 & !MELs21
-             + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                   & !MELs21
-             + CMNewFlrSpace(8,y) + CMNewFlrSpace(8,y))* 1000.0            ! miscdetail  !MELs21
-            ElevatorFlrBase = (CMUSSurvFloorTot(y)+CMUSNewFloorTot(y))*1000.0 ! miscdetail  !MELs21 - Elevators present in all 2012 CBECS PBAs, so setting equal to total floorspace
-            EscalatorFlrBase = (CMUSSurvFloorTot(y)-CMSurvFloorTot(3,y)  & ! miscdetail - total floorspace excluding food sales, food service, small offices, and warehouses
-             - CMSurvFloorTot(4,y) -CMSurvFloorTot(8,y)                  & ! miscdetail    to share escalators
-             - CMSurvFloorTot(10,y)) * 1000.0                            & ! miscdetail
-             + (CMUSNewFloorTot(y)-CMNewFlrSpace(3,y)-CMSurvFloorTot(4,y)& ! miscdetail
-             - CMSurvFloorTot(8,y) - CMSurvFloorTot(10,y)) * 1000.0        ! miscdetail
-            TotFlrNoWhse = (CMUSSurvFloorTot(y)-CMSurvFloorTot(10,y)     & ! miscdetail - total floorspace excluding warehouses to share electric vehicles
-             + CMUSNewFloorTot(y)-CMNewFlrSpace(10,y)) * 1000.0            ! miscdetail
-            KitchenFlrBase = (CMUSSurvFloorTot(y)-CMSurvFloorTot(7,y)    & ! miscdetail - total floorspace excluding large office, small office, warehouse,
-             - CMSurvFloorTot(8,y) -CMSurvFloorTot(10,y)                 & ! miscdetail    and other to share kitchen ventilation
-             - CMSurvFloorTot(11,y)) * 1000.0                            & ! miscdetail
-             + (CMUSNewFloorTot(y)-CMNewFlrSpace(7,y)-CMSurvFloorTot(8,y)& ! miscdetail
-             - CMSurvFloorTot(10,y) - CMSurvFloorTot(11,y)) * 1000.0       ! miscdetail
-            LabFlrBase = (CMSurvFloorTot(2,y) + CMSurvFloorTot(5,y)      & ! miscdetail - total education, health care, large office, small office, and other to share laboratory eqipment
-             + CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)                 & !MELs21
-             + CMSurvFloorTot(11,y) + CMNewFlrSpace(2,y)                 & ! miscdetail
-             + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                   & ! miscdetail  !MELs21
-             + CMNewFlrSpace(8,y) + CMNewFlrSpace(11,y))* 1000.0           ! miscdetail  !MELs21
-            OfficeFlrBase = (CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)   & ! miscdetail - total education, healthcare, and other to share laboratory eqipment
-             + CMNewFlrSpace(7,y)  + CMNewFlrSpace(8,y))* 1000.0   !TODO - verify descriptions between this block and (identical?) former block with floor bases
+               ! Add demand for each explicit miscellaneous category, shared by BT and CD
+                SurvFlrbsf = SurvFloorTotal(r,b,y) / 1000.0                    ! miscdetail - surviving floorspace in billion square feet for ease of sharing
+                CMNewFlrbsf = CMNewFloorSpace(r,b,y) / 1000.0                  ! miscdetail - new floorspace in billion sf for ease of sharing
+                BrewerFlrBase = (CMSurvFloorTot(4,y) + CMSurvFloorTot(7,y)   & ! miscdetail - total food service, and office space to share brewers
+                 + CMSurvFloorTot(8,y) + CMNewFlrSpace(4,y)                  & ! miscdetail
+                 + CMNewFlrSpace(7,y) + CMNewFlrSpace(8,y))* 1000.0            ! miscdetail
+                LaundryFlrBase = (CMSurvFloorTot(5,y) + CMSurvFloorTot(6,y)  & ! miscdetail - total health care, lodging, and merc/service space to share laundry
+                 + CMSurvFloorTot(9,y) + CMNewFlrSpace(5,y)                  & ! miscdetail
+                 + CMNewFlrSpace(6,y) + CMNewFlrSpace(9,y))* 1000.0            ! miscdetail
+                MedFlrBase = (CMSurvFloorTot(5,y) + CMSurvFloorTot(7,y)      & ! miscdetail - total health care, large office, small office space, and mercantile/service to share medical imaging equipment  !MELs21
+                 + CMSurvFloorTot(8,y) + CMSurvFloorTot(9,y)                 & !MELs21
+                 + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                   & !MELs21
+                 + CMNewFlrSpace(8,y) + CMNewFlrSpace(8,y))* 1000.0            ! miscdetail  !MELs21
+                ElevatorFlrBase = (CMUSSurvFloorTot(y)+CMUSNewFloorTot(y))*1000.0 ! miscdetail  !MELs21 - Elevators present in all 2012 CBECS PBAs, so setting equal to total floorspace
+                EscalatorFlrBase = (CMUSSurvFloorTot(y)-CMSurvFloorTot(3,y)  & ! miscdetail - total floorspace excluding food sales, food service, small offices, and warehouses
+                 - CMSurvFloorTot(4,y) -CMSurvFloorTot(8,y)                  & ! miscdetail    to share escalators
+                 - CMSurvFloorTot(10,y)) * 1000.0                            & ! miscdetail
+                 + (CMUSNewFloorTot(y)-CMNewFlrSpace(3,y)-CMSurvFloorTot(4,y)& ! miscdetail
+                 - CMSurvFloorTot(8,y) - CMSurvFloorTot(10,y)) * 1000.0        ! miscdetail
+                TotFlrNoWhse = (CMUSSurvFloorTot(y)-CMSurvFloorTot(10,y)     & ! miscdetail - total floorspace excluding warehouses to share electric vehicles
+                 + CMUSNewFloorTot(y)-CMNewFlrSpace(10,y)) * 1000.0            ! miscdetail
+                KitchenFlrBase = (CMUSSurvFloorTot(y)-CMSurvFloorTot(7,y)    & ! miscdetail - total floorspace excluding large office, small office, warehouse,
+                 - CMSurvFloorTot(8,y) -CMSurvFloorTot(10,y)                 & ! miscdetail    and other to share kitchen ventilation
+                 - CMSurvFloorTot(11,y)) * 1000.0                            & ! miscdetail
+                 + (CMUSNewFloorTot(y)-CMNewFlrSpace(7,y)-CMSurvFloorTot(8,y)& ! miscdetail
+                 - CMSurvFloorTot(10,y) - CMSurvFloorTot(11,y)) * 1000.0       ! miscdetail
+                LabFlrBase = (CMSurvFloorTot(2,y) + CMSurvFloorTot(5,y)      & ! miscdetail - total education, health care, large office, small office, and other to share laboratory eqipment
+                 + CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)                 & !MELs21
+                 + CMSurvFloorTot(11,y) + CMNewFlrSpace(2,y)                 & ! miscdetail
+                 + CMNewFlrSpace(5,y) + CMNewFlrSpace(7,y)                   & ! miscdetail  !MELs21
+                 + CMNewFlrSpace(8,y) + CMNewFlrSpace(11,y))* 1000.0           ! miscdetail  !MELs21
+                OfficeFlrBase = (CMSurvFloorTot(7,y) + CMSurvFloorTot(8,y)   & ! miscdetail - total education, healthcare, and other to share laboratory eqipment
+                 + CMNewFlrSpace(7,y)  + CMNewFlrSpace(8,y))* 1000.0   !TODO - verify descriptions between this block and (identical?) former block with floor bases
 
-            IF (y .eq. CMFirstYr) THEN  ! miscdetail - prepare for first model year transformer sharing - FinalEndUseCon not available
-              BaseElTotR =  0.0   ! miscdetail - initialize total prior to summation
-              DO nb = 1, CMnumBldg  ! sum contribution to base year electricity use over building types to share transformer Q within CD
-                BaseElTotR =  BaseElTotR + ComEUI(r,nb,10,1)*CMTotalFlspc(r,nb,y-1)
-              ENDDO  ! miscdetail sum base year electricity contribution over building types
-            ENDIF   ! check for first model year for special transformer sharing
+                IF (y .eq. CMFirstYr) THEN  ! miscdetail - prepare for first model year transformer sharing - FinalEndUseCon not available
+                  BaseElTotR =  0.0   ! miscdetail - initialize total prior to summation
+                  DO nb = 1, CMnumBldg  ! sum contribution to base year electricity use over building types to share transformer Q within CD
+                    BaseElTotR =  BaseElTotR + ComEUI(r,nb,10,1)*CMTotalFlspc(r,nb,y-1)
+                  ENDDO  ! miscdetail sum base year electricity contribution over building types
+                ENDIF   ! check for first model year for special transformer sharing
 
-            miscbyBT:  select case (b)                                                 ! miscdetail
+                miscbyBT:  select case (b)                                                 ! miscdetail
 
-             case(1)     ! assembly includes elevators, large video boards, data center adjustments, and uses in all buildings !DataCtr25
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                  ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                                             ! miscdetail - convert million sqft to billion sqft
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)      ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
-              FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              LrgVidBoardElQ(r,b,y)= LrgVidBoard*(SurvFlrbsf/CMSurvFloorTot(b,y))      ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y)   & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft               
-              OfficeUPSELQ(r,b,y)=OfficeUPS*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft               
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail !DataCtr25
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft               
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft  !MELs21
+                 case(1)     ! assembly includes elevators, large video boards, data center adjustments, and uses in all buildings !DataCtr25
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                    ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                  ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                                             ! miscdetail - convert million sqft to billion sqft
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)      ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= LrgVidBoard*(SurvFlrbsf/CMSurvFloorTot(b,y))      ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y)   & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft               
+                  OfficeUPSELQ(r,b,y)=OfficeUPS*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                               
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft               
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft  !MELs21
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-			   
-               !Add incremental intensity-data centers dcadjust !DataCtr25
-               !Apply to entire service demand to account for additional transformer requirements
-         	 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'1, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-			  89 format (a, 1x, f, 1x, a1, 1x, f, 1x a1,1x,   i2,1x, a1,1x, i2,1x, a1,1x, i1,1x, a1,1x, i4)
-		      CLOSE(663)
-		     ENDIF	 
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                   
+                   !Add incremental intensity-data centers dcadjust !DataCtr25
+                   !Apply to entire service demand to account for additional transformer requirements
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'1, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  89 format (a, 1x, f, 1x, a1, 1x, f, 1x a1,1x,   i2,1x, a1,1x, i2,1x, a1,1x, i1,1x, a1,1x, i4)
+                  CLOSE(663)
+                 ENDIF     
+                   ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'1, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 
+                 case(2)     ! education includes elevators, data center adjustments, and uses in all buildings !DataCtr25
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
+                  FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
+                  MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                                                  
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
+
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                   
+                   !Add incremental intensity-data centers dcadjust !DataCtr25
+                   !Apply to entire service demand to account for additional transformer requirements
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'2, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF            
+                   ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'2, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 case(3)     ! food sales exclude elevators and escalators, includes uses in all buildings
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ElevatorsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                                               !DataCtr26       
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       & !DataCtr26
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              & 
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'3, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF     
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'3, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 case(4)     ! food service includes coffee brewers, elevators, uses in all buildings
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= CoffeeBrewers*(CMTotalFlspc(r,b,y)/BrewerFlrBase) ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)      ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              & !DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'4, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF     
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'4, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 case(5)       ! health care includes MRI, CT Scanner, Xray, and ultrasounds (MedImaging); laundry; elevators; data center adjustments, uses in all buildings (!DataCtr25)
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
+                  FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= Laundry*(CMTotalFlspc(r,b,y)/LaundryFlrBase)          ! miscdetail
+                  MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                              
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    & ! DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
+
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                   
+                   !Add incremental intensity-data centers dcadjust !DataCtr25
+                   !Apply to entire service demand to account for additional transformer requirements
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'5, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF                
                ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
 
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'1, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-			 
-             case(2)     ! education includes elevators, data center adjustments, and uses in all buildings !DataCtr25
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
-              FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
-              MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail !DataCtr25
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                                       
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'5, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 case(6)       ! lodging includes laundry, elevators, data center adjustments, and uses in all buildings
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= Laundry*(CMTotalFlspc(r,b,y)/LaundryFlrBase)          ! miscdetail
+                  MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                              
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              & !DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-			   
-               !Add incremental intensity-data centers dcadjust !DataCtr25
-               !Apply to entire service demand to account for additional transformer requirements
-  			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'2, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	        
-               ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
 
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'2, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-			 ENDIF
-             case(3)     ! food sales exclude elevators and escalators, includes uses in all buildings
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
-              FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
-              ElevatorsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=0.00                 
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                   !Add incremental intensity-data centers dcadjust !DataCtr25
+                   !Apply to entire service demand to account for additional transformer requirements
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'6, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF                  
+                 ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
-  			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'3, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'6, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 case(7)       ! lg. off. include coffee brewers, data center adjustments, uses in all buildings !DataCtr25
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= CoffeeBrewers*(CMTotalFlspc(r,b,y)/BrewerFlrBase) ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
+                  FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail  !MELs21
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=OfficePBE*(CMTotalFlspc(r,b,y)/OfficeFlrBase)              
+                  VoiceIPElQ(r,b,y)=  VoiceIP*(CMTotalFlspc(r,b,y)/OfficeFlrBase)
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'3, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-             case(4)     ! food service includes coffee brewers, elevators, uses in all buildings
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= CoffeeBrewers*(CMTotalFlspc(r,b,y)/BrewerFlrBase) ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)      ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
-              FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=0.0                 
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              &  !DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
-  			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'4, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'4, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-             case(5)       ! health care includes MRI, CT Scanner, Xray, and ultrasounds (MedImaging); laundry; elevators; data center adjustments, uses in all buildings (!DataCtr25)
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
-              FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= Laundry*(CMTotalFlspc(r,b,y)/LaundryFlrBase)          ! miscdetail
-              MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       !DataCtr25                 
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
+                   !Add incremental intensity-data centers dcadjust
+                   !Apply to entire service demand to account for additional transformer requirements
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'7, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF                 
+                ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'7, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 case(8)     ! sm. off. include coffee brewers, medical imaging, data center adjustments, and uses in all buildings !DataCtr25
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= CoffeeBrewers*(CMTotalFlspc(r,b,y)/BrewerFlrBase) ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
+                  FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=OfficePBE*(CMTotalFlspc(r,b,y)/OfficeFlrBase)
+                  VoiceIPElQ(r,b,y)=  VoiceIP*(CMTotalFlspc(r,b,y)/OfficeFlrBase)
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-               
-			   !Add incremental intensity-data centers dcadjust !DataCtr25
-               !Apply to entire service demand to account for additional transformer requirements
-  			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'5, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	            
-		   ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              & !DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
 
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'5, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-             case(6)       ! lodging includes laundry, elevators, data center adjustments, and uses in all buildings
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
-              FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= Laundry*(CMTotalFlspc(r,b,y)/LaundryFlrBase)          ! miscdetail
-              MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       !DataCtr25                   
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
-
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-
-               !Add incremental intensity-data centers dcadjust !DataCtr25
-               !Apply to entire service demand to account for additional transformer requirements
-  			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'6, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	              
-			 ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
-
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'6, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-             case(7)       ! lg. off. include coffee brewers, data center adjustments, uses in all buildings !DataCtr25
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= CoffeeBrewers*(CMTotalFlspc(r,b,y)/BrewerFlrBase) ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= 0.0                                               ! miscdetail
-              LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
-              FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail  !MELs21
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       !DataCtr25  
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=OfficePBE*(CMTotalFlspc(r,b,y)/OfficeFlrBase)              
-              VoiceIPElQ(r,b,y)=  VoiceIP*(CMTotalFlspc(r,b,y)/OfficeFlrBase)
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
-
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
-
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-
-               !Add incremental intensity-data centers dcadjust
-               !Apply to entire service demand to account for additional transformer requirements
-  			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'7, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	             
-			ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
-
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'7, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-             case(8)     ! sm. off. include coffee brewers, medical imaging, data center adjustments, and uses in all buildings !DataCtr25
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= CoffeeBrewers*(CMTotalFlspc(r,b,y)/BrewerFlrBase) ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= 0.0                                               ! miscdetail
-              LabRefFrzElQ(r,b,y)= LabRefFrz*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
-              FumeHoodsElQ(r,b,y)= FumeHoods*(CMTotalFlspc(r,b,y)/LabFlrBase)          ! miscdetail  !MELs21
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       !DataCtr25             
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=OfficePBE*(CMTotalFlspc(r,b,y)/OfficeFlrBase)
-              VoiceIPElQ(r,b,y)=  VoiceIP*(CMTotalFlspc(r,b,y)/OfficeFlrBase)
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
-
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
-
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-
-               !Add incremental intensity-data centers dcadjust (!DataCtr25)
-               !Apply to entire service demand to account for additional transformer requirements
-  			
-			IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'8, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF	             
+                   !Add incremental intensity-data centers dcadjust (!DataCtr25)
+                   !Apply to entire service demand to account for additional transformer requirements
+                
+                IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'8, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF                 
 
 
-			 ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)* dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+                 ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
 
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
-			   
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'8, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-			   
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
+                   
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'8, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                   
 
 
-             case(9) ! mercantile/services include laundry, uses in all buildings
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
-              KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
-              LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
-              FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= Laundry*(CMTotalFlspc(r,b,y)/LaundryFlrBase)          ! miscdetail
-              MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail  !MELs21
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
-              EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                 
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=0.0                 
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)             
-              OfficePBEELQ(r,b,y)=0.0                    
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                 case(9) ! mercantile/services include laundry, uses in all buildings
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(CMTotalFlspc(r,b,y)/TotFlrNoWhse)  ! miscdetail
+                  KitchenVentElQ(r,b,y)= KitchenVent*(CMTotalFlspc(r,b,y)/KitchenFlrBase)  ! miscdetail
+                  LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= Laundry*(CMTotalFlspc(r,b,y)/LaundryFlrBase)          ! miscdetail
+                  MedImagingElQ(r,b,y)= MedImaging*(CMTotalFlspc(r,b,y)/MedFlrBase)        ! miscdetail  !MELs21
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail
+                  EscalatorsElQ(r,b,y)= Escalators*(CMTotalFlspc(r,b,y)/EscalatorFlrBase)  ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                 
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)                
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)             
+                  OfficePBEELQ(r,b,y)=0.0                    
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=0.0  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
-			 
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'9, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-			 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              & ! DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
+                 
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'9, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-			   
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'9, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
-			 
-             case(10)      ! warehouses include transformers, elevators, larger share of electric vehicles, POS machines, warehouse robots, data center adjustments, and end uses in all buildings !DataCtr25
-              XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
-              IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
-               XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
-                 ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
-              ENDIF
-              SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-              + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
-              CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
-              ElVehiclesElQ(r,b,y)= ElVehicles*(SurvFlrbsf/CMSurvFloorTot(b,y))        ! miscdetail
-              KitchenVentElQ(r,b,y)= 0.0                                               ! miscdetail
-              LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
-              FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
-              LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
-              LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
-              MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
-              ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail !MELs21
-              EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
-              ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &   ! miscdetail
-               + CMUSNewFloorTot(y))/1000)
-              OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       !DataCtr25  
-              ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)
-              OfficePBEELQ(r,b,y)=0.0
-              VoiceIPElQ(r,b,y)=0.0
-              POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
-              WarehouseRobotsElQ(r,b,y)=WarehouseRobots*(SurvFlrbsf/CMSurvFloorTot(b,y))  !MELs21
-!              WarehouseRobotsElQ(r,b,y)=WarehouseRobots*(CMTotalFlspc(r,b,y)/(CMSurvFloorTot(10,y)+CMNewFlrSpace(10,y))* 1000.0)  !MELs21
-              TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
-               + CMUSNewFloorTot(y))/1000)  !MELs21
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                   
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'9, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
+                 
+                 case(10)      ! warehouses include transformers, elevators, larger share of electric vehicles, POS machines, warehouse robots, data center adjustments, and end uses in all buildings !DataCtr25
+                  XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
+                  IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
+                   XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
+                     ((ComEUI(r,b,10,1)*CMTotalFlspc(r,b,y-1))/BaseElTotR)                 ! miscdetail - share to BT share of el use
+                  ENDIF
+                  SecurityElQ(r,b,y)= Security*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                  + CMUSNewFloorTot(y))/1000)                                              ! miscdetail
+                  CoffeeBrewersElQ(r,b,y)= 0.0                                             ! miscdetail
+                  ElVehiclesElQ(r,b,y)= ElVehicles*(SurvFlrbsf/CMSurvFloorTot(b,y))        ! miscdetail
+                  KitchenVentElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LabRefFrzElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  FumeHoodsElQ(r,b,y)= 0.0                                                 ! miscdetail
+                  LrgVidBoardElQ(r,b,y)= 0.0                                               ! miscdetail
+                  LaundryElQ(r,b,y)= 0.0                                                   ! miscdetail
+                  MedImagingElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ElevatorsElQ(r,b,y)= Elevators*(CMTotalFlspc(r,b,y)/ElevatorFlrBase)     ! miscdetail !MELs21
+                  EscalatorsElQ(r,b,y)= 0.0                                                ! miscdetail
+                  ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &   ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)
+                  OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)
+                  ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
+                   + CMUSNewFloorTot(y))/1000)
+                  OfficePBEELQ(r,b,y)=0.0
+                  VoiceIPElQ(r,b,y)=0.0
+                  POSsystemsElQ(r,b,y)=POSsystems*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) &  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
+                  WarehouseRobotsElQ(r,b,y)=WarehouseRobots*(SurvFlrbsf/CMSurvFloorTot(b,y))  !MELs21
+    !              WarehouseRobotsElQ(r,b,y)=WarehouseRobots*(CMTotalFlspc(r,b,y)/(CMSurvFloorTot(10,y)+CMNewFlrSpace(10,y))* 1000.0)  !MELs21
+                  TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
+                   + CMUSNewFloorTot(y))/1000)  !MELs21
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
-               + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
-               + TelevisionsElQ(r,b,y)  !MELs21
+                  TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
+                   + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
+                   + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+                   + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+                   + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+                   + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              &  !DataCtr26
+                   + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
+                   + TelevisionsElQ(r,b,y)  !MELs21
 
-              ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
+                  ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                       & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (SurvFlrbsf /(SurvFlrbsf+CMNewFlrbsf))      ! miscdetail
 
-              NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
-               TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
-			 			   
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'10, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF				   
-               !Add incremental intensity-data centers dcadjust !DataCtr25
-               !Apply to entire service demand to account for additional transformer requirements
-              ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
-               ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
-               ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
+                  NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                             & ! miscdetail
+                   TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail
+                               
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'10, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF                   
+                   !Add incremental intensity-data centers dcadjust !DataCtr25
+                   !Apply to entire service demand to account for additional transformer requirements
+                  ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
+                   ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
+                   ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
 
-              NewServDmd (s,b,r,y) =                                                 & !dcadjust
-               NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
-               NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'10, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y) ,',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF
+                  NewServDmd (s,b,r,y) =                                                 & !dcadjust
+                   NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
+                   NewServDmd (s,b,r,y) * dcf(b,s)* DatCtrShare                                 !dcadjust !DataCtr25
+                 IF (PRTDBGK.EQ.1) THEN
+                  OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+                  WRITE(663,89)'10, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y) ,',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+                  CLOSE(663)
+                 ENDIF
 
-             case(11)       ! other includes fume hoods for laboratories, uses in all buildings and data center adjustments !DataCtr25
+                 case(11)       ! other includes fume hoods for laboratories, uses in all buildings and data center adjustments !DataCtr25
               XfmrsDryElQ(r,b,y)=XfmrsDry*(FinalEndUseCon(1,b,r,y-1)/QELCM(11,y-1))    ! miscdetail
               IF (y .eq. CMFirstYr) THEN  ! miscdetail - first model year transformer sharing - FinalEndUseCon not available
                XfmrsDryElQ(r,b,y)=XfmrsDry*(QELCM(r,y-1)/QELCM(11,y-1)) *            & ! miscdetail - share to regional el. demand
@@ -4397,9 +4455,7 @@ END MODULE COM_MEM
               ITEquipELQ(r,b,y)= ITEquip*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
                + CMUSNewFloorTot(y))/1000)                 
               OfficeUPSELQ(r,b,y)=OfficeUPS* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)                
-              UPSDataCtrELQ(r,b,y)=UPSDataCtr*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
-               + CMUSNewFloorTot(y))/1000)  !convert million sqft to billion sqft                       !DataCtr25                 
+               + CMUSNewFloorTot(y))/1000)                          
               ShredderElQ(r,b,y)=Shredder* (CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail
                + CMUSNewFloorTot(y))/1000)             
               OfficePBEELQ(r,b,y)=0.0                    
@@ -4410,13 +4466,13 @@ END MODULE COM_MEM
               TelevisionsElQ(r,b,y)= Televisions*(CMTotalFlspc(r,b,y)/(CMUSSurvFloorTot(y) & ! miscdetail  !MELs21
                + CMUSNewFloorTot(y))/1000)  !MELs21
 
-              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)    & ! miscdetail
+              TotExplicitMiscElQ(r,b,y) = XfmrsDryElQ(r,b,y) + SecurityElQ(r,b,y)      & ! miscdetail
                + CoffeeBrewersElQ(r,b,y) + MedImagingElQ(r,b,y) + ElVehiclesElQ(r,b,y) & ! miscdetail
-               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)    & ! miscdetail
-               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)     & ! miscdetail
-               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)    &
-               + UPSDataCtrELQ(r,b,y) + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)    &
-               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y) & ! miscdetail  !MELs21
+               + ElevatorsElQ(r,b,y) + EscalatorsElQ(r,b,y) + FumeHoodsElQ(r,b,y)      & ! miscdetail
+               + LaundryElQ(r,b,y) + KitchenVentElQ(r,b,y) + LabRefFrzElQ(r,b,y)       & ! miscdetail
+               + LrgVidBoardElQ(r,b,y) + ITEquipELQ(r,b,y) + OfficeUPSELQ(r,b,y)       &
+               + ShredderElQ(r,b,y) + OfficePBEELQ(r,b,y)                              & !DataCtr26
+               + VoiceIPElQ(r,b,y) + POSsystemsElQ(r,b,y) + WarehouseRobotsElQ(r,b,y)  & ! miscdetail  !MELs21
                + TelevisionsElQ(r,b,y)  !MELs21
 
               ServDmdExBldg (s,b,r,y)= ServDmdExBldg (s,b,r,y) +                     & ! miscdetail
@@ -4424,15 +4480,15 @@ END MODULE COM_MEM
 
               NewServDmd (s,b,r,y)= NewServDmd (s,b,r,y) +                           & ! miscdetail
                TotExplicitMiscElQ(r,b,y) * (CMNewFlrbsf /(SurvFlrbsf+CMNewFlrbsf))     ! miscdetail               
-			 
-			 IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'11, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF			   !Add incremental intensity-data centers dcadjust !DataCtr25
-			   !Add incremental intensity-data centers dcadjust !DataCtr25
+             
+             IF (PRTDBGK.EQ.1) THEN
+              OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+              WRITE(663,89)'11, Before DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+              CLOSE(663)
+             ENDIF               !Add incremental intensity-data centers dcadjust !DataCtr25
+               !Add incremental intensity-data centers dcadjust !DataCtr25
                
-			   !Apply to entire service demand to account for additional transformer requirements
+               !Apply to entire service demand to account for additional transformer requirements
               ServDmdExBldg (s,b,r,y) =                                              & !dcadjust
                ServDmdExBldg (s,b,r,y)* (1.0 - DatCtrShare) +                        & !dcadjust
                ServDmdExBldg (s,b,r,y)*dcf(b,s) * DatCtrShare                              !dcadjust !DataCtr25
@@ -4440,12 +4496,12 @@ END MODULE COM_MEM
               NewServDmd (s,b,r,y) =                                                 & !dcadjust
                NewServDmd (s,b,r,y) * (1.0 - DatCtrShare) +                           & !dcadjust
                NewServDmd (s,b,r,y) * dcf(b,s) * DatCtrShare                                 !dcadjust !DataCtr25
-		
-		     IF (PRTDBGK.EQ.1) THEN
-		      OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
-		      WRITE(663,89)'11, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
-		      CLOSE(663)
-		     ENDIF		
+        
+             IF (PRTDBGK.EQ.1) THEN
+              OPEN(unit = 663, file = "CDM_DataCenters.txt", position="append") !creates the file
+              WRITE(663,89)'11, After DC,', NewServDmd (s,b,r,y), ',', ServDmdExBldg (s,b,r,y), ',', s,',', b,',', r,',', (y+1989)  !, 'DatCtrShare', DatCtrShare
+              CLOSE(663)
+             ENDIF        
 
             end select  miscbyBT
 
@@ -4492,7 +4548,6 @@ END MODULE COM_MEM
 
 
 !   ELASTICITY CALCULATIONS MOVED TO CONSUMPTION SUBROUTINE
-
 
        ! Split surviving building service demand into components
        ! subject to replacement and retrofit candidate decisions:
@@ -4648,7 +4703,7 @@ END MODULE COM_MEM
       EXTERNAL RTOVALUE
 
       INTEGER EPA111D
-     iNTEGER AB32SW
+      INTEGER AB32SW
 
       INTEGER*2 AEOYR      !Index corresponding to current AEO year (AEO report year - 1989); 1989=(BASEYR-1)
       COMMON /AEOReportYear/ AEOYR
@@ -5053,16 +5108,16 @@ END MODULE COM_MEM
       ! is the quantity of retrofit demand for which technology t,       invest
       ! vintage v is purchased to replace an existing technology.        invest
 
-      ! REAL*4 InvestCost (MNUMCR,CMnumMajServ,14:MNUMYR)
+      ! REAL*4 InvestCost (MNUMCR,CMnumMajServ,CBECSyear-BaseYr+1:MNUMYR)
       ! InvestCost (r,s,y) is the estimated investment in equipment required in region r tp satisfy service s in year y.
       ! Regions 1-9 are census divisions, 11 is national.
 
-      ! REAL*4 FedSubsidyInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,14:MNUMYR)       !investsub
+      ! REAL*4 FedSubsidyInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,CBECSyear-BaseYr+1:MNUMYR)       !investsub
       ! FedSubsidyInvestCost (r,s,f,y) is the estimated investment in federal equipment subsidies for a given
-     ! REAL*4 NonFedSubsidyInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,14:MNUMYR)       !investsub
+     ! REAL*4 NonFedSubsidyInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,CBECSyear-BaseYr+1:MNUMYR)       !investsub
       ! NonFedSubsidyInvestCost (r,s,f,y) is the estimated investment in local or utility  equipment subsidies for a given
 
-      ! REAL*4 Subsidy111dInvestCost (MNUMCR,CMnumMajServ,14:MNUMYR)   !investsub 111(d)
+      ! REAL*4 Subsidy111dInvestCost (MNUMCR,CMnumMajServ,CBECSyear-BaseYr+1:MNUMYR)   !investsub 111(d)
       ! Subsidy111dInvestCost (r,s,y) is the estimated investment in utility equipment subsidy (for 111d analysis) for a given
       !  technology in region r to satisfy service s in year y.
       ! Regions 1-9 are census divisions, 11 is national.
@@ -5154,7 +5209,7 @@ END MODULE COM_MEM
       NRG2007  = RTOVALUE("NRG2007  ",0)  ! Get dec 2007 energy bill switch value nrg07
       STIMULUS = RTOVALUE("STIMULUS  ",0) ! Get stimulus package switch value arra09
       EPA111D = RTOVALUE("EPA111D ",0)  ! SCEDES switch to activate subsidies for 111(d) analysis
-   AB32SW = RTOVALUE("AB32SW  ", 0)
+      AB32SW = RTOVALUE("AB32SW  ", 0)
 
       ! These are used as array subscripts to enhance the readability of the code
          iExist=1
@@ -7169,22 +7224,38 @@ END MODULE COM_MEM
 !         Region 1
           numerator   = sum(WHSE_SD(1:2,1,f,y))
           denominator = sum(WHSE_SD(1:2,1,f,y)*WHSE_EFF(1:2,1,f,y))
-          IF (denominator.ne.0.0) WHSE_HeatIndex(1,f,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+              WHSE_HeatIndex(1,f,y) = numerator/denominator
+          ELSE 
+              WHSE_HeatIndex(1,f,y) = 0.0
+          Endif
 
 !         Region 2
           numerator   = sum(WHSE_SD(3:4,1,f,y))
           denominator = sum(WHSE_SD(3:4,1,f,y)*WHSE_EFF(3:4,1,f,y))
-          IF (denominator.ne.0.0) WHSE_HeatIndex(2,f,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+              WHSE_HeatIndex(2,f,y) = numerator/denominator
+          ELSE 
+               WHSE_HeatIndex(2,f,y) = 0.0
+          ENDIF
 
 !         Region 3
           numerator   = sum(WHSE_SD(5:7,1,f,y))
           denominator = sum(WHSE_SD(5:7,1,f,y)*WHSE_EFF(5:7,1,f,y))
-          IF (denominator.ne.0.0) WHSE_HeatIndex(3,f,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+              WHSE_HeatIndex(3,f,y) = numerator/denominator
+          ELSE 
+              WHSE_HeatIndex(3,f,y) = 0.0
+          ENDIF
 
 !         Region 4
           numerator   = sum(WHSE_SD(8:9,1,f,y))
           denominator = sum(WHSE_SD(8:9,1,f,y)*WHSE_EFF(8:9,1,f,y))
-          IF (denominator.ne.0.0) WHSE_HeatIndex(4,f,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+               WHSE_HeatIndex(4,f,y) = (numerator/denominator)
+          ELSE 
+              WHSE_HeatIndex(4,f,y) = 0.0
+          ENDIF
 
 355       CONTINUE
 
@@ -7198,45 +7269,74 @@ END MODULE COM_MEM
 !         Region 1
           numerator   = sum(WHSE_SD(1:2,4,1,y))
           denominator = sum(WHSE_SD(1:2,4,1,y)*WHSE_EFF(1:2,4,1,y))
-          IF (denominator.ne.0.0) WHSE_VentIndex(1,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+               WHSE_VentIndex(1,y) = numerator/denominator
+          ELSE 
+              WHSE_VentIndex(1,y) = 0.0
+          ENDIF
 
 !         Region 2
           numerator   = sum(WHSE_SD(3:4,4,1,y))
           denominator = sum(WHSE_SD(3:4,4,1,y)*WHSE_EFF(3:4,4,1,y))
-          IF (denominator.ne.0.0) WHSE_VentIndex(2,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+               WHSE_VentIndex(2,y) = numerator/denominator
+          ELSE 
+              WHSE_VentIndex(2,y) = 0.0
+          ENDIF
 
 !         Region 3
           numerator   = sum(WHSE_SD(5:7,4,1,y))
           denominator = sum(WHSE_SD(5:7,4,1,y)*WHSE_EFF(5:7,4,1,y))
-          IF (denominator.ne.0.0) WHSE_VentIndex(3,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN
+               WHSE_VentIndex(3,y) = numerator/denominator          
+          ELSE 
+              WHSE_VentIndex(3,y) = 0.0
+          ENDIF
 
 !         Region 4
           numerator   = sum(WHSE_SD(8:9,4,1,y))
           denominator = sum(WHSE_SD(8:9,4,1,y)*WHSE_EFF(8:9,4,1,y))
-          IF (denominator.ne.0.0) WHSE_VentIndex(4,y) = numerator/denominator
-
+          IF (denominator.ne.0.0) THEN
+               WHSE_VentIndex(4,y) = numerator/denominator
+          ELSE 
+              WHSE_VentIndex(4,y) = 0.0
+          ENDIF
 !       Lighting (s=6,f=1)
 
 !         Region 1
           numerator   = sum(WHSE_SD(1:2,6,1,y))
           denominator = sum(WHSE_SD(1:2,6,1,y)*WHSE_EFF(1:2,6,1,y))
-          IF (denominator.ne.0.0) WHSE_LightIndex(1,y) = numerator/denominator
-
+          IF (denominator.ne.0.0) THEN
+              WHSE_LightIndex(1,y) = numerator/denominator
+          ELSE 
+              WHSE_LightIndex(1,y) = 0.0
+          ENDIF
 !         Region 2
           numerator   = sum(WHSE_SD(3:4,6,1,y))
           denominator = sum(WHSE_SD(3:4,6,1,y)*WHSE_EFF(3:4,6,1,y))
-          IF (denominator.ne.0.0) WHSE_LightIndex(2,y) = numerator/denominator
-
+          IF (denominator.ne.0.0) THEN
+               WHSE_LightIndex(2,y) = numerator/denominator
+          ELSE 
+              WHSE_LightIndex(2,y) = 0.0
+          ENDIF
+          
 !         Region 3
           numerator   = sum(WHSE_SD(5:7,6,1,y))
           denominator = sum(WHSE_SD(5:7,6,1,y)*WHSE_EFF(5:7,6,1,y))
-          IF (denominator.ne.0.0) WHSE_LightIndex(3,y) = numerator/denominator
+          IF (denominator.ne.0.0) THEN 
+               WHSE_LightIndex(3,y) = numerator/denominator
+          ELSE 
+              WHSE_LightIndex(3,y) = 0.0
+          ENDIF
 
 !         Region 4
           numerator   = sum(WHSE_SD(8:9,6,1,y))
           denominator = sum(WHSE_SD(8:9,6,1,y)*WHSE_EFF(8:9,6,1,y))
-          IF (denominator.ne.0.0) WHSE_LightIndex(4,y) = numerator/denominator
-
+          IF (denominator.ne.0.0) THEN 
+              WHSE_LightIndex(4,y) = numerator/denominator
+          ELSE 
+              WHSE_LightIndex(4,y) = 0.0
+          ENDIF
 !*****************************************************************
 
 !       Check to see if the calculations went as expected
@@ -7480,7 +7580,7 @@ END MODULE COM_MEM
                KitchenVent,LabRefFrz,Televisions,LrgVidBoard, & ! miscdetail !MELs21
                ElVehicles,FumeHoods,Laundry,MedImaging,       & ! miscdetail !MELs21
                Elevators,Escalators,ITEquip,OfficeUPS,        & ! miscdetail !MELs21
-               UPSDataCtr,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
+               Shredder,OfficePBE,VOICEIP,      & ! miscdetail !MELs21  !DataCtr26
                POSsystems,WarehouseRobots,TotExplicitMisc,    & !MELs21
                xmisccalc                                        ! miscdetail  ! holding variable for curiyr-CMFirstYr to use in MELs equations   !TODO - not used (remove)?
 
@@ -7488,15 +7588,15 @@ END MODULE COM_MEM
                KitchenVent,LabRefFrz,Televisions,LrgVidBoard, & ! miscdetail !MELs21
                ElVehicles,FumeHoods,Laundry,MedImaging,       & ! miscdetail !MELs21
                Elevators,Escalators,ITEquip,OfficeUPS,        & ! miscdetail !MELs21
-               UPSDataCtr,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
+               DataCtrServer,Shredder,OfficePBE,VOICEIP,      & ! miscdetail !MELs21
                POSsystems,WarehouseRobots,TotExplicitMisc,    & !MELs21
                xmisccalc                                        ! miscdetail  ! holding variable for curiyr-CMFirstYr to use in MELs equations    !TODO - not used (remove)?
 
-      COMMON /MiscElQ/ CoffeeBrewersElQ,XfmrsDryElQ,SecurityElQ,        & ! miscdetail
+      COMMON /MiscElQ/ CoffeeBrewersElQ,XfmrsDryElQ,SecurityElQ,           & ! miscdetail
                 KitchenVentElq,LabRefFrzElq,TelevisionsElQ,LrgVidBoardElq, & ! miscdetail
-                ElVehiclesElQ,FumeHoodsElQ,LaundryElQ,MedImagingElQ,    & ! miscdetail
-                ElevatorsElQ,EscalatorsElQ,ITEquipELQ,OfficeUPSELQ,   & ! miscdetail
-                UPSDataCtrELQ,ShredderELQ,OfficePBEELQ,VOICEIPELQ,   & ! miscdetail
+                ElVehiclesElQ,FumeHoodsElQ,LaundryElQ,MedImagingElQ,       & ! miscdetail
+                ElevatorsElQ,EscalatorsElQ,ITEquipELQ,OfficeUPSELQ,        & ! miscdetail
+                ShredderELQ,OfficePBEELQ,VOICEIPELQ,                       & ! miscdetail  !DataCtr26
                 POSsystemsElQ,WarehouseRobotsElQ,TotExplicitMiscElQ     !MELs21
 
       REAL*4 CoffeeBrewersElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                   ! miscdetail
@@ -7514,7 +7614,6 @@ END MODULE COM_MEM
       REAL*4 EscalatorsElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                      ! miscdetail
       REAL*4 ITEquipELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                         ! miscdetail
       REAL*4 OfficeUPSELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
-      REAL*4 UPSDataCtrELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                      ! miscdetail
       REAL*4 ShredderElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                        ! miscdetail
       REAL*4 OfficePBEELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
       REAL*4 VoiceIPElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                         ! miscdetail
@@ -7584,17 +7683,17 @@ END MODULE COM_MEM
       ! d using fuel f to satisfy service demand s in census division
       ! r in year y.
 
-      ! REAL*4 NSD (MNUMCR,CMnumBldg,CMnumServ,11:MNUMYR)
+      ! REAL*4 NSD (MNUMCR,CMnumBldg,CMnumServ,CBECSyear-BaseYr+1:MNUMYR)
       ! New service demand associated with new floorspace.
       ! Will replace NewServDmd in CMServDmdNw common block in
       ! Compar2 include file.
 
-      ! REAL*4 RSD (MNUMCR,CMnumBldg,CMnumServ,11:MNUMYR)
+      ! REAL*4 RSD (MNUMCR,CMnumBldg,CMnumServ,CBECSyear-BaseYr+1:MNUMYR)
       ! Replacement service demand associated with retiring equipment.
       ! Will replace RetireServDmd in CMServDmdNw common block in
       ! Compar2 include file.
 
-      ! REAL*4 SSD (MNUMCR,CMnumBldg,CMnumServ,11:MNUMYR)
+      ! REAL*4 SSD (MNUMCR,CMnumBldg,CMnumServ,CBECSyear-BaseYr+1:MNUMYR)
       ! Surviving service demand subject to retrofit decisions.
       ! Will replace ServDmdSurv in CMServDmdNw common block in
       ! Compar2 include file.
@@ -7667,6 +7766,7 @@ END MODULE COM_MEM
       REAL*4 SRElas        ! Holding variable for SR elasticity input    kelast
       REAL*4 EF1, EF2, EF3 ! elasticity distribution factors to spread
                            ! short run price elasticity effect over 3 years
+      REAL*4 MaxGrowthRate ! Maximum single year growth in coal consumption (!CoalCap26)
       INTEGER*4 elasbaseyr ! holding variable for base year index
       Integer   nt         !  loop index for generation technologies
       INTEGER*4 infile     !  Reusable file handle
@@ -8592,8 +8692,7 @@ END MODULE COM_MEM
               ELSEIF (f .EQ. 5) THEN
                 IF (PLGCM (r,CURIYR).gt.0.) minflprice= (PLGCM (r,CURIYR))
               ELSEIF (f .EQ. 6) THEN
-                IF (PCLCM (r,CURIYR).gt.0.) minflprice= (PCLCM (r,CURIYR)) !usePCLCM
-                IF (PCLCM (r,CURIYR).le.0.) minflprice= (PCLIN (r,CURIYR)) !indclprc !usePCLCM
+                IF (PCLCM (r,CURIYR).gt.0.) minflprice= (PCLCM (r,CURIYR))
               ELSEIF (f .EQ. 7) THEN
                 IF (PMGCM (r,CURIYR).gt.0.) minflprice= (PMGCM (r,CURIYR))
               ELSEIF (f .EQ. 8) THEN
@@ -8611,26 +8710,38 @@ END MODULE COM_MEM
 
 !        use appropriate own-price elasticity for projected intensity (consumption per square foot)    !minorfuel project
 !          also scale price to 2012 dollars was used in regressions) !BASEYR18 note that when macro updates dollar year, will need to update
-  !
-            If (MinFuelBeta (r,f-CMnumMajFl).GT.0.)  MinFuelBeta (r,f-CMnumMajFl)=0.0
 
+            if (MinFuelBeta (r,f-CMnumMajFl).GT.0.)  MinFuelBeta (r,f-CMnumMajFl)=0.0
 
-           temp = exp(MinFuelAlpha (r,f-CMnumMajFl) + log(minflprice / MC_JPGDP(-2) &
-               * MC_JPGDP(2012-baseyr+1))* MinFuelBeta (r,f-CMnumMajFl)) * FloorAdj(r)
+            temp = exp(MinFuelAlpha (r,f-CMnumMajFl) + log(minflprice / MC_JPGDP(-2) &
+              * MC_JPGDP(2012-baseyr+1))* MinFuelBeta (r,f-CMnumMajFl)) * FloorAdj(r)
+               
+!          set a maximum growth rate for coal consumption
+           MaxGrowthRate = 0.03 !CoalCap26
+               
+!          multiply intensity by floorspace to get projected energy consumption and scale to trillion Btu
+!            for coal and KS no growth for floorspace
 
-
-
-!        multiply intensity by floorspace to get projected energy consumption and scale to trillion Btu
- !             for coal and KS no growth for floorspace
-           DO b= 1, CMnumBldg
-            if(f.ne.6 .and.f .ne. 8 ) then
-              FinalEndUseCon (f,b,r,CURIYR)= temp *  &
+           DO b= 1, CMnumBldg ! For each building type, call the initial value for FinalEndUseCon in each (r,b,y)
+            if (f.eq.6 .or. f.eq.8) then ! For coal and KS, use 2018 floorspace base
+              FinalEndUseCon (f,b,r,CURIYR) = temp * &
+               (SurvFloorTotal (r,b,2018-baseyr+1) + CMNewFloorSpace (r,b,2018-baseyr+1))
+            else ! For all other fuels, use current year floorspace
+              FinalEndUseCon (f,b,r,CURIYR) = temp *  &
                (SurvFloorTotal (r,b,CURIYR) + CMNewFloorSpace (r,b,CURIYR))
-             else
-              FinalEndUseCon (f,b,r,CURIYR)= temp  *  &
-             (SurvFloorTotal (r,b,2018-baseyr+1) + CMNewFloorSpace (r,b,2018-baseyr+1)) !BASEYR18
-
-
+            endif
+            
+!           if necessary, cap single-year coal growth !CoalCap26            
+            if(f.eq.6) then !CoalCap26
+                if (FinalEndUseCon (f,b,r,CURIYR).gt.FinalEndUseCon (f,b,r,CURIYR-1) * (1.0 + MaxGrowthRate)) then
+                   FinalEndUseCon (f,b,r,CURIYR) = FinalEndUseCon (f,b,r,CURIYR-1) * (1.0 + MaxGrowthRate)
+                endif
+            elseif (f.eq.8 ) then
+                FinalEndUseCon (f,b,r,CURIYR)= temp  *  &
+                SurvFloorTotal (r,b,2018-baseyr+1) + CMNewFloorSpace (r,b,2018-baseyr+1)
+            else
+                FinalEndUseCon (f,b,r,CURIYR)= temp *  &
+               (SurvFloorTotal (r,b,CURIYR) + CMNewFloorSpace (r,b,CURIYR))
             endif
            ENDDO ! b
 
@@ -8878,6 +8989,9 @@ END MODULE COM_MEM
                 e, & ! emission type index
                 r, & ! census division index
                 y, y2   ! year index
+	  INTEGER*2 ApplyRamp ! Switch to implement ramp factor smoothing
+      REAL*4 RampFactor ! DCDmd26
+	  COMMON /CMRamp/ ApplyRamp
       INTEGER*2 DecayBM ! STEO Mistie Benchmarking Switch
       INTEGER*4 LastDecayYr ! Year which STEO Benchmarking is 0
       INTEGER*2 NoHist ! Switch - set to 1 in KPARM to turn off calibration to history and STEO ! NoHistory
@@ -8915,7 +9029,7 @@ END MODULE COM_MEM
       STIMULUS = RTOVALUE("STIMULUS  ",0)! Get stimulus package switch value arra09
 
       ! Initialize
-      EF1=0.5; EF2=0.35; EF3=0.15                                     !   SRelas	!TODO - update values? source?
+      EF1=0.5; EF2=0.35; EF3=0.15                                     !   SRelas    !TODO - update values? source?
       elasbaseyr = CBECSyear - (BASEYR-1)                             !   SRelas
 
 !Calculate consumption (in trillion Btu) for select non-building energy uses based on contractor MELs reports: https://www.eia.gov/analysis/studies/demand/miscelectric/
@@ -9344,9 +9458,9 @@ END MODULE COM_MEM
          QELCM(r,y)= CMFinalEndUse (1,r,y) + &
                          TRQ_ELEC(2,r,y) + &                         ! ldv fleet
                          TRQ_ELEC(3,r,y)   + &                         ! transit bus
-						 TRQ_ELEC(4,r,y)    + &						   ! school bus
-						 TRQ_ELEC(5,r,y)    + &                         ! commercial light truck
-						 TRQ_ELEC(6,r,y)      +&                    ! heavy truck
+                         TRQ_ELEC(4,r,y)    + &                           ! school bus
+                         TRQ_ELEC(5,r,y)    + &                         ! commercial light truck
+                         TRQ_ELEC(6,r,y)      +&                    ! heavy truck
                            TRQ_ELEC(7,r,y)+& 
                             TRQ_ELEC(8,r,y)+& 
                             TRQ_ELEC(9,r,y)
@@ -9695,7 +9809,7 @@ END MODULE COM_MEM
                KitchenVent,LabRefFrz,Televisions,LrgVidBoard, & ! miscdetail !MELs21
                ElVehicles,FumeHoods,Laundry,MedImaging,       & ! miscdetail !MELs21
                Elevators,Escalators,ITEquip,OfficeUPS,        & ! miscdetail !MELs21
-               UPSDataCtr,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
+               Shredder,OfficePBE,VOICEIP,                    & ! miscdetail !MELs21 !DataCtr26
                POSsystems,WarehouseRobots,TotExplicitMisc,    & !MELs21
                xmisccalc                                        ! miscdetail  ! holding variable for curiyr-CMFirstYr to use in MELs equations    !TODO - not used (remove)?
 
@@ -9703,7 +9817,7 @@ END MODULE COM_MEM
                KitchenVent,LabRefFrz,Televisions,LrgVidBoard, & ! miscdetail !MELs21
                ElVehicles,FumeHoods,Laundry,MedImaging,       & ! miscdetail !MELs21
                Elevators,Escalators,ITEquip,OfficeUPS,        & ! miscdetail !MELs21
-               UPSDataCtr,Shredder,OfficePBE,VOICEIP,         & ! miscdetail !MELs21
+               Shredder,OfficePBE,VOICEIP,                    & ! miscdetail !MELs21 !DataCtr26
                POSsystems,WarehouseRobots,TotExplicitMisc,    & !MELs21
                xmisccalc                                        ! miscdetail  ! holding variable for curiyr-CMFirstYr to use in MELs equations    !TODO - not used (remove)?
 
@@ -9711,7 +9825,7 @@ END MODULE COM_MEM
                 KitchenVentElq,LabRefFrzElq,TelevisionsElQ,LrgVidBoardElq, & ! miscdetail
                 ElVehiclesElQ,FumeHoodsElQ,LaundryElQ,MedImagingElQ,    & ! miscdetail
                 ElevatorsElQ,EscalatorsElQ,ITEquipELQ,OfficeUPSELQ,   & ! miscdetail
-                UPSDataCtrELQ,ShredderELQ,OfficePBEELQ,VOICEIPELQ,   & ! miscdetail
+                ShredderELQ,OfficePBEELQ,VOICEIPELQ,                  & ! miscdetail !DataCtr26
                 POSsystemsElQ,WarehouseRobotsElQ,TotExplicitMiscElQ     !MELs21
 
       REAL*4 CoffeeBrewersElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                   ! miscdetail
@@ -9729,7 +9843,6 @@ END MODULE COM_MEM
       REAL*4 EscalatorsElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                      ! miscdetail
       REAL*4 ITEquipELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                         ! miscdetail
       REAL*4 OfficeUPSELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
-      REAL*4 UPSDataCtrELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                      ! miscdetail
       REAL*4 ShredderElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                        ! miscdetail
       REAL*4 OfficePBEELQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                       ! miscdetail
       REAL*4 VoiceIPElQ(MNUMCR-2,CMnumBldg,CBECSyear-BaseYr+1:MNUMYR)                         ! miscdetail
@@ -10394,27 +10507,25 @@ END MODULE COM_MEM
             WRITE (dbfile,1000) r,b,13,f,y,VarVal,VarName               ! miscdetail
             VarVal= OfficeUPSELQ (r,b,y)                                ! miscdetail
             WRITE (dbfile,1000) r,b,14,f,y,VarVal,VarName               ! miscdetail
-            VarVal= UPSDataCtrELQ (r,b,y)                               ! miscdetail
-            WRITE (dbfile,1000) r,b,15,f,y,VarVal,VarName               ! miscdetail
             VarVal= ShredderELQ (r,b,y)                                 ! miscdetail
-            WRITE (dbfile,1000) r,b,16,f,y,VarVal,VarName               ! miscdetail
+            WRITE (dbfile,1000) r,b,15,f,y,VarVal,VarName               ! miscdetail
             VarVal= OfficePBEELQ (r,b,y)                                ! miscdetail
-            WRITE (dbfile,1000) r,b,17,f,y,VarVal,VarName               ! miscdetail
+            WRITE (dbfile,1000) r,b,16,f,y,VarVal,VarName               ! miscdetail
             VarVal= VoiceIPELQ (r,b,y)                                  ! miscdetail
-            WRITE (dbfile,1000) r,b,18,f,y,VarVal,VarName               ! miscdetail
+            WRITE (dbfile,1000) r,b,17,f,y,VarVal,VarName               ! miscdetail
             VarVal= POSsystemsElQ (r,b,y)                               !MELs21
-            WRITE (dbfile,1000) r,b,19,f,y,VarVal,VarName               !MELs21
+            WRITE (dbfile,1000) r,b,18,f,y,VarVal,VarName               !MELs21
             VarVal= WarehouseRobotsElQ (r,b,y)                          !MELs21
-            WRITE (dbfile,1000) r,b,20,f,y,VarVal,VarName               !MELs21
+            WRITE (dbfile,1000) r,b,19,f,y,VarVal,VarName               !MELs21
             VarVal= TelevisionsElQ (r,b,y)                              !MELs21
-            WRITE (dbfile,1000) r,b,21,f,y,VarVal,VarName               !MELs21
+            WRITE (dbfile,1000) r,b,20,f,y,VarVal,VarName               !MELs21
           ENDDO ! b                                                    ! miscdetail
           b= CMnumBldg+1  ! Assign b to non-building for water services ! miscdetail
           VarVal= WaterServicesElQ (r,y)                                ! miscdetail
-          WRITE (dbfile,1000) r,b,22,f,y,VarVal,VarName
+          WRITE (dbfile,1000) r,b,21,f,y,VarVal,VarName
           b= CMnumBldg+1    !TODO - Why is this done again? Both water and Telecom are non-building; shouldn't they both be the same CMnumBldg+1 rather than two different values?
           VarVal= TelecomServicesElQ (r,y)                              ! miscdetail
-          WRITE (dbfile,1000) r,b,23,f,y,VarVal,VarName
+          WRITE (dbfile,1000) r,b,22,f,y,VarVal,VarName
         ENDDO ! y                                                      ! miscdetail
       ENDDO ! r                                                        ! miscdetail
 
@@ -10453,8 +10564,7 @@ END MODULE COM_MEM
               case (5) PriceData   ! lpg
                Varval=plgcm(r,y)
               case (6) PriceData   ! coal
-               IF (r.EQ.1) Varval=pclin(r,y)   !indclprc
-               IF (r.NE.1) Varval=pclcm(r,y)   !indclprc
+               Varval=pclcm(r,y)
               case (7) PriceData   ! motor gas
                Varval=pmgcm(r,y)
               case (8) PriceData   ! kerosene
@@ -11088,10 +11198,10 @@ END MODULE COM_MEM
        include'apq'
        include'emmparm'  ! include needed for RPS credit price
        include'uecpout'  ! contains RPS credit price in 1987 mills/kWh - EPRPSPR(CURIYR) and !PhaseITC25 variables
-        !also contains clean energy target percentage of electricity as a fraction - EPRPSTGT(CURIYR) ceschp
-!  Note: when doing elasticity runs, include PQ block instead of APQ  ! elastruns
-!        MUST also make this change in the Main Comm routine          ! elastruns
-!        include'pq'                                                  ! elastruns
+!       also contains clean energy target percentage of electricity as a fraction - EPRPSTGT(CURIYR) ceschp
+!       Note: when doing elasticity runs, include PQ block instead of APQ  ! elastruns
+!       MUST also make this change in the Main Comm routine          ! elastruns
+!       include'pq'                                                  ! elastruns
        include'macout'
        include'uefpout'
        include'eusprc'
@@ -11195,7 +11305,7 @@ END MODULE COM_MEM
        REAL*4 XCUMNETFLOW(30)
        REAL*4 xtaxcreditclaimedtodate,XTOTTAXCREDIT   !total accumulated tax credits (up to total allowed) and total allowed credit
        INTEGER iTaxCreditCarryOver, iIntervalYrstoUse
-	           
+               
 
 !  DATA FROM DISTRIBUTED GEN INPUT FILE
        REAL*4 XDEGRAD(NTEK,MNUMYR),XELEFF(NTEK,MNUMYR), &
@@ -12266,59 +12376,59 @@ END MODULE COM_MEM
             if(xtaxcreditpct>0. .and. xtaxcreditmaxkw>0.) then
               xtaxcreditpct=min(xtaxcreditpct,xtaxcreditmaxkw/xcalceqcost)
             endif
-			
-			!PhaseITC25  - Calendar year for emissions draw down target being met must later than scheduled end date - For AEO2025, this is 2032
-			!UPIRA_APPYR is in YYYY format
-			
-			
-			IF (UPIRA_APPYR.EQ.9999) THEN
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
-			    WRITE(RCDBG,*) 'Emissions draw down target not met: UPIRA_APPYR = ', UPIRA_APPYR
-			  ENDIF
-			  
-			ELSEIF (UPIRA_APPYR.LE.2032) THEN
+            
+            !PhaseITC25  - Calendar year for emissions draw down target being met must later than scheduled end date - For AEO2025, this is 2032
+            !UPIRA_APPYR is in YYYY format
+            
+            
+            IF (UPIRA_APPYR.EQ.9999) THEN
               IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
-			    WRITE(RCDBG,*) 'Emissions draw down target not met after 2032: UPIRA_APPYR = ', UPIRA_APPYR
-              ENDIF			  
+                WRITE(RCDBG,*) 'Emissions draw down target not met: UPIRA_APPYR = ', UPIRA_APPYR
+              ENDIF
+              
+            ELSEIF (UPIRA_APPYR.LE.2032) THEN
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
+                WRITE(RCDBG,*) 'Emissions draw down target not met after 2032: UPIRA_APPYR = ', UPIRA_APPYR
+              ENDIF              
 
-			ELSEIF ((CURIYR + 1989).EQ.(UPIRA_APPYR + 1)) THEN
+            ELSEIF ((CURIYR + 1989).EQ.(UPIRA_APPYR + 1)) THEN
               XTAXCREDITPCT = XTAXCREDITPCT * 0.75
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1).AND.((NT).EQ.1)) THEN
-			  WRITE(RCDBG,*) 'ITC phase ', 'UPIRA_APPYR ', 'MNUMYR ', 'ICURIYR+1989 ', 'XTAXCREDITPCT ', 'NT '
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
-			  WRITE(RCDBG,*) 'first phase', UPIRA_APPYR, MNUMYR, ICURIYR+1989, XTAXCREDITPCT, NT
-			  ENDIF
-			  ENDIF
-			  
-			ELSEIF ((CURIYR + 1989).EQ.(UPIRA_APPYR + 2)) THEN  
-			  XTAXCREDITPCT = XTAXCREDITPCT * 0.50
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1).AND.((NT).EQ.1)) THEN
-			  WRITE(RCDBG,*) 'ITC phase ', 'UPIRA_APPYR ', 'MNUMYR ', 'ICURIYR+1989 ', 'XTAXCREDITPCT ', 'NT '
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
-			  WRITE(RCDBG,*) 'second phase', UPIRA_APPYR, MNUMYR, ICURIYR+1989, XTAXCREDITPCT, NT
-			  ENDIF
-			  ENDIF
-			
-			ELSEIF ((CURIYR + 1989).GE.(UPIRA_APPYR + 3)) THEN
-			  XTAXCREDITPCT = 0.00
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1).AND.((NT).EQ.1)) THEN
-			  WRITE(RCDBG,*) 'ITC phase ', 'UPIRA_APPYR ', 'MNUMYR ', 'ICURIYR+1989 ', 'XTAXCREDITPCT ', 'NT '
-			  IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
-			  WRITE(RCDBG,*) 'ITC end', UPIRA_APPYR, MNUMYR, ICURIYR+1989, XTAXCREDITPCT, NT  
-			  ENDIF	
-              ENDIF			  
-			  
-			ELSE
-			  XTAXCREDITPCT = XTAXCREDITPCT
-			ENDIF !PhaseITC25 end
-			  			  		
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1).AND.((NT).EQ.1)) THEN
+              WRITE(RCDBG,*) 'ITC phase ', 'UPIRA_APPYR ', 'MNUMYR ', 'ICURIYR+1989 ', 'XTAXCREDITPCT ', 'NT '
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
+              WRITE(RCDBG,*) 'first phase', UPIRA_APPYR, MNUMYR, ICURIYR+1989, XTAXCREDITPCT, NT
+              ENDIF
+              ENDIF
+              
+            ELSEIF ((CURIYR + 1989).EQ.(UPIRA_APPYR + 2)) THEN  
+              XTAXCREDITPCT = XTAXCREDITPCT * 0.50
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1).AND.((NT).EQ.1)) THEN
+              WRITE(RCDBG,*) 'ITC phase ', 'UPIRA_APPYR ', 'MNUMYR ', 'ICURIYR+1989 ', 'XTAXCREDITPCT ', 'NT '
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
+              WRITE(RCDBG,*) 'second phase', UPIRA_APPYR, MNUMYR, ICURIYR+1989, XTAXCREDITPCT, NT
+              ENDIF
+              ENDIF
+            
+            ELSEIF ((CURIYR + 1989).GE.(UPIRA_APPYR + 3)) THEN
+              XTAXCREDITPCT = 0.00
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1).AND.((NT).EQ.1)) THEN
+              WRITE(RCDBG,*) 'ITC phase ', 'UPIRA_APPYR ', 'MNUMYR ', 'ICURIYR+1989 ', 'XTAXCREDITPCT ', 'NT '
+              IF (((isize).EQ.1).AND.((iNiche).EQ.1).AND.((iRateLevel).EQ.1).AND.((iBld).EQ.1).AND.((iDiv).EQ.1)) THEN
+              WRITE(RCDBG,*) 'ITC end', UPIRA_APPYR, MNUMYR, ICURIYR+1989, XTAXCREDITPCT, NT  
+              ENDIF    
+              ENDIF              
+              
+            ELSE
+              XTAXCREDITPCT = XTAXCREDITPCT
+            ENDIF !PhaseITC25 end
+                                    
 
             XTOTTAXCREDIT=xcalceqcost*XTAXCREDITPCT
             if(xtaxcreditmax .gt. 0.)XTOTTAXCREDIT=min(xtottaxcredit,XTAXCREDITMAX)
             XTOTTAXCREDIT=XTOTTAXCREDIT+xCalcEqCost*comtxcrpct_div(nv,idiv,nt)                     ! 111dren
             basis = xcalceqcost - XTOTTAXCREDIT*.5
             iIntervalYrstoUse=iIntervalYrs(NT,NV)
-			
+            
 
 ! Initialize Cash Flow Starting Values
             XCUMNETFLOW(1:30)=0.
@@ -12572,7 +12682,7 @@ END MODULE COM_MEM
         xhwbtu = xhwbtu +XTEMP*XWATERHTGMMBTU/10.**6       !trills
         xshbtu = xshbtu + XTEMP*XspaceHTGMMBTU/10.**6      !trills
         xinvest = xinvest + XTEMP*xcalceqcost/10.**6       !$millions
-		
+        
         ENDIF !PhaseITC25
 
         IF(nt.eq.11) WindTechPotentialMW(Icuriyr,iDiv)= WindTechPotentialMW(Icuriyr,iDiv)            &
@@ -12739,7 +12849,7 @@ END MODULE COM_MEM
 ! Map variables provided to the utility model, generation, own use, grid sales,
 !     capacity, nonutility consumption of fuel for congeneration, to NEMS GDS:
 !
-!   The index f is the cogen fuel numbering scheme for electricity module (not
+!   The index f is the cogen fuel numbering scheme (MNUMCGF) for electricity module (not
 !     all of the EMM fuels -see cogen common block- are consumed by the commercial sector):
 !           f=1,  coal corresponds to nt=4, ifuel=6
 !           f=2,  oil corresponds to nt=5, ifuel=3
@@ -12753,17 +12863,18 @@ END MODULE COM_MEM
 !           f=10, other, unused by comm, ifuel=12
 !           f=11, wind, nt=11
 !           f=12, solar thermal, unused by comm
+!           f=13, battery energy storage; not currently modeled
 !           NOTE:  this scheme is NOT currently flexible and
 !                  depends upon the mapping of fuels and positions in kcogen
 
        ! Total Generation by division, year, fuel
-       CGCOMMGEN (r,iCURIYR,1:12,1:2)= 0.0 !grid sales=1, own use=2
+       CGCOMMGEN (r,iCURIYR,1:MNUMCGF,1:2)= 0.0 !grid sales=1, own use=2  !BESSmodel
 
        ! Fuel Consumption by division, year, fuel
-       CGCOMMQ (r,iCURIYR,1:12)= 0.0 !new
+       CGCOMMQ (r,iCURIYR,1:MNUMCGF)= 0.0 !BESSmodel
 
        ! Capacity Additions (by division, year, fuel)
-       cgcommcap(r,icuriyr,1:12)=0. ! new
+       cgcommcap(r,icuriyr,1:MNUMCGF)=0. !BESSmodel
 
            Do b=1,numbldg
 
@@ -12996,7 +13107,7 @@ END MODULE COM_MEM
                KCHPCESGEN(r,iCURIYR)                                            !ceschp
        ENDDO  ! r   ceschp
 
-       DO f= 1, 12
+       DO f= 1, MNUMCGF  !BESSmodel
         CGCOMmQ     (MNUMCR,iCURIYR,f)=   0.0
         CGCOMmGEN   (MNUMCR,iCURIYR,f,1)= 0.0
         CGCOMmGEN   (MNUMCR,iCURIYR,f,2)= 0.0

@@ -48,12 +48,14 @@ def fill_table_base_073(dfd, table_spec, table_id):
     z[2] = dfd['PRDH2NG'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0
     #Supply, Production, Steam Methane Reforming with CCS
     z[3] = dfd['PRDH2NG_CCS'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0
+    #Supply, Production, Autothermal Reforming with CCS
+    z[29] = dfd['PRDH2NGATR_CCS'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0
     #Supply, Production, Electrolysis
     z[4] = dfd['PRDH2EL'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0
     #Suply, Byproduct Supply to Market
     z[5] = dfd['BYPRDH2IN']
     # Supply, Total Hydrogen Supply
-    z[6] = (dfd['PRDH2NG'] + dfd['PRDH2NG_CCS'] + dfd['PRDH2EL']) / dfd['CFH2Q_KG'].iloc[0] * 1000.0 + (dfd['BYPRDH2IN'])
+    z[6] = (dfd['PRDH2NG'] + dfd['PRDH2NG_CCS'] + dfd['PRDH2EL'] + dfd['PRDH2NGATR_CCS']) / dfd['CFH2Q_KG'].iloc[0] * 1000.0 + (dfd['BYPRDH2IN'])
     #z[6] = z[1] + z[5]
 
     # Total Consumption by Fuel, Hydrogen Production, Natural gas
@@ -102,12 +104,22 @@ def fill_table_base_073(dfd, table_spec, table_id):
     z[21] = dfd['PH2_SPOT'] * SCALPR2
     
     # Delivered End-Use Prices, Industrial
-    z[22] = dfd['PH2IN'] * SCALPR2
+    z[22] = dfd['APMORE/PH2IN'] * SCALPR2
     
     # Delivered End-Use Prices, Transportation
     z[23] = dfd['AMPBLK/PH2TR'] * SCALPR2
     
     # Delivered End-Use Prices, Electric Power
-    z[24] = dfd['PH2EL'] * SCALPR2
+    z[24] = dfd['APMORE/PH2EL'] * SCALPR2
+    
+    # Productiion Capacity by Technology
+    # Steam Methane Reforming
+    z[25] = dfd['SMR_CAP'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0
+    # Steam Methane Reforming with CCS
+    z[26] = dfd['SMRCCS_CAP'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0    
+    # Autothermal Reforming with CCS
+    z[27] = dfd['ATRCCS_CAP'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0      
+    # Electrolysis
+    z[28] = dfd['ELEC_CAP'] / dfd['CFH2Q_KG'].iloc[0] * 1000.0    
     
     return z

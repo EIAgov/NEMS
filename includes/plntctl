@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/plntctl,v 1.4 2004/06/09 19:48:53 RSC Exp $
 !
 !  PLNTCTL: Control Variables For EFD Module

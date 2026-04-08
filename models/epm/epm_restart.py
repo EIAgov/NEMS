@@ -1,12 +1,12 @@
-"""Classes for storing restart file data in memory and doing restart file IO.
+"""Classes for storing restart file data in memory and doing restart file I/O.
 
 This module contains the `Restart` class, which wraps around PyFiler for
-reading and writing EPM-relevant parts of the NEMS binary restart file. For
-standalone runs, a Restart object is used to read the restart file once before
-EPM runs, store copies of all relevant arrays in memory while EPM runs, and
-then write the outputs to a new restart file after EPM runs. For integrated
-runs, no file IO occurs; an existing PyFiler object is directly passed in when
-the Restart object is created.
+reading and writing EPM-relevant parts of the NEMS restart file. In standalone
+runs, the restart object is used to read the restart file before EPM runs,
+store copies of all relevant arrays in memory while EPM is running, and then
+write the outputs to a new restart file once EPM finishes. In integrated runs,
+no actual file I/O occurs; an existing PyFiler object is directly passed in by
+NEMS when the restart object is created.
 """
 
 import importlib
@@ -46,7 +46,7 @@ PYFILER_DLL_DIR: Final[Path] = Path(
 
 # List of files that PyFiler needs to find for a successful standalone run
 PYFILER_NEEDED_FILES: Final[list[Path]] = [
-    Path.cwd() / "PyFiler" / "pyfiler1.cp311-win_amd64.pyd",
+    Path.cwd() / "PyFiler" / "pyfiler1.cp312-win_amd64.pyd",
     Path.cwd() / "FILELIST",
     Path.cwd() / "restart.unf",
     Path.cwd() / "input" / "dict.txt",
@@ -339,11 +339,11 @@ class Reference:
         """Create a new reference to a PyFiler variable with given converters.
 
         When the restart file data comes in via PyFiler, the `input_converter`
-        will be called to transform the PyFiler variable into a Python format
-        that will be used while EPM is running. When the data is put back into
-        back to the PyFiler variable after EPM runs, the `output_converter` is
-        called to transform the data from its EPM Python format back to a
-        format that can be safely assigned to the original PyFiler variable.
+        is called to transform the PyFiler variable to whatever format will be
+        used while EPM is running. When the data is put back into the PyFiler
+        variable after EPM runs, the `output_converter` is called to transform
+        the data from its EPM format back to a format that can be safely
+        assigned into the original PyFiler variable.
 
         Parameters
         ----------
@@ -351,11 +351,11 @@ class Reference:
             The PyFiler variable that will hold the values of interest.
         input_converter : Callable[[Any], Any]
             Called on the PyFiler variable once the restart file data is
-            available to convert the value into an EPM Python format.
+            available to convert the value into an EPM format.
         output_converter : Callable[[Any], Any] | None, optional
-            Called on the EPM Python variable to convert the format back before
-            the value is assigned back to the PyFiler variable. If None (the
-            default), then this PyFiler variable is not used for output.
+            Called on the EPM variable to convert the format back before the
+            value is assigned into the PyFiler variable. If None (the default),
+            then this PyFiler variable is not used for output.
         """
         self.pyfiler_variable = pyfiler_variable
         self.input_converter = input_converter
@@ -416,15 +416,15 @@ class Reference:
 
 
 class Restart:
-    """Handles restart file IO with PyFiler and stores values while EPM runs.
+    """Handles restart file I/O with PyFiler and stores values while EPM runs.
 
     This class manages the full list of restart file variables that are
     relevant to EPM for both input and output. It is capable of both restart
-    file IO with the file system (for standalone runs) and reading directly
+    file I/O with the file system (for standalone runs) and reading directly
     from a pre-initialized PyFiler object (for integrated runs). While EPM is
     running, the values for each restart file variable are stored in instance
-    attributes named for the include file and Fortran variable with an
-    underscore separator, e.g., `self.ghgrep_em_resd`.
+    attributes whose names are given by the include file and Fortran variable
+    name with an underscore separator, e.g., `self.ghgrep_em_resd`.
     """
 
     def __init__(self, pyfiler: ModuleType | None = None) -> None:
@@ -433,19 +433,19 @@ class Restart:
         One instance attribute will be created for each EPM-relevant restart
         variable. These attributes will initially contain reference objects,
         which will then be dynamically replaced by values of the correct types
-        when PyFiler reads the binary restart file. If instead a PyFiler object
-        is provided, the actual reading of the restart file will be skipped.
+        when the restart data is read from PyFiler.
 
-        Restart file disk IO is used for standalone EPM runs and direct use of
-        an existing PyFiler object is for integrated runs.
+        For integrated NEMS runs, a pre-initialized PyFiler object is passed in
+        directly, but standalone runs require this class to conduct the actual
+        PyFiler file I/O.
 
         Parameters
         ----------
         pyfiler : ModuleType | None, optional
             A pre-initialized PyFiler module object to use instead of reading
-            the binary restart file from disk. The default value of None
-            indicates that PyFiler should be internally initialized and the
-            restart file data should be read from disk.
+            the restart file from disk. The default value of None indicates
+            that PyFiler should be internally initialized and the restart file
+            data should be read from disk.
         """
         # Initialize the PyFiler module internally if not provided
         if pyfiler is None:
@@ -513,13 +513,12 @@ class Restart:
                 refs.append(attribute_name)
         return refs
 
-    def read_file(self) -> None:
-        """Read the restart file with PyFiler and set instance attributes.
+    def read(self) -> None:
+        """Read the restart file data from PyFiler and set instance attributes.
 
-        If a PyFiler object was passed in when this restart file object was
-        constructed, then the actual file IO operation is skipped. However,
-        calling this method is still necessary for setting the instance
-        attributes.
+        If a PyFiler object was not passed in when this restart object was
+        constructed, then the actual file read operation is carried out before
+        any data is copied.
         """
         # Read data from the restart file into the PyFiler arrays if needed
         global _epm_pyfiler
@@ -533,13 +532,12 @@ class Restart:
             values = ref.read_values()
             setattr(self, name, values)
 
-    def write_file(self) -> None:
-        """Write instance attributes out to the restart file with PyFiler.
+    def write(self) -> None:
+        """Write the instance attributes to PyFiler restart file variables.
 
-        If a PyFiler object was passed in when this restart file object was
-        constructed, then the actual file IO operation is skipped. However,
-        calling this method is still necessary for writing the instance
-        attribute values back to PyFiler.
+        If a PyFiler object was not passed in when this restart object was
+        constructed, then the actual restart file write operation is carried
+        out after all data is copied.
         """
         # Write values from the instance attributes back to the PyFiler arrays
         for name, ref in self._output_references.items():
@@ -721,9 +719,7 @@ class Restart:
         self.parametr_mnumyr = self._add_int(self.pyfiler.utils.mnumyr)
         self.parametr_mnumcr = self._add_int(self.pyfiler.utils.mnumcr)
         self.parametr_mnumpr = self._add_int(self.pyfiler.utils.mnumpr)
-        self.parametr_ndreg = self._add_int(self.pyfiler.utils.ndreg)
         self.parametr_mnumnr = self._add_int(self.pyfiler.utils.mnumnr)
-        self.parametr_mnpollut = self._add_int(self.pyfiler.utils.mnpollut)
         self.parametr_msedyr = self._add_int(self.pyfiler.utils.msedyr)
         self.parametr_nngem = self._add_int(self.pyfiler.utils.nngem)
         self.parametr_baseyr = self._add_int(self.pyfiler.utils.baseyr)
@@ -858,14 +854,6 @@ class Restart:
         This include file contains CO2 data for the Carbon Capture, Allocation,
         Transportation, and Sequestration (CCATS) module.
         """
-        # CO2 volumes from recycled CO2, split by 45Q eligibility
-        self.ccatsdat_sup_rec_45q = self._add_float_array(
-            self.pyfiler.ccatsdat.sup_rec_45q
-        )
-        self.ccatsdat_sup_rec_ntc = self._add_float_array(
-            self.pyfiler.ccatsdat.sup_rec_ntc
-        )
-
         # CO2 volumes from natural gas processing facilities, split by 45Q
         # eligibility
         self.ccatsdat_sup_ngp_45q = self._add_float_array(
@@ -891,25 +879,12 @@ class Restart:
             self.pyfiler.ccatsdat.sup_cmt_ntc
         )
 
-        # CO2 volumes from ethanol production, split by 45Q eligibility
-        self.ccatsdat_sup_eth_45q = self._add_float_array(
-            self.pyfiler.ccatsdat.sup_eth_45q
-        )
-        self.ccatsdat_sup_eth_ntc = self._add_float_array(
-            self.pyfiler.ccatsdat.sup_eth_ntc
-        )
-
         # CO2 volumes from hydrogen production, split by 45Q eligibility
         self.ccatsdat_sup_h2_45q = self._add_float_array(
             self.pyfiler.ccatsdat.sup_h2_45q
         )
         self.ccatsdat_sup_h2_ntc = self._add_float_array(
             self.pyfiler.ccatsdat.sup_h2_ntc
-        )
-
-        # CO2 supply output after CCATS optimization
-        self.ccatsdat_co2_sup_out = self._add_float_array(
-            self.pyfiler.ccatsdat.co2_sup_out
         )
 
     def _include_coalemm(self) -> None:
@@ -1601,11 +1576,6 @@ class Restart:
 
         This include file contains a variety of emissions-related variables.
         """
-        # Constant parameters
-        self.emission_mx_hg_grp = self._add_int(self.pyfiler.utils.mx_hg_grp)
-        self.emission_epm_hg_cls = self._add_int(self.pyfiler.utils.epm_hg_cls)
-        self.emission_epm_rank = self._add_int(self.pyfiler.utils.epm_rank)
-
         # Mercury cap and trade groups
         self.emission_num_hg_grp = self._add_int(
             self.pyfiler.emission.num_hg_grp, output=True
@@ -1695,11 +1665,6 @@ class Restart:
         )
         self.emission_em_auction_sh = self._add_float_array(
             self.pyfiler.emission.em_auction_sh, output=True
-        )
-
-        # Hydrogen emissions by fuel and pollutant
-        self.emission_emhm = self._add_float_array(
-            self.pyfiler.emission.emhm, output=True
         )
 
         # Required Hg MEF if no CAMR
@@ -1918,7 +1883,6 @@ class Restart:
         self.ghgrep_iel_i = self._add_int(self.pyfiler.utils.iel_i)
         self.ghgrep_iel_t = self._add_int(self.pyfiler.utils.iel_t)
         self.ghgrep_etot = self._add_int(self.pyfiler.utils.etot)
-        self.ghgrep_endcalyr = self._add_int(self.pyfiler.utils.endcalyr)
 
         # Carbon dioxide emissions by fuel, region, and year for each sector
         self.ghgrep_em_resd = self._add_float_array(
@@ -2195,7 +2159,6 @@ class Restart:
         self.qblk_qngtr = self._add_float_array(self.pyfiler.qblk.qngtr)
         self.qblk_qngin = self._add_float_array(self.pyfiler.qblk.qngin)
         self.qblk_qngel = self._add_float_array(self.pyfiler.qblk.qngel)
-        self.qblk_qnghm = self._add_float_array(self.pyfiler.qblk.qnghm)
 
         # Other natural gas
         self.qblk_qgptr = self._add_float_array(self.pyfiler.qblk.qgptr)
@@ -2237,9 +2200,7 @@ class Restart:
         self.qblk_qlgin = self._add_float_array(self.pyfiler.qblk.qlgin)
 
         # Residual fuel, low sulfur
-        self.qblk_qrlcm = self._add_float_array(self.pyfiler.qblk.qrlcm)
         self.qblk_qrltr = self._add_float_array(self.pyfiler.qblk.qrltr)
-        self.qblk_qrlin = self._add_float_array(self.pyfiler.qblk.qrlin)
         self.qblk_qrlel = self._add_float_array(self.pyfiler.qblk.qrlel)
 
         # Residual fuel, high sulfur

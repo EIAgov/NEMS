@@ -1,21 +1,27 @@
 parameter,value,type,description,units
-storage_formations_lookup,storage\\storage_formations_lookup.csv,input_file,Lookup of saline formation attributes
-co2_supply_facilities,co2_facilities\\co2_facility_lookup.csv,input_file,input_file,Lookup of CO2 capture facility attributes
-pipeline_lookup_multi,transport\\master_pipeline_lookup_multi.csv,input_file,Lookup of CO2 pipeline transportation attributes
-ts_multiplier,transport\\ts_multiplier.csv,input_file,Set of CO2 multipliers for TS arcs by year
-hsm_eor_centroid,demand\\hsm_eor_centroid.csv,input_file,CO2 demand from HSM centroids during STEO years
-small_sample_switch,FALSE,switch,Model solves for only a single census division for testing if TRUE
-small_sample_division,7,input_variable,Census division solved with "small_sample_switch" == TRUE
-split_45q_supply_switch,TRUE,switch,Split CO2 supply into 45Q and NTC components if TRUE
+storage_formations_lookup,storage\\storage_formations_lookup.csv,input_file,Lookup of saline formation attributes,none
+co2_supply_facilities,co2_facilities\\co2_facility_lookup.csv,input_file,Lookup of CO2 capture facility attributes,none
+pipeline_lookup_multi,transport\\master_pipeline_lookup_multi.csv,input_file,Lookup of CO2 pipeline transportation attributes,none
+ts_multiplier,transport\\ts_multiplier.csv,input_file,Set of CO2 multipliers for TS arcs by year,none
+hsm_eor_centroid,demand\\hsm_eor_centroid.csv,input_file,CO2 demand from HSM centroids during STEO years,none
+small_sample_switch,FALSE,switch,Model solves for only a single census division for testing if TRUE,none
+small_sample_division,7,input_variable,"Census division solved with ""small_sample_switch"" == TRUE",none
+split_45q_supply_switch,TRUE,switch,Split CO2 supply into 45Q and NTC components if TRUE,none
 block_45q_yr,6,input_variable,Decision variable for number of 45Q eligibility years remaining in model (see method: determine_facility_eligibility_45q),years
-new_pipes_to_exist_facilities,2026,First year that new pipelines can be built to existing capture facilities (first operational in the following year),years
+new_pipes_to_exist_facilities,2026,input_variable,First year that new pipelines can be built to existing capture facilities (first operational in the following year),years
 tech_learn_ammonia,0.007984,tech_rate,Tech rate for capture at ammonia facilities,fr/yr
-tech_learn_ethanol,0.00,tech_rate,Tech rate for capture at ethanol facilities,fr/yr
+tech_learn_ethanol,0,tech_rate,Tech rate for capture at ethanol facilities,fr/yr
 tech_learn_cement,0.01,tech_rate,Tech rate for capture at cement facilities,fr/yr
 tech_learn_ng_processing,0.01,tech_rate,Tech rate for capture at natural gas processing,fr/yr
 tech_learn_other,0.01,tech_rate,Tech rate for capture at all other facilities,fr/yr
-tech_learn_power,0.00,tech_rate,Tech rate for capture at power plants (coal and natural gas),fr/yr
+tech_learn_power,0,tech_rate,Tech rate for capture at power plants (coal and natural gas),fr/yr
 tech_learn_transport,0.01,tech_rate,Tech rate for carbon transport,fr/yr
 tech_learn_storage,0.01,tech_rate,Tech rate for carbon storage,fr/yr
-transport_buffer,1.15,Buffer capacity for new pipeline builds in the optimization,input_variable,
-storage_buffer,1.15,Buffer capacity for new saline formation storage builds in the optimization,input_variable,
+transport_buffer,1.15,input_variable,Buffer capacity for new pipeline builds in the optimization,scalar
+storage_buffer,1.15,input_variable,Buffer capacity for new saline formation storage builds in the optimization,scalar
+nat_co2_fields_lookup,sources\\nat_co2_fields_lookup.csv,input_file,Lookup of natural CO2 field attributes,none
+source_data,sources\\source_data.csv,input_file,File containing source technology parameters,none
+source_annual_existing_capacity,sources\\annual_capacity_existing.csv,input_file,File containing existing source capacity,none
+source_total_existing_capacity,sources\\total_capacity_existing.csv,input_file,File containing existing source capacity,none
+source_capacity_limits,sources\\capacity_limits.csv,input_file,File containing build limits for source capacity,none
+colocate_dac_ts_switch,TRUE,switch,Enable colocating direct air capture at ts nodes,bool

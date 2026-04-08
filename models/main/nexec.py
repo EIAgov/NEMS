@@ -1,8 +1,8 @@
 from datetime import datetime
 import os
 import time
+import aimms_endpoint
 import aimms_wrapper
-import pyd_datatransfer
 from logging_utilities import print_it
 
 try:
@@ -78,7 +78,7 @@ def process_aimms_wrapper_return(my_result, pyfiler1, current_nems_module):
         os.sys.exit()
 
 
-def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, user, current_nems_module):
+def nexec(IMODEL, pyfiler1, current_integer_year, current_iteration, user, current_nems_module):
     """Executes the call to individual NEMS models
 
     Calls to individual NEMS models and is called between iteration = 1 to MAXITR (specified in scedes file)
@@ -93,10 +93,7 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
     
     pyfiler1 : module
         pyfiler fortran module
-    
-    pyfiler2 : module
-        pyfiler fortran module
-    
+
     current_integer_year : int
         Corresponding integer to NEMS calendar year (e.g. 1 = 1990)
     
@@ -113,8 +110,6 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
     None.
 
     """
-    
-    
     # Assign commonly used variables to local variables
     my_cycle = pyfiler1.cycleinfo.curirun
     current_cal_year = 1989 + current_integer_year
@@ -167,14 +162,8 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
 
         # Call to EMM model
         case 7:
-            # copies all data in exposed commonblocks from pyfiler1 to pyfiler2
-            swap_pyd1to2(pyfiler1, pyfiler2)
-            
             # turn on/off EPHRTS and its debugger before rujning EMM
-            pyfiler2.emm_run.ephrts_on_off(int(user.SCEDES["EPHRTS"]),int(user.SCEDES["EPHRTSDB"]))
-
-            # copies all data in exposed commonblocks from pyfiler2 to pyfiler1
-            swap_pyd2to1(pyfiler1, pyfiler2)
+            pyfiler1.emm_run.ephrts_on_off(int(user.SCEDES["EPHRTS"]),int(user.SCEDES["EPHRTSDB"]))
         
         # Call to CMM model
         case 8 if current_cal_year >= int(user.SCEDES['CLBASEYR']):
@@ -182,9 +171,12 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
             # Create a string to the AIMMS executable using path from SCEDES file
             # e.g. 'c:\\aimms_installation_free_releases\\4.96.4.6-x64-VS2017\\Bin\\aimms.exe'
             z = os.path.join(user.SCEDES["AIMMSLOC"], 'Bin', 'aimms.exe')
+            s = f"AIMMS location for CMM is : {z}"
+            print_it(my_cycle, s, MODULE_NAME)
             
             # AIMMS wrapper to run CMM AIMMS Model
-            my_result = aimms_wrapper.run_module('coal', pyfiler1, user.CMMCONF["putvar"], z, user.CMMCONF["base_year"])
+            #my_result = aimms_wrapper.run_module('coal', pyfiler1, user.CMMCONF["putvar"], z, user.CMMCONF["base_year"])
+            my_result = aimms_endpoint.run_module('coal', pyfiler1, user.CMMCONF["putvar"], z, user.CMMCONF["base_year"])
             
             # Check if AIMMS process completed successfully
             process_aimms_wrapper_return(my_result, pyfiler1, current_nems_module)
@@ -208,9 +200,11 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
             # Create a string to the AIMMS executable using path from SCEDES file
             # e.g. 'c:\\aimms_installation_free_releases\\4.96.4.6-x64-VS2017\\Bin\\aimms.exe'
             z = os.path.join(user.SCEDES["AIMMSLOC"], 'Bin', 'aimms.exe')
+            s = f"AIMMS location for NGMM is : {z}"
+            print_it(my_cycle, s, MODULE_NAME)
             
             # AIMMS wrapper to run NGMM AIMMS Model
-            my_result = aimms_wrapper.run_module('ngas', pyfiler1, user.NGMMCONF["putvar"], z, user.NGMMCONF["base_year"])
+            my_result = aimms_endpoint.run_module('ngas', pyfiler1, user.NGMMCONF["putvar"], z, user.NGMMCONF["base_year"])
             
             # Check if AIMMS process completed successfully
             process_aimms_wrapper_return(my_result, pyfiler1, current_nems_module)
@@ -226,11 +220,7 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
         
         # Call to RFM model
         case 12:
-            # copies all data in exposed commonblocks from pyfiler1 to pyfiler2
-            swap_pyd1to2(pyfiler1, pyfiler2)
-            pyfiler2.renew_run.go_renew()
-            # copies all data in exposed commonblocks from pyfiler2 to pyfiler1
-            swap_pyd2to1(pyfiler1, pyfiler2)
+            pyfiler1.renew_run.go_renew()
 
         # Call to HMM model
         case 13 if current_integer_year >= int(user.HMMCONF["base_year"]) - 1989:
@@ -238,7 +228,10 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
             # IDM accounting required for H2 before executing HMM model
             th2con = idm_h2_accounting.h2_accounting_before_hmm(pyfiler1)
             z = os.path.join(user.SCEDES["AIMMSLOC"], 'Bin', 'aimms.exe')
-            my_result = aimms_wrapper.run_module('hmm', pyfiler1, user.HMMCONF["putvar"], z, user.HMMCONF["base_year"])
+            s = f"AIMMS location for HMM is : {z}"
+            print_it(my_cycle, s, MODULE_NAME)
+            
+            my_result = aimms_endpoint.run_module('hmm', pyfiler1, user.HMMCONF["putvar"], z, user.HMMCONF["base_year"])
             
             # Check if AIMMS process completed successfully
             process_aimms_wrapper_return(my_result, pyfiler1, current_nems_module)
@@ -264,44 +257,6 @@ def nexec(IMODEL, pyfiler1, pyfiler2, current_integer_year, current_iteration, u
     # Calculate and print time to execute the NEMS model with the following information: Model name, runtime (sec), cycle number, year, iteration
     mod_elapsed_time = time.time() - mod_start_time
     print_it(my_cycle, f" ***Module: {current_nems_module}, Runtime (sec): {mod_elapsed_time}, cycle: {my_cycle}, year: {1989 + current_integer_year}, iter: {current_iteration}", MODULE_NAME)
-
-
-def swap_pyd1to2(pyfiler1, pyfiler2):
-    """Copies data from pyfiler1 object to pyfiler2 object
-
-    Parameters
-    ----------
-    pyfiler1 : module
-        pyfiler fortran module
-    
-    pyfiler2 : module
-        pyfiler fortran module
-    
-    """
-    
-    # Copies data by fortran Equivalence
-    pyd_datatransfer.copy_equivalences_between_pyd(pyfiler1, pyfiler2)
-    # Copies data by fortran common blocks and individual variables
-    pyd_datatransfer.copy_tables_between_pyd(pyfiler1, pyfiler2)
-
-
-def swap_pyd2to1(pyfiler1, pyfiler2):
-    """Copies data from pyfiler2 object to pyfiler1 object
-
-    Parameters
-    ----------
-    pyfiler1 : module
-        pyfiler fortran module
-    
-    pyfiler2 : module
-        pyfiler fortran module
-    
-    """
-    
-    # Copies data by fortran Equivalence
-    pyd_datatransfer.copy_equivalences_between_pyd(pyfiler2, pyfiler1)
-    # Copies data by fortran common blocks and individual variables
-    pyd_datatransfer.copy_tables_between_pyd(pyfiler2, pyfiler1)
 
 def nexec2(pyfiler1, user, current_integer_year, IMODEL, current_nems_module):
     """Executes the final call to individual NEMS models for the iteration
@@ -373,8 +328,8 @@ def nexec2(pyfiler1, user, current_integer_year, IMODEL, current_nems_module):
             # e.g. 'c:\\aimms_installation_free_releases\\4.96.4.6-x64-VS2017\\Bin\\aimms.exe'
             z = os.path.join(user.SCEDES["AIMMSLOC"], 'Bin', 'aimms.exe')
             # AIMMS wrapper to run NGMM AIMMS Model
-            aimms_wrapper.run_module('ngas', pyfiler1, user.NGMMCONF["putvar"], z, user.NGMMCONF["base_year"])
-    
+            my_result = aimms_endpoint.run_module('ngas', pyfiler1, user.NGMMCONF["putvar"], z, user.NGMMCONF["base_year"])
+                
             # add some sleep in case HMM is the only module being called
             if number_of_modules == 1:
                 # This only needs to be done if this is the only module on

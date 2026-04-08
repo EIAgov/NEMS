@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/indout,v 1.6 2013/06/18 19:00:17 pkc Exp $
 !  INDUSTRIAL MODULE OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR

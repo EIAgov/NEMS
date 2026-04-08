@@ -244,6 +244,8 @@ class Alaska(sub.Submodule):
             #Convert max daily production (MB/D) to annual volume (MMB)
             self.projects_known[nam.initial_oil_prod_rate] = self.projects_known[nam.initial_oil_prod_rate].mul(0.365)
             self.projects_known[nam.max_oil_production_rate] = self.projects_known[nam.max_oil_production_rate].mul(0.365)
+
+            # Calculate production values
             #Get calculated max and initial production
             self.projects_known[nam.max_oil_production_rate_calc]  = (self.projects_known[nam.oil_resources] - self.projects_known[list(range(self.prod_eval_year, self.zero_year))].sum(axis=1)) * self.projects_known[nam.max_oil_production_rate_factor]
             self.projects_known[nam.initial_oil_prod_rate_calc]    = self.projects_known[nam.oil_resources] * self.projects_known[nam.initial_oil_prod_rate_factor]
@@ -252,13 +254,13 @@ class Alaska(sub.Submodule):
             max_mask = self.projects_known[nam.max_oil_production_rate_calc] < self.projects_known[nam.max_oil_production_rate]
             temp_df = self.projects_known[max_mask].copy()
             temp_df[nam.max_oil_production_rate] = temp_df[nam.max_oil_production_rate_calc]
-            self.projects_known.update(temp_df)
+            self.projects_known.update(temp_df.astype(self.projects_known.dtypes))
 
             ###Set initial production as min between calc and fixed max rate
             max_mask = self.projects_known[nam.initial_oil_prod_rate_calc] < self.projects_known[nam.initial_oil_prod_rate]
             temp_df = self.projects_known[max_mask].copy()
             temp_df[nam.initial_oil_prod_rate] = temp_df[nam.initial_oil_prod_rate_calc]
-            self.projects_known.update(temp_df)
+            self.projects_known.update(temp_df.astype(self.projects_known.dtypes))
 
             #Drop calc columns
             self.projects_known = self.projects_known.drop([nam.initial_oil_prod_rate_calc, nam.max_oil_production_rate_calc], axis = 1)
@@ -266,7 +268,7 @@ class Alaska(sub.Submodule):
             # Side case Adjustment
             temp = self.projects_known.loc[self.projects_known[nam.year_production_start] > self.zero_year].copy()
             temp[nam.oil_resources] = temp[nam.oil_resources] * self.parent.side_case_adj
-            self.projects_known.update(temp)
+            self.projects_known.update(temp.astype(self.projects_known.dtypes))
 
         ###Load Intermediate Tables:
         if (self.rest_curcalyr > self.zero_year) & (self.parent.integrated_switch == True):
@@ -436,7 +438,7 @@ class Alaska(sub.Submodule):
                               right_index=True,
                               how='left')
         temp_price[nam.crude_price] = temp_price[avg_years].mean(axis=1)
-        self.projects[nam.crude_price] = temp_price[nam.crude_price].copy()
+        self.projects[nam.crude_price] = temp_price[nam.crude_price]
 
         #Load natural gas prices
         temp_price = pd.merge(self.projects[nam.region_number],
@@ -445,7 +447,7 @@ class Alaska(sub.Submodule):
                               right_index=True,
                               how='left')
         temp_price[nam.natgas_price] = temp_price[avg_years].mean(axis=1)
-        self.projects[nam.natgas_price] = temp_price[nam.natgas_price].copy()
+        self.projects[nam.natgas_price] = temp_price[nam.natgas_price]
 
 
     def calculate_drilling(self):
@@ -530,6 +532,8 @@ class Alaska(sub.Submodule):
                 if series[i] > 0:
                     return i
             return np.NaN
+
+        # Calculate production delay for projects
         self.projects[nam.production_delay] = self.cash_flow.dev_drill_cost.apply(first_production, axis=1)
         self.projects[nam.production_delay] = 0
 
@@ -575,6 +579,9 @@ class Alaska(sub.Submodule):
 
         #Abandonment rate calculation
         self.projects[nam.abandon_rate] = self.projects[nam.kap_cost_rate] * self.projects[nam.oil_resources] * 0.1
+
+        #Apply tech rate (commented out to prevent ANWR cost spike)
+        #self.cash_flow.kap_cost = self.cash_flow.kap_cost.apply(lambda x: x.mul((1 - self.tech_rate) ** (self.rest_curcalyr - self.zero_year)))
 
         pass
 
@@ -657,6 +664,7 @@ class Alaska(sub.Submodule):
         self.cash_flow.properties[nam.royalty_rate] = self.royalty_rate
 
         #Set severance tax rate
+        # Set severance tax rates
         self.cash_flow.properties[nam.sev_rate_crude_prod] = self.sev_rate_crude
         self.cash_flow.properties[nam.sev_rate_natgas_prod] = self.sev_rate_natgas
 
@@ -741,7 +749,7 @@ class Alaska(sub.Submodule):
         ann_mask = resid_mask & ann_mask
         temp_df = self.projects[ann_mask].copy()
         temp_df[nam.profitability] = 1
-        self.projects.update(temp_df)
+        self.projects.update(temp_df.astype(self.projects.dtypes))
 
         #Set profitability selection mask
         selected_mask = self.projects[nam.profitability] > 0
@@ -755,14 +763,14 @@ class Alaska(sub.Submodule):
             #Update Projects so only one project is selected
             temp_df = temp_df.loc[temp_df[nam.resid] != temp_df[nam.resid].min()] #Drop smallest resid value which will always be largest prod
             temp_df[nam.year_production_start] = self.rest_curcalyr + 2
-            self.projects.update(temp_df)
+            self.projects.update(temp_df.astype(self.projects.dtypes))
 
             #Update Projects known so that all other projects are pushed back 2 years
             projects_known_mask = (self.projects_known[nam.resid] >= 51) & (self.projects_known[nam.year_production_start] >= self.rest_curcalyr)
             temp_df = self.projects_known[projects_known_mask].copy()
             temp_df[nam.year_production_start] = temp_df[nam.year_production_start] + 2
             temp_df.loc[temp_df[nam.year_production_start] < (self.rest_curcalyr + 2), nam.year_production_start] = (self.rest_curcalyr + 2)
-            self.projects_known.update(temp_df)
+            self.projects_known.update(temp_df.astype(self.projects_known.dtypes))
 
         #Create year mask
         year_mask = self.projects[nam.year_production_start] <= self.rest_curcalyr
@@ -774,7 +782,6 @@ class Alaska(sub.Submodule):
         #Crude production
         temp = self.cash_flow.crude_production.loc[selected_mask].copy()
         temp.columns = temp.columns + self.rest_curcalyr
-        # from https://stackoverflow.com/a/4587920
         labels = [i for i in temp.columns if i > self.parent.final_aeo_year]
         temp = temp.drop(labels, axis=1)
         temp[nam.resid] = self.projects.loc[selected_mask, nam.resid]
@@ -783,10 +790,10 @@ class Alaska(sub.Submodule):
         self.crude_production = pd.concat([self.crude_production, temp], ignore_index=True, join='outer')
         self.crude_production = self.crude_production.fillna(0)
 
-        self.projects_selected = pd.concat([self.projects[selected_mask].copy(), self.projects_selected], ignore_index=True)
+        self.projects_selected = pd.concat([self.projects.loc[selected_mask].copy(), self.projects_selected], ignore_index=True)
         self.projects = self.projects.loc[~selected_mask]
 
-        self.projects_selected = pd.concat([self.projects[selected_mask].copy(), self.projects_selected], ignore_index=True)
+        self.projects_selected = pd.concat([self.projects.loc[selected_mask].copy(), self.projects_selected], ignore_index=True)
         self.projects = self.projects.loc[~selected_mask]
 
         pass
@@ -841,9 +848,9 @@ class Alaska(sub.Submodule):
 
         """
         #Debug Files
-        self.projects.to_csv(self.output_path + 'projects_debug//' + 'hsm_ak_projects' + '_' + str(self.rest_curcalyr) + '_' + str(self.parent.current_iteration) + '.csv')
-        self.projects_known.to_csv(self.output_path + 'projects_debug//'  + 'hsm_ak_projects_known' + '_' + str(self.rest_curcalyr) + '_' + str(self.parent.current_iteration) + '.csv')
-        self.crude_production.to_csv(self.output_path + 'module_results_debug//'  + 'hsm_ak_crude_production.csv')
+        self.projects.to_csv(self.output_path + 'projects_debug//all//' + 'hsm_ak_projects' + '_' + str(self.rest_curcalyr) + '_' + str(self.parent.current_iteration) + '.csv')
+        self.projects_known.to_csv(self.output_path + 'projects_debug//all//'  + 'hsm_ak_projects_known' + '_' + str(self.rest_curcalyr) + '_' + str(self.parent.current_iteration) + '.csv')
+        self.crude_production.to_csv(self.output_path + 'module_results_debug//alaska//'  + 'hsm_ak_crude_production.csv')
         self.cash_flow.to_csv(self.output_path + 'cashflow_debug//', 'ak_cash_flow', self.rest_curcalyr, self.parent.current_iteration)
 
         pass
@@ -927,21 +934,36 @@ class Alaska(sub.Submodule):
         if self.rest_curcalyr >= self.parent.steo_years[0]:
 
             temp = self.crude_production.copy()[self.rest_curcalyr].sum()
-            self.restart.ogsmout_ogqcrrep.at[(4,int(self.rest_curcalyr)), 'value'] = temp / 1000000
+            dtype_ogqcrrep = self.restart.ogsmout_ogqcrrep['value'].dtype
+            self.restart.ogsmout_ogqcrrep.at[(4,int(self.rest_curcalyr)), 'value'] = dtype_ogqcrrep.type(
+                temp / 1000000
+            )
 
             #Update Crude by HSM region and LFMM fuel type
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.region_number]]
             temp = temp.groupby([nam.region_number]).sum()
             #Write to restart
-            self.restart.ogsmout_ogcrdprd.at[(11,3, int(self.rest_curcalyr)), nam.value] = temp.at[11, int(self.rest_curcalyr)] / 1000000  #AK medium medium sou
-            self.restart.ogsmout_ogcrdprd.at[(12,3, int(self.rest_curcalyr)), nam.value] = temp.at[12, int(self.rest_curcalyr)] / 1000000 #AK medium medium sou
-            self.restart.ogsmout_ogcrdprd.at[(13,3, int(self.rest_curcalyr)), nam.value] = temp.at[13, int(self.rest_curcalyr)] / 1000000 #AK medium medium sou
+            dtype_ogcrdprd = self.restart.ogsmout_ogcrdprd[nam.value].dtype
+            self.restart.ogsmout_ogcrdprd.at[(11,3, int(self.rest_curcalyr)), nam.value] = dtype_ogcrdprd.type(
+                temp.at[11, int(self.rest_curcalyr)] / 1000000
+            )  #AK medium medium sou
+            self.restart.ogsmout_ogcrdprd.at[(12,3, int(self.rest_curcalyr)), nam.value] = dtype_ogcrdprd.type(
+                temp.at[12, int(self.rest_curcalyr)] / 1000000
+            ) #AK medium medium sou
+            self.restart.ogsmout_ogcrdprd.at[(13,3, int(self.rest_curcalyr)), nam.value] = dtype_ogcrdprd.type(
+                temp.at[13, int(self.rest_curcalyr)] / 1000000
+            ) #AK medium medium sou
 
 
             #Crude Production by Alaska Region
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.ak_region_number]]
             temp = temp.groupby([nam.ak_region_number]).sum()
-            self.restart.ogsmout_ogprcoak['value'].update(temp[[int(self.rest_curcalyr)]].stack() / 1000000)
+            ogprcoak_series = (temp[[int(self.rest_curcalyr)]].stack() / 1000000).astype(
+                self.restart.ogsmout_ogprcoak['value'].dtype
+            )
+            # Avoid chained assignment + inplace Series.update; assign via .loc on the intersection of indices
+            ogprcoak_index = ogprcoak_series.index.intersection(self.restart.ogsmout_ogprcoak.index)
+            self.restart.ogsmout_ogprcoak.loc[ogprcoak_index, 'value'] = ogprcoak_series.loc[ogprcoak_index]
 
 
             ###Domestic Crude Oil Production by region for LFMM (including EOR)
@@ -976,21 +998,31 @@ class Alaska(sub.Submodule):
             # State
             temp_state = temp.loc[temp[nam.region_number] == 13].copy()
             temp_state = temp_state[self.rest_curcalyr].sum() / 1000000
-            self.restart.ogsmout_ogprdoff.at[(5,1,int(self.rest_curcalyr)),nam.value] = float(temp_state)
+            dtype_ogprdoff = self.restart.ogsmout_ogprdoff['value'].dtype
+            self.restart.ogsmout_ogprdoff.at[(5,1,int(self.rest_curcalyr)),nam.value] = dtype_ogprdoff.type(temp_state)
             
             # Fed
             temp_fed = temp.loc[temp[nam.region_number] == 11].copy()
             temp_fed = temp_fed[self.rest_curcalyr].sum() / 1000000
-            self.restart.ogsmout_ogprdoff.at[(6,1,int(self.rest_curcalyr)),nam.value] = float(temp_fed)
+            self.restart.ogsmout_ogprdoff.at[(6,1,int(self.rest_curcalyr)),nam.value] = dtype_ogprdoff.type(temp_fed)
 
 
             ### Alaska Oil Production Federal/Non-Federal
+            # Process Alaska Oil Production Federal/Non-Federal data
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.region_number]]
             temp = temp.groupby([nam.region_number]).sum()
             # Write to restart
-            self.restart.ogsmout_ogcoprd_fed.at[(11, int(self.rest_curcalyr)), nam.value] = temp.at[11, int(self.rest_curcalyr)] / 1000000 / 365 # Federal Offshore
-            self.restart.ogsmout_ogcoprd_fed.at[(12, int(self.rest_curcalyr)), nam.value] = temp.at[12, int(self.rest_curcalyr)] / 1000000 / 365  # Federal? Onshore
-            self.restart.ogsmout_ogcoprd_nonfed.at[(13, int(self.rest_curcalyr)), nam.value] = temp.at[13, int(self.rest_curcalyr)] / 1000000 / 365 # State Offshore
+            dtype_ogcoprd_fed = self.restart.ogsmout_ogcoprd_fed[nam.value].dtype
+            dtype_ogcoprd_nonfed = self.restart.ogsmout_ogcoprd_nonfed[nam.value].dtype
+            self.restart.ogsmout_ogcoprd_fed.at[(11, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_fed.type(
+                temp.at[11, int(self.rest_curcalyr)] / 1000000 / 365
+            ) # Federal Offshore
+            self.restart.ogsmout_ogcoprd_fed.at[(12, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_fed.type(
+                temp.at[12, int(self.rest_curcalyr)] / 1000000 / 365
+            )  # Federal? Onshore
+            self.restart.ogsmout_ogcoprd_nonfed.at[(13, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_nonfed.type(
+                temp.at[13, int(self.rest_curcalyr)] / 1000000 / 365
+            ) # State Offshore
 
 
 
@@ -1000,29 +1032,41 @@ class Alaska(sub.Submodule):
             ak_on = temp.at[(12,int(self.rest_curcalyr)), 'value']
             ak_off_state = temp.at[(13,int(self.rest_curcalyr)), 'value']
             ak_ng_prod = ak_off_fed + ak_on + ak_off_state
-            self.restart.ogsmout_ogqngrep.at[(8, int(self.rest_curcalyr)), 'value'] = ak_ng_prod
-            self.restart.ogsmout_ogdngprd.at[(3, 1, int(self.rest_curcalyr)), 'value'] = ak_ng_prod
-            self.restart.ogsmout_ogdngprd.at[(75, 1, int(self.rest_curcalyr)), 'value'] = ak_off_state # Alaska state offshore
-            self.restart.ogsmout_ogdngprd.at[(84, 1, int(self.rest_curcalyr)), 'value'] = ak_off_fed # Alaska federal offshore
+            dtype_ogqngrep = self.restart.ogsmout_ogqngrep['value'].dtype
+            dtype_ogdngprd = self.restart.ogsmout_ogdngprd['value'].dtype
+            self.restart.ogsmout_ogqngrep.at[(8, int(self.rest_curcalyr)), 'value'] = dtype_ogqngrep.type(ak_ng_prod)
+            self.restart.ogsmout_ogdngprd.at[(3, 1, int(self.rest_curcalyr)), 'value'] = dtype_ogdngprd.type(ak_ng_prod)
+            self.restart.ogsmout_ogdngprd.at[(75, 1, int(self.rest_curcalyr)), 'value'] = dtype_ogdngprd.type(ak_off_state) # Alaska state offshore
+            self.restart.ogsmout_ogdngprd.at[(84, 1, int(self.rest_curcalyr)), 'value'] = dtype_ogdngprd.type(ak_off_fed) # Alaska federal offshore
 
             # Alaska NG Offshore Prod
-            self.restart.ogsmout_ogprdoff.at[(5,2,int(self.rest_curcalyr)),nam.value] = 0.0
-            self.restart.ogsmout_ogprdoff.at[(6,2,int(self.rest_curcalyr)),nam.value] = 0.0
+            dtype_ogprdoff = self.restart.ogsmout_ogprdoff['value'].dtype
+            self.restart.ogsmout_ogprdoff.at[(5,2,int(self.rest_curcalyr)),nam.value] = dtype_ogprdoff.type(0.0)
+            self.restart.ogsmout_ogprdoff.at[(6,2,int(self.rest_curcalyr)),nam.value] = dtype_ogprdoff.type(0.0)
 
 
             ### Alaska Natural Gas Production Federal/Non-Federal
-            self.restart.ogsmout_ogngprd_fed.at[(11, int(self.rest_curcalyr)), nam.value] = ak_off_fed / 1000000000  # Federal Offshore
-            self.restart.ogsmout_ogngprd_fed.at[(12, int(self.rest_curcalyr)), nam.value] = ak_on / 1000000000  # Federal? Onshore
-            self.restart.ogsmout_ogngprd_nonfed.at[(13, int(self.rest_curcalyr)), nam.value] = ak_off_state / 1000000000  # State Offshore
+            dtype_ngprd_fed = self.restart.ogsmout_ogngprd_fed[nam.value].dtype
+            dtype_ngprd_nonfed = self.restart.ogsmout_ogngprd_nonfed[nam.value].dtype
+            self.restart.ogsmout_ogngprd_fed.at[(11, int(self.rest_curcalyr)), nam.value] = dtype_ngprd_fed.type(ak_off_fed / 1000)  # Federal Offshore, convert to tcf
+            self.restart.ogsmout_ogngprd_fed.at[(12, int(self.rest_curcalyr)), nam.value] = dtype_ngprd_fed.type(ak_on / 1000)  # Federal? Onshore, convert to tcf
+            self.restart.ogsmout_ogngprd_nonfed.at[(13, int(self.rest_curcalyr)), nam.value] = dtype_ngprd_nonfed.type(ak_off_state / 1000)  # State Offshore, convert to tcf
 
 
             #NGPLS
-            self.restart.ogsmout_ognglak.at[int(self.rest_curcalyr), nam.value] = self.ngpl_production * 1000
-            self.restart.ogsmout_ogngplprd.at[(3, int(self.rest_curcalyr)), nam.value] = self.ngpl_production
-            self.restart.ogsmout_ogngplet.at[(3, int(self.rest_curcalyr)), nam.value] = self.ethane_production
-            self.restart.ogsmout_ogngplpr.at[(3, int(self.rest_curcalyr)), nam.value] = self.propane_production
-            self.restart.ogsmout_ogngplbu.at[(3, int(self.rest_curcalyr)), nam.value] = self.butane_production
-            self.restart.ogsmout_ogngplis.at[(3, int(self.rest_curcalyr)), nam.value] = self.isobutane_production
-            self.restart.ogsmout_ogngplpp.at[(3, int(self.rest_curcalyr)), nam.value] = self.proplus_production
+            dtype_ognglak = self.restart.ogsmout_ognglak[nam.value].dtype
+            dtype_ogngplprd = self.restart.ogsmout_ogngplprd[nam.value].dtype
+            dtype_ogngplet = self.restart.ogsmout_ogngplet[nam.value].dtype
+            dtype_ogngplpr = self.restart.ogsmout_ogngplpr[nam.value].dtype
+            dtype_ogngplbu = self.restart.ogsmout_ogngplbu[nam.value].dtype
+            dtype_ogngplis = self.restart.ogsmout_ogngplis[nam.value].dtype
+            dtype_ogngplpp = self.restart.ogsmout_ogngplpp[nam.value].dtype
+            self.restart.ogsmout_ognglak.at[int(self.rest_curcalyr), nam.value] = dtype_ognglak.type(self.ngpl_production * 1000)
+            self.restart.ogsmout_ogngplprd.at[(3, int(self.rest_curcalyr)), nam.value] = dtype_ogngplprd.type(self.ngpl_production)
+            self.restart.ogsmout_ogngplet.at[(3, int(self.rest_curcalyr)), nam.value] = dtype_ogngplet.type(self.ethane_production)
+            self.restart.ogsmout_ogngplpr.at[(3, int(self.rest_curcalyr)), nam.value] = dtype_ogngplpr.type(self.propane_production)
+            self.restart.ogsmout_ogngplbu.at[(3, int(self.rest_curcalyr)), nam.value] = dtype_ogngplbu.type(self.butane_production)
+            self.restart.ogsmout_ogngplis.at[(3, int(self.rest_curcalyr)), nam.value] = dtype_ogngplis.type(self.isobutane_production)
+            self.restart.ogsmout_ogngplpp.at[(3, int(self.rest_curcalyr)), nam.value] = dtype_ogngplpp.type(self.proplus_production)
 
         pass

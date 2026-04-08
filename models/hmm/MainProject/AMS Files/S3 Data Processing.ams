@@ -111,7 +111,7 @@ Section S3_Data_Processing {
 			empty GDS_Parameters_in_HMM;
 			
 			! Macro paremeters
-			Treasury10yrYield(year) := sum(MNUMYR | NEMSmap_MNUMYRToYear(MNUMYR,year), MACOUT_MC_RMGBLUSREAL(MNUMYR))/100;
+			Treasury10yrYield(year) := sum(nh::MNUMYR | nh::NEMSmap_MNUMYRToYear(nh::MNUMYR,nh::year), MACOUT_MC_RMGBLUSREAL(nh::MNUMYR))/100;
 			SP500Index(year) := sum(MNUMYR | NEMSmap_MNUMYRToYear(MNUMYR,year), MACOUT_MC_SP500(MNUMYR));
 			IndustrialBondRate(year) := sum(MNUMYR | NEMSmap_MNUMYRToYear(MNUMYR,year), MACOUT_MC_RMCORPBAA(MNUMYR))/100;
 			
@@ -126,7 +126,7 @@ Section S3_Data_Processing {
 			IndustrialWeight(regCen, subindustry, year) := sum((MNUMCR, MNSICM, MNUMYR), MACOUT_MC_REVIND(MNUMCR, MNSICM, MNUMYR) * NEMSmap_MNUMCRToCensusRegion(regCEN, MNUMCR) * NEMSmap_MNSICMToSubIndustry(MNSICM, subindustry) *  NEMSmap_MNUMYRToYear(MNUMYR,year));
 			! Process assign GDP Deflator and extend range based on average growth
 			GDPPriceDeflator87(i_calYear) := sum(MNUMY3 | NEMSmap_MNUMY3toCalYear(MNUMY3, i_calYear), MACOUT_MC_JPGDP(MNUMY3));
-			AverageDeflatorGrowth := average(i_calYear | (GDPPriceDeflator87(i_calYear) and GDPPriceDeflator87(i_calYear-1)), GDPPriceDeflator87(i_calYear)/$GDPPriceDeflator87(i_calYear-1));
+			AverageDeflatorGrowth := mean(i_calYear | (GDPPriceDeflator87(i_calYear) and GDPPriceDeflator87(i_calYear-1)), GDPPriceDeflator87(i_calYear)/$GDPPriceDeflator87(i_calYear-1));
 			GDPPriceDeflator87(i_calYear)|(i_calYear > StringToElement(cal_year, LastModelYear)) := GDPPriceDeflator87(LastModelYear)*power(AverageDeflatorGrowth,ord(i_calYear)-card(GDPPriceDeflator87));
 			
 			
@@ -456,7 +456,7 @@ Section S3_Data_Processing {
 			endif;
 			
 			empty EligibleGeneration45V;
-			EligibleGeneration45V(regNERC, capYear, elecYear, hr, seas, FirstPlanningPeriod) := Credit45VEligibility(CurrentModelYear, capYear) * IncrementalityEligibility(elecYear, capYear) * RenewableGeneration45V(capYear, regNERC, elecYear, hr, seas) | capYear <= CurrentModelYear;
+			EligibleGeneration45V(regNERC, capYear, elecYear, hr, seas, FirstPlanningPeriod) := Credit45VEligibility(CurrentModelYear, capYear) * IncrementalityEligibility(elecYear, capYear) * RenewableGeneration45V(capYear, regNERC, elecYear, hr, seas) $ (capYear <= CurrentModelYear);
 			EligibleGeneration45V(regNERC, capyear, elecYear, hr, seas, SecondPlanningPeriod) | capyear < NextModelYear:=  RenewableGeneration45V(NextModelYear, regNERC, elecYear, hr, seas) * IncrementalityEligibility(elecYear, capyear) * Credit45VEligibility(NextModelYear, capYear);
 			
 			
@@ -494,8 +494,13 @@ Section S3_Data_Processing {
 			! This might have to change in future years.
 			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech) | histyear >= MECSYear := HistoricalProductionCapacityNonElecByYear(MECSYear, regCen, SMRTech) * CapacityReserveRatio;
 			
+			! Sometimes, HMM can struggle to produce realistic prices if capacity it too high utilized its first model year.
+			! So here, I give a small amount of additional capacity to the West South Central region to act as a "buffer" so it is not capacity constrained
+			! the first year that HMM runs.
+			HistoricalProductionCapacityNonElecByYear(histyear, 'WSCentral', SMRTech) | histyear >= MECSYear := HistoricalProductionCapacityNonElecByYear(histyear,'WSCentral', SMRTech) * 1.1;
+			
 			! add refining SMR capacity
-			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech)  += hist_refinery_smr_cap(histyear, regCen, SMRTech);
+			HistoricalProductionCapacityNonElecByYear(i_calYear, regCen, SMRTech)  += hist_refinery_smr_cap(i_calYear, regCen, SMRTech);
 			! subtract CCS cap
 			HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech)  | HistoricalProductionCapacityNonElecByYear(histyear, regCen, SMRTech) -= hist_smr_ccs_cap(histyear, regCen, SMRCCSTech);
 			! add CCS capacity into its own slot
@@ -523,7 +528,7 @@ Section S3_Data_Processing {
 			endfor;
 			
 			! Build initial capacity array for SMR
-			LastHistoricalProductionCapacityYear := Last(i_calYear | Exists((regCen, prodTech_nonElec)|HistoricalProductionCapacityNonElecByYear(i_calYear,regCen,SMRTech)));
+			LastHistoricalProductionCapacityYear := '2022';
 			CapacityNonElecVintage(LastHistoricalProductionCapacityYear, regCen, SMRTech , LastHistoricalProductionCapacityYear) :=  HistoricalProductionCapacityNonElecByYear(LastHistoricalProductionCapacityYear, regCen, SMRTech);
 			
 			! Fill and extend SMR CCS array 
@@ -549,10 +554,18 @@ Section S3_Data_Processing {
 			 := CapacityNonElecVintage(LastHistoricalProductionCapacityYear, regCen, SMRTech, LastHistoricalProductionCapacityYear);
 			
 			 ! Add in planned capacity
+			 ! Non Electrolyzer Planned Capacity
 			 for (capYear | capYear >= FirstModelYear) do
 			 	PlannedCapacityYear := capYear;
 				CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec, capYear) | (i_calYear >= PlannedCapacityYear)+= planned_cap(PlannedCapacityYear, regCen, prodTech_nonElec);
 				endfor; 
+			
+			! Electrolyzer planned capacity
+			for (capYear | capYear >= FirstModelYear) do
+				PlannedCapacityYear := capYear;
+				CapacityElecVintage(i_calYear, regNERC, prodTech_Elec, capYear) | (i_calYear >= PlannedCapacityYear) += planned_cap(PlannedCapacityYear, regNERC, prodTech_elec);
+				endfor;
+			
 			
 			! STORAGE HISTORY
 			HistoricalStorageCapacityByYear(histyear, regCen, storageTech) := hist_storage_cap(histyear, regCen, storageTech);
@@ -563,7 +576,7 @@ Section S3_Data_Processing {
 			empty InitialCapacityForLearning;
 			! Initialize capacities for learning
 			InitialCapacityForLearning(PEMTech) := electrolyzer_learning_cap;
-			InitialCapacityForLearning(prodTech_nonElec) :=  sum((capYear, regCEN), CapacityNonElecVintage(FirstModelYear, regCen, prodTech_nonElec, capYear));
+			InitialCapacityForLearning(prodTech_nonElec) :=  sum((i_calYear, capYear, regCEN), CapacityNonElecVintage(FirstLearningYear, regCen, prodTech_nonElec, capYear));
 		}
 	}
 	Procedure Impute_Historical_Consumption {
@@ -678,11 +691,11 @@ Section S3_Data_Processing {
 			endif;
 		}
 		Parameter AnnualValue {
-			IndexDomain: ::i_calYear;
+			IndexDomain: i_calYear;
 			Property: Input;
 		}
 		Parameter Ones {
-			IndexDomain: ::i_calYear;
+			IndexDomain: i_calYear;
 		}
 		Parameter DiscountRate {
 			Property: Input;
@@ -1051,7 +1064,7 @@ Section S3_Data_Processing {
 				IndexDomain: (icr,subindustry,histyear);
 			}
 			Parameter hist_refinery_smr_cap {
-				IndexDomain: (histyear,regCen,prodTech);
+				IndexDomain: (i_calYear,regCen,prodTech);
 			}
 			Parameter hist_smr_ccs_cap {
 				IndexDomain: (histyear,regCen,prodTech);
@@ -1158,6 +1171,10 @@ Section S3_Data_Processing {
 				Comment: "Non-electrolyzer OM Costs by year (1987$ / million metric ton)";
 			}
 			Parameter FixedOMCostNonElectrolyzerNoCapex {
+				IndexDomain: (seas,regCen,prodTech,pp);
+				Comment: "Non-electrolyzer OM costs by planning period (1987$/million metric ton)";
+			}
+			Parameter Copy_FixedOMCostNonElectrolyzerNoCapex {
 				IndexDomain: (seas,regCen,prodTech,pp);
 				Comment: "Non-electrolyzer OM costs by planning period (1987$/million metric ton)";
 			}

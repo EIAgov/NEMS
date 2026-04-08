@@ -45,16 +45,8 @@
       NEW=.TRUE.
       FILENM='LDSMRPT'
       IMSG=FILE_MGR('O',FILENM,NEW)  !Open LDSM REPORT FILE
-      NEW=.FALSE.
-      FILENM='LDSMDAF'
-      IODB=FILE_MGR('O',FILENM,NEW)  !Open DAF-LSR-DB
-      NEW=.FALSE.
-      FILENM='LDSMCRS'
-      IOCR=FILE_MGR('O',FILENM,NEW)  !Open COMMERCIAL RESTART FILE
-      FILENM='LDSMRRS'
-      IORR=FILE_MGR('O',FILENM,NEW)  !Open RESIDENTIAL RESTART FILE
 !
-      CALL DSMRST(WHOOPS) ! Read structure file and DSM option database * need this for UNRGNS
+      CALL DSMRST(WHOOPS) ! Read structure file * need this for UNRGNS
       IF(WHOOPS) THEN
          WRITE(6,*)'<))) Data passed by LDSM may be CORRUPTED'
       ENDIF
@@ -85,7 +77,6 @@
 !
       IF (UF_DBG.GT.0) CLOSE(UF_DBG)
       IF (UF_RPT.GT.0) CLOSE(UF_RPT)
-      IF (UF_CRV.GT.0) CLOSE(UF_CRV)
       CLOSE(UF_PLT)
 !
       END
@@ -1114,14 +1105,7 @@
 !
 !        INITIALIZE EFP VARIABLES FOR PIPELINE BUILDS
 !
-         IF (USW_XP .EQ. 0) then
-            CALL INITEFP
-         ELSE
-            WPCST = 0.0
-            WASVL = 0.0
-            WBCWP = 0.0
-            WRCWP = 0.0
-         END IF
+         CALL INITEFP
 !
 !        GET REGION AND GROUP NUMBER IF UNIT PASSES THE PRESCREEN
 !

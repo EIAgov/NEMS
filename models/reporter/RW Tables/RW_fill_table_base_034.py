@@ -201,13 +201,11 @@ def fill_table_base_034(dfd, table_spec, table_id):
 
     #           Industrial Gas Manufacturing
     # T34(109,IY,IS)=MC_REVIND(11,51,IY)
-    # z[109] = dfd['MC_REVIND'].loc[11].loc[51]
-    z[109] = dfd["MC_REVIND"].loc[51].loc[11]
+    z[109] = dfd["MC_REVIND"].loc[51]
 
     #           Synthetic Dye and Pigment/Other
     # T34(110,IY,IS)=MC_REVIND(11,52,IY)
-    # z[110] = dfd['MC_REVIND'].loc[11].loc[52]
-    z[110] = dfd["MC_REVIND"].loc[52].loc[11]
+    z[110] = dfd["MC_REVIND"].loc[52]
 
     #         Organic
     # T34(38,IR,IY,IS)=MC_REVIND(IR,16,IY)
@@ -215,17 +213,15 @@ def fill_table_base_034(dfd, table_spec, table_id):
 
     #           Petrochemical Manufacturing
     # T34(111,IY,IS)=MC_REVIND(11,49,IY)
-    # z[111] = dfd['MC_REVIND'].loc[11].loc[49]
-    z[111] = dfd["MC_REVIND"].loc[49].loc[11]
+    z[111] = dfd["MC_REVIND"].loc[49]
 
-    #           Ethanol
+    #           Ethanol     (subset of organic; petchem+all other organic=organic, and ethanol is a separate sub-series)
     # T34(34,IR,IY,IS)=MC_REVIND(IR,17,IY)
     z[34] = dfd["MC_REVIND"].loc[17]
 
     #           All Other Basic Organic Chem Man
     # T34(112,IY,IS)=MC_REVIND(11,50,IY)
-    # z[112] = dfd['MC_REVIND'].loc[11].loc[50]
-    z[112] = dfd["MC_REVIND"].loc[50].loc[11]
+    z[112] = dfd["MC_REVIND"].loc[50]
 
     #         Resin, Synthetic Rubber, and Fibers
     # T34(39,IR,IY,IS)=MC_REVIND(IR,18,IY)
@@ -291,13 +287,11 @@ def fill_table_base_034(dfd, table_spec, table_id):
 
     #         Container Glass
     # T34(113,IY,IS)=MC_REVIND(11,53,IY)
-    # z[113] = dfd['MC_REVIND'].loc[11].loc[53]
-    z[113] = dfd["MC_REVIND"].loc[53].loc[11]
+    z[113] = dfd["MC_REVIND"].loc[53]
 
     #         Manufac Excl. Flat and Contain Glass
     # T34(114,IY,IS)=MC_REVIND(11,54,IY)
-    # z[114] = dfd['MC_REVIND'].loc[11].loc[54]
-    z[114] = dfd["MC_REVIND"].loc[54].loc[11]
+    z[114] = dfd["MC_REVIND"].loc[54]
 
     #         Cement
     # T34(106,IR,IY,IS)=MC_REVIND(IR,30,IY)

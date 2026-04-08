@@ -57,7 +57,11 @@
 !	PAR2_IND
 !		   
 !___________________________________________________________________________________________	     
-!												     
+!
+!Updates
+!
+!09/10/2025	KDL	Updated historical EERE CNG/LNG price, tax data for transportation delivered prices
+!10/28/2025	KDL	Updated Citgygate estimated coefficients and other regression data in CG table;  2003 to 2023
 !___________________________________________________________________________________________	     
 !
 !                               1.  Markup Option Selections 
@@ -75,9 +79,9 @@ ElectricOption:=1;
 
 composite table:
 
-fuel    TransportationOption
-CNG     4
-LNG     3
+nn::fuel    TransportationOption
+    CNG     4
+    LNG     3
 ;												     
 !___________________________________________________________________________________________	     
 !
@@ -110,65 +114,64 @@ LNG     3
 ADJ_flag_:=data{annual,season,adjust};
 Composite table:
 
-state	ADJ_flag	x_SpotPrice_year	x_SpotPrice_peak	x_SpotPrice_offpeak	x_Qratio_year	x_Qratio_peak	x_Qratio_offpeak	c_year	c_peak	c_offpeak
-AL	annual		0.827			0.656			0.971			0.273		1.059		0.074			0.669	0.845	0.517
-AR	annual		0.900			0.549			1.131			6.132		4.245		6.673			0.195	0.974	-0.339
-AZ	annual		0.560			0.079			0.929			-0.458		5.593		0.965			1.299	1.498	0.193
-CA	annual		0.509			0.305			0.753			4.665		3.009		10.327			0.764	1.237	0.129
-CO	annual		1.050			0.774			1.248			3.398		14.409		2.506			0.339	0.265	0.236
-CT	adjust		0.122			0.101			0.322			5.495		0.928		4.864			1.550	1.932	1.385
-DC	adjust		-0.018			0.082			-0.503			1.871		1.549		1.254			2.166	1.838	3.740
-DE	adjust		0.346			0.213			0.568			2.259		0.650		2.696			1.152	1.866	0.386
-FL	seasonal	-0.210			0.049			-0.341			-2.893		5.482		-6.946			3.802	2.183	4.787
-GA	seasonal	0.411			0.189			0.845			1.583		1.593		0.522			1.334	1.758	0.739
-IA	annual		0.870			0.828			0.967			6.812		28.360		8.129			0.423	0.274	0.185
-ID	annual		0.642			0.523			0.816			3.006		6.373		3.413			0.838	0.958	0.465
-IL	annual		0.902			0.662			1.319			0.956		4.698		1.387			0.623	0.862	-0.205
-IN	annual		0.526			0.167			0.963			0.257		5.015		0.509			0.801	0.699	-0.066
-KS	annual		0.881			0.923			0.904			3.625		6.509		2.558			0.643	0.316	0.957
-KY	annual		0.815			0.669			0.936			-0.203		1.619		-0.476			0.815	0.889	0.739
-LA	annual		0.681			0.580			0.778			-0.451		0.463		0.015			1.035	1.101	0.724
-MA	adjust		0.243			0.245			0.230			20.451		19.244		20.029			1.187	1.204	1.267
-MD	seasonal	0.305			0.245			0.439			10.248		8.772		11.001			1.343	1.553	0.974
-ME	adjust		0.270			0.151			0.499			-0.042		-1.027		0.460			2.999	4.372	1.308
-MI	seasonal	0.648			0.510			0.974			-2.561		9.707		-1.297			1.021	1.114	0.360
-MN	seasonal	0.794			0.698			0.984			2.087		13.371		4.090			0.755	0.677	0.099
-MO	seasonal	0.701			0.565			0.821			7.978		7.687		7.619			0.717	0.946	0.607
-MS	annual		0.706			0.612			0.800			-0.056		0.684		-0.145			1.067	1.085	0.958
-MT	annual		0.792			0.352			1.381			0.400		4.721		0.305			0.435	0.489	-0.429
-NC	annual		0.406			0.308			0.956			0.600		-0.757		1.005			1.650	2.739	-0.148
-ND	annual		0.389			0.169			0.939			4.903		0.687		4.361			0.975	1.640	0.188
-NE	adjust		0.206			0.109			0.937			3.760		-6.004		4.589			2.126	2.473	1.101
-NH	seasonal	0.789			0.683			0.833			0.174		1.058		0.359			0.678	0.734	0.528
-NJ	seasonal	0.328			0.219			1.078			78.037		54.718		86.770			0.420	0.956	-1.009
-NM	seasonal	0.952			0.688			1.373			0.134		1.687		0.193			0.640	0.692	-0.137
-NV	seasonal	0.807			0.690			0.923			0.412		2.679		0.684			0.887	0.871	0.563
-NY	annual		0.879			0.691			1.120			1.092		4.329		1.063			0.622	0.618	0.213
-OH	seasonal	0.603			0.581			0.613			-2.955		-6.213		-3.376			1.253	1.333	1.275
-OK	annual		0.781			0.680			0.851			2.005		2.416		2.316			0.887	1.026	0.680
-OR	seasonal	0.480			0.290			0.785			2.469		8.424		2.275			1.056	0.758	0.658
-PA	seasonal	0.561			0.376			0.854			17.542		28.800		17.951			1.089	1.173	0.707
-RI	adjust		0.124			0.150			0.662			0.140		2.324		0.069			1.099	0.396	0.337
-SC	seasonal	0.405			0.152			1.179			0.612		-0.420		-0.126			1.378	2.024	0.417
-SD	annual		0.898			0.742			1.114			0.268		1.064		0.460			0.576	0.705	-0.087
-TN	annual		0.909			0.784			1.026			0.686		3.200		0.613			0.614	0.671	0.435
-TX	annual		0.941			0.938			0.969			-3.559		15.027		-6.540			1.033	0.648	1.138
-UT	adjust		0.422			0.035			0.767			-2.558		4.600		-1.741			2.490	2.721	1.688
-VA	adjust		0.447			0.259			0.947			9.662		5.411		9.588			1.018	1.576	0.295
-VT	seasonal	0.442			0.331			1.071			0.177		1.750		0.133			1.644	0.726	0.589
-WA	annual		0.559			0.361			1.206			4.537		21.633		4.924			0.897	0.342	-0.164
-WI	annual		0.932			0.774			1.355			4.470		15.455		5.293			0.519	0.495	-0.314
-WV	annual		0.707			0.557			0.821			1.627		1.342		1.856			0.708	1.003	0.396
-WY	annual		0.755			0.486			0.945			-0.032		1.417		0.009			0.973	1.025	0.616
-
-;
+state ADJ_flag  x_SpotPrice_year  x_SpotPrice_peak  x_SpotPrice_offpeak  x_Qratio_year  x_Qratio_peak  x_Qratio_offpeak    c_year    c_peak  c_offpeak
+   AL   annual          0.800950          0.643014             0.852715       0.266366       2.223967          0.148203  0.705480  0.723914   0.663108
+   AR   annual          1.265101          1.490011             1.107063       4.747774       3.579802          5.071211 -0.037705 -0.306594   0.137495
+   AZ   annual          0.690026          0.667169             0.770448      -0.570202       3.374683         -0.265293  1.028431  0.691936   0.774295
+   CA   annual          0.578700          0.495529             0.776715      -3.039623     -75.548001         12.251393  0.896372  2.067417   0.094466
+   CO   annual          0.800534          0.776476             0.943183       3.108630      17.159597          2.404456  0.692903  0.147088   0.619084
+   CT   adjust          0.161041          0.097793             0.472229       7.612327       5.972158          7.664260  1.353212  1.654649   0.813212
+   DC   adjust          0.367135          0.283259             0.690966       1.195450       2.385593          0.803462  1.764482  1.350244   1.697774
+   DE   adjust          0.053277          0.090030            -0.043806       2.085573       2.156200          1.875099  1.901197  1.659292   2.339527
+   FL   annual          0.308666          0.163132             0.356728       0.640728       7.401692         -2.718376  2.542891  1.924511   3.039578
+   GA   annual          0.538491          0.298791             0.816357       2.155831      11.822719          0.868300  1.097721  1.180478   0.782474
+   IA   annual          0.734712          0.715793             0.806390       0.247499       5.378611          0.246612  1.109088  0.855129   0.986549
+   ID   season          0.345419          0.328788             0.445228       0.205379       4.332692          0.328934  0.991887  0.477452   0.751916
+   IL   annual          0.734998          0.787706             0.689654       4.345617      24.478086          4.662915  0.762372  0.450712   0.818220
+   IN   annual          0.621714          0.480292             0.739291       2.777359       3.662841          3.058180  0.913841  1.168496   0.665625
+   KS   annual          0.944411          0.964582             0.887622       3.454730       5.607743          3.274222  0.690685  0.485645   0.833462
+   KY   annual          0.873091          0.612037             1.001147       0.068187       3.266450         -0.154625  0.696465  0.844710   0.588905
+   LA   annual          0.568465          0.576217             0.579280      -0.957133       1.010416         -1.077772  1.291848  1.043786   1.299704
+   MA   adjust          0.226652          0.165601             0.532232      25.421123      21.028011         26.858336  1.164759  1.526827   0.472974
+   MD   season          0.393861          0.287529             0.607138      10.731769      13.702667         10.722405  1.199587  1.309340   0.832572
+   ME   adjust          0.320995          0.211185             0.643703       0.183972      -0.244591          0.447125  2.521958  3.467939   1.265754
+   MI   annual          0.533351          0.279741             0.788616      -0.673364       0.568489         -0.693339  1.105407  1.552847   0.672616
+   MN   season          0.801253          0.742043             0.878097       1.283410       2.211166          2.434641  0.963511  1.147037   0.646489
+   MO   annual          0.718692          0.920417             0.509332       6.348255      12.978401          6.750472  0.817780  0.214213   1.060831
+   MS   season          0.779428          0.700148             0.816696      -0.050091       1.833483         -0.112853  1.010028  0.817545   0.975649
+   MT   season          0.429475          0.255352             0.880793       0.465530       3.864939          0.413267  1.035103  0.869400   0.338187
+   NC   annual          0.462798          0.207923             0.970723       5.330141       5.222688          4.412963  0.774074  1.288820   0.143271
+   ND   annual          0.797696          0.592522             1.143622       0.208710       1.936598          0.301888  0.902677  0.910529   0.196986
+   NE   annual          0.683623          0.557372             0.926787       0.378313      -0.477862          0.331617  1.148835  1.474983   0.783266
+   NH   adjust          0.358568          0.251757             0.651563       0.725863      -0.418972          1.016442  1.620807  2.760214   0.493130
+   NJ   season          0.170933          0.117172             0.525762       1.901114       2.588285          0.307108  2.226642  2.272063   1.859057
+   NM   annual          0.977138          1.010930             0.912949      -0.278841      -0.977967         -0.157264  0.614776  0.645599   0.655559
+   NV   annual          0.795948          0.749231             0.968310       0.338901      -3.456234          0.768418  0.934482  1.475328   0.524325
+   NY   season          0.337460          0.199273             0.815433      78.067861      65.327472         85.030037  0.426172  0.985785  -0.540970
+   OH   annual          0.649522          0.521351             0.705236      -0.109913       0.694475         -0.075234  1.184107  1.389326   1.090128
+   OK   annual          0.911167          0.907608             0.981172       1.650122       2.935912          1.953806  0.900067  0.861103   0.692259
+   OR   season          0.182148          0.156664             0.330954       2.164498       5.541798          2.109360  1.551845  1.279968   1.333470
+   PA   annual          0.530598          0.343218             0.740169      13.581997      34.753291         13.410162  1.270643  1.193828   1.018412
+   RI   adjust          0.143268          0.130151             0.455581       0.425163       2.522186          0.320753  1.283697  0.662027   0.922197
+   SC   season          0.454526          0.163017             0.961290       0.848353       1.008546          0.069218  1.291585  1.846320   0.767174
+   SD   annual          0.826082          0.713152             1.013164       0.232673       1.316261          0.298596  0.840226  0.829855   0.420945
+   TN   annual          0.812620          0.811414             0.824118       0.507668       4.368580          0.494230  0.779244  0.569781   0.759192
+   TX   annual          1.276084          1.340004             1.062390      -4.044707      18.834847         -3.964840  0.540014 -0.016492   0.850455
+   UT   adjust          0.137140          0.055150             0.370853      -2.390406      -1.078570         -1.656473  2.838065  3.079657   2.222386
+   VA   annual          0.410376          0.222954             0.753311       8.454815       8.385791          8.376580  1.163523  1.555880   0.648377
+   VT   adjust          0.278393          0.177527             0.639626       0.166968       1.408893          0.170483  1.812146  1.159255   1.158220
+   WA   season          0.417453          0.315052             0.779907       3.791728       9.685368          4.075721  1.266796  1.193971   0.655603
+   WI   annual          0.712210          0.397065             1.065064       3.963196       2.560603          4.763061  1.005395  1.670289   0.310019
+   WV   annual          0.897883          0.587153             1.003672       1.836569       2.940303          1.933389  0.454443  0.780534   0.234492
+   WY   annual          0.735749          0.679920             0.870395      -0.023286       0.862074         -0.027065  0.994607  0.872752   0.781255
+   ;
 
 ! Regional TX stuff. Should be the same as the TX calculations above.
 Composite table:
-state	ADJ_flag	x_SpotPrice_year	x_SpotPrice_peak	x_SpotPrice_offpeak	x_Qratio_year	x_Qratio_peak	x_Qratio_offpeak	c_year	c_peak	c_offpeak
-TX_W	annual		0.941			0.938			0.969			-3.559		15.027		-6.540			1.033	0.648	1.138
-TX_N	annual		0.941			0.938			0.969			-3.559		15.027		-6.540			1.033	0.648	1.138
-TX_E	annual		0.941			0.938			0.969			-3.559		15.027		-6.540			1.033	0.648	1.138
+state ADJ_flag  x_SpotPrice_year  x_SpotPrice_peak  x_SpotPrice_offpeak  x_Qratio_year  x_Qratio_peak  x_Qratio_offpeak    c_year    c_peak  c_offpeak
+TX_W    annual          1.276084          1.340004             1.062390      -4.044707      18.834847         -3.964840  0.540014 -0.016492   0.850455
+TX_N    annual          1.276084          1.340004             1.062390      -4.044707      18.834847         -3.964840  0.540014 -0.016492   0.850455
+TX_E    annual          1.276084          1.340004             1.062390      -4.044707      18.834847         -3.964840  0.540014 -0.016492   0.850455	
 ;
 
 !state           ADJ_flag        c_peak     x_SpotPrice_peak    x_Qratio_peak    c_offpeak   x_SpotPrice_offpeak   x_Qratio_offpeak      c_year      x_SpotPrice_year      x_Qratio_year
@@ -244,21 +247,35 @@ TX_E	annual		0.941			0.938			0.969			-3.559		15.027		-6.540			1.033	0.648	1.138
 !			but some regions (NE, Pac, Mid-Atlantic) saw changes to to the functional form by
 !			including yearly dummy variables where there was outlier data 
 !			see: \\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\AEO2022\EndUseMarkups
+!10/30/25	KDL	Updated based on new python regression tool. 2006 to 2023.  outliers taken out
 
 !
 Composite table:
 
-r_cen       	opt	DIV_RES 	PAR1_RES_CD	PAR2_RES_CD
-NewEngland   	1    	1.53874		10480.370	55.99486
-MidAtlantic  	1     	5.492054	-4745.275	-10.41988
-ENCentral    	1    	6.741160	-10798.96	-15.75930			
-WNCentral    	1     	6.062994	-18749.24	-30.72177
-Satlantic    	1     	5.827878	-39405.01	8.187181
-ESCentral    	1    	8.304386	-34434.32	-39.43892
-WSCentral    	1     	4.507661	-50199.91	8.614381
-Mountain     	1     	5.792611	-33720.63	-11.34671
-Pacific      	1    	9.384402	-57930.05	-16.05326
+      r_cen  opt   DIV_RES    PAR1_RES_CD  PAR2_RES_CD
+  ENCentral    1  5.406038  -23058.583449    -3.747072
+  ESCentral    1  4.862036  -48829.614106    28.441085
+MidAtlantic    1  3.852909  -23887.284468    11.575448
+   Mountain    1  6.651187  -56248.459558    -8.147071
+ NewEngland    1  4.937779  -22349.405708    44.913809
+    Pacific    1 14.051057 -141025.619933   -19.882044
+  Satlantic    1  9.745055  -59650.611110    -8.538571
+  WNCentral    1  3.405116  -23077.250913    15.203840
+  WSCentral    1  0.398285  -51198.601108    34.103502
 ;
+
+
+!r_cen       	opt	DIV_RES 	PAR1_RES_CD	PAR2_RES_CD
+!NewEngland   	1    	1.53874		10480.370	55.99486
+!MidAtlantic  	1     	5.492054	-4745.275	-10.41988
+!ENCentral    	1    	6.741160	-10798.96	-15.75930			
+!WNCentral    	1     	6.062994	-18749.24	-30.72177
+!Satlantic    	1     	5.827878	-39405.01	8.187181
+!ESCentral    	1    	8.304386	-34434.32	-39.43892
+!WSCentral    	1     	4.507661	-50199.91	8.614381
+!Mountain     	1     	5.792611	-33720.63	-11.34671
+!Pacific      	1    	9.384402	-57930.05	-16.05326
+!;
 
 !  
 ! markup(r,t) = exp(DIV(r)) * (consumption(r,t)/households(r,t))**PAR1 * markup(r,t-1)**PAR2 * 
@@ -519,20 +536,32 @@ PAR2_RES('4'):=       6.79E-07;
 
 !7/31/19	KDL	Changed option 1; now just a function of constant, Q/floorspace, and Q (commercial)
 !			See Eviews file in AEO2020 (input) directory on NGMM shared drive
+!10/30/25	KDL	Updated using new python regression tool.  2006 to 2023.  Outliers removed
 
 Composite table:
-
-r_cen       	opt     DIV_COM  	PAR1_COM_CD	PAR2_COM_CD
-NewEngland   	1	2.830177	-27.12285	0.005189
-MidAtlantic  	1     	2.968123	17.10526	-0.003488
-ENCentral    	1   	2.449596	-28.71759	0.000978
-WNCentral    	1     	2.025695	-41.45123	0.004968
-Satlantic    	1     	2.312393	-59.90353	0.003809
-ESCentral    	1     	3.541174	-57.29958	0.004830
-WSCentral    	1     	2.912134	-37.86267	-0.001284
-Mountain     	1     	3.934395	-42.03589	-0.001299
-Pacific      	1	0.783508	-22.24654	0.006566
+      r_cen    opt  	DIV_COM		PAR1_COM_CD	PAR2_COM_CD
+  ENCentral    1 	2.535936   	-97.384976     	0.004472
+  ESCentral    1 	4.202138  	-402.212530     0.064869
+MidAtlantic    1 	1.756430   	-65.199282     	0.005728
+   Mountain    1 	2.901984    	-6.379397    	-0.004413
+ NewEngland    1 	2.736292    	11.014663    	-0.002493
+    Pacific    1 	7.814998  	-577.604363     0.034606
+  Satlantic    1 	4.832899   	-69.998707    	-0.001648
+  WNCentral    1 	1.902468    	42.682689    	-0.006230
+  WSCentral    1 	2.659510  	-285.865190     0.022022
 ;
+
+!r_cen       	opt     DIV_COM  	PAR1_COM_CD	PAR2_COM_CD
+!NewEngland   	1	2.830177	-27.12285	0.005189
+!MidAtlantic  	1     	2.968123	17.10526	-0.003488
+!ENCentral    	1   	2.449596	-28.71759	0.000978
+!WNCentral    	1     	2.025695	-41.45123	0.004968
+!Satlantic    	1     	2.312393	-59.90353	0.003809
+!ESCentral    	1     	3.541174	-57.29958	0.004830
+!WSCentral    	1     	2.912134	-37.86267	-0.001284
+!Mountain     	1     	3.934395	-42.03589	-0.001299
+!Pacific      	1	0.783508	-22.24654	0.006566
+!;
 
 !------------------------------------
 ! Commercial option 1
@@ -2812,9 +2841,9 @@ Trans_TaxYrDollars := '2020';
 
 composite table:
 
-fuel    Conv_dge_Mcf    
-CNG     0.144           
-LNG     0.139
+nn::fuel    Conv_dge_Mcf    
+    CNG     0.144           
+    LNG     0.139
 ;
 
 
@@ -2825,12 +2854,12 @@ LNG     0.139
 
 composite table:
 
-fuel    vehicle         Trans_DailyCapacity     Trans_Utilization       Trans_Capex     Trans_YrsRecover        Trans_WACC      Trans_PctFuelLoss       Trans_Opex
-CNG     personal        1100                    0.60                    0.5             10                      0.15            0.005                   0.51    
-CNG     fleet           1600                    0.80                    0.8             5                       0.1             0.005                   0.34
-LNG     personal        4000                    0.60                    1               10                      0.15            0.02                    0.59
-LNG     fleet           4000                    0.80                    1               5                       0.1             0.01                    0.41
-LNG     rail            4000                    0.80                    1               5                       0.1             0.01                    0.212
+nn::fuel    vehicle         Trans_DailyCapacity     Trans_Utilization       Trans_Capex     Trans_YrsRecover        Trans_WACC      Trans_PctFuelLoss       Trans_Opex
+    CNG     personal        1100                    0.60                    0.5             10                      0.15            0.005                   0.51    
+    CNG     fleet           1600                    0.80                    0.8             5                       0.1             0.005                   0.34
+    LNG     personal        4000                    0.60                    1               10                      0.15            0.02                    0.59
+    LNG     fleet           4000                    0.80                    1               5                       0.1             0.01                    0.41
+    LNG     rail            4000                    0.80                    1               5                       0.1             0.01                    0.212
 ;
 
 !Federal taxes by fuel for all years
@@ -2838,76 +2867,85 @@ LNG     rail            4000                    0.80                    1       
 !Data from https://www.iftach.org/taxmatrix3/
 !Taxes are in nominal dollars
 !All taxes and prices are updated and documented in AEO2020 folder on shared drive, NGMM_Transportation_Prices_July2019
+!9/10/2025	KDL	Note iftach website changed to "taxmatrix4" at end of address
 
 composite table:
 
-year    fuel    Tax_Federal
-2000	CNG	0.485
-2000	LNG	1.441
-2001	CNG	0.485
-2001	LNG	1.441
-2002	CNG	0.485
-2002	LNG	1.441
-2003	CNG	0.485
-2003	LNG	1.441
-2004	CNG	0.485
-2004	LNG	1.441
-2005	CNG	0.485
-2005	LNG	2.954
-2006	CNG	0.485
-2006	LNG	2.954
-2007	CNG	1.445
-2007	LNG	2.942
-2008	CNG	1.445
-2008	LNG	2.942
-2009	CNG	1.445
-2009	LNG	2.942
-2010	CNG	1.445
-2010	LNG	2.942
-2011	CNG	1.445
-2011	LNG	2.942
-2012	CNG	1.445
-2012	LNG	2.942
-2013	CNG	1.445
-2013	LNG	2.942
-2014	CNG	1.445
-2014	LNG	2.942
-2015	CNG	1.445
-2015	LNG	2.942
-2016	CNG	1.453
-2016	LNG	1.758
-2017	CNG	1.453
-2017	LNG	1.758
-2018	CNG	1.453
-2018	LNG	1.758
-2019	CNG	1.453
-2019	LNG	1.758
-2020	CNG	1.453
-2020	LNG	1.758
+nn::year    nn::fuel        Tax_Federal
+    2000	CNG	    0.485
+    2000	LNG	    1.441
+    2001	CNG	    0.485
+    2001	LNG	    1.441
+    2002	CNG	    0.485
+    2002	LNG	    1.441
+    2003	CNG	    0.485
+    2003	LNG	    1.441
+    2004	CNG	    0.485
+    2004	LNG	    1.441
+    2005	CNG	    0.485
+    2005	LNG	    2.954
+    2006	CNG	    0.485
+    2006	LNG	    2.954
+    2007	CNG	    1.445
+    2007	LNG	    2.942
+    2008	CNG	    1.445
+    2008	LNG	    2.942
+    2009	CNG	    1.445
+    2009	LNG	    2.942
+    2010	CNG	    1.445
+    2010	LNG	    2.942
+    2011	CNG	    1.445
+    2011	LNG	    2.942
+    2012	CNG	    1.445
+    2012	LNG	    2.942
+    2013	CNG	    1.445
+    2013	LNG	    2.942
+    2014	CNG	    1.445
+    2014	LNG	    2.942
+    2015	CNG	    1.445
+    2015	LNG	    2.942
+    2016	CNG	    1.453
+    2016	LNG	    1.758
+    2017	CNG	    1.453
+    2017	LNG	    1.758
+    2018	CNG	    1.453
+    2018	LNG	    1.758
+    2019	CNG	    1.453
+    2019	LNG	    1.758
+    2020	CNG	    1.453
+    2020	LNG	    1.758
+    2021	CNG         1.453
+    2021	LNG         1.758
+    2022	CNG         1.453
+    2022	LNG         1.758
+    2023	CNG         1.453
+    2023	LNG         1.758
+    2024	CNG         1.453
+    2024	LNG         1.758
 ;
 
 
 composite table: 
  
-fuel	r_cen		Tax_State
-CNG	NewEngland	1.4054
-CNG	MidAtlantic	1.5338
-CNG	ENCentral	2.4286
-CNG	WNCentral	1.6584
-CNG	SAtlantic	1.4772
-CNG	ESCentral	1.5870
-CNG	WSCentral	1.0938
-CNG	Mountain	0.9587
-CNG	Pacific		0.7559
-LNG	NewEngland	1.9285
-LNG	MidAtlantic	1.9274
-LNG	ENCentral	3.3785
-LNG	WNCentral	1.5745
-LNG	SAtlantic	1.4456
-LNG	ESCentral	1.4269
-LNG	WSCentral	0.9958
-LNG	Mountain	0.8717
-LNG	Pacific		0.5070
+nn::fuel    r_cen         Tax_State
+    CNG	    NewEngland	  1.9078
+    CNG	    MidAtlantic	  1.5199
+    CNG	    ENCentral	  2.9452
+    CNG	    WNCentral	  1.9446
+    CNG	    SAtlantic	  2.0506
+    CNG	    ESCentral	  1.6791
+    CNG	    WSCentral	  1.0935
+    CNG	    Mountain	  1.0030
+    CNG	    Pacific       0.5337
+    LNG	    NewEngland	  2.4488
+    LNG	    MidAtlantic	  1.8446
+    LNG	    ENCentral	  3.8443
+    LNG	    WNCentral	  1.8406
+    LNG	    SAtlantic	  2.0317
+    LNG	    ESCentral	  1.5300
+    LNG	    WSCentral	  0.9936
+    LNG	    Mountain	  0.9066
+    LNG	    Pacific	  0.5078
 ;   
  
 !Eviews Estimate of markup by census division from Citygate
@@ -2969,471 +3007,525 @@ LAG_TRANS := 0.63;
 !Annual CNG price (average) by census division
 
 composite table:
-year	fuel	r_cen		HistoricalAnnualPriceEERE
-2000	CNG	NewEngland	6.376
-2000	CNG	MidAtlantic	7.236
-2000	CNG	ENCentral	4.250
-2000	CNG	WNCentral	6.353
-2000	CNG	SAtlantic	4.808
-2000	CNG	ESCentral	4.839
-2000	CNG	WSCentral	7.162
-2000	CNG	Mountain	4.521
-2000	CNG	Pacific		8.017
-2001	CNG	NewEngland	8.659
-2001	CNG	MidAtlantic	10.156
-2001	CNG	ENCentral	9.226
-2001	CNG	WNCentral	9.226
-2001	CNG	SAtlantic	8.012
-2001	CNG	ESCentral	9.226
-2001	CNG	WSCentral	0.000
-2001	CNG	Mountain	8.376
-2001	CNG	Pacific		11.613
-2002	CNG	NewEngland	10.413
-2002	CNG	MidAtlantic	8.983
-2002	CNG	ENCentral	7.688
-2002	CNG	WNCentral	7.688
-2002	CNG	SAtlantic	8.120
-2002	CNG	ESCentral	7.688
-2002	CNG	WSCentral	7.931
-2002	CNG	Mountain	7.506
-2002	CNG	Pacific		10.143
-2003	CNG	NewEngland	10.035
-2003	CNG	MidAtlantic	8.740
-2003	CNG	ENCentral	8.214
-2003	CNG	WNCentral	8.214
-2003	CNG	SAtlantic	10.642
-2003	CNG	ESCentral	8.214
-2003	CNG	WSCentral	9.671
-2003	CNG	Mountain	8.578
-2003	CNG	Pacific		12.058
-2004	CNG	NewEngland	10.844
-2004	CNG	MidAtlantic	11.249
-2004	CNG	ENCentral	7.931
-2004	CNG	WNCentral	7.931
-2004	CNG	SAtlantic	11.734
-2004	CNG	ESCentral	7.931
-2004	CNG	WSCentral	10.224
-2004	CNG	Mountain	11.060
-2004	CNG	Pacific		12.867
-2005	CNG	NewEngland	11.812
-2005	CNG	MidAtlantic	16.749
-2005	CNG	ENCentral	10.396
-2005	CNG	WNCentral	10.396
-2005	CNG	SAtlantic	16.425
-2005	CNG	ESCentral	10.396
-2005	CNG	WSCentral	15.130
-2005	CNG	Mountain	12.500
-2005	CNG	Pacific		14.483
-2006	CNG	NewEngland	15.219
-2006	CNG	MidAtlantic	17.188
-2006	CNG	ENCentral	10.444
-2006	CNG	WNCentral	10.444
-2006	CNG	SAtlantic	14.652
-2006	CNG	ESCentral	10.444
-2006	CNG	WSCentral	14.949
-2006	CNG	Mountain	14.571
-2006	CNG	Pacific		15.542
-2007	CNG	NewEngland	17.485
-2007	CNG	MidAtlantic	15.138
-2007	CNG	ENCentral	11.685
-2007	CNG	WNCentral	11.685
-2007	CNG	SAtlantic	13.196
-2007	CNG	ESCentral	11.685
-2007	CNG	WSCentral	14.275
-2007	CNG	Mountain	12.710
-2007	CNG	Pacific		16.567
-2008	CNG	NewEngland	19.953
-2008	CNG	MidAtlantic	19.629
-2008	CNG	ENCentral	13.317
-2008	CNG	WNCentral	13.317
-2008	CNG	SAtlantic	16.048
-2008	CNG	ESCentral	13.317
-2008	CNG	WSCentral	18.901
-2008	CNG	Mountain	8.623
-2008	CNG	Pacific		19.609
-2009	CNG	NewEngland	17.222
-2009	CNG	MidAtlantic	15.482
-2009	CNG	ENCentral	12.973
-2009	CNG	WNCentral	12.973
-2009	CNG	SAtlantic	12.366
-2009	CNG	ESCentral	12.973
-2009	CNG	WSCentral	13.378
-2009	CNG	Mountain	7.996
-2009	CNG	Pacific		14.733
-2010	CNG	NewEngland	16.979
-2010	CNG	MidAtlantic	15.866
-2010	CNG	ENCentral	12.548
-2010	CNG	WNCentral	12.548
-2010	CNG	SAtlantic	13.054
-2010	CNG	ESCentral	12.548
-2010	CNG	WSCentral	14.430
-2010	CNG	Mountain	10.141
-2010	CNG	Pacific		16.271
-2011	CNG	NewEngland	17.505
-2011	CNG	MidAtlantic	17.343
-2011	CNG	ENCentral	12.305
-2011	CNG	WNCentral	12.305
-2011	CNG	SAtlantic	12.933
-2011	CNG	ESCentral	12.305
-2011	CNG	WSCentral	13.357
-2011	CNG	Mountain	10.060
-2011	CNG	Pacific		17.404
-2012	CNG	NewEngland	18.436
-2012	CNG	MidAtlantic	16.615
-2012	CNG	ENCentral	13.803
-2012	CNG	WNCentral	13.803
-2012	CNG	SAtlantic	12.710
-2012	CNG	ESCentral	13.803
-2012	CNG	WSCentral	15.502
-2012	CNG	Mountain	12.346
-2012	CNG	Pacific		17.262
-2013	CNG	NewEngland	18.982
-2013	CNG	MidAtlantic	16.251
-2013	CNG	ENCentral	13.540
-2013	CNG	WNCentral	13.540
-2013	CNG	SAtlantic	14.713
-2013	CNG	ESCentral	13.540
-2013	CNG	WSCentral	15.239
-2013	CNG	Mountain	12.750
-2013	CNG	Pacific		17.950
-2014	CNG	NewEngland	19.225
-2014	CNG	MidAtlantic	16.068
-2014	CNG	ENCentral	15.259
-2014	CNG	WNCentral	15.259
-2014	CNG	SAtlantic	15.158
-2014	CNG	ESCentral	15.259
-2014	CNG	WSCentral	15.300
-2014	CNG	Mountain	13.681
-2014	CNG	Pacific		17.808
-2015	CNG	NewEngland	18.739
-2015	CNG	MidAtlantic	15.340
-2015	CNG	ENCentral	15.360
-2015	CNG	WNCentral	15.360
-2015	CNG	SAtlantic	14.855
-2015	CNG	ESCentral	15.360
-2015	CNG	WSCentral	14.774
-2015	CNG	Mountain	13.701
-2015	CNG	Pacific		17.444
-2016	CNG	NewEngland	18.577
-2016	CNG	MidAtlantic	14.571
-2016	CNG	ENCentral	14.066
-2016	CNG	WNCentral	14.066
-2016	CNG	SAtlantic	14.389
-2016	CNG	ESCentral	14.066
-2016	CNG	WSCentral	14.753
-2016	CNG	Mountain	13.782
-2016	CNG	Pacific		17.707
-2017	CNG	NewEngland	18.063
-2017	CNG	MidAtlantic	16.161
-2017	CNG	ENCentral	14.765
-2017	CNG	WNCentral	14.765
-2017	CNG	SAtlantic	15.372
-2017	CNG	ESCentral	14.765
-2017	CNG	WSCentral	15.008
-2017	CNG	Mountain	14.158
-2017	CNG	Pacific		18.386
-2018	CNG	NewEngland	18.831
-2018	CNG	MidAtlantic	17.011
-2018	CNG	ENCentral	14.907
-2018	CNG	WNCentral	14.907
-2018	CNG	SAtlantic	15.372
-2018	CNG	ESCentral	14.907
-2018	CNG	WSCentral	15.129
-2018	CNG	Mountain	14.724
-2018	CNG	Pacific		18.589
-2019	CNG	NewEngland	19.985
-2019	CNG	MidAtlantic	16.788
-2019	CNG	ENCentral	15.089
-2019	CNG	WNCentral	15.089
-2019	CNG	SAtlantic	15.534
-2019	CNG	ESCentral	15.089
-2019	CNG	WSCentral	15.655
-2019	CNG	Mountain	14.057
-2019	CNG	Pacific		18.791
-2020	CNG	NewEngland	19.479
-2020	CNG	MidAtlantic	17.314
-2020	CNG	ENCentral	14.826
-2020	CNG	WNCentral	14.826
-2020	CNG	SAtlantic	14.097
-2020	CNG	ESCentral	14.826
-2020	CNG	WSCentral	15.372
-2020	CNG	Mountain	14.785
-2020	CNG	Pacific		18.629
-2021	CNG	NewEngland	20.976
-2021	CNG	MidAtlantic	18.508
-2021	CNG	ENCentral	15.797
-2021	CNG	WNCentral	15.797
-2021	CNG	SAtlantic	15.008
-2021	CNG	ESCentral	15.797
-2021	CNG	WSCentral	16.566
-2021	CNG	Mountain	16.343
-2021	CNG	Pacific		18.993
-2022	CNG	NewEngland	25.326
-2022	CNG	MidAtlantic	20.369
-2022	CNG	ENCentral	18.751
-2022	CNG	WNCentral	18.751
-2022	CNG	SAtlantic	18.690
-2022	CNG	ESCentral	18.751
-2022	CNG	WSCentral	19.681
-2022	CNG	Mountain	18.083
-2022	CNG	Pacific		22.615
+nn::year	nn::fuel    r_cen	HistoricalAnnualPriceEERE
+    2000	    CNG	    NewEngland	6.376
+    2000	    CNG	    MidAtlantic	7.236
+    2000	    CNG	    ENCentral	4.250
+    2000	    CNG	    WNCentral	6.353
+    2000	    CNG	    SAtlantic	4.808
+    2000	    CNG	    ESCentral	4.839
+    2000	    CNG	    WSCentral	7.162
+    2000	    CNG	    Mountain	4.521
+    2000	    CNG	    Pacific	8.017
+    2001	    CNG	    NewEngland	8.659
+    2001	    CNG	    MidAtlantic	10.156
+    2001	    CNG	    ENCentral	9.226
+    2001	    CNG	    WNCentral	9.226
+    2001	    CNG	    SAtlantic	8.012
+    2001	    CNG	    ESCentral	9.226
+    2001	    CNG	    WSCentral	0.000
+    2001	    CNG	    Mountain	8.376
+    2001	    CNG	    Pacific	11.613
+    2002	    CNG	    NewEngland	10.413
+    2002	    CNG	    MidAtlantic	8.983
+    2002	    CNG	    ENCentral	7.688
+    2002	    CNG	    WNCentral	7.688
+    2002	    CNG	    SAtlantic	8.120
+    2002	    CNG	    ESCentral	7.688
+    2002	    CNG	    WSCentral	7.931
+    2002	    CNG	    Mountain	7.506
+    2002	    CNG	    Pacific	10.143
+    2003	    CNG	    NewEngland	10.035
+    2003	    CNG	    MidAtlantic	8.740
+    2003	    CNG	    ENCentral	8.214
+    2003	    CNG	    WNCentral	8.214
+    2003	    CNG	    SAtlantic	10.642
+    2003	    CNG	    ESCentral	8.214
+    2003	    CNG	    WSCentral	9.671
+    2003	    CNG	    Mountain	8.578
+    2003	    CNG	    Pacific	12.058
+    2004	    CNG	    NewEngland	10.844
+    2004	    CNG	    MidAtlantic	11.249
+    2004	    CNG	    ENCentral	7.931
+    2004	    CNG	    WNCentral	7.931
+    2004	    CNG	    SAtlantic	11.734
+    2004	    CNG	    ESCentral	7.931
+    2004	    CNG	    WSCentral	10.224
+    2004	    CNG	    Mountain	11.060
+    2004	    CNG	    Pacific	12.867
+    2005	    CNG	    NewEngland	11.812
+    2005	    CNG	    MidAtlantic	16.749
+    2005	    CNG	    ENCentral	10.396
+    2005	    CNG	    WNCentral	10.396
+    2005	    CNG	    SAtlantic	16.425
+    2005	    CNG	    ESCentral	10.396
+    2005	    CNG	    WSCentral	15.130
+    2005	    CNG	    Mountain	12.500
+    2005	    CNG	    Pacific	14.483
+    2006	    CNG	    NewEngland	15.219
+    2006	    CNG	    MidAtlantic	17.188
+    2006	    CNG	    ENCentral	10.444
+    2006	    CNG	    WNCentral	10.444
+    2006	    CNG	    SAtlantic	14.652
+    2006	    CNG	    ESCentral	10.444
+    2006	    CNG	    WSCentral	14.949
+    2006	    CNG	    Mountain	14.571
+    2006	    CNG	    Pacific	15.542
+    2007	    CNG	    NewEngland	17.485
+    2007	    CNG	    MidAtlantic	15.138
+    2007	    CNG	    ENCentral	11.685
+    2007	    CNG	    WNCentral	11.685
+    2007	    CNG	    SAtlantic	13.196
+    2007	    CNG	    ESCentral	11.685
+    2007	    CNG	    WSCentral	14.275
+    2007	    CNG	    Mountain	12.710
+    2007	    CNG	    Pacific	16.567
+    2008	    CNG	    NewEngland	19.953
+    2008	    CNG	    MidAtlantic	19.629
+    2008	    CNG	    ENCentral	13.317
+    2008	    CNG	    WNCentral	13.317
+    2008	    CNG	    SAtlantic	16.048
+    2008	    CNG	    ESCentral	13.317
+    2008	    CNG	    WSCentral	18.901
+    2008	    CNG	    Mountain	8.623
+    2008	    CNG	    Pacific	19.609
+    2009	    CNG	    NewEngland	17.222
+    2009	    CNG	    MidAtlantic	15.482
+    2009	    CNG	    ENCentral	12.973
+    2009	    CNG	    WNCentral	12.973
+    2009	    CNG	    SAtlantic	12.366
+    2009	    CNG	    ESCentral	12.973
+    2009	    CNG	    WSCentral	13.378
+    2009	    CNG	    Mountain	7.996
+    2009	    CNG	    Pacific	14.733
+    2010	    CNG	    NewEngland	16.979
+    2010	    CNG	    MidAtlantic	15.866
+    2010	    CNG	    ENCentral	12.548
+    2010	    CNG	    WNCentral	12.548
+    2010	    CNG	    SAtlantic	13.054
+    2010	    CNG	    ESCentral	12.548
+    2010	    CNG	    WSCentral	14.430
+    2010	    CNG	    Mountain	10.141
+    2010	    CNG	    Pacific	16.271
+    2011	    CNG	    NewEngland	17.505
+    2011	    CNG	    MidAtlantic	17.343
+    2011	    CNG	    ENCentral	12.305
+    2011	    CNG	    WNCentral	12.305
+    2011	    CNG	    SAtlantic	12.933
+    2011	    CNG	    ESCentral	12.305
+    2011	    CNG	    WSCentral	13.357
+    2011	    CNG	    Mountain	10.060
+    2011	    CNG	    Pacific	17.404
+    2012	    CNG	    NewEngland	18.436
+    2012	    CNG	    MidAtlantic	16.615
+    2012	    CNG	    ENCentral	13.803
+    2012	    CNG	    WNCentral	13.803
+    2012	    CNG	    SAtlantic	12.710
+    2012	    CNG	    ESCentral	13.803
+    2012	    CNG	    WSCentral	15.502
+    2012	    CNG	    Mountain	12.346
+    2012	    CNG	    Pacific	17.262
+    2013	    CNG	    NewEngland	18.982
+    2013	    CNG	    MidAtlantic	16.251
+    2013	    CNG	    ENCentral	13.540
+    2013	    CNG	    WNCentral	13.540
+    2013	    CNG	    SAtlantic	14.713
+    2013	    CNG	    ESCentral	13.540
+    2013	    CNG	    WSCentral	15.239
+    2013	    CNG	    Mountain	12.750
+    2013	    CNG	    Pacific	17.950
+    2014	    CNG	    NewEngland	19.225
+    2014	    CNG	    MidAtlantic	16.068
+    2014	    CNG	    ENCentral	15.259
+    2014	    CNG	    WNCentral	15.259
+    2014	    CNG	    SAtlantic	15.158
+    2014	    CNG	    ESCentral	15.259
+    2014	    CNG	    WSCentral	15.300
+    2014	    CNG	    Mountain	13.681
+    2014	    CNG	    Pacific	17.808
+    2015	    CNG	    NewEngland	18.739
+    2015	    CNG	    MidAtlantic	15.340
+    2015	    CNG	    ENCentral	15.360
+    2015	    CNG	    WNCentral	15.360
+    2015	    CNG	    SAtlantic	14.855
+    2015	    CNG	    ESCentral	15.360
+    2015	    CNG	    WSCentral	14.774
+    2015	    CNG	    Mountain	13.701
+    2015	    CNG	    Pacific	17.444
+    2016	    CNG	    NewEngland	18.577
+    2016	    CNG	    MidAtlantic	14.571
+    2016	    CNG	    ENCentral	14.066
+    2016	    CNG	    WNCentral	14.066
+    2016	    CNG	    SAtlantic	14.389
+    2016	    CNG	    ESCentral	14.066
+    2016	    CNG	    WSCentral	14.753
+    2016	    CNG	    Mountain	13.782
+    2016	    CNG	    Pacific	17.707
+    2017	    CNG	    NewEngland	18.063
+    2017	    CNG	    MidAtlantic	16.161
+    2017	    CNG	    ENCentral	14.765
+    2017	    CNG	    WNCentral	14.765
+    2017	    CNG	    SAtlantic	15.372
+    2017	    CNG	    ESCentral	14.765
+    2017	    CNG	    WSCentral	15.008
+    2017	    CNG	    Mountain	14.158
+    2017	    CNG	    Pacific	18.386
+    2018	    CNG	    NewEngland	18.831
+    2018	    CNG	    MidAtlantic	17.011
+    2018	    CNG	    ENCentral	14.907
+    2018	    CNG	    WNCentral	14.907
+    2018	    CNG	    SAtlantic	15.372
+    2018	    CNG	    ESCentral	14.907
+    2018	    CNG	    WSCentral	15.129
+    2018	    CNG	    Mountain	14.724
+    2018	    CNG	    Pacific	18.589
+    2019	    CNG	    NewEngland	19.985
+    2019	    CNG	    MidAtlantic	16.788
+    2019	    CNG	    ENCentral	15.089
+    2019	    CNG	    WNCentral	15.089
+    2019	    CNG	    SAtlantic	15.534
+    2019	    CNG	    ESCentral	15.089
+    2019	    CNG	    WSCentral	15.655
+    2019	    CNG	    Mountain	14.057
+    2019	    CNG	    Pacific	18.791
+    2020	    CNG	    NewEngland	19.479
+    2020	    CNG	    MidAtlantic	17.314
+    2020	    CNG	    ENCentral	14.826
+    2020	    CNG	    WNCentral	14.826
+    2020	    CNG	    SAtlantic	14.097
+    2020	    CNG	    ESCentral	14.826
+    2020	    CNG	    WSCentral	15.372
+    2020	    CNG	    Mountain	14.785
+    2020	    CNG	    Pacific	18.629
+    2021	    CNG	    NewEngland	20.976
+    2021	    CNG	    MidAtlantic	18.508
+    2021	    CNG	    ENCentral	15.797
+    2021	    CNG	    WNCentral	15.797
+    2021	    CNG	    SAtlantic	15.008
+    2021	    CNG	    ESCentral	15.797
+    2021	    CNG	    WSCentral	16.566
+    2021	    CNG	    Mountain	16.343
+    2021	    CNG	    Pacific	18.993
+    2022	    CNG	    NewEngland	25.326
+    2022	    CNG	    MidAtlantic	20.369
+    2022	    CNG	    ENCentral	18.751
+    2022	    CNG	    WNCentral	18.751
+    2022	    CNG	    SAtlantic	18.690
+    2022	    CNG	    ESCentral	18.751
+    2022	    CNG	    WSCentral	19.681
+    2022	    CNG	    Mountain	18.083
+    2022	    CNG	    Pacific	22.615
+    2023            CNG     NewEngland	30.910
+    2023            CNG     MidAtlantic	22.554
+    2023            CNG     ENCentral	19.762
+    2023            CNG     WNCentral	19.762
+    2023            CNG     SAtlantic	18.326
+    2023            CNG     ESCentral	19.762
+    2023            CNG     WSCentral	20.713
+    2023            CNG     Mountain	20.996
+    2023            CNG     Pacific	28.522
+    2024            CNG     NewEngland	29.089
+    2024            CNG     MidAtlantic	22.534
+    2024            CNG     ENCentral	20.025
+    2024            CNG     WNCentral	20.025
+    2024            CNG     SAtlantic	18.305
+    2024            CNG     ESCentral	20.025
+    2024            CNG     WSCentral	21.300
+    2024            CNG     Mountain	20.855
+    2024            CNG     Pacific	26.317
 ;
 
 composite table:
-year	fuel	vehicle_r	r_cen		HistoricalAnnualRoadPriceEERE
-2009	CNG	personal	NewEngland	15.745
-2009	CNG	personal	MidAtlantic	14.612
-2009	CNG	personal	ENCentral	12.103
-2009	CNG	personal	WNCentral	12.103
-2009	CNG	personal	SAtlantic	11.779
-2009	CNG	personal	ESCentral	12.103
-2009	CNG	personal	WSCentral	12.670
-2009	CNG	personal	Mountain	8.340
-2009	CNG	personal	Pacific		13.762
-2009	CNG	fleet		NewEngland	15.300
-2009	CNG	fleet		MidAtlantic	15.219
-2009	CNG	fleet		ENCentral	12.265
-2009	CNG	fleet		WNCentral	12.265
-2009	CNG	fleet		SAtlantic	12.184
-2009	CNG	fleet		ESCentral	12.265
-2009	CNG	fleet		WSCentral	14.207
-2009	CNG	fleet		Mountain	8.664
-2009	CNG	fleet		Pacific		15.502
-2010	CNG	personal	NewEngland	17.383
-2010	CNG	personal	MidAtlantic	16.736
-2010	CNG	personal	ENCentral	13.297
-2010	CNG	personal	WNCentral	13.297
-2010	CNG	personal	SAtlantic	13.196
-2010	CNG	personal	ESCentral	13.297
-2010	CNG	personal	WSCentral	14.490
-2010	CNG	personal	Mountain	11.618
-2010	CNG	personal	Pacific		16.554
-2010	CNG	fleet		NewEngland	15.016
-2010	CNG	fleet		MidAtlantic	15.138
-2010	CNG	fleet		ENCentral	9.655
-2010	CNG	fleet		WNCentral	9.655
-2010	CNG	fleet		SAtlantic	11.199
-2010	CNG	fleet		ESCentral	9.655
-2010	CNG	fleet		WSCentral	9.311
-2010	CNG	fleet		Mountain	8.461
-2010	CNG	fleet		Pacific		12.528
-2011	CNG	personal	NewEngland	18.274
-2011	CNG	personal	MidAtlantic	18.962
-2011	CNG	personal	ENCentral	12.285
-2011	CNG	personal	WNCentral	12.285
-2011	CNG	personal	SAtlantic	14.288
-2011	CNG	personal	ESCentral	12.285
-2011	CNG	personal	WSCentral	13.256
-2011	CNG	personal	Mountain	11.011
-2011	CNG	personal	Pacific		18.051
-2011	CNG	fleet		NewEngland	13.661
-2011	CNG	fleet		MidAtlantic	16.412
-2011	CNG	fleet		ENCentral	12.224
-2011	CNG	fleet		WNCentral	12.224
-2011	CNG	fleet		SAtlantic	9.250
-2011	CNG	fleet		ESCentral	12.224
-2011	CNG	fleet		WSCentral	13.627
-2011	CNG	fleet		Mountain	8.846
-2011	CNG	fleet		Pacific		12.144
-2012	CNG	personal	NewEngland	18.779
-2012	CNG	personal	MidAtlantic	18.516
-2012	CNG	personal	ENCentral	14.167
-2012	CNG	personal	WNCentral	14.167
-2012	CNG	personal	SAtlantic	12.953
-2012	CNG	personal	ESCentral	14.167
-2012	CNG	personal	WSCentral	15.947
-2012	CNG	personal	Mountain	13.499
-2012	CNG	personal	Pacific		17.889
-2012	CNG	fleet		NewEngland	16.979
-2012	CNG	fleet		MidAtlantic	15.360
-2012	CNG	fleet		ENCentral	12.164
-2012	CNG	fleet		WNCentral	12.164
-2012	CNG	fleet		SAtlantic	11.779
-2012	CNG	fleet		ESCentral	12.164
-2012	CNG	fleet		WSCentral	10.485
-2012	CNG	fleet		Mountain	10.707
-2012	CNG	fleet		Pacific		12.224
-2013	CNG	personal	NewEngland	19.184
-2013	CNG	personal	MidAtlantic	17.707
-2013	CNG	personal	ENCentral	13.398
-2013	CNG	personal	WNCentral	13.398
-2013	CNG	personal	SAtlantic	14.895
-2013	CNG	personal	ESCentral	13.398
-2013	CNG	personal	WSCentral	15.421
-2013	CNG	personal	Mountain	14.086
-2013	CNG	personal	Pacific		18.375
-2013	CNG	fleet		NewEngland	17.485
-2013	CNG	fleet		MidAtlantic	14.753
-2013	CNG	fleet		ENCentral	14.126
-2013	CNG	fleet		WNCentral	14.126
-2013	CNG	fleet		SAtlantic	13.499
-2013	CNG	fleet		ESCentral	14.126
-2013	CNG	fleet		WSCentral	11.860
-2013	CNG	fleet		Mountain	11.112
-2013	CNG	fleet		Pacific		12.285
-2014	CNG	personal	NewEngland	20.034
-2014	CNG	personal	MidAtlantic	17.768
-2014	CNG	personal	ENCentral	15.239
-2014	CNG	personal	WNCentral	15.239
-2014	CNG	personal	SAtlantic	15.441
-2014	CNG	personal	ESCentral	15.239
-2014	CNG	personal	WSCentral	15.603
-2014	CNG	personal	Mountain	14.774
-2014	CNG	personal	Pacific		18.253
-2014	CNG	fleet		NewEngland	16.433
-2014	CNG	fleet		MidAtlantic	14.066
-2014	CNG	fleet		ENCentral	15.259
-2014	CNG	fleet		WNCentral	15.259
-2014	CNG	fleet		SAtlantic	12.184
-2014	CNG	fleet		ESCentral	15.259
-2014	CNG	fleet		WSCentral	11.233
-2014	CNG	fleet		Mountain	12.285
-2014	CNG	fleet		Pacific		13.883
-2015	CNG	personal	NewEngland	19.305
-2015	CNG	personal	MidAtlantic	16.675
-2015	CNG	personal	ENCentral	15.401
-2015	CNG	personal	WNCentral	15.401
-2015	CNG	personal	SAtlantic	15.441
-2015	CNG	personal	ESCentral	15.401
-2015	CNG	personal	WSCentral	15.037
-2015	CNG	personal	Mountain	14.490
-2015	CNG	personal	Pacific		17.970
-2015	CNG	fleet		NewEngland	15.259
-2015	CNG	fleet		MidAtlantic	13.216
-2015	CNG	fleet		ENCentral	15.279
-2015	CNG	fleet		WNCentral	15.279
-2015	CNG	fleet		SAtlantic	6.742
-2015	CNG	fleet		ESCentral	15.279
-2015	CNG	fleet		WSCentral	12.487
-2015	CNG	fleet		Mountain	12.487
-2015	CNG	fleet		Pacific		14.409
-2016	CNG	personal	NewEngland	19.022
-2016	CNG	personal	MidAtlantic	15.401
-2016	CNG	personal	ENCentral	14.187
-2016	CNG	personal	WNCentral	14.187
-2016	CNG	personal	SAtlantic	14.915
-2016	CNG	personal	ESCentral	14.187
-2016	CNG	personal	WSCentral	14.956
-2016	CNG	personal	Mountain	14.551
-2016	CNG	personal	Pacific		18.213
-2016	CNG	fleet		NewEngland	14.511
-2016	CNG	fleet		MidAtlantic	12.771
-2016	CNG	fleet		ENCentral	13.620
-2016	CNG	fleet		WNCentral	13.620
-2016	CNG	fleet		SAtlantic	6.519
-2016	CNG	fleet		ESCentral	13.620
-2016	CNG	fleet		WSCentral	12.750
-2016	CNG	fleet		Mountain	12.548
-2016	CNG	fleet		Pacific		13.863
-2017	CNG	personal	NewEngland	20.109
-2017	CNG	personal	MidAtlantic	18.167
-2017	CNG	personal	ENCentral	16.144
-2017	CNG	personal	WNCentral	16.144
-2017	CNG	personal	SAtlantic	17.034
-2017	CNG	personal	ESCentral	16.144
-2017	CNG	personal	WSCentral	16.508
-2017	CNG	personal	Mountain	16.124
-2017	CNG	personal	Pacific		20.231
-2017	CNG	fleet		NewEngland	13.311
-2017	CNG	fleet		MidAtlantic	15.901
-2017	CNG	fleet		ENCentral	15.476
-2017	CNG	fleet		WNCentral	15.476
-2017	CNG	fleet		SAtlantic	8.334
-2017	CNG	fleet		ESCentral	15.476
-2017	CNG	fleet		WSCentral	14.262
-2017	CNG	fleet		Mountain	14.465
-2017	CNG	fleet		Pacific		15.759
-2018	CNG	personal	NewEngland	20.797
-2018	CNG	personal	MidAtlantic	18.632
-2018	CNG	personal	ENCentral	16.407
-2018	CNG	personal	WNCentral	16.407
-2018	CNG	personal	SAtlantic	17.034
-2018	CNG	personal	ESCentral	16.407
-2018	CNG	personal	WSCentral	16.609
-2018	CNG	personal	Mountain	16.751
-2018	CNG	personal	Pacific		20.716
-2018	CNG	fleet		NewEngland	14.545
-2018	CNG	fleet		MidAtlantic	17.418
-2018	CNG	fleet		ENCentral	14.991
-2018	CNG	fleet		WNCentral	14.991
-2018	CNG	fleet		SAtlantic	6.5540
-2018	CNG	fleet		ESCentral	14.991
-2018	CNG	fleet		WSCentral	14.647
-2018	CNG	fleet		Mountain	14.910
-2018	CNG	fleet		Pacific		14.586
-2019	CNG	personal	NewEngland	22.213
-2019	CNG	personal	MidAtlantic	18.410
-2019	CNG	personal	ENCentral	16.609
-2019	CNG	personal	WNCentral	16.609
-2019	CNG	personal	SAtlantic	17.236
-2019	CNG	personal	ESCentral	16.609
-2019	CNG	personal	WSCentral	17.095
-2019	CNG	personal	Mountain	15.881
-2019	CNG	personal	Pacific		21.040
-2019	CNG	fleet		NewEngland	14.889
-2019	CNG	fleet		MidAtlantic	17.196
-2019	CNG	fleet		ENCentral	14.566
-2019	CNG	fleet		WNCentral	14.566
-2019	CNG	fleet		SAtlantic	7.0800
-2019	CNG	fleet		ESCentral	14.566
-2019	CNG	fleet		WSCentral	14.910
-2019	CNG	fleet		Mountain	13.048
-2019	CNG	fleet		Pacific		14.809
-2020	CNG	personal	NewEngland	19.624
-2020	CNG	personal	MidAtlantic	18.531
-2020	CNG	personal	ENCentral	15.618
-2020	CNG	personal	WNCentral	15.618
-2020	CNG	personal	SAtlantic	14.080
-2020	CNG	personal	ESCentral	15.618
-2020	CNG	personal	WSCentral	16.265
-2020	CNG	personal	Mountain	15.921
-2020	CNG	personal	Pacific		19.259
-2020	CNG	fleet		NewEngland	13.655
-2020	CNG	fleet		MidAtlantic	17.810
-2020	CNG	fleet		ENCentral	13.520
-2020	CNG	fleet		WNCentral	13.520
-2020	CNG	fleet		SAtlantic	6.8040
-2020	CNG	fleet		ESCentral	13.520
-2020	CNG	fleet		WSCentral	15.004
-2020	CNG	fleet		Mountain	13.062
-2020	CNG	fleet		Pacific		13.520
-2021	CNG	personal	NewEngland	22.517
-2021	CNG	personal	MidAtlantic	19.320
-2021	CNG	personal	ENCentral	16.548
-2021	CNG	personal	WNCentral	16.548
-2021	CNG	personal	SAtlantic	16.184
-2021	CNG	personal	ESCentral	16.548
-2021	CNG	personal	WSCentral	17.398
-2021	CNG	personal	Mountain	17.520
-2021	CNG	personal	Pacific		20.291
-2021	CNG	fleet		NewEngland	13.311
-2021	CNG	fleet		MidAtlantic	18.774
-2021	CNG	fleet		ENCentral	16.771
-2021	CNG	fleet		WNCentral	16.771
-2021	CNG	fleet		SAtlantic	8.476
-2021	CNG	fleet		ESCentral	16.771
-2021	CNG	fleet		WSCentral	15.213
-2021	CNG	fleet		Mountain	15.306
-2021	CNG	fleet		Pacific		15.618
-2022	CNG	personal	NewEngland	27.635
-2022	CNG	personal	MidAtlantic	22.011
-2022	CNG	personal	ENCentral	20.190
-2022	CNG	personal	WNCentral	20.190
-2022	CNG	personal	SAtlantic	20.574
-2022	CNG	personal	ESCentral	20.190
-2022	CNG	personal	WSCentral	20.898
-2022	CNG	personal	Mountain	20.008
-2022	CNG	personal	Pacific		24.641
-2022	CNG	fleet		NewEngland	17.378
-2022	CNG	fleet		MidAtlantic	20.494
-2022	CNG	fleet		ENCentral	19.178
-2022	CNG	fleet		WNCentral	19.178
-2022	CNG	fleet		SAtlantic	12.158
-2022	CNG	fleet		ESCentral	19.178
-2022	CNG	fleet		WSCentral	23.245
-2022	CNG	fleet		Mountain	15.618
-2022	CNG	fleet		Pacific		19.381
-;                                               
+nn::year	    nn::fuel	vehicle_r   r_cen	HistoricalAnnualRoadPriceEERE
+    2009	        CNG     personal    NewEngland	15.745
+    2009	        CNG     personal    MidAtlantic	14.612
+    2009	        CNG     personal    ENCentral	12.103
+    2009	        CNG     personal    WNCentral	12.103
+    2009	        CNG     personal    SAtlantic	11.779
+    2009	        CNG     personal    ESCentral	12.103
+    2009	        CNG     personal    WSCentral	12.670
+    2009	        CNG     personal    Mountain	8.340
+    2009	        CNG     personal    Pacific	13.762
+    2009	        CNG     fleet       NewEngland	15.300
+    2009	        CNG     fleet       MidAtlantic	15.219
+    2009	        CNG     fleet       ENCentral	12.265
+    2009	        CNG     fleet       WNCentral	12.265
+    2009	        CNG     fleet       SAtlantic	12.184
+    2009	        CNG     fleet       ESCentral	12.265
+    2009	        CNG     fleet       WSCentral	14.207
+    2009	        CNG     fleet       Mountain	8.664
+    2009	        CNG     fleet       Pacific	15.502
+    2010	        CNG     personal    NewEngland	17.383
+    2010	        CNG     personal    MidAtlantic	16.736
+    2010	        CNG     personal    ENCentral	13.297
+    2010	        CNG     personal    WNCentral	13.297
+    2010	        CNG     personal    SAtlantic	13.196
+    2010	        CNG     personal    ESCentral	13.297
+    2010	        CNG     personal    WSCentral	14.490
+    2010	        CNG     personal    Mountain	11.618
+    2010	        CNG     personal    Pacific	16.554
+    2010	        CNG     fleet       NewEngland	15.016
+    2010	        CNG     fleet       MidAtlantic	15.138
+    2010	        CNG     fleet       ENCentral	9.655
+    2010	        CNG     fleet       WNCentral	9.655
+    2010	        CNG     fleet       SAtlantic	11.199
+    2010	        CNG     fleet       ESCentral	9.655
+    2010	        CNG     fleet       WSCentral	9.311
+    2010	        CNG     fleet       Mountain	8.461
+    2010	        CNG     fleet       Pacific	12.528
+    2011	        CNG     personal    NewEngland	18.274
+    2011	        CNG     personal    MidAtlantic	18.962
+    2011	        CNG     personal    ENCentral	12.285
+    2011	        CNG     personal    WNCentral	12.285
+    2011	        CNG     personal    SAtlantic	14.288
+    2011	        CNG     personal    ESCentral	12.285
+    2011	        CNG     personal    WSCentral	13.256
+    2011	        CNG     personal    Mountain	11.011
+    2011	        CNG     personal    Pacific	18.051
+    2011	        CNG     fleet       NewEngland	13.661
+    2011	        CNG     fleet       MidAtlantic	16.412
+    2011	        CNG     fleet       ENCentral	12.224
+    2011	        CNG     fleet       WNCentral	12.224
+    2011	        CNG     fleet       SAtlantic	9.250
+    2011	        CNG     fleet       ESCentral	12.224
+    2011	        CNG     fleet       WSCentral	13.627
+    2011	        CNG     fleet       Mountain	8.846
+    2011	        CNG     fleet       Pacific	12.144
+    2012	        CNG     personal    NewEngland	18.779
+    2012	        CNG     personal    MidAtlantic	18.516
+    2012	        CNG     personal    ENCentral	14.167
+    2012	        CNG     personal    WNCentral	14.167
+    2012	        CNG     personal    SAtlantic	12.953
+    2012	        CNG     personal    ESCentral	14.167
+    2012	        CNG     personal    WSCentral	15.947
+    2012	        CNG     personal    Mountain	13.499
+    2012	        CNG     personal    Pacific	17.889
+    2012	        CNG     fleet       NewEngland	16.979
+    2012	        CNG     fleet       MidAtlantic	15.360
+    2012	        CNG     fleet       ENCentral	12.164
+    2012	        CNG     fleet       WNCentral	12.164
+    2012	        CNG     fleet       SAtlantic	11.779
+    2012	        CNG     fleet       ESCentral	12.164
+    2012	        CNG     fleet       WSCentral	10.485
+    2012	        CNG     fleet       Mountain	10.707
+    2012	        CNG     fleet       Pacific	12.224
+    2013	        CNG     personal    NewEngland	19.184
+    2013	        CNG     personal    MidAtlantic	17.707
+    2013	        CNG     personal    ENCentral	13.398
+    2013	        CNG     personal    WNCentral	13.398
+    2013	        CNG     personal    SAtlantic	14.895
+    2013	        CNG     personal    ESCentral	13.398
+    2013	        CNG     personal    WSCentral	15.421
+    2013	        CNG     personal    Mountain	14.086
+    2013	        CNG     personal    Pacific	18.375
+    2013	        CNG     fleet       NewEngland	17.485
+    2013	        CNG     fleet       MidAtlantic	14.753
+    2013	        CNG     fleet       ENCentral	14.126
+    2013	        CNG     fleet       WNCentral	14.126
+    2013	        CNG     fleet       SAtlantic	13.499
+    2013	        CNG     fleet       ESCentral	14.126
+    2013	        CNG     fleet       WSCentral	11.860
+    2013	        CNG     fleet       Mountain	11.112
+    2013	        CNG     fleet       Pacific	12.285
+    2014	        CNG     personal    NewEngland	20.034
+    2014	        CNG     personal    MidAtlantic	17.768
+    2014	        CNG     personal    ENCentral	15.239
+    2014	        CNG     personal    WNCentral	15.239
+    2014	        CNG     personal    SAtlantic	15.441
+    2014	        CNG     personal    ESCentral	15.239
+    2014	        CNG     personal    WSCentral	15.603
+    2014	        CNG     personal    Mountain	14.774
+    2014	        CNG     personal    Pacific	18.253
+    2014	        CNG     fleet       NewEngland	16.433
+    2014	        CNG     fleet       MidAtlantic	14.066
+    2014	        CNG     fleet       ENCentral	15.259
+    2014	        CNG     fleet       WNCentral	15.259
+    2014	        CNG     fleet       SAtlantic	12.184
+    2014	        CNG     fleet       ESCentral	15.259
+    2014	        CNG     fleet       WSCentral	11.233
+    2014	        CNG     fleet       Mountain	12.285
+    2014	        CNG     fleet       Pacific	13.883
+    2015	        CNG     personal    NewEngland	19.305
+    2015	        CNG     personal    MidAtlantic	16.675
+    2015	        CNG     personal    ENCentral	15.401
+    2015	        CNG     personal    WNCentral	15.401
+    2015	        CNG     personal    SAtlantic	15.441
+    2015	        CNG     personal    ESCentral	15.401
+    2015	        CNG     personal    WSCentral	15.037
+    2015	        CNG     personal    Mountain	14.490
+    2015	        CNG     personal    Pacific	17.970
+    2015	        CNG     fleet       NewEngland	15.259
+    2015	        CNG     fleet       MidAtlantic	13.216
+    2015	        CNG     fleet       ENCentral	15.279
+    2015	        CNG     fleet       WNCentral	15.279
+    2015	        CNG     fleet       SAtlantic	6.742
+    2015	        CNG     fleet       ESCentral	15.279
+    2015	        CNG     fleet       WSCentral	12.487
+    2015	        CNG     fleet       Mountain	12.487
+    2015	        CNG     fleet       Pacific	14.409
+    2016	        CNG     personal    NewEngland	19.022
+    2016	        CNG     personal    MidAtlantic	15.401
+    2016	        CNG     personal    ENCentral	14.187
+    2016	        CNG     personal    WNCentral	14.187
+    2016	        CNG     personal    SAtlantic	14.915
+    2016	        CNG     personal    ESCentral	14.187
+    2016	        CNG     personal    WSCentral	14.956
+    2016	        CNG     personal    Mountain	14.551
+    2016	        CNG     personal    Pacific	18.213
+    2016	        CNG     fleet       NewEngland	14.511
+    2016	        CNG     fleet       MidAtlantic	12.771
+    2016	        CNG     fleet       ENCentral	13.620
+    2016	        CNG     fleet       WNCentral	13.620
+    2016	        CNG     fleet       SAtlantic	6.519
+    2016	        CNG     fleet       ESCentral	13.620
+    2016	        CNG     fleet       WSCentral	12.750
+    2016	        CNG     fleet       Mountain	12.548
+    2016	        CNG     fleet       Pacific	13.863
+    2017	        CNG     personal    NewEngland	20.109
+    2017	        CNG     personal    MidAtlantic	18.167
+    2017	        CNG     personal    ENCentral	16.144
+    2017	        CNG     personal    WNCentral	16.144
+    2017	        CNG     personal    SAtlantic	17.034
+    2017	        CNG     personal    ESCentral	16.144
+    2017	        CNG     personal    WSCentral	16.508
+    2017	        CNG     personal    Mountain	16.124
+    2017	        CNG     personal    Pacific	20.231
+    2017	        CNG     fleet       NewEngland	13.311
+    2017	        CNG     fleet       MidAtlantic	15.901
+    2017	        CNG     fleet       ENCentral	15.476
+    2017	        CNG     fleet       WNCentral	15.476
+    2017	        CNG     fleet       SAtlantic	8.334
+    2017	        CNG     fleet       ESCentral	15.476
+    2017	        CNG     fleet       WSCentral	14.262
+    2017	        CNG     fleet       Mountain	14.465
+    2017	        CNG     fleet       Pacific	15.759
+    2018	        CNG     personal    NewEngland	20.797
+    2018	        CNG     personal    MidAtlantic	18.632
+    2018	        CNG     personal    ENCentral	16.407
+    2018	        CNG     personal    WNCentral	16.407
+    2018	        CNG     personal    SAtlantic	17.034
+    2018	        CNG     personal    ESCentral	16.407
+    2018	        CNG     personal    WSCentral	16.609
+    2018	        CNG     personal    Mountain	16.751
+    2018	        CNG     personal    Pacific	20.716
+    2018	        CNG     fleet       NewEngland	14.545
+    2018	        CNG     fleet       MidAtlantic	17.418
+    2018	        CNG     fleet       ENCentral	14.991
+    2018	        CNG     fleet       WNCentral	14.991
+    2018	        CNG     fleet       SAtlantic	6.5540
+    2018	        CNG     fleet       ESCentral	14.991
+    2018	        CNG     fleet       WSCentral	14.647
+    2018	        CNG     fleet       Mountain	14.910
+    2018	        CNG     fleet       Pacific	14.586
+    2019	        CNG     personal    NewEngland	22.213
+    2019	        CNG     personal    MidAtlantic	18.410
+    2019	        CNG     personal    ENCentral	16.609
+    2019	        CNG     personal    WNCentral	16.609
+    2019	        CNG     personal    SAtlantic	17.236
+    2019	        CNG     personal    ESCentral	16.609
+    2019	        CNG     personal    WSCentral	17.095
+    2019	        CNG     personal    Mountain	15.881
+    2019	        CNG     personal    Pacific	21.040
+    2019	        CNG     fleet       NewEngland	14.889
+    2019	        CNG     fleet       MidAtlantic	17.196
+    2019	        CNG     fleet       ENCentral	14.566
+    2019	        CNG     fleet       WNCentral	14.566
+    2019	        CNG     fleet       SAtlantic	7.0800
+    2019	        CNG     fleet       ESCentral	14.566
+    2019	        CNG     fleet       WSCentral	14.910
+    2019	        CNG     fleet       Mountain	13.048
+    2019	        CNG     fleet       Pacific	14.809
+    2020	        CNG     personal    NewEngland	19.624
+    2020	        CNG     personal    MidAtlantic	18.531
+    2020	        CNG     personal    ENCentral	15.618
+    2020	        CNG     personal    WNCentral	15.618
+    2020	        CNG     personal    SAtlantic	14.080
+    2020	        CNG     personal    ESCentral	15.618
+    2020	        CNG     personal    WSCentral	16.265
+    2020	        CNG     personal    Mountain	15.921
+    2020	        CNG     personal    Pacific	19.259
+    2020	        CNG     fleet       NewEngland	13.655
+    2020	        CNG     fleet       MidAtlantic	17.810
+    2020	        CNG     fleet       ENCentral	13.520
+    2020	        CNG     fleet       WNCentral	13.520
+    2020	        CNG     fleet       SAtlantic	6.8040
+    2020	        CNG     fleet       ESCentral	13.520
+    2020	        CNG     fleet       WSCentral	15.004
+    2020	        CNG     fleet       Mountain	13.062
+    2020	        CNG     fleet       Pacific	13.520
+    2021	        CNG     personal    NewEngland	22.517
+    2021	        CNG     personal    MidAtlantic	19.320
+    2021	        CNG     personal    ENCentral	16.548
+    2021	        CNG     personal    WNCentral	16.548
+    2021	        CNG     personal    SAtlantic	16.184
+    2021	        CNG     personal    ESCentral	16.548
+    2021	        CNG     personal    WSCentral	17.398
+    2021	        CNG     personal    Mountain	17.520
+    2021	        CNG     personal    Pacific	20.291
+    2021	        CNG     fleet       NewEngland	13.311
+    2021	        CNG     fleet       MidAtlantic	18.774
+    2021	        CNG     fleet       ENCentral	16.771
+    2021	        CNG     fleet       WNCentral	16.771
+    2021	        CNG     fleet       SAtlantic	8.476
+    2021	        CNG     fleet       ESCentral	16.771
+    2021	        CNG     fleet       WSCentral	15.213
+    2021	        CNG     fleet       Mountain	15.306
+    2021	        CNG     fleet       Pacific	15.618
+    2022	        CNG     personal    NewEngland	27.635
+    2022	        CNG     personal    MidAtlantic	22.011
+    2022	        CNG     personal    ENCentral	20.190
+    2022	        CNG     personal    WNCentral	20.190
+    2022	        CNG     personal    SAtlantic	20.574
+    2022	        CNG     personal    ESCentral	20.190
+    2022	        CNG     personal    WSCentral	20.898
+    2022	        CNG     personal    Mountain	20.008
+    2022	        CNG     personal    Pacific	24.641
+    2022	        CNG     fleet       NewEngland	17.378
+    2022	        CNG     fleet       MidAtlantic	20.494
+    2022	        CNG     fleet       ENCentral	19.178
+    2022	        CNG     fleet       WNCentral	19.178
+    2022	        CNG     fleet       SAtlantic	12.158
+    2022	        CNG     fleet       ESCentral	19.178
+    2022	        CNG     fleet       WSCentral	23.245
+    2022	        CNG     fleet       Mountain	15.618
+    2022	        CNG     fleet       Pacific	19.381
+    2023	        CNG	personal    NewEngland	33.583
+    2023	        CNG	personal    MidAtlantic	24.216
+    2023	        CNG	personal    ENCentral	21.141
+    2023	        CNG	personal    WNCentral	21.141
+    2023	        CNG	personal    SAtlantic	19.017
+    2023	        CNG	personal    ESCentral	21.141
+    2023	        CNG	personal    WSCentral	22.112
+    2023	        CNG	personal    Mountain	23.427
+    2023	        CNG	personal    Pacific	31.054
+    2023	        CNG	fleet       NewEngland	18.855
+    2023	        CNG	fleet       MidAtlantic	22.173
+    2023	        CNG	fleet       ENCentral	20.372
+    2023	        CNG	fleet       WNCentral	20.372
+    2023	        CNG	fleet       SAtlantic	29.416
+    2023	        CNG	fleet       ESCentral	20.372
+    2023	        CNG	fleet       WSCentral	20.939
+    2023	        CNG	fleet       Mountain	17.499
+    2023	        CNG	fleet       Pacific	22.942
+    2024	        CNG	personal    NewEngland	31.560
+    2024	        CNG	personal    MidAtlantic	24.236
+    2024	        CNG	personal    ENCentral	21.586
+    2024	        CNG	personal    WNCentral	21.586
+    2024	        CNG	personal    SAtlantic	19.280
+    2024	        CNG	personal    ESCentral	21.586
+    2024	        CNG	personal    WSCentral	22.557
+    2024	        CNG	personal    Mountain	23.225
+    2024	        CNG	personal    Pacific	28.910
+    2024	        CNG	fleet       NewEngland	19.745
+    2024	        CNG	fleet       MidAtlantic	21.970
+    2024	        CNG	fleet       ENCentral	19.522
+    2024	        CNG	fleet       WNCentral	19.522
+    2024	        CNG	fleet       SAtlantic	23.002
+    2024	        CNG	fleet       ESCentral	19.522
+    2024	        CNG	fleet       WSCentral	23.609
+    2024	        CNG	fleet       Mountain	16.892
+    2024	        CNG	fleet       Pacific	20.251
+;                                          
 
                                             
                                                         

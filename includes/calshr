@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/calshr,v 1.2 2017/05/19 19:28:34 rsc Exp $
 ! Calshr:  has assumed California shares of the Pacific Region for estimating AB32 covered emissions for fuel suppliers
 !  fuel/sector detail similar to that in the NEMS quantity variables in qsblk and qblk

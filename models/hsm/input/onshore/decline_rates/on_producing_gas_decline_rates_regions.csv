@@ -1,0 +1,13 @@
+notes,Decline rate configuration for producing gas projects by region and gas type. Empty gas_type_number applies to all gas types.,,
+region_name,gas_type_number,year_1_decline,decline_rate
+east_coast,,0,0
+gulf_coast,,0,0
+midcontinent,,0,0
+southwest,3,0.2,0.04
+rocky_mountain,,0,0
+northern_great_plains,,0,0
+west_coast,,0,0
+midcontinent,,0,0
+rocky_mountain,,0,0
+gulf_coast,,0,0
+southwest,1,0.2,0.04

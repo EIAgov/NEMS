@@ -146,6 +146,14 @@ class CashFlow:
         """
         # DataFrame of non-time-depended properties
         self.properties = pd.DataFrame()
+        
+        # Conversion factors and economic parameters (set by parent module)
+        self.boe_conversion = 5.62  # Default BOE conversion factor
+        self.barrels_per_gallon = 42.0  # Default gallons per barrel
+        self.ch4_to_metric_tons = 51.921  # Default MCF to metric tons for CH4
+        self.ngpl_volume_divisor = 1000.0  # Default NGPL volume divisor
+        self.min_years_before_abandon = 6  # Default minimum years before abandonment
+        self.econ_life_default = 30  # Default economic life
 
         # DataFrames for production and revenue calculations
         self.crude_production       = pd.DataFrame()  # crude production
@@ -156,7 +164,7 @@ class CashFlow:
         self.crude_revenue          = pd.DataFrame()  # after-tariff crude revenue
         self.natgas_revenue         = pd.DataFrame()  # after-tariff natural gas revenue
         self.ngpl_revenue           = pd.DataFrame()  # after-tariff ngpl revenue
-        self.vent_natgas_revenue    = pd.DataFrame()  # Revenue from natural gas that is captured
+        self.vent_natgas_revenue    = pd.DataFrame()  # Revenue from natural gas that is captured - used to calculate royalty on vented gas
         self.revenue                = pd.DataFrame()  # after-tariff revenue
 
         # DataFrames for transportation calculations
@@ -283,6 +291,16 @@ class CashFlow:
                                                            self.properties[nam.crude_tariff_price], axis=0)
             self.natgas_revenue = self.natgas_production.mul(self.properties[nam.natgas_price] -
                                                              self.properties[nam.natgas_tariff_price], axis=0)
+
+            # Conditionally calculate vented gas revenue based on policy setting
+            if self.properties.get('vented_gas_royalty', True):  # Default to True for backward compatibility
+                self.vent_natgas_revenue = self.ch4_emissions.mul(self.properties[nam.natgas_price] -
+                                                                  self.properties[nam.natgas_tariff_price], axis=0)
+            else:
+                self.vent_natgas_revenue = pd.DataFrame(index=self.natgas_revenue.index,
+                                                        columns=self.natgas_revenue.columns,
+                                                        data=0.0)
+
             self.vent_natgas_revenue = self.ch4_emissions.mul(self.properties[nam.natgas_price] -
                                                              self.properties[nam.natgas_tariff_price], axis=0)
             self.revenue = self.crude_revenue + self.natgas_revenue + self.vent_natgas_revenue
@@ -400,7 +418,7 @@ class CashFlow:
         """
         logger.info('Cashflow Calculate NGPL Operating Cost')
 
-        ngpl_revenue = self.properties[nam.ngpl_price] * self.properties[nam.ngpl_volume] * 42.0 / 1000.0
+        ngpl_revenue = self.properties[nam.ngpl_price] * self.properties[nam.ngpl_volume] * self.barrels_per_gallon / self.ngpl_volume_divisor
         ngpl_rate = self.properties[nam.ngpl_cost] - ngpl_revenue
         self.ngpl_operating_cost = self.natgas_production.mul(ngpl_rate, axis=0)
 
@@ -428,8 +446,10 @@ class CashFlow:
             DataFrame of total operating costs
         """
         logger.info('Cashflow Calculate Operating Cost')
+
+        # Calculate operating costs based on production
         self.crude_operating_cost = self.crude_production.mul(self.properties[nam.production_opex_brl], axis=0)
-        self.natgas_operating_cost = self.natgas_production.div(5.62).mul(self.properties[nam.production_opex_brl], axis=0)
+        self.natgas_operating_cost = self.natgas_production.div(self.boe_conversion).mul(self.properties[nam.production_opex_brl], axis=0)
         self.co2_operating_cost = self.co2_use.mul(self.properties[nam.co2_cost], axis=0)
         self.general_admin_cost = self.general_admin_cost.mul(self.properties[nam.sga_opex_well], axis=0)
         self.operating_cost = self.crude_operating_cost + self.natgas_operating_cost + self.co2_operating_cost + self.general_admin_cost + self.ngpl_operating_cost
@@ -454,7 +474,7 @@ class CashFlow:
         logger.info('Cashflow Calculate Transportation')
 
         self.crude_trans    = self.crude_production.mul(self.properties[nam.crude_trans_price], axis=0)
-        self.natgas_trans   = self.natgas_production.div(5.62).mul(self.properties[nam.natgas_trans_price], axis=0)
+        self.natgas_trans   = self.natgas_production.div(self.boe_conversion).mul(self.properties[nam.natgas_trans_price], axis=0)
         self.trans_cost     = self.crude_trans + self.natgas_trans
 
         pass
@@ -544,10 +564,12 @@ class CashFlow:
         logger.info('Cashflow Calculate GGLA Depletion')
 
         #Get total production for depletion
-        total_prod = self.crude_production.add(self.natgas_production.div(5.62))
-        remaining_resources_factor = total_prod.add(self.properties[nam.remaining_oil_resources],axis=0).add(self.properties[nam.remaining_oil_resources]/5.62,axis=0)
+        total_prod = self.crude_production.add(self.natgas_production.div(self.boe_conversion))
+        remaining_resources_factor = total_prod.add(self.properties[nam.remaining_oil_resources],axis=0).add(self.properties[nam.remaining_oil_resources]/self.boe_conversion,axis=0)
 
         #Get depletion and total geo, geo, lease acquisition cost after depletion (currently assumes 100% depletion/0% expense ratio)
+        # Replace zeros in remaining_resources_factor to avoid division by zero
+        remaining_resources_factor = remaining_resources_factor.replace(0.0, np.nan)
         self.depletion = self.gg_la_cost.mul(total_prod).div(remaining_resources_factor).fillna(0.0)
         self.gg_la_cost_dep = self.gg_la_cost.sub(self.depletion)
 
@@ -575,7 +597,7 @@ class CashFlow:
 
         Note
         ----
-        Assumes no less than 6 years before abandonment to match AOGSS
+        Assumes minimum years before abandonment configurable via setup file
 
         Returns
         -------
@@ -641,7 +663,7 @@ class CashFlow:
         """
         logger.info('Cashflow Calculate Abandonment')
 
-        min_year = 6
+        min_year = self.min_years_before_abandon
 
         # make a mask for when the economic limit is less than 0 and the year is greater than the min year
         mask = self.econ_limit.lt(0.0)
@@ -655,13 +677,14 @@ class CashFlow:
         self.abandon_cost = abandon_mask.copy().mul(self.properties[nam.abandon_rate], axis=0)
 
         #Get economic life of projects
+        # Calculate economic life of projects
         self.properties[nam.econ_life] = 0
         for year in abandon_mask.columns:
             econ_limit_index = abandon_mask.index[abandon_mask[year] == True].tolist()
             self.properties.loc[econ_limit_index, nam.econ_life] = year
 
         #Set projects with econ life that exceeds the projection period end of the projection period
-        self.properties.loc[self.properties[nam.econ_life] == 0, nam.econ_life] = 30
+        self.properties.loc[self.properties[nam.econ_life] == 0, nam.econ_life] = self.econ_life_default # Default economic life for perpetually economical projects
 
         #Set following properties to zero following abandonment
         self.revenue            = self.revenue*mask
@@ -736,7 +759,7 @@ class CashFlow:
         logger.info('Cashflow Calculate CH4 Emissions Penalties')
 
         #Convert CH4 emissions from mcf to metric tons
-        self.ch4_emissions = self.ch4_emissions.div(51.921)
+        self.ch4_emissions = self.ch4_emissions.div(self.ch4_to_metric_tons)
 
         #Calculate Methane Venting & Flaring Cost Penalties
         self.ch4_emission_cost = self.ch4_emissions.mul(self.ch4_emission_cost, axis = 0)

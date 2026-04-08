@@ -10,7 +10,8 @@ constraint_listing_variable_values 1
 datatable_character_encoding WINDOWS-1252
 default_input_character_encoding WINDOWS-1252
 default_output_character_encoding WINDOWS-1252
-display_infeasibility_analysis 1
+disable_new_mathprog_generator 1
+eliminate_nonvar_columns 0
 external_dll_AIMMS_reference ASCII
 external_procedure_error_handling raise_warning_when_not_checked
 external_string_character_encoding WINDOWS-1252
@@ -24,9 +25,9 @@ rounding_compatibility Aimms_3_7
 Suppress_error_messages_of_val_function 1
 warning_duplicate_column strict_warning_default
 warning_duplicate_row strict_warning_default
-* AOA
 * CBC 2.9
-* CPLEX 12.10
+"CBC 2.9".Postsolve_continuous_variables 1
+* CPLEX 22.1
 * IPOPT 3.11
 * CPLEX 12.6.3
 "CPLEX 12.6.3".parallel_mode 1

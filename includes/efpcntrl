@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: M:/default/includes/RCS/efpcntrl,v 1.2 2019/02/23 17:45:34 dgr Exp $
 ! CONTROL COMMON FOR UEFP - MOST VARIABLES IN THIS COMMON ARE READ IN THE
 !                  ROUTINE INICON

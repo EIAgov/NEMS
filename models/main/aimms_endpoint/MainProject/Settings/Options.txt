@@ -1,0 +1,12 @@
+﻿* AIMMS
+Case_compatibility Aimms_4_80
+listing_page_width 400
+rounding_compatibility Aimms_3_7
+use_UTC_forCaseAndStartEndDate 1
+warning_comparing_elements_different_sets off
+warning_quantity_outside_main_namespace off
+* CBC 2.9
+* CPLEX 22.1
+* IPOPT 3.11
+* NETSOL
+* Environment

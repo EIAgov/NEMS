@@ -4,6 +4,7 @@ import fnmatch
 import pytest
 
 from Controller.StatusHelper import StatusHelper
+from validate import get_lastyr_entry
 
 def check_year_exists(year, files):
     for file in files:
@@ -12,6 +13,7 @@ def check_year_exists(year, files):
 
     return False
 
+import os
 
 def test_gas_model_aimms_files_exist(record_property):
     """
@@ -19,9 +21,10 @@ def test_gas_model_aimms_files_exist(record_property):
     """
     h = StatusHelper()
     h.skip_test(h.get_status('test_gas_model_aimms_files_exist'))
-    
-    START_YEAR = 2023
-    END_YEAR = 2050
+
+    scedyear = get_lastyr_entry()
+    START_YEAR = 2024
+    END_YEAR = scedyear
 
     if not Model.getInstance().files.parnems:
         pytest.skip("Must be Parallel run to run this test.")
@@ -51,8 +54,9 @@ def test_coal_model_aimms_files_exist(record_property):
     h = StatusHelper()
     h.skip_test(h.get_status('test_coal_model_aimms_files_exist'))
     
-    START_YEAR = 2022
-    END_YEAR = 2050
+    scedyear = get_lastyr_entry()
+    START_YEAR = 2024
+    END_YEAR = scedyear
 
     if not Model.getInstance().files.parnems:
         pytest.skip("Must be Parallel run to run this test.")
@@ -82,8 +86,9 @@ def test_restore_model_aimms_files_exist(record_property):
     h = StatusHelper()
     h.skip_test(h.get_status('test_restore_model_aimms_files_exist'))
     
-    START_YEAR = 2024
-    END_YEAR = 2050
+    START_YEAR = 2025
+    scedyear = get_lastyr_entry()
+    END_YEAR = scedyear
 
     if not Model.getInstance().files.parnems:
         pytest.skip("Must be Parallel run to run this test.")
@@ -108,22 +113,23 @@ def test_restore_model_aimms_files_exist(record_property):
 
 def test_hmm_model_aimms_files_exist(record_property):
     """
-    P2/hmm/fromAIMMS folder has files for every year 2023-2050
+    P1/hmm/fromAIMMS folder has files for every year 2023-2050
     """
     h = StatusHelper()
     h.skip_test(h.get_status('test_hmm_model_aimms_files_exist'))
     
     START_YEAR = 2023
-    END_YEAR = 2050
+    scedyear = get_lastyr_entry()
+    END_YEAR = scedyear
 
     if not Model.getInstance().files.parnems:
         pytest.skip("Must be Parallel run to run this test.")
 
     try:
-        hmm_files = Model.getInstance().files.p2.hmm.files
+        hmm_files = Model.getInstance().files.p1.hmm.files
     except AttributeError:
         record_property("csv_header", "Error")
-        record_property("ERROR", "p2/hmm folder does not exist.")
+        record_property("ERROR", "p1/hmm folder does not exist.")
         assert False
 
     record_property("csv_header", "Error Message")
@@ -144,7 +150,8 @@ def test_lfmm_gams_model_gdx_files_exist(record_property):
     h.skip_test(h.get_status('test_lfmm_gams_model_gdx_files_exist'))
     
     START_YEAR = 2018
-    END_YEAR = 2050
+    scedyear = get_lastyr_entry()
+    END_YEAR = scedyear
 
     if not Model.getInstance().files.parnems:
         pytest.skip("Must be Parallel run to run this test.")

@@ -56,14 +56,18 @@
       PARAMETER(FLTYPE=6)    ! Fuel type (Oil, NG, MCL, SCL, Ren, Al)
       PARAMETER(MNETOH=5)    ! Emissions of Ethanol, 5 Volume steps
       PARAMETER(MNCROP=2)    ! Emissions (Corn & Biomass)
-      PARAMETER(MSEDYR=32)   ! Number of Historical SEDS years
+      PARAMETER(MSEDYR=34)   ! Number of Historical SEDS years
       PARAMETER(NNGEM=17)    ! Number of NG - Electricity Regions
       PARAMETER(BASEYR=1990) ! Base calendar year corresponding to curiyr=1
       PARAMETER(ENDYR=2050)  ! End calendar year corresponding to curiyr=mnumyr
       PARAMETER(MAXNFR=24)   ! Max number of combined fuel regions (census,gas,coal,carbon)
       PARAMETER(MCANRG=12)   ! Canadian regions
       PARAMETER(MCANRR=4)    ! Canadian refinery regions (3 + Canada total)
-      PARAMETER(MNUMCGF=12)  ! Number of combined heat and power fuels
+      PARAMETER(MNUMCGF=13)  ! Number of distributed generation and combined heat and power fuels, including behind-the-meter battery energy storage
+                             ! 1=Coal            2=Petroleum      3=Natural Gas     4=Hydropower
+                             ! 5=Geothermal      6=MSW            7=Biomass         8=Solar Photovoltaic
+                             ! 9=Other Gaseous  10=Other         11=Wind           12=Solar Thermal
+                             ! 13=Battery Energy Storage
       PARAMETER(MNCRUD=11)   ! Crude oil types:  1=Light sweet  2=Light sour   3=Medium medium sour
                                          !       4=Medium sour  5=Heavy sweet  6=Heavy sour
                                          !       7=California   8=Syncrude     9=Dilbit/Synbit

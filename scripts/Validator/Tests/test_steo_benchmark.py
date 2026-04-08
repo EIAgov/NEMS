@@ -38,7 +38,7 @@ def test_steo_emm_equals_aeo(record_property):
     h.skip_test(h.get_status('test_steo_emm_equals_aeo'))
 
     catg = 'emm'
-    base = STEOBenchmarkBase(catg, 2023, 2025)
+    base = STEOBenchmarkBase(catg, 2024, 2026)
     df_unifapi = base.load_table(1)
 
     df_unifapi = df_unifapi[df_unifapi['Geogr'].isin(['united states','united states territories'])]

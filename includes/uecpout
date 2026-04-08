@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/uecpout,v 1.36 2018/06/18 12:53:43 dh5 Exp $
 !  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
@@ -365,6 +366,13 @@
 !     IRA TAX PHASE OUT YEAR
       INTEGER UPIRA_APPYR                   !Applicable year to start phase out of IRA tax credits that are triggered by electricity emission target
 
+      REAL*8 PV_CAP_ADJ(MNUMNR,MNUMYR)                             ! Cumulative PV capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 PT_CAP_ADJ(MNUMNR,MNUMYR)                             ! Cumulative PT capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 SO_CAP_ADJ(MNUMNR,MNUMYR)                             ! Cumulative SO capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 WN_CAP_ADJ(MNUMNR,MNUMYR)                             ! Cumulative WN capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 WF_CAP_ADJ(MNUMNR,MNUMYR)                             ! Cumulative WF capacity adjusted to be consistent with hourly capacity factors
+      REAL*8 WL_CAP_ADJ(MNUMNR,MNUMYR)                             ! Cumulative WL capacity adjusted to be consistent with hourly capacity factors
+
 !   UECP OUTPUT COMMON BLOCK
 
       COMMON/UECPOUT/UADDCSU,UADDIGU,UADDISU,UADDOSU,UADDCCU,UADDACU,UADDASU,UADDCTU,   &
@@ -413,7 +421,8 @@
                      USED_last, USED_last2, UNUSED_last, UNUSED_last2, &
                      DispatchTot, ExistStoTot, CurtailsTot, HourlyLoadTot, ElecPriceTot, PRICE_EL_HR, &
                      LOADMAXH2EL, QELCUR, &
-                     QELGEN, QELGEN_VINT, UPIRA_APPYR
+                     QELGEN, QELGEN_VINT, UPIRA_APPYR, &
+					 PV_CAP_ADJ,PT_CAP_ADJ,SO_CAP_ADJ,WN_CAP_ADJ,WF_CAP_ADJ,WL_CAP_ADJ
 
 
 !   Equivalence for FILER used for data storage
@@ -475,5 +484,6 @@
                     (3*MNUMNR*24*4*MNUMYR) + &                   ! QELGEN
                     (3*MNUMNR*MNUMYR*MNUMYV) + &                 ! QELGEN_VINT
                     1 +                    &                     ! UPIRA_APPYR                   
+					6*(MNUMNR * MNUMYR) +    &                    ! CAP_ADJ variables
 				   0 )                                      !  the end
       EQUIVALENCE (UECPDAT,UADDCSU)

@@ -1,5 +1,7 @@
 """Submodule for outputting CCATS results.
 
+.. _output:
+
 Output: Summary
 _______________
 This submodule outputs CCATS results:

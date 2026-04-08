@@ -9,6 +9,7 @@ from logging_utilities import print_it, prenems_setup_logs
 import subprocess
 import imodel_helper
 import ngplprice
+import pandas as pd
 
 sys.path.append("../converge")
 
@@ -43,8 +44,8 @@ def nems_runtype():
     # Parallel (parnems) lists the models that run only in their partition
     jogpar = \
           {"s" : ["CDM", "CMM", "EMM", "HMM", "HSM", "IDM", "IEM", "LFMM", "MAM", "NGMM", "RDM", "RFM", "TDM", "CCATS"],
-           "p1": ["CDM", "HSM", "IDM", "IEM", "LFMM", "MAM", "NGMM", "RDM", "TDM", "CCATS"],
-           "p2": ["CDM", "CMM", "EMM", "HMM", "RDM", "RFM"],
+           "p1": ["CDM", "HSM", "IDM", "IEM", "LFMM", "MAM", "NGMM", "RDM", "TDM", "CCATS", "HMM"],
+           "p2": ["CDM", "CMM", "EMM", "RDM", "RFM"],
            "p3": ["IDM"]}
 
     # Determines the current run type based on the folder path.
@@ -110,6 +111,10 @@ def set_nems_modules(user):
     # creates a final list of models to run in the determined order
     z = [i for i in module_order if i in module_on]
 
+    if not z:
+        with open("no_modules_on.txt", "w") as f:
+            f.write("")
+
     return z
 
 
@@ -149,22 +154,22 @@ def scenario_date_setup(pyfiler, CURIRUN):
 
     # Check if scenario name and datekey individually and combined exceeds character limit
     # If either or both exceeds the character limit, the string will be truncated
-    # 15 characters for scenario name
+    # 20 characters for scenario name
     # 8 characters for datekey
-    # Total not to exceed 24, including 'dot' separator: 15 + "." + 8 = 24 characters
-    # Check if scenario name exceeds 15 character limit. If exceed, program exits.
-    if len(scen) > 15:
-        print_it(CURIRUN, "WARNING: scenario name > 15 characters will probably cause scen_date to be truncated in pyfiler", MODULE_NAME)
-        print_it(CURIRUN, f"WARNING: SCEDES file name {scen} exceeded the 15 character limit. Exiting NEMS NOW", MODULE_NAME)
+    # Total not to exceed 29, including 'dot' separator: 20 + "." + 8 = 29 characters
+    # This is because excel, where the reports are produced, can only handle tabnames =< 31 characters
+    # Check if scenario name exceeds 20 character limit. If exceed, program exits.
+    if len(scen) > 20:
+        print_it(CURIRUN, f"WARNING: SCEDES file name {scen} exceeded the 20 character limit. Exiting NEMS NOW", MODULE_NAME)
         os.sys.exit()
     # Check if datekey exceeds 8 characters limit
     if len(date) > 8:
         print_it(CURIRUN, "WARNING: date name > 8 characters will be truncated in pyfiler", MODULE_NAME)
     
     # Assigns strings to pyfiler variables
-    scen_adj = scen[:16].ljust(16)
+    scen_adj = scen[:21].ljust(21)
     date_adj = date[:8].ljust(8)
-    scen_date_adj = f"{scen_adj.strip()}.{date_adj.strip()}"[:24].ljust(24)
+    scen_date_adj = f"{scen_adj.strip()}.{date_adj.strip()}"[:29].ljust(29)
     pyfiler.utils.scen = scen_adj
     pyfiler.nchar.date = date_adj
     pyfiler.nchar.scen_date = scen_date_adj
@@ -202,8 +207,36 @@ def get_runmod(models):
 
     return result
 
+def load_WEPS_data(scedes):
+    """
+    Load the WEPS data from rw-all_series_uid.csv to a dataframe.
 
-def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
+    Parameters
+    ----------
+    scedes : dict
+        dictionary of scedes keys and value pairs parsed from SCEDES.ALL file
+
+    Returns
+    -------
+    df_data: dataframe
+        WEPS data
+    """    
+    
+    # get the file path from scedes
+    file = scedes['RW-ALL_SERIES_UIDN'].replace('$NEMS/','').replace('/','\\').lower()
+    
+    try:
+        # read file path
+        df_data = pd.read_csv(file)
+        
+    except FileNotFoundError:
+        # print that the file is not founded.
+        print(f"{file} is not in the directory.")
+    
+    return df_data
+
+
+def nems_setup(pyfiler1, cur_cycle_num):
 
     """Setting up NEMS variables and user object before running NEMS cycle
     
@@ -228,18 +261,17 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
     16. Connect to EMM Oracle based on SCEDES flag input
     17. Run hswrk.bat
     18. Assign runmod flags to pyfiler
-    19. Read any remaining data specific to the Integrating Model
-    20. Prenems print setup essential messages / logs
-    21. Execute Natural Gas Plant Liquids (NGPL) to estimate ethane and propane prices
+    19. Initialize Inter-Cycle (intercv) flags based on scedes model configuration
+    20. Read any remaining data specific to the Integrating Model
+    21. Prenems print setup essential messages / logs
+    22. Execute Natural Gas Plant Liquids (NGPL) to estimate ethane and propane prices
+    23. Load rw_all_series.csv, WEPS data, to the user object
 
 
     Parameters
     ----------
 
     pyfiler1 : module
-        pyfiler fortran module
-
-    pyfiler2 : module
         pyfiler fortran module
 
     cur_cycle_num : int
@@ -256,7 +288,7 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
 
     # 1. Read in scedes file
     print_it(cur_cycle_num, "reading in 'scedes.all file", MODULE_NAME)
-    scedes = parse_scedes.parse_scedes_file("scedes.all")
+    scedes = parse_scedes.parse_scedes_all("scedes.all")
 
     # 2. Read in the restart file
     ## Restart file read-in has 3 different conditions to account for
@@ -290,7 +322,7 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
         # Overwrite the tmp_restart_extension from the scedes file
         # with hardcoded 'unf' string
         if os.getcwd().split('\\')[-1] == 'p3':
-            tmp_restart_extension = 'unf'
+            tmp_restart_extension = 'npz'
             
         input_restart_filename = 'input/restarti.' + tmp_restart_extension
 
@@ -298,10 +330,8 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
         input_restart_filename = 'restart.in'
     
     # Call function to read in restart file
-    # Must read in restart file into both pyfiler1 and pyfiler2 to initialise variables
+    # Must read in restart file into pyfiler1 to initialise variables
     restart_load.read_restart_file(input_restart_filename, pyfiler1)
-    restart_load.read_restart_file(input_restart_filename, pyfiler2)
-
     
     # 3. Create user class
     print_it(cur_cycle_num, f"creating user class", MODULE_NAME)
@@ -371,6 +401,8 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
                      "vars_rlx" : vars_rlx}
     # user.CONV_VAR (lower case of variable list derived from "all_vars") used by PyfilerToHDF5.main
     user.CONV_VAR = [x.lower() for x in user.CONV_DAT["all_vars"]]
+    # Load IMODEL convergence into dataframe
+    user.CONV_IMODEL = pd.read_csv(input_path_convergence + 'IMODEL.csv', index_col='NMODEL')
 
     # 16. Connect to EMM Oracle based on SCEDES flag input
     print_it(cur_cycle_num, f"Connect to EMM Oracle based on SCEDES flag input", MODULE_NAME)
@@ -378,7 +410,6 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
         pyfiler1.resetosw("ORCLECP ",0)
         pyfiler1.resetosw("ORCLEFP ",0)
         pyfiler1.resetosw("ORCLEFD ",0)
-        pyfiler1.resetosw("ORCLCL ",0)
 
     # 17. Run hswrk.bat
     print_it(cur_cycle_num, "run 'hswrk.bat'", MODULE_NAME)
@@ -387,11 +418,16 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
     # 18. Assign runmod flags to pyfiler
     print_it(cur_cycle_num, "Assign runmod flags to pyfiler", MODULE_NAME)
     pyfiler1.ncntrl.runmod = get_runmod(user.module_order)
+
+    # 19. Initialize Inter-Cycle (intercv) flags based on scedes model configuration
+    print_it(cur_cycle_num, "Initialize flags used for Inter-Cycle Convergence", MODULE_NAME)
+    restart_load.init_continue_flags_intercv(user, pyfiler1)
     
-    # 19. Read any remaining data specific to the Integrating Model
+    # 20. Read any remaining data specific to the Integrating Model
+    print_it(cur_cycle_num, "Read any remaining data specific to the Integrationg Model", MODULE_NAME)
     pyfiler1.initialize_api()
 
-    # 20. Execute Natural Gas Plant Liquids (NGPL) to estimate ethane and propane prices
+    # 21. Execute Natural Gas Plant Liquids (NGPL) to estimate ethane and propane prices
     RUNRNGPL=int(user.SCEDES['RUNRNGPL'])
     if RUNRNGPL==1:
         print_it(cur_cycle_num, "run 'ngpl_stat_price'", MODULE_NAME)
@@ -402,7 +438,10 @@ def nems_setup(pyfiler1, pyfiler2, cur_cycle_num):
     else:
         print_it(cur_cycle_num, '("  Not running Python program for propane and ethane pricing by request")', MODULE_NAME)
 
-    # 21. Prenems print setup essential messages / logs
+    # 22. Prenems print setup essential messages / logs
     prenems_setup_logs(pyfiler1, user, cur_cycle_num)
+    
+    # 23. Load WEPS data into user object
+    user.WEPSdata = load_WEPS_data(scedes)
 
     return user

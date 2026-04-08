@@ -7,8 +7,10 @@ duration_block1,1,input_variable,Duration of optimization model block 1,years
 duration_block2,18,input_variable,Duration of optimization model block 2,years
 duration_45q,12,input_variable,Duration of 45Q tax credit policy for a single facility,years
 financing_risk_premia,0.02,input_variable,Assumed risk premia required by investors over risk-free market rate,fraction
+financing_years_source,20,input_variable,Assumed financing years for source investments,years
 financing_years_transport,20,input_variable,Assumed financing years for pipeline transport investments,years
 financing_years_storage,26,input_variable,Assumed financing years for saline formation storage investments,years
+fixed_om_fraction_source,0,input_variable,Fixed O&M costs as a percentage of capital costs for source projects,fraction
 fixed_om_fraction_transport,0.025,input_variable,Fixed O&M costs as a percentage of capital costs for pipeline transport,fraction
 fixed_om_fraction_storage,0.087,input_variable,Fixed O&M costs as a percentage of capital costs for saline formation storage,fraction
 site_dev_years_storage,4,input_variable,Assumed number of years for storage site development,years

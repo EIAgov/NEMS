@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/coalrep,v 1.16 2017/08/04 11:38:34 pkc Exp $
 !  COAL MODULE REPORT COMMON BLOCK
 !  The dimension params - &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR

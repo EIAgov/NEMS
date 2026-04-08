@@ -134,11 +134,11 @@ def fill_table_base_005(dfd, table_spec, table_id):
     # T5(13,IY,IS)=CMUSCONSUMPTION(7,1,IY)
     z[13] = dfd["CMUSCONSUMPTION"].loc[7].loc[1]
 
-    #      Computing
+    #      Data center servers
     # T5(14,IY,IS)=CMUSCONSUMPTION(8,1,IY)
     z[14] = dfd["CMUSCONSUMPTION"].loc[8].loc[1]
 
-    #      Office Equipment
+    #      Computers and office equipment
     # T5(15,IY,IS)=CMUSCONSUMPTION(9,1,IY)
     z[15] = dfd["CMUSCONSUMPTION"].loc[9].loc[1]
 
@@ -263,11 +263,11 @@ def fill_table_base_005(dfd, table_spec, table_id):
     # T5(37,IY,IS)=CMUSCONSUMPTION(7,1,IY)
     z[37] = dfd["CMUSCONSUMPTION"].loc[7].loc[1]
 
-    #      Computing
+    #       Data Center Servers
     # T5(38,IY,IS)=CMUSCONSUMPTION(8,1,IY)
     z[38] = dfd["CMUSCONSUMPTION"].loc[8].loc[1]
 
-    #      Office Equipment
+    #      Computers and office equipment
     # T5(39,IY,IS)=CMUSCONSUMPTION(9,1,IY)
     z[39] = dfd["CMUSCONSUMPTION"].loc[9].loc[1]
 
@@ -337,11 +337,11 @@ def fill_table_base_005(dfd, table_spec, table_id):
     # T5(49,IY,IS)=T5(37,IY,IS)+CMUSCONSUMPTION(7,1,IY)*(QELCM(11,IY)/T5(17,IY,IS)) / dfd['QELAS(11,IY)*ELECLOSS
     z[49] = z[37] + z[13] / z[88]  * z[42] * (QELCM_rev * 0.001 / z[17])
 
-    #      Computing
+    #      Data Center Servers
     # T5(50,IY,IS)=T5(38,IY,IS)+CMUSCONSUMPTION(8,1,IY)*(QELCM(11,IY)/T5(17,IY,IS)) / dfd['QELAS(11,IY)*ELECLOSS
     z[50] = z[38] + z[14] / z[88]  * z[42] * (QELCM_rev * 0.001 / z[17])
 
-    #      Office Equipment
+    #      Computers and office equipment
     # T5(51,IY,IS)=T5(39,IY,IS)+CMUSCONSUMPTION(9,1,IY)*(QELCM(11,IY)/T5(17,IY,IS)) / dfd['QELAS(11,IY)*ELECLOSS
     z[51] = z[39] + z[15] / z[88]  * z[42] * (QELCM_rev * 0.001 / z[17])
 
@@ -426,11 +426,11 @@ def fill_table_base_005(dfd, table_spec, table_id):
     # T5(83,IY,IS)=PELRFCM(11,IY)
     z[83] = dfd["PELRFCM"].loc[MNUMCR] * SCALPR2
 
-    #     Computing
+    #     Data Center Servers
     # T5(84,IY,IS)=PELOPCM(11,IY)
     z[84] = dfd["PELOPCM"].loc[MNUMCR] * SCALPR2
 
-    #     Office Equipment
+    #     Computers and office equipment
     # T5(85,IY,IS)=PELONCM(11,IY)
     z[85] = dfd["PELONCM"].loc[MNUMCR] * SCALPR2
 

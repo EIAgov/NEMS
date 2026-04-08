@@ -1,40 +1,24 @@
-!
+! -*- f90 -*-
 !FILE NAME:      COMVARS
-!
-!DATE MODIFIED:  October 21, 2024
-!
+!DATE MODIFIED:  November 13, 2025
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
 !                Commercial Demand Module (CDM)
-!
 !DEFINITION:     CDM parameters and COMMON blocks
-!
 !UNITS:          unitless
-!
 !DIMENSION:      various
-!
 !SPECIAL CONSTRAINTS:  None
-!
 !ORGANIZATION OF DATA:  Primary CDM variables listed for reference
-!
 ! Census Divisions:  New England, Middle Atlantic, East North Central, West North Central, South Atlantic,
 !                    East South Central, West South Central, Mountain,Pacific, California, United States
-!
 ! Building Types:    Assembly, Education, Food Sales, Food Service, Health, Lodging, Office - Large,
 !                    Office - Small, Mercantile & Service, Warehouse, and Other
-!
 ! Services:          Heating, Cooling, Hot Water Heating, Ventilation, Cooking, Lighting, Refrigeration,
-!                    Office Equip-PCs, Office Equip-NonPCs, MELs
-!
+!                    Data Center Servers, PCs and Office Equip, MELs
 ! Major Fuels:       Electricity, Natural Gas, Distillate Oil
-!
 ! Minor Fuels:       Residual Oil, LPG, Steam Coal, Motor Gasoline, Kerosene
-!
 ! Non-solar Renewables:  Wood, Municipal Solid Waste (MSW)
-!
 ! Emissions:         Total carbon, CO, CO2, Methane, SOx, NOx, Volatile Organic Compounds (VOCs), Particulates
-!
 !SOURCES:        Not applicable
-
 
 !     INCLUDE (PARAMETR)
 
@@ -60,12 +44,10 @@
       PARAMETER (CMnumCT = 5)
       REAL*4     MAXCOST            ! large cost for unavailable equipment
       PARAMETER (MAXCOST = 10.0**9)
-      REAL*4     KFossilHR          ! approximate heat rate (Btu per Kilowatthour) for fossil-fuel electricity generation (used to
-      PARAMETER (KFossilHR = 9510.) !  calculate renewable fuel consumption); from Appendix A6 of Monthly Energy Review (accessed 2016-08-02)
       INTEGER*4  KSTEOYR
-      PARAMETER (KSTEOYR = 35)      ! bench exactly to STEO through 2024
+      PARAMETER (KSTEOYR = 37)      ! bench exactly to STEO through 2026
 	  INTEGER*4  LastYr2pct
-      PARAMETER (LastYr2pct = 36)   ! get within 2% of STEO through 2025
+      PARAMETER (LastYr2pct = 38)   ! get within 2% of STEO through 2027 for select fuels (set in KPARM.txt)
       INTEGER*4  CMBaseYear         ! base year for input data
       PARAMETER (CMBaseYear = 2019)
       INTEGER*4  CBECSyear          ! survey year of CBECS base data
@@ -74,7 +56,7 @@
       INTEGER*4 CMnumHeatPumpTechs
       PARAMETER (CMnumHeatPumpTechs=5)
       ! The number of distinct heat pump technologies.  Technology indices one through CMnumHeatPumpTechs are reserved
-      !  in the KTEK file for characterizing heat pumps providing heating.
+      !  in the KTEKX file for characterizing heat pumps providing heating.
       ! Indices CMnumHeatPumpTechs+1 through 2*CMnumHeatPumpTechs are reserved for characterizing the corresponding specs of those
       !  same heat pumps when providing cooling.
 
@@ -89,10 +71,10 @@
 
       INTEGER*4 CMCogHstYr      ! index of last year of historical commercial
                                 ! cogeneration data.
-      PARAMETER (CMCogHstYr=32) ! Last year of historical data is 2021
+      PARAMETER (CMCogHstYr=35) ! Last year of historical data is 2024
 	  
 	  INTEGER*4  SolarBMYr      ! index of last year of STEO small-scale non-residential solar projections
-      PARAMETER (SolarBMYr=38)  ! Last year of STEO data plus 2 years of smoothing is 2027
+      PARAMETER (SolarBMYr=39)  ! Last year of STEO data plus 2 years of smoothing is 2028
 	  
       INTEGER*4 CMFirstYr       ! index of first year to forecast; assigned in source code
       INTEGER*4 CMLastYr        ! index of last year of forecast and assumption data; assigned in source code
@@ -134,7 +116,7 @@
       COMMON /FLRBK1/ CBECSFlrSpc
 
       REAL*4 CMFinalEndUse (CMnumMajFl+CMnumMinFl+CMnumRenew, &
-                            MNUMCR,23:MNUMYR)
+                            MNUMCR,(CBECSyear-BASEYR+1):MNUMYR)
       !  End use consumption for each fuel type, after benchmarking.
       !  Units are trillions of Btus.
 
@@ -245,17 +227,7 @@
       ! service demand s in building type b of Census division r
       ! during the base year.
 
-      REAL*4 BaseYrPCShrofOffEqEUI
-      ! A parameter in file KPARM specifying the proportion of
-      ! the base year office equipment EUI present in file
-      ! KINTENS that is attributable to office PCs.  If the
-      ! parameter is assigned a value less than zero, then the
-      ! EUIs in KINTENS for PCs and NonPCs are used as specified,
-      ! otherwise the value given in the PCs slot is interpreted
-      ! to represent total OffEq EUI, and split accordingly.
-
-      COMMON /CMBaseYr/ BaseYrPCShrofOffEqEUI,  &
-                        TechShareofServiceBASE, &
+      COMMON /CMBaseYr/ TechShareofServiceBASE, &
                         FuelShareofServiceBASE, &
                         AverageEfficiencyBASE
 
@@ -348,23 +320,23 @@
       ! type, and is necessary because the KTEK market shares
       ! are regional, and constant across building types.
 
-      REAL*4 NewServDmd (CMnumServ,CMnumBldg,MNUMCR,23:MNUMYR),   &
-             RetireServDmd(CMnumServ,CMnumBldg,MNUMCR,23:MNUMYR), &
-             ServDmdSurv(CMnumServ,CMnumBldg,MNUMCR,23:MNUMYR),   &
-             ServDmdExBldg (CMnumServ,CMnumBldg,MNUMCR,23:MNUMYR)
+      REAL*4 NewServDmd (CMnumServ,CMnumBldg,MNUMCR,(CBECSyear-BASEYR+1):MNUMYR),   &
+             RetireServDmd(CMnumServ,CMnumBldg,MNUMCR,(CBECSyear-BASEYR+1):MNUMYR), &
+             ServDmdSurv(CMnumServ,CMnumBldg,MNUMCR,(CBECSyear-BASEYR+1):MNUMYR),   &
+             ServDmdExBldg (CMnumServ,CMnumBldg,MNUMCR,(CBECSyear-BASEYR+1):MNUMYR)
 
-!      REAL*4 EquipSD(MNUMCR,CMnumBldg,CMnumTechs,CMnumEqVint,CMDecision,23:MNUMYR) ! sw10-95 !add b to ksdout
+!      REAL*4 EquipSD(MNUMCR,CMnumBldg,CMnumTechs,CMnumEqVint,CMDecision,(CBECSyear-BASEYR+1):MNUMYR) ! sw10-95 !add b to ksdout
       ! EquipSD (r,b,t,v,d,y) is the amount of service demand satisfied by equipment for reg r, building type b, of tech t,
       !  model v, for decision type d in year y.  Regions 1-9 are Census division, 11 is national.
 
 
       REAL*4 ShellEffIndex (CMnumBldg,MNUMCR,2),            &
-             ShellHeatFactor(CMnumBldg,MNUMCR,2,23:MNUMYR), &
-             ShellCoolFactor(CMnumBldg,MNUMCR,2,23:MNUMYR), &
+             ShellHeatFactor(CMnumBldg,MNUMCR,2,(CBECSyear-BASEYR+1):MNUMYR), &
+             ShellCoolFactor(CMnumBldg,MNUMCR,2,(CBECSyear-BASEYR+1):MNUMYR), &
              MarketPenetration (3,MNUMYR),                  & ! PC, Non-PC, Other
              EffGrowthRate (CMnumServ)
 
-      REAL*4 FinalEndUseCon (CMnumAllFl+CMnumRenew,CMnumBldg,MNUMCR,23:MNUMYR), &
+      REAL*4 FinalEndUseCon (CMnumAllFl+CMnumRenew,CMnumBldg,MNUMCR,(CBECSyear-BASEYR+1):MNUMYR), &
              CMSEDS (CMnumAllFl,MNUMCR-2,LastYr2pct) 
 
       REAL*4 SEDSMistie (CMnumAllFl,MNUMCR-2)
@@ -471,33 +443,33 @@
       ! DecAvgEff (r,s,d,f,y) is the effective average efficiency of the equipment mix selected in decision segment d using fuel f
       !  to satisfy service demand s in Census division r in year y.
 
-      REAL*4 NSD (MNUMCR,CMnumBldg,CMnumServ,23:MNUMYR)
+      REAL*4 NSD (MNUMCR,CMnumBldg,CMnumServ,(CBECSyear-BASEYR+1):MNUMYR)
       ! New service demand associated with new floor space.
       ! Will replace NewServDmd in CMServDmdNw common block in Compar2 include file.
 
-      REAL*4 RSD (MNUMCR,CMnumBldg,CMnumServ,23:MNUMYR)
+      REAL*4 RSD (MNUMCR,CMnumBldg,CMnumServ,(CBECSyear-BASEYR+1):MNUMYR)
       ! Replacement service demand associated with retiring equipment.
       ! Will replace RetireServDmd in CMServDmdNw common block in Compar2 include file.
 
-      REAL*4 SSD (MNUMCR,CMnumBldg,CMnumServ,23:MNUMYR)
+      REAL*4 SSD (MNUMCR,CMnumBldg,CMnumServ,(CBECSyear-BASEYR+1):MNUMYR)
       ! Surviving service demand subject to retrofit decisions.
       ! Will replace ServDmdSurv in CMServDmdNw common block in Compar2 include file.
 
 ! Variables to capture investment costs.
 
-      REAL*4 InvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,23:MNUMYR)
+      REAL*4 InvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,(CBECSyear-BASEYR+1):MNUMYR)
       ! InvestCost (r,s,f,y) is the estimated investment in equipment required in region r to satisfy service s in year y for fuel f.
       ! Regions 1-9 are Census divisions, 11 is national.
 
-      REAL*4 SubsidyInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,23:MNUMYR)
+      REAL*4 SubsidyInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,(CBECSyear-BASEYR+1):MNUMYR)
       ! SubsidyInvestCost (r,s,f,y) is the estimated investment in federal, local, or utility equipment subsidies for a given
       !  technology in region r to satisfy service s in year y for fuel f.
       ! Regions 1-9 are census divisions, 11 is national.
 
-      REAL*4 FedSubsidyInvestCost(MNUMCR,CMnumServ,CMnumMajFl,23:MNUMYR) !Federal portion of subsidy investment cost
-      REAL*4 NonFedSubsidyInvestCost(MNUMCR,CMnumServ,CMnumMajFl,23:MNUMYR) !Sub-national (embedded rebate) portion of subsidy investment cost
+      REAL*4 FedSubsidyInvestCost(MNUMCR,CMnumServ,CMnumMajFl,(CBECSyear-BASEYR+1):MNUMYR) !Federal portion of subsidy investment cost
+      REAL*4 NonFedSubsidyInvestCost(MNUMCR,CMnumServ,CMnumMajFl,(CBECSyear-BASEYR+1):MNUMYR) !Sub-national (embedded rebate) portion of subsidy investment cost
 	  
-      REAL*4 Subsidy111dInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,23:MNUMYR)
+      REAL*4 Subsidy111dInvestCost (MNUMCR,CMnumMajServ,CMnumMajFl,(CBECSyear-BASEYR+1):MNUMYR)
       ! Subsidy111dInvestCost (r,s,f,y) is the estimated investment in utility equipment subsidy (for 111d analysis) for a given
       !  technology in region r to satisfy service s in year y for fuel f.
       ! Regions 1-9 are census divisions, 11 is national.
@@ -628,8 +600,7 @@
       !  division r to provide district service for service type s.
       ! Read from file KDSSTM.
 
-      REAL*4 DistServConsump (MNUMCR,CMnumBldg,CMnumDHServ,CMnumMajFl, &
-                              11:MNUMYR)
+      REAL*4 DistServConsump (MNUMCR,CMnumBldg,CMnumDHServ,CMnumMajFl,(CBECSyear-BASEYR+1):MNUMYR)
       ! DistServConsump (r,b,s,f,y) is the consumption of fuel f in building type b within Census division r during the year y
       !  to provide District Service for service type s.
       ! Calculated.

@@ -72,8 +72,8 @@ def fill_table_base_006(dfd, table_spec, table_id):
     ETH_CNV = dfd["ETHANOL_PARAM_rwpre"]
 
     MBCD_CNV = dfd["CFUBA_rwpre"]
-    TOT_H2_CONS = (dfd['PRDH2NG'].loc[11] + dfd['PRDH2NG_CCS'].loc[11] + dfd['PRDH2EL'].loc[11])/dfd['CFH2Q_KG'].iloc[0] * 1000 + dfd['BYPRDH2IN'].loc[11]
-    #TOT_H2_CONS = dfd["QH2IN"].loc[MNUMCR] + dfd["QH2TR"].loc[MNUMCR] + dfd["QH2EL"].loc[MNUMCR] 
+    #TOT_H2_CONS = (dfd['PRDH2NG'].loc[11] + dfd['PRDH2NG_CCS'].loc[11] + dfd['PRDH2EL'].loc[11])/dfd['CFH2Q_KG'].iloc[0] * 1000 + dfd['BYPRDH2IN'].loc[11]
+    TOT_H2_CONS = dfd["QH2IN"].loc[MNUMCR] + dfd["QH2TR"].loc[MNUMCR] + dfd["QH2EL"].loc[MNUMCR] 
     # preprocess propane, move to preprocessor
     dfd["APMORE/PPRIN"].loc[MNUMCR] = (
         (
@@ -141,7 +141,7 @@ def fill_table_base_006(dfd, table_spec, table_id):
     z[5] = dfd["PGIIN"].loc[MNUMCR] * SCALPR2
     #   Hydrogen
     #   (new row)
-    z[142] = dfd["PH2IN"].loc[MNUMCR] * SCALPR2
+    z[142] = dfd["APMORE/PH2IN"].loc[MNUMCR] * SCALPR2
     #   Metallurgical Coal
     #   T6(11,IY,IS)=PMCIN(11,IY)
     z[11] = dfd["AMPBLK/PMCIN"].loc[MNUMCR] * SCALPR2
@@ -212,8 +212,6 @@ def fill_table_base_006(dfd, table_spec, table_id):
     z[139] = dfd["QPROLENERF"].loc[MNUMCR] * TRIL_TO_QUAD
     #      Butane 3/	1	T6(140,IY,IS)=QBUINPF(MNUMCR,IY)+QISINPF(MNUMCR,IY)
     z[140] = (dfd["QBUINPF"].loc[MNUMCR] + dfd["QISINPF"].loc[MNUMCR]) * TRIL_TO_QUAD
-    #      Natural Gasoline	136	T6(136,IY,IS)=QPPINPF(MNUMCR,IY)
-    z[136] = dfd["QPPINPF"].loc[MNUMCR] * TRIL_TO_QUAD
     #   Motor Gasoline	74	T6(74,IY,IS)=QMGIN(11,IY)
     z[74] = dfd["QMGIN"].loc[MNUMCR] * TRIL_TO_QUAD
     #   Distillate Fuel Oil	69	T6(69,IY,IS)=QDSIN(11,IY)-REFCON(IXDS,5,IY)/1000.
@@ -397,8 +395,10 @@ def fill_table_base_006(dfd, table_spec, table_id):
     z[150] = z[148] + z[149]
     #   Purchased Electricity
     z[151] = dfd["QELHM"].loc[MNUMCR] * TRIL_TO_QUAD
+    #   Byproduct H2
+    z[164] = dfd["BYPRDH2IN"].loc[MNUMCR] * TRIL_TO_QUAD
     #   Delivered Energy
-    z[152] = z[150] + z[151]
+    z[152] = z[150] + z[151] +z[164]
     #   Electricity-Related Losses
     z[153] = (
         dfd["QELHM"].loc[MNUMCR] / dfd["QELAS"].loc[MNUMCR] * ELECLOSS

@@ -8,15 +8,20 @@ import os.path
 import shutil
 import sys
 import tarfile
-#import zipfile as zf
 
 LOGFILE = "nohup.out"
 MODULE_NAME = "cleanup.py"
 
 DELETE_ME = {}
-DELETE_ME["emm"] = ["emm_*.daf",]
+DELETE_ME["emm"] = ["emm_*.daf",
+                    "input/*.unf"]
 
-COMPRESS_ME_NOT = ["dict.out", "intercvout.txt", "nemsvardf.csv"]
+COMPRESS_ME_NOT = ["dict.out", 
+                   "intercvout.txt", 
+                   "nemsvardf.csv", 
+                   "p1/nemsvardf.csv", 
+                   "p2/nemsvardf.csv", 
+                   "p3/nemsvardf.csv"]
 COMPRESS_ME_NOT = [i.lower() for i in COMPRESS_ME_NOT[:]]
 
 COMPRESS_ME = {}
@@ -37,17 +42,32 @@ COMPRESS_ME['efd'] = ["efd/*.txt",
                       "efd/log/*.lis",
                       ]
 
-
 COMPRESS_ME['input'] = ["input/layin.xls",
                         "input/ps*.unf", 
                         ]
 
-COMPRESS_ME["misc"] = ["*.20", "*.daf", "*.gdx", "*dbg.txt", "*dbug.txt", 
-                       "*out.txt", "comfloor.xls", "idm*.csv", "mchighlo.xls", "tdm*.txt",
-                       "ldsmrpt.txt", "NEMSVardf.csv", "resdeqp.txt", "RFM_WDUMP.*", 
-                       "uefp.txt", "hmm/debug", "hsm/debug", "*.mdb", "*.mps",
-                       "hmm/fromAIMMS/*.txt", "hmm/toAIMMS/*.txt",
-                       "ngas/fromAIMMS/*.txt", "ngas/toAIMMS/*.txt",
+COMPRESS_ME["misc"] = ["*.20", 
+                       "*.daf", 
+                       "*.gdx", 
+                       "*dbg.txt", 
+                       "*dbug.txt", 
+                       "*out.txt", 
+                       "comfloor.xls", 
+                       "idm*.csv", 
+                       "mchighlo.xls", 
+                       "tdm*.txt",
+                       "ldsmrpt.txt", 
+                       "resdeqp.txt", 
+                       "RFM_WDUMP.*", 
+                       "uefp.txt", 
+                       "hmm/debug", 
+                       "hsm/debug", 
+                       "*.mdb", 
+                       "*.mps",
+                       "hmm/fromAIMMS/*.txt", 
+                       "hmm/toAIMMS/*.txt",
+                       "ngas/fromAIMMS/*.txt", 
+                       "ngas/toAIMMS/*.txt",
                        "rest/toAIMMS/*.txt",
                        "RAN_log.log"]
 
@@ -78,10 +98,7 @@ def log_it(n, s):
 
 
 def cleanup_gz_folder(n, folder_path):
-    """
-    Attempt to compress a given folder into a .tar.gz file
-    If compression is successful, delete the original
-    folder.
+    """ Attempt to compress a folder into a .tar.gz file and delete the original.
 
     Parameters
     ----------
@@ -108,7 +125,8 @@ def cleanup_gz_folder(n, folder_path):
 
 
 def list_folders(path=['.']):
-    """List all folders in the specified directory"""
+    """List all folders in the specified directory
+    """
     folders = []
     for i in path:
         try:
@@ -121,7 +139,7 @@ def list_folders(path=['.']):
 
 
 def cleanup(n, my_dir):
-    """Reanme, compress, and/or delete folders and files.
+    """Rename, compress, and/or delete folders and files.
 
     Parameters
     ----------
@@ -158,7 +176,7 @@ def cleanup(n, my_dir):
             try:
                 os.remove(f2) 
             except:
-                pass
+                log_it(n, f"unable to remove: {f2}")
 
     # compress specified files/folders
     MIN_COMPRESS_SIZE = 1000000  # minimum size (in bytes) of files to compress
@@ -189,14 +207,14 @@ def cleanup(n, my_dir):
 
     log_it(n, "done with file cleanup")
 
-    ## compress folders given the folder name
+    # compress folders given the folder name
     folders_to_compress = my_folders.copy()
     temp = [f"{i}/{j}" for i in ["p1", "p2", "p3"] for j in folders_to_compress]
     folders_to_compress += temp
     cleanup_gz_folder(n, folders_to_compress)
     log_it(n, "done with folder cleanup")
     
-    ## compress sub-folders given the folder name
+    # compress sub-folders given the folder name
     subfolders_to_compress = compress_subfolder.copy()
     temp = [f"{i}/{j}" for i in ["p1", "p2", "p3"] for j in subfolders_to_compress]
     subfolders_to_compress += temp

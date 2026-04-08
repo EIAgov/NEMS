@@ -104,6 +104,9 @@ Section S5_Optimization {
 			}
 		}
 		DeclarationSection NonElectrolysis_LP_Parameters {
+			Parameter FirstBuildYear {
+				IndexDomain: (prodtech);
+			}
 			Parameter CO2PriceNoCreditByYear {
 				IndexDomain: (regCen,year);
 			}
@@ -259,9 +262,10 @@ Section S5_Optimization {
 				IndexDomain: {
 					(prodStep,regCen,prodTech_nonElec,SecondThird_pp, capYearMod)  | (prodTech_nonElec <> 'SMR_CCS_OFF') and
 					(if SecondThird_pp = SecondPlanningPeriod then capYearMod = NextModelYear 
-					elseif SecondThird_pp = ThirdPlanningPeriod then (capYearMod = Last(thirdPeriodYears)) endif)
+					elseif SecondThird_pp = ThirdPlanningPeriod then (capYearMod = Last(thirdPeriodYears)) endif) and (val(capYearMod) >= FirstBuildYear(nh::prodTech_nonElec))
 				}
 				Range: nonnegative;
+				Comment: "Unplanned Non-Electrolyzer Capacity Additions";
 			}
 			Variable H2ProdNonElectrolyzer {
 				IndexDomain: (regCen,seas, prodTech_nonElec,pp,capYearModNE) | NonElectrolyzerRegionalDomainRestriction(regCen, capYearModNE, pp);
@@ -519,17 +523,16 @@ Section S5_Optimization {
 				IndexDomain: (regCen, seas, prodTech_nonElec, pp, capYearModNE);
 				Definition: {
 					H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, pp, capYearModNE) <= 
-					(ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capYearModNE | capYearModNE <= CurrentModelYear)
+					(ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capYearModNE $ (capYearModNE <= CurrentModelYear))
 					 + sum(pp_j | pp_j <= pp, sum(prodStep, PUCByStepNonElectrolyzer(prodStep, regCen, prodTech_nonElec, pp_j, capYearModNE)))) * SeasonalFraction(seas)
 					 ! NOTE: the pp_j | pp_j <= p is needed so that planning period 3 is aware of the capacity that was built in planning period 2. That way, the capacity is not built twice.
 				}
-				Comment: "Maximum amount of hydrogen production from non-electrolyzers must be less than existing plus planned non-electrolyzer capacity for a given season.";
 			}
 			Constraint MaxElectrolyzerProduction {
 				IndexDomain: (regNERC, seas, hr, prodTech_elec, pp, CapYearModE);
 				Definition: {
 					sum(creditStep, H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, pp, CapYearModE, creditStep)) <= 
-					( ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, CapYearModE | CapYearModE <= CurrentModelYear) 
+					( ExistingCapacityElectrolyzer(regNERC, prodTech_elec, pp, CapYearModE $ (CapYearModE <= CurrentModelYear)) 
 					+ sum(pp_j | pp_j <= pp, sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp_j, CapYearModE)))) 
 					* SeasonalFraction(seas) * HourlyFraction(hr)
 					;
@@ -726,8 +729,8 @@ Section S5_Optimization {
 			! compare against SMR capacity
 			empty CapacityDiscrepancy;
 			
-			SeasonalExistingSMRCapacity(regCen, seas, pp) := sum((prodtech_nonElec, capyear), ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capyear) | capyear <= FirstModelYear) * SeasonalFraction(seas);
-			SeasonalExistingPEMCapacity(regNERC, seas, pp) := sum((prodtech_elec,capyear),  ExistingCapacityElectrolyzer(regNERC, prodtech_elec, pp, capyear) | capyear <= FirstModelYear)* SeasonalFraction(seas);
+			SeasonalExistingSMRCapacity(regCen, seas, pp) := sum((prodtech_nonElec, capyear), ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, capyear) $ (capyear <= FirstModelYear)) * SeasonalFraction(seas);
+			SeasonalExistingPEMCapacity(regNERC, seas, pp) := sum((prodtech_elec,capyear),  ExistingCapacityElectrolyzer(regNERC, prodtech_elec, pp, capyear) $ (capyear <= FirstModelYear))* SeasonalFraction(seas);
 			TotalSeasonalCapacity(regCen, seas, pp) := SeasonalExistingSMRCapacity(regCen, seas, pp) + sum(regNERC, SeasonalExistingPEMCapacity(regNERC, seas, pp) * Map_NERCToCEN(regNERC, regCen));
 			
 			!SeasonalExistingSMRCapacity(regCen, seas, pp, FirstModelYear) := sum(prodtech_nonElec, ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, pp, FirstModelYear)) * SeasonalFraction(seas);
@@ -763,11 +766,29 @@ Section S5_Optimization {
 			
 			!electrolyzerRegional(regNERC, capyear, FirstPlanningPeriod) := [(capYear, regNERC) | Exists((prodTech_elec, pp) | ExistingCapacityElectrolyzer(regNERC, prodTech_elec, FirstPlanningPeriod, capYear))];
 			
+			! Domain Restriction for first planning period
 			ElectrolyzerRegionalDomainRestriction(regNERC, capYear, FirstPlanningPeriod) := Exists(prodtech_elec, ExistingCapacityElectrolyzer(regNERC, prodtech_elec, FirstPlanningPeriod, capYear));
-			ElectrolyzerRegionalDomainRestriction(regNERC, capYear, SecondThird_pp) := 1;
 			
+			! Domain restriction for second planning period
+			ElectrolyzerRegionalDomainRestriction(regNERC, capYear, SecondPlanningPeriod) := Exists(prodtech_elec, ExistingCapacityElectrolyzer(regNERC, prodtech_elec, FirstPlanningPeriod, capYear));
+			ElectrolyzerRegionalDomainRestriction(regNERC, NextModelYear, SecondPlanningPeriod) := 1;
+			
+			! Domain restriction for third planning period
+			ElectrolyzerRegionalDomainRestriction(regNERC, capYear, ThirdPlanningPeriod) := Exists(prodtech_elec, ExistingCapacityElectrolyzer(regNERC, prodtech_elec, FirstPlanningPeriod, capYear));
+			ElectrolyzerRegionalDomainRestriction(regNERC, NextModelYear, ThirdPlanningPeriod) := 1;
+			ElectrolyzerRegionalDomainRestriction(regNERC, LastYearInThirdPlanningPeriod, ThirdPlanningPeriod) := 1;
+			
+			! Domain Restriction for first planning period
 			NonElectrolyzerRegionalDomainRestriction(regCen, capYear, FirstPlanningPeriod) := Exists(prodTech_nonElec, ExistingCapacityNonElectrolyzer(regCEN, prodTech_nonElec, FirstPlanningPeriod, capYear));
-			NonElectrolyzerRegionalDomainRestriction(regCen, capYear, SecondThird_pp) := 1;
+			
+			! Domain restriction for second planning period
+			NonElectrolyzerRegionalDomainRestriction(regCen, capYear, SecondPlanningPeriod) := Exists(prodTech_nonElec, ExistingCapacityNonElectrolyzer(regCEN, prodTech_nonElec, FirstPlanningPeriod, capYear));
+			NonElectrolyzerRegionalDomainRestriction(regCen, NextModelYear, SecondPlanningPeriod) := 1;
+			
+			! Domain restriction for third planning period
+			NonElectrolyzerRegionalDomainRestriction(regCen, capYear, ThirdPlanningPeriod) := Exists(prodTech_nonElec, ExistingCapacityNonElectrolyzer(regCEN, prodTech_nonElec, FirstPlanningPeriod, capYear));
+			NonElectrolyzerRegionalDomainRestriction(regCen, NextModelYear, ThirdPlanningPeriod) := 1;
+			NonElectrolyzerRegionalDomainRestriction(regCen, LastYearInThirdPlanningPeriod, ThirdPlanningPeriod) := 1;
 			
 			! Set Capacity Steps
 			PUCByStepNonElectrolyzer.Upper('1', regCen, prodTech_nonElec, SecondThird_pp, capYearMod) := 1000000000 / kg_to_mMton;
@@ -785,10 +806,9 @@ Section S5_Optimization {
 			Process_EMM45V;
 			Process_Electrolyzer_Limits;
 			
-			!TUCCost(regCen, regCen_j, pp) := 9999;
-			option 
+			
+			solve solveHMM where
 				"CPLEX 22.1".LP_method := "Barrier";
-			solve solveHMM;
 			LPStatusNotOptimal;
 		}
 	}

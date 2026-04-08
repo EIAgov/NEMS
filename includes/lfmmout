@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: M:/default/includes/RCS/lfmmout,v 1.35 2020/02/25 15:57:21 jpg Exp $
 
 !     LIQUID FUELS (REFINERY) MODULE COMMON BLOCK
@@ -20,6 +21,7 @@
       REAL BIMQTY(4,MNUMPR,MNUMYR)        !Biodiesel production by type and PADD Mbbl per day
       REAL BIODIMPPD(MNUMPR,MNUMYR)       !Biodiesel imports by PADD in MBBL per day
       REAL BIODEXPPD(MNUMPR,MNUMYR)       !Biodiesel exports by PADD
+      REAL BUILDS(REFREG,57,MNUMYR)       !Refinery process unit capacity builds by region, unit type, year
       REAL RFSCREDPRC(4,MNUMYR)           !RFS credit price by constraint category in 87$ per BBL
       REAL RFSCREDITS(4,13,MNUMYR)        !RFS credits by category and biofuel in billion gallons per year
       REAL RFSSAFETY(4,MNUMYR)            !RFS safety valve activity by category and year in billion gallons per year
@@ -171,9 +173,10 @@
 !  Renewable diesel imports
       REAL  RenewDIMP(MNUMCR,MNUMYR)    ! Renewable diesel imports by census in 1000 bbl per day
       REAL  RenewDImpPD(MNUMPR,MNUMYR)  ! Renewable diesel import by subPADD in 1000 bbl per day
+      REAL  RenewDEXP(MNUMCR,MNUMYR)    ! Renewable diesel exports by census in 1000 bbl per day
 
       COMMON /LFMMOUT/ P_CRUDE_IMPORTS, Q_CRUDE_IMPORTS, Q_CRUDE_IMPORTA,GRD2DSQTY, GRN2MGQTY, SAF2JTQTY,  &
-                       ETHTOT, BIMQTY, BIODIMPPD,BIODEXPPD, RFSCREDPRC, RFSCREDITS, RFSSAFETY, RFSACTUAL, RFSMANDATES, &
+                       ETHTOT, BIMQTY, BIODIMPPD,BIODEXPPD, BUILDS, RFSCREDPRC, RFSCREDITS, RFSSAFETY, RFSACTUAL, RFSMANDATES, &
                        RFS_WAIVER, RFSDSTR, RFSMGTR, RFSRBOB, RFSJFTR, RFSDSRS, REF_CAP, REF_UTL, &
                        LCFS_BaseLine, LCFS_Actual, LCFS_Waiver, LCFS_Offset_Prc, LCFS_Carb_Offset,  &
                        LCFS_PeToTrills, &
@@ -199,7 +202,7 @@
 					   SBOQRJH, WGRQRJH, WGRQRDH, &
                        P_RFCRUDEINP, GRAINCD, AB32JETCOVER, &
                        AB32_DS, AB32_KS, AB32_PR, AB32_MG, AB32_ET, AB32_JF, &
-                       LFEXPLEASE, LFREFRENT, LFMMCODE, RenewDIMP, RenewDImpPD
+                       LFEXPLEASE, LFREFRENT, LFMMCODE, RenewDIMP, RenewDImpPD, RenewDEXP
 
 ! EQUIVALENCE FOR FILER USED FOR DATA STORAGE:
       REAL EQ_LFMMOUT(                               &
@@ -215,6 +218,7 @@
                     4 * MNUMPR * MNUMYR +            &  ! BIMQTY
                     MNUMPR * MNUMYR +                &  ! BIODIMPPD                  
                     MNUMPR * MNUMYR +                &  ! BIODEXPPD                      
+                    REFREG * 57 * MNUMYR +           &  ! BUILDS
                     4 * MNUMYR +                     &  ! RFSCREDPRC
                     4 * 13 * MNUMYR +                &  ! RFSCREDITS  
                     4 * MNUMYR +                     &  ! RFSSAFETY
@@ -269,6 +273,7 @@
                     6 * MNUMYR +                     &  ! AB32_DS, AB32_KS, AB32_PR, AB32_MG, AB32_ET, AB32_JF
                     MNUMCR * MNUMYR +                &  ! RenewDIMP
                     MNUMPR * MNUMYR +                &  ! RenewDImpPD
+                    MNUMCR * MNUMYR +                &  ! RenewDEXP
                      0)            ! close parenthesis
                     
       EQUIVALENCE (EQ_LFMMOUT,P_CRUDE_IMPORTS)

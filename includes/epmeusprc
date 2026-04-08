@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/epmeusprc,v 1.1 2009/04/02 15:27:50 pkc Exp $
 !  Utility end-use service prices
 !   Utility end-use service prices Common Block Parameters
@@ -27,15 +28,15 @@
       REAL AELCKCM(MNUMCR,MNUMYR) !   cooking CM
       REAL AELLTCM(MNUMCR,MNUMYR) !   lighting CM
       REAL AELRFCM(MNUMCR,MNUMYR) !   refrigeration CM
-      REAL AELOPCM(MNUMCR,MNUMYR) !   office equipment PCs CM
-      REAL AELONCM(MNUMCR,MNUMYR) !   office equipment, nonPCs CM8
+      REAL AELOPCM(MNUMCR,MNUMYR) !   data center servers CM
+      REAL AELONCM(MNUMCR,MNUMYR) !   computers and office equipment CM
       REAL AELOTCM(MNUMCR,MNUMYR) !   other commercial
       REAL AELP2CM(MNUMCR,MNUMYR) !   vehicle CM - public L2
-      REAL AELPFCM(MNUMCR,MNUMYR) !   vehicle CM – public DCFC
-      REAL AELSBCM(MNUMCR,MNUMYR) !   vehicle CM – school bus
-      REAL AELTBCM(MNUMCR,MNUMYR) !   vehicle CM – transit bus
-      REAL AELIBCM(MNUMCR,MNUMYR) !   vehicle CM – intercity bus + CLT + freight (fleet)
-      REAL AELFNCM(MNUMCR,MNUMYR) !   vehicle CM – freight truck non-fleet
+      REAL AELPFCM(MNUMCR,MNUMYR) !   vehicle CM â€“ public DCFC
+      REAL AELSBCM(MNUMCR,MNUMYR) !   vehicle CM â€“ school bus
+      REAL AELTBCM(MNUMCR,MNUMYR) !   vehicle CM â€“ transit bus
+      REAL AELIBCM(MNUMCR,MNUMYR) !   vehicle CM â€“ intercity bus + CLT + freight (fleet)
+      REAL AELFNCM(MNUMCR,MNUMYR) !   vehicle CM â€“ freight truck non-fleet
       REAL AELINP(MNUMCR,MNUMYR) !   industrial primary
       REAL AELINS(MNUMCR,MNUMYR) !   industrial shift
       REAL AELINM(MNUMCR,MNUMYR) !   industrial miscellaneous

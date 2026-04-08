@@ -171,98 +171,75 @@ def fill_table_base_058(dfd, table_spec, table_id):
 
     #                                                               
  
-    #   Railroads                                                   
- 
-    #    Ton Miles by Rail (billion)                                
-    #T58(196,IY,IS)=TRTMRR(1,IY)
+    #   Railroads
+
+    #    Ton Miles by Rail (billion)
     z[253] = dfd['TRTMRR'].loc[1]
- 
-    #    Fuel Efficiency (ton miles per thousand Btu)               
-    #T58(197,IY,IS)=TRTMRR(2,IY)
+
+    #    Fuel Efficiency (ton miles per thousand Btu)
     z[254] = dfd['TRTMRR'].loc[2]
- 
-    #    Fuel Consumption (trillion Btu)                            
- 
-    #      Distillate Fuel Oil (diesel)                             
-    #T58(198,IY,IS)=TRQRRF(1,IY)
+
+    #    Fuel Consumption (trillion Btu)
+
+    #      Distillate Fuel Oil (diesel)
     z[255] = dfd['TRQRRF'].loc[1]
- 
-    #      Residual Fuel Oil                                        
-    #T58(199,IY,IS)=TRQRRF(2,IY)
+
+    #      Residual Fuel Oil
     z[256] = dfd['TRQRRF'].loc[2]
- 
-    #      Compressed Natural Gas                                   
-    #T58(200,IY,IS)=TRQRRF(3,IY)
+
+    #      Compressed Natural Gas
     z[257] = dfd['TRQRRF'].loc[3]
- 
-    #      Liquefied Natural Gas                                    
-    #T58(201,IY,IS)=TRQRRF(4,IY)
+
+    #      Liquefied Natural Gas
     z[258] = dfd['TRQRRF'].loc[4]
- 
-    #                                                               
- 
-    #                                                               
- 
-    #   Domestic Shipping                                           
- 
-    #    Ton Miles Shipping (billion)                               
-    #T58(202,IY,IS)=TRTMSHIP(1,IY)
+
+
+    #   Domestic Shipping
+
+    #    Ton Miles Shipping (billion)
     z[259] = dfd['TRTMSHIP'].loc[1]
- 
-    #    Fuel Efficiency (ton miles per thousand Btu)               
-    #T58(203,IY,IS)=TRTMSHIP(2,IY)
+
+    #    Fuel Efficiency (ton miles per thousand Btu)
     z[260] = dfd['TRTMSHIP'].loc[2]
- 
-    #    Fuel Consumption (trillion Btu)                            
- 
-    #      Distillate Fuel Oil (diesel)                             
-    #T58(204,IY,IS)=TRQDOMS(1,IY)
+
+    #    Fuel Consumption (trillion Btu)
+
+    #      Distillate Fuel Oil (diesel)
     z[261] = dfd['TRQDOMS'].loc[1]
- 
-    #      Residual Fuel Oil                                        
-    #T58(205,IY,IS)=TRQDOMS(2,IY)
+
+    #      Residual Fuel Oil
     z[262] = dfd['TRQDOMS'].loc[2]
- 
-    #      Compressed Natural Gas                                   
-    #T58(206,IY,IS)=TRQDOMS(3,IY)
+
+    #      Compressed Natural Gas
     z[263] = dfd['TRQDOMS'].loc[3]
- 
-    #      Liquefied Natural Gas                                    
-    #T58(207,IY,IS)=TRQDOMS(4,IY)
+
+    #      Liquefied Natural Gas
     z[264] = dfd['TRQDOMS'].loc[4]
- 
-    #                                                               
- 
-    #   International Shipping                                      
- 
-    #    Gross Trade (billion m__m dollars)                         
-    #T58(208,IY,IS)=TRTRAVLD(8,IY)+TRIMSHIP(IY)
+
+
+    #   International Shipping
+
+    #    Gross Trade (billion m__m dollars)
     z[265] = dfd['TRTRAVLD'].loc[8] + dfd['TRIMSHIP']
- 
-    #    Exports (billion m__m dollars)                             
-    #T58(209,IY,IS)=TRTRAVLD(8,IY)
+
+    #    Exports (billion m__m dollars)
     z[266] = dfd['TRTRAVLD'].loc[8]
- 
-    #    Imports (billion m__m dollars)                             
-    #T58(210,IY,IS)=TRIMSHIP(IY)
+
+    #    Imports (billion m__m dollars)
     z[267] = dfd['TRIMSHIP']
- 
-    #    Fuel Consumption (trillion Btu)                            
- 
-    #      Distillate Fuel Oil (diesel)                             
-    #T58(211,IY,IS)=TRQINTS(1,IY)
+
+    #    Fuel Consumption (trillion Btu)
+
+    #      Distillate Fuel Oil (diesel)
     z[268] = dfd['TRQINTS'].loc[1]
- 
-    #      Residual Fuel Oil                                        
-    #T58(212,IY,IS)=TRQINTS(2,IY)
+
+    #      Residual Fuel Oil
     z[269] = dfd['TRQINTS'].loc[2]
- 
-    #      Compressed Natural Gas                                   
-    #T58(213,IY,IS)=TRQINTS(3,IY)
+
+    #      Compressed Natural Gas
     z[270] = dfd['TRQINTS'].loc[3]
- 
-    #      Liquefied Natural Gas                                    
-    #T58(214,IY,IS)=TRQINTS(4,IY)
+
+    #      Liquefied Natural Gas
     z[271] = dfd['TRQINTS'].loc[4]
     
     return z

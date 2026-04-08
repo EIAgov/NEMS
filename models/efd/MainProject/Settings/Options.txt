@@ -1,4 +1,5 @@
 ﻿* AIMMS
+disable_new_mathprog_generator 1
 always_store_constraint_levels 1
 always_store_marginals 1
 display_infeasibility_analysis 1

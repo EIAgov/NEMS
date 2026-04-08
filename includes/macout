@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: M:/default/includes/RCS/macout,v 1.27 2019/07/25 17:53:20 RT2 Exp $
 !  MACROECONOMIC MODULE OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR

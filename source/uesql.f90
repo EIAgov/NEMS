@@ -1626,8 +1626,9 @@
         ENDDO
       ENDDO
  
-        end subroutine EMM_MSW
- !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXstarting reading ldsm tables hereXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    end subroutine EMM_MSW
+ 
+    !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXstarting reading ldsm tables hereXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       Subroutine EMM_LDSM
         USE SQLITE
         implicit none
@@ -1649,7 +1650,6 @@
       include 'dsmtfefp' !<< communication with efp
       include 'dsmcaldr' !<< calendar data
       include 'dsmnercr' !<< nerc region data
-      include 'dsmoptdb' !<< dsm option data base
       include 'dsmhelm'
       include 'dsmrept'  !<< ldsm reports specificaton
       include 'control'
@@ -1687,11 +1687,11 @@
       character(len=80)                          :: errmsg
       logical                                    :: finished
       
-      INTEGER*4 nNERCreg_sq,id,NUMSEC_sq,MNUMNR_sq,NEUSGRP_sq,NREPREG_sq,MNUMCR_sq,MAXSEC_sq,NEUSE,EUGRP_sq(MAXEU+1),NEUSES_sq(MAXSEC)
+      INTEGER*4 nNERCreg_sq,id,NUMSEC_sq,MNUMNR_sq,MNUMCR_sq,MAXSEC_sq,NEUSE,EUGRP_sq(MAXEU+1),NEUSES_sq(MAXSEC)
       INTEGER*4 I,J,K,p,n,q, new_sq, RRlist_sq(MAXRLST),CRlist_sq(MAXRLST)
       INTEGER*4 RdecTYPix_sq(MAXDECT),RRlistN_sq,CRlistN_sq,REGNUM
       CHARACTER*1  RdecTYPid_sq(MAXDECT),RRlistID_sq(MAXRLST),CRlistID_sq(MAXRLST),secname
-      REAL EUELAS_sq(MNUMNR,MAXSEC,MAXEUGRP),UQTDLS_sq(mnumnr),MEFAC_sq(MNUMNR),DEMINT_sq(mnumnr)
+      REAL UQTDLS_sq(mnumnr),MEFAC_sq(MNUMNR)
       REAL*4 MappCtoN_sq(MNUMNR,MNUMCR,MAXSEC),x_sq
       CHARACTER*8 NERCnam_sq(mnumnr), EUNAM_sq(MAXEU), SLNAM_sq(MAXSEC), m_sq, SECTOR_sq
       CHARACTER*8 y_sq, LREG(MAXRLST), LREG_sq(MAXRLST)
@@ -1723,41 +1723,6 @@
 !                 write(6,'(a3,a3,i4,a3,i4)')'Aft ',  ' ',   nNERCreg, ' ',NUMSEC
             deallocate ( col )
             finished = .FALSE.         
-         
-            allocate ( col2(5) )
-                 ! QUERY THE DATABASE TABLE
-                   call sqlite3_column_query( col2(1), 'ID', sqlite_int )
-                   call sqlite3_column_query( col2(2), 'EMM_REG', sqlite_int )
-                   call sqlite3_column_query( col2(3), 'SECTOR', sqlite_int )
-                   call sqlite3_column_query( col2(4), 'EU_GRP', sqlite_int )
-                   call sqlite3_column_query( col2(5), 'EUELAS', sqlite_real )
-                   call sqlite3_prepare_select( db, 'V_EMM_LDSMSTR_EU', col2, stmt2 )
-         
-                 ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
-                   do
-                     call sqlite3_next_row( stmt2, col2, finished )
-                     if ( finished ) exit
-                     
-                     !write(6,*) 'can you read this2b4'
-                     call sqlite3_get_column( col2(1), ID )
-                     call sqlite3_get_column( col2(2), MNUMNR_sq )
-                     call sqlite3_get_column( col2(3), MAXSEC_sq )
-                     call sqlite3_get_column( col2(4), NEUSGRP_sq )
-                     call sqlite3_get_column( col2(5), EUELAS_sq(MNUMNR_sq,MAXSEC_sq,NEUSGRP_sq) )
-                     
-                     !MAXSEC = MAXSEC_sq
-                     !NEUSGRP = NEUSGRP_sq
-                     EUELAS(MNUMNR_sq,MAXSEC_sq,NEUSGRP_sq) = EUELAS_sq(MNUMNR_sq,MAXSEC_sq,NEUSGRP_sq)              
-                    
-            enddo
-!           write(6,'(a5,a3,i4,a3,i4)')'Aft2 ',  ' ',   nNERCreg, ' ',NUMSEC                 
-           
-           deallocate ( col2 )
-           finished = .FALSE.
-         
-         
-
-         
          
            allocate ( col4(5) )
                  ! QUERY THE DATABASE TABLE
@@ -1854,58 +1819,6 @@
                    enddo
 !                  write(6,*)'Aft6 EUNAM ',ID,EUNAM(ID),EUGRP(ID)             
            deallocate ( col6 )
-           finished = .FALSE.
-                  
-         
-           allocate ( col10(6) )
-                 ! QUERY THE DATABASE TABLE
-                   call sqlite3_column_query( col10(1), 'ID', sqlite_int ) 
-                   call sqlite3_column_query( col10(2), 'SECTOR', sqlite_char )
-                   call sqlite3_column_query( col10(3), 'NGROUP', sqlite_int )
-                   call sqlite3_column_query( col10(4), 'GROUPNM', sqlite_char )
-                   call sqlite3_column_query( col10(5), 'RGN_CD', sqlite_int )
-                   call sqlite3_column_query( col10(6), 'EMM_REG', sqlite_char )
-              
-                   call sqlite3_prepare_select( db, 'V_EMM_LDSMSTR_GRPS', col10, stmt10 )
-                                                  
-                 ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
-                  q = 0 
-                   do
-                   
-                     call sqlite3_next_row( stmt10, col10, finished )
-                     if ( finished ) exit
-         
-                     call sqlite3_get_column( col10(1), ID )
-                     call sqlite3_get_column( col10(2), SECTOR_sq )
-                     call sqlite3_get_column( col10(5), new_sq )
-                     
-                     IF (SECTOR_sq .eq. 'RES') p =1
-                     IF (SECTOR_sq .eq. 'COM') p =2
-
-                    If (p.eq.1) then
-                      call sqlite3_get_column( col10(3), RRlist_sq(new_sq))
-                      call sqlite3_get_column( col10(4), RRlistID_sq(new_sq) )                     
-                      call sqlite3_get_column( col10(6), LREG(new_sq) )
-                      RRlist(1,new_sq) = RRlist_sq(new_sq)
-                      RRlistID(1) = RRlistID_sq(new_sq)                  
-!             write(6,*)'Aft8',new_sq,' RRlistID ', RRlistID(1),' RRlist(1,new_sq) ',RRlist(1,new_sq), 'LREG=',LREG(new_sq)
-                    Else
-                      call sqlite3_get_column( col10(3), CRlist_sq(new_sq))
-                      call sqlite3_get_column( col10(4), CRlistID_sq(new_sq) )                      
-                      call sqlite3_get_column( col10(6), LREG(new_sq) )
-                      CRlist(1,new_sq) = CRlist_sq(new_sq)
-                      CRlistID(1) = CRlistID_sq(new_sq)
-!             write(6,*)'Aft8',new_sq,' CRlistID ', CRlistID(1),' CRlist(1,new_sq) ',CRlist(1,new_sq) , 'LREG=',LREG(new_sq)
-                    Endif
-            
-                 
-         
-                   enddo
-      
-                   
-        
-           deallocate ( col10 ) 
-       
        
         call sqlite3_close( db )
         end subroutine EMM_LDSM
@@ -2192,7 +2105,7 @@
         call sqlite3_column_query( col(1), 'EMM_REG', sqlite_int )
         call sqlite3_column_query( col(2), 'ITECH', sqlite_char )
         call sqlite3_column_query( col(3), 'WBTECH', sqlite_int )
-        call sqlite3_prepare_select( db, 'V_EMM_RENDAT_WBTECH', col, stmt)
+        call sqlite3_prepare_select( db, 'V_EMM_RENAT_WBTECH', col, stmt)   ! mas (7/7/2025) purposely misspelled to match existing misspelling
         
         ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
         do
@@ -2217,7 +2130,8 @@
            i = 5
         elseif (trim(ITECH) .eq. 'PV') then 
            i = 8
-        elseif (trim(ITECH) .eq. 'PV TILT') then 
+        elseif (trim(ITECH) .eq. 'PV TILT' .or. trim(ITECH) .eq. 'PV Tilt') then 
+        ! mas (7/7/2025) added to fix values not being passed into SolarMisc subroutine
            i = 9
         elseif (trim(ITECH) .eq. 'SOLAR TH') then 
            i = 7
@@ -2265,7 +2179,8 @@
            i = 5
         elseif (trim(ITECH) .eq. 'PV') then 
            i = 8
-        elseif (trim(ITECH) .eq. 'PV TILT') then 
+        elseif (trim(ITECH) .eq. 'PV TILT' .or. trim(ITECH) .eq. 'PV Tilt') then 
+        ! mas (7/7/2025) added to fix values not being passed into SolarMisc subroutine
            i = 9
         elseif (trim(ITECH) .eq. 'SOLAR TH') then 
            i = 7

@@ -1,0 +1,12 @@
+notes,"Decline rate configuration for producing tight oil projects, year 1 based on research",,
+play_name,region_name,year_1_decline,decline_rate
+default,,0,0
+Bakken,,0.4,0.05
+Eagle_Ford,,0.45,0.1
+Woodford,,0.05,0.05
+Austin_Chalk,,0.35,0.05
+Spraberry,,0.4,0.1
+Niobrara,,0.35,0.1
+Avalon_Bone_Spring,,0.35,0.05
+Wolfcamp,,0.3,0.1
+Utica,,0.4,0.07

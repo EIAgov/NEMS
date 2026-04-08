@@ -3,19 +3,30 @@
 import pandas as pd
 
 def read_conv_file(input_file):
-    """
-    Read convergence input file and return a DataFrame with convergence settings and a list 
+    """Read convergence input file and return a DataFrame with convergence settings and a list 
     of variables for convergence test.
 
-    Args:
-        input_file (str): The path to the input file.
+    Parameters
+    ----------
+    input_file : str
+        The path to the input file.
 
-    Returns:
-        df_conv (pandas.DataFrame): The DataFrame with convergence setting data.
-        df_rlx (pandas.DataFrame): The DataFrame with relax factor (0.33 - 1.0) for each variable.
-        vars_available (list): A list of all variables listed in the input .csv files.
-        vars_conv (list): A list of variables to test for convergence.
-        vars_rlx (list): A list of variables to apply relaxation factor between iterations.
+    Returns
+    -------
+    pandas.DataFrame
+        The DataFrame with convergence setting data.
+
+    pandas.DataFrame
+        The DataFrame with relax factor (0.33 - 1.0) for each variable.
+
+    list
+        A list of all variables listed in the input .csv files.
+
+    list 
+        A list of variables to test for convergence.
+        
+    list
+        A list of variables to apply relaxation factor between iterations.
     """
     
     dfQ = pd.read_csv(input_file + 'Quantities.csv', index_col='Variable')
@@ -34,7 +45,8 @@ def read_conv_file(input_file):
     #df_conv.index = df_conv.index.str.strip()
 
     # Create a list of available variables
-    vars_available = df_conv.index.to_list()
+    # (Exclude variables that are neither in convergence test nor relaxation)
+    vars_available = df_conv[(df_conv['Test'] == 0) | (df_conv['Relax'] == 1)].index.to_list()
 
     # Create dataframe for relaxation
     df_rlx = df_conv.copy() 

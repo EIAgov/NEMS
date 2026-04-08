@@ -1,4 +1,4 @@
-﻿! $Header: m:/default/input/RCS/ngcanada.txt,v 1.6 2020/08/03 20:16:42 KDL Exp $
+! $Header: m:/default/input/RCS/ngcanada.txt,v 1.6 2020/08/03 20:16:42 KDL Exp $
 !
 !
 ! 8/14/18 KDL	Final update; all Canada data has been updated through 2017
@@ -7,6 +7,9 @@
 !		\\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\Input_Data\Canada\CANSIM_storage_May2020.xlsx
 ! 7/7/21 SYK	update CANSIM data. 2019 electricity data was also revised to not be duplicate of 2018.
 !		latest files: \\fs-f3\OEA\PNGBA\_NGMT\NGMM\shared\AEO2022\Canada_Data
+! 8/27/25  KDL	Copied over ngcanada.txt from the NEMS_ngmm repository to replace existing file
+!		Added in pipeline capacity and W-E flows separately
+!		No found LNG imports after Feb 2024
 !___________________________________________________________________________________________
 !
 !				NGMM Canada Input File
@@ -446,6 +449,18 @@ HistoricalDemand := data table
 (February, 2024, Residential)	       39.940	 37.395
 (March, 2024, Residential)	       35.344	 35.612
 (April, 2024, Residential)	       22.145	 23.232
+(May, 2024, Residential)		9.933	14.527
+(June, 2024, Residential)		8.177	9.699
+(July, 2024, Residential)		8.593	6.225
+(August, 2024, Residential)		7.596	6.094
+(September, 2024, Residential)		8.067	6.908
+(October, 2024, Residential)		14.240	13.900
+(November, 2024, Residential)		28.585	28.525
+(December, 2024, Residential)		45.041	39.819
+(January, 2025, Residential)		58.499	43.444
+(February, 2025, Residential)		48.511	44.352
+(March, 2025, Residential)		37.334	33.079
+(April, 2025, Residential)		26.076	22.273
 (January, 1990, Commercial)            34.218    27.842
 (February, 1990, Commercial)           29.923    26.096
 (March, 1990, Commercial)              27.864    20.993
@@ -856,8 +871,20 @@ HistoricalDemand := data table
 (December, 2023, Commercial)	       36.369	 28.716
 (January, 2024, Commercial)	        4.873	 36.595
 (February, 2024, Commercial)	       39.723	 31.154
-(March, 2024, Commercial)	        4.777	 30.585
-(April, 2024, Commercial)	        4.414	 21.588
+(March, 2024, Commercial)	       34.777	 30.585
+(April, 2024, Commercial)	       24.414	 21.588
+(May, 2024, Commercial)		       12.019	14.103
+(June, 2024, Commercial)		7.892	9.032
+(July, 2024, Commercial)		7.001	6.444
+(August, 2024, Commercial)		7.290	6.397
+(September, 2024, Commercial)		8.652	6.328
+(October, 2024, Commercial)	       13.675	13.036
+(November, 2024, Commercial)	       27.418	23.475
+(December, 2024, Commercial)	       40.675	33.039
+(January, 2025, Commercial)	       55.615	36.571
+(February, 2025, Commercial)	       48.060	37.323
+(March, 2025, Commercial)	       37.834	28.119
+(April, 2025, Commercial)	       28.615	21.131
 (January, 1990, Industrial)            43.949    42.644
 (February, 1990, Industrial)           42.809    38.906
 (March, 1990, Industrial)              45.054    42.400
@@ -1270,6 +1297,18 @@ HistoricalDemand := data table
 (February, 2024, Industrial)	       75.147	217.006
 (March, 2024, Industrial)	       71.568	235.383
 (April, 2024, Industrial)	       56.651	211.830
+(May, 2024, Industrial)		       56.347	221.722
+(June, 2024, Industrial)	       53.422	211.129
+(July, 2024, Industrial)	       63.792	231.644
+(August, 2024, Industrial)	       64.623	229.666
+(September, 2024, Industrial)	       60.111	207.827
+(October, 2024, Industrial)	       58.410	229.945
+(November, 2024, Industrial)	       59.906	231.915
+(December, 2024, Industrial)	       78.446	241.907
+(January, 2025, Industrial)	       88.508	245.172
+(February, 2025, Industrial)	       89.047	226.149
+(March, 2025, Industrial)	       72.270	244.425
+(April, 2025, Industrial)	       56.456	213.945
 (January, 1990, Electric)               0.000     0.000
 (February, 1990, Electric)              0.000     0.000
 (March, 1990, Electric)                 0.000     0.000
@@ -1630,54 +1669,66 @@ HistoricalDemand := data table
 (October, 2019, Electric)	        5.959	 24.833
 (November, 2019, Electric)	        8.436	 25.193
 (December, 2019, Electric)	        9.050	 26.391
-(January, 2020, Electric)	       10.944	 30.313
-(February, 2020, Electric)	       10.051	 27.737
-(March, 2020, Electric)	                8.752	 28.207
-(April, 2020, Electric)	                5.014	 25.159
-(May, 2020, Electric)	                5.393	 21.251
-(June, 2020, Electric)	                6.548	 22.290
-(July, 2020, Electric)	               11.790	 23.273
-(August, 2020, Electric) 	       10.731	 25.676
-(September, 2020, Electric)	        7.461	 25.361
-(October, 2020, Electric)	        7.701	 26.838
-(November, 2020, Electric)	        7.602	 27.919
-(December, 2020, Electric)	       10.094	 28.865
-(January, 2021, Electric)	       11.147	 28.931
-(February, 2021, Electric)	       13.149	 28.555
-(March, 2021, Electric)	                9.122	 27.301
-(April, 2021, Electric)	                5.583	 25.692
-(May, 2021, Electric)	                5.380	 26.212
-(June, 2021, Electric)	                8.799	 27.636
-(July, 2021, Electric)	                8.512	 28.663
-(August, 2021, Electric) 	       13.686	 29.557
-(September, 2021, Electric)	        7.090	 27.325
-(October, 2021, Electric)	        9.424	 29.081
-(November, 2021, Electric)	       11.052	 29.119
-(December, 2021, Electric)	       12.463	 32.065
-(January, 2022, Electric)	       16.588	 32.606
-(February, 2022, Electric)	       12.134	 28.356
-(March, 2022, Electric)	               10.211	 29.880
-(April, 2022, Electric)	                6.422	 27.842
-(May, 2022, Electric)	                6.929	 28.261
-(June, 2022, Electric)	                6.784	 26.235
-(July, 2022, Electric)	               10.762	 29.888
-(August, 2022, Electric)               11.766	 31.626
-(September, 2022, Electric)	        7.740	 30.774
-(October, 2022, Electric)	        7.695	 31.745
-(November, 2022, Electric)	        7.732	 32.950
-(December, 2022, Electric)	       13.326	 35.401
-(January, 2023, Electric)	       10.669 	 34.824
-(February, 2023, Electric)	        9.085    28.750
-(March, 2023, Electric)	                8.042	 31.871
-(April, 2023, Electric)	                6.117	 28.775
-(May, 2023, Electric)	                6.880	 27.479
-(June, 2023, Electric)                 10.299	 26.752
-(July, 2023, Electric)	               13.937	 30.888
-(August, 2023, Electric)	       11.374	 31.268
-(September, 2023, Electric)	        9.714    28.874
-(October, 2023, Electric)	        7.697	 31.006
-(November, 2023, Electric)	       11.150	 32.443
-(December, 2023, Electric)	       13.125	 32.636
+(January, 2020, Electric)	       12.593	29.488
+(February, 2020, Electric)	       11.566	26.982
+(March, 2020, Electric)		       10.071	27.439
+(April, 2020, Electric)		       5.769	24.474
+(May, 2020, Electric)		       6.206	20.672
+(June, 2020, Electric)		       7.535	21.683
+(July, 2020, Electric)		       13.567	22.639
+(August, 2020, Electric)	       12.348	24.977
+(September, 2020, Electric)	       8.585	24.671
+(October, 2020, Electric)	       8.861	26.107
+(November, 2020, Electric)	       8.748	27.159
+(December, 2020, Electric)	       11.615	28.080
+(January, 2021, Electric)	       12.730	28.781
+(February, 2021, Electric)	       15.017	28.407
+(March, 2021, Electric)		       10.418	27.159
+(April, 2021, Electric)		       6.376	25.558
+(May, 2021, Electric)		       6.144	26.076
+(June, 2021, Electric)		       10.049	27.492
+(July, 2021, Electric)		       9.721	28.514
+(August, 2021, Electric)	       15.630	29.403
+(September, 2021, Electric)	       8.097	27.183
+(October, 2021, Electric)	       10.763	28.930
+(November, 2021, Electric)	       12.622	28.968
+(December, 2021, Electric)	       14.234	31.898
+(January, 2022, Electric)	       20.347	32.840
+(February, 2022, Electric)	       14.883	28.559
+(March, 2022, Electric)		       12.525	30.095
+(April, 2022, Electric)		       7.877	28.042
+(May, 2022, Electric)		       8.499	28.464
+(June, 2022, Electric)		       8.322	26.423
+(July, 2022, Electric)		       13.201	30.103
+(August, 2022, Electric)	       14.433	31.852
+(September, 2022, Electric)	       9.494	30.994
+(October, 2022, Electric)	       9.439	31.973
+(November, 2022, Electric)	       9.484	33.186
+(December, 2022, Electric)	       16.346	35.655
+(January, 2023, Electric)	       16.616	37.923
+(February, 2023, Electric)	       14.149	31.309
+(March, 2023, Electric)		       12.525	34.708
+(April, 2023, Electric)		       9.527	31.336
+(May, 2023, Electric)		       10.715	29.924
+(June, 2023, Electric)		       16.039	29.133
+(July, 2023, Electric)		       21.705	33.637
+(August, 2023, Electric)	       17.714	34.051
+(September, 2023, Electric)	       15.128	31.443
+(October, 2023, Electric)	       11.987	33.766
+(November, 2023, Electric)	       17.365	35.330
+(December, 2023, Electric)	       20.440	35.541
+(January, 2024, Electric)	       19.851	40.229
+(February, 2024, Electric)	       16.529	33.177
+(March, 2024, Electric)		       14.028	33.810
+(April, 2024, Electric)		       11.966	27.844
+(May, 2024, Electric)		       13.961	28.784
+(June, 2024, Electric)		       12.054	27.086
+(July, 2024, Electric)		       17.881	35.938
+(August, 2024, Electric)	       17.848	34.298
+(September, 2024, Electric)	       14.778	31.721
+(October, 2024, Electric)	       13.576	32.830
+(November, 2024, Electric)	       13.249	34.575
+(December, 2024, Electric)	       18.190	37.806
 ;
 
 ! Data: Underground natural gas storage withdrawals
@@ -2096,6 +2147,18 @@ HistoricalStorageWithdrawals := data table
 (February, 2024)	20.039	  38.172
 (March, 2024)	         3.547	  22.025
 (April, 2024)	         0.000	  1.490
+(May, 2024)		0.009	1.583
+(June, 2024)		0.000	0.958
+(July, 2024)		0.923	5.365
+(August, 2024)		0.120	1.467
+(September, 2024)	0.000	1.158
+(October, 2024)		0.000	3.041
+(November, 2024)	6.922	29.909
+(December, 2024)	36.409	48.402
+(January, 2025)		104.735	61.992
+(February, 2025)	65.426	78.983
+(March, 2025)		0.608	27.599
+(April, 2025)		0.169	7.534
 
 ;
 
@@ -2516,6 +2579,18 @@ HistoricalStorageInjections := data table
 (February, 2024)	0.331	 1.928
 (March, 2024)		22.502	 9.281
 (April, 2024)		13.104	 48.528
+(May, 2024)	        24.504	43.979	
+(June, 2024)		22.668	43.479	
+(July, 2024)		3.652	28.987	
+(August, 2024)		10.696	44.163	
+(September, 2024)	25.209	27.808	
+(October, 2024)		13.536	21.717	
+(November, 2024)	0.134	5.696	
+(December, 2024)	0.439	1.872	
+(January, 2025)		0.510	0.172	
+(February, 2025)	0.555	0.716	
+(March, 2025)		19.330	4.662	
+(April, 2025)		10.308	37.301	
 
 
 
@@ -2700,7 +2775,7 @@ HistoricalCNFlowThru:= data table
 !7/14/20	KDL	Update 2019 flows from CER/NEB website; use Northern Ontario Line
 !6/29/21	SYK	Update 2020 flows from CER/NEB website; use Northern Ontario Line
 !7/15/22	SYK	Update 2021 flows from CER/NEB website; use Northern Ontario Line
-
+!8/27/25	KDL	Update through 2024 flows from CER/NEB website; use Northern Ontario Line
 
 ! Average of flows at the Northern Ontario Line (MMcf/d)
 Composite table:
@@ -2908,29 +2983,32 @@ Composite table:
     CN_W      CN_E      2021                  3428.271
     CN_W      CN_E      2022                  3428.271
     CN_W      CN_E      2023                  3428.271
+    CN_W      CN_E      2024                  3428.271
+    CN_W      CN_E      2025                  3428.271
     ;
 
 ! Sum of flows at Northern Ontario Line (Bcf/yr)
 Composite table:
-    reg       reg1      datayear    HistoricalFlowAnnual
+    nn::reg   nn::reg1      datayear            nn::HistoricalFlowAnnual
 !   --------  --------  --------    --------------------
-    CN_W      CN_E      2006                    1173.025
-    CN_W      CN_E      2007                    1082.894
-    CN_W      CN_E      2008                     964.564
-    CN_W      CN_E      2009                     769.128
-    CN_W      CN_E      2010                     449.388
-    CN_W      CN_E      2011                     507.590
-    CN_W      CN_E      2012                     470.862
-    CN_W      CN_E      2013                     542.536
-    CN_W      CN_E      2014                     763.555
-    CN_W      CN_E      2015                     788.316
-    CN_W      CN_E      2016                     675.926
-    CN_W      CN_E      2017                     417.245
-    CN_W      CN_E      2018                     485.45
-    CN_W      CN_E      2019                     478.15
-    CN_W      CN_E      2020                     473.336
-    CN_W      CN_E      2021                     480.356
-    CN_W      CN_E      2022                     551.56
-    CN_W      CN_E      2023                     659.07
+        CN_W      CN_E      2006                    1173.025
+        CN_W      CN_E      2007                    1082.894
+        CN_W      CN_E      2008                     964.564
+        CN_W      CN_E      2009                     769.128
+        CN_W      CN_E      2010                     449.388
+        CN_W      CN_E      2011                     507.590
+        CN_W      CN_E      2012                     470.862
+        CN_W      CN_E      2013                     542.536
+        CN_W      CN_E      2014                     763.555
+        CN_W      CN_E      2015                     788.316
+        CN_W      CN_E      2016                     675.926
+        CN_W      CN_E      2017                     417.245
+        CN_W      CN_E      2018                     485.45
+        CN_W      CN_E      2019                     478.15
+        CN_W      CN_E      2020                     473.336
+        CN_W      CN_E      2021                     480.356
+        CN_W      CN_E      2022                     551.56
+        CN_W      CN_E      2023                     659.07
+        CN_W      CN_E      2024                     732.43
     ;
  

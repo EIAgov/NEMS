@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/efpwrt,v 1.2 1999/12/19 20:14:05 DSA Exp $
 ! UEFP REPORTING COMMON -- CONTAINS VARIABLES REPORTED IN THE LARGE
 !                     AND SMALL REPORTS.  THESE VARIABLES ARE

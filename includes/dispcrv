@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/dispcrv,v 1.6 2009/08/06 20:20:09 lc2 Exp $
 !
 !     DISPCRV STORES EMM LOAD AND RENEWABLE DISPATCH DATA 

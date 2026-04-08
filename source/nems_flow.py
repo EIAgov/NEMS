@@ -1,10 +1,13 @@
-from datetime import datetime
 import os
 import pickle
 import sys
 import time
 
-import PyFiler.NEMSRestartIO as nemres
+import win32api
+import win32con
+import win32process
+
+SIGTERM = win32con.PROCESS_TERMINATE
 
 
 dll_dirs = ([r"C:\Program Files (x86)\Intel\oneAPI\compiler\2023.2.1\windows\redist\intel64_win\compiler",
@@ -23,9 +26,6 @@ for i in ["PyFiler", "hsm", "main", "ngpl", "converge", "ccats", "epm"]:
 
 global pyfiler1
 import pyfiler1
-global pyfiler2
-import pyfiler2
-
 
 try:
     import run_epm as epm
@@ -33,14 +33,18 @@ except ModuleNotFoundError:
     pass
 import prenems
 import prenems_aimms
+import aimms_endpoint
 import nexec
 import postnems
 
 import nems_iteration_loop, imodel_helper
 import check_nan_inf
-import ngplprice
+
+import mnfactorx_calc
 
 from logging_utilities import print_it
+
+import NEMSRestartIO as nemsio
 
 # Declaire File name used for Logging
 MODULE_NAME = "nems_flow.py"
@@ -129,6 +133,14 @@ def nsolve(user):
     # 2. NEMS Year Loop (CURIYR and CURCALYR)
     for current_integer_year in range(1, LASTYR+1):
         
+        # Write out restart_running.npz if DBDUMP switch is on
+        # set it to only write out after the DBDUMP year
+        if user.SCEDES["DBDUMP"] > "0":
+            if current_integer_year + BASEYR -1 >= int(user.SCEDES["DBDUMPSTART"]):
+                print_it(CURIRUN,f"DBDUMP is on, writing out restart_running.npz, {current_integer_year + BASEYR - 1}", MODULE_NAME)
+                restart_name = "restart_running_C" + str(CURIRUN) + "_Y" + str(current_integer_year + BASEYR - 1)
+                nemsio.to_npz(pyfiler1, restart_name, user.NEMSVardf)
+            
         # Print/Log the start of the new year loop
         print_it(CURIRUN, f" ## Starting New Year Loop, CURIYR={current_integer_year}", MODULE_NAME)
 
@@ -163,7 +175,6 @@ def nsolve(user):
                 if current_iteration >= 2:
                     pyfiler1.utils.cnvtst[:,current_integer_year-1]=1
 
-
                 #####################################
                 # III. EPM Initialization and Read-in Data. Only Execute for First CURIYR and CURITR
                 if current_integer_year == 1 and current_iteration == 1:
@@ -175,7 +186,7 @@ def nsolve(user):
                     #####################################
                     # 2. CALL READ EPM Data
                     print_it(CURIRUN, "run epm read", MODULE_NAME)
-                    epm.run_epm(epm.Mode.READ, pyfiler1)
+                    epm.run_epm(epm.Mode.READ, pyfiler1, user)
                     # End of 2. CALL READ EPM Data
                     #####################################
 
@@ -193,6 +204,17 @@ def nsolve(user):
                             status = f'module: STOP, cycle: {pyfiler1.cycleinfo.curirun}, year:{pyfiler1.ncntrl.curcalyr}, iteration:{current_iteration}, FCRL:{pyfiler1.ncntrl.fcrl}\n'
                             print_it(CURIRUN, status, MODULE_NAME)
                             ns.write(status)
+                            
+                        if os.path.isfile('main/aimms_endpoint/aimms_pid.txt'):
+                            with open('main/aimms_endpoint/aimms_pid.txt', 'r') as file:
+                                aimms_pid = file.read() # Retrieve the AIMMS process ID
+                            proc_handle = win32api.OpenProcess(SIGTERM, False, int(aimms_pid))
+                            win32process.TerminateProcess(proc_handle, -1)
+                            win32api.CloseHandle(proc_handle)
+                            print_it(CURIRUN, "Closing AIMMS", MODULE_NAME)
+                            
+                        nemsio.to_npz(pyfiler1, "restart_stop", user.NEMSVardf)
+                        
                         os.sys.exit()
                     
                     # 2. Set variables at the start of each 'Model' loop
@@ -209,14 +231,14 @@ def nsolve(user):
                         ns.write(status)
 
                     # 5. Enter function that setups foresight then runs NEMS model, will enter NEXEC
-                    nems_iteration_loop.update_expectation_vars(pyfiler1, pyfiler2, loop_info, user)
+                    nems_iteration_loop.update_expectation_vars(pyfiler1, loop_info, user)
 
                     # 6. Check for NaN/Inf in pyfiler within model loop
                     if int(user.SCEDES["CHKNAN"]) == 2 and pyfiler1.ncntrl.curcalyr > int(user.SCEDES['CLBASEYR']):
                         msg = f'going to check NaN/inf. module:{current_nems_module}, cycle: {pyfiler1.cycleinfo.curirun}, year:{pyfiler1.ncntrl.curcalyr}, iteration:{current_iteration}, FCRL:{pyfiler1.ncntrl.fcrl}\n'
                         print_it(CURIRUN, msg, MODULE_NAME)
                         check_nan_inf.main_check_nan_inf(pyfiler1)
-
+                        
                 # End of IV. Model Loop (RUNMOD, NEMS_Modules)
                 #####################################
 
@@ -224,7 +246,7 @@ def nsolve(user):
                 # V. Call EPM After Model Loop. Computes carbon emission and implements some policy options.
                 if user.SCEDES["RUNEPM"] > "0":
                     print_it(CURIRUN, f' ## Executing EPM After Model Loop, CURITR={current_iteration}', MODULE_NAME)
-                    epm.run_epm(epm.Mode.MAIN, pyfiler1)
+                    epm.run_epm(epm.Mode.MAIN, pyfiler1, user)
                 else:
                     print_it(CURIRUN, f' ## NOT Executing EPM After Model Loop, CURITR={current_iteration}', MODULE_NAME)
                     print_it(CURIRUN, f' ## SCEDES value set to, RUNEPM={user.SCEDES["RUNEPM"]}', MODULE_NAME)
@@ -240,7 +262,6 @@ def nsolve(user):
 
                 # VII. Check if convergence test is stable for current and previous iteration
                 STABLE = nems_iteration_loop.act_ctest(CTEST, pyfiler1, MAXITR, STABLE, current_iteration)
-                
 
                 # VIII. Check for NaN/Inf in pyfiler within iteration loop, after model loop
                 if int(user.SCEDES["CHKNAN"]) == 1 and pyfiler1.ncntrl.curcalyr > int(user.SCEDES['CLBASEYR']):
@@ -281,7 +302,7 @@ def nsolve(user):
         # e. CALL EMISSION Model in NCRL. Computes carbon emission and implements some policy options.
         if user.SCEDES["RUNEPM"] > "0":
             print_it(CURIRUN, f' ## Executing EPM in NCRL reporting loop, CURITR={current_iteration}', MODULE_NAME)
-            epm.run_epm(epm.Mode.MAIN, pyfiler1)
+            epm.run_epm(epm.Mode.MAIN, pyfiler1, user)
         else:
             print_it(CURIRUN, f' ## NOT Executing EPM in NCRL reporting loop, CURITR={current_iteration}', MODULE_NAME)
             print_it(CURIRUN, f' ## SCEDES value set to, RUNEPM={user.SCEDES["RUNEPM"]}', MODULE_NAME)
@@ -300,8 +321,8 @@ def nsolve(user):
         #! +++ COMPUTE ALL-SECTOR AVERAGES FOR NEMS ADJUSTED PRICE VARIABLES FOR EPM
         pyfiler1.avepasa()
         #! +++ CALCULATES SOME WEIGHTED AVERAGE CONVERSION FACTORS
-        pyfiler1.cvhistyr.histyr = pyfiler1.convfact.histyr
-        pyfiler1.docvfacts()
+        #pyfiler1.cvhistyr.histyr = pyfiler1.convfact.histyr
+        mnfactorx_calc.docvfacts(pyfiler1, user)
         # End of f. Code block for: SUMQAS, AVEPAS, COPY_ADJUSTED, AVEPASA, DOCVFACTS
         #####################################
 
@@ -343,9 +364,44 @@ def main(arg_curirun=1):
         os.remove("done.txt")
 
     # 2. Initiate prenems function to setup NEMS run
-    user = prenems.nems_setup(pyfiler1, pyfiler2, arg_curirun)
+    user = prenems.nems_setup(pyfiler1, arg_curirun)
     user = prenems_aimms.fill_aimms_user_items(user, pyfiler1)
     user.MODEL_START_TIME = MODEL_START_TIME
+
+    scendate = f'{user.SCEDES["SCEN"]}_{user.SCEDES["DATE"]}'
+
+    # Open AIMMS
+    if (int(user.SCEDES["EXC"]) == 1) and (os.path.isdir("coal")):
+        with open("coal/my_modscendate.txt", "w") as f_modscendate:
+        #f_modscendate.write(f'my_modscendate := coal_{scendate} ;')
+            f_modscendate.write('cl::my_modscendate :=' + '"coal_' +  scendate + '" ;')
+        #currently there is no need for my_modscendate.txt to be read by aimms_frame_p2. Maybe this is for the later enhancement
+
+        print_it(curirun, f"{os.getcwd()=}", MODULE_NAME)
+    if (int(user.SCEDES["EXG"]) == 1) and (os.path.isdir("ngas")):
+        with open("ngas/my_modscendate.txt", "w") as f_modscendate:
+        #f_modscendate.write(f'my_modscendate := ngas_{scendate} ;')            
+            f_modscendate.write('nn::my_modscendate :=' + '"ngas_' +  scendate + '" ;')
+        print_it(curirun, f"{os.getcwd()=}", MODULE_NAME)
+
+
+    if (int(user.SCEDES["EXH"]) == 1) and (os.path.isdir("hmm")):
+        with open("hmm/my_modscendate.txt", "w") as f_modscendate:
+        #f_modscendate.write(f'my_modscendate := ngas_{scendate} ;')
+            f_modscendate.write('nh::my_modscendate :=' + '"hmm_' +  scendate + '" ;')
+        print_it(curirun, f"{os.getcwd()=}", MODULE_NAME)
+
+    if ((int(user.SCEDES["EXE"]) == 1) or (int(user.SCEDES["EXN"]) == 1) or (int(user.SCEDES["EXC"]) == 1)
+         or (int(user.SCEDES["EXG"]) == 1) or (int(user.SCEDES["EXH"]) == 1)):
+        # Only launch AIMMS endpoint if it is in p1 or if it is jognems run ("s")
+        if (prenems.nems_runtype()[1] == "p2") or (prenems.nems_runtype()[1] == "s"):
+            aimms_process_frame2 = aimms_endpoint.launch_aimms(user.SCEDES["AIMMSLOC"], "main/aimms_endpoint/aimms_endpoint.aimms")
+            print_it(curirun, f"{aimms_process_frame2=}", MODULE_NAME)
+        if (prenems.nems_runtype()[1] == "p1"):
+            aimms_process_frame2 = aimms_endpoint.launch_aimms(user.SCEDES["AIMMSLOC"], "main/aimms_endpoint/aimms_endpoint.aimms")
+            print_it(curirun, f"{aimms_process_frame2=}", MODULE_NAME)
+           
+
 
     # 3. Check restart file variables for any NaN or inf
     if int(user.SCEDES["CHKNAN"]) in (1,2):
@@ -361,7 +417,23 @@ def main(arg_curirun=1):
     nsolve(user)
 
     # 6. Execute postnems function to write out restart files, final accounting, and close out any models
-    postnems.nems_post(pyfiler1, pyfiler2, user)
+    postnems.nems_post(pyfiler1, user)
+
+    try:
+        proc_handle = win32api.OpenProcess(SIGTERM, False, aimms_process_frame.pid) 
+        win32process.TerminateProcess(proc_handle, -1)
+        win32api.CloseHandle(proc_handle)
+    except:
+        pass
+
+    try:
+        proc_handle = win32api.OpenProcess(SIGTERM, False, aimms_process_frame2.pid) 
+        win32process.TerminateProcess(proc_handle, -1)
+        win32api.CloseHandle(proc_handle)
+    except:
+        pass
+
+    postnems.nems_post(pyfiler1, user)
 
     # 7. Write a "done.txt" file that cycle.py looks for to ensure NEMS completed the cycle successfully
     with open('done.txt', 'w') as dummy_name:

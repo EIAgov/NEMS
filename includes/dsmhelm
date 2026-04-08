@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/dsmhelm,v 1.4 2011/08/08 13:10:33 LC2 Exp $
 ! ===== (DSMHELM) =====
 !**** This variables are used for communication within DSMHELM

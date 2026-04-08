@@ -165,8 +165,8 @@
  '16'  'Commercial - Cooking            '
  '17'  'Commercial - Lighting           '
  '18'  'Commercial - Refrigeration      '
- '19'  'Commercial - Office Equip, PC   '
- '20'  'Commercial - Office Equip, NonPC'
+ '19'  'Commercial - Data Center Servers'
+ '20'  'Commercial - Computers/off equip'
  '21'  'Commercial - Other              '
  '22'  'Commercial - EV Public L2 Chrgng'
  '23'  'Commercial - EV Fast DC Charging'
@@ -185,13 +185,13 @@
   '2'  'Commercial    '
   '3'  'Industrial    '
   '4'  'Transportation'
-  '5'  'All Sectors   '
+  '5'  'Average All Sectors   '
 %EFP SPROD  %
 # EFP Stage of Production Index
   '1'  'Production  '
   '2'  'Transmission'
   '3'  'Distribution'
-  '4'  'Average all functions'
+  '4'  'Total'
 %EFP OWNER  %
 # EFP Owner Index
   '1'  'Private'
@@ -220,19 +220,22 @@
   '3'  'Combined Cycle           '
   '4'  'Combustion Turbine/Diesel'
   '5'  'Nuclear Power            '
-  '6'  'Pumped Storage           '
-  '7'  'Fuel Cells               '
-  '8'  'Renewable Sources        '
-  '9'  'Distributed Gen (Nat Gas)'
+  '6'  'Diurnal Storage          '
+  '7'  'Hydrogen                 '
+  '8'  'Pumped Storage           '
+  '9'  'Fuel Cells               '
+ '10'  'Renewable Sources        '
+ '11'  'Distributed Gen (Nat Gas)'
 %EMM FTABFUL%
 # EMM FTAB Fuel Type Index    
   '1'  'Coal                     '
   '2'  'Petroleum                '
   '3'  'Natural Gas              '
   '4'  'Nuclear Power            '
-  '5'  'Pumped Storage/Other     '
-  '6'  'Renewable Sources        '
-  '7'  'Distributed Gen (Nat Gas)'
+  '5'  'Hydrogen                 '
+  '6'  'Pumped Storage/Other     '
+  '7'  'Renewable Sources        '
+  '8'  'Distributed Gen (Nat Gas)'
 %EMM FTABOWN%
 # EMM FTAB Own Type Index    
   '1'  'Electric Power Sector    ' 'EPS'

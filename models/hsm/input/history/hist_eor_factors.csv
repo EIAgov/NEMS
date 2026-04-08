@@ -1,0 +1,9 @@
+region_number,region_name,thermal_eor_factor,co2_eor_factor
+1,East,0,0
+2,Gulf Coast,0,0.18
+3,Midcon,0.005,0.04
+4,Southwest,0.01,0.67
+5,Rocky Mountains,0.01,0.108
+6,Northern Great Plains,0.005,0.002
+7,West Coast,0.97,0
+8,Total,1,1

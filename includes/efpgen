@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/efpgen,v 1.2 1999/12/19 20:13:23 DSA Exp $
 ! EFP GENERAL COMMON BLOCK
       INTEGER EIDIST       !PLANT TYPE NUMBER FOR DISTRIBUTION PLANT

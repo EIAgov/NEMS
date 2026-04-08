@@ -49,12 +49,14 @@ def fill_table_base_023(dfd, table_spec, table_id):
     z[1] = dfd['PRDH2NG'].loc[11]
     #Supply, Production, Steam Methane Reforming with CCS
     z[2] = dfd['PRDH2NG_CCS'].loc[11]
+    #Supply, Production, Autothermal Reforming with CCS
+    z[22] = dfd['PRDH2NGATR_CCS'].loc[11]
     #Supply, Production, Electrolysis
     z[3] = dfd['PRDH2EL'].loc[11]
     #Suply, Byproduct Supply to Market
     z[4] = dfd['BYPRDH2IN'].loc[11] * dfd['CFH2Q_KG'].iloc[0] / 1000
     # Supply, Total Hydrogen Supply
-    z[5] = (dfd['PRDH2NG'].loc[11] + dfd['PRDH2NG_CCS'].loc[11] + dfd['PRDH2EL'].loc[11]) + (dfd['BYPRDH2IN'].loc[11] * dfd['CFH2Q_KG'].iloc[0] / 1000)
+    z[5] = (dfd['PRDH2NG'].loc[11] + dfd['PRDH2NG_CCS'].loc[11] + dfd['PRDH2NGATR_CCS'].loc[11] + dfd['PRDH2EL'].loc[11]) + (dfd['BYPRDH2IN'].loc[11] * dfd['CFH2Q_KG'].iloc[0] / 1000)
 
     
     # Consumption Industrial Feedstock
@@ -98,12 +100,26 @@ def fill_table_base_023(dfd, table_spec, table_id):
     z[14] = dfd['PH2_SPOT'].loc[11] * SCALPR2
     
     # Industrial end use price
-    z[15] = dfd['PH2IN'].loc[11] * SCALPR2
+    z[15] = dfd['APMORE/PH2IN'].loc[11] * SCALPR2
     
     # Transportation end use price
-    z[16] = dfd['PH2TR'].loc[11] * SCALPR2
+    z[16] = dfd['AMPBLK/PH2TR'].loc[11] * SCALPR2
     
     # Electric power end use price
-    z[17] = dfd['PH2EL'].loc[11] * SCALPR2
+    z[17] = dfd['APMORE/PH2EL'].loc[11] * SCALPR2
     
+    # Production Capacity by Technology
+    z[23] = dfd['SMR_CAP'].loc[11] # SMR
+    
+    z[24] = dfd['SMRCCS_CAP'].loc[11] # SMR w/CCS
+    
+    z[25] = dfd['ATRCCS_CAP'].loc[11] # ATR w/CCS
+    
+    z[26] = dfd['ELEC_CAP'].loc[11] # Electrolysis
+    
+    # Capital costs
+    z[27] = dfd['SMRCAPCOST'] * SCALPR2 # SMR
+    z[28] = dfd['SMRCCSCAPCOST'] * SCALPR2 # SMR w/CCS
+    z[29] = dfd['ATRCCSCAPCOST'] * SCALPR2 # ATR w/CCS
+    z[30] = dfd['ELECCAPCOST'] * SCALPR2 # Electrolysis
     return z

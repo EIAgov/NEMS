@@ -12,6 +12,8 @@ from RW_debug import main_logger, log_execution
 
 # main_logger = setup_logging('main', 'RW_log.log', int(config.get('debugging', 'debug_screen')) == 1)
 
+import warnings
+warnings.simplefilter('ignore', category=FutureWarning)
 
 # @log_execution(main_logger, message='read_var')
 def read_var(varname, dat, variablelisting):
@@ -738,6 +740,7 @@ def indcarb(dfd, con, CARBON_OR_2):
 
 
 def sum_CarbCap_vars(dfd):
+
     # FOR AEO2025, fix any national totals that are missing. Remove for AEO2026
     try:
         dfd['CC_INDY'].loc[(slice(None), 11), :] = (
@@ -751,3 +754,50 @@ def sum_CarbCap_vars(dfd):
     except KeyError:
         pass
     return dfd
+
+
+# --- TDM lookups for RW_fill_table_base code readability and consistency ---
+
+tdm_powertrain = {'conv_gas': 1,
+                'diesel': 2,
+                'E85': 3,
+                'EV100': 4,
+                'PHEV20': 5,
+                'PHEV50': 6,
+                'EV200': 7,
+                'HEV_D': 8,
+                'NG_bifuel': 9,
+                'LPG_bifuel': 10,
+                'NG_dedicated': 11,
+                'LPG_dedicated': 12,
+                'FC_methanol': 13,
+                'FC_hydrogen': 14,
+                'EV300': 15,
+                'HEV_G': 16}
+
+tdm_fuel = {'gasoline': 1,
+            'M85': 2,
+            'E85': 3,
+            'NG': 4,
+            'LPG': 5,
+            'electricity': 6,
+            'hydrogen':7,
+            'diesel': 8}
+
+size_class_car = {'minicompact': 1,
+                    'subcompact': 2,
+                    'compact': 3,
+                    'midsize': 4,
+                    'large': 5,
+                    'two_seat': 6,
+                    'small_cuv': 7,
+                    'large_cuv': 8}
+
+size_class_trk = {'small_pickup': 1,
+                    'stnd_pickup': 2,
+                    'small_van': 3,
+                    'stnd_van': 4,
+                    'small_suv': 5,
+                    'large_suv': 6,
+                    'small_cuv': 7,
+                    'large_cuv': 8}

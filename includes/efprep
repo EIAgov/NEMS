@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/efprep,v 1.2 1999/12/19 20:13:54 DSA Exp $
 ! REPORTING COMMON -- CONTAINS VARIABLES REPORTED IN THE LARGE
 !                     AND SMALL REPORTS.  THESE VARIABLES ARE

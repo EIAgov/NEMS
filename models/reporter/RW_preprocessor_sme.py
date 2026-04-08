@@ -18,8 +18,7 @@ def preprocessor_sme(table_spec):  # dfd):  # , table_id):
 
     This function performs preprocessing tasks on SME (Subject Matter Expert) data. 
     - Reads coefficients from a CSV file and adds them to the 'dfd_sme' dictionary. 
-    - Processes tables for complicated formulas that seem to require subject matter 
-      expertise (SME). The results are also stored in the 'dfd_sme' dictionary and returned.
+    - Processes tables for complicated formulas that seem to require subject matter expertise (SME). The results are also stored in the 'dfd_sme' dictionary and returned.
 
     Parameters
     ----------

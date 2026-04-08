@@ -1,4 +1,4 @@
-Composite Table:
+﻿Composite Table:
 h               h1              datayear    HistoricalCapacity
 AR              TX_E            1990        635
 AR              TX_E            1994        750
@@ -31,6 +31,7 @@ AR              TX_E            2020        1210
 AR              TX_E            2021        1510
 AR              TX_E            2022        1510
 AR              TX_E            2023        1510
+AR              TX_E            2024        1510
 LA              TX_E            1990        1191
 LA              TX_E            1994        1267
 LA              TX_E            1995        1267
@@ -62,6 +63,7 @@ LA              TX_E            2020        4440
 LA              TX_E            2021        4440
 LA              TX_E            2022        4440
 LA              TX_E            2023        4440
+LA              TX_E            2024        4440
 MX_NE           TX_E-MX_NE      1990        350
 MX_NE           TX_E-MX_NE      1994        350
 MX_NE           TX_E-MX_NE      1995        350
@@ -93,6 +95,7 @@ MX_NE           TX_E-MX_NE      2020        925
 MX_NE           TX_E-MX_NE      2021        925
 MX_NE           TX_E-MX_NE      2022        925
 MX_NE           TX_E-MX_NE      2023        925
+MX_NE           TX_E-MX_NE      2024        925
 NM              TX_W            1990        2114
 NM              TX_W            1994        2386
 NM              TX_W            1995        2386
@@ -124,6 +127,7 @@ NM              TX_W            2020        2796
 NM              TX_W            2021        4305
 NM              TX_W            2022        4305
 NM              TX_W            2023        4305
+NM              TX_W            2024        4305
 OK              TX_N            1990        0
 OK              TX_N            1994        0
 OK              TX_N            1995        0
@@ -155,6 +159,7 @@ OK              TX_N            2020        3559
 OK              TX_N            2021        3559
 OK              TX_N            2022        3559
 OK              TX_N            2023        3559
+OK              TX_N            2024        3559
 OK              TX_W            1990        2060
 OK              TX_W            1994        3142
 OK              TX_W            1995        3142
@@ -186,6 +191,7 @@ OK              TX_W            2020        3729
 OK              TX_W            2021        3729
 OK              TX_W            2022        3729
 OK              TX_W            2023        3729
+OK              TX_W            2024        3729
 TX_E            AR              1990        1851
 TX_E            AR              1994        2072
 TX_E            AR              1995        2072
@@ -217,6 +223,7 @@ TX_E            AR              2020        2184
 TX_E            AR              2021        2184
 TX_E            AR              2022        2184
 TX_E            AR              2023        2184
+TX_E            AR              2024        2184
 TX_E            LA              1990        5909.2
 TX_E            LA              1994        5942.1
 TX_E            LA              1995        5942.1
@@ -248,6 +255,7 @@ TX_E            LA              2020        18577
 TX_E            LA              2021        18577
 TX_E            LA              2022        18577
 TX_E            LA              2023        18577
+TX_E            LA              2024        18577
 TX_E            TX_E-MX_NE      1990        449
 TX_E            TX_E-MX_NE      1994        499
 TX_E            TX_E-MX_NE      1995        499
@@ -279,11 +287,13 @@ TX_E            TX_E-MX_NE      2020        5387
 TX_E            TX_E-MX_NE      2021        5387
 TX_E            TX_E-MX_NE      2022        5387
 TX_E            TX_E-MX_NE      2023        5387
+TX_E            TX_E-MX_NE      2024        5387
 TX_E            TX_E-MX_SS      2019        2600
 TX_E            TX_E-MX_SS      2020        2600
 TX_E            TX_E-MX_SS      2021        2600
 TX_E            TX_E-MX_SS      2022        2600
 TX_E            TX_E-MX_SS      2023        2600
+TX_E            TX_E-MX_SS      2024        2600
 TX_E            TX_N            2010        700
 TX_E            TX_N            2011        700
 TX_E            TX_N            2012        700
@@ -298,6 +308,7 @@ TX_E            TX_N            2020        700
 TX_E            TX_N            2021        700
 TX_E            TX_N            2022        700
 TX_E            TX_N            2023        700
+TX_E            TX_N            2024        700
 TX_E            TX_W            2010        750
 TX_E            TX_W            2011        750
 TX_E            TX_W            2012        750
@@ -312,6 +323,7 @@ TX_E            TX_W            2020        750
 TX_E            TX_W            2021        750
 TX_E            TX_W            2022        750
 TX_E            TX_W            2023        750
+TX_E            TX_W            2024        750
 TX_E-MX_NE      MX_NE           1990        449
 TX_E-MX_NE      MX_NE           1994        499
 TX_E-MX_NE      MX_NE           1995        499
@@ -343,6 +355,7 @@ TX_E-MX_NE      MX_NE           2020        5387
 TX_E-MX_NE      MX_NE           2021        5387
 TX_E-MX_NE      MX_NE           2022        5387
 TX_E-MX_NE      MX_NE           2023        5387
+TX_E-MX_NE      MX_NE           2024        5387
 TX_E-MX_NE      TX_E            1990        350
 TX_E-MX_NE      TX_E            1994        350
 TX_E-MX_NE      TX_E            1995        350
@@ -374,11 +387,13 @@ TX_E-MX_NE      TX_E            2020        925
 TX_E-MX_NE      TX_E            2021        925
 TX_E-MX_NE      TX_E            2022        925
 TX_E-MX_NE      TX_E            2023        925
+TX_E-MX_NE      TX_E            2024        925
 TX_E-MX_SS      MX_SS           2019        2600
 TX_E-MX_SS      MX_SS           2020        2600
 TX_E-MX_SS      MX_SS           2021        2600
 TX_E-MX_SS      MX_SS           2022        2600
 TX_E-MX_SS      MX_SS           2023        2600
+TX_E-MX_SS      MX_SS           2024        2600
 TX_N            TX_E            2010        6733
 TX_N            TX_E            2011        6733
 TX_N            TX_E            2012        6733
@@ -393,6 +408,7 @@ TX_N            TX_E            2020        6893
 TX_N            TX_E            2021        6893
 TX_N            TX_E            2022        6893
 TX_N            TX_E            2023        6893
+TX_N            TX_E            2024        6893
 TX_N            TX_W            2010        700
 TX_N            TX_W            2011        700
 TX_N            TX_W            2012        700
@@ -407,6 +423,7 @@ TX_N            TX_W            2020        700
 TX_N            TX_W            2021        700
 TX_N            TX_W            2022        700
 TX_N            TX_W            2023        700
+TX_N            TX_W            2024        700
 TX_W            NM              1990        3643
 TX_W            NM              1994        3905
 TX_W            NM              1995        3905
@@ -438,6 +455,7 @@ TX_W            NM              2020        5022
 TX_W            NM              2021        5022
 TX_W            NM              2022        5022
 TX_W            NM              2023        5022
+TX_W            NM              2024        5022
 TX_W            OK              1990        4312
 TX_W            OK              1994        4476
 TX_W            OK              1995        4476
@@ -469,6 +487,7 @@ TX_W            OK              2020        4541
 TX_W            OK              2021        4541
 TX_W            OK              2022        4541
 TX_W            OK              2023        4541
+TX_W            OK              2024        4541
 TX_W            TX_E            2010        1420
 TX_W            TX_E            2011        1420
 TX_W            TX_E            2012        1420
@@ -483,6 +502,7 @@ TX_W            TX_E            2020        3170
 TX_W            TX_E            2021        7270
 TX_W            TX_E            2022        7330
 TX_W            TX_E            2023        8380
+TX_W            TX_E            2024        10880
 TX_W            TX_N            2010        1400
 TX_W            TX_N            2011        1400
 TX_W            TX_N            2012        1400
@@ -497,6 +517,7 @@ TX_W            TX_N            2020        1560
 TX_W            TX_N            2021        1560
 TX_W            TX_N            2022        1560
 TX_W            TX_N            2023        1560
+TX_W            TX_N            2024        1560
 TX_W            TX_W-MX_NE      1990        0
 TX_W            TX_W-MX_NE      1994        90
 TX_W            TX_W-MX_NE      1995        90
@@ -528,6 +549,7 @@ TX_W            TX_W-MX_NE      2020        4070
 TX_W            TX_W-MX_NE      2021        4070
 TX_W            TX_W-MX_NE      2022        4070
 TX_W            TX_W-MX_NE      2023        4070
+TX_W            TX_W-MX_NE      2024        4070
 TX_W-MX_NE      MX_NE           1990        0
 TX_W-MX_NE      MX_NE           1994        90
 TX_W-MX_NE      MX_NE           1995        90
@@ -559,13 +581,15 @@ TX_W-MX_NE      MX_NE           2020        4070
 TX_W-MX_NE      MX_NE           2021        4070
 TX_W-MX_NE      MX_NE           2022        4070
 TX_W-MX_NE      MX_NE           2023        4070
+TX_W-MX_NE      MX_NE           2024        4070
 ;
-
 
 ! Only put TX intra-state projects here.
 ! SYK	8/19/2022	Added Oasis Modernization Project
+! SYK	7/31/2025	Removed Matterhorn (completed), changed CGE Expansion to 2026. Added Blackcomb and Warrior, Apex
 Composite table:
-    h         h1        year    PlannedCapacity
+    nn::h     nn::h1    nn::year          nn::PlannedCapacity
 !   --------  --------  ----    ---------------
-    TX_W      TX_E      2024               3070         !Matterhorn Express (2500), GCE Expansion (570)
+        TX_W      TX_E      2026              3070		!GCE Expansion (570), Blackcomb Pipeline (3700)
+        TX_W      TX_N      2026              5700 		!Warrior Pipeline (3700), Apex Pipeline (2000)
     ;

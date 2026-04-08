@@ -76,7 +76,6 @@ PARAMETER    (maxatyp     		= 3,           			&      	! number of aircraft types
 ! ... Indices      
 		   
 INTEGER       AIRUNIT,          &							  	! Debug file for tranair (70)
-              AGEUNIT,          &							  	! Debug file for tranair stock model (71)
               iwreg,            &                             	! world regions (maxwreg)
               iatyp,            &                             	! aircraft type (maxatyp)
               iage,             &                             	! aircraft age (maxacage)
@@ -243,7 +242,7 @@ REAL 		  WEPS_TRAN_POP(maxwreg,mnumyr)
   COVID_MULT,COVIDMULT_REF,COVIDMULT_LOMAC,COVIDMULT_HIMAC, & ! QJETR_DI, &  !NEMSWEPSSWITCH -- Uncomment QJETR_DI for WEPS, comment out QJETR_DI for NEMS (in tranmain)
   MAX_UNPRK_SHR,STK_ALIGN_MULT, STK_AVGAGE_PA
 
-  common/tranairint4/ TRANEFF, iy, Num_to_Read, First_Read_Year, AIRUNIT, AGEUNIT,di, &
+  common/tranairint4/ TRANEFF, iy, Num_to_Read, First_Read_Year, AIRUNIT,di, &
 					  MINAGE_PRK_F, MINAGE_C_PPRK, MINAGE_C_PACT, MINAGE_PRK_P, MAXAGE_UNPRK_P  ! integer 4
 
   common/tranairint2/ YRS, N
@@ -267,6 +266,7 @@ SUBROUTINE TRANAIR
   INTEGER 		FILE_MGR
   EXTERNAL 		FILE_MGR
   CHARACTER*8 	FNAME
+  LOGICAL done_once/.false./ 
   
   FIRST_READ_YEAR = 1995
   iy = FIRST_READ_YEAR - BASEYR + 1		! BASEYR is 1990
@@ -280,11 +280,10 @@ SUBROUTINE TRANAIR
   NUM_TO_READ = IJUMPYR -(FIRST_READ_YEAR - BASEYR)
   
 !! Open debug write files and read the air variables from trnairx.xlsx
-  IF (YRS.eq.FIRST_READ_YEAR.and.curitr.eq.1) THEN
+  IF (.not.done_once) THEN
+    done_once=.true.
     FNAME = 'TRANAIR '
     AIRUNIT = FILE_MGR('O',FNAME,NEW)   ! open writes file for air subroutine
-    FNAME = 'AIRAGE  '
-    AGEUNIT = FILE_MGR('O',FNAME,NEW)   ! open writes file for air subroutine
     CALL READAIR
   ENDIF
   
@@ -324,8 +323,6 @@ END SUBROUTINE TRANAIR
 !    IF (YRS.eq.FIRST_READ_YEAR) THEN
 !      OPEN(unit=70,file='tranair.txt')
 !  	  AIRUNIT=70
-!  	  OPEN(unit=71,file='airage.csv')
-!  	  AGEUNIT=71
 !  	  CALL READAIR(tranair_input_file)
 !	  WRITE(airunit,*)'CHECKPOINT: Completed subroutine READAIR'
 !    ENDIF
@@ -472,11 +469,10 @@ SUBROUTINE READAIR
     CALL GETRNGI('MAXAGE_UNPRK_P  ',MAXAGE_UNPRK_P,1,1,1)        	! The maximum age at which passenger aircraft can be un-parked to meet excess demand.
     CALL GETRNGR('MAX_UNPRK_SHR   ',MAX_UNPRK_SHR,1,1,1)        	! The maximum share of total parked passenger aircraft that can be unparked in a single year (to meet excess demand).
 
-!! WEPS populates US WLD_POP and WLD_GDP with EIA US macro outputs; NEMS does not.	
-	DO i=iy,IJUMPYR
-	  WLD_POP(us,i) = MC_NP(11,i)
-	  WLD_GDP(us,i) = MC_GDPR(i)*(MC_JPGDP(26)/MC_JPGDP(23))   ! gdp, in 2015 USD [match oxford units used in other regions]
-	ENDDO
+!   WEPS populates US WLD_POP and WLD_GDP with EIA US macro outputs; NEMS does not.	
+	WLD_POP(us,iy:ijumpyr) = MC_NP(11,iy:ijumpyr)
+    WLD_GDP(us,iy:ijumpyr) = MC_GDPR(iy:ijumpyr)*(MC_JPGDP(26)/MC_JPGDP(23))   ! gdp, in 2015 USD [match oxford units used in other regions]
+
 ! NEMS section END -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
 
 ! WEPS section START -- NEMSWEPSSWITCH ----------------------------------------------------------------------------------------------------------------
@@ -526,26 +522,16 @@ SUBROUTINE READAIR
 	
 ! Input pre-processing / re-arranging
 ! Copy stock history into separate stock totals for forecasting
-  DO i=iy,IJUMPYR
-    DO iatyp=1,maxatyp
-      DO iwreg=1,maxwreg
-        STK_SUP_TOT(iwreg,iatyp,i)	= STKPA(iwreg,i,iatyp) + STKPP(iwreg,i,iatyp) + STKCA(iwreg,i,iatyp) + STKCP(iwreg,i,iatyp)
-		STKPTOT(iwreg,iatyp,i)      = STKPA(iwreg,i,iatyp) + STKPP(iwreg,i,iatyp)
-        STKCTOT(iwreg,iatyp,i)      = STKCA(iwreg,i,iatyp) + STKCP(iwreg,i,iatyp)
-      
-	  ENDDO
-    ENDDO
-  ENDDO
+  STK_SUP_TOT(1:maxwreg,1:maxatyp,iy:ijumpyr)  = STKPA(1:maxwreg,iy:ijumpyr,1:maxatyp) + STKPP(1:maxwreg,iy:ijumpyr,1:maxatyp) + &
+                                                 STKCA(1:maxwreg,iy:ijumpyr,1:maxatyp) + STKCP(1:maxwreg,iy:ijumpyr,1:maxatyp)
+  STKPTOT(1:maxwreg,1:maxatyp,iy:ijumpyr)      = STKPA(1:maxwreg,iy:ijumpyr,1:maxatyp) + STKPP(1:maxwreg,iy:ijumpyr,1:maxatyp)
+  STKCTOT(1:maxwreg,1:maxatyp,iy:ijumpyr)      = STKCA(1:maxwreg,iy:ijumpyr,1:maxatyp) + STKCP(1:maxwreg,iy:ijumpyr,1:maxatyp)
     
 ! Convert from gal/ton-mi (GPTM_VINT) to seat-mile/gal; consolidate  (ASMPG_VINT)
-  DO iwreg = 1, maxwreg
-    DO iatyp = 1, maxatyp
-      DO iage = 1, maxacage
-	    ASMPG_VINT(iwreg,iatyp,iage,1,LAST_HIST_YR-1989) = 1/(GPTMD_PASS_VINT(iwreg,iage,iatyp)*pass_weight/2000)
-		ASMPG_VINT(iwreg,iatyp,iage,2,LAST_HIST_YR-1989) = 1/(GPTMI_PASS_VINT(iwreg,iage,iatyp)*pass_weight/2000)
-	  ENDDO
-	ENDDO
-  ENDDO !iwreg
+  DO iage=1,maxacage
+    ASMPG_VINT(1:maxwreg,1:maxatyp,iage,1,LAST_HIST_YR-1989) = 1/(GPTMD_PASS_VINT(1:maxwreg,iage,1:maxatyp)*pass_weight/2000)
+    ASMPG_VINT(1:maxwreg,1:maxatyp,iage,2,LAST_HIST_YR-1989) = 1/(GPTMI_PASS_VINT(1:maxwreg,iage,1:maxatyp)*pass_weight/2000)
+  ENDDO
   
 ! Set covid RPM correction factor; dependent on case.
   COVID_MULT      = 0.0
@@ -607,17 +593,12 @@ SUBROUTINE TAIRT
   
   IF(curcalyr.eq.FIRST_READ_YEAR) THEN 
 
-!   Regionalize commercial jet fuel and aviation gas and drop new aircraft history into total stock variable
-    DO i = iy,LAST_HIST_INDEX  
-      DO iregn=1,mnumcr-2 
-        QAGTR(11,i)=QAGTR_US(1,i)
-        QAGTR(iregn,i)=QAGTR(11,i)*SEDSHRJF(iregn,6)
-      ENDDO
-      DO iwreg = 1, maxwreg
-        DO iatyp = 1, maxatyp
-          STK_SUP(iwreg,iatyp,1,i) = STK_SUP_NEW(iwreg,i,iatyp)			! MDRIEO2022 -- why isn't STK_SUP_NEW just read right into STK_SUP to start?
-		ENDDO
-      ENDDO
+!   Regionalize aviation gas and drop commercial aircraft sales history (iy:last_hist_index) into total stock variable
+    DO i = iy, LAST_HIST_INDEX
+      QAGTR(11,i)                      = QAGTR_US(1,i)
+      QAGTR(1:mnumcr-2,i)              = SPREAD(QAGTR(11,i), DIM=1, NCOPIES = MNUMCR-2) * &
+                                         SEDSHRJF(1:mnumcr-2,iy)
+      STK_SUP(1:maxwreg,1:maxatyp,1,i) = STK_SUP_NEW(1:maxwreg,i,1:maxatyp)
     ENDDO
 
   ENDIF  ! curcalyr.eq.FIRST_READ_YEAR
@@ -627,13 +608,9 @@ SUBROUTINE TAIRT
 ! ... Bound below by lowest cost per mile - Domestic (LCPMD) & Int (LCPMI)        
 ! ... Modify by the avg dom (LFDOMAVG) & international (LFINTAVG) load factors
 ! ==================================================================================================================
-
-  LFDOMAVG(N)  = 0.0
-  LFINTAVG(N)  = 0.0
-  DO iatyp = 1, maxatyp
-    LFDOMAVG(N)=LFDOMAVG(N)+LOAD_FACTOR(us,N,dom)*SHR_RPM(us,N,iatyp,dom)
-    LFINTAVG(N)=LFINTAVG(N)+LOAD_FACTOR(us,N,int)*SHR_RPM(us,N,iatyp,int)
-  ENDDO
+  
+  LFDOMAVG(N)=LFDOMAVG(N)+LOAD_FACTOR(us,N,dom)*sum(SHR_RPM(us,N,1:maxatyp,dom))
+  LFINTAVG(N)=LFINTAVG(N)+LOAD_FACTOR(us,N,int)*sum(SHR_RPM(us,N,1:maxatyp,int))
   
 ! Calculate Yield in 96 c/gal. Pjftr (convert 87$/mmbtu->96 cents/gal). Only done for US.
   IF (YRS.ge.FIRST_FCST_YR) THEN
@@ -644,12 +621,6 @@ SUBROUTINE TAIRT
     YIELD(int,N) = ALPHAYI*(1. - RHOYI) + RHOYI*YIELD(int,N-1) + BETAFUELI * (PJFTR_US(N) &
                    - RHOYI*PJFTR_US(N-1)) + BETATIMEI * (N+11 - RHOYI*(N+10))
   ENDIF
-  
-! ************************************ TESTING/DEBUG ************************************
-!  IF (curitr.eq.1) THEN 
-!    WRITE(AIRUNIT,*)YRS,yield(dom,N),yield(int,N)
-!  ENDIF  
-! ************************************ TESTING/DEBUG ************************************
 
 ! ==================================================================================================================
 ! ... Calculate revenue passenger miles domestic (RPMT) 
@@ -659,48 +630,35 @@ SUBROUTINE TAIRT
 ! Calculate RPMT per capita (RPMT_PC)
 ! Segment RPMT by body type (nb, wb, rj)
   IF (YRS.lt.FIRST_FCST_YR) THEN
-    DO iwreg = 1, maxwreg
-	  DO di = 1, domint
-	    RPMT(iwreg,di,N) = 1000.*RPMT_HIST(iwreg,N,di)				! convert to millions
-        RPMT_PC(iwreg,di,N) = RPMT(iwreg,di,N)/WLD_POP(iwreg,N)
-      ENDDO
-	ENDDO
-	
-    DO iwreg = 1, maxwreg
-      DO di = 1, domint
-    	DO iatyp = 1, maxatyp
-    	  RPM(iwreg,di,iatyp,N)=RPMT(iwreg,di,N)*SHR_RPM(iwreg,N,iatyp,di)
-    	ENDDO
-      ENDDO
-	ENDDO
+    RPMT(1:maxwreg,1:domint,N)          = 1000.*RPMT_HIST(1:maxwreg,N,1:domint)
+    RPMT_PC(1:maxwreg,1:domint,N)       = RPMT(1:maxwreg,1:domint,N) / &
+                                          SPREAD(WLD_POP(1:maxwreg,N), DIM = 2, NCOPIES = DOMINT)
+    DO iatyp = 1, maxatyp
+      RPM(1:maxwreg,1:domint,iatyp,N) = RPMT(1:maxwreg,1:domint,N) * &
+                                        SHR_RPM(1:maxwreg,N,iatyp,1:domint)
+    ENDDO
 	
   ELSE IF (YRS.ge.FIRST_FCST_YR) THEN 
-  
-! ************************************ TESTING/DEBUG ************************************
- 
-    DO iwreg = 1, maxwreg
+   
+!    DO iwreg = 1, maxwreg
       DO di = 1, domint
 	  
 !       Calculate RPM per capita by region and domestic / international
-		RPMT_PC(iwreg,di,N) = RPMT_PC(iwreg,di,N-1)*exp(intercept_rpm(iwreg,di))* &
-		                      (((WLD_GDP(iwreg,N)/WLD_POP(iwreg,N))/(WLD_GDP(iwreg,N-1)/WLD_POP(iwreg,N-1)))**beta1_rpm(iwreg,di))
+		RPMT_PC(1:maxwreg,di,N) = RPMT_PC(1:maxwreg,di,N-1)*exp(intercept_rpm(1:maxwreg,di))* &
+		                      (((WLD_GDP(1:maxwreg,N)/WLD_POP(1:maxwreg,N))/(WLD_GDP(1:maxwreg,N-1)/WLD_POP(1:maxwreg,N-1)))**beta1_rpm(1:maxwreg,di))
 		
-        RPMT(iwreg,di,N) = RPMT_PC(iwreg,di,N) * WLD_POP(iwreg,N)
+        RPMT(1:maxwreg,di,N) = RPMT_PC(1:maxwreg,di,N) * WLD_POP(1:maxwreg,N)
 !		Covid impact applied to 2019 baseline, rather than pre-covid projection.
-		IF (covid_mult(iwreg,N,di).ne.0) THEN
-		  RPMT(iwreg,di,N) = RPMT(iwreg,di,30)*(1-covid_mult(iwreg,N,di))		! Covid impact is pinned to the 2019 baseline (n=30)
-		  RPMT_PC(iwreg,di,N) = RPMT(iwreg,di,N)/WLD_POP(iwreg,N)
-		ENDIF
+		WHERE (covid_mult(1:maxwreg,N,di).ne.0)
+		  RPMT(1:maxwreg,di,N) = RPMT(1:maxwreg,di,30)*(1-covid_mult(1:maxwreg,N,di))		! Covid impact is pinned to the 2019 baseline (n=30)
+		  RPMT_PC(1:maxwreg,di,N) = RPMT(1:maxwreg,di,N)/WLD_POP(1:maxwreg,N)
+		END WHERE
 
-      ENDDO ! di:domint
-
-      DO di = 1, domint
 	    DO iatyp = 1, maxatyp
-		  RPM(iwreg,di,iatyp,N) = RPMT(iwreg,di,N)*SHR_RPM(iwreg,N,iatyp,di)
+		  RPM(1:maxwreg,di,iatyp,N) = RPMT(1:maxwreg,di,N)*SHR_RPM(1:maxwreg,N,iatyp,di)
 		ENDDO
 	  ENDDO
 	  
-    ENDDO ! iwreg
   ENDIF   ! YRS.ge.FIRST_FCST_YR
      
 ! ==================================================================================================================
@@ -710,23 +668,17 @@ SUBROUTINE TAIRT
 ! FTM_ALIGNHIST ensures that the projection aligns with history. It is phased out over the full projection period (LAST_HIST_YR --> 2050)
   IF (YRS.eq.LAST_HIST_YR) THEN
     FTM_ALIGNHIST = 0.0
-    DO iwreg = 1, maxwreg
-	  DO di = 1, domint
-	    FTM_ALIGNHIST(iwreg,di) = exp(intercept_ftm(iwreg,di))*(wld_gdp(iwreg,N)**(beta1_ftm(iwreg,di))) - FTM(iwreg,N,di)
-	  ENDDO
-	ENDDO
-  ENDIF
-
-  IF (YRS.ge.FIRST_FCST_YR) THEN
-	DO iwreg = 1, maxwreg
-	  DO di = 1, domint
-	    FTM(iwreg,N,di) = exp(intercept_ftm(iwreg,di))*(wld_gdp(iwreg,N)**(beta1_ftm(iwreg,di))) - FTM_ALIGNHIST(iwreg,di)*(0.85**(N-32))
-	  ENDDO
-	ENDDO
+    FTM_ALIGNHIST(1:maxwreg,1:domint) = exp(intercept_ftm(1:maxwreg,1:domint)) * &
+                                        (SPREAD(wld_gdp(1:maxwreg,N),DIM=2,NCOPIES=domint)**(beta1_ftm(1:maxwreg,1:domint))) - &
+                                        FTM(1:maxwreg,N,1:domint)
+  ELSEIF (YRS.ge.FIRST_FCST_YR) THEN
+	FTM(1:maxwreg,N,1:domint) = exp(intercept_ftm(1:maxwreg,1:domint)) * &
+                                        (SPREAD(wld_gdp(1:maxwreg,N),DIM=2,NCOPIES=domint)**(beta1_ftm(1:maxwreg,1:domint))) - &
+                                        FTM_ALIGNHIST(1:maxwreg,1:domint)*(0.85**(N-32))
   ENDIF
   
 ! ************************************ TESTING/DEBUG ************************************
-  IF (YRS.eq.2050) THEN
+  IF (fcrl.eq.1.and.YRS.eq.2050) THEN
     WRITE(airunit,*)'reg di year WLD_POP WLD_GDP RPMT FTM FTM_ALIGNHIST'
     DO i = 6, mnumyr
 	  DO iwreg = 1, maxwreg
@@ -745,13 +697,14 @@ SUBROUTINE TAIRT
 ! ==================================================================================================================
 
   DO iwreg = 1, maxwreg
+  
+    IF (N.eq.2001.and.iwreg.ne.1) THEN			! 9/11 impact not as strong in non-US regions (caused negative FTM demand in CA and RU)
+      PCT_BELLY_PLOAD(1:maxatyp,N,1:domint) = (PCT_BELLY_PLOAD(1:maxatyp,N-1,1:domint) + PCT_BELLY_PLOAD(1:maxatyp,N+1,1:domint))/2
+      PCT_BELLY_FRT(1:maxatyp,N,1:domint)   = (PCT_BELLY_FRT(1:maxatyp,N-1,1:domint)   + PCT_BELLY_FRT(1:maxatyp,N+1,1:domint))  /2
+    ENDIF
+    
     DO iatyp = 1, maxatyp
 	  DO di = 1, domint
-	  
-	    IF (N.eq.2001.and.iwreg.ne.1) THEN			! 9/11 impact not as strong in non-US regions (caused negative FTM demand in CA and RU)
-		  PCT_BELLY_PLOAD(iatyp,N,di) = (PCT_BELLY_PLOAD(iatyp,N-1,di) + PCT_BELLY_PLOAD(iatyp,N+1,di))/2
-		  PCT_BELLY_FRT(iatyp,N,di)   = (PCT_BELLY_FRT(iatyp,N-1,di)   + PCT_BELLY_FRT(iatyp,N+1,di))  /2
-		ENDIF
 	  
 !       Estimate belly freight, in units of RPM-equivalent (where PCT_BELLY_PLOAD is the share of pass-flight payload (pass+freight) that is freight))
 !		Note that RPM is only the passenger payload, while PCT_BELLY_PLOAD is freight share of pass + freight -- have to get freight indexed to passenger only (hence the 1- in denom)
@@ -803,21 +756,18 @@ SUBROUTINE TAIRT
   SMD_TOT(:,N) = 0.0
   ASM(:,:,:,N) = 0.0
   ASMDEMD(:,:,N) = 0.0
-  DO iwreg = 1, maxwreg
-    DO di = 1, domint
-	  DO iatyp = 1, maxatyp
-	    ASM(iwreg,di,iatyp,N) = RPM(iwreg,di,iatyp,N) / LOAD_FACTOR(iwreg,N,di)			! Calculate available seat miles ASM(iwreg,domint,iatyp,N) - not incl. belly freight
-      ENDDO
-	ENDDO
-  ENDDO
-  
-  DO iwreg = 1, maxwreg													
-    SMDEMD (iwreg,N) = sum(ASM(iwreg,:,:,N))													! Aggregate available seat miles to region
-    DO iatyp = 1, maxatyp
-	  ASMDEMD(iwreg,iatyp,N) = sum(ASM(iwreg,:,iatyp,N))										! Aggregate available seat miles to region, body type, millions
-	ENDDO
-	SMD_TOT(iwreg,N) = (SMDEMD(iwreg,N) + SUM(FTM(iwreg,N,:)) * 2000/pass_weight) * 0.001				! Calculate total seat mile demand, including freight, billions
-  ENDDO
+
+! Calculate available seat miles ASM(iwreg,domint,iatyp,N) - not incl. belly freight  
+  ASM(1:maxwreg,1:domint,1:maxatyp,N) = RPM(1:maxwreg,1:domint,1:maxatyp,N) / &
+                                        SPREAD(LOAD_FACTOR(1:maxwreg,N,1:domint) ,DIM=3 ,NCOPIES = maxatyp)
+
+! Aggregate available seat miles to region  
+  SMDEMD(1:maxwreg,N)            = sum(sum(ASM(1:maxwreg,1:domint,1:maxatyp,N),DIM=3),DIM=2)
+! Aggregate available seat miles to region, body type, millions
+  ASMDEMD(1:maxwreg,1:maxatyp,N) = sum(ASM(1:maxwreg,1:domint,1:maxatyp,N),DIM=2)
+! Calculate total seat mile demand, including freight, billions
+  SMD_TOT(1:maxwreg,N)           = (SMDEMD(1:maxwreg,N) + SUM(FTM(1:maxwreg,N,1:domint),DIM=2) * &
+                                   2000.0/pass_weight) * 0.001
 
   RETURN
 
@@ -831,6 +781,7 @@ END SUBROUTINE TAIRT
 
 SUBROUTINE TAIREFF
     USE AIRMOD
+    USE MEAN_FUNCS
     IMPLICIT NONE
 
 !   Declare local parameters
@@ -842,7 +793,6 @@ SUBROUTINE TAIREFF
 	REAL	  	FTMAC_ADJ(maxwreg,maxatyp)					! Adjustment factor to calibrate freighter annual capacity (FTM/plane) to actual in last_hist_yr
 
     REAL		SUM_ASMPG_STK_AGE(maxwreg,maxatyp,domint)	! Denominator for harmonic mean; collapse age dimension
-	REAL		SUM_ASMPG_STK_R(maxwreg)					! Denominator for harmonic mean; collapse all but region dimensions
 	REAL		SUM_ASMPG_STK_TYP(maxatyp)					! Denominator for harmonic mean; collapse all but body type dimensions
 	REAL		SUM_ASMPG_NEW_TYP(maxatyp)					! Denominator for harmonic mean; collapse all but body type dimensions
 
@@ -853,51 +803,53 @@ SUBROUTINE TAIREFF
 	REAL    	CARGOAC_NEEDED(maxwreg,maxatyp)				! Total new/unparked cargo aircraft needed to 1) replace retirements and 2) meet FTM demand
     REAL    	PASSAC_NEEDED(maxwreg,maxatyp)				! Total new/unparked passenger aircraft needed to 1) replace retirements and 2) meet RPM demand	
 
+    LOGICAL     TAIREFF_DEBUG/.false./
+
 !   Calculate historical energy (passenger RPM (incl belly freight) + cargo FTM (not incl. belly freight)    
 	QJETR_NUS(:,N)    = 0.0
     QJETR_DI(:,:,:,N) = 0.0
 	SUM_ASMPG_STK_AGE = 0.0
-	SUM_ASMPG_STK_R   = 0.0
 	SUM_ASMPG_STK_TYP = 0.0
 	SUM_ASMPG_NEW_TYP = 0.0
 	
-	IF (YRS.le.LAST_HIST_YR) THEN
+    IF (YRS.le.LAST_HIST_YR) THEN      
+      DO iatyp = 1, maxatyp
+        ASMPG_STK_TYP(iatyp,N) = HARMONIC_MEAN_2D(ASMPG_AVG_AGE(1:maxwreg,iatyp,1:domint,N), &
+                                                  ASM(1:maxwreg,1:domint,iatyp,N), &
+                                                  caller_id = 'ASMPG_STK_TYP')
+        ASMPG_NEW_TYP(iatyp,N) = HARMONIC_MEAN_2D(ASMPG_VINT(1:maxwreg,iatyp,(LAST_HIST_YR-(1989+N)+1),1:domint,LAST_HIST_YR-1989), &
+                                                  ASM(1:maxwreg,1:domint,iatyp,N), &
+                                                  caller_id = 'ASMPG_NEW_TYP')
+      ENDDO
+      
+      ASMPGT(1,N) = HARMONIC_MEAN_1D(ASMPG_NEW_TYP(1:maxatyp,N), &
+                                     sum(sum(ASM(1:maxwreg,1:domint,1:maxatyp,N),DIM=2),DIM=1), &
+                                     caller_id = 'ASMPGT(1)')
+      ASMPGT(2,N) = HARMONIC_MEAN_1D(ASMPG_STK_TYP(1:maxatyp,N), &
+                                     sum(sum(ASM(1:maxwreg,1:domint,1:maxatyp,N),DIM=2),DIM=1), &
+                                     caller_id = 'ASMPGT(2)')
+
 	  DO iwreg = 1, maxwreg
 	    DO iatyp = 1, maxatyp
 		  DO di = 1, domint
-		    IF (ASM(iwreg,di,iatyp,N).ne.0.0) THEN
-		      SUM_ASMPG_STK_TYP(iatyp) = SUM_ASMPG_STK_TYP(iatyp) + ASM(iwreg,di,iatyp,N)/ASMPG_AVG_AGE(iwreg,iatyp,di,N)												! Stock 
-	   	  	  SUM_ASMPG_NEW_TYP(iatyp) = SUM_ASMPG_NEW_TYP(iatyp) + ASM(iwreg,di,iatyp,N)/ASMPG_VINT(iwreg,iatyp,(LAST_HIST_YR-(1989+N)+1),di,LAST_HIST_YR-1989)		! New
-			  
-			  ! incl. miles flown in addition to revenue miles
+		    IF (ASM(iwreg,di,iatyp,N).ne.0.0) THEN			  
+!			  ! incl. miles flown in addition to revenue miles
 			  QJETR_DI(iwreg,di,1,N) = QJETR_DI(iwreg,di,1,N) + ((PASSAC_RPM_DMD(iwreg,iatyp,di,N) * AIR_MGMT_ADJ(iwreg,N,di) / RPMPG(iwreg,iatyp,di,N))/ 42.0) * CFJFK	! quads (million gal * barrel / gal * million BTU / barrel), passenger
 			  QJETR_DI(iwreg,di,2,N) = QJETR_DI(iwreg,di,2,N) + ((CARGOAC_FTM_DMD(iwreg,iatyp,di,N) * GPTM(iwreg,N,iatyp,di))/ 42.0) * CFJFK								! quads, freight
 			ENDIF                                  
 		  ENDDO
-		  
-	      ASMPG_STK_TYP(iatyp,N) = sum(ASM(:,:,iatyp,N))/MAX(1.0,SUM_ASMPG_STK_TYP(iatyp))				! Reported
-	   	  ASMPG_NEW_TYP(iatyp,N) = sum(ASM(:,:,iatyp,N))/MAX(1.0,SUM_ASMPG_NEW_TYP(iatyp))				! Reported
-		  
+!		  
 		ENDDO
 		
 	    QJETR_NUS(iwreg,N) = sum(QJETR_DI(iwreg,:,:,N))			! quads
 		QJETR(11,N) 	   = QJETR_NUS(1,N)						! quads
-		
+
+!       Split US jet fuel consumption across census divisions		
 		DO iregn=1,mnumcr-2
-		  QJETR(iregn,N)=QJETR(11,N)*SEDSHRJF(iregn,6)
+		  QJETR(iregn,N)=QJETR(11,N)*SEDSHRJF(iregn,N)
 		ENDDO
 		
 	  ENDDO
-	  
-	  ASMPGT(1,N) = sum(ASM(:,:,:,N)) / &
-	                ( (sum(ASM(:,:,nb,N))/MAX(1.0,ASMPG_NEW_TYP(nb,N))) + &
-	  			      (sum(ASM(:,:,wb,N))/MAX(1.0,ASMPG_NEW_TYP(wb,N))) + &
-	  			      (sum(ASM(:,:,rj,N))/MAX(1.0,ASMPG_NEW_TYP(rj,N))))
-	  			  
-	  ASMPGT(2,N) = sum(ASM(:,:,:,N)) / &
-	                ( (sum(ASM(:,:,nb,N))/MAX(1.0,ASMPG_STK_TYP(nb,N))) + &
-	  			      (sum(ASM(:,:,wb,N))/MAX(1.0,ASMPG_STK_TYP(wb,N))) + &
-	  			      (sum(ASM(:,:,rj,N))/MAX(1.0,ASMPG_STK_TYP(rj,N))))
 	  
 	ENDIF
 
@@ -936,24 +888,22 @@ SUBROUTINE TAIREFF
             STKCARGO_ACTIVE(iwreg,iatyp,iage,N) = STKCAVINT(iwreg,iage,iatyp)											! Stock - Active Cargo
           ENDDO  ! iage
 		  
-		  ! MDR IEO2023 populate historical sales for viewing in TIRE
-		  DO iage = 6, LAST_HIST_INDEX-1 	! iage is being used as a counter for YEAR here
-		    STKPASS_ACTIVE(iwreg,iatyp,1,iage) = STK_SUP_NEW(iwreg,iage,iatyp)
-		  ENDDO
+		  ! Populate historical sales for viewing in TIRE
+		  STKPASS_ACTIVE(iwreg,iatyp,1,6:LAST_HIST_INDEX-1) = STK_SUP_NEW(iwreg,6:LAST_HIST_INDEX-1,iatyp)
 
-		  ASMAC_ADJ(iwreg,iatyp) = 0		! Calibrate ASMAC/FTMAC to 2019 levels
+		  ASMAC_ADJ(iwreg,iatyp) = 0		! Calibrate ASMAC/FTMAC to 2021 levels
 		  FTMAC_ADJ(iwreg,iatyp) = 0
 
-          IF ((STKCTOT(iwreg,iatyp,32) .NE. 0.0).and.(SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)).NE.0.0)) THEN		! MDRIEO2023 switched all calibration from 2019 to 2021
-              WRITE(AIRUNIT,'("  Adjusting projected ",a," FTMAC for region ",a," from ",F11.0," to ",F11.0)') reg_atyp(iatyp),reg_def(iwreg), &
-					FTMAC(iwreg,32,iatyp),SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)) * 1000000. / STKCTOT(iwreg,iatyp,32)						! Calibrate to 2019 history, since that was "normal"
+          IF ((STKCTOT(iwreg,iatyp,32) .NE. 0.0).and.(SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)).NE.0.0)) THEN
+              IF (TAIREFF_DEBUG) WRITE(AIRUNIT,'("  Adjusting projected ",a," FTMAC for region ",a," from ",F11.0," to ",F11.0)') reg_atyp(iatyp),reg_def(iwreg), &
+					FTMAC(iwreg,32,iatyp),SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)) * 1000000. / STKCTOT(iwreg,iatyp,32)						! Calibrate to 2021 history
 			  FTMAC_ADJ(iwreg,iatyp)	   = (SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,32)) * 1000000. / STKCTOT(iwreg,iatyp,32)) &
 											 / FTMAC(iwreg,32,iatyp)
-			  FTMAC(iwreg,32:mnumyr,iatyp) = FTMAC_ADJ(iwreg,iatyp)*FTMAC(iwreg,32:mnumyr,iatyp)		! Apply the 2019 adjustment to the whole exogenous FTMAC projection
+			  FTMAC(iwreg,32:mnumyr,iatyp) = FTMAC_ADJ(iwreg,iatyp)*FTMAC(iwreg,32:mnumyr,iatyp)		! Apply the 2021 adjustment to the whole exogenous FTMAC projection
 		  ENDIF
 		  
 		  IF (STKPA(iwreg,32,iatyp).NE.0.0) THEN
-		      WRITE(AIRUNIT,'("  Adjusting projected ",a," ASMAC for region ",a," from ",F13.0," to ",F13.0)') reg_atyp(iatyp),reg_def(iwreg), &
+		      IF (TAIREFF_DEBUG) WRITE(AIRUNIT,'("  Adjusting projected ",a," ASMAC for region ",a," from ",F13.0," to ",F13.0)') reg_atyp(iatyp),reg_def(iwreg), &
 					ASMAC(iwreg,32,iatyp),ASMDEMD(iwreg,iatyp,32)*1000000 / STKPA(iwreg,32,iatyp)
 			  ASMAC_ADJ(iwreg,iatyp)	   = (ASMDEMD(iwreg,iatyp,32) *1000000 / STKPA(iwreg,32,iatyp))/ASMAC(iwreg,32,iatyp)
 			  ASMAC(iwreg,32:mnumyr,iatyp) = ASMAC_ADJ(iwreg,iatyp)*ASMAC(iwreg,32:mnumyr,iatyp)
@@ -1038,17 +988,17 @@ SUBROUTINE TAIREFF
 !     Estimate shortfall in aircraft to meet demand [CARGOAC_NEEDED]
 !	  Add this shortfall to the tally of add'l planes needed due to retirements [CARGOAC_NEEDED]
 !	  If there is excess, leave the excess planes in the stock (assumption: planes only retire due to age, not due to excess cargo capacity).
-	  WRITE(airunit,*)' '
-	  WRITE(airunit,*)'Aircraft supply v demand - year region iatyp CARGOAC_NEEDED STKPASS_CARGO'
+	  IF(TAIREFF_DEBUG) WRITE(airunit,*)' '
+	  IF(TAIREFF_DEBUG) WRITE(airunit,*)'Aircraft supply v demand - year region iatyp CARGOAC_NEEDED STKPASS_CARGO'
       DO iwreg=1,maxwreg
         DO iatyp = 1, maxatyp
 !		  Cargo
             IF (SUM(STKCARGO_ACTIVE(iwreg,iatyp,:,N-1)).ne.0.0) THEN													! Otherwise there would be a negative CARGOAC_NEEDED. 		
               CARGOAC_NEEDED(iwreg,iatyp) = SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,N)) * 1000000. / FTMAC(iwreg,N,iatyp) &	! Calculate deficit in dedicated freighters 
                                        - SUM(STKCARGO_ACTIVE(iwreg,iatyp,:,N))											!  (freighters needed - available freighters)
-		      WRITE(airunit,'(i4,a,i2,F8.1,F10.1)')YRS, reg_def(iwreg), iatyp, CARGOAC_NEEDED(iwreg,iatyp), SUM(STKCARGO_ACTIVE(iwreg,iatyp,:,N))
+		      IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,a,i2,F8.1,F10.1)')YRS, reg_def(iwreg), iatyp, CARGOAC_NEEDED(iwreg,iatyp), SUM(STKCARGO_ACTIVE(iwreg,iatyp,:,N))
 			ELSE																										
-			  WRITE(airunit,'("No ",a," freighters in ",a)')reg_atyp(iatyp),reg_def(iwreg)								! Unpark or buy if there is demand
+			  IF(TAIREFF_DEBUG) WRITE(airunit,'("No ",a," freighters in ",a)')reg_atyp(iatyp),reg_def(iwreg)								! Unpark or buy if there is demand
 			  IF (SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,N)).gt.0.0) CARGOAC_NEEDED(iwreg,iatyp) = SUM(CARGOAC_FTM_DMD(iwreg,iatyp,:,N)) * 1000000. / FTMAC(iwreg,N,iatyp)
 		    ENDIF
         ENDDO
@@ -1056,8 +1006,8 @@ SUBROUTINE TAIREFF
 	
 !     Match cargo aircraft fleet capacity to FTM demand and replace SCRAPPED_TOTAL/retired cargo aircraft [total to add = CARGOAC_NEEDED]
 !	  4 successive sources of aircraft: 1) parked cargo planes, 2) parked passenger planes, 3) older active passenger planes, 4) new cargo planes
-	  WRITE(airunit,*)' '
-	  WRITE(airunit,*)'Fill cargo capacity need [CARGOAC_NEEDED]'
+	  IF(TAIREFF_DEBUG) WRITE(airunit,*)' '
+	  IF(TAIREFF_DEBUG) WRITE(airunit,*)'Fill cargo capacity need [CARGOAC_NEEDED]'
       DO iwreg=1,maxwreg
 	    DO iatyp = 1,maxatyp		  
 		  IF (CARGOAC_NEEDED(iwreg,iatyp) .le. 0.0) THEN													! If there is enough existing FTM capacity, park some planes
@@ -1069,7 +1019,7 @@ SUBROUTINE TAIREFF
 				STKCARGO_ACTIVE(iwreg,iatyp,iage,N) = STKCARGO_ACTIVE(iwreg,iatyp,iage,N) - &
 				                                      ABS(CARGOAC_NEEDED(iwreg,iatyp))
 				PARKED(iwreg,iatyp,2,N)			    = PARKED(iwreg,iatyp,2,N) + ABS(CARGOAC_NEEDED(iwreg,iatyp))
-			    WRITE(airunit,'(i4,": Parked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
+			    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Parked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
 				      YRS,CARGOAC_NEEDED(iwreg,iatyp),iage,reg_atyp(iatyp),reg_def(iwreg)
 				CARGOAC_NEEDED(iwreg,iatyp) 		= 0.0
 				GO TO 2801
@@ -1077,7 +1027,7 @@ SUBROUTINE TAIREFF
 			    STKCARGO_PARKED(iwreg,iatyp,iage,N) = STKCARGO_PARKED(iwreg,iatyp,iage,N) + &
 													  STKCARGO_ACTIVE(iwreg,iatyp,iage,N)
 				PARKED(iwreg,iatyp,2,N)			    = PARKED(iwreg,iatyp,2,N) + STKCARGO_ACTIVE(iwreg,iatyp,iage,N)
-			    WRITE(airunit,'(i4,": Parked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
+			    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Parked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
 				      YRS,STKCARGO_ACTIVE(iwreg,iatyp,iage,N),iage,reg_atyp(iatyp),reg_def(iwreg)
 				STKCARGO_ACTIVE(iwreg,iatyp,iage,N) = 0.0
 		      ENDIF
@@ -1093,7 +1043,7 @@ SUBROUTINE TAIREFF
 			    STKCARGO_PARKED(iwreg,iatyp,iage,N) = STKCARGO_PARKED(iwreg,iatyp,iage,N) - &
 			                                          CARGOAC_NEEDED(iwreg,iatyp)
 			    UNPARKED(iwreg,iatyp,2,N) 		  	= UNPARKED(iwreg,iatyp,2,N) + CARGOAC_NEEDED(iwreg,iatyp)
-			    WRITE(airunit,'(i4,": Unparked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
+			    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Unparked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
 			  	    YRS,CARGOAC_NEEDED(iwreg,iatyp),iage,reg_atyp(iatyp),reg_def(iwreg)
 			    CARGOAC_NEEDED(iwreg,iatyp)		  	= 0.0
                 GO TO 2801																					!  and jump to the next region
@@ -1103,7 +1053,7 @@ SUBROUTINE TAIREFF
 			    CARGOAC_NEEDED(iwreg,iatyp)		  	= CARGOAC_NEEDED(iwreg,iatyp) - &
 			  										STKCARGO_PARKED(iwreg,iatyp,iage,N)
 			    UNPARKED(iwreg,iatyp,2,N) 		  	= UNPARKED(iwreg,iatyp,2,N) + STKCARGO_PARKED(iwreg,iatyp,iage,N)
-			    WRITE(airunit,'(i4,": Unparked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
+			    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Unparked ",F5.1,i3,"-year-old ",a," freighters in ",a)') & 
 			  	    YRS,STKCARGO_PARKED(iwreg,iatyp,iage,N),iage,reg_atyp(iatyp),reg_def(iwreg)
   			    STKCARGO_PARKED(iwreg,iatyp,iage,N) = 0.0		
 		      ENDIF
@@ -1122,7 +1072,7 @@ SUBROUTINE TAIREFF
 			      STKCARGO_ACTIVE(iwreg,iatyp,iage,N) 	= STKCARGO_ACTIVE(iwreg,iatyp,iage,N) + UNPARK		!  unpark what we need
 			      CONVERTED(iwreg,iatyp,1,N) 			= CONVERTED(iwreg,iatyp,1,N) + UNPARK
 			      CARGOAC_NEEDED(iwreg,iatyp)		 	= CARGOAC_NEEDED(iwreg,iatyp) - UNPARK
-			      WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," parked passenger aircraft in ",a)') & 
+			      IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," parked passenger aircraft in ",a)') & 
 				        YRS,UNPARK,iage,reg_atyp(iatyp),reg_def(iwreg)
 			      IF(CARGOAC_NEEDED(iwreg,iatyp).eq.0.0) GO TO 2801											! If demand has been met, next region
                 ELSE																						! If the current vintage does not meet or exceed the deficit
@@ -1134,7 +1084,7 @@ SUBROUTINE TAIREFF
 			      CARGOAC_NEEDED(iwreg,iatyp)		  = CARGOAC_NEEDED(iwreg,iatyp) - UNPARK
 			      CONVERTED(iwreg,iatyp,1,N) 		  = CONVERTED(iwreg,iatyp,1,N) + UNPARK
 			  
-			      WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," parked passenger aircraft in ",a)') & 
+			      IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," parked passenger aircraft in ",a)') & 
 				        YRS,UNPARK,iage,reg_atyp(iatyp),reg_def(iwreg)
 		        ENDIF
 		      IF(SUM(STKPASS_PARKED(iwreg,iatyp,:,N)).le.MIN_PARK(iwreg,iatyp)) GO TO 2802				! If but minimum parked fleet threshold hit, proceed to the next option
@@ -1152,7 +1102,7 @@ SUBROUTINE TAIREFF
 			    STKPASS_ACTIVE(iwreg,iatyp,iage,N)  = STKPASS_ACTIVE(iwreg,iatyp,iage,N) - &
 			                                          CARGOAC_NEEDED(iwreg,iatyp)
 			    CONVERTED(iwreg,iatyp,2,N) 			= CONVERTED(iwreg,iatyp,2,N) + CARGOAC_NEEDED(iwreg,iatyp)
-			    WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," active passenger aircraft in ",a)') & 
+			    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," active passenger aircraft in ",a)') & 
 				      YRS,CARGOAC_NEEDED(iwreg,iatyp),iage,reg_atyp(iatyp),reg_def(iwreg)
 			    CARGOAC_NEEDED(iwreg,iatyp)		  = 0.0
                 GO TO 2801																					!  and jump to the next region
@@ -1162,7 +1112,7 @@ SUBROUTINE TAIREFF
 			    CARGOAC_NEEDED(iwreg,iatyp)		  	= CARGOAC_NEEDED(iwreg,iatyp) - &
 				  									  STKPASS_ACTIVE(iwreg,iatyp,iage,N)
 			    CONVERTED(iwreg,iatyp,2,N) 		  	= CONVERTED(iwreg,iatyp,2,N) + STKPASS_ACTIVE(iwreg,iatyp,iage,N)
-			    WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," active passenger aircraft in ",a)') & 
+			    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Converted ",F5.1,i3,"-year-old ",a," active passenger aircraft in ",a)') & 
 				      YRS,STKPASS_ACTIVE(iwreg,iatyp,iage,N),iage,reg_atyp(iatyp),reg_def(iwreg)
   			    STKPASS_ACTIVE(iwreg,iatyp,iage,N)  = 0.0		
 		      ENDIF
@@ -1170,7 +1120,7 @@ SUBROUTINE TAIREFF
 		  
 !		    Finally, resort to purchasing new freighters
 		    STKCARGO_ACTIVE(iwreg,iatyp,1,N) = STKCARGO_ACTIVE(iwreg,iatyp,1,N) + CARGOAC_NEEDED(iwreg,iatyp)
-		    WRITE(airunit,'(i4,": Purchased ",F5.1," ",a," freighters in ",a)') & 
+		    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,": Purchased ",F5.1," ",a," freighters in ",a)') & 
 						    YRS,CARGOAC_NEEDED(iwreg,iatyp),reg_atyp(iatyp),reg_def(iwreg)
 		  ENDIF			  
 		  2801 CONTINUE
@@ -1196,17 +1146,17 @@ SUBROUTINE TAIREFF
 ! -------------------------------------------------------------------------------- 
 !     Estimate shortfall in aircraft to meet demand [PASSAC_NEEDED]
 !	  If there is excess, leave the excess planes in the stock (assumption: planes only retire due to age, not due to excess passenger capacity).
-	  WRITE(airunit,*)' '
-	  WRITE(airunit,*)'Aircraft supply v demand - year region iatyp PASSAC_NEEDED STKPASS_ACTIVE'
+	  IF(TAIREFF_DEBUG) WRITE(airunit,*)' '
+	  IF(TAIREFF_DEBUG) WRITE(airunit,*)'Aircraft supply v demand - year region iatyp PASSAC_NEEDED STKPASS_ACTIVE'
       DO iwreg=1,maxwreg
         DO iatyp = 1, maxatyp
 		  IF (SUM(STKPASS_ACTIVE(iwreg,iatyp,:,N-1)).ne.0.0) THEN														! If there were planes
             PASSAC_NEEDED(iwreg,iatyp) = ASMDEMD(iwreg,iatyp,N) * 1000000. / ASMAC(iwreg,N,iatyp) &						! Calculate add'l aircraft needed 
                                          - SUM(STKPASS_ACTIVE(iwreg,iatyp,:,N))											!  (aircraft needed - available aircraft)
-		    WRITE(airunit,'(i4,i3,i2,F8.1,F10.1)')YRS, iwreg, iatyp, PASSAC_NEEDED(iwreg,iatyp), SUM(STKPASS_ACTIVE(iwreg,iatyp,:,N))
+		    IF(TAIREFF_DEBUG) WRITE(airunit,'(i4,i3,i2,F8.1,F10.1)')YRS, iwreg, iatyp, PASSAC_NEEDED(iwreg,iatyp), SUM(STKPASS_ACTIVE(iwreg,iatyp,:,N))
 		  ELSE
-		    WRITE(airunit,'("No ",a," passenger AC in ",a)')reg_atyp(iatyp),reg_def(iwreg)								! Unpark or buy if there is demand
-			WRITE(airunit,'(3F10.2)')SUM(STKPASS_ACTIVE(iwreg,iatyp,:,N)), ASMDEMD(iwreg,iatyp,N), ASMAC(iwreg,N,iatyp)
+		    IF(TAIREFF_DEBUG) WRITE(airunit,'("No ",a," passenger AC in ",a)')reg_atyp(iatyp),reg_def(iwreg)								! Unpark or buy if there is demand
+			IF(TAIREFF_DEBUG) WRITE(airunit,'(3F10.2)')SUM(STKPASS_ACTIVE(iwreg,iatyp,:,N)), ASMDEMD(iwreg,iatyp,N), ASMAC(iwreg,N,iatyp)
 			IF (ASMDEMD(iwreg,iatyp,N).gt.0.0) PASSAC_NEEDED(iwreg,iatyp) = ASMDEMD(iwreg,iatyp,N) * 1000000. / ASMAC(iwreg,N,iatyp)
 		  ENDIF
         ENDDO
@@ -1293,7 +1243,7 @@ SUBROUTINE TAIREFF
 		  STKCTOT(iwreg,iatyp,N) = STKCA(iwreg,N,iatyp) + STKCP(iwreg,N,iatyp)
 		  
 		  STK_SUP(iwreg,iatyp,1,N)    = STKPASS_ACTIVE(iwreg,iatyp,1,N) + STKCARGO_ACTIVE(iwreg,iatyp,1,N)
-		  WRITE(AIRUNIT,'(i4, ": Sales of ",a," in ",a,":",3F10.2)')YRS,reg_def(iwreg),reg_atyp(iatyp),STKPASS_ACTIVE(iwreg,iatyp,1,N),STKCARGO_ACTIVE(iwreg,iatyp,1,N),STK_SUP(iwreg,iatyp,1,N)
+		  IF(TAIREFF_DEBUG) WRITE(AIRUNIT,'(i4, ": Sales of ",a," in ",a,":",3F10.2)')YRS,reg_def(iwreg),reg_atyp(iatyp),STKPASS_ACTIVE(iwreg,iatyp,1,N),STKCARGO_ACTIVE(iwreg,iatyp,1,N),STK_SUP(iwreg,iatyp,1,N)
 		  STK_SUP_TOT(iwreg,iatyp,N)  = STKPTOT(iwreg,iatyp,N) + STKCTOT(iwreg,iatyp,N)
 
 !		  Average active passenger aircraft age by region and body type
@@ -1319,90 +1269,65 @@ SUBROUTINE TAIREFF
 
 !   Adjust MPGs by tech improvement and re-powers (every 10 years). Estimate MPGs across different dimensions (harmonic mean)
 	SUM_ASMPG_STK_AGE = 0.0
-	SUM_ASMPG_STK_R   = 0.0
 	SUM_ASMPG_STK_TYP = 0.0
 	SUM_ASMPG_NEW_TYP = 0.0
     
     IF (YRS.ge.LAST_HIST_YR) THEN
 
 !     Stock shares by vintage, rather than ASM shares by vintage, must be used to collapse age dimension (don't have vintaged ASM)
-!     Calculate vintage stock shares for each region / body type (nb, wb, rj)	  
-	  DO iwreg = 1, maxwreg
-	    DO iatyp = 1, maxatyp
-	      DO di = 1, domint
-	        IF (YRS .ge. FIRST_FCST_YR) THEN 
-              ASMPG_VINT(iwreg,iatyp,1,di,N) = 1/(1/ASMPG_VINT(iwreg,iatyp,1,di,N-1)*(1-FUEL_BURN_RED))
-			ENDIF
-			
-			SUM_ASMPG_STK_AGE(iwreg,iatyp,di) = STKPASS_ACTIVE(iwreg,iatyp,1,N)/ASMPG_VINT(iwreg,iatyp,1,di,N)
-			
-!           Process stock vintaging and engine re-powers			
-			DO iage = 2, maxacage
-
-			  IF (YRS.ge.FIRST_FCST_YR) THEN
-			    ASMPG_VINT(iwreg,iatyp,iage,di,N) = ASMPG_VINT(iwreg,iatyp,iage-1,di,N-1)
-
-!               Install improved efficiency engine in aircraft every 10 years (1% increase in fuel economy)
-			    IF (iage.eq.10 .or. iage.eq.20 .or. iage.eq.30 .or. iage.eq.40) THEN
-                  ASMPG_VINT(iwreg,iatyp,iage,di,N) = 1.01 * ASMPG_VINT(iwreg,iatyp,iage,di,N)
-                ENDIF				
-				
-		      ENDIF
-			  
-			  SUM_ASMPG_STK_AGE(iwreg,iatyp,di) = SUM_ASMPG_STK_AGE(iwreg,iatyp,di) + STKPASS_ACTIVE(iwreg,iatyp,iage,N)/ASMPG_VINT(iwreg,iatyp,iage,di,N)
-			  
-			ENDDO !iage
-			
-!           Non-vintaged fuel economy, for use in further aggregation (ASMPG_STK_TYP and ASMPGT)
-!			GPTM and RPMPG are calculated for use in energy calculations
-		    ASMPG_AVG_AGE(iwreg,iatyp,di,N) = STKPA(iwreg,N,iatyp)/SUM_ASMPG_STK_AGE(iwreg,iatyp,di)
-			GPTM(iwreg,N,iatyp,di) = 1/(ASMPG_AVG_AGE(iwreg,iatyp,di,N)*pass_weight/2000)
-			IF (YRS.ge.2020.and.YRS.le.2026) GPTM(iwreg,N,iatyp,di) = GPTM(iwreg,N,iatyp,di)*STK_ALIGN_MULT(iwreg,N,iatyp)		! MDRIEO2023 extended phaseout to 2026
-			
-			IF (PASSAC_RPM_DMD(iwreg,iatyp,di,N).gt.0.0) THEN
-			  RPMPG(iwreg,iatyp,di,N) = 1/(GPTM(iwreg,N,iatyp,di)*pass_weight/2000* &
+!     Calculate vintage stock shares for each region / body type (nb, wb, rj)    
+      IF (YRS .ge. FIRST_FCST_YR) then
+!       Calculate current year new-aircraft fuel economy based on improvement over last year's (FUEL_BURN_RED)
+        ASMPG_VINT(1:maxwreg,1:maxatyp,1,1:domint,N)    = 1/(1/ASMPG_VINT(1:maxwreg,1:maxatyp,1,1:domint,N-1)*(1-FUEL_BURN_RED))
+!       Increment the stock mpg up a year
+        ASMPG_VINT(1:maxwreg,1:maxatyp,2:maxacage,1:domint,N) = ASMPG_VINT(1:maxwreg,1:maxatyp,1:maxacage-1,1:domint,N-1)
+!       Install improved efficiency engine in aircraft every 10 years (1% increase in fuel economy)        
+        ASMPG_VINT(1:maxwreg,1:maxatyp,[10,20,30,40],1:domint,N) = 1.01 * ASMPG_VINT(1:maxwreg,1:maxatyp,[10,20,30,40],1:domint,N)
+      ENDIF
+      
+!       Non-vintaged fuel economy, for use in further aggregation (ASMPG_STK_TYP and ASMPGT)        
+!		GPTM and RPMPG are calculated for use in energy calculations
+        DO iwreg = 1, maxwreg
+          DO iatyp = 1, maxatyp
+            DO di = 1, domint
+              ASMPG_AVG_AGE(iwreg,iatyp,di,N) = HARMONIC_MEAN_1D(ASMPG_VINT(iwreg,iatyp,1:maxacage,di,N), &
+                                                                STKPASS_ACTIVE(iwreg,iatyp,1:maxacage,N), &
+                                                                caller_id = 'ASMPG_AVG_AGE')
+              GPTM(iwreg,N,iatyp,di) = 1/(ASMPG_AVG_AGE(iwreg,iatyp,di,N)*pass_weight/2000.0)
+              IF (YRS.ge.2020.and.YRS.le.2026) GPTM(iwreg,N,iatyp,di) = GPTM(iwreg,N,iatyp,di)*STK_ALIGN_MULT(iwreg,N,iatyp)		! MDRIEO2023 extended phaseout to 2026
+			  IF (PASSAC_RPM_DMD(iwreg,iatyp,di,N).gt.0.0) THEN
+			    RPMPG(iwreg,iatyp,di,N) = 1/(GPTM(iwreg,N,iatyp,di)*pass_weight/2000* &
                                              (1 - (1-LOAD_FACTOR(iwreg,N,di))*PCT_PASS_MTOW(iatyp,N))/ &
                                              (1 - (1-LOAD_FACTOR(iwreg,N,di))*(1-(BELLY_RPM_EQ(iwreg,iatyp,di,N)/PASSAC_RPM_DMD(iwreg,iatyp,di,N)))) &
-           	  					           )
-			ELSE	! if no RPM demand, populate the variable anyway 
-			  RPMPG(iwreg,iatyp,di,N) = 1/(GPTM(iwreg,N,iatyp,di)*pass_weight/2000* &
+           	    					        )
+			  ELSE	! if no RPM demand, populate the variable anyway 
+			    RPMPG(iwreg,iatyp,di,N) = 1/(GPTM(iwreg,N,iatyp,di)*pass_weight/2000* &
                                              (1 - (1-LOAD_FACTOR(iwreg,N,di))*PCT_PASS_MTOW(iatyp,N))/ &
-										     (1 - (1-LOAD_FACTOR(iwreg,N,di))) &
-										   )
-			ENDIF
-
-!           Region weights for aggregating fuel economy.
-			SUM_ASMPG_STK_R(iwreg) = SUM_ASMPG_STK_R(iwreg) + ASM(iwreg,di,iatyp,N)/ASMPG_AVG_AGE(iwreg,iatyp,di,N)
-						
-		  ENDDO !di
-		ENDDO !iatyp
-	  ENDDO !iwreg
+			  							     (1 - (1-LOAD_FACTOR(iwreg,N,di))) &
+			  							    )
+			  ENDIF
+            ENDDO
+          ENDDO
+        ENDDO
 	  
 !     Stock and Sales average fuel economy by body type (wb/nb/rj), for reporting (ASMPG_STK_TYP & ASMPG_NEW_TYP)	  
 	  DO iatyp = 1, maxatyp
-	    DO iwreg = 1, maxwreg
-		  DO di = 1, domint
-		    SUM_ASMPG_STK_TYP(iatyp) = SUM_ASMPG_STK_TYP(iatyp) + ASM(iwreg,di,iatyp,N)/ASMPG_AVG_AGE(iwreg,iatyp,di,N)
-			SUM_ASMPG_NEW_TYP(iatyp) = SUM_ASMPG_NEW_TYP(iatyp) + ASM(iwreg,di,iatyp,N)/ASMPG_VINT(iwreg,iatyp,1,di,N)
-		  ENDDO
-		ENDDO	
-		
-	    ASMPG_STK_TYP(iatyp,N) = sum(ASM(:,:,iatyp,N))/MAX(1.0,SUM_ASMPG_STK_TYP(iatyp))				! Reported
-		ASMPG_NEW_TYP(iatyp,N) = sum(ASM(:,:,iatyp,N))/MAX(1.0,SUM_ASMPG_NEW_TYP(iatyp))				! Reported
-
-	  ENDDO !iatyp
+        ASMPG_STK_TYP(iatyp,N) = HARMONIC_MEAN_2D(ASMPG_AVG_AGE(1:maxwreg,iatyp,1:domint,N), &
+                                                  ASM(1:maxwreg,1:domint,iatyp,N), &
+                                                  caller_id = 'ASMPG_STK_TYP')
+        ASMPG_NEW_TYP(iatyp,N) = HARMONIC_MEAN_2D(ASMPG_VINT(1:maxwreg,iatyp,1,1:domint,N), &
+                                                  ASM(1:maxwreg,1:domint,iatyp,N), &
+                                                  caller_id = 'ASMPG_NEW_TYP')
+      ENDDO
 
 !     Calculate total new (1) and stock (2) ASMPGs for reporting (ASMPGT). This is for passenger planes, and
-!	  it includes belly freight (converted to available seats using passenger weight)
-	  ASMPGT(1,N) = sum(ASM(:,:,:,N)) / &
-	                ( (sum(ASM(:,:,nb,N))/MAX(1.0,ASMPG_NEW_TYP(nb,N))) + &
-					  (sum(ASM(:,:,wb,N))/MAX(1.0,ASMPG_NEW_TYP(wb,N))) + &
-					  (sum(ASM(:,:,rj,N))/MAX(1.0,ASMPG_NEW_TYP(rj,N))))
-					  
-	  ASMPGT(2,N) = sum(ASM(:,:,:,N)) / &
-	                ( (sum(ASM(:,:,nb,N))/MAX(1.0,ASMPG_STK_TYP(nb,N))) + &
-					  (sum(ASM(:,:,wb,N))/MAX(1.0,ASMPG_STK_TYP(wb,N))) + &
-					  (sum(ASM(:,:,rj,N))/MAX(1.0,ASMPG_STK_TYP(rj,N))))
+!	  it includes belly freight (converted to available seats using passenger weight)      
+      ASMPGT(1,N) = HARMONIC_MEAN_1D(ASMPG_NEW_TYP(1:maxatyp,N), &
+                                     sum(sum(ASM(1:maxwreg,1:domint,1:maxatyp,N),DIM=2),DIM=1), &
+                                     caller_id = 'ASMPGT(1)')
+      ASMPGT(2,N) = HARMONIC_MEAN_1D(ASMPG_STK_TYP(1:maxatyp,N), &
+                                     sum(sum(ASM(1:maxwreg,1:domint,1:maxatyp,N),DIM=2),DIM=1), &
+                                     caller_id = 'ASMPGT(2)')
 
       QJETR_DI(:,:,:,N) = 0.0
 !	  NOTE: Belly freight is in PASSAC_RPM_DMD, and it's energy consumption is therefore in passenger
@@ -1422,11 +1347,10 @@ SUBROUTINE TAIREFF
         QJETR(11,N)  = QJETR_NUS(1,N) 		! quads		
       ENDIF
 	
-	ENDIF ! YRS.ge.LAST_HIST_YR  !MDR0228 this overwrites historical value; may want to do gt.LAST_HIST_YR
+	ENDIF ! YRS.ge.LAST_HIST_YR
 
 ! ==================================================================================================================
 ! Aviation gasoline projection
-! This just results in a flat line projection... -- MDR
 ! ==================================================================================================================
 
 !   Calculate aviation gas demand
@@ -1451,7 +1375,6 @@ SUBROUTINE TAIREFF
 !   Close files
     IF (CURIYR.eq.LASTYR .and. FCRL.eq.1) THEN 
       CLOSE(airunit)
-      CLOSE(ageunit)
     ENDIF
 
     RETURN

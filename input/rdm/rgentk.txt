@@ -14,7 +14,7 @@ ORGANIZATION OF DATA: First block of data includes model control switches starti
                Data starts on row 21 of this file per RDM convention
 SOURCES:       U.S. Census Bureau American Community Survey (ACS); trackingthesun.lbl.gov/;
                 www.californiasolarstatistics.ca.gov/current_data_files/; www.njcleanenergy.com/renewable-energy/project-activity-reports/installation-summary-by-technology/solar-installation-projects; www.arizonagoessolar.org
-COMMENT:       FOR TESTING ONLY: Increment EstYear from 2021 to 2022 so solar PV hurdle model doesn't run in 2020 RECS base year
+COMMENT:       Revised EstYear, model coefficients, and covariates
 
 
 

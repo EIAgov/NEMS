@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/uso2grp,v 1.28 2018/06/19 12:29:09 pkc Exp $
 
       INTEGER MX_SO2       ! Maximum Number of SO2 Compliance Groups

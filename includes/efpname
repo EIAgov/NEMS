@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/efpname,v 1.2 1999/12/19 20:13:36 DSA Exp $
       COMMON/EFPNAME/NAMES,NAME1,NAME2,NAME3,CAPTIT,NAMER
       CHARACTER*16 NAMER      !TITLE INDICATING IF REPORT IS

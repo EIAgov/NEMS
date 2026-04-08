@@ -1,4 +1,4 @@
-! $Header: m:/default/includes/RCS/ecpcntl,v 1.124 2021/03/04 15:56:32 LC2 Exp $
+! -*- f90 -*-
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !     ECPCNTL:
 !     CONTAINS INITIAL INPUT DATA FOR THE LP MODEL THAT
@@ -81,9 +81,9 @@
        WIS2,     WIPV,     WIPT,     WIIN,     WIDB,     WIDP,                &
        WIEXC,    WIPVC,    WIEXS,    WICCT,    WIACT,    WISCC,               &
        WIGSF,    WISEQ,    WIBIG,    WIBCT,    WIBCC,    WIFLC,               &
-       WICNU,    WIANU,    WIWDP,    WIGTH,    WIMSW,    WIHYD,               &
-       WIHPS,    WIHP2,    WIWND,    WIWFS,    WISTH,    WIPVM,               &
-       WIPVB,    WIDGB,    WIDGP,                                             &
+       WICNU,    WIANU,    WISMR,    WIWDP,    WIGTH,    WIMSW,               &
+       WIHYD,    WIHPS,    WIHP2,    WIDST,    WIDSB,    WIWND,               &
+       WIWFS,    WISTH,    WIPVM,    WIPVB,    WIDGB,    WIDGP,               &
        RET_GRP,  RET_FRST, RET_NEXT, RET_FRG, UPRTLT,   UPINTSW,   &
        NOX_NST,  NOX_GRP,  NOX_TRDYR,  &
        TNOX_NST, TNOX_GRP, TNOX_TRDYR,  &
@@ -92,8 +92,8 @@
        CO2_NST,  CO2_GRP,  NumStoGrp, MaxNumbins, MaxPtypes, &
        GRW_XYR,  ECP_FYR,  UPRELSW,  UPBLDTYP, UPCFNSTP, NUM_864_TYPES, NUM_STEPS_PER_TYPE,Sto_Cap_indx, &
        SR_CREDIT, SR_TRAN_CREDIT, SR_MIN_CF, SR_RQMT_HGHT, SR_RQMT_DIFF, SR_INT, SR_MAX_LF, SR_MIN_LF, NO_CCS_PLNT_NDX, &
-       UPEFPT,   NOX_RGN,  NOX_PTYP, NOX_LT,   ECPACT,          & !INT*2
-       ECPBASIS, UCPDSPS,  UCPINTS,  UCPRNWS,  UCPDGNS,  UCPSTOS,         & !LOGICAL
+       UPEFPT,   NOX_RGN,  NOX_PTYP, NOX_LT,         & !INT*2
+       UCPDSPS,  UCPINTS,  UCPRNWS,  UCPDGNS,  UCPSTOS,         & !LOGICAL
        UIRINTS,  UIRRNWS,  UIRSTOS,  UPLTSW, &
        ECP_D_FILE, ECP_D_FILEB,UPLNAME,  StorageNames, StorageCodes, ECP_D_DBNM, ECP_D_DECK, ECP_D_DECKB,       & !CHAR
        ECP_D_PROB, UPBND,    UPNAME,   UPOBJ,    UPRHS,    &
@@ -587,12 +587,15 @@
       INTEGER*4 WIFLC                         ! Fuel Cell Component        
       INTEGER*4 WICNU                         ! Conv Nuclear Component    
       INTEGER*4 WIANU                         ! Adv Nuclear Component    
+      INTEGER*4 WISMR                         ! SMR Nuclear Component    
       INTEGER*4 WIWDP                         ! Wood prep - bio Component 
       INTEGER*4 WIGTH                         ! Geothermal Component      
       INTEGER*4 WIMSW                         ! Mun Solid Waste Component 
       INTEGER*4 WIHYD                         ! Conv Hydro Component      
       INTEGER*4 WIHPS                         ! Hyd Pump Storage Component
       INTEGER*4 WIHP2                         ! Other Storage Component   
+      INTEGER*4 WIDST                         ! Diurnal Storage BOS Component   
+      INTEGER*4 WIDSB                         ! Diurnal Storage Battery Component   
       INTEGER*4 WIWND                         ! Wind Component            
       INTEGER*4 WIWFS                         ! Wind Offshore Component   
       INTEGER*4 WISTH                         ! Solar Thermal Component   
@@ -637,8 +640,8 @@
       INTEGER*4 NUM_864_TYPES                 ! Number of Plant Types Consdered by the 864 Model
       INTEGER*4 NUM_STEPS_PER_TYPE(ECP_D_CAP)   ! Number of Price Bins per 864 Plant Typep
       INTEGER*4 Sto_Cap_Indx(ECP_D_CAP)         ! Value of Storage Index      
-	  INTEGER*4 StoTypMap(ECP_D_CAP)            ! Map of storage plant type to restore storage type for restart file
-	  INTEGER*4 CurtTypMap(ECP_D_CAP)           ! Map of Storage Plant types to restore curtailment type for restart file
+      INTEGER*4 StoTypMap(ECP_D_CAP)            ! Map of storage plant type to restore storage type for restart file
+      INTEGER*4 CurtTypMap(ECP_D_CAP)           ! Map of Storage Plant types to restore curtailment type for restart file
       INTEGER*4 UCPDSPI(ECP_D_DSP)              ! Map of DSP to CAP technology indices
       INTEGER*4 UCPINTI(ECP_D_INT)              ! Map of INT to CAP technology indices
       INTEGER*4 UCPRNWI(ECP_D_RNW)              ! Map of RNW to CAP technology indices
@@ -677,11 +680,6 @@
       INTEGER*4 UPVTYP(ECP_D_CAP)               ! VINT. TYPE 0=EX. 1=NEW--ECP CAP
       INTEGER*4 UPXRGN(MNUMNR,MNUMNR)         ! EXPORT TO IMPORT REGION MAP
       INTEGER*4 UPEFPT(ECP_D_CAP)               ! EFP TYPE
-
-      INTEGER*2 ECPACT                        ! YEAR TO WRITE ACTFILE
-                                              !     0 = WRITE FIRST YEAR
-      INTEGER*2 ECPBASIS                      !BASIS MODE 0-FROM PREVIOUS YEAR
-                                              !           1-FROM INPUT FILE
 
       LOGICAL*1 UCPDSPS(ECP_D_CAP)              ! Mask of DSP to CAP technology indices
       LOGICAL*1 UCPINTS(ECP_D_CAP)              ! Mask of INT to CAP technology indices
@@ -739,9 +737,9 @@
        REAL*4 SR_INT(ECP_D_CAP,MNUMNR)    ! Percent of derated intermitten capacity that must be matched with spinning reserves
        REAL*4 SR_MIN_LF(ECP_D_CAP)        ! Derate for min el and max sr mode = (1 - sr_min_lf) * sr_min_cf * (ld / min_ld) + sr_min_lf * sr_min_cf
        REAL*4 SR_MAX_LF(ECP_D_CAP)        ! Derate for max el and min sr mode = (1 - sr_max_lf) * (1 - for) * (ld / max_ld) + sr_min_lf * (1 - for)
-       
+
  !     Variables needed for heatrate improvement
- 
+
        REAL*4 HTRT_OVR_CST(ECP_D_CAP)   ! Heatrate improvement cost MM$/unit
        REAL*4 HTRT_REDUCTION(ECP_D_CAP) ! Heatrate improvement Percent Reduction
        REAL*4 HTRT_FLOOR(ECP_D_CAP)     ! Minimum heatrate allowed after improvement
@@ -750,12 +748,12 @@
        REAL*4 HTRT_REDQ(ECP_D_CAP,4)    ! Heatrate improvement Reduction by Quartile (Fraction)
        INTEGER*4 HTRT_YEAR
        INTEGER*4 HTRT_DOLLAR_YEAR
- 
+
        COMMON /HTRT_IMPROVEMENT/ HTRT_OVR_CST, HTRT_REDUCTION, HTRT_FLOOR, HTRT_MIN_CAP, HTRT_OVRQ, HTRT_REDQ,  &
           HTRT_YEAR, HTRT_DOLLAR_YEAR
- 
+
  !     Keep Track of Units that have choosen the heatrate improvement
- 
+
        REAL*8 HTRT_CAP(MNUMNR,ECP_D_DSP,MAXNFR,ECP_D_XPH)
        REAL*8 HTRT_CAP_MR(MNUMNR,ECP_D_DSP,MAXNFR,ECP_D_XPH)
        REAL*8 HTRT_EPGCAP(0:EFD_D_MFRG,ECP_D_RET,ECP_D_CAP,MNUMNR)       
@@ -764,9 +762,9 @@
        INTEGER*4 HTRT_NEXT(WPLT_D_REC)
        INTEGER*4 HTRT_IGRP(WPLT_D_REC)
        INTEGER*4 HTRT_UNITS(ECP_D_RET,ECP_D_CAP,MNUMNR)
-        
+
        COMMON /HTRT_OUT/ HTRT_CAP, HTRT_CAP_MR, HTRT_EPGCAP, HTRT_RESULTS, HTRT_FRST, HTRT_NEXT, HTRT_IGRP, HTRT_UNITS        
-        
+
 !     ARRAYS NEEDED TO SET UP STATE RPS TRANCHES
 
       INTEGER*4 NM_ST_CODES                              ! Number of state codes - matching parameter is MX_ST_CODES
@@ -822,11 +820,12 @@
       INTEGER*4 F_SO                 !  9 - Solar Thermal
       INTEGER*4 F_PV                 ! 10 - Solar PV
       INTEGER*4 F_OT                 ! 11 - Other
-      INTEGER*4 F_WN                 ! 12 - Wind 
+      INTEGER*4 F_WN                 ! 12 - Wind
+      INTEGER*4 F_BS                 ! 13 - Battery Energy Storage
 
       CHARACTER*2 TC_FUEL_CODES(TC_FUELS)
 
-      COMMON /CGGEN/ CG_GEN_I, CG_GEN_C, CG_GEN_R, CG_GEN_O, CG_GEN_F, F_CL, F_OL, F_OG, F_NG, F_HY, F_GT, F_MS, F_WD, F_SO, F_PV, F_OT, F_WN, TC_FUEL_CODES
+      COMMON /CGGEN/ CG_GEN_I, CG_GEN_C, CG_GEN_R, CG_GEN_O, CG_GEN_F, F_CL, F_OL, F_OG, F_NG, F_HY, F_GT, F_MS, F_WD, F_SO, F_PV, F_OT, F_WN, F_BS, TC_FUEL_CODES
 
       REAL*8 HY_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR)
       REAL*8 HY_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)
@@ -834,7 +833,7 @@
 
       REAL*8 NUC_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR),FOS_CF_ECP(ECP_D_SSZ,ECP_D_STP,MNUMNR)
       REAL*8 NUC_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR),FOS_CF_EFD(EFD_D_SSZ,ELD_D_DAY,MNUMNR)
-	  INTEGER*4 USW_NUCRETSM
+      INTEGER*4 USW_NUCRETSM
       COMMON /BASE_CF_FROM_M864/ NUC_CF_ECP, FOS_CF_ECP, NUC_CF_EFD, FOS_CF_EFD, USW_NUCRETSM
 
       COMMON /INTGEN/ UPINTLAG,UPINTINC,UPINTMAX,ITOTGEN,IRNWGEN,IRNWPCT,IRNWACT
@@ -884,5 +883,5 @@
       REAL DINURAL_STORAGE_CAPACITY_CREDIT(MNUMYR, MNUMNR), PT_STORAGE_CAPACITY_CREDIT(MNUMYR, MNUMNR)
 
       ! total restore generation
-	  REAL*4 TOT_GEN_RES(ECP_D_INT,4,MNUMNR,MNUMYR), CURTAILSUB(ECP_D_INT,4,MNUMNR,MNUMYR)
-	  COMMON /TOT_GEN/ TOT_GEN_RES, CURTAILSUB
+      REAL*4 TOT_GEN_RES(ECP_D_INT,4,MNUMNR,MNUMYR), CURTAILSUB(ECP_D_INT,4,MNUMNR,MNUMYR)
+      COMMON /TOT_GEN/ TOT_GEN_RES, CURTAILSUB

@@ -1,7 +1,7 @@
   COMPOSITE TABLE:
-  Sreg    Dreg    Sec   Tonrailmile
+  cl::Sreg    cl::Dreg    cl::Sec   cl::Tonrailmile
 !----------------------------------------------------------------------------------
-  1APN    01NE    E     918       
+      1APN        01NE        E         918       
   ;
                       
                       

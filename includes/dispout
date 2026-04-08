@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/dispout,v 1.14 2019/07/23 15:28:26 rsc Exp $
 !
 !     DISPOUT STORES EMM OUTPUT INFORMATION. THIS COMMON BLOCK IS CAPTURED

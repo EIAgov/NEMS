@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/epmmpblk,v 1.8 2012/08/30 16:21:57 pkc Exp $
 !  NEMS Adjustment Common Block for Prices in MPBLK
 
@@ -5,7 +6,7 @@
       INTEGER AMNUMP,AMPSIZE,APMSIZE
       PARAMETER(AMNUMP=84)   ! Number of NEMS price variables
       PARAMETER(AMPSIZE=AMNUMP*MNUMCR*MNUMYR) ! Size of price array
-      PARAMETER(APMSIZE=MNUMCR*MNUMYR*19)     ! Size of more price array:  19 dimensioned MNUMCRxMNUMYR
+      PARAMETER(APMSIZE=MNUMCR*MNUMYR*22)     ! Size of more price array:  22 dimensioned MNUMCRxMNUMYR
 ! PRICES
       REAL AELRS(MNUMCR,MNUMYR) !  1 Purchased Electricity - Residential
       REAL AELCM(MNUMCR,MNUMYR) !  2 Purchased Electricity - Commercial
@@ -132,13 +133,16 @@
       REAL APRINPF(MNUMCR,MNUMYR)            !  Industrial propane feedstock
       REAL AISINPF(MNUMCR,MNUMYR)            !  Industrial isobutane feedstock
       REAL APCIN(MNUMCR,MNUMYR)              !  Industrial petroleum coke
+	REAL AH2IN(MNUMCR,MNUMYR)              !  price of h2 to industrial sector
+      REAL AH2EL(MNUMCR,MNUMYR)              !  price of H2 to electric power sector by census division, year
+      REAL AELHM(MNUMCR,MNUMYR)              !  price of electricity delivered to hydrogen production subsector
 
       COMMON /APMORE/ ALGINPF, ACLGAS, &
                       APRRS, APRCM, APPIN, AETIN, ABUIN, &
                       APRIN, AISIN, ALUIN, APRTR, &
                       APROLENERF, ASULFURIN, &
                       APPINPF, AETINPF, ABUINPF, APRINPF, AISINPF, &
-                      APCIN
+                      APCIN,AH2IN,AH2EL,AELHM
 
       REAL APMOREQ(APMSIZE)
       EQUIVALENCE(APMOREQ,ALGINPF)

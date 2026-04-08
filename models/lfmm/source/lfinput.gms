@@ -710,6 +710,15 @@ P615=WACFS_AltVehicle_Carbon_Factor
 Q616=SELECT PetCategory, Vehicle_Type, WA_Share FROM WACFS_AltVehicles;
 P616=WACFS_AltVehicle_WA_Share
 
+Q630=SELECT RefReg, Year, Quant FROM RDHImpQuant ;
+P630=RDHImpQuant
+
+Q631=SELECT RefReg, Year, Quant FROM FBDExpQuant ;
+P631=FBDExpQuant
+
+Q632=SELECT RefReg, Year, Quant FROM RDHExpQuant ;
+P632=RDHExpQuant
+
 $offecho
 
 * write %DirPath%input\myLFMinput.gdx

@@ -1,3 +1,4 @@
+import copy
 import os
 import pandas as pd
 #from main import parse_dict as pdw
@@ -5,7 +6,21 @@ import parse_dict as pdw
 
 
 def fill_aimms_user_items(user, pyfiler):
+    """Update NEMS user object to include info for CMM, HMM, and NGMM.
+    Write "runval" input files for CMM, HMM, and NGMM,
 
+    Parameters
+    ----------
+    user : SimpleNamespace
+        NEMS user object
+    pyfiler : module
+        NEMS pyfiler object
+
+    Returns
+    -------
+    SimpleNamespace
+        updated NEMS user object
+    """
     pyfiler_dict_df = pdw.ParseDict('dict.txt')[0].set_index(['Common Block Name', 'Fortran Variable Name'])
 
     try:
@@ -22,14 +37,11 @@ def fill_aimms_user_items(user, pyfiler):
         user.HMMCONF["putvar"] = ""
         write_runval_hmm(user.SCEDES)
         user.HMMCONF["putvar"] = parse_putget_file("hmm/input/h2putvars.txt", pyfiler_dict_df, pyfiler)
-
+        write_parquet_mappings("HMM", "main/aimms_endpoint/Mappings", user)
         with open("hmm/input/h2config.txt", "r") as f:
             temp = f.readlines()
-        i = [j for j in temp if j.startswith("FirstModelYear")][0]
+        i = [j for j in temp if j.startswith("nh::FirstModelYear")][0]
         user.HMMCONF["base_year"] = int(i.split("=")[1].replace(";","").replace("'","").strip())
-        #for i in temp:
-        #    if i.startswith("FirstModelYear"):
-        #        user.HMMCONF["base_year"] = int(i.split("=")[1].replace(";","").replace("'","").strip())
 
     except:
         pass
@@ -46,24 +58,79 @@ def fill_aimms_user_items(user, pyfiler):
 
         with open("ngas/data/nginitialize.txt", "r") as f:
             temp = f.readlines()
-        i = [j for j in temp if j.startswith("FirstModelYear")][0]
+        i = [j for j in temp if j.startswith("nn::FirstModelYear")][0]
         user.NGMMCONF["base_year"] = int(i.split("=")[1].replace(";","").replace("'","").strip())
 
-        #for i in temp:
-        #    if i.startswith("FirstModelYear"):
-        #        user.NGMMCONF["base_year"] = int(i.split("=")[1].replace(";","").replace("'","").strip())
     except:
         pass
 
     return user
 
 
+def write_parquet_mappings(module, path, user):
+    """Writes the parquet mapping file so AIMMS can read in parquet files.
+    Parameters
+    ----------
+    path: str
+        path to AIMMS_frame folder mapping file
+        e.g. main/aimms_frame/Mappings
+    module: str
+        HMM, ngas, or coal
+
+    user : SimpleNamespace
+        NEMS user object
+
+    Returns
+    -------
+    None
+    """
+    my_prefix = {"coal": "",
+                 "hmm": "nh::",
+                 "ngas": "nn::"}
+
+#TODO: Generalize this for the rest of the AIMMS models. Currently just hardcoded to HMM
+    dest_file = module +"ParquetMapping.xml"
+    with open(os.path.join(path,dest_file), "w") as file:
+        file.write("<AimmsParquetMapping>")
+        for key, value in user.HMMCONF["putvar"].items():
+            TableMappingName = key.replace(".", "_")
+
+            ColumnMappingValues = value
+            ColumnBindingValues = [my_prefix["hmm"] + item for item in ColumnMappingValues]
+            ColumnBindingValues = ",".join(ColumnBindingValues)
+
+            file.write(f'\n   <TableMapping name="{TableMappingName}">')
+            file.write(f'\n     <RowMapping name="{TableMappingName}">')
+
+            for column in ColumnMappingValues:
+                file.write(f'\n         <ColumnMapping name="{column}" binds-to="{my_prefix["hmm"]}{column}"/>')
+
+            file.write(f'\n         <ColumnMapping name="{TableMappingName}" maps-to="{my_prefix["hmm"]}{TableMappingName}({ColumnBindingValues})"/>')
+            file.write("\n     </RowMapping>")
+            file.write("\n  </TableMapping>")
+        file.write("\n</AimmsParquetMapping>")
+    file.close()
+
+
+
 def parse_putget_file(f_in, pyfiler_dict, pyfiler):
+    """Parse CMM/HMM/NGMM 'putget' file.
+
+    Parameters
+    ----------
+    f_in: string
+        filename
+    pyfiler_dict : dict
+        NEMS user object
+    pyfiler : module
+        NEMS pyfiler module (not used)
+
+    Returns
+    -------
+    dict
+        dictionary of variable dimensions
     """
-        pyfiler_dict should be:
-            PyFiler.PyFilerWrapper.ParseDict('dict.txt')[0] \
-                  .set_index(['Common Block Name', 'Fortran Variable Name'])
-    """
+
     varlistfile = f_in
     z = pyfiler_dict
 
@@ -73,7 +140,6 @@ def parse_putget_file(f_in, pyfiler_dict, pyfiler):
         df[i] = df[i].apply(lambda x: x.split('=')[1].strip())
 
     df = df[~df.duplicated()]
-	
     df_all = df[df["variable"].str.upper() == "ALL"]
     df = df[df["variable"].str.upper() != "ALL"]
     L = []
@@ -109,8 +175,18 @@ def parse_putget_file(f_in, pyfiler_dict, pyfiler):
 
 
 # once per NEMS run
-def write_runval_ng(scedes): 
+def write_runval_ng(scedes):
+    """Write runval input file for NGMM, mostly based on scedes values.
 
+    Parameters
+    ----------
+    scedes: dict
+        NEMS scedes
+
+    Returns
+    -------
+    None
+    """
     scedes_params = [ \
         "STEOBM", "STEONG", "STSCALNG", 
         "KEEPOPEN", "NGASSUMPTIONSN", "NGMARKUPSN", "NGLNGEXPN",   
@@ -137,7 +213,17 @@ def write_runval_ng(scedes):
 
 # once per NEMS run
 def write_runval_cmm(scedes): 
+    """Write runval input file for CMM, based on scedes values.
 
+    Parameters
+    ----------
+    scedes: dict
+        NEMS scedes
+
+    Returns
+    -------
+    None
+    """
     scedes_params = [ \
         "CLUSEXPORTICMMN",  
         "ICMMCOMMODITYMAPN", 
@@ -187,7 +273,17 @@ def write_runval_cmm(scedes):
 
 # once per NEMS run
 def write_runval_hmm(scedes): 
+    """Write runval input file for HMM, based on scedes values.
 
+    Parameters
+    ----------
+    scedes: dict
+        NEMS scedes
+
+    Returns
+    -------
+    None
+    """
     scedes_params = ["KEEPOPEN","ZTCCOSTM", "TRANEFF"]
 
     if os.getcwd().endswith('hmm'):  # TODO: correct?
@@ -201,4 +297,3 @@ def write_runval_hmm(scedes):
                 f.write(f'{i} := {scedes[i]};\n')
             else:
                 f.write(f'{i} := "{scedes[i]}";\n')
-

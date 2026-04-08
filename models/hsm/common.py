@@ -47,7 +47,7 @@ def read_dataframe(filename, sheet_name=0, index_col=None, skiprows=None, to_int
     -------
     pd.DataFrame
     """
-    print_out('Loading Table: ' + str(filename + '|' + str(sheet_name)))
+    # print_out('Loading Table: ' + str(filename + '|' + str(sheet_name)))
 
     df = pd.DataFrame
 

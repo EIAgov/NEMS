@@ -1,4 +1,4 @@
-﻿! $Header: m:/default/input/RCS/nglngexp.txt,v 1.24 2020/11/12 16:53:56 KDL Exp $
+! $Header: m:/default/input/RCS/nglngexp.txt,v 1.24 2020/11/12 16:53:56 KDL Exp $
 
 !Updated 8/16/18	KDL	Lowered LNG shipping costs
 !___________________________________________________________________________________________
@@ -75,7 +75,7 @@ LNG_LowPriceRatio := 0.7;
 LNG_MaxTrainsYr :=4;
 
 !First year new LNG builds (not under construction) allowed
-LNG_FirstBuildYear := '2029';
+LNG_FirstBuildYear := '2030';
 
 !number of years after end of year of planning before train can be built
 LNG_YrsUntilBuild := 4;	
@@ -536,18 +536,18 @@ September, 2026	0.95
 October, 2026	0.95
 November, 2026	0.95
 December, 2026	0.95
-January, 2027	0.9
-February, 2027	0.9
-March, 2027	0.9
-April, 2027	0.9
-May, 2027	0.9
-June, 2027	0.9
-July, 2027	0.9
-August, 2027	0.9
-September, 2027	0.9
-October, 2027	0.9
-November, 2027	0.9
-December, 2027	0.9
+January, 2027	0.98
+February, 2027	0.98
+March, 2027	0.98
+April, 2027	0.98
+May, 2027	0.98
+June, 2027	0.98
+July, 2027	0.98
+August, 2027	0.98
+September, 2027	0.98
+October, 2027	0.98
+November, 2027	0.98
+December, 2027	0.98
 January, 2028	0.9
 February, 2028	0.9
 March, 2028	0.9
@@ -857,6 +857,13 @@ December, 2050	0.9
 !		Includes: updates to phase 1 of Calcasieu Pass, delaying Golden Pass, adding Plaquemines phase 2. 
 !		When no specific month is given, I will assume it is the last month of that quarter/year.
 !7/27/24 SYK 	Updating based on 2024Q2 version of liquefaction tracker. 
+!8/12/25 SYK	Updating based on 2025Q2 version of liquefaction tracker
+!		CCSIII delayed from Dec 2024 to Feb 2025. Golden Pass moved up about 6-18 months, depending on train. 
+!		Rio Grande Train 1 & 2 moved up ~6 months. Train 3 moved up about 12 months.
+!		Woodside LA LNG added
+!10/6/25 SYK    Updating based on latest liquefaction capacity tracker.
+!               NOTE: CStageIII (CCL Midscale 8-9) is *not* in the liquefaction capacity tracker.
+!               CCL Midscale is being added in because it began construction without all of the FTA/Non-FTA approvals.
 
 composite table:
 
@@ -881,16 +888,21 @@ Freeport	2	0.66 			'December, 2019'
 Freeport	3	0.66 			'March, 2020'
 CalcasieuPass	1	0.66			'March, 2022'		!Trains 1-9
 CalcasieuPass	2	0.66			'September, 2022'	!Trains 10-18	
-GoldenPass	1	0.68			'December, 2026'
-GoldenPass	2	0.68			'June, 2027'
-GoldenPass	3	0.68			'December, 2027'
+GoldenPass	1	0.68			'June, 2026'
+GoldenPass	2	0.68			'December, 2026'
+GoldenPass	3	0.68			'June, 2027'
 Plaquemines	1	1.32			'December, 2024'	!Trains 1-18
 Plaquemines	2	1.32			'September, 2025'	!Trains 19-36
 PortArthur	1	1.58			'December, 2027'	!Trains 1-2
-CCStageIII	1	1.32			'December, 2024'	!Trains 1-14
-RioGrande	1	0.72			'December, 2027'	!Train 1
-RioGrande	2	0.72			'December, 2028'	!Train 2
-RioGrande	3	0.72			'December, 2029'	!Train 3
+PortArthur	2	1.58			'December, 2031'	!Trains 3-4
+CCStageIII	1	1.32			'February, 2025'	!Trains 1-7
+CCStageIII      2       0.39                    'December, 2028'        !Trains 8-9
+RioGrande	1	0.72			'June, 2027'    	!Train 1
+RioGrande	2	0.72			'December, 2027'	!Train 2
+RioGrande	3	0.72			'December, 2028'	!Train 3
+RioGrande	4	0.72			'December, 2030'	!Train 4
+Woodside        1	2.18			'December, 2029'	!Train 1-3
+CP2             1       2.04                    'December, 2029'        !Train 1-26
 ;
 
 !map projects to LNG export regions
@@ -910,6 +922,8 @@ Plaquemines	LA		1
 PortArthur	TX_E		1
 CCStageIII	TX_E		1
 RioGrande	TX_E		1
+Woodside	LA		1
+CP2             LA              1	
 ;
 
 !Define ramp-up for new facilities by month and train
@@ -948,19 +962,20 @@ LNG_CostsYrDollars := '2021';
 composite table:
 
 lngexp	LNG_MaxExports	LNG_FirstYear	LNG_Liquefaction	LNG_SunkCost	LNG_PctFuelCharge	LNG_PeakExports		LNG_Regasification		
-MD	407.9		2029		3.30			3.00		0.15			0.38			0.1
-GA	119.9		2029		3.30			3.00		0.15			0.38			0.1
-LA	9999.9		2029		3.00			3.00		0.15			0.34			0.1
-TX_E	9999.9		2029		3.00			3.00		0.15			0.34			0.1
+MD	407.9		2030		3.30			3.00		0.15			0.38			0.1
+GA	119.9		2030		3.30			3.00		0.15			0.38			0.1
+LA	9999.9		2030		3.00			3.00		0.15			0.34			0.1
+TX_E	9999.9		2030		3.00			3.00		0.15			0.34			0.1
 ;
 
+! These use the same dollar year as LNG_CostsYrDollars 
 LNG_AKMaxExports:=799.9;
-LNG_AKFirstYear:=2030;
-LNG_AKLiquefaction:=7.00;	!equals $7 in 2018 dollars
+LNG_AKFirstYear:=2032;
+LNG_AKLiquefaction:=7.56;	
 LNG_AKSunkCost:=0.00;
-LNG_AKPctFuelCharge:=0.15;
+LNG_AKPctFuelCharge:=0.162;
 LNG_AKPeakExports:=0.33;
-LNG_AKRegasification:=0.1;		
+LNG_AKRegasification:=0.11;		
 
 !Data for LNG supply and destination points
 !Testing with different shipping costs
@@ -976,23 +991,23 @@ LNG_AKRegasification:=0.1;
 !LA 	Europe		0.587	0.86    1.07	1.28
 !TX 	Europe		0.595	0.86    1.07	1.28
 
+! SYK	10/2/2025	Updated with latest data from IHS (kept in 2021$)
 composite table:
-
 lngexp	d_lng		LNG_PctLossShipping	LNG_ShippingCost
-MD	Asia		0.041			1.92	!1.75	potential change 8/5/20. Revisit during tweeking if needed
-GA	Asia		0.041			1.92	!1.75	potential change 8/5/20. Revisit during tweeking if needed
-LA 	Asia		0.041			1.87	!1.60	potential change 8/5/20. Revisit during tweeking if needed
-TX_E 	Asia		0.041			1.87	!1.60	potential change 8/5/20. Revisit during tweeking if needed
-MD 	Europe		0.015			0.70
-GA 	Europe		0.015			0.70
-LA 	Europe		0.037			0.86
-TX_E 	Europe		0.037			0.86
+MD	Asia		0.041			2.32	!1.75	potential change 8/5/20. Revisit during tweeking if needed
+GA	Asia		0.041			2.26	!1.75	potential change 8/5/20. Revisit during tweeking if needed
+LA 	Asia		0.041			2.25	!1.60	potential change 8/5/20. Revisit during tweeking if needed
+TX_E 	Asia		0.041			2.26	!1.60	potential change 8/5/20. Revisit during tweeking if needed
+MD 	Europe		0.015			0.79
+GA 	Europe		0.015			0.84
+LA 	Europe		0.037			1.03
+TX_E 	Europe		0.037			1.05
 
 ;
 composite table
 d_lng		LNG_AKShippingCost	LNG_AKPctLossShipping	!LNG_IHS_AKShippingCost	 Old shipping
-Asia		0.65			0.015			!0.429                     0.90
-Europe		2.00  			0.041			!1.392  		   3.65
+Asia		0.88			0.015			!0.429                     0.90
+Europe		2.20  			0.041			!1.392  		   3.65
 ; 
 
 !___________________________________________________________________________________________
@@ -1039,6 +1054,7 @@ year	Europe	   Asia
 2021    15.665     10.761
 2022    36.094     17.678
 2023	12.865     14.386
+2024	10.890     13.343
 ;
 
 !Parameters to calculate price
@@ -1054,13 +1070,14 @@ year	Europe	   Asia
 !10/11/22	SYK	Updated LNG_ExpOil to align with new 15 yr history.
 !7/26/23	SYK	Updated LNGExpOil to align with new 15 year history. Switched data coefficient is based on to TTF price instead of NBP.
 !7/29/24	SYK	Updated LNGExpOil to new oil and and interantional lng prices.
-
+!10/8/25	SYK	Updated LNGExpOil using 10 year history.
+!12/11/25	KDL	LNG_ExpFlexLNG for Asia changed to -0.8 in response to change in definition of LNG_WorldFlex to capacity
 
 composite table:
 
 d_lng	LNG_PctFlex	LNG_ExpOil	LNG_ExpFlexLNG
-Europe	1.0		0.7759		-0.4
-Asia	1.0		0.9612		-0.6
+Europe	1.0		0.7962		-0.4
+Asia	1.0		0.9707		-0.8
 ;
 
 Convert_barrel_MMBtu := 5.8;
@@ -1097,71 +1114,75 @@ step_wop	LNG_step_OilPrice	LNG_ExpFlexLNG_adj	! LNG_step_OilPrice	LNG_ExpFlexLNG
 !			Consumption growth rates consistent with IEO 2019.
 !8/12/21	SYK		Updated Europe/Asia Cons and Asia production values from IEO 2021
 !7/29/24	SYK	Updated Europe consumption and Asia cons/production values from IEO2023.
+!11/25/25	KDL	Updated LNG_WorldFlex with global CAPACITY (excluding US) plus projects added that are under construction
+!			Source:  GIIGNL, IEA, assumptions past 2030 based on historical build trends.  
+!12/11/25	KDL	90% utilization, constant growth in "LNG_WorldFlex" (now world capacity) post 2030
 
 composite table:
 xyear	LNG_WorldFlex	Cons_EuropeOECD	Cons_Japan	Prod_China        
-2010	2013		20927		19097		15070
-2011	2927		19465		20536		14960
-2012	2838		18836		21610		15320
-2013	3124		18587		22285		15410
-2014	3382		16885		22987		16000
-2015	3272		17432		23132		16380
-2016	3489		18430		24039		16780
-2017	3343		19338		25474		17370
-2018	4132		18957		27533		17890
-2019	3906		19208		28238		18710
-2020	3550		18526		28225		18690
-2021	4083		19599		30169		19350
-2022	4185		19802		32902		20000
-2023	4489		19806		33931		20300
-2024	4851		20261		34406		20540
-2025	5032		20561		35126		20370
-2026	5450		20729		35689		20770
-2027	5984		20967		36187		21160
-2028	6278		21198		36703		21560
-2029	6755		21466		37210		21750
-2030	7293		21765		37732		22230
-2031	7870		21709		38253		22220
-2032	8366		21663		38737		22160
-2033	8469		21641		39298		22460
-2034	8893		21666		39769		22600
-2035	9429		21650		40249		22420
-2036	9886		21681		40865		21630
-2037	10670		21679		41467		21510
-2038	11142		21716		42071		21990
-2039	11457		21721		42681		21940
-2040	11305		21746		43312		22290
-2041	12876		21751		44120		21620
-2042	13811		21775		44921		22070
-2043	15137		21789		45718		22760
-2044	14972		21853		46519		23260
-2045	16098		21880		47330		23490
-2046	16351		21918		48134		24110
-2047	16485		21984		48933		24710
-2048	16611		22085		49712		25230
-2049	16753		22142		50491		25710
-2050	16889		22233		51295		26190
-2051	17047		22325		52141		26432
-2052	17205		22418		53003		26677
-2053	17363		22510		53883		26924
-2054	17521		22604		54780		27173
-2055	17679		22697		55696		27424
-2056	17837		22791		56630		27678
-2057	17996		22886		57582		27934
-2058	18154		22981		58554		28193
-2059	18312		23076		59545		28454
-2060	18470		23172		60556		28717
-2061	18628		23268		61587		28983
-2062	18786		23364		62639		29251
-2063	18944		23461		63711		29521
-2064	19102		23558		64805		29795
-2065	19260		23656		65921		30070
-2066	19418		23754		67059		30348
-2067	19576		23852		68219		30629
-2068	19735		23951		69403		30913
-2069	19893		24050		70610		31199
-2070	20051		24150		71841		31487  
+2010	10411           20927		19097		15070
+2011	11095           19465		20536		14960
+2012	11309           18836		21610		15320
+2013	11735           18587		22285		15410
+2014	12304           16885		22987		16000
+2015	12765           17432		23132		16380
+2016	13659           18430		24039		16780
+2017	14586           19338		25474		17370
+2018	15852           18957		27533		17890
+2019	16050           19208		28238		18710
+2020	16050           18526		28225		18690
+2021	16306           19599		30169		19350
+2022	16521           19802		32902		20000
+2023	16687           19806		33931		20300
+2024	17086           20261		34406		20540
+2025	17503           20561		35126		20370
+2026	18625           20729		35689		20770
+2027	19471           20967		36187		21160
+2028	20111           21198		36703		21560
+2029	22083           21466		37210		21750
+2030	22784           21765		37732		22230
+2031	23277           21709		38253		22220
+2032	23770           21663		38737		22160
+2033	24262           21641		39298		22460
+2034	24755           21666		39769		22600
+2035	25248           21650		40249		22420
+2036	25741           21681		40865		21630
+2037	26233           21679		41467		21510
+2038	26726           21716		42071		21990
+2039	27219           21721		42681		21940
+2040	27712           21746		43312		22290
+2041	28204           21751		44120		21620
+2042	28697           21775		44921		22070
+2043	29190           21789		45718		22760
+2044	29683           21853		46519		23260
+2045	30175           21880		47330		23490
+2046	30668           21918		48134		24110
+2047	31161           21984		48933		24710
+2048	31654           22085		49712		25230
+2049	32146           22142		50491		25710
+2050	32639           22233		51295		26190
+2051	33132           22325		52141		26432
+2052	33625           22418		53003		26677
+2053	34117           22510		53883		26924
+2054	34610           22604		54780		27173
+2055	35103           22697		55696		27424
+2056	35596           22791		56630		27678
+2057	36088           22886		57582		27934
+2058	36581           22981		58554		28193
+2059	37074           23076		59545		28454
+2060	37567           23172		60556		28717
+2061	38059           23268		61587		28983
+2062	38552           23364		62639		29251
+2063	39045           23461		63711		29521
+2064	39538           23558		64805		29795
+2065	40030           23656		65921		30070
+2066	40523           23754		67059		30348
+2067	41016           23852		68219		30629
+2068	41509           23951		69403		30913
+2069	42001           24050		70610		31199
+2070	42783           24150		71841		31487  
 ;
+
 
 
 !___________________________________________________________________________________________

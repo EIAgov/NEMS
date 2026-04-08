@@ -709,7 +709,7 @@ module P_
           enddo
       ENDIF
 
-   write(6,*) ' ephtrt renew ',ephtrt_aer(wigt),ephtrt_aer(wihy)
+   write(18,*) ' ephtrt renew ',ephtrt_aer(wigt),ephtrt_aer(wihy)
 
       return
       end
@@ -3039,8 +3039,8 @@ module P_
                      do w=1,mnumcl
                         do b=1,mnumbf
 
-                           WRITE(6,1003) curcalyr,nr,n,w,b,AnnCost(nr,curiyr,w,b)
- 1003                      format(1X,"Oops_used",5(":",I4),":",F20.6)
+                           WRITE(18,1003) curcalyr,nr,n,w,b,AnnCost(nr,curiyr,w,b)
+ 1003                      format(1X,"Oops_used:WN",5(":",I4),":",F20.6)
 
                         end do
                      end do
@@ -3283,8 +3283,8 @@ module P_
                      do w=1,mnumcl
                         do b=1,mnumbf
 
-!                           WRITE(6,1003) curcalyr,nr,n,w,b,AnnCost_WL(nr,curiyr,w,b)
- 1003                      format(1X,"Oops_used",5(":",I4),":",F20.6)
+!                           WRITE(18,1003) curcalyr,nr,n,w,b,AnnCost_WL(nr,curiyr,w,b)
+ 1003                      format(1X,"Oops_used:WL",5(":",I4),":",F20.6)
 
                         end do
                      end do
@@ -3855,9 +3855,9 @@ module P_
 
 
 !******************************************************************
-!     Subroutine SolarMisc decrements the wind resources given the new planned capacity and
-!     determines the new "best" wind class and buffer zone.  It also converts available swept land
-!     area into megawatts of available capacity and calculates capacity factors by time slice.
+!     Subroutine SolarMisc decrements the solar resources given the new planned capacity and
+!     determines the new "best" solar class.  It also converts available land
+!     area into megawatts of available capacity.
 
       subroutine SolarMisc
 
@@ -3885,25 +3885,20 @@ module P_
       real Ratio,Epsi,MaxDiff,AvlDiff
       real CapOut,CapOut_SO,CapOut_PV,CapOut_PT,ZLTElas_SO,ZLTElas_PV,ZLTElas_PT,Ralph(mnumnr),CapTemp
 
-!     real SuppCapMin,SuppCap,Value,CapFrac
-
       real SuppCap,Value,Value_SO,CapFrac,tmpcf
-
 
 !     integer XSwitch
 
-      real NatWnCap,NatSOCap,CFLrn,CFLrn_SO
+!      real NatWnCap,NatSOCap,CFLrn,CFLrn_SO
       real BaseLdCap,WnProb,WnProb_SO,AllowWnCap,AllowWnCap_SO,ExcessWn,ExcessWn_SO,NWn,NWn_SO,FullWn,FullWn_SO,WnRegStd,WnRegStd_SO,BaseCF,BaseCF_SO,InstWind,InstWind_SO,AveWnCap,AveWnCap_SO, &
          CoalAvail,NucAvail,XCoalAvail,NCoalAvail
       integer JDoCFA,JDoCFB
 
       data Epsi / 0.000001 /
-!      WTech = 10   !Wind technology number. - Shouldn't I be determining this instead of hard - wired?
-      WTech_SO = 7
-      Wtech_PV = 8
-      Wtech_PT = 9
+      WTech_SO = 7            ! solar thermal WNTECH from EMM_RENDAT
+      Wtech_PV = 8            ! standalone solar PV WNTECH
+      Wtech_PT = 9            ! solar PV hybrid WNTECH
       write( * , * )'WINDDBG - starting solarmisc3 ',trim(scen_date),' ',curiyr
-
 
 !     NOTE - At first blush, the stuff at the end of the input subroutine should go here because we have
 !     now modified CF and Area. But that would only change the amount of capacity from the fixed land
@@ -3969,8 +3964,8 @@ module P_
          NLead_PT = UPPLYR(WIPT)
 
          CapCommit_SO(nr,curiyr) = UADDSTD(nr,curiyr + NLead_SO)
-         CapCommit_PV(nr,curiyr) = UADDSTD(nr,curiyr + NLead_PV)
-         CapCommit_PT(nr,curiyr) = UADDSTD(nr,curiyr + NLead_PT)
+         CapCommit_PV(nr,curiyr) = UADDPVD(nr,curiyr + NLead_PV)   ! mas, 7/7/2025
+         CapCommit_PT(nr,curiyr) = UADDPTD(nr,curiyr + NLead_PT)   ! mas, 7/7/2025
 
 !        Capacity added is the difference between the total capacity installed this year minus last year.
 
@@ -4012,15 +4007,15 @@ module P_
 
          WRITE (18,3516) CURIRUN, CURIYR+1989, CURITR, nr, WISO, WTECH_SO, NLead_SO, CapIandC_SO(nr,curiyr), CapCmtTot_SO(nr,curiyr), CapPlnBld_SO(nr,curiyr), CapNewBld_SO(nr,curiyr), &
             CapAdded_SO (nr,curiyr), CapCommit_SO(nr,curiyr), CapInstall_SO(nr,curiyr), UCAPSTU(nr,curiyr-1), UCAPSTU(nr,curiyr), UADDSTD(nr,curiyr), UADDSTD(nr,curiyr+NLead)
- 3516    FORMAT (1X, "solarmisc3_Capacity",":SO",7(":",I5),11(":",F21.6))
+ 3516    FORMAT (1X, "solarmisc_Capacity",":SO",7(":",I5),11(":",F21.6))
 
          WRITE (18,3517) CURIRUN, CURIYR+1989, CURITR, nr, WIPV, WTECH_PV, NLead_PV, CapIandC_PV(nr,curiyr), CapCmtTot_PV(nr,curiyr), CapPlnBld_PV(nr,curiyr), CapNewBld_PV(nr,curiyr), &
              CapAdded_PV (nr,curiyr), CapCommit_PV(nr,curiyr), CapInstall_PV(nr,curiyr), UCAPPVU(nr,curiyr-1), UCAPPVU(nr,curiyr), UADDPVD(nr,curiyr), UADDPVD(nr,curiyr+NLead)
- 3517    FORMAT (1X, "solarmisc3_Capacity",":PV",7(":",I5),11(":",F21.6))
+ 3517    FORMAT (1X, "solarmisc_Capacity",":PV",7(":",I5),11(":",F21.6))
 
          WRITE (18,3518) CURIRUN, CURIYR+1989, CURITR, nr, WIPT, WTECH_PT, NLead_PT, CapIandC_PT(nr,curiyr), CapCmtTot_PT(nr,curiyr), CapPlnBld_PT(nr,curiyr), CapNewBld_PT(nr,curiyr), &
              CapAdded_PT (nr,curiyr), CapCommit_PT(nr,curiyr), CapInstall_PT(nr,curiyr), UCAPPTU(nr,curiyr-1), UCAPPTU(nr,curiyr), UADDPTD(nr,curiyr), UADDPTD(nr,curiyr+NLead)
- 3518    FORMAT (1X, "solarmisc3_Capacity",":PT",7(":",I5),11(":",F21.6))
+ 3518    FORMAT (1X, "solarmisc_Capacity",":PT",7(":",I5),11(":",F21.6))
 
 !        Increment the available, remaining capacity for the change ("growth") in original capacity. In general we
 !        have constructed the model so original capacity is constant over time, so this doesn't usually matter.
@@ -4036,7 +4031,7 @@ module P_
                ICapAvl_SO(nr,curiyr,wc) = 0.0
             end if
             if ((WCapAvl_SO(nr,curiyr - 1,wc) + MaxDiff) .gt. 0.0) then
-               WCapAvl_SO(nr,curiyr,wc) = WCapAvl_SO(nr,curiyr - 1,wc) + MaxDiff               !lsndarea
+               WCapAvl_SO(nr,curiyr,wc) = WCapAvl_SO(nr,curiyr - 1,wc) + MaxDiff               !landarea
             else
                WCapAvl_SO(nr,curiyr,wc) = 0.0
                AvlDiff = WCapAvl_SO(nr,curiyr - 1,wc)
@@ -4048,12 +4043,10 @@ module P_
             end if
          end do !wc
 
-!        Now I need to allocate the various capacities into the wind classes and transmission
-!        buffer zones. These need to be allocated because the wind model only knows how much
+!        Allocate the various capacities into the solar classes because the model only knows how much
 !        overall capacity had been chosen by the electricity model - it has to work backwards
-!        to determine which wind classes and buffer zones it all came out of. Moreover, it
-!        has to pay attention to the yearly timing of each piece, because the ranking of the
-!        wind classes and buffer zones can change over time.
+!        to determine which wind classes it all came out of. Moreover, it has to pay attention to 
+!        the yearly timing of each piece, because the ranking of the solar classes can change over time.
 !        A key thing to remember is that the builds from electricity are actually the previous year.
 !        The total new installed (includes planned builds and previously committed that is now built)
 !        was committed NLead number of years earlier plus one more year because they are only being
@@ -4096,13 +4089,13 @@ module P_
                        ICapAvl_SO(nr,curiyr,wc) = ICapAvl_SO(nr,curiyr,wc) - CapOut_SO / Pwrden_ST          !landarea
                        CapOut_SO = 0.0
                     else
-                       ICapInc_SO(nr,curiyr,wc) = ICapAvl_SO(nr,curiyr,wc) * Pwrden_ST                       !capacity
+                       ICapInc_SO(nr,curiyr,wc) = ICapAvl_SO(nr,curiyr,wc) * Pwrden_ST                      !capacity
                        CapOut_SO = CapOut_SO - ICapAvl_SO(nr,curiyr,wc) * Pwrden_ST                         !capacity
                        ICapAvl_SO(nr,curiyr,wc) = 0.0
                     endif
 
                   WRITE(18,3519) CURIRUN, CURIYR+1989, CURITR, nr, WISO, WTECH_SO, n, 7-wc, 1, AvlDiff, CapAdded_SO(nr,curiyr), CapOut_SO, ICapAvl_SO(nr,curiyr,wc), ICapInc_SO(nr,curiyr,wc)
- 3519             FORMAT (1X,"solarMISC3_INCCAP",":SO",9(":",I5),5(":",F21.6))
+ 3519             FORMAT (1X,"solarMISC_INCCAP",":SO",9(":",I5),5(":",F21.6))
 
                  endif
                ENDIF
@@ -4137,7 +4130,7 @@ module P_
                   if (ICapAvl_SO(nr,curiyr,wc) .gt. 0.0) then
                      if (ICapAvl_SO(nr,curiyr,wc) .ge. CapOut_PV/Pwrden_PV) then
                         ICapInc_PV(nr,curiyr,wc) = CapOut_PV                                           !capacity
-                        ICapAvl_SO(nr,curiyr,wc) = ICapAvl_SO(nr,curiyr,wc) - CapOut_PV /  Pwrden_PV  ! landarear
+                        ICapAvl_SO(nr,curiyr,wc) = ICapAvl_SO(nr,curiyr,wc) - CapOut_PV /  Pwrden_PV   ! landarea
                         CapOut_PV = 0.0
                      else
                         ICapInc_PV(nr,curiyr,wc) = ICapAvl_SO(nr,curiyr,wc) * Pwrden_PV                !capacity
@@ -4146,7 +4139,7 @@ module P_
                      endif
 
                    WRITE(18,3520) CURIRUN, CURIYR+1989, CURITR, nr, WIPV, WTECH_PV, n, 7-wc, 1, AvlDiff, CapAdded_PV(nr,curiyr), CapOut_PV, ICapAvl_SO(nr,curiyr,wc), ICapInc_PV(nr,curiyr,wc)
-  3520             FORMAT (1X,"solarmisc3_INCCAP",":PV",9(":",I5),5(":",F21.6))
+  3520             FORMAT (1X,"solarmisc_INCCAP",":PV",9(":",I5),5(":",F21.6))
 
                   endif
                 ENDIF
@@ -4189,7 +4182,7 @@ module P_
                         ICapAvl_SO(nr,curiyr,wc) = 0.0
                      endif
                              WRITE(18,3521) CURIRUN, CURIYR+1989, CURITR, nr, WIPT, WTECH_PT, n, 7-wc, 1, AvlDiff, CapAdded_PT(nr,curiyr), CapOut_PT, ICapAvl_SO(nr,curiyr,wc), ICapInc_PT(nr,curiyr,wc)
-  3521             FORMAT (1X,"solarmisc3_INCCAP",":PT",9(":",I5),5(":",F21.6))
+  3521             FORMAT (1X,"solarmisc_INCCAP",":PT",9(":",I5),5(":",F21.6))
 
                   endif
                 ENDIF
@@ -4498,7 +4491,7 @@ module P_
                XLTElas_PV(nr,wc) = 1.0
                if (UTCSSW(WTech_PV)  .gt.  1) then
                   do lev = 1,MLPTMX
-                     if (UTRSFC(nr,WTech_PV,lev) .lt. XRatio_PV(nr,wc)) then
+                     if (UTRSFC(nr,WTech_PV,lev) .lt. XRatio_SO(nr,wc)) then
                         XLTElas_PV(nr,wc) = UTCSFC(nr,WTech_PV,lev)
                      end if
                   end do
@@ -4509,7 +4502,7 @@ module P_
                XLTElas_PT(nr,wc) = 1.0
                if (UTCSSW(WTech_PT)  .gt.  1) then
                   do lev = 1,MLPTMX
-                     if (UTRSFC(nr,WTech_PT,lev) .lt. XRatio_PT(nr,wc)) then
+                     if (UTRSFC(nr,WTech_PT,lev) .lt. XRatio_SO(nr,wc)) then
                         XLTElas_PT(nr,wc) = UTCSFC(nr,WTech_PT,lev)
                      end if
                   end do
@@ -5237,7 +5230,7 @@ module P_
             else
                do w=1,mnumsl
                   WRITE(18,1003) curcalyr,nr,n,w,AnnCost_SO(nr,curiyr,w)
- 1003             format(1X,"Oops_used",5(":",I4),":",F20.6)
+ 1003             format(1X,"Oops_used:SO",5(":",I4),":",F20.6)
                end do
             end if
          end do
@@ -5372,7 +5365,7 @@ module P_
 
          else
 
-            WRITE(18,4334) CURIYR,CURITR,NR,FixChg_SO,EPLVFCF(ICAP,2)
+            WRITE(18,4334) CURIYR,CURITR,NR,FixChg_PV,EPLVFCF(ICAP,2)
  4334       FORMAT(1X,"EPLVFCF4:PV",3(":",I4),2(":",E10.3))
 
          endif
@@ -5402,7 +5395,7 @@ module P_
                   AnnCost_PV(nr,curiyr,wc) = (ICCCostR_PV(nr,wc,curiyr) * XLTElas_PV(nr,wc) * FixChg_PV + OMFCost_PV + WNTDBFCS(nr,1) * FixChg_PV) / (CF_PV(curiyr,wc) * 8760.0) + OMVCost_PV / 1000
 
                  WRITE(18,2004) CURIYR+1989,CURITR,nr,wc,1, AnnCost_PV(nr,curiyr,wc), ICCCostR_PV(nr,wc,curiyr), XLTElas_PV(nr,wc),  &
-                    FixChg_PV, OMFCost_PV, WNTDBFCS(nr,1), CF_SO(curiyr,wc), OMVCost_PV
+                    FixChg_PV, OMFCost_PV, WNTDBFCS(nr,1), CF_PV(curiyr,wc), OMVCost_PV
  2004             format(1X,"AnnCost:PV:1",5(":",I5),8(":",F15.6))
 
                end if
@@ -5461,7 +5454,7 @@ module P_
             else
                do w=1,mnumsl
                   WRITE(18,1003) curcalyr,nr,n,w,AnnCost_PV(nr,curiyr,w)
- 1003             format(1X,"Oops_used",5(":",I4),":",F20.6)
+ 1003             format(1X,"Oops_used:PV",5(":",I4),":",F20.6)
                end do
             end if
          end do
@@ -5596,7 +5589,7 @@ module P_
 
          else
 
-            WRITE(18,4334) CURIYR,CURITR,NR,FixChg_SO,EPLVFCF(ICAP,2)
+            WRITE(18,4334) CURIYR,CURITR,NR,FixChg_PT,EPLVFCF(ICAP,2)
  4334       FORMAT(1X,"EPLVFCF4:PT",3(":",I4),2(":",E10.3))
 
          endif
@@ -5618,15 +5611,15 @@ module P_
                if (XSwitch.eq.0) then
                   AnnCost_PT(nr,curiyr,wc)=(ICCCostR_PT(nr,wc,curiyr)*FixChg_PT+OMFCost_PT+ WNTDBFCS(nr,1)*FixChg_PT)/(CF_PT(curiyr,wc)*8760.0)+OMVCost_PT/1000
 
-!                 WRITE(18,2003) CURIYR+1989,CURITR,nr,wc, AnnCost_PT(nr,curiyr,wc), ICCCostR_PT(nr,wc,curiyr), FixChg_PT, OMFCost_PT,  &
-!                    WNTDBFCS(nr), CF_PT(curiyr,wc), OMVCost_PT
+                 WRITE(18,2003) CURIYR+1989,CURITR,nr,wc,0, AnnCost_PT(nr,curiyr,wc), ICCCostR_PT(nr,wc,curiyr), FixChg_PT, OMFCost_PT,  &
+                    WNTDBFCS(nr,1), CF_PT(curiyr,wc), OMVCost_PT
  2003             format(1X,"AnnCost:PT:0",5(":",I5),7(":",F15.6))
 
                else
                   AnnCost_PT(nr,curiyr,wc) = (ICCCostR_PT(nr,wc,curiyr) * XLTElas_PT(nr,wc) * FixChg_PT + OMFCost_PT + WNTDBFCS(nr,1) * FixChg_PT) / (CF_PT(curiyr,wc) * 8760.0) + OMVCost_PT / 1000
 
-!                 WRITE(18,2004) CURIYR+1989,CURITR,nr,wc, AnnCost_PT(nr,curiyr,wc), ICCCostR_PT(nr,wc,curiyr), XLTElas_PT(nr,wc),  &
-!                    FixChg_PT, OMFCost_PT, WNTDBFCS(nr), CF_PT(curiyr,wc), OMVCost_PT
+                 WRITE(18,2004) CURIYR+1989,CURITR,nr,wc, 1,AnnCost_PT(nr,curiyr,wc), ICCCostR_PT(nr,wc,curiyr), XLTElas_PT(nr,wc),  &
+                    FixChg_PT, OMFCost_PT, WNTDBFCS(nr,1), CF_PT(curiyr,wc), OMVCost_PT
  2004             format(1X,"AnnCost:PT:1",5(":",I5),8(":",F15.6))
 
                end if
@@ -5686,7 +5679,7 @@ module P_
                do w=1,mnumsl
 
                   WRITE(18,1003) curcalyr,nr,n,w,AnnCost_PT(nr,curiyr,w)
- 1003             format(1X,"Oops_used",5(":",I4),":",F20.6)
+ 1003             format(1X,"Oops_used:PT",5(":",I4),":",F20.6)
 
                end do
 
@@ -6366,7 +6359,7 @@ module P_
                  write(IORNREPT,'(1X,"PV",a,i1)') 'PV Class ',7-wc
                  write(IORNREPT,'(1X,"PV",a,<unrgns>f10.1)') ' Committed Capacity   ',(XCapCum_SO(nr,wc),nr=1,unrgns)
                  write(IORNREPT,'(1X,"PV",a,<unrgns>f10.0)') ' Maximum Capacity     ',(XCapMax_SO(nr,wc),nr=1,unrgns)
-                 write(IORNREPT,'(1X,"PV",a,<unrgns>f10.3)') ' Ratio                ',(XRatio_PV(nr,wc),nr=1,unrgns)
+                 write(IORNREPT,'(1X,"PV",a,<unrgns>f10.3)') ' Ratio                ',(XRatio_SO(nr,wc),nr=1,unrgns)
               end do
            end if
 
@@ -6758,7 +6751,7 @@ module P_
                write(IORNREPT,'(1X,"PT",a,i1)') 'PT Class ',7-wc
                write(IORNREPT,'(1X,"PT",a,<unrgns>f10.1)') ' Committed Capacity   ',(XCapCum_SO(nr,wc),nr=1,unrgns)
                write(IORNREPT,'(1X,"PT",a,<unrgns>f10.0)') ' Maximum Capacity     ',(XCapMax_SO(nr,wc),nr=1,unrgns)
-               write(IORNREPT,'(1X,"PT",a,<unrgns>f10.3)') ' Ratio                ',(XRatio_PT(nr,wc),nr=1,unrgns)
+               write(IORNREPT,'(1X,"PT",a,<unrgns>f10.3)') ' Ratio                ',(XRatio_SO(nr,wc),nr=1,unrgns)
             end do
          end if
 
@@ -8163,7 +8156,7 @@ do nr=1,unrgns
       FAnnCost(nr,curiyr,wc,bf) = (FICCCostR(nr,wc,bf,curiyr) * FFixChg + FOMFCost +  FWNTDBFCS(nr,bf) * FFixChg) / (FCF(curiyr,wc) * 8760.0) + FOMVCost / 1000.0
 
       IF (ISNAN(FAnnCost(nr,curiyr,wc,bf)) .OR. ABS(FAnnCost(nr,curiyr,wc,bf)) .GT. HUGE(FAnnCost(nr,curiyr,wc,bf))) THEN   ! check for NaNQ this way
-         WRITE(6,3337) CURIYR+1989, CURITR, NR, WC, BF, FAnnCost(nr,curiyr,wc,bf), FICCCostR(nr,wc,bf,curiyr), FFixChg, FOMFCost, FWNTDBFCS(nr,bf), FCF(curiyr,wc), FOMVCost
+         WRITE(18,3337) CURIYR+1989, CURITR, NR, WC, BF, FAnnCost(nr,curiyr,wc,bf), FICCCostR(nr,wc,bf,curiyr), FFixChg, FOMFCost, FWNTDBFCS(nr,bf), FCF(curiyr,wc), FOMVCost
  3337    FORMAT(1X,"FAnnCost0",5(":",I4),7(":",F15.4))
          FAnnCost(nr,curiyr,wc,bf) = 9999.9
       END IF
@@ -8172,7 +8165,7 @@ do nr=1,unrgns
       FAnnCost(nr,curiyr,wc,bf) = (FICCCostR(nr,wc,bf,curiyr) * FXLTElas(nr,wc) * FFixChg + FOMFCost + FWNTDBFCS(nr,bf) * FFixChg) / (FCF(curiyr,wc) * 8760.0) + FOMVCost / 1000.0
 
       IF (ISNAN(FAnnCost(nr,curiyr,wc,bf)) .OR. ABS(FAnnCost(nr,curiyr,wc,bf)) .GT. HUGE(FAnnCost(nr,curiyr,wc,bf))) THEN   ! check for NaNQ this way
-         WRITE(6,3339) CURIYR+1989, CURITR, NR, WC, BF, FAnnCost(nr,curiyr,wc,bf), FXLTElas(nr,wc), FFixChg, FOMFCost, FWNTDBFCS(nr,bf), FCF(curiyr,wc), FOMVCost
+         WRITE(18,3339) CURIYR+1989, CURITR, NR, WC, BF, FAnnCost(nr,curiyr,wc,bf), FXLTElas(nr,wc), FFixChg, FOMFCost, FWNTDBFCS(nr,bf), FCF(curiyr,wc), FOMVCost
  3339    FORMAT(1X,"FAnnCost1",5(":",I4),7(":",F12.4))
          FAnnCost(nr,curiyr,wc,bf) = 9999.9
       END IF
@@ -13990,7 +13983,7 @@ END SUBROUTINE PRINT_LFG_CAPACITY
       data largecap/5.E5/     ! in [MW]
 
       do irnt=1,WNTECH
-          if (irnt.ne.9 .and. irnt.ne.10 .and.(UTCSSW(irnt).gt.0).and.UTCSSW(irnt).le.3) then
+          if (irnt.ne.9 .and. irnt.ne.10 .and. irnt.ne. 8 .and. irnt.ne.12 .and.(UTCSSW(irnt).gt.0).and.UTCSSW(irnt).le.3) then
              call WELASTreal(irnt)
 !         else
 !            do istp=1,MSPTMX
@@ -14298,7 +14291,7 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 
          endif
 
-! ...... for wind
+! ...... for wind !no longer used
          if (irnt.eq.10)then
 ! ......    Load old constraints in new array
             WOLDCN(inr,irnt)=WCAWIEL(inr,iyr)
@@ -14312,10 +14305,10 @@ END SUBROUTINE PRINT_LFG_CAPACITY
 !           WCAWIEL(inr,iyr)=AMAX1(0.0,WCAWIEL(inr,iyr))
          endif
 
-! ...... for wind - Low Wind Speed
+! ...... for onshore wind
          if (irnt.eq.11)then
 ! ......    Load old constraints in new array
-            WOLDCN(inr,irnt)=WCAWLEL(inr,iyr)
+            WOLDCN(inr,irnt)=WCAWIEL(inr,iyr)
             if (ltstep.ge.MLPTMX) then
                 remainMW=UTRSMX(inr,irnt)-UTRSCU(inr,irnt)
             else

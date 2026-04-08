@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: M:/default/includes/RCS/efprp2,v 1.5 2019/02/23 17:42:37 dgr Exp $
 ! 2ND REPORTING COMMON -- CONTAINS VARIABLES REPORTED IN THE LARGE
 !                         AND SMALL REPORTS.  THESE VARIABLES ARE

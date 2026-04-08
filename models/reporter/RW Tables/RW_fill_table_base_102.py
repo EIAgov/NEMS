@@ -327,9 +327,9 @@ def fill_table_base_102(dfd, table_spec, table_id):
     # T102(122,IR,IY,IS)=FSUM(T102(28,IR,IY,IS),2)
     z[122] = z[28] + z[29]
 
-    #       Imports
-    # T102(31,IR,IY,IS)=RENEWDIMP(IR,IY)*GAL_PER_BBL*RDAYS/1000000.
-    z[31] = dfd["RENEWDIMP"] * GAL_PER_BBL * RDAYS / 1000000.0
+    #       Net Imports
+    # T102(31,IR,IY,IS)=(RENEWDIMP(IR,IY)-RENEWDEXP(IR,IY))*GAL_PER_BBL*RDAYS/1000000.
+    z[31] = (dfd["RENEWDIMP"]-dfd["RENEWDEXP"]) * GAL_PER_BBL * RDAYS / 1000000.0
 
     #          Total
     # T102(32,IR,IY,IS)=FSUM(T102(28,IR,IY,IS),4)

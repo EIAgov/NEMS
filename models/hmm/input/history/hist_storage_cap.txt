@@ -35,5 +35,4 @@ histyear    regCen         storageTech     hist_storage_cap
 2020        WSCentral      SaltCavern      164160
 2021        WSCentral      SaltCavern      164160
 2022        WSCentral      SaltCavern      164160
-2023        WSCentral      SaltCavern      164160
 ;

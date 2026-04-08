@@ -28,3 +28,5 @@ hist_epl2,hist_epl2.csv
 hist_dcrdwhp,hist_dcrdwhp.csv
 hist_eor_prod,hist_eor_prod.csv
 hist_crude_lfmm,hist_crude_lfmm.csv
+hist_ogcoprd_fed,hist_ogcoprd_fed.csv
+hist_ogngprd_fed,hist_ogngprd_fed.csv

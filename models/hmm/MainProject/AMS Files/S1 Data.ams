@@ -1,6 +1,7 @@
 ## ams_version=1.0
 
 Section S1_Data {
+	Procedure SetMappingDefinitions;
 	Section HMM_Dimensions {
 		DeclarationSection Fuel_Declarations {
 			Set Fuels_ {
@@ -50,6 +51,9 @@ Section S1_Data {
 			}
 		}
 		DeclarationSection Production_Dimensions {
+			ElementParameter ATRCCSTech {
+				Range: NonElectrolysisTechs_;
+			}
 			Set CreditStepsNoCurtail_ {
 				SubsetOf: CreditSteps_;
 				Index: CreditStepNoCurtail;
@@ -142,6 +146,9 @@ Section S1_Data {
 			}
 		}
 		DeclarationSection Time_Declarations {
+			ElementParameter FirstLearningYear {
+				Range: NEMSYears_;
+			}
 			ElementParameter FirstPipelineBuildYear {
 				Range: cal_Year;
 			}
@@ -235,7 +242,7 @@ Section S1_Data {
 			}
 			Set Seasons_ {
 				Index: seas, seas_j;
-				OrderBy: seas, seas_j;
+				OrderBy: seas;
 			}
 			Set HistoricalYears_ {
 				SubsetOf: cal_Year;

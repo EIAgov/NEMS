@@ -165,17 +165,14 @@ module ecp_row_col
   integer io ! unit number for writing ecpcoeff_yyyy.txt
 
   integer write_ecp_mps/0/ ! if 1, call ecp_mps to write out each ecp mps file based on AIMMS coefficient collection.
-  logical make_ecp_aimms /.false./   ! option to generate the AIMMS LP structural data for arraycode_ecp.f, such as the list of coefficient arrays, row/column lists, row types.
-  integer AIMECPBG                  ! set via runtime option from scedes file. if 0, and make_ecp_aimms and false, omit some output in ecpcoeff debug file to save time; omit aimms validation files in aimms
+  integer AIMECPBG                  ! set via runtime option from scedes file. if 0, omit some output in ecpcoeff debug file to save time; omit aimms validation files in aimms
   logical USE_AIMECP_SLNADJ /.true./             ! set during runtime based on collective values of CODEUSAGE of EFD LHS transfer variables found in aimefd.xlsx. it is set to .TRUE. if all are either 'RHS' or 'LHS_done',
                                     ! it is set to .FALSE. if any codeusage value is found to be either 'LHS' and 'LHS_coded'.   if .TRUE., skip FORTRAN EFD post-solution adjustments on EFD output variables.
                                     ! if .FALSE., execute FORTRAN EFD post-solution adjustments on EFD output variables.
-  integer AIMMKECP                  ! set via runtime option from scedes file. if 1, set make_ecp_aimms to .true. 
-  logical SKIP_ECPOML /.false./     ! flag to bypass passing fortran caculated ECP coefficients to AIMMS ECP and OML based on all 0 status found in ecparrays_all.txt
+    logical SKIP_ECPOML /.false./     ! flag to bypass passing fortran caculated ECP coefficients to AIMMS ECP and OML based on all 0 status found in ecparrays_all.txt
   
   external rtovalue ! function to get run-time options
   integer rtovalue
-  integer AIMECPPAR  ! run-time option to invoke parallel version of AIMMS ECP LP if = 1
   character*25 filen_ecpcoeff
   integer iOutTxt
   integer colunit ! I-O unit for column solution retrieval debug file
@@ -307,7 +304,8 @@ integer,parameter :: CoalProductionStep = 11
 integer,parameter :: CoalSupplyCurve = 26
 integer,parameter :: CoalSupplyCurve_Dom = 14
 integer,parameter :: CoalSupplyCurve_Int = 12
-integer,parameter :: CoalSupplyStep = 24       ! I01, I02, ..., I11, OTH, DN1, DN2..UP1, UP2, ..UP5,ZR0
+integer,parameter :: CoalSupplyStep = 11       ! DN5, DN4..ZR0,UP1, UP2,..UP5
+integer,parameter :: CoalSupplyStepINT = 10    ! I01..I10, I11 is escape vector (separate column)
 integer,parameter :: CoalType = 6
 integer,parameter :: CommitYear = 3 ! should equal PlanYear...same as UNXPH read from  emmcntl.txt
 integer,parameter :: NGCommitYear = 5 !INTEGER 1..5 created to handle column cE
@@ -340,7 +338,8 @@ integer,parameter :: NOXRegion = 3  !  emmparm: PARAMETER(NOX_D_GRP = 5).  regio
 integer,parameter :: nRCF=1
 integer,parameter :: NuclearUnit=900             ! MAXNUC
 integer,parameter :: Nuclear=NuclearUnit ! maxnuc, parameter in includes/ecp_nuc
-integer,parameter :: numACI=8  ! 0,1..7   ! activated carbon types
+integer,parameter :: ACIOption=8  ! 0..7
+integer,parameter :: numACI=8  ! 1..8   ! activated carbon types
 integer,parameter :: numACSS=1  ! num_ACSS number of aci supply steps.  1 
 integer,parameter :: OGSMRegion = 7
 integer,parameter :: OGSMRegion_ALTFrom = 7
@@ -390,7 +389,7 @@ integer,parameter :: SupplyStep = 6 ! from 'emmparm', INTEGER, parameter :: ECP_
 
 integer,parameter :: BiomassOption=6       ! ECP_D_CFS Biomass cofiring utilization options
 integer,parameter :: BiomassRetrofit=5     ! ECP_D_RCF ECP BiomassCofiring retrofit categories
-integer,parameter :: CHPFuel=12            ! MNUMCGF: combined heat and power fuels
+integer,parameter :: CHPFuel=13            ! MNUMCGF: combined heat and power fuels
 integer,parameter :: CO2CapGroup=5         ! CO2_D_GRP MAXIMUM NUMBER OF CO2 CAP GROUPS
 integer,parameter :: CPPRegion=9           ! EPAREG, Regions for EPA rule 111d: 6 + Alaska + Hawaii + national
 integer,parameter :: DayTypeSet=9          ! NUMBER OF periods per day   --- changed from 4
@@ -468,7 +467,7 @@ integer,parameter :: RetrofitComponent_SUP=8         ! MX_RCMB
 integer,parameter :: StateCodes=54               ! MX_ST_CODES 0:mx_st_codes
 integer,parameter :: SupplyCurves=26             ! MX_SUPPLY_CURVES (14) + MX_INTL_CURVES (12)
 integer,parameter :: Thousand=1000               
-integer,parameter :: TradCogenFuelType=12        ! TC_FUELS
+integer,parameter :: TradCogenFuelType=13        ! TC_FUELS
 integer,parameter :: UtilityType=11              ! MX_TYPE  0:mx_type
  
  
@@ -522,10 +521,11 @@ integer,parameter :: UtilityType=11              ! MX_TYPE  0:mx_type
 !integer, parameter :: RetrofitCombinations=47  ! MX_ROPT 
 !integer, parameter :: RetrofitComponent=8      ! MX_RCMB+2
  integer, parameter :: SliceGroup=24            ! MAXECPSG
-!integer, parameter :: StateCodes=54            ! MX_ST_CODES+1 (0:mx_st_codes) 
+ integer, parameter :: Ten=10                   ! 
+ !integer, parameter :: StateCodes=54            ! MX_ST_CODES+1 (0:mx_st_codes) 
 !integer, parameter :: SupplyCurves=53          ! MX_SUPPLY_CURVES+MX_INTL_CURVES
 !integer, parameter :: Thousand=1000            !  
-!integer, parameter :: TradCogenFuelType=12     ! TC_FUELS
+!integer, parameter :: TradCogenFuelType=13     ! TC_FUELS
 !integer, parameter :: UtilityType=11           ! MX_TYPE+1 (0:MX_TYPE) 
  integer, parameter :: MNUMYRX = 64             !  MNUMYR + ECP_D_XPH 
  integer, parameter :: MNUMYRF = 91             !  MNUMYR + ECP_D_FPH 

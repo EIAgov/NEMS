@@ -3,18 +3,16 @@ from os.path import dirname
 
 def main():
     """The main flow controller for this pyf duplicates remover automation.
-    Define the file path of pyfiler1.pyf and pyfiler1.pyf and call process_pyf() on both pyfiler1.pyf and pyfiler2, to remove their duplicates.
+    Define the file path of pyfiler1.pyf and pyfiler1.pyf and call process_pyf() on both pyfiler1.pyf, to remove their duplicates.
     Print a message to indicate the succeed when the removal is done without exception.
     """
     NEMS_path=dirname(dirname(dirname(dirname(os.path.realpath(__file__)))))
     file_path=os.path.join(NEMS_path,'source')
     f1=os.path.join(file_path,'pyfiler1.pyf')
-    f2=os.path.join(file_path,'pyfiler2.pyf')
     line_number_module_utils_starts, line_number_module_other_starts, line_number_for_end_module_other=locate_baseline_and_scan_lists(f1)
     
-    # now check and process the pyfiler1.pyf and pyfiler2.pyf
+    # now check and process the pyfiler1.pyf
     process_pyf(f1, line_number_module_utils_starts, line_number_module_other_starts, line_number_for_end_module_other)
-    process_pyf(f2, line_number_module_utils_starts, line_number_module_other_starts, line_number_for_end_module_other)    
 
     print("done with pyf duplicates removal!")
 
@@ -61,9 +59,7 @@ def process_pyf(file, line_number_module_utils_starts, line_number_module_other_
     """The major process pyf file method. Read in a pyf file, process the file, and produce the result with the same filename.
     The work is done with several steps:
     step 1) swap the filename with appending '-org' ('-org' stands for 'the origin').
-    step 2) split the file content into 5 lists - the module utils list, the module other list, the need-to-scan area list,
-      the temporary result list including the header part of the pyf until the module utils starts,
-      and the ending lines list which is the footer part of the pyf after the need-to-scan area ends.
+    step 2) split the file content into 5 lists - the module utils list, the module other list, the need-to-scan area list,the temporary result list including the header part of the pyf until the module utils starts,and the ending lines list which is the footer part of the pyf after the need-to-scan area ends.
     step 3) do feature engineering in the module utils list and the module other list, to discard irrelevant subroutines etc. lines.
     step 4) call get_duplicates_checklist() to get a duplicates checklist as the scan standard.
     step 5) scan through the duplicates, parse and compose the temporary result list.

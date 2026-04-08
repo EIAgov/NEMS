@@ -106,7 +106,6 @@
       include 'cdsparms'
       include 'uso2grp'
       include 'uecpout'
-      include 'xprsparm'
       include 'continew'
       include 'e111d'
       include 'uefdout'
@@ -140,7 +139,6 @@
       CHARACTER*255  filen/' '/
       LOGICAL file_exists/.false./
       logical(4) lResult
-      INTEGER ECPMPS,AMS_KEEPOPEN
 
       CHARACTER, POINTER :: NULLPC=>NULL()  ! for xfinit license path
 
@@ -150,21 +148,11 @@
 
       timall=timef()
 
-      ECPMPS=RTOVALUE('ECPMPS  ',0)
-      AMS_KEEPOPEN = RTOVALUE('KEEPOPEN',0)
-      
-        
         if (CODEUSAGE_AIMECP_read .eq. 0) then      
           CALL READAIMECPOPTIONS         
           CALL SetToUseAIMSECPPostADJST
         endif
         AIMECPBG=RTOVALUE('AIMECPBG',1)  ! if 1, more debug info included in ECPcoeff*txt files.
-        AIMMKECP=RTOVALUE('AIMMKECP',0)  ! if 1, set make_ecp_aimms to .true. and set AIMECPBG to 1 for more output
-        AIMECPPAR = RTOVALUE('AIMECPPAR',0)
-        if(AIMMKECP.eq.1) then
-          make_ecp_aimms=.true.
-          AIMECPBG=1
-        ENDIF
         timer=timef()
         SKIP_ECPAMS = 1       !flag to indicate if using only cpass (=1 if using all cpass => skip AIMM calcs)
         SKIP_ECPOML = .TRUE.   !added by AKN to test a new flag to disable ECPOML based LP generation
@@ -227,18 +215,12 @@
          CALL ecp_fill_aimms_coeff  ! fills in  LP coefficients for AIMMS ECP to read
          close(io) !ecpcoeff_yyyy.txt'
         ENDIF
-         if(.not. make_ecp_aimms) then
 !           write(6,*) 'AIMMS Interface: opening filen_ecpcoeff='//trim(filen_ecpcoeff)
 !         open(io,file=filen_ecpcoeff,status='old',access='append',BUFFERED='YES',BUFFERCOUNT=10) ! reopen ecpcoeff_yyyy.txt so "allzero" error messages get included
-           AIM_Phase=1 ! 1: if in LP set up phase, 2: if in LP solution retrieval phase. used because "Call getbout"  only applies in phase 2, AIMMS validation phase, after oml sol retrieval
-           CALL AIMMS_ECP('MainExecution')      ! transfers LP coefficients and other info to AIMMS, invokes AIMMS, and transfers results back
+        AIM_Phase=1 ! 1: if in LP set up phase, 2: if in LP solution retrieval phase. used because "Call getbout"  only applies in phase 2, AIMMS validation phase, after oml sol retrieval
+        CALL AIMMS_ECP('MainExecution')      ! transfers LP coefficients and other info to AIMMS, invokes AIMMS, and transfers results back
  !        close(io)
-          timer=timef()  
-         IF (AMS_KEEPOPEN .EQ. 0) THEN ! close AIMMS each time
-           CALL AIMMS_ECP('end')
-    write(6,'(a,f9.3)') 'Wall seconds for close AIMMS ECP:',timef()-timer      
-         ENDIF        !leave AIMMS open if KEEPOPEN=1 (NEMS_Monitor will loop until monitor.in.txt is updated for next solve
-        endif
+        timer=timef()  
 
       CALL MPTIM2(CPU_TIME_END)
       WRITE (18,2222) '** END DF SUBS ** ',FLOAT(CPU_TIME_END)/100.0, FLOAT(CPU_TIME_END)/100.0 - FLOAT(CPU_TIME_BEGIN)/100.0
@@ -506,6 +488,7 @@
 
       use ecp_row_col
       use hourly_restore_data
+      use ifport,only:timef
 !
 !     THIS SUBROUTINE CALL THE REVISE ROUTINES TO REVISE THE ECP
 !     MATRIX.
@@ -572,6 +555,7 @@
       REAL*8 DEM_ADJ
 	  REAL*8 H2_GENERATION
 	  INTEGER*4 EMM_SEASON
+      REAL*4 timer
       
       character*60 putFileName ! name of text file output by this routine
       integer funito
@@ -589,17 +573,21 @@
 
       TST = 0
 
+      timer = timef()
       IF (CURITR.EQ.1) THEN 
           write(putFileName,'(a,i4,a,a)') '.\rest\toAIMMS\ecpout_',curcalyr,'.txt'      
 
           WRITE(6,'(A)') putFileName
-
+! writes toAIMMS should be formatted so that headers and data are right-justified, headers should include re:: prefix for endpoint AIMMS
+! ensure that format statements for the header and data writes are consistent and widths are large enough to allow a space between fields          
           call unitunopened(100,999,FUNITO)    
           open(funito,file=putFileName,status='unknown',buffered='YES')
           rewind funito
           WRITE(funito,9990) 'COMPOSITE TABLE:'   
-          WRITE(funito,8991)    'm' , 'r' ,    'HydroCapFactor'
- 8991    FORMAT(1X,2(" ",A4),1(" ",A20))            
+          WRITE(funito,8991)    're::m' , 're::r' ,    're::HydroCapFactor'
+ 8991    FORMAT(1X,2(A6),A20)            
+ 8992    FORMAT(1X,2(I6),F20.3)    
+ 8993    FORMAT(1X,2(I6),I20)             
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1310) 'IRUN ', 'CYEAR', 'MONTH', 'EMMrg', '            HYDRO_CF', '             URHYCFA'
@@ -610,7 +598,6 @@
         DO m = 1 , 12
           DO d = 1 , unrgns         
            WRITE(funito,8992)  m, d, HYCFMO_AV(d,m) * URHYCFA(CURIYR)
- 8992       FORMAT(1X,2(" ",I4),1(" ",F20.3))    
            
                WRITE(UF_DBG,1311) CURIRUN, CURCALYR, m, d, HYCFMO_AV(d,m) * URHYCFA(CURIYR), URHYCFA(CURIYR)
  1311          FORMAT(1X," ECPto864_HYDRO_CF",4(",",I5),2(",",F20.3))
@@ -622,7 +609,7 @@
       
       IF (CURITR .EQ. 1) THEN 
           WRITE(funito,9990) 'COMPOSITE TABLE:'   
-          WRITE(funito,8991)    'm' , 'd' ,    'Idaytq'          
+          WRITE(funito,8991)    're::m' , 're::d' ,    're::Idaytq'          
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1410) 'IRUN ', 'CYEAR', 'MONTH', 'DTYPE', '              IDAYTQ'
@@ -632,7 +619,6 @@
       DO m = 1 , 12
         DO d = 1 , 3         
            WRITE(funito,8993)  m, d, IDAYTQ(d,m)
- 8993          FORMAT(1X,2(" ",I4),1(" ",I20))             
 
                WRITE(UF_DBG,1411) CURIRUN, CURCALYR, m, d, IDAYTQ(d,m)
  1411          FORMAT(1X," ECPto864_IDAYTQ",4(",",I5),",",I20)
@@ -644,16 +630,16 @@
 	  
 	  IF (CURITR .EQ. 1) THEN
 		WRITE(funito,9990) 'COMPOSITE TABLE:'
-		WRITE(funito,9996)   'r', 'r1'  ,'y' , 's', 'TranLimit'     
+		WRITE(funito,9996)   're::r', 're::r1'  ,'re::y' , 're::s', 're::TranLimit'     
 
- 9996    FORMAT(1X,4(" ",A4),1(" ",A22))  
-		DO IRG = 1, UNRGNS !import regions
+9996    FORMAT(1X,4(A7),(A22))  
+3389    FORMAT(1X,4(I7),(F22.6))  
+
+        DO IRG = 1, UNRGNS !import regions
 			DO KRG = 1,  MNUMNR + EFD_D_PROV - 3 !export regions (including CAN)
 				DO ISP = 1 , EPNMSP
 					if (CNSTRNTS_EFD(ISP,CURIYR,IRG,KRG) .GT. 0.0) THEN
 					 WRITE(funito,3389) IRG, KRG, CURCALYR, ISP, CNSTRNTS_EFD(ISP,CURIYR,IRG,KRG)
- 3389                FORMAT(1X,4(" ",I4),1(" ",F22.6))  
-					
 
                      WRITE(UF_DBG,1512) CURIRUN, CURCALYR, IRG, KRG, ISP, CNSTRNTS_EFD(ISP,CURIYR,IRG,KRG)
  1512                FORMAT(1X," ECPto864_TRANS_LIMITS",5(",",I5),1(",",F22.6))
@@ -666,9 +652,11 @@
 	
 	IF (CURITR .EQ. 1) THEN
 		WRITE(funito,9990) 'COMPOSITE TABLE:'
-		WRITE(funito,9997)   'r', 'r1'  ,'y' ,'CSteps', 'TranCost'     
+		WRITE(funito,9997)   're::r', 're::r1'  ,'re::y' ,'re::CSteps', 're::TranCost'     
 
- 9997    FORMAT(1X,3(" ",A4),1(" ",A6),1(" ",A22))   
+9997    FORMAT(1X,3(A7),(A12),(A22))   
+3395    FORMAT(1X,3(I7),(I12),(F22.6))  
+        
 		DO IRG = 1, UNRGNS !import regions
 			DO KRG = 1,  MNUMNR + EFD_D_PROV - 3 !export regions (including CAN)
 				!DO ISP = 1 , EPNMSP
@@ -688,10 +676,6 @@
 									WRITE(UF_DBG,1513) CURIRUN, CURCALYR, IRG, KRG,  1, PTHRESH1(CURIYR,KRG,IRG) + PTHRESH2(CURIYR,KRG,IRG) + BARRIER(CURIYR), PTHRESH1(CURIYR,KRG,IRG), PTHRESH2(CURIYR,KRG,IRG), BARRIER(CURIYR), 0.0, 0.0
 							end if
 						end if
-
-					 
-					
- 3395                FORMAT(1X,3(" ",I4),1(" ",I6),1(" ",F22.6))  
  1513                FORMAT(1X," ECPto864_TRANS_COST",5(",",I6),6(",",F22.6))
 					!END IF
 				!END DO
@@ -702,9 +686,11 @@
 	
 	IF (CURITR .EQ. 1) THEN
 		WRITE(funito,9990) 'COMPOSITE TABLE:'
-		WRITE(funito,9998)   'r1' ,'y' , 'loadgp', 'loadseg','CSteps','TranLimitCan'   
-9998    FORMAT(1X,2(" ",A4),3(" ",A7),1(" ",A22))  
-		!DO IRG = 1, UNRGNS !import regions
+		WRITE(funito,9998)   're::r1' ,'re::y' , 're::loadgp', 're::loadseg','re::CSteps','re::TranLimitCan'   
+9998    FORMAT(1X,2(A7),3(A12),1(A22))  
+3390    FORMAT(1X,2(I7),3(I12),(F22.6))  
+        
+        !DO IRG = 1, UNRGNS !import regions
 			DO KRG = MNUMNR+1,  MNUMNR+1 + EFD_D_PROV - 3 !export regions (including CAN)
 				DO ISP = 1, EENSP
 					DO ISTP = 1 , ELNVCT(ISP)
@@ -713,18 +699,12 @@
 						CRG = KRG - MNUMNR
 						DO CSTP = 1, EFD_D_CSS
 							IF (EFD_GW(ISEG,GRP,CSTP,CRG,CURIYR) * ECANSQZ(CRG,CURIYR) * CAN_QTY_SCMULT(CURIYR) .GT. 0.0) THEN
-							
 								WRITE(funito,3390) KRG, CURCALYR, GRP,ISEG, CSTP, EFD_GW(ISEG,GRP,CSTP,CRG,CURIYR) * ECANSQZ(CRG,CURIYR) * CAN_QTY_SCMULT(CURIYR)
-								
 								WRITE(UF_DBG,1514) CURIRUN, CURCALYR,  KRG, GRP,ISEG, CSTP, EFD_GW(ISEG,GRP,CSTP,CRG,CURIYR) * ECANSQZ(CRG,CURIYR) * CAN_QTY_SCMULT(CURIYR), &
 								EFD_GW(ISEG,GRP,CSTP,CRG,CURIYR), ECANSQZ(CRG,CURIYR) , CAN_QTY_SCMULT(CURIYR)
 							END IF
 						END DO
 					END DO
-
-					 
-					
- 3390                FORMAT(1X,2(" ",I4),3(" ",I7),1(" ",F22.6))  
  1514                FORMAT(1X," ECPto864_TRANS_CAN_LIMIT",6(",",I5),6(",",F22.6))
 				END DO
 			ENDDO
@@ -732,15 +712,12 @@
 		WRITE(funito,9990) ';'  
 	END IF
 	
-	  
-	  
-
-
       IF (CURITR .EQ. 1) THEN 
           WRITE(funito,9990) 'COMPOSITE TABLE:'
-          WRITE(funito,9991)   'r'  ,'y' , 'm' , 'd' , 'h'  , 'EMMGroup', 'EMMSegment','Group_ECP','Segment_ECP',  'Load'  , 'NetTrade'   
+          WRITE(funito,9991)   're::r'  ,'re::y' , 're::m' , 're::d' , 're::h'  , 're::EMMGroup', 're::EMMSegment','re::Group_ECP','re::Segment_ECP',  're::Load'  , 're::NetTrade'   
  9990    Format(A16)
- 9991    FORMAT(1X,5(" ",A4),4(" ",A12),2(" ",A22))     
+ 9991    FORMAT(1X,5(A7),4(A16),2(A22))     
+ 3381    FORMAT(1X,5(I7),4(I16),2(F22.6))  
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1510) 'IRUN ', 'CYEAR', 'EMMrg', 'MONTH', 'DTYPE', 'HOUR ', '                 LOAD', 'NetTrade'
@@ -846,12 +823,12 @@
                   DEM_ADJ = UEITAJ_ECP(ISP,NERC) - BTCOGEN(NERC) / 8.76 + BMEXICAN(NERC) / 8.76
 
                   TMP_NET_LOAD = DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR) - &
-                     PV_CAP_ADJ(NERC) * WSSPVEL_CF(NERC,CURIYR-1,d,m,h) - &
-                     PT_CAP_ADJ(NERC) * WSSPTEL_CF(NERC,CURIYR-1,d,m,h) - &
-                     SO_CAP_ADJ(NERC) * WSSSTEL_CF(NERC,CURIYR-1,d,m,h) - &
-                     WN_CAP_ADJ(NERC) * WSFWIEL_CF(NERC,CURIYR-1,d,m,h) - &
-                     WL_CAP_ADJ(NERC) * WSFWLEL_CF(NERC,CURIYR-1,d,m,h) - &
-                     WF_CAP_ADJ(NERC) * WSFWFEL_CF(NERC,CURIYR-1,d,m,h) 
+                     PV_CAP_ADJ(NERC,CURIYR) * WSSPVEL_CF(NERC,CURIYR-1,d,m,h) - &
+                     PT_CAP_ADJ(NERC,CURIYR) * WSSPTEL_CF(NERC,CURIYR-1,d,m,h) - &
+                     SO_CAP_ADJ(NERC,CURIYR) * WSSSTEL_CF(NERC,CURIYR-1,d,m,h) - &
+                     WN_CAP_ADJ(NERC,CURIYR) * WSFWIEL_CF(NERC,CURIYR-1,d,m,h) - &
+                     WL_CAP_ADJ(NERC,CURIYR) * WSFWLEL_CF(NERC,CURIYR-1,d,m,h) - &
+                     WF_CAP_ADJ(NERC,CURIYR) * WSFWFEL_CF(NERC,CURIYR-1,d,m,h) 
                   TOT_NET_LOAD(m,d,h) = TOT_NET_LOAD(m,d,h) + TMP_NET_LOAD
                   IF (TMP_NET_LOAD .GT. MAX_NET_LOAD(NERC)) THEN
                      MAX_NET_LOAD(NERC) = TMP_NET_LOAD
@@ -886,9 +863,7 @@
 
                      !WRITE(funito,3381) NERC, CURCALYR, m, d, h, GRP_EFD, VLS_EFD,IGRP, JVLS, DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR) + MAX(NET_XPORT_EFD(VLS_EFD,GRP_EFD,NERC),0.0) + DEM_ADJ
 					 WRITE(funito,3381) NERC, CURCALYR, m, d, h, GRP_EFD, VLS_EFD,IGRP, JVLS, DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR) + DEM_ADJ, NET_XPORT_EFD(VLS_EFD,GRP_EFD,NERC)
- 3381                FORMAT(1X,5(" ",I4),4(" ",I12),2(" ",F22.6))  
-
-
+ 
                      WRITE(UF_DBG,1511) CURIRUN, CURCALYR, NERC, m, d, h, DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR) + DEM_ADJ, DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_XPORT_EFD(VLS_EFD,GRP_EFD,NERC), DEM_ADJ
  1511                FORMAT(1X," ECPto864_LOAD",6(",",I5),3(",",F22.6))
 
@@ -943,28 +918,27 @@
      END DO
 	  
 	IF (CURITR.EQ.1) THEN 
-                WRITE(funito,9990) 'COMPOSITE TABLE:'
-                WRITE(funito,1997)   'm'  , 'Map_PeakMonth'
- 1997    FORMAT(1X,1(" ",A4),1(" ",A13))  
+        WRITE(funito,9990) 'COMPOSITE TABLE:'
+        WRITE(funito,1997)   're::m'  , 're::Map_PeakMonth'
+ 1997    FORMAT(1X,(A7),(A20))  
+ 1998    FORMAT(1X,(I7),(I20))   
  
           IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1619) 'PEAKMONTH1', 'PEAKMONTH2','PEAKMONTH3'
  1619       FORMAT(1X," ECPto864_Map_PeakMonth",5(",",A12))
           END IF
  
-!		DO m = 1 , UNRGNS
-1998            FORMAT(1X,1(" ",I4),1(" ",I1))   
         DO m = 1,12
             
             !turning off for now
             ! Include peak day in top 3 net load months
-            !IF (m .EQ. TOP_NET_LOAD_MONTHS(1) .OR. m .EQ. TOP_NET_LOAD_MONTHS(2) .OR. m .EQ. TOP_NET_LOAD_MONTHS(3)) THEN
-		!	    WRITE(funito,1998)  m, 1
-           ! ELSE
+            IF (m .EQ. TOP_NET_LOAD_MONTHS(1) .OR. m .EQ. TOP_NET_LOAD_MONTHS(2) .OR. m .EQ. TOP_NET_LOAD_MONTHS(3)) THEN
+			    WRITE(funito,1998)  m, 1
+            ELSE
                 WRITE(funito,1998)  m, 0
-            !ENDIF
+            ENDIF
         END DO
-        !END DO
+
  
 			WRITE(UF_DBG,1618)  TOP_NET_LOAD_MONTHS(1), TOP_NET_LOAD_MONTHS(2), TOP_NET_LOAD_MONTHS(3)
  1618       FORMAT(1X," ECPto864_Map_PeakMonth",3(",",I5))
@@ -972,15 +946,16 @@
 	WRITE(funito,9990) ';' 
     
     WRITE(funito,1323) LINELOSS 
-1323    FORMAT(1X,'TransLoss:=',F10.6,';')
+1323    FORMAT(1X,'re::TransLoss:=',F10.6,';')
     
     END IF
     
       
      IF (CURITR.EQ.1) THEN 
-                WRITE(funito,9990) 'COMPOSITE TABLE:'
-                WRITE(funito,1991)   'm'  ,'s' , 'Map_ms'
- 1991    FORMAT(1X,1(" ",A4),1(" ",A4),1(" ",A6))                   
+         WRITE(funito,9990) 'COMPOSITE TABLE:'
+         WRITE(funito,1991)   're::m'  ,'re::s' , 're::Map_ms'
+ 1991    FORMAT(1X,2(A7),(A12))                   
+ 1992    FORMAT(1X,2(I7),10x," 1")              
       
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1610) 'IRUN ', 'CYEAR', 'MONTH', 'SEASN', 'MAPms'
@@ -988,19 +963,15 @@
          END IF
      Do m=1,12
          WRITE(funito,1992)   m  ,TMPSN(m)
- 1992       FORMAT(1X,1(" ",I4),1(" ",I4),5x," 1")              
-
             WRITE(UF_DBG,1611) CURIRUN, CURCALYR, m, TMPSN(m), 1
  1611       FORMAT(1X," ECPto864_MapMS",5(",",I5))
-
      ENDDO
      WRITE(funito,9990) ';' 
      ENDIF  
 	 
 	 IF (CURITR.EQ.1) THEN 
-                WRITE(funito,9990) 'COMPOSITE TABLE:'
-                WRITE(funito,1993)   'm'  ,'es' , 'Map_mes'
- 1993    FORMAT(1X,1(" ",A4),1(" ",A4),1(" ",A7))                   
+         WRITE(funito,9990) 'COMPOSITE TABLE:'
+         WRITE(funito,1991)   're::m'  ,'re::es' , 're::Map_mes'
       
      Do m=1,12
 		! WINTER
@@ -1018,7 +989,6 @@
 				WRITE(funito,1992)   m ,  3
 			endif
 		endif
- !1992       FORMAT(1X,1(" ",I4),1(" ",I4),5x," 1")              
 
      ENDDO
      WRITE(funito,9990) ';' 
@@ -1026,8 +996,8 @@
      
       IF (CURITR.EQ.1) THEN 
          WRITE(funito,9990) 'COMPOSITE TABLE:'
-         WRITE(funito,2991)   'r'  ,'y' , 'm' , 'd' , 'h'  , 'tech' , 'SolWindCapFactor'
- 2991    FORMAT(1X,6(" ",A4),1(" ",A22))               
+         WRITE(funito,2991)   're::r'  ,'re::y' , 're::m' , 're::d' , 're::h'  , 're::tech' , 're::SolWindCapFactor'
+ 2991    FORMAT(1X,5(A6),A10,A22)               
     
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1710) 'IRUN ', 'CYEAR', 'EMMrg', 'MONTH', 'DTYPE', ' HOUR', ' TECH', '            CapFactor', '              URTPCFA'
@@ -1059,7 +1029,7 @@
 					 if (WSFWFEL_CF(NERC,CURIYR-1,d,m,h) > 0.0) THEN
 						WRITE(funito,2381) NERC, CURCALYR, m, d, h, WIWF, WSFWFEL_CF(NERC,CURIYR-1,d,m,h) * URWNCFA(CURIYR)
 					 end if
- 2381                FORMAT(1X,6(" ",I4),1(" ",F22.6)) 
+ 2381                FORMAT(1X,5(I6),I10,(F22.6)) 
 
                      WRITE(UF_DBG,1711) CURIRUN, CURCALYR, NERC, m, d, h, WIPV, WSSPVEL_CF(NERC,CURIYR-1,d,m,h), URPVCFA(CURIYR)
                      WRITE(UF_DBG,1711) CURIRUN, CURCALYR, NERC, m, d, h, WIPT, WSSPTEL_CF(NERC,CURIYR-1,d,m,h), URPVCFA(CURIYR)
@@ -1077,9 +1047,9 @@
       ENDIF  
 	  
 	WRITE(funito,9990) 'COMPOSITE TABLE:'
-    WRITE(funito,8922)   'y'  ,'r' , 'DPVcap'
-8922    FORMAT(1X,2(" ",A8),1(" ",A24))     
-8923    FORMAT(1X,2(" ",I8),1(" ",F22.6))  
+    WRITE(funito,8922)   're::y'  ,'re::r' , 're::DPVcap'
+8922    FORMAT(1X,2(A8),(A24))     
+8923    FORMAT(1X,2(I8),(F24.6))  
 
  DO NERC = 1 , UNRGNS
 	WRITE(funito,8923) CURCALYR, NERC, DPVTOTCAPNR(NERC,CURIYR)
@@ -1088,9 +1058,9 @@ END DO
 WRITE(funito,9990) ';'
 
 WRITE(funito,9990) 'COMPOSITE TABLE:'
-WRITE(funito,8924)   'y'  ,'r' , 'DPVgen'
-8924    FORMAT(1X,2(" ",A8),1(" ",A24))     
-8925    FORMAT(1X,2(" ",I8),1(" ",F22.6)) 
+WRITE(funito,8924)   're::y'  ,'re::r' , 're::DPVgen'
+8924    FORMAT(1X,2(A8),(A24))     
+8925    FORMAT(1X,2(I8),(F24.6)) 
 
  DO NERC = 1 , UNRGNS
 	WRITE(funito,8925) CURCALYR, NERC, DPVTOTGENNR(NERC,CURIYR)
@@ -1101,9 +1071,9 @@ WRITE(funito,9990) ';'
     ! START - THIS ELECTRICTY H2 GENERATION TERM IS FOR RESTORE, BUT SINCE EFD RUNS AFTER RESTORE, WE USE THE PREVIOUS YEAR'S GENERATION TERM
       
     WRITE(funito,9990) 'COMPOSITE TABLE:'
-    WRITE(funito,8914)   ' es'  ,' r' , ' h2_turbine_generation'
-8914    FORMAT(1X,2(" ",A8),1(" ",A24))     
-8915    FORMAT(1X,2(" ",I8),1(" ",F22.6))   
+    WRITE(funito,8914)   're::es'  ,'re::r' , 're::h2_turbine_generation'
+8914    FORMAT(1X,2(A8),(A28))     
+8915    FORMAT(1X,2(I8),(F28.6))   
 
    PREVIOUS_YEAR = (CURIYR+1989) - 1
 
@@ -1121,8 +1091,6 @@ WRITE(funito,9990) ';'
                   H2_GENERATION = H2_TURBINE_GENERATION(PREVIOUS_YEAR, EMM_SEASON, REGIONS)
                END IF
 		 WRITE(funito,8915) SEASONS, REGIONS, H2_GENERATION
-         !WRITE(funito,8915) SEASONS, REGIONS, H2_TURBINE_GENERATION(PREVIOUS_YEAR, EMM_SEASON, REGIONS)
-! 2381                FORMAT(1X,2(" ",I4),1(" ",F22.6)) 
 
        END DO
     END DO
@@ -1133,8 +1101,7 @@ WRITE(funito,9990) ';'
 	  
 	  IF (CURITR.EQ.1) THEN 
          WRITE(funito,9990) 'COMPOSITE TABLE:'
-         WRITE(funito,2991)   'r'  ,'y' , 'm' , 'd' , 'h'  , 'tech' , 'ClipCapFactor'
- !2991    FORMAT(1X,6(" ",A4),1(" ",A22))               
+         WRITE(funito,2991)   're::r'  ,'re::y' , 're::m' , 're::d' , 're::h'  , 're::tech' , 're::ClipCapFactor'
     
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,1714) 'IRUN ', 'CYEAR', 'EMMrg', 'MONTH', 'DTYPE', ' HOUR', ' TECH', '            ClipCapFactor', '              URTPCFA'
@@ -1153,9 +1120,6 @@ WRITE(funito,9990) ';'
 						WRITE(funito,2381) NERC, CURCALYR, m, d, h, WIPT, WSSPTEL_CF_CLIP(NERC,CURIYR-1,d,m,h) * URPVCFA(CURIYR)
 					 END IF
 
-
- !2381                FORMAT(1X,6(" ",I4),1(" ",F24.10)) 
-
                      WRITE(UF_DBG,1715) CURIRUN, CURCALYR, NERC, m, d, h, WIPT, WSSPTEL_CF_CLIP(NERC,CURIYR-1,d,m,h), URPVCFA(CURIYR)
 
  1715                FORMAT(1X," ECPto864_CLIP_CF",7(",",I5),2(",",F22.8))
@@ -1166,6 +1130,7 @@ WRITE(funito,9990) ';'
          ENDDO
          WRITE(funito,9990) ';'  
       ENDIF  
+        write(6,*)'AIMMS Interface: seconds to write output for RESTORE-1',timef()-timer
 
 
 !     CALCULATE BATTERY STORAGE REVENUE
@@ -1559,8 +1524,12 @@ WRITE(funito,9990) ';'
       IF(CURIYR+UHBSYR .GE. (UPSTYR + UPPLYR(WICT))) THEN 
          CALL GETBOUT(CURIYR - UPPLYR(WICT),REG)
       ENDIF
-      MEFAC2(REG) = MIN(EPLVCAP(WICT,IOWN) + EPLVFOM(WICT),EPLVCAP(WIAT,IOWN) + EPLVFOM(WIAT))          
 
+      IF (EPLVCAP(WIAT,IOWN) .GT. 0) THEN
+      MEFAC2(REG) = MIN(EPLVCAP(WICT,IOWN) + EPLVFOM(WICT),EPLVCAP(WIAT,IOWN) + EPLVFOM(WIAT))          
+      ELSE        
+        MEFAC2(REG) = EPLVCAP(WICT,IOWN) + EPLVFOM(WICT)
+      ENDIF		
 
       RMAVG(CURIYR,REG) = ( CPWT1*(NETCON * MEFAC2(REG)) + (cpwt2 * LEVRMD(CURIYR,REG)) + (cpwt3 * LEVRMD2(CURIYR,REG)) + (cpwt4 * LEVRMD2C(CURIYR,REG))   )  
 !     IF (CURIYR.EQ.23 .OR. CURIYR.EQ.24) RMAVG(CURIYR,REG) = MEFAC(REG)
@@ -1653,8 +1622,8 @@ WRITE(funito,9990) ';'
       REAL*8 TOT_RATE1(MX_NCOALS+MX_ISCV,NDREG,0:ECP_D_FPH),TOT_RATE2(MX_NCOALS+MX_ISCV,NDREG,0:ECP_D_FPH)
       INTEGER*4 TOT_TYPE(MX_NCOALS+MX_ISCV)
 !
-      COMMON /COFSHR/ COFCAP
-      REAL*4 COFCAP(ECP_D_RCF,ECP_D_DSP,MNUMNR,MAXNFR)
+      !COMMON /COFSHR/ COFCAP
+      !REAL*4 COFCAP(ECP_D_RCF,ECP_D_DSP,MNUMNR,MAXNFR)  !moved to include file emm_aimms
 !
       COMMON/RPS_REGIONS/MAP_NERC_TO_RPS_RGN
       INTEGER*4 MAP_NERC_TO_RPS_RGN(MNUMNR), RPS_RGN
@@ -1760,6 +1729,7 @@ WRITE(funito,9990) ';'
 !
       DO IRG = 1 , NDREG
         DO NERC = 1 , UNRGNS
+         CALL GETBLD(1,NERC)      !get regional financial data
          DO COF_EMM = 1 , ECP_D_RCF
             MIN_COF = 9999.9
             DO YEAR = 1 , UNXPH
@@ -1826,6 +1796,10 @@ WRITE(funito,9990) ';'
                      CALL CRHS(UPRHS,ROW,VAL,ROW_mask,'EP$CSUPPLY,11')
 !                 END IF
                   END IF
+              ELSE
+                  ROW = 'C'//UPRGCD(NERC)//EPFLCD(IRG)//COF_CD(COF_EMM)//'COFX'; call makmsk(ROW_mask,':C:',UPRGCD(NERC),EPFLCD(IRG),COF_CD(COF_EMM),':COFX:')
+                  VAL = 0.0        
+                  CALL CRHS(UPRHS,ROW,VAL,ROW_mask,'EP$CSUPPLY,11')
               END IF
             END DO
             END DO
@@ -2266,7 +2240,7 @@ WRITE(funito,9990) ';'
                                     VOM(KYR) = UPGNPD(KYR + CURIYR + UNXPH - 2) * UPCFSTEP(COF_EMM,CF_STP)
                                  END DO
                                  KYR = UNFPH - UNXPH + 1
-                                 XTR_TRN = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)
+                                 XTR_TRN = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)  !check why this is UNXPH and not UNXPH-1 as in other code
                               END IF
 !
 !                             INCREMENTAL VARIABLE O&M
@@ -2279,7 +2253,7 @@ WRITE(funito,9990) ';'
                                     VOM(KYR) = UPGNPD(KYR + CURIYR + UNXPH - 2) * UPCFVOM(COF_EMM) * 1000.0
                                  END DO
                                  KYR = UNFPH - UNXPH + 1
-                                 VOMCST = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)
+                                 VOMCST = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)!check why this is UNXPH and not UNXPH-1 as in other code
                               END IF
 !
 !                             ADJUST FOR COFIRING HURDLE RATE
@@ -2293,7 +2267,7 @@ WRITE(funito,9990) ';'
                                     VOM(KYR) = UPGNPD(LYR) * WDCFHUR(MIN(LYR,UNYEAR)) * 1000.0
                                  END DO
                                  KYR = UNFPH - UNXPH + 1
-                                 COFHUR = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)
+                                 COFHUR = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)!check why this is UNXPH and not UNXPH-1 as in other code
                               END IF
 !
 !                             ADJUST FOR BIOMASS COFIRING SUBSIDY, IF APPROPRIATE
@@ -2307,7 +2281,7 @@ WRITE(funito,9990) ';'
                                     VOM(KYR) = UPGNPD(LYR) * WDCFSUB(MIN(LYR,UNYEAR)) * 1000.0
                                  END DO
                                  KYR = UNFPH - UNXPH + 1
-                                 COFSUB = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)
+                                 COFSUB = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)!check why this is UNXPH and not UNXPH-1 as in other code
                               END IF
                               VAL = XTR_TRN + (VOMCST + COFHUR - COFSUB) / C_HTRT(IPLT,IRG,YEAR)
                               IF (USW_DIGIT .GT. 0)THEN
@@ -2353,6 +2327,7 @@ WRITE(funito,9990) ';'
             END DO
          END DO
          DO FRG = 1 , UNFRGN
+            IRG = EPCLMP(FRG)  
             DO IPLT = 1 , NUTSEC
                IF (C_ECP_CDS(IPLT,IRG) .EQ. 1) THEN
                   ISCRB = ECP_SCRUB(IPLT,CURIYR)
@@ -2401,7 +2376,7 @@ WRITE(funito,9990) ';'
                            VOM(KYR) = 9.9 * UPGNPD(KYR + CURIYR + UNXPH - 2)
                         END DO
                         KYR = UNFPH - UNXPH + 1
-                        VAL = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)
+                        VAL = PVV(VOM(1),ECP_D_FPH,KYR,DBLE(DSCRT)) * PWF(DBLE(DSCRT),UNXPH)!check why this is UNXPH and not UNXPH-1 as in other code
                      END IF
                      CALL CVAL(ROW_CF,UPOBJ,VAL*10.0,ROW_CF_mask,UPOBJ,'EP$CSUPPLY,32')
                   END DO
@@ -2807,51 +2782,6 @@ WRITE(funito,9990) ';'
 !
                               END IF         ! TEST (TST_ACI EQ 1)
 
-!                             IF (CL_SC .LE. MX_NCOALS) THEN
-!                                IF (CURIRUN .EQ. 1) THEN
-!                                   XCL_TRNINDX(IPLT,CL_SC,IRG) = 1
-!                                   IF (CURCALYR .GE. 2015) THEN
-!                                      IF (IPLT .EQ. WIB1 .OR. &
-!                                          IPLT .EQ. WIB2 .OR. &
-!                                          IPLT .EQ. WIC1 .OR. &
-!                                          IPLT .EQ. WIC2 .OR. & 
-!                                          IPLT .EQ. WIC3 .OR. & 
-!                                          IPLT .EQ. WIH1 .OR. & 
-!                                          IPLT .EQ. WIH2 .OR. &
-!                                          IPLT .EQ. WIH3) THEN
-!                                         XCL_TRNINDX(IPLT,CL_SC,IRG) = 0
-!                                         IF (CL_SC .EQ.  7 .OR. &
-!                                             CL_SC .EQ.  9 .OR. &
-!                                             CL_SC .EQ. 12 .OR. &
-!                                             CL_SC .EQ. 14 .OR. &
-!                                             CL_SC .EQ. 15 .OR. &
-!                                             CL_SC .EQ. 26 .OR. &
-!                                             CL_SC .EQ. 27 .OR. &
-!                                             CL_SC .EQ. 29 .OR. &
-!                                             CL_SC .EQ. 31 .OR. &
-!                                             CL_SC .EQ. 32 .OR. &
-!                                             CL_SC .EQ. 33 .OR. &
-!                                             CL_SC .EQ. 35 .OR. &
-!                                             CL_SC .EQ. 36 .OR. &
-!                                             CL_SC .EQ. 37 .OR. &
-!                                             CL_SC .EQ. 39 .OR. &
-!                                             CL_SC .EQ. 41 )THEN
-!                                            XCL_TRNINDX(IPLT,CL_SC,IRG) = 1
-!                                         END IF
-!                                      END IF
-!                                   END IF
-!                                END IF
-!                             END IF
-
-!                              IF (CL_SC .LE. MX_NCOALS) THEN
-!                              IF (TST_ACI .GE. 1 .AND. TOT_RATE1(CL_SC,IRG,0) .LT. 800.0) THEN
-!                                    IF (XCL_TRNINDX(IPLT,CL_SC,IRG) .EQ. 0) THEN
-!                                 COLUMN = 'T'//SC_CD//EPFLCD(FRG)//UPLNTCD(IPLT)//ACI_CD(J_ACI)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':T:',SC_CD,EPFLCD(FRG),UPLNTCD(IPLT),ACI_CD(J_ACI),UPYRCD(YEAR))
-!
-!                                 CALL CBND(UPBND,COLUMN,DBLE(0.0),DBLE(0.0),COLUMN_mask,'EP$CSUPPLY,53')
-!                                 ENDIF
-!                              ENDIF
-!                                 ENDIF
                            END DO            ! J_ACI
                         END IF               ! TEST (TOT_RATE1() LT 800.0)
                      END IF                  ! TEST (JECP GT 0 AND C_ECP_CDS() EQ 1)
@@ -2861,75 +2791,6 @@ WRITE(funito,9990) ';'
             END DO                           ! IPLT
          END DO                              ! FRG
 !
-         COLUMN = 'T_STOCK'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':T_STOCK:',UPYRCD(YEAR))
-         IF (YEAR .LT. UNXPH) THEN
-            IF (XCL_STOCK(MIN(UNYEAR,YEAR+CURIYR-1)) .GE. 0.0) THEN
-               VAL = XCL_STOCK(MIN(UNYEAR,YEAR+CURIYR-1))
-               CALL CBND(UPBND,COLUMN,VAL,VAL,COLUMN_mask,'EP$CSUPPLY,54')
-               SIGN = 1.0
-               STOCK_UP = VAL
-               STOCK_DN = 0.0
-            ELSE
-               VAL = -1.0 * XCL_STOCK(MIN(UNYEAR,YEAR+CURIYR-1))
-               CALL CBND(UPBND,COLUMN,VAL,VAL,COLUMN_mask,'EP$CSUPPLY,55')
-               SIGN = -1.0
-               STOCK_UP = 0.0
-               STOCK_DN = VAL
-            END IF
-!
-            IF (USW_HG .GT. 0) THEN
-               ROW_HG = 'EUHGOT1'//UPYRCD(YEAR); call makmsk(ROW_HG_mask,':EUHGOT1:',UPYRCD(YEAR))
-               VAL = -1.0 * SIGN * TMPMBTU(CURIYR) * 0.000001 * 1000.0
-               IF (USW_DIGIT .GT. 0)VAL = DIGITS2( VAL , DIGITS_PARM)
-               IF (VAL .GT. -ECP_MIN .AND. VAL .LT. ECP_MIN) VAL = ECP_MIN
-               CALL CVAL(COLUMN,ROW_HG,VAL,COLUMN_mask,ROW_HG_mask,'EP$CSUPPLY,56')
-            END IF
-!
-            ISO2 = 1
-            WRITE(SO2_CODE,'(I1)') ISO2
-            ROW_SO2 = 'EUSOOT'//SO2_CODE//UPYRCD(YEAR); call makmsk(ROW_SO2_mask,':EUSOOT:',SO2_CODE,UPYRCD(YEAR))
-            VAL = -1.0 * SIGN * TSPMBTU(CURIYR) * 1000.0
-            IF (USW_DIGIT .GT. 0)VAL = DIGITS2( VAL , DIGITS_PARM)
-            IF (VAL .GT. -ECP_MIN .AND. VAL .LT. ECP_MIN) VAL = ECP_MIN
-            CALL CVAL(COLUMN,ROW_SO2,VAL,COLUMN_mask,ROW_SO2_mask,'EP$CSUPPLY,57')
-            WRITE(18,1324) CURIYR+UHBSYR,CURIYR+UHBSYR+YEAR-1,COLUMN,ROW_SO2,VAL,XCL_STOCK(MIN(UNYEAR,YEAR+CURIYR-1)),TSPMBTU(CURIYR)*1000.0,TMPMBTU(CURIYR)*0.001
- 1324       FORMAT(1X,"XCL_STOCK",2(":",I4),2(":",A8),4(":",F12.3))
-!           Label:XCL_STOCK:CYEAR:PYEAR:COLUMN:ROW_SO2:VAL:XCL_STOCK:TSPMBTU,TMPMBTU
-!
-            DO FRG = 1 , UNFRGN
-               IRG = EPCLMP(FRG)
-               DO IPLT = 1 , NUTSEC
-                  IF (C_ECP_CDS(IPLT,IRG) .EQ. 1) THEN
-                     ISCRB = ECP_SCRUB(IPLT,CURIYR)
-!
-                     ROW = 'F'//EPFLCD(FRG)//UPLNTCD(IPLT)//SCRB_CD(ISCRB)//'XX'//UPYRCD(YEAR); call makmsk(ROW_mask,':F:',EPFLCD(FRG),UPLNTCD(IPLT),SCRB_CD(ISCRB),':XX:',UPYRCD(YEAR))
-!
-                     IF (STOCK_UP .GT. 0.0) THEN
-                        COLUMN = 'T_SU'//EPFLCD(FRG)//UPLNTCD(IPLT)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':T_SU:',EPFLCD(FRG),UPLNTCD(IPLT),UPYRCD(YEAR))
-                        VAL = STOCK_UP * SHR_US(IPLT,FRG)
-                        IF (USW_DIGIT .GT. 0)VAL = DIGITS2( VAL , DIGITS_PARM)
-                        IF (VAL .GT. -ECP_MIN .AND. VAL .LT. ECP_MIN) VAL = 0.0
-                        IF (VAL .NE. 0.0) THEN
-                           CALL CVAL(COLUMN,ROW,DBLE(1.0),COLUMN_mask,ROW_mask,'EP$CSUPPLY,58')
-                           CALL CBND(UPBND,COLUMN,VAL,VAL,COLUMN_mask,'EP$CSUPPLY,59')
-                        END IF
-                     END IF
-!
-                     IF (STOCK_DN .GT. 0.0) THEN
-                        COLUMN = 'T_SD'//EPFLCD(FRG)//UPLNTCD(IPLT)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':T_SD:',EPFLCD(FRG),UPLNTCD(IPLT),UPYRCD(YEAR))
-                        VAL = STOCK_DN * SHR_US(IPLT,FRG)
-                        IF (USW_DIGIT .GT. 0)VAL = DIGITS2( VAL , DIGITS_PARM)
-                        IF (VAL .GT. -ECP_MIN .AND. VAL .LT. ECP_MIN) VAL = 0.0
-                        IF (VAL .NE. 0.0) THEN
-                           CALL CVAL(COLUMN,ROW,DBLE(-1.0),COLUMN_mask,ROW_mask,'EP$CSUPPLY,60')
-                           CALL CBND(UPBND,COLUMN,VAL,VAL,COLUMN_mask,'EP$CSUPPLY,61')
-                        END IF
-                     END IF
-!
-                  END IF
-               END DO
-            END DO
-         END IF
 !
          DO CL_SC = 1 , MX_NCOALS
             JECP = XCL_TYPE(CL_SC)
@@ -2968,9 +2829,10 @@ WRITE(funito,9990) ';'
 !
 !              Account for other demands on supply curve
 !
-               COLUMN = 'MV'//SC_CD//'OTH'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,'OTH',UPYRCD(YEAR))  ! exception, make OTH element of coalsupplystep set
+               COLUMN = 'MV'//SC_CD//'OTH'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,':OTH:',UPYRCD(YEAR))  
                VAL = XCL_OTHER(CL_SC,MIN(CURIYR+YEAR-1,UNYEAR))
-               VAL = MIN(0.9 * XCL_QECP(cl_sc,YEAR,CURIYR-1) , VAL)
+!               VAL = MIN(0.9 * XCL_QECP(cl_sc,YEAR,CURIYR-1) , VAL)
+               VAL = MIN(0.9 * XCL_QECP(cl_sc,0,MIN(CURIYR+YEAR-1,UNYEAR)) , VAL)
                IF (USW_DIGIT .GT. 0)VAL = DIGITS2( VAL , DIGITS_PARM)
                CALL CBND(UPBND,COLUMN,VAL,VAL,COLUMN_mask,'EP$CSUPPLY,65')
                CALL CVAL(COLUMN,ROW,DBLE(1.0),COLUMN_mask,ROW_mask,'EP$CSUPPLY,66')
@@ -2997,12 +2859,12 @@ WRITE(funito,9990) ';'
                   CALL CVAL(COLUMN,ROW,DBLE(-1.0),COLUMN_mask,ROW_mask,'EP$CSUPPLY,67')
                   CALL CVAL(COLUMN,ROW_XC,DBLE(1.0),COLUMN_mask,ROW_XC_mask,'EP$CSUPPLY,68')
                   IF (YEAR .LT. UNXPH) THEN
-                     OBJVAL = XCL_PECP(cl_sc,ISTEP,YEAR,CURIYR-1) * UPGNPD(CURIYR+YEAR-1) * PWF(DSCRT,YEAR)
-                     VAL = XCL_QECP(cl_sc,YEAR,CURIYR-1) * CS_SHR
+                     OBJVAL = XCL_PECP(cl_sc,ISTEP,0,MIN(CURIYR+YEAR-1,UNYEAR)) * UPGNPD(CURIYR+YEAR-1) * PWF(DSCRT,YEAR)
+                     VAL = XCL_QECP(cl_sc,0,MIN(CURIYR+YEAR-1,UNYEAR)) * CS_SHR
                   ELSE
                      DO KYR = 1 , UNFPH - UNXPH + 1
-                        PCL(KYR) = XCL_PECP(cl_sc,ISTEP,YEAR+KYR-1,CURIYR-1) * UPGNPD(CURIYR+KYR+UNXPH-2)
-                        QCL(KYR) = XCL_QECP(cl_sc,YEAR+KYR-1,CURIYR-1) * CS_SHR
+                        PCL(KYR) = XCL_PECP(cl_sc,ISTEP,0,MIN(CURIYR+KYR+UNXPH-2,UNYEAR)) * UPGNPD(CURIYR+KYR+UNXPH-2)
+                        QCL(KYR) = XCL_QECP(cl_sc,0,MIN(CURIYR+KYR+UNXPH-2,UNYEAR)) * CS_SHR
                      END DO
                      OBJVAL = PVV(PCL,ECP_D_FPH,(UNFPH-UNXPH+1),DSCRT) * PWF(DSCRT,UNXPH-1)
                      VAL = PVV(QCL,ECP_D_FPH,(UNFPH-UNXPH+1),DSCRT) * PWF(DSCRT,UNXPH-1) / PV_KW
@@ -3017,7 +2879,7 @@ WRITE(funito,9990) ';'
                   CALL CBND(UPBND,COLUMN,DBLE(0.0),VAL,COLUMN_mask,'EP$CSUPPLY,70')
                   TVAL = TVAL + VAL
                   WRITE(18,1723) CURIYR+UHBSYR,CURIYR+UHBSYR+YEAR-1,cl_sc,JECP,COLUMN,ROW,OBJVAL,VAL, &
-                     XCL_PECP(cl_sc,ISTEP,YEAR,CURIYR-1),XCL_QECP(cl_sc,YEAR,CURIYR-1),XCL_STEPS(ISTEP)
+                     XCL_PECP(cl_sc,ISTEP,0,MIN(CURIYR+YEAR-1,UNYEAR)),XCL_QECP(cl_sc,0,MIN(CURIYR+YEAR-1,UNYEAR)),XCL_STEPS(ISTEP)
  1723             FORMAT(1X,"CL_SUPPLY",4(":",I4),2(":",A8),5(":",F12.3))
 !
 !                 Label:CL_SUPPLY:CYEAR:PYEAR:cl_sc:JECP:COLUMN:ROW:OBJVAL:VAL:XCL_PECP:XCL_QECP:XCL_STEPS
@@ -3062,7 +2924,7 @@ WRITE(funito,9990) ';'
 !
 !              Account for other demands on supply curve
 !
-               COLUMN = 'MV'//SC_CD//'OTH'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,'OTH',UPYRCD(YEAR)) ! exception, make OTH element of coalsupplystep set
+               COLUMN = 'MV'//SC_CD//'OTH'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,':OTH:',UPYRCD(YEAR)) 
                VAL = XCL_OTHER(CL_SC,MIN(CURIYR+YEAR-1,UNYEAR))
                IF (USW_DIGIT .GT. 0)VAL = DIGITS2( VAL , DIGITS_PARM)
                CALL CBND(UPBND,COLUMN,VAL,VAL,COLUMN_mask,'EP$CSUPPLY,75')
@@ -3079,7 +2941,7 @@ WRITE(funito,9990) ';'
                      ELSE
                         WRITE(CSS,'("I",I2)') ISTEP
                      END IF
-                     COLUMN = 'MV'//SC_CD//CSS//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,CSS,UPYRCD(YEAR))
+                     COLUMN = 'MV'//SC_CD//CSS//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,CSS,UPYRCD(YEAR),':!INT:')
                      CALL CVAL(COLUMN,ROW,DBLE(-1.0),COLUMN_mask,ROW_mask,'EP$CSUPPLY,77')
                      IF (YEAR .LT. UNXPH) THEN
                         OBJVAL = XCL_PIMP(CL_ISC,ISTEP,MIN(YEAR+CURIYR-1,UNYEAR)) * UPGNPD(CURIYR+YEAR-1) * PWF(DSCRT,YEAR)
@@ -3105,7 +2967,7 @@ WRITE(funito,9990) ';'
 !
                   END IF
                END DO
-               COLUMN = 'MV'//SC_CD//'I11'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,'I11',UPYRCD(YEAR)) !exception, make I11 a set element of CoalSupplyStep(I01, I02, ..., I10, I11, OTH)
+               COLUMN = 'MV'//SC_CD//'I11'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':MV:',SC_CD,':I11:',UPYRCD(YEAR)) 
                CALL CVAL(COLUMN,ROW,DBLE(-1.0),COLUMN_mask,ROW_mask,'EP$CSUPPLY,80')
                OBJVAL = 5.0 * PVAL
                IF (USW_DIGIT .GT. 0)OBJVAL = DIGITS2( OBJVAL , DIGITS_PARM)
@@ -3122,17 +2984,6 @@ WRITE(funito,9990) ';'
 !
          END DO
 !
-!
-!        SET UP STRUCTURE TO MOVE SO2 FROM PLANT TYPE SPECIFIC ROWS TO REGIONAL CONSTRAINT
-!
-         ISO2 = 1
-         WRITE(SO2_CODE,'(I1)') ISO2
-         ROW_SO2 = 'EUSO2X'//SO2_CODE//UPYRCD(YEAR); call makmsk(ROW_SO2_mask,':EUSO2X:',SO2_CODE,UPYRCD(YEAR))
-         ROW = 'EUSOOT'//SO2_CODE//UPYRCD(YEAR); call makmsk(ROW_mask,':EUSOOT:',SO2_CODE,UPYRCD(YEAR))
-         CALL CVAL(ROW,ROW,DBLE(-1.0),ROW_mask,ROW_mask,'EP$CSUPPLY,83')
-         CALL CVAL(ROW,ROW_SO2,DBLE(1.0),ROW_mask,ROW_SO2_mask,'EP$CSUPPLY,84')
-         CALL CROWTYPE(ROW,'L       ',ROW_mask)
-         CALL CRHS(UPRHS,ROW,DBLE(0.0),ROW_mask,'EP$CSUPPLY,85')
 !
          DO ISO2 = 1, NUM_SO2_GRP
             WRITE(SO2_CODE,'(I1)') ISO2
@@ -3156,12 +3007,6 @@ WRITE(funito,9990) ';'
 !        SET UP STRUCTURE TO MOVE MERCURY FROM PLANT TYPE SPECIFIC ROWS TO NATIONAL CONSTRAINT
 !
          IF (USW_HG .GT. 0) THEN
-            ROW_HG = 'EUHGXX1'//UPYRCD(YEAR); ROW_HG_mask='EUHGXX(*)(*)' ; ! call makmsk(ROW_HG_mask,':EUHGXX:','1',UPYRCD(YEAR))
-            ROW = 'EUHGOT1'//UPYRCD(YEAR); call makmsk(ROW_mask,':EUHGOT1:',UPYRCD(YEAR))
-            CALL CVAL(ROW,ROW,DBLE(-1.0),ROW_mask,ROW_mask,'EP$CSUPPLY,91')
-            CALL CVAL(ROW,ROW_HG,DBLE(1.0),ROW_mask,ROW_HG_mask,'EP$CSUPPLY,92')
-            CALL CROWTYPE(ROW,'L       ',ROW_mask)
-            CALL CRHS(UPRHS,ROW,DBLE(0.0),ROW_mask,'EP$CSUPPLY,93')
 !
             DO I_HG = 1, NUM_HG_GRP
                ROW_HG = 'EUHGXX'//UPRGCD(I_HG)//UPYRCD(YEAR); call makmsk(ROW_HG_mask,':EUHGXX:',UPRGCD(I_HG),UPYRCD(YEAR))
@@ -3231,8 +3076,8 @@ WRITE(funito,9990) ';'
          END DO
          DO CL_ISC = 1 , MX_ISCV
             CL_SC = CL_ISC + MX_NCOALS
-            DO JYR = 1 , ECP_D_FPH
-               MYR = MIN(IJUMPYR , CURIYR + JYR - 1)
+            DO JYR = 0 , ECP_D_FPH          !make this same as for domestic, 0 index = curiyr
+               MYR = MIN(MNUMYR , TYR + JYR)  
                TMP_RATE = 999.999
                TPORT = 0
                DO IPORT = 1 , 4
@@ -3254,8 +3099,6 @@ WRITE(funito,9990) ';'
                   TOT_RATE2(CL_SC,IRG,JYR) = 999.9
                END IF
             END DO
-            TOT_RATE1(CL_SC,IRG,0) = TOT_RATE1(CL_SC,IRG,1)
-            TOT_RATE2(CL_SC,IRG,0) = TOT_RATE2(CL_SC,IRG,1)
 !           IF (CURIYR .EQ. 16 .AND. CURITR .EQ. 1) THEN
 !              WRITE(6,2361) CURCALYR,TYR+1989,CURITR,IRG,CL_ISC,Cl_SC,TOT_TYPE(CL_SC),TOT_RATE1(CL_SC,IRG,1),(XCL_TRATI2(CL_ISC,IPORT),XCL_TESCI(IPORT,CURIYR,IRG), &
 !                 XCL_TR_IN(IPORT,CL_ISC,IRG,CURIYR),IPORT=1,4)
@@ -5510,394 +5353,8 @@ WRITE(funito,9990) ';'
          MAP_NERC_TO_RPS_RGN(8) = 9                 
       END IF
 
-!     ASSIGN PROJECT CODES
 !
-      PRJCD(1)  = '01'
-      PRJCD(2)  = '02'
-      PRJCD(3)  = '03'
-      PRJCD(4)  = '04'
-      PRJCD(5)  = '05'
-      PRJCD(6)  = '06'
-      PRJCD(7)  = '07'
-      PRJCD(8)  = '08'
-      PRJCD(9)  = '09'
-      PRJCD(10) = '10'
-      PRJCD(11) = '11'
-      PRJCD(12) = '12'
-      PRJCD(13) = '13'
-      PRJCD(14) = '14'
-      PRJCD(15) = '15'
-      PRJCD(16) = '16'
-      PRJCD(17) = '17'
-      PRJCD(18) = '18'
-      PRJCD(19) = '19'
-      PRJCD(20) = '20'
-      PRJCD(21) = '21'
-      PRJCD(22) = '22'
-      PRJCD(23) = '23'
-      PRJCD(24) = '24'
-      PRJCD(25) = '25'
-      PRJCD(26) = '26'
-      PRJCD(27) = '27'
-      PRJCD(28) = '28'
-      PRJCD(29) = '29'
-      PRJCD(30) = '30'
-      PRJCD(31) = '31'
-      PRJCD(32) = '32'
-      PRJCD(33) = '33'
-      PRJCD(34) = '34'
-      PRJCD(35) = '35'
-      PRJCD(36) = '36'
-      PRJCD(37) = '37'
-      PRJCD(38) = '38'
-      PRJCD(39) = '39'
-      PRJCD(40) = '40'
-      PRJCD(41) = '41'
-      PRJCD(42) = '42'
-      PRJCD(43) = '43'
-      PRJCD(44) = '44'
-      PRJCD(45) = '45'
-      PRJCD(46) = '46'
-      PRJCD(47) = '47'
-      PRJCD(48) = '48'
-      PRJCD(49) = '49'
-      PRJCD(50) = '50'
-      PRJCD(51) = '51'
-      PRJCD(52) = '52'
-      PRJCD(53) = '53'
-      PRJCD(54) = '54'
-      PRJCD(55) = '55'
-      PRJCD(56) = '56'
-      PRJCD(57) = '57'
-      PRJCD(58) = '58'
-      PRJCD(59) = '59'
-      PRJCD(60) = '60'
-      PRJCD(61) = '61'
-      PRJCD(62) = '62'
-      PRJCD(63) = '63'
-      PRJCD(64) = '64'
-      PRJCD(65) = '65'
-      PRJCD(66) = '66'
-      PRJCD(67) = '67'
-      PRJCD(68) = '68'
-      PRJCD(69) = '69'
-      PRJCD(70) = '70'
-      PRJCD(71) = '71'
-      PRJCD(72) = '72'
-      PRJCD(73) = '73'
-      PRJCD(74) = '74'
-      PRJCD(75) = '75'
-      PRJCD(76) = '76'
-      PRJCD(77) = '77'
-      PRJCD(78) = '78'
-      PRJCD(79) = '79'
-      PRJCD(80) = '80'
-      PRJCD(81) = '81'
-      PRJCD(82) = '82'
-      PRJCD(83) = '83'
-      PRJCD(84) = '84'
-      PRJCD(85) = '85'
-      PRJCD(86) = '86'
-      PRJCD(87) = '87'
-      PRJCD(88) = '88'
-      PRJCD(89) = '89'
-      PRJCD(90) = '90'
-      PRJCD(91) = '91'
-      PRJCD(92) = '92'
-      PRJCD(93) = '93'
-      PRJCD(94) = '94'
-      PRJCD(95) = '95'
-      PRJCD(96) = '96'
-      PRJCD(97) = '97'
-      PRJCD(98) = '98'
-      PRJCD(99) = '99'
-      PRJCD(100) = 'AA'
-!
-!     ASSIGN PROVINCE CODES
-!
-!     CISCD(1)  = 'D'
-!     CISCD(2)  = 'E'
-!     CISCD(3)  = 'F'
-!     CISCD(4)  = 'G'
-!     CISCD(5)  = 'H'
-!     CISCD(6)  = 'I'
-!     CISCD(7)  = 'J'
-!     CISCD(8)  = 'K'
-!     CISCD(9)  = 'L'
-!     CISCD(10) = 'M'
-!     CISCD(11) = 'N'
-!     CISCD(12) = 'O'
-!     CISCD(13) = 'P'
-!     CISCD(14) = 'Q'
-!     CISCD(15) = 'R'
-!     CISCD(16) = 'S'
-!     CISCD(17) = 'T'
-!
-!     FILL GW ARRAY
-!
-      IF ( USW_CANACC .GT. 0 ) THEN                          ! if allowing acceleration of canadian projects
 
-      DO YEAR = 1 , UNFPH
-         GW(YEAR) = DBLE(1.0)
-      END DO
-!
-!     NEW CANADIAN PROJECT INFO STORED IN FIRST YEAR EIJ DAF
-!
-      CALL GETEIJ(1)
-!
-!     FIND UNIQUE IMPORT REGION PAIRS (I.E. PROVINCES)
-!
-      DO IRG = 1, ECP$CS3
-         DO PRJ = 1 , ECP$CS2
-            UNQPAT(PRJ,IRG) = 0
-         END DO
-      END DO
-      NUMBER = 1
-      PRJ = 1
-      DO IRG = 1 , UCI$RGN(PRJ)
-         UNQPAT(1,IRG) = UCI$RGS(PRJ,IRG)
-      END DO
-      PROVNDX(PRJ) = 1
-      PRJ = 2
-      DO WHILE (UCI$CAP(PRJ) .GT. 0.0 .AND. PRJ .LT. ECP$CS2)
-         LAST = 0
-         NEXT = 1
-         DO WHILE (LAST .EQ. 0 .AND. NEXT .LE. NUMBER)
-            VLS = 0
-            DO FRST = 1, ECP$CS3
-               IF (FRST .LE. UCI$RGN(PRJ)) THEN
-                  IRG = UCI$RGS(PRJ,FRST)
-               ELSE
-                  IRG = 0
-               END IF
-               IF (IRG .EQ. UNQPAT(NEXT,FRST)) VLS = VLS + 1
-            END DO
-            IF (VLS .EQ. ECP$CS3) LAST = NEXT
-            NEXT = NEXT + 1
-         END DO
-         IF (LAST .EQ. 0) THEN
-            NUMBER = NUMBER + 1
-            LAST = NUMBER
-            DO IRG = 1 , UCI$RGN(PRJ)
-               UNQPAT(NUMBER,IRG) = UCI$RGS(PRJ,IRG)
-            END DO
-         END IF
-         PROVNDX(PRJ) = LAST
-         PRJ = PRJ + 1
-      END DO
-      WRITE(18,*) ' NUMBER OF CANADIAN PROVINCES ',NUMBER
-!
-!     FIRST TIME THROUGH SET UP CANADIAN IMPORT STRUCTURE
-!
-      PRJ = 1
-      DO WHILE (UCI$CAP(PRJ) .GT. 0.0 .AND. PRJ .LT. ECP$CS2)
-!
-!        DUMP THE DATA
-!
-         WRITE(18,9371) PRJ,PROVNDX(PRJ),LEAD(PRJ),MODYR(PRJ),PROJYR(PRJ),UCI$CAP(PRJ),UCI$MWH(PRJ),UCI$CFC(PRJ),UCI$RGN(PRJ)
- 9371    FORMAT(1X,'IMPORT DATA ',5I5,3F9.3,I5)
-!
-!        MAKE SURE THAT THE MODEL YEAR IS INITIALLY EQUAL TO THE
-!        PROJECT YEAR
-!
-         MODYR(PRJ) = PROJYR(PRJ)
-!
-!        CREATE VECTORS FOR COMMITTED CANADIAN PROJECTS
-!
-         DO YEAR = 1 , UNXPH
-            IRG = PROVNDX(PRJ)
-            CISCD(IRG) = CHAR(IRG+64+MNUMNR-10)
-            OLYRF = YEAR + CURIYR - 1 + UHBSYR
-            OLYR = YEAR + CURIYR - 1
-            COLUMN = 'E'//CISCD(IRG)//'IMU'//PRJCD(PRJ)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':E:',CISCD(IRG),':IMU:',PRJCD(PRJ),UPYRCD(YEAR))
-!
-            ROW = UPOBJ ; ROW_mask=UPOBJ
-            VALUE = DBLE(0.001)
-              CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,1')
-!
-            IF ( OLYRF .GE. MODYR(PRJ) .AND. OLYRF .LT. PROJYR(PRJ)) THEN
-               UVALUE = DBLE(UCI$CAP(PRJ) * 0.001)
-               IF (USW_DIGIT .GT. 0)UVALUE = DIGITS2( UVALUE , DIGITS_PARM)
-               IF (UVALUE .GT. -ECP_MIN .AND. UVALUE .LT. ECP_MIN) UVALUE = ECP_MIN
-            ELSE
-               UVALUE = ECP_MIN
-            END IF
-            LVALUE = UVALUE
-              CALL CBND(UPBND,COLUMN,LVALUE,UVALUE,COLUMN_mask,'EP$ETT,2')
-!
-            ROW = 'C'//CISCD(IRG)//'IMDDD'//UPYRCD(YEAR); call makmsk(ROW_mask,':C:',CISCD(IRG),':IMDDD:',UPYRCD(YEAR))
-            VALUE = DBLE(0.0) - DBLE( UCI$CFC(PRJ) )
-            IF (YEAR .EQ. UNXPH) THEN
-               MORE = PROJYR(PRJ) - UHBSYR - CURIYR + UNXPH - 1
-               MORE = MIN ( MORE , UNFPH )
-               XIR = DBLE(EPDSCRT)
-               IF (MORE .GT. 0) THEN
-                  VALUE = PVV(GW,ECP_D_FPH,MORE,XIR) / PVV(GW,ECP_D_FPH,UNFPH,XIR) * VALUE
-                  IF (USW_DIGIT .GT. 0)VALUE = DIGITS2( VALUE , DIGITS_PARM)
-                  IF (VALUE .GT. -ECP_MIN .AND. VALUE .LT. ECP_MIN) VALUE = ECP_MIN
-               ELSE
-                  VALUE = ECP_MIN
-               END IF
-            END IF
-            VALUE = TRUNC( VALUE , 2)
-              CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,3')
-         END DO                                                      ! YEAR
-!
-!        CREATE BOUND ROW TO LIMIT CANADIAN PROJECTS ACCELERATION
-!
-         IRG = PROVNDX(PRJ)
-         OLYRF = LEAD(PRJ) + CURIYR - 1 + UHBSYR
-         ROW = 'L'//CISCD(IRG)//'IMX'//PRJCD(PRJ)//'1'; call makmsk(ROW_mask,':L:',CISCD(IRG),':IMX:',PRJCD(PRJ),':1:')
-         IF ( OLYRF .LT. MODYR(PRJ)) THEN
-            UVALUE = DBLE(UCI$CAP(PRJ) * 0.001)
-            IF (USW_DIGIT .GT. 0)UVALUE = DIGITS2( UVALUE , DIGITS_PARM)
-            IF (UVALUE .GT. -ECP_MIN .AND. UVALUE .LT. ECP_MIN) UVALUE = ECP_MIN
-         ELSE
-            UVALUE = ECP_MIN
-         END IF
-         CALL CROWTYPE(ROW,'L       ',ROW_mask)
-           CALL CRHS(UPRHS,ROW,UVALUE,ROW_mask,'EP$ETT,4')
-!
-!        CREATE VECTORS TO ACCELERATE CANADIAN PROJECTS
-!
-         DO YEAR = 1 , UNXPH - LEAD(PRJ) + 1
-            IRG = PROVNDX(PRJ)
-            OLYRF = YEAR + LEAD(PRJ) + CURIYR - 2 + UHBSYR
-            OLYR = YEAR + LEAD(PRJ) + CURIYR - 2
-            COLUMN = 'B'//CISCD(IRG)//'IMU'//PRJCD(PRJ)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':B:',CISCD(IRG),':IMU:',PRJCD(PRJ),UPYRCD(YEAR))
-!
-            ROW = UPOBJ ; ROW_mask=UPOBJ
-            VALUE = DBLE(UCI$MWH(PRJ)) * UCI$CFC(PRJ) * &
-                UPGNPD(OLYR) * DBLE(8.760)
-            MORE = MIN( (PROJYR(PRJ) - OLYRF) , UNFPH)
-            IF (MORE .GT. 0 .AND. (OLYRF - LEAD(PRJ)) .GE. ECP_FYR) THEN
-               UVALUE = DBLE(UCI$CAP(PRJ)) * DBLE(0.001)
-               LVALUE = DBLE(0.0)
-                 CALL CBND(UPBND,COLUMN,LVALUE,UVALUE,COLUMN_mask,'EP$ETT,5')
-               JYR = YEAR + LEAD(PRJ) - 1
-               VALUE = VALUE / CRF(DBLE(EPDSCRT) , MORE)
-               VALUE = VALUE * PWF(DBLE(EPDSCRT) , JYR)
-               IF (USW_DIGIT .GT. 0)THEN
-               OBJVAL = DIGITS2( VALUE , DIGITS_PARM)
-               ELSE
-                  OBJVAL = VALUE
-               END IF
-                 CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,6')
-            ELSE
-               UVALUE = DBLE(0.0)
-               LVALUE = UVALUE
-                 CALL CBND(UPBND,COLUMN,LVALUE,UVALUE,COLUMN_mask,'EP$ETT,7')
-               VALUE = DBLE(0.001)
-               IF (USW_DIGIT .GT. 0)THEN
-               OBJVAL = DIGITS2( VALUE , DIGITS_PARM)
-               ELSE
-                  OBJVAL = VALUE
-               END IF
-                 CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,8')
-            END IF
-!
-!           put in overbuild constraint
-!
-            do IRGN = 1, UCI$RGN(PRJ)
-               nercrg = UNQPAT(PROVNDX(PRJ),IRGN)
-               IF (UPOVBDSW .GT. 0 .AND. UPOVBDSW .LE. 2)THEN
-                  ROW = 'R'//UPRGCD(nercrg)//'YYYYY'//UPYRCD(OLYR-CURIYR); call makmsk(ROW_mask,':R:',UPRGCD(nercrg),':YYYYY:',UPYRCD(OLYR-CURIYR))
-               ELSE
-                  ROW = 'R'//'U'//'YYYYY'//UPYRCD(OLYR-CURIYR); call makmsk(ROW_mask,':R:',':U:',':YYYYY:',UPYRCD(OLYR-CURIYR))
-               END IF
-               VALUE = DBLE(1.00)
-                 CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,9')
-            enddo
-!
-            ROW = 'L'//CISCD(IRG)//'IMX'//PRJCD(PRJ)//'1'; call makmsk(ROW_mask,':L:',CISCD(IRG),':IMX:',PRJCD(PRJ),':1:')
-            VALUE = DBLE(1.0)
-              CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,10')
-!
-            DO JYR = LEAD(PRJ) + YEAR - 1 , UNXPH
-               ROW = 'C'//CISCD(IRG)//'IMDDD'//UPYRCD(JYR); call makmsk(ROW_mask,':C:',CISCD(IRG),':IMDDD:',UPYRCD(JYR))
-               VALUE = DBLE(0.0) - DBLE( UCI$CFC(PRJ) )
-               VALUE = TRUNC( VALUE , 2)
-               IF (JYR .EQ. UNXPH) THEN
-                  MORE = (PROJYR(PRJ) - UHBSYR) - (CURIYR + UNXPH - 1)
-                  MORE = MIN ( MORE , UNFPH )
-                  XIR = DBLE(EPDSCRT)
-                  IF (MORE .GT. 0) THEN
-                     VALUE = PVV(GW,ECP_D_FPH,MORE,XIR) / PVV(GW,ECP_D_FPH,UNFPH,XIR) * VALUE
-                     IF (USW_DIGIT .GT. 0)VALUE = DIGITS2( VALUE , DIGITS_PARM)
-                     IF (VALUE .GT. -ECP_MIN .AND. VALUE .LT. ECP_MIN) VALUE = ECP_MIN
-                  ELSE
-                     VALUE = ECP_MIN
-                  END IF
-               ELSE
-                  MORE = CURIYR + JYR - 1 + UHBSYR
-                  IF (MORE .GE. PROJYR(PRJ)) THEN
-                     VALUE = ECP_MIN
-                  END IF
-               END IF
-                 CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,11')
-            END DO                                                    ! JYR
-         END DO                                                      ! YEAR
-         PRJ = PRJ + 1
-      END DO                                            ! PRJ (DO WHILE)
-!
-!     CANADIAN IMPORT OPERATE VECTORS
-!
-      DO PRJ = 1 , NUMBER
-         CISCD(PRJ) = CHAR(PRJ+64+MNUMNR-10)
-         DO YEAR = 1 , UNXPH
-            ROW = 'C'//CISCD(PRJ)//'IMDDD'//UPYRCD(YEAR); call makmsk(ROW_mask,':C:',CISCD(PRJ),':IMDDD:',UPYRCD(YEAR))
-            CALL CROWTYPE(ROW,'L       ',ROW_mask)
-              CALL CRHS(UPRHS,ROW,DBLE(0.0),ROW_mask,'EP$ETT,12')
-            IRG = 1
-            NERC = UNQPAT(PRJ,IRG)
-            DO WHILE (NERC .GT. 0 .AND. IRG .LE. ECP$CS3)
-               COLUMN = 'O'//UPRGCD(NERC)//'IM'//CISCD(PRJ)//'X1'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':O:',UPRGCD(NERC),':IM:',CISCD(PRJ),':X1:',UPYRCD(YEAR))
-
-               IF (SR_TRAN_CREDIT .GT. 0.0) THEN
-                  COLUMN_MIN_SR = 'O'//UPRGCD(NERC)//'IM'//CISCD(PRJ)//'X2'//UPYRCD(YEAR); call makmsk(COLUMN_MIN_SR_mask,':O:',UPRGCD(NERC),':IM:',CISCD(PRJ),':X2:',UPYRCD(YEAR))
-               END IF
-
-               ROW = 'C'//CISCD(PRJ)//'IMDDD'//UPYRCD(YEAR); call makmsk(ROW_mask,':C:',CISCD(PRJ),':IMDDD:',UPYRCD(YEAR))
-               VALUE = DBLE(1.0)
-                 CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,13')
-
-               IF (SR_TRAN_CREDIT .GT. 0.0) THEN
-                    CALL CVAL(COLUMN_MIN_SR,ROW,VALUE,COLUMN_MIN_SR_mask,ROW_mask,'EP$ETT,14')
-               END IF
-
-               ROW = 'R'//UPRGCD(NERC)//'XXXXX'//UPYRCD(YEAR); call makmsk(ROW_mask,':R:',UPRGCD(NERC),':XXXXX:',UPYRCD(YEAR))
-               VALUE = DBLE(1.0)
-                 CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,15')
-
-               IF (SR_TRAN_CREDIT .GT. 0.0) THEN
-                    CALL CVAL(COLUMN_MIN_SR,ROW,VALUE,COLUMN_MIN_SR_mask,ROW_mask,'EP$ETT,16')
-               END IF
-
-               DO IGRP = 1 , EPNGRP
-                  DO ISEG = 1 , EPNSPG(IGRP)
-                     VLS = EPLMAP(IGRP,ISEG,YEAR)
-                     JSP = EPGECP(IGRP)
-                     ROW = 'L'//UPRGCD(NERC)//'EL'//UPLDCD(JSP)//UPRGCD(IGRP)//UPRGCD(ISEG)//UPYRCD(YEAR); call makmsk(ROW_mask,':L:',UPRGCD(NERC),':EL:',UPLDCD(JSP),UPRGCD(IGRP),UPRGCD(ISEG),UPYRCD(YEAR)) ! aimms rLEL2
-                     VALUE = DBLE(1.0)
-                       CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$ETT,17')
-
-                     IF (SR_TRAN_CREDIT .GT. 0.0) THEN
-                        VALUE = DBLE(1.0 - SR_TRAN_CREDIT)
-                          CALL CVAL(COLUMN_MIN_SR,ROW,VALUE,COLUMN_MIN_SR_mask,ROW_mask,'EP$ETT,18')
-                        ROW_SR = 'R'//UPRGCD(NERC)//'SR'//UPLDCD(JSP)//UPRGCD(IGRP)//UPRGCD(ISEG)//UPYRCD(YEAR); call makmsk(ROW_SR_mask,':R:',UPRGCD(NERC),':SR:',UPLDCD(JSP),UPRGCD(IGRP),UPRGCD(ISEG),UPYRCD(YEAR))
-                        VALUE = DBLE(SR_TRAN_CREDIT)
-                          CALL CVAL(COLUMN_MIN_SR,ROW_SR,VALUE,COLUMN_MIN_SR_mask,ROW_SR_mask,'EP$ETT,19')
-                     END IF
-
-                  END DO                                              ! ISEG
-               END DO                                                 ! IGRP
-               IRG = IRG + 1
-               NERC = UNQPAT(PRJ,IRG)
-            END DO                                                    ! IRG
-         END DO                                                      ! YEAR
-      END DO                                                       ! PRJ
-      ENDIF                                 ! end if allowing acceleration of canadian projects
-!
 !     REVISE RHS OF ELECTRICITY IMPORT, EXPORT AND PIPELINE CONSTRAINTS
 !
       DO YEAR = UNXPH , 1 , - 1
@@ -8518,6 +7975,7 @@ WRITE(funito,9990) ';'
                      ROW = 'C'//UPRGCD(NERC)//UPLNTCD(UCPDSPI(IP))//'M'//EPFLCD(FLRG)//SCODE(ISP)//UPYRCD(YEAR); call makmsk(ROW_mask,':C:',UPRGCD(NERC),UPLNTCD(UCPDSPI(IP)),':M:',EPFLCD(FLRG),SCODE(ISP),UPYRCD(YEAR))
                      VALUE = DBLE( 1.0 )
                      CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$PM$LF,7')
+					 CALL CROWTYPE(ROW,'L       ',ROW_mask)
                   END IF
 
                   IF (HTRT_TEST .EQ. 0 .AND. HTRT_CAP(NERC,UPTTYP(IP),FLRG,YEAR) .GT. 0.0 .AND. AVG_HTRT_MOD(IP) .GT. 0.0 .AND. YEAR .GT. 1) THEN     !if HRI option possible
@@ -13082,7 +12540,7 @@ WRITE(funito,9990) ';'
       REAL*8 T_VAL
       REAL*8 PKADJ
       INTEGER*4 YEAR,NERC
-      INTEGER*4 ISP,IP
+      INTEGER*4 ISP
       INTEGER*4 IGRP,IYR
       INTEGEr*4 JSP,ISEG,VLS
       CHARACTER*16 ROW,ROW1,COLUMN
@@ -13131,18 +12589,9 @@ WRITE(funito,9990) ';'
 !     IF reserve margin is used in this way, need both pieces to recover reserve margin
 !
       IYR = CURIYR + YEAR - 1
-      if (EPKSHFT(NERC,IYR) .gt. 0.0) then
-         EPKMRGN(NERC,YEAR) = EPKSHFT(NERC,IYR)
-      else
-         EPKMRGN(NERC,YEAR) = EP_NET_PEAK(YEAR)
-      endif
-!     ETRMRGN(NERC,YEAR) = T_VAL - BTCOGEN(NERC) / 8.76 + BMEXICAN(NERC) / 8.76
+      EPKMRGN(NERC,YEAR) = EP_NET_PEAK(YEAR)
       ETRMRGN(NERC,YEAR) = PKADJ
-!
-!     For competitive run
-!
 
-      IP = 1
   
 !     IF CREATING MATRIX AND FIRST ECP YEAR DECLARE ROW TYPE
 !     AND CREATE ROW/COLUMN INTERSECTIONS FOR RESERVE MARGIN
@@ -13424,7 +12873,7 @@ WRITE(funito,9990) ';'
       T_VAL = UEITAJ_ECP(IS,NERC) + UTRELADJ(NERC,MIN(UNYEAR,CURIYR+YEAR-1))
 
       write(18,9317) CURIYR+UHBSYR,YEAR,NERC,IGRP,IS,T_VAL
- 9317 format(1x,"EPGETT",5(":",I4),":",F6.3)
+ 9317 format(1x,"EPGETT",5(":",I4),":",F8.3)
 
       IF(UPOVBDSW .LE. 0)THEN
          CALL CROWTYPE(ROW,'N       ',ROW_mask)
@@ -14842,7 +14291,7 @@ WRITE(funito,9990) ';'
 !
       IF ((CURIYR + UHBSYR) .EQ. UYR_STEO .AND. YEAR .EQ. 1)THEN
           CFHIST = UGNCFNR(1,NERC,CURIYR - 1) + UGNCFNR(2,NERC,CURIYR - 1)
-        DO JYR = CURIYR + UPCFCLT , MNUMYR
+        DO JYR = CURIYR + UPCFCLT , CURIYR + UPCFCLT + 1   !only impose limit one year to get retrofit capacity to meet limit
           IF (CFHIST .GE. 0.05)UPCFGEN(JYR,NERC) = MAX(UPCFGEN(JYR,NERC),CFHIST)
         END DO
 !       write(6,2222) curiyr+1989,curiyr+1989+upcfclt,nerc,cfhist,UPCFGEN(curiyr+1,nerc)
@@ -20171,21 +19620,17 @@ WRITE(funito,9990) ';'
                   IF (ICAP .EQ. BCAP) THEN
                      ROW = 'L'//UPRGCD(NERC)//UPLNTCD(ICAP)//'INT'//UPYRCD(YEAR); call makmsk(ROW_mask,':L:',UPRGCD(NERC),UPLNTCD(ICAP),':INT:',UPYRCD(YEAR))
 
-!                    SET ROW TYPE - WHEN USW_RNW >= 1 THEN SET ROW TYPE & BOUNDS ACCORDING TO RENEWABLE COMMON INFO
+!                    SET ROW TYPE & BOUNDS ACCORDING TO RENEWABLE COMMON INFO
 
-                     IF (USW_RNW .GE. 1) THEN
                         if(EPBNDTYP(RCAP).ne."2" .and. EPBNDTYP(RCAP).ne.' '.and.ichar(EPBNDTYP(RCAP)).ne.0) then
                            CALL CROWTYPE(ROW,EPBNDTYP(RCAP)//'       ',ROW_mask)
                         else
                           CALL CROWTYPE(ROW,'L       ',ROW_mask)
                         endif
-                     ELSE
-                        CALL CROWTYPE(ROW,'E       ',ROW_mask)
-                     END IF
 
 !                    REVISE RHS OF ROW
 
-                     IF ((USW_RNW .GE. 1) .AND. (UPAVLYR(ICAP) .LE. FULLYR)) THEN
+                     IF (UPAVLYR(ICAP) .LE. FULLYR) THEN
                         IF (OLYR .LT. UNXPH) THEN
                            VALUE = DBLE(EPBLDBND(RCAP,YEAR))
                         ELSE
@@ -20216,7 +19661,7 @@ WRITE(funito,9990) ';'
 
 !                       REVISE RHS OF ROW
 
-                        IF ((USW_RNW .GE. 1) .AND. (UPAVLYR(ICAP) .LE. FULLYR)) THEN
+                        IF (UPAVLYR(ICAP) .LE. FULLYR) THEN
                            VALUE = DBLE(EPBDSUP(RCAP,IS))
                         ELSE
                            VALUE = DBLE(0.0)
@@ -22067,9 +21512,8 @@ WRITE(funito,9990) ';'
                IF (ESTSWTCH(IECP) .GT. 0) THEN
                   ROW = 'L'//UPRGCD(NERC)//UPLNTCD(IECP)//'REN'//UPYRCD(YEAR); call makmsk(ROW_mask,':L:',UPRGCD(NERC),UPLNTCD(IECP),':REN:',UPYRCD(YEAR))
 
-!                 SET ROW TYPE  - IF USW_RNW GE 1 THEN SET ROW TYPE & BOUNDS ACCORDING TO RENEWABLE COMMON INFO
+!                 SET ROW TYPE & BOUNDS ACCORDING TO RENEWABLE COMMON INFO
 
-                  IF (USW_RNW .GE. 1) THEN
                  LEP=len_trim(EPBNDTYP(IRNW))
                  if(ichar(epbndtyp(irnw)).lt.32) then
 !                  write(6,*) 'ichar(epbndtyp(irnw))=',ichar(epbndtyp(irnw))
@@ -22080,13 +21524,10 @@ WRITE(funito,9990) ';'
                  else
                    CALL CROWTYPE(ROW,'L       ',ROW_mask)  ! Changed from 2 to L because EPBNDTYP of "2" is not a valid row type.
                  endif
-                  ELSE
-                     CALL CROWTYPE(ROW,'E       ',ROW_mask)
-                  ENDIF
 
 !                 REVISE RHS OF ROW
 
-                  IF (USW_RNW .GE. 1 .AND.  UPAVLYR(IECP) .LE. FULLYR) THEN
+                  IF (UPAVLYR(IECP) .LE. FULLYR) THEN
                      IF (OLYR .LT. UNXPH) THEN
                         VALUE = DBLE(EPBLDBND(IRNW,YEAR))
                      ELSE
@@ -22098,9 +21539,9 @@ WRITE(funito,9990) ';'
                   IF (USW_DIGIT .GT. 0)VALUE = DIGITS2( VALUE , DIGITS_PARM)
                   CALL CRHS(UPRHS,ROW,VALUE,ROW_mask,'EP$BRNW,66')
 
-!                 WRITE(6,5555) CURIRUN, CURCALYR, YEAR, NERC, IECP, IRNW, ESTSWTCH(IECP), USW_RNW, UPAVLYR(IECP), ROW, &
+!                 WRITE(6,5555) CURIRUN, CURCALYR, YEAR, NERC, IECP, IRNW, ESTSWTCH(IECP), UPAVLYR(IECP), ROW, &
 !                    EPBLDBND(IRNW,YEAR), VALUE
- 5555             FORMAT(1X,"EPBLDBND_ECP",9(":",I4),":",A16,2(":",F15.3))
+ 5555             FORMAT(1X,"EPBLDBND_ECP",8(":",I4),":",A16,2(":",F15.3))
 
 !                 TECHNOLOGY SUPPLY CURVE ROWS
 
@@ -22109,13 +21550,13 @@ WRITE(funito,9990) ';'
                      IF (EPBDSUP(IRNW,IS) .NE. 0.0) THEN
                         ROW = 'L'//UPRGCD(NERC)//UPLNTCD(IECP)//'RN'//SSTEP(IS)//UPYRCD(YEAR); call makmsk(ROW_mask,':L:',UPRGCD(NERC),UPLNTCD(IECP),':RN:',SSTEP(IS),UPYRCD(YEAR))
 
-!                       SET ROW TYPE - IF USW_RNW GE 1 THEN SET ROW TYPE & BOUNDS ACCORDING TO RENEWABLE COMMON INFO
+!                       SET ROW TYPE & BOUNDS ACCORDING TO RENEWABLE COMMON INFO
 
                         CALL CROWTYPE(ROW,'L       ',ROW_mask)
 
 !                       REVISE RHS OF ROW
 
-                        IF (USW_RNW .GE. 1 .AND. UPAVLYR(IECP) .LE. FULLYR) THEN
+                        IF (UPAVLYR(IECP) .LE. FULLYR) THEN
                            VALUE = DBLE(EPBDSUP(IRNW,IS))
                         ELSE
                            VALUE = DBLE(0.0)
@@ -22384,8 +21825,8 @@ WRITE(funito,9990) ';'
 
                                  IF (USW_DIGIT .GT. 0)VALUE = DIGITS2( VALUE , DIGITS_PARM)
 
-                                 IF (UF_DBG .GT. 0 .AND. (MOD(YEAR,5) .EQ. 1)) &
-                                    WRITE(18,'(A,A,2I4,2(2x,A),3F14.6,F9.4,3F8.4)') ' EP$BRNW2:YEAR,IP,COL,ROW,VAL,OBJVAL,TRANS,EPCOVR,EPCTRM,UPGNPD,EPCCRF:', &
+                                 IF (UF_DBG .GT. 0 .AND. (MOD(YEAR,5) .EQ. 1) .AND. OBJVAL .LT. 999999.9) &
+                                    WRITE(18,'(A,2I4,2(2x,A),3F14.6,F9.4,3F8.4)') ' EP$BRNW2:YEAR,IP,COL,ROW,VAL,OBJVAL,TRANS,EPCOVR,EPCTRM,UPGNPD,EPCCRF:', &
                                     YEAR,IP,COLUMN,ROW,VALUE,OBJVAL,TRANS,EPCOVR(IECP),EPCTRM(IECP),UPGNPD(YEAR),EPCCRF(IECP)
 
                                  CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'EP$BRNW,72')
@@ -22535,7 +21976,7 @@ WRITE(funito,9990) ';'
                                     VALUE = DBLE(7000.0)
                                  ENDIF
                                  IF (USW_DIGIT .GT. 0)VALUE = DIGITS2( VALUE , DIGITS_PARM)
-                                 IF (UF_DBG .GT. 0 .AND. (MOD(YEAR,5) .EQ. 1)) &
+                                 IF (UF_DBG .GT. 0 .AND. (MOD(YEAR,5) .EQ. 1) .AND. OBJVAL .LT. 999999.9) &
                                     WRITE(18,'(A,2I4,2(2x,A),3F14.6,F9.4,3F8.4)') ' EP$BRNW2:YEAR,IP,COL,ROW,VAL,OBJVAL,TRANS,EPCOVR,EPCTRM,UPGNPD,EPCCRF:', &
                                     YEAR,IP,COLUMN,ROW,VALUE,OBJVAL,TRANS,EPCOVR(IECP),EPCTRM(IECP),UPGNPD(YEAR),EPCCRF(IECP)
 
@@ -26728,6 +26169,7 @@ WRITE(funito,9990) ';'
                                              END IF
                                              EWGROE = EWGROE + CSTEQADJ
                                              UTROE  = UTROE  + CSTEQADJ
+                                             
                                              UTROR = UTROE * (1.0 - DEBT_F) + UTINT * DEBT_F
 
                                              LEVEL = LEVEL * DBLE(1000.0) ! CONVERT FROM GW TO MW
@@ -27060,9 +26502,13 @@ WRITE(funito,9990) ';'
                                              STORAGE_RGN(W_IGRP) = NERC
                                              STORAGE_ECPn(W_IGRP) = PLANT
                                              STORAGE_ECPc(W_IGRP) = PLNT_CD
+                                             
                                              DO ISP = 1, EFD_D_MSP
-                                                STORAGE_CAP(W_IGRP,ISP) = LEVEL * 0.001
-                                                STORAGE_CST(W_IGRP,ISP) = W_VOM + (FUEL_VAL(1) * 0.001 * WHRATE) / UPGNPD(CURIYR+UPPLYR(PLANT)) / (1.0 - EPDSCRT)
+                                                STORAGE_CAP(W_IGRP,ISP) = LEVEL * 0.001 !this is overwritten later in udat
+                                                
+                                                ! assume first fuel type, IFL=1 because no EFD info yet
+                                                STORAGE_CST(W_IGRP,ISP) = W_VOM + (UPFUEL(WFL(1),IFLRG) * 0.001 * WHRATE) 
+
                                                 STORAGE_GEN(W_IGRP,ISP) = 0.0
                                                 DO IMO = 1, 12
                                                    DO d = 1 , MAXDTP
@@ -27077,8 +26523,8 @@ WRITE(funito,9990) ';'
 
                                              WRITE(18,4419) CURIRUN, CURCALYR, W_IGRP, UPPLYR(PLANT), NERC, PLANT, IRET, IFL, IFLRG, PLNT_CD, BUILDNM, ROW_FUEL, &
                                                 LEVEL, FUEL_VAL(1), WHRATE, W_VOM, UPGNPD(CURIYR+UPPLYR(PLANT)), EPDSCRT, &
-                                                STORAGE_ECPn(W_IGRP), STORAGE_ECPc(W_IGRP), STORAGE_CAP(W_IGRP,1), STORAGE_GEN(W_IGRP,1), STORAGE_CST(W_IGRP,1)
-4419                                            FORMAT(1X,"ECP_STORAGE_INFO",9(":",I5),":",A2,2(":",A16),6(":",F21.6),":",I3,":",A2,3(":",F21.6))
+                                                STORAGE_ECPn(W_IGRP), STORAGE_ECPc(W_IGRP), STORAGE_CAP(W_IGRP,1), STORAGE_GEN(W_IGRP,1), STORAGE_CST(W_IGRP,1), UPFUEL(WFL(1),IFLRG)
+4419                                            FORMAT(1X,"ECP_STORAGE_INFO",9(":",I5),":",A2,2(":",A16),6(":",F21.6),":",I3,":",A2,4(":",F21.6))
          
                                              IF (UPPCEF(PLANT) .GT. 0.0) THEN     !CCS plant - store cost data for CCATS
                                                   ULCCS_INV(W_GRP) = LEVEL * 0.001 * PCST * UPCCS_INVSH(PLANT)  !nominal $ annuity for CCS share of cost
@@ -27821,7 +27267,7 @@ WRITE(funito,9990) ';'
                            LEV_DEF_CLtNG(2) = CST_CNFG_CLtNG(1,IYR)
                            LEV_DEF_CLtNG(3) = RCST_CNFG_CLtNG(1,IYR)
                            
-                           COL_CLtNG = 'GCL'//GRP_CD(IYR)//COAL; call makmsk(COL_CLtNG_CL_mask,':GCL:',GRP_CD(IYR),COAL)
+                           COL_CLtNG_CL = 'GCL'//GRP_CD(IYR)//COAL; call makmsk(COL_CLtNG_CL_mask,':GCL:',GRP_CD(IYR),COAL)
                            LEV_COL_CLtNG_CL = LEV_CNFG_CLtNG_CL(I_CNFG,IYR) 
                            LEV_CST_CLtNG_CL(2) = CST_CNFG_CLtNG_CL(I_CNFG,IYR)
                            LEV_CST_CLtNG_CL(3) = RCST_CNFG_CLtNG_CL(I_CNFG,IYR)
@@ -30267,14 +29713,14 @@ WRITE(funito,9990) ';'
       INTEGER PLT,OLYR,OPYR,IYR,ISP,IGRP,ISEG
       INTEGER NERC,YEAR,VLS,IVLS,IRET,JVLS
       REAL*8 PWF,PVV
-      REAL*8 DUAL_VALUE,WDTH,TWOVAL(5)
+      REAL*8 DUAL_VALUE,WDTH,TWOVAL(5),MXGEN(ECP_D_XPH)
       REAL*8 MRGNRG,MRGCAP,DSCKWH,AVGCFC,TOTHRS,GNP(ECP_D_FPH),DSCTMP,MRGCAP2,CAPT(10), &
-                  MRGCAP3,DSCTMP2,ONES(ECP_D_FPH),MRGCAP2_PD2,DSCTMP2_PD2, MRGSR, MRGINT
+                  MRGCAP3,DSCTMP2,ONES(ECP_D_FPH),MRGCAP2_PD2,DSCTMP2_PD2, MRGSR, MRGINT, MRGGEN
       REAL*8 T_VAL
       CHARACTER*16 ROW, ROW_SR
       CHARACTER*2 DEL
       CHARACTER*2 STATUS
-	  REAL*8 SRAVOID(ECP_D_STP,ECP_D_SSZ,ECP_D_XPH), INTAVOID(ECP_D_XPH)
+	  REAL*8 SRAVOID(ECP_D_STP,ECP_D_SSZ,ECP_D_XPH), INTAVOID(ECP_D_XPH),FGEN_AVD(ECP_D_XPH,ECP_D_CAP)
 	  INTEGER ICAP
 
 
@@ -30302,8 +29748,15 @@ WRITE(funito,9990) ';'
       DEL = ' :'
       STATUS = 'DV'
       DUAL_VALUE = DBLE(20.00)
-	  
-	  
+
+      ! replicate safety valve calculation from HGEN column to use as exclusion from FGEN_AVD
+      DO YEAR = 1 , UNXPH
+        IF (YEAR .LT. UNXPH) THEN
+          MXGEN(YEAR) = 1000.0 * UPGNPD(CURIYR + YEAR - 1)
+        ELSE
+          MXGEN(YEAR) = 2000.0 * UPGNPD(CURIYR + YEAR - 1)
+        ENDIF
+      ENDDO
 	  
 	 DO YEAR = 1 , UNXPH
      !    DO ERGN = 1 , UNRGNS
@@ -30344,6 +29797,17 @@ WRITE(funito,9990) ';'
 		CALL CWFSROW(ROW,'P       ',STATUS,TWOVAL,ROW_mask,IRET)
 		DUAL_VALUE=TWOVAL(1)
         INTAVOID(YEAR) = DUAL_VALUE
+
+        DO PLT = 1, ECP_D_CAP
+          ROW = 'F'//UPRGCD(NERC)//UPLNTCD(PLT)//'GEN'// UPYRCD(YEAR); call makmsk(ROW_mask,':F:',UPRGCD(NERC),UPLNTCD(PLT),':GEN:', UPYRCD(YEAR))
+   	      CALL CWFSROW(ROW,'P       ',STATUS,TWOVAL,ROW_mask,IRET)
+    	  DUAL_VALUE=TWOVAL(1)
+          IF (DUAL_VALUE .LT. MXGEN(YEAR)) THEN
+            FGEN_AVD(YEAR,PLT) = DUAL_VALUE
+          ELSE
+            FGEN_AVD(YEAR,PLT) = 0.0  ! ignore rows that are at an escape value      
+          ENDIF
+        ENDDO
 !
          DO VLS = 1 , EPNSTP(YEAR)
 !
@@ -30560,10 +30024,20 @@ WRITE(funito,9990) ';'
       DO PLT = 1 , ECP_D_DSP
        IF (UPVTYP(PLT) .GT. 0 .AND. UPBLDREG(PLT,NERC) .GT. 0.0 .AND. UPFOM(PLT) .LT. 200.0)THEN
          OLYR = 1 + UPPLYR(UCPDSPI(PLT))
-        IF ((CURIYR + UHBSYR + OLYR - 1) .GE. UPAVLYR(UCPDSPI(PLT)))THEN
+! average annual CF for discounted KWH later
+         AVGCFC = DBLE(0.0)
+         TOTHRS = DBLE(0.0)
+         DO IVLS = 1 , EPNSTP(OLYR)
+            AVGCFC = AVGCFC + PLTDER(NERC,PLT,IVLS,OLYR) * EPWDTH(IVLS,OLYR)
+            TOTHRS = TOTHRS + EPWDTH(IVLS,OLYR)
+         END DO
+         AVGCFC = AVGCFC / TOTHRS
+
+         IF ((CURIYR + UHBSYR + OLYR - 1) .GE. UPAVLYR(UCPDSPI(PLT)))THEN
          MRGNRG = DBLE(0.0)
          MRGCAP = DBLE(0.0)
 		 MRGSR = DBLE(0.0)
+         MRGGEN = DBLE(0.0)
          DO OPYR = OLYR , UNXPH
             DO VLS = 1 , EPNSTP(OPYR)
 				IGRP = EPLDGR(VLS,OPYR)
@@ -30576,19 +30050,10 @@ WRITE(funito,9990) ';'
 !                 pltder(nerc,plt,vls,opyr),epavoid(IGRP,ISEG,opyr),mrgnrg
 !1900 format(1h ,'!avdplt',i4,i3,i4,a3,i3,i3,f10.5,3f10.2)
             END DO
+            MRGGEN = MRGGEN - AVGCFC * 8.760 * FGEN_AVD(OPYR,PLT)
             MRGCAP = MRGCAP - 1.0 * EPRMRGN(OPYR)
          END DO
 !        COMPUTE DISCOUNTED KILOWATTHOURS FOR LEVELIZATION
-         AVGCFC = DBLE(0.0)
-         TOTHRS = DBLE(0.0)
-         DO IVLS = 1 , EPNSTP(OLYR)
-            AVGCFC = AVGCFC + PLTDER(NERC,PLT,IVLS,OLYR) * EPWDTH(IVLS,OLYR)
-            TOTHRS = TOTHRS + EPWDTH(IVLS,OLYR)
-!         write(18,1950) curiyr+1989,nerc,plt,uplntcd(plt),ivls,  &
-!            PLTDER(NERC,PLT,IVLS,OLYR) , EPWDTH(IVLS,OLYR) , avgcfc, tothrs, avgcfc / tothrs
-!1950 format(1h ,'!avdcfc',i4,i3,i4,a3,i3,5f10.4)
-         END DO
-         AVGCFC = AVGCFC / TOTHRS
 !        DISCOUNT GDP DEFLATORS
          DO OPYR = OLYR , UNFPH
             GNP(OPYR - OLYR + 1) = UPGNPD(CURIYR + OPYR - 1)
@@ -30596,14 +30061,10 @@ WRITE(funito,9990) ';'
          DSCKWH = &
             PVV(GNP,ECP_D_FPH,UNFPH - OLYR + 1,DBLE(EPDSCRT - UPRSK(UCPDSPI(PLT)))) * &
           PWF(DBLE(EPDSCRT - UPRSK(UCPDSPI(PLT))),OLYR - 1)
-!        if (uplntcd(plt) .eq. 'AC')write(6,1905) curiyr+1989,nerc,uplntcd(plt),mrgnrg,mrgcap,  &
-!         DSCKWH , AVGCFC ,  &
-!         DSCKWH * AVGCFC * 8.760
-!1905 format(1h ,'!dsckwh',i4,i3,a3,5f10.3)
          DSCKWH = DSCKWH * AVGCFC * 8.760
 !        DIVIDE DISCOUNTED PRESENT VALUE OF DUALS BY DISCOUNTED KWH TO GET LEVELIZED COSTS
          IF (DSCKWH .GT. 0.0)THEN
-            EPTAVD(UCPDSPI(PLT)) = (MRGNRG + MRGCAP + MRGSR) / DSCKWH
+            EPTAVD(UCPDSPI(PLT)) = (MRGNRG + MRGCAP + MRGSR + MRGGEN) / DSCKWH
             AVDTOT(UCPDSPI(PLT),NERC) = EPTAVD(UCPDSPI(PLT))
             AVDTOT(UCPDSPI(PLT),MNUMNR) = AVDTOT(UCPDSPI(PLT),MNUMNR) + EPTAVD(UCPDSPI(PLT))
             AVDNUM(UCPDSPI(PLT)) = AVDNUM(UCPDSPI(PLT)) + 1
@@ -30612,8 +30073,8 @@ WRITE(funito,9990) ';'
          ELSE
             EPTAVD(UCPDSPI(PLT)) = 0.0
          END IF
-         WRITE(13,2000) CURIYR + UHBSYR,NERC,UPLNTCD(UCPDSPI(PLT)),MRGNRG,MRGCAP,DSCKWH,EPTAVD(UCPDSPI(PLT)) * SCALPR,AVGCFC, MRGSR
- 2000    FORMAT(1H ,'NERC,PLT,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,4F10.2,2F10.4)
+         WRITE(13,2000) CURIYR + UHBSYR,NERC,UPLNTCD(UCPDSPI(PLT)),SCALPR,MRGNRG,MRGCAP,DSCKWH,EPTAVD(UCPDSPI(PLT)) * SCALPR,AVGCFC, MRGSR, MRGGEN
+ 2000    FORMAT(1H ,'NERC,PLT,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,F12.6,4F10.2,3F10.4)
         END IF
        END IF
       END DO
@@ -30644,6 +30105,7 @@ WRITE(funito,9990) ';'
          MRGCAP = DBLE(0.0)
 		 MRGSR = DBLE(0.0)
 		 MRGINT = DBLE(0.0)
+         MRGGEN = DBLE(0.0)
          DO OPYR = OLYR , UNXPH
             DO VLS = 1 , EPNSTP(OPYR)
                IGRP = EPLDGR(VLS,OPYR)
@@ -30668,8 +30130,9 @@ WRITE(funito,9990) ';'
 				IF (UCPINTIS(ICAP) .GT. 0) THEN
 					MRGINT = MRGINT - AVGCFC * 8.760 * INTAVOID(OPYR) 
 				ENDIF
-			ENDIF
-			   
+            ENDIF
+			MRGGEN = MRGGEN - AVGCFC * 8.76 * FGEN_AVD(OPYR,ICAP)
+            
             IF (DBLE(EPIRCCR(UIRINTI(PLT))) .GT. ECP_MIN) MRGCAP = MRGCAP - EPIRCCR(UIRINTI(PLT)) * EPRMRGN(OPYR)
          END DO
 !        DISCOUNT GDP DEFLATORS
@@ -30691,7 +30154,7 @@ WRITE(funito,9990) ';'
 		 
 !        DIVIDE DISCOUNTED PRESENT VALUE OF DUALS BY DISCOUNTED KWH TO GET LEVELIZED COSTS
          IF (DSCKWH .GT. 0.0)THEN
-            EPTAVD(UCPINTI(PLT)) = (MRGNRG + MRGCAP + MRGSR + MRGINT) / DSCKWH
+            EPTAVD(UCPINTI(PLT)) = (MRGNRG + MRGCAP + MRGSR + MRGINT + MRGGEN) / DSCKWH
             AVDTOT(UCPINTI(PLT),NERC) = EPTAVD(UCPINTI(PLT))
             AVDTOT(UCPINTI(PLT),MNUMNR) = AVDTOT(UCPINTI(PLT),MNUMNR) + EPTAVD(UCPINTI(PLT))
             AVDNUM(UCPINTI(PLT)) = AVDNUM(UCPINTI(PLT)) + 1
@@ -30700,8 +30163,8 @@ WRITE(funito,9990) ';'
          ELSE
             EPTAVD(UCPINTI(PLT)) = 0.0
          END IF
-         WRITE(13,2100) CURIYR + UHBSYR,NERC,UPLNTCD(UCPINTI(PLT)),MRGNRG,MRGCAP,DSCKWH,EPTAVD(UCPINTI(PLT)) * SCALPR,AVGCFC, MRGSR, MRGINT
- 2100    FORMAT(1H ,'NERC,INT,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,4F10.2,3F10.4)
+         WRITE(13,2100) CURIYR + UHBSYR,NERC,UPLNTCD(UCPINTI(PLT)),SCALPR,MRGNRG,MRGCAP,DSCKWH,EPTAVD(UCPINTI(PLT)) * SCALPR,AVGCFC, MRGSR, MRGGEN, MRGINT
+ 2100    FORMAT(1H ,'NERC,INT,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,F12.6,4F10.2,4F10.4)
         END IF
        END IF
       END DO
@@ -30718,6 +30181,7 @@ WRITE(funito,9990) ';'
             MRGNRG = DBLE(0.0)
             MRGCAP = DBLE(0.0)
 			MRGSR = DBLE(0.0)
+            MRGGEN = DBLE(0.0)
             DO OPYR = OLYR , UNXPH
                DO VLS = 1 , EPNSTP(OPYR)
 				IGRP = EPLDGR(VLS,OPYR)
@@ -30727,6 +30191,7 @@ WRITE(funito,9990) ';'
 						MRGSR = MRGSR - SRAVOID(IGRP,ISEG,OPYR) * (1.0 - EPRCFC(PLT)) * SR_CREDIT(UCPRNWI(PLT))	   
 				   ENDIF
                END DO
+               MRGGEN = MRGGEN - EPRCFC(PLT) * 8.760 * FGEN_AVD(OPYR,UCPRNWI(PLT))
                IF (DBLE(EPIRCCR(UIRRNWI(PLT))) .GT. ECP_MIN) MRGCAP = MRGCAP - EPIRCCR(UIRRNWI(PLT)) * EPRMRGN(OPYR)
             END DO
 !           DISCOUNT GDP DEFLATORS AND KILOWATTHOURS
@@ -30743,7 +30208,7 @@ WRITE(funito,9990) ';'
 !           DIVIDE DISCOUNTED PRESENT VALUE OF DUALS BY DISCOUNTED KWH
 !           TO GET LEVELIZED COSTS
             IF (DSCKWH .GT. 0.0)THEN
-               EPTAVD(UCPRNWI(PLT)) = (MRGNRG + MRGCAP + MRGSR) / DSCKWH
+               EPTAVD(UCPRNWI(PLT)) = (MRGNRG + MRGCAP + MRGSR + MRGGEN) / DSCKWH
                AVDTOT(UCPRNWI(PLT),NERC) = EPTAVD(UCPRNWI(PLT))
                AVDTOT(UCPRNWI(PLT),MNUMNR) = AVDTOT(UCPRNWI(PLT),MNUMNR) + EPTAVD(UCPRNWI(PLT))
                AVDNUM(UCPRNWI(PLT)) = AVDNUM(UCPRNWI(PLT)) + 1
@@ -30752,8 +30217,8 @@ WRITE(funito,9990) ';'
             ELSE
                EPTAVD(UCPRNWI(PLT)) = 0.0
             END IF
-            WRITE(13,2200) CURIYR + UHBSYR,NERC,UPLNTCD(UCPRNWI(PLT)),MRGNRG,MRGCAP,DSCKWH,EPTAVD(UCPRNWI(PLT)) * SCALPR,EPRCFC(PLT), MRGSR
- 2200       FORMAT(1H ,'NERC,RNW,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,4F10.2,2F10.4)
+            WRITE(13,2200) CURIYR + UHBSYR,NERC,UPLNTCD(UCPRNWI(PLT)),SCALPR,MRGNRG,MRGCAP,DSCKWH,EPTAVD(UCPRNWI(PLT)) * SCALPR,EPRCFC(PLT), MRGSR,MRGGEN
+ 2200       FORMAT(1H ,'NERC,RNW,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,F12.6,4F10.2,3F10.4)
            END IF
           END IF
        END IF
@@ -30819,8 +30284,8 @@ WRITE(funito,9990) ';'
          ELSE
             EPTAVD(UCPSTOI(PLT)) = 0.0
          END IF
-         WRITE(13,2201) CURIYR + UHBSYR,NERC,UPLNTCD(UCPSTOI(PLT)),MRGNRG ,MRGCAP,DSCKWH,EPTAVD(UCPSTOI(PLT)) * SCALPR,AVGCFC, MRGSR, STO_OUT_CF2_AVG(NERC)
- 2201    FORMAT(1H ,'NERC,STO,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,4F10.2,3F10.4)
+         WRITE(13,2201) CURIYR + UHBSYR,NERC,UPLNTCD(UCPSTOI(PLT)),SCALPR,MRGNRG ,MRGCAP,DSCKWH,EPTAVD(UCPSTOI(PLT)) * SCALPR,AVGCFC, MRGSR,0.0,0.0, STO_OUT_CF2_AVG(NERC)
+ 2201    FORMAT(1H ,'NERC,STO,NRG,CAP,KWH,AVD',2I5,1X,A2,1X,F12.6,4F10.2,5F10.4)
         END IF
        END IF
       END DO
@@ -32531,7 +31996,12 @@ WRITE(funito,9990) ';'
             WRITE(13,5000) 
  5000 FORMAT(1h ,'!INTGEN',T35,'INTERMITTENT GENERATION -- TOTAL GENERATION REQUIREMENT (Bkwh)')
             WRITE(13,5100) (REGNUM(REG),REG = 1 , UNRGNS)
- 5100 FORMAT(1h ,'!INTGEN',T15,25I6)
+ 5100       FORMAT(1h ,'!INTGEN',T15,25I6)
+            WRITE(13,2001) 
+ 2001 FORMAT(1h ,'!INTST1',T35,'INTERMITTENT GENERATION LIMIT STATUS Plan Year 1')
+            WRITE(13,2101) (REGNUM(REG),REG = 1 , UNRGNS)
+ 2101 FORMAT(1h ,'!INTST1',T15,25I6)
+
          END IF
          WRITE(13,2200) CURIYR + UHBSYR + UPPLYR(WIPV),(IBNDSTS(REG,UPPLYR(WIPV) + 1),REG = 1 , UNRGNS)
  2200 FORMAT(1h ,'!INTSTS',T10,I4,1X,25(2X,A4))
@@ -32578,260 +32048,11 @@ WRITE(funito,9990) ';'
       REAL*4 TPCST, TC_NP
       INTEGER*4 TEFPT, T_SYR,IPROV
       INTEGER*4 IRET,YEAR,NERC,IYR,ISP,IRG,PRJ
-      INTEGER*4 PROVNDX(ECP$CS2),UNQPAT(ECP$CS2,ECP$CS3)
       INTEGER*4 NUMBER,VLS,OLYRF,FRST,NEXT,LAST, TRAN_LEAD_TIME, JYR, IFPH2, MRG
       CHARACTER*16 COLUMN, COLUMN_BLD, ROW
       CHARACTER*2 STATUS
-      CHARACTER*2 PRJCD(ECP$CS2)
-      CHARACTER*1 CISCD(ECP$CS2)
 
       ecpsub='EPO$ETT'
-
-      IF (USYEAR(CURIYR) .EQ. UPSTYR) THEN
-         GEN_PRJ = 0.0
-      END IF
-!
-!     ASSIGN PROVINCE CODES
-!
-!     CISCD(1)  = 'D'
-!     CISCD(2)  = 'E'
-!     CISCD(3)  = 'F'
-!     CISCD(4)  = 'G'
-!     CISCD(5)  = 'H'
-!     CISCD(6)  = 'I'
-!     CISCD(7)  = 'J'
-!     CISCD(8)  = 'K'
-!     CISCD(9)  = 'L'
-!     CISCD(10) = 'M'
-!     CISCD(11) = 'N'
-!     CISCD(12) = 'O'
-!     CISCD(13) = 'P'
-!     CISCD(14) = 'Q'
-!     CISCD(15) = 'R'
-!     CISCD(16) = 'S'
-!     CISCD(17) = 'T'
-!
-!     ASSIGN PROJECT CODES
-!
-      PRJCD(1)  = '01'
-      PRJCD(2)  = '02'
-      PRJCD(3)  = '03'
-      PRJCD(4)  = '04'
-      PRJCD(5)  = '05'
-      PRJCD(6)  = '06'
-      PRJCD(7)  = '07'
-      PRJCD(8)  = '08'
-      PRJCD(9)  = '09'
-      PRJCD(10) = '10'
-      PRJCD(11) = '11'
-      PRJCD(12) = '12'
-      PRJCD(13) = '13'
-      PRJCD(14) = '14'
-      PRJCD(15) = '15'
-      PRJCD(16) = '16'
-      PRJCD(17) = '17'
-      PRJCD(18) = '18'
-      PRJCD(19) = '19'
-      PRJCD(20) = '20'
-      PRJCD(21) = '21'
-      PRJCD(22) = '22'
-      PRJCD(23) = '23'
-      PRJCD(24) = '24'
-      PRJCD(25) = '25'
-      PRJCD(26) = '26'
-      PRJCD(27) = '27'
-      PRJCD(28) = '28'
-      PRJCD(29) = '29'
-      PRJCD(30) = '30'
-      PRJCD(31) = '31'
-      PRJCD(32) = '32'
-      PRJCD(33) = '33'
-      PRJCD(34) = '34'
-      PRJCD(35) = '35'
-      PRJCD(36) = '36'
-      PRJCD(37) = '37'
-      PRJCD(38) = '38'
-      PRJCD(39) = '39'
-      PRJCD(40) = '40'
-      PRJCD(41) = '41'
-      PRJCD(42) = '42'
-      PRJCD(43) = '43'
-      PRJCD(44) = '44'
-      PRJCD(45) = '45'
-      PRJCD(46) = '46'
-      PRJCD(47) = '47'
-      PRJCD(48) = '48'
-      PRJCD(49) = '49'
-      PRJCD(50) = '50'
-      PRJCD(51) = '51'
-      PRJCD(52) = '52'
-      PRJCD(53) = '53'
-      PRJCD(54) = '54'
-      PRJCD(55) = '55'
-      PRJCD(56) = '56'
-      PRJCD(57) = '57'
-      PRJCD(58) = '58'
-      PRJCD(59) = '59'
-      PRJCD(60) = '60'
-      PRJCD(61) = '61'
-      PRJCD(62) = '62'
-      PRJCD(63) = '63'
-      PRJCD(64) = '64'
-      PRJCD(65) = '65'
-      PRJCD(66) = '66'
-      PRJCD(67) = '67'
-      PRJCD(68) = '68'
-      PRJCD(69) = '69'
-      PRJCD(70) = '70'
-      PRJCD(71) = '71'
-      PRJCD(72) = '72'
-      PRJCD(73) = '73'
-      PRJCD(74) = '74'
-      PRJCD(75) = '75'
-      PRJCD(76) = '76'
-      PRJCD(77) = '77'
-      PRJCD(78) = '78'
-      PRJCD(79) = '79'
-      PRJCD(80) = '80'
-      PRJCD(81) = '81'
-      PRJCD(82) = '82'
-      PRJCD(83) = '83'
-      PRJCD(84) = '84'
-      PRJCD(85) = '85'
-      PRJCD(86) = '86'
-      PRJCD(87) = '87'
-      PRJCD(88) = '88'
-      PRJCD(89) = '89'
-      PRJCD(90) = '90'
-      PRJCD(91) = '91'
-      PRJCD(92) = '92'
-      PRJCD(93) = '93'
-      PRJCD(94) = '94'
-      PRJCD(95) = '95'
-      PRJCD(96) = '96'
-      PRJCD(97) = '97'
-      PRJCD(98) = '98'
-      PRJCD(99) = '99'
-      PRJCD(100) = 'AA'
-!
-!     NEXT CAPTURE INVESTMENTS DECISION TO ACCELERATE CANADIAN PROJECTS
-!
-      IF ( USW_CANACC .GT. 0 ) THEN
-      CALL GETEIJ(1)
-!
-!     FIND UNIQUE IMPORT REGION PAIRS (I.E. PROVINCES)
-!
-      DO IRG = 1, ECP$CS3
-         DO PRJ = 1 , ECP$CS2
-            UNQPAT(PRJ,IRG) = 0
-         END DO
-      END DO
-      NUMBER = 1
-      PRJ = 1
-      DO IRG = 1 , UCI$RGN(PRJ)
-         UNQPAT(1,IRG) = UCI$RGS(PRJ,IRG)
-      END DO
-      PROVNDX(PRJ) = 1
-      PRJ = 2
-      DO WHILE (UCI$CAP(PRJ) .GT. 0.0 .AND. PRJ .LT. ECP$CS2)
-         LAST = 0
-         NEXT = 1
-         DO WHILE (LAST .EQ. 0 .AND. NEXT .LE. NUMBER)
-            VLS = 0
-            DO FRST = 1, ECP$CS3
-               IF (FRST .LE. UCI$RGN(PRJ)) THEN
-                  IRG = UCI$RGS(PRJ,FRST)
-               ELSE
-                  IRG = 0
-               END IF
-               IF (IRG .EQ. UNQPAT(NEXT,FRST)) VLS = VLS + 1
-               END DO
-            IF (VLS .EQ. ECP$CS3) LAST = NEXT
-               NEXT = NEXT + 1
-            END DO
-         IF (LAST .EQ. 0) THEN
-            NUMBER = NUMBER + 1
-            LAST = NUMBER
-            DO IRG = 1 , UCI$RGN(PRJ)
-               UNQPAT(NUMBER,IRG) = UCI$RGS(PRJ,IRG)
-            END DO
-         END IF
-         PROVNDX(PRJ) = LAST
-         PRJ = PRJ + 1
-      END DO
-!
-      YEAR = 1
-      PRJ = 1
-      DO WHILE (UCI$CAP(PRJ) .GT. 0.0 .AND. PRJ .LE. ECP$CS2)
-         IRG = PROVNDX(PRJ)
-         CISCD(IRG) = CHAR(IRG+64+MNUMNR-10)
-         COLUMN = 'B'//CISCD(IRG)//'IMU'//PRJCD(PRJ)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':B:',CISCD(IRG),':IMU:',PRJCD(PRJ),UPYRCD(YEAR))
-         TEST = DBLE(UCI$CAP(PRJ)) * DBLE(0.001) * DBLE(0.5)
-         CALL CWFSCOL(COLUMN,'A       ',STATUS,TWOVAL,COLUMN_mask,IRET)
-         LEVEL=TWOVAL(1)
-         IF ( LEVEL .GT. TEST .AND. IRET .EQ. 0) THEN
-            OLYRF = UHBSYR + CURIYR + LEAD(PRJ) - 1
-            MODYR(PRJ) = OLYRF
-            WRITE(18,*) ' PROJECTS ',OLYRF,' IN GW: ', &
-             COLUMN,' ',STATUS,' ',LEVEL,UCI$CAP(PRJ)
-         END IF
-         PRJ = PRJ + 1
-      END DO                                               ! PRJ (WHILE)
-      CALL STREIJ(1)
-!
-!     RETRIEVE IMPORT VECTORS
-!
-      YEAR = 1
-      IYR = CURIYR
-      CALL GETEIJ(IYR)
-      DO NERC = 1 , UNRGNS
-         UCANBLD(NERC) = DBLE(0.0)
-      END DO
-!
-      DO PRJ = 1 , NUMBER
-         CISCD(PRJ) = CHAR(PRJ+64+MNUMNR-10)
-         IRG = 1
-         NERC = UNQPAT(PRJ,IRG)
-         DO WHILE (NERC .GT. 0 .AND. IRG .LE. ECP$CS3)
-            LEVEL = DBLE(0.0)
-            COLUMN = 'O'//UPRGCD(NERC)//'IM'//CISCD(PRJ)//'X1'//UPYRCD(YEAR); call makmsk(COLUMN_mask,':O:',UPRGCD(NERC),':IM:',CISCD(PRJ),':X1:',UPYRCD(YEAR))
-            CALL CWFSCOL(COLUMN,'A       ',STATUS,TWOVAL,COLUMN_mask,IRET)
-            LEVEL=TWOVAL(1)
-            IF ( LEVEL .GT. 0.001 .AND. IRET .EQ. 0) THEN
-
-               WRITE(18,7011) USYEAR(IYR), COLUMN, STATUS, LEVEL, GEN_PRJ(PRJ,NERC)
- 7011          FORMAT(1X,"IMPORTS_IN_GW",":",I4,":",A16,":",A2,2(":",F12.3))
-
-               ZTIMPD(NERC) = ZTIMPD(NERC) + LEVEL * UCI$MWH(PRJ) * &
-                8.760
-               ZTIMPF(NERC) = ZTIMPF(NERC) + LEVEL * 8760000.0
-               UCANBLD(NERC) = UCANBLD(NERC) + LEVEL
-               GEN_PRJ(PRJ,NERC) = LEVEL
-!
-!           ADD to DETAILED FIRM IMPORTS FOR TRADE TABLE
-!
-               write(18,*) ' province ',province(prj)
-               IF (PROVINCE(PRJ) .EQ. ' BC 21' ) THEN
-                 IPROV = 29  !26
-               ELSEIF (PROVINCE(PRJ) .EQ. ' Manitoba') THEN
-                 IPROV = 30   !27
-               ELSEIF (PROVINCE(PRJ) .EQ. ' QUEBEC 8' .OR. PROVINCE(PRJ) .EQ. ' Quebec 8') THEN
-                 IPROV = 32  !29
-               ELSE
-                 write(18,*) ' no iprov for utfirm '
-               ENDIF
-               write(18,7012) ' CANPRJ FIRM IMP ',NERC,IPROV,UTFIRM(NERC,IPROV),LEVEL*8760000.0
- 7012          FORMAT(A,I4,':',I4,':',F12.3,':',f12.3)
-               IF (IPROV .NE. 0) THEN
-                 UTFIRM(NERC,IPROV) = UTFIRM(NERC,IPROV) + LEVEL * 8760000.0
-               ENDIF
-            END IF
-            IRG = IRG + 1
-            NERC = UNQPAT(PRJ,IRG)
-         END DO                                                    ! IRG
-      END DO                                                       ! PRJ
-      CALL STREIJ(IYR)
-      ENDIF                                            ! end if allowing acceleration of canadian projects
 
 !     Capture New Transmission Build Vectors
 
@@ -38310,45 +37531,10 @@ WRITE(funito,9990) ';'
 !     WRITE(18,2047)'debug reading dispatch' 
         
       read(funito2,'(a)',end=44) Textline      
-   43 read(funito2,'(a)',end=44) Textline
-
-         TLen=len_trim(TextLine)
-         q1=1
-         q2=1   
-         q3=0
-         DO I=1,TLen
-            q2=q2+1
-            if (textline(q2:q2).eq.',' .AND. q3.lt.8) then
-               q3=q3+1
-               if(q3.eq.1) then
-                  read(Textline(q1:q2),'(i4)')  YR
-               elseif(q3.eq.2) then
-                  read(Textline(q1:q2),'(i4)')  ETYP
-               elseif(q3.eq.3) then
-                  read(Textline(q1:q2),'(i4)')  ERGN
-               elseif(q3.eq.4) then
-                  read(Textline(q1:q2),'(i4)')  STP
-			   elseif(q3.eq.5) then
-                  read(Textline(q1:q2),'(i4)')  MO
-               elseif(q3.eq.6) then
-                 read(Textline(q1:q2),'(i4)')  DY  
-               elseif(q3.eq.7) then
-                  read(Textline(q1:q2),'(i4)')  HR                      
-               elseif(q3.eq.8) then
-                  read(Textline(q1:q2),'(i4)')  SLV
-                  read(Textline(q2+1:q2+10),'(F12.0)')  FVALUE
-                  DATA1(SLV,ERGN,ETYP,STP,MO,DY,HR) = FVALUE
-               endif
-               q1=q2+1 
-               q2=q1 
-            endif          
-         ENDDO
-
-!        IF (CURCALYR .EQ. 2020) THEN
-!           WRITE(18,2047)'debug dispatcha',YR,ETYP,ERGN,MO,DY,HR,SLV,DATA1(SLV,ERGN,ETYP,MO,DY,HR)               
-!2047       Format(A16,7(",",I4),",",F12.3)  
-!        END IF
-      GOTO 43            
+43    read(funito2,*, end=44) YR,ETYP,ERGN,STP,MO,DY,HR,SLV,FVALUE
+       DATA1(SLV,ERGN,ETYP,STP,MO,DY,HR) = FVALUE
+      GOTO 43                   
+          
       44 continue 
       RETURN
       END       
@@ -38373,45 +37559,10 @@ WRITE(funito,9990) ';'
 !     WRITE(18,2047)'debug reading dispatch' 
         
       read(funito2,'(a)',end=44) Textline      
-   43 read(funito2,'(a)',end=44) Textline
-
-         TLen=len_trim(TextLine)
-         q1=1
-         q2=1   
-         q3=0
-         DO I=1,TLen
-            q2=q2+1
-            if (textline(q2:q2).eq.',' .AND. q3.lt.9) then
-               q3=q3+1
-               if(q3.eq.1) then
-                  read(Textline(q1:q2),'(i4)')  YR
-               elseif(q3.eq.2) then
-                  read(Textline(q1:q2),'(i4)')  ETYP
-               elseif(q3.eq.3) then
-                  read(Textline(q1:q2),'(i4)')  ERGN
-               elseif(q3.eq.4) then
-                  read(Textline(q1:q2),'(i4)')  PSTP
-               elseif(q3.eq.5) then
-                  read(Textline(q1:q2),'(i4)')  MO
-               elseif(q3.eq.6) then
-                 read(Textline(q1:q2),'(i4)')  DY  
-               elseif(q3.eq.7) then
-                  read(Textline(q1:q2),'(i4)')  HR                      
-               elseif(q3.eq.8) then
-                  read(Textline(q1:q2),'(i4)')  SLV
-                  read(Textline(q2+1:q2+10),'(F12.0)')  FVALUE
-                  DATA1(SLV,ERGN,ETYP,PSTP,MO,DY,HR) = FVALUE
-               endif
-               q1=q2+1 
-               q2=q1 
-            endif          
-         ENDDO
-
-!        IF (CURCALYR .EQ. 2020) THEN
-!           WRITE(18,2047)'debug dispatcha',YR,ETYP,ERGN,MO,DY,HR,SLV,DATA1(SLV,ERGN,ETYP,MO,DY,HR)               
-!2047       Format(A16,7(",",I4),",",F12.3)  
-!        END IF
-      GOTO 43            
+43    read(funito2,*, end=44) YR,ETYP,ERGN,PSTP,MO,DY,HR,SLV,FVALUE
+        DATA1(SLV,ERGN,ETYP,PSTP,MO,DY,HR) = FVALUE
+      GOTO 43
+      
       44 continue 
       RETURN
       END       
@@ -38435,39 +37586,11 @@ WRITE(funito,9990) ';'
       
 !          WRITE(18,2047)'debug reading dispatch' 
         
-            read(funito2,'(a)',end=44) Textline      
-            43 read(funito2,'(a)',end=44) Textline
-!            write(18,'(a)') trim(Textline)
-            TLen=len_trim(TextLine)
-            q1=1
-            q2=1   
-            q3=0
-            DO I=1,TLen
-                q2=q2+1
-                if (textline(q2:q2).eq.',' .AND. q3.lt.7) then
-                   q3=q3+1
-                   if(q3.eq.1) then
-                     read(Textline(q1:q2),'(i4)')  YR
-                   elseif(q3.eq.2) then
-                     read(Textline(q1:q2),'(i4)')  ERGN
-                   elseif(q3.eq.3) then
-                     read(Textline(q1:q2),'(i4)')  MO
-                   elseif(q3.eq.4) then
-                     read(Textline(q1:q2),'(i4)')  DY 
-                   elseif(q3.eq.5) then
-                     read(Textline(q1:q2),'(i4)')  HR                      
-                   elseif(q3.eq.6) then
-                     read(Textline(q1:q2),'(i4)')  SLV
-                     read(Textline(q2+1:q2+10),'(F12.0)')  FVALUE
-                     DATA2(SLV,ERGN,MO,DY,HR) = FVALUE
-!                     WRITE(18,2047)'debug dispatcha',YR,ERGN,ETYP,MO,DY,HR,SLV,DATA2(SLV,ERGN,MO,DY,HR)               
-                   endif
-                   q1=q2+1 
-                   q2=q1 
-                endif          
-            ENDDO
-      2047   Format(A25,1x,1x,7(I4,1x),F12.3)  
-                  GOTO 43            
+      read(funito2,'(a)',end=44) Textline      
+43    read(funito2,*, end=44) YR,ERGN,MO,DY,HR,SLV,FVALUE
+        DATA2(SLV,ERGN,MO,DY,HR) = FVALUE
+      GOTO 43
+            
        44 continue   
       
       
@@ -38494,43 +37617,12 @@ WRITE(funito,9990) ';'
 !          WRITE(18,2047)'debug reading dispatch' 
         
             read(funito2,'(a)',end=44) Textline      
-            43 read(funito2,'(a)',end=44) Textline
-!            write(18,'(a)') trim(Textline)
-            TLen=len_trim(TextLine)
-            q1=1
-            q2=1   
-            q3=0
-            DO I=1,TLen
-                q2=q2+1
-                if (textline(q2:q2).eq.',' .AND. q3.lt.9) then
-                   q3=q3+1
-                   if(q3.eq.1) then
-                     read(Textline(q1:q2),'(i4)')  YR
-                   elseif(q3.eq.2) then
-                     read(Textline(q1:q2),'(i4)')  ETYP
-                   elseif(q3.eq.3) then
-                     read(Textline(q1:q2),'(i4)')  ERGN
-                   elseif(q3.eq.4) then
-                     read(Textline(q1:q2),'(i4)')  STP
-                   elseif(q3.eq.5) then
-                     read(Textline(q1:q2),'(i4)')  MO   
-                   elseif(q3.eq.6) then
-                     read(Textline(q1:q2),'(i4)')  DY   
-                   elseif(q3.eq.7) then
-                     read(Textline(q1:q2),'(i4)')  HR                       
-                   elseif(q3.eq.8) then
-                     read(Textline(q1:q2),'(A10)')  StoType
-                     read(Textline(q2+1:q2+9),'(F9.0)')  FVALUE
-                     DATA3(STP,ERGN,ETYP,MO,DY,HR) = DATA3(STP,ERGN,ETYP,MO,DY,HR) + FVALUE
-!                    DATA3(STP,ERGN,ETYP,MO,DY,HR) = FVALUE
-!                     WRITE(18,2047)'debug sto',YR,ERGN,ETYP,MO,DY,HR,DATA3(STP,ERGN,ETYP,MO,DY,HR),StoType,q1,q2,q3             
-                   endif
-                   q1=q2+1 
-                   q2=q1 
-                endif          
-            ENDDO
-      2047   Format(A25,1x,1x,6(I4,1x),F9.6,1x,A10,3(I4,1x))  
-                  GOTO 43            
+		43	read(funito2,*, end=44) YR,ETYP,ERGN,STP,MO,DY,HR,StoType,FVALUE
+			DATA3(STP,ERGN,ETYP,MO,DY,HR) = DATA3(STP,ERGN,ETYP,MO,DY,HR) + FVALUE
+			!WRITE(18,2047)'debug sto',YR,ERGN,ETYP,MO,DY,HR,DATA3(STP,ERGN,ETYP,MO,DY,HR),StoType
+	2047   Format(A25,1x,1x,6(I4,1x),F15.9,1x,A10) 		
+			Goto 43
+
        44 continue        
       
       RETURN
@@ -38556,43 +37648,10 @@ WRITE(funito,9990) ';'
 !     WRITE(18,2047)'debug reading dispatch' 
         
       read(funito2,'(a)',end=44) Textline      
-   43 read(funito2,'(a)',end=44) Textline
-
-         TLen=len_trim(TextLine)
-         q1=1
-         q2=1   
-         q3=0
-         DO I=1,TLen
-            q2=q2+1
-            if (textline(q2:q2).eq.',' .AND. q3.lt.8) then
-               q3=q3+1
-               if(q3.eq.1) then
-                  read(Textline(q1:q2),'(i4)')  YR
-               elseif(q3.eq.2) then
-                  read(Textline(q1:q2),'(i4)')  ETYP
-               elseif(q3.eq.3) then
-                  read(Textline(q1:q2),'(i4)')  ERGN
-               elseif(q3.eq.4) then
-                  read(Textline(q1:q2),'(i4)')  SLV
-               elseif(q3.eq.5) then
-                 read(Textline(q1:q2),'(i4)')  MO  
-               elseif(q3.eq.6) then
-                  read(Textline(q1:q2),'(i4)')  DY                      
-               elseif(q3.eq.7) then
-                  read(Textline(q1:q2),'(i4)')  HR
-                  read(Textline(q2+1:q2+10),'(F12.0)')  FVALUE
-                  DATA1(SLV,ERGN,ETYP,MO,DY,HR) = FVALUE
-               endif
-               q1=q2+1 
-               q2=q1 
-            endif          
-         ENDDO
-
-         IF (CURCALYR .EQ. 2020) THEN
-            WRITE(18,2047)'debug dispatcha',YR,ETYP,ERGN,MO,DY,HR,SLV,DATA1(SLV,ERGN,ETYP,MO,DY,HR)               
- 2047       Format(A16,7(",",I4),",",F12.3)  
-         END IF
-      GOTO 43            
+43    read(funito2,*, end=44) YR,ETYP,ERGN,SLV,MO,DY,HR,FVALUE
+       DATA1(SLV,ERGN,ETYP,MO,DY,HR) = FVALUE
+      GOTO 43
+      
       44 continue 
       RETURN
       END   
@@ -38617,42 +37676,11 @@ WRITE(funito,9990) ';'
       
 !     WRITE(18,2047)'debug reading storsr' 
         
-      read(funito2,'(a)',end=44) Textline      
-   43 read(funito2,'(a)',end=44) Textline
-
-         TLen=len_trim(TextLine)
-         q1=1
-         q2=1   
-         q3=0
-         DO I=1,TLen
-            q2=q2+1
-            if (textline(q2:q2).eq.',' .AND. q3.lt.7) then
-               q3=q3+1
-               if(q3.eq.1) then
-                  read(Textline(q1:q2),'(i4)')  YR
-               elseif(q3.eq.2) then
-                  read(Textline(q1:q2),'(i4)')  ETYP
-               elseif(q3.eq.3) then
-                  read(Textline(q1:q2),'(i4)')  ERGN
-               elseif(q3.eq.4) then
-                  read(Textline(q1:q2),'(i4)')  SLV
-               elseif(q3.eq.5) then
-                 read(Textline(q1:q2),'(i4)')  GP                  
-               elseif(q3.eq.6) then
-                  read(Textline(q1:q2),'(i4)')  SL
-                  read(Textline(q2+1:q2+10),'(F12.0)')  FVALUE
-                  DATA1(SLV,ERGN,ETYP,GP,SL) = FVALUE
-               endif
-               q1=q2+1 
-               q2=q1 
-            endif          
-         ENDDO
-
-!         IF (CURCALYR .EQ. 2021) THEN
-!            WRITE(18,2046)'debug storsr',YR,ETYP,ERGN,SLV,GP,SL,DATA1(SLV,ERGN,ETYP,GP,SL)          
-! 2046       Format(A16,6(",",I4),",",F12.3)  
-!         END IF
-      GOTO 43            
+      read(funito2,'(a)',end=44) Textline  
+43    read(funito2,*, end=44) YR,ETYP,ERGN,SLV,GP,SL,FVALUE
+       DATA1(SLV,ERGN,ETYP,GP,SL) = FVALUE
+      GOTO 43
+      
       44 continue 
       RETURN
       END       
@@ -38661,6 +37689,7 @@ WRITE(funito,9990) ';'
 
       use ecp_row_col
       use hourly_restore_data
+      use ifport,only:timef
 !
 !     THIS SUBROUTINE CALCULATES THE REVENUE OF BATTERY STORAGE FROM
 !     LOAD SHIFTING FROM EXPENSIVE HOURS TO CHEAPER HOURS
@@ -38768,11 +37797,15 @@ WRITE(funito,9990) ';'
       REAL*8 MAX_LOAD(MNUMNR)
       REAL*8 MAX_PERCENT(MNUMYR)
       
-        
+      REAL*4  timer,timer_bins  
       REAL*8  DPV_CF, UPV_CF, &
               DPV_CF_FRAC, UPV_CF_FRAC,  &
               DPV_CF_NEW, UPV_CF_NEW
 
+      REAL*8 CSTDTADJ,CSTEQADJ,SHRDTADJ
+      REAL*4 DBTADJ
+      INTEGER*4 LOOPS, NUMLOOP
+      
       integer funito
 
 ! names of text files and unit numbers output by this routine
@@ -38808,6 +37841,7 @@ WRITE(funito,9990) ';'
          MAX_PERCENT(IYR) = MIN(MAX_PERCENT(IYR-1) + Battery_Incremental_Percent  , Battery_Maximum_Percent)
       END DO
 
+      timer = timef()
       CALL MPTIM2(CPU_TIME_BEGIN)
       WRITE (18,49) '** call and load ecpyear.txt ** ',FLOAT(CPU_TIME_BEGIN)/100.
    49 FORMAT(10X,A,' CPU TIME (SECONDS) = ',F7.2)
@@ -38815,20 +37849,20 @@ WRITE(funito,9990) ';'
       write(putFileNameZ,'(".\rest\ECPYear.txt")')
       call unitunopened(100,999,FUNITOZ)    
       open(funitoZ,file=putFileNameZ,status='unknown',action='readwrite',buffered='YES')
-      WRITE(funitoZ,'(a,I4,a)') 'Year:=data {',curcalyr,'};'
+      WRITE(funitoZ,'(a,I4,a)') 're::Year:=data {',curcalyr,'};'
       close(funitoz)
       
       CALL MPTIM2(CPU_TIME_END)
       WRITE (18,49) '** done call and load ecpyear.txt ** ',FLOAT(CPU_TIME_END)/100.
       IF (CURITR.EQ.1) THEN
-          WRITE(funito,8881) 'HourstoBuy :=',HourstoBuy,';' 
-          WRITE(funito,8881) 'HourstoSell :=',HourstoSell,';'            
- 8880    Format(A20,F8.2,A1)
- 8881    Format(A20,I4,A1)
+          WRITE(funito,8881) 're::HourstoBuy :=',HourstoBuy,';' 
+          WRITE(funito,8881) 're::HourstoSell :=',HourstoSell,';'            
+ 8881    Format(A18,I4,A1)
 
           WRITE(funito,9990) 'COMPOSITE TABLE:'
-         WRITE(funito,7973)    'pt'  , '   BatteryEfficiency' 
- 7973    Format(1x,A2,1x,A20)              
+         WRITE(funito,7973)    're::pt'  , 're::BatteryEfficiency' 
+ 7973    Format(1x,A7,A24)              
+ 7874    Format(1x,A7,F24.2)          
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,2510) 'IRUN ', 'CYEAR', 'PType', '   BatteryEfficiency'
@@ -38836,10 +37870,9 @@ WRITE(funito,9990) ';'
          END IF
 
          WRITE(FUNITO,7874)  '13', batteryEfficiency
-          WRITE(FUNITO,7874)  '11', .83
+         WRITE(FUNITO,7874)  '11', .83
 		 WRITE(FUNITO,7874)  '21', .87
- 7874    Format(1x,A2,1x,F20.2)          
-
+ 
          WRITE(UF_DBG,2511) CURIRUN, CURCALYR, 13, batteryEfficiency
          WRITE(UF_DBG,2511) CURIRUN, CURCALYR, 11, .83
 		 WRITE(UF_DBG,2511) CURIRUN, CURCALYR, 21, .87
@@ -38848,8 +37881,9 @@ WRITE(funito,9990) ';'
          WRITE(funito,9990) ';'   
 
          WRITE(funito,9990) 'COMPOSITE TABLE:'
-         WRITE(funito,9973)    'year', 'r', 'pt', '    BatteryIncrement'
- 9973    Format(1x,A4,1x,A2,1x,A2,1x,A20)              
+         WRITE(funito,9973)    're::year', 're::r', 're::pt', 're::BatteryIncrement'
+ 9973    Format(1x,A10,2(A7),A22)              
+ 9874    Format(1x,I10,I7,A7,F22.3)
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,9510) 'IRUN ', 'CYEAR', 'ERGN ', 'PType', '    BatteryIncrement', '          MAX_PERENT', '            MAX_LOAD'
@@ -38858,7 +37892,6 @@ WRITE(funito,9990) ';'
 
          DO ERGN = 1, UNRGNS
             WRITE(FUNITO,9874)  CURIYR+UHBSYR, ERGN, '13', MAX_LOAD(ERGN) * MAX_PERCENT(CURIYR)
- 9874       Format(1x,I4,1x,I2,1x,A2,1x,F20.3)
 
             WRITE(UF_DBG,9511) CURIRUN, CURCALYR, ERGN, 13, MAX_LOAD(ERGN) * MAX_PERCENT(CURIYR), MAX_PERCENT(CURIYR), MAX_LOAD(ERGN)
  9511       FORMAT(1X," ECPto864_BATT_INC",4(",",I5),3(",",F20.6))
@@ -38892,40 +37925,41 @@ WRITE(funito,9990) ';'
           ENDDO
 
           WRITE(funito,9990) 'COMPOSITE TABLE:'
-          WRITE(funito,7976)    'pt'  , 'Steps', 'Map_PlantSteps' ,   'M864_LF'
- 7976    Format(1x,A5,1x,A5,1x,A15,3x,A7) 
+          WRITE(funito,7976)    're::pt'  , 're::Steps', 're::Map_PlantSteps' ,   're::M864_LF'
+ 7976    Format(1x,A7,A10,2A20) 
+ 7975    Format(1x,I7,I10,A20,F20.3)          
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,2610) 'IRUN ', 'CYEAR', 'PType', 'Steps', 'Map_Stp', '             M864_LF'
  2610       FORMAT(1X," ECPto864_PlantSteps",4(",",A5),",",A7,",",A20)
          END IF
-         
-
+        
           Do I=1,NumStoGrp
             Do J=1,Num_Steps_per_Type(I)
               WRITE(FUNITO,7975) STO_CAP_INDX(I),J,"1"  ,       M864_SR_MAX_LF(I)
                
                WRITE(UF_DBG,2611) CURIRUN, CURCALYR, STO_CAP_INDX(I), J, 1, M864_SR_MAX_LF(I)
  2611          FORMAT(1X," ECPto864_PlantSteps",4(",",I5),",",I7,",",F20.6)
-
             Enddo
           Enddo
- 7975    Format(1x,I5,1x,I5,1x,A15,3x,F7.3)          
           WRITE(funito,9990) ';'           
    
-         WRITE(funito,8881) 'UNRGNS :=',UNRGNS,';'   
+         WRITE(funito,8882) 're::UNRGNS :=',UNRGNS,';'   
+ 8882    Format(A13,I4,A1)
 	   
 	   !this is the switch that determines if you write an extra data file to be used for chart library. right now, we only need it for the first storage year and the last year (2050)
 	   IF (CURCALYR .EQ. UPSTYR .OR. CURCALYR .EQ. LASTYR+UHBSYR) THEN
-			WRITE(funito,8881) 'SW_OutputData :=1;'   
+			WRITE(funito,8883) 're::SW_OutputData :=1;'   
 	   ELSE
-			WRITE(funito,8881) 'SW_OutputData :=0;'   
+			WRITE(funito,8883) 're::SW_OutputData :=0;'   
 	   ENDIF
+ 8883    Format(A22)
 
           WRITE(funito,9990) 'COMPOSITE TABLE:'
-          WRITE(funito,9991)    'r' , 's', 'pt', 'y' , 'steps' , 'SupplyCurve' ,   'SupplyPrice'                                  
+          WRITE(funito,9991)    're::r' , 're::s', 're::pt', 're::y' , 're::steps' , 're::SupplyCurve' ,   're::SupplyPrice'                                  
  9990    Format(A16)
- 9991    FORMAT(1X,5(" ",A6),2(" ",A15)) 
+ 9991    FORMAT(1X,4(A7),A10,2(A18)) 
+ 2454    FORMAT(1x,4(I7),I10,2(F18.7))  
 
          IF (CURCALYR .EQ. UPSTYR) THEN
             WRITE(UF_DBG,2710) 'IRUN ', 'CYEAR', 'EMMrg', 'SEASN', 'PType', 'Steps', '        SupplyCapacity', '           SupplyPrice'
@@ -39008,7 +38042,7 @@ WRITE(funito,9990) ';'
  3883                FORMAT(1X,"SORTED_CAP",8(":",I6),3(":",F16.6)) 
                   ENDIF                   
 
-                  IF (STORAGE_ECPn(J) .GT. 0 .AND. ISP .EQ. 1) THEN
+                  IF (STORAGE_ECPn(J) .GT. 0 .AND. ISP .EQ. 2) THEN
 
                      IF (STORAGE_CST(J,ISP) .gt. MaxP(K)) MaxP(K) = STORAGE_CST(J,ISP)
                      IF (STORAGE_CST(J,ISP) .lt. MinP(K)) MinP(K) = STORAGE_CST(J,ISP)
@@ -39130,7 +38164,6 @@ WRITE(funito,9990) ';'
                      IF (Capbin(I,J,ISP) .GT. 0.0) THEN
                    
                         Write(FUNITO,2454) NERC, ISP, I, CURCALYR, J, Capbin(I,J,ISP), pricebin(I,J,ISP)
- 2454                    Format(1x,5(1x,I6),2(1x,F15.7))  
                         
                         ! Used to compute electrolyzer load lmits for HMM
                         ! Region, Season, RestoreTech, Steps
@@ -39152,7 +38185,9 @@ WRITE(funito,9990) ';'
          WRITE(funito,9990) ';'
          close(funito)
       ENDIF                   
-                              
+ 
+        write(6,*)'AIMMS Interface: seconds to write output for RESTORE-2',timef()-timer
+      
 !!      CALL MPTIM2(CPU_TIME_BEGIN)
 !!      WRITE (18,49) '** call put restore.zip in run folder and unzip** ',FLOAT(CPU_TIME_BEGIN)/100.       
 !!       
@@ -39175,7 +38210,8 @@ WRITE(funito,9990) ';'
                   
 !!      CALL MPTIM2(CPU_TIME_END)
 !!      WRITE (18,49) '** done put restore.zip in run folder and unzip** ',FLOAT(CPU_TIME_END)/100.
-                  
+      
+      timer = timef()  
       CALL MPTIM2(CPU_TIME_BEGIN)
       WRITE (18,49) '** call AIMMS Restore model** ',FLOAT(CPU_TIME_BEGIN)/100.       
                 
@@ -39184,21 +38220,22 @@ WRITE(funito,9990) ';'
 !     Call the ReStore Model
       Istatus=.false. 
       Iret=0
-      CALL AIMMS_ReStore(iret)
+      CALL AIMMS_ReStore
 
       CALL MPTIM3(CPUEND2,WALL_TIME_END)
 
       CALL MPTIM2(CPU_TIME_END)
       WRITE (18,749) '** done AIMMS Restore model** ',FLOAT(CPU_TIME_END)/100.0, FLOAT(CPUEND2-CPUBEG2)/100.0
   749 FORMAT(10X,A,' CPU TIME (SECONDS) = ',F7.2,' ELAPSED WALL TIME',F7.2)
-             
+      write(6,*)'AIMMS Interface: seconds to run RESTORE AIMMS',timef()-timer
+            
 !     Initialize CURTAIL
     CURTAILSUB(:,:,:,CURIYR) = 0.0
-      CURTAIL(:,:,CURIYR) = 0.0
+      ECPCURT(:,:,CURIYR) = 0.0
 	TOT_GEN_RES(:,:,:,CURIYR) = 0.0
 
 !     Read in Results from AIMMS ReStore model
-
+       timer = timef()
        CALL MPTIM2(CPU_TIME_BEGIN)
        WRITE (18,49) '** call read results from AIMMS model ** ',FLOAT(CPU_TIME_BEGIN)/100.       
 
@@ -39371,6 +38408,7 @@ WRITE(funito,9990) ';'
       
       CALL MPTIM2(CPU_TIME_END)
       WRITE (18,49) '** done read results from AIMMS model ** ',FLOAT(CPU_TIME_END)/100.       
+      write(6,*)'AIMMS Interface: seconds to read CSV from RESTORE AIMMS',timef()-timer
 
 !     Convert 864 Data to EFD and ECP Slice Inputs
 
@@ -39867,7 +38905,7 @@ WRITE(funito,9990) ';'
 					 
                      
 					 DO PSTP = 1 , Num_Steps_per_Type(M864_TYP)
-						CURTAIL(INT,ERGN,CURIYR) = CURTAIL(INT,ERGN,CURIYR) + Curtails(1,ERGN,M864_TYP,PSTP,m,d,h) * IDAYTQ(d,m)
+                        ECPCURT(INT,ERGN,CURIYR) = ECPCURT(INT,ERGN,CURIYR) + Curtails(1,ERGN,M864_TYP,PSTP,m,d,h) * IDAYTQ(d,m)
                         CURTAILSUB(INT,PSTP,ERGN,CURIYR) = CURTAILSUB(INT,PSTP,ERGN,CURIYR) + Curtails(1,ERGN,M864_TYP,PSTP,m,d,h) * IDAYTQ(d,m)
 					 END DO
 					 
@@ -39940,14 +38978,14 @@ WRITE(funito,9990) ';'
 							  HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN) = HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN) + TMP_DISP * IDAYTQ(d,m) / BM_FAC
 							  
 							IF (CURCALYR .LE. 2025) THEN
-               
+                              IF (TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN) .GT. 0.0001) THEN
                               WRITE(18,7310) CURIRUN, CURCALYR, I_STO_INC, INT, PSTP, ECPt, M864_TYP, ERGN, m, d, h, ECP_SP, ECP_GP, ECP_SL9, ECP_SL, &
                                  IDAYTQ(d,m), EFD_GP, EFD_SP, EFD_SL, CF_INT, &
                                  TOT_CAP(M864_TYP,1,EFD_SP,ERGN), TMP_DISP, Curtails(I_STO_INC,ERGN,M864_TYP,1,m,d,h), BM_FAC, HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN), HY_HR_EFD(PSTP,EFD_SL,EFD_GP,ERGN), &
 								 TOT_CAP(M864_TYP,2,EFD_SP,ERGN), DPVTOTCAPNR(ERGN,CURIYR)/1000, &
 								 HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN) / HY_HR_EFD(PSTP,EFD_SL,EFD_GP,ERGN)
  7310                         FORMAT(1X,"INT_CF_OUT",19(",",I4),2(",",F21.6),8(",",F21.6))
-
+                              END IF
                            END IF
 						   END DO
 
@@ -39961,36 +38999,30 @@ WRITE(funito,9990) ';'
             DO EFD_GP = 1 , UTNGRP
                DO EFD_SL = 1 , UTNSEG
                   EFD_SP = UTSEAS(EFD_GP)
-                  IF (TOT_CAP(M864_TYP,1,EFD_SP,ERGN) .GE. 0.0001) THEN
                      DO I_STO_INC = 1 , J_STO_INC
 						DO PSTP = 1 , 2
+                           IF (TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN) .GE. 0.0001) THEN
 							HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN) = HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN) / HY_HR_EFD(PSTP,EFD_SL,EFD_GP,ERGN)
-						END DO
+						   ENDIF
+                        END DO
                      END DO
                  
                      K_STO_INC = N_STO_INC + 6
                  DO PSTP = 1 , 2
-                     IF (TOT_CAP(M864_TYP,1,EFD_SP,ERGN) .GT. 0.0001) THEN
-						IF (ECPt .EQ. WIPV ) THEN
+                     IF (TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN) .GT. 0.0001) THEN
                         WRITE(18,7312) CURIRUN, CURCALYR, INT, ECPt, M864_TYP, PSTP,ERGN, EFD_SP, EFD_GP, EFD_SL, TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN), HY_HR_EFD(PSTP,EFD_SL,EFD_GP,ERGN) / TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN), &
                            CURTAILSUB(INT,PSTP,ERGN,CURIYR), BM_FAC, &
                            (HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN), I_STO_INC = 0 , J_STO_INC)
-						ELSE
-						    WRITE(18,7312) CURIRUN, CURCALYR, INT, ECPt, M864_TYP, PSTP,ERGN, EFD_SP, EFD_GP, EFD_SL, TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN), HY_HR_EFD(PSTP,EFD_SL,EFD_GP,ERGN) / TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN), &
-                           CURTAILSUB(INT,PSTP,ERGN,CURIYR), BM_FAC, &
-                           (HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN), I_STO_INC = 0 , J_STO_INC)
-						ENDIF
                      ELSE
                         WRITE(18,7312) CURIRUN, CURCALYR, INT, ECPt, M864_TYP, PSTP,ERGN, EFD_SP, EFD_GP, EFD_SL, TOT_CAP(M864_TYP,PSTP,EFD_SP,ERGN), 0.0, &
                            CURTAILSUB(INT,PSTP,ERGN,CURIYR), BM_FAC, &
                            (HREFDCF(I_STO_INC,INT,PSTP,EFD_SL,EFD_GP,ERGN), I_STO_INC = 0 , J_STO_INC)
                      END IF
  7312                FORMAT(1X,"INT_EFD_CF",10(",",I4),<K_STO_INC>(",",F21.6))
-				ENDDO
+				 ENDDO
 
-                  END IF
                END DO
-               END DO
+            END DO
                
             DO ECP_SL9 = 1 , EPNSTP(1)
                ECP_GP = EPLDGR(ECP_SL9,YEAR)
@@ -40012,7 +39044,7 @@ WRITE(funito,9990) ';'
                K_STO_INC = N_STO_INC + 9
 
                WRITE(18,6312) CURIRUN, CURCALYR, INT, ECPt, M864_TYP, ERGN, ECP_GP, ECP_SP, ECP_SL9, ECP_SL, TOT_CAP(M864_TYP,1,ECP_SP,ERGN), TOT_CAP_ECP(M864_TYP,1,ERGN), HY_HR_ECP(ECP_SL,ECP_GP,ERGN), &
-                  CURTAIL(INT,ERGN,CURIYR), EPECFC(ECPt,1), EPIACF(INT), EP_SP_CAP_FAC(ECP_SP,ECPt,1), &
+                  ECPCURT(INT,ERGN,CURIYR), EPECFC(ECPt,1), EPIACF(INT), EP_SP_CAP_FAC(ECP_SP,ECPt,1), &
                   (UPICFC(I_STO_INC,INT,ECP_GP,ECP_SL), I_STO_INC = 0 , J_STO_INC), TOT_GEN_RES(INT,1,ERGN,CURIYR), UPICFC_DPV(1,INT,ECP_GP,ECP_SL), HY_HR_ECP_DPV(ECP_SL,ECP_GP,ERGN)
  6312             FORMAT(1X,"INT_ECP_CF",10(":",I4),<K_STO_INC>(":",F15.6),":",F15.6,":",F15.6,":",F15.6)
 
@@ -40356,6 +39388,10 @@ WRITE(funito,9990) ';'
                PV$EXT = PVV(EXTR,ECP_D_FPH,IFPH2, DBLE(EPDSCRT)) * PWF(DBLE(EPDSCRT),OLYR-1)
                PV$SOM = 0.0
                PV$SOML = 0.0
+               
+!              CHECK FOR TIME-DEPENDENT DEBT/EQUITY SUBSIDIES
+
+               CALL EP$SUBFIN(IECP,OLYR,CSTDTADJ,CSTEQADJ,SHRDTADJ)
 
 !              COMPUTE LEVELIZED GENERATION O&M, SUBSIDY AND EXTERNALITY COSTS
 
@@ -40384,6 +39420,7 @@ WRITE(funito,9990) ';'
                DO IOWN = 1  , 2
                   IS = 1
                   IF (UPBLDTYP(NERC) .EQ. IOWN) THEN
+                      
                      COLUMN = 'I'//UPRGCD(NERC)//UPLNTCD(IECP)//UPOWNCD(IOWN)//'X'//SSTEP(IS)//UPYRCD(YEAR); call makmsk(COLUMN_mask,':I:',UPRGCD(NERC),UPLNTCD(IECP),UPOWNCD(IOWN),':X:',SSTEP(IS),UPYRCD(YEAR))
 
                      ROW = 'LUDSST1'//UPYRCD(YEAR); !
@@ -40392,7 +39429,6 @@ WRITE(funito,9990) ';'
                      VALUE = 1.0
                      CALL CVAL(COLUMN,ROW,VALUE,COLUMN_mask,ROW_mask,'CALC_STORAGE_VAL,12')
                      
-                     
                      J_STO_INC = N_STO_INC + 1
                      VALUE = MAX(ENERGY_STORED(J_STO_INC,NERC), BATTERY_USED(J_STO_INC,NERC))
                      CALL CBND(UPBND,COLUMN,DBLE(0.0),VALUE,COLUMN_mask,'CALC_STORAGE_VAL,11')
@@ -40400,10 +39436,24 @@ WRITE(funito,9990) ';'
 !                    STORE INDEX FOR AVAILABILITY OF TECHNOLOGY AND SUBSIDY
 
                      BUILD_AVL(IECP,YEAR,NERC,CURIYR) = 1
+                     
+!                    LOOP OVER TECHNOLOGY SUPPLY CURVE STEPS
+                     NUMLOOP = 1              !don't have a separate build vector for with/without subsidy -> but st
+                     LOOPS = 1
+
 
                      IF (IOWN .EQ. 1) THEN ! Utility Builds
+                         
+!                       CHECK FOR SUBSIDY LIMIT FOR DEBT FRACTION
 
-                        DEBT_F = EPUFDT
+                        IF (UPSUBCAS(IECP) .EQ. 3 .AND. NUMLOOP .EQ. 2 .AND. LOOPS .EQ. 1) THEN
+                            DEBT_F = EPUFDT
+                        ELSE
+                            DEBT_F = EPUFDT + UPNFDTA(IECP)
+                        END IF
+                        DEBT_F = DEBT_F + SHRDTADJ
+
+                        !DEBT_F = EPUFDT
                         UTINT  =  EPUIRT
                         UTROE  = (EPUROR - EPUFDT * EPUIRT) / (1.0 - EPUFDT)
                         UTROR  = UTROE * (1.0 - DEBT_F) + UTINT * DEBT_F
@@ -40477,13 +39527,67 @@ WRITE(funito,9990) ';'
                         END IF
 
 
-                     ELSE                  ! EWG Builds
+                  ELSE                  ! EWG Builds
+                      
+                      IF (UPSUBCAS(IECP) .EQ. 3 .AND. NUMLOOP .EQ. 2 .AND. LOOPS .EQ. 1) THEN
+                              DEBT_F = UPNFDT
+                      ELSE
+!                           ADJUST DEBT FRACTION ADJUSTMENT WHEN SUBSIDY IN PLACE
 
-                        DEBT_F = UPNFDT
-                        EWGINT = EPUIRT + UPNIPRM
-                        UTINT  =  EPUIRT
-                        EWGROE = EPUCRE + UPNRPRM
-                        UTROE  = EPUCRE
+                          DBTADJ = 1.0
+                          IF (UPNFDTA(IECP) .NE. 0.0 .AND. USW_WACC .GT. 0)THEN
+                            IF (UPGSUBPT(IECP) .GT. 0.0 .AND. UPGSUBYR(IECP,UPSTYR - UHBSYR) .GT. 0.0)THEN ! PTC year
+                                    DBTADJ = 1.0 - (UPGSUBYR(IECP,UPSTYR - UHBSYR) - UPGSUBYR(IECP,MIN(CURIYR + OLYR - 1,UNYEAR))) /  &
+                                            UPGSUBYR(IECP,UPSTYR - UHBSYR)
+!     if (year .eq. 1 .and. nerc .eq. 1)write(6,3456) curiyr+1989, curiyr+1989+olyr-1,uplntcd(icap),upgsubpt(icap),upnfdt,upnfdta(icap),  &
+!                                                  UPGSUBYR(ICAP,UPSTYR - UHBSYR) , UPGSUBYR(ICAP,MIN(UNYEAR,CURIYR + OLYR - 1)),  &
+!                                                        (UPGSUBYR(ICAP,UPSTYR - UHBSYR) - UPGSUBYR(ICAP,MIN(CURIYR + OLYR - 1,UNYEAR))) /  &
+!                                                  UPGSUBYR(ICAP,UPSTYR - UHBSYR), dbtadj
+!3456 format(1h ,'!dbtadj1',i4,i5,1x,a3,i3,10f10.3)
+                            END IF
+                            IF (UPCSBYR(IECP,UPSTYR - UHBSYR) .GT. 0.0)THEN ! ITC year
+                                DBTADJ = 1.0 - (UPCSBYR(IECP,UPSTYR - UHBSYR) - UPCSBYR(IECP,MIN(CURIYR + OLYR - 1,UNYEAR))) /   &
+                                        UPCSBYR(IECP,UPSTYR - UHBSYR)
+!     if (year .eq. 1 .and. nerc .eq. 1)write(6,3457) curiyr+1989, curiyr+1989+olyr-1,uplntcd(icap),upgsubpt(icap),upnfdt,upnfdta(icap),  &
+!                                                  UPCSBYR(ICAP,UPSTYR - UHBSYR) , UPCSBYR(ICAP,MIN(UNYEAR,CURIYR + OLYR - 1)),  &
+!                                                     (UPCSBYR(ICAP,UPSTYR - UHBSYR) - UPCSBYR(ICAP,MIN(CURIYR + OLYR - 1,UNYEAR))) /   &
+!                                               UPCSBYR(ICAP,UPSTYR - UHBSYR), dbtadj
+!3457 format(1h ,'!dbtadj2',i4,i5,1x,a3,i3,10f10.3)
+                            END IF
+                          END IF
+
+                          DEBT_F = UPNFDT + UPNFDTA(IECP) * DBTADJ
+                        END IF
+                        DEBT_F = DEBT_F + SHRDTADJ  
+                        
+!                       CHECK IF SUBSIDY FOR COST OF DEBT
+      
+                        IF (UPSUBCAS(IECP) .EQ. 4 .AND. NUMLOOP .EQ. 2 .AND. LOOPS .EQ. 1)THEN
+                            EWGINT = EPUIRT + UPNIPRM
+                            UTINT = EPUIRT
+                        ELSE
+                            EWGINT = EPUIRT + UPNIPRM + UPNIRTEA(IECP)
+                            UTINT = EPUIRT + UPNIRTEA(IECP)
+                        END IF
+                        EWGINT = EWGINT + CSTDTADJ
+                        UTINT  = UTINT  + CSTDTADJ
+
+!                       CHECK IF SUBSIDY FOR COST OF EQUITY
+
+                        IF (UPSUBCAS(IECP) .EQ. 5 .AND. NUMLOOP .EQ. 2 .AND. LOOPS .EQ. 1)THEN
+                            EWGROE = EPUCRE + UPNRPRM
+                            UTROE = EPUCRE
+                        ELSE
+                            EWGROE = EPUCRE + UPNRPRM + UPNRRTEA(IECP)
+                            UTROE = EPUCRE + UPNRRTEA(IECP)
+                        END IF
+                        EWGROE = EWGROE + CSTEQADJ
+                        UTROE  = UTROE  + CSTEQADJ
+
+                        !EWGINT = EPUIRT + UPNIPRM
+                        !UTINT  =  EPUIRT
+                        !EWGROE = EPUCRE + UPNRPRM
+                        !UTROE  = EPUCRE
                         EWGROR = EWGROE * (1.0 - DEBT_F) + EWGINT * DEBT_F
 
                         ANNRTE = (UPANNADJ(IECP,UNYEAR) / UPANNADJ(IECP,UNYEAR - 10)) ** (1.0 / 10.0)
@@ -40763,6 +39867,7 @@ WRITE(funito,9990) ';'
       include 'uefdout'
       include 'entcntl'
       include 'wwind'
+      include 'uecpout'
 
       INTEGER*4 NERC, YEAR, ISP, IGRP, VLS, JVLS, JVLS_CNT(MAXECPB), LVLS, m, d, h, IRET, VLSMAP(ECP_D_VLS,ECP_D_MSP,MNUMNR,ECP_D_XPH), MAPVLS(ECP_D_VLS,MAXECPB,MNUMNR,ECP_D_XPH)
       INTEGER*4 MAP_864_MONTH(12*3*24), MAP_864_DAYTYPE(12*3*24), MAP_864_HOUR(12*3*24), RANK_864_F(MNUMNR), RANK_864_N(12*3*24,MNUMNR), I_864, J_864, K_864, L_864,IRET1,I
@@ -40878,11 +39983,12 @@ WRITE(funito,9990) ';'
             DEM_ADJ = UEITAJ_ECP(ISP,NERC) - BTCOGEN(NERC) / 8.76 + BMEXICAN(NERC) / 8.76 
                    
 !           CALCULATE NET LOAD BY SUBTRACTING OUT INTERMITTENT CAPACITY AND STORAGE CAPACITY
-            LOAD_LDC(I_864) = DUCK_SYSTEM_LOAD(M,D,H,NERC,CURIYR) - PV_CAP_ADJ(NERC) * WSSPVEL_CF(NERC,CURIYR,d,m,h) - &
-               PT_CAP_ADJ(NERC) * WSSPTEL_CF(NERC,CURIYR,d,m,h) - &
-               SO_CAP_ADJ(NERC) * WSSSTEL_CF(NERC,CURIYR,d,m,h) - &
-               WN_CAP_ADJ(NERC) * WSFWIEL_CF(NERC,CURIYR,d,m,h) - &
-               WF_CAP_ADJ(NERC) * WSFWFEL_CF(NERC,CURIYR,d,m,h) + DEM_ADJ
+            LOAD_LDC(I_864) = DUCK_SYSTEM_LOAD(M,D,H,NERC,CURIYR) - &
+               PV_CAP_ADJ(NERC,CURIYR) * WSSPVEL_CF(NERC,CURIYR-1,d,m,h) - &
+               PT_CAP_ADJ(NERC,CURIYR) * WSSPTEL_CF(NERC,CURIYR-1,d,m,h) - &
+               SO_CAP_ADJ(NERC,CURIYR) * WSSSTEL_CF(NERC,CURIYR-1,d,m,h) - &
+               WN_CAP_ADJ(NERC,CURIYR) * WSFWIEL_CF(NERC,CURIYR-1,d,m,h) - &
+               WF_CAP_ADJ(NERC,CURIYR) * WSFWFEL_CF(NERC,CURIYR-1,d,m,h) + DEM_ADJ
             
             DINURAL_STORAGE_INDEX = 68
             
@@ -40992,6 +40098,7 @@ WRITE(funito,9990) ';'
       include 'uefdout'
       include 'entcntl'
       include 'wwind'
+      include 'uecpout'
 
       INTEGER*4 NERC, YEAR, ISP, IGRP, VLS, JVLS, JVLS_CNT(MAXECPB), LVLS, m, d, h, IRET, VLSMAP(ECP_D_VLS,ECP_D_MSP,MNUMNR,ECP_D_XPH), MAPVLS(ECP_D_VLS,MAXECPB,MNUMNR,ECP_D_XPH)
       INTEGER*4 MAP_864_MONTH(12*3*24), MAP_864_DAYTYPE(12*3*24), MAP_864_HOUR(12*3*24), RANK_864_F(MNUMNR), RANK_864_N(12*3*24,MNUMNR), I_864, J_864, K_864, L_864
@@ -41090,11 +40197,11 @@ WRITE(funito,9990) ';'
 !           Calculate net load by subtracting out intermittent capacity and storage capacity
 
             NET_LOAD(I_864,NERC) = DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR) - &
-               PV_CAP_ADJ(NERC) * WSSPVEL_CF(NERC,CURIYR,d,m,h) - &
-               PT_CAP_ADJ(NERC) * WSSPTEL_CF(NERC,CURIYR,d,m,h) - &
-               SO_CAP_ADJ(NERC) * WSSSTEL_CF(NERC,CURIYR,d,m,h) - &
-               WN_CAP_ADJ(NERC) * WSFWIEL_CF(NERC,CURIYR,d,m,h) - &
-               WF_CAP_ADJ(NERC) * WSFWFEL_CF(NERC,CURIYR,d,m,h) + &
+               PV_CAP_ADJ(NERC,CURIYR) * WSSPVEL_CF(NERC,CURIYR-1,d,m,h) - &
+               PT_CAP_ADJ(NERC,CURIYR) * WSSPTEL_CF(NERC,CURIYR-1,d,m,h) - &
+               SO_CAP_ADJ(NERC,CURIYR) * WSSSTEL_CF(NERC,CURIYR-1,d,m,h) - &
+               WN_CAP_ADJ(NERC,CURIYR) * WSFWIEL_CF(NERC,CURIYR-1,d,m,h) - &
+               WF_CAP_ADJ(NERC,CURIYR) * WSFWFEL_CF(NERC,CURIYR-1,d,m,h) + &
                DEM_ADJ
 
             TEST_LOAD = NET_LOAD(RANK_864_F(NERC),NERC)
@@ -41106,8 +40213,8 @@ WRITE(funito,9990) ';'
                IF (CURIYR+1989 .EQ. 2017 .OR. CURIYR+1989 .EQ. 2020 .OR. CURIYR+1989 .EQ. 2025 .OR. CURIYR+1989 .EQ. 2030 .OR. CURIYR+1989 .EQ. 2035 .OR. CURIYR+1989 .EQ. 2040 .OR. CURIYR+1989 .EQ. 2045) THEN
                   WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 0, 0, RANK_864_F(NERC), 0, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                       DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                      PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                      WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                      PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                      WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                       DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
                END IF
 
@@ -41119,8 +40226,8 @@ WRITE(funito,9990) ';'
                IF (CURIYR+1989 .EQ. 2017 .OR. CURIYR+1989 .EQ. 2020 .OR. CURIYR+1989 .EQ. 2025 .OR. CURIYR+1989 .EQ. 2030 .OR. CURIYR+1989 .EQ. 2035 .OR. CURIYR+1989 .EQ. 2040 .OR. CURIYR+1989 .EQ. 2045) THEN
                   WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 1, 0, RANK_864_F(NERC), 0, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                       DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                      PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                      WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                      PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                      WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                       DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
                END IF
                
@@ -41131,8 +40238,8 @@ WRITE(funito,9990) ';'
                IF (CURIYR+1989 .EQ. 2017 .OR. CURIYR+1989 .EQ. 2020 .OR. CURIYR+1989 .EQ. 2025 .OR. CURIYR+1989 .EQ. 2030 .OR. CURIYR+1989 .EQ. 2035 .OR. CURIYR+1989 .EQ. 2040 .OR. CURIYR+1989 .EQ. 2045) THEN
                   WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 2, 0, RANK_864_F(NERC), 0, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                       DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                      PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                      WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                      PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                      WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                       DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
                END IF
                
@@ -41151,8 +40258,8 @@ WRITE(funito,9990) ';'
                      IF (CURIYR+1989 .EQ. 2017 .AND. NERC .EQ. 1 .AND. I_864 .LE. 48) THEN
                         WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 3, J_864, RANK_864_F(NERC), L_864, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                             DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                            PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                            WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                            PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                            WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                             DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
                      END IF
 
@@ -41163,8 +40270,8 @@ WRITE(funito,9990) ';'
                      IF (CURIYR+1989 .EQ. 2017 .AND. NERC .EQ. 1 .AND. I_864 .LE. 48) THEN
                         WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 4, J_864, RANK_864_F(NERC), L_864, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                             DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                            PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                            WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                            PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                            WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                             DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
                      END IF
    
@@ -41177,8 +40284,8 @@ WRITE(funito,9990) ';'
                      IF (CURIYR+1989 .EQ. 2017 .AND. NERC .EQ. 1 .AND. I_864 .LE. 48) THEN
                         WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 5, J_864, RANK_864_F(NERC), L_864, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                             DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                            PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                            WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                            PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                            WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                             DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
                      END IF
 
@@ -41188,8 +40295,8 @@ WRITE(funito,9990) ';'
                IF ( CURIYR+1989 .LE. 2025 .OR. CURIYR+1989 .EQ. 2030 .OR. CURIYR+1989 .EQ. 2035 .OR. CURIYR+1989 .EQ. 2040 .OR. CURIYR+1989 .EQ. 2045) THEN
                   WRITE(18,3392) CURIRUN, NERC, CURIYR+1989, K_864, 9, J_864, RANK_864_F(NERC), L_864, I_864, RANK_864_N(I_864,NERC), m, d, h, IDAYTQ(d,m), &
                       DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), NET_LOAD(I_864,NERC), TEST_LOAD, &
-                      PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                      WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                      PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                      WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                       DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR)
  3392              FORMAT(1X,"NET_LOAD_CHRON",14(",",I4),18(",",F16.6))
                END IF
@@ -41257,21 +40364,21 @@ WRITE(funito,9990) ';'
                DO INT = 1 , ECP_D_INT
                   I_ECP = UCPINTI(INT)
                   IF (I_ECP .EQ. WIWN) THEN
-                     CAPFAC(INT) = WSFWIEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSFWIEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WIWL) THEN
-                     CAPFAC(INT) = WSFWLEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSFWLEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WIWF) THEN
-                     CAPFAC(INT) = WSFWFEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSFWFEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WISO) THEN
-                     CAPFAC(INT) = WSSSTEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSSSTEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WISS) THEN
-                     CAPFAC(INT) = WSSSTEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSSSTEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WIS2) THEN
-                     CAPFAC(INT) = WSSSTEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSSSTEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WIPV) THEN
-                     CAPFAC(INT) = WSSPVEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSSPVEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE IF (I_ECP .EQ. WIPT) THEN
-                     CAPFAC(INT) = WSSPTEL_CF(NERC,CURIYR,d,m,h)
+                     CAPFAC(INT) = WSSPTEL_CF(NERC,CURIYR-1,d,m,h)
                   ELSE 
                      CAPFAC(INT) = EPICFC(INT,1)
                   END IF
@@ -41303,16 +40410,16 @@ WRITE(funito,9990) ';'
                         CAP_AVG(I_ECP) = EPECAP(0,I_ECP,1) * CAPFAC(INT)
 
                         IF (I_ECP .EQ. WIWN) THEN
-                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, WN_CAP_ADJ(NERC), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
+                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, WN_CAP_ADJ(NERC,CURIYR), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                               VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE IF (I_ECP .EQ. WIWL) THEN
-                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, WL_CAP_ADJ(NERC), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
+                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, WL_CAP_ADJ(NERC,CURIYR), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                               VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE IF (I_ECP .EQ. WIWF) THEN
-                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, WF_CAP_ADJ(NERC), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
+                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, WF_CAP_ADJ(NERC,CURIYR), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                               VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE IF (I_ECP .EQ. WISO) THEN
-                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, SO_CAP_ADJ(NERC), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
+                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, SO_CAP_ADJ(NERC,CURIYR), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                               VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE IF (I_ECP .EQ. WISS) THEN
                            WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, EPECAP(0,I_ECP,1) * 0.001, CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
@@ -41321,10 +40428,10 @@ WRITE(funito,9990) ';'
                            WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, EPECAP(0,I_ECP,1) * 0.001, CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                               VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE IF (I_ECP .EQ. WIPV) THEN
-                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, PV_CAP_ADJ(NERC), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
+                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, PV_CAP_ADJ(NERC,CURIYR), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                               VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE IF (I_ECP .EQ. WIPT) THEN
-                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, PT_CAP_ADJ(NERC), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
+                           WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, PT_CAP_ADJ(NERC,CURIYR), CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
                            VARIANCE_CNV(I_ECP), SQRT(VARIANCE_CNV(I_ECP)), VARIANCE_INT(I_ECP), SQRT(VARIANCE_INT(I_ECP)), INTREGCRL(NERC,INT), INTSTDDV(NERC,INT), CAP_AVG(I_ECP), UPINTZ
                         ELSE 
                            WRITE(18,6002) CURIRUN, CURIYR+1989, NERC, I_ECP, INT, EPECAP(0,I_ECP,1) * 0.001, EPECAP(0,I_ECP,1) * 0.001, CAPFAC(INT), UPMSSIZ(I_ECP), NUMBER(I_ECP), &
@@ -41374,8 +40481,8 @@ WRITE(funito,9990) ';'
 
                IF ( CURIYR+1989 .LE. 2025 .OR. CURIYR+1989 .EQ. 2030 .OR. CURIYR+1989 .EQ. 2035 .OR. CURIYR+1989 .EQ. 2040 .OR. CURIYR+1989 .EQ. 2045) THEN
                   WRITE(18,3391) CURIRUN, NERC, CURIYR+1989, YEAR, K_864, I_864, m, d, h, IDAYTQ(d,m), IGRP, ISP, JVLS, HRTOEFDSL(NERC,m,d,h), VLS, IGRP, MAPVLS(VLS,IGRP,NERC,YEAR), DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), &
-                     NET_LOAD(I_864,NERC), PV_CAP_ADJ(NERC), WSSPVEL_CF(NERC,CURIYR,d,m,h), PT_CAP_ADJ(NERC), WSSPTEL_CF(NERC,CURIYR,d,m,h), SO_CAP_ADJ(NERC), WSSSTEL_CF(NERC,CURIYR,d,m,h), &
-                     WN_CAP_ADJ(NERC), WSFWIEL_CF(NERC,CURIYR,d,m,h), WL_CAP_ADJ(NERC), WSFWLEL_CF(NERC,CURIYR,d,m,h), WF_CAP_ADJ(NERC), WSFWFEL_CF(NERC,CURIYR,d,m,h), &
+                     NET_LOAD(I_864,NERC), PV_CAP_ADJ(NERC,CURIYR), WSSPVEL_CF(NERC,CURIYR-1,d,m,h), PT_CAP_ADJ(NERC,CURIYR), WSSPTEL_CF(NERC,CURIYR-1,d,m,h), SO_CAP_ADJ(NERC,CURIYR), WSSSTEL_CF(NERC,CURIYR-1,d,m,h), &
+                     WN_CAP_ADJ(NERC,CURIYR), WSFWIEL_CF(NERC,CURIYR-1,d,m,h), WL_CAP_ADJ(NERC,CURIYR), WSFWLEL_CF(NERC,CURIYR-1,d,m,h), WF_CAP_ADJ(NERC,CURIYR), WSFWFEL_CF(NERC,CURIYR-1,d,m,h), &
                      DEM_ADJ, EPHGHT(LVLS,YEAR), EPWDTH(LVLS,YEAR), WGHT*IDAYTQ(d,m)
  3391             FORMAT(1X,"NET_LOAD_SORTED",17(",",I4),17(",",F16.6))
 !                 WRITE(18,3391) CURIRUN, NERC, CURIYR+1989, K_864, I_864, m, d, h, IDAYTQ(d,m), IGRP, ISP, JVLS, HRTOEFDSL(NERC,m,d,h), VLSMAP(JVLS,ISP,NERC,1), DUCK_SYSTEM_LOAD(m,d,h,NERC,CURIYR), &

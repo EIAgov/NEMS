@@ -1,0 +1,253 @@
+/* CSS to align equation numbers to the right */
+div.math {
+    text-align: left; /* Aligns the equation to the left */
+}
+
+span.eqno {
+    float: right;     /* Moves the equation number to the right */
+    text-align: right; /* Aligns the text within the span to the right */
+}
+
+.rubric {
+  font-size: 0.8em;
+  font-weight: normal;
+  margin-bottom: 1em;
+}
+
+/* CSS to left-align table captions */
+.table > caption { /* Adjust the selector as needed */
+   text-align: left;
+}
+
+/*
+
+/* CSS to make tables responsive 
+table {
+    width: 100%; /* Take up the full width of the container 
+    font-size: 0.9em; /* Adjust the value as needed 
+}
+
+td {
+    word-break: break-all;   /* Forcing line breaks within words 
+    overflow-wrap: break-word; /* Alternate property for line breaks 
+    font-size: 0.8em; /* Adjust the value as needed 
+}
+
+th {
+    font-size: 0.8em; /* Adjust the value as needed 
+}
+*/
+
+/* FROM JEFF */
+
+/* 
+--------------------
+ General Formatting
+--------------------
+*/
+ body {
+    font-size: 100%;
+    line-height: 1.6;
+}
+p {
+    line-height: 1.6; 
+}
+
+div.body h1,
+div.body h2{
+    font-family: {{ theme_headfont }};
+    background-color: {{ theme_headbgcolor }};
+    font-weight: normal;
+    line-height: 1.6;
+    color: {{ theme_headtextcolor }};
+    border-bottom: 1px solid #ccc;
+    margin: 20px -20px 10px -20px;
+    padding: 3px 0 3px 10px;
+    border-bottom: 1px solid #0096d7cc;
+}
+div.body h3 {
+    font-family: {{ theme_headfont }};
+    background-color: {{ theme_headbgcolor }};
+    font-weight: normal;
+    line-height: 1.6;
+    color: {{ theme_headtextcolor }};
+    margin: 20px -20px 10px -20px;
+    padding: 3px 0 3px 10px;
+    border-bottom: none;
+}
+div.body h4,
+div.body h5,
+div.body h6 {
+    font-family: {{ theme_headfont }};
+    background-color: {{ theme_headbgcolor }};
+    font-weight: bold;
+    line-height: 1.6;
+    color: {{ theme_headtextcolor }};
+    margin: 20px -20px 10px -20px;
+    padding: 3px 0 3px 10px;
+    border-bottom: none;
+}
+
+div.body h1 { margin-top: 0; padding-top: 0; font-size: 200%; }
+div.body h2 { font-size: 160%; }
+div.body h3 { font-size: 140%; }
+div.body h4 { font-size: 120%; }
+div.body h5 { font-size: 110%; }
+div.body h6 { font-size: 100%; }
+
+/*
+--------------------
+ Admonitions
+--------------------
+ customizations based on https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/extending.html
+*/
+
+/* Base applies to todo*/
+div.admonition {
+    background-color: #ebeaea;
+    border: 2px solid #ff7700;
+}
+div.admonition p.admonition-title {
+    display: block;
+    font-size: 105%;
+    /*background-color:#d5d5d5;
+    color: #333333;*/
+}
+
+/* Applies to class note*/
+div.admonition.note {
+    background-color: #ebeaea;
+    border-color: #626262;
+}
+
+/* Applies to class changelog*/
+div.admonition.changelog {
+    background-color: #ebeaea;
+    border-color: #00405d;
+}
+/*
+--------------------
+ tables
+--------------------
+*/
+
+table.docutils {
+    border: 1px solid #0096d7;
+}
+
+table.docutils tr, table.docutils td, table.docutils th {
+    border: 1px solid #0096d7;
+    background: #ffffff;
+    padding: 0.25em 0.7em;
+}
+
+table.field-list, table.footnote {
+    border: none;
+    box-shadow: none;
+}
+
+table.footnote {
+    margin: 15px 0;
+    width: 100%;
+    border: 1px solid #ebeaea;
+    background: #ebeaea;
+    font-size: 0.9em;
+}
+
+table.footnote + table.footnote {
+    margin-top: -15px;
+    border-top: none;
+}
+
+table.field-list th {
+    padding: 0 0.8em 0 0;
+}
+
+table.field-list td {
+    padding: 0;
+}
+
+table.field-list p {
+    margin-bottom: 0.8em;
+}
+
+table.footnote td.label {
+    width: .1px;
+    padding: 0.3em 0 0.3em 0.5em;
+}
+
+table.footnote td {
+    padding: 0.3em 0.5em;
+}
+
+/* caption text formatting*/
+table caption span.caption-text{
+	font-weight: bold;
+}
+
+/* automatic caption number (Figure 1.) formatting */
+table caption span.caption-number{
+    font-weight: bold;
+    font-style: normal
+}
+
+/*
+--------------------
+Autodocumentation
+--------------------
+ Function parameters/returns background color
+*/
+ th, dl.field-list > dt {
+    background-color: #0096d7;
+}    padding: 0.3em 0.5em;
+
+/* 
+--------------------
+Figures 
+--------------------
+*/
+
+/* automatic caption number (Figure 1.) formatting */
+div.figure p.caption span.caption-number number {
+    color: #000000;
+	font-weight: bold;
+    font-style: normal;
+}
+
+/* Legend - line 1, font color and weight*/
+div.figure p.caption span.caption-number,
+figcaption span.caption-number {
+    color: #000000;
+	font-weight: bold;
+    font-style: normal;
+}
+
+div.figure p.caption span.caption-text,
+figcaption span.caption-text {
+    color: #000000;
+	font-weight: bold;
+	padding: 0.0em;
+}
+
+/* Legend - line 2, font color and weight*/
+div.legend {
+    color: #000000;
+	font-weight: bold;
+	margin: 0px;
+}
+
+/* alignment */
+figure.align-default figcaption p {
+	text-align: left;
+	margin: 0px;
+}
+
+/* put caption above the figure */
+figure.align-default{
+	display: table;
+}
+
+figure.align-default figcaption{
+	display: table-caption;
+	caption-side: top;
+}

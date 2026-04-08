@@ -204,7 +204,6 @@ class Canada(sub.Submodule):
         -------
         None
         """
-        com.print_out('running canada natural gas submodule')
         super().run()
 
         self.rest_curcalyr = int(self.rest_curcalyr)
@@ -266,7 +265,7 @@ class Canada(sub.Submodule):
         na_base = na_base.rename(columns = {nam.baseline_prod : nam.fixed_prod})
 
         #Merge to get NA Production
-        na_base = na_base.groupby([nam.region, nam.gas_type, nam.year], axis = 0).sum()
+        na_base = na_base.groupby([nam.region, nam.gas_type, nam.year]).sum()
         self.na_prod = na_base.copy()
 
 
@@ -284,7 +283,7 @@ class Canada(sub.Submodule):
 
         ad_base = pd.concat([ad_base_wcsb,ad_base_small], ignore_index=False)
         ad_base[nam.gas_type] = 'Associated Dissolved'
-        ad_base = ad_base.groupby([nam.region, nam.gas_type, nam.year], axis=0).sum()
+        ad_base = ad_base.groupby([nam.region, nam.gas_type, nam.year]).sum()
         ad_base = ad_base.rename(columns={nam.baseline_prod: nam.total_prod})
         self.ad_prod = ad_base.copy()
 
@@ -302,8 +301,8 @@ class Canada(sub.Submodule):
         ###Calibrate oil prices for associated dissolved gas
         #Depending on whether NEMS Brent price or Canada price is better, assign a different elasticity factor to calibration equation
         brent_df = pd.DataFrame()
-        brent_df[nam.brent_int] = self.parent.rest_brent_price[nam.value].copy()
-        brent_df[nam.brent_can] = self.benchmark_prices[nam.brent_1987].copy()
+        brent_df[nam.brent_int] = self.parent.rest_brent_price[nam.value]
+        brent_df[nam.brent_can] = self.benchmark_prices[nam.brent_1987]
 
         #Merge AD Prod to elasticity factors and brent prices
         ad_prod_elas_df = self.ad_prod.copy()
@@ -319,23 +318,24 @@ class Canada(sub.Submodule):
         high_price_df = ad_prod_elas_df[high_price_mask].copy()
         high_price_df[nam.total_prod] = high_price_df[nam.total_prod] * \
                                         ((high_price_df[nam.brent_int]/high_price_df[nam.brent_can]) ** high_price_df['high'])
-        ad_prod_elas_df.update(high_price_df)
+        ad_prod_elas_df.update(high_price_df.astype(ad_prod_elas_df.dtypes))
 
         #Low Price Scenario
         low_price_df = ad_prod_elas_df[~high_price_mask].copy()
         low_price_df[nam.total_prod] = low_price_df[nam.total_prod] * \
                                         ((low_price_df[nam.brent_int]/low_price_df[nam.brent_can]) ** low_price_df['low'])
-        ad_prod_elas_df.update(low_price_df)
+        ad_prod_elas_df.update(low_price_df.astype(ad_prod_elas_df.dtypes))
 
         #Update dataframes
         ad_prod_elas_df = ad_prod_elas_df.set_index([nam.region, nam.gas_type, nam.year])
-        self.ad_prod.update(ad_prod_elas_df)
+        self.ad_prod.update(ad_prod_elas_df.astype(self.ad_prod.dtypes))
 
         pass
 
 
     def wells_setup(self):
         """Reset Canada well counts to 0 for all model years.
+
 
         Returns
         -------
@@ -346,7 +346,7 @@ class Canada(sub.Submodule):
         temp_wells = self.can_wells.copy()
         temp_wells = temp_wells.loc[temp_wells[nam.year] > self.parent.history_year]
         temp_wells[nam.wells] = 0
-        self.can_wells.update(temp_wells, overwrite=True, errors='ignore')
+        self.can_wells.update(temp_wells.astype(self.can_wells.dtypes), overwrite=True, errors='ignore')
         self.can_wells = self.can_wells.set_index([nam.region, nam.gas_type, nam.year])
 
         pass
@@ -389,7 +389,13 @@ class Canada(sub.Submodule):
             #Add key and append
             decline_curves[nam.region] = index[0]
             decline_curves[nam.gas_type] = index[1]
-            self.prod_profile = pd.concat([self.prod_profile, decline_curves], ignore_index = False)
+            # Only concat non-empty decline_curves to avoid future dtype warnings
+            # If prod_profile is empty, assign directly; otherwise concatenate
+            if not decline_curves.empty:
+                if self.prod_profile.empty:
+                    self.prod_profile = decline_curves.copy()
+                else:
+                    self.prod_profile = pd.concat([self.prod_profile, decline_curves], ignore_index = False)
 
         #Set Prod Profile Index
         self.prod_profile = self.prod_profile.set_index([nam.region,nam.gas_type])
@@ -413,7 +419,7 @@ class Canada(sub.Submodule):
         """
 
         #Calibrate to henry hub prices
-        self.benchmark_prices[nam.hh_cal] = self.benchmark_prices[nam.henry_hub_1987] + self.can_well_v_HH[0]
+        self.benchmark_prices[nam.hh_cal] = self.benchmark_prices[nam.henry_hub_1987]
 
         ###Determine Additional Drilling using polynomial regression model
         #Apply Polynomial Regression Fit
@@ -438,14 +444,14 @@ class Canada(sub.Submodule):
                 #Predict new wells (regression coef + regression constant calibrated to hh - Canada price differential)
                 #Calibration variable is set to 0 as regression fit does not currently require calibration
                 if brent_int > brent_can:
-                    calibration_var = self.benchmark_prices.at[int(self.parent.current_year), nam.hh_cal] * (brent_int / brent_can) ** self.natgas_poly_eqs.at[index, 'oilprc_high']
+                    calibration_var = (brent_int / brent_can) ** self.natgas_poly_eqs.at[index, 'oilprc_high']
                     self.can_wells.at[(index[0], index[1], int(self.parent.current_year)), nam.wells] = \
-                        ((b3 * hh_int**3) + (b2 * hh_int**2) + (b1 * hh_int) + b0) * can_ng_price_bench.at[self.rest_curcalyr,nam.value] * (calibration_var **0.75)
+                        ((b3 * hh_int**3) + (b2 * hh_int**2) + (b1 * hh_int) + b0)  * calibration_var**.75
 
                 else:
-                    calibration_var = self.benchmark_prices.at[int(self.parent.current_year), nam.hh_cal] * (brent_int / brent_can) ** self.natgas_poly_eqs.at[index, 'oilprc_low']
+                    calibration_var = (brent_int / brent_can) ** self.natgas_poly_eqs.at[index, 'oilprc_low']
                     self.can_wells.at[(index[0], index[1], int(self.parent.current_year)), nam.wells] = \
-                        ((b3 * hh_int**3) + (b2 * hh_int**2) + (b1 * hh_int) + b0) * can_ng_price_bench.at[self.rest_curcalyr,nam.value] * (calibration_var **0.75)
+                        ((b3 * hh_int**3) + (b2 * hh_int**2) + (b1 * hh_int) + b0)  * calibration_var**.75
 
 
                 if self.can_wells.at[(index[0], index[1], int(self.parent.current_year)), nam.wells] < 0:
@@ -461,7 +467,7 @@ class Canada(sub.Submodule):
 
                 #Output Canada wells
                 if self.parent.debug_switch == 1:
-                    self.can_wells.to_csv(self.output_path + 'module_results_debug//' + 'hsm_can_wells_debug.csv')
+                    self.can_wells.to_csv(self.output_path + 'module_results_debug//canada//' + 'hsm_can_wells_debug.csv')
 
             pass
 
@@ -509,8 +515,13 @@ class Canada(sub.Submodule):
             temp_df = temp_df.set_index([nam.region,nam.gas_type], append=True)
             temp_df = temp_df.reorder_levels([1, 2, 0])
 
-            #Merge to master Dataframe
-            self.na_prod_new.update(temp_df, overwrite=True, errors='ignore')
+            #Merge to master Dataframe - ensure column is float dtype to avoid dtype incompatibility warnings
+            if self.rest_curcalyr not in self.na_prod_new.columns:
+                self.na_prod_new[self.rest_curcalyr] = 0.0
+            else:
+                self.na_prod_new[self.rest_curcalyr] = self.na_prod_new[self.rest_curcalyr].astype(float)
+            # Use .loc assignment instead of .update() to avoid chained assignment warnings
+            self.na_prod_new.loc[temp_df.index, self.rest_curcalyr] = temp_df[self.rest_curcalyr]
 
         pass
 
@@ -544,7 +555,7 @@ class Canada(sub.Submodule):
         self.na_prod[self.rest_curcalyr] = self.na_prod[self.rest_curcalyr].fillna(0)
         # Output Drilling Debug
         if self.parent.debug_switch == 1:
-            self.na_prod.to_csv(self.output_path + 'module_results_debug//' + 'hsm_can_drill_debug.csv')
+            self.na_prod.to_csv(self.output_path + 'module_results_debug//canada//' + 'hsm_can_drill_debug.csv')
 
 
         ###Assign production to summed variables and convert to restart file format
@@ -563,7 +574,7 @@ class Canada(sub.Submodule):
         if self.na_prod_sum.empty:
             self.na_prod_sum = temp_west_na_df.copy()
         else:
-            self.na_prod_sum[self.rest_curcalyr] = temp_west_na_df[self.rest_curcalyr].copy()
+            self.na_prod_sum[self.rest_curcalyr] = temp_west_na_df[self.rest_curcalyr]
 
 
         #East Canada NA
@@ -677,8 +688,8 @@ class Canada(sub.Submodule):
         """
         ### Export dataframes to csv
         if self.parent.debug_switch == 1:
-            self.na_prod_sum.to_csv(self.output_path + 'module_results_debug//' + 'hsm_can_na_prod.csv')
-            self.ad_prod.to_csv(self.output_path + 'module_results_debug//' + 'hsm_can_ad_prod.csv')
+            self.na_prod_sum.to_csv(self.output_path + 'module_results_debug//canada//' + 'hsm_can_na_prod.csv')
+            self.ad_prod.to_csv(self.output_path + 'module_results_debug//canada//' + 'hsm_can_ad_prod.csv')
 
         if self.rest_curcalyr >= self.parent.steo_years[0]:
 
@@ -698,13 +709,15 @@ class Canada(sub.Submodule):
             temp_no_export[nam.value] = temp_no_export[nam.value] - (temp_no_export['no_export_prod'] * 365)
             temp_no_export = temp_no_export.drop('no_export_prod', axis = 1)
             temp_no_export.loc[temp_no_export[nam.value] < 0, nam.value] = 0
-            temp_na.update(temp_no_export)
+            temp_na.update(temp_no_export.astype(temp_na.dtypes))
 
-            #Write to restart file
-            self.restart.ogsmout_cnenagprd.at[(1,self.rest_curcalyr), 'value'] = temp_na.at[(1,self.rest_curcalyr), 'value']
-            self.restart.ogsmout_cnenagprd.at[(2,self.rest_curcalyr), 'value'] = temp_na.at[(2,self.rest_curcalyr), 'value']
-            self.restart.ogsmout_cnadgprd.at[(1,self.rest_curcalyr), 'value'] = temp_ad.at[(1,self.rest_curcalyr), 'value']
-            self.restart.ogsmout_cnadgprd.at[(2,self.rest_curcalyr), 'value'] = temp_ad.at[(2,self.rest_curcalyr), 'value']
+            #Write to restart file with explicit dtype casting to match restart tables
+            dtype_cnenag = self.restart.ogsmout_cnenagprd['value'].dtype
+            dtype_cnadg = self.restart.ogsmout_cnadgprd['value'].dtype
+            self.restart.ogsmout_cnenagprd.at[(1,self.rest_curcalyr), 'value'] = dtype_cnenag.type(temp_na.at[(1,self.rest_curcalyr), 'value'])
+            self.restart.ogsmout_cnenagprd.at[(2,self.rest_curcalyr), 'value'] = dtype_cnenag.type(temp_na.at[(2,self.rest_curcalyr), 'value'])
+            self.restart.ogsmout_cnadgprd.at[(1,self.rest_curcalyr), 'value'] = dtype_cnadg.type(temp_ad.at[(1,self.rest_curcalyr), 'value'])
+            self.restart.ogsmout_cnadgprd.at[(2,self.rest_curcalyr), 'value'] = dtype_cnadg.type(temp_ad.at[(2,self.rest_curcalyr), 'value'])
             self.restart.ogsmout_cnrnagprd = self.restart.ogsmout_cnenagprd.copy()
 
 

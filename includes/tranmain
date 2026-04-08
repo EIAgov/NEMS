@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: M:/default/includes/RCS/tranmain,v 1.25 2020/09/09 19:23:47 MDR Exp $
 !  TRANSPORTATION MODULE MAIN COMMON BLOCK
 !  Freight variables passed from tranfrt.f to tran.f
@@ -6,7 +7,6 @@
       REAL     VMTFLT_SAF_TR(3,12,11)            ! Summation of vmtflt by size class, fuel, and region
       REAL     VMTFLT_SF_TR(3,34,12,11)          ! Summation of vmtflt by size class, age, fuel, and region
       REAL     VMT_TR(MNUMYR)                    ! Total truck VMT
-      REAL     FTMPG_TR(MNUMYR)                  ! Total stock mpg by everything
       REAL     TFRBTU_F_T(MNUMYR,3,7,MNUMCR)     ! Truck fuel consumption:  Passed back to TRAN main
       REAL     SEDSHREL(MNUMCR,MNUMYR),  &
                SEDSHRNG(MNUMCR,MNUMYR),  &
@@ -63,20 +63,20 @@
       REAL     CLTMPG(mnumyr,12)                 ! Commercial light truck MPG by powertrain
       REAL     CLTBTUT(12,MNUMCR,MNUMYR)         ! total CLT consumption by Btu
 	  REAL     VMTHH(mnumyr,mnumcr,16,2) 		 ! total household ldv vmt derived from licensed drivers
-      REAL     FLTVMTECH(2,4,16,4)				 ! fleet vmt (MAXVTYP,MAXFLEET,MAXLDV,MAXHAV)
+      REAL     fltechvmt(mnumcr,2,4,16,4)		 ! fleet vmt (MNUMCR,MAXVTYP,MAXFLEET,MAXLDV,MAXHAV)
 	  REAL	   CLTVMTT(12,mnumyr)				 ! Total CLT VMT by fuel (non-vintaged)
 	  REAL     LTSPLIT(mnumyr)                   ! Share of class 1-2 trucks that are class 1 and 2a
 	  REAL	   PctEVMT_PHEV(mnumyr,4,mnumcr,2)	 ! Share of PHEV VMT that is driven on electricity {1: DS, 2:MG}
 	  REAL 	   CHRG_EFF(MNUMYR)					 ! EVSE efficiency
 !... Cumulative GWh production for EV and PHEV moving between tran.f and tranfrt.f
-	REAL :: cumulative_gwh(mnumyr)               !...cumulative EV and PHEV li-ion battery production
-	
+      INTEGER  FIRST_BAT_YR						 ! First battery price projection year
+      
       PARAMETER(iFAFyear 	= 28,	&			 !...Latest year for Freight Analysis Frame (FAF) data in input files (1 = 1990)
 				TMAC_YR	 	= 2012)				 !...Macro base dollar-year
 	  
       COMMON /TRANMAIN/ TSIC,					                          &
                         VMTFLT_SAF_TR,VMTFLT_SF_TR,VMT_TR,                &
-                        FTMPG_TR,TFRBTU_F_T,                              &
+                        TFRBTU_F_T,                                       &
                         SEDSHREL,SEDSHRNG,SEDSHRMG,SEDSHRJF,SEDSHRDS,     &
                         SEDSHRLG,SEDSHRRS,SEDSHROT,SEDSHRME,SEDSHRET,     &
                         SEDSHRHY,                                         &
@@ -86,7 +86,8 @@
                         INC00_D_NP,QJETR,ASMDEMD,SMD_TOT,FTM,    	  	  &
                         TQDSHIPR, SHIPHISTYR,                             &
                         DSEFF, HTDSEFF, STMTT,                            &
-                        BSTMTT, TQISHIPR, FLTVMTECH,                      &
-                        VMTHH, CLTVMTT, CLTBTUT, CLTMPG,NCLTMPG,CLTFBTU,   &
-						LTSPLIT,PCTAF, QJETR_DI,    &
-						CUMULATIVE_GWH,PctEVMT_PHEV,CHRG_EFF
+                        BSTMTT, TQISHIPR, fltechvmt,                      &
+                        VMTHH, CLTVMTT, CLTBTUT, CLTMPG,NCLTMPG,CLTFBTU,  &
+						LTSPLIT,PCTAF, QJETR_DI,                          &
+						PctEVMT_PHEV,CHRG_EFF,&
+                        FIRST_BAT_YR

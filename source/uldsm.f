@@ -3,7 +3,6 @@
   
 !   uldsm.f contains the routines that make up the Load and Demand Side Management part of EMM
 !   all routines written by Adam Kreczko, ICF Resources, Inc.
-!       except DSMSHFT written by Pete Whitman
 !              DSMECP1 by unknown
 !          and sort routines from public domain
 
@@ -41,6 +40,7 @@
       include 'dsmnemsc' !<< results of ldsm to be passed to the rest of nems
       include 'wrenew'    ! mapping vars for ecp and efd hours to group number
       include 'eusprc'
+      include 'uecpout'
 
       INTEGER*4 LDSMmode ! -1 - prepare data for ECP  every iteration
                          !  1 - prepare data for ECP only on first iteration
@@ -50,7 +50,7 @@
       INTEGER CPUTIME1,CPUTIME2,CPUTSTRT,CPUTSTOP
       REAL Qdem,Histdem
       REAL CensusValues(MNUMCR),demout
-      INTEGER C,IREG,IECPYR,FULLYR
+      INTEGER C,IREG,IECPYR,FULLYR,YR
 
       COMMON /REGSYSLD/LSRname_s,DistLo_s
       REAL*4 DistLo_s(MNUMNR,MAXHOUR)
@@ -58,9 +58,6 @@
       
 !     other variables  needed for demand cumulant calculation
 
-      real*8 pi,discr
-      data pi/3.141592635/
-      integer iprob
       LOGICAL E_DEBUG_EXIST
       IF (TURN_ON_DEBUGGING .EQ. .TRUE.) THEN 
          INQUIRE(FILE="EPHRTS_DEBUG_FILE.TXT", EXIST=E_DEBUG_EXIST)
@@ -92,11 +89,6 @@
             WRITE(6,*)'<))) Control returned to UTIL'
             RETURN
          END IF
-         DO IREG = 1, MNUMNR
-            DO IECPYR = 1, UNYEAR + ECP_D_XPH
-               EPKSHFT(IREG,IECPYR) = 0.0
-            END DO          
-         END DO
          
 !        Get system load percentages from sqlitedatabase here 
          write(6,*)'Calling callsysload'
@@ -105,16 +97,6 @@
 !
 !        The Call to DSMRST has moved to UTIL so that the Load Shape Definitions are Available Before RDCNTRL is Called
 !
-!        set up probability calculation for demand
-!        calculate normal probability points
-
-         discr = 0.0
-         do iprob = 1,nprob
-            dprob(iprob) = (1.0 / ((2.0 * pi) ** 0.5)) * exp(-1.0d0 * dincr(iprob) * dincr(iprob) / 2.0) /2.0
-            discr = discr + dprob(iprob)
-         end do
-         dprob(1) = dprob(1) + (1.0D0 - discr)/2.0D0
-         dprob(nprob) = dprob(nprob) + (1.0D0 - discr)/2.0D0
       END IF
 
       WRITE(IMSG,*)'<))) ITERATION NUMBER,YEAR NUMBER:',CURITR,CURIYR
@@ -246,6 +228,19 @@
 !12 FORMAT('SGRIDLD:',' region ',I2,', year ',i4,' sector ',i4)
 13 FORMAT('SDEMEU ',2i4,2i2,3f10.2)
 
+          IF (CURITR .EQ. 1 .AND. CURIYR .EQ. UESTYR-UHBSYR ) THEN
+              DO YR=CURIYR,LASTYR ! fill for all years
+                  ! save intermittent capacity from restart file to use in net load calculation
+                  ! to avoid being overwritten in renew
+                  PV_CAP_ADJ_REST(RNB,YR) = PV_CAP_ADJ(RNB,YR)
+                  PT_CAP_ADJ_REST(RNB,YR) = PT_CAP_ADJ(RNB,YR)
+                  SO_CAP_ADJ_REST(RNB,YR) = SO_CAP_ADJ(RNB,YR)
+                  WN_CAP_ADJ_REST(RNB,YR) = WN_CAP_ADJ(RNB,YR)
+                  WF_CAP_ADJ_REST(RNB,YR) = WF_CAP_ADJ(RNB,YR)
+                  WL_CAP_ADJ_REST(RNB,YR) = WL_CAP_ADJ(RNB,YR)
+              ENDDO
+          ENDIF
+
             CALL DSMEFP   ! Prepare data required by EFP
 
             CALL DSMTOR   ! Prepare sectorial variables for reports
@@ -257,8 +252,6 @@
                IF (NODSMRPT(1)) CALL DSMREP1 ! STORE ANNUAL LOAD RESULTS
 
             END IF
-
-!           IF (FCRL .EQ. 1 .AND. NOREGRPT(RNB) .AND. NOYEARRPT(CURIYR)) THEN
 
             IF ((CURITR .EQ. 1.OR.LDSMmode .EQ. -1) .AND. (CURIYR .GE. UPSTYR-BASEYR+1)) THEN
 
@@ -660,6 +653,8 @@
         ENDDO
         KK=KK+1
         EFDSEGDSC1(KK)=EFDSEGDSC(seg)
+        MW = 0.0
+        RANK=0
         DO sli=1,EFDsgDnB(seg)
           DO sea=1,EFDnS
             DO slitot=1, ULNVCT(SEA)
@@ -895,7 +890,6 @@
         DO k=1,nCENSUSreg
 !
            IF (i.eq.4) THEN  !This takes care of the new Hydrogen end use from EPHRTS (can be removed once HMM/IDM populates QELINH variable (part of QELINOUT equivalence), or uses different HMM NERC region variable)
-               !load = annual_h2_mwh_consumed(RNB) * (3.41214 / 1000000.0) !converting mwh to tbtu (same as QELIN)
                load = annual_h2_mwh_consumed(RNB)/ (1000.0 * UNCONFA)! mwhrs to tbtu, where UNCONFA is 1 tbu equals 292 Gwhrs 
            ELSE
              CENSUSvalues(k)=QELINOUT(k,UBASEYR,i)
@@ -915,14 +909,8 @@
         WRITE(IMSG,2003) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,CURITR, i, LFinum, ind, SEC(IND), RNB, load, UNCONFA, FORESIGHTadj
  2003   FORMAT(1X,"IN_EU_2",9(":",I4),10(":",F12.3))
 
-!       IF( USW_XP .EQ.0) THEN              ! normal nems
           LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj
-!       ELSE
-!         LoadForec(LFinum,1)=load          !in Canadian run
-!       ENDIF
-! For now we use a matrix with total load forecast for INDUSTRIAL sector
-! When the INDUSTRIAL sector model is ready it should be replaced with
-! a matrix with forecast for each end-use like: INDDEM(year,reg,e-u)
+
         l=l+1
       ENDDO
       l=l-1
@@ -1011,22 +999,18 @@
       ENDDO
 !     WRITE(18,1003) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1003 FORMAT(1X,"HTRCON",T20,3(":",I4),10(":",E15.0))
-!     if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'HEATING:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=1
       LoadForec(LFinum,1)=load*UNCONFAR*FORESIGHTadj
       ResTGdem(tgn)=LoadForec(LFinum,1)
-! COOLING   ! depending on DG PV dispatch treatment, use different demand array
+! COOLING   
       l=l+1
       DO k=1,nCENSUSreg
           CENSUSvalues(k)=COOLCN(UBASEYR,ELCOOLX,k)
       ENDDO
 !     WRITE(18,1004) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1004 FORMAT(1X,"COOLCN",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'COOLING:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=2
@@ -1039,8 +1023,6 @@
       ENDDO
 !     WRITE(18,1005) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1005 FORMAT(1X,"H2OCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'W.HEAT.:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=3
@@ -1053,8 +1035,6 @@
       ENDDO
 !     WRITE(18,1006) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1006 FORMAT(1X,"CKCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'STOVES :',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=4
@@ -1067,8 +1047,6 @@
       ENDDO
 !     WRITE(18,1007) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1007 FORMAT(1X,"DRYCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'DRYERS :',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=5
@@ -1081,8 +1059,6 @@
       ENDDO
 !     WRITE(18,1008) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1008 FORMAT(1X,"REFCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'REFRIG.:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=6
@@ -1095,8 +1071,6 @@
       ENDDO
 !     WRITE(18,1009) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1009 FORMAT(1X,"FRZCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'FREEZER:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=7
@@ -1109,16 +1083,12 @@
       ENDDO
 !     WRITE(18,1010) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1010 FORMAT(1X,"LTCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'LIGHTI.:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=8
       LoadForec(LFinum,1)=load*UNCONFAR*FORESIGHTadj
       ResTGdem(tgn)=LoadForec(LFinum,1)
 ! APPLIANCES    ! pw2 added miscellaneous
-! Changed to add broken out services in June 1997
-! use different demand array depending on DG PV dispatch treatment
       l=l+1
       DO k=1,nCENSUSreg
           CENSUSvalues(k)=APCON(UBASEYR,k) + CSWCON(UBASEYR,k) +  DSWCON(UBASEYR,k) + &
@@ -1126,8 +1096,6 @@
       ENDDO
 !     WRITE(18,1011) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1011 FORMAT(1X,"APCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'APPLIEN:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=9
@@ -1140,8 +1108,6 @@
       ENDDO
 !     WRITE(18,1012) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1012 FORMAT(1X,"SHTCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'SEC.HEA:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=10
@@ -1154,8 +1120,6 @@
       ENDDO
 !     WRITE(18,1012) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
 !1012 FORMAT(1X,"SHTCON",T20,3(":",I4),10(":",E15.0))
-!        if(RNB.eq.7.and.CURITR.eq.1)
-!     write(imsg,*)'SEC.HEA:',(CENSUSvalues(k),k=1,9)
       LFinum=LFinum+1
       CALL DSMEMMV(CENSUSvalues,RNB,SEC(RES),load)
       tgn=11
@@ -1235,19 +1199,9 @@
          FORESIGHTadj=TraLK1/TraLUBASEYR * DEMCETR (k1 - CURIYR + 1)
       ENDIF
 !! Aggregate CENSUS regions load forecast into NERC region forecasts by end-use
-!! LIGHT DUTY ELECTRIC VEHICLES ! AEO2022 - new variable by fuel and vehicle type, add all vehicles
+!! LIGHT DUTY ELECTRIC VEHICLES ! new variable by fuel and vehicle type - vehicles all added to resid/comm demand
 !!      - {1:LDV-home,2:LDV-public,3:LDV-fast,4:Bus school,5:Bus transit,6:Bus intercity,7:CLT,8:Freight depot,9:Freight nondepot,10:pass rail}
-!      DO k=1,nCENSUSreg
-!!        CENSUSvalues(k)=TRQLDV(ELLDVHX,k,UBASEYR)
-!        CENSUSvalues(k)=TRQ_ELEC(1,k,UBASEYR) + TRQ_ELEC(2,k,UBASEYR) + TRQ_ELEC(3,k,UBASEYR) + TRQ_ELEC(4,k,UBASEYR) + &
-!              TRQ_ELEC(5,k,UBASEYR) + TRQ_ELEC(6,k,UBASEYR) + TRQ_ELEC(7,k,UBASEYR) + TRQ_ELEC(8,k,UBASEYR) + TRQ_ELEC(9,k,UBASEYR)
-!      ENDDO
-!     WRITE(18,1003) CURIYR+UHBSYR,K1+UHBSYR,UBASEYR+UHBSYR,(CENSUSvalues(k),k=1,nCENSUSREG)
-!1003 FORMAT(1X,"TRQLDV",T20,3(":",I4),10(":",F12.3))
-!      LFinum=LFinum+1
-!      CALL DSMEMMV(CENSUSvalues,RNB,SEC(TRA),load)
-!      LoadForec(LFinum,1)=load*UNCONFA*FORESIGHTadj
-! ELECTRIC TRAINS! AEO2022 - new variable by fuel and vehicle type, same value as old TRQRAILR
+! ELECTRIC TRAINS! 
       l=l+1
       DO k=1,nCENSUSreg
         CENSUSvalues(k)=TRQ_ELEC(10,k,UBASEYR)
@@ -1510,20 +1464,23 @@
       include 'dsmcaldr' !<< calendar data
       include 'dsmhelm'  !<< helm algorithm variables
       include 'dsmtoefd' !<< communication with efd
+      include 'dsmtfecp'
       include 'dsmnemsc' !<< results of ldsm to be passed to the rest of nems
       include 'dsmnercr' !<< nerc region data
       include 'dsmrept'  !<< dsm reports specification
+      include 'wrenew'
+      include 'uecpout'
 !********************** Declaring local variables *****************************
       REAL*4 SYLOAD1(MAXHOUR) !copy of SYLOAD for one segment of hour # in year
       REAL*4 SYLOAD2(MAXHOUR) !same as SYLOAD1 but different order
+      REAL*4 SYLOAD1_net(MAXHOUR) !copy of SYLOAD for one segment of hour # in year
+      REAL*4 SYLOAD2_net(MAXHOUR) !same as SYLOAD1 but different order
       REAL*4 area ! area of the block
-      INTEGER*2 i,j,k,l,h,h1,h2,w,w1,b1,b2,b,ii ! temporary variables
-      INTEGER imom,iprob,ise,jj   ! various temps for demand cumulant
-      REAL*8 dmult,dval,dmmnt,dmomh(nprob,nmom),dmom(MAXEFTB,nmom)
-      REAL*8 dmompk(nprob,nmom)   ! more temps for cumulants
+      INTEGER*2 i,j,k,l,h,h1,h2,w,w1,b1,b2,b,ii, hday, hmonth ! temporary variables
+      INTEGER ise,jj   
       INTEGER*4 SWITCH ! switch: SYSTEM LOAD or DSM program (is being processed)
       REAL*4 dh ! division point of an hour
-      REAL*8 pl ! current peak load
+      REAL*8 pl, abspeak(EFDnumSg) ! current peak load
       REAL*4 ENOVER ! OVERESTIMATION OF ENERGY IN THE PEAK BLOCKS
       INTEGER*2 sgn ! segment number
       INTEGER*2 blk ! number of a block in the entire LDC
@@ -1537,81 +1494,60 @@
       INTEGER*2 BlockNumEFD(MAXEFTB) ! Numbers of blocks
       INTEGER*2 HOURSEGNUMEFD(nhour) ! Numbers of blocks
       INTEGER*2 icl,hh
-      REAL*4 testel
       INTEGER*4 hmonthd,hdayd,hhourd
       INTEGER*4 TMPHRSLd(12,3,24)
 !****************** Initializing Variables *************************************
       ENOVER=0.0
       DO I=1,MAXEFTB
         PBL(I)=0
-        do imom=1,nmom
-          dmom(i,imom)=0.0
-        enddo
       ENDDO
 
 !****************** Body of the Program/Subprogram *****************************
 ! For every segment of load of EFD LDC develop load duration curves
 ! Create a vector of hourly loads for all calendar hours
+      
       DO hn=1,nhour
+            hmonth = MON864(hn)
+            hday = DAYT864(hn)
+            h = HR864(hn)
         SYLOAD1(hn)=SYLOAD(hn)
+        if (NL_SLICE_SW .EQ. 1) then
+        SYLOAD1_net(hn)=SYLOAD(hn)- &
+                     PV_CAP_ADJ_REST(RNB,CURIYR) * WSSPVEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     PT_CAP_ADJ_REST(RNB,CURIYR) * WSSPTEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     SO_CAP_ADJ_REST(RNB,CURIYR) * WSSSTEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     WN_CAP_ADJ_REST(RNB,CURIYR) * WSFWIEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     WL_CAP_ADJ_REST(RNB,CURIYR) * WSFWLEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     WF_CAP_ADJ_REST(RNB,CURIYR) * WSFWFEL_CF(RNB,CURIYR-1,hday,hmonth,h) 
+        else 
+            SYLOAD1_net(hn) = SYLOAD(hn)
+        endif
         HOURSEGNUMEFD(hn) = HourNumberEFD(hn)
       ENDDO
 ! Rewrite SYLOAD1 to SYLOAD2 in segment order
       DO i=1,nhour
         SYLOAD2(i)=SYLOAD1(HourNumberEFD(i))
+        SYLOAD2_net(i) = SYLOAD1_net(HourNumberEFD(i))
       ENDDO
 ! Sort loads in each segment in descending order
       DO i=1,EFDnumSg
-        CALL DSMQSR(SYLOAD2,HourNumberEFD,EFDsgFh(i),EFDsgLh(i),MAXHOUR)
+        CALL DSMQSR(SYLOAD2_net,HourNumberEFD,EFDsgFh(i),EFDsgLh(i),MAXHOUR)
       ENDDO
 ! SYLOAD2 now contains calendar hour loads sorted by segment(from last to first)
 ! then in each segment loads are sorted in descending order
 ! HourNumberEFD contains original positions of calendar hours
-! Determin heights of the EFD LDC blocks
+! Determine heights of the EFD LDC blocks
       blk=1 ! current block number within whole LDC
       bls=1 ! current block number within a segment
       area=0.0 ! current area under the curve from the end of the previous block
 ! Now go over all hours in the year and calculate blocks widths and heights
       DO sgn=EFDnumSg,1,-1
         l=0 ! x coordinate expressed in real hours
-!  next two lines are wrong   ! segment not block
-        h1=EFDsgFh(sgn) ! beginning of current block in calendar hours
-        h2=EFDsgLh(sgn) ! end of current block in calendar hours
-        pl=SYLOAD2(h1) !current local peak load
+        h1=EFDsgFh(sgn) ! beginning of current segment in calendar hours
+        h2=EFDsgLh(sgn) ! end of current segment in calendar hours
+        pl=SYLOAD1(HourNumberEFD(h1)) !current local peak load
+        abspeak(sgn) = pl
 
-          do imom=1,nmom
-          do iprob=1,nprob
-              dmompk(iprob,imom) = 0.0
-            enddo
-        enddo
-
-! Peak moment
-         do iprob = 1,nprob
-            dval  = (1. + dincr(iprob) * loadu) * (PL )
-            dmult = dval
-            dmmnt =  dprob(iprob)
-
-!          write(6,*)'dval',dval,'dprob',dprob(iprob)
-! Calculate all moments for this calendar hour
-            do imom=1,4   ! all moments about 0
-               dmompk(iprob,imom) = dmompk(iprob,imom)+(dmult )* dmmnt
-               dmult = dmult * dval
-            end do   ! imom
-          enddo    ! iprob
-
-!    calculate cumulants here
-!    First figure out what season we are in
-!    If the routine bombs here this means the calendar file (# seasons)
-!    is inconsistent
-           DO J=1,efdns
-          if (blk .ge. EFDSEDEF(J,1)) then
-            nsea =J
-            goto 1201   ! break loop
-          ENDIF
-           END DO
- 1201    continue
-!       write(IMSG,*)'nsea, blk ',J,blk
-!       write(IMSG,*)(EFDSEDEF(J,1),J=1,EFDnS)
 
         DO h=h1,h2 ! x coordinate expressed in calendar hours
           w1=HourlyWeights(HourNumberEFD(h))
@@ -1620,75 +1556,15 @@
             hdayd = DAYT864(HourNumberEFD(h))
             hhourd = HR864(HourNumberEFD(h))
             TMPHRSLd(hmonthd,hdayd,hhourd) = blk
-
-!         if(blk .lt. 10) then
-!           write(IMSG,*)'SYLOAD h,w1,h1,h2',SYLOAD2(h),
-!    +     h,w1,h1,h2 !,EEITAJ(nsea)
-!         endif
-!  Create cumulants for demand function by hour for each season
-!  need value for each calendar hour, and sum appropriately
-! equivalent to load part divided by total hrs at that probability level
-
-
-           do imom=1,nmom
-           do iprob=1,nprob
-              dmomh(iprob,imom) = 0.0
-             enddo
-         enddo
-
-
-         do iprob = 1,nprob
-           dval  = (1. + dincr(iprob) * loadu) * (SYLOAD2(h) )
-           dmult = dval
-           dmmnt =  dprob(iprob)
-!          write(6,*)'dval',dval,'dprob',dprob(iprob)
-
-! Calculate all moments for this calendar hour
-           do imom=1,4   ! all moments about 0
-               dmomh(iprob,imom) = dmomh(iprob,imom)+(dmult )* dmmnt
-               dmult = dmult * dval
-           end do   ! imom
-         enddo    ! iprob
+            
+            abspeak(sgn) = max(abspeak(sgn), SYLOAD1(HourNumberEFD(h)) ) ! this is absolute load peak used for first slice
 
           DO w=1,w1
             l=l+1 ! x coordinate in real hours
-            area=area+SYLOAD2(h)
-
-!  add moment about zero contribution
-              do imom=1,nmom
-                do iprob=1,nprob
-                  IF (EFDsgDbltyp(sgn,bls).EQ.'p'.OR. &
-                    EFDsgDbltyp(sgn,bls).EQ.'P') THEN !if a 'peak' type block
-                    dmom(blk,imom)=dmom(blk,imom) + dmompk(iprob,imom)
-                  ELSE
-                    dmom(blk,imom)=dmom(blk,imom) + dmomh(iprob,imom)
-                  ENDIF
-                enddo
-              endDo
+            area=area+SYLOAD1(HourNumberEFD(h))
 
             IF((bls.NE.EFDsgDnB(sgn)) .and.  & !if this is not last block in seg
               (l.GT.EFDblockx(sgn,bls))) THEN !if x coordinate beyond the block
-!  Add fraction of hour going dripping over to next block
-               do imom=1,nmom
-                do iprob=1,nprob
-                   dmom(blk+1,imom)=dmom(blk+1,imom) + dmomh(iprob,imom) * (l - EFDblockx(sgn,bls))
-
-! subtract off the excess quantity from the current block
-                  IF (EFDsgDbltyp(sgn,bls).EQ.'p'.OR. &
-                    EFDsgDbltyp(sgn,bls).EQ.'P') THEN !if a 'peak' type block
-                      dmom(blk,imom)=dmom(blk,imom) - dmompk(iprob,imom) * (l - EFDblockx(sgn,bls))
-                  ELSE
-                       dmom(blk,imom)=dmom(blk,imom) - dmomh(iprob,imom) * (l - EFDblockx(sgn,bls))
-                  ENDIF
-                enddo
-              enddo
-
-!           ELSE
-!             do imom=1,nmom
-!               do iprob=1,nprob
-!                 dmom(blk,imom)=dmom(blk,imom) + dmomh(iprob,imom)
-!               enddo
-!              endDo
             ENDIF
 
             IF(bls.NE.EFDsgDnB(sgn)) THEN !if this is not last block in segment
@@ -1696,16 +1572,16 @@
                 dh=l-EFDblockx(sgn,bls) ! calculate an x axcess
                 IF (EFDsgDbltyp(sgn,bls).EQ.'p'.OR. &
                   EFDsgDbltyp(sgn,bls).EQ.'P') THEN !if a 'peak' type block
-                  BlockHeightEFD(blk)=pl
-                  ENOVER=ENOVER+pl*EFDblWidth(blk)-(area-dh*SYLOAD2(h))
+                  BlockHeightEFD(blk)=abspeak(sgn)
+                  ENOVER=ENOVER+abspeak(sgn)*EFDblWidth(blk)-(area-dh*SYLOAD1(HourNumberEFD(h)))
                   PBL(blk)=1
                 ELSE
-                  BlockHeightEFD(blk)=(area-dh*SYLOAD2(h))/EFDblWidth(blk)
+                  BlockHeightEFD(blk)=(area-dh*SYLOAD1(HourNumberEFD(h)))/EFDblWidth(blk)
                 ENDIF
-                area=dh*SYLOAD2(h)
+                area=dh*SYLOAD1(HourNumberEFD(h))
                 bls=bls+1
                 blk=blk+1
-                pl=SYLOAD2(h)
+                pl=SYLOAD1(HourNumberEFD(h))
               ENDIF
             ENDIF
           ENDDO
@@ -1716,7 +1592,7 @@
         area=0.0
       ENDDO
       EFDnumBl=blk-1
-! Adjast the energy in the non-peak blocks for the overestimated energy in the
+! Adjust the energy in the non-peak blocks for the overestimated energy in the
 ! peak blocks
       IF(ENOVER.NE.0.0) THEN
         totarea=0.0
@@ -1737,24 +1613,13 @@
           BlockNumEFD(i)=i
       ENDDO
 
-!  Divide  moments by width
-        DO j=1,EFDnumBl
-        do imom=1,nmom
-             dmom(j,imom) = dmom(j,imom)/EFDblWidth(j)
-        enddo
-      enddo
-
-
-!       DO J=1 ,1
-!        write(IMSG,*)'BLOCK wdth cum',J,EFDblWidth(j)
-!    +       ,(dcum(J,imom,RNB),imom=1,nmom)
-!       ENDDO
-!        stop
 ! Sort LDC blocks in their height order
       DO j=1,EFDnS
         b1=EFDSEDEF(j,1)
         b2=EFDSEDEF(j,2)
-        CALL DSMQSR(BlockHeightEFD,BlockNumEFD,b1,b2,EFDnumBl)
+        if (NL_SLICE_SW .EQ. 0) then !only if not net load slice sorting
+          CALL DSMQSR(BlockHeightEFD,BlockNumEFD,b1,b2,EFDnumBl) 
+        end if
         !Write the LDC into the communication common block arrays:
         DO i=b1,b2
           b=i-b1+1
@@ -1786,11 +1651,13 @@
           ENDDO
          ENDDO
          IF (FCRL .EQ. 1) THEN
-            WRITE(IMSG,9128) CURIRUN, CURIYR+1989, RNB, b, j, ULHGHT(b,j,RNB), ULWDTH(b,j,RNB)
- 9128                   FORMAT(1X,"Map_864_to_SP_GP_SG",5(":",I4),2(":",F18.6))
+            WRITE(IMSG,9128) CURIRUN, CURIYR+1989, RNB, b, j, ULHGHT(b,j,RNB), ULWDTH(b,j,RNB), abspeak(j)
+ 9128                   FORMAT(1X,"Map_864_to_SP_GP_SG",5(":",I4),3(":",F18.6))
          ENDIF
         ENDDO
-        ULPEAK(j,RNB)=SYLOAD2(EFDsgFh(ULGRP(1,j,RNB)))
+        ULPEAK(j,RNB)= abspeak(j)  !needs to be absolute peak
+   !  WRITE(IMSG,9129) CURIRUN, CURIYR+1989, RNB, j, ULPEAK(j,RNB), abspeak(j)
+ !9129                   FORMAT(1X,"ULpeak2",4(":",I4),2(":",F18.6))
       ENDDO
 
 ! Copy into global block number by region
@@ -1798,50 +1665,15 @@
             GblockNumEfd(i,RNB)= BlockNumEFD(i)
        END DO
 
-!        do ise=1,1
-!         write(IMSG,*)'block dmom',ise,(dmom(ise,j),j=1,2)
-!         write(IMSG,*)'blockwd',efdblwidth(ise)
-!        end do
-
 !       write(IMSG,*) 'entering dsmsecwt'
-! only on first iteration do we re-do the end-use ldc ?? NO, need to run every iteration to get right demands for EFP
-!         IF (CURITR .EQ. 1) THEN
-                CALL DSMSECWT(HoursegnumEFD)
-!         ENDIF
-!     IF (FCRL .eq. 1 ) THEN
-!       write(IMSG,118)(ULHGHT(b,6,RNB),
-!    +  b=1,18)
-!118    format('in dsmefd load before',6F10.2)
-!     ENDIF
+! Run every iteration to get right demands for EFP
+      CALL DSMSECWT(HoursegnumEFD)
 
-! In addition to here, We also call dmshft in the dsmecp1 routine on the first iteration
-! but not the first year
-! go ahead and call the first year - send a switch to mark where called from
- !     IF ((USW_POL .eq. 4) .and. (FRMARG(CURIYR,RNB) .gt. 0.0)) THEN
-       IF (curiyr .gt. 11) THEN
-! call only if elasticity for at least one sector is greater than 0
-       testel=0.0
-         do icl=1,MAXSEC
-          do hh=1,neusgrp(icl)
-            testel=testel+EUELAS(RNB,icl,hh)
-           enddo
-          enddo
-         if (testel .gt. 0.0) CALL DSMSHFT(1)
-       ENDIF
-
-      DO jj=1,EFDnumBl
-          dcumhr(jj,RNB) = BLOCKNUMEFD(jj)
-      END DO ! jj
-
-      CALL DSMEFPS(BlockNumEFD) ! DEVELOP SECTORIAL LDC THAT THE EFP needs
       IF (FCRL .EQ. 1) THEN
         IF(NODSMRPT(4)) CALL DSMREP4 ! WRITE EFD LDC
       ENDIF
 !****************** Termination of the Program/Subprogram **********************
       RETURN
-900   WRITE(*,*)'<))) ERROR IN DSMEFD ROUTINE OF LDSM'
-      WRITE(*,*)'<)))) DSM PROGRAM DATA MAY BE CORRUPTED'
-      WRITE(IMSG,*)'<))) ERROR IN DSMEFD ROUTINE OF LDSM'
       END
 
       SUBROUTINE DSMEFP
@@ -2204,8 +2036,8 @@
       CALL DSMHLC(SYLOAD1,WHENQSR)
       CALL DSMQSR(SYLOAD1,Hindex,ONE,nhour,MAXHOUR)
       SystemPeak(K1)=SYLOAD1(1)
-!     write(imsg,*)'SYLOAD1(1...10)',(SYLOAD1(I),I=1,10)
-!     write(imsg,*)'K1,SystemPeak(K1)',K1,SystemPeak(K1)
+!     write(imsg,*)'SYLOAD1_10 ',CURIYR,CURITR,RNB,(SYLOAD1(I),I=1,10)
+ !    write(imsg,*)'K1,SystemPeak(K1) ',CURIYR,CURITR,RNB,K1,SystemPeak(K1), Hindex(1)
       SystemPeakHour(K1)=Hindex(1)
       TotSystemLoad(K1)=SystLo
       SystemLoadFactor(K1)=SystLo/nhouryr/SystemPeak(K1)
@@ -2237,8 +2069,10 @@
       include 'parametr' !<< nems parameter declarations
       include 'ncntrl'
       include 'emmparm'
+      include 'control'!<< contains UNYEAR
       include 'eusprc'
       include 'efpint'
+      include 'wrenew'
 !**********Declaring LDSM variables and common blocks via NEMS include files********
       include 'dsmdimen' !<< all ldsm parameter declarations
       include 'dsmunits' !<< include file with unit number for ldsm message file
@@ -2250,17 +2084,20 @@
       include 'dsmnercr' !<< nerc region data
       include 'dsmrept'  !<< ldsm reports specification
       include 'dsmsectr'
+      include 'uecpout'
 !********************** Declaring local variables *****************************
       INTEGER*2 ONE
       PARAMETER(ONE=1)
-
+      REAL*4 SYLOAD1_net(MAXHOUR) !copy of SYLOAD for one segment of hour # in year
       REAL*4 SYLOAD1(MAXHOUR) !copy of SYLOAD for one segment of hour # in year
       REAL*4 SYLOAD2(MAXHOUR) !same as SYLOAD1 but different order
+      REAL*4 SYLOAD3(MAXHOUR) !same as SYLOAD1 but different order
+      REAL*4 SYLOAD2_net(MAXHOUR) !same as SYLOAD1 but different order
       REAL*4 area ! area of the block
       INTEGER*2 i,j,k,l,h,h1,h2,w,w1,s,s1,s2 ! temporary variables
       INTEGER*4 SWITCH ! switch: SYSTEM LOAD or DSM program (is being processed)
       REAL*4 dh ! division point of an hour
-      REAL*4 pl ! current peak load
+      REAL*4 pl, abspeak ! current peak load
       REAL*4 ENOVER ! OVERESTIMATION OF ENERGY IN THE PEAK BLOCKS
       INTEGER*2 sgn ! segment number
       INTEGER*2 blk ! number of a block in the entire LDC
@@ -2271,35 +2108,61 @@
       REAL*4 totarea ! total area of non-peak blocks
       REAL*4 u,load ! temporary variable for load
       INTEGER*2 icl,jj ! temporary variables
-      REAL*4 testel
       INTEGER*4 hmonth,hday,hhour
       INTEGER*4 TMPHRSL(12,3,24)
+      INTEGER*2 HourNumber_rm(MAXHOUR)
+      INTEGER*4 LAST_PROJ_YR
+      
 !****************** Initializing Variables *************************************
       ENOVER=0.0
       DO I=1,MAXECTB
         PBL(I)=0
       ENDDO
+      LAST_PROJ_YR = min(UNYEAR,K1) !min of endyear and k1
 !****************** Body of the Program/Subprogram *****************************
 
 !     For every segment of load of ECP LDC develop load duration curves
 !     Create a vector of hourly loads for all calendar hours
 
       DO hn=1,nhour
-         SYLOAD1(hn)=SYLOAD(hn)
+            hmonth = MON864(hn)
+            hday = DAYT864(hn)
+            h = HR864(hn)
+            ! might be lagging a year with updates
+            SYLOAD1(hn)=SYLOAD(hn)
+            if (NL_SLICE_SW .EQ. 1) THEN
+         SYLOAD1_net(hn)=SYLOAD(hn)- &
+                     PV_CAP_ADJ_REST(RNB,LAST_PROJ_YR) * WSSPVEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     PT_CAP_ADJ_REST(RNB,LAST_PROJ_YR) * WSSPTEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     SO_CAP_ADJ_REST(RNB,LAST_PROJ_YR) * WSSSTEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     WN_CAP_ADJ_REST(RNB,LAST_PROJ_YR) * WSFWIEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     WL_CAP_ADJ_REST(RNB,LAST_PROJ_YR) * WSFWLEL_CF(RNB,CURIYR-1,hday,hmonth,h) - &
+                     WF_CAP_ADJ_REST(RNB,LAST_PROJ_YR) * WSFWFEL_CF(RNB,CURIYR-1,hday,hmonth,h) 
+            ELSE
+                SYLOAD1_net(hn)=SYLOAD(hn)
+            ENDIF
+        !write(IMSG,1111) CURIYR,K1,CURITR,RNB,hn, hmonth, hday, h, SYLOAD(hn), SYLOAD1_net(hn)
+!1111     FORMAT('syload1_net ',8I6,2F15.4)
       ENDDO
 
 !     Put SYLOAD1 in SYLOAD2 in segment order
 
       IF (SWITCH.LE.2) THEN
          DO i=1,nhour
+            SYLOAD2_net(i)=SYLOAD1_net(HourNumber(i))
             SYLOAD2(i)=SYLOAD1(HourNumber(i))
+            SYLOAD3(i)=SYLOAD1(HourNumber(i))
+            HourNumber_rm(i) = HourNumber(i)
          ENDDO
 
 !        Sort loads in each segment in descending order
 
          IF(SWITCH.EQ.1) THEN
             DO i=1,ECPnumSg
-               CALL DSMQSR(SYLOAD2,HourNumber,ECPsgFh(i),ECPsgLh(i),MAXHOUR)
+               CALL DSMQSR(SYLOAD2_net,HourNumber,ECPsgFh(i),ECPsgLh(i),MAXHOUR)
+               !this one is used for RM
+               
+               CALL DSMQSR(SYLOAD3,HourNumber_rm,ECPsgFh(i),ECPsgLh(i),MAXHOUR)
             ENDDO
          ENDIF
       ELSE
@@ -2323,11 +2186,12 @@
          l=0 ! x coordinate expressed in real hours
          h1=ECPsgFh(sgn) ! beginning of current block in calendar hours
          h2=ECPsgLh(sgn) ! end of current block in calendar hours
-         pl=SYLOAD2(h1) !current local peak load
-!        IF (CURIYR .EQ. 22 .AND. K1 .EQ. CURIYR) THEN
-!        write(6,110) CURIYR,RNB,sgn,h1,h2,pl
-!        ENDIF
-110     FORMAT(' ECPSG',5I6,F10.2)
+         pl=SYLOAD1(HourNumber(h1)) !current local peak load
+         abspeak = pl
+       ! IF (K1 .EQ. CURIYR) THEN
+       ! write(IMSG,110) CURIYR,RNB,sgn,h1,h2,HourNumber(h1),pl, SYLOAD2(HourNumber(h1)), SYLOAD1(HourNumber(h1)), SYLOAD2_net(h1), SYLOAD2(h1)
+       ! ENDIF
+!110     FORMAT(' ECPSG',6I6,4F10.2)
          DO h=h1,h2 ! x coordinate expressed in calendar hours
             IF(SWITCH.LE.2) THEN
                w1=HourlyWeights(HourNumber(h))
@@ -2340,38 +2204,47 @@
             hhour = HR864(HourNumber(h))
             TMPHRSL(hmonth,hday,hhour) = blk
            ENDIF
-!          IF( CURIYR .EQ. 22 .AND. K1 .EQ. CURIYR) THEN
-!          write(6,112) CURIYR,RNB,sgn,h,w1,HourNumber(h)
-!          ENDIF
-112      FORMAT(' HRWT ',6I6)
+           abspeak =  max(abspeak, SYLOAD1(HourNumber(h)) )
+          !IF(K1 .EQ. CURIYR) THEN
+          !write(IMSG,112) CURIYR,K1,RNB,sgn,h,w1,HourNumber(h), blk
+          !ENDIF
+112      FORMAT(' HRWT ',8I6)
             DO w=1,w1
                l=l+1 ! x coordinate in real hours
-               area=area+SYLOAD2(h)
+               area=area+SYLOAD1(HourNumber(h))
                IF(bls.NE.ECPsgDnB(sgn)) THEN !if this is not last block in segment
                   IF(l.GT.ECPblockx(sgn,bls)) THEN !if x coordinate beyond the block
                      dh=l-ECPblockx(sgn,bls) ! calculate an x axcess
                      IF (ECPsgDbltyp(sgn,bls).EQ.'p'.OR. ECPsgDbltyp(sgn,bls).EQ.'P') THEN !if a 'peak' type block
-                        BlockHeight(blk)=pl
-                        ENOVER=ENOVER+pl*ECPblWidth(blk)-(area-dh*SYLOAD2(h))
+                        BlockHeight(blk)=abspeak
+                        ENOVER=ENOVER+abspeak*ECPblWidth(blk)-(area-dh*SYLOAD1(HourNumber(h)))
                         PBL(blk)=1
-                     ELSE
-                        BlockHeight(blk)=(area-dh*SYLOAD2(h))/ECPblWidth(blk)
-                     ENDIF
-!                    IF (CURIYR .EQ. 22 .and. K1 .EQ. CURIYR) THEN
-!                      write(6,111) CURIYR,CURITR,RNB,SWITCH,blk,h,SYLOAD2(h),SYLOAD(h),BLOCKHEIGHT(BLK)
+!                      IF (K1 .EQ. CURIYR) THEN
+!                      write(IMSG,118) CURIYR,CURITR,RNB,SWITCH,blk,h, HourNumber(h),w,l,BLOCKHEIGHT(BLK), SYLOAD1(HourNumber(h)), SYLOAD2_net(h), area, ENOVER, abspeak, dh, abspeak*ECPblWidth(blk), area-dh*SYLOAD2(HourNumber(h))
 !                    ENDIF
-111     FORMAT(' DSMLCP: ',6I6,3F10.4)
-                     area=dh*SYLOAD2(h)
+                     ELSE
+                        BlockHeight(blk)=(area-dh*SYLOAD1(HourNumber(h)))/ECPblWidth(blk)
+!                        IF (K1 .EQ. CURIYR) THEN
+!                      write(IMSG,119) CURIYR,CURITR,RNB,SWITCH,blk,h, HourNumber(h),w,l,BLOCKHEIGHT(BLK), SYLOAD1(HourNumber(h)), SYLOAD2_net(h), area, ENOVER, pl, dh, ECPblWidth(blk), area-dh*SYLOAD2(HourNumber(h))
+!                    ENDIF
+                     ENDIF
+!                    IF (K1 .EQ. CURIYR) THEN
+!                      write(IMSG,111) CURIYR,CURITR,RNB,SWITCH,blk,h, HourNumber(h),w,l,SYLOAD1(h),SYLOAD(h),BLOCKHEIGHT(BLK), SYLOAD1(HourNumber(h)), SYLOAD2_net(h)
+!                    ENDIF
+111                 FORMAT(' DSMLCP: ',9I6,5F10.4)
+!                    118     FORMAT(' DSMLCP6: ',9I6,9F10.4)
+!                    119     FORMAT(' DSMLCP7: ',9I6,5F10.4)
+                     area=dh*SYLOAD1(HourNumber(h))
                      bls=bls+1
                      blk=blk+1
-                     pl=SYLOAD2(h)
+                     pl=SYLOAD1(HourNumber(h))
                   ENDIF
                ENDIF
             ENDDO
          ENDDO
          BlockHeight(blk)=area/ECPblWidth(blk) ! for last block in a segment
          IF (CURIYR .EQ. 21 .and. CURITR .eq. 1) THEN
-             write(6,111) CURIYR,CURITR,RNB,SWITCH,blk,h,SYLOAD2(h),SYLOAD(h),BLOCKHEIGHT(BLK)
+             write(IMSG,111) CURIYR,CURITR,RNB,SWITCH,blk,h, HourNumber(h),w, l,SYLOAD(h),BLOCKHEIGHT(BLK), 0, SYLOAD2_net(h)
          ENDIF
          blk=blk+1
          bls=1
@@ -2388,7 +2261,11 @@
          ENDDO
          IF(totarea.NE.0.0) THEN
             ovratio=1-ENOVER/totarea
+!115      FORMAT(' OVRATIO ',4I6, 5F20.6)
             DO blk=1,ECPnumBl
+!             IF(K1 .EQ. CURIYR) THEN
+!          write(IMSG,115) CURIYR,RNB,blk,PBL(blk), ENOVER, totarea, ovratio, BlockHeight(blk), BlockHeight(blk)*ovratio
+!          ENDIF
                IF(PBL(blk).EQ.0) BlockHeight(blk)=BlockHeight(blk)*ovratio
             ENDDO
          ELSE
@@ -2403,8 +2280,9 @@
          ENDDO
 
 !        Sort LDC blocks in their height order
-
+      if (NL_SLICE_SW .EQ. 0) then !only if not net load slice sorting
          CALL DSMQSR(BlockHeight,BlockNum,ONE,ECPnumBl,ECPnumBl)
+      endif
 
 !        Write into the communication common block arrays:
 !        ECPLDCBH(year,region,blocknumber) heights,
@@ -2416,7 +2294,7 @@
             ECPLDCBW(K1,RNB,i)=ECPblWidth(BlockNum(i))/SumSegWidth !to fr. of year
             ECPLDCBS(K1,RNB,i)=ECPblSeg(BlockNum(i))
             ECPLDCSL(K1,RNB,i)=ECPblSlc(BlockNum(i))
-           IF(CURIYR.LT.27) WRITE(IMSG,9402)'results ',K1,RNB,i,Blocknum(i),ECPLDCBH(k1,RNB,i),ECPLDCBW(k1,RNB,i),ECPLDCBS(k1,RNB,i),ECPLDCSL(k1,RNB,i)
+      IF(CURIYR.LT.27)     WRITE(IMSG,9402)'results ',K1,RNB,i,Blocknum(i),ECPLDCBH(k1,RNB,i),ECPLDCBW(k1,RNB,i),ECPLDCBS(k1,RNB,i),ECPLDCSL(k1,RNB,i)
 9402  FORMAT(A20,1x,4(I4,1x),2(F12.4,1x),I4,1x,F12.0,1x)
          ENDDO
          IF (K1 .EQ. CURIYR) THEN
@@ -2426,7 +2304,7 @@
                DO i = 1, ECPnumBL
                  IF (TMPHRSL(hmonth,hday,hhour) .EQ. BlockNum(i)) THEN
                      HRTOECPSL(CURIYR,RNB,hmonth,hday,hhour) = i
-            IF(CURIYR.LT.27) WRITE(IMSG,9120)'hrtoecpsl ',CURIYR,RNB,hmonth,hday,hhour,i,Blocknum(i),TMPHRSL(hmonth,hday,hhour),HRTOECPSL(CURIYR,RNB,hmonth,hday,hhour)
+            IF(CURIYR.LT.27) WRITE(IMSG,9120)'hrtoecpsli',CURIYR,RNB,hmonth,hday,hhour,i,Blocknum(i),TMPHRSL(hmonth,hday,hhour),HRTOECPSL(CURIYR,RNB,hmonth,hday,hhour)
 9120  FORMAT(A20,1x,9(I4,1x))
                  ENDIF
                ENDDO
@@ -2439,8 +2317,11 @@
             s2=ECPSEDEF(i,2)
             u=0.0
             DO s=s1,s2
-               load=SYLOAD2(ECPsgFh(s))
+               load=SYLOAD3(ECPsgFh(s))
                IF(load.GT.u) u=load
+               
+!              WRITE(IMSG,9121)'uppeak',CURIYR,K1,RNB,i, s,ECPsgFh(s), load, u, SYLOAD3(ECPsgFh(s))
+!              9121  FORMAT(A20,1x,6(I4,1x),3(F20.6,1x))
             ENDDO
             UPPEAK(i,K1-CURIYR+1,RNB)=u
          ENDDO
@@ -2475,21 +2356,6 @@
             ENDIF
          ENDIF
       ENDIF
-
-!     add ecp load shifting on first iteration
-
-      IF (CURITR .eq. 1 .and. CURIYR .gt. 11 .and. SWITCH .eq. 1) THEN
-
-!        call only if elasticity for at least one sector is greater than 0
-
-         testel=0.0
-         do icl=1,MAXSEC
-            do jj=1,neusgrp(icl)
-               testel=testel+EUELAS(RNB,icl,jj)
-            enddo
-         enddo
-         if (testel .gt. 0.0) CALL DSMSHFT(0)
-      ENDIF ! CURIYR
 
 !****************** Termination of the Program/Subprogram **********************
       RETURN
@@ -2625,23 +2491,15 @@
 	  INTEGER*4 DBnr  ! DB number of records
 	  COMMON /EUSYSLD/LSReuname_s,DistLo_eu_s, DBnr
       
-! If(curiyr+1989.le.2009) Write(6,*)'in DSMNWS ',RNB,Numrec,Lfpointer,Sector
-
 ! Read a record from the Sqlite DB
       IF (Numrec.eq.0) THEN 
          Do m=1,nhour
            DistLo(M) =  DistLo_s(RNB,m)
-!            if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1) Write(6,*)'test distlo db ',LSRname_s(RNB),RNB,m,DistLo(M)
          Enddo
       Else
          do m=1,nhour
            DistLo(m)=DistLo_eu_s(NUMREC,m)
 		 enddo
-		
-
-         Do m=1,nhour
-!             if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1)  Write(6,*)'test distlo daf ',LSRname,RNB,m,DistLo(M)
-         Enddo
       Endif
 
       IF(LFpointer.NE.0) THEN
@@ -2665,11 +2523,6 @@
         SYLOAD(M)=SYLOAD(M)+DistLo(M)*load2 !VLA Here total annual laod is disaggregated into hourly load where load2 is total system load
         
       ENDDO
-!  if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1) THEN
-!  write(IMSG,*)'LSRNAME   ',LSRname
-!   WRITE(IMSG,*)'load2,DistLo(1..10),SYLOAD(1...10)' &
-!   ,load2,(DistLo(M),M=1,10),(SYLOAD(M),M=1,10)
-!   ENDIF
       ENDIF
       IF(SECTOR.NE.0) THEN
         IF(K1.EQ.CURIYR) THEN
@@ -2677,11 +2530,6 @@
           DO M=1,nhour
             SectorLoad(M,SECTOR)=SectorLoad(M,SECTOR) +DistLo(M)*load1
           ENDDO
-!  if (RNB.eq.2.and.(curiyr+1989.eq.2010.or.curiyr+1989.eq.2020 ).AND.CURITR.EQ.1) THEN       
-!  write(IMSG,*)'LSRNAME   ',LSRname
-!    WRITE(IMSG,*)'load1,DistLo(1..10),SectorLoad(1...10)' &
-!    ,load1,(DistLo(M),M=1,10),(SectorLoad(M,SECTOR),M=1,10),nhour
-! Endif
         ENDIF
       ENDIF
 !****** Termination of the Program/Subprogram **********************
@@ -2921,77 +2769,6 @@
       GO TO 400
       END
 
-      FUNCTION DSMRMS(PAYBACK,SECTOR)
-!****************** Description of the Program/Subprogram **********************
-! THIS FUNCTION CALCULATES AFTER-DEMAND-SIDE-MANAGEMENT-OPTION-APPLICATION MARKET SHARE OF A TECHNOLOGY
-!       the TO technology is expressed as a fraction of TO+FROM market share
-!*******************************************************************************
-      IMPLICIT NONE
-!**********Declaring variables and common blocks via NEMS include files********
-      include 'parametr' ! nems parameter declarations
-      include 'emmparm'
-!**********Declaring LDSM variables and common blocks via NEMS include files********
-      include 'dsmdimen' ! ldsm parameter declarations
-      include 'dsmunits' !<< i/o units
-      include 'dsmsectr' !<< sector specific data and other associated variables
-!********************** Declaring local variables *****************************
-      INTEGER*2 PAYBACK ! DSM option pay-back period
-      INTEGER*2 SECTOR ! SECTOR IDENTIFIER
-      REAL*4 DSMRMS ! RESULITING MARKET SHARE
-      INTEGER*2 I,J,K ! UNIVERSAL POINTERS
-      INTEGER*2 Nrow ! current number of data rows
-!****************** Initializing Variables *************************************
-      Nrow=0
-!****************** Body of the Program/Subprogram *****************************
-      IF(SECTOR.GT.PACnS) GOTO 999
-!  count number of data points in PAC for the current sector
-      DO I=1,PACnR
-        IF(PACmp(I,SECTOR).GE.0.0) THEN
-          Nrow=I
-        ELSE
-          Nrow=I-1
-          GOTO 555
-        ENDIF
-      ENDDO
-555   CONTINUE
-! If only one value of market penetration was given on inpt return this value
-      IF(Nrow.EQ.1) THEN
-        DSMRMS=0.01*PACmp(1,SECTOR)
-        RETURN
-      ENDIF
-      DO I=1,Nrow
-        IF(PAYBACK.LT.PACpb(I)) THEN
-          IF(I.EQ.1) THEN
-!          extrapolate back if value lower than any value specified on input
-            DSMRMS=0.01*((PACmp(2,SECTOR)-PACmp(1,SECTOR)) &
-                /(PACpb(2)-PACpb(1)) &
-                *(PAYBACK-PACpb(1)) &
-                +PACmp(1,SECTOR))
-          ELSE
-!          otherwise interpolate
-            DSMRMS=0.01*((PACmp(I,SECTOR)-PACmp(I-1,SECTOR)) &
-                /(PACpb(I)-PACpb(I-1)) &
-                *(PAYBACK-PACpb(I-1)) &
-                +PACmp(I-1,SECTOR))
-          ENDIF
-          GOTO 998
-        ENDIF
-      ENDDO
-!    extrapolate if value higher than any value specified on input
-      DSMRMS=0.01*((PACmp(Nrow,SECTOR)-PACmp(Nrow-1,SECTOR)) &
-          /(PACpb(Nrow)-PACpb(Nrow-1)) &
-          *(PAYBACK-PACpb(Nrow)) &
-          +PACmp(Nrow,SECTOR))
-998   IF(DSMRMS.LT.0.0) DSMRMS=0.0
-!****************** Termination of the Program/Subprogram **********************
-      RETURN
-999   WRITE(IMSG,*)'<)) Message from FUNCTION DSMRMS'
-      WRITE(IMSG,*)'<))) PAC HAS NOT BEEN DEFINED FOR SECTOR #:',SECTOR
-      WRITE(IMSG,*)'<))) DSMRMS ASSUMED  = 1.0'
-      DSMRMS=1.0
-      RETURN
-      END
-
       SUBROUTINE DSMRST(WHOOPS)
 
 !     ****************** Description of the Program/Subprogram **********************
@@ -3017,7 +2794,6 @@
       include 'dsmtfefp' !<< communication with efp
       include 'dsmcaldr' !<< calendar data
       include 'dsmnercr' !<< nerc region data
-      include 'dsmoptdb' !<< dsm option data base
       include 'dsmhelm'
       include 'dsmrept'  !<< ldsm reports specificaton
       include 'control'
@@ -3098,7 +2874,6 @@
             character(len=40), pointer, dimension(:)   :: result
             character(len=80)                          :: errmsg
             logical                                    :: finished
-      Integer*4 NREPREG_sq
       Character*8 LSRnam_sq(MNUMNR,MAXSEC,MAXEU), LSRnam2, y_sq
       real x_sq(MNUMNR,MAXSEC,MAXEU)
       Integer*4 ID,IK,JK,MNUMNR_sq
@@ -3119,6 +2894,10 @@
       SecNam(TRA)='TRA'
       Neu=0
 
+      DTNAME(1) = 'WEEK-DAY'
+      DTNAME(2) = 'WEEK-END'
+      DTNAME(3) = 'PEAK-DAY'
+      
 !     Actual number of regions to be processed
 
 
@@ -3129,18 +2908,12 @@
          ENDDO
       ENDDO
       SumSegWidth=0
-      DO I=1,MNUMNR
-         NOREGRPT(I)=.FALSE.
-      ENDDO
-      DO I=1,UNYEAR
-         NOYEARRPT(I)=.FALSE.
-      ENDDO
 
       CALL EMM_LDSM
       
           call sqlite3_open( 'emm_db/NEMS_INPUT.db', db )
 
-           allocate ( col3(8) )
+           allocate ( col3(6) )
                  ! QUERY THE DATABASE TABLE
                    call sqlite3_column_query( col3(1), 'ID', sqlite_int ) 
                    call sqlite3_column_query( col3(2), 'EMM_REG', sqlite_int )
@@ -3148,36 +2921,20 @@
                    call sqlite3_column_query( col3(4), 'LSRnam', sqlite_char )
                    call sqlite3_column_query( col3(5), 'UQTDLS', sqlite_real )
                    call sqlite3_column_query( col3(6), 'MEFAC', sqlite_real )
-                   call sqlite3_column_query( col3(7), 'DEMINT', sqlite_real )
-                   call sqlite3_column_query( col3(8), 'NREPREGI', sqlite_int )
                    
                    call sqlite3_prepare_select( db, 'V_EMM_LDSMSTR_RGN', col3, stmt3 )
                    
-                   !write(6,*) 'can you read this1'
-         
                  ! LOAD RESULTS INTO FORTRAN VARIABLES FOR NEMS
                    do
-                     !write(6,*) 'can you read this1a'
                      call sqlite3_next_row( stmt3, col3, finished )
-                     !write(6,*) 'can you read this1b'
                      if ( finished ) exit
                      
-                     !write(6,*) 'can you read this2'
                      call sqlite3_get_column( col3(1), ID )
                      call sqlite3_get_column( col3(2), MNUMNR_sq )
                      call sqlite3_get_column( col3(3), NERCnam(MNUMNR_sq) )
                      call sqlite3_get_column( col3(4), LSRnamSys(MNUMNR_sq) )
                      call sqlite3_get_column( col3(5), UQTDLS(MNUMNR_sq) )
                      call sqlite3_get_column( col3(6), MEFAC(MNUMNR_sq) )
-                     call sqlite3_get_column( col3(7), DEMINT(MNUMNR_sq) )
-                     call sqlite3_get_column( col3(8), NREPREG_sq )
-                     
-
-                     NREPREG  = NREPREG_sq
-               
-            !write(6,*) 'can you read this3'
-               
-             !write(6,*)'LSRNa ',LSRnamSys(ID), 'UQTDLS(ID)',UQTDLS(ID),'NERCnam(ID)',NERCnam(ID)
                
                   enddo
                           
@@ -3211,30 +2968,8 @@
 		  
           call CALLSYSLOAD_EU	!TD	  
       
-!      write(6,*)'Can read everything in EMM_LDSM'
-!     ****************** Body of the Program/Subprogram *****************************
-!     * Read the DAF LSR database
-!     * Number of records and calendar data from the first record
-
-      NEW = .FALSE.
-      fname = 'LDSMDAF'
-      IODB = FILE_MGR('O',fname,NEW)  !Open DAF-LSR-DB
-
-      READ(IODB,REC=1)DAFnr,NMONTH,(NODAYS(I),I=1,NMONTH), &
-         ((WEIGHT(J,K),J=1,NODAYS(K)),K=1,NMONTH),NODAYT,NOSEA, &
-         (MONTYP(I),I=1,NMONTH),((IDAYTQ(I,J),I=1,NODAYS(J)),J=1,NMONTH), &
-         ((JDAYTP(I,J),i=1,NODAYS(J)),J=1,NMONTH),(SENAME(I),I=1,NOSEA), &
-         (DTNAME(I),I=1,NODAYT),(MONAME(i),i=1,NMONTH)
-		
- ! this reads DbLSRname from the DAF file. See LC2 note in the code just after format 2793. May not be needed but leaving it alone for now.- TD
- ! DAFnr=         544 (from current DAF file)
-      DO l=2,DAFnr
-         READ(IODB,REC=l)DbLSRname(l)		 
-      ENDDO
-! overwrite ldsmdaf inuts with calendar data from the database 
+! get calendar data from the SQLite database 
       CALL LOAD_LDSM_CAL
-
-
 	 
 !
 !     Open the structure file
@@ -3244,10 +2979,15 @@
       FILE=FILE_MGR('O',fname,NEW)
       CALL DSMSKP(FILE,WHOOPS)
       IF(WHOOPS) RETURN
+      
+!  Read swich for if for EFD/ECP should use net load or absolute load for sorting slices
+! 1 = net load, 0= abs load
+      READ(FILE,*)NL_SLICE_SW
 
 !  Read number of top coincident peak hours to be used to calculate average coincident peak load for EFP
 !      (PCP purposes)
-
+      CALL DSMSKP(FILE,WHOOPS)
+      IF(WHOOPS) RETURN
       READ(FILE,*)NpeakH
 
 !     Read definition of LDCs that are to be produced by the module
@@ -3412,6 +3152,8 @@
             ECPblSlc(K)=J
             x=x+ECPblWidth(K)
             ECPblockx(I,J)=x
+            !WRITE(IMSG,1728) CURIRUN, CURIYR+1989, CURITR, K, ECPblSeg(K), ECPblSlc(K), ECPnumSg, ECPsgDnB(I), ECPblWidth(K), x
+ !1728       FORMAT(1X,"LDC_order",8(":",I6),2(":",F20.6))
          ENDDO
       ENDDO
 
@@ -3558,6 +3300,9 @@
                         DO h=Dhour(n,1),Dhour(n,2)
                            EFDsgNum(l+h)=I
                            t=t+WEIGHT(K,EFDsgDmonth(J))
+                           
+!                        WRITE(IMSG,1728) CURIRUN, CURIYR+1989, CURITR, J, K, p, n, h, I, EFDsgDmonth(J) !, Dday(p), t
+ !1728       FORMAT(1X,"LDC_order",10(":",I8)) !,1(":",F20.6)
                         ENDDO
                      ENDDO
                   ENDIF
@@ -4420,37 +4165,14 @@
 !   sort the groups
       EUGRP(neu+1) = 0  ! marker for end of uses
         CALL DSMSORT(EUGRP,EUGRPNDX,MAXEU)
-!   read efd load uncertainty
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)loadu
-        loadu=loadu/100.
-
-!   read ecp load uncertainty
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)loadecpu
-        loadecpu=loadecpu/100.
  !   read net cone percentage and weights for blending duals with levelized costs of turbine
         CALL DSMSKP(FILE,WHOOPS)
         IF(WHOOPS) RETURN
         READ(FILE,*) NETCON,CPWT1,CPWT2,CPWT3,CPWT4
         WRITE(18,*) 'NETCON and WEIGHTS',NETCON,CPWT1,CPWT2,CPWT3,CPWT4
 
-!   read market entry factor for ecp
-        !CALL DSMSKP(FILE,WHOOPS)
-        !IF(WHOOPS) RETURN
-        !READ(FILE,*)(MEFAC(j),j=1,nNERCreg),MEFAC(MNUMNR-2),MEFAC(MNUMNR-1),MEFAC(MNUMNR)
-
-!     write(IMSG,*)'group',(EUGRPNDX(J),J=1,neu)
-!     stop
-!      do  j=1,neu
-!     write(IMSG,*)'group, index',EUGRP(J),EUGRPNDX(J)
-!     enddo
-!     stop
-
 ! Read matrices used for mapping between CENSUS divisions and NERC regions and
-! vice versa.
+! vice versa. Note - these were read from SQLite database earlier
       DO J=1,Numsec
         DO l=1,nNERCreg
           write(IMSG,1520) 'MappCtoN ', l,J,(MappCtoN(l,K,J),K=1,MNUMCR)
@@ -4463,10 +4185,8 @@
 !2792       FORMAT(1X,"MappNtoC",7(":",I4),2(":",F21.6))
             IF (MappCtoN(l,MNUMCR,J) .GT. 0.0) THEN
                MappNtoC(l,K,J) = MappCtoN(l,K,J) / MappCtoN(l,MNUMCR,J)
- !              MappNtoCRestart(l,K,J) = MappCtoN(l,K,J) / MappCtoN(l,MNUMCR,J)
             ELSE
                MappNtoC(l,K,J) = 0.0
- !              MappNtoCRestart(l,K,J) = 0.0
             ENDIF
           ENDDO
         ENDDO
@@ -4481,363 +4201,6 @@
       ENDDO
  
 
-!!LC2 - sections further down related to DSM still seem to be using the DAF. I don't think any of this is relevant in the current
-!!  model, but I would just leave this alone for now - so don't reuse DAFnr or DbLSRname variables.  
-
-! Read Payback-acceptance curves
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! Read number of rows of input data and the number of sectoral curves
-      READ(FILE,*)PACnR,PACnS
-!     write(imsg,*)'from dsmrst PACnR,PACnS',PACnR,PACnS
-! Read length of payback period and associated market penetrations
-! Data are assumed to be in ascending order of the length of the payback period
-      DO I=1,PACnR
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)PACpb(I),(PACmp(I,J),J=1,PACnS) !((Years)   Residential    Commercial   Industrial)
-!       write(imsg,*)PACpb(l),(PACmp(l,J),J=1,PACnS)
-      ENDDO
-! Read DSM option database
-! Read Pay-back period
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      READ(FILE,*)PAYBACK
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! Read Residential DSM Programs Specification
-      READ(FILE,*)NRPROG  !(Number of Residential DSM Programs)
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      DO I=1,NRPROG
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)v,RprogCode(I)   !(** # PROGRAM CODE   PROGRAM SPECIFICATION)
-      ENDDO
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! Read Commercial DSM Programs Specification
-      READ(FILE,*)NCPROG
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      DO I=1,NCPROG
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)v,CprogCode(I) ! (** # PROGRAM CODE   PROGRAM SPECIFICATION)
-      ENDDO
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! READ RESIDENTIAL TECHNLOLOGIES MAP
-      READ(FILE,*)RtechNumb
-      DO I=1,RtechNumb
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)v,RtechCode(I),RtechDMtn(I), &
-          (RtechDMG(I,J),J=1,RtechDMtn(I)), &
-          (RtechDMT(I,J),J=1,RtechDMtn(i)),LSRnam        ! (# Technology   Number of  Technology   Technology    LSR Code)
-        DO l=2,DAFnr
-          IF(LSRnam.EQ.DbLSRname(l)) THEN
-            RtechLSR(I)=l
-            GOTO 1110
-          ENDIF
-        ENDDO
-        GOTO 997 ! no match for LSR write message and stop the program
-1110    CONTINUE
-      ENDDO
-! READ REGION GROUP DEFINITION
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      READ(FILE,*)RRlistN
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! READ DECISION TYPE DESCRIPTORS MAP
-      READ(FILE,*)RdecTYPn
-      DO I=1,RdecTYPn
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)RdecTYPid(I),RdecTYPix(I)
-      ENDDO
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! READ BUILDING TYPE DESCRIPTORS MAP
-      READ(FILE,*)RbuildTn   !( Number of types)
-      DO I=1,RbuildTn
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)RbuildTid(I),RbuildTix(I)
-      ENDDO
-! READ OPTIONS DATA BASE
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      READ(FILE,*)DSMROptionNumb
-      DO I=1,DSMROptionNumb
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)DSMROptionCode(I),ProgNam,RegLd,DUMMYchar, &
-        DecTd,BuilTd,DSMROptionFromTnum(I), &
-        (FtechLSR(J),J=1,DSMROptionFromTnum(I)),DSMROptionToTnum(I), &
-        (TtechLSR(J),J=1,DSMROptionToTnum(I)),DSMROptionCost(I), &
-        DSMROptionRamp(I),DSMROptionFyr(I)
-        
-        DO J=1,NRPROG
-          IF(ProgNam.EQ.RprogCode(J)) THEN
-            RPROG(I)=J
-            GOTO 3333
-          ENDIF
-        ENDDO
-        GOTO 992
-3333    CONTINUE
-        DO J=1,RRlistN
-          IF(RegLd.EQ.RRlistID(J)) THEN
-            DSMROptionRegion(I)=J
-            GOTO 3334
-          ENDIF
-        ENDDO
-        GOTO 991
-3334    CONTINUE
-        DO J=1,RdecTYPn
-          IF(DecTd.EQ.RdecTYPid(J)) THEN
-            DSMROptionDecType(I)=RdecTYPix(J)
-            GOTO 3335
-          ENDIF
-        ENDDO
-        GOTO 990
-3335    CONTINUE
-        DO J=1,RbuildTn
-          IF(BuilTd.EQ.RbuildTid(J)) THEN
-            DSMROptionBuildT(I)=RbuildTix(J)
-            GOTO 3336
-          ENDIF
-        ENDDO
-        GOTO 889
-3336    CONTINUE
-        DO J=1,DSMROptionFromTnum(I)
-          DO l=1,RtechNumb
-            IF(FtechLSR(J).EQ.RtechCode(l)) THEN
-              DSMROptionFromTech(I,J)=l
-              GOTO 3337
-            ENDIF
-          ENDDO
-          GOTO 888
-3337      CONTINUE
-        ENDDO
-        DO J=1,DSMROptionToTnum(I)
-          DO l=1,RtechNumb
-            IF(TtechLSR(J).EQ.RtechCode(l)) THEN
-              DSMROptionToTech(I,J)=l
-              GOTO 3338
-            ENDIF
-          ENDDO
-          GOTO 777
-3338      CONTINUE
-        ENDDO
-      ENDDO
-      
-!!!!DKG PATCH HERE _SKIP THIS PART TILL I CAN FIGURE OUT WHAT TO DO WITH NEW REGIONALITY
-!
-! DEVELOP MAP OF RECORDS NUMBERS ON RESTART  FILE FOR DIFFERENT TECHNOLOGIES
-! IN DIFFERENT REGIONS AND BUILDING TYPES
-!  Read from RESIDENTIAL RESTART FILE technology identifiers
-!      READ(IORR,REC=1)RRFnr
-!     write(imsg,*)'RRFnr',RRFnr
-!      DO l=2,RRFnr
-!        READ(IORR,REC=l)TECHIDENT(l)
-!!       write(imsg,*)'TECHIDENT',TECHIDENT(l)
-!      ENDDO
-!      DO I=1,RtechNumb
-!        DO J=1,RtechDMtn(I)
-!          DO K=1,nNERCreg
-!            DO L=1,RbuildTn
-!              IDENTIF=10000000*K+100000*L+1000*RtechDMG(I,J)+10*RtechDMT(I,J)
-!!             if(K.eq.7.and.I.eq.20) write(imsg,*)'IDENTIF',IDENTIF
-!              DO m=2,RRFnr
-!                IF(IDENTIF.EQ.TECHIDENT(m)) THEN
-!                  RtechRrc(I,J,K,L)=m
-!                  GOTO 3355
-!                ENDIF
-!              ENDDO
-!              WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-!              WRITE(IMSG,*)'<))) No record with identifier: ',IDENTIF,'on RESTART file'
-!              RtechRrc(I,J,K,L)=0
-!3355          CONTINUE
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!      ENDDO
-
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! Read COMMERCIAL DSM OPTITONS DATA BASE ***********************
-! READ COMMERCIAL TECHNLOLOGIES LSR MAP
-      READ(FILE,*)CtechNumb   !(** Number of technologies)
-      DO I=1,CtechNumb
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)v,(CtechCode(I,J),J=1,NUMCTCE),(LSRnames(J),J=1,MAXCBT)
-        DO J=1,MAXCBT
-          DO l=2,DAFnr
-            IF(LSRnames(J).EQ.DbLSRname(l)) THEN
-              CtechLSR(I,J)=l
-              GOTO 2111
-            ENDIF
-          ENDDO
-          GOTO 1997 ! no match for LSR write message and stop the program
-2111      CONTINUE
-        ENDDO
-      ENDDO
-! READ REGION GROUP DEFINITION
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      READ(FILE,*)CRlistN
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! READ DECISION TYPE DESCRIPTORS MAP
-      READ(FILE,*)CdecTYPn       !(** Number of decision types)
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      DO I=1,CdecTYPn
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)CdecTYPid(I),CdecTYPix(I)  !(** Descriptor   Decision type )
-      ENDDO
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-! READ BUILDING TYPE DESCRIPTORS MAP
-      READ(FILE,*)CbuildTn      !( ** Define building type descriptors)
-      DO I=1,CbuildTn
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)CbuildTid(I),CbuildTix(I)
-!       write(imsg,*)'I,CbuildTid(I),CbuildTix(I)'
-!       write(imsg,*)I,' ',CbuildTid(I),CbuildTix(I)
-      ENDDO
-! READ OPTIONS DATA BASE
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      READ(FILE,*)DSMCOptionNumb  !(* Number of COMMERCIAL DSM options)
-      DO I=1,DSMCOptionNumb
-        CALL DSMSKP(FILE,WHOOPS)
-        IF(WHOOPS) RETURN
-        READ(FILE,*)DSMCOptionCode(I),ProgNam,RegLd,DUMMYchar, &
-        DecTd,BuilTd,DSMCOptionFromTnum(I), &
-        ((FCTC(K,J),K=1,NUMCTCE),J=1,DSMCOptionFromTnum(I)), &
-        DSMCOptionToTnum(I), &
-        ((TCTC(K,J),K=1,NUMCTCE),J=1,DSMCOptionToTnum(I)), &
-        DSMCOptionCost(I), &
-        DSMCOptionRamp(I),DSMCOptionFyr(I)
-        IF (FCTC(3,1) .EQ. 11 .OR. TCTC(3,1) .EQ. 12) GOTO 666 !for heat pumps
-        IF (FCTC(3,1) .EQ. 3 .AND. FCTC(3,2) .NE. 11) GOTO 666 !heating function
-        IF (FCTC(3,1) .EQ. 4 .AND. FCTC(3,2) .NE. 12) GOTO 666 !must go first, then
-        IF (TCTC(3,1) .EQ. 3 .AND. TCTC(3,2) .NE. 11) GOTO 666 !it has to be followed
-        IF (TCTC(3,1) .EQ. 4 .AND. TCTC(3,2) .NE. 12) GOTO 666 !by correct cooling function
-        IF (FCTC(3,1) .EQ. 3  .OR. FCTC(3,1) .EQ. 4 .OR. &
-            TCTC(3,1) .EQ. 3  .OR. TCTC(3,1) .EQ. 4) THEN      ! if heat pump option
-          IF (DSMCOptionFromTnum(I).NE.DSMCOptionToTnum(I)) GOTO 666
-          DO J=1,DSMCOptionFromTnum(I)
-            IF (FCTC(1,J).NE.TCTC(1,J)) GOTO 666 ! TO and FROM technologies has to be
-          ENDDO                                  ! listed in the same order of services
-        ENDIF
-        DO J=1,NCPROG
-          IF(ProgNam.EQ.CprogCode(J)) THEN
-            CPROG(I)=J
-            GOTO 7332
-          ENDIF
-        ENDDO
-        GOTO 992
-7332    CONTINUE
-        DO J=1,CRlistN
-          IF(RegLd.EQ.CRlistID(J)) THEN
-            DSMCOptionRegion(I)=J
-            GOTO 7334
-          ENDIF
-        ENDDO
-        GOTO 991
-7334    CONTINUE
-        DO J=1,CdecTYPn
-          IF(DecTd.EQ.RdecTYPid(J)) THEN
-            DSMCOptionDecType(I)=CdecTYPix(J)
-            GOTO 7335
-          ENDIF
-        ENDDO
-        GOTO 990
-7335    CONTINUE
-        DO J=1,CbuildTn
-          IF(BuilTd.EQ.CbuildTid(J)) THEN
-!         write(imsg,*)'I,J,BuilTd,CbuildTid(J),CbuildTix(J)'
-!         write(imsg,*)I,J,BuilTd,' ',CbuildTid(J),CbuildTix(J)
-            DSMCOptionBuildT(I)=CbuildTix(J)
-            GOTO 7336
-          ENDIF
-        ENDDO
-        GOTO 889
-7336    CONTINUE
-        DO J=1,DSMCOptionFromTnum(I)
-          DO l=1,CtechNumb
-            S=0
-            DO K=1,NUMCTCE
-              IF(FCTC(K,J).EQ.CtechCode(l,K)) S=S+1
-            ENDDO
-            IF (S.EQ.NUMCTCE) THEN
-              DSMCOptionFromTech(I,J)=l
-              GOTO 7337
-            ENDIF
-          ENDDO
-          GOTO 899
-7337      CONTINUE
-        ENDDO
-        DO J=1,DSMCOptionToTnum(I)
-          DO l=1,CtechNumb
-            S=0
-            DO K=1,NUMCTCE
-              IF(TCTC(K,J).EQ.CtechCode(l,K)) S=S+1
-            ENDDO
-            IF (S.EQ.NUMCTCE) THEN
-              DSMCOptionToTech(I,J)=l
-              GOTO 7338
-            ENDIF
-          ENDDO
-          GOTO 1777
-7338      CONTINUE
-        ENDDO
-      ENDDO
-!
-!!!!DKG PATCH SKIP THIS FOR NOW
-!
-! DEVELOP MAP OF RECORDS NUMBERS ON RESTART  FILE FOR DIFFERENT TECHNOLOGIES
-! IN DIFFERENT REGIONS AND BUILDING TYPES
-!  Read from COMMERCIAL RESTART FILE technology identifiers
-!      READ(IOCR,REC=1)CRFnr
-!!     WRITE(IMSG,*)'CRFnr',CRFnr
-!      DO l=2,CRFnr
-!        READ(IOCR,REC=l)TECHIDENT(l)
-!!       write(imsg,*)'TECHIDENT(l)',TECHIDENT(l)
-!      ENDDO
-!      DO I=1,CtechNumb
-!          DO K=1,nNERCreg
-!            DO L=1,CbuildTn
-!              IDENTIF=10000000*K+100000*L+1000*CtechCode(I,1)+10*CtechCode(I,3)+CtechCode(I,2)
-!!             write(imsg,*)'IDENTIF',IDENTIF
-!              DO m=2,CRFnr
-!                IF(IDENTIF.EQ.TECHIDENT(m)) THEN
-!                  CtechRrc(I,K,L)=m
-!!                 write(imsg,*)'CtechRrc(I,K,L),I,K,L',CtechRrc(I,K,L),I,K,L
-!                  GOTO 7355
-!                ENDIF
-!              ENDDO
-!!             WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-!!             WRITE(IMSG,*)'<))) No record with identifier: ',IDENTIF,'on RESTART file'
-!              CtechRrc(I,K,L)=0
-!7355          CONTINUE
-!            ENDDO
-!          ENDDO
-!      ENDDO
-      CALL DSMSKP(FILE,WHOOPS)
-      IF(WHOOPS) RETURN
-      READ(FILE,*)SURCHARGE
       ! DEFINE REPORTS TO BE GENERATED
       ! READ SPECIFICATION OF THE REPORTS TO BE GENERATED
       DO I=1,QDSMRPT
@@ -4849,52 +4212,17 @@
           NODSMRPT(I)=.FALSE.
         ENDIF
       ENDDO
-      ! READ EMM REGIONS THAT REPORTS ARE TO BE GENERATED FOR
-      CALL DSMSKP(FILE,WHOOPS)
-      READ(FILE,*)NREPREG,(LREG(I),I=1,NREPREG)  !(*** # OF REGIONS REGIONS)
-      DO I=1,NREPREG
-        DO J=1,nNERCreg
-          IF(LREG(I).EQ.NERCnam(J)) NOREGRPT(J)=.TRUE.
-        ENDDO
-      ENDDO
-      ! READ YEARS THAT REPORTS ARE TO BE GENERATED FOR "VERTICAL YEARS"
-      CALL DSMSKP(FILE,WHOOPS)
-      READ(FILE,*)NREPYRV,(IREPYRV(I),I=1,NREPYRV)   !( *** # OF YEARS   YEARS...)
-      DO I=1,NREPYRV
-        IREPYRV(I)=IREPYRV(I)-BASEYR+1
-        NOYEARRPT(IREPYRV(I))=.TRUE.
-      ENDDO
-      ! READ YEARS THAT REPORTS ARE TO BE GENERATED FOR "HORIZONTAL YEARS"
-      CALL DSMSKP(FILE,WHOOPS)
-      READ(FILE,*)NREPYRH,(IREPYRH(I),I=1,NREPYRH)
-      FILE=FILE_MGR('C',fname,NEW)
 
       WRITE(6,*)'nNERCreg to run ULDSM ',nNERCreg, UNRGNS
 
-!       write(imsg,*)'RESIDENTIAL DSM OPTIONS'
-!       do i=1,DSMROptionNumb
-!         write(imsg,*)i,' ',DSMROptionCode(i)
-!         ,(' ',RtechCode(DSMROptionFromTech(i,j)),
-!         j=1,DSMROptionFromTnum(i))
-!         ,(' ',RtechCode(DSMROptionToTech(i,j)),
-!         j=1,DSMROptionToTnum(i))
-!       enddo
 !****************** Termination of the Program/Subprogram **********************
       RETURN
 999   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
       WRITE(IMSG,*)'<))) Illegal sector name ',SLNAM(I),' on LDSMSTR file'
       WHOOPS=.TRUE.
       RETURN
-998   WRITE(IMSG,*)'<))  Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal sector name ',SLNM,' on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
 997   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
       WRITE(IMSG,*)'<))) Illegal lsr name ',LSRnam,' on LDSMSTRU file'
-      WHOOPS=.TRUE.
-      RETURN
-1997  WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal lsr name ',LSRnames(J),' on LDSMSTRU'
       WHOOPS=.TRUE.
       RETURN
 996   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
@@ -4908,62 +4236,6 @@
 994   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
       WRITE(IMSG,*)'<))) Illegal sum of widths of segments',SumSegWidth, &
       ' declared for ECP LDC on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-993   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal region name ',LREG(K), &
-      ' on region lists used for DSM options defin. on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-992   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal DSM program  name ',ProgNam, &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-991   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal DSM region list descriptor ',RegLd, &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-990   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal DSM decision type descriptor ',DecTd, &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-889   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal building type descriptor ',BuilTd, &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-888   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal FROM technology descrip.',FtechLSR(J), &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-899   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal FROM technology descrip.', &
-      (FCTC(K,J),K=1,NUMCTCE), &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-777   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal TO technology descriptor ',TtechLSR(J), &
-      ' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-1777  WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) Illegal TO technology descriptor ',(TCTC(K,J), &
-      K=1,NUMCTCE),' in DSM option definition on LDSMSTR file'
-      WHOOPS=.TRUE.
-      RETURN
-666   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) In DSM option definition ', &
-       DSMCOptionCode(I),' heat pump technology is wrongly defined'
-      WHOOPS=.TRUE.
-      RETURN
-897   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
-      WRITE(IMSG,*)'<))) 0.0 total load for NERC region #',l &
-      ,' in mapping matrix for sector ',SecNam(SEC(J))
       WHOOPS=.TRUE.
       RETURN
 896   WRITE(IMSG,*)'<)) Message from subroutine DSMRST'
@@ -5176,129 +4448,6 @@
       RETURN
       END
 
-      FUNCTION DSMPRVF(INVESCST,HRYRS,LIFETIM)
-!****************** Description of the Program/Subprogram **********************
-! THIS FUNCTION CALCULATES THE FRACTION OF THE TOTAL INVESTMENT COSTS TO BE USED IN CONSIDERATIONS OF THE TIME HORIZON
-!      the time horizon is HRYRS years
-!*******************************************************************************
-      IMPLICIT NONE
-!**********Declaring variables and common blocks via NEMS include files********
-      include 'parametr'
-      include 'emmparm'
-      include 'bildin'
-!**********Declaring LDSM variables and common blocks via NEMS include files********
-      include 'dsmdimen'
-      include 'dsmunits'
-!********************** Declaring local variables *****************************
-      REAL*4 DSMPRVF ! funcion itself
-      REAL*4 INVESCST !total investment cost
-      INTEGER*2 HRYRS ! time horizon of consideration
-      REAL*4 LIFETIM ! equipment technical lifetime
-      REAL*4 R1 ! temporary variable
-!****************** Initializing Variables *************************************
-!****************** Body of the Program/Subprogram *****************************
-      R1=EPDSCRT+1.0
-      DSMPRVF=INVESCST * (1.0-1.0/R1**HRYRS)/(1.0-1.0/R1**LIFETIM)
-!     IF(INVESCST.NE.0)WRITE(IMSG,*)'DSMPRVF/INVESCST=',DSMPRVF/INVESCST
-!****************** Termination of the Program/Subprogram **********************
-      RETURN
-      END
-
-      SUBROUTINE DSMEFPS(BlockNumEFD)
-
-!****************** Description of the Program/Subprogram **********************
-!*** THIS SUBROUTINE DEVELOPS SECTORAL LOAD DURATION CURVES FOR EFP
-!*******************************************************************************
-      IMPLICIT NONE
-!**********Declaring variables and common blocks via NEMS include files********
-      include 'parametr' !<< nems parameter declarations
-      include 'ncntrl'
-      include 'emmparm'
-!**********Declaring LDSM variables and common blocks via NEMS include files********
-      include 'dsmdimen' !<< all ldsm parameter declarations
-      include 'dsmunits' !<< include file with unit number for ldsm message file
-      include 'dsmcaldr' !<< calendar data
-      include 'dsmhelm' !<< helm algorithm variables
-      include 'dsmtfefp' !<< communication with efp
-      include 'dsmtoefd' !<< communication with efd
-      include 'dsmnemsc' !<< results of ldsm to be passed to the rest of nems
-      include 'dsmnercr' !<< nerc region data
-      include 'dsmsectr' !<< number of sectors
-!********************** Declaring local variables *****************************
-      REAL*8 SYLOAD2(MAXHOUR) !temporary variable
-      REAL*4 area ! area of the block
-      INTEGER*2 i,j,k,l,h,h1,h2,w,w1,b1,b2,b ! temporary variables
-      INTEGER*4 SWITCH ! switch: SYSTEM LOAD or DSM program (is being processed)
-      REAL*4 dh ! division point of an hour
-      REAL*4 pl ! current peak load
-      INTEGER*2 sgn ! segment number
-      INTEGER*2 blk ! number of a block in the entire LDC
-      INTEGER*2 bls ! number of a block in the segment
-      INTEGER*2 hn  ! current hour number
-      REAL*4 ovratio ! ratio for overestimation adjustment
-      REAL*4 totarea ! total area of non-peak blocks
-      REAL*4 BlockEnergy(MAXEFTB) ! Heights of blocks in EFD LDC
-      INTEGER*2 SECT ! current sector number
-      INTEGER*2 BlockNumEFD(MAXEFTB) ! Numbers of blocks
-!****************** Initializing Variables *************************************
-!****************** Body of the Program/Subprogram *****************************
-!     write(imsg,*)'total load, sectoral loads'
-!     do i=1,nhour
-!       write(imsg,*)i,SYLOAD(i),(SectorLoad(i,SECT),SECT=1,NumSec)
-!     enddo
-      DO SECT=1,NumSec
-        DO i=1,nhour
-          SYLOAD2(i)=SectorLoad(HourNumberEFD(i),SECT)
-        ENDDO
-! SYLOAD2 now contains calendar hour loads sorted in the same order as in the system LDC
-! HourNumberEFD contains original positions of calendar hours
-! Determine heights of the LDC blocks
-        blk=1 ! current block number within whole LDC
-        bls=1 ! current block number within a segment
-        area=0.0 ! current area under the curve from the end of the previous bl
-! Now go over all hours in the year and calculate block widths and heights
-        DO sgn=EFDnumSg,1,-1
-          l=0             ! x coordinate expressed in real hours
-          h1=EFDsgFh(sgn) ! beginning of current block in calendar hours
-          h2=EFDsgLh(sgn) ! end of current block in calendar hours
-          DO h=h1,h2      ! x coordinate expressed in calendar hours
-            w1=HourlyWeights(HourNumberEFD(h))
-            DO w=1,w1
-              l=l+1 ! x coordinate in real hours
-              area=area+SYLOAD2(h)
-              IF(bls.NE.EFDsgDnB(sgn)) THEN !if this is not last block in segmen
-                IF(l.GT.EFDblockx(sgn,bls)) THEN !if x coordinate beyond the blo
-                  dh=l-EFDblockx(sgn,bls) ! calculate an x axis
-                  BlockEnergy(blk)=area-dh*SYLOAD2(h)
-                  area=dh*SYLOAD2(h)
-                  bls=bls+1
-                  blk=blk+1
-                ENDIF
-              ENDIF
-            ENDDO
-          ENDDO
-          BlockEnergy(blk)=area ! for last block
-          blk=blk+1
-          bls=1
-          area=0.0
-        ENDDO
-        DO j=1,EFDnS
-          b1=EFDSEDEF(j,1)
-          b2=EFDSEDEF(j,2)
-          !Write the LDC into the communication common block arrays:
-          DO i=b1,b2
-            b=i-b1+1
-            SECTLDCBLEN(b,j,RNB,SECT)=BlockEnergy(BlockNumEFD(i))
-          ENDDO
-        ENDDO
-      ENDDO
-!****************** Termination of the Program/Subprogram **********************
-      RETURN
-900   WRITE(*,*)'<))) ERROR IN DSMEFPS ROUTINE OF LDSM'
-      WRITE(*,*)'<)))) DSM PROGRAM DATA MAY BE CORRUPTED'
-      WRITE(IMSG,*)'<))) ERROR IN DSMEFPS ROUTINE OF LDSM'
-      END
-
       SUBROUTINE DSMSECWT(HourSegNumEFD)   !(BLOCKNUMEFD)
 
 !****************** Description of the Program/Subprogram **********************
@@ -5466,11 +4615,6 @@
         ENDDO
 ! reset normalization factor
           TOTBLK = 0.0
-!     IF(RNB.EQ.1.AND.CURIYR.EQ.4.AND.CURITR.EQ.1) THEN
-!        write(IMSG,*)'LSRNAME   ',LSRname
-!     WRITE(IMSG,*)'load2,DistLo(1..10),SYLOAD(1...10)'
-!     ,load2,(DistLo(M),M=1,10),(SYLOAD(M),M=1,10)
-!     ENDIF
 
 
         ENDIF   ! new end-use or not
@@ -5494,9 +4638,6 @@
                 SYLOAD2(i)=SYLOAD2(i)+ SYLOAD3(HourNumberEFD(i))  ! No need to use EULOAD since we're not using the fractional/convertor method Distlo * EULOAD, instead we directly add load here hourly     
             end if
 			! write(991,*) 'syload2',SYLOAD3(HourNumberEFD(i)),SYLOAD3_tst(HourNumberEFD(i)),HourNumberEFD(i)
-!       if (CURIYR .eq. 3 .and. RNB .eq. 1 .and. LL .eq. 1) THEN
-!          write(IMSG,*)'SYLOAD2,HOURSEGNUM',SYLOAD2(i),HourNumberEFD(I)
-!       endif
            if ( k .eq. 21)  CALEN(I) = CALEN(I) +  DISTLO(I) * EULOAD
            ENDDO
            TOTEULOAD(K,RNB) = TOTEULOAD(K,RNB) + EULOAD
@@ -5570,13 +4711,7 @@
             endif
           ENDDO
         ENDDO
-        if (CURIYR .eq. 3 .and. RNB .eq. 1) THEN
-        endif
 !****************** Termination of the Program/Subprogram **********************
-      RETURN
-900   WRITE(*,*)'<))) ERROR IN DSMSECWPS ROUTINE OF LDSM'
-      WRITE(*,*)'<)))) DSM PROGRAM DATA MAY BE CORRUPTED'
-      WRITE(IMSG,*)'<))) ERROR IN DSMEFPS ROUTINE OF LDSM'
       RETURN
       END
 
@@ -5645,302 +4780,6 @@
  1101   RETURN
       END
 
-
-      SUBROUTINE DSMSHFT(callflag)
-
-!****************** Description of the Program/Subprogram **********************
-!*** THIS SUBROUTINE IMPLEMENTS LOAD SHIFTING REQUIRED FOR END USE PRICING
-!*******************************************************************************
-      IMPLICIT NONE
-!**********Declaring variables and common blocks via NEMS include files********
-      include 'parametr'
-      include 'emmparm'
-      include 'ncntrl'
-      include 'eusprc'
-      include 'efpint'
-      include 'efpout'
-      include 'efprp2'
-      include 'efprcy'
-      include 'macout'
-!**********Declaring LDSM variables and common blocks via NEMS include files********
-      include 'dsmdimen'
-      include 'dsmsectr'
-      include 'dsmtoefd'
-      include 'dsmunits' !<< include file with unit number for ldsm message file
-      include 'dsmhelm'
-      include 'dsmnemsc'
-      include 'dsmtfecp' !<< communication with ecp
-      include 'dsmrept'
-!********************** Declaring local variables *****************************
-      INTEGER callflag,ireg, EFDSS(MAXEFDS)
-      INTEGER ise,k,sblk,b,j,jj,i,icls,iblk,s,imom
-      INTEGER*2 b1,b2
-      REAL TOTEUSLD(MAXSEA),TOTEUSLD1(MAXSEA)
-      REAL TOTSYSLOAD1(MAXEFDSS,MAXSEA)
-      REAL TOTLD(MAXSEA),TOTLD1(MAXSEA)
-      REAL TOTSYSLOAD(MAXEFDSS,MAXSEA)
-
-      REAL*4 BlockHeightEFD(MAXEFTB) ! Heights of blocks in EFD LDC
-      INTEGER*2 BlockNumEFD(MAXEFTB) ! Numbers of blocks
-      REAL frac
-      REAL EFDblWdth(MAXEFTB)
-      REAL EFDblSg(MAXEFTB)
-      REAL EFDblSc(MAXEFTB)
-      REAL dcumo(MAXEFTB)
-      REAL EPSHFT(ECP_D_VLS,2)
-      REAL EPSHFTW(ECP_D_VLS,2)
-      INTEGER USHFT(MAXEFTB,2)
-      REAL TOTECPLD,TOTECPLD1
-      INTEGER YEAR,IVLS,IYR,ivls2,seg,slice
-      real tmppk(MAXSEA,mnumnr)
-!****************** Initializing Variables *************************************
-      DATA USHFT/9,9,9,8,8,8,7,7,7, &
-                 6,6,6,5,5,5,4,4,4, &
-                 3,3,3,2,2,2,1,1,1, &
-                 9*1, &
-                 6*1,        1,2,2, &
-                 3*1,  1,2,2,3*1/
-
-
-      DO ise = 1,  EFDNS
-        do ireg=1,mnumnr
-         tmppk(ise,ireg) = 0.0
-        enddo
-        TOTLD(ise)  = 0.0
-        TOTLD1(ise) = 0.0
-        DO IBLK = 1, ULNVCT(ise)
-          TOTSYSLOAD(IBLK,ise) = 0.0
-          TOTSYSLOAD1(IBLK,ise) = 0.0
-        END DO
-      ENDDO
-
-! first iteration we use previous year's prices for load shifting
-      IF(CURITR .eq. 1) THEN
-        IYR = CURIYR -1
-      ELSE
-        IYR = CURIYR
-      ENDIF
-
-      k = 0
-
-!****************** Body of the Program/Subprogram *****************************
-
-!     calculate demand shifted prices by region, time slice and end-use group
-       DO icls = 1, MAXSEC
-        DO j = 1, neusgrp(icls)
-         k = k +1
-         DO ise=1,EFDns    ! seasons
-          TOTEUSLD(ise) = 0.0
-          TOTEUSLD1(ise) = 0.0
-          b1=EFDSEDEF(ise,1)  ! starting and ending block in season
-          b2=EFDSEDEF(ise,2)
-          DO iblk=b1,b2
-            b=iblk-b1+1
-            s =  b
-
-            frac = ((ERSLCPRC(IYR,RNB,ISE,s,3) + EPRICE(icls,2,RNB) + EPRICE(icls,3,RNB))/ (MC_JPGDP(IYR)*PELOUTN(RNB,IYR,k)))**(-1.*euelas(RNB,icls,j))
-
-!  sum total load for normalization by season
-            TOTSYSLOAD1(s,ise) = TOTSYSLOAD1(s,ise) + efdblkservo(s,ise,RNB,k)
-
-            TOTEUSLD1(ise) = TOTEUSLD1(ise) + efdblkservo(s,ise,RNB,k)
-
-! mult by frac
-            efdblkserv(s,ise,RNB,k) = efdblkservo(s,ise,RNB,k) * frac
-            TOTEUSLD(ise) = TOTEUSLD(ise) + efdblkserv(s,ise,RNB,k)
-
-           ENDDO  !iblk
-          ENDDO ! ise
-
-!           completes one end-use
-! normalize single end-use
-
-        DO jj=1,EFDnS ! do for each season
-          b1=EFDSEDEF(jj,1) ! first block in a season
-          b2=EFDSEDEF(jj,2) ! last block in a season
-
-!              Write the LDC into the communication common block arrays:
-
-          DO i=b1,b2
-            b=i-b1+1
-
-!                    b:  block # in a seasonal LDC
-!                   jj:  season
-!                  RNB:  EMM region
-!                 SECT:  sector
-!          BlockNumEFD:  map of ordinal block numbers to block numbers in LDCs
-
-! normalize   old over new
-            If (TOTEUSLD(jj) .ne. 0) then
-                efdblkserv(b,jj,RNB,k)= efdblkserv(b,jj,RNB,k) * TOTEUSLD1(JJ)/TOTEUSLD(jj)
-
-! sum new for slice and season normalization
-                TOTSYSLOAD(b,jj) = TOTSYSLOAD(b,jj) + efdblkserv(b,jj,RNB,k)
-            endif
-          ENDDO ! i
-        ENDDO ! jj
-
-!           write(IMSG,*)'k toteusld,toteul',k,(TOTEUSLD(jj) ,jj=1,EFDnS) ,TOTEULOAD(k,RNB)
-
-         ENDDO   ! jj
-      ENDDO  ! icls
-
-! modify system load - if called from dsmefd subroutine
-
-      if (callflag .eq. 1) then
-        DO jj=1,EFDnS ! do for each season
-          b1=EFDSEDEF(jj,1) ! first block in a season
-          b2=EFDSEDEF(jj,2) ! last block in a season
-
-!           Write the LDC into the communication common block arrays:
-
-          DO iblk=b1,b2
-            b=iblk-b1+1
-
-!                    b:  block # in a seasonal LDC
-!                   jj:  season
-!                  RNB:  EMM region
-!                 SECT:  sector
-!          BlockNumEFD:  map of ordinal block numbers to block numbers in LDCs
-
-!              if ((fcrl .eq. 1) )!      .and.  (RNB .eq. 1)) write(imsg, *) ' dsmshft: j b totsys1/totsys - ',CURIYR,RNB,jj,b, TOTSYSLOAD1(b,jj)/TOTSYSLOAD(b,jj),ULHGHT(b,jj,RNB)
-
-! store old load
-
-          totld1(jj) = totld1(jj) + ULHGHT(b,jj,RNB)*ULWDTH(b,jj,RNB)
-
-!              BlockHeightEFD(iblk) = ULHGHT(b,jj,RNB) * TOTSYSLOAD1(b,jj)/ TOTSYSLOAD(b,jj)
-
-               BlockHeightEFD(iblk) = ULHGHT(b,jj,RNB) * TOTSYSLOAD(b,jj)/ TOTSYSLOAD1(b,jj)
-
-! store new load
-
-          totld(jj) = totld(jj)+ BlockHeightEFD(iblk)*ULWDTH(b,jj,RNB)
-          BlockNumEFD(iblk) = iblk
-          EFDblWdth(iblk) = ULWDTH(b,jj,RNB)
-          EFDblSg(iblk)= ULGRP(b,jj,RNB)
-          EFDblSc(iblk)= ULSEG(b,jj,RNB)
-
-         END DO ! iblk
-
-!         write(IMSG,*)'b1,b2',b1,b2,efdnumbl
-
-         CALL DSMQSR(BlockHeightEFD,BlockNumEFD,b1,b2,EFDnumBl)
-
-!         write(IMSG,*)'b1,b2',b1,b2,efdnumbl
-!         write(IMSG,*)'BLKHE',(BlockHeightEFD(iblk),iblk=b1,b2)
-
-!           Write the LDC into the communication common block arrays:
-
-        DO iblk=b1,b2
-          b=iblk-b1+1
-               ULHGHT(b,jj,RNB)=BlockHeightEFD(iblk) *  totld1(jj)/totld(jj)                      ! renormalize
-
-          ULWDTH(b,jj,RNB)=EFDblWdth(BlockNumEFD(iblk))
-          ULGRP(b,jj,RNB)=EFDblSg(BlockNumEFD(iblk))
-          ULSEG(b,jj,RNB)=EFDblSc(BlockNumEFD(iblk))
-
-          IF (RNB .EQ. 1) THEN
-              write(IMSG,9123) CURIRUN, CURIYR+1989, CURITR, RNB, jj, b1, b2, iblk, b, ULGRP(b,jj,RNB), ULSEG(b,jj,RNB), ULHGHT(b,jj,RNB), ULWDTH(b,jj,RNB), &
-              BlockHeightEFD(iblk),  totld1(jj), totld(jj)
- 9123         format(1X,"ULHGHT_ULDSM_1",11(":",I6),5(":",F21.6))
-          END IF
-
-        ENDDO
-       ENDDO ! jj
-
-      endif   ! callflag
-
-!      Only need to to do ecp load shifting on first iteration
-
-       IF ((CURITR .gt. 1) .or. (callflag .eq. 1))  RETURN
-
-
-!    Adjust ecp load on first iteration only
-
-      DO IVLS=1 , ECP_D_VLS
-        do slice=1,2
-          EPSHFT(IVLS,slice) = 0.0
-          EPSHFTW(IVLS,slice) = 0.0
-        enddo
-      END DO
-
-      IYR = CURIYR
-
-!      write(IMSG,*)'before',( ECPLDCBH(IYR,RNB,IVLS),IVLS=1,ECP_D_VLS)
-
-       DO jj=1,EFDnS ! do for each season
-         b1=EFDSEDEF(jj,1) ! first block in a season
-         b2=EFDSEDEF(jj,2) ! last block in a season
-         DO iblk=b1,b2
-           sblk=gblocknumefd(iblk,RNB)
-           b=iblk-b1+1
-
-!           EPSHFT(Ushft(sblk)) = EPSHFT(USHFT(sblk)) + totsysload1(b,jj) /totsysload(b,jj)* ULWDTH(b,jj,RNB)
-
-            EPSHFT(Ushft(sblk,1),USHFT(sblk,2)) = EPSHFT(USHFT(sblk,1),USHFT(sblk,2)) + totsysload(b,jj) /totsysload1(b,jj)* ULWDTH(b,jj,RNB)
-            EPSHFTW(Ushft(sblk,1),Ushft(sblk,2)) = EPSHFTW(USHFT(sblk,1),USHFT(sblk,2))+ ULWDTH(b,jj,RNB)
-
-         if (CURIYR .eq. 21) then
-               write(imsg,1668) CURIYR,RNB,jj,b,sblk,USHFT(sblk,1), USHFT(sblk,2),totsysload1(b,jj),totsysload(b,jj), ULWDTH(b,jj,RNB)
- 1668          FORMAT ('ecpshft ',7I4,3f10.2)
-          endif
-
-         ENDDO !iblk
-       ENDDO ! jj
-
-!  this subroutine is called from within a year loop k1=curiyr, curiyr+UNXPH-1
-
-        IYR = K1
-
-        TOTECPLD = 0.0
-        TOTECPLD1 = 0.0
-
-!  we go backwards (lowest to highest) to ensure that the slices are still in order
-!
-!       IVLS = ECP_D_VLS
-
-      do seg = 1 , MAXECPsg
-         do slice = 1 , ECPsgDnB(seg)
-           do ivls2 = 1,ECP_D_VLS
-              if (ECPLDCBS(IYR,RNB,ivls2) .eq. seg .and. ECPLDCSL(IYR,RNB,ivls2) .eq. slice) then
-                 TOTECPLD = TOTECPLD + ECPLDCBH(IYR,RNB,IVLS2) * ECPLDCBW(IYR,RNB,IVLS2)
-                 ECPLDCBH(IYR,RNB,IVLS2) = ECPLDCBH(IYR,RNB,IVLS2) * EPSHFT(seg,slice)/EPSHFTW(seg,slice)
-                 TOTECPLD1 = TOTECPLD1 + ECPLDCBH(IYR,RNB,IVLS2) * ECPLDCBW(IYR,RNB,IVLS2)
-              endif
-           enddo
-         enddo
-      enddo
-
-!   NORMALIZE load
-
-       DO IVLS = 1 ,ECP_D_VLS
-         ECPLDCBH(IYR,RNB,IVLS) = ECPLDCBH(IYR,RNB,IVLS) * TOTECPLD / TOTECPLD1
-       ENDDO
-
-
-!  update peak load variable for reserve margin calculation
-
-      EPKSHFT(RNB,IYR) = ECPLDCBH(IYR,RNB,1)
-
-      write(6,*) 'ldsm epkshft ',IYR,RNB,EPKSHFT(RNB,IYR)
-
-!     when in this part of code (ecp loop) resave efblkserv with old values
-
-      k=0
-      DO icls = 1, MAXSEC
-       DO j = 1, neusgrp(icls)
-         k = k +1
-            DO ise=1,EFDns    ! seasons
-               do b = 1, MAXEFDSS
-             efdblkserv(b,ise,RNB,k) = efdblkservo(b,ise,RNB,k)
-           enddo
-         ENDDO
-       ENDDO
-      ENDDO
-
-      RETURN
-      END
 
 !************************************ new stuff TD ****************
 !****************************************************************************************************************************
@@ -6031,13 +4870,6 @@ SUBROUTINE CALLSYSLOAD_EU
 !****************** Description of the Program/Subprogram **********************
 ! THIS SUBROUTINE gets the ldsm calendar data from the database and assigns it to nems variables
 !*******************************************************************************
-! replace this read from ldsmdaf:(did not replace SENAME or DAFnr)
-!         READ(IODB,REC=1)DAFnr,NMONTH,(NODAYS(I),I=1,NMONTH), &
-!         ((WEIGHT(J,K),J=1,NODAYS(K)),K=1,NMONTH),NODAYT,NOSEA, &
-!         (MONTYP(I),I=1,NMONTH),((IDAYTQ(I,J),I=1,NODAYS(J)),J=1,NMONTH), &
-!         ((JDAYTP(I,J),i=1,NODAYS(J)),J=1,NMONTH),(SENAME(I),I=1,NOSEA), &
-!         (DTNAME(I),I=1,NODAYT),(MONAME(i),i=1,NMONTH)
-    
 
 	  USE SQLITE
       IMPLICIT NONE
@@ -6110,19 +4942,19 @@ SUBROUTINE CALLSYSLOAD_EU
 	    call sqlite3_get_column( col(2), MOINDEX )
         call sqlite3_get_column( col(3), MONAME(MOINDEX) )
 		call sqlite3_get_column( col(4), lNODAYS(MOINDEX) )
-		NODAYS=lNODAYS
+		NODAYS(MOINDEX)=lNODAYS(MOINDEX)
         call sqlite3_get_column( col(5), lMONTYP(MOINDEX) )
-		MONTYP=lMONTYP
+		MONTYP(MOINDEX)=lMONTYP(MOINDEX)
      enddo
      deallocate ( col ) 
              
-	 allocate ( col(6) )
+	 allocate ( col(4) )
      ! QUERY THE DATABASE TABLE  
 			
      call sqlite3_column_query( col(1), 'ID', sqlite_int ) 
 	 call sqlite3_column_query( col(2), 'Month', sqlite_int ) 
-     call sqlite3_column_query( col(3), 'Day', sqlite_int ) 
-     call sqlite3_column_query( col(4), 'Weight', sqlite_int )
+     call sqlite3_column_query( col(3), 'DAY', sqlite_int ) 
+     call sqlite3_column_query( col(4), 'WEIGHTS', sqlite_int )
                                          
      call sqlite3_prepare_select( db, 'V_SYS_LOAD_WEIGHTS', col, stmt )
     
@@ -6135,8 +4967,8 @@ SUBROUTINE CALLSYSLOAD_EU
 	    call sqlite3_get_column( col(2), Month )
         call sqlite3_get_column( col(3), Day )
         call sqlite3_get_column( col(4), lWeight(Day,Month) )
-		WEIGHT=lWEIGHT
-        IDAYTQ=lWeight
+		WEIGHT(Day,Month)=lWEIGHT(Day,Month)
+        IDAYTQ(Day,Month)=lWeight(Day,Month)
 		JDAYTP(Day,Month)=Day
      enddo
      deallocate ( col ) 

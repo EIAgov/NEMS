@@ -53,6 +53,7 @@ class P1(BaseFolder):
     def __init__(self, path):
         super(P1, self).__init__(path=path)
         self.ngas = None
+        self.hmm = None
         self.lfmm = []
         self.lfmmlog = None
         self.scan_directory()
@@ -63,7 +64,9 @@ class P1(BaseFolder):
                 self.nohup = Nohup(path=os.path.join(self.path, file))
             elif fnmatch.fnmatch(file, "ngas"):
                 self.ngas = FromAIMMS(os.path.join(self.path, "ngas/fromAIMMS"))
-            
+            elif fnmatch.fnmatch(file, "hmm"):
+                self.hmm = FromAIMMS(os.path.join(self.path, "hmm/fromAIMMS"))
+
             # use wider search condition to prevent/avoid cycle.py compress timing problem and cover LFMM_p*.gdx.gz files
             elif fnmatch.fnmatch(file, "LFMM_p*.gdx*"):
                 self.lfmm.append(os.path.join(self.path, file))

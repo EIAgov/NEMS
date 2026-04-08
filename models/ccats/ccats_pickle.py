@@ -1,5 +1,7 @@
 """Class for handling intermediate variables in CCATS.
 
+.. _ccats pickle:
+
 CCATS Pickle: Summary
 _____________________
 * In year 1 the .pkl files are created, and then in subsequent years they are written to and read.
@@ -90,45 +92,75 @@ class CCATS_Pickle:
         -------
         self.preproc_i_storage_df : DataFrame
             DataFrame of storage formations - input data.
+        
         self.preproc_i_co2_supply_facility_df : DataFrame
-            DataFrame of Co\ :sub:`2` cost curve from NETL - input data.
+            DataFrame of CO\ :sub:`2` cost curve from NETL - input data.
+        
         self.preproc_i_pipeline_lookup_df : DataFrame
-            DataFrame of Co\ :sub:`2` pipeline lookup table - input data.
+            DataFrame of CO\ :sub:`2` pipeline lookup table - input data.
+        
         self.preproc_i_eor_demand_df : DataFrame
-            DataFrame of Co\ :sub:`2` EOR site CO2 demanded - input data.
+            DataFrame of CO\ :sub:`2` EOR site CO2 demanded - input data.
+        
         self.preproc_i_eor_cost_net_df : DataFrame
-            DataFrame of Co\ :sub:`2` EOR net cost for Co\ :sub:`2` - input data.
+            DataFrame of CO\ :sub:`2` EOR net cost for CO\ :sub:`2` - input data.
+        
         self.preproc_i_ts_multiplier_df : DataFrame
             DataFrame of multipliers for ts-ts node arcs - input data.
+        
+        self.preproc_i_source_data : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` data - input data.
+
+        self.preproc_i_source_capacity_existing : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` existing capacity - input data.
+
+        self.preproc_i_source_capacity_limits : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` capacity limits - input data.
+
         self.preproc_pipes_existing_df : DataFrame
-             DataFrame of existing Co\ :sub:`2` pipeline infrastructure in a given model year.
+             DataFrame of existing CO\ :sub:`2` pipeline infrastructure in a given model year.
+        
         self.preproc_storage_existing_df : DataFrame
-            DataFrame of existing Co\ :sub:`2` storage infrastructure in a given model year.
+            DataFrame of existing CO\ :sub:`2` storage infrastructure in a given model year.
+        
         self.preproc_co2_facility_eligibility_df : DataFrame
-            DataFrame of Co\ :sub:`2` facility 45Q eligibility.
+            DataFrame of CO\ :sub:`2` facility 45Q eligibility.
+        
         self.mod_new_built_pipes_df : DataFrame
             DataFrame of new pipelines built in previous model year Block 1.
+        
         self.mod_new_aors_df : DataFrame
             DataFrame of new AORS, carried over from the previous model year.
+        
         self.mod_store_prev_b0_df : DataFrame
-            DataFrame of previous model year Co\ :sub:`2` stored in Block 0.
+            DataFrame of previous model year CO\ :sub:`2` stored in Block 0.
+        
+        self.mod_store_prev_b0_df : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` existing capacity.
         '''
         ### Preprocessor
-        self.preproc_i_storage_df                   = pd.read_pickle(temp_filepath + 'preproc_i_storage_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_i_co2_supply_facility_df       = pd.read_pickle(temp_filepath + 'preproc_i_co2_supply_facility_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_i_pipeline_lookup_df           = pd.read_pickle(temp_filepath + 'preproc_i_pipeline_lookup_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_i_eor_demand_df                = pd.read_pickle(temp_filepath + 'preproc_i_eor_demand_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_i_eor_cost_net_df              = pd.read_pickle(temp_filepath + 'preproc_i_eor_cost_net_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_i_ts_multiplier_df             = pd.read_pickle(temp_filepath + 'preproc_i_ts_multiplier_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_storage_df                    = pd.read_pickle(temp_filepath + 'preproc_i_storage_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_co2_supply_facility_df        = pd.read_pickle(temp_filepath + 'preproc_i_co2_supply_facility_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_pipeline_lookup_df            = pd.read_pickle(temp_filepath + 'preproc_i_pipeline_lookup_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_eor_demand_df                 = pd.read_pickle(temp_filepath + 'preproc_i_eor_demand_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_eor_cost_net_df               = pd.read_pickle(temp_filepath + 'preproc_i_eor_cost_net_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_ts_multiplier_df              = pd.read_pickle(temp_filepath + 'preproc_i_ts_multiplier_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_source_data                   = pd.read_pickle(temp_filepath + 'preproc_i_source_data_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_source_capacity_limits        = pd.read_pickle(temp_filepath + 'preproc_i_source_capacity_limits_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_i_nat_co2_lookup_df             = pd.read_pickle(temp_filepath + 'preproc_i_nat_co2_lookup_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
 
-        self.preproc_pipes_existing_df              = pd.read_pickle(temp_filepath + 'preproc_pipes_existing_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_storage_existing_df            = pd.read_pickle(temp_filepath + 'preproc_storage_existing_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
-        self.preproc_co2_facility_eligibility_df    = pd.read_pickle(temp_filepath + 'preproc_co2_facility_eligibility_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_pipes_existing_df               = pd.read_pickle(temp_filepath + 'preproc_pipes_existing_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_storage_existing_df             = pd.read_pickle(temp_filepath + 'preproc_storage_existing_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_co2_facility_eligibility_df     = pd.read_pickle(temp_filepath + 'preproc_co2_facility_eligibility_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_nat_co2_lookup_df               = pd.read_pickle(temp_filepath + 'preproc_nat_co2_lookup_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_source_annual_capacity_existing = pd.read_pickle(temp_filepath + 'preproc_source_annual_capacity_existing_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.preproc_source_total_capacity_existing  = pd.read_pickle(temp_filepath + 'preproc_source_total_capacity_existing_' + itr_type + '_' + str(year_current - 1) + '.pkl')
 
         ### Postprocessor/Module
         self.mod_new_built_pipes_df     = pd.read_pickle(temp_filepath + 'mod_new_built_pipes_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
         self.mod_new_aors_df            = pd.read_pickle(temp_filepath + 'mod_new_aors_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
         self.mod_store_prev_b0_df       = pd.read_pickle(temp_filepath + 'mod_store_prev_b0_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
+        self.mod_nat_co2_prev_b0_df     = pd.read_pickle(temp_filepath + 'mod_nat_co2_prev_b0_df_' + itr_type + '_' + str(year_current - 1) + '.pkl')
 
         pass
 
@@ -160,14 +192,20 @@ class CCATS_Pickle:
         self.preproc_i_eor_demand_df.to_pickle(temp_filepath + 'preproc_i_eor_demand_df_' + itr_type + '_' + str(year_current) + '.pkl')
         self.preproc_i_eor_cost_net_df.to_pickle(temp_filepath + 'preproc_i_eor_cost_net_df_' + itr_type + '_' + str(year_current) + '.pkl')
         self.preproc_i_ts_multiplier_df.to_pickle(temp_filepath + 'preproc_i_ts_multiplier_df_' + itr_type + '_' + str(year_current) + '.pkl')
+        self.preproc_i_source_data.to_pickle(temp_filepath + 'preproc_i_source_data_' + itr_type + '_' + str(year_current) + '.pkl')
+        self.preproc_i_source_capacity_limits.to_pickle(temp_filepath + 'preproc_i_source_capacity_limits_' + itr_type + '_' + str(year_current) + '.pkl')
+        self.preproc_i_nat_co2_lookup_df.to_pickle(temp_filepath + 'preproc_i_nat_co2_lookup_df_' + itr_type + '_' + str(year_current) + '.pkl')
 
         self.preproc_pipes_existing_df.to_pickle(temp_filepath + 'preproc_pipes_existing_df_' + itr_type + '_' + str(year_current) + '.pkl')
         self.preproc_storage_existing_df.to_pickle(temp_filepath + 'preproc_storage_existing_df_' + itr_type + '_' + str(year_current) + '.pkl')
         self.preproc_co2_facility_eligibility_df.to_pickle(temp_filepath + 'preproc_co2_facility_eligibility_df_' + itr_type + '_' + str(year_current) + '.pkl')
+        self.preproc_nat_co2_lookup_df.to_pickle(temp_filepath + 'preproc_nat_co2_lookup_df_' + itr_type + '_' + str(year_current) + '.pkl')
+        self.preproc_source_annual_capacity_existing.to_pickle(temp_filepath + 'preproc_source_annual_capacity_existing_' + itr_type + '_' + str(year_current) + '.pkl')
+        self.preproc_source_total_capacity_existing.to_pickle(temp_filepath + 'preproc_source_total_capacity_existing_' + itr_type + '_' + str(year_current) + '.pkl')
 
         ### Postprocessor/Module
         self.mod_new_built_pipes_df.to_pickle(temp_filepath + 'mod_new_built_pipes_df_' + itr_type + '_' + str(year_current) + '.pkl')
         self.mod_new_aors_df.to_pickle(temp_filepath + 'mod_new_aors_df_' + itr_type + '_' + str(year_current) + '.pkl')
         self.mod_store_prev_b0_df.to_pickle(temp_filepath + 'mod_store_prev_b0_df_' + itr_type + '_' + str(year_current) + '.pkl')
-
+        self.mod_nat_co2_prev_b0_df.to_pickle(temp_filepath + 'mod_nat_co2_prev_b0_df_' + itr_type + '_' + str(year_current) + '.pkl')
         pass

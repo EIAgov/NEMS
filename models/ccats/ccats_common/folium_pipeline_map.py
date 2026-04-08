@@ -70,7 +70,6 @@ def scale_values(df, column_name, scale_start=1, scale_end=5):
         return scale
 
     max = round(df[column_name].max())
-    #df[column_name].min()
     min_v = round(min(i for i in df[column_name] if i > 0))
     diff = max - min_v
     scale_increments = scale_end - scale_start
@@ -79,7 +78,6 @@ def scale_values(df, column_name, scale_start=1, scale_end=5):
    
     for i in range(scale_start, scale_end+1, 1):
         new_row = [min_v+value, float(i)]
-        #new_row.append(min_v, i)
         scale.loc[len(scale)] = new_row
         value = value + value_increments
     
@@ -112,8 +110,9 @@ def create_nodetypes(types):
         ng_processing_group = folium.FeatureGroup("ng_processing")
         pp_coal_group = folium.FeatureGroup("pp_coal")
         pp_natgas_group = folium.FeatureGroup("pp_natgas")
+        dac_group = folium.FeatureGroup("dac")
+        nat_co2_group = folium.FeatureGroup("nat_co2_field")
         beccs_group = folium.FeatureGroup("beccs")
-
 
 
         # Trans-shipment
@@ -131,6 +130,8 @@ def create_nodetypes(types):
         node_types.append(ng_processing_group)
         node_types.append(pp_coal_group)
         node_types.append(pp_natgas_group)
+        node_types.append(dac_group)
+        node_types.append(nat_co2_group)
         node_types.append(beccs_group)
         node_types.append(ts_group)
         node_types.append(existing_ts_group)
@@ -382,7 +383,9 @@ def run(m, df, outdir, outfile):
                  'operational_ts_node': 'mediumseagreen',
                  'co2_eor': 'fuchsia',
                  'storage': 'purple',
-                 'hsm_centroid':'orchid'}
+                 'hsm_centroid':'orchid',
+                 'dac':'gray',
+                 'nat_co2_field':'black'}
                 
     legendimage_file = outdir +'legend.PNG'
     if not os.path.exists(legendimage_file):
@@ -411,7 +414,9 @@ def run(m, df, outdir, outfile):
                                     'operational_ts_node',
                                     'co2_eor',
                                     'storage',
-                                    'hsm_centroid'])
+                                    'hsm_centroid',
+                                    'dac',
+                                    'nat_co2_field'])
     node_groups_0vol = create_nodetypes(['ethanol0',
                                          'ammonia0',
                                          'cement0',
@@ -423,7 +428,9 @@ def run(m, df, outdir, outfile):
                                          'operational_ts_node0',
                                          'co2_eor0',
                                          'storage0',
-                                         'hsm_centroid0'])
+                                         'hsm_centroid0',
+                                         'dac0',
+                                         'nat_co2_field0'])
     pipeline_group = folium.FeatureGroup("pipeline")
     pipeline_group0 = folium.FeatureGroup("pipeline_0_volume")
 
@@ -506,7 +513,9 @@ def run_preprocessor_map(m, df,outdir, outfile):
                  'operational_ts_node': 'mediumseagreen',
                  'co2_eor': 'fuchsia',
                  'storage': 'purple',
-                 'hsm_centroid':'orchid'}
+                 'hsm_centroid':'orchid',
+                 'dac':'gray',
+                 'nat_co2_field':'black'}
     
     color_map = dict ([(k, color_map[k]) for k in types])
     

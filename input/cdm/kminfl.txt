@@ -1,11 +1,6 @@
 FILE NAME:     KMINFL
 
-DATE MODIFIED: August 30, 2024
-
-
-
-
-
+DATE MODIFIED: November 21, 2025
 
 USED BY:        Consumption subroutine of the National Energy Modeling System
                 (NEMS) Commercial Demand Module (CDM)
@@ -47,14 +42,19 @@ ORGANIZATION OF DATA:
 SOURCES:
 
                 Energy Information Administration, 'State Energy Data Report:
-                 Consumption, price, expenditure, and production estimates, 1960-2022,' DOE/EIA-0214(90), Washington DC, June 2024.
+                 Consumption, price, expenditure, and production estimates, 1960-2023,' DOE/EIA-0214(90), Washington DC, June 2025.
 
                 Energy Information Administration, 'State Energy Data Report:
-                 Codes and descriptions, 1960-2022,' DOE/EIA-0214(90), Washington DC, June 2024.
+                 Codes and descriptions, 1960-2023,' DOE/EIA-0214(90), Washington DC, June 2025.
 
-                Dodge Data & Analytics estimated building stock - 2nd quarter 2021 forecast
+                Dodge Data & Analytics, Estimated Building Stock - 2nd Quarter 2021 Forecast, 2021.
 
                 NEMS price deflators
+
+
+
+
+
 
 
 
@@ -102,56 +102,56 @@ Floorspace Adjustment factors
 
 
 
--3.1660	-1.4274
--5.0136	0.0000
+-6.5874	-0.5772
+-5.0053	0.0000
 -100.0000	0.0000
--5.2691	0.0000
--5.0030	-1.2739
+-5.5242	0.0882
+-5.0833	-1.2540
 
--8.8923	0.0000
--6.1117	0.0000
--4.9359	-2.8489
--5.2786	0.0000
--3.3930	-1.9608
-
--5.9924	-2.4803
--6.2604	0.0000
--5.4282	-1.4311
--5.3791	0.0000
--5.1024	-1.8548
-
--5.8452	-1.7591
--5.6246	0.0000
--7.3299	0.0000
--5.4179	0.0000
--6.5883	-1.5600
-
--4.5733	-2.8464
--6.0726	0.0000
--5.8059	-1.8103
--5.1557	0.0000
--3.7864	-2.2174
-
--8.5617	-1.4702
--6.2647	0.0000
--4.8013	-3.0113
--5.4127	0.0000
--4.2132	-2.2058
-
+-7.4375	-0.4416
+-6.1136	0.0000
 -100.0000	0.0000
--6.3824	0.0000
+-5.7283	0.1559
+-3.5287	-1.9269
+
+-7.8722	-0.7486
+-6.2211	0.0000
 -100.0000	0.0000
--5.5119	0.0000
--7.4500	-1.3455
+-5.7832	0.1421
+-5.2604	-1.8072
+
+-9.3152	-1.0615
+-5.6271	0.0000
+-100.0000	0.0000
+-5.4415	0.0000
+-6.6585	-1.5481
+
+-7.4967	-0.6038
+-6.0802	0.0000
+-100.0000	0.0000
+-5.1696	0.0000
+-3.9223	-2.1861
+
+-9.2188	-0.4111
+-6.2459	0.0000
+-100.0000	0.0000
+-5.4247	0.0000
+-4.3308	-2.1296
 
 -100.0000	0.0000
--5.8419	0.0000
--5.7484	-3.8097
--5.2497	0.0000
--6.2569	-1.8911
+-6.3556	0.0000
+-100.0000	0.0000
+-5.5217	0.0000
+-7.5149	-1.3351
 
 -100.0000	0.0000
--6.0990	0.0000
--6.4403	-0.4959
--5.0657	0.0000
--6.6746	-1.3520
+-5.7813	0.0000
+-100.0000	0.0000
+-5.2589	0.0000
+-6.3205	-1.8946
+
+-100.0000	0.0000
+-6.0574	0.0000
+-100.0000	0.0000
+-5.0686	0.0000
+-6.7181	-1.3560

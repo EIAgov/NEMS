@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/dsmfmgrd,v 1.2 1999/12/19 20:11:50 DSA Exp $
 ! ===== DSMFMGRD    =====
 !*** Declarations of variables used with FILE_MGR

@@ -95,7 +95,7 @@ def create_pipeline(id, volume, pointA, pointB, color, weight = 1):
     id: str
        Pipeline ID.
     volume: float
-      CO\ :sub:`2` volume
+      CO\ :sub:`2` volume.
     pointA: list
        Lat and long for a point.
     pointB: list
@@ -130,7 +130,7 @@ def create_arrowline( color, path, weight = 24):
     path : Folium Polyline
       Folium Polyline to render.
     weight: int
-        Weight of line
+        Weight of line.
 
     Returns
     -------
@@ -151,7 +151,7 @@ def create_dashedline( color, path, weight = 24):
     path : Folium Polyline
       Folium Polyline to render.
     weight: int
-        Weight of line
+        Weight of line.
 
     Returns
     -------

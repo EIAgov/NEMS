@@ -2,6 +2,8 @@
 ! Unit: Annual NEW capacity in kg of hydrogen. Not cumulative
 Composite Table:
 i_calYear    regCEN         prodTech     planned_cap
+2024         Satlantic      SMR_CCS      3.00903e+07
 2025         WSCentral      SMR_CCS      2.00602e+08
-2026         ENCentral      SMR_CCS      1.65496e+08
+2026         WSCentral      ATR_CCS      1.70512e+08
+2029         WSCentral      ATR_CCS      2.30692e+08
 ;

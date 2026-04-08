@@ -1,23 +1,24 @@
+! -*- f90 -*-
 !FILE NAME:      RSEFF
-!DATE MODIFIED:  September 7, 2023
+!DATE MODIFIED:  September 10, 2025
 !USED BY:        Main subroutine of the National Energy Modeling System (NEMS)
-!                Residential Demand Module (RDM)
+!                Residential Demand Module (RDM); Report Writer (Table 31)
 !DEFINITION:     RDM variable declarations and COMMON blocks
 !UNITS:          Unitless
 !DIMENSION:      Various
-!SPECIAL CONSTRAINTS:  None
+!SPECIAL CONSTRAINTS:  Variable dimensions must match DICT.txt, RSCON, and RESDREP (where applicable)
 !ORGANIZATION OF DATA:  Not applicable
 !SOURCES:        Not applicable
-!COMMENT:        Added header, reorganized variables to align with other residential files, cleaned up formatting, and clarified comments
+!COMMENT:        Reduced fuel array size for heating and cooling equipment to accommodate removal of kerosene and geothermal
 
 ! Existing and new households
     REAL*4 TOTALHOUSES(MNUMYR,3,MNUMCR-2)
 
 ! Space heating
-    REAL*4 HTRCONWT(MNUMYR,8,MNUMCR-2,3),HTRCONIN(MNUMYR,8,MNUMCR-2,3)
+    REAL*4 HTRCONWT(MNUMYR,5,MNUMCR-2,3),HTRCONIN(MNUMYR,5,MNUMCR-2,3)
 
 ! Space cooling
-    REAL*4 COOLCNWT(MNUMYR,3,MNUMCR-2,3),COOLCNIN(MNUMYR,3,MNUMCR-2,3)
+    REAL*4 COOLCNWT(MNUMYR,2,MNUMCR-2,3),COOLCNIN(MNUMYR,2,MNUMCR-2,3)
 
 ! Water heating
     REAL*4 H2OCONWT(MNUMYR,5,MNUMCR-2,3),H2OCONIN(MNUMYR,5,MNUMCR-2,3)
@@ -59,7 +60,7 @@
     REAL*4 APLCONWT(MNUMYR,3,MNUMCR-2,3),APLCONIN(MNUMYR,3,MNUMCR-2,3)
 
 ! Secondary space heating
-    REAL*4 SHTCONWT(MNUMYR,7,MNUMCR-2,3),SHTCONIN(MNUMYR,7,MNUMCR-2,3)
+    REAL*4 SHTCONWT(MNUMYR,5,MNUMCR-2,3),SHTCONIN(MNUMYR,5,MNUMCR-2,3)
 
 COMMON/RSEFF/CKCONWT,CKCONIN,COOLCNWT,COOLCNIN,CSWCONWT,CSWCONIN, &
    DRYCONWT,DRYCONIN,DSWCONWT,DSWCONIN,FRZCONWT,FRZCONIN,HTRCONWT,HTRCONIN, &
@@ -67,5 +68,5 @@ COMMON/RSEFF/CKCONWT,CKCONIN,COOLCNWT,COOLCNIN,CSWCONWT,CSWCONIN, &
    FANCONWT,FANCONIN,LTCONWT,LTCONIN,PCRCONWT,PCRCONIN,SHTCONWT,SHTCONIN, &
    TVRCONWT,TVRCONIN,TOTALHOUSES
 
-REAL*4 EQ_RSEFF(2*3*MNUMYR*(MNUMCR-2)*(3+3+1+2+1+1+8+5+1+1+3+1+1+1+7+1) + MNUMYR*3*(MNUMCR-2))
+REAL*4 EQ_RSEFF(2*3*MNUMYR*(MNUMCR-2)*(3+3+1+2+1+1+5+5+1+1+2+1+1+1+5+1) + MNUMYR*3*(MNUMCR-2))
 EQUIVALENCE (EQ_RSEFF,CKCONWT)

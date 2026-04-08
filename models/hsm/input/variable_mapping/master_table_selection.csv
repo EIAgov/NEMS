@@ -1,0 +1,62 @@
+variable,dimension,index_0,index_1,index_2,TYPE,UNITS,FUEL,SECTOR,description
+qmore_qngpin,2,mnumcr,mnumyr,,qnty,tbtu,el,nan,natural gas processing plant electricity consumption
+pmmout_rfqdcrd,2,mnumor_2,mnumyr,,qnty,mmbd,nan,refine,domestic total crude mmbbl/yr/ogsm
+pmmout_dcrdwhp,2,mnumor,mnumyr,,price,87$bbl,nan,refine,domestic crude wellhead price
+pmmout_rfqtdcrd,2,mnumor_2,mnumyr,,qnty,mmbd,nan,refine,domestic total crude (incl eor) mmbbl/yr/ogsm
+ogsmout_ogprdad,2,mnl48a,mnumyr,,qnty,bcf/yr,nan,nan,associated dissolved gas prod
+ogsmout_ogpcrwhp,1,mnumyr,,,qnty,87$bbl,nan,nan,crude avg wellhead price
+ogsmout_ogqcrrep,2,nogcro,mnumyr,,qnty,mmbbl,nan,nan,crude production by oil cat
+ogsmout_ogpngwhp,1,mnumyr,,,qnty,87$mcf,nan,nan,ng avg wellhead price
+ogsmout_ogqngrep,2,nogcat,mnumyr,,qnty,bcf/yr,nan,nan,ng production by gas cat
+ogsmout_ognowell,1,mnumyr,,,qnty,scalar,nan,nan,"total completed wells (successful + dryholes + exploratory) across all districts, regions, and well types"
+ogsmout_ogtechon,3,3,6,mnumyr,qnty,scalar,nan,nan,tech factors by costcat/fuel/year
+ogsmout_cnenagprd,2,numcan,mnumyr,,qnty,mmcf,ng,oilgas,expected canada nonassociated gas production
+ogsmout_cnadgprd,2,numcan,mnumyr,,qnty,mmcf,ng,oilgas,associated-dissolved canada gas production
+ogsmout_ogcnpprd,2,numcan,mnumyr,,qnty,scalar,nan,nan,canada wellhead price
+ogsmout_ogcoprd,2,mnl48t,mnumyr,,qnty,mmbd,nan,nan,crude production by Lower 48 region
+ogsmout_ogcowhp,2,mnl48t,mnumyr,,price,87$bbl,nan,nan,crude wellhead price by oil category
+ogsmout_ogngprd,2,mnl48t,mnumyr,,qnty,bcf/yr,nan,nan,ng production by gas category
+ogsmout_ogngwhp,2,mnl48t,mnumyr,,price,87$mcf,nan,nan,ng wellhead  price by gas category
+ogsmout_ogjobs,1,mnumyr,,,level,scalar,nan,nan,number of jobs in oil and gas supply sector
+ogsmout_ogprdadof,2,mnl48f,mnumyr,,qnty,bcf/yr,nan,nan,offshore ad gas production
+ogsmout_ognglak,1,mnumyr,,,qnty,mbcd,nan,nan,ngl from alaska (thousand bbl / day)
+ogsmout_ogprcexp,1,mnumyr,,,level,scalar,nan,nan,adjust last yrs price to reflect diff expectation
+ogsmout_oggrowfac,1,mnumyr,,,level,scalar,nan,nan,factor reflects expected future cons growth
+ogsmout_ogcoprdgom,2,water_depth_class,mnumyr,,qnty,mbcd,nan,nan,"offshore crude oil production, shallow and deep"
+ogsmout_ogngprdgom,2,water_depth_class,mnumyr,,qnty,bcf/yr,nan,nan,"offshore natural gas production, shallow and deep"
+ogsmout_ogprcoak,2,mnalas,mnumyr,,qnty,bcf/yr,nan,nan,alaska production by region
+ogsmout_ogcoprd_fed,2,mnumor,mnumyr,,qnty,mmbd,nan,nan,crude oil production federal
+ogsmout_ogcoprd_nonfed,2,mnumor,mnumyr,,qnty,mmbd,nan,nan,crude oil production non-federal
+ogsmout_ogngprd_fed,2,mnumor,mnumyr,,qnty,tcf,nan,nan,natural gas production federal
+ogsmout_ogngprd_nonfed,2,mnumor,mnumyr,,qnty,tcf,nan,nan,natural gas production non-federal
+ogsmout_ogprdugr,3,mnl48n,ogprdugr_3,mnumyr,qnty,bcf/yr,nan,nan,marketed unconventional lower 48 natural gas production
+ogsmout_ogeorprd,3,mnlnp1,eor_types,mnumyr,qnty,mbbl/yr,nan,nan,eor production from co2 & other EOR projects (mbbl)
+ogsmout_ogco2inj,3,8,13,mnumyr,qnty,mmcf,nan,nan,co2 injected (mmcf)
+ogsmout_ogco2rec,3,8,13,mnumyr,qnty,mmcf,nan,nan,co2 recycled (mmcf)
+ogsmout_ogco245q,3,8,13,mnumyr,qnty,mmcf,nan,nan,co2 purchased (mmcf) and recieves 45q credit
+ogsmout_ogdngprd,3,ogdist,gastyp,mnumyr,qnty,bcf/yr,nan,nan,dry natural gas production by state/district and gas type
+ogsmout_ogprdoff,3,offshore_category,prodtyp,mnumyr,qnty,mbbl/yr,nan,nan,"lower 48 offshore production by federal/state category (MMbbl/year, BCF/year)"
+ogsmout_ogcrdprd,3,mnumor,mncrud,mnumyr,qnty,mbbl/yr,nan,nan,crude oil production by region and type
+ogsmout_ogcrdheat,2,mncrud,mnumyr,,confac,btubbl,nan,nan,heat rates by crude oil type
+ogsmout_ogqshloil,2,soplay_ogqshloil,mnumyr,,qnty,mbbl/yr,nan,nan,crude oil production from select shale oil plays
+ogsmout_ogqshlgas,2,soplay_ogqshlgas,mnumyr,,qnty,tcf,nan,nan,natural gas production from select shale gas plays
+ogsmout_ogregprd,3,mnl48n,ogregprd_7,mnumyr,qnty,mmbd,nan,nan,regional crude oil and natural gas production by type of production. Natgas (tcf) crude (mmbd)
+ogsmout_ogngplprd,2,ogdist,mnumyr,,qnty,mbbl/yr,nan,nan,natural gas plant liquids by many regions
+ogsmout_ogsrl48,3,mnl48t,weltyp,mnumyr,rate,fract,nan,nan,lower 48 drilling success rate (successful wells / total wells)
+ogsmout_ogwellsl48,3,mnl48t,weltyp,mnumyr,qnty,scalar,nan,nan,total well count (successful + dry holes)
+ogsmout_ogcruderef,3,mnumpr,mncrud,mnumyr,qnty,mbcd,cr,nan,crude oil production by refinery region and crude type
+ogsmout_ogogwells,3,ogdist,weltyp,mnumyr,qnty,scalar,nan,oilgas,wells by district and type
+ogsmout_ogenagprd,3,ogdist,gastyp,mnumyr,qnty,bcf/yr,ng,oilgas,expected non-associated natural gas production
+ogsmout_ogrnagprd,3,ogdist,gastyp,mnumyr,qnty,bcf/yr,ng,oilgas,realized non-associated natural gas production
+ogsmout_ogoilprd,3,ogdist,oiltyp,mnumyr,qnty,mmbd,cr,oilgas,crude oil production
+ogsmout_ogadgprd,3,ogdist,oiltyp,mnumyr,qnty,bcf/yr,ng,oilgas,associated-dissolved natural gas production
+ogsmout_ogngplet,2,ogdist,mnumyr,,qnty,mbbl/yr,et,oilgas,ethane production from natural gas processing plants
+ogsmout_ogngplpr,2,ogdist,mnumyr,,qnty,mbbl/yr,pr,oilgas,propane production from natural gas processing plants
+ogsmout_ogngplbu,2,ogdist,mnumyr,,qnty,mbbl/yr,bu,oilgas,butane production from natural gas processing plants
+ogsmout_ogngplis,2,ogdist,mnumyr,,qnty,mbbl/yr,is,oilgas,isobutane production from natural gas processing plants
+ogsmout_ogngplpp,2,ogdist,mnumyr,,qnty,mbbl/yr,pp,oilgas,pentanes plus production from natural gas processing plants
+ogsmout_ns_start,2,8,200,,cntrol,blank,nan,nan,year project selected
+ogsmout_play_map,1,-200,,,qnty,nan,nan,nan,map of geological formations (plays) helps map to ccats
+ogsmout_ngpco2em,2,mnumcr,mnumyr,,qnty,blank,nan,nan,co2 emitted by natural gas processing plants (metric tons co2)
+ccatsdat_dem_eor,2,200,mnumyr,,qnty,blank,nan,nan,co2 demand from eor volumes - project-level
+ccatsdat_cst_eor,2,200,mnumyr,,qnty,blank,nan,nan,co2 price co2 eor projects are willing to offer for co2 - project-level

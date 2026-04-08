@@ -7,23 +7,23 @@ import sys
 from typing import Any, Final
 
 
-BASE_YR: Final[int] = 34
+BASE_YR: Final[int] = 35
 """Legacy `base_yr` constant for use in the `sum_emissions`, `oghg`, and
 `accntrev` functions.
 
 It is the NEMS year index for the last year of history overwrites. When reading
-history in EPMDATA, 2023 is currently the last data year.
+history in EPMDATA, 2024 is currently the last data year.
 
 See Also
 --------
 EPM_READ_HIST : Same value for the `epm_read` function.
 """
 
-EPM_READ_HIST: Final[int] = 34
+EPM_READ_HIST: Final[int] = 35
 """Legacy `hist` constant for use in the `epm_read` function.
 
 It is the number of years of emissions factor data, and indicates that we
-should read the historical CO2 data through NEMS year 34 (2023).
+should read the historical CO2 data through NEMS year 35 (2024).
 
 See Also
 --------

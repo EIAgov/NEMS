@@ -1,5 +1,5 @@
 FILE NAME:     RSMLGT
-DATE MODIFIED: October 24, 2024
+DATE MODIFIED: January 5, 2026
 USED BY:       RSMLGTREAD subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Self-contained lighting technology and usage database for the RDM
 UNITS:         See specific sections and headings below
@@ -14,8 +14,11 @@ SOURCES:       Updated Buildings Sector Appliance and Equipment Costs and Effici
                Residential Lighting End-Use Consumption Study: Estimation Framework and Initial Estimates: https://www1.eere.energy.gov/buildings/publications/pdfs/ssl/2012_residential-lighting-study.pdf
                2020 RECS microdata (https://www.eia.gov/consumption/residential/data/2020/index.php?view=microdata)
                NEMA Lamp Indices: https://www.nema.org/analytics/lamp-indices
-COMMENT:       Updated LED lighting subsidies, Updated GSL lighting betas based on NEMA indices; Revised technology menu, shares, bins, and base-year wattage to align with 2020 RECS base year update and latest Lighting Market Characterization report; added resd.f variable names to input descriptions
+COMMENT:       Move LightDiag switch from code to input file
 
+
+Print lighting diagnostics to RDM_OUT.txt; 0 = OFF (default), 1 = ON [LightDiag]
+0
 
 Dollar year for cost data [RLGTDOLLARYR]
 2022

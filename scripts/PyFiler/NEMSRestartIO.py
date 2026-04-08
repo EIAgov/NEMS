@@ -1,6 +1,8 @@
 '''
 A set of utilities to read a fortan style restart file from NEMS, convert it to an npz file, and send it back for NEMS.
 '''
+
+
 import warnings
 #import tables
 import sys
@@ -10,8 +12,7 @@ import math
 import pandas as pd
 import datetime
 import itertools
-warnings.filterwarnings('ignore', category=pd.io.pytables.PerformanceWarning)
-pd.options.mode.chained_assignment = None
+
 import string
 import time
 import shutil
@@ -19,13 +20,21 @@ import subprocess
 from shutil import move, copy, rmtree
 import os
 
-def to_npz(nems, vartable):
+# TODO GNM: remove futurewarning surpression and resolve warnings
+warnings.filterwarnings('ignore', category=pd.io.pytables.PerformanceWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+pd.options.mode.chained_assignment = None
+
+def to_npz(nems, restart, vartable):
     """This function reads in pyfiler and outputs the numpy arrays to a compressed npz file
 
     Parameters
     ----------
     nems: module
         pyfiler fortran module
+        
+    restart: string
+        the name of the .npz file being created
         
     vartable: dataframe
         dataframe of NEMS Variables after ParseDict and RetriveVarDim from PyFilerWrapper. In NEMS
@@ -40,13 +49,16 @@ def to_npz(nems, vartable):
     errors = {}
 
     for c, nemsmod in enumerate([nems.utils, nems.other]):
+        arr = None
         for var in set(dir(nemsmod)).intersection(vartable.index.str.lower()):
             # Get name, common block and data
             name = vartable.loc[var.upper()]["Fortran Variable Name"]
+            if isinstance(name, pd.DataFrame):
+                name = name.iloc[0]
             try:
                 comblock = vartable.loc[name.upper()]["Common Block Name"].upper()
                 nemsblock = getattr(nems, comblock.lower())
-                arr = getattr(nemsblock, name)
+                arr = getattr(nemsblock, name.lower())
             # Find the correct variable and common block if a variable is in two common blocks
             except AttributeError:
                 comblock = vartable.loc[var.upper()]["Common Block Name"]
@@ -55,24 +67,25 @@ def to_npz(nems, vartable):
                 try:
                     nemsblock = getattr(nems, comblock.lower())
                     if isinstance(name, pd.Series):
-                        name = name[0]
-                    arr = getattr(nemsblock, name)
-
+                        name = name.iloc[0]
+                    arr = getattr(nemsblock, name.lower())
                 # If pyfiler.commonblock.variable errors, this will return the variable from nems.utils or nems.other of PyFiler
                 # Please refer to Pyfiler.f90 for which include files/common blocks are in utils or other.
                 except:
                     try:
-                        arr = getattr(nemsmod, name)
-
+                        arr = getattr(nemsmod, name.lower())
                     # For unexpected errors, VarIssue will save off the variable into a dict with commonblock and variable name
                     # This list may hold common blocks and variables that are currently in the pyfiler.other section.
                     # TODO: Append VarIssue with variables from each section. If it ends up being placed, remove from VarIssue
                     except Exception as e:
+                        # TODO: Josh + Greg re-evaluate exception handling here to confirm if it is
+                        # required and working as expected
                         print(f"{name} has a problem!")
+                        import traceback
                         errors[f"{comblock} {name}"] = traceback.format_exception_only(e)  # fmt: skip
             key = f"{comblock}/{var}"
             npd[key] = arr
-    npz = os.path.join(os.getcwd(), "restart.npz")
+    npz = os.path.join(os.getcwd(), restart + ".npz")
     np.savez_compressed(npz, **npd)
     err_df = pd.DataFrame([key, val] for key, val in errors.items())
     if not err_df.empty:

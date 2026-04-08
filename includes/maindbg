@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/maindbg,v 1.6 2009/08/04 18:25:13 pkc Exp $
 ! MAINDBG INCLUDE--CONTAINS VARIABLES USED IN MAIN TO STORE SUMMARY
 !                  STATISTICS ON CONVERGENCE

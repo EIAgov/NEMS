@@ -1,27 +1,7 @@
-﻿!
-!  NEMS INDUSTRIAL MODULE
-!
+﻿!  NEMS INDUSTRIAL MODULE
 !  ORDER OF INDUSTRIES:
 !
-!  NON-MANUFACTURING
-!    1  AGRICULTURE - CROPS
-!    2  AGRICULTURE - OTHER
-!    3  COAL MINING
-!    4  OIL AND GAS
-!    5  METAL AND OTHER NON-METALLIC MINING
-!    6  CONSTRUCTION
-!  MANUFACTURING
-!    7  FOOD AND KINDRED PRODUCTS  (NAICS 311, SIC 20)
-!    8  PAPER AND ALLIED PRODUCTS  (NAICS 322, SIC 26)
-!    9  CHEMICALS AND ALLIED PRODUCTS  (NAICS 325, SIC 28)
-!         INORGANIC CHEMICALS  (NAICS 32512 to 32518, SIC 281)
-!         ORGANIC CHEMICALS  (NAICS 32511 & 32519, SIC 286)
-!         RESINS AND SYNTHETICS  (NAICS 3252, SIC 282)
-!         AGRICULTURAL CHEMICALS (NAICS 3253, SIC 287)
-!         OTHER CHEMICALS
-!***
-!*** COMBINE Inorganic, Organic, Resins, and AgChem TO CREATE THE BULK CHEMICALS
-!*** INDUSTRY===INDUSTRY 9
+!  NON-MANUFACTURINGP
 !***
 !  STONE,CLAY, AND GLASS PRODUCTS  (NAICS 327, SIC 32)
 !    10   GLASS AND GLASS PRODUCTS  (NAICS 3272, SIC 321,322,323)
@@ -78,6 +58,7 @@
 !  21.              - OTHER PETROLEUM FEEDSTOCKS
 !  22.              - OTHER PETROLEUM
 !  23.              - HYDROGEN
+!  30.				- HEAT PUMP (boiler "fuel" only)
 !  THE INTERMEDIATE PRODUCTS QUANTITY ARRAY:  QTYINTR(6,5)
 !   1.  STEAM                           (31)
 !   2.  COKE OVEN GAS                   (32)
@@ -159,33 +140,24 @@
 !=========================================================================================
 ! Common Declarations for the Industrial Module
 !
-      integer numind
-      parameter(numind=24)
-      
-      integer mainfuels
-      parameter(mainfuels=24)       ! NSK H2
+	  INTEGER, PARAMETER:: INUMREG=4	! number of regions
+      INTEGER, PARAMETER:: numind=24	! number of industries
+      INTEGER, PARAMETER:: mainfuels=24	! number of main fuels  
+	  INTEGER, PARAMETER:: allfuels=50	! number of all "fuel" slots; includes main fuels, intermediate/byproduct fuels, and renewables, and many empty slots
 
-      INTEGER techstrtyr
-      PARAMETER (techstrtyr=2017)      
-      
-      INTEGER INUMREG      !number of regions
-      PARAMETER (INUMREG=4)
+	  INTEGER, PARAMETER:: IBYR=2022	! base year
+	  INTEGER, PARAMETER:: IBYR2=2021	! base year for end-use industries
+	  INTEGER, PARAMETER:: ICURIYR=33	! base index year
+	  INTEGER, PARAMETER:: ICURIYR2=32	! base index year for end-use industries
 
-! indctrl
-! CONTROL VARIABLES AND RUNTIME PARAMETERS
+	  INTEGER, PARAMETER:: SedsLastYr=MSEDYR+1989	! last SEDS year (MSEDYR set by Integration)
+	  INTEGER, PARAMETER:: STEOLastYr=2026			! last STEO year used      
+      INTEGER, PARAMETER:: END_YR_QCR=2024     	    ! Last year of qcr data in ind_coal.csv
+	  INTEGER, PARAMETER:: END_YR_ASM=2022          ! Last year of asm data in ind_electric.csv
+      INTEGER, PARAMETER:: END_YR_FEEDSTOCK=2027      ! Last year of feedstock data in feedstock.csv; 2025 as of AEO2025
+      INTEGER, PARAMETER:: techstrtyr=2021    
 
       INTEGER IYR      ! Current year
-      INTEGER IBYR     ! base year
-      INTEGER IBYR2    ! base year for end-use industries
-      PARAMETER (IBYR=2018) ! base year parameter - to be changed with each new MECS update. POT_07/31/2013
-      PARAMETER (IBYR2=2017) ! base year for end-use industries is a year before the most recent MECS - to be changed with each new MECS update NSK 6/23/20
-      INTEGER ICURIYR        ! current base year index
-      INTEGER ICURIYR2       ! base year index for process-flow industries
-      PARAMETER (ICURIYR=29) ! current MECS base year — to be changed with each new MECS update
-      PARAMETER (ICURIYR2=28) ! current MECS base year minus 1 — to be changed with each new MECS 
-      !Integer, parameter:: START_YR_FEEDSTOCK=2006    ! Beginning of feedstock data
-      Integer, parameter:: END_YR_FEEDSTOCK=2025      ! Last year of feedstock data in feedstock.csv; 2025 as of AEO2025
-
       INTEGER IEYR     ! last year
       INTEGER IWDBG    ! debug switch
       INTEGER ISUBTR   ! subroutine trace option
@@ -230,8 +202,6 @@
       INTEGER PRICEPA  ! Option to use Process/Assembly Price Sensitivity Routine
       INTEGER LOOKAHEAD! Number of lookahead years for CHP
 
-      REAL COGFACTOR   ! Option to specify cogfactor. Default=1.0
-
       INTEGER IUNIT1  ! unit numbers used as file identifiers
       INTEGER IUNIT2
       INTEGER IUNIT3
@@ -241,34 +211,20 @@
       INTEGER IUNIT7
       INTEGER IUNIT8
       INTEGER IUNITBUG, IUNITBENCH, IUNITOUTF, IFACTOUT, IFACTIN, IFEEDOUT
-
       INTEGER IUNITFEED, IUNITH2, IUNITFRACETH, IUNITFRACPROP, IUNITCOAL, IUNITELEC, IUNITCARBSHRCA
 
       INTEGER FSTITER  ! first iteration
       INTEGER LSTITER  ! last iteration
-
-      INTEGER SedsLastYr
-      PARAMETER (SedsLastYr=2022)
-
-      INTEGER STEOLastYr
-      PARAMETER (STEOLastYr=2025)
       
-      Integer, parameter:: END_YR_QCR=2023     	    ! Last year of qcr data in ind_coal.csv; 2022 as of AEO2023
-	  Integer, parameter:: END_YR_ASM=2021          ! Last year of asm data in ind_electric.csv; 2021 as of AEO2023
-   
-      real ln2
-      PARAMETER (ln2=0.6931471806)
-
+      REAL, PARAMETER:: ln2=0.6931471806
+	  INTEGER DIV_to_REG(9)/1,1,2,2,3,3,3,4,4/	! array maps census division (index) to census region (values)
 !====================================
 
 ! indpa
 ! Process/Assembly Variables
-      integer maxlinks              ! parameter--maximum number of downsteps or links for any process
-      parameter(maxlinks=6)
-      integer maxstep
-      parameter(maxstep=32)         ! maximum number of process assembly steps -- for dimensioning.
-      integer maxtech
-      parameter(maxtech=12)         ! maximum number of technologies -- for dimensioning.
+      INTEGER, PARAMETER:: maxlinks=6	! maximum number of downsteps or links for any process
+      INTEGER, PARAMETER:: maxstep=32	! maximum number of process assembly steps       
+      INTEGER, PARAMETER:: maxtech=12	! maximum number of technologies for any process step  
 
       CHARACTER*40 INDNAME ! captures industry name from input
       CHARACTER*24 INDSTEPNAME(maxstep+1)! captures process step name from input
@@ -293,10 +249,10 @@
       INTEGER NumRptGrpSteps(12)          ! Number of steps in each reporting SubGroup for P/A
       INTEGER RptGrpSteps(12,maxstep)     ! Identification of step numbers included in each reporting subgroup in P/A
       Character*24 RptGrpNames(12)        ! Reporting group names
-      Character*24 RptGrpSName(12,maxstep+1)! Reporting labels for step names
+      Character*24 RptGrpStepName(12,maxstep+1)! Reporting labels for step names
       REAL    ENPINT(3,17,maxstep)  ! vintaged unit energy consumption values by fuel,process
       REAL    ENPQTY(4,18,maxstep)  ! energy consumption by vintage,fuel,process    vintage 4 is total
-      REAL    ENPMQTY(mainfuels)           ! energy consumption of main fuels      NSK H2
+      REAL    ENPMQTY(mainfuels)    ! energy consumption of main fuels for process and assembly
       REAL    ENPIQTY(7)            ! energy consumption of intermediate fuels
       REAL    ENPRQTY(9)            ! energy consumption of renewables
       REAL    BCSC(3,17,maxstep)    ! technological possibility coefficient applied to energy intensive industries
@@ -308,19 +264,14 @@
       REAL    BYPINT(3,5,maxstep)   ! vintaged byproduct unit energy consumption by region,process
       REAL    BYPCSC(3,5,maxstep)   ! vintage byproduct efficiency coefficients by region,process
       REAL    BYPQTY(4,6,maxstep)   ! vintaged byproduct energy consumption by fuel, process
-      REAL    ENBYPM(mainfuels,4)     ! stores main fuels consumption used in process/assembly and bsc from which byproducts are produced
-      REAL    ENBYPI(7,4)      ! stores intermediate fuels used in process/assembly and bsc to from which byproducts are produced
-      REAL    ENBYPR(9,4)      ! stores renewables used in process/assembly and bsc to from which byproducts are produced
 
 ! glass
-      integer GL_MAXSTPS
-      PARAMETER (GL_MAXSTPS=14)
+      INTEGER, PARAMETER:: GL_MAXSTPS=14
 
       real GL_OXY(3,4)
-      real GL_MECS(2)
       real GL_CRYO
       real GL_ALPHA_DECAY(GL_MAXSTPS,4,2)
-      real glassIBYR(5)             		! Base year shipments from macro -  Total,flat,blown,container,fiber
+      real glassIBYR(5)             		! Base year shipments from macro -  flat,container,blown,specialty/fiber,total
 	  REAL cullet_recycle_share_start(3)	! share of base year recycled cullet by glass type; for 1st index, 1=flat, 2=container, 3=specialty
 	  REAL cullet_recycle_share_final(3)	! share of final year recycled cullet by glass type; for 1st index, 1=flat, 2=container, 3=specialty
 	  REAL cullet_recycle_share(3,MNUMYR)	! share of recycled cullet by glass type; for 1st index, 1=flat, 2=container, 3=specialty
@@ -332,91 +283,69 @@
        real gl_oshares(maxtech)     ! Oxy shares
 
 !   glass Shipment variables
-       real gl_hist_ship(6,4)       !historical shipping shares by glass type for 6 historical years
-       real gl_ship(4)              ! U.S. flat glass shipments, flat, blown, container,glass products
+       real gl_ship(4)              ! U.S. glass shipments: flat, container, blown, specialty/fiber
        real gl_mecsbench(INUMREG,10) ! mecs benchmark factors
 
 ! aluminum
       real ALUMIBYR                    ! Aluminum base year production
-      integer AL_MAXSTPS
-      PARAMETER (AL_MAXSTPS=5)
-      integer ALUMINA_IN
-      PARAMETER (ALUMINA_IN=2010-BASEYR+1)     ! first alumina percent year in input file
-      real al_non_met                    !Non-Metallic use of alumina
-      real al_mass_loss                  !Mass loss converting alumina to aluminum
+      INTEGER, PARAMETER:: AL_MAXSTPS=5
+      INTEGER, PARAMETER:: ALUMINA_IN=2010-BASEYR+1	! first alumina percent year in input file
+      real al_non_met                    			! Non-Metallic use of alumina
+      real al_mass_loss                  			! Mass loss converting alumina to aluminum
       real al_alpha_decay(AL_MAXSTPS,4,2)
-      real primprod_percent(16:mnumyr)         !Primary Production Percentage ;
-      real alumina_percent(ALUMINA_IN:mnumyr)         !Alumina domestic use Percentage ;
-      REAL IND_FLOW_SHARE(8:13,33,4)      !shares energy use out to regions
-      real tot_production_tech(8:13,maxtech)      ! Total production by technology
+      real primprod_percent(16:mnumyr)         		! Primary Production Percentage ;
+      real alumina_percent(ALUMINA_IN:mnumyr)       ! Alumina domestic use Percentage ;
+      REAL IND_FLOW_SHARE(8:13,33,4)      			! shares energy use out to regions
+      real tot_production_tech(8:13,maxtech)      	! Total production by technology
       real AnodeRatio(6)
-      real al_pf_fuel(2)                    !product formation fuel
-      real al_mecsbench(INUMREG,10)! mecs benchmark factors
+      real al_pf_fuel(2)                    		! product formation fuel
+      real al_mecsbench(INUMREG,10)					! MECS benchmark factors
 
-! cement    POT_INPUT
+! cement
     REAL cm_logit_coeff_b(6) ! Calibration coefficients for burner fixed cost, fuel cost, emissions, particulate emissions
     REAL cm_logit_coeff_r(6) ! Calibration coefficients for raw grinding allocation fixed cost, fuel cost, emissions, heat service
     REAL cm_logit_coeff_k(6) ! Calibration coefficients for kiln allocation fixed cost, fuel cost, emissions, heat service
-    REAL cm_lifetimek, cm_lifetimeb,cm_lifetimer, cm_lifetimef, cm_baselifek, cm_baselifedry, cm_baselifewet, cm_baselifeb, cm_baselifer, cm_baselifef ! lifetime new technology and baselife existing technology for k (kiln) b (burner) r (raw grind) f (finish grind)
-    REAL lm_lifetime(3),lm_baselife ! Lime lifetime and baselife
-    REAL lm_logit_coeff(3)          ! Lime calibration coefficients for fixed cost, fuel cost, emissions
-    REAL CO2_Process                !lime CO2
+    REAL CO2_Process                ! lime CO2
 
-    integer CM_MAXSTPS
-    PARAMETER (CM_MAXSTPS=4)
+	INTEGER, PARAMETER:: CM_MAXSTPS=4
+	INTEGER, PARAMETER:: NUMROT=5	! 3 rotary kilns + Brimstone + Rotary PM
+	INTEGER, PARAMETER:: NUMTYP=7	! 7 burner types ng1,ng2,oil1,oil2,coal,petcoke,multi-channel
+	INTEGER, PARAMETER:: NUMTYPg=3	! raw grinder types: ball mill, roller mill, mill_PM
+	INTEGER, PARAMETER:: NUMFUELB=5	! Number of burner fuels	
     real c_mass_loss                  !Mass loss rate
     real cm_alpha_decay(CM_MAXSTPS,4,2)
-    real cm_baselifewet2(CM_MAXSTPS)
     integer CM_BASELIFECR(CM_MAXSTPS)
 	real CM_LIFETIME(CM_MAXSTPS)
     integer CM_CALIB(CM_MAXSTPS)
 	real CM_WACC(CM_MAXSTPS)
 	integer CM_FISYR(CM_MAXSTPS)
-    real cm_capshr(2)                 ! Share of baseline kiln capacity accommodated by Wet(1) and Dry(2) Process kilns
     real cm_import_clink              ! Percent of Finish Grinding tonnes composed of imported clinker
     real cm_combco2(3:4,maxtech)        ! cement combustion CO2 (T/GJ ofr heat service demand) for step 3 of cement (burners)
     real cm_heatsrv(maxtech)                ! cement  kiln heat service (GJ/T)
     real cm_heatsrv_fuel(maxtech)           ! cement  kiln heat service total fuel needs (MMBtu fuel/GJ heat service)    
     real CM_ADD                     !Percent additives for cement
     real cm_heatdcoef        !Heat demand:  GJ per metric ton of clinker
-    real cm_wetcoef(maxtech)             !Allocation by Burner Type (Wet Process)
-    real cm_wetcoef2(maxtech)             !Allocation by Type (Raw Grinding Wet Process)
-    real cm_rawtech(maxtech)
     real cm_fuelmix(7,5)       ! burner fuel mix
     integer scenario                             !NEMS scenario; REF,HITECH,FRZTECH,EETECH
- ! previously in incement
-   integer NUMROT ! 3 rotary kilns + Brimstone + Rotary PM
-   parameter (NUMROT=5)
-   integer NUMTYP !7 burner types ng1,ng2,oil1,oil2,coal,petcoke,multi-channel
-   parameter (NUMTYP=7)
-   integer NUMTYPg !raw grinder types: ball mill, roller mill, mill_PM
-   parameter (NUMTYPg=3)
-   integer NUMFUELB             ! Number of burner fuels
-   parameter(NUMFUELB=5)
-   real cm_eleccoef(numrot+1)
-   real cm_heatcoef(numrot+1)
+
+   real cm_eleccoef(numrot)
+   real cm_heatcoef(numrot)
    real grinding_tonnes         !finish grinding
-   real wet_process(MNUMYR)             !kilns
    real process_outputk         !kilns
-   real clinker_prod(NUMROT+1)  ! clinker producion in kilns; 1 = wet process, 2&3&4 = rotary, 5 = Brimstone, 6 = rotary PM
-   real heat_req(NUMROT+1)      !kilns
+   real clinker_prod(NUMROT)	! clinker producion in kilns; 1,2,3 = rotary, 4 = Brimstone, 5 = rotary PM
+   real heat_req(NUMROT)      !kilns
    real heat_demand             !kilns
    real tot_burner_fuel(NUMFUELB) !burner
    real burner_fuel(NUMTYP,NUMFUELB) !burner
-   real dry_heat_req
    real tot_prodg(NUMTYPG)      !raw grinder
-   real elec_use_rpt(NUMTYPG)   !raw grinder
-   real wet_elecg(NUMTYPG)      !raw grinder
-   real ng_use_rpt(NUMTYPG)     !raw grinder
+   real elec_use_rpt(NUMTYPG)   !raw grinder electricity consumption
+   real ng_use_rpt(NUMTYPG)     !raw grinder natural gas consumption
    real raw_material
    real part_matter(CM_MAXSTPS,maxtech)   ! particulate matter for each cement step and technology
    real ht_serv(NUMROT)
-   real comb_co2b(NUMTYP)
    real fuel_useb(NUMTYP)
    real fuel_mixbd(NUMTYP,NUMFUELB)
    real cm_mecsbench(INUMREG,10)! mecs benchmark factors
-   real cm_hfoshr(3)        ! cement share out hfo: resid,dist,other
-   real lm_hfoshr(3)        ! lime share out hfo: resid,dist,other
 
 !!!! cement CCS variables !!!!!!!!!!!
    real NatGasUseCCS          ! COC natural gas fuel use (MMBtu/tonne CO2)
@@ -448,63 +377,53 @@
 
    real electricityconsumedCCS(inumreg,MNUMYR) ! electricity consumed to operate installed cement retrofit CCS equipment
    real naturalgasconsumedCCS(inumreg,MNUMYR)  ! natural gas consumed to operate installed cement retrofit CCS equipment
-!!!! cement CCS variables !!!!!!!!!!!
 
 ! paper and pulp
-      integer PP_MAXSTPS
-      PARAMETER (PP_MAXSTPS=26)
-      real pp_chip  !electric fuel use for wood prep chip
-      real PP_STM_RYCL !percent steam that is recycled (pulp and paper)
-      real pp_steam(maxstep,maxtech)    !paper steam (units/kT)
+    INTEGER, PARAMETER:: PP_MAXSTPS=26
+    real pp_chip  !electric fuel use for wood prep chip
+    real PP_STM_RYCL !percent steam that is recycled (pulp and paper)
+    real pp_steam(maxstep,maxtech)    !paper steam (units/kT)
 	real pp_blkliq(maxstep,maxtech)   !paper balck liquor
-      real pp_hogfuel                   !paper hog fuel
+    real pp_hogfuel                   !paper hog fuel
 	real pp_hog(maxstep,maxtech)      !hog fuel for paper industry (GJ/kT)
 	REAL Paper_Share(5,17:MNUMYR)                    ! Allocation shares for Paper Production (5 Paper Types)
-      REAL Mech_Share(17:MNUMYR)                       ! Allocation share between Mechanical and Thermo-mechanical Pulping Technologies
-      REAL PP_ProxyDat(17:MNUMYR)                    ! Data from the Macro Model that will hopefully be directly passed to the IDM  (2006-2040) to 2050
-      real sumprodcur(8:13,PP_MAXSTPS)                      !national prodcur by step
-      REAL Paper_PriceIBYR(inumreg)
-      real pp_stmfuel_chp(9,5)                !chp fuel use for paper steam
-      real pp_stmfuel_bl(4,5)                 !boiler fuel use for paper steam
+    REAL Mech_Share(17:MNUMYR)                       ! Allocation share between Mechanical and Thermo-mechanical Pulping Technologies
+    REAL PP_ProxyDat(17:MNUMYR)                    ! Data from the Macro Model that will hopefully be directly passed to the IDM  (2006-2040) to 2050
+    real sumprodcur(8:13,PP_MAXSTPS)                      !national prodcur by step
+    REAL Paper_ShipIBYR(inumreg)
+    real pp_stmfuel_chp(9,5)                !chp fuel use for paper steam
+    real pp_stmfuel_bl(4,5)                 !boiler fuel use for paper steam
 	real ppst_shrstart(17,2)                !starting shares for paper steam
 	real ppst_shrfinal(17,2)                !final shares for paper steam
 	real pp_BioBoilEff                      !IDM Boiler Efficency (Biomass)
-      real hog_pulp                           !Tons Wood/Ton of Pulp
+    real hog_pulp                           !Tons Wood/Ton of Pulp
 	real hog_heat                           !HOG Net Heat Content
 	real hog_waste                          !% of waste to hog fuel
-      real pulpshare(2,2:5)                    !shares to distribute wash and dry fuels
-      real PP_ElecGen(4)                     ! Paper Electric Generation by fuel
-      real BldCHPShr                         ! bld CHP share
-      real CapFacAvg(2,4)                      !capacity factor weighted average
-      real pp_cogshr                        !share of total steam generated by cogen
-      real pp_hfoshr(4)                     ! share out hfo: resid,pet coke,dist,other
+    real pulpshare(2,2:5)                    !shares to distribute wash and dry fuels
+    real PP_ElecGen(4)                     ! Paper Electric Generation by fuel
+    real BldCHPShr                         ! bld CHP share
+    real CapFacAvg(2,4)                      !capacity factor weighted average
+    real pp_cogshr                        !share of total steam generated by cogen
+    real pp_hfoshr(4)                     ! share out hfo: resid,pet coke,dist,other
 	real pp_mecsbench(INUMREG,10) ! mecs benchmark factors
-	real pp_IBYRvals(5,7) !baseyear model results by region and fuel
-      real PAPER_BLIQ            ! KPE variable -- to keep track of black liquor in steps 1-23
-      real PAPER_BLIQQ            ! KPE variable -- kilotonnes black liquor using energy from steps 2 & 3	  
-
+	real pp_IBYRvals(5,7) !baseyear model results by region and fuel	  
+    REAL PRODX_Paper(inumreg)               ! Regional Paper Production	
+	REAL PAPER_STEAM(maxstep,mnumyr)                    ! Steam Paper--used for energy use (-100 & +100 steam = 0 no energy use
+	REAL PAPER_STEAM_GRS(maxstep,mnumyr)		          ! KPE "Gross Steam" -- absolute total steam value (abs(-100) + 100) = 200 steam demand  
+	REAL PAPER_BLIQUOR(maxstep,mnumyr)                  !Paper Black Liquor
+    REAL PAPER_HOG(maxstep,mnumyr)                      !Paper Hog FuelBlack Liquor
+    real PP_Steam_Cogen(6) !paper steam cogen by fuel -- uses PAPER_STEAM_GRS
+    real PP_Steam_Boiler(6) !paper steam boiler by fuel --uses PAPER_STEAM_GRS
+	
 !iron and steel parameters
-	  integer IS_MAXSTPS
-      PARAMETER (IS_MAXSTPS=8)
+	INTEGER, PARAMETER:: IS_MAXSTPS=8
+	INTEGER, PARAMETER:: IS_MAXFUEL=7
+	INTEGER, PARAMETER:: N_Boil_Tech=5      ! Number of Conventional Boiler Technologies
+	INTEGER, PARAMETER:: N_CHP_Tech=4       ! Number of CHP Technologies
+    REAL PRODX_Steel(inumreg)               ! Regional Steel Production
 
-	  integer IS_MAXFUEL
-      PARAMETER (IS_MAXFUEL=7)
-
-      REAL PRODX_Steel(inumreg)               ! Regional Steel Production
-      REAL PRODX_Paper(inumreg)               ! Regional Paper Production
-	  INTEGER N_Boil_Tech                                ! Number of Conventional Boiler Technologies
-      PARAMETER (N_Boil_Tech=5)
-	  INTEGER N_CHP_Tech                                  ! Number of CHP Technologies
-      PARAMETER (N_CHP_Tech=4)
-	  REAL PAPER_STEAM(maxstep,mnumyr)                    ! Steam Paper--used for energy use (-100 & +100 steam = 0 no energy use
-	  REAL PAPER_STEAM_GRS(maxstep,mnumyr)		          ! KPE "Gross Steam" -- absolute total steam value (abs(-100) + 100) = 200 steam demand  
-	  REAL PAPER_BLIQUOR(maxstep,mnumyr)                  !Paper Black Liquor
-      REAL PAPER_HOG(maxstep,mnumyr)                      !Paper Hog FuelBlack Liquor
-      real PP_Steam_Cogen(6) !paper steam cogen by fuel -- uses PAPER_STEAM_GRS
-      real PP_Steam_Boiler(6) !paper steam boiler by fuel --uses PAPER_STEAM_GRS
-
-      !MECS benchmark variables
-      real MECS_Data(8:13,1:5,1:10) !MECS Data for ibyr by industry, census region, fuel, read from ironstlx; NSK 2/9/23 added one more fuel indices   
+    !MECS benchmark variables
+    real MECS_Data(8:13,1:5,1:10) !MECS Data for ibyr by industry, census region, fuel, read from ironstlx
 
 ! variables for technology choice industries
 	  real is_shares(8:13,maxstep,maxtech,MNUMYR)        ! Shares stored by year
@@ -520,20 +439,18 @@
       REAL CoalMCons(maxstep,mnumyr)                ! Coal (Metallurgical) Consumption for Tech industries (TBtu)
       REAL PetCons(maxstep,mnumyr)                  ! Pet Coke Consumption for Tech industries (TBtu)
       REAL OPetCons(maxstep,mnumyr)                 ! Other Pet Coke Consumption for Tech industries (TBtu)
-      REAL H2Consume(maxstep,mnumyr)                   ! (Pure) H2 consumption for Tech industries (TBtu)   NSK H2
-      REAL H2FeedCons(maxstep,mnumyr)               ! H2 feedstock consumption for Tech industries (TBtu)   NSK H2
+      REAL H2Consume(maxstep,mnumyr)                   ! (Pure) H2 consumption for Tech industries (TBtu)
+      REAL H2FeedCons(maxstep,mnumyr)               ! H2 feedstock consumption for Tech industries (TBtu)
 
-      REAL PRODX_Base(8:13,INUMREG)        ! Base year  Production (Tonnes) from ENPROD input
-      real is_production(8:13,maxstep)                   ! historical Step production (1000 tonnes), (aka PRODCUR)
-      real IBYR_survcap(8:13,maxstep)            !base year surviving capacity
-      real ibyr_paper_cap_ratio(maxstep)          ! ratio of base year paper capacity to paper production in irontlx.xlsx
-      real is_BldCHPShr                         ! bld CHP share
+      REAL PRODX_Base(8:13,INUMREG)        			! Base year  Production (Tonnes) from ENPROD input
+      real is_production(8:13,maxstep)              ! historical Step production (1000 tonnes), (aka PRODCUR)
+      real IBYR_survcap(8:13,maxstep)            	! base year surviving capacity
+      real ibyr_paper_cap_ratio(maxstep)          	! ratio of base year paper capacity to paper production in irontlx.xlsx
+      real is_BldCHPShr                         	! bld CHP share
       real is_CapFacAvg(4)
       REAL is_CHP_Consump(5)                     ! CHP consumption by fuel
       real is_ElecGen(5)                     ! Steel Electric Generation by fuel  (1)NG, (2)HFO, (3)Elec, (4)Coal, (5)CO2
       real prod_adjust_fact
-
-      common /prodbase/PRODX_Base
       REAL    prodcurrpt(IS_MAXSTPS,mnumyr)  !save iron and steel prodcur by year for reporting
       REAL    pp_prodcurrpt(PP_MAXSTPS,mnumyr)  !save paper prodcur by year for reporting
       REAL    al_prodcurrpt(Al_MAXSTPS,mnumyr)  !save aluminum prodcur by year for reporting
@@ -544,21 +461,16 @@
       REAL DRI_EAF(inumreg)                   ! Regional Tonnage of DRI devoted to EAF
       REAL DRI_BOF(inumreg)                   ! Regional Tonnage of DRI devoted to BOF
 	  REAL IS_IND_FLOW(8,5)
-      Common /dri/dri_bof,dri_eaf ,is_ind_flow
-	  REAL MinBOF
-	  REAL MaxEAF
-
 	  REAL CHP_SHARE                                        ! Share of steam produced by CHP Systems (GJ)
 	  real STEAM_Total   ! Total Steam Demand
-	  REAL is_fsteam(5)                                      !Total fuel for steam; use quad BTU
-	  real SteamRgShr(8:13,inumreg)                               ! steam regional shares for steel
-
+	  REAL is_fsteam(5)                                      ! total fuel for steam; use quad BTU
+	  real SteamRgShr(8:13,inumreg)                          ! steam regional shares for steel and paper
 	   !********* Production & Capacity *******************
       real is_basecap(8:13,maxstep)                      ! Baseline capacity
       real is_surviving_cap(8:13)                            ! Surviving capacity
 	  integer is_FISYR(8:13)                              !first calculated year
       integer is_baselifecr(8:13)                         ! Baseline capacity lifetime
-    integer is_calib(8:13)                              ! Technology Survival Curve Calibration Constant(user-specified)
+      integer is_calib(8:13)                              ! Technology Survival Curve Calibration Constant(user-specified)
 	  real is_logit_coeff(8:13,6,maxstep)             ! Logit Coefficients for fixed costs, fuel costs, and emissions
      !********* Technology Characteristics **************
       real is_av_OM(8:13,maxstep,maxtech)             ! Technology O&M Cost($/1000 Tonnes)
@@ -567,7 +479,7 @@
       real is_lifetime(8:13)                              ! Technology Lifetime (Yrs)
       real IS_emiss(8:13,maxstep,maxtech)             ! Technology CO2 Emissions (T/kT)
       real obsoleteyr(8:13,maxstep,maxtech)             ! technology obsolescence year
-      real IS_nfuel_use(8:13,maxstep,2,maxtech)  ! non Fuel Intensity 1=oxygen 2=steam (MMBTU/kt)
+      real IS_nfuel_use(8:13,maxstep,2,maxtech)  ! non Fuel Intensity 1=oxygen 2=steam (tonne/kT and MMBTU/kt, respectively)
 	  real IS_fuel_use(8:13,maxstep,IS_MAXFUEL,maxtech)  ! Fuel Intensity 1=elec 2=ng 3=hfo 4=steam coal 5=H2 (MMBTU/kt)
 	  real is_alpha(8:13,maxstep,maxtech)             ! Alternative-Specific Constant
       real is_rei(8:13,maxstep,maxtech)             ! REIs read from ironstlx
@@ -576,9 +488,9 @@
       real is_base_tech_share(8:13,maxstep,maxtech)   ! Share for each baseline technology
       real is_add_tech_share(8:13,maxstep,maxtech)    ! Share for each added technology
       real is_co2penalty(8:13,21:MNUMYR)               ! CO2 penalty starting with 2010 (index year=21)
-      REAL is_Alpha_Furnace(inumreg)                ! Sensitivity Parameter (Currently uniform across regions/fuels, for simplicity)
-      real is_steam_adj                              !SIMS Steam adjustment factor, read from ironstl.xml
-      real is_ecalib(8:13,maxtech)                    !electricity calibration ; read from ironstl.xml
+      REAL is_Alpha_Furnace(inumreg)                ! Sensitivity Parameter
+      real is_steam_adj                              !CIMS Steam adjustment factor, read from ironstlx.xlsx
+      real is_ecalib(8:13,maxstep)                    !electricity calibration ; read from ironstlx.xlsx
       integer*4 is_numtech(8:13,maxstep)                !number of technologies in each step
       integer*2 is_numfuel(8:13,maxstep)                !number of fuels in each step
 
@@ -605,7 +517,6 @@
 
 ! Steel MECS benchmark
 	  real is_mecsbench(INUMREG,10) ! mecs benchmark factors for elec,ng,resid,steam coal. met coal
-	  real is_IBYRvals(5,5) !baseyear model results by region and fuel
 
 ! STEAM inputs for Steel
 	  REAL B_YEAR(2)                                        ! Initial & Final years to calculate shares of conventional boilers
@@ -653,38 +564,32 @@
 !====================================
 
 ! Energy price variables
-  Real Prcxlag(50,5,3)     ! energy price lags by fuel and region, 2==>  carbon price adjusted(1), unadjusted(2), 3: current industry's avg
+	Real Prcxlag(50,5,3)     ! energy price lags by fuel and region, 2==>  carbon price adjusted(1), unadjusted(2), 3: current industry's avg
 
 !====================================
 
-! indbld
 ! VARIABLES USED FOR ESTIMATING BUILDINGS ENERGY CONSUMPTION
 
-      REAL ENBINT(6,5)  !  REAL pain because there's another definition c. LINE 955, but won't run if commented out
-      REAL ENBQTY(7,5)  !
+      REAL ENBINT(6,5)
+      REAL ENBQTY(7,5)
 
 !====================================
 
-! indmacro
 ! INDUSTRIAL MODULE INDUSTRY MACROECONOMIC VARIABLES
 
-      REAL OUTIND(numind+2,11)        ! industrial output by census division, add 2 ind breakouts for cement & lime
-      REAL OUTINDIBYR(11)             ! base year industrial output by census division for paper
-      REAL CHEMSHIP(9,5,2002:endyr) ! chemical shipments by 4 chem sub industries (1:4) and total (5), then subindustry breakdowns: industrial gases (6) and
+      REAL OUTIND(numind+2,11,25:MNUMYR)        ! industrial output by census division, add 2 ind breakouts for cement & lime
+      REAL CHEMSHIP(9,5,2010:endyr) ! chemical shipments by 4 chem sub industries (1:4) and total (5), then subindustry breakdowns: industrial gases (6) and
 									! synthetic dyes/pigments & other inorganic (7) are subsets of inorganics, petrochemicals (8) and other organics (9) are subsets of organics
       REAL FOODSHIP(5,5,2010:endyr) ! Food shipments by 4 food sub industries & total, census region/total, year  POT_07/31/2013
       REAL EMPIND(25,11)        ! industrial employment by census division
       REAL PRODX                ! production (tons or dollars depending on industry)
       REAL PRODXLAG             ! lag year production
-      REAL PRODXBSYR            ! base year production
       REAL EMPLX                ! employment
-      REAL EMPLXLAG             ! lag year employment
       REAL PRCX(50,5,3)         ! energy prices by fuel and region, 2==>  carbon price adjusted(1), unadjusted(2), 3: current industry's avg
       REAL PRCXYR(50,4,9:MNUMYR,3)  ! Saves prices for all fuels by region and year 1998 to endyr
       REAL PRCXIBYR(4,4)        ! Saves base year prices for coal, oil, and gas and electricity (new afor AE02023) by census region
       REAL PRODVX               ! production capacity (dollars)
       REAL PRODVXLAG            ! lag year production capacity (dollars)
-	  REAL PRODVXBSYR            ! base year prodvx--added by kpe
       REAL BUSHEL(MNUMYR,5)     ! corn used for incremental ethanol production by census region
       INTEGER region(11)/1,1,2,2,3,3,3,4,4,4,5/  ! Maps Census divisions to Census regions
       REAL LIMEIBYR
@@ -695,8 +600,6 @@
 
       INTEGER IFSBYP       ! Number of byproducts consumed
       INTEGER IFSLOCBY(6)  ! Stores fuel id number byproduct fuel j
-      REAL    BYSINT(11)   ! Boiler Efficiency for byproduct fuel j
-      REAL    BYBSCSC(6)   ! Conservation supply coefficient for byproduct fuel j in the BSC
       REAL    BYPBSCM(mainfuels)  ! Byproduct consumption of main fuel j  
       REAL    BYPBSCI(7)   ! Byproduct consumption of intermediate fuel j
       REAL    BYPBSCR(9)   ! Byproduct consumption of renewable fuel j
@@ -705,24 +608,27 @@
       REAL    BYPSTMI      ! Amount of steam produced using intermediate fuels
       REAL    BYPSTMR      ! Amount of steam produced using renewable fuels
 	  REAL    BYPADIBYR(9) ! add 9/25/24 byproduct adjustment factor for wood to scale renewable output in ibyr 
-      INTEGER IFSMAX       ! Number of fuels consumed in the bsc
-      INTEGER IFSLOC(11)  ! Stores fuel id number for main boiler fuel j 
-      REAL    ENSQTY(11)   ! Consumption of fuel j to generate steam--added one dimension for electricity ! kpe 7/15--changed this and subsequent 2 to avoid 
-      REAL    BSSHR(12)    ! Boiler share of fuel j
-      REAL    BSSHRLAG(12) ! Lag year boiler share
+      REAL    ENSQTY(50)   ! Consumption of fuel j to generate steam
+      REAL    BSSHR(50+1)   ! Boiler share of fuel j, with index 51 a subtotal of petroleum products (hence total is sum(1:50))
       REAL    STEMCUR      ! Steam demand from process/assembly and buildings
       real cogsteam          ! total steam from cogen
       real noncogsteam       ! stemcur-cogsteam, or the non cogenerated steam
       real biosteam          ! steam from availbiomass (this is non cogen biomass steam)
 	  real biosteamlag       ! lagged biosteam
       real noncogfossteam    ! Non-cogen steam from fossill (=noncogsteam-biosteam)
-      real fuelfossteam(11)  ! fuel used to generate noncogfossteam, by type *kpe redimension these variables
-      real CogBoilFuel(11)   ! Cogen Boiler Fuel Use (fossil only)
-      REAL    BSFUELSHR(numind,4,15)   ! Stores share of oil based fuel i of total oil consumed
-      REAL    TLBSHR(numind,4,7)       ! stores boiler share logit coefficients--ADDED dimension for electric kpe 9/30/22
-      Real FosFuelSteamSize(numind,11,2,5) ! Boiler consumption by industry, fuel, size, and region
+      real fuelfossteam(51)  ! fuel used to generate noncogfossteam
+      real CogBoilFuel(0:11)   ! Cogen Boiler Fuel Use (fossil only)
+      REAL BSFUELSHR(numind,4,mainfuels)   ! Stores share of main fuel i of total main fuels consumed (excludes renewables)
+      Real FosFuelSteamSize(numind,51,2,5) ! Boiler consumption by industry, fuel, size, and region
       Real sizeshr(numind+1,12,2)       ! Boiler size shares by industry, fuel, for two groups sm<=10mmbtu/hr, lr>10mmbtu/hr
-
+	  Real Boiler_Fuel_List(9)/1,4,7,10,11,12,16,22,42/	! Array of fuel indices for fuels used in boilers
+	  real beff(50)/0.98, 0.0 , 0.0, 0.78, 0.0, 0.0 , 0.83, 0.0 , 0.0, 0.84, &	 
+					0.80, 0.76, 0.0 , 0.0, 0.0, 0.80, 0.0 , 0.0 , 0.0, 0.0 , &	! 1–23 are main fuels,
+					0.0 , 0.80, 0.0 , 0.0, 0.0, 0.0 , 0.0 , 0.0 , 0.0, 0.0 , &	! 30 is heat pump
+					0.0 , 0.0 , 0.0 , 0.0, 0.0, 0.0 , 0.0 , 0.0 , 0.0, 0.0 , &	! 31—36 are intermediate "fuels"
+					0.80, 0.69, 0.69, 0.0, 0.0, 0.0 , 0.0 , 0.69, 0.0, 0.0 /		! 41—48 are renewable "fuels"
+					! beff positions correspond to the universal fuel indices (same indices as fuelname)
+	  real HPbeff/1.008/ ! efficiency gain required every year to achieve fleet efficiency/COP of 1.15 by 2050
 !====================================
 
 ! indcogen
@@ -735,10 +641,8 @@
       REAL RPTGEN(5)         ! CHP generation by fuel GWHa
       REAL RPTCAP(5)         ! CHP capacity by fuel MW
 
-      integer numfl  ! 1:coal,2:oil,3:ngas,4:hydro,5:geoth,6:msw,7:biomass,8:solar,9:othergas,10:electricity, 11:other (total?) !kpe change--reorder eventuallyh
-      parameter(numfl=12)  ! kpe changed 7/15/24 to 12 from 11
-	  integer numflchp
-	  parameter(numflchp=10) ! numflchp is one less because electric boilers aren't chp units
+      INTEGER,PARAMETER:: numfl=12		! 1:coal,2:oil,3:ngas,4:hydro,5:geoth,6:msw,7:biomass,8:solar,9:othergas,10:electricity, 11:other (total?)
+	  INTEGER,PARAMETER:: numflchp=10	! numflchp is one less because electric boilers aren't chp units
       REAL GENGWH(11,numflchp,2)    ! Generation by division,fuel,grid/own use
       REAL DIVFUEL(11,numflchp,2)   ! Fuel consumption for generation by division,fuel, grid/own
       REAL CAPGW(11,numflchp,2)     ! Capacity by division, fuel,grid/own
@@ -750,13 +654,12 @@
       REAL RegCHPutil(4,numind)                 ! CHP utilization fraction by census region and industry  POT_08/01/2013
       REAL maxRegCHPutil(4,numind)              ! Max CHP utilization fraction by census region and industry POT_08/01/2013
       INTEGER MAXCOGYR             ! maximum number of cogen data years
-      REAL BSCIBYR(numind+1,5,13)  ! Latest MECS boiler/steam/cogen fuel (aka, indirect fuels) in trill. btu KPE-redimensioned for electri
-      REAL BOILIBYR(numind+1,5,12) ! Estimated base year boiler fuel after subtracting CHP fuel use (same year) from Form 860b data
+      REAL BSCIBYR(numind+1,5,50+1)  ! Latest MECS boiler/steam/cogen fuel (aka, indirect fuels) in TBtu
+      REAL BOILIBYR(numind+1,5,51) ! Estimated base year boiler fuel after subtracting CHP fuel use (same year) from Form 860b data
       REAL CHPIBYR(numind+1,5,12)  ! Base year CHP fuel use from Form 860b data, at 4 region level
       REAL COGSTEAMIBYR(numind+1,5) ! Base year steam from chp
       real STEMCURIBYR(numind+1,5)  ! Base year total steam load
       real BIOSTEAMIBYR(numind+1,5)
-      real noncogfosstmIBYR(numind+1,5)
       REAL CALIBIBYR_BIO(numind+1,5)  ! MECS/860B BSC BIO/Other Calibration
       real CALIBIBYR_FOS(numind+1,5) ! MECS/860B BSC Fossil
 	  real ELOWNX(8:12,4)		        ! regional ELOWN for steel and paper  kpe added
@@ -775,16 +678,14 @@
         real elc             ! cogadd(iadd).elc
         real grd             ! cogadd(iadd).grd
       end type plancap
-      integer maxadd,nadds,iadd
-      parameter(maxadd=100)
-      type (plancap) :: cogadd(maxadd)  ! up to 50 allowed; increase if more records added next year
+      integer nadds,iadd
 
 !  cogen market penetration assumptions
-
-      integer nsys,nload
-      parameter(nsys=8)        ! number of systems
-      parameter(nload=8)       ! number of load segments
-
+      INTEGER,PARAMETER:: maxadd=100
+	  ! Subroutine EvalCogen will not work if nsys=/=nload!!
+      INTEGER,PARAMETER:: nsys=8	! number of systems
+	  INTEGER,PARAMETER:: nload=8	! number of load segments
+      type (plancap) :: cogadd(maxadd)  ! up to 50 allowed; increase if more records added next year	  
       real CogFuelPrice        !  Price for cogen system fuel
       real CogElecPrice        !  $/mmbtu Price at which cogenerated electricity is valued (ie., sale price or purchased price net of standby charges)
       real StandByFrac         !  Fraction of CogElecPrice representing standby charges
@@ -802,11 +703,20 @@
       real OverAllEffYearly(2015:endyr,nsys) !  Overall efficiency by year
       real FuelUse(nsys)       !  Annual Fuel used by the Cogen system in million BTUs
       real SteamOutput(nsys)   !  Annual thermal heat output of the cogen system mmbtu
-      real RapidCapCostYr(2015:endyr,nsys)     !  Capital cost/kw assumptions for HiTech runs
-      real CRapidHeatRateYr(2015:endyr,nsys)   !  heatrate assumptions by year, system for HiTech runs
-      real RapidOrAllEffYr(2015:endyr,nsys)    !  Overall efficiency by year for HiTech runs
+      integer CogSys(nload)/1,2,3,4,5,6,7,8/	! Map CHP systems (array values) to nload segments (index). Currently, nsys=nload, so the mapping
+! is 1-to-1, but the dimensions need to change if this is ever not the case.
+!	nload			steam load segment (MMBtu/hr)	isys index		isys CHP system (kW)
+!	1				1.5–3.0							1				1,000
+!	2				3.0–6.5							2				3,000
+!	3				6.5–10.0						3				5,000
+!	4				10–50							4				10,000
+!	5				50–100							5				25,000
+!	6				100–250							6				40,000
+!	7				250–500							7				100,000
+!	8				>500							8				375,000
 
-      integer CogSys(nload)    !  Cogen system # (from 1 to nsys) to serve a given load segment
+! This only works if nload=nsys. If ever nsys or nload changes, this statement will have to change to a different mapping.
+	
       real EBoilEff(nload)     !  ratio of useful heat out to heat in for the conventional boiler (not the cogen boiler)
       real BoilerCost(nload)   !  not used yet
       real Investment(nload)   !  Capital cost of the cogeneration system,  $
@@ -824,7 +734,6 @@
       real SteamSeg_Chem(nload)
       real SteamSeg_Steel(nload)
       real SteamSeg_Other(nload)
-      real SteamSeg_refin(nload)
 
       real AcceptFrac(13)      ! Fraction of firms willing to accept a payback period of N years or longer, n=0..12 (13 points on the 'curve')
       real AcceptFrac2(13)     ! Same as AcceptFrac, but applies to Largest Load Segment (used to distinguish merchant IPP from industrial
@@ -847,7 +756,6 @@
       REAL TQMAIN(mainfuels,5)     ! Total consumption of main fuel j in region k 
       REAL TQINTR(7,5)      ! Total consumption for intermediate fuel k
       REAL TQRENW(9,5)      ! Total consumption of renewable fuel j in region k
-
       real xelin(4,4)       ! accumulate totals for 4 electricity groups
       real xelinshr(4,4)    ! shares of total for 4 electricity groups
                             ! 1=primary,2=metal based,3=misc, 4=H2 electrolyzers
@@ -910,17 +818,12 @@
 ! indbench
 ! BENCHMARKING - Related variables
 
-! SUSAN SOME CHANGES TO BENCHMARKING RELATED VARIABLES
-      INTEGER ISEDS        ! Option from file indrun:  1=Benchmark to SEDS, 0:don't benchmark
-      REAL BF(MNUMYR,mainfuels-1,5)          !DEFINED WITH YEAR DIMENSION POT_2050 51 to MNUMYR
-      REAL RBF(MNUMYR,8,5)          ! POT_2050 51 to MNUMYR
+      REAL BF(MNUMYR,mainfuels-1,5)
+      REAL RBF(MNUMYR,8,5)
 ! BENCHFAC IS THE OLD WEXOG BENCHMARK FACTOR ARRAY. NEEDS REVISION
       REAL BENCHFAC(19,5) ! Benchmark factors for 17 main fuels and 2 biomass fuels by Census Division
-!      REAL BENCHFAC(17,5) ! Benchmark factors for 15 main fuels and 2 biomass fuels by Census Division      NSK H2
       REAL STEOQ(STEOLastYr-6:STEOLastYr,21)  ! STEO History and projections by year, 21 fuel
       INTEGER ICALIBRATE
-	  REAL HISTBF(70,22,4) ! BENCHMARK FACTORS READ IN FROM IBFACTRI.CSV (no longer used)
-     REAL RHISTBF(70,8,4) ! RENEWABLE BENCHMARK FACTORS READ IN FROM IBFACTRI.CSV (no longer used)
 
 ! Define Data Type BUFYEAR to hold all input/output varying by industry and region for a single year
       TYPE COPY_BY_IND_REG
@@ -930,17 +833,13 @@
       REAL    ENPRQTY(9)
       REAL    PRODX
       REAL    PRODXLAG
-	  REAL    PRODXBSYR
       REAL    PRODVX
       REAL    PRODVXLAG
-	  REAL    PRODVXBSYR
       REAL    EMPLX
-      REAL    EMPLXLAG
       REAL    ENBINT(6,5)
       REAL    ENBQTY(7,5)
-      REAL    ENSQTY(11)
-      REAL    BSSHR(12)
-      REAL    BSSHRLAG(12)
+      REAL    ENSQTY(50)
+      REAL    BSSHR(50+1)
       REAL    STEMCUR
       REAL    STEMCURLAG
       REAL    COGSTEAM
@@ -948,8 +847,8 @@
       REAL    BIOSTEAM
 	  REAL    BIOSTEAMLAG
       REAL    NONCOGFOSSTEAM
-      REAL    FUELFOSSTEAM(11)
-      REAL    COGBOILFUEL(11)
+	  REAL    FUELFOSSTEAM(51)
+      REAL    COGBOILFUEL(0:11)
       REAL    ELOWN
       REAL    ELSALE
       REAL    GENFUEL(5)        ! CHP fuel consumption by fuel
@@ -979,11 +878,8 @@
       REAL    PHDRAT
       INTEGER INDDIR
       INTEGER IDVAL
-      INTEGER IFSMAX
-      INTEGER IFSLOC(11)
       INTEGER IFSBYP
       INTEGER IFSLOCBY(6)
-      REAL    GENEQPHTRT(4)
       INTEGER NTMAX(maxstep)
       INTEGER IFMAX(maxstep+1)
       INTEGER IPASTP(maxstep,MAXLINKS)
@@ -997,7 +893,7 @@
       INTEGER NumRptGrpSteps(12)          ! Number of steps in each reporting SubGroup for P/A
       INTEGER RptGrpSteps(12,maxstep)     ! Identification of step numbers included in each reporting subgroup in P/A
       Character*24 RptGrpNames(12)        ! Reporting group names
-      Character*24 RptGrpSName(12,maxstep+1)! Reporting labels for step names
+      Character*24 RptGrpStepName(12,maxstep+1)! Reporting labels for step names
       CHARACTER*40 INDNAME
       CHARACTER*24 INDSTEPNAME(maxstep+1)
 
@@ -1019,7 +915,7 @@
       INTEGER IR,ID,IF,I,J,YR,ibif
       REAL DPRCX(30,11,3) ! division prices by fuel, region+US, by Carbon-Adjusted(1),Unadjusted(2), Current Industry's average (3)
       REAL DCONX(30,11)
-      CHARACTER*40 INAMECK(numind),INAME(numind),LINDNAME  ! for enprod reads in subr iedata
+      CHARACTER*40 INAME(numind),LINDNAME  ! for enprod reads in subr iedata
       integer IOS,IOSTAT
 
 !*********************************************************************************AE
@@ -1033,7 +929,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
     real INDETTCBUS(mnumyr)		! Ethane/Ethylene Product Supplied
     real INDC4TCBUS(mnumyr)		! Butanes/Butylenes Product Supplied
     real INDPRTCBUS(mnumyr)		! Propane/Propylene Product Supplied
-!    real INDC3TCPUS(mnumyr)   ! Propane Consumption (million barrels)
     real INDPPTCBUS(mnumyr)		! Natural Gasoline (Pentanes Plus) Product Supplied
     Real INDDFTCBUS(mnumyr)		! Distillate Fuel Oil Product Supplied
     Real INDRFTCBUS(mnumyr)		! Residual Fuel Oil Product Supplied
@@ -1065,21 +960,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 	
 	REAL carbshrcadata(numind) ! GHG data read in from California's carbon share file (carbshrca.csv); function of industry
 	
-! let's try a remap of the steps for the following INDUSTRIES
-! Needs to be updated at every MECS update. Current for 2018 MECS
- 
-!     integer,allocatable::indsteps(:)  ! some industries have different # of steps
-	 
-!	 integer,parameter::normind(numind-5) = [1,2,3,4,5,6,8,9,10,11,12,13,14,16,17,19,20,21,24] ! industries w/mpastp=steps
-!	 integer,parameter::exceptind(5) = [7,15,18,22,23]  ! industries where steps are skipped
-
-!     integer,parameter::foodstp(23) = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24] ! food missing 22
-!     integer,parameter::machstp(5) = [1,2,3,5,6] ! machinery, missing 4
-!     integer,parameter::elecstp(5) = [1,3,4,5,6] ! electrical equipment, missing 2
-!     integer,parameter::nonmstp(4) = [1,4,5,6] ! other non-metallic minerals, missing step 2 and 3
-!     integer,parameter::primstp(5) = [1,3,4,5,6] ! other primary metals, missing step 2
-	 
-
 !===============================================================================================
 ! END OF Global Declarations for Subroutine IND
 !===============================================================================================
@@ -1111,6 +991,7 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
       CALL INDCGN    ! copy cogen data variables to NEMS global variables for the current year.  Because this
                      ! is done prior to the actual model start year, and is done for the reporting loop,
                      ! assignments to cgindcap, cgindgen, and cgindq will override history reads of these vars within the EMM
+
 
       IF(CURCALYR.LT. ibyr2) then
 ! zero reporting variables prior to base year
@@ -1194,11 +1075,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 	  NEW=.TRUE.
 	  IFACTOUT=FILE_MGR('O',FNAME,NEW)
 
-!	OPEN BENCHMARK FACTOR INPUT FILE
-	  FNAME='IBFACTRI           '
-      NEW=.FALSE.
-      IFACTIN=FILE_MGR('O',FNAME,NEW)
-
       FNAME='IFEEDDBG           '
       NEW=.TRUE.
       IFEEDOUT=FILE_MGR('O',FNAME,NEW)
@@ -1249,7 +1125,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
     !  CALL ALLOCATE_STEPS
 
       CALL ISEAM
-  
   
       CALL CALIBRATE_COAL_ELEC
 !******
@@ -1314,18 +1189,17 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
       DO 5 ID=1,11
         ir=region(id)
 
-        OUTIND(1,ID)=MC_REVIND(ID,42,curiyr)        ! CROPS
-        OUTIND(2,ID)=MC_REVIND(ID,44,curiyr) + &    ! OTHER AG
+        OUTIND(1,ID,curiyr)=MC_REVIND(ID,42,curiyr)        ! CROPS
+        OUTIND(2,ID,curiyr)=MC_REVIND(ID,44,curiyr) + &    ! OTHER AG
                      MC_REVIND(ID,43,curiyr) + &    ! ANIMAL PRODUCTION
                      ResidAdd(ID)                   ! FOREST RESIDUE ABOVE DO NOT HAVE ADJUSTMENT FACTOR
-        OUTIND(3,ID)=MC_REVIND(ID,45,curiyr)        ! COAL MINING
-        OUTIND(4,ID)=MC_REVIND(ID,46,curiyr)        ! OIL & GAS MINING
-        OUTIND(5,ID)=MC_REVIND(ID,47,curiyr)		! METAL & OTHER MINING
-        OUTIND(6,ID)=MC_REVIND(ID,48,curiyr)        ! CONSTRUCTION
-        OUTIND(7,ID)=MC_REVIND(ID,1,curiyr)			! FOOD
-        OUTIND(8,ID)=MC_REVIND(ID,10,curiyr)		! PAPER
-        IF (curcalyr.eq.ibyr2) OUTINDIBYR(ID)=MC_REVIND(ID,10,curiyr)        ! PAPER
-        OUTIND(9,ID)=MC_REVIND(ID,15,curiyr) + &    ! BASIC INORGANIC CHEM
+        OUTIND(3,ID,curiyr)=MC_REVIND(ID,45,curiyr)        ! COAL MINING
+        OUTIND(4,ID,curiyr)=MC_REVIND(ID,46,curiyr)        ! OIL & GAS MINING
+        OUTIND(5,ID,curiyr)=MC_REVIND(ID,47,curiyr)		! METAL & OTHER MINING
+        OUTIND(6,ID,curiyr)=MC_REVIND(ID,48,curiyr)        ! CONSTRUCTION
+        OUTIND(7,ID,curiyr)=MC_REVIND(ID,1,curiyr)			! FOOD
+        OUTIND(8,ID,curiyr)=MC_REVIND(ID,10,curiyr)		! PAPER
+        OUTIND(9,ID,curiyr)=MC_REVIND(ID,15,curiyr) + &    ! BASIC INORGANIC CHEM
                      MC_REVIND(ID,16,curiyr) + &    ! BASIC ORGANIC CHEM
                      MC_REVIND(ID,18,curiyr) + &    ! RESINS AND SYNTHETICS
                      MC_REVIND(ID,19,curiyr)        ! AGRICULTURE CHEMICALS
@@ -1334,7 +1208,7 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
         chemship(2,ir,curcalyr)=chemship(2,ir,curcalyr) + MC_REVIND(ID,16,curiyr) ! ORGANIC
         chemship(3,ir,curcalyr)=chemship(3,ir,curcalyr) + MC_REVIND(ID,18,curiyr) ! RESINS AND SYNTHETICS
         chemship(4,ir,curcalyr)=chemship(4,ir,curcalyr) + MC_REVIND(ID,19,curiyr) ! AG CHEM
-        chemship(5,ir,curcalyr)=chemship(5,ir,curcalyr) + OUTIND(9,ID)
+        chemship(5,ir,curcalyr)=chemship(5,ir,curcalyr) + OUTIND(9,ID,curiyr)
 		! Subcomponents of inorganic
 		chemship(6,ir,curcalyr)=chemship(6,ir,curcalyr) + MC_REVIND(ID,51,curiyr) ! industrial gases
 		chemship(7,ir,curcalyr)=chemship(7,ir,curcalyr) + MC_REVIND(ID,52,curiyr) ! synthetic dyes/pigments & other inorganics
@@ -1348,22 +1222,22 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
         foodship(2,ir,curcalyr)=foodship(2,ir,curcalyr) + MC_REVIND(ID,3,curiyr) ! Dairy Products
         foodship(3,ir,curcalyr)=foodship(3,ir,curcalyr) + MC_REVIND(ID,4,curiyr) ! Animal Slaughter and Seafood Products
         foodship(4,ir,curcalyr)=foodship(4,ir,curcalyr) + MC_REVIND(ID,5,curiyr) ! Other Food Products
-        foodship(5,ir,curcalyr)=foodship(5,ir,curcalyr) + OUTIND(7,ID)           ! Total for Food
+        foodship(5,ir,curcalyr)=foodship(5,ir,curcalyr) + OUTIND(7,ID,curiyr)           ! Total for Food
 		  
 ! POT_07/31/2013 END! Add the food subindustry shipments to obtain the total. Then, sum food shipments for the regions.
 
-        OUTIND(10,ID)=MC_REVIND(ID,28,curiyr)											! GLASS
+        OUTIND(10,ID,curiyr)=MC_REVIND(ID,28,curiyr)											! GLASS
 		! 11 is cement and lime; defined below
-        OUTIND(12,ID)=MC_REVIND(ID,33,curiyr) + MC_REVIND(ID,26,curiyr) * (1.0 - 0.91)	! IRON & STEEL & coke plants
-        OUTIND(13,ID)=MC_REVIND(ID,34,curiyr)										    ! PRIMARY ALUM
+        OUTIND(12,ID,curiyr)=MC_REVIND(ID,33,curiyr) + MC_REVIND(ID,26,curiyr) * (1.0 - 0.91)	! IRON & STEEL & coke plants
+        OUTIND(13,ID,curiyr)=MC_REVIND(ID,34,curiyr)										    ! PRIMARY ALUM
 
 !  METALS-BASED DURABLES  (NAICS 332 to 336)
 
-        OUTIND(14,ID)=MC_REVIND(ID,36,curiyr)   ! fabricated metal products
-        OUTIND(15,ID)=MC_REVIND(ID,37,curiyr)   ! machinery
-        OUTIND(16,ID)=MC_REVIND(ID,38,curiyr)   ! computer & electronics
-        OUTIND(17,ID)=MC_REVIND(ID,39,curiyr)   ! transport equipment
-        OUTIND(18,ID)=MC_REVIND(ID,40,curiyr)	! electrical equipment
+        OUTIND(14,ID,curiyr)=MC_REVIND(ID,36,curiyr)   ! fabricated metal products
+        OUTIND(15,ID,curiyr)=MC_REVIND(ID,37,curiyr)   ! machinery
+        OUTIND(16,ID,curiyr)=MC_REVIND(ID,38,curiyr)   ! computer & electronics
+        OUTIND(17,ID,curiyr)=MC_REVIND(ID,39,curiyr)   ! transport equipment
+        OUTIND(18,ID,curiyr)=MC_REVIND(ID,40,curiyr)	! electrical equipment
 
 !  Balance of Manufacturing
 !    19   BOM-wood products
@@ -1380,12 +1254,12 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 !                30:11, 31:11, 32:22, 33:12, 34:13, 35:23, 36:14, 37:15, 38:16, 39:17, 
 !                40:18, 41:24, 42:1, 43:2, 44:2, 45:3, 46:4, 47:5, 48:6}
 !       ship_dict = {26:{24:0.91, 12:0.09}, 31:{11:0.28, 24:0.72}}
-        OUTIND(19,ID)=MC_REVIND(ID, 8,curiyr)   ! lumber
-        OUTIND(20,ID)=MC_REVIND(ID,27,curiyr) 	! plastics
-        OUTIND(21,ID)=MC_REVIND(ID,20,curiyr)	! other chemicals - this might be the whole thing
-        OUTIND(22,ID)=MC_REVIND(ID,32,curiyr) 	! total other non metallic minerals kpe 10/13
-        OUTIND(23,ID)=MC_REVIND(ID,35,curiyr) 	! other primary metals
-        OUTIND(24,ID)=MC_REVIND(ID, 6,curiyr) + &         ! tobacco
+        OUTIND(19,ID,curiyr)=MC_REVIND(ID, 8,curiyr)   ! lumber
+        OUTIND(20,ID,curiyr)=MC_REVIND(ID,27,curiyr) 	! plastics
+        OUTIND(21,ID,curiyr)=MC_REVIND(ID,20,curiyr)	! other chemicals - this might be the whole thing
+        OUTIND(22,ID,curiyr)=MC_REVIND(ID,32,curiyr) 	! total other non metallic minerals kpe 10/13
+        OUTIND(23,ID,curiyr)=MC_REVIND(ID,35,curiyr) 	! other primary metals
+        OUTIND(24,ID,curiyr)=MC_REVIND(ID, 6,curiyr) + &         ! tobacco
                       MC_REVIND(ID, 7,curiyr) + &         ! textiles
                       MC_REVIND(ID, 9,curiyr) + &         ! furniture
                       MC_REVIND(ID,14,curiyr) + &         ! printing
@@ -1395,10 +1269,10 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 ! keys are mc revind, values nested dictionary.  Keys in nested dictionary are idm industries, values are proportions
 !     ship_dict = {26:{24:0.91, 12:0.09}, 31:{11:0.28, 24:0.72}}
 
-        OUTIND(25,ID)=MC_REVIND(ID,30,curiyr)      	! CEMENT
-        OUTIND(26,ID)=MC_REVIND(ID,31,curiyr)      	! LIME
-        OUTIND(11,ID)=OUTIND(25,ID) + OUTIND(26,ID) ! CEMENT & LIME
-        IF(ID.EQ.11) LIMEOUTPUT(curiyr) = OUTIND(26,ID)
+        OUTIND(25,ID,curiyr)=MC_REVIND(ID,30,curiyr)      					! CEMENT
+        OUTIND(26,ID,curiyr)=MC_REVIND(ID,31,curiyr)      					! LIME
+        OUTIND(11,ID,curiyr)=OUTIND(25,ID,curiyr) + OUTIND(26,ID,curiyr) 	! CEMENT & LIME
+        IF(ID.EQ.11) LIMEOUTPUT(curiyr) = OUTIND(26,ID,curiyr)
 ! Record Lime base year production for indexing
         IF (curcalyr.eq.ibyr) THEN
             LIMEIBYR=MC_REVIND(ID,31,ICURIYR)
@@ -1413,12 +1287,12 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
         ENDIF
 ! Record Glass base year production for indexing
         IF (curcalyr.eq.ibyr) THEN
-            GLASSIBYR(1)=MC_REVIND(ID,28,ICURIYR)
+            GLASSIBYR(5)=MC_REVIND(ID,28,ICURIYR)
             call GL_shipping
-            GLASSIBYR(2)=GL_ship(1)
-            GLASSIBYR(3)=GL_ship(2)
-            GLASSIBYR(4)=GL_ship(3)
-            GLASSIBYR(5)=GL_ship(4)
+            GLASSIBYR(1)=GL_ship(1)
+            GLASSIBYR(2)=GL_ship(2)
+            GLASSIBYR(3)=GL_ship(3)
+            GLASSIBYR(4)=GL_ship(4)
         ENDIF
 
    5  CONTINUE
@@ -2149,7 +2023,7 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 			PRCXIBYR(1,IR) = PRCX(4,IR,1)
 			PRCXIBYR(2,IR) = PRCX(7,IR,1)
 			PRCXIBYR(3,IR) = PRCX(10,IR,1)
-			PRCXIBYR(4,IR) = PRCX(1,IR,1)  ! electricity.  NEW for aeo2023 kpe
+			PRCXIBYR(4,IR) = PRCX(1,IR,1)  ! electricity
         ENDDO
     ENDIF
 ! Fill in yearly price array with current year prices. ":" is for adjusted/unadjusted dimension
@@ -2201,12 +2075,16 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
       REAL,ALLOCATABLE::qcrcokeplnt(:)                  ! allocatable, because the number of entries can change every year
       REAL,ALLOCATABLE::qcrindchp(:)                 ! allocatable, because the number of entries can change every year
       REAL,ALLOCATABLE::qcrindnchp(:)                 ! allocatable, because the number of entries can change every year
-      
-      
-    IF ((CURCALYR .eq. ibyr) .AND. (CURITR .eq. 1)) THEN 
-            ALLOCATE(qcrcokeplnt(QCR_YEARS))                  ! allocatable, because the number of entries can change every year
-            ALLOCATE(qcrindchp(QCR_YEARS))                 ! allocatable, because the number of entries can change every year
-            ALLOCATE(qcrindnchp(QCR_YEARS))                 ! allocatable, because the number of entries can change every year
+	
+	IF ((CURCALYR .eq. ibyr2) .AND. (CURITR .eq. 1)) THEN 	! initialize
+		qcrcokeplnt=0
+		qcrindchp=0
+		qcrindnchp=0
+	ENDIF
+    IF ((CURCALYR .eq. ibyr) .AND. (CURITR .eq. 1)) THEN	! define size (since QCR_YEARS defined in ibyr-1)
+        ALLOCATE(qcrcokeplnt(QCR_YEARS))	! allocatable, because the number of entries can change every year
+        ALLOCATE(qcrindchp(QCR_YEARS))		! allocatable, because the number of entries can change every year
+        ALLOCATE(qcrindnchp(QCR_YEARS))		! allocatable, because the number of entries can change every year
     ENDIF
 !******
 !  READ THE CONTROL VARIABLE FILE
@@ -2261,8 +2139,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
              ENPINTLAG=enpint
              BYPINTLAG=bypint
              stemcurlag=stemcur
-             bsshrlag=bsshr
-             emplxlag=emplx
              prodlag=prodcur
              idlcaplag=idlcap
 
@@ -2311,7 +2187,13 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
             Call Read_electric(ASM_YEARS, IUNITELEC, asmdata, MNUMYR, NUMIND, IBYR, ICURIYR) 
 			IUNITELEC=FILE_MGR('C',FNAME,NEW)
             
-            IF (inddir.eq.9) qcrdata(curiyr,inddir,5) = MAX( qcrdata(curiyr,inddir,5) - QCLETH(curiyr,11), 0.0)     ! Subtract ethanol plant coal consumption
+            IF(inddir.eq.9)THEN
+				qcrdata(curiyr,9,5) = qcrdata(curiyr,9,5) - QCLETH(curiyr,11)	! Subtract ethanol plant coal consumption from chemicals.
+				IF(qcrdata(curiyr,9,5)<0)THEN									! If this results in a negative value,
+					qcrdata(curiyr,7,5)=qcrdata(curiyr,7,5)+qcrdata(curiyr,9,5)	! subtract the rest from food
+					qcrdata(curiyr,9,5)=0.										! and set chemicals steam coal to 0.
+				ENDIF
+			ENDIF
             IF (inddir.eq.12) qcrdata(curiyr,inddir,5) = MAX( qcrdata(curiyr,inddir,5) - OGSUPGAS(1,4,curiyr), 0.0) ! Subtract consumption from town gas facility in North Dakota (which is allocated to steel by our preprocessing)			
 			 
             DO IREG=1,4
@@ -2330,7 +2212,13 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
         ENDIF
         
 		IF ((CURCALYR .gt. ibyr) .and. (CURCALYR .le. END_YR_QCR) .and. (CURITR .eq. 1)) THEN
-            IF (inddir.eq.9) qcrdata(curiyr,inddir,5) = MAX( qcrdata(curiyr,inddir,5)- QCLETH(curiyr,11), 0.0)      ! Subtract ethanol plant coal consumption
+            IF(inddir.eq.9)THEN
+				qcrdata(curiyr,9,5) = qcrdata(curiyr,9,5) - QCLETH(curiyr,11)	! Subtract ethanol plant coal consumption from chemicals.
+				IF(qcrdata(curiyr,9,5)<0)THEN									! If this results in a negative value,
+					qcrdata(curiyr,7,5)=qcrdata(curiyr,7,5)+qcrdata(curiyr,9,5)	! subtract the rest from food
+					qcrdata(curiyr,9,5)=0.										! and set chemicals steam coal to 0.
+				ENDIF
+			ENDIF
             IF (inddir.eq.12) qcrdata(curiyr,inddir,5) = MAX( qcrdata(curiyr,inddir,5)- OGSUPGAS(1,4,curiyr), 0.0)  ! Subtract consumption from town gas facility in North Dakota (which is allocated to steel by our preprocessing)
 		ENDIF 
         
@@ -2340,8 +2228,8 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
           indreg=IREG
 
           call rexog ! get macro data
-! helpful to change this to ibyr2?
-          IF ((IYR.EQ.ibyr2).and.(curitr == 1)) THEN !.and.(curitr == 1)) THEN  ! we read everything here
+
+          IF ((IYR.EQ.ibyr2).and.(curitr == 1)) THEN ! we read everything here
 
 !           In first model year, read input files and do model calculations.
 
@@ -2368,33 +2256,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
             ENDIF
 
             CALL IEDATA    ! read enprod
-			
-! remap steps happends in --output is steps for that industry 
-! For simplicity, use common fuel indices for all boiler fuels whether used or not
-! IF CHANGING THESE, MAKE SURE TO UPDATE BENCHMECS SUBROUTINE
-            IFSLOC(1)=4     ! natural gas
-            ifsloc(2)=7     ! steam coal
-            ifsloc(3)=10    ! resid
-            ifsloc(4)=11    ! distillate
-            ifsloc(5)=12    ! propane
-			if (inddir.ge.7) then	  ! manufacturing has electric boilers; this sets the electric boiler fuel and the ifsmax to 6
-				ifsloc(6)=1 ! electricity
-				ifsmax=6
-			else  ! nonmanufacturing does not have coal or electric boilers; keeps ifsmax at 5
-			    ifsmax = 5
-			endif
-			if(inddir.eq.8.or.&   ! paper
-               inddir.eq.9.or.&   ! bchem
-               inddir.eq.12.or.&  ! steel
-               inddir.ge.21) then ! BOMOther
-                   ifsloc(7)=16
-                   ifsloc(8)=22
-                   ifsmax=8
-            endif
-            ifsmax=ifsmax+1
-            ifsloc(ifsmax)=41  ! hydro
-            ifsmax=ifsmax+1
-            ifsloc(ifsmax)=48   ! MSW
 	
 ! For Food sub-industry analysis, temporarily fill prodflow based on subindustry shipment share of
 ! total food shipments.  POT_07/31/2013
@@ -2421,17 +2282,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 
             call ifinlcalc ! recalculate prodcur w/new prodflows
 
-           if(inddir.eq.9) then
-! For Chemicals sub-industry analysis, restore prodflow
-              DO IS=1,MPASTP
-                if(index(indstepname(is),'STEAM').eq.0) then   ! for all but the steam steps
-                  isub=((is-1)/6)+1                            ! subindustry 1 to 4
-                  prodflow(1,IS,1)=1.                          ! sub-industry share of ibyr2 chemical shipments
-                  prodflow(2,IS,1)=prodflow(1,IS,1)
-                endif
-              enddo
-            endif
-
 ! Read a record from the industrial building energy use file.  Skip lines with "*" in column 1.
 ! Format of file is comma-separated values but with industry names enclosed in apostrophes.
 !           position on next non-comment record
@@ -2456,7 +2306,7 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
                backspace ibeu
                enbint=0.
             else
-! convert building energy use from trillion btu to trillion btu per million employees.
+! convert building energy use from trillion btu to trillion btu per thousand employees (emplx converted to thousands in REXOG)
               do ieu=1,6
                 do ifx=1,5
                   if(emplx.gt.0.) then
@@ -2465,7 +2315,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
                 enddo
               enddo
             endif
- 
 
 ! Establish average industry prices based on share of market covered and non-covered
             call INDBIFURC
@@ -2476,7 +2325,6 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 !         CALCULATE ENERGY CONSUMPTION IN THE PROCESS AND
 !            AND ASSEMBLY COMPONENT.
 !******
-            ! kpe change --- call calpatot based on industry
 			if (ISPROCFLOW(inddir) == 1) then	
 				CALL CALPATOT('tech')
 			else
@@ -2486,20 +2334,13 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 !         CALCULATE BYPRODUCT ENERGY PRODUCED.
 !******
             if (curcalyr.le.IBYR) BYPADIBYR(:) = 1.
-            if ((inddir.ne.8).and.(inddir.ne.12)) then ! KPE conditional--no paper, steel -- allowing new industries now (didn't before)
+            if ((inddir.ne.8).and.(inddir.ne.12)) then !no paper, steel
 				CALL CALBYPROD  
 			else ! initialize variables	
 				BYPQTY(:,:,:)=0.0
-				DO ifx=1,mainfuels
-					BYPBSCM(ifx)=0.0
-				enddo
-				DO ifx=1,7
-					BYPBSCI(ifx)=0.0
-				enddo
-				DO ifx=1,9
-				BYPBSCR(ifx)=0.0
-				enddo
-
+				BYPBSCM(1:mainfuels)=0.0
+				BYPBSCI(1:7)=0.0
+				BYPBSCR(1:9)=0.0
 			endif
 
 !******
@@ -2514,33 +2355,25 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 !****
 !    CALCULATE ELECTRICITY GENERATION.
 !****
-! with the new chp file, will need to get rid of the inddir.le.21 condition
+! 860 survey doesn't have the NAICS granularity to add industries 22–24 to tthe CHP files
+      if ((inddir.ne.8 .and. inddir.ne.12).and.(inddir.le.21)) CALL CALGEN
 
-      if ((inddir.ne.8 .and. inddir.ne.12).and.(inddir.le.21)) CALL CALGEN  ! kpe adds conditional
-
-
-      if((prtdbgi.eq.3).and.(inddir.le.21)) then
-        call pcoggen
-      endif
+      if((prtdbgi.eq.3).and.(inddir.le.21)) CALL pcoggen
 
 !****
 !    CALCULATE THIS YEAR'S FUEL SHARES AND INTENSITIES.
 !****
            if (inddir.ne.8 .and. inddir.ne.12) call calbsc
 !******
-!         CALCULATE ENERGY CONSUMPTION FOR THE BOILER/STEAM
-!            /COGENERATION COMPONENT.
+!         CALCULATE ENERGY CONSUMPTION FOR THE BOILER/STEAM/COGENERATION COMPONENT.
 !******
             if (inddir.ne.8 .and. inddir.ne.12) CALL CALSTOT
-
 !******
-!         CALCULATE TOTAL ENERGY CONSUMPTION FOR THE
-!            INDUSTRY.
+!         CALCULATE TOTAL ENERGY CONSUMPTION FOR THE INDUSTRY.
 !******
             CALL INDTOTAL(INDREG)
 !******
-!         CALCULATE NATIONAL TOTAL ENERGY CONSUMPTION FOR THE
-!            INDUSTRY.
+!         CALCULATE NATIONAL TOTAL ENERGY CONSUMPTION FOR THE INDUSTRY.
 !******
             IF(IREG.EQ.4) THEN
               CALL NATTOTAL
@@ -2552,12 +2385,10 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
             CALL CONTAB(INDREG)
             IF(INDREG.EQ.4) CALL CONTAB(5)
 
-
             CALL WRBIN
 
-
           ELSE IF (ISPROCFLOW(inddir) == 0 .and. (IYR.GT.ibyr2) )  then ! kpe change to nonprocess flow industries; run only
-		                                                        ! for years 2015 and later; we skip a year
+		                                                        ! for years 2021 and later; we skip a year
 
 !******
 !       Else, not the first year: just do MODEL CALCULATIONS without data file reading
@@ -2589,48 +2420,30 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 
 ! Establish average industry prices based on share of market covered and non-covered
             call INDBIFURC
-
-!  for high tech case, read a second set of UECs and TPCs that allow
-!  a faster rate of technological improvement for some fuels/industries.
-!  The new set is expected to be in the ITECH file, after the MECS set,
-!  following a record with the string "hitech"
-
-
-            if(curcalyr.gt.techstrtyr.and.hitech.eq.1) call uectpc
-
-
-            ! if (ISPROCFLOW == 0) 
 			CALL MODCAL('original')
-
 !******
 !  CALCULATE INDUSTRY TOTALS.
 !******
-
           CALL WRQTY
-
 !******
 !  WRITE INFORMATION TO BE S AVED TO THE memory management buffer
 !******
           INDREG=IREG
-          ! if (ISPROCFLOW == 0) 
 		  CALL WRBIN
 
-        ENDIF ! END OF IF STARTING ON LINE 2305 AND THE ELSE IF FOR END USE INDUSTRIES
-        ENDDO     ! KPE end of regional loop, still in industry loop
+        ENDIF ! END OF IF FOR END USE/PROCESS FLOW INDUSTRIES
+        ENDDO ! end of regional loop, still in industry loop
 
 ! Re-invoke regional sequence for tech-choice industries since they are dependent
 ! on regional shares of prodcur.mo
         IF ((ISPROCFLOW(inddir) == 1).AND.(curcalyr.gt.ibyr2)) then ! new if statment, still in industry loop
-		 ! if (ISPROCFLOW == 1) then
-          ! if(inddir.eq.10  .or. inddir.eq.11  .or. inddir.eq. 13 .or. inddir.eq.12 .or. inddir.eq.8) then
             DO IREG=1,4
               indreg=IREG
               CALL RDBIN
               call rexog
-			  if (inddir.eq.7.or.inddir.eq.8.or.inddir.eq.9.or.  & ! primary
-               inddir.eq.12.or.inddir.eq.13) then
+			  if (inddir.eq.7.or.inddir.eq.8.or.inddir.eq.9.or.inddir.eq.12.or.inddir.eq.13) then  ! primary electricity
 					prcx(1,indreg,1:2)=prcx(24,indreg,1:2)
-						prcxyr(1,indreg,curiyr,1:2)=prcxyr(24,indreg,curiyr,1:2)
+					prcxyr(1,indreg,curiyr,1:2)=prcxyr(24,indreg,curiyr,1:2)
               else
                  prcx(1,indreg,1:2)=prcx(25,indreg,1:2)
                  prcxyr(1,indreg,curiyr,1:2)=prcxyr(25,indreg,curiyr,1:2)
@@ -2643,10 +2456,8 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
               call modcal('tech')
               call wrqty
               call wrbin
-            enddo
-          
-        endif
-
+            ENDDO
+        ENDIF
    45 CONTINUE
 
 !******
@@ -2656,11 +2467,9 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
         call addupcogs ! add up cogen arrays
         CALL INDCGN
 
-
 !******
 !  CLOSE PRODUCTION AND ENERGY FILE, IF FIRST YEAR.
 !******
-
       IF(IYR.EQ.ibyr2) THEN
         FNAME='ENPROD'
         NEW=.FALSE.
@@ -2668,9 +2477,7 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 		
 		fname='INDBEU'
         new=.false.
-        ibeu=file_mgr('C',fname,new)
-
-		
+        ibeu=file_mgr('C',fname,new)		
       ENDIF
 
   801 FORMAT(1X,'DEBUG TEST FILE, YEAR = ',I4)
@@ -2733,65 +2540,54 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 
       RETURN
       END SUBROUTINE PRICE
-!******
-!  FOR THE MCLAIN-LIEBERMAN BILL, this routine will
-!  SET AVERAGE INDUSTRY ENERGY PRICES BASED ON SHARE OF THE INDUSTRY COVERED BY
-!  THE BILL.
+
+! This subroutine seems to apply the California AB32 CO2 price to relevant industries in census region 4,
+! and then applies the share of each industry's vonsumption that the CO2 price should be applied to, based on settings in indrun.txt (currently
       SUBROUTINE indbifurc
    use i_
       IMPLICIT NONE
 
 ! Called within the industry/region loop, so ir and inddir are defined in calling program
       INTEGER ifuel,iyyr
-
       INTEGER RTOVALUE,AB32SW
       EXTERNAL RTOVALUE
 
 !  Check runtime option to turn AB32SW switch for implementation of AB32 cap-and-trade in State of California.
 !  The default setting is ON (1).
-!
-      AB32SW=RTOVALUE('AB32SW  ',1)
 
-      ir=indreg
-        DO IFUEL=1,50
-          IF(AB32SW.EQ.1) then
-            PRCX(IFUEL,IR,3)= (PRCX(IFUEL,IR,1) *     CARBSHR_AB(INDDIR,IR)) &
-                          + (PRCX(IFUEL,IR,2) * (1.-CARBSHR_AB(INDDIR,IR)))
-            prcxyr(ifuel,ir,CURIYR,1:3)=prcx(ifuel,ir,1:3)
-            DO IYYR=9,CURIYR-1
-              prcxyr(ifuel,ir,IYYR,3)=(prcxyr(ifuel,ir,IYYR,1) *     CARBSHR_AB(INDDIR,IR)) &
-                                     + (prcxyr(ifuel,ir,IYYR,2) * (1.-CARBSHR_AB(INDDIR,IR)))
-            ENDDO
-          ELSE
-          PRCX(IFUEL,IR,3)= (PRCX(IFUEL,IR,1) *     CARBSHR(INDDIR)) &
-                          + (PRCX(IFUEL,IR,2) * (1.-CARBSHR(INDDIR)))
-          prcxyr(ifuel,ir,CURIYR,1:3)=prcx(ifuel,ir,1:3)
-          DO IYYR=9,CURIYR-1
-            prcxyr(ifuel,ir,IYYR,3)=(prcxyr(ifuel,ir,IYYR,1) *     CARBSHR(INDDIR)) &
-                                   + (prcxyr(ifuel,ir,IYYR,2) * (1.-CARBSHR(INDDIR)))
+    AB32SW=RTOVALUE('AB32SW  ',1)
 
-          ENDDO
-          ENDIF
-ENDDO
+    ir=indreg
+    IF(AB32SW.EQ.1) then
+        PRCX(1:allfuels,IR,3)= (PRCX(1:allfuels,IR,1) *     CARBSHR_AB(INDDIR,IR)) &
+                          + (PRCX(1:allfuels,IR,2) * (1.-CARBSHR_AB(INDDIR,IR)))
+        prcxyr(1:allfuels,ir,CURIYR,1:3)=prcx(1:allfuels,ir,1:3)
+        DO IYYR=9,CURIYR-1
+            prcxyr(1:allfuels,ir,IYYR,3)=(prcxyr(1:allfuels,ir,IYYR,1) * CARBSHR_AB(INDDIR,IR)) &
+                                     + (prcxyr(1:allfuels,ir,IYYR,2) * (1.-CARBSHR_AB(INDDIR,IR)))
+        ENDDO
+    ELSE
+        PRCX(1:allfuels,IR,3)= (PRCX(1:allfuels,IR,1) * CARBSHR(INDDIR)) &
+                          + (PRCX(1:allfuels,IR,2) * (1.-CARBSHR(INDDIR)))
+        prcxyr(1:allfuels,ir,CURIYR,1:3)=prcx(1:allfuels,ir,1:3)
+        DO IYYR=9,CURIYR-1
+            prcxyr(1:allfuels,ir,IYYR,3)=(prcxyr(1:allfuels,ir,IYYR,1) *     CARBSHR(INDDIR)) &
+                                   + (prcxyr(1:allfuels,ir,IYYR,2) * (1.-CARBSHR(INDDIR)))
+		ENDDO
+	ENDIF
 
-!***********************************************************************AE
 ! Do lag prices
 
-       DO IFUEL=1,50
-         IF(AB32SW.EQ.1) then
-           PRCXlag(IFUEL,IR,3)= (PRCXlag(IFUEL,IR,1) *     CARBSHR_AB(INDDIR,IR)) &
-                              + (PRCXlag(IFUEL,IR,2) * (1.-CARBSHR_AB(INDDIR,IR)))
-         ELSE
-          PRCXlag(IFUEL,IR,3)= (PRCXlag(IFUEL,IR,1) *     CARBSHR(INDDIR)) &
-                          + (PRCXlag(IFUEL,IR,2) * (1.-CARBSHR(INDDIR)))
-         ENDIF
-       ENDDO
+    IF(AB32SW.EQ.1) then
+        PRCXlag(1:allfuels,IR,3)= (PRCXlag(1:allfuels,IR,1) * CARBSHR_AB(INDDIR,IR)) &
+                              + (PRCXlag(1:allfuels,IR,2) * (1.-CARBSHR_AB(INDDIR,IR)))
+    ELSE
+        PRCXlag(1:allfuels,IR,3)= (PRCXlag(1:allfuels,IR,1) * CARBSHR(INDDIR)) &
+                          + (PRCXlag(1:allfuels,IR,2) * (1.-CARBSHR(INDDIR)))
+    ENDIF
 
-
-!***********************************************************************end AE
-
-      RETURN
-      END SUBROUTINE indbifurc
+    RETURN
+    END SUBROUTINE indbifurc
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !  THIS SUBROUTINE READS THE CONTROL FILE INDRUN.
@@ -2823,8 +2619,7 @@ ENDDO
       READ(IUNIT5,803) ISUBTR   ! SUBROUTINE TRACE OPTION
       READ(IUNIT5,803) INDMAX   ! MAX NUMBER OF INDUSTRIES
       READ(IUNIT5,803) IWDBG    ! DEBUG SWITCH
-      READ(IUNIT5,803) ISEDS    ! OPTION FOR SEDS BENCHMARKING
-	  READ(IUNIT5,803) ICALIBRATE ! OPTION TO CALIBRATE BACK TO TABLE 6  !SUSAN_UPDATE
+	  READ(IUNIT5,803) ICALIBRATE ! OPTION TO CALIBRATE BACK TO TABLE 6
       READ(IUNIT5,803) IPRICE   ! OPTION FOR PRICE SENSITIVITIES
       READ(IUNIT5,807) ELEC    !   ELEC PRICE sensitivity factor
       READ(IUNIT5,807) FGAS    !   firm gas price sensitivity factor
@@ -2868,44 +2663,25 @@ ENDDO
 !******
       FNAME='ITLBSHR'
       IUNIT10=FILE_MGR('O',FNAME,NEW)
-      READ(IUNIT10,900)
-      READ(IUNIT10,900)
-      DO I = 1,1000
-        read(iunit10,'(a)') onerec
-        first=ichar(onerec(1:1))
-        if(first.le.47.or.first.ge.58) then
-           exit! exit do loop
-        else
-          READ(onerec,*,end=399)INDINT,INDRG,COEFF(1)
-          TLBSHR(INDINT,INDRG,1)=COEFF(1)  ! fuel shares, k=2,3,4, overridden using data below & Form 860b
-        endif      
-	  ENDDO
       read(iunit10,'(a)') onerec ! skip a line
+	  read(iunit10,'(a)') onerec ! skip another line
 
 ! read MECS boiler/steam/cogen fuel (aka, indirect fuels) in trill. btu
       BSCIBYR=0.
       do indint=7,numind
         do indrg=1,4
-          read(iunit10,*,end=499) j,j,(temp(k),k=1,9) ! order on record is Resid,Dist,Ngas,LPG,Coal,Oth pet, pet coke, ELECTRICITY
-! copy to fuel order consistent with cogen data arrays, which is 1:coal,2:tot oil,3:ngas,4:wood,5:oth,6:msw
-! since we don't have breakout of wood/other/msw, and we want to keep track of oil by fuel, then save
-! oil detail into positions 7:8:9:10:11
-! kpe 7/15/24
-          BSCIBYR(indint,indrg,1)= temp(5) ! coal
-          BSCIBYR(indint,indrg,2)= temp(1)+temp(2)+temp(4)+temp(7)+temp(8) ! oil
-          BSCIBYR(indint,indrg,3)= temp(3) ! ngas
-          BSCIBYR(indint,indrg,4)= temp(6) ! wood/biomass
-          BSCIBYR(indint,indrg,5)= 0.      ! other cogen
-          BSCIBYR(indint,indrg,6)= 0.      ! msw   cogen
-          BSCIBYR(indint,indrg,7)= temp(1) ! residual
-          BSCIBYR(indint,indrg,8)= temp(2) ! distillate
-          BSCIBYR(indint,indrg,9)= temp(4) ! propane
-          BSCIBYR(indint,indrg,10)= temp(7) ! oth pet
-          BSCIBYR(indint,indrg,11)= temp(8) ! pet coke
-          BSCIBYR(indint,indrg,12)= temp(9) ! electricity, new for AEO2023
-
-!		  write(139,*) 'BSCIBYR for renewables for industry ', indint, &
-!		     ' and region ', indrg, ':  ', BSCIBYR(indint,indrg,4)
+          read(iunit10,*,end=499) j,j,(temp(k),k=1,9) ! order on record is Resid,Dist,Ngas,LPG,Coal,renew,Oth pet, pet coke, ELECTRICITY
+          BSCIBYR(indint,indrg,1)= temp(9) ! electricity
+		  BSCIBYR(indint,indrg,4)= temp(3) ! ngas
+          BSCIBYR(indint,indrg,7)= temp(5) ! coal
+		  BSCIBYR(indint,indrg,10)= temp(1) ! residual
+          BSCIBYR(indint,indrg,11)= temp(2) ! distillate
+          BSCIBYR(indint,indrg,12)= temp(4) ! propane
+          BSCIBYR(indint,indrg,16)= temp(8) ! pet coke
+          BSCIBYR(indint,indrg,22)= temp(7) ! oth pet
+          BSCIBYR(indint,indrg,42)= temp(6) ! wood/biomass
+		  
+          BSCIBYR(indint,indrg,51)= temp(1)+temp(2)+temp(4)+temp(7)+temp(8) ! oil subtotal
 
         enddo
       enddo
@@ -2914,61 +2690,39 @@ ENDDO
       read(iunit10,'()') ! skip a line
 ! Read in size share array by industry, fuel, and size group
       Do indsize=1,6 ! non-man, food, paper, chem, metals, other man
-         Do ifuel=1,5 ! NG, Coal, Oil products, biomass, electricity (kpe add 10/21/22
+         Do ifuel=1,5 ! NG, Coal, Oil products, biomass, electricity
             read(iunit10,*,end=499) sizeshrtemp(indsize,ifuel,1),sizeshrtemp(indsize,ifuel,2)
          Enddo
       Enddo
 ! do sum somes
   do indreg=1,4
-    do ifuel=1,12
+    do ifuel=1,mainfuels	! no biomass in total
       BSCIBYR(numind+1,indreg,ifuel)=sum(BSCIBYR(1:numind,indreg,ifuel))
     enddo
   enddo
   do inddir=1,numind+1
-    do ifuel=1,12 ! double check the 13 index
+    do ifuel=1,mainfuels	! no biomass in total
       BSCIBYR(inddir,5,ifuel)=sum(BSCIBYR(inddir,1:4,ifuel))
     enddo
   enddo
 
 ! Move size shares to proper var
   do inddir=1,numind+1
-     do jfuel=1,10
+     do jfuel=1,5	! NG, Coal, Oil products, biomass, electricity
         do isize=1,2
-           If (jfuel.EQ.1.OR.jfuel.EQ.2) Then       ! NG=1, coal=2
-              ifuel=jfuel
-           ElseIf (jfuel.GE.3.AND.jfuel.LE.5) Then   ! oil products
-              ifuel=3
-           ElseIf (jfuel.EQ.6) Then   ! electricity
-              ifuel=5
-		   else
-		  ! now fuels categorides diverge--see ~2400 for ifsmax 
-			   if(inddir.eq.8.or.&   ! paper
-				   inddir.eq.9.or.&   ! bchem
-				   inddir.eq.12.or.&  ! steel
-				   inddir.ge.21) then ! BOMOther
-					  if ((jfuel.GE.7).AND.(jfuel.LE.8)) Then   ! Other & biomass
-						 ifuel=3
-					  else 
-						 ifuel=4
-					  endif
-				elseif ((inddir.ge.7).AND.(jfuel.ge.7)) then
-						 ifuel=4
-				Endif
-			endif
-
-           If (inddir.GE.1.AND.inddir.LE.6) Then     ! Non-manufacturing
-              sizeshr(inddir,jfuel,isize)=sizeshrtemp(1,ifuel,isize)
+           If (inddir.le.6) Then     			! Non-manufacturing
+              sizeshr(inddir,jfuel,isize)=sizeshrtemp(1,jfuel,isize)
            ElseIf (inddir.EQ.7) Then            ! Food
-              sizeshr(inddir,jfuel,isize)=sizeshrtemp(2,ifuel,isize)
+              sizeshr(inddir,jfuel,isize)=sizeshrtemp(2,jfuel,isize)
            ElseIf (inddir.EQ.8) Then            ! Paper
-              sizeshr(inddir,jfuel,isize)=sizeshrtemp(3,ifuel,isize)
+              sizeshr(inddir,jfuel,isize)=sizeshrtemp(3,jfuel,isize)
            ElseIf (inddir.EQ.9) Then            ! Chemicals
-              sizeshr(inddir,jfuel,isize)=sizeshrtemp(4,ifuel,isize)
-           ElseIf (inddir.EQ.10.OR.inddir.EQ.11.OR.inddir.GE.14) Then ! .AND.inddir.LE.24) Then  ! Oth. man.
-              sizeshr(inddir,jfuel,isize)=sizeshrtemp(6,ifuel,isize)
-           ElseIf (inddir.EQ.12.OR.inddir.EQ.13) Then        ! Metals
-              sizeshr(inddir,jfuel,isize)=sizeshrtemp(5,ifuel,isize)
-           Endif
+              sizeshr(inddir,jfuel,isize)=sizeshrtemp(4,jfuel,isize)
+           ElseIf((inddir.EQ.12).OR.(inddir.EQ.13))Then	! Metals
+              sizeshr(inddir,jfuel,isize)=sizeshrtemp(5,jfuel,isize)
+           Else									! Other manufacturing
+              sizeshr(inddir,jfuel,isize)=sizeshrtemp(6,jfuel,isize)
+		   Endif
         Enddo
      Enddo
   Enddo
@@ -2981,17 +2735,17 @@ ENDDO
     do inddir=1,numind+1
       do indreg=1,5
         write(6,'(2i3,10f9.2)') inddir,indreg, &
-         BSCIBYR(inddir,indreg,7),  &  ! resid
-         BSCIBYR(inddir,indreg,8),  &  ! disti
-         BSCIBYR(inddir,indreg,3),  &  ! ngas
-         BSCIBYR(inddir,indreg,9),  &  ! LPG
-         BSCIBYR(inddir,indreg,1),  &  ! coal
-         BSCIBYR(inddir,indreg,4),  &  ! other (renewable)
-         BSCIBYR(inddir,indreg,10), &  ! oth pet
-         BSCIBYR(inddir,indreg,11), &  ! pet coke
-         BSCIBYR(inddir,indreg,2),  &  ! oil-tot
-         BSCIBYR(inddir,indreg,12),  &  ! electricity--new for aeo2023
-         sum(BSCIBYR(inddir,indreg,1:4))
+         BSCIBYR(inddir,indreg,10),  &  ! resid
+         BSCIBYR(inddir,indreg,11),  &  ! disti
+         BSCIBYR(inddir,indreg,4),  &  ! ngas
+         BSCIBYR(inddir,indreg,12),  & ! propane
+         BSCIBYR(inddir,indreg,7),  &  ! coal
+         BSCIBYR(inddir,indreg,42),  &  ! other (renewable)
+         BSCIBYR(inddir,indreg,22), &  ! oth pet
+         BSCIBYR(inddir,indreg,16), &  ! pet coke
+         BSCIBYR(inddir,indreg,51),  &  ! oil-tot
+         BSCIBYR(inddir,indreg,1),  &  ! electricity
+         sum(BSCIBYR(inddir,indreg,1:50))
       enddo
     enddo
   endif
@@ -3040,9 +2794,9 @@ ENDDO
 
       DO ID=IX,IY
         !IF (ISECT.EQ.11) THEN
-        !   PRODVX=PRODVX+OUTIND(25,ID)
+        !   PRODVX=PRODVX+OUTIND(25,ID,curiyr)
         !ELSE
-           PRODVX=PRODVX+OUTIND(ISECT,ID)
+           PRODVX=PRODVX+OUTIND(ISECT,ID,curiyr)
         !ENDIF
         EMPLX=EMPLX+EMPIND(ISECT,ID)
       ENDDO
@@ -3051,7 +2805,7 @@ ENDDO
 !  ADJUST UNITS FROM NEMS (MILLION) TO WHAT WE NEED (THOUSAND)
 !******
 
-      EMPLX=EMPLX*1000.0
+      EMPLX=EMPLX*1000.0		! NSK: I think this is only done so the report writer in in thousands? It is needlessly confusing.
 
       if(iyr.eq.ibyr2) then
          prodvxlag=prodvx
@@ -3088,13 +2842,12 @@ ENDDO
 !  DECLARE INTERNAL VARIABLES.
 !******
 
-    INTEGER ICD,ICR,IY,IYEAR,NYR,FUEL_INDEX,IYLAG,ITT,IFF,IFUEL, ILOOP,CHEM_INDEX,IMAC,ISUB
+    INTEGER ICD,ICR,IY,IYEAR,NYR,FUEL_INDEX,IFUEL,ILOOP,CHEM_INDEX,IMAC,ISUB
     INTEGER DOONCE(MNUMYR)/MNUMYR*0/   ! variable to make sure some things are just done once
 
     SAVE DOONCE
 
     INTEGER NCENSREG, NCENSDIV, MDivPerReg, ICOUNT, MAINFL, RENEWFL
-    INTEGER CREG(9)/1,1,2,2,3,3,3,4,4/
     PARAMETER(NCENSREG=4,NCENSDIV=9,MDivPerReg=3,MAINFL=mainfuels-1,RENEWFL=8)
     REAL SEDS9(11,MAINFL),SEDS4(5,MAINFL)
     REAL RSEDS9(11,RENEWFL),RSEDS4(5,RENEWFL)
@@ -3107,8 +2860,7 @@ ENDDO
     REAL RSTEO(RENEWFL)
     REAL BMAIN(MAINFL,5)             ! UNBENCHMARKED MODEL RESULTS FOR MAIN FUELS
     REAL BRENEW(RENEWFL,5)           ! UNBENCHMARKED MODEL RESULTS FOR RENEWABLES
-    REAL FADE
-    REAL fade_factor ! (1,1)            ! refers to new function
+    REAL FADE,fade_factor
     REAL BMAIN_SEDS_ADJUSTED(MAINFL)
     REAL BRENEW_SEDS_ADJUSTED(RENEWFL)
     REAL BF_STEO(MAINFL)
@@ -3116,15 +2868,13 @@ ENDDO
     REAL BMAIN_ADJUSTED(MAINFL,5)
     REAL BRENEW_ADJUSTED(RENEWFL,5)
     REAL FIRMSHR(5),SUMCDIV,ADJUSTED,RADJUSTED, REF(mainfuels-1)
-
     real sELeth(9),sNGeth(9),sCLeth(9)  ! backup regional shares for missing regional ethanol quantities
 
     real ethaneproduction ! national ethane production in trillion BTU
-    real heattemp(MNUMYR)
-    real heattemp2(MNUMYR)
+    real heattemp(MNUMYR),heattemp2(MNUMYR)
     real Naphtha_to_ethane    ! Convert tBtu of naphtha cracking consumption to tBtu of ethane consumption
       
-      ! New chemical model variables (NSK 2021)
+    ! New chemical model variables
     real, parameter:: H2_heat = 134.229           ! MMBtu/tonne
     real, parameter:: Methane_heat = 52.618       ! MMBtu/tonne
     real, parameter:: ULSD_heat = 41.9540         ! MMBtu/tonne
@@ -3161,7 +2911,7 @@ ENDDO
       real Ethylene_benchmark           ! Benchmark ethylene demand regression to last year of read-in feedstock numbers (tonnes/tonne)
       
       ! Cracking capacity variables
-      real, parameter:: Naphtha_nonflex_consumption = 550.  ! Base naphtha cracking consumption in tBtu; assumed constant over model period
+      real, parameter:: Naphtha_nonflex_consumption = 550.	! Base naphtha cracking consumption in tBtu; assumed constant over model period
       real Naphtha_flex_consumption(5, MNUMYR)              ! Naphtha consumption from flexible cracking capacity, in tBtu
       real Slow_flex_capacity(5, MNUMYR)                    ! Ethane cracking capacity (in tonnes ethylene produced) that could switch to 
                                                             !   flexible cracking capacity given sustained favorable naphtha economics
@@ -3187,7 +2937,7 @@ ENDDO
                                                                                             ! because division 5 has net imports, but the total is a net export; slightly upped  the amount that is exported from other regions
                                                                                             ! so that sum of fractions equals 1.0. Last two entries are for the unused division and the U.S. total, respectively. NSK 3/2023
 
-      INTEGER, parameter:: MAX_FRAC_YEARS=37          ! Last index year of feedstock data in EthaneReg.csv and PropaneReg.csv; 37 (corresponding to 2026) as of AEO2023
+      INTEGER,PARAMETER:: MAX_FRAC_YEARS=38          ! Last index year of feedstock data in EthaneReg.csv and PropaneReg.csv; 37 (corresponding to 2027) as of AEO2026
       INTEGER FEEDYEARS, MAX_YEARS, Hist_Yr, L, M
     
 ! FEEDHGLtotal, feedngtotal, and feedethtotal will have a varying number of entries, depending on the start (ibyr) and end (SEDSLASTYR+FEEDYEARS)of the data period
@@ -3198,27 +2948,19 @@ ENDDO
       REAL,ALLOCATABLE::feednormbutanetotal(:)      ! feednormbutanetotal is allocatable, because the number of entries can change every year
       REAL,ALLOCATABLE::feedisobutanetotal(:)       ! feedisobutanetotal is allocatable, because the number of entries can change every year
       REAL,ALLOCATABLE::feedpropylenetotal(:)       ! feedpropylenetotal is allocatable, because the number of entries can change every year
-      REAL,ALLOCATABLE::feednatgasolinetotal(:)     ! feednatgasolinetotal is allocatable, because the number of entries can change every year
       REAL,ALLOCATABLE::feednaphtotal(:)            ! feednaphtotal is allocatable, because the number of entries can change every year
-	  REAL,ALLOCATABLE::feedH2fertilizer(:)			! H2 feedstock for fertilizer production; does NOT go through MAX_YEARS, but rather MAX_YEARS-2
+	  REAL,ALLOCATABLE::feedH2fertilizer(:)			! H2 feedstock for fertilizer production; does NOT go through MAX_YEARS, but rather MAX_YEARS-3
       REAL,ALLOCATABLE::EthaneDivFrac(:, :)         ! EthaneDivFrac and PropaneDivFrac are the fraction of total ethane or propane feedstock (respectively) in a given Census Division (second
       REAL,ALLOCATABLE::PropaneDivFrac(:, :)        ! argument, always 1 to 9) in a given year (first argument and the reason the variable is allocatable; goes from 1990 to STEOLastYr+4, where 1990=1)
       REAL PropyleneDivFrac(9)/0.0,0.053,0.012,0.0,0.015,0.009,0.895,0.0,0.016/ ! propylene regional fractions of total consumption, based on Warren's calculations; kept constant over all years; NSK 9/26/2019
       REAL NaphthaDivFrac(4)/0.0,0.0,1.0,0.0/       ! Assume all naphtha cracking is in census region 3
-	  REAL testH2(1)
-	  REAL Ethylene_x(5)				! X variables for ethylene regression (MC_REVIND(11,18,curiyr)); filled in below
+	  REAL Ethylene_x(5)				! X variables for ethylene regression (MC_REVIND(11,49,curiyr)); filled in below
 	  REAL Ethylene_y(5)				! Y variables for ethylene regression (tonnes ethylene); filled in below
- !!!!!!!!!!!!!!
- 
-      real laststeoyr_ethylene      ! last STEO year ethylene demand
-      real laststeoyr_totalhgl      ! last STEO year total HGL demand
-	  real add_ethylene				! current ethylene adder
-	  real add_totalhgl             ! current total HGL adder
 
     character*20 FUELNAME(mainfuels-1)
       DATA  FUELNAME/&
       '1 Electricity     ', & !   1,
-      '2 H2 FEEDSTOCK    ', & !   2,        ! NSK H2
+      '2 H2 FEEDSTOCK    ', & !   2,
       '3 NG CORE         ', & !   3,
       '4 NG NONCORE      ', & !   4,
       '5 NG FEEDSTOCK    ', & !   5,
@@ -3252,35 +2994,25 @@ ENDDO
         '7 WIND           ', & ! 7
         '8 MSW            '/   ! 8
 
-
 ! Index Constants for Industrial Tables 35 to 44 not sure why this is here ?????
 ! constants used in layout files
-    integer ixEL/1/,ixNG/2/,ixCL/3/,ixMC/4/, &
-            ixCI/5/,ixRF/6/,ixDS/7/,ixLG/8/,ixMG/9/, &
-            ixSG/10/,ixPC/11/,ixAS/12/,ixPF/13/,ixKS/14/, &
-            ixOP/15/,ixNF/16/,ixLF/17/,ixRN/18/, ixHF/19/, ixHH/20/       ! NSK H2
-
+    integer ixEL/1/,ixNG/2/,ixCL/3/,ixMC/4/,ixCI/5/, &
+            ixRF/6/,ixDS/7/,ixLG/8/,ixMG/9/,ixSG/10/,&
+            ixPC/11/,ixAS/12/,ixPF/13/,ixKS/14/,ixOP/15/, &
+            ixNF/16/,ixLF/17/,ixRN/18/,ixHF/19/,ixHH/20/
     INTEGER SF,ISEDYR,IOWN,IGRD,IYY,indus
     INTEGER ING3/3/,ICL1/1/,IRL2/2/
-
     real asphalttarget(5), asphaltpercent(5) 
     REAL HGL_recycle_rate(mnumyr)
     REAL,PARAMETER :: HGL_recycle_rate_base=0.95
 	REAL chem_macro(6,9)		! dummy placeholder to handle bulk chemical macro for subsectors more easily
 	REAL H2_byp_index(mnumcr,mnumyr)	! index for growth of byproduct H2
+
+    IY=IYR-1989
+
+    IF(ISUBTR.EQ.1.AND.IOPEN.EQ.1.AND.LSTITER.EQ.1) WRITE(IUNIT1,991)
 	
-!******
-!  INITIALIZE VARIOUS INTERNAL VARIABLES.
-!******
-
-      IY=IYR-1989
-      IYLAG=IY-1
-      ITT=0
-      IFF=0
-
-      IF(ISUBTR.EQ.1.AND.IOPEN.EQ.1.AND.LSTITER.EQ.1) &
-        WRITE(IUNIT1,991)
-900   FORMAT(1X)
+900 FORMAT(1X)
 
       sELeth(1:9)=(/0.,0.,0.31,0.69,0.,0.,0.,0.,0./)  !  backup regional shares
       sNGeth(1:9)=(/0.,0.,0.30,0.70,0.,0.,0.,0.,0./)
@@ -3326,10 +3058,10 @@ ENDDO
 ! HYDRO          		TQRENW(1,ICR)   BRENEW(1,1:5)    QHOIN
 ! BIOMASS - WOOD    	TQRENW(2,ICR)   BRENEW(2,1:5)    QBMIN
 ! BIOMASS - PULP    	TQRENW(3,ICR)   BRENEW(3,1:5)    QBMIN
-! GEOTHERMAL       		TQRENW(4,ICR)   BRENEW(4,1:5)    QGEIN
-! SOLAR          		TQRENW(5,ICR)   BRENEW(5,1:5)    QSTIN
-! PHOTOVOLTAIC      	TQRENW(6,ICR)   BRENEW(6,1:5)    QPVIN
-! WIND          		TQRENW(7,ICR)   BRENEW(7,1:5)    QWIIN
+! GEOTHERMAL       		TQRENW(4,ICR)   BRENEW(4,1:5)    QGEIN	UNUSED
+! SOLAR          		TQRENW(5,ICR)   BRENEW(5,1:5)    QSTIN	UNUSED
+! PHOTOVOLTAIC      	TQRENW(6,ICR)   BRENEW(6,1:5)    QPVIN	UNUSED
+! WIND          		TQRENW(7,ICR)   BRENEW(7,1:5)    QWIIN	UNUSED
 ! MUNI WASTE      		TQRENW(8,ICR)   BRENEW(8,1:5)    QMSIN
 
 ! BIOMASS WOOD AND PULPING LIQUOR ARE COMBINED IN THE BENCHMARKING.  THEY
@@ -3345,7 +3077,21 @@ ENDDO
     
     FEEDYEARS = END_YR_FEEDSTOCK - SEDSLASTYR
     MAX_YEARS = END_YR_FEEDSTOCK-IBYR+1 ! Go from ibyr to END_YR_FEEDSTOCK (the +1 makes it include the first year)
-    
+	   
+IF ((CURCALYR .eq. ibyr2) .AND. (CURITR .eq. 1)) THEN	
+	feedngtotal=0
+	FEEDHGLtotal=0
+	feedethtotal=0
+	feedpropanetotal=0
+	feednormbutanetotal=0
+	feedisobutanetotal=0
+	feedpropylenetotal=0
+	feednaphtotal=0
+	feedH2fertilizer=0
+	EthaneDivFrac=0
+	PropaneDivFrac=0
+ENDIF	
+
 IF (CURCALYR .eq. ibyr2 .AND. CURITR .eq. 1) THEN
 	
     ALLOCATE(feedngtotal(MAX_YEARS+10))
@@ -3355,7 +3101,6 @@ IF (CURCALYR .eq. ibyr2 .AND. CURITR .eq. 1) THEN
     ALLOCATE(feednormbutanetotal(MAX_YEARS+10))
     ALLOCATE(feedisobutanetotal(MAX_YEARS+10))
     ALLOCATE(feedpropylenetotal(MAX_YEARS+10))
-    ALLOCATE(feednatgasolinetotal(MAX_YEARS+10))
     ALLOCATE(feednaphtotal(MAX_YEARS+10))
 	ALLOCATE(feedH2fertilizer(MAX_YEARS+10))
  
@@ -3368,7 +3113,7 @@ IF (CURCALYR .eq. ibyr2 .AND. CURITR .eq. 1) THEN
     IUNITFEED=FILE_MGR('O',FNAME,NEW)
 		
     Call Read_feedstock(MAX_YEARS, FEEDYEARS, ibyr, IUNITFEED, feedngtotal, feedhgltotal, feedethtotal, feedpropanetotal, &
-                        feedpropylenetotal, feednormbutanetotal, feedisobutanetotal, feednatgasolinetotal, feednaphtotal, feedH2fertilizer)
+                        feedpropylenetotal, feednormbutanetotal, feedisobutanetotal, feednaphtotal, feedH2fertilizer)
 	
 	fertilizer_H2(icuriyr:(icuriyr+MAX_YEARS),5)=feedH2fertilizer(:)	! Pass values from feedH2fertilizer to a global variable, U.S. total
     
@@ -3393,7 +3138,7 @@ IF (CURCALYR .eq. ibyr2 .AND. CURITR .eq. 1) THEN
     Call Read_H2(H2_chem_supply_reg,H2_chem_demand_reg,H2_ref_supply_div)
 	
 	DO ICR=1, 4
-		fertilizer_H2(icuriyr:(icuriyr+MAX_YEARS-2),ICR)=fertilizer_H2(icuriyr:(icuriyr+MAX_YEARS-2),5)*H2_chem_demand_reg(6,ICR)/SUM(H2_chem_demand_reg(6,1:4))
+		fertilizer_H2(icuriyr:(icuriyr+MAX_YEARS-3),ICR)=fertilizer_H2(icuriyr:(icuriyr+MAX_YEARS-3),5)*H2_chem_demand_reg(6,ICR)/SUM(H2_chem_demand_reg(6,1:4))
 	ENDDO
 END IF
 	
@@ -3426,25 +3171,14 @@ IF(curcalyr.eq.ibyr) THEN
 				H2_chem_supply_div(9,ISUB)=H2_chem_supply_reg(ISUB,4)
 		ENDIF	! (really this is 0 for demand anyways, unless we eventually model an H2 demand in merchant gases)
 	ENDDO
-	DO ICD=1,9
-			H2_chem_demand_div(ICD,7)=SUM(H2_chem_demand_div(ICD,1:6))	! sum by census division across subsubsectors
-			H2_chem_supply_div(ICD,7)=SUM(H2_chem_supply_div(ICD,1:6))
-	ENDDO
+	H2_chem_demand_div(1:9,7)=SUM(H2_chem_demand_div(1:9,1:6),DIM=2)	! index 7 is sum across subsubsectors (DIM=2)
+	H2_chem_supply_div(1:9,7)=SUM(H2_chem_supply_div(1:9,1:6),DIM=2)
 ENDIF
 	
-
-!*******************************
-
-! FOR ALL YEARS
-
-! CREATE BMAIN(23,5) AND FIRMSHR(5)
-
-!  CREATE FADE FACTORS.  FADE IS USED TO CREATE A COMPOSITE BENCHMARK FACTOR
-!  PREVIOUSLY THIS WAS IN A LOOP ... WE ONLY NEED TO DO IT ONCE PER YEAR
+! FOR ALL YEARS, CREATE BMAIN(23,5) AND FIRMSHR(5).
+! CREATE FADE FACTORS. FADE IS USED TO CREATE A COMPOSITE BENCHMARK FACTOR.
 
        INDBMOVR2 = RTOVALUE('INDBMOVR',0)
-! for now, comment out the FADEYRS variable until after modelling season
-!	   FADEYRS   = RTOVALUE('INDSTEOFADE',10)
 	   
 	   FADEYRS = 12
 	   FADE = 0.0
@@ -3454,7 +3188,7 @@ ENDIF
 	
     ! CREATE NATIONAL REFINERY DATA FOR OUTPUT LATER
 
-    REF(1) = QELRF(11,CURIYR) + QELETH(CURIYR,11) + OGELSHALE(CURIYR)
+    REF(1) = QELRF(11,CURIYR) + QELETH(CURIYR,11)
     REF(2) = SUM(QH2RF(1:9,CURIYR))
     REF(3) = QNGRF(11,CURIYR) + QNGETH(CURIYR,11)
     REF(4) = 0
@@ -3476,12 +3210,11 @@ ENDIF
     REF(20) = 0
     REF(21) = QOTRF(11,CURIYR)
     REF(22) = QOTRF(11,CURIYR)
-    REF(23) = 0                  ! NSK H2
+    REF(23) = 0
 
 	IF (FCRL .EQ. 1) THEN
     WRITE(IUNITBENCH,*) "***************************************"
     WRITE(IUNITBENCH,*) " "
-
     WRITE(IUNITBENCH,*) "  "
     WRITE(IUNITBENCH,*) "***************************************************************"
     WRITE(IUNITBENCH,360) " ***   CURIYR =  ", CURIYR, "  *****  CURCALYR =  ", CURCALYR, " *****"
@@ -3489,11 +3222,8 @@ ENDIF
     WRITE(IUNITBENCH,*) "  "
 	END IF
 360   FORMAT(A,I4,A,I6,A)
-      DO ICR=1,4
-        DO FUEL_INDEX=1,19
-          BMAIN(FUEL_INDEX,ICR) = TQMAIN(FUEL_INDEX,ICR)
-        END DO
-        
+    DO ICR=1,4
+        BMAIN(1:19,ICR) = TQMAIN(1:19,ICR)
         BMAIN(21,ICR) = TQMAIN(21,ICR) + TQMAIN(22,ICR)
 		BMAIN(22,ICR) = BMAIN(21,ICR)
         BMAIN(23,ICR) = 0.0        ! No H2 combustion right now    NSK H2
@@ -3502,30 +3232,26 @@ ENDIF
 		ELSE
 			FIRMSHR(ICR) = 0
 		END IF
-      END DO	  
-
-    DO FUEL_INDEX=1,mainfuels-1
-       BMAIN(FUEL_INDEX,5) = SUM(BMAIN(FUEL_INDEX,1:4))
-    END DO
+    END DO	  
+	BMAIN(1:(mainfuels-1),5) = SUM(BMAIN(1:(mainfuels-1),1:4),DIM=2)
     FIRMSHR(5) = BMAIN(3,5) / (BMAIN(3,5) + BMAIN(4,5))
     WRITE(IUNITBENCH,'(a,5F8.4)') "FIRM SHARE = ", FIRMSHR(1:5)
 
 ! CREATE BRENEW
-
+    BRENEW(1,1:4) = TQRENW(1,1:4)
+    BRENEW(2,1:4) = TQRENW(2,1:4) + TQRENW(3,1:4)
+    BRENEW(3,1:4) = TQRENW(2,1:4) + TQRENW(3,1:4)
+    BRENEW(4,1:4) = TQRENW(4,1:4)
+    BRENEW(5,1:4) = TQRENW(5,1:4)
+    BRENEW(6,1:4) = TQRENW(6,1:4)
+    BRENEW(7,1:4) = TQRENW(7,1:4)
+    BRENEW(8,1:4) = TQRENW(8,1:4)
+	
     DO ICR=1,4
-        BRENEW(1,ICR) = TQRENW(1,ICR)
-        BRENEW(2,ICR) = TQRENW(2,ICR) + TQRENW(3,ICR)
-        BRENEW(3,ICR) = TQRENW(2,ICR) + TQRENW(3,ICR)
-        BRENEW(4,ICR) = TQRENW(4,ICR)
-        BRENEW(5,ICR) = TQRENW(5,ICR)
-        BRENEW(6,ICR) = TQRENW(6,ICR)
-        BRENEW(7,ICR) = TQRENW(7,ICR)
-        BRENEW(8,ICR) = TQRENW(8,ICR)
 		write(IUNITBUG,*) 'BRENEW for msw for region ', icr, ':  ', brenew(8,ICR)
     END DO
-    DO IFUEL=1,8
-		BRENEW(IFUEL,5) = SUM(BRENEW(IFUEL,1:4))
-    END DO
+	
+	BRENEW(1:RENEWFL,5) = SUM(BRENEW(1:RENEWFL,1:4),DIM=2)	! sum across census regions (DIM=2)
 
 !CASE 1:  CURIYR .LE. MSEDYR
 
@@ -3534,7 +3260,7 @@ IF (CURIYR .LE. MSEDYR)  THEN
         WRITE(IUNITBENCH,*) "SEDS INPUTS FOR ", CURCALYR
 		WRITE(IUNITBENCH,*) "ELECTRICITY: ","QSELIN = ",QSELIN(11,CURIYR),"QELRF = ", &
              QELRF(11,CURIYR),"QELETH = ",QELETH(CURIYR,11),&
-			 "OGELSHALE = ",OGELSHALE(CURIYR),"QNGPIN(11,CURIYR)=",QNGPIN(11,CURIYR), &
+			 "QNGPIN(11,CURIYR)=",QNGPIN(11,CURIYR), &
 			 "CO2_ELEC(11,curiyr)=",CO2_ELEC(11,curiyr)
 		IF (CURIYR.ge.ICURIYR) WRITE(IUNITBENCH,*) "NATURAL GAS: ","QSNGIN = ", QSNGIN(11,CURIYR), &
             "QNGRF = ", QNGRF(11,CURIYR), "QNGETH = ", QNGETH(CURIYR,11), &
@@ -3567,24 +3293,17 @@ IF (CURIYR .LE. MSEDYR)  THEN
 
 	END IF
 
-    DO ICD=1,9
-		ICR = CReg(ICD)
-
     ! INDUSTRIAL ELECTRICITY
-		IF (ICD .EQ. 8) THEN
-			SEDS9(ICD,1) = QSELIN(ICD,CURIYR) - QELRF(ICD,CURIYR) - QELETH(CURIYR,ICD) - &
-				(QELINH2NG(ICD,CURIYR)+QELINH2e(ICD,CURIYR)) - OGELSHALE(CURIYR) - &! ADD IN OILSHALE ELECTRICITY IN DIVISION 8  
-		         QNGPIN(ICD,CURIYR) - CO2_ELEC(ICD,CURIYR) * 0.000003412   
-		ELSE
-			SEDS9(ICD,1) = QSELIN(ICD,CURIYR) - QELRF(ICD,CURIYR) - QELETH(CURIYR,ICD) - &
-				(QELINH2NG(ICD,CURIYR)+QELINH2e(ICD,CURIYR))- QNGPIN(ICD,CURIYR) - CO2_ELEC(ICD,CURIYR) * 0.000003412
-		END IF
+		SEDS9(1:9,1) = QSELIN(1:9,CURIYR) - QELRF(1:9,CURIYR) - QELETH(CURIYR,1:9) - &
+				QELHM(1:9,CURIYR) - QNGPIN(1:9,CURIYR) - CO2_ELEC(1:9,CURIYR) * CFELQ/10**9   
 
-! The hardcoded 0.000003412 above is to convert CCATS electricity pipeline use from MWh to trillion Btu 
+! The hardcoded CFELQ/10**9 above is to convert CCATS electricity pipeline use from MWh to trillion Btu 
 
     ! H2 FEEDSTOCK
-        SEDS9(ICD,2) = 0.0   ! H2 feedstock, which is not in SEDS		NSK H2
-
+        SEDS9(1:9,2) = 0.0   ! H2 feedstock, which is not in SEDS
+		
+    DO ICD=1,9
+		ICR = DIV_to_REG(ICD)
     ! NG FEEDSTOCK
 		IF (CURIYR.ge.ICURIYR) SEDS9(ICD,5) = FEEDNGTOTAL(CURIYR-ICURIYR+1) * FEEDNGPERCENT(ICR) * &
             DIVSHR(QSNGIN(1,CURIYR),ICD,ICR)
@@ -3601,8 +3320,7 @@ IF (CURIYR .LE. MSEDYR)  THEN
     ! SEDS9(ICD,6) IS LEASE AND PLANT FUEL WHICH WE DO NOT BENCH
 
     ! STEAM COAL
-		SEDS9(ICD,7) = QSCLIN(ICD,CURIYR) - QCLRF(ICD,CURIYR) - &
-                     QCLETH(CURIYR,ICD) - CGOGSQ(ICD,CURIYR,ICL1) - &
+		SEDS9(ICD,7) = QSCLIN(ICD,CURIYR) - QCLRF(ICD,CURIYR) - QCLETH(CURIYR,ICD) - CGOGSQ(ICD,CURIYR,ICL1) - &
                      OGSUPGAS(1,ICD,CURIYR) * CFNGC(CURIYR)     ! coal consumed to produce town gas; assume equal to heat value of gas
 
       ! MET COAL
@@ -3622,8 +3340,8 @@ IF (CURIYR .LE. MSEDYR)  THEN
       IF (CURIYR.ge.ICURIYR) SEDS9(ICD,13) = FEEDHGLTOTAL(CURIYR-ICURIYR+1) * FEEDHGLPERCENT(ICR) * DIVSHR(QSLGIN(1,CURIYR),ICD,ICR)
 
       ! PROPANE HEAT AND POWER
-      SEDS9(ICD,12) = QSLGIN(ICD,CURIYR) - QLGRF(ICD,CURIYR) &
-             - SEDS9(ICD,13)
+      SEDS9(ICD,12) = QSLGIN(ICD,CURIYR) - QLGRF(ICD,CURIYR) - SEDS9(ICD,13)
+
       ! MOGAS
       SEDS9(ICD,14) = QSMGIN(ICD,CURIYR)
 
@@ -3652,29 +3370,19 @@ IF (CURIYR .LE. MSEDYR)  THEN
       ! BMAIN 21 AND BMAIN 22 ARE DUPLICATES AS WELL
       SEDS9(ICD,22) = SEDS9(ICD,21)
       
-      SEDS9(ICD,23) = 0.0   ! H2, which is not in SEDS		NSK H2 
+      SEDS9(ICD,23) = 0.0   ! H2, which is not in SEDS
+	  
 
       !********************* RENEWABLES **************************
       ! HYDRO
       RSEDS9(ICD,1) = QSHOIN(ICD,IY)
 
       ! BIOMASS WOOD
-      RSEDS9(ICD,2) = QSBMIN(ICD,CURIYR) - QBMRF(ICD,CURIYR)
+      RSEDS9(ICD,2) = QSBMIN(ICD,CURIYR)
 
       ! BIOMASS PULPING LIQUOR
-      RSEDS9(ICD,3) = QSBMIN(ICD,CURIYR) - QBMRF(ICD,CURIYR)
+      RSEDS9(ICD,3) = QSBMIN(ICD,CURIYR)	! not used
 
-      ! GEOTHERMAL
-      RSEDS9(ICD,4)= BRENEW(4,ICR) * DIVSHR(QSGEIN(1,CURIYR),ICD,ICR)
-
-      ! SOLAR
-      RSEDS9(ICD,5)= BRENEW(5,ICR) * DIVSHR(QSSTIN(1,CURIYR),ICD,ICR)
-
-      ! PHOTOVOLTAIC
-      RSEDS9(ICD,6)= BRENEW(6,ICR) * DIVSHR(QSPVIN(1,CURIYR),ICD,ICR)
-
-      ! WIND
-      RSEDS9(ICD,7)= BRENEW(7,ICR) * DIVSHR(QSWIIN(1,CURIYR),ICD,ICR)
 
       ! MUNICIPAL SOLID WASTE
       RSEDS9(ICD,8)= QSMSIN(ICD,CURIYR)
@@ -3703,7 +3411,7 @@ IF (CURIYR .LE. MSEDYR)  THEN
     DO FUEL_INDEX=1,8
        RSEDS9(11,FUEL_INDEX) = SUM(RSEDS9(1:9,FUEL_INDEX))
        WRITE(IUNITBENCH,300) RFUELNAME(FUEL_INDEX),"RENEWABLES SEDS = ",RSEDS9(11,FUEL_INDEX)
-       END DO
+    ENDDO
       WRITE(IUNITBENCH,*) "*************************************"
 
 	END IF
@@ -3856,8 +3564,8 @@ IF (CURIYR .LE. MSEDYR)  THEN
 !            .AND. CURCALYR .LE. (STEOLASTYR - INDBMOVR2)) THEN
 		! PURCHASED ELECTRICTY
 		STEO(1) = MAX(0.0,STEOQ(CURCALYR,18) - QELRF(11,CURIYR) - &
-           QELETH(CURIYR,11) - OGELSHALE(CURIYR)- (QELINH2NG(11,CURIYR)+QELINH2e(11,CURIYR)) & 
-		     - QNGPIN(11,CURIYR) - CO2_ELEC(11,CURIYR) * 0.000003412)	! OGLESHALE is only in region 8 (and maybe not evene that, anymore)
+           QELETH(CURIYR,11) - (QELINH2NG(11,CURIYR)+QELINH2e(11,CURIYR)) & 
+		     - QNGPIN(11,CURIYR) - CO2_ELEC(11,CURIYR) * CFELQ/10**9)	! OGLESHALE is only in region 8 (and maybe not evene that, anymore)
 !###
         ! HYDROGEN FEEDSTOCK, but doesn't exist in STEO
         STEO(2) = 0.0
@@ -3935,11 +3643,10 @@ IF (CURIYR .LE. MSEDYR)  THEN
       RSTEO(1) = STEOQ(CURCALYR,19)
 
       ! BIOMASS WOOD AND PULPING LIQUOR
-      RSTEO(2) = STEOQ(CURCALYR,20) - QBMRF(11,CURIYR)
+      RSTEO(2) = STEOQ(CURCALYR,20)
 
       ! BIOMASS PULPING LIQUOR AND WOOD
-      RSTEO(3) = STEOQ(CURCALYR,20) - QBMRF(11,CURIYR)
-		! ADDED -QBMRF(11,CURIYR) (SUBTRACTION OF REFINERY BIOMASS CONSUMPTION 8/26/16 BY MS)
+      RSTEO(3) = STEOQ(CURCALYR,20)		! not used
 
       ! GEOTHERMAL
       RSTEO(4)= BRENEW(4,5)
@@ -4023,14 +3730,14 @@ IF (CURIYR .LE. MSEDYR)  THEN
 
 !******************************************************************************
 ! NOW FOR ALL YEARS WE NEED TO COMPUTE THE COMPOSITE BENCHMARK FACTOR BF
-! NOTEE THAT FOR SEDS YEARS BF WILL BE BF_SEDS.  FOR STEO YEARS BF WILL BE
-! BF_STEO * BF_SEDS.  AND FOR YEARS AFTER STEOLASTYR BF WILL BE A COMPOSITE OF
-! BF_SEDS AND BF_SEDS * BF_STEO.  EVENTUALLY THIS COMPOSITE WILL FADE OUT AND
+! NOTE THAT FOR SEDS YEARS BF WILL BE BF_SEDS. FOR STEO YEARS BF WILL BE
+! BF_STEO * BF_SEDS. AND FOR YEARS AFTER STEOLASTYR BF WILL BE A COMPOSITE OF
+! BF_SEDS AND BF_SEDS * BF_STEO. EVENTUALLY THIS COMPOSITE WILL FADE OUT AND
 ! WE WILL USE BF_SEDS AS THE COMPOSITE FACTOR UNTIL 2050.
 ! ALSO NOTE THAT THE FINAL BF_SEDS COMPUTATION IS CHANGED PER CONSULTATION WITH
-! PETER.  PREVIOUSLY BF_SEDS WAS AN AVERAGE.  WE SWITCHED TO USING THE LAST SEDS
-! YEARS AS THE FINAL BF_SEDS FACTOR.  THE REASON IS THE EARLY YEARS HAVE TOO MUCH
-! NOISE IN THE INDUSTRIAL MODEL ESTIMATES.  THE FINAL SEDS YEAR SHOULD HAVE THE
+! PETER. PREVIOUSLY BF_SEDS WAS AN AVERAGE. WE SWITCHED TO USING THE LAST SEDS
+! YEARS AS THE FINAL BF_SEDS FACTOR. THE REASON IS THE EARLY YEARS HAVE TOO MUCH
+! NOISE IN THE INDUSTRIAL MODEL ESTIMATES. THE FINAL SEDS YEAR SHOULD HAVE THE
 ! LEAST AMOUNT OF MODEL NOISE.
 !*******************************************************************************
 !
@@ -4064,10 +3771,10 @@ IF (CURIYR .LE. MSEDYR)  THEN
         Slow_flex_capacity(3,curiyr) = 5510000.     ! Ethane cracking capacity (in tonnes ethylene produced) that could switch to flexible cracking capacity given sustained favorable naphtha economics
         Quick_flex_capacity(3,curiyr) = 2610000.    ! Cracking capacity (in tonnes ethylene produced) that can switch quickly between cracking naphtha or cracking ethane, based on economic favoribility
         
-        DO IMAC=1,5	! Use last 5 years of read-in HGL numbers
+        DO IMAC=1,5	! Use last 2021 to 2025 (AEO2026) read-in HGL numbers
             ! Populate ethylene regression x variables for last 5 years of read-in feedstock numbers
-            Ethylene_x(IMAC)=MC_REVIND(11,18,ICURIYR2+MAX_YEARS-(5-IMAC)) 	! Macro shipments, in billion 2012$ as of AEO2023 (macro shipments of resins, synthetic rubber, and fibers—index 18)
-			Ethylene_y(IMAC)=(QETINPF(11,ICURIYR2+MAX_YEARS-(5-IMAC))/Ethane_heat)*Yields_ethane(1) + (QPFIN(11,ICURIYR2+MAX_YEARS-(5-IMAC)) &
+            Ethylene_x(IMAC)=MC_REVIND(11,49,ICURIYR2+MAX_YEARS-2-(5-IMAC)) 	! Macro shipments, in billion 2012$ as of AEO2026 (macro shipments of petrochemicalss—index 49)
+			Ethylene_y(IMAC)=(QETINPF(11,ICURIYR2+MAX_YEARS-2-(5-IMAC))/Ethane_heat)*Yields_ethane(1) + (QPFIN(11,ICURIYR2+MAX_YEARS-2-(5-IMAC)) &
 								/Naphtha_heat)*Yields_naphtha(1)			! tonnes ethylene from ethane and naphtha cracking
         ENDDO
 		! Calculate ethylene regression slope and intercept
@@ -4131,48 +3838,15 @@ IF (CURIYR .LE. MSEDYR)  THEN
              -0.5*Quick_flex_capacity(3,curiyr)*Naphtha_heat/Yields_naphtha(1))
         EndIf
         
-		Ethylene_benchmark=Ethylene_y(5)/(Ethylene_slope*MC_REVIND(11,18,END_YR_FEEDSTOCK-1989) + Ethylene_intercept)	! benchmark to last year of read-in values		
+		Ethylene_benchmark=((QETINPF(11,END_YR_FEEDSTOCK-1989)/Ethane_heat)*Yields_ethane(1) + (QPFIN(11,END_YR_FEEDSTOCK-1989)/Naphtha_heat)*Yields_naphtha(1))/ &
+							(Ethylene_slope*MC_REVIND(11,49,END_YR_FEEDSTOCK-1989) + Ethylene_intercept)
 
-        Ethylene_demand(curiyr)=(Ethylene_slope*MC_REVIND(11,18,curiyr) + Ethylene_intercept) &
+        Ethylene_demand(curiyr)=(Ethylene_slope*MC_REVIND(11,49,curiyr) + Ethylene_intercept) &
 		  *Ethylene_benchmark*HGL_recycle_rate(curiyr) 		! tonnes ethylene (U.S. total demand)
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! add correction to ethylene demand in early years
-        if (curcalyr.le.steolastyr+1) then
-		   laststeoyr_ethylene = 42500000.0 ! estimated ethylene production in 2025
-		   add_ethylene = 0.0
-		   if (curitr.eq.1) THEN
-		      write (6,*) 'Note that in the IDM, we have avtivated an overwrite to the HGL feedstock consumption' 
-			  write (6,*) 'algorithm so that for 2026 the consumption of HGLs follows STEO and beyond 2026 the consumption'
-			  write (6,*) 'of HGLs is modeled to increase or stay flat in recognition that in the short to mid term'
-			  write (6,*) 'it is expected ethylene production in the Reference Case will not decline'
-			  write (6,*) 'For AEO2026 this correction will be removed and replaced with an HGL consumption model'
-              write (6,*) 'that is able to show expected growth in feedstock consumption both in the short term and also'
-			  write (6,*) 'correlate with chemicals shipments in the long term.'
-			  write (6,*) 'detailed output from this correction for AEO2025 can be found in fort.5526 output file'
-			  write (5526,*) 'Activating STEO overwrite in the industrial model for ethylene. Remove post AEO2025.'
-		   end if
-		end if
-		
-        if (curcalyr.ge.steolastyr+1) then ! employ ethyene production correction based on hardcoded 2025 value 
-		   add_ethylene = (laststeoyr_ethylene - Ethylene_demand(curiyr))*(1.0 + ((curcalyr - STEOLASTYR)/100.0) )
-           if (add_ethylene.lt.0.0) then
-		      add_ethylene = 0.0
-		   end if
-		end if
-
-        Ethylene_demand(curiyr)=(Ethylene_slope*MC_REVIND(11,18,curiyr) + Ethylene_intercept) &
-		  *Ethylene_benchmark*HGL_recycle_rate(curiyr) + add_ethylene	! tonnes ethylene (U.S. total demand)
 
         Base_ethane_demand(curiyr)=(Ethylene_demand(curiyr)-Naphtha_nonflex_consumption*Yields_naphtha(1)/Naphtha_heat)* &
 									Ethane_heat/Yields_ethane(1)  														! tBtu ethane demand if all flexible capacity uses ethane		
 		
-    	write (5526,*) 'curiyr ', 'curcalyr ', 'laststeoyr_ethylene ', 'Ethylene_demand(curiyr) ', 'add_ethylene '
-		write (5526,*) curiyr, curcalyr, laststeoyr_ethylene, Ethylene_demand(curiyr), add_ethylene
-		write (5526,*) 'Base_ethane_demand(curiyr) = ', Base_ethane_demand(curiyr)
-		write (5526,*)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
         Do ICD=1,9           
             ! tBtu ethane demand by census region; use census division ethane split from last feed year (2022 for AEO2021)
             ! Assume census divisions other than 7 are not building new facilities, and remain at constant production levels (use last feed year read-in data)
@@ -4221,8 +3895,8 @@ IF (CURIYR .LE. MSEDYR)  THEN
 				ELSE
 				    NGFEEDTARGET(1:5) = 0
                     HGLFEEDTARGET(1:5) = 0
-                END IF
-
+                END IF	
+		IF(IFUEL.eq.16) BF(CURIYR,IFUEL,ICR) = BF_SEDS(IFUEL,ICR)	! petcoke uses SEDS benchmark for entire projection; STEO values are problematic
                 
         write (IFEEDOUT,*)
         write (IFEEDOUT,'(A,I4)') 'Feedstock targets for ',curcalyr
@@ -4237,7 +3911,8 @@ IF (CURIYR .LE. MSEDYR)  THEN
 ! THESE ARE LIMITS PUT ON THE FINAL BF ... SOMEWHAT CONSISTENT WITH THE OLD WEXOG
           
     IF (CURCALYR .GT. (STEOLASTYR - INDBMOVR2)) THEN
-        IF ((IFUEL .EQ. 2) .OR. (IFUEL .EQ. 9) .OR. (IFUEL .EQ. 12) .OR. (IFUEL .EQ. 23)) THEN       ! NSK H2
+        IF ((IFUEL .EQ. 2) .OR. (IFUEL .EQ. 9) .OR. (IFUEL .EQ. 23)) THEN
+		!IF ((IFUEL .EQ. 2) .OR. (IFUEL .EQ. 9) .OR. (IFUEL .EQ. 12) .OR. (IFUEL .EQ. 23)) THEN
             BF(CURIYR,IFUEL,ICR) = 1.0
 
         ELSE IF (IFUEL .EQ. 5) THEN ! adjust natural gas feedstock benchmark factor
@@ -4246,14 +3921,15 @@ IF (CURIYR .LE. MSEDYR)  THEN
             ELSE
                 BF(CURIYR,5,ICR) = 0.0
             END IF
-            
+        ELSE IF (IFUEL .EQ. 12) THEN	! propane heat and power matches last SEDS benchmark
+			BF(CURIYR,IFUEL,ICR) = BF_SEDS(IFUEL,ICR)           
         ELSE IF (IFUEL .EQ. 13) THEN ! adjust HGL benchmark factor
             IF (BMAIN(13,ICR) .GT. 0.0) THEN
                 BF(CURIYR,13,ICR) = HGLFEEDTARGET(ICR) / BMAIN(13,ICR)
             ELSE
                 BF(CURIYR,13,ICR) = 0.0
             END IF
-            
+
         ELSE IF (IFUEL .EQ. 19) THEN
             IF (curcalyr.eq.sedslastyr+FEEDYEARS) THEN ! Use naphtha read-in value for sedslastyr+FEEDYEARS
                 IF (BMAIN(19,ICR) .GT. 0.0) THEN
@@ -4402,19 +4078,19 @@ IF (FCRL .EQ. 1) THEN !CHECK FOR FCRL
 ! WRITE OUT RESULTS TO Q VARIABLES
 
 DO ICD=1,9
-      ICR = CReg(ICD)
+      ICR = DIV_to_REG(ICD)
 
     ! INDUSTRIAL ELECTRICITY  (add natural gas plant CCS electricity QNGPIN and CCATS pipeline electricity CO2_ELEC)
     IF (ICD .EQ. 8) THEN
 		QELIN(ICD,IY) = BMAIN_ADJUSTED(1,ICR) * DIVSHR(QSELIN(1,MSEDYR),ICD,ICR) +&	! ADD IN OILSHALE ELECTRICITY IN DIVISION 8
-        QELRF(ICD,IY) + QELETH(IY,ICD) + (QELINH2NG(ICD,IY)+QELINH2e(ICD,IY)) + OGELSHALE(IY) + QNGPIN(ICD,IY) + &
-		   CO2_ELEC(ICD,IY) * 0.000003412
+        QELRF(ICD,IY) + QELETH(IY,ICD) + QELHM(ICD,IY) + QNGPIN(ICD,IY) + &
+		   CO2_ELEC(ICD,IY) * CFELQ/10**9
 	ELSE
 		QELIN(ICD,IY) = BMAIN_ADJUSTED(1,ICR) * DIVSHR(QSELIN(1,MSEDYR),ICD,ICR) +&
-			QELRF(ICD,IY) + QELETH(IY,ICD) + (QELINH2NG(ICD,IY)+QELINH2e(ICD,IY)) + QNGPIN(ICD,IY) + &
-			  CO2_ELEC(ICD,IY) * 0.000003412
+			QELRF(ICD,IY) + QELETH(IY,ICD) + QELHM(ICD,IY) + QNGPIN(ICD,IY) + &
+			  CO2_ELEC(ICD,IY) * CFELQ/10**9
     END IF
-    write (5525,*) 'ICD curcalyr CO2_ELEC ', ICD, curcalyr, CO2_ELEC(ICD,IY) * 0.000003412
+    write (5525,*) 'ICD curcalyr CO2_ELEC ', ICD, curcalyr, CO2_ELEC(ICD,IY) * CFELQ/10**9
     ! H2 FEEDSTOCK
       QH2INPF(ICD,IY) = BMAIN_ADJUSTED(2,ICR)*DIVSHR(H2_chem_demand_div(1,7),ICD,ICR)	+ QH2RF(ICD,IY)         ! NSK H2
 
@@ -4440,7 +4116,7 @@ DO ICD=1,9
 
     ! STEAM COAL
       QCLIN(ICD,IY) = BMAIN_ADJUSTED(7,ICR) * DIVSHR(QSCLIN(1,MSEDYR),ICD,ICR) &
-        + QCLRF(ICD,IY) + QCLETH(IY,ICD) + CGOGSQ(ICD,IY,ICL1)
+        + QCLRF(ICD,IY) + QCLETH(IY,ICD) + CGOGSQ(ICD,IY,ICL1)+OGSUPGAS(1,ICD,CURIYR) * CFNGC(CURIYR)	
 
     ! MET COAL
       QMCIN(ICD,IY) = BMAIN_ADJUSTED(8,ICR) * DIVSHR(QSMCIN(1,MSEDYR),ICD,ICR)
@@ -4467,14 +4143,11 @@ DO ICD=1,9
     !************************************************************************************************
 
     ! HGL FEEDSTOCK
-    ! Subtract naphtha flex consumption from HGL feedstock (convert to ethane-equivalent tBtu — that is, the tBtus of ethane needed to produce the same amount of ethylene
-      INQLGPF(ICD,IY) = BMAIN_ADJUSTED(13,ICR) * DIVSHR(QSLGIN(1,MSEDYR),ICD,ICR)! - &
+      INQLGPF(ICD,IY) = BMAIN_ADJUSTED(13,ICR) * DIVSHR(QSLGIN(1,MSEDYR),ICD,ICR)
 
     ! PROPANE HEAT AND POWER
       INQLGHP(ICD,IY) = BMAIN_ADJUSTED(12,ICR) * DIVSHR(QSLGIN(1,MSEDYR),ICD,ICR) &
         + QLGRF(ICD,IY)  ! + QSPPIN(ICD,IY)
-    
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
@@ -4528,8 +4201,10 @@ DO ICD=1,9
 	
 		H2_byp_index(ICD,IY)=(0.1613*QETIN(ICD,IY)+0.1287*QPRINPF(ICD,IY)+0.0296*QPFIN(ICD,IY))/ &		! Grow byproduct H2 by growth in fuels whose cracking produces H2 byproduct,
 								(0.1613*QETIN(ICD,IY-1)+0.1287*QPRINPF(ICD,IY-1)+0.0296*QPFIN(ICD,IY-1))! weighted by assumed cracking yields in TBtu H2/TBtu feedstock
+
 		IF(((QETIN(ICD,IY-1)+QPRINPF(ICD,IY-1)+QPFIN(ICD,IY-1))*1.0).eq.0.0) H2_byp_index(ICD,IY)=1.0
-	    IF (curcalyr.eq.IBYR) THEN
+	    
+		IF (curcalyr.eq.IBYR) THEN
 			BYPRDH2IN(ICD,IY) = MAX(0.0,QH2IN(ICD,IY) + QH2TR(ICD,IY) + QH2EL(ICD,IY) - H2_chem_supply_div(ICD,7) - H2_ref_supply_div(ICD))
 		ELSE
 			BYPRDH2IN(ICD,IY) = BYPRDH2IN(ICD,IY-1)*H2_byp_index(ICD,IY)
@@ -4543,28 +4218,14 @@ DO ICD=1,9
       QHOIN(ICD,IY) = BRENEW_ADJUSTED(1,ICR) * DIVSHR(QSHOIN(1,MSEDYR),ICD,ICR)
 
     ! BIOMASS
-      QBMIN(ICD,IY) = BRENEW_ADJUSTED(2,ICR) * DIVSHR(QSBMIN(1,MSEDYR),ICD,ICR) + QBMRF(ICD,IY)
-		! ADDED &+QBMRF(ICD,IY) (ADDITION OF REFINERY CONSUMPTION OF BIOMASS) 8/26/16 BY MS
-
-    ! GEOTHERMAL
-      QGEIN(ICD,IY) = BRENEW_ADJUSTED(4,ICR) * DIVSHR(QSGEIN(1,MSEDYR),ICD,ICR)
-
-    ! SOLAR
-      QSTIN(ICD,IY) = BRENEW_ADJUSTED(5,ICR) * DIVSHR(QSSTIN(1,MSEDYR),ICD,ICR)
-
-    ! PHOTOVOLTAIC
-      QPVIN(ICD,IY) = BRENEW_ADJUSTED(6,ICR) * DIVSHR(QSPVIN(1,MSEDYR),ICD,ICR)
-
-    ! WIND
-      QWIIN(ICD,IY) = BRENEW_ADJUSTED(7,ICR) * DIVSHR(QSWIIN(1,MSEDYR),ICD,ICR)
+      QBMIN(ICD,IY) = BRENEW_ADJUSTED(2,ICR) * DIVSHR(QSBMIN(1,MSEDYR),ICD,ICR)
 
     ! MUNICIPAL SOLID WASTE
       QMSIN(ICD,IY) = BRENEW_ADJUSTED(8,ICR) * DIVSHR(QSMSIN(1,MSEDYR),ICD,ICR)
 
     ! TOTAL RENEWABLES
-      QTRIN(ICD,IY) = QHOIN(ICD,IY) + QGEIN(ICD,IY) + QBMIN(ICD,IY) + &
-                      QMSIN(ICD,IY) + QSTIN(ICD,IY) + QPVIN(ICD,IY) + &
-                      QWIIN(ICD,IY)
+      QTRIN(ICD,IY) = QHOIN(ICD,IY) + QBMIN(ICD,IY) + QMSIN(ICD,IY)
+
 ! END RENEWABLE FUELS
 
        
@@ -4633,10 +4294,6 @@ DO ICD=1,9
     QH2INHP(11,IY) = sum(QH2INHP(1:9,IY))       ! NSK H2
     QHOIN(11,IY) = sum(QHOIN(1:9,IY))
     QBMIN(11,IY) = sum(QBMIN(1:9,IY))
-    QGEIN(11,IY) = sum(QGEIN(1:9,IY))
-    QSTIN(11,IY) = sum(QSTIN(1:9,IY))
-    QPVIN(11,IY) = sum(QPVIN(1:9,IY))
-    QWIIN(11,IY) = sum(QWIIN(1:9,IY))
     QMSIN(11,IY) = sum(QMSIN(1:9,IY))
     QTRIN(11,IY) = sum(QTRIN(1:9,IY))
     QH2IN(11,IY) = sum(QH2IN(1:9,IY))       ! NSK H2
@@ -4717,37 +4374,6 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 350     FORMAT(A,<LASTYR-21+1>(",",F8.4))
 351     FORMAT(A,2(",",I3),<LASTYR-ICURIYR2+1>(",",F12.6))
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! add correction to total HGL demand in early years so that post 2025 HGL consumtpion does not decrease
-! this section of code for short term HGL consumption will be removed post AEO2025
-        if (curcalyr.le.sedslastyr+feedyears) then 
-		   laststeoyr_totalhgl = inqlgpf(11,curiyr) ! set the base for 2025 HGL consumption
-		   add_totalhgl = 0.0
-		end if
-		
-        if (curcalyr.gt.sedslastyr+feedyears) then ! add correction to HGL consumption based off of 2025 STEO consumption
-		   add_totalhgl = (laststeoyr_totalhgl - inqlgpf(11,curiyr))*(1.0 + (1.1*(curcalyr - STEOLASTYR)/100.0) )
-           if (add_totalhgl.lt.0.0) then
-		      add_totalhgl = 0.0
-		   end if
-		end if
-
-		do icd = 1,9 ! adjust short-term CD level HGL feedstock total
-		   inqlgpf(icd,curiyr) = inqlgpf(icd,curiyr) + (add_totalhgl * (inqlgpf(icd,curiyr) / inqlgpf(11,curiyr)))
-		end do
-        inqlgpf(11,curiyr) = inqlgpf(11,curiyr) + add_totalhgl ! adjust short-term national level HGL feedstock total
-		
-      write (5526,*) 'curcalyr ', 'sedslastyr+feedyears ', 'curiyr '
-	  write (5526,*) curcalyr, sedslastyr+feedyears, curiyr
-      if (curcalyr.eq.sedslastyr+feedyears) then 
-	     write (5526,*) 'inqlgpf at sedslastyr+feedyears = ', inqlgpf(11,curiyr)
-      end if
-      if (curcalyr.gt.sedslastyr+feedyears) then 
-	     write (5526,*) 'inqlgpf at curcalyr ', curcalyr, '= ', inqlgpf(11,curiyr)
-      end if
-      write (5526,*)
-      write (5526,*)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       if (curcalyr.gt.sedslastyr+feedyears) then                
 	          qlgin(11,curiyr) = inqlgpf(11,curiyr) + inqlghp(11,curiyr)
@@ -4769,16 +4395,15 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 
     ethaneproduction =  RFQNGPL(10,curiyr,1)*CFEEQ*365.0*10.0**3/10.0**6  ! LFMM (really HSM) national ethane production, 1,000 barrels/d to tBtu/yr;  CFEEQ = 2.783 MMBtu/b ethane
 
-    IF ((CURIYR .ge. ICURIYR).and.(CURIYR .lt. MSEDYR+FEEDYEARS+1)) Then  ! Put in historical and projected numbers from base year to MSEDYR+FEEDYEARS (2021 for AEO 2020) from feedstock.csv
-          qetinpf(11,curiyr) = feedethtotal(CURIYR-ICURIYR+1)                            ! Ethane
-          qprinpf(11,curiyr) = feedpropanetotal(CURIYR-ICURIYR+1)                        ! Propane
-          qprolenerf(11,curiyr) = feedpropylenetotal(CURIYR-ICURIYR+1)                   ! Propylene          
-          qbuinpf(11,curiyr) = feednormbutanetotal(CURIYR-ICURIYR+1)                     ! Normal butane
-          qisinpf(11,curiyr) = feedisobutanetotal(CURIYR-ICURIYR+1)                      ! Isobutane
-          qppinpf(11,curiyr) = feednatgasolinetotal(CURIYR-ICURIYR+1)                    ! Natural gasoline
-     
-    ELSEIF (CURIYR .gt. MSEDYR+FEEDYEARS) Then                             ! Put in projected numbers after MSEDYR+FEEDYEARS (2021 for AEO 2020); NSK 4/1/2020 
-        qprolenerf(11,curiyr) = 302000*365*3.835/1000000.0                 ! Set total propylene at 302,000 b/d after MSEDYR+FEEDYEARS; 3.835 is MMBtu/b propylene NSK 9/24/2019  
+    IF ((CURIYR .ge. ICURIYR).and.(CURIYR .le. MSEDYR+FEEDYEARS)) Then  ! Put in historical and projected numbers from base year to MSEDYR+FEEDYEARS (2027 for AEO 2026) from feedstock.csv
+          qetinpf(11,curiyr) = feedethtotal(CURIYR-ICURIYR+1)			! Ethane
+          qprinpf(11,curiyr) = feedpropanetotal(CURIYR-ICURIYR+1)		! Propane
+          qprolenerf(11,curiyr) = feedpropylenetotal(CURIYR-ICURIYR+1)	! Propylene          
+          qbuinpf(11,curiyr) = feednormbutanetotal(CURIYR-ICURIYR+1)	! Normal butane
+          qisinpf(11,curiyr) = feedisobutanetotal(CURIYR-ICURIYR+1)		! Isobutane
+          qppinpf(11,curiyr) = 0.										! Natural gasoline
+    ELSEIF (CURIYR .gt. MSEDYR+FEEDYEARS) Then                          ! Put in projected numbers after MSEDYR+FEEDYEARS (2021 for AEO 2020); NSK 4/1/2020 
+        qprolenerf(11,curiyr) = 302000*365*3.835/1000000.0              ! Set total propylene at 302,000 b/d after MSEDYR+FEEDYEARS; 3.835 is MMBtu/b propylene NSK 9/24/2019  
         IF (qetinpf(11,curiyr) .gt. ethaneproduction) THEN
             heattemp2(curiyr) = qetinpf(11,curiyr) - ethaneproduction
             qetinpf(7,curiyr) = qetinpf(7,curiyr) - heattemp2(curiyr)    ! Reduce consumption only in division 7
@@ -4787,14 +4412,14 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
             heattemp2(curiyr)=0.0
         END IF
 		
-        qprinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qprinpf(11,MSEDYR+FEEDYEARS)/ &                 ! Propane after the last read-in year (MSEDYR+FEEDYEARS, or 2022 for AEO 2021) is set to be
-            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS)) + 0.83*heattemp2(curiyr) ! the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year; also add 83% of ethane demand that OGSM can't meet (NSK 7/2021)
-        qbuinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qbuinpf(11,MSEDYR+FEEDYEARS)/ &                 ! n-butane isobutane after the last read-in year (MSEDYR+FEEDYEARS, or 2022 for AEO 2021) is set to be
-            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS)) + 0.17*heattemp2(curiyr) ! the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year; also add 17% of ethane demand that OGSM can't meet (NSK 7/2021)
-        qisinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qisinpf(11,MSEDYR+FEEDYEARS)/ &                 ! Isobutane after the last read-in year (MSEDYR+FEEDYEARS, or 2022 for AEO 2021) is set to be 
-            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS))                        ! the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year (NSK 7/2021)
-        qppinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qppinpf(11,MSEDYR+FEEDYEARS)/ &                 ! Natural gasoline after the last read-in year (MSEDYR+FEEDYEARS, or 2022 for AEO 2021) is set to be
-            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS))                         ! the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year (NSK 7/2021)
+        qprinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qprinpf(11,MSEDYR+FEEDYEARS)/ &                 ! Propane after the last read-in year (MSEDYR+FEEDYEARS, or 2027 for AEO 2026) is set to be
+            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS)) + 0.83*heattemp2(curiyr) !  the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year; also add 83% of ethane demand that HSM can't meet
+        qbuinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qbuinpf(11,MSEDYR+FEEDYEARS)/ &                 ! n-butane after the last read-in year (MSEDYR+FEEDYEARS, or 2027 for AEO 2026) is set to be
+            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS)) + 0.17*heattemp2(curiyr) !  the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year; also add 17% of ethane demand that HSM can't meet
+        qisinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qisinpf(11,MSEDYR+FEEDYEARS)/ &                 ! Isobutane after the last read-in year (MSEDYR+FEEDYEARS, or 2027 for AEO 2026) is set to be 
+            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS))                        	 !  the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year
+        qppinpf(11,curiyr) = (inqlgpf(11,curiyr)-qetinpf(11,curiyr)-qprolenerf(11,curiyr)-heattemp2(curiyr))*qppinpf(11,MSEDYR+FEEDYEARS)/ &                 ! Natural gasoline after the last read-in year (MSEDYR+FEEDYEARS, or 2027 for AEO 2026) is set to be
+            (inqlgpf(11,MSEDYR+FEEDYEARS)-qetinpf(11,MSEDYR+FEEDYEARS)-qprolenerf(11,MSEDYR+FEEDYEARS)-heattemp2(MSEDYR+FEEDYEARS))                          !  the same fraction of total feedstock HGL minus propylene and ethane as the last read-in year
 
             IF (qppinpf(11,curiyr).lt.0.0) THEN
                 qbuinpf(11,curiyr)=qbuinpf(11,curiyr)+qppinpf(11,curiyr)
@@ -5062,101 +4687,39 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 !  Miscellaneous = all the rest
 !  H2 electrolyzers = electricity from H2 electrolysis in HMM
 
-    qelinp(1,iy)=(qelin(1,iy)-QELRF(1,IY)-QELETH(IY,1)-(QELINH2NG(1,IY)+QELINH2e(1,IY))-QNGPIN(1,IY) &
-	    - CO2_ELEC(1,IY) * 0.000003412)*xelinshr(1,1) &
-		+QELRF(1,IY)+QELETH(IY,1)+QELINH2NG(1,IY)	! All refining (QELRF) and ethanol (QELETH) electricity goes to primary; so does SMR electricity (QELINH2NG)
-    qelinp(2,iy)=(qelin(2,iy)-QELRF(2,IY)-QELETH(IY,2)-(QELINH2NG(2,IY)+QELINH2e(2,IY))-QNGPIN(2,IY) & 
-	    - CO2_ELEC(2,IY) * 0.000003412)*xelinshr(1,1) &
-		+QELRF(2,IY)+QELETH(IY,2)+QELINH2NG(2,IY)	! H2 electricity for SMRs (QELINH2NG) stays in primary, but H2 electricity
-    qelinp(3,iy)=(qelin(3,iy)-QELRF(3,IY)-QELETH(IY,3)-(QELINH2NG(3,IY)+QELINH2e(3,IY))-QNGPIN(3,IY) & 
-	    - CO2_ELEC(3,IY) * 0.000003412)*xelinshr(1,2)&
-		+QELRF(3,IY)+QELETH(IY,3)+QELINH2NG(3,IY)	! for electrolyzers is the fourth load curve (QELINH2E).
-    qelinp(4,iy)=(qelin(4,iy)-QELRF(4,IY)-QELETH(IY,4)-(QELINH2NG(4,IY)+QELINH2e(4,IY))-QNGPIN(4,IY) &
-	    - CO2_ELEC(4,IY) * 0.000003412)*xelinshr(1,2)&
-		+QELRF(4,IY)+QELETH(IY,4)+QELINH2NG(4,IY)	! Note QELHM=QELINH2E+QELINH2NG.
-    qelinp(5,iy)=(qelin(5,iy)-QELRF(5,IY)-QELETH(IY,5)-(QELINH2NG(5,IY)+QELINH2e(5,IY))-QNGPIN(5,IY) &
-	    - CO2_ELEC(5,IY) * 0.000003412)*xelinshr(1,3)&
-		+QELRF(5,IY)+QELETH(IY,5)+QELINH2NG(5,IY)
-    qelinp(6,iy)=(qelin(6,iy)-QELRF(6,IY)-QELETH(IY,6)-(QELINH2NG(6,IY)+QELINH2e(6,IY))-QNGPIN(6,IY) &
-	    - CO2_ELEC(6,IY) * 0.000003412)*xelinshr(1,3)&
-		+QELRF(6,IY)+QELETH(IY,6)+QELINH2NG(6,IY)
-    qelinp(7,iy)=(qelin(7,iy)-QELRF(7,IY)-QELETH(IY,7)-(QELINH2NG(7,IY)+QELINH2e(7,IY))-QNGPIN(7,IY) &
-	    - CO2_ELEC(7,IY) * 0.000003412)*xelinshr(1,3)&
-		+QELRF(7,IY)+QELETH(IY,7)+QELINH2NG(7,IY)
-    qelinp(8,iy)=(qelin(8,iy)-QELRF(8,IY)-QELETH(IY,8)-(QELINH2NG(8,IY)+QELINH2e(8,IY))-QNGPIN(8,IY) &
-	    - CO2_ELEC(8,IY) * 0.000003412 -OGELSHALE(IY))&
-		*xelinshr(1,4)+QELRF(8,IY)+QELETH(IY,8)+QELINH2NG(8,IY)+OGELSHALE(IY)	! OGLESHALE in region 8 only; added back in to primary since it falls under refining
-    qelinp(9,iy)=(qelin(9,iy)-QELRF(9,IY)-QELETH(IY,9)-(QELINH2NG(9,IY)+QELINH2e(9,IY))-QNGPIN(9,IY) &
-	    - CO2_ELEC(9,IY) * 0.000003412)*xelinshr(1,4)&
-		+QELRF(9,IY)+QELETH(IY,9)+QELINH2NG(9,IY)
-	  
-    qelins(1,iy)=(qelin(1,iy)-QELRF(1,IY)-QELETH(IY,1)-(QELINH2NG(1,IY)+QELINH2e(1,IY))-QNGPIN(1,IY) &
-	   - CO2_ELEC(1,IY) * 0.000003412)*xelinshr(2,1)
-    qelins(2,iy)=(qelin(2,iy)-QELRF(2,IY)-QELETH(IY,2)-(QELINH2NG(2,IY)+QELINH2e(2,IY))-QNGPIN(2,IY) &
-	   - CO2_ELEC(2,IY) * 0.000003412)*xelinshr(2,1)
-    qelins(3,iy)=(qelin(3,iy)-QELRF(3,IY)-QELETH(IY,3)-(QELINH2NG(3,IY)+QELINH2e(3,IY))-QNGPIN(3,IY) &
-	   - CO2_ELEC(3,IY) * 0.000003412)*xelinshr(2,2)
-    qelins(4,iy)=(qelin(4,iy)-QELRF(4,IY)-QELETH(IY,4)-(QELINH2NG(4,IY)+QELINH2e(4,IY))-QNGPIN(4,IY) &
-	   - CO2_ELEC(4,IY) * 0.000003412)*xelinshr(2,2)
-    qelins(5,iy)=(qelin(5,iy)-QELRF(5,IY)-QELETH(IY,5)-(QELINH2NG(5,IY)+QELINH2e(5,IY))-QNGPIN(5,IY) &
-	   - CO2_ELEC(5,IY) * 0.000003412)*xelinshr(2,3)
-    qelins(6,iy)=(qelin(6,iy)-QELRF(6,IY)-QELETH(IY,6)-(QELINH2NG(6,IY)+QELINH2e(6,IY))-QNGPIN(6,IY) &
-	   - CO2_ELEC(6,IY) * 0.000003412)*xelinshr(2,3)
-    qelins(7,iy)=(qelin(7,iy)-QELRF(7,IY)-QELETH(IY,7)-(QELINH2NG(7,IY)+QELINH2e(7,IY))-QNGPIN(7,IY) &
-	   - CO2_ELEC(7,IY) * 0.000003412)*xelinshr(2,3)
-    qelins(8,iy)=(qelin(8,iy)-QELRF(8,IY)-QELETH(IY,8)-(QELINH2NG(8,IY)+QELINH2e(8,IY))-QNGPIN(8,IY)-OGELSHALE(IY) &
-	   - CO2_ELEC(8,IY) * 0.000003412)*xelinshr(2,4)
-    qelins(9,iy)=(qelin(9,iy)-QELRF(9,IY)-QELETH(IY,9)-(QELINH2NG(9,IY)+QELINH2e(9,IY))-QNGPIN(9,IY) &
-	   - CO2_ELEC(9,IY) * 0.000003412)*xelinshr(2,4)
-
-! QNGPIN and CO2_ELEC are mining and gets added back into miscellaneous
-	qelinm(1,iy)=(qelin(1,iy)-QELRF(1,IY)-QELETH(IY,1)-(QELINH2NG(1,IY)+QELINH2e(1,IY))-QNGPIN(1,IY) &
-	   - CO2_ELEC(1,IY) * 0.000003412)*xelinshr(3,1)+QNGPIN(1,IY)+CO2_ELEC(1,IY) * 0.000003412	
-    qelinm(2,iy)=(qelin(2,iy)-QELRF(2,IY)-QELETH(IY,2)-(QELINH2NG(2,IY)+QELINH2e(2,IY))-QNGPIN(2,IY) &
-	   - CO2_ELEC(2,IY) * 0.000003412)*xelinshr(3,1)+QNGPIN(2,IY)+CO2_ELEC(1,IY) * 0.000003412
-    qelinm(3,iy)=(qelin(3,iy)-QELRF(3,IY)-QELETH(IY,3)-(QELINH2NG(3,IY)+QELINH2e(3,IY))-QNGPIN(3,IY) &
-	   - CO2_ELEC(3,IY) * 0.000003412)*xelinshr(3,2)+QNGPIN(3,IY)+CO2_ELEC(3,IY) * 0.000003412
-    qelinm(4,iy)=(qelin(4,iy)-QELRF(4,IY)-QELETH(IY,4)-(QELINH2NG(4,IY)+QELINH2e(4,IY))-QNGPIN(4,IY) &
-	   - CO2_ELEC(4,IY) * 0.000003412)*xelinshr(3,2)+QNGPIN(4,IY)+CO2_ELEC(4,IY) * 0.000003412
-    qelinm(5,iy)=(qelin(5,iy)-QELRF(5,IY)-QELETH(IY,5)-(QELINH2NG(5,IY)+QELINH2e(5,IY))-QNGPIN(5,IY) &
-	   - CO2_ELEC(5,IY) * 0.000003412)*xelinshr(3,3)+QNGPIN(5,IY)+CO2_ELEC(5,IY) * 0.000003412
-    qelinm(6,iy)=(qelin(6,iy)-QELRF(6,IY)-QELETH(IY,6)-(QELINH2NG(6,IY)+QELINH2e(6,IY))-QNGPIN(6,IY) &
-	   - CO2_ELEC(6,IY) * 0.000003412)*xelinshr(3,3)+QNGPIN(6,IY)+CO2_ELEC(6,IY) * 0.000003412
-    qelinm(7,iy)=(qelin(7,iy)-QELRF(7,IY)-QELETH(IY,7)-(QELINH2NG(7,IY)+QELINH2e(7,IY))-QNGPIN(7,IY) &
-	   - CO2_ELEC(7,IY) * 0.000003412)*xelinshr(3,3)+QNGPIN(7,IY)+CO2_ELEC(7,IY) * 0.000003412
-    qelinm(8,iy)=(qelin(8,iy)-QELRF(8,IY)-QELETH(IY,8)-(QELINH2NG(8,IY)+QELINH2e(8,IY))-QNGPIN(8,IY) &
-	   - CO2_ELEC(8,IY) * 0.000003412-OGELSHALE(IY))*xelinshr(3,4)+QNGPIN(8,IY)+CO2_ELEC(8,IY) * 0.000003412
-    qelinm(9,iy)=(qelin(9,iy)-QELRF(9,IY)-QELETH(IY,9)-(QELINH2NG(9,IY)+QELINH2e(9,IY))-QNGPIN(9,IY) &
-	   - CO2_ELEC(9,IY) * 0.000003412)*xelinshr(3,4)+QNGPIN(9,IY)+CO2_ELEC(9,IY) * 0.000003412
-!###  
-
-!   get a us total for the 4 electricity groups
-! ***
-    qelinp(11,IY)=0.
-    qelins(11,IY)=0.
-    qelinm(11,IY)=0.
-	  
-    DO ICD = 1,9
-        qelinp(11,IY)= qelinp(11,iy) + qelinp(icd,iy)
-        qelins(11,IY)= qelins(11,iy) + qelins(icd,iy)
-        qelinm(11,IY)= qelinm(11,iy) + qelinm(icd,iy)
-    ENDDO
+! All refining (QELRF) and ethanol (QELETH) electricity goes to primary; so does SMR electricity (QELINH2NG)
+! H2 electricity for SMRs (QELINH2NG) stays in primary, but H2 electricity for electrolyzers is the fourth load curve (QELINH2E).
+! Note QELHM=QELINH2E+QELINH2NG. Also note QELETH has indiex order opposite all the other Q- variables.
+!!! PRIMARY ELECTRICITY CONSUMPTION
+	QELINp(1:9,CURIYR)=(	QELIN(1:9,CURIYR)-QELRF(1:9,CURIYR)-QELETH(CURIYR,1:9)-QELHM(1:9,CURIYR)- &
+         QNGPIN(1:9,CURIYR)-CO2_ELEC(1:9,CURIYR)*CFELQ/10**9	)*xelinshr(1,DIV_to_REG(1:9)) + &
+		 QELRF(1:9,CURIYR) + QELETH(CURIYR,1:9) + QELINH2NG(1:9,CURIYR)	 
+	QELINp(11,CURIYR) = SUM(QELINp(1:9,CURIYR))
+!!!SHIFT ELECTRICITY CONSUMPTION
+    QELINs(1:9,CURIYR)=(	QELIN(1:9,CURIYR)-QELRF(1:9,CURIYR)-QELETH(CURIYR,1:9)-QELHM(1:9,CURIYR)- &
+	   QNGPIN(1:9,CURIYR)-CO2_ELEC(1:9,CURIYR)*CFELQ/10**9	)*xelinshr(2,DIV_to_REG(1:9))
+	QELINs(11,CURIYR) = SUM(QELINs(1:9,CURIYR))
+!!!MISCELLANEOUS ELECTRICITY CONSUMPTION
+! QNGPIN (natural gas plant electricity consumption) is mining and gets added back into miscellaneous.
+! Sequestration electricity (CO2_ELEC) is really Transportation, but is here for now (and very small).
+	QELINm(1:9,CURIYR)=(	QELIN(1:9,CURIYR)-QELRF(1:9,CURIYR)-QELETH(CURIYR,1:9)-QELHM(1:9,CURIYR)-QNGPIN(1:9,CURIYR)- &
+	   CO2_ELEC(1:9,CURIYR) * CFELQ/10**9	)*xelinshr(3,DIV_to_REG(1:9)) + QNGPIN(1:9,CURIYR)+CO2_ELEC(1:9,CURIYR)*CFELQ/10**9
+	QELINm(11,CURIYR) = SUM(QELINm(1:9,CURIYR))
 
 !  adjust mining to add cogen fuel consumption
       do icr=1,4
 		MINECON(ixEL,icr,curiyr)=MINECON(ixEL,icr,curiyr)+SumCDIV(QNGPIN(1,CURIYR),icr) &
-		   + 0.000003412 * SumCDIV(CO2_ELEC(1,CURIYR),icr)
+		   + (CFELQ/10**9) * SumCDIV(CO2_ELEC(1,CURIYR),icr)
         MINECON(ixNG,icr,CURIYR)=MINECON(ixNG,icr,CURIYR)+SumCDIV(CGOGSQ(1,CURIYR,3),icr)
         MINECON(ixRF,icr,CURIYR)=MINECON(ixRF,icr,CURIYR)+SumCDIV(CGOGSQ(1,CURIYR,2),icr)
       enddo
-	  MINECON(ixEL,5,curiyr)=MINECON(ixEL,5,curiyr)+QNGPIN(11,CURIYR)+CO2_ELEC(11,CURIYR) * 0.000003412
-      MINECON(ixNG,5,CURIYR)=MINECON(ixNG,5,CURIYR)+CGOGSQ(11,CURIYR,3)
-      MINECON(ixRF,5,CURIYR)=MINECON(ixRF,5,CURIYR)+CGOGSQ(11,CURIYR,2)
+	  
+	  MINECON(ixEL,5,curiyr)=SUM(MINECON(ixEL,1:4,curiyr))
+      MINECON(ixNG,5,CURIYR)=SUM(MINECON(ixNG,1:4,CURIYR))
+      MINECON(ixRF,5,CURIYR)=SUM(MINECON(ixRF,1:4,CURIYR))
 
 ! Drop mill waste into var for RFM
-      DO ICR=1,4
-         MWIN(ICR,IY)=TQRENW(2,ICR)
-      ENDDO
+      MWIN(1:4,IY)=TQRENW(2,1:4)
  
 ! CREATE NATIONAL BENCHMARK FACTORS FOR FEEDSTOCKS FOR LAST BENCHMARKED YEAR.
 	IF (CURCALYR .LE. SEDSLASTYR + FEEDYEARS) THEN
@@ -5253,22 +4816,9 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
           STEOQ(IYEAR,19) = INDHVICBUS(IYEAR-1990+1) + INDHVCCBUS(IYEAR-1990+1) ! Hydro (includes commercial)         
           STEOQ(IYEAR,20) = INDWWICBUS(IYEAR-1990+1)                            ! Wood
           STEOQ(IYEAR,21) = INDOWICBUS(IYEAR-1990+1)                            ! Municipal solid waste
-      ENDDO
-
-	 DO IFUEL=1,22      ! mainfuels-1   No slot in IBFACTRI for H2 heat and power yet   NSK H2
-	    DO ICR=1,4
-         READ(IFACTIN,993) FUELNAME(IFUEL),IDUM1,IDUM2, HISTBF(ICURIYR:LASTYR,IFUEL,ICR)
-	    END DO
-	 END DO
-     DO IFUEL=1,8
-	   DO ICR=1,4
-        READ(IFACTIN,993) RFUELNAME(IFUEL),IDUM1,IDUM2, RHISTBF(ICURIYR:LASTYR,IFUEL,ICR)
-	   END DO
-    END DO	
-      
+      ENDDO  
 
   992 FORMAT(A)
-  993 FORMAT(A,2(1X,I3),<LASTYR-ICURIYR+1>(1X,F12.6))
 
       RETURN
 
@@ -5286,49 +4836,15 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
    use i_
       IMPLICIT NONE
 
-!****
-!  DECLARE INTERNAL VARIABLES.
-!****
-
-      INTEGER IFLAG,NUMFMT,NLASTREG,IERR,ICOUNT,NUMREG, &
-          LINDDIR,INDEXX,NUMEIIND,IHEADER,ISTEPDEF,ICOGEN,INEIELAS, &
-          IEISTEP,EIFLAG, NSTEP,IFUEL,IFL,IVINT,NFUELS,IFPX,IEQ, &
+      INTEGER IFLAG,NLASTREG,IERR,ICOUNT,NUMREG, &
+          LINDDIR,IHEADER,NSTEP,IFUEL,IFL,IVINT,NFUELS, &
           ISTP,ICA,ICB,ILOOP
-      REAL TOTSHR,BTEMP
-      REAL TEMPVAR
-	  integer, ALLOCATABLE::new_steps(:)
+      REAL TOTSHR,BTEMP,TEMPVAR
 	  
       CHARACTER*200 ISTR
-!
-!   DEFINE NUMBER OF INDUSTRIES, FORMATS, ENERGY INTENSIVE INDUSTRIES
-!      AND REGIONS
-!
-      PARAMETER (NUMFMT=9, NUMEIIND=7, NUMREG=4)
-      CHARACTER*8 IFORMT(NUMFMT),EIIND(NUMEIIND), &
-       ITAG,LTAGNAME
-
-      INTEGER IREGCK(NUMREG)
-!
-!   USE DATA STATEMENTS TO DEFINE FILE FORMATS, INDUSTRIES, AND
-!     ENERGY INTENSIVE INDUSTRIES.
-!
-      DATA IFORMT /'.HEADER ', &
-                   '.STEPDEF', &
-                   'BEU     ', &
-                   'BSCBYP  ', &
-                   'BSFUEL  ', &
-                   'COGEN   ', &
-                   'NEIELAS ', &
-                   'STEPBYP ', &
-                   'EISTEP'/
-
-    DATA IREGCK/NUMREG*0/
-    DATA EIIND /'07FOOD  ', '08PAPER ', '09B_CHEM', '10GLASS ', &
-        '11CEMENT', '12STEEL ', '13ALUMNM'/
-
-    integer only1/0/
-    integer irecd/0/
-!
+      CHARACTER*8 ITAG
+    integer only1/0/, irecd/0/
+	
 !***
 !  WRITE SUBROUTINE TRACE, IF ON.
 !****
@@ -5337,18 +4853,15 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
         WRITE(IUNIT1,991)
       if(only1.eq.0) then
          only1=1
-         INAMECK(:)='XYZ'
          INAME(:)= (/'01AGCROP', '02AGOTHR', '03COALMN', '04OILGAS', &
          '05METLMN', '06CONSTR', '07FOOD  ', '08PAPER ', '09B_CHEM', &
          '10GLASS ', '11CEMENT', '12STEEL ', '13ALUMNM', '14FABMET', &
          '15MACHIN', '16COMPUT', '17TRANEQ', '18ELECEQ', '19WOODPR', &
          '20PLASTI', '21LTCHEM', '22OTHNMM', '23OTHPRI', '24MISCFN'/)
-         ! EXPANDED kpe 9/28/22
          lindname=iname(1)
          nlastreg=1
       endif
-      CALL IZEROOUT(ITAG,NLASTREG,ISTP,NSTEP,IEQ,IFPX,NFUELS, &
-           IFUEL,IHEADER,ISTEPDEF,ICOGEN,INEIELAS,IEISTEP)
+      CALL IZEROOUT(ITAG,NLASTREG,ISTP,NSTEP,NFUELS,IFUEL,IHEADER)
 
       call mecsbase ! read mecsbase updates for prodflows
 
@@ -5362,72 +4875,6 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 
 1     FORMAT(A8,1X,I8,1X,A8,1X,A176)
 
-!   CHECK FOR CORRECT INDUSTRY NAME.  IF NOT, WRITE A MESSAGE AND
-!      SKIP TO NEXT RECORD
-
-      CALL ICHECK(IFLAG,NUMIND,INAME,INDNAME,INDEXX)
-      IF (IFLAG.EQ.0) THEN
-        IF(PRTDBGI.GE.2) WRITE(6,2) INDNAME
-2       FORMAT(1X,'SUB_IEDATA:  INDUSTRY NAME=',A8, &
-                  ' NOT RECOGNIZED, SKIP RECORD')
-        GO TO 29
-      ENDIF
-!   CHECK FOR ENERGY INTENSIVE INDUSTRY.  IF SO, SET EIFLAG=1
-
-      IF(ICOUNT.EQ.1) THEN
-        CALL ICHECK(EIFLAG,NUMEIIND,EIIND,INDNAME,INDEXX)
-      ENDIF
-
-!   FILE SUBSECTIONS MUST BEGIN WITH A .HEADER RECORD.  ONLY ONE
-!     WILL BE READ PER SUBSECTION
-
-      if(icount.eq.1.and.itag.ne.'.HEADER ') then
-        WRITE(6,4) INDNAME,INDREG,ITAG,'HAS INVALID FIRST RECORD; MUST BE .HEADER.  SKIP RECORD.'
-4       FORMAT(1X,'SUB_IEDATA:  ',A8,' REGION',I3,', ',A8,1X,A)
-        GO TO 29
-       ENDIF
-
-!   CHECK FOR VALID FILE FORMAT NAME.  IF NOT, WRITE A MESSAGE
-!     AND SKIP TO NEXT RECORD
-
-      CALL ICHECK(IFLAG,NUMFMT,IFORMT,ITAG,INDEXX)
-      IF(IFLAG.EQ.0) THEN
-        WRITE(6,4) INDNAME,INDREG,ITAG, 'HAS INVALID FILE FORMAT.  SKIP RECORD.'
-        GO TO 29
-      ENDIF
-
-!   IF REGION NUMBER OUT OF RANGE, WRITE A MESSAGE
-!      AND SKIP TO NEXT RECORD
-
-      IF(INDREG.LT.1.OR.INDREG.GT.NUMREG) THEN
-        WRITE(6,4) INDNAME,INDREG,ITAG,'HAS INVALID REGION NUMBER.  SKIP RECORD.'
-        GO TO 29
-      ENDIF
-
-!   WRITE FILE SUBSECTION DESCRIPTION TO PRINTER
-
-      IF(ICOUNT.EQ.1) THEN
-        IF(PRTDBGI.GE.2)WRITE(6,7) INDNAME, INDREG
-7       FORMAT(1X,'SUB_IEDATA:  READING ENPROD INDUSTRY ' &
-              ,A8,', REGION',I3)
-      ENDIF
-
-!   IF THIS IS A NEW INDUSTRY, CHECK IF ALL REGIONS WERE REPRESENTED
-!     IN THE LAST INDUSTRY
-
-       if (icount.gt.1) then
-        IF(INDNAME.NE.LINDNAME) THEN
-          DO J=1,NUMREG
-            IF(IREGCK(J).NE.J)THEN
-              WRITE(6,11) trim(LINDNAME),J
-11            FORMAT(1X,'SUB_IEDATA WARNING: ',A,' REGION' &
-                    ,I3,' IS MISSING')
-            ENDIF
-            IREGCK(J)=0          ! AFTER CHECKING, ZERO OUT
-          ENDDO
-        ENDIF
-       endif
-
 !    IF THIS IS A NEW REGION OR INDUSTRY, BACKSPACE THE FILE,
 !       MAKE SURE THE FILE SUBSECTION HAD THE CORRECT COMPONENTS,
 !       MODIFY THE PRODUCTIONS FLOWS TO REFLECT IMPORTS
@@ -5439,11 +4886,6 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
           irecd=irecd-1
           INDREG = NLASTREG
           INDNAME = LINDNAME
-
-          CALL IFINLCHECK(IFLAG,NLASTREG,IHEADER,ISTEPDEF,ICOGEN,EIFLAG,INEIELAS,IEISTEP)
-
-          IF(IFLAG.GT.0)RETURN
-
           CALL IFINLCALC
           RETURN
         ENDIF
@@ -5460,25 +4902,9 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
           ENDIF
           WRITE(IUNIT1,992) IDVAL,PHDRAT
         ENDIF
-        ! the following  stupid little if statement had a big effect on wood industry bio consumption
-        ! if the statement is commented out, wood industry biomass consumption goes to 0. 
-		!  tried setting indstepname(1) in enprod to HEAT.  Ag industries are now assigned
-		! 
-      ! if(EIFLAG.eq.0) then 
-       !    INDSTEPNAME(1)='N/A'         ! STEP NAME IS N/A
- 
-       ! endif
-	   !  if ((INDNAME.eq.'01AGCROP').or.(INDNAME.eq.'02AGOTHR')) &
-	    !	    INDSTEPNAME(1)='BLDG'
-	    
-
-      ELSEIF(ITAG.EQ. 'BSCBYP  ') THEN
-        CALL IRBSCBYP(ISTR,IOS,IERR)
-
       ELSEIF(ITAG.EQ.'STEPBYP ') THEN
         CALL IRSTEPBYP(ISTR,IOS,IERR,IFLAG)
         IF(IFLAG.EQ.0) GO TO 29      ! INVALID STEP NAME
-
       ENDIF
 
       IF(IERR.GT.0) GO TO 100          ! INDICATES A READ ERROR
@@ -5487,59 +4913,31 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 !   OF VALID RECORDS IN THIS REGION AND STORE THE
 !     INDUSTRY NAME, REGION NUMBER, AND TAG NAME
 
-      IF(ICOUNT.EQ.1) THEN
-        IREGCK(INDREG)=INDREG
-      ENDIF
       ICOUNT=ICOUNT+1
       LINDNAME=INDNAME
       LINDDIR=INDDIR
       NLASTREG=INDREG
-      LTAGNAME=ITAG
 
 29    CONTINUE
-!
+
       WRITE(6,99)
 99    FORMAT(1X,'SUB_IEDATA ERROR:  LOOP INCREMENT EXCEEDED BEFORE ' &
             ,'EOF ENCOUNTERED.')
-      RETURN
-!
+	  RETURN
+			
 100   WRITE(6,101) IOS
       write(6,'(a,i5)') 'on record number :',irecd
 101   FORMAT(1X,'SUB_IEDATA READ ERROR NUMBER ',I5)
-      IF(IERR.GT.0) THEN
-        WRITE(6,102) IFORMT(IERR)
-102     FORMAT(1X,'SUB_IEDATA ERROR:  READING ENPROD FORMAT TYPE ' &
-                ,A8)
-      ENDIF
-      RETURN
-!
-!   MODIFY PRODUCTION FLOWS FOR LAST REGION OF LAST INDUSTRY
-!
-105   CONTINUE
 
-      CALL IFINLCHECK(IFLAG,NLASTREG,IHEADER,ISTEPDEF,ICOGEN,EIFLAG,INEIELAS,IEISTEP)
+      RETURN
+
+!   MODIFY PRODUCTION FLOWS FOR LAST REGION OF LAST INDUSTRY
+
+105   CONTINUE
 
       IF(IFLAG.GT.0)RETURN
       CALL IFINLCALC
-      
-!   CHECK IF ALL REGIONS WERE REPRESENTED IN THE LAST INDUSTRY
 
-      DO J=1,NUMREG
-        IF(IREGCK(J).NE.J)THEN
-          WRITE(6,11) LINDNAME,J
-        ENDIF
-      ENDDO
-!
-!   CHECK IF ALL INDUSTRIES ARE REPRESENTED IN THIS RUN
-!
-      DO I=1,NUMIND
-        IF(INAMECK(I).NE.INAME(I)) THEN
-          WRITE(6,106) INAME(I),INAMECK(I)
-106       FORMAT(1X,'SUB_IEDATA INDUSTRY ',A,' NOT REPRESENTED. (' &
-                ,A,')')
-        ENDIF
-      ENDDO
-!
       IF(PRTDBGI.GE.2)WRITE(6,110)IOS
 110   FORMAT(1X,'SUB_IEDATA:  ENPROD EOF ENCOUNTERED ',I5)
 !
@@ -5569,7 +4967,7 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
       DO WHILE(ILOOP.LE.NUMVAR.AND.IFLAG.EQ.0)
          IF(ICHARX.EQ.ICHARAR(ILOOP)) THEN
            IFLAG=1
-           INDEXX=ILOOP
+		   INDEXX=ILOOP
          ENDIF
          ILOOP=ILOOP+1
       END DO
@@ -5615,43 +5013,7 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 100   IERR=1
       RETURN
       END SUBROUTINE IRHEADER
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!    SUBROUTINE IRBSCBYP READS BYPRODUCT FUEL INFORMATION FOR
-!      INDUSTRIES HAVING A BOILER/STEAM COMPONENT WHICH USE
-!      BYPRODUCT FUELS (GENERALLY PRODUCED IN THAT INDUSTRY'S
-!      PROCESS/ASSEMBLY COMPONENT).
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!
-      SUBROUTINE IRBSCBYP(ISTR,IOSi,IERR)
-   use i_
-      IMPLICIT NONE
-!
-      CHARACTER*200 ISTR
-      INTEGER*4 IOSi
-      INTEGER IERR,IDUM,IFX
-      REAL TEMP(2)
 
-      IERR=0
-!
-!   IDUM IS THE FUEL SEQUENCE NUMBER--NOT ACTUALLY USED
-!
-      READ(ISTR,*,ERR=100,IOSTAT=IOSi) IDUM,IFX, &
-       (TEMP(J),J=1,2)
-!
-!   COUNT BYPRODUCT FUELS, AND STORE FUEL NUMBER AND OTHER VALUES
-!     IN THE APPROPRIATE POSITION IN THE ARRAYS
-!
-      IFSBYP=IFSBYP+1
-      IFSLOCBY(IFSBYP)=IFX
-      BYSINT(IFSBYP)  =TEMP(1)
-      BYBSCSC(IFSBYP) =TEMP(2)
-	  
-!
-      RETURN
-!
-100   IERR=4
-      RETURN
-      END SUBROUTINE IRBSCBYP
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !   SUBROUTINE IRCOGEN READS COGENERATION DATA
 !
@@ -5660,7 +5022,7 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
       IMPLICIT NONE
 
       INTEGER IUNIT9,IUNIT11
-      INTEGER IYEAR,IND,cgfuel
+      INTEGER IYEAR,IND,cgfuel,uni_fuel
       real*8 tmpcap,tmpgen,tmpelf,tmpthr,tmpfac,tmpihr,tmpgrd
 
       integer doonce/0/
@@ -5741,37 +5103,6 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 
       RETURN
       END SUBROUTINE IRCOGEN
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!    CALCULATE COGEN Grid and Own-use SHARES for current INDREG, INDDIR.
-!    That is fill  GRDSHR_REG(indreg,inddir)
-      SUBROUTINE CALCGSH
-   use i_
-      IMPLICIT NONE
-
-      real curshare,newshare,goalshare
-      real sumshr, sumgen
-
-      INTEGER K,L,M,ifuel
-
-!     Calculate total grid share for each region based on division values
-
-! Establish the range of census divisions for the current region using an innovative approach
-      L=indreg*2+indreg/4-1  ! obviously, L will be 1,3,5, and 8 for indreg=1..4
-      M=indreg*2+indreg/3    !            M will be 2,4,7, and 9 for indreg=1..4
-
-! determine GRDSHR_REG(INDREG,INDDIR), the average grid share across the fuels and census divisions
-! for this industry in this census region
-      sumshr=0.
-      sumgen=0.
-      do ir=l,m
-        do ifuel=1,numflchp
-          sumshr=sumshr + coggen(ir,curiyr,inddir,ifuel)*coggrd(ir,curiyr,inddir,ifuel)
-          sumgen=sumgen + coggen(ir,curiyr,inddir,ifuel)
-        enddo
-      enddo
-
-      RETURN
-      END SUBROUTINE CALCGSH
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !   Initialize cogen arrays for the current year by
@@ -5811,7 +5142,7 @@ write(IUNITBUG,'(" Met coal Q variable ",I6,10F12.3)') curcalyr,QMCIN(1:9,IY),QM
 
 
    ! if (inddir.le.21) then ! will have to amend this for when we update the CHP for additional industries in the summer of 2023
-      if (curiyr.gt.maxcogyr) then ! .and.(inddir.le.numind-3)) then
+      if (curiyr.gt.maxcogyr) then
         coggen(l:m,curiyr,inddir,:)=0.
         cogcap(l:m,curiyr,inddir,:)=0.
         cogthr(l:m,curiyr,inddir,:)=0.
@@ -5936,11 +5267,12 @@ implicit none
 ! This balance of fuels will be used as the starting fuel basis for applying boiler fuel elasticities
 
   integer if1,if2,ifuel, L, M
-  real fuel860b, fuelmecs, diff, oilsum, sumfos, sumoil
+  real fuelmecs(4), fuel860b(4), diff(4)
+  real oilsum, sumoil
   character*4 cfuel(4)/'coal','oil','ngas','othr'/
-  fuel860b = 0.0
-  fuelmecs = 0.0
-  diff = 0.0
+  fuelmecs(:) = 0.0
+  fuel860b(:) = 0.0
+  diff(:) = 0.0
   do inddir=1,numind
     do indreg=1,4
 ! Establish the range of census divisions for the current region using an innovative approach
@@ -5951,81 +5283,91 @@ implicit none
         if1=ifuel
         if2=ifuel
         if(ifuel.eq.4) if2=6   ! to do sum of 860b's wood, other, msw
-
-            ! KPE --- here is where initial fuel from CHP comes
-			fuel860b=sum(cogelf(L:M,curiyr,inddir,if1:if2))+ &
+        ! here is where initial fuel from CHP comes
+		fuel860b(ifuel)=sum(cogelf(L:M,curiyr,inddir,if1:if2))+ &
 					 sum(cogthr(L:M,curiyr,inddir,if1:if2))/.8  ! .8 is form 860 assumed boiler efficiency
-			CHPIBYR(inddir,indreg,ifuel)=fuel860b
+		CHPIBYR(inddir,indreg,ifuel)=fuel860b(ifuel)
 
+		IF(ifuel.eq.1) fuelmecs(ifuel)=BSCIBYR(inddir,indreg,7)		! coal
+		IF(ifuel.eq.2) fuelmecs(ifuel)=BSCIBYR(inddir,indreg,51)	! oil
+		IF(ifuel.eq.3) fuelmecs(ifuel)=BSCIBYR(inddir,indreg,4)		! natural gas
+		IF(ifuel.eq.4) fuelmecs(ifuel)=BSCIBYR(inddir,indreg,42)	! renewables
+		
+        diff(ifuel)=fuelmecs(ifuel)-fuel860b(ifuel)
 
-        fuelmecs=BSCIBYR(inddir,indreg,ifuel)
-        diff=fuelmecs-fuel860b
-
-        if(diff.lt.0.0 .and. prtdbgi.ge.3 .and.inddir.ge.7) then
+        if(diff(ifuel).lt.0.0 .and. prtdbgi.ge.3 .and.inddir.ge.7) then
           write(6,'(a,2i3,1x,a,2f12.0)') &
           '860b CHP fuel exceeds MECS indirect fuel (inddir,indreg,ifuel,mecs,860b):', &
-          inddir,indreg,cfuel(ifuel),fuelmecs,fuel860b
+          inddir,indreg,cfuel(ifuel),fuelmecs(ifuel),fuel860b(ifuel)
         endif
 
-        diff=max(0.,diff)
-        BOILIBYR(inddir,indreg,ifuel)=diff
-        fuelmecs=fuel860b+diff ! reset "mecs" in case fuel is missing or 860b is greater
-        BSCIBYR(inddir,indreg,ifuel)=fuelmecs
+        diff(ifuel)=max(0.,diff(ifuel))
+
+		IF(ifuel.eq.1) BOILIBYR(inddir,indreg,7)=diff(ifuel)	! coal
+		IF(ifuel.eq.2) BOILIBYR(inddir,indreg,51)=diff(ifuel)	! oil
+		IF(ifuel.eq.3) BOILIBYR(inddir,indreg,4)=diff(ifuel)	! natural gas
+		IF(ifuel.eq.4) BOILIBYR(inddir,indreg,42)=diff(ifuel)	! renewables
+		
+        fuelmecs(ifuel)=fuel860b(ifuel)+diff(ifuel) ! reset "mecs" in case fuel is missing or 860b is greater
+        
+		IF(ifuel.eq.1) BSCIBYR(inddir,indreg,7)=fuelmecs(ifuel)		! coal
+		IF(ifuel.eq.2) BSCIBYR(inddir,indreg,51)=fuelmecs(ifuel)	! oil
+		IF(ifuel.eq.3) BSCIBYR(inddir,indreg,4)=fuelmecs(ifuel)		! natural gas
+		IF(ifuel.eq.4) BSCIBYR(inddir,indreg,42)=fuelmecs(ifuel)	! renewables
       enddo
 ! reshare BSCIBYR petroleum detail to revised oil total
-      oilsum=sum(BSCIBYR(inddir,indreg,7:11)) ! sum of oil products
-      if(oilsum.gt.0.) then
-         BSCIBYR(inddir,indreg,7)=BSCIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,7)/oilsum) ! resid
-         BSCIBYR(inddir,indreg,8)=BSCIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,8)/oilsum) ! dist
-         BSCIBYR(inddir,indreg,9)=BSCIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,9)/oilsum) ! propane
-         BSCIBYR(inddir,indreg,10)=BSCIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,10)/oilsum) ! oth oil
-         BSCIBYR(inddir,indreg,11)=BSCIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,11)/oilsum) ! petrol coke
+      oilsum=sum(BSCIBYR(inddir,indreg,10:12))+ BSCIBYR(inddir,indreg,16)+BSCIBYR(inddir,indreg,22)	! sum of oil products
+      IF(oilsum.gt.0.) THEN
+         BSCIBYR(inddir,indreg,10)=BSCIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,10)/oilsum) ! resid
+         BSCIBYR(inddir,indreg,11)=BSCIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,11)/oilsum) ! dist
+         BSCIBYR(inddir,indreg,12)=BSCIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,12)/oilsum) ! propane
+         BSCIBYR(inddir,indreg,16)=BSCIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,16)/oilsum) ! petcoke
+         BSCIBYR(inddir,indreg,22)=BSCIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,22)/oilsum) ! other petroleum
+         
+		 oilsum=sum(BSCIBYR(inddir,indreg,10:12))+ BSCIBYR(inddir,indreg,16)+BSCIBYR(inddir,indreg,22)	! re-sum
 
-         oilsum=sum(BSCIBYR(inddir,indreg,7:11)) ! sum of oil products
+         BOILIBYR(inddir,indreg,10)=BOILIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,10)/oilsum)	! resid
+         BOILIBYR(inddir,indreg,11)=BOILIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,11)/oilsum)	! distillate
+         BOILIBYR(inddir,indreg,12)=BOILIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,12)/oilsum)	! propane
+         BOILIBYR(inddir,indreg,16)=BOILIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,16)/oilsum)	! petcoke
+         BOILIBYR(inddir,indreg,22)=BOILIBYR(inddir,indreg,51)*(BSCIBYR(inddir,indreg,22)/oilsum)	! other petroleum
 
-         BOILIBYR(inddir,indreg,7)=BOILIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,7)/oilsum)
-         BOILIBYR(inddir,indreg,8)=BOILIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,8)/oilsum)
-         BOILIBYR(inddir,indreg,9)=BOILIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,9)/oilsum)
-         BOILIBYR(inddir,indreg,10)=BOILIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,10)/oilsum)
-         BOILIBYR(inddir,indreg,11)=BOILIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,11)/oilsum)
- 
          if (inddir.le.21) then
-			 CHPIBYR(inddir,indreg,7)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,7)/oilsum)
-			 CHPIBYR(inddir,indreg,8)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,8)/oilsum)
-			 CHPIBYR(inddir,indreg,9)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,9)/oilsum)
-			 CHPIBYR(inddir,indreg,10)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,10)/oilsum)
-			 CHPIBYR(inddir,indreg,11)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,11)/oilsum)
+			 CHPIBYR(inddir,indreg,7)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,10)/oilsum)	! resid
+			 CHPIBYR(inddir,indreg,8)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,11)/oilsum)	! distillate
+			 CHPIBYR(inddir,indreg,9)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,12)/oilsum)	! propane
+			 CHPIBYR(inddir,indreg,10)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,22)/oilsum)	! other petroleum
+			 CHPIBYR(inddir,indreg,11)=CHPIBYR(inddir,indreg,2)*(BSCIBYR(inddir,indreg,16)/oilsum)	! petcoke
 		 endif
-      else ! oil distribution missing because it was aggregated in 860b data
-         BSCIBYR(inddir,indreg,7)=BSCIBYR(inddir,indreg,2)  !  put it all in resid
-         BSCIBYR(inddir,indreg,8:11)=0.
+      ELSE ! oil distribution missing because it was aggregated in 860b data
+         BSCIBYR(inddir,indreg,10)=BSCIBYR(inddir,indreg,51)  !  put it all in resid
+         BSCIBYR(inddir,indreg,11:12)=0.
+		 BSCIBYR(inddir,indreg,16)=0.
+		 BSCIBYR(inddir,indreg,22)=0.
 
-         BOILIBYR(inddir,indreg,7)=BOILIBYR(inddir,indreg,2)  !  put it all in resid
-         BOILIBYR(inddir,indreg,8:11)=0.
          if (inddir.le.21) then
 			 CHPIBYR(inddir,indreg,7)=CHPIBYR(inddir,indreg,2)  !  put it all in resid
 			 CHPIBYR(inddir,indreg,8:11)=0.
-	 endif
-
-      endif  ! double check index on below
+		 endif
+      ENDIF
       ! electricity has no chp, so boilibyr is a simple assignment
-	  if (inddir.ge.7) BOILIBYR(inddir,indreg,12)=BSCIBYR(inddir,indreg,12)  ! electric boilers
+	  if (inddir.ge.7) BOILIBYR(inddir,indreg,1)=BSCIBYR(inddir,indreg,1)  ! electric boilers
 
 	enddo
   enddo
 ! do sum somes  
   do indreg=1,4
-    do ifuel=1,12
+    do ifuel=1,mainfuels	! no biomass in total
       BSCIBYR(numind+1,indreg,ifuel)=sum(BSCIBYR(1:numind,indreg,ifuel))
     enddo
   enddo
   do inddir=1,numind+1
-    do ifuel=1,12
+    do ifuel=1,mainfuels	! no biomass in total
       BSCIBYR(inddir,5,ifuel)=sum(BSCIBYR(inddir,1:4,ifuel))
     enddo
   enddo
   do indreg=1,4
-    do ifuel=1,11  ! no electric fuel because electric boilers don't have chp  KPE 9/30/22
+    do ifuel=1,11  ! no electric fuel because electric boilers don't have chp
       CHPIBYR(numind+1,indreg,ifuel)=sum(CHPIBYR(1:numind,indreg,ifuel)) ! -3 omitted for all the industries
     enddo
   enddo
@@ -6035,55 +5377,34 @@ implicit none
     enddo
   enddo
   do indreg=1,4
-    do ifuel=1,12
+    do ifuel=1,mainfuels	! no biomass in total
       BOILIBYR(numind+1,indreg,ifuel)=sum(BOILIBYR(1:numind,indreg,ifuel))
     enddo
   enddo
   do inddir=1,numind+1
-    do ifuel=1,12
+    do ifuel=1,mainfuels	! no biomass in total
       BOILIBYR(inddir,5,ifuel)=sum(BOILIBYR(inddir,1:4,ifuel))
     enddo
   enddo
-! Reset Fossil boiler shares using nonCHP boiler fuel .  Warning: Fuel order inconsistent among
-! these arrays.  See itlbshr.txt
-!
-  do inddir=1,numind
-    do indreg=1,4
-      sumfos=sum(BOILIBYR(inddir,indreg,1:3)) + BOILIBYR(inddir,indreg,12) ! last term is electric
-      if(sumfos.gt.0) then
-        tlbshr(inddir,indreg,5)=BOILIBYR(inddir,indreg,12)/sumfos ! electric inprogress
-        tlbshr(inddir,indreg,2)=BOILIBYR(inddir,indreg,3)/sumfos !ngas
-        tlbshr(inddir,indreg,3)=BOILIBYR(inddir,indreg,1)/sumfos !coal
-        tlbshr(inddir,indreg,4)=BOILIBYR(inddir,indreg,2)/sumfos !oil
-      else
-        sumfos=sum(BSCIBYR(inddir,indreg,1:3)) + BSCIBYR(inddir,indreg,12)
-        if(sumfos.gt.0) then
-		  tlbshr(inddir,indreg,5)=BSCIBYR(inddir,indreg,12)/sumfos !electric
-          tlbshr(inddir,indreg,2)=BSCIBYR(inddir,indreg,3)/sumfos !ngas
-          tlbshr(inddir,indreg,3)=BSCIBYR(inddir,indreg,1)/sumfos !coal
-          tlbshr(inddir,indreg,4)=BSCIBYR(inddir,indreg,2)/sumfos !oil
-        endif
-      endif
-    enddo
-  enddo
+  
   if(prtdbgi.eq.3) then
 ! write out in approximate same layout as input file itlbshr.txt'
     write(6,'(a)') 'Revised base year BSC fuel use after Form 860b adjustment'
-    write(6,'(a)') 'IND REG    Resid     Dist     ngas      LPG     coal    other    oth pet    pet coke   electric    oil-tot    total'
+    write(6,'(a)') 'IND REG    Resid     Dist     ngas      propane    coal    renew    oth pet    pet coke   electric    oil-tot    total'
     do inddir=1,numind+1
       do indreg=1,5
         write(6,'(2i3,11f9.2)') inddir,indreg, &
-         BSCIBYR(inddir,indreg,7), &  ! resid
-         BSCIBYR(inddir,indreg,8), &  ! disti
-         BSCIBYR(inddir,indreg,3), &  ! ngas
-         BSCIBYR(inddir,indreg,9), &  ! LPG
-         BSCIBYR(inddir,indreg,1), &  ! coal
-         BSCIBYR(inddir,indreg,4), &  ! other
-         BSCIBYR(inddir,indreg,10), &  ! oil oth
-         BSCIBYR(inddir,indreg,11), &  ! petrol coke
-         BSCIBYR(inddir,indreg,12), &  ! electricity--new for AEO2023--this prints out OK here
-         BSCIBYR(inddir,indreg,2), &  ! oil-tot
-         sum(BSCIBYR(inddir,indreg,1:4))
+         BSCIBYR(inddir,indreg,10), &  ! resid
+         BSCIBYR(inddir,indreg,11), &  ! disti
+         BSCIBYR(inddir,indreg,4),  &  ! ngas
+         BSCIBYR(inddir,indreg,12), &  ! propane
+         BSCIBYR(inddir,indreg,7),  &  ! coal
+         BSCIBYR(inddir,indreg,42), &  ! renewables
+         BSCIBYR(inddir,indreg,22), &  ! other petroleum
+         BSCIBYR(inddir,indreg,16), &  ! petrol coke
+         BSCIBYR(inddir,indreg,1),  &  ! electricity
+         BSCIBYR(inddir,indreg,51), &  ! oil subtotal
+		 sum(BSCIBYR(inddir,indreg,1:50))	! total
       enddo
     enddo
 
@@ -6106,27 +5427,21 @@ implicit none
       enddo
     enddo
     write(6,'(a)') 'nonCHP fuel use after MECS-860b adjustment'
-    write(6,'(a)') 'IND REG    Resid     Dist     ngas      LPG     coal    other    oth pet    pet coke   oil-tot  electric  total',&
-  '  %ngas  %coal   %oil'  
+    write(6,'(a)') 'IND REG    Resid     Dist     ngas      propane    coal    renewables    oth pet    pet coke  electric  oil-tot  total'
     do inddir=1,numind+1
       do indreg=1,5
         write(6,'(2i3,10f9.2\)') inddir,indreg, &
-         BOILIBYR(inddir,indreg,7), &  ! resid
-         BOILIBYR(inddir,indreg,8), &  ! disti
-         BOILIBYR(inddir,indreg,3), &  ! ngas
-         BOILIBYR(inddir,indreg,9), &  ! LPG
-         BOILIBYR(inddir,indreg,1), &  ! coal
-         BOILIBYR(inddir,indreg,4), &  ! other
-         BOILIBYR(inddir,indreg,10), &  ! oil oth
-         BOILIBYR(inddir,indreg,11), &  ! petrol coke
-         BOILIBYR(inddir,indreg,2), &  ! oil-tot
-		 BOILIBYR(inddir,indreg,12), &  ! electric--this is OK & nonzero
-         sum(BOILIBYR(inddir,indreg,1:4))   ! total
-         if(inddir.le.numind.and.indreg.le.4) then
-           write(6,'(3f7.4)') (tlbshr(inddir,indreg,ifuel),ifuel=2,4)  ! boiler fuel shares
-         else
-           write(6,*)
-         endif
+         BOILIBYR(inddir,indreg,10), &  ! resid
+         BOILIBYR(inddir,indreg,11), &  ! disti
+         BOILIBYR(inddir,indreg,4), &  ! ngas
+         BOILIBYR(inddir,indreg,12), &  ! propane
+         BOILIBYR(inddir,indreg,7), &  ! coal
+         BOILIBYR(inddir,indreg,42), &  ! renewables
+         BOILIBYR(inddir,indreg,22), &  ! other petroleum
+         BOILIBYR(inddir,indreg,16), &  ! petrol coke
+		 BOILIBYR(inddir,indreg,1), &  ! electric
+         BOILIBYR(inddir,indreg,51), &  ! oil subtotal
+         sum(BOILIBYR(inddir,indreg,1:50))   ! total
       enddo
     enddo
 
@@ -6142,112 +5457,64 @@ end subroutine mecsless860b
       SUBROUTINE IRSTEPBYP(ISTR,IOSi,IERR,IFLAG)
    use i_
       IMPLICIT NONE
-!
+
       CHARACTER*200 ISTR,ISTR2
       CHARACTER*8 TNAME, ISTPN(30)
       INTEGER*4 IOSi
       INTEGER IFL,IERR,IDUM,IFX,ISTP,IFLAG
       REAL TEMP(4)
-!
+
       IERR=0
       ISTPN(:) = ''
-!
+
 !   FIRST READ IS FORMATTED TO READ CHARACTER DATA
       READ(ISTR,1,ERR=100,IOSTAT=IOSi) TNAME,ISTR2
 1     FORMAT(A8,1X,A192)
-!	  write(6,*) "First read of IRSTEPBYP TNAME and ISTR2 *",TNAME,'*',ISTR2
 
-!
 !   SECOND READ IS UNFORMATTED; IDUM IS THE SEQUENCE NUMBER--NOT USED
       READ(ISTR2,*,ERR=100,IOSTAT=IOSi) IDUM,IFX, &
        (TEMP(J),J=1,4)
-!
+
 !   ASSIGN THE VALUES IN INDSTEPNAME TO AN 8 CHARACTER ARRAY,
 !     CHECK FOR A VALID STEP NAME, AND FIND THE STEP NUMBER
-! 
  		DO J=1,MPASTP
-		ISTPN(J)=INDSTEPNAME(J)
+			ISTPN(J)=INDSTEPNAME(J)
 		ENDDO
-	  	  
-!
+
       CALL ICHECK(IFLAG,MPASTP,ISTPN,TNAME,ISTP)   ! redimension for lower and upperbound of indsteps
       IF(IFLAG.EQ.0) THEN                   ! INVALID STEP NAME
-!        WRITE(6,*) 'SUB_IRSTEPBYP WARNING:  *',INDNAME,'*',' HAS NO STEP *' &
-!               ,TNAME,'* SKIP RECORD'
 5       FORMAT(1X,'SUB_IRSTEPBYP WARNING:  *',A8,'*',' HAS NO STEP *' &
                ,A8,'* SKIP RECORD')
         RETURN
       ENDIF
-!
+
 !   COUNT FUELS FOR STEP ISTP, STORE FUEL NUMBER AND OTHER VALUES
 !     IN THE APPROPRIATE POSITION OF THE ARRAYS.
-!
+
       IFBYP(ISTP)=IFBYP(ISTP)+1
       IFL=IFBYP(ISTP)
       IFLOCBY(IFL,ISTP)=IFX
-!
+
       BYPINT(1,IFL,ISTP)=TEMP(1)
       BYPCSC(1,IFL,ISTP)=TEMP(2)
-!
+
 !  SET VINTAGE 2 VALUES EQUAL TO VINTAGE 3 VALUES
-!
 
       DO J=2,3
         BYPINT(J,IFL,ISTP)=TEMP(3)
         BYPCSC(J,IFL,ISTP)=TEMP(4)
       ENDDO
-!
+
       DO J=1,3
         BYPINTLAG(J,IFL,ISTP)=BYPINT(J,IFL,ISTP)
       ENDDO
       RETURN
-!
+
 100   IERR=8
-!
+
       RETURN
       END SUBROUTINE IRSTEPBYP
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!   SUBROUTINE IFINLCHECK CHECKS FOR 1 .HEADER RECORD AND THE CORRECT
-!     NUMBER OF COGEN RECORDS FOR
-!     EACH REGION OF EACH INDUSTRY AND STORES THE INDUSTRY NAME.
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!
-      SUBROUTINE IFINLCHECK(IFLAG,NREG,IHEADER,ISTEPDEF,ICOGEN,EIFLAG,INEIELAS,IEISTEP)
-   use i_
 
-      IMPLICIT NONE
-      INTEGER IFLAG,NREG,IHEADER,ISTEPDEF, &
-        ICOGEN,INEIELAS,IEISTEP, &
-        ITMP,EIFLAG
-
-      IFLAG=0
-!
-!   MUST BE ONE AND ONLY ONE .HEADER RECORD PER FILE SUBSECTION
-      IF(IHEADER.NE.1)THEN
-        IFLAG=IFLAG+1
-        WRITE(6,1) INDNAME,NREG,IHEADER
-      ENDIF
-!
-!   NO MORE THAN ONE COGEN RECORD PER FILE SUBSECTION
-      IF(ICOGEN.GT.1) THEN
-        IFLAG=IFLAG+1
-        WRITE(6,3) INDNAME,NREG,ICOGEN
-      ENDIF
-      IF(IFLAG.NE.0) WRITE(6,6)INDNAME,NREG,IFLAG
-      IF(IFLAG.EQ.0) INAMECK(INDDIR)=INDNAME
-!
-1     FORMAT(1X,'SUB_IFINLCHECK ERROR:  ',A,' REGION ' &
-             ,I3,' HAS ',I3,' .HEADER')
-3     FORMAT(1X,'SUB_IFINLCHECK ERROR:  ',A,' REGION ' &
-             ,I3,' HAS ',I3,' COGEN,', &
-             ' SHOULD HAVE 0 OR 1')
-6     FORMAT(1X,'SUB_IFINLCHECK NOTE:  ',A,' REGION ' &
-             ,I3,' HAS',I3,' ERROR(S) AS ', &
-             'INDICATED ABOVE.  CORRECT AND RE-EXECUTE')
-!
-      RETURN
-      END SUBROUTINE IFINLCHECK
-!
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !   SUBROUTINE IFINLCALC CALCULATES SELECTED VALUES AT THE END OF
 !     REGIONAL DATA FOR EACH INDUSTRY.
@@ -6281,16 +5548,14 @@ end subroutine mecsless860b
   100 CONTINUE
 
 !   COMPUTE THE SHARE OF TOTAL FUEL CONSUMPTION FOR EACH FUEL
-!
-      BTEMP=0.0
-      DO IS=1,IFSMAX
-        BTEMP=BTEMP+BSSHR(IS)
-      ENDDO
-      if(bsshr(is).gt.0.) then
-        DO IS=1,IFSMAX
+
+      BTEMP=sum(BSSHR(1:mainfuels))
+ 	  
+      DO IS=1,mainfuels
+		if(bsshr(is).gt.0.) then		
           BSSHR(IS)=BSSHR(IS)/BTEMP
-        ENDDO
-      endif
+		endif
+      ENDDO
       RETURN
       END SUBROUTINE IFINLCALC
 !
@@ -6300,14 +5565,12 @@ end subroutine mecsless860b
 !     ZERO, OR ONE.
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !
-      SUBROUTINE IZEROOUT(ITAG,NLASTREG,ISTP,NSTEP,IEQ,IFPX,NFUELS, &
-          IFUEL,IHEADER,ISTEPDEF,ICOGEN,INEIELAS,IEISTEP)
+      SUBROUTINE IZEROOUT(ITAG,NLASTREG,ISTP,NSTEP,NFUELS,IFUEL,IHEADER)
    use i_
       IMPLICIT NONE
 !
 !   DECLARE LOCAL VARIABLES
-      INTEGER NLASTREG,ISTP,NSTEP,IEQ,IFPX,NFUELS,IFUEL,K,L, &
-         IHEADER,ISTEPDEF,ICOGEN,INEIELAS,IEISTEP
+      INTEGER NLASTREG,ISTP,NSTEP,NFUELS,IFUEL,K,L,IHEADER
       CHARACTER *8 ITAG
 !
 !   INITIALIZE VARIABLES TO ZERO, BLANK, OR ONE AS APPROPRIATE
@@ -6319,18 +5582,11 @@ end subroutine mecsless860b
       MPASTP = 0
       ISTP=    0
       NSTEP   =0
-      IEQ     =0
-      IFPX    =0
       NFUELS  =0
       IFUEL   =0
       IHEADER =0
-      ISTEPDEF=0
-      ICOGEN  =0
-      INEIELAS=0
-      IEISTEP =0
-      IFSMAX  =0
       IFSBYP  =0
-!
+
       NTMAX(:)=0
       PRODRETR(:)=0.0
       INDSTEPNAME(:)='        '
@@ -6343,14 +5599,9 @@ end subroutine mecsless860b
       BCSC(:,:,:)=0.0
       BYPINT(:,:,:)=0.0
       BYPCSC(:,:,:)=0.0
-      IFSLOC(:)=0
       BSSHR(:)=0.0
       IFSLOCBY(:)=0
-      BYSINT(:)=0.0
-      BYBSCSC(:)=0.0
       IFLOC(:,:)=0
-	  PAPER_BLIQ = 0.0
-	  PAPER_BLIQQ = 0.0
 	  sumprodcur(:,:) = 0.0
 	  PAPER_STEAM_GRS(:,:) = 0.0 
 	  PP_STEAM_Cogen(:) = 1.0
@@ -6376,12 +5627,10 @@ end subroutine mecsless860b
       COPYBUF(INDREG,INDDIR).PRODVX     = PRODVX
       COPYBUF(INDREG,INDDIR).PRODVXLAG  = PRODVXLAG
       COPYBUF(INDREG,INDDIR).EMPLX      = EMPLX
-      COPYBUF(INDREG,INDDIR).EMPLXLAG   = EMPLXLAG
       COPYBUF(INDREG,INDDIR).ENBINT     = ENBINT
       COPYBUF(INDREG,INDDIR).ENBQTY     = ENBQTY
       COPYBUF(INDREG,INDDIR).ENSQTY     = ENSQTY
       COPYBUF(INDREG,INDDIR).BSSHR      = BSSHR
-      COPYBUF(INDREG,INDDIR).BSSHRLAG   = BSSHRLAG
       COPYBUF(INDREG,INDDIR).STEMCUR    = STEMCUR
       COPYBUF(INDREG,INDDIR).STEMCURLAG = STEMCURLAG
       COPYBUF(INDREG,INDDIR).COGSTEAM   = COGSTEAM
@@ -6420,8 +5669,6 @@ end subroutine mecsless860b
       COPYBUF(INDREG,INDDIR).PHDRAT     = PHDRAT
       COPYBUF(INDREG,INDDIR).INDDIR     = INDDIR
       COPYBUF(INDREG,INDDIR).IDVAL      = IDVAL
-      COPYBUF(INDREG,INDDIR).IFSMAX     = IFSMAX
-      COPYBUF(INDREG,INDDIR).IFSLOC     = IFSLOC
       COPYBUF(INDREG,INDDIR).IFSBYP     = IFSBYP
       COPYBUF(INDREG,INDDIR).IFSLOCBY   = IFSLOCBY
       COPYBUF(INDREG,INDDIR).NTMAX      = NTMAX
@@ -6437,7 +5684,7 @@ end subroutine mecsless860b
       COPYBUF(INDREG,INDDIR).NumRptGrpSteps = NumRptGrpSteps
       COPYBUF(INDREG,INDDIR).RptGrpSteps    = RptGrpSteps
       COPYBUF(INDREG,INDDIR).RptGrpNames    = RptGrpNames
-      COPYBUF(INDREG,INDDIR).RptGrpSName    = RptGrpSName
+      COPYBUF(INDREG,INDDIR).RptGrpStepName    = RptGrpStepName
       COPYBUF(INDREG,INDDIR).INDNAME    = INDNAME
       COPYBUF(INDREG,INDDIR).INDSTEPNAME= INDSTEPNAME
 
@@ -6461,12 +5708,10 @@ end subroutine mecsless860b
       PRODVX           = COPYBUF(INDREG,INDDIR).PRODVX
       PRODVXLAG        = COPYBUF(INDREG,INDDIR).PRODVXLAG
       EMPLX            = COPYBUF(INDREG,INDDIR).EMPLX
-      EMPLXLAG         = COPYBUF(INDREG,INDDIR).EMPLXLAG
       ENBINT           = COPYBUF(INDREG,INDDIR).ENBINT
       ENBQTY           = COPYBUF(INDREG,INDDIR).ENBQTY
       ENSQTY           = COPYBUF(INDREG,INDDIR).ENSQTY
       BSSHR            = COPYBUF(INDREG,INDDIR).BSSHR
-      BSSHRLAG         = COPYBUF(INDREG,INDDIR).BSSHRLAG
       STEMCUR          = COPYBUF(INDREG,INDDIR).STEMCUR
       STEMCURLAG       = COPYBUF(INDREG,INDDIR).STEMCURLAG
       COGSTEAM         = COPYBUF(INDREG,INDDIR).COGSTEAM
@@ -6505,8 +5750,6 @@ end subroutine mecsless860b
       PHDRAT           = COPYBUF(INDREG,INDDIR).PHDRAT
       INDDIR           = COPYBUF(INDREG,INDDIR).INDDIR
       IDVAL            = COPYBUF(INDREG,INDDIR).IDVAL
-      IFSMAX           = COPYBUF(INDREG,INDDIR).IFSMAX
-      IFSLOC           = COPYBUF(INDREG,INDDIR).IFSLOC
       IFSBYP           = COPYBUF(INDREG,INDDIR).IFSBYP
       IFSLOCBY         = COPYBUF(INDREG,INDDIR).IFSLOCBY
       NTMAX            = COPYBUF(INDREG,INDDIR).NTMAX
@@ -6522,7 +5765,7 @@ end subroutine mecsless860b
       NumRptGrpSteps   = COPYBUF(INDREG,INDDIR).NumRptGrpSteps
       RptGrpSteps      = COPYBUF(INDREG,INDDIR).RptGrpSteps
       RptGrpNames      = COPYBUF(INDREG,INDDIR).RptGrpNames
-      RptGrpSName      = COPYBUF(INDREG,INDDIR).RptGrpSName
+      RptGrpStepName      = COPYBUF(INDREG,INDDIR).RptGrpStepName
       INDNAME          = COPYBUF(INDREG,INDDIR).INDNAME
       INDSTEPNAME      = COPYBUF(INDREG,INDDIR).INDSTEPNAME
       return
@@ -6547,7 +5790,7 @@ end subroutine mecsless860b
       REAL ab_covd_em_GLASS,ab_covd_em_CEMENT,ab_covd_em_STEEL
       REAL ab_covd_em_ALUM,ab_covd_em_FAB,ab_covd_em_MACH
       REAL ab_covd_em_COMP,ab_covd_em_TRANEQ,ab_covd_em_ELECEQ
-      REAL ab_covd_em_WOODPRD,ab_covd_em_PLASTIC ! ab_covd_em_BOM
+      REAL ab_covd_em_WOODPRD,ab_covd_em_PLASTIC
 	  REAL ab_covd_em_LTCHEM, ab_covd_em_OTHRNMM, ab_covd_em_OTHRPRIM, ab_covd_em_MISCFIN 
 
       REAL TEMP_VALUE
@@ -6557,12 +5800,9 @@ end subroutine mecsless860b
 
       DATA INTSVE/7,8,9,10,11,12,13/
       DATA NONMFG/0,0,1,2,3,4,5,6/
-	  
-	  !Real, intent(IN) :: datacarbshrca
 
 !  Check runtime option to turn AB32SW switch for implementation of AB32 cap-and-trade in State of California.
 !  The default setting is ON (1).
-!
       AB32SW=RTOVALUE('AB32SW  ',1)
 
 !****
@@ -6580,8 +5820,8 @@ end subroutine mecsless860b
 !  ASSIGN AB32 CARBON SHARE FOR STATE OF CALIFORNIA.
 !****
       IF(AB32SW.EQ.1) THEN
-        IF(INDREG.EQ.4.AND.CURCALYR.ge.IBYR) THEN        !  Program starts 2013. POT_ibyr2  ! kpe changed ibyr2 to ibyr because it doesn't seem as if carbshrCA prints before this
-          CARBSHR_AB(INDDIR,INDREG)=min(CARBSHRCA(INDDIR),1.0)    !  2010 CA share of covered facilities in western census region.
+        IF(INDREG.EQ.4.AND.CURCALYR.ge.IBYR) THEN
+          CARBSHR_AB(INDDIR,INDREG)=min(CARBSHRCA(INDDIR),1.0)    !  2018 CA share of covered facilities in western census region.
         ELSE
           CARBSHR_AB(INDDIR,INDREG)=0.     !  Zero value denotes no covered facilities in CA.
         ENDIF
@@ -6594,7 +5834,7 @@ end subroutine mecsless860b
 		     call prodflow_paper                      ! this replaces CALPROD for paper
           else if ((inddir.eq.12).and.(curcalyr.ge.ibyr))  then
 		     call prodflow_steel                      ! this replaces CALPROD for iron and steel
-          else if (curcalyr.ge.ibyr) then ! KPE added conditional
+          else if (curcalyr.ge.ibyr) then
              CALL CALPROD
           endif
 
@@ -6602,9 +5842,7 @@ end subroutine mecsless860b
       if (version == 'original') then
 		DO ISTEP=1,MPASTP
 			DO IFUEL=1,IFMAX(ISTEP)
-
-			CALL CALCSC(IFUEL,ISTEP)
-
+				CALL CALCSC(IFUEL,ISTEP)
 			ENDDO
 		ENDDO
 	  endif 
@@ -6636,23 +5874,15 @@ end subroutine mecsless860b
 !  DETERMINE BYPRODUCT FUEL PRODUCED IN THE PA STEPS.
 !****
             if (curcalyr.le.IBYR) BYPADIBYR(:) = 1. ! byproduct reconcilation in calbhyprod
-            if ((inddir.ne.8).and.(inddir.ne.12)) then ! KPE conditional
+            if ((inddir.ne.8).and.(inddir.ne.12)) then
 				CALL CALBYPROD  
 			else ! initialize variables	
 				BYPQTY(:,:,:)=0.0
-				DO ifx=1,mainfuels
-					BYPBSCM(ifx)=0.0
-				enddo
-				DO ifx=1,7
-					BYPBSCI(ifx)=0.0
-				enddo
-				DO ifx=1,9
-				BYPBSCR(ifx)=0.0
-			    BYPADIBYR(ifx) = 1.
-				enddo
-
+				BYPBSCM(1:mainfuels)=0.0
+				BYPBSCI(1:7)=0.0
+				BYPBSCR(1:9)=0.0
+				BYPADIBYR(1:9) = 1.
 			endif
-
 !****
 !    ADD UP TOTAL BUILDING ENERGY CONSUMPTION.
 !****
@@ -6663,27 +5893,33 @@ end subroutine mecsless860b
 !  CALCULATE ENERGY CONSUMPTION IN BOILER/STEAM/COGEN.
 !****
 !bsc is included in P&A for steel and paper  
-if ((inddir.eq.12).or.(inddir.eq.8)) then   ! made the contingency on industry only; then call ppis_bsc only for certain years
-   if (CURCALYR.GT.maxcogyr) call ppis_bsc   !  KPE call for all regions--but only after maxcogyr--was ge.ibyr  
-
+if ((inddir.eq.12).or.(inddir.eq.8)) then
+   if (CURCALYR.GT.maxcogyr) call ppis_bsc   !  KPE call for all regions--but only after maxcogyr
 else
 !****
 !    CALCULATE ELECTRICITY GENERATION.
 !****
 
       CALL CALGEN
-	  ! zero out elown and elsale as to industries 22-24. Take out statement when CHP is updated.
+	  ! zero out elown and elsale as to industries 22-24. 860 survey doesn't have
+	  ! the NAICS granularity to add industries 22–24 to tthe CHP files
 	  if (inddir.gt.21) then 
 		elown  = 0
 		elsale = 0
-endif
+	  endif
       if(prtdbgi.eq.3) then
         call pcoggen
       endif
 
 !****
 !    CALCULATE THIS YEAR'S FUEL SHARES AND INTENSITIES.
+!
+!    ALSO INTRODUCE BOILER EFFICIENCY ADDER TO ACCOUNT FOR HEAT PUMP ADDITIONS
 !****
+     IF ((CURITR == 1).and.(INDDIR == 1).and.(INDREG == 1)) then 
+	     beff(1) = beff(1)*HPbeff
+		 write(6,*) 'boiler efficiency/COP for ', curcalyr, ' is ', beff(1)
+	 endif
      if (inddir.ne.8 .and. inddir.ne.12) CALL CALBSC
 
 !****
@@ -6704,33 +5940,27 @@ endif
 ! not quite --- the first modcal invocation is for year ibyr2 (at least as it stands in the code now); this invocation
 ! is for the remaining years
 
-! old version
-!  IF( (inddir.eq.10 .or. inddir.eq.11  .or. inddir.eq.13 .or. inddir.eq.12 .or. inddir.eq.8).and. version.ne.'tech') then
-!     return
-!  endif
-
 ! kpe version --- invokes the process flow industry subroutines
 !  this is where the mecsbench procedure used to be --- now at bottom of calpatot
-  IF ((inddir == 8).or.((inddir >= 10).and.(inddir <= 13))) then
+	IF ((inddir == 8).or.((inddir >= 10).and.(inddir <= 13))) then
 !****
 !  Benchmark and CALCULATE OVERALL INDUSTRY TOTALS.
 !****
-
- if (CURCALYR.ge.(ibyr+1)) then 
-      SELECT CASE (INDDIR)
-		Case (12)
-	      call benchmecs(steelcon(1,1,curiyr-1),is_mecsbench(indreg,1:10))
-        Case (8)
-          call benchmecs(papercon(1,1,curiyr-1),pp_mecsbench(indreg,1:10))
-        Case (13)
-          call benchmecs(alumcon(1,1,curiyr-1),al_mecsbench(indreg,1:10))
-        Case (11)
-          call benchmecs(cementcon(1,1,curiyr-1),cm_mecsbench(indreg,1:10))
-        Case (10)
-          call benchmecs(glasscon(1,1,curiyr-1),gl_mecsbench(indreg,1:10))
-      end select
-  endif
-endif ! process flow industry total----
+		if (CURCALYR.ge.(ibyr+1)) then 
+			SELECT CASE (INDDIR)
+				Case (12)
+				  call benchmecs(steelcon(1,1,curiyr-1),is_mecsbench(indreg,1:10))
+				Case (8)
+				  call benchmecs(papercon(1,1,curiyr-1),pp_mecsbench(indreg,1:10))
+				Case (13)
+				  call benchmecs(alumcon(1,1,curiyr-1),al_mecsbench(indreg,1:10))
+				Case (11)
+				  call benchmecs(cementcon(1,1,curiyr-1),cm_mecsbench(indreg,1:10))
+				Case (10)
+				  call benchmecs(glasscon(1,1,curiyr-1),gl_mecsbench(indreg,1:10))
+			END SELECT
+		endif
+	endif ! process flow industry total----
 
       IF(INDREG.EQ.4.AND.CURCALYR.EQ.ibyr) THEN
 
@@ -7061,35 +6291,27 @@ endif ! process flow industry total----
       REAL X
       INTEGER IS,IV,IT,IP,IC
       integer nz
-	  INTEGER INDBMOVR2
-	  INTEGER INDBMOVR
+	  INTEGER INDBMOVR, INDBMOVR2
       parameter(nz=numind*4)
       REAL PRODXIBYR(numind,4)/nz*0./    ! Holds base year version of PRODX (Ind. Production) by industry and region
-      REAL PRODXMID/0./              ! Holds Change in PRODX since the base year
-      REAL PRODXNEW/0./              ! Holds Change in PRODX from prior year
+      REAL PRODXMID/0./              ! holds change in PRODX since the base year
+      REAL PRODXNEW/0./              ! holds change in PRODX from prior year
       INTEGER MAXSTPS
       PARAMETER (MAXSTPS=maxstep+1)
       REAL PRODSAV(4,MAXSTPS)
       REAL ALPHA(7)
-      REAL MCPRICE(4)
       INTEGER IY,CASE,isub
       real old_ship(5),new_ship(5),surv_ship
 ! Retirement Rate price sensitivity function
-      REAL RetireBeta/2./    ! Logit coefficient for use in choice between default and maximum retirement rate
-      REAL RetireMaxRate     ! Maximum Retirement rate
-      REAL RetirePrat(maxstps) ! Ratio of current Prices to base year Prices
-      REAL RetirePriceFactor ! Multiplier on retirement rate due to energy price response
-      REAL RetireRate(0:maxstps)     ! retirement rate after application of price sensitivity parameter(by step)
-
-!      REAL AveSPrc           !function to return price change since a specified year
-      REAL ImportFac          ! factor for import penetration of cement in high price scenarios
+      REAL RetireBeta/2./    	! Logit coefficient for use in choice between default and maximum retirement rate
+      REAL RetireMaxRate     	! Maximum Retirement rate
+      REAL RetirePrat(maxstps) 	! Ratio of current prices to base year prices
+      REAL RetirePriceFactor 	! Multiplier on retirement rate due to energy price response
+      REAL RetireRate(0:maxstps)! retirement rate after application of price sensitivity parameter(by step)
+      REAL ImportFac          	! factor for import penetration of cement in high price scenarios
       REAL KeepPF(2,maxstep,maxlinks) !keep the original prodflow so it can be restored at the end of the routine
       REAL ImpScalar/0.80/
-      REAL WetFac/0.80/   ! Wet Kilns are reduced more than dry kilns
 
-      real alprodtotal(4) ! regional primary + secondary total from prodflow matrix;
-                          ! assume this total maintained even though relative amounts of primary and secondary
-                          ! flows can vary over time
       real alslope(4)     ! electric price regression slopes
       real alslopelag(4)  ! electric price lag regression slopes
       real alintercept(4) ! regression intercepts
@@ -7122,7 +6344,7 @@ endif ! process flow industry total----
 ! rates specified in the PRODFLOW(NEW, , )  array
 
     REAL IDLED_OLD,IDLED_MID
-    INTEGER OLD,MID,NEU,TOT ,DOWN_STEP,  & ! Constants Used to Refer to Subscripts by Name
+    INTEGER OLD,MID,NEU,TOT,DOWN_STEP,  & ! Constants Used to Refer to Subscripts by Name
     OLD_RATE,NEW_RATE                    ! Constants Used to Refer to Subscripts by Name
     PARAMETER(OLD=1,MID=2,NEU=3,TOT=4)    ! Constants Used to Refer to Subscripts by Name
     PARAMETER(OLD_RATE=1,NEW_RATE=2)      ! Constants Used to Refer to Subscripts by Name
@@ -7141,6 +6363,7 @@ endif ! process flow industry total----
       data alefficiency/1.0,1.0,1.0,1.0/    ! factors in changes for electricity; 1.0 assumes 14500 kWh/ton
       DATA ALPHA/1.0,2.5,3.0,3.5,4.0,4.5,5.0/
 
+
       IY = IYR - baseyr + 1
       IR = INDREG
 ! *** assign the behave runtime variable            ***
@@ -7156,12 +6379,11 @@ endif ! process flow industry total----
       DO IS=1,MPASTP
         RetirePrat(is)=AveSPrc(ir,ibyr2-1989,curiyr,is)  ! last historical price year is IND base year
         ClinkPrat(is) =AveSPrc(ir,19,curiyr,is)  ! for clinker flow rate change use 2008 as clinker base year
-     !   if(RetirePrat(is).lt.1.1) RetirePrat(is)=1.0   ! only price changes >10 % influence retires
-      enddo
+      ENDDO
 
 !   If this is a RETIREMENT SENSITIVITY CASE,
 !   Adjust Retirement Rates by sensitivity multiplier
-      IF(IRETIRE.EQ.1.AND.curcalyr.EQ.IBYR+2) THEN  ! POT_IBYROTHER 2008 to IBYR+2
+      IF(IRETIRE.EQ.1.AND.curcalyr.EQ.IBYR+2) THEN
          DO IS = 1,MPASTP
           PRODRETR(IS)=MIN(0.9,RETRATE*PRODRETR(IS))
          ENDDO
@@ -7176,32 +6398,31 @@ endif ! process flow industry total----
 ! if average energy prices have not increase.
 
       DO IS = 1,MPASTP
-
         X=RetirePrat(is)**RetireBeta
         RetirePriceFactor=X/(1.0+X)
 
         if(curcalyr.gt.techstrtyr) then
-          if(frztech.eq.1)then !if frozen technology, change Retirements
-            RetireRate(is)=PRODRETR(IS)*RetirePriceFactor  ! if no price change, rate is 0.5 of default rate
-          elseif(hitech.eq.1)then !if high technology, change Retirements
-            RetireRate(is)=3.0*PRODRETR(IS)*RetirePriceFactor
-          else
-            RetireRate(is)=2.0*PRODRETR(IS)*RetirePriceFactor
-          endif
+			if(frztech.eq.1)then !if frozen technology, change retirements
+				RetireRate(is)=PRODRETR(IS)*RetirePriceFactor  ! if no price change, rate is 0.5 of default rate
+			elseif(hitech.eq.1)then !if high technology, change Retirements
+				RetireRate(is)=3.0*PRODRETR(IS)*RetirePriceFactor
+			else
+				RetireRate(is)=2.0*PRODRETR(IS)*RetirePriceFactor
+			endif
          endif
-      enddo
+      ENDDO
 
       prodcur=prodlag  ! initialize from prior year, every iteration
       idlcap=idlcaplag ! initialize from prior year, every iteration
 
 !    Restore any capacity that was idled last year.
-!    retire the OLD and MIDDLE Production Capacity
+!    retire the OLD and MIDDLE production capacity
 
       DO IS=1,MPASTP
         PRODCUR(MID,IS)=PRODCUR(MID,IS)+PRODCUR(NEU,IS)   ! Put last year's NEW into this year's MID
-        PRODCUR(OLD,IS)=PRODCUR(OLD,IS)+IDLCAP(IS)        ! Add back any Idled Capacity from Last Year
-        IDLCAP(IS)=0.                                     ! Initialize Idle Capacity
-        PRODCUR(NEU,IS)=0.0                               ! Initialize New  Capacity
+        PRODCUR(OLD,IS)=PRODCUR(OLD,IS)+IDLCAP(IS)        ! Add back any idled capacity from Last Year
+        IDLCAP(IS)=0.                                     ! Initialize idle capacity
+        PRODCUR(NEU,IS)=0.0                               ! Initialize new capacity
 
         PRODCUR(OLD,IS)=PRODCUR(OLD,IS)*(1.0-RetireRate(IS))
         PRODCUR(MID,IS)=PRODCUR(MID,IS)                 ! mid not retired *(1.0-RetireRate(IS))
@@ -7222,21 +6443,16 @@ endif ! process flow industry total----
       ENDIF
 !
 !    Break exogenous production out into a base year component, Post-base year component,
-!    and a new component.  This is for compatibility with the process step
-!    vintaging.
-!
-! NSK ibyr2 update 7/2020  
+!    and a new component.  This is for compatibility with the process step vintaging.
+
   IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then ! Process-flow industries     
       IF(IYR.EQ.ibyr) PRODXIBYR(INDDIR,INDREG)=PRODXLAG ! process-flow industries
-  ELSE                                                                                                              ! End-use industries
+  ELSE                                                                     ! End-use industries
       IF(IYR.EQ.ibyr) PRODXIBYR(INDDIR,INDREG)=PRODXLAG ! end-use industries
   ENDIF
       
       PRODXMID=PRODXLAG-PRODXIBYR(INDDIR,INDREG)
       PRODXNEW=PRODX-PRODXLAG
-
-!      IF(IYR.EQ.IBYR+1) PRODXIBYR(INDDIR,INDREG)=PRODXLAG !MECS reset to IBYR
-!      PRODXMID=PRODXLAG-PRODXIBYR(INDDIR,INDREG)
 
       IF(PRTDBGI.gt.1) THEN
         write(6,*) 'PRODXLAG)=',PRODXLAG
@@ -7254,13 +6470,11 @@ endif ! process flow industry total----
 ! For Food sub-industry analysis, fill prodflow based on subindustry shipment share of
 ! total food shipments for years after the baseyear.  POT_07/31/2013
     if(inddir.eq.7) then
-	  ! DO isub=1,4
          DO IS=1,MPASTP
             isub=((is-1)/6)+1            ! this is correct--just weird way of getting subindustry ! subindustry 1 to 4 with 6 steps each
             prodflow(1,IS,1)=foodship(isub,indreg,iyr)/foodship(5,indreg,iyr) ! sub-industry share of food shipments
             prodflow(2,IS,1)=prodflow(1,IS,1)
          enddo
-	  ! enddo
     endif
 ! POT_07/31/2013 END
 
@@ -7284,7 +6498,7 @@ endif ! process flow industry total----
            prodflow(2,is,it) = ImportFac*prodflow(2,is,it)
          endif
          if (is.eq.3) then
-           prodflow(1,is,it) = WetFac*ImportFac*prodflow(1,is,it) ! plus factor for wet kilns
+           prodflow(1,is,it) = ImportFac*prodflow(1,is,it)	! previously had factor for wet kilns; line may not be needed any longer?
          endif
         enddo
        enddo
@@ -7323,8 +6537,8 @@ endif ! process flow industry total----
 
       if (inddir.eq.13 ) then                                                        ! Aluminum Industry prodflow adjustment
         alprodflowtotal(indreg) = prodflow(old_rate,3,1) + prodflow(old_rate,4,1)  ! Add primary and secondary production
-        alratio(indreg) = prcx(1,indreg,2) * 0.003412 * 14500 * alslope(indreg) + &
-                           prcxlag(1,indreg,2) * 0.003412 * 14500 * alslopelag(indreg) + alintercept(indreg)
+        alratio(indreg) = prcx(1,indreg,2) * (CFELQ/10**6) * 14500 * alslope(indreg)  + &
+                           prcxlag(1,indreg,2) * (CFELQ/10**6) * 14500 * alslopelag(indreg) + alintercept(indreg)
          prodflow(old_rate,4,1) = alratio(indreg) * alprodflowtotal(indreg)         ! Reallocate prodflow between primary and secondary
          prodflow(old_rate,4,2) = prodflow(old_rate,4,1)                            !   Set downstep = upstep
          prodflow(old_rate,3,1) = alprodflowtotal(indreg) - prodflow(old_rate,4,1)  !
@@ -7389,7 +6603,7 @@ endif ! process flow industry total----
 
 !     if(inddir.eq.12.and.dnew(8).gt.0.) dnew(8)=0. ! don't attempt to add coking capacity
       if(inddir.eq.12.and.dnew(4).gt.0.) dnew(4)=0. ! don't attempt to add ingot capacity
-!w      Xnewk = matmul(IAnew_inv , Dnew)  ! cumulative new capacity add since beginning
+!      Xnewk = matmul(IAnew_inv , Dnew)  ! cumulative new capacity add since beginning
       Xnew = matmul(IAnew_inv , Dnew)  ! cumulative new capacity add since beginning but
       Xold = matmul(IAold_inv , Dnew)
 
@@ -7443,7 +6657,7 @@ endif ! process flow industry total----
             co2_lime(iy,1:5)=0.
          endif
 
-         co2_clink(iy,ir)=clinkFac*(prodcur(TOT,2)+prodcur(TOT,3)+prodcur(TOT,5)) ! dry+wet+dry-bal
+         co2_clink(iy,ir)=clinkFac*prodcur(TOT,2)
 ! problem with this next line is that the lime industry model may not have been called yet so the value is from the prior year or region
          co2_lime(iy,ir) =CO2_process   !Use lime process emissions from new sub-model
          if(ir.eq.4) then
@@ -7483,7 +6697,7 @@ endif ! process flow industry total----
             IF(inddir.eq.13) THEN
 			    primprod_percent(iy)=ind_flow(4,5)/(ind_flow(4,5)+ind_flow(3,5))  !set primary production percent for AL--																			  ! note: legacy prodcur step index used because prodcur is calculated by legacy code
 				if (curcalyr.lt.ibyr) primprod_percent(iy) = min(0.32,primprod_percent(iy))              ! POT_ibyr215
-				if (curcalyr.ge.ibyr) primprod_percent(iy) = min(0.19365355357531,primprod_percent(iy))                            ! in subsequent years, primary production is constrained at 25%
+				if (curcalyr.ge.ibyr) primprod_percent(iy) = min(0.19365355357531,primprod_percent(iy))  ! in subsequent years, primary production is constrained at 25%
 
 			ENDIF
 
@@ -7494,13 +6708,6 @@ endif ! process flow industry total----
             ENDDO
           ENDIF
         ENDIF
-
-!	Note: for Cement, IND_FLOW_SHARE ratios are used to regionalize energy demand as follows:
-
-!                       is = 1    Finish Grinding demand
-!                       is = 2    Dry Process demand
-!	                  is = 3    Wet Process demand
-!                       is = 4,5  Ignored
 
 !	For Aluminum, IND_FLOW_SHARE ratios are used to regionalize energy demand as follows:
 
@@ -7553,37 +6760,23 @@ endif ! process flow industry total----
       IMPLICIT NONE
       real AveFPrc
       external AveFPrc
-      INTEGER INDBMOVR2
-      INTEGER INDBMOVR
+      INTEGER INDBMOVR, INDBMOVR2
       INTEGER IFUEL,ISTEP,IV,IFX
 ! Variables for price sensitive TPC
       REAL TPCBeta        ! Logit coefficient for use in choice between default and maximum TPC rate
       REAL TPCMaxRate     ! Maximum TPC rate
       REAL TPCPrat        ! Ratio of current Prices to base year Prices
-    !  REAL TPCPriceFactor ! Multiplier on TPC rate due to energy price response
       REAL TPCRate(3)     ! TPC rate after application of price sensitivity parameter(by step)
       Real X
-
-    !  real minpint(3)     ! minimum ENPINT (uec) associated with enr year REI
-
-! variables for the aggressive consumer response scenario
-    
-    !  real penfac/3.0/!factor changes market penetration in aggressive consumer scenario
-     ! real minpintfac(3)     ! factor to reduce minpint for old and new vintage
        
-	Integer T_Mid(17,maxstep)       ! Year of inflection point in logistic curve        NSK H2
-	!Integer T_Mid(15,maxstep)       ! Year of inflection point in logistic curve    
+	Integer T_Mid(17,maxstep)       ! Year of inflection point in logistic curve  
 	Integer T_Shift(17,maxstep)     ! Calibration of curve shape (time shift) 
-	!Integer T_Shift(15,maxstep)     ! Calibration of curve shape (time shift)          NSK H2  
 	REAL alpha_1(maxstep)           ! Time dependence coefficient
 	REAL alpha_2(maxstep)           ! Price dependence coefficient
 	REAL beta_1(maxstep)            ! Logit Exponent 
     REAL REI(3,17,maxstep)          ! REI 
 	REAL REI_Adj(3,17,maxstep)      ! REI adjustment to UEC
 	REAL REI_Adj_Lag(3,17,maxstep)  ! Lagged value of REI adjustment
-    !REAL REI(3,15,maxstep)          ! REI                                              NSK H2
-	!REAL REI_Adj(3,15,maxstep)      ! REI adjustment to UEC                            NSK H2
-	!REAL REI_Adj_Lag(3,15,maxstep)  ! Lagged value of REI adjustment                   NSK H2
 
     ! set the values for testing
     beta_1(istep)=2.0
@@ -7598,8 +6791,7 @@ endif ! process flow industry total----
 		alpha_2(istep) = 0.0
     ENDIF
           
-     ! IY = IYR - 1989
-      IR = INDREG
+    IR = INDREG
 	REI(1,ifuel,istep) = ((1.+bcsc(1,ifuel,istep))**float(ijumpcalyr-ibyr))          ! REI Old
 	REI(3,ifuel,istep) = ((1.+bcsc(3,ifuel,istep))**float(ijumpcalyr-ibyr))          ! REI New
 	REI(2,ifuel,istep) = REI(3,ifuel,istep)                                          ! REI Existing  (superfluous?)
@@ -7614,15 +6806,16 @@ endif ! process flow industry total----
 	                            (1.0 + (alpha_1(istep) * (Max((curcalyr-ibyr2-T_Shift(ifuel,istep)),0)     &
 		                        / (T_Mid(ifuel,istep)-ibyr2-T_Shift(ifuel,istep)))    & 
 								+  alpha_2(istep) * (Max(TPCPrat - 1.0,0.0)))**beta_1(istep))))
-	  TPCRate(iv) = min(REI_Adj(iv,ifuel,istep) / REI_Adj_Lag(iv,ifuel,istep) , 1.0)       ! Dynamic TPC for this time period
+	  TPCRate(iv) = min(REI_Adj(iv,ifuel,istep) / REI_Adj_Lag(iv,ifuel,istep) , 1.0)       ! Dynamic TPC for this time period  
     enddo
+
     TPCRate(2)=TPCRate(3)                               ! Current-vintage plants improve at the same rate as new plants
-    IF(INDDIR.EQ.1.OR.INDDIR.EQ.2) CALL AGTPC(IFUEL,ISTEP)                  ! Calculate TPCs for Agriculture Sectors (Crop & Other)
-    IF(INDDIR.EQ.3)  CALL COALTPC(IFUEL,ISTEP)                ! Calculate TPCs for Coal Mining sector
+!   IF(INDDIR.EQ.1.OR.INDDIR.EQ.2) CALL AGTPC(IFUEL,ISTEP)                  ! Calculate TPCs for Agriculture Sectors (Crop & Other)
+!    IF(INDDIR.EQ.3)  CALL COALTPC(IFUEL,ISTEP)                ! Calculate TPCs for Coal Mining sector
     IF(INDDIR.EQ.4) CALL OGSMTPC(IFUEL,ISTEP)                ! Calculate TPCs for Oil & Gas sector; OGSM values not set on first iteration so don't call
-    IF(INDDIR.EQ.5)  CALL OTH_MINTPC(IFUEL,ISTEP)                ! Calculate TPCs for Other Mining sector
+!   IF(INDDIR.EQ.5)  CALL OTH_MINTPC(IFUEL,ISTEP)                ! Calculate TPCs for Other Mining sector
 !   IF(INDDIR.EQ.6) CALL CONTPC(IFUEL,ISTEP)                 	! Calculate TPCs for the Construction sector
-	
+
 	! 9/6/2016 Call to CON Subroutine commented out by MSN. This call erroneously assumes that CON is split into the 3 categories
     ! of building construction, civil engineering, and trade. This is no longer true (in the program). Commenting out this call to CON Subroutine until
 	! long-term fix can be made to properly split CON into it's three subcategories again.
@@ -7654,8 +6847,6 @@ endif ! process flow industry total----
     !  else
    !     TPCPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx) ! AveFPrc returns price change since history ended (ie the base year)
    !   endif
-	  !x=TPCPrat**TPCBeta              ! logistical function to get s-shape response
-     ! TPCPriceFactor=X/(1.0+X)
 
 ! Instead of using EINTER (the base year UEC), use
 ! last year's UEC and implement one year's worth of
@@ -7663,7 +6854,6 @@ endif ! process flow industry total----
 ! due to price factors to be incorporated as well.
 ! Do not Apply tech progress
 ! to the mid-vintage productive capacity
-
       DO IV=1,3,2
         ENPINT(IV,IFUEL,ISTEP)=ENPINTLAG(IV,IFUEL,ISTEP)* TPCRate(iv)
       ENDDO
@@ -7687,7 +6877,7 @@ endif ! process flow industry total----
           enpint(1,ifuel,istep) = ENPINTLAG(1,IFUEL,ISTEP)
           enpint(3,ifuel,istep) = ENPINTLAG(3,IFUEL,ISTEP)
       ENDIF
-      
+   
       if(curcalyr.gt.techstrtyr.and.frztech.eq.1)return
 
   991 FORMAT(3X,'CALCSC')
@@ -7745,7 +6935,7 @@ endif ! process flow industry total----
            bypcsc(1,ifuel,is)=0.003
            bypcsc(3,ifuel,is)=0.003
         enddo
-      enddo
+      ENDDO
 
 !****
 !  CALCULATE THIS YEAR'S RATE OF BYPRODUCT ENERGY PRODUCED including price
@@ -7756,7 +6946,6 @@ endif ! process flow industry total----
         DO 60 IFuel=1,IFBYP(IS)
           ifx=iflocby(ifuel,is)
           
-! NSK ibyr2 update 7/2020
     IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries
               TPCPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx)  ! AveFPrc returns price change since last history year (ie the base year)
     ELSE                                                                                                                ! End-use industries
@@ -7764,7 +6953,7 @@ endif ! process flow industry total----
     END IF     
       
           TPCPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx)  ! AveFPrc returns price change since last history year (ie the base year)
-!      if(TPCPrat.lt.1.1) TPCPrat=1.0  ! Don't change TPC unless price change > 1.1
+		  
 ! if prices have not increased the base case is used
 ! *** do this only for fuel 42 (biomass) and fuel 43 (pulping liquor)
 ! kpe revised 8/26/24 to eliminate the hitech and frztech variables, which we do not use anymore. this gets rid of some statements b/c some now identical
@@ -7791,7 +6980,7 @@ endif ! process flow industry total----
         TPC3Pap=bypcsc(3,ifuel,is)
 
         x=TPCPrat**TPCBeta          ! logistical function to get s-shape response
-        TPCPriceFactor=X/(1.0+X)    !
+        TPCPriceFactor=X/(1.0+X)
         if(isnan(TPCPriceFactor)) TPCPRICEFACTOR=.5
         TPCRate(1)=2.0*TPC1Pap * TPCPriceFactor
         TPCRate(3)=2.0*TPC3Pap * TPCPriceFactor
@@ -7900,10 +7089,6 @@ endif ! process flow industry total----
       enddo	 ! fuel loop	  
 ! add global scaling value for renewable fuel 42 (wood)
 ! it will be the greater of 1 of the renewables boiler over byproduct
-    write(6,*) 'In calbyprod. Industry and region are: ', inddir, indreg, curcalyr 
-
-
-
 
 	if (curcalyr.le.ibyr) then
 	      do ifx = 1,9
@@ -7911,25 +7096,14 @@ endif ! process flow industry total----
 		  enddo
 		  if (sum(BYPBSCR(2:3)).ne.0) then
 		      do ifx=2,3
-			       BYPADIBYR(ifx) = max((BSCIBYR(inddir,indreg,4)/sum(BYPBSCR(2:3))),1.)
+			       BYPADIBYR(ifx) = max((BSCIBYR(inddir,indreg,42)/sum(BYPBSCR(2:3))),1.)
 			  enddo
 		  endif
     endif		  
-
-!	write(137,*) 'BYPADIBYR for industry ', inddir, 'and region ', &
-!	            indreg, 'and year', curcalyr, ':  ', BYPADIBYR(:)
-
 	
 	do IFY=1,9
 		 BYPBSCR(IFY) = BYPADIBYR(IFY)*BYPBSCR(IFY)
 	enddo
-!	if (PRTDBGI.gt.1) &
-!	         write(137,997) IFX, IFY, Ifuel, IS, bypqty, BYPADIBYR, &
-!	          BSCIBYR(inddir,indreg,4)
-
-
-
-
 
 !****
 !  FORMAT STATEMENTS.
@@ -7950,38 +7124,20 @@ endif ! process flow industry total----
 !  THIS STEP CALCULATES THE TOTAL ENERGY CONSUMPTION IN THE PROCESS
 !  ASSEMBLY COMPONENT.
 !****
-      SUBROUTINE CALPATOT(versx)
-   use i_
-      IMPLICIT NONE
-     character*(*) versx ! argument passed as 'original' or 'tech' to trigger tech choice industries
+SUBROUTINE CALPATOT(versx)
+	use i_
+	IMPLICIT NONE
+    
+	character*(*) versx ! argument passed as 'original' or 'tech' to trigger tech choice industries
+    INTEGER IS,IV,IFX,IFY,IFUEL
+    INTEGER CASE,IY,kk
+    REAL TEMP, machdrv
+    REAL kraft_shr    ! KPE kraft share of total kraft/mechanical pulp for assigning steps 24-26
+	REAL steam_share(7)  ! kpe variables to allocate steam to different is steps, based on paper_steam_grs
 
-!****
-!  DECLARE INTERNAL VARIABLES.
-!****
-
-      INTEGER IS,IV,IFX,IFY,IFUEL
-      INTEGER CASE,IY,kk
-      REAL TEMP, machdrv
-       real domprod_rpt(15:mnumyr)
-       real prim_prod_rpt(15:mnumyr)
-       real survcap_rpt(15:mnumyr)
-       real index2006_rpt(15:mnumyr)
-	   real coalpapsumx(3,mnumyr)     ! kpe papersum variable so we don't add up all 26 steps at the same time 
-       real kraft_shr    ! KPE kraft share of total kraft/mechanical pulp for assigning steps 24-26
-	   real steam_share(7)  ! kpe variables to allocate steam to different is steps, based on paper_steam_grs
-      
-
-      common /alrpt/domprod_rpt,prim_prod_rpt,survcap_rpt,index2006_rpt
-
-      IY = IYR - baseyr + 1
-
-     coalpapsumx(:,:) = 0.   ! initialize intermediate paper sum variable
+     IY = IYR - baseyr + 1
 	 kraft_shr = 0.
 	 steam_share(:) = 0.
-	 
-	coalpapsumx(1,curiyr) = sum(CoalSCons(10:15,curiyr))
-	coalpapsumx(2,curiyr) = sum(CoalSCons(16:20,curiyr))
-    coalpapsumx(3,curiyr) = sum(CoalSCons(21:26,curiyr))
 
 !****
 !  WRITE SUBROUTINE TRACE, IF ON.
@@ -8093,8 +7249,8 @@ endif ! process flow industry total----
             ENPQTY(4,4,4)=IND_FLOW_SHARE(inddir,2,indreg)*CoalMCons(5,curiyr) *1000.0   
 
           ! fuel 5 Resid                
-            ENPQTY(4,5,2)=0.0 !IND_FLOW_SHARE(inddir,2,indreg)*(HFOCons(3,curiyr))*cm_hfoshr(1)*1000.0
-	        ENPQTY(4,5,4)=0.0 !IND_FLOW_SHARE(inddir,2,indreg)*(HFOCons(5,curiyr))*lm_hfoshr(1) 
+            ENPQTY(4,5,2)=0.0
+	        ENPQTY(4,5,4)=0.0
 
           ! fuel 6 Distl
             ENPQTY(4,6,2)=IND_FLOW_SHARE(inddir,2,indreg)*(HFOCons(3,curiyr))*1000.0	! cement 
@@ -8106,7 +7262,7 @@ endif ! process flow industry total----
           
             ! fuel 8 Oth Pet
             ENPQTY(4,8,2)=IND_FLOW_SHARE(inddir,2,indreg)*(tot_burner_fuel(5))*1000.0
-            ENPQTY(4,8,4)=0.0 !IND_FLOW_SHARE(inddir,2,indreg)*lm_hfoshr(3)*(HFOCons(3,curiyr))*1000.0
+            ENPQTY(4,8,4)=0.0
 
 			! itech lines results in inconsistent indices for steel by process step after 8; luckily those fuels are 0 anyways, but fair warning if we put renewables or something into cement/lime in the future
 			
@@ -8144,16 +7300,16 @@ endif ! process flow industry total----
        ! ElecCons and NGCons first index reference the 14 glass processes
           ENPQTY(:,:,1:4)=0.0
 ! fuel 1 Elect
-          ENPQTY(4,1,1)=SUM(ElecCons(1:4,curiyr))*IND_FLOW_SHARE(inddir,1,indreg)*gl_mecs(2)
-          ENPQTY(4,1,2)=SUM(ElecCons(5:7,curiyr))*IND_FLOW_SHARE(inddir,2,indreg)*gl_mecs(2)
-          ENPQTY(4,1,3)=SUM(ElecCons(8:11,curiyr))*IND_FLOW_SHARE(inddir,3,indreg) *gl_mecs(2)
-          ENPQTY(4,1,4)=SUM(ElecCons(12:14,curiyr))*IND_FLOW_SHARE(inddir,4,indreg) *gl_mecs(2)
+          ENPQTY(4,1,1)=SUM(ElecCons(1:4,curiyr))*IND_FLOW_SHARE(inddir,1,indreg)
+          ENPQTY(4,1,2)=SUM(ElecCons(5:7,curiyr))*IND_FLOW_SHARE(inddir,2,indreg)
+          ENPQTY(4,1,3)=SUM(ElecCons(8:11,curiyr))*IND_FLOW_SHARE(inddir,3,indreg)
+          ENPQTY(4,1,4)=SUM(ElecCons(12:14,curiyr))*IND_FLOW_SHARE(inddir,4,indreg)
 
 ! fuel 2 NG
-          ENPQTY(4,2,1)=SUM(NGCons(1:4,curiyr))*IND_FLOW_SHARE(inddir,1,indreg)*1000000.0 *gl_mecs(1)
-          ENPQTY(4,2,2)=SUM(NGCons(5:7,curiyr))*IND_FLOW_SHARE(inddir,2,indreg)*1000000.0*gl_mecs(1)
-          ENPQTY(4,2,3)=SUM(NGCons(8:11,curiyr))*IND_FLOW_SHARE(inddir,3,indreg) *1000000.0 *gl_mecs(1)
-          ENPQTY(4,2,4)=SUM(NGCons(12:14,curiyr))*IND_FLOW_SHARE(inddir,4,indreg)*1000000.0*gl_mecs(1)
+          ENPQTY(4,2,1)=SUM(NGCons(1:4,curiyr))*IND_FLOW_SHARE(inddir,1,indreg)*1000000.0
+          ENPQTY(4,2,2)=SUM(NGCons(5:7,curiyr))*IND_FLOW_SHARE(inddir,2,indreg)*1000000.0
+          ENPQTY(4,2,3)=SUM(NGCons(8:11,curiyr))*IND_FLOW_SHARE(inddir,3,indreg) *1000000.0
+          ENPQTY(4,2,4)=SUM(NGCons(12:14,curiyr))*IND_FLOW_SHARE(inddir,4,indreg)*1000000.0
         endif  ! End Glass
 
 ! Iron and Steel Model
@@ -8188,7 +7344,7 @@ endif ! process flow industry total----
         ENPQTY(4,3,is)=(NgCons(6,curiyr)+NgCons(7,curiyr))*IND_FLOW_SHARE(inddir,6,indreg)*1000000.0        	! natural gas
         ENPQTY(4,4,is)=(CoalSCons(6,curiyr)+CoalSCons(7,curiyr))*IND_FLOW_SHARE(inddir,6,indreg)*1000000.0  	! steam coal
         ENPQTY(4,5,is)=(CoalMCons(6,curiyr)+CoalMCons(7,curiyr))*IND_FLOW_SHARE(inddir,6,indreg)*1000000.0  	! met coal
-		ENPQTY(4,6,is)=0.0																						! resid
+		ENPQTY(4,6:7,is)=0.0																						! resid
 		ENPQTY(4,7,is)=0.0                                                                                  	! other petroleum
 
 		is=8 !coke is step 8 in process calcs
@@ -8342,15 +7498,9 @@ endif ! process flow industry total----
 !  FUEL SOURCES AND ENPRQTY FOR THE RENEWABLE ENERGY SOURCES.
 !****
 
-    DO 90 IFUEL=1,mainfuels
-        ENPMQTY(IFUEL)=0.0
-	90 CONTINUE
-    DO 92 IFUEL=1,7
-        ENPIQTY(IFUEL)=0.0
-	92 CONTINUE
-    DO 94 IFUEL=1,9
-        ENPRQTY(IFUEL)=0.0
-	94 CONTINUE
+    ENPMQTY(1:mainfuels)=0.0
+	ENPIQTY(1:7)=0.0
+    ENPRQTY(1:9)=0.0
 
    ! "b" versx gets rid of the year thing; a versx should keep the years intact
    if (((inddir.ne.8).and.(inddir.ne.12))) then
@@ -8387,13 +7537,13 @@ endif ! process flow industry total----
             ENPRQTY(2:3)=0.0; ENPIQTY(1) =0.0 ! reinitialize for the new enprqty variables and enpiqty
 		  ! let's calculate enprqty in this place only.   Have changed to PP_HOGFuel, which is all hogfuel used, both step 25 & steam 
 		  !  NOTE:  reverting to the nonsteam hogfuel for now. Do we use ENPIQTY for paper?  However, do we need intermediate? we do this because renewable steam is not accounted for in ppis_bsc 
-		   ! ENPRQTY(2)=(IND_FLOW_SHARE(inddir,1,indreg)*PP_HOGFuel/1.054615)*1.0E-6 
-		   ENPRQTY(2)= IND_FLOW_SHARE(inddir,1,indreg)*((SUM(PAPER_HOG(1:26,curiyr))/1.054615)*1.0E-6 +PP_STEAM_Cogen(6)) ! trills; adding renewable steam; no boiler  
-           ENPRQTY(3)= (IND_FLOW_SHARE(inddir,1,indreg)*ABS(SUM(PAPER_BLIQUOR(1:26,curiyr)))/1.054615)*1.0E-6 ! trills NOTE: setting to lower values causes runaway values   *1000000.0  /1.054615
-           ! KPE --- old equation ENPIQTY(1)=SUM(PAPER_STEAM(1:26,curiyr))/1.054615*SteamRgShr(inddir,indreg)
+		   ! ENPRQTY(2)=(IND_FLOW_SHARE(inddir,1,indreg)*PP_HOGFuel*CFJOULE/1000.0)*1.0E-6 
+		   ENPRQTY(2)= IND_FLOW_SHARE(inddir,1,indreg)*((SUM(PAPER_HOG(1:26,curiyr))*CFJOULE)*1.0E-9 +PP_STEAM_Cogen(6)) ! trills; adding renewable steam; no boiler  
+           ENPRQTY(3)= (IND_FLOW_SHARE(inddir,1,indreg)*ABS(SUM(PAPER_BLIQUOR(1:26,curiyr)))*CFJOULE)*1.0E-9 ! trills NOTE: setting to lower values causes runaway values   *1000000.0  *CFJOULE/1000.0
+           ! KPE --- old equation ENPIQTY(1)=SUM(PAPER_STEAM(1:26,curiyr))*CFJOULE/1000.0*SteamRgShr(inddir,indreg)
 		   ! now setting to the gross number because steam being generated uses energy too and we don't account in the ensqty variable for renewables
 		   ! use this for paper?  This is meaningless; steam is included in the various fuel equations
-            ENPIQTY(1)=((SUM(PAPER_STEAM_GRS(1:26,curiyr))/1.054615)*SteamRgShr(inddir,indreg))*1.0E-6  ! trills
+            ENPIQTY(1)=((SUM(PAPER_STEAM_GRS(1:26,curiyr))*CFJOULE)*SteamRgShr(inddir,indreg))*1.0E-9  ! trills
         
     else if (inddir.eq.12) then   ! iron and steel
 
@@ -8473,12 +7623,13 @@ subroutine corncalc(is,ifuel,ifx)
        integer idxEL/1/,idxNG/2/,idxDS/3/,idxLP/4/,idxMG/5/
        real cornfuel(5),nitrofuel
        real cornfac(5)/1.10,3.05,6.65,3.32,1.64/,nitrofac/23.4/
-!                      EL,  NG,  DS,  LP,  MG,            ag chem ng feedstock (thousand Btu/bushel)
+!                      EL,  NG,  DS,  LP,  MG,            ag chem ng feedstock (thousand Btu/bushel—equivalent to10^9 Btu
+! 															per 10^6 bushel, since the "bushel" variable is in 10^6 bushels)
        if(inddir.eq.1) then
-            cornfuel(1:5) = cornfac(1:5) *(bushel(curiyr,indreg) - bushel(ICURIYR,indreg))        
+            cornfuel(1:5) = cornfac(1:5) *(bushel(curiyr,indreg) - bushel(ICURIYR,indreg))       ! billion Btu 
 
             IF(IFX.eq.1)THEN
-                enpqty(3,IFUEL,IS) = enpqty(3,IFUEL,IS) + cornfuel(idxEL)/1000.
+                enpqty(3,IFUEL,IS) = enpqty(3,IFUEL,IS) + cornfuel(idxEL)/1000.	! divide cornfuel by 1000 to get TBtu
                 enpqty(4,IFUEL,IS) = enpqty(4,IFUEL,IS) + cornfuel(idxEL)/1000.
             ENDIF
             IF(IFX.eq.3)THEN
@@ -8500,9 +7651,9 @@ subroutine corncalc(is,ifuel,ifx)
        elseif ((inddir.eq.9).and.(curcalyr.gt.END_YR_FEEDSTOCK)) then
 
             nitrofuel = 0.0
-            nitrofuel = nitrofac * (bushel(curiyr,indreg) - bushel(END_YR_FEEDSTOCK-1990+1,indreg))
+            nitrofuel = nitrofac * (bushel(curiyr,indreg) - bushel(END_YR_FEEDSTOCK-1989,indreg))	! billion Btu
             IF(IFX.eq.5)THEN
-              enpqty(4,IFUEL,IS) = enpqty(4,IFUEL,IS) + nitrofuel/1000.
+              enpqty(4,IFUEL,IS) = enpqty(4,IFUEL,IS) + nitrofuel/1000.								! divide nitrofuel by 1000 to get TBtu
             ENDIF
 
        endif
@@ -8525,7 +7676,7 @@ subroutine corncalc(is,ifuel,ifx)
       integer iy,ifx
       real uec(6,5)
       real eweight/0.7/,pweight
-      integer ibldloc(5)/1,3,31,11,12/ ! elec, core ng, steam , dist, propane (kep change 30 to 31 ?)
+      integer ibldloc(5)/1,3,31,11,12/ ! elec, core ng, steam , dist, propane 
       ! kpe change 30 to 31--because 31 is steam
       pweight=1.-eweight
       ir=indreg
@@ -8534,8 +7685,7 @@ subroutine corncalc(is,ifuel,ifx)
 !****
 !  CALCULATE ENERGY CONSUMPTION FOR LIGHTING AND HVAC.
 !****
-
-! NSK ibyr2 update 7/2020     
+  
     IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries           
       if(curiyr.eq.ibyr2-baseyr+1) then
         prodvxIBYR(inddir,indreg)=PRODVX
@@ -8544,42 +7694,37 @@ subroutine corncalc(is,ifuel,ifx)
     ELSE                                                                                                                ! End-use industries      
       if(curiyr.eq.IBYR2-baseyr+1) then
         prodvxIBYR(inddir,indreg)=PRODVX
-        emplxIBYR(inddir,indreg)=emplx
+        emplxIBYR(inddir,indreg)=emplx		! thousands of employees
       endif
     END IF      
       
-      do is=1,6
-        do ifuel=1,5
-           uec(is,ifuel)=0.
-           if(prodvxIBYR(inddir,indreg).gt.0.0.and. &
-              emplxIBYR(inddir,indreg).gt.0.0) &
-           uec(is,ifuel)=enbint(is,ifuel)* &
-           emplxIBYR(inddir,indreg)/prodvxIBYR(inddir,indreg)
-        enddo
-      enddo
-      DO 70 IS=1,6
-      DO 70 IFUEL=1,5
-
-        ifx=ibldloc(ifuel)
+	uec(:,:) = 0.0	! initialize
+	IF (prodvxIBYR(inddir,indreg) > 0.0 .AND. emplxIBYR(inddir, indreg) > 0.0) THEN
+		uec(:,:) = enbint(:,:) * (emplxIBYR(inddir, indreg) / prodvxIBYR(inddir, indreg))
+	ENDIF
+  
+    DO 70 IS=1,6
+		DO 70 IFUEL=1,5
+			ifx=ibldloc(ifuel)
 
 !  Define a price-related factor to reduce energy consumption if price changes
-! NSK ibyr2 update 7/2020
-    IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries
-        BldPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx) ! price change since history ended (base year)
-    ELSE                                                                                                                ! End-use industries
-        BldPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx) ! price change since history ended (base year)
-    END IF       
+			IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries
+				BldPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx) ! price change since history ended (base year)
+			ELSE                                                                                                                ! End-use industries
+				BldPrat=AveFprc(ir,ibyr2-1989,curiyr,ifx) ! price change since history ended (base year)
+			END IF       
 
-        BldPFac=BldPRat**BldElas
+			BldPFac=BldPRat**BldElas
 
-        ENBQTY(IS,IFUEL)= BldPFac * &
-           (eweight*EMPLX*ENBINT(IS,IFUEL) &
-          +pweight*prodvx*UEC(IS,IFUEL))
+			ENBQTY(IS,IFUEL)= BldPFac * &
+			   (eweight*EMPLX*ENBINT(IS,IFUEL) &
+			  +pweight*prodvx*UEC(IS,IFUEL))
 
-   70 CONTINUE
-      DO 80 IFUEL=1,5
+	70 CONTINUE
+	
+    DO 80 IFUEL=1,5
         ENBQTY(7,IFUEL)=sum(ENBQTY(1:6,IFUEL))  ! kpe increase 5 to 7 and is for total across 4 to 6 usage classes
-   80 CONTINUE
+	80 CONTINUE
 
 !****
 !  WRITE CONSUMPTION TO DEBUG FILE, IF ON.
@@ -8603,28 +7748,7 @@ subroutine corncalc(is,ifuel,ifx)
 
       RETURN
       END SUBROUTINE CALBTOT
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!  pick which of 5 steam segment variables to use
-!  return the fraction of steam by cogen load segment
-      FUNCTION STEAMSEG(indus,iload)
-   use i_
-      implicit none
-      real steamseg
-      integer indus,iload
 
-      if(indus.eq.7) then
-        steamseg=SteamSeg_Food(iload)
-      elseif(indus.eq.8) then
-        steamseg=SteamSeg_Paper(iload)
-      elseif(indus.eq.9) then
-        steamseg=SteamSeg_Chem(iload)
-      elseif(indus.eq.12) then
-        steamseg=SteamSeg_Steel(iload)
-      else
-        steamseg=SteamSeg_Other(iload)
-      endif
-      return
-      end FUNCTION SteamSeg
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ! THIS SUBROUTINE CALCULATES ELECTRICITY GENERATION FOR OWN
 ! USE AND SALES TO THE GRID.  IT ALSO CALCULATES STEAM USED
@@ -8633,39 +7757,26 @@ subroutine corncalc(is,ifuel,ifx)
       SUBROUTINE CALGEN
    use i_
       IMPLICIT NONE
-      real SteamSeg
-      External SteamSeg
-      real AggSteamLoad,AveHourlyLoad,TechPotMW(nload+1), &
-       EconPotMw(nload+1),CapAddMW, &
-       CapAddGWH,NonCogStm,escalng,escalel,totq1,totq2
-      real capaddsum,techpotsum,econpotsum,dshr,suminvest,capcost
-      real StmAddTril,BioAddElf,BioAddStm
-      integer il,isys
-      real jfrac
-      real bio
-      INTEGER IT
-      INTEGER MY,K,L,M,n
-      integer fuel,div
+      real SteamSeg(nload),TechPotMW(nload+1),EconPotMw(nload+1),CapAddMW,&
+       CapAddGWH,NonCogStm,escalng,escalel,totq1,totq2,gen(nload),capcost(nload)
+      real capaddsum,techpotsum,econpotsum,dshr,suminvest
+      real StmAddTril,BioAddElf,BioAddStm,jfrac,bio
+      INTEGER IT,L,M,il,fuel,div
+	  INTEGER isys(nload)
       real BioAvail(4,MNUMYR)   ! save amount of byproduct biofuels available, paper only
-      real BioAddGwh, BioAddMW,gen,stm,avehtrt,BioAddHtRt, BioDeclineRate
+      real BioAddGwh, BioAddMW,avehtrt,BioAddHtRt, BioDeclineRate
 ! added for byproduct steam calculation
       real bysqty(10)
-      real avgint,tdem
-      integer ifx,ify,ifuel
-! end of additions for byproduct steam calculation
-
+      integer ifx,ify,ifuel,pyr
 ! added so boiler efficiency-related calculations would parallel CALSTOT
-      real bypbeff(6)/0.69,0.69,0.69,0.69,0.69,0.69/   ! 69 percent match boiler eff, prior value was 65 percent based on oit steam and cibo reports
-! end of boiler efficiency-related additions
-
+      real bypbeff/0.69/   ! 69 percent match boiler eff, prior value was 65 percent based on oit steam and cibo reports
       integer rtovalue,behave,AB32SW
       external rtovalue
-      real cf(4),penetrate
-      real biofactor/0.90/   ! incremental bio available for cogen (ei867/MECS)
-      real biocapfac/.666/   ! assumed capacity factor to convert new bio-gen to capacity
-      integer pyr,pyear      ! lookahead removed
-      real W_Util(5)         ! POT_08/01/2013 Historical utilizations for the past five years
-      integer util_yr        ! POT_08/01/2013 Year of history used in Do loop
+      real cf(4),penetrate(nload)
+      real biofactor/0.90/  ! incremental bio available for cogen (ei867/MECS)
+      real biocapfac/.666/  ! assumed capacity factor to convert new bio-gen to capacity
+      real W_Util(5)        ! Historical utilizations for the past five years
+      integer util_yr       ! Year of history used in Do loop
       real newgen, oldgrd, newgrd, coggrdnew(numind)
 
 ! coggrdnew:  Assumed grid share for new capacity additions
@@ -8698,32 +7809,6 @@ subroutine corncalc(is,ifuel,ifx)
 !     industries 22-24 are 0 because we're assuming all chp in light chem;
 !     dimensions of exstcap.txt not expanded, but not sure if this is appropriate
 !     KPE 9/28/22
-	 
-
-! coggrdnew:  Assumed grid share for new capacity additions
-!    Initialized from exstcap.txt, 2008/US(11)/"all fl"
-!      data coggrdnew/ &
-!      0.2827, & ! agcrop
-!      0.0399, & ! agother
-!      0.0000, & ! coal min
-!      0.0000, & ! O&G min
-!      0.8216, & ! met min
-!      0.0000, & ! cons
-!      0.2633, & ! Food.
-!      0.1926, & ! Paper
-!      0.2937, & ! B-chem
-!      0.0000, & ! Glass
-!      0.2434, & ! cement
-!      0.1139, & ! steel
-!      0.1561, & ! allum
-!      0.1965, & ! fab metals
-!      0.3902, & ! machinery
-!      0.0099, & ! computers
-!      0.1455, & ! transportation
-!      0.0953, & ! electrical equip
-!      0.6482, & ! wood products
-!      0.0000, & ! plastics
-!      0.1805/   ! BOM
 
       Real  RegCHPScore(4)/0.335,0.175,0.235,0.255/     ! Remove scaling; only scaling should be done to the penetration variable in indcogenx.xlsx
                                                         ! Regional penetration adjustment based on
@@ -8747,9 +7832,21 @@ subroutine corncalc(is,ifuel,ifx)
         M = 9
       ENDIF
 
+! Define steam segments by industry, as read in from indcogen.xlsx	  
+		if(inddir.eq.7) then
+			SteamSeg(1:nload)=SteamSeg_Food(1:nload)
+		elseif(inddir.eq.8) then
+			SteamSeg(1:nload)=SteamSeg_Paper(1:nload)
+		elseif(inddir.eq.9) then
+			SteamSeg(1:nload)=SteamSeg_Chem(1:nload)
+		elseif(inddir.eq.12) then
+			SteamSeg(1:nload)=SteamSeg_Steel(1:nload)
+		else
+			SteamSeg(1:nload)=SteamSeg_Other(1:nload)
+		endif
+		
 !  Check runtime option to turn AB32SW switch for implementation of AB32 cap-and-trade in State of California.
 !  The default setting is ON (1).
-!
       AB32SW=RTOVALUE('AB32SW  ',1)
 
 ! Estimate economic attractiveness of typical cogen systems for various steam loads.
@@ -8758,10 +7855,7 @@ subroutine corncalc(is,ifuel,ifx)
         cogElecPrice=0.
         jfrac=0.
 
-        pyear=curcalyr
         pyr=curiyr
-
-!       lookahead=0                     ! assume myopic--zero future years considered
         jfrac=1./(1.+float(lookahead))  ! used for price averaging over the current and "lookahead" years
         do j=0,lookahead                ! loop over current year and once for each lookahead year
           escalng=0.
@@ -8801,7 +7895,7 @@ subroutine corncalc(is,ifuel,ifx)
         CogElecPrice=CogElecPrice*jfrac * MC_JPGDP(DollarYearCHP-BASEYR+1)       
         CogElecPrice=CogElecPrice*(1.-StandByFrac)
         
-! POT_08/01/2013 Start - utilizaton code
+! Start - utilizaton code
 
 !***** compute utilization fractions for economic assessment.
         RegCHPutil(:,:)=0.
@@ -8821,8 +7915,6 @@ subroutine corncalc(is,ifuel,ifx)
 
          if(maxRegCHPutil(indreg,inddir).gt.1.0) write(6,'(5x,a,f10.6,2x,2(i4,2x))') '==== ERROR Utilization of CHP too HIGH ',  &
                                                  maxRegCHPutil(indreg,inddir), inddir, indreg
-
-         if(inddir.eq.18.and.indreg.eq.1) write(6,'(5x,a,f10.6,2x,5(f10.6,2x))') 'inddir=18 indreg=1 ',RegCHPutil(indreg,inddir),W_Util(1:5)
 
 !*****  Quality Check on CHP data from OES (exstcap.txt)
          if(maxRegCHPutil(indreg,inddir).gt.0.90) maxRegCHPutil(indreg,inddir)=0.90
@@ -8847,16 +7939,15 @@ subroutine corncalc(is,ifuel,ifx)
 !****
 !  TOTAL STEAM DEMAND FROM THE BLD AND PA COMPONENTS.
 !****
-! NSK ibyr2 update 7/2020
-      STEMCUR=ENBQTY(2,3)+ENPIQTY(1)    ! Steam demand from HVAC in buildings (only part of ENBQTY that uses steam) plus steam demand from the process and assembly component (ENPIQTY)
+    STEMCUR=ENBQTY(2,3)+ENPIQTY(1)    ! Steam demand from HVAC in buildings (only part of ENBQTY that uses steam) plus steam demand from the process and assembly component (ENPIQTY)
 
     IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries
       if(curcalyr.eq.ibyr2) stemcurlag=stemcur
-    ELSE                                                                                                                ! End-use industries
+    ELSE                                                                       ! End-use industries
       if(curcalyr.eq.ibyr2) stemcurlag=stemcur    
     END IF
     
-      if(stemcur.lt.0.) stemcur=0.
+    IF(stemcur.lt.0.) stemcur=0.
       
 !****
 !  CALCULATE THE AMOUNT OF STEAM GENERATED BY THE BYPRODUCT FUELS.
@@ -8869,15 +7960,15 @@ subroutine corncalc(is,ifuel,ifx)
         IFX=IFSLOCBY(IFuel)
         IF(IFX.LE.30) THEN
           BYSQTY(IFuel)=BYPBSCM(IFX)
-          BYPSTMM=BYPSTMM+(BYSQTY(IFuel)*bypbeff(IFuel))
+          BYPSTMM=BYPSTMM+(BYSQTY(IFuel)*bypbeff)
         ELSEIF(IFX.LE.40) THEN
           IFY=IFX-30
           BYSQTY(IFuel)=BYPBSCI(IFY)
-          BYPSTMI=BYPSTMI+(BYSQTY(IFuel)*bypbeff(IFuel))
+          BYPSTMI=BYPSTMI+(BYSQTY(IFuel)*bypbeff)
         ELSE
           IFY=IFX-40
           BYSQTY(IFuel)=BYPBSCR(IFY)
-          BYPSTMR=BYPSTMR+(BYSQTY(IFuel)*bypbeff(IFuel))
+          BYPSTMR=BYPSTMR+(BYSQTY(IFuel)*bypbeff)
         ENDIF
       ENDDO
       BYPSTM=BYPSTMM+BYPSTMI+BYPSTMR  ! why is this never used?
@@ -8894,7 +7985,7 @@ subroutine corncalc(is,ifuel,ifx)
       endif
 
 ! Next line controls start year for Cogen model builds (unplanned additions)
-      if(curiyr.gt.maxcogyr) then ! this ends at label 100
+    if(curiyr.gt.maxcogyr) then ! this ends at label 100
 !  Beginning with year beyond the last history year, which was 2008 in aeo2010,
 !  assess cogen potential, ignoring any prior year 'model' additions.
 !  All new systems are assumed to be gas turbines, except for Byproduct-fueled cogen which is
@@ -8906,50 +7997,47 @@ subroutine corncalc(is,ifuel,ifx)
 !
 !    See Subr EvalCogen for economic assessment of candidate systems
 
-         NonCogStm=STEMCUR-cogsteamhist(inddir,indreg) !  Steam not generated by existing cogen or biofuels
+        NonCogStm=STEMCUR-cogsteamhist(inddir,indreg) !  Steam not generated by existing cogen or biofuels
          
-         if(NonCogStm .lt. 0.0) nonCogStm=0.0
-         CapAddGWH=0.
-         CapAddMW=0.
-         techpotmw(nload+1)=0.
-         econpotmw(nload+1)=0.
-         gen=0.
-         avehtrt=0.
-         StmAddTril=0.
-         stm=0.
-         DO il=1,nload                                         ! load segments. see icogen.wk1 for example
-           isys=CogSys(il)                                     ! system as sized for the given segment
-           AggSteamLoad  = NonCogStm*SteamSeg(inddir,il)       ! Fraction of Agg. Steam within the load segment
-           AveHourlyLoad = AggSteamLoad /.008760               ! Average hourly steam load in segment (tot., not per-site)
-           TechPotMW(il) = AveHourlyLoad*PowerSteam(isys)/3.412 ! Assume all candidate systems sized to meet average load in segment
-           EconPotMW(il) = TechPotMW(il)*EconFrac(il)           ! Total Economic Potential based on Payback Acceptance Assumptions
-           penetrate=penetration(il)*RegCHPScore(indreg)
-           
-! increase yearly penetration fraction of the economic potential during periods with ITCs
-           if(IYR.GE.CapCostMultStart.AND.IYR.LE.CapCostMultEnd.and.CapCostMult(isys).lt.0.97) then
-             penetrate=penetrate*1.25  ! normally about 1/20 of the potential added each year.  this speeds it up to 1/16 during ITC period
-           endif
-           CapAddMW      = CapAddMW +                           & ! Accumulate over iload
-                          EconPotMW(il)*Penetrate               ! yearly penetration , mw, for this iload
-           gen=          (EconPotMW(il)*Penetrate) * 8.670 *   & ! yearly penetration, mw POT_08/01/2013
-                           (RegCHPutil(indreg,inddir) + ((maxRegCHPutil(indreg,inddir) - RegCHPutil(indreg,inddir)) / & ! used to achieve max historical utilization
-                           (IEYR - 2011)) * (curcalyr - 2011)) ! to a historical high  POT_2050 2040 to IEYR
-           CapAddGWH     = CapAddGWH + gen                      ! Accumulate over iload
+        if(NonCogStm .lt. 0.0) nonCogStm=0.0
+        CapAddGWH=0.
+        CapAddMW=0.
+        techpotmw(nload+1)=0.
+        econpotmw(nload+1)=0.
+        gen(1:nload)=0.
+        avehtrt=0.
+        StmAddTril=0.
+	
+! Average hourly steam load in segment divided by 8,760 operating hours/year, and convert from TBtu to MMBtu
 
-           stm=           (gen*3412./10.**6)/PowerSteam(isys)  ! keep track of annual steam provided
-           StmAddTril    = StmAddTril+stm
-           techpotmw(nload+1)=techpotmw(nload+1)+techpotmw(il)
-           econpotmw(nload+1)=econpotmw(nload+1)+econpotmw(il)
-           capaddsum=capaddsum+EconPotMW(il)*Penetrate
-           techpotsum=techpotsum+techpotmw(il)
-           econpotsum=econpotsum+econpotmw(il)
-           avehtrt=avehtrt+gen*CHeatRate(isys)
-           CapCost=CogCapCostKW(isys)
-           if(IYR.GE.CapCostMultStart.AND.IYR.LE.CapCostMultEnd) Then
-             CapCost=CogCapCostKW(isys)*CapCostMult(isys)
-           endif
-           suminvest=suminvest+EconPotMW(il)*Penetrate*CapCost
-         ENDDO
+		TechPotMW(1:nload) = (NonCogStm*SteamSeg(1:nload)/.008760)*PowerSteam(CogSys(1:nload))/3.412
+		EconPotMW(1:nload) = TechPotMW(1:nload)*EconFrac(1:nload)           ! Total Economic Potential based on Payback Acceptance Assumptions
+		penetrate(1:nload) = penetration(1:nload)*RegCHPScore(indreg)                                    	! load segments           
+! increase yearly penetration fraction of the economic potential during periods with ITCs
+		DO il=1,nload 
+			if(IYR.GE.CapCostMultStart.AND.IYR.LE.CapCostMultEnd.and.CapCostMult(CogSys(il)).lt.0.97) then
+				penetrate(il)=penetrate(il)*1.25  ! normally about 1/20 of the potential added each year.  this speeds it up to 1/16 during ITC period
+			endif
+		ENDDO
+		   
+         CapAddMW = SUM(EconPotMW(1:nload)*Penetrate(1:nload))		! yearly penetration (MW), for all load segments
+         gen(1:nload)=(EconPotMW(1:nload)*Penetrate(1:nload)) * 8.670 *   & 				! yearly penetration, mw
+                        (RegCHPutil(indreg,inddir) + ((maxRegCHPutil(indreg,inddir) - RegCHPutil(indreg,inddir)) / & ! used to achieve max historical utilization
+                        (IEYR - 2011)) * (curcalyr - 2011)) ! to a historical high  POT_2050 2040 to IEYR
+         CapAddGWH = SUM(gen(1:nload))
+         StmAddTril = SUM((gen(1:nload)*CFELQ/10.**6)/PowerSteam(CogSys(1:nload))) ! keep track of annual steam provided
+         techpotmw(nload+1)=SUM(techpotmw(1:nload))
+         econpotmw(nload+1)=SUM(econpotmw(1:nload))
+         capaddsum=SUM(EconPotMW(1:nload)*Penetrate(1:nload))
+         techpotsum=SUM(techpotmw(1:nload))
+         econpotsum=SUM(econpotmw(1:nload))
+         avehtrt=SUM(gen(1:nload)*CHeatRate(CogSys(1:nload)))
+         CapCost(1:nload)=CogCapCostKW(CogSys(1:nload))
+         if(IYR.GE.CapCostMultStart.AND.IYR.LE.CapCostMultEnd) Then
+            CapCost(1:nload)=CogCapCostKW(CogSys(1:nload))*CapCostMult(CogSys(1:nload))
+         endif
+         suminvest=SUM(EconPotMW(1:nload)*Penetrate(1:nload)*CapCost(1:nload))
+		 
          if(capaddGWH.gt.0) then
             avehtrt=avehtrt/capaddGWH
          endif
@@ -9060,12 +8148,7 @@ subroutine corncalc(is,ifuel,ifx)
 100   endif     ! of IF(iyr.gt.(maxcogyr))
 
 !****
-      if (inddir.le.21) then
-	     CALL CALCGSH ! calculate average grid share for each region (average over census div and fuel)
-
-!********
-!     Total generation by grid, own-use across fuels and census divisions for this industry
-!********
+      if (inddir.le.21) then	! Total generation by grid, own-use across fuels and census divisions for this industry
           elsale=sum(coggen(l:m,curiyr,inddir,1:numflchp)*coggrd(l:m,curiyr,inddir,1:numflchp))
           elown =sum(coggen(l:m,curiyr,inddir,1:numflchp)*(1.-coggrd(l:m,curiyr,inddir,1:numflchp)))
       end if
@@ -9105,19 +8188,15 @@ subroutine corncalc(is,ifuel,ifx)
       real ngasPfac/1.00/    ! Factor to reflect NGAS as "premium" fuel
       real oilPfac/1.17/     ! Factor to reflect oil as "discount" fuel
       real elecPfac/1.00/    ! CHP Factor to reflect electricity as equivalent to natural gas in "premiumness"
-      integer icoal
 ! now the factors for decreasing natural gas and coal boiler shares by 2050, and values for the x0 of the logistic function
-      real coalShr2050/0.40/  ! note: shares do what we expect, but often doesn't reflect energy consumption.
-      real ngShr2050/0.25/   ! 30% of natrual gas boilers in first MECS year are transferred to electric boilers in the last YEAR
+!      real coalShr2050/0.40/  ! note: shares do what we expect, but often doesn't reflect energy consumption.
+!      real ngShr2050/0.25/   ! 30% of natrual gas boilers in first MECS year are transferred to electric boilers in the last YEAR
+      real coalShr2050/0.20/  ! note: shares do what we expect, but often doesn't reflect energy consumption.
+      real ngShr2050/0.10/   ! 10% of natrual gas boilers in first MECS year are transferred to electric boilers in the last YEAR
 	  real logistic_factor
       real xzero             ! the the value  of the logistic function, halfway between first and last year
 	  real aslope/0.5/
 	  real sumall            ! sums of bscibyr
-	  real bsshr_ibyr(11)
-	  
-	  
-! Average boiler efficiencies   NG, coal, resid, distl, LPG, electricity petcoke, oth, biomass, hydro, total
-      real avebeff(11)/0.78,0.83,0.84,0.80,0.76,0.98,0.80,0.80,0.69,0.80,0.80/         ! Multiple sources
 
 ! WRITE SUBROUTINE TRACE IF ON.
 
@@ -9131,66 +8210,44 @@ subroutine corncalc(is,ifuel,ifx)
 
       ir=indreg
       iy = iyr - 1989
-	  !  set xzero to be inbetween base year and 2050 
-      ! from itlbshr, boiler efficiency and 
-	  ! bscibyr order Resid,Distill,Natgas,LPG,Coal,Renew,OthPet,PCoke,Elec
-	  if (INDDIR.lt.7) BSCIBYR(inddir,indreg,1) = 0.  !Nonmanufacturing doesn't use coal
-      sumoil=BSCIBYR(inddir,indreg,2)
-	  sumall=sum(BSCIBYR(inddir,indreg,1:IFSMAX))
-      BSFUELSHR(INDDIR,INDREG,1:IFSMAX)=0.
-	  bsshr_ibyr(:) = 0.
+	  ! set xzero to be inbetween base year and 2050 
+	  if (INDDIR.lt.7) BSCIBYR(inddir,indreg,7) = 0.  ! nonmanufacturing doesn't use coal
+      sumoil=BSCIBYR(inddir,indreg,51)
+	  sumall=sum(BSCIBYR(inddir,indreg,1:mainfuels))
+      BSFUELSHR(INDDIR,INDREG,:)=0.
 
       xzero = IBYR + (LASTCALYR - IBYR)/2
       logistic_factor = 1/(1 + exp(-aslope*(curcalyr - xzero)))	  
 
-	  if (sumall.ne.0) then
-          DO IFuel=1,IFSMAX              ! Loop over all fuels-kpe see lines 2446 for assignments--don't quite understand      ! now using bscibyr for all fuels, not just oil.
-			if(IFSLOC(IFUEL).eq.10) then                           ! Residual Oil
-				  BSFUELSHR(INDDIR,INDREG,IFuel)=(BSCIBYR(inddir,indreg,7)/sumall)*avebeff(IFuel)
-			elseif(ifsloc(ifuel).eq.11) then                       ! Distillate Oil
-					BSFUELSHR(INDDIR,INDREG,IFuel)=(BSCIBYR(inddir,indreg,8)/sumall)*avebeff(IFuel)
-			elseif(ifsloc(ifuel).eq.12)then                        ! Propane H&P
-					BSFUELSHR(INDDIR,INDREG,IFuel)=(BSCIBYR(inddir,indreg,9)/sumall)*avebeff(IFuel)
-			elseif(ifsloc(ifuel).eq.16)then                        ! Pet Coke
-					BSFUELSHR(INDDIR,INDREG,IFuel)=(BSCIBYR(inddir,indreg,11)/sumall)*avebeff(IFuel)
-			elseif(ifsloc(ifuel).eq.22)then                        ! Other Petro
-					BSFUELSHR(INDDIR,INDREG,IFuel)=(BSCIBYR(inddir,indreg,10)/sumall)*avebeff(IFuel)
-    	    elseif(ifsloc(ifuel).eq.4) then                           ! NG
-               bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,3)/sumall)*avebeff(IFuel)
-            elseif(ifsloc(ifuel).eq.7) then                           ! Coal
-               bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,1)/sumall)*avebeff(IFuel)
-			   if (inddir.lt.7) bsfuelshr(inddir,indreg,ifuel)= 0.   ! we assume no coal in nonmanufacturing
-            elseif(ifsloc(ifuel).eq.1) then                           ! electricity
-               bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,12)/sumall)*avebeff(IFuel)
-           endif ! if islog
-			! begin natgas/coal/electricity block
-
-		   if (curcalyr.gt.ibyr) then !   BSFUELSHR_ibyr(INDDIR,INDREG,Ifuel) = bsfuelshr(inddir,indreg,ifuel) ! for all fuels where curcalyr <= ibyr
-				if(ifsloc(ifuel).eq.4) then                           ! NG
-				   bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,3)/sumall)*(1 - logistic_factor*ngShr2050) &
-				   *avebeff(1) !beffs added 8/6/2024 by kpe--this and 3 lines down
-				elseif(ifsloc(ifuel).eq.7) then                           ! Coal
-				   bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,1)/sumall)*(1 - logistic_factor*coalShr2050) &
-				   *avebeff(2)
-				elseif(ifsloc(ifuel).eq.1) then                           ! electricity
+	if (sumall.gt.0) then
+        DO IFuel=1,mainfuels              ! Loop over all main fuels
+			IF(ANY(ifuel.eq.Boiler_Fuel_List)) BSFUELSHR(INDDIR,INDREG,IFuel)=(BSCIBYR(inddir,indreg,IFUEL)/sumall)*beff(IFUEL)
+			
+			if (curcalyr.gt.ibyr) then
+				if(ifuel.eq.4) then                           ! natural gas
+				   bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,4)/sumall)* &
+				   (1 - logistic_factor*ngShr2050)*beff(4)
+				elseif(ifuel.eq.7) then                       ! coal
+				   bsfuelshr(inddir,indreg,ifuel)=(BSCIBYR(inddir,indreg,7)/sumall)* &
+				   (1 - logistic_factor*coalShr2050)*beff(7)
+				elseif(ifuel.eq.1) then                       ! electricity
 				   ! the subtractions from natural gas and coal are added here
-				   bsfuelshr(inddir,indreg,ifuel)= (BSCIBYR(inddir,indreg,12)/sumall) &
-							+ logistic_factor*ngShr2050*(BSCIBYR(inddir,indreg,3)/sumall)*avebeff(6)/avebeff(1) &
-					-		+ logistic_factor*coalShr2050*(BSCIBYR(inddir,indreg,1)/sumall)*avebeff(6)/avebeff(2) 
-			     endif   ! if curcalyr > ibyr
-		  endif
-          enddo
-		else ! if sumall == 0; assign shares equally
-           bsfuelshr(inddir,indreg,:) = 1/ifsmax
-     endif ! conclustion of sumall.ne.0 if statement		   
+				   bsfuelshr(inddir,indreg,ifuel)= (BSCIBYR(inddir,indreg,1)/sumall) &
+							+ logistic_factor*ngShr2050*(BSCIBYR(inddir,indreg,4)/sumall)*beff(1)/beff(4) &
+							+ logistic_factor*coalShr2050*(BSCIBYR(inddir,indreg,7)/sumall)*beff(1)/beff(7) 
+			    else
+					CONTINUE
+				endif
+			endif
+        ENDDO
+    endif ! conclustion of sumall.gt.0 if statement		   
 
 !   ASSIGN PRICES AND COEFFICIENTS TO DUMMY VARIABLES
 !   W1=>GAS,W2=>COAL,W3=>OIL, W4=> electricity
 
 !   First set the "default" alpha
-       Alpha=TLBSHR(INDDIR,INDREG,1) ! this is the default value
+       Alpha=-2 ! this is the default value
 
-! NSK ibyr2 update 7/2020
     IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries
         SwitchPrat=AveFPrc(ir,ibyr2-1989,curiyr,31) ! AveFPrc returns price change since history ended (base year)
     ELSE                                                                                                                ! End-use industries
@@ -9203,74 +8260,40 @@ subroutine corncalc(is,ifuel,ifx)
        W(1) = ngasPfac*PRCX(4,INDREG,3)/PRCXIBYR(1,INDREG) ! indexed price of gas (base year not = 1)
        W(2) = coalPfac*PRCX(7,INDREG,3)/PRCXIBYR(2,INDREG) ! indexed price of coal
        W(3) = oilPfac*PRCX(10,INDREG,3)/PRCXIBYR(3,INDREG) ! indexed price of residual fuel
-       W(4) = elecPfac*PRCX(1,INDREG,3)/PRCXIBYR(4,INDREG)  ! indexed price for electric--ntoe index at end
+       W(4) = elecPfac*PRCX(1,INDREG,3)/PRCXIBYR(4,INDREG) ! indexed price for electric--ntoe index at end
        LSUM = 0.0
        DO I = 1,4
-          if(w(i).le.0.05) w(i)=.05  ! prevent zero raised to negative exp (alpha) when coal or other prices set to zero
-
-      !    LSUM = LSUM +  (W(I)**ALPHA)*TLBSHR(INDDIR,INDREG,I+1)			
+          if(w(i).le.0.05) w(i)=.05  ! prevent zero raised to negative exp (alpha) when coal or other prices set to zero			
        ENDDO
 
       renorm=1.0
-      icoal=0
 	  
-	DO IFuel=1,IFSMAX
-	 ! Petroleum based products
-	   IF((IFSLOC(IFuel).GE.10.AND.IFSLOC(IFuel).LE.12).OR. &
-		  (IFSLOC(IFuel).GE.14.AND.IFSLOC(IFuel).LE.16).OR. &
-		  IFSLOC(IFuel).EQ.20.OR.IFSLOC(IFuel).EQ.22) THEN
-		  BSSHR(IFuel) = (W(3)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
-	   ENDIF
-
-	   
-	   ! Natural Gas
-		 IF(IFSLOC(IFuel).EQ.4) &
-			 BSSHR(IFuel) = (W(1)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
-		   
-	   ! Coal
-		 IF(IFSLOC(IFuel).EQ.7) THEN
-			if(TLBSHR(INDDIR,INDREG,3).gt. 0.0) icoal=ifuel
-			  BSSHR(IFuel) = (W(2)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
-			if (INDDIR.lt.7) BSSHR(IFuel) = 0. ! no nonmfg coal boilers					   
-		 ENDIF ! coal
-		 ! electricity BSSHR index is 6, 
-		 IF(IFSLOC(IFuel).EQ.1)  &
-		  BSSHR(IFuel) = (W(4)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
+	DO IFuel=1,mainfuels
+		IF(IFuel.EQ.1)THEN		! electricity
+			BSSHR(IFuel) = (W(4)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)	
+		ELSEIF(IFuel.eq.4)THEN	! natural gas
+			BSSHR(IFuel) = (W(1)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
+		ELSEIF(IFuel.eq.7)THEN	! coal
+			BSSHR(IFuel) = (W(2)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
+			if (INDDIR.lt.7) BSSHR(IFuel) = 0. ! no nonmfg coal boilers
+		ELSEIF(((IFuel.GE.10).AND.(IFuel.LE.12)).OR. &
+			   ((IFuel.GE.14).AND.(IFuel.LE.16)).OR. &
+			   (IFuel.EQ.20).OR.(IFuel.EQ.20))THEN	! petroleum fuels
+			BSSHR(IFuel) = (W(3)**ALPHA)*BSFUELSHR(INDDIR,INDREG,IFuel)
+		ENDIF
 	ENDDO
 
 ! normalize boiler shares
-      LSUM=0.
-      do IFUEL=1,IFSMAX
-        lsum=lsum+bsshr(ifuel)
-      enddo
-      if((lsum.ne.0).and.(abs(lsum-1.).gt.0.001)) then
-        do ifuel=1,ifsmax
-           bsshr(ifuel)=bsshr(ifuel)/lsum
-        enddo
-	  ELSE
-	       bsshr(:) = 1/ifsmax
+      LSUM=sum(bsshr(1:mainfuels))
+      if(lsum.ne.0)then
+           bsshr(1:mainfuels)=bsshr(1:mainfuels)/lsum
       endif
+	  bsshr(51)=bsshr(10)+bsshr(11)+bsshr(12)+bsshr(14)+bsshr(15)+bsshr(16)+bsshr(20)+bsshr(22)	! bsshr(51) is subtotal of petroleum products
 
-
-! NSK ibyr2 update 7/2020   
-! write to global variable bsshr 
- !   IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and.  (inddir .le. 13))) then   ! Process-flow industries
- !        if(curcalyr.eq.ibyr2) then
- !            bsshrlag=bsshr
- !        endif
- !    ELSE                                                                                                                ! End-use industries
- !        if(curcalyr.eq.ibyr2) then
- !            bsshrlag=bsshr
- !        endif    
- !    END IF
- !      
-       bsshrlag=bsshr
-
-       if(prtdbgi.gt.1) then
-         if(indreg.eq.1) write(6,'(a,15I6)')'               Ind Reg ',(ifsloc(ifuel),ifuel=1,ifsmax)
-         write(6,'(a,2I4,15F6.3)') 'Boiler Shares:',inddir,indreg,bsshr(1:ifsmax),sum(bsshr(1:ifsmax))
-		 write(6,*) 'w(x) vars and tlbshrvars', W(1:4), TLBSHR(inddir, indreg, 1:7)
-       endif
+       ! if(prtdbgi.gt.1) then
+         ! if(indreg.eq.1) write(6,'(a,15I6)')'               Ind Reg ',(ifuel=1,50)
+         ! write(6,'(a,2I4,15F6.3)') 'Boiler Shares:',inddir,indreg,bsshr(1:50),sum(bsshr(1:50))
+       ! endif
 
 !  FORMAT STATEMENTS.
   991 FORMAT(3X,'CALBSC')
@@ -9289,43 +8312,28 @@ subroutine corncalc(is,ifuel,ifx)
       real fuelelec(numflchp)     ! Elec portion of cogen system fuel by fuel type
       real fuelcogsteam(numflchp) ! process steam portion of cogen system fuel
       real availbiomass      ! bioproduct fuel used in non cogen boilers (bioproduct less fuelsys(3,4)
-! Average boiler efficiencies (kp reordered 7/15/24)
-!    NG, coal, resid, distl, LPG, electricity, petcoke, oth, biomass, hydro, total
-      real beff(11)/0.78,0.83,0.84,0.80,0.76,0.98,0.80,0.80,0.69,0.80,0.80/         ! same as calbsc
-	!  real reg2div(2) ! maps regions to census divisions
-	  real divbounds(2)
       real noncogfosfuel     ! Non-cogen fossil fuel to make noncogfossteam
       real TotCogBoilFuel    ! total fossil boiler fuel
       real fuel(3)           ! temp to store fuel for cogen (grid, own-use, tot)
       real elecfuel(3)       ! temp to store fuel for elec portion of cogen
       real incrheatrate      ! amount of input heat allocated to elec portion of cogen
-      real avebeff           ! average boiler efficiency across fossil fuels
 	  real chp_eff/0.8/ ! assumed efficiency of chp units in the first year
 	  ! now for some new renewable VARIABLES
-	  real biopropor    ! biomass in year 0 / shipments in year 0 (ibyr)
-	  real bionew       ! biopropor times shipments in year t 
       real TotFuel,NormSum,NewShr,OldShr,Shift,SumShr,CurSum ,Factor
       integer ntries,maxtries
-    !  real bsshrFossil(11)   ! recomputation of bsshr, boiler fuel shares
       real resetsum,estimated,implied
-      integer reset(11) ,repeat, ifuel_last_fossil
-      logical assigned_once(6) ! used when mapping the 3 cogen fuel indexing to the indexing with ifsloc
+      integer reset(11) ,repeat
       INTEGER IP,IT,IFJ,K,L,M,N,ifx
 	  INTEGER LO, HI ! division bounds
       integer IFuel,JFuel,bsize     ! index for fuel and size loops
-      real check_cogboilfuel,check_fuelsys,check3,check4,check5,check6,check7,check8 ! debugging sums
+      real check_cogboilfuel,check_fuelsys,check3 ! debugging sums
 
       GENFUEL=0.  ! sum of cogen fuel for this industry and region ; stored in buffers; for indy rep writer
       RPTCAP=0.
       RPTGEN=0.
-	!  bsshrFossil(:) = 0.
 	  reset(:) = 0.
 
       YR = IYR - 1989
-	  
-! DON'T use function to replace the variables below	  
-
-   !   divbounds = reg2div(lo, hi)
 
 ! pick range of census divisions that are in the current census region
       IF(INDREG.EQ.1) THEN
@@ -9352,7 +8360,7 @@ subroutine corncalc(is,ifuel,ifx)
 !          RTPGEN, RPTCAP used in the report writer and stored by region/year in the buffers
 ! since we are compiling sums across industries here, we have to apply
 ! grid/own-use shares at the industry level
-      do I=L,M ! census divisions in current indreg
+    do I=L,M ! census divisions in current indreg
         do ifuel=1,numflchp
           jfuel=min(4,ifuel) ! 1:coal, 2:oil, 3:natgas, 4:other/renew
 
@@ -9375,7 +8383,7 @@ subroutine corncalc(is,ifuel,ifx)
 
         enddo ! ifuel
 
-      enddo ! census divisions in current indreg
+    enddo ! census divisions in current indreg
 
 !  The steam generated from cogen won't
 !  need to be generated by non-cogeneration boilers
@@ -9393,8 +8401,8 @@ subroutine corncalc(is,ifuel,ifx)
 ! lower than bulkc chemicals (9)
 
 
-   if (inddir.eq.7) BSCIBYR(inddir,indreg,4) = BSCIBYR(inddir,indreg,4) + BSCIBYR(9,indreg,4)
-   if (inddir.eq.9) BSCIBYR(inddir,indreg,4) = 0.
+   if (inddir.eq.7) BSCIBYR(inddir,indreg,42) = BSCIBYR(inddir,indreg,42) + BSCIBYR(9,indreg,42)
+   if (inddir.eq.9) BSCIBYR(inddir,indreg,42) = 0.
 
 
 ! kpe revision (issue 1369, October 2024):  
@@ -9406,19 +8414,18 @@ subroutine corncalc(is,ifuel,ifx)
 !
 
       if (curcalyr.le.ibyr) then
-	      biosteam = BSCIBYR(inddir,indreg,4)*beff(9) ! - fuelsys(7))*beff(9)
+	      biosteam = BSCIBYR(inddir,indreg,42)*beff(42)
 	  ELSE
           biosteam = biosteamlag*(PRODVX/PRODVXLAG) 
       endif
           biosteamlag=biosteam	  
 
-  !    biomassintibyr = BSCIBYR(4)/sum(outind(divbounds(:),inddir))
    !   availbiomass=(ByPBSCR(2)+ ByPBSCR(3)) - fuelsys(7) ! subtract cogen wood from wood byproducts
 	!  if (inddir.eq.19) write(137,*) 'First calc Wood biomass for region ', inddreg, ':  ', availbiomass
-   !   availbiomass=max((BSCIBYR(inddir,indreg,4)/sum(ByPBSCR(2:3))),1.)*(ByPBSCR(2)+ ByPBSCR(3)) - fuelsys(7) ! subtract cogen wood from wood byproducts
+   !   availbiomass=max((BSCIBYR(inddir,indreg,42)/sum(ByPBSCR(2:3))),1.)*(ByPBSCR(2)+ ByPBSCR(3)) - fuelsys(7) ! subtract cogen wood from wood byproducts
 	!  if (inddir.eq.19) write(137,*) 'Second calc Wood biomass for region ', inddreg, ':  ', availbiomass
     !  availbiomass=max(0.,availbiomass)
-     ! biosteam=availbiomass*beff(9)  ! wood boiler efficiency--correct 7/15/24
+     ! biosteam=availbiomass*beff(42)  ! wood boiler efficiency
 
 !  Determine steam that must be produced from non-cogen boilers.
 !  It's possible that Cogen steam (cogsteam) will be greater than
@@ -9434,123 +8441,91 @@ subroutine corncalc(is,ifuel,ifx)
 ! for printing debug info on calibrating nonCHP boiler fuel use, save steam info
 !IF ((inddir .eq. 8) .or. ((inddir .ge. 10) .and. (inddir .le. 13))) then   ! Process-flow industries
     if(yr.eq.(ibyr-baseyr)) then
-
         STEMCURIBYR(inddir,indreg)=stemcur
         COGSTEAMIBYR(inddir,indreg)=cogsteam
         BIOSTEAMIBYR(inddir,indreg)=biosteam
-        noncogfosstmIBYR(inddir,indreg)=noncogfossteam
 
 ! Calculate calibration factors such that the CHP and nonCHP fuel use will match MECS.
 ! this is in part due to regional discrepancies in steam-to-fuel ratios and/or
 ! bad steam estimates from 860b or the mecs-based estimate.
         CALIBIBYR_BIO(inddir,indreg)=1.
         CALIBIBYR_FOS(inddir,indreg)=1.
-        if(BOILIBYR(inddir,indreg,4).gt.0.) then
-          estimated=biosteam/beff(9)
-          implied=BOILIBYR(inddir,indreg,4)
+        if(BOILIBYR(inddir,indreg,42).gt.0.) then
+          estimated=biosteam/beff(42)
+          implied=BOILIBYR(inddir,indreg,42)
           if(estimated.gt.0.0) CALIBIBYR_BIO(inddir,indreg)=implied/estimated
         endif
 ! Correct for regional situation where CHP fuel exceeds MECS, yet steam demand
 ! for nonCHP boilers still must be met.  Set a very low calibration factor
 ! such that MECS fuel use is not exceeded by more than .1 trill btu.
-        if(sum(BOILIBYR(inddir,indreg,1:3)).eq. 0.0 .and. noncogfossteam.gt.0.0) then
-           BOILIBYR(inddir,indreg,1:3)=.0333
+        if(((BOILIBYR(inddir,indreg,4)+BOILIBYR(inddir,indreg,7)+BOILIBYR(inddir,indreg,51)).eq.0.0).and.(noncogfossteam.gt.0.0)) then
+           BOILIBYR(inddir,indreg,4)=.0333
+		   BOILIBYR(inddir,indreg,7)=.0333
+		   BOILIBYR(inddir,indreg,51)=.0333
         endif
-        if (sum(BOILIBYR(inddir,indreg,1:3)).gt.0.) then
+        if ((BOILIBYR(inddir,indreg,4)+BOILIBYR(inddir,indreg,7)+BOILIBYR(inddir,indreg,51)).gt.0.) then
           estimated=noncogfossteam/chp_eff
-          implied=sum(BOILIBYR(inddir,indreg,1:3))
+          implied=BOILIBYR(inddir,indreg,4)+BOILIBYR(inddir,indreg,7)+BOILIBYR(inddir,indreg,51)
           if(estimated.gt.0.0) CALIBIBYR_FOS(inddir,indreg)=implied/estimated
         endif
     endif
-! assign cogen fossil fuel to IND fuel locations and share out oil fuel use to oil products
-! based on MECS
-
-      CogBoilFuel(:)=0.
-      ifuel_last_fossil=0 ! highest fuel index matching a fossil fuel, assuming indices in ifsloc(1:ifsmax) are in ascending order
-      Do IFUEL=1,IFSMAX
-        I=IFSLOC(IFUEL)
-        jfuel=0
-        if(i.eq.7) then
-          jfuel=1 ! coal
-          CogBoilFuel(ifuel)=Fuelsys(jfuel)
-          IF(inddir.lt.7) CogBoilFuel(ifuel)=0.0    ! No steam coal for nonmanufacturing
-          ifuel_last_fossil=max(ifuel,ifuel_last_fossil)
-        elseif(i.ge.10.and.i.le.22) then
-          jfuel=2  ! oil -- need to add up (KPE 7/10/24 change)
-          CogBoilFuel(ifuel)= CogBoilFuel(ifuel) + Fuelsys(jfuel)*BSFUELSHR(INDDIR,INDREG,IFUEL) ! this requires that bsfuelshr be based on BSCibyr2, not BOILibyr2
-          ifuel_last_fossil=max(ifuel,ifuel_last_fossil)
-! the rest of these are to transfer non-biomass renewables (msw& hydro are non zero) to
-! the ensqty array to be reflected in qtyrenw--check order. Don't mess w/jfuel this time around, if ever kpe 7/15/24
-        elseif(i.eq.4) then
-          jfuel=3  ! ngas
-          CogBoilFuel(ifuel)=Fuelsys(jfuel)
-          ifuel_last_fossil=max(ifuel,ifuel_last_fossil)
-        elseif(i.eq.41) then  ! this and all subsequent fuels are renewable
-          jfuel=4
-          CogBoilFuel(ifuel)=Fuelsys(jfuel)
-        elseif(i.eq.44) then
-          jfuel=5
-          CogBoilFuel(ifuel)=Fuelsys(jfuel)
-        elseif(i.eq.48) then
-          jfuel=6
-          CogBoilFuel(ifuel)=Fuelsys(jfuel)
-        elseif(i.eq.46) then
-          jfuel=8
-          CogBoilFuel(ifuel)=Fuelsys(jfuel)
-        elseif(i.eq.1) then
-          jfuel=9  ! electricity
-          CogBoilFuel(ifuel)= 0. 
-          ifuel_last_fossil=max(ifuel,ifuel_last_fossil) ! anything not biomass is considered "fossil"
-        endif
-        if(jfuel.eq.0) then
-          Write(6,'(a,i2,a,i2,a,i2)') 'unassigned cogboilfuel index for i, where i=ifsloc(ifuel):',i, &
-          ' in industry # ',inddir,' Region ',indreg
-        endif
-      enddo
+! assign cogen fossil fuel to IND fuel locations and share out oil fuel use to oil products based on MECS
+    CogBoilFuel(:)=0.
+	CogBoilFuel(1:numflchp)=Fuelsys(1:numflchp)
+	IF(inddir.lt.7) CogBoilFuel(1)=0.0    ! No steam coal for nonmanufacturing	
 
 ! Assign nonCHP fossil fuel (noncogfosfuel) to IND fuel locations and share out based on update fuel shares
 
-! ifuel = 1=NG, 2=Coal, 3=Resid, 4=Distl, 5=LPG H&P, 6=electricity (was Pet Coke), 
-! 7=petcoke, 8=other petorleum, 9=biomass, 10=hydro 11=msw  
-! Not all fuels are used for all industries, but indicies are the same for all industries (check order)
-
       FuelFosSteam(:)=0.
-      sumshr=sum(bsshr(:))
-      DO IFUEL=1,ifsmax  
-        NonCogFosFuel=noncogfossteam*BSSHR(ifuel)  
-        FuelFosSteam(ifuel)=(NonCogFosFuel/beff(ifuel))*CALIBIBYR_FOS(inddir,indreg) 
-        DO bsize=1,2            ! 1=10 MMBtu/yr or less, 2=greater than 10 MMBtu/yr
-               if (IFUEL.eq.6) then
-    		     FosFuelSteamSize(inddir,ifuel,bsize,indreg)= FuelFosSteam(ifuel)*sizeshr(inddir,5,bsize)
-    		   else
-    		     FosFuelSteamSize(inddir,ifuel,bsize,indreg)= FuelFosSteam(ifuel)*sizeshr(inddir,ifuel,bsize)
-    		   endif											 
-    		      FOSFUELSTEAMSIZE(inddir,ifuel,bsize,5)=FOSFUELSTEAMSIZE(inddir,ifuel,bsize,5)+&
-                                                            FOSFUELSTEAMSIZE(inddir,ifuel,bsize,indreg)
-		enddo
+      DO IFUEL=1,mainfuels  
+        NonCogFosFuel=noncogfossteam*BSSHR(ifuel)
+		IF(beff(ifuel).gt.0) FuelFosSteam(ifuel)=(NonCogFosFuel/beff(ifuel))*CALIBIBYR_FOS(inddir,indreg)
       ENDDO
+	  ! use 0.8 for petroleum boiler efficiency (average of distillate, resid, propane, petcoke, and other petroleum)
+	  FuelFosSteam(51)=(NonCogFosFuel/0.8)*CALIBIBYR_FOS(inddir,indreg)	  
+      DO bsize=1,2            ! 1=10 MMBtu/yr or less, 2=greater than 10 MMBtu/yr
+        FosFuelSteamSize(inddir,4,bsize,indreg)= FuelFosSteam(4)*sizeshr(inddir,1,bsize)	! natural gas
+		FosFuelSteamSize(inddir,7,bsize,indreg)= FuelFosSteam(7)*sizeshr(inddir,2,bsize)	! coal
+    	FosFuelSteamSize(inddir,51,bsize,indreg)= FuelFosSteam(51)*sizeshr(inddir,3,bsize)	! petroleum products
+		FosFuelSteamSize(inddir,42,bsize,indreg)= FuelFosSteam(42)*sizeshr(inddir,4,bsize)	! biomass
+		FosFuelSteamSize(inddir,1,bsize,indreg)= FuelFosSteam(1)*sizeshr(inddir,5,bsize)	! electricity
+	  ENDDO
 
-      check_cogboilfuel=sum(cogboilfuel(1:ifuel_last_fossil))  ! fossil fuels
-      check_fuelsys=sum(fuelsys(1:3))                          ! fossil fuel for
-      check3=check_cogboilfuel-check_fuelsys
-      if(abs(check3).gt. 0.001.and.prtdbgi.gt.1) then
-        write(6,'(a,2i3,3f10.3)')' Cogboilfuel and fuelsys fossil don''t agree, in Inddir,indreg,cogboilfuel,fuelsys,check3:', &
-        inddir,indreg,check_cogboilfuel,check_fuelsys,check3
-      endif
+      do ifuel=1,50
+	  !IF statements converting main fuel index to CHP fuel indices used in exstcap and plancap. Remove this when CHP indices converted to main fuel index.
+		IF(ifuel.eq.7)THEN
+			ifx=1	! coal
+		ELSEIF(ifuel.eq.11)THEN
+			ifx=2	! oil products; based on a quick look at 2023 860 data, mostly distillate
+		ELSEIF(ifuel.eq.4)THEN
+			ifx=3	! natural gas
+		ELSEIF(ifuel.eq.41)THEN
+			ifx=4	! hydroelectric
+		ELSEIF(ifuel.eq.44)THEN
+			ifx=5	! geothermal
+		ELSEIF(ifuel.eq.48)THEN
+			ifx=6	! MSW
+		ELSEIF(ifuel.eq.42)THEN
+			ifx=7	! biomass
+		ELSEIF(ifuel.eq.46)THEN
+			ifx=8	! solar PV
+		ELSEIF(ifuel.eq.34)THEN
+			ifx=9	! other byproduct gas
+		ELSEIF(ifuel.eq.11)THEN
+			ifx=10	! other petroleum
+		ELSE
+			IFX=0
+		ENDIF
 
-      do ifuel=1,ifsmax
-        ifx=ifsloc(ifuel)
-		ensqty(ifuel)=FuelFosSteam(ifuel)+CogBoilFuel(ifuel) ! may need different index for cogboil fuel ...KPE changed argument of 1st term from ifuel
-		IF (PRTDBGI .GE. 2) write(6,*) 'FuelFosSteam, CogBoilFuel and ensqty for ifuel ', Ifuel,' and ifsloc(ifuel)',ifx ,':  ', &
-     		FuelFosSteam(ifuel), CogBoilFuel(ifuel), ensqty(ifuel)
+		ensqty(ifuel)=FuelFosSteam(ifuel)+CogBoilFuel(ifx)
+		
+		IF (PRTDBGI .GE. 2) write(6,*) 'FuelFosSteam, CogBoilFuel and ensqty for ifuel ', Ifuel,' CHP fuel index',ifx ,':  ', &
+     		FuelFosSteam(ifuel), CogBoilFuel(ifx), ensqty(ifuel)
       enddo
 	  
 	  ! now put fuel used for biosteam in renewable array for wood. 
 	  
-	  ENPRQTY(2) = ENPRQTY(2) + biosteam/beff(9)
-
-      check5=sum(ensqty)
-      check4=sum(fuelfossteam)
+	  ENPRQTY(2) = ENPRQTY(2) + biosteam/beff(42)
 
       if(yr.eq.(maxcogyr)) then
 ! for cogen technical potential, determine amount of steam not already met by cogen and not
@@ -9572,28 +8547,19 @@ subroutine corncalc(is,ifuel,ifx)
       INTEGER IFUEL,IFF
       REAL sv_val
       REAL ELECTEMP
-      REAL SUM
-      REAL OwnAdj ! adjust own use and grid sales if needed
 
       IF(ISUBTR.EQ.1.AND.IOPEN.EQ.1.AND.LSTITER.EQ.1) &
         WRITE(IUNIT1,991)
 
 !  INITIALIZE THE QTY ARRAYS.
 
-          DO IFUEL=1,mainfuels
-            QTYMAIN(IFUEL,INDREG)=0.0
-          ENDDO
-          DO IFUEL=1,7
-            QTYINTR(IFUEL,INDREG)=0.0
-          ENDDO
-          DO IFUEL=1,9
-            QTYRENW(IFUEL,INDREG)=0.0
-          ENDDO
+            QTYMAIN(1:mainfuels,INDREG)=0.0
+            QTYINTR(1:7,INDREG)=0.0
+            QTYRENW(1:9,INDREG)=0.0
+			
           if (indnum.eq.1) then
-              do ifUEL=1,4
-                 xelin(ifUEL,indreg)=0.0
-                 xelinshr(ifUEL,indreg)=0.0
-              enddo
+                 xelin(1:4,indreg)=0.0
+                 xelinshr(1:4,indreg)=0.0
           endif
 
 !  THE PA QUANTITIES ARE PUT IN THE TOTAL ARRAYS.
@@ -9656,38 +8622,36 @@ subroutine corncalc(is,ifuel,ifx)
          QTYMAIN(12,INDREG) = sv_val
       END IF
 
-!  BSC ENERGY SOURCES HAVE TO BE TRANSLATED.  run for steel and paper.  
- !    if ((inddir .ne. 8).and.(inddir .ne. 12)) then
-
-		  DO 80 IFUEL=1,IFSMAX
-			IF(IFSLOC(IFUEL).LT.30) THEN
-			  IFF=IFSLOC(IFUEL)
-
-			  sv_val = QTYMAIN(IFF,INDREG)
-			  QTYMAIN(IFF,INDREG)=QTYMAIN(IFF,INDREG)+ENSQTY(IFUEL)
-        
-			  IF (ISNAN(ENSQTY(IFUEL))) THEN
-				 WRITE(6,2336) CURIRUN, CURIYR+1989, CURITR, INDREG, IFF, IFUEL, sv_val, ENSQTY(IFUEL)
-	 2336        FORMAT(1X,"ENSQTY_IS_NAN",6(":",I4),2(":",F21.6))
-				 QTYMAIN(IFF,INDREG) = sv_val
-			  END IF
-
-			ELSE
-			  IF(IFSLOC(IFUEL).LT.40) THEN
-				IFF=IFSLOC(IFUEL)-30
-				if (ISNAN(BYPBSCI(IFF))) then
+!  BSC ENERGY SOURCES HAVE TO BE TRANSLATED
+		DO 80 IFUEL=1,50
+			IF(IFUEL.LE.mainfuels)THEN	! main fuels
+				sv_val = QTYMAIN(IFUEL,INDREG)
+				QTYMAIN(IFUEL,INDREG)=QTYMAIN(IFUEL,INDREG)+ENSQTY(IFUEL)
+				IF (ISNAN(ENSQTY(IFUEL))) THEN
+					WRITE(6,2336) CURIRUN, CURIYR+1989, CURITR, INDREG, IFUEL, sv_val, ENSQTY(IFUEL)
+	 2336       	FORMAT(1X,"ENSQTY_IS_NAN",6(":",I4),2(":",F21.6))
+					QTYMAIN(IFUEL,INDREG) = sv_val
+				ENDIF
+			ELSEIF(IFUEL.LE.30)THEN	! no fuels from mainfuels+1 through index 30
+				CONTINUE
+			ELSEIF(IFUEL.LE.36)THEN	! 6 intermediate fuels
+				IFF=IFUEL-30
+				IF(ISNAN(BYPBSCI(IFF)))THEN
 				    QTYINTR(IFF,INDREG)=QTYINTR(IFF,INDREG) ! similar change as renewable bypsc
 				ELSE
 				    QTYINTR(IFF,INDREG)=QTYINTR(IFF,INDREG)+BYPBSCI(IFF) ! similar change as renewable bypsc
-                endif
-			  ELSE
-				IFF=IFSLOC(IFUEL)-40
-				if (ISNAN(BYPBSCR(IFF))) then
+                ENDIF
+			ELSEIF(IFUEL.LE.40)THEN	! no fuels for indices 37–40
+				CONTINUE
+			ELSEIF(IFUEL.LE.48)THEN	! 8 renewable fuels
+				IFF=IFUEL-40
+				IF (ISNAN(BYPBSCR(IFF))) then
 				    QTYRENW(IFF,INDREG)=QTYRENW(IFF,INDREG) ! similar change as renewable bypsc
 				ELSE
 				    QTYRENW(IFF,INDREG)=QTYRENW(IFF,INDREG)+BYPBSCR(IFF) ! similar change as renewable bypsc
-                endif
-			  ENDIF
+                ENDIF
+			ELSE					! no fuels in indices 49 or 50
+				CONTINUE
 			ENDIF
 	   80 CONTINUE
 
@@ -9718,13 +8682,13 @@ subroutine corncalc(is,ifuel,ifx)
 ! doesn't apply to steel and paper?
 ! use separate equation for steel and paper --now there's an else statement! 
       
-		  ELECTEMP=QTYMAIN(1,INDREG) - ELOWN*(3412./10.**6)  ! check to see if this applies to steel and paper
+		  ELECTEMP=QTYMAIN(1,INDREG) - ELOWN*(CFELQ/10.**6)  ! check to see if this applies to steel and paper
 	  if ((inddir.ne.8).and.(inddir.ne.12)) then
      	IF(ELECTEMP.GE.0.0) THEN
 			QTYMAIN(1,INDREG)=ELECTEMP
 		ELSE
-			ELOWN  = ELOWN +  ELECTEMP * (10.**6/3412.) ! if we are here, electemp is negative
-			ELSALE = ELSALE - ELECTEMP * (10.**6/3412.) ! to keep things balanced, increase sales to grid
+			ELOWN  = ELOWN +  ELECTEMP * (10.**6/CFELQ) ! if we are here, electemp is negative
+			ELSALE = ELSALE - ELECTEMP * (10.**6/CFELQ) ! to keep things balanced, increase sales to grid
 			QTYMAIN(1,INDREG)=0.0                       ! reduce ownuse by same amount
 		   if(prtdbgi.gt.1) then
 			 write(6,'(A,3I4)') ' self generation exceeds electricity use, curiyr,indreg,inddir=', &
@@ -9763,22 +8727,7 @@ subroutine corncalc(is,ifuel,ifx)
         xelin(3,indreg)=xelin(3,indreg) + qtymain(1,indreg)
     ENDIF
 
-      xelinshr(1,indreg)=xelin(1,indreg)/ &
-       (xelin(1,indreg)+ &
-        xelin(2,indreg)+ &
-        xelin(3,indreg))
-
-       xelinshr(2,indreg)=xelin(2,indreg)/ &
-       (xelin(1,indreg)+ &
-        xelin(2,indreg)+ &
-        xelin(3,indreg))
-
-      xelinshr(3,indreg)=xelin(3,indreg)/ &
-       (xelin(1,indreg)+ &
-        xelin(2,indreg)+ &
-        xelin(3,indreg))
-
-!  FORMAT STATEMENTS.
+    xelinshr(1:3,indreg)=xelin(1:3,indreg)/SUM(xelin(1:3,indreg))
 
   991 FORMAT(3X,'INDTOTAL')
 
@@ -9957,7 +8906,6 @@ subroutine corncalc(is,ifuel,ifx)
       integer k,it,ifuel,iy
 
 ! sum capacity and generation across the numind industries for the current year
-
       IY = curiyr
       CAPGW=0.
       GENGWH=0.
@@ -9991,11 +8939,11 @@ subroutine corncalc(is,ifuel,ifx)
 !  COGENERATION VARIABLES ARE PASSED TO NEMS.
 
         DO ID=1,11  ! divisions
-          DO IF=1,numflchp
+          DO IF=1,numflchp+3                 !BESSmodel - parameter(numflchp=10) above; CGINDLQ/CAP/GEN are declared through fuel index 13 (MNUMCGF) in cogen includes, so adding +3 here to initialize all variables through MNUMCGF even though they aren't populated above IF=numflchp below
             CGINDLCAP(ID,IY,IF)=0.0          !CAPACITY
-            CGINDLQ(ID,IY,IF)=0.0            !FUEL CONS
+            CGINDLQ(ID,IY,IF)=0.0            !FUEL CONSUMPTION
             DO IT=1,2
-              CGINDLGEN(ID,IY,IF,IT)=0.0            !GENERATION
+              CGINDLGEN(ID,IY,IF,IT)=0.0     !GENERATION
             ENDDO
           ENDDO
         ENDDO
@@ -10007,8 +8955,8 @@ subroutine corncalc(is,ifuel,ifx)
             DO IT=1,2    ! grid=1, own use=2 sales
               CGINDLGEN(ID,IY,IFuel,IT)=GENGWH(ID,IFuel,IT)
             ENDDO
-          enddo
-        enddo
+          ENDDO
+        ENDDO
 
       RETURN
       END  SUBROUTINE INDCGN
@@ -10076,7 +9024,7 @@ subroutine corncalc(is,ifuel,ifx)
         REFCON(11,icr,iy)=SUM(QPCRF(DIVS(icr,1):DIVS(icr,2),IY)) + &  ! petroleum coke, marketable
 						  SUM(QCCRF(DIVS(icr,1):DIVS(icr,2),IY))      ! petroleum coke, cat coke
         REFCON(15,icr,iy)=SUM(QOTRF(DIVS(icr,1):DIVS(icr,2),IY))      ! other petroleum
-        REFCON(18,icr,iy)=SUM(QBMRF(DIVS(icr,1):DIVS(icr,2),IY))      ! biomass
+        REFCON(18,icr,iy)=0.0      									  ! biomass
         REFCON(19,icr,iy)=SUM(QH2RF(DIVS(icr,1):DIVS(icr,2),IY))	  ! H2 feedstock is 0 for now NSK H2
         REFCON(20,icr,iy)=0.0                                         ! H2 fuel is 0 for LFMM NSK H2
 
@@ -10397,7 +9345,7 @@ subroutine corncalc(is,ifuel,ifx)
       NumRptGrpSteps(1:12)=0
       RptGrpSteps(1:12,1:maxstep)=0
       RptGrpNames(1:12)=' '
-      RptGrpSName(1:12,1:maxstep)=' '
+      RptGrpStepName(1:12,1:maxstep)=' '
 
 ! read lines until the end of file is reached or all records
 ! for a given industry and region have been read in
@@ -10443,19 +9391,19 @@ subroutine corncalc(is,ifuel,ifx)
 !      INTEGER NumRptGrpSteps(12)          ! Number of steps in each reporting SubGroup for P/A
 !      INTEGER RptGrpSteps(12,maxstep)     ! Identification of step numbers included in each reporting subgroup in P/A
 !      Character*24 RptGrpNames(12)        ! Reporting group names
-!      Character*24 RptGrpSName(12,maxstep+1)! Reporting labels for step names
+!      Character*24 RptGrpStepName(12,maxstep+1)! Reporting labels for step names
 
                 do g=1,NumRptGrps
 12                read(iunit,'(a)') line
                   if(line(1:1).eq.'*') goto 12
                   read(line,*) inpind,inpreg,inpg,RptGrpNames(inpg),NumRptGrpSteps(inpg), &
                     (RptGrpSteps(inpg,igs),igs=1,NumRptGrpSteps(inpg)),                    &
-                    (RptGrpSName(inpg,igs),igs=1,NumRptGrpSteps(inpg))
-                  RptGrpSName(inpg,NumRptGrpSteps(inpg)+1)='  Total'
+                    (RptGrpStepName(inpg,igs),igs=1,NumRptGrpSteps(inpg))
+                  RptGrpStepName(inpg,NumRptGrpSteps(inpg)+1)='  Total'
                   if(prtdbgi.gt.1) then
                     write(6,'(1x,3i4,1x,a,i5)') inpind,inpreg,inpg,RptGrpNames(inpg),NumRptGrpSteps(inpg)
                     do igs=1,NumRptGrpSteps(inpg)
-                      write(6,'(32x,i5,6x,a)') RptGrpSteps(inpg,igs),RptGrpSName(inpg,igs)
+                      write(6,'(32x,i5,6x,a)') RptGrpSteps(inpg,igs),RptGrpStepName(inpg,igs)
                     enddo
                   endif
                 enddo
@@ -10464,7 +9412,7 @@ subroutine corncalc(is,ifuel,ifx)
                 NumRptGrpSteps(NumRptGrps+1)=mpastp
                 do is=1,mpastp
                    RptGrpSteps(NumRptGrps+1,is)=is
-                   RptGrpSName(NumRptGrps+1,is)=indstepname(is)
+                   RptGrpStepName(NumRptGrps+1,is)=indstepname(is)
                 enddo
               endif
 ! read retirement rates
@@ -10493,13 +9441,6 @@ subroutine corncalc(is,ifuel,ifx)
               dumc, &
              (prodflow(min(ivint,2),inpstp,idown),idown=1,ntmax(inpstp))
               if(prtdbgi.gt.1) &
-!       this is here for experimental purposes only !!!
-!             if(ivint.eq.3) then
-!               do idown=1,ntmax(inpstp)
-!                 prodflow(2,inpstp,idown)=
-!    1            prodflow(1,inpstp,idown)           !  keep same flows
-!               enddo
-!             end if
               write(6,'(4i3,a,6f10.3)') inpind,inpreg,ivint,inpstp, &
               dumc, &
              (prodflow(min(ivint,2),inpstp,idown),idown=1,ntmax(inpstp))
@@ -10533,7 +9474,7 @@ subroutine corncalc(is,ifuel,ifx)
       CHARACTER*20 FUELNAME(50)
       fuelname=' '  ! array initialization
       FUELNAME(1)='ELECTRICITY '
-      FUELNAME(2)='H2 FEEDSTOCK'  !NSK H2
+      FUELNAME(2)='H2 FEEDSTOCK'
       FUELNAME(3)='NAT GAS CORE '
       FUELNAME(4)='NAT GAS NONCORE'
       FUELNAME(5)='NAT GAS FEEDSTOCK'
@@ -10554,38 +9495,10 @@ subroutine corncalc(is,ifuel,ifx)
       FUELNAME(20)='KEROSENE'
       FUELNAME(21)='OTHER OIL FEEDSTOCKS'
       FUELNAME(22)='OTHER PETROLEUM'
-      FUELNAME(23)='H2 FUEL'   !NSK H2
+      FUELNAME(23)='H2 FUEL'
 
       iyr=curiyr+baseyr-1
       ir=indreg
-
-        if(prtdbgi.ge.1.and.curitr.eq.1.and.curcalyr.eq.ibyr2) then
-
-! write out what could be used as the ITECH file to INDTST.txt
-!  (would be used if steps/industries changed or for debugging
-        DO IS=1,MPASTP
-          write(iunit1,3002) indnum,ir,ifmax(is), &
-            (ifloc(ifl,is),ifl=1,ifmax(is))
-
-3002   format(1x,i2,',',i1,',','''',a,'''',',',i2,',', & 
-       15(i2,','))
-        enddo
-        DO IS = 1,MPASTP
-          DO IFL = 1,IFMAX(IS)
-            IFX = IFLOC(IFL,IS)
-            write(iunit1,3001) indnum,ir, &
-            ifx,fuelname(ifx), &  
-            einter(1,ifl,is), &
-            futuec(einter(1,ifl,is),bcsc(1,ifl,is),29), &
-            bcsc(1,ifl,is), &
-            einter(3,ifl,is), &
-            futuec(einter(3,ifl,is),bcsc(3,ifl,is),29), &
-            bcsc(3,ifl,is)
-          enddo
-        enddo
-3001     format(1x,i2,',',i1,',',',',i2,',', &
-          '''',a,'''',',',2(f8.4,',',f8.4,',',f8.4,','))
-       endif
 
 !   read in the ITECH file used as the
 !   spreadsheet input (in comma-separate-value format)
@@ -10596,27 +9509,11 @@ subroutine corncalc(is,ifuel,ifx)
         fname='ITECH'
         new=.false.
         iuectpc=file_mgr('O',fname,new)
-        READ(iuectpc,*)         ! Six line comment/header must be read-over
-        READ(iuectpc,*)
-        READ(iuectpc,*)
-        READ(iuectpc,*)
-        READ(iuectpc,*)
-        READ(iuectpc,*)
+        READ(iuectpc,*)         ! ONE line comment/header must be read-over kpe 10/21/25
       endif
 
       if(iuectpc.gt.0) then
 
-!  For hitech case, read second set of UEC/TPCs for use after 'techstrtyr'.
-!  To do this, position file in the middle after the "hitech" record
-!
-        if(hitech.eq.1.and.curcalyr.gt.techstrtyr.and. &
-           ir.eq.1.and.inddir.eq.1 ) then
-           rewind iuectpc
- 25        continue
-           read(iuectpc,'(a)',end=199) line      ! read lines until the end or
-           if(index(line,'hitech').eq.0) goto 25  ! until a record with "hitech" is found
-           write(6,*) ' Hitech records found in ITECH file'
-        endif
         DO IS = 1,MPASTP
 ! count fuels used in each step.  Allows fuel detail to override enprod
           ifmax(is)=0
@@ -10628,20 +9525,20 @@ subroutine corncalc(is,ifuel,ifx)
           i_stp=0
           duma=' '
           i_ifx=0
-          read(iuectpc,*,end=199,err=299,iostat=ios) i_ind,i_ir,i_stp,i_ifx
+          read(iuectpc,*,end=199,err=199,iostat=ios) i_ind,i_ir,i_stp,i_ifx
 																				   
           if(i_ind.eq.indnum.and.i_ir.eq.ir.and.i_stp.eq.IS) then
              ifl=ifl+1
              ifmax(is)=ifmax(is)+1
              ifloc(ifl,is)=i_ifx
              IFX = IFLOC(IFL,IS)
-         !     indstepname(is)=duma
+
              backspace iuectpc
-             read(iuectpc,*,end=199,err=299) i_ind,i_ir,i_stp,i_ifx, &
+             read(iuectpc,*,end=199,err=199) i_ind,i_ir,i_stp,i_ifx, &
                          einter(1,ifl,is),minpint,bcsc(1,ifl,is), &
                          einter(3,ifl,is),minpint,bcsc(3,ifl,is)
 ! KPE minpint isn't used (2050 UECs) , so why is it in the input file
-! NSK ibyr2 update 7/2020; although this is for end-use industries, the values are read in only on the first year the model runs
+! although this is for end-use industries, the values are read in only on the first year the model runs
              if(iyr.eq.ibyr2) then ! seems as if we should work through the enpints if we want to make this dynamic. Change in UEC appropriate.
                 enpint(1,ifl,is)=einter(1,ifl,is)
                 enpint(3,ifl,is)=einter(3,ifl,is)
@@ -10654,21 +9551,12 @@ subroutine corncalc(is,ifuel,ifx)
         enddo
       endif
 199   continue
-     if (inddir.ge.numind.and.indreg.ge.4) then
-         fname='ITECH'
-         iuectpc=file_mgr('C',fname,new)
-         iuectpc=0
-      endif
-      return
-
-299   continue
-
-298   continue
       if (inddir.ge.numind.and.indreg.ge.4) then
          fname='ITECH'
          iuectpc=file_mgr('C',fname,new)
          iuectpc=0
       endif
+      return
 
       end  subroutine uectpc
 ! =======================================================
@@ -10727,9 +9615,6 @@ subroutine corncalc(is,ifuel,ifx)
          CALL GETRNGR('capfac          ',CapFac          ,1,nsys,1)
          CALL GETRNGR('heatrateyearly  ',CHeatRateYearly ,endyr-2015+1,nsys,1)
          CALL GETRNGR('overalleffyear  ',OverAllEffYearly,endyr-2015+1,nsys,1)
-         CALL GETRNGR('rapidcapcostyr  ',RapidCapCostYr  ,endyr-2015+1,nsys,1)
-         CALL GETRNGR('rapidheatrateyr ',CRapidHeatRateYr,endyr-2015+1,nsys,1)
-         CALL GETRNGR('rapidoralleffyr ',RapidOrAllEffYr,endyr-2015+1,nsys,1)
 
 ! Steam Load Segmentation for 8 boiler size class:
          CALL GETRNGR('steamseg_food   ',SteamSeg_Food  ,1,nload,1)
@@ -10737,7 +9622,6 @@ subroutine corncalc(is,ifuel,ifx)
          CALL GETRNGR('steamseg_chem   ',SteamSeg_Chem  ,1,nload,1)
          CALL GETRNGR('steamseg_steel  ',SteamSeg_Steel ,1,nload,1)
          CALL GETRNGR('steamseg_other  ',SteamSeg_Other ,1,nload,1)
-         CALL GETRNGR('steamseg_refin  ',SteamSeg_Refin ,1,nload,1)
          CALL GETRNGR('penetration     ',Penetration    ,1,nload,1)
          CALL GETRNGR('acceptfrac      ',AcceptFrac     ,13,1,1)
          CALL GETRNGR('acceptfrac2     ',AcceptFrac2    ,13,1,1)
@@ -10752,80 +9636,40 @@ subroutine corncalc(is,ifuel,ifx)
          idebug=prtdbgi
          CogElecPrice=CogElecPrice*(1.-StandByFrac)
          call EvalCogen(idebug,CURIYR+BASEYR-1)
-!
-      ENDIF  ! doonce=1
+      ENDIF
       Return
       End SUBROUTINE cogent
 ! ==============================================================================
       Subroutine EvalCogen(idebug,Year)
    use i_
-      implicit none
-      real acceptance
-      external acceptance
-      integer idebug, il, isys,Year,year2, t, RTOVALUE
-      real CapCost, PVSav, disrate, CHPyr
-      external RTOVALUE
+    implicit none
+    real acceptance
+    external acceptance
+    integer idebug, il, isys,Year,year2, t, RTOVALUE
+    real CapCost, PVSav, disrate, CHPyr
+    external RTOVALUE
 ! Assign the current year cost and performance characteristics.
-      year2=year
-      if(year2.lt.2009) year2=2009    ! Base year for CHP data is 2009
-!      if(hitech.eq.1.and.curcalyr.gt.2008) year2=ijumpcalyr  ! use ijumpcalyr cost/perform assumptions for hitech case
-      if(frztech.eq.1.and.curcalyr.gt.techstrtyr) year2=techstrtyr ! use side case start yr cost/perform assumptions for frozen case
-!     put in some code so that if the following are 0, they get set to a harmless number and we get rid of NaNs
-
-      do i=1,nsys
-        CogCapCostKW(i)=CapCostYearly(year2,i)
-        Cheatrate(i)   =CheatRateYearly(year2,i)
-        OverAllEff(i)  =OverAllEffYearly(year2,i)
-      enddo
-
-      if(hitech.eq.1) then
-        do i=1,nsys
-          CogCapCostKW(i)=RapidCapCostYr(year2,i)
-          Cheatrate(i)   =CRapidHeatRateYr(year2,i)
-          OverAllEff(i)  =RapidOrAllEffYr(year2,i)
-        enddo
-      endif
+    year2=year
+    CogCapCostKW(1:nsys)=CapCostYearly(year2,1:nsys)
+    Cheatrate(1:nsys)=CheatRateYearly(year2,1:nsys)
+    OverAllEff(1:nsys)=OverAllEffYearly(year2,1:nsys)
 
 !  Establish the technical characteristics derived from the input characteristics
-         do i=1,nsys
-           ElecGenEff(i)=3412./CHeatRate(i)
-           ElecSizeMWH(i)=CogSizeKW(i) * 8.760 * &
-             MIN(CapFac(i),maxRegCHPutil(indreg,inddir) * &
-             (QELAS(11,curiyr)/QELAS(11,22))) ! maxRegCHPutil(indreg,inddir) is our POT_08/01/2013
-                                              ! initial guess for assumed utilization
-           FuelUse(i)=ElecSizeMWH(i) * CHeatRate(i)/10.**6  ! to bill btu/yr
-           PowerSteam(i)=ElecGenEff(i)/(OverAllEff(i)-ElecGenEff(i))
-           SteamOutput(i)=CogSizeKW(i)*.003412 /PowerSteam(i)
-         enddo
-
-      ! the next do loop assigns non-zero values to variables with value of zero
- ! if anyone wants to get rid of the NaNs
- !      do i=1,nsys
- !	     CogCapCostKW(i) = max(CogCapCostKW(i),1.0)
- !		 CapFac(i)       = max(CapFac(i),0.05)
- !		 Cheatrate(i)    = max(Cheatrate(i),1.0)
- !		 CogSizeKW(i)    = max(CogSizeKW(i),0.1)
- !		 ElecSizeMWH(i)  = max(ElecSizeMWH(i),0.1)
- !		 OverAllEff(i)   = max(OverAllEff(i),0.05)
- !		 ElecGenEff(i))  = max(ElecGenEff(i),0.03)  ! lower than overall efficiency b/c we don't violate the laws of physics at EIA!
- !		 FuelUse(i)      = max(FuelUse(i),1.0)
- !		 PowerSteam(i)   = max(PowerSteam(i),0.05)
- !		 SteamOutput(i)  = max(SteamOutput(i),1.0)
- !	  enddo
- !
- !
-
+    ElecGenEff(1:nsys)=CFELQ/CHeatRate(1:nsys)
+    ElecSizeMWH(1:nsys)=CogSizeKW(1:nsys) * 8.760 * &
+        MIN(CapFac(1:nsys),maxRegCHPutil(indreg,inddir) * &
+        (QELAS(11,curiyr)/QELAS(11,22)))	! maxRegCHPutil(indreg,inddir) is our POT_08/01/2013
+											! initial guess for assumed utilization NSK: suggest removing QELAS portion, since QELAS(2011) is not necessarily valid history
+    FuelUse(1:nsys)=ElecSizeMWH(1:nsys) * CHeatRate(1:nsys)/10.**6  ! to bill btu/yr
+    PowerSteam(1:nsys)=ElecGenEff(1:nsys)/(OverAllEff(1:nsys)-ElecGenEff(1:nsys))
+    SteamOutput(1:nsys)=CogSizeKW(1:nsys)*(CFELQ/10**6) /PowerSteam(1:nsys)		 
 
 !  For each load segment l..
-      do il=1,nload
-         EboilEff(il)=.8
-      enddo
-      do il=1,nload
-!        Use preassigned cogeneration system for each load segment
-!        (as opposed to some sort of thermal matching done previously).
+         EboilEff(1:nload)=.8
 
-         CogSys(il)=il
-         isys=CogSys(il)
+    do il=1,nload
+		CogSys(il)=il
+        isys=CogSys(il)
          FuelCost(il)     = FuelUse(isys)*CogFuelPrice      ! to 1000s of $
          ExistFuelUse(il) = SteamOutput(isys) * 8.76 * &
                               MIN(CapFac(isys),maxRegCHPutil(indreg,inddir) * &    ! POT_08/01/2013 UTIL1 CHANGE
@@ -10834,14 +9678,13 @@ subroutine corncalc(is,ifuel,ifx)
 
          ExistFuelCost(il)= ExistFuelUse(il) * CogFuelPrice
 
-         ElecValue(il)    = ElecSizeMWH(isys) * CogElecPrice*.003412
+         ElecValue(il)    = ElecSizeMWH(isys) * CogElecPrice*CFELQ/10**6
          IncrFuelCost(il) = FuelCost(il) - ExistFuelCost(il)
          OperProfit(il)   = ElecValue(il) - IncrFuelCost(il)
 
          CapCost=CogCapCostKW(isys)
 
-! Multiply capital cost by a factor if in the specified interval. Implements
-! CCTI if alternate icogen.wk1 input file used
+! Multiply capital cost by a factor if in the specified interval
 
          if(Year.GE.CapCostMultStart.AND.Year.LE.CapCostMultEnd) Then
            CapCost=CogCapCostKW(isys)*CapCostMult(isys)
@@ -10874,8 +9717,6 @@ subroutine corncalc(is,ifuel,ifx)
               ENDIF
            ENDDO
 
-         ! CPayBack(il)     = Investment(il) / OperProfit(il)    **Old econ equation**
-
 !  Get Economic Fraction based on the Payback Acceptance Curve.  Two versions
 !  of the curve are used: one version for small plants, represents industrial ownership.
 !  the second, used for the largest plants, represents independent ownership.
@@ -10886,9 +9727,7 @@ subroutine corncalc(is,ifuel,ifx)
            EconFrac(il)     = Acceptance(AcceptFrac2(1),13,CPayback(il))
          endif
         endif
-!
 
-	 
    	     if(idebug.gt.1) then
            call WritCogen(6,isys,il)
          endif
@@ -11257,7 +10096,7 @@ subroutine corncalc(is,ifuel,ifx)
            ' ', &
            ' ', &
            ' ', &
-           ' ', &
+           'Heat Pump', &
            'Steam', &
            'Coke Oven Gas', &
            'Blast Furnace Gas', &
@@ -11302,7 +10141,7 @@ subroutine corncalc(is,ifuel,ifx)
            'Distillate', &
            'Liquid Petroleum Gases', &
 		   'Petroleum Coke', &
-           'Other', &
+           'Other Petroleum', &
            'Other Renewables',&
            'Biomass', &
            'Electricity'/
@@ -11421,6 +10260,8 @@ subroutine corncalc(is,ifuel,ifx)
 	REAL EnConsArray(mainfuels)					!Stand in for national sum of ENPMQTYT
 	REAL RenConsArray(9)						!Stand in for national sum of ENPRQTYT
 	integer k,ka
+	INTEGER boilfuel(9)
+	DATA boilfuel/1,3,7,10,11,12,16,22,42/
 
       if(notopen) return
       fname='INDREG' ! for file_mgr
@@ -11709,7 +10550,7 @@ subroutine corncalc(is,ifuel,ifx)
 		  ENDDO
 			 ! Apply MECS benchmarking to reported fuel use in 2018 for local overwrite
 		  DO IFn=1,mainfuels
-			 IF (iyr.eq.2018) THEN
+			 IF (iyr.eq.ibyr) THEN
 				if (((fuelIndexArray(IFn,3).ge.1).and.(fuelIndexArray(IFn,3).le.7)).or.((fuelIndexArray(IFn,3).ge.9).and.(fuelIndexArray(IFn,3).le.10))) then
 				SELECT CASE (INDNUM)
 					Case (8)
@@ -11755,7 +10596,7 @@ subroutine corncalc(is,ifuel,ifx)
           ENDDO
 ! Apply MECS benchmarking to reported renewable fuel use in 2018 for local overwrite
 		  DO IFn=1,9
-			 IF (iyr.eq.2018) THEN
+			 IF (iyr.eq.ibyr) THEN
 				SELECT CASE (INDNUM)
 					Case (8)
 						IF (papercon(18,INDREG,IY).ne.0.0) benchValArray(IFn,INDNUM) = MECS_Data(indnum,INDREG,8)/papercon(18,INDREG,IY)
@@ -11991,44 +10832,35 @@ subroutine corncalc(is,ifuel,ifx)
 !  ESTABLISH BOILER/STEAM/COGENERATION CONSUMPTION BY FUEL.
 
 !  PURCHASED FUELS:
-
-! Logic here is kind of hard to follow.  IFSLOC is a holder array for fuel codes.  ENSQTY is defined from 1 to IFSMAX.
-! but this index is not the fuel codes.  We need to use IFSLOC to locate the fuel code. Changed code to reflect the correct fuel code.
-
-          DO IFn=1,IFSMAX   
-		                    
-             IFF=IFSLOC(IFn)
-             ENSQTYT(IFF,5) = ENSQTYT(IFF,5)+ENSQTY(IFn)
-		     if ((inddir.eq.8).or. (inddir.eq.12)) then
-               if (curcalyr.gt.ibyr2) ENSQTYT(IFF,INDREG) = ENSQTY(IFn)*SteamRgShr(inddir,indreg)
-			 endif
-             IF (INDNUM .eq. 4) THEN          ! For O&G mine need to add cogen calc from OGS
-                IF (IFF .eq. 4) THEN           ! Natural gas
-
-                   ENSQTYT(IFF,5)=ENSQTYT(IFF,5)+SumCDIV(CGOGSQ(1,CURIYR,3),INDREG)
-                   ENSQTYT(IFF,INDREG)=ENSQTYT(IFF,INDREG)+SumCDIV(CGOGSQ(1,CURIYR,3),INDREG)
-                ELSE IF (IFF .eq. 7) THEN      ! Coal
-
-                   ENSQTYT(IFF,5)=ENSQTYT(IFF,5)+SumCDIV(CGOGSQ(1,CURIYR,1),INDREG)
-                   ENSQTYT(IFF,INDREG)=ENSQTYT(IFF,INDREG)+SumCDIV(CGOGSQ(1,CURIYR,1),INDREG)
-                ELSE IF (IFF .eq. 10) THEN     ! Residual Fuel
-
-                   ENSQTYT(IFF,5)=ENSQTYT(IFF,5)+SumCDIV(CGOGSQ(1,CURIYR,2),INDREG)
-                   ENSQTYT(IFF,INDREG)=ENSQTYT(IFF,INDREG)+SumCDIV(CGOGSQ(1,CURIYR,2),INDREG)
+        DO IFn=1,50                 
+            ENSQTYT(IFn,5) = ENSQTYT(IFn,5)+ENSQTY(IFn)
+		    if ((inddir.eq.8).or.(inddir.eq.12)) then
+               if(curcalyr.gt.ibyr2) ENSQTYT(IFn,INDREG) = ENSQTY(IFn)*SteamRgShr(inddir,indreg)
+			endif
+            IF(INDNUM.eq.4)THEN		! for O&G mining need to add cogen calc from HSM
+                IF(IFn.eq.4)THEN		! natural gas
+                   ENSQTYT(IFn,5)=ENSQTYT(IFn,5)+SumCDIV(CGOGSQ(1,CURIYR,3),INDREG)
+                   ENSQTYT(IFn,INDREG)=ENSQTYT(IFn,INDREG)+SumCDIV(CGOGSQ(1,CURIYR,3),INDREG)
+                ELSEIF(IFn.eq.7)THEN      ! coal
+                   ENSQTYT(IFn,5)=ENSQTYT(IFn,5)+SumCDIV(CGOGSQ(1,CURIYR,1),INDREG)
+                   ENSQTYT(IFn,INDREG)=ENSQTYT(IFn,INDREG)+SumCDIV(CGOGSQ(1,CURIYR,1),INDREG)
+                ELSEIF(IFn.eq.10)THEN     ! residual fuel
+                   ENSQTYT(IFn,5)=ENSQTYT(IFn,5)+SumCDIV(CGOGSQ(1,CURIYR,2),INDREG)
+                   ENSQTYT(IFn,INDREG)=ENSQTYT(IFn,INDREG)+SumCDIV(CGOGSQ(1,CURIYR,2),INDREG)
                 ENDIF
              ENDIF
-          ENDDO
+        ENDDO
 
 !  BYPRODUCT FUELS:
-          DO IFn=1,8
-            BYPQTYTR(IFn,5)=BYPQTYTR(IFn,5)+BYPBSCR(IFn)
-            BYPQTYTR(IFn,INDREG)=BYPBSCR(IFn)
-          ENDDO
-
           DO IFn=1,6
             BYPQTYTI(IFn,5)=BYPQTYTI(IFn,5)+BYPBSCI(IFn)
             BYPQTYTI(IFn,INDREG)=BYPBSCI(IFn)
           ENDDO
+!  RENEWABLE FUELS		  
+          DO IFn=1,8
+            BYPQTYTR(IFn,5)=BYPQTYTR(IFn,5)+BYPBSCR(IFn)
+            BYPQTYTR(IFn,INDREG)=BYPBSCR(IFn)
+          ENDDO		  
 
 !** ESTABLISH TOTAL STEAM DEMAND.
 
@@ -12086,7 +10918,7 @@ subroutine corncalc(is,ifuel,ifx)
 
 ! ESTABLISH TOTAL BOILER FUEL BY SIZE
           DO indcnt=1,indmax
-             DO ifn=1,10
+             DO ifn=1,51
                 DO bsize=1,2
                    FOSFUELSTEAMSIZE(indcnt,ifn,bsize,5)=FOSFUELSTEAMSIZE(indcnt,ifn,bsize,5)+&
                                                           FOSFUELSTEAMSIZE(indcnt,ifn,bsize,indreg)
@@ -12167,12 +10999,12 @@ subroutine corncalc(is,ifuel,ifx)
          if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
          CALL cknum(I15,IROW,icol,dble(outputval(indreg)),2,4)
 
-         if(outputqty(indreg).gt.0.) then
-           Line = '  Physical Output (million tonnes)'
-           IROW = IROW + 1
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-           CALL cknum(I15,IROW,icol,dble(OUTPUTQTY(indreg)),2,4)
-         endif
+         !if(outputqty(indreg).gt.0.) then
+         !  Line = '  Physical Output (million tonnes)'
+         !  IROW = IROW + 1
+         !  if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
+         !  CALL cknum(I15,IROW,icol,dble(OUTPUTQTY(indreg)),2,4)
+         !endif
 
          if(employ(indreg).gt.0.) then
            Line =  '  Employment (thousand)'
@@ -12243,7 +11075,9 @@ subroutine corncalc(is,ifuel,ifx)
 !**********************************************************
 !  WRITE UNIT ENERGY CONSUMPTION BY FUEL.
 !**********************************************************
+	! Disabled 'Unit Energy Consumption (MMBTU/TONNE)' functionality
 
+		IF(IDVAL.NE.1) THEN
          IROW = IROW + 2
          IF(IDVAL.EQ.1) THEN
            LINE =  'Unit Energy Consumption (MMBTU/TONNE)'
@@ -12301,309 +11135,7 @@ subroutine corncalc(is,ifuel,ifx)
          ENDDO
 		 endif
          total=0.
-!**********************************************************
-!  WRITE ENERGY CONSUMPTION IN THE BUILDINGS COMPONENT.
-!**********************************************************
-         if(indnum.gt.6) then ! non-mfg has no buildings component
-
-           LINE = 'BUILDINGS COMPONENT'
-           IROW = IROW + 2
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-           total=0.
-
-           TOTAL=sum(BLDENCONS(1:12,INDREG))
-
-           LINE = 'Energy Consumption for Buildings (Trillion BTU)'
-           IROW = IROW + 2
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-           do i=1,12
-             LINE=BLDNAME(I)
-             IROW = IROW + 1
-             if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-             CALL cknum(I15,IROW,ICOL,dble(BLDENCONS(I,indreg)),2,4)
-           enddo
-           Line =  '          Total Building Energy Use'
-
-           IROW = IROW + 1
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-           CALL cknum(I15,IROW,ICOL,DBLE(total),2,4)
-           IF (BLDENCONS(4,indreg) .NE. 0.)  THEN
-             Line =  '          Total less Steam'
-             IROW = IROW + 1
-             if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-             TOTAL = TOTAL - BLDENCONS(4,indreg)
-             CALL cknum(I15,IROW,ICOL,DBLE(total),2,4)
-           ENDIF
-         endif  ! end of the non-mfg exclude
-
-!**********************************************************
-!  WRITE VARIOUS VARIABLES IN THE PA COMPONENT.
-!**********************************************************
-         total=0.
-         LINE = 'PROCESS AND ASSEMBLY COMPONENT'
-         IROW = IROW + 2
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-!**********************************************************
-!      WRITE PRODUCT THROUGHPUT IN THE PA COMPONENT.
-!      APPLICABLE ONLY TO ENERGY INTENSIVE INDUSTRIES.
-!**********************************************************
-
-         IF (inddir.gt.6) THEN ! DO ENERGY INTENSIVE
-           IF(IDVAL.EQ.1) THEN
-             LINE = 'Product Throughput (million tonnes)'
-           ELSE
-             LINE = 'Product Throughput (billion 2012$)'
-           ENDIF
-           IROW = IROW + 2
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-           DO ISTEP=1,MPASTP
-             LINE = '  ' // INDSTEPNAME(ISTEP)
-             IROW = IROW + 1
-             if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-             CALL cknum(I15,IROW,icol,dble(OUTPUT(ISTEP,indreg)),2,4)
-           ENDDO
-         ENDIF                !  END OF SKIP FOR NON-ENERGY INTENSIVE
-
-!**********************************************************
-!  WRITE ENERGY CONSUMPTION FOR EACH PROCESS STEP.
-!**********************************************************
-
-        LINE='Energy Consumption for Process and Assembly (Trillion BTU)'
-
-        IROW = IROW + 2
-        if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-        if(NumRptGrps.eq.0) then ! standard report
-           numstep=mpastp
-           if(inddir.le.2.OR.inddir.ge.6) numstep=numstep+1  ! do not provide total p/a for mining or construction
-           DO ISTEP=1,numstep
-				total=0.
-				IF(inddir.le.2.OR.INDDIR.ge.6) THEN
-					LINE = '  ' // INDSTEPNAME(ISTEP)
-					IROW = IROW + 1
-					if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-				ENDIF
-
-			 ! hardwire for steel
-				if (inddir.eq.12) then
-					IFUELpa=0
-					IFUELpa(1:3,1:4)=1 !HOT, Cold and Continuous
-					IFUELpa(4,1:5)=1 !BOF
-					IFUELpa(5,1:2)=1 !EAF
-					IFUELpa(6,1:7)=1 !DRI				  
-					IFUELpa(7,1:6)=1 !Coke
-					IFUELpa(8,1:7)=1 !Total
-					IFLOC(1:7,8)=STfuelmap(1:7)		! 7 fuels currently (as of 3/2024) used in iron and steel
-				endif
-                 
-            if (inddir.eq.18) then ! Hardcode for Electrical Equipment & Appliances
-                  DO IS=1,MPASTP+1
-                    DO IFn=1,IFMAX(IS)+1
-                        IFUELpa(is,IFn) = 1
-                    ENDDO
-                  ENDDO
-            endif   
-
-            
-            if (inddir.ge.21) then ! Hardcode for new industries 21-24
-                  DO IS=1,MPASTP+1
-                    DO IFn=1,IFMAX(IS)+1
-                        IFUELpa(is,IFn) = 1
-                    ENDDO
-                  ENDDO
-            endif                        	      
-            
-            DO IF=1,IFMAX(ISTEP)
-               IF (IFUELpa(istep,IF) .EQ. 1.OR.(inddir.le.2.OR. &
-				inddir.eq.6.OR.inddir.eq.10.or.inddir.eq.11.or.inddir.eq.13)) THEN
-			     LINE = '    ' // FUELNAME(IFLOC(IF,ISTEP))
-                 IROW = IROW + 1
-                 if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-				 if (CURCALYR.eq.ibyr2) then
-				   CALL cknum(I15,IROW,icol,dble(ENPQTYT(IF,ISTEP,indreg)),2,4)
-				   TOTAL = TOTAL + ENPQTYT(IF,ISTEP,indreg)
-				 else
-					if ((inddir.eq.12).and.(if.gt.3)) then
-						CALL cknum(I15,IROW,icol,dble(ENPQTYT(if,ISTEP,indreg)),2,4)
-						TOTAL = TOTAL + ENPQTYT(if,ISTEP,indreg)
-					else
-						CALL cknum(I15,IROW,icol,dble(ENPQTYT(IF,ISTEP,indreg)),2,4)
-						TOTAL = TOTAL + ENPQTYT(IF,ISTEP,indreg)
-					endif
-                 endif
-               endif
-              ENDDO
-           ENDDO
-
-           Line =  '          Total'
-           IROW = IROW + 1
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-           CALL cknum(I15,IROW,Icol,dble(total),2,4)
-
-         else    ! Print P/A by Reporting Group (chemicals)
-!      INTEGER NumRptGrps                  ! Number of Reporting SubGroups for Process Assembly Energy reporting (used in Chemicals for Subindustry rpt), max:12, min:0
-!      INTEGER NumRptGrpSteps(12)          ! Number of steps in each reporting SubGroup for P/A
-!      INTEGER RptGrpSteps(12,maxstep)     ! Identification of step numbers included in each reporting subgroup in P/A
-!      Character*12 RptGrpNames(12)        ! Reporting group names
-!      Character*12 RptGrpSName(12,maxstep)! Reporting labels for step names
-
-           do g=1,NumRptGrps
-             irow=irow+2
-             line='Process/Assembly Subset:  '//RptGrpNames(g)
-             if(once(vers)) call ckstr(i15,irow,1,line,1,0,1)
-             RptGrpSName(g,NumRptGrpSteps(g)+1)='Total '//RptGrpNames(g)
-
-             Do igs=1,NumRptGrpSteps(g)+1
-               IROW = IROW + 1
-               line='  '//RptGrpSName(g,igs)
-               if(once(vers))CALL ckstr(I15,IROW,1,line,1,0,1)
-               total=0.
-               DO i=1,GFMAX(g,igs)
-                 iff=gfloc(i,g,igs)
-                 LINE = '    ' // FUELNAME(iff)
-                 IROW = IROW + 1
-                 if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-                 CALL cknum(I15,IROW,icol,dble(ENPQTYsub(g,i,igs,indreg)),2,4)
-                 TOTAL = TOTAL + ENPQTYsub(g,i,igs,indreg)
-               ENDDO
-               if(gfmax(g,igs).gt.1) then
-                 Line =  '          Total'
-                 IROW = IROW + 1
-                 if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-                 CALL cknum(I15,IROW,Icol,dble(total),2,4)
-               endif
-             enddo
-          enddo
-! write out total of process/assembly
-          istep=mpastp+1
-          LINE = RptGrpNames(NumRptGrps+1)
-          IROW = IROW + 2
-          if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-          total=0.
-           DO IF=1,IFMAX(ISTEP)
-             IF (IFUELpa(istep,IF) .EQ. 1) THEN
-               LINE = '  ' // FUELNAME(IFLOC(IF,ISTEP))
-               IROW = IROW + 1
-               if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-               CALL cknum(I15,IROW,icol,dble(ENPQTYT(IF,ISTEP,indreg)),2,4)
-               TOTAL = TOTAL + ENPQTYT(IF,ISTEP,indreg)
-             endif
-            ENDDO
-           Line =  '      Total'
-           IROW = IROW + 1
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-           CALL cknum(I15,IROW,Icol,dble(total),2,4)
-
-        endif
-!**********************************************************
-!  WRITE ENERGY CONSUMPTION FOR BSC COMPONENT.
-!**********************************************************
- !if (inddir.ne.12) then   !no BSC for steel; included in PA
-         LINE = 'BOILER/STEAM/COGENERATION COMPONENT'
-         IROW = IROW + 2
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-
-         LINE = 'Energy Consumption for Boiler'// &
-               '/Steam/Cogeneration (Trillion BTU)'
-         IROW = IROW + 2
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         total=0.
-         DO IF=1,mainfuels-1
-           IF((ENSQTYT(IF,indreg).gt.0.001).or.ANY(cfuel.eq.if)) then   ! currently (12/22) for indices 1,4,7,10,11,12,16,22
-             LINE = '  ' // FUELNAME(IF)
-             IROW = IROW + 1
-             if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-             CALL cknum(I15,IROW,icol,dble(ENSQTYT(IF,indreg)),0,4)
-			 TOTAL = TOTAL + ENSQTYT(IF,indreg)
-           ENDIF
-         ENDDO
-
-         DO IF=1,8
-           IF(BYPQTYTR(IF,indreg).gt.0.001) THEN
-             LINE = '  ' // FUELNAME(IF+40)
-             IROW = IROW + 1
-             if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-             CALL cknum(I15,IROW,ICOL,dble(BYPQTYTR(IF,indreg)),0,4)
-             TOTAL = TOTAL+ BYPQTYTR(IF,indreg)
-           ENDIF
-         ENDDO
- 	     if (inddir.ne.12) then !don't report for steel
-         DO IF=2,5    ! omit steam and coke
-            IF(BYPQTYTI(IF,indreg).gt.0.001) THEN
-              LINE = '  ' // FUELNAME(IF+30)
-              IROW = IROW + 1
-              if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-              CALL cknum(I15,IROW,icol,dble(BYPQTYTI(IF,indreg)),0,4)
-              TOTAL= TOTAL + BYPQTYTI(IF,indreg)
-            ENDIF
-         ENDDO
-		 endif
-
-         Line =  '          Total'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         CALL cknum(I15,IROW,ICOL,dble(total),0,4)
-
-         LINE = 'Unbenchmarked Energy Consumption for Boilers'// &
-               'by size (Trillion BTU)'
-         IROW = IROW + 2
-         LINE = 'Boilers 10MMBTU/HR and Under'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         total=0.
-         DO IFn=1,10
-           LINE = '  ' // BFUELNAME(IFn)
-           IROW = IROW + 1
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-           CALL cknum(I15,IROW,icol,dble(FosFuelSteamSize(inddir,IFn,1,indreg)),0,4)
-           TOTAL = TOTAL + FosFuelSteamSize(inddir,IFn,1,indreg)
-         ENDDO
-
-         LINE = 'Boilers Over 10MMBTU/HR'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         total=0.
-         DO IFn=1,10
-           LINE = '  ' // BFUELNAME(IFn)
-           IROW = IROW + 1
-           if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-           CALL cknum(I15,IROW,icol,dble(FosFuelSteamSize(inddir,IFn,2,indreg)),0,4)
-           TOTAL = TOTAL + FosFuelSteamSize(inddir,IFn,2,indreg)
-         ENDDO
-
-!**********************************************************
-!  WRITE STEAM GENERATION.
-!**********************************************************
-
-         LINE = 'Total Steam Generation (Tr. BTU)'
-         IROW = IROW + 2
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         CALL cknum(I15,IROW,icol,dble(STEMCURT(indreg)),0,4)
-
-         LINE = '  CHP Steam Generation'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         CALL cknum(I15,IROW,icol,dble(COGSTEAMT(indreg)),0,4)
-
-         LINE = '  Total Non-CHP Steam Generation'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         CALL cknum(I15,IROW,icol,dble(NONCOGSTEAMT(indreg)),0,4)
-
-         LINE = '      Non-CHP Fossil Steam Generation'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         CALL cknum(I15,IROW,icol,dble(NONCOGFOSSTEAMT(indreg)),0,4)
-
-         LINE = '      Non-CHP Biomass Steam Generation'
-         IROW = IROW + 1
-         if(once(vers))CALL ckstr(I15,IROW,1,LINE,1,0,1)
-         CALL cknum(I15,IROW,icol,dble(BIOSTEAMT(indreg)),0,4)
+		ENDIF
 
 !**********************************************************
 !  WRITE ELECTRICITY/CHP  VARIABLES.
@@ -12779,7 +11311,7 @@ subroutine corncalc(is,ifuel,ifx)
       SUBROUTINE INDGRP(groupsel)
    use i_
       IMPLICIT NONE
-      INTEGER IY,ISTEP,IS,IFUEL(50),IROW/0/,IU,IY1,IY2
+      INTEGER IY,ISTEP,IS,IFUEL,IROW/0/,IU,IY1,IY2
       INTEGER IREG,IFF,IREC,IGROUP,ifl,L,M,icr,icd,ncol
       INTEGER IUNIT(5)
       REAL*8 BENCHMARK,PRODUCT,EMPLY,ENCON,TOTCON,ENMAIN
@@ -13182,30 +11714,29 @@ subroutine corncalc(is,ifuel,ifx)
                ENDDO
             ENDDO
 
+
 !  ESTABLISH BOILER/STEAM/COGENERATION CONSUMPTION BY FUEL.
 
 !  PURCHASED FUELS:
 
-            DO IF=1,IFSMAX
-              IFF=IFSLOC(IF)
-              ENSQTYT(IFF,0) =      ENSQTYT(IFF,0)      +ENSQTY(IF)
-              ENSQTYT(IFF,INDREG) = ENSQTYT(IFF,INDREG) +ENSQTY(IF)
-              ENSQTYT(IFF,IGROUP) = ENSQTYT(IFF,IGROUP) +ENSQTY(IF) 
-
+            DO IFUEL=1,50
+              ENSQTYT(IFUEL,0) =      ENSQTYT(IFUEL,0)      +ENSQTY(IFUEL)
+              ENSQTYT(IFUEL,INDREG) = ENSQTYT(IFUEL,INDREG) +ENSQTY(IFUEL)
+              ENSQTYT(IFUEL,IGROUP) = ENSQTYT(IFUEL,IGROUP) +ENSQTY(IFUEL) 
             ENDDO
 			  
 !  BYPRODUCT FUELS:
 
-              DO IF=1,8
-                BYPQTYTR(IF,0)=     BYPQTYTR(IF,0)     +BYPBSCR(IF)
-                BYPQTYTR(IF,INDREG)=BYPQTYTR(IF,INDREG)+BYPBSCR(IF)
-                BYPQTYTR(IF,IGROUP)=BYPQTYTR(IF,IGROUP)+BYPBSCR(IF)
+              DO IFUEL=1,8
+                BYPQTYTR(IFUEL,0)=     BYPQTYTR(IFUEL,0)     +BYPBSCR(IFUEL)
+                BYPQTYTR(IFUEL,INDREG)=BYPQTYTR(IFUEL,INDREG)+BYPBSCR(IFUEL)
+                BYPQTYTR(IFUEL,IGROUP)=BYPQTYTR(IFUEL,IGROUP)+BYPBSCR(IFUEL)
               ENDDO
 
-              DO IF=1,6
-                BYPQTYTI(IF,0)=     BYPQTYTI(IF,0)     +BYPBSCI(IF)
-                BYPQTYTI(IF,INDREG)=BYPQTYTI(IF,INDREG)+BYPBSCI(IF)
-                BYPQTYTI(IF,IGROUP)=BYPQTYTI(IF,IGROUP)+BYPBSCI(IF)
+              DO IFUEL=1,6
+                BYPQTYTI(IFUEL,0)=     BYPQTYTI(IFUEL,0)     +BYPBSCI(IFUEL)
+                BYPQTYTI(IFUEL,INDREG)=BYPQTYTI(IFUEL,INDREG)+BYPBSCI(IFUEL)
+                BYPQTYTI(IFUEL,IGROUP)=BYPQTYTI(IFUEL,IGROUP)+BYPBSCI(IFUEL)
               ENDDO
 
 !  ESTABLISH TOTAL STEAM DEMAND.
@@ -13366,10 +11897,10 @@ subroutine corncalc(is,ifuel,ifx)
         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
         CALL cknum(I16,IROW,icol,dble(outputval(indreg)),2,4)
 
-        Line = '  Physical Output (million tonnes)'
-        IROW = IROW + 1
-        if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-        CALL cknum(I16,IROW,icol,dble(outputqty(indreg)),2,4)
+        !Line = '  Physical Output (million tonnes)'
+        !IROW = IROW + 1
+        !if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
+        !CALL cknum(I16,IROW,icol,dble(outputqty(indreg)),2,4)
 
         Line =  '  Employment (thousand)'
         IROW = IROW + 1
@@ -13462,136 +11993,6 @@ subroutine corncalc(is,ifuel,ifx)
              if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
              CALL cknum(I16,IROW,ICOL,dble(work),2,4)
          ENDDO
-
-!  WRITE ENERGY CONSUMPTION IN THE BUILDINGS COMPONENT.
-
-           LINE = 'BUILDINGS COMPONENT'
-           IROW = IROW + 2
-           if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-           total=sum(BLDENCONS(1:12,INDREG))
-
-           LINE = 'Energy Consumption for Buildings (TR BTU)'
-           IROW = IROW + 2
-           if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-           do i=1,12
-             LINE=BLDNAME(I)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(BLDENCONS(I,indreg)),2,4)
-           enddo
-           Line =  '          Total Building Energy Use'
-
-           IROW = IROW + 1
-           if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-           CALL cknum(I16,IROW,ICOL,DBLE(total),2,4)
-             Line =  '          Total less Steam'
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             TOTAL = TOTAL - BLDENCONS(4,indreg)
-             CALL cknum(I16,IROW,ICOL,DBLE(total),2,4)
-
-!  WRITE VARIOUS VARIABLES IN THE PA COMPONENT.
-
-         LINE = 'PROCESS AND ASSEMBLY COMPONENT'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-!  WRITE ENERGY CONSUMPTION FOR EACH PROCESS STEP.
-
-         LINE='Energy consumption for Process and Assembly (Trillion BTU)'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         TOTAL = 0.
-         DO IF=1,50
-             LINE = '    ' // FUELNAME(IF)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(ENPQTYTR(IF,INDREG)),2,4)
-             TOTAL = TOTAL + ENPQTYTR(IF,INDREG)
-           IF(IF .EQ. 6) THEN
-             LINE = '    Natural Gas Total'
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             WORK = ENPQTYTR(3,INDREG)+ENPQTYTR(4,INDREG) &
-                   +ENPQTYTR(5,INDREG)+ENPQTYTR(6,INDREG)
-             CALL cknum(I16,IROW,ICOL,dble(work),2,4)
-           ENDIF
-         ENDDO
-
-         Line =  '          Total'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,ICOL,DBLE(TOTAL),2,4)
-
-!  WRITE ENERGY CONSUMPTION FOR BSC COMPONENT.
- 
-		 LINE = 'BOILER/STEAM/COGENERATION COMPONENT'
-		 IROW = IROW + 2
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-		 LINE = 'Energy Consumption for Boiler/Steam/Cogeneration' &
-		 // ' (Trillion BTU)'
-		 IROW = IROW + 2
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-		 TOTAL = 0.
-		 DO IF=1,mainfuels-1
-			 LINE = '  ' // FUELNAME(IF)
-			 IROW = IROW + 1
-			 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-			 CALL cknum(I16,IROW,ICOL,dble(ENSQTYT(IF,INDREG)),2,4)
-			 TOTAL = TOTAL + ENSQTYT(IF,INDREG)
-		 ENDDO
-
-		 DO IF=1,8
-			 LINE = '  ' // FUELNAME(IF+40)
-			 IROW = IROW + 1
-			 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-			 CALL cknum(I16,IROW,ICOL,dble(BYPQTYTR(IF,INDREG)),2,4)
-			 TOTAL = TOTAL + BYPQTYTR(IF,INDREG)
-		 ENDDO
-
-		 DO IF=2,6
-			 LINE = '  ' // FUELNAME(IF+30)
-			 IROW = IROW + 1
-			 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-			 CALL cknum(I16,IROW,ICOL,dble(BYPQTYTI(IF,INDREG)),2,4)
-			 TOTAL = TOTAL + BYPQTYTI(IF,INDREG)
-		 ENDDO
-
-		 Line =  '          Total'
-		 IROW = IROW + 1
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-		 CALL cknum(I16,IROW,ICOL,dble(total),2,4)
-
-!  WRITE STEAM GENERATION.
-
-		 LINE = 'Total Steam Generation (Tr. BTU)'
-		 IROW = IROW + 2
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-		 CALL cknum(I16,IROW,ICOL,dble(STEMCURT(INDREG)),2,4)
-
-		 LINE = '  CHP Steam Generation'
-		 IROW = IROW + 1
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-		 CALL cknum(I16,IROW,icol,dble(COGSTEAMT(indreg)),2,4)
-
-		 LINE = '  Total Non-CHP Steam Generation'
-		 IROW = IROW + 1
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-		 CALL cknum(I16,IROW,icol,dble(NONCOGSTEAMT(indreg)),2,4)
-
-		 LINE = '      Non-CHP Fossil Steam Generation'
-		 IROW = IROW + 1
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-		 CALL cknum(I16,IROW,icol,dble(NONCOGFOSSTEAMT(indreg)),2,4)
-
-		 LINE = '      Non-CHP Biomass Steam Generation'
-		 IROW = IROW + 1
-		 if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-		 CALL cknum(I16,IROW,icol,dble(BIOSTEAMT(indreg)),2,4)
 
 !**********************************************************
 !  WRITE ELECTRICITY/CHP  VARIABLES.
@@ -13714,133 +12115,6 @@ subroutine corncalc(is,ifuel,ifx)
          IROW = IROW + 1
          if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
          CALL cknum(I16,IROW,ICOL,dble(TOTAL),2,4)
-
- !  WRITE ENERGY CONSUMPTION IN THE BUILDINGS COMPONENT.
-
-           LINE = 'BUILDINGS COMPONENT'
-           IROW = IROW + 2
-           if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-           total=sum(BLDENCONS(1:12,IGROUP))
-
-           LINE = 'Energy Consumption for Buildings (Trillion BTU)'
-           IROW = IROW + 2
-           if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-           do i=1,12
-             LINE=BLDNAME(I)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(BLDENCONS(I,IGROUP)),2,4)
-           enddo
-           Line =  '          Total Building Energy Use'
-
-           IROW = IROW + 1
-           if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-           CALL cknum(I16,IROW,ICOL,DBLE(total),2,4)
-             Line =  '          Total less Steam'
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             TOTAL = TOTAL - BLDENCONS(4,IGROUP)
-             CALL cknum(I16,IROW,ICOL,DBLE(total),2,4)
-
-         LINE = 'PROCESS AND ASSEMBLY COMPONENT'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-!  WRITE ENERGY CONSUMPTION FOR EACH PROCESS STEP.
-
-         LINE='Energy Consumption for Process and Assembly (Trillion BTU)'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         TOTAL = 0.
-         DO IF=1,50
-             LINE = '    ' // FUELNAME(IF)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(ENPQTYTR(IF,IGROUP)),2,4)
-             TOTAL = TOTAL + ENPQTYTR(IF,IGROUP)
-           IF(IF .EQ. 6) THEN
-             LINE = '    Natural Gas Total'
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             WORK = ENPQTYTR(3,IGROUP)+ENPQTYTR(4,IGROUP) &
-                   +ENPQTYTR(5,IGROUP)+ENPQTYTR(6,IGROUP)
-             CALL cknum(I16,IROW,ICOL,dble(work),2,4)
-           ENDIF
-         ENDDO
-
-         Line =  '          Total'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,ICOL,DBLE(TOTAL),2,4)
-
-!  WRITE ENERGY CONSUMPTION FOR BSC COMPONENT.
-
-         LINE = 'BOILER/STEAM/COGENERATION COMPONENT'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-         LINE = 'Energy Consumption for Boiler/Steam/Cogeneration' &
-         // ' (Trillion BTU)'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-
-         TOTAL = 0.
-         DO IF=1,mainfuels-1
-             LINE = '  ' // FUELNAME(IF)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(ENSQTYT(IF,IGROUP)),2,4)
-             TOTAL = TOTAL + ENSQTYT(IF,IGROUP)
-         ENDDO
-
-         DO IF=1,8
-             LINE = '  ' // FUELNAME(IF+40)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(BYPQTYTR(IF,IGROUP)),2,4)
-             TOTAL = TOTAL + BYPQTYTR(IF,IGROUP)
-         ENDDO
-
-         DO IF=2,6
-             LINE = '  ' // FUELNAME(IF+30)
-             IROW = IROW + 1
-             if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-             CALL cknum(I16,IROW,ICOL,dble(BYPQTYTI(IF,IGROUP)),2,4)
-             TOTAL = TOTAL + BYPQTYTI(IF,IGROUP)
-         ENDDO
-
-         Line =  '          Total'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,ICOL,dble(total),2,4)
-
-!  WRITE STEAM GENERATION.
-
-         LINE = 'Total Steam Generation (Tr. BTU)'
-         IROW = IROW + 2
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,ICOL,dble(STEMCURT(IGROUP)),2,4)
-         LINE = '  CHP Steam Generation'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,icol,dble(COGSTEAMT(IGROUP)),2,4)
-
-         LINE = '  Total Non-CHP Steam Generation'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,icol,dble(NONCOGSTEAMT(IGROUP)),2,4)
-
-         LINE = '      Non-CHP Fossil Steam Generation'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,icol,dble(NONCOGFOSSTEAMT(IGROUP)),2,4)
-
-         LINE = '      Non-CHP Biomass Steam Generation'
-         IROW = IROW + 1
-         if(once)CALL ckstr(I16,IROW,1,LINE,1,0,1)
-         CALL cknum(I16,IROW,icol,dble(BIOSTEAMT(IGROUP)),2,4)
 
 !**********************************************************
 !  WRITE ELECTRICITY/CHP  VARIABLES.
@@ -13994,7 +12268,6 @@ subroutine corncalc(is,ifuel,ifx)
     write(6,*) ' error opening ', trim(blnkfile)
     notopen=.true.
    END SUBROUTINE INDGRP
-
 
 ! ==============================================================================
    function divshr(a,icd,icr)
@@ -14312,68 +12585,53 @@ subroutine corncalc(is,ifuel,ifx)
       real temp(3),temp2(3)
       integer istep,iv,ifuel,ifx,ify,ift,isc
       integer ifx_map(48), if_map(7)                                ! Maps IDM fuel indices to the 5 fuels used in this section (zeros otherwise)
-!     Real   WHSE_ShellIndex(4,mnumyr)                              ! Global Variables from
-!     Real   WHSE_LightIndex(4,mnumyr)                              ! Commercial Module:
-!     Real   WHSE_VentIndex(4,mnumyr)                               ! 4 Regions, Electricity only
-!     Real   WHSE_HeatIndex(4,5,mnumyr)                             ! this var 3 Fuels (EL, NG, DS)
       Real   BLD_Index(4,6,mnumyr)                                  ! Marginal change for buildings: heat, light, shell, all 5 fuels
       Real   VEH_Index(8,mnumyr)                                    ! Marginal change for vehicles, by fuel
       Real   IRR_Index(4,mnumyr)                                    ! Marginal change for irrigation, by region
       Real   Trk_Intens(mnumyr,8)                                   ! Weighted Average Energy Intensity for Trucks
 	  Real	 TPC_Limit												! Upper Constraint on TPC (ensures minimal level of improvement)
 	  Real	 TPC_Scale(5)											! Manual Scaling Factors to keep TPC within reasonable bounds
-!     common /TPC/WHSE_ShellIndex,WHSE_HeatIndex,WHSE_VentIndex,WHSE_LightIndex
-      Real AG_Bldg_Wt(3,8)                                          ! Building functional weights by fuel (5)
-!     Real Weight_AG(4,3,5)                                         ! Component weights, by census region(4),
-                                                                    ! function(3):  buildings, vehicles, irrigation,
-                                                                    ! and fuels(5): electricity, NG, Dist, LPG, Gasoline
+      Real AG_Bldg_Wt(3,8)                                          ! Building functional weights by fuel (7)
 
 !*********** Data for weighting relative influence on TPC ******************************
 
 !	Functional Weights for Buildings
-
 !                           Heat  Light Shell
-	Data AG_Bldg_Wt(1:3,1) /0.25, 0.25, 0.50/                       ! Electricity
-	Data AG_Bldg_Wt(1:3,2) /0.25, 0.00, 0.75/                       ! Natural Gas
-	Data AG_Bldg_Wt(1:3,3) /0.25, 0.00, 0.75/                       ! Distillate
-	Data AG_Bldg_Wt(1:3,4) /0.25, 0.00, 0.75/                       ! LPG
-	Data AG_Bldg_Wt(1:3,5) /0.25, 0.00, 0.75/                       ! Gasoline
-    Data AG_Bldg_Wt(1:3,6) /0.25, 0.00, 0.75/                       ! MSW
-    Data AG_Bldg_Wt(1:3,5) /0.25, 0.00, 0.75/                       ! OP
-    Data AG_Bldg_Wt(1:3,6) /0.25, 0.00, 0.75/                       ! Steam
+	Data AG_Bldg_Wt(1:3,1) /0.25, 0.25, 0.50/                       ! electricity
+	Data AG_Bldg_Wt(1:3,2) /0.25, 0.00, 0.75/                       ! natural gas
+	Data AG_Bldg_Wt(1:3,3) /0.25, 0.00, 0.75/                       ! distillate
+	Data AG_Bldg_Wt(1:3,4) /0.25, 0.00, 0.75/                       ! propane
+	Data AG_Bldg_Wt(1:3,5) /0.25, 0.00, 0.75/                       ! gasoline
+    Data AG_Bldg_Wt(1:3,6) /0.25, 0.00, 0.75/                       ! other petroleum
+    Data AG_Bldg_Wt(1:3,7) /0.25, 0.00, 0.75/                       ! steam
 
 !						 Heat Light	Shell Veh  IRR
 	Data TPC_Scale(1:5) /1.0, 10.0, 1.0,  10.0, 10.0/				! Ad Hoc scaling factors for TPC components
 !***************** End Data *************************************************************
 
 	ifx=ifloc(ifuel,istep)	! Identifies the specific fuel associated with the IFUEL index for this industry
-
 !					ifx
 !	Electricity		1
 !	Natural Gas		3
 !	Distillate		11
-!	LPG				12
-!	Coal			7
+!	Propane 		12
 !	Gasoline		14
 !	Other Pet.		22
 !	Steam			31
-!   Renewables MSW  48
 
 	ifx_map = 0        ! Initialize:  ifx_map(ifx) should provide fuel indices in the proper order
 
-	   ifx_map(1)  = 1  ! EL
-	  ifx_map(3)  = 2  ! NG
-	  ifx_map(11) = 3  ! DS
-	  ifx_map(12) = 4  ! LG
-	  ifx_map(14) = 5  ! GS
-	 ! ifx_map(48) = 6  ! MSW
-      ifx_map(22) = 6  ! OP  (Other Petroleum) !td add/change
-      ifx_map(31) = 7  ! ST   (Steam)          !td add/change
-
+	ifx_map(1)  = 1  ! EL
+	ifx_map(3)  = 2  ! NG
+	ifx_map(11) = 3  ! DS
+	ifx_map(12) = 4  ! LG (propane)
+	ifx_map(14) = 5  ! GS
+    ifx_map(22) = 6  ! OP (other petroleum)
+    ifx_map(31) = 7  ! ST (steam)
+	
 	IF(ifx_map(ifx).EQ.0) RETURN    ! If not one of the considered fuels, skip the rest of the subroutine.
 
 	ift = ifx_map(ifx) ! For brevity (the variable ifuel is not uniquely linked to the ifx indices)
-
 !	************ Stock-Weighted Energy Intensity for Freight Trucks **************************
 
 !	Tran Variables:	TFR_FTMPG(year,size,fuel,existing stock=2)	    Gasoline-Equivalent MPG
@@ -14383,26 +12641,18 @@ subroutine corncalc(is,ifuel,ifx)
 !                                  (6) Electric, (7) plug in diesel, (8) Plug in gasoline, (9) fuel cell
 
 	data if_map /0,4,1,3,2,0,0/        ! if_map(ift) should return the matching truck fuel (no electricity, OP, or steam)
-!      if_map(1:7)=(//0,4,1,3,2,0,0/)
 
 	Trk_Intens(curiyr,ift) = 1.0         ! Initialize to 1.0 every year, to avoid error messages
         IF (curcalyr.eq.ibyr) Trk_Intens(curiyr-1,ift) = 1.0    ! avoid divide by 0 first time through
 
         IF (if_map(ift).ne.0) THEN     ! All remaining years skip over electricity for trucks
 
-	  Trk_Intens(curiyr,ift)=(    TFR_TRK_FAS_T(curiyr,1,if_map(ift),2) / TFR_FTMPG(curiyr,1,if_map(ift),2)   &
-                                 + TFR_TRK_FAS_T(curiyr,2,if_map(ift),2) / TFR_FTMPG(curiyr,2,if_map(ift),2)  &
-								+ TFR_TRK_FAS_T(curiyr,3,if_map(ift),2) / TFR_FTMPG(curiyr,3,if_map(ift),2) ) &
-                                 / sum(TFR_TRK_FAS_T(curiyr,1:3,if_map(ift),2))
+			Trk_Intens(curiyr,ift)=(    TFR_TRK_FAS_T(curiyr,1,if_map(ift),2) / TFR_FTMPG(curiyr,1,if_map(ift),2)   &
+									+ TFR_TRK_FAS_T(curiyr,2,if_map(ift),2) / TFR_FTMPG(curiyr,2,if_map(ift),2)  &
+									+ TFR_TRK_FAS_T(curiyr,3,if_map(ift),2) / TFR_FTMPG(curiyr,3,if_map(ift),2) ) &
+									/ sum(TFR_TRK_FAS_T(curiyr,1:3,if_map(ift),2))
         ENDIF
 
-! Print new indexes to nohup to allow debugging (may be removed later) tdm
-  IF (curitr.eq.1.and.inddir.eq.1.and.indreg.eq.1) Then
-      write(IUNITBUG,6670) curcalyr, WHSE_LightIndex(indreg,curiyr), WHSE_ShellIndex(indreg,curiyr), WHSE_VentIndex(indreg,curiyr), WHSE_HeatIndex(indreg,1:5,curiyr)
-  Endif
- 6670  Format("Indexes for Light, Shell, Vent, Heat (last 5):",i6, 2x, 8(f10.4))
-
-!	***********************************************
 	TPC_Limit = -0.001
 
 !	Marginal Change in Energy Intensity from Prior Year
@@ -14436,9 +12686,6 @@ subroutine corncalc(is,ifuel,ifx)
 	ENDIF
 
  6666  CONTINUE
-
-6664	  format(5(i5),2x,(f10.6))
-!	ENDIF
 
       RETURN
       END SUBROUTINE AGTPC
@@ -14484,12 +12731,12 @@ subroutine corncalc(is,ifuel,ifx)
 
 	ifx=ifloc(ifuel,istep)	! Identifies the specific fuel associated with the IFUEL index for this industry
 
-!					ifx
+! As of AEO2025		ifx
 !	Electricity		1
 !	Natural Gas		3
 !	Residual Oil	10
 !	Distillate		11
-!	LPG				12
+!	Propane			12
 !	Coal			7
 !	Gasoline		14
 !	Other Pet.		22
@@ -14520,13 +12767,13 @@ subroutine corncalc(is,ifuel,ifx)
 !	*** Calculate Surface and Underground Production by Census Region, Mapping the 14 Coal Production Regions ***
 
 	iy = curiyr
-     if (curiyr.le.ICURIYR+2) then !cement not calculated yet, POT_ibyr2 19 to ICURIYR+2
+    if (curiyr.le.ICURIYR+2) then !cement not calculated yet
 	  Raw_Grind_Eff_lag=246.6
 	  raw_grind_eff=246.6
-	 else
+	else
 	    if (curitr.eq.1) Raw_Grind_Eff_lag=raw_grind_eff   !save last year's value in first iterarion
-          Raw_Grind_Eff=(elec_use_rpt(1)+elec_use_rpt(2)) / (tot_prodg(1)+tot_prodg(2))
-       endif
+        Raw_Grind_Eff=SUM(elec_use_rpt(:)) / SUM(tot_prodg(:))
+    endif
 !	Surface
 	CL_Surface(1,iy) = PMTS(1,iy)
 	CL_Surface(2,iy) = PMTS(2,iy) + PMTS(3,iy) + PMTS(6,iy)
@@ -14557,7 +12804,7 @@ subroutine corncalc(is,ifuel,ifx)
 !	Tran Variables:	TFR_FTMPG(year,size,fuel,existing stock=2)	    Gasoline-Equivalent MPG
 !                       TFR_TRK_FAS_T(year,size,fuel,existing stock=2)      Existing Stock
 
-!	Fuel Indices:   ify= (1)Diesel, (2)Gasoline, (3)LPG, (4)CNG
+!	Fuel Indices:   ify= (1)diesel, (2)gasoline, (3)propane, (4)CNG
 
 	data if_map /0,4,1,2,0,0/      ! if_map(ift) should return the matching truck fuel (no electricity, coal, or residual)
 
@@ -14578,27 +12825,29 @@ subroutine corncalc(is,ifuel,ifx)
 
 	IF (ift.eq.1) THEN          ! For Electric Equipment
 
-	EQP_Index(indreg,1,curiyr) = (Raw_Grind_Eff / Raw_Grind_Eff_lag -1.0)  ! From cement subroutine, no regional component
-	EQP_Index(indreg,2,curiyr) = (WHSE_LightIndex(indreg,curiyr)  / WHSE_LightIndex(indreg,curiyr-1) -1.0)
-	EQP_Index(indreg,3,curiyr) = (WHSE_VentIndex(indreg,curiyr)   / WHSE_VentIndex(indreg,curiyr-1)  -1.0)
-    
-	Wt_EQP_Index(indreg,curiyr) = EQP_Index(indreg,1,curiyr) * Elec_Weight(indreg,1) &        ! Grinding
-	                            + EQP_Index(indreg,2,curiyr) * Elec_Weight(indreg,2) &        ! Lighting
-	                            + EQP_Index(indreg,3,curiyr) * Elec_Weight(indreg,3)          ! Ventilation
+		EQP_Index(indreg,1,curiyr) = (Raw_Grind_Eff / Raw_Grind_Eff_lag -1.0)  ! From cement subroutine, no regional component
+		EQP_Index(indreg,2,curiyr) = (WHSE_LightIndex(indreg,curiyr)  / WHSE_LightIndex(indreg,curiyr-1) -1.0)
+		EQP_Index(indreg,3,curiyr) = (WHSE_VentIndex(indreg,curiyr)   / WHSE_VentIndex(indreg,curiyr-1)  -1.0)
+		
+		Wt_EQP_Index(indreg,curiyr) = EQP_Index(indreg,1,curiyr) * Elec_Weight(indreg,1) &        ! Grinding
+									+ EQP_Index(indreg,2,curiyr) * Elec_Weight(indreg,2) &        ! Lighting
+									+ EQP_Index(indreg,3,curiyr) * Elec_Weight(indreg,3)          ! Ventilation
 
-	if(curitr.eq.1)then
-6667	  format (3(i5),4(f12.5,2x))
-	endif
+		if(curitr.eq.1)then
+6667		format (3(i5),4(f12.5,2x))
+		endif
 
-	  ELSE                      ! For Other Fuels (ift = 2-6)
+	ELSE ! For Other Fuels (ift = 2-6)
 
-	    IF(ift.eq.6) THEN           ! Temporary fix to include residual, without editing the CDM code
-	EQP_Index(indreg,1,curiyr) = (WHSE_HeatIndex(indreg,3,curiyr)  / WHSE_HeatIndex(indreg,3,curiyr-1)  -1.0) ! Use Distillate values of Heat Index
-
-            ELSE                  ! For Fuels 2-5
-
-	EQP_Index(indreg,1,curiyr) = (WHSE_HeatIndex(indreg,ift,curiyr)  / WHSE_HeatIndex(indreg,ift,curiyr-1)  -1.0) ! Re-using this variable from above.
-          ENDIF
+	    IF(ift.eq.6)	THEN           ! Temporary fix to include residual, without editing the CDM code
+			EQP_Index(indreg,1,curiyr) = (WHSE_HeatIndex(indreg,3,curiyr)  / WHSE_HeatIndex(indreg,3,curiyr-1)  -1.0) ! Use Distillate values of Heat Index
+        ELSEIF (ift.eq.4) THEN	! ift=4 is gasoline for this subroutine, whic is equivalent to index 5 for WHSE_HeatIndex
+			EQP_Index(indreg,1,curiyr) = (WHSE_HeatIndex(indreg,5,curiyr)  / WHSE_HeatIndex(indreg,5,curiyr-1)  -1.0)
+		ELSEIF (ift.eq.5) THEN	! ift=5 is coal for this subroutine, but has no equivalent index in WHSE_HeatIndex
+			EQP_Index(indreg,1,curiyr) = 0.0
+		ELSE                  ! For fuels 2 and 3
+			EQP_Index(indreg,1,curiyr) = (WHSE_HeatIndex(indreg,ift,curiyr)  / WHSE_HeatIndex(indreg,ift,curiyr-1)  -1.0) ! Re-using this variable from above.
+        ENDIF
 
         IF (Trk_Intens(curiyr-1,ift) .NE. 0.0) THEN
            VEH_Index(ift,curiyr) = (Trk_Intens(curiyr,ift)/Trk_Intens(curiyr-1,ift) -1.0)   ! Energy intensity improvement index for trucks
@@ -14606,9 +12855,8 @@ subroutine corncalc(is,ifuel,ifx)
            VEH_Index(ift,curiyr) = 0.0    ! assuming no change
         ENDIF
 
-	Wt_EQP_Index(indreg,curiyr) = EQP_Index(indreg,1,curiyr) * NonEl_Weight(ift,1) &        ! Heating
-                                  + VEH_Index(ift,curiyr)      * NonEl_Weight(ift,2)          ! Vehicles
-
+		Wt_EQP_Index(indreg,curiyr) = EQP_Index(indreg,1,curiyr) * NonEl_Weight(ift,1) &	! Heating
+										+ VEH_Index(ift,curiyr)      * NonEl_Weight(ift,2)	! Vehicles
 	ENDIF
 
 !*******************************************************************************************
@@ -14628,18 +12876,6 @@ subroutine corncalc(is,ifuel,ifx)
 
 6688	CONTINUE
 
-	IF (curitr.eq.1) Then
-	 ! write(IUNITBUG,6664) curcalyr,ifx,ifuel,inddir,indreg,BCSC(1,IFUEL,ISTEP)
-6664	  format(5(i5),2x,(f10.6))
-	ENDIF
-
-
-	IF (curitr.eq.1) Then
-	!  write(IUNITBUG,6662) curcalyr,ift,indreg,Wt_EQP_Index(indreg,curiyr),Under_Index(indreg,curiyr),Under_Share(indreg,curiyr),L_Prod_Index(indreg,1,curiyr),L_Prod_Index(indreg,2,curiyr)
-6662	  format(3(i5),2x,5(f10.6))
-	ENDIF
-
-
       RETURN
       END SUBROUTINE COALTPC
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -14647,31 +12883,27 @@ subroutine corncalc(is,ifuel,ifx)
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !   Test Subroutine for Oil & Gas TPC Calculation - JRM
 !
-      SUBROUTINE OGSMTPC(IFUEL,ISTEP)
-      use i_
-      implicit none
+    SUBROUTINE OGSMTPC(IFUEL,ISTEP)
+    use i_
+    implicit none
 
-
-      integer istep,iv,ifuel,ifx,ify,ift,isc,ifn,iy,K,R
+    integer istep,iv,ifuel,ifx,ify,ift,isc,ifn,iy,K,R
 	integer ifx_map(42), if_map(6)                                  ! Maps IDM fuel indices to the 6 fuels used in this section (zeros otherwise)
 
+	Real   VEH_Index(6,mnumyr)                                     ! Marginal change for vehicles, by fuel
+	Real   Trk_Intens(mnumyr,6)                                    ! Weighted Average Energy Intensity for Trucks
 
-	 Real   VEH_Index(6,mnumyr)                                     ! Marginal change for vehicles, by fuel
-	 Real   Trk_Intens(mnumyr,6)                                    ! Weighted Average Energy Intensity for Trucks
+	Real   OGSM_Map(MNL48N,4)                                      ! Mapping Factor: 7 HSM regions to 4 Census Regions
+	Real   OG_Prod_Tmp(7,4,mnumyr,MNL48N)                          ! Oil & Gas Production (Temp): 7 fuel types, 4 CRs, 6 OGSM regions
+	Real   OG_Prod(7,4,mnumyr)                                     ! Cumulative O&G production in 4 CRs for 7 fuels (2 oil & 5 gas)
+	Real   Oil_Convert                                             ! Factor to convert MMBbl/Day of oil to Trills/Year
+	Real   Gas_Convert                                             ! Factor to convert TCF of NG to Trills
+	Real   Oil_Share(4,mnumyr)                                     ! Oil Share of Production, by region
 
-	 Real   OGSM_Map(MNL48N,4)                                      ! Mapping Factor: 6 OGSM regions to 4 Census Regions
-	 Real   OG_Prod_Tmp(7,4,mnumyr,MNL48N)                          ! Oil & Gas Production (Temp): 7 fuel types, 4 CRs, 6 OGSM regions
-	 Real   OG_Prod(7,4,mnumyr)                                     ! Cumulative O&G production in 4 CRs for 7 fuels (2 oil & 5 gas)
-	 Real   Oil_Convert                                             ! Factor to convert MMBbl/Day of oil to Trills/Year
-	 Real   Gas_Convert                                             ! Factor to convert TCF of NG to Trills
-	 Real   Oil_Share(4,mnumyr)                                     ! Oil Share of Production, by region
-
-	 Real   PROD_Wt(7)                                              ! Ad-Hoc factor reflecting relative difficulty of extraction by fuel type
-	 Real   OG_ProdSum(7,4,mnumyr)                                  ! Intermediate value for calculating production factors
-	 Real   OG_ProdFac(2,4,mnumyr)                                  ! Production Factors for Oil (1) and Natural Gas (2), by region
-	 Real   Prod_Index(4,mnumyr)                                    ! Production-Weighted Factors for TPC Calculation, by region
-
-
+	Real   PROD_Wt(7)                                              ! Ad-Hoc factor reflecting relative difficulty of extraction by fuel type
+	Real   OG_ProdSum(7,4,mnumyr)                                  ! Intermediate value for calculating production factors
+	Real   OG_ProdFac(2,4,mnumyr)                                  ! Production Factors for Oil (1) and Natural Gas (2), by region
+	Real   Prod_Index(4,mnumyr)                                    ! Production-Weighted Factors for TPC Calculation, by region
 
 	REAL Success_Well_Reg(7,4,mnumyr,MNL48N)
 	REAL Dry_Well_Reg(7,4,mnumyr,MNL48N)
@@ -14683,9 +12915,6 @@ subroutine corncalc(is,ifuel,ifx)
 	REAL Wtd_OG_WellFac(4,mnumyr)                                   ! Weighted average dry well percentage by region
 	REAL TPC_Fac_Wt(6,3)                                            ! Contribution to TPC from each of three drivers, by fuel type
 	REAL Well_Index(4,mnumyr)
-
-
-
 
 !***************** Map IDM Fuel Numbers to the Indices Used for Oil & Gas ******************
 
@@ -14708,7 +12937,7 @@ subroutine corncalc(is,ifuel,ifx)
 	  ifx_map(3)  = 2  ! NG
 	  ifx_map(11) = 3  ! DS
 	  ifx_map(14) = 4  ! GS
-	  ifx_map(42) = 5  ! RN  (Renewables/wood)  Currently in ITECH, don't now why.
+	  ifx_map(42) = 5  ! RN  (Renewables/wood)
 	  ifx_map(10) = 6  ! RS
 
 	IF(ifx_map(ifx).EQ.0) RETURN    ! If not one of the considered fuels, skip the rest of the subroutine.
@@ -14736,19 +12965,16 @@ subroutine corncalc(is,ifuel,ifx)
 	Oil_Convert = 2026.2                                             ! Factor to convert MMBbl/Day of oil to Trils/Year
 	Gas_Convert = 1031.0                                             ! Factor to convert TCF of NG to Trills/Year
 
-
 	DO K=1,7
+		DO R=1,MNL48N
+			OG_Prod_Tmp(K,indreg,iy,R) = OGREGPRD(R,K,iy)*OGSM_Map(R,indreg)     ! Allocate HSM output to Census Regions
+		ENDDO
 
-	  DO R=1,MNL48N
-	    OG_Prod_Tmp(K,indreg,iy,R) = OGREGPRD(R,K,iy)*OGSM_Map(R,indreg)     ! Allocate OGSM output to Census Regions
-        ENDDO
-
-	  IF (K.le.2) THEN                                                          ! For Oil (Conventional & EOR)
-	    OG_Prod(K,indreg,iy) = SUM(OG_Prod_Tmp(K,indreg,iy,1:MNL48N)) * Oil_Convert  !   Sum across OGSM Region, & Convert to Trils/yr
-	  ELSE                                                                      ! For Natural Gas
-	    OG_Prod(K,indreg,iy) = SUM(OG_Prod_Tmp(K,indreg,iy,1:MNL48N)) * Gas_Convert  !   Sum across OGSM Region, & Convert to Trils/yr
-	  ENDIF
-
+		IF (K.le.2) THEN                                                          ! For Oil (Conventional & EOR)
+			OG_Prod(K,indreg,iy) = SUM(OG_Prod_Tmp(K,indreg,iy,1:MNL48N)) * Oil_Convert  !   Sum across HSM Region, & Convert to Trils/yr
+		ELSE                                                                      ! For Natural Gas
+			OG_Prod(K,indreg,iy) = SUM(OG_Prod_Tmp(K,indreg,iy,1:MNL48N)) * Gas_Convert  !   Sum across HSM Region, & Convert to Trils/yr
+		ENDIF
 	ENDDO
 
 	Oil_Share(indreg,iy) = SUM(OG_Prod(1:2,indreg,iy))/SUM(OG_Prod(1:7,indreg,iy))  ! Share of Production (in Trils) represented by Oil
@@ -14771,10 +12997,9 @@ subroutine corncalc(is,ifuel,ifx)
 
 
           ! Zero out (assume no change) this factor to avoid extreme volatility pre-2012 and divide by 0
-          IF(iy .le. 22 .or. OG_ProdFac(1,indreg,iy-1) .EQ. 0.0 .OR. OG_ProdFac(2,indreg,iy-1) .EQ. 0.0) THEN
+          IF(OG_ProdFac(1,indreg,iy-1) .EQ. 0.0 .OR. OG_ProdFac(2,indreg,iy-1) .EQ. 0.0) THEN
              Prod_Index(indreg,iy) = 0.0
           ELSE
-
              Prod_Index(indreg,iy) = Oil_Share(indreg,iy)*(OG_ProdFac(1,indreg,iy)/OG_ProdFac(1,indreg,iy-1) - 1.0) &
                          + (1.0 - Oil_Share(indreg,iy)) * (OG_ProdFac(2,indreg,iy)/OG_ProdFac(2,indreg,iy-1) - 1.0)
           ENDIF
@@ -14893,13 +13118,10 @@ subroutine corncalc(is,ifuel,ifx)
       END SUBROUTINE OGSMTPC
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-!   Test Subroutine for Metals and Non-Metals Mining TPC Calculation
-!
+!   Subroutine for Metals and Non-Metals Mining TPC Calculation
       SUBROUTINE OTH_MINTPC(IFUEL,ISTEP)
       use i_
       implicit none
-	!include 'tranrep'
-      !include 'coalrep'
 
       integer istep,iv,ifuel,ifx,ify,ift,isc,ifn,iy
 	integer ifx_map(31), if_map(6)                                  ! Maps IDM fuel indices to the 5 fuels used in this section (zeros otherwise)
@@ -14913,7 +13135,7 @@ subroutine corncalc(is,ifuel,ifx)
 	 Real   Wt_NM_EQP_Index(4,mnumyr)                               ! Non-Metals: Weighted Equipment index for the fuel in question
 
 	 Real   Raw_Grind_Eff     	                                    ! Raw Grinding Efficiency, from Cement subroutine
-       Real   Raw_Grind_Eff_Lag	                                    ! Raw Grinding Efficiency, from Cement subroutine lag year
+     Real   Raw_Grind_Eff_Lag	                                    ! Raw Grinding Efficiency, from Cement subroutine lag year
 
 	 Real   Elec_Met_Wt(4,3)                                        ! Metal Mining Weighting factors for electric equipment components (3), by region (4)
 	 Real   Elec_NM_Wt(4,3)                                         ! Non-Metal Mining Weighting factors for electric equipment components (3), by region (4)
@@ -14931,9 +13153,8 @@ subroutine corncalc(is,ifuel,ifx)
 	 Real   Reg_MetlShr(4)                                          ! Normalized allocation of Metal Mining shares across regions
 
 	 Real   Elec_Weight(4,3)                                        ! Not used: superseded by metal/non-metal factors above
-	 Real   TPC_Weight(4,3,6)                                       ! Not used
-	 Real   NonEl_Weight(2:6,2)                                     ! Not used
-
+	 Real   TPC_Weight(4,3,6)
+	 Real   NonEl_Weight(2:6,2)
 
 
        COMMON /IN_COAL/Elec_Weight,TPC_Weight,NonEl_Weight,CL_L_Prod, &
@@ -14968,7 +13189,7 @@ subroutine corncalc(is,ifuel,ifx)
 
 	ifx_map = 0        ! Initialize:  ifx_map(ifx) should provide fuel indices in the proper order
 
-	 ifx_map(1)  = 1  ! EL
+	  ifx_map(1)  = 1  ! EL
 	  ifx_map(3)  = 2  ! NG
 	  ifx_map(11) = 3  ! DS
 	  ifx_map(14) = 4  ! GS
@@ -15013,15 +13234,13 @@ subroutine corncalc(is,ifuel,ifx)
 
 !	Raw Grinding Efficiency from Cement Module
 	
-    if (curiyr.le.ICURIYR2+1) then !cement not calculated yet, POT_IBYR 19 to ICURIYR+2
+    if (curiyr.le.ICURIYR) then ! cement not calculated yet
 	  Raw_Grind_Eff_lag=246.6
 	  raw_grind_eff=246.6
-	 else
-	    if (curitr.eq.1) Raw_Grind_Eff_lag=raw_grind_eff        !save last year's value in first iterarion
-
-          Raw_Grind_Eff = (elec_use_rpt(1)+elec_use_rpt(2))  &
-		              / (tot_prodg(1)+tot_prodg(2))
-       endif
+	else
+	    if (curitr.eq.1) Raw_Grind_Eff_lag=raw_grind_eff        ! save last year's value in first iterarion
+        Raw_Grind_Eff = SUM(elec_use_rpt(:)) / SUM(tot_prodg(:))
+    endif
 
 !	Surface Mining Labor Productivity Index
 
@@ -15047,11 +13266,15 @@ subroutine corncalc(is,ifuel,ifx)
 	                                + EQP_Index(indreg,2,iy) * Elec_NM_Wt(indreg,2) &        ! Lighting
 	                                + EQP_Index(indreg,3,iy) * Elec_NM_Wt(indreg,3)          ! Ventilation
 
-	  ELSE                      ! For Other Fuels (ift = 2-6)
+	ELSE                      ! For Other Fuels (ift = 2-6)
 
         IF (ift.eq.6) THEN      ! For Residual Fuel Oil only
             EQP_Index(indreg,1,iy) = (WHSE_HeatIndex(indreg,3,iy)  / WHSE_HeatIndex(indreg,3,iy-1)  -1.0) ! Use Distillate results for Residual.
-        ELSE
+		ELSEIF (ift.eq.4) THEN	! ift=4 is gasoline for this subroutine, whic is equivalent to index 5 for WHSE_HeatIndex
+			EQP_Index(indreg,1,iy) = (WHSE_HeatIndex(indreg,5,iy)  / WHSE_HeatIndex(indreg,5,iy-1)  -1.0)
+		ELSEIF (ift.eq.5) THEN	! ift=5 is coal for this subroutine, which has no equivalent index in WHSE_HeatIndex
+			EQP_Index(indreg,1,iy) = 0.0
+		ELSE	! ift is 2 or 3
             EQP_Index(indreg,1,iy) = (WHSE_HeatIndex(indreg,ift,iy)  / WHSE_HeatIndex(indreg,ift,iy-1)  -1.0) ! Re-using this variable from above.
         ENDIF
 
@@ -15061,15 +13284,14 @@ subroutine corncalc(is,ifuel,ifx)
            VEH_Index(ift,iy) = 0.0         ! assume no change
         ENDIF
 
-!	Metals Mining
-	Wt_Met_EQP_Index(indreg,iy) = EQP_Index(indreg,1,iy) * NonEl_Met_Wt(ift,1) &        ! Heating
+!		Metals Mining
+		Wt_Met_EQP_Index(indreg,iy) = EQP_Index(indreg,1,iy) * NonEl_Met_Wt(ift,1) &        ! Heating
                                   + VEH_Index(ift,iy)      * NonEl_Met_Wt(ift,2)          ! Vehicles
-!	Non-Metals Mining
-	Wt_NM_EQP_Index(indreg,iy)  = EQP_Index(indreg,1,iy) * NonEl_NM_Wt(ift,1) &        ! Heating
+!		Non-Metals Mining
+		Wt_NM_EQP_Index(indreg,iy)  = EQP_Index(indreg,1,iy) * NonEl_NM_Wt(ift,1) &        ! Heating
                                   + VEH_Index(ift,iy)      * NonEl_NM_Wt(ift,2)          ! Vehicles
 
 	ENDIF
-
 !*******************************************************************************************
 
 
@@ -15101,23 +13323,22 @@ subroutine corncalc(is,ifuel,ifx)
 
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !   Test Subroutine for Construction TPC Calculation
-!
+
       SUBROUTINE CONTPC(IFUEL,ISTEP)
       use i_
       implicit none
 
      integer istep,iv,ifuel,ifx,ify,ift,isc,ifn,iy !,ir
-	 integer ifx_map(31), if_map(5)                                  ! Maps IDM fuel indices to the 5 fuels used in this section (zeros otherwise)
+	 integer ifx_map(31), if_map(5)                                 ! Maps IDM fuel indices to the 5 fuels used in this section (zeros otherwise)
      Real   EQP_Index(4,3,mnumyr)                                   ! Marginal change for equipment: heat, light, ventillation, by region
      Real   VEH_Index_SC(5,3,mnumyr)                                ! Marginal change for vehicles, by fuel & Size Class
      Real   Trk_Intens_SC(mnumyr,3,5)                               ! Weighted Average Energy Intensity for Trucks for 2 size classes, and cumulative
      Real   Wt_EQP_Index(indreg,curiyr)                             ! Weighted Equipment index for the fuel in question
      Real   Wt_VEH_Index(indreg,curiyr)                             ! Weighted Vehicle index for the fuel in question
-     Real CON_Proxy_Wt(3,5)                                          ! Weighting shares for proxy measures: heat, light, ventilation
-!	 Real CON_Equip_Wt(2,5)                                          ! Vehicle & Equipment functional weights by fuel (5)
-     Real Weight_CON(4,3,5)                                          ! Component weights, by census region (ir=4),
+     Real CON_Proxy_Wt(3,5)                                         ! Weighting shares for proxy measures: heat, light, ventilation
+     Real Weight_CON(4,3,5)                                         ! Component weights, by census region (ir=4),
 	                                                                ! Components (ifn=3):  Buildings, Civil Engineering, Trade
-                                                                      !  and Fuels (ift=5):  Electricity, NG, Dist, Other Petroleum, Gasoline
+                                                                    !  and Fuels (ift=5):  Electricity, NG, Dist, Other Petroleum, Gasoline
      Real GI_Hwy_Invest(mnumyr)                                     ! Gross investment in highways and streets, from GI Model (hard-coded temporarily)
      Real GI_Hwy_Index(4,mnumyr)                                    ! Index of Highway Spending for Asphalt & Road Oil TPC
 	 Real TPC_Limit_CON												! Upper Constraint on TPC (ensures minimal level of improvement)
@@ -15148,7 +13369,7 @@ subroutine corncalc(is,ifuel,ifx)
 	Data CON_Proxy_Wt(1:3,1) /0.20, 0.20, 0.60/                              ! Electricity
 	Data CON_Proxy_Wt(1:3,2) /1.00, 0.00, 0.00/                              ! Natural Gas
 	Data CON_Proxy_Wt(1:3,3) /1.00, 0.00, 0.00/                              ! Distillate
-	Data CON_Proxy_Wt(1:3,4) /1.00, 0.00, 0.00/                              ! LPG
+	Data CON_Proxy_Wt(1:3,4) /1.00, 0.00, 0.00/                              ! Other petroleum
 	Data CON_Proxy_Wt(1:3,5) /1.00, 0.00, 0.00/                              ! Gasoline
 
 !						     Heat Light	Vent Veh
@@ -15168,15 +13389,15 @@ subroutine corncalc(is,ifuel,ifx)
 
 	ifx = ifloc(ifuel,istep)	! Identifies the specific fuel associated with the IFUEL index for this industry
 
-!                             ifx             ift
-!Electricity                    1               1
-!Natural Gas                    3               2
-!Distillate                    11               3
-!LPG                           12               -
-!Coal                           7               -
-!Gasoline                      14               5
-!Other Petroleum               17               4
-!Steam                         31               -
+!           		ifx
+!Electricity		1
+!Natural Gas		3
+!Distillate			11
+!Propane			12
+!Gasoline			14
+!Asphalt			17
+!Other Petroleum	22
+
 
 	ifx_map = 0        ! Initialize:  ifx_map(ifx) should provide fuel indices in the proper order
 
@@ -15195,16 +13416,16 @@ subroutine corncalc(is,ifuel,ifx)
 !	Tran Variables:	TFR_FTMPG(year,size,fuel,existing stock=2)	    Gasoline-Equivalent MPG
 !					TFR_TRK_FAS_T(year,size,fuel,existing stock=2)  Existing Stock
 
-!	Fuel Indices:   ify= (1)Diesel, (2)Gasoline, (3)LPG, (4)CNG   (LPG is assumed to be zero in construction)
+!	Fuel Indices:   ify= (1)Diesel, (2)Gasoline, (3)Propane, (4)CNG   (propane is assumed to be zero in construction)
 
-	data if_map /0,4,1,1,2/      ! if_map(ift) should return the matching truck fuel (no electricity or LPG) ("Other" uses Diesel as a proxy)
+	data if_map /0,4,1,1,2/      ! if_map(ift) should return the matching truck fuel (no electricity) ("Other petroleum" uses Diesel as a proxy)
 
 	DO isc = 1,3
 	   Trk_Intens_SC(ibyr2-1-1989,isc,ift) = 1.0   ! Initialize to 1.0, to avoid error messages
 	   Trk_Intens_SC(curiyr,isc,ift) = 1.0   ! Initialize to 1.0, to avoid error messages
 	ENDDO
 
-	IF (if_map(ift).ne.0) THEN     ! Skip over electricity and LPG for trucks
+	IF (if_map(ift).ne.0) THEN     ! Skip over electricity and propane for trucks
 
       ! All Trucks  (Buildings Function)
 
@@ -15247,7 +13468,7 @@ subroutine corncalc(is,ifuel,ifx)
 	                            + EQP_Index(indreg,2,curiyr) * CON_Proxy_Wt(2,ift) &
 	                            + EQP_Index(indreg,3,curiyr) * CON_Proxy_Wt(3,ift)
 
-!	Specific measure for Asphalt & Road Oil (IFX = 17).  Link to State & Local Highway spending
+!	Specific measure for Asphalt & Road Oil (IFUEL = 17).  Link to State & Local Highway spending
 
     GI_Hwy_Index(indreg,curiyr) = (GI_Hwy_Invest(curiyr)/GI_Hwy_Invest(22)) * 0.008
 
@@ -15258,9 +13479,8 @@ subroutine corncalc(is,ifuel,ifx)
 !************************************************************************
 
 6530	Format (i4,2x,12(f8.4,2x))
-6531  Format (i4,2x,4(f8.4,2x))
+6531  	Format (i4,2x,4(f8.4,2x))
 
-!	IF(iyr.eq.ibyr) GOTO 6677       ! Jump over calculations in the first year to avoid dividing by zero
 	IF(curiyr.lt.ICURIYR+6) GOTO 6677       ! Jump over calculations in the first year to avoid dividing by zero POT_ibyr2OTHER 23 to ICURIYR+6
     
        write (IFEEDOUT,*) 'istep = ',istep
@@ -15546,10 +13766,9 @@ subroutine corncalc(is,ifuel,ifx)
 			IF (ENBQTY(5,3) .NE. 0.0) &
 			   WRITE(IUNITOUTF,810) CURCALYR, INDNUM, INDNAME2(INDNUM), INDREG, "ENBQTY", 31, FUELNAME(31), ENBQTY(5,3)
 
-          DO IFUEL=1,IFSMAX
-             IFF = IFSLOC(IFUEL)
+          DO IFUEL=1,48
              IF (ENSQTY(IFUEL) .NE. 0.0) &
-			    WRITE(IUNITOUTF,810) CURCALYR, INDNUM, INDNAME2(INDNUM), INDREG, "ENSQTY", IFF, FUELNAME(IFF), ENSQTY(IFUEL)
+			    WRITE(IUNITOUTF,810) CURCALYR, INDNUM, INDNAME2(INDNUM), INDREG, "ENSQTY", IFUEL, FUELNAME(IFUEL), ENSQTY(IFUEL)
           END DO
 
 		  IF (ELOWN .NE. 0.0) &
@@ -15591,35 +13810,31 @@ subroutine corncalc(is,ifuel,ifx)
 	  END SUBROUTINE CHECK_FOR_STUFF
 
 SUBROUTINE CALIBRATE_COAL_ELEC
-      use i_
-      IMPLICIT NONE
+    use i_
+    IMPLICIT NONE
 
-	  INTEGER IFUEL, IREG, ICR, IFF, IS, IFn, IND_idx
-      REAL hist_bench(mnumyr,numind,5,mainfuels-1)   ! steam coal and electricity benchmark as a function of year, industry, census region, and fuel (fuel codes match QTYMAIN fuel codes)
+	INTEGER IFUEL, IREG, ICR, IFF, IS, IFn, IND_idx
+    REAL hist_bench(mnumyr,numind,5,mainfuels-1)   ! steam coal and electricity benchmark as a function of year, industry, census region, and fuel (fuel codes match QTYMAIN fuel codes)
                                             ! index 1 is purchased electricity and 7 is steam coal
     TQMAIN(1,1:5)=0.0       ! electricity
     TQMAIN(7,1:5)=0.0       ! steam coal
     DO IND_idx=1,INDMAX
         QTYMAIN(1,5)=0.0    ! electricity
         QTYMAIN(7,5)=0.0    ! steam coal
-        
         DO IREG=1,4         ! calculate QTYMAIN(fuel,5)
-            QTYMAIN(:,IREG)= COPYBUF(IREG,IND_idx).QTYMAIN    
-            QTYMAIN(1,5)=QTYMAIN(1,5)+QTYMAIN(1,IREG) ! electricity
-            QTYMAIN(7,5)=QTYMAIN(7,5)+QTYMAIN(7,IREG) ! steam coal
+            QTYMAIN(1:mainfuels,IREG)= COPYBUF(IREG,IND_idx).QTYMAIN
         ENDDO
-        
+            QTYMAIN(1,5)=SUM(QTYMAIN(1,1:4))	! electricity
+            QTYMAIN(7,5)=SUM(QTYMAIN(7,1:4))	! steam coal
+			
         DO IREG=1,4
-!**********************************************************
-!  copy region-industry data to local
-!**********************************************************
             ELOWN   = COPYBUF(IREG,IND_idx).ELOWN
             ENPMQTY = COPYBUF(IREG,IND_idx).ENPMQTY
             ENSQTY  = COPYBUF(IREG,IND_idx).ENSQTY
             BYPBSCM = COPYBUF(IREG,IND_idx).BYPBSCM 
 			ENPQTY  = COPYBUF(IREG,IND_idx).ENPQTY
         
-          ! electricity benchmarking; for chemicals, HMM consumption is so small we can ignore any discrepancy between ASM (with H2 SMRs) and our chemicals (without H2 SMRs)
+        ! electricity benchmarking; for chemicals, HMM consumption is so small we can ignore any discrepancy between ASM (with H2 SMRs) and our chemicals (without H2 SMRs)
 			IF ((QTYMAIN(1,IREG).ne.0.0).and.(IND_idx.ge.7)) THEN   
                 IF ((curcalyr.ge.ibyr+1).and.(curcalyr.le.END_YR_ASM)) THEN   ! Unlike steam coal, ASM data benchmarking starts after base year
                     hist_bench(curiyr,IND_idx,IREG,1)=asmdata(curiyr,IND_idx,5)/QTYMAIN(1,5)
@@ -15632,17 +13847,8 @@ SUBROUTINE CALIBRATE_COAL_ELEC
 				QTYMAIN(1,IREG) = QTYMAIN(1,IREG) * hist_bench(curiyr,IND_idx,IREG,1)  ! electricity
 				ELOWN = ELOWN * hist_bench(curiyr,IND_idx,IREG,1)
 				ENPMQTY(1) = ENPMQTY(1) * hist_bench(curiyr,IND_idx,IREG,1)  
-				ENSQTY(6) = ENSQTY(6) * hist_bench(curiyr,IND_idx,IREG,1)
+				ENSQTY(1) = ENSQTY(1) * hist_bench(curiyr,IND_idx,IREG,1)
 				BYPBSCM(1) = BYPBSCM(1) * hist_bench(curiyr,IND_idx,5,1)
-
-				!DO IS=1,MPASTP
-				!	DO IFn=1,IFMAX(IS)
-				!		IFF = IFLOC(IFn,IS)
-				!		IF (IFF .GT. 0 .AND. IFF .LE. 23) THEN
-				!			ENPQTY(1:4,1,IS)= ENPQTY(1:4,1,IS) * hist_bench(curiyr,IND_idx,IREG,1)	! index 1 is always electricity
-				!		END IF
-				!	END DO
-				!ENDDO
             ENDIF
             
             IF ((QTYMAIN(7,IREG).ne.0.0).and.(IND_idx.ge.7)) THEN   ! steam coal benchmarking
@@ -15656,24 +13862,16 @@ SUBROUTINE CALIBRATE_COAL_ELEC
                 
 				QTYMAIN(7,IREG) = QTYMAIN(7,IREG) * hist_bench(curiyr,IND_idx,IREG,7)  ! steam coal
 				ENPMQTY(7) = ENPMQTY(7) * hist_bench(curiyr,IND_idx,IREG,7)  ! steam coal
-				ENSQTY(2) = ENSQTY(2) * hist_bench(curiyr,IND_idx,IREG,7)  ! steam coal
+				ENSQTY(7) = ENSQTY(7) * hist_bench(curiyr,IND_idx,IREG,7)  ! steam coal
 				BYPBSCM(7) = BYPBSCM(7) * hist_bench(curiyr,IND_idx,5,7) ! steam coal
-				! DO IS=1,MPASTP
-					! DO IFn=1,IFMAX(IS)
-						! IFF = IFLOC(IFn,IS)
-						! IF (IFF .GT. 0 .AND. IFF .LE. 23) THEN
-							! ENPQTY(1:4,IFn,IS)= ENPQTY(1:4,IFn,IS) * hist_bench(curiyr,IND_idx,IREG,7)
-						! END IF
-					! END DO
-				! ENDDO
             ENDIF
 
-        COPYBUF(IREG,IND_idx).QTYMAIN   = QTYMAIN(:,IREG)
-        COPYBUF(IREG,IND_idx).ELOWN     = ELOWN
-        COPYBUF(IREG,IND_idx).ENPMQTY   = ENPMQTY
-        COPYBUF(IREG,IND_idx).ENSQTY    = ENSQTY
-        COPYBUF(IREG,IND_idx).BYPBSCM   = BYPBSCM
-		COPYBUF(IREG,IND_idx).ENPQTY    = ENPQTY
+			COPYBUF(IREG,IND_idx).QTYMAIN   = QTYMAIN(:,IREG)
+			COPYBUF(IREG,IND_idx).ELOWN     = ELOWN
+			COPYBUF(IREG,IND_idx).ENPMQTY   = ENPMQTY
+			COPYBUF(IREG,IND_idx).ENSQTY    = ENSQTY
+			COPYBUF(IREG,IND_idx).BYPBSCM   = BYPBSCM
+			COPYBUF(IREG,IND_idx).ENPQTY    = ENPQTY
 
         CALL CONTAB(IREG)
 
@@ -15681,16 +13879,11 @@ SUBROUTINE CALIBRATE_COAL_ELEC
 
         QTYMAIN(1,5) =  SUM(QTYMAIN(1,1:4))     ! electricity   
         QTYMAIN(7,5) =  SUM(QTYMAIN(7,1:4))     ! steam coal
-
-! CODE FROM NATTOTAL
-            QTYMAIN(mainfuels,1:5)=0.0
-	    DO 100 IREG=1,5
-            TQMAIN(1,IREG)=TQMAIN(1,IREG)+QTYMAIN(1,IREG) ! electricity
-            TQMAIN(7,IREG)=TQMAIN(7,IREG)+QTYMAIN(7,IREG) ! steam coal
-        DO 100 IFUEL=1,mainfuels-1
-            QTYMAIN(mainfuels,IREG)=QTYMAIN(mainfuels,IREG)+QTYMAIN(IFUEL,IREG)
-  100 CONTINUE
-
+			
+        TQMAIN(1,1:5)=TQMAIN(1,1:5)+QTYMAIN(1,1:5) ! electricity
+        TQMAIN(7,1:5)=TQMAIN(7,1:5)+QTYMAIN(7,1:5) ! steam coal
+			
+        QTYMAIN(mainfuels,1:5)=SUM(QTYMAIN(1:mainfuels-1,1:5), DIM=1)	! Re-sum across fuels (DIM=1) with benchmarked values
 
 !**********************************************************
 !  copy local back to buffer so it is there for INDUSA
@@ -15698,241 +13891,125 @@ SUBROUTINE CALIBRATE_COAL_ELEC
 
 	  CALL CONTAB(5)
 
-	  ! GO TO NEXT INDUSTRY
-
-    ENDDO
+    ENDDO	! GO TO NEXT INDUSTRY
 
 	  END SUBROUTINE   
       
-	  SUBROUTINE CALIBRATE
-      use i_
-      IMPLICIT NONE
+SUBROUTINE CALIBRATE
+    use i_
+    IMPLICIT NONE
 	  
-	  include 'hmmblk'
+	include 'hmmblk'
 
-	  INTEGER IFUEL, IREG, ICR, IFF, IS, IFn, ICD
-	  REAL TQMCHECK(mainfuels,5)
-      REAL TQRCHECK(9,5)
-	  REAL SUMCDIV
+	INTEGER IFUEL, IREG, ICR, IFF, IS, IFn, ICD
+	REAL SUMCDIV
 
-	!   Index Constants for Industrial Tables 35 to 44 not sure why this is here ?????
-	!   these variables are used in the dreaded layin/layout files--arguments are 
-	!   fuels used in the xxxxxCON variables
-       integer ixEL/1/,ixNG/2/,ixCL/3/,ixMC/4/, &
-              ixCI/5/,ixRF/6/,ixDS/7/,ixLG/8/,ixMG/9/, &
-              ixSG/10/,ixPC/11/,ixAS/12/,ixPF/13/,ixKS/14/, &
-              ixOP/15/,ixNF/16/,ixLF/17/,ixRN/18/,ixHF/19/,ixHH/20/
+! fuel indices for -CON variables
+    integer ixEL/1/,ixNG/2/,ixCL/3/,ixMC/4/,ixCI/5/, &
+            ixRF/6/,ixDS/7/,ixLG/8/,ixMG/9/,ixSG/10/, &
+            ixPC/11/,ixAS/12/,ixPF/13/,ixKS/14/,ixOP/15/, &
+            ixNF/16/,ixLF/17/,ixRN/18/,ixHF/19/,ixHH/20/
 
-   !   integer ixNG/2/,ixCL/3/,ixRF/6/
-
-
-	  TQMCHECK( : , : ) = 0.0D0
-	  TQRCHECK( : , : ) = 0.0D0
-
-	  DO INDNUM=1,INDMAX
-	     INDDIR=INDNUM
-
-       DO IREG=1,4
-	      INDREG=IREG
-
-!**********************************************************
+	DO INDNUM=1,INDMAX
+	    INDDIR=INDNUM	! needed for WRBIN and CONTAB
+		DO IREG=1,4
+			INDREG=IREG	! needed for WRBIN
 !  copy region-industry data to local
-!**********************************************************
-          CALL RDBIN
+			CALL RDBIN
 
-	      QTYMAIN(1:(mainfuels-1),INDREG) = QTYMAIN(1:(mainfuels-1),INDREG) * BF(CURIYR,1:(mainfuels-1),INDREG)
-          QTYRENW(1:8,INDREG) = QTYRENW(1:8,INDREG) * RBF(CURIYR,1:8,INDREG)
+			QTYMAIN(1:(mainfuels-1),INDREG) = QTYMAIN(1:(mainfuels-1),INDREG) * BF(CURIYR,1:(mainfuels-1),INDREG)
+			QTYRENW(1:8,INDREG) = QTYRENW(1:8,INDREG) * RBF(CURIYR,1:8,INDREG)
 
-		  ELOWN = ELOWN * BF(CURIYR,1,INDREG)
-          ENPMQTY(1:(mainfuels-1)) = ENPMQTY(1:(mainfuels-1)) * BF(CURIYR,1:(mainfuels-1),INDREG)
-		  ENBQTY(1:5,1) = ENBQTY(1:5,1) * BF(CURIYR,1,INDREG)
-		  ENBQTY(1:5,2) = ENBQTY(1:5,2) * BF(CURIYR,3,INDREG)
-		  ENBQTY(1:5,4) = ENBQTY(1:5,4) * BF(CURIYR,11,INDREG)
-		  ENBQTY(1:5,5) = ENBQTY(1:5,5) * BF(CURIYR,12,INDREG)
-          
-          DO IFUEL = 1,IFSMAX
-		    IFF = IFSLOC(IFUEL)
-		    IF (IFF .GT. 0 .AND. IFF .LT. 30) THEN
-		       ENSQTY(IFUEL) = ENSQTY(IFUEL) * BF(CURIYR,IFF,INDREG)
-	        END IF
-	 ! ADD IN CODE TO ADJUST RENEWABLES
-		  END DO
-
-		  BYPBSCM(1:(mainfuels-1)) = BYPBSCM(1:(mainfuels-1)) * BF(CURIYR,1:(mainfuels-1),INDREG)
-
-		  ! CODE COPIED FROM INDSIC AND MODIFIED
-		  DO IS=1,MPASTP
-
-           DO IFn=1,IFMAX(IS)
-              IFF = IFLOC(IFn,IS)
+			ELOWN = ELOWN * BF(CURIYR,1,INDREG)
+			ENPMQTY(1:(mainfuels-1)) = ENPMQTY(1:(mainfuels-1)) * BF(CURIYR,1:(mainfuels-1),INDREG)
+			ENBQTY(1:5,1) = ENBQTY(1:5,1) * BF(CURIYR,1,INDREG)
+			ENBQTY(1:5,2) = ENBQTY(1:5,2) * BF(CURIYR,3,INDREG)
+			ENBQTY(1:5,4) = ENBQTY(1:5,4) * BF(CURIYR,11,INDREG)
+			ENBQTY(1:5,5) = ENBQTY(1:5,5) * BF(CURIYR,12,INDREG)
+			ENSQTY(1:(mainfuels-1)) = ENSQTY(1:(mainfuels-1)) * BF(CURIYR,1:(mainfuels-1),INDREG)
 			
-			  IF (IFF .GT. 0 .AND. IFF .LE. mainfuels-1) THEN
-               ENPQTY(1:4,IFn,IS)= ENPQTY(1:4,IFn,IS) * BF(CURIYR,IFF,INDREG)
-			  END IF
-            END DO
-		  END DO
+	 ! ADD IN CODE TO ADJUST RENEWABLES
+			BYPBSCM(1:(mainfuels-1)) = BYPBSCM(1:(mainfuels-1)) * BF(CURIYR,1:(mainfuels-1),INDREG)
 
-340  FORMAT(I3,I3,4F9.3)
-360  FORMAT(A,I3,I3,4F9.3)
+			DO IS=1,MPASTP
+				DO IFn=1,IFMAX(IS)
+					IFF = IFLOC(IFn,IS)
+					IF (IFF .GT. 0 .AND. IFF .LE. mainfuels-1) THEN
+						ENPQTY(1:4,IFn,IS)= ENPQTY(1:4,IFn,IS) * BF(CURIYR,IFF,INDREG)
+					ENDIF
+				ENDDO
+			ENDDO
 
-          CALL WRBIN
+			CALL WRBIN
+			CALL CONTAB(INDREG)
+		ENDDO
 
-		  TQMCHECK(1:(mainfuels-1),INDREG) = TQMCHECK(1:(mainfuels-1),INDREG) + QTYMAIN(1:(mainfuels-1),INDREG)
-		  TQRCHECK(1:8,INDREG) = TQRCHECK(1:8,INDREG) + QTYRENW(1:8,INDREG)
+! sum across regions (DIM=2 indicates sum over second index)
+		QTYMAIN(1:mainfuels-1, 5) = SUM(QTYMAIN(1:mainfuels-1,1:4),DIM=2)	
+		QTYRENW(1:8,5) = SUM(QTYRENW(1:8,1:4), DIM=2)
 
-       CALL CONTAB(INDREG)
+! sum across fuels (DIM=2 indicates sum over first index)
+        QTYMAIN(mainfuels, 1:5) = SUM(QTYMAIN(1:mainfuels-1, 1:5), DIM=1)
+		QTYRENW(9, 1:5) = SUM(QTYRENW(1:8, 1:5), DIM=1)
 
-	   END DO
-
-		DO IFUEL=1,mainfuels-1
-	       QTYMAIN(IFUEL,5) =  SUM(QTYMAIN(IFUEL,1:4))
-		   TQMCHECK(IFUEL,5) = TQMCHECK(IFUEL,5) + QTYMAIN(IFUEL,5)
-		END DO
-		DO IFUEL=1,8
-		   QTYRENW(IFUEL,5) = SUM(QTYRENW(IFUEL,1:4))
-		   TQRCHECK(IFUEL,5) = TQRCHECK(IFUEL,5) + QTYRENW(IFUEL,5)
- 		END DO
-
-! CODE FROM NATTOTAL
-	    DO 100 INDREG=1,5
-        QTYMAIN(mainfuels,INDREG)=0.0
-        DO 100 IFUEL=1,mainfuels-1
-          QTYMAIN(mainfuels,INDREG)=QTYMAIN(mainfuels,INDREG)+QTYMAIN(IFUEL,INDREG)
-  100 CONTINUE
-
-        DO 105 INDREG=1,5
-        QTYRENW(9,INDREG)=0.0
-        DO 105 IFUEL=1,8
-          QTYRENW(9,INDREG)=QTYRENW(9,INDREG)+QTYRENW(IFUEL,INDREG)
-  105 CONTINUE
-
-        TQMCHECK(mainfuels,1:5) = TQMCHECK(mainfuels,1:5) + QTYMAIN(mainfuels,1:5)
-        TQRCHECK(9,1:5) = TQRCHECK(9,1:5) + QTYRENW(9,1:5)
-
-!**********************************************************
 !  copy local back to buffer so it is there for INDUSA
-!**********************************************************
 
-	  CALL CONTAB(5)
+		CALL CONTAB(5)
 
-	  ! GO TO NEXT INDUSTRY
-
-	  END DO
+	ENDDO	! INDNUM loop
 
 	  ! CODE FROM WEXOG ... NEEDS TO BE ADDED TO CONTAB IN FUTURE
-
-	  do icr=1,4
+	  
+	DO icr=1,4
 			MINECON(ixEL,icr,curiyr)=MINECON(ixEL,icr,curiyr)+SumCDIV(QNGPIN(1,CURIYR),icr) &
-			   + 0.000003412 * SumCDIV(CO2_ELEC(1,CURIYR),icr)
+			   + (CFELQ/10**9) * SumCDIV(CO2_ELEC(1,CURIYR),icr)
 			MINECON(ixNG,icr,CURIYR)=MINECON(ixNG,icr,CURIYR)+SumCDIV(CGOGSQ(1,CURIYR,3),icr)
 			MINECON(ixRF,icr,CURIYR)=MINECON(ixRF,icr,CURIYR)+SumCDIV(CGOGSQ(1,CURIYR,2),icr)
-      enddo
+    ENDDO
 	  
-	  MINECON(ixEL,5,curiyr)=MINECON(ixEL,5,curiyr)+QNGPIN(11,CURIYR)+CO2_ELEC(11,CURIYR) * 0.000003412
-      MINECON(ixNG,5,CURIYR)=MINECON(ixNG,5,CURIYR)+CGOGSQ(11,CURIYR,3)
-      MINECON(ixRF,5,CURIYR)=MINECON(ixRF,5,CURIYR)+CGOGSQ(11,CURIYR,2)
+	  MINECON(ixEL,5,curiyr)=SUM(MINECON(ixEL,1:4,curiyr))
+      MINECON(ixNG,5,CURIYR)=SUM(MINECON(ixNG,1:4,CURIYR))
+      MINECON(ixRF,5,CURIYR)=SUM(MINECON(ixRF,1:4,CURIYR))
   
-	  ! Split QELIN into load curves for EMM
-! calculate electricity shares for the 4 groups:
+! Split QELIN into 4 load curves for EMM:
 !  Primary = food,paper,chemicals,steel,aluminum,refining
 !  Shift = metal based durables
-!  Miscellaneous = all the rest
-! H2 electrolyzers = electricity from H2 electrolysis in HMM
-DO ICR=1,4
-    xelin(1,icr)=FOODCON(1,icr,CURIYR)+PAPERCON(1,icr,CURIYR)+CHEMCON(1,icr,CURIYR)+STEELCON(1,icr,CURIYR)+ALUMCON(1,icr,CURIYR)+REFCON(1,icr,CURIYR)					! primary
-    xelin(2,icr)=FABMETALCON(1,icr,CURIYR)+MACHINECON(1,icr,CURIYR)+COMPUTECON(1,icr,CURIYR)+TRANEQUIPCON(1,icr,CURIYR)+ELECEQUIPON(1,icr,CURIYR)	! shift
-    xelin(3,icr)=AGCON(1,icr,CURIYR)+MINECON(1,icr,CURIYR)+CONSTCON(1,icr,CURIYR)+GLASSCON(1,icr,CURIYR)+CEMENTCON(1,icr,CURIYR)+&					! miscellaneous
-						WOODPRODCON(1,icr,CURIYR)+PLASTICCON(1,icr,CURIYR)+LTCHEMCON(1,icr,CURIYR)+OTHRNMMCON(1,icr,CURIYR)+&
-						OTHRPRIMCON(1,icr,CURIYR)+MISCFINCON(1,icr,CURIYR)
-						
-    xelinshr(1:3,icr)=xelin(1:3,icr)/sum(xelin(1:3,icr))	! define shares of each of three original load types (electrolyzers are a separate variable defined in HMM, QELINH2e)
+!  Miscellaneous = all the rest, except...
+!  H2 electrolyzers = electricity from H2 electrolysis in HMM
+	DO ICR=1,4
+		xelin(1,icr)=FOODCON(1,icr,CURIYR)+PAPERCON(1,icr,CURIYR)+CHEMCON(1,icr,CURIYR)+STEELCON(1,icr,CURIYR)+ALUMCON(1,icr,CURIYR)+REFCON(1,icr,CURIYR)					! primary
+		xelin(2,icr)=FABMETALCON(1,icr,CURIYR)+MACHINECON(1,icr,CURIYR)+COMPUTECON(1,icr,CURIYR)+TRANEQUIPCON(1,icr,CURIYR)+ELECEQUIPON(1,icr,CURIYR)	! shift
+		xelin(3,icr)=AGCON(1,icr,CURIYR)+MINECON(1,icr,CURIYR)+CONSTCON(1,icr,CURIYR)+GLASSCON(1,icr,CURIYR)+CEMENTCON(1,icr,CURIYR)+&					! miscellaneous
+							WOODPRODCON(1,icr,CURIYR)+PLASTICCON(1,icr,CURIYR)+LTCHEMCON(1,icr,CURIYR)+OTHRNMMCON(1,icr,CURIYR)+&
+							OTHRPRIMCON(1,icr,CURIYR)+MISCFINCON(1,icr,CURIYR)						
+		xelinshr(1:3,icr)=xelin(1:3,icr)/sum(xelin(1:3,icr))	! define shares of each of three original load types (electrolyzers are a separate variable defined in HMM, QELINH2e)	
+	ENDDO
 
-ENDDO
-    qelinp(1,CURIYR)=(qelin(1,CURIYR)-QELRF(1,CURIYR)-QELETH(CURIYR,1)-(QELINH2NG(1,CURIYR)+QELINH2e(1,CURIYR))- &
-        QNGPIN(1,CURIYR) - CO2_ELEC(1,CURIYR) * 0.000003412)*xelinshr(1,1)&
-		+QELRF(1,CURIYR)+QELETH(CURIYR,1)+QELINH2NG(1,CURIYR)	! All refining (QELRF) and ethanol (QELETH) electricity goes to primary; so does SMR electricity (QELINH2NG)
-    qelinp(2,CURIYR)=(qelin(2,CURIYR)-QELRF(2,CURIYR)-QELETH(CURIYR,2)-(QELINH2NG(2,CURIYR)+QELINH2e(2,CURIYR))- &
-	   QNGPIN(2,CURIYR) - CO2_ELEC(2,CURIYR) * 0.000003412)*xelinshr(1,1)&
-		+QELRF(2,CURIYR)+QELETH(CURIYR,2)+QELINH2NG(2,CURIYR)	! H2 electricity for SMRs (QELINH2NG) stays in primary, but H2 electricity
-    qelinp(3,CURIYR)=(qelin(3,CURIYR)-QELRF(3,CURIYR)-QELETH(CURIYR,3)-(QELINH2NG(3,CURIYR)+QELINH2e(3,CURIYR))- &
-	   QNGPIN(3,CURIYR) - CO2_ELEC(3,CURIYR) * 0.000003412)*xelinshr(1,2)&
-		+QELRF(3,CURIYR)+QELETH(CURIYR,3)+QELINH2NG(3,CURIYR)	! for electrolyzers is the fourth load curve (QELINH2E).
-    qelinp(4,CURIYR)=(qelin(4,CURIYR)-QELRF(4,CURIYR)-QELETH(CURIYR,4)-(QELINH2NG(4,CURIYR)+QELINH2e(4,CURIYR))- &
-	   QNGPIN(4,CURIYR) - CO2_ELEC(4,CURIYR) * 0.000003412)*xelinshr(1,2)&
-		+QELRF(4,CURIYR)+QELETH(CURIYR,4)+QELINH2NG(4,CURIYR)	! Note QELHM=QELINH2E+QELINH2NG.
-    qelinp(5,CURIYR)=(qelin(5,CURIYR)-QELRF(5,CURIYR)-QELETH(CURIYR,5)-(QELINH2NG(5,CURIYR)+QELINH2e(5,CURIYR))- &
-	   QNGPIN(5,CURIYR) - CO2_ELEC(5,CURIYR) * 0.000003412)*xelinshr(1,3)&
-		+QELRF(5,CURIYR)+QELETH(CURIYR,5)+QELINH2NG(5,CURIYR)
-    qelinp(6,CURIYR)=(qelin(6,CURIYR)-QELRF(6,CURIYR)-QELETH(CURIYR,6)-(QELINH2NG(6,CURIYR)+QELINH2e(6,CURIYR))- &
-	   QNGPIN(6,CURIYR) - CO2_ELEC(6,CURIYR) * 0.000003412)*xelinshr(1,3)&
-		+QELRF(6,CURIYR)+QELETH(CURIYR,6)+QELINH2NG(6,CURIYR)
-    qelinp(7,CURIYR)=(qelin(7,CURIYR)-QELRF(7,CURIYR)-QELETH(CURIYR,7)-(QELINH2NG(7,CURIYR)+QELINH2e(7,CURIYR))- &
-	   QNGPIN(7,CURIYR) - CO2_ELEC(7,CURIYR) * 0.000003412)*xelinshr(1,3)&
-		+QELRF(7,CURIYR)+QELETH(CURIYR,7)+QELINH2NG(7,CURIYR)
-    qelinp(8,CURIYR)=(qelin(8,CURIYR)-QELRF(8,CURIYR)-QELETH(CURIYR,8)-(QELINH2NG(8,CURIYR)+QELINH2e(8,CURIYR))-OGELSHALE(CURIYR)- &
-	   QNGPIN(8,CURIYR) - CO2_ELEC(8,CURIYR) * 0.000003412)*xelinshr(1,4)&
-		+QELRF(8,CURIYR)+QELETH(CURIYR,8)+QELINH2NG(8,CURIYR)	! OGLESHALE in region 8 only
-    qelinp(9,CURIYR)=(qelin(9,CURIYR)-QELRF(9,CURIYR)-QELETH(CURIYR,9)-(QELINH2NG(9,CURIYR)+QELINH2e(9,CURIYR))- &
-	   QNGPIN(9,CURIYR) - CO2_ELEC(9,CURIYR) * 0.000003412)*xelinshr(1,4)+QELRF(9,CURIYR)+QELETH(CURIYR,9)+QELINH2NG(9,CURIYR)
-	  
-    qelins(1,CURIYR)=(qelin(1,CURIYR)-QELRF(1,CURIYR)-QELETH(CURIYR,1)-(QELINH2NG(1,CURIYR)+QELINH2e(1,CURIYR))- &
-	   QNGPIN(1,CURIYR) - CO2_ELEC(1,CURIYR) * 0.000003412)*xelinshr(2,1)
-    qelins(2,CURIYR)=(qelin(2,CURIYR)-QELRF(2,CURIYR)-QELETH(CURIYR,2)-(QELINH2NG(2,CURIYR)+QELINH2e(2,CURIYR))- &
-	   QNGPIN(2,CURIYR) - CO2_ELEC(2,CURIYR) * 0.000003412)*xelinshr(2,1)
-    qelins(3,CURIYR)=(qelin(3,CURIYR)-QELRF(3,CURIYR)-QELETH(CURIYR,3)-(QELINH2NG(3,CURIYR)+QELINH2e(3,CURIYR))- &
-	   QNGPIN(3,CURIYR) - CO2_ELEC(3,CURIYR) * 0.000003412)*xelinshr(2,2)
-    qelins(4,CURIYR)=(qelin(4,CURIYR)-QELRF(4,CURIYR)-QELETH(CURIYR,4)-(QELINH2NG(4,CURIYR)+QELINH2e(4,CURIYR))- & 
-	   QNGPIN(4,CURIYR) - CO2_ELEC(4,CURIYR) * 0.000003412)*xelinshr(2,2)
-    qelins(5,CURIYR)=(qelin(5,CURIYR)-QELRF(5,CURIYR)-QELETH(CURIYR,5)-(QELINH2NG(5,CURIYR)+QELINH2e(5,CURIYR))- & 
-	   QNGPIN(5,CURIYR) - CO2_ELEC(5,CURIYR) * 0.000003412)*xelinshr(2,3)
-    qelins(6,CURIYR)=(qelin(6,CURIYR)-QELRF(6,CURIYR)-QELETH(CURIYR,6)-(QELINH2NG(6,CURIYR)+QELINH2e(6,CURIYR))- &
-	   QNGPIN(6,CURIYR) - CO2_ELEC(6,CURIYR) * 0.000003412)*xelinshr(2,3)
-    qelins(7,CURIYR)=(qelin(7,CURIYR)-QELRF(7,CURIYR)-QELETH(CURIYR,7)-(QELINH2NG(7,CURIYR)+QELINH2e(7,CURIYR))- &
-	   QNGPIN(7,CURIYR) - CO2_ELEC(7,CURIYR) * 0.000003412)*xelinshr(2,3)
-    qelins(8,CURIYR)=(qelin(8,CURIYR)-QELRF(8,CURIYR)-QELETH(CURIYR,8)-(QELINH2NG(8,CURIYR)+QELINH2e(8,CURIYR))- &
-	   OGELSHALE(CURIYR)-QNGPIN(8,CURIYR) - CO2_ELEC(8,CURIYR) * 0.000003412)*xelinshr(2,4)
-    qelins(9,CURIYR)=(qelin(9,CURIYR)-QELRF(9,CURIYR)-QELETH(CURIYR,9)-(QELINH2NG(9,CURIYR)+QELINH2e(9,CURIYR))- &
-	   QNGPIN(9,CURIYR) - CO2_ELEC(9,CURIYR) * 0.000003412)*xelinshr(2,4)
-
-	qelinm(1,CURIYR)=(qelin(1,CURIYR)-QELRF(1,CURIYR)-QELETH(CURIYR,1)-(QELINH2NG(1,CURIYR)+QELINH2e(1,CURIYR))-QNGPIN(1,CURIYR)- &
-	   CO2_ELEC(1,CURIYR) * 0.000003412)*xelinshr(3,1)+QNGPIN(1,CURIYR)+CO2_ELEC(1,CURIYR) * 0.000003412	! QNGPIN is mining and gets added back into miscellaneous
-    qelinm(2,CURIYR)=(qelin(2,CURIYR)-QELRF(2,CURIYR)-QELETH(CURIYR,2)-(QELINH2NG(2,CURIYR)+QELINH2e(2,CURIYR))-QNGPIN(2,CURIYR)- &
-	   CO2_ELEC(2,CURIYR) * 0.000003412)*xelinshr(3,1)+QNGPIN(2,CURIYR)+CO2_ELEC(2,CURIYR) * 0.000003412
-    qelinm(3,CURIYR)=(qelin(3,CURIYR)-QELRF(3,CURIYR)-QELETH(CURIYR,3)-(QELINH2NG(3,CURIYR)+QELINH2e(3,CURIYR))-QNGPIN(3,CURIYR)- &
-	   CO2_ELEC(3,CURIYR) * 0.000003412)*xelinshr(3,2)+QNGPIN(3,CURIYR)+CO2_ELEC(3,CURIYR) * 0.000003412
-    qelinm(4,CURIYR)=(qelin(4,CURIYR)-QELRF(4,CURIYR)-QELETH(CURIYR,4)-(QELINH2NG(4,CURIYR)+QELINH2e(4,CURIYR))-QNGPIN(4,CURIYR)- &
-	   CO2_ELEC(4,CURIYR) * 0.000003412)*xelinshr(3,2)+QNGPIN(4,CURIYR)+CO2_ELEC(4,CURIYR) * 0.000003412
-    qelinm(5,CURIYR)=(qelin(5,CURIYR)-QELRF(5,CURIYR)-QELETH(CURIYR,5)-(QELINH2NG(5,CURIYR)+QELINH2e(5,CURIYR))-QNGPIN(5,CURIYR)- &
-	   CO2_ELEC(5,CURIYR) * 0.000003412)*xelinshr(3,3)+QNGPIN(5,CURIYR)+CO2_ELEC(5,CURIYR) * 0.000003412
-    qelinm(6,CURIYR)=(qelin(6,CURIYR)-QELRF(6,CURIYR)-QELETH(CURIYR,6)-(QELINH2NG(6,CURIYR)+QELINH2e(6,CURIYR))-QNGPIN(6,CURIYR)- &
-	   CO2_ELEC(6,CURIYR) * 0.000003412)*xelinshr(3,3)+QNGPIN(6,CURIYR)+CO2_ELEC(6,CURIYR) * 0.000003412
-    qelinm(7,CURIYR)=(qelin(7,CURIYR)-QELRF(7,CURIYR)-QELETH(CURIYR,7)-(QELINH2NG(7,CURIYR)+QELINH2e(7,CURIYR))-QNGPIN(7,CURIYR)- &
-	   CO2_ELEC(7,CURIYR) * 0.000003412)*xelinshr(3,3)+QNGPIN(7,CURIYR)+CO2_ELEC(7,CURIYR) * 0.000003412
-    qelinm(8,CURIYR)=(qelin(8,CURIYR)-QELRF(8,CURIYR)-QELETH(CURIYR,8)-(QELINH2NG(8,CURIYR)+QELINH2e(8,CURIYR))-OGELSHALE(CURIYR)-QNGPIN(8,CURIYR)- &
-	   CO2_ELEC(8,CURIYR) * 0.000003412)*xelinshr(3,4)+OGELSHALE(CURIYR)+QNGPIN(8,CURIYR)+CO2_ELEC(8,CURIYR) * 0.000003412	! Refining and mining Mining is miscellaneous
-    qelinm(9,CURIYR)=(qelin(9,CURIYR)-QELRF(9,CURIYR)-QELETH(CURIYR,9)-(QELINH2NG(9,CURIYR)+QELINH2e(9,CURIYR))-QNGPIN(9,CURIYR)- &
-	   CO2_ELEC(9,CURIYR) * 0.000003412)*xelinshr(3,4)+QNGPIN(9,CURIYR)+CO2_ELEC(9,CURIYR) * 0.000003412
-
+! All refining (QELRF) and ethanol (QELETH) electricity goes to primary; so does SMR electricity (QELINH2NG)
+! H2 electricity for SMRs (QELINH2NG) stays in primary, but H2 electricity for electrolyzers is the fourth load curve (QELINH2E).
+! Note QELHM=QELINH2E+QELINH2NG. Also note QELETH has indiex order opposite all the other Q- variables.
+!!! PRIMARY ELECTRICITY CONSUMPTION
+	QELINp(1:9,CURIYR)=(	QELIN(1:9,CURIYR)-QELRF(1:9,CURIYR)-QELETH(CURIYR,1:9)-QELHM(1:9,CURIYR)- &
+         QNGPIN(1:9,CURIYR)-CO2_ELEC(1:9,CURIYR)*CFELQ/10**9	)*xelinshr(1,DIV_to_REG(1:9)) + &
+		 QELRF(1:9,CURIYR) + QELETH(CURIYR,1:9) + QELINH2NG(1:9,CURIYR)	 
+	QELINp(11,CURIYR) = SUM(QELINp(1:9,CURIYR))
+!!!SHIFT ELECTRICITY CONSUMPTION
+    QELINs(1:9,CURIYR)=(	QELIN(1:9,CURIYR)-QELRF(1:9,CURIYR)-QELETH(CURIYR,1:9)-QELHM(1:9,CURIYR)- &
+	   QNGPIN(1:9,CURIYR)-CO2_ELEC(1:9,CURIYR)*CFELQ/10**9	)*xelinshr(2,DIV_to_REG(1:9))
+	QELINs(11,CURIYR) = SUM(QELINs(1:9,CURIYR))
+!!!MISCELLANEOUS ELECTRICITY CONSUMPTION
+! QNGPIN (natural gas plant electricity consumption) is mining and gets added back into miscellaneous.
+! Sequestration electricity (CO2_ELEC) is really Transportation, but is here for now (and very small).
+	QELINm(1:9,CURIYR)=(	QELIN(1:9,CURIYR)-QELRF(1:9,CURIYR)-QELETH(CURIYR,1:9)-QELHM(1:9,CURIYR)-QNGPIN(1:9,CURIYR)- &
+	   CO2_ELEC(1:9,CURIYR) * CFELQ/10**9	)*xelinshr(3,DIV_to_REG(1:9)) + QNGPIN(1:9,CURIYR)+CO2_ELEC(1:9,CURIYR)*CFELQ/10**9
+	QELINm(11,CURIYR) = SUM(QELINm(1:9,CURIYR))
+	
     if (curcalyr.gt.2027) then
 	   write (5525,*) 'check electicity'
 	   write (5525,*) 'curcalyr = ', CURCALYR
 	   write (5525,*) 'qelin(1,curiyr) = ', qelin(1,curiyr)
 	   write (5525,*) 'sum of parts = ', qelinp(1,CURIYR) + qelins(1,CURIYR) + qelinm(1,CURIYR)
     end if
-
-
-!   get a us total for the 4 electricity groups
-! ***
-    qelinp(11,CURIYR)=0.
-    qelins(11,CURIYR)=0.
-    qelinm(11,CURIYR)=0.
-	  
-    DO ICD = 1,9
-        qelinp(11,CURIYR)= qelinp(11,CURIYR) + qelinp(icd,CURIYR)
-        qelins(11,CURIYR)= qelins(11,CURIYR) + qelins(icd,CURIYR)
-        qelinm(11,CURIYR)= qelinm(11,CURIYR) + qelinm(icd,CURIYR)
-    ENDDO
-
 	  END SUBROUTINE
 
       SUBROUTINE CO2CALC
@@ -16054,11 +14131,7 @@ ENDDO
         endif
         IS_FISYR(inddir)=CM_FISYR(1)
         call TECH_STEP(1)
-        if ((FRZTECH.eq.1) .or. (HITECH.eq.1) )then
-         call kiln_capacity(1)  !if tech case then use wet retirements
-        else
-         call kiln_capacity(2)
-        endif
+        call kiln_capacity
         call kiln_allocation
         call cm_burner
         call cm_raw_grind
@@ -16074,23 +14147,16 @@ ENDDO
 
 !***************************************************************************************
 ! CEMENT Kiln Capacity
-       subroutine kiln_capacity(tech)
+       subroutine kiln_capacity
        use i_
        implicit none
 
-       integer tech
        real needed_capacity(MNUMYR)    !Year is installation year not survival year (current loop)
        real surviving_capacity
        real sumup
        real baseline_capacity_IBYR
        integer iy,stepnum
        real new_cap_survk(MNUMYR)
-       real BCapWet      ! Allocated Wet Process baseline capacity
-       real BCapDry      ! Allocated Dry Process baseline capacity
-       real BCapWet_lag      ! Allocated Wet Process baseline capacity -previous year
-       real BCapDry_lag      ! Allocated Dry Process baseline capacity - previous year
-       real BCapWet_IBYR      ! Allocated Wet Process baseline capacity-beginning year
-       real BCapDry_IBYR      ! Allocated Dry Process baseline capacity-beginning year
        real basecap_lag(8:13,maxstep)                            ! Lagged baseline capacity
 	   real Clinker_Scalar              ! hardcoded (for now) scaling factor to allow baseline historical year
 										! clinker production to be equal to USGS data (in ironstlx.xlsx)
@@ -16111,30 +14177,12 @@ ENDDO
             is_basecap(inddir,stepnum) = process_outputk
             baseline_capacity_IBYR = is_basecap(inddir,stepnum) ! Baseline capacity
             basecap_lag(inddir,stepnum) = baseline_capacity_IBYR
-            if (tech==1) then
-              BCapWet_IBYR = baseline_capacity_IBYR * cm_capshr(1)       ! Split baseline capacity into Wet and Dry Processes
-              BCapDry_IBYR = baseline_capacity_IBYR * cm_capshr(2)
-              BCapWet_lag = BCapWet_IBYR
-              BCapDry_lag = BCapDry_IBYR
-            endif
           else
             if(curitr.eq.1) basecap_lag(inddir,stepnum) = is_basecap(inddir,stepnum)            ! Save result from prior year on first iteration
           endif
-          if (tech==1) then
-            if (curitr.eq.1) then  ! save result from prior year on first iteration
-              BCapWet_lag = BCapWet
-              BCapDry_lag = BCapDry
-            endif
-	        BCapWet = BCapWet_lag - (BCapWet_IBYR/cm_BaseLifeWet2(scenario))  ! Wet and Dry capacities may retire at different rates
-	        if (BCapWet.lt.0.0) BCapWet = 0.0
-	        BCapDry = BCapDry_lag - (BCapDry_IBYR/cm_BaseLifeDry)
-	        if (BCapDry.LT.0.0) BCapDry = 0.0
-            is_basecap(inddir,stepnum) = BCapWet + BCapDry        ! Recombine to get total surviving baseline capacity
-          else
-            is_basecap(inddir,stepnum)=basecap_lag(inddir,stepnum)-(baseline_capacity_IBYR/is_baselifecr(inddir))
-          endif
+          is_basecap(inddir,stepnum)=basecap_lag(inddir,stepnum)-(baseline_capacity_IBYR/is_baselifecr(inddir))
           if (is_basecap(inddir,stepnum).lt.0.0) is_basecap(inddir,stepnum)=0.0
-        endif
+       endif
 
         if (curiyr.le.CM_FISYR(stepnum)) then
             surviving_capacity=is_basecap(inddir,stepnum)
@@ -16159,25 +14207,25 @@ ENDDO
 		 if (curcalyr.eq.ibyr) then						            ! for base year scale clinker production
             Clinker_Scalar = is_production(11,2) / process_outputk	! to USGS 2018 historical value of clinker production
             Lime_Base = is_production(11,5)                         ! use base year (2018) USGS lime data to set initial lime production (thousand metric tons)
-			Lime_Shipment_Base = OUTIND(26,11)			            ! base year national lime shipments
+			Lime_Shipment_Base = OUTIND(26,11,curiyr)			    ! base year national lime shipments
 		 end if
 
 		 co2_clink(curiyr,5) = CO2_Cement_Process_Emission_Factor * Clinker_Scalar * &
-		                            (1.0 - clinker_prod(5)/sum(clinker_prod(1:6))) * process_outputk
+		                            (1.0 - clinker_prod(4)/sum(clinker_prod(:))) * process_outputk
 									! emissions in CO2_Process_Emissions are given in thousand metric tons (tonnes) CO2
 									! because clinker_prod variable is also in thousand metric tons (tonnes)
-									! the clinker_prod(i)/sum(clinker_prod(1:6)) term account for the Brimstone clinker production
+									! the clinker_prod(i)/sum(clinker_prod(:)) term account for the Brimstone clinker production
 									! which produces zero process emissions, and therefore this (fractional) amount must be 
 									! subtracted off from the total clinker production process_outputk
 
          write (5525,*) 'check process_outputk versus clinker_prod '
 		 write (5525,*) 'process_outputk = ', process_outputk
-		 write (5525,*) 'clinker _prod = ', sum(clinker_prod(1:6))
-		 write (5525,*) 'clinker _prod with scalar = ', sum(clinker_prod(1:6)) * Clinker_Scalar
-		 write (5525,*) 'Brimstone production and fraction', clinker_prod(5), clinker_prod(5)/sum(clinker_prod(1:6))
+		 write (5525,*) 'clinker _prod = ', sum(clinker_prod(:))
+		 write (5525,*) 'clinker _prod with scalar = ', sum(clinker_prod(:)) * Clinker_Scalar
+		 write (5525,*) 'Brimstone production and fraction', clinker_prod(4), clinker_prod(4)/sum(clinker_prod(:))
 		 write (5525,*) 'check clinker'
 
-		 co2_lime(curiyr,5) = CO2_Lime_Process_Emission_Factor * Lime_base * OUTIND(26,11) / Lime_Shipment_Base
+		 co2_lime(curiyr,5) = CO2_Lime_Process_Emission_Factor * Lime_base * OUTIND(26,11,curiyr) / Lime_Shipment_Base
 									! compute lime process emissions by making assumption regarding growth of lime 
 									! product based on lime shipments and using this lime physical product to compute
 									! lime process emissions via a lime process emissions factor
@@ -16197,9 +14245,7 @@ ENDDO
        real dry_process
 
 ! baseline capacity of Kilns
-       real wet_rotary(MNUMYR), wet_rotaryIBYR
        real dry_rotary(MNUMYR,NUMROT), dry_rotaryIBYR(NUMROT)
-       real wet_processIBYR
        real CRF
        real totfixcst(NUMROT)
 
@@ -16208,7 +14254,7 @@ ENDDO
        real logit_comp(NUMROT)
        real shares(NUMROT,MNUMYR)
        real surviving_added_capacity(NUMROT)
-       real elec_used(NUMROT+1)
+       real elec_used(NUMROT)
        real temp
        real alpha_kiln(NUMROT)
        real adjust_factork(NUMROT)
@@ -16216,14 +14262,12 @@ ENDDO
        integer numiter
        integer imaxitr ! max number of iterations when calculating new alpha_kiln
        real calib_k
-       real vintage
        real alpha_decay(2)
        real scale_min
        real scale_comp(numrot)
        real scale_adj
        real scale_fctr
        integer stepnum, inumtech
-       real vintage_index
        real sum_logit_comp
        
 	   stepnum=2
@@ -16243,8 +14287,6 @@ ENDDO
          enddo
        endif
 
-       vintage=vintage_index(stepnum)
-
         crf=is_wacc(inddir)*(1.0+is_wacc(inddir))**is_lifetime(inddir)/((1.0+is_wacc(inddir))**is_lifetime(inddir)-1.0) ! Same for all technologies
 
        do inumtech=1,NUMROT
@@ -16254,36 +14296,23 @@ ENDDO
        if (curiyr.ge.ICURIYR2-1) then
          continue
          if (curiyr.le.ICURIYR) then
-           wet_process(curiyr)=process_outputk*cm_capshr(1) !pwet
-           dry_process=process_outputk*cm_capshr(2) !pdry
-           wet_rotary(curiyr)=wet_process(curiyr)
-           wet_processIBYR = wet_process(curiyr)
-           wet_rotaryIBYR = wet_rotary(curiyr)
+           dry_process=process_outputk
 
            do i=1,NUMROT
              dry_rotary(curiyr,i)=dry_process*is_base_tech_share(inddir,stepnum,i)
-             if (curiyr.eq.ICURIYR2+1) then
+             if (curiyr.eq.ICURIYR) then
                 dry_rotaryIBYR(i) = dry_rotary(curiyr,i)
                 dry_rotary(curiyr-1,i) = dry_rotaryIBYR(i)
              end if
            enddo
          else
-
-           wet_process(curiyr)=wet_process(curiyr-1)-(wet_processIBYR/20.0)
-		              !wet_process(curiyr)=wet_process(curiyr-1)-(wet_processIBYR/is_baselifecr(inddir))        ! POT_INPUT baselifec to cm_baselifek
-           if (wet_process(curiyr).lt.0.0) wet_process(curiyr)=0.0
-           dry_process = process_outputk-wet_process(curiyr)
-
+           dry_process = process_outputk
            do i=1,NUMROT
              dry_rotary(curiyr,i)=dry_rotary(curiyr-1,i)-(dry_rotaryIBYR(i)/is_baselifecr(inddir))
              if (dry_rotary(curiyr,i).lt.0.0) dry_rotary(curiyr,i)=0.0
            enddo
-
-! baseline kiln capacity
-           wet_rotary(curiyr)=wet_rotary(curiyr-1)-(wet_rotaryIBYR/is_baselifecr(inddir))
-           if (wet_rotary(curiyr).lt.0.0) wet_rotary(curiyr)=0.0
          endif
-         surv_dry_base=dry_rotary(curiyr,1)+dry_rotary(curiyr,2)+dry_rotary(curiyr,3)
+         surv_dry_base=SUM(dry_rotary(curiyr,:))
          need_dry_cap=dry_process-surv_dry_base
          if (need_dry_cap.lt.0.0) need_dry_cap=0.0
 
@@ -16367,9 +14396,6 @@ ENDDO
          enddo
 
 ! total clinker production
-
-         clinker_prod(1)=wet_process(curiyr)
-
          do i=1,NUMROT
            if (surv_dry_base.ne.0.0) then
              temp=dry_process/surv_dry_base
@@ -16377,19 +14403,17 @@ ENDDO
            else
              temp=1.0
            endif
-           clinker_prod(i+1)=temp*dry_rotary(curiyr,i)+surviving_added_capacity(i)
+           clinker_prod(i)=temp*dry_rotary(curiyr,i)+surviving_added_capacity(i)
          enddo
 
 ! heating requirement
-        do i=1,NUMROT+1		! wet process is i=1
-			heat_req(i)=clinker_prod(i)*cm_heatcoef(i)
-			elec_used(i)=clinker_prod(i)*cm_eleccoef(i)
-        enddo
+			heat_req(:)=clinker_prod(:)*cm_heatcoef(:)
+			elec_used(:)=clinker_prod(:)*cm_eleccoef(:)
 
 ! total heat demand
          heat_demand=0.0
          ElecCons(stepnum,curiyr)=0.0
-         do i=1,NUMROT+1
+         do i=1,NUMROT
            heat_demand=heat_demand+heat_req(i)
            ElecCons(stepnum,curiyr)=ElecCons(stepnum,curiyr)+elec_used(i)
          enddo
@@ -16411,12 +14435,10 @@ ENDDO
        real av_om(NUMTYP)
        real totfixcst(NUMTYP)
        real surv_base
-       real tot_burn_outw(NUMTYP)
        real tot_burn_outd(NUMTYP)
        real logit_comp(NUMTYP)
        real shares(NUMTYP,MNUMYR)
        real surviving_added_capacity(NUMTYP)
-       real heat_demandb
        real price(NUMTYP)
        real adjust_factorb(NUMTYP)
        real co2_emiss_dum(MNUMYR)
@@ -16424,7 +14446,6 @@ ENDDO
        integer numiter
        integer imaxitr ! max number of iterations when calculating new alpha_burner
        integer f       ! max number of burner fuels
-       real vintage
        real scale_min
        real scale_comp(numtyp)
        real scale_adj
@@ -16436,30 +14457,23 @@ ENDDO
        real bb_coal_mix
        real lag_max_asf_inc
        real asf_inc_temp
-       real fuel_mixbw(NUMTYP,NUMFUELB)
        integer inumtech
        integer stepnum
-       real vintage_index                            !vintage index
-       real oyr  !obsolete year switch
+
        stepnum=3
 
        is_calib(inddir)=cm_calib(stepnum)
        is_lifetime(inddir)=cm_lifetime(stepnum)
        is_baselifecr(inddir)= cm_baselifecr(stepnum)
-       dry_heat_req = heat_demand - heat_req(1)
 
         CALL Step_Capacity(stepnum,        &
                          is_FISYR(inddir),       &
                          is_baselifecr(inddir),  &
                          is_lifetime(inddir),    &
                          is_calib(inddir),       &
-                         dry_heat_req)
+                         heat_demand)
 
        fuel_mixbd=cm_fuelmix
-       fuel_mixbw(:,:)=fuel_mixbd(:,:)  ! Overwrite for fuel mix of wet process kiln burners, until fuel-switching becomes more integrated
-       fuel_mixbw(7,3)=.51
-       fuel_mixbw(7,4)=.20
-       fuel_mixbw(7,5)=.29
        burner_fuel(:,:)=0.0
        write(IUNITBUG,*) 'Cement burner HITECH=',HITECH
 ! quality check on fuel mix for burners
@@ -16467,10 +14481,6 @@ ENDDO
          if(sum(fuel_mixbd(i,1:NUMFUELB)).ne.1.0) then
            write(6,*) '===== Error: Sum of shares is not 1.0 for dry process burner = ',i
            write(6,'(5x,a,5(f6.2,2x),3(1x,i4))') '==== Kiln burners fuel mix = ',fuel_mixbd(i,1:5), i, curcalyr, curiyr
-         end if
-         if(sum(fuel_mixbw(i,1:NUMFUELB)).ne.1.0) then
-           write(6,*) '===== Error: Sum of shares is not 1.0 for wet process burner = ',i
-           write(6,'(5x,a,5(f6.2,2x),3(1x,i4))') '==== Kiln burners fuel mix = ',fuel_mixbw(i,1:5), i, curcalyr, curiyr
          end if
        end do
 
@@ -16509,7 +14519,6 @@ ENDDO
            if(fcrl.eq.1) write(6,*) '==== ASF Adjustment: = ', asf_inc, curcalyr
            if(fcrl.eq.1) write(6,'(5x,a,5(f6.2,2x),2(1x,i4))') '==== Multi-channel burner fuel mix = ',fuel_mixbd(7,1:5), curcalyr, curiyr
          end if
-         vintage=vintage_index(stepnum)
        end if
 
        do i=1,MNUMYR
@@ -16529,7 +14538,7 @@ ENDDO
          do i=1,NUMTYP
 
            if (curiyr==ICURIYR) then
-             basecapb(curiyr,i)=dry_heat_req*is_base_tech_share(inddir,stepnum,i)
+             basecapb(curiyr,i)=heat_demand*is_base_tech_share(inddir,stepnum,i)
              basecapIBYR(i) = basecapb(curiyr,i)
              basecapb(curiyr-1,i) = basecapIBYR(i)
            else
@@ -16624,18 +14633,15 @@ ENDDO
            endif
          enddo
 
-         heat_demandb=cm_heatdcoef* wet_process(curiyr)                        ! from Kiln Allocation
-
          do i=1,NUMTYP
-           tot_burn_outw(i)=heat_demandb*cm_wetcoef(i) ! wet_coeff(i); wet process energy, by burner type
-           if ((surv_base.ne.0.0).and.((dry_heat_req/surv_base).le.1.0)) then
-             tot_burn_outd(i)=dry_heat_req/surv_base*basecapb(curiyr,i)+surviving_added_capacity(i)
+           if ((surv_base.ne.0.0).and.((heat_demand/surv_base).le.1.0)) then
+             tot_burn_outd(i)=heat_demand/surv_base*basecapb(curiyr,i)+surviving_added_capacity(i)
            else
              tot_burn_outd(i)=basecapb(curiyr,i)+surviving_added_capacity(i)
            endif
 
            do f=1,NUMFUELB
-             burner_fuel(i,f) =((tot_burn_outw(i)*fuel_mixbw(i,f))+(tot_burn_outd(i)*fuel_mixbd(i,f)))*cm_heatsrv_fuel(i)
+             burner_fuel(i,f) =tot_burn_outd(i)*fuel_mixbd(i,f)*cm_heatsrv_fuel(i)
            end do
 		 
          end do
@@ -16665,13 +14671,10 @@ ENDDO
        real surv_base
        real logit_comp(NUMTYPG)
        real surviving_added_capacity(NUMTYPG)
-       real wet_prod(NUMTYPG)
        real shares(NUMTYPG,MNUMYR)
        real mass_loss_rat
        real adjust_factorg(NUMTYPG)
        integer k, iy
-       real vintage
-       real vintage_index                            !vintage index
        integer numiter
        integer imaxitr ! max number of iterations when calculating new alpha_rg
        real scale_min
@@ -16685,8 +14688,7 @@ ENDDO
        is_calib(inddir)=cm_calib(stepnum)
        is_lifetime(inddir)=cm_lifetime(stepnum)
        is_baselifecr(inddir)= cm_baselifecr(stepnum)
-       raw_material = (process_outputk-wet_process(curiyr)) * C_MASS_LOSS
-
+       raw_material = process_outputk * C_MASS_LOSS
        CALL Step_Capacity(stepnum,        &
                          is_FISYR(inddir),       &
                          is_baselifecr(inddir),  &
@@ -16699,7 +14701,6 @@ ENDDO
        imaxitr=50
 
        mass_loss_rat=c_mass_loss
-       vintage=vintage_index(stepnum)
        crf=is_wacc(inddir)*(1.0+is_wacc(inddir))**is_lifetime(inddir)/((1.0+is_wacc(inddir))**is_lifetime(inddir)-1.0) ! Same for all technologies
        do inumtech=1,NUMTYPG
          ann_cc(inumtech)= crf*is_capcost(inddir,stepnum,inumtech)      !annualized capital cost
@@ -16793,37 +14794,30 @@ ENDDO
                  if ((ABS(adjust_factorg(i)).GT.0.001).and.(numiter.le.imaxitr)) GOTO 1669                ! If any of the factors exceeds the limit, redo the calculation
               enddo
             endif
-         do i=1,NUMTYPG
+        do i=1,NUMTYPG
            surviving_added_capacity(i)=0.0
            if (curiyr.ge.CM_FISYR(stepnum))then
              do k=CM_FISYR(stepnum),curiyr
                surviving_added_capacity(i)=surviving_added_capacity(i)+shares(i,k)*IS_incr_adds(inddir,stepnum,k)
              end do
            end if
-         end do
-          if(curcalyr.eq.ibyr2) then
-             wet_process(curiyr) = mass_loss_rat*wet_process(curiyr) ! from Kiln Allocation, BO
-          end if
+        enddo
 
-          do i=1,is_numtech(inddir,stepnum)
-           wet_prod(i)=wet_process(curiyr)*cm_rawtech(i) !BJ-BK
-           wet_elecg(i)=wet_prod(i)*cm_wetcoef2(i)                               ! BL-BM  Wet Process Grinding Energy, by mill type
-           if (surv_base.ne.0.0) then
-             if ((raw_material/surv_base).gt.1.0) then
-               tot_prodg(i)=basecapg(curiyr,i)+surviving_added_capacity(i)
-             else
-               tot_prodg(i)=raw_material/surv_base*basecapg(curiyr,i)+surviving_added_capacity(i)
-             end if
-           else
-             tot_prodg(i)=basecapg(curiyr,i)+surviving_added_capacity(i)
-           end if
+        do i=1,is_numtech(inddir,stepnum)
+			if (surv_base.ne.0.0) then
+				if ((raw_material/surv_base).gt.1.0) then
+					tot_prodg(i)=basecapg(curiyr,i)+surviving_added_capacity(i)
+				else
+					tot_prodg(i)=raw_material/surv_base*basecapg(curiyr,i)+surviving_added_capacity(i)
+				endif
+			else
+				tot_prodg(i)=basecapg(curiyr,i)+surviving_added_capacity(i)
+			end if
            elec_use_rpt(i)=tot_prodg(i)*IS_fuel_use(inddir,stepnum,1,i)
-
-           ng_use_rpt(i)=tot_prodg(i)*IS_fuel_use(inddir,stepnum,2,i)
+           ng_use_rpt(i)=tot_prodg(i)*IS_fuel_use(inddir,stepnum,2,i)	   
          end do
-          ElecCons(stepnum,curiyr)=elec_use_rpt(1)+elec_use_rpt(2)+wet_elecg(1)+wet_elecg(2)
-          NGCons(stepnum,curiyr)=ng_use_rpt(1)+ng_use_rpt(2)
-
+          ElecCons(stepnum,curiyr)=SUM(elec_use_rpt(:))
+          NGCons(stepnum,curiyr)=SUM(ng_use_rpt(:))
        end if
        return
        end
@@ -16929,6 +14923,10 @@ ENDDO
 											  ! 45Q CO2 prices received trom CCATS to evaluate general economic viability
 											  ! of retrofitting CCS equipment on cement kilns
 
+	   real prcxnaturalgas2018(inumreg)       ! placeholders for lost 2018 prcx prices (see more detail in comments below)
+       real prcxelectricity2018(inumreg)	  ! placeholders for lost 2018 prcx prices (see more detail in comments below)
+
+
 ! "intergerize" variables that should be integers but are read in as real variable types from ironstl.xlsx
        LastConsYrCCSint = int(LastConsYrCCS + 0.000001)
 	   CreditDurCCSint = int(CreditDurCCS + 0.000001)
@@ -16982,15 +14980,15 @@ ENDDO
 !!!!!!!!!!!!!!!!!!!!!!! CCATS price placeholder !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	   
 ! check placeholder CO2 prices
-       if (curcalyr.eq.2022) then
-	      do idumyr = 29,61 ! from 2018 to 2050
+       if (curcalyr.eq.ibyr) then
+	      do idumyr = icuriyr,61 ! from 2022 to 2050
 		     write (5525,*) 'check CO2 placeholder 45Q', idumyr+1989, CO2_PRC_REG_45Q(3,idumyr) * MC_JPGDP(29)
 		     write (5525,*) 'check CO2 placeholder NTC', idumyr+1989, CO2_PRC_REG_NTC(3,idumyr) * MC_JPGDP(29)
 		  end do
 	   end if
 
 !      for debugging purposes only: print out total CO2 caputured each year
-       if (curcalyr.gt.2023) then
+       if (curcalyr.gt.ibyr+1) then
           do idummy = 1,inumreg
 	         totalcapturedCO2(idummy) = SUP_CMT_45Q(idummy,curiyr-1) + SUP_CMT_NTC(idummy,curiyr-1)
           end do
@@ -17003,19 +15001,35 @@ ENDDO
        write(5525,*) 'natural gas fuel use (MMBtu/tonne CO2) = ', NatGasUseCCS
        write(5525,*) 'electricity use (MMBtu/tonne CO2) = ', ElectricUseCCS	   
 
-! set baseline (2018) fuel costs
+! Here we set baseline (2018) fuel (natural gas and purchased electricity) costs. Before the MECS2022 update (in AEO2025), we employed the regional industrial 2018 
+! natural gas prices prcx(3,1:4,2) and electricity prices prcx(1,1:4,2) to fill in regional industrial prices for year 2018 into
+! the baselinenaturalgascost(1:4) and baselineelectricitycost(1:4). Note that the prcx variable was programmed to be picked up in
+! 2018 because all cement CCS costs are from year 2018. Note also that prcx prices are in 1987$ so that they needed to
+! be inflated to 2018$ using JPGDP(29) so that the baselinenaturalgascost(1:4) and baselineelectricitycost(1:4) costs 
+! would be in 2018$ (specifically, these baseline fuel costs would be in units of 2018$/tonne CO2). 
 ! note that NatGasUseCCS and ElectricUseCCS are in MMBtu/tonne CO2 units, so multiplying these
-! by prcx prices (1987 $/MMBtu) gives 1987 $/tonne CO2
-       if (curcalyr.eq.2018) then
-          do idummy = 1,inumreg
-	         baselinenaturalgascost(idummy) = prcx(3,idummy,2) * MC_JPGDP(29) * NatGasUseCCS
-             baselineelectricitycost(idummy) = prcx(1,idummy,2) * MC_JPGDP(29) * ElectricUseCCS
-          end do
-		  write (5525,*) 'check payback period ', PPCCS(1:4)
-       end if
+! by prcx prices (1987 $/MMBtu) gives 1987 $/tonne CO2. 
+
+! After the 2022 MECS update however, ind.f no longer has access to 2018 prices for prcx since the base year has moved past 
+! 2018. So for now we will hardcode in prcx prices with the known 2018 regional prices for natural gas and electricity. 
+
+	   prcxnaturalgas2018(1) = 3.006644
+	   prcxnaturalgas2018(2) = 2.085139
+	   prcxnaturalgas2018(3) = 1.793004
+	   prcxnaturalgas2018(4) = 2.792197
+       prcxelectricity2018(1) = 12.40447	 
+       prcxelectricity2018(2) = 10.89933	 
+       prcxelectricity2018(3) = 8.974671 
+       prcxelectricity2018(4) = 12.96395	 
+
+       do idummy = 1,inumreg
+	      baselinenaturalgascost(idummy) = prcxnaturalgas2018(idummy) * MC_JPGDP(29) * NatGasUseCCS
+          baselineelectricitycost(idummy) = prcxelectricity2018(idummy) * MC_JPGDP(29) * ElectricUseCCS
+       end do
+       write (5525,*) 'check payback period ', PPCCS(1:4)
 ! check baseline (2018) fuel costs
-       write (5525,*) 'check baseline natural gas cost = ', baselinenaturalgascost(1:inumreg)
-       write (5525,*) 'check baseline electricity cost = ', baselineelectricitycost(1:inumreg)
+       write (5525,*) 'check baseline natural gas cost = ', curcalyr, baselinenaturalgascost(1:inumreg)
+       write (5525,*) 'check baseline electricity cost = ', curcalyr, baselineelectricitycost(1:inumreg)
 
 ! check total 2018 mean/average COC (in 2018 dollars) and store;
 ! note that the "baseline" cost here does NOT include the capital cost adder
@@ -17072,7 +15086,7 @@ ENDDO
           absolutetotalcost(idummy,curiyr) = CST_CMT_INV(idummy,curiyr) + CST_CMT_OM(idummy,curiyr)
        end do	      
 
-       if (curcalyr.eq.2020) then
+       if (curcalyr.eq.ibyr) then
           write (5525,*) 'check MC_JPGDP 1987 2018 2022 2050'
 	      write (5525,*) 'MC_JPGDP(-2) = ', MC_JPGDP(-2)
 	      write (5525,*) 'MC_JPGDP(29) = ', MC_JPGDP(29)
@@ -17086,9 +15100,9 @@ ENDDO
        write (5525,*) 'mean variable cost (2018$) ', CST_CMT_OM(1:4,curiyr) * MC_JPGDP(29)
 
 ! print out CCATS Results !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       if (curcalyr.ge.2021) then
+       if (curcalyr.ge.ibyr) then
 	      continue
-	      if (curcalyr.eq.2021) then
+	      if (curcalyr.eq.ibyr+1) then
 	         curcalyrminusone = curcalyr
 	      end if
 ! only print out last iteration's results
@@ -17788,9 +15802,9 @@ subroutine AL_prod_form
 
       real  dom_prod  !domestic production (1000 tonnes)
       real index
-	  ! kpe code change to account for USGS production - change made 10/13/2017
-	  if (curcalyr.le.2016) index=1.0       ! old index=OUTIND(13,11)/ALUMIBYR
-	  if (curcalyr.gt.2016) index = outind(13,11)/ALUMIBYR    ! shipments - current year to ibyr2 year. POT_ibyr2 Departure from other models - sets base year to ibyr2 POT_ibyr2
+
+	  if (curcalyr.le.2016) index=1.0
+	  if (curcalyr.gt.2016) index = outind(13,11,curiyr)/ALUMIBYR    ! shipments - current year to ibyr2 year. POT_ibyr2 Departure from other models - sets base year to ibyr2 POT_ibyr2
 	  ! end kkpe code change 10/13/17
 
       dom_prod=is_production(inddir,1)*index
@@ -17937,28 +15951,26 @@ subroutine AL_anode_prd
 !    which turned out to be a surprisingly steady (Freddy) percentage
 !    starting at 23.38% in 2014 and rising slowly to 24.08% in 2040, thus 24% is used below.
 
-       Subroutine GL_Shipping
+    SUBROUTINE GL_Shipping
 ! individual glass shipments
 
-       use i_
-       IMPLICIT NONE
+    use i_
+    IMPLICIT NONE
 
-       integer ii
-       real yg(4)
-       real ytot
+    integer ii
+    real yg(4)
+    real ytot
 
-        ! yg(1)=0.00171*(mc_revind(mnumcr,39,curiyr) + mc_revind(mnumcr,48,curiyr))-0.1756   ! flat glass; uses transportation equipment (index 39) and construction (index 48) shipments
-         gl_ship(1)=mc_revind(mnumcr,29,curiyr)                      ! flat glass
-         yg(2)=0.048151*0.24*mc_revind(mnumcr,7,curiyr) + 2.932934   ! blown glass; uses textile shipments (index 7)
-         yg(3)=0.003772*mc_revind(mnumcr,1,curiyr) + 2.533845        ! container glass; uses food shipments (index 1)
-         yg(4)=0.070395*mc_revind(mnumcr,27,curiyr) - 2.77323        ! glass products; uses plastics and rubber shipments (index 27)
-         ytot=sum(yg(2:4))
-         
-         do ii=2,4         
-            gl_ship(ii)=yg(ii)/ytot*(mc_revind(mnumcr,28,curiyr)-mc_revind(mnumcr,29,curiyr))! normalize total glass shipments minus flat glass shipments
-         enddo
+    gl_ship(1)=mc_revind(mnumcr,29,curiyr)                     	! flat glass
+    gl_ship(2)=mc_revind(mnumcr,53,curiyr)       				! container glass
+
+    yg(3)=0.048151*0.24*mc_revind(mnumcr,7,curiyr) + 2.932934  	! blown glass; uses textile shipments (index 7)
+    yg(4)=0.070395*mc_revind(mnumcr,27,curiyr) - 2.77323       	! specialty/fiber; uses plastics and rubber shipments (index 27)
+    ytot=yg(3)+yg(4)
+    
+    gl_ship(3:4)=yg(3:4)/ytot*(mc_revind(mnumcr,54,curiyr))			! normalize total glass shipments minus flat glass and container glass shipments, which is MC_REVIND(54)
 		 
-       end
+    END
 
 !***************************************************
        Subroutine GL_OxyFuel(gtype)
@@ -18067,12 +16079,10 @@ subroutine AL_anode_prd
       real*16 logit_calc                            ! logit function
       real*16 scale_fctr2                           ! scale factor function
       real SurvivingAddedCapacity                   ! added capacity function
-      real vintage_index                            ! vintage index
-      real OXY_Steel(9) !IS_MAXSTPS)                ! Oxygen Demand (GJ)
-      real ELEC_OXY(9) !IS_MAXSTPS)
-      real index2006 ,v
+      real OXY_Steel(9)				                ! Oxygen Demand (GJ)
+      real ELEC_OXY(9)
+      real shipment_index(8:13,maxstep,icuriyr:mnumyr)
       real TotBliq
-	  real Bliqtot 								 !Total Black Liquor for paper (kilotonnes)
       real particulate_dummy
 
       ! initialization block
@@ -18083,9 +16093,7 @@ subroutine AL_anode_prd
        scale_comp = 0.0; scale_fac = 0.0;       scale_min = 0.0;                               ! Minimum scale factor
        Oxygen_Intensity = 0.0;  co2_use(:,:) = 0.0; 
        OXY_Steel(:) = 0.0; ELEC_OXY(:) = 0.0; 
-	   index2006= 0.0;  v = 0.0
 	   TotBliq = 0.0
-	   Bliqtot = 0.0
 
         if (HITECH.eq.1) then
            scenario=2
@@ -18099,18 +16107,19 @@ subroutine AL_anode_prd
         if (inddir == 10) then  !glass
             SELECT CASE (stepnum)
               CASE (1:4)
-                index2006=GL_ship(1)/GLASSIBYR(2)
+                shipment_index(inddir,stepnum,curiyr)=GL_ship(1)/GLASSIBYR(1)	! flat glass
               CASE (5:7)
-                index2006=GL_ship(2)/GLASSIBYR(3)
+                shipment_index(inddir,stepnum,curiyr)=GL_ship(2)/GLASSIBYR(2)	! container				
               CASE (8:11)
-                index2006=GL_ship(3)/GLASSIBYR(4)
+                shipment_index(inddir,stepnum,curiyr)=GL_ship(3)/GLASSIBYR(3)	! blown glass
               CASE (12:14)
-                index2006=GL_ship(4)/GLASSIBYR(5)
+                shipment_index(inddir,stepnum,curiyr)=GL_ship(4)/GLASSIBYR(4)	! specialty/fiber
               CASE DEFAULT
             END SELECT
+
 			! Subtract base year cullet recycle share from container processing step
-			sumprodcur(inddir,stepnum)=IS_PRODUCTION(inddir,stepnum)*index2006
-			IF(stepnum.eq.7) sumprodcur(inddir,stepnum)=IS_PRODUCTION(inddir,stepnum)*index2006*(1-cullet_recycle_share(2,curiyr))
+			sumprodcur(inddir,stepnum)=IS_PRODUCTION(inddir,stepnum)*shipment_index(inddir,stepnum,curiyr)
+			IF(stepnum.eq.7) sumprodcur(inddir,stepnum)=IS_PRODUCTION(inddir,stepnum)*shipment_index(inddir,stepnum,curiyr)*(1-cullet_recycle_share(2,curiyr))
             gl_prodcurrpt(stepnum,curiyr)=sumprodcur(inddir,stepnum) !save for TECHSHR_RPT
             is_alpha_decay(inddir,:)=gl_alpha_decay(stepnum,scenario,:)
 			! glass process emissions come from melting of materials in furnace; cullet share has none; million tonnes
@@ -18122,12 +16131,12 @@ subroutine AL_anode_prd
 			GHG_PROCESSIN(10,curiyr)=SUM(Glass_Furnace_Process_Emissions(:))
 			
         else if (inddir==13) then !aluminum
-           index2006=OUTIND(13,11)/ALUMIBYR
+           shipment_index(inddir,stepnum,curiyr)=OUTIND(13,11,curiyr)/ALUMIBYR
            if (stepnum==1) then
-             sumprodcur(inddir,stepnum)=is_production(inddir,stepnum)*index2006*primprod_percent(curiyr)      ! Total AL production, percent allocated to primary
+             sumprodcur(inddir,stepnum)=is_production(inddir,stepnum)*shipment_index(inddir,stepnum,curiyr)*primprod_percent(curiyr)      ! Total AL production, percent allocated to primary
 
            else if(stepnum==5) then
-             sumprodcur(inddir,stepnum) = is_production(inddir,1) * index2006 * (1-primprod_percent(curiyr))          ! Total AL production, percent allocated to secondary
+             sumprodcur(inddir,stepnum) = is_production(inddir,1) * shipment_index(inddir,stepnum,curiyr) * (1-primprod_percent(curiyr))          ! Total AL production, percent allocated to secondary
 
            else if (stepnum.eq.3) then
              sumprodcur(inddir,stepnum)=( sumprodcur(inddir,1)/al_mass_loss) * (1.0+al_non_met) *(1 - alumina_percent(curiyr))       ! Changed to percent imports—hold at 43.6% for now
@@ -18145,19 +16154,15 @@ subroutine AL_anode_prd
 				IS_LIFETIME(INDDIR)=CM_LIFETIME(stepnum)
 				IS_CALIB(INDDIR)=CM_CALIB(stepnum)
 				IS_WACC(inddir)=CM_WACC(stepnum)
-				IS_FISYR(inddir)=ICURIYR !CM_FISYR(stepnum)
-				index2006=OUTIND(25,11)/CEMENTIBYR             
-				sumprodcur(inddir,stepnum)=is_production(inddir,stepnum)*index2006
+				IS_FISYR(inddir)=ICURIYR
+				shipment_index(inddir,stepnum,curiyr)=OUTIND(25,11,curiyr)/CEMENTIBYR             
+				sumprodcur(inddir,stepnum)=is_production(inddir,stepnum)*shipment_index(inddir,stepnum,curiyr)
 				cm_prodcurrpt(stepnum,curiyr)=sumprodcur(inddir,stepnum)
 				is_alpha_decay(inddir,:)=cm_alpha_decay(stepnum,scenario,:)
 				grinding_tonnes=sumprodcur(inddir,stepnum)
-				If (curiyr.ge.ICURIYR2+3) then               ! POT_ibyr2 20 to ICURIYR2+3
-					v=vintage_index(stepnum)  !calc vintage index
-				endif
 			else
-               index2006=OUTIND(26,11)/LIMEIBYR
-               sumprodcur(inddir,stepnum)=is_production(inddir,stepnum)*index2006
-               v=vintage_index(stepnum)  !calc vintage index
+               shipment_index(inddir,stepnum,curiyr)=OUTIND(26,11,curiyr)/LIMEIBYR
+               sumprodcur(inddir,stepnum)=is_production(inddir,stepnum)*shipment_index(inddir,stepnum,curiyr)
 			endif
         endif
         
@@ -18271,7 +16276,6 @@ subroutine AL_anode_prd
                   write (5525,*) 'curcalyr & inddir & inumtech & stepnum & IS_emiss(inddir,stepnum,inumtech) = '
 			      write (5525,*) curcalyr, inddir, inumtech, stepnum, IS_emiss(inddir,stepnum,inumtech),logit_comp(inumtech)
 			   end if
-!QQ          end if
             ENDDO
         end if
 !***** Allocate Additional Production Among Competing Technologies ********
@@ -18425,14 +16429,12 @@ subroutine AL_anode_prd
 
 !***** Special Case: Aluminum Smelting ***************
                  if (stepnum == 1) then
-                   v=vintage_index(stepnum)
 	 	             IS_tot_energy_use(ifuel,is_numtech(inddir,stepnum)+1) = tot_production_tech(inddir,is_numtech(inddir,stepnum)+1)       &           ! Total Production (kT)
                                           * (IS_fuel_use(inddir,stepnum,ifuel,is_numtech(inddir,stepnum)+1))                      ! only one technology for base anode capacity now; no Soderberg
                  endif                                                                                                            ! No REI/SOA adjustment for base smelting
 
 !***** Special Case: Cement Finish Grinding  ***************
               else  if ((inddir == 11).and.(stepnum == 1)) then
-                 v=vintage_index(stepnum)
                  IS_tot_energy_use(ifuel,inumtech)= tot_production_tech(inddir,inumtech)* &
                                                   (IS_FUEL_USE(inddir,stepnum,stepnum,inumtech))  &
                                                     * SOA_adj(inddir,stepnum,inumtech)
@@ -18475,7 +16477,7 @@ subroutine AL_anode_prd
 		ElecGen_pap26(stepnum,curiyr) = 0.0 ! KPE only valid for step26, techs 1 & 6
         CoalSCons(stepnum,curiyr) = 0.0;   CoalMCons(stepnum,curiyr)=0.0;  PAPER_STEAM(stepnum,curiyr)=0.0
 		PAPER_STEAM_GRS(stepnum,curiyr) = 0.0  ! KPE added variable
-         PAPER_BLIQUOR(stepnum,curiyr)=0.0; PAPER_HOG(stepnum,curiyr)=0.0; Bliqtot=0.0
+         PAPER_BLIQUOR(stepnum,curiyr)=0.0; PAPER_HOG(stepnum,curiyr)=0.0
 ! some, but not all consumption, is=0 in trills 
         if (inddir > 8) then
           if (inddir == 12) then !steel
@@ -18494,23 +16496,23 @@ subroutine AL_anode_prd
           
         endif
 ! 
-        if (inddir == 8) then  ! 
-		  ElecCons(stepnum,curiyr)  = SUM(IS_tot_energy_use(1,1:is_numtech(inddir,stepnum)))/1000000.0 ! ww
-		  if (stepnum == 26) then ! KPE for the recovery furnace step, split elec cons & elec gen
-			ElecCons(stepnum,curiyr)  =  + SUM(IS_tot_energy_use(1,2:5))/1000000.0  ! these steps consume energy
-			ElecGen_pap26(stepnum,curiyr)  = abs(IS_tot_energy_use(1,1) + IS_tot_energy_use(1,6))/1000000.0 ! generate energy trilBTU
-		  endif
-   		  ! Electricity Consumption  (Trils)
-          if (stepnum.eq.1) then !Pulp and Paper, Wood Prep
-	    !add woodchipping electricity
-   	        ElecCons(stepnum,curiyr)=ElecCons(stepnum,curiyr)+SUM(tot_production_tech(inddir,1:is_numtech(inddir,stepnum)))*pp_chip/1000000.0
-          endif   ! kpe the next statements look odd. Why gt used insetead of eq? -- I think it's OK.
-		if (is_numfuel(inddir,stepnum).gt.1) &
-	          NgCons(stepnum,curiyr)= SUM(IS_tot_energy_use(2,1:is_numtech(inddir,stepnum)))/1000000.0 ! NG Consumption  (Trils) -- 
-          if (is_numfuel(inddir,stepnum).gt.2) &
+        if (inddir == 8) then  ! pulp & paper
+			ElecCons(stepnum,curiyr)  = SUM(IS_tot_energy_use(1,1:is_numtech(inddir,stepnum)))/1000000.0
+			if (stepnum == 26) then ! KPE for the recovery furnace step, split elec cons & elec gen
+				ElecCons(stepnum,curiyr)  =  + SUM(IS_tot_energy_use(1,2:5))/1000000.0  ! these steps consume energy
+				ElecGen_pap26(stepnum,curiyr)  = abs(IS_tot_energy_use(1,1) + IS_tot_energy_use(1,6))/1000000.0 ! generate energy trilBTU
+			endif
+			! Electricity Consumption  (Trils)
+			if (stepnum.eq.1) then !Pulp and Paper, Wood Prep
+				!add woodchipping electricity
+				ElecCons(stepnum,curiyr)=ElecCons(stepnum,curiyr)+SUM(tot_production_tech(inddir,1:is_numtech(inddir,stepnum)))*pp_chip/1000000.0
+			endif   ! kpe the next statements look odd. Why gt used insetead of eq? -- I think it's OK.
+			if (is_numfuel(inddir,stepnum).gt.1) &
+	         NgCons(stepnum,curiyr)= SUM(IS_tot_energy_use(2,1:is_numtech(inddir,stepnum)))/1000000.0 ! NG Consumption  (Trils) -- 
+			if (is_numfuel(inddir,stepnum).gt.2) &
              HFOCons(stepnum,curiyr)= SUM(IS_tot_energy_use(3,1:is_numtech(inddir,stepnum)))/1000000.0     ! HFO Consumption (Trils)
-          if (is_numfuel(inddir,stepnum).gt.3) &
-	           CoalSCons(stepnum,curiyr)= SUM(IS_tot_energy_use(4,1:is_numtech(inddir,stepnum)))/1000000.0     ! Sub-Bit Coal Consumption (Trils)
+			if (is_numfuel(inddir,stepnum).gt.3) &
+	         CoalSCons(stepnum,curiyr)= SUM(IS_tot_energy_use(4,1:is_numtech(inddir,stepnum)))/1000000.0     ! Sub-Bit Coal Consumption (Trils)
 			   
 		 ! KPE paper steam to pass to boiler / steam variables 
 		 ! has to be treated specially--because negative steam (supply) has to be genrated too so we need energy for that
@@ -18533,14 +16535,8 @@ subroutine AL_anode_prd
 		  ! END KPE code change, August 17, 2020--rechecked 8/27 some refinements
 		  !PAPER_STEAM(stepnum,curiyr)=SUM(IS_tot_energy_use(is_numfuel(inddir,stepnum)+1,1:is_numtech(inddir,stepnum)))/1000000.0
           PAPER_HOG(stepnum,curiyr)=SUM(IS_tot_energy_use(is_numfuel(inddir,stepnum)+3,1:is_numtech(inddir,stepnum))) ! GJ /1000000.0  ! KPE 8/18/20 added scaling like others
-         PAPER_BLIQUOR(stepnum,curiyr)= SUM(IS_tot_energy_use(is_numfuel(inddir,stepnum)+2,1:is_numtech(inddir,stepnum))) ! GJ  /1000000.0  !(GJ)        
-		!Total BLiquor and convert to kT for reporting and steps 24:26 calcs
-         
-        ! KPE reset black liquor variables so they don't accumulate		
-			if (stepnum == 26) then
-				Bliqtot = 0.0
-				PAPER_BLIQ = 0.0; 
-			endif
+		  PAPER_BLIQUOR(stepnum,curiyr)= SUM(IS_tot_energy_use(is_numfuel(inddir,stepnum)+2,1:is_numtech(inddir,stepnum))) ! GJ  /1000000.0  !(GJ)        
+			!Total BLiquor and convert to kT for reporting and steps 24:26 calcs
 		endif
 
 	    If((inddir.eq.11).and.(stepnum.eq.5)) Then                                                ! POT_2050lime start cement industry with stepnum 5 for lime to step 4 in reporting
@@ -18552,8 +16548,8 @@ subroutine AL_anode_prd
 
 	  !***** Steam Demand ***************  KPE address steam total for paper later; 
 	  !td note: zero out STM_STEEL at the beginning of paper and steel so I can sum the whole array without reference to which industry
-        if (inddir == 12) STEAM_Total = SUM(STM_Steel(1:IS_MAXSTPS)) / 1.054615   !Total Steam Demand (GJ converted to MMBtu): AKA ENPIQTY(1) Check units.
-        if (inddir == 8) STEAM_Total   = SUM(STM_Steel(1:PP_MAXSTPS)) / 1.054615   !Total Steam Demand (GJ converted to MMBtu): AKA ENPIQTY(1) Check units.
+        if (inddir == 12) STEAM_Total = SUM(STM_Steel(1:IS_MAXSTPS)) * CFJOULE / 1000.0   !Total Steam Demand (GJ converted to MMBtu): AKA ENPIQTY(1) Check units.
+        if (inddir == 8) STEAM_Total   = SUM(STM_Steel(1:PP_MAXSTPS)) * CFJOULE / 1000.0   !Total Steam Demand (GJ converted to MMBtu): AKA ENPIQTY(1) Check units.
 
         DO inumtech=1,is_numtech(inddir,stepnum)
           co2_use(stepnum,inumtech)=tot_production_tech(inddir,inumtech)*is_emiss(inddir,stepnum,inumtech)
@@ -18561,7 +16557,7 @@ subroutine AL_anode_prd
         CO2_Tech(stepnum,curiyr)  =SUM(co2_use(stepnum,1:is_numtech(inddir,stepnum)))
         if ((inddir == 11) .and. (stepnum.eq.5)) CO2_Process=CO2_Tech(stepnum,curiyr) !lime
         return
-        end
+    END
 
 !************************************************************************************************************
 ! This subroutine calculates capacity variables:
@@ -18607,19 +16603,19 @@ subroutine AL_anode_prd
       ENDDO
 
 ! Base year capacity retirements
-      IF (curiyr.le.FISYR)  then                                  ! for base year
-          is_basecap(inddir,stepnum) = production                 ! steel and glass baseline capacity assumed equal to base year production
-                                                                                                  ! base year paper production no longer matches the values in ironstlx.xlsx; use a ratio of the ironstlx 
-          if (inddir.eq.8) is_basecap(inddir,stepnum)=production*ibyr_paper_cap_ratio(stepnum)    ! capacity to the ironstlx production to get equivalent capacities for the new paper production values
-          if ((inddir.eq.11) .or. (inddir.eq.13)) is_basecap(inddir,stepnum) = IBYR_SurvCap(inddir,stepnum)   ! cement and aluminum
-          if ((inddir.eq.11).and.(stepnum.eq.5)) is_basecap(inddir,stepnum) = production                      ! lime has no explicit max capacity in inronstlx.xlsx, so set equal to base year production
-          IBYR_SurvCap(inddir,stepnum)=is_basecap(inddir,stepnum) ! base year capacity for all 5 process-flow industries now stored in this variable
+      IF (curiyr.le.FISYR)  THEN                                ! for base year
+        is_basecap(inddir,stepnum) = production                 ! steel and glass baseline capacity assumed equal to base year production
+		! base year paper production no longer matches the values in ironstlx.xlsx; use a ratio of the ironstlx capacity to the ironstlx production to get equivalent capacities for the new paper production values
+        if (inddir.eq.8) is_basecap(inddir,stepnum)=production*ibyr_paper_cap_ratio(stepnum)
+        if ((inddir.eq.11) .or. (inddir.eq.13)) is_basecap(inddir,stepnum) = IBYR_SurvCap(inddir,stepnum)   ! cement and aluminum
+        if ((inddir.eq.11).and.(stepnum.eq.5)) is_basecap(inddir,stepnum) = production                      ! lime has no explicit max capacity in inronstlx.xlsx, so set equal to base year production
+        IBYR_SurvCap(inddir,stepnum)=is_basecap(inddir,stepnum) ! base year capacity for all 5 process-flow industries now stored in this variable
       ELSEIF (curiyr.gt.FISYR) then   ! for each calculated year   
-          IF((curitr.eq.1).and.(indreg.eq.1))THEN         ! Base year capacity retires linearly; do only on first iteration and for first region (regions don't matter for the total capacity, but don't want capacity retiring 4 times a year)
-              basecap_lag(inddir,stepnum) = is_basecap(inddir,stepnum)            ! Save result from prior year on first iteration   
-              is_basecap(inddir,stepnum) =  basecap_lag(inddir,stepnum) - (IBYR_SurvCap(inddir,stepnum)/baselifecr)      ! Baseline capacity is reduced linearly                         
-              if (is_basecap(inddir,stepnum).lt.0.0) is_basecap(inddir,stepnum)=0.0                ! Until it is zero
-          ENDIF
+        IF((curitr.eq.1).and.(indreg.eq.1))THEN         ! Base year capacity retires linearly; do only on first iteration and for first region (regions don't matter for the total capacity, but don't want capacity retiring 4 times a year)
+            basecap_lag(inddir,stepnum) = is_basecap(inddir,stepnum)            ! Save result from prior year on first iteration   
+            is_basecap(inddir,stepnum) =  basecap_lag(inddir,stepnum) - (IBYR_SurvCap(inddir,stepnum)/baselifecr)      ! Baseline capacity is reduced linearly                         
+            if (is_basecap(inddir,stepnum).lt.0.0) is_basecap(inddir,stepnum)=0.0                ! Until it is zero
+        ENDIF
       ENDIF
 
 ! Calculate total existing capacity (existing base plus existing builds since base)      
@@ -18687,7 +16683,7 @@ subroutine AL_anode_prd
                                           lfuel_use(2) * PGFIN(MNUMCR,curiyr)*MC_JPGDP(ICURIYR2)+ & ! Natural Gas
                                           lfuel_use(3) * PRLIN(MNUMCR,curiyr)*MC_JPGDP(ICURIYR2)+ & ! Residual Fuel Oil
                                           lfuel_use(4) * PCLIN(MNUMCR,curiyr)*MC_JPGDP(ICURIYR2)+ & ! Sub-bit Coal
-                                          lfuel_use(5) * PH2IN(MNUMCR,curiyr)*MC_JPGDP(ICURIYR2)) &	! H2 heat and power		NSK H2
+                                          lfuel_use(5) * PH2IN(MNUMCR,curiyr)*MC_JPGDP(ICURIYR2)) &	! H2 heat and power
                     +  calibrationc(2) * logit_steam   &
                     +  calibrationc(3) * lemiss *  co2penalty   &
                     +  alpha*exp(-alpha_decay(1)*float(curcalyr-ibyr)*ln2/alpha_decay(2))+scale_fac)
@@ -18876,12 +16872,6 @@ subroutine AL_anode_prd
 	  integer ij,kk
       integer technum
 
-!***** Steel Step 6: DRI/BOF Data **********************
-      MinBOF= 0.10
-
-!***** Steel Step 7: DRI EAF Data *************************************
-      MaxEAF= 1.0
-
 	  FNAME='IRONSTLX'
       NEW=.FALSE.
       WKUNIT=FILE_MGR('O',FNAME,NEW)
@@ -19005,7 +16995,7 @@ subroutine AL_anode_prd
       CALL GETRNGR('CHP_INTENSITY   ',CHP_INTENSITY,5,4,1)
       CALL GETRNGR('IS_CPROCESS     ',IS_CPROCESS,1,4,1)
       CALL GETRNGR('IS_CEnergy_Use  ',IS_CEnergy_Use,1,7,1) !coke production energy use
-      IS_CEnergy_Use(4)=IS_CEnergy_Use(4)*is_steam_adj  !SIMS Steam adjustment
+      IS_CEnergy_Use(4)=IS_CEnergy_Use(4)*is_steam_adj  !CIMS Steam adjustment
 
       CALL GETRNGR('B_YEAR          ',B_YEAR,2,1,1)
       CALL GETRNGR('B_SHR           ',B_SHR,2,1,1)
@@ -19016,7 +17006,7 @@ subroutine AL_anode_prd
       CALL GETRNGR('C_T_Start       ',C_T_Start,1,4,1)
       CALL GETRNGR('C_T_Final       ',C_T_Final,1,4,1)
       CALL GETRNGR('ISPROD          ',is_production(inumind,1:IS_MAXSTPS),IS_MAXSTPS,1,1)
-      CALL GETRNGR('ibyrVALS        ',is_ibyrvals,5,5,1)
+      !CALL GETRNGR('ibyrVALS        ',is_ibyrvals,5,5,1)		need to remove range from ironstlx
       CALL GETRNGR('ST_capfacavg    ',is_CapFacAvg(1:3),1,3,1) !Capacity Factor Weighted Average
       CALL GETRNGR('ST_bldchpshr    ',is_BldCHPShr,1,1,1) !building CHP share
       CALL GETRNGR('St_MECS         ',MECS_Data(inumind,1:5,1:10),5,10,1)                 ! row, col, group
@@ -19185,9 +17175,7 @@ inumind=8
 	  CALL GETRNGR('gWACC           ',IS_WACC(inumind),1,1,1)
       CALL GETRNGI('gFISYR          ',IS_FISYR(inumind),1,1,1)
       CALL GETRNGR('gloxy           ',GL_OXY(1:3,1:4),3,4,1)
-      CALL GETRNGR('glmecs          ',GL_MECS(1:2),1,2,1)
       CALL GETRNGR('glcryo          ',GL_CRYO,1,1,1)
-      CALL GETRNGR('gl_histship     ',GL_hist_ship(1:6,1:4),6,4,1)
 
       do ij=1,GL_MAXSTPS
         write(strij,'(I2)') ij
@@ -19247,20 +17235,20 @@ inumind=8
     WKUNIT = FILE_MGR('C',FNAME,NEW)   !close xml input file
     inumind=11
     CALL GETRNGI4('cnumtech        ',IS_NUMTECH(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)                 ! row, col, group
-	CALL GETRNGI('cNUMFUEL        ',IS_NUMFUEL(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)
-	CALL GETRNGR('cPROD           ',is_production(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)
-    CALL GETRNGR('cbyrsurvcap     ',ibyr_survcap(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)
+	CALL GETRNGI('cNUMFUEL        '	,IS_NUMFUEL(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)
+	CALL GETRNGR('cPROD           '	,is_production(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)
+    CALL GETRNGR('cbyrsurvcap     '	,ibyr_survcap(inumind,1:CM_MAXSTPS),CM_MAXSTPS,1,1)
     CALL GETRNGI4('cBASELIFECR     ',CM_BASELIFECR(1:4),1,4,1)
-	CALL GETRNGR('cLIFETIME       ',CM_LIFETIME(1:4),1,4,1)
+	CALL GETRNGR('cLIFETIME       '	,CM_LIFETIME(1:4),1,4,1)
     CALL GETRNGI4('cCALIB          ',CM_CALIB(1:4),1,4,1)
-	CALL GETRNGR('cWACC           ',CM_WACC(1:4),1,4,1)
+	CALL GETRNGR('cWACC           '	,CM_WACC(1:4),1,4,1)
 	CALL GETRNGI4('cFISYR          ',CM_FISYR(1:4),1,4,1)
-    CALL GETRNGR('cmass_loss      ',C_MASS_LOSS,1,1,1)
-    CALL GETRNGR('cm_add          ',CM_ADD,1,1,1)
-    CALL GETRNGR('cADECAY1        ',CM_ALPHA_DECAY(1,:,:),4,2,1)
-    CALL GETRNGR('cADECAY2        ',CM_ALPHA_DECAY(2,:,:),4,2,1)
-    CALL GETRNGR('cADECAY3        ',CM_ALPHA_DECAY(3,:,:),4,2,1)
-    CALL GETRNGR('cADECAY4        ',CM_ALPHA_DECAY(4,:,:),4,2,1)   
+    CALL GETRNGR('cmass_loss      '	,C_MASS_LOSS,1,1,1)
+    CALL GETRNGR('cm_add          '	,CM_ADD,1,1,1)
+    CALL GETRNGR('cADECAY1        '	,CM_ALPHA_DECAY(1,:,:),4,2,1)
+    CALL GETRNGR('cADECAY2        '	,CM_ALPHA_DECAY(2,:,:),4,2,1)
+    CALL GETRNGR('cADECAY3        '	,CM_ALPHA_DECAY(3,:,:),4,2,1)
+    CALL GETRNGR('cADECAY4        '	,CM_ALPHA_DECAY(4,:,:),4,2,1)   
 
 !********************************************************************
 !!!! CCS cement parameter read in from ironstl.xlsx input file for CCATS subroutine !!!!
@@ -19370,22 +17358,14 @@ inumind=8
       CALL GETRNGR('cm_REI4          ',IS_REI(inumind,4,1:IS_NUMTECH(inumind,4)),1,IS_NUMTECH(inumind,4),1)
 
       CALL GETRNGR('cm_calib_k      ',is_ecalib(inumind,1:4),1,4,1)
-      CALL GETRNGR('cm_wet          ',cm_baselifewet2(1:4),4,1,1)
-      CALL GETRNGR('cm_cap_shr      ',cm_capshr(1:2),2,1,1)
       CALL GETRNGR('cm_import       ',cm_import_clink,1,1,1)
       CALL GETRNGR('comb_co23       ',cm_combco2(3,1:IS_NUMTECH(inumind,3)),1,IS_NUMTECH(inumind,3),1)
       CALL GETRNGR('cm_heatsrv      ',cm_heatsrv(1:IS_NUMTECH(inumind,2)),1,IS_NUMTECH(inumind,2),1)
       CALL GETRNGR('cm_heatsrv_fuel ',cm_heatsrv_fuel(1:IS_NUMTECH(inumind,3)),1,IS_NUMTECH(inumind,3),1)      
-      CALL GETRNGR('cm_basedry      ',cm_baselifedry,1,1,1)
-      CALL GETRNGR('elec_coeff      ',cm_eleccoef(1:6),1,6,1)
-      CALL GETRNGR('heat_coeff      ',cm_heatcoef(1:6),1,6,1)
+      CALL GETRNGR('elec_coeff      ',cm_eleccoef(1:5),1,5,1)
+      CALL GETRNGR('heat_coeff      ',cm_heatcoef(1:5),1,5,1)
       CALL GETRNGR('cm_heatdcoef    ',cm_heatdcoef,1,1,1)
-
-      CALL GETRNGR('cm_wetcoef      ',cm_wetcoef(1:IS_NUMTECH(inumind,3)),1,IS_NUMTECH(inumind,3),1)
-      CALL GETRNGR('cm_wetcoef2     ',cm_wetcoef2(1:IS_NUMTECH(inumind,4)),1,IS_NUMTECH(inumind,4),1)
-      CALL GETRNGR('cm_rawtech      ',cm_rawtech(1:2),1,2,1)
       CALL GETRNGR('cm_fuelmix      ',cm_fuelmix(1:7,1:5),7,5,1)
-
       CALL GETRNGR('Ce_MECS         ',MECS_Data(inumind,1:5,1:10),5,10,1)                 ! row, col, group
       
       return
@@ -20252,23 +18232,23 @@ inumind=8
 ! Get data for the 4 proxy variables & consolidate to census region
 !prx = 1: Fabricated Metals; 2: Machinery; 3: Transportation Equipment; 4: Construction
         DO prx = 1,4
-            MacroProxy(irx,prx)=SUM(OUTIND(ndx(prx),rgnmap(irx,1):rgnmap(irx,2)))                  ! Consolidate divisional values within each region
+            MacroProxy(irx,prx)=SUM(OUTIND(ndx(prx),rgnmap(irx,1):rgnmap(irx,2),curiyr))                  ! Consolidate divisional values within each region
         ENDDO
-	PRODVX_Steel(irx)=SUM(OUTIND(inddir,rgnmap(irx,1):rgnmap(irx,2)))   ! Consolidate divisional values of steel production
+	PRODVX_Steel(irx)=SUM(OUTIND(inddir,rgnmap(irx,1):rgnmap(irx,2),curiyr))   ! Consolidate divisional values of steel production
    !  POT_2050STEEL arbitrary region change delete when macro change
    !     PRODVX_STEEL(irx) = PRODVX_Steel(irx) * (OUTIND(inddir,11)/SUM(OUTIND(inddir,1:10)))
 
 	  !************* Calculate Cold-Rolled Percentage ******************
         Cold_Proxy(irx) = sum(MacroProxy(irx,1:3))/sum(MacroProxy(irx,1:4)) ! Infer share of production to cold-rolled steel
-        if (curcalyr.eq.ibyr) Cold_BYR(irx) = Cold_Proxy(irx)             ! Set base year value for indexing
+        if (curcalyr.eq.ibyr) Cold_BYR(irx) = Cold_Proxy(irx)             	! Set base year value for indexing
         Cold_Index(irx) = Cold_Proxy(irx)/Cold_BYR(irx)                     ! Index subsequent years to base year
         Cold_Pct(irx) = Cold_Index(irx) * Base_Cold(irx)                    ! Adjust initial Cold Percent to reflect changes in mfg output
 
 !************** Adjust PHDRAT/PRODX ********************
         Val_Add = 0.15                                                      ! Fixed, ad-hoc assignment for price premium
 
-        if ((curcalyr.ge.ibyr2).AND.(curcalyr.le.ibyr)) then                ! Base Year (ibyr2) Calculations POT_ibyr2
-           PRODX_Steel(irx)  = PRODX_Base(inddir,irx)  / 1000.0             ! Initialize Base Year Values, in 1000 Tonnes - looks silly because I just multiplied by 1000, but this is all over the program
+        if ((curcalyr.ge.ibyr2).AND.(curcalyr.le.ibyr)) then
+           PRODX_Steel(irx)  = PRODX_Base(inddir,irx)  / 1000.0             ! Initialize Base Year Values, in 1000 tonnes
 
            Base_Price(irx) = (PRODVX_Steel(irx)/PRODX_Steel(irx)) &         ! Value calculated for base year, & held constant thereafter.
                           /(1+ Val_Add * Cold_Pct(irx))                     ! Not sure of units, may need to adjust scale
@@ -20537,11 +18517,11 @@ inumind=8
 	  use i_
       implicit none
 
-	  integer stepnum                  ! Steel process step
-	  real hotshares(11)                ! hotroll shares by product
-      Real flow(3)                     ! Flows by product (1000 Tonnes)
-      real consumption(3,4)            ! Consumption for each fuel and product(blooms,billets,slab,slab skin (Trils)
-      REAL HRCO2_emiss(2)                ! CO2 Emissions for blooms and billets (million tonnes)
+	  integer stepnum                  ! steel process step
+	  real hotshares(11)               ! hotroll shares by product
+      Real flow(3)                     ! flows by product (1000 Tonnes)
+      real consumption(3,4)            ! consumption for each fuel and product(blooms,billets,slab,slab skin (Trils)
+      REAL HRCO2_emiss(2)              ! CO2 Emissions for blooms and billets (million tonnes)
 	  real steel_output
 	  real forecast
 	  real q_interp2
@@ -20586,13 +18566,13 @@ inumind=8
 
 !***** Add consumption to values previously calculated in hot roll with technology choice ********************************************
 
-      NgCons(stepnum,curiyr)   = NgCons(stepnum,curiyr)+SUM(consumption(1,1:2))                                ! NG Consumption for Step 2 (Trils)
-      HFOCons(stepnum,curiyr)  = HFOCons(stepnum,curiyr)+SUM(consumption(2,1:2))                               ! HFO Consumption for Step 2 (Trils)
+      NgCons(stepnum,curiyr)   = NgCons(stepnum,curiyr)+SUM(consumption(1,1:2))     ! NG consumption (Trils)
+      HFOCons(stepnum,curiyr)  = HFOCons(stepnum,curiyr)+SUM(consumption(2,1:2))    ! HFO consumption (Trils)
       ElecCons(stepnum,curiyr) = ElecCons(stepnum,curiyr)+&
 	                             SUM(consumption(3,1:2))+ &
 								 SUM(consumption(1:2,3))+ &
-								 SUM(consumption(1:2,4)) ! Electricity Consumption for Step 2 (Trils)
-      CO2_Tech(stepnum,curiyr)  = CO2_Tech(stepnum,curiyr)+SUM(HRCO2_Emiss(1:2))                               ! CO2 Emissions for Step 2 (million tonnes)
+								 SUM(consumption(1:2,4)) 							! electricity consumption (Trils)
+      CO2_Tech(stepnum,curiyr)  = CO2_Tech(stepnum,curiyr)+SUM(HRCO2_Emiss(1:2))	! CO2 emissions (million tonnes)
 
       return
       end
@@ -20691,7 +18671,7 @@ inumind=8
        NgCons(8,curiyr)  =Coke_Prod*IS_CEnergy_Use(2)/1000000.0
        HFOCons(8,curiyr)=Coke_Prod*IS_CEnergy_Use(3)/1000000.0
        CoalMCons(8,curiyr) =Coke_Prod*IS_CEnergy_Use(5)/1000000.0
-	   STM_Steel(8)=Coke_Prod*IS_CEnergy_Use(4)*1.054615
+	   STM_Steel(8)=Coke_Prod*IS_CEnergy_Use(4)*1000/CFJOULE
 	   
 !***** Calculate Coke Process Outputs *************************
 
@@ -20726,7 +18706,7 @@ inumind=8
 
 !***** Steam Demand ***************
 ! total steam for all steps
-    STEAM_Total =SUM(STM_Steel(1:IS_MAXSTPS)) / 1.054615   !Total Steam Demand (GJ converted to MMBtu): AKA ENPIQTY(1) Check units.
+    STEAM_Total =SUM(STM_Steel(1:IS_MAXSTPS)) * CFJOULE / 1000.0   !Total Steam Demand (GJ converted to MMBtu): AKA ENPIQTY(1) Check units.
  ! calculate steam regional shares
     do irg=1,4
 	    if (SUM(PRODCUR(1:4,4)).ne.0.0) then
@@ -20803,12 +18783,12 @@ inumind=8
     DO ii = 1,N_CHP_Tech                                ! CHP Technologies
         DO jj = 1,5                                      ! (1)NG, (2)HFO, (3)Elec, (4)Coal, (5)CO2
             is_CHP_Consump(JJ) = is_CHP_Consump(JJ)+(STEAM_Total * CHP_SHARE &
-                                 * C_T_Share(ii) * CHP_Intensity(jj,ii) / (1.054615*1000000.0))      ! Trillion Btu
+                                 * C_T_Share(ii) * CHP_Intensity(jj,ii) / (10**9/CFJOULE))      ! Trillion Btu
         ENDDO
     ENDDO
-    IS_ElecGen(1)=-1.0*(C_T_Share(4) * CHP_Intensity(3,4)+C_T_Share(1) * CHP_Intensity(3,1))*STEAM_Total * CHP_SHARE/3412.0/1.054615 !gas (GWh)
-    IS_ElecGen(2)=-1.0*C_T_Share(3) * CHP_Intensity(3,3)*STEAM_Total * CHP_SHARE/3412.0/1.054615  !oil
-    IS_ElecGen(4)=-1.0*C_T_Share(2) * CHP_Intensity(3,2)*STEAM_Total * CHP_SHARE/3412.0/1.054615  !coal
+    IS_ElecGen(1)=-1.0*(C_T_Share(4) * CHP_Intensity(3,4)+C_T_Share(1) * CHP_Intensity(3,1))*STEAM_Total * CHP_SHARE/CFELQ*CFJOULE/1000.0 !gas (GWh)
+    IS_ElecGen(2)=-1.0*C_T_Share(3) * CHP_Intensity(3,3)*STEAM_Total * CHP_SHARE/CFELQ*CFJOULE/1000.0  !oil
+    IS_ElecGen(4)=-1.0*C_T_Share(2) * CHP_Intensity(3,2)*STEAM_Total * CHP_SHARE/CFELQ*CFJOULE/1000.0  !coal
     IS_ElecGen(3)=0.0
 
 !  Add these into corresponding fuel demands to get total
@@ -20935,12 +18915,12 @@ inumind=8
 
     DO irx = 1,inumreg        ! Loops through all idm regions
 !*Get Macro Data and Squish it Into Shape
-	    PRODVX_Paper(irx)=SUM(OUTIND(inddir,rgnmap(irx,1):rgnmap(irx,2)))
+	    PRODVX_Paper(irx)=SUM(OUTIND(inddir,rgnmap(irx,1):rgnmap(irx,2),curiyr))
         If (curcalyr.eq.ibyr) THEN                            ! Do Base Year (2010) Calculations
           PRODX_Paper(irx)  = PRODX_Base(inddir,irx)/1000.0      ! Initialize Base Year Values, in 1000 Tonnes
-          Paper_PriceIBYR(irx)  =SUM(OUTINDIBYR(rgnmap(irx,1):rgnmap(irx,2)))/PRODX_Paper(irx)
+          Paper_ShipIBYR(irx)  =SUM(OUTIND(inddir,rgnmap(irx,1):rgnmap(irx,2),icuriyr))/PRODX_Paper(irx)
         endif
-        PRODX_Paper(irx) = PRODVX_Paper(irx)/Paper_PriceIBYR(irx)               ! Post-2010 tonnage of paper production
+        PRODX_Paper(irx) = PRODVX_Paper(irx)/Paper_ShipIBYR(irx)               ! Post-2010 tonnage of paper production
          call IAMatrix(PRODX_Paper,irx) !one region, all steps set
 	    if (irx.eq.4) then
           DO IS=1,MPASTP
@@ -20982,11 +18962,11 @@ inumind=8
  ! fill in gap between read in data and ibyr if there is one
     If ((curcalyr.eq.ibyr).and.(pp_proxy_iyr.lt.icuriyr)) THEN  
 		do ii=pp_proxy_iyr,curiyr-1
-			PP_ProdNDX(1,ii) = MC_REVIND(11,14,ii)/PP_ProxyDat(ii) ! Newsprint Index
-			PP_ProdNDX(2,ii) = MC_REVIND(11,12,ii)/MC_REVIND(11,11,ii) ! Paperboard Index
-			PP_ProdNDX(3,ii) = MC_REVIND(11,14,ii)/MC_REVIND(11,11,ii) ! Print Index (Coated)
-			PP_ProdNDX(4,ii) = PP_ProdNDX(3,ii)                        ! Print Index (Uncoated)--Same as Coated
-			PP_ProdNDX(5,ii) = MC_REVIND(11,13,ii)/MC_REVIND(11,12,ii) ! Tissue Index
+			PP_ProdNDX(1,ii) = MC_REVIND(11,14,ii)/PP_ProxyDat(ii) 		! Newsprint Index
+			PP_ProdNDX(2,ii) = MC_REVIND(11,12,ii)/MC_REVIND(11,11,ii) 	! Paperboard Index
+			PP_ProdNDX(3,ii) = MC_REVIND(11,14,ii)/MC_REVIND(11,11,ii) 	! Print Index (Coated)
+			PP_ProdNDX(4,ii) = PP_ProdNDX(3,ii)                        	! Print Index (Uncoated)--Same as Coated
+			PP_ProdNDX(5,ii) = MC_REVIND(11,13,ii)/MC_REVIND(11,12,ii) 	! Tissue Index
 			DO prx = 1,5
 			 Paper_Temp(prx) = PP_ProdNDX(prx,ii)*Paper_Share(prx,pp_proxy_iyr)          ! Calculate Un-normalized Shares
 			ENDDO
@@ -21161,10 +19141,10 @@ inumind=8
  !Boiler Steam -- PP_Steam_boiler is in fuel units 
     do ii=1,5
       PP_Steam_Boiler(ii)=0.0
-      do jj=1,4  !9 tdtdtdt
+      do jj=1,4
 		PP_Steam_Boiler(ii)=PP_Steam_Boiler(ii)+(pp_stmfuel_bl(jj,ii)*share(jj+4))  ! running through matrix gives fuel units
       enddo
-      PP_Steam_Boiler(ii)=max(PP_Steam_Boiler(ii)*boilersx/(1.054615*(10.0**6)),1.0) !elec,ng,hfo,coal,CO2 COL AP-AS, AU  KPE-in trills
+      PP_Steam_Boiler(ii)=max(PP_Steam_Boiler(ii)*boilersx/((10.0**9)/CFJOULE),1.0) !elec,ng,hfo,coal,CO2 COL AP-AS, AU  KPE-in trills
     enddo
 
  !Steam_cogenx  ---in fuel units--conventional only
@@ -21173,16 +19153,16 @@ inumind=8
       do jj=1,9
 			PP_Steam_cogen(ii)=PP_Steam_cogen(ii)+(pp_stmfuel_chp(jj,ii)*share(jj+8))  !  GJ fuel * gj steam 
       enddo
-      PP_Steam_cogen(ii)=max(abs(PP_Steam_cogen(ii))*cogenx/(1.054615*(10.0**6)),1.0) ! KPE (GJ fuel/GJ steam)*GJ steam/(GJ/MMBTU)*trill/mill = trills OK elec,ng,hfo,coal,CO2 COL AP-AS, AU  KPE--in trills
+      PP_Steam_cogen(ii)=max(abs(PP_Steam_cogen(ii))*cogenx/((10.0**9)/CFJOULE),1.0) ! KPE (GJ fuel/GJ steam)*GJ steam/(GJ/MMBTU)*trill/mill = trills OK elec,ng,hfo,coal,CO2 COL AP-AS, AU  KPE--in trills
     enddo
  
   !  PP_Steam_cogen(1)=PP_Steam_cogen(1)+ &             ! PP_Steam_cogen has already been converted to SAE (trills?)
   !                 (pp_stmfuel_chp(7,1)*PAPER_STEAM_GRS(26,curiyr) + &   ! KPE ABS() FOR PAPER_STEAM Col O, Black Liquor Electricity(Trils)
-  !                (pp_stmfuel_chp(6,1)*share(3) +pp_stmfuel_chp(7,1)*share(4))*HOGFSteam)/1.054615*(10.0**-6) !Col P Hog Fuel Electricity(Trils)
+  !                (pp_stmfuel_chp(6,1)*share(3) +pp_stmfuel_chp(7,1)*share(4))*HOGFSteam)*CFJOULE/1000.0*(10.0**-6) !Col P Hog Fuel Electricity(Trils)
    ! this is in trills
     ! GJ /(GJ/MMBTU) * (trills/million)
    ! PP steam cogen	--- all renewable steam is assumed to be cogen; this is steam converted to fuel units
-   PP_Steam_cogen(6)=max(((PAPER_STEAM_GRS(26,curiyr) + abs(HOGFSteam))/pp_BioBoilEff)/(1.054615*(10.0**6)),1.0)    ! HOG Col AT  KPE ADD ABS() --- trills energy  	
+   PP_Steam_cogen(6)=max(((PAPER_STEAM_GRS(26,curiyr) + abs(HOGFSteam))/pp_BioBoilEff)/((10.0**9)/CFJOULE),1.0)    ! HOG Col AT  KPE ADD ABS() --- trills energy  	
 
     ! pp_elecgen=0.0 !Electric Generation (Gwh) -- not yet. The next series of equations is abs(GJ elec/GJ steam) 
 	PP_ElecGen(1:4) = 0.0
@@ -21205,18 +19185,18 @@ inumind=8
 
     
     do ii=1,3  ! conventional
-   ! old equation  PP_ElecGen(ii)=(PP_ElecGen(ii)*cogenx*1000.0/1.054615)/3.412   ! KPE:  ((GJ ELEC/GJ STEAM)*(GJ STEAM)*10.0**3/(GJ/mmbtu))/((btu/kwh)*10.0**-3) = not GWh 
-     PP_ElecGen(ii)=max((PP_ElecGen(ii)*cogenx/1.054615)/3412.0,1.0)   ! KPE:  ((GJ ELEC/GJ STEAM)*(GJ STEAM)/(GJ/mmbtu))/((btu/kwh)) = MMkwh = GWh 
+   ! old equation  PP_ElecGen(ii)=(PP_ElecGen(ii)*cogenx*CFJOULE)/3.412   ! KPE:  ((GJ ELEC/GJ STEAM)*(GJ STEAM)*10.0**3/(GJ/mmbtu))/((btu/kwh)*10.0**-3) = not GWh 
+     PP_ElecGen(ii)=max((PP_ElecGen(ii)*cogenx*CFJOULE/1000.0)/CFELQ,1.0)   ! KPE:  ((GJ ELEC/GJ STEAM)*(GJ STEAM)/(GJ/mmbtu))/((btu/kwh)) = MMkwh = GWh 
     enddo
    ! PP_ElecGen(4) =  abs(PP_ElecGen(4)*HOGFSteam) ! KPE GJ energy/GJ hog steam * GJ hog steam = GJ energy  convert in final equation tdtdtdttd
     ! because this equation has to be substantially rewritte! n, I will do so
 	! old equation
-	! PP_ElecGen(4)=ABS((pp_stmfuel_chp(7,1)*PAPER_STEAM_GRS(26,curiyr)/1.054615) + & !  !Col O, Black Liquor Electricity(Trils)  
-    ! ((pp_stmfuel_chp(6,1)*share(3) +pp_stmfuel_chp(7,1)*share(4))*HOGFSteam/1.054615))& !Col P Hog Fuel Electricity(Trils)
-    ! *1000000.0/3412.0
+	! PP_ElecGen(4)=ABS((pp_stmfuel_chp(7,1)*PAPER_STEAM_GRS(26,curiyr)*CFJOULE/1000.0) + & !  !Col O, Black Liquor Electricity(Trils)  
+    ! ((pp_stmfuel_chp(6,1)*share(3) +pp_stmfuel_chp(7,1)*share(4))*HOGFSteam*CFJOULE/1000.0))& !Col P Hog Fuel Electricity(Trils)
+    ! *1000000.0/CFELQ
 	! KPE GJ/(GJ/MMBTU)*(1/(btu/kwh)) = MMkWh = GWh
 	! this is renewable electric generation from hog fuel and black liquor steps 1 & 6   
-	 PP_ElecGen(4)=max(((PP_ElecGen(4) + abs(ElecGen_pap26(26,curiyr)))/1.054615)/3412.0,1.0) ! confirmed KPE GJ/(GJ/MMBTU)*(1/(btu/kwh)) = MMkWh = GWh
+	 PP_ElecGen(4)=max(((PP_ElecGen(4) + abs(ElecGen_pap26(26,curiyr)))*CFJOULE/1000.0)/CFELQ,1.0) ! confirmed KPE GJ/(GJ/MMBTU)*(1/(btu/kwh)) = MMkWh = GWh
 
 !***** Steam Demand ***************
 
@@ -21259,40 +19239,7 @@ inumind=8
     end subroutine PPSTEAM
 
 !***********************************
-! Vintage Index function for aluminum and cement !no longer used
-    FUNCTION VINTAGE_INDEX(stepnum)
-    use i_
-    implicit none
 
-    real sum1, prodsum, vintage_index
-    integer stepnum
-
-    if (curiyr.ge.ICURIYR2+3) then
-        prodsum=0.0
-        sum1=0.0
-        do i=is_FISYR(inddir),curiyr-1
-            if (IS_incr_adds(inddir,stepnum,i).gt.0.0) then
-               prodsum=prodsum+(IS_incr_adds(inddir,stepnum,i)*(i+1989))
-               sum1=sum1+IS_incr_adds(inddir,stepnum,i)
-            endif
-        enddo
-        if (prodsum.lt.0.0) prodsum=0.0
-        prodsum=prodsum+is_basecap(inddir,stepnum)*(ibyr2+2)  ! POT_ibyr2 2008 to (ibyr2+2)
-        if (sum1.lt.0.0) sum1=0.0
-        sum1=sum1+is_basecap(inddir,stepnum)
-        if (sum1.ne.0.0) then
-           vintage_index=(prodsum/sum1)-(ibyr2+3.0)            ! POT_ibyr2 2009 to (ibyr2+3.0)
-        else
-           vintage_index=0.0
-        endif
-        if (vintage_index.lt.0.0) vintage_index=0.0
-    else
-        vintage_index=0.0
-    endif
-    RETURN
-    END
-
-   !*****************************************************************************
     subroutine ppis_bsc
 !paper and steel bsc
 ! BSC is bypassed for paper and steel because BSC is included in P&A
@@ -21317,6 +19264,7 @@ inumind=8
     coggenshr(:,:)=1.0E-3; cogcapshr(:,:)= 0.; cogthrshr(:,:) = 0.; cogelfshr(:,:) = 0.  	
 	cogthrmelecshr(:) = 0. 
 	renewchpfac = 1. ; natgaschpfac = 1.
+	ensqty=0.
 
     !  KPE -- initialize coginit across all 4 regions
 	if (curiyr > maxcogyr) then
@@ -21354,13 +19302,13 @@ inumind=8
 
     if (inddir==8) then
 	   !old equation
-       ! totcogen=abs(PP_Steam_Cogen(1))/3412)*10.0**6 
+       ! totcogen=abs(PP_Steam_Cogen(1))/CFELQ)*10.0**6 
 	   ! old eq.  total electric cogen (GWh)! KPE trills to btu, btu to kwh, kwh to GWh (compressed scaling factor 10.0**12 * 10.0**-6) 
        ! new equation--we already have cogen in GWH, so we should use it
 	   ! total cogen--natgascapfactors and renew are ==1 when year <= maxcogyr so works
 	   totcogen = PP_ElecGen(1)*natgaschpfac + sum(PP_ElecGen(2:3)) + PP_ElecGen(4)*renewchpfac  ! already in GWh, so no conversion
    else
-       totcogen=(-1.0*is_CHP_Consump(3))/.003412 !total cogen (GWh)  this is for steel
+       totcogen=(-1.0*is_CHP_Consump(3))/CFELQ/10**6 !total cogen (GWh)  this is for steel
    endif
 
 !paper uses this
@@ -21455,7 +19403,7 @@ inumind=8
 			! KPE below is cogthr for electric generation---which doesn't really make a lot of sense because cogthr is
 		    ! (we believe) the form 923 steam used for electricity
 			! now and correct if there's a problem.
-			cogthr(11,curiyr,inddir,1)= (PP_Steam_Cogen(1)+ElecCons(26,curiyr))/(3.412*0.8) ! not quite (cogen steam + recovery furnance in tBtu)/(3412 Btu/kWh) = billion kWh of fuel; multiplied by 0.8 (assumed CHP efficiency) to put in units of steam
+			cogthr(11,curiyr,inddir,1)= (PP_Steam_Cogen(1)+ElecCons(26,curiyr))/(3.412*0.8) ! not quite (cogen steam + recovery furnance in tBtu)/(CFELQ Btu/kWh) = billion kWh of fuel; multiplied by 0.8 (assumed CHP efficiency) to put in units of steam
 
 		do ir=1,9
 			do j=1,3 !fuels
@@ -21486,39 +19434,28 @@ inumind=8
 	
     endif
 
-	   if (inddir==8) then
+	if (inddir==8) then
 	    ! we already have these variables, dont't we, from PPSTEAM, or can build them
 		! variables:  cogeneration steam, noncogen steam, biosteam, 
-        STEMCUR=SteamRgShr(inddir,indreg)*SUM(PAPER_STEAM_GRS(1:26,curiyr))/(1.054615*(10.0**6))  ! this is in trills		
+        STEMCUR=SteamRgShr(inddir,indreg)*SUM(PAPER_STEAM_GRS(1:26,curiyr))/((10.0**9)/CFJOULE)  ! this is in trills		
         COGSTEAM=STEMCUR*pp_cogshr                                                           ! CHP Steam Generation--same as in PPSTEAM ?
         NONCOGSTEAM=STEMCUR-COGSTEAM                                                         ! Total Non-CHP Steam Generation
         NONCOGFOSSTEAM=NONCOGSTEAM                                ! we                          ! Non-CHP Fossil Steam Generation
         BIOSTEAM=0.0  !Non-CHP Biomass Steam Generation  KPE -verified coorect
-        ! KPE -- these equations look OK. . . this is steam fuel use
-        ensqty(1)=max((PP_Steam_Cogen(2)+PP_Steam_Boiler(2)),1.0)*SteamRgShr(inddir,indreg)  !ng -add steam fuel consumption calc'ed in subroutine IS_STEAM
-        ensqty(3)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(1)*SteamRgShr(inddir,indreg)  !% HFO is resid-add steam fuel consumption calc'ed in subroutine IS_STEAM
-        ensqty(2)=max((PP_Steam_Cogen(4)+PP_Steam_Boiler(4)),1.0)*SteamRgShr(inddir,indreg)  !coal -add steam fuel consumption calc'ed in subroutine IS_STEAM
-        ensqty(5)=0.0   !Propane
-        ensqty(4)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(3)*SteamRgShr(inddir,indreg) !% of HFO is distilate
-        ensqty(6)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(2)*SteamRgShr(inddir,indreg) !% of HFO is pet coke
-        ensqty(7)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(4)*SteamRgShr(inddir,indreg) !% of HFO is other petroleum
-        ensqty(8)=0.0
-        !zero out other fuels -- why no bio?
-        ! KPE old equation ELOWN=  -1.0*pp_Steam_Cogen(1)*SteamRgShr(inddir,indreg)/3412.0*1000000.0
-		! new equation 
-		! also, don't we have electricity in PPSTEAM?
-		! KPE changed the steam variable to coggen . . . we can do regional if we want 
-        
+        ensqty(1)=max((PP_Steam_Boiler(1)),1.0)*SteamRgShr(inddir,indreg)  !ng -add steam fuel consumption calc'ed in subroutine IS_STEAM
+        ensqty(4)=max((PP_Steam_Cogen(2)+PP_Steam_Boiler(2)),1.0)*SteamRgShr(inddir,indreg)  !ng -add steam fuel consumption calc'ed in subroutine IS_STEAM
+        ensqty(10)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(1)*SteamRgShr(inddir,indreg)  !% HFO is resid-add steam fuel consumption calc'ed in subroutine IS_STEAM
+        ensqty(7)=max((PP_Steam_Cogen(4)+PP_Steam_Boiler(4)),1.0)*SteamRgShr(inddir,indreg)  !coal -add steam fuel consumption calc'ed in subroutine IS_STEAM
+        ensqty(11)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(3)*SteamRgShr(inddir,indreg) !% of HFO is distilate
+        ensqty(16)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(2)*SteamRgShr(inddir,indreg) !% of HFO is pet coke
+        ensqty(22)=max((PP_Steam_Cogen(3)+PP_Steam_Boiler(3)),1.0)*pp_hfoshr(4)*SteamRgShr(inddir,indreg) !% of HFO is other petroleum
 	else if (inddir==12) then
         STEMCUR=ENPIQTY(1)
         COGSTEAM=STEMCUR*CHP_SHARE
         NONCOGSTEAM=STEMCUR-COGSTEAM
-        ensqty(1)=IS_FSTEAM(1)*SteamRgShr(inddir,indreg)  !ng -add steam fuel consumption calc'ed in subroutine IS_STEAM
-        ensqty(3)=IS_FSTEAM(2)*SteamRgShr(inddir,indreg)  !TD changed to all resid based on 2014 Mecs;PREVIOUS: 10% HFO is resid-add steam fuel consumption calc'ed in subroutine IS_STEAM
-        ensqty(2)=IS_FSTEAM(4)*SteamRgShr(inddir,indreg)  !coal -add steam fuel consumption calc'ed in subroutine IS_STEAM
-        ensqty(7)=0.0 !IS_FSTEAM(2)*0.90*SteamRgShr(inddir,indreg) !no other pet in MEcs 2014; previously: 90% of HFO is other petroleum
-        ensqty(4:6)=0.0
-        ensqty(8:)=0.0
+        ensqty(4)=IS_FSTEAM(1)*SteamRgShr(inddir,indreg)  !ng -add steam fuel consumption calc'ed in subroutine IS_STEAM
+        ensqty(10)=IS_FSTEAM(2)*SteamRgShr(inddir,indreg)  !TD changed to all resid based on 2014 Mecs;PREVIOUS: 10% HFO is resid-add steam fuel consumption calc'ed in subroutine IS_STEAM
+        ensqty(7)=IS_FSTEAM(4)*SteamRgShr(inddir,indreg)  !coal -add steam fuel consumption calc'ed in subroutine IS_STEAM
         GENFUEL=0.  ! sum of cogen fuel for this industry and region ; stored in buffers; for indy rep writer
 	endif
 
@@ -21632,13 +19569,13 @@ common/ind_easy/INDETTCBUS, INDC4TCBUS, INDPRTCBUS, INDPPTCBUS, INDDFTCBUS, INDR
 !******************************************************************
 ! Subroutine to read in HGL and natural gas feedstock projections and recent data; added 6/25/2019 by NSK and NAL
   
-Subroutine Read_feedstock (MAX_YEARS, FEEDYEARS, ibyr, IUNITFEED, NG, LPG, ETH, PROP, PPRLNE, NBUT, IBUT, NGASOL, NAPH, H2)
+Subroutine Read_feedstock (MAX_YEARS, FEEDYEARS, ibyr, IUNITFEED, NG, LPG, ETH, PROP, PPRLNE, NBUT, IBUT, NAPH, H2)
             ! These are dummy variables whose values are passed to feedngtotal, FEEDHGLtotal, feedethtotal, &
-            ! feedpropanetotal, feedpropylenetotal, feednormbutanetotal, feedisobutanetotal, feednatgasolinetotal, feednaphtotal, and feedH2fertilizer respectively
+            ! feedpropanetotal, feedpropylenetotal, feednormbutanetotal, feedisobutanetotal, feednaphtotal, and feedH2fertilizer respectively
 
 	INTEGER, INTENT(IN) :: MAX_YEARS, FEEDYEARS, ibyr, IUNITFEED
     INTEGER IYEARFEED/0/, countx/0/   					                        ! IYEAR, countx initialized to 0 using /<number>/
-    Real*8  NGAS_FEED, LPG_FEED, ETH_FEED, PROP_FEED, PPRLNE_FEED, NBUT_FEED, IBUT_FEED, NGASOL_FEED, NAPH_FEED, H2_FEED       ! These values are a mix of SEDS data, MER data, STEO projections, and estimates from real-world research
+    Real*8  NGAS_FEED, LPG_FEED, ETH_FEED, PROP_FEED, PPRLNE_FEED, NBUT_FEED, IBUT_FEED, NAPH_FEED, H2_FEED       ! These values are a mix of SEDS data, MER data, STEO projections, and estimates from real-world research
     Real, intent(out), dimension (MAX_YEARS) :: NG          	! Natural gas feedstock
     Real, intent(out), dimension (MAX_YEARS) :: LPG         	! HGL total feedstock
     Real, intent(out), dimension (MAX_YEARS) :: ETH         	! Ethane feedstock
@@ -21646,14 +19583,13 @@ Subroutine Read_feedstock (MAX_YEARS, FEEDYEARS, ibyr, IUNITFEED, NG, LPG, ETH, 
     Real, intent(out), dimension (MAX_YEARS) :: PPRLNE      	! Propylene feedstock
     Real, intent(out), dimension (MAX_YEARS) :: NBUT        	! Normal butane feedstock 
     Real, intent(out), dimension (MAX_YEARS) :: IBUT        	! Isobutane feedstock
-    Real, intent(out), dimension (MAX_YEARS) :: NGASOL      	! Natural gasoline feedstock
     Real, intent(out), dimension (MAX_YEARS) :: NAPH        	! Naphtha feedstock
-	Real, intent(out), dimension (MAX_YEARS) :: H2        	! Naphtha feedstock
+	Real, intent(out), dimension (MAX_YEARS) :: H2        		! H2 feedstock
     
 	Read(IUNITFEED, '()' )                          ! Skip first line (header)
         
     DO WHILE (countx < MAX_YEARS)         				! Go from start year (ibyr is equivalent to index 1) to last year (as of AEO2023, 2024)
-        Read(IUNITFEED,*) IYEARFEED, NGAS_FEED, LPG_FEED, ETH_FEED, PROP_FEED, PPRLNE_FEED, NBUT_FEED, IBUT_FEED, NGASOL_FEED, NAPH_FEED, H2_FEED
+        Read(IUNITFEED,*) IYEARFEED, NGAS_FEED, LPG_FEED, ETH_FEED, PROP_FEED, PPRLNE_FEED, NBUT_FEED, IBUT_FEED, NAPH_FEED, H2_FEED
  
         countx = IYEARFEED-ibyr+1  		! Go from start year (ibyr) to last year (currently newest SEDS year plus 4)
         NG(countx)=NGAS_FEED            ! Pass output values to WEXOG arrays
@@ -21663,9 +19599,8 @@ Subroutine Read_feedstock (MAX_YEARS, FEEDYEARS, ibyr, IUNITFEED, NG, LPG, ETH, 
         PPRLNE(countx)=PPRLNE_FEED
         NBUT(countx)=NBUT_FEED
         IBUT(countx)=IBUT_FEED
-        NGASOL(countx)=NGASOL_FEED
         NAPH(countx)=NAPH_FEED
-		IF(countx .le. MAX_YEARS-2) H2(countx)=H2_FEED	! H2 feed for fertilizer doesn't have data for STEO years
+		IF(countx .le. MAX_YEARS-3) H2(countx)=H2_FEED	! H2 feed for fertilizer doesn't have data for STEO years
 	ENDDO
 
 End Subroutine Read_feedstock
@@ -21808,11 +19743,9 @@ End Subroutine Read_carbshrca
 ! Subroutine to read in HGL and natural gas feedstock projections and recent data; added 6/25/2019 by NSK and NAL
   
 Subroutine Read_H2 (H2_chem_supply_regx,H2_chem_demand_regx,H2_ref_supply_divx)
-                            ! These are dummy variables whose values are passed to feedngtotal, FEEDHGLtotal, feedethtotal, &
-                            ! feedpropanetotal, feedpropylenetotal, feednormbutanetotal, feedisobutanetotal, feednatgasolinetotal, &
-    use i_                  ! feednaphtotal, and base year H2 feedstock consumption for 6 chemical subsectors (industrial gases, other inorganics,
-    Implicit None			! petrochemicals, other organics, resins, and ag chemicals), respectively
-
+! These are dummy variables whose values are passed to H2_chem_supply_reg, H2_chem_demand_reg, and H2_ref_supply_div, respectively
+    use i_
+    Implicit None
 	INTEGER countx/0/
 	REAL dum1			! dummies for first and second columns (description)
 	CHARACTER dum2
@@ -21871,7 +19804,7 @@ SUBROUTINE BENCHMECS(con,mecsbench)
           do ii=1,10
             MECS_Data(inddir,INDREG,ii)=MECS_Data(inddir,INDREG,ii)+MECS_Data(9,INDREG,ii)
           enddo
-          MECS_Data(inddir,INDREG,4)=qcrdata(29,11,INDREG)      ! Make steam coal match read in QCR data, which already includes lime
+          MECS_Data(inddir,INDREG,4)=qcrdata(icuriyr,11,INDREG)      ! Make steam coal match read in QCR data, which already includes lime
         endif
         if (con(1,indreg).ne.0.0) mecsbench(1)=MECS_Data(inddir,INDREG,1)/CON(1,indreg)     !elec
         if (con(2,indreg).ne.0.0) mecsbench(2)=MECS_Data(inddir,INDREG,2)/CON(2,indreg)     !ngas
@@ -21908,12 +19841,12 @@ SUBROUTINE BENCHMECS(con,mecsbench)
         endif   
     endif
 
-    if (CURCALYR.ge.(ibyr+1)) then 
-	    ENPMQTY(1)=mecsbench(1)*ENPMQTY(1) !ixEL
-	    ENPMQTY(3)=mecsbench(2)*ENPMQTY(3) !ngas
-        ENPMQTY(4)=mecsbench(2)*ENPMQTY(4) !non core gas
-        ENPMQTY(6)=mecsbench(2)*ENPMQTY(6) !lease and plant gas
-!NSK        ENPMQTY(7)=mecsbench(4)*ENPMQTY(7) !ixCL
+    if (CURCALYR.gt.(ibyr)) then 
+	    ENPMQTY(1)=mecsbench(1)*ENPMQTY(1) 	!ixEL
+	    ENPMQTY(3)=mecsbench(2)*ENPMQTY(3) 	!ngas
+        ENPMQTY(4)=mecsbench(2)*ENPMQTY(4) 	!non core gas
+        ENPMQTY(6)=mecsbench(2)*ENPMQTY(6) 	!lease and plant gas
+											!steam coal done in CALIBRATE_COAL_ELEC
 	    ENPMQTY(10)=mecsbench(3)*ENPMQTY(10) !ixRF
 	    
         if (inddir.eq.12) then 
@@ -21923,42 +19856,33 @@ SUBROUTINE BENCHMECS(con,mecsbench)
           ENPMQTY(8)=0.0 !no met coal in MECS
           bypbscm(8)=0.0
         endif
-        ENPMQTY(11)=mecsbench(5)*ENPMQTY(11)  !distillate
-        ENPMQTY(12)=mecsbench(6)*ENPMQTY(12)  !propane
-        ENPMQTY(16)=mecsbench(7)*ENPMQTY(16)  !pet coke
-        ENPMQTY(18)=mecsbench(8)*ENPMQTY(18)  ! NSK:we want mecsbench of 8, not the propane mecsbench
- !               ENPMQTY(18)=mecsbench(6)*ENPMQTY(18) !renewables---KPE-lubes & waxes; using propane bench for now
-        ENPMQTY(22)=mecsbench(10)*ENPMQTY(22) !other petroleum
+        ENPMQTY(11)=mecsbench(5)*ENPMQTY(11)  ! distillate
+        ENPMQTY(12)=mecsbench(6)*ENPMQTY(12)  ! propane
+        ENPMQTY(16)=mecsbench(7)*ENPMQTY(16)  ! pet coke
+        ENPMQTY(18)=mecsbench(8)*ENPMQTY(18)  ! lubes & waxes; using renewables bench for now
+        ENPMQTY(22)=mecsbench(10)*ENPMQTY(22) ! other petroleum
         
  ! steam fuels       
-	    ensqty(1)=mecsbench(2)*ensqty(1)        ! non core ng
-!NSK	    ensqty(2)=mecsbench(4)*ensqty(2)    ! steam coal	    
-        ensqty(3)=mecsbench(3)*ensqty(3)        ! resid
-        ensqty(4)=mecsbench(5)*ensqty(4)        ! distillate
-        ensqty(5)=mecsbench(6)*ensqty(5)        ! propane
-        ensqty(6)=mecsbench(1)*ensqty(6)        ! electricity
-        
-        IF ((inddir.eq.8) .or.(inddir.eq.12)) THEN      ! paper and steel have  2 additional fuels
-            ensqty(7)=mecsbench(7)*ensqty(7)    ! petcoke
-            ensqty(8)=mecsbench(10)*ensqty(8)   ! other petroleum
-            ensqty(9)=0.0                       ! hydro
-            ensqty(10)=mecsbench(8)*ensqty(10)  ! biomass
-        ELSE
-            ensqty(7)=0.0                       ! hydro
-            ensqty(8)=mecsbench(8)*ensqty(8)    ! biomass
-       ENDIF
+        ensqty(1) =mecsbench(1)*ensqty(1)   ! electricity
+	    ensqty(4) =mecsbench(2)*ensqty(4)   ! natural gas
+											! steam coal done in CALIBRATE_COAL_ELEC
+        ensqty(10)=mecsbench(3)*ensqty(10)  ! resid
+        ensqty(11)=mecsbench(5)*ensqty(11)  ! distillate
+        ensqty(12)=mecsbench(6)*ensqty(12)  ! propane
+        ensqty(16)=mecsbench(7)*ensqty(16)   ! petcoke
+        ensqty(22)=mecsbench(10)*ensqty(22) ! other petroleum
+        ensqty(42)=mecsbench(8)*ensqty(42)  ! biomass
         
         enbqty(1:5,1)=mecsbench(1)*enbqty(1:5,1) !elec
         enbqty(1:5,2)=mecsbench(2)*enbqty(1:5,2) !ng
-        !enbqty(1:5,3)=mecsbench()*enbqty(1:5,3) !steam
         enbqty(1:5,4)=mecsbench(5)*enbqty(1:5,4) !dist
         enbqty(1:5,5)=mecsbench(6)*enbqty(1:5,5) !lpg
         
         bypbscm(1)=mecsbench(1)*bypbscm(1) !ixEL
-	    bypbscm(3)=mecsbench(2)*bypbscm(3) !ngas
+	    bypbscm(4)=mecsbench(2)*bypbscm(4) !ngas
         bypbscm(4)=mecsbench(2)*bypbscm(4) !non core gas
         bypbscm(6)=mecsbench(2)*bypbscm(6) !lease and plant gas
-!NSK        bypbscm(7)=mecsbench(4)*bypbscm(7) !ixCL
+										   ! steam coal done in CALIBRATE_COAL_ELEC
 	    bypbscm(10)=mecsbench(3)*bypbscm(10) !RF     
         bypbscr(1:9)=mecsbench(8)*bypbscr(1:9) !renewables
         enprqty(1:9)=mecsbench(8)*enprqty(1:9) !renewables
@@ -22045,7 +19969,7 @@ End Subroutine Read_prop_frac
 	
 		if ((CURCALYR .GT. SedsLastYr).and.(CURCALYR .LE. (STEOLastYr + fadexyrs - indbmov))) then
 		  IF (CURCALYR .LE. (STEOLastYr - indbmov)) THEN
-			fade_factor=1.0         ! STEO Years 2010-2013
+			fade_factor=1.0         ! STEO Years
           else ! if (curcalyr .GT. (STEOLastYr - indbmov)) then
 				do ix = 1,fadexyrs
 					if (curcalyr .eq. (STEOLastYr + ix - indbmov)) then

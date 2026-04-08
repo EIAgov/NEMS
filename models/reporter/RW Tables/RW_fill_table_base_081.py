@@ -65,6 +65,9 @@ def fill_table_base_081(dfd, table_spec, table_id):
 
     #     Marcellus
     z[7] = dfd["OGQSHLGAS"].loc[7]
+    
+    #     Marcellus/Utica
+    z[12] = dfd["OGQSHLGAS"].loc[7] + dfd["OGQSHLGAS"].loc[9]
 
     #     Bakken
     z[8] = dfd["OGQSHLGAS"].loc[8]
@@ -75,11 +78,11 @@ def fill_table_base_081(dfd, table_spec, table_id):
     #     Permian
     z[10] = dfd["OGQSHLGAS"].loc[10]
 
-    #     Other
-    z[11] = dfd["OGQSHLGAS"].loc[15]
+    #     Other (Fayetteville + Woodford + Antrim + Other)
+    z[11] = dfd["OGQSHLGAS"].loc[3] + dfd["OGQSHLGAS"].loc[4] + dfd["OGQSHLGAS"].loc[6] + dfd["OGQSHLGAS"].loc[15]
 
     #     ?
-    z[12] = dfd["OGQSHLGAS"].loc[12]
+    #z[12] = dfd["OGQSHLGAS"].loc[12]
 
     #     ?
     z[13] = dfd["OGQSHLGAS"].loc[13]
@@ -92,7 +95,9 @@ def fill_table_base_081(dfd, table_spec, table_id):
 
     #       Total
     # T80(56,IY,IS)=SUM(OGQSHLGAS(1:15,IY))
-    z[16] = pd.concat([z[i].to_frame().T for i in range(1, 12)]).sum()
+    # Total = Barnett + Haynesville/Bossier + Eagle Ford + Bakken +
+    # Marcellus/Utica + Permian + Other
+    z[16] = z[1]+z[2]+z[5]+z[12]+z[8]+z[10]+z[11]
 
     #   Tight Oil Plays
     # T79(1:15,IY,IS)=OGQSHLOIL(1:15,IY)
@@ -117,33 +122,18 @@ def fill_table_base_081(dfd, table_spec, table_id):
     #     Avalon/Bone Springs
     z[23] = dfd["OGQSHLOIL"].loc[7]
 
-    #     Monterey
-    z[24] = dfd["OGQSHLOIL"].loc[8]
-
     #     Wolfcamp
-    z[25] = dfd["OGQSHLOIL"].loc[9]
+    z[24] = dfd["OGQSHLOIL"].loc[9]
 
     #     Utica
-    z[26] = dfd["OGQSHLOIL"].loc[10]
+    z[25] = dfd["OGQSHLOIL"].loc[10]
 
-    #     Other
-    z[27] = dfd["OGQSHLOIL"].loc[11:15].sum()
-
-    #     Monterey
-    z[28] = dfd["OGQSHLOIL"].loc[12]
-
-    #     Monterey
-    z[29] = dfd["OGQSHLOIL"].loc[13]
-
-    #     Monterey
-    z[30] = dfd["OGQSHLOIL"].loc[14]
-
-    #     Monterey
-    z[31] = dfd["OGQSHLOIL"].loc[15]
+    #     Other (Woodford + Other)
+    z[26] = dfd["OGQSHLOIL"].loc[3] + dfd["OGQSHLOIL"].loc[11:15].sum()
 
     #       Total
     # T79(40,IY,IS)=SUM(OGQSHLOIL(1:15,IY))
-    z[32] = pd.concat([z[i].to_frame().T for i in range(17, 28)]).sum()
+    z[27] = pd.concat([z[i].to_frame().T for i in range(17, 27)]).sum()
 
 
     return z

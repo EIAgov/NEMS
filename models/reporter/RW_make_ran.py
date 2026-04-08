@@ -327,7 +327,11 @@ def write_datatype_1(fmt_row, RGTNum, RGTKey, RGTAct, RGTReg, region_info):
     """
     if fmt_row["CM"] != "HD":
         return
+    if fmt_row["Level"] > 2:
+        region_info = ""
     if fmt_row["Level"] > 1:
+        fmt_row["Label"] = ""
+    if fmt_row["Level"] == 1:
         region_info = ""
     RGText = fmt_row["Label"] + region_info
     RGTLen = len(RGText)
@@ -1185,7 +1189,7 @@ def make_ran(
     RSSLen = len(RSScen)
 
     # Load data
-    df_data = pd.read_csv(df_data_file_path)
+    df_data = pd.read_csv(df_data_file_path, dtype={"SubSrc":str})
     df_data.set_index(["TableNumber", "RowNum", "RegionNum"], inplace=True)
 
     # Replace infinite values with 0

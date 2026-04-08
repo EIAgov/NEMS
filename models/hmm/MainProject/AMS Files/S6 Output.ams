@@ -112,6 +112,9 @@ Section S6_Output {
 	}
 	Section PostProcessing {
 		DeclarationSection ZCT_Declarations {
+			ElementParameter ZTCBasisYear {
+				Range: cal_Year;
+			}
 			Set ZTCTech {
 				SubsetOf: ProductionTechs_;
 			}
@@ -123,7 +126,7 @@ Section S6_Output {
 			}
 			Parameter LowZTCReduction;
 			File ReferenceCapitalCostFile {
-				Name: "data/CapitalCostsByYearReference.txt";
+				Name: "../../hmm/data/CapitalCostsByYearReference.txt";
 				Device: Disk;
 				Mode: replace;
 			}
@@ -131,8 +134,8 @@ Section S6_Output {
 		Procedure ZCT_CapitalCostReduction {
 			Body: {
 				LowZTCReduction := ZTCCOSTM;
-				LowZTCReductionYear := '2050';
-				LowZTCReductionToDate(NextModelYear) := (LowZTCReduction /$ (LowZTCReductionYear - FirstModelYear)) * ((NextModelYear - FirstModelYear));
+				LowZTCReductionYear := LastModelYear;
+				LowZTCReductionToDate(NextModelYear) := (LowZTCReduction /$ (LowZTCReductionYear - ZTCBasisYear)) * ((NextModelYear - ZTCBasisYear));
 				
 				CapitalCostsByYear(NextModelYear, reg, prodtech_elec) := CapitalCostsByYearReference(NextModelYear, reg, prodtech_elec) * (1-LowZTCReductionToDate(NextModelYear));
 			}
@@ -235,6 +238,9 @@ Section S6_Output {
 				}
 			}
 			DeclarationSection Hydrogen_Production_and_Capacity_Declarations {
+				Parameter Electrolyzer_Capacity_Census {
+					IndexDomain: (regCen,year);
+				}
 				Parameter SeasonalRegionalElectrolyzerProductionByTech {
 					IndexDomain: (regNERC,seas,prodTech,year);
 				}
@@ -270,11 +276,26 @@ Section S6_Output {
 				}
 			}
 			DeclarationSection CO2_Declarations {
+				Parameter TotalCCS {
+					IndexDomain: (regCen,year);
+				}
+				Parameter CCSShares {
+					IndexDomain: (regCen,prodtech_ccs, year);
+				}
+				Parameter CO2InvestmentCostsByTech {
+					IndexDomain: (regCen,prodtech_ccs,year);
+				}
 				Parameter CO2OMCostsBySeason {
 					IndexDomain: (regCen,seas,year);
 				}
+				Parameter CO2OMCostsBySeasonByTech {
+					IndexDomain: (regCen,seas, prodtech_ccs, year);
+				}
 				Parameter CO2OMCosts {
 					IndexDomain: (regCen,year);
+				}
+				Parameter CO2OMCostsByTech {
+					IndexDomain: (regCen,prodtech_ccs,year);
 				}
 				Parameter CO2InvestmentCosts {
 					IndexDomain: (regCen,year);
@@ -302,6 +323,7 @@ Section S6_Output {
 			Parameter IndustrialPriceMarkup;
 		}
 		DeclarationSection Endogenous_Learning {
+			Parameter ccs_cost_share;
 			Parameter CapitalCostsByYearReference {
 				IndexDomain: (i_calYear,reg,prodTech_elec);
 			}
@@ -452,7 +474,8 @@ Section S6_Output {
 						H2Demand(seas, lpd, FirstPlanningPeriod) := SupplyCurveTotalDemand(lpd, H2STEP, seas, CurrentModelYear);
 						ByproductSupply(lpd, seas, FirstPlanningPeriod) := Byproduct_SupplyCurve_Q(lpd, H2STEP, seas, CurrentModelYear);
 						CheckByproductInfeasibility;
-						solve solveHMM;
+						solve solveHMM where
+							"CPLEX 22.1".LP_method := "Dual Simplex";;
 						LPStatusNotOptimalEMMSupplyCurve;
 						EMM_SupplyCurve_P(lph, H2STEP, seas, CurrentModelYear) := (HubBalance.ShadowPrice(seas, lph, FirstPlanningPeriod)/kg_to_mMton) +  EndUseMarkup(ElectricitySector) + CapitalCostAdder(lph, CurrentModelYear);
 				
@@ -480,12 +503,71 @@ Section S6_Output {
 				!EMM_SupplyCurve_Q(regCen, '1', seas, CurrentModelYear) |  EMM_SupplyCurve_Q(regCen, '1', seas, CurrentModelYear) = 0 := .000000001;
 			}
 		}
+		Procedure Calculate_CCS_Costs {
+			Body: {
+				 ! CO2 investment costs. ((We assume the CCS cost is the difference between the SMR and SMR w/CCS capital costs.)
+				 CO2InvestmentCostsByTech (regCen,prodTech_ccs, CurrentModelYear) := ((PUCCostNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod) - PUCCostNonElectrolyzer(regCen, SMRTech, FirstPlanningPeriod))
+				 	 / CO2CaptureRate(prodtech_ccs))*kg_to_tons;
+				
+				
+				 ! CO2 investment costs. ((We assume the CCS cost is the difference between the SMR and SMR w/CCS capital costs.)
+				 CO2InvestmentCosts(regCen, CurrentModelYear) := (sum(prodtech_ccs, ((PUCCostNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod) - PUCCostNonElectrolyzer(regCen, SMRTech, FirstPlanningPeriod))
+				  * AnnualRegionalH2ProductionByTech(regCen, prodTech_ccs, CurrentModelYear)
+				 	 / CO2CaptureRate(prodtech_ccs))*kg_to_tons))
+				 	 /$ sum(prodTech_ccs, AnnualRegionalH2ProductionByTech(regCen, prodTech_ccs, CurrentModelYear));
+				
+				! For regions/year combinations with no CCS production, assume SMR CCS capex
+				CO2InvestmentCosts(regCen, CurrentModelYear) | (CO2InvestmentCosts(regCen, CurrentModelYear) = 0) := 
+										CO2InvestmentCostsByTech(regCen, SMRCCSTEch, CurrentModelYear);
+				 CO2OMCostsBySeason(regCEN, seas, CurrentModelYear) := 
+				 ! Fixed OM + Var OM
+				 ! @TODO TAKE DIFFERENCE BETWEEN SMR AND SMR CCS IN FIXED OM AND VAR OM.
+				 (
+				 (FixedOMCostNonElectrolyzerNoCapex(seas, regCen, SMRCCSTech, FirstPlanningPeriod) + VarOMCostNonElectrolyzer(seas, regCen, SMRCCSTech, FirstPlanningPeriod)
+				 ! Feedstock Costs
+				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (FeedstockConsumption(SMRCCSTech, fuel) - FeedstockConsumption(SMRTech, fuel))))
+				 ! HP Costs
+				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (HPconsumption(SMRCCSTech, fuel) - HPconsumption(SMRTech, fuel))))
+				  )) /CO2CaptureRate(SMRCCSTech) * kg_to_tons;
+				
+				
+				 CO2OMCostsBySeasonByTech(regCEN, seas,prodtech_ccs, CurrentModelYear) := 
+				 ! Fixed OM + Var OM
+				 ! @TODO TAKE DIFFERENCE BETWEEN SMR AND SMR CCS IN FIXED OM AND VAR OM.
+				 (
+				 (FixedOMCostNonElectrolyzerNoCapex(seas, regCen, prodtech_ccs, FirstPlanningPeriod) + VarOMCostNonElectrolyzer(seas, regCen, prodtech_ccs, FirstPlanningPeriod)
+				 ! Feedstock Costs
+				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (FeedstockConsumption(prodtech_ccs, fuel) - FeedstockConsumption(SMRTech, fuel))))
+				 ! HP Costs
+				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (HPconsumption(prodtech_ccs, fuel) - HPconsumption(SMRTech, fuel))))
+				  )) /CO2CaptureRate(prodtech_ccs) * kg_to_tons;
+				
+				CO2OMCostsByTech(regCEN, prodtech_ccs, CurrentModelYear) := (sum(seas, CO2OMCostsBySeasonByTech(regCen, seas, prodtech_ccs, CurrentModelYear)
+					 * H2Demand(seas, regCen, FirstPlanningPeriod))) /$
+					sum(seas, H2Demand(seas, regCen, FirstPlanningPeriod));
+				
+				TotalCCS(regCen, CurrentModelYear) := sum(prodtech_ccs, AnnualRegionalH2ProductionByTech(regCen, prodTech_ccs, CurrentModelYear));
+				
+				CCSShares(regCen, prodtech_ccs, CurrentModelYear) := 	AnnualRegionalH2ProductionByTech(regCen, prodTech_ccs, CurrentModelYear) /$
+											TotalCCS(regCen, CurrentModelYear);
+				
+				
+				
+				
+				CO2OMCosts(regCEN, CurrentModelYear) := (sum(prodtech_ccs, (CO2OMCostsByTech(regCen, prodtech_ccs, CurrentModelYear)
+									 * AnnualRegionalH2ProductionByTech(regCen, prodtech_ccs, CurrentModelYear))))
+				 					 /$ sum(prodTech_ccs, AnnualRegionalH2ProductionByTech(regCen, prodTech_ccs, CurrentModelYear));
+				
+				! For any region without any SMR CCS or ATR CCS (preventing weighted average), use the SMR CCS OPEX price
+				CO2OMCosts(regCen, CurrentModelYear) | (CO2OMCosts(regCen, CurrentModelYear) = 0) := CO2OMCostsByTech(regCen, SMRCCSTech, CurrentModelYear);
+			}
+		}
 		Procedure ExtractModelResults {
 			Body: {
 				
 				! Calculate capital cost adder by determining the weighted average cost of existing H2 capacity.
 				CombinedCapitalCosts(regCen, prodTech_nonElec, pp, CurrentModelYear) := PUCCostNonElectrolyzer(regCen, prodTech_nonElec, pp);
-				CombinedCapitalCosts(regCen, prodTech_elec, pp, CurrentModelYear) := Average(regNERC | map_regNERCToRegCEN(regNERC, regCen) , PUCCostElectrolyzer(regNERC, prodTech_elec, pp));
+				CombinedCapitalCosts(regCen, prodTech_elec, pp, CurrentModelYear) := mean(regNERC | map_regNERCToRegCEN(regNERC, regCen) , PUCCostElectrolyzer(regNERC, prodTech_elec, pp));
 				CombinedCapacity(regCen, prodtech_nonElec, CurrentModelYear) := sum(capyear, ExistingCapacityNonElectrolyzer(regCen, prodTech_nonElec, FirstPlanningPeriod, capYear));
 				CapitalCostAdder(regCen, CurrentModelYear) := sum(prodtech , CombinedCapitalCosts(regCen, prodTech, FirstPlanningPeriod, CurrentModelYear) * CombinedCapacity(regCen, prodTech, CurrentModelYear)) /$ sum(prodtech, CombinedCapacity(regCen, prodTech, CurrentModelYear));
 				CapitalCostAdder(regCen, CurrentModelYear) := CapitalCostAdder(regCen, CurrentModelYear) / kg_to_mMton;
@@ -506,9 +588,9 @@ Section S6_Output {
 				if NCNTRL_FCRL('1') = 1 OR AIMMS_Standalone_Switch =1 then
 					PUCExpansionsNonElectrolyzer(regCen, prodTech_nonElec, NextModelYear) := sum(prodStep, PUCByStepNonElectrolyzer(prodStep, regCen, prodTech_nonElec, SecondPlanningPeriod, NextModelYear));
 				
-					PUCExpansionsElectrolyzer(regNERC, prodTech_elec, NextModelYear) := sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, SecondPlanningPeriod,NextModelYear) | PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, SecondPlanningPeriod, NextModelYear) > 0);
+					PUCExpansionsElectrolyzer(regNERC, prodTech_elec, NextModelYear) := sum(prodStep, PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, SecondPlanningPeriod,NextModelYear) $ (PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, SecondPlanningPeriod,NextModelYear) > 0));
 				
-					PUCExpansionElectrolyzerByStep(prodStep, regNERC, prodTech_elec, pp, capYear, CurrentModelYear) := PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, pp,capYear) | PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp, capYear) > 0;
+					PUCExpansionElectrolyzerByStep(prodStep, regNERC, prodTech_elec, pp, capYear, CurrentModelYear) := PUCByStepElectrolyzer(prodStep, regNERC, prodTech_Elec, pp,capYear) $ (PUCByStepElectrolyzer(prodStep, regNERC, prodTech_elec, pp, capYear) > 0);
 				
 					! Add capacity expansions to existing capacity so that they are available the following model year.
 					CapacityNonElecVintage(i_calYear, regCen, prodTech_nonElec, NextModelYear) | (i_calYear >= NextModelYear) += PUCExpansionsNonElectrolyzer(regCEN, prodTech_Nonelec, NextModelYear);
@@ -624,24 +706,7 @@ Section S6_Output {
 				CO2NonEligible45Q(regCen, CurrentModelYear) := sum((seas, prodTech_nonElec, capYearMod) | Credit45QEligibility(CurrentModelYear, capYearMod) <> 1 , H2ProdNonElectrolyzer(regCen, seas, prodTech_nonElec, FirstPlanningPeriod, capYearMod)
 				 * CO2CaptureRate(prodTech_nonElec))/kg_to_tons;
 				
-				 ! CO2 investment costs. ((We assume the CCS cost is the difference between the SMR and SMR w/CCS capital costs.)
-				 CO2InvestmentCosts(regCen, CurrentModelYear) := ((PUCCostNonElectrolyzer(regCen, SMRCCSTech, FirstPlanningPeriod) - PUCCostNonElectrolyzer(regCen, SMRTech, FirstPlanningPeriod))
-				 	 / CO2CaptureRate(SMRCCSTech))*kg_to_tons;
-				
-				
-				 CO2OMCostsBySeason(regCEN, seas, CurrentModelYear) := 
-				 ! Fixed OM + Var OM
-				 ! @TODO TAKE DIFFERENCE BETWEEN SMR AND SMR CCS IN FIXED OM AND VAR OM.
-				 (
-				 (FixedOMCostNonElectrolyzerNoCapex(seas, regCen, SMRCCSTech, FirstPlanningPeriod) + VarOMCostNonElectrolyzer(seas, regCen, SMRCCSTech, FirstPlanningPeriod)
-				 ! Feedstock Costs
-				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (FeedstockConsumption(SMRCCSTech, fuel) - FeedstockConsumption(SMRTech, fuel))))
-				 ! HP Costs
-				  + sum(fuel, (FuelCost(seas, regCen, fuel, FirstPlanningPeriod) * (HPconsumption(SMRCCSTech, fuel) - HPconsumption(SMRTech, fuel))))
-				  )) /CO2CaptureRate(SMRCCSTech) * kg_to_tons;
-				
-				CO2OMCosts(regCEN, CurrentModelYear) := (sum(seas, CO2OMCostsBySeason(regCen, seas, CurrentModelYear) * H2Demand(seas, regCen, FirstPlanningPeriod))) /$
-					sum(seas, H2Demand(seas, regCen, FirstPlanningPeriod));
+				Calculate_CCS_Costs;
 				
 				! Add in end-use markups.
 				HydrogenEndUsePrices(regCen, sec, CurrentModelYear) := HydrogenPriceAnnual(regCen, CurrentModelYear) + EndUseMarkup(sec);
@@ -656,8 +721,6 @@ Section S6_Output {
 				ui_NERCtoCEN(CurrentModelYear, regNERC, regCen) := sum((seas, hr, prodTech_elec, capYearMod, creditStep), H2ProdElectrolyzer(regNERC, seas, hr, prodTech_elec, FirstPlanningPeriod, capYearMod, creditStep)) * map_regNERCToRegCEN(regNERC, regCen);
 				
 				! Run additional LPs for EMM Supply curve
-				option 
-					"CPLEX 22.1".LP_method := "Dual Simplex";
 				Calculate_EMM_SupplyCurve;
 				
 				! If is less than 1, but not zero, that means the Low ZCT case is being run, and the capital costs need to be a specified reduction from the Reference case.
@@ -668,13 +731,16 @@ Section S6_Output {
 				
 				! If it is the low ZTC case (ZTCCOSTM < 1, then overwrite capital costs with a percent reduction from the Reference case.
 				if (ZTCCOSTM > 0 and ZTCCOSTM < 1) then
-					ZCT_CapitalCostReduction;
+					if CurrentModelYear >= ZTCBasisYear then
+						ZCT_CapitalCostReduction;
+					endif;
 				endif;
 				
 					! When ZTCCOSTM = 0 (High ZCT Case), then we hold capital costs constant to whatever they are in the FirstModelYear
 				if	 ZTCCOSTM = 0 then
-						CapitalCostsByYear(NextModelYear, reg, prodTech_elec) := CapitalCostsByYear(FirstModelYear, reg, prodTech_elec);
-				
+					if CurrentModelYear >= ZTCBasisYear then
+						CapitalCostsByYear(NextModelYear, reg, prodTech_elec) := CapitalCostsByYear(ZTCBasisYear, reg, prodTech_elec);
+					endif;
 				endif;
 			}
 		}
@@ -685,11 +751,18 @@ Section S6_Output {
 				
 				ExistingCapacityForLearning(NextModelYear, prodTech_nonElec) := sum( (regCen,capYear), CapacityNonElecVintage(NextModelYear, regCen, prodTech_nonElec, capYear));
 				ExistingCapacityForLearning(NextModelYear, prodTech_elec) := sum((regNERC, capYear), CapacityElecVintage(NextModelYear, regNERC, prodTech_elec, capYear));
+				
+				! Set Existing ATR capacity for learning same as SMR CCS
+				InitialCapacityForLearning(ATRCCSTech) := InitialCapacityForLearning(SMRCCSTech);
+				
 				! Final capacity used for learning algo.
 				TotalCapacityForLearning(NextModelYear, prodTech) := (NewCapacityForLearning(NextModelYear, prodTech)+ExistingCapacityForLearning(NextModelYear, prodTech));
-				
-				
 				TotalCapacityForLearning(NextModelYear, PEMTech) := ExistingCapacityForLearning(NextModelYear, PEMTech) + NewCapacityForLearning(NextModelYear, PEMTech) + InitialCapacityForLearning(PEMTech);
+				TotalCapacityForLearning(NextModelYear, ATRCCSTech) := InitialCapacityForLearning(ATRCCSTech) + ExistingCapacityForLearning(NextModelYear, ATRCCSTech) + NewCapacityForLearning(NextModelYear, PEMTech);
+				
+				! Add in a fraction of SMR CCS/ATR CCS to each other to represent shared CCS tech learning
+				TotalCapacityForLearning(NextModelYear, ATRCCSTech) := TotalCapacityForLearning(NextModelYear, ATRCCSTech) + (TotalCapacityForLearning(NextModelYear, SMRCCSTech)-TotalCapacityForLearning('2023', SMRCCSTech))* ccs_cost_share;
+				TotalCapacityForLearning(NextModelYear, SMRCCSTech) := TotalCapacityForLearning(NextModelYear, SMRCCSTech) + (TotalCapacityForLearning(NextModelYear, ATRCCSTech)-TotalCapacityForLearning('2023', ATRCCSTech))* ccs_cost_share;
 				
 				! @TODO, remove when these when done testing/debugging.
 				empty LRCapacityBySteps;
@@ -773,9 +846,10 @@ Section S6_Output {
 				
 				! Calculate what minimum learning should be after a given year:
 				MinimumLearningReductionToDate(prodTech) := (minimum_learning(prodTech) /$ (MinimumLearningEndYear - FirstModelYear)) * ((NextModelYear - FirstModelYear));
-				!MinimumLearningFactor(prodTech) | (MinimumLearningReductionToDate(prodTech)) :=  MinimumLearningReductionToDate(prodTech);
+				
 				if(NextModelYear <= MinimumLearningEndYear) then
 					CapitalCostsByYearMinimumLearning(NextModelYear, reg, prodTech) := (1-MinimumLearningReductionToDate(prodTech)) *  CapitalCostsByYear(FirstModelYear, reg, prodTech);
+				
 					 !If the capital costs via minimum learning is less than the capital cost from endogenous learning, replace the capital cost with minimum learning.
 					CapitalCostsByYear(NextModelYear, reg, prodTech) | (CapitalCostsByYearMinimumLearning(NextModelYear, reg, prodTech) < CapitalCostsByYear(NextModelYear, reg, prodTech)) := CapitalCostsByYearMinimumLearning(NextModelYear, reg, prodTech);
 				else CapitalCostsByYear(NextModelYear, reg, prodTech) | (CapitalCostsByYear(NextModelYear, reg, prodTech) > CapitalCostsByYearMinimumLearning(MinimumLearningEndYear, reg, prodTech)) := CapitalCostsByYearMinimumLearning(MinimumLearningEndYear, reg, prodTech);
@@ -796,7 +870,7 @@ Section S6_Output {
 				!ncntrl_curcalyr(1) := 2050;
 				!ncntrl_curitr(1) := 1;
 				
-				sDataYearFile := "fromAIMMS\\GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
+				sDataYearFile := "../../hmm\\fromAIMMS\\GlobalDataToNEMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+".txt";
 				
 				! Note the "FILE" identifier GlobalDataToNEMS is linked to the string parameter sDataYearFile
 				put GlobalDataToNEMS; ! opens the file (sDataYearFile) and sets stage for subsequent display and/or put statements
@@ -822,6 +896,7 @@ Section S6_Output {
 					display {HMMBLK_QELINH2NG(MNUMCR, globalyr)} where decimals:=22;
 					display {HMMBLK_QELTRH2(MNUMCR, globalyr)} where decimals:=22;
 					display {HMMBLK_PRDH2NG_CCS(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_PRDH2NGATR_CCS(MNUMCR, globalyr)} where decimals:=22;
 					display {HMMBLK_PRDH2EL_NR(MNUMNR, globalyr)} where decimals:=22;
 					display {HMMBLK_PH2_SPOT(MNUMCR, globalyr)} where decimals:=22;
 					display {MPBLK_PH2TR(MNUMCR, globalyr)} where decimals:=22;
@@ -829,6 +904,14 @@ Section S6_Output {
 					display {CCATSDAT_SUP_H2_NTC(MNUMCR, globalyr)} where decimals:=22;
 					display {CCATSDAT_CST_H2_INV(MNUMCR, globalyr)} where decimals:=22;
 					display {CCATSDAT_CST_H2_OM(MNUMCR, globalyr)} where decimals:=22;
+					display {HMMBLK_SMR_CAP(MNUMCR,globalyr)} where decimals:=22;
+					display {HMMBLK_SMRCCS_CAP(MNUMCR,globalyr)} where decimals:=22;
+					display {HMMBLK_ATRCCS_CAP(MNUMCR,globalyr)} where decimals:=22;
+					display {HMMBLK_ELEC_CAP(MNUMCR,globalyr)} where decimals:=22;		
+					display {HMMBLK_SMRCAPCOST(globalyr)} where decimals:=22;
+					display {HMMBLK_SMRCCSCAPCOST(globalyr)} where decimals:=22;
+					display {HMMBLK_ATRCCSCAPCOST(globalyr)} where decimals:=22;
+					display {HMMBLK_ELECCAPCOST(globalyr)} where decimals:=22;			
 				putclose;
 			}
 			Comment: "send global data back to nems via a text file.";
@@ -871,6 +954,10 @@ Section S6_Output {
 				!SMR with CCS 
 				HMMBLK_PRDH2NG_CCS(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN| NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), AnnualRegionalH2ProductionByTech(regCen, SMRCCSTech, CurrentModelYear));
 				HMMBLK_PRDH2NG_CCS(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN, AnnualRegionalH2ProductionByTech(regCen, SMRCCSTech, CurrentModelYear));
+				
+				! ATR with CCS
+				HMMBLK_PRDH2NGATR_CCS(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN| NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), AnnualRegionalH2ProductionByTech(regCen, ATRCCSTech, CurrentModelYear));
+				HMMBLK_PRDH2NGATR_CCS(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN, AnnualRegionalH2ProductionByTech(regCen, ATRCCSTech, CurrentModelYear));
 				
 				! PEM
 				HMMBLK_PRDH2EL(MNUMCR,NEMSmap_MNUMYR(CurrentModelYear)) := sum((regCEN, prodTech_elec) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  AnnualRegionalH2ProductionByTech(regCen, prodTech_elec, CurrentModelYear));
@@ -943,6 +1030,31 @@ Section S6_Output {
 				CCATSDAT_CST_H2_OM(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, (CCATSDAT_CST_H2_OM(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) 
 				* sum((regCen, prodtech_ccs, capYear) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ExistingCapacityNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod, capYear)))) /$
 				sum(MNUMCR, sum((regCEN, prodtech_ccs, capYear) | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), ExistingCapacityNonElectrolyzer(regCen, prodtech_ccs, FirstPlanningPeriod, capYear)));
+				
+				! Capital costs ($/kg)
+				
+				! Production capacity
+				! SMR capacity
+				HMMBLK_SMR_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  sum(capYear, CapacityNonElecVintage(CurrentModelYear, regCen, SMRTech, capYear)));
+				HMMBLK_SMR_CAP(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, HMMBLK_SMR_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				! SMR CCS capacity
+				HMMBLK_SMRCCS_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  sum(capYear, CapacityNonElecVintage(CurrentModelYear, regCen, SMRCCSTech, capYear)));
+				HMMBLK_SMRCCS_CAP(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, HMMBLK_SMRCCS_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				! ATR CCS capacity
+				HMMBLK_ATRCCS_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR),  sum(capYear, CapacityNonElecVintage(CurrentModelYear, regCen, ATRCCSTech, capYear)));
+				HMMBLK_ATRCCS_CAP(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, HMMBLK_ATRCCS_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				! Electrolysis capacity
+				Electrolyzer_Capacity_Census(regCen, CurrentModelYear) := sum(regNERC | map_regNERCToRegCEN(regNERC, regCen), sum(capYear, CapacityElecVintage(CurrentModelYear, regNERC, PEMTech, capYear))) ;
+				HMMBLK_ELEC_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)) := sum(regCEN | NEMSmap_MNUMCRToCensusRegion(regCen, MNUMCR), Electrolyzer_Capacity_Census(regCen, CurrentModelYear));
+				HMMBLK_ELEC_CAP(TotalUS, NEMSmap_MNUMYR(CurrentModelYear)) := sum(MNUMCR, HMMBLK_ELEC_CAP(MNUMCR, NEMSmap_MNUMYR(CurrentModelYear)));
+				
+				! Capital costs
+				! Maybe do a weighted average eventually. Right now, it doesn't matter, costs are the same in all regions.
+				HMMBLK_SMRCAPCOST(NEMSmap_MNUMYR(CurrentModelYear)) := mean(regCEN, CapitalCostsByYear(CurrentModelYear, regCen , SMRTech)) / kg_to_mMton ;
+				HMMBLK_SMRCCSCAPCOST(NEMSmap_MNUMYR(CurrentModelYear)) := mean(regCEN, CapitalCostsByYear(CurrentModelYear, regCen , SMRCCSTech)) / kg_to_mMton ;
+				HMMBLK_ATRCCSCAPCOST(NEMSmap_MNUMYR(CurrentModelYear)) := mean(regCEN, CapitalCostsByYear(CurrentModelYear, regCen , ATRCCSTech)) / kg_to_mMton ;
+				HMMBLK_ELECCAPCOST(NEMSmap_MNUMYR(CurrentModelYear)) := mean(regNERC, CapitalCostsByYear(CurrentModelYear, regNERC , PEMTech)) / kg_to_mMton ;
+				
 				
 				! if current model year is the first year, write history consumption variables for IDM
 				if (CurrentModelYear = FirstModelYear) then

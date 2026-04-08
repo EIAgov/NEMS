@@ -5,8 +5,8 @@ Section Cases {
 		Arguments: (CaseName);
 		Body: {
 			CaseFileSave(
-			url: FormatString("data\\cases\\%s.data",CaseName),
-			contents: AllIdentifiers );
+			url: FormatString("../../hmm\\data\\cases\\%s.data",CaseName),
+			contents: nems_hmm );
 		}
 		StringParameter CaseName {
 			Property: Input;
@@ -21,14 +21,14 @@ Section Cases {
 		}
 		Set HMM_Identifiers_ {
 			SubsetOf: AllIdentifiers;
-			Definition: AllIdentifiers-Global_Data_Structure-'CurrentModelYear'-'NextModelYear'-'ThirdModelYear'-'YearsInThirdPlanningPeriod_'-DataExchange-AIMMSProLibrary;
+			Definition: nems_hmm-Global_Data_Structure-'CurrentModelYear'-'NextModelYear'-'ThirdModelYear'-'YearsInThirdPlanningPeriod_'-DataExchange;
 		}
 	}
 	Procedure SaveHMM {
 		Arguments: (CaseName);
 		Body: {
 			CaseFileSave(
-			url: FormatString("data\\cases\\%s.data",CaseName),
+			url: FormatString("../../hmm\\data\\cases\\%s.data",CaseName),
 			contents: HMM_Identifiers_ );
 		}
 		StringParameter CaseName {
@@ -39,7 +39,7 @@ Section Cases {
 		Arguments: (CaseName);
 		Body: {
 			CaseFileSave(
-			url: FormatString("data\\cases\\%s.data",CaseName),
+			url: FormatString("../../hmm\\data\\cases\\%s.data",CaseName),
 			contents: GDS_Identifiers_);
 		}
 		StringParameter CaseName {
@@ -50,7 +50,7 @@ Section Cases {
 		Arguments: (CaseName);
 		Body: {
 			CaseFileLoad(
-			url: FormatString("data\\cases\\%s.data",CaseName));
+			url: FormatString("../../hmm\\data\\cases\\%s.data",CaseName));
 		}
 		StringParameter CaseName {
 			Property: Input;
@@ -60,7 +60,7 @@ Section Cases {
 		Arguments: (CaseName);
 		Body: {
 			CaseFileLoad(
-			url: FormatString("data\\cases\\%s.data",CaseName),0);	!Load case file "CaseName" and destroy previous runtime libraries
+			url: FormatString("../../hmm\\data\\cases\\%s.data",CaseName),0);	!Load case file "CaseName" and destroy previous runtime libraries
 		}
 		StringParameter CaseName {
 			Property: Input;
@@ -91,8 +91,8 @@ Section Cases {
 			if ProjectDeveloperMode then
 				_sp_CasePath := "data/";
 			
-			else
-			    _sp_CasePath :=  FormatString( "PRO:/PublicData/Cases/%s", pro::Modelname);
+			!else
+			    !_sp_CasePath :=  FormatString( "PRO:/PublicData/Cases/%s", pro::Modelname);
 			
 			endif;
 			

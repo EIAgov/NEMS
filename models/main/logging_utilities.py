@@ -2,6 +2,7 @@ from datetime import datetime
 import sys
 import os
 
+
 def print_it(CURIRUN, s, MODULE_NAME):
     """Prints messages onto the terminal and flush them from buffer
     
@@ -12,7 +13,6 @@ def print_it(CURIRUN, s, MODULE_NAME):
 
     Parameters
     ----------
-
     CURIRUN : str
         Current NEMS cycle number
     s : str
@@ -22,12 +22,10 @@ def print_it(CURIRUN, s, MODULE_NAME):
 
     Returns
     -------
-    
     None
 
     """
-    
-    print(f"{datetime.now()} :: cycle {CURIRUN} :: {MODULE_NAME} :: {s}\n")
+    print(f"{datetime.now()} :: cycle {CURIRUN} :: {MODULE_NAME} :: {s}")
     sys.stdout.flush()
     sys.stderr.flush()
 
@@ -56,11 +54,9 @@ def prenems_setup_logs(pyfiler, user, CURIRUN):
 
     Returns
     -------
+    None
     
-    None.
-
     """
-    
     print(f"####################################################")
     print(f"####################################################")
     
@@ -72,14 +68,11 @@ def prenems_setup_logs(pyfiler, user, CURIRUN):
     else:
         print(f"NEMS Run Type: UNKNOWN")
     
-    
     print(f"SCEDES: {pyfiler.utils.scen}")                          # 2.  SCEDES file name
     print(f"Datekey: {pyfiler.nchar.date}")                         # 3.  Datekey
     print(f"Host PC Name: {os.environ['COMPUTERNAME']}")            # 4.  HOST PC Name
     print(f"Current Cycle: {CURIRUN} of {user.SCEDES['NRUNS']}")    # 5.  Current Cycle Number
 
-
-    
     # 6.  EPHRTS and H2 model switches
     #! EDT (06/25/22): toggle electricty h2 submodule
     EPHRTS = int(user.SCEDES['EPHRTS']) and ('EMM' in user.module_order)
@@ -91,7 +84,6 @@ def prenems_setup_logs(pyfiler, user, CURIRUN):
     
     print(f"####################################################")
     print(f"####################################################")
-
 
     sys.stdout.flush()
     sys.stderr.flush()

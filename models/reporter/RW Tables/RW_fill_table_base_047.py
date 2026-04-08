@@ -7,6 +7,7 @@ Created on Mon Dec 18 09:49:06 2023
 SZO fixed TRQLDV TRANSP Lt Duty Vehicle Energy Use on 9/4/2024
 """
 
+from RW_preprocessor import tdm_powertrain, tdm_fuel
 
 def fill_table_base_047(dfd, table_spec, table_id):
     """Fill table Light-Duty Vehicle Energy Consumption by Technology Type and Fuel Type
@@ -35,83 +36,35 @@ def fill_table_base_047(dfd, table_spec, table_id):
 
     z = {}
 
-    MNUMCR = dfd["MNUMCR_rwpre"]
+    MNUMCR = dfd["MNUMCR_rwpre"]            
 
     #   Light-Duty Vehicle Energy Consumption by Technology Type and Fuel Type
     #   (trillion Btu)
     #    Technology Type
-    #
     #   Light-Duty Consumption by Technology Type 1/
     #   Conventional Vehicles
-    #     Gasoline ICE Vehicles
-    # T47(1,IY,IS)=TRLDQTEK(1,IY)
-    z[1] = dfd["TRLDQTEK"].loc[1]
-    #     TDI Diesel ICE
-    # T47(2,IY,IS)=TRLDQTEK(2,IY)
-    z[2] = dfd["TRLDQTEK"].loc[2]
-    #       Total Conventional
-    # T47(18,IY,IS)=T47(1,IY,IS)+T47(2,IY,IS)
+    z[1] = dfd["TRLDQTEK"].loc[tdm_powertrain['conv_gas']]
+    z[2] = dfd["TRLDQTEK"].loc[tdm_powertrain['diesel']]
+    #   Total Conventional
     z[18] = z[1] + z[2]
-    #
-    #   Alternative-Fuel Vehicles
-    #     Ethanol-Flex Fuel ICE
-    # T47(4,IY,IS)=TRLDQTEK(3,IY)
-    z[4] = dfd["TRLDQTEK"].loc[3]
+    
+    #  Alternative-tdm_fuel Vehicles
+    z[4] = dfd["TRLDQTEK"].loc[tdm_powertrain['E85']]
+    z[5] = dfd["TRLDQTEK"].loc[tdm_powertrain['EV100']]
+    z[11] = dfd["TRLDQTEK"].loc[tdm_powertrain['EV200']]
+    z[15] = dfd["TRLDQTEK"].loc[tdm_powertrain['EV300']]
+    z[12] = dfd["TRLDQTEK"].loc[tdm_powertrain['PHEV20']]
+    z[3] = dfd["TRLDQTEK"].loc[tdm_powertrain['PHEV50']]
+    z[13] = dfd["TRLDQTEK"].loc[tdm_powertrain['HEV_D']]
+    z[14] = dfd["TRLDQTEK"].loc[tdm_powertrain['HEV_G']]
+    z[7] = dfd["TRLDQTEK"].loc[tdm_powertrain['NG_dedicated']]
+    z[8] = dfd["TRLDQTEK"].loc[tdm_powertrain['NG_bifuel']]
+    z[9] = dfd["TRLDQTEK"].loc[tdm_powertrain['LPG_dedicated']]
+    z[10] = dfd["TRLDQTEK"].loc[tdm_powertrain['LPG_bifuel']]
+    z[16] = dfd["TRLDQTEK"].loc[tdm_powertrain['FC_methanol']]
+    z[17] = dfd["TRLDQTEK"].loc[tdm_powertrain['FC_hydrogen']]
 
-    #     100-Mile Electric Vehicle
-    # T47(5,IY,IS)=TRLDQTEK(4,IY)
-    z[5] = dfd["TRLDQTEK"].loc[4]
-
-    #     200-Mile Electric Vehicle
-    # T47(11,IY,IS)=TRLDQTEK(7,IY)
-    z[11] = dfd["TRLDQTEK"].loc[7]
-
-    #     300-Mile Electric Vehicle
-    # T47(15,IY,IS)=TRLDQTEK(15,IY)
-    z[15] = dfd["TRLDQTEK"].loc[15]
-
-    #     Plug-in 20 Gasoline Hybrid
-    # T47(12,IY,IS)=TRLDQTEK(5,IY)
-    z[12] = dfd["TRLDQTEK"].loc[5]
-
-    #     Plug-in 50 Gasoline Hybrid
-    # T47(3,IY,IS)=TRLDQTEK(6,IY)
-    z[3] = dfd["TRLDQTEK"].loc[6]
-
-    #     Electric-Diesel Hybrid
-    # T47(13,IY,IS)=TRLDQTEK(8,IY)
-    z[13] = dfd["TRLDQTEK"].loc[8]
-
-    #     Electric-Gasoline Hybrid
-    # T47(14,IY,IS)=TRLDQTEK(16,IY)
-    z[14] = dfd["TRLDQTEK"].loc[16]
-
-    #     Natural Gas ICE
-    # T47(7,IY,IS)=TRLDQTEK(11,IY)
-    z[7] = dfd["TRLDQTEK"].loc[11]
-
-    #     Natural Gas Bi-fuel
-    # T47(8,IY,IS)=TRLDQTEK(9,IY)
-    z[8] = dfd["TRLDQTEK"].loc[9]
-
-    #     Propane ICE
-    # T47(9,IY,IS)=TRLDQTEK(12,IY)
-    z[9] = dfd["TRLDQTEK"].loc[12]
-
-    #     Propane Bi-fuel
-    # T47(10,IY,IS)=TRLDQTEK(10,IY)
-    z[10] = dfd["TRLDQTEK"].loc[10]
-
-    #     Fuel Cell Methanol
-    # T47(16,IY,IS)=TRLDQTEK(13,IY)
-    z[16] = dfd["TRLDQTEK"].loc[13]
-
-    #     Fuel Cell Hydrogen
-    # T47(17,IY,IS)=TRLDQTEK(14,IY)
-    z[17] = dfd["TRLDQTEK"].loc[14]
-
-    #       Total Alternative
-    # T47(19,IY,IS)=FSUM(T47(3,IY,IS),15) #there's no T47(6)
+    # Total Alternative
     z[19] = (
         z[3]
         + z[4]
@@ -129,43 +82,17 @@ def fill_table_base_047(dfd, table_spec, table_id):
         + z[17]
     )
 
-    #
     #   Total
-    # T47(20,IY,IS)=T47(18,IY,IS)+T47(19,IY,IS)
     z[20] = z[18] + z[19]
 
-    #
-    #   Light-Duty Consumption by Fuel Type
-    #     Motor Gasoline
-    # T47(21,IY,IS)=TRQLDV(1,11,IY)
-    z[21] = dfd["TRQLDV"].loc[1].loc[MNUMCR]
-
-    #     Distillate Fuel Oil (diesel)
-    # T47(22,IY,IS)=TRQLDV(8,11,IY)
-    z[22] = dfd["TRQLDV"].loc[8].loc[MNUMCR]
-
-    #     M85
-    # T47(23,IY,IS)=TRQLDV(2,11,IY)
-    z[23] = dfd["TRQLDV"].loc[2].loc[MNUMCR]
-
-    #     E85 2/
-    # T47(24,IY,IS)=TRQLDV(3,11,IY)
-    z[24] = dfd["TRQLDV"].loc[3].loc[MNUMCR]
-
-    #     Natural Gas
-    # T47(25,IY,IS)=TRQLDV(4,11,IY)
-    z[25] = dfd["TRQLDV"].loc[4].loc[MNUMCR]
-
-    #     Propane
-    # T47(26,IY,IS)=TRQLDV(5,11,IY)
-    z[26] = dfd["TRQLDV"].loc[5].loc[MNUMCR]
-
-    #     Electricity
-    # T47(27,IY,IS)=TRQLDV(6,11,IY)
-    z[27] = dfd["TRQLDV"].loc[6].loc[MNUMCR]
-
-    #     Hydrogen
-    # T47(28,IY,IS)=TRQLDV(7,11,IY)
-    z[28] = dfd["TRQLDV"].loc[7].loc[MNUMCR]
+    # Light-Duty Consumption by tdm_fuel Type
+    z[21] = dfd["TRQLDV"].loc[tdm_fuel['gasoline']].loc[MNUMCR]
+    z[22] = dfd["TRQLDV"].loc[tdm_fuel['diesel']].loc[MNUMCR]
+    z[23] = dfd["TRQLDV"].loc[tdm_fuel['M85']].loc[MNUMCR]
+    z[24] = dfd["TRQLDV"].loc[tdm_fuel['E85']].loc[MNUMCR]
+    z[25] = dfd["TRQLDV"].loc[tdm_fuel['NG']].loc[MNUMCR]
+    z[26] = dfd["TRQLDV"].loc[tdm_fuel['LPG']].loc[MNUMCR]
+    z[27] = dfd["TRQLDV"].loc[tdm_fuel['electricity']].loc[MNUMCR]
+    z[28] = dfd["TRQLDV"].loc[tdm_fuel['hydrogen']].loc[MNUMCR]
 
     return z

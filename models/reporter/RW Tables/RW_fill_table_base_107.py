@@ -685,8 +685,8 @@ def fill_table_base_107(dfd, table_spec, table_id):
     z[156] = (dfd["BIODIMP"].loc[MNUMCR] + dfd["RENEWDIMP"].loc[MNUMCR]) / 1000.0
 
     #     Biodiesel Exports
-    # T107(172,IY,IS)=BIODEXP(11,IY)/1000.
-    z[172] = dfd["BIODEXP"].loc[MNUMCR] / 1000.0
+    # T107(172,IY,IS)=(BIODEXP(11,IY)+RENEWDEXP(11,IY))/1000.
+    z[172] = (dfd["BIODEXP"].loc[MNUMCR] + dfd["RENEWDEXP"].loc[MNUMCR]) / 1000.0
 
     #     Biodiesel Stock Withdrawal
     # T107(157,IY,IS)=BIODSTKCHG(IY)/1000.
@@ -1132,7 +1132,7 @@ def fill_table_base_107(dfd, table_spec, table_id):
     ) / 1000.0
 
     #       Imports
-    # T107(44,IY,IS)=(RFIPQDS(MNUMPR,IY,2)+RFIPQDL(MNUMPR,IY,2)+RFIPQDU(MNUMPR,IY,2)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY))/1000.
+    # T107(44,IY,IS)=(RFIPQDS(MNUMPR,IY,2)+RFIPQDL(MNUMPR,IY,2)+RFIPQDU(MNUMPR,IY,2)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY)-RENEWDEXP(11,IY))/1000.
     z[44] = (
         dfd["RFIPQDS"].loc[MNUMPR].loc[2]
         + dfd["RFIPQDL"].loc[MNUMPR].loc[2]
@@ -1140,6 +1140,7 @@ def fill_table_base_107(dfd, table_spec, table_id):
         + dfd["BIODIMP"].loc[MNUMCR]
         - dfd["BIODEXP"].loc[MNUMCR]
         + dfd["RENEWDIMP"].loc[MNUMCR]
+        - dfd["RENEWDEXP"].loc[MNUMCR]
     ) / 1000.0
 
     #       Exports

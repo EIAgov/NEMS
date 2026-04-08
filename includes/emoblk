@@ -1,25 +1,26 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/emoblk,v 1.8 2011/08/03 15:58:40 pkc Exp $
 
       INTEGER DBUGEPM      ! DEBUG SWITCH FOR THE EPM
-      INTEGER NOMINAL_FLAG ! NOMINAL OR 87 DOLLARS
+      INTEGER NOMINAL_FLAG ! NOMINAL (1) OR 1987 DOLLARS (0)
 ! INTEGERS DETERMINE WHICH TYPE OF POLICY IS TO BE USED (1=TRUE 0=FALSE)
-      INTEGER TAX_FLAG     !  TAX ONLY
+      INTEGER TAX_FLAG     ! TAX ONLY
       INTEGER PERMIT_FLAG  ! AUCTION FOR PERMITS
       INTEGER MARKET_FLAG  ! FULL MARKET FOR PERMITS
       INTEGER OFFSET_FLAG  ! MARKET FOR PERMITS WITH OFFSETS
       INTEGER ETAX_FLAG    ! ENERGY TAX ONLY
-      INTEGER TRAN_FLAG    ! Cap/Fee applies to Tran Only
-      INTEGER ELEC_FLAG    ! Cap Applies to Elec Only
-      INTEGER RESD_FLAG    ! Cap/fee excludes RESiDential 
-      INTEGER COMM_FLAG    ! Cap/fee excludes COMMercial
-      INTEGER BANK_FLAG    ! Escalated Fee with banking to meet cap over long period. (see include epmbank) 
+      INTEGER TRAN_FLAG    ! Cap/fee applies to transportation sector only
+      INTEGER ELEC_FLAG    ! Cap/fee applies to electricity sector only
+      INTEGER RESD_FLAG    ! Cap/fee excludes residential sector
+      INTEGER COMM_FLAG    ! Cap/fee excludes commercial sector
+      INTEGER BANK_FLAG    ! Escalated Fee with banking to meet cap over long period. (see include epmbank)
 
-      REAL*4 EMTAX(MNUMYR),           & ! TAX OR PRICE OF PERMIT
-             TOTAL_EMISSIONS(MNUMYR), & ! COUNTRY EMISSIONS BY YR
-             EMISSIONS_GOAL(MNUMYR),  & ! GOAL BY YEAR
-             MAX_TAX(MNUMYR),         & ! MAX PENALTY IN ANY YEAR
-             MIN_TAX(MNUMYR),         & ! MIN PENALTY IN ANY YEAR
-             INIT_ALLOC(5,MNUMYR)       ! INITIAL PERMIT ALLOCATION
+      REAL*4 EMTAX(MNUMYR),           & ! TAX OR PRICE OF PERMIT (1987$ per kilogram carbon equiv.)
+             TOTAL_EMISSIONS(MNUMYR), & ! COUNTRY EMISSIONS BY YR (million metric tons carbon equiv.)
+             EMISSIONS_GOAL(MNUMYR),  & ! GOAL BY YEAR (million metric tons carbon equiv.)
+             MAX_TAX(MNUMYR),         & ! MAX PENALTY IN ANY YEAR (1987$ per kilogram carbon equiv.)
+             MIN_TAX(MNUMYR),         & ! MIN PENALTY IN ANY YEAR (1987$ per kilogram carbon equiv.)
+             INIT_ALLOC(5,MNUMYR)       ! INITIAL PERMIT ALLOCATION (thousand metric tons carbon equiv.)
 
       INTEGER CL_CDNUM(9)   ! NUMBER OF COAL REGIONS FOR EACH CENSUS DIVISION
       INTEGER CL_CDMAP(9,5) ! MAPPING OF COAL REGIONS TO CENSUS DIVISION

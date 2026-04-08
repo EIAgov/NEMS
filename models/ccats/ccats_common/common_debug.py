@@ -119,9 +119,7 @@ def check_nans(df, tablename='my_table'):
         nan_cols_table = df.loc[:, df.isna().any()]
         fileparts = os.path.split(tablename)
         tablename = fileparts[1]
-        #print_table(nan_cols_table, tablename)
         logger.warning(f'Dataframe {tablename} has nans in columns: {nan_cols}.')
-        #raise Exception(f'Dataframe {tablename} has nans in columns: {nan_cols}')
         return True
     else:
         logger.info('Dataframe has no nans')
@@ -217,7 +215,7 @@ def print_table(df, outputfilename = None):
 
 """
 Minimal Intractable System (MIS) finder
-Originall written by Ben Knueven as part of the WaterTAP project:
+Originally written by Ben Knueven as part of the WaterTAP project:
    https://github.com/watertap-org/watertap
 That's why DLW put a huge license notice at the bottom of the file.
 

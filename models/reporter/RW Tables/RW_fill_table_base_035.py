@@ -135,6 +135,9 @@ def fill_table_base_035(dfd, table_spec, table_id):
     # T35(69,IY,IS)=RFQNGPF(11,IY)
     z[69] = dfd["RFQNGPF"].loc[MNUMCR]
 
+    # Hydrogen Feedstocks
+    z[70] = dfd["INDREP/REFCON"].loc[IXHF].loc[5]
+
     #    Steam Coal 4/
     # T35(10,IY,IS)=REFCON(IXCL,5,IY)
     z[10] = dfd["INDREP/REFCON"].loc[IXCL].loc[5]
@@ -175,7 +178,7 @@ def fill_table_base_035(dfd, table_spec, table_id):
     )
     #    Renewables
     # T35(63,IY,IS)=(CGREFQ(11,IY,6)+CGREFQ(11,IY,7))
-    z[63] = dfd["INDREP/REFCON"].loc[IXHF].loc[5]
+    #z[63] = dfd["INDREP/REFCON"].loc[IXHF].loc[5]
 
     #    Purchased Electricity
     # T35(11,IY,IS)=REFCON(IXEL,5,IY)
@@ -183,7 +186,7 @@ def fill_table_base_035(dfd, table_spec, table_id):
 
     #      Total
     # T35(12,IY,IS)=FSUM(T35(8,IY,IS),4)+T35(48,IY,IS)
-    z[12] = z[8] + z[9] + z[10] + z[11] + z[48]
+    z[12] = z[8] + z[9] + z[10] + z[11] + z[48] + z[70]
 
     #   Summing LPG and Still Gas
     # T35(67,IY,IS)=REFCON(IXLG,5,IY)+REFCON(IXSG,5,IY)

@@ -460,12 +460,15 @@ python module pyfiler1 ! in
             integer*4 :: wiflc
             integer*4 :: wicnu
             integer*4 :: wianu
+            integer*4 :: wismr
             integer*4 :: wiwdp
             integer*4 :: wigth
             integer*4 :: wimsw
             integer*4 :: wihyd
             integer*4 :: wihps
             integer*4 :: wihp2
+            integer*4 :: widst
+            integer*4 :: widsb
             integer*4 :: wiwnd
             integer*4 :: wiwfs
             integer*4 :: wisth
@@ -517,8 +520,6 @@ python module pyfiler1 ! in
             integer*4 dimension(28,5) :: nox_rgn
             integer*4 dimension(80) :: nox_ptyp
             integer*4 :: nox_lt
-            integer*2 :: ecpact
-            integer*2 :: ecpbasis
             logical*1 dimension(80) :: ucpdsps
             logical*1 dimension(80) :: ucpints
             logical*1 dimension(80) :: ucprnws
@@ -578,8 +579,8 @@ python module pyfiler1 ! in
             integer*4 dimension(4,80,28) :: htrt_units
             real*8 dimension(10,100) :: st_rps_ut_pcnt
             real*8 dimension(100,91) :: st_rps_pcap_87
-            real*8 dimension(12,100) :: st_rps_chp
-            real*8 dimension(12,100) :: st_rps_dg
+            real*8 dimension(13,100) :: st_rps_chp
+            real*8 dimension(13,100) :: st_rps_dg
             real*8 dimension(100) :: st_rps_cofire
             real*8 dimension(80,100) :: st_rps_ecp_ex
             real*8 dimension(80,100) :: st_rps_ecp_nw
@@ -608,11 +609,11 @@ python module pyfiler1 ! in
             character dimension(55,2),intent(c) :: st_codes
             character dimension(100,2),intent(c) :: st_rps_stcd
             character dimension(100,1),intent(c) :: st_rps_id
-            real*8 dimension(28,12) :: cg_gen_i
-            real*8 dimension(28,12) :: cg_gen_c
-            real*8 dimension(28,12) :: cg_gen_r
-            real*8 dimension(28,12) :: cg_gen_o
-            real*8 dimension(28,12) :: cg_gen_f
+            real*8 dimension(28,13) :: cg_gen_i
+            real*8 dimension(28,13) :: cg_gen_c
+            real*8 dimension(28,13) :: cg_gen_r
+            real*8 dimension(28,13) :: cg_gen_o
+            real*8 dimension(28,13) :: cg_gen_f
             integer*4 :: f_cl
             integer*4 :: f_ol
             integer*4 :: f_og
@@ -625,7 +626,8 @@ python module pyfiler1 ! in
             integer*4 :: f_pv
             integer*4 :: f_ot
             integer*4 :: f_wn
-            character dimension(12,2),intent(c) :: tc_fuel_codes
+            integer*4 :: f_bs
+            character dimension(13,2),intent(c) :: tc_fuel_codes
             real*8 dimension(4,12,28) :: hy_cf_ecp
             real*8 dimension(4,9,28) :: hy_cf_efd
             real*8 dimension(4,12,28) :: nuc_cf_ecp
@@ -1806,7 +1808,6 @@ python module pyfiler1 ! in
             integer :: dsmswtch
             integer :: dbdump
             integer :: modelon
-            integer :: ecpstart
             integer dimension(14,61) :: cnvtst
             integer :: itimng
             integer :: yearpr
@@ -1828,8 +1829,8 @@ python module pyfiler1 ! in
             integer :: prtdbgq
             integer :: ijumpyr
             integer :: ijumpcalyr
-            character*24 :: scen_date
-            character*16 :: scen
+            character*29 :: scen_date
+            character*21 :: scen
             character*8 :: date
             character*72 :: comment
             character dimension(14,6),intent(c) :: subr_names
@@ -1848,6 +1849,7 @@ python module pyfiler1 ! in
             real dimension(4,10,61) :: bimqty
             real dimension(10,61) :: biodimppd
             real dimension(10,61) :: biodexppd
+            real dimension(9,57,61) :: builds
             real dimension(4,61) :: rfscredprc
             real dimension(4,13,61) :: rfscredits
             real dimension(4,61) :: rfssafety
@@ -1973,6 +1975,7 @@ python module pyfiler1 ! in
             integer :: lfmmcode
             real dimension(11,61) :: renewdimp
             real dimension(10,61) :: renewdimppd
+            real dimension(11,61) :: renewdexp
             real dimension(11,61) :: rfqprdt
             real dimension(16,61) :: rfqdcrd
             real dimension(61) :: rfsprfr
@@ -2214,6 +2217,11 @@ python module pyfiler1 ! in
             integer*4 dimension(8,200) :: ns_start
             integer*4 dimension(200) :: play_map
             real dimension(11,61) :: ngpco2em
+            real dimension(61) :: capex_per_well
+            real dimension(61) :: drill_cost
+            real dimension(61) :: plat_cost
+            real dimension(61) :: flow_cost
+            real dimension(61) :: dev_cost
             real dimension(17,61) :: ogelsngon
             real dimension(3,61) :: ogelsngof
             real dimension(7,61) :: ogqeorpr
@@ -2250,6 +2258,8 @@ python module pyfiler1 ! in
             real dimension(17,61,3) :: spngelgr
             real dimension(17,61) :: pngelgr
             real dimension(11,61,4) :: spngin
+            real*4 dimension(6,61) :: pipecap
+            real*4 dimension(61) :: lngcap
             real*4 dimension(14,61) :: ogwprng
             real*4 dimension(61) :: ogprsup
             real*4 dimension(14,61) :: ogprdng
@@ -2991,6 +3001,12 @@ python module pyfiler1 ! in
             real*4 dimension(3,28,24,4,61) :: qelgen
             real*4 dimension(3,28,61,61) :: qelgen_vint
             integer :: upira_appyr
+            real*8 dimension(28,61) :: pv_cap_adj
+            real*8 dimension(28,61) :: pt_cap_adj
+            real*8 dimension(28,61) :: so_cap_adj
+            real*8 dimension(28,61) :: wn_cap_adj
+            real*8 dimension(28,61) :: wf_cap_adj
+            real*8 dimension(28,61) :: wl_cap_adj
             real*4 dimension(28,4) :: totsecload
             real*4 dimension(28,11,4) :: mappntoc
             real*4 dimension(28) :: systemlf
@@ -3168,8 +3184,8 @@ python module pyfiler1 ! in
             real dimension(61,3) :: rseh
             real dimension(61,3) :: rsnh
             real dimension(61,3) :: rshseadd
-            real dimension(61,8) :: rshtrcon
-            real dimension(61,3) :: rscoolcn
+            real dimension(61,5) :: rshtrcon
+            real dimension(61,2) :: rscoolcn
             real dimension(61,5) :: rsh2ocon
             real dimension(61,3) :: rsckcon
             real dimension(61,2) :: rsdrycon
@@ -3177,7 +3193,7 @@ python module pyfiler1 ! in
             real dimension(61) :: rsfrzcon
             real dimension(61) :: rsltcon
             real dimension(61,4) :: rsapcon
-            real dimension(61,9) :: rshtrs
+            real dimension(61,8) :: rshtrs
             real dimension(61,5) :: rscoolers
             real dimension(61,5) :: rswater
             real dimension(61,3) :: rscook
@@ -3366,6 +3382,7 @@ python module pyfiler1 ! in
             real dimension(16,61) :: li_ion_cost
             real dimension(5,61) :: cost_battkwh_trk
             real dimension(3,61) :: adjmpg
+            real dimension(6,2,61) :: global_batt_prod
             real dimension(3,5,61) :: trefftrkf
             real dimension(61) :: trxair
             real dimension(61) :: trxrail
@@ -3908,9 +3925,9 @@ python module pyfiler1 ! in
             real dimension(61) :: jagtr
             real dimension(61) :: jlutr
             real dimension(28,61,10) :: cgotgen
-            real dimension(28,61,12) :: cgntcap
-            real dimension(28,61,12,2) :: cgntgen
-            real dimension(28,61,12) :: cgntq
+            real dimension(28,61,13) :: cgntcap
+            real dimension(28,61,13,2) :: cgntgen
+            real dimension(28,61,13) :: cgntq
             real dimension(28,61) :: ucapcsc
             real dimension(28,61) :: ucapigc
             real dimension(28,61) :: ucaposc
@@ -3945,24 +3962,24 @@ python module pyfiler1 ! in
             real dimension(28,61) :: uaddwnc
             real dimension(28,61) :: uaddwfc
             real dimension(28,61) :: uaddtlc
-            real dimension(11,61,12,2) :: cgresgen
-            real dimension(11,61,12) :: cgresq
-            real dimension(11,61,12) :: cgrescap
-            real dimension(11,61,12) :: cgrefq
-            real dimension(11,61,12) :: cgrefcap
-            real dimension(11,61,12,2) :: cgrefgen
+            real dimension(11,61,13,2) :: cgresgen
+            real dimension(11,61,13) :: cgresq
+            real dimension(11,61,13) :: cgrescap
+            real dimension(11,61,13) :: cgrefq
+            real dimension(11,61,13) :: cgrefcap
+            real dimension(11,61,13,2) :: cgrefgen
             real dimension(11,61,4) :: cgogsq
             real dimension(11,61,4) :: cgogscap
             real dimension(11,61,4,2) :: cgogsgen
-            real dimension(11,61,12) :: cgindlq
-            real dimension(11,61,12) :: cgindlcap
-            real dimension(11,61,12,2) :: cgindlgen
-            real dimension(11,61,12) :: cgcommq
-            real dimension(11,61,12) :: cgcommcap
-            real dimension(11,61,12,2) :: cgcommgen
-            real dimension(28,61,12) :: cgtotqnr
-            real dimension(28,61,12) :: cgtotcapnr
-            real dimension(28,61,12,2) :: cgtotgennr
+            real dimension(11,61,13) :: cgindlq
+            real dimension(11,61,13) :: cgindlcap
+            real dimension(11,61,13,2) :: cgindlgen
+            real dimension(11,61,13) :: cgcommq
+            real dimension(11,61,13) :: cgcommcap
+            real dimension(11,61,13,2) :: cgcommgen
+            real dimension(28,61,13) :: cgtotqnr
+            real dimension(28,61,13) :: cgtotcapnr
+            real dimension(28,61,13,2) :: cgtotgennr
             real dimension(28,61,2) :: cgepgen
             real dimension(11,61) :: cgcpvres
             real dimension(11,61) :: cgcwnres
@@ -4551,8 +4568,8 @@ python module pyfiler1 ! in
             real*4 dimension(61) :: upv_mw
             real*4 dimension(61,3,9,3) :: ckconwt
             real*4 dimension(61,3,9,3) :: ckconin
-            real*4 dimension(61,3,9,3) :: coolcnwt
-            real*4 dimension(61,3,9,3) :: coolcnin
+            real*4 dimension(61,2,9,3) :: coolcnwt
+            real*4 dimension(61,2,9,3) :: coolcnin
             real*4 dimension(61,9,3) :: cswconwt
             real*4 dimension(61,9,3) :: cswconin
             real*4 dimension(61,2,9,3) :: dryconwt
@@ -4561,8 +4578,8 @@ python module pyfiler1 ! in
             real*4 dimension(61,9,3) :: dswconin
             real*4 dimension(61,9,3) :: frzconwt
             real*4 dimension(61,9,3) :: frzconin
-            real*4 dimension(61,8,9,3) :: htrconwt
-            real*4 dimension(61,8,9,3) :: htrconin
+            real*4 dimension(61,5,9,3) :: htrconwt
+            real*4 dimension(61,5,9,3) :: htrconin
             real*4 dimension(61,5,9,3) :: h2oconwt
             real*4 dimension(61,5,9,3) :: h2oconin
             real*4 dimension(61,9,3) :: refconwt
@@ -4577,8 +4594,8 @@ python module pyfiler1 ! in
             real*4 dimension(61,9,3) :: ltconin
             real*4 dimension(61,9,3) :: pcrconwt
             real*4 dimension(61,9,3) :: pcrconin
-            real*4 dimension(61,7,9,3) :: shtconwt
-            real*4 dimension(61,7,9,3) :: shtconin
+            real*4 dimension(61,5,9,3) :: shtconwt
+            real*4 dimension(61,5,9,3) :: shtconin
             real*4 dimension(61,9,3) :: tvrconwt
             real*4 dimension(61,9,3) :: tvrconin
             real*4 dimension(61,3,9) :: totalhouses
@@ -5031,7 +5048,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: mnetoh=5
             integer, parameter,optional :: mncrop=2
             integer, parameter,optional :: mnumbx=26
-            integer, parameter,optional :: msedyr=33
+            integer, parameter,optional :: msedyr=34
             integer, parameter,optional :: nngem=17
             integer, parameter,optional :: baseyr=1990
             integer, parameter,optional :: endyr=2050
@@ -5052,7 +5069,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: wtireg=2
             integer, parameter,optional :: jumpcalyr=2030
             integer, parameter,optional :: mjumpyr=41
-            integer, parameter,optional :: mnumcgf=12
+            integer, parameter,optional :: mnumcgf=13
             integer, parameter,optional :: nlngter=11
             integer, parameter,optional :: epareg=9
             integer, parameter,optional :: welltypes=7
@@ -5110,7 +5127,7 @@ python module pyfiler1 ! in
             integer*4, parameter,optional :: efd_d_frg=3
             integer*4, parameter,optional :: efd_d_ldg=6
             integer*4, parameter,optional :: efd_d_mfrg=25
-            integer*4, parameter,optional :: efd_d_mhg=1400
+            integer*4, parameter,optional :: efd_d_mhg=1500
             integer*4, parameter,optional :: efd_d_mdg=600
             integer*4, parameter,optional :: efd_d_mhs=1200
             integer*4, parameter,optional :: efd_d_mpg=1200
@@ -5172,7 +5189,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: eci_d_msp=6
             integer, parameter,optional :: eci_d_grp=18
             integer, parameter,optional :: eci_d_seg=6
-            integer*4, parameter,optional :: tc_fuels=12
+            integer*4, parameter,optional :: tc_fuels=13
             integer*4, parameter,optional :: tc_sectors=5
             integer*4, parameter,optional :: mx_st_rps=100
             integer*4, parameter,optional :: mx_st_codes=54
@@ -5218,7 +5235,7 @@ python module pyfiler1 ! in
             integer*2, parameter,optional :: maxopc=70
             real*4, parameter,optional :: unconfa=292.83
             real*4, parameter,optional :: unconfar=0.00029283
-            integer*4, parameter,optional :: qdsmrpt=24
+            integer*4, parameter,optional :: qdsmrpt=4
             integer*2, parameter,optional :: maxcop=9999
             integer*2, parameter,optional :: maxrop=2500
             integer*2, parameter,optional :: elindex=1
@@ -5356,7 +5373,7 @@ python module pyfiler1 ! in
             real dimension(131) :: nchar_eq
             real dimension(2) :: cyc_inf_eq
             integer, parameter,optional :: lcfs_cat=2
-            real dimension(257936) :: eq_lfmmout
+            real dimension(289900) :: eq_lfmmout
             real dimension(49405) :: eq_rfout
             real dimension(56092) :: eq_rfrpt
             real dimension(43310) :: eq_rfftab
@@ -5364,8 +5381,8 @@ python module pyfiler1 ! in
             integer, parameter,optional :: mnfngss=4
             integer, parameter,optional :: soplay=15
             integer, parameter,optional :: numcan=2
-            real dimension(421361) :: eq_ogout
-            real dimension(41236) :: eq_ntout
+            real dimension(421666) :: eq_ogout
+            real dimension(41663) :: eq_ntout
             real dimension(17,61,3) :: muprc
             real dimension(17,61,4) :: smuprc
             real dimension(11,61,8) :: trqpldv
@@ -5381,7 +5398,7 @@ python module pyfiler1 ! in
             real dimension(17,61,4) :: smuqty
             real dimension(17,61,4) :: sgasquant
             real dimension(339892) :: udatdat
-            real dimension(21342010) :: uecpdat
+            real dimension(21352258) :: uecpdat
             real dimension(4417) :: dsmefdat
             real dimension(78148) :: uettdat
             integer, parameter,optional :: mcsize=23916
@@ -5395,15 +5412,15 @@ python module pyfiler1 ! in
             integer, parameter,optional :: recsyear=2020
             integer, parameter,optional :: numhddyr=2050
             integer, parameter,optional :: numcddyr=2050
-            integer, parameter,optional :: ntek=3
-            integer, parameter,optional :: lastsedsyr=2022
-            integer, parameter,optional :: laststeoyr=2024
-            integer, parameter,optional :: laststeoyravail=2025
+            integer, parameter,optional :: ntek=4
+            integer, parameter,optional :: lastsedsyr=2023
+            integer, parameter,optional :: laststeoyr=2026
+            integer, parameter,optional :: laststeoyravail=2027
             real*4, parameter,optional :: benchallyrs=1.0
             integer, parameter,optional :: globalbenchon=1
             integer, parameter,optional :: appliancebetaswitch=0
             integer, parameter,optional :: appliancebetaendyr=2024
-            real dimension(8945) :: eq_rsrep
+            real dimension(8662) :: eq_rsrep
             integer*4, parameter,optional :: cmnummajfl=3
             integer*4, parameter,optional :: cmnumminfl=5
             integer*4, parameter,optional :: cmnumserv=10
@@ -5413,8 +5430,8 @@ python module pyfiler1 ! in
             integer*4, parameter,optional :: cmnumvintage=10
             integer*4, parameter,optional :: cmdecision=3
             integer*4, parameter,optional :: cmnumeqvint=44
-            integer*4, parameter,optional :: ktmax=5900
-            integer*4, parameter,optional :: cnummels=21
+            integer*4, parameter,optional :: ktmax=6000
+            integer*4, parameter,optional :: cnummels=20
             integer*4, parameter,optional :: cmoldestbldgvint=1824
             integer, parameter,optional :: size_comparm=868642
             real dimension(868642) :: eq_cmprm
@@ -5424,7 +5441,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: frfuel=12
             integer, parameter,optional :: maxzev=3
             integer, parameter,optional :: tnumclass=9
-            real dimension(335971) :: eq_trrep
+            real dimension(336703) :: eq_trrep
             real dimension(125542) :: eq_mcout
             real*4 dimension(6222) :: eq_mcdtl
             integer, parameter,optional :: max_crude_source=1
@@ -5440,7 +5457,7 @@ python module pyfiler1 ! in
             real dimension(162897) :: eq_emout
             integer, parameter,optional :: nclpr2=38
             real dimension(7442) :: eq_eaout
-            real dimension(394975) :: eq_cgout
+            real dimension(419375) :: eq_cgout
             integer, parameter,optional :: mnumso=9
             integer, parameter,optional :: mnumwi=9
             integer, parameter,optional :: mnumcl=4
@@ -5481,7 +5498,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: so2grp_size=1593703
             real*4 dimension(1593703) :: eq_so2grp
             real*4 dimension(549) :: eq_bldglrn
-            real*4 dimension(133407) :: eq_rseff
+            real*4 dimension(113643) :: eq_rseff
             integer, parameter,optional :: mnumcvtst=102
             integer, parameter,optional :: maxcycles=10
             integer, parameter,optional :: size_converge=25621
@@ -5503,7 +5520,16 @@ python module pyfiler1 ! in
             integer, parameter,optional :: opsize=671
             real dimension(671) :: oparry
             integer, parameter,optional :: hmkt=3
-            real dimension(201971) :: hmarry
+            real*4 dimension(11,61) :: prdh2ngatr_ccs
+            real*4 dimension(11,61) :: smr_cap
+            real*4 dimension(11,61) :: smrccs_cap
+            real*4 dimension(11,61) :: atrccs_cap
+            real*4 dimension(11,61) :: elec_cap
+            real*4 dimension(61) :: smrcapcost
+            real*4 dimension(61) :: smrccscapcost
+            real*4 dimension(61) :: atrccscapcost
+            real*4 dimension(61) :: eleccapcost
+            real dimension(205570) :: hmarry
             integer, parameter,optional :: cqsize=238
             real*4 dimension(238) :: eq_cont
             real dimension(1220) :: eq_ab32
@@ -5526,11 +5552,11 @@ python module pyfiler1 ! in
             character*2 :: dtyear
             integer, parameter,optional :: log_unit=157839
             common /sec45vparms/ sec45v_co2_req
-            common /ecp_d_cntl/ upcapd,upgnpd,uptcrt,upnirte,upnrrte,upniprm,upnrprm,upnfdt,uprsksw,upbeta,utbeta,upnirtea,upnrrtea,upnfdta,upnirtey,upnrrtey,upnfdty,uptxrt,upovrbld,upovbdrt,upp2lim,upccr,upmcf,upcpro,upcsb,upcsbyr,upfom,upfort,upovr,uppmrt,uprsk,upvom,upvsb,uphtrt,upctrm,uppcfb,uppsef,uppsrt,updcfb,updsef,updsrt,updcef,upphrt0,upphrtn,upiccf,upintlow,upintexp,upgsub,upgsubyr,upgsmx,upirayr0,upira_emyr,upira_empct,upibnd,upintz,uecp_htrt_adj,uecp_cpen_adj,alt_uecp_cpen_adj,upscpr,upshpen,upscpen,upsrsk,upsqmax,upsrmax,upcfcpr,upcfhpen,upcfcpen,upncpr,levrmd,levrmd2,levrmd2c,levrmc,ecp_pct,upcalpha,upcarbnd,upco2eor,upso2prc,uprnwbnd,uprnwshr,uprnwcap,uprnwexg,uprnwbndr,uprnwshrr,uprnwcapr,uprnwexgr,uprnwbas,uprnwbasr,ces_dcr,ces_smooth_tgt,ces_smooth_dual,st_rnw_bnd,st_rnw_shr,upcapbnd,upcapshr,upsublim,upccsadj,upseqbyr,upseqblm,fr_or_trancostg,tccv_gl,tccf_gl,ttcv_gl,ttcf_gl,ticv_gl,ticf_gl,htrt_gl,upbldreg,upxclgrw,upxclflr,updgavr,updgfpr,upnggrwt,upnggrwe,upcrvsiz,upcrvela,upcargrw,upnucgrw,upcflev,upcfstep,upcfbtu,upcfcst,upcffom,upcfvom,upcfgen,upbqmax,upbrmax,cl_cnxt_cst,fl_cnxt_cst,frg_emm_map,emm_cnxt_cst,emm_cndc_cst,ctl_cd_nr,upovcc,upovhr,upovfx,upovvr,upretrat,upretfhu,upretnhu,upretrt0,upretrtl,upretchg,upintbnd,upintbd0,ret_pct,ret_val,ret_cap,ret_fom,ret_avg,uppcef,uppcef_min,noxbyst,noxbygrp,nox_hrs,nox_ecp,nox_efd,nox_new,tnoxbyst,tnoxbygrp,tnox_hrs,tnox_ecp,tnox_efd,co2_geo,co2_msw,co2_dgn,co2byst,co2bygrp,co2flgrp,co2rqgrp,co2rpgrp,co2oqgrp,co2opgrp,co2esgrp,co2eqgrp,co2epgrp,co2bqgrp,co2njexc,co2vaexc,upxtra,dem_grw,dem_wght,upwdcof,upwdcfr,estyradd,estyrpln,estmnadd,estcsinc,estcpinc,estcpadd,estcpstp,estcpcsm,estcpcst,estcplim,uppfl,uppfln,upcrb,upcrbn,ucspvshr,ucwndshr,upcapflr,upcqmax,upcrmax,upccscap,upccshrt,updsicap,updsiovr,updsifom,updsivom,updsisef,upavlov,upavlyr,upclyr,upplyr,upeclf,upnclf,upnllf,uptxlf,upuclf,estswtch,estswcsm,upgsubpt,upgsy1,upgsyl,upgsyr,upgsty,upgsyd,upfltp,udfltp,upself,usw_clgrp,usw_rtrsk,usw_hg,usw_mact,umact_yr,usw_bact,ubact_yr,usw_dsi,udsi_yr,usw_wacc,usw_digit,urev_nyr,urev_nyrn,pcap_so2,pcap_nox,pcap_car,pcap_hg,upsgrp,upsclt,upstxvn,upstxyr,upstxlf,upscr2,upscscr,upcfelf,upcfclt,upnasw,upnayr,upnelf,upnclt,ecpcapm,ecpdspm,ecpintm,ecprnwm,ecpstom,ecpi_rm,ecp_d_drte,ecp_d_idsm,ecp_d_init,ecp_d_lfcc,ecp_d_lfhr,ecp_d_ovcc,ecp_d_ovhr,ecp_d_ovfx,ecp_d_ovvr,ecp_d_pack,ecp_d_mode,ecp_d_mshr,ecp_d_prnt,ecp_d_rsk,ecp_d_amb,efp_d_scr,efp_d_trn,ucpdspis,ucpintis,ucprnwis,ucpdgnis,ucpstois,ucpftabi,ucpvstor,ucpdspi,ucpinti,ucprnwi,ucpdgni,stotypmap,curttypmap,ucpstoi,upfnuc,upfcol,upfgas,upfres,upfdis,upfhyt,ufl_d_ecp,uirinti,uirrnwi,uirstoi,unfph,unxph,unaph,upcensus,upcimp,upclrg,upettsw,upgtrn,uplntidx,upmshsw,upngrg,upcarg,upnugsw,uptopr,uptmrm,upefdt,upcptrsw,upttyp,wpttyp,upvtyp,upxrgn,ecp_bbn,upscrfrm,upovbdsw,upovbdsy,upcrvsw,upcrvstp,uprnwreg,uprnwcas,uprnwrgn,uprnwcog,uprnwimp,uprnwsun,uprnwcrd,uprnwlev,uprnwrps,uprnwbnk,uprnwcasr,uprnwcogr,uprnwsunr,uprnwrpsr,uprnwbnkr,upcapcas,upsubcas,upsubfcf,upseqcas,upseqcar,upseqnyr,upseqlim,upnirtes,upnirtel,upnrrtes,upnrrtel,upnfdts,upnfdtl,wib1,wib2,wib3,wib4,wib5,wib6,wib7,wib8,wic1,wic2,wic3,wic4,wic5,wic6,wic7,wic8,wic9,wicx,wicy,wicz,wih1,wih2,wih3,wih4,wih5,wih6,wih7,wih8,wih9,wiha,wihb,wihc,wipc,wioc,wiig,wii2,wipq,wiis,wing,wist,wiet,wiic,wict,wit2,wiat,wiec,wicc,wiac,wia2,wics,wifc,wicn,wian,wism,wign,wiwd,wibi,wigt,wiag,wims,wihy,wiho,wihi,witi,wips,wip2,wisq,wids,wios,wiwn,wiwl,wiwf,wiso,wiss,wis2,wipv,wipt,wiin,widb,widp,wiexc,wipvc,wiexs,wicct,wiact,wiscc,wigsf,wiseq,wibig,wibct,wibcc,wiflc,wicnu,wianu,wiwdp,wigth,wimsw,wihyd,wihps,wihp2,wiwnd,wiwfs,wisth,wipvm,wipvb,widgb,widgp,ret_grp,ret_frst,ret_next,ret_frg,uprtlt,upintsw,nox_nst,nox_grp,nox_trdyr,tnox_nst,tnox_grp,tnox_trdyr,tso2_nst,tso2_yr_by_st,tso2_vr_by_st,tso2_cl_by_st,tso2_ol_by_st,tso2_tr_by_st,co2_nst,co2_grp,numstogrp,maxnumbins,maxptypes,grw_xyr,ecp_fyr,uprelsw,upbldtyp,upcfnstp,num_864_types,num_steps_per_type,sto_cap_indx,sr_credit,sr_tran_credit,sr_min_cf,sr_rqmt_hght,sr_rqmt_diff,sr_int,sr_max_lf,sr_min_lf,no_ccs_plnt_ndx,upefpt,nox_rgn,nox_ptyp,nox_lt,ecpact,ecpbasis,ucpdsps,ucpints,ucprnws,ucpdgns,ucpstos,uirints,uirrnws,uirstos,upltsw,ecp_d_file,ecp_d_fileb,uplname,storagenames,storagecodes,ecp_d_dbnm,ecp_d_deck,ecp_d_deckb,ecp_d_prob,upbnd,upname,upobj,uprhs,updmcd,upflcd,uplntcd,upldcd,upmdcd,ecp_ftp,ecp_nct,nox_st,nox_rg,tnox_st,tnox_rg,co2_st,co2_rg,upowncd,uprgcd,upsccd,upyrcd,ecp_btm,no_ccs_plntcd
+            common /ecp_d_cntl/ upcapd,upgnpd,uptcrt,upnirte,upnrrte,upniprm,upnrprm,upnfdt,uprsksw,upbeta,utbeta,upnirtea,upnrrtea,upnfdta,upnirtey,upnrrtey,upnfdty,uptxrt,upovrbld,upovbdrt,upp2lim,upccr,upmcf,upcpro,upcsb,upcsbyr,upfom,upfort,upovr,uppmrt,uprsk,upvom,upvsb,uphtrt,upctrm,uppcfb,uppsef,uppsrt,updcfb,updsef,updsrt,updcef,upphrt0,upphrtn,upiccf,upintlow,upintexp,upgsub,upgsubyr,upgsmx,upirayr0,upira_emyr,upira_empct,upibnd,upintz,uecp_htrt_adj,uecp_cpen_adj,alt_uecp_cpen_adj,upscpr,upshpen,upscpen,upsrsk,upsqmax,upsrmax,upcfcpr,upcfhpen,upcfcpen,upncpr,levrmd,levrmd2,levrmd2c,levrmc,ecp_pct,upcalpha,upcarbnd,upco2eor,upso2prc,uprnwbnd,uprnwshr,uprnwcap,uprnwexg,uprnwbndr,uprnwshrr,uprnwcapr,uprnwexgr,uprnwbas,uprnwbasr,ces_dcr,ces_smooth_tgt,ces_smooth_dual,st_rnw_bnd,st_rnw_shr,upcapbnd,upcapshr,upsublim,upccsadj,upseqbyr,upseqblm,fr_or_trancostg,tccv_gl,tccf_gl,ttcv_gl,ttcf_gl,ticv_gl,ticf_gl,htrt_gl,upbldreg,upxclgrw,upxclflr,updgavr,updgfpr,upnggrwt,upnggrwe,upcrvsiz,upcrvela,upcargrw,upnucgrw,upcflev,upcfstep,upcfbtu,upcfcst,upcffom,upcfvom,upcfgen,upbqmax,upbrmax,cl_cnxt_cst,fl_cnxt_cst,frg_emm_map,emm_cnxt_cst,emm_cndc_cst,ctl_cd_nr,upovcc,upovhr,upovfx,upovvr,upretrat,upretfhu,upretnhu,upretrt0,upretrtl,upretchg,upintbnd,upintbd0,ret_pct,ret_val,ret_cap,ret_fom,ret_avg,uppcef,uppcef_min,noxbyst,noxbygrp,nox_hrs,nox_ecp,nox_efd,nox_new,tnoxbyst,tnoxbygrp,tnox_hrs,tnox_ecp,tnox_efd,co2_geo,co2_msw,co2_dgn,co2byst,co2bygrp,co2flgrp,co2rqgrp,co2rpgrp,co2oqgrp,co2opgrp,co2esgrp,co2eqgrp,co2epgrp,co2bqgrp,co2njexc,co2vaexc,upxtra,dem_grw,dem_wght,upwdcof,upwdcfr,estyradd,estyrpln,estmnadd,estcsinc,estcpinc,estcpadd,estcpstp,estcpcsm,estcpcst,estcplim,uppfl,uppfln,upcrb,upcrbn,ucspvshr,ucwndshr,upcapflr,upcqmax,upcrmax,upccscap,upccshrt,updsicap,updsiovr,updsifom,updsivom,updsisef,upavlov,upavlyr,upclyr,upplyr,upeclf,upnclf,upnllf,uptxlf,upuclf,estswtch,estswcsm,upgsubpt,upgsy1,upgsyl,upgsyr,upgsty,upgsyd,upfltp,udfltp,upself,usw_clgrp,usw_rtrsk,usw_hg,usw_mact,umact_yr,usw_bact,ubact_yr,usw_dsi,udsi_yr,usw_wacc,usw_digit,urev_nyr,urev_nyrn,pcap_so2,pcap_nox,pcap_car,pcap_hg,upsgrp,upsclt,upstxvn,upstxyr,upstxlf,upscr2,upscscr,upcfelf,upcfclt,upnasw,upnayr,upnelf,upnclt,ecpcapm,ecpdspm,ecpintm,ecprnwm,ecpstom,ecpi_rm,ecp_d_drte,ecp_d_idsm,ecp_d_init,ecp_d_lfcc,ecp_d_lfhr,ecp_d_ovcc,ecp_d_ovhr,ecp_d_ovfx,ecp_d_ovvr,ecp_d_pack,ecp_d_mode,ecp_d_mshr,ecp_d_prnt,ecp_d_rsk,ecp_d_amb,efp_d_scr,efp_d_trn,ucpdspis,ucpintis,ucprnwis,ucpdgnis,ucpstois,ucpftabi,ucpvstor,ucpdspi,ucpinti,ucprnwi,ucpdgni,stotypmap,curttypmap,ucpstoi,upfnuc,upfcol,upfgas,upfres,upfdis,upfhyt,ufl_d_ecp,uirinti,uirrnwi,uirstoi,unfph,unxph,unaph,upcensus,upcimp,upclrg,upettsw,upgtrn,uplntidx,upmshsw,upngrg,upcarg,upnugsw,uptopr,uptmrm,upefdt,upcptrsw,upttyp,wpttyp,upvtyp,upxrgn,ecp_bbn,upscrfrm,upovbdsw,upovbdsy,upcrvsw,upcrvstp,uprnwreg,uprnwcas,uprnwrgn,uprnwcog,uprnwimp,uprnwsun,uprnwcrd,uprnwlev,uprnwrps,uprnwbnk,uprnwcasr,uprnwcogr,uprnwsunr,uprnwrpsr,uprnwbnkr,upcapcas,upsubcas,upsubfcf,upseqcas,upseqcar,upseqnyr,upseqlim,upnirtes,upnirtel,upnrrtes,upnrrtel,upnfdts,upnfdtl,wib1,wib2,wib3,wib4,wib5,wib6,wib7,wib8,wic1,wic2,wic3,wic4,wic5,wic6,wic7,wic8,wic9,wicx,wicy,wicz,wih1,wih2,wih3,wih4,wih5,wih6,wih7,wih8,wih9,wiha,wihb,wihc,wipc,wioc,wiig,wii2,wipq,wiis,wing,wist,wiet,wiic,wict,wit2,wiat,wiec,wicc,wiac,wia2,wics,wifc,wicn,wian,wism,wign,wiwd,wibi,wigt,wiag,wims,wihy,wiho,wihi,witi,wips,wip2,wisq,wids,wios,wiwn,wiwl,wiwf,wiso,wiss,wis2,wipv,wipt,wiin,widb,widp,wiexc,wipvc,wiexs,wicct,wiact,wiscc,wigsf,wiseq,wibig,wibct,wibcc,wiflc,wicnu,wianu,wismr,wiwdp,wigth,wimsw,wihyd,wihps,wihp2,widst,widsb,wiwnd,wiwfs,wisth,wipvm,wipvb,widgb,widgp,ret_grp,ret_frst,ret_next,ret_frg,uprtlt,upintsw,nox_nst,nox_grp,nox_trdyr,tnox_nst,tnox_grp,tnox_trdyr,tso2_nst,tso2_yr_by_st,tso2_vr_by_st,tso2_cl_by_st,tso2_ol_by_st,tso2_tr_by_st,co2_nst,co2_grp,numstogrp,maxnumbins,maxptypes,grw_xyr,ecp_fyr,uprelsw,upbldtyp,upcfnstp,num_864_types,num_steps_per_type,sto_cap_indx,sr_credit,sr_tran_credit,sr_min_cf,sr_rqmt_hght,sr_rqmt_diff,sr_int,sr_max_lf,sr_min_lf,no_ccs_plnt_ndx,upefpt,nox_rgn,nox_ptyp,nox_lt,ucpdsps,ucpints,ucprnws,ucpdgns,ucpstos,uirints,uirrnws,uirstos,upltsw,ecp_d_file,ecp_d_fileb,uplname,storagenames,storagecodes,ecp_d_dbnm,ecp_d_deck,ecp_d_deckb,ecp_d_prob,upbnd,upname,upobj,uprhs,updmcd,upflcd,uplntcd,upldcd,upmdcd,ecp_ftp,ecp_nct,nox_st,nox_rg,tnox_st,tnox_rg,co2_st,co2_rg,upowncd,uprgcd,upsccd,upyrcd,ecp_btm,no_ccs_plntcd
             common /htrt_improvement/ htrt_ovr_cst,htrt_reduction,htrt_floor,htrt_min_cap,htrt_ovrq,htrt_redq,htrt_year,htrt_dollar_year
             common /htrt_out/ htrt_cap,htrt_cap_mr,htrt_epgcap,htrt_results,htrt_frst,htrt_next,htrt_igrp,htrt_units
             common /state_rps/ st_rps_ut_pcnt,st_rps_pcap_87,st_rps_chp,st_rps_dg,st_rps_cofire,st_rps_ecp_ex,st_rps_ecp_nw,h_sales,st_rps_req,st_rps_tolerance,nm_st_codes,nm_ut_types,st_rps_sw,nm_st_rps,st_rps_stnm,st_rps_syr,st_rps_eyr,st_rps_post,st_rps_pcap_yr,st_rps_pcap_typ,st_rps_imports,st_rps_chp_sw,st_rps_dg_sw,st_rps_emm_map,st_rps_trd,st_rps_ut_nm,st_rps_ut_type,st_rps_title,ut_type_codes,st_codes,st_rps_stcd,st_rps_id
-            common /cggen/ cg_gen_i,cg_gen_c,cg_gen_r,cg_gen_o,cg_gen_f,f_cl,f_ol,f_og,f_ng,f_hy,f_gt,f_ms,f_wd,f_so,f_pv,f_ot,f_wn,tc_fuel_codes
+            common /cggen/ cg_gen_i,cg_gen_c,cg_gen_r,cg_gen_o,cg_gen_f,f_cl,f_ol,f_og,f_ng,f_hy,f_gt,f_ms,f_wd,f_so,f_pv,f_ot,f_wn,f_bs,tc_fuel_codes
             common /hy_cf_from_m864/ hy_cf_ecp,hy_cf_efd
             common /base_cf_from_m864/ nuc_cf_ecp,fos_cf_ecp,nuc_cf_efd,fos_cf_efd,usw_nucretsm
             common /intgen/ upintlag,upintinc,upintmax,itotgen,irnwgen,irnwpct,irnwact
@@ -5550,23 +5576,23 @@ python module pyfiler1 ! in
             common /mxpblk/ xpelcm,xpelin,xpgfel,xpgiin,xpgiel,xpngcm,xpngel,xpclel,xpdscm,xpdsel,xprlel,xprhel,xprsel,xpurel,xpmgas,xpjftr,xpdsrs,xpdstr,xpdsin,xpksas,xplgas,xprlas,xprhas,xppfin,xpasin,xpotas,xpmetr,xpettr,xit_wop,xogwprng,xogwprngpf,xp_itimcrsc,xwpetoh,xpclgas,xpalmg,xbrent_price,xwti_price,xstart_price
             common /holdxwhp/ holdoldwhpx
             common /qsblk/ qselrs,qselcm,qseltr,qselin,qselrf,qselhm,qselas,qsgfrs,qsgfcm,qsgftr,qsgfin,qsgfrf,qsgfel,qsgfhm,qsgfas,qsgirs,qsgicm,qsgitr,qsgiin,qsgirf,qsgiel,qsgihm,qsgias,qsngrs,qsngcm,qsngtr,qsngin,qsngrf,qsngel,qsnghm,qsngas,qsgptr,qslpin,qsclrs,qsclcm,qsclin,qsclrf,qsclel,qsclsn,qsclhm,qsclas,qsmcin,qsmgcm,qsmgtr,qsmgin,qsmgas,qsjftr,qsdsrs,qsdscm,qsdstr,qsdsin,qsdsrf,qsdsel,qsdsas,qsksrs,qskscm,qsksin,qsksas,qslgrs,qslgcm,qslgtr,qslgin,qslgrf,qslgas,qsrlcm,qsrltr,qsrlin,qsrlrf,qsrlel,qsrlas,qsrhtr,qsrhel,qsrhas,qsrscm,qsrstr,qsrsin,qsrsrf,qsrsel,qsrsas,qspfin,qssgin,qssgrf,qspcin,qspcrf,qspcel,qspcas,qsasin,qsottr,qsotin,qsotrf,qsotas,qstprs,qstpcm,qstptr,qstpin,qstprf,qstpel,qstpas,qsmetr,qsettr,qsethm,qshytr,qsurel,qsurhm,qshoin,qshoel,qshoas,qsgers,qsgein,qsgeel,qsgeas,qsbmrs,qsbmcm,qsbmin,qsbmrf,qsbmel,qsbmsn,qsbmhm,qsbmas,qsmsin,qsmsel,qsmsas,qsstrs,qsstcm,qsstin,qsstel,qsstas,qspvrs,qspvcm,qspvin,qspvel,qspvas,qswicm,qswiin,qswiel,qswias,qstrrs,qstrcm,qstrtr,qstrin,qstrel,qstrsn,qstrhm,qstras,qseiel,qsciin,qstsrs,qstscm,qststr,qstsin,qstsrf,qstsel,qstssn,qstshm,qstsas,qsh1tr,qsh2tr,qsh3tr,qsppin,qsluin,qslutr,qsbuin,qsetin,qsisin,qsprin,qsprtr,qsprcm,qsprrs,qspyin
-            common /ncntrl/ exw,exm,exr,exk,exi,ext,exe,exc,exl,exg,exo,exn,exh,exq,runmod,firsyr,lastyr,lastcalyr,maxitr,frctol,abstol,rlxpc,nyrs,i4site,i4scnt,irelax,wwop,mmac,history,curitr,curiyr,curcalyr,loopop,ctest,fcrl,ncrl,macfdbk,elassw,dsmswtch,dbdump,modelon,ecpstart,cnvtst,itimng,yearpr,scalpr,morder,prtdbgw,prtdbgm,prtdbgr,prtdbgk,prtdbgi,prtdbgt,prtdbge,prtdbgc,prtdbgl,prtdbgg,prtdbgo,prtdbgn,prtdbgh,prtdbgq,ijumpyr,ijumpcalyr
+            common /ncntrl/ exw,exm,exr,exk,exi,ext,exe,exc,exl,exg,exo,exn,exh,exq,runmod,firsyr,lastyr,lastcalyr,maxitr,frctol,abstol,rlxpc,nyrs,i4site,i4scnt,irelax,wwop,mmac,history,curitr,curiyr,curcalyr,loopop,ctest,fcrl,ncrl,macfdbk,elassw,dsmswtch,dbdump,modelon,cnvtst,itimng,yearpr,scalpr,morder,prtdbgw,prtdbgm,prtdbgr,prtdbgk,prtdbgi,prtdbgt,prtdbge,prtdbgc,prtdbgl,prtdbgg,prtdbgo,prtdbgn,prtdbgh,prtdbgq,ijumpyr,ijumpcalyr
             common /nchar/ scen_date,scen,date,comment,subr_names,subr_descr,fore_site_cntl,fore_site_type
             common /cycleinfo/ curirun,numiruns
-            common /lfmmout/ p_crude_imports,q_crude_imports,q_crude_importa,grd2dsqty,grn2mgqty,saf2jtqty,ethtot,bimqty,biodimppd,biodexppd,rfscredprc,rfscredits,rfssafety,rfsactual,rfsmandates,rfs_waiver,rfsdstr,rfsmgtr,rfsrbob,rfsjftr,rfsdsrs,ref_cap,ref_utl,lcfs_baseline,lcfs_actual,lcfs_waiver,lcfs_offset_prc,lcfs_carb_offset,lcfs_petotrills,cfp_baseline,cfp_actual,cfp_waiver,cfp_offset_prc,cfp_carb_offset,cfp_petotrills,wacfs_baseline,wacfs_actual,wacfs_waiver,wacfs_offset_prc,wcfs_carb_offset,wacfs_petotrills,eth_ferm_co2,refgain,rfipqmg,rfipqrg,rfipqcbob,rfipqrbob,rfipqcg,rfipqds,rfipqdl,rfipqdu,rfipqcd,rfipqrl,rfipqrh,rfipqjf,rfipqpf,rfipqas,rfipqag,rfipqlu,rfipqpc,rfipqet,rfipqpr,rfipqpy,rfipqbu,rfipqis,rfipqpp,rfipqmn3,rfipqgo3,rfipqar3,motor_fuel,dist_fuel,feedstocks,intermediate,refine_prod,gross_import,gross_export,dom_consume,qngrfpd,rfsrevmandate,rfs_rev,p_crude_exports,q_crude_exports,rfcrudewhp,rfcrudeinp,rfotherinp,ethstkchg,biodstkchg,biobutestk,rfprddiesel,profit_bbl,rfbiobutecd,rfbiobuterr,qbiobute,biobuteimp,biobuteexp,biobuteprice,corncd,p_crude_to_can,q_crude_to_can,lfdenprod,lfdencons,refprodet,refprodpr,refprodbu,refprodis,refprodpp,refprodpy,refprodoo,refinpet,refinppr,refinpbu,refinpis,refinppp,refinppy,refinpoo,sboqgd,ygrqgd,wgrqgd,sboqrjh,wgrqrjh,wgrqrdh,p_rfcrudeinp,graincd,ab32jetcover,ab32_ds,ab32_ks,ab32_pr,ab32_mg,ab32_et,ab32_jf,lfexplease,lfrefrent,lfmmcode,renewdimp,renewdimppd
+            common /lfmmout/ p_crude_imports,q_crude_imports,q_crude_importa,grd2dsqty,grn2mgqty,saf2jtqty,ethtot,bimqty,biodimppd,biodexppd,builds,rfscredprc,rfscredits,rfssafety,rfsactual,rfsmandates,rfs_waiver,rfsdstr,rfsmgtr,rfsrbob,rfsjftr,rfsdsrs,ref_cap,ref_utl,lcfs_baseline,lcfs_actual,lcfs_waiver,lcfs_offset_prc,lcfs_carb_offset,lcfs_petotrills,cfp_baseline,cfp_actual,cfp_waiver,cfp_offset_prc,cfp_carb_offset,cfp_petotrills,wacfs_baseline,wacfs_actual,wacfs_waiver,wacfs_offset_prc,wcfs_carb_offset,wacfs_petotrills,eth_ferm_co2,refgain,rfipqmg,rfipqrg,rfipqcbob,rfipqrbob,rfipqcg,rfipqds,rfipqdl,rfipqdu,rfipqcd,rfipqrl,rfipqrh,rfipqjf,rfipqpf,rfipqas,rfipqag,rfipqlu,rfipqpc,rfipqet,rfipqpr,rfipqpy,rfipqbu,rfipqis,rfipqpp,rfipqmn3,rfipqgo3,rfipqar3,motor_fuel,dist_fuel,feedstocks,intermediate,refine_prod,gross_import,gross_export,dom_consume,qngrfpd,rfsrevmandate,rfs_rev,p_crude_exports,q_crude_exports,rfcrudewhp,rfcrudeinp,rfotherinp,ethstkchg,biodstkchg,biobutestk,rfprddiesel,profit_bbl,rfbiobutecd,rfbiobuterr,qbiobute,biobuteimp,biobuteexp,biobuteprice,corncd,p_crude_to_can,q_crude_to_can,lfdenprod,lfdencons,refprodet,refprodpr,refprodbu,refprodis,refprodpp,refprodpy,refprodoo,refinpet,refinppr,refinpbu,refinpis,refinppp,refinppy,refinpoo,sboqgd,ygrqgd,wgrqgd,sboqrjh,wgrqrjh,wgrqrdh,p_rfcrudeinp,graincd,ab32jetcover,ab32_ds,ab32_ks,ab32_pr,ab32_mg,ab32_et,ab32_jf,lfexplease,lfrefrent,lfmmcode,renewdimp,renewdimppd,renewdexp
             common /pmmout/ rfqprdt,rfqdcrd,rfsprfr,rfsprim,rfpqngl,rfqprcg,dcrdwhp,xdcrdwhp,xrfqdcrd,rfqtdcrd,qclrfpd,ethne85,trgne85,crnprice,qbmrfbtl,glbcrddmd,rfqngpfcd,qcrdrf,ctlfrac,gtlfrac,btlfrac,cbtlfrac,qmerf,ubavol,prdstkwdr,xtl_co2avail,os_wop,rfqngpl
             common /pmmrpt/ rfdstcap,rfdstutl,rfipqcll,rfimcr,rfimtp,rfqmg,rfqds,rfqjf,rfqrl,rfqrh,rfqlg,rfqpf,rfqks,rfqoth,rfqaro,rfqstg,rfqpck,rfpqiprdt,rfqexprdt,rfqexcrd,rfqicrd,rfpqufc,qprdrf,rfbdstcap,rfcrdoth,bldimp,rfmtbi,rfmeti,rfethe85,rfmetm85,muftax,dssttx,mgsttx,jfsttx,crnethcd,cllethcd,qprdex,ethimp,pethm,bimqtycd,pethanol,ethe85cd,ethtotcd,biodimp,biodprice,ethexp,tdiesel,ethgascd,othethcd,grnethcd,advethcd,biodexp,biodconcd
             common /pmmftab/ rfqin,rfqtr,rfqrc,rfqel,rfqsect,rfimpexpend,crncapcd,cllcapcd,palmg,palbob,pds,pdsl,pjf,mgmutr,dsmurs,dsmutr,jfmutr,rfenvfx,bankused,bankcred,minren,rfqngpf,rfqsgpf,coneff,plmqtycd,sboqtycd,sbo_price,ygr_price,pdsu,pdsc,pdsi,pdst,cellimpfrac,cellcd,rfhcxh2in,sbo2gdtpd,sbo2safpd,ygr2gdtpd,wgr2gdtpd,wgr2safpd,ws_rbob,lcfssafe,cbiodual,grncapcd,advcapcd,wgr_price,e85iccredit,ubavolds,ubavolmg,dscshr,pdscrb,fuel_carb
-            common /ogsmout/ ogresngon,ogprrngon,ogradngon,ogresngof,ogprrngof,ogradngof,ogprdad,ogqngexp,ogqngimp,ogpngexp,ogpngimp,ogpcrwhp,ogqcrrep,ogqcrrsv,ogpngwhp,ogqngrep,ogqngrsv,ognowell,ogtechon,cnenagprd,cnrnagprd,cnadgprd,ogprrcan,ogrescan,ogcnqprd,ogcnpprd,ogcorsv,ogngrsv,ogcoprd,ogcowhp,ogngprd,ogngwhp,exspend,dvspend,exoilft,dvoilft,exgasft,dvgasft,exdryft,dvdryft,exftage,dvftage,ogtaxprem,ogjobs,ogprdadon,ogprdadof,ognglak,ogwptdm,ogprcexp,oggrowfac,ogcoprdgom,ogngprdgom,ogprcoak,ogcoprd_fed,ogcoprd_nonfed,ogngprd_fed,ogngprd_nonfed,ogngplprd_fed,ogngplprd_nonfed,ogelshale,ogshaleng,ogprdugr,ogeorprd,ogco2inj,ogco2rec,ogco2pur,ogco245q,ogco2pur2,ogco2avl,ogco2avls,ogco2prc,ogco2prcs,ogco2pem,ogco2plf,ogco2qem,ogco2qlf,ogco2tar,ogdngprd,ogprdoff,ogeoyurr,ogeoyinf,ogeoyrsv,ogeoyugr,ogeoyad,ogeoyrsvon,ogcrdprd,ogcrdheat,ogqshloil,ogqshlgas,ogregprd,ogngplprd,ogsrl48,ogwellsl48,ogcruderef,ogogwells,ogenagprd,ogrnagprd,ogoilprd,ogadgprd,ogcrudeprd,ogngplet,ogngplpr,ogngplbu,ogngplis,ogngplpp,ns_start,play_map,ngpco2em
+            common /ogsmout/ ogresngon,ogprrngon,ogradngon,ogresngof,ogprrngof,ogradngof,ogprdad,ogqngexp,ogqngimp,ogpngexp,ogpngimp,ogpcrwhp,ogqcrrep,ogqcrrsv,ogpngwhp,ogqngrep,ogqngrsv,ognowell,ogtechon,cnenagprd,cnrnagprd,cnadgprd,ogprrcan,ogrescan,ogcnqprd,ogcnpprd,ogcorsv,ogngrsv,ogcoprd,ogcowhp,ogngprd,ogngwhp,exspend,dvspend,exoilft,dvoilft,exgasft,dvgasft,exdryft,dvdryft,exftage,dvftage,ogtaxprem,ogjobs,ogprdadon,ogprdadof,ognglak,ogwptdm,ogprcexp,oggrowfac,ogcoprdgom,ogngprdgom,ogprcoak,ogcoprd_fed,ogcoprd_nonfed,ogngprd_fed,ogngprd_nonfed,ogngplprd_fed,ogngplprd_nonfed,ogelshale,ogshaleng,ogprdugr,ogeorprd,ogco2inj,ogco2rec,ogco2pur,ogco245q,ogco2pur2,ogco2avl,ogco2avls,ogco2prc,ogco2prcs,ogco2pem,ogco2plf,ogco2qem,ogco2qlf,ogco2tar,ogdngprd,ogprdoff,ogeoyurr,ogeoyinf,ogeoyrsv,ogeoyugr,ogeoyad,ogeoyrsvon,ogcrdprd,ogcrdheat,ogqshloil,ogqshlgas,ogregprd,ogngplprd,ogsrl48,ogwellsl48,ogcruderef,ogogwells,ogenagprd,ogrnagprd,ogoilprd,ogadgprd,ogcrudeprd,ogngplet,ogngplpr,ogngplbu,ogngplis,ogngplpp,ns_start,play_map,ngpco2em,capex_per_well,drill_cost,plat_cost,flow_cost,dev_cost
             common /ogintrn/ ogelsngon,ogelsngof,ogqeorpr,ogelsco,ogprrco,ogresco
-            common /ngtdmout/ ogprdngon,ogprdngof,prng_padd,pgfelgr,pgielgr,pgcelgr,clsyngwp,qgftrfv,qgftrpv,pgftrfv,pgftrpv,qgltrfv,qgltrpv,pgltrfv,pgltrpv,spgfelgr,spgielgr,pbaja,qbaja,qgftrrail,qgltrrail,pgftrrail,pgltrrail,qgftrship,qgltrship,pgftrship,pgltrship,spngelgr,pngelgr,spngin
+            common /ngtdmout/ ogprdngon,ogprdngof,prng_padd,pgfelgr,pgielgr,pgcelgr,clsyngwp,qgftrfv,qgftrpv,pgftrfv,pgftrpv,qgltrfv,qgltrpv,pgltrfv,pgltrpv,spgfelgr,spgielgr,pbaja,qbaja,qgftrrail,qgltrrail,pgftrrail,pgltrrail,qgftrship,qgltrship,pgftrship,pgltrship,spngelgr,pngelgr,spngin,pipecap,lngcap
             common /ngtdmrep/ ogwprng,ogprsup,ogprdng,ngstrcap,ngpipcap,gmd_alb,gak_alb,ngscrv_min,ngscrv_max,ngscrv_q,ngscrv_p,ngscrv_q0,ngscrv_p0,ngscrv_elas,ngscrv_per,ogcapimp,cnlngimp,oghhprng,ngbal,el_mrkup_beta,ogsupgas,acgpr_rescom,udtar,arescom,cngavail,nalngexp,pintlng,pusng,ptransng,ogprcng,ngrnagprd,ngimpvol,ngexpvol,ngimpprc,ngexpprc,ngspot_emm,ogprrng,lcfsrngos
             common /ngrpt/ cap_nen,cap_nex,cap_cen,cap_cex,ngflows,ngcaps,ngarcmp,ngcode
             common /uefpout/ pelav,pelcp,pelfl,pelom,pelwh,pelme,peltl,pelbs
             common /efpout/ pecasrln,pecasmen,pecastxn,pecastdn,peccmrln,peccmmen,peccmtxn,peccmtdn,pecinrln,pecinmen,pecintxn,pecintdn,pecrsrln,pecrsmen,pecrstxn,pecrstdn,pelrsnr,pelcmnr,peltrnr,pelinnr,pelasnr,pelcpnr,pelflnr,pelomnr,pelwhnr,peltlnr,pecgenn,pecdisn,pectrnn,ewsprcn
             common /uefdout/ ugnclnr,ugngfnr,ugnginr,ugngcnr,ugndsnr,ugnrlnr,ugnrhnr,ugnurnr,ugnpsnr,ugnhynr,ugngenr,ugnmsnr,ugnwdnr,ugncfnr,ugnsonr,ugnpvnr,ugnwnnr,ugnwfnr,ugnhonr,ugndgnr,ugnddnr,ugntlnr,uflclnr,uflgfnr,uflginr,uflgcnr,ufldsnr,uflrlnr,uflrhnr,uflurnr,uflpsnr,uflhynr,uflotnr,ufldgnr,uflddnr,uflgtnr,uflwdnr,uflmsnr,uflsonr,uflpvnr,uflwnnr,uflwfnr,ufltlnr,ucrclnr,ucrngnr,ucrnunr,ucrhynr,ucrgenr,ucrmsnr,ucrwdnr,ucrcfnr,ucrsonr,ucrpvnr,ucrwnnr,ucrwfnr,ucrtlnr,ucrchnr,ucrpnnr,ucrbknr,ucrbsnr,urpsprc,urpscst,urpspen,urpsprcr,urpscstr,urpspenr,urpscgg,urpscgo,uptclnr,uptngnr,uptnunr,upthynr,uptgenr,uptmsnr,uptwdnr,uptcfnr,uptsonr,uptpvnr,uptwnnr,uptwfnr,upttlnr,uptccst,uprclnr,uprngnr,uprdsnr,uprrsnr,uprwdnr,utso2,utnox,utco2,utco1,utcar,uthg,urettlu,uprwdcr,xdsel,xrlel,xrhel,flagso2,costso2,ucarprc,qgfelgr,qgielgr,qgcelgr,eqgfelgr,eqgielgr,eqgcelgr,xqgfelgr,xqgielgr,xqgcelgr,coalgen,oilgen,gasgen,rnwgen,othgen,coalcap,oilcap,gascap,rnwcap,othcap,totcap,ctlgen,ctlcap,ugninr,ugnotr,ugnsrv,uflinr,uflotr,uflsrv,uso2inr,uso2otr,uco2inr,uco2otr,ucarinr,ucarotr,unoxinr,unoxotr,uhginr,uhgotr,sqgfelgr,sqgielgr,sqngelgr,qngelgr,qbmelcl,upmxgas,upmxoil,upmxcol,upmxgas_mr,upmxoil_mr,upmxcol_mr,upgasprc,updisprc,upresprc,upcolprc,upnucprc,uphydprc,upmaxcf,up_xfor,up_xpmr,uouncp,uouccp,ctlnoxem,ctlso2em,ctlhgem,upcoalavg,ucrotnr,uefd_cap,uefd_gen,ugrd_stc,ugrd_rtc,ugrd_prc,ugrd_cap,ugrd_stg,ugrd_rtg,ugrd_prg,ugrd_gen,ugnsdnr,ugnptnr,ugnwlnr,ucrptnr,ucrwlnr,uptptnr,uptwlnr,ijumpemrgn,unrgns,co2_ccs,btu_ccs,sqh2el
             common /udatout/ ucapcsu,ucapsqu,ucapigu,ucapisu,ucaposu,ucapccu,ucapacu,ucapasu,ucapctu,ucapatu,ucapnuu,ucapfcu,ucappsu,ucaphyu,ucapgeu,ucapmsu,ucapwdu,ucapstu,ucappvu,ucapwnu,ucapwfu,ucaprnu,ucapdbu,ucapdpu,ucaptlu,ucapcsn,ucapsqn,ucapign,ucapisn,ucaposn,ucapccn,ucapacn,ucapasn,ucapctn,ucapatn,ucapnun,ucapfcn,ucappsn,ucaphyn,ucapgen,ucapmsn,ucapwdn,ucapstn,ucappvn,ucapwnn,ucapwfn,ucaprnn,ucapdbn,ucapdpn,ucaptln,uretcsu,uretsqu,uretigu,uretisu,uretosu,uretccu,uretacu,uretasu,uretctu,uretatu,uretnuu,uretfcu,uretpsu,urethyu,uretgeu,uretmsu,uretwdu,uretstu,uretpvu,uretwnu,uretwfu,uretrnu,qelasn,qelrsn,qelcmn,qelinn,qeltrn,ucapwnr,ucapwfr,ucapp2,ugenpc,ugensq,ugenig,ugenis,ugenos,ugencc,ugenac,ugencs,ugenct,ugenat,ugennu,ugenps,ugenfc,ugenrn,ugendg,ucapngu,ucapngn,uretngu,ugenng,ucapocu,ucapocn,uretocu,ugenoc,ucapi2u,ucapi2n,ureti2u,ugeni2,ucappqu,ucappqn,uretpqu,ugenpq,ucapicu,ucapicn,ureticu,ugenic,ucapt2u,ucapt2n,urett2u,ugent2,ucapa2u,ucapa2n,ureta2u,ugena2,ucapsmu,ucapsmn,uretsmu,ugensm,ucapgnu,ucapgnn,uretgnu,ugengn,ucapbiu,ucapbin,uretbiu,ugenbi,ucapagu,ucapagn,uretagu,ugenag,ucaphou,ucaphon,urethou,ugenho,ucaphiu,ucaphin,urethiu,ugenhi,ucaptiu,ucaptin,urettiu,ugenti,ucapqsu,ucapqsn,uretqsu,ugenqs,ucapdsu,ucapdsn,uretdsu,ugends,ucapzsu,ucapzsn,uretzsu,ugenzs,ucapwlu,ucapwln,uretwlu,ugenwl,ucapssu,ucapssn,uretssu,ugenss,ucaps2u,ucaps2n,urets2u,ugens2,ucapptu,ucapptn,uretptu,ugenpt,ucapinu,ucapinn,uretinu,ugenin,ucapwlr,unrvcol,unrvccy,unrvstm,unrvnuc,uncpcol,uncpccy,uncpstm,uncpnuc,ugensq_alt,ugenis_alt,ugenpq_alt,ugencs_alt,ugena2_alt,ucapngcf,ugenngcf
-            common /uecpout/ uaddcsu,uaddigu,uaddisu,uaddosu,uaddccu,uaddacu,uaddasu,uaddctu,uaddatu,uaddnuu,uaddfcu,uaddrnu,uaddpsu,uadddbu,uadddpu,uaddtlu,uaddcsn,uaddign,uaddisn,uaddosn,uaddccn,uaddacn,uaddasn,uaddfcn,uaddctn,uaddatn,uaddnun,uaddrnn,uaddpsn,uadddbn,uadddpn,uaddtln,uaddp2,uaddhyt,uaddget,uaddmst,uaddwdt,uaddstt,uaddpvt,uaddwnt,uaddwft,uaddpst,uaddcst,uaddhyd,uaddged,uaddmsd,uaddwdd,uaddstd,uaddpvd,uaddwnd,uaddwfd,uaddpsd,uaddinr,uaddotr,uaddsrv,ucapinr,ucapotr,ucapsrv,epnoxpr,epcarpr,eprpstgt,eprpspr,eprpslm,eprpscp,eprpscr,eprpsbk,eprpsprr,eprpslmr,eprpscpr,eprpscrr,eprpsbkr,uppcccst,upigccst,upisccst,upctccst,upatccst,upccccst,upacccst,upcsccst,upfcccst,upanccst,upwdccst,upgtccst,upmsccst,uphyccst,upwnccst,upwfccst,upsoccst,uppvccst,updbccst,updpccst,cp_add,carbon_rev,ret_cst,total_vcst,total_rcc,total_ric,total_rps,fuel_vom,non_fuel_vom,total_fom,total_vom,t_domecon,t_domfirm,t_intexp,t_intimp,ret_inv,new_cap_el,g_inst_all,t_ovr,g_ann,t_ann,trctlovr,trctlfcf,ureltgt,urelrsv,urelprc,ucapadj,capccs,copccs,tfccs,tvccs,ifccs,ivccs,rmpool,rmavg,ces_duals,g_scap,g_tccv,g_tccf,g_ttcv,g_ttcf,g_ticv,g_ticf,c_scap,c_tccv,c_tccf,c_ttcv,c_ttcf,c_ticv,c_ticf,g_avgcf,g_avgtf,g_avgif,g_avgcv,g_avgtv,g_avgiv,fr_or_trancost,tns_costs,c_avgtf,c_avgif,c_ry,g_igrp,c_igrp,g_plts,c_plts,must_store,uaddhyu,uaddgeu,uaddmsu,uaddwdu,uaddstu,uaddpvu,uaddwnu,uaddwfu,uaddhyn,uaddgen,uaddmsn,uaddwdn,uaddstn,uaddpvn,uaddwnn,uaddwfn,uaddocu,uaddocn,upocccst,uaddi2u,uaddi2n,upi2ccst,uaddpqu,uaddpqn,uppqccst,uaddngu,uaddngn,upngccst,uaddicu,uaddicn,upicccst,uaddt2u,uaddt2n,upt2ccst,uadda2u,uadda2n,upa2ccst,uaddsmu,uaddsmn,upsmccst,uaddgnu,uaddgnn,upgnccst,uaddbiu,uaddbin,upbiccst,uaddagu,uaddagn,upagccst,uaddhou,uaddhon,uphoccst,uaddhiu,uaddhin,uphiccst,uaddtiu,uaddtin,upticcst,uaddsqu,uaddsqn,upsqccst,uadddsu,uadddsn,updsccst,uaddzsu,uaddzsn,upzsccst,uaddwlu,uaddwln,upwlccst,uaddssu,uaddssn,upssccst,uadds2u,uadds2n,ups2ccst,uaddptu,uaddptn,upptccst,uaddinu,uaddinn,upinccst,utco2pem,utco2qem,uaddwlt,uaddptt,uaddwld,uaddptd,st_rps_emm_q,st_rps_emm_p,st_rps_duals,st_rps_prc_87,st_rps_ex_gen,st_rps_nw_gen,st_rps_xp_gen,st_rps_ex_crd,st_rps_nw_crd,st_rps_xp_crd,used_last,used_last2,unused_last,unused_last2,dispatchtot,existstotot,curtailstot,hourlyloadtot,elecpricetot,price_el_hr,loadmaxh2el,qelcur,qelgen,qelgen_vint,upira_appyr
+            common /uecpout/ uaddcsu,uaddigu,uaddisu,uaddosu,uaddccu,uaddacu,uaddasu,uaddctu,uaddatu,uaddnuu,uaddfcu,uaddrnu,uaddpsu,uadddbu,uadddpu,uaddtlu,uaddcsn,uaddign,uaddisn,uaddosn,uaddccn,uaddacn,uaddasn,uaddfcn,uaddctn,uaddatn,uaddnun,uaddrnn,uaddpsn,uadddbn,uadddpn,uaddtln,uaddp2,uaddhyt,uaddget,uaddmst,uaddwdt,uaddstt,uaddpvt,uaddwnt,uaddwft,uaddpst,uaddcst,uaddhyd,uaddged,uaddmsd,uaddwdd,uaddstd,uaddpvd,uaddwnd,uaddwfd,uaddpsd,uaddinr,uaddotr,uaddsrv,ucapinr,ucapotr,ucapsrv,epnoxpr,epcarpr,eprpstgt,eprpspr,eprpslm,eprpscp,eprpscr,eprpsbk,eprpsprr,eprpslmr,eprpscpr,eprpscrr,eprpsbkr,uppcccst,upigccst,upisccst,upctccst,upatccst,upccccst,upacccst,upcsccst,upfcccst,upanccst,upwdccst,upgtccst,upmsccst,uphyccst,upwnccst,upwfccst,upsoccst,uppvccst,updbccst,updpccst,cp_add,carbon_rev,ret_cst,total_vcst,total_rcc,total_ric,total_rps,fuel_vom,non_fuel_vom,total_fom,total_vom,t_domecon,t_domfirm,t_intexp,t_intimp,ret_inv,new_cap_el,g_inst_all,t_ovr,g_ann,t_ann,trctlovr,trctlfcf,ureltgt,urelrsv,urelprc,ucapadj,capccs,copccs,tfccs,tvccs,ifccs,ivccs,rmpool,rmavg,ces_duals,g_scap,g_tccv,g_tccf,g_ttcv,g_ttcf,g_ticv,g_ticf,c_scap,c_tccv,c_tccf,c_ttcv,c_ttcf,c_ticv,c_ticf,g_avgcf,g_avgtf,g_avgif,g_avgcv,g_avgtv,g_avgiv,fr_or_trancost,tns_costs,c_avgtf,c_avgif,c_ry,g_igrp,c_igrp,g_plts,c_plts,must_store,uaddhyu,uaddgeu,uaddmsu,uaddwdu,uaddstu,uaddpvu,uaddwnu,uaddwfu,uaddhyn,uaddgen,uaddmsn,uaddwdn,uaddstn,uaddpvn,uaddwnn,uaddwfn,uaddocu,uaddocn,upocccst,uaddi2u,uaddi2n,upi2ccst,uaddpqu,uaddpqn,uppqccst,uaddngu,uaddngn,upngccst,uaddicu,uaddicn,upicccst,uaddt2u,uaddt2n,upt2ccst,uadda2u,uadda2n,upa2ccst,uaddsmu,uaddsmn,upsmccst,uaddgnu,uaddgnn,upgnccst,uaddbiu,uaddbin,upbiccst,uaddagu,uaddagn,upagccst,uaddhou,uaddhon,uphoccst,uaddhiu,uaddhin,uphiccst,uaddtiu,uaddtin,upticcst,uaddsqu,uaddsqn,upsqccst,uadddsu,uadddsn,updsccst,uaddzsu,uaddzsn,upzsccst,uaddwlu,uaddwln,upwlccst,uaddssu,uaddssn,upssccst,uadds2u,uadds2n,ups2ccst,uaddptu,uaddptn,upptccst,uaddinu,uaddinn,upinccst,utco2pem,utco2qem,uaddwlt,uaddptt,uaddwld,uaddptd,st_rps_emm_q,st_rps_emm_p,st_rps_duals,st_rps_prc_87,st_rps_ex_gen,st_rps_nw_gen,st_rps_xp_gen,st_rps_ex_crd,st_rps_nw_crd,st_rps_xp_crd,used_last,used_last2,unused_last,unused_last2,dispatchtot,existstotot,curtailstot,hourlyloadtot,elecpricetot,price_el_hr,loadmaxh2el,qelcur,qelgen,qelgen_vint,upira_appyr,pv_cap_adj,pt_cap_adj,so_cap_adj,wn_cap_adj,wf_cap_adj,wl_cap_adj
             common /dsmtfefp/ totsecload,mappntoc,systemlf,secmonldpeak,secannualpeak,secannpeaavpcp,syspeakhour,npeakh
             common /dsmtfefr/ dsmannualcost
             common /dsmtfefs/ sectldcblen
@@ -5579,7 +5605,7 @@ python module pyfiler1 ! in
             common /resdrep/ rseh,rsnh,rshseadd,rshtrcon,rscoolcn,rsh2ocon,rsckcon,rsdrycon,rsrefcon,rsfrzcon,rsltcon,rsapcon,rshtrs,rscoolers,rswater,rscook,rsdry,rsref,rsfrz,rseefht,rseefcl,rseefhw,rseefrf,rseeffz,rsnefht,rsnefcl,rsnefhw,rsnefrf,rsneffz,hshell1,hshell2,hshell3,cshell1,cshell2,cshell3,sqftavg,rscswcon,rsdswcon,rstvrcon,rspcrcon,rsfancon,rshouses,rsgascust,hddadj,cddadj
             common /comparm/ enduseconsump,capacityfactor,techeff,techcost,techlife,whse_shellindex,whse_lightindex,whse_ventindex,whse_heatindex,euconwithdg
             common /commrep/ cmussurvfloortot,cmusnewfloortot,cmusconsumption,cmsurvfloortot,cmnewflrspace,cmfinalendusecon,cmusavgeff,cmuscogen,cmusdistserv,distservsteam,cmuspurcheff,cmeffind,ceffgrowth,degreedays,survfloortotal,agednew,cmnewfloorspace,cmtotalflspc,cmnonbldguse
-            common /tranrep/ trqhwy,trqnhwy,trqenuse,trqftrk,trqrrf,trqdoms,trqints,trqairt,trqmil,trqbus,trqrrp,trqboat,trqlub,treffcar,trefftrk,treffaltc,treffaltt,trslshrc,trslshrt,trhpcar,trhptrk,trwtcar,trwttrk,trldqtek,trldsalc,trldsalt,trldstkc,trldstkt,trldmpgc,trldmpgt,trldmpgf,trldvmt,trldvmte,trtravld,airout,traireffn,traireffs,trstmdem,techpen_avg,trvmttrk,trtmrr,trtmrrc,trtmship,trimship,trqldv,trqrailr,fltechrpt,fltechstkrpt,fltfcldvbtu,fltechvmtrpt,degrpt,treffflt,tot_emis,legaltsal,trftmpg,mpg,pri,rng,bcltbtut,bcltvmt,cltstkt,ncltmpgt,cltmpgt,cltsalt,newmpg,avg_prc_car,avg_prc_trk,avg_prc_veh,tfr_fbtu_fas_t,tfr_fbtu_fasf_t,tfr_fbtu_tr,tfr_trk_fas_t,tfr_trk_fasf_t,tfr_trk_tr,tfr_vmt_fas_t,tfr_vmt_fasf_t,tfr_vmt_tr,tfr_ftmpg,tfr_ftmpg_s,tfr_ftmpg_tr,tfr_invest_tr,techshare,mkt_d_p,avgcost,trwtcar_stock,trwttrk_stock,hfueltax,qffv,e85avail,e10share,hfavl,xqffv,xtrqldv,truempg,cafestd,wld_gdp,wld_pop,trmicros,qagtr,qlutr,xqagtr,xqlutr,full_prc_car,full_prc_trk,full_prc_veh,fclogit0,fclogit1,fclogit2,fclogit3,fclogit4,cltfuelbtu,pas_rpm,trk_tmt,ldv_mpg,tthcons,trqftrk_new,trqhwy_new,techmpg,stkmpg,zev_credit_bank,ldvmpg,ldvpri,ldvrng,trq_elec,li_ion_cost,cost_battkwh_trk,adjmpg
+            common /tranrep/ trqhwy,trqnhwy,trqenuse,trqftrk,trqrrf,trqdoms,trqints,trqairt,trqmil,trqbus,trqrrp,trqboat,trqlub,treffcar,trefftrk,treffaltc,treffaltt,trslshrc,trslshrt,trhpcar,trhptrk,trwtcar,trwttrk,trldqtek,trldsalc,trldsalt,trldstkc,trldstkt,trldmpgc,trldmpgt,trldmpgf,trldvmt,trldvmte,trtravld,airout,traireffn,traireffs,trstmdem,techpen_avg,trvmttrk,trtmrr,trtmrrc,trtmship,trimship,trqldv,trqrailr,fltechrpt,fltechstkrpt,fltfcldvbtu,fltechvmtrpt,degrpt,treffflt,tot_emis,legaltsal,trftmpg,mpg,pri,rng,bcltbtut,bcltvmt,cltstkt,ncltmpgt,cltmpgt,cltsalt,newmpg,avg_prc_car,avg_prc_trk,avg_prc_veh,tfr_fbtu_fas_t,tfr_fbtu_fasf_t,tfr_fbtu_tr,tfr_trk_fas_t,tfr_trk_fasf_t,tfr_trk_tr,tfr_vmt_fas_t,tfr_vmt_fasf_t,tfr_vmt_tr,tfr_ftmpg,tfr_ftmpg_s,tfr_ftmpg_tr,tfr_invest_tr,techshare,mkt_d_p,avgcost,trwtcar_stock,trwttrk_stock,hfueltax,qffv,e85avail,e10share,hfavl,xqffv,xtrqldv,truempg,cafestd,wld_gdp,wld_pop,trmicros,qagtr,qlutr,xqagtr,xqlutr,full_prc_car,full_prc_trk,full_prc_veh,fclogit0,fclogit1,fclogit2,fclogit3,fclogit4,cltfuelbtu,pas_rpm,trk_tmt,ldv_mpg,tthcons,trqftrk_new,trqhwy_new,techmpg,stkmpg,zev_credit_bank,ldvmpg,ldvpri,ldvrng,trq_elec,li_ion_cost,cost_battkwh_trk,adjmpg,global_batt_prod
             common /trnintrn/ trefftrkf,trxair,trxrail,trxship,trxaireff,trxfreff,trxraileff,trxshipeff,hpw,ldvhpw
             common /macout/ mc_bopcrntac,mc_cd,mc_cdfhe,mc_cdfher,mc_cdmv,mc_cdmvr,mc_cdo,mc_cdoor,mc_cdor,mc_cdotaer,mc_cdr,mc_cdrec,mc_cdrecipr,mc_cdrecor,mc_cdrecr,mc_cgoods,mc_cgoodsr,mc_ckf,mc_ckfadjcorp,mc_ckfcorp,mc_ckfcorpbk,mc_cn,mc_cncs,mc_cncsr,mc_cnefao,mc_cnefaor,mc_cnegao,mc_cnegaor,mc_cnf,mc_cnfr,mc_cnoo,mc_cnoor,mc_cnopmp,mc_cnopmpr,mc_cnotob,mc_cnotobr,mc_cnr,mc_commflsp,mc_cons,mc_consr,mc_cpi,mc_cpie,mc_cpixfae,mc_csv,mc_csvac,mc_csvacr,mc_csvf,mc_csvfin,mc_csvfinr,mc_csvfr,mc_csvh,mc_csvhc,mc_csvhcr,mc_csvhh,mc_csvhhr,mc_csvhr,mc_csvins,mc_csvinsr,mc_csvnpish,mc_csvnpishr,mc_csvo,mc_csvor,mc_csvr,mc_csvrec,mc_csvrecr,mc_csvts,mc_csvtsr,mc_csvu,mc_csvuer,mc_csvugr,mc_csvur,mc_dallfuels,mc_denducoal,mc_denduelc,mc_dendung,mc_dendupet,mc_eea,mc_empna,mc_engdomo,mc_engdompetang,mc_g,mc_gdp,mc_gdpfer,mc_gdpr,mc_gf,mc_gfml,mc_gfmlr,mc_gfo,mc_gfor,mc_gfr,mc_gnp,mc_gnpr,mc_gr,mc_gsl,mc_gslgisnhwyr,mc_gslr,mc_huesold,mc_husmfg,mc_husps,mc_husps1,mc_husps2a,mc_i,mc_ifnre,mc_ifnree,mc_ifnreeind,mc_ifnreeindr,mc_ifnreeip,mc_ifnreeipccr,mc_ifnreeipcsr,mc_ifnreeipctr,mc_ifnreeipr,mc_ifnreemiscr,mc_ifnreeo,mc_ifnreeor,mc_ifnreer,mc_ifnreetac,mc_ifnreetacr,mc_ifnreetlv,mc_ifnreetlvr,mc_ifnreeto,mc_ifnreetor,mc_ifnreetr,mc_ifnrer,mc_ifnres,mc_ifnresbaor,mc_ifnresc,mc_ifnrescr,mc_ifnresmfg,mc_ifnresmfgr,mc_ifnresmi,mc_ifnresmir,mc_ifnreso,mc_ifnresor,mc_ifnresp,mc_ifnrespc,mc_ifnrespcr,mc_ifnrespp,mc_ifnresppr,mc_ifnrespr,mc_ifnrespur,mc_ifnresr,mc_ifre,mc_ifree,mc_ifreer,mc_ifrer,mc_ifres,mc_ifresr,mc_ifxr,mc_ii,mc_iicmiu,mc_iicmiur,mc_iif,mc_iifr,mc_iim,mc_iimr,mc_iinf,mc_iinfr,mc_iir,mc_iirt,mc_iirtr,mc_iiw,mc_iiwr,mc_intnetbus,mc_ipsb50001,mc_ir,mc_ivacorp,mc_jcsmich,mc_jeciwsp,mc_jeciwssp,mc_jexchmtp,mc_jpcnefao,mc_jpcnegao,mc_jpcsvue,mc_jpcsvug,mc_jpgdp,mc_jqind12,mc_jqind13,mc_jqpcmhnf,mc_khups1,mc_khups2a,mc_khumfg,mc_m,mc_mfy,mc_mg,mc_mgautor,mc_mgcr,mc_mgffbr,mc_mginapetr,mc_mgkr,mc_mgr,mc_mr,mc_msvtot,mc_msvtotr,mc_netcaptrf,mc_netcfiva,mc_netsavgfunify,mc_nlfc,mc_nnp,mc_np,mc_np16a,mc_np65a,mc_poilimp,mc_poilwti,mc_qgasasf,mc_revind,mc_revser,mc_rlrmcorppuaa,mc_rmcorpaaa,mc_rmcorpbaa,mc_rmcorppuaa,mc_rmff,mc_rmgblusreal,mc_rmmtg30con,mc_rmtb3m,mc_rmtcm10y,mc_ruc,mc_savprate,mc_sfdprodr,mc_sp500,mc_stat,mc_sublsurpgf,mc_sublsurpgsl,mc_suva,mc_suvlv,mc_suvtham,mc_suvtl,mc_trfbus,mc_txcorp,mc_txcorpgf,mc_txcorpgsl,mc_txcorprw,mc_txim,mc_utlb00004,mc_vehicles,mc_wpi,mc_wpi05,mc_wpi051,mc_wpi053,mc_wpi054,mc_wpi055,mc_wpi0561,mc_wpi057,mc_wpi0574,mc_wpi10,mc_wpi11,mc_wpi14,mc_wpiind05,mc_wpisop3000,mc_wpisop3200,mc_x,mc_xfy,mc_xg,mc_xgautor,mc_xgcr,mc_xgffbr,mc_xginr,mc_xgkr,mc_xgr,mc_xr,mc_xsvtot,mc_xsvtotr,mc_yn,mc_yp,mc_ypcomp,mc_ypd,mc_ypdr,mc_yppropadjf,mc_yppropadjnf,mc_yprentadj,mc_za,mc_zadiv,mc_zar,mc_zare,mc_zb,mc_zbecon,mc_zbivadfin521,mc_zbivarw,mc_ev_success
             common /mcdetail/ mc_detail
@@ -5761,19 +5787,19 @@ python module pyfiler1 ! in
             real dimension(17,61,3) :: spngelgr
             real dimension(17,61) :: pngelgr
             real*4 dimension(61,3,9) :: ckcon
-            real*4 dimension(61,3,9) :: coolcn
+            real*4 dimension(61,2,9) :: coolcn
             real*4 dimension(61,9) :: cswcon
             real*4 dimension(61,2,9) :: drycon
             real*4 dimension(61,9) :: dswcon
             real*4 dimension(61,9) :: frzcon
-            real*4 dimension(61,8,9) :: htrcon
+            real*4 dimension(61,5,9) :: htrcon
             real*4 dimension(61,5,9) :: h2ocon
             real*4 dimension(61,9) :: refcon
             real*4 dimension(61,9) :: apcon
             real*4 dimension(61,9) :: fancon
             real*4 dimension(61,9) :: ltcon
             real*4 dimension(61,9) :: pcrcon
-            real*4 dimension(61,7,9) :: shtcon
+            real*4 dimension(61,5,9) :: shtcon
             real*4 dimension(61,9) :: tvrcon
             real dimension(2,16,61) :: pclelcdr
             real dimension(11,61) :: pdstrhwy
@@ -6260,7 +6286,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: mnetoh=5
             integer, parameter,optional :: mncrop=2
             integer, parameter,optional :: mnumbx=26
-            integer, parameter,optional :: msedyr=33
+            integer, parameter,optional :: msedyr=34
             integer, parameter,optional :: nngem=17
             integer, parameter,optional :: baseyr=1990
             integer, parameter,optional :: endyr=2050
@@ -6281,7 +6307,7 @@ python module pyfiler1 ! in
             integer, parameter,optional :: wtireg=2
             integer, parameter,optional :: jumpcalyr=2030
             integer, parameter,optional :: mjumpyr=41
-            integer, parameter,optional :: mnumcgf=12
+            integer, parameter,optional :: mnumcgf=13
             integer, parameter,optional :: nlngter=11
             integer, parameter,optional :: epareg=9
             integer, parameter,optional :: welltypes=7
@@ -6301,7 +6327,7 @@ python module pyfiler1 ! in
             real dimension(17,61,3) :: muprc
             real dimension(17,61,4) :: smuprc
             real dimension(17,61,4) :: sgasprice
-            real*4 dimension(20313) :: eq_rscon
+            real*4 dimension(12078) :: eq_rscon
             integer, parameter,optional :: ndrg2=16
             real dimension(1952) :: clprcout
             integer, parameter,optional :: opsize=671
@@ -6333,19 +6359,6 @@ python module pyfiler1 ! in
                 integer :: imodel
             end subroutine go_nxpect
         end module nxpect_run
-        subroutine docvfacts ! in :pyfiler1:util_docvfacts.f90
-            integer :: histyr
-            common /cvhistyr/ histyr
-        end subroutine docvfacts
-        function api_to_btu(api_in,api_calc) ! in :pyfiler1:util_docvfacts.f90
-            real :: api_in
-            integer :: api_calc
-            real dimension(100) :: api_grav
-            real dimension(100) :: btu_per_gal
-            integer :: api_count
-            real :: api_to_btu
-            common /api_block/ api_grav,btu_per_gal,api_count
-        end function api_to_btu
         subroutine copy_adjusted ! in :pyfiler1:util_copyadjusted.f90
             real dimension(11,61) :: aelrs
             real dimension(11,61) :: aelcm
@@ -6450,6 +6463,9 @@ python module pyfiler1 ! in
             real dimension(11,61) :: aprinpf
             real dimension(11,61) :: aisinpf
             real dimension(11,61) :: apcin
+            real dimension(11,61) :: ah2in
+            real dimension(11,61) :: ah2el
+            real dimension(11,61) :: aelhm
             real*4 dimension(17,61) :: agfelgr
             real*4 dimension(17,61) :: agielgr
             real*4 dimension(17,61) :: agcelgr
@@ -6503,7 +6519,7 @@ python module pyfiler1 ! in
             real dimension(11,61) :: aelinh2e
             real dimension(11,61) :: aellttr
             common /ampblk/ aelrs,aelcm,aeltr,aelin,aelas,agfrs,agfcm,agftr,agfin,agfel,agfas,agirs,agicm,agitr,agiin,agiel,agias,angrs,angcm,angtr,angin,angel,angas,agptr,alpin,aclrs,aclcm,aclin,aclel,aclsn,aclas,amcin,amgcm,amgtr,amgin,amgas,ajftr,adsrs,adscm,adstr,adsin,adsel,adsas,aksrs,akscm,aksin,aksas,algrs,algcm,algtr,algin,algas,arlcm,arltr,arlin,arlel,arlas,arhtr,arhel,arhas,arscm,arstr,arsin,arsel,arsas,apfin,aasin,aottr,aotin,aotas,atprs,atpcm,atptr,atpin,atprf,atpel,atpas,ametr,aettr,ahytr,aurel,ah1tr,ah2tr,ah3tr
-            common /apmore/ alginpf,aclgas,aprrs,aprcm,appin,aetin,abuin,aprin,aisin,aluin,aprtr,aprolenerf,asulfurin,appinpf,aetinpf,abuinpf,aprinpf,aisinpf,apcin
+            common /apmore/ alginpf,aclgas,aprrs,aprcm,appin,aetin,abuin,aprin,aisin,aluin,aprtr,aprolenerf,asulfurin,appinpf,aetinpf,abuinpf,aprinpf,aisinpf,apcin,ah2in,ah2el,aelhm
             common /angtdm/ agfelgr,agielgr,agcelgr,agftrfv,agftrpv,agltrfv,agltrpv,aspgfelgr,aspgielgr,apbaja,aqbaja,agftrrail,agltrrail,agftrship,agltrship,aspngelgr,apngelgr
             common /acoalprc/ apclelcdr
             common /epmcntl/ runepm
@@ -6518,70 +6534,6 @@ python module pyfiler1 ! in
             real :: emfact
             real :: ab32p9
         end function ab32p9
-        subroutine check_for_nanq(inanq) ! in :pyfiler1:util_checkfor_nanq.f90
-            integer :: inanq
-        end subroutine check_for_nanq
-        subroutine write_nanq(rvalue,curiyr,curitr,ireg,vname,inanq) ! in :pyfiler1:util_checkfor_nanq.f90
-            real :: rvalue
-            integer :: ireg
-            character*(*) :: vname
-            integer :: inanq
-        end subroutine write_nanq
-        subroutine relax ! in :pyfiler1:util_cvtest_relax.f90
-        end subroutine relax
-        subroutine cvtest(imodel) ! in :pyfiler1:util_cvtest_relax.f90
-            integer :: imodel
-        end subroutine cvtest
-        subroutine mnchkcv(cur,old,frcchg,abschg) ! in :pyfiler1:util_cvtest_relax.f90
-            real :: cur
-            real :: old
-            real :: frcchg
-            real :: abschg
-        end subroutine mnchkcv
-        subroutine mnprtcv(ncheck,iy,it,ir,cur,old,frcchg,limit,varnam,subnam,typstr) ! in :pyfiler1:util_cvtest_relax.f90
-            integer :: ncheck
-            integer :: iy
-            integer :: it
-            integer :: ir
-            real :: cur
-            real :: old
-            real :: frcchg
-            real :: limit
-            character*9 :: varnam
-            character*6 :: subnam
-            character*4 :: typstr
-        end subroutine mnprtcv
-        subroutine sortrpt(frcchg,ir,prevv,mrc,mvars) ! in :pyfiler1:util_cvtest_relax.f90
-            real :: frcchg
-            integer :: ir
-            real :: prevv
-            real :: mrc
-            character*(*) :: mvars
-        end subroutine sortrpt
-        function pqmatch(iprice,mnumq,mnump) ! in :pyfiler1:util_cvtest_relax.f90
-            integer :: iprice
-            integer :: mnumq
-            integer :: mnump
-            integer :: pqmatch
-        end function pqmatch
-        subroutine getirun(run_char) ! in :pyfiler1:util_cvtest_relax.f90
-            use dfport
-            character*(*) :: run_char
-        end subroutine getirun
-        subroutine getmps(mps) ! in :pyfiler1:util_cvtest_relax.f90
-            use dfport
-            character*50 :: mps
-        end subroutine getmps
-        function numq_as(iquan,mnumq) ! in :pyfiler1:util_cvtest_relax.f90
-            integer :: iquan
-            integer :: mnumq
-            integer :: numq_as
-        end function numq_as
-        function nump_as(iprice,mnump) ! in :pyfiler1:util_cvtest_relax.f90
-            integer :: iprice
-            integer :: mnump
-            integer :: nump_as
-        end function nump_as
         subroutine sumqas ! in :pyfiler1:util_sumqas.f90
         end subroutine sumqas
         subroutine sumary(array,n) ! in :pyfiler1:util_sumqas.f90
@@ -6610,20 +6562,6 @@ python module pyfiler1 ! in
             real dimension(17,61) :: apngelgr
             common /angtdm/ agfelgr,agielgr,agcelgr,agftrfv,agftrpv,agltrfv,agltrpv,aspgfelgr,aspgielgr,apbaja,aqbaja,agftrrail,agltrrail,agftrship,agltrship,aspngelgr,apngelgr
         end subroutine avepasa
-        subroutine ninit ! in :pyfiler1:util_minit.f90
-        end subroutine ninit
-        subroutine zeror(x,n) ! in :pyfiler1:util_minit.f90
-            real dimension(n) :: x
-            integer, optional,check(shape(x, 0) == n),depend(x) :: n=shape(x, 0)
-        end subroutine zeror
-        subroutine stmnpqit ! in :pyfiler1:util_minit.f90
-        end subroutine stmnpqit
-        subroutine wrmnpqit(cvar,qvar,ir,curiyr,curitr,firsyr,flagwr) ! in :pyfiler1:util_minit.f90
-            character*(*) :: cvar
-            real*4 :: qvar
-            integer :: ir
-            integer :: flagwr
-        end subroutine wrmnpqit
         subroutine resetosw(opt_name,new_value) ! in :pyfiler1:util_minit.f90
             character*8 :: opt_name
             integer :: new_value
@@ -6681,6 +6619,17 @@ python module pyfiler1 ! in
             subroutine go_ngpl_stat_price_reporting ! in :pyfiler1:util_call_pyd1_module.f90:ngpl_stat_price_run
             end subroutine go_ngpl_stat_price_reporting
         end module ngpl_stat_price_run
+        module emm_run ! in :pyfiler1:util_call_pyd1_module.f90
+            subroutine ephrts_on_off(is_turn_on,is_turn_on_debugging) ! in :pyfiler1:util_call_pyd1_module.f90:emm_run
+                use ephrts_swtiches
+                integer :: is_turn_on
+                integer :: is_turn_on_debugging
+            end subroutine ephrts_on_off
+        end module emm_run
+        module renew_run ! in :pyfiler1:util_call_pyd1_module.f90
+            subroutine go_renew ! in :pyfiler1:util_call_pyd1_module.f90:renew_run
+            end subroutine go_renew
+        end module renew_run
     end interface 
 end python module pyfiler1
 

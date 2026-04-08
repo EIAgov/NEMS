@@ -1153,14 +1153,33 @@ Parameters
 
      FBDImpElas                                                      biodiesel import supply curve elasticity
                                                                      /0.30/
+                                                                     
+     FBDExpPrice(Step,t)                                             Biodiesel export supply step prices
+     FBDExpSupply(Step,t)                                            Biodiesel export supply step quantities
+     
+     FBDExpQuant(RefReg,t)                                           Biodiesel max export quantities by region in M bbl per day
+     FBDExpMaxQty(t)                                                 Total biodiesel max export quantity in M bbl per day
+
+     FBDExpElas                                                      biodiesel export supply curve elasticity
+                                                                     /0.30/
 
      LFMMOUT_RenewDIMP(MNUMCR,MNUMYR)                                Renewable diesel imports by census in 1000 bbl per day- renew version of BIODIMP
      LFMMOUT_RenewDImpPD(MNUMPR,MNUMYR)                              Renewable Diesel import by subPADD in 1000 bbl per day- renew version of BIODIMPPD
+     LFMMOUT_RenewDEXP(MNUMCR,MNUMYR)                                Renewable diesel exports by census in 1000 bbl per day- renew version of BIODEXP
+     
+     RDHImpQuant(RefReg,t)                                           historical renewable diesel import supply by reg 1000 bbl per day
      RDHImpElas                                                      Renewable Diesel import supply curve elasticity
                                                                      /0.30/
 
      RDHImpPrice(Step,t)                                             Renewable diesel import supply step prices
      RDHImpSupply(Step,t)                                            Renewable diesel import supply step quantities
+     
+     RDHExpQuant(RefReg,t)                                           historical renewable diesel export supply by reg 1000 bbl per day
+     RDHExpElas                                                      Renewable Diesel export supply curve elasticity
+                                                                     /0.30/
+
+     RDHExpPrice(Step,t)                                             Renewable diesel export supply step prices
+     RDHExpSupply(Step,t)                                            Renewable diesel export supply step quantities
 
      CDtoREFMap(RefReg,CenDiv)                                       Census-to-RefReg mapping for NGPL demands
 
@@ -1215,7 +1234,8 @@ $Loaddc CornPriceExp, CornTranCost, SeedOilQnty, GrainQnty
 $Loaddc BrzAdvTranCost, BrzAdvP0, BrzAdvQ0, BrzAdvEpsilon
 $Loaddc BrzEthDmdTranCost, BrzEthDmdP0, BrzEthDmdQ0, BrzEthDmdEpsilon
 $Loaddc NonUSEthTranCost, NonUSEthP0, NonUSEthQ0, NonUSEthEpsilon
-$Loaddc FBDImpQuant, FBDImpCoefB, FBDImpCoefM, CDtoREFMap
+$Loaddc FBDImpQuant, FBDImpCoefB, FBDImpCoefM, RDHImpQuant, CDtoREFMap
+$Loaddc FBDExpQuant, RDHExpQuant
 
 $Loaddc AB32_CapAdjFactor, AB32_AssistFactor, AB32_BenchFactor, AB32_StartYr, AB32_CoverageFrac
 $Loaddc CCATSDAT_SUP_ETH_45Q_lfmm, CCATSDAT_SUP_ETH_NTC_lfmm
@@ -2624,7 +2644,7 @@ EthExpDmdPrc('ETHCRNexp',Step,ModelYears(t)) = NonUSEthP0(t) *
 
 
 
-*-- Biodiesel import curves --*
+*-- Biodiesel import and export curves --*
 Parameters
 
      FBDImpQuant(RefReg,t)
@@ -2634,6 +2654,14 @@ Parameters
      FBDImpSupply(Step,t)                                            biodiesel import supply step quantities 1000 bbl per day
      FBDImpPrice(Step,t)                                             biodiesel import supply step prices 1987 $ per bbl
      FBDMaxQty(t)
+     
+     FBDExpQuant(RefReg,t)
+     FBDExpCumQuant(Step,t)                                          holds cum biodiesel export supply at step 1000 bbl per day
+     FBDExpMiddlePrice(t)                                            placeholder for Po biodiesel export price 1987$ per bbl
+     FBDExpMiddleQuant(t)                                            placeholder for Qo bio diesel export supply 1000 bbl per day
+     FBDExpSupply(Step,t)                                            biodiesel export supply step quantities 1000 bbl per day
+     FBDExpPrice(Step,t)                                             biodiesel export supply step prices 1987 $ per bbl
+     FBDExpMaxQty(t)
 
 *   3/12/20 - esh
 *   INTtoREFFBDTranCost:  1987$/bbl
@@ -2653,15 +2681,11 @@ INTtoREFFBDTranCost('1_INTREG','3_RefReg') = -sum((MNUMYR,RunYears)$tMNUM(RunYea
 *  MaxFlag(t)
 
 ;
+*--Imports--*
 
 FBDMiddlePrice(t) = 1.25*sum( MNUMYR$tMNUM(t,MNUMYR),
                                1.20*MPBLK_PDSTR('11_United_States',MNUMYR)*CONVFACT_CFDSUQ(MNUMYR) );
 FBDCumQuant(Step,t) = 0.0 ;
-
-*MaxFlag(t)            = 0.0 ;
-*FBDImpSplit(RefReg,t) = 0.0 ;
-*MiddleQuant(t)        = 0.0 ;
-*CumQuant(Step,t)      = 0.0 ;
 
 loop((ModelYears(t),MNUMYR)$tMNUM(t,MNUMYR),
 
@@ -2674,39 +2698,6 @@ FBDMiddleQuant(t) = FBDMaxQty(t) ;
     FBDCumQuant('STEP03',t) = 1.075* FBDMiddleQuant(t) ;
     FBDCumQuant('STEP04',t) = 1.250* FBDMiddleQuant(t) ;
     FBDCumQuant('STEP05',t) = 1.750* FBDMiddleQuant(t) ;
-*  if(PMMRPT_TDIESEL('11_United_States',MNUMYR)=0.0,
-*   FBDMaxQty(t) = FBDMaxQty(t) ;
-*  else
-*     FBDMaxQty(t) = FBDMaxQty(t) * (PMMRPT_TDIESEL('11_United_States',MNUMYR)/PMMRPT_TDIESEL('11_United_States',MNUMYR-1)) ;
-*  );
-
-*  if(PMMRPT_BIODIMP('11_United_States',MNUMYR) <= 0.0,
-*     MiddleQuant(t) = 0.25 * FBDMaxQty(t) ;
-*  elseif(PMMRPT_BIODIMP('11_United_States',MNUMYR) >= 0.95*FBDMaxQty(t)),
-*     MiddleQuant(t) = 0.95 * FBDMaxQty(t) ;
-*     MaxFlag(t) = 1 ;
-*  else
-*     MiddleQuant(t) = PMMRPT_BIODIMP('11_United_States',MNUMYR) ;
-*  );
-
-*  if(MaxFlag(t)=1,
-*     CumQuant('STEP03',t) = 0.075*(FBDMaxQty(t)-MiddleQuant(t)) + MiddleQuant(t) ;
-*     CumQuant('STEP04',t) = 0.25*(FBDMaxQty(t)-MiddleQuant(t)) + MiddleQuant(t) ;
-*  else
-*     CumQuant('STEP03',t) = 0.075*MiddleQuant(t) + MiddleQuant(t) ;
-*     CumQuant('STEP04',t) = 0.25*MiddleQuant(t) + MiddleQuant(t) ;
-*  );
-*  CumQuant('STEP02',t) = MiddleQuant(t) - 0.075*MiddleQuant(t) ;
-*  CumQuant('STEP01',t) = MiddleQuant(t) - 0.25*MiddleQuant(t) ;
-
-* 9-14-18 em4 * adjust biodiesel import quantity downward (60%) to better match current levels
-*  CumQuant(Step,t) = 0.60*CumQuant(Step,t) ;
-
-*  FBDImpPrice('STEP01',t) = ((FBDImpCoefB(t)*FBDImpCoefM(t)**(0.991*CumQuant('STEP01',t)))-6.855) * 0.991 + 6.448 + 12.518 ;
-*  FBDImpPrice('STEP02',t) = ((FBDImpCoefB(t)*FBDImpCoefM(t)**(0.991*CumQuant('STEP02',t)))-6.855) * 0.991 + 6.448 + 12.518 ;
-*  FBDImpPrice('STEP03',t) = ((FBDImpCoefB(t)*FBDImpCoefM(t)**(0.991*MiddleQuant(t)))-6.855) * 0.991 + 6.448 + 12.518 ;
-*  FBDImpPrice('STEP04',t) = ((FBDImpCoefB(t)*FBDImpCoefM(t)**(0.991*CumQuant('STEP03',t)))-6.855) * 0.991 + 6.448 + 12.518 ;
-*  FBDImpPrice('STEP05',t) = ((FBDImpCoefB(t)*FBDImpCoefM(t)**(0.991*CumQuant('STEP04',t)))-6.855) * 0.991 + 6.448 + 12.518 ;
 
   Loop( Step$(ord(Step) <= 5),
     FBDImpPrice(Step,t) = FBDMiddlePrice(t) *
@@ -2730,6 +2721,44 @@ loop( t$(ord(t)>LastYear),
 *  FBDImpSplit(RefReg,t)= FBDImpSplit(RefReg,'2050') ;
 );
 
+*--Exports--*
+
+FBDExpMiddlePrice(t) = 1.25*sum( MNUMYR$tMNUM(t,MNUMYR),
+                               1.20*MPBLK_PDSTR('11_United_States',MNUMYR)*CONVFACT_CFDSUQ(MNUMYR) );
+FBDExpCumQuant(Step,t) = 0.0 ;
+
+loop((ModelYears(t),MNUMYR)$tMNUM(t,MNUMYR),
+
+  FBDExpMaxQty(t) = 0.75*sum(DomRefReg, FBDExpQuant(DomRefReg,t) ) ;
+
+FBDExpMiddleQuant(t) = FBDExpMaxQty(t) ;
+
+    FBDExpCumQuant('STEP01',t) = 0.750* FBDExpMiddleQuant(t) ;
+    FBDExpCumQuant('STEP02',t) = 0.925* FBDExpMiddleQuant(t) ;
+    FBDExpCumQuant('STEP03',t) = 1.075* FBDExpMiddleQuant(t) ;
+    FBDExpCumQuant('STEP04',t) = 1.250* FBDExpMiddleQuant(t) ;
+    FBDExpCumQuant('STEP05',t) = 1.750* FBDExpMiddleQuant(t) ;
+
+  Loop( Step$(ord(Step) <= 5),
+    FBDExpPrice(Step,t) = FBDExpMiddlePrice(t) *
+                                   ( (FBDExpCumQuant(Step,t) / FBDExpMiddleQuant(t))**(1./FBDExpElas) ) ;
+  );
+
+  FBDExpSupply('STEP01',t) = FBDExpCumQuant('STEP01',t) ;
+  FBDExpSupply('STEP02',t) = FBDExpCumQuant('STEP02',t) - FBDExpCumQuant('STEP01',t) ;
+  FBDExpSupply('STEP03',t) = FBDExpCumQuant('STEP03',t) - FBDExpCumQuant('STEP02',t) ;
+  FBDExpSupply('STEP04',t) = FBDExpCumQuant('STEP04',t) - FBDExpCumQuant('STEP03',t) ;
+  FBDExpSupply('STEP05',t) = FBDExpCumQuant('STEP05',t) - FBDExpCumQuant('STEP04',t) ;
+
+
+);
+
+* extend beyond 2050
+loop( t$(ord(t)>LastYear),
+  FBDExpSupply(Step,t) = FBDExpSupply(Step,'2050');
+  FBDExpPrice(Step,t)  = FBDExpPrice(Step,'2050');
+);
+
 
 * =========================================================
 *
@@ -2745,7 +2774,10 @@ loop( t$(ord(t)>LastYear),
 *   LFMMOUT_RenewDImpPD:  1000 bbl/cd (renewable diesel, soln, like BIODIMPPD)
 * =========================================================
 
-*-- Renewable Diesel import curves --*
+*-- Renewable Diesel import and export curves --*
+
+*--Imports--*
+
 Parameters
      RDHImpQuant(RefReg,t)                                           historical renewable diesel import supply by reg 1000 bbl per day
      RDHCumQuant(Step,t)                                             holds cum renewable diesel import supply at step 1000 bbl per day
@@ -2755,54 +2787,6 @@ Parameters
      RDHImpPrice(Step,t)                                             Renewable Diesel import supply step prices 1987 $ per bbl
      RDHMaxQty(t)                                                    Total renewable diesel U.S. import quantity in M bbl per day
 ;
-
-* hardcoded RDHImpQuant for historical years- until move to lfimportpurch.xlsx newTAB:RDHImpQuant
-* 2019 estimated from Dec2018-Nov2019
-* set 2010, 2011 = 2012 so no zero totals exist
-* 1000 bbl/cd
-* 2022
-
-Table RDHImpQuant(RefReg,t)
-                   2010     2011     2012     2013     2014     2015     2016     2017     2018     2019     2020     2021     2022
-      1_RefReg     1.00     1.00     1.00     1.50     0.00     1.00     1.00     0.00     0.00     0.00     0.00     0.00     0.00
-      4_RefReg     0.00     0.00     0.00     2.50     1.00     1.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-      7_RefReg     1.00     1.00     1.00     9.00     7.00    11.00    13.00    12.00    11.00    15.00    17.66    26.00    36.34
-;
-
-RDHImpQuant('8_RefReg',t) = 0.25*RDHImpQuant('7_RefReg',t) ;
-RDHImpQuant('7_RefReg',t)= 0.75*RDHImpQuant('7_RefReg',t) ;
-
-* hardcoded grow at 1.25% per year over projection until move to lfimportpurch.xlsx
-loop( t$(t.val > 2022),
-  RDHImpQuant(RefReg,t) = 1.0125* RDHImpQuant(RefReg,t-1) ;
-);
-
-* hardcoded LFMMOUT_RenewDIMP=0 until updates made in lfreport.gms and restart.unf file
-*loop( t$(t.val<2020),
-*  LFMMOUT_RenewDIMP(MNUMCR,MNUMYR)$tMNUM(t,MNUMYR) = 0.0 ;
-*);
-
-* hardcoded to match RDHImpQuant for historical years, until move to rfhist.txt
-* 1000 bbl/d
-
-*loop( (t,MNUMYR)$tMNUM(t,MNUMYR),
-*  if( LFMMOUT_RenewDIMP('11_United_States',MNUMYR) <= 0.0,
-*
-*      LFMMOUT_RenewDIMP('11_United_States',MNUMYR) = sum(DomRefReg, RDHImpQuant(DomRefReg,t) );
-*      LFMMOUT_RenewDIMPpd('10_MNUMPR',MNUMYR)      = sum(DomRefReg, RDHImpQuant(DomRefReg,t) );
-*      loop( DomRefReg,
-*        LFMMOUT_RenewDIMPpd(MNUMPR,MNUMYR)$RefReg2MNUMPR(MNUMPR,DomRefReg)
-*                                           = RDHImpQuant(DomRefReg,t) ;
-*      );
-*  );
-*);
-
-*    RDHImpPrice                                    Renewable Diesel import supply step prices
-*    RDHImpSupply                                   Renewable Diesel import supply step quantities
-*    RDHImpElas                                     Renewable Diesel import supply curve elasticity
-*    RDHMiddlePrice                                 placeholder for Po renewable diesel import price 1987$ per bbl
-*    RDHMiddleQuant                                 placeholder for Qo renewable or bio diesel import supply 1000 bbl per day
-
 
 * hardcoded mapping of RefReg to CenDiv
 * hardcoded MiddlePrice (Po) = 25% above diesel price, converted from 1987$/MMBtu to 1987$/bbl
@@ -2851,7 +2835,64 @@ loop( t$(ord(t)>LastYear),
   RDHImpPrice(Step,t)  = RDHImpPrice(Step,'2050');
 );
 
+*--Exports--*
 
+Parameters
+     RDHExpQuant(RefReg,t)                                           historical renewable diesel export supply by reg 1000 bbl per day
+     RDHExpCumQuant(Step,t)                                          holds cum renewable diesel export supply at step 1000 bbl per day
+     RDHExpMiddlePrice(t)                                            placeholder for Po renewable diesel export price 1987$ per bbl
+     RDHExpMiddleQuant(t)                                            placeholder for Qo renewable or bio diesel export supply 1000 bbl per day
+     RDHExpSupply(Step,t)                                            Renewable Diesel export supply step quantities 1000 bbl per day
+     RDHExpPrice(Step,t)                                             Renewable Diesel export supply step prices 1987 $ per bbl
+     RDHExpMaxQty(t)                                                 Total renewable diesel U.S. export quantity in M bbl per day
+;
+
+* hardcoded mapping of RefReg to CenDiv
+* hardcoded MiddlePrice (Po) = 25% above diesel price, converted from 1987$/MMBtu to 1987$/bbl
+
+RDHExpMiddlePrice(t)     = sum( MNUMYR$tMNUM(t,MNUMYR),
+                               1.25*MPBLK_PDSTR('11_United_States',MNUMYR)*CONVFACT_CFDSUQ(MNUMYR) );
+
+
+RDHExpCumQuant(Step,t) = 0.0 ;
+
+loop( (ModelYears(t),MNUMYR)$tMNUM(t,MNUMYR),
+
+  RDHExpMaxQty(t)             = sum(DomRefReg, RDHExpQuant(DomRefReg,t) ) ;
+
+RDHExpMiddleQuant(t) = RDHExpMaxQty(t) ;
+
+
+* loop( DomRefReg,
+    RDHExpCumQuant('STEP01',t) = 0.750* RDHExpMiddleQuant(t) ;
+    RDHExpCumQuant('STEP02',t) = 0.925* RDHExpMiddleQuant(t) ;
+    RDHExpCumQuant('STEP03',t) = 1.075* RDHExpMiddleQuant(t) ;
+    RDHExpCumQuant('STEP04',t) = 1.250* RDHExpMiddleQuant(t) ;
+    RDHExpCumQuant('STEP05',t) = 1.750* RDHExpMiddleQuant(t) ;
+
+* P = Po* (Q/Qo)^(1/elas) (1987$/bbl)
+* Q = Qo* (P/Po)^elas     (1000 bbl/d)
+* where Po = RDHMiddlePrice
+*       Qo = MiddleQuant
+*       Q  = CumQuant
+    Loop( Step$(ord(Step) <= 5),
+      RDHExpPrice(Step,t) = RDHExpMiddlePrice(t) *
+                                   ( (RDHExpCumQuant(Step,t) / RDHExpMiddleQuant(t))**(1./RDHExpElas) ) ;
+    );
+
+    RDHExpSupply('STEP01',t) = RDHExpCumQuant('STEP01',t) ;
+    RDHExpSupply('STEP02',t) = RDHExpCumQuant('STEP02',t) - RDHExpCumQuant('STEP01',t) ;
+    RDHExpSupply('STEP03',t) = RDHExpCumQuant('STEP03',t) - RDHExpCumQuant('STEP02',t) ;
+    RDHExpSupply('STEP04',t) = RDHExpCumQuant('STEP04',t) - RDHExpCumQuant('STEP03',t) ;
+    RDHExpSupply('STEP05',t) = RDHExpCumQuant('STEP05',t) - RDHExpCumQuant('STEP04',t) ;
+
+);
+
+* extend beyond 2050
+loop( t$(ord(t)>LastYear),
+  RDHExpSupply(Step,t) = RDHExpSupply(Step,'2050');
+  RDHExpPrice(Step,t)  = RDHExpPrice(Step,'2050');
+);
 
 
 * For now, set all input prices and quantities in future years to the 2008 values
@@ -3101,7 +3142,7 @@ loop( t$(ord(t)>LastYear),
      );
 
 * 2008 $/lb; set all regions equal to US price (convert from 87$/lb to 2008$/lb)
-    SoyOMidPrice_CoalDReg(CoalDReg,t) = 0.5*WRENEW_SOYOILSUP_P('03_M10','17_NDRGN1',MNMYRF) * agGDP87('2008') ;
+    SoyOMidPrice_CoalDReg(CoalDReg,t) = 0.4*WRENEW_SOYOILSUP_P('03_M10','17_NDRGN1',MNMYRF) * agGDP87('2008') ;
 
 * set values after 2029 equal to 2029 value (year 40=2029)
 *    ExpectedWOP2029 = INTOUT_Start_Price('2029_MNUMYR') ;
@@ -3277,12 +3318,16 @@ loop( t$(ord(t)>LastYear),
 RefInpPrc(DomRefReg,'H2','STEP01',t) = sum(MNUMYR$tMNUM(t,MNUMYR),sum((ActiveDem,MNUMCR)$(crN2L(ActiveDem,MNUMCR)and RefReg_to_CenDiv_ACU_Frac(DomRefReg,ActiveDem)),
         RefReg_to_CenDiv_ACU_Frac(DomRefReg,ActiveDem)*HMMBLK_PH2RF(MNUMCR,MNUMYR)));
 
+RefInpPrc(DomRefReg,'H2','STEP02',t) = sum(MNUMYR$tMNUM(t,MNUMYR),sum((ActiveDem,MNUMCR)$(crN2L(ActiveDem,MNUMCR)and RefReg_to_CenDiv_ACU_Frac(DomRefReg,ActiveDem)),
+        RefReg_to_CenDiv_ACU_Frac(DomRefReg,ActiveDem)*HMMBLK_PH2RF(MNUMCR,MNUMYR)))*7;
+
 *-- Merchant Hydrogen --*
 * Allow H2 purchasing in all refinery regions (merchant now includes refinery SMR H2).
 
 * extend beyond 2050
 loop( t$(ord(t)>LastYear),
   RefInpSup(DomRefReg,'H2','STEP01',t) = RefInpSup(DomRefReg,'H2','STEP01','2050') ;
+  RefInpSup(DomRefReg,'H2','STEP02',t) = RefInpSup(DomRefReg,'H2','STEP02','2050') ;
 );
 
 
@@ -3302,7 +3347,9 @@ Parameters
    npv_TranCostFromBrazil(Period)                                 NPV of cost coeff for ETHIMP
 
    npv_FBDImpPrice(Step,Period)                                   NPV of stream of biodiesel import prices at each step in each period in NOMINAL dollars
+   npv_FBDExpPrice(Step,Period)                                   NPV of stream of biodiesel export prices at each step in each period in NOMINAL dollars
    npv_RDHImpPrice(Step,Period)                                   NPV of stream of renewable diesel import prices at each step in each period in NOMINAL dollars
+   npv_RDHExpPrice(Step,Period)                                   NPV of stream of renewable diesel export prices at each step in each period in NOMINAL dollars
    npv_RefInpPrc(RefReg,RefInputStr,Step,Period)                  NPV of stream of refinery input prices at each step in each period in NOMINAL dollars
    npv_BiomassPrc(CoalDReg,BioStr,Step,Period)                    NPV of stream of biomass prices at each step in each period in NOMINAL dollars
    npv_CoalPrc(CoalSReg,CoalStr,Step,Period)                      NPV of stream of coal prices at each step in each period in NOMINAL dollars
@@ -3350,7 +3397,9 @@ Parameters
    npv_BioOthDemand(CoalDReg,BioStr,Other_MKT,Period)             NPV AVERAGE of biomass demands from other NEMS modeules at each step in each period
    npv_EthBrazilSup(EthStream,Step,Period)                        NPV AVERAGE of Brazilian ethanol supply bounds at each step in each period
    npv_FBDImpSupply(Step,Period)                                  NPV AVERAGE of biodiesel import supply bounds at each step in each period
+   npv_FBDExpSupply(Step,Period)                                  NPV AVERAGE of biodiesel export supply bounds at each step in each period
    npv_RDHImpSupply(Step,Period)                                  NPV AVERAGE of renewable diesel import supply bounds at each step in each period
+   npv_RDHExpSupply(Step,Period)                                  NPV AVERAGE of renewable diesel export supply bounds at each step in each period
    npv_FBDImpSplit(RefReg,Period)                                 NPV AVERAGE of biodiesel import split in each period
    npv_NonUSEthDmd(Period)                                        NPV AVERAGE of Non-US ethanol ethanol demand in each period
    npv_RefInpSup(RefReg,RefInputStr,Step,Period)                  NPV AVERAGE of supply region input supply bounds at each step in each period
@@ -3967,8 +4016,10 @@ CarbonTaxCredit(JFBioStreams,ModelYears(t)) =
 
 set
   IRAbiosubYr(t) /2023, 2024/
+
   ETHCLEsubYr(t) /2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024/
-  CleanFuelProductionYr(t) /2025, 2026, 2027/
+  CleanFuelProductionYr(t) /2025/
+  CleanFuelOBBAYr(t) /2026, 2027, 2028, 2029/
 
 if ((LEGIRA = 1  or LEGIRA = 2 or LEGIRA = 3),
    BiofuelSubsidy('RJH',IRAbiosubYr) = 1.25 ;
@@ -3981,6 +4032,11 @@ if ((LEGIRA = 1  or LEGIRA = 2 or LEGIRA = 3),
    BiofuelSubsidy('RDH',CleanFuelProductionYr) = 1.00 ;
    BiofuelSubsidy('RNH',CleanFuelProductionYr) = 1.00 ;
    BiofuelSubsidy('ETHCLE',CleanFuelProductionYr) = 1.01;
+   BiofuelSubsidy('RJH',CleanFuelOBBAYr) = 1.00 ;
+   BiofuelSubsidy('FBD',CleanFuelOBBAYr) = 1.10 ;
+   BiofuelSubsidy('RDH',CleanFuelOBBAYr) = 1.10 ;
+   BiofuelSubsidy('RNH',CleanFuelOBBAYr) = 1.00 ;
+   BiofuelSubsidy('ETHCLE',CleanFuelOBBAYr) = 1.01;
 elseif (LEGIRA=0),
    BiofuelSubsidy(Stream,t) = BiofuelSubsidy(Stream,t) ;
 );

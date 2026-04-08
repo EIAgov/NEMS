@@ -1,5 +1,7 @@
 """Submodule for Preprocessing CCATS data during runtime.
 
+.. _preprocessor:
+
 Preprocessor: Summary
 _____________________
 This submodule preprocesses CCATS data from the restart file and input files and prepares it for use in the main CCATS optimization model.
@@ -11,7 +13,7 @@ The preprocessor runs as follows:
        :meth:`~preprocessor.Preprocessor.load_inputs_csv` and :meth:`~preprocessor.Preprocessor.load_inputs_pkl` are called to read in input DataFrames.
 
     3. Other model year 1 setup processes are performed, (i.e. input costs are inflation adjusted in :meth:`~preprocessor.Preprocessor.harmonize_costs_inflation` and 45Q tax
-    credit values are assigned to demand and storage input DataFrames in :meth:`~preprocessor.Preprocessor.assign_tax_credits`).
+       credit values are assigned to demand and storage input DataFrames in :meth:`~preprocessor.Preprocessor.assign_tax_credits`).
 
     4. :ref:`preprocessor` setup ends.
 
@@ -70,8 +72,9 @@ _________________________
 Preprocessor: Model Functions and Class Methods
 _______________________________________________
 
+Setup
+-----
 
-    Setup
 
     * :meth:`~preprocessor.Preprocessor.__init__` - Constructor to initialize Preprocessor submodule (instantiated by :meth:`module.Module.setup` in :ref:`module`)
     * :meth:`~preprocessor.Preprocessor.setup` - Setup Preprocessor submodule for CCATS (called by :meth:`module.Module.setup`).
@@ -83,12 +86,14 @@ _______________________________________________
 
 
     
-    Run
+Run
+---
 
     * :meth:`~preprocessor.Preprocessor.run` - Run Preprocessor Submodule for CCATS (called by :meth:`module.Module.run`).
 
     
-    Model Year Instantiations
+Model Year Instantiations
+-------------------------
 
     * :meth:`~preprocessor.Preprocessor.assign_tax_credits` - Assign 45Q tax credits values to storage and demand input DataFrames (called by :meth:`~preprocessor.Preprocessor.run`).
     * :meth:`~preprocessor.Preprocessor.instantiate_model_year_dfs` - Instantiate model year DataFrames (i.e. model year pipeline lookup, available saline formations, etc.) (called by :meth:`~preprocessor.Preprocessor.run`).
@@ -98,7 +103,8 @@ _______________________________________________
     * :meth:`~preprocessor.Preprocessor.declare_existing_pipe_infrastructure` - Declare and update existing pipeline network (called by :meth:`~preprocessor.Preprocessor.run`).
 
     
-    Produce CO\ :sub:`2` supply source roster
+Produce CO\ :sub:`2` supply source roster
+-----------------------------------------
 
     * :meth:`~preprocessor.Preprocessor.apply_tech_rate_capture_costs` - Apply tech learning rate to NETL capture costs (called by :meth:`~preprocessor.Preprocessor.run`).
     * :meth:`~preprocessor.Preprocessor.assign_nems_capture_costs` - Assign CO\ :sub:`2` capture cost ($/tonne) for net-new facilities based on restart file variables (called by :meth:`~preprocessor.Preprocessor.run`).
@@ -109,18 +115,21 @@ _______________________________________________
     * :meth:`~preprocessor.Preprocessor.zero_inv_costs_for_retrofit_facilities` - Zeroes out investment costs for facilities which have been retrofit (called by :meth:`~preprocessor.Preprocessor.run`).
 
     
-    Update CO\ :sub:`2` transportation roster
+Update CO\ :sub:`2` transportation roster
+-----------------------------------------
 
     * :meth:`~preprocessor.Preprocessor.filter_available_pipelines` - Remove inactive CO\ :sub:`2` supply, storage and CO\ :sub:`2` EOR nodes from the pipeline network to make more sparse (called by :meth:`~preprocessor.Preprocessor.run`).
     * :meth:`~preprocessor.Preprocessor.assign_electricity_costs` - Assign electricity costs ($/MWh) for pipelines (called by :meth:`~preprocessor.Preprocessor.run`).
 
     
-    Update CO\ :sub:`2` saline formation storage roster
+Update CO\ :sub:`2` saline formation storage roster
+---------------------------------------------------
 
     * :meth:`~preprocessor.Preprocessor.update_storage_infrastructure` - Declare and update existing storage infrastructure based on last model year results (called by :meth:`~preprocessor.Preprocessor.run`).
 
     
-    Setup CCATS Optimization
+Setup CCATS Optimization
+------------------------
 
     * :meth:`~preprocessor.Preprocessor.declare_supply_opt` - Declare supply DataFrames for the main CCATS optimization (called by :meth:`~preprocessor.Preprocessor.run`).
     * :meth:`~preprocessor.Preprocessor.prepare_storage_opt` - Prepare storage DataFrames for the main CCATS optimization (called by :meth:`~preprocessor.Preprocessor.run`).
@@ -129,7 +138,8 @@ _______________________________________________
     * :meth:`~preprocessor.Preprocessor.instantiate_pyomo_series` - Declare Pyomo optimization inputs as series (called by :meth:`~preprocessor.Preprocessor.run`).
 
     
-    CCATS Preprocessor Utilities
+CCATS Preprocessor Utilities
+----------------------------
 
     * :meth:`~preprocessor.Preprocessor.write_pkl` - Write CCATS variables that need to be passed between model iterations via .pkl files (called by :meth:`~preprocessor.Preprocessor.run`).
     * :meth:`~preprocessor.Preprocessor.summarize_inputs` - Output debug file of preprocessor data summary (called by :meth:`~preprocessor.Preprocessor.run`).
@@ -200,7 +210,83 @@ class Preprocessor(subccats.Submodule):
 
         Returns
         -------
-        None
+        self.i_source_data : DataFrame
+            DataFrame input of sources to be modeled.
+
+        self.i_source_annual_capacity_existing : DataFrame
+            DataFrame input of existing annual source capacity.
+
+        self.i_source_total_capacity_existing : DataFrame
+            DataFrame input of existing total source capacity.
+        
+        self.source_kinds : list
+            List of kinds of sources.
+
+        self.vintages_source : list
+            List of vintages of sources (year constructed).
+
+        self.cost_invest_source : DataFrame
+            Source investment costs, indexed by kind of source and node (k,n).
+
+        self.cost_variable_source : DataFrame
+            Source variable costs, indexed by kind of source and node (k,n).
+        
+        self.build_limit_source_node : Series
+            Source node build limit, indexed by kind of source (k).
+        
+        self.build_limit_source_total : Series
+            Source nationwide build limit, indexed by kind of source (k).
+
+        self.capacity_exist_source : Series
+            Existing source capacity (indexed by kind of source and node, k and n).
+
+        self.policy_eligibility_source : Series
+            Source policy eligiblity indexed by kind of source, and vintage (k,v).
+
+        self.cost_invest_source_b0 : Series
+            Investment source costs for block 0 (indexed by kind of source and node, k and n).
+        
+        self.cost_invest_source_b1 : Series
+            Investment source costs for block 1 (indexed by kind of source and node, k and n).
+        
+        self.cost_invest_source_b0 : Series
+            Investment source costs for block 2 (indexed by kind of source and node, k and n).
+
+        self.cost_variable_source_b0 : Series
+            Variable source costs for block 0 (indexed by kind of source and node, k and n).
+
+        self.cost_variable_source_b1 : Series
+            Variable source costs for block 1 (indexed by kind of source and node, k and n).
+
+        self.cost_variable_source_b2 : Series
+            Variable source costs for block 2 (indexed by kind of source and node, k and n).
+
+        self.discount_invest_source_b0 : float
+            Investment discount multiplier for source for block 0.
+        
+        self.discount_invest_source_b1 : float
+            Investment discount multiplier for source for block 1.
+        
+        self.discount_invest_source_b2 : float
+            Investment discount multiplier for source for block 2.
+        
+        self.build_limit_source_node_b0 : Series
+            Built limit at a single node for block 0 (indexed by kind of source, k).
+        
+        self.build_limit_source_node_b1 : Series
+            Built limit at a single node for block 0 (indexed by kind of source, k).
+        
+        self.build_limit_source_node_b2 : Series
+            Built limit at a single node for block 0 (indexed by kind of source, k).
+        
+        self.build_limit_source_total_b0 : float
+            Nationwide build limit for block 0.
+
+        self.build_limit_source_total_b1 :float
+            Nationwide build limit for block 1.
+
+        self.build_limit_source_total_b2 : float
+            Nationwide build limit for block 2.
 
         """
         ### I/O Setup
@@ -224,6 +310,7 @@ class Preprocessor(subccats.Submodule):
         ### Switches
         self.small_sample_switch        = False # Model solves for only a single census division for testing if TRUE
         self.split_45q_supply_switch    = False # Split CO2 supply into 45Q and NTC components if TRUE
+        self.colocate_dac_ts_switch     = False # Enable colocating direct air capture at ts nodes
 
         ### Input dfs
         self.i_industrial_supply_45q_df = pd.DataFrame() # DataFrame of CO2 supply 45Q eligible from NEMS modules
@@ -279,6 +366,95 @@ class Preprocessor(subccats.Submodule):
 
         ### Preprocessor summary data df
         self.preproc_df             = pd.DataFrame() # DataFrame of preprocessor inputs to optimization
+
+        #============================
+        ### Endogenous sources of CO2
+        #============================
+        
+        #----------------------------
+        ## Input Data
+        # ---------------------------
+        # Natural CO2 Fields
+        self.i_nat_co2_lookup_df = pd.DataFrame() # DataFrame of natural CO2 fields
+
+        self.i_source_data = pd.DataFrame() # sources to be modeled
+
+        # capacity
+        self.i_source_annual_capacity_existing   = pd.Series() # Annual capacity existing before NEMS begins
+        self.i_source_total_capacity_existing    = pd.Series() # Total capacity existing before NEMS begins
+
+        
+        # capacity
+        self.i_source_capacity_limits     = pd.Series() # source capacity limits by kind and node
+
+        #----------------------------
+        ## Preprocessor variables
+        # ---------------------------
+
+        # kinds of sources
+        self.source_kinds = []
+
+        # costs
+        self.cost_invest_source   = pd.Series()
+        self.cost_variable_source = pd.Series()
+
+        # build limits
+        self.build_limit_source_node  = pd.Series()
+        self.build_limit_source_total = pd.Series()
+
+        #----------------------------
+        ## Optimization - Sets
+        # ---------------------------
+        # Types of source
+        self.kinds_source = [] # List of values
+
+        # Locations for sources
+        self.nodes_source = [] # List of values
+
+        # Source vintages (year constructed)
+        self.vintages_source = [] # List of values
+        
+        #---------------------------
+        ## Optimization - Parameters
+        #----------------------------
+        # existing capacity
+        self.capacity_exist_source       = pd.Series() # MultiIndex - Indexed by kind of source, node and vintage (k,n,v)
+
+        # policy eligibility (by block)
+        self.policy_eligibility_source_exist_b0  = pd.Series() # Multiindex - Indexed by kind of source, policy, and vintage (k,p,v) - block 0
+        self.policy_eligibility_source_exist_b1  = pd.Series() # Multiindex - Indexed by kind of source, policy, and vintage (k,p,v) - block 1
+        self.policy_eligibility_source_exist_b2  = pd.Series() # Multiindex - Indexed by kind of source, policy, and vintage (k,p,v) - block 2
+        self.policy_eligibility_source_new_b0    = pd.Series() # Multiindex - Indexed by kind of source, and policy (k,p) - block 0
+        self.policy_eligibility_source_new_b1    = pd.Series() # Multiindex - Indexed by kind of source, and policy (k,p) - block 1
+        self.policy_eligibility_source_new_b2    = pd.Series() # Multiindex - Indexed by kind of source, and policy (k,p) - block 2
+
+        # investment costs by block
+        self.cost_invest_source_b0       = pd.Series() # MultiIndex - Indexed by kind of source and node (k,n) - block 0
+        self.cost_invest_source_b1       = pd.Series() # MultiIndex - Indexed by kind of source and node (k,n) - block 1
+        self.cost_invest_source_b2       = pd.Series() # MultiIndex - Indexed by kind of source and node (k,n) - block 2
+
+        # variable costs by block
+        self.cost_variable_source_b0     = pd.Series() # MultiIndex - Indexed by kind of source and node (k,n) - block 0
+        self.cost_variable_source_b1     = pd.Series() # MultiIndex - Indexed by kind of source and node (k,n) - block 1
+        self.cost_variable_source_b2     = pd.Series() # MultiIndex - Indexed by kind of source and node (k,n) - block 2
+
+        # financing
+        self.discount_invest_source_b0   = 0.0 # Single value - block 0
+        self.discount_invest_source_b1   = 0.0 # Single value - block 1
+        self.discount_invest_source_b2   = 0.0 # Single value - block 2
+        
+        # Built limit at a single node by block
+        self.build_limit_source_node_b0  = pd.Series() # Single Index - Indexed by kind of source and node (k,n) - block 0
+        self.build_limit_source_node_b1  = pd.Series() # Single Index - Indexed by kind of source and node (k,n) - block 1
+        self.build_limit_source_node_b2  = pd.Series() # Single Index - Indexed by kind of source and node (k,n) - block 2
+
+        # Built limit at a single node b- cuulative
+        self.build_limit_source_node_cumulative = pd.Series() # Single Index - Indexed by kind of source and node (k,n)
+        
+        # Nationwide build limit by block
+        self.build_limit_source_total_b0 = 0.0 # Single value - block 0
+        self.build_limit_source_total_b1 = 0.0 # Single value - block 1
+        self.build_limit_source_total_b2 = 0.0 # Single value - block 2
 
         pass
 
@@ -356,7 +532,21 @@ class Preprocessor(subccats.Submodule):
 
         self.storage_buffer : float
             Buffer (fraction) added above CO\ :sub:`2` flow to storage network during optimization.
+        
+        self.self.colocate_dac_ts_switch : bool
+            Enable co-locating direct air capture at ts nodes
 
+        self.i_source_data : DataFrame
+            DataFrame input of sources to be modeled.
+
+        self.i_source_annual_capacity_existing : DataFrame
+            DataFrame input of existing source capacity.
+
+        self.i_source_total_capacity_existing : DataFrame
+            DataFrame input of existing source capacity.
+
+        self.i_source_capacity_limits : DataFrame
+            DataFrame input of builds limits for endogenous sources by node.
         """
         super().setup(setup_filename)
 
@@ -376,6 +566,7 @@ class Preprocessor(subccats.Submodule):
         ### Switches
         self.small_sample_switch = self.setup_table.at['small_sample_switch', 'value'].upper() == 'True'.upper()
         self.split_45q_supply_switch = self.setup_table.at['split_45q_supply_switch', 'value'].upper() == 'True'.upper()  # If TRUE, split a facility's supply into 45Q and NTC components within a block
+        self.colocate_dac_ts_switch = self.setup_table.at['colocate_dac_ts_switch', 'value'].upper() == 'True'.upper()  # If TRUE, enables co-locating direct air capture at ts nodes
 
 
         ### Variables
@@ -393,6 +584,29 @@ class Preprocessor(subccats.Submodule):
         self.block_45q_yr                  = int(  self.setup_table.at['block_45q_yr',                  'value']) # Years within a block that a facility must be 45Q elgibile to get tax credit (only applies if split_45q_supply_switch is FALSE)
         self.new_pipes_to_exist_facilities = int(  self.setup_table.at['new_pipes_to_exist_facilities', 'value']) # first year that new pipelines can be built to existing capture facilities (first operational in the following year)
 
+        ## Endogenous sources of CO2
+
+        # Read in the names of tables to import
+        filepath_source_data              = str(self.setup_table.at['source_data',  'value']) # file containing source data
+        filepath_source_annual_existing_capacity = str(self.setup_table.at['source_annual_existing_capacity', 'value'])
+        filepath_source_total_existing_capacity = str(self.setup_table.at['source_total_existing_capacity', 'value'])
+        filepath_source_capacity_limits   = str(self.setup_table.at['source_capacity_limits', 'value'])
+
+        # Read in tables as DataFrames
+        self.i_source_data       = pd.read_csv(self.preproc_input_path + filepath_source_data, skiprows=1)
+        annual_capacity_existing = pd.read_csv(self.preproc_input_path + filepath_source_annual_existing_capacity)
+        total_capacity_existing = pd.read_csv(self.preproc_input_path + filepath_source_total_existing_capacity)
+        source_capacity_limits   = pd.read_csv(self.preproc_input_path + filepath_source_capacity_limits)
+
+        # Process source existing capacity
+        self.i_source_annual_capacity_existing = annual_capacity_existing.groupby(['kind','node','vintage']).sum()['capacity']
+        self.i_source_total_capacity_existing  = total_capacity_existing.groupby(['kind','node','vintage']).sum()['capacity']
+
+
+        # Process source build limits
+        self.i_source_capacity_limits = pd.melt(source_capacity_limits, id_vars=['node'], var_name='kind',value_name='capacity')
+        self.i_source_capacity_limits = self.i_source_capacity_limits.set_index(['kind','node'])
+
 
         ### Run setup methods
         self.logger.info('Load Inputs Restart')
@@ -405,6 +619,12 @@ class Preprocessor(subccats.Submodule):
         else:
             self.logger.info('Load Inputs PKL')
             self.load_inputs_pkl()  # Load real data inputs
+
+       # Direct Air Capture
+        if (self.parent.endogenous_source_switch) and (self.colocate_dac_ts_switch):
+            if (self.parent.integrated_switch==False) | ((self.parent.integrated_switch==True) & (self.parent.year_current == self.parent.year_start)):
+                self.logger.info('Co-locate direct air capture with ts nodes') # Only need to set-up during the start year
+                self.colocate_dac_with_ts_nodes()
 
         # Harmonize costs to inflation
         self.logger.info('Harmonize Costs to Inflation')
@@ -492,7 +712,9 @@ class Preprocessor(subccats.Submodule):
 
         self.i_eor_cost_net_df : DataFrame
             DataFrame of CO\ :sub:`2` EOR net cost for CO\ :sub:`2` - input data.
-
+        
+        self.i_nat_co2_lookup_df : DataFrame
+            DataFrame of natural CO\ :sub:`2` field attributes
         '''
         ### Read in DataFrames
         ### Storage
@@ -523,6 +745,11 @@ class Preprocessor(subccats.Submodule):
         self.i_eor_demand_df = self.i_eor_demand_df[self.i_eor_demand_df['census_division'].notnull()]
         self.i_eor_cost_net_df = self.i_eor_cost_net_df[self.i_eor_cost_net_df['census_division'].notnull()]
 
+        ### CO2 Sources
+        # Read in natural CO2 data
+        self.i_nat_co2_lookup_df = com.read_dataframe(self.preproc_input_path + self.setup_table.at['nat_co2_fields_lookup','value'])
+        self.i_nat_co2_lookup_df = self.i_nat_co2_lookup_df.rename(columns = {'field_id':'node_id'})
+
         pass
 
 
@@ -549,7 +776,22 @@ class Preprocessor(subccats.Submodule):
 
         self.i_eor_cost_net_df : DataFrame
             DataFrame of CO\ :sub:`2` EOR net cost for CO\ :sub:`2` - input data.
+        
+        self.i_source_data : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` data - input data.
 
+        self.i_source_annual_capacity_existing : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` existing annual capacity - input data.
+            
+        self.i_source_total_capacity_existing : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` existing total capacity - input data.
+
+        self.i_source_capacity_limits : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` capacity limits - input data.
+
+        self.i_nat_co2_lookup_df : DataFrame
+            DataFrame of natural CO\ :sub:`2` field attributes
+        
         self.pipes_existing_df : DataFrame
             DataFrame of existing CO\ :sub:`2` pipeline infrastructure in a given model year.
 
@@ -570,25 +812,40 @@ class Preprocessor(subccats.Submodule):
 
         self.parent.co2_supply_prev_b1_df : DataFrame
             DataFrame of previous model year CO\ :sub:`2` supplied in b1.
+        
+        self.parent.i_source_annual_capacity_existing : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` built annual capacity.
+        
+        self.parent.i_source_total_capacity_existing : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` built total capacity.
 
+        self.parent.pkl.mod_nat_co2_prev_b0 : DataFrame
+            DataFrame of previous model year natural CO2 flows
         '''
         # Load pickled input tables
-        self.i_storage_df               = self.parent.pkl.preproc_i_storage_df.copy()
-        self.i_co2_supply_facility_df   = self.parent.pkl.preproc_i_co2_supply_facility_df.copy()
-        self.i_pipeline_lookup_df       = self.parent.pkl.preproc_i_pipeline_lookup_df.copy()
-        self.i_eor_demand_df            = self.parent.pkl.preproc_i_eor_demand_df.copy()
-        self.i_eor_cost_net_df          = self.parent.pkl.preproc_i_eor_cost_net_df.copy()
-        self.i_ts_multiplier_df         = self.parent.pkl.preproc_i_ts_multiplier_df.copy()
+        self.i_storage_df                   = self.parent.pkl.preproc_i_storage_df.copy()
+        self.i_co2_supply_facility_df       = self.parent.pkl.preproc_i_co2_supply_facility_df.copy()
+        self.i_pipeline_lookup_df           = self.parent.pkl.preproc_i_pipeline_lookup_df.copy()
+        self.i_eor_demand_df                = self.parent.pkl.preproc_i_eor_demand_df.copy()
+        self.i_eor_cost_net_df              = self.parent.pkl.preproc_i_eor_cost_net_df.copy()
+        self.i_ts_multiplier_df             = self.parent.pkl.preproc_i_ts_multiplier_df.copy()
+        self.i_source_data                  = self.parent.pkl.preproc_i_source_data.copy() 
+        self.i_source_capacity_limits       = self.parent.pkl.preproc_i_source_capacity_limits.copy()
+        self.i_nat_co2_lookup_df            = self.parent.pkl.preproc_i_nat_co2_lookup_df
 
         # Load pickled process tables
-        self.pipes_existing_df              = self.parent.pkl.preproc_pipes_existing_df.copy()
-        self.storage_existing_df            = self.parent.pkl.preproc_storage_existing_df.copy()
-        self.co2_facility_eligibility_df    = self.parent.pkl.preproc_co2_facility_eligibility_df.copy()
+        self.pipes_existing_df                  = self.parent.pkl.preproc_pipes_existing_df.copy()
+        self.storage_existing_df                = self.parent.pkl.preproc_storage_existing_df.copy()
+        self.nat_co2_lookup_df                  = self.parent.pkl.preproc_nat_co2_lookup_df
+        self.co2_facility_eligibility_df        = self.parent.pkl.preproc_co2_facility_eligibility_df.copy()
+        self.source_annual_capacity_existing    = self.parent.pkl.preproc_source_annual_capacity_existing.copy()
+        self.source_total_capacity_existing     = self.parent.pkl.preproc_source_total_capacity_existing.copy()
 
         # Load module-level pickle tables
         self.parent.new_built_pipes_df      = self.parent.pkl.mod_new_built_pipes_df.copy()
         self.parent.new_aors_df             = self.parent.pkl.mod_new_aors_df.copy()
         self.parent.store_prev_b0_df        = self.parent.pkl.mod_store_prev_b0_df.copy()
+        self.parent.nat_co2_prev_b0         = self.parent.pkl.mod_nat_co2_prev_b0_df.copy()
 
         pass
 
@@ -651,6 +908,13 @@ class Preprocessor(subccats.Submodule):
             self.i_storage_df['capex_closure'] = self.i_storage_df['capex_closure_2008$'] * inflate_from_2008_dollars
             self.i_storage_df['fixom_closure'] = self.i_storage_df['fixedom_closure_2008$_per_yr'] * inflate_from_2008_dollars
             self.i_storage_df['varom_closure'] = self.i_storage_df['varom_closure_2008$_per_ton-yr'] * inflate_from_2008_dollars
+        
+            # Source costs - specified dollar year to 1987$
+            for i in self.i_source_data.index:
+                dollar_year_starting = self.i_source_data.loc[i,'dollar_year']
+                self.i_source_data.loc[i,'CAPEX_USD_t'] = self.i_source_data.loc[i,'CAPEX_USD_t'] * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), dollar_year_starting)
+                self.i_source_data.loc[i,'VOM_USD_t']   = self.i_source_data.loc[i,'VOM_USD_t']   * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), dollar_year_starting)
+
         else:
             pass
 
@@ -753,6 +1017,9 @@ class Preprocessor(subccats.Submodule):
         self.i_storage_df['leg_tax_credit_value']       = self.parent.leg_ccs_saline_45q.at[int(self.parent.year_current),'value']
         self.i_eor_demand_df['leg_tax_credit_value']    = self.parent.leg_ccs_eor_45q.at[int(self.parent.year_current),'value']
 
+        self.i_storage_df['tax_credit_value_dac']       = self.parent.dac_saline_45q * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), self.parent.year_new_45q)
+        self.i_eor_demand_df['tax_credit_value_dac']    = self.parent.dac_eor_45q    * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), self.parent.year_new_45q)
+
         pass
 
 
@@ -839,11 +1106,24 @@ class Preprocessor(subccats.Submodule):
         self.logger.info('Update storage infrastructure')
         self.update_storage_infrastructure()
 
+        # Update natural CO2 reserves
+        self.logger.info('Update natural CO2 reserves')
+        self.update_natural_co2_reserves()
+
         # Declare optimization dfs
         self.logger.info('Declare, filter and format optimization DataFrames')
         self.declare_supply_opt()
         self.prepare_storage_opt()
         self.prepare_eor_opt()
+
+        # Endogenous sources of CO2
+        if self.parent.endogenous_source_switch:
+            self.logger.info('Prepare endogenous sources of CO2 for optimization')
+            self.prepare_endogenous_sources()
+            
+        if self.parent.natural_co2_switch:
+            self.logger.info('Prepare natural sources of CO2 for optimization')
+            self.prepare_natural_sources()
 
         # Re-index, set dataframes up for optimization
         self.logger.info('Set up for optimization')
@@ -1086,9 +1366,9 @@ class Preprocessor(subccats.Submodule):
 
         # Get time periods 0 & 1 EOR demands
         if int(self.year_current) < self.parent.year_final:
-            self.eor_demand_df = temp_eor_demand_df[['play_id', 'census_division', 'tax_credit_value', int(self.year_current), (int(self.year_current) + 1)]].copy()
+            self.eor_demand_df = temp_eor_demand_df[['play_id', 'census_division', 'tax_credit_value', 'tax_credit_value_dac', int(self.year_current), (int(self.year_current) + 1)]].copy()
         else:
-            self.eor_demand_df = temp_eor_demand_df[['play_id', 'census_division', 'tax_credit_value', int(self.year_current)]].copy()
+            self.eor_demand_df = temp_eor_demand_df[['play_id', 'census_division', 'tax_credit_value', 'tax_credit_value_dac', int(self.year_current)]].copy()
             self.eor_demand_df[(int(self.year_current) + 1)] = temp_eor_demand_df[int(self.year_current)]
 
         # Get time period 2 EOR demand
@@ -1929,21 +2209,27 @@ class Preprocessor(subccats.Submodule):
         storage_mask = self.pipeline_lookup_df['node_j_id'].isin(self.storage_new_df['node_id'].copy())
 
         # Mask for node and arc types that are always in pipeline lookup
-        ts_mask = self.pipeline_lookup_df['node_i_type'].isin(['operational_ts_node','uniform_ts_node'])
-        op_ts_mask = self.pipeline_lookup_df['pipeline_type'] == 'op_source_to_ts_node'
-        op_eor_mask = self.pipeline_lookup_df['pipeline_type'] == 'source_to_hsm_cent'
-        supply_ts_mask = self.pipeline_lookup_df['pipeline_type'] == 'source_to_ts_node'
-        ts_ts_mask = self.pipeline_lookup_df['pipeline_type'] == 'ts_node_to_ts_node'
+        ts_mask             = self.pipeline_lookup_df['node_i_type'].isin(['operational_ts_node','uniform_ts_node'])
+        op_ts_mask          = self.pipeline_lookup_df['pipeline_type'] == 'op_source_to_ts_node'
+        nat_co2_dem_mask    = self.pipeline_lookup_df['pipeline_type'] == 'nat_co2_to_demand'        
+        op_eor_mask         = self.pipeline_lookup_df['pipeline_type'] == 'source_to_hsm_cent'
+        supply_ts_mask      = self.pipeline_lookup_df['pipeline_type'] == 'source_to_ts_node'
+        ts_ts_mask          = self.pipeline_lookup_df['pipeline_type'] == 'ts_node_to_ts_node'
+        dac_ts_mask         = self.pipeline_lookup_df['pipeline_type'] == 'dac_to_ts_node'
+        nat_co2_ts_mask     = self.pipeline_lookup_df['pipeline_type'] == 'nat_co2_to_ts_node'
 
         # Create cumulative mask
-        mask = ((supply_mask & eor_mask) |
-                (supply_mask & storage_mask) |
-                (ts_mask & eor_mask) |
-                (ts_mask & storage_mask) |
-                (supply_mask & supply_ts_mask) |
-                (supply_mask & op_ts_mask) |
-                (supply_mask & op_eor_mask) |
-                ts_ts_mask)
+        mask = ((supply_mask & eor_mask)        |
+                (supply_mask & storage_mask)    |
+                (ts_mask & eor_mask)            |
+                (ts_mask & storage_mask)        |
+                (supply_mask & supply_ts_mask)  |
+                (supply_mask & op_ts_mask)      |
+                (supply_mask & op_eor_mask)     |
+                ts_ts_mask                      |
+                dac_ts_mask                     |
+                nat_co2_dem_mask                |
+                nat_co2_ts_mask)
 
         # Apply mask to pipeline lookup
         self.pipeline_lookup_df = self.pipeline_lookup_df[mask].copy()
@@ -2028,6 +2314,7 @@ class Preprocessor(subccats.Submodule):
         if int(self.year_current) <= self.parent.year_start:
             self.storage_existing_df = self.i_storage_df[['node_id', 'active_aor_co2_store_remaining', 'max_co2_store_cap', 'max_co2_project_tonnes',
                                                           'max_inj_projects','inj_rate_project_tonnes_yr', 'max_injectivity', 'storage_aors_existing', 'tax_credit_value',
+                                                          'tax_credit_value_dac',
                                                           'capex_site_dev', 'fixom_site_dev', 'varom_site_dev',
                                                           'capex_construction', 'fixom_construction', 'varom_construction',
                                                           'capex_injection', 'fixom_injection', 'varom_injection',
@@ -2068,6 +2355,33 @@ class Preprocessor(subccats.Submodule):
 
         pass
 
+    #######################################
+    ###Natural CO2 Preprocessing
+    #######################################
+    def update_natural_co2_reserves(self):
+        '''Declare and update natural CO2 reserves based on last model year results.
+
+        Returns
+        -------
+
+        '''
+        # Instantiate existing natural CO2 fields
+        if int(self.year_current) <= self.parent.year_start:
+            self.nat_co2_lookup_df = self.i_nat_co2_lookup_df.copy()
+            
+
+        else:
+            self.nat_co2_lookup_df = self.nat_co2_lookup_df.merge(self.parent.nat_co2_prev_b0,
+                                                                  how = 'left',
+                                                                  left_on = 'node_id',
+                                                                  right_index= True)
+            self.nat_co2_lookup_df = self.nat_co2_lookup_df.rename(columns = {'co2_volume':'prev_year_nat_co2'})
+            self.nat_co2_lookup_df['net_err_mt_current'] = self.nat_co2_lookup_df['net_err_mt_current'] - self.nat_co2_lookup_df['prev_year_nat_co2']
+            self.nat_co2_lookup_df = self.nat_co2_lookup_df.drop(['prev_year_nat_co2'],axis = 1)
+
+        # todo add check to make sure that CO2 used never exceeds CO2 avaialble
+
+        pass
 
     #######################################
     ###Setup Optimization
@@ -2216,7 +2530,7 @@ class Preprocessor(subccats.Submodule):
         '''
         ### Declarations
         # Existing EOR
-        self.eor_demand_df = self.eor_demand_df[['node_id','census_division','b0_co2_volume','b1_co2_volume','b2_co2_volume','tax_credit_value']].copy()
+        self.eor_demand_df = self.eor_demand_df[['node_id','census_division','b0_co2_volume','b1_co2_volume','b2_co2_volume','tax_credit_value','tax_credit_value_dac']].copy()
         self.eor_demand_df['node_type'] = 'co2_eor'
 
         # Remove any empty HSM centroids
@@ -2226,6 +2540,524 @@ class Preprocessor(subccats.Submodule):
 
         pass
 
+    def colocate_dac_with_ts_nodes(self):
+        """Create new nodes co-located with transshipment nodes for building direct air capture.
+
+        self.i_pipeline_lookup_df is updated with an arc going to each of the new nodes.
+        
+        Returns
+        -------
+        self.i_pipeline_lookup_df
+
+        """
+        # offsets - for visualization only
+        offset_latitude = 0.1
+        offset_longitude = 0.1
+
+        # type of nodes to use
+        node_types = ['operational_ts_node', 'uniform_ts_node']
+        
+        # make a local copy
+        pipeline_lookup_df = self.i_pipeline_lookup_df.copy()
+
+        # --------
+        ## find ts nodes based on i nodes
+        # --------
+        # dictionary, columns to get -> new name
+        d_cols_i = {'node_i_id':'id', 'node_i_type':'type','i_latitude':'latitude', 'i_longitude':'longitude', 
+                    'node_i_census_division':'census_division','node_i_census_region':'census_region',
+                    'pipe_segment':'pipe_segment', 'min_throughput_tonnes':'min_throughput_tonnes', 
+                    'max_throughput_tonnes':'max_throughput_tonnes'}
+        # get values
+        i_nodes = pipeline_lookup_df.loc[pipeline_lookup_df.loc[:, 'node_i_type'].isin(node_types), d_cols_i.keys()]
+        # rename columns
+        i_nodes = i_nodes.rename(columns=d_cols_i)
+
+        # --------
+        ## find ts nodes based on j nodes
+        # --------
+        # dictionary, columns to get -> new name
+        d_cols_j = {'node_j_id':'id', 'node_j_type':'type','j_latitude':'latitude', 'j_longitude':'longitude', 
+                    'node_j_census_division':'census_division','node_j_census_region':'census_region',
+                    'pipe_segment':'pipe_segment', 'min_throughput_tonnes':'min_throughput_tonnes', 
+                    'max_throughput_tonnes':'max_throughput_tonnes'}
+        # get values
+        j_nodes = pipeline_lookup_df.loc[pipeline_lookup_df.loc[:, 'node_j_type'].isin(node_types), d_cols_j.keys()]
+        # rename columns
+        j_nodes = j_nodes.rename(columns=d_cols_j)
+        
+        # --------
+        ## combine ts nodes based on i and j nodes, keep unique entries
+        # --------
+        ts_nodes = pd.concat([i_nodes, j_nodes])
+        ts_nodes = ts_nodes.drop_duplicates(subset='id',keep='first')
+
+        # --------
+        # Create new source arcs
+        # --------
+
+        # empty Series to fill in for each new arc, maintain column names
+        s_empty = pd.Series(index=pipeline_lookup_df.columns)
+
+        # empty dataframe to store the new arcs
+        arcs_source = pd.DataFrame()
+
+        # iterate through each ts node
+        for i in ts_nodes.index:
+            s = s_empty.copy()
+            s['node_i_id']              = 'dac_' + ts_nodes.loc[i, 'id']
+            s['node_i_type']            = 'dac'
+            s['i_latitude']             = ts_nodes.loc[i, 'latitude'] + offset_latitude
+            s['i_longitude']            = ts_nodes.loc[i, 'longitude'] + offset_longitude
+            s['node_i_census_division'] = ts_nodes.loc[i, 'census_division']
+            s['node_i_census_region']   = ts_nodes.loc[i, 'census_region']
+
+            s['node_j_id']              = ts_nodes.loc[i, 'id']
+            s['node_j_type']            = ts_nodes.loc[i, 'type']
+            s['j_latitude']             = ts_nodes.loc[i, 'latitude']
+            s['j_longitude']            = ts_nodes.loc[i, 'longitude']
+            s['node_j_census_division'] = ts_nodes.loc[i, 'census_division']
+            s['node_j_census_region']   = ts_nodes.loc[i, 'census_region']
+
+            s['route_id']               = s['node_i_id'] + '_to_' + s['node_j_id']
+            s['pipe_segment']           = ts_nodes.loc[i, 'pipe_segment']
+            s['pipe_capex_intercept']   = 0.0
+            s['pipe_capex_slope']       = 0.0
+            s['min_throughput_tonnes']  = float(ts_nodes.loc[i, 'min_throughput_tonnes'])
+            s['max_throughput_tonnes']  = float(ts_nodes.loc[i, 'max_throughput_tonnes'])
+            s['pipeline_miles']         = 0.0
+            s['average_electricity']    = 0.0
+
+            s['pipeline_type'] = 'dac_to_ts_node'
+            s['existing_throughput_tonnes'] = 0.0
+            s['operational_status'] = 'N'
+
+            # store
+            arcs_source = pd.concat([arcs_source, s.to_frame().transpose()])
+
+        # --------
+        # Set datatypes
+        # --------
+        arcs_source = arcs_source.astype({'i_latitude':'float64',
+                                          'i_longitude':'float64',
+                                          'j_latitude':'float64',
+                                          'j_longitude':'float64',
+                                          'min_throughput_tonnes':'float64',
+                                          'max_throughput_tonnes':'float64',
+                                          'pipeline_miles':'float64',
+                                          'average_electricity':'float64',
+                                          'existing_throughput_tonnes':'float64',
+                                          'node_i_census_division':'int',
+                                          'node_i_census_region':'int',
+                                          'node_j_census_division':'int',
+                                          'node_j_census_region':'int'})
+
+        # --------
+        # Save nodes and arcs by appending to i_pipeline_lookup_df
+        # --------
+        self.i_pipeline_lookup_df = pd.concat([self.i_pipeline_lookup_df, arcs_source])
+
+        pass
+
+    
+    def prepare_endogenous_sources(self):
+        """Prepare enodgenous sources of CO\ :sub:`2`.
+
+        Returns
+        -------
+        self.source_annual_capacity_existing : Series
+            Existing source annual capacity, updated for last year's run, indexed by kind of source and node (k,n).
+            
+        self.parent.source_total_capacity_existing : Series
+            Existing source total capacity, updated for last year's run, indexed by kind of source and node (k,n).
+        
+        self.source_kinds : list
+            List of kinds of sources.
+
+        self.cost_invest_source : DataFrame
+            Source investment costs, indexed by kind of source and node (k,n).
+
+        self.cost_variable_source : DataFrame
+            Source variable costs, indexed by kind of source and node (k,n).
+        
+        self.build_limit_source_node : Series
+            Source node build limit, indexed by kind of source (k).
+        
+        self.build_limit_source_total : Series
+            Source nationwide build limit, indexed by kind of source (k).
+
+        """
+        #----------------------------
+        ## Get nodes and kinds, used for indexing
+        #----------------------------
+
+        # get source nodes from self.pipeline_lookup_df
+        source_df = self.pipeline_lookup_df.loc[self.pipeline_lookup_df['node_i_type'].isin(['dac'])].copy()
+        nodes_source = source_df['node_i_id'].tolist()
+        node_prices = source_df[['node_i_id','node_i_census_division']].groupby(['node_i_id']).first().copy()
+
+        # get kinds of sources
+        kinds_source = self.i_source_data.kind.tolist()
+
+        # get vintages of sources
+        if int(self.year_current) == int(self.parent.year_start):
+            vintages_source   = self.i_source_annual_capacity_existing.copy().reset_index().vintage.unique().tolist()
+        else: 
+            vintages_source   = self.source_annual_capacity_existing.copy().reset_index().vintage.unique().tolist()
+
+        #----------------------------
+        ## Existing Capacity
+        #----------------------------
+        # Only include if node is in nodes_source
+        if int(self.year_current) == int(self.parent.year_start):
+            self.source_annual_capacity_existing   = self.i_source_annual_capacity_existing.copy() # MultiIndex - Indexed by kind of source, node and vintage (k,n,v)
+            self.source_total_capacity_existing   = self.i_source_total_capacity_existing.copy() # MultiIndex - Indexed by kind of source, node and vintage (k,n,v)
+
+        else: 
+            pass
+
+
+        #----------------------------
+        # Energy prices
+        #----------------------------
+        
+        ## create dataframe with prices for the current year
+
+        # local copies of restart file variables
+        prices_natgas = self.parent.restart.mpblk_pngin.copy()
+        prices_elec = self.parent.restart.mpblk_pelin.copy()
+
+        # store prices for each census division
+        prices = pd.DataFrame()
+        for i in range(1,10):
+
+            # store values of interest in a Series
+            s = pd.Series()
+            s['division']    = int(i)
+            s['natgas']      = prices_elec.loc[i, int(self.parent.year_current)].value
+            s['electricity'] = prices_natgas.loc[i, int(self.parent.year_current)].value
+            
+            # store Series in the prices DataFrame
+            if len(prices)==0:
+                prices = s.to_frame().transpose()
+            else:
+                prices = pd.concat([prices, s.to_frame().transpose()])
+
+        prices['division'] = prices['division'].astype('int')
+        prices = prices.set_index(['division'])
+
+        ## store prices for each node
+
+        # default as nationwide average
+        node_prices.loc[:,'natgas']      = prices.natgas.mean()
+        node_prices.loc[:,'electricity'] = prices.electricity.mean()
+
+        # store prices for each census division
+        for i in range(1,10):
+
+            # get indicies of nodes for this division
+            ind = node_prices.node_i_census_division == i
+
+            # store prices
+            node_prices.loc[ind,'natgas']      = prices.loc[i,'natgas']
+            node_prices.loc[ind,'electricity'] = prices.loc[i,'electricity']
+
+        # node_prices = node_prices.set_index('node_i_id')
+
+        #----------------------------
+        ## Costs
+        #----------------------------
+        # adjust LCFS credit for inflation
+        self.LCFS_credit = self.parent.LCFS_credit * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), self.parent.LCFS_dollar_year)
+
+        # make a copy of data to work with
+        source_data = self.i_source_data.copy().set_index('kind')
+        
+        # create a dataframe to store results
+        source_costs = pd.DataFrame()
+
+        # iterate through each source kind
+        for k in kinds_source:
+            
+            # access data regarding this kind
+            CAPEX_USD_t     = source_data.loc[k,'CAPEX_USD_t']
+            VOM_USD_t       = source_data.loc[k,'VOM_USD_t']
+            natgas_GJ_t     = source_data.loc[k,'natgas_GJ_t']
+            elec_GJ_t       = source_data.loc[k,'elec_GJ_t']
+            cost_multiplier = source_data.loc[k,'cost_multiplier']
+            LCFS_eligible   = source_data.loc[k,'LCFS_eligible']=='Y'
+            
+            # iterate through each node
+            for n in node_prices.index:
+
+                # get node specific energy costs (convert from $/MMBtu to specified units)
+                MMBtu_to_GJ = 1.055056
+                natgas_USD_GJ = node_prices.loc[n,'natgas'] / MMBtu_to_GJ
+                elec_USD_GJ  = node_prices.loc[n,'electricity'] / MMBtu_to_GJ
+
+                # LCFS
+                VOM_USD_t2 = VOM_USD_t
+                if LCFS_eligible:
+                    VOM_USD_t2 = VOM_USD_t - self.LCFS_credit
+
+                # store in a Series
+                s = pd.Series()
+                s['k'] = k
+                s['n'] = n
+                s['cost_invest'] = cost_multiplier * (CAPEX_USD_t)
+                s['cost_variable'] = cost_multiplier * (VOM_USD_t2 + natgas_USD_GJ * natgas_GJ_t + elec_USD_GJ * elec_GJ_t)
+                # append
+                source_costs = pd.concat([source_costs, s.to_frame().transpose()])
+
+        # ------------------
+        # policy eligibility  - Existing capacity
+        # ------------------
+        block_start = np.array([0, self.parent.ccats_fin.duration_b0, self.parent.ccats_fin.duration_b0 + self.parent.ccats_fin.duration_b1])
+        for b in range(len(block_start)):
+            eligibility = pd.DataFrame()
+            for k in kinds_source:
+                for p in [0, 1, 2]:
+                    for v in vintages_source:
+                        s = pd.Series()
+                        s['kind'] = k
+                        s['policy'] = p
+                        s['vintage'] = v
+
+                        # Determine whether this kind of source counts as 1) DAC, 2) CCS, or 3) neither
+                        is_DAC = source_data.loc[k,'45Q-DAC']=='Y'
+                        is_CCS = source_data.loc[k,'45Q-CCS']=='Y'
+                        if is_DAC and is_CCS:
+                            is_CCS = False
+
+                        # Determine eligibily
+                        if p==0: # NTC (Always an option)
+                            s['eligibility'] = 1 # Elgibile
+
+                        elif p==1: # 45Q - CCS (Does not apply to DAC)
+                            
+                            if (is_CCS) and (int(self.year_current) + block_start[b] < v + self.parent.ccats_fin.duration_45q):
+                                s['eligibility'] = 1 # Eligible
+                            else:
+                                s['eligibility'] = 0 # Inelgibile
+
+                        elif p==2: #45Q - DAC (Vintage dependent)
+
+                            if (is_DAC) and (int(self.year_current) + block_start[b] < v + self.parent.ccats_fin.duration_45q):
+                                s['eligibility'] = 1 # Eligible
+                            else:
+                                s['eligibility'] = 0 # Inelgibile
+
+                        # store
+                        eligibility = pd.concat([eligibility, s.to_frame().transpose()])
+            
+            # save
+            if b==0:
+                policy_eligibility_source_exist_b0 = eligibility.set_index(['kind','policy','vintage'])
+            elif b==1:
+                policy_eligibility_source_exist_b1 = eligibility.set_index(['kind','policy','vintage'])
+            elif b==2:
+                policy_eligibility_source_exist_b2 = eligibility.set_index(['kind','policy','vintage'])
+
+        # ------------------
+        # policy eligibility  - New builds
+        # ------------------
+        block_start = np.array([0, self.parent.ccats_fin.duration_b0, self.parent.ccats_fin.duration_b0 + self.parent.ccats_fin.duration_b1])
+        for b in range(len(block_start)):
+            eligibility = pd.DataFrame()
+            for k in kinds_source:
+                for p in [0, 1, 2]:
+                    s = pd.Series()
+                    s['kind'] = k
+                    s['policy'] = p
+
+                    # Determine whether this kind of source counts as 1) DAC, 2) CCS, or 3) neither
+                    is_DAC = source_data.loc[k,'45Q-DAC']=='Y'
+                    is_CCS = source_data.loc[k,'45Q-CCS']=='Y'
+                    if is_DAC and is_CCS:
+                        is_CCS = False
+
+                    # Determine eligibily
+                    if p==0: # NTC (Always an option)
+                        s['eligibility'] = 1 # Elgibile
+
+                    elif p==1: # 45Q - CCS (Does not apply to DAC)
+                        if (is_CCS) and (int(self.year_current) + block_start[b] <= self.parent.year_45q_last_new):
+                            s['eligibility'] = 1 # Eligible
+                        else:
+                            s['eligibility'] = 0 # Inelgibile
+
+                    elif p==2: #45Q - DAC (Vintage dependent)
+
+                        if (is_DAC) and (int(self.year_current) + block_start[b] <= self.parent.year_45q_last_new):
+                            s['eligibility'] = 1 # Eligible
+                        else:
+                            s['eligibility'] = 0 # Inelgibile
+
+                    # store
+                    eligibility = pd.concat([eligibility, s.to_frame().transpose()])
+            # save
+            if b==0:
+                policy_eligibility_source_new_b0 = eligibility.set_index(['kind','policy'])
+            elif b==1:
+                policy_eligibility_source_new_b1 = eligibility.set_index(['kind','policy'])
+            elif b==2:
+                policy_eligibility_source_new_b2 = eligibility.set_index(['kind','policy'])
+
+        #----------------------------
+        ### Optimization inputs
+        #----------------------------
+        # only populate if there are source nodes
+        if len(nodes_source)>0:
+            # set-up multi-index
+            source_costs = source_costs.set_index(['k','n'])
+
+            ## Sets
+            self.source_kinds = kinds_source # List
+            self.vintages_source = vintages_source # List
+
+            ## Parameters
+            # policy eligibility - existing capacity: Multiindex - Indexed by kind of source, policy and vintage (k,p,v)
+            self.policy_eligibility_source_exist_b0  = policy_eligibility_source_exist_b0['eligibility'].astype('int') # block 0
+            self.policy_eligibility_source_exist_b1  = policy_eligibility_source_exist_b1['eligibility'].astype('int') # block 1
+            self.policy_eligibility_source_exist_b2  = policy_eligibility_source_exist_b2['eligibility'].astype('int') # block 2
+
+            # policy eligibility - new capacity: Multiindex - Indexed by kind of source and policy and vintage (k,p)
+            self.policy_eligibility_source_new_b0  = policy_eligibility_source_new_b0['eligibility'].astype('int') # block 0
+            self.policy_eligibility_source_new_b1  = policy_eligibility_source_new_b1['eligibility'].astype('int') # block 1
+            self.policy_eligibility_source_new_b2  = policy_eligibility_source_new_b2['eligibility'].astype('int') # block 2
+
+            # investment costs (MultiIndex - Indexed by kind of source and node (k,n))
+            self.cost_invest_source       = source_costs.copy()['cost_invest'].astype('float')
+
+            # variable costs (MultiIndex - Indexed by kind of source and node (k,n))
+            self.cost_variable_source     = source_costs.copy()['cost_variable'].astype('float')
+            
+            ## build limits (dictionaries - Indexed by kind of source)
+            # make a copy of data to work with
+            source_data = self.i_source_data.copy().set_index('kind')
+
+            # iterate through each source kind
+            self.build_limit_source_node = pd.Series()
+            self.build_limit_source_total = pd.Series()
+            for k in kinds_source:
+                # access data regarding this kind
+                init_build_limit_node   = source_data.loc[k,'init_build_limit_node']
+                rate_build_limit_node   = source_data.loc[k,'rate_build_limit_node']
+                init_build_limit_total = source_data.loc[k,'init_build_limit_total']
+                rate_build_limit_total = source_data.loc[k,'rate_build_limit_total']
+
+                # store result
+                self.build_limit_source_node[k]  = init_build_limit_node  * (1.0 + rate_build_limit_node  * (int(self.year_current) - int(self.parent.year_start)))
+                self.build_limit_source_total[k] = init_build_limit_total * (1.0 + rate_build_limit_total * (int(self.year_current) - int(self.parent.year_start)))
+
+            self.build_limit_source_node_cumulative = self.i_source_capacity_limits.copy()
+
+        pass
+
+
+    def prepare_natural_sources(self):
+        """Prepare natural sources of CO\ :sub:`2`.
+
+        Returns
+        -------
+        self.parent.source_annual_capacity_existing : Series
+            Existing source capacity, updated for last year's run, indexed by kind of source and node (k,n).
+            
+        self.parent.total_capacity_existing : Series
+            Existing source capacity, updated for last year's run, indexed by kind of source and node (k,n).
+
+        self.source_kinds : list
+            List of kinds of sources.
+
+        self.cost_invest_source : DataFrame
+            Source investment costs, indexed by kind of source and node (k,n).
+
+        self.cost_variable_source : DataFrame
+            Source variable costs, indexed by kind of source and node (k,n).
+
+        self.build_limit_source_node : Series
+            Source node build limit, indexed by kind of source (k).
+
+        self.build_limit_source_total : Series
+            Source nationwide build limit, indexed by kind of source (k).
+
+        """
+        ### Source Kinds
+        self.source_kinds = self.source_kinds + ['nat_co2']
+
+
+        ### Create temp_nat_co2 dataframe containing natural CO2 site input parameters
+        temp_nat_co2 = self.nat_co2_lookup_df.copy()
+        temp_nat_co2['kind'] = 'nat_co2'
+        temp_nat_co2['vintage'] = int(self.parent.year_start)
+        temp_nat_co2 = temp_nat_co2.set_index(['kind','node_id','vintage'],append = False)
+
+
+        ### Parameter inputs
+        # Policy eligibility
+        temp_nat_co2['eligibility'] = 0
+
+        # Investment costs
+        temp_nat_co2['cost_invest'] = 0
+
+        # Variable costs
+        # $15 is a rough estimate based on https://www.netl.doe.gov/sites/default/files/netl-file/co2_eor_primer.pdf, waiting on CREAM study
+        temp_nat_co2['cost_variable'] = 15
+        temp_nat_co2['cost_variable'] = temp_nat_co2['cost_variable'] * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), 2010)
+
+        # Build Limit
+        temp_nat_co2['capacity'] = temp_nat_co2['gross_err_mt'].sum()
+
+
+        ### Concatenate natural CO2 parameters to main source parameters series
+        # Only include if node is in nodes_source
+        if int(self.year_current) == int(self.parent.year_start):
+            self.source_annual_capacity_existing = pd.concat([self.source_annual_capacity_existing,temp_nat_co2['max_co2_prod']])  # MultiIndex - Indexed by kind of source, node and vintage (k,n,v)
+            self.source_total_capacity_existing = pd.concat([self.source_total_capacity_existing,temp_nat_co2['net_err_mt_current']])
+        else:
+            self.source_total_capacity_existing.update(temp_nat_co2['net_err_mt_current'])
+
+
+        ### Optimization parameter inputs
+        # only populate if there are source nodes
+
+        ### Optimization parameters
+        # Policy eligibility - existing capacity: Multiindex - Indexed by kind of source, policy and vintage (k,p,v)
+        temp_policy = pd.DataFrame()
+        for p in [0, 1, 2]:
+            temp = temp_nat_co2.copy().droplevel(level=1)
+            temp['policy'] = p
+            temp = temp.set_index(['policy'], append = True)
+            temp.index = temp.index.reorder_levels([0,2,1])
+            if p == 0: # NTC - always available
+                temp['eligibility'] = 1
+            temp_policy = pd.concat([temp_policy,temp])
+        temp_policy = temp_policy[['eligibility']]
+        temp_policy = temp_policy[~temp_policy.index.duplicated(keep='first')]
+
+        self.policy_eligibility_source_exist_b0 = pd.concat([self.policy_eligibility_source_exist_b0, temp_policy['eligibility'].astype('int')]) # block 0
+        self.policy_eligibility_source_exist_b1 = pd.concat([self.policy_eligibility_source_exist_b1, temp_policy['eligibility'].astype('int')]) # block 1
+        self.policy_eligibility_source_exist_b2 = pd.concat([self.policy_eligibility_source_exist_b2, temp_policy['eligibility'].astype('int')]) # block 2
+
+        # Policy eligibility - new capacity: Multiindex - Indexed by kind of source and policy and vintage (k,p)
+        self.policy_eligibility_source_new_b0 = pd.concat([self.policy_eligibility_source_new_b0, temp_policy['eligibility'].astype('int')]) # block 0
+        self.policy_eligibility_source_new_b1 = pd.concat([self.policy_eligibility_source_new_b1, temp_policy['eligibility'].astype('int')]) # block 1
+        self.policy_eligibility_source_new_b2 = pd.concat([self.policy_eligibility_source_new_b2, temp_policy['eligibility'].astype('int')]) # block 2
+
+        # Costs (MultiIndex - Indexed by kind of source and node (k,n))
+        temp_cost = temp_nat_co2.droplevel(level=2).copy()
+
+        self.cost_invest_source = pd.concat([self.cost_invest_source,temp_cost.copy()['cost_invest'].astype('float')])
+        self.cost_variable_source = pd.concat([self.cost_variable_source,temp_cost.copy()['cost_variable'].astype('float')])
+
+        # Build Limits
+        temp_build_limits = temp_nat_co2.droplevel(level=2).copy()
+
+        self.build_limit_source_node.loc['nat_co2'] = 0
+        self.build_limit_source_total.loc['nat_co2'] = 0
+        self.build_limit_source_node_cumulative = pd.concat([self.build_limit_source_node_cumulative, temp_build_limits[['capacity']].astype('float')])
+
+        pass
 
     def setup_optimization(self):
         '''Format and prepare data in optimization DataFrames for optimization.
@@ -2291,14 +3123,14 @@ class Preprocessor(subccats.Submodule):
         self.storage_costs_opt      = self.storage_costs_df.copy()
         self.storage_costs_opt      = self.storage_costs_opt.set_index(['node_id'], drop=False).sort_index()
 
-        self.eor_cost_net_opt          = self.eor_cost_net_df.copy()
-        self.eor_cost_net_opt          = self.eor_cost_net_opt.set_index(['node_id'], drop=False).sort_index()
+        self.eor_cost_net_opt       = self.eor_cost_net_df.copy()
+        self.eor_cost_net_opt       = self.eor_cost_net_opt.set_index(['node_id'], drop=False).sort_index()
 
 
         ### Instantiate OPT versions of other dfs
         # Potential new pipelines
         self.pipeline_lookup_opt    = self.pipeline_lookup_df.copy()
-        self.pipeline_lookup_opt = self.pipeline_lookup_opt .rename(columns = {'max_throughput_tonnes':'thruput_tonnes'})
+        self.pipeline_lookup_opt    = self.pipeline_lookup_opt .rename(columns = {'max_throughput_tonnes':'thruput_tonnes'})
         self.pipeline_lookup_opt    = self.pipeline_lookup_opt.set_index(['node_i_id', 'node_j_id','pipe_segment'], drop=False).sort_index()
 
         # Existing pipelines
@@ -2570,6 +3402,11 @@ class Preprocessor(subccats.Submodule):
         
         '''
         ### Nodes
+
+        # Nodes source
+        source_df = self.pipeline_lookup_opt.loc[self.pipeline_lookup_opt['node_i_type'].isin(['dac','nat_co2_field'])].copy()
+        self.nodes_source = set(source_df['node_i_id'].tolist())
+
         # Nodes_supply
         supply_df = self.pipeline_lookup_opt.loc[self.pipeline_lookup_opt['node_i_type'].isin(['other_existing','ethanol','ammonia','ng_processing','cement','pp_coal','pp_natgas','beccs'])].copy()
         self.nodes_supply = set(supply_df['node_i_id'].tolist())
@@ -2602,6 +3439,7 @@ class Preprocessor(subccats.Submodule):
 
         ### Parameters
         #### Policy Incentives
+        
         # Get tax credit array
         tax_credit_45q_df  = pd.concat([self.storage_existing_opt[['tax_credit_value']], self.eor_demand_opt[['tax_credit_value']]])
         tax_credit_45q_df['eligibility_45q'] = 1
@@ -2611,8 +3449,18 @@ class Preprocessor(subccats.Submodule):
         credit_ineligible_df['tax_credit_value'] = 0.0
         credit_ineligible_df['eligibility_45q'] = 0
 
+        if self.parent.endogenous_source_switch:
+            # Get tax credit array for DAC
+            tax_credit_45q_dac_df = pd.concat([self.storage_existing_opt[['tax_credit_value_dac']], self.eor_demand_opt[['tax_credit_value_dac']]])
+            tax_credit_45q_dac_df['tax_credit_value'] = tax_credit_45q_dac_df['tax_credit_value_dac']
+            tax_credit_45q_dac_df['eligibility_45q'] = 2
+            tax_credit_45q_dac_df = tax_credit_45q_dac_df.drop(columns=['tax_credit_value_dac'])
+
         # Combine dfs and declare index
-        self.policy_cost = pd.concat([tax_credit_45q_df, credit_ineligible_df])
+        if self.parent.endogenous_source_switch:
+            self.policy_cost = pd.concat([tax_credit_45q_df, credit_ineligible_df, tax_credit_45q_dac_df])
+        else:
+            self.policy_cost = pd.concat([tax_credit_45q_df, credit_ineligible_df])
         self.policy_cost = self.policy_cost.set_index('eligibility_45q', append = True)
 
         # Declare optimization variable
@@ -2809,10 +3657,16 @@ class Preprocessor(subccats.Submodule):
         block_start = int(self.year_current) + np.array([0, self.duration_b0, self.duration_b0 + self.duration_b1])
 
         # ccats financing assumptions
+        n_source         = self.parent.ccats_fin.financing_years_source      # number of years that source projects are financed over
+        FOM_source       = self.parent.ccats_fin.fixed_om_fraction_source    # fraction of CAPEX paid as Fixed O&M annually        
         n_transport      = self.parent.ccats_fin.financing_years_transport   # number of years that transport projects are financed over
         FOM_transport    = self.parent.ccats_fin.fixed_om_fraction_transport # fraction of CAPEX paid as Fixed O&M annually
         n_storage        = self.parent.ccats_fin.financing_years_storage     # number of years that storage projects are financed over
         FOM_storage      = self.parent.ccats_fin.fixed_om_fraction_storage   # fraction of CAPEX paid as Fixed O&M annually
+
+        self.discount_invest_source_b0  = self.parent.ccats_fin.calculate_discount_investment(block_start[0], n_source, FOM_source)
+        self.discount_invest_source_b1  = self.parent.ccats_fin.calculate_discount_investment(block_start[1], n_source, FOM_source)
+        self.discount_invest_source_b2  = self.parent.ccats_fin.calculate_discount_investment(block_start[2], n_source, FOM_source)
 
         self.discount_invest_storage_b0 = self.parent.ccats_fin.calculate_discount_investment(block_start[0], n_storage, FOM_storage)
         self.discount_invest_storage_b1 = self.parent.ccats_fin.calculate_discount_investment(block_start[1], n_storage, FOM_storage)
@@ -2841,11 +3695,15 @@ class Preprocessor(subccats.Submodule):
             # store relevant data as a Series
             discount_multipliers = pd.Series()
             discount_multipliers['year_current']                 = int(self.year_current)
+            discount_multipliers['n_source']                     = n_source
             discount_multipliers['n_storage']                    = n_storage
             discount_multipliers['n_transport']                  = n_transport
             discount_multipliers['duration_b0']                  = self.duration_b0
             discount_multipliers['duration_b1']                  = self.duration_b1
             discount_multipliers['duration_b2']                  = self.duration_b2
+            discount_multipliers['discount_invest_source_b0']    = self.discount_invest_source_b0
+            discount_multipliers['discount_invest_source_b1']    = self.discount_invest_source_b1
+            discount_multipliers['discount_invest_source_b2']    = self.discount_invest_source_b2
             discount_multipliers['discount_invest_storage_b0']   = self.discount_invest_storage_b0
             discount_multipliers['discount_invest_storage_b1']   = self.discount_invest_storage_b1
             discount_multipliers['discount_invest_storage_b2']   = self.discount_invest_storage_b2
@@ -2866,6 +3724,90 @@ class Preprocessor(subccats.Submodule):
                 discount_multipliers_df.to_csv(discount_multipliers_filename)
             else:
                 discount_multipliers_df.to_csv(discount_multipliers_filename, mode='a', header=False)
+
+        ### Endogeneous sources of CO2
+        if self.parent.endogenous_source_switch:
+
+            #----------------------------
+            ## Sets
+            #----------------------------
+            # Kinds of sources
+            self.kinds_source               = self.source_kinds # List of values
+            
+            #----------------------------
+            ## Parameters
+            #----------------------------
+
+            ### existing capacity (MultiIndex - Indexed by kind of DAC and node (k,n))
+            if len(self.kinds_source)>0 and len(self.nodes_source)>0:
+                self.annual_capacity_exist_source   = self.source_annual_capacity_existing.copy()
+                self.total_capacity_exist_source   = self.source_total_capacity_existing.copy()
+
+            else:
+                self.annual_capacity_exist_source   = pd.Series()
+                self.total_capacity_exist_source   = pd.Series()
+
+            # investment costs by block (MultiIndex - Indexed by kind of DAC and node (k,n))
+            self.cost_invest_source_b0       = self.cost_invest_source.copy()
+            self.cost_invest_source_b1       = self.cost_invest_source.copy()
+            self.cost_invest_source_b2       = self.cost_invest_source.copy()
+
+            # variable costs by block (MultiIndex - Indexed by kind of DAC and node (k,n))
+            self.cost_variable_source_b0     = self.cost_variable_source.copy()
+            self.cost_variable_source_b1     = self.cost_variable_source.copy()
+            self.cost_variable_source_b2     = self.cost_variable_source.copy()
+            
+            # Build limit - At a single node by block (Single Index - Indexed by kind of source,k)
+            self.build_limit_source_node_b0  = self.build_limit_source_node
+            self.build_limit_source_node_b1  = self.build_limit_source_node
+            self.build_limit_source_node_b2  = self.build_limit_source_node
+
+            # Build limit - Nationwide by block  (Single Index - Indexed by kind of source,k)
+            self.build_limit_source_total_b0 = self.build_limit_source_total
+            self.build_limit_source_total_b1 = self.build_limit_source_total
+            self.build_limit_source_total_b2 = self.build_limit_source_total
+
+            if self.parent.debug_switch:
+                with open(self.output_path                               + 'source//input_kinds_source.dat', 'w') as f:
+                    for kind in self.kinds_source:
+                        f.write(f"{kind}\n")
+
+                with open(self.output_path                               + 'source//input_vintages_source.dat', 'w') as f:
+                    for vintage in self.vintages_source:
+                        f.write(f"{vintage}\n")
+
+                with open(self.output_path                               + 'source//input_nodes_source.dat', 'w') as f:
+                    for node in self.nodes_source:
+                        f.write(f"{node}\n")
+
+                self.capacity_exist_source.to_csv(self.output_path       + 'source//input_capacity_exist_source.csv')
+                self.cost_invest_source_b0.to_csv(self.output_path       + 'source//input_cost_invest_source_b0.csv')
+                self.cost_invest_source_b1.to_csv(self.output_path       + 'source//input_cost_invest_source_b1.csv')
+                self.cost_invest_source_b2.to_csv(self.output_path       + 'source//input_cost_invest_source_b2.csv')
+                self.cost_variable_source_b0.to_csv(self.output_path     + 'source//input_cost_variable_source_b0.csv')
+                self.cost_variable_source_b1.to_csv(self.output_path     + 'source//input_cost_variable_source_b1.csv')
+                self.cost_variable_source_b2.to_csv(self.output_path     + 'source//input_cost_variable_source_b2.csv')
+                self.build_limit_source_node_b0.to_csv(self.output_path  + 'source//input_build_limit_source_node_b0.csv')
+                self.build_limit_source_node_b1.to_csv(self.output_path  + 'source//input_build_limit_source_node_b1.csv')
+                self.build_limit_source_node_b2.to_csv(self.output_path  + 'source//input_build_limit_source_node_b2.csv')
+                self.build_limit_source_total_b0.to_csv(self.output_path + 'source//input_build_limit_source_total_b0.csv')
+                self.build_limit_source_total_b1.to_csv(self.output_path + 'source//input_build_limit_source_total_b1.csv')
+                self.build_limit_source_total_b2.to_csv(self.output_path + 'source//input_build_limit_source_total_b2.csv')
+
+            # LCFS and tax credits
+            dac_tax_credits = pd.Series()
+            dac_tax_credits['year_current']   = int(self.year_current)
+            dac_tax_credits['dac_saline_45q'] = self.parent.dac_saline_45q * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), self.parent.year_new_45q)
+            dac_tax_credits['dac_eor_45q']    = self.parent.dac_eor_45q    * com.calculate_inflation(self.parent.rest_mc_jpgdp.copy(), self.parent.year_new_45q)
+            dac_tax_credits['LCFS']           = self.LCFS_credit
+
+            # transform to a dataframe and save to CSV
+            dac_tax_credits = dac_tax_credits.to_frame().transpose()
+            dac_tax_credits_filename = self.output_path + 'source//' + 'tax_credits.csv'
+            if self.year_current == self.parent.year_start:
+                dac_tax_credits.to_csv(dac_tax_credits_filename)
+            else:
+                dac_tax_credits.to_csv(dac_tax_credits_filename, mode='a', header=False)
 
         ### Test data
         self.parent.pytest.nodes_supply                     = self.nodes_supply.copy()
@@ -2924,6 +3866,9 @@ class Preprocessor(subccats.Submodule):
         self.parent.pkl.preproc_i_ts_multiplier_df : DataFrame
             DataFrame of multipliers for ts-ts node arcs - input data.
 
+        self.parent.pkl.preproc_i_nat_co2_lookup_df : DataFrame
+            DataFrame of natural CO\ :sub:`2` field attributes            
+
         self.parent.pkl.preproc_pipes_existing_df : DataFrame
             DataFrame of existing CO\ :sub:`2` pipeline infrastructure in a given model year.
 
@@ -2933,6 +3878,15 @@ class Preprocessor(subccats.Submodule):
         self.parent.pkl.preproc_co2_facility_eligibility_df : DataFrame
             DataFrame of CO\ :sub:`2` facility 45Q eligibility.
         
+        self.parent.pkl.preproc_i_source_data : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` data.
+
+        self.parent.pkl.preproc_i_source_annual_capacity_existing : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` existing capacity.
+
+        self.parent.pkl.preproc_i_source_capacity_limits : DataFrame
+            DataFrame of endogenous sources of CO\ :sub:`2` capacity limits.        
+        
         '''
         ### Write input tables
         self.parent.pkl.preproc_i_storage_df                = self.i_storage_df.copy()
@@ -2941,12 +3895,19 @@ class Preprocessor(subccats.Submodule):
         self.parent.pkl.preproc_i_eor_demand_df             = self.i_eor_demand_df.copy()
         self.parent.pkl.preproc_i_eor_cost_net_df           = self.i_eor_cost_net_df.copy()
         self.parent.pkl.preproc_i_ts_multiplier_df          = self.i_ts_multiplier_df.copy()
-
+        self.parent.pkl.preproc_i_nat_co2_lookup_df         = self.i_nat_co2_lookup_df.copy()
 
         ### Write local process tables
-        self.parent.pkl.preproc_pipes_existing_df           = self.pipes_existing_df.copy()
-        self.parent.pkl.preproc_storage_existing_df         = self.storage_existing_df.copy()
-        self.parent.pkl.preproc_co2_facility_eligibility_df = self.co2_facility_eligibility_df.copy()
+        self.parent.pkl.preproc_pipes_existing_df                 = self.pipes_existing_df.copy()
+        self.parent.pkl.preproc_storage_existing_df               = self.storage_existing_df.copy()
+        self.parent.pkl.preproc_co2_facility_eligibility_df       = self.co2_facility_eligibility_df.copy()
+        self.parent.pkl.preproc_nat_co2_lookup_df                 = self.nat_co2_lookup_df.copy()
+        self.parent.pkl.preproc_source_annual_capacity_existing   = self.source_annual_capacity_existing.copy()
+        self.parent.pkl.preproc_source_total_capacity_existing    = self.source_total_capacity_existing.copy()
+
+        # Endogenous sources of CO2
+        self.parent.pkl.preproc_i_source_data                     = self.i_source_data.copy()
+        self.parent.pkl.preproc_i_source_capacity_limits          = self.i_source_capacity_limits.copy()
 
         pass
 
@@ -2980,7 +3941,7 @@ class Preprocessor(subccats.Submodule):
             'total CO2 volume demanded time period 0': [self.eor_demand_df['b0_co2_volume'].sum()],
             'total CO2 volume demanded time period 1': [self.eor_demand_df['b1_co2_volume'].sum()],
             'total CO2 volume demanded time period 2': [self.eor_demand_df['b2_co2_volume'].sum()],
-            'total existing annual CO2 storage': [(self.storage_existing_df['inj_rate_project_tonnes_yr'] *self.storage_new_df['storage_aors_existing']).sum()],
+            'total existing annual CO2 storage': [(self.storage_existing_df['inj_rate_project_tonnes_yr'] * self.storage_new_df['storage_aors_existing']).sum()],
             'total undeveloped annual CO2 storage': [(self.storage_new_df['inj_rate_project_tonnes_yr'] * self.storage_new_df['storage_aors_available']).sum()]
         }
 

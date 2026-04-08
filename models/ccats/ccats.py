@@ -30,38 +30,6 @@ and then calls :ref:`Module` to run the main CCATS processes. The file operates 
         e. After main CCATS model functions run, results are prepared and reported to the restart file in
            :meth:`restart.Restart.write_results`.
 
-           
-CCATS Dependencies
-__________________
-
-CCATS relies on the below list of Python libraries to run.
-
-* Libraries included with the default distribution or available via pip or conda:
-
-    * sys
-    * os
-    * io
-    * shutil
-    * pathlib
-    * logging
-    * argparse
-    * shutil
-    * pylint
-    * tabulate
-    * pylab
-    * itertools
-    * warnings
-    * pickle
-    * numpy
-    * pandas
-    * pyomo
-    * matplotlib
-    * folium (for mapping)
-    * xpress (if using the FICO Xpress solver)
-    
-* NEMS specific libraries:
-    * pyfiler1 - maintined by the NEMS Integration Team.
-
     
 CCATS Main: Input Files
 _______________________
@@ -93,7 +61,7 @@ import logging
 import argparse as ap
 
 ### Declare Cores
-os.environ['NUMEXPR_MAX_THREADS'] = '4' # intial amount of threads, overwritten in module.setup() based on user input
+os.environ['NUMEXPR_MAX_THREADS'] = '4'
 
 
 ### Setup Logging
@@ -228,6 +196,7 @@ def run_ccats(year, iteration, pyfiler1, cycle, scedes):
                year,
                pyfiler1,
                cycle,
+               iteration,
                scedes)
 
 
@@ -257,9 +226,11 @@ def run_ccats(year, iteration, pyfiler1, cycle, scedes):
 
 
     else: # Integrated Run
+        if ccats.debug_integrated_switch: # set the year for the run
+            year = ccats.debug_integrated_year
+        
         if year < ccats.year_start: # Before ccats Start Year
             temp_filename = main_directory + 'restart_CCATSo.unf'
-            #ccats.restart.write_results(temp_filename)
             logger.info('Returning Restart File before CCATS start year ' + str(year))
 
 

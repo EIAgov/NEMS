@@ -125,7 +125,6 @@ def fill_table_base_001(dfd, table_spec, table_id):
     z[32] = (
         (
             dfd["QBMAS"].loc[MNUMCR]
-            - dfd["QBMRF"].loc[MNUMCR]
             + dfd["CORNCD"].loc[3].loc[MNUMCR] * dfd["CFCORN"].iloc[0] / 1000000.0
             + dfd["BIMQTYCD"].loc[(slice(None), 11), :].sum()
             / 1000.0
@@ -235,7 +234,7 @@ def fill_table_base_001(dfd, table_spec, table_id):
 
     # Exports----------
     #    Petroleum and Other Liquids 8/
-    # T1(14,IY,IS)=(RFQEXCRD(MNUMPR,IY)*.001*CFCRDEXP(IY)+RFQEXPRDT(MNUMPR,IY)*CFEXPRD(IY) +ETHEXP(11,IY)/1000.*CFPET+BIODEXP(11,IY)/1000.*CFBIOD(IY))*RDAYS*.001
+    # T1(14,IY,IS)=(RFQEXCRD(MNUMPR,IY)*.001*CFCRDEXP(IY)+RFQEXPRDT(MNUMPR,IY)*CFEXPRD(IY) +ETHEXP(11,IY)/1000.*CFPET+BIODEXP(11,IY)/1000.*CFBIOD(IY)+RENEWDEXP(11,IY)/1000.*CFDSQT(IY))*RDAYS*.001
 
     z[14] = (
         (
@@ -243,6 +242,7 @@ def fill_table_base_001(dfd, table_spec, table_id):
             + dfd["RFQEXPRDT"].loc[MNUMPR] * dfd["CFEXPRD"]
             + dfd["ETHEXP"].loc[MNUMCR] / 1000.0 * dfd["CFPET"].iloc[0]
             + dfd["BIODEXP"].loc[MNUMCR] / 1000.0 * dfd["CFBIOD"]
+            + dfd["RENEWDEXP"].loc[MNUMCR] / 1000.0 * dfd["CFDSQT"]
         )
         * dfd["RDAYS_rwpre"]
         * dfd["TRIL_TO_QUAD_rwpre"]
@@ -306,7 +306,6 @@ def fill_table_base_001(dfd, table_spec, table_id):
 
     z[33] = (
         dfd["QBMAS"].loc[11] / 1000
-        - dfd["QBMRF"].loc[11] / 1000
         + dfd["CORNCD"].loc[3].loc[11] * dfd["CFCORN"].iloc[0] / 1000000000.0
         - dfd["RFBIOBUTECD"].loc[MNUMCR] * RDAYS * dfd["CFBIOBUTE"] / 1000000.0
         - dfd["ETHANOL_PARAM_rwpre"]
@@ -351,7 +350,7 @@ def fill_table_base_001(dfd, table_spec, table_id):
     ) * dfd["TRIL_TO_QUAD_rwpre"] - dfd["WNCMSEL"].loc[MNUMCR]
     #    Other 13/
     # formula_F = T1(24,IY,IS)=QEIEL(11,IY)+WNCMSEL(IY,11)+QHYTR(11,IY)
-    z[24] = (dfd["QEIEL"].loc[MNUMCR] + dfd["QHYTR"].loc[MNUMCR]) * dfd[
+    z[24] = (dfd["QEIEL"].loc[MNUMCR] + dfd["QHYTR"].loc[MNUMCR] + dfd["BYPRDH2IN"].loc[MNUMCR]) * dfd[
         "TRIL_TO_QUAD_rwpre"
     ] + dfd["WNCMSEL"].loc[MNUMCR]
 

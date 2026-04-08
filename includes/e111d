@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/e111d,v 1.10 2015/10/21 10:16:59 XJ2 Exp $
 
       REAL*4 SAVE111RES(MNUMCR,MNUMYR)                ! Residential sector savings in kilowatthours

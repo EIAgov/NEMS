@@ -7,7 +7,7 @@ import shutil, csv, os
 
 class NetworkDrive:
     def get_catg_drive_list(self,outmenu_file,user):
-        """Retrieve drive free space info of the drives listed in the outment file ($NEMS\scripts\setup\input\submit_outment.txt), and find
+        """Retrieve drive free space info of the drives listed in the outment file ($NEMS\\scripts\\setup\\input\\submit_outment.txt), and find
            the suggested drive and return lists of drives by category and dict of all drive info.
 
         Parameters

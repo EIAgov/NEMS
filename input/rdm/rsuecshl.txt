@@ -1,5 +1,5 @@
 ﻿FILE NAME:     RSUECSHL
-DATE MODIFIED: July 23, 2018
+DATE MODIFIED: September 2, 2025
 USED BY:       RSUECSHLREAD subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Shell-based modification to home UEC levels
 UNITS:         various
@@ -7,10 +7,10 @@ DIMENSION:     housing type, census division, equipment type
 SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
 ORGANIZATION OF DATA:
                Census divisions:  (1) New England, (2) Middle Atlantic, (3) East North Central, (4) West North Central, (5) South Atlantic, (6) East South Central, (7) West South Central, (8) Mountain, (9) Pacific
-               Columns represent housing type; 9 blocks of 11 heating technologies for each census division (followed by 1 block of central AC for each CD)
-               Next section is baseload for each of the 11 heating classes and 5 cooling classes (RTCLEQCL) in RSCLASS.TXT
-SOURCES:       Navigant Consulting, Fourth DRAFT EIA - Technology Forecast Updates – Residential and Commercial Building Technologies
-COMMENT:       Add census division labels to NEWHEATUEC/NEWCOOLUEC data and update equipment names to align with other input files (e.g., RSUEC, RSSTK, RSHTSHR)
+               Columns represent housing type; 9 blocks of 11 space heating technologies for each census division (followed by 1 block of central AC for each CD)
+               Next section is base efficiency for new, standard equipment in RECSyear+1 for each of the 11 space heating classes and 5 space cooling classes (RTCLEQCL) in RSCLASS.TXT
+SOURCES:       Guidehouse and Leidos, EIA - Technology Forecast Updates – Residential and Commercial Building Technologies – Reference Case, March, 2023 (https://www.eia.gov/analysis/studies/buildings/equipcosts/)
+COMMENT:       Revise BASELOAD based on latest major end-use technology contract report; remove kerosene placeholders
 
 
 New Home service demand for tech choice computation by technolgy, census division, and housing type (NEWHEATUEC; NEWCOOLUEC)
@@ -22,7 +22,6 @@ Family          family          Home        Division    Type
 70.20000	21.80000	104.40000	1	Air-Source Heat Pumps (heating)
 70.20000	21.80000	104.40000	1	Natural Gas Furnaces
 68.00000	20.20000	73.10000	1	Natural Gas Boilers & Other
-70.20000	21.80000	104.40000	1	Kerosene Furnaces (unused placeholder)
 70.20000	21.80000	104.40000	1	Propane Furnaces & Other
 70.20000	21.80000	104.40000	1	Distillate Fuel Oil & Kerosene Furnaces
 68.00000	20.20000	73.10000	1	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -33,7 +32,6 @@ Family          family          Home        Division    Type
 74.30000	15.30000	75.30000	2	Air-Source Heat Pumps (heating)
 74.30000	15.30000	75.30000	2	Natural Gas Furnaces
 72.10000	14.00000	52.70000	2	Natural Gas Boilers & Other
-74.30000	15.30000	75.30000	2	Kerosene Furnaces (unused placeholder)
 74.30000	15.30000	75.30000	2	Propane Furnaces & Other
 74.30000	15.30000	75.30000	2	Distillate Fuel Oil & Kerosene Furnaces
 72.10000	14.00000	52.70000	2	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -44,7 +42,6 @@ Family          family          Home        Division    Type
 78.80000	18.50000	86.40000	3	Air-Source Heat Pumps (heating)
 78.80000	18.50000	86.40000	3	Natural Gas Furnaces
 76.70000	17.20000	60.50000	3	Natural Gas Boilers & Other
-78.80000	18.50000	86.40000	3	Kerosene Furnaces (unused placeholder)
 78.80000	18.50000	86.40000	3	Propane Furnaces & Other
 78.80000	18.50000	86.40000	3	Distillate Fuel Oil & Kerosene Furnaces
 76.70000	17.20000	60.50000	3	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -55,7 +52,6 @@ Family          family          Home        Division    Type
 77.10000	20.40000	101.70000	4	Air-Source Heat Pumps (heating)
 77.10000	20.40000	101.70000	4	Natural Gas Furnaces
 74.70000	18.80000	71.20000	4	Natural Gas Boilers & Other
-77.10000	20.40000	101.70000	4	Kerosene Furnaces (unused placeholder)
 77.10000	20.40000	101.70000	4	Propane Furnaces & Other
 77.10000	20.40000	101.70000	4	Distillate Fuel Oil & Kerosene Furnaces
 74.70000	18.80000	71.20000	4	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -66,7 +62,6 @@ Family          family          Home        Division    Type
 31.70000	2.70000	30.10000	5	Air-Source Heat Pumps (heating)
 31.70000	2.70000	30.10000	5	Natural Gas Furnaces
 28.30000	3.40000	21.10000	5	Natural Gas Boilers & Other
-30.30000	2.70000	30.10000	5	Kerosene Furnaces (unused placeholder)
 31.70000	2.70000	30.10000	5	Propane Furnaces & Other
 30.30000	2.70000	30.10000	5	Distillate Fuel Oil & Kerosene Furnaces
 28.30000	3.40000	21.10000	5	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -77,7 +72,6 @@ Family          family          Home        Division    Type
 42.80000	5.60000	42.90000	6	Air-Source Heat Pumps (heating)
 42.80000	5.60000	42.90000	6	Natural Gas Furnaces
 38.00000	5.20000	30.00000	6	Natural Gas Boilers & Other
-42.80000	5.60000	42.90000	6	Kerosene Furnaces (unused placeholder)
 42.80000	5.60000	42.90000	6	Propane Furnaces & Other
 42.80000	5.60000	42.90000	6	Distillate Fuel Oil & Kerosene Furnaces
 38.00000	5.20000	30.00000	6	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -88,7 +82,6 @@ Family          family          Home        Division    Type
 33.90000	2.70000	25.60000	7	Air-Source Heat Pumps (heating)
 33.90000	2.70000	25.60000	7	Natural Gas Furnaces
 30.60000	2.50000	17.90000	7	Natural Gas Boilers & Other
-33.90000	2.70000	25.60000	7	Kerosene Furnaces (unused placeholder)
 33.90000	2.70000	25.60000	7	Propane Furnaces & Other
 33.90000	2.70000	25.60000	7	Distillate Fuel Oil & Kerosene Furnaces
 30.60000	2.50000	17.90000	7	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -99,7 +92,6 @@ Family          family          Home        Division    Type
 54.70000	12.90000	59.50000	8	Air-Source Heat Pumps (heating)
 54.70000	12.90000	58.00000	8	Natural Gas Furnaces
 47.90000	12.80000	40.00000	8	Natural Gas Boilers & Other
-54.70000	12.90000	58.00000	8	Kerosene Furnaces (unused placeholder)
 54.70000	12.90000	58.00000	8	Propane Furnaces & Other
 54.70000	12.90000	58.00000	8	Distillate Fuel Oil & Kerosene Furnaces
 47.90000	12.80000	40.00000	8	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -110,7 +102,6 @@ Family          family          Home        Division    Type
 31.90000	1.90000	29.20000	9	Air-Source Heat Pumps (heating)
 31.90000	1.90000	28.40000	9	Natural Gas Furnaces
 28.50000	1.70000	19.60000	9	Natural Gas Boilers & Other
-31.90000	1.90000	28.40000	9	Kerosene Furnaces (unused placeholder)
 31.90000	1.90000	28.40000	9	Propane Furnaces & Other
 31.90000	1.90000	28.40000	9	Distillate Fuel Oil & Kerosene Furnaces
 28.50000	1.70000	19.60000	9	Distillate Fuel Oil & Kerosene Boilers & Other
@@ -127,20 +118,19 @@ Family          family          Home        Division    Type
 23.40000	18.90000	41.80000	8	Central Air Conditioners
 46.10000	19.70000	18.50000	9	Central Air Conditioners
 
-Baseload by 11 heating and 5 cooling equipment classes (BASELOAD)
-0.980	'ELEC_RAD'
-2.163	'ELEC_HP'
-0.800	'NG_FA'
-0.800	'NG_RAD'
-0.800	'KERO_FA'
-0.800	'LPG_FA'
-0.800	'DIST_FA'
-0.800	'DIST_RAD'
-0.650	'WOOD_HT'
-3.000	'GEO_HP'
-1.300	'NG_HP'
-2.719	'ROOM_AIR'
-3.332	'CENT_AIR'
-3.508	'ELEC_HP'
-12.30	'GEO_HP'
-0.600	'NG_HP'
+Base efficiency of new, federal standard equipment by 11 space heating and 5 space cooling classes (BASELOAD)
+1.00	'ELEC_RAD'
+2.40	'ELEC_HP'
+0.80	'NG_FA'
+0.84	'NG_RAD'
+0.80	'LPG_FA'
+0.83	'DIST_FA'
+0.86	'DIST_RAD'
+0.71	'WOOD_HT'
+3.20	'GEO_HP'
+1.30	'NG_HP'
+3.19	'ROOM_AIR'
+3.81	'CENT_AIR'
+4.10	'ELEC_HP'
+14.10	'GEO_HP'
+0.70	'NG_HP'

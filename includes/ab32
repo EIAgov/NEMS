@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/ab32,v 1.8 2016/09/26 16:00:13 xj2 Exp $
 ! California AB32 cap and trade variables
 real ab_covd_em_ind(mnumyr) ! Covered CO2 emissions, industrial, excl refining    (tonnes Ceq)

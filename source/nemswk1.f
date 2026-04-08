@@ -1,39 +1,3 @@
-! $Header: m:/default/source/RCS/nemswk1.f,v 1.54 2019/10/01 20:31:41 pkc Exp $
-      subroutine wk1init
-!      use fm
-      implicit none
-! this routine reads a file containing various wk1 codes for
-! various record types.  It must be called before the other routines
-! here get called.  next open the file. then call readrng to read the
-! spreadsheet.  then call getrngi and getrngr to move the data from
-! ranges to arrays in your code.
-      include 'wk1block'
-
-      LOGICAL NEW
-      CHARACTER*18 FNAME
-      integer funit
-	  
-	  INTEGER	   I
-	  INTEGER      FILE_MGR
-	  EXTERNAL     FILE_MGR
-
-write(*,*) 'Claire test -inside wk1init(), 1.before call FILE_MGR()'
-!  open worksheet record-codes file using file manager; read it in.
-      NEW=.FALSE.
-      FNAME='CODES123'
-      funit = FILE_MGR('O',FNAME,NEW)
-write(*,*) 'Claire test -inside wk1init(), 2.after call FILE_MGR()'
-5     read(funit,'(i3,1x,a9,1x,a26)',end=6) I,record(I),recnam(I)
-      goto 5
-6     continue
-
-!  close file
-      funit = FILE_MGR('C',FNAME,NEW)
-write(*,*) 'Claire test -inside wk1init(), 3.close FILE_MGR()'
-      return
-      end
-
-! -----------------------------------------------------------
       subroutine getrngi(namedin,Vname,ix,iy,iz)
       implicit none
 ! loads integer*2 array Vname from spreadsheet range NAMEDIN with ix rows and iy columns and iz groups

@@ -154,7 +154,7 @@ class CCATS_History:
         self.logger.info('Zero out History')
         self.zero_out_history()
 
-        #Update history
+        # Update history
         self.logger.info('Update History')
         self.update_history()
         
@@ -239,7 +239,7 @@ class CCATS_History:
         temp_supply_reg.index.names = self.parent.rest_co2_sup_out.index.names
         self.parent.rest_co2_sup_out_r.update(temp_supply_reg)
 
-        #CO2 EOR
+        # CO2 EOR
         self.co2_eor_hist_div['co2_seq_type'] = 1
         self.co2_eor_hist_reg['co2_seq_type'] = 1
 

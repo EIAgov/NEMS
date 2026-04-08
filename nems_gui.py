@@ -4,7 +4,7 @@ Created on Apr 25 2023
 
 @author: Claire Su
 """
-import os, subprocess, csv
+import os, shutil, subprocess, csv
 from tkinter import Tk, Label, Listbox, LabelFrame, Button, Entry, StringVar, IntVar, Radiobutton, Checkbutton
 from tkinter import N, E, S, W, NE, NW, SE, SW
 from tkinter import ttk
@@ -31,7 +31,7 @@ class NEMSApp():
         self.user = os.environ['USERNAME'].lower()
         self.root_script_dir = os.path.join(os.getcwd(),'scripts')
         self.root_scedes_dir = os.path.join(os.getcwd(),'scedes')
-        self.scedes = (os.path.join(self.root_scedes_dir,'scedes.ref2025')).replace('\\', '/')
+        self.scedes = (os.path.join(self.root_scedes_dir,'scedes.cb2026.csv')).replace('\\', '/')
         self.outdir = baseout
         self.drive_list = drive_list
         self.NEMSPYENV = os.environ['NEMSPYENV']
@@ -251,10 +251,14 @@ class NEMSApp():
         key = split.pop()  # Datekey
         scen = split.pop()  # Scenairo
 
-        # Check if run is on nem7, nem8, nem9, or nem10
-        for num in range(7, 11):
-            nem = os.path.abspath(f"\\\\nem{num}.eia.doe.gov\\workdir\\{scen}\\{key}")
-            if os.path.isdir(nem):  # End loop if path exists
+        # GNM TODO pull hostnames directly from AD using ldap3 module (?)
+        NEMS_HOSTS = [
+            'NEM7', 'NEM8', 'NEM9', 'NEM10',
+            'TSTNEM1', 'TSTNEM2', 'TSTNEM3', 'ashtstnemvir003'
+        ]
+        for i, host in enumerate(NEMS_HOSTS):
+            nem = os.path.abspath(f"\\\\{host}.eia.doe.gov\\workdir\\{scen}\\{key}")
+            if os.path.isdir(nem):
                 paths.append(nem)
                 break
 
@@ -266,7 +270,7 @@ class NEMSApp():
                     paths.append(ppath)
 
             # Allow integration to stop any run regardless of user who initiated it
-            integration = ["GOD", "dne", "rcs", "bto", "mc6", "jid", "ark", "djs", "jmw"]
+            integration = ['ark', 'jmw', 'kcu', 'syk']
 
             # Get user that launched run
             with open(os.path.join(paths[0], "launched.from"), mode="r") as file:
@@ -327,6 +331,26 @@ class NEMSApp():
                                                   title="NEMS: Select your output directory")
         self.lbl_outdir.insert(0,self.filefolder)
 
+    def check_and_copy_user_custom_scedes_file(self, NEMS_scedes_dir, scenario_dir, scenario_filename):
+        """
+        Copy over the user custom path scedes in $NEMS/scedes folder and print the message.
+        If user already selects a scedes file exists in $NEMS/scedes, no copy action.
+
+        Parameters
+        ----------
+        NEMS_scedes_dir : string
+            the $NEMS/scedes path
+        scenario_dir : string
+            the user custom directory
+        scenario_filename : string
+            the user scenario filename. eg. scedes.ref2025
+        """
+        user_custom_scedes_source = os.path.join(scenario_dir, scenario_filename)
+        uscedes = os.path.join(NEMS_scedes_dir, scenario_filename)
+        if user_custom_scedes_source != uscedes:
+            print(f'The user scenario descriptor file does not exist in the $NEMS/scedes folder, copy {user_custom_scedes_source} over')
+            shutil.copy(user_custom_scedes_source,uscedes)
+
     def run_selection(self):
         '''
         The method sends work to nems_submit.py. It gets invoked by validate_arg(), collects the info nems_submit.py requires, 
@@ -339,10 +363,15 @@ class NEMSApp():
         '''
         # parse the scedes file path to get the senario
         scenario_dir = os.path.dirname(self.lbl_scedes.get().strip()).replace('/','\\')
-        filename,scenario = os.path.splitext(self.lbl_scedes.get().strip())
+        filename,ext = os.path.splitext(self.lbl_scedes.get().strip())
+        filename, scenario = os.path.splitext(filename)
         scenario = scenario[1:]
+        print(scenario)
+
         
         scpt_list = [f'cd {scenario_dir}']
+
+        #scpt_list = [f'cd {self.root_scedes_dir}']
 
         # for debug, clean up cmd settings
         #cmd_cleanup=r'start /i "%windir%\explorer.exe" "%windir%\system32\cmd.exe"'

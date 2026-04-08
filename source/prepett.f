@@ -79,15 +79,9 @@
          MXIMPF(MNUMYR,MNUMNR),XTEXDF(MNUMYR,MNUMNR), &
          MXEXPF(MNUMYR,MNUMNR),XTEXMF(MNUMYR,MNUMNR)
       REAL SPCANRGN,SPNEMS,SPRHS,SPPKRHS,SPCF,SPDOLL,SPMILLS
-      REAL TSUMCAP,TDMWH,TDMW,TCFC,TFOR, &
-         CSSUMCAP(ECP$CS2),CSDMWH(ECP$CS2),CSDMW(ECP$CS2), &
-         CSCFC(ECP$CS2),CSFOR(ECP$CS2)
-      INTEGER*4 TNUMRGS,TRGN(ECP$CS3),TMODYR,TPRJYR,TLEAD,PRJNUM, &
-         CSNUMRGS(ECP$CS2),CSRGN(ECP$CS2,ECP$CS3), &
-         CSMODYR(ECP$CS2),CSPRJYR(ECP$CS2),CSLEAD(ECP$CS2)
       INTEGER SPSTEP,SPYR,NEWSYR,SYR,EYR,OLDYR,MXCSYR,B1,B2
       INTEGER IRG,JYEAR(MNUMYR),JYR,NYR,ISP,YR,STRTYR,ENDYEAR 
-      INTEGER I_CNTL,UF_CNSR,UF_RCNSR,UF_CAN,IYR,CS_SW,UF_CST,CSTRGN
+      INTEGER I_CNTL,UF_CNSR,UF_RCNSR,IYR,CS_SW,UF_CST,CSTRGN
       INTEGER I,J,K,Y,L,JRG,IRGEX,IRGIM,IRECL,IREC,IFTAB
       INTEGER RGIMP,RGEXP,SEASN,ICOUNT,YI,YE,INTRG1,INTRG2,USECODE,PHOUTCODE,DIRSW
       INTEGER  NUMEXPCNS(ETT_D_MSP,MNUMNR,MNUMYR), &
@@ -100,7 +94,7 @@
       CHARACTER*5 RECTYPE
       CHARACTER*1 SN
       CHARACTER*2 S
-      CHARACTER*26 TPRJNAME,CSPRJNAME(ECP$CS2),IRGIMDESC,IRGEXDESC
+      CHARACTER*26 IRGIMDESC,IRGEXDESC
       CHARACTER*40 IMPRGDESC,EXPRGDESC,FTYPE,SOURCE
       CHARACTER*18 TPROV,CSPROV(ECP$CS2)
 !
@@ -179,16 +173,8 @@
       NEW=.TRUE.
       FILENM='LDSMRPT'
       IMSG=FILE_MGR('O',FILENM,NEW)  !Open LDSM REPORT FILE
-      NEW=.FALSE.
-      FILENM='LDSMDAF'
-      IODB=FILE_MGR('O',FILENM,NEW)  !Open DAF-LSR-DB
-      NEW=.FALSE.
-!      FILENM='LDSMCRS'
-!      IOCR=FILE_MGR('O',FILENM,NEW)  !Open COMMERCIAL RESTART FILE
-!      FILENM='LDSMRRS'
-!      IORR=FILE_MGR('O',FILENM,NEW)  !Open RESIDENTIAL RESTART FILE
 !
-      CALL DSMRST(WHOOPS) ! Read structure file and DSM option database
+      CALL DSMRST(WHOOPS) ! Read structure file 
       IF(WHOOPS) THEN
          WRITE(6,*)'<))) Data passed by LDSM may be CORRUPTED'
       ENDIF
@@ -252,32 +238,6 @@
         DO 9000 I=1,MNUMYR
 
              PIPEPCT(I)=1.0
-
-        IF (USW_XP .GT.0) THEN
-!  TDLS FACTORS FOR CANADA
-             TDLS(I,1)=0.0
-             TDLS(I,2)=0.0
-             TDLS(I,3)=0.0
-             TDLS(I,4)=0.0
-             TDLS(I,5)=0.0
-             TDLS(I,6)=0.0
-             TDLS(I,7)=0.0
-             TDLS(I,8)=0.0
-             TDLS(I,9)=0.0
-             TDLS(I,10)=0.0
-             TDLS(I,11)=0.0
-             TDLS(I,12)=0.0
-             TDLS(I,13)=0.0
-             TDLS(I,14)=0.0
-             TDLS(I,15)=0.0
-             TDLS(I,16)=0.0
-             TDLS(I,17)=0.0
-             TDLS(I,18)=0.0
-             TDLS(I,19)=0.0
-             TDLS(I,20)=0.0
-             TDLS(I,21)=0.0
-             TDLS(I,22)=0.0
-        ENDIF
 
           DO 9008 J=1,MNUMNR
             XTDMMF(I,J)=0
@@ -418,90 +378,6 @@
              FRMVCST(I,J)=FRMVCST(I,J)*INFLAT(I) * 1000
           END DO
        END DO
-!
-!      READ AND STORE CANADIAN SUPPLY DATA FILE
-!
-
-       DO I=1,ECP$CS2
-         UCI$CAP(I)=0.0
-         UCI$MWH(I)=0.0
-         UCI$DMW(I)=0.0
-         UCI$CFC(I)=0.0
-         UCI$FOR(I)=0.0
-         UCI$RGN(I)=0
-         MODYR(I)=0
-         PROJYR(I)=0
-         LEAD(I)=0
-         PNAME(I)='           '
-         PROVINCE(I)='        '
-         DO J=1,ECP$CS3
-          UCI$RGS(I,J)=0
-         END DO
-       END DO
-
-       IF ( USW_CANACC .GT. 0 ) THEN
-
-         NEW=.FALSE.
-         FILENM='CANSPLY'
-         UF_CAN=FILE_MGR('O',FILENM,NEW)
-         I = 0
-         SPCANRGN = 0.0
-         DO WHILE (SPCANRGN .LT. 99.0)
-            I = I + 1
-            READ(UF_CAN,*,END=799)SPCANRGN,SPNEMS,SPSTEP,SPYR,SPRHS, &
-             SPPKRHS,SPCF,SPDOLL,SPMILLS
-890       FORMAT(I4,1X,2(F3.0,1X),I4,1X,I4,1X,5(F8.4,1X))
-
-           IF (UNRGNS.EQ.13) THEN
-             SPCANRGN = SPCANRGN+9
-           ENDIF
-          
-           IF (SPNEMS .GT. 0.0) THEN
-             YR=SPYR-(USYEAR(1)-1)
-             FMW(YR,SPSTEP,SPNEMS)=SPRHS
-             PMW(YR,SPSTEP,SPNEMS)=SPPKRHS
-             CF (YR,SPSTEP,SPNEMS)=SPCF
-             CST(YR,SPSTEP,SPNEMS)=SPMILLS
-             CRG(YR,SPSTEP,SPNEMS)=SPCANRGN
-           END IF
-         END DO
-
-          WRITE(UF_PETT,*)'New Canadian Supply File'
-          PRJNUM=0
-          READ(UF_CAN,*)DUMMY
-          WRITE(UF_PETT,*)DUMMY
-
-          DO 9151 I=1,ECP$CS2
-
-            READ(UF_CAN,889,END=799)TPRJNAME,TPROV,TSUMCAP,TLEAD,TMODYR, &
-               TPRJYR,TCFC,TDMW,TDMWH,TFOR,TNUMRGS,(TRGN(J),J=1,5)
-889           FORMAT(1X,A22,A11,1X,F6.0,7X,I2,5X,I4,5X,I4,4X,F5.3, &
-               3X,F6.0,1X,F8.3,4X,F5.3,8X,I1,5(7X,I2))
-             
-
-          PRJNUM=PRJNUM+1
-          UCI$CAP(PRJNUM)=TSUMCAP
-          UCI$MWH(PRJNUM)=TDMWH
-          UCI$DMW(PRJNUM)=TDMW
-          UCI$CFC(PRJNUM)=TCFC
-          UCI$FOR(PRJNUM)=TFOR
-          UCI$RGN(PRJNUM)=TNUMRGS
-          MODYR(PRJNUM)=TMODYR
-          PROJYR(PRJNUM)=TPRJYR
-          LEAD(PRJNUM)=TLEAD
-          PNAME(PRJNUM)=TPRJNAME
-          PROVINCE(PRJNUM)=TPROV
-          DO J=1,ECP$CS3
-            UCI$RGS(PRJNUM,J)=TRGN(J)
-          END DO
-
-9151      CONTINUE
-
-799      CONTINUE
-
-       ENDIF                   ! end if allowing acceleration of canadian projects
-
-
 
 
       call sqlite3_open( 'emm_db/NEMS_INPUT.db', db )
@@ -975,11 +851,6 @@
 
 !     ADJUSTMENT FACTORS FOR T AND D LOSSES OVER TIME
 
-      if (USW_XP .gt. 0) then         !Canada
-         do I=1,MNUMYR
-           ULOSSADJ(I) = 0.900
-         enddo
-      else                            !NEMS
          ULOSSADJ(1) = 1.000
          ULOSSADJ(2) = 1.000
          ULOSSADJ(3) = 1.000
@@ -1010,16 +881,15 @@
          ULOSSADJ(28) = 1.000
          ULOSSADJ(29) = 1.000
          ULOSSADJ(30) = 1.000
-         ULOSSADJ(31) = 1.000
-         ULOSSADJ(32) = 0.990
-         ULOSSADJ(33) = 0.980
-         ULOSSADJ(34) = 0.970
-         ULOSSADJ(35) = 0.960
-         ULOSSADJ(36) = 0.950
+         ULOSSADJ(31) = 0.8      !recalibrate to match recent history
+         ULOSSADJ(32) = 0.8
+         ULOSSADJ(33) = 0.8
+         ULOSSADJ(34) = 0.8
+         ULOSSADJ(35) = 0.8
+         ULOSSADJ(36) = 0.8
        do I = 37,MNUMYR
          ULOSSADJ(I) = ULOSSADJ(36)
        end do
-      endif
 
 !  RECORD RESULTS IN THE NEW DEMAND FILE
 !
@@ -1060,14 +930,6 @@
              ENDIF
  8257  format(a,3I5,2(1x,F16.4))
             ENDDO
-
-            DO L=1,ECP_D_CIS
-               UCI$FMW(L,I)=FMW(J,L,I)
-               UCI$PMW(L,I)=PMW(J,L,I)
-               UCI$CF(L,I) = CF(J,L,I)
-               UCI$CST(L,I)=CST(J,L,I)
-               UCI$CRG(L,I)=CRG(J,L,I)
-            END DO
 
 !           Map to EFD Seasons
    
@@ -1196,31 +1058,6 @@
       WRITE(UF_PETT,125) 'CTIMPD - INTERNAT FIRM PWR IMPORTS (MM$)  ' , &
        (CAPIMPD(JYR,IRG), JYR = 1 , MNUMYR)
 
-
-        WRITE(UF_PETT,125)'CANADIAN SUPPLY - STEP 1                '
-        WRITE(UF_PETT,135)'UCI$FMW -CANADIAN RHS                  ', &
-         (FMW(J,1,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$PMW - CANADIAN PK RHS               ', &
-         (PMW(J,1,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$CF - CANADIAN CF                    ', &
-         (CF(J,1,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$CST - CANADIAN MILLS                ', &
-          (CST(J,1,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$CRG - CANADIAN REGION               ', &
-          (CRG(J,1,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,125)'CANADIAN SUPPLY - STEP 2                '
-        WRITE(UF_PETT,135)'UCI$FMW -CANADIAN RHS                  ', &
-         (FMW(J,2,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$PMW - CANADIAN PK RHS               ', &
-         (PMW(J,2,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$CF - CANADIAN CF                    ', &
-         (CF(J,2,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$CST - CANADIAN MILLS                ', &
-          (CST(J,2,IRG), J=1,MNUMYR)
-        WRITE(UF_PETT,135)'UCI$CRG - CANADIAN REGION               ', &
-          (CRG(J,2,IRG), J=1,MNUMYR)
-
-
         DO K = 1 , MNUMNR + EFD_D_PROV
           IF (FIRMTRADE(IRG,K,21) .NE. 0.0) THEN
             write(UF_PETT,145) ' FTRADE ',irg,k,(FIRMTRADE(IRG,k,IYR)/1000.0,IYR=16,31)
@@ -1240,8 +1077,6 @@
   145  FORMAT(A,2X,i4,i4,16(F12.2))
   152  FORMAT(a,2x,3i5,2(f12.2))
 
-        FILENM='CANSPLY'
-        UF_CAN=FILE_MGR('C',FILENM,NEW)
         FILENM='ETTIN'
         UF_RCNSR=FILE_MGR('C',FILENM,NEW)
         FILENM='ETTDEM'

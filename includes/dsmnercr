@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/dsmnercr,v 1.2 1999/12/19 20:11:59 DSA Exp $
 ! ===== (DSMNERCR) =====   ! updated
 ! NERCnam(MAXNRG) - NERC REGION NAMES

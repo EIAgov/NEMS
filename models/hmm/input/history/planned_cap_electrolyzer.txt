@@ -2,5 +2,17 @@
 ! Unit: Annual kg of hydrogen. Max theoretical assuming 8760 hours of production a year
 Composite Table:
 i_calYear    regNERC    prodTech    planned_cap
-2024         NYUP       PEM         2.84833e+07
+2023         FRCC       PEM         3.98182e+06
+2023         NYUP       PEM         199091
+2023         RMRG       PEM         199091
+2024         SRSE       PEM         6.37091e+06
+2025         MISC       PEM         44152.9
+2025         MISW       PEM         222982
+2026         BASN       PEM         3.504e+07
+2026         CASO       PEM         1.61159e+06
+2026         MISS       PEM         3.18545e+06
+2026         NWPP       PEM         1.60216e+06
+2026         NYUP       PEM         5.57455e+06
+2026         TRE        PEM         1.59273e+07
+2027         TRE        PEM         1.59273e+07
 ;

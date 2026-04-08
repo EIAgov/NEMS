@@ -18,7 +18,7 @@ and pass the arguments (see below).
 Three argument cases are supported:
     
     . $NEMS/scripts/commands.sh
-    submitpy="C:/python_environments/aeo2025_py311_D/Scripts/activate&python $NEMS/scripts/setup/src/nems_submit.py"
+    submitpy="C:/python_environments/nems_pyenv/Scripts/activate&python $NEMS/scripts/setup/src/nems_submit.py"
 
     cmd.exe /c "$submitpy"
     cmd.exe /c "$submitpy jog|par"
@@ -41,8 +41,7 @@ from datetime import datetime
 from network_drive import NetworkDrive
 from meson_exec import make_pyd_files
 from meson_exec import copy_pyd_to_pyfiler
-
-
+from scedes_processor import ScedesProcessor
 log_prefix = '[Setup Program]'
 
 USER = ""
@@ -69,7 +68,6 @@ def main(arg_list):
     -------
     None
     """
-    nemsh = "nemsone.shell"
     wpwd = os.getcwd()
 
     # ----------
@@ -87,7 +85,7 @@ def main(arg_list):
     #    OUTDIR = arg_list[1]
     #    USCEN = arg_list[2]
     
-    jobtype = "local"  # TODO: why not "queue" by default?
+    jobtype = "local"  # to consider public users' setting, use local instead of queue as default. The issue #1137 for entire design: https://git.eia.gov/oea/NEMS/-/issues/1137
     only_run_folder_checked = "0"  # default for the "only run folder" checkbox is "un-checked"
     if len(arg_list) == 4:
         jobtype = arg_list[3][:-1]
@@ -101,17 +99,14 @@ def main(arg_list):
     my_vars = ['USER', 'NEMS', 'NEMSJOBLOG', 'OSTYPE', 'PREPRO']
     bashvars = {k: os.getenv(k, "").replace('/', '\\') for k in my_vars}
     
-    global USER, NEMS_PATH, NEMS_SCPT_PATH  # TODO: better to avoid global ?
+    global USER, NEMS_PATH, NEMS_SCPT_PATH  # Set in global scope for easy problem troubleshoot
     USER = bashvars.get('USER')
     NEMS_PATH = bashvars.get('NEMS')
     NEMS_SCPT_PATH = os.path.join(NEMS_PATH, 'scripts')
-    NEMSJOBLOG =  "Y:\RabbitMQ"
-
-
+    NEMSJOBLOG =  "Y:\\RabbitMQ"
     check_current_directory(wpwd, NEMS_SCPT_PATH)
-    
-    # prepare actualfile and shellfile list for keys.sed later
-    actualfile, shellfile = make_actualfile_list(PREPRO, nemsh)
+   
+    emmprepro = make_actualfile_list(PREPRO)
 
     # select user scedes file
     USCEN = choose_scedes(arg_list)
@@ -130,18 +125,13 @@ def main(arg_list):
     
     print(f"{log_prefix}")
     
-    # copy shell files content over to actual files
-    #print(shellfile)
-    for i in range(0,len(shellfile)):
-        if os.path.exists(shellfile[i]):
-            shutil.copy(shellfile[i], actualfile[i])
-
-    # Invoke string substitutions in shell files
     # The order of the substitutions establishes the precedence: 
-    # first value is used
-    # ???    3a) Set output directory first
-    make_keys_sed([OUTDIR,USCEN,DATE], mode)
-    uscedes = search_scedes_file(wpwd, USCEN, actualfile)
+    # checks to see if the scedes exists
+    uscedes = search_scedes_file(wpwd, USCEN)
+    #processes the scedes
+    sp = ScedesProcessor()
+    sp.run([uscedes,wpwd,USCEN,DATE])
+
 
     # ------------------------------------------------------------------
     # Make the pyd files. A value of 0 or 1 or 2 is required for 
@@ -156,21 +146,15 @@ def main(arg_list):
     make_pyd_flag, pyver = get_init_configs()
 
     if PREPRO == 'yes':
-        cur_workdir = os.getcwd()
-        os.chdir('../source')
-        print("[SETUP PREPRO] building .obj files")
-        subprocess.run("buildprepro.bat", shell = True)
-        print("[SETUP PREPRO] build .obj files complete")
-        os.chdir(cur_workdir)
+        pass
     else:
         make_pyd_files(make_pyd_flag, pyver, work_dir,uscedes)
 
-        # check for existence of pyfiler1 and pyfiler2 pyd files
+        # check for existence of pyfiler1 pyd files
         # exit if they don't exist
         temp = os.listdir(os.path.join(work_dir, "builddir"))
         check_pyd_1 = (len(fnmatch.filter(temp, "pyfiler1.*.pyd")) == 1)
-        check_pyd_2 = (len(fnmatch.filter(temp, "pyfiler2.*.pyd")) == 1)
-        if not (check_pyd_1 and check_pyd_2):
+        if not check_pyd_1:
             print("[SETUP ERROR]: Error building pyd files. Exiting Setup now.")
             os.sys.exit()
            
@@ -183,8 +167,10 @@ def main(arg_list):
     
     #if arg_list[0] == 'pre':
     if PREPRO == "yes":
-        # EMM preprocesser mode
-        prepro_run(mode, USCEN, DATE, OUTDIR, uscedes)
+        sys.path.append(NEMS_PATH)
+        os.add_dll_directory(NEMS_PATH)
+        import scripts.emm_preprocessor_setup as ems
+        ems.prepplt(OUTDIR, USCEN, NEMS_PATH,DATE, emmprepro)
     else:
         # jognems and parnems mode
         scpt = convert_to_py_path(pyver + '/scripts/activate&python ')
@@ -193,7 +179,7 @@ def main(arg_list):
         subprocess.run(scpt, shell=True)
 
 def get_init_configs():
-    """Read in $NEMS\scripts\setup\input\init_config.csv and return make_pyd_flag and Python verion path string.
+    """Read in $NEMS/scripts/setup/input/init_config.csv and return make_pyd_flag and Python verion path string.
 
     Args:
         NEMS_PATH (_str_): the directory path of NEMS source code folder.
@@ -215,7 +201,7 @@ def get_init_configs():
     
     return make_pyd_flag, pyver
 
-def make_actualfile_list(PREPRO, nemsh):
+def make_actualfile_list(PREPRO):
     """
     Make the actualfile list. Prepare for keys.sed copy filemgr, jcl, nems.sh etc. file based on jog/par or pre mode.
 
@@ -223,15 +209,11 @@ def make_actualfile_list(PREPRO, nemsh):
     ----------
     PREPRO : string
         yes/no flag to indicate if it's EMM preprocessor mode
-    nemsh : string
-        filename; e.g. "nemsone.shell"
 
     Returns
     -------
-    actualfile : list
-        list of actual files filemgr, jcl, moreopt etc. to apply for keys.sed
-    shellfile : list
-        list of shell files filemgr, jcl, moreopt etc. in $NEMS\scripts directory to use as a source for keys.sed
+    emmprepro : string
+        user input for prepplt or 2 for prepett.
     """
     # introduce a new variable emmprepro to identify normal NEMS run or EMM preprocessor switch
     emmprepro = ''
@@ -241,65 +223,11 @@ def make_actualfile_list(PREPRO, nemsh):
         # interact with user to choose prepplt or prepett to process
         emmprepro = interact_prepro()
     
-    # assemble shellfile and actualfile lists
-    shellfile = []
-    actualfile = []
-    shell_list = ['filemgr.shell', 'moreopt.shell', nemsh, emmprepro+'.shell']
-    actual_list = ['FILELIST','MOREOPT','nems.sh']
-
-    # create shellfile and makefile lists up to regular NEMS run or EMM preprocessor
-    # go execute parnems or jognems if PREPRO is empty or 'no'. Otherwise, run EMM preprocessor:
-    if PREPRO == 'no':
-        for i in range(0,3):
-            shellfile.append(os.path.join(NEMS_SCPT_PATH,shell_list[i]))
-            actualfile.append(actual_list[i])
-    else:
-        print(f'{log_prefix}This will create the NEMS script (nems.sh) from {os.path.join(NEMS_SCPT_PATH,shell_list[-1])}')
-        # assign actualfile=["$NEMS/scripts/filemgr.shell","$NEMS/scripts/$prepro.shell"], and actualfile=["FILELIST","nems.sh"]
-        shellfile.append(os.path.join(NEMS_SCPT_PATH,shell_list[0]))
-        shellfile.append(os.path.join(NEMS_SCPT_PATH,shell_list[-1]))
-        actualfile.append(actual_list[0])
-        actualfile.append(actual_list[-1])
-    
-    return actualfile, shellfile
+ 
+    return emmprepro
 
 
-def prepro_run(mode, USCEN, DATE, OUTDIR, uscedes):
-    """
-    Generate a prepro nems.sh with shell command to user scenario, output directory et. info,
-    and log info in a launch.from text file. Execute the nems.sh and save the excution result in nems.out.sh
 
-    Parameters
-    ----------
-    mode : string
-        the user chosen mode of the run. The value is either par (parnems), jog (jognems), or pre (EMM preprocessor).
-    USCEN : string
-        the user scenario. eg. ref2024
-    DATE : string
-        datekey string. eg. d041923a
-    OUTDIR : string
-        the output directory path.
-    uscedes : string
-        the chosen scedes file path
-
-    Returns
-    -------
-    None
-    """
-    file = f"nems.sh.{USCEN}.{DATE}"
-    file_out = file.replace('nems.sh', 'nems.out.sh')
-    uscedes_text = uscedes.replace('\\', '/')
-    with open(file, 'a', encoding='utf-8') as f:
-        f.write(f'echo This run was set up using EMM prepro mode >> launched.from\n')
-        f.write(f'echo The common scedes file or run used to set up this run: >> launched.from\n')
-        f.write(f'echo The user scedes file to set up this run: {uscedes_text} >> launched.from\n')
-        f.write(f'echo OUTDIR={OUTDIR}/{USCEN}/{DATE} >> launched.from\n')
-    
-    scpt=f'sh {file} | tee {file_out}'
-    subprocess.run(scpt, shell=True)
-    print(f'{log_prefix}')
-    print(f'{log_prefix}')
-    print(f'{log_prefix}A copy of the messages above was saved in {file_out}')
 
 
 def prepare_setup_py(ls):
@@ -309,11 +237,7 @@ def prepare_setup_py(ls):
     Parameters
     ----------
     ls : list
-        setting info
-        example: ['nemsnew_j', 
-                  'd041423b', 
-                  'Q:/output/rcs', 
-                  'L:\\main\\rcs\\temp_testing\\scedes.nemsnew_j']
+        setting info.      example: ['nemsnew_j', 'd041423b', 'Q:/output/rcs', 'L:\\main\\rcs\\temp_testing\\scedes.nemsnew_j']
 
     Returns
     -------
@@ -338,41 +262,12 @@ def prepare_setup_py(ls):
     # need to explicitly assign copyem and COPYDIR here since the info
     # is needed before keys.sed file generated in the output directory
     os.environ['copyem'] = "1" # copyem=?COPYINP@
-    os.environ['COPYDIR'] = ".\input"
+    os.environ['COPYDIR'] = ".\\input"
 
 
-def make_keys_sed(ls, mode):
+def search_scedes_file(wpwd,USCEN):
     """
-    Write a key.sed file with OUTDIR, scenario, datekey inno. 
-    Also, if it is a parnems run, write EXBUILD=0 and CUTITR=0 
-
-    Parameters
-    ----------
-    ls : list
-        the content list of the info to write to the keys.sed file.
-    mode : string
-        the user chosen mode of the run. The value is either par (parnems), jog (jognems), or pre (EMM preprocessor).
-
-    Returns
-    -------
-    None
-    """
-    with open('keys.sed', 'w+') as f:
-        f.write(f'OUTDIR={ls[0]}\n')
-        f.write(f'SCEN={ls[1]}\n')
-        f.write(f'DATE={ls[2]}\n')
-        if mode != 'par':
-            f.write('EXBUILD=0\n')
-            f.write('CUTITR=0\n')
-
-
-# TODO: use more descriptive function name rather than "search_scedes_file"
-def search_scedes_file(wpwd,USCEN,actualfile):
-    """
-    The major function populates key.sed. It performs 4 tasks: 
-    Search for the user provided scedes file. Exit the program if scedes not found.
-    Run scenawak.exe and display the warnings if any.
-    Then run keyssed.exe to generate the rest content of the keys.sed file.
+    checks for the existence of the scede file
 
     Parameters
     ----------
@@ -380,15 +275,13 @@ def search_scedes_file(wpwd,USCEN,actualfile):
         the working directory
     USCEN : string
         the user scenario. eg. ref2024
-    actualfile : list
-        the list of actual files keyssed.exe shall apply
 
     Returns
     -------
     uscedes : string
         the user scenario which is going to use in a NEMS run
     """
-    uscedes = os.path.join(wpwd,'scedes.'+USCEN)
+    uscedes = os.path.join(wpwd,'scedes.'+USCEN+'.csv')
     
     if os.path.exists(uscedes) and not os.path.isdir(uscedes):
         print(f'{log_prefix}The user scenario descriptor file, {uscedes}, will be used.')
@@ -396,11 +289,6 @@ def search_scedes_file(wpwd,USCEN,actualfile):
             os.remove('warn')
         except OSError:
             pass        
-        
-        # run scenawak.exe
-        scpt = os.path.join(NEMS_SCPT_PATH,'scenawk.exe') + ' ' + uscedes + ' >>keys.sed'
-        subprocess.run(scpt, shell=True)
-        
         if os.path.exists('warn'):
             with open('warn','r') as f:
                 for line in f:
@@ -412,11 +300,7 @@ def search_scedes_file(wpwd,USCEN,actualfile):
     else:
         print(f'The optional user scenario descriptor file, {uscedes}, not found.')
         os.sys.exit()
-    
-    # apply string substitutions to the shell files to create the actual files
-    scpt = os.path.join(NEMS_SCPT_PATH,'keyssed.exe')+' keys.sed '
-    for i in range(0, len(actualfile)):
-        subprocess.run(scpt+actualfile[i], shell=True)
+
 
     return uscedes
 
@@ -638,28 +522,28 @@ def set_datecode(NEMSJOBLOG, USCEN):
     vers = 'a'
     curr_date = datetime.now().strftime('%m%d%y')
     DATE = 'd' + curr_date
-    
-    verfile = f"{NEMSJOBLOG}\@.verscomp.{USCEN}.{DATE}"
+
+    verfile = f"{NEMSJOBLOG}\\@.verscomp.{USCEN}.{DATE}"
     # for debug: verfile=r'M:\NEMSJobLog\@.verscomp.ref2023_solo.d040623'
-    
+
     # check and read the verfile. Calculate and update the next version char
     if os.path.exists(verfile):
         num_lines = sum(1 for line in open(verfile))
         vers = get_version_char(num_lines+1)
-    
+
     DATE += vers
     print(f'{log_prefix}')
     print(f'{log_prefix}     The unique name for this run will be {USCEN}/{DATE}')
     return DATE, verfile
 
 
-def get_version_char(num):
+def get_version_char(n):
     """
     Find the alphabetic character(s) corresponding to arg 'num'.
 
     Parameters
     ----------
-    num : integer
+    n : integer
         version numer
 
     Returns
@@ -667,14 +551,13 @@ def get_version_char(num):
     string
         version character(s). example: a, bh
     """
-    file = os.path.join(NEMS_SCPT_PATH, 'version.seq')
-    with open(file, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-    lookup = {s[0]: s[1].strip() for s in [i.split(" ") for i in lines]}
-    # example "lookup" dict: {"1": "a", "2": "b", ...}
-
-    # return the mapped char. return HAHAHA if no corresponding key value pair found
-    return lookup.get(str(num), 'HAHAHA')
+    
+    result = []
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        result.append(chr(65 + remainder))
+    return "".join(reversed(result)).lower()
+   
 
 
 def choose_scedes(arg_list):
@@ -693,15 +576,15 @@ def choose_scedes(arg_list):
     """
     #if len(arg_list) >= 3:
     if len(arg_list) >= 2:
+        print(arg_list)
         return arg_list[1]
-
     scedes_list = [i for i in os.listdir() if \
                    i.startswith("scedes") and not i.startswith("scedes.all.")]
     scedes_list.sort(key=os.path.getmtime, reverse=True)
-    
     if len(scedes_list) > 0:
         # grab the most recent scedes file as the default. Only take the file extension.
         # for example, scedes.ref2023 yields USCEN='ref2023'
+        print(scedes_list[0])
         USCEN = scedes_list[0].split('.')[1]
     else:
         msg = "No scedes file found. Please launch from the scedes folder. Exiting NEMS."
@@ -807,7 +690,7 @@ def choose_mode_info():
 
 def check_current_directory(curr_dir, scpt_dir):
     """
-    Make sure that the current working directory is not $NEMS\scripts. 
+    Make sure that the current working directory is not $NEMS/scripts. 
     Otherwise, print message and exit the program.
 
     Parameters
@@ -815,7 +698,7 @@ def check_current_directory(curr_dir, scpt_dir):
     curr_dir : string
         the current working directory path.
     scpt_dir : string
-        the $NEMS\scripts directory path.
+        the $NEMS/scripts directory path.
 
     Returns
     -------
@@ -830,7 +713,7 @@ def check_current_directory(curr_dir, scpt_dir):
 
 def convert_to_py_path(src):
     """
-    Convert shell script forward slash (/) to Python backslash (\) format. 
+    Convert shell script forward slash (/) to Python backslash (\\) format. 
     The Job queue runlog still uses /.
 
     Parameters
@@ -841,7 +724,7 @@ def convert_to_py_path(src):
     Returns
     -------
     src : string
-        the path in Python backslash (\) format
+        the path in Python backslash (\\) format
     """
     return src.replace('/', '\\')
 
@@ -850,9 +733,9 @@ if __name__ == '__main__':
     # Python passes the file name as the first argument. Since 
     # we do not need that info, remove it from the arument list.
     arg_list = sys.argv[1:]
-    
+
     # if a mode is not sepecified, ask user to choose a mode
     if len(arg_list) == 0:
         arg_list.append(choose_mode_info())
-    
+
     main(arg_list)

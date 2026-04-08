@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  ctus shared data
 
 ! need to include 'ogsmparm' for: max_reg,max_src,max_yr

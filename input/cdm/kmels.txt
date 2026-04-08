@@ -1,5 +1,5 @@
 FILE NAME:      KMELS
-DATE MODIFIED:  November 15, 2024
+DATE MODIFIED:  December 17, 2025
 
 USED BY:        Consumption subroutine of the National Energy Modeling System (NEMS) Commercial Sector Demand Module (CDM)
 DEFINITION:     Miscellaneous Electric Loads (MELs) inputs, including annual energy consumption (AEC) and indices
@@ -13,19 +13,23 @@ ORGANIZATION OF DATA:
                   Building Types:    (1) Assembly, (2) Education, (3) Food Sales, (4) Food Service, (5) Health, (6) Lodging, 
                                      (7) Office - Large, (8) Office - Small, (9) Mercantile & Service, (10) Warehouse, and (11) Other
                   End-Use Services:  (1) Heating, (2) Cooling, (3) Hot Water Heating, (4) Ventilation, (5) Cooking, (6) Lighting, 
-                                     (7) Refrigeration, (8) Office Equip-PCs, (9) Office Equip-NonPCs, (10) MELs
+                                     (7) Refrigeration, (8) Data Center Servers, (9) Office Equip-PCs and equipment, (10) MELs
 
-SOURCES:        Guidehouse, Inc. and Leidos, Inc.,"Analysis and Representation of Miscellaneous Electric Loads in NEMS," 
-		 prepared for the U.S. Energy Information Administration, April 2021 (eia.gov/analysis/studies/demand/miscelectric).
+SOURCES:        Guidehouse, Inc. and Leidos, Inc., "Analysis and Representation of Miscellaneous Electric Loads in NEMS" 
+		prepared for the U.S. Energy Information Administration, April 2021 (eia.gov/analysis/studies/demand/miscelectric).
                 Leidos and Navigant Consulting, Trends in Commercial Whole-Building Sensors and Controls, prepared for 
-                 U.S. Department of Energy, U.S. Energy Information Administration, October 2019
+                U.S. Department of Energy, U.S. Energy Information Administration, October 2019.
 		Energy Information Administration, 2018 Commercial Buildings Energy Consumption Survey, Public Use Data, available December 2022,
-                  (eia.gov/consumption/commercial/data/2018).
-COMMENT:        Reindexed arrays to new base year (updated from 2012 to 2018, based on new CBECS year); updated MarketPenetrationSC for lighting controls and HVAC controls; 
-                Updated MelsElQ and MarketPenetrationMels arrays for lab refrigerators/freezers and distribution transformers for the latest ENERGY STAR and federal standards, 
-				and OfficePCPenetration for the latest ENERGY STAR standard;
-				Updated and expanded multiplicative factors for on-premise data center consumption by building type.
-                
+                  (eia.gov/consumption/commercial/data/2018).	
+		Shehabi, A., Smith, S.J., Hubbard, A., Newkirk, A., Lei, N., Siddik, M.A.B., Holecek, B., Koomey, 
+                   J., Masanet, E., Sartor, D. 2024. 2024 United States Data Center Energy Usage Report. 
+                   Lawrence Berkeley National Laboratory, Berkeley, California. LBNL-2001637.
+                   Koomey, J., Das, T., Schmidt, Z. 2025. Electricity Demand Growth and Data Centers.
+                   Bipartisan Policy Center, Washington, DC.	   
+COMMENT:       Add side case placeholder and update dcf array to account for incremental energy intensity increases attributable to data center server operation; 
+                   Update DataCtrServPenetration AEC index using LBNL report; 
+                   Update xplicitmiscshr, combine office PCs and non-PC equipment, add DatServ end-use and DataCtrServPenetration, 
+		   remove Data Center Servers from MelsElQ and MarketPenetrationMels.
 
 
 
@@ -88,38 +92,35 @@ COMMENT:        Reindexed arrays to new base year (updated from 2012 to 2018, ba
 
 
 
-
-
-
-
-
-
-
-
-Multiplicative factors by end use to account for additional intensity of use in on-premise data centers, each row is a building type [dcf]
-Heat	Cool	HWH	Vent	Cook	Light	Refri	PCs	NonPCs	MELs	
-1.0	2.1	1.0	1.9	1.0	1.0	1.0	3.9	1.0	1.8	Assembly
-1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.5	1.0	1.0	Education
-1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	Food sales
+Multiplicative factors by end use to account for additional intensity of energy use in data centers and data center rooms. Each row is a building type (BT) [dcf]
+  Note: Standalone data centers not explicity modeled as a distinct BT;
+  implicitly represented as part of "Other" BT, with the incremental intensity increases attributable to on-premise data center rooms
+  reflected across remaining BTs
+  
+Heat	Cool	HWH	Vent	Cook	Light	Refri	DatServ	PCEquip	MELs	
+1.0	2.1	1.0	1.9	1.0	1.0	1.0	1.0	10.6	1.8	Assembly
+1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.4	1.0	Education
+1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.7	1.0	Food sales
 1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	Food service
-1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.5	1.0	1.0	Health care
-1.0	1.0	1.0	1.4	1.0	1.0	1.0	6.2	1.0	1.0	Lodging
-1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.6	1.0	1.0	Large office
-1.0	1.0	1.0	1.3	1.0	1.0	1.0	3.8	1.0	1.0	Small office
-1.0	1.2	1.0	1.4	1.0	1.0	1.0	1.0	1.0	1.3	Mercantile and Service
-1.0	1.4	1.0	2.6	1.0	1.0	1.0	3.7	1.0	1.4	Warehouse
-1.0	1.2	1.0	2.2	1.0	1.0	1.0	5.7	1.0	2.7	Other
+1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	Health care
+1.0	1.0	1.0	1.4	1.0	1.0	1.0	1.0	8.7	1.0	Lodging
+1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	Large office
+1.0	1.0	1.0	1.3	1.0	1.0	1.0	1.0	2.3	1.0	Small office
+1.0	1.2	1.0	1.4	1.0	1.0	1.0	1.0	2.6	1.3	Mercantile and Service
+1.0	1.4	1.0	2.6	1.0	1.0	1.0	1.0	5.2	1.4	Warehouse
+1.0	2.9	1.0	1.8	1.0	1.0	1.0	1.0	2.4	2.2	Other
+1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0	Side case placeholder
 
 Share of miscellaneous electric end uses explicitly accounted for in base year by building type [xplicitmiscshr]
-0.464	0.639	0.381	0.411	1.000	0.415	0.373	0.488	0.460	0.394	0.493
+0.772	0.846 	0.442 	0.448 	1.000 	0.517 	0.459 	0.558 	0.660 	0.732 	0.587
 
-Office Computing AEC Indices (CBECS year=1.000); used to modify end-use intensities from KINTENS.txt input file based on BaseYrPCShrofOffEqEUI in KPARM includes [OfficePCPenetration]
+Data center server AEC Indices (CBECS year=1.000); explicitly reported subset of computing end use; previously part of MELs [DataCtrServPenetration]
 2019	2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040	2041	2042	2043	2044	2045	2046	2047	2048	2049	2050
-0.997	0.995	0.993	0.994	0.997	0.999	1.001	1.005	1.009	1.014	1.018	1.022	1.027	1.033	1.040	1.048	1.057	1.067	1.079	1.091	1.104	1.118	1.133	1.148	1.163	1.179	1.195	1.211	1.228	1.245	1.261	1.278
+1.200	1.427	1.678	1.952	2.246	2.553	2.868	3.194	3.528	3.862	4.195	4.523	4.845	5.163	5.476	5.783	6.083	6.373	6.653	6.921	7.175	7.412	7.633	7.833	8.012	8.166	8.296	8.398	8.472	8.516	8.529	8.529
 
-Non-PC Office Equipment AEC Indices (CBECS year=1.000); used to modify end-use intensities from KINTENS.txt input file based on 1-BaseYrPCShrofOffEqEUI in KPARM includes [OfficeNonPCPenetration]
+Office Computing and equipment AEC Indices (CBECS year=1.000); used to modify end-use intensities from KINTENS.txt input file [OfficePCPenetration]
 2019	2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040	2041	2042	2043	2044	2045	2046	2047	2048	2049	2050
-0.970	0.944	0.922	0.905	0.891	0.878	0.867	0.859	0.852	0.847	0.842	0.837	0.833	0.829	0.826	0.824	0.822	0.820	0.818	0.815	0.812	0.808	0.802	0.795	0.787	0.777	0.764	0.750	0.733	0.713	0.691	0.666
+0.940	0.884	0.832	0.784	0.740	0.699	0.660	0.624	0.591	0.560	0.531	0.504	0.479	0.455	0.434	0.415	0.397	0.381	0.366	0.352	0.340	0.328	0.316	0.306	0.295	0.285	0.275	0.266	0.256	0.246	0.236	0.226
 
 Base-year MELs AEC (trillion Btu/sqft/yr) [MelsElQ]
 1487.15	Distribution Transformers
@@ -136,7 +137,6 @@ Base-year MELs AEC (trillion Btu/sqft/yr) [MelsElQ]
 26.00	Escalators
 570.13	IT Equipment
 26.35	Uninterruptible Power Supplies
-248.88	UPS-DataCenter
 2.76	Shredders 
 19.62	Private Branch Exchange
 13.43	Voice over IP
@@ -160,7 +160,6 @@ AEC Indices (CBECS year=1.000) [MarketPenetrationMels]
 1.254	1.273	1.287	1.298	1.304	1.307	1.306	1.301	1.293	1.281	1.266	1.247	1.226	1.201	1.173	1.142	1.108	1.072	1.033	0.991	0.947	0.900	0.851	0.800	0.747	0.691	0.634	0.575	0.514	0.452	0.388	0.322	Escalators
 1.030	1.063	1.099	1.140	1.185	1.232	1.279	1.329	1.381	1.434	1.487	1.539	1.592	1.646	1.702	1.759	1.816	1.875	1.935	1.995	2.056	2.116	2.177	2.237	2.297	2.355	2.412	2.468	2.522	2.575	2.625	2.674	IT Equipment
 1.364	1.403	1.439	1.472	1.502	1.529	1.554	1.576	1.596	1.613	1.628	1.641	1.652	1.660	1.667	1.672	1.675	1.676	1.675	1.673	1.670	1.665	1.659	1.652	1.643	1.634	1.623	1.612	1.600	1.587	1.574	1.560	Uninterruptible Power Supplies
-1.410	1.456	1.498	1.537	1.573	1.606	1.637	1.665	1.690	1.712	1.733	1.750	1.766	1.779	1.790	1.800	1.807	1.812	1.815	1.817	1.817	1.816	1.813	1.809	1.803	1.796	1.788	1.779	1.769	1.758	1.746	1.734	UPS-DataCenter
 0.833	0.807	0.781	0.755	0.729	0.703	0.677	0.651	0.626	0.601	0.576	0.552	0.528	0.506	0.483	0.462	0.442	0.422	0.404	0.387	0.370	0.356	0.342	0.330	0.320	0.311	0.304	0.299	0.295	0.294	0.294	0.297	Shredders 
 0.385	0.326	0.275	0.229	0.188	0.153	0.124	0.098	0.077	0.060	0.046	0.036	0.029	0.024	0.021	0.020	0.020	0.022	0.025	0.028	0.031	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	0.000	Private Branch Exchange
 1.201	1.210	1.214	1.214	1.211	1.204	1.194	1.181	1.165	1.147	1.127	1.105	1.082	1.057	1.032	1.006	0.979	0.952	0.925	0.898	0.873	0.848	0.824	0.801	0.781	0.762	0.746	0.732	0.721	0.713	0.708	0.707	Voice over IP

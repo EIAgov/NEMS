@@ -1,0 +1,45 @@
+[2025-07-16 15:13:42,221][ccats.py][<module>][INFO]  :: |All Model System Paths|
+[2025-07-16 15:13:42,222][ccats.py][<module>][INFO]  :: |['\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\docs\\EIA_themes', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\scripts\\setup\\src', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\scripts\\setup', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\scripts\\pyfiler', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\scripts', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\ccats', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\epm', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\ngpl', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\main', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\converge', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\reporter\\RW Tables', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models\\reporter', '\\\\nemsfs.eia.doe.gov\\L\\mid\\adc\\git\\NEMS\\models', 'C:\\python_environments\\aeo2025_py311_doc\\Scripts\\sphinx-build.exe', 'C:\\Python311\\python311.zip', 'C:\\Python311\\DLLs', 'C:\\Python311\\Lib', 'C:\\Python311', 'C:\\python_environments\\aeo2025_py311_doc', 'C:\\python_environments\\aeo2025_py311_doc\\Lib\\site-packages', 'C:\\python_environments\\aeo2025_py311_doc\\Lib\\site-packages\\win32', 'C:\\python_environments\\aeo2025_py311_doc\\Lib\\site-packages\\win32\\lib', 'C:\\python_environments\\aeo2025_py311_doc\\Lib\\site-packages\\Pythonwin', 'C:\\python_environments\\aeo2025_py311_doc\\Lib\\site-packages\\setuptools\\_vendor']|
+[2025-07-16 15:13:43,080][pyomo.core][construct][DEBUG]  :: |Constructing Set, name=Any, from data=None|
+[2025-07-16 15:13:43,084][pyomo.core][construct][DEBUG]  :: |Constructing Set, name=AnyWithNone, from data=None|
+[2025-07-16 15:13:43,085][pyomo.core][construct][DEBUG]  :: |Constructing Set, name=EmptySet, from data=None|
+[2025-07-16 15:13:43,087][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=Reals, from data=None|
+[2025-07-16 15:13:43,088][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,089][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=NonNegativeReals, from data=None|
+[2025-07-16 15:13:43,090][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,090][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=NonPositiveReals, from data=None|
+[2025-07-16 15:13:43,091][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,092][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=NegativeReals, from data=None|
+[2025-07-16 15:13:43,093][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,094][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=PositiveReals, from data=None|
+[2025-07-16 15:13:43,095][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,096][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=Integers, from data=None|
+[2025-07-16 15:13:43,097][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,098][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=NonNegativeIntegers, from data=None|
+[2025-07-16 15:13:43,099][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,099][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=NonPositiveIntegers, from data=None|
+[2025-07-16 15:13:43,100][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,101][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=NegativeIntegers, from data=None|
+[2025-07-16 15:13:43,102][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,103][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=PositiveIntegers, from data=None|
+[2025-07-16 15:13:43,104][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,105][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=Binary, from data=None|
+[2025-07-16 15:13:43,106][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,107][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=Boolean, from data=None|
+[2025-07-16 15:13:43,108][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,109][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=PercentFraction, from data=None|
+[2025-07-16 15:13:43,110][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,111][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=UnitInterval, from data=None|
+[2025-07-16 15:13:43,111][pyomo.core][construct][DEBUG]  :: |Constructing RangeSet, name=GlobalSet, from data=None|
+[2025-07-16 15:13:43,114][pyomo.core][construct][DEBUG]  :: |Constructing Set, name=UnindexedComponent_ReferenceSet, from data=None|
+[2025-07-16 15:13:43,427][pyomo.core][construct][DEBUG]  :: |Constructing ConcreteModel 'ConcreteModel', from data=None|
+[2025-07-16 15:13:44,252][module.py][<module>][INFO]  :: |Import Shutil|
+[2025-07-16 15:13:44,254][module.py][<module>][INFO]  :: |Import pandas|
+[2025-07-16 15:13:44,255][module.py][<module>][INFO]  :: |Import os|
+[2025-07-16 15:13:44,255][module.py][<module>][INFO]  :: |Import Pathlib|
+[2025-07-16 15:13:45,163][matplotlib][wrapper][DEBUG]  :: |matplotlib data path: C:\python_environments\aeo2025_py311_doc\Lib\site-packages\matplotlib\mpl-data|
+[2025-07-16 15:13:45,174][matplotlib][wrapper][DEBUG]  :: |CONFIGDIR=C:\Users\ADC\.matplotlib|
+[2025-07-16 15:13:45,176][matplotlib][<module>][DEBUG]  :: |interactive is False|
+[2025-07-16 15:13:45,177][matplotlib][<module>][DEBUG]  :: |platform is win32|
+[2025-07-16 15:13:45,261][matplotlib][wrapper][DEBUG]  :: |CACHEDIR=C:\Users\ADC\.matplotlib|
+[2025-07-16 15:13:45,266][matplotlib.font_manager][_load_fontmanager][DEBUG]  :: |Using fontManager instance from C:\Users\ADC\.matplotlib\fontlist-v330.json|

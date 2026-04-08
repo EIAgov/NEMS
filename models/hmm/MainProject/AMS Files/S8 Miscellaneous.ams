@@ -14,7 +14,7 @@ Section S8_Miscellaneous {
 		Body: {
 			! Fills parameter `Results~ with profiler measurements for which gross time is larger than 0.5 seconds
 			ProfilerCollectAllData(Results, GrossTimeThreshold: 0.1);
-			sDataYearFile := "log\\ProfilerResults\\Profiler"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+formatstring("%>02i",CYCLEINFO_CURIRUN(1))+".txt";
+			sDataYearFile := "../../HMM/log\\ProfilerResults\\Profiler"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%>02i",ncntrl_curitr(1))+formatstring("%>02i",CYCLEINFO_CURIRUN(1))+".txt";
 			write Results to file sDataYearFile;
 		}
 	}
@@ -175,9 +175,9 @@ Section S8_Miscellaneous {
 		Procedure EMM_Testing {
 			Body: {
 				!dex::PrefixAutoTableWithDataset := 1;
-				dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
-				dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
-				dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
+				!dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
+				!dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
+				!dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
 				!dex::DatasetGeneratorFilter('CSV', 'Dense') := 1;
 				!dex::DatasetGeneratorFilter('Parquet', 'Dense') := 1;
 				DEX::PrefixAutoTableWithDataset := 1;
@@ -263,12 +263,12 @@ Section S8_Miscellaneous {
 		Procedure Generate_Mappings {
 			Body: {
 				!dex::PrefixAutoTableWithDataset := 1;
-				dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
-				dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
-				dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
+				!dex::DatasetGeneratorFilter(dex::gt, dex::amt) := 0;
+				!dex::DatasetGeneratorFilter('Parquet', 'Sparse') := 1;
+				!dex::DatasetGeneratorFilter('CSV', 'Sparse') := 1;
 				!dex::DatasetGeneratorFilter('CSV', 'Dense') := 1;
 				!dex::DatasetGeneratorFilter('Parquet', 'Dense') := 1;
-				dex::GenerateDatasetMappings();
+				!dex::GenerateDatasetMappings();
 			}
 		}
 		Procedure Read_Parquet {

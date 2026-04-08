@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wen Jan 18 08:46:11 2024
-
 @author: SZO
-
 Last updated on 7/16/2024
-
 """
 
 import tomllib
@@ -31,9 +28,7 @@ def postprocessor_base(table_spec, d_base, dfd):
     ----------
     d_base : dict
         key: table_id
-        value: df with indexes of row and region, and column as 2019-2050:
-                       2019, 2020, ......2050
-            row region
+        value: df with indexes of row and region, and column as 2019-2050: 2019, 2020, ......2050
     table_spec : dict
 
     Returns
@@ -46,6 +41,7 @@ def postprocessor_base(table_spec, d_base, dfd):
         For cross-reference, we create a placeholder in the base table, and then
         populate the placer holder here. In development, the try-except block may be
         needed to handle situations when the cross-referenced table is not available.
+    
     """
 
     # TN 004 -------------------
@@ -134,7 +130,7 @@ def postprocessor_base(table_spec, d_base, dfd):
     # Index for last census division (national total)
     MNUMCR = int(dfd["MNUMCR_rwpre"])
     # Residential woody biomass combustion
-    d_base["TN 069"].loc[16] = (
+    d_base["TN 069"].loc[16] = np.float32(
         d_base["TN 024"].loc[1].values * T69_EMFAC["woody biomass"]
     )
     # Commercial woody biomass combustion

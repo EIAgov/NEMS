@@ -46,7 +46,7 @@ restart_file = Path(os.getcwd()) / "RestartHMMAttempt.unf" # source restart file
 
 # Add path to where PyFiler is so we can import the modules
 sys.path.insert(1, '../../../scripts/PyFiler')
-import pyfiler
+import pyfiler1
 import PyFilerWrapper as pfw
 
 # PyFiler requires its directory to be in the PyFiler folder.

@@ -16,8 +16,7 @@ restart variables. The module operates as follows:
 
     5. Overwrite select restart variables with history in *overwrite_restart_var_steo*.
 
-    6. Prepare DataFrames to be used in STEO overwrites after all HSM modules have run during STEO years in *load_steo_adjustments* and
-       *aggregate_pmm_output_totals*.
+    6. Aggregate updates to history and steo in "total" or "national" value rows for PMM output tables in *aggregate_pmm_output_totals*.
 
 
 Input Files
@@ -72,10 +71,6 @@ derived from Python preprocessors.
     * steo_ogenagprd.csv - STEO year natural gas expected production by natural gas type and HSM district
     * steo_ogadgprd.csv - STEO year natural gas associated dissolved production by oil type and HSM district
     * steo_can.csv - STEO year natural gas production by HSM Canada region and type
-    * steo_owrite_ngpls.csv - STEO overwrite values for NGPL production
-    * steo_owrite_rfqtdcrd.csv - STEO overwrite values for crude oil production
-    * steo_owrite_ad_ng.csv - STEO overwrite values for associated dissolved natural gas production
-    * steo_owrite_na_ng.csv - STEO overwrite values for non associated natural gas production
 
 
 Model Functions and Class Methods
@@ -89,7 +84,7 @@ class (sub.Submodule) - History and STEO submodule for HSM
     * calculate_ngpl_region_shares - Breakout EIA History NGPL reporting for STEO years
     * load_steo_tables - Load in STEO benchmark values
     * overwrite_restart_var_steo - Overwrites Restart variables with STEO variables for PMMOUT variables used to calculate price
-    * load_steo_adjustments - Load in STEO overwrite values
+    * load_steo_adjustments - Placeholder method (kept for backward compatibility, no longer loads data)
     * aggregate_pmm_output_totals - Aggregate updates to history and steo in "total" or "national" value rows for PMM output tables
 
 
@@ -148,6 +143,7 @@ import names as nam
 import pandas as pd
 import common as com
 import submodule as sub
+import numpy as np
 
 
 class hist_steo(sub.Submodule):
@@ -185,7 +181,6 @@ class hist_steo(sub.Submodule):
         self.hist_epl2          = pd.DataFrame()  # OFFICIAL HISTORICAL NGPL COMPOSITION (MBBL/D)
         self.hist_dcrdwhp       = pd.DataFrame()  # HISTORICAL CRUDE OIL WELLHEAD PRICES AND PRODUCTION
         self.hist_eor_prod      = pd.DataFrame()  # EOR PRODUCTION (BBL/D)
-        self.hist_co2_eor_prod  = pd.DataFrame()  # EOR PRODUCTION (BBL/D)
         self.hist_lfmm_prod     = pd.DataFrame()  # CRUDE OIL PRODUCTION BY TYPE AND LFMM REGION (MBBl/D)
         self.ngpl_shares        = pd.DataFrame()  #: dataframe of ngpl shares by region based on historical production
 
@@ -203,10 +198,9 @@ class hist_steo(sub.Submodule):
         self.steo_ogenagprd     = pd.DataFrame()  #Natural Gas Expected NA Production (BCF)
         self.steo_ogadgprd      = pd.DataFrame()  #Natural Gas Expected AD Production (BCF)
         self.steo_can           = pd.DataFrame()  #Expected Canada Natural Gas Production (BCF)
-        self.steo_o_ngpls       = pd.DataFrame()  #STEO adjustment ngpls
-        self.steo_o_rfqtdcrd    = pd.DataFrame()  #STEO adjustment crude
-        self.steo_o_natgas      = pd.DataFrame()  #STEO adjustment natgas
-        self.steo_o_ogeorprd    = pd.DataFrame()  #STEO adjustment EOR production
+
+        self.hist_ogcoprd_fed   = pd.DataFrame()  #Historical crude production on federal lands
+        self.hist_ogngprd_fed   = pd.DataFrame()  #Historical natural gas production on federal lands
 
 
     ###History###
@@ -315,7 +309,11 @@ class hist_steo(sub.Submodule):
         temp_filename = self.parent.hist_setup_table.at[nam.hist_rfqtdcrd, nam.filename]
         self.hist_rfqtdcrd = com.read_dataframe(self.parent.hist_input_path + temp_filename, index_col=[nam.year])
         # Reformat to match restart file
-        self.hist_rfqtdcrd.columns = list(range(1, len(self.hist_rfqtdcrd.columns) + 1))
+        # Map region name columns to region numbers using mapping table
+        region_mapping = self.parent.mapping[[nam.region_number, nam.region_name]].drop_duplicates()
+        region_mapping = region_mapping.set_index(nam.region_name)[nam.region_number].to_dict()
+        # Rename columns from region names to region numbers
+        self.hist_rfqtdcrd = self.hist_rfqtdcrd.rename(columns=region_mapping)
         self.hist_rfqtdcrd = pd.DataFrame(self.hist_rfqtdcrd.stack())
         self.hist_rfqtdcrd.index.names = self.restart.pmmout_rfqtdcrd.index.names
         self.hist_rfqtdcrd.columns = [nam.value]
@@ -612,123 +610,44 @@ class hist_steo(sub.Submodule):
         self.hist_dcrdwhp = self.hist_dcrdwhp.reorder_levels([1, 0])
 
         ###Load EOR History
+        # Load master EOR production data from input file
+        # This file contains historical EOR production by EOR type (Thermal and CO2)
         temp_filename = self.parent.hist_setup_table.at[nam.hist_eor_prod, nam.filename]
         temp_hist_eor_prod_master = com.read_dataframe(self.parent.hist_input_path + temp_filename, skiprows=1)
+        # Set 'type' column as index for easier row selection by type name
+        temp_hist_eor_prod_master = temp_hist_eor_prod_master.set_index('type')
 
-        # Get sums by year
-        def sum_by_year(df, region, region_multiplier):
-            # Create dfs by region and type = 4 and then apply self.restart.ogsmout_ogeorprod file format
-            df[nam.region_number] = region
-            df = df.set_index([nam.region_number], append=True)
-            df = df.reorder_levels([1, 0])
-            df = df * region_multiplier
-            return df
+        # Load EOR regional allocation factors from input file
+        # Contains thermal_eor_factor and co2_eor_factor for allocating each EOR type across HSM regions (1-7) plus Total (8)
+        eor_factors_df = com.read_dataframe(self.parent.hist_input_path + 'hist_eor_factors.csv')
+        eor_factors_df = eor_factors_df.set_index('region_number')
+        # Store factors for use in overwrite_restart_var_history
+        self.eor_factors_df = eor_factors_df.copy()
 
-        # Set Historical EOR parameters
+        # Process Historical EOR Production by Region
+        # Extract years of interest and get Thermal and CO2 production separately
         years = list(range(self.parent.param_baseyr, self.parent.history_year + 1))
-        regions = list(range(1, 9))
-        eor_factors = [0.0009, 0.064, 0.019, 0.365, 0.096, 0.456, 0.000, 1.0]  # Legacy factors from Dana for all EOR
-        co2_eor_factors = [0.00, 0.17, 0.09, 0.63, 0.11, 0.0, 0.0, 1.0]  # Legacy factors from Dana for CO2 EOR
+        temp_thermal_eor = temp_hist_eor_prod_master.loc['Thermal', years].to_frame(name=nam.value)
+        temp_co2_eor = temp_hist_eor_prod_master.loc['CO2', years].to_frame(name=nam.value)
+        # Store raw EOR data for use in overwrite_restart_var_history
+        self.hist_thermal_eor_raw = temp_thermal_eor.copy()
+        self.hist_co2_eor_raw = temp_co2_eor.copy()
 
-        # Create dataframe for Historical EOR paramters
-        temp_hist_eor_prod = pd.DataFrame(temp_hist_eor_prod_master[years].copy().sum(), columns=[nam.value])
-
-        self.hist_eor_prod = sum_by_year(temp_hist_eor_prod.copy(), regions[0], eor_factors[0])  # Region 1
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Region 2
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                        regions[1],
-                                        eor_factors[1])],
-                                        ignore_index=False)
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Region 3
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                        regions[2],
-                                        eor_factors[2])],
-                                        ignore_index=False)
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Region 4
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                        regions[3],
-                                        eor_factors[3])],
-                                        ignore_index=False)
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Region 5
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                        regions[4],
-                                        eor_factors[4])],
-                                        ignore_index=False)
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Region 6
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                        regions[5],
-                                        eor_factors[5])],
-                                        ignore_index=False)
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Region 7
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                                    regions[6],
-                                                    eor_factors[6])],
-                                       ignore_index=False)
-
-        self.hist_eor_prod = pd.concat([self.hist_eor_prod,  # Total
-                                        sum_by_year(temp_hist_eor_prod.copy(),
-                                        regions[7],
-                                        eor_factors[7])],
-                                        ignore_index=False)
-
-        # Create dataframe for Historical CO2 EOR parameters
-        temp_hist_co2_eor_prod = temp_hist_eor_prod_master.loc[[8, 9]].copy()
-        temp_hist_co2_eor_prod = pd.DataFrame(temp_hist_co2_eor_prod[years].copy().sum(), columns=[nam.value])
-
-        self.hist_co2_eor_prod = sum_by_year(temp_hist_co2_eor_prod.copy(), regions[0], co2_eor_factors[0])  # Region 1
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Region 2
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[1],
-                                            co2_eor_factors[1])],
-                                            ignore_index=False)
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Region 3
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[2],
-                                            co2_eor_factors[2])],
-                                            ignore_index=False)
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Region 4
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[3],
-                                            co2_eor_factors[3])],
-                                            ignore_index=False)
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Region 5
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[4],
-                                            co2_eor_factors[4])],
-                                            ignore_index=False)
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Region 6
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[5],
-                                            co2_eor_factors[5])],
-                                            ignore_index=False)
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Region 7
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[6],
-                                            co2_eor_factors[6])],
-                                            ignore_index=False)
-
-        self.hist_co2_eor_prod = pd.concat([self.hist_co2_eor_prod,  # Total
-                                            sum_by_year(temp_hist_co2_eor_prod.copy(),
-                                            regions[7],
-                                            co2_eor_factors[7])],
-                                            ignore_index=False)
-
-        # Reformat CO2 EOR Prod Index for write to restart variable
-        self.hist_co2_eor_prod[nam.eor_type] = 1
-        self.hist_co2_eor_prod = self.hist_co2_eor_prod.set_index([nam.eor_type], append=True)
-        self.hist_co2_eor_prod = self.hist_co2_eor_prod.reorder_levels([0, 2, 1])
+        # Allocate EOR production across regions using type-specific regional factors
+        # For each region: regional_total = (Thermal * thermal_factor) + (CO2 * co2_factor)
+        hist_eor_prod_list = []
+        for region_num in range(1, 9):
+            thermal_factor = eor_factors_df.loc[region_num, 'thermal_eor_factor']
+            co2_factor = eor_factors_df.loc[region_num, 'co2_eor_factor']
+            # Calculate regional EOR as sum of thermal and CO2 contributions
+            regional_thermal = temp_thermal_eor.copy() * thermal_factor
+            regional_co2 = temp_co2_eor.copy() * co2_factor
+            regional_total = regional_thermal + regional_co2
+            regional_total[nam.region_number] = region_num
+            regional_total = regional_total.set_index([nam.region_number], append=True)
+            regional_total = regional_total.reorder_levels([1, 0])
+            hist_eor_prod_list.append(regional_total)
+        self.hist_eor_prod = pd.concat(hist_eor_prod_list, ignore_index=False)
 
 
         ###Load LFMM History
@@ -739,6 +658,39 @@ class hist_steo(sub.Submodule):
         self.hist_lfmm_prod.columns = [nam.value]
         self.hist_lfmm_prod.index = self.hist_lfmm_prod.index.set_levels(self.hist_lfmm_prod.index.levels[2].astype(int), level=2)
         self.hist_lfmm_prod.index.names = self.restart.ogsmout_ogcruderef.index.names
+
+        ###Load Federal Production History
+        # Historical crude production on federal lands
+        # CSV units: mmbbl/year, restart variable units: mmbd (million barrels per day)
+        temp_filename = self.parent.hist_setup_table.at[nam.hist_ogcoprd_fed, nam.filename]
+        self.hist_ogcoprd_fed = com.read_dataframe(self.parent.hist_input_path + temp_filename)
+        # Set index to [year, region_number] and extract production column
+        self.hist_ogcoprd_fed = self.hist_ogcoprd_fed.set_index([nam.year, nam.region_number])[['production']]
+        # Convert from mmbbl/year to mmbd: divide by 365
+        self.hist_ogcoprd_fed['production'] = self.hist_ogcoprd_fed['production'] / 365
+        # Convert region_number from float to int
+        self.hist_ogcoprd_fed.index = self.hist_ogcoprd_fed.index.set_levels(self.hist_ogcoprd_fed.index.levels[1].astype(int), level=1)
+        # Reorder levels to [region_number, year] to match restart structure
+        self.hist_ogcoprd_fed = self.hist_ogcoprd_fed.reorder_levels([1, 0])
+        # Set column and index names to match restart variable
+        self.hist_ogcoprd_fed.columns = [nam.value]
+        self.hist_ogcoprd_fed.index.names = self.restart.ogsmout_ogcoprd_fed.index.names
+
+        # Historical natural gas production on federal lands
+        # CSV units: bcf/year, restart variable units: tcf (trillion cubic feet per year)
+        temp_filename = self.parent.hist_setup_table.at[nam.hist_ogngprd_fed, nam.filename]
+        self.hist_ogngprd_fed = com.read_dataframe(self.parent.hist_input_path + temp_filename)
+        # Set index to [year, region_number] and extract production column
+        self.hist_ogngprd_fed = self.hist_ogngprd_fed.set_index([nam.year, nam.region_number])[['production']]
+        # Convert from bcf/year to tcf/year: divide by 1000
+        self.hist_ogngprd_fed['production'] = self.hist_ogngprd_fed['production'] / 1000
+        # Convert region_number from float to int
+        self.hist_ogngprd_fed.index = self.hist_ogngprd_fed.index.set_levels(self.hist_ogngprd_fed.index.levels[1].astype(int), level=1)
+        # Reorder levels to [region_number, year] to match restart structure
+        self.hist_ogngprd_fed = self.hist_ogngprd_fed.reorder_levels([1, 0])
+        # Set column and index names to match restart variable
+        self.hist_ogngprd_fed.columns = [nam.value]
+        self.hist_ogngprd_fed.index.names = self.restart.ogsmout_ogngprd_fed.index.names
 
         #Load Alaska and Offshore
         hist_years = list(range(self.parent.param_baseyr, self.parent.history_year + 1))
@@ -877,7 +829,27 @@ class hist_steo(sub.Submodule):
         """
 
         ###Overwrite region-level crude production(including EOR)
-        self.restart.pmmout_rfqtdcrd.update(self.hist_rfqtdcrd)
+        # Cast to float64 for consistent calculations
+        self.restart.pmmout_rfqtdcrd['value'] = self.restart.pmmout_rfqtdcrd['value'].astype(np.float64)
+        self.restart.pmmout_rfqtdcrd.update(self.hist_rfqtdcrd.astype(self.restart.pmmout_rfqtdcrd.dtypes))
+
+        ###Overwrite OGCOPRD with historical crude production data
+        # Extract onshore regions (1-7) and offshore regions (9-10) from pmmout_rfqtdcrd
+        # Filter to history years only
+        temp_ogcoprd = self.restart.pmmout_rfqtdcrd.copy()
+        temp_ogcoprd = temp_ogcoprd[temp_ogcoprd.index.get_level_values(0).isin([1, 2, 3, 4, 5, 6, 7, 9, 10])]
+        temp_ogcoprd = temp_ogcoprd[temp_ogcoprd.index.get_level_values(1) <= self.parent.history_year]
+        
+        # Remap region indices: 9→8, 10→9 (offshore regions)
+        temp_ogcoprd = temp_ogcoprd.reset_index()
+        temp_ogcoprd.loc[temp_ogcoprd['1'] == 9, '1'] = 8
+        temp_ogcoprd.loc[temp_ogcoprd['1'] == 10, '1'] = 9
+        temp_ogcoprd = temp_ogcoprd.set_index(['1', '2'])
+        temp_ogcoprd.index.names = self.restart.ogsmout_ogcoprd.index.names
+        
+        # Cast to float64 for consistent calculations
+        self.restart.ogsmout_ogcoprd['value'] = self.restart.ogsmout_ogcoprd['value'].astype(np.float64)
+        self.restart.ogsmout_ogcoprd.update(temp_ogcoprd.astype(self.restart.ogsmout_ogcoprd.dtypes))
 
 
         ###Overwrite region-level crude production(not including EOR)
@@ -887,8 +859,11 @@ class hist_steo(sub.Submodule):
         index_mask = temp_hist_eor_df.index #mask for history
         temp_rest_df = self.restart.pmmout_rfqtdcrd.loc[index_mask].copy()
         temp_rest_df = temp_rest_df.sub(temp_hist_eor_df,axis = 1) #subtract EOR from rfqdcrd
-        temp_rest_df.loc[temp_rest_df[nam.value] < 0, nam.value] = 0
-        self.restart.pmmout_rfqdcrd.update(temp_rest_df)
+        temp_rest_df.loc[temp_rest_df[nam.value] < 0, nam.value] = 0.0
+        
+        # Cast to float64 for consistent calculations
+        self.restart.pmmout_rfqdcrd['value'] = self.restart.pmmout_rfqdcrd['value'].astype(np.float64)
+        self.restart.pmmout_rfqdcrd.update(temp_rest_df.astype(self.restart.pmmout_rfqdcrd.dtypes))
 
 
         ###Overwrite LFMM Crude Production History
@@ -911,12 +886,16 @@ class hist_steo(sub.Submodule):
         alaska_prod.index.names = temp_ogcruderef.index.names
         temp_ogcruderef = pd.concat([temp_ogcruderef, alaska_prod], ignore_index= False)
 
-        self.restart.ogsmout_ogcruderef.update(temp_ogcruderef)
+        # Cast to float64 for consistent calculations
+        self.restart.ogsmout_ogcruderef['value'] = self.restart.ogsmout_ogcruderef['value'].astype(np.float64)
+        self.restart.ogsmout_ogcruderef.update(temp_ogcruderef.astype(self.restart.ogsmout_ogcruderef.dtypes))
 
 
         ###Overwrite district-level crude production
-        self.restart.ogsmout_ogoilprd.update(self.hist_htoilprd)
-        self.restart.ogsmout_ogoilprd.update(self.hist_hcoilprd)
+        # Cast to float64 for consistent calculations
+        self.restart.ogsmout_ogoilprd['value'] = self.restart.ogsmout_ogoilprd['value'].astype(np.float64)
+        self.restart.ogsmout_ogoilprd.update(self.hist_htoilprd.astype(self.restart.ogsmout_ogoilprd.dtypes))
+        self.restart.ogsmout_ogoilprd.update(self.hist_hcoilprd.astype(self.restart.ogsmout_ogoilprd.dtypes))
 
 
         ###Overwrite crude production history by HSM region and LFMM crude oil type (ogcrdprd)
@@ -959,7 +938,8 @@ class hist_steo(sub.Submodule):
         temp = temp.merge(hist_lfmm_prod, how='left', on=['lfmm_region_number', 'year'])
         temp['total'] = temp['ratio'] * temp['value']
         temp = temp.groupby(['region_number', 'lfmm_crude_type', 'year'])['total'].sum().to_frame(name='value')
-        self.restart.ogsmout_ogcrdprd.update(temp)
+        temp = temp.astype(np.float32)
+        self.restart.ogsmout_ogcrdprd.update(temp.astype(self.restart.ogsmout_ogcrdprd.dtypes))
 
         ###Set ogsmout_ogcrdprd "Total" value
         temp_df = self.restart.ogsmout_ogcrdprd.loc[self.restart.ogsmout_ogcrdprd.index.get_level_values(0).isin(list(range(1,14)))].copy()
@@ -968,10 +948,13 @@ class hist_steo(sub.Submodule):
         temp_df = temp_df.set_index([2], append = True)
         temp_df = temp_df.reorder_levels([2,0,1])
         temp_df.index.names = self.restart.ogsmout_ogcrdprd.index.names
-        self.restart.ogsmout_ogcrdprd.update(temp_df)
+        self.restart.ogsmout_ogcrdprd.update(temp_df.astype(self.restart.ogsmout_ogcrdprd.dtypes))
 
         ###Overwrite play-level crude production
-        self.restart.ogsmout_ogqshloil.update(self.hist_ogqshloil)
+        # cast up to float64 (instead of down to float32)
+        # Cast to float64 for consistent calculations
+        self.restart.ogsmout_ogqshloil['value'] = self.restart.ogsmout_ogqshloil['value'].astype(np.float64)
+        self.restart.ogsmout_ogqshloil.update(self.hist_ogqshloil.astype(self.restart.ogsmout_ogqshloil.dtypes))
 
 
         ###Overwrite Alaska crude production
@@ -991,38 +974,79 @@ class hist_steo(sub.Submodule):
         temp = temp * 365
 
         #Write to restart variable
-        self.restart.ogsmout_ogprcoak.update(temp)
+        # cast up to float64 (instead of down to float32)
+        # Cast to float64 for consistent calculations
+        self.restart.ogsmout_ogprcoak['value'] = self.restart.ogsmout_ogprcoak['value'].astype(np.float64)
+        self.restart.ogsmout_ogprcoak.update(temp.astype(self.restart.ogsmout_ogprcoak.dtypes))
 
 
-        ###Overwrite CO2 EOR Prod
-        temp_co2_eor_prod = self.hist_co2_eor_prod/1000 * 365 # convert to thousand barrels per year, mbbl/yr
-
+        ###Overwrite EOR Production by Region and Type
+        # Build EOR production data for all regions (1-8) and EOR types (1=Thermal, 2=CO2, 3=Total)
+        # Units: Convert from BBL/D to MBbl/yr (divide by 1000, multiply by 365)
+        eor_prod_list = []
+        history_years = range(self.restart.parametr_baseyr, self.parent.history_year + 1)
+        
+        for region_num in range(1, 9):
+            thermal_factor = self.eor_factors_df.loc[region_num, 'thermal_eor_factor']
+            co2_factor = self.eor_factors_df.loc[region_num, 'co2_eor_factor']
+            
+            # eor_type=1: Thermal EOR
+            regional_thermal = self.hist_thermal_eor_raw.copy() * thermal_factor / 1000 * 365
+            regional_thermal[nam.region_number] = region_num
+            regional_thermal[nam.eor_type] = 1
+            regional_thermal = regional_thermal.set_index([nam.region_number, nam.eor_type], append=True)
+            regional_thermal = regional_thermal.reorder_levels([1, 2, 0])
+            eor_prod_list.append(regional_thermal)
+            
+            # eor_type=2: CO2 EOR
+            regional_co2 = self.hist_co2_eor_raw.copy() * co2_factor / 1000 * 365
+            regional_co2[nam.region_number] = region_num
+            regional_co2[nam.eor_type] = 2
+            regional_co2 = regional_co2.set_index([nam.region_number, nam.eor_type], append=True)
+            regional_co2 = regional_co2.reorder_levels([1, 2, 0])
+            eor_prod_list.append(regional_co2)
+            
+            # eor_type=3: Total EOR (Thermal + CO2)
+            regional_total = (self.hist_thermal_eor_raw.copy() * thermal_factor + 
+                              self.hist_co2_eor_raw.copy() * co2_factor) / 1000 * 365
+            regional_total[nam.region_number] = region_num
+            regional_total[nam.eor_type] = 3
+            regional_total = regional_total.set_index([nam.region_number, nam.eor_type], append=True)
+            regional_total = regional_total.reorder_levels([1, 2, 0])
+            eor_prod_list.append(regional_total)
+        
+        # Combine all EOR production data
+        temp_eor_prod = pd.concat(eor_prod_list, ignore_index=False)
+        
         # Create a copy to mask for updates
         temp_ogeorprd = self.restart.ogsmout_ogeorprd.copy()
         temp_ogeorprd['value'] = 0  # Default all values to 0
-
-        # Update matching indices in the mask
-        matching_indices = temp_co2_eor_prod.index.intersection(
+        temp_ogeorprd['value'] = temp_ogeorprd['value'].astype(np.float32)
+        
+        # Update matching indices for all regions (1-8), EOR types (1-3), and history years
+        matching_indices = temp_eor_prod.index.intersection(
             pd.MultiIndex.from_product(
-                [[8], [1], range(self.restart.parametr_baseyr, self.parent.history_year + 1)],
-                names=temp_co2_eor_prod.index.names
+                [range(1, 9), range(1, 4), history_years],
+                names=temp_eor_prod.index.names
             )
         )
+        
+        temp_ogeorprd.loc[matching_indices, 'value'] = temp_eor_prod.loc[matching_indices, 'value'].astype(np.float32)
+        
+        # Apply the updates to EOR Production
+        self.restart.ogsmout_ogeorprd.update(temp_ogeorprd.astype(self.restart.ogsmout_ogeorprd.dtypes))
 
-        temp_ogeorprd.loc[matching_indices, 'value'] = temp_co2_eor_prod.loc[matching_indices, 'value']
-
-        # Apply the updates to CO2 EOR Prod
-        self.restart.ogsmout_ogeorprd.update(temp_ogeorprd)
-
-        ###Overwrite region-level crude price data
-        self.restart.pmmout_dcrdwhp.update(self.hist_dcrdwhp)
+        ###Overwrite region-level crude price data with historical data
+        #Note: This historical data will be used for history years, but projection years
+        #will use calculated values from rfcrudewhp (via reg_crude_price) in calculate_prices()
+        self.restart.pmmout_dcrdwhp.update(self.hist_dcrdwhp.astype(self.restart.pmmout_dcrdwhp.dtypes))
 
 
         ###Overwrite district-level natural gas production
-        self.restart.ogsmout_ogenagprd.update(self.hist_htgasprd)
-        self.restart.ogsmout_ogenagprd.update(self.hist_hsgasprd)
-        self.restart.ogsmout_ogenagprd.update(self.hist_hcgasprd)
-        self.restart.ogsmout_ogenagprd.update(self.hist_hcbmprd)
+        self.restart.ogsmout_ogenagprd.update(self.hist_htgasprd.astype(self.restart.ogsmout_ogenagprd.dtypes))
+        self.restart.ogsmout_ogenagprd.update(self.hist_hsgasprd.astype(self.restart.ogsmout_ogenagprd.dtypes))
+        self.restart.ogsmout_ogenagprd.update(self.hist_hcgasprd.astype(self.restart.ogsmout_ogenagprd.dtypes))
+        self.restart.ogsmout_ogenagprd.update(self.hist_hcbmprd.astype(self.restart.ogsmout_ogenagprd.dtypes))
 
         temp = self.restart.ogsmout_ogenagprd.copy()
         temp = temp[temp.index.isin([1, 2, 3, 4], level=1)]
@@ -1031,13 +1055,75 @@ class hist_steo(sub.Submodule):
         temp = temp.set_index([nam.well_type], append = True)
         temp = temp.reorder_levels([0,2,1])
         temp.index.names = self.restart.ogsmout_ogenagprd.index.names
-        self.restart.ogsmout_ogenagprd.update(temp)
+        self.restart.ogsmout_ogenagprd.update(temp.astype(self.restart.ogsmout_ogenagprd.dtypes))
+
+        # Recategorize historical tight gas (gas_type 2) to shale gas (gas_type 3) in ogenagprd
+        # Extract tight gas (gas_type 2) for history years
+        history_years_mask_ogen = self.restart.ogsmout_ogenagprd.index.get_level_values(2) <= self.parent.history_year
+        tight_gas_mask_ogen = self.restart.ogsmout_ogenagprd.index.get_level_values(1) == 2
+        tight_gas_history_mask_ogen = history_years_mask_ogen & tight_gas_mask_ogen
+
+        # Get tight gas values for history years
+        temp_tight_gas_ogen = self.restart.ogsmout_ogenagprd.loc[tight_gas_history_mask_ogen].copy()
+        if len(temp_tight_gas_ogen) > 0:
+            # Reset index to extract district and year, then set gas_type to 3 (shale gas)
+            temp_tight_gas_ogen = temp_tight_gas_ogen.reset_index()
+            temp_tight_gas_ogen['2'] = 3  # Change gas_type from 2 to 3
+            temp_tight_gas_ogen = temp_tight_gas_ogen.set_index(['1', '2', '3'])
+            temp_tight_gas_ogen.index.names = self.restart.ogsmout_ogenagprd.index.names
+            
+            # Get existing shale gas (gas_type 3) for history years
+            shale_gas_mask_ogen = self.restart.ogsmout_ogenagprd.index.get_level_values(1) == 3
+            shale_gas_history_mask_ogen = history_years_mask_ogen & shale_gas_mask_ogen
+            temp_shale_gas_ogen = self.restart.ogsmout_ogenagprd.loc[shale_gas_history_mask_ogen].copy()
+            
+            # Add tight gas to shale gas using .add() for proper index alignment
+            if len(temp_shale_gas_ogen) > 0:
+                temp_shale_gas_ogen['value'] = temp_shale_gas_ogen['value'].add(temp_tight_gas_ogen['value'], fill_value=0)
+                self.restart.ogsmout_ogenagprd.update(temp_shale_gas_ogen.astype(self.restart.ogsmout_ogenagprd.dtypes))
+            else:
+                # If no existing shale gas, just add the tight gas as shale gas
+                self.restart.ogsmout_ogenagprd.update(temp_tight_gas_ogen.astype(self.restart.ogsmout_ogenagprd.dtypes))
+            
+            # Zero out tight gas (gas_type 2) for all history years
+            self.restart.ogsmout_ogenagprd.loc[tight_gas_history_mask_ogen, 'value'] = 0
 
         #Realized non-associated natural gas
-        self.restart.ogsmout_ogrnagprd.update(self.hist_htgasprd)
-        self.restart.ogsmout_ogrnagprd.update(self.hist_hsgasprd)
-        self.restart.ogsmout_ogrnagprd.update(self.hist_hcgasprd)
-        self.restart.ogsmout_ogrnagprd.update(self.hist_hcbmprd)
+        self.restart.ogsmout_ogrnagprd.update(self.hist_htgasprd.astype(self.restart.ogsmout_ogrnagprd.dtypes))
+        self.restart.ogsmout_ogrnagprd.update(self.hist_hsgasprd.astype(self.restart.ogsmout_ogrnagprd.dtypes))
+        self.restart.ogsmout_ogrnagprd.update(self.hist_hcgasprd.astype(self.restart.ogsmout_ogrnagprd.dtypes))
+        self.restart.ogsmout_ogrnagprd.update(self.hist_hcbmprd.astype(self.restart.ogsmout_ogrnagprd.dtypes))
+
+        # Recategorize historical tight gas (gas_type 2) to shale gas (gas_type 3) in ogrnagprd
+        # Extract tight gas (gas_type 2) for history years
+        history_years_mask = self.restart.ogsmout_ogrnagprd.index.get_level_values(2) <= self.parent.history_year
+        tight_gas_mask = self.restart.ogsmout_ogrnagprd.index.get_level_values(1) == 2
+        tight_gas_history_mask = history_years_mask & tight_gas_mask
+
+        # Get tight gas values for history years
+        temp_tight_gas = self.restart.ogsmout_ogrnagprd.loc[tight_gas_history_mask].copy()
+        if len(temp_tight_gas) > 0:
+            # Reset index to extract district and year, then set gas_type to 3 (shale gas)
+            temp_tight_gas = temp_tight_gas.reset_index()
+            temp_tight_gas['2'] = 3  # Change gas_type from 2 to 3
+            temp_tight_gas = temp_tight_gas.set_index(['1', '2', '3'])
+            temp_tight_gas.index.names = self.restart.ogsmout_ogrnagprd.index.names
+            
+            # Get existing shale gas (gas_type 3) for history years
+            shale_gas_mask = self.restart.ogsmout_ogrnagprd.index.get_level_values(1) == 3
+            shale_gas_history_mask = history_years_mask & shale_gas_mask
+            temp_shale_gas = self.restart.ogsmout_ogrnagprd.loc[shale_gas_history_mask].copy()
+            
+            # Add tight gas to shale gas using .add() for proper index alignment
+            if len(temp_shale_gas) > 0:
+                temp_shale_gas['value'] = temp_shale_gas['value'].add(temp_tight_gas['value'], fill_value=0)
+                self.restart.ogsmout_ogrnagprd.update(temp_shale_gas.astype(self.restart.ogsmout_ogrnagprd.dtypes))
+            else:
+                # If no existing shale gas, just add the tight gas as shale gas
+                self.restart.ogsmout_ogrnagprd.update(temp_tight_gas.astype(self.restart.ogsmout_ogrnagprd.dtypes))
+            
+            # Zero out tight gas (gas_type 2) for all history years
+            self.restart.ogsmout_ogrnagprd.loc[tight_gas_history_mask, 'value'] = 0
 
         temp = self.restart.ogsmout_ogrnagprd.copy()
         temp = temp[temp.index.isin([1, 2, 3, 4], level=1)]
@@ -1046,11 +1132,11 @@ class hist_steo(sub.Submodule):
         temp = temp.set_index([nam.well_type], append = True)
         temp = temp.reorder_levels([0,2,1])
         temp.index.names = self.restart.ogsmout_ogrnagprd.index.names
-        self.restart.ogsmout_ogrnagprd.update(temp)
+        self.restart.ogsmout_ogrnagprd.update(temp.astype(self.restart.ogsmout_ogrnagprd.dtypes))
 
         #Associated disolved natural gas
-        self.restart.ogsmout_ogadgprd.update(self.hist_htadgprd)
-        self.restart.ogsmout_ogadgprd.update(self.hist_hcadgprd)
+        self.restart.ogsmout_ogadgprd.update(self.hist_htadgprd.astype(self.restart.ogsmout_ogadgprd.dtypes))
+        self.restart.ogsmout_ogadgprd.update(self.hist_hcadgprd.astype(self.restart.ogsmout_ogadgprd.dtypes))
 
         temp = self.restart.ogsmout_ogadgprd.copy()
         temp = temp[temp.index.isin([1, 2, 3, 4], level=1)]
@@ -1059,11 +1145,11 @@ class hist_steo(sub.Submodule):
         temp = temp.set_index([nam.well_type], append = True)
         temp = temp.reorder_levels([0,2,1])
         temp.index.names = self.restart.ogsmout_ogadgprd.index.names
-        self.restart.ogsmout_ogadgprd.update(temp)
+        self.restart.ogsmout_ogadgprd.update(temp.astype(self.restart.ogsmout_ogadgprd.dtypes))
 
         #Total Dry natural gas production by state/district and gas type
         temp = self.restart.ogsmout_ogrnagprd + self.restart.ogsmout_ogadgprd
-        self.restart.ogsmout_ogdngprd.update(temp)
+        self.restart.ogsmout_ogdngprd.update(temp.astype(self.restart.ogsmout_ogdngprd.dtypes))
 
         ###Overwrite region-level natural gas production
         temp_na_prod = self.restart.ogsmout_ogenagprd.copy()
@@ -1094,7 +1180,7 @@ class hist_steo(sub.Submodule):
 
         #Overwrite ogsmout_ogngprd
         temp_ogngprd = temp_hist_prod[temp_hist_prod.index.get_level_values(0).isin([1,2,3,4,5,6,7,8,9,10])].copy()
-        self.restart.ogsmout_ogngprd.update(temp_ogngprd)
+        self.restart.ogsmout_ogngprd.update(temp_ogngprd.astype(self.restart.ogsmout_ogngprd.dtypes))
 
         #Get ogsmout_ogngprd total
         temp = self.restart.ogsmout_ogngprd.copy()
@@ -1105,7 +1191,7 @@ class hist_steo(sub.Submodule):
         temp = temp.set_index([1], append = True)
         temp = temp.reorder_levels([1,0])
         temp.index.names = self.restart.ogsmout_ogngprd.index.names
-        self.restart.ogsmout_ogngprd.update(temp)
+        self.restart.ogsmout_ogngprd.update(temp.astype(self.restart.ogsmout_ogngprd.dtypes))
 
 
         ###Overwrite natural gas production by category
@@ -1132,7 +1218,7 @@ class hist_steo(sub.Submodule):
         temp_realized_shale['1'] = 1
         temp_realized_shale = (temp_realized_shale.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_realized_shale.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_realized_shale)
+        self.restart.ogsmout_ogqngrep.update(temp_realized_shale.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         #Coalbed Methane Production
         temp_realized_cbm = on_realized_prod_df.loc[on_realized_prod_df.index.get_level_values(1) == 4].copy()
@@ -1140,7 +1226,7 @@ class hist_steo(sub.Submodule):
         temp_realized_cbm['1'] = 2
         temp_realized_cbm = (temp_realized_cbm.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_realized_cbm.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_realized_cbm)
+        self.restart.ogsmout_ogqngrep.update(temp_realized_cbm.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         #Tight Production
         temp_realized_tight = on_realized_prod_df.loc[on_realized_prod_df.index.get_level_values(1) == 2].copy()
@@ -1148,7 +1234,7 @@ class hist_steo(sub.Submodule):
         temp_realized_tight['1'] = 3
         temp_realized_tight = (temp_realized_tight.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_realized_tight.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_realized_tight)
+        self.restart.ogsmout_ogqngrep.update(temp_realized_tight.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         #Conventional Production
         temp_realized_conv = on_realized_prod_df.loc[on_realized_prod_df.index.get_level_values(1) == 1].copy()
@@ -1156,7 +1242,7 @@ class hist_steo(sub.Submodule):
         temp_realized_conv['1'] = 4
         temp_realized_conv = (temp_realized_conv.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_realized_conv.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_realized_conv)
+        self.restart.ogsmout_ogqngrep.update(temp_realized_conv.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         # Other AD Gas Production
         temp_ad_prod = on_ad_prod_df.loc[on_ad_prod_df.index.get_level_values(1).isin([1])].copy()
@@ -1165,7 +1251,7 @@ class hist_steo(sub.Submodule):
         temp_ad_prod['1'] = 5
         temp_ad_prod = (temp_ad_prod.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_ad_prod.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_ad_prod)
+        self.restart.ogsmout_ogqngrep.update(temp_ad_prod.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         ###Offshore Realized Production Adjustment
         # Since NA and AD natgas aren't split up, we need to produce a production ratio here
@@ -1187,7 +1273,7 @@ class hist_steo(sub.Submodule):
         temp_realized_na_prod_off['1'] = 6
         temp_realized_na_prod_off = (temp_realized_na_prod_off.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_realized_na_prod_off.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_realized_na_prod_off[[nam.value]])
+        self.restart.ogsmout_ogqngrep.update(temp_realized_na_prod_off[[nam.value]].astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         #AD Offshore Production
         temp_ad_prod = off_ad_prod_df.loc[off_ad_prod_df.index.get_level_values(1) == 1].copy()
@@ -1196,7 +1282,7 @@ class hist_steo(sub.Submodule):
         temp_ad_prod['1'] = 7
         temp_ad_prod = (temp_ad_prod.set_index(['1'], append=True)).reorder_levels([1, 0])
         temp_ad_prod.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp_ad_prod)
+        self.restart.ogsmout_ogqngrep.update(temp_ad_prod.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         ###Alaska Natural Gas Production
         alaska_na_prod = self.restart.ogsmout_ogrnagprd.copy()
@@ -1215,7 +1301,7 @@ class hist_steo(sub.Submodule):
         alaska_ng_prod['1'] = 8
         alaska_ng_prod = (alaska_ng_prod.set_index(['1'], append=True)).reorder_levels([1, 0])
         alaska_ng_prod.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(alaska_ng_prod)
+        self.restart.ogsmout_ogqngrep.update(alaska_ng_prod.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
         ###Natural Gas Production by Category
         #Onshore Shale Production plus gas production from tight oil plays
@@ -1238,124 +1324,111 @@ class hist_steo(sub.Submodule):
         temp = temp.set_index([1], append=True)
         temp = temp.reorder_levels([1, 0])
         temp.index.names = self.restart.ogsmout_ogqngrep.index.names
-        self.restart.ogsmout_ogqngrep.update(temp)
+        self.restart.ogsmout_ogqngrep.update(temp.astype(self.restart.ogsmout_ogqngrep.dtypes))
 
 
         ###Overwrite play-level natural gas production
-        self.restart.ogsmout_ogqshlgas.update(self.hist_ogqshlgas)
+        self.restart.ogsmout_ogqshlgas.update(self.hist_ogqshlgas.astype(self.restart.ogsmout_ogqshlgas.dtypes))
+
+        ###Adjust OGQSHLGAS to match OGQNGREP index 1 for historical years
+        # Adjust 'other' category (index 15) to ensure total play-level production matches OGQNGREP shale gas total
+        # This ensures consistency between the aggregate (OGQNGREP) and play-level (OGQSHLGAS) shale gas data
+        # OGQNGREP is in BCF/year, OGQSHLGAS is in TCF/year
+        hist_years_mask = self.restart.ogsmout_ogqshlgas.index.get_level_values(1) <= self.parent.history_year
+        hist_years = sorted(self.restart.ogsmout_ogqshlgas.loc[hist_years_mask].index.get_level_values(1).unique())
+        
+        for year in hist_years:
+            # Calculate sum of all OGQSHLGAS plays for this year
+            shale_sum = self.restart.ogsmout_ogqshlgas.xs(year, level=1, drop_level=False)['value'].sum()
+            
+            # Get OGQNGREP index 1 (shale gas total) for this year
+            ogqngrep_shale = self.restart.ogsmout_ogqngrep.at[(1, year), 'value']
+            
+            # Calculate difference: convert OGQSHLGAS sum from TCF to BCF for comparison
+            # Then convert difference back to TCF for adjustment
+            tempscale = ogqngrep_shale - shale_sum * 1000
+            
+            # Apply adjustment to index 15 (other category)
+            # Use .loc[] for accessing the value, ensuring it's a scalar
+            # Cast to the column's dtype to avoid FutureWarning
+            value_dtype = self.restart.ogsmout_ogqshlgas['value'].dtype
+            self.restart.ogsmout_ogqshlgas.loc[(15, year), 'value'] = (
+                self.restart.ogsmout_ogqshlgas.loc[(15, year), 'value'] + tempscale / 1000
+            ).astype(value_dtype)
 
 
         ###Overwrite Oil and Natural Gas Production by type of production
-        # Crude Oil (1 = Primary Crude Oil, 2 = Secondary Production)
-        for region in list(range(1, 8)):
-
+        # Crude Oil (1 = Primary Crude Oil, 2 = Secondary/EOR Production)
+        # Use pre-computed regional EOR data from self.hist_eor_prod
+        
+        # Get rfqdcrd (crude excluding EOR) for primary production (type=1)
+        temp_rfqdcrd = self.restart.pmmout_rfqdcrd.copy()
+        temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(0) <= 7]
+        temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(1) <= self.parent.history_year]
+        
+        # Get regional EOR data (convert from BBL/D to MMBBL/D)
+        temp_eor_prod = self.hist_eor_prod.copy() / 1000000
+        
+        for region in range(1, 8):
+            # Get ogregprd template for this region and history years
             temp_ogregprd = self.restart.ogsmout_ogregprd.copy()
             temp_ogregprd = temp_ogregprd.loc[temp_ogregprd.index.get_level_values(2) <= self.parent.history_year]
-            temp_ogregprd_not_eor = temp_ogregprd.loc[temp_ogregprd.index.get_level_values(1) == 1].copy()
-            temp_ogregprd_eor = temp_ogregprd.loc[temp_ogregprd.index.get_level_values(1) == 2].copy()
-
-            temp_rfqtdcrd = self.restart.pmmout_rfqtdcrd.copy()
-            temp_rfqtdcrd = temp_rfqtdcrd.loc[temp_rfqtdcrd.index.get_level_values(0) <= 7]
-            temp_rfqtdcrd = temp_rfqtdcrd.loc[temp_rfqtdcrd.index.get_level_values(1) <= self.parent.history_year]
-
-            temp_rfqdcrd = self.restart.pmmout_rfqdcrd.copy()
-            temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(0) <= 7]
-            temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(1) <= self.parent.history_year]
-
-            temp_ogqcrrep = self.restart.ogsmout_ogqcrrep.copy() / 365 # convert from mmb/yr to mmb/d
-            temp_ogqcrrep = temp_ogqcrrep.loc[temp_ogqcrrep.index.get_level_values(0) == 1]
-            temp_ogqcrrep = temp_ogqcrrep.loc[temp_ogqcrrep.index.get_level_values(1) <= self.parent.history_year]
-
-
-            if region <= 4:
-
-                temp_ogregprd_not_eor = temp_ogregprd_not_eor.loc[temp_ogregprd_not_eor.index.get_level_values(0) == region]
-                temp_ogregprd_eor = temp_ogregprd_eor.loc[temp_ogregprd_eor.index.get_level_values(0) == region]
-                temp_rfqtdcrd = temp_rfqtdcrd.loc[temp_rfqtdcrd.index.get_level_values(0) == region]
-                temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(0) == region]
-
-                temp_ogregprd_not_eor[nam.value] = temp_rfqdcrd[nam.value].values
-                temp_ogregprd_eor[nam.value] = temp_rfqtdcrd[nam.value].values - temp_rfqdcrd[nam.value].values
-
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_not_eor)
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_eor)
-
-            elif region == 5:
-
-                temp_ogregprd_not_eor = temp_ogregprd_not_eor.loc[temp_ogregprd_not_eor.index.get_level_values(0) == region]
-                temp_ogregprd_eor = temp_ogregprd_eor.loc[temp_ogregprd_eor.index.get_level_values(0) == region]
-                temp_rfqtdcrd = temp_rfqtdcrd.loc[temp_rfqtdcrd.index.get_level_values(0) == region]
-                temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(0) == region]
-
-                temp_ogregprd_not_eor[nam.value] = temp_rfqdcrd[nam.value].values + temp_ogqcrrep[nam.value].values
-                temp_ogregprd_eor[nam.value] = temp_rfqtdcrd[nam.value].values - temp_rfqdcrd[nam.value].values - temp_ogqcrrep[nam.value].values
-
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_not_eor)
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_eor)
-
-            elif region == 6:
-
-                temp_ogregprd_not_eor = temp_ogregprd_not_eor.loc[temp_ogregprd_not_eor.index.get_level_values(0) == region]
-                temp_ogregprd_eor = temp_ogregprd_eor.loc[temp_ogregprd_eor.index.get_level_values(0) == region]
-                temp_rfqtdcrd = temp_rfqtdcrd.loc[temp_rfqtdcrd.index.get_level_values(0) == 7]
-                temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(0) == 7]
-
-                temp_ogregprd_not_eor[nam.value] = temp_rfqdcrd[nam.value].values
-                temp_ogregprd_eor[nam.value] = temp_rfqtdcrd[nam.value].values - temp_rfqdcrd[nam.value].values
-
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_not_eor)
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_eor)
-
-
-            elif region == 7:
-
-                temp_ogregprd_not_eor = temp_ogregprd_not_eor.loc[temp_ogregprd_not_eor.index.get_level_values(0) == region]
-                temp_ogregprd_eor = temp_ogregprd_eor.loc[temp_ogregprd_eor.index.get_level_values(0) == region]
-                temp_rfqtdcrd = temp_rfqtdcrd.loc[temp_rfqtdcrd.index.get_level_values(0) == 6]
-                temp_rfqdcrd = temp_rfqdcrd.loc[temp_rfqdcrd.index.get_level_values(0) == 6]
-
-                temp_ogregprd_not_eor[nam.value] = temp_rfqdcrd[nam.value].values
-                temp_ogregprd_eor[nam.value] = temp_rfqtdcrd[nam.value].values - temp_rfqdcrd[nam.value].values
-
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_not_eor)
-                self.restart.ogsmout_ogregprd.update(temp_ogregprd_eor)
+            temp_ogregprd_primary = temp_ogregprd.loc[(temp_ogregprd.index.get_level_values(0) == region) & 
+                                                       (temp_ogregprd.index.get_level_values(1) == 1)].copy()
+            temp_ogregprd_eor = temp_ogregprd.loc[(temp_ogregprd.index.get_level_values(0) == region) & 
+                                                   (temp_ogregprd.index.get_level_values(1) == 2)].copy()
+            
+            # Get rfqdcrd and EOR data for this region
+            region_rfqdcrd = temp_rfqdcrd.xs(region, level=0)
+            region_eor = temp_eor_prod.xs(region, level=0)
+            
+            # Update primary production (type=1) with rfqdcrd
+            temp_ogregprd_primary[nam.value] = region_rfqdcrd[nam.value].values
+            self.restart.ogsmout_ogregprd.update(temp_ogregprd_primary.astype(self.restart.ogsmout_ogregprd.dtypes))
+            
+            # Update EOR production (type=2) with hist_eor_prod
+            temp_ogregprd_eor[nam.value] = region_eor[nam.value].values
+            self.restart.ogsmout_ogregprd.update(temp_ogregprd_eor.astype(self.restart.ogsmout_ogregprd.dtypes))
 
 
         ###Update ogqcrrep (EOR, Conv & Tight, Offshore, Alaska, Anwr, Total) history
-        # calculate EOR production
-        temp_excl_eor = self.restart.pmmout_rfqdcrd.copy().loc[([1,2,3,4,5,6,7], slice(None))].groupby(level=1).sum()
-        temp_excl_eor = temp_excl_eor.loc[temp_excl_eor.index <= self.parent.history_year] * 365 # convert to mmbbl/yr
-        temp_incl_eor = self.restart.pmmout_rfqtdcrd.copy().loc[([1,2,3,4,5,6,7], slice(None))].groupby(level=1).sum()
-        temp_incl_eor = temp_incl_eor.loc[temp_incl_eor.index <= self.parent.history_year] * 365 # convert to mmbbl/yr
-        temp_only_eor = temp_incl_eor - temp_excl_eor
+        # Use pre-computed EOR data from self.hist_eor_prod for consistency with ogeorprd/ogregprd
+        temp_eor_prod = self.hist_eor_prod.copy() / 1000000  # Convert BBL/D to MMBBL/D
+        temp_eor_prod = temp_eor_prod.loc[temp_eor_prod.index.get_level_values(0) <= 7]  # Regions 1-7
+        temp_eor_prod = temp_eor_prod.loc[temp_eor_prod.index.get_level_values(1) <= self.parent.history_year]  # History only
+        temp_only_eor = temp_eor_prod.groupby(level=1).sum() * 365  # Sum by year, convert to MMBBL/yr
 
-        # EOR
+        # EOR (category 1)
         temp_only_eor['1'] = 1
         temp_only_eor = (temp_only_eor.set_index(['1'], append=True)).reorder_levels([1,0])
         temp_only_eor.index.names =  self.restart.ogsmout_ogqcrrep.index.names
-        self.restart.ogsmout_ogqcrrep.update(temp_only_eor)
+        self.restart.ogsmout_ogqcrrep.update(temp_only_eor.astype(self.restart.ogsmout_ogqcrrep.dtypes))
+
+        # Calculate temp_excl_eor for Conventional & Tight category (category 2)
+        temp_excl_eor = self.restart.pmmout_rfqdcrd.copy().loc[([1,2,3,4,5,6,7], slice(None))].groupby(level=1).sum()
+        temp_excl_eor = temp_excl_eor.loc[temp_excl_eor.index <= self.parent.history_year] * 365 # convert to mmbbl/yr
 
         # Conventional & Tight
         temp_excl_eor['1'] = 2
         temp_excl_eor = (temp_excl_eor.set_index(['1'], append=True)).reorder_levels([1,0])
         temp_excl_eor.index.names =  self.restart.ogsmout_ogqcrrep.index.names
-        self.restart.ogsmout_ogqcrrep.update(temp_excl_eor)
+        self.restart.ogsmout_ogqcrrep.update(temp_excl_eor.astype(self.restart.ogsmout_ogqcrrep.dtypes))
 
         # Offshore
-        temp_offshore = self.restart.pmmout_rfqdcrd.copy().loc[([8,9,10], slice(None))].groupby(level=1).sum() #includes atlantic, GOM, pacific (excludes alaska offshore)
+        temp_offshore = self.restart.pmmout_rfqtdcrd.copy().loc[([8,9,10], slice(None))].groupby(level=1).sum() #includes atlantic, GOM, pacific (excludes alaska offshore)
         temp_offshore = temp_offshore.loc[temp_offshore.index <= self.parent.history_year] * 365 # convert to mmbbl/yr
         temp_offshore['1'] = 3
         temp_offshore = (temp_offshore.set_index(['1'], append=True)).reorder_levels([1,0])
         temp_offshore.index.names =  self.restart.ogsmout_ogqcrrep.index.names
-        self.restart.ogsmout_ogqcrrep.update(temp_excl_eor)
+        self.restart.ogsmout_ogqcrrep.update(temp_offshore.astype(self.restart.ogsmout_ogqcrrep.dtypes))
 
         # Alaska
-        temp_alaska = self.restart.pmmout_rfqdcrd.copy().loc[([14], slice(None))].groupby(level=1).sum() # Alaska
+        temp_alaska = self.restart.pmmout_rfqtdcrd.copy().loc[([14], slice(None))].groupby(level=1).sum() # Alaska
         temp_alaska = temp_alaska.loc[temp_alaska.index <= self.parent.history_year] * 365 # convert to mmbbl/yr
         temp_alaska['1'] = 4
         temp_alaska = (temp_alaska.set_index(['1'], append=True)).reorder_levels([1,0])
         temp_alaska.index.names =  self.restart.ogsmout_ogqcrrep.index.names
-        self.restart.ogsmout_ogqcrrep.update(temp_excl_eor)
+        self.restart.ogsmout_ogqcrrep.update(temp_alaska.astype(self.restart.ogsmout_ogqcrrep.dtypes))
 
 
         ###Apply adjusted realized natural gas volumes to ogsmout_ogregprd (4 = Conventional gas, 5 = Tight Gas, 6 = Shale Gas, 7 = CBM)
@@ -1393,15 +1466,12 @@ class hist_steo(sub.Submodule):
         temp_realized_conv['2'] = 4
         temp_realized_conv = (temp_realized_conv.set_index(['2'], append=True)).reorder_levels([0,2,1])
         temp_realized_conv.index.names = self.restart.ogsmout_ogregprd.index.names
-        self.restart.ogsmout_ogregprd.update((temp_realized_conv / 1000))
+        self.restart.ogsmout_ogregprd.update((temp_realized_conv / 1000).astype(self.restart.ogsmout_ogregprd.dtypes))
 
-        #Tight Production
+        #Tight Production - recategorize to shale gas (index 6) instead of tight gas (index 5)
+        # Extract tight gas from ogrnagprd (gas type 2) - DO NOT modify ogrnagprd itself
         temp_realized_tight = on_realized_prod_df.loc[on_realized_prod_df['2'] == 2].copy()
         temp_realized_tight = temp_realized_tight.groupby([nam.region_number, '3']).sum()
-        temp_realized_tight['2'] = 5
-        temp_realized_tight = (temp_realized_tight.set_index(['2'], append=True)).reorder_levels([0,2,1])
-        temp_realized_tight.index.names = self.restart.ogsmout_ogregprd.index.names
-        self.restart.ogsmout_ogregprd.update(temp_realized_tight / 1000)
 
         #Onshore Shale Production plus gas production from tight oil plays
         temp_realized_shale = on_realized_prod_df.loc[on_realized_prod_df['2'] == 3].copy()
@@ -1410,11 +1480,13 @@ class hist_steo(sub.Submodule):
         temp_ad_prod = on_ad_prod_df.loc[on_ad_prod_df['2'] == 2].copy()
         temp_ad_prod = temp_ad_prod.groupby([nam.region_number, '3']).sum()
 
-        temp_realized_shale['value'] = temp_realized_shale['value'].values + temp_ad_prod['value'].values
+        # Add tight gas volumes to shale gas (index 6) instead of writing to index 5
+        # Use .add() with fill_value=0 to properly align indices and handle missing combinations
+        temp_realized_shale['value'] = temp_realized_shale['value'].add(temp_ad_prod['value'], fill_value=0).add(temp_realized_tight['value'], fill_value=0)
         temp_realized_shale['2'] = 6
         temp_realized_shale = (temp_realized_shale.set_index(['2'], append=True)).reorder_levels([0,2,1])
         temp_realized_shale.index.names = self.restart.ogsmout_ogregprd.index.names
-        self.restart.ogsmout_ogregprd.update(temp_realized_shale / 1000)
+        self.restart.ogsmout_ogregprd.update((temp_realized_shale / 1000).astype(self.restart.ogsmout_ogregprd.dtypes))
 
         #Coalbed Methane Production
         temp_realized_cbm = on_realized_prod_df.loc[on_realized_prod_df['2'] == 4].copy()
@@ -1422,40 +1494,104 @@ class hist_steo(sub.Submodule):
         temp_realized_cbm['2'] = 7
         temp_realized_cbm = (temp_realized_cbm.set_index(['2'], append=True)).reorder_levels([0,2,1])
         temp_realized_cbm.index.names = self.restart.ogsmout_ogregprd.index.names
-        self.restart.ogsmout_ogregprd.update(temp_realized_cbm / 1000)
-        # Crude production on non-federal lands
-        temp = self.restart.ogsmout_ogcoprd_nonfed.copy()
-        temp = temp.loc[temp.index.get_level_values(1) <= self.parent.history_year]
-        temp = temp.replace(temp.values, 0) # zero for now, in the future will find historical data
-        self.restart.ogsmout_ogcoprd_nonfed.update(temp)
+        self.restart.ogsmout_ogregprd.update((temp_realized_cbm / 1000).astype(self.restart.ogsmout_ogregprd.dtypes))
+
+        # Zero out tight gas (index 5) for all history years after recategorizing to shale gas
+        history_years_mask = self.restart.ogsmout_ogregprd.index.get_level_values(2) <= self.parent.history_year
+        tight_gas_mask = self.restart.ogsmout_ogregprd.index.get_level_values(1) == 5
+        tight_gas_history_mask = history_years_mask & tight_gas_mask
+        self.restart.ogsmout_ogregprd.loc[tight_gas_history_mask, 'value'] = 0
 
         # Crude production on federal lands
-        temp = self.restart.ogsmout_ogcoprd_fed.copy()
-        temp = temp.loc[temp.index.get_level_values(1) <= self.parent.history_year]
-        temp = temp.replace(temp.values, 0) # zero for now, in the future will find historical data
-        self.restart.ogsmout_ogcoprd_fed.update(temp)
+        # Update with historical data from CSV
+        self.restart.ogsmout_ogcoprd_fed.update(self.hist_ogcoprd_fed.astype(self.restart.ogsmout_ogcoprd_fed.dtypes))
 
-        # Natural Gas production on non-federal lands
-        temp = self.restart.ogsmout_ogngprd_nonfed.copy()
-        temp = temp.loc[temp.index.get_level_values(1) <= self.parent.history_year]
-        temp = temp.replace(temp.values, 0) # zero for now, in the future will find historical data
-        self.restart.ogsmout_ogngprd_nonfed.update(temp)
+        # Crude production on non-federal lands
+        # Calculate for onshore regions (1-7) only: nonfed = total - fed
+        temp_ogcoprd = self.restart.ogsmout_ogcoprd.copy()
+        temp_ogcoprd = temp_ogcoprd[temp_ogcoprd.index.get_level_values(0).isin([1, 2, 3, 4, 5, 6, 7])]
+        temp_ogcoprd = temp_ogcoprd[temp_ogcoprd.index.get_level_values(1) <= self.parent.history_year]
+
+        temp_ogcoprd_fed = self.restart.ogsmout_ogcoprd_fed.copy()
+        temp_ogcoprd_fed = temp_ogcoprd_fed[temp_ogcoprd_fed.index.get_level_values(0).isin([1, 2, 3, 4, 5, 6, 7])]
+        temp_ogcoprd_fed = temp_ogcoprd_fed[temp_ogcoprd_fed.index.get_level_values(1) <= self.parent.history_year]
+
+        # Calculate non-federal = total - federal
+        # Use .sub() with fill_value=0 to handle index alignment properly
+        temp_ogcoprd_nonfed = temp_ogcoprd.copy()
+        temp_ogcoprd_nonfed['value'] = temp_ogcoprd['value'].sub(temp_ogcoprd_fed['value'], fill_value=0)
+        temp_ogcoprd_nonfed.loc[temp_ogcoprd_nonfed['value'] < 0, 'value'] = 0.0
+
+        # Update restart variable
+        self.restart.ogsmout_ogcoprd_nonfed.update(temp_ogcoprd_nonfed.astype(self.restart.ogsmout_ogcoprd_nonfed.dtypes))
 
         # Natural Gas production on federal lands
-        temp = self.restart.ogsmout_ogngprd_fed.copy()
-        temp = temp.loc[temp.index.get_level_values(1) <= self.parent.history_year]
-        temp = temp.replace(temp.values, 0) # zero for now, in the future will find historical data
-        self.restart.ogsmout_ogngprd_fed.update(temp)
+        # Update with historical data from CSV
+        self.restart.ogsmout_ogngprd_fed.update(self.hist_ogngprd_fed.astype(self.restart.ogsmout_ogngprd_fed.dtypes))
+
+        # Natural Gas production on non-federal lands
+        # Calculate for onshore regions (1-7) only: nonfed = total - fed
+        # Get total natural gas production for onshore regions (1-7) and historical years (units: bcf/yr)
+        temp_ogngprd = self.restart.ogsmout_ogngprd.copy()
+        temp_ogngprd = temp_ogngprd[temp_ogngprd.index.get_level_values(0).isin([1, 2, 3, 4, 5, 6, 7])]
+        temp_ogngprd = temp_ogngprd[temp_ogngprd.index.get_level_values(1) <= self.parent.history_year]
+
+        # Convert from bcf/yr to tcf/yr
+        temp_ogngprd['value'] = temp_ogngprd['value'] / 1000
+
+        # Get federal natural gas production for same regions/years (already in tcf)
+        temp_ogngprd_fed = self.restart.ogsmout_ogngprd_fed.copy()
+        temp_ogngprd_fed = temp_ogngprd_fed[temp_ogngprd_fed.index.get_level_values(0).isin([1, 2, 3, 4, 5, 6, 7])]
+        temp_ogngprd_fed = temp_ogngprd_fed[temp_ogngprd_fed.index.get_level_values(1) <= self.parent.history_year]
+
+        # Calculate non-federal = total - federal
+        # Use .sub() with fill_value=0 to handle index alignment properly
+        temp_ogngprd_nonfed = temp_ogngprd.copy()
+        temp_ogngprd_nonfed['value'] = temp_ogngprd['value'].sub(temp_ogngprd_fed['value'], fill_value=0)
+        temp_ogngprd_nonfed.loc[temp_ogngprd_nonfed['value'] < 0, 'value'] = 0.0
+
+        # Update restart variable
+        self.restart.ogsmout_ogngprd_nonfed.update(temp_ogngprd_nonfed.astype(self.restart.ogsmout_ogngprd_nonfed.dtypes))
 
         ###Overwrite district-level wells
-        self.restart.ogsmout_ogogwells.update(self.hist_htowells)
-        self.restart.ogsmout_ogogwells.update(self.hist_htgwells)
-        self.restart.ogsmout_ogogwells.update(self.hist_hsgwells)
-        self.restart.ogsmout_ogogwells.update(self.hist_hdryholes)
-        self.restart.ogsmout_ogogwells.update(self.hist_hcowells)
-        self.restart.ogsmout_ogogwells.update(self.hist_hcgwells)
-        self.restart.ogsmout_ogogwells.update(self.hist_hcbmwells)
+        self.restart.ogsmout_ogogwells.update(self.hist_htowells.astype(self.restart.ogsmout_ogogwells.dtypes))
+        self.restart.ogsmout_ogogwells.update(self.hist_htgwells.astype(self.restart.ogsmout_ogogwells.dtypes))
+        self.restart.ogsmout_ogogwells.update(self.hist_hsgwells.astype(self.restart.ogsmout_ogogwells.dtypes))
+        self.restart.ogsmout_ogogwells.update(self.hist_hdryholes.astype(self.restart.ogsmout_ogogwells.dtypes))
+        self.restart.ogsmout_ogogwells.update(self.hist_hcowells.astype(self.restart.ogsmout_ogogwells.dtypes))
+        self.restart.ogsmout_ogogwells.update(self.hist_hcgwells.astype(self.restart.ogsmout_ogogwells.dtypes))
+        self.restart.ogsmout_ogogwells.update(self.hist_hcbmwells.astype(self.restart.ogsmout_ogogwells.dtypes))
 
+        # Recategorize historical tight gas wells (well_type 4) to shale gas wells (well_type 5) in ogogwells
+        # Extract tight gas wells (well_type 4) for history years
+        history_years_mask_wells = self.restart.ogsmout_ogogwells.index.get_level_values(2) <= self.parent.history_year
+        tight_wells_mask = self.restart.ogsmout_ogogwells.index.get_level_values(1) == 4
+        tight_wells_history_mask = history_years_mask_wells & tight_wells_mask
+
+        # Get tight gas well counts for history years
+        temp_tight_wells = self.restart.ogsmout_ogogwells.loc[tight_wells_history_mask].copy()
+        if len(temp_tight_wells) > 0:
+            # Reset index to extract district and year, then set well_type to 5 (shale gas wells)
+            temp_tight_wells = temp_tight_wells.reset_index()
+            temp_tight_wells['2'] = 5  # Change well_type from 4 to 5
+            temp_tight_wells = temp_tight_wells.set_index(['1', '2', '3'])
+            temp_tight_wells.index.names = self.restart.ogsmout_ogogwells.index.names
+            
+            # Get existing shale gas wells (well_type 5) for history years
+            shale_wells_mask = self.restart.ogsmout_ogogwells.index.get_level_values(1) == 5
+            shale_wells_history_mask = history_years_mask_wells & shale_wells_mask
+            temp_shale_wells = self.restart.ogsmout_ogogwells.loc[shale_wells_history_mask].copy()
+            
+            # Add tight gas wells to shale gas wells using .add() for proper index alignment
+            if len(temp_shale_wells) > 0:
+                temp_shale_wells['value'] = temp_shale_wells['value'].add(temp_tight_wells['value'], fill_value=0)
+                self.restart.ogsmout_ogogwells.update(temp_shale_wells.astype(self.restart.ogsmout_ogogwells.dtypes))
+            else:
+                # If no existing shale gas wells, just add the tight gas wells as shale gas wells
+                self.restart.ogsmout_ogogwells.update(temp_tight_wells.astype(self.restart.ogsmout_ogogwells.dtypes))
+            
+            # Zero out tight gas wells (well_type 4) for all history years
+            self.restart.ogsmout_ogogwells.loc[tight_wells_history_mask, 'value'] = 0
 
         ###Overwrite Total historical well count
         for year in self.hist_ognowell.index:
@@ -1463,12 +1599,12 @@ class hist_steo(sub.Submodule):
 
         ###Overwrite NGPL production
         self.restart.ogsmout_ogngplprd.update(self.hist_ngplprd)
-        self.restart.ogsmout_ogngplpp.update(self.hist_eplp)
-        self.restart.ogsmout_ogngplpr.update(self.hist_epllpa)
-        self.restart.ogsmout_ogngplet.update(self.hist_epllea)
-        self.restart.ogsmout_ogngplbu.update(self.hist_epllban)
-        self.restart.ogsmout_ogngplis.update(self.hist_epllbai)
-        self.restart.ogsmout_ogngplprd.update(self.hist_epl2)
+        self.restart.ogsmout_ogngplpp.update(self.hist_eplp.astype(self.restart.ogsmout_ogngplpp.dtypes))
+        self.restart.ogsmout_ogngplpr.update(self.hist_epllpa.astype(self.restart.ogsmout_ogngplpr.dtypes))
+        self.restart.ogsmout_ogngplet.update(self.hist_epllea.astype(self.restart.ogsmout_ogngplet.dtypes))
+        self.restart.ogsmout_ogngplbu.update(self.hist_epllban.astype(self.restart.ogsmout_ogngplbu.dtypes))
+        self.restart.ogsmout_ogngplis.update(self.hist_epllbai.astype(self.restart.ogsmout_ogngplis.dtypes))
+        self.restart.ogsmout_ogngplprd.update(self.hist_epl2.astype(self.restart.ogsmout_ogngplprd.dtypes))
 
         pass
 
@@ -1505,8 +1641,8 @@ class hist_steo(sub.Submodule):
         self.ngpl_shares[nam.ngpl_share_ratio] = self.ngpl_shares[nam.ngpl_share_ratio].fillna(0.0)
 
         #Hardcode Alaska and California
-        self.ngpl_shares.at[3, nam.ngpl_share_ratio] = 0.45
-        self.ngpl_shares.at[6, nam.ngpl_share_ratio] = 0.55
+        self.ngpl_shares.at[3, nam.ngpl_share_ratio] = np.float32(0.45)
+        self.ngpl_shares.at[6, nam.ngpl_share_ratio] = np.float32(0.55)
 
         pass
 
@@ -1563,16 +1699,6 @@ class hist_steo(sub.Submodule):
 
 
         ###Read in STEO Tables
-        #Average Wellhead Price (nominal $/brl)
-        temp_filename = self.steo_setup_table.at[nam.steo_dcrdwhp, nam.filename]
-        self.steo_dcrdwhp = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.region_number])
-        #Convert to 1987 $
-        for year in self.steo_dcrdwhp.columns:
-            self.steo_dcrdwhp[year] = self.steo_dcrdwhp[year].div(self.parent.rest_mc_jpgdp.at[year, nam.value])
-        #Stack DF and format to match restart file
-        self.steo_dcrdwhp = pd.DataFrame(self.steo_dcrdwhp.stack())
-        self.steo_dcrdwhp.index.names = ['1', '2']
-        self.steo_dcrdwhp.columns = [nam.value]
 
         #Domestic Crude Oil Production (MMBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_rfqtdcrd, nam.filename]
@@ -1603,7 +1729,7 @@ class hist_steo(sub.Submodule):
         #NGPL Production (MBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_ogngplprd, nam.filename]
         self.steo_ogngplprd = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_region_number])
-        self.steo_ogngplprd = self.steo_ogngplprd.drop([nam.ngpl_region_name], axis = 1)
+        self.steo_ogngplprd = self.steo_ogngplprd.drop(columns=[nam.ngpl_region_name, nam.ngpl_region_description], errors='ignore')
         self.steo_ogngplprd = self.steo_ogngplprd.div(1000, axis = 1) #Convert to MMBBL/D
         #Assign production to HSM districts
         self.steo_ogngplprd = com.assign_ngpls_to_district(self.steo_ogngplprd, self.ngpl_shares, self.parent.steo_years)
@@ -1615,7 +1741,7 @@ class hist_steo(sub.Submodule):
         #Ethane Production (MBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_ogngplet, nam.filename]
         self.steo_ogngplet = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_region_number])
-        self.steo_ogngplet = self.steo_ogngplet.drop([nam.ngpl_region_name], axis=1)
+        self.steo_ogngplet = self.steo_ogngplet.drop(columns=[nam.ngpl_region_name, nam.ngpl_region_description], errors='ignore')
         self.steo_ogngplet = self.steo_ogngplet.div(1000, axis=1)  # Convert to MMBBL/D
         #Assign production to HSM districts
         self.steo_ogngplet = com.assign_ngpls_to_district(self.steo_ogngplet, self.ngpl_shares, self.parent.steo_years)
@@ -1627,7 +1753,7 @@ class hist_steo(sub.Submodule):
         #Propane Production (MBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_ogngplpr, nam.filename]
         self.steo_ogngplpr = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_region_number])
-        self.steo_ogngplpr = self.steo_ogngplpr.drop([nam.ngpl_region_name], axis=1)
+        self.steo_ogngplpr = self.steo_ogngplpr.drop(columns=[nam.ngpl_region_name, nam.ngpl_region_description], errors='ignore')
         self.steo_ogngplpr = self.steo_ogngplpr.div(1000, axis=1)  # Convert to MMBBL/D
         #Assign production to HSM districts
         self.steo_ogngplpr = com.assign_ngpls_to_district(self.steo_ogngplpr, self.ngpl_shares, self.parent.steo_years)
@@ -1639,7 +1765,7 @@ class hist_steo(sub.Submodule):
         #Butane Production (MBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_ogngplbu, nam.filename]
         self.steo_ogngplbu = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_region_number])
-        self.steo_ogngplbu = self.steo_ogngplbu.drop([nam.ngpl_region_name], axis=1)
+        self.steo_ogngplbu = self.steo_ogngplbu.drop(columns=[nam.ngpl_region_name, nam.ngpl_region_description], errors='ignore')
         self.steo_ogngplbu = self.steo_ogngplbu.div(1000, axis=1)  # Convert to MMBBL/D
         #Assign production to HSM districts
         self.steo_ogngplbu = com.assign_ngpls_to_district(self.steo_ogngplbu, self.ngpl_shares, self.parent.steo_years)
@@ -1651,7 +1777,7 @@ class hist_steo(sub.Submodule):
         #Isobutane Production (MBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_ogngplis, nam.filename]
         self.steo_ogngplis = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_region_number])
-        self.steo_ogngplis = self.steo_ogngplis.drop([nam.ngpl_region_name], axis=1)
+        self.steo_ogngplis = self.steo_ogngplis.drop(columns=[nam.ngpl_region_name, nam.ngpl_region_description], errors='ignore')
         self.steo_ogngplis = self.steo_ogngplis.div(1000, axis=1)  # Convert to MMBBL/D
         #Assign production to HSM districts
         self.steo_ogngplis = com.assign_ngpls_to_district(self.steo_ogngplis, self.ngpl_shares, self.parent.steo_years)
@@ -1663,7 +1789,7 @@ class hist_steo(sub.Submodule):
         #Pentanes Production (MBBL/D)
         temp_filename = self.steo_setup_table.at[nam.steo_ogngplpp, nam.filename]
         self.steo_ogngplpp = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_region_number])
-        self.steo_ogngplpp = self.steo_ogngplpp.drop([nam.ngpl_region_name], axis=1)
+        self.steo_ogngplpp = self.steo_ogngplpp.drop(columns=[nam.ngpl_region_name, nam.ngpl_region_description], errors='ignore')
         self.steo_ogngplpp = self.steo_ogngplpp.div(1000, axis=1)  # Convert to MMBBL/D
         #Assign production to HSM districts
         self.steo_ogngplpp = com.assign_ngpls_to_district(self.steo_ogngplpp, self.ngpl_shares, self.parent.steo_years)
@@ -1686,12 +1812,15 @@ class hist_steo(sub.Submodule):
         self.restart.pmmout_rfqtdcrd : df
             Total crude production by HSM region
         """
-        ###Domestic Crude Oil Production (MMBBL/D) - Do this up front to get prices, will need to be done a second time at end of run
-        self.restart.pmmout_rfqtdcrd.update(self.steo_rfqtdcrd)
+        #Explicitly cast data to NumPy Float32
+        # Use pd.to_numeric to handle any non-numeric values (e.g., column names that may have been stacked)
+        self.steo_rfqtdcrd['value'] = pd.to_numeric(self.steo_rfqtdcrd['value'], errors='coerce').astype(np.float32)
 
+        ###Domestic Crude Oil Production (MMBBL/D) - Do this up front to get prices, will need to be done a second time at end of run
+        self.restart.pmmout_rfqtdcrd.update(self.steo_rfqtdcrd.astype(self.restart.pmmout_rfqtdcrd.dtypes))
 
         ###Domestic Crude Oil Production (MMBBL/D) - EOR
-        self.restart.pmmout_rfqdcrd.update(self.steo_rfqtdcrd)
+        self.restart.pmmout_rfqdcrd.update(self.steo_rfqtdcrd.astype(self.restart.pmmout_rfqdcrd.dtypes))
 
         #Set Domestic Crude Oil Production for steo years based on history year ratio
         temp_rfqtdcrd = self.restart.pmmout_rfqtdcrd.copy()
@@ -1712,10 +1841,7 @@ class hist_steo(sub.Submodule):
         temp_rfqdcrd = temp_rfqdcrd.merge(temp_eor_ratio, how = 'left', left_on = '1', right_index = True)
         temp_rfqdcrd[nam.value] = temp_rfqdcrd[nam.value] * temp_rfqdcrd['eor_ratio']
         temp_rfqdcrd = temp_rfqdcrd.set_index(['1', '2'])
-        self.restart.pmmout_rfqdcrd.update(temp_rfqdcrd[nam.value])
-
-        ###Average Wellhead Price (nominal $/brl)
-        self.restart.pmmout_dcrdwhp.update(self.steo_dcrdwhp)
+        self.restart.pmmout_rfqdcrd.update(temp_rfqdcrd[nam.value].astype(self.restart.pmmout_rfqdcrd.dtypes))
 
         pass
 
@@ -1723,47 +1849,14 @@ class hist_steo(sub.Submodule):
     def load_steo_adjustments(self):
         """Load in STEO overwrite values.
 
-            * Load in STEO overwrite values for when STEO year production values are projected, and need to be frozen for the side cases
-            * Load in Crude Production by HSM region, natural gas production, and total NGPL production
+        This method is kept for backward compatibility but no longer loads any data.
+        STEO overwrites for side cases are now handled by apply_side_case_steo_overwrites()
+        in prepare_results.py, which uses files from input/side_case_owrites/ directory.
 
         Returns
         ------
-        self.steo_o_rfqtdcrd : df
-            DataFrame of STEO overwrite values for crude oil production
-
-        self.steo_o_na_ng : df
-            DataFrame of STEO overwrite values for non-associated natural gas production
-
-        self.steo_o_ad_ng : df
-            DataFrame of STEO overwrite values for associated dissolved natural gas production
-
-        self.steo_o_ngpls : df
-            DataFrame of STEO overwrite values for NGPL production
+        None
         """
-        #Crude Production
-        temp_filename = self.steo_setup_table.at[nam.steo_owrite_rfqtdcrd, nam.filename]
-        self.steo_o_rfqtdcrd = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.region_number])
-        #Stack DF and format to match restart file
-        self.steo_o_rfqtdcrd = pd.DataFrame(self.steo_o_rfqtdcrd.stack())
-        self.steo_o_rfqtdcrd.index.names = ['1', '2']
-        self.steo_o_rfqtdcrd.columns = [nam.value]
-
-        #NA Natural Gas
-        temp_filename = self.steo_setup_table.at[nam.steo_owrite_na_ng, nam.filename]
-        self.steo_o_na_ng = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.district_number])
-
-        #AD Natural Gas
-        temp_filename = self.steo_setup_table.at[nam.steo_owrite_ad_ng, nam.filename]
-        self.steo_o_ad_ng = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.district_number])
-
-        #Canadian Natural Gas Production
-        temp_filename = self.steo_setup_table.at[nam.steo_owrite_can, nam.filename]
-        self.steo_o_can = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1)
-
-        #NGPLS
-        temp_filename = self.steo_setup_table.at[nam.steo_owrite_ngpls, nam.filename]
-        self.steo_o_ngpls = com.read_dataframe(self.parent.steo_input_path + temp_filename, skiprows=1, index_col=[nam.ngpl_type])
-
         pass
 
 
@@ -1774,6 +1867,7 @@ class hist_steo(sub.Submodule):
             * pmmout_rfqtdcrd row 15 is for Onshore/Offshore production
             * pmmout_rfqtdcrd row 16 is for total production
             * pmmout_dcrdwhp row 14 is for national weighted average price
+
 
         Returns
         ------
@@ -1791,7 +1885,7 @@ class hist_steo(sub.Submodule):
         temp[1] = 14
         temp = temp.set_index(1, append=True)
         temp = temp.reorder_levels([1, 0])
-        self.restart.pmmout_rfqtdcrd.update(temp)
+        self.restart.pmmout_rfqtdcrd.update(temp.astype(self.restart.pmmout_rfqtdcrd.dtypes))
 
         #Get Onshore/Offshore production sum
         temp = self.restart.pmmout_rfqtdcrd.copy()
@@ -1800,7 +1894,7 @@ class hist_steo(sub.Submodule):
         temp[1] = 15
         temp = temp.set_index(1, append = True)
         temp = temp.reorder_levels([1,0])
-        self.restart.pmmout_rfqtdcrd.update(temp)
+        self.restart.pmmout_rfqtdcrd.update(temp.astype(self.restart.pmmout_rfqtdcrd.dtypes))
 
         #Get total production sum
         temp = self.restart.pmmout_rfqtdcrd.copy()
@@ -1809,7 +1903,7 @@ class hist_steo(sub.Submodule):
         temp[1] = 16
         temp = temp.set_index(1, append = True)
         temp = temp.reorder_levels([1,0])
-        self.restart.pmmout_rfqtdcrd.update(temp)
+        self.restart.pmmout_rfqtdcrd.update(temp.astype(self.restart.pmmout_rfqtdcrd.dtypes))
 
 
         ###Average Wellhead Price (nominal $/brl) Weighted Average for national price
@@ -1833,28 +1927,7 @@ class hist_steo(sub.Submodule):
         temp_price[1] = 14
         temp_price = temp_price.set_index(1, append=True)
         temp_price = temp_price.reorder_levels([1, 0])
-        self.restart.pmmout_dcrdwhp.update(temp_price)
+        self.restart.pmmout_dcrdwhp.update(temp_price.astype(self.restart.pmmout_dcrdwhp.dtypes))
 
         pass
 
-    def update_2022(self):
-        """
-        This function updates 2022 history year only. this is necessary because AEO2024 was skipped and thus 2022
-        was not updated in the restart file and won't be updated without specific intervention by this function
-
-        Returns
-        -------
-
-        """
-        # Crude Oil Production by district and oil type
-        temp = self.parent.restart.ogsmout_ogoilprd.copy()
-        temp = temp[temp.index.isin([1, 2, 3, 4], level=1)]
-        temp = temp[temp.index.isin([int(2022)], level=2)]
-        temp = temp.groupby(level = [0,2]).sum()
-        temp[nam.well_type] = 5
-        temp = temp.set_index(nam.well_type, append = True)
-        temp = temp.reorder_levels([0, 2, 1])
-        temp.index.names = self.parent.restart.ogsmout_ogoilprd.index.names
-        self.parent.restart.ogsmout_ogoilprd.update(temp)
-
-        pass

@@ -22,12 +22,10 @@ which is maintained by the Integration team. The module operates as follows:
     7. Each instantiated variable is called from the **restart_unf** class dictionary, re-sized to match restart file formatting,
        and then written to the appropriate restart variable.
 
-    8. A new restart file, restart_HSMOUT.unf, is produced and written to the model's parent directory, which is picked up by NEMS.
-
 
 Input Files
 -----------
-    * restart_HSMIN.unf - Restart file from NEMS in UNF format
+    * restart.npz - Restart file from NEMS in npz format
 
 
 Model Functions and Class Methods
@@ -146,14 +144,23 @@ Restart Submodule Class Methods
 _______________________________
 """
 import os
+import sys
 import pandas as pd
 import numpy as np
 import common as com
 #import self.parent.pyfiler1
 from hsm import logging
 
-logger = logging.getLogger('module.py')
+curdir = os.path.dirname(os.path.abspath(__file__))
+modeldir = os.path.dirname(curdir)
+maindir = os.path.join(modeldir, "main")
 
+if maindir not in sys.path:
+    sys.path.insert(0, maindir)
+
+import restart_load
+
+logger = logging.getLogger('module.py')
 
 class Restart:
     def __init__(self, parent):
@@ -163,6 +170,7 @@ class Restart:
         self.df_dict_out            = {}  #:
         self.int_dict_in            = {}  #:
         self.int_dict_out           = {}  #:
+        self.param_mappings         = None  #: Cached parameter mapping dictionaries
 
         # parameters
         self.parametr_ncrl          = self.add_int('parametr_ncrl'         , self.parent.pyfiler1.utils.ncrl            , output=False)  # ! parameter, not restart variable
@@ -308,14 +316,11 @@ class Restart:
         pass
 
 
-    def setup(self, temp_filename, temp_rest):
+    def setup(self, temp_rest):
         '''Setup function for reading the restart file into HSM.
 
         Parameters
         ----------
-        temp_filename : str
-            Filename for abbreviated HSM input Restart file
-
         temp_rest : str
             Filename for main NEMS restart file
 
@@ -324,10 +329,10 @@ class Restart:
         None
         '''
         self.output_path = self.parent.output_path
-        self.run(temp_filename, temp_rest)
+        self.run(temp_rest)
 
 
-    def run(self,temp_filename, temp_rest):
+    def run(self, temp_rest):
         '''Calls the read_filer method from self.parent.pyfiler1 and loads the restart file into HSM.
 
             * If main NEMS restart file exist, read abbreviated restart file
@@ -337,26 +342,24 @@ class Restart:
 
         Parameters
         ----------
-        temp_filename
+        temp_rest
 
         Returns
         -------
         Restart File
         self.__dict__
         '''
+        import time
+
         if self.parent.integrated_switch == True:
             pass
         else:
             if os.path.exists(temp_rest):
-                self.parent.pyfiler1.utils.read_filer(temp_filename)
+                #self.parent.pyfiler1.utils.read_filer(temp_filename)
+                restart_load.read_restart_file(temp_rest, self.parent.pyfiler1)
             else:
-                restartunf = open(temp_rest, "w")
-                restartunf.write('')
-                restartunf.close()
-                self.parent.pyfiler1.utils.read_filer(temp_filename) 
-        
+                print("Uh Oh, Spaghettios")
 
-        com.print_out('running restart submodule')
         for key, value in self.int_dict_in.items():
             self.__dict__[key] = int(value)
         for key, value in self.df_dict_in.items():
@@ -365,7 +368,7 @@ class Restart:
             df1 = com.array_to_df(value)
             temp_index = df2.index.copy()
             df2.index = df1.index
-            df2.update(df1)
+            df2.update(df1.astype(df2.dtypes))
             df2.index = temp_index
             self.__dict__[key] = df2
         pass
@@ -464,7 +467,13 @@ class Restart:
             setattr(nested_method, var, value)
 
         #Debugger
-        if (self.parent.current_year == self.parent.final_aeo_year) & (self.parametr_ncrl == 1):
+        if self.parent.debug_restart_yearly_switch:
+            # Print debug output every year when flag is True
+            logger.info('Debug Restart File Start')
+            self.dump_restart()
+            logger.info('Debug Restart File End')
+        elif (self.parent.current_year == self.parent.final_aeo_year) & (self.parametr_ncrl == 1):
+            # Original behavior: only print in final year when flag is False
             logger.info('Debug Restart File Start')
             self.dump_restart()
             logger.info('Debug Restart File End')
@@ -474,79 +483,359 @@ class Restart:
         pass
 
 
-    def dump_restart(self):
-        """Dumps restart file to .xlsx debug file.
+    def _load_parameter_mappings(self):
+        """
+        Load parameter mapping tables from CSV files and cache them.
+        
+        Returns a tuple of (mappings_dict, index_names_dict):
+        - mappings_dict: keys are parameter names (e.g., 'soplay_ogqshloil')
+          and values are dictionaries mapping index values to descriptions.
+        - index_names_dict: keys are parameter names and values are the first
+          column name from each CSV file.
+        
+        The mappings are cached in self.param_mappings to avoid redundant file I/O.
+        """
+        if self.param_mappings is not None:
+            return self.param_mappings['mappings'], self.param_mappings['index_names']
+        
+        param_path = os.path.join(self.parent.variable_mapping_input_path, 'parameter_ref_tables')
+        ref_params = [f.split('.')[0] for f in os.listdir(param_path)]
+        
+        mappings = {}
+        index_names = {}
+        
+        for param in ref_params:
+            df = pd.read_csv(os.path.join(param_path, f"{param}.csv"))
+            mappings[param] = dict(zip(df.iloc[:, 0], df.iloc[:, 1]))
+            index_names[param] = df.columns[0]
+        
+        self.param_mappings = {
+            'mappings': mappings,
+            'index_names': index_names
+        }
+        
+        return mappings, index_names
 
+
+    def _get_restart_dump_start_year(self):
+        """
+        Read restart dump start year parameter from setup.csv.
+        
         Returns
         -------
-        None
+        int | None
+            Start year for filtering restart dump output, or None if not set.
         """
+        try:
+            restart_dump_start_year_str = str(self.parent.setup_table.at['restart_dump_start_year', 'filename']).strip()
+            if restart_dump_start_year_str and restart_dump_start_year_str.lower() not in ['', 'none', 'nan']:
+                year = int(restart_dump_start_year_str)
+                logger.info(f'Restart dump filtering enabled: start_year = {year}')
+                return year
+            else:
+                logger.info('Restart dump filtering disabled: parameter is empty')
+                return None
+        except (KeyError, ValueError) as e:
+            # Parameter not found or invalid, default to no filtering
+            logger.info(f'Restart dump filtering disabled: {type(e).__name__} - {str(e)}')
+            return None
 
-        writer = pd.ExcelWriter(self.output_path + 'restart_file_debug\\' + 'hsm_rest_all.xlsx')
+
+    def _filter_dataframe_by_year(self, df, start_year):
+        """
+        Filter DataFrame columns to keep only year columns >= start_year.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to filter
+        start_year : int | None
+            Start year for filtering. If None, returns df unchanged.
+            
+        Returns
+        -------
+        pd.DataFrame
+            Filtered DataFrame with year columns >= start_year
+        """
+        if start_year is None:
+            return df
+        
+        # Handle MultiIndex columns - year values are typically in the last level
+        if isinstance(df.columns, pd.MultiIndex):
+            # Get the last level of the MultiIndex (where year values typically are)
+            year_level = df.columns.nlevels - 1
+            year_values = df.columns.get_level_values(year_level)
+            
+            # Identify year columns and filter
+            cols_to_keep = []
+            for idx, col in enumerate(df.columns):
+                try:
+                    # Get the year value from the last level
+                    year_val = year_values[idx]
+                    # Handle both int and string representations
+                    if isinstance(year_val, str):
+                        year_int = int(year_val.strip())
+                    else:
+                        year_int = int(year_val)
+                    if 1900 <= year_int <= 2100:
+                        # This is a year column - only keep if >= start_year
+                        if year_int >= start_year:
+                            cols_to_keep.append(col)
+                    else:
+                        # Not a year column - keep it
+                        cols_to_keep.append(col)
+                except (ValueError, TypeError, AttributeError):
+                    # Column value is not a numeric year - keep it (it's not a year column)
+                    cols_to_keep.append(col)
+            
+            return df[cols_to_keep]
+        else:
+            # Regular Index columns
+            year_cols = []
+            for col in df.columns:
+                try:
+                    # Try to convert column name to int (handle both int and string representations)
+                    if isinstance(col, str):
+                        col_int = int(col.strip())
+                    else:
+                        col_int = int(col)
+                    if 1900 <= col_int <= 2100:
+                        year_cols.append(col)
+                except (ValueError, TypeError, AttributeError):
+                    # Column name is not a numeric year, skip
+                    pass
+            
+            if year_cols:
+                # Filter columns: remove year columns before start_year
+                cols_to_keep = [col for col in df.columns if col not in year_cols]
+                for col in year_cols:
+                    try:
+                        if isinstance(col, str):
+                            col_year = int(col.strip())
+                        else:
+                            col_year = int(col)
+                        if col_year >= start_year:
+                            cols_to_keep.append(col)
+                    except (ValueError, TypeError, AttributeError):
+                        # Skip if can't convert
+                        pass
+                return df[cols_to_keep]
+        
+        return df
 
 
-        ###Outputs
-        self.ogsmout_ogcnpprd.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogcnpprd')
-        self.ogsmout_ogrnagprd.unstack(2).to_excel( writer, sheet_name='ogsmout_ogrnagprd')
-        self.ogsmout_cnadgprd.unstack(1).to_excel(  writer, sheet_name='ogsmout_cnadgprd')
-        self.ogsmout_cnenagprd.unstack(1).to_excel( writer, sheet_name='ogsmout_cnenagprd')
-        self.ogsmout_ns_start.unstack(1).to_excel(  writer, sheet_name='ogsmout_ns_start')
-        self.ogsmout_ogadgprd.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogadgprd')
-        self.ogsmout_ogco245q.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogco245q')
-        self.ogsmout_ogco2inj.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogco2inj')
-        self.ogsmout_ogco2rec.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogco2rec')
-        self.ogsmout_ogcoprd.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogcoprd')
-        self.ogsmout_ogcoprdgom.unstack(1).to_excel(writer, sheet_name='ogsmout_ogcoprdgom')
-        self.ogsmout_ogcowhp.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogcowhp')
-        self.ogsmout_ogcrdheat.unstack(1).to_excel( writer, sheet_name='ogsmout_ogcrdheat')
-        self.ogsmout_ogcrdprd.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogcrdprd')
-        self.ogsmout_ogcruderef.unstack(2).to_excel(writer, sheet_name='ogsmout_ogcruderef')
-        self.ogsmout_ogdngprd.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogdngprd')
-        self.ogsmout_ogenagprd.unstack(2).to_excel( writer, sheet_name='ogsmout_ogenagprd')
-        self.ogsmout_ogeorprd.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogeorprd')
-        self.ogsmout_oggrowfac.T.to_excel(          writer, sheet_name='ogsmout_oggrowfac')
-        self.ogsmout_ogjobs.T.to_excel(             writer, sheet_name='ogsmout_ogjobs')
-        self.ogsmout_ognglak.T.to_excel(            writer, sheet_name='ogsmout_ognglak')
-        self.ogsmout_ogngplbu.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogngplbu')
-        self.ogsmout_ogngplet.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogngplet')
-        self.ogsmout_ogngplis.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogngplis')
-        self.ogsmout_ogngplpp.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogngplpp')
-        self.ogsmout_ogngplpr.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogngplpr')
-        self.ogsmout_ogngplprd.unstack(1).to_excel( writer, sheet_name='ogsmout_ogngplprd')
-        self.ogsmout_ogngprd.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogngprd')
-        self.ogsmout_ogngprdgom.unstack(1).to_excel(writer, sheet_name='ogsmout_ogngprdgom')
-        self.ogsmout_ogngwhp.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogngwhp')
-        self.ogsmout_ognowell.T.to_excel(           writer, sheet_name='ogsmout_ognowell')
-        self.ogsmout_ogogwells.unstack(2).to_excel( writer, sheet_name='ogsmout_ogogwells')
-        self.ogsmout_ogoilprd.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogoilprd')
-        self.ogsmout_ogpcrwhp.T.to_excel(           writer, sheet_name='ogsmout_ogpcrwhp')
-        self.ogsmout_ogpngwhp.T.to_excel(           writer, sheet_name='ogsmout_ogpngwhp')
-        self.ogsmout_ogprcexp.T.to_excel(           writer, sheet_name='ogsmout_ogprcexp')
-        self.ogsmout_ogprcoak.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogprcoak')
-        self.ogsmout_ogprdad.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogprdad')
-        self.ogsmout_ogprdadof.unstack(1).to_excel( writer, sheet_name='ogsmout_ogprdadof')
-        self.ogsmout_ogprdoff.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogprdoff')
-        self.ogsmout_ogprdugr.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogprdugr')
-        self.ogsmout_ogqcrrep.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogqcrrep')
-        self.ogsmout_ogqngrep.unstack(1).to_excel(  writer, sheet_name='ogsmout_ogqngrep')
-        self.ogsmout_ogqshlgas.unstack(1).to_excel( writer, sheet_name='ogsmout_ogqshlgas')
-        self.ogsmout_ogqshloil.unstack(1).to_excel( writer, sheet_name='ogsmout_ogqshloil')
-        self.ogsmout_ogregprd.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogregprd')
-        self.ogsmout_ogsrl48.unstack(2).to_excel(   writer, sheet_name='ogsmout_ogsrl48')
-        self.ogsmout_ogtechon.unstack(2).to_excel(  writer, sheet_name='ogsmout_ogtechon')
-        self.ogsmout_ogwellsl48.unstack(2).to_excel(writer, sheet_name='ogsmout_ogwellsl48')
-        self.pmmout_dcrdwhp.unstack(1).to_excel(    writer, sheet_name='pmmout_dcrdwhp')
-        self.pmmout_rfqdcrd.unstack(1).to_excel(    writer, sheet_name='pmmout_rfqdcrd')
-        self.pmmout_rfqtdcrd.unstack(1).to_excel(   writer, sheet_name='pmmout_rfqtdcrd')
-        self.ccatsdat_dem_eor.unstack(1).to_excel(   writer, sheet_name='ccatsdat_dem_eor')
-        self.ccatsdat_cst_eor.unstack(1).to_excel(   writer, sheet_name='ccatsdat_cst_eor')
-        self.ogsmout_play_map.to_excel(   writer, sheet_name='ogsmout_play_map')
-        self.ogsmout_ogcoprd_fed.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogcoprd_fed')
-        self.ogsmout_ogcoprd_nonfed.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogcoprd_nonfed')
-        self.ogsmout_ogngprd_fed.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogngprd_fed')
-        self.ogsmout_ogngprd_nonfed.unstack(1).to_excel(   writer, sheet_name='ogsmout_ogngprd_nonfed')
-        self.qmore_qngpin.unstack(1).to_excel(   writer, sheet_name='qmore_qngpin')
-        self.ogsmout_ngpco2em.unstack(1).to_excel(writer, sheet_name='ogsmout_ngpco2em')
+    def _write_variable_csv(self, df, var, description, units, output_dir):
+        """
+        Write DataFrame to CSV file with description header.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to write
+        var : str
+            Variable name
+        description : str
+            Variable description
+        units : str
+            Variable units
+        output_dir : str
+            Output directory path
+        """
+        filename = var.replace("ogsmout_", "")
+        out_path = os.path.join(output_dir, f"{filename}.csv")
+        
+        # Write description as first row, then actual data
+        try:
+            with open(out_path, 'w', newline='', encoding='utf-8') as f:
+                f.write(f"{description}, {units}\n")
+                df.to_csv(f, index=True)
+        except (PermissionError, OSError, IOError) as e:
+            logger.warning(f"Failed to write file '{out_path}' for variable '{var}': {str(e)}. Skipping this file and continuing with remaining files.")
+            return
 
-        #Close the Pandas Excel writer and output the .xlsx file
-        writer.close()
+
+    def _process_single_variable(self, var, df, mapping, sub_dict, index_names, start_year, output_dir, ref_params):
+        """
+        Process a single variable: filter, transform, and write to CSV.
+        
+        Parameters
+        ----------
+        var : str
+            Variable name
+        df : pd.DataFrame
+            DataFrame to process (already reset_index)
+        mapping : pd.DataFrame
+            Master mapping table with variable metadata
+        sub_dict : dict
+            Parameter mappings dictionary
+        index_names : dict
+            Index names dictionary
+        start_year : int | None
+            Start year for filtering
+        output_dir : str
+            Output directory path
+        ref_params : list
+            List of reference parameter names
+        """
+        # Filter by start year if parameter is set
+        # This must happen before column renaming to identify year columns correctly
+        if start_year is not None:
+            df = self._filter_dataframe_by_year(df, start_year)
+        
+        # Get metadata for current variable
+        meta = mapping[mapping['variable'] == var].iloc[0]
+        dim = meta['dimension']
+        description = meta['description']
+        units = meta['UNITS']
+        index_vars = [meta[f'index_{i}'] for i in range(dim)]
+        renamed_indices = [index_names.get(idx, idx) for idx in index_vars]
+        
+        # Update DataFrame headers
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(-1)
+        
+        df.columns = renamed_indices[:-1] + df.columns.tolist()[len(renamed_indices) - 1:]
+        
+        # Replace index values with readable names
+        for i in range(dim - 1):
+            df.iloc[:, i] = df.iloc[:, i].ffill()
+            if index_vars[i] in ref_params:
+                # Convert to object dtype before mapping to avoid FutureWarning when mapping returns strings
+                col = df.columns[i]
+                df = df.astype({col: "object"})
+                df[col] = df[col].map(sub_dict[index_vars[i]]).fillna(df[col])
+        
+        # Write to CSV
+        self._write_variable_csv(df, var, description, units, output_dir)
+
+
+    def dump_restart(self):
+        """
+        Processes and reformats internal DataFrames by substituting index values with
+        human-readable labels from reference CSVs, then writes each resulting table
+        to a separate CSV file for inspection or debugging.
+
+        This method performs the following:
+        - Loads a mapping file (master_table_selection.csv) to get metadata for each variable (description, dimensions, index types).
+        - Reads substitution tables (CSV files named after index types) to map numeric codes to names.
+        - Applies necessary `unstack` or transpose operations on data.
+        - Substitutes index codes with readable names using the lookup dictionaries.
+        - Writes each formatted DataFrame to its own CSV file, with a description in the first row.
+        """
+        # Get restart dump start year parameter
+        restart_dump_start_year = self._get_restart_dump_start_year()
+
+        # Load mapping file, update this file if adding a variable to debug, add parameter reference table if new index is included
+        mapping = pd.read_csv(os.path.join(self.parent.variable_mapping_input_path, 'master_table_selection.csv'))
+
+        # Define how each output DataFrame is reshaped
+        # Grouped by transformation type for clarity
+        dfs = {
+            # unstack(1) transformations
+            "ogsmout_ogcnpprd": self.ogsmout_ogcnpprd.unstack(1),
+            "ogsmout_cnadgprd": self.ogsmout_cnadgprd.unstack(1),
+            "ogsmout_cnenagprd": self.ogsmout_cnenagprd.unstack(1),
+            "ogsmout_ns_start": self.ogsmout_ns_start.unstack(1),
+            "ogsmout_ogcoprd": self.ogsmout_ogcoprd.unstack(1),
+            "ogsmout_ogcoprdgom": self.ogsmout_ogcoprdgom.unstack(1),
+            "ogsmout_ogcowhp": self.ogsmout_ogcowhp.unstack(1),
+            "ogsmout_ogcrdheat": self.ogsmout_ogcrdheat.unstack(1),
+            "ogsmout_ogngplbu": self.ogsmout_ogngplbu.unstack(1),
+            "ogsmout_ogngplet": self.ogsmout_ogngplet.unstack(1),
+            "ogsmout_ogngplis": self.ogsmout_ogngplis.unstack(1),
+            "ogsmout_ogngplpp": self.ogsmout_ogngplpp.unstack(1),
+            "ogsmout_ogngplpr": self.ogsmout_ogngplpr.unstack(1),
+            "ogsmout_ogngplprd": self.ogsmout_ogngplprd.unstack(1),
+            "ogsmout_ogngprd": self.ogsmout_ogngprd.unstack(1),
+            "ogsmout_ogngprdgom": self.ogsmout_ogngprdgom.unstack(1),
+            "ogsmout_ogngwhp": self.ogsmout_ogngwhp.unstack(1),
+            "ogsmout_ogprcoak": self.ogsmout_ogprcoak.unstack(1),
+            "ogsmout_ogprdad": self.ogsmout_ogprdad.unstack(1),
+            "ogsmout_ogprdadof": self.ogsmout_ogprdadof.unstack(1),
+            "ogsmout_ogqcrrep": self.ogsmout_ogqcrrep.unstack(1),
+            "ogsmout_ogqngrep": self.ogsmout_ogqngrep.unstack(1),
+            "ogsmout_ogqshlgas": self.ogsmout_ogqshlgas.unstack(1),
+            "ogsmout_ogqshloil": self.ogsmout_ogqshloil.unstack(1),
+            "pmmout_dcrdwhp": self.pmmout_dcrdwhp.unstack(1),
+            "pmmout_rfqdcrd": self.pmmout_rfqdcrd.unstack(1),
+            "pmmout_rfqtdcrd": self.pmmout_rfqtdcrd.unstack(1),
+            "ccatsdat_dem_eor": self.ccatsdat_dem_eor.unstack(1),
+            "ccatsdat_cst_eor": self.ccatsdat_cst_eor.unstack(1),
+            "ogsmout_ogcoprd_fed": self.ogsmout_ogcoprd_fed.unstack(1),
+            "ogsmout_ogcoprd_nonfed": self.ogsmout_ogcoprd_nonfed.unstack(1),
+            "ogsmout_ogngprd_fed": self.ogsmout_ogngprd_fed.unstack(1),
+            "ogsmout_ogngprd_nonfed": self.ogsmout_ogngprd_nonfed.unstack(1),
+            "qmore_qngpin": self.qmore_qngpin.unstack(1),
+            "ogsmout_ngpco2em": self.ogsmout_ngpco2em.unstack(1),
+            # unstack(2) transformations
+            "ogsmout_ogrnagprd": self.ogsmout_ogrnagprd.unstack(2),
+            "ogsmout_ogadgprd": self.ogsmout_ogadgprd.unstack(2),
+            "ogsmout_ogco245q": self.ogsmout_ogco245q.unstack(2),
+            "ogsmout_ogco2inj": self.ogsmout_ogco2inj.unstack(2),
+            "ogsmout_ogco2rec": self.ogsmout_ogco2rec.unstack(2),
+            "ogsmout_ogcrdprd": self.ogsmout_ogcrdprd.unstack(2),
+            "ogsmout_ogcruderef": self.ogsmout_ogcruderef.unstack(2),
+            "ogsmout_ogdngprd": self.ogsmout_ogdngprd.unstack(2),
+            "ogsmout_ogenagprd": self.ogsmout_ogenagprd.unstack(2),
+            "ogsmout_ogeorprd": self.ogsmout_ogeorprd.unstack(2),
+            "ogsmout_ogogwells": self.ogsmout_ogogwells.unstack(2),
+            "ogsmout_ogoilprd": self.ogsmout_ogoilprd.unstack(2),
+            "ogsmout_ogprdoff": self.ogsmout_ogprdoff.unstack(2),
+            "ogsmout_ogprdugr": self.ogsmout_ogprdugr.unstack(2),
+            "ogsmout_ogregprd": self.ogsmout_ogregprd.unstack(2),
+            "ogsmout_ogsrl48": self.ogsmout_ogsrl48.unstack(2),
+            "ogsmout_ogtechon": self.ogsmout_ogtechon.unstack(2),
+            "ogsmout_ogwellsl48": self.ogsmout_ogwellsl48.unstack(2),
+            # transpose transformations
+            "ogsmout_oggrowfac": self.ogsmout_oggrowfac.T,
+            "ogsmout_ogjobs": self.ogsmout_ogjobs.T,
+            "ogsmout_ognglak": self.ogsmout_ognglak.T,
+            "ogsmout_ognowell": self.ogsmout_ognowell.T,
+            "ogsmout_ogpcrwhp": self.ogsmout_ogpcrwhp.T,
+            "ogsmout_ogpngwhp": self.ogsmout_ogpngwhp.T,
+            "ogsmout_ogprcexp": self.ogsmout_ogprcexp.T,
+            # no transformation
+            "ogsmout_play_map": self.ogsmout_play_map,
+        }
+
+        # Load parameter mappings and index names (cached)
+        sub_dict, index_names = self._load_parameter_mappings()
+        
+        # Get reference parameter names for lookup
+        param_path = os.path.join(self.parent.variable_mapping_input_path, 'parameter_ref_tables')
+        ref_params = [f.split('.')[0] for f in os.listdir(param_path)]
+
+        # Setup output directory
+        output_dir = os.path.join(self.output_path, 'restart_file_debug')
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Process each variable
+        for var, df in dfs.items():
+            # Filter from index if year is still in index (before reset_index)
+            if restart_dump_start_year is not None and isinstance(df.index, pd.MultiIndex):
+                # Check if last index level contains year values
+                last_level = df.index.nlevels - 1
+                last_level_values = df.index.get_level_values(last_level)
+                # Check if values look like years
+                try:
+                    sample_val = last_level_values[0]
+                    if isinstance(sample_val, (int, float)) and 1900 <= int(sample_val) <= 2100:
+                        # Last level appears to be years - filter it
+                        year_mask = last_level_values >= restart_dump_start_year
+                        df = df[year_mask]
+                except (ValueError, TypeError, IndexError):
+                    pass
+            
+            df = df.reset_index()
+            self._process_single_variable(var, df, mapping, sub_dict, index_names, 
+                                        restart_dump_start_year, output_dir, ref_params)
+
+
+
+
+
+
+
+
+
+

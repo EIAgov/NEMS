@@ -1,228 +1,228 @@
-COMPOSITE TABLE:
-SReg    Sulf    Mtyp    Rank    DReg    Sec      Trate2  Trate3
-!----------------------------------------------------------
-1APN    1A      1S      1B      01NE    E        59.55   59.55
-1APN    1A      1S      1B      02YP    E        5.98    5.98
-1APN    1A      1S      1B      03S1    E        13.13   13.13
-1APN    1A      1S      1B      04S2    E        13.2    13.2
-1APN    1A      1S      1B      05GF    E        16.44   16.44
-1APN    1A      1S      1B      06OH    E        4.32    4.32
-1APN    1A      1S      1B      07EN    E        7.67    7.67
-1APN    1A      1S      1B      08KT    E        2.85    2.85
-1APN    1A      1S      1B      09AM    E        12.5    12.5
-1APN    1A      1S      1B      10C1    E        999.99  999.99
-1APN    1A      1S      1B      11C2    E        999.99  999.99
-1APN    1A      1S      1B      12WS    E        999.99  999.99
-1APN    1A      1S      1B      13MT    E        999.99  999.99
-1APN    1A      1S      1B      14CU    E        999.99  999.99
-1APN    1A      1S      1B      15ZN    E        999.99  999.99
-1APN    1A      1S      1B      16PC    E        999.99  999.99
-1APN    1A      1S      5G      01NE    E        999.99  999.99
-1APN    1A      1S      5G      02YP    E        4.66    4.66
-1APN    1A      1S      5G      03S1    E        10.42   10.42
-1APN    1A      1S      5G      04S2    E        999.99  999.99
-1APN    1A      1S      5G      05GF    E        999.99  999.99
-1APN    1A      1S      5G      06OH    E        999.99  999.99
-1APN    1A      1S      5G      07EN    E        999.99  999.99
-1APN    1A      1S      5G      08KT    E        999.99  999.99
-1APN    1A      1S      5G      09AM    E        999.99  999.99
-1APN    1A      1S      5G      10C1    E        999.99  999.99
-1APN    1A      1S      5G      11C2    E        999.99  999.99
-1APN    1A      1S      5G      12WS    E        999.99  999.99
-1APN    1A      1S      5G      13MT    E        999.99  999.99
-1APN    1A      1S      5G      14CU    E        999.99  999.99
-1APN    1A      1S      5G      15ZN    E        999.99  999.99
-1APN    1A      1S      5G      16PC    E        999.99  999.99
-2APR    1A      1S      1B      01NE    E        999.99  999.99
-2APR    1A      1S      1B      02YP    E        7.15    7.15
-2APR    1A      1S      1B      03S1    E        3.23    3.23
-2APR    1A      1S      1B      04S2    E        11.81   11.81
-2APR    1A      1S      1B      05GF    E        15.05   15.05
-2APR    1A      1S      1B      06OH    E        2.55    2.55
-2APR    1A      1S      1B      07EN    E        8.99    8.99
-2APR    1A      1S      1B      08KT    E        4       4
-2APR    1A      1S      1B      09AM    E        2.54    2.54
-2APR    1A      1S      1B      10C1    E        999.99  999.99
-2APR    1A      1S      1B      11C2    E        999.99  999.99
-2APR    1A      1S      1B      12WS    E        999.99  999.99
-2APR    1A      1S      1B      13MT    E        999.99  999.99
-2APR    1A      1S      1B      14CU    E        999.99  999.99
-2APR    1A      1S      1B      15ZN    E        999.99  999.99
-2APR    1A      1S      1B      16PC    E        999.99  999.99
-3INR    1A      1S      1B      01NE    E        999.99  999.99
-3INR    1A      1S      1B      02YP    E        47.63   47.63
-3INR    1A      1S      1B      03S1    E        13.05   13.05
-3INR    1A      1S      1B      04S2    E        15.74   15.74
-3INR    1A      1S      1B      05GF    E        12.28   12.28
-3INR    1A      1S      1B      06OH    E        7.01    7.01
-3INR    1A      1S      1B      07EN    E        4.89    4.89
-3INR    1A      1S      1B      08KT    E        5.41    5.41
-3INR    1A      1S      1B      09AM    E        2.5     2.5
-3INR    1A      1S      1B      10C1    E        999.99  999.99
-3INR    1A      1S      1B      11C2    E        10.33   10.33
-3INR    1A      1S      1B      12WS    E        12.84   12.84
-3INR    1A      1S      1B      13MT    E        999.99  999.99
-3INR    1A      1S      1B      14CU    E        999.99  999.99
-3INR    1A      1S      1B      15ZN    E        999.99  999.99
-3INR    1A      1S      1B      16PC    E        999.99  999.99
-4LGN    1A      1S      3L      01NE    E        999.99  999.99
-4LGN    1A      1S      3L      02YP    E        999.99  999.99
-4LGN    1A      1S      3L      03S1    E        999.99  999.99
-4LGN    1A      1S      3L      04S2    E        999.99  999.99
-4LGN    1A      1S      3L      05GF    E        999.99  999.99
-4LGN    1A      1S      3L      06OH    E        999.99  999.99
-4LGN    1A      1S      3L      07EN    E        999.99  999.99
-4LGN    1A      1S      3L      08KT    E        999.99  999.99
-4LGN    1A      1S      3L      09AM    E        12.83   12.83
-4LGN    1A      1S      3L      10C1    E        9.1     9.1
-4LGN    1A      1S      3L      11C2    E        999.99  999.99
-4LGN    1A      1S      3L      12WS    E        5.36    5.36
-4LGN    1A      1S      3L      13MT    E        3.02    3.02
-4LGN    1A      1S      3L      14CU    E        999.99  999.99
-4LGN    1A      1S      3L      15ZN    E        999.99  999.99
-4LGN    1A      1S      3L      16PC    E        999.99  999.99
-5PRB    1A      1S      2S      01NE    E        999.99  999.99
-5PRB    1A      1S      2S      02YP    E        999.99  999.99
-5PRB    1A      1S      2S      03S1    E        23.38   23.61
-5PRB    1A      1S      2S      04S2    E        999.99  999.99
-5PRB    1A      1S      2S      05GF    E        16.14   16.3
-5PRB    1A      1S      2S      06OH    E        16.42   16.59
-5PRB    1A      1S      2S      07EN    E        11.97   12.09
-5PRB    1A      1S      2S      08KT    E        11.5    11.5
-5PRB    1A      1S      2S      09AM    E        10.22   10.32
-5PRB    1A      1S      2S      10C1    E        11.75   11.86
-5PRB    1A      1S      2S      11C2    E        7.93    8.01
-5PRB    1A      1S      2S      12WS    E        10.5    10.5
-5PRB    1A      1S      2S      13MT    E        4       4
-5PRB    1A      1S      2S      14CU    E        6.98    7.05
-5PRB    1A      1S      2S      15ZN    E        14.79   14.95
-5PRB    1A      1S      2S      16PC    E        13.58   13.71
-6WSR    1A      1S      1B      01NE    E        999.99  999.99
-6WSR    1A      1S      1B      02YP    E        999.99  999.99
-6WSR    1A      1S      1B      03S1    E        35.24   35.24
-6WSR    1A      1S      1B      04S2    E        999.99  999.99
-6WSR    1A      1S      1B      05GF    E        28.35   28.35
-6WSR    1A      1S      1B      06OH    E        22.15   22.15
-6WSR    1A      1S      1B      07EN    E        18.05   18.05
-6WSR    1A      1S      1B      08KT    E        19.97   19.97
-6WSR    1A      1S      1B      09AM    E        25.17   25.17
-6WSR    1A      1S      1B      10C1    E        999.99  999.99
-6WSR    1A      1S      1B      11C2    E        999.99  999.99
-6WSR    1A      1S      1B      12WS    E        999.99  999.99
-6WSR    1A      1S      1B      13MT    E        999.99  999.99
-6WSR    1A      1S      1B      14CU    E        3.43    3.43
-6WSR    1A      1S      1B      15ZN    E        10.08   10.08
-6WSR    1A      1S      1B      16PC    E        11.23   11.23
-6WSR    1A      1S      2S      01NE    E        999.99  999.99
-6WSR    1A      1S      2S      02YP    E        999.99  999.99
-6WSR    1A      1S      2S      03S1    E        999.99  999.99
-6WSR    1A      1S      2S      04S2    E        999.99  999.99
-6WSR    1A      1S      2S      05GF    E        999.99  999.99
-6WSR    1A      1S      2S      06OH    E        999.99  999.99
-6WSR    1A      1S      2S      07EN    E        999.99  999.99
-6WSR    1A      1S      2S      08KT    E        999.99  999.99
-6WSR    1A      1S      2S      09AM    E        999.99  999.99
-6WSR    1A      1S      2S      10C1    E        999.99  999.99
-6WSR    1A      1S      2S      11C2    E        999.99  999.99
-6WSR    1A      1S      2S      12WS    E        14.15   14.29
-6WSR    1A      1S      2S      13MT    E        999.99  999.99
-6WSR    1A      1S      2S      14CU    E        10.47   10.58
-6WSR    1A      1S      2S      15ZN    E        6.65    6.72
-6WSR    1A      1S      2S      16PC    E        1.75    1.77
-1APN    1A      2D      1B      01NE    E        59.55   59.55
-1APN    1A      2D      1B      02YP    E        5.98    5.98
-1APN    1A      2D      1B      03S1    E        13.13   13.13
-1APN    1A      2D      1B      04S2    E        13.2    13.2
-1APN    1A      2D      1B      05GF    E        16.44   16.44
-1APN    1A      2D      1B      06OH    E        4.32    4.32
-1APN    1A      2D      1B      07EN    E        7.67    7.67
-1APN    1A      2D      1B      08KT    E        3.85    3.85
-1APN    1A      2D      1B      09AM    E        12.5    12.5
-1APN    1A      2D      1B      10C1    E        999.99  999.99
-1APN    1A      2D      1B      11C2    E        999.99  999.99
-1APN    1A      2D      1B      12WS    E        999.99  999.99
-1APN    1A      2D      1B      13MT    E        999.99  999.99
-1APN    1A      2D      1B      14CU    E        999.99  999.99
-1APN    1A      2D      1B      15ZN    E        999.99  999.99
-1APN    1A      2D      1B      16PC    E        999.99  999.99
-2APR    1A      2D      1B      01NE    E        999.99  999.99
-2APR    1A      2D      1B      02YP    E        7.15    7.15
-2APR    1A      2D      1B      03S1    E        3.23    3.23
-2APR    1A      2D      1B      04S2    E        11.81   11.81
-2APR    1A      2D      1B      05GF    E        14.55   14.55
-2APR    1A      2D      1B      06OH    E        2.55    2.55
-2APR    1A      2D      1B      07EN    E        8.99    8.99
-2APR    1A      2D      1B      08KT    E        5.85    5.85
-2APR    1A      2D      1B      09AM    E        2.54    2.54
-2APR    1A      2D      1B      10C1    E        999.99  999.99
-2APR    1A      2D      1B      11C2    E        999.99  999.99
-2APR    1A      2D      1B      12WS    E        999.99  999.99
-2APR    1A      2D      1B      13MT    E        999.99  999.99
-2APR    1A      2D      1B      14CU    E        999.99  999.99
-2APR    1A      2D      1B      15ZN    E        999.99  999.99
-2APR    1A      2D      1B      16PC    E        999.99  999.99
-3INR    1A      2D      1B      01NE    E        999.99  999.99
-3INR    1A      2D      1B      02YP    E        47.63   47.63
-3INR    1A      2D      1B      03S1    E        13.05   13.05
-3INR    1A      2D      1B      04S2    E        9.74    9.74
-3INR    1A      2D      1B      05GF    E        14.78   14.78
-3INR    1A      2D      1B      06OH    E        3.01    3.01
-3INR    1A      2D      1B      07EN    E        5.89    5.89
-3INR    1A      2D      1B      08KT    E        3.6     3.6
-3INR    1A      2D      1B      09AM    E        7.98    7.98
-3INR    1A      2D      1B      10C1    E        999.99  999.99
-3INR    1A      2D      1B      11C2    E        10.33   10.33
-3INR    1A      2D      1B      12WS    E        12.84   12.84
-3INR    1A      2D      1B      13MT    E        999.99  999.99
-3INR    1A      2D      1B      14CU    E        999.99  999.99
-3INR    1A      2D      1B      15ZN    E        999.99  999.99
-3INR    1A      2D      1B      16PC    E        999.99  999.99
-1APN    1A      2D      4P      01NE    E        999.99  999.99
-1APN    1A      2D      4P      02YP    E        999.99  999.99
-1APN    1A      2D      4P      03S1    E        999.99  999.99
-1APN    1A      2D      4P      04S2    E        999.99  999.99
-1APN    1A      2D      4P      05GF    E        999.99  999.99
-1APN    1A      2D      4P      06OH    E        999.99  999.99
-1APN    1A      2D      4P      07EN    E        999.99  999.99
-1APN    1A      2D      4P      08KT    E        999.99  999.99
-1APN    1A      2D      4P      09AM    E        999.99  999.99
-1APN    1A      2D      4P      10C1    E        999.99  999.99
-1APN    1A      2D      4P      11C2    E        999.99  999.99
-1APN    1A      2D      4P      12WS    E        999.99  999.99
-1APN    1A      2D      4P      13MT    E        999.99  999.99
-1APN    1A      2D      4P      14CU    E        999.99  999.99
-1APN    1A      2D      4P      15ZN    E        999.99  999.99
-1APN    1A      2D      4P      16PC    E        999.99  999.99
-2APR    1A      2D      4P      01NE    E        999.99  999.99
-2APR    1A      2D      4P      02YP    E        999.99  999.99
-2APR    1A      2D      4P      03S1    E        999.99  999.99
-2APR    1A      2D      4P      04S2    E        999.99  999.99
-2APR    1A      2D      4P      05GF    E        999.99  999.99
-2APR    1A      2D      4P      06OH    E        999.99  999.99
-2APR    1A      2D      4P      07EN    E        999.99  999.99
-2APR    1A      2D      4P      08KT    E        999.99  999.99
-2APR    1A      2D      4P      09AM    E        999.99  999.99
-2APR    1A      2D      4P      10C1    E        999.99  999.99
-2APR    1A      2D      4P      11C2    E        999.99  999.99
-2APR    1A      2D      4P      12WS    E        999.99  999.99
-2APR    1A      2D      4P      13MT    E        999.99  999.99
-2APR    1A      2D      4P      14CU    E        999.99  999.99
-2APR    1A      2D      4P      15ZN    E        999.99  999.99
-2APR    1A      2D      4P      16PC    E        999.99  999.99
-6WSR    1A      2D      1B      01NE    E        999.99  999.99
-6WSR    1A      2D      1B      02YP    E        999.99  999.99
-6WSR    1A      2D      1B      03S1    E        35.24   35.24
-6WSR    1A      2D      1B      04S2    E        999.99  999.99
-6WSR    1A      2D      1B      05GF    E        28.35   28.35
-6WSR    1A      2D      1B      06OH    E        22.15   22.15
-6WSR    1A      2D      1B      07EN    E        18.05   18.05
-6WSR    1A      2D      1B      08KT    E        19.97   19.97
-6WSR    1A      2D      1B      09AM    E        25.17   25.17
-6WSR    1A      2D      1B      10C1    E        999.99  999.99
-6WSR    1A      2D      1B      11C2    E        999.99  999.99
-6WSR    1A      2D      1B      12WS    E        999.99  999.99
-6WSR    1A      2D      1B      13MT    E        999.99  999.99
-6WSR    1A      2D      1B      14CU    E        3.43    3.43
-6WSR    1A      2D      1B      15ZN    E        10.08   10.08
-6WSR    1A      2D      1B      16PC    E        11.23   11.23
-;
+    COMPOSITE TABLE:
+cl::SReg    cl::Sulf    cl::Mtyp    cl::Rank    cl::DReg    cl::Sec      cl::Trate2  cl::Trate3
+    !----------------------------------------------------------
+    1APN        1A          1S          1B          01NE        E            88.22       88.22
+    1APN        1A          1S          1B          02YP        E            4.34        4.34
+    1APN        1A          1S          1B          03S1        E            13.13       13.13
+    1APN        1A          1S          1B          04S2        E            25.61       25.61
+    1APN        1A          1S          1B          05GF        E            16.44       16.44
+    1APN        1A          1S          1B          06OH        E            22.96       22.96
+    1APN        1A          1S          1B          07EN        E            7.67        7.67
+    1APN        1A          1S          1B          08KT        E            2.85        2.85
+    1APN        1A          1S          1B          09AM        E            12.50       12.50
+    1APN        1A          1S          1B          10C1        E            999.99      999.99
+    1APN        1A          1S          1B          11C2        E            999.99      999.99
+    1APN        1A          1S          1B          12WS        E            999.99      999.99
+    1APN        1A          1S          1B          13MT        E            999.99      999.99
+    1APN        1A          1S          1B          14CU        E            999.99      999.99
+    1APN        1A          1S          1B          15ZN        E            999.99      999.99
+    1APN        1A          1S          1B          16PC        E            999.99      999.99
+    1APN        1A          1S          5G          01NE        E            999.99      999.99
+    1APN        1A          1S          5G          02YP        E            3.25        3.25
+    1APN        1A          1S          5G          03S1        E            5.95        5.95
+    1APN        1A          1S          5G          04S2        E            999.99      999.99
+    1APN        1A          1S          5G          05GF        E            999.99      999.99
+    1APN        1A          1S          5G          06OH        E            999.99      999.99
+    1APN        1A          1S          5G          07EN        E            999.99      999.99
+    1APN        1A          1S          5G          08KT        E            999.99      999.99
+    1APN        1A          1S          5G          09AM        E            999.99      999.99
+    1APN        1A          1S          5G          10C1        E            999.99      999.99
+    1APN        1A          1S          5G          11C2        E            999.99      999.99
+    1APN        1A          1S          5G          12WS        E            999.99      999.99
+    1APN        1A          1S          5G          13MT        E            999.99      999.99
+    1APN        1A          1S          5G          14CU        E            999.99      999.99
+    1APN        1A          1S          5G          15ZN        E            999.99      999.99
+    1APN        1A          1S          5G          16PC        E            999.99      999.99
+    2APR        1A          1S          1B          01NE        E            999.99      999.99
+    2APR        1A          1S          1B          02YP        E            7.15        7.15
+    2APR        1A          1S          1B          03S1        E            2.53        2.53
+    2APR        1A          1S          1B          04S2        E            7.33        7.33
+    2APR        1A          1S          1B          05GF        E            8.33        8.33
+    2APR        1A          1S          1B          06OH        E            2.55        2.55
+    2APR        1A          1S          1B          07EN        E            8.99        8.99
+    2APR        1A          1S          1B          08KT        E            6.24        6.24
+    2APR        1A          1S          1B          09AM        E            17.56       17.56
+    2APR        1A          1S          1B          10C1        E            999.99      999.99
+    2APR        1A          1S          1B          11C2        E            999.99      999.99
+    2APR        1A          1S          1B          12WS        E            999.99      999.99
+    2APR        1A          1S          1B          13MT        E            999.99      999.99
+    2APR        1A          1S          1B          14CU        E            999.99      999.99
+    2APR        1A          1S          1B          15ZN        E            999.99      999.99
+    2APR        1A          1S          1B          16PC        E            999.99      999.99
+    3INR        1A          1S          1B          01NE        E            999.99      999.99
+    3INR        1A          1S          1B          02YP        E            47.63       47.63
+    3INR        1A          1S          1B          03S1        E            13.05       13.05
+    3INR        1A          1S          1B          04S2        E            14.38       14.38
+    3INR        1A          1S          1B          05GF        E            12.28       12.28
+    3INR        1A          1S          1B          06OH        E            17.55       17.55
+    3INR        1A          1S          1B          07EN        E            3.09        3.09
+    3INR        1A          1S          1B          08KT        E            5.41        5.41
+    3INR        1A          1S          1B          09AM        E            2.50        2.50
+    3INR        1A          1S          1B          10C1        E            999.99      999.99
+    3INR        1A          1S          1B          11C2        E            10.33       10.33
+    3INR        1A          1S          1B          12WS        E            12.84       12.84
+    3INR        1A          1S          1B          13MT        E            999.99      999.99
+    3INR        1A          1S          1B          14CU        E            999.99      999.99
+    3INR        1A          1S          1B          15ZN        E            999.99      999.99
+    3INR        1A          1S          1B          16PC        E            999.99      999.99
+    4LGN        1A          1S          3L          01NE        E            999.99      999.99
+    4LGN        1A          1S          3L          02YP        E            999.99      999.99
+    4LGN        1A          1S          3L          03S1        E            999.99      999.99
+    4LGN        1A          1S          3L          04S2        E            999.99      999.99
+    4LGN        1A          1S          3L          05GF        E            999.99      999.99
+    4LGN        1A          1S          3L          06OH        E            999.99      999.99
+    4LGN        1A          1S          3L          07EN        E            999.99      999.99
+    4LGN        1A          1S          3L          08KT        E            999.99      999.99
+    4LGN        1A          1S          3L          09AM        E            4.92        4.92
+    4LGN        1A          1S          3L          10C1        E            3.20        3.20
+    4LGN        1A          1S          3L          11C2        E            999.99      999.99
+    4LGN        1A          1S          3L          12WS        E            1.39        1.39
+    4LGN        1A          1S          3L          13MT        E            3.02        3.02
+    4LGN        1A          1S          3L          14CU        E            999.99      999.99
+    4LGN        1A          1S          3L          15ZN        E            999.99      999.99
+    4LGN        1A          1S          3L          16PC        E            999.99      999.99
+    5PRB        1A          1S          2S          01NE        E            999.99      999.99
+    5PRB        1A          1S          2S          02YP        E            999.99      999.99
+    5PRB        1A          1S          2S          03S1        E            23.38       23.38
+    5PRB        1A          1S          2S          04S2        E            999.99      999.99
+    5PRB        1A          1S          2S          05GF        E            18.59       18.59
+    5PRB        1A          1S          2S          06OH        E            16.42       16.42
+    5PRB        1A          1S          2S          07EN        E            11.44       11.44
+    5PRB        1A          1S          2S          08KT        E            10.94       10.94
+    5PRB        1A          1S          2S          09AM        E            11.55       11.55
+    5PRB        1A          1S          2S          10C1        E            12.52       12.52
+    5PRB        1A          1S          2S          11C2        E            6.94        6.94
+    5PRB        1A          1S          2S          12WS        E            10.60       10.60
+    5PRB        1A          1S          2S          13MT        E            7.64        7.64
+    5PRB        1A          1S          2S          14CU        E            7.96        7.96
+    5PRB        1A          1S          2S          15ZN        E            19.27       19.27
+    5PRB        1A          1S          2S          16PC        E            12.02       12.02
+    6WSR        1A          1S          1B          01NE        E            999.99      999.99
+    6WSR        1A          1S          1B          02YP        E            999.99      999.99
+    6WSR        1A          1S          1B          03S1        E            35.24       35.24
+    6WSR        1A          1S          1B          04S2        E            999.99      999.99
+    6WSR        1A          1S          1B          05GF        E            28.35       28.35
+    6WSR        1A          1S          1B          06OH        E            22.15       22.15
+    6WSR        1A          1S          1B          07EN        E            32.92       32.92
+    6WSR        1A          1S          1B          08KT        E            41.04       41.04
+    6WSR        1A          1S          1B          09AM        E            25.17       25.17
+    6WSR        1A          1S          1B          10C1        E            999.99      999.99
+    6WSR        1A          1S          1B          11C2        E            999.99      999.99
+    6WSR        1A          1S          1B          12WS        E            999.99      999.99
+    6WSR        1A          1S          1B          13MT        E            999.99      999.99
+    6WSR        1A          1S          1B          14CU        E            3.43        3.43
+    6WSR        1A          1S          1B          15ZN        E            1.41        1.41
+    6WSR        1A          1S          1B          16PC        E            2.31        2.31
+    6WSR        1A          1S          2S          01NE        E            999.99      999.99
+    6WSR        1A          1S          2S          02YP        E            999.99      999.99
+    6WSR        1A          1S          2S          03S1        E            999.99      999.99
+    6WSR        1A          1S          2S          04S2        E            999.99      999.99
+    6WSR        1A          1S          2S          05GF        E            999.99      999.99
+    6WSR        1A          1S          2S          06OH        E            999.99      999.99
+    6WSR        1A          1S          2S          07EN        E            8.08        8.08
+    6WSR        1A          1S          2S          08KT        E            999.99      999.99
+    6WSR        1A          1S          2S          09AM        E            999.99      999.99
+    6WSR        1A          1S          2S          10C1        E            5.69        5.69
+    6WSR        1A          1S          2S          11C2        E            999.99      999.99
+    6WSR        1A          1S          2S          12WS        E            14.15       14.15
+    6WSR        1A          1S          2S          13MT        E            3.33        3.33
+    6WSR        1A          1S          2S          14CU        E            14.49       14.49
+    6WSR        1A          1S          2S          15ZN        E            10.79       10.79
+    6WSR        1A          1S          2S          16PC        E            8.77        8.77
+    1APN        1A          2D          1B          01NE        E            66.56       66.56
+    1APN        1A          2D          1B          02YP        E            3.19        3.19
+    1APN        1A          2D          1B          03S1        E            13.13       13.13
+    1APN        1A          2D          1B          04S2        E            11.09       11.09
+    1APN        1A          2D          1B          05GF        E            17.27       17.27
+    1APN        1A          2D          1B          06OH        E            1.30        1.30
+    1APN        1A          2D          1B          07EN        E            7.67        7.67
+    1APN        1A          2D          1B          08KT        E            3.94        3.94
+    1APN        1A          2D          1B          09AM        E            12.50       12.50
+    1APN        1A          2D          1B          10C1        E            999.99      999.99
+    1APN        1A          2D          1B          11C2        E            999.99      999.99
+    1APN        1A          2D          1B          12WS        E            999.99      999.99
+    1APN        1A          2D          1B          13MT        E            999.99      999.99
+    1APN        1A          2D          1B          14CU        E            999.99      999.99
+    1APN        1A          2D          1B          15ZN        E            999.99      999.99
+    1APN        1A          2D          1B          16PC        E            999.99      999.99
+    2APR        1A          2D          1B          01NE        E            999.99      999.99
+    2APR        1A          2D          1B          02YP        E            7.15        7.15
+    2APR        1A          2D          1B          03S1        E            6.41        6.41
+    2APR        1A          2D          1B          04S2        E            2.07        2.07
+    2APR        1A          2D          1B          05GF        E            14.55       14.55
+    2APR        1A          2D          1B          06OH        E            2.55        2.55
+    2APR        1A          2D          1B          07EN        E            3.71        3.71
+    2APR        1A          2D          1B          08KT        E            999.99      999.99
+    2APR        1A          2D          1B          09AM        E            999.99      999.99
+    2APR        1A          2D          1B          10C1        E            999.99      999.99
+    2APR        1A          2D          1B          11C2        E            999.99      999.99
+    2APR        1A          2D          1B          12WS        E            999.99      999.99
+    2APR        1A          2D          1B          13MT        E            999.99      999.99
+    2APR        1A          2D          1B          14CU        E            999.99      999.99
+    2APR        1A          2D          1B          15ZN        E            999.99      999.99
+    2APR        1A          2D          1B          16PC        E            999.99      999.99
+    3INR        1A          2D          1B          01NE        E            999.99      999.99
+    3INR        1A          2D          1B          02YP        E            47.63       47.63
+    3INR        1A          2D          1B          03S1        E            13.05       13.05
+    3INR        1A          2D          1B          04S2        E            5.32        5.32
+    3INR        1A          2D          1B          05GF        E            15.28       15.28
+    3INR        1A          2D          1B          06OH        E            6.89        6.89
+    3INR        1A          2D          1B          07EN        E            6.59        6.59
+    3INR        1A          2D          1B          08KT        E            1.25        1.25
+    3INR        1A          2D          1B          09AM        E            7.98        7.98
+    3INR        1A          2D          1B          10C1        E            999.99      999.99
+    3INR        1A          2D          1B          11C2        E            10.33       10.33
+    3INR        1A          2D          1B          12WS        E            12.84       12.84
+    3INR        1A          2D          1B          13MT        E            999.99      999.99
+    3INR        1A          2D          1B          14CU        E            999.99      999.99
+    3INR        1A          2D          1B          15ZN        E            999.99      999.99
+    3INR        1A          2D          1B          16PC        E            999.99      999.99
+    1APN        1A          2D          4P          01NE        E            999.99      999.99
+    1APN        1A          2D          4P          02YP        E            999.99      999.99
+    1APN        1A          2D          4P          03S1        E            999.99      999.99
+    1APN        1A          2D          4P          04S2        E            999.99      999.99
+    1APN        1A          2D          4P          05GF        E            999.99      999.99
+    1APN        1A          2D          4P          06OH        E            999.99      999.99
+    1APN        1A          2D          4P          07EN        E            999.99      999.99
+    1APN        1A          2D          4P          08KT        E            999.99      999.99
+    1APN        1A          2D          4P          09AM        E            999.99      999.99
+    1APN        1A          2D          4P          10C1        E            999.99      999.99
+    1APN        1A          2D          4P          11C2        E            999.99      999.99
+    1APN        1A          2D          4P          12WS        E            999.99      999.99
+    1APN        1A          2D          4P          13MT        E            999.99      999.99
+    1APN        1A          2D          4P          14CU        E            999.99      999.99
+    1APN        1A          2D          4P          15ZN        E            999.99      999.99
+    1APN        1A          2D          4P          16PC        E            999.99      999.99
+    2APR        1A          2D          4P          01NE        E            999.99      999.99
+    2APR        1A          2D          4P          02YP        E            999.99      999.99
+    2APR        1A          2D          4P          03S1        E            999.99      999.99
+    2APR        1A          2D          4P          04S2        E            999.99      999.99
+    2APR        1A          2D          4P          05GF        E            999.99      999.99
+    2APR        1A          2D          4P          06OH        E            999.99      999.99
+    2APR        1A          2D          4P          07EN        E            999.99      999.99
+    2APR        1A          2D          4P          08KT        E            999.99      999.99
+    2APR        1A          2D          4P          09AM        E            999.99      999.99
+    2APR        1A          2D          4P          10C1        E            999.99      999.99
+    2APR        1A          2D          4P          11C2        E            999.99      999.99
+    2APR        1A          2D          4P          12WS        E            999.99      999.99
+    2APR        1A          2D          4P          13MT        E            999.99      999.99
+    2APR        1A          2D          4P          14CU        E            999.99      999.99
+    2APR        1A          2D          4P          15ZN        E            999.99      999.99
+    2APR        1A          2D          4P          16PC        E            999.99      999.99
+    6WSR        1A          2D          1B          01NE        E            999.99      999.99
+    6WSR        1A          2D          1B          02YP        E            999.99      999.99
+    6WSR        1A          2D          1B          03S1        E            35.24       35.24
+    6WSR        1A          2D          1B          04S2        E            999.99      999.99
+    6WSR        1A          2D          1B          05GF        E            28.35       28.35
+    6WSR        1A          2D          1B          06OH        E            22.15       22.15
+    6WSR        1A          2D          1B          07EN        E            37.18       37.18
+    6WSR        1A          2D          1B          08KT        E            19.97       19.97
+    6WSR        1A          2D          1B          09AM        E            25.17       25.17
+    6WSR        1A          2D          1B          10C1        E            999.99      999.99
+    6WSR        1A          2D          1B          11C2        E            999.99      999.99
+    6WSR        1A          2D          1B          12WS        E            999.99      999.99
+    6WSR        1A          2D          1B          13MT        E            999.99      999.99
+    6WSR        1A          2D          1B          14CU        E            3.82        3.82
+    6WSR        1A          2D          1B          15ZN        E            10.08       10.08
+    6WSR        1A          2D          1B          16PC        E            11.23       11.23
+    ;

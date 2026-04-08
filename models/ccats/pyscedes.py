@@ -2,7 +2,7 @@
 Created on April 4 2023
 @author: jmw
 
-PyScedesAll is a Python function for parsing the keys.sed file into a user class that can be passed between Python
+PyScedesAll is a Python function for parsing the scedes.all file into a user class that can be passed between Python
 programs for use in NEMS. This code sets a dictionary of scedes keys in the user class.
 """
 
@@ -17,19 +17,19 @@ class User:
 def find_keys_sed():
     current_dir = os.getcwd()
     if current_dir.endswith("PyFiler"):
-        keys_path = os.path.abspath(os.path.join(current_dir, os.pardir, "keys.sed"))
+        keys_path = os.path.abspath(os.path.join(current_dir, os.pardir, "scedes.all"))
     elif "p1" in os.listdir(current_dir):
-        keys_path = os.path.abspath(os.path.join(current_dir, "p1", "keys.sed"))
+        keys_path = os.path.abspath(os.path.join(current_dir, "p1", "scedes.all"))
     elif os.path.basename(current_dir) in ["p1", "p2", "p3"]:
-        keys_path = os.path.abspath(os.path.join(current_dir, "keys.sed"))
+        keys_path = os.path.abspath(os.path.join(current_dir, "scedes.all"))
     else:
-        keys_path = os.path.abspath("keys.sed")
+        keys_path = os.path.abspath("scedes.all")
 
     if os.path.exists(keys_path):
         return keys_path
     else:
-        print("Oh no! I cannot find keys.sed!")
-        sys.exit("Fatal Error- No keys.sed file found. Please check in output directory")
+        print("Oh no! I cannot find scedes.all!")
+        sys.exit("Fatal Error- No scedes.all file found. Please check in output directory")
 
 
 def parse_scedes_file(filename):
@@ -37,7 +37,7 @@ def parse_scedes_file(filename):
 
     Parameters
     ----------
-    filename- currently hardcoded to the keys.sed file inside of the local folder of NEMS
+    filename- currently hardcoded to the scedes.all file inside of the local folder of NEMS
 
     Returns
     -------

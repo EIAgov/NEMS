@@ -61,12 +61,7 @@ reporting functions. The module operates as follows:
         c. In the first STEO year (AEO year - 1), run *set_expected_production_to_steo*, which overwrites production volumes
            with STEO production values.
 
-        d. Over the STEO years run *apply_steo_adjustments* which benchmarks HSM results to STEO. During initial runs these values are calculated,
-           but once the reference case is frozen, these values are hard-coded to the calculated values so that side cases
-           can be run with the same STEO benchmarks as the reference case.
-
-        e. Run *apply_ngmm_realized_prod*, *adjust_vars_for_realized_prod*, and *adjust_onshore_shale_gas_plays_for_realized_prod* in **onshore.py*
-        to respond to actual natural gas demand volumes provided by NGMM.
+        d. Run *adjust_production* to respond to actual natural gas demand volumes provided by NGMM.
 
         f. Call *write_pkl_variables* from **intermediate_var_pickle.py** to write intermediate variables out for the next model year.
 
@@ -89,9 +84,7 @@ _________________________________
     * calculate_prices - Aggregates and shares out crude type and natural gas prices to regions and districts
     * prepare_results - Prepare results for writing to the restart file
     * aggregate_results_across_submodules - Calculate sum  values in restart variable tables that are aggregated across submodules
-    * apply_steo_adjustments - Applies steo adjustments to smooth transition from STEO forecasts to HSM projections over STEO years
-    * apply_ngmm_realized_prod - Apply NGMM realized production to HSM
-    * adjust_vars_for_realized_prod - Adjust Restart variables so that they reflect final model year realized production
+    * adjust_production - Adjust Restart variables so that they reflect final model year realized production
 
 
 Output Debug Files
@@ -136,6 +129,7 @@ import pandas as pd
 import numpy as np
 import names as nam
 import common as com
+import time
 
 
 
@@ -203,7 +197,7 @@ class Module:
 
         ###Switches
         self.integrated_switch          = False     #False means standalone run, True means integrated run
-        self.steo_benchmark_adj_switch      = False     #False means steo benchmarks are read in, True means STEO benchmark factors are calculated
+        self.side_case_steo_overwrite_switch      = False     #False means side case overwrites disabled, True means enable side case STEO overwrites from CSV files
         self.run_every_itr_switch       = False     #False means only run itrs 1, fcrl = 1 & ncrl = 1, True means run every iteration
         self.debug_switch               = False     #False means local debug files are not printed out, True means local debug files are printed out
         self.low_price_case             = False     #Flag for if run is a low price case, False means off, True means on
@@ -318,7 +312,7 @@ class Module:
         self.rest_ogsrl48               = pd.DataFrame()  #ogsmout:     REAL OGSRL48(MNL48T,7,MNUMYR)     ! Lower 48 drilling success rates
         self.rest_ogtechon              = pd.DataFrame()  #ogsmout:     REAL OGTECHON(3,6,MNUMYR)         ! TECH FACTORS BY COSTCAT/FUEL/YEAR
         self.rest_ogwellsl48            = pd.DataFrame()  #ogsmout:     REAL OGWELLSL48(MNL48T,7,MNUMYR)  ! Lower 48 successful and dry well counts
-        self.rest_dcrdwhp               = pd.DataFrame()  #pmmout:      REAL DCRDWHP(MNUMOR,MNUMYR)       ! DOM CRUDE WELLHEAD PRICE
+        self.rest_dcrdwhp               = pd.DataFrame()  #pmmout:      REAL DCRDWHP(MNUMOR,MNUMYR)       ! DOM CRUDE WELLHEAD PRICE (calculated from reg_crude_price, derived from rfcrudewhp)
         self.rest_rfqdcrd               = pd.DataFrame()  #pmmout:      REAL RFQDCRD(MNUMOR+2,MNUMYR)     ! DOMESTIC TOTAL CRUDE MMBBL/
         self.rest_rfqtdcrd              = pd.DataFrame()  #pmmout:      REAL RFQTDCRD(MNUMOR+2,MNUMYR)    ! DOM TOTAL CRUDE (INCL EOR)
         self.rest_ogcoprd_fed           = pd.DataFrame()  #ogsmout:     REAL OGCOPRD_FED(MNL48T, MNUMYR)  !  Crude oil federal
@@ -326,6 +320,14 @@ class Module:
         self.rest_ogngprd_fed           = pd.DataFrame()  #ogsmout:     REAL OGNGPRD_FED(MNL48T, MNUMYR)  !  Natural gas federal
         self.rest_ogngprd_nofed         = pd.DataFrame()  #ogsmout:     REAL OGNGPRD_NONFED(MNL48T, MNUMYR) !  Natural gas  non-federal
         self.rest_pelin                 = pd.DataFrame()  #mpblk:       REAL MPBLK_PELIN(MNUMCR,MNUMYR)! Purchased Electricity - Industrial
+
+        ###Timing Variables
+        self.onshore_runtime    = 0.0  #Runtime for Onshore submodule
+        self.offshore_runtime   = 0.0  #Runtime for Offshore submodule
+        self.alaska_runtime     = 0.0  #Runtime for Alaska submodule
+        self.canada_runtime     = 0.0  #Runtime for Canada submodule
+        self.prepare_results_runtime = 0.0  #Runtime for prepare_results method
+        self.ngp_runtime        = 0.0  #Runtime for NGP submodule
 
 
     def setup(self, standalone_directory,
@@ -337,6 +339,7 @@ class Module:
               cycle,
               scedes):
         """HSM Setup function.
+
 
             * Assigns input paths and global variables
             * Reads in setup tables
@@ -421,8 +424,8 @@ class Module:
         self.run_every_itr_switch : boolean
             Switch indicating whether HSM should run every iteration, or just itrs 1, fcrl = 1 and ncrl = 1
 
-        self.steo_benchmark_adj_switch : boolean
-            Switch indicating whether HSM should calculate STEO benchmarks, or whether they've been hardcoded
+        self.side_case_steo_overwrite_switch : boolean
+            Switch indicating whether side case STEO overwrites from reference case CSV files should be enabled
 
         self.debug_switch : boolean
             Switch indicating whether HSM-specific debug files should be printed out (increases runtime)
@@ -469,7 +472,7 @@ class Module:
             self.current_cycle = cycle
 
 
-        ###Assign directories for stanalone vs. integrated run based on where setup.csv is located
+        ###Assign directories for standalone vs. integrated run based on where setup.csv is located
         file_exists = os.path.exists(integrated_input_path + 'setup.csv')
         self.logger.info('parent input path: ' + integrated_directory)
         if file_exists:
@@ -487,6 +490,9 @@ class Module:
             self.hsm_var_output_path        = standalone_directory + 'intermediate_tables\\'
             self.integrated_switch          = False
             self.logger.info('INTEGRATED SWITCH OFF')
+            
+            # Validate required files for standalone runs
+            self._validate_standalone_files()
 
 
         #Assign other input paths
@@ -497,13 +503,26 @@ class Module:
         self.alaska_input_path          = self.input_path + 'alaska\\'
         self.canada_input_path          = self.input_path + 'canada\\'
         self.ngp_input_path             = self.input_path + 'ngp\\'
+        self.variable_mapping_input_path = self.input_path + 'variable_mapping\\'
 
         ### Instantiate Pyfiler
         if self.integrated_switch == True:
             self.pyfiler1 = pyfiler1
         else:
-            import pyfiler1
-            self.pyfiler1 = pyfiler1
+            try:
+                import pyfiler1
+                self.pyfiler1 = pyfiler1
+            except ModuleNotFoundError as e:
+                import sys
+                error_msg = (
+                    f"Failed to import pyfiler1. This is likely a Python version mismatch.\n"
+                    f"Current Python version: {sys.version}\n"
+                    f"pyfiler1.cp312-win_amd64.pyd is compiled for Python 3.12.\n"
+                    f"Please use Python 3.12 or obtain a pyfiler1 version compiled for Python {sys.version_info.major}.{sys.version_info.minor}.\n"
+                    f"Current directory: {os.getcwd()}\n"
+                    f"Python path includes: {[p for p in sys.path if 'hsm' in p]}"
+                )
+                raise ModuleNotFoundError(error_msg) from e
 
 
         #Assign base model parameters
@@ -516,9 +535,16 @@ class Module:
         self.final_aeo_year             = int(self.setup_table.at[nam.final_aeo_year    , nam.filename])
         self.steo_years                 = list(range(self.aeo_year - 1, self.aeo_year + 2))
         self.run_every_itr_switch       = str(self.setup_table.at[nam.run_every_itr_switch, nam.filename]).upper() == 'True'.upper()
-        self.steo_benchmark_adj_switch      = str(self.setup_table.at[nam.steo_benchmark_adj_switch, nam.filename]).upper() == 'True'.upper()
+        self.side_case_steo_overwrite_switch      = str(self.setup_table.at[nam.side_case_steo_overwrite_switch, nam.filename]).upper() == 'True'.upper()
         self.debug_switch               = str(self.setup_table.at[nam.debug_switch, nam.filename]).upper() == 'True'.upper()
         self.hsm_var_debug_switch       = str(self.setup_table.at[nam.hsm_var_debug_switch, nam.filename]).upper() == 'True'.upper()
+        self.debug_restart_yearly_switch = str(self.setup_table.at[nam.debug_restart_yearly_switch, nam.filename]).upper() == 'True'.upper()
+        self.suppress_warnings_switch = str(self.setup_table.at[nam.suppress_warnings_switch, nam.filename]).upper() == 'True'.upper()
+        self.standalone_scedes_file = str(self.setup_table.at[nam.standalone_scedes_file, nam.filename])
+
+        #Configure warnings filter if suppress_warnings_switch is enabled. This should be done prudently and only to help modeler see logging clearly
+        if self.suppress_warnings_switch:
+            warnings.filterwarnings('ignore')
 
         #Load in project finance variables
         temp_filename                   = self.setup_table.at[nam.discounting, nam.filename]
@@ -572,9 +598,8 @@ class Module:
 
         ###Load restart file
         self.logger.info('Load Restart File')
-        temp_filename   = self.main_directory + self.setup_table.at['restart_in', nam.filename]
-        temp_rest       = self.main_directory + 'restart.unf'
-        self.restart.setup(temp_filename, temp_rest)
+        temp_rest       = self.main_directory + 'restart.npz'
+        self.restart.setup(temp_rest)
         self.load_parameters()
         self.process_restart_variables()
         self.logger.info('End Load Restart File')
@@ -583,10 +608,10 @@ class Module:
         ###Load Scedes scenario flag to determine if run is a side case
         self.logger.info('Load Scedes and Side Cases')
         ###Load Scedes
-        # Standalone Run
+        # Standalone Run (Offline)
         if scedes is None:
-            scedes_filepath = pyscedes.find_keys_sed()
-            self.scedes     = pyscedes.parse_scedes_file(scedes_filepath)
+            scedes_filepath = pyscedes.find_scedes(self.standalone_scedes_file)
+            self.scedes     = pyscedes.parse_scedes(scedes_filepath)
 
             #Load side case flag from scedes for High Oil and Low Oil Supply Cases
             if (self.scedes.get('OGTECH') == '23'): #HOGS
@@ -597,12 +622,16 @@ class Module:
                 self.side_case_adj = 1.0
 
             self.logger.info('Scenario Flag')
-            self.logger.info(self.scedes.get('SCEN'))
-            self.logger.info(self.side_case_adj)
+            scenario = self.standalone_scedes_file.split('.')[1]  # derive from the scedes filename which includes scenario between periods
+            self.logger.info(f'Standalone scedes file: {self.standalone_scedes_file}')
+            self.logger.info(f'Scenario: {scenario}')
+            self.logger.info(f'O&G Tech Adjustment: {self.side_case_adj}')
 
             #Get Low Price flag for drilling eq sensitivity
             if '1' in self.scedes.get('WWOP'):
                 self.low_price_case = True
+
+            self.param_ncrl = 0 # avoid feedback loop with static natural gas data as NGMM cannot be run with HSM in offline standalone
 
         # Integrated Run
         else:
@@ -684,7 +713,6 @@ class Module:
             self.logger.info('Load History')
             self.hist_steo.load_history()
             self.hist_steo.overwrite_restart_var_history()
-            self.hist_steo.update_2022()
         else:
             pass
 
@@ -772,6 +800,48 @@ class Module:
                 warnings.warn('NGP Submodule Turned Off', UserWarning)
 
         pass
+
+
+    def _validate_standalone_files(self):
+        """Validate that all required files are present for standalone runs.
+        
+        Checks for the following required files:
+        - dict.txt and varlist.txt in input directory
+        - restart.npz, pyfiler1.cp312-win_amd64.pyd, and FILELIST in main directory
+        
+        Raises
+        ------
+        FileNotFoundError
+            If any required files are missing, with a detailed error message listing all missing files.
+        """
+        missing_files = []
+        
+        # Check files in input directory
+        required_input_files = ['dict.txt', 'varlist.txt']
+        for filename in required_input_files:
+            filepath = os.path.join(self.input_path, filename)
+            if not os.path.exists(filepath):
+                missing_files.append(filepath)
+        
+        # Check files in main directory
+        required_main_files = [
+            'restart.npz',
+            'pyfiler1.cp312-win_amd64.pyd',
+            'FILELIST'
+        ]
+        for filename in required_main_files:
+            filepath = os.path.join(self.main_directory, filename)
+            if not os.path.exists(filepath):
+                missing_files.append(filepath)
+        
+        if missing_files:
+            error_msg = "STANDALONE RUN FILE VALIDATION FAILED\n"
+            error_msg += "The following required files are missing:\n"
+            for filepath in missing_files:
+                error_msg += f"  - {filepath}\n"
+            error_msg += "\nPlease copy the missing files to the appropriate locations before running in standalone mode."
+            self.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
 
 
     def load_parameters(self):
@@ -864,7 +934,7 @@ class Module:
             Crude oil production by refinery region and crude type
 
         self.rest_dcrdwhp : df
-            Domestic crude oil wellhead price by region
+            Domestic crude oil wellhead price by region (calculated from reg_crude_price, derived from rfcrudewhp)
 
         self.rest_rfqtdcrd : df
             Domestic crude oil production by region (including EOR)
@@ -898,6 +968,7 @@ class Module:
 
         """
         ###Years
+        # ADS, here self.restart.ncntrl_curcalyr is zero. 
         self.current_year       = int(self.restart.ncntrl_curcalyr)
         self.current_iteration  = int(self.restart.ncntrl_curitr)
 
@@ -907,18 +978,39 @@ class Module:
             self.restart.ogsmout_ogcruderef.loc[self.restart.ogsmout_ogcruderef.index.get_level_values(2).isin([self.current_year])] = 0
 
         if self.current_year >= self.history_year:
-            self.restart.ogsmout_ogenagprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogadgprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogdngprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogqngrep.loc[(slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogregprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogngprd_fed.loc[(slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogngprd_nonfed.loc[(slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogcoprd_fed.loc[(slice(None), self.current_year), 'value'] = 0
-            self.restart.ogsmout_ogcoprd_nonfed.loc[(slice(None), self.current_year), 'value'] = 0
+            # In standalone mode, zero all projection years for debugging
+            # In integrated mode, only zero the current year being processed
+            if self.integrated_switch == False:  # Standalone mode
+                # Zero all projection years (history_year + 1 through final_aeo_year)
+                projection_years = list(range(self.history_year + 1, self.final_aeo_year + 1))
+                
+                self.restart.ogsmout_ogenagprd.loc[(slice(None), slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogadgprd.loc[(slice(None), slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogdngprd.loc[(slice(None), slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogqngrep.loc[(slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogregprd.loc[(slice(None), slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogngprd.loc[(slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogngprd_fed.loc[(slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogngprd_nonfed.loc[(slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogcoprd_fed.loc[(slice(None), projection_years), 'value'] = 0
+                self.restart.ogsmout_ogcoprd_nonfed.loc[(slice(None), projection_years), 'value'] = 0
+                
+                if self.current_iteration == 1:
+                    self.restart.ogsmout_ogrnagprd.loc[(slice(None), slice(None), projection_years), 'value'] = 0
+            else:  # Integrated mode - keep existing behavior
+                self.restart.ogsmout_ogenagprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogadgprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogdngprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogqngrep.loc[(slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogregprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogngprd.loc[(slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogngprd_fed.loc[(slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogngprd_nonfed.loc[(slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogcoprd_fed.loc[(slice(None), self.current_year), 'value'] = 0
+                self.restart.ogsmout_ogcoprd_nonfed.loc[(slice(None), self.current_year), 'value'] = 0
 
-            if self.current_iteration == 1:
-                self.restart.ogsmout_ogrnagprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
+                if self.current_iteration == 1:
+                    self.restart.ogsmout_ogrnagprd.loc[(slice(None), slice(None), self.current_year), 'value'] = 0
 
         self.logger.info('Reset Restart Variables to 0')
 
@@ -934,8 +1026,9 @@ class Module:
 
         ###NEMS Restart variables reformatted
         #Set Domestic Crude Price
-        self.rest_dcrdwhp         = self.restart.pmmout_dcrdwhp.copy().unstack()
-        self.rest_dcrdwhp.columns = list(range(self.param_baseyr,self.final_aeo_year + 1))
+        #Note: rest_dcrdwhp is now calculated from reg_crude_price in calculate_prices()
+        #Initialize as empty DataFrame - will be populated in calculate_prices()
+        self.rest_dcrdwhp = pd.DataFrame()
 
         #Set Domestic Crude Production
         self.rest_rfqtdcrd = self.restart.pmmout_rfqtdcrd.copy().unstack()
@@ -1036,25 +1129,41 @@ class Module:
 
         if self.onshore_switch:
             self.logger.info('Running Onshore Submodule')
+            start_time = time.time()
             self.onshore.run()
+            elapsed = time.time() - start_time
+            self.onshore_runtime += elapsed
+            self.logger.info(f'Onshore Submodule completed in {self.format_time(elapsed)}')
         else:
             self.logger.info('Onshore Submodule Switch Off')
 
         if self.offshore_switch:
             self.logger.info('Running Offshore Submodule')
+            start_time = time.time()
             self.offshore.run()
+            elapsed = time.time() - start_time
+            self.offshore_runtime += elapsed
+            self.logger.info(f'Offshore Submodule completed in {self.format_time(elapsed)}')
         else:
             self.logger.info('Offshore Submodule Switch Off')
 
         if self.alaska_switch:
             self.logger.info('Running Alaska Submodule')
+            start_time = time.time()
             self.alaska.run()
+            elapsed = time.time() - start_time
+            self.alaska_runtime += elapsed
+            self.logger.info(f'Alaska Submodule completed in {self.format_time(elapsed)}')
         else:
             self.logger.info('Alaska Submodule Switch Off')
 
         if self.canada_switch:
             self.logger.info('Running Canada Submodule')
+            start_time = time.time()
             self.canada.run()
+            elapsed = time.time() - start_time
+            self.canada_runtime += elapsed
+            self.logger.info(f'Canada Submodule completed in {self.format_time(elapsed)}')
         else:
             self.logger.info('Canada Submodule Switch Off')
 
@@ -1101,6 +1210,242 @@ class Module:
 
         pass
 
+    def _safe_divide(self, numerator, denominator, fill_value=np.nan):
+        """Safely divide two DataFrames/Series, handling zero denominators.
+        
+        Parameters
+        ----------
+        numerator : pd.DataFrame or pd.Series
+            Numerator values
+        denominator : pd.DataFrame or pd.Series
+            Denominator values
+        fill_value : float, default np.nan
+            Value to use when denominator is zero or NaN
+            
+        Returns
+        -------
+        pd.DataFrame or pd.Series
+            Result of division with zero/NaN protection
+        """
+        # Handle zero/NaN denominators with fill_value
+        return numerator.div(denominator, fill_value=fill_value).replace([np.inf, -np.inf], fill_value)
+
+    def _calculate_production_weighted_price(self, prices, production, groupby_level):
+        """Calculate production-weighted average price with NaN/zero handling.
+        
+        This function computes a production-weighted average price by:
+        1. Multiplying prices by production to get price-weighted production
+        2. Summing by group
+        3. Dividing by total production (with zero protection)
+        
+        Parameters
+        ----------
+        prices : pd.DataFrame
+            Price data indexed by (region/type, ...)
+        production : pd.DataFrame
+            Production data with same index structure as prices
+        groupby_level : str or list
+            Level(s) to group by for aggregation
+            
+        Returns
+        -------
+        pd.Series or pd.DataFrame
+            Production-weighted average prices
+        """
+        # Calculate production-weighted average price
+        price_weighted_prod = prices * production
+        price_weighted_sum = price_weighted_prod.groupby(groupby_level).sum()
+        total_production = production.groupby(groupby_level).sum()
+        # Zero production results in NaN
+        weighted_price = self._safe_divide(price_weighted_sum, total_production, fill_value=np.nan)
+        
+        return weighted_price
+
+    def _process_natural_gas_prices(self):
+        """Process natural gas prices and production by district and region.
+        
+        This method:
+        1. Formats natural gas production by type and district
+        2. Aggregates production to regions
+        3. Calculates production-weighted regional prices from district data
+        4. Handles special cases (Alaska region mapping, regions without production)
+        
+        Sets the following instance attributes:
+        - self.dist_natgas_type_prod: Natural gas production by district and type
+        - self.dist_natgas_prod: Total natural gas production by district
+        - self.reg_natgas_prod: Total natural gas production by region
+        - self.dist_natgas_price: Natural gas price by district
+        - self.reg_natgas_price: Natural gas price by region (updated with calculated values)
+        """
+        # Format natural gas production by type by district
+        self.dist_natgas_type_prod = self.rest_ogrnagprd.unstack(2).copy()
+        self.dist_natgas_type_prod.columns = self.dist_natgas_type_prod.columns.droplevel(0)
+        self.dist_natgas_type_prod.index.set_names([nam.district_number, nam.gas_type_number], inplace=True)
+
+        # Get total natural gas production by district (sum across param_gastypes)
+        self.dist_natgas_prod = self.dist_natgas_type_prod.loc(axis=0)[:, self.param_gastypes].copy()
+        self.dist_natgas_prod = self.dist_natgas_prod.droplevel(nam.gas_type_number)
+
+        # Aggregate production to region using mapping table
+        self.reg_natgas_prod = pd.merge(
+            self.dist_natgas_prod,
+            self.mapping[[nam.district_number, nam.region_number]],
+            on=nam.district_number
+        )
+        self.reg_natgas_prod = self.reg_natgas_prod.groupby(nam.region_number).sum()
+        self.reg_natgas_prod = self.reg_natgas_prod.drop(nam.district_number, axis=1)
+
+        # Format natural gas prices by district
+        self.dist_natgas_price = self.rest_ogprcng.unstack(1).copy()
+        self.dist_natgas_price.columns = self.dist_natgas_price.columns.droplevel(0)
+        self.dist_natgas_price.index.set_names(nam.district_number, inplace=True)
+
+        # Format natural gas prices by region (from restart file)
+        self.reg_natgas_price = self.rest_ogwprng.unstack(1).copy()
+        self.reg_natgas_price.columns = self.reg_natgas_price.columns.droplevel(0)
+        self.reg_natgas_price.index.set_names(nam.region_number, inplace=True)
+        # Remove total region
+        self.reg_natgas_price = self.reg_natgas_price.drop([self.param_num_ogsm_regions])
+
+        # Calculate production-weighted regional prices from district data
+        price_weighted_prod = self.dist_natgas_prod * self.dist_natgas_price
+        price_weighted_prod = pd.merge(
+            price_weighted_prod,
+            self.mapping[[nam.district_number, nam.region_number]],
+            on=nam.district_number
+        )
+        price_weighted_prod = price_weighted_prod.groupby(nam.region_number).sum()
+        
+        # Calculate weighted average price (zero production results in NaN)
+        calculated_reg_price = self._safe_divide(price_weighted_prod, self.reg_natgas_prod, fill_value=np.nan)
+        calculated_reg_price = calculated_reg_price.drop(nam.district_number, axis=1, errors='ignore')
+        
+        # Alaska region 11 uses same price as region 13
+        calculated_reg_price.loc[11] = calculated_reg_price.loc[13]
+        
+        # Fill NaN regions with previous values from restart file (avoids .update())
+        self.reg_natgas_price = calculated_reg_price.where(calculated_reg_price.notna(), self.reg_natgas_price)
+
+    def _process_crude_prices(self):
+        """Process crude oil prices and production by LFMM region, district, and HSM region.
+        
+        This method:
+        1. Formats crude prices and production by type and LFMM region
+        2. Handles NaN/zero values in rfcrudewhp and ogcruderef
+        3. Maps prices from LFMM regions to districts and HSM regions
+        4. Calculates production-weighted average prices
+        5. Updates restart variable pmmout_dcrdwhp
+        
+        Sets the following instance attributes:
+        - self.lfmm_reg_crude_type_price: Crude price by LFMM region and type
+        - self.lfmm_reg_crude_type_prod: Crude production by LFMM region and type
+        - self.dist_crude_type_price: Crude price by district and type
+        - self.lfmm_reg_crude_price: Type-averaged crude price by LFMM region
+        - self.dist_crude_price: Type-averaged crude price by district
+        - self.reg_crude_price: Type-averaged crude price by HSM region
+        - self.rest_dcrdwhp: Domestic crude wellhead price by region (for restart file)
+        """
+        # Format crude prices by type by LFMM region
+        self.lfmm_reg_crude_type_price = self.rest_rfcrudewhp.unstack(2).copy()
+        self.lfmm_reg_crude_type_price.columns = self.lfmm_reg_crude_type_price.columns.droplevel(0)
+        self.lfmm_reg_crude_type_price.index.set_names([nam.lfmm_region_number, nam.crude_type_number], inplace=True)
+
+        # Format crude production by type by LFMM region
+        self.lfmm_reg_crude_type_prod = self.rest_ogcruderef.unstack(2).copy()
+        self.lfmm_reg_crude_type_prod.columns = self.lfmm_reg_crude_type_prod.columns.droplevel(0)
+        self.lfmm_reg_crude_type_prod.index.set_names([nam.lfmm_region_number, nam.crude_type_number], inplace=True)
+
+        # Handle NaN/zero: replace zero production with NaN (avoids division issues)
+        # Replace NaN prices with 0 (zero price is valid)
+        self.lfmm_reg_crude_type_prod = self.lfmm_reg_crude_type_prod.replace(0, np.nan)
+        self.lfmm_reg_crude_type_price = self.lfmm_reg_crude_type_price.fillna(0)
+        
+        # Use current_year - 1 production values for all years (fixes issue where rest_ogcruderef
+        # gets zeroed out at beginning of each year in integrated mode)
+        weight_year = self.current_year - 1
+        if weight_year in self.lfmm_reg_crude_type_prod.columns:
+            # Extract the previous year's production values
+            prev_year_prod = self.lfmm_reg_crude_type_prod[weight_year]
+            # Replace all columns with previous year's production values
+            self.lfmm_reg_crude_type_prod = pd.DataFrame(
+                {col: prev_year_prod for col in self.lfmm_reg_crude_type_prod.columns},
+                index=self.lfmm_reg_crude_type_prod.index
+            )
+
+        # Map crude prices from LFMM regions to districts
+        self.dist_crude_type_price = pd.merge(
+            self.mapping[[nam.district_number, nam.lfmm_region_number]],
+            self.lfmm_reg_crude_type_price.reset_index(),
+            on=nam.lfmm_region_number
+        )
+        self.dist_crude_type_price = self.dist_crude_type_price.drop(nam.lfmm_region_number, axis=1)
+        self.dist_crude_type_price = self.dist_crude_type_price.set_index([nam.district_number, nam.crude_type_number])
+
+        # Calculate type-averaged crude prices by LFMM region (production-weighted)
+        self.lfmm_reg_crude_price = self._calculate_production_weighted_price(
+            self.lfmm_reg_crude_type_price,
+            self.lfmm_reg_crude_type_prod,
+            nam.lfmm_region_number
+        )
+
+        # Map type-averaged crude prices from LFMM regions to districts
+        self.dist_crude_price = pd.DataFrame(
+            self.mapping[[nam.district_number, nam.lfmm_region_number]]
+        )
+        self.dist_crude_price = pd.merge(
+            self.dist_crude_price,
+            self.lfmm_reg_crude_price,
+            on=nam.lfmm_region_number
+        )
+        self.dist_crude_price = self.dist_crude_price.set_index(nam.district_number)
+        self.dist_crude_price = self.dist_crude_price.sort_index()
+        self.dist_crude_price = self.dist_crude_price.drop(nam.lfmm_region_number, axis=1)
+
+        # Map type-averaged crude prices from LFMM regions to HSM regions
+        self.reg_crude_price = pd.DataFrame(
+            self.reg_natgas_price.reset_index()[nam.region_number]
+        )
+        self.reg_crude_price = pd.merge(
+            self.reg_crude_price,
+            self.mapping[[nam.region_number, nam.lfmm_region_number + '_old']],
+            on=nam.region_number
+        )
+        self.reg_crude_price = pd.merge(
+            self.reg_crude_price,
+            self.lfmm_reg_crude_price,
+            left_on=nam.lfmm_region_number + '_old',
+            right_on=nam.lfmm_region_number
+        )
+        self.reg_crude_price = self.reg_crude_price.drop(nam.lfmm_region_number + '_old', axis=1)
+        # Use mean() if multiple LFMM regions map to same HSM region
+        self.reg_crude_price = self.reg_crude_price.groupby(nam.region_number).mean()
+
+        # Populate rest_dcrdwhp from reg_crude_price (replaces old restart file value)
+        self.rest_dcrdwhp = self.reg_crude_price.copy()
+
+        # Calculate region 14 as production-weighted average of regions 1-13
+        regions_1_13 = list(range(1, 14))
+        temp_prod = self.rest_rfqtdcrd.loc[regions_1_13].copy()
+        
+        # Calculate production weights (handle zero total production)
+        total_prod = temp_prod.sum(axis=0)
+        temp_prod_weights = temp_prod.div(total_prod, axis=1)
+        temp_prod_weights = temp_prod_weights.replace([np.inf, -np.inf, np.nan], 0)
+        
+        # Calculate weighted average price for region 14
+        region_14_price = temp_prod_weights.mul(self.rest_dcrdwhp, axis=0).sum(axis=0)
+        region_14_price.name = 14
+
+        # Add region 14 to rest_dcrdwhp
+        self.rest_dcrdwhp = pd.concat([self.rest_dcrdwhp, region_14_price.to_frame().T])
+
+        # Update pmmout_dcrdwhp restart variable with calculated values
+        temp_restart_update = self.rest_dcrdwhp.stack()
+        temp_restart_update.index.names = self.restart.pmmout_dcrdwhp.index.names
+
+        common_indices = temp_restart_update.index.intersection(self.restart.pmmout_dcrdwhp.index)
+        if len(common_indices) > 0:
+            self.restart.pmmout_dcrdwhp.loc[common_indices, nam.value] = temp_restart_update.loc[common_indices]
 
     def calculate_prices(self):
         """Aggregates and shares out crude type and natural gas prices to regions and districts.
@@ -1108,6 +1453,8 @@ class Module:
         The calculation of regional prices should be aggregated up from the district, crude type level, currently
         crude production by type and district is not output by OGSM, so the LFMM regions are directly converted to
         OGSM/HSM regions.
+
+        Orchestrates price calculations via helper methods with NaN/zero handling.
 
         Returns
         -------
@@ -1124,10 +1471,10 @@ class Module:
             Natural gas price by HSM region
 
         self.lfmm_reg_crude_type_price
-            Crude oil price by type and HSM region
+            Crude oil price by type and LFMM region
 
         self.lfmm_reg_crude_type_prod
-            Crude oil production by type and HSM region
+            Crude oil production by type and LFMM region
 
         self.dist_crude_type_price
             Crude oil price by type and HSM district
@@ -1136,91 +1483,11 @@ class Module:
             Crude oil price by HSM region
 
         """
-        ###Natural gas prices
-        #Format natural gas production by type by district
-        self.dist_natgas_type_prod = self.rest_ogrnagprd.unstack(2).copy()
-        self.dist_natgas_type_prod.columns = self.dist_natgas_type_prod.columns.droplevel(0)
-        self.dist_natgas_type_prod.index.set_names([nam.district_number, nam.gas_type_number], inplace=True)
+        # Process natural gas prices (district-to-region aggregation)
+        self._process_natural_gas_prices()
 
-        #Get total natural gas production by district
-        #(https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
-        self.dist_natgas_prod = self.dist_natgas_type_prod.loc(axis=0)[:, self.param_gastypes].copy()
-        self.dist_natgas_prod = self.dist_natgas_prod.droplevel(nam.gas_type_number)
-
-        #Aggregate production to region
-        self.reg_natgas_prod = pd.merge(self.dist_natgas_prod,
-                                        self.mapping[[nam.district_number, nam.region_number]],
-                                        on=nam.district_number)
-        self.reg_natgas_prod = self.reg_natgas_prod.groupby(nam.region_number).sum()
-        self.reg_natgas_prod = self.reg_natgas_prod.drop(nam.district_number, axis=1)
-
-        #Format natural gas prices by district
-        self.dist_natgas_price = self.rest_ogprcng.unstack(1).copy()
-        self.dist_natgas_price.columns = self.dist_natgas_price.columns.droplevel(0)
-        self.dist_natgas_price.index.set_names(nam.district_number, inplace=True)
-
-        #Format natural gas prices by region
-        self.reg_natgas_price = self.rest_ogwprng.unstack(1).copy()
-        self.reg_natgas_price.columns = self.reg_natgas_price.columns.droplevel(0)
-        self.reg_natgas_price.index.set_names(nam.region_number, inplace=True)
-        # don't want total
-        self.reg_natgas_price = self.reg_natgas_price.drop([self.param_num_ogsm_regions])
-
-        #Format natural gas prices by region
-        temp_price_product = self.dist_natgas_prod * self.dist_natgas_price
-        temp_price_product = pd.merge(temp_price_product, self.mapping[[nam.district_number, nam.region_number]],
-                                      on=nam.district_number)
-        temp_price_product = temp_price_product.groupby(nam.region_number).sum()
-        temp_price = temp_price_product / self.reg_natgas_prod
-        temp_price = temp_price.drop(nam.district_number, axis=1)
-        #Distribute Alaska regional prices across three regions
-        temp_price.loc[11] = temp_price.loc[13]
-        #For nans (regions without production, so price distribution doesn't work) fill with previous numbers from restart file
-        self.reg_natgas_price.update(temp_price)
-
-
-        ###Crude prices
-        #Format crude prices by type by lfmm region
-        self.lfmm_reg_crude_type_price = self.rest_rfcrudewhp.unstack(2).copy()
-        self.lfmm_reg_crude_type_price.columns = self.lfmm_reg_crude_type_price.columns.droplevel(0)
-        self.lfmm_reg_crude_type_price.index.set_names([nam.lfmm_region_number, nam.crude_type_number], inplace=True)
-
-        #Format crude production by type by lfmm region
-        self.lfmm_reg_crude_type_prod = self.rest_ogcruderef.unstack(2).copy()
-        self.lfmm_reg_crude_type_prod.columns = self.lfmm_reg_crude_type_prod.columns.droplevel(0)
-        self.lfmm_reg_crude_type_prod.index.set_names([nam.lfmm_region_number, nam.crude_type_number], inplace=True)
-
-        #Get crude prices, by type, by district
-        self.dist_crude_type_price = pd.merge(self.mapping[[nam.district_number, nam.lfmm_region_number]],
-                                              self.lfmm_reg_crude_type_price.reset_index(),
-                                              on=nam.lfmm_region_number)
-        self.dist_crude_type_price = self.dist_crude_type_price.drop(nam.lfmm_region_number, axis=1)
-        self.dist_crude_type_price = self.dist_crude_type_price.set_index([nam.district_number, nam.crude_type_number])
-
-        #Get type-averaged crude prices by lfmm region
-        temp_price_product = self.lfmm_reg_crude_type_price*self.lfmm_reg_crude_type_prod
-        temp_price_product = temp_price_product.groupby(nam.lfmm_region_number).sum()
-        temp_total_production = self.lfmm_reg_crude_type_prod.groupby(nam.lfmm_region_number).sum()
-        self.lfmm_reg_crude_price = temp_price_product/temp_total_production
-
-        #Get type-averaged crude prices by district
-        self.dist_crude_price = pd.DataFrame(self.mapping[[nam.district_number, nam.lfmm_region_number]])
-        self.dist_crude_price = pd.merge(self.dist_crude_price, self.lfmm_reg_crude_price, on=nam.lfmm_region_number)
-        self.dist_crude_price = self.dist_crude_price.set_index(nam.district_number)
-        self.dist_crude_price = self.dist_crude_price.sort_index()
-        self.dist_crude_price = self.dist_crude_price.drop(nam.lfmm_region_number, axis=1)
-
-        #Get type-averaged crude prices by region
-        self.reg_crude_price = pd.DataFrame(self.reg_natgas_price.reset_index()[nam.region_number])
-        self.reg_crude_price = pd.merge(self.reg_crude_price,
-                                        self.mapping[[nam.region_number, nam.lfmm_region_number + '_old']],
-                                        on=nam.region_number)
-        self.reg_crude_price = pd.merge(self.reg_crude_price, self.lfmm_reg_crude_price,
-                                        left_on=nam.lfmm_region_number + '_old', right_on=nam.lfmm_region_number)
-        self.reg_crude_price = self.reg_crude_price.drop(nam.lfmm_region_number + '_old', axis=1)
-        self.reg_crude_price = self.reg_crude_price.groupby(nam.region_number).mean()
-
-        pass
+        # Process crude oil prices (LFMM→district→HSM region mapping, NaN/zero handling)
+        self._process_crude_prices()
 
 
     def prepare_results(self):
@@ -1240,12 +1507,14 @@ class Module:
         self.restart.ogsmout_oggrowfac : df
             HSM growth factor (deprecated)
         """
+        start_time = time.time()
+        
         #Set Price Expectation Adjustment
         #self.restart.ogsmout_ogprcexp.at[(self.current_year,), nam.value] = 1.00
 
         #Set OG Growth Factor
         #self.restart.ogsmout_oggrowfac.at[self.current_year, nam.value] = 1.00
-        self.restart.ogsmout_oggrowfac.iloc[self.current_year-self.param_baseyr][0] = 1.00
+        self.restart.ogsmout_oggrowfac.iloc[self.current_year-self.param_baseyr, 0] = 1.00
 
         if self.onshore_switch:
             self.logger.info('Onshore Prepare Results')
@@ -1268,25 +1537,47 @@ class Module:
             self.logger.info('Aggregate Results Across Submodules')
             self.prep_results.aggregate_results_across_submodules()
 
-        #Set play-level crude/oil and ngpl production in first STEO year to match STEO
-        if self.current_year in self.steo_years[0:2]: # Don't benchmark to last Steo year (i.e. in AEO2025, that's 2026)
-            self.logger.info('First Year STEO Adjustments to Results')
+        # Apply STEO fixed benchmarks for first two STEO years
+        # Overwrites model-calculated production (crude oil, natural gas, NGPL) with STEO forecast values
+        # Always runs for first two STEO years (steo_years[0:2]) - no flag required
+        # Excludes the last STEO year (steo_years[2]) from benchmarking
+        # Note: In side cases (HOGS/LOGS, HP/LP), steo_years is set to only the first STEO year, so this runs only for that year
+        if self.current_year in self.steo_years[0:2]: # Don't benchmark to last STEO year (i.e. in AEO2025, that's 2026)
+            self.logger.info('STEO Fixed Benchmarks (First Two STEO Years)')
             self.prep_results.apply_steo_fixed_benchmarks()
 
-        #Apply STEO Scaling Adjustments
-        if (self.steo_benchmark_adj_switch == True) & (self.current_year in self.steo_years[0:2]):
-            self.logger.info('Years 2-3 STEO Adjustments to Results')
-            self.prep_results.apply_steo_adjustments()
+        #Apply Side Case STEO Overwrites
+        # For variables not in apply_steo_fixed_benchmarks()
+        # Only runs for side cases in first STEO year when side_case_steo_overwrite_switch == True
+        is_side_case = (self.scedes.get('OGTECH') in ['23', '30'] or self.scedes.get('WWOP') in ['1', '3'])
+        if (self.side_case_steo_overwrite_switch == True) & (self.current_year == self.steo_years[0]) & is_side_case:
+            self.logger.info('Side Case STEO Overwrites (First STEO Year)')
+            self.prep_results.apply_side_case_steo_overwrites()
 
-        #Apply Realized Production
-        if (self.current_year == self.steo_years[0]) & (self.param_ncrl == 1):
-            self.prep_results.adjust_vars_for_year_one_prod()
-        elif (self.current_year > self.steo_years[0]) & (self.param_ncrl == 1):
-            self.logger.info('Apply NGMM Realized Prod')
-            self.prep_results.apply_ngmm_realized_prod()
-            self.prep_results.adjust_vars_for_realized_prod()
-            if self.onshore_switch == True:
-                self.onshore.adjust_onshore_shale_gas_plays_for_realized_prod()
+        # Apply Realized Production Ratio Adjustment
+        # Skip for side cases in first STEO year only to avoid interfering with side case STEO overwrites
+        if not (is_side_case & (self.current_year == self.steo_years[0])):
+            if (self.current_year >= self.steo_years[0]) & (self.param_ncrl == 1):
+                # Ratio adjustment: scale all gas types proportionally for all integrated years
+                # All years >= steo_years[0] are treated the same with ratio adjustment
+                # Years > steo_years[0] additionally get shale gas plays adjustment
+                self.logger.info('Apply Ratio Adjustment to Realized Prod')
+                self.prep_results.adjust_production(mode='year_one')
+            elif (self.current_year >= self.steo_years[0]) & (self.integrated_switch == False):
+                # Standalone mode: same updates as integrated (ogqngrep, ogdngprd, fed/nonfed,
+                # ogngprd, ogregprd, first-STEO-year OGQSHLGAS) using expected NA (ogenagprd)
+                self.logger.info('Update regional natural gas production for standalone mode')
+                self.prep_results.adjust_production(mode='standalone')
+            
+
+        #Calculate outputs that are aggregated across submodules
+        if self.current_year >= self.history_year:
+            self.logger.info('Aggregate Results Across Submodules')
+            self.prep_results.aggregate_results_across_submodules()
+
+        elapsed = time.time() - start_time
+        self.prepare_results_runtime += elapsed
+        self.logger.info(f'Prepare Results completed in {self.format_time(elapsed)}')
 
     def run_ngp(self):
         """Assess HSM results to produce Natural Gas Procesing Facility CO2 supply.
@@ -1297,7 +1588,13 @@ class Module:
         """
         if self.ngp_switch:
             self.logger.info('Running NGP Submodule')
+            start_time = time.time()
             self.ngp.run()
+            elapsed = time.time() - start_time
+            self.ngp_runtime += elapsed
+            self.logger.info(f'NGP Submodule completed in {self.format_time(elapsed)}')
+        else:
+            pass
 
 
     def write_pkl(self):
@@ -1326,4 +1623,80 @@ class Module:
                 pass
 
         pass
+
+    def reset_timing(self):
+        """Reset all timing variables to zero.
+        
+        Returns
+        -------
+        None
+        """
+        self.onshore_runtime = 0.0
+        self.offshore_runtime = 0.0
+        self.alaska_runtime = 0.0
+        self.canada_runtime = 0.0
+        self.prepare_results_runtime = 0.0
+        self.ngp_runtime = 0.0
+
+    def format_time(self, seconds):
+        """Format elapsed time in seconds to a human-readable string.
+
+        Parameters
+        ----------
+        seconds : float
+            Elapsed time in seconds
+
+        Returns
+        -------
+        str
+            Formatted time string
+        """
+        if seconds < 60:
+            return f"{seconds:.2f} seconds"
+        elif seconds < 3600:
+            minutes = int(seconds // 60)
+            secs = seconds % 60
+            return f"{minutes}m {secs:.1f}s"
+        else:
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            secs = seconds % 60
+            return f"{hours}h {minutes}m {secs:.0f}s"
+
+    def get_timing_summary(self):
+        """Get a formatted summary of all timing data.
+
+        Returns
+        -------
+        str
+            Formatted timing summary table
+        """
+        summary = "\n" + "="*50 + "\n"
+        summary += "HSM Runtime Summary\n"
+        summary += "="*50 + "\n"
+        
+        if self.onshore_runtime > 0:
+            summary += f"Onshore Submodule:     {self.format_time(self.onshore_runtime)}\n"
+        if self.offshore_runtime > 0:
+            summary += f"Offshore Submodule:    {self.format_time(self.offshore_runtime)}\n"
+        if self.alaska_runtime > 0:
+            summary += f"Alaska Submodule:      {self.format_time(self.alaska_runtime)}\n"
+        if self.canada_runtime > 0:
+            summary += f"Canada Submodule:      {self.format_time(self.canada_runtime)}\n"
+        if self.prepare_results_runtime > 0:
+            summary += f"Prepare Results:       {self.format_time(self.prepare_results_runtime)}\n"
+        if self.ngp_runtime > 0:
+            summary += f"NGP Submodule:         {self.format_time(self.ngp_runtime)}\n"
+        
+        total = (self.onshore_runtime + self.offshore_runtime + 
+                self.alaska_runtime + self.canada_runtime + 
+                self.prepare_results_runtime + self.ngp_runtime)
+        
+        if total > 0:
+            summary += "-"*50 + "\n"
+            summary += f"Total Submodule Time:  {self.format_time(total)}\n"
+        
+        summary += "="*50 + "\n"
+        
+        return summary
 

@@ -1,8 +1,8 @@
 FILE NAME:      KSTEO
-DATE MODIFIED:  December 23, 2024
+DATE MODIFIED:  November 20, 2025
 USED BY:        Consumption subroutine of the National Energy Modeling System
                 (NEMS) Commercial Demand Module (CDM)
-DEFINITION:     MER and STEO commercial sector historical and forecasted fuel consumption for the years 2021 through 2025
+DEFINITION:     MER and STEO commercial sector historical and forecasted fuel consumption for the years 2021 through 2026
 UNITS:          trillion Btu consumed
 DIMENSION:      fuel type, year, Census division
 SPECIAL CONSTRAINTS:    None
@@ -27,15 +27,15 @@ ORGANIZATION OF DATA: Data starts on row 101 of this file as per CDM convention.
 						East North Central, West North Central, South Atlantic, East South Central, 
 						West South Central, Mountain, and Pacific.                   
 SOURCES:
-                2023 national values:  Monthly Energy Review Tables 2.3, 3.8a, 4.3, and A4, released November 26, 2024
+                2024 national values:  Monthly Energy Review Tables 2.3, 3.8a, 4.3, and A4, released October 28, 2025
                   Online at www.eia.gov/totalenergy/data/monthly/previous.php
-                  Accessed through EIA Excel API add-on tool:  www.eia.gov/opendata/excel
+                  Accessed through EIA API:  www.eia.gov/opendata
 
-                2024 - 2025 national and all regional values:  Short Term Energy Outlook, December 10, 2024
+                2025 - 2026 national and all regional values:  Short Term Energy Outlook, November 12, 2025
                   Online at www.eia.gov/outlooks/steo
+                  Accessed through EIA API:  www.eia.gov/opendata
 				  
-COMMENT: Updating to December 2024 STEO; Unbenchmarked growth rates for all fuels except CL, RS, KS, which use STEO growth rates.
-
+COMMENT: Updating to November 2025 STEO through 2026; NEMS unbenchmarked growth rates for all fuels except coal, which uses STEO growth rates.
 
 
 
@@ -100,15 +100,15 @@ COMMENT: Updating to December 2024 STEO; Unbenchmarked growth rates for all fuel
 Regional STEO data indicator; 1=available, 0=not available
 0	0	0	0	0	0
 
-2023	2024	2025
+2024	2025	2026
 
-325.57	307.99	316.27	DS	National
-2.69	2.50	2.50	RF	
-188.65	206.04	209.51	LG	
-11.60	11.88	13.67	CL	
-446.72	431.57	438.86	MG	
-2.63	2.06	1.63	KS				
-
+314.22	316.03	321.12	DS	National
+2.91	4.06	4.13	RF	
+187.51	217.18	221.05	LG	
+10.29	12.09	13.43	CL	
+388.54	416.79	423.58	MG	
+1.65	2.48	3.54	KS	
+			
 0	0	0	0	CD1	DS	Regional
 0	0	0	0	CD2	
 0	0	0	0	CD3	

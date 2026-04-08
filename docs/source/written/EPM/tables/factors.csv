@@ -1,0 +1,44 @@
+Fuel type,CO\ :sub:`2` coefficient at full combustion,Combustion fraction\ :sup:`a`,Adjusted emission factor
+**Petroleum**,,,
+        Propane used as fuel,62.88,1,62.88
+        Propane used as feedstock,62.88,0.2,12.58
+        Ethane used as fuel,59.58,1,59.58
+        Ethane used as feedstock,59.58,0.2,11.92
+        Butane used as fuel,64.75,1,64.75
+        Butane used as feedstock,64.75,0.2,12.95
+        Isobutane used as fuel,64.94,1,64.94
+        Isobutane used as feedstock,64.94,0.2,12.99
+        Natural gasoline (pentanes plus) used as fuel,66.88,1,66.88
+        Natural gasoline (pentanes plus) used as feedstock,66.88,0.2,13.38
+        Motor gasoline (not including ethanol),70.66,1,70.66
+        Jet fuel,72.23,1,72.23
+        Distillate fuel (not including biodiesel),74.14,1,74.14
+        Residual fuel,75.09,1,75.09
+        Asphalt and road oil,75.35,0,0
+        Lubricants,74.07,0.5,37.03
+        Petrochemical feedstocks,69.26,0.308,21.31
+        Kerosene,73.19,1,73.19
+        Petroleum coke (industrial),102.12,0.956,97.59
+        Petroleum coke (electric power),102.12,1,102.12
+        Petroleum still gas,66.73,1,66.73
+        Other industrial\ :sup:`b`,30.39,1,30.39
+**Coal**,,,
+        Residential and commercial,95.99,1,95.99
+        Metallurgical,93.9,1,93.9
+        Coke,113.67,1,113.67
+        Industrial other\ :sup:`c`,95.7,1,95.7
+        Electric power\ :sup:`d`,95.81,1,95.81
+**Natural gas**,,,
+        Used as fuel,52.91,1,52.91
+        Used as hydrogen production feedstock,52.91,1,52.91
+        Used as other industrial feedstock,52.91,0.366,19.37
+**Biogenic energy sources**\ :sup:`e`,,,
+        Woody biomass,93.81,1,93.81
+        Biogenic waste,90.64,1,90.64
+        Biofuels heat and coproducts,93.81,1,93.81
+        Ethanol,68.42,1,68.42
+        Biodiesel,72.73,1,72.73
+        Renewable diesel and gasoline,73.15,1,73.15
+        Renewable natural gas,52.91,1,52.91
+        Biobutanol,70.58,1,70.58
+        Other biomass liquids,73.15,1,73.15

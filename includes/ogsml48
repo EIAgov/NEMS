@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/ogsml48,v 1.56 2019/07/23 15:29:07 rsc Exp $
 !  LOWER 48 ONSHORE BASE YEAR
       INTEGER L48BYR

@@ -9,6 +9,7 @@
       SUBROUTINE UTIL
       USE EPHRTS_SWTICHES
       USE EPHRTS_FILE_UNIT_NUMBERS
+      use ifport,only:timef
 !
       IMPLICIT NONE
 !
@@ -67,6 +68,7 @@
       include 'emmemis'
       include 'fuelin'
       include 'hmmblk'
+      include 'emm_aimms'
 
 !
       COMMON /RSVMRG/ EPMRMIN
@@ -127,10 +129,15 @@
       COMMON/BNCHGEN/ BSNCGEN,BSHYGEN,BSSOGEN,BSPVGEN,BSWNGEN,BSGTGEN,BMNCLYR,BMHYLYR,BMSOLYR,BMPVLYR,BMWNLYR,BMGTLYR
       REAL BSNCGEN,BSHYGEN,BSSOGEN,BSPVGEN,BSWNGEN,BSGTGEN
       INTEGER BMNCLYR,BMHYLYR,BMSOLYR,BMPVLYR,BMWNLYR,BMGTLYR
+	  REAL BNCH_ADJFAC
 
       COMMON /BCHMRKSTEOPRICE/ BCHMRKSTEOPRICEADDER, BCHMRKSTEOPRC_N   !STEO Price benchmark feature --- by AKN
       REAL BCHMRKSTEOPRICEADDER(MNUMCR,MNUMYR), BCHMRKSTEOPRC_N(MNUMNR,MNUMYR)  !STEO benchmark price adjustment adder --- by AKN
 
+      COMMON /EFPIT/ EFPITR,EFPFCRL,EFPITPRT
+      INTEGER EFPITR,EFPFCRL,EFPITPRT
+      real*4 timer
+      
       DATA NEWUNIT/3/
       DATA NUMCH/'1','2','3','4','5','6','7','8','9','0'/
 
@@ -139,6 +146,9 @@
       INTEGER itr_season, itr_region, previous_year
       LOGICAL E_DEBUG_EXIST
       
+ ! STEO generation adjustment factor (adjust target for CF benchmarking if needed to ease coal/gen constraint in EFD)
+	  BNCH_ADJFAC = 1.005
+	  
       !do year = 20,60
       !  write(*,*) 'util', 'regions ', 'seasons ','steps ', 'H2SCRV_P ', 'H2SCRV_Q '
       !    do regions = 1, 11
@@ -189,7 +199,7 @@
          OPEN(UNIT=13,FILE='EMM_EMMREPT',BUFFERED='YES', BUFFERCOUNT=10)
          OPEN(UNIT=18,FILE='EMM_EMMPRNT',BUFFERED='YES', BUFFERCOUNT=10)
 
-         CURTAIL = 0.0
+         ECPCURT = 0.0
 
 !        Initialize array which specifies if plants with CO2 capture technology must store captured CO2, i.e. Carbon Cap, Carbon Tax, etc.
 
@@ -239,14 +249,6 @@
 !        WRITE(6,8493)'CLOSS  coeffs after RDCNTRL ',UCL_CF1,UCL_CF2,UCL_CF3,UCL_CF4
 8493  FORMAT(A25,1x,4(F12.7,1x))
 !
-         IF(USW_XP .GT. 0) THEN                                  !CANADA
-            UNRGNS = EFD_D_PROV - 3
-         ENDIF
-!        FOR PC AND CANADIAN VERSION READ IN CENSUS REGION ELECTRICITY DEMANDS
-!
-!        IF(USW_XP .GT. 0) THEN
-!        ENDIF
-!
 !        OPEN THE PLANT DIRECT ACCESS FILE
 !
          NEW = .FALSE.
@@ -277,10 +279,8 @@
          ORCLEFD  = RTOVALUE('ORCLEFD ',0)
          ORCLECP  = RTOVALUE('ORCLECP ',0)
          ORCLEFP  = RTOVALUE('ORCLEFP ',0)
-         ORCLCL   = RTOVALUE('ORCLCL  ',0)
 
 
-         IF(USW_XP .EQ.1) USW_DBS = 0          !off for canadian run
 !        Turn off emmdbase.txt writes if all of emm database writes turned on
 !        IF (ORACLESW .GT. 0) USW_DBS=0
          IF (ORCLEFP .GT. 0 .AND. ORCLEFD .GT. 0 .AND. ORCLECP .GT. 0) USW_DBS = 0
@@ -294,20 +294,12 @@
            FILENM = 'EDBPGRP'
            NEW = .TRUE.
            UF_DBPGRP = FILE_MGR('O',FILENM,NEW)
-           WRITE(UF_DBPGRP,*) '  ',TRIM(SCEN_DATE)
+          ! WRITE(UF_DBPGRP,*) '  ',TRIM(SCEN_DATE)
          ENDIF
          IF (((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1 )) .OR. (USW_DBS .GT. 1)) THEN
              CALL WRPLNT
          END IF
 
-
-!        OPEN THE EFD INPUT DIRECT ACCESS FILE
-!
-         IF(USW_DISP .LE. 0) THEN
-            NEW = .TRUE.
-            FILENM='INPTDAF'
-            UF_IN=FILE_MGR('O',FILENM,NEW)
-         END IF
 !
 !        OPEN THE ECP INPUT DIRECT ACCESS FILE
 !
@@ -333,12 +325,6 @@
 !        OPEN(UF_BOUT,FILE=FILENM,ACCESS='DIRECT',FORM='UNFORMATTED',
 !        +   RECL=16384,STATUS='UNKNOWN')
 !
-!        OPEN THE SO2 DIRECT ACCESS FILE
-!
-         NEW = .TRUE.
-         FILENM='SO2DAF'
-         UF_SO2=FILE_MGR('O',FILENM,NEW)
-!
 !        OPEN THE INTER-REGIONAL TRADE FILES
 !
          NEW = .FALSE.
@@ -355,18 +341,6 @@
          UF_ETT=FILE_MGR('O',FILENM,NEW)
 !
 !
-!         FILENM='CANOUT'
-!         NEW = .FALSE.
-!         UF_CN2=FILE_MGR('O',FILENM,NEW)
-
-         FILENM='EFDOUT'
-         NEW = .TRUE.
-         UF_EFD=FILE_MGR('O',FILENM,NEW)
-
-         FILENM='TRANSET'
-         NEW = .TRUE.
-         UF_TRAN=FILE_MGR('O',FILENM,NEW)
-
 !        OPEN THE EFP DIRECT ACCESS FILES
 !
          NEW = .TRUE.
@@ -464,8 +438,6 @@
 !   High Demand case - adjust QEL__ variables on first iteration
       IF (USW_CEL .eq. 1 .AND. CURITR .eq. 1 .AND. CURIRUN .eq. 1) CALL HIELADJ
 
-      CALL ELDMND(JYR)
-!
       IF((CURITR .EQ. 1) .AND. (FULLYR .EQ. UESTYR)) THEN
 !
 !        CAPTURE FUEL DATA
@@ -564,20 +536,6 @@
 !        WRITE(6,3113) CURIRUN, CURIYR+1989, CURITR
 !3113    FORMAT("UTIL_CPFKECP",3(":",I4))
 
-!        DO ICNS = 1, MNUMCR
-!           DO ICLRG = 1, EFD_D_MFRG
-!              DO IGSRG = 1, EFD_D_MFRG
-!                 CPFLRG(ICNS,ICLRG,IGSRG) = 0.0
-!                 IF (FULLYR .EQ. UESTYR) EPNFLRG(ICNS,ICLRG,IGSRG) = 0
-!                 DO IECP = 1, ECP_D_CAP
-!                    CPFLECP(IECP,ICNS,ICLRG,IGSRG) = 0.0
-!                 ENDDO
-!                 DO IEFD = 1, EFD_D_CAP
-!                    CPFLEFD(IEFD,ICNS,ICLRG,IGSRG) = 0.0
-!                 ENDDO
-!              ENDDO
-!           ENDDO
-!        ENDDO
       ENDIF
 !
 
@@ -615,7 +573,6 @@
                END DO
             END IF
 !
-            IF (USW_XP .EQ. 0) THEN                       !OFF FOR CANADA
                IF (FULLYR .EQ. UESTYR) THEN
 !
 !                 CALL ROUTINE TO READ CAPACITY EXPANSION INPUT DATA
@@ -641,7 +598,6 @@
 !6330             FORMAT(1X,"GETBLD_CALL",3(":",I4))
 !
                END IF
-            END IF
 !
 !           LOAD TRANSMISSION AND TRANSFER DATA FOR REGION IRG
 !
@@ -656,87 +612,22 @@
 !
             CALL ELDECP(IRG)
 !
-!           GET PLANT DATA FOR CURRENT YEAR
-
-!           I_TEST = 1
-!           DO IECP = 1 , ECP_D_DSP
-!              IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                 WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!9331             FORMAT(1X,"HTRT_UTIL",8(":",I6),":",A2,3(":",F12.0))
-!              END IF
-!           END DO
-
-!           DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!              IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                 WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!              END IF
-!           END DO
-            
+           
 			! NEED TO RUN THIS BEFORE CRPGRP SO INT CFsARE UPDATED IF CLASS CHANGES
            IF (FULLYR .GE. UESTYR)  THEN
-               IF(USW_XP .EQ. 0) THEN                       !OFF FOR CANADA
-                  IF(USW_RNW .GE. 1) THEN
-                      CALL CFCOVR(IRG)
-                  ENDIF
-               ENDIF
+              CALL CFCOVR(IRG)
            ENDIF
-           
 
+!           GET PLANT DATA FOR CURRENT YEAR
             CALL CRPGRP(FULLYR,IRG,MAXHRZN)
-
-!           I_TEST = I_TEST + 1
-!           DO IECP = 1 , ECP_D_DSP
-!              IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                 WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!              END IF
-!           END DO
-
-!           DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!              IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                 WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!              END IF
-!           END DO
 !
-!           IF INTEGRATED WITH RENEWABLES CALL RENOVR TO OVERWRITE ECP INPUT
-!           VALUES WITH RENEW COMMON VALUES, CALL CFCOVR TO OVERWRITE
-!           INTERMITTENT MAX CAP FACTORS AND CALL RENEFD TO OVERWRITE EFD
-!           INPUT VALUES.
+!           CALL RENOVR TO OVERWRITE ECP INPUT VALUES WITH RENEW COMMON VALUES,
+!           CALL CFCOVR TO OVERWRITE INTERMITTENT MAX CAP FACTORS AND 
+!           CALL RENEFD TO OVERWRITE EFD INPUT VALUES.
 !
             IF (FULLYR .GE. UESTYR)  THEN
-               IF(USW_XP .EQ. 0) THEN                       !OFF FOR CANADA
-                  IF(USW_RNW .GE. 1) THEN
-                     CALL RENOVR(IRG)
-
-!                    I_TEST = I_TEST + 1
-!                    DO IECP = 1 , ECP_D_DSP
-!                       IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                          WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!                       END IF
-!                    END DO
-
-!                    DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!                       IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                          WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!                       END IF
-!                    END DO
-
-                     CALL RENEFD(IRG)
-
-!                    I_TEST = I_TEST + 1
-!                    DO IECP = 1 , ECP_D_DSP
-!                       IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                          WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!                       END IF
-!                    END DO
-
-!                    DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!                       IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                          WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!                       END IF
-!                    END DO
-
-                  ENDIF
-               ENDIF
+                 CALL RENOVR(IRG)
+                 CALL RENEFD(IRG)
             ENDIF
 !
 !           STORE CAPACITIES TO DISPOUT COMMON
@@ -750,7 +641,6 @@
 
 !           WRITE(6,6331) CURIRUN, CURIYR+1989, CURITR
 !6331       FORMAT(1X,"STRBLD_CALL",3(":",I4))
-
 !
          END IF
 !
@@ -788,25 +678,6 @@
 !
          CALL ELNUGS(IRG,CURIYR)
 !
-!        GET EFD LOAD DATA
-!
-!        CALL ELDEFD(CURIYR,CURITR,IRG)  ! moved this up to fill EETIME earlier, needed in other subroutines
-!
-!        OUTPUT EFD LOAD SHAPE CURVES (LAST ITERATION OF YEAR)
-!
-         IF (FCRL .EQ. 1 .AND. ULCVSW .EQ. 1) THEN
-            DO ISP = 1 , EENSP
-               WRITE(18,2225)' EFDLD:C,I,R,S,N,P,T=',CURIYR,CURITR, &
-                IRG,ISP,ELNVCT(ISP),ELPEAK(ISP),EETIME(ISP)
-               DO IV = 1, ELNVCT(ISP)
-                  WRITE(18,2226) ' EFDLD:C,I,R,S,V,H,W=', &
-              CURIYR,CURITR,IRG,ISP,IV,ELHGHT(IV,ISP),ELWDTH(IV,ISP)
-               END DO
-            END DO
-         ENDIF
- 2225    FORMAT(A21,5(1X,I2),2(1X,F10.5))
- 2226    FORMAT(A21,5(1X,I2),2(1X,F10.5))
-!
 !        STORE INPUT BLOCK
 !
          CALL STRIN(1,IRG)
@@ -823,21 +694,21 @@
           BSNCGEN  = BSNCGEN + UGNURNR(1,MNUMNR-2,CURIYR) + UGNURNR(2,MNUMNR-2,CURIYR) &    ! nuclear
                              + UGNURNR(1,MNUMNR-1,CURIYR) + UGNURNR(2,MNUMNR-1,CURIYR)
          IF (BMNCGEN(CURIYR) .GT. 0.0) THEN
-          URNCCFA(CURIYR) = BMNCGEN(CURIYR) / BSNCGEN
+          URNCCFA(CURIYR) = (BMNCGEN(CURIYR)*BNCH_ADJFAC) / BSNCGEN   ! bench to slightly above STEO 
          ENDIF
           BSHYGEN  = BSHYGEN + UGNHYNR(1,MNUMNR-2,CURIYR) + UGNHYNR(2,MNUMNR-2,CURIYR) &    ! hydro
                              + UGNHYNR(1,MNUMNR-1,CURIYR) + UGNHYNR(2,MNUMNR-1,CURIYR)
           EXSGEN(WIHY,MNUMNR) = EXSGEN(WIHY,MNUMNR) + UGNHYNR(1,MNUMNR-2,CURIYR) + UGNHYNR(2,MNUMNR-2,CURIYR) &
                                 + UGNHYNR(1,MNUMNR-1,CURIYR) + UGNHYNR(2,MNUMNR-1,CURIYR)
          IF (BMHYGEN(CURIYR) .GT. 0.0) THEN
-          URHYCFA(CURIYR) = BMHYGEN(CURIYR) / BSHYGEN
+          URHYCFA(CURIYR) = (BMHYGEN(CURIYR)*BNCH_ADJFAC) / BSHYGEN
          ENDIF
           BSGTGEN  = BSGTGEN + UGNGENR(1,MNUMNR-2,CURIYR) + UGNGENR(2,MNUMNR-2,CURIYR) &    ! geoth
                              + UGNGENR(1,MNUMNR-1,CURIYR) + UGNGENR(2,MNUMNR-1,CURIYR)
           EXSGEN(WIGT,MNUMNR) = EXSGEN(WIGT,MNUMNR) + UGNGENR(1,MNUMNR-2,CURIYR) + UGNGENR(2,MNUMNR-2,CURIYR) &
                                 + UGNGENR(1,MNUMNR-1,CURIYR) + UGNGENR(2,MNUMNR-1,CURIYR)
          IF (BMGTGEN(CURIYR) .GT. 0.0) THEN
-          URGTCFA(CURIYR) = BMGTGEN(CURIYR) / BSGTGEN
+          URGTCFA(CURIYR) = (BMGTGEN(CURIYR)*BNCH_ADJFAC) / BSGTGEN
          ENDIF
           BSSOGEN  = BSSOGEN + UGNSONR(1,MNUMNR-2,CURIYR) + UGNSONR(2,MNUMNR-2,CURIYR) &    ! solar th
                              + UGNSONR(1,MNUMNR-1,CURIYR) + UGNSONR(2,MNUMNR-1,CURIYR)
@@ -855,7 +726,7 @@
           EXSGEN(WIPT,MNUMNR) = EXSGEN(WIPT,MNUMNR) + UGNPTNR(1,MNUMNR-2,CURIYR) + UGNPTNR(2,MNUMNR-2,CURIYR) &
                                 + UGNPTNR(1,MNUMNR-1,CURIYR) + UGNPTNR(2,MNUMNR-1,CURIYR)
          IF (BMSOGEN(CURIYR) .GT. 0.0) THEN
-          URSOCFA(CURIYR) = BMSOGEN(CURIYR) / BSSOGEN
+          URSOCFA(CURIYR) = (BMSOGEN(CURIYR)*BNCH_ADJFAC) / BSSOGEN
          ENDIF
           BSWNGEN  = BSWNGEN + UGNWNNR(1,MNUMNR-2,CURIYR) + UGNWNNR(2,MNUMNR-2,CURIYR) &    ! wind
                              + UGNWNNR(1,MNUMNR-1,CURIYR) + UGNWNNR(2,MNUMNR-1,CURIYR) &
@@ -870,7 +741,7 @@
           EXSGEN(WIWL,MNUMNR) = EXSGEN(WIWF,MNUMNR) + UGNWFNR(1,MNUMNR-2,CURIYR) + UGNWFNR(2,MNUMNR-2,CURIYR) &
                                 + UGNWFNR(1,MNUMNR-1,CURIYR) + UGNWFNR(2,MNUMNR-1,CURIYR)
           IF (BMWNGEN(CURIYR) .GT. 0.0) THEN
-          URWNCFA(CURIYR) = BMWNGEN(CURIYR) / BSWNGEN
+          URWNCFA(CURIYR) = (BMWNGEN(CURIYR)*BNCH_ADJFAC) / BSWNGEN
          ENDIF
 !   implement phase out if used
         IF (BMPHSNC .GT. 0) THEN
@@ -966,7 +837,7 @@
 
       IF((CURITR .EQ. 1) .AND. (FULLYR .EQ. UESTYR)) THEN
         IF ( (ORACLESW .GE. 1) .AND. (FNRUN .EQ. 1) ) THEN
-          IF (ORCLEFD .NE. 0 .OR. ORCLCL .NE. 0 .OR. ORCLEFP .NE. 0 .OR. ORCLECP .NE. 0) THEN
+          IF (ORCLEFD .NE. 0 .OR. ORCLEFP .NE. 0 .OR. ORCLECP .NE. 0) THEN
             WRITE (*,3010)
             CALL DEFNTABS
             CALL EMMDEFS
@@ -988,8 +859,6 @@
          ENDDO
       ENDIF
 !
-      IF (USW_XP .EQ. 0) THEN                             !OFF FOR CANADA
-
 !        CALL ROUTINES TO DETERMINE SHORT-TERM ELASTICITIES
 
          IF (CURITR .EQ. 1)THEN
@@ -1001,73 +870,19 @@
 
             CALL ELOPTLC
 
-!           I_TEST = I_TEST + 1
-!           DO IRG = 1 , UNRGNS
-!              CALL GETBLD(1,IRG)
-
-!              DO IECP = 1 , ECP_D_DSP
-!                 IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                    WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!                 END IF
-!              END DO
-
-!              DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!                 IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                    WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!                 END IF
-!              END DO
-!           END DO
-
 !           CALL ROUTINE TO DETERMINE IMPROVEMENTS IN HEATRATES
 
             CALL ELHRTLC
-
-!           I_TEST = I_TEST + 1
-!           DO IRG = 1 , UNRGNS
-!              CALL GETBLD(1,IRG)
-
-!              DO IECP = 1 , ECP_D_DSP
-!                 IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                    WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!                 END IF
-!              END DO
-
-!              DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!                 IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                    WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!                 END IF
-!              END DO
-!           END DO
 
 !           CALL ROUTINE TO USE ALTERNATIVE CHARACTERISTICS, IF APPROPRIATE
 
             CALL ELOVWRT
 
-!           I_TEST = I_TEST + 1
-!           DO IRG = 1 , UNRGNS
-!              CALL GETBLD(1,IRG)
-
-!              DO IECP = 1 , ECP_D_DSP
-!                 IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                    WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP), EPPHRT0(IECP), EPPHRTN(IECP)
-!                 END IF
-!              END DO
-
-!              DO IECP = ECP_D_DSP + 1 , ECP_D_CAP
-!                 IF ((UPVTYP(IECP) .EQ. 1) .OR. (UPTOPR(IECP) .EQ. 3)) THEN
-!                    WRITE(18,9331) CURIRUN, CURIYR+1989, CURITR, I_TEST, IRG, IECP, UPVTYP(IECP), UPTOPR(IECP), UPLNTCD(IECP), UPHTRT(IECP)
-!                 END IF
-!              END DO
-!           END DO
-
 !           CALL ROUTINE TO ASSIGN RISK PREMIUMS FOR CAPACITY EXPANSION
-
-!           IF (CURIYR .EQ. FIRSYR .AND. CURITR .EQ. 1) CALL ELRSKPR
 
             IF (FULLYR .EQ. UESTYR) CALL ELRSKPR
 
          END IF
-      ENDIF
 !
 !     ADD GLOBAL RISK PREMIUM BY YEAR IF APPROPRIATE
       IF (FULLYR .EQ. UPSTYR .AND. CURITR .EQ. 1) THEN
@@ -1087,11 +902,15 @@
        ENDDO
       ENDIF
 326   FORMAT(1x,a15,3I6,3F12.4)
+      
+!     CAPTURE FUEL DATA
+!
+      CALL GETFUEL(FULLYR)
 
 !
-!        CALL PLANNING MODULE (OML) IN UPSTYR AND BEYOND
+!        CALL PLANNING MODULE IN UPSTYR AND BEYOND
 !
-      IF (FULLYR .GE. UPSTYR .AND. ECPSTART .GE. 2) THEN
+      IF (FULLYR .GE. UPSTYR) THEN
          IF ((CURITR .EQ. 1) .OR. (I4SITE .EQ. 3)) THEN
 !
 !           WCDBUG
@@ -1114,8 +933,7 @@
 !
 !           WCDBUG
 !
-            IF(USW_XP .EQ. 0) THEN                      ! OFF FOR CANADA
-               CALL ELECP
+            CALL ELECP
 !
 !             OVERWRITE NEMS CARBON FEE WITH ECP RESULT, IF SWITCHES TURNED ON
 !
@@ -1125,48 +943,14 @@
 			   ! Claire 01/16 epm.f removal - temp disable 
                !CALL SUM_EMISSIONS
               END IF
-            ELSE
-!
-!             WHEN ECP IS TURNED OFF, USE DUMMY CALL TO STRBOUT SO BILDOUT EXISTS
-!             AND OTHER MODULES DON'T BOMB
-!
-              DO IRG = 1 , UNRGNS
-                 CALL STRBOUT(CURIYR,IRG)
-              END DO
-            ENDIF
          END IF
       END IF
 !
-!     REVISE NET EXPORTS TO REFLECT NEW CANADIAN PROJECTS
+!     Refresh trade data (DAF) with current year values after ECP runs - ECP has last loaded values for a future year
+      CALL GETEIJ(CURIYR)
+
 !
-      IF (CURITR .EQ. 1) THEN
-         CALL GETEIJ(CURIYR)
-         DO IRG = 1 , UNRGNS
-            JRG = URGNUM(IRG)
-            CALL GETIN(1,IRG)
 
-!           WRITE(6,3977) CURIRUN, CURIYR+1989, CURITR, IRG, EEITAJ(1), EEITAJ(2), EEITAJ(3)
-!3977       FORMAT(1X,"UTIL_00656_EEITAJ_GET",4(":",I4),3(":",F12.3))
-
-            BNW_IMP(JRG) = - UCANBLD(JRG) * 8.760
-            DO NSP = 1 , EENSP
-               EEITAJ(NSP) = EEITAJ(NSP) - UCANBLD(JRG)
-
-!              WRITE(6,7335) CURIRUN, CURIYR+1989, CURITR, IRG, JRG, NSP, EEITAJ(NSP), UCANBLD(JRG)
-!7335          FORMAT(1X,"EEITAJ_UCANBLD",6(":",I4),2(":",F15.3))
-
-            END DO
-            CALL STRIN(1,IRG)
-
-!           WRITE(6,2977) CURIRUN, CURIYR+1989, CURITR, IRG, EEITAJ(1), EEITAJ(2), EEITAJ(3)
-!2977       FORMAT(1X,"UTIL_00669_EEITAJ_STR",4(":",I4),3(":",F12.3))
-
-         END DO
-      END IF
-!
-!     CAPTURE FUEL DATA
-!
-      CALL GETFUEL(FULLYR)
       
 !     EXECUTE THE ECONOMIC FUEL DISPATCH MODULE (ELEFD)
 !
@@ -1274,50 +1058,53 @@
       CALL EMMPRCO
 !
 !     CALL ROUTINE TO CREATE SECTORAL ELECTRICITY PRICES BY REGION
-!
-! add logic to calculate STEO price adjustment in CURITR= 2 only (based on iter 1 price)  -AKN
-      IF (CURITR .EQ. 1) THEN
-        BCHMRKSTEOPRICEADDER(:,CURIYR) = 0.0
-        BCHMRKSTEOPRC_N(:,CURIYR) = 0.0
-      ENDIF
+!     If EFP prices are being benched to STEO, run first EFP iter without adjustment, then rerun with required adj
+!       
+      EFPITR = 1
+      BCHMRKSTEOPRICEADDER(:,CURIYR) = 0.0
+      BCHMRKSTEOPRC_N(:,CURIYR) = 0.0      
+      timer=timef()
+      CALL ELEFP
+      write(6,*)'Seconds to run EFP first pass        ',timef()-timer
+                 
+! add logic to calculate STEO price adjustment and recall EFP with adjustment
 
       IF (BMELPRC(CURIYR) .GT. 0.0) THEN   !STEO Price benchmark feature --- by AKN
-        If (CURITR .EQ. 2) THEN
-                            BCHMRKSTEOPRICEADDER(3,CURIYR) = (PELAS(3,CURIYR) * 0.34121416 - ESTCU_ENC (CURIYR)) * QELAS(3,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(6,CURIYR) = (PELAS(6,CURIYR) * 0.34121416  - ESTCU_ESC(CURIYR)) * QELAS(6,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(2,CURIYR) = (PELAS(2,CURIYR) * 0.34121416 - ESTCU_MAC(CURIYR)) * QELAS(2,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(8,CURIYR) = (PELAS(8,CURIYR) * 0.34121416 - ESTCU_MTN(CURIYR)) * QELAS(8,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(1,CURIYR) = (PELAS(1,CURIYR) * 0.34121416 - ESTCU_NEC(CURIYR)) * QELAS(1,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(9,CURIYR) = (PELAS(9,CURIYR) * 0.34121416 - ESTCU_PAC(CURIYR)) * QELAS(9,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(5,CURIYR) = (PELAS(5,CURIYR) * 0.34121416 - ESTCU_SAC(CURIYR)) * QELAS(5,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(4,CURIYR) = (PELAS(4,CURIYR) * 0.34121416 - ESTCU_WNC(CURIYR)) * QELAS(4,CURIYR) * 2930710
-                            BCHMRKSTEOPRICEADDER(7,CURIYR) = (PELAS(7,CURIYR) * 0.34121416 - ESTCU_WSC(CURIYR)) * QELAS(7,CURIYR) * 2930710
+        timer=timef()
+          !lower the calculated difference by 10% (multiply by 0.9) because taxes will also be adjusted when the adder gets applied and otherwise will overshoot
+            BCHMRKSTEOPRICEADDER(3,CURIYR) = 0.9 * (PELAS(3,CURIYR) * 0.34121416 - ESTCU_ENC (CURIYR)) * QELAS(3,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(6,CURIYR) = 0.9 * (PELAS(6,CURIYR) * 0.34121416  - ESTCU_ESC(CURIYR)) * QELAS(6,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(2,CURIYR) = 0.9 * (PELAS(2,CURIYR) * 0.34121416 - ESTCU_MAC(CURIYR)) * QELAS(2,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(8,CURIYR) = 0.9 * (PELAS(8,CURIYR) * 0.34121416 - ESTCU_MTN(CURIYR)) * QELAS(8,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(1,CURIYR) = 0.9 * (PELAS(1,CURIYR) * 0.34121416 - ESTCU_NEC(CURIYR)) * QELAS(1,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(9,CURIYR) = 0.9 * (PELAS(9,CURIYR) * 0.34121416 - ESTCU_PAC(CURIYR)) * QELAS(9,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(5,CURIYR) = 0.9 * (PELAS(5,CURIYR) * 0.34121416 - ESTCU_SAC(CURIYR)) * QELAS(5,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(4,CURIYR) = 0.9 * (PELAS(4,CURIYR) * 0.34121416 - ESTCU_WNC(CURIYR)) * QELAS(4,CURIYR) * 2930710
+            BCHMRKSTEOPRICEADDER(7,CURIYR) = 0.9 * (PELAS(7,CURIYR) * 0.34121416 - ESTCU_WSC(CURIYR)) * QELAS(7,CURIYR) * 2930710
          DO IRG = 1, UNRGNS
             DO ICR = 1, MNUMCR - 2
                BCHMRKSTEOPRC_N(IRG,CURIYR) = BCHMRKSTEOPRC_N(IRG,CURIYR) + BCHMRKSTEOPRICEADDER(ICR,CURIYR) * MappCtoN(IRG,ICR,4)
             ENDDO
          ENDDO
 
-         ENDIF
-         IF (CURITR .GE. 2 .AND. BMELPRC(CURIYR) .GT. 0.0) THEN
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'NEC',PELAS(1,CURIYR)*.3412,ESTCU_NEC(CURIYR),QELAS(1,CURIYR),BCHMRKSTEOPRICEADDER(1,CURIYR)/1000000
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'MAC',PELAS(2,CURIYR)*.3412,ESTCU_MAC(CURIYR),QELAS(2,CURIYR),BCHMRKSTEOPRICEADDER(2,CURIYR)/1000000     
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'ENC',PELAS(3,CURIYR)*.3412,ESTCU_ENC(CURIYR),QELAS(3,CURIYR),BCHMRKSTEOPRICEADDER(3,CURIYR)/1000000
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'WNC',PELAS(4,CURIYR)*.3412,ESTCU_WNC(CURIYR),QELAS(4,CURIYR),BCHMRKSTEOPRICEADDER(4,CURIYR)/1000000             
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'SAC',PELAS(5,CURIYR)*.3412,ESTCU_SAC(CURIYR),QELAS(5,CURIYR),BCHMRKSTEOPRICEADDER(5,CURIYR)/1000000
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'ESC',PELAS(6,CURIYR)*.3412,ESTCU_ESC(CURIYR),QELAS(6,CURIYR),BCHMRKSTEOPRICEADDER(6,CURIYR)/1000000
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'WSC',PELAS(7,CURIYR)*.3412,ESTCU_WSC(CURIYR),QELAS(7,CURIYR),BCHMRKSTEOPRICEADDER(7,CURIYR)/1000000
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'MTN',PELAS(8,CURIYR)*.3412,ESTCU_MTN(CURIYR),QELAS(8,CURIYR),BCHMRKSTEOPRICEADDER(8,CURIYR)/1000000            
-             write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'PAC',PELAS(9,CURIYR)*.3412,ESTCU_PAC(CURIYR),QELAS(9,CURIYR),BCHMRKSTEOPRICEADDER(9,CURIYR)/1000000
-             write(22,124) 'STEOPRCADJ NERC',CURIYR,CURITR,(BCHMRKSTEOPRC_N(IRG,CURIYR)/1000000,IRG=1,UNRGNS)
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'NEC',PELAS(1,CURIYR)*.3412,ESTCU_NEC(CURIYR),QELAS(1,CURIYR),BCHMRKSTEOPRICEADDER(1,CURIYR)/1000000
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'MAC',PELAS(2,CURIYR)*.3412,ESTCU_MAC(CURIYR),QELAS(2,CURIYR),BCHMRKSTEOPRICEADDER(2,CURIYR)/1000000     
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'ENC',PELAS(3,CURIYR)*.3412,ESTCU_ENC(CURIYR),QELAS(3,CURIYR),BCHMRKSTEOPRICEADDER(3,CURIYR)/1000000
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'WNC',PELAS(4,CURIYR)*.3412,ESTCU_WNC(CURIYR),QELAS(4,CURIYR),BCHMRKSTEOPRICEADDER(4,CURIYR)/1000000             
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'SAC',PELAS(5,CURIYR)*.3412,ESTCU_SAC(CURIYR),QELAS(5,CURIYR),BCHMRKSTEOPRICEADDER(5,CURIYR)/1000000
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'ESC',PELAS(6,CURIYR)*.3412,ESTCU_ESC(CURIYR),QELAS(6,CURIYR),BCHMRKSTEOPRICEADDER(6,CURIYR)/1000000
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'WSC',PELAS(7,CURIYR)*.3412,ESTCU_WSC(CURIYR),QELAS(7,CURIYR),BCHMRKSTEOPRICEADDER(7,CURIYR)/1000000
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'MTN',PELAS(8,CURIYR)*.3412,ESTCU_MTN(CURIYR),QELAS(8,CURIYR),BCHMRKSTEOPRICEADDER(8,CURIYR)/1000000            
+            write(22,123) 'STEOPRCADJ ', CURIYR,CURITR,'PAC',PELAS(9,CURIYR)*.3412,ESTCU_PAC(CURIYR),QELAS(9,CURIYR),BCHMRKSTEOPRICEADDER(9,CURIYR)/1000000
+            write(22,124) 'STEOPRCADJ NERC',CURIYR,CURITR,(BCHMRKSTEOPRC_N(IRG,CURIYR)/1000000,IRG=1,UNRGNS)
 123 FORMAT(1x,A12,2I4,A5,3F12.5,F15.5)
 124 FORMAT(1x,A20,2I4,25F15.5)
-         ENDIF
+
+         EFPITR = 2
+         CALL ELEFP        ! call EFP again to get benchmarking to flow through      
+        write(6,*)'Seconds to rerun EFP for benchmarking',timef()-timer
       END IF  !STEO Price benchmark feature --- by AKN
 
-      IF(USW_XP .EQ. 0) THEN                             !OFF FOR CANADA
-         CALL ELEFP
-      ENDIF
 !
 ! If overwrite switch on and historical year then overwrite Electricity Prices by census and emm region.
       IF (USW_OVER .GT. 0) THEN
@@ -1438,13 +1225,13 @@
             ENDDO
          ENDDO
 !  write output coal unit file for cycling.  this is in AIMMS data statement format
-         WRITE(FUNITI,'(A)') 'Plantid_unitid := Data {'
+         WRITE(FUNITI,'(A)') 'cl::Plantid_unitid := Data {'
          WRITE(FUNITI,'(A)') TRIM(TEMP_CL_UNITS(1))
          DO I=2,NUM_CMM_UNITS
             WRITE(FUNITI,'(A,A)') ',',TRIM(TEMP_CL_UNITS(I))
          ENDDO
          WRITE(FUNITI,'(A/)') '} ;'
-         WRITE(FUNITI,'(A)') 'COALEMM_EMM_CL_UNITS := Data {'
+         WRITE(FUNITI,'(A)') 'cl::COALEMM_EMM_CL_UNITS := Data {'
          WRITE(FUNITI,'(A,A,A)') '1:"',TRIM(TEMP_CL_UNITS(1)),'"'
          DO I=2,NUM_CMM_UNITS
             WRITE(FUNITI,'(A,I4,A,A,A)') ',',I,':"',TRIM(TEMP_CL_UNITS(I)),'"'
@@ -2560,26 +2347,26 @@
 !
 !        READ EMM FTAB CAPACITY INDEX TABLE
 !
-         RET_CODE = RD$TBL(UF_TMP,'%EMM FTABCAP%',9,UF_DBG,UF_MSG)
+         RET_CODE = RD$TBL(UF_TMP,'%EMM FTABCAP%',11,UF_DBG,UF_MSG)
          RET_CODE = RD$C1(DUMMY,1,DMSZ)
-         RET_CODE = RD$C1(ECAPFTABD,1,9)                     !EFP PLANT TYPE DEF
+         RET_CODE = RD$C1(ECAPFTABD,1,11)                     !EFP PLANT TYPE DEF
 !
 !        WRITE EMM FTAB CAPACITY INDEX TABLE
 !
-         DO I = 1 , 9
+         DO I = 1 , 11
            WRITE(UF_DBS,2200) COL,I,COL,ECAPFTABD(I),COL,TRIM(SCEN_DATE)
  2200 FORMAT(1X,'ECAPFTABD',A2,I2,A2,A40,A2,A)
          ENDDO
 !
 !        READ EMM FTAB FUEL INDEX TABLE
 !
-         RET_CODE = RD$TBL(UF_TMP,'%EMM FTABFUL%',7,UF_DBG,UF_MSG)
+         RET_CODE = RD$TBL(UF_TMP,'%EMM FTABFUL%',8,UF_DBG,UF_MSG)
          RET_CODE = RD$C1(DUMMY,1,DMSZ)
-         RET_CODE = RD$C1(FUELFTABD,1,7)                     !EFP PLANT TYPE DEF
+         RET_CODE = RD$C1(FUELFTABD,1,8)                     !EFP PLANT TYPE DEF
 !
 !        WRITE EMM FTAB FUEL INDEX TABLE
 !
-         DO I = 1 , 7
+         DO I = 1 , 8
            WRITE(UF_DBS,2300) COL,I,COL,FUELFTABD(I),COL,TRIM(SCEN_DATE)
  2300 FORMAT(1X,'FUELFTABD',A2,I2,A2,A40,A2,A)
          ENDDO
@@ -5814,7 +5601,7 @@
       UQFUEL(UIGC,IRG,1) * FACT2, &
       SPNGELGR(IRG,CURIYR,1),SPNGELGR(IRG,CURIYR,2),SPNGELGR(IRG,CURIYR,3), &
       SQNGELGR(IRG,CURIYR,1),SQNGELGR(IRG,CURIYR,2),SQNGELGR(IRG,CURIYR,3)
-1813  FORMAT(1H ,' IYR,ITR,IRG,NG_PQ',4(":",I5),3(":",F8.4),3(":",F8.2),3(":",F8.4),3(":",F8.2))
+1813  FORMAT(1H ,' IYR,ITR,IRG,NG_PQ',4(":",I5),2(":",F8.4),3(":",F8.2),3(":",F8.4),3(":",F8.2))
       END DO
 !
       DO NERC = 1 , UNRGNS
@@ -6576,20 +6363,6 @@
                         CONRSY(IOWN) = GENRSY(IOWN) * HRTOL(IOWN) * 0.001
                         CONNGY(IOWN) = GENNGY(IOWN) * HRTNG(IOWN) * 0.001
                      END DO
-!                    if (curitr .eq. 1)then
-!                       write(6,3050) curiyr+1989,gentl(1),gentl(2),gentl(1) + gentl(2),facto,tgen,rgen,ogen
-!3050 format(1h ,'!hiflytl',i4,8f10.3)
-!                       write(6,3100) curiyr+1989,gencly(1),gencly(2),concly(1),concly(2)
-!3100 format(1h ,'!hiflycl',i4,8f10.3)
-!                       write(6,3200) curiyr+1989,gendsy(1),gendsy(2),genrsy(1),genrsy(2),condsy(1),condsy(2),conrsy(1),conrsy(2)
-!3200 format(1h ,'!hiflyol',i4,8f10.3)
-!                       write(6,3300) curiyr+1989,genngy(1),genngy(2),conngy(1),conngy(2)
-!3300 format(1h ,'!hiflyng',i4,8f10.3)
-!                       write(6,3400) curiyr+1989,gengey(1),gengey(2),genmsy(1),genmsy(2),genwdy(1),genwdy(2),genhyy(1),genhyy(2)
-!3400 format(1h ,'!hiflygmwh',i4,8f10.3)
-!                       write(6,3500) curiyr+1989,genwny(1),genwny(2),genwfy(1),genwfy(2),gensoy(1),gensoy(2),genpvy(1),genpvy(2)
-!3500 format(1h ,'!hiflyws',i4,8f10.3)
-!                    endif
                   END IF
                ELSE
                   GENCLY(IOWNER) = HGNCLNR(IOWNER,HAWAII,IYR) * FACTO
@@ -6730,14 +6503,6 @@
                      UFLWFNR(IOWNER,IRG,CURIYR) = GENWFY(IOWNER) * 3412.0 * .001
                      QWIEL(ICENSUS,CURIYR) = QWIEL(ICENSUS,CURIYR) + (GENWFY(IOWNER) * 3412.0 * .001)
 
-!                    if (curitr .eq. 1 .and. iowner .eq. 2)then
-!                       write(6,4400) curiyr+1989, HFOSHR(IYR),GENHYY(1),GENHYY(2),(GENHYY(1) + GENHYY(2)) * HFOSHR(IYR) * .001
-!4400 format(1h ,'!hignhy',i4,5f10.3)
-!                       write(6,4500) curiyr+1989, HFOSHR(IYR),GENGEY(1),GENGEY(2),(GENGEY(1) + GENGEY(2)) * HFOSHR(IYR) * .001
-!4500 format(1h ,'!hignge',i4,5f10.3)
-!                       write(6,4600) curiyr+1989, HFOSHR(IYR),GENWNY(1),GENWNY(2),(GENWNY(1) + GENWNY(2)) * HFOSHR(IYR) * .001
-!4600 format(1h ,'!hignwn',i4,5f10.3)
-!                    end if
                   END DO
             ELSE
                WRITE(6,'(A,I4,A)') '** EMMDSPO ERR CENSUS= ',ICENSUS,' QELAS(ICENSUS,IYR) IS 0.0'
@@ -9993,11 +9758,6 @@
 
       ENDDO
 !
-!     Add ACI Costs
-!
-!     Fuel_VOM(MNUMNR,CURIYR) = Fuel_VOM(MNUMNR,CURIYR) + ACICST(CURIYR)
-!     Non_Fuel_VOM(MNUMNR,CURIYR) = Non_Fuel_VOM(MNUMNR,CURIYR)  + ACIOAM(CURIYR)
-!
 !     LOOP OVER REGIONS AND GET DISPIN INFORMATION
 !
         TLHG = 0.0
@@ -10051,30 +9811,6 @@
                 ENDIF
  2050    FORMAT(1X,'DOSPTOV',6(A2,I2),A2,F12.3,A2,A)
 
-!               TNUM = 1
-!               IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                 IF (LOOPING(TNUM) .EQ. 0) THEN
-!                   NUMCOLS(TNUM) = 7
-!                   DYNSTM(TNUM) =  'INSERT INTO EFD_DOSPTOV VALUES(?,?,?,?,?,?,?,?)'
-!                 ENDIF
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = J
-!                 COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                 COLV(TNUM,6,LOOPING(TNUM)) = IVIN
-!                 COLV(TNUM,7,LOOPING(TNUM)) = ECSCAP(J,IVIN,IOWN)
-!               IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                  COLVALS(:,:) = COLV(TNUM,:,:)
-!                  CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                  CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                  LOOPING(TNUM) = 0
-!                 ENDIF
-!               ENDIF
-!
-!               --- END efd_DOSPTOV ---
-!
               END IF
               SCAP = SCAP + ECSCAP(J,IVIN,IOWN)
             END DO  ! IVIN
@@ -10107,35 +9843,6 @@
                COL,TRIM(SCEN_DATE)
                 ENDIF
 !
-!                --- efd_DOSPTO ---
-!
-!               TNUM = 2
-!                IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                   IF (LOOPING(TNUM) .EQ. 0) THEN
-!                     NUMCOLS(TNUM) = 10
-!                     DYNSTM(TNUM) = 'INSERT INTO EFD_DOSPTO VALUES(?,?,?,?,?,?,?,?,?,?,?)'
-!                   ENDIF
-!                   LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                   COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                   COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                   COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                   COLV(TNUM,4,LOOPING(TNUM)) = J
-!                   COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                   COLV(TNUM,6,LOOPING(TNUM)) = EQPGN(J,IOWN)*0.001
-!                   COLV(TNUM,7,LOOPING(TNUM)) = ERTOMF(J,IOWN)
-!                   COLV(TNUM,8,LOOPING(TNUM)) = ERPOM(J,IOWN)
-!                   COLV(TNUM,9,LOOPING(TNUM)) = ERPFL(J,IOWN)
-!                   COLV(TNUM,10,LOOPING(TNUM)) = ECSRET(J,IOWN)
-!                    IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                    COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                    CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                    LOOPING(TNUM) = 0
-!                   ENDIF
-!                ENDIF
-!
-!                --- END efd_DOSPTO ---
-!
               END IF
  2100    FORMAT(1X,'DOSPTO',5(A2,I2),A2,3(F9.3,A2),2(F12.3,A2),A)
 !
@@ -10156,31 +9863,6 @@
                    EAVLPS(J,IS),COL,TRIM(SCEN_DATE)
                  END IF
  2150    FORMAT(1X,'DOSPTS',5(A2,I2),A2,3(F12.3,A2),A)
-!
-!        --- START efd_DOSPTS ---
-!
-!             TNUM = 3
-!             IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                 IF (LOOPING(TNUM) .EQ. 0) THEN
-!                   NUMCOLS(TNUM) = 8
-!                   DYNSTM(TNUM) = 'INSERT INTO EFD_DOSPTS VALUES(?,?,?,?,?,?,?,?,?)'
-!                 ENDIF
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = J
-!                 COLV(TNUM,5,LOOPING(TNUM)) = IS
-!                 COLV(TNUM,6,LOOPING(TNUM)) = EGENPS(J,IS) * .001
-!                 COLV(TNUM,7,LOOPING(TNUM)) = ECAPPS(J,IS)
-!                 COLV(TNUM,8,LOOPING(TNUM)) = EAVLPS(J,IS)
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                    COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                    CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                    LOOPING(TNUM) = 0
-!                 ENDIF
-!              ENDIF
               ENDIF
             ENDDO
          ENDIF
@@ -10199,34 +9881,6 @@
                  COL,EQPFLGN(J,IOWN,IFLTP)*0.001,COL,    &
                  EQPFLCN(J,IOWN,IFLTP)*0.001,COL,TRIM(SCEN_DATE)
                ENDIF
-!
-!                --- START efd_DOSPTF ---
-!
-!              TNUM = 4
-!
-!                    IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                 IF (LOOPING(TNUM) .EQ. 0) THEN
-!                   NUMCOLS(TNUM) = 8
-!                   DYNSTM(TNUM) = 'INSERT INTO EFD_DOSPTF VALUES(?,?,?,?,?,?,?,?,?)'
-!                 ENDIF
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = J
-!                       COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                       COLV(TNUM,6,LOOPING(TNUM)) = IFLTP
-!                       COLV(TNUM,7,LOOPING(TNUM)) = EQPFLGN(J,IOWN,IFLTP)*0.001
-!                       COLV(TNUM,8,LOOPING(TNUM)) = EQPFLCN(J,IOWN,IFLTP)*0.001
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                    COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                    LOOPING(TNUM) = 0
-!                 ENDIF
-!              ENDIF
-!
-!                --- END efd_DOSPTF ---
 !
              END IF
            ENDDO
@@ -10249,37 +9903,6 @@
          ENDIF
  2200    FORMAT(1X,'DOSPT',4(A2,I2),A2,F12.3,A2,   &
                      F5.3,A2,5(F12.3,A2),A)
-!
-!        --- START efd_DOSPT ---
-!
-!        TNUM = 5
-!        IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!           IF (LOOPING(TNUM) .EQ. 0) THEN
-!              NUMCOLS(TNUM) = 11
-!              DYNSTM(TNUM) = 'INSERT INTO EFD_DOSPT VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
-!           ENDIF
-!           LOOPING(TNUM) = LOOPING(TNUM) + 1
-!           COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!           COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!           COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!           COLV(TNUM,4,LOOPING(TNUM)) = J
-!           COLV(TNUM,5,LOOPING(TNUM)) = EQPCP(J)
-!           COLV(TNUM,6,LOOPING(TNUM)) = CF
-!           COLV(TNUM,7,LOOPING(TNUM)) = EQPFL(J)*0.001
-!           COLV(TNUM,8,LOOPING(TNUM)) = EQPSO2(J)*0.001
-!           COLV(TNUM,9,LOOPING(TNUM)) = EQPNOX(J)*0.001
-!           COLV(TNUM,10,LOOPING(TNUM)) = EQPCO2(J)*0.001
-!              COLV(TNUM,11,LOOPING(TNUM)) = EQPHG(J)
-!              IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!              COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!              CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!              LOOPING(TNUM) = 0
-!           ENDIF
-!        ENDIF
-!
-!        --- END efd_DOSPT ---
-!
       END DO  ! J
 !
 !     GET RENEWABLE EMISSIONS FROM WGRP INFO AND SUM TO PLANT TYPE LEVEL
@@ -10330,28 +9953,6 @@
                  IVIN,COL,EHSCAP(J,IVIN,IOWN),COL,TRIM(SCEN_DATE)
                 ENDIF
 !
-!               --- START efd_DOSPTOV ---
-!
-!               TNUM = 1
-!               IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                  LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                  COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                  COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                  COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                  COLV(TNUM,4,LOOPING(TNUM)) = K
-!                  COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                  COLV(TNUM,6,LOOPING(TNUM)) = IVIN
-!                  COLV(TNUM,7,LOOPING(TNUM)) = EHSCAP(J,IVIN,IOWN)
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                   COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                   CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                   LOOPING(TNUM) = 0
-!                  ENDIF
-!               ENDIF
-!
-!               --- END efd_DOSPTOV ---
-!
               END IF
               SCAP = SCAP + EHSCAP(J,IVIN,IOWN)
             END DO  ! IVIN
@@ -10379,31 +9980,6 @@
               ERHOM(J,IOWN),COL,DUMMY,COL,EHSRET(J,IOWN),COL,TRIM(SCEN_DATE)
                 ENDIF
 !
-!                --- START efd_DOSPTO ---
-!
-!                TNUM = 2
-!                IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                   LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                   COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                   COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                   COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                   COLV(TNUM,4,LOOPING(TNUM)) = K
-!                   COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                   COLV(TNUM,6,LOOPING(TNUM)) = EQHGN(J,IOWN)*0.001
-!                   COLV(TNUM,7,LOOPING(TNUM)) = ERTOMF(K,IOWN)
-!                   COLV(TNUM,8,LOOPING(TNUM)) = ERHOM(J,IOWN)
-!                   COLV(TNUM,9,LOOPING(TNUM)) = DUMMY
-!                   COLV(TNUM,10,LOOPING(TNUM)) = EHSRET(J,IOWN)
-!                    IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                    COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                    CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                    LOOPING(TNUM) = 0
-!                   ENDIF
-!                ENDIF
-!
-!                --- END efd_DOSPTO ---
-!
               END IF
          END DO  ! IOWN
 !
@@ -10420,32 +9996,10 @@
                  EGENHS(J,IS)*.001,COL,ECAPHS(J,IS),COL,ECAPHS(J,IS), &
                  COL,TRIM(SCEN_DATE)
                ENDIF
-!
-!        --- START efd_DOSPTS ---
-!
-!              TNUM = 3
-!              IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = K
-!                 COLV(TNUM,5,LOOPING(TNUM)) = IS
-!                 COLV(TNUM,6,LOOPING(TNUM)) = EGENHS(J,IS) * .001
-!                 COLV(TNUM,7,LOOPING(TNUM)) = ECAPHS(J,IS)
-!                 COLV(TNUM,8,LOOPING(TNUM)) = ECAPHS(J,IS)
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                  COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                  CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                  LOOPING(TNUM) = 0
-!                 ENDIF
-!              ENDIF
              ENDIF
            END DO
          END IF
 !
-!              --- END efd_DOSPTS ---
 !
 !         WRITE OUT EFD DISPOUT VARIABLES BY PLANT TYPE AND FUEL
 !
@@ -10459,29 +10013,6 @@
                  COL,EQPFLGN(K,IOWN,IFLTP)*0.001,COL,  &
                  EQPFLCN(K,IOWN,IFLTP)*0.001,COL,TRIM(SCEN_DATE)
                ENDIF
-!
-!                --- START efd_DOSPTF ---
-!
-!                TNUM = 4
-!                    IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!                   LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                   COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                   COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                   COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                   COLV(TNUM,4,LOOPING(TNUM)) = K
-!                       COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                       COLV(TNUM,6,LOOPING(TNUM)) = IFLTP
-!                       COLV(TNUM,7,LOOPING(TNUM)) = EQPFLGN(K,IOWN,IFLTP)*0.001
-!                       COLV(TNUM,8,LOOPING(TNUM)) = EQPFLCN(K,IOWN,IFLTP)*0.001
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                     COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!               CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                     LOOPING(TNUM) = 0
-!                   ENDIF
-!                 ENDIF
-!
-!                --- END efd_DOSPTF ---
 !
              END IF
            ENDDO
@@ -10498,32 +10029,6 @@
             CF,COL,RBTU(J)*0.001,COL,RSO2(J)*0.001,COL, &
             RNOX(J)*0.001,COL,RCO2(J)*0.001,COL,DUMMY,COL,TRIM(SCEN_DATE)
          ENDIF
-!
-!        --- START efd_DOSPT ---
-!
-!        TNUM = 5
-!        IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!           LOOPING(TNUM) = LOOPING(TNUM) + 1
-!           COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!           COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!           COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!           COLV(TNUM,4,LOOPING(TNUM)) = K
-!           COLV(TNUM,5,LOOPING(TNUM)) = EQHCP(J)
-!           COLV(TNUM,6,LOOPING(TNUM)) = CF
-!           COLV(TNUM,7,LOOPING(TNUM)) = DUMMY
-!           COLV(TNUM,8,LOOPING(TNUM)) = DUMMY
-!           COLV(TNUM,9,LOOPING(TNUM)) = DUMMY
-!           COLV(TNUM,10,LOOPING(TNUM)) = DUMMY
-!              COLV(TNUM,11,LOOPING(TNUM)) = DUMMY
-!              IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!             COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!             CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!             LOOPING(TNUM) = 0
-!           ENDIF
-!        ENDIF
-!
-!        --- END efd_DOSPT ---
 !
       END DO  ! J
 !
@@ -10545,29 +10050,6 @@
                  COL,K,COL,IOWN,COL, &
                  IVIN,COL,EDSCAP(J,IVIN,IOWN),COL,TRIM(SCEN_DATE)
                 ENDIF
-!
-!               --- START efd_DOSPTOV ---
-!
-!               TNUM = 1
-!               IF ( (ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1) ) THEN
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = K
-!                 COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                 COLV(TNUM,6,LOOPING(TNUM)) = IVIN
-!                 COLV(TNUM,7,LOOPING(TNUM)) = EDSCAP(J,IVIN,IOWN)
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                   COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                   CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                   LOOPING(TNUM) = 0
-!                 ENDIF
-!               ENDIF
-!
-!               --- END efd_DOSPTOV ---
-!
               END IF
               SCAP = SCAP + EDSCAP(J,IVIN,IOWN)
             END DO  ! IVIN
@@ -10598,32 +10080,6 @@
                     EQDGN(J,IOWN)*0.001,COL,ERTOMF(K,IOWN),COL, &
                   ERDOM(J,IOWN),COL,ERDFL(J,IOWN),COL,EDSRET(J,IOWN),COL,TRIM(SCEN_DATE)
                 ENDIF
-!
-!                --- START efd_DOSPTO ---
-!
-!               TNUM = 2
-!               IF ( (ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1) ) THEN
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = K
-!                 COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                 COLV(TNUM,6,LOOPING(TNUM)) = EQDGN(J,IOWN)*0.001
-!                 COLV(TNUM,7,LOOPING(TNUM)) = ERTOMF(K,IOWN)
-!                 COLV(TNUM,8,LOOPING(TNUM)) = ERDOM(J,IOWN)
-!                 COLV(TNUM,9,LOOPING(TNUM)) = ERDFL(J,IOWN)
-!                 COLV(TNUM,10,LOOPING(TNUM)) = EDSRET(J,IOWN)
-!                    IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                   COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                   CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                   LOOPING(TNUM) = 0
-!                 ENDIF
-!               ENDIF
-!
-!                --- END efd_DOSPTO ---
-!
               END IF
          END DO  ! IOWN
 !
@@ -10640,30 +10096,6 @@
                  EGENDS(J,IS)*.001,COL,ECAPDS(J,IS),COL,ECAPDS(J,IS), &
                  COL,TRIM(SCEN_DATE)
                ENDIF
-!
-!        --- START efd_DOSPTS ---
-!
-!               TNUM = 3
-!               IF ( (ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1) ) THEN
-!                 LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                 COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                 COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                 COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                 COLV(TNUM,4,LOOPING(TNUM)) = K
-!                 COLV(TNUM,5,LOOPING(TNUM)) = IS
-!                 COLV(TNUM,6,LOOPING(TNUM)) = EGENDS(J,IS) * .001
-!                 COLV(TNUM,7,LOOPING(TNUM)) = ECAPDS(J,IS)
-!                 COLV(TNUM,8,LOOPING(TNUM)) = ECAPDS(J,IS)
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                   COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                   CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                   LOOPING(TNUM) = 0
-!                 ENDIF
-!              ENDIF
-!
-!                    --- END efd_DOSPTS ---
-!
              ENDIF
            END DO
          END IF
@@ -10680,30 +10112,6 @@
                  COL,EQPFLGN(K,IOWN,IFLTP)*0.001,COL,  &
                  EQPFLCN(K,IOWN,IFLTP)*0.001,COL,TRIM(SCEN_DATE)
                ENDIF
-!
-!                --- START efd_DOSPTF ---
-!
-!              TNUM = 4
-!                    IF ( (ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1) ) THEN
-!                LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                COLV(TNUM,4,LOOPING(TNUM)) = K
-!                       COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                       COLV(TNUM,6,LOOPING(TNUM)) = IFLTP
-!                       COLV(TNUM,7,LOOPING(TNUM)) = EQPFLGN(K,IOWN,IFLTP)*0.001
-!                       COLV(TNUM,8,LOOPING(TNUM)) = EQPFLCN(K,IOWN,IFLTP)*0.001
-!                       IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                  COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!              CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                  LOOPING(TNUM) = 0
-!                ENDIF
-!              ENDIF
-!
-!                --- END efd_DOSPTF ---
-!
              END IF
            ENDDO
          ENDDO
@@ -10720,33 +10128,6 @@
             CF,COL,EQDFL(J)*0.001,COL,EQDSO2(J)*0.001,COL, &
                EQDNOX(J)*0.001,COL,EQDCO2(J)*0.001,COL,EQDHG(J),COL,TRIM(SCEN_DATE)
          ENDIF
-!
-!        --- START efd_DOSPT ---
-!
-!        TNUM = 5
-!        IF ( (ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1) ) THEN
-!          LOOPING(TNUM) = LOOPING(TNUM) + 1
-!          COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!          COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!          COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!          COLV(TNUM,4,LOOPING(TNUM)) = K
-!          COLV(TNUM,5,LOOPING(TNUM)) = EQDCP(J)
-!          COLV(TNUM,6,LOOPING(TNUM)) = CF
-!          COLV(TNUM,7,LOOPING(TNUM)) = EQDFL(J) * 0.001
-!          COLV(TNUM,8,LOOPING(TNUM)) = EQDSO2(J) * 0.001
-!          COLV(TNUM,9,LOOPING(TNUM)) = EQDNOX(J) * 0.001
-!          COLV(TNUM,10,LOOPING(TNUM)) = EQDCO2(J) * 0.001
-!              COLV(TNUM,11,LOOPING(TNUM)) = EQDHG(J)
-!              IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!            COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!            CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!            LOOPING(TNUM) = 0
-!          ENDIF
-!        ENDIF
-!
-!        --- END efd_DOSPT ---
-!
       END DO  ! J
 !
 !        WRITE OUT EFD FUEL DISPOUT VARIABLES
@@ -10771,39 +10152,6 @@
             ENDIF
  3000    FORMAT(1X,'DOSFT',4(A2,I2),A2,F12.4,A2,   &
                      F12.3,A2,4(F12.1,A2),5(F12.4,A2),A)
-!
-!           --- START efd_DOSFT ---
-!
-!           TNUM = 6
-!           IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!             IF (LOOPING(TNUM) .EQ. 0) THEN
-!                NUMCOLS(TNUM) = 15
-!                DYNSTM(TNUM) = 'INSERT INTO EFD_DOSFT VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-!             ENDIF
-!              LOOPING(TNUM) = LOOPING(TNUM) + 1
-!              COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!              COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!              COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!              COLV(TNUM,4,LOOPING(TNUM)) = J
-!              COLV(TNUM,5,LOOPING(TNUM)) = EPFUEL(J)
-!              COLV(TNUM,6,LOOPING(TNUM)) = ERFFL(J)
-!              COLV(TNUM,7,LOOPING(TNUM)) = EQFSO2(J)
-!              COLV(TNUM,8,LOOPING(TNUM)) = EQFNOX(J)
-!              COLV(TNUM,9,LOOPING(TNUM)) = EQFCO2(J)
-!              COLV(TNUM,10,LOOPING(TNUM)) = EQFHG(J)
-!              COLV(TNUM,11,LOOPING(TNUM)) = EFRSO2(J)
-!              COLV(TNUM,12,LOOPING(TNUM)) = EFRNOX(J)
-!              COLV(TNUM,13,LOOPING(TNUM)) = EFRCO2(J)
-!              COLV(TNUM,14,LOOPING(TNUM)) = EFRHG(J)
-!              COLV(TNUM,15,LOOPING(TNUM)) = EFHCNT(J)
-!              IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                LOOPING(TNUM) = 0
-!              ENDIF
-!           ENDIF
-!
             DO IOWN = 1 , USW_OWN
 !
 !              WRITE OUT EFD DISPOUT VARIABLES BY FUEL TYPE AND OWNER
@@ -10816,33 +10164,6 @@
                    EQFFL(J,IOWN)*.001,COL,TRIM(SCEN_DATE)
                 ENDIF
  3100    FORMAT(1X,'DOSFTO',5(A2,I2),A2,F12.3,A2,F12.3,A2,A)
-!
-!             --- START efd_DOSFTO ---
-!
-!             TNUM = 7
-!             IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!               IF (LOOPING(TNUM) .EQ. 0) THEN
-!                 NUMCOLS(TNUM) = 7
-!                 DYNSTM(TNUM) = 'INSERT INTO EFD_DOSFTO VALUES(?,?,?,?,?,?,?,?)'
-!               ENDIF
-!                LOOPING(TNUM) = LOOPING(TNUM) + 1
-!                COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!                COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!                COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!                COLV(TNUM,4,LOOPING(TNUM)) = J
-!                COLV(TNUM,5,LOOPING(TNUM)) = IOWN
-!                COLV(TNUM,6,LOOPING(TNUM)) = EQFGN(J,IOWN) * .001
-!                COLV(TNUM,7,LOOPING(TNUM)) = EQFFL(J,IOWN) * .001
-!                    IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                 COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                 CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                 LOOPING(TNUM) = 0
-!                ENDIF
-!             ENDIF
-!
-!             --- END efd_DOSFTO ---
-!
               END IF
            END DO
          END DO
@@ -10855,33 +10176,7 @@
                      EGALLW(J),COL,EMELPSO2(CURIYR,J),COL,EGSO2(J),COL,TRIM(SCEN_DATE)
             ENDIF
  3200       FORMAT(1X,'DSO2A',4(A2,I2),A2,F12.1,A2,F12.4,A2,F12.1,A2,A)
-!
-!           --- START efd_DSO2A ---
-!
-!           TNUM = 8
-!           IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!              IF (LOOPING(TNUM) .EQ. 0) THEN
-!                NUMCOLS(TNUM) = 7
-!                DYNSTM(TNUM) = 'INSERT INTO EFD_DSO2A VALUES(?,?,?,?,?,?,?,?)'
-!              ENDIF
-!              LOOPING(TNUM) = LOOPING(TNUM) + 1
-!              COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!              COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!              COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!              COLV(TNUM,4,LOOPING(TNUM)) = J
-!              COLV(TNUM,5,LOOPING(TNUM)) = EGALLW(J)
-!              COLV(TNUM,6,LOOPING(TNUM)) = EMELPSO2(CURIYR,J)
-!              COLV(TNUM,7,LOOPING(TNUM)) = EGSO2(J)
-!           IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                LOOPING(TNUM) = 0
-!              ENDIF
-!           ENDIF
          END DO
-!
-!           --- END efd_DSO2A ---
 !
 !        WRITE OUT MARGINAL COST VARIABLES BY SEASON AND LOAD SLICE
 !
@@ -10891,35 +10186,6 @@
                  COL,ELPEAK(IS),COL,EETIME(IS),COL,EEITAJ(IS), &
                  COL,TRNCSTEX(IS),COL,TRNCSTIM(IS),COL,TRIM(SCEN_DATE)
            ENDIF
-!
-!            --- START efd_DSEASINFO ---
-!
-!            TNUM = 9
-!            IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!               IF (LOOPING(TNUM) .EQ. 0) THEN
-!                 NUMCOLS(TNUM) = 9
-!                 DYNSTM(TNUM) = 'INSERT INTO EFD_DSEASINFO VALUES(?,?,?,?,?,?,?,?,?,?)'
-!               ENDIF
-!               LOOPING(TNUM) = LOOPING(TNUM) + 1
-!               COLV(TNUM,1,LOOPING(TNUM)) = CURIYR
-!               COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!               COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!               COLV(TNUM,4,LOOPING(TNUM)) = IS
-!               COLV(TNUM,5,LOOPING(TNUM)) = ELPEAK(IS)
-!               COLV(TNUM,6,LOOPING(TNUM)) = EETIME(IS)
-!               COLV(TNUM,7,LOOPING(TNUM)) = EEITAJ(IS)
-!               COLV(TNUM,8,LOOPING(TNUM)) = TRNCSTEX(IS)
-!               COLV(TNUM,9,LOOPING(TNUM)) = TRNCSTIM(IS)
-!              IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                LOOPING(TNUM) = 0
-!               ENDIF
-!            ENDIF
-!
-!            --- END efd_DSEASINFO ---
-!
              DO ILD = 1 , ELNVCT(IS)
                IF ((USW_DBS .GT. 0) .OR. (ORCLEFD .EQ. 1)) THEN
 !              IF (((USW_DBS .GT. 0) .OR. (ORCLEFD .EQ. 1)) .AND. &
@@ -11163,43 +10429,6 @@
            ENDIF
           ENDIF
 !
-!     IF first emm year print out 1990 to curiyr expci data to detailed trade table
-!
-!       IF ( FULLYR .EQ. UESTYR) THEN
-!         DO IYR = 1 , CURIYR -1
-!         IF ( EXPCI(IYR,IRG) .GT. 0.0 ) THEN
-!           DO IPROV = 1 , EFD_D_PROV
-!             IF ( MAPEXPCI(IRG,IPROV) .NE. 0.0) THEN
-!               write(uf_ett,2591) ' trdrep econ ',iyr,curitr,iprov+mnumnr,irg,                 &
-!                 (EXPCI(iYR,irg)*MAPEXPCI(irg,iPROV)*.001),(EXPCI(iYR,IRG)*MAPEXPCI(irg,iPROV)*.001)
-!               write(6,*) ' trdrep econ ',iyr,curitr,iprov,iprov+mnumnr,irg,               &
-!                 (EXPCI(iYR,irg)*MAPEXPCI(irg,IPROV)*.001)
-!
-!               TNUM = 12
-!               LOOPING(TNUM) = LOOPING(TNUM) + 1
-!               COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!               COLV(TNUM,2,LOOPING(TNUM)) = CURITR
-!               CHCOLV(TNUM,3,LOOPING(TNUM)) = TRDTYPE
-!               COLV(TNUM,4,LOOPING(TNUM)) = IPROV + MNUMNR
-!               COLV(TNUM,5,LOOPING(TNUM)) = IRG
-!               COLV(TNUM,6,LOOPING(TNUM)) = EXPCI(IYR,IRG)*MAPEXPCI(IRG,IPROV) * .001
-!               COLV(TNUM,7,LOOPING(TNUM)) = EXPCI(IYR,IRG)*MAPEXPCI(IRG,IPROV) * .001
-!               COLV(TNUM,8,LOOPING(TNUM)) = 0.0
-!               COLV(TNUM,9,LOOPING(TNUM)) = 0.0
-!
-!               IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!                 COLVALS(:,:) = COLV(TNUM,:,:)
-!                 CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!                 CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!                 LOOPING(TNUM) = 0
-!               ENDIF
-!
-!             ENDIF
-!           ENDDO
-!         ENDIF
-!        ENDDO
-!      ENDIF
-!
 ! write economy trade data from EFD
             DO KRG=1, MNUMNR + EFD_D_PROV
                IF ( UTECON(IRG,KRG) .GT. 0.0 ) THEN
@@ -11308,37 +10537,6 @@
                   ETCAR,COL,ETCO1,COL,ETVOC,COL,ETHG,COL,ERSO2,COL,TRIM(SCEN_DATE)
            ENDIF
  3500    FORMAT(1X,'DEMIS',3(A2,I2),A2,8(F12.1,A2),F12.4,A2,A)
-!
-!        --- START efd_DEMIS ---
-!
-!        TNUM = 14
-!        IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!           IF (LOOPING(TNUM) .EQ. 0) THEN
-!              NUMCOLS(TNUM) = 12
-!              DYNSTM(TNUM) = 'INSERT INTO EFD_DEMIS VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
-!           ENDIF
-!           LOOPING(TNUM) = LOOPING(TNUM) + 1
-!           COLV(TNUM,1,LOOPING(TNUM)) = IYR
-!           COLV(TNUM,2,LOOPING(TNUM)) = IRG
-!           COLV(TNUM,3,LOOPING(TNUM)) = CURITR
-!           COLV(TNUM,4,LOOPING(TNUM)) = ETALLW
-!           COLV(TNUM,5,LOOPING(TNUM)) = ETSO2
-!           COLV(TNUM,6,LOOPING(TNUM)) = ETNOX
-!           COLV(TNUM,7,LOOPING(TNUM)) = ETCO2
-!           COLV(TNUM,8,LOOPING(TNUM)) = ETCAR
-!           COLV(TNUM,9,LOOPING(TNUM)) = ETCO1
-!           COLV(TNUM,10,LOOPING(TNUM)) = ETVOC
-!           COLV(TNUM,11,LOOPING(TNUM)) = ETHG
-!           COLV(TNUM,12,LOOPING(TNUM)) = ERSO2
-!           IF (LOOPING(TNUM) .EQ. MAXRECS) THEN
-!             COLVALS(:,:) = COLV(TNUM,:,:)
-!                    CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!             CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-!             LOOPING(TNUM) = 0
-!           ENDIF
-!        ENDIF
-!
-!        --- END efd_DEMIS ---
 !
 !        WRITE OUT ANNUAL REGIONAL MISC??    TABLE
 !
@@ -11795,40 +10993,6 @@
 !
         DO I = 1, ECNTP
           IGRP = ECDBID(I)
-!
-!           DO J = 1 , EIFPLT
-!             TNUM = 1
-!             IFUEL = ECFLTP(I,J)
-!               IF (IFUEL .GT. 0) THEN
-!                 RECCOUNT(TNUM) = RECCOUNT(TNUM) + 1
-!                 WRITE(UF_DBPGRP,2045) COL,CURIYR,COL,CURITR,COL,RECCOUNT(TNUM),COL,IGRP,COL, &
-!                 J,COL,IFUEL,COL,ULIGRP(IGRP), &
-!               COL,ECNR(I),COL,ECFOWN(I),COL,ECASTS(I),COL,ECTECP(I), &
-!               COL,ULEFPT(IGRP),COL,ULVINT(IGRP),COL,ECCR(I),COL, &
-!               ECOPR(I),COL,ECMRUN(I),COL, &
-!               ECSCRB(I), &
-!               COL,ECALLW(I),COL,ECMXCP(I),COL,ECPMR(IGRP),COL, &
-!                 ECFOR(IGRP),COL,ULFCST(IGRP),COL,ULVCST(IGRP),COL, &
-!                 ULFLCST(J,IGRP),COL, ULHTRT_EFD(IGRP,1), COL,ECMFSH(I,J),COL,UP_FL_RG(IGRP),COL,  &
-!               ULRPS(IGRP),COL,ULCAPC(IGRP),COL,ULRETC(IGRP),COL, &
-!                 ULREVS(IGRP),COL,ULCCST(IGRP),COL, &
-!                 ULSO2P(IGRP),COL,ULNOXP(IGRP),COL,ULHGP(IGRP),COL,ULRPSP(IGRP),COL,  &
-!                 ULGENE(J,IGRP),COL,ULBTUE(J,IGRP), &
-!                 COL,ULNOXW(J,IGRP),COL,ULSO2W(J,IGRP),COL,ULCO2W(J,IGRP), &
-!                 COL,ULCARW(J,IGRP),COL,ULHGQ(J,IGRP),COL,     &
-!                 ECCAP(I,1),COL,ECCOPM(I,1),COL,ECFNOX(I,1), &
-!                 COL,ULGENS(1,IGRP),COL,ULCSTR(1,IGRP),COL,INTZERO,COL, &
-!                 ECCAP(I,2),COL,ECCOPM(I,2),COL,ECFNOX(I,2), &
-!                 COL,ULGENS(2,IGRP),COL,ULCSTR(2,IGRP),COL,INTZERO,COL, &
-!                 ECCAP(I,3),COL,ECCOPM(I,3),COL,ECFNOX(I,3), &
-!                 COL,ULGENS(3,IGRP),COL,ULCSTR(3,IGRP),COL,INTZERO,COL,TRIM(SCEN_DATE)
-
- 2045  FORMAT(1X,'DPGRP',2(A2,I3),2(A2,I6),2(A2,I3),A2,I6,10(A2,I3), &
-                  A2,F12.3,A2,I6,A2,5(F12.6,A2),F12.4,A2,F9.5,A2,2(I3,A2),15(F15.6,A2), &
-                  5(F15.6,A2),I6,A2,    &
-                  5(F15.6,A2),I6,A2,    &
-                  5(F15.6,A2),I6,A2,A)
-!               DPGRP:Label:CURIYR:CURITR:IGRP:ULIGRP:ECNR:ECFOWN:ECASTS:ECTECP:ULEFPT:ULVINT:ECCR:ECOPR:ECMRUN:ECSCRB:ECALLW:ECMXCP:ECPMR:ECFOR:ULVCST:ULFCST:ULRPS:ULCAPC:ULRETC:ULTGEN:ULREVS:ULCCST:ULSO2P:ULNOXP:ULHGP:ULRPSP:TRIM(SCEN_DATE)
 !            --- START efd_DPGDT ---
         DO J = 1 , EIFPLT
           IFUEL = ECFLTP(I,J)
@@ -11974,34 +11138,6 @@
           IGRP = EHDBID(I)
           EHMRUN = 0
           IF (ULMRUN(IGRP) .GT. 0) EHMRUN = 1
-!
-!         DO J = 1 , EIFPLT
-!           IFUEL = EHFLTP(I,J)
-!           IF (IFUEL .GT. 0) THEN
-!             TNUM = 1
-!               RECCOUNT(TNUM) = RECCOUNT(TNUM) + 1
-
-!              WRITE(UF_DBPGRP,2045) COL,CURIYR,COL,CURITR,COL,RECCOUNT(TNUM),COL,IGRP,COL, &
-!               J,COL,IFUEL,COL,ULIGRP(IGRP), &
-!               COL,EHNR(I),COL,EHFOWN(I),COL,EHHYTP(I),COL,EHTECP(I), &
-!               COL,ULEFPT(IGRP),COL,ULVINT(IGRP),COL,EHCR(I),COL, &
-!               ULOPER(IGRP),COL,EHMRUN,COL, &
-!               INTZERO, &
-!               COL,DUMZERO,COL,INTZERO,COL,DUMZERO,COL, &
-!               DUMZERO,COL,ULFCST(IGRP),COL,ULVCST(IGRP),COL, &
-!               ULFLCST(J,IGRP),COL, ULHTRT_EFD(IGRP,1), COL,EHMFSH(I,J),COL,UP_FL_RG(IGRP),COL,   &
-!               ULRPS(IGRP),COL,ULCAPC(IGRP),COL,ULRETC(IGRP),COL, &
-!               ULREVS(IGRP),COL,ULCCST(IGRP),COL, &
-!               ULSO2P(IGRP),COL,ULNOXP(IGRP),COL,ULHGP(IGRP),COL,ULRPSP(IGRP),COL,  &
-!               ULGENE(J,IGRP),COL,ULBTUE(J,IGRP), &
-!               COL,ULNOXW(J,IGRP),COL,ULSO2W(J,IGRP),COL,ULCO2W(J,IGRP), &
-!               COL,ULCARW(J,IGRP),COL,ULHGQ(J,IGRP),COL,     &
-!               EHCAP(I,1),COL,EHCAP(I,1),COL,EHFNOX(I,1), &
-!               COL,ULGENS(1,IGRP),COL,ULCSTR(1,IGRP),COL,EHHYCF(I,1),COL, &
-!               EHCAP(I,2),COL,EHCAP(I,2),COL,EHFNOX(I,2), &
-!               COL,ULGENS(2,IGRP),COL,ULCSTR(2,IGRP),COL,EHHYCF(I,2),COL, &
-!               EHCAP(I,3),COL,EHCAP(I,3),COL,EHFNOX(I,3), &
-!               COL,ULGENS(3,IGRP),COL,ULCSTR(3,IGRP),COL,EHHYCF(I,3),COL,TRIM(SCEN_DATE)
 
 !            --- START efd_DPGDT ---
         DO J = 1 , EIFPLT
@@ -12101,34 +11237,6 @@
 !
         DO I = 1, EDNTP
           IGRP = EDDBID(I)
-!
-!         DO J = 1 , EIFPLT
-!           IFUEL = EDFLTP(I,J)
-!           IF (IFUEL .GT. 0) THEN
-!           TNUM = 1
-!           RECCOUNT(TNUM) = RECCOUNT(TNUM) + 1
-
-!           WRITE(UF_DBPGRP,2045) COL,CURIYR,COL,CURITR,COL,RECCOUNT(TNUM),COL,IGRP,COL, &
-!               J,COL,IFUEL,COL,ULIGRP(IGRP), &
-!               COL,EDNR(I),COL,EDFOWN(I),COL,EDASTS(I),COL,EDTECP(I), &
-!               COL,ULEFPT(IGRP),COL,ULVINT(IGRP),COL,EDCR(I),COL, &
-!               ULOPER(IGRP),COL,EDMRUN(I),COL, &
-!               INTZERO, &
-!               COL,DUMZERO,COL,EDMXCP(I),COL,EDPMR(I)*EFACTR,COL, &
-!               EDFOR(I)*EFACTR,COL,ULFCST(IGRP),COL,ULVCST(IGRP),COL, &
-!               ULFLCST(J,IGRP),COL, ULHTRT_EFD(IGRP,1), COL,EDMFSH(I,J),COL,UP_FL_RG(IGRP),COL,  &
-!               ULRPS(IGRP),COL,ULCAPC(IGRP),COL,ULRETC(IGRP),COL, &
-!               ULREVS(IGRP),COL,ULCCST(IGRP),COL, &
-!               ULSO2P(IGRP),COL,ULNOXP(IGRP),COL,ULHGP(IGRP),COL,ULRPSP(IGRP),COL,  &
-!               ULGENE(J,IGRP),COL,ULBTUE(J,IGRP), &
-!               COL,ULNOXW(J,IGRP),COL,ULSO2W(J,IGRP),COL,ULCO2W(J,IGRP), &
-!               COL,ULCARW(J,IGRP),COL,ULHGQ(J,IGRP),COL,     &
-!               EDCAP(I,1),COL,EDCAP(I,1),COL,EDFNOX(I,1), &
-!               COL,ULGENS(1,IGRP),COL,ULCSTR(1,IGRP),COL,INTZERO,COL, &
-!               EDCAP(I,2),COL,EDCAP(I,2),COL,EDFNOX(I,2), &
-!               COL,ULGENS(2,IGRP),COL,ULCSTR(2,IGRP),COL,INTZERO,COL, &
-!               EDCAP(I,3),COL,EDCAP(I,3),COL,EDFNOX(I,3), &
-!               COL,ULGENS(3,IGRP),COL,ULCSTR(3,IGRP),COL,INTZERO,COL,TRIM(SCEN_DATE)
 
 !            --- START efd_DPGDT ---
         DO J = 1 , EIFPLT
@@ -12974,33 +12082,8 @@
 !
 !     RELIABILITY CHANGES FOR SMART GRID
 !
-!     OPTION 1 - adjust load uncertainity
+!     This option has been removed
 !
-      IF ( (CURITR .EQ. 1) .AND. (USW_SGRID .GE. 1) .AND. &
-        (FULLYR .GE. UYR_SGREL) .AND. (FULLYR .LE. (UYR_SGREL + UNYRSGREL)) )  THEN
-!
-!       write(6,*) ' loadu sgrid before ',curiyr,loadu,loadecpu
-        LOADU = LOADU * ( 1.0 - USGRELIMP )
-        LOADECPU = LOADECPU * ( 1.0 - USGRELIMP )
-!       write(6,*) ' loadu sgrid after  ',curiyr,loadu,loadecpu
-!
-!     OPTION 2 - adjust forced outage rate
-!
-!       DO IP = 1 , EFD_D_CAP
-!         write(6,*) ' wfor ip before ',curiyr,ip,usgrelimp,wfor(ip)
-!         WFOR(IP) = WFOR(IP) * ( 1.0 - USGRELIMP )
-!         write(6,*) ' wfor ip after  ',ip,wfor(ip)
-!       ENDDO
-!       DO IP = 1 , ECP_D_CAP
-!         write(6,*) ' upfort ip before ',curiyr,ip,usgrelimp,upfort(ip)
-!         UPFORT(IP) = UPFORT(IP) * ( 1.0 - USGRELIMP )
-!         write(6,*) ' upfort ip after ',ip,upfort(ip)
-!       ENDDO
-!
-      ENDIF
-
-
-
 
       RETURN
       END
@@ -13020,51 +12103,43 @@
       include 'eusprc'
       include 'edbdef'
 
-      REAL*8 COLVAL(MAXCOLS,MAXRECS),COLS(MAXCOLS)
-      INTEGER NUMCOL,LOOPINGS,MSGFIL,ICOL,I,CHCOLIND(MAXCOLS),NUMCHCOLS
-      INTEGER LOAD_TIME_BEGIN,LOAD_TIME_END,IMSG,ICHCOLS
-      CHARACTER*40 CHCOLVAL(MAXCOLS,MAXRECS),CHCOLS(MAXCOLS)
+      REAL*8 COLVAL(MAXCOLS,MAXRECS)
+      INTEGER NUMCOL,LOOPINGS,MSGFIL,ICOL,I,J,STRLEN, IMSG
+      CHARACTER*40 CHCOLVAL(MAXCOLS,MAXRECS)
+      CHARACTER*40 CLEANEDVAL
       CHARACTER*35 TBLENAME,WRTESTMT
-      CHARACTER*1  QUOTE(maxcols)
+      CHARACTER(LEN=5000) :: CSVLINE, TMPSTR
+      INTEGER LOAD_TIME_BEGIN,LOAD_TIME_END
 
-      numchcols = 0
       tblename = trim(wrtestmt)
-      quote = "'"
-      IMSG = MSGFIL
-!     IMSG = 6    ! for testing send writes to nohup.out
-!
-      write(imsg,*) ' in write db data   ',wrtestmt,numcol,loopings
-!
+      CSVLINE = ''
+	  IMSG = MSGFIL
+      
       CALL MPTIM2(LOAD_TIME_BEGIN)
       WRITE (IMSG,1111) ' Begin write_DB_data table ',tblename,FLOAT(LOAD_TIME_BEGIN)/100.
 1111  FORMAT(10X,A,1x,A,1x,' CPU TIME (SECONDS) = ',F7.2,A,F7.2)
 
-!
-     DO I = 1 , loopings
-       numchcols = 0
-       DO icol = 1 , numcol
-         cols(icol) = colval(icol,i)
-          IF ( CHCOLVAL(ICOL,I) .NE. ' ') THEN
-            NUMCHCOLS = NUMCHCOLS + 1
-            CHCOLIND(NUMCHCOLS) = ICOL
-          ENDIF
-         chcols(icol) = trim(chcolval(icol,I))
-!        chcols(icol) = "'" // trim(chcols(icol)) // "'"
-       enddo  ! end icol do
+! loop through all records
+      DO I = 1, LOOPINGS
+	  ! Start each line with table name and scenario
+         CSVLINE = TRIM(tblename) // ','// TRIM(SCEN_DATE)
+         DO ICOL = 1, NUMCOL
+            IF (CHCOLVAL(ICOL, I) /= ' ') THEN
+                ! copy chcolval to cleanedval and replace commas with semicolons to avoid problems reading the CSV file in ACCESS
+                CLEANEDVAL = CHCOLVAL(ICOL, I)
+                STRLEN = LEN_TRIM(CLEANEDVAL)
+                DO J = 1, STRLEN
+                    IF (CLEANEDVAL(J:J) == ',') CLEANEDVAL(J:J) = ';'
+                ENDDO
+			    WRITE(TMPSTR, '(A)') TRIM(CLEANEDVAL)
+            ELSE
+                WRITE(TMPSTR, '(F15.6)') COLVAL(ICOL,I)
+            ENDIF
+            CSVLINE = TRIM(CSVLINE) // ',' // TRIM(TMPSTR)           
+         ENDDO
+         WRITE(UF_DBPGRP,'(A)') TRIM(CSVLINE)
+      ENDDO
 
-       IF ( NUMCHCOLS .EQ. 0 ) THEN
-         write(UF_DBPGRP,2343)  tblename,numcol,numchcols,(cols(icol),icol=1,numcol)
-       ELSE
-         write(UF_DBPGRP,2345)  tblename,numcol,numchcols,(cols(icol),icol=1,numcol),       &
-            (chcolind(ichcols),ichcols=1,numchcols),(quote(ichcols),trim(chcols(chcolind(ichcols))),quote(ichcols),ichcols=1,numchcols)
-       ENDIF
-!
-     ENDDO   ! end loopings do
-!
- 2343 format(a,I3,2X,I3,1X<numcol>(f15.6,2x))
- 2345 format(a,I3,2X,I3,1X<numcol>(f15.6,2x),2x,<numchcols>(I3,2x),<numchcols>(a1,a,a1,2x))
-!
-!      write(IMSG,*) ' end load_data '
       CALL MPTIM2(LOAD_TIME_END)
       WRITE (IMSG,2222) '** End write_DB_data table ',wrtestmt,FLOAT(LOAD_TIME_END)/100., &
        FLOAT(LOAD_TIME_END)/100. - FLOAT(LOAD_TIME_BEGIN)/100.
@@ -13270,317 +12345,271 @@
       CHCOLVALS = ' '
       CHCOLV = ' '
 
-! ********************** Write to Oracle DEF tables  *******
+! ********************** Write to Access DEF tables  *******
 !
       TNUM = 1
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO ECP_DY_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'ECP_DY_DEF'
-        ENDIF
+      ENDIF
 !
-        DO I = 1 , MNUMYR + ECP_D_FPH
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          COLV(TNUM,2,LOOPING(TNUM)) = UHBSYR + I
-        ENDDO
-!     ENDIF
+      DO I = 1 , MNUMYR + ECP_D_FPH
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         COLV(TNUM,2,LOOPING(TNUM)) = UHBSYR + I
+      ENDDO
 !
-! **********  WRITE TO EMM NERC REGION NAME TABLE --> ORACLE ****
+! **********  WRITE TO EMM NERC REGION NAME TABLE ****
 !
       TNUM = 2
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO NERC_RG_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'NERC_RG_DEF'
-        ENDIF
-        DO I = 1 , MNUMNR
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
-        ENDDO
-!     ENDIF
+      ENDIF
+      DO I = 1 , MNUMNR
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
+      ENDDO
 !
-! **********  WRITE TO ECP EXPORT REGION NAME (EXPRG) TABLE --> ORACLE ****
+! **********  WRITE TO ECP EXPORT REGION NAME (EXPRG) TABLE ****
 !
       TNUM = 3
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO ECP_EXPORT_RG_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'ECP_EXPORT_RG_DEF'
-        ENDIF
-        DO I = 1 , MNUMNR
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , MNUMNR
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
+      ENDDO
+!
 ! ****  WRITE EFD PLANT LOCATION REGION NAME (DPLTRG) TABLE ****
 !
       TNUM = 4
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_DPLTRG_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DPLTRG_DEF'
-        ENDIF
-        DO I = 1 , MNUMNR
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , MNUMNR
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
+      ENDDO
+!
 ! **********  WRITE TRADE REGION TABLE  -->
 !
       TNUM = 5
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 4
          DYNSTM(TNUM) = 'INSERT INTO TRADE_RG_DEF VALUES (?,?,?,?,?)'
          WRTSTM(TNUM) = 'TRADE_RG_DEF'
-        ENDIF
-        DO I = 1 , MNUMNR + EFD_D_PROV
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          COLV(TNUM,3,LOOPING(TNUM)) = I
-           IF (I .LE. MNUMNR) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = URGNME(I)(1:4)
-           ELSEIF (I .EQ. MNUMNR+1) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-BC'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-BC'
-           ELSEIF (I .EQ.MNUMNR+2) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-MB'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-MB'
-           ELSEIF (I .EQ. MNUMNR+3) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-ON'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-ON'
-           ELSEIF (I .EQ. MNUMNR+4) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-QB'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-QB'
-           ELSEIF (I .EQ. MNUMNR+5) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-NB'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-NB'
-           ELSEIF (I .EQ. MNUMNR+EFD_D_PROV) THEN
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'Mexico'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'Mexico'
-           ELSE
-             CHCOLV(TNUM,2,LOOPING(TNUM)) = 'N/A'
-             CHCOLV(TNUM,4,LOOPING(TNUM)) = 'N/A'
-           ENDIF
-        ENDDO
-!     ENDIF
-
-! ************************  WRITE TO ECP CCAP (CCAP) TABLE --> ORACLE ****
+      ENDIF
+      DO I = 1 , MNUMNR + EFD_D_PROV
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         COLV(TNUM,3,LOOPING(TNUM)) = I
+         IF (I .LE. MNUMNR) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = URGNME(I)(1:4)
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = URGNME(I)(1:4)
+         ELSEIF (I .EQ. MNUMNR+1) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-BC'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-BC'
+         ELSEIF (I .EQ.MNUMNR+2) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-MB'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-MB'
+         ELSEIF (I .EQ. MNUMNR+3) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-ON'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-ON'
+         ELSEIF (I .EQ. MNUMNR+4) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-QB'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-QB'
+         ELSEIF (I .EQ. MNUMNR+5) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'CAN-NB'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'CAN-NB'
+         ELSEIF (I .EQ. MNUMNR+EFD_D_PROV) THEN
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'Mexico'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'Mexico'
+         ELSE
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = 'N/A'
+            CHCOLV(TNUM,4,LOOPING(TNUM)) = 'N/A'
+         ENDIF
+      ENDDO
+!
+! ************************  WRITE TO ECP CCAP (CCAP) TABLE ****
 !
       TNUM = 6
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 7
          DYNSTM(TNUM) = 'INSERT INTO CCAP_DEF VALUES (?,?,?,?,?,?,?,?)'
          WRTSTM(TNUM) = 'CCAP_DEF'
-        ENDIF
-        DO I = 1 , ECP_D_CAP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = UPLNTCD(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = UPLNAME(I)
-          CHCOLV(TNUM,4,LOOPING(TNUM)) = PTYPE(I)
-          COLV(TNUM,5,LOOPING(TNUM)) = UCPFTABI(I)
-          COLV(TNUM,6,LOOPING(TNUM)) = UPVTYP(I)
-          COLV(TNUM,7,LOOPING(TNUM)) = UPAVLYR(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , ECP_D_CAP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = UPLNTCD(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = UPLNAME(I)
+         CHCOLV(TNUM,4,LOOPING(TNUM)) = PTYPE(I)
+         COLV(TNUM,5,LOOPING(TNUM)) = UCPFTABI(I)
+         COLV(TNUM,6,LOOPING(TNUM)) = UPVTYP(I)
+         COLV(TNUM,7,LOOPING(TNUM)) = UPAVLYR(I)
+      ENDDO
+!
 ! ************************  WRITE TO EMM CAP  FTAB TABLE *****************
 !
       TNUM = 7
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO FTAB_CAP_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'FTAB_CAP_DEF'
-        ENDIF
-        DO I = 1 , 9
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = ECAPFTABD(I)
-        ENDDO
-!     ENDIF
-
-! ************************  WRITE TO ECP FUEL (CFL) TABLE --> ORACLE ******
+      ENDIF
+      DO I = 1 , 9
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = ECAPFTABD(I)
+      ENDDO
+!
+! ************************  WRITE TO ECP FUEL (CFL) TABLE ******
 !
       TNUM = 8
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 3
          DYNSTM(TNUM) = 'INSERT INTO ECP_CFL_DEF VALUES (?,?,?,?)'
          WRTSTM(TNUM) = 'ECP_CFL_DEF'
-        ENDIF
-        DO I = 1 , ECP_D_NFL
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = UPFLCD(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = FLNAME(I)
-        ENDDO
-!     ENDIF
-
-! ************************  WRITE TO EFD/ECP FUEL REGION TABLE --> ORACLE ******
+      ENDIF
+      DO I = 1 , ECP_D_NFL
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = UPFLCD(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = FLNAME(I)
+      ENDDO
+!
+! ************************  WRITE TO EFD/ECP FUEL REGION TABLE ******
 !
       TNUM = 9
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 7
          DYNSTM(TNUM) = 'INSERT INTO EFD_FLREG_DEF VALUES (?,?,?,?,?,?,?,?)'
          WRTSTM(TNUM) = 'EFD_FLREG_DEF'
-        ENDIF
-        DO I = 1 , UNFRGN
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = FLRGCODE(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = FLRGNAME(I)
-          COLV(TNUM,4,LOOPING(TNUM)) = EPCSMP(I)
-          COLV(TNUM,5,LOOPING(TNUM)) = EPCLMP(I)
-          COLV(TNUM,6,LOOPING(TNUM)) = EPGSMP(I)
-          COLV(TNUM,7,LOOPING(TNUM)) = EPCAMP(I)
-        ENDDO
-!     ENDIF
-
-! ******************  WRITE TO ECP OWNER TYPE (COWN) TABLE --> ORACLE *****
+      ENDIF
+      DO I = 1 , UNFRGN
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = FLRGCODE(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = FLRGNAME(I)
+         COLV(TNUM,4,LOOPING(TNUM)) = EPCSMP(I)
+         COLV(TNUM,5,LOOPING(TNUM)) = EPCLMP(I)
+         COLV(TNUM,6,LOOPING(TNUM)) = EPGSMP(I)
+         COLV(TNUM,7,LOOPING(TNUM)) = EPCAMP(I)
+      ENDDO
+!
+! ******************  WRITE TO ECP OWNER TYPE (COWN) TABLE *****
 !
       TNUM = 10
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 3
          DYNSTM(TNUM) = 'INSERT INTO ECP_COWN_DEF VALUES (?,?,?,?)'
          WRTSTM(TNUM) = 'ECP_COWN_DEF'
-        ENDIF
-        DO I = 1 , ECP_D_OWN
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = UPOWNCD(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = OWNNAME(I)
-        ENDDO
-!     ENDIF
-
-! *****************  WRITE TO ECP PLANNING YEAR (PY) TABLE --> ORACLE *****
+      ENDIF
+      DO I = 1 , ECP_D_OWN
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = UPOWNCD(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = OWNNAME(I)
+      ENDDO
+!
+! *****************  WRITE TO ECP PLANNING YEAR (PY) TABLE *****
 !
       TNUM = 11
-!
       IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
-         NUMCOLS(TNUM) = 2
-         DYNSTM(TNUM) = 'INSERT INTO ECP_PY_DEF VALUES (?,?,?)'
-         WRTSTM(TNUM) = 'ECP_PY_DEF'
-        ENDIF
-        DO I = 1, ECP_D_XPH
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = ECPPYD(I)
-        ENDDO
+         IF (LOOPING(TNUM) .EQ. 0) THEN
+            NUMCOLS(TNUM) = 2
+            DYNSTM(TNUM) = 'INSERT INTO ECP_PY_DEF VALUES (?,?,?)'
+            WRTSTM(TNUM) = 'ECP_PY_DEF'
+         ENDIF
+         DO I = 1, ECP_D_XPH
+            LOOPING(TNUM) = LOOPING(TNUM) + 1
+            COLV(TNUM,1,LOOPING(TNUM)) = I
+            CHCOLV(TNUM,2,LOOPING(TNUM)) = ECPPYD(I)
+         ENDDO
       ENDIF
-
+!
 !  ************** WRITE EFD OWNER DEFINITION TABLE (DOWN) ********
 !
       TNUM = 12
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 3
          DYNSTM(TNUM) = 'INSERT INTO EFD_DOWN_DEF VALUES (?,?,?,?)'
          WRTSTM(TNUM) = 'EFD_DOWN_DEF'
-        ENDIF
-        DO I = 1 , EFD_D_OWN
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDOWND(I)
-          COLV(TNUM,3,LOOPING(TNUM)) = EOWNFTAB(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFD_D_OWN
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDOWND(I)
+         COLV(TNUM,3,LOOPING(TNUM)) = EOWNFTAB(I)
+      ENDDO
+!
 ! ********** WRITE EFD PLANT FILE FINANCIAL OWNER DEFINITION TABLE (DWFOWN)**
 !
       TNUM = 13
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_DWFOWN_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DWFOWN_DEF'
-        ENDIF
-        DO I = 1 , EFD_D_OWN
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDPOWND(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFD_D_OWN
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDPOWND(I)
+      ENDDO
+!
 ! ********* WRITE OUT EFD PLANT FUEL USE TABLE (DCAPFL) **************
 !
       TNUM = 14
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_DCAPFL_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DCAPFL_DEF'
-        ENDIF
-        DO I = 1 , EFD_D_FPP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDFUD(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFD_D_FPP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDFUD(I)
+      ENDDO
+!
 !  **************  WRITE PLANT FILE VINTAGE TABLE (DWFVIN) ****************
 !
       TNUM = 15
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_DWFVIN_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DWFVIN_DEF'
-        ENDIF
-        DO I = 1, 11
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = EFDPVINI(I)
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDPVIND(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1, 11
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = EFDPVINI(I)
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDPVIND(I)
+      ENDDO
+!
 !   ****************  WRITE OUT EFD VINTAGE TABLE (DVIN) ******************
 !
       TNUM = 16
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_DVIN_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DVIN_DEF'
-        ENDIF
-        DO I = 1 , EFD_D_VIN
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDVIND(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFD_D_VIN
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFDVIND(I)
+      ENDDO
+!
 ! ****************** WRITE EFD ITERATION DEFINITION TABLE (DITR) ****
 !
 !     TNUM = 17
@@ -13601,360 +12630,254 @@
 !  ***************************** WRITE EFD (DCAP) TABLE  ****
 !
       TNUM = 18
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 5
          DYNSTM(TNUM) = 'INSERT INTO DCAP_DEF VALUES (?,?,?,?,?,?)'
          WRTSTM(TNUM) = 'DCAP_DEF'
-        ENDIF
-        DO I = 1 , EFD_D_CAP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EPPLCD(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = EFDNAME(I)
-          COLV(TNUM,4,LOOPING(TNUM))   = EPFTABI(I)
-          COLV(TNUM,5,LOOPING(TNUM))   = EFDIEAMAP(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFD_D_CAP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EPPLCD(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = EFDNAME(I)
+         COLV(TNUM,4,LOOPING(TNUM))   = EPFTABI(I)
+         COLV(TNUM,5,LOOPING(TNUM))   = EFDIEAMAP(I)
+      ENDDO
+!
 !   ********************************* WRITE EFD (DFL) TABLE  ****
 !
       TNUM = 19
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 4
          DYNSTM(TNUM) = 'INSERT INTO EFD_DFL_DEF VALUES (?,?,?,?,?)'
          WRTSTM(TNUM) = 'EFD_DFL_DEF'
-        ENDIF
-        DO I = 1 , UNFUELS
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = UFLCODE(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = UNMFL(I)
-          COLV(TNUM,4,LOOPING(TNUM))   = EFLFTABI(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , UNFUELS
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = UFLCODE(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = UNMFL(I)
+         COLV(TNUM,4,LOOPING(TNUM))   = EFLFTABI(I)
+      ENDDO
+!
 ! ************************  WRITE TO FTAB FUEL TABLE *****************
 !
       TNUM = 20
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO FTAB_FUEL_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'FTAB_FUEL_DEF'
-        ENDIF
-        DO I = 1 , 7
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = FUELFTABD(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , 7
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = FUELFTABD(I)
+      ENDDO
+!
 ! ************************  WRITE TO FTAB OWN  TABLE *****************
 !
       TNUM = 21
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 3
          DYNSTM(TNUM) = 'INSERT INTO FTAB_OWN_DEF VALUES (?,?,?,?)'
          WRTSTM(TNUM) = 'FTAB_OWN_DEF'
-        ENDIF
-        DO I = 1 , 3
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = FTABOWND(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = FTABOWNS(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , 3
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = FTABOWND(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = FTABOWNS(I)
+      ENDDO
+!
 !  ****** WRITE IEA CAPACITY CATEGORY TABLE                 ******
 !
       TNUM = 22
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO IEA_CAPCAT_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'IEA_CAPCAT_DEF'
-        ENDIF
-        DO I = 1 , 8
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = IEACATD(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , 8
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = IEACATD(I)
+      ENDDO
+!
 !  ****** WRITE SO2 COMPLIANCE GROUP INDEX (DSOCGI) TABLE  *******
 !
       TNUM = 23
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO DSOCGI_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'DSOCGI_DEF'
-        ENDIF
-        DO I = 1 , EFD_D_SO2
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = ECPSO2D(I)
-        ENDDO
-!     ENDIF
-
-!  *************** WRITE Record Count Index TABLE ******************
-!
-!     TNUM = 24
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!       IF (LOOPING(TNUM) .EQ. 0) THEN
-!        NUMCOLS(TNUM) = 2
-!        DYNSTM(TNUM) = 'INSERT INTO REC_COUNT_DEF VALUES (?,?,?)'
-!        WRTSTM(TNUM) = 'REC_COUNT_DEF'
-!       ENDIF
-!       DO I = 1 , EMM_D_GRP
-!         LOOPING(TNUM) = LOOPING(TNUM) + 1
-!         COLV(TNUM,1,LOOPING(TNUM))   = I
-!          WRITE(CDPGI,'(I5)')I
-!         CHCOLV(TNUM,2,LOOPING(TNUM))= ' Record Count #'//CDPGI
-!       ENDDO
-!     ENDIF
-
-!
-!  *************** WRITE GROUP INDEX (DPG) TABLE ******************
-!
-!     TNUM = 25
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!       IF (LOOPING(TNUM) .EQ. 0) THEN
-!        NUMCOLS(TNUM) = 2
-!        DYNSTM(TNUM) = 'INSERT INTO EFD_DPG_DEF VALUES (?,?,?)'
-!        WRTSTM(TNUM) = 'EFD_DPG_DEF'
-!       ENDIF
-!       DO I = 1 , EMM_D_GRP
-!         LOOPING(TNUM) = LOOPING(TNUM) + 1
-!         COLV(TNUM,1,LOOPING(TNUM))   = I
-!          WRITE(CDPGI,'(I5)')I
-!         CHCOLV(TNUM,2,LOOPING(TNUM))= ' Plant Group #'//CDPGI
-!       ENDDO
-!     ENDIF
+      ENDIF
+      DO I = 1 , EFD_D_SO2
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = ECPSO2D(I)
+      ENDDO
 
 !   *************** WRITE PLANT SUBGROUP INDEX (SPG) TABLE ***
 !
       TNUM = 26
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_SPG_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_SPG_DEF'
-        ENDIF
-        ISGRP = EMM_D_REC/EMM_D_GRP
-        DO I = 1 , ISGRP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          WRITE(CSPGI,'(I2)')I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = ' Plant Subgroup #'//CSPGI
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      ISGRP = EMM_D_REC/EMM_D_GRP
+      DO I = 1 , ISGRP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         WRITE(CSPGI,'(I2)')I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = ' Plant Subgroup #'//CSPGI
+      ENDDO
+!
 !  ******** WRITE ECP PLANT TYPE TO EFD PLANT TYPE MAPPING TABLE ******
 !
       TNUM = 28
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFD_DECPEFDPT VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFD_DECPEFDPT'
-        ENDIF
-        DO I = 1 , ECP_D_CAP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          COLV(TNUM,2,LOOPING(TNUM)) = UPEFDT(I)
-        ENDDO
-
+      ENDIF
+      DO I = 1 , ECP_D_CAP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         COLV(TNUM,2,LOOPING(TNUM)) = UPEFDT(I)
+      ENDDO
+!
 !    ***************************  WRITE EFP DEFINITION TABLES **********
 !     **************************  WRITE EFP CAP DEFINITION TABLE *******
 !
       TNUM = 29
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO FCAP_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'FCAP_DEF'
-        ENDIF
-        DO I = 1 , EFP_D_CAP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPPTYD(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFP_D_CAP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPPTYD(I)
+      ENDDO
+!
 !   **********************  WRITE EFP OWN DEFINITION TABLE *********
 !
       TNUM = 30
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFP_FOWN_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFP_FOWN_DEF'
-        ENDIF
-        DO I = 1 , EFP_D_OWN + 1
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM))   = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPOWND(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , EFP_D_OWN + 1
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM))   = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPOWND(I)
+      ENDDO
+!
 !  **************  WRITE EFP DEMAND SECTOR DEFINITION TABLE ********
 !
       TNUM = 31
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFP_FDSECT_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFP_FDSECT_DEF'
-        ENDIF
-        DO I = 1 , 4
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPDSTD(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , 5
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPDSTD(I)
+      ENDDO
+!
 ! ************  WRITE EFP STAGE OF PRODUCTION DEFINITION TABLE  *****
 !
       TNUM = 32
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFP_FSTPRD_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFP_FSTPRD_DEF'
-        ENDIF
-        DO I = 1 , 3
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPSPRD(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , 4                                   ! defined in emmdbdef.txt
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPSPRD(I)
+      ENDDO
+!
 ! ************************ WRITE EFP END USE DEFINITION TABLE ********
 !
       TNUM = 33
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFP_FENDUSE_DEF VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFP_FENDUSE_DEF'
-        ENDIF
-        DO I = 1 , MNEUGRP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPEUSD(I)
-        ENDDO
-!     ENDIF
-
-! ************** WRITE EFP HISTORICAL YEAR DEFINITION TABLE ******
-!
-!!     TNUM = 34
-!
-!!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-!      IF (LOOPING(TNUM) .EQ. 0) THEN
-!         NUMCOLS(TNUM) = 2
-!         DYNSTM(TNUM) = 'INSERT INTO EFP_FHYR_DEF VALUES (?,?,?)'
-!         WRTSTM(TNUM) = 'EFP_FHYR_DEF'
-!     ENDIF
-!        DO I = 1 , 85
-!          LOOPING(TNUM) = LOOPING(TNUM) + 1
-!          COLV(TNUM,1,LOOPING(TNUM)) = I
-!          INTCOL = UHBSYR - (I-1)
-!          WRITE(NAMECOL,'(I5)')INTCOL
-!          CHCOLV(TNUM,2,LOOPING(TNUM)) = NAMECOL
-!        ENDDO
-!!     ENDIF
+      ENDIF
+      DO I = 1 , MNEUGRP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = EFPEUSD(I)
+      ENDDO
 
 ! ****** WRITE ECP PLANT TYPE TO EFP PLANT TYPE MAPPING TABLE*****
 !
       TNUM = 35
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFP_FCFPT VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFP_FCFPT'
-        ENDIF
-        DO I = 1 , ECP_D_CAP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          COLV(TNUM,2,LOOPING(TNUM)) = UPEFPT(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , ECP_D_CAP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         COLV(TNUM,2,LOOPING(TNUM)) = UPEFPT(I)
+      ENDDO
+!
 !  *********** WRITE EFD PLANT TYPE TO EFP PLANT TYPE MAPPING TABLE *****
 !
       TNUM = 36
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 2
          DYNSTM(TNUM) = 'INSERT INTO EFP_FDFPT VALUES (?,?,?)'
          WRTSTM(TNUM) = 'EFP_FDFPT'
-        ENDIF
-        DO I = 1 , EFD_D_CAP
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          COLV(TNUM,2,LOOPING(TNUM)) = EFDEFPT(I)
-        ENDDO
-!     ENDIF
+      ENDIF
+      DO I = 1 , EFD_D_CAP
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         COLV(TNUM,2,LOOPING(TNUM)) = EFDEFPT(I)
+      ENDDO
 !
-! ************************  WRITE TO STATE RPS DEF Table (ST_RPS_DEF)  --> ORACLE ****
+! ************************  WRITE TO STATE RPS DEF Table (ST_RPS_DEF) ****
 !
       TNUM = 37
-!
-!     IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        IF (LOOPING(TNUM) .EQ. 0) THEN
+      IF (LOOPING(TNUM) .EQ. 0) THEN
          NUMCOLS(TNUM) = 10
          DYNSTM(TNUM) = 'INSERT INTO ST_RPS_DEF VALUES (?,?,?,?,?,?,?,?,?,?,?)'
          WRTSTM(TNUM) = 'ST_RPS_DEF'
-        ENDIF
-        DO I = 1 , NM_ST_RPS
-          LOOPING(TNUM) = LOOPING(TNUM) + 1
-          COLV(TNUM,1,LOOPING(TNUM)) = I
-          CHCOLV(TNUM,2,LOOPING(TNUM)) = ST_RPS_TITLE(I)
-          CHCOLV(TNUM,3,LOOPING(TNUM)) = ST_RPS_STCD(I)
-          COLV(TNUM,4,LOOPING(TNUM)) = ST_RPS_STNM(I)
-          CHCOLV(TNUM,5,LOOPING(TNUM)) = ST_RPS_ID(I)
-          COLV(TNUM,6,LOOPING(TNUM)) = ST_RPS_SYR(I)
-          COLV(TNUM,7,LOOPING(TNUM)) = ST_RPS_EYR(I)
-          COLV(TNUM,8,LOOPING(TNUM)) = ST_RPS_POST(I)
-          COLV(TNUM,9,LOOPING(TNUM)) = ST_RPS_PCAP_YR(I)
-          COLV(TNUM,10,LOOPING(TNUM)) = ST_RPS_PCAP_TYP(I)
-        ENDDO
-!     ENDIF
-
+      ENDIF
+      DO I = 1 , NM_ST_RPS
+         LOOPING(TNUM) = LOOPING(TNUM) + 1
+         COLV(TNUM,1,LOOPING(TNUM)) = I
+         CHCOLV(TNUM,2,LOOPING(TNUM)) = ST_RPS_TITLE(I)
+         CHCOLV(TNUM,3,LOOPING(TNUM)) = ST_RPS_STCD(I)
+         COLV(TNUM,4,LOOPING(TNUM)) = ST_RPS_STNM(I)
+         CHCOLV(TNUM,5,LOOPING(TNUM)) = ST_RPS_ID(I)
+         COLV(TNUM,6,LOOPING(TNUM)) = ST_RPS_SYR(I)
+         COLV(TNUM,7,LOOPING(TNUM)) = ST_RPS_EYR(I)
+         COLV(TNUM,8,LOOPING(TNUM)) = ST_RPS_POST(I)
+         COLV(TNUM,9,LOOPING(TNUM)) = ST_RPS_PCAP_YR(I)
+         COLV(TNUM,10,LOOPING(TNUM)) = ST_RPS_PCAP_TYP(I)
+      ENDDO
+!
 !      --- WRITE OUT ANY LEFT OVER RECORDS TO THE NEMS DATA BASE
-!      IF ((ORCLEFD .EQ. 1) .AND. (FNRUN .EQ. 1)) THEN
-        DO TNUM = 1 , NUMTABS
+      DO TNUM = 1 , NUMTABS
          IF (LOOPING(TNUM) .NE. 0) THEN
-           COLVALS(:,:) = COLV(TNUM,:,:)
-           CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
-!          CALL LOAD_DATA(DYNSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-           CALL WRITE_DB_DATA(WRTSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
-           LOOPING(TNUM) = 0
+            COLVALS(:,:) = COLV(TNUM,:,:)
+            CHCOLVALS(:,:) = CHCOLV(TNUM,:,:)
+            CALL WRITE_DB_DATA(WRTSTM(TNUM),NUMCOLS(TNUM),LOOPING(TNUM),COLVALS,CHCOLVALS,UF_DBS)
+            LOOPING(TNUM) = 0
          ENDIF
-        ENDDO
-!      ENDIF
-
+      ENDDO
+!
       RETURN
       END
 !

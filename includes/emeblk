@@ -1,5 +1,8 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/emeblk,v 1.7 2012/08/30 16:20:26 pkc Exp $
-!   Carbon Emissions Factors (million metric ton Carbon per quad Btu) (grams-C/thousand Btu)
+!   Carbon Emissions Factors (in million metric tons carbon per quad Btu)
+!   (equivalent to thousand metric tons carbon per trillion Btu)
+!   (also equivalent to grams carbon per thousand Btu)
 
       REAL EGFRS(MNUMYR)   !  1 Natural Gas, Core - Residential
       REAL EGFCM(MNUMYR)   !  2 Natural Gas, Core - Commercial
@@ -86,7 +89,6 @@
       REAL EAGTR(MNUMYR)   ! 84 Aviation gasoline - Transportation
       REAL ELUTR(MNUMYR)   ! 85 Lubricants - Transportation
 
-!   
       COMMON/EMEBLK/ &
        EGFRS,EGFCM,EGFTR,EGFIN,EGFEL, &
        EGIRS,EGICM,EGITR,EGIIN,EGIEL, &
@@ -108,11 +110,13 @@
       real eq_emeblk(emeblk_size)
       equivalence(EGFRS,eq_emeblk)
 
+
 !  Mercury emission factors for oil and gas--not needed in restart file
+!  (in lbs per million Btu)
 
       REAL HGDSEL       ! 1 Distillate
-      REAL HGRLEL       ! 2 Low sulfur resid
-      REAL HGRHEL       ! 3 Hi  sulfur resid
+      REAL HGRLEL       ! 2 Low sulfur residual fuel
+      REAL HGRHEL       ! 3 High sulfur residual fuel
       REAL HGNGEL       ! 4 Natural gas
 
       COMMON/HGEBLK/HGDSEL,HGRLEL,HGRHEL,HGNGEL

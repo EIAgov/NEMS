@@ -81,3 +81,37 @@ module ngpl_stat_price_run
     CLOSE(10)
     end subroutine go_ngpl_stat_price_reporting
 end module ngpl_stat_price_run
+
+! ----------------------------
+module emm_run
+    contains
+    subroutine ephrts_on_off(IS_TURN_ON,IS_TURN_ON_DEBUGGING)
+	    USE EPHRTS_SWTICHES
+		INTEGER IS_TURN_ON,IS_TURN_ON_DEBUGGING
+		
+		EPHRTS=IS_TURN_ON
+		if (IS_TURN_ON .eq. 0) then
+            WRITE(*,*) "THE ELECTRICITY H2 SUBMODULE IS TURNED OFF, EPHRTS = ", IS_TURN_ON
+		else
+            WRITE(*,*) "THE ELECTRICITY H2 SUBMODULE IS TURNED ON, EPHRTS = ", IS_TURN_ON
+		endif
+		if (IS_TURN_ON_DEBUGGING .eq. 0) then
+			TURN_ON_DEBUGGING=.FALSE.
+		else
+			TURN_ON_DEBUGGING=.TRUE.
+		endif
+
+		call UTIL
+		
+		CLOSE(10)
+    end subroutine
+	
+end module emm_run
+
+module renew_run
+    contains
+    subroutine go_renew
+    call RENEW
+	CLOSE(10)
+    end subroutine
+end module renew_run

@@ -1,17 +1,17 @@
 FILE NAME:      RSSTEO
-DATE MODIFIED:  December 23, 2024
-DEFINITION:     SEDS and STEO residential sector historical and forecasted fuel consumption for the years 2021 through 2025 (STEOCN)  
+DATE MODIFIED:  November 13, 2025
+DEFINITION:     SEDS and STEO residential sector historical and forecasted fuel consumption for the years 2021 through 2026 (STEOCN)  
 UNITS:          trillion Btu consumed
 DIMENSION:      fuel type, year, census division
 SPECIAL CONSTRAINTS:  Data starts on row 21 of this file as per RDM convention.
 ORGANIZATION OF DATA: Each block of data by fuel includes 9 U.S. census divisions; consumption data starts in RECSyear+1
-SOURCES:        2024-2025: Short-Term Energy Outlook (STEO), December 10, 2024
+SOURCES:        2025-2027: Short-Term Energy Outlook (STEO), November 13, 2025
                   Online at www.eia.gov/outlooks/steo/
-                2023: Monthly Energy Review Tables 2.3, 3.8a, 4.3, and A4, released November 26, 2024
+                2024: Monthly Energy Review Tables 2.3, 3.8a, 4.3, and A4, released October 28, 2025
                   Online at www.eia.gov/totalenergy/data/monthly/previous.php
-                2021-2022: State Energy Data System (SEDS), June 23, 2023
-                  Accessed through EIA Excel API add-on tool:  /www.eia.gov/opendata/excel
-COMMENT:        Updated distillate and propane consumption 2021 - 2025, electricity and natural gas multiplicative factors set to 1.00; Updated for 2020 RECS.
+                2021-2023: State Energy Data System (SEDS), August 21, 2025
+                  Accessed through EIA Excel API:  /www.eia.gov/opendata/excel
+COMMENT:        Updated distillate and propane consumption 2021 - 2027
 
 
 
@@ -23,24 +23,24 @@ Benchmark multiplicative tweaking factor for natural gas (STEObenchNG); set to 1
 Benchmark multiplicative tweaking factor for electricity (STEObenchEL); set to 1.0 unless needed for 2% STEO benchmarking
 1.00
 
-2021	2022	2023	2024	2025
-Distillate Fuel Oil
-198.084	192.264	225.447	192.333	202.551
-201.870	157.517	184.703	180.862	194.683
-16.861	15.566	18.253	14.753	18.293
-8.732	6.792	7.964	6.853	7.634
-36.947	27.713	32.496	34.198	35.390
-1.064	0.574	0.673	0.929	1.026
-0.104	0.368	0.432	0.183	0.173
-2.342	2.158	2.530	2.019	2.036
-14.575	12.330	14.458	13.747	13.445
-Propane
-40.113	40.868	38.959	38.884	40.502
-48.474	48.043	45.799	42.004	45.939
-122.570	122.797	117.062	102.904	118.977
-85.274	91.168	86.910	81.268	90.439
-57.958	61.050	58.199	55.898	57.716
-22.848	22.639	21.582	21.540	22.300
-26.991	30.238	28.826	28.203	29.376
-41.910	41.715	39.767	40.415	41.292
-37.991	36.417	34.716	34.469	34.211
+2021	2022	2023	2024	2025	2026	2027
+Distillate Fuel Oil						
+196.83	194.74	197.23	189.80	199.97	192.66	189.32
+204.91	209.68	202.80	195.16	205.62	198.10	194.67
+17.39	18.24	17.49	16.83	17.73	17.08	16.79
+7.04	7.78	7.43	7.15	7.53	7.25	7.13
+38.49	39.42	37.95	36.52	38.48	37.07	36.43
+1.39	1.39	1.48	1.42	1.50	1.44	1.42
+0.10	0.11	0.10	0.10	0.11	0.10	0.10
+1.83	1.91	2.03	1.95	2.06	1.98	1.95
+15.12	13.95	16.05	15.45	16.28	15.68	15.41
+Propane						
+40.11	39.92	39.09	39.81	43.39	42.50	42.58
+48.47	46.59	43.66	44.46	48.46	47.47	47.56
+122.57	120.40	118.82	121.01	131.91	129.20	129.44
+85.27	101.12	88.88	90.51	98.67	96.64	96.82
+57.96	58.39	53.21	54.19	59.07	57.85	57.96
+22.85	25.00	20.58	20.96	22.84	22.37	22.42
+26.99	33.84	28.83	29.36	32.01	31.35	31.41
+41.91	45.54	43.91	44.72	48.75	47.75	47.84
+37.99	33.51	35.50	36.15	39.40	38.59	38.67

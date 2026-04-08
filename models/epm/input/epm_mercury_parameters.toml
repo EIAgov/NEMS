@@ -78,7 +78,7 @@ hg_mefnc.2016 = [  # YR
 ]
 
 
-# Mercury contents for oil and gas in lbs/mmmmtbu
+# Mercury contents for oil and gas in lbs per million Btu
 hgdsel = 0.6048
 hgrlel = 0.6048
 hgrhel = 0.6048

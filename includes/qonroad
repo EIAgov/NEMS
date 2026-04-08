@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/qonroad,v 1.1 2004/06/17 18:32:04 PKC Exp $
 !  Common Block for on-road distillate quantity and conversion factor
 

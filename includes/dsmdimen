@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/dsmdimen,v 1.9 2019/06/27 12:17:40 pkc Exp $
 !============== (DSMDIMEN) ===================
 ! This common block contains all PARAMETER statements of LDSM module
@@ -203,6 +204,6 @@
       PARAMETER(MAXPACR=10)
       PARAMETER(ECPTHR=10)
       PARAMETER(MAXCBIL=11,MAXCSRV=10)
-      PARAMETER(QDSMRPT=24)
+      PARAMETER(QDSMRPT=4)
       PARAMETER(NPROB=13)
       PARAMETER(NMOM=4)

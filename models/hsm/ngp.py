@@ -281,10 +281,10 @@ class NGP(sub.Submodule):
         self.co2_capture_volumes_ntc    = pd.DataFrame(0.0, index = list(range(1, self.census_divisions + 1)), columns = list(range(self.zero_year,self.final_year + 1)))
         self.co2_capture_volumes_ntc.index.names = ['census_division']
         
-        self.co2_capture_costs_inv      = pd.DataFrame(999, index = list(range(1, self.census_divisions + 1)), columns = list(range(self.zero_year,self.final_year + 1)))
+        self.co2_capture_costs_inv      = pd.DataFrame(999.0, index = list(range(1, self.census_divisions + 1)), columns = list(range(self.zero_year,self.final_year + 1)))
         self.co2_capture_costs_inv.index.names = ['census_division']
 
-        self.co2_capture_costs_om      = pd.DataFrame(999, index = list(range(1, self.census_divisions + 1)), columns = list(range(self.zero_year,self.final_year + 1)))
+        self.co2_capture_costs_om      = pd.DataFrame(999.0, index = list(range(1, self.census_divisions + 1)), columns = list(range(self.zero_year,self.final_year + 1)))
         self.co2_capture_costs_om.index.names = ['census_division']
         
         self.cc_electricity_demand  = pd.DataFrame(0.0, index = list(range(1, self.census_divisions + 1)), columns = list(range(self.zero_year,self.final_year + 1)))
@@ -350,6 +350,7 @@ class NGP(sub.Submodule):
         self.tech_improvement()
 
         #Assign flow volumes to legacy and representative facilites
+        # Process legacy facilities through STEO years (assuming retrofits take 3 years)
         if int(self.rest_curcalyr) <= self.parent.steo_years[-1]:
             self.logger.info('Assign CO2 flow to legacy facilities')
             self.assign_legacy_plant_volumes()
@@ -540,7 +541,7 @@ class NGP(sub.Submodule):
         Returns
         _______
         """
-        # Retire legacy plants at a rate of 2% year
+        # Retire legacy plants at a rate of 2% per year
         self.legacy_facilities_df['ng_thruput_mmcf_cap'] = self.legacy_facilities_df['ng_thruput_mmcf_cap'] * (1 - self.ngpp_retire_rate)
         self.legacy_facilities_df['ng_thruput_mmcf'] = self.legacy_facilities_df['ng_thruput_mmcf'] * (1 - self.ngpp_retire_rate)
 
@@ -559,6 +560,7 @@ class NGP(sub.Submodule):
         None
         
         """
+        # Check 45Q eligibility for facilities
         if int(self.rest_curcalyr) <= self.final_45q_eligibility_year:
             # Set 45Q eligibility for facilities which have been operating for more than 12 years to false and remove from active list
             self.facilities_df.loc[self.facilities_df['years_operating'] > self.evaluation_years, '45q_eligible'] = False
@@ -576,8 +578,9 @@ class NGP(sub.Submodule):
         Returns
         _______
         '''
-        # Reset CO2 Price
-        self.facilities_df['co2_price'] = 0
+        # Reset CO2 Price and ensure it is stored as float to avoid dtype issues when updating
+        self.facilities_df['co2_price'] = 0.0
+        self.facilities_df['co2_price'] = self.facilities_df['co2_price'].astype(float)
 
         ### Get CO2 prices from CCATS
         #45Q
@@ -610,8 +613,17 @@ class NGP(sub.Submodule):
         
         
         ### Update facilities
-        self.facilities_df.update(temp_45q_df)
-        self.facilities_df.update(temp_ntc_df)
+        # Only update CO2 prices by eligibility group to avoid dtype issues on boolean columns
+        # 45Q-eligible facilities
+        if not temp_45q_df.empty:
+            self.facilities_df.loc[temp_45q_df.index, 'co2_price'] = (
+                temp_45q_df['co2_price'].astype(self.facilities_df['co2_price'].dtype)
+            )
+        # Non-45Q (NTC) facilities
+        if not temp_ntc_df.empty:
+            self.facilities_df.loc[temp_ntc_df.index, 'co2_price'] = (
+                temp_ntc_df['co2_price'].astype(self.facilities_df['co2_price'].dtype)
+            )
 
         pass
     
@@ -669,6 +681,7 @@ class NGP(sub.Submodule):
             self.cash_flow.co2_flow[year] = self.cf_facilities_df['co2_capture_tonnes'].copy()
 
         # Load Properties
+        # Set CO2 price and capture period properties
         self.cash_flow.properties['facility_id'] = self.cf_facilities_df['facility_id'].copy()
         self.cash_flow.properties[nam.co2_price] = self.cf_facilities_df[nam.co2_price].copy()
         self.cash_flow.properties[nam.electricity_cost] = self.cf_facilities_df[nam.electricity_cost].copy()
@@ -690,6 +703,7 @@ class NGP(sub.Submodule):
             self.cash_flow.operating_cost[year] = self.cf_facilities_df['total_opr_costs'].copy()
 
         # Load in fractions for tangible costs
+        # Set tangible cost fractions
         self.cash_flow.properties[nam.exp_tang_frac] = self.ngp_exp_tang_frac
         self.cash_flow.properties[nam.dev_tang_frac] = self.ngp_dev_tang_frac
 
@@ -736,8 +750,22 @@ class NGP(sub.Submodule):
         self.cf_facilities_df['inv_cost_tonne_co2'] = self.cash_flow.properties['inv_cost_tonne_co2'].copy()
         self.cf_facilities_df['om_cost_tonne_co2'] = self.cash_flow.properties['om_cost_tonne_co2'].copy()
 
-        # Update main df facilities_df
-        self.facilities_df.update(self.cf_facilities_df)
+        # Update main df facilities_df - handle dtype conversion carefully to avoid warnings
+        # Only update columns that exist in both DataFrames and handle dtype mismatches
+        common_cols = self.cf_facilities_df.columns.intersection(self.facilities_df.columns)
+        for col in common_cols:
+            if col in self.facilities_df.columns:
+                target_dtype = self.facilities_df[col].dtype
+                if target_dtype == 'bool':
+                    # For boolean columns, ensure proper conversion
+                    self.facilities_df.loc[self.cf_facilities_df.index, col] = self.cf_facilities_df[col].astype(bool)
+                else:
+                    # For other columns, try to match the target dtype
+                    try:
+                        self.facilities_df.loc[self.cf_facilities_df.index, col] = self.cf_facilities_df[col].astype(target_dtype)
+                    except (ValueError, TypeError):
+                        # If conversion fails, use the original dtype
+                        self.facilities_df.loc[self.cf_facilities_df.index, col] = self.cf_facilities_df[col]
         self.facilities_df = self.facilities_df.sort_values('profitability', ascending= False)
 
         pass
@@ -787,9 +815,10 @@ class NGP(sub.Submodule):
         years_operating_mask = self.facilities_df['years_operating'] > 0
         active_cc_facilities_mask = self.facilities_df['facility_id'].isin(self.active_cc_facilities_df['facility_id'])
         mask = years_operating_mask | active_cc_facilities_mask
-        temp = self.facilities_df[mask].copy()
-        temp['years_operating'] += 1
-        self.facilities_df.update(temp)
+        # Increment years_operating directly via .loc to avoid dtype issues with .update
+        self.facilities_df.loc[mask, 'years_operating'] = (
+            self.facilities_df.loc[mask, 'years_operating'] + 1
+        )
         
         if self.rest_curcalyr >= self.parent.steo_years[0]:
             self.active_cc_facilities_df['years_operating'] += 1
@@ -877,7 +906,7 @@ class NGP(sub.Submodule):
         temp_electric_demand_df.index.names = self.restart.qmore_qngpin.index.names
         temp_electric_demand_df.columns = [nam.value]
         temp_electric_demand_df = temp_electric_demand_df.mul(.000003412141)  # Convert from MWh to Tbtu
-        self.restart.qmore_qngpin.update(temp_electric_demand_df)
+        self.restart.qmore_qngpin.update(temp_electric_demand_df.astype(self.restart.qmore_qngpin.dtypes))
 
         pass
 
@@ -934,7 +963,7 @@ class NGP(sub.Submodule):
         temp_sup_45q = temp_sup_45q.set_index(['year'], append = True)
         temp_sup_45q.index.names = self.restart.ccatsdat_sup_ngp_45q.index.names
         temp_sup_45q.columns = [nam.value]
-        self.restart.ccatsdat_sup_ngp_45q.update(temp_sup_45q)
+        self.restart.ccatsdat_sup_ngp_45q.update(temp_sup_45q.astype(self.restart.ccatsdat_sup_ngp_45q.dtypes))
         
         # NTC Supply
         temp_sup_ntc = self.co2_capture_volumes_ntc.copy()
@@ -943,7 +972,7 @@ class NGP(sub.Submodule):
         temp_sup_ntc = temp_sup_ntc.set_index(['year'], append = True)
         temp_sup_ntc.index.names = self.restart.ccatsdat_sup_ngp_ntc.index.names
         temp_sup_ntc.columns = [nam.value]
-        self.restart.ccatsdat_sup_ngp_ntc.update(temp_sup_ntc)
+        self.restart.ccatsdat_sup_ngp_ntc.update(temp_sup_ntc.astype(self.restart.ccatsdat_sup_ngp_ntc.dtypes))
 
         # Cost Investment
         temp_cst_inv = self.co2_capture_costs_inv.copy()
@@ -952,7 +981,7 @@ class NGP(sub.Submodule):
         temp_cst_inv = temp_cst_inv.set_index(['year'], append = True)
         temp_cst_inv.index.names = self.restart.ccatsdat_cst_ngp_inv.index.names
         temp_cst_inv.columns = [nam.value]
-        self.restart.ccatsdat_cst_ngp_inv.update(temp_cst_inv)
+        self.restart.ccatsdat_cst_ngp_inv.update(temp_cst_inv.astype(self.restart.ccatsdat_cst_ngp_inv.dtypes))
         
         # Cost Opex
         temp_cst_om = self.co2_capture_costs_om.copy()
@@ -961,7 +990,7 @@ class NGP(sub.Submodule):
         temp_cst_om = temp_cst_om.set_index(['year'], append = True)
         temp_cst_om.index.names = self.restart.ccatsdat_cst_ngp_om.index.names
         temp_cst_om.columns = [nam.value]
-        self.restart.ccatsdat_cst_ngp_om.update(temp_cst_om)
+        self.restart.ccatsdat_cst_ngp_om.update(temp_cst_om.astype(self.restart.ccatsdat_cst_ngp_om.dtypes))
 
         # CO2 Emissions from Natural Gas Plants, returns CO2 capture from NGPPs where capture is unprofitable
         # Prepare legacy emissions
@@ -988,7 +1017,7 @@ class NGP(sub.Submodule):
 
         # Add legacy and retrofit emissions
         temp_ngp_co2_em_total = temp_ngp_co2_em_legacy.add(temp_ngp_co2_em_retrofit,fill_value=0)
-        self.restart.ogsmout_ngpco2em.update(temp_ngp_co2_em_total)
+        self.restart.ogsmout_ngpco2em.update(temp_ngp_co2_em_total.astype(self.restart.ogsmout_ngpco2em.dtypes))
 
         pass
     pass

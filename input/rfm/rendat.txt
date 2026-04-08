@@ -29,8 +29,8 @@
  'MSW     '       4
  'BIOMASS '       3
  'SOLAR TH'       1
- 'PV      '       1
- 'PV Tilt '       1
+ 'PV      '       2
+ 'PV Tilt '       2
  'WIND    '       2
  'WIND_ons'       2
  'WIND_ofs'       2

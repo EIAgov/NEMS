@@ -11,9 +11,31 @@ Function to create the initial user object passed in NEMS
 
 from types import SimpleNamespace
 import os
+import pandas as pd
 
 
 def parse_scedes_file(f):
+    """Reads in scedes.all into memory as dict
+    
+    Parse a NEMS scedes file into a dict. Keep only the first
+    instance of a key, if there are duplicates.
+    
+    Parameters
+    ----------
+    f : str
+        name of file to read in (scedes.all)
+    
+    Returns
+    -------
+    dict
+        dictionary of scedes keys and value pair
+    
+    """
+    scedesall = pd.read_csv(f, header=0, comment='#')
+    scedes_dict = dict(scedesall[['Key','Value']].values)
+    return scedes_dict
+
+def parse_scedes_all(f):
     """Reads in scedes.all into memory as dict
     
     Parse a NEMS scedes file into a dict. Keep only the first

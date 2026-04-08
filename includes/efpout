@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/efpout,v 1.5 2006/09/14 17:45:47 lc2 Exp $
 !  ELECTRICITY MARKET MODULE (EMM)--PRICING OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR

@@ -1,36 +1,43 @@
 table,filename,notes,price_year
-on_zero_year,2023,year,
+on_zero_year,2024,year,
 on_final_year,2050,year,
-on_projects_continuous,on_projects_continuous.csv,,
-on_projects_producing_gas,on_projects_producing_gas.csv,,
-on_projects_producing_oil,on_projects_producing_oil.csv,,
-on_projects_other_eor,on_projects_other_eor.csv,,
-on_projects_co2_eor,on_projects_co2_eor.csv,,
-on_projects_undiscovered,on_projects_undiscovered.csv,,
-on_process_codes,on_process_codes.csv,,
-on_drill_eq_constraints,on_drill_eq_constraints.csv,,
-on_old_process_code_conv,on_old_process_code_conv.csv,,
-on_discovery_order,on_discovery_order.csv,,
-on_drilling_costs,on_drilling_costs.csv,,
-on_capital_constraints,on_capital_constraints.csv,,
-on_drill_cost_eqs,on_drill_cost_eqs.csv,,
-on_basin_avg_cost,on_basin_avg_cost.csv,,
-on_region_avg_cost,on_region_avg_cost.csv,,
-on_rig_constraint_eq,on_rig_constraint_eq.csv,,
-on_footage_constraint_eq,on_footage_constraint_eq.csv,,
-on_constraint_params,on_constraint_params.csv,,
-on_capital_constraint_eq,on_capital_constraint_eq.csv,,
-on_wells_per_rig,on_wells_per_rig.csv,,
+on_projects_continuous,projects/on_projects_continuous.csv,,
+on_projects_producing_gas,projects/on_projects_producing_gas.csv,,
+on_projects_producing_oil,projects/on_projects_producing_oil.csv,,
+on_projects_co2_eor,projects/on_projects_co2_eor.csv,,
+on_projects_undiscovered,projects/on_projects_undiscovered.csv,,
+on_process_codes,configuration/on_process_codes.csv,,
+on_drill_eq_constraints,constraints/on_drill_eq_constraints.csv,,
+on_old_process_code_conv,configuration/on_old_process_code_conv.csv,,
+on_discovery_order,projects/on_discovery_order.csv,,
+on_drilling_costs,costs/on_drilling_costs.csv,,
+on_capital_constraints,constraints/on_capital_constraints.csv,,
+on_drill_cost_eqs,costs/on_drill_cost_eqs.csv,,
+on_basin_avg_cost,costs/on_basin_avg_cost.csv,,
+on_region_avg_cost,costs/on_region_avg_cost.csv,,
+on_rig_constraint_eq,constraints/on_rig_constraint_eq.csv,,
+on_footage_constraint_eq,constraints/on_footage_constraint_eq.csv,,
+on_constraint_params,constraints/on_constraint_params.csv,,
+on_capital_constraint_eq,constraints/on_capital_constraint_eq.csv,,
+on_wells_per_rig,constraints/on_wells_per_rig.csv,,
 on_select_plays,on_select_plays.csv,,
-on_dryhole_rate,on_dryhole_rate.csv,,
-on_tech_levers,on_tech_levers.csv,,
-on_ngpl_costs,on_ngpl_costs.csv,,
-on_eor_other_costs,on_eor_other_costs.csv,,
+on_dryhole_rate,configuration/on_dryhole_rate.csv,,
+on_tech_levers,configuration/on_tech_levers.csv,,
+on_ngpl_costs,costs/on_ngpl_costs.csv,,
+on_eor_other_costs,costs/on_eor_other_costs.csv,,
 on_eor_trans_factors,on_eor_trans_factors.csv,,
-on_co2_supply_cost_temp,on_co2_supply_cost_temp.csv,,
-on_legacy_co2_costs,on_legacy_co2_costs.csv,,
-on_co2_pipe_seg_costs,on_co2_pipe_seg_costs.csv,,
-on_ch4_emission_factors_basin,on_ch4_emission_factors_basin.csv,,
+on_co2_supply_cost_temp,co2_eor/on_co2_supply_cost_temp.csv,,
+on_legacy_co2_costs,costs/on_legacy_co2_costs.csv,,
+on_co2_pipe_seg_costs,costs/on_co2_pipe_seg_costs.csv,,
+on_ch4_emission_factors_basin,co2_eor/on_ch4_emission_factors_basin.csv,,
+on_tight_oil_play_map,configuration/tight_oil_play_map.csv,,
+on_shale_gas_play_map,configuration/shale_gas_play_map.csv,,
+on_base_oil_prc_by_play,configuration/base_oil_prc_by_play.csv,,
+on_producing_oil_decline_rates,decline_rates/on_producing_oil_decline_rates_plays.csv,,
+on_producing_oil_decline_rates_regions,decline_rates/on_producing_oil_decline_rates_regions.csv,,
+on_producing_gas_decline_rates_play,decline_rates/on_producing_gas_decline_rates_play.csv,,
+on_producing_gas_decline_rates_regions,decline_rates/on_producing_gas_decline_rates_regions.csv,,
+on_future_wells_configuration,configuration/on_future_wells_configuration.csv,,
 hsm_on_projects,hsm_on_projects.csv,,
 hsm_on_projects_undiscovered,hsm_on_projects_undiscovered.csv,,
 hsm_on_crude_production,hsm_on_crude_production.csv,,
@@ -53,8 +60,8 @@ hsm_on_co2_injected,hsm_on_co2_injected.csv,,
 hsm_on_co2_recycled,hsm_on_co2_recycled.csv,,
 hsm_on_co2_available,hsm_on_co2_available.csv,,
 play_map_switch,TRUE,,
-on_averaging_years,1,years,
-on_royalty_rate,0.1667,fraction,
+on_averaging_years,-1,years,Number of additional future years to include in price average (positive = forward-looking  negative = backward-looking). Value of 2 means current year + 2 future years = 3 years total
+on_royalty_rate,0.125,fraction,
 on_oil_exp_tang_frac,0.3,fraction,
 on_oil_dev_tang_frac,0.3,fraction,
 on_gas_exp_tang_frac,0.4,fraction,
@@ -66,10 +73,52 @@ on_intang_amor_frac,0,fraction,
 on_abandon_rate,0.1,fraction,
 on_drill_ramp_up,5,years,
 on_drill_predecline,0.7,fraction,
-on_base_oil_prc,66,dollars,
+on_base_oil_prc,50,dollars,
 on_base_gas_prc,2.2,dollars,
 on_contraint_tech_rate,0.01,fraction,
 on_eor_tc_rate,0.15,fraction,
 on_eor_tc_phaseout,44.3,dollars,
 on_co2_trans_cost,0.4,dollars,
+on_steo_eor_annual_growth_rate,0.04,fraction,Annual growth rate for EOR ratio in STEO years
 on_max_co2_prc,9.52,dollars,
+on_vented_gas_royalty,FALSE,,
+on_override_switches,configuration/on_override_switches.csv,,
+on_constraint_overrides,configuration/on_constraint_overrides.csv,,
+on_totpat_multipliers,configuration/on_totpat_multipliers.csv,,
+on_boe_conversion,5.62,mcf_per_bbl,Barrel of Oil Equivalent conversion factor for natural gas
+on_barrels_per_gallon,42,gal_per_bbl,Gallons per barrel conversion factor
+on_ch4_to_metric_tons,51.921,mcf_per_metric_ton,MCF to metric tons conversion for CH4 emissions
+on_ngpl_volume_divisor,1000,divisor,NGPL volume calculation divisor (barrels to thousands)
+on_acres_per_section,640,acres,Acres per section for drilling calculations
+on_drilling_growth_multiplier,1.3,fraction,Maximum annual drilling growth rate multiplier
+on_production_factor,0.1,fraction,Production factor for max drill rate calculation (analyst adjusted 0.08-0.1)
+on_undiscovered_unconv_production_factor,0.1,fraction,Production factor for max drill rate calculation for undiscovered unconventional projects (tight oil/shale gas/tight gas)
+on_max_drilling_pct_cap,0.3,fraction,Maximum percentage of available wells drillable per year
+on_default_drilling_pct,0.06,fraction,Default drilling percentage for projects without history
+on_min_well_spacing_floor,40,acres,Minimum well spacing floor in acres
+on_lateral_length_divisor,3000,feet,Divisor for lateral length spacing calculation
+on_lateral_length_multiplier,40,multiplier,Multiplier for lateral length spacing calculation
+on_cost_adj_tier_one,1,fraction,Cost adjustment factor for projects with 1-5 historical wells
+on_cost_adj_tier_two,0.6,fraction,Cost adjustment factor for projects with 10-50 historical wells
+on_cost_adj_tier_three,0.3,fraction,Cost adjustment factor for projects with 50+ historical wells
+on_min_years_before_abandon,6,years,Minimum production years before abandonment eligible
+on_econ_life_default,30,years,Default economic life when project does not hit economic limit
+on_producing_wells_multiplier,1.03,fraction,Multiplier applied to producing well counts
+on_price_elasticity_exponent,0.25,exponent,Price adjustment elasticity exponent for well projections
+on_wells_steo_ratio,0.3,fraction,Well ratio factor for matching STEO projections
+on_national_cost_multiplier,2,multiplier,Cost multiplier for national-level cost matches (non-economical regions)
+on_regional_cost_multiplier,1.5,multiplier,Cost multiplier for regional-level cost matches
+on_eor_other_opex_multiplier,1.5,multiplier,Production opex multiplier for Other EOR projects (process code 11)
+on_eor_other_capex_multiplier,2,multiplier,Facility capex multiplier for Other EOR projects (process code 11)
+on_cost_fillna_district_mult,1.5,multiplier,Cost multiplier when filling missing costs by district average
+on_cost_fillna_region_mult,1.75,multiplier,Cost multiplier when filling missing costs by region average
+on_cost_fillna_resource_mult,2,multiplier,Cost multiplier when filling missing costs by resource type average
+on_cost_outlier_lower_mult,0.5,multiplier,Lower bound multiplier for cost outlier detection
+on_cost_outlier_upper_mult,1.5,multiplier,Upper bound multiplier for cost outlier detection
+on_crude_heat_base,158886,btu_per_bbl_base,Base value for crude heat content calculation formula
+on_sga_conservative_factor,0.5,fraction,SGA opex conservative reduction factor for developing projects
+on_sga_producing_factor,0.1,fraction,SGA opex conservative reduction factor for producing projects
+on_facility_producing_factor,0.5,fraction,Facility capex reduction factor for producing projects (existing infrastructure)
+on_tier_boundary_low,10,wells,Historical well count boundary between tier 1 and tier 2
+on_tier_boundary_high,50,wells,Historical well count boundary between tier 2 and tier 3
+on_past_drilling_threshold,10,wells,Minimum well count threshold for past drilling eligibility in project selection

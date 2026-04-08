@@ -1,193 +1,193 @@
 Composite Table:
-Sreg Dreg  Tier  DistanceSurcharge
-1APN 01NE     1                845
-1APN 02YP     1                154
-1APN 03S1     1                231
-1APN 04S2     1                231
-1APN 05GF     1                808
-1APN 06OH     1                  8
-1APN 07EN     1                391
-1APN 08KT     1                442
-1APN 09AM     1                642
-1APN 10C1     1                791
-1APN 11C2     1                791
-1APN 12WS     1               1500
-1APN 13MT     1               1773
-1APN 14CU     1               2100
-1APN 15ZN     1               2300
-1APN 16PC     1               3000
-2APR 01NE     1                914
-2APR 02YP     1                582
-2APR 03S1     1                306
-2APR 04S2     1                306
-2APR 05GF     1                636
-2APR 06OH     1                161
-2APR 07EN     1                543
-2APR 10C1     1                600
-2APR 11C2     1                600
-2APR 13MT     1               1773
-2APR 14CU     1               1410
-2APR 15ZN     1               1972
-2APR 16PC     1               2365
-2APR 08KT     1                100
-2APR 09AM     1                 43
-2APR 12WS     1               1134
-3INR 01NE     1               1100
-3INR 02YP     1                243
-3INR 03S1     1                700
-3INR 04S2     1                700
-3INR 05GF     1                636
-3INR 06OH     1                395
-3INR 07EN     1                 76
-3INR 08KT     1                197
-4LGN 09AM     1                236
-3INR 10C1     1                210
-3INR 11C2     1                210
-3INR 12WS     1                776
-3INR 13MT     1               1179
-3INR 14CU     1               1010
-3INR 15ZN     1               1572
-3INR 16PC     1               2365
-4LGN 12WS     1                 15
-4LGN 01NE     1               2000
-4LGN 02YP     1               2000
-4LGN 03S1     1               2100
-4LGN 04S2     1               2100
-4LGN 05GF     1               1768
-4LGN 06OH     1               1900
-4LGN 07EN     1                992
-4LGN 08KT     1               1600
-4LGN 10C1     1                 10
-4LGN 11C2     1                 10
-4LGN 13MT     1                 54
-4LGN 14CU     1               1074
-4LGN 15ZN     1               1806
-4LGN 16PC     1               1481
-5PRB 01NE     1               2100
-5PRB 02YP     1               1619
-5PRB 03S1     1               1656
-5PRB 04S2     1               1656
-5PRB 05GF     1               1781
-5PRB 06OH     1               1426
-5PRB 07EN     1               1193
-5PRB 08KT     1               1446
-5PRB 09AM     1               1555
-5PRB 10C1     1                985
-5PRB 11C2     1                985
-5PRB 12WS     1               1264
-5PRB 13MT     1                246
-5PRB 14CU     1                426
-5PRB 15ZN     1               1780
-5PRB 16PC     1               1294
-6WSR 01NE     1               2083
-6WSR 02YP     1               2100
-6WSR 03S1     1               1900
-6WSR 04S2     1               1900
-6WSR 05GF     1               1858
-6WSR 06OH     1               1568
-6WSR 07EN     1               1422
-6WSR 08KT     1               1504
-6WSR 09AM     1               1681
-6WSR 10C1     1               1173
-6WSR 11C2     1               1173
-6WSR 12WS     1               1361
-6WSR 13MT     1                920
-6WSR 14CU     1                139
-6WSR 15ZN     1                965
-6WSR 16PC     1               1336
-1APN 01NE     2                845
-1APN 02YP     2                154
-1APN 03S1     2                400
-1APN 04S2     2                400
-1APN 05GF     2                808
-1APN 06OH     2                  8
-1APN 07EN     2                391
-1APN 08KT     2                442
-1APN 09AM     2                642
-1APN 10C1     2                791
-1APN 11C2     2                791
-1APN 12WS     2               1500
-1APN 13MT     2               1773
-1APN 14CU     2               2100
-1APN 15ZN     2               2300
-1APN 16PC     2               3000
-2APR 01NE     2                914
-2APR 02YP     2                582
-2APR 03S1     2                306
-2APR 04S2     2                306
-2APR 05GF     2                636
-2APR 06OH     2                161
-2APR 07EN     2                543
-2APR 10C1     2                600
-2APR 11C2     2                600
-2APR 13MT     2               1773
-2APR 14CU     2               1410
-2APR 15ZN     2               1972
-2APR 16PC     2               2365
-2APR 08KT     2                100
-2APR 09AM     2                 43
-2APR 12WS     2               1134
-3INR 01NE     2               1100
-3INR 02YP     2                700
-3INR 03S1     2                700
-3INR 04S2     2                700
-3INR 05GF     2                636
-3INR 06OH     2                395
-3INR 07EN     2                 76
-3INR 08KT     2                197
-4LGN 09AM     2                236
-3INR 10C1     2                210
-3INR 11C2     2                210
-3INR 12WS     2                776
-3INR 13MT     2               1179
-3INR 14CU     2               1010
-3INR 15ZN     2               1572
-3INR 16PC     2               2365
-4LGN 12WS     2                 15
-4LGN 01NE     2               2000
-4LGN 02YP     2               2000
-4LGN 03S1     2               2100
-4LGN 04S2     2               2100
-4LGN 05GF     2               1768
-4LGN 06OH     2               1900
-4LGN 07EN     2                992
-4LGN 08KT     2               1600
-4LGN 10C1     2                 10
-4LGN 11C2     2                 10
-4LGN 13MT     2                 54
-4LGN 14CU     2               1074
-4LGN 15ZN     2               1806
-4LGN 16PC     2               1481
-5PRB 01NE     2               2100
-5PRB 02YP     2               1619
-5PRB 03S1     2               1656
-5PRB 04S2     2               1656
-5PRB 05GF     2               1781
-5PRB 06OH     2               1426
-5PRB 07EN     2               1193
-5PRB 08KT     2               1446
-5PRB 09AM     2               1555
-5PRB 10C1     2                985
-5PRB 11C2     2                985
-5PRB 12WS     2               1264
-5PRB 13MT     2                246
-5PRB 14CU     2                425
-5PRB 15ZN     2               1780
-5PRB 16PC     2               1294
-6WSR 01NE     2               2083
-6WSR 02YP     2               2100
-6WSR 03S1     2               1900
-6WSR 04S2     2               1900
-6WSR 05GF     2               1858
-6WSR 06OH     2               1568
-6WSR 07EN     2               1422
-6WSR 08KT     2               1504
-6WSR 09AM     2               1681
-6WSR 10C1     2               1173
-6WSR 11C2     2               1173
-6WSR 12WS     2               1361
-6WSR 13MT     2                920
-6WSR 14CU     2                139
-6WSR 15ZN     2                965
-6WSR 16PC     2               1336
+cl::Sreg cl::Dreg  cl::Tier  cl::DistanceSurcharge
+    1APN     01NE         1                    845
+    1APN     02YP         1                    154
+    1APN     03S1         1                    231
+    1APN     04S2         1                    231
+    1APN     05GF         1                    808
+    1APN     06OH         1                      8
+    1APN     07EN         1                    391
+    1APN     08KT         1                    442
+    1APN     09AM         1                    642
+    1APN     10C1         1                    791
+    1APN     11C2         1                    791
+    1APN     12WS         1                   1500
+    1APN     13MT         1                   1773
+    1APN     14CU         1                   2100
+    1APN     15ZN         1                   2300
+    1APN     16PC         1                   3000
+    2APR     01NE         1                    914
+    2APR     02YP         1                    582
+    2APR     03S1         1                    306
+    2APR     04S2         1                    306
+    2APR     05GF         1                    636
+    2APR     06OH         1                    161
+    2APR     07EN         1                    543
+    2APR     10C1         1                    600
+    2APR     11C2         1                    600
+    2APR     13MT         1                   1773
+    2APR     14CU         1                   1410
+    2APR     15ZN         1                   1972
+    2APR     16PC         1                   2365
+    2APR     08KT         1                    100
+    2APR     09AM         1                     43
+    2APR     12WS         1                   1134
+    3INR     01NE         1                   1100
+    3INR     02YP         1                    243
+    3INR     03S1         1                    700
+    3INR     04S2         1                    700
+    3INR     05GF         1                    636
+    3INR     06OH         1                    395
+    3INR     07EN         1                     76
+    3INR     08KT         1                    197
+    4LGN     09AM         1                    236
+    3INR     10C1         1                    210
+    3INR     11C2         1                    210
+    3INR     12WS         1                    776
+    3INR     13MT         1                   1179
+    3INR     14CU         1                   1010
+    3INR     15ZN         1                   1572
+    3INR     16PC         1                   2365
+    4LGN     12WS         1                     15
+    4LGN     01NE         1                   2000
+    4LGN     02YP         1                   2000
+    4LGN     03S1         1                   2100
+    4LGN     04S2         1                   2100
+    4LGN     05GF         1                   1768
+    4LGN     06OH         1                   1900
+    4LGN     07EN         1                    992
+    4LGN     08KT         1                   1600
+    4LGN     10C1         1                     10
+    4LGN     11C2         1                     10
+    4LGN     13MT         1                     54
+    4LGN     14CU         1                   1074
+    4LGN     15ZN         1                   1806
+    4LGN     16PC         1                   1481
+    5PRB     01NE         1                   2100
+    5PRB     02YP         1                   1619
+    5PRB     03S1         1                   1656
+    5PRB     04S2         1                   1656
+    5PRB     05GF         1                   1781
+    5PRB     06OH         1                   1426
+    5PRB     07EN         1                   1193
+    5PRB     08KT         1                   1446
+    5PRB     09AM         1                   1555
+    5PRB     10C1         1                    985
+    5PRB     11C2         1                    985
+    5PRB     12WS         1                   1264
+    5PRB     13MT         1                    246
+    5PRB     14CU         1                    426
+    5PRB     15ZN         1                   1780
+    5PRB     16PC         1                   1294
+    6WSR     01NE         1                   2083
+    6WSR     02YP         1                   2100
+    6WSR     03S1         1                   1900
+    6WSR     04S2         1                   1900
+    6WSR     05GF         1                   1858
+    6WSR     06OH         1                   1568
+    6WSR     07EN         1                   1422
+    6WSR     08KT         1                   1504
+    6WSR     09AM         1                   1681
+    6WSR     10C1         1                   1173
+    6WSR     11C2         1                   1173
+    6WSR     12WS         1                   1361
+    6WSR     13MT         1                    920
+    6WSR     14CU         1                    139
+    6WSR     15ZN         1                    965
+    6WSR     16PC         1                   1336
+    1APN     01NE         2                    845
+    1APN     02YP         2                    154
+    1APN     03S1         2                    400
+    1APN     04S2         2                    400
+    1APN     05GF         2                    808
+    1APN     06OH         2                      8
+    1APN     07EN         2                    391
+    1APN     08KT         2                    442
+    1APN     09AM         2                    642
+    1APN     10C1         2                    791
+    1APN     11C2         2                    791
+    1APN     12WS         2                   1500
+    1APN     13MT         2                   1773
+    1APN     14CU         2                   2100
+    1APN     15ZN         2                   2300
+    1APN     16PC         2                   3000
+    2APR     01NE         2                    914
+    2APR     02YP         2                    582
+    2APR     03S1         2                    306
+    2APR     04S2         2                    306
+    2APR     05GF         2                    636
+    2APR     06OH         2                    161
+    2APR     07EN         2                    543
+    2APR     10C1         2                    600
+    2APR     11C2         2                    600
+    2APR     13MT         2                   1773
+    2APR     14CU         2                   1410
+    2APR     15ZN         2                   1972
+    2APR     16PC         2                   2365
+    2APR     08KT         2                    100
+    2APR     09AM         2                     43
+    2APR     12WS         2                   1134
+    3INR     01NE         2                   1100
+    3INR     02YP         2                    700
+    3INR     03S1         2                    700
+    3INR     04S2         2                    700
+    3INR     05GF         2                    636
+    3INR     06OH         2                    395
+    3INR     07EN         2                     76
+    3INR     08KT         2                    197
+    4LGN     09AM         2                    236
+    3INR     10C1         2                    210
+    3INR     11C2         2                    210
+    3INR     12WS         2                    776
+    3INR     13MT         2                   1179
+    3INR     14CU         2                   1010
+    3INR     15ZN         2                   1572
+    3INR     16PC         2                   2365
+    4LGN     12WS         2                     15
+    4LGN     01NE         2                   2000
+    4LGN     02YP         2                   2000
+    4LGN     03S1         2                   2100
+    4LGN     04S2         2                   2100
+    4LGN     05GF         2                   1768
+    4LGN     06OH         2                   1900
+    4LGN     07EN         2                    992
+    4LGN     08KT         2                   1600
+    4LGN     10C1         2                     10
+    4LGN     11C2         2                     10
+    4LGN     13MT         2                     54
+    4LGN     14CU         2                   1074
+    4LGN     15ZN         2                   1806
+    4LGN     16PC         2                   1481
+    5PRB     01NE         2                   2100
+    5PRB     02YP         2                   1619
+    5PRB     03S1         2                   1656
+    5PRB     04S2         2                   1656
+    5PRB     05GF         2                   1781
+    5PRB     06OH         2                   1426
+    5PRB     07EN         2                   1193
+    5PRB     08KT         2                   1446
+    5PRB     09AM         2                   1555
+    5PRB     10C1         2                    985
+    5PRB     11C2         2                    985
+    5PRB     12WS         2                   1264
+    5PRB     13MT         2                    246
+    5PRB     14CU         2                    425
+    5PRB     15ZN         2                   1780
+    5PRB     16PC         2                   1294
+    6WSR     01NE         2                   2083
+    6WSR     02YP         2                   2100
+    6WSR     03S1         2                   1900
+    6WSR     04S2         2                   1900
+    6WSR     05GF         2                   1858
+    6WSR     06OH         2                   1568
+    6WSR     07EN         2                   1422
+    6WSR     08KT         2                   1504
+    6WSR     09AM         2                   1681
+    6WSR     10C1         2                   1173
+    6WSR     11C2         2                   1173
+    6WSR     12WS         2                   1361
+    6WSR     13MT         2                    920
+    6WSR     14CU         2                    139
+    6WSR     15ZN         2                    965
+    6WSR     16PC         2                   1336
 ;

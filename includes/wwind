@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/wwind,v 1.19 2017/08/30 18:44:38 LC2 Exp $
 ! *****************************************************************
 !  COMMON WWIND
@@ -303,15 +304,15 @@
       REAL*4 XCapMax_SO(mnumnr,mnumsl)      
       REAL*4 XRatio(mnumnr,mnumcl)
       REAL*4 XRatio_SO(mnumnr,mnumsl)  
-      REAL*4 XRatio_PV(mnumnr,mnumsl) 
-      REAL*4 XRatio_PT(mnumnr,mnumsl) 
+      !REAL*4 XRatio_PV(mnumnr,mnumsl) 
+      !REAL*4 XRatio_PT(mnumnr,mnumsl) 
       REAL*4 XLTElas(mnumnr,mnumcl)
       REAL*4 XLTElas_WL(mnumnr,mnumcl)
       REAL*4 XLTElas_SO(mnumnr,mnumsl)
       REAL*4 XLTElas_PV(mnumnr,mnumsl)
       REAL*4 XLTElas_PT(mnumnr,mnumsl)
 
-      COMMON/WWind8/XSwitch, XCapCum, XCapCum_SO,XCapMax, XCapMax_SO, XRatio, XRatio_SO, XRatio_PV, XRatio_PT, XLTElas, XLTElas_WL, XLTElas_SO, XLTElas_PV, XLTElas_PT
+      COMMON/WWind8/XSwitch, XCapCum, XCapCum_SO,XCapMax, XCapMax_SO, XRatio, XRatio_SO,  XLTElas, XLTElas_WL, XLTElas_SO, XLTElas_PV, XLTElas_PT
 
       REAL*4 ConsTol(mnumnr)
       REAL*4 ConsTol_WL(mnumnr)

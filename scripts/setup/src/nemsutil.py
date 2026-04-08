@@ -72,7 +72,7 @@ def util_remove_file(self, file):
 
 def util_remove_extension(self, dirname, extension):
     '''
-    In the specific directory, remove the files with a particular file extension. For example, *.gz
+    In the specific directory, remove the files with a particular file extension. For example, 
 
     Parameters
     ----------

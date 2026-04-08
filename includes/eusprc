@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/eusprc,v 1.2 1999/12/19 20:14:58 DSA Exp $
 !  Utility end-use service prices
 !   Utility end-use service prices Common Block Parameters
@@ -27,15 +28,15 @@
       REAL PELCKCM(MNUMCR,MNUMYR) !   cooking CM
       REAL PELLTCM(MNUMCR,MNUMYR) !   lighting CM
       REAL PELRFCM(MNUMCR,MNUMYR) !   refrigeration CM
-      REAL PELOPCM(MNUMCR,MNUMYR) !   office equipment PCs CM
-      REAL PELONCM(MNUMCR,MNUMYR) !   office equipment, nonPCs CM
+      REAL PELOPCM(MNUMCR,MNUMYR) !   data center servers CM
+      REAL PELONCM(MNUMCR,MNUMYR) !   computers and office equipment CM
       REAL PELOTCM(MNUMCR,MNUMYR) !   other commercial
       REAL PELP2CM(MNUMCR,MNUMYR) !   vehicle CM - public L2
-      REAL PELPFCM(MNUMCR,MNUMYR) !   vehicle CM – public DCFC
-      REAL PELSBCM(MNUMCR,MNUMYR) !   vehicle CM – school bus
-      REAL PELTBCM(MNUMCR,MNUMYR) !   vehicle CM – transit bus
-      REAL PELIBCM(MNUMCR,MNUMYR) !   vehicle CM – intercity bus + CLT + freight (fleet)
-      REAL PELFNCM(MNUMCR,MNUMYR) !   vehicle CM – freight truck non-fleet
+      REAL PELPFCM(MNUMCR,MNUMYR) !   vehicle CM â€“ public DCFC
+      REAL PELSBCM(MNUMCR,MNUMYR) !   vehicle CM â€“ school bus
+      REAL PELTBCM(MNUMCR,MNUMYR) !   vehicle CM â€“ transit bus
+      REAL PELIBCM(MNUMCR,MNUMYR) !   vehicle CM â€“ intercity bus + CLT + freight (fleet)
+      REAL PELFNCM(MNUMCR,MNUMYR) !   vehicle CM â€“ freight truck non-fleet
       REAL PELINP(MNUMCR,MNUMYR) !   industrial primary
       REAL PELINS(MNUMCR,MNUMYR) !   industrial shift
       REAL PELINM(MNUMCR,MNUMYR) !   industrial miscellaneous

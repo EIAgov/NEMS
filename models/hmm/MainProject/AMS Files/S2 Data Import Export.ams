@@ -1,57 +1,71 @@
 ## ams_version=1.0
 
 Section S2_Data_Import_Export {
+	DeclarationSection Parquet_File_Declarations {
+		StringParameter GlobalDataFolderString;
+	}
+	Procedure ReadParquetGDSData {
+		Body: {
+			sDataYearFile:="../../hmm/toAIMMS/GlobalDataToAIMMS_"+formatstring("%i",ncntrl_curcalyr(1))+"_"+formatstring("%i",ncntrl_curitr(1));
+			dex::ReadFromFile(sDataYearFile, "HMMParquetMapping");
+		}
+	}
+	Procedure Add_Parquet_Mappings {
+		Body: {
+			dex::AddMapping("HMMParquetMapping", "Mappings/HMMParquetMapping.xml");
+		}
+	}
 	Procedure Read_Input_Data {
 		Body: {
 			! Only needs to be done first model year and then save data to a restart.data case file to load up for future years?
 			
 			! Get list of files in "operations" folder.
 			DirectoryGetFiles(
-			        "input/operations",     ! (input) scalar string expression
+			        "../../hmm/input/operations",     ! (input) scalar string expression
 			        "*.txt",         ! (input) scalar string expression
 			        OperationInputs      ! (output) a one-dimensional string parameter
 			        );
 			
 			! Get list of files in "other" folder.
 			DirectoryGetFiles(
-			        "input/other",      ! (input) scalar string expression
+			        "../../hmm/input/other",      ! (input) scalar string expression
 			        "*.txt",         ! (input) scalar string expression
 			        OtherInputs      ! (output) a one-dimensional string parameter
 			        );
 			
 			! Get list of files in the "TAndS" (transportation and storage) folder
 			DirectoryGetFiles(
-			        "input/TAndS",      ! (input) scalar string expression
+			        "../../hmm/input/TAndS",      ! (input) scalar string expression
 			        "*.txt",         ! (input) scalar string expression
 			        TandSInputs      ! (output) a one-dimensional string parameter
 			        );
 			
 			! Get list of files in the "history"  folder
 			DirectoryGetFiles(
-			        "input/history",      ! (input) scalar string expression
+			        "../../hmm/input/history",      ! (input) scalar string expression
 			        "*.txt",         ! (input) scalar string expression
 			        HistoryInputs      ! (output) a one-dimensional string parameter
 			        );
 			
 			! Read files
 			for (op_input_fn in OperationInputFileNumbers_) do
-				inputFile := "input/operations/" + OperationInputs(op_input_fn);
+				inputFile := "../../hmm/input/operations/" + OperationInputs(op_input_fn);
 				read from file inputFile in merge mode;
 			endfor;
 			
 			
 			for (oth_input_fn in OtherInputFileNumbers_) do
-				inputFile := "input/other/" + OtherInputs(oth_input_fn);
+				inputFile := "../../hmm/input/other/" + OtherInputs(oth_input_fn);
 				read from file inputFile in merge mode;
 			endfor;
 			
 			for (tands_input_fn in TAndSInputFileNumbers_) do
-				inputFile := "input/TAndS/" + TandSInputs(tands_input_fn);
+				inputFile := "../../hmm/input/TAndS/" + TandSInputs(tands_input_fn);
 				read from file inputFile in merge mode;
 			endfor;
 			
 			for (history_input_fn in HistoryInputFileNumbers_) do
-				inputFile := "input/history/" + HistoryInputs(history_input_fn);
+				inputFile := "../../hmm/input/history/" + HistoryInputs(history_input_fn);
 				read from file inputFile in merge mode;
 			endfor;
 		}
@@ -231,7 +245,10 @@ Section S2_Data_Import_Export {
 	Procedure Read_GDS_Initial {
 		Body: {
 			!read from file "ToAIMMS/GlobalDataToHMM_init_old.txt" in merge mode;
-			read from file "ToAIMMS/GlobalDataToHMM_init.txt" in merge mode;
+			!read from file "../../hmm/ToAIMMS/GlobalDataToHMM_init.txt" in merge mode;
+			dex::AddMapping("HMMParquetMapping", "Mappings/HMMParquetMapping.xml");
+			sDataYearFile:="../../hmm/toAIMMS/GlobalDataToAIMMS_2023_1";
+			dex::ReadFromFile(sDataYearFile, "HMMParquetMapping");
 		}
 		Comment: "Procedure for reading in initial GDS data from ToAIMMS/GlobalDataToHMM_Init.txt. This procedure is only necessary during initial model development, and should be deprecated when the model is complete.";
 	}
@@ -269,9 +286,9 @@ Section S2_Data_Import_Export {
 					Comment: "Maps MNUMCR to Census Regions";
 				}
 				Parameter NEMSmap_MNUMYRToYear {
-					IndexDomain: (MNUMYR,year);
+					IndexDomain: (nh::MNUMYR,nh::year);
 					Definition: {
-						if Val(year)-1989= MNUMYR then
+						if Val(nh::year)-1989= nh::MNUMYR then
 						1
 						endif;
 					}
@@ -462,6 +479,38 @@ Section S2_Data_Import_Export {
 			}
 			Section HMMBLK {
 				DeclarationSection HMMBLK_Declarations {
+					Parameter HMMBLK_SMRCAPCOST {
+						IndexDomain: MNUMYR;
+						Comment: "SMR w/o CCS capital cost ($/kg)";
+					}
+					Parameter HMMBLK_SMRCCSCAPCOST {
+						IndexDomain: MNUMYR;
+						Comment: "SMR w CCS capital cost ($/kg)";
+					}
+					Parameter HMMBLK_ATRCCSCAPCOST {
+						IndexDomain: MNUMYR;
+						Comment: "ATR w CCS capital cost ($/kg)";
+					}
+					Parameter HMMBLK_ELECCAPCOST {
+						IndexDomain: MNUMYR;
+						Comment: "Electrolyzer capital cost ($/kg)";
+					}
+					Parameter HMMBLK_ELEC_CAP {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "Electrolysis production capacity (mmMT)";
+					}
+					Parameter HMMBLK_SMRCCS_CAP {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "SMR w/CCS production capacity (mmMT)";
+					}
+					Parameter HMMBLK_ATRCCS_CAP {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "ATR w/CCS production capacity (mmMT)";
+					}
+					Parameter HMMBLK_SMR_CAP {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "SMR w/o CCS production capacity (mmMT)";
+					}
 					Parameter HMMBLK_H2STEP {
 						IndexDomain: M1;
 						Range: integer;
@@ -482,13 +531,18 @@ Section S2_Data_Import_Export {
 						IndexDomain: (MNUMCR,MNUMYR);
 						Comment: "H2 Production from electrolysis, Census division (million metric tons)";
 					}
-					Parameter HMMBLK_PRDH2NG_CCS {
-						IndexDomain: (MNUMCR,MNUMYR);
-						Comment: "H2 production from SMR/ATR w/CCS (million metric tons)";
-					}
 					Parameter HMMBLK_PRDH2NG {
 						IndexDomain: (MNUMCR,MNUMYR);
 						Comment: "H2 production from SMR/ATR without CCS (million metric tons)";
+					}
+					Parameter HMMBLK_PRDH2NG_CCS {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Comment: "H2 production from SMR w/CCS (million metric tons)";
+					}
+					Parameter HMMBLK_PRDH2NGATR_CCS {
+						IndexDomain: (MNUMCR,MNUMYR);
+						Text: "H2 production from ATR w/CCS (million metric tons)";
+						Comment: "H2 production from ATR w/CCS (million metric tons)";
 					}
 					Parameter HMMBLK_QELHM_HR {
 						IndexDomain: (MNUMNR,M4,M24,MNUMYR);

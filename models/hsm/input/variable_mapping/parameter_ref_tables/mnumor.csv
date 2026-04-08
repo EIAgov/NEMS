@@ -1,0 +1,15 @@
+region_number,region_name
+1,east_coast
+2,gulf_coast
+3,midcontinent
+4,southwest
+5,rocky_mountain
+6,northern_great_plains
+7,west_coast
+8,atlantic
+9,gulf_of_mexico
+10,pacific
+11,alaska_offshore_north
+12,alaska_onshore_north
+13,alaska_other
+14,Total production

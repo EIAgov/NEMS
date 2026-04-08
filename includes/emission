@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/emission,v 1.31 2017/08/10 16:59:24 rsc Exp $
 !
 !     EMISSION COMMON BLOCK
@@ -5,7 +6,7 @@
 !     The user should add the following INCLUDE statement:      INCLUDE(PARAMETR)
 !
 !     Emission variables
-!
+
       INTEGER numcoalch4regs
       PARAMETER(numcoalch4regs=5)
       INTEGER MX_HG_GRP
@@ -16,7 +17,7 @@
       PARAMETER(EPM_RANK=3)
       INTEGER MX_SO2_GRP
       PARAMETER(MX_SO2_GRP=EFD_D_SO2)
-!
+
       REAL    EMRFSA(MNUMYR,MX_SO2_GRP)             !  1 Sulfur allowances
       REAL    EMELPSO2(MNUMYR,MX_SO2_GRP)           !  2 CDS Sulfur dioxide emission allowance price
       INTEGER NUM_HG_GRP                            !  3 Number of Mercury Cap and Trade Groups
@@ -25,24 +26,24 @@
       REAL    EMEL_QHG(MX_HG_GRP,MNUMYR)            !  6 Mercury Caps by Group and Year
       REAL    EMEL_PHG(MX_HG_GRP,MNUMYR)            !  7 Mercury Penalty Price by Group and Year
       REAL    EMUMM(MNUMYR)                         !  8 Spent nuclear fuel discharges
-      REAL    EMRS(4,MNPOLLUT,MNUMYR)               !  9 Resd Emissions of Air Pollutants
+      REAL    EMRS(4,MNPOLLUT,MNUMYR)               !  9 Resd Emissions of Air Pollutants (million metric tons carbon equiv.)
                                                     !    (C, CO, CO2, SOx, NOx, VOC, CH4, Part), by Fuel type
                                                     !    where CH4 & Particulates are Reserved placeholders
-      REAL    EMRSC(MNUMCR,MNPOLLUT,MNUMYR)         ! 10 Resd Emissions by Region
-      REAL    EMCM(5,MNPOLLUT,MNUMYR)               ! 11 Comm Emissions by Air Pollutants
-      REAL    EMCMC(MNUMCR,MNPOLLUT,MNUMYR)         ! 12 Comm Emissions by Region
-      REAL    EMINC(4,MNPOLLUT,MNUMYR)              ! 13 Ind Emis by Fuel-Combustion
-      REAL    EMINCC(MNUMCR,MNPOLLUT,MNUMYR)        ! 14 Ind Emis by Region-Comb
+      REAL    EMRSC(MNUMCR,MNPOLLUT,MNUMYR)         ! 10 Resd Emissions by Region (million metric tons carbon equiv.)
+      REAL    EMCM(5,MNPOLLUT,MNUMYR)               ! 11 Comm Emissions by Air Pollutants (million metric tons carbon equiv.)
+      REAL    EMCMC(MNUMCR,MNPOLLUT,MNUMYR)         ! 12 Comm Emissions by Region (million metric tons carbon equiv.)
+      REAL    EMINC(4,MNPOLLUT,MNUMYR)              ! 13 Ind Emis by Fuel-Combustion (million metric tons carbon equiv.)
+      REAL    EMINCC(MNUMCR,MNPOLLUT,MNUMYR)        ! 14 Ind Emis by Region-Comb (million metric tons carbon equiv.)
       REAL    EMINCN(MNUMCR,MNPOLLUT,MNUMYR)        ! 15 Ind Emis by Reg-Noncomb
-      REAL    EMTR(5,MNPOLLUT,MNUMYR)               ! 16 Transportation Emissions by Fuel
-      REAL    EMTRC(MNUMCR,MNPOLLUT,MNUMYR)         ! 17 Trans Emissions by Region
+      REAL    EMTR(5,MNPOLLUT,MNUMYR)               ! 16 Transportation Emissions by Fuel (million metric tons carbon equiv.)
+      REAL    EMTRC(MNUMCR,MNPOLLUT,MNUMYR)         ! 17 Trans Emissions by Region (million metric tons carbon equiv.)
       REAL    EMTRS(5,MNPOLLUT,MNUMYR)              ! 18 Trans Emissions by Trans Modes
-      REAL    EMNT(MNUMCR,MNPOLLUT,MNUMYR)          ! 19 NGTDM Emissions by Region
+      REAL    EMNT(MNUMCR,MNPOLLUT,MNUMYR)          ! 19 NGTDM Emissions by Region (thousand metric tons carbon equiv.)
       REAL    EMOGC(MNUMCR,MNPOLLUT,MNUMYR)         ! 20 Oil&Gas Emissions by Region
       REAL    EMOGCS(2,MNPOLLUT,MNUMYR)             ! 21 O&G Emis by Activity (On/offshore)
       REAL    EMOGF(2,MNPOLLUT,MNUMYR)              ! 22 O&G Emis by Fuel (Oil, NG)
-      REAL    EMEL(4,MNPOLLUT,MNUMYR)               ! 23 EMM Emissions by Fuel Type
-      REAL    EMELC(MNUMCR,MNPOLLUT,MNUMYR)         ! 24 EMM Emissions by Region
+      REAL    EMEL(4,MNPOLLUT,MNUMYR)               ! 23 EMM Emissions by Fuel Type (million metric tons carbon equiv.)
+      REAL    EMELC(MNUMCR,MNPOLLUT,MNUMYR)         ! 24 EMM Emissions by Region (million metric tons carbon equiv.)
       REAL    EMPMC(4,MNPOLLUT,MNUMYR)              ! 25 Petroleum Emis by Fuel-Combustion
       REAL    EMPMCC(MNUMCR,MNPOLLUT,MNUMYR)        ! 26 PMM Emis by Regn-Comb
       REAL    EMPMCN(MNUMCR,MNPOLLUT,MNUMYR)        ! 27 PMM Emis by Reg-Noncomb
@@ -118,23 +119,23 @@
       REAL HEMOLTL(MNPOLLUT,MNUMYR)                 ! 92 HISTORICAL OIL  (C,CO,CO2,SO2,NOX,VOC)
       REAL HEMCLTL(MNPOLLUT,MNUMYR)                 ! 93 HISTORICAL COAL (C,CO,CO2,SO2,NOX,VOC)
       REAL HEMOTTL(MNPOLLUT,MNUMYR)                 ! 94 HISTORICAL REN  (C,CO,CO2,SO2,NOX,VOC)
- 
+
       REAL HEMSO2R(MNUMNR,MNUMYR)                   ! 95 HISTORICAL SO2 EMISSIONS BY REGION AND POLLUTANT
       REAL HEMNOXR(MNUMNR,MNUMYR)                   ! 96 HISTORICAL NOX EMISSIONS BY REGION AND POLLUTANT
       REAL HEMCO2R(MNUMNR,MNUMYR)                   ! 97 HISTORICAL CO2 EMISSIONS BY REGION AND POLLUTANT
       REAL HNOXFAC(MNUMNR)                          ! 98 CALIBRATION FAC. FOR HIST. NOX EM.
       REAL HSO2FAC(MNUMNR)                          ! 99 CALIBRATION FAC. FOR HIST. SO2 EM.
- 
+
       REAL UCAP_HG                                  !100 CAP ON HG  CREDIT PRICE
 
       INTEGER USW_CAMR                              !101 Switch to turn off CAMR (0 = CAMR, 1 = No CAMR)
       INTEGER NUM_SO2_GRP                           !102 Number of SO2 Compliance Groups
-      
+
       REAL    EMELGCS(MNUMNR,MNUMYR)                ! 103 Gas CO2 CCS controls - Gross Capacity
       REAL    EMELGDR(MNUMNR,MNUMYR)                ! 104 Gas CO2 CCS controls - Derated Capacity
-      
 
-!     Emission common block   
+
+!     Emission common block
 
       COMMON/EMISSION/EMRFSA,EMELPSO2,NUM_HG_GRP,HG_GRP,TOT_MERC,                         &
          EMEL_QHG,EMEL_PHG,EMUMM,EMRS,EMRSC,EMCM,EMCMC,                                   &
@@ -154,9 +155,9 @@
          CCS_PMM,HEMNGTL,HEMOLTL,HEMCLTL,HEMOTTL,HEMSO2R,HEMNOXR,HEMCO2R,HNOXFAC,HSO2FAC, &
          UCAP_HG,                                                                         &
          USW_CAMR, NUM_SO2_GRP, EMELGCS, EMELGDR
-!
+
 !     Equivalence for FILER used for data storage
-!
+
       REAL EQ_EMOUT( (MNUMYR * MX_SO2_GRP)     +  & !  1 Sulfur allowances
          (MNUMYR * MX_SO2_GRP)                 +  & !  2 CDS Sulfur dioxide emission allowance price
          1                                     +  & !  3 Number of Mercury Cap and Trade Groups
@@ -261,5 +262,5 @@
          1                                     +  & !102 Number of SO2 Compliance Groups
         (MNUMNR * MNUMYR)                      +  & !103 Gas CO2 CCS controls
         (MNUMNR * MNUMYR)                         ) !104 Gas CO2 CCS controls - Capacity Derate
- 
+
       EQUIVALENCE (EQ_EMOUT,EMRFSA)

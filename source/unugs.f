@@ -174,6 +174,7 @@
       MAP_EL_SCTR(S_RES,F_OG) = 9
       MAP_EL_SCTR(S_RES,F_OT) = 10
       MAP_EL_SCTR(S_RES,F_WN) = 11
+      MAP_EL_SCTR(S_RES,F_BS) = 13
 !
       MAP_EL_SCTR(S_OG,F_CL) = 1
       MAP_EL_SCTR(S_OG,F_OL) = 2
@@ -193,14 +194,9 @@
       MAP_ECP_NDX(F_SO) = WISO
       MAP_ECP_NDX(F_PV) = WIPV
       MAP_ECP_NDX(F_WN) = WIWN
+      MAP_ECP_NDX(F_BS) = WIDS
 !
       CALL GETBLD(1,IRG)
-!
-!     THIS CALL IS FOR CANADA ONLY               !//CANADA ONLY
-!
-      IF (USW_XP .GT. 0) THEN
-         IF (IRG .EQ. 1) CALL RDCOGEN            !//CANADA ONLY
-      END IF
 !
 !     LOAD Traditional Cogen Generation and Capacity Vectors
 !
@@ -1302,16 +1298,6 @@
         ENDIF
       ENDDO
 
-!  NT Cogen added to EFP IPP costs
-!     DO IFL = 1,EFD_D_NFL
-!        TOTGENI = TOTGENI + UQFGENN(IFL,IRG,4)
-!       IF (UPRNWREG .LE. 1) THEN
-!        RPSPRCI = RPSPRCI + UQFGENN(IFL,IRG,4) * EPRPSPR(CURIYR) * UPRNWBND(CURIYR)
-!       ELSE
-!        RPSPRCI = RPSPRCI + UQFGENN(IFL,IRG,4) * EPRPSPRR(IRG,CURIYR) * UPRNWBNDR(CURIYR,IRG)
-!       ENDIF
-!     END DO
-
       IF (TOTGENRS .GT. 0.0) RPSPRCR = RPSPRCR / TOTGENRS * 0.001
       IF (TOTGENC  .GT. 0.0) RPSPRCC = RPSPRCC / TOTGENC * 0.001
       IF (TOTGENI  .GT. 0.0) RPSPRCI = RPSPRCI / TOTGENI * 0.001
@@ -1319,42 +1305,9 @@
       WRITE(UF_DBG,1212) CURIYR,CURITR,IRG,RPSPRCR,RPSPRCC,RPSPRCI
 1212  FORMAT(1X,'RPSPRC ',3I5,3F12.6)
 
-
-!     CALCULATE RESIDENTIAL NUGS REVENUES (USE COM SHARES--NO RES)
-
-!     DO I = 1,9
-!       DO J = 1,10
-!         TOTGENRS = TOTGENRS + CSHARE(IRG,I) * CGRESGEN(I,IYR,J,1)
-!         if ( &
-!           (CGRESGEN(I,IYR,J,1) + CGRESGEN(I,IYR,J,2)) * CGRESCAP(I,IYR,J) &
-!           .NE. 0.0) &
-!         TOTCAPRS = TOTCAPRS + CSHARE(IRG,I) * (CGRESGEN(I,IYR,J,1) / &
-!           (CGRESGEN(I,IYR,J,1) + CGRESGEN(I,IYR,J,2))) * (CGRESCAP(I,IYR,J)/1000)
-!       END DO
-!     END DO
-
-!     TOTGENRS = CG_GEN_R(IRG)
-
       LOCRRC = LOCRRC + ((EWGAVP + RPSPRCR) * TOTGENRS)
 
       EWGRRC = EWGRRC + LOCRRC
-
-!     CALCULATE COMMERCIAL NUGS REVENUES
-
-!     DO 110 I = 1,9
-!        DO 112 J = 1,10
-!           TOTGENC = TOTGENC + &
-!            ( CSHARE(IRG,I) * (GRIDSHR(I,IYR) * (CGCOMGEN(I,IYR,J))) )
-
-!           DO 114 K = 1,2
-!              TOTCAPC = TOTCAPC + &
-!               (CSHARE(IRG,I) * (GRIDSHR(I,IYR) * &
-!                (CGCOMCAP(I,IYR,J,K)/1000)) )
-!114         CONTINUE
-!112      CONTINUE
-!110   CONTINUE
-
-!     TOTGENC = CG_GEN_C(IRG)
 
       LOCRCC = LOCRCC + ((EWGAVP + RPSPRCC) * TOTGENC)
 
@@ -1362,53 +1315,6 @@
 
 !     CALCULATE INDUSTRIAL NUGS REVENUES
 !     AS SUM OF INDUSTRIAL COGEN PLUS COGEN - OTHER AND NON-TRAD COGEN
-
-      DO 3420 I = 1,10
-         DO 3410 J = 1,2
-!           WRITE(6,2504)'A-CGINDLGEN',(CGINDLGEN(CRG,IYR,I,J),CRG=1,9)
-2504        FORMAT(A9,1X,9(F9.2,1X))
-3410     CONTINUE
-3420  CONTINUE
-
-!     TOTGENI = TOTGENI + &
-!      ( IGENGN(IRG) * (CGINDLGEN(11,IYR,1,1) + &
-!      CGINDLGEN(11,IYR,2,1) + &
-!      CGINDLGEN(11,IYR,3,1) + &
-!      CGINDLGEN(11,IYR,4,1) + &
-!      CGINDLGEN(11,IYR,5,1) + &
-!      CGINDLGEN(11,IYR,6,1) + &
-!      CGINDLGEN(11,IYR,7,1) + &
-!      CGINDLGEN(11,IYR,8,1) + &
-!      CGINDLGEN(11,IYR,9,1) + &
-!      CGINDLGEN(11,IYR,10,1) + &
-!      CGREGEN(11,IYR,1,1) + &
-!      CGREGEN(11,IYR,2,1) + &
-!      CGREGEN(11,IYR,3,1) + &
-!      CGREGEN(11,IYR,4,1) + &
-!      CGREGEN(11,IYR,5,1) + &
-!      CGOGSGEN(11,IYR,1,1) + &
-!      CGOGSGEN(11,IYR,2,1) + &
-!      CGOGSGEN(11,IYR,3,1) + &
-!      CGOGSGEN(11,IYR,4,1)))
-
-!     TOTGENI = CG_GEN_I(IRG) + CG_GEN_O(IRG) + CG_GEN_F(IRG)
-!     DO IFL = 1,EFD_D_NFL
-!        TOTGENI = TOTGENI + UQFGENN(IFL,IRG,4)
-!     END DO
-
-!     DO 140 I = 1,10
-!           TOTCAPI = TOTCAPI + (ISHARE(IRG,K) * CGINDLCAP(K,IYR,I,1)/1000)
-!140   CONTINUE
-
-!     ADD NON-TRADITIONAL COGEN TO CAPACITY CHARGES
-!
-!     DO 555 IDSP = 1,EFD_D_DSP
-!        DO 565 IVIN = 1,EFD_D_VIN
-!           TOTCAPI = TOTCAPI + (ECSCAP(IDSP,IVIN,4)/1000)
-!565      CONTINUE
-!555   CONTINUE
-
-135   CONTINUE
 
       LOCRIC = LOCRIC + ((EWGAVP + RPSPRCI) * TOTGENI)
 
@@ -1459,79 +1365,6 @@
 !     ETIMPD = (EWGAVP2 * ETIMPE)
 !     ETEXPD = (EWGAVP2 * ETEXPE)
       ULEIXR(IRG) = ULEIXE(IRG) * EWGAVP
-
-      RETURN
-      END
-
-
-      SUBROUTINE RDCOGEN
-      IMPLICIT NONE
-
-!     THIS SUBROUTINE IS NONUTILITY (END USE) GENERATION FOR CANADA ONLY
-
-      include 'parametr'
-      include 'ncntrl'
-      include 'emmparm'
-      include 'control'
-      include 'dispin'
-      include 'cogen'
-      include 'postpr'
-      include 'wrenew'
-      include 'dispinyr'
-!
-!
-      LOGICAL NEW
-      INTEGER I,J,K,CRG
-      CHARACTER*18 FILENM
-      INTEGER FILE_MGR
-      EXTERNAL FILE_MGR
-!
-!     RDCOGEN.CMN READ COMMERCIAL AND INDUSTRIAL FOR PC AND CANADA ONLY RUNS
-!
-!     OPEN THE COGEN FILE
-!
-
-      FILENM = 'COGENMF'
-      NEW = .FALSE.
-      UF_TMP=FILE_MGR('O',FILENM,NEW)
-      WRITE(6,'("  Reading ",A," file")') TRIM(FILENM)
-
-!     READ IN COGEN COMMERCIAL & INDUSTRIAL
-
-      DO 9430 J = 1,10
-         DO 9432 I = 1,MNUMYR
-            READ(UF_TMP, * ) (CGCOMMGEN(CRG,I,J,2),CRG = 1,MNUMCR)
-9432     CONTINUE
-9430  CONTINUE
-
-      DO 9434 K = 1,2
-         DO 9436 J = 1,10
-            DO 9438 I = 1,MNUMYR
-               READ(UF_TMP, * ) (CGINDLGEN(CRG,I,J,K),CRG = 1,MNUMCR)
-9438        CONTINUE
-9436     CONTINUE
-9434  CONTINUE
-
-      DO 9334 K = 1,2
-         DO 9336 J = 1,5
-            DO 9338 I = 1,MNUMYR
-               READ(UF_TMP, * ) (CGREFGEN(CRG,I,J,K),CRG = 1,MNUMCR)
-9338        CONTINUE
-9336     CONTINUE
-9334  CONTINUE
-
-      DO 9234 K = 1,2
-         DO 9236 J = 1,4
-            DO 9238 I = 1,MNUMYR
-               READ(UF_TMP, * ) (CGOGSGEN(CRG,I,J,K),CRG = 1,MNUMCR)
-9238        CONTINUE
-9236     CONTINUE
-9234  CONTINUE
-
-!      DO 9230 I = 1,MNUMYR
-!         READ(UF_TMP, * ) (GRIDSHR(CRG,I),CRG = 1,MNUMCR)
-!9230  CONTINUE
-
 
       RETURN
       END

@@ -523,617 +523,6 @@ module scedes_keys
 end module
 !******************************************************************
 
-module CALLING_AIMMS
-! declares data shared among AIMMS invocation routines:  AIMMS_Coal, AIMMS_NG, Read_AIMMS_Link, write_to_AIMMS_txt_cmd, read_from_AIMMS_txt, and End_AIMMS_cmd
-      include 'parametr'
-      include 'ncntrl'
-      include 'fdict'
-      include 'cdsparms'
-      include 'coalout'
-      include 'ngrpt'
-      include 'continew'
-
-!  Need to retrieve run-time options to see if we want to keep AIMMS open for the duration
-      external rtovalue
-      integer rtovalue
-
-
-! AIMMS-related variables
-     integer Num_AIMMS_modules,Num_AIMMS_modules_d,coalmod,ngasmod,restore
-     parameter(Num_AIMMS_modules=3)
-     parameter(coalmod=1)   ! coalmod, ngasmod, restore numbered as in aimms_module
-     parameter(ngasmod=2)
-     parameter(restore=3)
-     parameter(Num_AIMMS_modules_d=Num_AIMMS_modules+1)
-     integer keepopen(Num_AIMMS_modules)                              ! keep AIMMS open for each module
-     integer(KIND=4) projectHandle(0:Num_AIMMS_modules)
-     integer aimms_module ! 1 for coal, 2 for natural gas, 3 for ReStore used as index of projectHandle
-
-     character*5 modfolder(Num_AIMMS_modules)/'coal','ngas','rest'/
-
-     logical aimms_opened(0:Num_AIMMS_modules)                        ! Status of aimms for a given module. coal remains open. others may close between invocations.
-     integer monitordbg(Num_AIMMS_modules)                            ! unit number for monitor.debug.txt
-     logical opened_yet(Num_AIMMS_modules)/.false.,.false.,.false./   ! has monitordbg been opened for each module
-     logical closed(0:Num_AIMMS_modules)                              ! Status of aimms for a a given module. if closed, it stays closed due to error.
-
-
-     integer(KIND=4) ret
-     character*80 aimmsFolder(Num_AIMMS_modules)
-     logical lexist, l_a_result, no_aimms/.false./
-     real*4 timer,timer2,mtimer
-
-    integer file_mgr
-    external file_mgr
-    logical new,old
-
-    integer iret                                                       ! integer return code
-
- ! declaration for subroutine filer arguments
-    integer funiti,funito,fretcd,funfmt,frtype,fsourc
-    character*100 fnamei,fnameo
-    character*100 filen,filen2
-
-    logical lopened
-
-  integer O/6/     ! unit number for status/error messages
-
-  Character*80 restarto,restarti
-  character*18 varlistfile  ! such as coalputvars.txt or coalgetvars.txt
-  integer fmt/6/
-
-end module CALLING_AIMMS
-!******************************************************************
-! end of module CALLING_AIMMS
-!******************************************************************
-Subroutine AIMMS_ReStore(ireturn)
-   use ifport,only:timef
-   use globmain
-   use CALLING_AIMMS
-   implicit none
-   integer ireturn ! return code
-   logical done_yet/.false./
-   character*20 restore_issue(10)  ! assigns issues to return codes 1 - 10 from aimms
-   integer i
-
-! No data exchanges.  These are done in EMM (uecp.f)
-! Moving the call here from uecp.f so that it retries AIMMS connection when appropriate
-
-!  Each time through:
-!  1) Open AIMMS project via the command line
-!  2) invoke its MainExecution procedure and wait for it to finish.
-  ireturn=0
-  aimms_module=restore  ! index to projectHandle to keep ReStore separate from coal and natural gas
-
-  restarto='.\\rest\\restore.aimms'
-  restore_issue(1) ='Rest: Infeasible    '
-  restore_issue(2) ='Rest: Unbounded     '
-  restore_issue(3) ='Rest: Internal Solve'
-  restore_issue(4) ='Rest: Solve UnCalled'
-  restore_issue(5) ='Rest: Solver Failure'
-  restore_issue(6) ='Rest: Setup Failure '
-  restore_issue(7) ='Rest: Preprocessor  '
-  restore_issue(8) ='Rest: Post Processor'
-  restore_issue(9) ='Rest: No Solution   '
-  restore_issue(10)='Rest: Other         '
-
-! first time through (keepopen does not apply to restore):
- if (.not. done_yet) then
-     call Read_AIMMS_Link           !  get AIMMS Link foldername
-     done_yet=.true.
-     if (no_AIMMS) then
-       write(6,'(a)') 'AIMMS Software not found in expected location so exiting AIMMS_ReStore'
-       ireturn=221
-       return
-     endif
- endif
-
-! send input/output global data to AIMMS project and invoke its MainExecution procedure
-  if (.not. closed(aimms_module)) then   ! once closed, don't reopen
-     restarto='.\\rest\\restore.aimms'
-     varlistfile=''
-     call write_to_AIMMS_txt_cmd
-     ireturn=iret
-     if (iret .ne. 0) then          ! if fails, call termination procedure and close AIMMS project
-         Call End_AIMMS_cmd
-         closed(aimms_module)=.true.
-         return
-     endif
-  endif
-
-  if (.not. closed(aimms_module)) then  ! once closed, don't reopen
-!    restarti='.\\rest\\restore.aimms'
-!    varlistfile=''     ! no longer used with text data transfer.  also, not used with restore.
-!    call read_from_AIMMS_txt
-!    if (iret .ne. 0) then
-!      if(iret .le. 10) then
-!        write(6,'(a,i4,a,I2,a,i2,2a)') 'AIMMS ',curcalyr,'  Iteration',CURITR,'    ReStore problem, return code=',iret,' '//restore_issue(iret)
-!      else
-!        write(6,'(a,i4,a,I2,a,i2)') 'AIMMS ',curcalyr,'  Iteration',CURITR,'   ReStore problem, code=',iret
-!      endif
-!      CONTINE=0
-!      write(REASONE,'(A10,2x,I4)') 'ReStore   ',CURCALYR
-!    endif
-
-     ireturn=iret
-     if (iret .ne. 0) then
-! call termination procedure and close AIMMS project. don't reopen after error.
-       Call End_AIMMS_cmd
-       closed(aimms_module)=.true.
-       aimms_opened(aimms_module)=.false.
-     else
-! call termination procedure and close AIMMS project
-          Call End_AIMMS_cmd
-          aimms_opened(aimms_module)=.false.
-     endif
-  endif
-
-  if (curiyr .eq. lastyr .and. fcrl .eq. 1 .and. aimms_opened(aimms_module)) then
-    ! call termination procedure and close AIMMS project
-    Call End_AIMMS_cmd
-    closed(aimms_module)=.true.
-    aimms_opened(aimms_module)=.false.
-  endif
-
-  return
-
-  end subroutine AIMMS_ReStore
- 
- !===================================================================================================================
-
-Subroutine Read_AIMMS_Link
-  use globmain
-  use CALLING_AIMMS
-  implicit none
-
-character(80) aimms32,aimms64,AIMMSLOC*66
-
- no_aimms=.false.
-
- call RTOSTRING('AIMMSLOC',AIMMSLOC) !  e.g., 'C:\AIMMS_Installation_Free_Releases\4.8.1.299-x64'
- aimmsFolder(aimms_module) = trim(AIMMSLOC)//char(0)
- aimms32 = trim(AIMMSLOC)//'\bin\aimms.exe'
- aimms64 = trim(AIMMSLOC)//'\bin\aimms.exe'
-
-
- inquire(file=aimms64,exist=lexist)
- if(lexist) then
-    write(O,'(A)') 'AIMMS executable found:   '//trim(aimms64)
- else
-    inquire(file=aimms32,exist=lexist)
-    if(lexist) then
-       write(O,'(A)') 'AIMMS executable found:   '//trim(aimms32)
-    else
-      no_AIMMS=.true.
-    endif
- endif
-
- return
-
-End Subroutine Read_AIMMS_Link
-
-!===================================================================================================================
-
-Subroutine Write_to_AIMMS_txt_cmd
-! invokes aimms through command line. assumed curcalyr and curitr send via text file (monitor.in.txt)
-  use ifcore,only:commitqq
-  use ifport,only:timef,sleepqq
-  use CALLING_AIMMS
-  implicit none
-
-
-      character*60 putFileName ! name of text file output by this routine
-      INTEGER*4 IR,ICL,folder_start,folder_end
-      integer*4 numerr,L,iwait,eunit,counter,ntries,ntriesmax/10/
-      character*180 line,cmd*200,args*200
-      logical license_issue
-      character curdate*8,curtime*10
-      integer iPID, iPIDlist, iPID2 ! process ID from oscall_pid or tasklist command
-      integer nmessage,nchar ! counts of lines and characters in message.log
-      integer ikill  ! set to 1 if aimms.exe has to be killed
-
-! time limit to wait for AIMMS to return:
-      integer aimms_time_limit /1200/         ! in half seconds, 1200 is 10 minutes (600 seconds)
-
-     ! doing this to pass curcalyr to filer so it can incorporate it in a file name
-      INTEGER   PASSCALYR
-      COMMON /PassToFiler/ PASSCALYR
-      PASSCALYR=CURCALYR
-
-
-      ntries=1
-100   continue ! return to here from below if license error occurs to retry up to "ntriesmax-ntries" more times.
-
-
-if (aimms_module .eq. restore) goto 26       ! skip passing data for restore as this is done in uecp.f
-      folder_start=index(restarto,'\\')+2         ! character after the first "\\"
-      folder_end  =index(restarto,'\\',.true.)-1  ! character before the last "\\"
-      write(putFileName,'(a,i4,a,i2.2,a)') '.\'//restarto(folder_start:folder_end)//'\toAIMMS\GlobalDataToAIMMS_',curcalyr,'_',curitr,'.txt'
-      call unitunopened(100,999,FUNITO)
-      open(funito,file=putFileName,status='unknown',buffered='YES')
-      rewind funito
-
-      write(O,'(a,i4,2a)') 'AIMMS ',curcalyr,'    List of variables to be sent: ',trim(varlistfile)
-      write(O,'(a,i4,2a)') 'AIMMS ',curcalyr,'    Text file with sent data: ',trim(putFileName)
-      write(O,'(a,i4,2a)') 'AIMMS ',curcalyr,'    Name of AIMMS project:     ',trim(restarto)
-
-! write out variables listed in output request file
-      FRTYPE=1
-
-! get unit number and open varlist file using filemgr
-      NEW=.false.
-      FUNITI = FILE_MGR('O',varlistfile,NEW)
-      rewind funiti    ! in case it is already open, position at beginning
-      FNAMEI=' '       ! blank when the file is opened outside of filer
-      FSOURC=1         ! obtain list of variables from file
-      FNAMEO=' '  ! blank when the file is open outside of filer
-      FUNFMT=7    ! text data transfer via AIMMS composite tables
-26 continue
-
-      ! inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file=trim(modfolder(aimms_module))//'\monitor.in.txt',status='unknown')
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Wait";'
-if (aimms_module .ne. restore) then
-      write(eunit,'(a,i4,a)') "ncntrl_curcalyr('1'):=",curcalyr,';'
-      write(eunit,'(a,i2,a)') "ncntrl_curitr('1')  :=",curitr,  ';'
-else
-      write(eunit,'(a,i4,a)') "Year:=data {",curcalyr," };"
-endif
-      l_a_result=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-      close(eunit)
-      call date_and_time(curdate,curtime)
-      write(monitordbg(aimms_module),'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-      if(.not. aimms_opened(aimms_module) ) then
-
-        timer=timef()
-        l=len_trim(aimmsFolder(aimms_module))-1
-        cmd=aimmsFolder(aimms_module)(:l)//'\bin\aimms.exe '
-
-        args='--hidden --license-wait-seconds 120 -RNEMS_monitor '//trim(restarto)
-        write(6,'(2a)') 'AIMMS Command line is ',trim(cmd)//' '//trim(args)
-        write(O,'(a,i4,a)') 'AIMMS ',curcalyr,'    Opening AIMMS project, procedure NEMS_monitor'
-        call date_and_time(curdate,curtime)
-        write(monitordbg(aimms_module),'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-        iwait=0
-        call oscall_pid(iwait,cmd,args,iret,iPID)
-
-        if(iret.eq.0) then
-          aimms_opened(aimms_module)=.true.
-        else
-          write(O,'(a,i4,a,i4)') 'AIMMS error running '//trim(restarto)//', return code=',iret,'  in ',curcalyr
-          aimms_opened(aimms_module)=.true.
-          closed(aimms_module)=.true.
-        endif
-
-        write(O,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to open project:',timef()-timer
-
-      endif
-
-if (aimms_module .eq. restore) goto 27       ! skip passing data for restore as this is done in uecp.f
-! send variables to AIMMS project
-      timer=timef()
-
-      CALL FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-      close(funito)
-      write(6,'(a,i4,a,i4)') 'AIMMS ',curcalyr,'    filer put return code=',fretcd
-      write(6,'(a,i4,a,i5)') 'AIMMS ',curcalyr,'    filer FYearSubset=',FYearSubset
-
-
-      write(O,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to output transfer data to text file=',timef()-timer
-27 continue
-
-! Initialize AIMMS output message file so this routine won't see old one and think AIMMS is finished
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file=trim(modfolder(aimms_module))//'\monitor.out.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-      l_a_result=commitqq(eunit)
-      close(eunit)
-
-! Tell AIMMS to invoke MainExecution via its input message file
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file=trim(modfolder(aimms_module))//'\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-
-!  writing instructions to AIMMS module
-!  moving sAction to last so the other variables will be in the file before it is told to run
-if (aimms_module .ne. restore) then
-      write(eunit,'(a,i4,a)') "ncntrl_curcalyr('1'):=",curcalyr,';'
-      write(eunit,'(a,i2,a)') "ncntrl_curitr('1')  :=",curitr,  ';'
-      write(eunit,'(a,i2,a)') "ncntrl_ncrl('1')  :=",ncrl,  ';'
-else
-      write(eunit,'(a,i4,a)') "Year:=data {",curcalyr," };"
-endif
-      write(eunit,'(a)')      'sAction             := "MainExecution";'
-
-      l_a_result=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-      close(eunit)
-      call date_and_time(curdate,curtime)
-      write(monitordbg(aimms_module),'(a,t45,3a)') 'monitor.in.txt  : MainExecution', curtime(1:2),':',curtime(3:10)
-      write(monitordbg(aimms_module),'(t20,a)') 'Here is the monitor.in.txt file:'
-if (aimms_module .ne. restore) then
-      write(monitordbg(aimms_module),'(t25,a,i4,a)') "ncntrl_curcalyr('1'):=",curcalyr,';'
-      write(monitordbg(aimms_module),'(t25,a,i2,a)') "ncntrl_curitr('1')  :=",curitr,  ';'
-      write(monitordbg(aimms_module),'(t25,a,i2,a)') "ncntrl_ncrl('1')  :=",ncrl,  ';'
-else
-      write(monitordbg(aimms_module),'(t25,a,i4,a)') "Year:=data {",curcalyr,"};"
-endif
-
-      counter=0
-      line=' '
-! when AIMMS is done, the monitor procedure writes out a keyword "Completed" to monitor.out.txt. Wait for
-      do while (counter.lt.aimms_time_limit .and. (index(line,'Completed')+index(line,'Quit')+index(line,'Exited')).eq.0)
-     !  setting back to original sleep 500 and increment 1 as sleeping 1000 increment 2 did not help
-        call sleepqq(500)
-        counter=counter+1
-        iret=1
-        open(eunit,file=trim(modfolder(aimms_module))//'\monitor.out.txt',status='old',SHARED,action='READ',err=99)
-        line=' '
-        read(eunit,'(a)',err=99,end=99) line
-!        write(6,'(a)') 'line='//trim(line)
-        iret=0
-        close(eunit)
-99      continue
-
-      enddo
-      call date_and_time(curdate,curtime)
-
-      write(O,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to run AIMMS MainExecution:',timef()-timer
-
-      if(counter.ge.aimms_time_limit) then ! Aimms may have stopped running a procedure or in start up.
-        write(monitordbg(aimms_module),'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : wait time exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-        write(6,'(a)') 'AIMMS wait time exceeded. Showing AIMMS messages.log and checking for license issue.'
-        license_issue=.false.
-        inquire(file=trim(modfolder(aimms_module))//'\log\messages.log',exist=lexist)
-        nmessage=0
-        nchar=0
-        if(lexist) then
-          open(eunit,file=trim(modfolder(aimms_module))//'\log\messages.log',status='old',SHARED,READONLY,err=1999)
-1000      continue
-            read(eunit,'(a)',end=1998,err=1999) line
-            write(6,'(a,I4,2a)') 'AIMMS  ',curcalyr,'  AIMMS messages.log:  ',trim(line)
-            nmessage=nmessage+1
-            nchar=nchar+len_trim(line)  ! count characters. if only 3 in file, aimms didn't start gracefully. sign of intermittant error.
-            if(index(line,'license') .gt. 0 .or. index(line,'SaveAll') .gt. 0 .or. &
-               index(line,'invalid window handle') .gt. 0 .or. &
-               index(line,'RHS of DemandMassBalance constraint is negative') .gt. 0) then
-              license_issue=.true.
-            endif
-            goto 1000  ! above
-1998      continue
-          close(eunit)
-1999      continue
-          write(6,'(a,I4,a,i5)') 'AIMMS  ',curcalyr,'  AIMMS messages.log, number of lines read:',nmessage
-        endif
-! if an aimms.exe is still executing with the same ProcessID (iPID), kill it.
-        args=' '
-        iWait=-1
-        ikill=0
-        cmd='cmd /c tasklist -v -FI "IMAGENAME eq aimms.exe" > tasklist.txt'
-        call oscall_PID(iWait,cmd,Args,iRet,iPID2)
-        inquire(exist=lexist,file='tasklist.txt')
-        if(lexist) then
-          open(eunit, file='tasklist.txt',status='old',READONLY)
-        19 continue
-           read(eunit,'(a)',end=21) line
-           if (index(line,'aimms.exe') .gt. 0) then
-             line(:20)=''
-             read(line,*,end=21,err=21) iPIDlist
-             if (iPIDlist .eq. iPID) then
-                ikill=1
-                write(6,'(a,i6,a)') 'The aimms.exe is still executing.  Will kill the process ID ',iPID
-                write(cmd,'(a,i6)')  'taskkill /F /PID ',iPID
-                iWait=-1
-                call oscall_PID(iWait,cmd,Args,iRet,iPID2)
-                goto 21
-             else
-               goto 19
-             endif
-           else
-             goto 19
-           endif
-        21 continue
-           close(eunit)
-        endif
-        if (ikill .eq. 0) then
-          write(6,'(a)') 'AIMMS seems to have closed early. No aimms.exe process found with matching process ID.'
-        endif
-        if (license_issue .and. ntries .lt. 3) then  ! for time out errors, only repeat twice more, or 3 total
-          write(6,'(a,i2)') 'AIMMS license issue.  Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened(aimms_module)=.false.
-          go to 100  ! above at subroutine start
-        elseif (ntries .lt. 3 .and. ikill .eq. 1 .and. nchar .eq. 3) then  ! when AIMMS stays open and writes only 3 non-printable characters in message.log.
-          write(6,'(a,i2)') 'AIMMS start up failed, funny message.log.  Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened(aimms_module)=.false.
-          go to 100  ! above at subroutine start
-        elseif(ntries.lt.3 .and. ikill.eq.0) then
-          write(6,'(a,i2)') 'AIMMS process not found. Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100  ! above at subroutine start
-        else
-          iret=900
-          aimms_opened(aimms_module)=.false.
-          closed(aimms_module)=.true.
-          write(6,'(a)') 'AIMMS wait time exceeded. Stopping now to avoid confusion.'
-          stop
-        endif
-      else
-        if(index(line,'Exited').gt.0) then  ! error or licensing issue
-          write(6,'(a)') 'AIMMS Exited early. Likely a licensing issue or error in the AIMMS code or transfer data. Displaying log/messages.log:'
-          license_issue=.false.
-          inquire(file=trim(modfolder(aimms_module))//'\log\messages.log',exist=lexist)
-          if(lexist) then
-            open(eunit,file=trim(modfolder(aimms_module))//'\log\messages.log',status='old',SHARED,READONLY,err=2999)
-2000        continue
-              read(eunit,'(a)',end=2998,err=2999) line
-              write(6,'(2a)')'AIMMS messages.log:  ',trim(line)
-              if(index(line,'license').gt.0) then
-                license_issue=.true.
-              endif
-              goto 2000  ! above
-2998        continue
-            close(eunit)
-2999        continue
-            if (aimms_module .eq. 2) then       ! flag for notification via intercv
-               CONTING=0
-               REASONG='AIMMS early exit'
-            endif
-          else
-            write(6,'(a)') 'AIMMS message log, log/messages.log, does not exist.'
-          endif
-          if (license_issue .and. ntries .lt. ntriesmax) then
-            if (aimms_module .eq. 2) then       ! reset flag for notification via intercv for next try
-               CONTING=1
-               REASONG=''
-            endif
-            write(6,'(a,i2)') 'AIMMS license issue.  Will retry. Number of tries so far: ',ntries
-            ntries=ntries+1
-            aimms_opened(aimms_module)=.false.
-            go to 100   ! above at subroutine start
-            iret=900
-            aimms_opened(aimms_module)=.false.
-            closed(aimms_module)=.true.
-          endif
-          
-          write(6,'(a)') 'AIMMS Licensing issue. Stopping now'
-          stop
-          
-        elseif (index(line,'Completed') .gt. 0) then
-          write(monitordbg(aimms_module),'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          ! inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file=trim(modfolder(aimms_module))//'\monitor.in.txt',status='unknown')
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "Wait";'
-          write(eunit,'(a,i4,a)') "ncntrl_curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "ncntrl_curitr('1')  :=",curitr,  ';'
-          l_a_result=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg(aimms_module),'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-        elseif(index(line,'Quit').gt.0) then
-          call date_and_time(curdate,curtime)
-          write(monitordbg(aimms_module),'(a,t45,3a,i5,i3)') 'monitor.out.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-        else
-        endif
-
-
-     endif
-   return
-
-End Subroutine Write_to_AIMMS_txt_cmd
-
-
-!===================================================================================================================
-
-
-
-!===================================================================================================================
-
-Subroutine Read_from_AIMMS_txt
-  use ifport,only:timef
-  use CALLING_AIMMS
-  implicit none
-  integer folder_start,folder_end
-  character*60 putFileName ! name of text file output by this routine
-
-      folder_start=index(restarto,'\\')+2         ! character after the first "\\"
-      folder_end  =index(restarto,'\\',.true.)-1  ! character before the last "\\"
-      write(putFileName,'(a,i4,a,i2.2,a)') '.\'//restarto(folder_start:folder_end)//'\fromAIMMS\GlobalDataToNEMS_',curcalyr,'_',curitr,'.txt'
-      write(6,'(a,i4,2a)') 'AIMMS ',curcalyr,'    Reading text file with data from AIMMS: ',trim(putFileName)
-      inquire(file=putFileName,exist=lexist)
-      if(.not. lexist) then
-         write(6,'(3a)')  'AIMMS ERROR: text data from AIMMS not found: '//trim(putFileName)
-         Call End_AIMMS_cmd
-         closed(aimms_module)=.true.
-         write(6,'(3a)')  'AIMMS ERROR: stopping now to avoid confusion.'
-         if (aimms_module .eq. 1 .and. CONTINC .eq. 1) then
-            CONTINC=0
-            REASONC='AIMMS error'
-         endif
-         if (aimms_module .eq. 2 .and. CONTING .eq. 1) then
-            CONTING=0
-            REASONG='AIMMS error'
-         endif
-         CALL NDATOT('   ')
-         CALL NDATOT('GDX')
-         stop 192                  !  flag for Returncode
-      endif
-      call unitunopened(100,999,FUNITI)
-      open(FUNITI,file=putFileName,status='old')
-
-      FRTYPE=2           ! read from restart file/aimms project
-      FSOURC=1           ! variables identified in the file
-      FNAMEI=' '         ! blank when opened outside of filer
-      FUNFMT=7           ! format indicator for AIMMS text format, composite tables
-
-! Read global variables from AIMMS
-
-      timer=timef()
-      CALL FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-      close(FUNITI)
-
-      write(6,'(a,i4,a,i4)')   'AIMMS ',curcalyr,'    filer put return code=',fretcd
-      write(6,'(a,i4,a,i5)')   'AIMMS ',curcalyr,'    filer FYearSubset=',FYearSubset
-      write(6,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to retrieve variables=',timef()-timer
-
-
-   return
-
-end subroutine Read_from_AIMMS_txt
-
-!===================================================================================================================
-
-Subroutine End_AIMMS_cmd
-  use ifport,only:sleepqq
-  use CALLING_AIMMS
-  implicit none
-  integer eunit,ntries,nmax/240/
-  character*160 line
-  character curdate*8,curtime*10
-
-! write Quit to message file to tell aimms project monitor to exit
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file=trim(modfolder(aimms_module))//'\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Quit";'
-      close(eunit)
-
-      call date_and_time(curdate,curtime)
-      write(monitordbg(aimms_module),'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-
-!   need to wait until project is closed. May take 30 seconds to close for some reason. error trapping?
-!   Added MainTermination statement to write "Exited" to monitor.out.txt, so use this as signal to stop
-      ntries=1
-      do while (ntries .lt. nmax)
-        open(eunit,file=trim(modfolder(aimms_module))//'\monitor.out.txt',status='old',SHARED,READONLY)
-        flush eunit
-        read(eunit,'(a)',err=99,end=99) line
-        close(eunit)
-        if(index(line,'Exited').gt.0) then
-          exit  ! exit do while
-        endif
-99      ntries=ntries+1
-        call sleepqq(500) ! wait 1/2 second
-      enddo
-      write(6,'(a,i4,a,i4)') 'AIMMS Exiting, number of monitor.out.txt checks ',ntries,', max number set to ',nmax
-      call date_and_time(curdate,curtime)
-      if(ntries.eq.nmax) then
-        write(monitordbg(aimms_module),'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : wait for Exited exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-        write(monitordbg(aimms_module),'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif
-      return
-
-End Subroutine End_AIMMS_cmd
-
 !===================================================================================================================
 !******************************************************************
 !*  Subroutine NXPECT
@@ -2000,3 +1389,190 @@ implicit none
    enddo
    return
 end subroutine coal_expect
+
+
+
+!******************************************************************************
+!*    Function PQMATCH(IPRICE,MNUMQ,MNUMP)
+!*
+!*    Returns the subscript of the corresponding quantity-variable for any
+!*    PRICE subscript.  Checks for changes in price/quantity variable dimen-
+!*    sions using MNUMQ and MNUMP.
+!******************************************************************************
+      FUNCTION PQMATCH(IPRICE,MNUMQ,MNUMP)
+      IMPLICIT NONE
+
+      INTEGER PQMATCH        ! Returns product code subscript for MQTY
+      INTEGER NP             ! Dimension of map -- MUST MATCH MNUMP
+      PARAMETER(NP=84)
+      INTEGER MAP(NP)        ! Mapping of PRICE products to QUANTITY products
+      INTEGER IPRICE         ! Product code subscript for MPRC
+      INTEGER MNUMQ,MNUMP    ! Dimensions of MQTY and MPRC to insure against
+                             ! changes.
+
+      DATA MAP/ &
+         1,  2,  3,  4,  7,          & ! PELRS,PELCM,PELTR,PELIN,PELAS,
+         8,  9, 10, 11, 13, 15,      & ! PGFRS,PGFCM,PGFTR,PGFIN,PGFEL,PGFAS,
+        16, 17, 18, 19, 21, 23,      & ! PGIRS,PGICM,PGITR,PGIIN,PGIEL,PGIAS,
+        24, 25, 26, 27, 29, 31,      & ! PNGRS,PNGCM,PNGTR,PNGIN,PNGEL,PNGAS,
+        32, 33,                      & ! PGPTR,PLPIN,
+        34, 35, 36, 38, 39, 41, 42,  & ! PCLRS,PCLCM,PCLIN,PCLEL,PCLSN,PCLAS,PMCIN,
+        43, 44, 45, 46, 47,          & ! PMGCM,PMGTR,PMGIN,PMGAS,PJFTR,
+        48, 49, 50, 51, 53, 54,      & ! PDSRS,PDSCM,PDSTR,PDSIN,PDSEL,PDSAS,
+        55, 56, 57, 58,              & ! PKSRS,PKSCM,PKSIN,PKSAS,
+        59, 60, 61, 62, 64,          & ! PLGRS,PLGCM,PLGTR,PLGIN,PLGAS,
+        65, 66, 67, 69, 70,          & ! PRLCM,PRLTR,PRLIN,PRLEL,PRLAS,
+        71, 72, 73,                  & ! PRHTR,PRHEL,PRHAS,
+        74, 75, 76, 78, 79,          & ! PRSCM,PRSTR,PRSIN,PRSEL,PRSAS,
+        80, 87,                      & ! PPFIN,PASIN,
+        88, 89, 91,                  & ! POTTR,POTIN,POTAS,
+        92, 93, 94, 95, 96, 97, 98,  & ! PTPRS,PTPCM,PTPTR,PTPIN,PTPRF,PTPEL,PTPAS,
+        99,100,102,103,              & ! PMETR,PETTR,PHYTR,PUREL
+       155,156,157/                    ! PH1TR,PH2TR,PH3TR
+
+      PQMATCH=MAP(IPRICE)
+      IF (NP.NE.MNUMP) THEN
+         WRITE(*,*) ' PARAMETER MNUMP (DIMENSION OF MAIN PRICE ARRAY MPRC) HAS BEEN CHANGED'
+         WRITE(*,*) ' AND IS INCOMPATIBLE WITH FUNCTION PQMATCH IN MAIN.'
+      ENDIF
+
+      IF (PQMATCH.GT.MNUMQ) THEN
+         WRITE(*,*) ' PARAMETER MNUMQ (DIMENSION OF MAIN QTY ARRAY MQTY) HAS BEEN CHANGED'
+         WRITE(*,*) ' AND IS INCOMPATIBLE WITH FUNCTION PQMATCH IN MAIN.'
+      ENDIF
+
+      RETURN
+      END
+      subroutine GETIRUN(run_char)
+      use dfport
+      implicit none
+      character*(*) run_char
+      call getenv("n",run_char)
+      return
+      end
+      subroutine GETMPS(mps)
+      use dfport
+      implicit none
+      character*50 mps
+      call getenv("MPS",mps)
+      return
+      end
+      
+!******************************************************************************
+!*    Function NUMQ_AS(IQUAN,MNUMQ)
+!*
+!*    The function NUMQ_AS(IPRICE) returns the number of component quantities
+!*    for the MNUMQ array.  Quantity arrays with names not ending in "AS"
+!*    (for Across Sector) have 0 as the number of components.  It is currently
+!*    (5/7/92) being used to skip these "AS" series for the convergence test.
+!******************************************************************************
+      FUNCTION NUMQ_AS(IQUAN,MNUMQ)
+      IMPLICIT NONE
+
+      INTEGER NUMQ_AS
+      INTEGER MNUMQ,IQUAN
+      INTEGER NQ
+      PARAMETER (NQ=160)
+      INTEGER NUMQAS(NQ)
+
+      DATA NUMQAS/ &
+            0, 0, 0, 0, 0, 0, 6,        & ! QELRS,QELCM,QELTR,QELIN,QELRF,QELHM,QELAS,
+           -1,-1,-1, 0,-1, 0,-1, 7,     & ! QGFRS,QGFCM,QGFTR,QGFIN,QGFRF,QGFEL,QGFHM,QGFAS,
+           -1,-1,-1, 0,-1, 0,-1, 7,     & ! QGIRS,QGICM,QGITR,QGIIN,QGIRF,QGIEL,QGIHM,QGIAS,
+            0, 0, 0, 0, 0, 0, 0, 7,     & ! QNGRS,QNGCM,QNGTR,QNGIN,QNGRF,QNGEL,QNGHM,QNGAS,
+            0, 0,                       & ! QGPTR,QLPIN,
+            0, 0, 0, 0, 0, 0, 0, 7,     & ! QCLRS,QCLCM,QCLIN,QCLRF,QCLEL,QCLSN,QCLHM,QCLAS,
+            0,                          & ! QMCIN,
+            0, 0, 0, 3,                 & ! QMGCM,QMGTR,QMGIN,QMGAS,
+            0,                          & ! QJFTR,
+            0, 0, 0, 0, 0, 0, 6,        & ! QDSRS,QDSCM,QDSTR,QDSIN,QDSRF,QDSEL,QDSAS,
+            0, 0, 0, 3,                 & ! QKSRS,QKSCM,QKSIN,QKSAS,
+            0, 0, 0, 0, 0, 5,           & ! QLGRS,QLGCM,QLGTR,QLGIN,QLGRF,QLGAS,
+            0, 0, 0, 0, 0, 5,           & ! QRLCM,QRLTR,QRLIN,QRLRF,QRLEL,QRLAS,
+            0, 0, 2,                    & ! QRHTR,QRHEL,QRHAS,
+           -1,-1,-1,-1,-1, 5,           & ! QRSCM,QRSTR,QRSIN,QRSRF,QRSEL,QRSAS,
+            0, 0, 0,                    & ! QPFIN,QSGIN,QSGRF,
+            0, 0, 0, 3,                 & ! QPCIN,QPCRF,QPCEL,QPCAS,
+            0,                          & ! QASIN,
+            0, 0, 0, 3,                 & ! QOTTR,QOTIN,QOTRF,QOTAS,
+           -1,-1,-1,-1,-1,-1, 6,        & ! QTPRS,QTPCM,QTPTR,QTPIN,QTPRF,QTPEL,QTPAS,
+            0, 0, 0, 0, 0, 0,           & ! QMETR,QETTR,QETHM,QHYTR,QUREL,QURHM,
+            0, 0, 2,                    & ! QHOIN,QHOEL,QHOAS,
+            0, 0, 0, 3,                 & ! QGERS,QGEIN,QGEEL,QGEAS,
+            0, 0, 0, 0, 0, 0, 0, 7,     & ! QBMRS,QBMCM,QBMIN,QBMRF,QBMEL,QBMSN,QBMHM,QBMAS,
+            0, 0, 2,                    & ! QMSIN,QMSEL,QMSAS,
+            0, 0, 0, 0, 4,              & ! QSTRS,QSTCM,QSTIN,QSTEL,QSTAS,
+            0, 0, 0, 0, 4,              & ! QPVRS,QPVCM,QPVIN,QPVEL,QPVAS,
+            0, 0, 2,                    & ! QWIIN,QWIEL,QWIAS,
+           -1,-1,-1,-1,-1,-1,-1, 7,     & ! QTRRS,QTRCM,QTRTR,QTRIN,QTREL,QTRSN,QTRHM,QTRAS,
+            0, 0,                       & ! QEIEL,QCIIN,
+           -1,-1,-1,-1,-1,-1,-1,-1, 8,  & ! QTSRS,QTSCM,QTSTR,QTSIN,QTSRF,QTSEL,QTSSN,QTSHM,QTSAS
+            0, 0, 0, 0, 0, 0/             ! QH1TR,QH2TR,QH3TR,QH2IN,QH2INPF,QH2INHP
+
+      IF (NQ.NE.MNUMQ) THEN
+         WRITE(*,*) ' PARAMETER MNUMQ (DIMENSION OF MAIN QUANTITY ARRAY MPRC) HAS BEEN CHANGED'
+         WRITE(*,*) ' AND IS INCOMPATIBLE WITH FUNCTION NUMQ_AS IN MAIN.'
+      ENDIF
+
+      NUMQ_AS=NUMQAS(IQUAN)
+
+      RETURN
+      END
+      
+!******************************************************************************
+!*    Function NUMP_AS(IPRICE,MNUMP)
+!*
+!*    The function NUMP_AS(IPRICE) returns the number of component prices for
+!*    any of the MNUMP price arrays.  Prices arrays with names not ending in
+!*    "AS" (for Across Sector) have 0 as the number of component prices. For
+!*    the "AS" arrays, NUMP_AS(IV,MNUMP) returns NUMPAS, the number of prices
+!*    defined for product IV. These NUMPAS component prices arrays are stored
+!*    as the NUMPAS consecutive arrays before IV, or from (IV-NUMPAS) to (IV-1).
+!******************************************************************************
+      FUNCTION NUMP_AS(IPRICE,MNUMP)
+      IMPLICIT NONE
+
+      INTEGER NUMP_AS
+      INTEGER MNUMP,IPRICE
+      INTEGER NP
+      PARAMETER (NP=84)
+      INTEGER NUMPAS(NP)
+
+!  THE NUMPAS VARIABLE IS A KEY FOR BOTH CONVERGENCE TESTING AND
+!     SUMMING OVER THE SECTORS INTO THE 'AS' VARIABLES AS FOLLOWS:
+
+!           VALUE   EFFECT
+!            -1     NO CONVERGENCE TESTING OR SUMMING
+!             0     NO SUMMING
+!             N(>0) SUM PREVIOUS N VARIABLES;  NO CONVERGENCE TESTING
+
+      DATA NUMPAS/ &
+            0, 0, 0, 0, 4,       & ! PELRS,PELCM,PELTR,PELIN,PELAS,
+           -1,-1,-1, 0, 0, 5,    & ! PGFRS,PGFCM,PGFTR,PGFIN,PGFEL,PGFAS,
+           -1,-1,-1, 0, 0, 5,    & ! PGIRS,PGICM,PGITR,PGIIN,PGIEL,PGIAS,
+            0, 0, 0, 0, 0, 5,    & ! PNGRS,PNGCM,PNGTR,PNGIN,PNGEL,PNGAS,
+            0, 0,                & ! PGPTR,PLPIN,
+            0, 0, 0, 0, 0, 5,    & ! PCLRS,PCLCM,PCLIN,PCLEL,PCLSN,PCLAS,
+            0,                   & ! PMCIN,
+            0, 0, 0, 3,          & ! PMGCM,PMGTR,PMGIN,PMGAS,
+            0,                   & ! PJFTR,
+            0, 0, 0, 0, 0, 5,    & ! PDSRS,PDSCM,PDSTR,PDSIN,PDSEL,PDSAS,
+            0, 0, 0, 3,          & ! PKSRS,PKSCM,PKSIN,PKSAS,
+            0, 0, 0, 0, 4,       & ! PLGRS,PLGCM,PLGTR,PLGIN,PLGAS,
+            0, 0, 0, 0, 4,       & ! PRLCM,PRLTR,PRLIN,PRLEL,PRLAS,
+            0, 0, 2,             & ! PRHTR,PRHEL,PRHAS,
+            0, 0, 0, 0, 4,       & ! PRSCM,PRSTR,PRSIN,PRSEL,PRSAS,
+            0, 0,                & ! PPFIN,PASIN,
+            0, 0, 2,             & ! POTTR,POTIN,POTAS,
+           -1,-1,-1,-1,-1,-1, 6, & ! PTPRS,PTPCM,PTPTR,PTPIN,PTPRF,PTPEL,PTPAS
+            0, 0, 0, 0,          & ! PMETR,PETTR,PHYTR,PUREL
+           -1,-1,-1/               ! PH1TR,PH2TR,PH3TR
+
+      IF (NP.NE.MNUMP) THEN
+         WRITE(*,*) ' PARAMETER MNUMP (DIMENSION OF MAIN PRICE ARRAY MPRC) HAS BEEN CHANGED'
+         WRITE(*,*) ' AND IS INCOMPATIBLE WITH FUNCTION NUMP_AS IN MAIN.'
+      ENDIF
+
+      NUMP_AS=NUMPAS(IPRICE)
+      RETURN
+      END

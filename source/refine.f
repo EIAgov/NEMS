@@ -1,10 +1,7 @@
-! $Header: m:/default/source/RCS/refine.f,v 1.853 2020/10/29 19:36:23 ESH Exp $
-!
 ! LIQUID FUELS MARKET MODULE (LFMM)
 !       FOR THE NATIONAL ENERGY MODELING SYSTEM (NEMS)
 
 !     FILE NAME: refine.f
-!     CONTACT:
 
 !     PARAMETERS:
 !     VARIABLES:PMMCOM1,PMMOUT,PMMRPT,MPBLK,QBLK,INTOUT,WRENEW,COGEN,EMISSION,
@@ -147,6 +144,13 @@
 
       REAL WEIGHTEDPRICE(MNCRUD+1)
       
+	  INTEGER LASTYRADJ ! Year after which WTI completely reverts to RFCRUDEWHP(2,1,curiyr)
+	  REAL WTIADJFACT   ! adjustment factor
+	  REAL WTIADJSLOPE
+	  REAL WTIADJINTERCEPT
+	  REAL WTIDECLINE
+
+	  
 !      real resiweights(1:9)/0.172,0.161,-0.102,-0.183,0.111,0.0582,0.0385,-0.0416,0.120/
 !      real commweights(1:9)/0.0188,0.0753,-0.0797,-0.121,0.0369,-0.0164,-0.0210,-0.00942,0.0487/
 !      real tranweights(1:9)/-0.0233,-0.0159,0.00396,-0.0106,0.0254,0.0200,-0.00514,-0.0240,-0.000260/
@@ -286,8 +290,21 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
 
 ! temp set WTI_PRICE = RFCRUDEWHP for RR2 (mnumpr=2), LtSweet(mncrude=1)
 !====== if (curiyr+1989 .gt. 2015)  WTI_PRICE(curiyr) = RFCRUDEWHP(2,1,curiyr)
-        if (curiyr+1989 .gt. HISTLYR)  WTI_PRICE(curiyr) = RFCRUDEWHP(2,1,curiyr)
+! WTI adjust
 
+        LASTYRADJ = 2050
+		WTIDECLINE = 0.98 ! INITIAL ADJUSTMENT WTI IN YEAR HISTLYR+1
+        if (curiyr+1989 .gt. HISTLYR+1989) THEN
+		   continue
+           if (curiyr+1989 .GE. HISTLYR+1989+1 .AND. curiyr+1989 .LE. LASTYRADJ) then 
+              WTIADJSLOPE = (1.0 / ((HISTLYR+1989+1) - LASTYRADJ))
+              WTIADJINTERCEPT = 1.0 - WTIADJSLOPE * (HISTLYR+1989+1)		   
+              WTIADJFACT = (WTIADJSLOPE * (curiyr+1989) + WTIADJINTERCEPT)/10
+           ELSE
+		      WTIADJFACT = 0.0
+		   endif
+		   WTI_PRICE(curiyr) = WTIDECLINE * WTIADJFACT * WTI_PRICE(HISTLYR) + (1.0 - WTIADJFACT) * RFCRUDEWHP(2,1,curiyr)
+        endif
 !-----------------------------------------------------------------------------
 ! Call lfmmsh.bat which appends any GAMS error messages from lfshell.lst into lfdebug.txt
 ! lffindstr.bat:
@@ -3372,7 +3389,8 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
        IF (J+1989.LT.2016) THEN
          PETTR(:,J) = tempPETTR(:,J)
          PMGTR(:,J) = tempPMGTR(:,J)
-       ELSEIF (FCRL .EQ. 1) THEN       ! only overwrite when fcrl=1
+!      Removed PMGTR from above in AEO2026 to allow all cycles to write mogas price ELSEIF (FCRL .EQ. 1) THEN       ! only overwrite when fcrl=1
+       ELSE
          PETTR(:,J) = tempPETTR(:,J)
          PMGTR(:,J) = tempPMGTR(:,J)
        ENDIF
@@ -3695,18 +3713,18 @@ write (6,'(" The return status from LFMM in ",I4," is ",I2)') curcalyr,iret
 ! 3/8/16 em4 read through STEO years for side case overwrites
       DO J =1,STEOLYR
        DO K = 1,2
-        DO L = 1,MNUMCGF
+        DO L = 1,MNUMCGF-1	!BESSmodel - accommodate RDM changes for battery energy storage systems
           IF (L .EQ.  1 .OR. L .EQ.  4 .OR. L .EQ.  5 .OR. L .EQ.  7 .OR. &
               L .EQ.  8 .OR. L .EQ. 10 .OR. L .EQ. 11 .OR. L .EQ. 12) CYCLE
           READ(IUNIT1,128) (CGREFGEN(I,J,L,K),I=1,DMDRGNS)
         ENDDO
        ENDDO
-       DO L = 1,MNUMCGF
+       DO L = 1,MNUMCGF-1	!BESSmodel - accommodate RDM changes for battery energy storage systems
           IF (L .EQ.  1 .OR. L .EQ.  4 .OR. L .EQ.  5 .OR. L .EQ.  7 .OR. &
               L .EQ.  8 .OR. L .EQ. 10 .OR. L .EQ. 11 .OR. L .EQ. 12) CYCLE
           READ(IUNIT1,128) (CGREFCAP(I,J,L),I=1,DMDRGNS)
        ENDDO
-       DO L = 1,MNUMCGF                         ! OG,PT,NG,OT, tril BTU/yr
+       DO L = 1,MNUMCGF-1                         ! OG,PT,NG,OT, tril BTU/yr	!BESSmodel - accommodate RDM changes for battery energy storage systems
           IF (L .EQ.  1 .OR. L .EQ.  4 .OR. L .EQ.  5 .OR. L .EQ.  7 .OR. &
               L .EQ.  8 .OR. L .EQ. 10 .OR. L .EQ. 11 .OR. L .EQ. 12) CYCLE
           READ(IUNIT1,128) (CGREFQ(I,J,L),I=1,DMDRGNS)

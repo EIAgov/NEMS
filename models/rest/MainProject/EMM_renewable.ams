@@ -1,6 +1,159 @@
 ## ams_version=1.0
 
-Model Main_EMM_renewable {
+LibraryModule nems_rest {
+	Prefix: re;
+	Interface: {
+		data {api_curitr, api_curcalyr, REST_API_Call} + Data_to_NEMS + EMMRenewable_Structure
+		!NEMS_REST   !use this to convert calls of CSVExport in ReportData into dex::writetofile calls  until NEMS_rest gets broken up into "Public_section" and "Private_section"
+		!            !then switch interface to 
+		!data {api_curitr, api_curcalyr, REST_API_Call} + 're::Public_Section';
+	}
+	Procedure REST_API_Call {
+		Body: {
+				! Establishing API data location
+				_sp_input := dex::api::RequestAttribute('request-data-path') ; ! API path from NEMS
+			
+				! Sometimes AIMMS tells me it can't find the mapping.
+				! For whatever reason, explicitly adding the mapping seems to help.
+				dex::AddMapping(mappingName : "json-request-mapping_rest",
+				    mappingFile : "Mappings/Generated/restinput-request-JSON-Sparse_rest.xml");	
+			
+				! Read Year/Iteration info from NEMS		
+				dex::ReadFromFile(_sp_input,"json-request-mapping_rest");
+			
+			!	year := api_curcalyr; currently read from file ECPYEAR.txt but could come from here
+			
+			
+				ErrorOut_file_name := "../../rest/log/aimmsRunOnly.err";
+				if fileexists(ErrorOut_file_name) then
+				    FileDelete(ErrorOut_file_name, 0);
+				endif;
+			
+				block
+			
+				MainExecution;
+				 Onerror err do
+				   ErrorHandler(err);
+			
+				endblock;
+				! Write done.txt when finished
+				write done to file "../../rest/done.txt";
+		}
+		StringParameter _sp_input {
+			Property: Input;
+		}
+	}
+	DeclarationSection ErrorHandling {
+		File ErrorOut_file {
+			Name: ErrorOut_file_name;
+			Device: Disk;
+			Mode: replace;
+		}
+		ElementParameter err {
+			Range: errh::PendingErrors;
+		}
+		StringParameter ErrorOut_file_name;
+	}
+	Section API_Call {
+		Parameter my_port;
+		Parameter done {
+			Definition: 1;
+		}
+		Parameter api_curitr {
+			dex::ColumnName: re::iteration;
+			dex::Dataset: request;
+			dex::TableName: restinput;
+		}
+		Parameter api_curcalyr {
+			dex::ColumnName: re::year;
+			dex::Dataset: request;
+			dex::TableName: restinput;
+		}
+	}
+	Procedure ErrorHandler {
+		Arguments: (err);
+		Body: {
+			err_code := errh::Message(err);
+			re::ErrorOut_file_name := "../../rest/log/aimmsRunOnly.err";
+			put re::ErrorOut_file;
+			if FindString(err_code, "Division by zero error",1,,)> 0  then
+			  put "Error : Division by zero error with 0 ";
+			elseif FindString(err_code,"CPLEX",1,,)> 0 then
+			  put "Error : The CPLEX ";
+			elseif FindString(err_code,"icense",1,,)> 0 then
+			  put "Error : solver license related issue ";
+			else
+			  put err_code;
+			endif;
+			putclose re::ErrorOut_file;
+		}
+		StringParameter err_code;
+		ElementParameter err {
+			Range: errh::PendingErrors;
+			Property: Input;
+		}
+	}
+	Section time_logging {
+		DeclarationSection time_logger_only_parameters {
+			Parameter line_counter {
+				InitialData: 0;
+			}
+			StringParameter LogFile_name;
+			File LogFile {
+				Name: LogFile_name;
+				Device: Disk;
+				Mode: merge;
+			}
+			StringParameter timestamp;
+			StringParameter currentTime;
+		}
+		Procedure time_logger {
+			Arguments: (restore_code_location,before_or_after);
+			Body: {
+				read year from file "ECPYEAR.txt";
+				LogFile_name := "timestamps_" + first(year) + ".log";
+				put LogFile;
+				currentTime := CurrentToString("%H:%M:%S");
+				if (FindString(restore_code_location, "Model_Prepare")> 0 and before_or_after = "before" ) then
+				    line_counter:= 2;
+				endif;
+				if (line_counter = 0) then
+				   put "",/;
+				   put "**************************** Year:", +first(year) + " ***********************************",/;
+				endif;
+				
+				line_counter := line_counter + 1;
+				if (before_or_after = "before") then 
+				   put formatstring("%i",line_counter) + ". start time of " + restore_code_location + " : " + currentTime,/;
+				else
+				   put formatstring("%i",line_counter) + ".   End time of " + restore_code_location + " : " + currentTime,/ ;
+				endif;
+				putclose LogFile;
+			}
+			Comment: "procedure to print timesamps to a log file - turn on for debugging, not as default";
+			StringParameter restore_code_location {
+				Property: Input;
+			}
+			StringParameter before_or_after {
+				Property: Input;
+			}
+		}
+	}
+	Procedure RESTSetOptions {
+		Body: {
+			option
+			    listing_and_temporary_files := "../../rest/log",
+			    disable_new_mathprog_generator := "off";
+		}
+	}
+	Procedure RESTResetOptions {
+		Body: {
+			option
+			    listing_and_temporary_files := "log",
+			    Bound_Tolerance := 1.0e-8,
+			    postsolve_continuous_variables := 'no_rounding';
+		}
+	}
 	Section EMMRenewable_Structure {
 		DeclarationSection ER_sets {
 			Set CanSteps {
@@ -25,19 +178,31 @@ Model Main_EMM_renewable {
 				Comment: "Last hour of the day";
 			}
 			Set Year {
-				Index: y;
 				OrderBy: val(y);
+				dex::FieldName: Year;
+			}
+			Index y {
+				Range: Year;
+				dex::ColumnName: Year;
 			}
 			Set Month {
-				Index: m;
 				OrderBy: val(m);
 				Definition: {
 					{1..12};
 				}
+				dex::FieldName: Month;
+			}
+			Index m {
+				Range: Month;
+				dex::ColumnName: Month;
 			}
 			Set ECP_Hour {
-				Index: h;
 				OrderBy: val(h);
+				dex::FieldName: ECP_Hour;
+			}
+			Index h {
+				Range: ECP_Hour;
+				dex::ColumnName: ECP_Hour;
 			}
 			Set Hour {
 				Index: hh;
@@ -46,44 +211,67 @@ Model Main_EMM_renewable {
 				}
 			}
 			Set DayType {
-				Index: d;
+				dex::FieldName: DayType;
+			}
+			Index d {
+				Range: DayType;
+				dex::ColumnName: DayType;
 			}
 			Set LoadGroup {
-				Index: loadgp;
 				Definition: {
 					{1,2,3,4,5,6}
 				}
 				Comment: "EMM Load Group - used for EFD Storage SR output";
 			}
+			Index loadgp {
+				Range: LoadGroup;
+				dex::ColumnName: LoadGroup;
+			}
 			Set LoadSegment {
-				Index: loadseg;
 				Definition: {
 					{1,2,3,4,5,6}
 				}
 				Comment: "EMM Load Segment - used for EFD Storage SR output";
 			}
+			Index loadseg {
+				Range: LoadSegment;
+				dex::ColumnName: LoadSegment;
+			}
 			Set CPGroup {
-				Index: cpgp;
 				Definition: {
 					{1,2,3,4,5,6}
 				}
 				Comment: "ECP Load Group - used for ECP Storage SR output";
 			}
+			Index cpgp {
+				Range: CPGroup;
+				dex::ColumnName: CPGroup;
+			}
 			Set CPSegment {
-				Index: cpseg;
 				Definition: {
 					{1,2,3,4,5,6}
 				}
 				Comment: "ECP Load Segment - used for ECP Storage SR output";
 			}
+			Index cpseg {
+				Range: CPSegment;
+				dex::ColumnName: CPSegment;
+			}
 			Set EMMReg1 {
 				SubsetOf: EMMReg;
-				Index: r;
 				Definition: data { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,23,24,25 };
+				dex::FieldName: EMMReg;
+			}
+			Index r {
+				Range: EMMReg1;
+				dex::ColumnName: EMMReg;
 			}
 			Set EMMReg {
-				Index: r1;
 				Definition: data { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,23,24,25, 26, 27, 28, 29, 30, 31, 32, 33};
+			}
+			Index r1 {
+				Range: EMMReg;
+				dex::ColumnName: EMMReg_from;
 			}
 			Set EMMRegCan {
 				SubsetOf: EMMReg;
@@ -103,10 +291,13 @@ Model Main_EMM_renewable {
 				}
 			}
 			Set Season {
-				Index: s;
 				Definition: {
 					{1,2,3}
 				}
+			}
+			Index s {
+				Range: Season;
+				dex::ColumnName: Season;
 			}
 			Set ephrts_Season {
 				Index: es;
@@ -163,20 +354,31 @@ Model Main_EMM_renewable {
 				Comment: "Number of days per month to solve the problem.";
 			}
 			Set GenSteps {
-				Index: Steps;
 				OrderBy: steps;
+				dex::FieldName: GenSteps;
+			}
+			Index steps {
+				Range: GenSteps;
+				dex::ColumnName: GenSteps;
 			}
 		}
 		DeclarationSection New_Group_Sets {
 			Set Ecptechgroup {
 				SubsetOf: Ecpgroup;
-				Index: pt;
 				Definition: data{1..23};
+				dex::FieldName: Ecpgroup;
+			}
+			Index pt {
+				Range: Ecptechgroup;
+				dex::ColumnName: Ecpgroup;
 			}
 			Set Storage_Group {
 				SubsetOf: Ecptechgroup;
-				Index: pts;
 				Definition: data { 11, 13, 21 };
+			}
+			Index pts {
+				Range: Storage_Group;
+				dex::ColumnName: Ecpgroup;
 			}
 			Set Storage_noPV_Group {
 				SubsetOf: Storage_Group;
@@ -211,12 +413,12 @@ Model Main_EMM_renewable {
 			Set Solar_Group {
 				SubsetOf: Intermittent_PVBatt_Group;
 				Index: ptsol;
-				Definition: data { 17, 18, 19, 20 ,21};
+				Definition: data { 14,16,17, 18, 19, 20 ,21};
 			}
 			Set Solar_Group2 {
 				SubsetOf: Solar_Group;
 				Index: ptsol2;
-				Definition: data { 17, 18, 19, 20 ,21};
+				Definition: data { 14,16,17, 18, 19, 20 ,21};
 			}
 			Set Hydro_Group {
 				SubsetOf: Renewable_Group;
@@ -224,8 +426,11 @@ Model Main_EMM_renewable {
 				Definition: data {10 };
 			}
 			Set Ecpgroup {
-				Index: pt_rep;
 				Definition: data {1..23,Curtailment,Load,Unserved_Load};
+			}
+			Index pt_rep {
+				Range: Ecpgroup;
+				dex::ColumnName: Ecpgroup;
 			}
 		}
 		DeclarationSection ER_Mapping_Parameters {
@@ -523,7 +728,7 @@ Model Main_EMM_renewable {
 					+ sum((y),unmet_Load(reg, y, hr)*UnmetLoad_penalty)
 					+ sum((y,rsub),TradeToFrom(reg,rsub,y,hr)*TranCost(reg,rsub,y,'1')) 
 					+ sum((y,rcan,csteps),TradeToFromCan(reg,rcan,y,hr,CSteps)*TranCost(reg,rcan,y,CSteps)) 
-					)*Dayweights(hr) | SW_RunDm(hr))
+					)*Dayweights(hr) $ SW_RunDm(hr))
 				}
 			}
 			Constraint Can_Trade_Limit {
@@ -645,6 +850,24 @@ Model Main_EMM_renewable {
 			}
 		}
 		DeclarationSection ER_Model_Structure {
+			Set EMM_parameters {
+				SubsetOf: AllParameters;
+				Definition: {
+					data 
+					    { 're::err'                     , 're::ErrorOut_file_name'      , 're::my_port'                 , 're::done'                    , 're::api_curitr'              , 're::api_curcalyr'            , 're::line_counter'            , 're::LogFile_name'            , 're::timestamp'               , 're::currentTime'             , 're::SW_OutputData'           , 're::SW_trade'                ,
+					      're::Map_ms'                  , 're::Map_PeakMonth'           , 're::Map_mes'                 , 're::Map_Daypattern'          , 're::Map_MonthHour'           , 're::Map_SeasonHour'          , 're::Map_EcpHour_Emmhour'     , 're::Map_Daytype_Hour'        , 're::Map_DmHour'              , 're::DummyMonHour'            , 're::Map_EcpGroup'            , 're::Map_PlantSteps'          ,
+					      're::a'                       , 're::b'                       , 're::TotalHour'               , 're::Idaytq'                  , 're::Idaytq_orig'             , 're::EMMGroup'                , 're::EMMSegment'              , 're::Group_ECP'               , 're::Segment_ECP'             , 're::SW_RunDm'                , 're::SW_RunDmM'               , 're::SolarCurtailment'        ,
+					      're::TransLoss'               , 're::NetTradeTS'              , 're::h2_turbine_generation'   , 're::TranLimitHr'             , 're::TranLimitCan'            , 're::TradeCanLimit'           , 're::TranCost'                , 're::TranLimit'               , 're::Load_EMMRen'             , 're::NetTrade'                , 're::SolWinCapFactor_ER'      , 're::HydroCapFactor'          ,
+					      're::ClipCapFactor_ER'        , 're::RampUp_Cost'             , 're::RampDown_Cost'           , 're::Battery_ChargeCap'       , 're::Battery_DischargeCap'    , 're::UNRGNS'                  , 're::BatteryEfficiency'       , 're::HourstoBuy'              , 're::HourstoSell'             , 're::RampRate'                , 're::DayPerMonth'             , 're::UnmetLoad_penalty'       ,
+					      're::lasthr'                  , 're::Dayweights'              , 're::SupplyPrice'             , 're::SupplyCurve'             , 're::M864_LF'                 , 're::CapacityFactor'          , 're::HydroDispatchablePortion', 're::BatteryIncrement'        , 're::Storagelvl_cost'         , 're::PVBatt_maxCF'            , 're::PVBattClipping'          , 're::GenerationMaxTotal'      ,
+					      're::DPVcap'                  , 're::DPVgen'                  , 're::Rep_curt_slice'          , 're::TotGen'                  , 're::TotGen2'                 , 're::TotGenNoDPV'             , 're::TotGenDPV'               , 're::ReadinData'              , 're::OutputDir'               , 're::NewStor'                 , 're::Load'                    , 're::SwitchSolve'             ,
+					      're::Rep_NetExport'           , 're::Rep_Load'                , 're::Rep_Generation'          , 're::Rep_GenerationUpper'     , 're::Rep_GenerationDelta'     , 're::Rep_Curtailment'         , 're::Rep_MarginalPrices'      , 're::Rep_Storage'             , 're::Rep_StorageLevel'        , 're::Rep_umet_Load'           , 're::Rep_Generation_wos'      , 're::Rep_Curtailment_wos'     ,
+					      're::Rep_MarginalPirces_wos'  , 're::Rep_Storage_wos'         , 're::Rep_Gen_slice'           , 're::Rep_Sto_slice'           , 're::Rep_Hours_per_slice'     , 're::Rep_Hours_per_CPslice'   , 're::Rep_DischargeCap'        , 're::Rep_Storage_sr'          , 're::Rep_Sto_sr_CPSlice_frac' , 're::Rep_Sto_sr_Slice_frac'   , 're::Rep_TradeToFrom'         , 're::Rep_Export_Slice'        ,
+					      're::Rep_Import_Slice'        , 're::Rep_NetExport_Slice'     , 're::Rep_output_all'          , 're::Rep_output_seasonal'     , 're::Rep_PVBattClipping'      , 're::Rep_Gen_Slice_frac'      , 're::Rep_Curt_Slice_frac'     , 're::Rep_Gen_Slice_frac_real' , 're::Rep_Curt_Slice_frac_real', 're::ave_cap'                 , 're::RESTCODE'                , 
+					      're::DailyPeakLoad'           , 're::SolWindCapFactor'        , 're::ClipCapFactor'           , 're::Map_techs'               , 're::SR_MAX_LF'               , 're::M864_TEC'                , 're::yrselect'                , 're::grpselect'               , 're::Map_ptecpgroup'          , 're::GenerationBy_ECPType'    , 're::GenerationBy_Group'      , 're::HourlyShadowPrice'       ,
+					      're::IntermittentCurtailment' , 're::IntermittentCurtailment2', 're::Tot_generation'          , 're::Tot_Rep_Storage'         , 're::RE_Upperbound'           , 're::epselect'                , 're::CountSleep'              , 're::sMessageInFile'          , 're::sMessageOutFile'         , 're::sAction'                 , 're::sStatusMessage'          }
+				}
+			}
 			MathematicalProgram EMM_renewable {
 				Objective: Objectivefunction;
 				Direction: minimize;
@@ -654,35 +877,41 @@ Model Main_EMM_renewable {
 			}
 			Set EMM_Constraints {
 				SubsetOf: AllConstraints;
-				InitialData: {
-					data 
-					    { Objectivefunction       , Demand_balance          , Gen_ramp                , StorageBalance , FirstHour_gen_ramp         ,
-					      FirstHourStorageBalance2,Hydro_Gen_Cap,Can_Trade_Limit, Can_Trade_Limit2, PVBattery_balance      , PVbattery_balance2, H2_Gen_Cap_max, H2_Gen_Cap_min}
+				Definition: {
+					AllConstraints
+					*(ER_Constraints)-'re::NetTransmission'-'re::NetTransmissionMin'
 				}
 			}
 			Set EMM_Variables {
 				SubsetOf: AllVariables;
-				Definition: {
-					data 
-					    { RampUp           , RampDown         , Storage_inflow   , Storage_outflow  , Storage_level    , Generation       ,
-					      unmet_Load       , Objectivefunction, TradeToFrom, TradeToFromCan }
-				}
+				Definition: AllVariables * (ER_Variables)+'re::Objectivefunction';
 			}
 		}
 	}
 	Section Data_To_NEMS {
+		dex::Dataset: Output_Report;
 		DeclarationSection Rep_Parameters {
 			Set Storage_rep {
-				Index: Stor_rep;
 				Definition: data {Charge,Discharge,Generation,Load};
 			}
+			Index Stor_rep {
+				Range: Storage_rep;
+				dex::ColumnName: Storage_rep;
+			}
 			Set StorageType {
-				Index: Stor;
 				Definition: data { Storage_In, Storage_Out };
 			}
+			Index Stor {
+				Range: StorageType;
+				dex::ColumnName: StorageType;
+			}
 			Set SolveIndex {
-				Index: k;
 				Definition: data { 1, 2 };
+				dex::FieldName: SolveIndex;
+			}
+			Index k {
+				Range: SolveIndex;
+				dex::ColumnName: SolveIndex;
 			}
 			Parameter SwitchSolve {
 				IndexDomain: k;
@@ -690,14 +919,23 @@ Model Main_EMM_renewable {
 			}
 			Parameter Rep_NetExport {
 				IndexDomain: (y,r,m,d,h);
+				dex::ColumnName: Rep_NetExport;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: netexp;
 			}
 			Parameter Rep_Load {
 				IndexDomain: (r,y,m,d,h);
 				Definition: Load(r,y,m,d,h);
+				dex::ColumnName: Rep_Load;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: load;
 			}
 			Parameter Rep_Generation {
 				IndexDomain: (y,pt,r,Steps,m,d,h,k);
 				Text: "GW";
+				dex::ColumnName: Rep_Generation;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: generation;
 			}
 			Parameter Rep_GenerationUpper {
 				IndexDomain: (y,pt,r,Steps,m,d,h,k);
@@ -706,27 +944,45 @@ Model Main_EMM_renewable {
 			Parameter Rep_GenerationDelta {
 				IndexDomain: (y,pt,r,Steps,m,d,h,k);
 				Text: "GW";
+				dex::ColumnName: Rep_GenerationDelta;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: gen_delta;
 			}
 			Parameter Rep_Curtailment {
 				IndexDomain: (y,pt,r,Steps,m,d,h,k);
 				Text: "GW";
+				dex::ColumnName: Rep_Curtailment;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: curtail;
 			}
 			Parameter Rep_MarginalPrices {
 				IndexDomain: (y,r,m,d,h,k);
 				Text: "87$/MWh";
+				dex::ColumnName: Rep_MarginalPrices;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: margprc;
 			}
 			Parameter Rep_Storage {
 				IndexDomain: (y,pts,r,Steps,m,d,h,Stor);
 				Text: "GW";
+				dex::ColumnName: Rep_Storage;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: storage;
 			}
 			Parameter Rep_StorageLevel {
 				IndexDomain: (y,pts,r,Steps,m,d,h);
+				dex::ColumnName: Rep_StorageLevel;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: stolevel;
 			}
 			Parameter Rep_umet_Load {
 				IndexDomain: (y,r,m, d, h,k);
 				Text: "GW";
 				Range: nonnegative;
 				Comment: "slack variable";
+				dex::ColumnName: Rep_umet_Load;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: unmet_load;
 			}
 			Parameter Rep_Generation_wos {
 				IndexDomain: (y,pt,r,m,d,h);
@@ -748,16 +1004,25 @@ Model Main_EMM_renewable {
 				IndexDomain: (y,pt,r,Steps,loadgp,loadseg);
 				Text: "GWh";
 				Comment: "debug calculating generation by EMM slice for comparison to EFD";
+				dex::ColumnName: Rep_Gen_slice;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: genbyslice;
 			}
 			Parameter Rep_Sto_slice {
 				IndexDomain: (y,pts,r,Steps,loadgp,loadseg);
 				Text: "GWh";
 				Comment: "debug calculating net storage gen by EMM slice for comparison to EFD";
+				dex::ColumnName: Rep_Sto_slice;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: stobyslice;
 			}
 			Parameter Rep_Hours_per_slice {
 				IndexDomain: (y,r,loadgp,loadseg);
 				Text: "hours";
 				Comment: "hours per EMM load group/segment";
+				dex::ColumnName: Rep_Hours_per_slice;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: hours_slice;
 			}
 			Parameter Rep_Hours_per_CPslice {
 				IndexDomain: (y,r,cpgp,cpseg);
@@ -774,31 +1039,58 @@ Model Main_EMM_renewable {
 			Parameter Rep_Sto_sr_CPSlice_frac {
 				IndexDomain: (y,pts,r,Steps,cpgp,cpseg);
 				Comment: "Storage available for spinning reserves as a fraction of capacity mapped to ECP slices";
+				dex::ColumnName: Rep_Sto_sr_CPSlice_frac;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: sto_sr_ecpslice;
 			}
 			Parameter Rep_Sto_sr_Slice_frac {
 				IndexDomain: (y,pts,r,Steps,loadgp,loadseg);
 				Comment: "Storage available for spinning reserves as a fraction of capacity mapped to EMM (EFD) slices";
+				dex::ColumnName: Rep_Sto_sr_Slice_frac;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: sto_sr_efdslice;
 			}
 			Parameter Rep_TradeToFrom {
 				IndexDomain: (y,r,r1,m,d,h,k);
+				dex::ColumnName: Rep_TradeToFrom;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: trade;
 			}
 			Parameter Rep_Export_Slice {
 				IndexDomain: (y,r,loadgp,loadseg);
+				dex::ColumnName: Rep_Export_Slice;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: expbyslice;
 			}
 			Parameter Rep_Import_Slice {
 				IndexDomain: (y,r,loadgp,loadseg);
+				dex::ColumnName: Rep_Import_Slice;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: impbyslc;
 			}
 			Parameter Rep_NetExport_Slice {
 				IndexDomain: (y,r,loadgp,loadseg);
+				dex::ColumnName: Rep_NetExport_Slice;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: netexpbyslc;
 			}
 			Parameter Rep_output_all {
 				IndexDomain: (y,pt_rep,h,Stor_rep);
+				dex::ColumnName: Rep_output_all;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: output_all;
 			}
 			Parameter Rep_output_seasonal {
 				IndexDomain: (y,pt_rep,s,h,Stor_rep);
+				dex::ColumnName: Rep_output_seasonal;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: output_seas;
 			}
 			Parameter Rep_PVBattClipping {
 				IndexDomain: (y,r,m,d,h,k);
+				dex::ColumnName: Rep_PVBattClipping;
+				dex::ExtraAttributeList: precision=8;
+				dex::TableName: pvbattclip;
 			}
 			Parameter Rep_Gen_Slice_frac {
 				IndexDomain: (y,pt,r,Steps,m,d);
@@ -818,7 +1110,7 @@ Model Main_EMM_renewable {
 			Set M1_ {
 				SubsetOf: Integers;
 				Index: M1;
-				InitialData: {
+				Definition: {
 					{1..0001}
 				}
 			}
@@ -827,18 +1119,9 @@ Model Main_EMM_renewable {
 				Text: "SolverStaus, ProgramStatus combination return code, 0 is success";
 			}
 			File RETURNCODE {
-				Name: "fromAIMMS/RETURNCODE.txt";
+				Name: "../../rest/fromAIMMS/RETURNCODE.txt";
 				Device: Disk;
 				Mode: replace;
-			}
-			StringParameter CSVExportDllName {
-				Definition: {
-					if AimmsStringConstants('Architecture') = 'x86' then
-					        "CSVExport.dll"
-					else
-					        "CSVExport64.dll"
-					endif
-				}
 			}
 		}
 	}
@@ -932,21 +1215,26 @@ Model Main_EMM_renewable {
 			}
 		}
 	}
-	Procedure MainInitialization {
+	Procedure MainExecution {
 		Body: {
+			!time_logger("procedure MainExecution ","before");
 			Model_Prepare;
+			RESTSetOptions;
 			!Solving_Model;
 			Solve_Model_Fixed;
+			RESTResetOptions;
+			!time_logger("procedure MainExecution ","after");
 		}
 	}
 	Procedure Model_Prepare {
 		Body: {
-			empty Allparameters;
+			!empty Allparameters;
+			empty EMM_parameters;
 			! read data from NEMS
 			!read in current year and input file
-			read year from file "ECPYEAR.txt";
-			ReadinData := "toAIMMS/ECPout_"+ first(year) +".txt";
-			OutputDir := "fromAIMMS/Output_"+ first(year);
+			read year from file "../../rest/ECPYEAR.txt";
+			ReadinData := "../../rest/toAIMMS/ECPout_"+ first(year) +".txt";
+			OutputDir := "../../rest/fromAIMMS/Output_"+ first(year);
 			if DirectoryExists(OutputDir) = 0 then
 			    DirectoryCreate(OutputDir);
 			endif;
@@ -954,7 +1242,7 @@ Model Main_EMM_renewable {
 			read Map_MS,Map_MES,Map_PlantSteps,SolWindCapFactor,HydroCapFactor,EMMGroup,EMMSegment,Group_ECP,Segment_ECP,Load,NetTrade,HourstoBuy,HourstoSell,SupplyPrice, SupplyCurve,Idaytq,Map_techs,BatteryEfficiency,M864_LF,BatteryIncrement,UNRGNS,ClipCapFactor,SW_OutputData, h2_turbine_generation, DPVcap,
 				TranLimit, TranCost, TranLimitCan, TransLoss, Map_PeakMonth from file ReadinData;
 			! read data from local files
-			read Map_EcpGroup,RampRate,RampUp_Cost,RampDown_Cost,UnmetLoad_penalty,HydroDispatchablePortion from file "input/restprep.txt";
+			read Map_EcpGroup,RampRate,RampUp_Cost,RampDown_Cost,UnmetLoad_penalty,HydroDispatchablePortion from file "../../rest/input/restprep.txt";
 			AcitveEMMReg:= {r|val(r)<=UNRGNS};
 			
 			! do hour prep
@@ -987,15 +1275,17 @@ Model Main_EMM_renewable {
 			
 			!load shape calculation,solar and wind hourly capacity factors calculation,Mapping Month and hour
 			a:=1;
+			!time_logger("for-loop inside procedure Model_Prepare ","before");     !uncomment this only to put out timestamps for various parts of code to compare execution time
 			for (mm,dm,h) do
 				Map_DmHour((dm,hr)|ord(hr)=a) := 1 ;
 				Load_EMMRen((r, y, hr)|ord(hr)=a) :=sum(d,Load(r, y, mm, d, h)*Map_Daypattern( mm, d, dm));
-				SolWinCapFactor_ER((r, y, hr, tech)|ord(hr)=a) :=sum(d,SolWindCapFactor(r, y, mm, d, h, tech)*Map_Daypattern( mm, d, dm));
-				ClipCapFactor_ER((r, y, hr, tech)|ord(hr)=a) := sum(d,ClipCapFactor(r, y, mm, d, h, tech)*Map_Daypattern( mm, d, dm));
+				SolWinCapFactor_ER((r, y, hr, ti)|ord(hr)=a) :=sum(d,SolWindCapFactor(r, y, mm, d, h, ti)*Map_Daypattern( mm, d, dm));
+				ClipCapFactor_ER((r, y, hr, ti)|ord(hr)=a) := sum(d,ClipCapFactor(r, y, mm, d, h, ti)*Map_Daypattern( mm, d, dm));
 				DummyMonHour((r,y,mm,hr)|ord(hr)=a) :=sum(d,Load(r, y, mm, d, h)*Map_Daypattern( mm, d, dm));
 				SW_RunDm((hr)|ord(hr)=a AND (Map_PeakMonth(mm)=1 OR NOT dm = last(DayPerMon))):= 1;
 			    a:=a+1;
 			endfor;
+			!time_logger("for-loop inside procedure Model_Prepare ","after");
 			
 			Map_MonthHour((mm, hr)|DummyMonHour(first(r), first(y), mm, hr)) := 1;
 			Map_SeasonHour(s, hr) := sum(m|Map_MonthHour(m, hr), Map_ms(m, s));
@@ -1010,9 +1300,8 @@ Model Main_EMM_renewable {
 			!Add a small variable cost for solar, hydro and wind, which is used for the curtialment sequence.
 			SupplyPrice(r, s, pth, y, '1'):=0.003;
 			SupplyPrice(r, s, pth, y, '2'):=0.003;
-			SupplyPrice(r, s, '14', y,'1'):=0.002;
-			!SupplyPrice(r, s, '15', y,'1'):=0.002;
-			SupplyPrice(r, s, '16', y,'1'):=0.002;
+			SupplyPrice(r, s, '14', y,'1'):=0.001;
+			SupplyPrice(r, s, '16', y,'1'):=0.001;
 			SupplyPrice(r, s, '17', y, '1'):=0.001;
 			SupplyPrice(r, s, '18', y, '1'):=0.001;
 			SupplyPrice(r, s, '19', y, '1'):=0.001;
@@ -1043,6 +1332,16 @@ Model Main_EMM_renewable {
 			!Idaytq(mm| not (mm in PeakMonths) OR (Val(Last(DayPerMon)) = 2), '1') := Idaytq(mm, '1')+Idaytq(mm, '3');
 			Idaytq((mm,'1')| NOT SW_RunDmM(mm,'3')) := Idaytq(mm, '1')+Idaytq(mm, '3');
 			Idaytq((mm,'3')| NOT SW_RunDmM(mm,'3')) := 0;
+			
+			! fix load for peak day
+			for mm do
+				Load_EMMRen((r, y, hr) | Map_Daytype_Hour('1', hr) and NOT SW_RunDmM(mm,'3') and Map_MonthHour(mm, hr)) :=
+							sum((h),
+							(Idaytq_orig(mm,'1')*Load(r, y, mm, '1', h)*Map_MonthHour(mm, hr)*Map_EcpHour_Emmhour(hr, h) +
+							Idaytq_orig(mm,'3')*Load(r, y, mm, '3', h)*Map_MonthHour(mm, hr)*Map_EcpHour_Emmhour(hr, h))
+								/Idaytq(mm, '1'));
+
+			endfor;			
 			
 			!Calculate day weights for each hr
 			Dayweights(hr) := sum((mm,d),Idaytq(mm, d)*Map_MonthHour(mm, hr)*Map_Daytype_Hour(d, hr)); !fix probably
@@ -1082,10 +1381,11 @@ Model Main_EMM_renewable {
 	}
 	Procedure Solve_Model_Fixed {
 		Body: {
-			Empty Allvariables;
+			!Empty Allvariables;
+			Empty EMM_Variables;
 			option Bound_Tolerance := 1.0e-8;
 			!option linear_presolve := off;
-			!option postsolve_continuous_variables := "no_rounding";
+			option postsolve_continuous_variables := 'Round to nearest bound';
 			
 			if SW_trade = 0 then
 				TradeToFromCan(r,rcan,y,hr,CSteps) := 0;
@@ -1102,6 +1402,8 @@ Model Main_EMM_renewable {
 			Generation(ptipv, y, reg, Steps, hr).Upper := sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptipv) ,SupplyCurve(reg, s, ptipv, y, Steps)*SolWinCapFactor_ER(reg, y, hr, tech));
 			Generation(ptn, y, reg, Steps, hr).Upper := 0;
 			
+			Generation(pt,y,reg,Steps,hr).nonvar := 1 $ (Generation(pt,y,reg,Steps,hr).Upper = 0);
+			
 			!Generation('20', y, reg, '1', hr).Upper := sum((s)|Map_SeasonHour(s, hr),SupplyCurve(reg, s, '20', y, '1')*SolWinCapFactor_ER(reg, y, hr, '76'))*TotGenNoDPV(reg)/$TotGen2(reg);
 			!Generation('20', y, reg, '2', hr).Upper := sum((s)|Map_SeasonHour(s, hr),SupplyCurve(reg, s, '20', y, '2')*SolWinCapFactor_ER(reg, y, hr, '76'))*DPVgen(y,reg)/$TotGenDPV(reg);
 			
@@ -1115,10 +1417,13 @@ Model Main_EMM_renewable {
 			
 			RampUp(ptc, y, reg, Steps, hr).Upper := RampRate(ptc)*sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, ptc, y, Steps));
 			RampDown(ptc, y, reg, Steps, hr).Upper := RampRate(ptc)*sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, ptc, y, Steps));
+			RampUp(ptc, y, reg, Steps, hr).nonvar := 1 $ (RampUp(ptc, y, reg, Steps, hr).Upper = 0);
+			RampDown(ptc, y, reg, Steps, hr).nonvar := 1 $ (RampDown(ptc, y, reg, Steps, hr).Upper = 0);
 			
 			TranLimitHr(r,r1,y,hr) := sum(s|Map_SeasonHour(s, hr),TranLimit(r,r1,y,s)); 
 			!TradeToFrom(r,r1,y,hr,CSteps).Upper := 0;
 			TradeToFrom(r,rsub,y,hr).Upper  := TranLimitHr(r,rsub,y,hr); !tranlimit is ToFrom, we want to switch to FromTo
+			TradeToFrom(r,rsub,y,hr).nonvar := 1 $ (TradeToFrom(r,rsub,y,hr).Upper = 0);
 			
 			!TradeToFrom(r,r1,y,hr,csteps).Lower  := 0.0;
 			TradeCanLimit(rcan,y,hr,CSteps) := 
@@ -1126,7 +1431,7 @@ Model Main_EMM_renewable {
 					sum(loadgp|EMMGroup('1',y,m,d,h)=ORD(loadgp), 
 						TranLimitCan(rcan,y,loadgp,'1',CSteps)));
 			TradeToFromCan(r,rcan,y,hr,CSteps).Upper  := min(TradeCanLimit(rcan,y,hr,CSteps), TranLimitHr(r,rcan,y,hr)); !TranLimitHr(r,rcan,y,hr);
-			
+			TradeToFromCan(r,rcan,y,hr,CSteps).nonvar := 1 $ (TradeToFromCan(r,rcan,y,hr,CSteps).Upper = 0);
 			
 			!Solving model without increment storage(switchsolve(k)=0)
 			!Solving model with increment storage(switchsolve(k)=1)
@@ -1141,12 +1446,17 @@ Model Main_EMM_renewable {
 				    Storage_level('13', y, reg, Steps, hr).Upper := sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, '13', y, Steps))*HourstoBuy;
 			            Storage_level('11', y, reg, Steps, hr).Upper := sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, '11', y, Steps))*12;
 			            Storage_level(ptpvb, y, reg, Steps, hr).Upper := sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, ptpvb, y, Steps))*HourstoBuy / 3; !3 is storage cap fraction of inverter
+			            Storage_level(pts,y,reg,Steps,hr).nonvar := 1 $ (Storage_level(pts,y,reg,Steps,hr).Upper = 0);
 			
 				    Storage_inflow(pts, y, reg, Steps, hr).Upper := Battery_ChargeCap(pts, reg, y, Steps, hr);
 			            Storage_outflow(pts, y, reg, Steps, hr).Upper := Battery_DischargeCap(pts, reg, y, Steps, hr);
+			            Storage_inflow(pts, y, reg, Steps, hr).nonvar := 1 $ (Storage_inflow(pts, y, reg, Steps, hr).Upper = 0);
+			            Storage_outflow(pts, y, reg, Steps, hr).nonvar := 1 $ (Storage_outflow(pts, y, reg, Steps, hr).Upper = 0);
 			
+				    !time_logger("first Solve EMM_renewable ","before");
 				    solve EMM_renewable;
-			            PostMainInitialization_wos;     
+				    !time_logger("first Solve EMM_renewable ","after");
+			            PostMainExecution_wos;     
 			    else 
 			            option Bound_Tolerance := 1.0e-6;
 			            option postsolve_continuous_variables := 'Round to nearest bound';
@@ -1159,16 +1469,23 @@ Model Main_EMM_renewable {
 			            Storage_level('13', y, reg, Steps, hr).Upper := sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, '13', y, Steps))*HourstoBuy;
 			            Storage_level('11', y, reg, Steps, hr).Upper := sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, '11', y, Steps))*12;
 			            Storage_level(ptpvb, y, reg, Steps, hr).Upper := sum(s|Map_SeasonHour(s, hr),SupplyCurve(reg, s, ptpvb, y, Steps))*HourstoBuy / 3;
+			            Storage_level(pts,y,reg,Steps,hr).nonvar := 1 $ (Storage_level(pts,y,reg,Steps,hr).Upper = 0);
+			
 			            Storage_inflow(pts, y, reg, Steps, hr).Upper := Battery_ChargeCap(pts, reg, y, Steps, hr);
 			            Storage_outflow(pts, y, reg, Steps, hr).Upper := Battery_DischargeCap(pts, reg, y, Steps, hr);
+			            Storage_inflow(pts, y, reg, Steps, hr).nonvar := 1 $ (Storage_inflow(pts, y, reg, Steps, hr).Upper = 0);
+			            Storage_outflow(pts, y, reg, Steps, hr).nonvar := 1 $ (Storage_outflow(pts, y, reg, Steps, hr).Upper = 0);
+			
 			            !Fixed existing storage dispatch and trade
-						TradeToFromCan(r,rcan,y,hr,CSteps).nonvar:= 1;  
-						TradeToFrom(r,rsub,y,hr).nonvar:= 1;  
-						Storage_inflow(pts, y, r, '1', hr).nonvar:=1;
-						Storage_outflow(pts, y, r, '1', hr).nonvar:=1;
-						Storage_level(pts, y, r, '1', hr).nonvar:=1;
+						TradeToFromCan(r,rcan,y,hr,CSteps).nonvar:= -1;  
+						TradeToFrom(r,rsub,y,hr).nonvar:= -1;  
+						Storage_inflow(pts, y, r, '1', hr).nonvar:=-1;
+						Storage_outflow(pts, y, r, '1', hr).nonvar:=-1;
+						Storage_level(pts, y, r, '1', hr).nonvar:=-1;
+				    !time_logger("second Solve EMM_renewable ","before");
 			            solve EMM_renewable;
-			            PostMainInitialization;         
+			            !time_logger("second Solve EMM_renewable ","after");
+			            PostMainExecution;         
 			    endif;
 			endfor;
 			
@@ -1249,46 +1566,46 @@ Model Main_EMM_renewable {
 			ReportData;
 		}
 	}
-	Procedure PostMainInitialization_wos {
+	Procedure PostMainExecution_wos {
 		Body: {
 			!Rep Curtailment    
-			IntermittentCurtailment(pti, reg, y, hr,Steps) := 
+			IntermittentCurtailment(pti, reg, y, hr,Steps)| SW_RunDm(hr) := 
 			    sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, pti),SupplyCurve(reg, s, pti, y, Steps)*SolWinCapFactor_ER(reg, y, hr, tech))
 			    - Generation(pti, y, reg, Steps, hr).Level;
-			IntermittentCurtailment('20', reg, y, hr,Steps) := 
+			IntermittentCurtailment('20', reg, y, hr,Steps)| SW_RunDm(hr) := 
 			    Generation('20', y, reg, Steps, hr).Upper - Generation('20', y, reg, Steps, hr).Level;
-			IntermittentCurtailment(pth, reg, y, hr,'1') := 
+			IntermittentCurtailment(pth, reg, y, hr,'1')| SW_RunDm(hr) := 
 			    sum((s,mm)|Map_SeasonHour(s, hr) and Map_MonthHour(mm, hr) ,SupplyCurve(reg, s, pth, y, '2')*HydroCapFactor(mm, reg))
 			    - Generation(pth, y, reg, '2', hr).Level;
 			!for PV+battery, we need to make sure we don't count inverter clipping as curtailment.
-			IntermittentCurtailment(ptpvb, reg, y, hr,Steps) := 
+			IntermittentCurtailment(ptpvb, reg, y, hr,Steps)| SW_RunDm(hr) := 
 			    sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptpvb),SupplyCurve(reg, s, ptpvb, y, Steps)*(ClipCapFactor_ER(reg, y, hr, tech)+SolWinCapFactor_ER(reg,y,  hr, tech)))
 			    - Generation(ptpvb, y, reg, Steps, hr).Level - Storage_inflow(ptpvb, y, reg, '1',hr);
-			PVBattClipping(reg,y,hr) :=     sum(ptpvb,sum(Steps,GenerationMaxTotal(ptpvb,y,reg,Steps,hr))
-			    - sum(Steps,Generation(ptpvb, y, reg, Steps, hr).Level) - Storage_inflow(ptpvb, y, reg, '1',hr) - sum(Steps,IntermittentCurtailment(ptpvb, reg, y, hr,Steps)|(IntermittentCurtailment(ptpvb, reg, y, hr,Steps)>0.000000001)  ));
-			Rep_PVBattClipping(y,r,m,d,h,'1') := sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),PVBattClipping(r,y,hr)|(PVBattClipping(r,y,hr)>0.000000001));
+			PVBattClipping(reg,y,hr)| SW_RunDm(hr) :=     sum(ptpvb,sum(Steps,GenerationMaxTotal(ptpvb,y,reg,Steps,hr))
+			    - sum(Steps,Generation(ptpvb, y, reg, Steps, hr).Level) - Storage_inflow(ptpvb, y, reg, '1',hr) - sum(Steps,IntermittentCurtailment(ptpvb, reg, y, hr,Steps)$(IntermittentCurtailment(ptpvb, reg, y, hr,Steps)>0.000000001)  ));
+			Rep_PVBattClipping(y,r,m,d,h,'1') := sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),PVBattClipping(r,y,hr)$(PVBattClipping(r,y,hr)>0.000000001));
 			Rep_PVBattClipping(y,r,m,'3',h,'1')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)) := 
-			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),PVBattClipping(r,y,hr)|(PVBattClipping(r,y,hr)>0.000000001));
+			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),PVBattClipping(r,y,hr)$(PVBattClipping(r,y,hr)>0.000000001));
 			
 			!adjusting curtailment and generation numbers to make it even among groups
-			SolarCurtailment(reg, y, hr):= sum(ptsol,IntermittentCurtailment(ptsol, reg, y, hr,'1')|(IntermittentCurtailment(ptsol, reg, y, hr,'1')>0.000000001));
+			SolarCurtailment(reg, y, hr)| SW_RunDm(hr):= sum(ptsol,IntermittentCurtailment(ptsol, reg, y, hr,'1')$(IntermittentCurtailment(ptsol, reg, y, hr,'1')>0.000000001));
 			
-			IntermittentCurtailment2(ptsol, reg, y, hr,'1') := SolarCurtailment(reg, y, hr) * 
+			IntermittentCurtailment2(ptsol, reg, y, hr,'1')| SW_RunDm(hr) := SolarCurtailment(reg, y, hr) * 
 			 sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptsol),SupplyCurve(reg, s, ptsol, y, '1')*(ClipCapFactor_ER(reg, y, hr, tech)+SolWinCapFactor_ER(reg, y, hr, tech)) - Storage_inflow(ptsol,y,reg,'1',hr))/
 			 $sum((s,tech,ptsol2)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptsol2),SupplyCurve(reg, s, ptsol2, y, '1')*(ClipCapFactor_ER(reg, y, hr, tech)+SolWinCapFactor_ER(reg, y, hr, tech)) - Storage_inflow(ptsol2,y,reg,'1',hr));
 			
 			Generation(ptsol, y, r, '1', hr).Level := Generation(ptsol, y, r, '1', hr).Level + IntermittentCurtailment(ptsol, r, y, hr,'1') - max(0.0,IntermittentCurtailment2(ptsol, r, y, hr,'1'));
 			
-			IntermittentCurtailment(ptsol, reg, y, hr,'1') := IntermittentCurtailment2(ptsol, reg, y, hr,'1') ;
+			IntermittentCurtailment(ptsol, reg, y, hr,'1')| SW_RunDm(hr) := IntermittentCurtailment2(ptsol, reg, y, hr,'1') ;
 			
-			Rep_Curtailment(y, ptipv, r, Steps, m, d, h, '1'):= sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),IntermittentCurtailment(ptipv, r, y, hr,Steps)|(IntermittentCurtailment(ptipv, r, y, hr,Steps)>0.000000001));
+			Rep_Curtailment(y, ptipv, r, Steps, m, d, h, '1'):= sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),IntermittentCurtailment(ptipv, r, y, hr,Steps)$(IntermittentCurtailment(ptipv, r, y, hr,Steps)>0.000000001));
 			Rep_Curtailment(y, ptipv, r, Steps, m, '3', h, '1')|(NOT SW_RunDmM(m,'3')  OR (Val(Last(DayPerMon)) = 2)):= 
-			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),IntermittentCurtailment(ptipv, r, y, hr, Steps)|(IntermittentCurtailment(ptipv, r, y, hr, Steps)>0.000000001));
+			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),IntermittentCurtailment(ptipv, r, y, hr, Steps)$(IntermittentCurtailment(ptipv, r, y, hr, Steps)>0.000000001));
 			
 			
-			Rep_Curtailment(y,pth,r,Steps,m,d,h,'1') :=sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr), IntermittentCurtailment(pth, r, y, hr,Steps)|(IntermittentCurtailment(pth, r, y, hr,Steps)>0.000000001));
+			Rep_Curtailment(y,pth,r,Steps,m,d,h,'1') :=sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr), IntermittentCurtailment(pth, r, y, hr,Steps)$(IntermittentCurtailment(pth, r, y, hr,Steps)>0.000000001));
 			Rep_Curtailment(y,pth,r, Steps, m,'3',h,'1')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)) :=
-			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr), IntermittentCurtailment(pth, r, y, hr, Steps)|(IntermittentCurtailment(pth, r, y, hr,  Steps)>0.000000001));
+			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr), IntermittentCurtailment(pth, r, y, hr, Steps)$(IntermittentCurtailment(pth, r, y, hr,  Steps)>0.000000001));
 			
 			!Report generation dispatch data
 			!Rep Generation
@@ -1338,41 +1655,41 @@ Model Main_EMM_renewable {
 			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr), unmet_Load(r, y, hr).Level);
 		}
 	}
-	Procedure PostMainInitialization {
+	Procedure PostMainExecution {
 		Body: {
 			!Rep Curtailment    
-			IntermittentCurtailment(pti, reg, y, hr,Steps) := 
+			IntermittentCurtailment(pti, reg, y, hr,Steps)| SW_RunDm(hr) := 
 			    sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, pti),SupplyCurve(reg, s, pti, y, Steps)*SolWinCapFactor_ER(reg, y, hr, tech))
 			    - Generation(pti, y, reg, Steps, hr).Level;
-			IntermittentCurtailment('20', reg, y, hr,Steps) := 
+			IntermittentCurtailment('20', reg, y, hr,Steps)| SW_RunDm(hr) := 
 			    Generation('20', y, reg, Steps, hr).Upper - Generation('20', y, reg, Steps, hr).Level;
-			IntermittentCurtailment(pth, reg, y, hr,'1') := 
+			IntermittentCurtailment(pth, reg, y, hr,'1')| SW_RunDm(hr) := 
 			    sum((s,mm)|Map_SeasonHour(s, hr) and Map_MonthHour(mm, hr) ,SupplyCurve(reg, s, pth, y, '2')*HydroCapFactor(mm, reg))
 			    - Generation(pth, y, reg, '2', hr).Level;
 			!need to make sure PV+battery doesn't count inverter clipping as curtailment
-			IntermittentCurtailment(ptpvb, reg, y, hr,Steps) := 
+			IntermittentCurtailment(ptpvb, reg, y, hr,Steps)| SW_RunDm(hr) := 
 			    sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptpvb),SupplyCurve(reg, s, ptpvb, y, Steps)*(ClipCapFactor_ER(reg, y, hr, tech)+SolWinCapFactor_ER(reg, y, hr, tech)))
 			    - Generation(ptpvb, y, reg, Steps, hr).Level - Storage_inflow(ptpvb, y, reg, '1',hr);
 			
-			PVBattClipping(reg,y,hr) :=     sum(ptpvb,sum(Steps,GenerationMaxTotal(ptpvb,y,reg,Steps,hr))
-			    - sum(Steps,Generation(ptpvb, y, reg, Steps, hr).Level) - Storage_inflow(ptpvb, y, reg, '1',hr) - IntermittentCurtailment(ptpvb, reg, y, hr, '1')|(IntermittentCurtailment(ptpvb, reg, y, hr, '1')>0.000000001));
-			Rep_PVBattClipping(y,r,m,d,h,'2') := sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),PVBattClipping(r,y,hr)|(PVBattClipping(r,y,hr)>0.000000001));
-			Rep_PVBattClipping(y,r,m,'3',h,'2')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)) := sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),PVBattClipping(r,y,hr)|(PVBattClipping(r,y,hr)>0.000000001));
+			PVBattClipping(reg,y,hr)| SW_RunDm(hr) :=     sum(ptpvb,sum(Steps,GenerationMaxTotal(ptpvb,y,reg,Steps,hr))
+			    - sum(Steps,Generation(ptpvb, y, reg, Steps, hr).Level) - Storage_inflow(ptpvb, y, reg, '1',hr) - IntermittentCurtailment(ptpvb, reg, y, hr, '1')$(IntermittentCurtailment(ptpvb, reg, y, hr, '1')>0.000000001));
+			Rep_PVBattClipping(y,r,m,d,h,'2') := sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),PVBattClipping(r,y,hr)$(PVBattClipping(r,y,hr)>0.000000001));
+			Rep_PVBattClipping(y,r,m,'3',h,'2')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)) := sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),PVBattClipping(r,y,hr)$(PVBattClipping(r,y,hr)>0.000000001));
 			
 			!adjusting curtailment and generation numbers to make it even among groups
-			SolarCurtailment(reg, y, hr):= sum(ptsol,IntermittentCurtailment(ptsol, reg, y, hr,'1')|(IntermittentCurtailment(ptsol, reg, y, hr,'1')>0.000000001));
+			SolarCurtailment(reg, y, hr)| SW_RunDm(hr):= sum(ptsol,IntermittentCurtailment(ptsol, reg, y, hr,'1')$(IntermittentCurtailment(ptsol, reg, y, hr,'1')>0.000000001));
 			
-			IntermittentCurtailment2(ptsol, reg, y, hr,'1') := SolarCurtailment(reg, y, hr) * 
+			IntermittentCurtailment2(ptsol, reg, y, hr,'1')| SW_RunDm(hr) := SolarCurtailment(reg, y, hr) * 
 			 sum((s,tech)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptsol),SupplyCurve(reg, s, ptsol, y, '1')*(ClipCapFactor_ER(reg, y, hr, tech)+SolWinCapFactor_ER(reg, y, hr, tech)) - Storage_inflow(ptsol,y,reg,'1',hr))/
 			 $sum((s,tech,ptsol2)|Map_SeasonHour(s, hr) and Map_EcpGroup(tech, ptsol2),SupplyCurve(reg, s, ptsol2, y, '1')*(ClipCapFactor_ER(reg, y, hr, tech)+SolWinCapFactor_ER(reg, y, hr, tech)) - Storage_inflow(ptsol2,y,reg,'1',hr));
 			
 			Generation(ptsol, y, r, '1', hr).Level := Generation(ptsol, y, r, '1', hr).Level + IntermittentCurtailment(ptsol, r, y, hr,'1') - max(0.0,IntermittentCurtailment2(ptsol, r, y, hr,'1'));
 			
-			IntermittentCurtailment(ptsol, reg, y, hr, '1') := IntermittentCurtailment2(ptsol, reg, y, hr,'1') ;
-			Rep_Curtailment(y, ptipv, r, Steps,m, d, h, '2'):= sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),IntermittentCurtailment(ptipv, r, y, hr, Steps)|(IntermittentCurtailment(ptipv, r, y, hr, Steps)>0.000000001));
-			Rep_Curtailment(y, ptipv, r, Steps,m, '3', h, '2')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)):= sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),IntermittentCurtailment(ptipv, r, y, hr, Steps)|(IntermittentCurtailment(ptipv, r, y, hr, Steps)>0.000000001));
-			Rep_Curtailment(y,pth,r, Steps,m,d,h,'2') :=sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr), IntermittentCurtailment(pth, r, y, hr, Steps)|(IntermittentCurtailment(pth, r, y, hr, Steps)>0.000000001));
-			Rep_Curtailment(y,pth,r, Steps,m,'3',h,'2')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)) :=sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr), IntermittentCurtailment(pth, r, y, hr, Steps)|(IntermittentCurtailment(pth, r, y, hr, Steps)>0.000000001));
+			IntermittentCurtailment(ptsol, reg, y, hr, '1')| SW_RunDm(hr) := IntermittentCurtailment2(ptsol, reg, y, hr,'1') ;
+			Rep_Curtailment(y, ptipv, r, Steps,m, d, h, '2'):= sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr),IntermittentCurtailment(ptipv, r, y, hr, Steps)$(IntermittentCurtailment(ptipv, r, y, hr, Steps)>0.000000001));
+			Rep_Curtailment(y, ptipv, r, Steps,m, '3', h, '2')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)):= sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr),IntermittentCurtailment(ptipv, r, y, hr, Steps)$(IntermittentCurtailment(ptipv, r, y, hr, Steps)>0.000000001));
+			Rep_Curtailment(y,pth,r, Steps,m,d,h,'2') :=sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour(d, hr), IntermittentCurtailment(pth, r, y, hr, Steps)$(IntermittentCurtailment(pth, r, y, hr, Steps)>0.000000001));
+			Rep_Curtailment(y,pth,r, Steps,m,'3',h,'2')|(NOT SW_RunDmM(m,'3') OR (Val(Last(DayPerMon)) = 2)) :=sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr), IntermittentCurtailment(pth, r, y, hr, Steps)$(IntermittentCurtailment(pth, r, y, hr, Steps)>0.000000001));
 			
 			!Rep Shadow price
 			HourlyShadowPrice(reg, y, hr)|SW_RunDm(hr) := -Demand_balance(reg, y, hr).ShadowPrice;
@@ -1423,52 +1740,55 @@ Model Main_EMM_renewable {
 			sum(hr|Map_MonthHour(m, hr) and Map_EcpHour_Emmhour(hr, h) and Map_Daytype_Hour('1', hr), unmet_Load(r, y, hr).Level);
 		}
 	}
-	ExternalProcedure CSVExport {
-		Arguments: (param,location);
-		DllName: CSVExportDllName;
-		BodyCall: {
-			CSVExport(
-			        scalar string : param,
-			        scalar string : location
-			        )
-		}
-		ElementParameter param {
-			Range: AllIdentifiers;
-			Property: Input;
-		}
-		StringParameter location {
-			Default: ".";
-			Property: Optional;
-		}
-	}
 	Procedure ReportData {
 		Body: {
-			CSVExport('Rep_Generation',OutputDir);
-			CSVExport('Rep_GenerationDelta',OutputDir);
-			!CSVExport('Rep_GenerationUpper',OutputDir);
-			CSVExport('Rep_Curtailment',OutputDir);
-			CSVExport('Rep_MarginalPrices',OutputDir);
-			CSVExport('Rep_Storage',OutputDir);
-			CSVExport('Rep_umet_Load',OutputDir);
-			CSVExport('Rep_StorageLevel',OutputDir);
-			CSVExport('Rep_Gen_Slice',OutputDir);
-			CSVExport('Rep_Sto_Slice',OutputDir);
-			CSVExport('Rep_Hours_per_slice',OutputDir);
-			CSVExport('Rep_PVBattClipping',OutputDir);
-			!CSVExport('Rep_Storage_sr',OutputDir);
-			!CSVExport('Rep_DischargeCap',OutputDir);
-			            CSVExport('Rep_Load',OutputDir);
-			CSVExport('Rep_TradeToFrom',OutputDir);
-			CSVExport('Rep_NetExport',OutputDir);
-			CSVExport('Rep_Export_Slice',OutputDir);
-			CSVExport('Rep_Import_Slice',OutputDir);
-			CSVExport('Rep_NetExport_Slice',OutputDir);
-			CSVExport('Rep_Sto_sr_Slice_frac',OutputDir);
-			CSVExport('Rep_Sto_sr_CPSlice_frac',OutputDir);
+			!dex::GenerateDatasetMappings();
+			dex::AddMapping("generation","Mappings/Generated/Output_Report-generation-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Generation.csv","generation",1);
+			dex::AddMapping("gen_delta","Mappings/Generated/Output_Report-gen_delta-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_GenerationDelta.csv","gen_delta",1); 
+			dex::AddMapping("curtail","Mappings/Generated/Output_Report-curtail-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Curtailment.csv","curtail",1);  
+			dex::AddMapping("margprc","Mappings/Generated/Output_Report-margprc-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_MarginalPrices.csv","margprc",1);  
+			dex::AddMapping("storage","Mappings/Generated/Output_Report-storage-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Storage.csv","storage",1);  
+			dex::AddMapping("stolevel","Mappings/Generated/Output_Report-stolevel-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_StorageLevel.csv","stolevel",1);  
+			dex::AddMapping("unmet_load","Mappings/Generated/Output_Report-unmet_load-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_umet_Load.csv","unmet_load",1);  
+			dex::AddMapping("genbyslice","Mappings/Generated/Output_Report-genbyslice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Gen_Slice.csv","genbyslice",1);  
+			dex::AddMapping("stobyslice","Mappings/Generated/Output_Report-stobyslice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Sto_Slice.csv","stobyslice",1);  
+			dex::AddMapping("stobyslice","Mappings/Generated/Output_Report-stobyslice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Sto_Slice.csv","stobyslice",1);  
+			dex::AddMapping("pvbattclip","Mappings/Generated/Output_Report-pvbattclip-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_PVBattClipping.csv","pvbattclip",1);  
+			dex::AddMapping("sto_sr_efdslice","Mappings/Generated/Output_Report-sto_sr_efdslice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Sto_sr_Slice_frac.csv","sto_sr_efdslice",1);  
+			dex::AddMapping("sto_sr_ecpslice","Mappings/Generated/Output_Report-sto_sr_ecpslice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Sto_sr_CPSlice_frac.csv","sto_sr_ecpslice",1);  
+			dex::AddMapping("load","Mappings/Generated/Output_Report-load-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Load.csv","load",1);
+			dex::AddMapping("trade","Mappings/Generated/Output_Report-trade-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_TradeToFrom.csv","trade",1);
+			dex::AddMapping("netexp","Mappings/Generated/Output_Report-netexp-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_NetExport.csv","netexp",1);
+			dex::AddMapping("netexpbyslc","Mappings/Generated/Output_Report-netexpbyslc-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_NetExport_Slice.csv","netexpbyslc",1);
+			dex::AddMapping("impbyslc","Mappings/Generated/Output_Report-impbyslc-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Import_Slice.csv","impbyslc",1);
+			dex::AddMapping("expbyslice","Mappings/Generated/Output_Report-expbyslice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Export_Slice.csv","expbyslice",1);
+			dex::AddMapping("hours_slice","Mappings/Generated/Output_Report-hours_slice-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_Hours_per_slice.csv","hours_slice",1);
 			
 			if SW_OutputData = 1 then
-				CSVExport('Rep_output_all',OutputDir);
-				CSVExport('Rep_output_seasonal',OutputDir);
+			dex::AddMapping("output_all","Mappings/Generated/Output_Report-output_all-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_output_all.csv","output_all",1);
+			dex::AddMapping("output_seas","Mappings/Generated/Output_Report-output_seas-CSV.xml");
+			dex::WriteToFile(OutputDir+"/Rep_output_seasonal.csv","output_seas",1);
 			endif;
 			
 			! set return code
@@ -1550,46 +1870,25 @@ Model Main_EMM_renewable {
 			! the following allows the aimms project to be kept open (when keepopen=1) and to later Quit at direction of NEMS,
 			! or to run and exit immediately. NEMS is set up to wait for 
 			! an action message of "Exited" written by the MainTermination procedure right before aimms exits.
-			CountSleep := 0;
-			! count sleep/wake cycles while waiting for direction from nems via sAction in the message file, monitor.in.txt
-			while ( CountSleep <= 2000 ) do
-			   if fileexists(sMessageInFile) then
+			!time_logger("procedure NEMS_Monitor ","before");
+			
+			if fileexists(sMessageInFile) then
 			   ! read sAction, current model year, and current iteration from sMessageInFile
 			     sAction:=" ";
 			     read from file sMessageInFile in merge mode;
-			   else
-			     put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
-			   endif;
-			   if sAction = "MainExecution" then
-			     sAction:="executing";    ! Action message to tell NEMS I'm executing
-			     write sAction to file NEMSMessageOutFile in replace mode;  
-			
-			     dialogProgress(""); ! remove progress dialog
-			     read year from file "ECPYEAR.txt";
-			     sStatusMessage := formatstring("Invoking MainInitialization for %s",first(year));
-			     put sStatusMessage;
-			     MainInitialization;
-			     sAction:=formatstring("Completed %s,",first(year)) ;    ! Action message to tell NEMS I'v completed this year, iteration
-			     write sAction to file NEMSMessageOutFile in replace mode;  
-			     CountSleep:=0;   
-			     sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
-			     put sStatusMessage;
-			     Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
-			   elseif sAction = "Quit" then ! NEMS says to exit aimms
-			     CountSleep:=2000;
-			   else
-			     sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
-			     Delay(.5);                  
-			   endif;
-			   dialogProgress(sStatusMessage,round(100*CountSleep/2000));
-			   CountSleep += 1;
-			
-			endwhile;
-			if CountSleep>=2001 then
-			  put "Quit directive found in monitor.in.txt. Exiting AIMMS";
 			else
-			  put "Wait time exceeded. Exiting Aimms";
+			     put "the NEMS message file not found \n ";
+			     !put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
 			endif;
+			read year from file "ECPYEAR.txt";
+			sStatusMessage := formatstring("Invoking MainInitialization for %s",first(year));
+			put sStatusMessage,/;
+			MainExecution;
+			sAction:=formatstring("Completed %s,",first(year)) ;    ! Action message to tell NEMS I'v completed this year, iteration
+			write sAction to file NEMSMessageOutFile in replace mode;  
+			
+			
+			!time_logger("procedure NEMS_Monitor ","after");
 			exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
 		}
 		Comment: {

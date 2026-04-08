@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: M:/default/includes/RCS/gdxiface,v 1.2 2011/02/23 19:33:55 dsa Exp $
 ! ?header?
 ! Interface blocks for "GDX" routines (stored in gdxf9def.f).  Invoking some of these functions 

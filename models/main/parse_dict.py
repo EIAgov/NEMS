@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 
+# TODO GNM: remove this import and fix warnings
+import warnings
+warnings.simplefilter('ignore', category=FutureWarning)
+
 def ParseDict(file_dict):
     """parses dict.txt (given as an input) and outputs the Fortran Variable Table and Attribute Table.
 
@@ -38,15 +42,33 @@ def ParseDict(file_dict):
     n_cols = 4
     NEMSFortranAttributesTable = pd.DataFrame(np.zeros((n_rows, n_cols)))
     NEMSFortranAttributesTable.columns = ['Dimensions', 'DimName', 'DimSize', 'DimDescrip']
+    NEMSFortranAttributesTable = NEMSFortranAttributesTable.astype({
+        'Dimensions': 'str',
+        'DimName': 'str',
+        'DimSize': 'int64',
+        'DimDescrip': 'str'
+    })
 
-    for jj in range(len(dictattrib)):
-        dictparse = dictattrib[jj]
+    for jj, dictparse in enumerate(dictattrib):
         DIM = str.rstrip(str.strip(dictparse[0:5]))
+        if 'DIMD' == DIM:
+            continue
         FDIMNAM = str.rstrip(str.strip(dictparse[6:15]))
-        FDIMSIZ = str.rstrip(str.strip(dictparse[16:23]))
+        # try to cast to int64 if fail use original code
+        # TODO: Josh + Greg -- What is the correct/expected value when FDIMSIZ = '0 1'
+        # Set breakpoint for FDIMNAM = MNUMPR to recreate
+        try:
+            FDIMSIZ = np.int64(str.rstrip(str.strip(dictparse[16:23])))
+        except TypeError:
+            FDIMSIZ = str.rstrip((str.strip(dictparse[16:23])))
+        except ValueError:
+            FDIMSIZ = str.rstrip(str.strip(dictparse[16:23]))
+        except Exception as e:
+            print(e)
         FDIMDESCRIP = str.rstrip(str.strip(dictparse[24:-1]))
-        NEMSFortranAttributesTable.loc[jj] = DIM, FDIMNAM, FDIMSIZ, FDIMDESCRIP
 
+        # TODO GNM: fix FutureWarning here -- occurs when a NaN is in data and set as ''
+        NEMSFortranAttributesTable.loc[jj] = DIM, FDIMNAM, FDIMSIZ, FDIMDESCRIP
     NEMSFortranAttributesTable = NEMSFortranAttributesTable.set_index('DimName', drop=False)
 
     # Create NEMS Fortran Variable Table in pandas dataframe vectorized
@@ -78,7 +100,7 @@ def ParseDict(file_dict):
                                 "Dimensions", "Dimensions Parameters", "Parameters", "Units", "Fuel", "Sector", "Note"]
 
     NEMSFortVarTable = NEMSFortVarTable.set_index('Fortran Variable Name', drop=False)
-    NEMSFortVarTable['Fortran Variable Name'].replace('', np.nan, inplace=True)
+    NEMSFortVarTable['Fortran Variable Name'] = NEMSFortVarTable['Fortran Variable Name'].replace('', np.nan)
     NEMSFortVarTable.dropna(subset=['Fortran Variable Name'], inplace=True)
 
     return NEMSFortVarTable, NEMSFortranAttributesTable

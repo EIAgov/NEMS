@@ -7,426 +7,210 @@
 !===================================================================================================================================================
 ! AIMMS_EFD Invokes and transfers data to/from AIMMS EFD model   
       SUBROUTINE AIMMS_EFD(OPTION)
-      use efd_row_col
-      use ifport,only:timef,sleepqq
-      use ifcore, only : commitqq
-      implicit none
-
-! Steps in the Process 
-! 1) Transfer EFD LP data to the the AIMMS EFD project.
-! 2) Initialize the monitor.in.txt file to communicate with efd.
-! 3) Invoke the AIMMS EFD project from the command line with the monitor procudure.
-! 4) Write out the monitor.in.txt file to instruct the AIMMS project to run the
-!    mainExecution procedure (or procedure passed as the argument "option") and write results back to NEMS.
-! 5) Wait for AIMMS to finish by periodically reading monitor.out.txt file.
-! 6) initialize the monitor.in.txt file with a Wait command.
-
-
-! Note: aimms is invoked this way so it can be left open to send additional data and return results
-! after the solution retrieval routines are called. This is needed for validation the aimms solution
-! variable derivation with the oml-fortran solution variables. Once validation is finished, AIMMS could be
-! invoked here in a more straightforward fashion by invoking the MainProcedure.
-
-! argument option:  
-!    'end' causes the AIMMS project to be closed down via a command sent to monitor.in.txt
-!     'pass_back' is used to transmit variables derived in the solution-retrieval routines back to AIMMS and
-!            retrieve the comparable version of the variables from AIMMS
-!            for validation testing during the oml-to-aimms transition period.
-! 
-
-      include 'aimms_c_face'
-      include 'parametr'
-      INCLUDE 'ncntrl'
-
-      character*(*) option
-
-!---------------------------------------------------------------
-! AIMMS-related variables
-      integer(KIND=4) ret,procedureRet,iret
-      character*80 projectName,aimmsFolder
-      logical lexist,aimms_opened/.false./,no_aimms/.false./,aimms_error
-!
-     integer monitordbg ! unit number for monitor.debug.txt
-     common/monitor_efd/monitordbg
-     logical opened_yet/.false./  ! indicator if monitordbg has been opened yet.
-     logical file_exists/.false./ ! indicator if file does exist or not  !added by AKN to differently handle composite file write out during pre and post solve stages
-     logical lresult
-     integer iPID, iPIDlist, iPID2 ! process ID from oscall_pid
-     integer nmessage,nchar ! counts of lines and characters in
-     integer ikill  ! set to 1 if aimms.exe has to be killed
-     character curdate*8,curtime*10
-     character*80 aimms64,AIMMSLOC*66
+        use efd_row_col
+        use ifport,only:timef,sleepqq,getcwd
+        use ifcore, only : commitqq
+        implicit none
   
-      real*4 timer,timer2,mtimer
-
-      real*4 scalar_r(1)      ! single element real array to pass a scalar 
-      integer*4 scalar_i(1)   ! single element integer array to pass a scalar 
-      integer iyr,ipy,rs,ip,L
-      integer iwait ! argument for oscall: if 0, wait indefinitly
-      integer eunit,ntries,counter,ntriesmax/3/
-      character cmd*200,args*200,line*150,filen*100
-      logical license_issue,CPLEX_issue
-
-! first time through, get aimms foldername and open monitor debug file
-      if(.not. opened_yet) then
-      !  get AIMMS  foldername
-          no_aimms=.false.
-          call RTOSTRING('AIMMSLOC',AIMMSLOC) !  e.g., 'C:\AIMMS_Installation_Free_Releases\4.8.1.299-x64'
-          aimmsFolder = trim(AIMMSLOC)//char(0)
-          aimms64 = trim(AIMMSLOC)//'\bin\aimms.exe'
-          inquire(file=aimms64,exist=lexist)
-          if(.not. lexist) then
-             write(6,'(2a)') 'AIMMS executable, "\bin\aimms.exe", not found in location specified in scedes by AIMMSLOC: ',trim(AIMMSLOC)
-          endif
-
-        opened_yet=.true.
-        call unitunopened(100,999,monitordbg)
-        open(monitordbg,file='efd\monitor.debug.txt',status='unknown')
-        rewind monitordbg
-      endif  
-
-      if (Option(1:3) .eq. 'end') then
-        if(aimms_opened) then
-          call end_AIMMS
-          aimms_opened=.false.
-        endif
-        return
-      endif
-      if(make_efd_aimms) return ! if this is a run to generate AIMMS LP structure, don't invoke aimms, just return
- 
-      timer=timef()   
-     
-! 1) Send the LP coefficients in bulk to AIMMS, then send a subset of EMM arrays to aimms
-!   First, write out each AIMMS coefficient array as a AIMMS parameter using the composite table format
-      write(filen,'(a,i4,a,i2.2,a)')  './efd/composite_',curcalyr,'_',curitr,'.txt'
-      call unitunopened(100,999,iOutTxt)
-      !if (AIM_Phase.eq.1) then    !added by AKN to differently handle composite file write out during pre and post solve stages
-      open(iOutTxt,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-      rewind iOutTxt
-
-      if (SKIP_EFDOML .eq. .FALSE. .OR. AIMEFDBG .EQ. 1) then   !not to pass coefficient values to AIMEFD 
-          do ip=1,max_aimms_param
-            if(len_trim(aimparm(ip).name).gt.0) then
-               call AIMMS_OutTxt_efd(aimparm(ip).name,  aimparm(ip).idxFirst, aimparm(ip).idxLast, aimparm(ip).setNames)
+  ! Steps in the Process 
+  ! 1) Transfer EFD LP data to the the AIMMS EFD project.
+  ! 2) Initialize the monitor.in.txt file to communicate with efd.
+  ! 3) Invoke the AIMMS EFD project from the command line with the monitor procudure.
+  ! 4) Write out the monitor.in.txt file to instruct the AIMMS project to run the
+  !    mainExecution procedure (or procedure passed as the argument "option") and write results back to NEMS.
+  ! 5) Wait for AIMMS to finish by periodically reading monitor.out.txt file.
+  ! 6) initialize the monitor.in.txt file with a Wait command.
+  
+  
+  ! Note: aimms is invoked this way so it can be left open to send additional data and return results
+  ! after the solution retrieval routines are called. This is needed for validation the aimms solution
+  ! variable derivation with the oml-fortran solution variables. Once validation is finished, AIMMS could be
+  ! invoked here in a more straightforward fashion by invoking the MainProcedure.
+  
+  ! argument option:  
+  !    'end' causes the AIMMS project to be closed down via a command sent to monitor.in.txt
+  !     'pass_back' is used to transmit variables derived in the solution-retrieval routines back to AIMMS and
+  !            retrieve the comparable version of the variables from AIMMS
+  !            for validation testing during the oml-to-aimms transition period.
+  ! 
+  
+        include 'parametr'
+        INCLUDE 'ncntrl'
+  
+        character*(*) option
+  
+  !---------------------------------------------------------------
+  ! AIMMS-related variables
+        integer(KIND=4) ret,procedureRet,iret
+        character*80 projectName,aimmsFolder
+        CHARACTER*255 cwd 
+        logical lexist,aimms_opened/.false./,no_aimms/.false./,aimms_error
+  !
+       integer monitordbg ! unit number for monitor.debug.txt
+       common/monitor_efd/monitordbg
+       logical opened_yet/.false./  ! indicator if monitordbg has been opened yet.
+       logical file_exists/.false./ ! indicator if file does exist or not  !added by AKN to differently handle composite file write out during pre and post solve stages
+       logical lresult
+       logical ran_successfully/.false./ 
+       logical aimmserr/.false./
+       integer iPID, iPIDlist, iPID2 ! process ID from oscall_pid
+       integer nmessage,nchar ! counts of lines and characters in
+       integer ikill  ! set to 1 if aimms.exe has to be killed
+       character curdate*8,curtime*10, nemspyenv*40
+       character*80 aimms64,AIMMSLOC*66
+       INTEGER wunit/84235/
+    
+        real*4 timer,timer2,mtimer
+  
+        real*4 scalar_r(1)      ! single element real array to pass a scalar 
+        integer*4 scalar_i(1)   ! single element integer array to pass a scalar 
+        integer(4) istat
+        integer iyr,ipy,rs,ip,L
+        integer iwait ! argument for oscall: if 0, wait indefinitly
+        integer eunit,eunit2,ntries,counter,ntriesmax/3/
+        character cmd*200,args*200,line*216,filen*100
+        logical CPLEX_issue
+  
+  ! first time through, get aimms foldername and open monitor debug file
+        if(.not. opened_yet) then
+        !  get AIMMS  foldername
+            no_aimms=.false.
+            call RTOSTRING('AIMMSLOC',AIMMSLOC) !  e.g., 'C:\AIMMS_Installation_Free_Releases\4.8.1.299-x64'
+            aimmsFolder = trim(AIMMSLOC)//char(0)
+            aimms64 = trim(AIMMSLOC)//'\bin\aimms.exe'
+            inquire(file=aimms64,exist=lexist)
+            if(.not. lexist) then
+               write(6,'(2a)') 'AIMMS executable, "\bin\aimms.exe", not found in location specified in scedes by AIMMSLOC: ',trim(AIMMSLOC)
             endif
-          enddo
-      endif
-      write(iOutTxt,'(a,i1,a)') 'AIMEFDBG := ',AIMEFDBG,' ;'
-      write(iOutTxt,'(a,i1,a)') 'EMMBENCH := ',RTOVALUE('EMMBENCH',0),' ;'
-      write(iOutTxt,'(a,i1,a)') 'AB32SW := ',  RTOVALUE('AB32SW  ',0),' ;'
-      write(iOutTxt,'(a,i1,a)') 'RUN45Q := ',  RTOVALUE('RUN45Q  ',0),' ;'
-      write(iOutTxt,'(a,i1,a)') 'EPHRTS := ',  RTOVALUE('EPHRTS  ',0),' ;'
-      
-        !   Second, write out the EMM arrays to AIMMS where they will be to derive the LP coefficient parameters in AIMMS directly, 
-        !   eventually replacing the coeffient parameters passed in bulk 
-      call AIMMS_Transfer_Out_efd
-      lresult=commitqq(IoutTxt)  ! use ifcore: force data to be written to file immediately
-      close(iOutTxt)
-      !elseif (AIM_Phase.eq.2) then !added by AKN to differently handle composite file write out during pre and post solve stages
-              !INQUIRE(file=filen, EXIST=file_exists)
-              !if (file_exists.eq..true.) then
-                 !open(iOutTxt,file=filen,status='old',access='append',BUFFERED='YES',BUFFERCOUNT=10)
-                 !call AIMMS_Transfer_Out_efd
-                 !lresult=commitqq(iOutTxt)  ! use ifcore: force data to be written to file immediately
-                 !close(iOutTxt)
-              !else
-                 !write(6,'(a)') 'Composit file '//filen//' is missing. Fortran EMM arrays adjusted after LP solved cannot be passed to AIMMS.'
-              !endif
-      !endif
-      write(6,*)'AIMMS Interface: seconds to write output for EFD AIMMS',timef()-timer
+  
+          opened_yet=.true.
+          call unitunopened(100,999,monitordbg)
+          open(monitordbg,file='efd\monitor.debug.txt',status='unknown')
+          rewind monitordbg
+        endif  
+  
+        if (Option(1:3) .eq. 'end') then     !need to keep this because postnems.py calls it
+          if(aimms_opened) then
+            aimms_opened=.false.
+          endif
+          return
+        endif
+   
+        timer=timef()   
+        ! delete lis, mps, log files created from the previous endpoint model run before messages get appended from a following run
+        ! clean up perviously created log, lis, and mps files found under the endpoint project folder to prevent accumulation of mixed messgeas from running different models
+        ! for AIMMS validation, check for previously generated cplex mps file under aimms_frame_p2 folder. if found, delete them.       
+        write(line,'(a)') 'del .\main\aimms_endpoint\cpx0*.mps'
+        call callsys(iret,line)
+        line=' ' 
+        ! for AIMMS debugging, check for a previously generated messages.log file that includes aimms status messages. if found, delete it.
+        write(line,'(a)') 'if exist .\main\aimms_endpoint\log\messages.log  del .\main\aimms_endpoint\log\messages.log '
+        call callsys(iret,line)
+        line=' '
+                      
+        ! for AIMMS validation, check for rest.lis file larger than 1024 bytes that includes aimms-to-cplex crosswalk. if found, copy to new file named with model year and iteration.
+        write(line,'(a)') 'if exist .\efd\log\aimms_endpoint.lis del .\efd\log\aimms_endpoint.lis '
+        lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+        call callsys(iret,line)
+        line=' '  
+        
+  ! 1) Send the LP coefficients in bulk to AIMMS, then send a subset of EMM arrays to aimms
+  !   First, write out each AIMMS coefficient array as a AIMMS parameter using the composite table format
+        write(filen,'(a,i4,a,i2.2,a)')  './efd/composite_',curcalyr,'_',curitr,'.txt'
+        call unitunopened(100,999,iOutTxt)
+        !if (AIM_Phase.eq.1) then    !added by AKN to differently handle composite file write out during pre and post solve stages
+        open(iOutTxt,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
+        rewind iOutTxt
+  
+        if (SKIP_EFDOML .eq. .FALSE. .OR. AIMEFDBG .EQ. 1) then   !not to pass coefficient values to AIMEFD 
+            do ip=1,max_aimms_param
+              if(len_trim(aimparm(ip).name).gt.0) then
+                 call AIMMS_OutTxt_efd(aimparm(ip).name,  aimparm(ip).idxFirst, aimparm(ip).idxLast, aimparm(ip).setNames)
+              endif
+            enddo
+        endif
+        write(iOutTxt,'(a,i1,a)') 'ed::AIMEFDBG := ',AIMEFDBG,' ;'
+        write(iOutTxt,'(a,i1,a)') 'ed::EMMBENCH := ',RTOVALUE('EMMBENCH',0),' ;'
+        write(iOutTxt,'(a,i1,a)') 'ed::AB32SW := ',  RTOVALUE('AB32SW  ',0),' ;'
+        write(iOutTxt,'(a,i1,a)') 'ed::RUN45Q := ',  RTOVALUE('RUN45Q  ',0),' ;'
+        write(iOutTxt,'(a,i1,a)') 'ed::EPHRTS := ',  RTOVALUE('EPHRTS  ',0),' ;'
+        
+          !   Second, write out the EMM arrays to AIMMS where they will be to derive the LP coefficient parameters in AIMMS directly, 
+          !   eventually replacing the coeffient parameters passed in bulk 
+        call AIMMS_Transfer_Out_efd
+        lresult=commitqq(IoutTxt)  ! use ifcore: force data to be written to file immediately
+        close(iOutTxt)
+        !elseif (AIM_Phase.eq.2) then !added by AKN to differently handle composite file write out during pre and post solve stages
+                !INQUIRE(file=filen, EXIST=file_exists)
+                !if (file_exists.eq..true.) then
+                   !open(iOutTxt,file=filen,status='old',access='append',BUFFERED='YES',BUFFERCOUNT=10)
+                   !call AIMMS_Transfer_Out_efd
+                   !lresult=commitqq(iOutTxt)  ! use ifcore: force data to be written to file immediately
+                   !close(iOutTxt)
+                !else
+                   !write(6,'(a)') 'Composit file '//filen//' is missing. Fortran EMM arrays adjusted after LP solved cannot be passed to AIMMS.'
+                !endif
+        !endif
+        write(6,*)'AIMMS Interface: seconds to write output for EFD AIMMS',timef()-timer
+  
+        
+  ! 2) inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
+        ! call unitunopened(100,999,EUNIT)
+        ! open(eunit,file='efd\monitor.in.txt',status='unknown')
+        ! rewind eunit
+        !write(eunit,'(a)')      'sAction             := "Wait";'
+        ! write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
+        ! write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
+        ! lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
+        ! close(eunit)
+        call date_and_time(curdate,curtime)
+        write(monitordbg,'(a,t45,3a,i5,i3)') 'endpoint_p2_caller.txt : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
+        write(6,'(a,t45,5a,i5,i3)') 'Calling EFD AIMMS : ',curtime(1:2),':',curtime(3:4),':',curtime(5:10),curcalyr,curitr
 
-      ntries=1
-100   continue ! return to here from below if license error occurs to retry up to "ntriesmax-ntries" more times. 
+        !write lines to write out main\endpoint_p2_caller.txt to contain curcalyr,curiter, module name (ecp, efd, rest)
+        call unitunopened(100,999,eunit2)
+        open(eunit2,file='main\endpoint_p2_caller.txt',status='unknown')
+        write(eunit2,'(a,i4)') "cycle     : ",CURIRUN
+        write(eunit2,'(a,i4)') "year      : ",curcalyr
+        write(eunit2,'(a,i2)') "iter      : ",curitr
+        write(eunit2,'(a,i2)') "ncrl      : ",0
+        write(eunit2,'(2a)') "my_module : ","efd"
+        close(eunit2)
 
-      
-! 2) inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='efd\monitor.in.txt',status='unknown')
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Wait";'
-      write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-      write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-      lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-      close(eunit)
-      call date_and_time(curdate,curtime)
-      write(monitordbg,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-      timer=timef() 
-!  3) Invoke AIMMS from the command line using OSCALL_pid  
-      if(.not. aimms_opened ) then
-          
-
-        l=len_trim(aimmsFolder)-1
-        cmd=aimmsFolder(:l)//'\bin\aimms.exe '
-
-        args='--hidden --license-wait-seconds 120 -RNEMS_monitor .\\efd\\efd.aimms'
-!        args=' --license-wait-seconds 120 -RNEMS_monitor .\\efd\\efd.aimms'
+        timer=timef() 
+  !  3) Invoke AIMMS from the command line using EXECUTE_COMMAND_LINE() 
+        !l=len_trim(aimmsFolder)-1
+        !cmd=aimmsFolder(:l)//'\bin\aimms.exe '
+  
+        !args='--hidden --license-wait-seconds 120 -RNEMS_monitor .\\efd\\efd.aimms'
+        istat = getcwd(cwd)
+        cmd=trim(cwd)//'\main\call_p2_endpoint.bat'
+        call rtostring('NEMSPYENV',nemspyenv)
+        open (unit=wunit,file=cmd,status='unknown')                               !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(a)') 'pushd %~dp0'                                          !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(2a)') 'SET myENV=',trim(nemspyenv)                          !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(a)') 'call C:\python_environments\%myENV%\scripts\activate' !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(a)') 'python p2_endpoint_run_api.py'                        !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        lresult=commitqq(wunit)                                                   !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        close(wunit)   
+      !        args=' --license-wait-seconds 120 -RNEMS_monitor .\\efd\\efd.aimms'
         write(6,'(2a)') 'AIMMS Command line is ',trim(cmd)//' '//trim(args)
         write(6,'(a,i4,a)') 'AIMMS ',curcalyr,'    Opening AIMMS project, procedure NEMS_monitor'
         call date_and_time(curdate,curtime)
         write(monitordbg,'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-        iwait=0
-        call oscall_pid(iwait,cmd,args,iret,iPID)
-        
-        if(iret.eq.0) then
-          aimms_opened=.true.      
-        else
-          write(6,'(a,i4,a)') 'AIMMS error running efd/efd.aimms, return code=',iret
-          aimms_opened=.false.  
-        endif
-
-        write(6,'(a,i4,a,f9.3)') 'AIMMS ',curcalyr,'    Time to open project:',timef()-timer
-
-      endif
-    
-
-      timer=timef()
-
-! Initialize AIMMS output message file so this routine won't see old one and think AIMMS is finished
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='efd\monitor.out.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-      lresult=commitqq(eunit)
-      close(eunit)      
-      
-!4)  Tell AIMMS to invoke name of routine passed in argument "option" (usually set to "MainExecution") via its input message file
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='efd\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "'//trim(option)//'";'
-      write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-      write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-      lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-      close(eunit)
-      call date_and_time(curdate,curtime)
-      write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : '//trim(option)//' ', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      
-      counter=0
-      line=' '
-
-! 5) when AIMMS is done, its monitor procedure writes out a keyword "Completed" to monitor.out.txt. Wait for 
-! for the signal, up to a time limit of 5 minutes, or 300 seconds (600 half seconds)
-      do while (counter.lt.600 .and. (index(line,'Completed')+index(line,'Quit')+index(line,'Exited')).eq.0)
-        call sleepqq(500)
-        counter=counter+1
-        iret=1
-        open(eunit,file='efd\monitor.out.txt',status='old',SHARED,action='READ',err=99)
-        line=' '
-        read(eunit,'(a)',err=99,end=99) line
-!        write(6,'(a)') 'line='//trim(line)
-        iret=0
-        close(eunit)
-99      continue 
-
-      enddo
-      call date_and_time(curdate,curtime)
-
-      write(6,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to run AIMMS EFD procedure '//trim(option)//':',timef()-timer
-
-      if(counter.ge.600) then
- ! Wait time exceeded. Display message log in nohup.out
-         write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt  : wait time exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-         write(6,'(a)') 'AIMMS wait time exceeded. Showing AIMMS messages.log and checking for license issue.'
-         license_issue=.false.
-         inquire(file='efd/log/messages.log',exist=lexist)
-         nmessage=0
-         nchar=0
-         if(lexist) then
-           open(eunit,file='efd/log/messages.log',status='old',SHARED,READONLY,err=999)
-10         continue
-             read(eunit,'(a)',end=998,err=999) line
-             write(6,'(2a)')'AIMMS messages.log:  ',trim(line)
-             nmessage=nmessage+1
-             nchar=nchar+len_trim(line) ! count characters. if only 3 in file, aimms didn't start gracefully. sign of intermittant error.
-             if(index(line,'license').gt.0) then
-               license_issue=.true.
-             endif
-             goto 10 ! above
-998        continue
-           close(eunit)
-999        continue
-          write(6,'(a,i5)') 'AIMMS message log, number of lines read:',nmessage
-         endif
-! if an aimms.exe is still executing with the same ProcessID (iPID), kill it.
-        args=' '
-        iWait=-1
-        ikill=0
-        cmd='cmd /c tasklist -v -FI "IMAGENAME eq aimms.exe" > tasklist.txt'
-        call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-        inquire(exist=lexist,file='tasklist.txt')
-        if(lexist) then
-          open(eunit, file='tasklist.txt',status='old',READONLY)
-19 continue
-          read(eunit,'(a)',end=21) line
-          if(index(line,'aimms.exe').gt.0) then
-            line(:20)=''
-            read(line,*,end=21,err=21) iPIDlist
-            if(iPIDlist.eq.iPID) then
-              ikill=1
-              write(6,'(a,i6,a)') 'The aimms.exe is still executing.  Will kill the process ID ',iPID
-              write(cmd,'(a,i6)')  'taskkill /F /PID ',iPID
-              iWait=-1
-              call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-              goto 21
-            else
-              goto 19
-            endif
-          else
-            goto 19
-          endif
-21        continue 
-          close(eunit)
-        endif        
-        if(ikill.eq.0) then
-          write(6,'(a)') 'AIMMS seems to have closed early. No aimms.exe process found with matching process ID.'
-        endif
-        if (license_issue .and. ntries.lt.ntriesmax) then
-          write(6,'(a,i2)') 'AIMMS license issue.  Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100
-        elseif(ntries.lt.ntriesmax.and.ikill.eq.1 .and. nchar.eq.3) then  ! when AIMMS stays open and writes only 3 non-printable characters in message.log
-          write(6,'(a,i2)') 'AIMMS wait time issue. Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100  ! above at subroutine start
-        elseif(ntries.lt.ntriesmax .and. ikill.eq.0) then
-          write(6,'(a,i2)') 'AIMMS process not found. Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100  ! above at subroutine start
-        else
-          iret=900
-                      
-	  write(6,'(a)') 'AIMMS wait time exceeded. Stopping now to avoid confusion.'
-	          
-          stop
-        endif
-      else
-        if(index(line,'Exited').gt.0) then
-! Early exit - check if CPLEX issue first
-          CPLEX_issue=.false.
-          inquire(file='efd/log/messages.log',exist=lexist)
-          if(lexist) then
-            open(eunit,file='efd/log/messages.log',status='old',SHARED,READONLY,err=1001)
-11          continue
-             read(eunit,'(a)',end=1000,err=1001) line
-              if(index(line,'CPLEX').gt.0) then
-                CPLEX_issue=.true.
-              endif
-              go to 11   !read next line
-1000        continue
-             close(eunit)
-1001       continue             
-          endif
-          
-          if (CPLEX_issue .and. ntries.lt.ntriesmax) then
-            write(6,'(a,i2)') 'CPLEX license issue.  Will retry. Number of tries so far: ',ntries
-            ntries=ntries+1
-            aimms_opened=.false.
-! if an aimms.exe is still executing with the same ProcessID (iPID), kill it.
-            args=' '
-            iWait=-1
-            ikill=0
-            cmd='cmd /c tasklist -v -FI "IMAGENAME eq aimms.exe" > tasklist.txt'
-            call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-            inquire(exist=lexist,file='tasklist.txt')
-            if(lexist) then
-               open(eunit, file='tasklist.txt',status='old',READONLY)
-23  continue
-               read(eunit,'(a)',end=25) line
-              if(index(line,'aimms.exe').gt.0) then
-                line(:20)=''
-                read(line,*,end=25,err=25) iPIDlist
-               if(iPIDlist.eq.iPID) then
-                ikill=1
-                 write(6,'(a,i6,a)') 'The aimms.exe is still executing.  Will kill the process ID ',iPID
-                 write(cmd,'(a,i6)')  'taskkill /F /PID ',iPID
-                 iWait=-1
-                 call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-                 goto 25
-                else
-                 goto 23
-                endif
-              else
-                goto 23
-              endif
-25            continue 
-              close(eunit)
-            endif        
-           
+        CALL EXECUTE_COMMAND_LINE(trim(cmd),wait=.true.,CMDSTAT=iret)  
+        write(line,'(2a)') 'del ',cmd     !added to delete \main\call_p2_endpoint.bat  after the call
+        call callsys(iret,line)           !added to delete \main\call_p2_endpoint.bat  after the call
+        line=' '                          !added to delete \main\call_p2_endpoint.bat  after the call
+        INQUIRE(file='Kill_run.txt', EXIST=file_exists)
+        if(file_exists .eq. .true. ) then
             go to 100
-          else      
-            write(6,'(a)') 'AIMMS Exited early. Likely an error in the AIMMS code or transfer data. Stopping NEMS now'
-            aimms_opened=.false.
-            stop
-          endif
-        elseif(index(line,'Completed').gt.0) then
-! Normal Completion
-          write(monitordbg,'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          ! inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-
-! 6) initialize the monitor.in.txt file with a Wait command.
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='efd\monitor.in.txt',status='unknown')
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "Wait";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
         endif
-
-      endif
-   return
-
-
-CONTAINS
-
-!===================================================================================================================================================
-Subroutine End_AIMMS
-  integer ntries,nmax/240/
-! write Quit to message file to tell aimms project monitor to exit
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='efd\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Quit";'
-      close(eunit)
-
-      call date_and_time(curdate,curtime)
-      write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-!   need to wait until project is closed. May take 30 seconds to close 
-!   Added statement in MainTermination to write "Exited" to monitor.out.txt so that should
-!   be signal to stop
-      ntries=1
-      do while (ntries.lt.nmax)
-        open(eunit,file='efd\monitor.out.txt',status='old',SHARED,READONLY)
-        flush eunit
-        read(eunit,'(a)',err=99,end=99) line
-        close(eunit)
-        if(index(line,'Exited').gt.0) then
-          exit  ! exit do while
-        endif
-99      ntries=ntries+1
-        call sleepqq(500) ! wait 1/2 second
-      enddo
-      write(6,'(a,i4,a,i4)') 'AIMMS Exiting, number of monitor.out.txt checks ',ntries,', max number set to ',nmax
-      call date_and_time(curdate,curtime)
-      if(ntries.eq.nmax) then
-        write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : wait for Exited exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-        write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif
-
-end subroutine end_aimms
-
-! end of CONTAINed routines--near duplicates of ecp version of routine
-End Subroutine AIMMS_EFD
+        write(6,'(a,i5,a,i3,a,f9.3)') '## AIMMS EFD year:',curcalyr,' iteration:',curitr,'    Time to run AIMMS EFD MainExecution:',timef()-timer 
+        return
+100     write(6,'(a,i5,a,i3,a)') '## Inability to successfully run AIMMS EFD for year',curcalyr,' iteration',curitr,' terminates the run.'
+        STOP   
+  End Subroutine AIMMS_EFD
 
 !===================================================================================================================================================
 
@@ -1113,7 +897,7 @@ subroutine efd_aimms_init
     rewind io
     goto 49
 48  continue
-    ! if calling this routine from readaimlis.exe or other program outside of nems, efd folder won't exist, so just write it in local
+    ! if calling this routine from program outside of nems, efd folder won't exist, so just write it in local
      open(io,file='efdsetdata.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)   
 49   continue
     call write_efd_sets
@@ -1237,7 +1021,7 @@ subroutine efd_fill_aimms_coeff
   timer2=timef()
     
 ! Print AIMMS row and column names along with their associated OML masks and the sets defining their index space   
-  if(AIMEFDBG.eq.1 .or. make_efd_aimms) then
+  if(AIMEFDBG.eq.1) then
     call efd_list_aimms_rowcols(0)
 
 !   write coefficients for debuggging
@@ -1326,12 +1110,6 @@ subroutine efd_fill_aimms_coeff
          if(L.gt.0) ParamName(L:L)='!'  ! change back to ! after sorting with |
        endif
        UseCol=index(ParamName,'!')+index(ParamName,'|') ! if either is gt.0, triggers an exception to use col set element. in case ! is in both col/row names, only first is converted to |
-! If generating list of parameter arrays need to store coefficients, erase paramName temporarily
-! so the list of paramname's needed will be listed int the "missing messages" below
-       if(make_efd_aimms)then 
-         ParamTemp=ParamName
-         ParamName='nothing'
-       endif
 
       ifound=0
        do ip=1,max_aimms_param
@@ -1404,11 +1182,7 @@ subroutine efd_fill_aimms_coeff
           
        endif
        
-       if(make_efd_aimms)then  ! restore parameter name for coeffient debug output written below
-         ParamName=ParamTemp
-       endif
-
-       if(AIMEFDBG.eq.0 .and. .not. make_efd_aimms) cycle ! omit rest of coefficient loop which is for writing debug efdcoeff*txt.
+       if(AIMEFDBG.eq.0) cycle ! omit rest of coefficient loop which is for writing debug efdcoeff*txt.
 
 ! for debug display column name in array format, such as B(R,P,G,F)
        colstr=' '
@@ -2418,13 +2192,13 @@ subroutine get_efd_set_element(setname,ccode,icode)
     case ('WindClass')             ! MNUMCL: wind classes, include 'wrenew'
       read(ccode,'(i1)') icode
       if(.not. set_lookup) call efd_write_int_set(setname,1,WindClass,1)
-    case ('PlantType_ECPp2')             ! MNUMCL: wind classes, include 'wrenew'
+    case ('PlantType_ECPp2')             ! 
       read(ccode,'(i2)') icode
       if(.not. set_lookup) call efd_write_int_set(setname,1,PlantType_ECPp2,2)
-    case ('FuelRegion26')             ! MNUMCL: wind classes, include 'wrenew'
+    case ('FuelRegion26')             ! 
       read(ccode,'(i2)') icode
       if(.not. set_lookup) call efd_write_int_set(setname,1,FuelRegion26,2)
-    case ('EMMStates')             ! MNUMCL: wind classes, include 'wrenew'
+    case ('EMMStates')             ! 
       read(ccode,'(i2)') icode
       if(.not. set_lookup) call efd_write_int_set(setname,1,EMMStates,2)
     case ('Ten')              
@@ -2469,13 +2243,13 @@ subroutine get_efd_set_element(setname,ccode,icode)
 !  write out the name and elements of the set in AIMMS-compatible format to efdsetdata.dat
       LL=len(list(1))
       if(nElements.gt.1) then
-        write(io, '(3a,<nElements-1>(a<LL>,a2),a<LL>,a)' )firstchar, &
-        trim(efd_setname),     '_ := data {',         &
+        write(io, '(3a,<nElements-1>(a<LL>,a2),a<LL>,a)' )firstchar, &                          !<------------------
+        trim('ed::'//efd_setname),     '_ := data {',         &
         ((list(i),', '),i=1,nElements-1),                    &
         list(nElements),        '};'
       else
-        write(io, '(3a,a<LL>,a)' )firstchar, &
-        trim(efd_setname),     '_ := data {',         &
+        write(io, '(3a,a<LL>,a)' )firstchar, &                                                 !<------------------
+        trim('ed::'//efd_setname),     '_ := data {',         &
         list(nElements),        '};'
       endif
     endif
@@ -2903,9 +2677,9 @@ subroutine get_efd_set_element(setname,ccode,icode)
   character*256 line
   if(last.gt.first) then
     if (first .ge. 0) then
-        write(io,'(3a,i<nfield>.<nfield>,a,i<nfield>.<nfield>,a)') firstchar, trim(setname),'_ := data {',first,'..',last,'};'
+        write(io,'(3a,i<nfield>.<nfield>,a,i<nfield>.<nfield>,a)') firstchar,trim('ed::'//setname),'_ := data {',first,'..',last,'};'    !<--------------------
     else
-        line = firstchar//setname//'_ := data {'
+        line = firstchar//'ed::'//setname//'_ := data {'
         do is = first, 0     
             if (is .ne. 0) then
               write (line(len_trim(line)+1: ), form(5)) '"', is,'",'
@@ -2918,7 +2692,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
         write(io,form(3)) trim(line)
     endif
   else
-    write(io,'(3a,i<nfield>.<nfield>,a)') firstchar, trim(setname),'_ := data {',first,'};'
+    write(io,'(3a,i<nfield>.<nfield>,a)') firstchar, trim('ed::'//setname),'_ := data {',first,'};'
   endif
   return
   end subroutine efd_write_int_set
@@ -3279,13 +3053,13 @@ subroutine get_efd_set_element(setname,ccode,icode)
    integer nfield ! size of integer fields such as plantgroup, which is 5 characters wide
    
    integer, parameter :: maxlinelength = 600
-   character (LEN=maxlinelength) line, line2
+   character (LEN=maxlinelength) line, line2, line3
 !
    open(io,file='efd\efdsetdata.dat',status='unknown',err=48)
    rewind io
    goto 49
 48 continue
-   open(io,file='efdsetdata.dat',status='unknown') ! if running outside of nems, like from readaimlis.f90
+   open(io,file='efdsetdata.dat',status='unknown') ! if running outside of nems
 49 continue   
 
    numaimsets=0
@@ -3308,7 +3082,14 @@ subroutine get_efd_set_element(setname,ccode,icode)
      ifound=index(line,'_ := data {')
      if(ifound.gt.2) then
        numaimsets=numaimsets+1
-       aimsets(numaimsets).setname=line(2:ifound-1)
+       line3 = ' '
+       line3 = line(1:ifound-1)
+       if (index(line3,'::') .gt.2) then
+          line3 = line(index(line3,'::')+2:ifound-1)
+          aimsets(numaimsets).setname=line3
+       else
+          aimsets(numaimsets).setname=line(2:ifound-1)
+       endif
        line(1:ifound+10)=' '
        ifound=index(line,'}')
        if(ifound.gt.0) then
@@ -6369,23 +6150,22 @@ subroutine get_efd_set_element(setname,ccode,icode)
 
        if(numsets.gt.0) then
          write(IOutTXT,'(a)') 'Composite table:'
-         write(IOutTXT,'(30a)') (trim(setnames(i)),' ',i=1,numsets),trim(arrayname)
+         write(IOutTXT,'(30a)') (trim('ed::'//setnames(i)),' ',i=1,numsets),trim('ed::'//arrayname)     !<-------------------
        else
          select case(RorI)
          case("R4")
            R8var = dble(R4ARRAY(1,1,1,1,1,1,1,1))
-            write(IOutTXT,'(2a,1PG24.15E3,a)') trim(arrayname),' :=',R8var,' ;'
+            write(IOutTXT,'(2a,1PG24.15E3,a)') trim('ed::'//arrayname),' :=',R8var,' ;'    !<---------------------
 !           write(IOutTXT,'(2a,1PG15.7E2,a)') trim(arrayname),' :=',R4ARRAY(1,1,1,1,1,1,1),' ;'
          case("R8")
-           write(IOutTXT,'(2a,1PG24.15E3,a)') trim(arrayname),' :=',R8ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,1PG24.15E3,a)') trim('ed::'//arrayname),' :=',R8ARRAY(1,1,1,1,1,1,1,1),' ;'    !<-------------
          case("I4")
-           write(IOutTXT,'(2a,I8,a)') trim(arrayname),' :=',I4ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,I8,a)') trim('ed::'//arrayname),' :=',I4ARRAY(1,1,1,1,1,1,1,1),' ;'    !<-------------------
          case("I2")
-           write(IOutTXT,'(2a,I5,a)') trim(arrayname),' :=',I2ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,I5,a)') trim('ed::'//arrayname),' :=',I2ARRAY(1,1,1,1,1,1,1,1),' ;'    !<-------------------
          case("I1")
-           write(IOutTXT,'(2a,I3,a)') trim(arrayname),' :=', -1*I1ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,I3,a)') trim('ed::'//arrayname),' :=', -1*I1ARRAY(1,1,1,1,1,1,1,1),' ;'    !<-------------------
          end select
-
          return
        endif
        line=' '
@@ -6404,24 +6184,24 @@ subroutine get_efd_set_element(setname,ccode,icode)
             alt_alias=.true.
           endif
           setcopies(i)=setnames(i)(1:ialt)  ! use setcopies for printing the elements
-          LcolumnStart(i)=LcolumnEnd(i-1)+1
-          LcolumnEnd(i)=LcolumnStart(i)+len_trim(setnames(i))   ! includes added blank at end to separate each field 
+          LcolumnStart(i)=LcolumnEnd(i-1)+1    !<------------ add a blank and prefix 'ed::'
+          LcolumnEnd(i)=LcolumnStart(i)+len_trim('ed::'//setnames(i))   ! includes added blank at end to separate each field 
         enddo  ! i=1,numsets
 
-        LcolumnStart(numsets+1) = LcolumnEnd(numsets) + 1
-        LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim(arrayname)-1
+        LcolumnStart(numsets+1) = LcolumnEnd(numsets) + 1    !<------------ add a blank and prefix 'ed::'
+        LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim('ed::'//arrayname)-1
 
         call get_setIDs_efd(setnames,numsets,setIDs) 
     ! diminensioning parameters represent a max size and the actual set size may be smaller. So
     ! when writing the array, only write elements within the actual set range.
-       k(1)=1;if(numsets.ge.1) k(1)=min(n1,aimsets(setIDs(1)).iend - aimsets(setIDs(1)).istart +1)
-       k(2)=1;if(numsets.ge.2) k(2)=min(n2,aimsets(setIDs(2)).iend - aimsets(setIDs(2)).istart +1)
-       k(3)=1;if(numsets.ge.3) k(3)=min(n3,aimsets(setIDs(3)).iend - aimsets(setIDs(3)).istart +1)
-       k(4)=1;if(numsets.ge.4) k(4)=min(n4,aimsets(setIDs(4)).iend - aimsets(setIDs(4)).istart +1)
-       k(5)=1;if(numsets.ge.5) k(5)=min(n5,aimsets(setIDs(5)).iend - aimsets(setIDs(5)).istart +1)
-       k(6)=1;if(numsets.ge.6) k(6)=min(n6,aimsets(setIDs(6)).iend - aimsets(setIDs(6)).istart +1)
-       k(7)=1;if(numsets.ge.7) k(7)=min(n7,aimsets(setIDs(7)).iend - aimsets(setIDs(7)).istart +1)
-       k(8)=1;if(numsets.ge.8) k(8)=min(n8,aimsets(setIDs(8)).iend - aimsets(setIDs(8)).istart +1)
+       k(1)=1;if(numsets.ge.1) k(1)=min(n1,aimsets(setIDs(1)).iend - aimsets(setIDs(1)).istart +1 )   
+       k(2)=1;if(numsets.ge.2) k(2)=min(n2,aimsets(setIDs(2)).iend - aimsets(setIDs(2)).istart +1 )  
+       k(3)=1;if(numsets.ge.3) k(3)=min(n3,aimsets(setIDs(3)).iend - aimsets(setIDs(3)).istart +1 )   
+       k(4)=1;if(numsets.ge.4) k(4)=min(n4,aimsets(setIDs(4)).iend - aimsets(setIDs(4)).istart +1 )   
+       k(5)=1;if(numsets.ge.5) k(5)=min(n5,aimsets(setIDs(5)).iend - aimsets(setIDs(5)).istart +1 )  
+       k(6)=1;if(numsets.ge.6) k(6)=min(n6,aimsets(setIDs(6)).iend - aimsets(setIDs(6)).istart +1 )   
+       k(7)=1;if(numsets.ge.7) k(7)=min(n7,aimsets(setIDs(7)).iend - aimsets(setIDs(7)).istart +1 )   
+       k(8)=1;if(numsets.ge.8) k(8)=min(n8,aimsets(setIDs(8)).iend - aimsets(setIDs(8)).istart +1 )  
        
        if(numsets.ge.1 .and. s1 .lt. 1) k(1)=1-s1+k(1)
        if(numsets.ge.2 .and. s2 .lt. 1) k(2)=1-s2+k(2)
@@ -6487,7 +6267,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
         do i8=j(8),k(8)
           if(numsets.ge.8) then
             c(8)=setElements(    aimsets(setIDs(8)).istart + i8 - 1 )
-            line(LcolumnStart(8):LcolumnEnd(8)) = c(8)
+            line(LcolumnStart(8)+4:LcolumnEnd(8)) = c(8)      !<-------------------- adjustment was made to accomodate 'ed::'
           endif
           if (s(8) .lt. 1) then
              q(8) = i8+s(8) -1 
@@ -6498,7 +6278,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
             do i7=j(7),k(7)
               if(numsets.ge.7) then
                 c(7)=setElements(    aimsets(setIDs(7)).istart + i7 - 1 )
-                line(LcolumnStart(7):LcolumnEnd(7)) = c(7)
+                line(LcolumnStart(7)+4:LcolumnEnd(7)) = c(7)        !<-------------------- adjustment was made to accomodate 'ed::'
               endif
               if (s(7) .lt. 1) then
                  q(7) = i7+s(7) -1 
@@ -6509,7 +6289,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
               do i6=j(6),k(6)
                 if(numsets.ge.6)then
                   c(6)=setElements(    aimsets(setIDs(6)).istart + i6 - 1 )
-                  line(LcolumnStart(6):LcolumnEnd(6)) = c(6)
+                  line(LcolumnStart(6)+4:LcolumnEnd(6)) = c(6)          !<-------------------- adjustment was made to accomodate 'ed::'
                 endif
                 if (s(6) .lt. 1) then
                     q(6) = i6+s(6) -1 
@@ -6520,7 +6300,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
                 do i5=j(5),k(5)
                   if(numsets.ge.5) then
                     c(5)=setElements(    aimsets(setIDs(5)).istart + i5 - 1 )
-                    line(LcolumnStart(5):LcolumnEnd(5)) = c(5)
+                    line(LcolumnStart(5)+4:LcolumnEnd(5)) = c(5)            !<-------------------- adjustment was made to accomodate 'ed::'
                   endif
                   if (s(5) .lt. 1) then
                     q(5) = i5+s(5) -1 
@@ -6531,7 +6311,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
                   do i4=j(4),k(4)
                     if(numsets.ge.4)then
                       c(4)=setElements(    aimsets(setIDs(4)).istart + i4 - 1 )
-                      line(LcolumnStart(4):LcolumnEnd(4)) = c(4)
+                      line(LcolumnStart(4)+4:LcolumnEnd(4)) = c(4)          !<-------------------- adjustment was made to accomodate 'ed::'
                     endif
                     if (s(4) .lt. 1) then
                          q(4) = i4+s(4) -1 
@@ -6542,7 +6322,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
                     do i3=j(3),k(3)
                       if(numsets.ge.3) then
                         c(3)=setElements(    aimsets(setIDs(3)).istart + i3 - 1)
-                        line(LcolumnStart(3):LcolumnEnd(3)) = c(3)
+                        line(LcolumnStart(3)+4:LcolumnEnd(3)) = c(3)            !<-------------------- adjustment was made to accomodate 'ed::'
                       endif
                       if (s(3) .lt. 1) then
                          q(3) = i3+s(3) -1 
@@ -6553,7 +6333,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
                       do i2=j(2),k(2)
                         if(numsets.ge.2)then
                           c(2)=setElements(    aimsets(setIDs(2)).istart + i2 - 1 )
-                          line(LcolumnStart(2):LcolumnEnd(2)) = c(2)
+                          line(LcolumnStart(2)+4:LcolumnEnd(2)) = c(2)          !<-------------------- adjustment was made to accomodate 'ed::'
                         endif
                         if (s(2) .lt. 1) then
                             q(2) = i2+s(2) -1 
@@ -6563,7 +6343,7 @@ subroutine get_efd_set_element(setname,ccode,icode)
                     
                         do i1=j(1),k(1)
                           c(1)=setElements(    aimsets(setIDs(1)).istart + i1 - 1 )
-                          line(LcolumnStart(1):LcolumnEnd(1)) = c(1)
+                          line(LcolumnStart(1)+4:LcolumnEnd(1)) = c(1)          !<-------------------- adjustment was made to accomodate 'ed::'
                           if (s(1) .lt. 1) then
                               q(1) = i1+s(1) -1 
                           else
@@ -6575,41 +6355,41 @@ subroutine get_efd_set_element(setname,ccode,icode)
                             iform=1
                             if(R4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0.0 .and. .not. isnan(R4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))) then
                             R8var = dble(R4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))
-                            write(        line(LcolumnStart(numsets+1):),form(2)) R8var
+                            write(        line(LcolumnStart(numsets+1)+4:),form(2)) R8var
     !                          write(        line(LcolumnStart(numsets+1):),form(iform)) R4ARRAY(s(1)+i1-j(1),s(2)+i2-j(2),s(3)+i3-j(3),s(4)+i4-j(4),s(5)+i5-j(5),s(6)+i6-j(6),s(7)+i7-j(7))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+23))
-                              if(line(LcolumnStart(numsets+1):).eq.'Infinity') line(LcolumnStart(numsets+1):)='Inf'
-                              if(line(LcolumnStart(numsets+1):).eq.'-Infinity') line(LcolumnStart(numsets+1):)='-Inf'
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+23+4))        !<----------- adjustment was made to accomodate 'ed::'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'Infinity') line(LcolumnStart(numsets+1)+4:)='Inf'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'-Infinity') line(LcolumnStart(numsets+1)+4:)='-Inf'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("R8")
                             iform=2
                             if(R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0.0 .and. .not. isnan(R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+23))
-                              if(line(LcolumnStart(numsets+1):).eq.'Infinity') line(LcolumnStart(numsets+1):)='Inf'
-                              if(line(LcolumnStart(numsets+1):).eq.'-Infinity') line(LcolumnStart(numsets+1):)='-Inf'
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+23+4))          !<----------- adjustment was made to accomodate 'ed::'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'Infinity') line(LcolumnStart(numsets+1)+4:)='Inf'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'-Infinity') line(LcolumnStart(numsets+1)+4:)='-Inf'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("I4")
                             iform=3
                             if(I4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) I4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+7))
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) I4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+7+4))         !<---------- adjustment was made to accomodate 'ed::'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("I2")
                             iform=4
                             if(I2ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) I2ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+4))
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) I2ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+4+4))         !<---------- adjustment was made to accomodate 'ed::'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("I1")
                             iform=5
                             if ((I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ge.-1) .and. (I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)) .le. 1)) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) abs(I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+4))
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) abs(I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))       
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+4+4))         !<---------- adjustment was made to accomodate 'ed::'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           end select
@@ -7261,7 +7041,7 @@ if (i1 .GT. 54) then
      comp_buffer(nline)= 'Composite table'
      comp_buflen(nline)=len_trim(comp_buffer(nline))
      nline=nline+1
-     write(comp_buffer(nline),'(30a)') (trim(setnames(i)),'  ',i=1,numsets),'  ',trim(ParamName)
+     write(comp_buffer(nline),'(30a)') (trim('ed::'//setnames(i)),'  ',i=1,numsets),'  ',trim('ed::'//ParamName)    !<------------------- 
      comp_buflen(nline)=len_trim(comp_buffer(nline))
      setIDS=0  
      setcopies=' '
@@ -7280,7 +7060,7 @@ if (i1 .GT. 54) then
        endif
        setcopies(i)=setnames(i)(1:ialt)  ! use setcopies for printing the elements (names without _ALT (alias) suffix
        LcolumnStart(i)=LcolumnEnd(i-1)+1
-       LcolumnEnd(i)=LcolumnStart(i)+len_trim(setnames(i))+1    
+       LcolumnEnd(i)=LcolumnStart(i)+len_trim('ed::'//setnames(i))+1        !<------------------- 
        if(alt_alias) then
          do j=1,numAimSets
            if( trim(aimsets(j).setname).eq. trim(setcopies(i))  ) then
@@ -7300,16 +7080,16 @@ if (i1 .GT. 54) then
        endif
      enddo  
      LcolumnStart(numsets+1) = LcolumnEnd(numsets) + 1
-     LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim(ParamName) -1
+     LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim('ed::'//ParamName) -1    !<------------------- 
 
      LastSetPos=LcolumnEnd(numsets)  ! save for end of set elements
 
  
      do i=1,numsets
        if(setIDs(i).gt.0) then
-         LcolumnEnd(i)=LcolumnStart(i)+len_trim( setElements( aimsets(  setIDs(i) ).istart ) )-1
+         LcolumnEnd(i)=LcolumnStart(i)+len_trim('ed::'//setElements( aimsets(  setIDs(i) ).istart ) )-1   !<------------------- 
        else
-         LcolumnEnd(i)=LcolumnStart(i)+len_trim(   efd_coeff( efd_sortidx(idxFirst) ).cset_elements(i)  ) -1
+         LcolumnEnd(i)=LcolumnStart(i)+len_trim( 'ed::'//efd_coeff( efd_sortidx(idxFirst) ).cset_elements(i)  ) -1   !<------------------- 
        endif
      enddo
 
@@ -7332,21 +7112,21 @@ if (i1 .GT. 54) then
 ! character string set element from SetElements that AIMMS will recognize 
        if(setIDs(i).gt.0) then ! true for aliased sets
          if(efd_coeff(ic).iset_elements(i).gt.0) then      
-           comp_buffer(nline)(LcolumnStart(i):LcolumnEnd(i)) = setElements(    aimsets(setIDs(i)).istart + efd_coeff(ic).iset_elements(i) -1) 
+           comp_buffer(nline)(LcolumnStart(i)+4:LcolumnEnd(i)) = setElements(    aimsets(setIDs(i)).istart + efd_coeff(ic).iset_elements(i) -1) 
          else
            skip=1
          endif
        else ! unaliased set: use set elements directly
          if(efd_coeff(ic).cset_elements(i).ne.' ') then      
-           comp_buffer(nline)(LcolumnStart(i):LcolumnEnd(i)) = efd_coeff(ic).cset_elements(i)
+           comp_buffer(nline)(LcolumnStart(i)+4:LcolumnEnd(i)) = efd_coeff(ic).cset_elements(i)
          else
            skip=1
          endif
        endif
      enddo
      if(skip.ne.1) then
-       write(comp_buffer(nline)(LastSetPos+1:LastSetPos+15),'(1PG15.7E2)') efd_coeff(ic).coeff8
-       comp_buflen(nline)=LastSetPos+15
+       write(comp_buffer(nline)(LastSetPos+1:LastSetPos+15+4),'(1PG19.7E2)') efd_coeff(ic).coeff8
+       comp_buflen(nline)=LastSetPos+15+4
      else
        nline=nline-1
      endif
@@ -7432,9 +7212,9 @@ if (i1 .GT. 54) then
    integer ifound
    character*216 line,previousline
    character*216 header
-   logical backwards/.true./,scalar,first_scalar,dash,goto10,emptyTable,withSafety,withoutSafety
+   logical backwards/.true./,scalar,first_scalar,dash,goto10,emptyTable,withSafety,withoutSafety,file_exists
    character*24 identifier
-   integer nline,idot,lline,ispace,iparen,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L,L2,irg
+   integer nline,idot,idot_start,lline,ispace,iparen,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L,L2,irg
    integer iyr
    real*4 timer
 
@@ -7443,6 +7223,12 @@ if (i1 .GT. 54) then
    
    
    write(filen,'(a,i4,a,i2.2,a)')  './efd/PassBack_',curcalyr,'_',curitr,'.txt'
+ 
+   INQUIRE(file=filen, EXIST=file_exists)
+   if(file_exists .eq. .false. ) then
+     write(6,*) 'EFD output file ',filen, ' not found: EFD AIMMS did not complete, stopping run'
+     stop
+   endif
 
    call unitunopened(100,999,IUNIT)
    open(iunit,file=filen,FORM='FORMATTED',ACCESS = 'SEQUENTIAL',STATUS='UNKNOWN')
@@ -7490,7 +7276,8 @@ if (i1 .GT. 54) then
        first_scalar=.true.  ! indicates the the current line holds the assignment for the first of 4 scalars.
        ! get row/column name
        idot=index(header,':=')
-       identifier=adjustl(header(:idot-1))
+       idot_start=index(header,'ed::')
+       identifier=adjustl(header(idot_start+4:idot-1))  !<-------------- scalars have ed:: before variable name
      else
        scalar=.false.  
        first_scalar=.false.
@@ -8250,7 +8037,7 @@ if (i1 .GT. 54) then
 ! a complication:  the headers showing set names are AIMMS alias for different versions of the sets (of different length) as used to construct OML names, or refer to sets used
 ! multiple times in an identifer, such as region_ALTfrom and region_ALTto.  The AIMMS set elements read from the file for these aliases are those for the primary set with "_ALT*" omitted,
 ! so often these set elements must be translated from the primary set version to the alternate set version used in the OML names.
-
+   use ifcore, only : commitqq
    use efd_row_col
    implicit none
    include 'parametr'
@@ -8265,11 +8052,11 @@ if (i1 .GT. 54) then
    integer Lcolumnend(0:12)
    character*40 fieldname(0:12),fields(0:12) ! allocate space for 13 fields, or 12 starting at 1
    integer iUnit/-1/,min_unit/100/,ifound
-   character*216 line
-   character*216 header
-   logical backwards/.true./,scalar,first_scalar,dash,goto10
+   character*300 line
+   character*300 header
+   logical backwards/.true./,scalar,first_scalar,dash,goto10,lresult,file_exists
    character*24 identifier
-   integer nline,idot,ispace,lline,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L,a
+   integer nline,idot,ispace,lline,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L,a,idlen
    character*5 afield,setname*32
    logical withSafety,withoutSafety,lopened
    integer iret,idbg,IX
@@ -8279,27 +8066,51 @@ if (i1 .GT. 54) then
    character*16 wfield(5)
 
 ! for AIMMS validation, check for cplex mps file. if found, copy to new file named with model year and iteration.
-   write(line,'(a,i4,a,i2.2,a)') 'if exist .\efd\cpx00000.mps copy /Y .\efd\cpx00000.mps .\efd\cpx_',curcalyr,'_',curitr,'.mps'
-   call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-   line=' '   
+    open (unit=iunit,file='move_mps.bat',status='unknown')
+    write(iunit,'(a)') '@echo off'
+    write(iunit,'(a)') 'cd main\aimms_endpoint'
+    write(iunit,'(a)') 'for /f "tokens=*" %%i in (''dir cpx0*.mps /b /o:d'') do (set "latestFile=%%i")'
+    write(iunit,'(a,i4,a)') 'if defined latestFile (copy "%latestFile%" "..\..\efd\cpx_',curcalyr,'.mps" /y)'
+    write(iunit,'(a)') 'del cpx0*.mps'
+    write(iunit,'(a)') 'cd ..\..'
+    lresult=commitqq(iunit)  ! use ifcore: force data to be written to file immediately
+    close(iunit)
+    write(line,'(a)') 'call move_mps.bat'
+    call callsys(iret,line)
+    write(line,'(a)') 'del move_mps.bat'
+    call callsys(iret,line)
+    line=' ' 
+   
 
 ! for AIMMS validation, check for efd.lis file that includes aimms-to-cplex crosswalk. if found, copy to new file named with model year and iteration.
-   write(line,'(a,i4,a,i2.2,a)') 'if exist .\efd\log\efd.lis copy /Y .\efd\log\efd.lis .\efd\log\efd_',curcalyr,'_',curitr,'.lis'
+   write(line,'(a,i4,a,i2.2,a)') 'if exist .\efd\log\aimms_endpoint.lis copy /Y .\efd\log\aimms_endpoint.lis .\efd\log\efd_',curcalyr,'_',curitr,'.lis'
    call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-   line=' '   
+   line=' '
+   write(line,'(a)') 'if exist .\efd\log\aimms_endpoint.lis  del .\efd\log\aimms_endpoint.lis '
+   call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
+   line=' '
+   !open (iunit,file='main\aimms_frame_p2\log\aimms_frame_p2.lis',status='unknown')
+   !close(iunit)  
 
 ! for AIMMS debugging, check for messages.log file that includes aimms status messages. if found, copy to new file named with model year and iteration.
-   write(line,'(a,i4,a,i2.2,a)') 'if exist .\efd\log\messages.log copy /Y .\efd\log\messages.log .\efd\log\messages_',curcalyr,'_',curitr,'.log'
+   write(line,'(a,i4,a,i2.2,a)') 'if exist .\main\aimms_endpoint\log\messages.log copy /Y .\main\aimms_endpoint\log\messages.log .\efd\log\messages_',curcalyr,'_',curitr,'.log'
    call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-   line=' '   
-
-! for AIMMS debugging, check for aimms.err file that includes aimms error messages. if found, copy to new file named with model year and iteration.
-   write(line,'(a,i4,a,i2.2,a)') 'if exist .\efd\log\aimms.err copy /Y .\efd\log\aimms.err .\efd\log\aimms_',curcalyr,'_',curitr,'.err'
+   line=' ' 
+   write(line,'(a)') 'if exist .\main\aimms_endpoint\log\messages.log  del .\main\aimms_endpoint\log\messages.log '
    call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-   line=' '   
+   line=' '
+   open (iunit,file='main\aimms_endpoint\log\messages.log',status='unknown')
+   close(iunit)  
 
    write(filen,'(a,i4,a,i2.2,a)')  './efd/OutToNEMS_',curcalyr,'_',curitr,'.txt'
    num_efd_col_sol=0
+
+   INQUIRE(file=filen, EXIST=file_exists)
+   if(file_exists .eq. .false. ) then
+     write(6,*) 'EFD output file ',filen,' not found: EFD AIMMS did not complete, stopping run'
+     stop  
+   endif
+
    call unitunopened(100,999,IUNIT)
    open(iunit,file=filen,FORM='FORMATTED',ACCESS = 'SEQUENTIAL',STATUS='UNKNOWN')
 
@@ -8366,6 +8177,8 @@ if (i1 .GT. 54) then
        idot=index(header,':=')
 ! determine if r or c:
        identifier=adjustl(header(:idot-1))
+       idlen = len(identifier)
+       identifier = identifier(5:idlen)   !<----------- drop first 4 char for 'ed::'
        if (identifier(1:1).eq.'c') then
          iden_type='col '
        elseif (identifier(1:1).eq.'r') then
@@ -8416,7 +8229,7 @@ if (i1 .GT. 54) then
          go to 10
        endif
        ispace=index(header(1:idot),' ',backwards)
-       identifier=header(ispace+1:idot-1)
+       identifier=header(ispace+1+4:idot-1)  !<------------ add 4 for 'ed::'
        if (identifier(1:1).eq.'c'.and.(index(header,'ReducedCost').gt.0 .or. scalar)) then
          iden_type='col '
        elseif (identifier(1:1).eq.'r'.and.(index(header,'ReducedCost').gt.0 .or. scalar)) then ! in case some free rows are implemented as columns instead of parameter
@@ -8467,7 +8280,7 @@ if (i1 .GT. 54) then
          elseif(dash .and. line(i:i).ne.'-') then
            dash=.false.
            Lcolumnend(nfields)=i-1
-           fieldname(nfields)=adjustl(header(Lcolumnstart(nfields):Lcolumnend(nfields))) ! adjustl: remove leading blanks
+           fieldname(nfields)=adjustl(header(Lcolumnstart(nfields)+4:Lcolumnend(nfields))) ! adjustl: remove leading blanks
          endif
        enddo
        if(iden_type.eq.'col') then  ! should be 5 fields for each column solution header record and 1 field for each set in the index space
@@ -9200,8 +9013,6 @@ endif
     
     efdcolnam=column
 
-      if(make_efd_aimms) return ! there is no AIMMS solution if this is a make_efd_aimms run, so return
-
 ! look up OML col names in the AIMMS solution list, efd_col_sol.  
 ! use hash table for col names for fast lookup of solution record "isol"
 ! based on the col name.
@@ -9253,8 +9064,6 @@ endif
     character*6  scodes/'ASLUP '/
     
     efdrownam=row
-
-    if(make_efd_aimms) return ! there is no AIMMS solution if this is a make_efd_aimms run. so return
 
       ! look up OML row names in the AIMMS solution list, efd_row_sol. 
 ! use hash table for row names for fast lookup of solution record "isol"
@@ -9670,969 +9479,222 @@ end function ihash
 
 ! AIMMS_ECP Invokes and transfers data to/from AIMMS ECP model   
       SUBROUTINE AIMMS_ECP(OPTION)
-      use ecp_row_col
-      use ifport, only:timef,sleepqq,getcwd
-      use ifcore, only : commitqq
-      implicit none
-
-! Steps in the Process 
-! 1) Transfer ECP LP data to the the AIMMS ECP project.
-! 2) Initialize the monitor.in.txt file to communicate with ecp.
-! 3) Invoke the AIMMS ECP project from the command line with the monitor procudure.
-! 4) Write out the monitor.in.txt file to instruct the AIMMS project to run the
-!    mainExecution procedure and write results back to NEMS.
-! 5) Wait for AIMMS to finish by periodically reading monitor.out.txt file.
-! 6) initialize the monitor.in.txt file with a Wait command.
-
-! argument option:  'end' causes the AIMMS project to be closed down via a
-! command sent to monitor.in.txt
-      
-      include 'aimms_c_face'
-      include 'parametr'
-      INCLUDE 'ncntrl'
-
-      character*3 option
-
-!---------------------------------------------------------------
-! AIMMS-related variables
-      integer(KIND=4) ret,procedureRet,iret
-      character*80 projectName,aimmsFolder
-      CHARACTER*255 cwd                               !*********************************************************addded by AKN
-      logical lexist,aimms_opened/.false./,no_aimms/.false./,aimms_error/.false./,aimms_gsw_opened/.true./,aimms_ge_opened/.true./
-!
-     integer monitordbg, monitordbg_ge,  monitordbg_gsw! unit number for monitor.debug.txt
-     common/monitor_ecp/monitordbg, monitordbg_ge,  monitordbg_gsw
-     logical opened_yet/.false./  ! indicator if monitordbg has been opened yet.
-     logical file_exists/.false./ ! indicator if file does exist or not
-     logical lresult
-     integer iPID, iPIDlist, iPID2 ! process ID from oscall_pid
-     integer nmessage,nchar ! counts of lines and characters in
-     integer ikill  ! set to 1 if aimms.exe has to be killed
-     character curdate*8,curtime*10
-     character*80 aimms64,AIMMSLOC*66
+        use ecp_row_col
+        use ifport, only:timef,sleepqq,getcwd
+        use ifcore, only : commitqq
+        implicit none
   
-      real*4 timer,timer2,mtimer
-
-      real*4 scalar_r(1)      ! single element real array to pass a scalar 
-      integer*4 scalar_i(1)   ! single element integer array to pass a scalar 
-      integer iyr,ipy,rs,ip,L
-      integer iwait ! argument for oscall: if 0, wait indefinitly
-      integer eunit,ntries,counter,ntriesmax/3/
-      character cmd*200,args*200,line*150,line_ge*150,line_gsw*150,filen*100,filen_g*100,fileName*100  &
-                , filen_ge*150, filen_gsw*150   
-      logical license_issue,CPLEX_issue
-      
-      integer(4) istat
-
-      AIMECPPAR = RTOVALUE('AIMECPPAR',0)
-! first time through, get aimms foldername and open monitor debug file
-      if(.not. opened_yet) then
-      !  get AIMMS  foldername
-          no_aimms=.false.
-          call RTOSTRING('AIMMSLOC',AIMMSLOC) !  e.g., 'C:\AIMMS_Installation_Free_Releases\4.8.1.299-x64'
-          aimmsFolder = trim(AIMMSLOC)//char(0)
-          aimms64 = trim(AIMMSLOC)//'\bin\aimms.exe'
-          inquire(file=aimms64,exist=lexist)
-          if(.not. lexist) then
-             write(6,'(2a)') 'AIMMS executable, "\bin\aimms.exe", not found in location specified in scedes by AIMMSLOC: ',trim(AIMMSLOC)
-          endif
-
-        opened_yet=.true.
+  ! Steps in the Process 
+  ! 1) Transfer ECP LP data to the the AIMMS ECP project.
+  ! 2) Initialize the monitor.in.txt file to communicate with ecp.
+  ! 3) Invoke the AIMMS ECP project from the command line with the monitor procudure.
+  ! 4) Write out the monitor.in.txt file to instruct the AIMMS project to run the
+  !    mainExecution procedure and write results back to NEMS.
+  ! 5) Wait for AIMMS to finish by periodically reading monitor.out.txt file.
+  ! 6) initialize the monitor.in.txt file with a Wait command.
+  
+  ! argument option:  'end' causes the AIMMS project to be closed down via a
+  ! command sent to monitor.in.txt
         
-        if (AIMECPPAR .eq. 0) then
-            call unitunopened(100,999,monitordbg)
-            open(monitordbg,file='ecp\monitor.debug.txt',status='unknown')
-            rewind monitordbg
-        else
-            call unitunopened(100,999,monitordbg_ge)
-            open(monitordbg_ge,file='ecp\ecp_ge\monitor.debug.txt',status='unknown')
-            rewind monitordbg_ge
-            open(monitordbg_gsw,file='ecp\ecp_gsw\monitor.debug.txt',status='unknown')
-            rewind monitordbg_gsw
-        endif
-      endif  
-
-      if (Option .eq. 'end') then
-        if(aimms_opened) then
-          if (AIMECPPAR .eq. 0) then
-             call end_AIMMS
-          else
-             call end_AIMMS2                                                       !****************************** make an appropritate modifications to close three opened licenses
-         endif
-          aimms_opened=.false.
-        endif
-        return
-      endif
-      if(make_ecp_aimms) return ! if this is a run to generate AIMMS LP structure, don't invoke aimms, just return
- 
-      timer=timef()   
-     fileName = ''
-! 1) Send the LP coefficients in bulk to AIMMS, then send a subset of EMM arrays to aimms
-!   First, write out each AIMMS coefficient array as a AIMMS parameter using the composite table format
-     if (AIMECPPAR .eq. 0) then
-         write(filen,'(a,i4,a)')  './ecp/composite_',curcalyr,'.txt'
-         call unitunopened(100,999,iOutTxt)
-     !if (AIM_Phase.eq.1) then 
-         open(iOutTxt,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-         rewind iOutTxt
-         if (SKIP_ECPOML .eq. .FALSE. ) then   !not to pass coefficient values to AIMECP 
-             do ip=1,max_aimms_param
-                if(len_trim(aimparm(ip).name).gt.0 .and. (aimparm(ip).status .eq. 1 .or. AIMECPBG.eq.1)) then
-                  call AIMMS_OutTxt_ecp(aimparm(ip).name,  aimparm(ip).idxFirst, aimparm(ip).idxLast, aimparm(ip).setNames)
-                endif
-              enddo
+        include 'parametr'
+        INCLUDE 'ncntrl'
+  
+        character*3 option
+  
+  !---------------------------------------------------------------
+  ! AIMMS-related variables
+        integer(KIND=4) ret,procedureRet,iret
+        character*80 projectName,aimmsFolder
+        CHARACTER*255 cwd                               !*********************************************************addded by AKN
+        logical lexist,aimms_opened/.false./,no_aimms/.false./,aimms_error/.false./,aimms_gsw_opened/.true./,aimms_ge_opened/.true./
+        logical aimmspathfile/.false./
+  !
+       integer monitordbg, monitordbg_ge,  monitordbg_gsw! unit number for monitor.debug.txt
+       common/monitor_ecp/monitordbg, monitordbg_ge,  monitordbg_gsw
+       logical opened_yet/.false./  ! indicator if monitordbg has been opened yet.
+       logical file_exists/.false./ ! indicator if file does exist or not
+       logical lresult
+       logical ran_successfully/.false./ 
+       logical aimmserr/.false./,aimmserr_ge/.false./,aimmserr_gsw/.false./
+       integer iPID, iPIDlist, iPID2 ! process ID from oscall_pid
+       integer nmessage,nchar ! counts of lines and characters in
+       integer ikill  ! set to 1 if aimms.exe has to be killed
+       character curdate*8,curtime*10,nemspyenv*40
+       character*80 aimms64,AIMMSLOC*66
+       character*100 ecp_sub_folder
+    
+        real*4 timer,timer2,mtimer
+  
+        real*4 scalar_r(1)      ! single element real array to pass a scalar 
+        integer*4 scalar_i(1)   ! single element integer array to pass a scalar 
+        integer iyr,ipy,rs,ip,L
+        integer iwait ! argument for oscall: if 0, wait indefinitly
+        integer eunit,eunit2,ntries,counter,ntriesmax/3/
+        character cmd*200,args*200,line*216,line_ge*216,line_gsw*216,filen*100,filen_g*100,fileName*100  &
+                  , filen_ge*150, filen_gsw*150   
+        logical CPLEX_issue
+        integer wUnit/28345/
+        
+        integer(4) istat
+  
+  ! first time through, get aimms foldername and open monitor debug file
+        if(.not. opened_yet) then
+        !  get AIMMS  foldername
+            no_aimms=.false.
+            call RTOSTRING('AIMMSLOC',AIMMSLOC) !  e.g., 'C:\AIMMS_Installation_Free_Releases\4.8.1.299-x64'
+            aimmsFolder = trim(AIMMSLOC)//char(0)
+            aimms64 = trim(AIMMSLOC)//'\bin\aimms.exe'
+            inquire(file=aimms64,exist=lexist)
+            if(.not. lexist) then
+               write(6,'(2a)') 'AIMMS executable, "\bin\aimms.exe", not found in location specified in scedes by AIMMSLOC: ',trim(AIMMSLOC)
+            endif
+  
+          opened_yet=.true.
+        
+          call unitunopened(100,999,monitordbg)
+          open(monitordbg,file='ecp\monitor.debug.txt',status='unknown')
+          rewind monitordbg
+        endif  
+  
+        if (Option .eq. 'end') then
+          if(aimms_opened) then
+  
+            aimms_opened=.false.
           endif
-          write(iOutTxt,'(a,i1,a)') 'AIMECPBG := ',AIMECPBG,' ;'
-          write(iOutTxt,'(a,i1,a)') 'AIMECPPAR := ',AIMECPPAR,';'
-          write(iOutTxt,'(a,i1,a)') 'RUN45Q := ',  RTOVALUE('RUN45Q  ',0),' ;'
-          write(iOutTxt,'(a,i1,a)') 'EPHRTS := ',  RTOVALUE('EPHRTS  ',0),' ;'
+          return
+        endif
+   
+        timer=timef()   
+       fileName = ''
+  ! 1) Send the LP coefficients in bulk to AIMMS, then send a subset of EMM arrays to aimms
+  !   First, write out each AIMMS coefficient array as a AIMMS parameter using the composite table format
+           write(filen,'(a,i4,a)')  './ecp/composite_',curcalyr,'.txt'
+           call unitunopened(100,999,iOutTxt)
+       !if (AIM_Phase.eq.1) then 
+           open(iOutTxt,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
+           rewind iOutTxt
+           if (SKIP_ECPOML .eq. .FALSE. ) then   !not to pass coefficient values to AIMECP 
+               do ip=1,max_aimms_param
+                  if(len_trim(aimparm(ip).name).gt.0 .and. (aimparm(ip).status .eq. 1 .or. AIMECPBG.eq.1)) then
+                    call AIMMS_OutTxt_ecp(aimparm(ip).name,  aimparm(ip).idxFirst, aimparm(ip).idxLast, aimparm(ip).setNames)
+                  endif
+                enddo
+            endif
+            write(iOutTxt,'(a,i1,a)') 'ec::AIMECPBG := ',AIMECPBG,' ;'
+            write(iOutTxt,'(a,i1,a)') 'ec::RUN45Q := ',  RTOVALUE('RUN45Q  ',0),' ;'
+            write(iOutTxt,'(a,i1,a)') 'ec::EPHRTS := ',  RTOVALUE('EPHRTS  ',0),' ;'
+  
+      !   Second, write out the EMM arrays to AIMMS where they will be used to derive the LP coefficient parameters in AIMMS directly, 
+      !   eventually replacing the coeffient parameters passed in bulk 
+            call AIMMS_Transfer_Out_ecp
+            lresult=commitqq(IoutTxt)  ! use ifcore: force data to be written to file immediately
+            close(iOutTxt)
 
-    !   Second, write out the EMM arrays to AIMMS where they will be used to derive the LP coefficient parameters in AIMMS directly, 
-    !   eventually replacing the coeffient parameters passed in bulk 
-          call AIMMS_Transfer_Out_ecp
-          lresult=commitqq(IoutTxt)  ! use ifcore: force data to be written to file immediately
-          close(iOutTxt)
-     else
-         l=len_trim(aimmsFolder)-1
-         cmd=aimmsFolder(:l)//'\bin\aimmsCmd.exe '
-         call Mreplace(cmd,'\','/');
-         
-         write(filen_ge,'(a)')  './ecp/CurrentRunYear.txt'    !*****************************************************************Pass current run year to run_ecp_parallel.py
-         call unitunopened(100,999,iOutTxt)
-         open(iOutTxt,file=filen_ge,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-         write(iOutTxt,'(i4)') curcalyr
-         close(iOutTxt)
-         
-         write(filen_ge,'(a,i4,a)')  './ecp/ecp_ge/ecp_ge_cmds_',curcalyr,'.txt'    !*****************************************************************write an AIMMS command file into folder ecp_ge
-         call unitunopened(100,999,iOutTxt)
-     !if (AIM_Phase.eq.1) then 
-         open(iOutTxt,file=filen_ge,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-         write(iOutTxt,'(a,i1,a)') 'Let AIMECPBG := ',AIMECPBG,';'
-         write(iOutTxt,'(a,i1,a)') 'Let AIMECPPAR := ',AIMECPPAR,';'
-         write(iOutTxt,'(a,i4,a)') "Let CURCALYR('1') := ",curcalyr,';'
-         write(iOutTxt,'(a)') "Let CURITR('1') := 1;"
-         write(iOutTxt,'(a,i1,a)') 'Let RUN45Q := ',  RTOVALUE('RUN45Q  ',0),';'
-         write(iOutTxt,'(a,i1,a)') 'Let EPHRTS := ',  RTOVALUE('EPHRTS  ',0),';'
-         !write(iOutTxt,'(a)') "Run MainExecution;"
-         write(iOutTxt,'(a)') "Run NEMS_Monitor;"
-         write(iOutTxt,'(a)') "Quit; "
-         close(iOutTxt)
-         
-         
-         write(filen_gsw,'(a,i4,a)')  './ecp/ecp_gsw/ecp_gsw_cmds_',curcalyr,'.txt'    !*****************************************************************write an AIMMS command file into folder ecp_gs
-         call unitunopened(100,999,iOutTxt)
-     !if (AIM_Phase.eq.1) then 
-         open(iOutTxt,file=filen_gsw,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-         write(iOutTxt,'(a,i1,a)') 'Let AIMECPBG := ',AIMECPBG,';'
-         write(iOutTxt,'(a,i1,a)') 'Let AIMECPPAR := ',AIMECPPAR,';'
-         write(iOutTxt,'(a,i4,a)') "Let CURCALYR('1') := ",curcalyr,';'
-         write(iOutTxt,'(a)') "Let CURITR('1') := 1;"
-         write(iOutTxt,'(a,i1,a)') 'Let RUN45Q := ',  RTOVALUE('RUN45Q  ',0),';'
-         write(iOutTxt,'(a,i1,a)') 'Let EPHRTS := ',  RTOVALUE('EPHRTS  ',0),';'
-         !write(iOutTxt,'(a)') "Run MainExecution;"
-         write(iOutTxt,'(a)') "Run NEMS_Monitor;"
-         write(iOutTxt,'(a)') "Quit; "
-         close(iOutTxt)
-              
        
-         
-         write(filen_g,'(a,i4,a)')  './ecp/composite_',curcalyr,'.txt'    !*****************************************************************write a compoiste file into folder ecp_g
-         fileName = filen_g
-         call unitunopened(100,999,iOutTxt)
-     !if (AIM_Phase.eq.1) then 
-         open(iOutTxt,file=filen_g,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-         rewind iOutTxt
-         if (SKIP_ECPOML .eq. .FALSE. ) then   !not to pass coefficient values to AIMECP 
-             do ip=1,max_aimms_param
-                if(len_trim(aimparm(ip).name).gt.0 .and. (aimparm(ip).status .eq. 1 .or. AIMECPBG.eq.1)) then
-                  call AIMMS_OutTxt_ecp(aimparm(ip).name,  aimparm(ip).idxFirst, aimparm(ip).idxLast, aimparm(ip).setNames)
-                endif
-              enddo
-          endif
-          write(iOutTxt,'(a,i1,a)') 'AIMECPBG := ',AIMECPBG,' ;'
-          write(iOutTxt,'(a,i1,a)') 'AIMECPPAR := ',AIMECPPAR,' ;'
-          write(iOutTxt,'(a,i1,a)') 'RUN45Q := ',  RTOVALUE('RUN45Q  ',0),' ;' 
-          write(iOutTxt,'(a,i1,a)') 'EPHRTS := ',  RTOVALUE('EPHRTS  ',0),' ;'
-
-    !   Second, write out the EMM arrays to AIMMS where they will be used to derive the LP coefficient parameters in AIMMS directly, 
-    !   eventually replacing the coeffient parameters passed in bulk 
-          call AIMMS_Transfer_Out_ecp
-          lresult=commitqq(IoutTxt)  ! use ifcore: force data to be written to file immediately
-          close(iOutTxt)
-          call ecp_aimms_init_par   ! produces modified set definitions for regional interconnection (parallel version of ECP)
-          ISTAT = GETCWD(cwd)
-          call mreplace(fileName,'./ecp/',"")
-          cmd=trim(cwd)//'\ecp\AppendFile2.bat '//trim(fileName)
-          CALL execute_command_line(cmd,WAIT=.true.,EXITSTAT=iret)    !*****************************************************************copy the composite file into folder ecp_ge, ecp_gsw
-          if(iret.ne.0) then
-             write(6,'(a,i4)') 'AIMMS error appending Composite_plus.txt to '//trim(fileName)//' in folder ecp, return code=',iret
-          endif
-          cmd=trim(cwd)//'\ecp\copyFile2.bat '//trim(fileName)
-          CALL execute_command_line(cmd,WAIT=.true.,EXITSTAT=iret)    !*****************************************************************copy the composite file into folder ecp_ge, ecp_gsw
-          if(iret.ne.0) then
-             write(6,'(a,i4)') 'AIMMS error copying '//trim(fileName)//' into subfolders under ecp, return code=',iret
-          endif
-    endif
-     
-    !elseif (AIM_Phase.eq.2) then
-          !INQUIRE(file=filen, EXIST=file_exists)
-          !if (file_exists.eq..true.) then
-             !open(iOutTxt,file=filen,status='old',access='append',BUFFERED='YES',BUFFERCOUNT=10)
-             !call AIMMS_Transfer_Out_ecp
-             !lresult=commitqq(iOutTxt)  ! use ifcore: force data to be written to file immediately
-             !close(iOutTxt)
-          !else
-             !write(6,'(a)') 'Composit file '//filen//' is missing. Fortran EMM arrays adjusted after LP solved cannot be passed to AIMMS.'
-          !endif
-    !endif
-        
-      write(6,*)'AIMMS Interface: seconds to write output for ECP AIMMS',timef()-timer
-
-      ntries=1
-100   continue ! return to here from below if license error occurs to retry up to "ntriesmax-ntries" more times. 
-
-        
-! 2) inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-      if (AIMECPPAR .eq. 0) then
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\monitor.in.txt',status='unknown')
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "Wait";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\ecp_ge\monitor.in.txt',status='unknown')
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "Wait";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          write(eunit,'(a)') "RegGridIndex('1') := 1;"
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg_ge,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
+      !elseif (AIM_Phase.eq.2) then
+            !INQUIRE(file=filen, EXIST=file_exists)
+            !if (file_exists.eq..true.) then
+               !open(iOutTxt,file=filen,status='old',access='append',BUFFERED='YES',BUFFERCOUNT=10)
+               !call AIMMS_Transfer_Out_ecp
+               !lresult=commitqq(iOutTxt)  ! use ifcore: force data to be written to file immediately
+               !close(iOutTxt)
+            !else
+               !write(6,'(a)') 'Composit file '//filen//' is missing. Fortran EMM arrays adjusted after LP solved cannot be passed to AIMMS.'
+            !endif
+      !endif
           
-          !call unitunopened(100,999,EUNIT)
-          !open(eunit,file='ecp\ecp_gs\monitor.in.txt',status='unknown')
-          !rewind eunit
-          !write(eunit,'(a)')      'sAction             := "Wait";'
-          !write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          !write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          !write(eunit,'(a)') "RegGridIndex('1') := 2;"
-          !lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          !close(eunit)
-          !call date_and_time(curdate,curtime)
-          !write(monitordbg_gs,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          !
-          !call unitunopened(100,999,EUNIT)
-          !open(eunit,file='ecp\ecp_gw\monitor.in.txt',status='unknown')
-          !rewind eunit
-          !write(eunit,'(a)')      'sAction             := "Wait";'
-          !write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          !write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          !write(eunit,'(a)') "RegGridIndex('1') := 3;"
-          !lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          !close(eunit)
-          !call date_and_time(curdate,curtime)
-          !write(monitordbg_gw,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
+        write(6,*)'AIMMS Interface: seconds to write output for ECP AIMMS',timef()-timer
+  
+  !      ntries=1
+  !100   continue ! return to here from below if license error occurs to retry up to "ntriesmax-ntries" more times. 
+  
           
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\ecp_gsw\monitor.in.txt',status='unknown')
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "Wait";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          write(eunit,'(a)') "RegGridIndex('1') := 4;"
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg_gsw,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif 
-     
+  ! 2) inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
+            ! open(eunit,file='ecp\monitor.in.txt',status='unknown')
+            ! rewind eunit
+            !write(eunit,'(a)')      'sAction             := "Wait";'
+            ! write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
+            ! write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
+            ! lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
+            ! close(eunit)
+            
+            ! clean up perviously created log, lis, and mps files found under the endpoint project folder to prevent accumulation of mixed messgeas from running different models
+            ! for AIMMS validation, check for previously generated cplex mps file under aimms_frame_p2 folder. if found, delete them.       
+             write(line,'(a)') 'del .\main\aimms_endpoint\cpx0*.mps'
+             call callsys(iret,line)
+             line=' ' 
+             ! for AIMMS debugging, check for a previously generated messages.log file that includes aimms status messages. if found, delete it.
+             write(line,'(a)') 'if exist .\main\aimms_endpoint\log\messages.log  del .\main\aimms_endpoint\log\messages.log '
+             call callsys(iret,line)
+             line=' '
+                      
+            ! for AIMMS validation, check for rest.lis file larger than 1024 bytes that includes aimms-to-cplex crosswalk. if found, copy to new file named with model year and iteration.
+            write(line,'(a)') 'if exist .\ecp\log\aimms_endpoint.lis del .\ecp\log\aimms_endpoint.lis '
+            lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+            call callsys(iret,line)
+            line=' '  
+            
+            call date_and_time(curdate,curtime)
+            write(monitordbg,'(a,t45,3a,i5,i3)') 'endpoint_p2_caller.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
+            write(6,'(a,t45,5a,i5,i3,i5)') 'Calling ECP AIMMS : ',curtime(1:2),':',curtime(3:4),':',curtime(5:10),curcalyr,curitr,monitordbg
 
+            !write lines to write out main\endpoint_p2_caller.txt to contain curcalyr,curiter, module name (ecp, efd, rest)
+            call unitunopened(100,999,eunit2)
+            open(eunit2,file='main\endpoint_p2_caller.txt',status='unknown')
+            write(eunit2,'(a,i4)') "cycle     : ",CURIRUN
+            write(eunit2,'(a,i4)') "year      : ",curcalyr
+            write(eunit2,'(a,i2)') "iter      : ",curitr
+            write(eunit2,'(a,i2)') "ncrl      : ",0
+            write(eunit2,'(2a)') "my_module : ","ecp"
+            close(eunit2)
+       
+  
+        timer = timef()
+  !  3) Invoke AIMMS from the command line using EXECUTE_COMMAND_LINE()  
+  !      if(.not. aimms_opened ) then
+            
+              istat = getcwd(cwd)
+              call rtostring('NEMSPYENV',nemspyenv)
+              cmd=trim(cwd)//'\main\call_p2_endpoint.bat'
+              open (unit=wunit,file=cmd,status='unknown')                               !added to replace static \main\call_p2_endpoint.bat  with code driven one
+              write(wunit,'(a)') 'pushd %~dp0'                                          !added to replace static \main\call_p2_endpoint.bat  with code driven one
+              write(wunit,'(2a)') 'SET myENV=',trim(nemspyenv)                          !added to replace static \main\call_p2_endpoint.bat  with code driven one
+              write(wunit,'(a)') 'call C:\python_environments\%myENV%\scripts\activate' !added to replace static \main\call_p2_endpoint.bat  with code driven one
+              write(wunit,'(a)') 'python p2_endpoint_run_api.py'                        !added to replace static \main\call_p2_endpoint.bat  with code driven one
+              lresult=commitqq(wunit)                                                   !added to replace static \main\call_p2_endpoint.bat  with code driven one
+              close(wunit)                                                              !added to replace static \main\call_p2_endpoint.bat  with code driven one 
 
-!  3) Invoke AIMMS from the command line using OSCALL  
-      if(.not. aimms_opened ) then
           
-        if (AIMECPPAR .eq. 0) then
-            l=len_trim(aimmsFolder)-1
-            cmd=aimmsFolder(:l)//'\bin\aimms.exe '
-        else
-            ISTAT = GETCWD(cwd)
-            cmd=trim(cwd)//'\ecp\RunAIMECP_parallel.bat'
-        endif
-
-        args='--hidden --license-wait-seconds 120 -RNEMS_monitor .\\ecp\\ecp.aimms'
-!        args=' --license-wait-seconds 120 -RNEMS_monitor .\\ecp\\ecp.aimms'
+  !         args='--hidden --license-wait-seconds 120 -RNEMS_monitor .\\ecp\\ecp.aimms'
+  ! !        args=' --license-wait-seconds 120 -RNEMS_monitor .\\ecp\\ecp.aimms'
         write(6,'(2a)') 'AIMMS Command line is ',trim(cmd)//' '//trim(args)
         write(6,'(a,i4,a)') 'AIMMS ',curcalyr,'    Opening AIMMS project, procedure NEMS_monitor'
         call date_and_time(curdate,curtime)
-        if (AIMECPPAR .eq. 0) then
             write(monitordbg,'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-        else
-            write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-            !write(monitordbg_gs,'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-            !write(monitordbg_gw,'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-            write(monitordbg_gsw,'(a,t45,3a,i5,i3,i2)') '                : Opening Aimms Project', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-        endif
-
-        iwait=0
-       
-    
-        if (AIMECPPAR .eq. 0) then
-            call oscall(iwait,cmd,args,iret)       
-        else    
-            CALL execute_command_line(cmd,WAIT=.false.,CMDSTAT=iret)                                     !***************************  replace this with a new command driven AIMMS execution 
-        endif
-        if(iret.eq.0) then
-          aimms_opened=.true.      
-          aimms_gsw_opened=.true.
-          aimms_ge_opened=.true.
-        else
-          if (AIMECPPAR .eq. 0) then
-          write(6,'(a,i4,a)') 'AIMMS error running ecp/ecp.aimms, return code=',iret
-          else
-                write(6,'(a,i4,a)') 'AIMMS error running ecp/ecp_ge/ecp.aimms and ecp/ecp_gsw/ecp.aimms , return code=',iret
-          endif
-          aimms_opened=.false.  
-        endif
-
-        write(6,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to open project:',timef()-timer
-
-      endif
-    
-
-      timer=timef()
-
-! Initialize AIMMS output message file so this routine won't see old one and think AIMMS is finished
-      if (AIMECPPAR .eq. 0) then
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\monitor.out.txt',status='unknown',SHARED)
-          rewind eunit
-          write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-          lresult=commitqq(eunit)
-          close(eunit) 
-      else
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\ecp_ge\monitor.out.txt',status='unknown',SHARED)
-          rewind eunit
-          write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-          lresult=commitqq(eunit)
-          close(eunit) 
           
-          !call unitunopened(100,999,EUNIT)
-          !open(eunit,file='ecp\ecp_gs\monitor.out.txt',status='unknown',SHARED)
-          !rewind eunit
-          !write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-          !lresult=commitqq(eunit)
-          !close(eunit) 
-          !
-          !call unitunopened(100,999,EUNIT)
-          !open(eunit,file='ecp\ecp_gw\monitor.out.txt',status='unknown',SHARED)
-          !rewind eunit
-          !write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-          !lresult=commitqq(eunit)
-          !close(eunit) 
-          
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\ecp_gsw\monitor.out.txt',status='unknown',SHARED)
-          rewind eunit
-          write(eunit,'(a)') 'executing' !  so loop below won't think it is already finished in loop below.
-          lresult=commitqq(eunit)
-          close(eunit) 
-      endif
-      
-!4)  Tell AIMMS to invoke MainExecution via its input message file
-      if (AIMECPPAR .eq. 0) then
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\monitor.in.txt',status='unknown',SHARED)
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "MainExecution";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : MainExecution', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\ecp_ge\monitor.in.txt',status='unknown',SHARED)
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "MainExecution";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          write(eunit,'(a)') "RegGridIndex('1') := 1;"
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : MainExecution', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          
-          !call unitunopened(100,999,EUNIT)
-          !open(eunit,file='ecp\ecp_gs\monitor.in.txt',status='unknown',SHARED)
-          !rewind eunit
-          !write(eunit,'(a)')      'sAction             := "MainExecution";'
-          !write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          !write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          !write(eunit,'(a)') "RegGridIndex('1') := 2;"
-          !lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          !close(eunit)
-          !call date_and_time(curdate,curtime)
-          !write(monitordbg_gs,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : MainExecution', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          !
-          !call unitunopened(100,999,EUNIT)
-          !open(eunit,file='ecp\ecp_gw\monitor.in.txt',status='unknown',SHARED)
-          !rewind eunit
-          !write(eunit,'(a)')      'sAction             := "MainExecution";'
-          !write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          !write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          !write(eunit,'(a)') "RegGridIndex('1') := 3;"
-          !lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          !close(eunit)
-          !call date_and_time(curdate,curtime)
-          !write(monitordbg_gw,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : MainExecution', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          
-          call unitunopened(100,999,EUNIT)
-          open(eunit,file='ecp\ecp_gsw\monitor.in.txt',status='unknown',SHARED)
-          rewind eunit
-          write(eunit,'(a)')      'sAction             := "MainExecution";'
-          write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-          write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-          write(eunit,'(a)') "RegGridIndex('1') := 4;"
-          lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-          close(eunit)
-          call date_and_time(curdate,curtime)
-          write(monitordbg_gsw,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : MainExecution', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif
-      
-      counter=0
-      line=' '
-      line_ge=' '
-      line_gsw=' '
+              CALL EXECUTE_COMMAND_LINE(trim(cmd),wait=.true.,CMDSTAT=iret) 
+              write(line,'(2a)') 'del ',cmd     !added to delete \main\call_p2_endpoint.bat  after the call
+              call callsys(iret,line)           !added to delete \main\call_p2_endpoint.bat  after the call
+              line=' '                          !added to delete \main\call_p2_endpoint.bat  after the call
+              INQUIRE(file='Kill_run.txt', EXIST=file_exists)
+              if(file_exists .eq. .true. ) then
+                  go to 100
+              endif
 
-
-! 5) when AIMMS is done, its monitor procedure writes out a keyword "Completed" to monitor.out.txt. Wait for 
-! for the signal, up to a time limit of 10 minutes, or 600 seconds (1200 half seconds)
-       if (AIMECPPAR .eq. 0) then
-          do while (counter.lt.1200 .and. (index(line,'Completed')+index(line,'Quit')+index(line,'Exited')).eq.0)
-            call sleepqq(500)
-            counter=counter+1
-            iret=1
-            open(eunit,file='ecp\monitor.out.txt',status='old',SHARED,action='READ',err=99)
-            line=' '
-            read(eunit,'(a)',err=99,end=99) line
-    !        write(6,'(a)') 'line='//trim(line)
-            iret=0
-            close(eunit)
-99          continue 
-
-          enddo
-      else
-      
-          do while (counter.lt.1200 .and. (((index(line_gsw,'Completed')+index(line_gsw,'Quit')+index(line_gsw,'Exited')).eq.0)  &
-                .OR. ((index(line_ge,'Completed')+index(line_ge,'Quit')+index(line_ge,'Exited')).eq.0) ))
-            call sleepqq(500)
-            counter=counter+1
-            iret=1
-            open(eunit,file='ecp\ecp_ge\monitor.out.txt',status='old',SHARED,action='READ',err=992)                      !check here to see if counter is greater than 1200
-            line_ge=' '
-            read(eunit,'(a)',err=992,end=992) line_ge
-    !        write(6,'(a)') 'line='//trim(line)
-            iret=0
-            close(eunit)
-992         continue 
-            iret=1
-            open(eunit,file='ecp\ecp_gsw\monitor.out.txt',status='old',SHARED,action='READ',err=993)
-            line_gsw=' '
-            read(eunit,'(a)',err=993,end=993) line_gsw
-    !        write(6,'(a)') 'line='//trim(line)
-            iret=0
-            close(eunit)
-993         continue 
-!            iret=1
-!            open(eunit,file='ecp\ecp_ge\monitor.out.txt',status='old',SHARED,action='READ',err=991)
-!            line_ge=' '
-!            read(eunit,'(a)',err=991,end=991) line_ge
-!    !        write(6,'(a)') 'line='//trim(line)
-!            iret=0
-!            close(eunit)
-!991         continue 
-        
-          enddo
-          
-      endif
-      call date_and_time(curdate,curtime)
-
-      write(6,'(a,i4,a,f8.1)') 'AIMMS ',curcalyr,'    Time to run AIMMS ECP MainExecution:',timef()-timer                    !check here to see if counter is greater than 1200
-
-      if(counter.ge.1200) then
- ! Wait time exceeded
-         if (AIMECPPAR .eq. 0) then
-            write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt  : wait time exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-         else
-             if ((index(line_gsw,'Completed')+index(line_gsw,'Quit')+index(line_gsw,'Exited')).eq.0 ) Then
-                write(monitordbg_gsw,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt  : wait time exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-             endif
-             if ((index(line_ge,'Completed')+index(line_ge,'Quit')+index(line_ge,'Exited')).eq.0 ) Then
-                write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt  : wait time exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-             endif
-             !if ((index(line_ge,'Completed')+index(line_ge,'Quit')+index(line_ge,'Exited')).eq.0 ) Then
-             !   write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt  : wait time exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-             !endif
-         endif
-         write(6,'(a)') 'AIMMS wait time exceeded. Showing AIMMS messages.log and checking for license issue.'
-         license_issue=.false.
-         if (AIMECPPAR .eq. 0) then
-             inquire(file='ecp/log/messages.log',exist=lexist)
-             if(lexist) then
-               open(eunit,file='ecp/log/messages.log',status='old',SHARED,READONLY,err=999)
-10             continue
-               read(eunit,'(a)',end=998,err=999) line
-               write(6,'(2a)')'AIMMS messages.log:  ',trim(line)
-               if(index(line,'license').gt.0) then
-                   license_issue=.true.
-               endif
-               goto 10
-998            continue
-               close(eunit)
-999            continue
-             endif
-         else
-             inquire(file='ecp/ecp_ge/log/messages.log',exist=lexist)
-             if(lexist) then
-               open(eunit,file='ecp/ecp_ge/log/messages.log',status='old',SHARED,READONLY,err=9991)
-101             continue
-               read(eunit,'(a)',end=9981,err=9991) line_ge
-               write(6,'(2a)')'AIMMS messages.log:  ',trim(line_ge)
-               if(index(line_ge,'license').gt.0) then
-                   license_issue=.true.
-               endif
-               goto 101
-9981            continue
-               close(eunit)
-9991            continue
-             endif
-             inquire(file='ecp/ecp_gsw/log/messages.log',exist=lexist)
-             if(lexist) then
-               open(eunit,file='ecp/ecp_gsw/log/messages.log',status='old',SHARED,READONLY,err=9992)
-102             continue
-               read(eunit,'(a)',end=9982,err=9992) line_gsw
-               write(6,'(2a)')'AIMMS messages.log:  ',trim(line_gsw)
-               if(index(line_gsw,'license').gt.0) then
-                   license_issue=.true.
-               endif
-               goto 102
-9982            continue
-               close(eunit)
-9992            continue
-             endif
-!             inquire(file='ecp/ecp_gw/log/messages.log',exist=lexist)
-!             if(lexist) then
-!               open(eunit,file='ecp/ecp_gw/log/messages.log',status='old',SHARED,READONLY,err=9993)
-!103             continue
-!               read(eunit,'(a)',end=9983,err=9993) line_gw
-!               write(6,'(2a)')'AIMMS messages.log:  ',trim(line_gw)
-!               if(index(line_gw,'license').gt.0) then
-!                   license_issue=.true.
-!               endif
-!               goto 103
-!9983            continue
-!               close(eunit)
-!9993            continue
-!             endif             
-         endif
-! if an aimms.exe is still executing with the same ProcessID (iPID), kill it.
-        args=' '
-        iWait=-1
-        ikill=0
-        !cmd='cmd /c tasklist -v -FI "IMAGENAME eq aimms.exe" > tasklist.txt'
-        cmd='cmd /c tasklist -v -FI "IMAGENAME eq aimmsCmd.exe" > tasklist.txt'                       !************************************  modificiation made to detect PID associated with running aimmscmd.exe
-        call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-        inquire(exist=lexist,file='tasklist.txt')
-        if(lexist) then
-          open(eunit, file='tasklist.txt',status='old',READONLY)
-19        continue
-          read(eunit,'(a)',end=21) line
-          if (AIMECPPAR .eq. 0) then
-                if(index(line,'aimms.exe').gt.0) then
-                line(:20)=''
-                read(line,*,end=21,err=21) iPIDlist
-                if(iPIDlist.eq.iPID) then
-                    ikill=1
-                    write(6,'(a,i6,a)') 'The aimms.exe is still executing.  Will kill the process ID ',iPID
-                    write(cmd,'(a,i6)')  'taskkill /F /PID ',iPID
-                    iWait=-1
-                    call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-                    goto 21
-                else
-                    goto 19
-                endif
-                else
-                goto 19
-                endif
-          else
-                if(index(line,'aimmsCmd.exe').gt.0) then
-                line(:20)=''
-                read(line,*,end=21,err=21) iPIDlist
-                if(iPIDlist.eq.iPID) then
-                    ikill=1
-                    write(6,'(a,i6,a)') 'The aimmsCmd.exe is still executing.  Will kill the process ID ',iPID
-                    write(cmd,'(a,i6)')  'taskkill /F /PID ',iPID
-                    iWait=-1
-                    call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-                    goto 21
-                else
-                    goto 19
-                endif
-                else
-                goto 19
-                endif
-          endif
-21        continue 
-          close(eunit)
-        endif        
-        if(ikill.eq.0) then
-          if (AIMECPPAR .eq. 0) then
-            write(6,'(a)') 'AIMMS seems to have closed early. No aimms.exe process found with matching process ID.'
-          else
-            write(6,'(a)') 'AIMMS seems to have closed early. No aimmsCmd.exe process found with matching process ID.'
-          endif
-        endif
-        if (license_issue .and. ntries.lt.ntriesmax) then
-          write(6,'(a,i2)') 'AIMMS license issue.  Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100
-        elseif(ntries.lt.ntriesmax.and.ikill.eq.1 .and. nchar.eq.3) then  ! when AIMMS stays open and writes only 3 non-printable characters in message.log
-          write(6,'(a,i2)') 'AIMMS wait time issue. Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100  ! above at subroutine start
-        elseif (ikill .eq. 0 .and. ntries.lt.ntriesmax) then
-          write(6,'(a,i2)') 'AIMMS process not found.  Will retry. Number of tries so far: ',ntries
-          ntries=ntries+1
-          aimms_opened=.false.
-          go to 100
-        else
-          iret=900
-          
-          write(6,'(a)') 'AIMMS wait time exceeded. Stopping now to avoid confusion.'
-          
-          stop
-        endif
-      else
-        if (AIMECPPAR .eq. 0) then
-          if(index(line,'Exited').gt.0) then
-  ! Early exit - check if CPLEX issue first
-            CPLEX_issue=.false.
-            inquire(file='ecp/log/messages.log',exist=lexist)
-            if(lexist) then
-              open(eunit,file='ecp/log/messages.log',status='old',SHARED,READONLY,err=1001)
-11            continue
-              read(eunit,'(a)',end=1000,err=1001) line
-               if(index(line,'CPLEX').gt.0) then
-                 CPLEX_issue=.true.
-               endif
-              goto 11
-1000          continue            
-              close(eunit)
-1001          continue            
-            endif
-          
-            if (CPLEX_issue .and. ntries.lt.ntriesmax) then
-              write(6,'(a,i2)') 'CPLEX license issue.  Will retry. Number of tries so far: ',ntries
-              ntries=ntries+1
-              aimms_opened=.false.
-        ! if an aimms.exe is still executing with the same ProcessID (iPID), kill it.
-                args=' '
-                iWait=-1
-                ikill=0
-                cmd='cmd /c tasklist -v -FI "IMAGENAME eq aimmsCmd.exe" > tasklist.txt'                       !************************************  modificiation made to detect PID associated with running aimmscmd.exe
-                call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-                inquire(exist=lexist,file='tasklist.txt')
-                if(lexist) then
-                  open(eunit, file='tasklist.txt',status='old',READONLY)
-23                continue
-                  read(eunit,'(a)',end=25) line
-                    if(index(line,'aimms.exe').gt.0) then
-                        line(:20)=''
-                        read(line,*,end=25,err=25) iPIDlist
-                        if(iPIDlist.eq.iPID) then
-                            ikill=1
-                            write(6,'(a,i6,a)') 'The aimms.exe is still executing.  Will kill the process ID ',iPID
-                            write(cmd,'(a,i6)')  'taskkill /F /PID ',iPID
-                            iWait=-1
-                            call oscall_PID(iWait,cmd,Args,iRet,iPID2) 
-                            goto 25
-                        else
-                            goto 23
-                        endif
-                    else
-                        goto 23
-                    endif
-25                  continue 
-                  close(eunit)
-                endif        
-              
+        if (ntries.gt.ntriesmax) then
+              write(6,'(a,i2,a)') '## AIMMS ECP is not successfuly after trying : ',ntries-1, ' attempts'
               go to 100
-            else      
-              write(6,'(a)') 'AIMMS Exited early. Likely an error in the AIMMS code or transfer data.  Stopping NEMS now'
-              aimms_opened=.false.
-              stop
-            endif 
-          elseif(index(line,'Completed').gt.0) then
-    ! Normal Completion
-              write(monitordbg,'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-              ! inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-
-    ! 6) initialize the monitor.in.txt file with a Wait command.
-              call unitunopened(100,999,EUNIT)
-              open(eunit,file='ecp\monitor.in.txt',status='unknown')
-              rewind eunit
-              write(eunit,'(a)')      'sAction             := "Wait";'
-              write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-              write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-              lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-              close(eunit)
-              call date_and_time(curdate,curtime)
-              write(monitordbg,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-          endif
-        else
-    !         if(index(line_gs,'Exited').gt.0) then
-    !! Early exit
-    !               !write(6,'(a)') 'AIMMS Exited early. Likely an error in the AIMMS code or transfer data.  See last line of log/messages.log'
-    !               aimms_opened=.false.
-    !               iret=900
-    !         elseif(index(line_gs,'Completed').gt.0) then
-    !! Normal Completion
-    !              write(monitordbg_gs,'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : '//trim(line_gs(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-    !              ! inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-    !
-    !    ! 6) initialize the monitor.in.txt file with a Wait command.
-    !              call unitunopened(100,999,EUNIT)
-    !              open(eunit,file='ecp\ecp_gs\monitor.in.txt',status='unknown')
-    !              rewind eunit
-    !              write(eunit,'(a)')      'sAction             := "Wait";'
-    !              write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-    !              write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-    !              write(eunit,'(a)') "RegGridIndex('1') := 2;"
-    !              lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-    !              close(eunit)
-    !              call date_and_time(curdate,curtime)
-    !              write(monitordbg_gs,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-    !        endif
-            
-             if(index(line_gsw,'Exited').gt.0) then
-    ! Early exit
-                   !write(6,'(a)') 'AIMMS Exited early. Likely an error in the AIMMS code or transfer data.  See last line of log/messages.log'
-                   aimms_gsw_opened=.false.
-                   iret=900
-             elseif(index(line_gsw,'Completed').gt.0) then
-    ! Normal Completion
-                  write(monitordbg_gsw,'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : '//trim(line_gsw(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-                  ! inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-
-        ! 6) initialize the monitor.in.txt file with a Wait command.
-                  call unitunopened(100,999,EUNIT)
-                  open(eunit,file='ecp\ecp_gsw\monitor.in.txt',status='unknown')
-                  rewind eunit
-                  write(eunit,'(a)')      'sAction             := "Wait";'
-                  write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-                  write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-                  write(eunit,'(a)') "RegGridIndex('1') := 4;"
-                  lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-                  close(eunit)
-                  call date_and_time(curdate,curtime)
-                  write(monitordbg_gsw,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-            endif
-        
-             if(index(line_ge,'Exited').gt.0) then
-    ! Early exit
-                   !write(6,'(a)') 'AIMMS Exited early. Likely an error in the AIMMS code or transfer data.  See last line of log/messages.log'
-                   aimms_ge_opened=.false.
-                   iret=900
-             elseif(index(line_ge,'Completed').gt.0) then
-    ! Normal Completion
-                  write(monitordbg_ge,'(a,t75,3a,i5,i3,i2)') 'monitor.out.txt  : '//trim(line_ge(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-                  !inititalize message file used to direct actions of the aimms project monitor to wait so it doesn't start early.
-
-        ! 6) initialize the monitor.in.txt file with a Wait command.
-                  call unitunopened(100,999,EUNIT)
-                  open(eunit,file='ecp\ecp_ge\monitor.in.txt',status='unknown')
-                  rewind eunit
-                  write(eunit,'(a)')      'sAction             := "Wait";'
-                  write(eunit,'(a,i4,a)') "curcalyr('1'):=",curcalyr,';'
-                  write(eunit,'(a,i2,a)') "curitr('1')  :=",curitr,  ';'
-                  write(eunit,'(a)') "RegGridIndex('1') := 1;"
-                  lresult=commitqq(eunit)  ! use ifcore: force data to be written to file immediately
-                  close(eunit)
-                  call date_and_time(curdate,curtime)
-                  write(monitordbg_ge,'(a,t45,3a,i5,i3)') 'monitor.in.txt  : Wait', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-            endif
-            aimms_opened = aimms_gsw_opened .OR. aimms_ge_opened
-     endif
-     
-   endif  
-     
-   return
-
-
-CONTAINS
-
-!===================================================================================================================================================
-Subroutine End_AIMMS
-  integer ntries,nmax/240/
-! write Quit to message file to tell aimms project monitor to exit
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='ecp\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Quit";'
-      close(eunit)
-
-      call date_and_time(curdate,curtime)
-      write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-!   need to wait until project is closed. May take 30 seconds to close 
-!   Added statement in MainTermination to write "Exited" to monitor.out.txt so that should
-!   be signal to stop
-      ntries=1
-      do while (ntries.lt.nmax)
-        open(eunit,file='ecp\monitor.out.txt',status='old',SHARED,READONLY)
-        flush eunit
-        read(eunit,'(a)',err=99,end=99) line
-        close(eunit)
-        if(index(line,'Exited').gt.0) then
-          exit  ! exit do while
         endif
-99      ntries=ntries+1
-        call sleepqq(500) ! wait 1/2 second
-      enddo
-      write(6,'(a,i4,a,i4)') 'AIMMS Exiting, number of monitor.out.txt checks ',ntries,', max number set to ',nmax
-      call date_and_time(curdate,curtime)
-      if(ntries.eq.nmax) then
-        write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : wait for Exited exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-        write(monitordbg,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif
-
-end subroutine end_aimms
-
-!===================================================================================================================================================
-Subroutine End_AIMMS2
-  integer ntries,nmax/240/
-! write Quit to message file to tell aimms project monitor to exit
-      
-      !for ecp\ecp_gsw
   
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='ecp\ecp_gsw\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Quit";'
-      close(eunit)
-
-      call date_and_time(curdate,curtime)
-      write(monitordbg_gsw,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-!   need to wait until project is closed. May take 30 seconds to close 
-!   Added statement in MainTermination to write "Exited" to monitor.out.txt so that should
-!   be signal to stop
-      ntries=1
-      do while (ntries.lt.nmax)
-        open(eunit,file='ecp\ecp_gsw\monitor.out.txt',status='old',SHARED,READONLY)
-        flush eunit
-        read(eunit,'(a)',err=991,end=991) line
-        close(eunit)
-        if(index(line,'Exited').gt.0) then
-          exit  ! exit do while
-        endif
-991      ntries=ntries+1
-        call sleepqq(500) ! wait 1/2 second
-      enddo
-      write(6,'(a,i4,a,i4)') 'AIMMS Exiting, number of monitor.out.txt checks ',ntries,', max number set to ',nmax
-      call date_and_time(curdate,curtime)
-      if(ntries.eq.nmax) then
-        write(monitordbg_gsw,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : wait for Exited exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-        write(monitordbg_gsw,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif
-      
-!      !for ecp\ecp_gw
-!      
-!      call unitunopened(100,999,EUNIT)
-!      open(eunit,file='ecp\ecp_gw\monitor.in.txt',status='unknown',SHARED)
-!      rewind eunit
-!      write(eunit,'(a)')      'sAction             := "Quit";'
-!      close(eunit)
-!     
-!      call date_and_time(curdate,curtime)
-!      write(monitordbg_gw,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-!
-!!   need to wait until project is closed. May take 30 seconds to close 
-!!   Added statement in MainTermination to write "Exited" to monitor.out.txt so that should
-!!   be signal to stop
-!      ntries=1
-!      do while (ntries.lt.nmax)
-!        open(eunit,file='ecp\ecp_gw\monitor.out.txt',status='old',SHARED,READONLY)
-!        flush eunit
-!        read(eunit,'(a)',err=992,end=992) line
-!        close(eunit)
-!        if(index(line,'Exited').gt.0) then
-!          exit  ! exit do while
-!        endif
-!992      ntries=ntries+1
-!        call sleepqq(500) ! wait 1/2 second
-!      enddo
-!      write(6,'(a,i4,a,i4)') 'AIMMS Exiting, number of monitor.out.txt checks ',ntries,', max number set to ',nmax
-!      call date_and_time(curdate,curtime)
-!      if(ntries.eq.nmax) then
-!        write(monitordbg_gw,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : wait for Exited exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-!      else
-!        write(monitordbg_gw,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-!      endif
-
-      !for ecp\ecp_ge
-      
-      call unitunopened(100,999,EUNIT)
-      open(eunit,file='ecp\ecp_ge\monitor.in.txt',status='unknown',SHARED)
-      rewind eunit
-      write(eunit,'(a)')      'sAction             := "Quit";'
-      close(eunit)
-      
-      call date_and_time(curdate,curtime)
-      write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') 'monitor.in.txt  : Quit', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-
-!   need to wait until project is closed. May take 30 seconds to close 
-!   Added statement in MainTermination to write "Exited" to monitor.out.txt so that should
-!   be signal to stop
-      ntries=1
-      do while (ntries.lt.nmax)
-        open(eunit,file='ecp\ecp_ge\monitor.out.txt',status='old',SHARED,READONLY)
-        flush eunit
-        read(eunit,'(a)',err=993,end=993) line
-        close(eunit)
-        if(index(line,'Exited').gt.0) then
-          exit  ! exit do while
-        endif
-993      ntries=ntries+1
-        call sleepqq(500) ! wait 1/2 second
-      enddo
-      write(6,'(a,i4,a,i4)') 'AIMMS Exiting, number of monitor.out.txt checks ',ntries,', max number set to ',nmax
-      call date_and_time(curdate,curtime)
-      if(ntries.eq.nmax) then
-        write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : wait for Exited exceeded', curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      else
-        write(monitordbg_ge,'(a,t45,3a,i5,i3,i2)') 'monitor.out.txt : '//trim(line(5:)), curtime(1:2),':',curtime(3:10),curcalyr,curitr
-      endif    
-      
-end subroutine end_aimms2
-
-! end of CONTAINed routines--near duplicates of ecp version of routine
-End Subroutine AIMMS_ECP
-
+        write(6,'(a,i5,a,f9.3)') '## AIMMS ECP year:',curcalyr,'    Time to run AIMMS ECP MainExecution:',timef()-timer 
+        return
+100     write(6,'(a,i5,a)') '## Inability to successfully run AIMMS ECP for year',curcalyr,' terminates the run.'
+        STOP
+  
+  !===================================================================================================================================================
+  
+  ! end of CONTAINed routines--near duplicates of ecp version of routine
+  End Subroutine AIMMS_ECP
 !===================================================================================================================================================
 
 subroutine ecp_assign_coeff
@@ -11318,7 +10380,7 @@ subroutine ecp_aimms_init
     rewind io
     goto 49
 48  continue
-    ! if calling this routine from readaimlis.exe or other program outside of nems, ecp folder won't exist, so just write it in local
+    ! if calling this routine from program outside of nems, ecp folder won't exist, so just write it in local
      open(io,file='ecpsetdata.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)   
 49   continue
     call write_ecp_sets
@@ -11347,71 +10409,10 @@ subroutine ecp_aimms_init
   open(io,file=filen_ecpcoeff,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
   rewind io
   ENDIF
-  !if (AIMECPPAR .eq. 1) then
-  !    ! write set definitions for Parallel version of ECP if selected       
-  !      write(year_iter,'(i4)') curcalyr  
-  !      call unitunopened(100,999,io)
-  !      open(io,file='ecp\ecp_ge\ecpsetdata_ge_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-  !      rewind io
-  !      call write_ecp_sets_par(1)
-  !      close(io) 
-  !
-  !      call unitunopened(100,999,io)
-  !      open(io,file='ecp\ecp_gs\ecpsetdata_gs_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-  !      rewind io
-  !      call write_ecp_sets_par(2)
-  !      close(io) 
-  !  
-  !      call unitunopened(100,999,io)
-  !      open(io,file='ecp\ecp_gw\ecpsetdata_gw_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-  !      rewind io
-  !      call write_ecp_sets_par(3)
-  !      close(io) 
-  !  endif 
   return
     end subroutine ecp_aimms_init
   
-!===================================================================================================================================================
- subroutine ecp_aimms_init_par
-! initialize aimms-ecp-related row, col, and coefficients and allocate arrays dynamically so space is above 2GB area.
-! Read aimecp.xlsx to get AIMMS identifier names and row/column masks to decode OML row and column names
- use ecp_row_col
- implicit none
- include 'parametr'
- include 'ncntrl'
- !integer file,iset,i5,i
- character*8 year_iter
 
- 
- if (AIMECPPAR .eq. 1) then
-      ! write set definitions for Parallel version of ECP if selected       
-        write(year_iter,'(i4)') curcalyr
-        ! write set definitions out   
-        call unitunopened(100,999,io)
-        open(io,file='ecp\ecp_ge\ecpsetdata_ge_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-        rewind io
-        call write_ecp_sets_par(1)
-        close(io) 
-
-        !call unitunopened(100,999,io)
-        !open(io,file='ecp\ecp_gs\ecpsetdata_gs_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-        !rewind io
-        !call write_ecp_sets_par(2)
-        !close(io) 
-        !
-        !call unitunopened(100,999,io)
-        !open(io,file='ecp\ecp_gw\ecpsetdata_gw_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-        !rewind io
-        !call write_ecp_sets_par(3)
-        !close(io) 
-        
-        call unitunopened(100,999,io)
-        open(io,file='ecp\ecp_gsw\ecpsetdata_gsw_'//trim(year_iter)//'.dat',status='unknown',BUFFERED='YES',BUFFERCOUNT=5)
-        rewind io
-        call write_ecp_sets_par(4)
-        close(io) 
-    endif 
- end subroutine ecp_aimms_init_par
 !===========================================================================================================================
 subroutine ecp_list_aimms_rowcols(iopen)
   use ecp_row_col
@@ -11503,7 +10504,7 @@ subroutine ecp_fill_aimms_coeff
   timer2=timef()
     
 ! Print AIMMS row and column names along with their associated OML masks and the sets defining their index space   
-  if(AIMECPBG.eq.1 .or. make_ecp_aimms) then
+  if(AIMECPBG.eq.1) then
     call ecp_list_aimms_rowcols(0)
 
 !   write coefficients for debuggging
@@ -11592,12 +10593,6 @@ subroutine ecp_fill_aimms_coeff
          if(L.gt.0) ParamName(L:L)='!'  ! change back to ! after sorting with |
        endif
        UseCol=index(ParamName,'!')+index(ParamName,'|') ! if either is gt.0, triggers an exception to use col set element. in case ! is in both col/row names, only first is converted to |
-! If generating list of parameter arrays need to store coefficients, erase paramName temporarily
-! so the list of paramname's needed will be listed int the "missing messages" below
-       if(make_ecp_aimms)then 
-         ParamTemp=ParamName
-         ParamName='nothing'
-       endif
 
       ifound=0
        do ip=1,max_aimms_param
@@ -11670,11 +10665,7 @@ subroutine ecp_fill_aimms_coeff
           
        endif
        
-       if(make_ecp_aimms)then  ! restore parameter name for coeffient debug output written below
-         ParamName=ParamTemp
-       endif
-
-       if(AIMECPBG.eq.0 .and. .not. make_ecp_aimms) cycle ! omit rest of coefficient loop which is for writing debug ecpcoeff*txt.
+       if(AIMECPBG.eq.0)  cycle ! omit rest of coefficient loop which is for writing debug ecpcoeff*txt.
 
 ! for debug display column name in array format, such as B(R,P,G,F)
        colstr=' '
@@ -12233,8 +11224,8 @@ subroutine get_ecp_set_element(setname,ccode,icode)
   character*1 cLoadSegment(LoadSegment)/'1','2','3'/
   character*1 cNGCommitYear(NGCommitYear)/'1','2','3','4','5'/  
 
-  character*3 cCoalSupplyStep(CoalSupplyStep)/'I01','I02','I03','I04','I05','I06','I07','I08','I09','I10','I11','OTH', &
-                                              'DN1','DN2','DN3','DN4','DN5','UP1','UP2','UP3','UP4','UP5','UP6','ZR0'/
+  character*3 cCoalSupplyStep(CoalSupplyStep)/'DN5','DN4','DN3','DN2','DN1','ZR0','UP1','UP2','UP3','UP4','UP5'/
+  character*3 cCoalSupplyStepINT(CoalSupplyStepINT)/'I01','I02','I03','I04','I05','I06','I07','I08','I09','I10'/
   character*3 cRetrofitCFG(RetrofitCFG)/'COL','001','002','003','004','005','006','007','008','009','010',& 
                                         '011','012','013','014','015','016','017','018','019','020',& 
                                         '021','022','023','024','025','026','027','028','029','030',& 
@@ -12321,8 +11312,9 @@ subroutine get_ecp_set_element(setname,ccode,icode)
 !'02-East'           'TE'
 !'03-West'           'TW'  under csapr/transport rule
   character*2 cNOXRegion(NOXRegion)/'TS','TE','TW'/
-  
-character*1 cnumACI(numACI)/'0','1','2','3','4','5','6','7'/
+
+character*1 cACI2(ACIOption)/'0','1','2','3','4','5','6','7'/ ! note that it starts with 0 to match aimms set {0..7}
+character*1 cnumACI(numACI)/'1','2','3','4','5','6','7','8'/
 
   
 character*1 cBioCOFCF(BioCOFCF)/     &
@@ -12356,7 +11348,7 @@ character*1 cBioCOFCF(BioCOFCF)/     &
 'a', &   !       COF_CMB(5,3) = 'a'
 'b', &   !       COF_CMB(5,4) = 'b'
 'c', &   !       COF_CMB(5,5) = 'c'
-'d'/  !       COF_CMB(5,6) = 'd'
+'d'/     !       COF_CMB(5,6) = 'd'
 
 character*2 cCHPFuel(CHPFuel)/  & ! from TC_FUEL_CODES  assignments in udat.f
 'CL', &   !  1 Coal
@@ -12370,7 +11362,8 @@ character*2 cCHPFuel(CHPFuel)/  & ! from TC_FUEL_CODES  assignments in udat.f
 'SO', &   !  9 Solar Thermal
 'PV', &   ! 10 Solar PV
 'OT', &   ! 11 Other
-'WN'/     ! 12 Wind
+'WN', &   ! 12 Wind
+'BS'/     ! 13 Battery Energy Storage
 
 ! traditional cogen sectors      
 !      TC_SECTOR_CODES(1) = 'IOU '
@@ -12528,6 +11521,8 @@ character*1 cRPSTrancheID(RPSTrancheID)/'1','2','3','4','5','6','7','8','9'/ ! b
         if(.not. set_lookup) call ecp_write_int_set(setname,1,CanadaProject,2)
     case ('CoalSupplyStep')
         call ecp_lookup(ccode,cCoalSupplyStep,CoalSupplyStep,icode)
+    case ('CoalSupplyStepINT')
+        call ecp_lookup(ccode,cCoalSupplyStepINT,CoalSupplyStepINT,icode)       
     case ('RetrofitCFG')
         call ecp_lookup(ccode,cRetrofitCFG,RetrofitCFG,icode)
     case ('FuelSupplyStep')
@@ -12651,6 +11646,8 @@ character*1 cRPSTrancheID(RPSTrancheID)/'1','2','3','4','5','6','7','8','9'/ ! b
         call ecp_lookup(ccode,cNOXRegion,NOXRegion,icode)
     case ('CoalProductionStep')
         call ecp_lookup(ccode,C2COD,CoalProductionStep,icode)
+    case ('ACIOption') 
+      call ecp_lookup(ccode,cACI2,ACIOption,icode)
     case ('numACI')
         call ecp_lookup(ccode,cnumACI,numACI,icode)
     case ('numACSS')  ! aci supply steps.  numacss=1
@@ -12967,6 +11964,9 @@ character*1 cRPSTrancheID(RPSTrancheID)/'1','2','3','4','5','6','7','8','9'/ ! b
       case ('SupplyCurves')                     ! 2
         read(ccode,'(i2)') icode
         if(.not. set_lookup) call ecp_write_int_set(setname,1,SupplyCurves,2)
+      case ('Ten')                           ! 2
+        read(ccode,'(i2)') icode
+        if(.not. set_lookup) call ecp_write_int_set(setname,1,Ten,2)
       case ('Thousand')                         ! 4
          read(ccode,'(i4)') icode
         if(.not. set_lookup) call ecp_write_int_set(setname,1,Thousand,4)
@@ -12996,77 +11996,7 @@ character*1 cRPSTrancheID(RPSTrancheID)/'1','2','3','4','5','6','7','8','9'/ ! b
     end subroutine get_ecp_set_element
  ! 
 !==================================================================================================================================================================
-subroutine get_ecp_set_element_par(setname,ccode,icode,iRegGrid)
-! returns the AIMMS set element corresponding to a given OML character code and AIMMS set only for adjusted set definions necessary for sub-national version of ECP
-! based on regional interconnection breakout (parallel solve of multiple smaller ECP)
-  use ecp_row_col
-  implicit none
-  include 'parametr'
-  include 'emmparm'
-  include 'control'
-  character*(*) setname ! name of the set
-  character*(*) ccode   ! character code for the set element 
-  integer icode         ! integer value for the given set and set element
-  integer i  ,L
-  integer iRegGrid
 
-  LOGICAL ERRORTYPE
-
-  character*4 SupplyRegion4(SupplyRegion)
-  character*1 CHCOD(33)/'1','2','3','4','5','6','7','8','9','0','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O', &
-     'P','Q','R','S','T','U','V','W'/
-
-! traditional cogen sectors      
-!      TC_SECTOR_CODES(1) = 'IOU '
-!      TC_SECTOR_CODES(2) = 'COOP'
-!      TC_SECTOR_CODES(3) = 'MUNI'
-!      TC_SECTOR_CODES(4) = 'FED '
-
-
-
-   DO I = 1 , SupplyRegion ! SupplyRegion4(SupplyRegion)  note lower case is used in URGNME(1:4) where this was taken from
-        SupplyRegion4(I) = URGNME(I)(1:4)
-   END DO
-
-   ! ERROR HANDLING 
-    ERRORTYPE = .FALSE.
-    
-    IF ( ANY( SupplyRegion4 == '') ) THEN
-        ERRORTYPE = .TRUE.
-    END IF 
-    
-     ! write(*,*) "cVLoadSegment", cVLoadSegment
-  IF (ERRORTYPE) THEN
-      CALL CRASH_NEMS('CRASH : DYNAMIC_EMM_AUTOMATIC_MAPPING HAS FAILED')
-  END IF
-
-    icode=0
-    ecp_setname=setname
-    select case (setname)
-        case ('SupplyRegion')                           ! four character abbrev. used in AIMMS
-            call ecp_lookup_par(ccode,SupplyRegion4,SupplyRegion,icode,iRegGrid)
-        case ('RPSRegion')                      
-            call ecp_lookup_par(ccode,CHCOD,SupplyRegion,icode,iRegGrid)
-        case ('SupplyState')
-            call ecp_lookup_par(ccode,USTNME,SupplyState,icode,iRegGrid)   
-        case ('CoalGroup')     
-            read(ccode,'(i4)') icode
-            if(.not. set_lookup) call ecp_write_int_set_par(setname,1,CoalGroup,4,iRegGrid)
-        case ('NuclearUnit')     
-            read(ccode,'(i3)') icode
-            if(.not. set_lookup) call ecp_write_int_set_par(setname,1,NuclearUnit,3,iRegGrid)
-        case ('Nuclear')     
-            read(ccode,'(i4)') icode
-            if(.not. set_lookup) call ecp_write_int_set_par(setname,1,Nuclear,4,iRegGrid)
-        case ('NaturalGasGroup')     
-            read(ccode,'(i4)') icode
-            if(.not. set_lookup) call ecp_write_int_set_par(setname,1,CoalGroup,4,iRegGrid)
-    end select
-    
-    return
-    end subroutine get_ecp_set_element_par
- ! 
-!==================================================================================================================================================================
   subroutine ecp_lookup(code,list,nElements,icode)
     use ecp_row_col
     implicit none
@@ -13091,12 +12021,12 @@ subroutine get_ecp_set_element_par(setname,ccode,icode,iRegGrid)
       LL=len(list(1))
       if(nElements.gt.1) then
         write(io, '(3a,<nElements-1>(a<LL>,a2),a<LL>,a)' )firstchar, &
-        trim(ecp_setname),     '_ := data {',         &
+        trim('ec::'//ecp_setname),     '_ := data {',         &
         ((list(i),', '),i=1,nElements-1),                    &
         list(nElements),        '};'
       else
         write(io, '(3a,a<LL>,a)' )firstchar, &
-        trim(ecp_setname),     '_ := data {',         &
+        trim('ec::'//ecp_setname),     '_ := data {',         &
         list(nElements),        '};'
       endif
     endif
@@ -13407,75 +12337,6 @@ RETURN
 END function IsInRegionalGrid
 
 !================================================================================================================
-subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
-    use ecp_row_col
-    implicit none
-  !  look for a character "code" in an ordered "list" of codes to find the element number (icode)
-    character*(*) code 
-    character*(2000) line
-    integer nElements,iRegGrid
-    character*(*) list(nElements)
-    character*(20) tGridReg
-    integer i,icode,L,LL,lineLength,lastCommaIndex,ElementCounter
-    external IsInRegionalGrid
-    logical  IsInRegionalGrid
-    
-    if (iRegGrid .eq. 1) then
-        tGridReg = 'EasternGrid'
-    elseif (iRegGrid .eq. 2) then
-        tGridReg = 'SouthernGrid'
-    elseif (iRegGrid .eq. 3) then
-        tGridReg = 'WesternGrid'
-    elseif (iRegGrid .eq. 4) then
-        tGridReg = 'SouthWestGrid'
-    else
-        tGridReg = ''
-    endif
-    
-    if(set_lookup) then
-      L=len_trim(code)
-      icode=0
-      do i=1,nElements
-        if(code(:L).eq.list(i)(:L)) then
-          icode=i
-          exit
-        endif
-      enddo
-    else
-!      firstchar=' '  ! normally
-!      if(index(sets(iset),'_ALT').gt.0) firstchar='!'
-!  write out the name and elements of the set in AIMMS-compatible format to ecpsetdata.dat   IsInRegionalGrid(tArrayName,tSetElement,tGridRegion)
-      LL=len(list(1))
-      line = '  '// trim(ecp_setname)//'_ := data{'
-      LineLength = len_trim(line)
-      ElementCounter = 0
-      do i=1,nElements
-           if (IsInRegionalGrid(ecp_setname,list(i),trim(tGridReg))) Then
-               if (ElementCounter .eq. 0) then
-                    line = trim(line) // list(i) 
-               else
-                    line = trim(line) // ',' // list(i) 
-               endif
-               if (LineLength + LL + 1 .le. 385) then                   
-                    LineLength = LineLength + LL + 1
-               else
-                    if (i .lt. nElements) then
-                       write (io,'(a)') trim(line)
-                       LineLength = 0
-                       Line = '      '
-                    endif
-               endif
-               ElementCounter = ElementCounter + 1
-           endif
-           if (i .eq. nElements) then
-              line = trim(line) // '};'
-              write (io,'(a)') trim(line)
-           endif
-      enddo
-    endif
-    return
-  end subroutine ecp_lookup_par
-  !================================================================================================================
   subroutine ecp_write_int_set(setname,first,last,nfield)
   use ecp_row_col
 ! ecp_write_int_set writes out a set declaration to an AIMMS-compatible file to transmit integer
@@ -13491,9 +12352,9 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
   
   if(last.gt.first) then
     if (first .ge. 0) then
-       write(io,'(3a,i<nfield>.<nfield>,a,i<nfield>.<nfield>,a)') firstchar, trim(setname),'_ := data {',first,'..',last,'};'
+       write(io,'(3a,i<nfield>.<nfield>,a,i<nfield>.<nfield>,a)') firstchar, trim('ec::'//setname),'_ := data {',first,'..',last,'};'
     else
-       line = firstchar//setname//'_ := data {'
+       line = firstchar//'ec::'//setname//'_ := data {'
         do is = first, 0     
             if (is .ne. 0) then
               write (line(len_trim(line)+1: ), form(5)) '"', is,'",'
@@ -13506,84 +12367,10 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
         write(io,form(3)) trim(line)
     endif
   else
-    write(io,'(3a,i<nfield>.<nfield>,a)') firstchar, trim(setname),'_ := data {',first,'};'
+    write(io,'(3a,i<nfield>.<nfield>,a)') firstchar, trim('ec::'//setname),'_ := data {',first,'};'
   endif
   return
-    end subroutine ecp_write_int_set
-  !================================================================================================================
-  subroutine ecp_write_int_set_par(setname,first,last,nfield,iRegGrid)
-  use ecp_row_col
-! ecp_write_int_set writes out a set declaration to an AIMMS-compatible file to transmit integer
-! set definitions to the ECP project.
-
-  implicit none
-  character*(*) setname
-  character*12 form(5)/'(I1)','(I0.0)','(a)','(a,I0.0)','(a,I0.0,a)'/
-  integer first,last,j,is,iRegGrid,LineLength,i,lastCommaIndex,ElementCounter
-  integer nfield ! size of field used to provide leading zeroes for PlantGroup, CoalSupplyCurve sets
-  character*500 line
-  character*(20) tGridReg,Setelement
-  external IsInRegionalGrid
-  logical  IsInRegionalGrid
-  
-   if (iRegGrid .eq. 1) then
-        tGridReg = 'EasternGrid'
-    elseif (iRegGrid .eq. 2) then
-        tGridReg = 'SouthernGrid'
-    elseif (iRegGrid .eq. 3) then
-        tGridReg = 'WesternGrid'
-    elseif (iRegGrid .eq. 4) then
-        tGridReg = 'SouthWestGrid'
-    else
-        tGridReg = ''
-    endif
-  if(last .gt. first) then
-    if (first .ge. 0) then
-      line = '  '// trim(setname)//'_ := data{'
-      LineLength = len_trim(line)
-      ElementCounter = 0
-      do i=first,last
-           write (Setelement,'(i<nfield>.<nfield>)') i
-           if (IsInRegionalGrid(setname,trim(Setelement),trim(tGridReg))) Then    
-                    if (ElementCounter .eq. 0) then
-                        line= trim(line) // trim(Setelement)
-                    else
-                        line= trim(line) //','// trim(Setelement)
-                    endif
-                    if (LineLength + nfield + 1 .le. 385) then
-                        LineLength = LineLength + nfield + 1
-                    else
-                        if (i .lt. last) then
-                            write (io,'(a)') trim(line)
-                            LineLength = 0
-                            Line = '      '
-                        endif
-                    endif
-                    ElementCounter = ElementCounter + 1
-           endif
-           if (i .eq. last) then
-              line = trim(line) // '};'
-              write (io,'(a)') trim(line)
-           endif
-      enddo
-    else
-       line = firstchar//setname//'_ := data {'
-        do is = first, 0     
-            if (is .ne. 0) then
-              write (line(len_trim(line)+1: ), form(5)) '"', is,'",'
-            else
-              write ( line( len_trim(line)+1:), form(3)) '0'
-            endif
-        enddo 
-        write(line(len_trim(line)+1:), form(5)) '..',last,'};'       
-        call mreplace(line,'"',char(39))
-        write(io,form(3)) trim(line)
-    endif
-  else
-    write(io,'(3a,i<nfield>.<nfield>,a)') firstchar, trim(setname),'_ := data {',first,'};'
-  endif
-  return
-  end subroutine ecp_write_int_set_par
+    end subroutine ecp_write_int_set 
  !================================================================================================================
   subroutine write_ecp_sets
 !   collect AIMMS sets used and calls get_ecp_set_element for each to write out the set name and its 
@@ -13676,101 +12463,6 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
    
    return
     end subroutine write_ecp_sets
- !================================================================================================================
-  subroutine write_ecp_sets_par(RegGridIndex)
-!   collect AIMMS sets used and calls get_ecp_set_element for each to write out pre-selected set name and its 
-!   elements to a file for AIMMS parallel version (broken up by regional interconnections) to read.  This is intended to maintain sub dimensionality of the AIMMS ecp 
-!   parallel versions in corresponding to their fortran/oml ecp.
-  use ecp_row_col
-  implicit none
-  integer nsets,ic,is,ir,ifound,iset,i
-  integer, parameter :: maxsets = 200
-  character*30 sets(maxsets)
-  character*30 tset(max_set) ! 6 in uecp.f, 5 in uefd.f
-  character*5 ccode/'12345'/
-  integer icode, inBoth
-  integer RegGridIndex
-
-  nsets=1
-  sets(1)='SupplyRegion' ! 4-character version for AIMMS, unused in ECP. All "_ALT" or alias sets for SupplyRegion in ECP OML names are 1 or 2 characters
-  do ic = 0,max_col_aimms  ! number of column mask patterns, and matched to variables in AIMMS project
-    if(col_aimms(ic).colnam_aimms.ne.' ') then
-      tset(1:max_set)=' '
-      do is=1,max_set  !  identifiers have up to max_set sets to define their domain.
-         if(len_trim(col_aimms(ic).setnam(is)).gt.0) then
-           tset(is)=col_aimms(ic).setnam(is)
-           ifound=0
-           do iset=1,nsets   ! go through list of sets being compiled and see if this set is new. if so, add to the list.
-             if(tset(is).eq.sets(iset)) then
-               ifound=1
-               exit
-             endif
-           enddo
-           if(ifound.eq.0 .and. ((trim(tset(is)) .eq. 'SupplyRegion') .or. (trim(tset(is)) .eq. 'RPSRegion') .or. (trim(tset(is)) .eq. 'CoalGroup') .or. (trim(tset(is)) .eq. 'NuclearUnit'))) then  ! add only pre-selected set to the list
-             nsets=nsets+1
-             sets(nsets)=tset(is)
-           endif
-         endif
-      enddo
-    endif
-  enddo
-
-  do ir = 0,max_row_aimms  ! loop over list of row mask patterns, and matched to row/constraints in AIMMS project
-    if(row_aimms(ir).rownam_aimms.ne.' ') then
-      tset(1:max_set)=' ' 
-      do is=1,max_set !  identifiers have up to max_set sets to define their domain.
-        if(len_trim(row_aimms(ir).setnam(is)).gt.0) then
-          tset(is)=row_aimms(ir).setnam(is)
-          ifound=0
-          do iset=1,nsets    ! go through list of sets being compiled and see if this set is new. if so, add to the list.
-            if(tset(is).eq.sets(iset)) then
-              ifound=1
-              exit
-            endif
-          enddo
-          if(ifound.eq.0 .and. ((trim(tset(is)) .eq. 'SupplyRegion') .or. (trim(tset(is)) .eq. 'SupplyState') .or. (trim(tset(is)) .eq. 'RPSRegion') .or. &
-          (trim(tset(is)) .eq. 'CoalGroup') .or. (trim(tset(is)) .eq. 'NuclearUnit') .or. (trim(tset(is)) .eq. 'Nuclear') .or. (trim(tset(is)) .eq. 'NaturalGasGroup'))) then  ! add only pre-selected set to the list
-            nsets=nsets+1
-            sets(nsets)=tset(is)
-          endif
-        else
-          exit
-        endif
-      enddo
-    endif
-  enddo
-
-  is=1
-  do i=1,ECPSetLookCount
-     tset(is)=xecpSetLook(i,2)
-     ifound=0
-     do iset=1,nsets    ! go through list of sets being compiled and see if this set is new. if so, add to the list.
-       if(tset(is).eq.sets(iset)) then
-         ifound=1
-         exit
-       endif
-     enddo
-     if((ifound.eq.0) .and. ((trim(tset(is)) .eq. 'SupplyRegion') .or. (trim(tset(is)) .eq. 'SupplyState') .or. (trim(tset(is)) .eq. 'RPSRegion') .or. &
-     (trim(tset(is)) .eq. 'CoalGroup') .or. (trim(tset(is)) .eq. 'NuclearUnit') .or. (trim(tset(is)) .eq. 'Nuclear') .or. (trim(tset(is)) .eq. 'NaturalGasGroup'))) then  ! add the set to the list
-       nsets=nsets+1
-       sets(nsets)=tset(is)
-     endif
-  enddo
-   
-   set_lookup=.false.
-
-! with set_lookup false, each call writes out the set name and its elements to a file in aimms-compatible format
-   do iset=1,nsets
-     firstchar=' '
-     if(index(sets(iset),'_ALT').gt.0) firstchar='!'   ! first character is a comment for sets with "_ALT in the name
-     call get_ecp_set_element_par(trim(sets(iset)),ccode,icode,RegGridIndex)
-   
-   enddo
-   
-   set_lookup=.true.  ! normal setting so get_ecp_set_element just returns the set element associated with a masked position
-   
-   return
-   end subroutine write_ecp_sets_par
 !================================================================================================================
    subroutine ecp_mps
     use ecp_row_col
@@ -13934,13 +12626,13 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
    integer nfield ! size of integer fields such as plantgroup, which is 5 characters wide
    
    integer, parameter :: maxlinelength = 600
-   character (LEN=maxlinelength) line, line2
+   character (LEN=maxlinelength) line, line2, line3
 !
    open(io,file='ecp\ecpsetdata.dat',status='unknown',err=48)
    rewind io
    goto 49
 48 continue
-   open(io,file='ecpsetdata.dat',status='unknown') ! if running outside of nems, like from readaimlis.f90
+   open(io,file='ecpsetdata.dat',status='unknown') ! if running outside of nems
 49 continue   
 
    numaimsets=0
@@ -13963,7 +12655,14 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
      ifound=index(line,'_ := data {')
      if(ifound.gt.2) then
        numaimsets=numaimsets+1
-       aimsets(numaimsets).setname=line(2:ifound-1)
+       line3 = ' '
+       line3 = line(1:ifound-1)
+       if (index(line3,'::') .gt.2) then
+          line3 = line(index(line3,'::')+2:ifound-1)
+          aimsets(numaimsets).setname=line3
+       else
+          aimsets(numaimsets).setname=line(2:ifound-1)
+       endif
        line(1:ifound+10)=' '
        ifound=index(line,'}')
        if(ifound.gt.0) then
@@ -14408,6 +13107,11 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
           NUTSEC,        MNUMYR,        1,             1,             1,             1,             1,             1,  &
           "UtilitySector", "MNUMYR",   "",            "",            "",            "",            "",            "",  &
           "I4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(ECP_SCRUB,ECP_SCRUB,ECP_SCRUB,ECP_SCRUB,ECP_SCRUB,2,"ECP_SCRUB_pass", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          NUTSEC,        MNUMYR,        1,             1,             1,             1,             1,             1,  &
+          "UtilitySector", "MNUMYR",   "",            "",            "",            "",            "",            "",  &
+          "I4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(C_EMM_CDS,C_EMM_CDS,C_EMM_CDS,C_EMM_CDS,C_EMM_CDS,2,"C_EMM_CDS", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           MNUMNR,        NDREG,         1,             1,             1,             1,             1,             1,  &
@@ -14623,6 +13327,11 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
           CO2_D_GRP,     MNUMYR,        1,             1,             1,             1,             1,             1,  &
           "CO2CapGroup", "MNUMYR",     "",            "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(COFCAP,COFCAP,COFCAP,COFCAP,COFCAP,4,"COFCAP", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          ECP_D_RCF,     ECP_D_DSP,     MNUMNR,        MAXNFR,        1,             1,             1,             1,  &
+          "BiomassCOF", "DispatchableECP", "SupplyRegion_ALT1", "FuelRegion", "",   "",            "",            "",  &
+          "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(CPCTNSH,CPCTNSH,CPCTNSH,CPCTNSH,CPCTNSH,2,"CPCTNSH", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           MAXNFR,        EFD_D_NFL,     1,             1,             1,             1,             1,             1,  &
@@ -14643,11 +13352,6 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
           SCALAR,        1,             1,             1,             1,             1,             1,             1,  &
           "SCALARSet",  "",            "",            "",            "",            "",            "",            "",  &
           "I4",iyr,.FALSE.)
-       call AIMMS_TransArray_out_ecp(CURTAIL,CURTAIL,CURTAIL,CURTAIL,CURTAIL,3,"CURTAIL", &
-          1,             1,             1,             1,             1,             1,             1,             1,  &
-          ECP_D_INT,     MNUMNR,        MNUMYR,        1,             1,             1,             1,             1,  &
-          "Intermittent", "SupplyRegion", "MNUMYR",   "",            "",            "",            "",            "",  &
-          "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(CURTAILSUB,CURTAILSUB,CURTAILSUB,CURTAILSUB,CURTAILSUB,4,"CURTAILSUB", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_INT,     4,             MNUMNR,        MNUMYR,        1,             1,             1,             1,  &
@@ -16771,12 +15475,22 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
        call AIMMS_TransArray_out_ecp(UCF_RCAP1,UCF_RCAP1,UCF_RCAP1,UCF_RCAP1,UCF_RCAP1,4,"UCF_RCAP1", &
           1,             1,             1,             1,                1,             1,             1,             1,  &
           ECP_D_RCF,     MNUMNR,        NDREG,         MNUMYR+ECP_D_XPH, 1,             1,             1,             1,  &
-          "BiomassRetrofit", "SupplyRegion", "CoalDemandRegion", "MNUMYRX", "",     "",            "",            "",  &
+          "BiomassCOF", "SupplyRegion", "CoalDemandRegion", "MNUMYRX", "",          "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UCF_RCAP1,UCF_RCAP1,UCF_RCAP1,UCF_RCAP1,UCF_RCAP1,4,"UCF_RCAP1_pass", &
           1,             1,             1,             1,                1,             1,             1,             1,  &
           ECP_D_RCF,     MNUMNR,        NDREG,         MNUMYR+ECP_D_XPH, 1,             1,             1,             1,  &
-          "BiomassRetrofit", "SupplyRegion", "CoalDemandRegion", "MNUMYRX", "",     "",            "",            "",  &
+          "BiomassCOF", "SupplyRegion", "CoalDemandRegion", "MNUMYRX", "",          "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,4,"UCF_TCAP1", &
+          1,             1,             1,             1,                1,             1,             1,             1,  &
+          ECP_D_RCF,     MNUMNR,        NDREG,         MNUMYR+ECP_D_XPH, 1,             1,             1,             1,  &
+          "BiomassCOF", "SupplyRegion", "CoalDemandRegion", "MNUMYRX", "",          "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,4,"UCF_TCAP1_pass", &
+          1,             1,             1,             1,                1,             1,             1,             1,  &
+          ECP_D_RCF,     MNUMNR,        NDREG,         MNUMYR+ECP_D_XPH, 1,             1,             1,             1,  &
+          "BiomassCOF", "SupplyRegion", "CoalDemandRegion", "MNUMYRX", "",          "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UCL_CL_NG_FOM_ADJ,UCL_CL_NG_FOM_ADJ,UCL_CL_NG_FOM_ADJ,UCL_CL_NG_FOM_ADJ,UCL_CL_NG_FOM_ADJ,1,"UCL_CL_NG_FOM_ADJ", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -17251,7 +15965,7 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
        call AIMMS_TransArray_out_ecp(UPCFBTU,UPCFBTU,UPCFBTU,UPCFBTU,UPCFBTU,2,"UPCFBTU", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     NDREG,         1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "CoalDemandRegion", "",  "",            "",            "",            "",            "",  &
+          "BiomassCOF", "CoalDemandRegion", "",       "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCFCLT,UPCFCLT,UPCFCLT,UPCFCLT,UPCFCLT,1,"UPCFCLT", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -17266,7 +15980,7 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
        call AIMMS_TransArray_out_ecp(UPCFCST,UPCFCST,UPCFCST,UPCFCST,UPCFCST,1,"UPCFCST", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     1,             1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "",       "",            "",            "",            "",            "",            "",  &
+          "BiomassCOF", "",            "",            "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCFELF,UPCFELF,UPCFELF,UPCFELF,UPCFELF,1,"UPCFELF", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -17276,7 +15990,7 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
        call AIMMS_TransArray_out_ecp(UPCFFOM,UPCFFOM,UPCFFOM,UPCFFOM,UPCFFOM,1,"UPCFFOM", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     1,             1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "",       "",            "",            "",            "",            "",            "",  &
+          "BiomassCOF", "",            "",            "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCFGEN,UPCFGEN,UPCFGEN,UPCFGEN,UPCFGEN,2,"UPCFGEN", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -17296,22 +16010,22 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
        call AIMMS_TransArray_out_ecp(UPCFLEV,UPCFLEV,UPCFLEV,UPCFLEV,UPCFLEV,2,"UPCFLEV", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     ECP_D_CFS,     1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "BiomassOption", "",     "",            "",            "",            "",            "",  &
+          "BiomassCOF", "BiomassOption", "",          "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCFNSTP,UPCFNSTP,UPCFNSTP,UPCFNSTP,UPCFNSTP,1,"UPCFNSTP", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     1,             1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "",       "",            "",            "",            "",            "",            "",  &
+          "BiomassCOF", "",            "",            "",            "",            "",            "",            "",  &
           "I4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCFSTEP,UPCFSTEP,UPCFSTEP,UPCFSTEP,UPCFSTEP,2,"UPCFSTEP", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     ECP_D_CFS,     1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "BiomassOption", "",     "",            "",            "",            "",            "",  &
+          "BiomassCOF", "BiomassOption", "",          "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCFVOM,UPCFVOM,UPCFVOM,UPCFVOM,UPCFVOM,1,"UPCFVOM", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_RCF,     1,             1,             1,             1,             1,             1,             1,  &
-          "BiomassRetrofit", "",       "",            "",            "",            "",            "",            "",  &
+          "BiomassCOF", "",            "",            "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(UPCIMP,UPCIMP,UPCIMP,UPCIMP,UPCIMP,1,"UPCIMP", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -18043,11 +16757,6 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
           SCALAR,        1,             1,             1,             1,             1,             1,             1,  &
           "SCALARSet",  "",            "",            "",            "",            "",            "",            "",  &
           "I4",iyr,.FALSE.)
-       call AIMMS_TransArray_out_ecp(USW_RNW,USW_RNW,USW_RNW,USW_RNW,USW_RNW,1,"USW_RNW", &
-          1,             1,             1,             1,             1,             1,             1,             1,  &
-          SCALAR,        1,             1,             1,             1,             1,             1,             1,  &
-          "SCALARSet",  "",            "",            "",            "",            "",            "",            "",  &
-          "I4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(USW_RTRSK,USW_RTRSK,USW_RTRSK,USW_RTRSK,USW_RTRSK,1,"USW_RTRSK", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           SCALAR,        1,             1,             1,             1,             1,             1,             1,  &
@@ -18618,25 +17327,50 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
           MX_NCOALS,     MNUMYR,        1,             1,             1,             1,             1,             1,  &
           "CoalSupplyCurve_Dom", "MNUMYR", "",        "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_PIMP,XCL_PIMP,XCL_PIMP,XCL_PIMP,XCL_PIMP,3,"XCL_PIMP", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_ISCV,       10,            MNUMYR,        1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Int", "Ten", "MNUMYR",     "",            "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_QIMP,XCL_QIMP,XCL_QIMP,XCL_QIMP,XCL_QIMP,3,"XCL_QIMP", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_ISCV,       10,            MNUMYR,        1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Int", "Ten", "MNUMYR",     "",            "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(XCL_PLIM,XCL_PLIM,XCL_PLIM,XCL_PLIM,XCL_PLIM,2,"XCL_PLIM", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           MX_NCOALS,     MNUMYR,        1,             1,             1,             1,             1,             1,  &
           "CoalSupplyCurve_Dom", "MNUMYR", "",        "",            "",            "",            "",            "",  &
-          "R4",iyr,.FALSE.)
-       call AIMMS_TransArray_out_ecp(XCL_QECP,XCL_QECP,XCL_QECP,XCL_QECP,XCL_QECP,3,"XCL_QECP", &
-          1,             0,             1,             1,             1,             1,             1,             1,  &
-          MX_NCOALS,     ECP_D_FPH,     MNUMYR,        1,             1,             1,             1,             1,  &
-          "CoalSupplyCurve_Dom", "PlanningHorizon", "MNUMYR", "",    "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(XCL_SO2_YR,XCL_SO2_YR,XCL_SO2_YR,XCL_SO2_YR,XCL_SO2_YR,2,"XCL_SO2_YR", &
           1,                 1,             1,             1,             1,             1,             1,             1,  &
           MX_NCOALS+MX_ISCV, MNUMYR,        1,             1,             1,             1,             1,             1,  &
           "CoalSupplyCurve", "MNUMYR", "",            "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_STEPS,XCL_STEPS,XCL_STEPS,XCL_STEPS,XCL_STEPS,1,"XCL_STEPS", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          11,            1,             1,             1,             1,             1,             1,             1,  &
+          "Eleven",     "",            "",            "",            "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(XCL_STOCK,XCL_STOCK,XCL_STOCK,XCL_STOCK,XCL_STOCK,1,"XCL_STOCK", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
           MNUMYR,        1,             1,             1,             1,             1,             1,             1,  &
           "MNUMYR",     "",            "",            "",            "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_TESCI,XCL_TESCI,XCL_TESCI,XCL_TESCI,XCL_TESCI,3,"XCL_TESCI", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          4,             MNUMYR,        NDREG,         1,             1,             1,             1,             1,  &
+          "Four",       "MNUMYR",      "CoalDemandRegion", "",       "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_TR_IN,XCL_TR_IN,XCL_TR_IN,XCL_TR_IN,XCL_TR_IN,4,"XCL_TR_IN", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          4,             MX_ISCV,       NDREG,         MNUMYR,        1,             1,             1,             1,  &
+          "Four",       "CoalSupplyCurve_Int", "CoalDemandRegion", "MNUMYR", "",    "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_TRATI2,XCL_TRATI2,XCL_TRATI2,XCL_TRATI2,XCL_TRATI2,2,"XCL_TRATI2", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_ISCV,       4,             1,             1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Int", "Four", "",          "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(XCL_TR_T1,XCL_TR_T1,XCL_TR_T1,XCL_TR_T1,XCL_TR_T1,3,"XCL_TR_T1", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -18677,6 +17411,26 @@ subroutine ecp_lookup_par(code,list,nElements,icode,iRegGrid)
           1,             1,             1,             1,             1,             1,             1,             1,  &
           ECP_D_DSP,     1,             1,             1,             1,             1,             1,             1,  &
           "DispatchableECP", "",       "",            "",            "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_1TESC(:,0,:,:),XCL_1TESC(:,0,:,:),XCL_1TESC(:,0,:,:),XCL_1TESC(:,0,:,:),XCL_1TESC(:,0,:,:),3,"XCL_1TESC0", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_NCOALS,     MNUMYR,        NDREG,         1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Dom", "MNUMYR", "CoalDemandRegion", "",   "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_2TESC(:,0,:,:),XCL_2TESC(:,0,:,:),XCL_2TESC(:,0,:,:),XCL_2TESC(:,0,:,:),XCL_2TESC(:,0,:,:),3,"XCL_2TESC0", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_NCOALS,     MNUMYR,        NDREG,         1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Dom", "MNUMYR", "CoalDemandRegion", "",   "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_PECP(:,:,0,:),XCL_PECP(:,:,0,:),XCL_PECP(:,:,0,:),XCL_PECP(:,:,0,:),XCL_PECP(:,:,0,:),3,"XCL_PECP0", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_NCOALS,     11,            MNUMYR,        1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Dom", "Eleven", "MNUMYR",  "",            "",            "",            "",            "",  &
+          "R4",iyr,.FALSE.)
+       call AIMMS_TransArray_out_ecp(XCL_QECP(:,0,:),XCL_QECP(:,0,:),XCL_QECP(:,0,:),XCL_QECP(:,0,:),XCL_QECP(:,0,:),2,"XCL_QECP0", &
+          1,             1,             1,             1,             1,             1,             1,             1,  &
+          MX_NCOALS,     MNUMYR,        1,             1,             1,             1,             1,             1,  &
+          "CoalSupplyCurve_Dom", "MNUMYR", "",        "",            "",            "",            "",            "",  &
           "R4",iyr,.FALSE.)
        call AIMMS_TransArray_out_ecp(CAN_CST,CAN_CST,CAN_CST,CAN_CST,CAN_CST,3,"CAN_CST", &
           1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -19278,21 +18032,21 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
 
        if(numsets.gt.0) then
          write(IOutTXT,'(a)') 'Composite table'
-         write(IOutTXT,'(30a)') (trim(setnames(i)),' ',i=1,numsets),trim(arrayname)
+         write(IOutTXT,'(30a)') (trim('ec::'//setnames(i)),' ',i=1,numsets),trim('ec::'//arrayname)  !<------handle endpoint prefix 'ec::'
        else
          select case(RorI)
          case("R4")
           R8var = dble(R4ARRAY(1,1,1,1,1,1,1,1))
-           write(IOutTXT,'(2a,1PG24.15E3,a)') trim(arrayname),' :=',R8var,' ;'
+           write(IOutTXT,'(2a,1PG24.15E3,a)') trim('ec::'//arrayname),' :=',R8var,' ;'                 !<------handle endpoint prefix 'ec::'
 !          write(IOutTXT,'(2a,1PG15.7E2,a)') trim(arrayname),' :=',R4ARRAY(1,1,1,1,1,1,1,1),' ;'
          case("R8")
-           write(IOutTXT,'(2a,1PG24.15E3,a)') trim(arrayname),' :=',R8ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,1PG24.15E3,a)') trim('ec::'//arrayname),' :=',R8ARRAY(1,1,1,1,1,1,1,1),' ;'    !<------handle endpoint prefix 'ec::'
          case("I4")
-           write(IOutTXT,'(2a,I8,a)') trim(arrayname),' :=',I4ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,I8,a)') trim('ec::'//arrayname),' :=',I4ARRAY(1,1,1,1,1,1,1,1),' ;'            !<------handle endpoint prefix 'ec::'
          case("I2")
-           write(IOutTXT,'(2a,I5,a)') trim(arrayname),' :=',I2ARRAY(1,1,1,1,1,1,1,1),' ;'
+           write(IOutTXT,'(2a,I5,a)') trim('ec::'//arrayname),' :=',I2ARRAY(1,1,1,1,1,1,1,1),' ;'            !<------handle endpoint prefix 'ec::'
          case("I1")
-           write(IOutTXT,'(2a,I3,a)') trim(arrayname),' :=',-1*I1ARRAY(1,1,1,1,1,1,1,1),' ;'          !added by AKN on 6/5/2019
+           write(IOutTXT,'(2a,I3,a)') trim('ec::'//arrayname),' :=',-1*I1ARRAY(1,1,1,1,1,1,1,1),' ;'          !added by AKN on 6/5/2019
          end select
 
          return
@@ -19313,24 +18067,24 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
             alt_alias=.true.
           endif
           setcopies(i)=setnames(i)(1:ialt)  ! use setcopies for printing the elements
-          LcolumnStart(i)=LcolumnEnd(i-1)+1
-          LcolumnEnd(i)=LcolumnStart(i)+len_trim(setnames(i))   ! includes added blank at end to separate each field 
+          LcolumnStart(i)=LcolumnEnd(i-1)+1 
+          LcolumnEnd(i)=LcolumnStart(i)+len_trim('ec::'//setnames(i))   !<-------------------
         enddo  ! i=1,numsets
 
-        LcolumnStart(numsets+1) = LcolumnEnd(numsets) + 1
-        LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim(arrayname)-1
+        LcolumnStart(numsets+1) = LcolumnEnd(numsets) + 1 
+        LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim('ec::'//arrayname)-1      !<-------------------
 
         call get_setIDs_ecp(setnames,numsets,setIDs) 
     ! diminensioning parameters represent a max size and the actual set size may be smaller. So
     ! when writing the array, only write elements within the actual set range.
-       k(1)=1;if(numsets.ge.1) k(1)=min(n1,aimsets(setIDs(1)).iend - aimsets(setIDs(1)).istart +1)
-       k(2)=1;if(numsets.ge.2) k(2)=min(n2,aimsets(setIDs(2)).iend - aimsets(setIDs(2)).istart +1)
-       k(3)=1;if(numsets.ge.3) k(3)=min(n3,aimsets(setIDs(3)).iend - aimsets(setIDs(3)).istart +1)
-       k(4)=1;if(numsets.ge.4) k(4)=min(n4,aimsets(setIDs(4)).iend - aimsets(setIDs(4)).istart +1)
-       k(5)=1;if(numsets.ge.5) k(5)=min(n5,aimsets(setIDs(5)).iend - aimsets(setIDs(5)).istart +1)
-       k(6)=1;if(numsets.ge.6) k(6)=min(n6,aimsets(setIDs(6)).iend - aimsets(setIDs(6)).istart +1)
-       k(7)=1;if(numsets.ge.7) k(7)=min(n7,aimsets(setIDs(7)).iend - aimsets(setIDs(7)).istart +1)
-       k(8)=1;if(numsets.ge.8) k(8)=min(n8,aimsets(setIDs(8)).iend - aimsets(setIDs(8)).istart +1)
+       k(1)=1;if(numsets.ge.1) k(1)=min(n1,aimsets(setIDs(1)).iend - aimsets(setIDs(1)).istart +1)    
+       k(2)=1;if(numsets.ge.2) k(2)=min(n2,aimsets(setIDs(2)).iend - aimsets(setIDs(2)).istart +1)    
+       k(3)=1;if(numsets.ge.3) k(3)=min(n3,aimsets(setIDs(3)).iend - aimsets(setIDs(3)).istart +1)    
+       k(4)=1;if(numsets.ge.4) k(4)=min(n4,aimsets(setIDs(4)).iend - aimsets(setIDs(4)).istart +1)    
+       k(5)=1;if(numsets.ge.5) k(5)=min(n5,aimsets(setIDs(5)).iend - aimsets(setIDs(5)).istart +1)    
+       k(6)=1;if(numsets.ge.6) k(6)=min(n6,aimsets(setIDs(6)).iend - aimsets(setIDs(6)).istart +1)    
+       k(7)=1;if(numsets.ge.7) k(7)=min(n7,aimsets(setIDs(7)).iend - aimsets(setIDs(7)).istart +1)    
+       k(8)=1;if(numsets.ge.8) k(8)=min(n8,aimsets(setIDs(8)).iend - aimsets(setIDs(8)).istart +1)   
        
        if(numsets.ge.1 .and. s1 .lt. 1) k(1)=1-s1+k(1)
        if(numsets.ge.2 .and. s2 .lt. 1) k(2)=1-s2+k(2)
@@ -19401,7 +18155,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
          do i8=j(8),k(8)
           if(numsets.ge.8) then
             c(8)=setElements(    aimsets(setIDs(8)).istart + i8 - 1 )
-            line(LcolumnStart(8):LcolumnEnd(8)) = c(8)
+            line(LcolumnStart(8) + 4:LcolumnEnd(8)) = c(8)              !<------------ to align with a header with prefix 'ec::'
           endif
           if (s(8) .lt. 1) then
              q(8) = i8+s(8) -1 
@@ -19412,7 +18166,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
             do i7=j(7),k(7)
               if(numsets.ge.7) then
                 c(7)=setElements(    aimsets(setIDs(7)).istart + i7 - 1 )
-                line(LcolumnStart(7):LcolumnEnd(7)) = c(7)
+                line(LcolumnStart(7) + 4 :LcolumnEnd(7)) = c(7)           !<------------ to align with a header with prefix 'ec::'
               endif
               if (s(7) .lt. 1) then
                  q(7) = i7+s(7) -1 
@@ -19423,7 +18177,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
               do i6=j(6),k(6)
                 if(numsets.ge.6)then
                   c(6)=setElements(    aimsets(setIDs(6)).istart + i6 - 1 )
-                  line(LcolumnStart(6):LcolumnEnd(6)) = c(6)
+                  line(LcolumnStart(6) + 4:LcolumnEnd(6)) = c(6)              !<------------ to align with a header with prefix 'ec::'
                 endif
                 if (s(6) .lt. 1) then
                     q(6) = i6+s(6) -1 
@@ -19434,7 +18188,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                 do i5=j(5),k(5)
                   if(numsets.ge.5) then
                     c(5)=setElements(    aimsets(setIDs(5)).istart + i5 - 1 )
-                    line(LcolumnStart(5):LcolumnEnd(5)) = c(5)
+                    line(LcolumnStart(5) + 4:LcolumnEnd(5)) = c(5)            !<------------ to align with a header with prefix 'ec::'
                   endif
                   if (s(5) .lt. 1) then
                     q(5) = i5+s(5) -1 
@@ -19445,7 +18199,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                   do i4=j(4),k(4)
                     if(numsets.ge.4)then
                       c(4)=setElements(    aimsets(setIDs(4)).istart + i4 - 1 )
-                      line(LcolumnStart(4):LcolumnEnd(4)) = c(4)
+                      line(LcolumnStart(4) + 4:LcolumnEnd(4)) = c(4)            !<------------ to align with a header with prefix 'ec::'
                     endif
                     if (s(4) .lt. 1) then
                          q(4) = i4+s(4) -1 
@@ -19456,7 +18210,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                     do i3=j(3),k(3)
                       if(numsets.ge.3) then
                         c(3)=setElements(    aimsets(setIDs(3)).istart + i3 - 1)
-                        line(LcolumnStart(3):LcolumnEnd(3)) = c(3)
+                        line(LcolumnStart(3) + 4:LcolumnEnd(3)) = c(3)            !<------------ to align with a header with prefix 'ec::'
                       endif
                       if (s(3) .lt. 1) then
                          q(3) = i3+s(3) -1 
@@ -19467,7 +18221,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                       do i2=j(2),k(2)
                         if(numsets.ge.2)then
                           c(2)=setElements(    aimsets(setIDs(2)).istart + i2 - 1 )
-                          line(LcolumnStart(2):LcolumnEnd(2)) = c(2)
+                          line(LcolumnStart(2) + 4:LcolumnEnd(2)) = c(2)          !<------------ to align with a header with prefix 'ec::'
                         endif
                         if (s(2) .lt. 1) then
                             q(2) = i2+s(2) -1 
@@ -19477,7 +18231,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                     
                         do i1=j(1),k(1)
                           c(1)=setElements(    aimsets(setIDs(1)).istart + i1 - 1 )
-                          line(LcolumnStart(1):LcolumnEnd(1)) = c(1)
+                          line(LcolumnStart(1) + 4:LcolumnEnd(1)) = c(1)          !<------------ to align with a header with prefix 'ec::'  
                           if (s(1) .lt. 1) then
                               q(1) = i1+s(1) -1 
                           else
@@ -19489,40 +18243,40 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                             iform=1                      
                             if(R4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0.0 .and. .not. isnan(R4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))) then
                             R8var = dble(R4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))
-                            write(        line(LcolumnStart(numsets+1):),form(2)) R8var
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+23))
-                              if(line(LcolumnStart(numsets+1):).eq.'Infinity') line(LcolumnStart(numsets+1):)='Inf'
-                              if(line(LcolumnStart(numsets+1):).eq.'-Infinity') line(LcolumnStart(numsets+1):)='-Inf'
+                            write(        line(LcolumnStart(numsets+1)+4:),form(2)) R8var
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+23+4))   !<------------ to align with a header with prefix 'ec::'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'Infinity') line(LcolumnStart(numsets+1)+4:)='Inf'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'-Infinity') line(LcolumnStart(numsets+1)+4:)='-Inf'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("R8")
                             iform=2
                             if(R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0.0 .and. .not. isnan(R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+23))
-                              if(line(LcolumnStart(numsets+1):).eq.'Infinity') line(LcolumnStart(numsets+1):)='Inf'
-                              if(line(LcolumnStart(numsets+1):).eq.'-Infinity') line(LcolumnStart(numsets+1):)='-Inf'
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) R8ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+23+4))    !<------------ to align with a header with prefix 'ec::'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'Infinity') line(LcolumnStart(numsets+1)+4:)='Inf'
+                              if(line(LcolumnStart(numsets+1)+4:).eq.'-Infinity') line(LcolumnStart(numsets+1)+4:)='-Inf'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("I4")
                             iform=3
                             if(I4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) I4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+7))
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) I4ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+7+4))    !<------------ to align with a header with prefix 'ec::'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("I2")
                             iform=4
                             if(I2ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ne.0) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) I2ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+4))
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) I2ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+4+4))     !<------------ to align with a header with prefix 'ec::'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           case("I1")
                             iform=5
                             if ((I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)).ge.-1) .and. (I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)) .le. 1)) then
-                              write(        line(LcolumnStart(numsets+1):),form(iform)) abs(I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))
-                              line(LcolumnStart(numsets+1):) = adjustl(line(LcolumnStart(numsets+1):LcolumnStart(numsets+1)+4))
+                              write(        line(LcolumnStart(numsets+1)+4:),form(iform)) abs(I1ARRAY(q(1),q(2),q(3),q(4),q(5),q(6),q(7),q(8)))
+                              line(LcolumnStart(numsets+1)+4:) = adjustl(line(LcolumnStart(numsets+1)+4:LcolumnStart(numsets+1)+4+4))      !<------------ to align with a header with prefix 'ec::'
                               write(IOutTXT,'(a)') trim(line)
                             endif
                           end select
@@ -20094,7 +18848,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
      comp_buffer(nline)= 'Composite table'
      comp_buflen(nline)=len_trim(comp_buffer(nline))
      nline=nline+1
-     write(comp_buffer(nline),'(30a)') (trim(setnames(i)),'  ',i=1,numsets),'  ',trim(ParamName)
+     write(comp_buffer(nline),'(30a)') (trim('ec::'//setnames(i)),'  ',i=1,numsets),'  ',trim('ec::'//ParamName)     !<------------------- 
      comp_buflen(nline)=len_trim(comp_buffer(nline))
      setIDS=0  
      setcopies=' '
@@ -20113,7 +18867,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
        endif
        setcopies(i)=setnames(i)(1:ialt)  ! use setcopies for printing the elements (names without _ALT (alias) suffix
        LcolumnStart(i)=LcolumnEnd(i-1)+1
-       LcolumnEnd(i)=LcolumnStart(i)+len_trim(setnames(i))+1    
+       LcolumnEnd(i)=LcolumnStart(i)+len_trim('ec::'//setnames(i))+1    !<------------------- 
        if(alt_alias) then
          do j=1,numAimSets
            if( trim(aimsets(j).setname).eq. trim(setcopies(i))  ) then
@@ -20133,16 +18887,16 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
        endif
      enddo  
      LcolumnStart(numsets+1) = LcolumnEnd(numsets) + 1
-     LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim(ParamName) -1
+     LcolumnEnd(numsets+1) = LcolumnStart(numsets+1) + len_trim('ec::'//ParamName) -1      !<------------------- 
 
      LastSetPos=LcolumnEnd(numsets)  ! save for end of set elements
 
  
      do i=1,numsets
        if(setIDs(i).gt.0) then
-         LcolumnEnd(i)=LcolumnStart(i)+len_trim( setElements( aimsets(  setIDs(i) ).istart ) )-1
+         LcolumnEnd(i)=LcolumnStart(i)+len_trim( 'ec::'//setElements( aimsets(  setIDs(i) ).istart ) )-1             !<------------------- 
        else
-         LcolumnEnd(i)=LcolumnStart(i)+len_trim(   ecp_coeff( ecp_sortidx(idxFirst) ).cset_elements(i)  ) -1
+         LcolumnEnd(i)=LcolumnStart(i)+len_trim( 'ec::'//ecp_coeff( ecp_sortidx(idxFirst) ).cset_elements(i)  ) -1   !<------------------- 
        endif
      enddo
 
@@ -20165,21 +18919,21 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
 ! character string set element from SetElements that AIMMS will recognize 
        if(setIDs(i).gt.0) then ! true for aliased sets
          if(ecp_coeff(ic).iset_elements(i).gt.0) then      
-           comp_buffer(nline)(LcolumnStart(i):LcolumnEnd(i)) = setElements(    aimsets(setIDs(i)).istart + ecp_coeff(ic).iset_elements(i) -1) 
+           comp_buffer(nline)(LcolumnStart(i)+4:LcolumnEnd(i)) = setElements(    aimsets(setIDs(i)).istart + ecp_coeff(ic).iset_elements(i) -1) 
          else
            skip=1
          endif
        else ! unaliased set: use set elements directly
          if(ecp_coeff(ic).cset_elements(i).ne.' ') then      
-           comp_buffer(nline)(LcolumnStart(i):LcolumnEnd(i)) = ecp_coeff(ic).cset_elements(i)
+           comp_buffer(nline)(LcolumnStart(i)+4:LcolumnEnd(i)) = ecp_coeff(ic).cset_elements(i)
          else
            skip=1
          endif
        endif
      enddo
      if(skip.ne.1) then
-       write(comp_buffer(nline)(LastSetPos+1:LastSetPos+15),'(1PG15.7E2)') ecp_coeff(ic).coeff8
-       comp_buflen(nline)=LastSetPos+15
+       write(comp_buffer(nline)(LastSetPos+1:LastSetPos+15+4),'(1PG19.7E2)') ecp_coeff(ic).coeff8             !<------------------- 
+       comp_buflen(nline)=LastSetPos+15+4             !<-------------------                   
      else
        nline=nline-1
      endif
@@ -20276,65 +19030,45 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
    integer ifound
    character*216 line,previousline
    character*216 header
-   logical backwards/.true./,scalar,first_scalar,dash,goto10,emptyTable
+   logical backwards/.true./,scalar,first_scalar,dash,goto10,emptyTable,file_exists
    character*24 identifier
    integer nline,idot,lline,ispace,iparen,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L,L2,irg
-   integer iyr
+   integer iyr,idot_start
    logical withSafety,withoutSafety
-   integer SubModelIndex, NumSubModels
-   character*100 ecp_sub_folder, ecp_sub_model
    
    iyr=curiyr
    
-   NumSubModels  = 1
-   if (AIMECPPAR .eq. 1) then
-        NumSubModels  = 4
-   endif
-   ecp_sub_folder ='\'
-   ecp_sub_model = ''
-   
-   do SubModelIndex = 1, NumSubModels 
-        if ((SubModelIndex .eq. 1) .OR. (SubModelIndex .eq. 4))  Then
-            if (AIMECPPAR .eq. 1) then
-                if (SubModelIndex .eq. 1) then
-                     ecp_sub_folder ='\ecp_ge\'
-                     ecp_sub_model ='_ge'
-                 !else if (SubModelIndex .eq. 2) then
-                 !    ecp_sub_folder ='\ecp_gs\'
-                 !    ecp_sub_model ='_gs'
-                 !else if (SubModelIndex .eq. 3) then
-                 !    ecp_sub_folder ='\ecp_gw\'
-                 !    ecp_sub_model ='_gw'
-                 else if (SubModelIndex .eq. 4) then
-                     ecp_sub_folder ='\ecp_gsw\'
-                     ecp_sub_model ='_gsw'
-                 endif
-            endif
 
-           write(filen,'(a,a,a,i4,a)')  './ecp',trim(ecp_sub_folder),'PassBack_new_',curcalyr,'.txt'
-           call Mreplace(filen,'\','/')
+    write(filen,'(a,i4,a)')  './ecp/PassBack_new_',curcalyr,'.txt'
+    call Mreplace(filen,'\','/')
+
+    INQUIRE(file=filen, EXIST=file_exists)
+     if(file_exists .eq. .false. ) then
+        write(6,*) 'ECP output file ',filen,' not found: ECP AIMMS did not complete, stopping run'
+        stop
+     endif
 
    call unitunopened(100,999,IUNIT)
    open(iunit,file=filen,FORM='FORMATTED',ACCESS = 'SEQUENTIAL',STATUS='UNKNOWN')
 
-           withSafety=.false.
-           withoutSafety=.false.
-        ! read first two lines that have solution status for problems "WithoutSafety" and "WithSafety"
-            read (iunit,'(a)',end=999) line
-            write(6,*) 'AIMMS Interface: '//trim(line(4:))  ! first 3 characters in the file are garbage.
-            if(index(line,'Optimal').gt.0) then
-                withoutSafety=.true.
-            endif
-            read (iunit,'(a)') line
-            read (iunit,'(a)') line
-            if(index(line,'Optimal').gt.0) then
-                withSafety=.true.   
-            endif
-            write(6,'(a)') 'AIMMS Interface ECP'//trim(ecp_sub_model)//': '//trim(line)
-            if ( (.not.  withoutSafety) .and. (.not. withSafety)) then 
-                write(6,*)'AIMMS Interface: Optimal ECP Solution not found. Stopping NEMS now'
-                stop
-            endif
+    withSafety=.false.
+    withoutSafety=.false.
+! read first two lines that have solution status for problems "WithoutSafety" and "WithSafety"
+    read (iunit,'(a)',end=999) line
+    write(6,*) 'AIMMS Interface: '//trim(line(4:))  ! first 3 characters in the file are garbage.
+    if(index(line,'Optimal').gt.0) then
+        withoutSafety=.true.
+    endif
+    read (iunit,'(a)') line
+    read (iunit,'(a)') line
+    if(index(line,'Optimal').gt.0) then
+        withSafety=.true.   
+    endif
+    write(6,'(a)') 'AIMMS Interface ECP: '//trim(line)
+    if ( (.not.  withoutSafety) .and. (.not. withSafety)) then 
+        write(6,*)'AIMMS Interface: Optimal ECP Solution not found. Stopping NEMS now'
+        stop
+    endif
                      
            
    call geteij(iyr)
@@ -20359,7 +19093,8 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
        first_scalar=.true.  ! indicates the the current line holds the assignment for the first of 4 scalars.
        ! get row/column name
        idot=index(header,':=')
-       identifier=adjustl(header(:idot-1))
+       idot_start=index(header,'ec::')
+       identifier=adjustl(header(idot_start+4:idot-1))  !<-------------- scalars have ec:: before variable name
      else
        scalar=.false.  
        first_scalar=.false.
@@ -20552,6 +19287,11 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                     call AIMMS_Transfer_in_ecp(BUILD_AVL,BUILD_AVL,BUILD_AVL,BUILD_AVL,BUILD_AVL, &
                     1,             1,             1,             1,             1,             1,             1,             1,  &
                     ECP_D_CAP,     ECP_D_XPH,     MNUMNR,        MNUMYR,        1,             1,             1,             1,  &
+                    "I4",LcolumnStart,LcolumnEnd,FieldName,nfields,iunit)
+     CASE('ECP_SCRUB')
+                    call AIMMS_Transfer_in_ecp(ECP_SCRUB,ECP_SCRUB,ECP_SCRUB,ECP_SCRUB,ECP_SCRUB, &
+                    1,             1,             1,             1,             1,             1,             1,             1,  &
+                    NUTSEC,        MNUMYR,        1,             1,             1,             1,             1,             1,  &
                     "I4",LcolumnStart,LcolumnEnd,FieldName,nfields,iunit)
      CASE('CAPSUB')
                     call AIMMS_Transfer_in_ecp(CAPSUB,CAPSUB,CAPSUB,CAPSUB,CAPSUB, &
@@ -20808,6 +19548,11 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                     1,             1,             1,             1,                1,             1,             1,             1,  &
                     ECP_D_RCF,     MNUMNR,        NDREG,         MNUMYR+ECP_D_XPH, 1,             1,             1,             1,  &
                     "R4",LcolumnStart,LcolumnEnd,FieldName,nfields,iunit)
+     CASE('UCF_TCAP1')
+                    call AIMMS_Transfer_in_ecp(UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,UCF_TCAP1,UCF_TCAP1, &
+                    1,             1,             1,             1,                1,             1,             1,             1,  &
+                    ECP_D_RCF,     MNUMNR,        NDREG,         MNUMYR+ECP_D_XPH, 1,             1,             1,             1,  &
+                    "R4",LcolumnStart,LcolumnEnd,FieldName,nfields,iunit)
      CASE('UECP_GEN')
                     call AIMMS_Transfer_in_ecp(UECP_GEN,UECP_GEN,UECP_GEN,UECP_GEN,UECP_GEN, &
                     1,             1,             1,             1,             1,             1,             1,             1,  &
@@ -20976,8 +19721,6 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
    call getin(1,1)   
    call getout(iyr,1)
 
-      endif     
-   enddo
    
 999 return  
 
@@ -21013,11 +19756,12 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
 ! A complication:  the headers showing set names are AIMMS alias for different versions of the sets (of different length) as used to construct OML names, or refer to sets used
 ! multiple times in an identifer, such as region_ALTfrom and region_ALTto.  The AIMMS set elements read from the file for these aliases are those for the primary set with "_ALT*" omitted,
 ! so often these set elements must be translated from the primary set version to the alternate set version used in the OML names.
-
+   use ifcore, only : commitqq
    use ecp_row_col
    implicit none
    include 'parametr'
    include 'ncntrl'
+
    
    character*80 filen/' '/
    real(KIND=8) rfield(5),inf/0.1797693134862315708145E+309/
@@ -21027,527 +19771,505 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
    integer Lcolumnstart(0:12)
    integer Lcolumnend(0:12)
    character*40 fieldname(0:12),fields(0:12) ! allocate space for 13 fields, or 12 starting at 1
-   integer iUnit/-1/,min_unit/100/,ifound
-   character*216 line
-   character*216 header
-   logical backwards/.true./,scalar,first_scalar,dash,goto10
+   integer iUnit/-1/,min_unit/100/,ifound,wUnit/28345/
+   character*300 line
+   character*300 header
+   logical backwards/.true./,scalar,first_scalar,dash,goto10,lresult,file_exists
+   CHARACTER*255 cwd  
+   integer(4) istat
    character*24 identifier
-   integer nline,idot,ispace,lline,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L
+   integer nline,idot,ispace,lline,nfields,nsets,ic,ir,isol,i,imatch,j,lm,la,lf,icode,fs,s,L,idlen
    character*5 afield,setname*32
    logical withSafety,withoutSafety,lopened,basic_output
-   integer iret,idbg, SubModelIndex, NumSubModels
+   integer iret,idbg
    
    character*4 iden_type/' '/
    character*5 zeroes/'00000'/
    character*16 wfield(5)
-   character*100 ecp_sub_folder, ecp_sub_model
    
-
-   
-   NumSubModels  = 1
-   if (AIMECPPAR .eq. 1) then
-       NumSubModels  = 4
-   endif
-   ecp_sub_folder ='\'
-   ecp_sub_model = ''
 
  
-   do SubModelIndex = 1, NumSubModels 
-           if ((SubModelIndex .eq. 1) .OR. (SubModelIndex .eq. 4))  Then
-               if (AIMECPPAR .eq. 1) then
-                   if (SubModelIndex .eq. 1) then
-                        ecp_sub_folder ='\ecp_ge\'
-                        ecp_sub_model ='_ge'
-                    !else if (SubModelIndex .eq. 2) then
-                    !    ecp_sub_folder ='\ecp_gs\'
-                    !    ecp_sub_model ='_gs'
-                    !else if (SubModelIndex .eq. 3) then
-                    !    ecp_sub_folder ='\ecp_gw\'
-                    !    ecp_sub_model ='_gw'
-                    else if (SubModelIndex .eq. 4) then
-                        ecp_sub_folder ='\ecp_gsw\'
-                        ecp_sub_model ='_gsw'
-                    endif
-               endif
-            ! for AIMMS validation, check for cplex mps file. if found, copy to new file named with model year and iteration.
-               write(line,'(a,a,a,a,a,a,a,a,a,i4,a)') 'if exist .\ecp',trim(ecp_sub_folder),'cpx00000.mps copy /Y .\ecp',trim(ecp_sub_folder),'cpx00000.mps .\ecp',trim(ecp_sub_folder),'cpx',trim(ecp_sub_model),'_',curcalyr,'.mps'
-               call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-               line=' '   
+    
+	    ! for AIMMS validation, check for cplex mps file. if found, copy to new file named with model year and iteration.
+	    open (unit=wunit,file='move_mps.bat',status='unknown')
+	    write(wunit,'(a)') '@echo off'
+	    write(wunit,'(a)') 'cd main\aimms_endpoint'
+	    write(wunit,'(a)') 'for /f "tokens=*" %%i in (''dir cpx0*.mps /b /o:d'') do (set "latestFile=%%i")'
+	    write(wunit,'(a,i4,a)') 'if defined latestFile (copy "%latestFile%" "..\..\ecp\cpx_',curcalyr,'.mps" /y)'
+	    write(wunit,'(a)') 'del cpx0*.mps'
+	    write(wunit,'(a)') 'cd ..\..'
+	    lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+	    close(wunit)
+	    write(line,'(a)') 'call move_mps.bat'
+	    call callsys(iret,line)
+	    write(line,'(a)') 'del move_mps.bat'
+	    call callsys(iret,line)
+	    line=' ' 
+                    
+	        !only make a copy of ecp_yyyy.lis larger than 1k (=1024 bytes)
+	    open (unit=wunit,file='move_lis.bat',status='unknown')
+	    write(wunit,'(a)') '@echo off'
+	    write(wunit,'(3a)') 'for %%I in (.\ecp\log\aimms_endpoint.lis) do if exist %%I if %%~zI gtr 1024 ('     !1024 bytes= 1kb
+	    write(wunit,'(a,i4,a)') 'copy /Y .\ecp\log\aimms_endpoint.lis .\ecp\log\ecp_',curcalyr,'.lis )'
+	    write(wunit,'(a)') 'if exist .\ecp\log\aimms_endpoint.lis del .\ecp\log\aimms_endpoint.lis '
+	    lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+	    close(wunit)
+	    write(line,'(a)') 'call move_lis.bat'
+	    call callsys(iret,line)
+	    line=' '
+	    write(line,'(a)') 'del move_lis.bat'
+	    call callsys(iret,line)
+	    line=' '
 
-            ! for AIMMS validation, check for ecp.lis file that includes aimms-to-cplex crosswalk. if found, copy to new file named with model year and iteration.
-               write(line,'(a,a,a,a,a,a,a,a,a,i4,a)') 'if exist .\ecp',trim(ecp_sub_folder),'log\ecp.lis copy /Y .\ecp',trim(ecp_sub_folder),'log\ecp.lis .\ecp',trim(ecp_sub_folder),'log\ecp',trim(ecp_sub_model),'_',curcalyr,'.lis'
-               call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-               line=' '   
+	    !only make a copy of messsage.log larger than 1k (=1024 bytes)
+	    open (unit=wunit,file='move_log.bat',status='unknown')
+	    write(wunit,'(a)') '@echo off'
+	    write(wunit,'(3a)') 'for %%I in (.\main\aimms_endpoint\log\messages.log) do if exist %%I if %%~zI gtr 1024 ('    !1024 bytes= 1kb
+	    write(wunit,'(a,i4,a)') 'copy /Y .\main\aimms_endpoint\log\messages.log .\ecp\log\messages_',curcalyr,'.log )'
+	    write(wunit,'(a)') 'if exist .\main\aimms_endpoint\log\messages.log  del .\main\aimms_endpoint\log\messages.log '
+	    lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+	    close(wunit)
+	    write(line,'(a)') 'call move_log.bat'
+	    call callsys(iret,line)
+	    line=' '
+	    write(line,'(a)') 'del move_log.bat'
+	    call callsys(iret,line)
+	    line=' '                
+                    
+	    write(filen,'(a,i4,a)')  './ecp/OutToNEMS_',curcalyr,'.txt'
+	    call Mreplace(filen,'\','/')
+	    num_ecp_col_sol=0
 
-            ! for AIMMS debugging, check for messages.log file that includes aimms status messages. if found, copy to new file named with model year and iteration.
-               write(line,'(a,a,a,a,a,a,a,i4,a)') 'if exist .\ecp',trim(ecp_sub_folder),'log\messages.log copy /Y .\ecp',trim(ecp_sub_folder),'log\messages.log .\ecp',trim(ecp_sub_folder),'log\messages_',curcalyr,'.log'
-               call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-               line=' '   
+	    INQUIRE(file=filen, EXIST=file_exists)
+	        if(file_exists .eq. .false. ) then
+	        write(6,*) 'ECP output file ',filen,' not found: ECP AIMMS did not complete, stopping run'
+	        stop
+	        endif
 
-            ! for AIMMS debugging, check for aimms.err file that includes aimms error messages. if found, copy to new file named with model year and iteration.
-               write(line,'(a,a,a,a,a,a,a,i4,a)') 'if exist .\ecp',trim(ecp_sub_folder),'log\aimms.err copy /Y .\ecp',trim(ecp_sub_folder),'log\aimms.err .\ecp',trim(ecp_sub_folder),'log\aimms_',curcalyr,'.err'
-               call callsys(iret,line)  ! calls a subroutine in main.f to send the command to the system  like a console command.
-               line=' '   
-           
-               write(filen,'(a,a,a,i4,a)')  './ecp',trim(ecp_sub_folder),'OutToNEMS_',curcalyr,'.txt'
-               call Mreplace(filen,'\','/')
-               if (SubModelIndex .eq. 1) then
-                    num_ecp_col_sol=0
-               endif
-               call unitunopened(100,999,IUNIT)
-               open(iunit,file=filen,FORM='FORMATTED',ACCESS = 'SEQUENTIAL',STATUS='UNKNOWN')
+	    call unitunopened(100,999,IUNIT)
+	    open(iunit,file=filen,FORM='FORMATTED',ACCESS = 'SEQUENTIAL',STATUS='UNKNOWN')
 
-            ! open column and row solution retrieval debug files
-               if((colunit.gt.0) .and. (SubModelIndex .eq. 1)) then
-                 close(colunit)
-               endif
-               if((rowunit.gt.0) .and. (SubModelIndex .eq. 1)) then
-                 close(rowunit)
-               endif
+	! open column and row solution retrieval debug files
+	    if(colunit.gt.0) then
+	        close(colunit)
+	    endif
+	    if(rowunit.gt.0) then
+	        close(rowunit)
+	    endif
 
-              IF ((AIMECPBG.eq.1) .and. (SubModelIndex .eq. 1))THEN
-                   call unitunopened(100,999,colunit)
-                   write(filen,'(a,i4,a)') 'ecp_soln_cols_',curcalyr,'.txt'
-                   !if (AIMECPPAR .eq. 1) then
-                       !if (SubModelIndex .eq. 1) then
-                            !write(filen,'(a,i4,a)') 'ecp_ge_soln_cols_',curcalyr,'.txt'
-                        !else if (SubModelIndex .eq. 2) then
-                            !write(filen,'(a,i4,a)') 'ecp_gs_soln_cols_',curcalyr,'.txt'
-                        !else if (SubModelIndex .eq. 3) then
-                            !write(filen,'(a,i4,a)') 'ecp_gw_soln_cols_',curcalyr,'.txt'
-                        !endif
-                   !endif
-                   open(colunit,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-                   rewind colunit
+	    IF (AIMECPBG.eq.1)THEN
+	        call unitunopened(100,999,colunit)
+	        write(filen,'(a,i4,a)') 'ecp_soln_cols_',curcalyr,'.txt'
+	        open(colunit,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
+	        rewind colunit
    
-                   call unitunopened(100,999,rowunit)
-                   write(filen,'(a,i4,a)') 'ecp_soln_rows_',curcalyr,'.txt'
-                   !if (AIMECPPAR .eq. 1) then
-                       !if (SubModelIndex .eq. 1) then
-                            !write(filen,'(a,i4,a)') 'ecp_ge_soln_rows_',curcalyr,'.txt'
-                        !else if (SubModelIndex .eq. 2) then
-                            !write(filen,'(a,i4,a)') 'ecp_gs_soln_rows_',curcalyr,'.txt'
-                        !else if (SubModelIndex .eq. 3) then
-                            !write(filen,'(a,i4,a)') 'ecp_gw_soln_rows_',curcalyr,'.txt'
-                        !endif
-                   !endif
-                   open(rowunit,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-                   rewind rowunit
-               ENDIF
+	        call unitunopened(100,999,rowunit)
+	        write(filen,'(a,i4,a)') 'ecp_soln_rows_',curcalyr,'.txt'
+	        open(rowunit,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
+	        rewind rowunit
+	    ENDIF
 
 
-                nline=0
-                num_ecp_col_sol=0
+	    nline=0
+	    num_ecp_col_sol=0
 
-               withSafety=.false.
-               withoutSafety=.false.
-            ! read first two lines that have solution status for problems "WithoutSafety" and "WithSafety"
-               read (iunit,'(a)',end=999) line
-               write(6,*) 'AIMMS Interface: '//trim(line(4:))  ! first 3 characters in the file are garbage.
-               if(index(line,'Optimal').gt.0) then
-                 withoutSafety=.true.
-               endif
-               read (iunit,'(a)') line
-               read (iunit,'(a)') line
-               if(index(line,'Optimal').gt.0) then
-                 withSafety=.true.   
-               endif
-               write(6,'(a)') 'AIMMS Interface ECP'//trim(ecp_sub_model)//': '//trim(line)
-               if ( (.not.  withoutSafety) .and. (.not. withSafety)) then 
-                 write(6,*)'AIMMS Interface: Optimal ECP Solution not found. Stopping NEMS now'
-                 stop
-               endif
+	    withSafety=.false.
+	    withoutSafety=.false.
+	! read first two lines that have solution status for problems "WithoutSafety" and "WithSafety"
+	    read (iunit,'(a)',end=999) line
+	    write(6,*) 'AIMMS Interface: '//trim(line(4:))  ! first 3 characters in the file are garbage.
+	    if(index(line,'Optimal').gt.0) then
+	        withoutSafety=.true.
+	    endif
+	    read (iunit,'(a)') line
+	    read (iunit,'(a)') line
+	    if(index(line,'Optimal').gt.0) then
+	        withSafety=.true.   
+	    endif
+	    write(6,'(a)') 'AIMMS Interface ECP: '//trim(line)
+	    if ( (.not.  withoutSafety) .and. (.not. withSafety)) then 
+	        write(6,*)'AIMMS Interface: Optimal ECP Solution not found. Stopping NEMS now'
+	        stop
+	    endif
      
    
-            ! Return here from below until the end of file is reached. then go down to 99 continue
-            10 continue
-            ! find another line. Find start of next composite table or else an assignment statement:
-                 read(iunit,'(a)',end=99) line   
-                 nline=nline+1   ! keep track of file line numbers for debugging and error messages
-                 if(len_trim(line).eq.0) go to 10
+	! Return here from below until the end of file is reached. then go down to 99 continue
+	10 continue
+	! find another line. Find start of next composite table or else an assignment statement:
+	    read(iunit,'(a)',end=99) line   
+	    nline=nline+1   ! keep track of file line numbers for debugging and error messages
+	    if(len_trim(line).eq.0) go to 10
 
-                 scalar=.false.
+	    scalar=.false.
      
-                 ifound=index(line,':=')  ! indication of scalar so solution values not written as composite table
-                 if(ifound.gt.0) then
-                   nsets=0
-                   nfields=1
-                   scalar=.true.
-                   header=line
-                   row_type=' '
-                   first_scalar=.true.  ! indicates the the current line holds the assignment for the first of 4 scalars.
-                   ! get row/column name
-                   idot=index(header,':=')
-            ! determine if r or c:
-                   identifier=adjustl(header(:idot-1))
-                   if (identifier(1:1).eq.'c') then
-                     iden_type='col '
-                   elseif (identifier(1:1).eq.'r') then
-                     iden_type='row '
-                     L=len_trim(identifier)
-                     if(identifier(L:L).eq.'n') then
-                       row_type='N'
-                     else
-                       row_type=identifier(L-1:L-1)  ! ' eq, le, ge, ==> E, L, or G
-                       call low2up(row_type,1)
-                     endif
-                   elseif (identifier(1:8).eq.'ECPCOSTS') then
-                     iden_type='row '
-                     row_type='N'
-                   else
-                     write(6,'(a)')'AIMMS Interface error ECP'//trim(ecp_sub_model)//': identifier type could not be determined for '//trim(identifier)//' in line: '//trim(header)
-                     go to 10
-                   endif
+	    ifound=index(line,':=')  ! indication of scalar so solution values not written as composite table
+	    if(ifound.gt.0) then
+	    nsets=0
+	    nfields=1
+	    scalar=.true.
+	    header=line
+	    row_type=' '
+	    first_scalar=.true.  ! indicates the the current line holds the assignment for the first of 4 scalars.
+	    ! get row/column name
+	    idot=index(header,':=')
+	! determine if r or c:
+	    identifier=adjustl(header(:idot-1))
+	    idlen = len(identifier)
+	    identifier = identifier(5:idlen)   !<----------- drop first 4 char for 'ec::'
+	    if (identifier(1:1).eq.'c') then
+	        iden_type='col '
+	    elseif (identifier(1:1).eq.'r') then
+	        iden_type='row '
+	        L=len_trim(identifier)
+	        if(identifier(L:L).eq.'n') then
+	        row_type='N'
+	        else
+	        row_type=identifier(L-1:L-1)  ! ' eq, le, ge, ==> E, L, or G
+	        call low2up(row_type,1)
+	        endif
+	    elseif (identifier(1:8).eq.'ECPCOSTS') then
+	        iden_type='row '
+	        row_type='N'
+	    else
+	        write(6,'(a)')'AIMMS Interface error ECP: identifier type could not be determined for '//trim(identifier)//' in line: '//trim(header)
+	        go to 10
+	    endif
 
        
-                 else
-                   scalar=.false.  
-                   first_scalar=.false.
-                 endif
+	    else
+	    scalar=.false.  
+	    first_scalar=.false.
+	    endif
    
-                 ifound=index(line,'Composite table:')
-                 if(ifound.gt.0) then
-            !  Next line will have the header that identifies the column-variable (starts with c, unless a free row implemented as a variable) or row-constraint (starts with r, unless...)
-                   read(iunit,'(a)',end=99) header
-                   nline=nline+1
-                   basic_output = .false.    !initialize
-            ! get row/column name
-                   idot=index(header,'.',backwards)
-            ! determine if r or c:
-                   if(idot.eq.0.and. scalar) then
-                     idot=index(header,':')
-                   elseif(idot.eq.0)then
-                     idot=len_trim(header)
-                     if(header(idot:idot).eq.'n') then  ! looking for free row, identifier ends in lower case n. implemented as parameter. composite table has only one value field, no dots
-                       idot=idot+1
-                       header(idot:idot)='.'  ! fake it
-                     else
-                       idot=0
-                     endif
-                   endif       
-                   if(idot.eq.0) then
-                     write(6,'(a)')'AIMMS Interface error ECP'//trim(ecp_sub_model)//': header with identifier not found for composite table in '//trim(filen)
-                     go to 10
-                   endif
-                   ispace=index(header(1:idot),' ',backwards)
-                   identifier=header(ispace+1:idot-1)
-                   if (identifier(1:1).eq.'c'.and.(index(header,'ReducedCost').gt.0 .or. scalar)) then
-                     iden_type='col '
-                   elseif (identifier(1:1).eq.'r'.and.(index(header,'ReducedCost').gt.0 .or. scalar)) then ! in case some free rows are implemented as columns instead of parameter
-                     iden_type='free'
-                     row_type='N'
-                   elseif (identifier(1:1).eq.'r') then
-                     L=len_trim(identifier)
-                     if(identifier(L:L).eq.'n') then
-                       iden_type='free'
-                       row_type='N'
-                     else
-                       row_type=identifier(L-1:L-1)  ! ' eq, le, ge, ==> E, L, or G
-                       call low2up(row_type,1)
-                       iden_type='row '
-                     endif
-                     if (index(header,'basic').gt.0) basic_output = .true.
-                   elseif (identifier(1:8).eq.'ECPCOSTS') then
-                     iden_type='row '
-                     row_type='N'
-                     identifier(9:)= ' '
-                   else
-                     write(6,'(a)')'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  identifier type could not be determined for '//trim(identifier)//' in line: '//trim(header)
-                     go to 10
-                   endif
+	    ifound=index(line,'Composite table:')
+	    if(ifound.gt.0) then
+	!  Next line will have the header that identifies the column-variable (starts with c, unless a free row implemented as a variable) or row-constraint (starts with r, unless...)
+	    read(iunit,'(a)',end=99) header
+	    nline=nline+1
+	    basic_output = .false.    !initialize
+	! get row/column name
+	    idot=index(header,'.',backwards)
+	! determine if r or c:
+	    if(idot.eq.0.and. scalar) then
+	        idot=index(header,':')
+	    elseif(idot.eq.0)then
+	        idot=len_trim(header)
+	        if(header(idot:idot).eq.'n') then  ! looking for free row, identifier ends in lower case n. implemented as parameter. composite table has only one value field, no dots
+	        idot=idot+1
+	        header(idot:idot)='.'  ! fake it
+	        else
+	        idot=0
+	        endif
+	    endif       
+	    if(idot.eq.0) then
+	        write(6,'(a)')'AIMMS Interface error ECP: header with identifier not found for composite table in '//trim(filen)
+	        go to 10
+	    endif
+	    ispace=index(header(1:idot),' ',backwards)
+	    identifier=header(ispace+1+4:idot-1)  !<------------ add 4 for 'ec::'
+	    if (identifier(1:1).eq.'c'.and.(index(header,'ReducedCost').gt.0 .or. scalar)) then
+	        iden_type='col '
+	    elseif (identifier(1:1).eq.'r'.and.(index(header,'ReducedCost').gt.0 .or. scalar)) then ! in case some free rows are implemented as columns instead of parameter
+	        iden_type='free'
+	        row_type='N'
+	    elseif (identifier(1:1).eq.'r') then
+	        L=len_trim(identifier)
+	        if(identifier(L:L).eq.'n') then
+	        iden_type='free'
+	        row_type='N'
+	        else
+	        row_type=identifier(L-1:L-1)  ! ' eq, le, ge, ==> E, L, or G
+	        call low2up(row_type,1)
+	        iden_type='row '
+	        endif
+	        if (index(header,'basic').gt.0) basic_output = .true.
+	    elseif (identifier(1:8).eq.'ECPCOSTS') then
+	        iden_type='row '
+	        row_type='N'
+	        identifier(9:)= ' '
+	    else
+	        write(6,'(a)')'AIMMS Interface error ECP:  identifier type could not be determined for '//trim(identifier)//' in line: '//trim(header)
+	        go to 10
+	    endif
 
-             ! get underscore line and use it to determine column positions for each field 
-                   read(iunit,'(a)',end=99) line
-                   nline=nline+1
-                   if(index(line,'!').eq.0 .or. index(line,'--').eq.0) then  
-                   ! not an underscore comment line
-                     write(6,'(a)')'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  no comment or underscore line where expected in line: '//trim(line)
-                     goto 10
-                   endif   
+	! get underscore line and use it to determine column positions for each field 
+	    read(iunit,'(a)',end=99) line
+	    nline=nline+1
+	    if(index(line,'!').eq.0 .or. index(line,'--').eq.0) then  
+	    ! not an underscore comment line
+	        write(6,'(a)')'AIMMS Interface error ECP:  no comment or underscore line where expected in line: '//trim(line)
+	        goto 10
+	    endif   
      
-                   LLINE=len_trim(line)+1
-                   nfields=0
-                   lcolumnstart=0
-                   lcolumnend=0
-                   fieldname=' '
-                   fields=' '
+	    LLINE=len_trim(line)+1
+	    nfields=0
+	    lcolumnstart=0
+	    lcolumnend=0
+	    fieldname=' '
+	    fields=' '
      
-                   dash=.false.
-                   do i=1,LLINE
-                     if(.not. dash .and. line(i:i).eq.'-') then
-                       nfields=nfields+1
-                       dash=.true.
-                       Lcolumnstart(nfields)=i
-                     elseif(dash .and. line(i:i).ne.'-') then
-                       dash=.false.
-                       Lcolumnend(nfields)=i-1
-                       fieldname(nfields)=adjustl(header(Lcolumnstart(nfields):Lcolumnend(nfields))) ! adjustl: remove leading blanks
-                     endif
-                   enddo
-                   if(iden_type.eq.'col') then  ! should be 5 fields for each column solution header record and 1 field for each set in the index space
-                     if(nfields.le.5 ) then  ! should be 5 value fields for each column solution record and 1 field for each set in the index space
-                       write(6,'(a,i6)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  not enough fields found in this solution header '//trim(header)//' on line:',nline
-                       go to 10
-                     endif
-                     nsets=nfields-5  ! number of sets in the index space. 0 is for scalar
-                   elseif( iden_type.eq.'row' ) then  ! should be 4 fields for each row solution header record and 1 field for each set in the index space
-                     if (basic_output) nfields = nfields - 1   !if basic output is written out there will be an extra field in the composite table, we should ignore
-                   if ( nfields .le. 4 ) then  ! should be 4 value fields for each row solution record and 1 field for each set in the index space
-                       write(6,'(a,i6)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  not enough fields found in this solution header '//trim(header)//' on line:',nline
-                       go to 10
-                     endif
-                     nsets=nfields-4  ! number of sets in the index space. 0 is for scalar
-                   elseif( iden_type.eq.'free' ) then  ! should be 1 fields in solution header record 1 for each field in the index space
-                     if ( nfields .le. 1 ) then  ! should be 1 field for the solution value  and 1 field for each set in the index space
-                       write(6,'(a,i6)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  not enough fields found in this solution header '//trim(header)//' on line:',nline
-                       go to 10
-                     endif
-                     nsets=nfields-1  ! number of sets in the index space. 0 is for scalar
-                   endif
-                 endif ! of ... if found "composite table" 
-            ! 
-            ! At this point, line can be header for a composite table or an assignment for a scalar
-                 if (iden_type .eq. 'col ') then
-                   ic=-1
-                   call usehash(identifier, colname_hash, max_col_aimms, ic, initial_store)
-                   if(initial_store) then
-                     write(6,'(a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//': aimms identifier not found: '//trim(identifier)//' from this table header: '//trim(header)
-                     colname_hash(ic)= ' ' ! reset hash key to blank since this identifier shouldn't be added to the hash list at this point
-                     goto 10
-                   endif
-                   aimms_col_ID_num=col_aimms_ptr(ic)  
-                 elseif (iden_type .eq. 'row ' .or. iden_type .eq. 'free') then
-                   ir=-1
-                   if(index(identifier,'.').gt.0  .and. iden_type.ne.'free') then
-                     identifier(  index(identifier,'.')  :) = ' '
-                   endif
-                   call usehash(identifier, rowname_hash, max_row_aimms, ir, initial_store)
-                   if(initial_store) then
-                     write(6,'(a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//': aimms identifier not found: '//trim(identifier)//' from this table header: '//trim(header)
-                     rowname_hash(ir)= ' ' ! reset hash key to blank since this identifier shouldn't be added to the hash list at this point
-                     goto 10
-                   endif
-                   aimms_row_ID_num=row_aimms_ptr(ir) 
-                 endif
+	    dash=.false.
+	    do i=1,LLINE
+	        if(.not. dash .and. line(i:i).eq.'-') then
+	        nfields=nfields+1
+	        dash=.true.
+	        Lcolumnstart(nfields)=i
+	        elseif(dash .and. line(i:i).ne.'-') then
+	        dash=.false.
+	        Lcolumnend(nfields)=i-1
+	        fieldname(nfields)=adjustl(header(Lcolumnstart(nfields)+4:Lcolumnend(nfields))) ! adjustl: remove leading blanks
+	        endif
+	    enddo
+	    if(iden_type.eq.'col') then  ! should be 5 fields for each column solution header record and 1 field for each set in the index space
+	        if(nfields.le.5 ) then  ! should be 5 value fields for each column solution record and 1 field for each set in the index space
+	        write(6,'(a,i6)') 'AIMMS Interface error ECP:  not enough fields found in this solution header '//trim(header)//' on line:',nline
+	        go to 10
+	        endif
+	        nsets=nfields-5  ! number of sets in the index space. 0 is for scalar
+	    elseif( iden_type.eq.'row' ) then  ! should be 4 fields for each row solution header record and 1 field for each set in the index space
+	        if (basic_output) nfields = nfields - 1   !if basic output is written out there will be an extra field in the composite table, we should ignore
+	    if ( nfields .le. 4 ) then  ! should be 4 value fields for each row solution record and 1 field for each set in the index space
+	        write(6,'(a,i6)') 'AIMMS Interface error ECP:  not enough fields found in this solution header '//trim(header)//' on line:',nline
+	        go to 10
+	        endif
+	        nsets=nfields-4  ! number of sets in the index space. 0 is for scalar
+	    elseif( iden_type.eq.'free' ) then  ! should be 1 fields in solution header record 1 for each field in the index space
+	        if ( nfields .le. 1 ) then  ! should be 1 field for the solution value  and 1 field for each set in the index space
+	        write(6,'(a,i6)') 'AIMMS Interface error ECP:  not enough fields found in this solution header '//trim(header)//' on line:',nline
+	        go to 10
+	        endif
+	        nsets=nfields-1  ! number of sets in the index space. 0 is for scalar
+	    endif
+	    endif ! of ... if found "composite table" 
+	! 
+	! At this point, line can be header for a composite table or an assignment for a scalar
+	    if (iden_type .eq. 'col ') then
+	    ic=-1
+	    call usehash(identifier, colname_hash, max_col_aimms, ic, initial_store)
+	    if(initial_store) then
+	        write(6,'(a)') 'AIMMS Interface error ECP: aimms identifier not found: '//trim(identifier)//' from this table header: '//trim(header)
+	        colname_hash(ic)= ' ' ! reset hash key to blank since this identifier shouldn't be added to the hash list at this point
+	        goto 10
+	    endif
+	    aimms_col_ID_num=col_aimms_ptr(ic)  
+	    elseif (iden_type .eq. 'row ' .or. iden_type .eq. 'free') then
+	    ir=-1
+	    if(index(identifier,'.').gt.0  .and. iden_type.ne.'free') then
+	        identifier(  index(identifier,'.')  :) = ' '
+	    endif
+	    call usehash(identifier, rowname_hash, max_row_aimms, ir, initial_store)
+	    if(initial_store) then
+	        write(6,'(a)') 'AIMMS Interface error ECP: aimms identifier not found: '//trim(identifier)//' from this table header: '//trim(header)
+	        rowname_hash(ir)= ' ' ! reset hash key to blank since this identifier shouldn't be added to the hash list at this point
+	        goto 10
+	    endif
+	    aimms_row_ID_num=row_aimms_ptr(ir) 
+	    endif
 
-            ! return here from below until the composite table data ends with a ";" or a new composite table starts following some scalar assignment statements,
-            ! or the end of the file is reached.  For scalars, the first scalar is in "line" read at 10 above. But then control returns here to read the next three.
-            20   continue
-                 if(.not.scalar  .or.  (.not. first_scalar)) then
-                   read(iunit,'(a)',end=99) line
-                   nline=nline+1
-                 endif
-                 if(index(line,';').gt.1 .and. (.not. scalar)) then
-                   goto 10  ! composite tables end with a ";" on a new line.  Go back up to search for next table.
-                 endif
-                 if(index(line,'Composite').gt.0) then  ! can happen after processing assignment statements. so backspace file 1 line and go to top to re-read line and restart table processing.
-                   backspace iunit 
-                   nline=nline-1
-                   goto 10
-                 endif
-                 if(index(line,'!').ge.1) then 
-                   goto 20  ! some tables have additional header lines to indicate the default values (such as 0 or Inf) to be assumed for each blank solution entry.
-                 endif
+	! return here from below until the composite table data ends with a ";" or a new composite table starts following some scalar assignment statements,
+	! or the end of the file is reached.  For scalars, the first scalar is in "line" read at 10 above. But then control returns here to read the next three.
+	20   continue
+	    if(.not.scalar  .or.  (.not. first_scalar)) then
+	    read(iunit,'(a)',end=99) line
+	    nline=nline+1
+	    endif
+	    if(index(line,';').gt.1 .and. (.not. scalar)) then
+	    goto 10  ! composite tables end with a ";" on a new line.  Go back up to search for next table.
+	    endif
+	    if(index(line,'Composite').gt.0) then  ! can happen after processing assignment statements. so backspace file 1 line and go to top to re-read line and restart table processing.
+	    backspace iunit 
+	    nline=nline-1
+	    goto 10
+	    endif
+	    if(index(line,'!').ge.1) then 
+	    goto 20  ! some tables have additional header lines to indicate the default values (such as 0 or Inf) to be assumed for each blank solution entry.
+	    endif
 
-                 if(len_trim(line).eq.0) then
-                   if(.not.scalar) then
-                     goto 20
-                   else
-            ! there is a blank line between two successive scalars.  If a blank line is encountered when the solution records for a scalar,
-            ! return to start of read loop to start processing next scalar.       
-                     goto 10
-                   endif
-                 endif
+	    if(len_trim(line).eq.0) then
+	    if(.not.scalar) then
+	        goto 20
+	    else
+	! there is a blank line between two successive scalars.  If a blank line is encountered when the solution records for a scalar,
+	! return to start of read loop to start processing next scalar.       
+	        goto 10
+	    endif
+	    endif
 
-            ! Scalar processing:     
-                 if(nsets.eq.0 .and. index(line,':=').gt.0) then
-                   scalar=.true.
+	! Scalar processing:     
+	    if(nsets.eq.0 .and. index(line,':=').gt.0) then
+	    scalar=.true.
      
-                   if (iden_type .eq. 'col ') then
-            ! 1) read scalar solution values from multiple lines, OML Column Identifier
-                     call store_ecp_col_scalar
+	    if (iden_type .eq. 'col ') then
+	! 1) read scalar solution values from multiple lines, OML Column Identifier
+	        call store_ecp_col_scalar
 
-                   elseif (iden_type .eq. 'row ' .or. iden_type .eq.'free') then
-            ! 2) read scalar solution values from multiple lines, OML Row Identifier
-                     call store_ecp_row_scalar
-                   endif
-                   first_scalar=.false.
+	    elseif (iden_type .eq. 'row ' .or. iden_type .eq.'free') then
+	! 2) read scalar solution values from multiple lines, OML Row Identifier
+	        call store_ecp_row_scalar
+	    endif
+	    first_scalar=.false.
 
-                   goto 20  ! get next record in this group of scalar assignment statements
+	    goto 20  ! get next record in this group of scalar assignment statements
 
-                 endif     ! of scalar processing... if(nsets.eq.0 .and. index(line,':=').gt.0) then
+	    endif     ! of scalar processing... if(nsets.eq.0 .and. index(line,':=').gt.0) then
 
-            ! if here, the lines are part of a composite table, not scalar assignments. Determine set elements and construct the OML column or row name based on the column or row mask.
-            ! Store solution values with the OML column or row name it matches    
-                 do i=1,nfields
-                   fields(i)=adjustl(line(Lcolumnstart(i):Lcolumnend(i))) ! adjustl: remove leading blanks
-                 enddo   
+	! if here, the lines are part of a composite table, not scalar assignments. Determine set elements and construct the OML column or row name based on the column or row mask.
+	! Store solution values with the OML column or row name it matches    
+	    do i=1,nfields
+	    fields(i)=adjustl(line(Lcolumnstart(i):Lcolumnend(i))) ! adjustl: remove leading blanks
+	    enddo   
 
-                 if (iden_type .eq. 'col ') then
+	    if (iden_type .eq. 'col ') then
 
-            ! 3) Process lines from composite table, OML column identifier    
-                    call store_ecp_col_sol
-                    if(goto10) goto 10
-                 elseif (iden_type .eq. 'row ' .or. iden_type .eq. 'free') then
+	! 3) Process lines from composite table, OML column identifier    
+	    call store_ecp_col_sol
+	    if(goto10) goto 10
+	    elseif (iden_type .eq. 'row ' .or. iden_type .eq. 'free') then
 
-            ! 4) Process lines from composite table, OML row identifier
-                    call store_ecp_row_sol
-                    if(goto10) goto 10
+	! 4) Process lines from composite table, OML row identifier
+	    call store_ecp_row_sol
+	    if(goto10) goto 10
          
-                 endif     
-                 go to 20  ! get next record in this composite table
+	    endif     
+	    go to 20  ! get next record in this composite table
 
-            99 close(iunit)
+	99 close(iunit)
    
-            ! write AIMMS solution records to debug file
-             if(aimecpbg.eq.1) then
-               write(filen,'(a,i4,a)') 'ecp_aimms_soln_debug_',curcalyr,'.txt'
-               if (AIMECPPAR .eq. 1) then
-                   if (SubModelIndex .eq. 1) then
-                      write(filen,'(a,i4,a)') 'ecp_ge_aimms_soln_debug_',curcalyr,'.txt'
-                   else if (SubModelIndex .eq. 4) then
-                      write(filen,'(a,i4,a)') 'ecp_gsw_aimms_soln_debug_',curcalyr,'.txt'
-                   !else if (SubModelIndex .eq. 3) then
-                   !   write(filen,'(a,i4,a)') 'ecp_gw_aimms_soln_debug_',curcalyr,'.txt'
-                   endif
-               endif
-               call unitunopened(100,999,IUNIT)
-               open(iunit,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
-               rewind iunit
-             endif
+	! write AIMMS solution records to debug file
+	    if(aimecpbg.eq.1) then
+	    write(filen,'(a,i4,a)') 'ecp_aimms_soln_debug_',curcalyr,'.txt'
+	    call unitunopened(100,999,IUNIT)
+	    open(iunit,file=filen,status='unknown',BUFFERED='YES',BUFFERCOUNT=10)
+	    rewind iunit
+	    endif
 
-            ! column solutions
-               do i=1,num_ecp_col_sol
-                 ecpcolnam=col_sol_names(i) ! sequence of oml cols names as read from AIMMS solution file
-            ! use hash table for col names for fast lookup of solution record "s"
-            ! based on the col name.
-                 call usehash(ecpcolnam, ecp_col_name, max_ecp_col_hash, s, initial_store)
+	! column solutions
+	    do i=1,num_ecp_col_sol
+	        ecpcolnam=col_sol_names(i) ! sequence of oml cols names as read from AIMMS solution file
+	! use hash table for col names for fast lookup of solution record "s"
+	! based on the col name.
+	        call usehash(ecpcolnam, ecp_col_name, max_ecp_col_hash, s, initial_store)
 
-                 aimms_col_ID_num=ecp_col_sol(s).aimms_col_ID_num
-                 nsets=ecp_col_sol(s).nsets
-                 if(aimms_col_ID_num.ge.0) then
-                   do j=1,5
-                     if(ecp_col_sol(s).solval(j).gt.999999999.) then
-                       wfield(j)='       inf'
-                     elseif(ecp_col_sol(s).solval(j).le.-99999999.) then
-                       wfield(j)='      -inf'
-                     else
-                       write(wfield(j),'(F16.6)')  ecp_col_sol(s).solval(j)
-                     endif
-                   enddo 
-                   ecp_col_sol(s).status=' '
-                   if(ecp_col_sol(s).solval(3) .eq. ecp_col_sol(s).solval(4) .and.  &
-                      ecp_col_sol(s).solval(1) .eq. ecp_col_sol(s).solval(3)) then
+	        aimms_col_ID_num=ecp_col_sol(s).aimms_col_ID_num
+	        nsets=ecp_col_sol(s).nsets
+	        if(aimms_col_ID_num.ge.0) then
+	        do j=1,5
+	            if(ecp_col_sol(s).solval(j).gt.999999999.) then
+	            wfield(j)='       inf'
+	            elseif(ecp_col_sol(s).solval(j).le.-99999999.) then
+	            wfield(j)='      -inf'
+	            else
+	            write(wfield(j),'(F16.6)')  ecp_col_sol(s).solval(j)
+	            endif
+	        enddo 
+	        ecp_col_sol(s).status=' '
+	        if(ecp_col_sol(s).solval(3) .eq. ecp_col_sol(s).solval(4) .and.  &
+	            ecp_col_sol(s).solval(1) .eq. ecp_col_sol(s).solval(3)) then
 
-                             ecp_col_sol(s).status='EQ'
+	                    ecp_col_sol(s).status='EQ'
 
-                   elseif(ecp_col_sol(s).solval(1) .eq. ecp_col_sol(s).solval(4)) then
+	        elseif(ecp_col_sol(s).solval(1) .eq. ecp_col_sol(s).solval(4)) then
 
-                             ecp_col_sol(s).status='UL'
+	                    ecp_col_sol(s).status='UL'
 
-                   elseif(ecp_col_sol(s).solval(1).eq.ecp_col_sol(s).solval(3)) then
+	        elseif(ecp_col_sol(s).solval(1).eq.ecp_col_sol(s).solval(3)) then
 
-                            ecp_col_sol(s).status='LL'
+	                ecp_col_sol(s).status='LL'
 
-                   elseif(ecp_col_sol(s).solval(1) .gt. ecp_col_sol(s).solval(3) .and. &
-                          ecp_col_sol(s).solval(1) .lt. ecp_col_sol(s).solval(4)) then
+	        elseif(ecp_col_sol(s).solval(1) .gt. ecp_col_sol(s).solval(3) .and. &
+	                ecp_col_sol(s).solval(1) .lt. ecp_col_sol(s).solval(4)) then
 
-                            ecp_col_sol(s).status='BS'
+	                ecp_col_sol(s).status='BS'
 
-                   endif
-                   if(aimecpbg.eq.1)then
-                     if(aimms_col_ID_num.ge.0) then 
-                       write(iunit,'(i6,i4,1x,a,1x,a,1x,I1,1x,<max_set>(a5,1x),a,5a16,1x,a2)') i, &
-                                             aimms_col_ID_num, &
-                                   col_aimms(aimms_col_ID_num).colnam_aimms, &
-                                   col_aimms(aimms_col_ID_num).colnam_mask,  &
-                                   nsets, &
-                                   ecp_col_sol(s).cset_elements(1:max_set), &
-                                   ecp_col_sol(s).ecpcolnam, wfield(1:5),ecp_col_sol(s).status
-                     else
-                       write(iunit,'(i6,i4,1x,a24,1x,a30,1x,I1,1x,<max_set>(a5,1x),a,5a16,1x,a2)') i, &
-                                             aimms_col_ID_num, &
-                                   ' ', &
-                                   ' ',  &
-                                   nsets, &
-                                   ecp_col_sol(s).cset_elements(1:max_set), &
-                                   ecpcolnam, wfield(1:5),ecp_col_sol(s).status
-                     endif
-                   endif
-                 endif
-               enddo
-            ! row solutions   
-               do i=1,num_ecp_row_sol
-                 ecprownam=row_sol_names(i) ! sequence of oml row names as read from AIMMS solution file
-                 row_type=row_sol_types(i)
-            ! use hash table for row names for fast lookup of solution record "s"
-            ! based on the row name.
-                 call usehash(ecprownam, ecp_row_name, max_ecp_row_hash, s, initial_store)
-                 if(ecp_row_sol(s).row_type .ne. row_type) then  ! for example, aimms writes solution for two row types, but only one is used (CARBONAB)
-            !       write(6,'(a)') 'AIMMS Interface: skipping solution for '//ecprownam//' with row_type of '//row_type//'. Latest row type is '//ecp_row_sol(s).row_type
-                    cycle  ! skip the rest of this i iteration and continue do loop
-                 endif
-                 aimms_row_ID_num=ecp_row_sol(s).aimms_row_ID_num
-                   nsets=ecp_row_sol(s).nsets
-                   do j=1,5
-                     if(ecp_row_sol(s).solval(j).gt.999999999.) then
-                       wfield(j)='       inf'
-                     elseif(ecp_row_sol(s).solval(j).le.-99999999.) then
-                       wfield(j)='      -inf'
-                     else
-                       write(wfield(j),'(F16.6)')  ecp_row_sol(s).solval(j)
-                     endif
-                   enddo
-                   ecp_row_sol(s).status=' '
-                   if(row_type.eq.'N') then
-                      ecp_row_sol(s).status='FR'
-                   elseif(ecp_row_sol(s).solval(3) .eq. ecp_row_sol(s).solval(4) .and. &
-                          ecp_row_sol(s).solval(1) .eq. ecp_row_sol(s).solval(3)) then
+	        endif
+	        if(aimecpbg.eq.1)then
+	            if(aimms_col_ID_num.ge.0) then 
+	            write(iunit,'(i6,i4,1x,a,1x,a,1x,I1,1x,<max_set>(a5,1x),a,5a16,1x,a2)') i, &
+	                                    aimms_col_ID_num, &
+	                        col_aimms(aimms_col_ID_num).colnam_aimms, &
+	                        col_aimms(aimms_col_ID_num).colnam_mask,  &
+	                        nsets, &
+	                        ecp_col_sol(s).cset_elements(1:max_set), &
+	                        ecp_col_sol(s).ecpcolnam, wfield(1:5),ecp_col_sol(s).status
+	            else
+	            write(iunit,'(i6,i4,1x,a24,1x,a30,1x,I1,1x,<max_set>(a5,1x),a,5a16,1x,a2)') i, &
+	                                    aimms_col_ID_num, &
+	                        ' ', &
+	                        ' ',  &
+	                        nsets, &
+	                        ecp_col_sol(s).cset_elements(1:max_set), &
+	                        ecpcolnam, wfield(1:5),ecp_col_sol(s).status
+	            endif
+	        endif
+	        endif
+	    enddo
+	! row solutions   
+	    do i=1,num_ecp_row_sol
+	        ecprownam=row_sol_names(i) ! sequence of oml row names as read from AIMMS solution file
+	        row_type=row_sol_types(i)
+	! use hash table for row names for fast lookup of solution record "s"
+	! based on the row name.
+	        call usehash(ecprownam, ecp_row_name, max_ecp_row_hash, s, initial_store)
+	        if(ecp_row_sol(s).row_type .ne. row_type) then  ! for example, aimms writes solution for two row types, but only one is used (CARBONAB)
+	!       write(6,'(a)') 'AIMMS Interface: skipping solution for '//ecprownam//' with row_type of '//row_type//'. Latest row type is '//ecp_row_sol(s).row_type
+	        cycle  ! skip the rest of this i iteration and continue do loop
+	        endif
+	        aimms_row_ID_num=ecp_row_sol(s).aimms_row_ID_num
+	        nsets=ecp_row_sol(s).nsets
+	        do j=1,5
+	            if(ecp_row_sol(s).solval(j).gt.999999999.) then
+	            wfield(j)='       inf'
+	            elseif(ecp_row_sol(s).solval(j).le.-99999999.) then
+	            wfield(j)='      -inf'
+	            else
+	            write(wfield(j),'(F16.6)')  ecp_row_sol(s).solval(j)
+	            endif
+	        enddo
+	        ecp_row_sol(s).status=' '
+	        if(row_type.eq.'N') then
+	            ecp_row_sol(s).status='FR'
+	        elseif(ecp_row_sol(s).solval(3) .eq. ecp_row_sol(s).solval(4) .and. &
+	                ecp_row_sol(s).solval(1) .eq. ecp_row_sol(s).solval(3)) then
               
-                            ecp_row_sol(s).status='EQ'
+	                ecp_row_sol(s).status='EQ'
                 
-                   elseif(ecp_row_sol(s).solval(1) .eq. ecp_row_sol(s).solval(4)) then
+	        elseif(ecp_row_sol(s).solval(1) .eq. ecp_row_sol(s).solval(4)) then
        
-                            ecp_row_sol(s).status='UL'
+	                ecp_row_sol(s).status='UL'
                 
-                   elseif(ecp_row_sol(s).solval(1) .eq. ecp_row_sol(s).solval(3)) then
+	        elseif(ecp_row_sol(s).solval(1) .eq. ecp_row_sol(s).solval(3)) then
        
-                            ecp_row_sol(s).status='LL'
+	                ecp_row_sol(s).status='LL'
                 
-                   elseif(ecp_row_sol(s).solval(1) .gt. ecp_row_sol(s).solval(3) .and.  &
-                          ecp_row_sol(s).solval(1) .lt. ecp_row_sol(s).solval(4)) then
+	        elseif(ecp_row_sol(s).solval(1) .gt. ecp_row_sol(s).solval(3) .and.  &
+	                ecp_row_sol(s).solval(1) .lt. ecp_row_sol(s).solval(4)) then
               
-                            ecp_row_sol(s).status='BS'
-                   endif
-                   if(AIMECPBG.eq.1) then
-                    if(aimms_row_ID_num.ge.0) then
-                      write(iunit,'(i6,i4,1x,a,1x,a,1x,I1,1x,<max_set>(a5,1x),a,5A16,1x,a2)') i, &
-                                             aimms_row_ID_num, &
-                                   row_aimms(aimms_row_ID_num).rownam_aimms, &
-                                   row_aimms(aimms_row_ID_num).rownam_mask,  &
-                                   nsets, &
-                                   ecp_row_sol(s).cset_elements(1:max_set), &
-                                   ecp_row_sol(s).ecprownam, wfield(1:5),ecp_row_sol(s).status
-                    else
-                      write(iunit,'(i6,i4,1x,a24,1x,a30,1x,I1,1x,<max_set>(a5,1x),a,5A16,1x,a2)') i, &
-                                             aimms_row_ID_num, &
-                                   ' ', &
-                                   ' ',  &
-                                   nsets, &
-                                   ecp_row_sol(s).cset_elements(1:max_set), &
-                                   ecprownam, wfield(1:5),ecp_row_sol(s).status
-                    endif
-                   endif
-               enddo
-               if (aimecpbg.eq.1) close(iunit)
-           endif
-      enddo
-999   if ((SubModelIndex .lt. NumSubModels) .and. (NumSubModels .gt. 1)) then
-          write(6,'(a,i4)') 'AIMMS Interface error: Reading one or more of parallel ECP AIMMS solution related files has failed during year ',curcalyr
-      endif
-      return
+	                ecp_row_sol(s).status='BS'
+	        endif
+	        if(AIMECPBG.eq.1) then
+	        if(aimms_row_ID_num.ge.0) then
+	            write(iunit,'(i6,i4,1x,a,1x,a,1x,I1,1x,<max_set>(a5,1x),a,5A16,1x,a2)') i, &
+	                                    aimms_row_ID_num, &
+	                        row_aimms(aimms_row_ID_num).rownam_aimms, &
+	                        row_aimms(aimms_row_ID_num).rownam_mask,  &
+	                        nsets, &
+	                        ecp_row_sol(s).cset_elements(1:max_set), &
+	                        ecp_row_sol(s).ecprownam, wfield(1:5),ecp_row_sol(s).status
+	        else
+	            write(iunit,'(i6,i4,1x,a24,1x,a30,1x,I1,1x,<max_set>(a5,1x),a,5A16,1x,a2)') i, &
+	                                    aimms_row_ID_num, &
+	                        ' ', &
+	                        ' ',  &
+	                        nsets, &
+	                        ecp_row_sol(s).cset_elements(1:max_set), &
+	                        ecprownam, wfield(1:5),ecp_row_sol(s).status
+	        endif
+	        endif
+	    enddo
+	      if (aimecpbg.eq.1) close(iunit)
+	999   continue
       
-      return
+	      return
    CONTAINS
 !
 !  The following four subroutines share the declarations in the subroutine above because they are within the scope its "CONTAINS" definition
@@ -21559,7 +20281,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
         if(aimms_col_ID_num.ge.0) then
           num_ecp_col_sol=num_ecp_col_sol+1  ! count of solution records
           if(num_ecp_col_sol .gt. max_ecp_col) then
-            write(6,'(a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  max_ecp_col exceeded in store_ecp_col_sol. stopping.'
+            write(6,'(a)') 'AIMMS Interface error ECP:  max_ecp_col exceeded in store_ecp_col_sol. stopping.'
             stop
           endif
 ! make sure the sets identified in the composite header match those set names defined for the col_aimms column
@@ -21599,7 +20321,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                     la=len_trim(afield)
                  endif
                  if(icode.eq.0 .or. ifound.eq.0 .or. la.ne.(cindend(i)-cindstt(i)+1)) then
-                   write(6,'(3a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//' with '//trim(identifier)// &
+                   write(6,'(3a)') 'AIMMS Interface error ECP with '//trim(identifier)// &
                     ' solution. Could not get aliased set element for field: '//trim(fields(i))//' for set: '//trim(fieldname(i))//' and '//trim(setname)
                    goto10=.true.
                    return
@@ -21640,22 +20362,11 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
              enddo
              if(s.ge.0) then
                ecp_col_sol(s).ecpcolnam = ecpcolnam
-               if (AIMECPPAR .eq. 0) then                !added this for now to make them closer to single LP solution    by AKN
-                   ecp_col_sol(s).solval(1) = rfield(1)
-                   ecp_col_sol(s).solval(2) = rfield(2)
-                   ecp_col_sol(s).solval(3) = rfield(3)
-                   ecp_col_sol(s).solval(4) = rfield(4)
-                   ecp_col_sol(s).solval(5) = rfield(5)
-               else
-                   if (ecp_col_sol(s).solval(1) .le. rfield(1)) then
-                      ecp_col_sol(s).solval(1) = rfield(1)
-                      ecp_col_sol(s).solval(2) = rfield(2)
-                      ecp_col_sol(s).solval(3) = rfield(3)
-                      ecp_col_sol(s).solval(4) = rfield(4)
-                      ecp_col_sol(s).solval(5) = rfield(5)
-                   endif
-                endif
-
+               ecp_col_sol(s).solval(1) = rfield(1)
+               ecp_col_sol(s).solval(2) = rfield(2)
+               ecp_col_sol(s).solval(3) = rfield(3)
+               ecp_col_sol(s).solval(4) = rfield(4)
+               ecp_col_sol(s).solval(5) = rfield(5)
                ecp_col_sol(s).aimms_col_ID_num = aimms_col_ID_num
 ! store set elements from each set field          
                ecp_col_sol(s).nsets = nsets
@@ -21663,13 +20374,13 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                  ecp_col_sol(s).cset_elements(i)=fields(i)
                enddo
              else
-               write(6,'(a,i6)') 'AIMMS Interface error: ECP'//trim(ecp_sub_model)//': bad hash index from column name: '//ecpcolnam//' so may need to increase max_ecp_col_hash'
+               write(6,'(a,i6)') 'AIMMS Interface error: ECP: bad hash index from column name: '//ecpcolnam//' so may need to increase max_ecp_col_hash'
              endif
           else
-            write(6,'(a,i6)') 'AIMMS Interface error: ECP'//trim(ecp_sub_model)//': index set mismatch on solution for identifier '//trim(identifier)//' line #',nline
+            write(6,'(a,i6)') 'AIMMS Interface error: ECP: index set mismatch on solution for identifier '//trim(identifier)//' line #',nline
           endif
         else
-          write(6,'(3a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//': aimms_col_ID_num<0 reading column solution in subroutine store_ecp_col_sol'
+          write(6,'(3a)') 'AIMMS Interface error ECP: aimms_col_ID_num<0 reading column solution in subroutine store_ecp_col_sol'
           goto10=.true.
        endif
 
@@ -21683,7 +20394,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
         if(aimms_row_ID_num.ge.0) then
           num_ecp_row_sol=num_ecp_row_sol+1   ! count of solution records
           if(num_ecp_row_sol .gt. max_ecp_row) then
-            write(6,'(a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  max_ecp_row exceeded in store_ecp_row_sol. stopping.'
+            write(6,'(a)') 'AIMMS Interface error ECP:  max_ecp_row exceeded in store_ecp_row_sol. stopping.'
             stop
           endif
 ! make sure the sets identified in the composite header match those set names defined for the row_aimms row
@@ -21724,7 +20435,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                     la=len_trim(afield)
                  endif
                  if(icode.eq.0 .or. ifound.eq.0) then
-                   write(6,'(3a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//' with '//trim(identifier)// &
+                   write(6,'(3a)') 'AIMMS Interface error ECP with '//trim(identifier)// &
                     ' solution. Could not get aliased set element for field: '//trim(fields(i))//' for set: '//trim(fieldname(i))//' and '//trim(setname)
                    goto10=.true.
                    return
@@ -21775,21 +20486,11 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                endif
              enddo
              if(s.ge.0) then
-               if (AIMECPPAR .eq. 0) then   !added this for now to make them closer to single LP solution    by AKN
                    ecp_row_sol(s).solval(1) = rfield(1)
                    ecp_row_sol(s).solval(2) = 0.
                    ecp_row_sol(s).solval(3) = rfield(2)
                    ecp_row_sol(s).solval(4) = rfield(3)
                    ecp_row_sol(s).solval(5) = rfield(4)
-               else
-                   if (ecp_row_sol(s).solval(1) .le. rfield(1)) then
-                      ecp_row_sol(s).solval(1) = rfield(1)
-                      ecp_row_sol(s).solval(2) = 0.
-                      ecp_row_sol(s).solval(3) = rfield(2)
-                      ecp_row_sol(s).solval(4) = rfield(3)
-                      ecp_row_sol(s).solval(5) = rfield(4)
-                   endif
-                endif
                if(row_type.eq.'L')then
                  if(rfield(3).gt.0.and.rfield(3).lt.inf) then
                    ecp_row_sol(s).solval(2)=rfield(3)-rfield(1) ! slack activity for oml comparability
@@ -21808,16 +20509,16 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                  ecp_row_sol(s).cset_elements(i)=fields(i)
               enddo
              else
-               write(6,'(a,i6)') 'AIMMS Interface ECP'//trim(ecp_sub_model)//' bad hash index from row name: '//ecprownam//' so may need to increase max_ecp_row_hash'
+               write(6,'(a,i6)') 'AIMMS Interface ECP bad hash index from row name: '//ecprownam//' so may need to increase max_ecp_row_hash'
              endif
            else
           !  write(6,'(a)') 'AIMMS Interface ECP skipping solution for '//ecprownam//' row_type='//row_type//': does not match '//ecp_row_sol(s).row_type
            endif
           else
-            write(6,'(a,i6)') 'AIMMS Interface ECP'//trim(ecp_sub_model)//' index set mismatch on solution for identifier '//trim(identifier)//' line #',nline
+            write(6,'(a,i6)') 'AIMMS Interface ECP index set mismatch on solution for identifier '//trim(identifier)//' line #',nline
           endif
         else
-          write(6,'(3a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//' aimms_row_ID_num<0 reading row solution in subroutine store_ecp_row_sol'
+          write(6,'(3a)') 'AIMMS Interface error ECP aimms_row_ID_num<0 reading row solution in subroutine store_ecp_row_sol'
           goto10=.true.
         endif
 
@@ -21833,7 +20534,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                num_ecp_col_sol=num_ecp_col_sol+1
                rfield(:)=0.
                if(num_ecp_col_sol .gt. max_ecp_col) then
-                 write(6,'(a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  max_ecp_col exceeded in store_ecp_col_scalar. stopping.'
+                 write(6,'(a)') 'AIMMS Interface error ECP:  max_ecp_col exceeded in store_ecp_col_scalar. stopping.'
                  stop
                endif
                ecpcolnam=col_aimms(aimms_col_ID_num).colnam_mask  ! for scalars, the mask should have no replacement patterns and so match the oml column
@@ -21879,17 +20580,9 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                      read(line,*) rfield(isol)
                   endif
                 endif
-                if (AIMECPPAR .eq. 0) then                                  !added this for now to make them closer to single LP solution    by AKN
-                    ecp_col_sol(s).solval(isol) = rfield(isol)
-                else
-                   if(ecp_col_sol(s).solval(isol) .lt. rfield(isol)) then
-                      ecp_col_sol(s).solval(isol) = rfield(isol)
-                   endif
-                endif
-                
-              endif
+                ecp_col_sol(s).solval(isol) = rfield(isol)
+              endif     !  f(isol.gt.0) then
             endif          
-
           endif
        return
        end subroutine store_ecp_col_scalar  
@@ -21902,7 +20595,7 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                num_ecp_row_sol=num_ecp_row_sol+1
                rfield(:)=0.
                if(num_ecp_row_sol .gt. max_ecp_row) then
-                 write(6,'(a)') 'AIMMS Interface error ECP'//trim(ecp_sub_model)//':  max_ecp_row exceeded in store_ecp_row_scalar. stopping.'
+                 write(6,'(a)') 'AIMMS Interface error ECP:  max_ecp_row exceeded in store_ecp_row_scalar. stopping.'
                  stop
                endif
                ecprownam=row_aimms(aimms_row_ID_num).rownam_mask  ! for scalars, the mask should have no replacement patterns and so match the oml rowumn
@@ -21951,14 +20644,9 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
                   endif
                   if(isol.eq.4) then
                      if(rfield(4).lt.inf .and. rfield(4).gt.0) rfield(2)=rfield(4)-rfield(1)
-                  endif
-                  if (AIMECPPAR .eq. 0) then                             !added this for now to make them closer to single LP solution    by AKN
-                    ecp_row_sol(s).solval(isol) = rfield(isol)
-                  else
-                   if(ecp_row_sol(s).solval(isol) .lt. rfield(isol)) then
-                      ecp_row_sol(s).solval(isol) = rfield(isol)
-                   endif
-                  endif
+                  endif                             
+                  ecp_row_sol(s).solval(isol) = rfield(isol)
+
                 endif
               endif          
             else
@@ -22042,8 +20730,6 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
 
     ecpcolnam=column 
 
-      if(make_ecp_aimms) return ! there is no AIMMS solution if this is a make_ecp_aimms run, so return
-
 ! look up OML col names in the AIMMS solution list, ecp_col_sol.  
 ! use hash table for col names for fast lookup of solution record "isol"
 ! based on the col name.
@@ -22094,8 +20780,6 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
     
     
     ecprownam=row
-
-    if(make_ecp_aimms) return ! there is no AIMMS solution if this is a make_ecp_aimms run. so return
 
       ! look up OML row names in the AIMMS solution list, ecp_row_sol. 
 ! use hash table for row names for fast lookup of solution record "isol"
@@ -22150,5 +20834,153 @@ do iyr =curiyr,curiyr + ECP_D_XPH - 1
 
    END SUBROUTINE CWFSROW
 
+!===================================================================================================================================================
+!  restore routines
+!===================================================================================================================================================
+! AIMMS_RESTORE Invokes AIMMS restore model   
+      SUBROUTINE AIMMS_RESTORE
+        use ifport,only:timef,sleepqq,getcwd
+        use ifcore, only : commitqq
+        implicit none
+  
 
+  
+  ! Note: aimms is invoked this way so it can be left open to send additional data and return results
+  ! after the solution retrieval routines are called. This is needed for validation the aimms solution
+  ! variable derivation with the oml-fortran solution variables. Once validation is finished, AIMMS could be
+  ! invoked here in a more straightforward fashion by invoking the MainProcedure.
+  
+  ! argument option:  
+  !    'end' causes the AIMMS project to be closed down via a command sent to monitor.in.txt
+  !     'pass_back' is used to transmit variables derived in the solution-retrieval routines back to AIMMS and
+  !            retrieve the comparable version of the variables from AIMMS
+  !            for validation testing during the oml-to-aimms transition period.
+  ! 
+  
+        include 'parametr'
+        INCLUDE 'ncntrl'
+  
+  
+  !---------------------------------------------------------------
+  ! AIMMS-related variables
+        integer(KIND=4) iret
+        CHARACTER*255 cwd 
+  !
+        logical lresult
 
+        character curdate*8,curtime*10,nemspyenv*40
+        LOGICAL file_exists/.false./
+        real*4 timer
+   
+        integer(4) istat
+        integer eunit2
+        character cmd*200,line*216
+        INTEGER wunit/84235/
+  
+  
+        timer=timef()  
+  
+        call date_and_time(curdate,curtime)
+        write(6,'(a,t45,5a,i5,i3)') 'Calling RESTORE AIMMS : ',curtime(1:2),':',curtime(3:4),':',curtime(5:10),curcalyr,curitr
+        
+        ! following delete commands are called because python launch_module() does not clean up aimms log, lis, and mps files produced by aimms_endpoint run especially CMM AIMMS is called by launch_module() in aimms_endpoint.py
+        ! for AIMMS validation, check for previously generated cplex mps file under aimms_endpoint folder. if found, delete them.       
+         write(line,'(a)') 'del .\main\aimms_endpoint\cpx0*.mps'
+         call callsys(iret,line)
+         line=' ' 
+         ! for AIMMS debugging, check for a previously generated messages.log file that includes aimms status messages. if found, delete it.
+         write(line,'(a)') 'if exist .\main\aimms_endpoint\log\messages.log  del .\main\aimms_endpoint\log\messages.log '
+         call callsys(iret,line)
+         line=' '
+                      
+        ! for AIMMS validation, check for rest.lis file larger than 1024 bytes that includes aimms-to-cplex crosswalk. if found, copy to new file named with model year and iteration.
+        write(line,'(a)') 'if exist .\rest\log\aimms_endpoint.lis del .\rest\log\aimms_endpoint.lis '
+        lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+        call callsys(iret,line)
+        line=' '  
+
+        !write lines to write out main\endpoint_p2_caller.txt to contain curcalyr,curiter, module name (ecp, efd, rest)
+        call unitunopened(100,999,eunit2)
+        open(eunit2,file='main\endpoint_p2_caller.txt',status='unknown')
+        write(eunit2,'(a,i4)') "cycle     : ",CURIRUN
+        write(eunit2,'(a,i4)') "year      : ",curcalyr
+        write(eunit2,'(a,i2)') "iter      : ",curitr
+        write(eunit2,'(a,i2)') "ncrl      : ",0
+        write(eunit2,'(2a)') "my_module : ","rest"
+        close(eunit2)
+
+        timer=timef() 
+
+        istat = getcwd(cwd)
+        cmd=trim(cwd)//'\main\call_p2_endpoint.bat'
+        write(6,'(2a)') 'The command line call to launch a Python program to run AIMMS endpoint run_api for RESTORE is ',trim(cmd)
+        call date_and_time(curdate,curtime)
+        call rtostring('NEMSPYENV',nemspyenv)
+        open (unit=wunit,file=cmd,status='unknown')                               !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(a)') 'pushd %~dp0'                                          !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(2a)') 'SET myENV=',trim(nemspyenv)                          !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(a)') 'call C:\python_environments\%myENV%\scripts\activate' !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        write(wunit,'(a)') 'python p2_endpoint_run_api.py'                        !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        lresult=commitqq(wunit)                                                   !added to replace static \main\call_p2_endpoint.bat  with code driven one
+        close(wunit)                                                              !added to replace static \main\call_p2_endpoint.bat  with code driven one 
+        CALL EXECUTE_COMMAND_LINE(trim(cmd),wait=.true.,CMDSTAT=iret)  
+        write(line,'(2a)') 'del ',cmd     !added to delete \main\call_p2_endpoint.bat  after the call
+        call callsys(iret,line)           !added to delete \main\call_p2_endpoint.bat  after the call
+        line=' '                          !added to delete \main\call_p2_endpoint.bat  after the call
+        INQUIRE(file='Kill_run.txt', EXIST=file_exists)
+        if(file_exists .eq. .true. ) then
+            go to 100
+        endif
+        
+        ! for AIMMS validation, check for cplex mps file. if found, copy to new file named with model year and iteration.
+         open (unit=wunit,file='move_mps.bat',status='unknown')
+         write(wunit,'(a)') '@echo off'
+         write(wunit,'(a)') 'cd main\aimms_endpoint'
+         write(wunit,'(a)') 'for /f "tokens=*" %%i in (''dir cpx0*.mps /b /o:d'') do (set "latestFile=%%i")'
+         write(wunit,'(a,i4,a)') 'if defined latestFile (copy "%latestFile%" "..\..\rest\cpx_',curcalyr,'.mps" /y)'
+         write(wunit,'(a)') 'del cpx0*.mps'
+         write(wunit,'(a)') 'cd ..\..'
+         lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+         close(wunit)
+         write(line,'(a)') 'call move_mps.bat'
+         call callsys(iret,line)
+         write(line,'(a)') 'del move_mps.bat'
+         call callsys(iret,line)
+         line=' ' 
+         ! for AIMMS debugging, check for messages.log file that includes aimms status messages. if found (size > 1024 bytes), copy to new file named with model year and iteration.
+         open (unit=wunit,file='move_log.bat',status='unknown')
+         write(wunit,'(a)') '@echo off'
+         write(wunit,'(a)') 'for %%I in (.\main\aimms_endpoint\log\messages.log) do if exist %%I if %%~zI gtr 1024 ('    !1024 bytes= 1kb
+         write(wunit,'(a,i4,a,i2.2,a)') 'copy /Y .\main\aimms_endpoint\log\messages.log .\rest\log\messages_',curcalyr,'_',curitr,'.log )'
+         write(wunit,'(a)') 'if exist .\main\aimms_endpoint\log\messages.log  del .\main\aimms_endpoint\log\messages.log '
+         lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+         close(wunit)
+         write(line,'(a)') 'call move_log.bat'
+         call callsys(iret,line)
+         line=' '
+         write(line,'(a)') 'del move_log.bat'
+         call callsys(iret,line)
+         line=' '
+                         
+        ! for AIMMS validation, check for rest.lis file larger than 1024 bytes that includes aimms-to-cplex crosswalk. if found, copy to new file named with model year and iteration.
+        open (unit=wunit,file='move_lis.bat',status='unknown')
+        write(wunit,'(a)') '@echo off'
+        write(wunit,'(a)') 'for %%I in (.\rest\log\aimms_endpoint.lis) do if exist %%I if %%~zI gtr 1024 ('        !1024 bytes= 1kb
+        write(wunit,'(a,i4,a)') 'copy /Y .\rest\log\aimms_endpoint.lis .\rest\log\rest_',curcalyr,'.lis )'
+        write(wunit,'(a)') 'if exist .\rest\log\aimms_endpoint.lis del .\rest\log\aimms_endpoint.lis '
+        lresult=commitqq(wunit)  ! use ifcore: force data to be written to file immediately
+        close(wunit)
+        write(line,'(a)') 'call move_lis.bat'
+        call callsys(iret,line)
+        line=' '
+        write(line,'(a)') 'del move_lis.bat'
+        call callsys(iret,line)
+        line=' '   
+
+        write(6,'(a,i5,a,i3,a,f9.3)') '## AIMMS RESTORE year:',curcalyr,' iteration:',curitr,'    Time to run AIMMS RESTORE MainExecution:',timef()-timer 
+        return
+100     write(6,'(a,i5,a,i3,a)') '## Inability to successfully run AIMMS RESTORE for year',curcalyr,' iteration',curitr,' terminates the run.'
+        STOP   
+  End Subroutine AIMMS_RESTORE
+
+!===================================================================================================================================================

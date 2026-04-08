@@ -1,32 +1,35 @@
-table,filename
-hist_setup,hist_setup.csv
-steo_setup,steo_setup.csv
-can_setup,can_setup.csv
-off_setup,off_setup.csv
-on_setup,on_setup.csv
-ak_setup,ak_setup.csv
-ngp_setup,ngp_setup.csv
-restart_in,restart_HSMIN.unf
-restart_out,restart_HSMOUT.unf
-fcrl_intermediate_vars,fcrl_var.pkl
-ncrl_intermediate_vars,ncrl_var.pkl
-onshore_switch,TRUE
-offshore_switch,TRUE
-alaska_switch,TRUE
-canada_switch,TRUE
-ngp_switch,TRUE
-run_every_itr_switch,TRUE
-steo_benchmark_adj_switch,TRUE
-debug_switch,FALSE
-hsm_var_debug_switch,FALSE
-discounting,discounting.csv
-mapping,mapping.csv
-hist_wells,hist_wells.csv
-state_tax_table,state_tax.csv
-depreciation_schedules,depreciation_schedules.csv
-base_year,1990
-base_price_year,1987
-history_year,2023
-technology_year,2024
-aeo_year,2025
-final_aeo_year,2050
+table,filename,comment
+hist_setup,hist_setup.csv,
+steo_setup,steo_setup.csv,
+can_setup,can_setup.csv,
+off_setup,off_setup.csv,
+on_setup,on_setup.csv,
+ak_setup,ak_setup.csv,
+ngp_setup,ngp_setup.csv,
+fcrl_intermediate_vars,fcrl_var.pkl,
+ncrl_intermediate_vars,ncrl_var.pkl,
+onshore_switch,TRUE,"Enable/disable onshore submodule (TRUE=on, FALSE=off)"
+offshore_switch,TRUE,"Enable/disable offshore submodule (TRUE=on, FALSE=off)"
+alaska_switch,TRUE,"Enable/disable Alaska submodule (TRUE=on, FALSE=off)"
+canada_switch,TRUE,"Enable/disable Canada submodule (TRUE=on, FALSE=off)"
+ngp_switch,TRUE,"Enable/disable Natural Gas Processing submodule (TRUE=on, FALSE=off)"
+run_every_itr_switch,TRUE,"If TRUE: HSM runs every iteration. If FALSE: only runs in iteration 1, fcrl=1, and ncrl=1 (faster for testing)"
+side_case_steo_overwrite_switch,TRUE,If TRUE: enable side case STEO overwrites from reference case preprocessed data for first STEO year. If FALSE: disable side case overwrites (use FALSE for reference case runs)
+side_case_steo_overwrite_year,2025,STEO year for which preprocessed overwrite data was extracted. Must match the year used when running preprocess_steo_overwrites.py
+debug_switch,FALSE,"If TRUE: write general debug files (debug method outputs, STEO adjustment factor CSVs to debug/steo_debug/). Increases runtime"
+hsm_var_debug_switch,FALSE,"If TRUE: write CSV copies of intermediate variables to intermediate_tables/ (e.g., hsm_on_projects.csv, hsm_off_fields.csv). Increases runtime"
+debug_restart_yearly_switch,FALSE,If TRUE: print restart file debug output every year. If FALSE: only print in final year when ncrl=1
+suppress_warnings_switch,FALSE,If TRUE: suppress Python warnings to reduce log clutter. Use prudently to help modeler see logging clearly
+standalone_scedes_file,scedes.lowogs.csv,Scedes file used for standalone (offline) runs. Format: scedes.<scenario>.<year>.csv (e.g. scedes.cb2026.csv for reference case)
+discounting,discounting.csv,
+mapping,mapping.csv,
+hist_wells,hist_wells.csv,
+state_tax_table,state_tax.csv,
+depreciation_schedules,depreciation_schedules.csv,
+base_year,1990,
+base_price_year,1987,
+history_year,2024,
+technology_year,2025,
+aeo_year,2026,
+final_aeo_year,2050,
+restart_dump_start_year,2020,Start year for restart file dump filtering. Leave empty to dump all years. Filters data to only include years >= this value.

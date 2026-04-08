@@ -83,11 +83,11 @@ class TestCollection():
         # Save to file
         save_to_file = True
         if save_to_file:
-            stdout_bak = sys.stdout  # backup stdout
-            sys.stdout = io.StringIO()
-            pytest.main()
-            output = sys.stdout.getvalue()
-            sys.stdout.close()
+            stdout_bak = sys.stdout  # backup standard output stream
+            sys.stdout = io.StringIO() #create in-memory file object
+            pytest.main() # Run pytest
+            output = sys.stdout.getvalue() # Get outputs from memory file object stream
+            sys.stdout.close() # Close memory file object
             sys.stdout = stdout_bak  # resto
             file = 'pytestlog_' + model_year + '.log'
             try:

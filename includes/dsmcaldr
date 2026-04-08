@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/dsmcaldr,v 1.4 2011/08/08 13:08:43 LC2 Exp $
 ! ====== (DSMCALDR) =====
 ! MONTYP(MAXMON) - SEASON ASSIGNMENT OF MONTH

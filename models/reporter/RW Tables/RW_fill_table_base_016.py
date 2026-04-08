@@ -116,7 +116,7 @@ def fill_table_base_016(dfd, table_spec, table_id):
  
     #      Solar Photovoltaic 5/      off a little in 2007,2009  
     #T16(17,IY,IS) = UGNPVNR(1,mnumnr,IY) + UGNPVNR(2,mnumnr,IY) + UGNPTNR(1,mnumnr,IY) + UGNPTNR(2,mnumnr,IY) + (CGNTGEN(mnumnr,IY, 8,1) + CGNTGEN(mnumnr,IY, 8,2)) * 0.001    
-    z[17] = dfd['UGNPVNR'].loc[1].loc[MNUMNR] + dfd['UGNPVNR'].loc[2].loc[MNUMNR] + dfd['UGNPTNR'].loc[1].loc[MNUMNR] + dfd['UGNPTNR'].loc[2].loc[MNUMNR] + (dfd['CGNTGEN'].loc[MNUMNR].loc[8].loc[1] + dfd['CGNTGEN'].loc[MNUMNR].loc[8].loc[2] + dfd['UGNSONR'].loc[1].loc[MNUMNR] + dfd['UGNSONR'].loc[2].loc[MNUMNR]) * 0.001 
+    z[17] = dfd['UGNPVNR'].loc[1].loc[MNUMNR] + dfd['UGNPVNR'].loc[2].loc[MNUMNR] + dfd['UGNPTNR'].loc[1].loc[MNUMNR] + dfd['UGNPTNR'].loc[2].loc[MNUMNR] + dfd['UGNSONR'].loc[1].loc[MNUMNR] + dfd['UGNSONR'].loc[2].loc[MNUMNR] + (dfd['CGNTGEN'].loc[MNUMNR].loc[8].loc[1] + dfd['CGNTGEN'].loc[MNUMNR].loc[8].loc[2]) * 0.001 
     
     #      Wind                                                     
     #T16(18,IY,IS)=UGNWNNR(1,MNUMNR,IY)+UGNWNNR(2,MNUMNR,IY)+UGNWLNR(1,MNUMNR,IY)+UGNWLNR(2,MNUMNR,IY)

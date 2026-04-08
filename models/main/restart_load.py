@@ -1,3 +1,27 @@
+import numpy as np
+import time
+
+
+def check_substring(search_term):
+
+    """Excludes the equivalence from COALEMM from being read in due to issues with duplicate variables read in
+
+    Returns
+    -------
+    bool
+        True if this string is a COALEMM equivalence that should be excluded. False if not
+    
+    """
+
+    exclude_list_coalemm = ["qclclnr", "hclclnr", "gclclnr", "pslclnr", "phgclnr", "pcaclnr", "hrtclnr", "rclclnr", "sclclnr", "bclclnr", "cclclnr", "xclclnr"]
+
+    for equivalence_exclude in exclude_list_coalemm:
+        if equivalence_exclude in search_term:
+            return True
+    
+    return False
+
+
 def read_restart_file(input_restart_filename, pyfiler):
 
     """Reads in the restart file (e.g. restart.unf, restart.rlx) into memory. Creates a required empty restart.unf file
@@ -24,8 +48,28 @@ def read_restart_file(input_restart_filename, pyfiler):
     with open('restart.unf', 'w+') as fp:
         pass
     
+    
+    pyfiler.utils.init_filer()
+    
+    with np.load(input_restart_filename) as restartnpz:
+        start=time.time()
+        for key in list(restartnpz.keys()):
+                
+                if check_substring(key):
+                    continue
 
-    pyfiler.utils.read_filer(input_restart_filename)
+                try:
+                    parts=key.split("/")
+                    a=getattr(pyfiler, str.lower(parts[0]))
+                    setattr(a,parts[1],restartnpz[key]) 
+                except AttributeError: 
+                    print('This key isnt on pyfiler.  If intentional, thats fine:', key)
+                except ValueError: 
+                    print('Error copying the npz key to pyfiler.  Maybe crash NEMS:', key)
+        print('npz to pyfiler load time:', time.time()-start)
+
+
+    
 
 def write_restart_file(output_restart_filename, pyfiler):
 
@@ -269,22 +313,51 @@ def scedes_to_pyfiler(user, pyfiler):
     pyfiler.ncntrl.ijumpyr      = po['IJUMPYR']     # End of forecast horizon - index
     pyfiler.ncntrl.ijumpcalyr   = po['IJUMPCAL']    # End of forecast horizon - calendar year
     pyfiler.ncntrl.firsyr       = int(po['FIRSYR']) - 1990 + 1      # FIRST FORECAST YEAR INDEX (EG. 2)
-    pyfiler.ncntrl.frctol       = po['FRCTOL']      # MINIMUM FRACTIONAL CONVERGENCE TOLERANCE
-    pyfiler.ncntrl.abstol       = po['ABSTOL']      # MINIMUM ABSOLUTE  CONVERGENCE TOLERANCE
-    pyfiler.ncntrl.rlxpc        = po['RLXPC']       # RELAXATION FRACTION
     pyfiler.ncntrl.nyrs         = po['NYRS']        # NUMBER OF GROWTH YEARS FOR EXPECTATIONS
     pyfiler.ncntrl.i4site       = po['I4SITE']      # FORESIGHT OPT (1:MYOPIC, 2: ADAPTIVE, 3: PERFECT)
     pyfiler.ncntrl.i4scnt       = po['I4SCNT']      # FORESIGHT CONTROL: (1: MAIN, 2: SUBMODULE)
     pyfiler.ncntrl.irelax       = po['IRELAX']      # OPTION TO RUN HEURISTIC ROUTINE TO SPEED CONVERGENCE
-    pyfiler.ncntrl.itimng       = po['ITIMNG']      # TIMING SWITCH (ITIMNG=1 MEANS TIMING ON)
     pyfiler.ncntrl.wwop         = po['WWOP']        # WORLD OIL PRICE CASE
     pyfiler.ncntrl.mmac         = po['MMAC']        # MACRO CASE
     pyfiler.ncntrl.history      = po['HISTORY']     # OPTION TO OVERWRITE 1990 DATA W/SEDS DATA (1=TRUE)
-    pyfiler.ncntrl.modelon      = po['MODELON']     # MODELS NEVER OFF SWITCH(0->OFF,1->ON)(DEF=0)
-    pyfiler.ncntrl.ecpstart     = po['ECPSTART']    # START YEAR FOR ECP MODULE (DEF=1)
     pyfiler.ncntrl.macfdbk      = po['MACFDBK']     # MACROECONOMIC FEEDBACK SWITCH
     pyfiler.ncntrl.elassw       = po['ELASSW']      # ELASTICITY SWITCH (0->OFF, 1->ON)
     pyfiler.ncntrl.dsmswtch     = po['DSMSWTCH']    # DEM SIDE MGMT SWITCH(0->OFF,1->ON)
     pyfiler.ncntrl.yearpr       = po['YEARPR']      # FOR REPORTING, YEAR DOLLARS
     pyfiler.ncntrl.scalpr       = pyfiler.macout.mc_jpgdp[int(po['YEARPR']) - 1987]     # Setting deflator value for reporting year dollars !PCWGDP SCALING FROM 1987$ TO YEARPR $
     pyfiler.cycleinfo.numiruns  = po['NRUNS']       # Maximum cycles in run
+
+def init_continue_flags_intercv(user, pyfiler):
+    """Sets all pyfiler.continew runtime flags to values passed from scedes.all
+    
+
+    Parameters
+    ----------
+    user : SimpleNamespace
+        user class object, containing dict with NEMS runtime information
+    pyfiler : module
+        pyfiler fortran object
+
+    Returns
+    -------
+    None.
+
+    """
+    po = user.SCEDES
+
+    pyfiler.continew.reasonyes = 1
+    pyfiler.continew.reasonchr = "Other"
+
+    pyfiler.continew.continw = 1
+    pyfiler.continew.continm = 1
+    pyfiler.continew.continr = 1
+    pyfiler.continew.contink = 1
+    pyfiler.continew.contini = 1
+    pyfiler.continew.contint = 1
+    pyfiler.continew.contine = 1
+    pyfiler.continew.continc = 1
+    pyfiler.continew.continl = 1
+    pyfiler.continew.conting = 1
+    pyfiler.continew.contino = 1
+    pyfiler.continew.continn = 1
+    pyfiler.continew.continh = 1

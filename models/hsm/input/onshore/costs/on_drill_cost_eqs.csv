@@ -1,0 +1,72 @@
+Notes,,,,,,,,,,,
+coef_name,coef,std err,t,p_val,low_con_int(0.025),high_con_int(0.975),cost_type,base_year,resource_type,usgs_province_num,usgs_province_num_merge
+Intercept,11.9422,0.035,338.998,0,11.873,12.011,capex_per_well_1987,2020,gas,,n
+Appalachian Basin (Marcellus),1.4159,0.02,70.065,0,1.376,1.456,capex_per_well_1987,2020,gas,50671,671
+Appalachian Basin (Utica),1.5414,0.022,71.398,0,1.499,1.584,capex_per_well_1987,2020,gas,50672,672
+Arkoma Basin,-0.026,0.034,-0.775,0.438,-0.092,0.04,capex_per_well_1987,2020,gas,5062,62
+Bend Arch-Ft. Worth Basin,0.3534,0.02,17.484,0,0.314,0.393,capex_per_well_1987,2020,gas,5045,45
+Cherokee Platform,-1.24E-15,3.32E-17,-37.354,0,-1.30E-15,-1.17E-15,capex_per_well_1987,2020,gas,5060,60
+Denver Basin,1.0179,0.078,13.09,0,0.865,1.17,capex_per_well_1987,2020,gas,5039,39
+East Texas Basin/LA-MS Salt Basins (Haynesville),1.5054,0.017,88.294,0,1.472,1.539,capex_per_well_1987,2020,gas,50471,471
+East Texas Basin/LA-MS Salt Basins (Other),0.8244,0.016,51.203,0,0.793,0.856,capex_per_well_1987,2020,gas,5047,47
+Montana Thrust Belt,1.17E-16,2.46E-17,4.74,0,6.83E-17,1.65E-16,capex_per_well_1987,2020,gas,5027,27
+Paradox Basin,3.74E-16,2.55E-17,14.696,0,3.24E-16,4.24E-16,capex_per_well_1987,2020,gas,5021,21
+Permian Basin,2.54E-16,2.87E-17,8.853,0,1.97E-16,3.10E-16,capex_per_well_1987,2020,gas,5044,44
+Powder River Basin,1.20E-16,8.53E-18,14.081,0,1.03E-16,1.37E-16,capex_per_well_1987,2020,gas,5033,33
+San Juan Basin,4.70E-16,3.58E-17,13.121,0,4.00E-16,5.41E-16,capex_per_well_1987,2020,gas,5022,22
+Southwestern Wyoming,1.3721,0.066,20.865,0,1.243,1.501,capex_per_well_1987,2020,gas,5037,37
+Uinta-Piceance Basin,2.0312,0.04,50.546,0,1.952,2.11,capex_per_well_1987,2020,gas,5020,20
+Williston Basin,8.93E-18,4.26E-18,2.094,0.036,5.64E-19,1.73E-17,capex_per_well_1987,2020,gas,5031,31
+Wind River Basin,-0.5394,0.117,-4.628,0,-0.768,-0.311,capex_per_well_1987,2020,gas,5035,35
+LA,1.3343,0.02,65.616,0,1.294,1.374,capex_per_well_1987,2020,gas,,n
+OH,0.8656,0.024,36.466,0,0.819,0.912,capex_per_well_1987,2020,gas,,n
+OK,2.4199,0.025,96.833,0,2.371,2.469,capex_per_well_1987,2020,gas,,n
+PA,1.0322,0.016,64.201,0,1.001,1.064,capex_per_well_1987,2020,gas,,n
+TX,1.349,0.015,89.358,0,1.319,1.379,capex_per_well_1987,2020,gas,,n
+UT,-0.188,0.07,-2.693,0.007,-0.325,-0.051,capex_per_well_1987,2020,gas,,n
+WV,1.0594,0.018,58.291,0,1.024,1.095,capex_per_well_1987,2020,gas,,n
+WY,0.8326,0.055,15.055,0,0.724,0.941,capex_per_well_1987,2020,gas,,n
+num_vfeet,1.20E-05,3.42E-06,3.52,0,5.32E-06,1.87E-05,capex_per_well_1987,2020,gas,,n
+num_latlen,7.77E-05,2.47E-06,31.407,0,7.28E-05,8.25E-05,capex_per_well_1987,2020,gas,,n
+hist_cost_quantile_01,984757.8447,,,,,,capex_per_well_1987,2020,gas,,n
+hist_cost_median,4286722.547,,,,,,capex_per_well_1987,2020,gas,,n
+hist_cost_quantile_99,7119565.472,,,,,,capex_per_well_1987,2020,gas,,n
+avg_vfeet,9875.894155,,,,,,capex_per_well_1987,2020,gas,,n
+avg_latlen,9232.590837,,,,,,capex_per_well_1987,2020,gas,,n
+Anadarko Basin,0,0,0,0,0,0,capex_per_well_1987,2020,gas,5058,58
+Intercept,12.0694,0.037,328.47,0,11.997,12.141,capex_per_well_1987,2020,oil,,n
+Appalachian Basin (Marcellus),-8.95E-13,7.64E-14,-11.711,0,-1.04E-12,-7.45E-13,capex_per_well_1987,2020,oil,50671,671
+Appalachian Basin (Utica),0.7402,0.033,22.263,0,0.675,0.805,capex_per_well_1987,2020,oil,50672,672
+Arkoma Basin,-0.2068,0.098,-2.11,0.035,-0.399,-0.015,capex_per_well_1987,2020,oil,5062,62
+Bend Arch-Ft. Worth Basin,-0.4081,0.116,-3.519,0,-0.635,-0.181,capex_per_well_1987,2020,oil,5045,45
+Cherokee Platform,0.4617,0.093,4.957,0,0.279,0.644,capex_per_well_1987,2020,oil,5060,60
+Denver Basin,1.1895,0.036,33.373,0,1.12,1.259,capex_per_well_1987,2020,oil,5039,39
+East Texas Basin/LA-MS Salt Basins (Haynesville),-2.64E-16,1.25E-16,-2.105,0.035,-5.09E-16,-1.81E-17,capex_per_well_1987,2020,oil,50471,471
+East Texas Basin/LA-MS Salt Basins (Other),-0.0304,0.037,-0.813,0.416,-0.104,0.043,capex_per_well_1987,2020,oil,5047,47
+Montana Thrust Belt,-0.3483,0.199,-1.751,0.08,-0.738,0.042,capex_per_well_1987,2020,oil,5027,27
+Paradox Basin,0.4715,0.181,2.608,0.009,0.117,0.826,capex_per_well_1987,2020,oil,5021,21
+Permian Basin,-0.0089,0.036,-0.249,0.803,-0.079,0.061,capex_per_well_1987,2020,oil,5044,44
+Powder River Basin,1.354,0.06,22.75,0,1.237,1.471,capex_per_well_1987,2020,oil,5033,33
+San Juan Basin,0.5272,0.075,6.995,0,0.379,0.675,capex_per_well_1987,2020,oil,5022,22
+Southwestern Wyoming,1.2166,0.067,18.14,0,1.085,1.348,capex_per_well_1987,2020,oil,5037,37
+Uinta-Piceance Basin,1.2359,0.105,11.816,0,1.031,1.441,capex_per_well_1987,2020,oil,5020,20
+Williston Basin,0.7625,0.077,9.928,0,0.612,0.913,capex_per_well_1987,2020,oil,5031,31
+Wind River Basin,-2.47E-16,2.28E-17,-10.84,0,-2.92E-16,-2.02E-16,capex_per_well_1987,2020,oil,5035,35
+KS,0.6808,0.115,5.913,0,0.455,0.906,capex_per_well_1987,2020,oil,,n
+LA,1.4264,0.103,13.889,0,1.225,1.628,capex_per_well_1987,2020,oil,,n
+MT,0.1868,0.067,2.806,0.005,0.056,0.317,capex_per_well_1987,2020,oil,,n
+ND,0.2273,0.067,3.379,0.001,0.095,0.359,capex_per_well_1987,2020,oil,,n
+NM,1.1764,0.043,27.09,0,1.091,1.261,capex_per_well_1987,2020,oil,,n
+OH,0.7402,0.033,22.263,0,0.675,0.805,capex_per_well_1987,2020,oil,,n
+OK,1.0305,0.036,28.7,0,0.96,1.101,capex_per_well_1987,2020,oil,,n
+TX,1.1333,0.04,28.106,0,1.054,1.212,capex_per_well_1987,2020,oil,,n
+UT,-0.1366,0.127,-1.076,0.282,-0.385,0.112,capex_per_well_1987,2020,oil,,n
+WY,-0.3158,0.054,-5.825,0,-0.422,-0.21,capex_per_well_1987,2020,oil,,n
+num_vfeet,0.0001,2.05E-06,64.165,0,0,0,capex_per_well_1987,2020,oil,,n
+num_latlen,6.12E-05,1.07E-06,57.381,0,5.91E-05,6.32E-05,capex_per_well_1987,2020,oil,,n
+hist_cost_quantile_01,976126.6101,,,,,,capex_per_well_1987,2020,oil,,n
+hist_cost_median,3331856.537,,,,,,capex_per_well_1987,2020,oil,,n
+hist_cost_quantile_99,6171959.353,,,,,,capex_per_well_1987,2020,oil,,n
+avg_vfeet,9283.185469,,,,,,capex_per_well_1987,2020,oil,,n
+avg_latlen,9297.635264,,,,,,capex_per_well_1987,2020,oil,,n
+Anadarko Basin,0,0,0,0,0,0,capex_per_well_1987,2020,oil,5058,58

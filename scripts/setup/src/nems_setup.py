@@ -5,15 +5,9 @@ Created on Feb 24 2023
 @author: Claire Su
 """
 
-import os, shutil, subprocess, re, zipfile
-import time
-import socket
-
+import os, shutil, subprocess, re
 from pathlib import Path
-from datetime import datetime
-
 from nemsbase import NEMSBase
-from nemsutil import util_debugging_dump_dict
 from cel import run_task
 
 def copy_filelist_etc(nemsbase):
@@ -31,7 +25,8 @@ def copy_filelist_etc(nemsbase):
 
     '''
     # no scentext.$scenario.$datekey exists in the output dir even produced from 2022/12 nemspar.shell. We may remove the file copy of scentext.
-    ls = ('keys.sed', 'FILELIST', 'MOREOPT', 'scentext')
+    #ls = ('keys.sed', 'FILELIST', 'MOREOPT', 'scentext', 'scedes.all')
+    ls = ('keys.sed', 'FILELIST', 'MOREOPT', 'scentext', 'scedes.all')
     for i in ls:
         src=f'{i}.{nemsbase.dt_scenario}'
         src = os.path.join(nemsbase.OLDDIR, src)
@@ -42,7 +37,7 @@ def copy_filelist_etc(nemsbase):
 
 def fix_filelist_path_bug(nemsbase, file):
     '''
-    Fix directory path bug ("./input/psrain.txt" become ".\input/psrain.txt" due to Python instead of Shell environment) in FILELIST file.
+    Fix directory path bug ("./input/psrain.txt" become ".\\input/psrain.txt" due to Python instead of Shell environment) in FILELIST file.
 
     Parameters
     ----------
@@ -58,7 +53,7 @@ def fix_filelist_path_bug(nemsbase, file):
     '''
     nemsbase.util_convert_py_path_to_ksh_path(file)
 
-def build_coal_structure(nemsbase, p='p2'):
+def build_coal_structure(nemsbase):
     '''
     Build AIMMS folder and file structure of coal model.
 
@@ -75,26 +70,25 @@ def build_coal_structure(nemsbase, p='p2'):
 
     '''
     # put coal units file in p2 for coal model at beginning of run so it will be there for project open/read
-    f=nemsbase.scedvars.get('COALUNITSN')+nemsbase.scedvars.get('COALUNITSD')
+    f=nemsbase.scedvars.get('COALUNITSN')
     shutil.copy(f,'COALEMM_EMM_CL_UNITS.txt')
 
     access = os.path.join(nemsbase.dir_scripts, 'access.dsn')
     print(f'{nemsbase.log_prefix}'+f"AIMMSBIT option to use 64-bit odbc template: {nemsbase.AIMMSBIT}")
     if (nemsbase.AIMMSBIT == '1' and nemsbase.AIMMSVER == '4'): access = os.path.join(nemsbase.dir_scripts, 'access64.dsn')
     print(f'{nemsbase.log_prefix}'+f'aimms odbc template file: {access}')
-    
-    if (p == 'p2' or nemsbase.mode == 'jog'):
-        print(f'{nemsbase.log_prefix}coal directory for coal AIMMS project')
-    
-        # We touch the .ams file after unzipping to update the time stamp to prevent possible errors from cygwin
-        shutil.copytree(nemsbase.scedvars.get('COALN'), 'coal')
-        Path('.\\coal\\mainproject\\coal.ams').touch()
-        shutil.copy(access, 'coal\\coal_out.mdb.dsn')
-        nemsbase.util_append_content('coal\\coal_out.mdb.dsn', 'DBQ=coal_out.mdb')
-        
-        # The following line sets up diagnostic messaging for the AIMMS SDK "aimmslink" process. for NGMM and COAL
-        nemsbase.util_copy_extension(nemsbase.dir_scripts, os.getcwd(), '.logger.xml')
-        #nemsbase.util_copy_pattern_files(nemsbase.dir_scripts, os.getcwd(), '.logger.xml')
+
+    print(f'{nemsbase.log_prefix}coal directory for coal AIMMS project')
+
+    # We touch the .ams file after unzipping to update the time stamp to prevent possible errors from cygwin
+    shutil.copytree(nemsbase.scedvars.get('COALN'), 'coal')
+    Path('.\\coal\\mainproject\\coal.ams').touch()
+    shutil.copy(access, 'coal\\coal_out.mdb.dsn')
+    nemsbase.util_append_content('coal\\coal_out.mdb.dsn', 'DBQ=coal_out.mdb')
+
+    # The following line sets up diagnostic messaging for the AIMMS SDK "aimmslink" process. for NGMM and COAL
+    nemsbase.util_copy_extension(nemsbase.dir_scripts, os.getcwd(), '.logger.xml')
+    #nemsbase.util_copy_pattern_files(nemsbase.dir_scripts, os.getcwd(), '.logger.xml')
 
     # these 3 small AIMMS database description files are sometimes needed after the run, so put them in all input folders, not just p2,
     # since only one copy of the input folder (p3) is saved after the run (when invoked via runit.exe)
@@ -107,7 +101,7 @@ def build_coal_structure(nemsbase, p='p2'):
         f = os.path.join(nemsbase.COPYDIR, e)
         nemsbase.util_append_content(f,'DBQ=.'+f)
 
-def build_efd_ecp_rest_structure(nemsbase, p='p2'):
+def build_efd_ecp_rest_structure(nemsbase):
     '''
     Build AIMMS folder and file structures of EFD, ECP, and REST models.
 
@@ -123,34 +117,21 @@ def build_efd_ecp_rest_structure(nemsbase, p='p2'):
     None.
 
     '''
-    if (p == 'p2' or nemsbase.mode == 'jog'):
-        # only add these AIMMS EFD files for the p2 run
-        if (nemsbase.scedvars.get('AIMMSEFD') == '1'):
-            print(f'{nemsbase.log_prefix}efd directory for efd AIMMS project')
-            shutil.copytree(nemsbase.scedvars.get('EFDN'), '.\\efd')
-            Path('.\\efd\\mainproject\\efd.ams').touch()
+    # Because of the unified AIMMS endpoint, ECP/EFP/Rest need to be in both, p1 and p2
+    print(f'{nemsbase.log_prefix}efd directory for efd AIMMS project')
+    shutil.copytree(nemsbase.scedvars.get('EFDN'), '.\\efd')
+    Path('.\\efd\\mainproject\\efd.ams').touch()
 
-        if (nemsbase.scedvars.get('AIMMSECP') == '1'):
-            print(f'{nemsbase.log_prefix}ecp directory for ecp AIMMS project')
-            shutil.copytree(nemsbase.scedvars.get('ECPN'), '.\\ecp')
-            if (nemsbase.scedvars.get('AIMECPPAR') == '0'):
-                Path('.\\ecp\\mainproject\\ecp.ams').touch()
-            else:
-                # Path('.\\ecp\\ecp_ge\\mainproject\\ecp_ge.ams').touch()
-                # Path('.\\ecp\\ecp_gs\\mainproject\\ecp_gs.ams').touch()
-                # Path('.\\ecp\\ecp_gw\\mainproject\\ecp_gw.ams').touch()
-                Path('.\\ecp\\ecp_ge\\mainproject\\ecp.ams').touch()
-                Path('.\\ecp\\ecp_gsw\\mainproject\\ecp.ams').touch()
-                #Path('.\\ecp\\ecp_gw\\mainproject\\ecp.ams').touch()
+    print(f'{nemsbase.log_prefix}ecp directory for ecp AIMMS project')
+    shutil.copytree(nemsbase.scedvars.get('ECPN'), '.\\ecp')
+    Path('.\\ecp\\mainproject\\ecp.ams').touch()
 
-        if (nemsbase.scedvars.get('RUNSTORE') == '1'):
-            print(f'{nemsbase.log_prefix}rest directory for wind, solar, and electricity storage project')
-            shutil.copytree(nemsbase.scedvars.get('RESTOREN'), '.\\rest')
-            Path('.\\rest\\mainproject\\EMM_renewable.ams').touch()
+    print(f'{nemsbase.log_prefix}rest directory for wind, solar, and electricity storage project')
+    shutil.copytree(nemsbase.scedvars.get('RESTOREN'), '.\\rest')
+    Path('.\\rest\\mainproject\\EMM_renewable.ams').touch()
 
-        if (nemsbase.scedvars.get('RUNEMMSQL') == '1'):
-            print(f'{nemsbase.log_prefix}'+'emm_db directory for emm_db AIMMS project')
-            shutil.copytree(nemsbase.scedvars.get('EMM_DBN'), '.\\emm_db')
+    print(f'{nemsbase.log_prefix}'+'emm_db directory for emm_db AIMMS project')
+    shutil.copytree(nemsbase.scedvars.get('EMM_DBN'), '.\\emm_db')
 def build_ephrts_structure(nemsbase, p='p2'):
     '''
     Build AIMMS folder and file structures of HMM (EPHRTS) model.
@@ -175,7 +156,7 @@ def build_ephrts_structure(nemsbase, p='p2'):
             shutil.copytree(nemsbase.scedvars.get('HYDROGENN'), '.\\ephrts')
             Path('.\\ephrts\\mainproject\\ephrts.ams').touch()
 
-def build_ngas_structure(nemsbase, p='p1'):
+def build_ngas_structure(nemsbase):
     '''
     Build AIMMS folder and file structures of NGMM model.
 
@@ -191,11 +172,9 @@ def build_ngas_structure(nemsbase, p='p1'):
     None.
 
     '''
-    if (p == 'p1' or nemsbase.mode == 'jog'):
-        if (nemsbase.scedvars.get('AIMMSNG') == '1'):
-            print(f'{nemsbase.log_prefix}'+'ngas directory for ngas AIMMS project')
-            shutil.copytree(nemsbase.scedvars.get('NGAIMMSN'), '.\\ngas')
-            Path('.\\ngas\\mainproject\\natgas.ams').touch()
+    print(f'{nemsbase.log_prefix}'+'ngas directory for ngas AIMMS project')
+    shutil.copytree(nemsbase.scedvars.get('NGAIMMSN'), '.\\ngas')
+    Path('.\\ngas\\mainproject\\natgas.ams').touch()
 
 def build_hsm_structure(nemsbase, p='p1'):
     '''
@@ -261,7 +240,7 @@ def build_reporter_structure(nemsbase, p='p1'):
     shutil.copytree(nemsbase.scedvars.get('REPORTRN'), '.\\reporter')
     Path('.\\reporter\\reporter.py').touch()
     
-def build_hmm_structure(nemsbase, p='p2'):
+def build_hmm_structure(nemsbase):
     '''
     Build AIMMS folder and file structures of HMM model.
 
@@ -277,10 +256,9 @@ def build_hmm_structure(nemsbase, p='p2'):
     None.
 
     '''
-    if (p == 'p2' or nemsbase.mode == 'jog'):
-      print(f'{nemsbase.log_prefix}'+'hmm directory for hmm AIMMS project')
-      shutil.copytree(nemsbase.scedvars.get('H2AIMMSN'), '.\\hmm')
-      Path('.\\hmm\\mainproject\\hmm.ams').touch()
+    print(f'{nemsbase.log_prefix}'+'hmm directory for hmm AIMMS project')
+    shutil.copytree(nemsbase.scedvars.get('H2AIMMSN'), '.\\hmm')
+    Path('.\\hmm\\mainproject\\hmm.ams').touch()
 
 def build_ccats_structure(nemsbase, p='p1'):
     '''
@@ -304,7 +282,7 @@ def build_ccats_structure(nemsbase, p='p1'):
         shutil.copytree(nemsbase.scedvars.get('CCPYPTH'), '.\\CCATS')
         Path('.\\ccats\\ccats.py').touch()
         
-def build_idm_structure(nemsbase, p='p2'):
+def build_idm_structure(nemsbase, p='p1'):
     
     '''
     Build Python folder and file structures of IDM model. Place the IDM folder in p2
@@ -322,7 +300,7 @@ def build_idm_structure(nemsbase, p='p2'):
     None.
 
     '''
-    if (p == 'p2' or nemsbase.mode == 'jog'):
+    if (p == 'p1' or nemsbase.mode == 'jog'):
         print(f'{nemsbase.log_prefix}'+'IDM directory for IDM python project')
         print(nemsbase.scedvars.get('IDMPYPTH'))
         shutil.copytree(nemsbase.scedvars.get('IDMPYPTH'), '.\\idm')
@@ -492,71 +470,7 @@ def cycle_restart_emm(nemsbase):
     '''
     # cycle restart file  and EMM basis files if this is a multi-cycle run
     if nemsbase.NRUNS > 1:
-        shutil.copy(nemsbase.scedvars.get('RESTARTN')+nemsbase.scedvars.get('RESTARTD'),'RESTART.IN')
-        if nemsbase.BoolE:
-            shutil.copy(nemsbase.scedvars.get('BASEMMIN')+nemsbase.scedvars.get('BASEMMID'),'basemmi')
-            shutil.copy(nemsbase.scedvars.get('BASEFDIN')+nemsbase.scedvars.get('BASEFDID'),'basefdi')
-
-def build_root_dir(nemsbase):
-    '''
-    Build the content of (intercvfiles.txt, RESTART.unf) files in the output root directory, and ('iccnvrg.txt','dict.txt','varlist.txt') in the input subdirectory.
-
-    Parameters
-    ----------
-    nemsbase : NEMSBase object
-        the main NEMS class.
-
-    Returns
-    -------
-    None.
-
-    '''
-    logfile = 'intercvfiles.txt'
-    f=('iccnvrg.txt','dict.txt','varlist.txt')
-    sced=(('ICCNVRGN','ICCNVRGD'),('DICTN','DICTD'),('VARLISTN','VARLISTD'))
-    log_only=('FILERN','FILERD')
-    s_log_only=f'           {nemsbase.scedvars.get(log_only[0])+nemsbase.scedvars.get(log_only[1])}\n'
-
-    if nemsbase.copyem:
-        # set up the input folder for ftab inputs
-        nemsbase.util_create_dir(nemsbase.COPYDIR)
-        '''
-        I intentionally disable the followning Python print-out command, because:
-        it’s a bug in nemspar.shell Line #749. it uses >> intercvfiles.txt, but actually, the I/O entry is reductant.
-        in nemspar.shell: echo "           ?COPYDIR@/iccnvrg.txt" >> intercvfiles.txt
-        '''
-        #s=f'           {nemsbase.COPYDIR}\iccnvrg.txt'+'\n'
-        #nemsbase.util_append_content(logfile,s)
-
-        if nemsbase.NRUNS == 1:
-            shutil.copy(nemsbase.scedvars.get('RESTARTN')+nemsbase.scedvars.get('RESTARTD'),os.path.join(nemsbase.COPYDIR,'restarti.unf'))
-            # be aware the following s string patching f'           {nemsbase.COPYDIR}\\restarti.unf' required double slashes - need to escape \r (line break) -Claire
-            s='           RESTART.unf'+'\n'+'           1'+'\n'+f'           {nemsbase.COPYDIR}\\restarti.unf'+'\n'+'           1\n'
-            nemsbase.util_append_content(logfile,s)
-        else:
-            shutil.copy(os.path.join(nemsbase.dir_scripts,logfile),logfile)
-
-        for i,v in enumerate(f):
-            shutil.copy(nemsbase.scedvars.get(sced[i][0])+nemsbase.scedvars.get(sced[i][1]),os.path.join(nemsbase.COPYDIR,f[i]))
-            nemsbase.util_append_content(logfile,f'           {nemsbase.COPYDIR}\{f[i]}\n')
-
-    else:
-        if nemsbase.NRUNS == 1:
-            # only log RESTART.unf. No copy over. why?
-            s='           RESTART.unf'+'\n'+'           1'+'\n'+f'           {nemsbase.scedvars.get("RESTARTN")+nemsbase.scedvars.get("RESTARTD")}'+'\n'+'           1\n'
-            nemsbase.util_append_content(logfile,s)
-        else:
-            shutil.copy(os.path.join(nemsbase.dir_scripts,logfile),logfile)
-
-        for i,v in enumerate(f):
-            # no copy over but log out only
-            nemsbase.util_append_content(logfile,f'           {nemsbase.scedvars.get(sced[i][0])+nemsbase.scedvars.get(sced[i][1])}\n')
-
-    # same code for either copyem !=0 or ==0. No copy for ?FILERN@?FILERD@. Only echo to the log
-    nemsbase.util_append_content(logfile,s_log_only)
-
-    # replace Python path '\' with Ksh format '/' for NEMS cycle_par.sh well pick up and continue:
-    nemsbase.util_convert_py_path_to_ksh_path(logfile)
+        shutil.copy(nemsbase.scedvars.get('RESTARTN'),'RESTART.IN')
 
 def grep_word_append_moreopt_file(nemsbase,pattern,replacement):
     '''
@@ -589,25 +503,6 @@ def grep_word_append_moreopt_file(nemsbase,pattern,replacement):
 
     shutil.move('m', 'MOREOPT')
 
-
-def check_xpress(nemsbase):
-    '''
-    Check the scedes XPRESSSW value and output the message if XPRESS is not turned on.
-
-    Parameters
-    ----------
-    nemsbase : NEMSBase object
-        the main NEMS class.
-
-    Returns
-    -------
-    None.
-
-    '''
-    # Check for xpress on hosts that don't have it and turn it off
-    if nemsbase.scedvars.get('XPRESSSW') == "0":
-        print(f'{nemsbase.log_prefix}'+'   XPRESS not turned on')
-
 def just_do_it(nemsbase, jobtype):
     '''
     Now we are ready tokick off a NEMS run. Just do it!
@@ -624,16 +519,6 @@ def just_do_it(nemsbase, jobtype):
     None.
 
     '''
-    # for debugging: (in default scedes ref202):
-    #HOLD=0, RUNCOB=0, RELEASE=0
-    hold   =nemsbase.scedvars.get('HOLD')
-    runcob =nemsbase.scedvars.get('RUNCOB')
-    release=nemsbase.scedvars.get('RELEASE')
-    delay  =''
-    if (hold == '1'): delay='hold'
-    if (runcob == '1'): delay='18:00'
-    if (release == '1'): delay='release'
-    
     if 'local' in jobtype:
 
         print(f'{nemsbase.log_prefix}'+f'Submitting NEMS run in class debug on this computer {nemsbase.bashvars.get("COMPUTERNAME")}')
@@ -661,7 +546,10 @@ def just_do_it(nemsbase, jobtype):
         
         shutil.copy(os.path.join(nemsbase.dir_scripts,"setup","src", "cel", "run_task.py"), "run_task.py")
         print('now send to queue')
-        run_task.run_task_with_timeout(nemsbase.path_datekey, comm, "shared")
+        if 'sequential' in jobtype:
+            run_task.run_task_with_timeout(nemsbase.path_datekey, comm, "shared_priority", 2)
+        else:
+            run_task.run_task_with_timeout(nemsbase.path_datekey, comm, "shared_priority", 1)
 
 def build_emm_exe_exm_exo_list(nemsbase):
     '''
@@ -674,8 +562,6 @@ def build_emm_exe_exm_exo_list(nemsbase):
 
     Returns
     -------
-    ls_emm : dict
-        list files of EMM model.
     ls_exe : dict
         list files grouped for EXE on/off switch.
     ls_exm : dict
@@ -684,30 +570,24 @@ def build_emm_exe_exm_exo_list(nemsbase):
         list files grouped for EXO on/off switch.
 
     '''
-    ls_emm=[{'file':'basemmi.txt', 'file2':'basemmi',\
-             'display': 'BASEMMI.dat','src':nemsbase.scedvars.get('BASEMMIN')+nemsbase.scedvars.get('BASEMMID')}]
-    ls_emm.append({'file':'BASEFDi.txt', 'file2':'basefdi',\
-                   'display':'BASEFDI.dat', 'src':nemsbase.scedvars.get('BASEFDIN')+nemsbase.scedvars.get('BASEFDID')})
+    ls_exe=[{'file':'plntdaf.daf', 'display': 'PLNTTMP.daf','src':nemsbase.scedvars.get('PLNTDAFN')}]
+    ls_exe.append({'file':'ettdem.daf', 'display':'ETTTMP.daf', 'src':nemsbase.scedvars.get('ETTDEMN')})
 
-    ls_exe=[{'file':'plntdaf.daf', 'display': 'PLNTTMP.daf','src':nemsbase.scedvars.get('PLNTDAFN')+nemsbase.scedvars.get('PLNTDAFD')}]
-    ls_exe.append({'file':'ettdem.daf', 'display':'ETTTMP.daf', 'src':nemsbase.scedvars.get('ETTDEMN')+nemsbase.scedvars.get('ETTDEMD')})
+    ls_exm=[{'file':'mchighlo.xls', 'display': 'mchighlo.xls','src':nemsbase.scedvars.get('MCHIGHLON')}]
+    ls_exm.append({'file':'comfloor.xls', 'display':'comfloor.xls', 'src':nemsbase.scedvars.get('COMFLOORN')})
 
-    ls_exm=[{'file':'mchighlo.xls', 'display': 'mchighlo.xls','src':nemsbase.scedvars.get('MCHIGHLON')+nemsbase.scedvars.get('MCHIGHLOD')}]
-    ls_exm.append({'file':'comfloor.xls', 'display':'comfloor.xls', 'src':nemsbase.scedvars.get('COMFLOORN')+nemsbase.scedvars.get('COMFLOORD')})
-    ls_exm.append({'file':'eviews32.ini', 'display':'eviews32.ini', 'src':nemsbase.scedvars.get('EVIEWS32N')+nemsbase.scedvars.get('EVIEWS32D')})
-
-    ls_exo=[{'file':'lf_nem.gms', 'display': 'lf_nem.gms','src':nemsbase.scedvars.get('LF_NEMN')+nemsbase.scedvars.get('LF_NEMD')}]
+    ls_exo=[{'file':'lf_nem.gms', 'display': 'lf_nem.gms','src':nemsbase.scedvars.get('LF_NEMN')}]
     #ls_exo.append({'file':'lfinput.gms', 'display':'lfinput.gms', 'src':nemsbase.scedvars.get('LFINPUTN')+nemsbase.scedvars.get('LFINPUTD')})
-    ls_exo.append({'file':'lfminput.gdx', 'display':'lfminput.gdx', 'src':nemsbase.scedvars.get('LFMINPUTN')+nemsbase.scedvars.get('LFMINPUTD')})
-    ls_exo.append({'file':'lfmodel.gms', 'display':'lfmodel.gms', 'src':nemsbase.scedvars.get('LFMODELN')+nemsbase.scedvars.get('LFMODELD')})
-    ls_exo.append({'file':'lfprep.gms', 'display':'lfprep.gms', 'src':nemsbase.scedvars.get('LFPREPN')+nemsbase.scedvars.get('LFPREPD')})
-    ls_exo.append({'file':'lfrepset.gms', 'display':'lfrepset.gms', 'src':nemsbase.scedvars.get('LFREPSETN')+nemsbase.scedvars.get('LFREPSETD')})
-    ls_exo.append({'file':'lfreport.gms', 'display':'lfreport.gms', 'src':nemsbase.scedvars.get('LFREPORTN')+nemsbase.scedvars.get('LFREPORTD')})
-    ls_exo.append({'file':'lfshell.gms', 'display':'lfshell.gms', 'src':nemsbase.scedvars.get('LFSHELLN')+nemsbase.scedvars.get('LFSHELLD')})
-    ls_exo.append({'file':'mpsshell.gms', 'display':'mpsshell.gms', 'src':nemsbase.scedvars.get('MPSSHELLN')+nemsbase.scedvars.get('MPSSHELLD')})
-    ls_exo.append({'file':'cre8mps.gms', 'display':'cre8mps.gms', 'src':nemsbase.scedvars.get('CRE8MPSN')+nemsbase.scedvars.get('CRE8MPSD')})
+    ls_exo.append({'file':'lfminput.gdx', 'display':'lfminput.gdx', 'src':nemsbase.scedvars.get('LFMINPUTN')})
+    ls_exo.append({'file':'lfmodel.gms', 'display':'lfmodel.gms', 'src':nemsbase.scedvars.get('LFMODELN')})
+    ls_exo.append({'file':'lfprep.gms', 'display':'lfprep.gms', 'src':nemsbase.scedvars.get('LFPREPN')})
+    ls_exo.append({'file':'lfrepset.gms', 'display':'lfrepset.gms', 'src':nemsbase.scedvars.get('LFREPSETN')})
+    ls_exo.append({'file':'lfreport.gms', 'display':'lfreport.gms', 'src':nemsbase.scedvars.get('LFREPORTN')})
+    ls_exo.append({'file':'lfshell.gms', 'display':'lfshell.gms', 'src':nemsbase.scedvars.get('LFSHELLN')})
+    ls_exo.append({'file':'mpsshell.gms', 'display':'mpsshell.gms', 'src':nemsbase.scedvars.get('MPSSHELLN')})
+    ls_exo.append({'file':'cre8mps.gms', 'display':'cre8mps.gms', 'src':nemsbase.scedvars.get('CRE8MPSN')})
 
-    return ls_emm, ls_exe, ls_exm, ls_exo
+    return ls_exe, ls_exm, ls_exo
 
 def parse_cpcmds_copy_file(nemsbase, path):
     src=[]
@@ -766,11 +646,12 @@ def copy_models_main_folder_etc(nemsbase, p):
     f = os.path.join(nemsbase.NEMS, 'models', 'main')
     shutil.copytree(f,'main')
     
-    # copy FILELIST to root datecode folder
+    #copy FILELIST to root datecode folder
     if p == "p1":
         src_dir = os.path.join(nemsbase.NEMS, 'scedes')
         temp = os.path.join(src_dir, "FILELIST")
-        shutil.copy(os.path.join(src_dir, "FILELIST"), "../FILELIST")
+        shutil.copy(os.path.join("FILELIST"), "../FILELIST")
+        #shutil.copy(os.path.join("FILELIST"), "../FILELIST")
 
     src_input_dir = os.path.join(nemsbase.NEMS, 'input')
     if p == 'p1' and nemsbase.BoolM:
@@ -780,7 +661,7 @@ def copy_models_main_folder_etc(nemsbase, p):
             shutil.copy(os.path.join(src_dir,i), i)    
         f = 'eviews32.ini'
         shutil.copy(os.path.join(src_input_dir,f), f)
-    
+
     if p == 'p2' and nemsbase.BoolO:
         # LFMM module specific. Copy its input files under output root:
         src_models_lfmm_dir = os.path.join(nemsbase.NEMS,'models','lfmm')
@@ -794,6 +675,88 @@ def copy_models_main_folder_etc(nemsbase, p):
     # copy entire PyFiler folder from the root:
     f = os.path.join(os.path.dirname(os.getcwd()), 'PyFiler')
     shutil.copytree(f,'PyFiler')
+
+def copy_input_files(nemsbase, FILELIST):
+    '''
+    Copy files from the FILELIST to the run's inputs folder and modify the paths with 'READ' in the FILELIST.
+
+    Parameters
+    ----------
+    nemsbase : NEMSBase object
+        the main NEMS class.
+    FILELIST : string
+        the name or path to the FILELIST
+    
+    Returns
+    -------
+    None.
+    '''
+    # try reading the FILELIST and store the entries into a list that does not start with '*' in a list and the header in another list. Returns error if file is not found. 
+    try:
+        ls_FILELIST = []
+        ls_header = []
+        with open(FILELIST, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('*'):
+                    ls_FILELIST.append(line)
+                else:
+                    ls_header.append(line)
+    except FileNotFoundError:
+        print(f"{FILELIST} is not in the directory.")
+    
+    # split the entries in the FILELIST into the variable name and path with 'READ' except 'MOREOPT' and 'JCLDAT' which needs to be modified
+    # save those entries to be used to copy files and to re-create the FILELIST with the new paths
+    # save the other variables and path in FILELIST with 'READWRITE' and 'WRITE' to be merged later
+    ls_FILELIST_read_new = []
+    ls_FILELIST_other = []
+    ls_FILELIST_path = []
+    ls_FILELIST_path_new = []
+    for i in range(len(ls_FILELIST)):
+        ls_parts = ls_FILELIST[i].split()
+        if ls_parts[2] == 'READ' and not ls_parts[0].startswith(('MOREOPT','JCLDAT')):
+            ls_FILELIST_path.append(ls_parts[1].strip().replace('$NEMS',nemsbase.NEMS).replace('/','\\'))
+            ls_path_parts = ls_parts[1].split('.')
+            if len(ls_path_parts) > 1:
+                ls_FILELIST_path_new.append('input/' + ls_parts[0].lower() + '.' + ls_path_parts[-1])
+                ls_FILELIST_read_new.append(' ' + ls_parts[0] + ' ' + './input/' + ls_parts[0].lower() + '.' + ls_path_parts[-1] + ' ' + ' '.join(ls_parts[2:]))
+            else:
+                ls_FILELIST_path_new.append('input/' + ls_parts[0].lower())
+                ls_FILELIST_read_new.append(' ' + ls_parts[0] + ' ' + './input/' + ls_parts[0].lower() + ' ' + ' '.join(ls_parts[2:]))
+        else:
+            ls_FILELIST_other.append(' ' + ' '.join(ls_parts))
+    
+    # create the input directory
+    nemsbase.util_create_dir('input')
+    
+    # loop over the ls_FILELIST_path to copy into the new path
+    for i in range(len(ls_FILELIST_path)):
+        try:
+            shutil.copy(ls_FILELIST_path[i],ls_FILELIST_path_new[i])
+        except:
+            try:
+                shutil.copytree(ls_FILELIST_path[i],ls_FILELIST_path_new[i])
+            except:
+                print(f"unable to copy {ls_FILELIST_path[i]}")
+                pass
+    
+    # merge the lists and write into the new FILELIST.changed
+    ls_FILELIST_new = ls_header + ls_FILELIST_read_new + ls_FILELIST_other
+    try:
+        print("Writing new FILELIST into FILELIST.changed")
+        with open ('FILELIST.changed', 'w') as f:
+            for line in ls_FILELIST_new:
+                f.write(line + '\n')
+    except:
+        print("Error writing FILELIST.changed")
+    
+    # remove the old FILELIST
+    print("Replace the old FILELIST with the new FILELIST")
+    nemsbase.util_remove_file('FILELIST')
+    
+    # trim (right space) the content of the FILELIST.changed file as the new FILELIST and remove the .changed 
+    nemsbase.util_trim_right_space('FILELIST.changed','FILELIST')
+    nemsbase.util_remove_file('FILELIST.changed')
 
 def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
     '''
@@ -836,34 +799,10 @@ def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
         subprocess.run([scpt], stdout=subprocess.PIPE, shell=True)
         nemsbase.util_move_file_dir('filelist.tmp','FILELIST')
 
-        tmp_cmd = os.path.join(nemsbase.NEMS, 'scripts','cac_filelist.exe')
+        # copy the NEMS files into the run's input folder
         if (nemsbase.copyem): #"$copyem" != "0"
-            nemsbase.util_remove_file('filelist.changed')
-            nemsbase.util_remove_file('cpcmds.sh')
-            subprocess.run([tmp_cmd, 'FILELIST', nemsbase.COPYDIR], stdout=subprocess.PIPE)
-            
-            # At this moment, bad filelist.changed is generated. FILELIST is still good
-            # but next step FILELIST will be removed and replaced with filelist.changed
-            fix_filelist_path_bug(nemsbase, 'Filelist.changed')
-            fix_filelist_path_bug(nemsbase, 'cpcmds.sh')
-
-            nemsbase.util_remove_file('FILELIST')
-
-            # trim (right space) the content of  the filelist.changed file and save to the FILIST file
-            nemsbase.util_trim_right_space('filelist.changed','FILELIST')
-            
-            nemsbase.util_remove_file('filelist.changed')
-            nemsbase.util_create_dir(nemsbase.COPYDIR)
-            # so far so good. Ready to copy a list of files
-
-            # cac_filelist creates uncmprss.sh and cpcmds.sh to uncompress files and then copy them
-            parse_cpcmds_copy_file(nemsbase, 'cpcmds.sh')
-            
-            nemsbase.util_remove_file('cpcmds.sh')
-        else:
-            #  the u as the directory to copy input files to really means do an "uncompress only"
-            subprocess.run([tmp_cmd, 'FILELIST', 'u'], stdout=subprocess.PIPE)
-            # cac_filelist creates uncmprss.sh to uncompress files but we don't need to run uncmprss anymore since no .zip files
+            print("copying the files from NEMS folder to run's input folder.")
+            copy_input_files(nemsbase, 'FILELIST')
 
         nemsbase.util_remove_file('hswrk.bat')
         nemsbase.util_remove_file('nohup.out')
@@ -878,33 +817,25 @@ def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
         # finding error string
         if (nemsbase.BoolO): shutil.copy(os.path.join(nemsbase.dir_scripts, 'lffindstr.bat'), 'lffindstr.bat')
         
-        if (nemsbase.BoolN and p == 'p2'):
-            prev = os.getcwd()
-            os.chdir(nemsbase.COPYDIR)
-            #unzip PSBASEUNF.zip file
-            with zipfile.ZipFile(nemsbase.scedvars.get('PSBASEUNFN'), 'r') as z:
-                z.extractall()
-
-            os.chdir(prev)
-
         #  put coal units file in p2 for coal model at beginning of run so it will be there for project open/read
-        if (nemsbase.BoolC):
-            build_coal_structure(nemsbase, p)
-
-        if (nemsbase.BoolE):
-            build_efd_ecp_rest_structure(nemsbase, p)
+        # if (nemsbase.BoolC):
+        #     build_coal_structure(nemsbase, p)
+        # since aimms_frame_p2 (aimms endpoint project) has all four models are linked as libraries, four aimms model folders always need to be copied together regardless
+        if (nemsbase.BoolE) or (nemsbase.BoolC) or (nemsbase.BoolG) or (nemsbase.BoolH):
+            build_efd_ecp_rest_structure(nemsbase)
             # reserve the following for Ed EPHRTS project (nemspar.shell version cut-off date is 12/28/2022)
-            build_ephrts_structure(nemsbase, p)
+            build_ephrts_structure(nemsbase)
+            build_coal_structure(nemsbase)
 
-        if (nemsbase.BoolG):
-            build_ngas_structure(nemsbase, p)
+            # NGMM
+            build_ngas_structure(nemsbase)
+
+            # NGMM (is IDM really still needed here?)
+            build_hmm_structure(nemsbase)
+            build_idm_structure(nemsbase, p)
 
         if (nemsbase.BoolL):
             build_hsm_structure(nemsbase, p)
-            
-        if (nemsbase.BoolH):
-            build_hmm_structure(nemsbase, p)
-            build_idm_structure(nemsbase, p)
             
         if (nemsbase.BoolCC):
             build_ccats_structure(nemsbase, p)
@@ -914,37 +845,31 @@ def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
         # The epm_read routine is called for all runs, even if RUNEPM == 0
         build_epm_structure(nemsbase)
 
-
-        shutil.copy(os.path.join(nemsbase.dir_scripts,'deloml.bat'), 'hswrk.bat')
+        open('hswrk.bat', 'w+').close()
         runoml = int(nemsbase.scedvars.get('EXE')) + int(nemsbase.scedvars.get('EXC')) + int(nemsbase.scedvars.get('EXH'))
         runoml = 1 if (runoml > 0) else 0
         wd = '' if (runoml > 0) else 'not '
 
-        ls_emm, ls_exe, ls_exm, ls_exo = build_emm_exe_exm_exo_list(nemsbase)
+        ls_exe, ls_exm, ls_exo = build_emm_exe_exm_exo_list(nemsbase)
         print(f'{nemsbase.log_prefix}'+f'NRUNS set to {nemsbase.NRUNS}')
         if (nemsbase.copyem):
-            nruns_switch_emm_group(nemsbase, ls_emm, True)
 
             if (nemsbase.BoolE):
                 copy_none_output_hswrk(nemsbase, 'basemmo.txt', 'BASEMMO.dat')
 
             nruns_switch_group(nemsbase, ls_exe, 'E', True, True)
 
-            src=nemsbase.scedvars.get('EMMDBN')+nemsbase.scedvars.get('EMMDBD')
+            src=nemsbase.scedvars.get('EMMDBN')
             copy_inputfile_output_hswrk(nemsbase, src, 'emmdb.mdb', 'EMMDB.mdb')
 
             nruns_switch_group(nemsbase, ls_exm, 'M', True, True)
             nruns_switch_group(nemsbase, ls_exo, 'O', True, True)
 
         else:
-            nruns_switch_emm_group(nemsbase, ls_emm, False)
             nruns_switch_group(nemsbase, ls_exe, 'E', False, False)
             nruns_switch_group(nemsbase, ls_exm, 'M', False, False)
             nruns_switch_group(nemsbase, ls_exo, 'O', False, False)
 
-
-        dbwrite = int(nemsbase.scedvars.get('ORCLECP')) + int(nemsbase.scedvars.get('ORCLEFD')) + int(nemsbase.scedvars.get('ORCLEFP'))
-        dbmodon = int(nemsbase.scedvars.get('EXE'))
 
         if (p == 'p2'):
             # the following 2 codes are specific for parnems only. Because:
@@ -952,10 +877,7 @@ def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
             shutil.copy('input\\varlist.txt', 'input\\varlistall.txt')
             shutil.copy('input\\varlistrec.txt', 'input\\varlist.txt')
             
-            # copy executable for converting plant group data from text file to access database
-            if dbwrite > 0 and dbmodon > 0:
-                shutil.copy(f"{nemsbase.scedvars.get('UDBPN')}{nemsbase.scedvars.get('UDBPD')}", 'udbp.exe')
-
+           
         elif (p == 'p3'):
             # MOREOPT.shell doesn't have the output 'ITERDUMP 0' like parnems/p3 does. It seems 'ITERDUMP 0' already will naturally output to jognems and {p1,p2} parnems, but not p3'. Is this a nemsh.shell missing code or on purpose? -Claire
             grep_word_append_moreopt_file(nemsbase,'iterdump','ITERDUMP 0')
@@ -967,17 +889,10 @@ def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
         os.environ['TMP'] = os.getcwd()
 
         cycle_restart_emm(nemsbase)
-
-        # clean-up script
-        shutil.copy(nemsbase.scedvars.get('CLEANUP'),'cleanup.sh')
         # end of loop for setting up parallel folders.
 
     # now we come back to the root dir
     os.chdir('..')
-
-    # Remainder sets up the parent folder.
-    build_root_dir(nemsbase)
-
 
     # create scedes.all
     # be aware that {p1,p2,p3}/keys.sed with nullstr info and sceds.all is on the output root.
@@ -988,8 +903,6 @@ def build_parnems(nemsbase, jobtype, is_only_run_folder_checked):
     nemsbase.copy_validator()
     nemsbase.copy_reporter()
     nemsbase.copy_converge()
-
-    check_xpress(nemsbase)
 
     if not is_only_run_folder_checked:
         just_do_it(nemsbase, jobtype)
@@ -1031,34 +944,10 @@ def build_jognems(nemsbase, jobtype, is_only_run_folder_checked):
     subprocess.run([scpt], stdout=subprocess.PIPE, shell=True)
     nemsbase.util_move_file_dir('filelist.tmp','FILELIST')
 
-    tmp_cmd = os.path.join(nemsbase.NEMS, 'scripts','cac_filelist.exe')
+    # copy the NEMS files into the run's input folder
     if (nemsbase.copyem): #"$copyem" != "0"
-        nemsbase.util_remove_file('filelist.changed')
-        nemsbase.util_remove_file('cpcmds.sh')
-        subprocess.run([tmp_cmd, 'FILELIST', nemsbase.COPYDIR], stdout=subprocess.PIPE)
-        
-        # At this moment, bad filelist.changed is generated. FILELIST is still good
-        # but next step FILELIST will be removed and replaced with filelist.changed
-        fix_filelist_path_bug(nemsbase, 'Filelist.changed')
-        fix_filelist_path_bug(nemsbase, 'cpcmds.sh')
-
-        nemsbase.util_remove_file('FILELIST')
-
-        # trim (right space) the content of  the filelist.changed file and save to the FILIST file
-        nemsbase.util_trim_right_space('filelist.changed','FILELIST')
-
-        nemsbase.util_remove_file('filelist.changed')
-        nemsbase.util_create_dir(nemsbase.COPYDIR)
-        # so far so good. Ready to copy a list of files
-
-        # cac_filelist creates uncmprss.sh and cpcmds.sh to uncompress files and then copy them
-        parse_cpcmds_copy_file(nemsbase, 'cpcmds.sh')
-        
-        nemsbase.util_remove_file('cpcmds.sh')
-    else:
-        # the u as the directory to copy input files to really means do an "uncompress only"
-        subprocess.run([tmp_cmd, 'FILELIST', 'u'], stdout=subprocess.PIPE)
-        # cac_filelist creates uncmprss.sh to uncompress files but we don't need to run uncmprss anymore since no .zip files
+        print("copying the files from NEMS folder to run's input folder.")
+        copy_input_files(nemsbase, 'FILELIST')
 
     nemsbase.util_remove_file('hswrk.bat')
     nemsbase.util_remove_file('nohup.out')
@@ -1070,33 +959,21 @@ def build_jognems(nemsbase, jobtype, is_only_run_folder_checked):
     # finding error string
     if (nemsbase.BoolO): shutil.copy(os.path.join(nemsbase.dir_scripts, 'lffindstr.bat'), 'lffindstr.bat')
 
-    if (nemsbase.BoolN):
-        prev = os.getcwd()
-        os.chdir(nemsbase.COPYDIR)
-        #unzip PSBASEUNF.zip file
-        with zipfile.ZipFile(nemsbase.scedvars.get('PSBASEUNFN'), 'r') as z:
-            z.extractall()
-
-        os.chdir(prev)
-
     #  put coal units file in p2 for coal model at beginning of run so it will be there for project open/read
-    if (nemsbase.BoolC):
-        build_coal_structure(nemsbase)
-
-    if (nemsbase.BoolE):
+    # if (nemsbase.BoolC):
+    #     build_coal_structure(nemsbase)
+    # since aimms_frame_p2 (aimms endpoint project) has all four models are linked as libraries, four aimms model folders always need to be copied together regardless
+    if (nemsbase.BoolE) or (nemsbase.BoolC) or (nemsbase.BoolG) or (nemsbase.BoolH):
         build_efd_ecp_rest_structure(nemsbase)
         # reserve the following for Ed EPHRTS project (nemspar.shell version cut-off date is 08/03/2022)
         build_ephrts_structure(nemsbase)
-
-    if (nemsbase.BoolG):
+        build_coal_structure(nemsbase)
         build_ngas_structure(nemsbase)
+        build_hmm_structure(nemsbase)
+        build_idm_structure(nemsbase) # I think HMM might need IDM for something?
 
     if (nemsbase.BoolL):
         build_hsm_structure(nemsbase)
-    
-    if (nemsbase.BoolH):
-        build_hmm_structure(nemsbase)
-        build_idm_structure(nemsbase)
         
     if (nemsbase.BoolCC):
         build_ccats_structure(nemsbase)
@@ -1108,12 +985,11 @@ def build_jognems(nemsbase, jobtype, is_only_run_folder_checked):
     build_ngpl_structure(nemsbase)
     #build_reporter_structure(nemsbase)
 
-    shutil.copy(os.path.join(nemsbase.dir_scripts,'deloml.bat'), 'hswrk.bat')
+    open('hswrk.bat', 'w+').close()
 
-    ls_emm, ls_exe, ls_exm, ls_exo = build_emm_exe_exm_exo_list(nemsbase)
+    ls_exe, ls_exm, ls_exo = build_emm_exe_exm_exo_list(nemsbase)
     print(f'{nemsbase.log_prefix}'+f'NRUNS set to {nemsbase.NRUNS}')
     if (nemsbase.copyem):
-        nruns_switch_emm_group(nemsbase, ls_emm, True)
 
         if (nemsbase.BoolE):
             # Identically translate the code in nemspar.shell. Be aware. The following two lines are not in the origin else (i.e. not copyem) statement.
@@ -1122,38 +998,25 @@ def build_jognems(nemsbase, jobtype, is_only_run_folder_checked):
         nruns_switch_group(nemsbase, ls_exe, 'E', True, True)
 
         # Identically translate the code in nemspar.shell. Be aware. the following two lines are not in the origin else (i.e. not copyem) statement.
-        src=nemsbase.scedvars.get('EMMDBN')+nemsbase.scedvars.get('EMMDBD')
+        src=nemsbase.scedvars.get('EMMDBN')
         copy_inputfile_output_hswrk(nemsbase, src, 'emmdb.mdb', 'EMMDB.mdb')
 
         nruns_switch_group(nemsbase, ls_exm, 'M', True, True)
         nruns_switch_group(nemsbase, ls_exo, 'O', True, True)
 
     else:
-        nruns_switch_emm_group(nemsbase, ls_emm, False)
         nruns_switch_group(nemsbase, ls_exe, 'E', False, False)
         nruns_switch_group(nemsbase, ls_exm, 'M', False, False)
         nruns_switch_group(nemsbase, ls_exo, 'O', False, False)
     
-    # nemsh.shell has this code block in different position but in nemspar.shell is under p2 folder. I re-arrange it to here.
-    dbwrite = int(nemsbase.scedvars.get('ORCLECP')) + int(nemsbase.scedvars.get('ORCLEFD')) + int(nemsbase.scedvars.get('ORCLEFP'))
-    dbmodon = int(nemsbase.scedvars.get('EXE'))
-    if dbwrite > 0 and dbmodon > 0:
-        shutil.copy(f"{nemsbase.scedvars.get('UDBPN')}{nemsbase.scedvars.get('UDBPD')}", 'udbp.exe')
-
+    
     # source\udat.f(58) and command.sh calls $TMP
     os.environ['TMP'] = os.getcwd()
 
     cycle_restart_emm(nemsbase)
 
-    # clean-up script
-    shutil.copy(nemsbase.scedvars.get('CLEANUP'),'cleanup.sh')
-    # end of loop for setting up parallel folders.
-
     # for parnems, we need to come back to the root dir. But for jognems, we stay in the root always
     #os.chdir('..')
-
-    # Remainder sets up the parent folder.
-    build_root_dir(nemsbase)
 
     # create scedes.all so future run replication/archival will work
     src = os.path.join(nemsbase.OLDDIR, f'scedes.all.{nemsbase.bashvars.get("scenario")}.{nemsbase.bashvars.get("datekey")}')
@@ -1163,8 +1026,6 @@ def build_jognems(nemsbase, jobtype, is_only_run_folder_checked):
     nemsbase.copy_validator()
     nemsbase.copy_reporter()
     nemsbase.copy_converge()
-
-    check_xpress(nemsbase)
     
     if not is_only_run_folder_checked:
         just_do_it(nemsbase, jobtype)

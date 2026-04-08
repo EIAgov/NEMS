@@ -4,109 +4,64 @@
 """
 
 import os
-import shutil
 import time
-import random
 import numpy as np
 import pandas as pd
 
-from restart_util import (read_stuff, write_restart)
 from intercv_data_preprocess import read_icnv_file
 from convergence_check import check_conv
 from relax import perform_relax
 from intercv_sum_conv import sum_conv
+import intercv_npz_util
+from datetime import datetime
 
 import warnings
 from tables import NaturalNameWarning
 warnings.filterwarnings('ignore', category=NaturalNameWarning)
 
-def load_values(restarthdf_path, my_vars, adj_flag):
-    """
-    Load data from a restart HDF file and return a dict of df.
+MODULE_NAME = "intercv_main.py"
+LOGFILE = "nohup.out"
 
-    Parameters:
-        restarthdf_path (str): The path to the restart HDF file.
-        my_vars (list): A list of variables to load from the restart file.
-        adj_flag: 'Adjusted' or  'Unadjusted' for carbon-adjusted and unadjusted prices (AMPBLK/MPBLK, 
-        ANGTDM/NGTDMOUT, ACOALPRC/COALPRC)
-                
-    Returns:
-        dict: containing df of old data.
-
-    Example:
-        restarthdf_path = 'restart_data.h5'
-        my_vars = ['var1', 'var2', 'var3']
-        dfd = load_values(restarthdf_path, my_Qvars)
-    """
+def log_it(n, s, fout=False):
+    """Append a formatted message to LOGFILE (nohup.out).
     
-    # Get data from restart
-    dat = pd.HDFStore(restarthdf_path, 'r')
-    # Load data
-    dfd = read_stuff(dat, my_vars, adj_flag)
-             
-    dat.close()
+    LOGGFILE is a module-level hardcoded parameter.
 
-    return dfd
+    sys.stdout.flush() and sys.stederr.flush() ensure that
+    nothing is left in the buffer.
 
-def write_values(restarthdf_path, my_vars, dfd):
+    Parameters
+    ----------
+    n : integer
+        cycle number
+    s : string
+        message to write in logfile
     """
-    Write data to a restart HDF file.
 
-    Parameters:
-        restarthdf_path (str): The path to the restart HDF file.
-        my_vars (list): A list of variables to load from the restart file.
-        dfd (dict): Data to write
+    if not fout:
+        fout = LOGFILE
 
-    Example:
-        restarthdf_path = 'restart_data.h5'
-        my_vars = ['var1', 'var2', 'var3']
-        dfd = write_values(restarthdf_path, my_vars)
-    """
-    
-    # Get data from restart
-    dat = pd.HDFStore(restarthdf_path, 'r+')
+    with open(fout, "a", encoding="utf-8") as f:
+        f.write(f"{datetime.now()} :: cycle {n} :: {MODULE_NAME} :: {s}\n")
+        f.flush()
 
-    # Write data
-    write_restart(dat, my_vars, dfd)
-             
-    dat.close()
 
-def get_current_values(dfd_old, my_vars):
-    """
-    Get current data FOR TESTING PURPOSES ONLY
-
-    Parameters:
-        dfd_old (dict): containing DataFrames of the old data.
-
-    Returns:
-        dict: containing DataFrames of the current data.
-
-    Note:
-        We randomly select a variable and alter its values to get its "new" values.
-        This is for testing purposes only.     
-    """
- 
-    # Here we assume current values = old values + changes
-    dfd_cur = dfd_old.copy()
-
-    # Let's randomly select a variable and alter its values for testing
-    #df_var_random = random.choice(list(dfd_cur.keys()))
-    #df_var_random = random.choice(my_vars)
-    df_var_random = 'QELTR'
-    print(f'randomly select variable to change: {df_var_random}')
-    #dfd_cur[df_var_random] = dfd_cur[df_var_random].map(lambda value: value + np.random.randn())
-    #dfd_cur[df_var_random] = dfd_cur[df_var_random].map(lambda value: value *1.11)
-    dfd_cur[df_var_random] = dfd_cur[df_var_random].map(lambda value: value *100)
-
-    return dfd_cur, df_var_random
 
 def calc_average_score(GPA):
-    """
-    Sort the scores and take average of 3 worst (lowest) scores
+    """Sort the scores and take average of 3 worst (lowest) scores
 
-    Parameters:
-        GPA(pandas.Series): containing GPA scores.        
+    Parameters
+    ----------
+    GPA : pandas.Series
+        containing GPA scores.
+        
+    Returns
+    -------
+    numpy.float64
+        average of the lowest 3 GPA scores
+    
     """
+    
     #sort only the scores in the projected period that starts 2 years after last SEDS year and
     Score_sorted = GPA.sort_values()
     #take average of 3 worst (lowest) scores
@@ -115,26 +70,52 @@ def calc_average_score(GPA):
     return Average
 
 def write_GPA(ave, ave_US, cycle, StopCode, MinScore, path):
-    """
-    Write debug files
+    """Write US and Regional GPA summary for corresponding cycle number to log file
 
-    Parameters:
-        df(pandas.DataFrame): containing non-converged variables.
-        df_reg(pandas.DataFrame): regional level non-converged variables.
-        RegRepFlag: flag to write out regional info
+    Writes a summary message to the nohup.out or terminal if the cycle has passed or failed
+    the GPA threshold. Logs the GPA value for both US and regional to the following file in
+    the "converge/output" directory:
+
+    * Iconv_AverageGPA.csv
+
+    Parameters
+    ----------
+    ave : float64
+        Regional GPA value
+    
+    ave_US : float64
+        National GPA value
+    
+    cycle : int
+        current cycle number
+    
+    StopCode : int
+        return code to indicate if cycle has passed the minimum GPA. 1 = Pass, 0 = Fail
+
+    MinScore : float
+        selected GPA value for convergence to exceed (e.g. 3.9) to be considered "PASS"
+
+    path : str
+        path to converge/output directory
+        
+    Returns
+    -------
+    numpy.float64
+        average of the lowest 3 GPA scores
+    
     """
         
     df= pd.DataFrame.from_records([{'Cycle': str(cycle), 'Regional GPA': ave, 'US GPA': ave_US, \
                                      'PASS/FAIL': ''}], index='Cycle')
     
-    print(f'Cycle {str(cycle)} GPA (US: {ave_US = :.2f}; REG {ave = :.2f}) on a 4 point scale \
-(averaged over 3 worst years) with {MinScore } considered minimally acceptable.')
+    log_it(cycle, f'Cycle {str(cycle)} GPA (US: {ave_US = :.2f}; REG {ave = :.2f}) on a 4 point scale \
+(averaged over 3 worst years) with {MinScore} considered minimally acceptable.')
     if StopCode == 1:
         df['PASS/FAIL'] = 'PASS'
-        print(f'Congratulations for passing our rigorous testing standards.   GPA: **PASS**')
+        log_it(cycle, f'Congratulations for passing our rigorous testing standards.   GPA: **PASS**')
     else:
         df['PASS/FAIL'] = 'FAIL'
-        print(f'Warning:  additional run cycles may be needed.   GPA: **FAIL**')     
+        log_it(cycle, f'Warning:  additional run cycles may be needed.   GPA: **FAIL**')
 
     name = 'Iconv_AverageGPA.csv'
     out_path = os.path.join(path, name)
@@ -145,16 +126,40 @@ def write_GPA(ave, ave_US, cycle, StopCode, MinScore, path):
         df.to_csv(out_path, mode='a', header=False)
 
 def write_debug(df_sum, df_weights, df_GPA, cycle, fl, path):
-    """
-    Write debug files
+    """Write debug information into .csv under "converge/output" directory
 
-    Parameters:
-        df_sum(pandas.DataFrame): containing summary of non-converged variables.
-        df_weights(pandas.DataFrame): weighted scores for debug.
-        df_GPA(pandas.DataFrame): Weighted scores by class and final GPA for all years
-        cycle: current cycle number
-        fl: flag REG or US
+    The following are output files written to:
+
+    * IConvSummary_<cycleNumber>.csv
+    * IConv_Weighted_Deviations_<cycleNumber>.csv
+    * IConv_GPAscores_debug<cycleNumber>.csv
+
+    Parameters
+    ----------
+    df_sum : pandas.DataFrame
+        containing summary of non-converged variables.
+    
+    df_weights : pandas.DataFrame
+        weighted scores for debug.
+    
+    df_GPA : pandas.DataFrame
+        Weighted scores by class and final GPA for all years
+    
+    cycle : int
+        current cycle number
+    
+    fl : str
+        flag REG or US
+    
+    path : str
+        path to output directory
+        
+    Returns
+    -------
+    None
+    
     """
+
     df_sum = df_sum.set_index(['Year','CVTAB ID'])
     df_sum = df_sum.drop(columns = ['Weight_Start', 'Weight_Sum'])
 
@@ -174,19 +179,39 @@ def write_debug(df_sum, df_weights, df_GPA, cycle, fl, path):
             my_df.to_csv(out_path, mode='a', header=False)  
 
 
-def update_CVTAB(score, score_US, df, path, path_out, cycle):
-    """
-    Update CONVERGE common block variables for restart file
+def update_CVTAB(score, score_US, df, path, cycle, NEMSVardf):
+    """Update CONVERGE common block variables for restart file
 
-    Parameters:
-        score, score_US: GPA scores to fill CVSCORE and CVSCORE_US
-        path: restart file location
-        cycle: current cycle number
-        df(pandas.DataFrame): containing info for CVTAB variable.        
+    Parameters
+    ----------
+    score : numpy.ndarray
+        GPA scores to fill CVSCORE
+     
+    score_US : numpy.ndarray
+        GPA scores to fill CVSCORE_US
+
+    df : pandas.DataFrame
+        containing info for CVTAB variable. 
+    
+    path : str
+        restart file path location
+    
+    cycle : int
+        current cycle number
+        
+    NEMSVardf : pandas.DataFrame
+        dataframe of all variables in the restart file with their dimensions
+        
+    Returns
+    -------
+    None
+    
     """
+
     cv_vars = ['CVTAB', 'CVSCORE', 'CVSCORE_US', 'CVSCOREHIST']
+    
     # Load data
-    dfd = load_values(path, cv_vars, adj_flag='Adjusted')
+    dfd = intercv_npz_util.read_npz_to_dfd(path, cv_vars, NEMSVardf, adj_flag='Adjusted')
     
     if cycle == 1:
         dfd['CVSCOREHIST'].iloc[:,:]=0
@@ -209,36 +234,50 @@ def update_CVTAB(score, score_US, df, path, path_out, cycle):
     df.rename(columns={'Year':'MNUMYR', 'CVTAB ID': 'M106', 'Current':1, \
                             'Previous':2, 'Abs Change':3, 'Signed_Deviation':4 }, inplace=True)
     df[['MNUMYR','M106']] = df[['MNUMYR','M106']].astype('int64')
-    df = df.set_index(['MNUMYR', 'M106']).stack(future_stack=True)
+    df = df.set_index(['MNUMYR', 'M106']).stack()
     df.index.set_names('M4', level=2, inplace=True)
     df=df.unstack(level=0)
     df = df.astype('float32')
     dfd['CVTAB'].update(df)
     
-    write_values(path_out, cv_vars, dfd) 
+    #write out the restart file with updated CVTAB information
+    npz_out = "restart.npz"
+    intercv_npz_util.write_to_npz(path, npz_out, cv_vars, dfd, NEMSVardf)
 
-    return 
+    return
 
-def update_reason(path, PFgpa):
-    '''
-    Updates the reason for stopping or continuing
-    Parameters:
-        path(str): path for restart file 
-        PFgpa: Pass/Fail indicator.
-    '''
+def update_reason(path, PFgpa, NEMSVardf):
+    """Updates the reason (flag) for stopping or continuing
+
+    Parameters
+    ----------
+    path : str
+        path for restart file 
+    
+    PFgpa : int
+        Pass/Fail indicator (1 = Pass, 0 = Fail)
+
+    NEMSVardf : pandas.DataFrame
+        dataframe of all variables in the restart file with their dimensions
+        
+    Returns
+    -------
+    int
+        return code to indicate if cycle has passed the minimum GPA. 1 = Pass, 0 = Fail
+    
+    """
+
     ReasonYes_var = ['REASONYES']
-    reason_vars = ['REASONW', 'REASONM', 'REASONR', 'REASONK', 'REASONI', 'REASONT', 
-                   'REASONE', 'REASONC', 'REASONL', 'REASONG', 'REASONO', 'REASONN', 'REASONH']
     continew_vars = ['CONTINW', 'CONTINM', 'CONTINR', 'CONTINK', 'CONTINI', 'CONTINT', 
                      'CONTINE', 'CONTINC', 'CONTINL', 'CONTING', 'CONTINO', 'CONTINN', 'CONTINH']
-    continew = load_values(path, continew_vars, adj_flag='Adjusted')
-    reason = load_values(path, reason_vars, adj_flag='Adjusted')
-    ReasonYes = load_values(path, ReasonYes_var, adj_flag='Adjusted')
+
+    continew = intercv_npz_util.read_npz_to_dfd(path, continew_vars, NEMSVardf, adj_flag='Adjusted')
+    ReasonYes = intercv_npz_util.read_npz_to_dfd(path, ReasonYes_var, NEMSVardf, adj_flag='Adjusted')
+
     RYes = ReasonYes['REASONYES'].iloc[0,0]
     for var in continew_vars:
         if continew[var].any().any() == 0:
             RYes = 0
-            Reason_char = reason[var]
     
     if PFgpa == 1 and RYes == 1:
         StopCode = 1
@@ -248,26 +287,43 @@ def update_reason(path, PFgpa):
     return StopCode
     
 
-def main():
+def main(restartnpz_prev, restartnpz_cur, Min_score):
+    """Main entrypoint into inter-cycle convergence code
 
-    #StopCode = code to be picked up to stop the cycling; 1 indicates a Passing GPA
+    Parameters
+    ----------
+    restartnpz_prev : str
+        file path to input previous cycle restart file
 
-    #Command line argument min_score_c hardcoded for now
-    Min_score = 3.9
+    restartnpz_cur : str
+        file path to input current cycle restart file
 
-    #SET HARDCODED PARAMETERS
+    Min_score : float
+        GPA value for convergence passing score (e.g. 3.9)
+        
+    Returns
+    -------
+    int
+        return code to determine if convergence is met (0: convergence not achieved, 1: convergence is achieved)
+    
+    """
+
+
     #Flag: write out regional convergence info =1; no=0
     RegRepFlag = 1
-    #Set FirstYear = MSEDYR+2; PARAMETER(MSEDYR=32)   ! Number of Historical SEDS years
-    FirstYear = 34
-        
-    input_path = os.path.join(os.getcwd(), 'input')
-    output_path = os.path.join(os.getcwd(), 'output')
-    os.makedirs(output_path, exist_ok=True)
-    restarthdf_prev_path = os.path.join(input_path, 'RestartRepWrt_Cycle3_Year2050.hdf5')
-    restarthdf_path = os.path.join(input_path, 'RestartRepWrt_Cycle5_Year2050.hdf5')
+    #Set FirstYear = MSEDYR+2; PARAMETER(MSEDYR=34)   ! Number of Historical SEDS years
+    FirstYear = 36
+    
+    # Set working paths (e.g. input and output)
+    input_path = os.path.join(os.getcwd(), r'converge\\input')
+    output_path = os.path.join(os.getcwd(), r'converge\\output')
     convergence_path = os.path.join(input_path, 'icnv_')
 
+    # Create output directory
+    os.makedirs(output_path, exist_ok=True)
+
+    # Read in NEMSVardf.csv as dataframe
+    NEMSVardf = intercv_npz_util.read_NEMSvardf()
     
     # Read convergence and relaxation settings
     df_conv, df_rlx, df_cvtab, all_vars, vars_conv, vars_rlx, vars_cvtab = read_icnv_file(convergence_path)
@@ -276,30 +332,25 @@ def main():
     my_params = ['IRELAX','CURIRUN','CURIYR']
         
     all_vars = my_params + all_vars
-        
+    
+    
     # Load variables from hdf
     # For convergence testing use adjusted prices
-    dfd_prev = load_values(restarthdf_prev_path, all_vars, adj_flag='Adjusted')
-    dfd_cur = load_values(restarthdf_path, all_vars, adj_flag='Adjusted')
-    #dfd_prev, df_var_random = get_current_values(dfd_cur, all_vars)
+    dfd_prev = intercv_npz_util.read_npz_to_dfd(restartnpz_prev, all_vars, NEMSVardf, adj_flag='Adjusted')
+    dfd_cur = intercv_npz_util.read_npz_to_dfd(restartnpz_cur, all_vars, NEMSVardf, adj_flag='Adjusted')
+
     # For relaxation use unadjusted prices
-    dfd_prev_rlx = load_values(restarthdf_prev_path, vars_rlx, adj_flag='Unadjusted')
-    dfd_cur_rlx = load_values(restarthdf_path, vars_rlx, adj_flag='Unadjusted')
-        
-    # Get scalar values of IRELAX, CURIYR
+    dfd_prev_rlx = intercv_npz_util.read_npz_to_dfd(restartnpz_prev, all_vars, NEMSVardf, adj_flag='Unadjusted')
+    dfd_cur_rlx = intercv_npz_util.read_npz_to_dfd(restartnpz_cur, all_vars, NEMSVardf, adj_flag='Unadjusted')
+
+    # Get scalar values of IRELAX, CURIRUN, CURIYR
     I_Relax = dfd_cur['IRELAX'].iloc[0,0]
     I_Cycle = dfd_cur['CURIRUN'].iloc[0,0]
     LastYear = dfd_cur['CURIYR'].iloc[0,0]
-    TestYears = range( FirstYear-1,LastYear)
+    TestYears = range(FirstYear-1,LastYear)
 
-    name = 'RestartOUT_Cycle' + str(I_Cycle) +'.hdf5'    
-    restartout_path = os.path.join(output_path, name)
-    # copy current restart file to output to modify
-    if not os.path.isfile(restartout_path):
-        shutil.copy(restarthdf_path, restartout_path)
     
     # Check convergencies
-
     df_conv_res, df_regcv  = check_conv(dfd_prev, dfd_cur, vars_conv, df_conv, TestYears, RegRepFlag)
     # print regional debug report
     if RegRepFlag == 1:
@@ -330,35 +381,42 @@ def main():
         PFgpa = 1
     else:
         PFgpa = 0
-    StopCode = update_reason(restarthdf_path, PFgpa) 
+    StopCode = update_reason(restartnpz_cur, PFgpa, NEMSVardf)
+
 
     #Update and write out variables for CONVERGE common block
-    update_CVTAB(cvscore, cvscore_US, df_sum, restarthdf_path, restartout_path, I_Cycle) 
+    update_CVTAB(cvscore, cvscore_US, df_sum, restartnpz_cur, I_Cycle, NEMSVardf)
 
     #write GPA scores     
-    write_GPA(Average_Score, Average_Score_US, I_Cycle, StopCode, Min_score, output_path)    
+    write_GPA(Average_Score, Average_Score_US, I_Cycle, StopCode, Min_score, output_path)
     
     # Perform Relaxation
-    if I_Relax > 0:
+    if I_Relax > 1:
         dfd_updated = perform_relax(dfd_prev_rlx, dfd_cur_rlx, vars_rlx, df_rlx, TestYears)
 
-    name_rlx = 'RestartRLX_Cycle' + str(I_Cycle) +'.hdf5'
-    pathrlx = os.path.join(output_path, name_rlx)
-    # copy OUT restart file to output to create RLX restart 
-    if not os.path.isfile(pathrlx):
-        shutil.copy(restartout_path, pathrlx)
+        npz_start = "restart.npz"   #starting npz to read in
+        npz_out = "restart.rlx"     #output name of npz file with relaxed values
+        # Create RLX restart with updated relaxed values
+        intercv_npz_util.write_to_npz(npz_start, npz_out, vars_rlx, dfd_updated, NEMSVardf)
 
-    # Create RLX restart with updated relaxed values
-    write_values(pathrlx, vars_rlx, dfd_updated)
-                
+        #rename/replace the writtenout npz from restart.rlx.npz to restart.rlx
+        if os.path.exists(npz_out):
+                os.replace(f"{npz_out}.npz", npz_out)
+        else:
+            os.rename(f"{npz_out}.npz", npz_out)
+
     return StopCode
 
 if __name__ == "__main__":
-    print('Start testing......')
+    log_it(0, 'Start testing......')
     start = time.process_time()
 
-    StopCode = main()
+    prev_restart = "converge/input/restart.1.npz"
+    curr_restart = "converge/input/restart.2.npz"
+    min_score = 3.9
+    os.chdir("..")
+    StopCode = main(prev_restart, curr_restart, min_score)
 
     elapsed = time.process_time() - start
-    print(f'Elapsed time: {elapsed} seconds.\n')
-    print('Completed!')
+    log_it(0, f'Elapsed time: {elapsed} seconds.\n')
+    log_it(0, 'Completed!')

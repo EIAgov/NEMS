@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/efpint,v 1.10 2016/10/07 20:14:33 LC2 Exp $
 ! INTERNAL EFP VARIABLES.
 ! Requires EUSPRC first
@@ -245,15 +246,15 @@
       REAL PELCKCMN(MNUMNR,MNUMYR) !   cooking CM
       REAL PELLTCMN(MNUMNR,MNUMYR) !   lighting CM
       REAL PELRFCMN(MNUMNR,MNUMYR) !   refrigeration CM
-      REAL PELOPCMN(MNUMNR,MNUMYR) !   office equipment PCs CM
-      REAL PELONCMN(MNUMNR,MNUMYR) !   office equipment, nonPCs CM8
+      REAL PELOPCMN(MNUMNR,MNUMYR) !   data center servers CM
+      REAL PELONCMN(MNUMNR,MNUMYR) !   computers and office equipment CM
       REAL PELOTCMN(MNUMNR,MNUMYR) !   other commercial
-      REAL PELP2CMN(MNUMNR,MNUMYR) !   vehicle CM – public L2 
-      REAL PELPFCMN(MNUMNR,MNUMYR) !   vehicle CM – public DCFC
-      REAL PELSBCMN(MNUMNR,MNUMYR) !   vehicle CM – school bus
-      REAL PELTBCMN(MNUMNR,MNUMYR) !   vehicle CM – transit bus
-      REAL PELIBCMN(MNUMNR,MNUMYR) !   vehicle CM – intercity bus + CLT + freight (fleet)
-      REAL PELFNCMN(MNUMNR,MNUMYR) !   vehicle CM – freight truck non-fleet
+      REAL PELP2CMN(MNUMNR,MNUMYR) !   vehicle CM â€“ public L2 
+      REAL PELPFCMN(MNUMNR,MNUMYR) !   vehicle CM â€“ public DCFC
+      REAL PELSBCMN(MNUMNR,MNUMYR) !   vehicle CM â€“ school bus
+      REAL PELTBCMN(MNUMNR,MNUMYR) !   vehicle CM â€“ transit bus
+      REAL PELIBCMN(MNUMNR,MNUMYR) !   vehicle CM â€“ intercity bus + CLT + freight (fleet)
+      REAL PELFNCMN(MNUMNR,MNUMYR) !   vehicle CM â€“ freight truck non-fleet
       REAL PELINPN(MNUMNR,MNUMYR) !   industrial primary
       REAL PELINSN(MNUMNR,MNUMYR) !   industrial shift
       REAL PELINMN(MNUMNR,MNUMYR) !   industrial miscellaneous

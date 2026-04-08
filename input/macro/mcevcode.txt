@@ -12,23 +12,23 @@ INSERT_1
 
 
 'Year for growth rates
-%growth_yr = "2024"
+%growth_yr = "2025"
 
 'Mean of quarters in year for growth
-%growth_meanyr = "2024:1 2024:4"
+%growth_meanyr = "2025:1 2025:4"
 
 'Read present working directory
 %wfpathpwd = @wfpath
 
 'US Macro model page
 if (macmode = 2) then
-  %scenpage = "t301024eia"
+  %scenpage = "t300825"
 endif
 if (macmode = 5) then
-  %scenpage = "opt301024eia"
+  %scenpage = "opt300825"
 endif
 if (macmode = 4) then
-  %scenpage = "pes301024eia"
+  %scenpage = "pes300825"
 endif
 
 
@@ -36,19 +36,34 @@ endif
 '* Create series objects                             *
 '*****************************************************
 'Average price, light-duty vehicles, thousands of dollars
-'Source: AEO2017 Reference Case
-'        K:/output/aeo2023/ref2023/d122522a/p1/altdata.csv; tranprice_avgvehicle_a; column BK
+'Source: AEO2026 Reference Case
+'        T:/output/aeo2026/ref2026/d011226h/p1/altdata.csv; tranprice_avgvehicle_a; column BK
 '        tranprice_avgvehicle is in 2012 dollars. Change from the reference is computed
 '        and applied to the US model baseline.
 genr tranprice_avgvehicle_b = 0
-tranprice_avgvehicle_b.fill(o=1997)     26.90739, 27.71206, 27.55847, 27.87071, _
-27.4928,  27.96318, 28.52744, 29.0749,  27.85184, 27.34533, 27.21965, 27.12844, _
-28.78568, 28.2395,  30.48345, 29.97512, 30.26544, 28.96004, 30.87971, 30.69246, _
-29.61852, 30.55088, 29.62475, 30.59712, 33.14174, 33.48651, 33.80608, 34.04296, _
-34.61542, 34.87492, 35.03839, 35.398,   35.47209, 35.52199, 35.5931,  35.65496, _
-35.73438, 35.76783, 35.81466, 35.84504, 35.88993, 35.93583, 35.99041, 36.02792, _
-36.0712,  36.11681, 36.16439, 36.19409, 36.18907, 36.22665, 36.25775, 36.31692, _
-36.35202, 36.3665
+tranprice_avgvehicle_b.fill(o=1997)     29.12082, 28.88407, 29.60248, 27.88113, _
+25.83336, 26.47046, 26.834,   27.45237, 25.98332, 27.15306, 26.95537, 26.87369, _
+28.19299, 27.56183, 30.10133, 29.01283, 29.35907, 28.56921, 30.51448, 30.28136, _
+28.9422,  30.00629, 32.78172, 33.12288, 33.67419, 32.78505, 33.23737, 33.13381, _
+33.02512, 33.40886, 33.55359, 34.07022, 34.39557, 34.63861, 34.93271, 35.14484, _
+35.08787, 34.97913, 34.85999, 34.72654, 34.66741, 34.642,   34.65581, 34.58375, _
+34.55005, 34.51045, 34.50756, 34.49794, 34.46617, 34.46961, 34.40992, 34.37425, _
+34.33834, 34.32088
+
+
+'Chained price index--gross domestic product, 2012 = 1.0
+'Source: AEO2026 Reference Case
+'        T:/output/aeo2026/ref2026/d011226h/p1/altdata.csv; JPGDP_A; column BT
+'        JPGDP is 2012 = 1.
+genr JPGDP_b = 0
+JPGDP_b.fill(o=1997)                0.74416, 0.75236, 0.7629, 0.78034,  _
+0.79833, 0.81029, 0.82652, 0.8486,  0.87509, 0.90232, 0.92676, 0.94421, _
+0.95042, 0.96182, 0.98165, 1,       1.01728, 1.03499, 1.04401, 1.05401, _
+1.07324, 1.09781, 1.11597, 1.13098, 1.18241, 1.26687, 1.31227, 1.34402, _
+1.38364, 1.42174, 1.44903, 1.47951, 1.51009, 1.54153, 1.57472, 1.60804, _
+1.64257, 1.67778, 1.71351, 1.74915, 1.78421, 1.82006, 1.85595, 1.89318, _
+1.931,   1.96911, 2.00778, 2.04656, 2.08523, 2.12415, 2.16316, 2.20266, _
+2.24206, 2.28156
 
 
 'reference and side cases baseline investment except low and high macro
@@ -217,7 +232,8 @@ altmod.append @identity wpi0574_a      = ((comprice_residualfuel_a *(comcon_resi
                                        +  (tranprice_residualfuel_a*(trancon_residualfuel_a/seccon_respetrofuels_a))) _
                                        * jpgdp_a
 'average price, light-duty vehicles
-altmod.append @identity plvavg_a       = tranprice_avgvehicle_a/tranprice_avgvehicle_b
+altmod.append @identity plvavg_a       = (tranprice_avgvehicle_a*jpgdp_a)/(tranprice_avgvehicle_b*jpgdp_b)
+
 'steam coal share in electrical generation
 altmod.append @identity endusepccoal_a = (elgencon_steamcoal_a/(elgencon_elecpowertot_a-elgencon_elecimports_a))
 'natural gas share in electrical generation
@@ -502,7 +518,7 @@ ratiomod.solve
 
 
 if (mac111d = 1) then
-  'This removes values in 2025.
+  'This removes values in 2026.
   '  ElSec_InstCap, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Installed Capacity in Billion 2012 Dollars
   elsec_instcap_r_0  = elsec_instcap_r_0*elsec_dmy_r_0
   '  ElSec_Tran, Total Resource Costs, Electric Sector, Annual Expense and Capital Commitment, Transmission in Billion 2012 Dollars
@@ -545,8 +561,7 @@ endif
 
 'Create group ratio containing change from NEMS base for energy price and
 ' quantity assumptions.
-group ratio *_r_0 mac* prod_naturalgas_a plginpf_a_0 ppfin_a_0 petin_a_0 ethanol_ip_a
-
+group ratio *_r_0 mac* prod_naturalgas_a plginpf_a_0 ppfin_a_0 petin_a_0 ethanol_ip_a 
 group jonshr js_*
 
 'Set frequency conversion from low to high for jon shares to constant
@@ -570,7 +585,6 @@ call TRAN
 'INSERT_4 sets series to hold energy price quantity assumptions equal to US base
 ' over historical and forecast period.
 INSERT_4
-
 
 'domestic production of energy from petroleum
  genr engdompet = engdompet_0
@@ -664,6 +678,8 @@ INSERT_4
  genr wpi057         = wpi057_0
 'Producer price index - residual petroleum fuels
  genr wpi0574        = wpi0574_0
+'Average price, light-duty vehicles
+ genr plvavg        = plvavg_tdm_d011226h
 'Steam coal share in electrical generation
  genr endusepccoal_1 = endusepccoal
 'Natural gas share in electrical generation
@@ -691,13 +707,6 @@ INSERT_4
 
 'Regional producer price indexes
 call REGWPIPT1
-
-
-'CAFE
-'cafe=1 Exogenize PLVAVG, Average price of a new light vehicle (thousands of dollars)
-if (cafemode <> 0) then
-  genr plvavg = plvavg_0
-endif
 
 
 'Federal excise tax accruals other than for a VAT.
@@ -852,6 +861,8 @@ INSERT_5A
  genr wpi057         = @mean(wpi057,%growth_meanyr)*{%wfpathpwd}eviewsdb::wpi057_r_0
 'Producer price index - residual petroleum fuels
  genr wpi0574        = @mean(wpi0574,%growth_meanyr)*{%wfpathpwd}eviewsdb::wpi0574_r_0
+'Average price, light-duty vehicles
+ genr plvavg         = plvavg * {%wfpathpwd}eviewsdb::plvavg_r_0
 'Steam coal share in electrical generation
  genr endusepccoal_1 = @mean(endusepccoal_1,%growth_meanyr)*{%wfpathpwd}eviewsdb::endusepccoal_r_0
 'Natural gas share in electrical generation
@@ -877,11 +888,11 @@ INSERT_5A
 
 ' EIA population forecast
 copy np        np_sap
-copy np_eia    np
+'copy np_eia    np
 copy np16a     np16a_sap
-copy np16a_eia np16a
+'copy np16a_eia np16a
 copy np65a     np65a_sap
-copy np65a_eia np65a
+'copy np65a_eia np65a
 
 
 'Regional producer price indexes
@@ -920,18 +931,18 @@ call REGWPIPT2
  if (ttechmode <> 2 and macmode = 2) then
 
 ' domestic energy demand index used for AEO technology cases
-' source: T:\output\aeo2025\ref2025\d032025a\p1\mcevwork.wf1; qeng_1 from 2025q1 to 2050q4
-  qeng.fill(s=s_fcst) 1.070709, 1.073697, 1.076048, 1.077759, 1.07762,  1.07854,  1.079306, 1.07992,  _
-1.080198,  1.080578,  1.080877, 1.081096, 1.081085, 1.081202, 1.081298, 1.081373, 1.081687, 1.081615, _
-1.081418,  1.081096,  1.0804,   1.079926, 1.079427, 1.078901, 1.078297, 1.07774,  1.077178, 1.076611, _
-1.076199,  1.075558,  1.074848, 1.074069, 1.072691, 1.071985, 1.071422, 1.071001, 1.070925, 1.070708, _
-1.070552,  1.070458,  1.070456, 1.070472, 1.070536, 1.070649, 1.070986, 1.071126, 1.071245, 1.071342, _
-1.071122,  1.071295,  1.071566, 1.071934, 1.072462, 1.072999, 1.073608, 1.074288, 1.075148, 1.075929, _
-1.076737,  1.077574,  1.078737, 1.079511, 1.080196, 1.080789, 1.081047, 1.081557, 1.082075, 1.0826,   _
-1.083047,  1.083621,  1.084237, 1.084893, 1.085581, 1.086325, 1.087114, 1.08795,  1.088833, 1.089759, _
-1.090731,  1.091747,  1.093145, 1.094116, 1.094997, 1.095787, 1.095894, 1.096742, 1.097738, 1.098881, _
-1.100461,  1.101783,  1.103137, 1.104523, 1.105685, 1.107237, 1.108924, 1.110746, 1.112933, 1.114932, _
-1.116972,  1.119054,  1.121179, 1.123345, 1.125554, 1.127804 
+' source: T:\output\aeo2026\ref2026\d123025e\p1\mcevwork.wf1; qeng_1 from 2026q1 to 2050q4
+  qeng.fill(s=s_fcst) 1.079161, 1.080593, 1.081361, 1.081467, 1.07872,  1.078375, 1.078243, 1.078323, _
+1.079884,  1.079883,  1.079587, 1.078996, 1.077329, 1.076462, 1.075614, 1.074784, 1.074424, 1.073449, _
+1.072312,  1.071013,  1.069322, 1.067789, 1.066185, 1.06451,  1.062546, 1.060817, 1.059104, 1.057406, _
+1.055115,  1.053695,  1.052534, 1.051634, 1.051429, 1.050875, 1.050408, 1.050028, 1.049568, 1.049427, _
+1.049439,  1.049605,  1.050136, 1.050523, 1.050978, 1.051501, 1.052461, 1.052973, 1.053405, 1.053759, _
+1.053561,  1.053945,  1.054439, 1.055043, 1.055822, 1.056621, 1.057503, 1.058469, 1.059775, 1.060807, _
+1.06182,   1.062815,  1.063899, 1.064813, 1.065665, 1.066454, 1.066976, 1.067723, 1.06849,  1.069277, _
+1.070068,  1.070901,  1.07176,  1.072646, 1.073332, 1.074359, 1.075502, 1.076761, 1.078651, 1.079936, _
+1.08113,   1.082235,  1.082714, 1.083852, 1.085115, 1.086502, 1.088424, 1.089895, 1.091327, 1.092718, _
+1.093941,  1.095305,  1.09668,  1.098066, 1.099509, 1.100901, 1.102287, 1.103667, 1.105041, 1.106409, _
+1.10777,   1.109126
 
 
  endif
@@ -993,8 +1004,8 @@ INSERT_5A
  engdomoo dallfuelsoo dendupet dendung denduelc denducoal _
  jexchmtp jexchoitp _
  wpi051 wpi053 wpi054 wpi055 wpi0561 wpi057 _
- rr325193 _
- jpcsvue jpcsvug 
+ rr325193 plvavg _
+ jpcsvue jpcsvug ipsg316
  
  m_us2023a.override engresidualpet engresidualng engexpbio engimpbio engresidualbio _
  engexpoo engimpoo engresidualoo engexpng 
@@ -1020,29 +1031,32 @@ endif
 'Low Resource scenario
 if (ogtechmode = 30) then
 
+'copy enrm211a3_a_lowogs enrm211a3_a
+'copy ipsg213_a_lowogs ipsg213_a
+
 copy csvfinfree_a_lowogs   csvfinfree_a
-copy jpcsvfinfree_a_lowogs jpcsvfinfree_a
-copy xginnpetr_a_lowogs    xginnpetr_a
+'copy jpcsvfinfree_a_lowogs jpcsvfinfree_a
+'copy xginnpetr_a_lowogs    xginnpetr_a
 
-copy jqpcmhmd_a_logs jqpcmhmd_a
-copy rmtcm10y_a_logs rmtcm10y_a
-copy rmcorppuaa_a_logs rmcorppuaa_a
-copy ifmvpunar_a_logs ifmvpunar_a
+'copy jqpcmhmd_a_logs jqpcmhmd_a
+'copy rmtcm10y_a_logs rmtcm10y_a
+'copy rmcorppuaa_a_logs rmcorppuaa_a
+'copy ifmvpunar_a_logs ifmvpunar_a
 
-copy rr312_a_logs     rr312_a
-copy rr313t316_a_logs rr313t316_a
-copy rr3254_a_logs    rr3254_a
-copy rr3255_a_logs    rr3255_a
-copy rr3256_a_logs    rr3256_a
-copy rr325o_a_logs    rr325o_a
-copy rr3311a2_a_logs  rr3311a2_a
-copy rr332_a_logs     rr332_a
-copy rr333_a_logs     rr333_a
-copy rr334_a_logs     rr334_a
-copy rr335_a_logs     rr335_a
-copy rr336_a_logs     rr336_a
-copy rr337_a_logs     rr337_a
-copy rr339_a_logs     rr339_a
+'copy rr312_a_logs     rr312_a
+'copy rr313t316_a_logs rr313t316_a
+'copy rr3254_a_logs    rr3254_a
+'copy rr3255_a_logs    rr3255_a
+'copy rr3256_a_logs    rr3256_a
+'copy rr325o_a_logs    rr325o_a
+'copy rr3311a2_a_logs  rr3311a2_a
+'copy rr332_a_logs     rr332_a
+'copy rr333_a_logs     rr333_a
+'copy rr334_a_logs     rr334_a
+'copy rr335_a_logs     rr335_a
+'copy rr336_a_logs     rr336_a
+'copy rr337_a_logs     rr337_a
+'copy rr339_a_logs     rr339_a
 
 
 endif
@@ -1052,36 +1066,34 @@ endif
 if (ogtechmode = 23) then
 
 copy mgpetr_a_highogs    mgpetr_a
-copy rmtcm10y_a_hogs rmtcm10y_a
-copy rmcorppuaa_a_hogs rmcorppuaa_a
 
-copy rr312_a_hogs     rr312_a
-copy rr313t316_a_hogs rr313t316_a
-copy rr321_a_hogs     rr321_a
-copy rr3254_a_hogs    rr3254_a
-copy rr3255_a_hogs    rr3255_a
-copy rr3256_a_hogs    rr3256_a
-copy rr325o_a_hogs    rr325o_a
-copy rr3311a2_a_hogs  rr3311a2_a
-copy rr332_a_hogs     rr332_a
-copy rr333_a_hogs     rr333_a
-copy rr334_a_hogs     rr334_a
-copy rr335_a_hogs     rr335_a
-copy rr336_a_hogs     rr336_a
-copy rr337_a_hogs     rr337_a
-copy rr339_a_hogs     rr339_a
+'copy econ2362_a_highogs econ2362_a
+'copy enrm211a3_a_highogs enrm211a3_a
+'copy ipsg213_a_highogs ipsg213_a
+'copy ipsn33313_a_highogs ipsn33313_a
+'copy jqpcmhnf_a_highogs jqpcmhnf_a
+
+'copy rmtcm10y_a_hogs rmtcm10y_a
+'copy rmcorppuaa_a_hogs rmcorppuaa_a
+
+'copy rr312_a_hogs     rr312_a
+'copy rr313t316_a_hogs rr313t316_a
+'copy rr321_a_hogs     rr321_a
+'copy rr3254_a_hogs    rr3254_a
+'copy rr3255_a_hogs    rr3255_a
+'copy rr3256_a_hogs    rr3256_a
+'copy rr325o_a_hogs    rr325o_a
+'copy rr3311a2_a_hogs  rr3311a2_a
+'copy rr332_a_hogs     rr332_a
+'copy rr333_a_hogs     rr333_a
+'copy rr334_a_hogs     rr334_a
+'copy rr335_a_hogs     rr335_a
+'copy rr336_a_hogs     rr336_a
+'copy rr337_a_hogs     rr337_a
+'copy rr339_a_hogs     rr339_a
 
 
 endif
-
-
-'CAFE
-'cafe=1 Exogenize PLVAVG, Average price of a new light vehicle (thousands of dollars)
- if (cafemode <> 0) then
-   genr rmfflev_1     = 0.9
-   m_us2023a.exclude(m) PLVAVG
-   m_us2023a.override(m) RMFFLEV
- endif
 
 
 'Federal excise tax accruals other than for a VAT.
@@ -1405,7 +1417,7 @@ INSERT_14
  wfselect drvdata
 
 
-'INSERT_15 sets sample range for change from base data from 2025 to end of forecast period.
+'INSERT_15 sets sample range for change from base data from 2026 to end of forecast period.
 INSERT_15
 
 

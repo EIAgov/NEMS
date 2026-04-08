@@ -30,9 +30,9 @@ debug_xlsx_const_list_file='./input/mnfactorx_xlsx_const_list.txt'
 # --- End of the Debug file switch ----
 ''' *************************** Module Level Design Concepts ************************************************************
 This module mnfactorx_parser.py execution involves 3 input files:
-    -the Conversion Factors historical data Excel file: input/mnfactorx.xlsx
-    -api_file: input/mnfactorx_calc_api_list.txt
-    -xlsx_eq_file: input/mnfactorx_calc_xlsx_eq_list.txt
+-the Conversion Factors historical data Excel file: input/mnfactorx.xlsx
+-api_file: input/mnfactorx_calc_api_list.txt
+-xlsx_eq_file: input/mnfactorx_calc_xlsx_eq_list.txt
 
 The api_file lists the variables which are handled and computed in mnfactorx_calc.py module (i.e. origin utils_docvfacts.f90 docvfacts() subroutine).
 Each api_file listed variable shall have a cooresponding calculation handling method in mnfactorx_calc.py

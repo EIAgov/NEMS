@@ -191,7 +191,37 @@ put LFDBG 'Computer Date/Time: ', system.date:8 ' - ' system.time /;
 
 * Load prior build decisions
 Parameters
-   PriorBuilds(RefReg,RefType,Process,t)  Parameter to store build decisions in build period
+   PriorBuilds(RefReg,RefType,Process,t)
+   FixedCap(RefReg,RefType,Process)
+   testutilization1
+   testutilization2
+   testutilization3
+   testutilization4
+   testutilization5
+   testutilization6
+   testutilization7
+   testutilization8
+   realutilization1
+   realutilization2
+   realutilization3
+   realutilization4
+   realutilization5
+   realutilization6
+   realutilization7
+   realutilization8
+   utilizationthreshold
+   testold1
+   testold2
+   testold3
+   testold4
+   testold5
+   testold6
+   testold7
+   testold8
+   dummytarget
+   dummystart
+   dumfact(RefReg,t)
+   utilcapflag(RefReg)
 ;
 
 $if not set LFMM_BUILDS $set LFMM_BUILDS 'LFMM_Builds.gdx'
@@ -222,6 +252,17 @@ Scalar
 
 *---------------------------------------------
 
+
+*Gross: set baseline 2008 capacity 
+FixedCap(RefReg,RefType,Process) = ExistingCap(RefReg,RefType,Process,'2008') ;
+
+*Gross: set utilization flags
+utilcapflag(RefReg) = 0.0 ;
+
+*Gross: set utilization decline starting point and target
+dummystart = 0.99 ;
+dummytarget = 0.96 ;
+
 * Solve the model for all years in the RunYears set
 loop(RunYears,
 
@@ -231,16 +272,165 @@ loop(RunYears,
 
   CurrentDeflator = sum((t,ReportYr)$ReportYr(t), GDP(t)) / sum((t,CurrentYr)$CurrentYr(t), GDP(t)) ;
 
-* Calculate total existing capacity for this model year (=existing + planned + prior builds)
+*Gross: threshold utilization rate
+  utilizationthreshold = 0.85 ;
+
+*Gross: set default capacity 
   AvailCap(RefReg,RefType,Process) =
     sum(t$(Ord(t)<=CurYrIdx), ExistingCap(RefReg,RefType,Process,t)) +
     sum(t$(Ord(t)< CurYrIdx), PriorBuilds(RefReg,RefType,Process,t)) ;
 
+*Gross: Set up baseline utilization rates
+  if (CurYrIdx+1989 = 2029,
+*Gross: initialize dumfact in 2029 and load into Grossdumfact.gdx
+    dumfact(RefReg,t) = 1.0 ;
+*Gross: store dumfact for use later
+    Execute_Unload "Grossdumfact.gdx", dumfact ;
+*Gross: get operating capacity
+    Execute_Load "GrossCapacity.gdx", OPERATECAP.l ; 
+    testold1 = OPERATECAP.l('1_REFREG','COKING','ACU','Per1') / AvailCap('1_REFREG','COKING','ACU') ;
+    testold2 = OPERATECAP.l('2_REFREG','COKING','ACU','Per1') / AvailCap('2_REFREG','COKING','ACU') ;
+    testold3 = OPERATECAP.l('3_REFREG','COKING','ACU','Per1') / AvailCap('3_REFREG','COKING','ACU') ;
+    testold4 = OPERATECAP.l('4_REFREG','COKING','ACU','Per1') / AvailCap('4_REFREG','COKING','ACU') ;
+    testold5 = OPERATECAP.l('5_REFREG','COKING','ACU','Per1') / AvailCap('5_REFREG','COKING','ACU') ;
+    testold6 = OPERATECAP.l('6_REFREG','COKING','ACU','Per1') / AvailCap('6_REFREG','COKING','ACU') ;
+    testold7 = OPERATECAP.l('7_REFREG','COKING','ACU','Per1') / AvailCap('7_REFREG','COKING','ACU') ;
+    testold8 = OPERATECAP.l('8_REFREG','COKING','ACU','Per1') / AvailCap('8_REFREG','COKING','ACU') ;    
+  );
+
+*Gross: get utilization rates in projection years where we allow retirements
+  if (CurYrIdx+1989 >= 2030,
+*Gross: reset AvailCap for all regions and processes as a default
+***    AvailCap(RefReg,RefType,Process) =
+***      (sum(t$(Ord(t)<=CurYrIdx), ExistingCap(RefReg,RefType,Process,t)) +
+***      sum(t$(Ord(t)< CurYrIdx), PriorBuilds(RefReg,RefType,Process,t))) ;
+
+*Gross: load current dumfact values
+    Execute_Load "Grossdumfact.gdx", dumfact ;
+*Gross: now make sure AvailCap is what it's supposed to be based on the improvements in utilization
+    AvailCap('1_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('1_RefReg',t)*ExistingCap('1_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('1_RefReg','COKING',Process,t))) ;
+    AvailCap('2_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('2_RefReg',t)*ExistingCap('2_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('2_RefReg','COKING',Process,t))) ;
+    AvailCap('3_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('3_RefReg',t)*ExistingCap('3_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('3_RefReg','COKING',Process,t))) ;
+    AvailCap('4_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('4_RefReg',t)*ExistingCap('4_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('4_RefReg','COKING',Process,t))) ;
+    AvailCap('5_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('5_RefReg',t)*ExistingCap('5_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('5_RefReg','COKING',Process,t))) ;
+    AvailCap('6_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('6_RefReg',t)*ExistingCap('6_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('6_RefReg','COKING',Process,t))) ;
+    AvailCap('7_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('7_RefReg',t)*ExistingCap('7_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('7_RefReg','COKING',Process,t))) ;
+    AvailCap('8_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('8_RefReg',t)*ExistingCap('8_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('8_RefReg','COKING',Process,t))) ;
+
+    Execute_Load "GrossCapacity.gdx", OPERATECAP.l ; 
+    testutilization1 = OPERATECAP.l('1_REFREG','COKING','ACU','Per1') / AvailCap('1_REFREG','COKING','ACU') ;
+    testutilization2 = OPERATECAP.l('2_REFREG','COKING','ACU','Per1') / AvailCap('2_REFREG','COKING','ACU') ;
+    testutilization3 = OPERATECAP.l('3_REFREG','COKING','ACU','Per1') / AvailCap('3_REFREG','COKING','ACU') ;
+    testutilization4 = OPERATECAP.l('4_REFREG','COKING','ACU','Per1') / AvailCap('4_REFREG','COKING','ACU') ;
+    testutilization5 = OPERATECAP.l('5_REFREG','COKING','ACU','Per1') / AvailCap('5_REFREG','COKING','ACU') ;
+    testutilization6 = OPERATECAP.l('6_REFREG','COKING','ACU','Per1') / AvailCap('6_REFREG','COKING','ACU') ;
+    testutilization7 = OPERATECAP.l('7_REFREG','COKING','ACU','Per1') / AvailCap('7_REFREG','COKING','ACU') ;
+    testutilization8 = OPERATECAP.l('8_REFREG','COKING','ACU','Per1') / AvailCap('8_REFREG','COKING','ACU') ;
+
+    if (testutilization1 < utilizationthreshold,
+      dumfact('1_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization2 < utilizationthreshold,
+      dumfact('2_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization3 < utilizationthreshold,
+      dumfact('3_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization4 < utilizationthreshold,
+      dumfact('4_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization5 < utilizationthreshold,
+      dumfact('5_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization6 < utilizationthreshold,
+      dumfact('6_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization7 < utilizationthreshold,
+      dumfact('7_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+    if (testutilization8 < utilizationthreshold,
+      dumfact('8_RefReg','2008') = dummystart + (CurYrIdx+1989 - 2030) * ((dummytarget - dummystart) / (2050 - 2030)) ;
+    );
+
+*Gross: spit back out updated (if any) dumfacts
+    Execute_Unload "Grossdumfact.gdx", dumfact ;
+;
+
+*Gross: recompute AvailCap with updated dumfacts
+    AvailCap('1_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('1_RefReg',t)*ExistingCap('1_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('1_RefReg','COKING',Process,t))) ;
+    AvailCap('2_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('2_RefReg',t)*ExistingCap('2_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('2_RefReg','COKING',Process,t))) ;
+    AvailCap('3_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('3_RefReg',t)*ExistingCap('3_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('3_RefReg','COKING',Process,t))) ;
+    AvailCap('4_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('4_RefReg',t)*ExistingCap('4_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('4_RefReg','COKING',Process,t))) ;
+    AvailCap('5_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('5_RefReg',t)*ExistingCap('5_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('5_RefReg','COKING',Process,t))) ;
+    AvailCap('6_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('6_RefReg',t)*ExistingCap('6_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('6_RefReg','COKING',Process,t))) ;
+    AvailCap('7_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('7_RefReg',t)*ExistingCap('7_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('7_RefReg','COKING',Process,t))) ;
+    AvailCap('8_RefReg','COKING',Process) =
+      (sum(t$(Ord(t)<=CurYrIdx), dumfact('8_RefReg',t)*ExistingCap('8_RefReg','COKING',Process,t)) +
+      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('8_RefReg','COKING',Process,t))) ;
+*    AvailCap('9_RefReg',RefType,Process) =
+*      (sum(t$(Ord(t)<=CurYrIdx), dumfact('9_RefReg',t)*ExistingCap('9_RefReg',RefType,Process,t)) +
+*      sum(t$(Ord(t)< CurYrIdx), PriorBuilds('9_RefReg',RefType,Process,t))) ;
+
+* write out resulting utiolizations for diagnostic purposes
+    realutilization1 = OPERATECAP.l('1_REFREG','COKING','ACU','Per1') / AvailCap('1_REFREG','COKING','ACU') ;
+    realutilization2 = OPERATECAP.l('2_REFREG','COKING','ACU','Per1') / AvailCap('2_REFREG','COKING','ACU') ;
+    realutilization3 = OPERATECAP.l('3_REFREG','COKING','ACU','Per1') / AvailCap('3_REFREG','COKING','ACU') ;
+    realutilization4 = OPERATECAP.l('4_REFREG','COKING','ACU','Per1') / AvailCap('4_REFREG','COKING','ACU') ;
+    realutilization5 = OPERATECAP.l('5_REFREG','COKING','ACU','Per1') / AvailCap('5_REFREG','COKING','ACU') ;
+    realutilization6 = OPERATECAP.l('6_REFREG','COKING','ACU','Per1') / AvailCap('6_REFREG','COKING','ACU') ;
+    realutilization7 = OPERATECAP.l('7_REFREG','COKING','ACU','Per1') / AvailCap('7_REFREG','COKING','ACU') ;
+    realutilization8 = OPERATECAP.l('8_REFREG','COKING','ACU','Per1') / AvailCap('8_REFREG','COKING','ACU') ;
+
+  );
+
+*  if (CurYrIdx+1989 >= 2031,
+*    AvailCap(RefReg,'COKING',Process) =
+*      sum(t$(Ord(t)<=CurYrIdx), 0.97*ExistingCap(RefReg,'COKING',Process,t)) +
+*      sum(t$(Ord(t)< CurYrIdx), PriorBuilds(RefReg,'COKING',Process,t)) ;
+*  );
+
 * 9-29-14 em4, to resolve infeas in Per1 for MaxLTE row
 * (also changed lfmodel.gms to not build row for Per1)
-  AvailCap(RefReg,RefType,'LTE') $(not sameas(RefType,'ETH_REF')) =
-               max(AvailCap(RefReg,RefType,'LTE'),
-               ExistingCap(RefReg,RefType,'LTE','2008')) + 0.001 ;
+**  AvailCap(RefReg,RefType,'LTE') $(not sameas(RefType,'ETH_REF')) =
+**               max(AvailCap(RefReg,RefType,'LTE'),
+**               ExistingCap(RefReg,RefType,'LTE','2008')) + 0.001 ;
 
 * moved from CapRec adj to TotalProjInv 7-19-2016
 *---------------------------------------------
@@ -506,7 +696,9 @@ OpVarCost('GTL',ProcessMode)$(ProcProcMode('GTL',ProcessMode)) =
   npv_UtilityPrice(RefReg,Utility,ActivePeriod)                          = npv1(UtilityPrice(RefReg,Utility,t),Rate(t));
   npv_RefInpPrc(RefReg,RefInputStr,Step,ActivePeriod)                    = npv1(RefInpPrc(RefReg,RefInputStr,Step,t),Rate(t));
   npv_FBDImpPrice(Step,ActivePeriod)                                     = npv1(FBDImpPrice(Step,t),Rate(t));
+  npv_FBDExpPrice(Step,ActivePeriod)                                     = npv1(FBDExpPrice(Step,t),Rate(t));
   npv_RDHImpPrice(Step,ActivePeriod)                                     = npv1(RDHImpPrice(Step,t),Rate(t));
+  npv_RDHExpPrice(Step,ActivePeriod)                                     = npv1(RDHExpPrice(Step,t),Rate(t));
   npv_BiomassPrc(CoalDreg,BioStr,Step,ActivePeriod)                      = npv1(BiomassPrc(CoalDreg,BioStr,Step,t),Rate(t));
   npv_CoalPrc(CoalSReg,CoalStr,Step,ActivePeriod)                        = npv1(CoalPrc(CoalSReg,CoalStr,Step,t),Rate(t));
   npv_SO2Prc(CoalStr,MX_SO2,ActivePeriod)                                = npv1(SO2Prc(CoalStr,MX_SO2,t),Rate(t));
@@ -572,8 +764,10 @@ OpVarCost('GTL',ProcessMode)$(ProcProcMode('GTL',ProcessMode)) =
 
   npv_RefInpSup(RefReg,RefInputStr,Step,ActivePeriod)             = npv2(RefInpSup(RefReg,RefInputStr,Step,t),Rate(t));
   npv_FBDImpSupply(Step,ActivePeriod)                             = npv2(FBDImpSupply(Step,t),Rate(t));
+  npv_FBDExpSupply(Step,ActivePeriod)                             = npv2(FBDExpSupply(Step,t),Rate(t));
 
   npv_RDHImpSupply(Step,ActivePeriod)                             = npv2(RDHImpSupply(Step,t),Rate(t));
+  npv_RDHExpSupply(Step,ActivePeriod)                             = npv2(RDHExpSupply(Step,t),Rate(t));
   npv_BiomassSup(CoalDReg,BioStr,Step,ActivePeriod)               = npv2(BiomassSup(CoalDReg,BioStr,Step,t),Rate(t));
   npv_BioOthDemand(CoalDReg,BioStr,Other_MKT,ActivePeriod)        = npv2(BioOthDemand(CoalDReg,BioStr,Other_MKT,t),Rate(t));
   npv_CoalSup(CoalSReg,CoalStr,Step,ActivePeriod)                 = npv2(CoalSup(CoalSReg,CoalStr,Step,t),Rate(t));
@@ -1175,6 +1369,18 @@ elseif (E85curveSwitch = 2),
 * Bound the operations of existing capacity to the amount previously built
   OPERATECAP.up(RefReg,RefType,Process,ActivePeriod) =
     AvailCap(RefReg,RefType,Process)$(AvailCap(RefReg,RefType,Process)>0) ;
+  if (testutilization3 > 0.9,
+    OPERATECAP.up('3_RefReg','COKING',Process,ActivePeriod) =
+      0.95*AvailCap('3_RefReg','COKING',Process)$(AvailCap('3_RefReg','COKING',Process)>0) ;
+    );
+  if (testutilization4 > 0.9,
+    OPERATECAP.up('4_RefReg','COKING',Process,ActivePeriod) =
+      0.95*AvailCap('4_RefReg','COKING',Process)$(AvailCap('4_RefReg','COKING',Process)>0) ;
+    );
+  if (testutilization7 > 0.9,
+    OPERATECAP.up('7_RefReg','COKING',Process,ActivePeriod) =
+      0.95*AvailCap('7_RefReg','COKING',Process)$(AvailCap('7_RefReg','COKING',Process)>0) ;
+    );
 
 $ontext
 
@@ -1259,10 +1465,19 @@ $offtext
   BIODIMP.up(Step,ActivePeriod)$(ord(Step)<6)  = npv_FBDImpSupply(Step,ActivePeriod) ;
 
   BIODIMP.up(Step,ActivePeriod)$(ord(Step)>=6) = 0.0 ;
+  
+  BIODEXP.up(Step,ActivePeriod)$(ord(Step)<6)  = npv_FBDExpSupply(Step,ActivePeriod) ;
+
+  BIODEXP.up(Step,ActivePeriod)$(ord(Step)>=6) = 0.0 ;
 
   RENEWDIMP.up(Step,ActivePeriod)$(ord(Step)<6)  = npv_RDHImpSupply(Step,ActivePeriod) ;
 
   RENEWDIMP.up(Step,ActivePeriod)$(ord(Step)>=6) = 0.0 ;
+  
+  RENEWDEXP.up(Step,ActivePeriod)$(ord(Step)<6)  = npv_RDHExpSupply(Step,ActivePeriod) ;
+
+  RENEWDEXP.up(Step,ActivePeriod)$(ord(Step)>=6) = 0.0 ;
+
 
   CO2_PURCH.up(OGCO2Reg,CO2_Source,ActivePeriod) =
     max(0.0001, npv_CO2_Avail(OGCO2Reg,CO2_Source,ActivePeriod)) ;
@@ -1660,6 +1875,9 @@ if (DebugVerbose=1 and RunYears.val>=2036,
       put_utility 'shell' / 'move LFMM_p2.gdx LFMM_steo2_' RunYears.te(RunYears) '.gdx' ;
     );
   );
+
+*Gross: set up gdx file for utilization calculation in lfshell.gms
+Execute_Unload "GrossCapacity.gdx", OPERATECAP.l ;
 
 );  /* end_of_loop: RunYears */
 

@@ -481,8 +481,8 @@ def read_mercury_files(
             restart.emission_hg_input[i_class, r, :] = data[hg_input_column]
             restart.emission_hg_mef[i_class, r, :] = data[hg_mef_column]
             # NOTE: The hard-coded constant here is exactly the number of
-            # pounds in one kilogram, so we're apparently converting grams per
-            # MWh into thousandths of a pound per MWh. Not sure why...
+            # pounds in one kilogram, so we are evidently converting grams per
+            # MWh into pounds per GWh
             restart.emission_hg_output[i_class, r, :] = (
                 restart.emission_hg_grams_mwh[i_class, :] * 2.2046
             )

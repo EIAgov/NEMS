@@ -1,0 +1,4 @@
+test,start_year,end_year,TableNum,varnam2,inequality,abs
+test_AB32_allowance(record_property),2020,2050,118,GHG000:ab_allbankavl,>0,0
+test_brent_price(record_property),2020,2050,102,AFT000:fa_BrentPrice,>0,0
+test_brent_WTI_price(record_property),2020,2050,12,PPP000:see_spot_markup,>1.5,0

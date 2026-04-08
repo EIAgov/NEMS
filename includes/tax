@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/tax,v 1.5 2018/01/30 13:29:35 xj2 Exp $
 ! UEFP TAX VARIABLES
       COMMON/TAX/IRSYP,IRSYTD,IRSYT2,TXRTYR,JCAPYR,ICAPYR,MLAG,IYRITC, &

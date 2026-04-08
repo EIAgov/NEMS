@@ -9,6 +9,7 @@ module F_
     include 'macout'
     include 'ampblk'
     include 'qsblk'
+    include 'convfact'
 
 !...Freight variables passed from tranfrt.f to tran.f
     include 'tranmain'
@@ -18,7 +19,7 @@ module F_
 !=============================================================================================================
 !...Parameters
     INTEGER AGE,SEC,SC,FNEW,FSTK, &
-            TK,NFT,FLT,RGN,CUR,LAG,NVMT,BSYR_VMT,BSYR_STK, &
+            TK,NFT,FLT,CUR,LAG,NVMT,BSYR_VMT,BSYR_STK, &
 			CAFE14,TECHP2,CAFE19,SC4,FUEL12,PBK_YR,VOC, &
             GHGTRY
 
@@ -117,11 +118,10 @@ PARAMETER(NVOC = 1)      	! Non-vocational truck
 PARAMETER(VOC = 2)       	! Vocational truck 
 PARAMETER(TECHP2 = 83)   	! Phase 2 HDV GHG Standards New technologies available (see trnhdvx.xlsx for definitions)
 PARAMETER(PBK_YR = 7)	 	! Maximum length of fleet financial horizon
-PARAMETER(RGN = 11)        	! Regions
 PARAMETER(CUR=2,LAG=1)     	! Current and Lag year subscripts
 PARAMETER(NVMT = 11)       	! NUMBER OF VMT bins
-PARAMETER(BSYR_VMT = 33)   	! Nems year index of base year for truck VMT data
-PARAMETER(BSYR_STK = 2023) 	! Nems year index of base year for Truck Stock data
+PARAMETER(BSYR_VMT = 34)   	! Nems year index of base year for truck VMT data
+PARAMETER(BSYR_STK = 2024) 	! Nems year index of base year for Truck Stock data
 !=============================================================================================================
 !...Subscripts
 INTEGER IAGE                    	! Index for vintage
@@ -152,24 +152,10 @@ INTEGER CLTMap(FUEL12)              ! Maps 12 freight truck powertrain types to 
 INTEGER CLTMap2(7)
 INTEGER GVWRP2Map(CAFE19)			! Maps GVWR classes (2,3,4,5,6,7,8,9) to 19 EPA size classes
 INTEGER VocOrNoMap(CAFE19)			! Map of vocational/not for 19 size classes (1=Not,2=Voc)
-!=============================================================================================================
+
 !...switches for freight transportation scenarios
 INTEGER      RTOVALUE
 EXTERNAL     RTOVALUE
-INTEGER      IFRTEFF      !...side case switches
-                          !...1  = high tech case
-                          !...2  = frozen tech case
-                          !...3  = zero natural gas vehicle incremental cost (permanent credit)
-                          !...4  = NATGAS Act tax credit phase out for incremental cost (temporary tax credit)
-                          !...3  = expanded natural gas market
-                          !...4  = expanded natural gas market NATGAS ACT (S.1863)
-                          !...5  = turns on Phase 2 HDV standards
-                          !...6  = reference natural gas market with NATGAS ACT
-                          !...7  = reference natural gas market with permanent natural gas vehicle tax credit
-                          !...8  = ubiquitious natural gas market
-                          !...9  = ubiquitious natural gas market NATGAS ACT
-                          !...10 = ubiquitious natural gas market with permanent natural gas vehicle tax credit
-!=============================================================================================================
 
 ! Market penetration curve parameters
 INTEGER*2 CYAFVXG(SC4,FUEL12,FLT) 					! Logistic mkt penetration curve parameter # of yrs, AFV
@@ -183,10 +169,6 @@ REAL ANNVMT_19(MNUMYR,CAFE19,AGE,FUEL12)					! Annual VMT by freight truck size 
 REAL ANNVMT(SC4,AGE,FUEL12,VOC)         			! Average annual VMT per vehicle
 REAL FUELPRICE_R(MNUMYR,FUEL12,MNUMCR)  			! Price of fuel, 1990$ per MBtu
 REAL FUELPRICE_R_AVG(FUEL12,MNUMCR)     			! Average regional price of fuel over 3 years, 1990$ per MBtu
-REAL BMPGSTK2B(AGE,MNUMYR,6)           				! class 3 historic fuel economy by vintage
-REAL BMPGSTK3(AGE,MNUMYR,6)            				! class 3 historic fuel economy by vintage
-REAL BMPGSTK46(AGE,MNUMYR,6)           				! class 4-6 historic fuel economy by vintage
-REAL BMPGSTK78(AGE,MNUMYR,6)           				! class 7-8 historic fuel economy by vintage
 REAL HDV_MPG(MNUMYR,SC4,AGE,FUEL12)     			! ON-ROAD fuel economy size class, vintage, and fuel in mpg miles/cubic cng
 REAL HDV_MPG_S_F(MNUMYR,SC,FUEL12)      			! ON-ROAD fuel economy by size class and fuel
 REAL HDV_MPG_S(MNUMYR,SC)              				! ON-ROAD fuel economy by size class
@@ -203,10 +185,12 @@ REAL cumulative_fc_stacks(MNUMYR)    				! cumulative Fuel Cell Stack additions
 REAL cumulative_h2_tanks(MNUMYR)    				! cumulative H2 Storage Tank additions
 REAL INC_COST_FCEV(NVMT,CAFE19,MNUMYR)				! Total FCEV incremental cost
 REAL INC_COST_FCHEV(NVMT,CAFE19,MNUMYR)				! Total FCHEV incremental cost
+REAL IRA_CREDIT(FUEL12,NVMT,CAFE19,MNUMYR)          ! IRA 45W credit amount
 
 REAL VMT_VEH(NVMT,FLT,CAFE19)               		! vmt per vehicle by non-fleet, fleet, and size class
 REAL VEH_SHR(NVMT,FLT,CAFE19)               		! percent share of vehicle by non-fleet, fleet, and size class
 REAL PBACK_SHR(PBK_YR,CAFE19)						! share of vehicles that require payback at a given threshold (1-7 years)
+REAL ann_uptime_days                                ! Number of driving days per year per vehicle
 REAL npv_choice(CAFE19,FUEL12,NVMT,PBK_YR,MNUMCR-2,MNUMYR)	! Net present value of fuel/maintenance/insurance/other operating cost savings (or not)
 REAL fuel_shr_regn(MNUMYR,CAFE19,FUEL12,FLT,MNUMCR) ! Fuel shares for New trucks by size class, fleet/nonfleet, region. NOTE: updated after TRUCK_ACT
 REAL fuel_shr_ivmt(MNUMYR,NVMT,FLT,CAFE19,FUEL12,MNUMCR)	! Fuel shares for New trucks by size class, fleet/nonfleet, region, vmt bin.
@@ -252,6 +236,7 @@ REAL h2_refuelopcost(NVMT,CAFE19,3),&               ! Extra daily refuelings req
      max_kWh_cap(CAFE19,MNUMYR),&                   ! Maximum battery kWh that will fit on a vehicle
      charging_speed(CAFE19),&                       ! Public charging speed
      TRK_BEV_DOD,&                                  ! Depth of discharge allowed (for converting nominal to usable batt kWh)
+     MIN_REQ_RNG,&                                  ! Minimum required BEV range regardless of average daily travel
      refuel_timeval                                 ! Value of time (labor + lost freight revenue) per hour
 
 REAL avg_batt_kWh_FCEV(MNUMYR,flt,CAFE19,MNUMCR),&	! market-share weighted average battery capacity
@@ -269,6 +254,7 @@ REAL battsize_b_PHEV(CAFE19)						! Coefficient for battery sizing (based on dai
 REAL BEV_infra_cost(CAFE19,MNUMYR)					! Upfront investment required for EVSE equipment and installation (2021USD)
 REAL BEV_elec_markup(CAFE19)						! Markup (multiplier) for retail/public electricity costs by size class
 REAL NG_priceadj(2)									! Multiplier to adjust supply module NG costs up to actual {1: CNG, 2: LNG}
+REAL CNG_shrof_NG(mnumyr)                           ! Share of Class 7&8 NG truck sales that are CNG
 REAL cost_ice_CNG(CAFE19)								! Incremental cost of NG engine and aftertreatment (v. gasoline [2b-3] or diesel [4-8])
 REAL cost_NGtank_DGE(SC4,MNUMYR)					! CNG tank cost ($/DGE)
 REAL cost_ICE(CAFE19,MNUMYR)						! Incremental cost of ICE engine (incl. non-batt/FC/H2 components added back in); used in TRUCK_CHOICE
@@ -310,7 +296,8 @@ REAL PHEV_eVMT_share(MNUMYR,flt,CAFE19,MNUMCR,2)	! PHEV eVMT share (needed for a
 REAL PctEVMT_PHEV_AVG(MNUMYR,MNUMCR,2)				! Aggregate average stock-average share of PHEV VMT that is on electricity {1: DS, 2:MG}
 
 !...IRA Tax credits
-INTEGER IRA_switch									! {0: IRA not enacted, 1: IRA enacted}
+INTEGER SwitchHDV_IRA							    ! {0: IRA not enacted, 1: IRA enacted}
+INTEGER SwitchHDV_HR1								! {0: HR1 not enacted, 1: HR1 enacted}	
 REAL IRA_45W_max(CAFE19,FUEL12)						! Maximum allowable IRA 45W tax credit
 REAL EVSE_30Ctaxcred								! Average tax credit for freight truck EVSE
 
@@ -371,8 +358,6 @@ REAL 		DISCRTXGL_P2                      		! Discount rate following the standar
 REAL 		PREFF_P2(TECHP2,CAFE19,FUEL12)     		! Market penertation price sensitvity mulitpler
 REAL 		VMTFLT_19(MNUMYR,CAFE19,AGE,FUEL12) 	! Total VMT
 REAL 		TRKSTK_19(MNUMYR,CAFE19,AGE,FUEL12)  	! Stock total by 19 different CAFE size classes
-REAL 		CREDSALES_19(MNUMYR,CAFE19,FUEL12)
-REAL 		credsales_p2(MNUMYR,CAFE14,FUEL12)
 LOGICAL 	HDV_passGHG(mnumyr,CAFE4)
 REAL        GHG_creds_agg(mnumyr,CAFE4)             ! Total ghg credits (could be negative) generated in a given year and averaging set
 REAL		TECHSHR_P2(MNUMYR,techp2,CAFE19,FUEL12)
@@ -403,6 +388,7 @@ REAL VMTFLT(cur,SC,AGE,FUEL12,FLT)       			! VMT at its most detailed
 REAL VMTFLTR(cur,SC,AGE,FUEL12,FLT,MNUMCR) 			! VMT at its most detailed by census division
 REAL FLTSHR_STK(MNUMYR,CAFE19)						! Share of on-road stock that is fleet (large, rental, gov, or dealer/mfr)
 REAL FLTSHR_SALES(MNUMYR,CAFE19)					! Share of new vehicle sales that were to fleets (large, rental, gov, or dealer/mfr)
+REAL FRT_LOAD_FACT(3)                               ! average payload carried by NEMS reported size class {1: C3, 2: C4-6, 3: C7&8}
 REAL VMTDMDR(MNUMYR,MNUMCR)            				! VMT by census division
 REAL TR_VMT(MNUMYR,MNUMCR)             				! Total truck vehicle miles travelled (billion)
 REAL THIST_VMT(MNUMYR,MNUMCR-2)        				! Historical truck vehicle miles travelled (billion) by census divsion
@@ -410,14 +396,11 @@ REAL TTM_OUTPUT(MNUMCR-2,SEC-2)        				! Truck ton-miles per $ output
 REAL TTONMI_ORIG(MNUMCR-2,SEC-2)       				! Truck ton-miles by census division and industrial sector for base year
 REAL NEWTRUCKS_regn(MNUMYR,CAFE19,FLT,MNUMCR) 		! Sales of new trucks by size clase, fleet/nonfleet, and region
 
-REAL HARMONIC_MEAN                     			! Function to calculate average mpg weighted by VMT or MPG
 REAL HDV_STANDARD_C(MNUMYR,CAFE14)     			! HDV fuel consumption and GHG emissions standards expressed in MPG combined across fuels
 REAL INC_TECH_COST(MNUMYR,FUEL12,SC4)			! Incremental cost for tech adoption, aggregated to 4 size classes
 REAL inc_tech_cost_19(MNUMYR,CAFE19,FUEL12)		! Incremental cost for tech adoption
 REAL PHEVELECVMT(CAFE19)                       	! Elec motor share of VMT for PHEV engines
 REAL CLTSIC(MNUMYR)                    			! SIC output averaged across 6 categories, for Class 2b
-
-EXTERNAL HARMONIC_MEAN
 
 ! ... Connected and autonomous freight fleets
 INTEGER TOONYEAR*2
@@ -425,10 +408,11 @@ REAL TOONSHR(MNUMYR)
 
 ! ... Commercial light truck module
 REAL CLTSALESPER(6,mnumyr)                  ! Percent of new commercial light truck sales by fuel 1995-2011
-REAL CLTSTK(mnumyr,FUEL12,AGE,2,mnumcr)     ! Commercial light truck stock by year, powertrain, vintage, voc, and census division
+REAL CLTSTK(mnumyr,FUEL12,AGE,FLT,mnumcr)     ! Commercial light truck stock by year, powertrain, vintage, voc, and census division
 REAL CLTVMT(mnumyr,FUEL12,AGE)              ! Commercial light truck total vmt by year, powertrain, and vintage
 REAL CLTMPG_YR(mnumyr,FUEL12,AGE)           ! MPG by year rather than cur/lag
 REAL CLTVMTDIST(6)                          ! Distribution of CLT VMT by industry
+REAL CLTGAL
 
 ! ... Waterborne Freight Module
 ! ... Domestic Waterborne
@@ -490,16 +474,24 @@ INTEGER      YRS                                ! actual model year (1989+curiyr
 end module F_
 !=============================================================================================================
 !...Freight subroutines
-  SUBROUTINE TRANFRT(FRTEFF,ICALL)
+  SUBROUTINE TRANFRT(ICALL)
   USE F_
+  USE MEAN_FUNCS     ! lives in tran.f
   IMPLICIT NONE
-    integer FRTEFF        ! (was Technology scenario 0: none 1:high tech 2: frozen)
     INTEGER ICALL, once/.false./
-    REAL :: VMTFLT_SAFF_TR(SC), VMT_TRR(MNUMYR)
+    REAL :: VMTFLT_SAFF_TR(SC)
+
+!   Timers
+    INTEGER(KIND=4) :: start_count, end_count, count_rate, count_max
+    REAL(KIND=8)    :: elapsed_time_seconds
+    REAL(KIND=8)    :: elapsed_time_TRUCK_NEW = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_STOCK = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_VMT = 0.0
+    REAL(KIND=8)    :: elapsed_time_TCOMMCL_TRK = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_FUEL = 0.0
+
     
     IF(.not. allocated(TRKSTK_19R)) allocate(TRKSTK_19R(MNUMYR,CAFE19,age,FUEL12,flt,MNUMCR))
-
-    ifrteff=frteff        ! copy argument from tran.f to common
 
     IYR = CURIYR          ! nems year index
     ITR = CURITR          ! nems iteration
@@ -519,22 +511,23 @@ end module F_
     IF(CURITR.EQ.1) THEN
       VMTFLT(LAG,:,:,:,:)=VMTFLT(CUR,:,:,:,:)
     ENDIF
-
-    HRATE(:,1) = 138700                    ! Diesel
-    HRATE(:,2) = 125071                    ! Gasoline
-    HRATE(:,3) = 125071                    ! LPG
-    HRATE(1,4) = 125071                    ! CNG Class 3
-    HRATE(2,4) = 125071 		           ! CNG Class 4-6
-    HRATE(3,4) = 138700                    ! LNG Class 7-8
-	HRATE(4,4) = 125071                    ! CNG Class 2
-	HRATE(:,5) = 125071                    ! E85
-	HRATE(:,6) = 138700                    ! Electric
-	HRATE(:,7) = 138700                    ! PHEV Diesel
-	HRATE(:,8) = 125071                    ! PHEV Gasoline
-	HRATE(:,9) = 138700                    ! Hydrogen
-	HRATE(:,10) = 138700                   ! Hydrogen large Batt
-	HRATE(:,11) = 125071                   ! HEV gasoline
-	HRATE(:,12) = 138700                   ! H2 ICE
+    
+!   Convert MMbtu/barrel to btu/gallon
+    HRATE(:,1)  = CFDSTR(n)/42*1000000          ! Diesel
+    HRATE(:,2)  = CFMGQ(n)/42*1000000           ! Gasoline
+    HRATE(:,3)  = CFMGQ(n)/42*1000000           ! LPG
+    HRATE(1,4)  = CFMGQ(n)/42*1000000           ! CNG Class 3
+    HRATE(2,4)  = CFMGQ(n)/42*1000000 		    ! CNG Class 4-6
+    HRATE(3,4)  = CFDSTR(n)/42*1000000          ! LNG Class 7-8
+	HRATE(4,4)  = CFMGQ(n)/42*1000000           ! CNG Class 2
+	HRATE(:,5)  = CFMGQ(n)/42*1000000           ! E85
+	HRATE(:,6)  = CFDSTR(n)/42*1000000          ! Electric
+	HRATE(:,7)  = CFDSTR(n)/42*1000000          ! PHEV Diesel
+	HRATE(:,8)  = CFMGQ(n)/42*1000000           ! PHEV Gasoline
+	HRATE(:,9)  = CFDSTR(n)/42*1000000          ! Hydrogen
+	HRATE(:,10) = CFDSTR(n)/42*1000000          ! Hydrogen large Batt
+	HRATE(:,11) = CFMGQ(n)/42*1000000           ! HEV gasoline
+	HRATE(:,12) = CFDSTR(n)/42*1000000          ! H2 ICE
 
 !...Determine Truck Fuel Use as follows
 !...1) Update the truck stock vintages by applying scrappage rates.
@@ -551,23 +544,38 @@ end module F_
 
 !...Estimate new vehicle sales, stocks, and fuel economy
     IF(curcalyr.gt.2017) then
+      CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
       CALL TRUCK_NEW
-!	  WRITE(*,*)'TRANFRT TRUCK_NEW Complete', iyr+1989
+      CALL SYSTEM_CLOCK(COUNT=end_count)
+      elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+      elapsed_time_TRUCK_NEW = elapsed_time_TRUCK_NEW + elapsed_time_seconds
     ENDIF
-
+    
+    CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
     CALL TRUCK_STOCK
-!	WRITE(*,*)'TRANFRT TRUCK_STOCK Complete', iyr+1989
+    CALL SYSTEM_CLOCK(COUNT=end_count)
+    elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+    elapsed_time_TRUCK_STOCK = elapsed_time_TRUCK_STOCK + elapsed_time_seconds
 
 !...Estimate aggregate VMT and per truck VMT
+    CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
     CALL TRUCK_VMT
-!	WRITE(*,*)'TRANFRT TRUCK_VMT Complete', iyr+1989
+    CALL SYSTEM_CLOCK(COUNT=end_count)
+    elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+    elapsed_time_TRUCK_VMT = elapsed_time_TRUCK_VMT + elapsed_time_seconds
 
+    CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
     CALL TCOMMCL_TRK
-!	WRITE(*,*)'TRANFRT TCOMMCL_TRK Complete', iyr+1989
+    CALL SYSTEM_CLOCK(COUNT=end_count)
+    elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+    elapsed_time_TCOMMCL_TRK = elapsed_time_TCOMMCL_TRK + elapsed_time_seconds
 
 !...Calculate fuel demand from vmt and mpg
+    CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
     CALL TRUCK_FUEL
-!	WRITE(*,*)'TRANFRT TRUCK_FUEL Complete', iyr+1989
+    CALL SYSTEM_CLOCK(COUNT=end_count)
+    elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+    elapsed_time_TRUCK_FUEL = elapsed_time_TRUCK_FUEL + elapsed_time_seconds
 
 
 !...aggregate vmt by sector and vintage sent to TRAN for Table 7
@@ -583,30 +591,38 @@ end module F_
         VMTFLT_SAFF_TR(ISC) =sum( VMTFLT_SAF_TR(ISC,1:FUEL12,1:MNUMCR-2) )
     ENDDO
 
-    VMT_TRR(IYR) = sum(VMTFLT_SAF_TR(1:SC,1:FUEL12,1:MNUMCR-2) )
+    VMT_TR(IYR) = sum(VMTFLT_SAF_TR(1:SC,1:FUEL12,1:MNUMCR-2) )
 
 !...average MPG over vintages, fuels, and size class
     DO isc=1,sc
       DO ifuel=1,FUEL12
-        HDV_MPG_S_F(IYR,ISC,IFUEL) = HARMONIC_MEAN(HDV_MPG(iyr,ISC,1:AGE,IFUEL),VMTFLT_SF_TR(ISC,1:AGE,IFUEL,11),AGE)
+        HDV_MPG_S_F(IYR,ISC,IFUEL) = HARMONIC_MEAN_1D(HDV_MPG(iyr,ISC,1:AGE,IFUEL), &
+                                                      VMTFLT_SF_TR(ISC,1:AGE,IFUEL,11),&
+                                                      caller_id = 'HDV_MPG_S_F')
+        
 	  IF(HDV_MPG_S_F(IYR,ISC,IFUEL).eq.0) HDV_MPG_S_F(IYR,ISC,IFUEL) = HDV_MPG_S_F(IYR-1,ISC,IFUEL)
       ENDDO
-      HDV_MPG_S(IYR,ISC) = HARMONIC_MEAN(HDV_MPG_S_F(IYR,ISC,1:FUEL12), VMTFLT_SAF_TR(ISC,1:FUEL12,11),FUEL12)
+      HDV_MPG_S(IYR,ISC) = HARMONIC_MEAN_1D(HDV_MPG_S_F(IYR,ISC,1:FUEL12), &
+                                            VMTFLT_SAF_TR(ISC,1:FUEL12,11),&
+                                            caller_id = 'HDV_MPG_S')
 	  IF(HDV_MPG_S(IYR,ISC).eq.0) HDV_MPG_S(IYR,ISC) = HDV_MPG_S(IYR-1,ISC)
     ENDDO
 
-!...Average MPG over size classes - sent to TRAN to determine bus efficiency
-    FTMPG_TR(IYR) = HARMONIC_MEAN( HDV_MPG_S(IYR,1:SC),VMTFLT_SAFF_TR(1:SC),SC)
+!...Average MPG over size classes - sent to Table 7 (ftab)
+    TRFTMPG(IYR) = HARMONIC_MEAN_1D(HDV_MPG_S(IYR,1:SC), &
+                                    VMTFLT_SAFF_TR(1:SC),&
+                                    caller_id = 'TRFTMPG')
 
-!...Duplicate average MPG sent to Table 7 (ftab)
-    TRFTMPG(IYR) = FTMPG_TR(IYR)
-	
-!	WRITE(21,*)'TRANFRT Complete', iyr+1989
+    if(n.eq.mnumyr.and.fcrl.eq.1) then
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_NEW): ", elapsed_time_TRUCK_NEW, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_STOCK): ", elapsed_time_TRUCK_STOCK, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_VMT): ", elapsed_time_TRUCK_VMT, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TCOMMCL_TRK): ", elapsed_time_TCOMMCL_TRK, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_FUEL): ", elapsed_time_TRUCK_FUEL, " seconds"
+    endif
 
   RETURN
   END SUBROUTINE TRANFRT
-
-! CONTAINS
 
 !=============================================================================================================
  SUBROUTINE TRUCK_NEW
@@ -620,19 +636,29 @@ end module F_
 		 new_fc_stacks, &     								! annual Fuel Cell Stack additions
 		 new_h2_tanks     									! annual H2 Storage Tank additions
     REAL TECHRPT_SAL(MNUMYR,10,FUEL12)
+    REAL sum_fuel_shr_ivmt_local                            ! temporary local variable for aggregation
+    LOGICAL detail_trucknew_write/.FALSE./
+
+!   Timers
+    INTEGER(KIND=4) :: start_count, end_count, count_rate, count_max
+    REAL(KIND=8)    :: elapsed_time_seconds
+    REAL(KIND=8)    :: elapsed_time_TRUCK_TECHADOPT = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_INCCOST = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_CHOICE = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_AGGVARS = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_GHGMEET = 0.0
+    REAL(KIND=8)    :: elapsed_time_TRUCK_GHGZEV = 0.0
 
 	IF (curcalyr.gt.BSYR_STK)then
 !...  Distribute new truck sales (from macro) by region and fleet/non-fleet based on historical sales (iage=1)
 !	  Note that the fleet sales distribution is different from the stock (fleets account for a much larger share of sales than stocks)
-	  NEWTRUCKS_regn(iyr,:,:,:) = 0.0
+	  NEWTRUCKS_regn(iyr,1:cafe19,1:flt,1:mnumcr) = 0.0
 	  DO iregn = 1,MNUMCR-2
 		DO icafe19 = 1,CAFE19
 		  IF (icafe19.le.2) then
 		    NEWTRUCKS_regn(iyr,icafe19,FLT,iregn) = SUM(MC_Vehicles(1:2,iyr))*(1-LTSplit(iyr)) * 1000000. * &
 													SUM(TRKSTK_19R(iyr-1,icafe19,1,:,:,iregn))/SUM(TRKSTK_19R(iyr-1,1:2,1,:,:,MNUMCR)) * &
 													FLTSHR_SALES(iyr,icafe19)
-!		    WRITE(21,'(a,4(",",i4),3(",",f12.0),2(",",f8.4))')'newtrucks',curcalyr,curitr,iregn,icafe19,SUM(MC_Vehicles(1:2,iyr)),SUM(TRKSTK_19R(iyr-1,icafe19,1,:,:,iregn)),&
-!                                                        SUM(TRKSTK_19R(iyr-1,1:2,1,:,:,MNUMCR)),(1-LTSplit(iyr)),FLTSHR_SALES(iyr,icafe19)
           ELSEIF (icafe19.le.4) then
 		    NEWTRUCKS_regn(iyr,icafe19,FLT,iregn) = MC_VEHICLES(3,iyr) * 1000000. * &
 													SUM(TRKSTK_19R(iyr-1,icafe19,1,:,:,iregn))/SUM(TRKSTK_19R(iyr-1,3:4,1,:,:,MNUMCR)) * &
@@ -663,27 +689,46 @@ end module F_
       FUELPRICE_R_AVG(ifuel,MNUMCR) = SUM(FUELPRICE_R(iyr-4:iyr,ifuel,MNUMCR))/5.0 
 	ENDDO	
 
-	call cpu_time(start)
 	IF (curcalyr.gt.2017) THEN
 	  DO itryghg = 1, GHGTRY
         
         if (itryghg.eq.1) HDV_passGHG(iyr,:) = .false.
         
+        CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
 	    CALL TRUCK_TECHADOPT
+        CALL SYSTEM_CLOCK(COUNT=end_count)
+        elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+        elapsed_time_TRUCK_TECHADOPT = elapsed_time_TRUCK_TECHADOPT + elapsed_time_seconds
         
 !       Estimate alternative powertrain adoption, after building truck options based on tech adoption above	  
-!	    CALL TRUCK_INCCOST        
 	    IF (curcalyr.gt.BSYR_STK) THEN
+          CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
           CALL TRUCK_INCCOST
+          CALL SYSTEM_CLOCK(COUNT=end_count)
+          elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+          elapsed_time_TRUCK_INCCOST = elapsed_time_TRUCK_INCCOST + elapsed_time_seconds
+          
+          CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
           CALL TRUCK_CHOICE
+          CALL SYSTEM_CLOCK(COUNT=end_count)
+          elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+          elapsed_time_TRUCK_CHOICE = elapsed_time_TRUCK_CHOICE + elapsed_time_seconds
         ENDIF
 
 	    IF (ACT_switch.eq.1.and.curcalyr.ge.2021) CALL TRUCK_ACT
 
 !	    Re-estimate aggregate sales, credit, and mpg variables now that fuel shares have changed	  
-	    CALL TRUCK_AGGVARS
-        
+	    CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
+        CALL TRUCK_AGGVARS
+        CALL SYSTEM_CLOCK(COUNT=end_count)
+        elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+        elapsed_time_TRUCK_AGGVARS = elapsed_time_TRUCK_AGGVARS + elapsed_time_seconds
+          
+        CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
         CALL TRUCK_GHGMEET
+        CALL SYSTEM_CLOCK(COUNT=end_count)
+        elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+        elapsed_time_TRUCK_GHGMEET = elapsed_time_TRUCK_GHGMEET + elapsed_time_seconds
 
         IF (ALL(HDV_passGHG(iyr,:))) THEN
           if(fcrl.eq.1) WRITE(21,'(a,i4,i2)')'Freight truck GHG met in ',curcalyr,itryghg
@@ -694,9 +739,17 @@ end module F_
 !       convert sales to ZEVs to meet the reg.
         IF(.not.ALL(HDV_passGHG(iyr,:)).and.itryghg.eq.GHGTRY.and.curcalyr.ge.2021) THEN
           if(fcrl.eq.1) WRITE(21,'(a,i4,i2)')'Entering TRUCK_GHGZEV in ',curcalyr,itryghg
+          CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
           CALL TRUCK_GHGZEV
+          CALL SYSTEM_CLOCK(COUNT=end_count)
+          elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+          elapsed_time_TRUCK_GHGZEV = elapsed_time_TRUCK_GHGZEV + elapsed_time_seconds
           
+          CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
           CALL TRUCK_AGGVARS
+          CALL SYSTEM_CLOCK(COUNT=end_count)
+          elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+          elapsed_time_TRUCK_AGGVARS = elapsed_time_TRUCK_AGGVARS + elapsed_time_seconds
           
           IF (ALL(HDV_passGHG(iyr,:))) THEN
             if(fcrl.eq.1) WRITE(21,'(a,i4,i2)')'Freight truck GHG met with ZEVs in ',curcalyr,itryghg
@@ -711,8 +764,6 @@ end module F_
 	  ENDDO
 	ENDIF
     
-    call cpu_time(finish)      ! Stop Timer
-!	WRITE(21,'(a,3(",",i4),8(",",f5.2))')'timer_TRANFRT_TRUCKNEW',curcalyr, curitr, itryghg, finish - start
 
     IF (curcalyr.gt.BSYR_STK)then
 !	  Accumulate sales of tech that uses learning curves (batteries, fuel cell stacks, hydrogen tanks)
@@ -730,98 +781,83 @@ end module F_
 	  	  DO icafe19=1,CAFE19
             isc = SC19Map(icafe19)
             DO ifuel = 6,FUEL12
+              sum_fuel_shr_ivmt_local = SUM(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,ifuel,iregn))
 !             First calculate average component sizes (vmt-bin-based, need to aggregate up)
-			  IF(SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn)).gt.0.0)then
+			  IF(sum_fuel_shr_ivmt_local.gt.0.0)then
 				DO ivmt=1, nvmt
-			      IF (ifuel.eq.6) THEN
+			      SELECT CASE (ifuel)
+                    CASE (6)
                     avg_batt_kWh_BEV(iyr,iflt,icafe19,iregn)    = avg_batt_kWh_BEV(iyr,iflt,icafe19,iregn) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))&
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local&
                                                                    * kWh_nominal(ivmt,icafe19,iyr)
 !                                                                  * PT_battkWh_BEV(ivmt,icafe19,iyr)
-				  ELSEIF(ifuel.eq.7) THEN
+				    CASE (7)
                     avg_batt_kWh_PHEVD(iyr,iflt,icafe19,iregn)  = avg_batt_kWh_PHEVD(iyr,iflt,icafe19,iregn) &
-					  										    + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))*PT_battkWh_PHEV(ivmt,icafe19)
+					  										    + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local*PT_battkWh_PHEV(ivmt,icafe19)
                     PHEV_eVMT_share(iyr,iflt,icafe19,iregn,1)   = PHEV_eVMT_share(iyr,iflt,icafe19,iregn,1) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn)) &
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local &
                                                                   * MIN(1.0,((PT_battkWh_PHEV(ivmt,icafe19) * TRK_PHEV_DOD * 3412.0 / HRATE(isc,6)) * &	! usable battery size in dge
-                                                                              new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * 250.0 / &					    ! fuel economy in mpdge   (now we have annual battery miles of range available)
+                                                                              new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * ann_uptime_days / &					    ! fuel economy in mpdge   (now we have annual battery miles of range available)
                                                                               VMT_VEH(ivmt,iflt,icafe19))
-                  ELSEIF(ifuel.eq.8) THEN
+                    CASE (8)
                     avg_batt_kWh_PHEVG(iyr,iflt,icafe19,iregn)  = avg_batt_kWh_PHEVG(iyr,iflt,icafe19,iregn) &
-					  										    + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))*PT_battkWh_PHEV(ivmt,icafe19)
+					  										    + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local*PT_battkWh_PHEV(ivmt,icafe19)
                     PHEV_eVMT_share(iyr,iflt,icafe19,iregn,2)   = PHEV_eVMT_share(iyr,iflt,icafe19,iregn,2) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn)) &
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local &
                                                                   * MIN(1.0,((PT_battkWh_PHEV(ivmt,icafe19) * TRK_PHEV_DOD * 3412.0 / HRATE(isc,6)) * &	! usable battery size in dge
-                                                                              new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * 250.0 / &					    ! fuel economy in mpdge   (now we have annual battery miles of range available)
+                                                                              new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * ann_uptime_days / &					    ! fuel economy in mpdge   (now we have annual battery miles of range available)
                                                                               VMT_VEH(ivmt,iflt,icafe19))
-                  ELSEIF(ifuel.eq.9) THEN
+                    CASE (9)
                     avg_batt_kWh_FCEV(iyr,iflt,icafe19,iregn)   = avg_batt_kWh_FCEV(iyr,iflt,icafe19,iregn) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))&
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local&
 															      * PT_battkWh_FCEV(ivmt,icafe19)
                     avg_tank_cnt_FCEV(iyr,iflt,icafe19,iregn)   = avg_tank_cnt_FCEV(iyr,iflt,icafe19,iregn) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))&
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local&
 															      * PT_tankcnt_FCEV(ivmt,icafe19)
-				  ELSEIF(ifuel.eq.10) THEN  
+				    CASE (10)
                     avg_batt_kWh_FCHEV(iyr,iflt,icafe19,iregn)  = avg_batt_kWh_FCHEV(iyr,iflt,icafe19,iregn) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))&
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local&
 															      * PT_battkWh_FCHEV(ivmt,icafe19)
 				    avg_tank_cnt_FCHEV(iyr,iflt,icafe19,iregn)  = avg_tank_cnt_FCHEV(iyr,iflt,icafe19,iregn) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))&
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local&
 															      * PT_tankcnt_FCHEV(ivmt,icafe19)
-                  ELSEIF(ifuel.eq.12) THEN
+                    CASE (12)
                     avg_tank_cnt_H2ICE(iyr,iflt,icafe19,iregn)  = avg_tank_cnt_H2ICE(iyr,iflt,icafe19,iregn) &
-                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))&
+                                                                + fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/sum_fuel_shr_ivmt_local&
 															      * PT_tankcnt_H2ICE(ivmt,icafe19)
-                  ENDIF
+                  END SELECT
                 ENDDO
 			  ENDIF
             ENDDO	! ifuel
 	  	  ENDDO	    ! icafe19
 	  	ENDDO		! iflt
-	  ENDDO		! iregn
+	  ENDDO		    ! iregn
+
+!     Sum up technology production to add to cumulative and drive cost learning
+!     Battery packs, fuel cell stacks, hydrogen tanks      
+      new_gwh = 0.0
+      new_h2_tanks = 0.0
+      DO iflt=1,flt
+        new_gwh      = new_gwh &    ! BEV, PHEVG, PHEVD, FCEV, FCHEV, HEV
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1, 6, iflt, 1:mnumcr-2) * (avg_batt_kWh_BEV(iyr, iflt, 1:cafe19, 1:mnumcr-2))) &
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1, 7, iflt, 1:mnumcr-2) * (avg_batt_kWh_PHEVD(iyr, iflt, 1:cafe19, 1:mnumcr-2))) &
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1, 8, iflt, 1:mnumcr-2) * (avg_batt_kWh_PHEVG(iyr, iflt, 1:cafe19, 1:mnumcr-2))) &
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1, 9, iflt, 1:mnumcr-2) * (avg_batt_kWh_FCEV(iyr, iflt, 1:cafe19, 1:mnumcr-2))) &
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1,10, iflt, 1:mnumcr-2) * (avg_batt_kWh_FCHEV(iyr, iflt, 1:cafe19, 1:mnumcr-2))) &
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1,11, iflt, 1:mnumcr-2) * (SPREAD(PT_battkWh_HEV(1:cafe19), DIM=2, NCOPIES = mnumcr-2)))
+        new_h2_tanks = new_h2_tanks &   ! FCEV, FCHEV, H2ICE
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1, 9, iflt, 1:mnumcr-2) * avg_tank_cnt_FCEV(iyr,iflt,1:cafe19,1:mnumcr-2) ) &
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1,10, iflt, 1:mnumcr-2) * avg_tank_cnt_FCHEV(iyr,iflt,1:cafe19,1:mnumcr-2) )&
+                     + SUM( TRKSTK_19R(iyr, 1:cafe19, 1,12, iflt, 1:mnumcr-2) * avg_tank_cnt_H2ICE(iyr,iflt,1:cafe19,1:mnumcr-2) )
+      ENDDO
       
-	  DO iregn=1,MNUMCR-2
-	    DO iflt=1,flt
-	  	  DO icafe19=1,CAFE19
-            DO ifuel = 6,FUEL12
-!	   		  Sum up new GWh of BEV and PHEV battery added to stock and add back to tran.f
-	  		  IF (ifuel.ge.6) THEN
-	  		 	IF (ifuel.eq.6) new_gwh = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) * (avg_batt_kWh_BEV(iyr,iflt,icafe19,iregn))/ 1000000.0 
-	  		 	IF (ifuel.eq.7) new_gwh = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) * (avg_batt_kWh_PHEVD(iyr,iflt,icafe19,iregn))/ 1000000.0 
-	  		 	IF (ifuel.eq.8) new_gwh = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) * (avg_batt_kWh_PHEVG(iyr,iflt,icafe19,iregn))/ 1000000.0
-                IF (ifuel.eq.9) new_gwh = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) * (avg_batt_kWh_FCEV(iyr,iflt,icafe19,iregn))/ 1000000.0
-                IF (ifuel.eq.10)new_gwh = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) * (avg_batt_kWh_FCHEV(iyr,iflt,icafe19,iregn))/ 1000000.0
-	  	        IF (ifuel.eq.11)new_gwh = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) * PT_battkWh_HEV(icafe19)/ 1000000.0 
-                cumulative_gwh(iyr) = cumulative_gwh(iyr) + new_gwh
-              ENDIF
-	  		  
-!	  		  Sum up new Fuel Cell Stacks and H2 Tanks added to stock
-	  		  IF (ifuel.ge.9.and.ifuel.ne.11) then
-!               Initialize using previous year's cumulative production
-	  			IF (iregn==1 .and. iflt==1 .and. icafe19==1.and.ifuel.eq.9) then
-	  			  cumulative_fc_stacks(iyr) = cumulative_fc_stacks(iyr-1)
-	  			  cumulative_h2_tanks(iyr) = cumulative_h2_tanks(iyr-1)
-                ENDIF
-                
-!               FCEV and FCHEV add H2 tank and fuel cell stack production
-                IF (ifuel.eq.9.or.ifuel.eq.10) then
-                  new_fc_stacks = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn)
-	  			  IF (ifuel.eq.9) new_h2_tanks = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn)*avg_tank_cnt_FCEV(iyr,iflt,icafe19,iregn)
-	  			  IF (ifuel.eq.10)new_h2_tanks = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn)*avg_tank_cnt_FCHEV(iyr,iflt,icafe19,iregn)
-                  cumulative_fc_stacks(iyr) = cumulative_fc_stacks(iyr) + new_fc_stacks
-	  			  cumulative_h2_tanks(iyr) = cumulative_h2_tanks(iyr) + new_h2_tanks
-                  
-!               H2 ICE adds H2 tank production	  			
-	  			ELSEIF (ifuel.eq.12) then
-                  new_h2_tanks = TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn)*avg_tank_cnt_H2ICE(iyr,iflt,icafe19,iregn)
-	  			  cumulative_h2_tanks(iyr) = cumulative_h2_tanks(iyr) + new_h2_tanks
-                ENDIF
-	  		  ENDIF
-            ENDDO	! ifuel
-	  	  ENDDO	    ! icafe19
-	  	ENDDO		! iflt
-	  ENDDO		! iregn
-	ENDIF ! gt.bsyr_stk
+      new_fc_stacks = SUM(TRKSTK_19R(iyr,1:cafe19,1,[9,10],1:flt,1:mnumcr-2))
+      
+      global_batt_prod(2,1,iyr) = global_batt_prod(2,1,iyr-1) + new_gwh / 1000000.0      
+      cumulative_fc_stacks(iyr) = cumulative_fc_stacks(iyr-1) + new_fc_stacks
+      cumulative_h2_tanks(iyr) = cumulative_h2_tanks(iyr-1) + new_h2_tanks
+      
+	ENDIF           ! gt.bsyr_stk
 
 !...Aggregate 19 Phase 2 size class technology shares into groups for reporting in ftab
     IF (curcalyr.gt.2017) THEN
@@ -840,34 +876,18 @@ end module F_
       ENDDO ! end itechp2 loop
     ENDIF
 
-  IF (n.eq.MNUMYR.and.fcrl.eq.1) then
-!	WRITE(21,*)'Total regional sales by icafe19'
-!	DO i = 32, MNUMYR
-!	  DO iregn = 1, MNUMCR-2
-!	    WRITE(21,'(i4,",",i2,19(",",f9.0))')i+1989,iregn,sum(TRKSTK_19R(i,1,1,:,:,iregn)), sum(TRKSTK_19R(i,2,1,:,:,iregn)), sum(TRKSTK_19R(i,3,1,:,:,iregn)),&
-!														 sum(TRKSTK_19R(i,4,1,:,:,iregn)), sum(TRKSTK_19R(i,5,1,:,:,iregn)), sum(TRKSTK_19R(i,6,1,:,:,iregn)),&
-!														 sum(TRKSTK_19R(i,7,1,:,:,iregn)), sum(TRKSTK_19R(i,8,1,:,:,iregn)), sum(TRKSTK_19R(i,9,1,:,:,iregn)),&
-!														 sum(TRKSTK_19R(i,10,1,:,:,iregn)),sum(TRKSTK_19R(i,11,1,:,:,iregn)),sum(TRKSTK_19R(i,12,1,:,:,iregn)),&
-!														 sum(TRKSTK_19R(i,13,1,:,:,iregn)),sum(TRKSTK_19R(i,14,1,:,:,iregn)),sum(TRKSTK_19R(i,15,1,:,:,iregn)),&
-!														 sum(TRKSTK_19R(i,16,1,:,:,iregn)),sum(TRKSTK_19R(i,17,1,:,:,iregn)),sum(TRKSTK_19R(i,18,1,:,:,iregn)),&
-!														 sum(TRKSTK_19R(i,19,1,:,:,iregn))
-!	  ENDDO
-!	ENDDO	
-	
-!	WRITE(21,*)'Final sales by region by powertrain'
-!	DO i = 32, MNUMYR
-!	  DO iregn = 1, MNUMCR-2
-!		DO ifuel = 1, FUEL12
-!	        WRITE(21,'(i4,",",i2,",",i2,19(",",f12.0))')i+1989,iregn,ifuel,sum(TRKSTK_19R(i,1,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,2,1,ifuel,:,iregn)),&
-!													  sum(TRKSTK_19R(i,3,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,4,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,5,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,6,1,ifuel,:,iregn)) ,&
-!													  sum(TRKSTK_19R(i,7,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,8,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,9,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,10,1,ifuel,:,iregn)),&
-!													  sum(TRKSTK_19R(i,11,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,12,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,13,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,14,1,ifuel,:,iregn)),&
-!													  sum(TRKSTK_19R(i,15,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,16,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,17,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,18,1,ifuel,:,iregn)),&
-!													  sum(TRKSTK_19R(i,19,1,ifuel,:,iregn))
-!		ENDDO
-!	  ENDDO
-!	ENDDO
+!   Timers
+    if(n.eq.mnumyr.and.fcrl.eq.1) then
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_TECHADOPT): ", elapsed_time_TRUCK_TECHADOPT, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_INCCOST): ", elapsed_time_TRUCK_INCCOST, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_CHOICE): ", elapsed_time_TRUCK_CHOICE, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_AGGVARS): ", elapsed_time_TRUCK_AGGVARS, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_GHGMEET): ", elapsed_time_TRUCK_GHGMEET, " seconds"
+      WRITE(21,*) "Elapsed wall-clock time (TRUCK_GHGZEV): ", elapsed_time_TRUCK_GHGZEV, " seconds"
+    endif
 
+! Detailed writes, triggered by switch detail_trucknew_write.
+  IF (n.eq.MNUMYR.and.fcrl.eq.1.and.detail_trucknew_write) then
 	WRITE(21,*)'Freight truck BEV battery size (kWh)'
 	WRITE(21,'(a2,19(",",a7))')'ivmt','2b','2bV','3','3V','4','5','6','7V','7D','7D','7D','8V','8D','8D','8D','8S','8S','8S','HH'
 	DO i = 34, MNUMYR
@@ -875,24 +895,24 @@ end module F_
 	    WRITE(21,'(i4,",",i2,19(",",f7.1))') i+1989, ivmt, kWh_nominal(ivmt,:,i)
 	  ENDDO
     ENDDO
-!	WRITE(21,*)'Freight truck FCHEV h2 tank count (units)'
-!	WRITE(21,'(a4,",",a4,",",a4,",",19(",",a7))')'year','regn','flt','2b','2bV','3','3V','4','5','6','7V','7D','7D','7D','8V','8D','8D','8D','8S','8S','8S','HH'
-!	DO i=34,MNUMYR
-!      DO iregn = 1, mnumcr-2
-!        DO iflt = 1, flt
-!	      WRITE(21,'(i4,",",i4,",",i4,19(",",f3.1))') i+1989,iregn,iflt,avg_tank_cnt_FCHEV(i,iflt,:,iregn)
-!	    ENDDO
-!      ENDDO
-!    ENDDO
-!	WRITE(21,*)'Freight truck FCEV h2 tank count (units)'
-!	WRITE(21,'(a4,",",a4,",",a4,",",19(",",a7))')'year','regn','flt','2b','2bV','3','3V','4','5','6','7V','7D','7D','7D','8V','8D','8D','8D','8S','8S','8S','HH'
-!	DO i=34,MNUMYR
-!      DO iregn = 1, mnumcr-2
-!        DO iflt = 1, flt
-!	      WRITE(21,'(i4,",",i4,",",i4,19(",",f3.1))') i+1989,iregn,iflt,avg_tank_cnt_FCEV(i,iflt,:,iregn)
-!	     ENDDO
-!      ENDDO
-!   ENDDO
+	WRITE(21,*)'Freight truck FCHEV h2 tank count (units)'
+	WRITE(21,'(a4,",",a4,",",a4,",",19(",",a4))')'year','regn','flt','2b','2bV','3','3V','4','5','6','7V','7D','7D','7D','8V','8D','8D','8D','8S','8S','8S','HH'
+	DO i=34,MNUMYR
+      DO iregn = 1, mnumcr-2
+        DO iflt = 1, flt
+	      WRITE(21,'(i4,",",i4,",",i4,19(",",f4.1))') i+1989,iregn,iflt,avg_tank_cnt_FCHEV(i,iflt,:,iregn)
+	    ENDDO
+      ENDDO
+    ENDDO
+	WRITE(21,*)'Freight truck FCEV h2 tank count (units)'
+	WRITE(21,'(a4,",",a4,",",a4,",",19(",",a4))')'year','regn','flt','2b','2bV','3','3V','4','5','6','7V','7D','7D','7D','8V','8D','8D','8D','8S','8S','8S','HH'
+	DO i=34,MNUMYR
+      DO iregn = 1, mnumcr-2
+        DO iflt = 1, flt
+	      WRITE(21,'(i4,",",i4,",",i4,19(",",f4.1))') i+1989,iregn,iflt,avg_tank_cnt_FCEV(i,iflt,:,iregn)
+	     ENDDO
+      ENDDO
+    ENDDO
   	WRITE(21,*)'HDV Alt-Powertrain Component Costs (2022USD)'
 	WRITE(21,'(a4,12(",",a10))')'Year','cumulFCstk','c_FCkW','cumulH2tank','$_h2tank','$_batt45V','$_batt68V','$_batt78T','$_batt2b3','$_battHEV','$_motorkW','$_obc'
   	DO i=34,MNUMYR
@@ -909,118 +929,200 @@ end module F_
   	WRITE(21,'(a4,",",a4,8(",",a6))')'year','regn','MG','DS','CNG_pub','CNG_flt','LNG_pub','LNG_flt','H2','H2$kg'
   	DO i = 31, MNUMYR
   	  DO iregn = 1, MNUMCR-2
-  	    WRITE(21,'(i4,",",i4,8(",",f6.3))')i+1989,iregn,PMGTR(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1), PDSTR(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1),&
-  														 PGFTRPV(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(1),PGFTRFV(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(1),&
-  														 PGLTRPV(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(2),PGLTRFV(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(2),&
-                                                         PH2TR(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1),PH2TR(iregn,i)/7.5*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1)
+  	    WRITE(21,'(i4,",",i4,8(",",f6.3))')i+1989,iregn,PMGTR(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1), PDSTR(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1),&
+  														 PGFTRPV(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(1),PGFTRFV(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(1),&
+  														 PGLTRPV(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(2),PGLTRFV(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1)*NG_priceadj(2),&
+                                                         PH2TR(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1),PH2TR(iregn,i)/7.5*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1)
   	  ENDDO
   	ENDDO
   	WRITE(21,*)'EV charging prices (2022 USD/MMBtu)'
   	WRITE(21,'(a4,3(",",a7))')'year','LDV_l2','HDV_flt','HDV_nft'
   	DO i = 31, MNUMYR
   	  DO iregn = 1, MNUMCR-2
-  	    WRITE(21,'(i4,",",i4,3(",",f7.3))')i+1989,iregn,PELP2CM(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1),PELIBCM(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1),&
-  														PELFNCM(iregn,i)*1.115*mc_jpgdp(2022-1989)/mc_jpgdp(1)
+  	    WRITE(21,'(i4,",",i4,3(",",f7.3))')i+1989,iregn,PELP2CM(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1),PELIBCM(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1),&
+  														PELFNCM(iregn,i)*mc_jpgdp(1)*mc_jpgdp(2022-1989)/mc_jpgdp(1)
   	  ENDDO
   	ENDDO
-!	WRITE(21,*)'techshr_p2'
-!	DO i = 29, MNUMYR
-!	  DO itechp2 = 1, TECHP2
-!        WRITE(21,'(i4,",",i2,19(",",f5.3))') i+1989, itechp2, techshr_P2(i,itechp2,:,1)
-!	  ENDDO
-!	ENDDO
-!	WRITE(21,*)'cost_ice (2022USD)'
-!	WRITE(21,'(a4,",",a4,3(",",a8))')'Year','icaf','cost_ice','c_tech','c_lonox'
-!  	DO i=34,MNUMYR
-!  	  DO icafe19  = 1,CAFE19
-!  	    WRITE(21,'(I4,",",I4,3(",",F8.2))') i+1989, icafe19, cost_ICE(icafe19,i) / mc_jpgdp(1) * mc_jpgdp(33), &
-!															 cost_icetech(icafe19,i) / mc_jpgdp(1) * mc_jpgdp(33), &
-!															 lonox_cost(icafe19,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-!  	WRITE(21,*)'HDV INC_COST_CNG (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  DO ivmt  = 1,nvmt
-!  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_CNG(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-!  	WRITE(21,*)'HDV INC_COST_BEV (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  DO ivmt  = 1,nvmt
-!  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_BEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-!  	WRITE(21,*)'HDV INC_COST_PHEVD (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  DO ivmt  = 1,nvmt
-!  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_PHEVD(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-!  	WRITE(21,*)'HDV INC_COST_PHEVG (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  DO ivmt  = 1,nvmt
-!  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_PHEVG(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-!	WRITE(21,*)'HDV INC_COST_FCEV (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  DO ivmt  = 1,nvmt
-!  	    WRITE(21,'(I4,",",I4,19(",",F7.0))') i+1989, ivmt, INC_COST_FCEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-!  	WRITE(21,*)'HDV INC_COST_FCHEV (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  DO ivmt  = 1,nvmt
-!  	    WRITE(21,'(I4,",",I4,19(",",F7.0))') i+1989, ivmt, INC_COST_FCHEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	  ENDDO
-!  	ENDDO
-! 	WRITE(21,*)'HDV INC_COST_H2ICE (2022USD)'
-! 	DO i=34,MNUMYR
-! 	  DO ivmt  = 1,nvmt
-! 	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_H2ICE(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
-! 	  ENDDO
-! 	ENDDO
-!  	WRITE(21,*)'HDV BEV inc_tech_cost_19 (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,6)-inc_tech_cost_19(34,:,6)) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	ENDDO
-!  	WRITE(21,*)'HDV PHEVD inc_tech_cost_19 (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,7)-inc_tech_cost_19(34,:,7)) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	ENDDO
-!  	WRITE(21,*)'HDV PHEVG inc_tech_cost_19 (2022USD)'
-!  	DO i=34,MNUMYR
-!  	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,8)-inc_tech_cost_19(34,:,8)) / mc_jpgdp(1) * mc_jpgdp(33)
-!  	ENDDO
-!   	WRITE(21,*)'HDV FCEV inc_tech_cost_19 (2022USD)'
-!   	DO i=34,MNUMYR
-!   	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,9)-inc_tech_cost_19(34,:,9)) / mc_jpgdp(1) * mc_jpgdp(33)
-!   	ENDDO
-!    WRITE(21,*)'HDV GHG Compliance Cost (2022USD)'
-!    DO i=35,MNUMYR
-!      DO iregn = 1, mnumcr-2
-!   	    WRITE(21,'(I4,",",I2,19(",",F12.0))') i+1989,iregn, ghg_comp_cost(:,iregn,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!   	  ENDDO
-!    ENDDO
-!          
-!    WRITE(21,*)'HDV ACT Compliance Cost (2022USD)'
-!    DO i=35,MNUMYR
-!      DO iregn = 1, mnumcr-2
-!   	    WRITE(21,'(I4,",",I2,19(",",F12.0))') i+1989,iregn, act_comp_cost(:,iregn,i) / mc_jpgdp(1) * mc_jpgdp(33)
-!   	  ENDDO
-!    ENDDO
-!    WRITE(21,*)'Sales share by all dimensions (no LPG or E85)'
-!    DO i = 35,MNUMYR
-!      DO iregn = 1, MNUMCR-2
-!        DO icafe19 = 1, CAFE19
-!          DO iflt = 1, FLT
-!            DO ivmt = 1, NVMT
-!              WRITE(21,'(I4,4(",",I4),12(",",f9.5))')i+1989,iregn,icafe19,iflt,ivmt,fuel_shr_ivmt(i,ivmt,iflt,icafe19,:,iregn)
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!      ENDDO
-!    ENDDO
+	WRITE(21,*)'cost_ice (2022USD)'
+	WRITE(21,'(a4,",",a4,3(",",a8))')'Year','icaf','cost_ice','c_tech','c_lonox'
+  	DO i=34,MNUMYR
+  	  DO icafe19  = 1,CAFE19
+  	    WRITE(21,'(I4,",",I4,3(",",F8.2))') i+1989, icafe19, cost_ICE(icafe19,i) / mc_jpgdp(1) * mc_jpgdp(33), &
+															 cost_icetech(icafe19,i) / mc_jpgdp(1) * mc_jpgdp(33), &
+															 lonox_cost(icafe19,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+    
+!   Technology adoption (TRUCK_TECHADOPT)
+  	WRITE(21,*)'HDV BEV inc_tech_cost_19 (2022USD)'
+  	DO i=34,MNUMYR
+  	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,6)-inc_tech_cost_19(34,:,6)) / mc_jpgdp(1) * mc_jpgdp(33)
+  	ENDDO
+  	WRITE(21,*)'HDV PHEVD inc_tech_cost_19 (2022USD)'
+  	DO i=34,MNUMYR
+  	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,7)-inc_tech_cost_19(34,:,7)) / mc_jpgdp(1) * mc_jpgdp(33)
+  	ENDDO
+  	WRITE(21,*)'HDV PHEVG inc_tech_cost_19 (2022USD)'
+  	DO i=34,MNUMYR
+  	  WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,8)-inc_tech_cost_19(34,:,8)) / mc_jpgdp(1) * mc_jpgdp(33)
+  	ENDDO
+    WRITE(21,*)'HDV FCEV inc_tech_cost_19 (2022USD)'
+    DO i=34,MNUMYR
+      WRITE(21,'(I4,19(",",F9.0))') i+1989, (inc_tech_cost_19(i,:,9)-inc_tech_cost_19(34,:,9)) / mc_jpgdp(1) * mc_jpgdp(33)
+    ENDDO
+  	WRITE(21,*)'HDV inc_tech_cost_19 (2022USD) 2023 Base Year'
+  	DO i=34,MNUMYR
+  	  DO ifuel=1,FUEL12
+        WRITE(21,'(I4,",",I4,19(",",F9.0))') i+1989, ifuel, (inc_tech_cost_19(i,:,ifuel)-inc_tech_cost_19(34,:,ifuel)) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+    ENDDO
+	WRITE(21,*)'techshr_p2'
+	DO i = 29, MNUMYR
+	  DO ifuel = 1, fuel12
+        DO itechp2 = 1, TECHP2
+          WRITE(21,'(i4,",",i2,",",i2,19(",",f5.3))') i+1989, ifuel, itechp2, techshr_P2(i,itechp2,:,ifuel)
+	    ENDDO
+      ENDDO
+	ENDDO
+!   Alternative Powetrain full incremental costs
+  	WRITE(21,*)'HDV INC_COST_CNG (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_CNG(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV INC_COST_BEV (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_BEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV INC_COST_PHEVD (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_PHEVD(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV INC_COST_PHEVG (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_PHEVG(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+	WRITE(21,*)'HDV INC_COST_FCEV (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F7.0))') i+1989, ivmt, INC_COST_FCEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV INC_COST_FCHEV (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F7.0))') i+1989, ivmt, INC_COST_FCHEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+ 	WRITE(21,*)'HDV INC_COST_H2ICE (2022USD)'
+ 	DO i=34,MNUMYR
+ 	  DO ivmt  = 1,nvmt
+ 	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_H2ICE(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+ 	  ENDDO
+ 	ENDDO
+ 	WRITE(21,*)'HDV INC_COST_HEV (2022USD)'
+ 	DO i=34,MNUMYR
+ 	  DO ivmt  = 1,nvmt
+ 	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, INC_COST_HEV(ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+ 	  ENDDO
+ 	ENDDO
+  	WRITE(21,*)'HDV BEV IRA_CREDIT (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, IRA_CREDIT(6,ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV PHEVD IRA_CREDIT (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, IRA_CREDIT(7,ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV PHEVG IRA_CREDIT (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F8.0))') i+1989, ivmt, IRA_CREDIT(8,ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+	WRITE(21,*)'HDV FCEV IRA_CREDIT (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F7.0))') i+1989, ivmt, IRA_CREDIT(9,ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+  	WRITE(21,*)'HDV FCHEV IRA_CREDIT (2022USD)'
+  	DO i=34,MNUMYR
+  	  DO ivmt  = 1,nvmt
+  	    WRITE(21,'(I4,",",I4,19(",",F7.0))') i+1989, ivmt, IRA_CREDIT(10,ivmt,:,i) / mc_jpgdp(1) * mc_jpgdp(33)
+  	  ENDDO
+  	ENDDO
+	WRITE(21,*)'Final sales by powertrain'
+	DO i = 32, MNUMYR
+		DO ifuel = 1, FUEL12
+	        WRITE(21,'(i4,",",i2,19(",",f12.0))')i+1989,ifuel,sum(TRKSTK_19R(i,1,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,2,1,ifuel,:,mnumcr)),&
+													  sum(TRKSTK_19R(i,3,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,4,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,5,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,6,1,ifuel,:,mnumcr)) ,&
+													  sum(TRKSTK_19R(i,7,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,8,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,9,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,10,1,ifuel,:,mnumcr)),&
+													  sum(TRKSTK_19R(i,11,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,12,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,13,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,14,1,ifuel,:,mnumcr)),&
+													  sum(TRKSTK_19R(i,15,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,16,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,17,1,ifuel,:,mnumcr)),sum(TRKSTK_19R(i,18,1,ifuel,:,mnumcr)),&
+													  sum(TRKSTK_19R(i,19,1,ifuel,:,mnumcr))
+		ENDDO
+	ENDDO
+	WRITE(21,*)'Total regional sales by icafe19'
+	DO i = 32, MNUMYR
+	  DO iregn = 1, MNUMCR-2
+	    WRITE(21,'(i4,",",i2,19(",",f9.0))')i+1989,iregn,sum(TRKSTK_19R(i,1,1,:,:,iregn)), sum(TRKSTK_19R(i,2,1,:,:,iregn)), sum(TRKSTK_19R(i,3,1,:,:,iregn)),&
+														 sum(TRKSTK_19R(i,4,1,:,:,iregn)), sum(TRKSTK_19R(i,5,1,:,:,iregn)), sum(TRKSTK_19R(i,6,1,:,:,iregn)),&
+														 sum(TRKSTK_19R(i,7,1,:,:,iregn)), sum(TRKSTK_19R(i,8,1,:,:,iregn)), sum(TRKSTK_19R(i,9,1,:,:,iregn)),&
+														 sum(TRKSTK_19R(i,10,1,:,:,iregn)),sum(TRKSTK_19R(i,11,1,:,:,iregn)),sum(TRKSTK_19R(i,12,1,:,:,iregn)),&
+														 sum(TRKSTK_19R(i,13,1,:,:,iregn)),sum(TRKSTK_19R(i,14,1,:,:,iregn)),sum(TRKSTK_19R(i,15,1,:,:,iregn)),&
+														 sum(TRKSTK_19R(i,16,1,:,:,iregn)),sum(TRKSTK_19R(i,17,1,:,:,iregn)),sum(TRKSTK_19R(i,18,1,:,:,iregn)),&
+														 sum(TRKSTK_19R(i,19,1,:,:,iregn))
+	  ENDDO
+	ENDDO	
+	WRITE(21,*)'Final sales by region by powertrain'
+	DO i = 32, MNUMYR
+	  DO iregn = 1, MNUMCR-2
+		DO ifuel = 1, FUEL12
+	        WRITE(21,'(i4,",",i2,",",i2,19(",",f12.0))')i+1989,iregn,ifuel,sum(TRKSTK_19R(i,1,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,2,1,ifuel,:,iregn)),&
+													  sum(TRKSTK_19R(i,3,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,4,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,5,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,6,1,ifuel,:,iregn)) ,&
+													  sum(TRKSTK_19R(i,7,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,8,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,9,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,10,1,ifuel,:,iregn)),&
+													  sum(TRKSTK_19R(i,11,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,12,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,13,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,14,1,ifuel,:,iregn)),&
+													  sum(TRKSTK_19R(i,15,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,16,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,17,1,ifuel,:,iregn)),sum(TRKSTK_19R(i,18,1,ifuel,:,iregn)),&
+													  sum(TRKSTK_19R(i,19,1,ifuel,:,iregn))
+		ENDDO
+	  ENDDO
+	ENDDO
+    WRITE(21,*)'Sales share by all dimensions (no LPG or E85)'
+    DO i = 35,MNUMYR
+      DO iregn = 1, MNUMCR-2
+        DO icafe19 = 1, CAFE19
+          DO iflt = 1, FLT
+            DO ivmt = 1, NVMT
+              WRITE(21,'(I4,4(",",I4),12(",",f9.5))')i+1989,iregn,icafe19,iflt,ivmt,fuel_shr_ivmt(i,ivmt,iflt,icafe19,:,iregn)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+    WRITE(21,*)'HDV GHG Compliance Cost (2022USD)'
+    DO i=35,MNUMYR
+      DO iregn = 1, mnumcr-2
+   	    WRITE(21,'(I4,",",I2,19(",",F12.0))') i+1989,iregn, ghg_comp_cost(:,iregn,i) / mc_jpgdp(1) * mc_jpgdp(33)
+   	  ENDDO
+    ENDDO
+    WRITE(21,*)'HDV ACT Compliance Cost (2022USD)'
+    DO i=35,MNUMYR
+      DO iregn = 1, mnumcr-2
+   	    WRITE(21,'(I4,",",I2,19(",",F12.0))') i+1989,iregn, act_comp_cost(:,iregn,i) / mc_jpgdp(1) * mc_jpgdp(33)
+   	  ENDDO
+    ENDDO
   ENDIF
 
 
@@ -1035,7 +1137,7 @@ end module F_
 !	  Aggregate sales. credits, and mpgs from 19 size classes to 1) 4 NEMS reported classes and 2) 14 Phase 2 classes
 !	  The Phase 2 aggregate variables are used in the CAFE model, 4-class aggregation used in final reporting.
 !	Output:
-!		Updates TRKSTK_19,CREDSALES_19,TRKSAL_SC,TRKSAL_P2,credsales_p2,HDV_MPG,new_mpg_p2,cltmpg_yr
+!		Updates TRKSTK_19,TRKSAL_SC,TRKSAL_P2,HDV_MPG,new_mpg_p2,cltmpg_yr
 ! ==========================================================================================================
  SUBROUTINE TRUCK_AGGVARS
  USE F_
@@ -1044,23 +1146,10 @@ end module F_
 	INTEGER i
 
 !	Populate aggregate (national, no fleet detail) stock for rest of model, now that powertrain choice is done
-	DO icafe19 = 1, cafe19
-	  DO ifuel = 1, FUEL12
-	    TRKSTK_19(iyr,icafe19,1,ifuel) = sum(TRKSTK_19R(iyr,icafe19,1,ifuel,:,11))
-	  ENDDO
-	ENDDO
-
-!	Calculate CAFE credit sales allowed for PHEVs, EVs, and FCVs
-!	apply credit multipliers to sales
-    DO icafe19=1,CAFE19
-	  DO ifuel=1,FUEL12
-        CREDSALES_19(iyr,icafe19,ifuel)=TRKSTK_19(iyr,icafe19,1,ifuel)*HDV_AFV_CREDITS(ifuel,iyr)
-      ENDDO
-    ENDDO
+    TRKSTK_19(iyr, 1:cafe19, 1, 1:fuel12) = sum(TRKSTK_19R(iyr, 1:cafe19, 1, 1:fuel12, 1:FLT, 11), DIM=3)
 
 	TRKSAL_SC(iyr,:,:) 		= 0.0
 	TRKSAL_P2(iyr,:,:) 		= 0.0
-	credsales_p2(iyr,:,:) 	= 0.0
 	HDV_MPG(iyr,:,1,:) 		= 0.0
 	new_mpg_p2(iyr,:,:)		= 0.0
 	DO ifuel = 1,FUEL12
@@ -1069,7 +1158,6 @@ end module F_
 		icafe14 = P219Map(icafe19)
 	    TRKSAL_SC(iyr,isc4,ifuel) = TRKSAL_SC(iyr,isc4,ifuel) + TRKSTK_19(iyr,icafe19,1,ifuel)
 		TRKSAL_P2(iyr,icafe14,ifuel) = TRKSAL_P2(iyr,icafe14,ifuel) + TRKSTK_19(iyr,icafe19,1,ifuel)
-		credsales_p2(iyr,icafe14,ifuel) = credsales_p2(iyr,icafe14,ifuel) + CREDSALES_19(iyr,icafe19,ifuel)
         if(new_mpg_19(iyr,ifuel,icafe19).gt.0.0.and.TRKSTK_19(iyr,icafe19,1,ifuel).gt.0.0) THEN 
 		  HDV_MPG(iyr,isc4,1,ifuel) = HDV_MPG(iyr,isc4,1,ifuel) + TRKSTK_19(iyr,icafe19,1,ifuel) / (new_mpg_19(iyr,ifuel,icafe19)*(1-HDV_DF(ifuel,icafe14)))  ! Apply degradation for on-road
 		  new_mpg_p2(iyr,ifuel,icafe14) = new_mpg_p2(iyr,ifuel,icafe14) + TRKSTK_19(iyr,icafe19,1,ifuel) / new_mpg_19(iyr,ifuel,icafe19)
@@ -1122,12 +1210,10 @@ end module F_
                                           SUM(TRKSTK_19R(iyr,1:2,1,ifuel,:,11)))**-1.0
 	  ENDIF
     ENDDO
+    
 !   Vintages 2 - 33
-    DO iage = 2,33      
-	  DO ifuel = 1,FUEL12
-	    cltmpg_yr(iyr,ifuel,iage) = cltmpg_yr(iyr-1,ifuel,iage-1)
-      ENDDO
-    ENDDO
+    cltmpg_yr(iyr,1:fuel12,2:age) = cltmpg_yr(iyr-1,1:fuel12,1:age-1)
+
 !   Vintage 34+
     DO ifuel = 1,FUEL12
 	  IF(sum(VMTFLT_19(iyr-1,1:2,33:34,2)).gt.0.0.and.cltmpg_yr(iyr-1,CLTMap(ifuel),34).gt.0.0.and.cltmpg_yr(iyr-1,CLTMap(ifuel),33).gt.0.0) then
@@ -1137,56 +1223,6 @@ end module F_
 	    cltmpg_yr(iyr,CLTMap(ifuel),34) = cltmpg_yr(iyr-1,CLTMap(ifuel),33)
 	  ENDIF
     ENDDO
-
-!!... New vehicles - Vintage 1
-!    cltmpg_yr(iyr,1,1) = ((VMTFLT_19(iyr-1,1,1,2)/sum(VMTFLT_19(iyr-1,1:2,1,2)))/NEW_MPG_19(iyr,2,1) + &
-!						  (VMTFLT_19(iyr-1,2,1,2)/sum(VMTFLT_19(iyr-1,1:2,1,2)))/NEW_MPG_19(iyr,2,2))**-1.0               ! gasoline
-!	cltmpg_yr(iyr,2,1) = ((VMTFLT_19(iyr-1,1,1,1)/sum(VMTFLT_19(iyr-1,1:2,1,1)))/NEW_MPG_19(iyr,1,1) + &
-!						  (VMTFLT_19(iyr-1,2,1,1)/sum(VMTFLT_19(iyr-1,1:2,1,1)))/NEW_MPG_19(iyr,1,2))**-1.0               ! diesel
-!    DO ifuel = 3,FUEL12
-!        IF(sum(VMTFLT_19(iyr-1,1:2,1,ifuel)).gt.0.0) then 
-!	      cltmpg_yr(iyr,ifuel,1) = ((VMTFLT_19(iyr-1,1,1,ifuel)/sum(VMTFLT_19(iyr-1,1:2,1,ifuel)))/NEW_MPG_19(iyr,ifuel,1) + &
-!									(VMTFLT_19(iyr-1,2,1,ifuel)/sum(VMTFLT_19(iyr-1,1:2,1,ifuel)))/NEW_MPG_19(iyr,ifuel,2))**-1.0 	
-!        ELSE
-!          cltmpg_yr(iyr,ifuel,1) = ((SUM(TRKSTK_19R(iyr,1,1,ifuel,:,11))/NEW_MPG_19(iyr,ifuel,1) + &
-!		                             SUM(TRKSTK_19R(iyr,2,1,ifuel,:,11))/NEW_MPG_19(iyr,ifuel,2)) / &
-!								   SUM(TRKSTK_19R(iyr,1:2,1,ifuel,:,11)))**-1.0
-!		ENDIF
-!    ENDDO
-!        
-!!... Vintages 2 - 33
-!    DO iage = 2,33      
-!	    DO ifuel = 1,FUEL12
-!		  cltmpg_yr(iyr,ifuel,iage) = cltmpg_yr(iyr-1,ifuel,iage-1)
-!        ENDDO
-!    ENDDO
-!!... Vintage 34+
-!	IF(sum(VMTFLT_19(iyr-1,1:2,33:34,2)).gt.0.0) then
-!	  cltmpg_yr(iyr,1,34) = 1.0/(((sum(VMTFLT_19(iyr-1,1:2,33,2))/cltmpg_yr(iyr-1,1,34)) + &
-!        (sum(VMTFLT_19(iyr-1,1:2,34,2))/cltmpg_yr(iyr-1,1,33)))/(sum(VMTFLT_19(iyr-1,1:2,33:34,2))))
-!    ELSE
-!	  cltmpg_yr(iyr,1,34) = cltmpg_yr(iyr-1,1,33)
-!	ENDIF
-!	IF(sum(VMTFLT_19(iyr-1,1:2,33:34,1)).gt.0.0) then
-!	  cltmpg_yr(iyr,2,34) = 1.0/(((sum(VMTFLT_19(iyr-1,1:2,33,1))/cltmpg_yr(iyr-1,2,34)) + &
-!       (sum(VMTFLT_19(iyr-1,1:2,34,1))/cltmpg_yr(iyr-1,2,33)))/sum(VMTFLT_19(iyr-1,1:2,33:34,1)))
-!	ELSE
-!	  cltmpg_yr(iyr,2,34) = cltmpg_yr(iyr-1,2,33)
-!	ENDIF
-!    DO ifuel = 3,FUEL12
-!	    IF(sum(VMTFLT_19(iyr-1,1:2,33:34,ifuel)).gt.0.0) then
-!		    IF(cltmpg_yr(iyr-1,ifuel,34).gt.0.0.or.cltmpg_yr(iyr-1,ifuel,33).gt.0.0) then
-!		      cltmpg_yr(iyr,ifuel,34) = 1.0/(((sum(VMTFLT_19(iyr-1,1:2,33,ifuel))/cltmpg_yr(iyr-1,ifuel,34)) + &
-!                (sum(VMTFLT_19(iyr-1,1:2,34,ifuel))/cltmpg_yr(iyr-1,ifuel,33)))/sum(VMTFLT_19(iyr-1,1:2,33:34,ifuel)))
-!			ELSEIF(cltmpg_yr(iyr-1,ifuel,33).gt.0.0) then
-!			  cltmpg_yr(iyr,ifuel,34) = cltmpg_yr(iyr-1,ifuel,33)
-!			ELSEIF(cltmpg_yr(iyr-1,ifuel,34).gt.0.0) then
-!			  cltmpg_yr(iyr,ifuel,34) = cltmpg_yr(iyr-1,ifuel,34)
-!			ENDIF
-!	    ELSE
-!	      cltmpg_yr(iyr,ifuel,34) = cltmpg_yr(iyr-1,ifuel,33)
-!		ENDIF
-!	ENDDO
  
  RETURN
  END SUBROUTINE TRUCK_AGGVARS
@@ -1216,7 +1252,9 @@ end module F_
 		 veh_cost,&
          refueltimeval,&
 		 MIDYR_choice(CAFE19,FUEL12,FLT,NVMT), &
-		 SLOPE_choice(CAFE19,FUEL12,FLT,NVMT)
+		 SLOPE_choice(CAFE19,FUEL12,FLT,NVMT), &
+         MIDYR_adj(CAFE19,FUEL12,FLT,NVMT), &
+         sum_npv_choice
 		 
     INTEGER Y
 	
@@ -1225,6 +1263,7 @@ end module F_
 	
 	IF (first_time) then
 	  start_curve(:,:,:,:) = .false.
+      MIDYR_adj(:,:,:,:) = 0.0
 	  first_time = .false.
 	ENDIF
 
@@ -1238,9 +1277,7 @@ end module F_
     IF (jfuel.eq.6.and.iflt.eq.2.and.icafe19.lt.16) then	! Non-sleeper fleet vehicles (infra cost in inc_cost)
 	  veh_cost = inc_cost -BEV_infra_cost(icafe19,iyr)
     ENDIF
-    
-    inc_cost = inc_cost * (1 + sales_tax_rate(iregn))
-	
+    	
 !	calculate annual fuel savings relative to conventional powertrain (Class 2b/3: gasoline, Class 4-8: diesel)
     ann_savings =  ann_vmt_per_veh * (cpm_base-cpm)
 	
@@ -1255,8 +1292,9 @@ end module F_
                                                  + (ann_savings - insure_rate*veh_cost + (mr_ice(Y) - MR_cost(icafe19,jfuel,Y,iyr))*ann_vmt_per_veh - refueltimeval)&
                                                    / (1.0+DISCRTXG_P2)**(Y)
     ENDDO
-
-	IF (sum(npv_choice(icafe19,jfuel,ivmt,:,iregn,iyr)).ne.sum(npv_choice(icafe19,jfuel,ivmt,:,iregn,iyr))) then
+    
+    sum_npv_choice = sum(npv_choice(icafe19,jfuel,ivmt,:,iregn,iyr))
+	IF (sum_npv_choice.ne.sum_npv_choice) then
 	  WRITE(21,'(a,6(",",a4),8(",",a8),9(",",a4))')'ERROR: TRANFRT NaN NPV','year','regn','cafe','flt','fuel','ivmt','npv(1)','npv(2)','npv(3)','npv(4)','npv(5)','npv(6)',&
 												   'npv(7)','annvmt','cpmbase','cpm','MR(1)','MR(2)','MR(3)','MR(4)','MR(5)','MR(6)','MR(7)'
 	  WRITE(21,'(a,6(",",i4),8(",",f8.0),9(",",f4.3),2(",",f10.1))')'ERROR: TRANFRT NaN NPV',curcalyr,iregn,icafe19,iflt,jfuel,ivmt,npv_choice(icafe19,jfuel,ivmt,:,iregn,iyr),ann_vmt_per_veh,&
@@ -1274,7 +1312,7 @@ end module F_
 !        IF(fcrl.eq.1.and.itryghg.eq.1) WRITE(21,'(a,7(",",i4),2(",",f10.1))')'skip_adopt',curcalyr,iregn,icafe19,iflt,jfuel,ivmt,Y,VMT_VEH(ivmt,iflt,icafe19),HDV_USEFULLIFE(1,P219Map(icafe19))
         CYCLE
       ENDIF
-      IF (inc_cost.lt.npv_choice(icafe19,jfuel,ivmt,Y,iregn,iyr)) then
+      IF (inc_cost* (1 + sales_tax_rate(iregn)).lt.npv_choice(icafe19,jfuel,ivmt,Y,iregn,iyr)) then
         buy_shr(y) = pback_shr(Y,icafe19)*veh_shr_vmt_bin
       ENDIF
     ENDDO
@@ -1285,29 +1323,28 @@ end module F_
 !	the earliest start year (TRGSHXG): start the s-curve to begin manufacturing ramp-up and infrastructure rollout.
 	IF (buy_shr_agg.ge.BFSHXG(isc4,jfuel,iflt).and.curcalyr.ge.TRGSHXG(icafe19,jfuel,iflt)) then
 	  IF (.not.start_curve(icafe19,jfuel,iflt,ivmt)) then
-	    MIDYR_choice(icafe19,jfuel,iflt,ivmt)	= curcalyr+(1.*CYAFVXG(isc4,jfuel,iflt)/2)
+	    MIDYR_choice(icafe19,jfuel,iflt,ivmt)	= curcalyr*1.+(1.*CYAFVXG(isc4,jfuel,iflt)/2.0)
 	    start_curve(icafe19,jfuel,iflt,ivmt) = .true.
-		SLOPE_choice(icafe19,jfuel,iflt,ivmt)  = LOG(0.01)/((1.*CYAFVXG(isc4,jfuel,iflt))/2)
+		SLOPE_choice(icafe19,jfuel,iflt,ivmt)  = LOG(0.01)/((1.*CYAFVXG(isc4,jfuel,iflt))/2.0)
 	  ENDIF
-	  mpath = BFSHXG(isc4,jfuel,iflt) + (EFSHXG(isc4,jfuel,iflt)-BFSHXG(isc4,jfuel,iflt)) &
-			  /(1.+(exp(SLOPE_choice(icafe19,jfuel,iflt,ivmt)*(1.*curcalyr-MIDYR_choice(icafe19,jfuel,iflt,ivmt)))))
 
 !     Two possible modifications:
 !     1. If not meeting CAFE, squish the S-curve steeper for BEV, PHEVD, PHEVG, FCEV, FCHEV, HEV, H2ICE
       IF (itryghg.gt.1.and.jfuel.ge.6.and.HDV_passGHG(iyr,P24Map(P219Map(icafe19))).eq..FALSE.) THEN
         IF (itryghg.le.CEILING(ghgtry/2.0)) THEN     ! For the first 50% of attempts, push HEV and PHEV options
-          IF (jfuel.eq.11.or.jfuel.eq.7.or.jfuel.eq.8) MIDYR_choice(icafe19,jfuel,iflt,ivmt) = MIDYR_choice(icafe19,jfuel,iflt,ivmt) - 0.5
+          IF (jfuel.eq.11.or.jfuel.eq.7.or.jfuel.eq.8) MIDYR_adj(icafe19,jfuel,iflt,ivmt) = itryghg * 0.5
         ELSE                                         ! For latter half of attempts, push ZEV options
-          IF (jfuel.ne.11.and.jfuel.ne.7.and.jfuel.ne.8) MIDYR_choice(icafe19,jfuel,iflt,ivmt) = MIDYR_choice(icafe19,jfuel,iflt,ivmt) - 0.5
+          IF (jfuel.ne.11.and.jfuel.ne.7.and.jfuel.ne.8) MIDYR_adj(icafe19,jfuel,iflt,ivmt) = itryghg * 0.5
         ENDIF
-        mpath = BFSHXG(isc4,jfuel,iflt) + (EFSHXG(isc4,jfuel,iflt)-BFSHXG(isc4,jfuel,iflt)) &
-			  /(1.+(exp(SLOPE_choice(icafe19,jfuel,iflt,ivmt)*(1.*curcalyr-MIDYR_choice(icafe19,jfuel,iflt,ivmt)))))
 !     2. If market share is lower than last year, freeze the S-curve ascent (bump MIDYR up 1 year)
 !      ELSEIF (buy_shr_agg*mpath.lt.fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn)) THEN
 !        MIDYR_choice(icafe19,jfuel,iflt,ivmt) = MIDYR_choice(icafe19,jfuel,iflt,ivmt) + 1.0
 !        mpath = BFSHXG(isc4,jfuel,iflt) + (EFSHXG(isc4,jfuel,iflt)-BFSHXG(isc4,jfuel,iflt)) &
 !			  /(1.+(exp(SLOPE_choice(icafe19,jfuel,iflt,ivmt)*(1.*curcalyr-MIDYR_choice(icafe19,jfuel,iflt,ivmt)))))
       ENDIF
+
+	  mpath = BFSHXG(isc4,jfuel,iflt) + (EFSHXG(isc4,jfuel,iflt)-BFSHXG(isc4,jfuel,iflt)) &
+			  /(1.+(exp(SLOPE_choice(icafe19,jfuel,iflt,ivmt)*(1.*curcalyr-(MIDYR_choice(icafe19,jfuel,iflt,ivmt)-MIDYR_adj(icafe19,jfuel,iflt,ivmt))))))
 	ELSE
 	  mpath = 1.0
 	ENDIF
@@ -1318,9 +1355,9 @@ end module F_
     fuel_shr_regn(iyr,icafe19,jfuel,iflt,iregn) = fuel_shr_regn(iyr,icafe19,jfuel,iflt,iregn) + buy_shr_agg*mpath
 
 !   DEBUG
-!	IF (jfuel.eq.11.and.icafe19.le.4.and.icafe19.ge.3) then
-!	  WRITE(21,'(a,7(",",i4),10(",",f8.0),12(",",f4.3))')'npv_choice_debug',curitr,curcalyr,iregn,icafe19,iflt,jfuel,ivmt,npv_choice(icafe19,jfuel,ivmt,:,iregn,iyr),ann_vmt_per_veh,&
-!															  inc_cost,refueltimeval, cpm_base,cpm,MR_cost(icafe19,jfuel,:,iyr),mpath,buy_shr_agg
+!	IF (jfuel.eq.11.and.icafe19.le.2.and.icafe19.ge.1) then
+!	  WRITE(21,'(a,8(",",i4),10(",",f8.0),9(",",f4.3),2(",",f6.3),",",L2)')'npv_choice_debug',curitr,curcalyr,iregn,icafe19,iflt,jfuel,ivmt,itryghg,npv_choice(icafe19,jfuel,ivmt,:,iregn,iyr),ann_vmt_per_veh,&
+!															  inc_cost,refueltimeval, cpm_base,cpm,MR_cost(icafe19,jfuel,:,iyr),mpath,buy_shr_agg,start_curve(icafe19,jfuel,iflt,ivmt)
 !	ENDIF
 
 
@@ -1973,6 +2010,7 @@ end module F_
 !=============================================================================================================
  SUBROUTINE TRUCK_STOCK
  USE F_
+ USE MEAN_FUNCS
  IMPLICIT NONE
 
  REAL age_wgt(MNUMYR,CAFE19,MNUMCR)
@@ -2007,33 +2045,16 @@ end module F_
       ENDDO         ! end region
 	ENDIF
     
-    DO icafe19 = 1, CAFE19
-      DO ifuel = 1, FUEL12
-        DO iage = 1, AGE
-          DO iflt = 1, flt
-            TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,11) = sum(TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,1:mnumcr-2))
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+    TRKSTK_19R(iyr,1:cafe19,1:age,1:fuel12,1:flt,11) = sum(TRKSTK_19R(iyr,1:cafe19,1:age,1:fuel12,1:flt,1:mnumcr-2), DIM=5)
 
 	IF (curcalyr.gt.BSYR_STK)then
-!      WRITE(21,'(a,2(",",i4),4(",",f12.0))')'trkstk2',curcalyr,curitr,sum(TRKSTK_19R(iyr,1:2,1,:,:,mnumcr)),sum(TRKSTK_19R(iyr,3:4,1,:,:,mnumcr)),sum(TRKSTK_19R(iyr,5:7,1,:,:,mnumcr)),sum(TRKSTK_19R(iyr,8:19,1,:,:,mnumcr))
             
 !	  Summing the stock to match the reporting aggregation levels
-      DO iage=1,age
-        DO ifuel=1,FUEL12
-   	      DO iflt = 1,FLT
-            TRKSTK(iyr,1,iage,ifuel,iflt) = sum(TRKSTK_19R(iyr,3:4,iage,ifuel,iflt,mnumcr))
-	  	    TRKSTK(iyr,2,iage,ifuel,iflt) = sum(TRKSTK_19R(iyr,5:7,iage,ifuel,iflt,mnumcr))
-	  	    TRKSTK(iyr,3,iage,ifuel,iflt) = sum(TRKSTK_19R(iyr,8:19,iage,ifuel,iflt,mnumcr))
-          ENDDO
-!		  Putting the truck stock in the format used in the fuel economy model
-          DO icafe19 = 1,CAFE19
-            TRKSTK_19(iyr,icafe19,iage,ifuel) = sum(TRKSTK_19R(iyr,icafe19,iage,ifuel,1:2,mnumcr)) 	  
-	      ENDDO
-        ENDDO
-      ENDDO
+      TRKSTK(iyr,1,1:age,1:fuel12,1:flt) = sum(TRKSTK_19R(iyr,3:4,1:age,1:fuel12,1:flt,mnumcr), DIM=1)
+      TRKSTK(iyr,2,1:age,1:fuel12,1:flt) = sum(TRKSTK_19R(iyr,5:7,1:age,1:fuel12,1:flt,mnumcr), DIM=1)
+      TRKSTK(iyr,3,1:age,1:fuel12,1:flt) = sum(TRKSTK_19R(iyr,8:19,1:age,1:fuel12,1:flt,mnumcr), DIM=1)
+      
+      TRKSTK_19(iyr,1:cafe19,1:age,1:fuel12) = sum(TRKSTK_19R(iyr,1:cafe19,1:age,1:fuel12,1:2,mnumcr),DIM=4)
 
 !	  age vehicle fuel economy to correspond with vehicle vintaging
       DO isc=1,sc
@@ -2047,7 +2068,9 @@ end module F_
           IF(VMTTMP(1)+VMTTMp(2).le.0.0)then
             HDV_MPG(iyr,isc,AGE,ifuel) = HDV_MPG(iyr-1,isc,age-1,ifuel)
           ELSE
-            HDV_MPG(iyr,isc,AGE,ifuel) = HARMONIC_MEAN(HDV_MPG(iyr-1,isc,AGE-1:AGE,ifuel),VMTTMP(1:2),2)
+            HDV_MPG(iyr,isc,AGE,ifuel) = HARMONIC_MEAN_1D(HDV_MPG(iyr-1,isc,AGE-1:AGE,ifuel), &
+                                                          VMTTMP(1:2), &
+                                                          caller_id = 'HDV_MPG')
           ENDIF
         ENDDO
       ENDDO
@@ -2057,19 +2080,13 @@ end module F_
 !	Note that for CLT, {1:gasoline, 2:diesel} (reversed from freight truck module)
     IF(curcalyr.ge.2012) then
       DO iage = 1,age
-	    DO iregn = 1,MNUMCR-2
           DO ivoc = 1, 2
             DO ifuel = 1,FUEL12
-              CLTSTK(iyr,CLTMap(ifuel),iage,ivoc,iregn) = sum(TRKSTK_19R(iyr,ivoc,iage,ifuel,1:2,iregn))
+              CLTSTK(iyr,CLTMap(ifuel),iage,ivoc,1:mnumcr-2) = sum(TRKSTK_19R(iyr,ivoc,iage,ifuel,1:2,1:mnumcr-2), DIM=1)
             ENDDO
           ENDDO
-	    ENDDO
 !		Calculate national numbers as well
-		DO ifuel = 1,FUEL12
-		  DO ivoc = 1,2
-		    CLTSTK(n,ifuel,iage,ivoc,MNUMCR) = sum(CLTSTK(n,ifuel,iage,ivoc,1:MNUMCR-2))
-		  ENDDO
-		ENDDO
+		CLTSTK(n,1:fuel12,iage,1:2,MNUMCR) = sum(CLTSTK(n,1:fuel12,iage,1:2,1:MNUMCR-2), DIM=3)
 	  ENDDO
 	  DO ifuel = 1,FUEL12
 	    CLTSALT(ifuel,n) = sum(CLTSTK(n,ifuel,1,:,MNUMCR))                ! Total sales by powertrain
@@ -2119,6 +2136,21 @@ end module F_
 !	      										avg_age(isc,icafe19,9),avg_age(isc,icafe19,MNUMCR)
 !		ENDDO
 !	  ENDDO
+!	  WRITE(21,*)'Final stock by size class (millions, for regional scrappage calibration)'
+!	  DO isc = 32, MNUMYR
+!	  	DO icafe19 = 1, cafe19
+!	        WRITE(21,'(i4,",",i2,10(",",f12.3))')isc+1989,icafe19,sum(TRKSTK_19R(isc,icafe19,:,:,:,1))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,2))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,3))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,4))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,5))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,6))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,7))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,8))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,9))/1000000,&
+!                                                                  sum(TRKSTK_19R(isc,icafe19,:,:,:,11))/1000000
+!	  	ENDDO
+!	  ENDDO
 	ENDIF	! (curcalyr.eq.2050.and.FCRL.eq.1)
 
  RETURN
@@ -2150,30 +2182,30 @@ end module F_
 	REAL    TOT_MKT, MAX_SHARE, MAX_SHARE_S(techp2)
 	REAL    REQ_MKT, SYNERGY_LOSS(techp2), delta_mkt
 	REAL    MPGEFF_19(FUEL12,CAFE19), techadjshr_P2(MNUMYR,techp2,CAFE19,FUEL12)
-	REAL    TECHRPT_SAL(MNUMYR,10,FUEL12)
 	REAL    TECHMID_P2_ADJ(TECHP2,CAFE14)
+    REAL    term_btu_temp(cafe19)
     
     LOGICAL tech_once_p2(techp2,CAFE19,FUEL12)
 	LOGICAL REQUIRED
 	
     IF(curcalyr.eq.2018) then
-	  DO ifuel = 1,FUEL12
-!...	Filling in phase 2 new_mpg variable - 19 CAFE class sizes
-    	new_mpg_19(iyr-1,ifuel,:) = base_mpg_p2(ifuel,:)
-        TECHPENYR_P2(:,:,:,:) = 0.0
+!     Filling in phase 2 new_mpg variable - 19 CAFE class sizes
+      new_mpg_19(iyr-1, 1:fuel12, 1:cafe19) = base_mpg_p2(1:fuel12, 1:cafe19)
+      TECHPENYR_P2(1:mnumyr, 1:techp2, 1:CAFE19, 1:FUEL12) = 0.0
+      
+!     Align techs from Phase 1 to Phase 2 for base tech penetration
+	  TECHSHR_P2(iyr-1,1:techp2, 1:CAFE19, 1:FUEL12) = TECHBASE_P2(1:techp2, 1:CAFE19, 1:FUEL12)
 
-!...	Align techs from Phase 1 to Phase 2 for base tech penetration
-        DO icafe19 = 1,CAFE19
-          DO itechp2 = 1,techp2	   
-	        TECHSHR_P2(iyr-1,itechp2,icafe19,ifuel) = TECHBASE_P2(itechp2,icafe19,ifuel)
-		  ENDDO
-	    ENDDO
-      ENDDO     ! End fuel loop
 	ENDIF      ! End Phase 2 initial year section
 
     if (itryghg.eq.1) then
       tech_once_p2(:,:,:) = .false.
 
+!     Grab the first year each tech is available on ANY powertrain (fyr_p2)
+      WHERE (techlearn_p2(1:techp2,1:cafe14).gt.1)
+        fyr_p2(1:techp2,1:cafe14) = minval(techfyr_p2(1:techp2,1:cafe14,1:fuel12),DIM=3)
+      END WHERE
+      
       DO ifuel = 1,FUEL12
 !...    calculate new truck energy consumption (million Btu) per vehicle
 !	    Accumulate total annual energy consumed and total sales within each of the 14 regulatory size classes
@@ -2181,44 +2213,45 @@ end module F_
 !	    execute AFTER tech adoption, so use previous year values for weighting.
 	    Temp_Btu_p2(:,ifuel) = 0.0
 	    Temp_sales_p2(:,ifuel) = 0.0
-	    DO icafe19 = 1, cafe19
+	    term_btu_temp = (ANNVMT_19(iyr,1:CAFE19,1,ifuel) / NEW_MPG_19(iyr-1,ifuel,1:CAFE19) * &
+                        HRATE(SC19Map(1:CAFE19),ifuel) * (1.0E-6)) * TRKSTK_19(iyr-1,1:CAFE19,1,ifuel)
+        
+        DO icafe19 = 1, cafe19
 	  	  icafe14 = P219Map(icafe19)	! crosswalk to 14 P2 regulatory groups
 	  	  isc4 = SC19Map(icafe19)	! crosswalk to 4 NEMS reported size class groups
-	  	  Temp_Btu_p2(icafe14,ifuel) 	= Temp_Btu_p2(icafe14,ifuel) &
-	  	  							+ (ANNVMT_19(iyr,icafe19,1,ifuel) / NEW_MPG_19(iyr-1,ifuel,icafe19)*HRATE(isc4,ifuel)*(1E-6))*TRKSTK_19(iyr-1,icafe19,1,ifuel)
-	  	  Temp_sales_p2(icafe14,ifuel)= Temp_sales_p2(icafe14,ifuel) + TRKSTK_19(iyr-1,icafe19,1,ifuel)
+	  	  Temp_Btu_p2(icafe14,ifuel)   = Temp_Btu_p2(icafe14,ifuel) + term_btu_temp(icafe19)
+	  	  Temp_sales_p2(icafe14,ifuel) = Temp_sales_p2(icafe14,ifuel) + TRKSTK_19(iyr-1,icafe19,1,ifuel)
 	    ENDDO
       
 !	    Calculate average annual energy consumed within each of the 14 regulatory size classes
-	    DO icafe14 = 1, CAFE14
-	  	  if (Temp_sales_p2(icafe14,ifuel).gt.0.0) Temp_Btu_p2(icafe14,ifuel) = Temp_Btu_p2(icafe14,ifuel) / Temp_sales_p2(icafe14,ifuel)
-	    ENDDO
-
-!...    Incorporating technology cost learning curve into technology cost variable
-	    DO icafe19 = 1,CAFE19
-          icafe14 = P219Map(icafe19)	! crosswalk to 14 P2 regulatory groups
-	      DO itechp2 = 1,techp2
-            IF(techlearn_p2(itechp2,icafe14).gt.1) then 	! If assuming learning cost reductions for this tech
-              fyr_p2(itechp2,icafe14) = minval(techfyr_p2(itechp2,icafe14,:))	! first year it is available on ANY powertrain
-      
-!	          Learning curves are pinned to actual years, rather than generic passage of time.
-!             This shifts the learning curve so that it is "1" in the first year the tech is available, rather than a set calendar year
-              learn_adj(itechp2,icafe14) = 0.0
-	          IF(fyr_p2(itechp2,icafe14).gt.learn_yr(techlearn_p2(itechp2,icafe14))) then
-	            learn_adj(itechp2,icafe14) 			= fyr_p2(itechp2,icafe14)-learn_yr(techlearn_p2(itechp2,icafe14))
-	          ENDIF
-	          TECHCOSTyr_p2(iyr,itechp2,icafe19) 	= techcost_p2(itechp2,icafe14)*learning_p2(techlearn_p2(itechp2,icafe14),iyr-learn_adj(itechp2,icafe14))
-            ELSE
-              techcostyr_p2(iyr,itechp2,icafe19) 	= techcost_p2(itechp2,icafe14)
-            ENDIF
-
-!            IF(ifuel.eq.1.and.fcrl.eq.1.and.icafe19.eq.cafe19) WRITE(21,'(a,",",i4,",",i2,19(",",f9.2))') 'techcost',curcalyr,itechp2,techcostyr_p2(iyr,itechp2,:)
-            
-          ENDDO
-	    ENDDO
+	    WHERE (Temp_sales_p2(1:cafe14,ifuel).gt.0.0)
+          Temp_Btu_p2(1:cafe14,ifuel) = Temp_Btu_p2(1:cafe14,ifuel) / Temp_sales_p2(1:cafe14,ifuel)
+        END WHERE
       ENDDO
-    ENDIF   ! itryghg.eq.1
+      
+!...  Incorporating technology cost learning curve into technology cost variable
+	  DO icafe19 = 1,CAFE19
+        icafe14 = P219Map(icafe19)	! crosswalk to 14 P2 regulatory groups
+	    DO itechp2 = 1,techp2
+          IF(techlearn_p2(itechp2,icafe14).gt.1) then 	! If assuming learning cost reductions for this tech
+      
+!	        Learning curves are pinned to actual years, rather than generic passage of time.
+!           This shifts the learning curve so that it is "1" in the first year the tech is available, rather than a set calendar year
+            learn_adj(itechp2,icafe14) = 0.0
+	        IF(fyr_p2(itechp2,icafe14).gt.learn_yr(techlearn_p2(itechp2,icafe14))) then
+	          learn_adj(itechp2,icafe14) 			= fyr_p2(itechp2,icafe14)-learn_yr(techlearn_p2(itechp2,icafe14))
+	        ENDIF
+	        TECHCOSTyr_p2(iyr,itechp2,icafe19) 	= techcost_p2(itechp2,icafe14)*learning_p2(techlearn_p2(itechp2,icafe14),iyr-learn_adj(itechp2,icafe14))
+          ELSE
+            techcostyr_p2(iyr,itechp2,icafe19) 	= techcost_p2(itechp2,icafe14)
+          ENDIF
 
+!          IF(ifuel.eq.1.and.fcrl.eq.1.and.icafe19.eq.cafe19) WRITE(21,'(a,",",i4,",",i2,19(",",f9.2))') 'techcost',curcalyr,itechp2,techcostyr_p2(iyr,itechp2,:)
+          
+        ENDDO
+	  ENDDO
+    ENDIF   ! itryghg.eq.1
+        
 !...determine technology penetration trigger price for new technology penetration
 	  DO icafe19 = 1,CAFE19
 	    icafe14 = P219Map(icafe19)	! 1-14
@@ -2235,29 +2268,18 @@ end module F_
 !...        application criteria: is technology available by size class and fuel?
             IF(curcalyr.ge.TECHFYR_P2(itechp2,icafe14,ifuel)) then
               Payback1_P2(itechp2,icafe19) = Payback_P2(icafe14) + MIN(5,itryghg-1)
-!...          calculate present value of energy savings over payback period (increase discount rate post-standards)
-              DO ip = 1,payback1_P2(itechp2,icafe19)
-!                IF(curcalyr.le.2032)then
-			      IF(ANNVMT_19(iyr,icafe19,1,ifuel).gt.0) TEMP_TRIG_P2(itechp2,icafe19) = TEMP_TRIG_P2(itechp2,icafe19) + &
-							((TEMP_BTU_p2(icafe14,ifuel)*ANNVMT_19(iyr,icafe19,ip,ifuel)/ANNVMT_19(iyr,icafe19,1,ifuel)*techeff_p2(itechp2,icafe14))/((1.0 + DISCRTXG_P2)**ip))
-!                ELSE
-!			      IF(ANNVMT_19(iyr,icafe19,1,ifuel).gt.0) TEMP_TRIG_P2(itechp2,icafe19) = TEMP_TRIG_P2(itechp2,icafe19) + &
-!							((TEMP_BTU_p2(icafe14,ifuel)*ANNVMT_19(iyr,icafe19,ip,ifuel)/ANNVMT_19(iyr,icafe19,1,ifuel)*techeff_p2(itechp2,icafe14))/((1.0 + DISCRTXGL_P2)**ip))
-!                ENDIF
-              ENDDO
+              
+!...          calculate present value of energy savings over payback period
+!             Note that vector of payback years (real( (/ (i, i=1, payback1_P2) /), kind=KIND(1.0D0))) changes with each itechp2/icafe19
+              IF(ANNVMT_19(iyr,icafe19,1,ifuel).gt.0) THEN
+                TEMP_TRIG_P2(itechp2,icafe19) = SUM( (TEMP_BTU_p2(icafe14,ifuel)*ANNVMT_19(iyr,icafe19,(/ (i, i=1, Payback1_P2(itechp2,icafe19)) /),ifuel) / &
+                                                     ANNVMT_19(iyr,icafe19,1,ifuel)*techeff_p2(itechp2,icafe14))/ &
+                                                     ((1.0 + DISCRTXG_P2)**real( (/ (i, i=1, Payback1_P2(itechp2,icafe19)) /), kind=KIND(1.0D0))) &
+                                                   )
+              ENDIF
 				
 !...          calculate trigger price 									   [cost of tech]  / [energy saved from tech]  =  $ / mmbtu 
               TRIGGER_PRICE_P2(itechp2,icafe19,ifuel) = TECHCOSTyr_p2(iyr,itechp2,icafe19) / TEMP_TRIG_P2(itechp2,icafe19)
-              
-!              IF (TRIGGER_PRICE_P2(itechp2,icafe19,ifuel).lt.0.0) THEN
-!                IF (TECHCOSTyr_p2(iyr,itechp2,icafe19).lt.0.0) THEN
-!                  WRITE(21,'(a,5(",",i4),3(",",f10.2),3(",",i5))')'trig_neg_cost',curcalyr,itryghg,icafe19,ifuel,itechp2,TRIGGER_PRICE_P2(itechp2,icafe19,ifuel),TECHCOSTyr_p2(iyr,itechp2,icafe19),&
-!                                    techcost_p2(itechp2,icafe14),fyr_p2(itechp2,icafe14),learn_yr(techlearn_p2(itechp2,icafe14)),techlearn_p2(itechp2,icafe14)
-!                ELSE
-!                  WRITE(21,'(a,5(",",i4),5(",",f10.2))')'trig_neg_trig',curcalyr,itryghg,icafe19,ifuel,itechp2,TRIGGER_PRICE_P2(itechp2,icafe19,ifuel),TECHCOSTyr_p2(iyr,itechp2,icafe19),&
-!                                    TEMP_TRIG_P2(itechp2,icafe19),techeff_p2(itechp2,icafe14),TEMP_BTU_p2(icafe14,ifuel)
-!                ENDIF
-!              ENDIF
 
 !...          set market penetration price sensitivity factor
               PREFF_P2(itechp2,icafe19,ifuel) = 1.0 + TECHVAR_P2(itechp2,icafe14)*((FUELPRICE_R_AVG(ifuel,MNUMCR)/TRIGGER_PRICE_P2(itechp2,icafe19,ifuel)) - 1.0)
@@ -2297,6 +2319,15 @@ end module F_
                   TECHSHR_P2(iyr,itechp2,icafe19,ifuel) = TECHSHR_P2(iyr-1,itechp2,icafe19,ifuel)*PREFF_P2(itechp2,icafe19,ifuel)
  			    ENDIF
               ENDIF
+            
+              IF (TECHSHR_P2(iyr,itechp2,icafe19,ifuel).ne.TECHSHR_P2(iyr,itechp2,icafe19,ifuel)) THEN
+			    WRITE(21,'(a,",",i2,",",i2,",",i4,",",i2,8(",",f6.2))') "TECHSHR_P2_BUSTED",icafe19,itechp2,iyr+1989,ifuel,TECHSHR_P2(iyr,itechp2,icafe19,ifuel),TECHBASE_P2(itechp2,icafe19,ifuel), &
+																		TECHMAX_P2(itechp2,icafe14),techeff_p2(itechp2,icafe14),TEMP_BTU_p2(icafe14,ifuel), &
+																		NEW_MPG_19(iyr-1,ifuel,icafe19),ANNVMT_19(iyr,icafe19,1,ifuel)/1000
+			    WRITE(*,*)'ERROR: TDM TRANFRT TECHSHR CAFE compliance module. See p1/TRNOUT.txt.'
+			    STOP 903
+			  ENDIF
+            
             ENDIF
 
 !			Debug techshr
@@ -2306,14 +2337,6 @@ end module F_
 !                                           TEMP_TRIG_P2(itechp2,icafe19),TRIGGER_PRICE_P2(itechp2,icafe19,ifuel)*mc_jpgdp(2022-1989)/mc_jpgdp(1),FUELPRICE_R_AVG(ifuel,MNUMCR)*mc_jpgdp(2022-1989)/mc_jpgdp(1),TECHCOSTyr_p2(iyr,itechp2,icafe19)*mc_jpgdp(2022-1989)/mc_jpgdp(1),TEMP_BTU_p2(icafe14,ifuel),&
 !                                           TECHSHR_P2(iyr,itechp2,icafe19,ifuel),NEW_MPG_19(iyr-1,ifuel,icafe19),ANNVMT_19(iyr,icafe19,1,ifuel)
 !			ENDIF
-
-			IF (TECHSHR_P2(iyr,itechp2,icafe19,ifuel).ne.TECHSHR_P2(iyr,itechp2,icafe19,ifuel)) THEN
-			  WRITE(21,'(a,",",i2,",",i2,",",i4,",",i2,8(",",f6.2))') "TECHSHR_P2_BUSTED",icafe19,itechp2,iyr+1989,ifuel,TECHSHR_P2(iyr,itechp2,icafe19,ifuel),TECHBASE_P2(itechp2,icafe19,ifuel), &
-																		TECHMAX_P2(itechp2,icafe14),techeff_p2(itechp2,icafe14),TEMP_BTU_p2(icafe14,ifuel), &
-																		NEW_MPG_19(iyr-1,ifuel,icafe19),ANNVMT_19(iyr,icafe19,1,ifuel)/1000
-			  WRITE(*,*)'ERROR: TDM TRANFRT TECHSHR CAFE compliance module. See p1/TRNOUT.txt.'
-			  STOP 903
-			ENDIF
 
 		  ENDDO    ! End itechp2 loop
 
@@ -2327,11 +2350,8 @@ end module F_
                 TOT_MKT   = TECHSHR_P2(iyr,itechp2,icafe19,ifuel)
                 MAX_SHARE = TECHMAX_P2(itechp2,icafe14)
 
-!...   	  		Find maximum allowable tech chain penetration (maximum of current tech [max_share] and all techs it supercedes).
-!               Cycle through the number of techs that are superceded in this note
-				DO i = 2,tech_cnt_sup(inote)
-				  MAX_SHARE = max(max_share,MAX_SHARE_S(supersedes_tech(i,inote)))					  
-                ENDDO						
+!...   	  		Find maximum allowable tech chain penetration (maximum of current tech [max_share] and all techs it supercedes).       
+                MAX_SHARE = MAX(MAX_SHARE, MAXVAL(MAX_SHARE_S(supersedes_tech(2:tech_cnt_sup(inote), inote))))
 
 !...   	  		Find and adjust any EXCESS penetration downward.
 !               One at a time, cycle through techs that are superceded, adding each of their adoption rates to the "parent" tech, and then
@@ -2348,68 +2368,72 @@ end module F_
           ENDDO   ! end itechp2 loop for supersedes notes			
 
 !...      Apply required engineering notes
-          DO itechp2 = 1,techp2
-            IF(curcalyr.lt.TECHFYR_P2(itechp2,icafe14,ifuel)) cycle
-            REQUIRED = .FALSE.
-            REQ_MKT  = 0.0
-            DO inote = 1,num_req
-              IF(REQUIRES_tech(1,inote).eq.itechp2) then					
-                REQUIRED = .TRUE.
-				REQ_MKT  = REQ_MKT + TECHSHR_P2(iyr,requires_tech(2,inote),icafe19,ifuel)				  
-               ENDIF
-            ENDDO
-            IF(REQUIRED) then
-              REQ_MKT = min(REQ_MKT,1.0)
-			  TECHSHR_P2(iyr,itechp2,icafe19,ifuel) = min(TECHSHR_P2(iyr,itechp2,icafe19,ifuel),REQ_MKT)
-			ENDIF			
-		  ENDDO      
+          IF (NUM_REQ.gt.0) THEN
+            DO itechp2 = 1,techp2
+              IF(curcalyr.lt.TECHFYR_P2(itechp2,icafe14,ifuel)) cycle
+              REQUIRED = .FALSE.
+              REQ_MKT  = 0.0
+              DO inote = 1,num_req
+                IF(REQUIRES_tech(1,inote).eq.itechp2) then					
+                  REQUIRED = .TRUE.
+			  	  REQ_MKT  = REQ_MKT + TECHSHR_P2(iyr,requires_tech(2,inote),icafe19,ifuel)				  
+                ENDIF
+              ENDDO
+              IF(REQUIRED) then
+                REQ_MKT = min(REQ_MKT,1.0)
+			    TECHSHR_P2(iyr,itechp2,icafe19,ifuel) = min(TECHSHR_P2(iyr,itechp2,icafe19,ifuel),REQ_MKT)
+			  ENDIF			
+		    ENDDO
+          ENDIF
 
 !...      Apply required engineering notes when the required tech could be one of a few
           TECHSHR_P2(iyr,68,icafe19,ifuel) = min(TECHSHR_P2(iyr,68,icafe19,ifuel), & 
-						(TECHSHR_P2(iyr,62,icafe19,ifuel) + TECHSHR_P2(iyr,66,icafe19,ifuel) + TECHSHR_P2(iyr,67,icafe19,ifuel)))
+                                                 SUM(TECHSHR_P2(iyr,[62,66,67],icafe19,ifuel)))
           TECHSHR_P2(iyr,69,icafe19,ifuel) = min(TECHSHR_P2(iyr,69,icafe19,ifuel), & 
-						(TECHSHR_P2(iyr,62,icafe19,ifuel) + TECHSHR_P2(iyr,66,icafe19,ifuel) + TECHSHR_P2(iyr,67,icafe19,ifuel)))
+                                                 SUM(TECHSHR_P2(iyr,[62,66,67],icafe19,ifuel)))
           TECHSHR_P2(iyr,71,icafe19,ifuel) = min(TECHSHR_P2(iyr,71,icafe19,ifuel), & 
-						(TECHSHR_P2(iyr,62,icafe19,ifuel) + TECHSHR_P2(iyr,66,icafe19,ifuel) + TECHSHR_P2(iyr,67,icafe19,ifuel)))
+                                                 SUM(TECHSHR_P2(iyr,[62,66,67],icafe19,ifuel)))
 
 !...   	  Loop through and apply the synergy engineering notes
-          DO itechp2 = 1,techp2        
-            IF(curcalyr.lt.TECHFYR_P2(itechp2,icafe14,ifuel)) cycle
-            SYNERGY_LOSS(itechp2) = 0.0
-
-!...		Market share affected by synergy effects between two technologies is estimated as the probabilistic overlap
-!...		between the market shares of the two technologies. Mathematically, this market share is expressed as the 
-!...		product of the market shares of the two technologies.  The incremental market share overlap for a single year
-!...		is equal to the cumulative estimated overlap (based on cumulative estimated market penetrations) for the 
-!...		current year minus the cumulative estimated overlap for the previous year.  Note also, that the input value
-!...		of SYNR_DEL is negative so that the estimated synergy loss will also be negative and should be treated as an
-!...		additive parameter.
-            DO inote = 1,num_syn
-              IF(synergy_tech(1,inote).eq.itechp2) then
-				DO i = 2,tech_cnt_syn(inote)
-				  delta_mkt = (TECHSHR_P2(iyr,itechp2,icafe19,ifuel)*TECHSHR_P2(iyr,synergy_tech(i,inote),icafe19,ifuel)) - &
-			              (TECHSHR_P2(iyr-1,itechp2,icafe19,ifuel)*TECHSHR_P2(iyr-1,synergy_tech(i,inote),icafe19,ifuel))
-                  SYNERGY_LOSS(itechp2) = SYNERGY_LOSS(itechp2) + (DELTA_MKT*syn_per(i,inote))
-		        ENDDO
-              ENDIF
-            ENDDO
-!... 		Flex fuel technology improvements should be the same as gasoline technology improvements
-            IF(ifuel.eq.5) TECHSHR_P2(iyr,itechp2,icafe19,ifuel) = TECHSHR_P2(iyr,itechp2,icafe19,2)
-!... 		PHEV aero, tire, and weight reduction should be the same as diesel and gasoline, respectively
-            IF(ifuel.eq.7.and.itechp2.le.17) TECHSHR_P2(iyr,itechp2,icafe19,ifuel) = TECHSHR_P2(iyr,itechp2,icafe19,1)
-            IF(ifuel.eq.8.and.itechp2.le.17) TECHSHR_P2(iyr,itechp2,icafe19,ifuel) = TECHSHR_P2(iyr,itechp2,icafe19,2)
-          ENDDO               ! end itechp2 loop for synergy notes
+          SYNERGY_LOSS(1:TECHP2) = 0.0
+          IF (NUM_SYN.gt.0) THEN
+            DO itechp2 = 1,techp2        
+              IF(curcalyr.lt.TECHFYR_P2(itechp2,icafe14,ifuel)) cycle
+              
+!...		  Market share affected by synergy effects between two technologies is estimated as the probabilistic overlap
+!...		  between the market shares of the two technologies. Mathematically, this market share is expressed as the 
+!...		  product of the market shares of the two technologies.  The incremental market share overlap for a single year
+!...		  is equal to the cumulative estimated overlap (based on cumulative estimated market penetrations) for the 
+!...		  current year minus the cumulative estimated overlap for the previous year.  Note also, that the input value
+!...		  of SYNR_DEL is negative so that the estimated synergy loss will also be negative and should be treated as an
+!...		  additive parameter.
+              DO inote = 1,num_syn
+                IF(synergy_tech(1,inote).eq.itechp2) then
+			  	  DO i = 2,tech_cnt_syn(inote)
+			  	    delta_mkt = (TECHSHR_P2(iyr,itechp2,icafe19,ifuel)*TECHSHR_P2(iyr,synergy_tech(i,inote),icafe19,ifuel)) - &
+			                  (TECHSHR_P2(iyr-1,itechp2,icafe19,ifuel)*TECHSHR_P2(iyr-1,synergy_tech(i,inote),icafe19,ifuel))
+                    SYNERGY_LOSS(itechp2) = SYNERGY_LOSS(itechp2) + (DELTA_MKT*syn_per(i,inote))
+		          ENDDO
+                ENDIF
+              ENDDO
+            ENDDO               ! end itechp2 loop for synergy notes
+          ENDIF
+          
+!...      Flex fuel technology improvements should be the same as gasoline technology improvements
+          IF(ifuel.eq.5) TECHSHR_P2(iyr,1:TECHP2,icafe19,ifuel) = TECHSHR_P2(iyr,1:TECHP2,icafe19,2)
+!...      PHEV aero, tire, and weight reduction should be the same as diesel and gasoline, respectively
+          IF(ifuel.eq.7) TECHSHR_P2(iyr,1:17,icafe19,ifuel) = TECHSHR_P2(iyr,1:17,icafe19,1)
+          IF(ifuel.eq.8) TECHSHR_P2(iyr,1:17,icafe19,ifuel) = TECHSHR_P2(iyr,1:17,icafe19,2)
 
 !...      determine combined MPG improvement of fuel-saving technologies by weighting each technologies improvement by market share
           MPGEFF_19(ifuel,icafe19) = 1.0
+          techadjshr_P2(iyr,1:techp2,icafe19,ifuel) = 0.
+          WHERE (curcalyr.ge.techfyr_P2(1:techp2,icafe14,ifuel).and.techshr_P2(iyr,1:techp2,icafe19,ifuel).gt.0.)
+            techadjshr_P2(iyr,1:techp2,icafe19,ifuel) = max(techshr_P2(iyr,1:techp2,icafe19,ifuel) - TECHBASE_P2(1:techp2,icafe19,ifuel),-1.0*TECHBASE_P2(1:techp2,icafe19,ifuel))
+          END WHERE
+          
           DO itechp2 = 1,techp2
             IF(curcalyr.ge.techfyr_P2(itechp2,icafe14,ifuel))then
-              IF(techshr_P2(iyr,itechp2,icafe19,ifuel).gt.0..and.techshr_p2(iyr,itechp2,icafe19,ifuel).ge.techbase_p2(itechp2,icafe19,ifuel)) then 
-                techadjshr_P2(iyr,itechp2,icafe19,ifuel) = techshr_P2(iyr,itechp2,icafe19,ifuel) - TECHBASE_P2(itechp2,icafe19,ifuel)
-                techadjshr_P2(iyr,itechp2,icafe19,ifuel) = max(techadjshr_P2(iyr,itechp2,icafe19,ifuel),-1.0*TECHBASE_P2(itechp2,icafe19,ifuel))
-              ELSE
-                techadjshr_P2(iyr,itechp2,icafe19,ifuel) = 0.
-              ENDIF
 			  MPGEFF_19(ifuel,icafe19) = MPGEFF_19(ifuel,icafe19)*(1.0 - ((techeff_p2(itechp2,icafe14) + & 
                                          synergy_loss(itechp2))*TECHadjSHR_P2(iyr,itechp2,icafe19,ifuel)))
 			  MPGEFF_19(ifuel,icafe19) = min(mpgeff_19(ifuel,icafe19),1.0)
@@ -2418,10 +2442,11 @@ end module F_
 
           inc_tech_cost_19(iyr,icafe19,ifuel) = sum(techshr_P2(iyr,1:techp2,icafe19,ifuel)*TECHCOSTyr_p2(iyr,1:techp2,icafe19))
 
-!...   	  determine new fuel economy for the 19 cafe size classes 
-          NEW_MPG_19(iyr,ifuel,icafe19) = BASE_MPG_p2(ifuel,icafe19)/MPGEFF_19(ifuel,icafe19)
         ENDDO   ! ifuel		
       ENDDO		! icafe19
+
+!...  determine new fuel economy for the 19 cafe size classes 
+      NEW_MPG_19(iyr,1:fuel12,1:cafe19) = BASE_MPG_p2(1:fuel12,1:cafe19)/MPGEFF_19(1:fuel12,1:cafe19)      
 
    RETURN
    END SUBROUTINE TRUCK_TECHADOPT
@@ -2625,7 +2650,7 @@ end module F_
 !     Transfer 2b/3 PUV credits to 2b-5V, then 6-7V
       DO icafe4 = 2,3
         IF (.not.HDV_passGHG(iyr,icafe4).and.SUM(GHGBank(iyr-CRED_LIFE:iyr-1,1,1)).gt.0.0) THEN
-!         If there are enough 2b/3 PUV credits to meet the full 2b-5V deficit, meet it
+!         If there are enough 2b/3 PUV credits to meet the full 2b-5V or 6-7V deficit, meet it
           IF (sum(GHGBank(iyr-CRED_LIFE:iyr-1,1,1)).gt.-GHG_creds_agg(iyr,icafe4)) THEN
             if(fcrl.eq.1.and.ghg_debug) WRITE(21,'(a16,4(",",i4),2(",",f12.2))')'2b3_credshift',curcalyr,itryghg,icafe4,SUM(GHGBank(iyr-CRED_LIFE:iyr-1,1,1)),GHG_creds_agg(iyr,icafe4)
             DO i = 1,CRED_LIFE
@@ -2639,7 +2664,7 @@ end module F_
                 GHGBank(iyr-i,1,1)         = 0.0
               ENDIF
             ENDDO
-!         If not, empty the 2b/3 PUV bank into the 2b-5V deficit
+!         If not, empty the 2b/3 PUV bank into the 2b-5V or 6-7V deficit
           ELSE
             GHG_creds_agg(iyr,icafe4)  = GHG_creds_agg(iyr,icafe4) + SUM(GHGBank(iyr-CRED_LIFE:iyr-1,1,1))
             GHGBank(iyr-CRED_LIFE:iyr-1,1,1) = 0.0
@@ -2941,15 +2966,15 @@ end module F_
    SUBROUTINE TRUCK_INCCOST
    USE F_
    IMPLICIT NONE
-   include 'convfact'
 
    INTEGER i, ibatt
-   REAL PHEV_daily_Evmt
+   REAL PHEV_daily_Evmt(NVMT)
    REAL kWh_used(NVMT,CAFE19,MNUMYR), &             ! Parameters for endogenous battery sizing
         kWh_needed(NVMT,CAFE19,MNUMYR), &
         kWh_usable(NVMT,CAFE19,MNUMYR), &
-        daily_recharges(NVMT,CAFE19,MNUMYR), &
         daily_hours(NVMT,CAFE19,MNUMYR)
+
+      IRA_CREDIT(:,:,:,n) = 0.0
 
 !...  Accumulate cost of technology adopted to meet NHTSA/EPA standards, incl. tech adopted due to cost effectiveness.
 !	  The total here -- cost_ICE -- is subtracted off the alt-fuel powertrain incremental cost.
@@ -2966,30 +2991,28 @@ end module F_
 	        cost_icetech(icafe19,iyr)       = (inc_tech_cost_19(iyr,icafe19,1)*sum(TRKSTK_19R(iyr-1,icafe19,1,1,:,MNUMCR)) &
                                             +  inc_tech_cost_19(iyr,icafe19,2)*sum(TRKSTK_19R(iyr-1,icafe19,1,2,:,MNUMCR))) &
                                                 / sum(TRKSTK_19R(iyr-1,icafe19,1,1:2,:,MNUMCR))
-!	        cost_ICE(icafe19,iyr) 	        = cost_ICE(icafe19,2016-1989) + cost_icetech(icafe19,iyr)
             if(curcalyr.gt.BSYR_STK) &
               cost_ICE(icafe19,iyr) 	    = cost_ICE(icafe19,BSYR_STK-1989) + (cost_icetech(icafe19,iyr) - cost_icetech(icafe19,BSYR_STK-1989))
 
 	      ELSEIF (icafe19.gt.7) then	    ! Class 7&8, diesel only
 	        cost_icetech(icafe19,iyr)	    = inc_tech_cost_19(iyr,icafe19,1)
-!	        cost_ICE(icafe19,iyr) 	        = cost_ICE(icafe19,2016-1989) + cost_icetech(icafe19,iyr)
             if(curcalyr.gt.BSYR_STK) &
               cost_ICE(icafe19,iyr) 	    = cost_ICE(icafe19,BSYR_STK-1989) + (cost_icetech(icafe19,iyr) - cost_icetech(icafe19,BSYR_STK-1989))
 	      ENDIF
-
-!         HEV, PHEVG, PHEVD, and H2ICE incremental costs are based on EITHER diesel OR gasoline, so no averaging like above          
-          IF (curcalyr.gt.BSYR_STK) THEN
-            cost_ICE_HEV(icafe19,iyr)     = cost_ICE_HEV(icafe19,BSYR_STK-1989) + (inc_tech_cost_19(iyr,icafe19,2) - inc_tech_cost_19(BSYR_STK-1989,icafe19,2))
-            cost_ICE_PHEV(icafe19,1,iyr)  = cost_ICE_PHEV(icafe19,1,BSYR_STK-1989) + (inc_tech_cost_19(iyr,icafe19,1) - inc_tech_cost_19(BSYR_STK-1989,icafe19,1))
-            cost_ICE_PHEV(icafe19,2,iyr)  = cost_ICE_PHEV(icafe19,2,BSYR_STK-1989) + (inc_tech_cost_19(iyr,icafe19,2) - inc_tech_cost_19(BSYR_STK-1989,icafe19,2))
-            cost_ICE_H2ICE(icafe19,iyr)   = cost_ICE_H2ICE(icafe19,BSYR_STK-1989) + (inc_tech_cost_19(iyr,icafe19,1) - inc_tech_cost_19(BSYR_STK-1989,icafe19,1))
-          ENDIF 
           
         ENDIF
         
 !	    if(itryghg.eq.1) WRITE(21,'(a,2(",",i4),5(",",f10.0))')'cost_ICE',curitr,curcalyr,cost_ICE(icafe19,iyr),sum(TRKSTK_19R(iyr-1,icafe19,1,1,:,MNUMCR)),&
 !                                              inc_tech_cost_19(iyr,icafe19,1),sum(TRKSTK_19R(iyr-1,icafe19,1,2,:,MNUMCR)),inc_tech_cost_19(iyr,icafe19,2)
 	  ENDDO
+
+!     HEV, PHEVG, PHEVD, and H2ICE incremental costs are based on EITHER diesel OR gasoline, so no averaging like above          
+      IF (curcalyr.gt.BSYR_STK) THEN
+        cost_ICE_HEV(1:cafe19,iyr)     = cost_ICE_HEV(1:cafe19,BSYR_STK-1989) + (inc_tech_cost_19(iyr,1:cafe19,2) - inc_tech_cost_19(BSYR_STK-1989,1:cafe19,2))
+        cost_ICE_PHEV(1:cafe19,1,iyr)  = cost_ICE_PHEV(1:cafe19,1,BSYR_STK-1989) + (inc_tech_cost_19(iyr,1:cafe19,1) - inc_tech_cost_19(BSYR_STK-1989,1:cafe19,1))
+        cost_ICE_PHEV(1:cafe19,2,iyr)  = cost_ICE_PHEV(1:cafe19,2,BSYR_STK-1989) + (inc_tech_cost_19(iyr,1:cafe19,2) - inc_tech_cost_19(BSYR_STK-1989,1:cafe19,2))
+        cost_ICE_H2ICE(1:cafe19,iyr)   = cost_ICE_H2ICE(1:cafe19,BSYR_STK-1989) + (inc_tech_cost_19(iyr,1:cafe19,1) - inc_tech_cost_19(BSYR_STK-1989,1:cafe19,1))
+      ENDIF
 
 !...  Low NOx rule compliance cost, starting in MY2027
 	  lonox_cost(:,iyr) = 0.0
@@ -3010,50 +3033,38 @@ end module F_
 	    ENDDO
 	  ENDIF
 
-!...  CNG
+!...  CNG (note: vectorized calculation across all ivmt)
 	  INC_COST_CNG(:,:,n) = 0.0
-	  DO ivmt=1,nvmt
 	    DO icafe19=1, CAFE19
 	      isc4 = SC19Map(icafe19)
-	  	  INC_COST_CNG(ivmt,icafe19,n)  = cost_NGtank_DGE(isc4,iyr)*PT_tanksize_CNG(ivmt,icafe19) &
-	  								    + (inc_tech_cost_19(iyr,icafe19,4) - inc_tech_cost_19(BSYR_STK-1989,icafe19,4)) &   ! adopted tech improvement (v. cost base year)
-	  								    - cost_ice_CNG(icafe19) &                                                           ! Incremental CNG cost (non-tank, non tech adopt)
-                                        - cost_icetech(icafe19,iyr)
+	  	  INC_COST_CNG(1:nvmt,icafe19,n)  = cost_NGtank_DGE(isc4,iyr)*PT_tanksize_CNG(1:nvmt,icafe19) &
+	  								      + (inc_tech_cost_19(iyr,icafe19,4) - inc_tech_cost_19(BSYR_STK-1989,icafe19,4)) &   ! adopted tech improvement (v. cost base year)
+	  								      - cost_ice_CNG(icafe19) &                                                           ! Incremental CNG cost (non-tank, non tech adopt)
+                                          - cost_icetech(icafe19,iyr)
 
 !         Subtract delta of diesel/gasoline avg. LowNOx compliance cost [lonox_cost] and CNG LowNOx compliance cost [cost_LoNOx]
 	  	  IF (iyr.ge.2027-1989.and.NOX_switch.eq.1) &
-            INC_COST_CNG(ivmt,icafe19,n) = INC_COST_CNG(ivmt,icafe19,n) - (lonox_cost(icafe19,iyr) - cost_LoNOx(icafe19,4))
+            INC_COST_CNG(1:nvmt,icafe19,n) = INC_COST_CNG(1:nvmt,icafe19,n) - (lonox_cost(icafe19,iyr) - cost_LoNOx(icafe19,4))
           
-          INC_COST_CNG(ivmt,icafe19,n)  = INC_COST_CNG(ivmt,icafe19,n) &						                            ! Add excise tax (Class 8)
-	  								    * (1+fet_rate(icafe19))
+          INC_COST_CNG(1:nvmt,icafe19,n)  = INC_COST_CNG(1:nvmt,icafe19,n) &						                            ! Add excise tax (Class 8)
+                                          * (1+fet_rate(icafe19))
 	    ENDDO
-	  ENDDO
 
 !...  Battery cost (applied to all BEV, PHEV-D, PHEV-G, FCEV, and FCHEV)
-!     HEV battery prices (index 4) are also estimated here.
+!     HEV battery prices are also estimated here.
 !     Battery price per kWh. Initial costs are in 2020 dollars, converted to 1990 dollars here
 !     Battery Pack Cost learning rate equation:
 !     Cost = a_battery*(cumulative production)^(-b_battery) + a_material*(cumulative production)^(-b_material)
 !     where b = -Log(1.0-(learning rate))/Log(2.0)
 !	  Different coefficients for Class 2b/3 (closer to LDV pricing) and Class 4-8 (more expensive)
-	  DO ibatt = 1, 5
-	    IF(curcalyr.gt.BSYR_STK) cost_battkWh_trk(ibatt,iyr) = (cost_battpack_a(ibatt)*cumulative_gwh(iyr-1)**(-cost_battpack_b(ibatt)) + &
-														        cost_battmat_a(ibatt)*cumulative_gwh(iyr-1)**(-cost_battmat_b(ibatt))) / &
-														       mc_jpgdp(31) * mc_jpgdp(1)
-	  ENDDO
-
-!...  Motor cost (applied to all BEV, FCEV, and FCHEV)
-!     Weighted average of motor cost data from 2020 to 2025
-	  IF (curcalyr.le.2025) then
-	    cost_motorkW(iyr) = (-2.2*(curcalyr) + 4483)/ mc_jpgdp(31) * mc_jpgdp(1)
-!     EPA: 3% from 2025 - 2030, 2% from 2030 - 2035, 1% from 2035 - 2050
-	  ELSEIF (curcalyr.gt.2025.and.curcalyr.le.2030) then
-	    cost_motorkW(iyr) = cost_motorkW(iyr-1)*.97
-	  ELSEIF (curcalyr.gt.2030.and.curcalyr.le.2035) then
-	    cost_motorkW(iyr) = cost_motorkW(iyr-1)*.98
-	  ELSEIF (curcalyr.gt.2035) then
-	    cost_motorkW(iyr) = cost_motorkW(iyr-1)*.99
-	  ENDIF
+	  IF (iyr.gt.first_bat_yr) then
+        IF (iyr.eq.first_bat_yr+1) &
+          cost_battpack_a(1:5) = (cost_battkWh_trk(1:5,iyr)-cost_battmat_a(1:5)*(sum(global_batt_prod(:,:,n)))**(-cost_battmat_b(1:5))) / &
+                                 ((sum(global_batt_prod(:,:,n)))**(-cost_battpack_b(1:5)))	
+          
+        cost_battkWh_trk(1:5,iyr) = cost_battpack_a(1:5)*(sum(global_batt_prod(:,:,n)))**(-cost_battpack_b(1:5)) + &
+                                        cost_battmat_a(1:5)*(sum(global_batt_prod(:,:,n)))**(-cost_battmat_b(1:5))
+      ENDIF
 
 !	  Incremental BEV, HEV, PHEV, FCEV, and FCHEV costs (only needed in BSYR_STK:MNUMYR)
 	  IF(curcalyr.gt.BSYR_STK)then
@@ -3064,9 +3075,8 @@ end module F_
 	    cost_h2tank(iyr) = MIN((cost_h2tank_a *(cumulative_h2_tanks(iyr-1) ** (-cost_h2tank_b)))/ mc_jpgdp(31) * mc_jpgdp(1), &
 	  						    cost_h2tank(33)*((1-cost_h2tank_rd)**(iyr-33)))
 
-!...    BEV
+!...    BEV (note: vectorized calculation across all ivmt)
 	    INC_COST_BEV(:,:,n) = 0.0
-        DO ivmt=1,nvmt
           DO icafe19=1,CAFE19
             isc4 = SC19Map(icafe19)
 		    IF (icafe19.le.4) then                          ! Class 2b/3
@@ -3079,55 +3089,53 @@ end module F_
 		      ibatt = 3
 		    ENDIF
             
-!           Size batteries                            average daily range                      / fuel economy (mpgde or mpgde)          / convert to kWh
-            kWh_used(ivmt,icafe19,iyr)          = (SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250       / new_mpg_19(iyr-1,6,icafe19)            / 3412  * (HRATE(isc4,6))           ! kWh consumed to meet average daily range
-            kWh_needed(ivmt,icafe19,iyr)        = (MAX(100.0,(SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250))  / new_mpg_19(iyr-1,6,icafe19)    / 3412  * (HRATE(isc4,6))           ! kWh consumed to meet average daily range (OR 100 miles, whichever is more)
-            kWh_nominal(ivmt,icafe19,iyr)       = MIN(max_kWh_cap(icafe19,iyr),kWh_needed(ivmt,icafe19,iyr) / TRK_BEV_DOD)                                                  ! kWh installed on the vehicle
-            kWh_usable(ivmt,icafe19,iyr)        = kWh_nominal(ivmt,icafe19,iyr) * TRK_BEV_DOD                                                                               ! kWh available for use
-            daily_recharges(ivmt,icafe19,iyr)   = kWh_used(ivmt,icafe19,iyr) / kWh_usable(ivmt,icafe19,iyr)                                                                 ! daily recharging sessions required to achieve average daily range
-            daily_hours(ivmt,icafe19,iyr)       = MAX(0.0,(daily_recharges(ivmt,icafe19,iyr)-1)) * kWh_used(ivmt,icafe19,iyr) / charging_speed(icafe19)                     ! hours spent recharging, daily (not including nightly charge)
-            bev_refuelopcost(ivmt,icafe19,iyr)  = daily_hours(ivmt,icafe19,iyr) * refuel_timeval * 250                                                                      ! annual labor/time cost due to recharging stops
+!           Size batteries                            average daily range                                      / fuel economy (mpgde or mpgde) / convert to kWh
+            kWh_used(1:nvmt,icafe19,iyr)          = (SUM(VMT_VEH(1:nvmt,:,icafe19),DIM=2)/2) / ann_uptime_days / new_mpg_19(iyr-1,6,icafe19)   / 3412  * (HRATE(isc4,6))           ! kWh consumed to meet average daily range
+            kWh_needed(1:nvmt,icafe19,iyr)        = (MAX(MIN_REQ_RNG,(SUM(VMT_VEH(1:nvmt,:,icafe19),DIM=2)/2) / ann_uptime_days))  / new_mpg_19(iyr-1,6,icafe19)    / 3412  * (HRATE(isc4,6))           ! kWh consumed to meet average daily range (OR 100 miles, whichever is more)
+            kWh_nominal(1:nvmt,icafe19,iyr)       = MIN(max_kWh_cap(icafe19,iyr),kWh_needed(1:nvmt,icafe19,iyr) / TRK_BEV_DOD)                                                  ! kWh installed on the vehicle
+            kWh_usable(1:nvmt,icafe19,iyr)        = kWh_nominal(1:nvmt,icafe19,iyr) * TRK_BEV_DOD                                                                               ! kWh available for use
+            daily_hours(1:nvmt,icafe19,iyr)       = MAX(0.0, kWh_used(1:nvmt,icafe19,iyr) - kWh_usable(1:nvmt,icafe19,iyr)) / charging_speed(icafe19)                     ! hours spent recharging, daily (not including nightly charge)
+            bev_refuelopcost(1:nvmt,icafe19,iyr)  = daily_hours(1:nvmt,icafe19,iyr) * refuel_timeval * ann_uptime_days                                                                      ! annual labor/time cost due to recharging stops
             
 !           Calculate Incremental BEV cost increase over conventional diesel
-	  	    INC_COST_BEV(ivmt,icafe19,n)  = PT_emotorkW(icafe19,6)*cost_motorkW(iyr)&					                    ! motor
-	  								      + cost_battkWh_trk(ibatt,iyr)*kWh_nominal(ivmt,icafe19,iyr)&	                    ! battery
+	  	    INC_COST_BEV(1:nvmt,icafe19,n)  = PT_emotorkW(icafe19,6)*cost_motorkW(iyr)&					                    ! motor
+	  								      + cost_battkWh_trk(ibatt,iyr)*kWh_nominal(1:nvmt,icafe19,iyr)&	                    ! battery
 	  									  + (inc_tech_cost_19(iyr,icafe19,6) - inc_tech_cost_19(BSYR_STK-1989,icafe19,6)) & ! adopted tech improvement (v. cost base year)
 										  + BEV_infra_cost(icafe19,iyr) &									                ! EVSE equipment + installation
 	  									  + cost_OBC(iyr) &													                ! On-board charger cost
 										  - cost_ICE(icafe19,iyr) &											                ! ICE components removed (incl. tech adopted for ICE truck)
 										  - lonox_cost(icafe19,iyr)											                ! Low NOx compliance cost starting in 2027 (lonox_cost(:,1995:2027) = 0)
-		    INC_COST_BEV(ivmt,icafe19,n)  = INC_COST_BEV(ivmt,icafe19,n) &									                ! Add excise tax (Class 8)
-										  + (INC_COST_BEV(ivmt,icafe19,n)-BEV_infra_cost(icafe19,iyr)) &
-										    * fet_rate(icafe19)
 
 !	  	    IRA commercial clean vehicle credit (Section 45W)
 !	  	    Class 2b-3 (up to  14k GVWR): Minimum of $7,500, 30% of vehicle cost, and incremental cost
 !	  	    Class 4-8: Minimum of $40,000, 30% of vehicle cost, and incremental cost
 !		    Note that the credit ceiling (full incremental cost) is VEHICLE ONLY -- so the infrastructure cost is subtracted off.
 	  	    IF (curcalyr.ge.2023.and.curcalyr.le.2032) then
-	  	      INC_COST_BEV(ivmt,icafe19,n) = INC_COST_BEV(ivmt,icafe19,n) - MAX(0.0,MIN(IRA_45W_max(icafe19,6) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_BEV(ivmt,icafe19,n)-BEV_infra_cost(icafe19,iyr)))
-	  	    ENDIF
+              if(SwitchHDV_HR1.eq.0) then       ! Original IRA 45W sunset of 2032 
+                IRA_CREDIT(6,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,6) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_BEV(1:nvmt,icafe19,n)-BEV_infra_cost(icafe19,iyr)))
+              elseif(curcalyr.le.2025) then     ! HR 1 ends 45W credits in 2026
+                IRA_CREDIT(6,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,6) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_BEV(1:nvmt,icafe19,n)-BEV_infra_cost(icafe19,iyr)))
+              endif            
+              INC_COST_BEV(1:nvmt,icafe19,n) = INC_COST_BEV(1:nvmt,icafe19,n) - IRA_CREDIT(6,1:nvmt,icafe19,n)
+            ENDIF
 
-!		  IF (ivmt.eq.1.and.icafe19.eq.1.and.curcalyr.eq.2017) WRITE(21,'(a19,4(",",a4),10(",",a8))')'INC_COST_BEV_detail','itr','year','icaf','ivmt', &
-!																	 'inc_cost','motorkW','motorkW$','battkWh','battkWh$','tech$','ice$','nox$','fet%','state%'
-!		  WRITE(21,'(a19,4(",",i4),",",f8.0,7(",",f8.1),2(",",f8.5))')'INC_COST_BEV_detail',curitr,curcalyr,icafe19,ivmt,INC_COST_BEV(ivmt,icafe19,n)/ mc_jpgdp(1) * mc_jpgdp(33),PT_emotorkW(icafe19,6),cost_motorkW(iyr)/ mc_jpgdp(1) * mc_jpgdp(33),PT_battkWh_BEV(ivmt,icafe19,iyr),&
-!																cost_battkWh_trk(ibatt,iyr)/ mc_jpgdp(1) * mc_jpgdp(33),inc_tech_cost_19(iyr,icafe19,6)/ mc_jpgdp(1) * mc_jpgdp(33),cost_ICE(icafe19,iyr)/ mc_jpgdp(1) * mc_jpgdp(33),&
-!																lonox_cost(icafe19,iyr)/ mc_jpgdp(1) * mc_jpgdp(33),fet_rate(icafe19),sum(sales_tax_rate(1:MNUMCR-2))/(MNUMCR-2)
-          ENDDO
-        ENDDO
+		    INC_COST_BEV(1:nvmt,icafe19,n)  = INC_COST_BEV(1:nvmt,icafe19,n) &									                ! Add excise tax (Class 8)
+										    + (INC_COST_BEV(1:nvmt,icafe19,n)-BEV_infra_cost(icafe19,iyr)) &
+										    * fet_rate(icafe19)
+         ENDDO
         
 !        IF (iyr.eq.mnumyr) then
 !          WRITE(21,*) 'battsizecheck',curitr
 !          DO i = BSYR_STK-1989+1,MNUMYR
 !            DO icafe19 = 1, cafe19
 !              DO ivmt = 1, nvmt
-!                WRITE(21,'(3(i4,","),4(f8.1,","),2(f5.1,","),f10.1)') i+1989,icafe19,ivmt,kWh_used(ivmt,icafe19,i),kWh_needed(ivmt,icafe19,i),kWh_nominal(ivmt,icafe19,i),kWh_usable(ivmt,icafe19,i),daily_recharges(ivmt,icafe19,i),daily_hours(ivmt,icafe19,i),bev_refuelopcost(ivmt,icafe19,i)
+!                WRITE(21,'(3(i4,","),4(f8.1,","),(f5.1,","),f10.1)') i+1989,icafe19,ivmt,kWh_used(ivmt,icafe19,i),kWh_needed(ivmt,icafe19,i),kWh_nominal(ivmt,icafe19,i),kWh_usable(ivmt,icafe19,i),daily_hours(ivmt,icafe19,i),bev_refuelopcost(ivmt,icafe19,i)
 !              ENDDO
 !            ENDDO
 !          ENDDO
 !        ENDIF
 
-!...    Gasoline HEV
+!...    Gasoline HEV (note: vectorized calculation across all ivmt)
 	    INC_COST_HEV(:,:,n) = 0.0
         ibatt = 5                       ! HEV battery price
         DO icafe19=1,CAFE19
@@ -3136,166 +3144,153 @@ end module F_
 	  								 + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_HEV(icafe19)&			                    ! battery (total capacity, not usable)
 	  								 + (inc_tech_cost_19(iyr,icafe19,11) - inc_tech_cost_19(BSYR_STK-1989,icafe19,11)) &! adopted tech improvement (v. cost base year)
 									 - cost_ICE_HEV(icafe19,iyr) &									                    ! ICE components removed (incl. tech adopted for ICE truck)
-									 - lonox_cost(icafe19,iyr)									                        ! Low NOx compliance cost starting in 2027 (lonox_cost(:,1995:2027) = 0)
+									 - lonox_cost(icafe19,iyr)                          								! Low NOx compliance cost starting in 2027 (lonox_cost(:,1995:2027) = 0)
 
-!		IF (ivmt.eq.1.and.icafe19.eq.1.and.curcalyr.eq.BSYR_STK+1) WRITE(21,'(a19,3(",",a4),9(",",a9))')'INC_COST_HEV_detail','itr','year','icaf', &
-!																	 'inc_cost','motorkW','motorkW$','battkWh','battkWh$','tech$','ice$','nox$'
-!		IF (ivmt.eq.1) WRITE(21,'(a19,3(",",i4),8(",",f9.1))')'INC_COST_HEV_detail',curitr,curcalyr,icafe19,INC_COST_HEV(ivmt,icafe19,n)/ mc_jpgdp(1) * mc_jpgdp(33),PT_motorkW_HEV(icafe19),cost_motorkW(iyr)/ mc_jpgdp(1) * mc_jpgdp(33),PT_battkWh_HEV(icafe19),&
-!																cost_battkWh_trk(4,iyr)/ mc_jpgdp(1) * mc_jpgdp(33),inc_tech_cost_19(iyr,icafe19,11)/ mc_jpgdp(1) * mc_jpgdp(33),cost_ICE_HEV(icafe19)/ mc_jpgdp(1) * mc_jpgdp(33),&
-!																lonox_cost(icafe19,iyr)/ mc_jpgdp(1) * mc_jpgdp(33)
+!         Add Low NOx compliance cost (assume equal to gasoline compliance cost)
+		  IF (n.ge.2027-1989.and.NOX_switch.eq.1) &
+		    INC_COST_HEV(:,icafe19,n) = INC_COST_HEV(:,icafe19,n) + cost_LoNOx(icafe19,11)
         ENDDO
 
-!...    Hydrogen ICE
+!...    Hydrogen ICE (note: vectorized calculation across all ivmt)
 	    INC_COST_H2ICE(:,:,n) = 0.0
         DO icafe19=1,CAFE19
           isc4 = SC19Map(icafe19)
-          DO ivmt = 1, nvmt
-!           Size H2 tanks                      average daily range                    / fuel economy (mpgde or mpgde)  * convert to kgH2
-            PT_tankkg_h2ice(ivmt,icafe19)  = ((SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250) / new_mpg_19(iyr-1,12,icafe19)   * CFH2Q_KG  * (HRATE(isc4,12)*1E-6)
-            PT_tankkg_h2ice(ivmt,icafe19)  = PT_tankkg_h2ice(ivmt,icafe19) / usable_h2
+!           Size H2 tanks                      average daily range                                / fuel economy (mpgde or mpgde)  * convert to kgH2
+            PT_tankkg_h2ice(1:nvmt,icafe19)  = ((SUM(VMT_VEH(1:nvmt,:,icafe19),DIM=2)/2) / ann_uptime_days) / new_mpg_19(iyr-1,12,icafe19)   * CFH2Q_KG  * (HRATE(isc4,12)*1E-6)
+            PT_tankkg_h2ice(1:nvmt,icafe19)  = PT_tankkg_h2ice(1:nvmt,icafe19) / usable_h2
 
 !           Calculate number of tanks (used in cost learning)
-            PT_tankcnt_H2ICE(ivmt,icafe19) = MIN(h2_max_tanks(icafe19,3),REAL(CEILING(PT_tankkg_h2ice(ivmt,icafe19) / h2_kg_per_tank(icafe19,3))))
+            PT_tankcnt_H2ICE(1:nvmt,icafe19) = MIN(h2_max_tanks(icafe19,3),REAL(CEILING(PT_tankkg_h2ice(1:nvmt,icafe19) / h2_kg_per_tank(icafe19,3))))
 
 !           Calculate cost for extra required refuelings (if not enough space to install tanks sufficient to achieve daily range, have to stop and refuel)
 !           First, ratio of kgH2 capacity needed to meet average daily range to actual on-board kgH2 capacity (>1 means need to refuel to achieve duty cycle)
-            h2_refuelopcost(ivmt,icafe19,3) = PT_tankkg_H2ICE(ivmt,icafe19) / (PT_tankcnt_H2ICE(ivmt,icafe19) * h2_kg_per_tank(icafe19,3))
+            h2_refuelopcost(1:nvmt,icafe19,3) = PT_tankkg_H2ICE(1:nvmt,icafe19) / (PT_tankcnt_H2ICE(1:nvmt,icafe19) * h2_kg_per_tank(icafe19,3))
 !           Second, scale up to annual, apply refueling time and cost per hour
-            h2_refuelopcost(ivmt,icafe19,3) = MAX(0.0, (h2_refuelopcost(ivmt,icafe19,3) - 1) * 250 * h2_refuel_time * refuel_timeval)
+            h2_refuelopcost(1:nvmt,icafe19,3) = MAX(0.0, (h2_refuelopcost(1:nvmt,icafe19,3) - 1) * ann_uptime_days * h2_refuel_time * refuel_timeval)
 
 !           Calculate Incremental HEV cost increase over conventional diesel
-	  	    INC_COST_H2ICE(ivmt,icafe19,n)  = cost_h2tank(iyr)*PT_tankcnt_H2ICE(ivmt,icafe19)*h2_kg_per_tank(icafe19,3) &       ! h2 tank
+	  	    INC_COST_H2ICE(1:nvmt,icafe19,n)  = cost_h2tank(iyr)*PT_tankcnt_H2ICE(1:nvmt,icafe19)*h2_kg_per_tank(icafe19,3) &       ! h2 tank
                                             + (inc_tech_cost_19(iyr,icafe19,12) - inc_tech_cost_19(BSYR_STK-1989,icafe19,12)) & ! adopted tech improvement (v. cost base year)
                                             - cost_ICE_H2ICE(icafe19,iyr)								                        ! ICE components removed (incl. tech adopted for diesel ICE truck)
-            INC_COST_H2ICE(ivmt,icafe19,n)  = INC_COST_H2ICE(ivmt,icafe19,n) &
-                                            * (1+fet_rate(icafe19))
 
 !           Add Low NOx compliance cost (assume equal to gasoline compliance cost)
 		    IF (n.ge.2027-1989.and.NOX_switch.eq.1) &
-			  INC_COST_H2ICE(ivmt,icafe19,n) = INC_COST_H2ICE(ivmt,icafe19,n) + cost_LoNOx(icafe19,12)
+			  INC_COST_H2ICE(1:nvmt,icafe19,n) = INC_COST_H2ICE(1:nvmt,icafe19,n) - lonox_cost(icafe19,iyr) + cost_LoNOx(icafe19,12)
 
-!		    IF (ivmt.eq.1.and.icafe19.eq.1.and.curcalyr.eq.BSYR_STK+1) WRITE(21,'(a19,3(",",a4),3(",",a9))')'INC_COST_H2ICE_detail','itr','year','icaf', &
-!		  															 'inc_cost','tech$','ice$'
-!		    IF (ivmt.eq.1) WRITE(21,'(a19,3(",",i4),3(",",f9.1))')'INC_COST_H2ICE_detail',curitr,curcalyr,icafe19,INC_COST_H2ICE(ivmt,icafe19,n)/ mc_jpgdp(1) * mc_jpgdp(33),
-!                                                                 inc_tech_cost_19(iyr,icafe19,12)/ mc_jpgdp(1) * mc_jpgdp(33),cost_ICE_H2ICE(icafe19)/ mc_jpgdp(1) * mc_jpgdp(33)
-!            WRITE(21,'(a6,4(",",i4),10(",",f7.2),",",f8.1)') 'H2ICE',curcalyr,curitr,icafe19,ivmt,(SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250,new_mpg_19(iyr-1,12,icafe19),CFH2Q_KG,&
-!                                                            (HRATE(isc4,12)*1E-6),h2_kg_per_tank(icafe19,3),PT_tankcnt_H2ICE(ivmt,icafe19),PT_tankkg_h2ice(ivmt,icafe19),&
-!                                                            h2_max_tanks(icafe19,3),h2_refuel_time,refuel_timeval/ mc_jpgdp(1)*mc_jpgdp(33),h2_refuelopcost(ivmt,icafe19,3)/ mc_jpgdp(1)*mc_jpgdp(33)
-
-          ENDDO
+            INC_COST_H2ICE(1:nvmt,icafe19,n)  = INC_COST_H2ICE(1:nvmt,icafe19,n) &
+                                            * (1+fet_rate(icafe19))
         ENDDO
 
-!...    PHEV diesel and gasoline
+!...    PHEV diesel and gasoline (note: vectorized calculation across all ivmt)
 	    INC_COST_PHEVD(:,:,n) = 0.0
 	    INC_COST_PHEVG(:,:,n) = 0.0
-        DO ivmt=1,nvmt
           DO icafe19=1,CAFE19
-		    PHEV_daily_Evmt = ((SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250 * PHEVElecVMT(icafe19))		  
+		    PHEV_daily_Evmt(1:nvmt) = ((SUM(VMT_VEH(1:nvmt,:,icafe19),DIM=2)/2) / ann_uptime_days * PHEVElecVMT(icafe19))		  
 		    ibatt = 2           ! Assume high-power battery
 
-		    PT_battkWh_PHEV(ivmt,icafe19) = battsize_a_PHEV(icafe19) * (PHEV_daily_Evmt** battsize_b_PHEV(icafe19))
-		    PT_battkWh_PHEV(ivmt,icafe19) = PT_battkWh_PHEV(ivmt,icafe19) * new_mpg_19(BSYR_STK-1989,6,icafe19)/new_mpg_19(iyr,6,icafe19)   !  Adjust battery size down as charge depleting fuel economy improves
+		    PT_battkWh_PHEV(1:nvmt,icafe19) = battsize_a_PHEV(icafe19) * (PHEV_daily_Evmt(1:nvmt)** battsize_b_PHEV(icafe19))
+		    PT_battkWh_PHEV(1:nvmt,icafe19) = PT_battkWh_PHEV(1:nvmt,icafe19) * new_mpg_19(BSYR_STK-1989,6,icafe19)/new_mpg_19(iyr,6,icafe19)   !  Adjust battery size down as charge depleting fuel economy improves
             
 !           Calculate Incremental BEV cost increase over conventional diesel
-	  	    INC_COST_PHEVD(ivmt,icafe19,n) = PT_emotorkW(icafe19,7)*cost_motorkW(iyr)&			                                ! motor
-	  								       + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_PHEV(ivmt,icafe19)&	                        ! battery (total capacity, not usable)
+	  	    INC_COST_PHEVD(1:nvmt,icafe19,n) = PT_emotorkW(icafe19,7)*cost_motorkW(iyr)&			                                ! motor
+	  								       + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_PHEV(1:nvmt,icafe19)&	                        ! battery (total capacity, not usable)
 	  									   + (inc_tech_cost_19(iyr,icafe19,7) - inc_tech_cost_19(BSYR_STK-1989,icafe19,7)) &	! adopted tech improvement
 	  									   + cost_OBC(iyr) &											                        ! On-board charger cost
 										   - cost_ICE_PHEV(icafe19,1,iyr)	                                                    ! ICE components removed/PHEV added (incl. removing tech adopted for diesel truck)
-	  	    INC_COST_PHEVG(ivmt,icafe19,n) = PT_emotorkW(icafe19,8)*cost_motorkW(iyr)&			                                ! motor
-	  								       + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_PHEV(ivmt,icafe19)&	                        ! battery (total capacity, not usable)
+	  	    INC_COST_PHEVG(1:nvmt,icafe19,n) = PT_emotorkW(icafe19,8)*cost_motorkW(iyr)&			                                ! motor
+	  								       + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_PHEV(1:nvmt,icafe19)&	                        ! battery (total capacity, not usable)
 	  									   + (inc_tech_cost_19(iyr,icafe19,8) - inc_tech_cost_19(BSYR_STK-1989,icafe19,8)) &	! adopted tech improvement (v. cost base year)
 	  									   + cost_OBC(iyr) &											                        ! On-board charger cost
 										   - cost_ICE_PHEV(icafe19,2,iyr)	                                                    ! ICE components removed/PHEV added (incl. removing tech adopted for gasoline truck)
-		    INC_COST_PHEVD(ivmt,icafe19,n) = INC_COST_PHEVD(ivmt,icafe19,n) &							                        ! Add excise tax (Class 8)
-										   * (1+fet_rate(icafe19))                      
-		    INC_COST_PHEVG(ivmt,icafe19,n) = INC_COST_PHEVG(ivmt,icafe19,n) &							                        ! Add excise tax (Class 8)
-										   * (1+fet_rate(icafe19))
 
 !           Subtract delta of diesel/gasoline avg. LowNOx compliance cost [lonox_cost] and PHEV LowNOx compliance cost [cost_LoNOx]
 		    IF (n.ge.2027-1989.and.NOX_switch.eq.1) then
-			  INC_COST_PHEVD(ivmt,icafe19,n) = INC_COST_PHEVD(ivmt,icafe19,n) - (lonox_cost(icafe19,iyr) - cost_LoNOx(icafe19,7))
-			  INC_COST_PHEVG(ivmt,icafe19,n) = INC_COST_PHEVG(ivmt,icafe19,n) - (lonox_cost(icafe19,iyr) - cost_LoNOx(icafe19,8))
+			  INC_COST_PHEVD(1:nvmt,icafe19,n) = INC_COST_PHEVD(1:nvmt,icafe19,n) - (lonox_cost(icafe19,iyr) - cost_LoNOx(icafe19,7))
+			  INC_COST_PHEVG(1:nvmt,icafe19,n) = INC_COST_PHEVG(1:nvmt,icafe19,n) - (lonox_cost(icafe19,iyr) - cost_LoNOx(icafe19,8))
 		    ENDIF
 
 !	  	    IRA commercial clean vehicle credit (Section 45W)
 !	  	    Class 2b-3 (up to 14k GVWR): Minimum of $7,500, 15% of vehicle cost, and incremental cost
 !	  	    Class 4-8: Minimum of $40,000, 15% of vehicle cost, and incremental cost
 	  	    IF (curcalyr.ge.2023.and.curcalyr.le.2032) then
-	  	      INC_COST_PHEVD(ivmt,icafe19,n) = INC_COST_PHEVD(ivmt,icafe19,n) - MAX(0.0,MIN(IRA_45W_max(icafe19,7) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_PHEVD(ivmt,icafe19,n)))
-	  	      INC_COST_PHEVG(ivmt,icafe19,n) = INC_COST_PHEVG(ivmt,icafe19,n) - MAX(0.0,MIN(IRA_45W_max(icafe19,8) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_PHEVG(ivmt,icafe19,n)))
+              if(SwitchHDV_HR1.eq.0) then       ! Original IRA 45W sunset of 2032 
+                IRA_CREDIT(7,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,7) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_PHEVD(1:nvmt,icafe19,n)))
+                IRA_CREDIT(8,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,8) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_PHEVG(1:nvmt,icafe19,n)))
+              elseif(curcalyr.le.2025) then     ! HR 1 ends 45W credits in 2026
+                IRA_CREDIT(7,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,7) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_PHEVD(1:nvmt,icafe19,n)))
+                IRA_CREDIT(8,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,8) / mc_jpgdp(n) * mc_jpgdp(1),INC_COST_PHEVG(1:nvmt,icafe19,n)))
+              endif
+              INC_COST_PHEVD(1:nvmt,icafe19,n) = INC_COST_PHEVD(1:nvmt,icafe19,n) - IRA_CREDIT(7,1:nvmt,icafe19,n)
+	  	      INC_COST_PHEVG(1:nvmt,icafe19,n) = INC_COST_PHEVG(1:nvmt,icafe19,n) - IRA_CREDIT(8,1:nvmt,icafe19,n)
 	  	    ENDIF
 
-          ENDDO
-        ENDDO
+		    INC_COST_PHEVD(1:nvmt,icafe19,n) = INC_COST_PHEVD(1:nvmt,icafe19,n) &							                        ! Add excise tax (Class 8)
+                                             * (1+fet_rate(icafe19))                      
+		    INC_COST_PHEVG(1:nvmt,icafe19,n) = INC_COST_PHEVG(1:nvmt,icafe19,n) &							                        ! Add excise tax (Class 8)
+										     * (1+fet_rate(icafe19))
 
-!...    FCEV and FCHEV
+          ENDDO
+
+!...    FCEV and FCHEV (note: vectorized calculation across all ivmt)
 	    INC_COST_FCEV(:,:,n) = 0.0
 	    INC_COST_FCHEV(:,:,n) = 0.0
-	    DO ivmt=1,nvmt
 	      DO icafe19=1,CAFE19
             isc4 = SC19Map(icafe19)
-!           Size H2 tanks                      average daily range                   / fuel economy (mpgde or mpgde)   *  convert to kgH2
-            PT_tankkg_FCEV(ivmt,icafe19)  = ((SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250) / new_mpg_19(iyr-1,9,icafe19)     * CFH2Q_KG * (HRATE(isc4,9)*1E-6)
-            PT_tankkg_FCHEV(ivmt,icafe19) = ((SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250) / new_mpg_19(iyr-1,10,icafe19)    * CFH2Q_KG * (HRATE(isc4,10)*1E-6)
-            PT_tankkg_FCEV(ivmt,icafe19)  = PT_tankkg_FCEV(ivmt,icafe19) / usable_h2
-            PT_tankkg_FCHEV(ivmt,icafe19) = PT_tankkg_FCHEV(ivmt,icafe19) / usable_h2
+!           Size H2 tanks                      average daily range                                         / fuel economy (mpgde or mpgde)   *  convert to kgH2
+            PT_tankkg_FCEV(1:nvmt,icafe19)  = ((SUM(VMT_VEH(1:nvmt,:,icafe19),DIM=2)/2) / ann_uptime_days) / new_mpg_19(iyr-1,9,icafe19)     * CFH2Q_KG * (HRATE(isc4,9)*1E-6)
+            PT_tankkg_FCHEV(1:nvmt,icafe19) = ((SUM(VMT_VEH(1:nvmt,:,icafe19),DIM=2)/2) / ann_uptime_days) / new_mpg_19(iyr-1,10,icafe19)    * CFH2Q_KG * (HRATE(isc4,10)*1E-6)
+            PT_tankkg_FCEV(1:nvmt,icafe19)  = PT_tankkg_FCEV(1:nvmt,icafe19) / usable_h2
+            PT_tankkg_FCHEV(1:nvmt,icafe19) = PT_tankkg_FCHEV(1:nvmt,icafe19) / usable_h2
 
 !           Calculate number of tanks required (used in cost learning)
-            PT_tankcnt_FCEV(ivmt,icafe19) = MIN(h2_max_tanks(icafe19,1),REAL(CEILING(PT_tankkg_FCEV(ivmt,icafe19) / h2_kg_per_tank(icafe19,1))))
-            PT_tankcnt_FCHEV(ivmt,icafe19)= MIN(h2_max_tanks(icafe19,2),REAL(CEILING(PT_tankkg_FCHEV(ivmt,icafe19) / h2_kg_per_tank(icafe19,2))))
+            PT_tankcnt_FCEV(1:nvmt,icafe19) = MIN(h2_max_tanks(icafe19,1),REAL(CEILING(PT_tankkg_FCEV(1:nvmt,icafe19) / h2_kg_per_tank(icafe19,1))))
+            PT_tankcnt_FCHEV(1:nvmt,icafe19)= MIN(h2_max_tanks(icafe19,2),REAL(CEILING(PT_tankkg_FCHEV(1:nvmt,icafe19) / h2_kg_per_tank(icafe19,2))))
 
 !           Calculate opportunity cost for extra required refuelings (if not enough space to install tanks sufficient to achieve daily range, have to stop and refuel)
 !           First, ratio of kgH2 capacity needed to meet average daily range to actual on-board kgH2 capacity (>1 means need to refuel to achieve duty cycle)
-            h2_refuelopcost(ivmt,icafe19,1) = PT_tankkg_FCEV(ivmt,icafe19) / (PT_tankcnt_FCEV(ivmt,icafe19) * h2_kg_per_tank(icafe19,1))
-            h2_refuelopcost(ivmt,icafe19,2) = PT_tankkg_FCHEV(ivmt,icafe19) /(PT_tankcnt_FCHEV(ivmt,icafe19)* h2_kg_per_tank(icafe19,2))
+            h2_refuelopcost(1:nvmt,icafe19,1) = PT_tankkg_FCEV(1:nvmt,icafe19) / (PT_tankcnt_FCEV(1:nvmt,icafe19) * h2_kg_per_tank(icafe19,1))
+            h2_refuelopcost(1:nvmt,icafe19,2) = PT_tankkg_FCHEV(1:nvmt,icafe19) /(PT_tankcnt_FCHEV(1:nvmt,icafe19)* h2_kg_per_tank(icafe19,2))
 !           Second, scale up to annual, apply refueling time and cost per hour             
-            h2_refuelopcost(ivmt,icafe19,1) = MAX(0.0, (h2_refuelopcost(ivmt,icafe19,1) - 1) * 250 * h2_refuel_time * refuel_timeval)
-            h2_refuelopcost(ivmt,icafe19,2) = MAX(0.0, (h2_refuelopcost(ivmt,icafe19,2) - 2) * 250 * h2_refuel_time * refuel_timeval)
+            h2_refuelopcost(1:nvmt,icafe19,1) = MAX(0.0, (h2_refuelopcost(1:nvmt,icafe19,1) - 1) * ann_uptime_days * h2_refuel_time * refuel_timeval)
+            h2_refuelopcost(1:nvmt,icafe19,2) = MAX(0.0, (h2_refuelopcost(1:nvmt,icafe19,2) - 2) * ann_uptime_days * h2_refuel_time * refuel_timeval)
 
 		    ibatt = 2			! Assume high-power battery
 
-	        INC_COST_FCEV(ivmt,icafe19,n)  = cost_FCkW(iyr)*PT_fckW_FCEV(ivmt,icafe19) &				                        ! fuel cell stack
+	        INC_COST_FCEV(1:nvmt,icafe19,n)  = cost_FCkW(iyr)*PT_fckW_FCEV(1:nvmt,icafe19) &				                        ! fuel cell stack
 	  									   + cost_motorkW(iyr)*PT_emotorkW(icafe19,9) &		                                    ! motor
-	  									   + cost_h2tank(iyr)*PT_tankcnt_FCEV(ivmt,icafe19)*h2_kg_per_tank(icafe19,1) &	        ! h2 tank
-	  									   + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_FCEV(ivmt,icafe19) &                        ! battery
+	  									   + cost_h2tank(iyr)*PT_tankcnt_FCEV(1:nvmt,icafe19)*h2_kg_per_tank(icafe19,1) &	        ! h2 tank
+	  									   + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_FCEV(1:nvmt,icafe19) &                        ! battery
 	  									   + (inc_tech_cost_19(iyr,icafe19,9) - inc_tech_cost_19(BSYR_STK-1989,icafe19,9)) &    ! adopted tech improvement (v. cost base year)
 	  									   - cost_ICE(icafe19,iyr) &									                        ! ICE components removed (incl. tech adopted for ICE truck)
 										   - lonox_cost(icafe19,iyr)									                        ! Low NOx compliance cost starting in 2027 (lonox_cost(:,1995:2027) = 0)
-	        INC_COST_FCHEV(ivmt,icafe19,n) = cost_FCkW(iyr)*PT_fckW_FCHEV(ivmt,icafe19) &				                        ! fuel cell stack
+	        INC_COST_FCHEV(1:nvmt,icafe19,n) = cost_FCkW(iyr)*PT_fckW_FCHEV(1:nvmt,icafe19) &				                        ! fuel cell stack
 	  									   + cost_motorkW(iyr)*PT_emotorkW(icafe19,10) &		                                ! motor
-	  									   + cost_h2tank(iyr)*PT_tankcnt_FCHEV(ivmt,icafe19)*h2_kg_per_tank(icafe19,2) &        ! h2 tank
-	  									   + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_FCHEV(ivmt,icafe19)&                        ! battery
+	  									   + cost_h2tank(iyr)*PT_tankcnt_FCHEV(1:nvmt,icafe19)*h2_kg_per_tank(icafe19,2) &        ! h2 tank
+	  									   + cost_battkWh_trk(ibatt,iyr)*PT_battkWh_FCHEV(1:nvmt,icafe19)&                        ! battery
 	  									   + (inc_tech_cost_19(iyr,icafe19,10) - inc_tech_cost_19(BSYR_STK-1989,icafe19,10)) &	! adopted tech improvement (v. cost base year)
 	  									   - cost_ICE(icafe19,iyr) &									                        ! ICE components removed (incl. tech adopted for ICE truck)
 										   - lonox_cost(icafe19,iyr)									                        ! Low NOx compliance cost starting in 2027 (lonox_cost(:,1995:2027) = 0)
-		    INC_COST_FCEV(ivmt,icafe19,n)  = INC_COST_FCEV(ivmt,icafe19,n) &							                        ! Add excise tax (Class 8)
-										   * (1+fet_rate(icafe19))                      
-		    INC_COST_FCHEV(ivmt,icafe19,n) = INC_COST_FCHEV(ivmt,icafe19,n) &							                        ! Add excise tax (Class 8)
-										   * (1+fet_rate(icafe19))
 
 !	  	    IRA commercial clean vehicle credit (Section 45W). The higher 30% is used (would be 15% for PHEV)
 !	  	    Class 2b-3 (up to  14k GVWR): Minimum of $7,500, 30% of vehicle cost, and incremental cost
 !	  	    Class 4-8: Minimum of $40,000, 30% of vehicle cost, and incremental cost
 	  	    IF (curcalyr.ge.2023.and.curcalyr.le.2032) then
-	  	      INC_COST_FCEV(ivmt,icafe19,n) 	= INC_COST_FCEV(ivmt,icafe19,n)  - MAX(0.0,MIN(IRA_45W_max(icafe19,9)/ mc_jpgdp(n) * mc_jpgdp(1),INC_COST_FCEV(ivmt,icafe19,n)))
-	  	      INC_COST_FCHEV(ivmt,icafe19,n) 	= INC_COST_FCHEV(ivmt,icafe19,n) - MAX(0.0,MIN(IRA_45W_max(icafe19,10)/ mc_jpgdp(n) * mc_jpgdp(1),INC_COST_FCHEV(ivmt,icafe19,n)))
+              if(SwitchHDV_HR1.eq.0) then       ! Original IRA 45W sunset of 2032 
+                IRA_CREDIT(9,1:nvmt,icafe19,n)  = MAX(0.0,MIN(IRA_45W_max(icafe19,9)/ mc_jpgdp(n) * mc_jpgdp(1),INC_COST_FCEV(1:nvmt,icafe19,n)))
+                IRA_CREDIT(10,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,10)/ mc_jpgdp(n) * mc_jpgdp(1),INC_COST_FCHEV(1:nvmt,icafe19,n)))
+              elseif(curcalyr.le.2025) then     ! HR 1 ends 45W credits in 2026
+                IRA_CREDIT(9,1:nvmt,icafe19,n)  = MAX(0.0,MIN(IRA_45W_max(icafe19,9)/ mc_jpgdp(n) * mc_jpgdp(1),INC_COST_FCEV(1:nvmt,icafe19,n)))
+                IRA_CREDIT(10,1:nvmt,icafe19,n) = MAX(0.0,MIN(IRA_45W_max(icafe19,10)/ mc_jpgdp(n) * mc_jpgdp(1),INC_COST_FCHEV(1:nvmt,icafe19,n)))
+              endif	  	    
+              INC_COST_FCEV(1:nvmt,icafe19,n) 	= INC_COST_FCEV(1:nvmt,icafe19,n)  - IRA_CREDIT(9,1:nvmt,icafe19,n)
+	  	      INC_COST_FCHEV(1:nvmt,icafe19,n) 	= INC_COST_FCHEV(1:nvmt,icafe19,n) - IRA_CREDIT(10,1:nvmt,icafe19,n)
 	  	    ENDIF
 
-!		  IF (ivmt.eq.1.and.icafe19.eq.1.and.curcalyr.gt.2040) WRITE(21,'(a20,4(",",a4),14(",",a8))')'INC_COST_FCEV_detail','itr','year','icaf','ivmt','inc_cost','motorkW','motorkW$','battkWh','battkWh$',&
-!																				'tankkg','tankkg$','FCkW','FCkW$','tech$','ice$','nox$','tax%','state%'
-!		  WRITE(21,'(a19,4(",",i4),",",f8.0,9(",",f8.1),2(",",f8.5))')'FCEV',curitr,curcalyr,icafe19,ivmt,INC_COST_FCEV(ivmt,icafe19,n),PT_motorkW_FCEV(ivmt,icafe19),cost_motorkW(iyr),PT_battkWh_FCEV(ivmt,icafe19),&
-!																cost_battkWh_trk(ibatt,iyr),PT_tankkg_FCEV(ivmt,icafe19),cost_h2tank(iyr),PT_fckW_FCEV(ivmt,icafe19),cost_FCkW(iyr),inc_tech_cost_19(iyr,icafe19,9),cost_ICE(icafe19,iyr),&
-!																lonox_cost(icafe19,iyr),fet_rate(icafe19),sum(sales_tax_rate(1:MNUMCR-2))/(MNUMCR-2)
-!		  IF (curcalyr.gt.2040) WRITE(21,'(a20,4(",",i4),12(",",f8.1),2(",",f8.5))')'FCHEV',curitr,curcalyr,icafe19,ivmt,INC_COST_FCHEV(ivmt,icafe19,n),PT_motorkW_FCHEV(ivmt,icafe19),cost_motorkW(iyr),PT_battkWh_FCHEV(ivmt,icafe19),&
-!																cost_battkWh_trk(ibatt,iyr),PT_tankkg_FCHEV(ivmt,icafe19),cost_h2tank(iyr),PT_fckW_FCHEV(ivmt,icafe19),cost_FCkW(iyr),inc_tech_cost_19(iyr,icafe19,10),cost_ICE(icafe19,iyr),&
-!																lonox_cost(icafe19,iyr),fet_rate(icafe19),sum(sales_tax_rate(1:MNUMCR-2))/(MNUMCR-2)   
-!            WRITE(21,'(a6,4(",",i4),10(",",f7.2),",",f8.1)')'FCEV',curcalyr,curitr,icafe19,ivmt,(SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250,new_mpg_19(iyr-1,9,icafe19),CFH2Q_KG,(HRATE(isc4,9)*1E-6),h2_kg_per_tank(icafe19,1),&
-!                                                        PT_tankcnt_FCEV(ivmt,icafe19),PT_tankkg_FCEV(ivmt,icafe19),h2_max_tanks(icafe19,1),h2_refuel_time,refuel_timeval/ mc_jpgdp(1)*mc_jpgdp(33),h2_refuelopcost(ivmt,icafe19,1)/ mc_jpgdp(1)*mc_jpgdp(33)
-!            WRITE(21,'(a6,4(",",i4),10(",",f7.2),",",f8.1)')'FCHEV',curcalyr,curitr,icafe19,ivmt,(SUM(VMT_VEH(ivmt,:,icafe19))/2) / 250,new_mpg_19(iyr-1,10,icafe19),CFH2Q_KG,(HRATE(isc4,10)*1E-6),h2_kg_per_tank(icafe19,2),&
-!                                                        PT_tankcnt_FCHEV(ivmt,icafe19),PT_tankkg_FCHEV(ivmt,icafe19),h2_max_tanks(icafe19,2),h2_refuel_time,refuel_timeval/ mc_jpgdp(1)*mc_jpgdp(33),h2_refuelopcost(ivmt,icafe19,2)/ mc_jpgdp(1)*mc_jpgdp(33)
+		    INC_COST_FCEV(1:nvmt,icafe19,n)  = INC_COST_FCEV(1:nvmt,icafe19,n) &							                        ! Add excise tax (Class 8)
+                                             * (1+fet_rate(icafe19))                      
+		    INC_COST_FCHEV(1:nvmt,icafe19,n) = INC_COST_FCHEV(1:nvmt,icafe19,n) &							                        ! Add excise tax (Class 8)
+                                             * (1+fet_rate(icafe19))
 		  ENDDO
-	    ENDDO
 	  ENDIF
 
  RETURN
@@ -3308,6 +3303,7 @@ end module F_
 ! ==========================================================================================================
  SUBROUTINE TRUCK_CHOICE
  USE F_
+ USE MEAN_FUNCS
  IMPLICIT NONE
  include 'angtdm'
  INCLUDE 'EUSPRC'
@@ -3323,6 +3319,7 @@ end module F_
  	  CPM_R_ICE(MNUMYR,MNUMCR,flt,CAFE19),&				! Composite diesel/gasoline cost per mile
  	  MR_ICE(PBK_YR)									! M&R cost 
  REAL CPM_ICE_HEV, MR_ICE_HEV(PBK_YR)
+ REAL TEMP_val(FLT,CAFE19,MNUMCR-2)
  
   fuel_shr_regn(iyr,:,:,:,:) = 0.0
   TRKSTK_19R(iyr,:,1,:,:,:)  = 0.0
@@ -3333,10 +3330,8 @@ end module F_
 
 !		Heavy-haul is diesel only -- no need to run choice module
         IF (icafe19.eq.19) then
-		  DO ivmt = 1, nvmt
-		    fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,1,iregn) 		= veh_shr(ivmt,iflt,icafe19)
-		    fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,2:FUEL12,iregn) = 0.0
-		  ENDDO
+		  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,1,iregn) 		= veh_shr(1:nvmt,iflt,icafe19)
+		  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,2:FUEL12,iregn) = 0.0
 		  CYCLE
 		ENDIF
 		
@@ -3345,16 +3340,16 @@ end module F_
 !       Cost per mile (1990USD/mi) for each powertrain
 	    CPM_R(n,:,icafe19,iflt,iregn) = 0.0
         DO ifuel=1,FUEL12
-          IF(ifuel.ne.4) CPM_R(n,ifuel,icafe19,iflt,iregn) = FUELPRICE_R_AVG(ifuel,iregn)/NEW_MPG_19(iyr,ifuel,icafe19)*HRATE(isc4,ifuel)*1E-6									! ifuel = 4 --> CNG
+          IF(ifuel.ne.4) CPM_R(n,ifuel,icafe19,iflt,iregn) = FUELPRICE_R_AVG(ifuel,iregn)/NEW_MPG_19(iyr,ifuel,icafe19)*HRATE(isc4,ifuel)*1E-6					! ifuel = 4 --> CNG
           IF(ifuel.eq.1) then
 		    CPM_DEF(iyr,icafe19,iregn) = 1/NEW_MPG_19(iyr,ifuel,icafe19) * DEF_dose * cost_DEF(iyr)
-			IF (NOX_switch.eq.1.and.curcalyr.ge.2027) CPM_DEF(iyr,icafe19,iregn) = 1/NEW_MPG_19(iyr,ifuel,icafe19) * DEF_dose_LoNOx * cost_DEF(iyr)						! Higher DEF consumption to meet low NOx reg
+			IF (NOX_switch.eq.1.and.curcalyr.ge.2027) CPM_DEF(iyr,icafe19,iregn) = 1/NEW_MPG_19(iyr,ifuel,icafe19) * DEF_dose_LoNOx * cost_DEF(iyr)				! Higher DEF consumption to meet low NOx reg
 			CPM_R(iyr,ifuel,icafe19,iflt,iregn) = CPM_R(iyr,ifuel,icafe19,iflt,iregn) + CPM_DEF(iyr,icafe19,iregn)
 		  ELSEIF(ifuel.eq.6) then 
 		    IF(iflt.eq.1.or.icafe19.gt.16) then		! Vehicles charged over-the-road (retail/public) -- non-fleet and all sleeper cabs
-			  CPM_R(n,ifuel,icafe19,iflt,iregn) = SUM(PELFNCM(iregn,iyr-4:iyr))/5.0*1.115 /NEW_MPG_19(iyr,ifuel,icafe19)*HRATE(isc4,ifuel)*1E-6	
+			  CPM_R(n,ifuel,icafe19,iflt,iregn) = SUM(PELFNCM(iregn,iyr-4:iyr))/5.0*mc_jpgdp(1) /NEW_MPG_19(iyr,ifuel,icafe19)*HRATE(isc4,ifuel)*1E-6	
 			ELSE	! Depot-charged
-			  CPM_R(n,ifuel,icafe19,iflt,iregn) = SUM(PELIBCM(iregn,iyr-4:iyr))/5.0*1.115 /NEW_MPG_19(iyr,ifuel,icafe19)*HRATE(isc4,ifuel)*1E-6
+			  CPM_R(n,ifuel,icafe19,iflt,iregn) = SUM(PELIBCM(iregn,iyr-4:iyr))/5.0*mc_jpgdp(1) /NEW_MPG_19(iyr,ifuel,icafe19)*HRATE(isc4,ifuel)*1E-6
 			ENDIF
 			
 			CPM_R(iyr,ifuel,icafe19,iflt,iregn) = (CPM_R(iyr,ifuel,icafe19,iflt,iregn) + &
@@ -3363,11 +3358,11 @@ end module F_
 		  ENDIF
 		ENDDO
 	    IF(icafe19.le.7) then           ! Classes 2b - 6, CNG
-          IF(iflt.eq.1) CPM_R(n,4,icafe19,iflt,iregn) = (sum(PGFTRPV(iregn,iyr-4:iyr))/5.0*1.115) * NG_priceadj(1) /NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
-          IF(iflt.eq.2) CPM_R(n,4,icafe19,iflt,iregn) = (sum(PGFTRFV(iregn,iyr-4:iyr))/5.0*1.115) * NG_priceadj(1) /NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
-        ELSE                            ! Classes 7 - 8, avg of CNG and LNG
-          IF(iflt.eq.1) CPM_R(n,4,icafe19,iflt,iregn) = ((sum(PGLTRPV(iregn,iyr-4:iyr))/5.0* NG_priceadj(2)+sum(PGFTRPV(iregn,iyr-2:iyr))/3.0 * NG_priceadj(1))/2*1.115)  / NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
-          IF(iflt.eq.2) CPM_R(n,4,icafe19,iflt,iregn) = ((sum(PGLTRFV(iregn,iyr-4:iyr))/5.0* NG_priceadj(2)+sum(PGFTRFV(iregn,iyr-2:iyr))/3.0 * NG_priceadj(1))/2*1.115)  / NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
+          IF(iflt.eq.1) CPM_R(n,4,icafe19,iflt,iregn) = (sum(PGFTRPV(iregn,iyr-4:iyr))/5.0*mc_jpgdp(1)) * NG_priceadj(1) /NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
+          IF(iflt.eq.2) CPM_R(n,4,icafe19,iflt,iregn) = (sum(PGFTRFV(iregn,iyr-4:iyr))/5.0*mc_jpgdp(1)) * NG_priceadj(1) /NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
+        ELSE                            ! Classes 7 - 8, weighted average of CNG and LNG (CNG_shrof_NG)
+          IF(iflt.eq.1) CPM_R(n,4,icafe19,iflt,iregn) = ((sum(PGLTRPV(iregn,iyr-4:iyr))/5.0*NG_priceadj(2)*(1-CNG_shrof_NG(n))+sum(PGFTRPV(iregn,iyr-4:iyr))/5.0*NG_priceadj(1)*CNG_shrof_NG(n))*mc_jpgdp(1))  / NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
+          IF(iflt.eq.2) CPM_R(n,4,icafe19,iflt,iregn) = ((sum(PGLTRFV(iregn,iyr-4:iyr))/5.0*NG_priceadj(2)*(1-CNG_shrof_NG(n))+sum(PGFTRFV(iregn,iyr-4:iyr))/5.0*NG_priceadj(1)*CNG_shrof_NG(n))*mc_jpgdp(1))  / NEW_MPG_19(iyr,4,icafe19)*HRATE(isc4,4)*1E-6
         ENDIF
 
 !.......Fuel choice model for new vehicle sales
@@ -3378,40 +3373,35 @@ end module F_
 !		  3) Payback grouping. For BEV, CNG, and FCV, (1) and (2) are further multiplied by the share of vehicle purchases that
 !			 will purchase a vehicle given a specific payback time (i.e., "IF BEV pays back in 1 year, X% will adopt; 2 years, Y%; 3 years, Z%, etc")
 !		At the end, all shares are re-normalized (SUM(shares) = 100%)
+
+!		Calculate fuel/def and M&R cost per mile for this size class and region, to compete against alt-fuels
+!		IF no gasoline/diesel/hev, set CPM equal to previous year and do flat avg of MR_cost instead of sales-weighted
+		IF (sum(TRKSTK_19R(iyr-1,icafe19,1,[1,2,11],iflt,iregn)).eq.0.0) then
+		  CPM_R_ICE(iyr,iregn,iflt,icafe19) = CPM_R_ICE(iyr-1,iregn,iflt,icafe19)
+		  MR_ICE(1:PBK_YR) = SUM(MR_cost(icafe19,[1,2,11],1:PBK_YR,iyr),DIM=1)/3
+		ELSE
+!		  Class 2b-6: Sales-weighted composite ICE (diesel + gasoline + HEV) fuel/def and M&R cost per mile
+		  IF (icafe19.le.7) then
+		    CPM_R_ICE(iyr,iregn,iflt,icafe19) = WEIGHTED_MEAN_1D(CPM_R(iyr,[1,2,11],icafe19,iflt,iregn), &
+                                                                 TRKSTK_19R(iyr-1,icafe19,1,[1,2,11],iflt,iregn), &
+                                                                 caller_id = 'CPM_R_ICE')
+!		    WRITE(21,'(a,",",i4,3(",",i2),",",f5.3,2(",",f10.1))')'cpm_ice',iyr+1989,iregn,icafe19,iflt,CPM_R_ICE(iyr,iregn,iflt,icafe19),TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn),TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn)
+		    DO i = 1, PBK_YR
+			  MR_ICE(i) = WEIGHTED_MEAN_1D(MR_cost(icafe19,[1,2,11],i,iyr), &
+                                           TRKSTK_19R(iyr-1,icafe19,1,[1,2,11],iflt,iregn), &
+                                           caller_id = 'MR_ICE')
+		    ENDDO
+!		    WRITE(21,'(a,",",i4,3(",",i2),7(",",f5.3))')'MR_ICE',iyr+1989,iregn,icafe19,iflt,MR_ICE(:)
+!		  Class 7&8 alt-fuels are all competed against diesel
+		  ELSEIF (icafe19.ge.8) then
+		    CPM_R_ICE(iyr,iregn,iflt,icafe19) = CPM_R(iyr,1,icafe19,iflt,iregn)
+		    MR_ICE(1:PBK_YR) = MR_cost(icafe19,1,1:PBK_YR,iyr)
+		  ENDIF
+		ENDIF
 		
 		fuel_shr_ivmt(iyr,:,iflt,icafe19,:,iregn) = 0.0
         DO jfuel=FUEL12,1,-1
-          IF(jfuel.ge.3) then
-		    IF(curcalyr.lt.TRGSHXG(icafe19,jfuel,iflt)) cycle                     ! Cannot purchase IF the powertrain is not available
-
-!		    Calculate fuel/def and M&R cost per mile for this size class and region, to compete against alt-fuels
-!			IF no gasoline/diesel, set CPM equal to previous year and MR equal to diesel/gasoline/HEV average
-			IF (sum(TRKSTK_19R(iyr-1,icafe19,1,1:2,iflt,iregn)).eq.0.0) then
-			  CPM_R_ICE(iyr,iregn,iflt,icafe19) = CPM_R_ICE(iyr-1,iregn,iflt,icafe19)
-			  DO i = 1, PBK_YR
-			    MR_ICE(i) = SUM(MR_cost(icafe19,[1,2,11],i,iyr))/3
-			  ENDDO
-			ELSE
-!			  Class 2b-6: Sales-weighted composite ICE (diesel + gasoline + HEV) fuel/def and M&R cost per mile
-			  IF (icafe19.le.7) then
-			    CPM_R_ICE(iyr,iregn,iflt,icafe19) = (CPM_R(iyr,1,icafe19,iflt,iregn)*TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn) &
-												     + CPM_R(iyr,2,icafe19,iflt,iregn)*TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn) &
-												     + CPM_R(iyr,11,icafe19,iflt,iregn)*TRKSTK_19R(iyr-1,icafe19,1,11,iflt,iregn)) &
-												  / sum(TRKSTK_19R(iyr-1,icafe19,1,[1,2,11],iflt,iregn))
-!		        WRITE(21,'(a,",",i4,3(",",i2),",",f5.3,2(",",f10.1))')'cpm_ice',iyr+1989,iregn,icafe19,iflt,CPM_R_ICE(iyr,iregn,iflt,icafe19),TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn),TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn)
-			    DO i = 1, PBK_YR
-				  MR_ICE(i) = (MR_cost(icafe19,1,i,iyr)*TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn) &
-					           + MR_cost(icafe19,2,i,iyr)*TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn) &
-                               + MR_cost(icafe19,11,i,iyr)*TRKSTK_19R(iyr-1,icafe19,1,11,iflt,iregn)) &
-						    / sum(TRKSTK_19R(iyr-1,icafe19,1,[1,2,11],iflt,iregn))
-			    ENDDO
-!			    WRITE(21,'(a,",",i4,3(",",i2),7(",",f5.3))')'MR_ICE',iyr+1989,iregn,icafe19,iflt,MR_ICE(:)
-!			  Class 7&8 alt-fuels are all competed against diesel
-			  ELSEIF (icafe19.ge.8) then
-			    CPM_R_ICE(iyr,iregn,iflt,icafe19) = CPM_R(iyr,1,icafe19,iflt,iregn)
-			    MR_ICE(:) = MR_cost(icafe19,1,:,iyr)
-			  ENDIF
-			ENDIF
+          IF(jfuel.ge.3.and.curcalyr.ge.TRGSHXG(icafe19,jfuel,iflt)) then       ! Cannot purchase IF the powertrain is not available
 									
 !           CNG
             IF(jfuel.eq.4)then
@@ -3419,16 +3409,15 @@ end module F_
                 IF(veh_shr(ivmt,iflt,icafe19).gt.0.0.and.PT_tanksize_CNG(ivmt,icafe19).ne.9999.) then
 				  CALL TRUCK_PBK(INC_COST_CNG(ivmt,icafe19,iyr),VMT_VEH(ivmt,iflt,icafe19),CPM_R(iyr,jfuel,icafe19,iflt,iregn), &
 									CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),0.0)
-				    
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible.
-!                 For CNG, prevent falling below last historical year's sales share
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn)   = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19),&
-                                                                           fuel_shr_ivmt(BSYR_STK-1989,ivmt,iflt,icafe19,jfuel,iregn))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
 			  ENDDO
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19), &
+                                                                         fuel_shr_ivmt(BSYR_STK-1989,1:nvmt,iflt,icafe19,jfuel,iregn))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
 				
 !           BEV
             ELSEIF(jfuel.eq.6)then
@@ -3441,22 +3430,21 @@ end module F_
 					CALL TRUCK_PBK(INC_COST_BEV(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_R(n,jfuel,icafe19,iflt,iregn), &
 									  CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),bev_refuelopcost(ivmt,icafe19,iyr))
 				  ENDIF
-
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-!                 For BEVs, prevent falling below last historical year's sales share
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn)   = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19),&
-                                                                           fuel_shr_ivmt(BSYR_STK-1989,ivmt,iflt,icafe19,jfuel,iregn))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn)   = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-                                                                           fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
 			  ENDDO
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19), &
+                                                                         fuel_shr_ivmt(BSYR_STK-1989,1:nvmt,iflt,icafe19,jfuel,iregn))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
 
 !           PHEV diesel
             ELSEIF(jfuel.eq.7)then
               DO ivmt=1, nvmt
 !						   		usable battery size (kWh) in btu                   / now in gallons  * and now in miles of range*adj for phev losses * and scaled up to annual
-                batt_range 	= ((PT_battkWh_PHEV(ivmt,icafe19) * TRK_PHEV_DOD * 3412.0 / HRATE(isc4,6)) * new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * 250.0
+                batt_range 	= ((PT_battkWh_PHEV(ivmt,icafe19) * TRK_PHEV_DOD * 3412.0 / HRATE(isc4,6)) * new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * ann_uptime_days
 				phev_uf    	= MIN(batt_range / VMT_VEH(ivmt,iflt,icafe19),1.0)
 				CPM_PHEV	= (phev_uf / (NEW_MPG_19(iyr,6,icafe19)*phev_mpg_adj * CHRG_EFF(iyr))) &				! Charge depleting (incl. add'l PHEV loss and charging loss)														! Miles traveled on electricity
 				 			* FUELPRICE_R_AVG(6,iregn) * HRATE(isc4,6)*1E-6  &										! Electricity price
@@ -3465,21 +3453,21 @@ end module F_
                 IF(veh_shr(ivmt,iflt,icafe19).gt.0.0) then
 				  CALL TRUCK_PBK(INC_COST_PHEVD(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_PHEV, &
 									CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),0.0)
-														  
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
 !				WRITE(21,'(a,",",i4,4(",",i2),",",f7.0,",",f5.3,","f6.3)')'TRANFRT_check_PHEVD',n+1989,iregn,iflt,icafe19,ivmt,batt_range,phev_uf,CPM_PHEV
 			  ENDDO
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
 
  !          PHEV gasoline
             ELSEIF(jfuel.eq.8)then
               DO ivmt=1, nvmt
 !							   usable battery size (kWh) in btu                   / now in gallons  * and now in miles of range*adj for phev losses * and scaled up to annual
-                batt_range 	= ((PT_battkWh_PHEV(ivmt,icafe19) * TRK_PHEV_DOD * 3412.0 / HRATE(isc4,6)) * new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * 250.0
+                batt_range 	= ((PT_battkWh_PHEV(ivmt,icafe19) * TRK_PHEV_DOD * 3412.0 / HRATE(isc4,6)) * new_mpg_19(iyr,6,icafe19)*phev_mpg_adj) * ann_uptime_days
 			    phev_uf    	= MIN(batt_range / VMT_VEH(ivmt,iflt,icafe19),1.0)
 			    CPM_PHEV	= (phev_uf / (NEW_MPG_19(iyr,6,icafe19)*phev_mpg_adj * CHRG_EFF(iyr))) &				! Charge depleting (incl. add'l PHEV loss and charging loss)														! Miles traveled on electricity
 					  		* FUELPRICE_R_AVG(6,iregn) * HRATE(isc4,6)*1E-6  &										! Electricity price
@@ -3488,14 +3476,16 @@ end module F_
 				IF(veh_shr(ivmt,iflt,icafe19).gt.0.0) then
 				  CALL TRUCK_PBK(INC_COST_PHEVG(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_PHEV, &
 									CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),0.0)
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
 !				WRITE(21,'(a,",",i4,4(",",i2),",",f7.0,",",f5.3,","f6.3)')'TRANFRT_check_PHEVG',n+1989,iregn,iflt,icafe19,ivmt,batt_range,phev_uf,CPM_PHEV
 			  ENDDO
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
+              
 
 !           FCEV
             ELSEIF(jfuel.eq.9)then
@@ -3503,58 +3493,57 @@ end module F_
                 IF(veh_shr(ivmt,iflt,icafe19).gt.0.0) then
 				  CALL TRUCK_PBK(INC_COST_FCEV(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_R(n,jfuel,icafe19,iflt,iregn), &
 										   CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),h2_refuelopcost(ivmt,icafe19,1))
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
               ENDDO
-
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
+              
 !           FCHEV
             ELSEIF(jfuel.eq.10)then
               DO ivmt=1, nvmt
 			    IF(veh_shr(ivmt,iflt,icafe19).gt.0.0) then
 				  CALL TRUCK_PBK(INC_COST_FCHEV(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_R(n,jfuel,icafe19,iflt,iregn), &
 										   CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),h2_refuelopcost(ivmt,icafe19,1))
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
               ENDDO
-
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
+              
 !           Gasoline HEV
             ELSEIF(jfuel.eq.11)then
 !             HEVs are competed against gasoline/diesel composite vehicle (other alt fuels competed against DS/MG/HEV composite)
               IF (sum(TRKSTK_19R(iyr-1,icafe19,1,1:2,iflt,iregn)).eq.0.0) THEN 
                 CPM_ICE_HEV = SUM(CPM_R(iyr,1:2,icafe19,iflt,iregn))/2
-                DO i = 1, PBK_YR
-			      MR_ICE(i) = SUM(MR_cost(icafe19,[1,2],i,iyr))/2
-			    ENDDO
+                MR_ICE_HEV(1:PBK_YR) = SUM(MR_cost(icafe19,[1,2],1:PBK_YR,iyr), DIM=1)/2
               ELSE
-                CPM_ICE_HEV = (CPM_R(iyr,1,icafe19,iflt,iregn)*TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn) &
-                               + CPM_R(iyr,2,icafe19,iflt,iregn)*TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn)) &
-						    / sum(TRKSTK_19R(iyr-1,icafe19,1,1:2,iflt,iregn))
-                DO i = 1, PBK_YR 
-                  MR_ICE_HEV(i)  = (MR_cost(icafe19,1,i,iyr)*TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn) &
-					                + MR_cost(icafe19,2,i,iyr)*TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn)) &
-						         / sum(TRKSTK_19R(iyr-1,icafe19,1,[1,2],iflt,iregn))
-                ENDDO
+                CPM_ICE_HEV           = WEIGHTED_MEAN_1D(CPM_R(iyr,1:2,icafe19,iflt,iregn),&
+                                                         TRKSTK_19R(iyr-1,icafe19,1,1:2,iflt,iregn),&
+                                                         caller_id = 'CPM_ICE_HEV')
+                
+                MR_ICE_HEV(1:PBK_YR)  = (MR_cost(icafe19,1,1:PBK_YR,iyr)*TRKSTK_19R(iyr-1,icafe19,1,1,iflt,iregn) &
+					                  + MR_cost(icafe19,2,1:PBK_YR,iyr)*TRKSTK_19R(iyr-1,icafe19,1,2,iflt,iregn)) &
+						              / sum(TRKSTK_19R(iyr-1,icafe19,1,[1,2],iflt,iregn))
               ENDIF
               DO ivmt=1, nvmt
                 IF(veh_shr(ivmt,iflt,icafe19).gt.0.0) then
 				  CALL TRUCK_PBK(INC_COST_HEV(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_R(n,jfuel,icafe19,iflt,iregn), &
 							     CPM_ICE_HEV,MR_ICE_HEV,veh_shr(ivmt,iflt,icafe19),0.0)
-				    
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		 fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
 			  ENDDO
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
 
 !           H2ICE
             ELSEIF(jfuel.eq.12)then
@@ -3562,13 +3551,14 @@ end module F_
                 IF(veh_shr(ivmt,iflt,icafe19).gt.0.0) then
 				  CALL TRUCK_PBK(INC_COST_H2ICE(ivmt,icafe19,n),VMT_VEH(ivmt,iflt,icafe19),CPM_R(n,jfuel,icafe19,iflt,iregn), &
 										   CPM_R_ICE(iyr,iregn,iflt,icafe19),MR_ICE,veh_shr(ivmt,iflt,icafe19),h2_refuelopcost(ivmt,icafe19,3))
-!				  Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(ivmt,iflt,icafe19))
-				  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn),&
-																		   fuel_shr_ivmt(iyr-1,ivmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(ivmt,iflt,icafe19))
 				ENDIF
               ENDDO
+              
+!		      Limit pace of growth/decline to ensure future manufacturing scale-up/down is feasible
+              fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) - max_drop*veh_shr(1:nvmt,iflt,icafe19))
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn),&
+																		 fuel_shr_ivmt(iyr-1,1:nvmt,iflt,icafe19,jfuel,iregn) + max_rise*veh_shr(1:nvmt,iflt,icafe19))
 
 !           IF not CNG, BEV, PHEVG, PHEVD, FCEV, FCHEV, HEV, or H2ICE the fuel share is set by time-based S-curve (MPATH)
 			ELSE
@@ -3581,9 +3571,7 @@ end module F_
 			  SLOPE = LOG(0.01)/((1.*CYAFVXG(isc4,jfuel,iflt))/2)
               MPATH_regn(icafe19,jfuel,iflt,iyr,iregn)=DCOST*(BFSHXG(isc4,jfuel,iflt)+(EFSHXG(isc4,jfuel,iflt)-BFSHXG(isc4,jfuel,iflt))  &
                                   /(1.+(exp(SLOPE*(1.*curcalyr - MIDYR)))))				  				
-			  DO ivmt=1, nvmt
-				fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MPATH_regn(icafe19,jfuel,iflt,iyr,iregn)*veh_shr(ivmt,iflt,icafe19)
-			  ENDDO
+			  fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MPATH_regn(icafe19,jfuel,iflt,iyr,iregn)*veh_shr(1:nvmt,iflt,icafe19)
 				
 			ENDIF  ! end of jfuel.ge.3
 
@@ -3592,49 +3580,52 @@ end module F_
             MPATH_regn(icafe19,jfuel,iflt,iyr,iregn) = BFSHXG(isc4,jfuel,iflt) + (EFSHXG(isc4,jfuel,iflt) - & 
 			                                           BFSHXG(isc4,jfuel,iflt))*(1. - exp(CSTDXG(isc4,iflt) + CSTDVXG(isc4,iflt)*(1.*curcalyr)))
 
-			DO ivmt=1, nvmt
-			  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,jfuel,iregn) = MAX(0.0,MPATH_regn(icafe19,jfuel,iflt,iyr,iregn) &
-				                                                        *(veh_shr(ivmt,iflt,icafe19) &
-																		 -sum(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,[3:FUEL12],iregn))))
-			ENDDO
+			fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,jfuel,iregn) = MAX(0.0,MPATH_regn(icafe19,jfuel,iflt,iyr,iregn) &
+				                                                        *(veh_shr(1:nvmt,iflt,icafe19) &
+																		 -sum(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,[3:FUEL12],iregn),DIM=2)))
 		  ENDIF
 		ENDDO  	! end fuel loop
 
-!		Gasoline gets the leftover
+!		Gasoline gets the leftover (in every ivmt bin)
 !       Prevent gasoline sales share growth in Class 7&8
-		DO ivmt = 1, nvmt
-		  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,2,iregn)= MAX(0.0, (veh_shr(ivmt,iflt,icafe19)-sum(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,[1,3:FUEL12],iregn))))
-		  if (icafe19.gt.7) fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,2,iregn) = MIN(fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,2,iregn),fuel_shr_ivmt(BSYR_STK-1989,ivmt,iflt,icafe19,2,iregn))
-        ENDDO
+		fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,2,iregn)= MAX(0.0, (veh_shr(1:nvmt,iflt,icafe19)-sum(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,[1,3:FUEL12],iregn), DIM=2)))
+        if (icafe19.gt.7) fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,2,iregn)= MIN(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,2,iregn),fuel_shr_ivmt(BSYR_STK-1989,1:nvmt,iflt,icafe19,2,iregn))
 		
       ENDDO   ! end size class loop		  
     ENDDO     ! end fleet loop
   ENDDO       ! end regional loop
     
 !	Normalize fuel shares to ensure they sum to 1
-    DO iregn = 1,MNUMCR-2
-      IF (iregn.eq.10) CYCLE
-      DO iflt=1,flt
-        DO icafe19 = 1,CAFE19
-		  DO ifuel = 1,FUEL12
-			DO ivmt = 1, nvmt
-			  IF (ifuel.eq.1.and.ivmt.eq.1) TEMP = SUM(fuel_shr_ivmt(iyr,:,iflt,icafe19,:,iregn))
-			  fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn) = fuel_shr_ivmt(iyr,ivmt,iflt,icafe19,ifuel,iregn)/TEMP
-			ENDDO
-
-			fuel_shr_regn(iyr,icafe19,ifuel,iflt,iregn)  = sum(fuel_shr_ivmt(iyr,:,iflt,icafe19,ifuel,iregn))
-
-!			Distribute total new truck sales to fuels			  
-			TRKSTK_19R(iyr,icafe19,1,ifuel,iflt,iregn) = NEWTRUCKS_regn(iyr,icafe19,iflt,iregn)*fuel_shr_regn(iyr,icafe19,ifuel,iflt,iregn)
-            IF (iregn.eq.MNUMCR-2) then
-			  DO iage = 1,age
-		  	    TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,11) = sum(TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,1:mnumcr-2))
-		  	  ENDDO
-			ENDIF
-		  ENDDO
-		ENDDO
-	  ENDDO
-	ENDDO
+!   Reminder: SUM(fuel_shr_ivmt(iyr,1:nvmt,iflt,icafe19,1:FUEL12,iregn)) = 100%
+!             SUM(fuel_shr_regn(iyr,icafe19,1:FUEL12,iflt,iregn)) = 100%
+    TEMP_val = SUM(SUM(fuel_shr_ivmt(iyr, 1:nvmt, 1:flt, 1:cafe19, 1:fuel12, 1:mnumcr-2), DIM=4), DIM=1)
+    
+    DO iregn = 1, MNUMCR-2
+      IF (iregn == 10) CYCLE
+      
+      fuel_shr_ivmt(iyr, 1:nvmt, 1:flt, 1:CAFE19, 1:FUEL12, iregn) = &
+          fuel_shr_ivmt(iyr, 1:nvmt, 1:flt, 1:CAFE19, 1:FUEL12, iregn) / &
+          SPREAD(SPREAD(TEMP_val(1:flt, 1:CAFE19, iregn), DIM=3, NCOPIES=fuel12),DIM=1, NCOPIES=nvmt)
+      
+!     Collapse iflt dimension for use in rest of model       
+      do iflt = 1, flt
+        fuel_shr_regn(iyr, 1:CAFE19, 1:FUEL12, iflt, iregn) = &
+          SUM(fuel_shr_ivmt(iyr, 1:nvmt, iflt, 1:CAFE19, 1:FUEL12, iregn), DIM=1)
+      enddo
+      
+!	  Distribute total new truck sales to fuels		      
+      TRKSTK_19R(iyr, 1:CAFE19, 1, 1:FUEL12, 1:flt, iregn) = &
+          SPREAD(NEWTRUCKS_regn(iyr, 1:CAFE19, 1:flt, iregn), DIM=2, NCOPIES=FUEL12) * &
+          fuel_shr_regn(iyr, 1:CAFE19, 1:FUEL12, 1:flt, iregn)
+      
+      
+      IF (iregn == MNUMCR-2) THEN
+          TRKSTK_19R(iyr, 1:CAFE19, 1:age, 1:FUEL12, 1:flt, 11) = &
+              SUM(TRKSTK_19R(iyr, 1:CAFE19, 1:age, 1:FUEL12, 1:flt, 1:MNUMCR-2), DIM=5)
+      END IF
+    END DO
+    
+    
       
     IF (curcalyr.eq.2050.and.FCRL.eq.1) THEN
 !  	  WRITE(21,*)'CPM_R DS 2022USD (INCLUDES DEF, split out below)'
@@ -3821,31 +3812,20 @@ end module F_
 !...aggregate total VMT by heavy-duty trucks (NOT including 2b)
 !	This is done to calibrate Class 3-8 VMT to that estimated from industrial output growth (VMTDMDR)
 	AGGVMTR=0.
-	DO iage = 1,AGE
-	  DO ifuel = 1,FUEL12
-		DO iflt = 1,flt
-		  IF(curcalyr.le.2011) then
-		    DO isc = 1,3
-		      AGGVMTR = AGGVMTR + SUM(ANNVMT(isc,iage,ifuel,1:voc))/2*TRKSTK(iyr,isc,iage,ifuel,iflt)
-			ENDDO
-		  ELSEIF (curcalyr.le.bsyr_stk) THEN
-		    DO icafe19 = 3,CAFE19
-		      AGGVMTR = AGGVMTR + ANNVMT_19(iyr,icafe19,iage,ifuel)*TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,11)
-			ENDDO
-		  ELSE
-            DO icafe19 = 3,CAFE19
-		      AGGVMTR = AGGVMTR + ANNVMT_19(iyr,icafe19,iage,ifuel)*TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,11)
-			ENDDO
-          ENDIF
-		ENDDO
-	  ENDDO
-	ENDDO
+    
+    DO iflt = 1, flt
+      IF (curcalyr.le.2011) THEN
+        AGGVMTR = AGGVMTR + SUM( SUM(ANNVMT(1:3,1:AGE,1:FUEL12,1:voc),DIM=4)/2 * TRKSTK(iyr,1:3,1:AGE,1:FUEL12,iflt) )
+      ELSE
+        AGGVMTR = AGGVMTR + SUM( ANNVMT_19(iyr,3:CAFE19,1:AGE,1:FUEL12) * TRKSTK_19R(iyr,3:CAFE19,1:AGE,1:FUEL12,iflt,11) )
+      ENDIF
+    ENDDO
 
 !	Calibrate VMT schedules using factor calculated above (again, NOT incl. 2b)
     VMTADJR=VMTDMDR(iyr,11)/AGGVMTR
-	ANNVMT(1:3,:,:,:) = ANNVMT(1:3,:,:,:)*VMTADJR			! ANNVMT(isc,iage,ifuel,ivoc)
-	ANNVMT_19(iyr,3:19,:,:) = ANNVMT_19(iyr,3:19,:,:)*VMTADJR		! ANNVMT_19(icafe19,iage,ifuel)
-	VMTFLT(CUR,1:3,:,:,:) = 0.0								! Initialize before filling below
+	ANNVMT(1:3,1:AGE,1:FUEL12,1:voc) = ANNVMT(1:3,1:AGE,1:FUEL12,1:voc)*VMTADJR
+	ANNVMT_19(iyr,3:19,1:AGE,1:FUEL12) = ANNVMT_19(iyr,3:19,1:AGE,1:FUEL12)*VMTADJR
+	VMTFLT(CUR,1:3,:,:,:) = 0.0		  ! Initialize before filling below
 
 
 !...Class 2b
@@ -3876,31 +3856,18 @@ end module F_
 	    ANNVMT_19(iyr,1:2,:,:) = ANNVMT_19(iyr,1:2,:,:) * VMTADJR
 !	  Grow VMT at a rate that accounts for stock growth
 !	  (i.e., how much faster is CLTSIC growing than CLTSTK?)
-	  ELSEIF (curitr.eq.1) then
+	  ELSE
 	    ANNVMT_19(iyr,1:2,:,:) = ANNVMT_19(iyr-1,1:2,:,:) * (CLTSIC(N)/CLTSIC(N-1)) / &
 												  (sum(CLTSTK(n,:,:,:,11))/sum(CLTSTK(n-1,:,:,:,11)))
       ENDIF
 !	  Calculate final aggregate Class 2b VMT
 	  DO ifuel=1,FUEL12
         DO iage = 1,AGE 
-!		  diesel
-          IF(ifuel.eq.1) then
-		    CLTVMT(n,2,iage) = CLTSTK(n,2,iage,1,11) * ANNVMT_19(iyr,1,iage,ifuel) + &
-							   CLTSTK(n,2,iage,2,11) * ANNVMT_19(iyr,2,iage,ifuel)
-!		  gasoline
-		  ELSEIF(ifuel.eq.2) then
-		    CLTVMT(n,1,iage) = CLTSTK(n,1,iage,1,11) * ANNVMT_19(iyr,1,iage,ifuel) + &
-							   CLTSTK(n,1,iage,2,11) * ANNVMT_19(iyr,2,iage,ifuel)
-		  ELSE
-		    CLTVMT(n,ifuel,iage) = CLTSTK(n,ifuel,iage,1,11) * ANNVMT_19(iyr,1,iage,ifuel) + &
-								   CLTSTK(n,ifuel,iage,2,11) * ANNVMT_19(iyr,2,iage,ifuel)
-		  ENDIF
+          CLTVMT(n,CLTMap(ifuel),iage) = CLTSTK(n,CLTMap(ifuel),iage,1,11) * ANNVMT_19(iyr,1,iage,ifuel) + &
+                                         CLTSTK(n,CLTMap(ifuel),iage,2,11) * ANNVMT_19(iyr,2,iage,ifuel)
         ENDDO
-	  ENDDO
-!	  Calculate total VMT by fuel type -- can't be in above loop due to mismatch in gas/diesel indices (2b v. 3-8)
-	  DO ifuel=1,FUEL12
-	    CLTVMTT(ifuel,N) = SUM(CLTVMT(n,ifuel,1:age)) / 1000000000.0
-	  ENDDO
+	    CLTVMTT(CLTMap(ifuel),N) = SUM(CLTVMT(n,CLTMap(ifuel),1:age)) / 1000000000.0
+      ENDDO
 	ENDIF
 
 !...Populate VMT for all 19 size classes, and by three size classes for reporting (3, 4-6, 7&8)
@@ -3914,27 +3881,19 @@ end module F_
 		  ELSE
 
 !			Need aggregate VMT by Class 3, 4-6, and 7&8 for reporting
-			VMTFLT(CUR,1,iage,ifuel,IFLT) = ANNVMT_19(iyr,3,iage,ifuel)*TRKSTK_19R(iyr,3,iage,ifuel,iflt,11) + &
-											ANNVMT_19(iyr,4,iage,ifuel)*TRKSTK_19R(iyr,4,iage,ifuel,iflt,11)
-			VMTFLT(CUR,2,iage,ifuel,IFLT) = ANNVMT_19(iyr,5,iage,ifuel)*TRKSTK_19R(iyr,5,iage,ifuel,iflt,11) + &
-											ANNVMT_19(iyr,6,iage,ifuel)*TRKSTK_19R(iyr,6,iage,ifuel,iflt,11) + &
-											ANNVMT_19(iyr,7,iage,ifuel)*TRKSTK_19R(iyr,7,iage,ifuel,iflt,11)
-			DO icafe19 = 8,19
-			  VMTFLT(CUR,3,iage,ifuel,IFLT) = VMTFLT(CUR,3,iage,ifuel,IFLT) + ANNVMT_19(iyr,icafe19,iage,ifuel)*TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,11)
-			ENDDO
-
-!			Need detailed VMT (by 19 size classes) for rest of model
-!			Note that this disaggregate VMT doesn't have a "fleet" dimension
-			IF (iflt.eq.flt) THEN
-			  DO icafe19 = 1,CAFE19
-			    VMTFLT_19(iyr,icafe19,iage,ifuel) = ANNVMT_19(iyr,icafe19,iage,ifuel)*SUM(TRKSTK_19R(iyr,icafe19,iage,ifuel,:,11))
-			  ENDDO
-			ENDIF
+			VMTFLT(CUR,1,iage,ifuel,IFLT) = SUM( ANNVMT_19(iyr,[3,4],iage,ifuel)*TRKSTK_19R(iyr,[3,4],iage,ifuel,iflt,11) )
+			VMTFLT(CUR,2,iage,ifuel,IFLT) = SUM( ANNVMT_19(iyr,[5,6,7],iage,ifuel)*TRKSTK_19R(iyr,[5,6,7],iage,ifuel,iflt,11) )
+			VMTFLT(CUR,3,iage,ifuel,IFLT) = SUM( ANNVMT_19(iyr,[8:19],iage,ifuel)*TRKSTK_19R(iyr,[8:19],iage,ifuel,iflt,11) )
 
 		  ENDIF
 		ENDDO
 	  ENDDO
 	ENDDO
+
+!	Need detailed VMT (by 19 size classes) for rest of model
+!	Note that this disaggregate VMT doesn't have a "fleet" dimension    
+    VMTFLT_19(iyr,1:cafe19,1:age,1:fuel12) = ANNVMT_19(iyr,1:cafe19,1:age,1:fuel12) * &
+                                             SUM(TRKSTK_19R(iyr,1:cafe19,1:age,1:fuel12,1:flt,11),DIM=4)
 
     DO iregn=1,MNUMCR
       VMTSHRR(iyr,iregn)=VMTDMDR(iyr,iregn)/VMTDMDR(iyr,11)
@@ -4012,15 +3971,6 @@ end module F_
      ENDDO
      HDV_MPG_CAV_ADJ(ISC,:,:)=.07 ! Operational energy savings from platooning, not fuel economy improvement
    ENDIF
-
-!   IF(curitr.eq.maxitr+1.and.curiyr.ge.TOONYEAR-1) then
-!     DO ifuel=1,FUEL12
-!       DO iage=1,age
-!         write(21,'(a,3(",",1x,i4),1(",",1x,f15.3),9(",",1x,f10.8))') 'msi,VMTFLTR_CAV_SHR',curiyr,ifuel,iage,sum(VMTFLTR(CUR,3,:,IFUEL,2,:)), &
-!		                                                                   (VMTFLTR_CAV_SHR(CUR,3,IAGE,IFUEL,2,iregn),iregn=1,MNUMCR-2)
-!       ENDDO
-!     ENDDO
-!   ENDIF
    
    VMTFLTR_CAV_SHR= VMTFLTR_CAV_SHR*VMT_CAV_ELIG
    
@@ -4076,11 +4026,11 @@ end module F_
 	
    
 !...Calculate fuel demand from VMT and MPG by size class, fuel and fleet/nonfleet, by census division
+    FUELDMDR(1:SC4,1:FUEL12,1:FLT,1:mnumcr)=0.
     DO ISC=1,SC4
       DO IFLT=1,FLT
         DO iregn=1,MNUMCR-2
           DO IFUEL=1,FUEL12
-            FUELDMDR(ISC,IFUEL,IFLT,iregn)=0.
             DO IAGE=1,AGE
 			  IF (isc.ne.4) THEN
                 IF(HDV_MPG(iyr,ISC,IAGE,IFUEL).gt.0.0) &
@@ -4090,9 +4040,8 @@ end module F_
               ELSE      ! Class 2b
                 IF (curcalyr.le.2011) THEN      ! Regional stocks aren't populated pre-2012
                   IF(cltmpg_yr(iyr,CLTMap(ifuel),iage).gt.0.0.and.SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,1:2,11)).gt.0.0) &
-                    FUELDMDR(ISC,IFUEL,IFLT,iregn) =  FUELDMDR(ISC,IFUEL,IFLT,iregn) + SUM(VMTFLT_19(iyr,1:2,iage,ifuel)) &
-                                                                                     * SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,iflt,iregn))/SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,1:2,11)) &
-                                                                                     / cltmpg_yr(iyr,CLTMap(ifuel),iage)
+                    FUELDMDR(ISC,IFUEL,IFLT,iregn) =  FUELDMDR(ISC,IFUEL,IFLT,iregn) + CLTVMT(iyr,CLTMap(ifuel),iage)/cltmpg_yr(iyr,CLTMap(ifuel),iage) &
+                                                                                     * SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,iflt,iregn))/SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,1:2,11))
                 ELSE
                   IF(cltmpg_yr(iyr,CLTMap(ifuel),iage).gt.0.0.and.SUM(TRKSTK_19R(iyr,1:2,iage,ifuel,1:2,11)).gt.0.0) &
                     FUELDMDR(ISC,IFUEL,IFLT,iregn) =  FUELDMDR(ISC,IFUEL,IFLT,iregn) + SUM(VMTFLT_19(iyr,1:2,iage,ifuel)) &
@@ -4101,6 +4050,18 @@ end module F_
                 ENDIF
               ENDIF
 			ENDDO
+
+!           Apply charging losses to BEVs and PHEVs            
+            if (ifuel.eq.6) then
+              FUELDMDR(ISC,IFUEL,IFLT,iregn) = FUELDMDR(ISC,IFUEL,IFLT,iregn) / CHRG_EFF(iyr)
+            elseif (ifuel.eq.7) then
+              FUELDMDR(ISC,IFUEL,IFLT,iregn) = FUELDMDR(ISC,IFUEL,IFLT,iregn) * PctEVMT_PHEV(iyr,4,iregn,1) / CHRG_EFF(iyr) + &
+                                               FUELDMDR(ISC,IFUEL,IFLT,iregn) * (1 - PctEVMT_PHEV(iyr,4,iregn,1))
+            elseif (ifuel.eq.8) then
+              FUELDMDR(ISC,IFUEL,IFLT,iregn) = FUELDMDR(ISC,IFUEL,IFLT,iregn) * PctEVMT_PHEV(iyr,4,iregn,2) / CHRG_EFF(iyr) + &
+                                               FUELDMDR(ISC,IFUEL,IFLT,iregn) * (1 - PctEVMT_PHEV(iyr,4,iregn,2))
+            endif
+            
           ENDDO
 !         Diesel (conventional, PHEV)
 		  FUELBTUR(ISC,1,IFLT,iregn) = FUELDMDR(ISC,1,IFLT,iregn)*HRATE(isc,1)*(1E-12) + &
@@ -4118,8 +4079,8 @@ end module F_
 		  FUELBTUR(ISC,5,IFLT,iregn) = FUELDMDR(ISC,5,IFLT,iregn)*HRATE(isc,5)*(1E-12)*PCTAF(2,iregn,iyr)
 !         Electric
           FUELBTUR(ISC,6,IFLT,iregn) = FUELDMDR(ISC,6,IFLT,iregn)*HRATE(isc,6)*(1E-12) + &
-		                               FUELDMDR(ISC,7,IFLT,iregn)*HRATE(isc,7)*(1E-12)*PctEVMT_PHEV(iyr,isc,iregn,1) / CHRG_EFF(iyr) + &
-		                               FUELDMDR(ISC,8,IFLT,iregn)*HRATE(isc,8)*(1E-12)*PctEVMT_PHEV(iyr,isc,iregn,2) / CHRG_EFF(iyr)
+		                               FUELDMDR(ISC,7,IFLT,iregn)*HRATE(isc,7)*(1E-12)*PctEVMT_PHEV(iyr,isc,iregn,1) + &
+		                               FUELDMDR(ISC,8,IFLT,iregn)*HRATE(isc,8)*(1E-12)*PctEVMT_PHEV(iyr,isc,iregn,2)
 !         Hydrogen
           FUELBTUR(ISC,7,IFLT,iregn) = FUELDMDR(ISC,9,IFLT,iregn)*HRATE(isc,9)*(1E-12)+ &
 									   FUELDMDR(ISC,10,IFLT,iregn)*HRATE(isc,10)*(1E-12)+&
@@ -4143,12 +4104,22 @@ end module F_
           ENDIF 
         ENDDO
         IF (isc.ne.4) THEN
-          TFRBTU_F_T(iyr,isc,ifuel,11) = sum(TFRBTU_F_T(iyr,isc,ifuel,1:MNUMCR-2))
+          TFRBTU_F_T(iyr,isc,ifuel,mnumcr) = sum(TFRBTU_F_T(iyr,isc,ifuel,1:MNUMCR-2))
         ELSE
-          cltfbtu(iyr,CLTMap2(ifuel),11) = sum(cltfbtu(iyr,ifuel,1:MNUMCR-2))
+          cltfbtu(iyr,CLTMap2(ifuel),mnumcr) = sum(cltfbtu(iyr,CLTMap2(ifuel),1:MNUMCR-2))
         ENDIF
       ENDDO
     ENDDO
+
+!...CLT gallons by powertrain (gallons of gasoline equivalent [gge])
+    CLTGAL = 0.0
+    DO ifuel = 1,FUEL12
+      CLTBTUT(CLTMap(ifuel),1:mnumcr-2,iyr) = SUM(FUELDMDR(4,IFUEL,1:FLT,1:mnumcr-2), DIM=1) * HRATE(4,ifuel) * (1E-12)  ! convert to btu
+      CLTBTUT(CLTMap(ifuel),mnumcr,iyr) = SUM(CLTBTUT(CLTMap(ifuel),1:mnumcr-2,iyr))
+      CLTGAL = CLTGAL + CLTBTUT(CLTMap(ifuel),mnumcr,iyr) / HRATE(4,2) * (1E12)              ! Convert to gge for agg fuel econ calc
+    ENDDO
+
+    CLTMPGT(iyr) = (SUM(CLTVMTT(:,iyr))*10.0**9)/CLTGAL   ! average mpg over vintages
 
 !...Calculate the share of truck electricity consumption by public/retail (1) and depot/fleet (2)
 !   NOT including Class 2b (accounted for separately in TRQ_ELEC)
@@ -4161,10 +4132,10 @@ end module F_
           DO iage = 1, age
             IF (iflt.eq.1.or.icafe19.ge.16) then      ! Non-fleet and all sleeper cabs
               TFRBTU_chgsplit(1,iyr) = TFRBTU_chgsplit(1,iyr) + ANNVMT_19(iyr,icafe19,iage,6)*sum(TRKSTK_19R(iyr,icafe19,iage,6,1:2,iregn)) &
-                                                                / (NEW_MPG_19(iyr,6,icafe19)*(1-HDV_DF(ifuel,icafe14)))
+                                                                / (NEW_MPG_19(iyr,6,icafe19)*(1-HDV_DF(6,icafe14)))
             ELSE                                      ! All others (non-sleeper-cab fleet vehicles)
               TFRBTU_chgsplit(2,iyr) = TFRBTU_chgsplit(2,iyr) + ANNVMT_19(iyr,icafe19,iage,6)*sum(TRKSTK_19R(iyr,icafe19,iage,6,1:2,iregn)) &
-                                                                / (NEW_MPG_19(iyr,6,icafe19)*(1-HDV_DF(ifuel,icafe14)))
+                                                                / (NEW_MPG_19(iyr,6,icafe19)*(1-HDV_DF(6,icafe14)))
             ENDIF
           ENDDO
         ENDDO
@@ -4175,10 +4146,6 @@ end module F_
       TFRBTU_chgsplit(:,iyr) = 0.5
     ENDIF
 
-    QGFTRPV(iregn,iyr) = 0.0
-    QGFTRFV(iregn,iyr) = 0.0
-    QGLTRPV(iregn,iyr) = 0.0
-    QGLTRFV(iregn,iyr) = 0.0
 !...Similarly, calculate the share of truck NG consumption by public and depot/private
     DO iregn=1,MNUMCR
       QGFTRPV(iregn,iyr) = sum(FUELBTUR(1:2,4,nft,iregn))	! CNG central refueling (class 3 and class 4-6)
@@ -4196,28 +4163,24 @@ end module F_
 ! ==========================================================================================================
     SUBROUTINE TCOMMCL_TRK
     USE F_
+    USE MEAN_FUNCS
     IMPLICIT NONE
 
     REAL     NUM, DEN
-	REAL     var(FUEL12)
-    REAL     CLTGAL
+	REAL     clt_fuel_share(FUEL12)
 
-	if(CURITR.eq.1) then 	
-	  CLTMPG(iyr,:) = 0.0
-	endif
+!...New fuel economy by powertrain
+    NCLTMPG(iyr,1:FUEL12) = cltmpg_yr(iyr,1:FUEL12,1)
 
-!... New fuel economy by powertrain
-    do ifuel = 1,FUEL12
-      NCLTMPG(iyr,ifuel) = cltmpg_yr(iyr,ifuel,1)
-	enddo
-!... Sales weighted average new fuel economy
-	do ifuel = 1,FUEL12
-      var(ifuel) = 0.0
-	  if(ncltmpg(iyr,ifuel).gt.0.0) var(ifuel) = (sum(CLTSTK(iyr,ifuel,1,:,11))/SUM(CLTSTK(iyr,:,1,:,11)))/ncltmpg(iyr,ifuel)
-    enddo
-	NCLTMPGT(iyr) = 1/sum(var(:))
-
-!... VMT weighted average stock fuel economy	
+!...Sales weighted average new fuel economy
+	clt_fuel_share(1:FUEL12) = sum(CLTSTK(iyr,1:FUEL12,1,1:VOC,MNUMCR), DIM=2) &
+                              /SUM(CLTSTK(iyr,1:FUEL12,1,1:VOC,MNUMCR))
+    
+    NCLTMPGT(iyr) = HARMONIC_MEAN_1D(ncltmpg(iyr,1:FUEL12), &
+                                     clt_fuel_share(1:FUEL12), &
+                                     caller_id = 'NCLTMPGT' )
+     
+!...VMT weighted average stock fuel economy	
 	do ifuel=1,FUEL12
       NUM = 0.0
       DEN = 0.0
@@ -4227,43 +4190,11 @@ end module F_
           DEN = DEN + CLTVMT(iyr,ifuel,iage)/cltmpg_yr(iyr,ifuel,iage)
         endif
       enddo
-        if(DEN.gt.0.0) CLTMPG(iyr,ifuel) = NUM/DEN
-    enddo
-
-!...CLT BTU by powertrain (tbtu) -- regionalized using stocks
-!   Note that ifuel = {1:gasoline, 2:diesel} (flipped from freight trucks)
-	CLTGAL = 0.0
-    do iregn = 1, mnumcr-2
-      do ifuel=1,FUEL12
-	    CLTBTUT(CLTMap(ifuel),iregn,iyr) = 0.0
-        do iage = 1,age
-	      IF (curcalyr.le.2011) THEN        ! No regional stocks before 2012
-            IF (cltmpg_yr(iyr,CLTMap(ifuel),iage).gt.0.0.and.SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,1:2,11)).gt.0.0) &
-              CLTBTUT(CLTMap(ifuel),iregn,iyr) = CLTBTUT(CLTMap(ifuel),iregn,iyr) + CLTVMT(iyr,CLTMap(ifuel),iage)/cltmpg_yr(iyr,CLTMap(ifuel),iage)	&
-                                                                                  * SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,1:2,iregn))/SUM(TRKSTK_19R(2012-1989,1:2,iage,ifuel,1:2,11)) &
-                                                                                  * HRATE(4,ifuel)/1000/1000000000.0
-          
-          ELSE
-            IF (cltmpg_yr(iyr,CLTMap(ifuel),iage).gt.0.0.and.SUM(TRKSTK_19R(iyr,1:2,iage,ifuel,1:2,11)).gt.0.0) &
-              CLTBTUT(CLTMap(ifuel),iregn,iyr) = CLTBTUT(CLTMap(ifuel),iregn,iyr) + CLTVMT(iyr,CLTMap(ifuel),iage)/cltmpg_yr(iyr,CLTMap(ifuel),iage)	&
-                                                                                  * SUM(TRKSTK_19R(iyr,1:2,iage,ifuel,1:2,iregn))/SUM(TRKSTK_19R(iyr,1:2,iage,ifuel,1:2,11)) &
-                                                                                  * HRATE(4,ifuel)/1000/1000000000.0
-          ENDIF
-        enddo
-!        WRITE(21,'(a,5(",",i4),",",f18.9)')'cltbtut',curcalyr,curitr,iregn,ifuel,CLTMap(ifuel),CLTBTUT(CLTMap(ifuel),iregn,iyr),SUM(TRKSTK_19R(iyr,1:2,iage,ifuel,1:2,iregn)),CLTVMT(iyr,CLTMap(ifuel),iage),cltmpg_yr(iyr,CLTMap(ifuel),iage)
-        CLTGAL = CLTGAL + CLTBTUT(CLTMap(ifuel),iregn,iyr) / (HRATE(4,ifuel)/1000/1000000000.0)
-	  enddo
-    enddo
-    
-	DO ifuel=1,FUEL12
-	  CLTBTUT(CLTMap(ifuel),mnumcr,iyr) = SUM(CLTBTUT(CLTMap(ifuel),1:mnumcr-2,iyr))
-	ENDDO
-    
-    CLTMPGT(iyr) = (SUM(CLTVMTT(:,iyr))*10.0**9)/CLTGAL   ! average mpg over vintages
-
-!... Filling in BTU by fuel variable
-    do ifuel = 1,FUEL12
-      if(CLTMPG(iyr,ifuel).eq.0.0) CLTMPG(iyr,ifuel) = 1.0
+      if(DEN.gt.0.0) then
+        CLTMPG(iyr,ifuel) = NUM/DEN
+      else
+        CLTMPG(iyr,ifuel) = 0.0
+      endif
     enddo
 
   RETURN
@@ -4283,15 +4214,27 @@ end module F_
 
 !...Local variable dictionary
     INTEGER, PARAMETER :: US = 11         !...National level parameter (census division 11 = US)
-    INTEGER :: itsic, itsicyr             !...Industry indexing
     LOGICAL done_once/.false./            !...Logic switch to ensure action done only one time
 
+!   Timers
+    INTEGER(KIND=4) :: start_count, end_count, count_rate, count_max
+    REAL(KIND=8)    :: elapsed_time_seconds
+    INTEGER         :: result
+    
 !...Call read input file and set variable (DO only one a run)
     IF(.not.done_once)then
       done_once=.true.
-	  WRITE(21,*)'TRANFRT_doonce',iyr
+      CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
       CALL CFREAD
+      CALL SYSTEM_CLOCK(COUNT=end_count)
+      elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+      WRITE(21,*) "Elapsed wall-clock time (CFREAD): ", elapsed_time_seconds, " seconds"
+      CALL SYSTEM_CLOCK(COUNT=start_count, COUNT_RATE=count_rate, COUNT_MAX=count_max)
 	  CALL CFREADSTOCK
+      CALL SYSTEM_CLOCK(COUNT=end_count)
+      elapsed_time_seconds = REAL(end_count - start_count, KIND=8) / REAL(count_rate, KIND=8)
+      WRITE(21,*) "Elapsed wall-clock time (CFREADSTOCK): ", elapsed_time_seconds, " seconds"
+      write(*,'(a)') 'Finished reading freight truck input files'
     ENDIF
 
 !...Summarize economic output into sectors and calculate growth rate in output
@@ -4306,34 +4249,33 @@ end module F_
 !...17) utility                        18) goverment
 
     TSIC(:,:,iyr)=0.
-    DO iregn=1,MNUMCR
-      TSIC(1,iregn,iyr) = sum(MC_REVIND(iregn,15:20,iyr)) - &
-                          MC_REVIND(iregn,17,iyr) - &
-                          MC_REVIND(iregn,19,iyr) - &
-                          MC_REVIND(iregn,21,iyr)
-      TSIC(2,iregn,iyr) = sum(MC_REVIND(iregn,33:35,iyr))
-      TSIC(3,iregn,iyr) = sum(MC_REVIND(iregn,2:5,iyr))
-      TSIC(4,iregn,iyr) = sum(MC_REVIND(iregn,11:13,iyr))
-      TSIC(5,iregn,iyr) = sum(MC_REVIND(iregn,25:26,iyr))
-      TSIC(6,iregn,iyr) = MC_REVIND(iregn,28,iyr) + &
-                          MC_REVIND(iregn,30,iyr) + &
-                          MC_REVIND(iregn,32,iyr)
-      TSIC(7,iregn,iyr) = sum(MC_REVIND(iregn,36:40,iyr)) - &
-                          MC_REVIND(iregn,38,iyr)
-      TSIC(8,iregn,iyr) = sum(MC_REVIND(iregn,7:8,iyr)) + &
-                          MC_REVIND(iregn,14,iyr) + &
-                          MC_REVIND(iregn,41,iyr)
-      TSIC(9,iregn,iyr) = sum(MC_REVIND(iregn,42:44,iyr))
-      TSIC(10,iregn,iyr)= sum(MC_REVIND(iregn,45:47,iyr))
-      TSIC(11,iregn,iyr)= MC_REVIND(iregn,6,iyr)
-      TSIC(12,iregn,iyr)= MC_REVIND(iregn,21,iyr)
-      TSIC(13,iregn,iyr)= MC_REVIND(iregn,19,iyr)
-      TSIC(14,iregn,iyr)= MC_REVIND(iregn,27,iyr)
-      TSIC(15,iregn,iyr)= MC_REVIND(iregn,38,iyr)
-      TSIC(16,iregn,iyr)= MC_REVIND(iregn,9,iyr)
-      TSIC(17,iregn,iyr)= sum(MC_REVSER(iregn,3:4,iyr))
-      TSIC(18,iregn,iyr)= MC_REVSER(iregn,10,iyr)
-    ENDDO
+    TSIC(1,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,15:20,iyr),DIM=2) - &
+                           MC_REVIND(1:mnumcr,17,iyr) - &
+                           MC_REVIND(1:mnumcr,19,iyr) - &
+                           MC_REVIND(1:mnumcr,21,iyr)
+    TSIC(2,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,33:35,iyr),DIM=2)
+    TSIC(3,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,2:5,iyr),DIM=2)
+    TSIC(4,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,11:13,iyr),DIM=2)
+    TSIC(5,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,25:26,iyr),DIM=2)
+    TSIC(6,1:mnumcr,iyr) = MC_REVIND(1:mnumcr,28,iyr) + &
+                           MC_REVIND(1:mnumcr,30,iyr) + &
+                           MC_REVIND(1:mnumcr,32,iyr)
+    TSIC(7,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,36:40,iyr),DIM=2) - &
+                           MC_REVIND(1:mnumcr,38,iyr)
+    TSIC(8,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,7:8,iyr),DIM=2) + &
+                           MC_REVIND(1:mnumcr,14,iyr) + &
+                           MC_REVIND(1:mnumcr,41,iyr)
+    TSIC(9,1:mnumcr,iyr) = sum(MC_REVIND(1:mnumcr,42:44,iyr),DIM=2)
+    TSIC(10,1:mnumcr,iyr)= sum(MC_REVIND(1:mnumcr,45:47,iyr),DIM=2)
+    TSIC(11,1:mnumcr,iyr)= MC_REVIND(1:mnumcr,6,iyr)
+    TSIC(12,1:mnumcr,iyr)= MC_REVIND(1:mnumcr,21,iyr)
+    TSIC(13,1:mnumcr,iyr)= MC_REVIND(1:mnumcr,19,iyr)
+    TSIC(14,1:mnumcr,iyr)= MC_REVIND(1:mnumcr,27,iyr)
+    TSIC(15,1:mnumcr,iyr)= MC_REVIND(1:mnumcr,38,iyr)
+    TSIC(16,1:mnumcr,iyr)= MC_REVIND(1:mnumcr,9,iyr)
+    TSIC(17,1:mnumcr,iyr)= sum(MC_REVSER(1:mnumcr,3:4,iyr),DIM=2)
+    TSIC(18,1:mnumcr,iyr)= MC_REVSER(1:mnumcr,10,iyr)
+
 	TSIC(1:16,:,iyr) = TSIC(1:16,:,iyr)*1000.
 
 !...Class 2b Vehicle miles traveled
@@ -4358,29 +4300,27 @@ end module F_
                     MC_REVIND(11,17,N)-MC_REVIND(11,29,N)) * CLTVMTDIST(4) + &
                 SUM(MC_REVSER(11,3:4,N)) * CLTVMTDIST(5) + &    ! utility 
                 (sum(VMTHH(N,1:MNUMCR-2,:,:)) + & 								! VMTHH(N,1:MNUMCR-2,1:maxldv,1:maxvtyp)	
-					SUM(FLTVMTECH(:,:,:,:)) / 1000000000.0) * CLTVMTDIST(6)		! FLTVMTECH(1:maxvtyp,1:maxfleet,1:maxldv,1:maxhav)
+					SUM(fltechvmt(mnumcr,:,:,:,:)) / 1000000000.0) * CLTVMTDIST(6)		! fltechvmt(iregn,1:maxvtyp,1:maxfleet,1:maxldv,1:maxhav)
 
 !...Set average fuel prices and convert from 1987$/mmbtu to 1990$/mmbtu
 !	GDP deflator from TEDB Table B18
 !	PHEV utility factor is not consistent with that produced in the powertrain choice module; values below are only used for 
 !	CAFE tech adoption, though, so not a major concern (don't see PHEVs adopting significant tech to meet CAFE).
-    DO iregn = 1,MNUMCR
-      FUELPRICE_R(iyr,1,iregn)  = PDSTR(iregn,IYR)*1.115                                                            ! Diesel
-      FUELPRICE_R(iyr,2,iregn)  = PMGTR(iregn,IYR)*1.115                                                            ! Gasoline
-      FUELPRICE_R(iyr,3,iregn)  = PLGTR(iregn,IYR)*1.115                                                            ! LPG
-      FUELPRICE_R(iyr,4,iregn)  = ( (PGFTRFV(iregn,IYR) + PGFTRPV(iregn,IYR)) * NG_priceadj(1) &
-								   +(PGLTRFV(iregn,IYR) + PGLTRPV(iregn,IYR)) * NG_priceadj(2) )/4 * 1.115          ! CNG/LNG
-	  FUELPRICE_R(iyr,5,iregn)  = MIN(PETTR(iregn,IYR),PMGTR(iregn,IYR)) * 1.115                                    ! Flex fuel
-	  FUELPRICE_R(iyr,6,iregn)  = PELIBCM(iregn,IYR)*1.115 	                                                        ! Electric
-	  FUELPRICE_R(iyr,7,iregn)  = (SUM(PHEVElecVMT(:))/CAFE19*PELIBCM(iregn,IYR) &						            ! PHEV Diesel
-								+ (1.0-SUM(PHEVElecVMT(:))/CAFE19)*PDSTR(iregn,IYR)) * 1.115
-	  FUELPRICE_R(iyr,8,iregn)  = (SUM(PHEVElecVMT(:))/CAFE19*PELIBCM(iregn,IYR) &                                  ! PHEV Gasoline
-								+ (1.0-SUM(PHEVElecVMT(:))/CAFE19)*PMGTR(iregn,IYR)) * 1.115
-	  FUELPRICE_R(iyr,9,iregn)  = PH2TR(iregn,IYR) * 1.115                                                          ! Hydrogen
-	  FUELPRICE_R(iyr,10,iregn) = PH2TR(iregn,IYR) * 1.115
-	  FUELPRICE_R(iyr,11,iregn) = PMGTR(iregn,IYR) * 1.115                                                          ! Gasoline HEV
-	  FUELPRICE_R(iyr,12,iregn) = PH2TR(iregn,IYR) * 1.115 * (1-H2ICE_fueldisc)                                     ! H2 ICE
-    ENDDO
+    FUELPRICE_R(iyr,1,1:mnumcr)  = PDSTR(1:mnumcr,IYR)*mc_jpgdp(1)                                                            ! Diesel
+    FUELPRICE_R(iyr,2,1:mnumcr)  = PMGTR(1:mnumcr,IYR)*mc_jpgdp(1)                                                            ! Gasoline
+    FUELPRICE_R(iyr,3,1:mnumcr)  = PLGTR(1:mnumcr,IYR)*mc_jpgdp(1)                                                            ! LPG
+    FUELPRICE_R(iyr,4,1:mnumcr)  = ( (PGFTRFV(1:mnumcr,IYR) + PGFTRPV(1:mnumcr,IYR))*NG_priceadj(1)*CNG_shrof_NG(n) &
+								   +(PGLTRFV(1:mnumcr,IYR) + PGLTRPV(1:mnumcr,IYR))*NG_priceadj(2)*(1-CNG_shrof_NG(n)))*mc_jpgdp(1)   ! CNG/LNG
+	FUELPRICE_R(iyr,5,1:mnumcr)  = MIN(PETTR(1:mnumcr,IYR),PMGTR(1:mnumcr,IYR)) * mc_jpgdp(1)                                    ! Flex fuel
+	FUELPRICE_R(iyr,6,1:mnumcr)  = PELIBCM(1:mnumcr,IYR)*mc_jpgdp(1) 	                                                        ! Electric
+	FUELPRICE_R(iyr,7,1:mnumcr)  = (SUM(PHEVElecVMT(:))/CAFE19*PELIBCM(1:mnumcr,IYR) &						                    ! PHEV Diesel
+								+ (1.0-SUM(PHEVElecVMT(:))/CAFE19)*PDSTR(1:mnumcr,IYR)) * mc_jpgdp(1)
+	FUELPRICE_R(iyr,8,1:mnumcr)  = (SUM(PHEVElecVMT(:))/CAFE19*PELIBCM(1:mnumcr,IYR) &                                          ! PHEV Gasoline
+								+ (1.0-SUM(PHEVElecVMT(:))/CAFE19)*PMGTR(1:mnumcr,IYR)) * mc_jpgdp(1)
+	FUELPRICE_R(iyr,9,1:mnumcr)  = PH2TR(1:mnumcr,IYR) * mc_jpgdp(1)                                                          ! Hydrogen
+	FUELPRICE_R(iyr,10,1:mnumcr) = PH2TR(1:mnumcr,IYR) * mc_jpgdp(1)
+	FUELPRICE_R(iyr,11,1:mnumcr) = PMGTR(1:mnumcr,IYR) * mc_jpgdp(1)                                                          ! Gasoline HEV
+	FUELPRICE_R(iyr,12,1:mnumcr) = PH2TR(1:mnumcr,IYR) * mc_jpgdp(1) * (1-H2ICE_fueldisc)                                     ! H2 ICE
 
    RETURN
    END SUBROUTINE INIT
@@ -4391,16 +4331,13 @@ end module F_
    IMPLICIT NONE
 
 !...Reads input for the freight model from spreadsheet input file
-    REAL*4 TEMPR_S(SC)
-    REAL*4 TEMPR_A_S(AGE,SC4)
-    INTEGER*2 IT,IV, J, I, INOTE,FUEL4
+    INTEGER*2 IT,IV, J, I, INOTE,FUEL4,m2, f2, t2, sc2, a2
     PARAMETER(FUEL4=4)       ! This is only used for annual VMT read-in
     LOGICAL NEW
     CHARACTER*18 FNAME
     INTEGER FILE_MGR
     EXTERNAL FILE_MGR
-    CHARACTER*16 RNAME
-    INTEGER WKUNIT,SYSUNIT
+    INTEGER WKUNIT
 	REAL VMTCLS2b(AGE,FUEL4)                ! vmt per truck by fuel and vintage, class 2b
 	REAL VMTCLS2bV(AGE,FUEL4)               ! vmt per truck by fuel and vintage, class 2b vocational
 	REAL VMTCLS3V(AGE,FUEL4)                ! vmt per truck by fuel and vintage, class 3
@@ -4408,8 +4345,129 @@ end module F_
 	REAL VMTCLS78V(AGE,FUEL4)               ! vmt per truck by fuel and vintage, class 7-8 vocation
 	REAL VMTCLS78(AGE,FUEL4)                ! vmt per truck by fuel and vintage, class 7-8 tractor
     REAL batt_enden_imp(MNUMYR)
+
+!   Parameters for base technology market penetration by powertrain and regulatory class  
+    INTEGER, PARAMETER      :: NUM_ROWS = TECHP2*FUEL12       ! TECHP2 techs and FUEL12 powertrains
+    integer, PARAMETER      :: NUM_IND_COLS = 2
+    INTEGER, PARAMETER      :: NUM_DATA_COLS = CAFE19
+    INTEGER, PARAMETER      :: TOTAL_COLS = NUM_IND_COLS + NUM_DATA_COLS
+    INTEGER, PARAMETER      :: MAX_LINE_BUFFER_LENGTH = 20 * TOTAL_COLS 
     
-!...call subroutine to read defined ranges from spreadsheet
+    INTEGER, DIMENSION(NUM_ROWS) :: col1_ifuel
+    INTEGER, DIMENSION(NUM_ROWS) :: col2_itech
+    REAL, DIMENSION(NUM_ROWS,NUM_DATA_COLS)  :: HDVTECHBASE
+
+!   Parameters for stock mpg by class (sc4), powertrain (6), age (34), and year (1995-bsyr_stk)
+    INTEGER, PARAMETER      :: NUM_ROWS2 = sc4*6*AGE
+    integer, PARAMETER      :: NUM_IND_COLS2 = 3
+    INTEGER, PARAMETER      :: NUM_DATA_COLS2 = BSYR_STK-1995+1
+    INTEGER, PARAMETER      :: TOTAL_COLS2 = NUM_IND_COLS2 + NUM_DATA_COLS2
+    
+    INTEGER, DIMENSION(NUM_ROWS2) :: col1_isc
+    INTEGER, DIMENSION(NUM_ROWS2) :: col2_ifuel
+    INTEGER, DIMENSION(NUM_ROWS2) :: col3_iage
+    REAL, DIMENSION(NUM_ROWS2,NUM_DATA_COLS2)  :: HDVBMPGSTK
+    
+!   Parameters shared for csv read-in    
+    CHARACTER(LEN=MAX_LINE_BUFFER_LENGTH) :: line_buffer
+    INTEGER :: status, current_row_idx    
+    
+!...Read in TECHBASE_P2 data from csv 
+!   Open the file
+    FNAME = 'TRNHDV_BMPGSTK'
+    WKUNIT = FILE_MGR('O',FNAME,NEW)
+    
+!   -- Read file line by line --
+!   Read and drop the header
+    READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+    
+!   Read the data    
+    current_row_idx = 0
+    DO i = 1, NUM_ROWS2 
+      current_row_idx = current_row_idx + 1
+      
+      ! Read an entire line into the buffer
+      READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+      IF (status /= 0) THEN
+        PRINT *, "Error reading line ", current_row_idx, " or unexpected EOF. IOSTAT=", status
+        STOP
+      END IF
+      
+      ! Now parse the line_buffer using an internal read (assumes commas are delimiters)
+      READ(line_buffer, *, IOSTAT=status) &
+           col1_isc(current_row_idx), &
+           col2_ifuel(current_row_idx), &
+           col3_iage(current_row_idx), &
+           (HDVBMPGSTK(current_row_idx,j), j=1, NUM_DATA_COLS2)
+           ! The (..., j=1, NUM_DATA_COLS) is an implied DO-list for the 2D array
+          
+      IF (status /= 0) THEN
+        PRINT *, "Error parsing line ", current_row_idx, " with data: '", TRIM(line_buffer), "' IOSTAT=", status
+        STOP
+      END IF
+      
+    ENDDO ! NUM_ROWS2
+
+    WKUNIT = FILE_MGR('C',FNAME,NEW)    
+    
+    do m2=1,NUM_ROWS2
+      sc2 = col1_isc(m2)
+      f2 = col2_ifuel(m2)
+      a2 = col3_iage(m2)
+      HDV_MPG(1995-1989:BSYR_STK-1989,sc2,a2,f2) = HDVBMPGSTK(m2,1:BSYR_STK-1995+1)
+    enddo
+
+!...Filling in historic fuel economy through bsyr_stk (1995:bsyr_stk)
+	cltmpg_yr(IY:bsyr_stk-1989,2,1:age)   = HDV_MPG(IY:bsyr_stk-1989,4,1:age,1)		! Diesel 2b
+	cltmpg_yr(IY:bsyr_stk-1989,1,1:age)   = HDV_MPG(IY:bsyr_stk-1989,4,1:age,2)		! Gasoline 2b
+	do ifuel = 3,6
+      cltmpg_yr(IY:bsyr_stk-1989,ifuel,1:age) = HDV_MPG(IY:bsyr_stk-1989,4,1:age,ifuel)    ! all other fuels, 2b
+    enddo
+        
+!...Read in BMPGSTK data from csv
+!   Open the file
+    FNAME = 'TRNHDV_TECHBASE_P2'
+    WKUNIT = FILE_MGR('O',FNAME,NEW)
+    
+!   -- Read file line by line --
+!   Read and drop the header
+    READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+    
+!   Read the data    
+    current_row_idx = 0
+    DO i = 1, NUM_ROWS 
+      current_row_idx = current_row_idx + 1
+      
+      ! Read an entire line into the buffer
+      READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+      IF (status /= 0) THEN
+        PRINT *, "Error reading line ", current_row_idx, " or unexpected EOF. IOSTAT=", status
+        STOP
+      END IF
+      
+      ! Now parse the line_buffer using an internal read (assumes commas are delimiters)
+      READ(line_buffer, *, IOSTAT=status) &
+           col1_ifuel(current_row_idx), &
+           col2_itech(current_row_idx), &
+           (HDVTECHBASE(current_row_idx,j), j=1, NUM_DATA_COLS)
+           ! The (..., j=1, NUM_DATA_COLS) is an implied DO-list for the 2D array
+          
+      IF (status /= 0) THEN
+        PRINT *, "Error parsing line ", current_row_idx, " with data: '", TRIM(line_buffer), "' IOSTAT=", status
+        STOP
+      END IF
+      
+    ENDDO ! NUM_ROWS
+
+    WKUNIT = FILE_MGR('C',FNAME,NEW)    
+    
+    do m2=1,NUM_ROWS
+      f2 = col1_ifuel(m2)
+      t2 = col2_itech(m2)
+      TECHBASE_P2(t2,1:CAFE19,f2) = HDVTECHBASE(m2,1:CAFE19)
+    enddo
+    
+!...call subroutine to read remaining data from defined ranges from spreadsheet
     FNAME='TRNHDVX'
     WKUNIT = FILE_MGR('O',FNAME,NEW) ! open trnhdvx.xlsx input file
 
@@ -4425,6 +4483,8 @@ end module F_
 	  FLTSHR_SALES(i,:) = FLTSHR_SALES(BSYR_STK-1989,:)
 	  FLTSHR_STK(i,:) = FLTSHR_STK(BSYR_STK-1989,:)
 	ENDDO
+
+    CALL GETRNGR('FRT_LOAD_FACT   ',FRT_LOAD_FACT,1,3,1)
 
 !...VMT PER TRUCK BY FUEL AND VINTAGE
 	CALL GETRNGR('VMTCLS2b        ',VMTCLS2b,AGE,FUEL4,1)
@@ -4496,37 +4556,14 @@ end module F_
     CALL GETRNGR('THIST_VMT       ',THIST_VMT (6:BSYR_VMT,1:9),BSYR_VMT-6+1,MNUMCR-2,1)
     CALL GETRNGR('TTONMI_ORIG     ',TTONMI_ORIG (1:9,1:16),MNUMCR-2,SEC-2,1)
 
-!...Historic MPG values by age and fuel
-    CALL GETRNGR('BMPGSTK2B       ',BMPGSTK2B(1:AGE,IY:BSYR_STK-BASEYR+1,1:6),AGE,BSYR_STK-1995+1,6)
-    CALL GETRNGR('BMPGSTK3        ',BMPGSTK3 (1:AGE,IY:BSYR_STK-BASEYR+1,1:6),AGE,BSYR_STK-1995+1,6)
-    CALL GETRNGR('BMPGSTK46       ',BMPGSTK46(1:AGE,IY:BSYR_STK-BASEYR+1,1:6),AGE,BSYR_STK-1995+1,6)
-    CALL GETRNGR('BMPGSTK78       ',BMPGSTK78(1:AGE,IY:BSYR_STK-BASEYR+1,1:6),AGE,BSYR_STK-1995+1,6)
-
-!...Filling in historic fuel economy through bsyr_stk
-	HDV_MPG(:,:,:,:) = 0.0
-	DO i = IY, bsyr_stk-1989
-	  DO iage = 1,age
-        HDV_MPG(i,1,iage,1:6) = BMPGSTK3 (iage,i,1:6)
-        HDV_MPG(i,2,iage,1:6) = BMPGSTK46(iage,i,1:6)
-        HDV_MPG(i,3,iage,1:6) = BMPGSTK78(iage,i,1:6)
-		HDV_MPG(i,4,iage,1:6) = BMPGSTK2B(iage,i,1:6)
-	    cltmpg_yr(i,2,iage)   = HDV_MPG(i,4,iage,1)					! Diesel 2b
-	    cltmpg_yr(i,1,iage)   = HDV_MPG(i,4,iage,2)					! Gasoline 2b
-	    DO ifuel = 3,6 
-	      cltmpg_yr(i,ifuel,iage) = HDV_MPG(i,4,iage,ifuel)      	! all other fuels, 2b
-        ENDDO
-	  ENDDO
-	ENDDO
-
 !...Commercial light truck historical values
     CALL GETRNGR('CLTVMTDIST      ',CLTVMTDIST,1,6,1)                         
 	CALL GETRNGR('CLTSALESPER     ',CLTSALESPER(1:6,6:22),6,17,1)	
 	CALL GETRNGR('CLTVMT_H        ',CLTVMTT (1:6,6:22),6,17,1)
-!   Populate pre-Polk-data sales (1995-2011)   
-    DO i = 6,22    
-      DO ifuel = 1,6      ! Total Class 1 and 2 LT sales          2b share          fuel share
-        CLTSALT(ifuel,i) = (MC_Vehicles(1,i)+MC_VEHICLES(2,i)) * (1-LTSplit(i))  * CLTSALESPER(ifuel,i) * 1000000.
-      ENDDO
+    
+!   Populate pre-Polk-data sales (1995-2011 -- indices 6-22)   
+    DO ifuel = 1,6      ! Total Class 1 and 2 LT sales          2b share          fuel share
+      CLTSALT(ifuel,6:22) = (MC_Vehicles(1,6:22)+MC_VEHICLES(2,6:22)) * (1-LTSplit(6:22))  * CLTSALESPER(ifuel,6:22) * 1000000.
     ENDDO
 
 !...Waterborne Freight Model values for international and domestic marine
@@ -4576,7 +4613,7 @@ end module F_
 !...Data inputs for fuel choice model
 !	VMT bin information (avg. annual VMT, and share of vehicle stock, within each VMT bin)
 	CALL GETRNGR('payback_shr     ',PBACK_SHR,PBK_YR,CAFE19,1)
-	
+    
 	DO icafe19 = 1, CAFE19
 	  IF (icafe19.le.2) then												! Class 2b
 	    CALL GETRNGR('VMT_VEH_2       ',VMT_VEH(1:nvmt,1:2,icafe19),11,FLT,1)
@@ -4596,6 +4633,7 @@ end module F_
       ENDIF
 	ENDDO
 
+	CALL GETRNGR('ann_uptime_days ',ann_uptime_days,1,1,1)          ! Number of driving days per year per vehicle
 	CALL GETRNGR('max_drop        ',max_drop,1,1,1)					! Maximum YoY decrease in alt-fuel powertrain market share 	
 	CALL GETRNGR('max_rise        ',max_rise,1,1,1)					! Maximum YoY increase in alt-fuel powertrain market share 	
 
@@ -4626,22 +4664,22 @@ end module F_
 	CALL GETRNGR('usable_h2       ',usable_h2,1,1,1)						    ! Ratio of usable h2 to nominal h2 (for a tank)
 
 	CALL GETRNGR('TRK_BEV_DOD     ',TRK_BEV_DOD,1,1,1)						    ! Depth of discharge allowed (for converting nominal to usable batt kWh)
-	CALL GETRNGR('batt_enden_imp  ',batt_enden_imp(34:61),1,2050-2022,1)        ! Battery energy density improvement (for estimating maximum installable batt kWh)
+	CALL GETRNGR('MIN_REQ_RNG     ',MIN_REQ_RNG,1,1,1)						    ! Minimum required BEV range regardless of average daily travel
+    CALL GETRNGR('batt_enden_imp  ',batt_enden_imp(34:61),1,2050-2022,1)        ! Battery energy density improvement (for estimating maximum installable batt kWh)
 	CALL GETRNGR('charging_speed  ',charging_speed,1,CAFE19,1)                  ! Public charging speed
 	CALL GETRNGR('max_kWh_cap     ',max_kWh_cap(1:CAFE19,2027-1989),1,CAFE19,1) ! Maximum installable battery capacity (kWh, MY2027)
 
+!   Estimate maximum nominal battery pack (in kWh) that can be feasibly installed on a truck, given continuous improvements in energy density
     DO i = 2023,MNUMYR+1989
-      DO icafe19 = 1, CAFE19
-        max_kWh_cap(icafe19,i-1989) = max_kWh_cap(icafe19,2027-1989) * batt_enden_imp(i-1989) / batt_enden_imp(2027-1989)
-      ENDDO
-!      WRITE(21,'(a,",",i4,19(",",f6.1))')'max_kwh_cap',i,max_kWh_cap(:,i-1989)
+      max_kWh_cap(1:cafe19,i-1989) = max_kWh_cap(1:cafe19,2027-1989) * batt_enden_imp(i-1989) / batt_enden_imp(2027-1989)
     ENDDO
     
 	CALL GETRNGR('battsize_a_PHEV ',battsize_a_PHEV,1,CAFE19,1)					! Coefficient for battery sizing (based on daily VMT requirement from VMT_VEH)
 	CALL GETRNGR('battsize_b_PHEV ',battsize_b_PHEV,1,CAFE19,1)					! Coefficient for battery sizing (based on daily VMT requirement from VMT_VEH)
 
 	CALL GETRNGR('NG_priceadj     ',NG_priceadj,1,2,1)							! Multiplier to adjust supply module NG costs up to actual {1: CNG, 2: LNG}
-	CALL GETRNGR('cost_ICE        ',cost_ICE(1:CAFE19,BSYR_STK-1989),1,CAFE19,1)! Incremental cost of ICE engine (incl. non-batt/FC/H2 components added back in)
+	CALL GETRNGR('CNG_shrof_NG    ',CNG_shrof_NG(1995-1989:MNUMYR),1,56,1)		! Share of Class 7&8 NG truck sales that are CNG
+    CALL GETRNGR('cost_ICE        ',cost_ICE(1:CAFE19,BSYR_STK-1989),1,CAFE19,1)! Incremental cost of ICE engine (incl. non-batt/FC/H2 components added back in)
 
 	CALL GETRNGR('cost_ice_CNG    ',cost_ice_CNG,1,CAFE19,1)					! Incremental cost of NG engine and aftertreatment (v. gasoline [2b-3] or diesel [4-8])
 	CALL GETRNGR('cost_NGtank_DGE ',cost_NGtank_DGE(1:SC4,25:MNUMYR),SC4,37,1)	! CNG tank cost ($/DGE)
@@ -4655,15 +4693,19 @@ end module F_
 	CALL GETRNGR('DEF_dose_LoNOx  ',DEF_dose_LoNOx,1,1,1)						! DEF dose rate (percent of diesel consumption); MY2027+, Low NOx rule
 
 !	IRA tax credits
-	CALL GETRNGI('IRA_switch      ',IRA_switch,1,1,1)
+	CALL GETRNGI('SwitchHDV_IRA   ',SwitchHDV_IRA,1,1,1)                        ! Switch for IRA {1: yes, 0: no}
+	CALL GETRNGI('SwitchHDV_HR1   ',SwitchHDV_HR1,1,1,1)                        ! Switch for 119 Congress H.R. 1 {1: yes, 0: no}
 	CALL GETRNGR('IRA_45W_max     ',IRA_45W_max,CAFE19,FUEL12,1)				! Maximum allowable IRA 45W tax credit (2022USD)
 	CALL GETRNGR('EVSE_30Ctaxcred ',EVSE_30Ctaxcred,1,1,1)						! Average per-EVSE tax credit (%)
 
-	IF (IRA_switch.eq.0.or.RTOVALUE('LEGIRA  ',0).eq.0) then
+	IF (SwitchHDV_IRA.eq.0.or.RTOVALUE('LEGIRA  ',0).eq.0) then
 	  IRA_45W_max(:,:) = 0.0
 	  EVSE_30Ctaxcred = 0.0
 	ENDIF
-
+    
+!...Scedes switch overrides trnldvx setting for HR1
+    if (RTOVALUE('TRANEFF ',0).eq.4) SwitchHDV_HR1 = 0
+    
 !	EPA MY2027 Low NOx rule compliance costs
 	CALL GETRNGI('NOX_switch      ',NOX_switch,1,1,1)
 	CALL GETRNGR('cost_LoNOx      ',cost_LoNOx,CAFE19,FUEL12,1)						! Low NOx compliance cost{1: diesel, 2: gasoline}
@@ -4708,10 +4750,8 @@ end module F_
     enddo
 
 !   Fill in historical truck battery prices based on ratio to LDV price
-    do i = 6, BSYR_STK-1989
-      do j = 1, 5
-        cost_battkWh_trk(j,i) = Li_ion_Cost(15,i+1989) * trk_battc_hist(j)
-      enddo
+    do j = 1, 5
+      cost_battkWh_trk(j,6:first_bat_yr) = Li_ion_Cost(15,6+1989:first_bat_yr+1989) * trk_battc_hist(j)
     enddo
 
 !	Historical prices are set equal to the last historical year
@@ -4720,6 +4760,9 @@ end module F_
 	cost_motorkW(6:BSYR_STK-1989)= (cost_emotor_a) / mc_jpgdp(31) * mc_jpgdp(1)
 
 !	Convert all to 1990USD for choice model
+!   Battery cost model initial prices (2020USD --> 1990USD)
+    cost_battpack_a(:) = cost_battpack_a(:) / mc_jpgdp(31) * mc_jpgdp(1)
+    cost_battmat_a(:)  = cost_battmat_a(:) / mc_jpgdp(31) * mc_jpgdp(1) 
 !   Incremental ICE cost (engine + gearbox + mech-acc + alternator + 12V batt - elec-acc - power electronics - gearbox_ev)
 	cost_ice_CNG(:)	  		        = cost_ice_CNG(:) / mc_jpgdp(2022-1989) * mc_jpgdp(1)
 	cost_NGtank_DGE(:,:)	        = cost_NGtank_DGE(:,:) / mc_jpgdp(2009-1989) * mc_jpgdp(1)
@@ -4734,6 +4777,21 @@ end module F_
 	MR_intercept(:)	  		        = MR_intercept(:) / mc_jpgdp(2022-1989) * mc_jpgdp(1)
 	cost_LoNOx(:,:)	  		        = cost_LoNOx(:,:) / mc_jpgdp(2022-1989) * mc_jpgdp(1)
     refuel_timeval                  = refuel_timeval / mc_jpgdp(2022-1989) * mc_jpgdp(1)
+
+!...Motor cost (applied to all BEV, FCEV, and FCHEV)
+!   Weighted average of motor cost data from 2020 to 2025
+    do i = 6, mnumyr
+	  IF (i.le.2025-1989) then
+	    cost_motorkW(i) = (-2.2*(i+1989) + 4483.0)/ mc_jpgdp(31) * mc_jpgdp(1)
+!     EPA: 3% from 2025 - 2030, 2% from 2030 - 2035, 1% from 2035 - 2050
+	  ELSEIF (i.gt.2025-1989.and.i.le.2030-1989) then
+	    cost_motorkW(i) = cost_motorkW(i-1)*.97
+	  ELSEIF (i.gt.2030-1989.and.i.le.2035-1989) then
+	    cost_motorkW(i) = cost_motorkW(i-1)*.98
+	  ELSEIF (i.gt.2035-1989) then
+	    cost_motorkW(i) = cost_motorkW(i-1)*.99
+	  ENDIF
+    enddo
 
 !	Populate maintenance & repair cost for payback model; Write to TRNOUT
 !	WRITE(21,*)'Maintenance and repair cost by fuel {1:DS,2:MG,6:BEV,9:FCV}'
@@ -4750,36 +4808,27 @@ end module F_
 			IF (ifuel.eq.9.or.ifuel.eq.10) MR_cost(icafe19,ifuel,j,i) = MR_cost(icafe19,ifuel,j,i) * MR_FCVmult(icafe19,i)
             IF (ifuel.eq.11) MR_cost(icafe19,ifuel,j,i) = MR_cost(icafe19,2,j,i)        ! Gasoline HEV M&R equal to gasoline iCE
             IF (ifuel.eq.12) MR_cost(icafe19,ifuel,j,i) = (MR_cost(icafe19,1,j,i) + MR_cost(icafe19,2,j,i)) / 2        ! H2ICE M&R average of gas/diesel
-			IF(icafe19.eq.CAFE19.and.i.gt.32) then
-!			  IF (ifuel.eq.1.or.ifuel.eq.2.or.ifuel.eq.6.or.ifuel.eq.9) then
-!			    WRITE(21,'(i4,",",i2,",",i2,19(",",f4.3))')i+1989,ifuel,j,MR_cost(:,ifuel,j,i)* mc_jpgdp(2022-1989) / mc_jpgdp(1)
-!			  ENDIF
-			ENDIF
 		  ENDDO
 		ENDDO
 	  ENDDO
 	ENDDO
 	
 !	BEV infrastructure installation cost (convert to 1990USD)
-!	Apply IRA 30C alt-fuel infrastructure tax credit until sunset
+!	Apply IRA 30C alt-fuel infrastructure tax credit until sunset (June 30, 2026 per H.R. 1 Sec. 70505)
 	DO icafe19 = 1, CAFE19
 	  BEV_infra_cost(icafe19,:) = BEV_infra_cost(icafe19,2023-1989)/mc_jpgdp(32)*mc_jpgdp(1)
 	ENDDO
-	BEV_infra_cost(:,2023-1989:2032-1989) = BEV_infra_cost(:,2023-1989:2032-1989) * (1 - EVSE_30Ctaxcred)
+	IF (SwitchHDV_HR1.eq.1) THEN
+      BEV_infra_cost(:,2023-1989:2026-1989) = BEV_infra_cost(:,2023-1989:2026-1989) * (1 - EVSE_30Ctaxcred)
+    ELSE
+      BEV_infra_cost(:,2023-1989:2032-1989) = BEV_infra_cost(:,2023-1989:2032-1989) * (1 - EVSE_30Ctaxcred)
+    ENDIF
 	
 !	EVSE efficiency
 !	WRITE(21,*)'Year, CHRG_EFF, CHRG_EFF_IMP, evse_maint (2022USD), insure_rate, cost_obc (2022USD)'
-	DO i = iy,MNUMYR
-	  IF (i.le.2024-1989) THEN
-	    CHRG_EFF(i) = CHRG_EFF(2024-1989)
-	  ELSEIF (i.le.2032-1989) THEN
-	    CHRG_EFF(i) = CHRG_EFF(2024-1989) * CHRG_EFF_IMP ** (i - (2024-1989))
-	  ELSE
-	    CHRG_EFF(i) = CHRG_EFF(2032-1989)
-	  ENDIF
-!	  IF (i.gt.33) WRITE(21,'(i4,",",f4.2,",",F5.3,",",f6.4,",",f4.3)')i+1989, CHRG_EFF(i), CHRG_EFF_IMP, evse_maint * mc_jpgdp(2022-1989) / mc_jpgdp(1), &
-!				 insure_rate
-	ENDDO	
+	CHRG_EFF(iy:2024-1989) = CHRG_EFF(2024-1989)
+    CHRG_EFF(2025-1989:2032-1989) = CHRG_EFF(2024-1989) * CHRG_EFF_IMP ** ( (/ (i, i = 2025-1989, 2032-1989) /) - (2024-1989))
+    CHRG_EFF(2033-1989:mnumyr) = CHRG_EFF(2032-1989)	
 
 !... Share of PHEV EV VMT Share
     CALL GETRNGR('PHEVELECVMT     ',PHEVELECVMT,1,CAFE19,1)
@@ -4816,7 +4865,6 @@ end module F_
     CALL GETRNGR('TECHVAR_P2      ',TECHVAR_P2,TECHP2,CAFE14,1)
     CALL GETRNGR('TECHMID_P2      ',TECHMID_P2,TECHP2,CAFE14,1)
     CALL GETRNGR('TECHSHAPE_P2    ',TECHSHAPE_P2,TECHP2,CAFE14,1)
-    CALL GETRNGR('TECHBASE_P2     ',TECHBASE_P2(1:TECHP2,1:CAFE19,1:FUEL12),TECHP2,CAFE19,FUEL12)
 
     CALL GETRNGR('TECHMAX_P2      ',TECHMAX_P2,TECHP2,CAFE14,1)
     CALL GETRNGR('HDV_GHGSTD_CI   ',HDV_GHGSTD(1:CAFE14,28:61,1),CAFE14,34,1)
@@ -4865,13 +4913,13 @@ end module F_
 
 !... For Phase 2
 	TECHCOST_P2(:,:) = TECHCOST_P2(:,:)/MC_JPGDP(2015-1989)*MC_JPGDP(1)  ! Convert tech costs from 2012$ to 1990$
-	DO i = 1, 24
+    DO i = 1, 24
       LEARNING_P2(:,i) = LEARNING_P2(:,25)                              ! Learning curves start in 2014; set pre-2014 equal to 2014
     ENDDO
     
 	 num_sup = 0
-	 num_req = 0.
-	 num_syn = 0.
+	 num_req = 0
+	 num_syn = 0
     DO itechp2 = 1,techp2
 !     Setup parameters for SUPERSEDES notes 
      IF(SUPERSCEDE_P2(itechp2).eq.1) then 	                ! If this tech supercedes others                       
@@ -4914,7 +4962,10 @@ end module F_
   END SUBROUTINE CFREAD
 
 
-!=============================================================================================================
+! ==========================================================================================================
+! ... Subroutine CFREADSTOCK reads the input files TRNSTOCK_HDV.CSV and TRNSTOCKX_HDV_PRE2012 into
+!     the main freight truck stock array, TRKSTK_19R.
+! ==========================================================================================================
    SUBROUTINE CFREADSTOCK
    USE F_
    IMPLICIT NONE
@@ -4923,115 +4974,202 @@ end module F_
     CHARACTER*18  FNAME
     INTEGER       FILE_MGR
     EXTERNAL      FILE_MGR
-    CHARACTER*16  RNAME
-    INTEGER       WKUNIT,SYSUNIT
-	INTEGER       j2, y2, YearsReadIn
-    INTEGER*2     m2, r2, a2, f2
-    Integer*2    HDV_CENSUS(1836), HDV_FUEL(1836), HDV_VINTAGE(1836)
+    INTEGER       WKUNIT
+	INTEGER       i, j, j2, y2, YearsReadIn,Y2_START,Y2_END
+    INTEGER*2     m2, r2, a2, f2, g2, v2
 	PARAMETER(YearsReadIn = bsyr_stk - 2011)
-	REAL CLS2bSTKHIST(AGE,6:22,6)				! Class 2b stock
-	REAL CLS3STKHIST(AGE,6:22,6)				! Class 3 stock
-	REAL CLS46STKHIST(AGE,6:22,6) 				! Class 4-6 stock
-	REAL CLS78STKHIST(AGE,6:22,6)				! Class 7&8 stock
-	REAL CLS2bSTKREGN(1836,YearsReadIn)         ! Class 2b stock by region                
-    REAL CLS2bVSTKREGN(1836,YearsReadIn)        ! Class 2b vocational stock by region     
-    REAL CLS3STKREGN(1836,YearsReadIn)          ! Class 3 stock by region                 
-    REAL CLS3VSTKREGN(1836,YearsReadIn)         ! Class 3 vocational stock by region      
-    REAL CLS4VSTKREGN(1836,YearsReadIn)         ! Class 4 vocational stock by region      
-    REAL CLS5VSTKREGN(1836,YearsReadIn)         ! Class 5 vocational stock by region      
-    REAL CLS6VSTKREGN(1836,YearsReadIn)         ! Class 6 vocational stock by region      
-    REAL CLS7STKREGN(1836,YearsReadIn)          ! Class 7 stock by region                 
-    REAL CLS7VSTKREGN(1836,YearsReadIn)         ! Class 7 vocational stock by region      
-    REAL CLS8STKREGN(1836,YearsReadIn)          ! Class 8 stock by region                 
-    REAL CLS8VSTKREGN(1836,YearsReadIn)         ! Class 8 vocational stock by region      
-    REAL CLS8HSTKREGN(1836,YearsReadIn)         ! Class 8 super heavy trucks by region 
-    REAL temp_stock_check                       ! TEMP
-    REAL TEMP_STK
+    PARAMETER(Y2_START = 2012-1989)
+    PARAMETER(Y2_END = bsyr_stk-1989)
+    REAL        temp_stock_check                       ! TEMP
+    REAL        TEMP_STK,sum_trkstk_allfuel
+    INTEGER     y2_indices(YearsReadIn)
 
-!...Reads stock data for the freight model from spreadsheet input file
-    FNAME = 'TRNSTOCKX'
-    WKUNIT = FILE_MGR('O',FNAME,NEW)   !open trnstockx.xlsx input file
-    CALL ReadRngXLSX(WKUNIT,'HDV')      !read range names & coerresponding data from worksheet "HDV"
-    WKUNIT = FILE_MGR('C',FNAME,NEW)   !close trnstockx.xlsx input file
-    CLOSE(WKUNIT)
-	
-!...Historic stocks by vintage and fuel type
-    CALL GETRNGR('CLS2bSTKHIST    ',CLS2bSTKHIST(1:34,6:22,1:6),AGE,17,6)
-	CALL GETRNGR('CLS3STKHIST     ',CLS3STKHIST (1:34,6:22,1:6),AGE,17,6)
-    CALL GETRNGR('CLS46STKHIST    ',CLS46STKHIST(1:34,6:22,1:6),AGE,17,6)
-    CALL GETRNGR('CLS78STKHIST    ',CLS78STKHIST(1:34,6:22,1:6),AGE,17,6)
-!... By region starting in 2012
-    CALL GETRNGR('CLS2bSTKREGN    ',CLS2bSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS2bVSTKREGN   ',CLS2bVSTKREGN, 1836,YearsReadIn,1)	
-    CALL GETRNGR('CLS3STKREGN     ',CLS3STKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS3VSTKREGN    ',CLS3VSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS4VSTKREGN    ',CLS4VSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS5VSTKREGN    ',CLS5VSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS6VSTKREGN    ',CLS6VSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS7STKREGN     ',CLS7STKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS7VSTKREGN    ',CLS7VSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS8STKREGN     ',CLS8STKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS8VSTKREGN    ',CLS8VSTKREGN, 1836,YearsReadIn,1)
-    CALL GETRNGR('CLS8HSTKREGN    ',CLS8HSTKREGN, 1836,YearsReadIn,1)
-!... Variables to help with reading in regional stock variables
-    CALL GETRNGI('HDV_CENSUS      ',HDV_CENSUS,  1,1836,1)
-    CALL GETRNGI('HDV_FUEL        ',HDV_FUEL,  1,1836,1)
-    CALL GETRNGI('HDV_VINTAGE     ',HDV_VINTAGE,  1,1836,1)   	
+!   Parameters for regional HDV stock data (2012+)    
+    INTEGER, PARAMETER      :: NUM_ROWS = (MNUMCR-2)*AGE*6*12       ! Stock data has 6 powertrains and 12 classes
+    integer, PARAMETER      :: NUM_IND_COLS = 5
+    INTEGER, PARAMETER      :: NUM_DATA_COLS = YearsReadIn
+    INTEGER, PARAMETER      :: TOTAL_COLS = NUM_IND_COLS + NUM_DATA_COLS
+    INTEGER, PARAMETER      :: MAX_LINE_BUFFER_LENGTH = 20 * TOTAL_COLS 
+    
+    INTEGER, DIMENSION(NUM_ROWS) :: col1_iregn
+    INTEGER, DIMENSION(NUM_ROWS) :: col2_igvwr
+    INTEGER, DIMENSION(NUM_ROWS) :: col3_ivoc
+    INTEGER, DIMENSION(NUM_ROWS) :: col4_iage
+    INTEGER, DIMENSION(NUM_ROWS) :: col5_ifuel
+    REAL, DIMENSION(NUM_ROWS,NUM_DATA_COLS)  :: HDVSTKREGN
 
-	TRKSTK(:,:,:,:,:) 		= 0.0
-	TRKSTK_19R(:,:,:,:,:,:) = 0.0
-	TRKSTK_19(:,:,:,:) 		= 0.0
+!   Parameters for national HDV stock data (1995-2011)    
+!   Older stock data has 6 powertrains and 4 classes {1:2b, 2:3, 3:4-6, 4:7&8}
+    INTEGER, PARAMETER      :: NUM_ROWS_OLD = AGE*6*4
+    integer, PARAMETER      :: NUM_IND_COLS_OLD = 5
+    INTEGER, PARAMETER      :: NUM_DATA_COLS_OLD = 2012 - 1995
+    INTEGER, PARAMETER      :: TOTAL_COLS_OLD = NUM_IND_COLS_OLD + NUM_DATA_COLS_OLD
+    INTEGER, PARAMETER      :: MAX_LINE_BUFFER_LENGTH_OLD = 20 * TOTAL_COLS_OLD 
+    
+    INTEGER, DIMENSION(NUM_ROWS_OLD) :: col1_igvwr
+    INTEGER, DIMENSION(NUM_ROWS_OLD) :: col2_ifuel
+    INTEGER, DIMENSION(NUM_ROWS_OLD) :: col3_iage
+    REAL, DIMENSION(NUM_ROWS_OLD,NUM_DATA_COLS_OLD)  :: HDVSTKNATL
 
-!...Populate 2012+ stocks (regional). Non-fleet first, then fleet.
-!	Note 
-    DO m2 = 1,1836
-      DO j2 = 1,YearsReadIn
-        y2 = j2 + 22
-        r2 = HDV_census(m2)
-    	a2 = HDV_vintage(m2)
-    	f2 = HDV_fuel(m2)
-    	TRKSTK_19R(y2,1 ,a2,f2,1,r2) = CLS2bSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,1)) 
-    	TRKSTK_19R(y2,2 ,a2,f2,1,r2) = CLS2bVSTKREGN(m2,j2)*(1.0-FLTSHR_STK(y2,2)) 
-    	TRKSTK_19R(y2,3 ,a2,f2,1,r2) = CLS3STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,3)) 
-    	TRKSTK_19R(y2,4 ,a2,f2,1,r2) = CLS3VSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,4)) 
-    	TRKSTK_19R(y2,5 ,a2,f2,1,r2) = CLS4VSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,5)) 
-    	TRKSTK_19R(y2,6 ,a2,f2,1,r2) = CLS5VSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,6)) 
-    	TRKSTK_19R(y2,7 ,a2,f2,1,r2) = CLS6VSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,7)) 
-    	TRKSTK_19R(y2,8 ,a2,f2,1,r2) = CLS7VSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,8)) 
-    	TRKSTK_19R(y2,9 ,a2,f2,1,r2) = CLS7STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,9))  * base_mkt_p2(f2,9) 
-    	TRKSTK_19R(y2,10,a2,f2,1,r2) = CLS7STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,10)) * base_mkt_p2(f2,10)
-    	TRKSTK_19R(y2,11,a2,f2,1,r2) = CLS7STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,11)) * base_mkt_p2(f2,11)
-    	TRKSTK_19R(y2,12,a2,f2,1,r2) = CLS8VSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,12)) 
-    	TRKSTK_19R(y2,13,a2,f2,1,r2) = CLS8STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,13)) * base_mkt_p2(f2,13)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,14,a2,f2,1,r2) = CLS8STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,14)) * base_mkt_p2(f2,14)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,15,a2,f2,1,r2) = CLS8STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,15)) * base_mkt_p2(f2,15)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,16,a2,f2,1,r2) = CLS8STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,16)) * base_mkt_p2(f2,16)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,17,a2,f2,1,r2) = CLS8STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,17)) * base_mkt_p2(f2,17)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,18,a2,f2,1,r2) = CLS8STKREGN(m2,j2)  *(1.0-FLTSHR_STK(y2,18)) * base_mkt_p2(f2,18)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,19,a2,f2,1,r2) = CLS8HSTKREGN(m2,j2) *(1.0-FLTSHR_STK(y2,19)) 
+!   Parameters shared for csv read-in    
+    CHARACTER(LEN=MAX_LINE_BUFFER_LENGTH) :: line_buffer
+    INTEGER :: status, current_row_idx
 
-        TRKSTK_19R(y2,1 ,a2,f2,2,r2) = CLS2bSTKREGN(m2,j2) * FLTSHR_STK(y2,1) 
-    	TRKSTK_19R(y2,2 ,a2,f2,2,r2) = CLS2bVSTKREGN(m2,j2)* FLTSHR_STK(y2,2) 
-    	TRKSTK_19R(y2,3 ,a2,f2,2,r2) = CLS3STKREGN(m2,j2)  * FLTSHR_STK(y2,3) 
-    	TRKSTK_19R(y2,4 ,a2,f2,2,r2) = CLS3VSTKREGN(m2,j2) * FLTSHR_STK(y2,4) 
-    	TRKSTK_19R(y2,5 ,a2,f2,2,r2) = CLS4VSTKREGN(m2,j2) * FLTSHR_STK(y2,5) 
-    	TRKSTK_19R(y2,6 ,a2,f2,2,r2) = CLS5VSTKREGN(m2,j2) * FLTSHR_STK(y2,6) 
-    	TRKSTK_19R(y2,7 ,a2,f2,2,r2) = CLS6VSTKREGN(m2,j2) * FLTSHR_STK(y2,7) 
-    	TRKSTK_19R(y2,8 ,a2,f2,2,r2) = CLS7VSTKREGN(m2,j2) * FLTSHR_STK(y2,8) 
-    	TRKSTK_19R(y2,9 ,a2,f2,2,r2) = CLS7STKREGN(m2,j2)  * FLTSHR_STK(y2,9)  * base_mkt_p2(f2,9) 
-    	TRKSTK_19R(y2,10,a2,f2,2,r2) = CLS7STKREGN(m2,j2)  * FLTSHR_STK(y2,10) * base_mkt_p2(f2,10)
-    	TRKSTK_19R(y2,11,a2,f2,2,r2) = CLS7STKREGN(m2,j2)  * FLTSHR_STK(y2,11) * base_mkt_p2(f2,11)
-    	TRKSTK_19R(y2,12,a2,f2,2,r2) = CLS8VSTKREGN(m2,j2) * FLTSHR_STK(y2,12) 
-    	TRKSTK_19R(y2,13,a2,f2,2,r2) = CLS8STKREGN(m2,j2)  * FLTSHR_STK(y2,13) * base_mkt_p2(f2,13)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,14,a2,f2,2,r2) = CLS8STKREGN(m2,j2)  * FLTSHR_STK(y2,14) * base_mkt_p2(f2,14)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,15,a2,f2,2,r2) = CLS8STKREGN(m2,j2)  * FLTSHR_STK(y2,15) * base_mkt_p2(f2,15)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,16,a2,f2,2,r2) = CLS8STKREGN(m2,j2)  * FLTSHR_STK(y2,16) * base_mkt_p2(f2,16)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,17,a2,f2,2,r2) = CLS8STKREGN(m2,j2)  * FLTSHR_STK(y2,17) * base_mkt_p2(f2,17)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,18,a2,f2,2,r2) = CLS8STKREGN(m2,j2)  * FLTSHR_STK(y2,18) * base_mkt_p2(f2,18)/(sum(base_mkt_p2(f2,13:18)))
-    	TRKSTK_19R(y2,19,a2,f2,2,r2) = CLS8HSTKREGN(m2,j2) * FLTSHR_STK(y2,19) 
-      ENDDO
+!...Read in HDV regional stock data from csv  
+!   Open the file
+    FNAME = 'TRNSTOCKX_HDV'
+    WKUNIT = FILE_MGR('O',FNAME,NEW)
+    
+!   -- Read file line by line --
+!   Read and drop the header
+    READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+    
+!   Read the data    
+    current_row_idx = 0
+    DO i = 1, NUM_ROWS 
+      current_row_idx = current_row_idx + 1
+      
+      ! Read an entire line into the buffer
+      READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+      IF (status /= 0) THEN
+        PRINT *, "Error reading line ", current_row_idx, " or unexpected EOF. IOSTAT=", status
+        STOP
+      END IF
+      
+      ! Now parse the line_buffer using an internal read (assumes commas are delimiters)
+      READ(line_buffer, *, IOSTAT=status) &
+           col1_iregn(current_row_idx), &
+           col2_igvwr(current_row_idx), &
+           col3_ivoc(current_row_idx), &
+           col4_iage(current_row_idx), &
+           col5_ifuel(current_row_idx), &
+           (HDVSTKREGN(current_row_idx,j), j=1, NUM_DATA_COLS)
+           ! The (..., j=1, NUM_DATA_COLS) is an implied DO-list for the 2D array
+          
+      IF (status /= 0) THEN
+        PRINT *, "Error parsing line ", current_row_idx, " with data: '", TRIM(line_buffer), "' IOSTAT=", status
+        STOP
+      END IF
+      
+    ENDDO ! NUM_ROWS
+
+    WKUNIT = FILE_MGR('C',FNAME,NEW)
+
+!...Read in HDV national stock data from csv (1995-2011)
+!   Open the file
+    FNAME = 'TRNSTOCKX_HDV_PRE2012'
+    WKUNIT = FILE_MGR('O',FNAME,NEW)
+    
+!   -- Read file line by line --
+!   Read and drop the header
+    READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+    
+!   Read the data    
+    current_row_idx = 0
+    DO i = 1, NUM_ROWS_OLD 
+      current_row_idx = current_row_idx + 1
+      
+      ! Read an entire line into the buffer
+      READ(WKUNIT, '(A)', IOSTAT=status) line_buffer
+      IF (status /= 0) THEN
+        PRINT *, "Error reading line ", current_row_idx, " or unexpected EOF. IOSTAT=", status
+        STOP
+      END IF
+      
+      ! Now parse the line_buffer using an internal read (assumes commas are delimiters)
+      READ(line_buffer, *, IOSTAT=status) &
+           col1_igvwr(current_row_idx), &
+           col2_ifuel(current_row_idx), &
+           col3_iage(current_row_idx), &
+           (HDVSTKNATL(current_row_idx,j), j=1, NUM_DATA_COLS_OLD)
+           ! The (..., j=1, NUM_DATA_COLS_OLD) is an implied DO-list for the 2D array
+          
+      IF (status /= 0) THEN
+        PRINT *, "Error parsing line ", current_row_idx, " with data: '", TRIM(line_buffer), "' IOSTAT=", status
+        STOP
+      END IF
+      
+    ENDDO ! NUM_ROWS
+
+    WKUNIT = FILE_MGR('C',FNAME,NEW)
+
+!...Populate 2012+ stocks (regional)
+	TRKSTK(1:MNUMYR,1:SC,1:AGE,1:FUEL12,1:FLT) 		            = 0.0
+	TRKSTK_19R(1:MNUMYR,1:CAFE19,1:age,1:FUEL12,1:flt,1:MNUMCR) = 0.0
+	TRKSTK_19(1:MNUMYR,1:CAFE19,1:AGE,1:FUEL12) 		        = 0.0
+    CLTSTK(1:MNUMYR,1:FUEL12,1:AGE,1:VOC,1:MNUMCR)              = 0.0
+    y2_indices = (/(i + 22, i = 1, YearsReadIn)/)
+    
+    DO m2 = 1,NUM_ROWS
+	  r2 = col1_iregn(m2)   ! Region
+      g2 = col2_igvwr(m2)   ! GVWR size class
+      v2 = col3_ivoc(m2)    ! Vocational (0: no, 1: yes)
+      a2 = col4_iage(m2)    ! Vintage
+	  f2 = col5_ifuel(m2)   ! Powertrain
+	  
+      SELECT CASE (g2)
+        CASE (2)            ! Class 2b
+          icafe19 = 1+v2
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) *(1.0-FLTSHR_STK(y2_indices,icafe19))
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * FLTSHR_STK(y2_indices,icafe19)
+        CASE (3)            ! Class 3
+          icafe19 = 3+v2
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) *(1.0-FLTSHR_STK(y2_indices,icafe19))
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * FLTSHR_STK(y2_indices,icafe19)
+        CASE (4,5,6)        ! Class 4-6
+          icafe19 = g2+1
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) *(1.0-FLTSHR_STK(y2_indices,icafe19))
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * FLTSHR_STK(y2_indices,icafe19)
+        CASE (7)
+          SELECT CASE (v2)
+            CASE (0)        ! Class 7 tractor (non-vocational)
+              icafe19 = 9   ! Class 7 tractor - low roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)
+              icafe19 = 10  ! Class 7 tractor - mid roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)
+              icafe19 = 11  ! Class 7 tractor - high roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)
+            CASE (1)        ! Class 7 vocational
+              icafe19 = 8
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) *(1.0-FLTSHR_STK(y2_indices,icafe19))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * FLTSHR_STK(y2_indices,icafe19)
+          END SELECT
+        CASE (8)
+          SELECT CASE (v2)
+            CASE (0)        ! Class 8 tractor (non-vocational) -- split out across 6 regulatory classes (sleeper/day cab, low/mid/high roof)
+              icafe19 = 13  ! Class 8 tractor - daycab - low roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))              
+              icafe19 = 14  ! Class 8 tractor - daycab - mid roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))  
+              icafe19 = 15  ! Class 8 tractor - daycab - high roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))  
+              icafe19 = 16  ! Class 8 tractor - sleeper - low roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))  
+              icafe19 = 17  ! Class 8 tractor - daycab - mid roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))  
+              icafe19 = 18  ! Class 8 tractor - daycab - high roof
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (1.0-FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * (FLTSHR_STK(y2_indices,icafe19)) * base_mkt_p2(f2,icafe19)/(sum(base_mkt_p2(f2,13:18)))
+            CASE (1)        ! Class 8 vocational
+              icafe19 = 12
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) *(1.0-FLTSHR_STK(y2_indices,icafe19))
+              TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * FLTSHR_STK(y2_indices,icafe19)
+          END SELECT
+        CASE (9)            ! Class 8 heavy haul
+          icafe19 = 19
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 1, r2) = HDVSTKREGN(m2,1:YearsReadIn) *(1.0-FLTSHR_STK(y2_indices,icafe19))
+          TRKSTK_19R(y2_indices, icafe19, a2, f2, 2, r2) = HDVSTKREGN(m2,1:YearsReadIn) * FLTSHR_STK(y2_indices,icafe19)
+        END SELECT
     ENDDO
-
+    
 !	Re-distribute recent vintaged stock across fleet/non-fleet. We need to keep accurate accounting here, since the fleet/non-fleet distinction
 !		drives the distribution of charging types for the total BEV stock.
 !	For instance, in y2=2018, iage = 1 fleet split will be equal to FLTSHR_SALES(2018), since TFFXGRT(isc4,1) is just 0 (no transfers in the first year)
@@ -5063,48 +5201,26 @@ end module F_
       endif
 	ENDDO
 	
-	DO y2 = 2012-1989,bsyr_stk-1989
-	  DO icafe19 = 1, CAFE19
-	    DO iage = 1, age
-	      DO ifuel = 1, FUEL12
-	  	    DO iflt = 1, flt
-	  	      TRKSTK_19R(y2,icafe19,iage,ifuel,iflt,11) = SUM(TRKSTK_19R(y2,icafe19,iage,ifuel,iflt,1:MNUMCR-2))
-			ENDDO
-		  ENDDO
-		ENDDO
-	  ENDDO
-	ENDDO
+!   Populate national stocks using sum of the regional
+    TRKSTK_19R(2012-1989:bsyr_stk-1989, 1:CAFE19, 1:age, 1:FUEL12, 1:flt, 11) = SUM(TRKSTK_19R(2012-1989:bsyr_stk-1989, 1:CAFE19, 1:age, 1:FUEL12, 1:flt, 1:MNUMCR-2), DIM=6)
 		  
 !...Summing the stock to match the reporting aggregation levels
-    DO y2 = 2012-1989,bsyr_stk-1989
-!	  by aggregate size class, no region
-	  DO iage=1,age
-        DO ifuel=1,FUEL12
-   	      DO iflt = 1,FLT
-            TRKSTK(y2,1,iage,ifuel,iflt) = sum(TRKSTK_19R(y2,3:4,iage,ifuel,iflt,11))
-	  	    TRKSTK(y2,2,iage,ifuel,iflt) = sum(TRKSTK_19R(y2,5:7,iage,ifuel,iflt,11))
-	  	    TRKSTK(y2,3,iage,ifuel,iflt) = sum(TRKSTK_19R(y2,8:19,iage,ifuel,iflt,11))
-	  	  ENDDO
-	    ENDDO
-	  ENDDO	
-!	  No region, no fleet type
-	  DO iage=1,age
-        DO ifuel=1,FUEL12
-          DO icafe19 = 1,CAFE19
-	  	    TRKSTK_19(y2,icafe19,iage,ifuel) = sum(TRKSTK_19R(y2,icafe19,iage,ifuel,1:2,11))
-	  	  ENDDO
-	    ENDDO
-	  ENDDO
-	ENDDO
+!	by aggregate size class, no region
+    TRKSTK(Y2_START:Y2_END,1,1:age,1:FUEL12,1:FLT) = SUM(TRKSTK_19R(Y2_START:Y2_END,3:4,1:age,1:FUEL12,1:FLT,11),DIM=2)     ! Class 3
+    TRKSTK(Y2_START:Y2_END,2,1:age,1:FUEL12,1:FLT) = SUM(TRKSTK_19R(Y2_START:Y2_END,5:7,1:age,1:FUEL12,1:FLT,11),DIM=2)     ! Class 4-6
+    TRKSTK(Y2_START:Y2_END,3,1:age,1:FUEL12,1:FLT) = SUM(TRKSTK_19R(Y2_START:Y2_END,8:19,1:age,1:FUEL12,1:FLT,11),DIM=2)    ! Class 7&8
+!	No region, no fleet type
+    TRKSTK_19(Y2_START:Y2_END,1:CAFE19,1:age,1:FUEL12) = SUM(TRKSTK_19R(Y2_START:Y2_END,1:CAFE19,1:age,1:FUEL12,1:FLT,11),DIM=5)
 	
-	fuel_shr_regn(:,:,:,:,:) = 0.0
 !...Fill historical new vehicle sales fuel shares, incl. estimate of share by vmt bin (assumes same powertrain dist across all VMT bins for hist)
+	fuel_shr_regn(:,:,:,:,:) = 0.0
 	DO y2 = 2012-1989,bsyr_stk-1989
 	  DO iregn = 1, MNUMCR-2
         DO icafe19 = 1, CAFE19
           DO iflt = 1, flt
+              sum_trkstk_allfuel = sum(TRKSTK_19R(y2,icafe19,1,:,iflt,iregn))
               DO ifuel = 1, FUEL12
-    	        fuel_shr_regn(y2,icafe19,ifuel,iflt,iregn) = TRKSTK_19R(y2,icafe19,1,ifuel,iflt,iregn)/sum(TRKSTK_19R(y2,icafe19,1,:,iflt,iregn))
+    	        fuel_shr_regn(y2,icafe19,ifuel,iflt,iregn) = TRKSTK_19R(y2,icafe19,1,ifuel,iflt,iregn)/sum_trkstk_allfuel
     	        DO ivmt = 1, nvmt
 				  fuel_shr_ivmt(y2,ivmt,iflt,icafe19,ifuel,iregn) = fuel_shr_regn(y2,icafe19,ifuel,iflt,iregn) * veh_shr(ivmt,iflt,icafe19)
 			    ENDDO
@@ -5114,53 +5230,48 @@ end module F_
 	  ENDDO
     ENDDO  
 
-!...Populate 1995-2011 stocks (not regional). Have to DO this after filling 2012+ above (TRKSTK_19R) since 2012 shares are used for voc/non-voc split in pre-2012.
-    DO y2 = 6, 2011-1989
-      DO isc=1,sc4
-        DO iage=1,age
-          DO ifuel=1,6
-!           class 3
-            IF(isc.eq.1)then
-              TRKSTK(y2,isc,iage,ifuel,FLT) = CLS3STKHIST(iage,y2,ifuel) * (SUM(FLTSHR_STK(y2,3:4))/2)
-			  TRKSTK(y2,isc,iage,ifuel,NFT) = CLS3STKHIST(iage,y2,ifuel) - TRKSTK(y2,isc,iage,ifuel,FLT)
-!           class 4-6
-            ELSEIF(isc.eq.2)then
-              TRKSTK(y2,isc,iage,ifuel,FLT) = CLS46STKHIST(iage,y2,ifuel) * (SUM(FLTSHR_STK(y2,5:7))/3)
-              TRKSTK(y2,isc,iage,ifuel,NFT) = CLS46STKHIST(iage,y2,ifuel) - TRKSTK(y2,isc,iage,ifuel,FLT)
-!           class 7&8
-            ELSEIF(isc.eq.3)then
-              TRKSTK(y2,isc,iage,ifuel,FLT) = CLS78STKHIST(iage,y2,ifuel) * (SUM(FLTSHR_STK(y2,8:19))/12)
-              TRKSTK(y2,isc,iage,ifuel,NFT) = CLS78STKHIST(iage,y2,ifuel) - TRKSTK(y2,isc,iage,ifuel,FLT)
- 	   	  
-!     		class 2b -- Estimate pre-2012 vocational/non-vocational split using 2012 stock distribution
-            ELSE		! NOTE: CLTSTK uses 1:gasoline, 2:diesel (unlike other freight arrays 1:diesel, 2:gasoline)
-!  	        diesel
-              IF (ifuel.eq.1) then
-      	        CLTSTK(y2,2,iage,1,11) = CLS2bSTKHIST(iage,y2,ifuel) * sum(TRKSTK_19R(2012-1989,1,iage,ifuel,:,1:MNUMCR-2)) / &			! TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,iregn)
-      	      														   sum(TRKSTK_19R(2012-1989,1:2,iage,ifuel,:,1:MNUMCR-2))
-      	        CLTSTK(y2,2,iage,2,11) = CLS2bSTKHIST(iage,y2,ifuel) - CLTSTK(y2,2,iage,1,11)
-!      	      gasoline																					  
-      	      ELSEIF (ifuel.eq.2) then
-      	        CLTSTK(y2,1,iage,1,11) = CLS2bSTKHIST(iage,y2,ifuel) * sum(TRKSTK_19R(2012-1989,1,iage,ifuel,:,1:MNUMCR-2)) / &			! TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,iregn)
-      	      														   sum(TRKSTK_19R(2012-1989,1:2,iage,ifuel,:,1:MNUMCR-2))
-      	        CLTSTK(y2,1,iage,2,11) = CLS2bSTKHIST(iage,y2,ifuel) - CLTSTK(y2,1,iage,1,11)
-!      	      other fuels -- use sum of non-diesel to estimate shares (in case of zeros for some alt-fuels)
-!      	      all other fuel indices line up between Class 2b and 3-8
-      	      ELSEIF (ifuel.gt.2) then
-      	        CLTSTK(y2,ifuel,iage,1,11) = CLS2bSTKHIST(iage,y2,ifuel) * sum(TRKSTK_19R(2012-1989,1,iage,2:FUEL12,:,1:MNUMCR-2)) / &	! TRKSTK_19R(iyr,icafe19,iage,ifuel,iflt,iregn)
-      	  	    													       sum(TRKSTK_19R(2012-1989,1:2,iage,2:FUEL12,:,1:MNUMCR-2))
-      	        CLTSTK(y2,ifuel,iage,2,11) = CLS2bSTKHIST(iage,y2,ifuel) - CLTSTK(y2,ifuel,iage,1,11)
-              ENDIF
-            ENDIF
-          ENDDO
-        ENDDO
-	    
-!       Populate Class 2b total stock by powertrain
-	    DO ifuel = 1,FUEL12
-          CLTSTKT(ifuel,y2) = sum(CLTSTK(y2,ifuel,1:34,:,11))/ 1000.0
-        ENDDO
-      ENDDO
-	ENDDO
+!...Populate 1995-2011 stocks (not regional). 
+!   Have to Do this after filling 2012+ above (TRKSTK_19R) since 2012 shares are used for voc/non-voc split in pre-2012.    
+    DO m2 =1, NUM_ROWS_OLD
+      g2 = col1_igvwr(m2)
+      f2 = col2_ifuel(m2)
+      a2 = col3_iage(m2)
+      isc = g2-1
+      
+      SELECT CASE (g2)
+!       Class 2b -- CLTSTK uses 1:gasoline, 2:diesel (unlike other freight arrays 1:diesel, 2:gasoline)
+        CASE (1)
+          SELECT CASE (f2)
+            CASE (1)        ! Diesel
+              CLTSTK(6:2011-1989,2,a2,NFT,11) = HDVSTKNATL(m2,1:2012-1995) * sum(TRKSTK_19R(2012-1989,1,a2,f2,NFT,1:MNUMCR-2)) / &
+                                                                           sum(TRKSTK_19R(2012-1989,1:2,a2,f2,1:FLT,1:MNUMCR-2))
+      	      CLTSTK(6:2011-1989,2,a2,FLT,11) = HDVSTKNATL(m2,1:2012-1995) - CLTSTK(6:2011-1989,2,a2,NFT,11)
+            CASE (2)        ! Gasoline
+              CLTSTK(6:2011-1989,1,a2,NFT,11) = HDVSTKNATL(m2,1:2012-1995) * sum(TRKSTK_19R(2012-1989,1,a2,f2,NFT,1:MNUMCR-2)) / &
+      	        													       sum(TRKSTK_19R(2012-1989,1:2,a2,f2,1:FLT,1:MNUMCR-2))
+      	      CLTSTK(6:2011-1989,1,a2,FLT,11) = HDVSTKNATL(m2,1:2012-1995) - CLTSTK(6:2011-1989,1,a2,NFT,11)
+            CASE (3,4,5,6)  ! Others (use sum of non-diesel to estimate shares (in case of zeros for some alt-fuels))
+              CLTSTK(6:2011-1989,f2,a2,NFT,11) = HDVSTKNATL(m2,1:2012-1995) * sum(TRKSTK_19R(2012-1989,1,a2,2:FUEL12,NFT,1:MNUMCR-2)) / &
+      	        													        sum(TRKSTK_19R(2012-1989,1:2,a2,2:FUEL12,1:FLT,1:MNUMCR-2))
+      	      CLTSTK(6:2011-1989,f2,a2,FLT,11) = HDVSTKNATL(m2,1:2012-1995) - CLTSTK(6:2011-1989,f2,a2,NFT,11)          
+          END SELECT
+!       Class 3
+        CASE (2)
+          TRKSTK(6:2011-1989,isc,a2,f2,FLT) = HDVSTKNATL(m2,1:2012-1995) * (SUM(FLTSHR_STK(6:2011-1989,3:4),DIM=2)/2)
+          TRKSTK(6:2011-1989,isc,a2,f2,NFT) = HDVSTKNATL(m2,1:2012-1995) - TRKSTK(6:2011-1989,isc,a2,f2,FLT)
+!       Class 4-6
+        CASE (3)
+          TRKSTK(6:2011-1989,isc,a2,f2,FLT) = HDVSTKNATL(m2,1:2012-1995) * (SUM(FLTSHR_STK(6:2011-1989,5:7),DIM=2)/3)
+          TRKSTK(6:2011-1989,isc,a2,f2,NFT) = HDVSTKNATL(m2,1:2012-1995) - TRKSTK(6:2011-1989,isc,a2,f2,FLT)
+!       Class 7&8
+        CASE (4)
+          TRKSTK(6:2011-1989,isc,a2,f2,FLT) = HDVSTKNATL(m2,1:2012-1995) * (SUM(FLTSHR_STK(6:2011-1989,8:19),DIM=2)/12)
+          TRKSTK(6:2011-1989,isc,a2,f2,NFT) = HDVSTKNATL(m2,1:2012-1995) - TRKSTK(6:2011-1989,isc,a2,f2,FLT)
+      END SELECT
+    ENDDO
+
+!   Populate total Class 2b stocks by fuel and year (collapse vintage and FLT dimensions; transpose)
+    CLTSTKT(1:6,6:2011-1989) = TRANSPOSE(sum(sum(CLTSTK(6:2011-1989,1:6,1:AGE,1:FLT,11),DIM=3),DIM=3))/ 1000.0
 	
   RETURN
   END SUBROUTINE CFREADSTOCK
@@ -5168,35 +5279,34 @@ end module F_
 !=============================================================================================================
   SUBROUTINE TFRTRPT
   USE F_
+  USE MEAN_FUNCS
   IMPLICIT NONE
 
 !...Local variable dictionary
     INTEGER IFNS
     REAL :: TEMP_V, TEMP
-    REAL VMT_TMP,TRTMP
+    REAL :: VMT_TMP
     REAL :: FUEL_VR(FUEL12,MNUMCR)
 
 !...Benchmark VMT and FUEL for reporting using benchmark's determined in tran.f
-    FUEL_VR(1,1:RGN) = BENDS(1:RGN,iyr)                                                                 ! Diesel
-    FUEL_VR(2,1:RGN) = BENMG(1:RGN,iyr)                                                                 ! Motor Gasoline
-    FUEL_VR(3,1:RGN) = BENLG(1:RGN,iyr)                                                                 ! Propane
-    FUEL_VR(4,1:RGN) = BENNG(1:RGN,iyr)                                                                 ! Natural Gas
-	FUEL_VR(5,1:RGN) = BENET(1:RGN,iyr)*PCTAF(2,1:RGN,iyr) + BENMG(1:RGN,iyr)*(1.0-PCTAF(2,1:RGN,iyr))  ! Ethanol
-	FUEL_VR(6,1:RGN) = BENEL(1:RGN,iyr)                                                                 ! Electric
-	FUEL_VR(7,1:RGN) = BENEL(1:RGN,iyr)*PctEVMT_PHEV_AVG(iyr,1:RGN,1) &									! PHEV Diesel
-					 + BENDS(1:RGN,iyr)*(1 - PctEVMT_PHEV_AVG(iyr,1:RGN,1))
-	FUEL_VR(8,1:RGN) = BENEL(1:RGN,iyr)*PctEVMT_PHEV_AVG(iyr,1:RGN,2) &									! PHEV Gasoline
-					 + BENMG(1:RGN,iyr)*(1 - PctEVMT_PHEV_AVG(iyr,1:RGN,2))
-	FUEL_VR(9,1:RGN) = BENHY(1:RGN,iyr)                                                                 ! Hydrogen
-	FUEL_VR(10,1:RGN)= BENHY(1:RGN,iyr)																	! Hydrogen large batt	
-	FUEL_VR(11,1:RGN)= BENMG(1:RGN,iyr)																	! Gasoline HEV	
-	FUEL_VR(12,1:RGN)= BENHY(1:RGN,iyr)																	! Gasoline HEV	
-
-    DO ifuel=1,FUEL12
-      DO iregn=1,MNUMCR
-        IF(FUEL_VR(ifuel,iregn).eq.0) FUEL_VR(ifuel,iregn)=1.0
-      ENDDO
-    ENDDO
+    FUEL_VR(1,1:MNUMCR) = BENDS(1:MNUMCR,iyr)                                                                 ! Diesel
+    FUEL_VR(2,1:MNUMCR) = BENMG(1:MNUMCR,iyr)                                                                 ! Motor Gasoline
+    FUEL_VR(3,1:MNUMCR) = BENLG(1:MNUMCR,iyr)                                                                 ! Propane
+    FUEL_VR(4,1:MNUMCR) = BENNG(1:MNUMCR,iyr)                                                                 ! Natural Gas
+	FUEL_VR(5,1:MNUMCR) = BENET(1:MNUMCR,iyr)*PCTAF(2,1:MNUMCR,iyr) + BENMG(1:MNUMCR,iyr)*(1.0-PCTAF(2,1:MNUMCR,iyr))  ! Ethanol
+	FUEL_VR(6,1:MNUMCR) = BENEL(1:MNUMCR,iyr)                                                                 ! Electric
+	FUEL_VR(7,1:MNUMCR) = BENEL(1:MNUMCR,iyr)*PctEVMT_PHEV_AVG(iyr,1:MNUMCR,1) &									! PHEV Diesel
+                        + BENDS(1:MNUMCR,iyr)*(1 - PctEVMT_PHEV_AVG(iyr,1:MNUMCR,1))
+	FUEL_VR(8,1:MNUMCR) = BENEL(1:MNUMCR,iyr)*PctEVMT_PHEV_AVG(iyr,1:MNUMCR,2) &									! PHEV Gasoline
+                        + BENMG(1:MNUMCR,iyr)*(1 - PctEVMT_PHEV_AVG(iyr,1:MNUMCR,2))
+	FUEL_VR(9,1:MNUMCR) = BENHY(1:MNUMCR,iyr)                                                                 ! Hydrogen
+	FUEL_VR(10,1:MNUMCR)= BENHY(1:MNUMCR,iyr)																	! Hydrogen large batt	
+	FUEL_VR(11,1:MNUMCR)= BENMG(1:MNUMCR,iyr)																	! Gasoline HEV	
+	FUEL_VR(12,1:MNUMCR)= BENHY(1:MNUMCR,iyr)																	! Gasoline HEV	
+    
+    WHERE (FUEL_VR(1:fuel12,1:mnumcr).eq.0.0)
+      FUEL_VR(1:fuel12,1:mnumcr)=1.0
+    END WHERE
 
     TEMP = 1000000.0
     TEMP_V = TEMP * 1000.0                      ! Scale for vmt
@@ -5234,17 +5344,24 @@ end module F_
       ENDDO
 	  
     ENDDO
-        
-    DO ISC = 1, SC
-      DO IFUEL = 1, FUEL12
-        TFR_TRK_FAS_T(IYR,ISC,IFUEL,FNEW) = SUM(TRKSTK(IYR,ISC,FNEW,IFUEL,:))/TEMP
-        TFR_TRK_FAS_T(IYR,ISC,IFUEL,FSTK) = SUM(TRKSTK(IYR,ISC,:,IFUEL,:))/TEMP
-      ENDDO
-      TFR_TRK_FASF_T(IYR,ISC,FNEW)        = SUM(TRKSTK(IYR,ISC,FNEW,:,:))/TEMP
-      TFR_TRK_FASF_T(IYR,ISC,FSTK)        = SUM(TRKSTK(IYR,ISC,:,:,:))/TEMP
-      TFR_TRK_TR(IYR,FNEW)                = SUM(TRKSTK(IYR,:,FNEW,:,:))/TEMP
-      TFR_TRK_TR(IYR,FSTK)                = SUM(TRKSTK(IYR,:,:,:,:))/TEMP
-    ENDDO
+     
+    TFR_TRK_FAS_T(IYR,1:SC,1:FUEL12,FNEW) = SUM(TRKSTK(IYR,1:SC,FNEW,1:FUEL12,1:FLT),DIM=3)/TEMP
+    TFR_TRK_FAS_T(IYR,1:SC,1:FUEL12,FSTK) = SUM(SUM(TRKSTK(IYR,1:SC,1:AGE,1:FUEL12,1:FLT),DIM=4),DIM=2)/TEMP
+    TFR_TRK_FASF_T(IYR,1:SC,FNEW)         = SUM(SUM(TRKSTK(IYR,1:SC,FNEW,1:FUEL12,1:FLT),DIM=3),DIM=2)/TEMP
+    TFR_TRK_FASF_T(IYR,1:SC,FSTK)         = SUM(SUM(SUM(TRKSTK(IYR,1:SC,1:AGE,1:FUEL12,1:FLT),DIM=4),DIM=3),DIM=2)/TEMP
+    TFR_TRK_TR(IYR,FNEW)                  = SUM(TRKSTK(IYR,1:SC,FNEW,1:FUEL12,1:FLT))/TEMP
+    TFR_TRK_TR(IYR,FSTK)                  = SUM(TRKSTK(IYR,1:SC,1:AGE,1:FUEL12,1:FLT))/TEMP
+
+!...Freight Travel (billion ton miles travelled)	
+    TRK_TMT(:,n) = 0.0
+	if(curcalyr.gt.2012)then	
+      ! Light Truck - class 3
+      TRK_TMT(1,n)=sum(tfr_vmt_fas_t(n,1,1:12,2))*FRT_LOAD_FACT(1)
+      ! Medium Truck - class 4-6
+      TRK_TMT(2,n)=sum(tfr_vmt_fas_t(n,2,1:12,2))*FRT_LOAD_FACT(2)
+      ! Heavy Truck
+      TRK_TMT(3,n)=sum(tfr_vmt_fas_t(n,3,1:12,2))*FRT_LOAD_FACT(3)
+    endif
 
 !...Fill MPG for reporting
     DO ISC = 1,SC
@@ -5252,18 +5369,24 @@ end module F_
 !	    Store new vehicle MPG for fuels and size classes
         TFR_FTMPG(IYR,ISC,IFUEL,FNEW) = HDV_MPG(iyr,ISC,FNEW,IFUEL)		
 !	    Average mpg over vintages
-        TFR_FTMPG(IYR,ISC,IFUEL,FSTK) = harmonic_mean(HDV_MPG(iyr,ISC,1:AGE,IFUEL),VMTFLT_SF_TR(ISC,1:AGE,IFUEL,11),age)
+        TFR_FTMPG(IYR,ISC,IFUEL,FSTK) = HARMONIC_MEAN_1D(HDV_MPG(iyr,ISC,1:AGE,IFUEL),&
+                                                         VMTFLT_SF_TR(ISC,1:AGE,IFUEL,11),&
+                                                         caller_id='TFR_FTMPG')
 	    IF(TFR_FTMPG(IYR,ISC,IFUEL,FSTK).eq.0) TFR_FTMPG(IYR,ISC,IFUEL,FSTK) = TFR_FTMPG(IYR-1,ISC,IFUEL,FSTK)
       ENDDO
 ! 	  Average MPG over fuel for new vehicles and the total stock
       DO IFNS = FNEW, FSTK
-        TFR_FTMPG_S(IYR,ISC,IFNS) =harmonic_mean(TFR_FTMPG(IYR,ISC,1:FUEL12,IFNS),TFR_VMT_FAS_T(IYR,ISC,1:FUEL12,IFNS),FUEL12)
+        TFR_FTMPG_S(IYR,ISC,IFNS) = HARMONIC_MEAN_1D(TFR_FTMPG(IYR,ISC,1:FUEL12,IFNS),&
+                                                     TFR_VMT_FAS_T(IYR,ISC,1:FUEL12,IFNS),&
+                                                     caller_id = 'TFR_FTMPG_S')
       ENDDO	
     ENDDO
 
 !...Average MPG over Size Class
     DO IFNS = FNEW, FSTK
-      TFR_FTMPG_TR(IYR,IFNS)=harmonic_mean(TFR_FTMPG_S(IYR,1:SC,IFNS),TFR_VMT_FASF_T(IYR,1:SC,IFNS),SC)
+      TFR_FTMPG_TR(IYR,IFNS) = HARMONIC_MEAN_1D(TFR_FTMPG_S(IYR,1:SC,IFNS),&
+                                                TFR_VMT_FASF_T(IYR,1:SC,IFNS),&
+                                                caller_id = 'TFR_FTMPG_TR')
     ENDDO        ! IFNS   NEW/STOCK
 
 !...Investment Calculation
@@ -5273,41 +5396,6 @@ end module F_
 
   RETURN
   END SUBROUTINE TFRTRPT
-
-! ==========================================================================================================
-   FUNCTION HARMONIC_MEAN(MPGS,WEIGHTS,NVAL)
-   IMPLICIT NONE
-
-!...Computes harmonic mean, used for averaging fuel economy measured in miles per gallon.  The
-!...calculation essentially takes the reciprocal of MPG, or efficieny,
-!...computes the quantity weighted average, then converts the result back
-!...to a miles-per-gallons by taking the reciprocal
-
-!...INPUTS:
-!...  mpgs   : arragy of mpg values to be averaged
-!...  weights: array of quantity weights
-!...  nval   : number of items in the array
-
-    INTEGER NVAL,I
-    REAL MPGS(NVAL),WEIGHTS(NVAL),TEMPSUM
-    REAL HARMONIC_MEAN ! function return value
-
-    HARMONIC_MEAN=0.
-
-    TEMPSUM=SUM(WEIGHTS)
-    IF(TEMPSUM.NE.0.) THEN
-      DO I=1,NVAL
-        IF(MPGS(I).NE.0.) THEN
-          HARMONIC_MEAN= HARMONIC_MEAN+ WEIGHTS(I)*(1./MPGS(I))
-        ENDIF
-      ENDDO
-      HARMONIC_MEAN=HARMONIC_MEAN/SUM(WEIGHTS)
-      IF(HARMONIC_MEAN.NE.0.) THEN
-        HARMONIC_MEAN=1./HARMONIC_MEAN
-      ENDIF
-    ENDIF
-  RETURN
-  END
 
 ! ==========================================================================================================
 !...Subroutine TSHIP
@@ -5324,7 +5412,6 @@ end module F_
     include 'lfmmout'
     include 'ogsmout'
     include 'ngtdmrep'
-    include 'convfact'
     include 'cdsparms'
     include 'coalout'
 
@@ -5345,82 +5432,61 @@ end module F_
     REAL, PARAMETER ::  IMO2020 = .60      ! IMO2020 compliant fuel is a mix of residual and distillate fuel oils
     REAL, PARAMETER ::  UpgradeCost = .43  ! fixed and variable cost per mmBtu (2000$) to upgrade residual fuel oil to IMO 2020 compliant lsfo
     REAL :: ISFDT(MNUMYR),ISFDT_B(MNUMYR)
-    REAL :: INTS_B
     REAL :: reg_shr(MNUMCR)                ! regional fuel share
     REAL :: FLEETSURV(VTYPE)               ! fleet survival percentage for the current year, by vessel type
     REAL :: MEFFINC(VTYPE)                 ! hold marine engine efficiency improvements for the current year, by vessel type
-    REAL :: ECAFUELCONS(MNUMCR,MNUMYR),FLTPROF(5,MNUMCR,MNUMYR),ECADEMAND
+    REAL :: ECAFUELCONS(MNUMCR,MNUMYR),FLTPROF(5,MNUMCR,MNUMYR)
     REAL :: GEFFECTS(VTYPE,MNUMYR),MARFUEL(VTYPE,MNUMCR,MNUMYR)
-    INTEGER :: IR
     INTEGER :: MFTYPE,MV
     REAL :: DSPFAC,RFPFAC,CNGPFAC,LNGPFAC,LSFOPFAC
     REAL :: ALPHA,W(5),LSUM, LSFO_UPGRADE(MNUMCR,MNUMYR)
     REAL :: AVEMEFF(5),ENPEN(5)            ! average marine engine fuel efficiency and penalties; multiple sources from Leidos marine report
 	REAL :: price_input(5,MNUMCR,MNUMYR)	! fuel prices pre-convergence
     REAL :: temp_prhtr(MNUMCR,MNUMYR)       ! Imputed high-sulfur resid price for regions other than region 9
-
-
+    
+    LOGICAL writeTSHIPprices/.FALSE./    ! Switch to write out fuel prices
+    
     AVEMEFF=(/0.50,0.48,0.28,0.50,0.48/)        ! multiple sources from Leidos marine fuel choice report
     ENPEN=(/0.0,0.02,0.0,0.0,0.0/)                ! penalty for scrubber with residuel fuel oil
     
-!...calculate freight domestic marine freight parameter for latest FAF year
+!...calculate freight domestic marine freight parameter for each region/sector pair
+!   based on last year of FAF data (iFAFyear)
+!   Set equal to zero if industrial output (TSIC) for that sector and region is 0.
     IF(n.eq.iFAFyear) then
-      DO iregn=1,MNUMCR-2
-        DO isic=1,sic
-          IF(TSIC(isic,iregn,iFAFyear).gt.0.) then
-            DSTM_OUTPUT(iregn,isic)=DSHIST_TONMI(n,iregn)*DTM_SHARES(iregn,isic)/TSIC(isic,iregn,iFAFyear)   ! compute static domestic marine freight parameter (ton-miles per $ of industrial output)
-          ELSE
-            DSTM_OUTPUT(iregn,isic)=0.
-          ENDIF
-        ENDDO
-      ENDDO
+      DSTM_OUTPUT(1:mnumcr-2,1:sic) = 0.0
+      WHERE(TRANSPOSE(TSIC(1:sic,1:mnumcr-2,iFAFyear)).gt.0.)
+        DSTM_OUTPUT(1:mnumcr-2,1:sic) = SPREAD(DSHIST_TONMI(n,1:mnumcr-2), DIM=2, NCOPIES = sic) * &
+                                        DTM_SHARES(1:mnumcr-2,1:sic)/TRANSPOSE(TSIC(1:sic,1:mnumcr-2,iFAFyear))
+      END WHERE
     ENDIF
     
 !...calculate freight domestic marine ton-miles
-    DO iregn=1,MNUMCR-2
       IF(n.le.SHIPHISTYR)then
-        STMTT(n,iregn)=DSHIST_TONMI(n,iregn)
+        STMTT(n,1:mnumcr-2)=DSHIST_TONMI(n,1:mnumcr-2)
       ELSE
-        DO isic=1,sic
-          DSADD_TONMI(n,iregn,isic)=TSIC(isic,iregn,n)*(DSTM_OUTPUT(iregn,isic)*(1.-ANN_DECLINE(n)))
-        ENDDO
-		STMTT(n,iregn)=sum(DSADD_TONMI(n,iregn,1:SIC))
+        DSADD_TONMI(n,1:mnumcr-2,1:SIC)=TRANSPOSE(TSIC(1:SIC,1:mnumcr-2,n))*(DSTM_OUTPUT(1:mnumcr-2,1:SIC)*(1.-ANN_DECLINE(n)))
+		STMTT(n,1:mnumcr-2)=sum(DSADD_TONMI(n,1:mnumcr-2,1:SIC),DIM=2)
       ENDIF
-    ENDDO
 
 !...overwrite STMTT(:,:) census division freight domestic marine ton-miles for short-term history (between iFAFyear and SHIPHISTYR)
     IF(n.ge.iFAFyear.and.n.le.SHIPHISTYR) then
-      DO iregn=1,MNUMCR-2
-        DO isic=1,sic
-          DSADD_TONMI(n,iregn,isic)=TSIC(isic,iregn,n)*(DSTM_OUTPUT(iregn,isic)*(1.-ANN_DECLINE(n)))
-        ENDDO
-      ENDDO
-      DO iregn=1,MNUMCR-2
-        IF(sum(DSADD_TONMI(n,1:MNUMCR-2,1:SIC)).gt.0.) then
-          STMTT(n,iregn)=sum(DSHIST_TONMI(n,1:MNUMCR-2))* &
-                          (sum(DSADD_TONMI(n,iregn,1:SIC))/ &
-                          sum(DSADD_TONMI(n,1:MNUMCR-2,1:SIC)))
-        ELSE
-          STMTT(n,iregn)=0.
-        ENDIF
-      ENDDO
+      DSADD_TONMI(n,1:mnumcr-2,1:sic) = TRANSPOSE(TSIC(1:sic,1:mnumcr-2,n))* &
+                                        (DSTM_OUTPUT(1:mnumcr-2,1:sic)*(1.-ANN_DECLINE(n)))
+      STMTT(n,1:MNUMCR-2)=0.
+      IF(sum(DSADD_TONMI(n,1:MNUMCR-2,1:SIC)).gt.0.) then
+          STMTT(n,1:mnumcr-2) = sum(DSHIST_TONMI(n,1:MNUMCR-2))* &
+                                (sum(DSADD_TONMI(n,1:mnumcr-2,1:SIC),DIM=2)/ &
+                                sum(DSADD_TONMI(n,1:MNUMCR-2,1:SIC)))
+      ENDIF
     ENDIF
     STMTT(n,11)=sum(STMTT(n,1:MNUMCR-2))           !...compute a national value from the regional
 
 !...calculate domestic marine energy consumption
-    IF(n.gt.SHIPHISTYR)then
-      IF(IFRTEFF.eq.2) DSEFF(n)=DSEFF(SHIPHISTYR)  !...freezes domestic shipping efficiency at last historic year
-      IF(IFRTEFF.eq.1) DSEFF(n)=HTDSEFF(n)
-    ENDIF
-    DO iregn=1,MNUMCR
-      TQDSHIPT(n,iregn)=STMTT(n,iregn)*DSEFF(n)
-    ENDDO
+    TQDSHIPT(n,1:mnumcr)=STMTT(n,1:mnumcr)*DSEFF(n)
 
 !...calculate fuel use by domestic shipping
-    DO iregn=1,MNUMCR
-      DO MFTYPE=1,4
-        TQDSHIPR(MFTYPE,iregn,n) = TQDSHIPT(n,iregn)*domship_fuel_shr(MFTYPE,n)
-      ENDDO
+    DO MFTYPE=1,4
+      TQDSHIPR(MFTYPE,1:mnumcr,n) = TQDSHIPT(n,1:mnumcr)*domship_fuel_shr(MFTYPE,n)
     ENDDO
 
 !   Calculate total energy consumption
@@ -5428,15 +5494,13 @@ end module F_
     IF (n.le.2020-1989) THEN
       ISFDT_B(N) = (QSRSTR(11,n) - SUM(TQDSHIPR(2,1:MNUMCR-2,n))) + (Q_SHIPBUNKDS(N) - SUM(TQDSHIPR(1,1:MNUMCR-2,n)))
 !   Projection is estimated from growth in total exports (MC_XR) and import (MC_MR)
-!   For 2021-2023, let energy grow 1:1 with trade (INTS_B=0)
+!   For 2021-2023, let energy grow 1:1 with trade
     ELSEIF (n.le.2023-1989) THEN
       ISFDT_B(N) = ISFDT_B(N-1) * (MC_XR(N)+MC_MR(N)) / (MC_XR(N-1)+MC_MR(N-1))
 !   For post-2021, assume continued efficiency improvements (tech, logistics) prevent and shift in value/ton of exports slows energy cons growth compared to trade
     ELSE
       ISFDT_B(N) = ISFDT_B(N-1) * (1 + ((MC_XR(N)+MC_MR(N)) / (MC_XR(N-1)+MC_MR(N-1))- 1.0) * 0.5)
     ENDIF
-
-!    WRITE(21,'(a,2(",",i4),5(",",f9.1))')'ISFDT_B',curcalyr,curitr,ISFDT_B(N),QSRSTR(11,n),SUM(TQDSHIPR(2,1:MNUMCR-2,n)),Q_SHIPBUNKDS(N),SUM(TQDSHIPR(1,1:MNUMCR-2,n))
 
 ! ... calculate international shipping fuel demand occurring in north american emission control areas for fuel sharing purposes
 
@@ -5474,27 +5538,17 @@ end module F_
     geffects(8,n)=mc_xgffbr(n)/mc_xgffbr(23)
     geffects(9,n)=mc_mgkr(n)/mc_mgkr(23)
 
-    IF(curcalyr.eq.2012) then
-      DO iregn=1,MNUMCR-2
-        !IF(curitr.eq.maxitr+1) write(21,'(a,i4,9(1x,f13.2))') '2012 eca baseline ', iregn, (fuelcons(iregn,mv),mv=1,vtype)
-      ENDDO
-    ENDIF
-
     ecafuelcons(:,n)=0.
     IF(curcalyr.ge.2012) then
-      DO iregn=1,MNUMCR-2
+!      DO iregn=1,MNUMCR-2
         DO mv=1,vtype
           fleetsurv(mv)=max(0.,1.-((curcalyr-2012)*fleetto(mv)))
           meffinc(mv)=(1-effinc(mv))**((curcalyr-2012)*.5)
-          ecademand=((fuelcons(iregn,mv)*fleetsurv(mv))+         &
-            (fuelcons(iregn,mv)*(1.-fleetsurv(mv))*meffinc(mv)))* &
-            geffects(mv,n)
-            !IF(curitr.eq.maxitr+1) write(21,'(A,3I4,f12.3)') 'msi, ecademand,', curcalyr, iregn, mv, ecademand
-          ecafuelcons(iregn,n)=ecafuelcons(iregn,n)+ecademand
+          ecafuelcons(1:mnumcr-2,n)=ecafuelcons(1:mnumcr-2,n)+ &
+                                    ((fuelcons(1:mnumcr-2,mv)*fleetsurv(mv))+         &
+                                    (fuelcons(1:mnumcr-2,mv)*(1.-fleetsurv(mv))*meffinc(mv)))* &
+                                    geffects(mv,n)
         ENDDO
-        !IF(curitr.eq.maxitr+1) write(21,'(a,2(1x,i4),9(1x,f6.4))') 'msi,fleetsurv,', curcalyr, iregn, (fleetsurv(mv),mv=1,vtype)
-      ENDDO
-      !IF(curitr.eq.maxitr+1) write(21,'(a,i4,9(",",1x,f12.3))') 'msi,ecafuelcons,',CURCALYR,(ecafuelcons(iregn,n),iregn=1,MNUMCR-2)
     ENDIF
 
 !...Calculate international shipping fuel demand fuel shares occurring in North American Emission Control Areas (ECA)
@@ -5525,7 +5579,6 @@ end module F_
       lsfopfac=INTSHIPLOGIT_FAC(5,1)+(INTSHIPLOGIT_FAC(5,2)-INTSHIPLOGIT_FAC(5,1))/ &
               (1+exp(-.5*(float(curcalyr)-INTSHIPLOGIT_FAC(5,3))))  !
     ENDIF 
-    !IF(curitr.eq.maxitr+1) write(21,'(a,i4,10(",",1x,f13.4))') 'msi,price,',curcalyr,dspfac,(pdstr(iregn,n),iregn=1,MNUMCR-2)
     
     lsfo_upgrade(:,n)=0.0
     IF(curcalyr.gt.2020) then
@@ -5543,7 +5596,6 @@ end module F_
         w(3)=cngpfac*pgftrship(3,iregn,n)/pgftrship(3,iregn,27)                                ! indexed price of cng
         w(4)=lngpfac*(maxval(pgltrship(3,iregn,n-2:n)))/(maxval(pgltrship(3,iregn,26:27)))     ! indexed price of lng
         w(5)=lsfopfac*max(1.,lsfo_upgrade(iregn,n)/pgltrship(3,iregn,n))*(maxval(lsfo_upgrade(iregn,n-2:n)))/(maxval(lsfo_upgrade(iregn,26:27)))    ! indexed price of upgraded low-sulfur fuel oil
-!        IF(curitr.eq.maxitr+1) write(21,'(a,i4,5(",",1x,f13.4))') 'msi,w,',curcalyr,ecafuelcons(iregn,n),(w(mftype),mftype=1,4)
 
 !		Grabbing pre-converged prices for offline Excel marine model checks
 		IF(curitr.eq.maxitr) THEN		! No iterations - grab the raw "first guess" prices
@@ -5564,7 +5616,6 @@ end module F_
             fltprof(mftype,iregn,n)=((w(mftype)**alpha)*fltprof(mftype,iregn,31)*avemeff(mftype))/lsum
           ENDDO
         ENDIF
-!       IF(curitr.eq.maxitr+1) write(21,'(a,i4,5(",",1x,f6.4))') 'msi,fltprof,',curcalyr,(fltprof(mftype,iregn,n),mftype=1,4),lsum
         ! normalize shares
         lsum=0.
         DO mftype=1,4+1
@@ -5574,7 +5625,6 @@ end module F_
           DO mftype=1,4+1
             fltprof(mftype,iregn,n)=fltprof(mftype,iregn,n)/lsum
           ENDDO
-!          IF(curitr.eq.maxitr+1) write(21,'(a,i4,6(",",1x,f6.4))') 'msi,fltprofnorm,',curcalyr,(fltprof(mftype,iregn,n),mftype=1,4+1),lsum
         ENDIF
       ENDDO
     ELSE
@@ -5584,11 +5634,11 @@ end module F_
     ENDIF
 	
 !	write out prices (NOTE: post-model convergence)
-	IF(curitr.eq.maxitr+1.and.n.eq.MNUMYR) THEN
+	IF(curitr.eq.maxitr+1.and.n.eq.MNUMYR.and.writeTSHIPprices) THEN
 	  DO mftype=1,MNUMYR			! Commandeer an index for year
 	    DO iregn=1,MNUMCR-2
-!	      WRITE(21,'(a,i4,",",i3,6(",",1x,f13.4))') 'mdr_prices, ',mftype+1989,iregn,UpgradeCost/mc_jpgdp(11)*mc_jpgdp(1),prltr(iregn,mftype),pdstr(iregn,mftype),prhtr(iregn,mftype), pgltrship(3,iregn,mftype),pgftrship(3,iregn,mftype)
-!	      write(21,'(a,i4,",",i2,5(",",1x,f10.4))') 'MDR_prices,',mftype+1989,iregn,price_input(:,iregn,mftype)
+	      WRITE(21,'(a,i4,",",i3,6(",",1x,f13.4))') 'mdr_prices, ',mftype+1989,iregn,UpgradeCost/mc_jpgdp(11)*mc_jpgdp(1),prltr(iregn,mftype),pdstr(iregn,mftype),prhtr(iregn,mftype), pgltrship(3,iregn,mftype),pgftrship(3,iregn,mftype)
+	      write(21,'(a,i4,",",i2,5(",",1x,f10.4))') 'MDR_prices,',mftype+1989,iregn,price_input(:,iregn,mftype)
 		ENDDO
 	  ENDDO
 	ENDIF
@@ -5596,15 +5646,10 @@ end module F_
 
 !...calculate eca regional (census division) consumption and add to international shipping
     marfuel=0.
-    DO iregn=1,MNUMCR-2
-      DO mftype=1,4+1
-        marfuel(mftype,iregn,n)=ecafuelcons(iregn,n)*fltprof(mftype,iregn,n)*(1+enpen(mftype))*.001
-        !IF(curitr.eq.maxitr+1) write(21,'(a,3(",",1x,i4),1(",",1x,f12.3))') 'msi,tqishipr',curcalyr,mftype,iregn,tqishipr(mftype,iregn,n)
-        !IF(curitr.eq.maxitr+1) write(21,'(a,3(",",1x,i4),1(",",1x,f12.3))') 'msi,marfuel',curcalyr,mftype,iregn,marfuel(mftype,iregn,n)
-        !IF(curitr.eq.maxitr+1) write(21,'(a,3(",",1x,i4),1(",",1x,f12.3))') 'msi,tqishiprmar',curcalyr,mftype,iregn,tqishipr(mftype,iregn,n)
-      ENDDO
-!      IF(curitr.eq.maxitr+1) write(21,'(a,2(",",1x,i4),9(",",1x,f12.3))') 'msi,marfuel',curcalyr,iregn,(marfuel(mftype,iregn,n),mftype=1,5)
+    DO mftype=1,4+1
+      marfuel(mftype,1:mnumcr-2,n)=ecafuelcons(1:mnumcr-2,n)*fltprof(mftype,1:mnumcr-2,n)*(1+enpen(mftype))*.001
     ENDDO
+
     
 ! ... calculate the non-ECA international shipping fuel use split by the 4 fuel types:
 ! ...   1) distillate
@@ -5618,43 +5663,32 @@ end module F_
         isfd(MFTYPE,n) = isfdt_b(n) * intship_fuel_shr(MFTYPE,n)
       ELSE
         intship_fuel_shr(MFTYPE,n)=sum(marfuel(MFTYPE,1:MNUMCR-2,n))/sum(marfuel(:,1:MNUMCR-2,n)) ! overwrites: ECA consumption projects fuel share for int'l marine
-        !IF(curcalyr.ge.2025) intship_fuel_shr(MFTYPE,n)=intshi_fuel_shr(MFTYPE,n-1)
-        !IF(curitr.eq.maxitr+1) write(21,'(a,i4,i4,1(1x,f10.5))') 'msi marfuel share ', curcalyr, mftype, sum(marfuel(MFTYPE,1:MNUMCR-2,n))/sum(marfuel(1:4,1:MNUMCR-2,n))
         isfd(MFTYPE,n) = isfdt_b(n) * intship_fuel_shr(MFTYPE,n)
       ENDIF
     ENDDO
-    
-!    IF(curitr.eq.maxitr+1.and.curcalyr.eq.2050) then
-!      DO mv=6,MNUMYR
-!        write(21,'(a,i2,1x,5(1x,f8.5))') 'msi marfuel share ', mv, intship_fuel_shr(1,mv),intship_fuel_shr(2,mv),intship_fuel_shr(3,mv),intship_fuel_shr(4,mv),intship_fuel_shr(5,mv)
-!      ENDDO
-!    ENDIF
 
 !...calculate regional consumption and adjust residual fuel oil to account for intermediate fuel oil (IFO) mixture
-    DO iregn=1,MNUMCR-2
-      DO MFTYPE=1,4+1
-        reg_shr(iregn) = sedshrrs(iregn,n)
-        IF(MFTYPE.eq.1) reg_shr(iregn) = sedshrds(iregn,n)
-        tqishipr(MFTYPE,iregn,n) = isfd(MFTYPE,n) * reg_shr(iregn)
-        IF(mftype.eq.2) then
-          tqishipr(1,iregn,n)=tqishipr(1,iregn,n)+(tqishipr(mftype,iregn,n)*(1.-ifo))       ! distillate fuel oil amount, ifo mix
-          tqishipr(mftype,iregn,n)=tqishipr(mftype,iregn,n)*ifo                             ! residual fuel oil amount, ifo mix
-        ENDIF
-        IF(mftype.eq.5) then
-          tqishipr(1,iregn,n)=tqishipr(1,iregn,n)+tqishipr(mftype,iregn,n)*(1.-IMO2020)     ! now increase distillate fuel oil amount for blending
-          tqishipr(mftype,iregn,n)=tqishipr(mftype,iregn,n)*IMO2020                         ! now decrease lsfo amount to agree with distillate blending
+    DO MFTYPE=1,4+1
+      reg_shr(1:mnumcr-2) = sedshrrs(1:mnumcr-2,n)
+      IF(MFTYPE.eq.1) reg_shr(1:mnumcr-2) = sedshrds(1:mnumcr-2,n)
+      tqishipr(MFTYPE,1:mnumcr-2,n) = isfd(MFTYPE,n) * reg_shr(1:mnumcr-2)
+      IF(mftype.eq.2) then
+        tqishipr(1,1:mnumcr-2,n)=tqishipr(1,1:mnumcr-2,n)+(tqishipr(mftype,1:mnumcr-2,n)*(1.-ifo))       ! distillate fuel oil amount, ifo mix
+        tqishipr(mftype,1:mnumcr-2,n)=tqishipr(mftype,1:mnumcr-2,n)*ifo                             ! residual fuel oil amount, ifo mix
+      ENDIF
+      IF(mftype.eq.5) then
+        tqishipr(1,1:mnumcr-2,n)=tqishipr(1,1:mnumcr-2,n)+tqishipr(mftype,1:mnumcr-2,n)*(1.-IMO2020)     ! now increase distillate fuel oil amount for blending
+        tqishipr(mftype,1:mnumcr-2,n)=tqishipr(mftype,1:mnumcr-2,n)*IMO2020                         ! now decrease lsfo amount to agree with distillate blending
 
-          tqishipr(1,iregn,n)=tqishipr(1,iregn,n)+(tqishipr(mftype,iregn,n)*(lsfoRisk(n)))  ! distillate fuel oil amount, risk of lsfo availability
-          tqishipr(mftype,iregn,n)=tqishipr(mftype,iregn,n)*(1.-lsfoRisk(n))                ! lsfo amount, 2020 risk of lsfo availability
-          ENDIF
-      ENDDO
+        tqishipr(1,1:mnumcr-2,n)=tqishipr(1,1:mnumcr-2,n)+(tqishipr(mftype,1:mnumcr-2,n)*(lsfoRisk(n)))  ! distillate fuel oil amount, risk of lsfo availability
+        tqishipr(mftype,1:mnumcr-2,n)=tqishipr(mftype,1:mnumcr-2,n)*(1.-lsfoRisk(n))                ! lsfo amount, 2020 risk of lsfo availability
+        ENDIF
     ENDDO
 
     DO mftype=1,4+1
       tqishipr(mftype,11,n)=sum(tqishipr(mftype,1:MNUMCR-2,n))  ! sum to obtain national value, by fuel
       marfuel(mftype,11,n)=sum(marfuel(mftype,1:MNUMCR-2,n))    ! sum to obtain national value, by fuel
     ENDDO
-!    write(21,'(a,3(",",1x,i4),9(",",1x,f12.3))') 'msi,tqishiprmar',curitr,curcalyr,iregn+1,(tqishipr(mftype,11,n),mftype=1,4+1)
 
     RETURN
     END SUBROUTINE TSHIP

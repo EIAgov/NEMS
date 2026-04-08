@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/plntin,v 1.10 2016/08/09 15:31:11 xj2 Exp $
 !
 !     PLNTIN CONTAINS THE UNIT LEVEL DATA FROM A COMBINATION OF THE F860,

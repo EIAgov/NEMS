@@ -1,0 +1,10 @@
+* The timestamps in this namechange file are stored in Coordinated universal time (UTC).
+"nh::nh_FirstHistoricalYear" "nh::FirstHistoricalYear" "2025-04-10 14:00:42"
+"nh::ATRCCSech" "nh::ATRCCSTech" "2025-07-21 12:49:45"
+"nh::FirstBuildYearNE" "nh::FirstBuildYear" "2025-07-21 12:58:03"
+"nh::Copy_CO2OMCostsBySeason" "nh::Copy_CO2OMCostsBySeasonByTech" "2025-07-29 17:37:40"
+"nh::Copy_CO2OMCostsBySeasonByTech" "nh::CO2OMCostsBySeasonByTech" "2025-07-29 17:38:25"
+"nh::Copy_CO2OMCosts" "nh::CO2OMCostsByTech" "2025-07-29 17:49:10"
+"nh::HMMBLK_ELECAP" "nh::HMMBLK_ELEC_CAP" "2025-09-24 18:36:03"
+"nh::LearningReductionStartYear" "nh::LowZTCBasisYear" "2026-01-28 17:39:41"
+"nh::LowZTCBasisYear" "nh::ZTCBasisYear" "2026-02-02 19:28:01"

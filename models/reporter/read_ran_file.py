@@ -19,8 +19,7 @@ Every NEMS run generates an XML report in addition to a RAN file. The XML
 report includes only those tables specified in a input file ???, but additional
 tables can be created after a run via the NEMS utility ftab.
 
-Example NEMS XML file:
-    \\nem1\K\output\aeo2019\ref2019\d102218a\ref2019.1022a.xml
+Example NEMS XML file:\\nem1\K\output\aeo2019\ref2019\d102218a\ref2019.1022a.xml
 
 Column A of the XML report has unique table/row identifiers (uid). This column
 is normally hidden. To unhide column A, see the instructions at 
@@ -38,10 +37,9 @@ How to use this package from a Python console:
 t and x are dictionaries of dictionaries.
 
 t.keys() = 6-character table IDs, same as in XML except:
-    * ‘A’ as 4th character in t.keys() maps to ‘0’ as 4th character in the XML 
-    file (e.g., SUPA00 in t.keys() corresponds to SUP000 in the XML file)
-    * t.keys() includes regional tables (e.g., AUAA01) and other tables that 
-    might not be shown in the XML report
+    * ‘A’ as 4th character in t.keys() maps to ‘0’ as 4th character in the XML file (e.g., SUPA00 in t.keys() corresponds to SUP000 in the XML file)
+    * t.keys() includes regional tables (e.g., AUAA01) and other tables that might not be shown in the XML report
+
 
 t[<table id>].keys() = [‘tablenum’, ‘caption’, ‘caption_sub’, ‘units’]
 
@@ -60,8 +58,8 @@ x[<table id>][<row id>].keys() = ['uid', 'table', 'row', 'tablenum', 'rownum', '
     * x[<table id>][<row id>]['rownum’] = row number
     * x[<table id>][<row id>]['data'] = Pandas data series
     * x[<table id>][<row id>]['text'] = a dictionary with keys:
-        * ['sector','data_type','graph_label','energy_source','graph_units', 
-        'var_units','expression','geography']
+    * ['sector','data_type','graph_label','energy_source','graph_units', 'var_units','expression','geography']
+
 
 Example of x[<table id>][<row id>]['text']:
 

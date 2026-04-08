@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/indepm
 ! INDEPM -- Cement-related CO2 process emissions passed from IDM to EPM
 !           for use in greenhouse gas accounting

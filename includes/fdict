@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/fdict,v 1.18 2017/06/16 19:33:12 pkc Exp $
 ! START OF  /FDICTC/ DECLARATION
 !  DICTIONARY VARIABLES.
@@ -56,7 +57,7 @@
       INTEGER*4 FMaxDim,FMaxDims,FMaxAtt,FAttTyp,FAttVal,FDimIndex,FAttIndex,FMaxStrs
       PARAMETER (FMaxDim=250,FMaxDims=101,FMaxAtt=256,FAttTyp=1,FAttVal=2,FMaxStrs=7500)
       INTEGER*4 FMAXDT,FMAXCM,FMAXCHARVAR,FMAXCHARCOM
-      PARAMETER (FMAXDT=4000,FMAXCM=100,FMAXCHARVAR=16,FMAXCHARCOM=16)
+      PARAMETER (FMAXDT=9000,FMAXCM=100,FMAXCHARVAR=16,FMAXCHARCOM=16)
       CHARACTER FDimNam(FMaxDim)*6,FAttNam(2,FMaxAtt)*6, &
        FAttDescrip(FMaxAtt)*25,FDimDescrip(FMaxDim)*25, &
        FVarDims(5,FMAXDT)*6,FVarDIM(5)*6,FVarAtts(5,FMAXDT)*6, &

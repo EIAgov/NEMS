@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/tranrep,v 1.54 2018/09/12 13:06:54 pkc Exp $
 
 !     COMMON TRANREP
@@ -63,7 +64,7 @@
       REAL FLTFCLDVBTU(2,16,MNUMYR)   		! 54 Fleet Car/Trk Consumption
       REAL FLTECHVMTRPT(2,16,MNUMYR)  		! 55 Fleet Car/Trk VMT
       REAL DEGRPT(2,MNUMYR)          		! 56 Degredation Factor
-      REAL TREFFFLT(4,MNUMYR)        		! 57 Fleet Vehicle Efficiency
+      REAL TREFFFLT(4,MNUMYR)        		! 57 Fleet Vehicle Efficiency {1: car sales, 2: lt sales, 3: car stock, 4: lt stock}
       REAL TOT_EMIS(MNUMYR,3,12) 			! 58 Emissions by pol by nems vt (MMtons)
       REAL LEGALTSAL(3,MNUMCR,MNUMYR) 		! 59 Legislative alt. veh sales
       REAL TRFTMPG(MNUMYR)            		! 60 Freight MPG
@@ -150,10 +151,13 @@
 																							  !4:School bus, 5:Transit bus, 6:Intercity bus,
 																							  !7:CLT,8:freight truck fleet, 9:freight truck non-fleet,
 																							  !10:pass rail}
-	  REAL LI_ION_COST(16,1990:1989+MNUMYR)                             ! Lithium-ion battery cost ($/kWhr) by vehicle type
-      REAL COST_BATTKWH_TRK(5,MNUMYR)                                   ! Li-ion battery cost ($/kWhr) for freight trucks {1: Class 2b-3, 2:Class 4-5, 3: Class 6-7V, 4: Class 7/8 Tractor, 5: HEV}
-	  REAL AdjMpg(3,MNUMYR)             !...5-cycle tested (EPA "adjusted") fuel economy
-      
+	  REAL LI_ION_COST(16,1990:1989+MNUMYR) ! Lithium-ion battery cost ($/kWhr) by vehicle type
+      REAL COST_BATTKWH_TRK(5,MNUMYR)       ! Li-ion battery cost ($/kWhr) for freight trucks {1: Class 2b-3, 2:Class 4-5, 3: Class 6-7V, 4: Class 7/8 Tractor, 5: HEV}
+	  REAL AdjMpg(3,MNUMYR)                 ! 5-cycle tested (EPA "adjusted") fuel economy
+      REAL global_batt_prod(6,2,mnumyr)     ! cumulative global battery demand 
+                                            !   Dim 1: {1: LDV, 2: Other transportation, 3: ESS, 4: Res bldgs, 5: Com bldgs, 6: Other}
+                                            !   Dim 2: {1: US, 2: Non-US}
+                                            !   Note: All global consumer electronics battery demand is in sector 6, Non-US (US is empty)
       
       COMMON/TRANREP/ TRQHWY,TRQNHWY,TRQENUSE,TRQFTRK, &                ! Row 1
          TRQRRF,TRQDOMS,TRQINTS,TRQAIRT,TRQMIL,TRQBUS, &                ! Row 2
@@ -180,7 +184,8 @@
          QAGTR, QLUTR, XQAGTR, XQLUTR, FULL_PRC_CAR, FULL_PRC_TRK, FULL_PRC_VEH, &
          FCLOGIT0, FCLOGIT1, FCLOGIT2, FCLOGIT3, FCLOGIT4, CLTFUELBTU, &
          PAS_RPM, TRK_TMT, LDV_MPG, TTHCONS, TRQFTRK_NEW, TRQHWY_NEW, &
-         TECHMPG, STKMPG, ZEV_CREDIT_BANK, LDVMPG, LDVPRI, LDVRNG, TRQ_ELEC,LI_ION_COST,COST_BATTKWH_TRK,AdjMpg
+         TECHMPG, STKMPG, ZEV_CREDIT_BANK, LDVMPG, LDVPRI, LDVRNG, &
+         TRQ_ELEC,LI_ION_COST,COST_BATTKWH_TRK,AdjMpg,global_batt_prod
 
 ! EQUIVALENCE FOR FILER USED FOR DATA STORAGE
       REAL EQ_TRREP(MNUMYR*(  &                                             ! get size from dictionary output in nohup.out and divide by 4, or calculate
@@ -230,7 +235,7 @@
           (MNUMCR-2) * MAXZEV * MNUMYR + &                                  ! ZEV_CREDIT_BANK
           3 * 2 * 16 * (TNUMCLASS-1) * MNUMYR + &                           ! LDVMPG, LDVPRI, LDVRNG
           10*MNUMCR*MNUMYR + 16*MNUMYR + 5*MNUMYR + &                       ! TRQ_ELEC, LI_ION_COST, cost_battkWh_trk
-		  3*MNUMYR + &                                                      ! ADJMPG
+		  3*MNUMYR + 6*2*MNUMYR + &                                         ! ADJMPG, global_batt_prod
           0)                                                                ! the end
            
       EQUIVALENCE (EQ_TRREP,TRQHWY)

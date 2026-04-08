@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/ngtdmout,v 1.10 2017/06/16 19:28:09 pkc Exp $
 !
 !=============================
@@ -55,6 +56,10 @@
       REAL PNGELGR(NNGEM,MNUMYR)
 !  Hydrogen Variables
       REAL SPNGIN(MNUMCR,MNUMYR,4)       ! Natural Gas delivered price to industrial sector by HMM season
+	  
+!	Capacity variables for MAM
+	  REAL*4 PIPECAP(6, MNUMYR) ! QUNTY	BCF/YR	Natural gas pipeline capacity by Cost Region
+	  REAL*4 LNGCAP(MNUMYR)	!QUNTY	BCF/YR	LNG Capacity 
 !
       COMMON /NGTDMOUT/ OGPRDNGON, OGPRDNGOF, &
          PRNG_PADD, PGFELGR, PGIELGR, PGCELGR, CLSYNGWP, &
@@ -63,13 +68,14 @@
          SPGFELGR, SPGIELGR, PBAJA, QBAJA, &
          QGFTRRAIL, QGLTRRAIL, PGFTRRAIL, PGLTRRAIL, &
          QGFTRSHIP, QGLTRSHIP, PGFTRSHIP, PGLTRSHIP, &
-         SPNGELGR, PNGELGR, SPNGIN
+         SPNGELGR, PNGELGR, SPNGIN, PIPECAP, LNGCAP
 !   Equivalence for FILER used for data storage
-      REAL EQ_NTOUT(MNUMYR*(7*NNGEM+2*17+3+MNUMPR+4*MNUMCR+4*MNUMCR+2) + &
+      REAL EQ_NTOUT(MNUMYR*(7*NNGEM+2*17+3+MNUMPR+4*MNUMCR+4*MNUMCR+3) + &
                    5*4*MNUMCR*MNUMYR + &           ! 4 rail variables and SPNGIN
                    4*3*MNUMCR*MNUMYR + &           ! 4 ship variables
                      NNGEM*MNUMYR*3  + &           ! SPNGELGR
                      NNGEM*MNUMYR    + &           ! PNGELGR
+					 6*MNUMYR        + &           ! PIPECAP
                    0)             ! the end
       EQUIVALENCE (EQ_NTOUT,OGPRDNGON)
 !   Equivalence for MAIN to test convergence on natural gas to util

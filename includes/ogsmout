@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: M:/default/includes/RCS/ogsmout,v 1.37 2021/05/18 14:12:49 avk Exp $
 !  OIL & GAS SUPPLY MODULE (OGSM) COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR
@@ -165,6 +166,13 @@
 ! CO2 emitted by natural gas processing plants (metric tons CO2)
       REAL NGPCO2EM(MNUMCR,MNUMYR)
 
+! Variables to MAM for jobs/investment
+      REAL CAPEX_PER_WELL(MNUMYR)     ! Capital Cost per well - Onshore
+      REAL DRILL_COST(MNUMYR)         ! Exploratory Drilling Cost - Offshore
+      REAL PLAT_COST(MNUMYR)          ! Platform Cost - Offshore 
+      REAL FLOW_COST(MNUMYR)          ! Flowline Cost - Offshore
+      REAL DEV_COST(MNUMYR)           ! Dev Drill Cost - Offshore
+
 !   OGSM output common blocks
       COMMON/OGSMOUT/OGRESNGON,OGPRRNGON,OGRADNGON,OGRESNGOF, &
        OGPRRNGOF,OGRADNGOF,OGPRDAD, &
@@ -192,7 +200,8 @@
        OGCRUDEREF,OGOGWELLS,OGENAGPRD,OGRNAGPRD,OGOILPRD,OGADGPRD,OGCRUDEPRD, &
        OGNGPLET,OGNGPLPR,OGNGPLBU,OGNGPLIS,OGNGPLPP, &
        NS_START,PLAY_MAP, &
-       NGPCO2EM
+       NGPCO2EM, &
+	   CAPEX_PER_WELL, DRILL_COST, PLAT_COST, FLOW_COST, DEV_COST
 
 
 
@@ -242,6 +251,7 @@
         8*200                     + & !  NS_START
         200                       + & !  PLAY_MAP
         MNUMCR*MNUMYR             + & !  NGPCO2EM
+		5 * MNUMYR                + & !  CAPEX_PER_WELL, DRILL_COST, PLAT_COST, FLOW_COST, DEV_COST
         0)                            ! FIN
 
       EQUIVALENCE (EQ_OGOUT,OGRESNGON)

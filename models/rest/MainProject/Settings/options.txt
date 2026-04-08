@@ -1,0 +1,2 @@
+﻿* AIMMS
+disable_new_mathprog_generator 0

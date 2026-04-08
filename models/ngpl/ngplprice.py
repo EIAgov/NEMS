@@ -12,11 +12,12 @@ Hydrocarbon Gas Liquids" by Janice Lent, Peter Gross, and Giovanni Petris
 Parameter assignments in the original R code were maintained in most
 instances so that interested readers can refer to the original R code
 descriptions found in the monograph:
-    "Dynamic Linear Models with R"
-    by Giovanni Petris, Sonia Petrone, and Patrizia Campagnoli
-    Submitted 2007 to Springer and published June 2009
-    on pages 31-84 of the Journal of Applied Statistics
-     10.1007/b135794_2. 
+
+"Dynamic Linear Models with R"
+by Giovanni Petris, Sonia Petrone, and Patrizia Campagnoli
+Submitted 2007 to Springer and published June 2009
+on pages 31-84 of the Journal of Applied Statistics
+10.1007/b135794_2. 
 
 The concept is that annual propane and ethane prices may be 
 forecast in future years from forecasts of Brent prices, 
@@ -24,58 +25,57 @@ Henry Hub prices, organics demand, and propane production
 quantities based on a dynamic linear model that determines linear
 coefficients based on the dependencies in past years.
 
-Selections from Petris et al. (2009) to guide parameter conventions where
-t indicates a time-based subscript:
-    'The observable process (Yt) depends on the latent state 
-    pro￾cess (θt), which has a simpler, Markovian dynamics, and we can reasonably
-    assume that the observation Yt only depends on the state of the system at
-    the time the measurement is taken, θt.'
+Selections from Petris et al. (2009) to guide parameter conventions where \
+t indicates a time-based subscript::
+        
+        'The observable process (Yt) depends on the latent state 
+        pro￾cess (θt), which has a simpler, Markovian dynamics, and we can reasonably
+        assume that the observation Yt only depends on the state of the system at
+        the time the measurement is taken, θt.'
+        
+        'Dynamic linear models are specified by means of two equations
+            Yt = Ftθt + vt, vt ∼ Nm(0, Vt),              (2.4)
+            θt = Gtθt−1 + wt, wt ∼ Np(0, Wt),
+        where Gt and Ft are known matrices and the (vt) and (wt) are two independent
+        white noise sequences (i.e., they are independent, both between them and
+        within each of them), with mean zero and known covariance matrices Vt and
+        Wt respectively.'
+        
+        'Furthermore, it is assumed that θ0 has a Gaussian distribution,
+            θ0 ∼ Np(m0, C0),                            (2.5)
+        for some non-random vector m0 and matrix C0, and it is independent on
+        (vt) and (wt).'
+        
+        'The required components of a dlm object are m0, C0, FF, V, GG, W, 
+        which correspond to the vector/matrices m0, C0, Ft, Vt, Gt, Wt 
+        in (2.5) and (2.4), assuming that Ft, Vt, Gt, Wt do not vary with t.'
 
-    'Dynamic linear models are specified by means of two equations
-        Yt = Ftθt + vt, vt ∼ Nm(0, Vt),              (2.4)
-        θt = Gtθt−1 + wt, wt ∼ Np(0, Wt),
-    where Gt and Ft are known matrices and the (vt) and (wt) are two independent
-    white noise sequences (i.e., they are independent, both between them and
-    within each of them), with mean zero and known covariance matrices Vt and
-    Wt respectively.'
-    
-    'Furthermore, it is assumed that θ0 has a Gaussian distribution,
-        θ0 ∼ Np(m0, C0),                            (2.5)
-    for some non-random vector m0 and matrix C0, and it is independent on
-    (vt) and (wt).'
-
-    'The required components of a dlm object are m0, C0, FF, V, GG, W, 
-    which correspond to the vector/matrices m0, C0, Ft, Vt, Gt, Wt 
-    in (2.5) and (2.4), assuming that Ft, Vt, Gt, Wt do not vary with t.'
 
 This code is organized within a main definition that relies on eleven 
 definitions/functions:
-    setFG
-    setF
-    setup_random_walk_dlm
-    read_input_data
-    setup_expert_based_dlms
-    compute_forecast_weights
-    create_pdf_plots
-    create_propane_consumption_trend
-    prep_propane_model
-    fit_new_propane_model
-    pickle_and_save_results
+* setFG
+* setF
+* setup_random_walk_dlm
+* read_input_data
+* setup_expert_based_dlms
+* compute_forecast_weights
+* create_pdf_plots
+* create_propane_consumption_trend
+* prep_propane_model
+* fit_new_propane_model
+* pickle_and_save_results
+
 In addition, a class package named dlm.py is called.
 
-The model expects a single argument, the Run Name, to identify the
-file to be processed.
+The model expects a single argument, the Run Name, to identify the file to be processed.
 
 The model operates from two inputs:
     NGLPriceInputParameters.csv:
         -- directories and file name extensions
         -- years describing historical and future events
-        -- parameters chosen by Petris and Lent for running R code 
-            to describe expected behavior
+        -- parameters chosen by Petris and Lent for running R code to describe expected behavior
     Input data from NEMS:
-        Single csv file with rows beginning in historic years and extending through the 
-        model forecast period containing the following NEMS parameters
-        in this particular order (* indicates columns used in this model):
+        Single csv file with rows beginning in historic years and extending through the model forecast period containing the following NEMS parameters in this particular order (* indicates columns used in this model):
             A. * Year
             B. total NGPL production (Mbbl/d)
             C. ethane annual NGPL production (Mbbl/d)
@@ -118,15 +118,15 @@ the time varying components of the observation and system
 matrices, as discussed on page 45 of Petris et al. (2009).'''
 def setFG(mod):
     """
-    Expand the X matrix in the dlm object into separate FF and GG matrices,
+    Expand the X matrix in the dlm object into separate FF and GG matrices,\
     one for each time period, as specified by JFF and JGG matrices.
 
     Arguments:
     mod: a dlm object with time-varying observation and system matrices.
 
     Returns:
-    mod: the same input object with additional components 'FFa' and 'GGa'
-      containing sequences of observation and system matrices built 
+    mod: the same input object with additional components 'FFa' and 'GGa'\
+      containing sequences of observation and system matrices built \
       from the 'X' component.
     
     Create a local copy of the dlm object"""
@@ -207,12 +207,12 @@ def setF(mod):
     representing the time index.
 
     Arguments:
-    mod (dlm object): An object of class 'dlm' that needs to be enhanced 
+    mod (dlm object): An object of class 'dlm' that needs to be enhanced \
       with the time-varying observation matrix.
 
     Returns:
-    dlm object: The same object as the input, but enhanced with an 
-      additional 'FFa' component, which includes
+    dlm object: The same object as the input, but enhanced with an \
+      additional 'FFa' component, which includes \
       the sequence of observation matrices as 3-dimensional arrays.
     """
     mod = copy.deepcopy(mod)
@@ -394,9 +394,7 @@ def read_input_data(Param, RunName):
     RunName (str): A string representing the name of the run, used in forming the file name.
 
     Returns:
-    tuple of pandas.DataFrame: A tuple containing two DataFrames.
-        The first DataFrame (`dat`) contains the full dataset with 17 columns,
-        and the second DataFrame (`dat_1`) contains a subset with just 15 columns.
+    tuple of pandas.DataFrame: A tuple containing two DataFrames.The first DataFrame (`dat`) contains the full dataset with 17 columns, and the second DataFrame (`dat_1`) contains a subset with just 15 columns.
     """
     directory = str(Param.loc['Directory', 'Value'])
     input_name_extension = str(Param.loc['InputNameExtension', 'Value'])
@@ -623,15 +621,15 @@ def create_pdf_plots(RunName, MovingAvgLength, delprop1, delprop2, delprop3, Efr
     PropaneSeries3 = np.concatenate([lasthistory['Propane'].values, NowComp3[:, 1]])
     PropaneSeries4 = np.concatenate([lasthistory['Propane'].values, NowComp4[:, 1]])
 
-    ethaneComp1_ts = pd.Series(EthaneSeries1, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries1), freq='AS'))
-    ethaneComp2_ts = pd.Series(EthaneSeries2, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries2), freq='AS'))
-    ethaneComp3_ts = pd.Series(EthaneSeries3, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries3), freq='AS'))
-    ethaneComp4_ts = pd.Series(EthaneSeries4, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries4), freq='AS'))
+    ethaneComp1_ts = pd.Series(EthaneSeries1, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries1), freq='YS'))
+    ethaneComp2_ts = pd.Series(EthaneSeries2, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries2), freq='YS'))
+    ethaneComp3_ts = pd.Series(EthaneSeries3, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries3), freq='YS'))
+    ethaneComp4_ts = pd.Series(EthaneSeries4, index=pd.date_range(start=str(LastHistoricalYear), periods=len(EthaneSeries4), freq='YS'))
 
-    propaneComp1_ts = pd.Series(PropaneSeries1, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries1), freq='AS'))
-    propaneComp2_ts = pd.Series(PropaneSeries2, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries2), freq='AS'))
-    propaneComp3_ts = pd.Series(PropaneSeries3, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries3), freq='AS'))
-    propaneComp4_ts = pd.Series(PropaneSeries4, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries4), freq='AS'))
+    propaneComp1_ts = pd.Series(PropaneSeries1, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries1), freq='YS'))
+    propaneComp2_ts = pd.Series(PropaneSeries2, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries2), freq='YS'))
+    propaneComp3_ts = pd.Series(PropaneSeries3, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries3), freq='YS'))
+    propaneComp4_ts = pd.Series(PropaneSeries4, index=pd.date_range(start=str(LastHistoricalYear), periods=len(PropaneSeries4), freq='YS'))
 
     pdf_filename = f"{RunName}_{MovingAvgLength}_d_{delprop1}_{delprop2}_{delprop3}_e_{Efrac}2_Python.pdf"
 
@@ -720,14 +718,11 @@ def create_propane_consumption_trend(dat, NoExcessEthaneYear, StartYear):
 
     Arguments:
     dat (DataFrame): The complete dataset containing various yearly data points.
-    NoExcessEthaneYear (int): The year after which excess ethane is no longer available, 
-                              used to filter the dataset.
+    NoExcessEthaneYear (int): The year after which excess ethane is no longer available,used to filter the dataset.
     StartYear (int): The starting year for the analysis, used to further filter the dataset.
 
     Returns:
-    LinearRegression Model: A linear regression model object representing the trend in propane 
-                            consumption over the specified years. This model can be used to 
-                            predict future trends based on historical data.
+    LinearRegression Model: A linear regression model object representing the trend in propane consumption over the specified years. This model can be used to predict future trends based on historical data.
     """
 
     ''' Call the data from Year (A), Ethane Consumption (P), and 
@@ -827,9 +822,9 @@ def fit_new_propane_model(dat, dat_1, Param, LastHistoricalYear, PFloor, FirstMo
 
     Returns:
     Tuple: Contains three elements - 
-           1. NewPropaneForecast_ts (Series): A time series of the new propane forecast.
-           2. NewPropaneForecast_1_ts (Series): Propane price forecast from linear regression of covariates.
-           3. Brent_ts (Series): Brent oil prices corresponding to the propane forecasts.
+    1. NewPropaneForecast_ts (Series): A time series of the new propane forecast.
+    2. NewPropaneForecast_1_ts (Series): Propane price forecast from linear regression of covariates.
+    3. Brent_ts (Series): Brent oil prices corresponding to the propane forecasts.
     """
 
     ''' Rename specific columns and filter the data to develop a training set.'''
@@ -845,7 +840,7 @@ def fit_new_propane_model(dat, dat_1, Param, LastHistoricalYear, PFloor, FirstMo
 
     ''' Create a time series for plotting
     Generate a date range starting from (FirstModelYear - 1) '''
-    date_range = pd.date_range(start=str(FirstModelYear - 1), periods=len(NewPropForecast_0), freq='AS')
+    date_range = pd.date_range(start=str(FirstModelYear - 1), periods=len(NewPropForecast_0), freq='YS')
     NewPropaneForecast_1_ts = pd.Series( NewPropForecast_0.values, index=date_range )
 
     ''' Next train the model with the price variables in log scale,
@@ -879,14 +874,14 @@ def fit_new_propane_model(dat, dat_1, Param, LastHistoricalYear, PFloor, FirstMo
     ''' Add PConstant to the PropProject column.'''
     projonly['PropProject'] = projonly['PropProject'].copy() + PConstant
     date_range_propane = pd.date_range(start=str(FirstModelYear), 
-                                       periods=len(projonly), freq='AS')
+                                       periods=len(projonly), freq='YS')
     NewPropaneForecast_ts = pd.Series(projonly['PropProject'].values, 
                                       index=date_range_propane)
     NewBrentForecast_0 = pd.concat([lasthistory['Brent2'][1:], 
                                     projonly_1['Brent']]) 
     ''' Create a time series for Brent prices.'''
     date_range_brent = pd.date_range(start=str(FirstModelYear - 1), 
-                                     periods=len(NewBrentForecast_0), freq='AS')
+                                     periods=len(NewBrentForecast_0), freq='YS')
     Brent_ts = pd.Series(NewBrentForecast_0.values, index=date_range_brent)
 
     return  NewPropaneForecast_ts, NewPropaneForecast_1_ts, Brent_ts
@@ -1103,10 +1098,10 @@ def main(cycle_number):
     ''' When EthaneProject is valid, create the time series.'''
     ethaneForecast_ts = pd.Series( EthaneProject, \
         index=pd.date_range(start=str(LastHistoricalYear), \
-                            periods=len(PropaneProject), freq='AS'))
+                            periods=len(PropaneProject), freq='YS'))
     propaneForecast_ts = pd.Series( PropaneProject, \
         index=pd.date_range(start=str(LastHistoricalYear), \
-                            periods=len(PropaneProject), freq='AS'))
+                            periods=len(PropaneProject), freq='YS'))
 
     ''' Fit and generate new propane model forecasts and time series '''
     NewPropaneForecast_ts, NewPropaneForecast_1_ts, Brent_ts = \

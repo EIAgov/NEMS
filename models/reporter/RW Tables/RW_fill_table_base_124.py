@@ -54,10 +54,6 @@ def fill_table_base_124(dfd, table_spec, table_id):
     #T124(3,IY,IS)=QLGRS(11,IY)
     z[3] = dfd['QLGRS'].loc[MNUMCR]*TRIL_TO_QUAD
  
-    #     Kerosene                                                  
-    #T124(2,IY,IS)=QKSRS(11,IY)
-    z[2] = dfd['QKSRS'].loc[MNUMCR]*TRIL_TO_QUAD
- 
     #     Distillate Fuel Oil                                       
     #T124(1,IY,IS)=QDSRS(11,IY)
     z[1] = dfd['QDSRS'].loc[MNUMCR]*TRIL_TO_QUAD
@@ -69,10 +65,6 @@ def fill_table_base_124(dfd, table_spec, table_id):
     #     Natural Gas                                               
     #T124(5,IY,IS)=QNGRS(11,IY)
     z[5] = dfd['QNGRS'].loc[MNUMCR]*TRIL_TO_QUAD
- 
-    #     Coal                                                      
-    #T124(6,IY,IS)=QCLRS(11,IY)
-    z[6] = dfd['QCLRS'].loc[MNUMCR]*TRIL_TO_QUAD
  
     #     Renewable Energy 1/                                       
     #T124(7,IY,IS)=QBMRS(11,IY)
@@ -111,8 +103,8 @@ def fill_table_base_124(dfd, table_spec, table_id):
     #   Nonmarketed Renewables Consumption                          
 
     #   (quadrillion Btu)                                           
-    #T124(13,IY,IS)=(RSH2OCON(IY,5)+RSHTRCON(IY,7)+RSCOOLCN(IY,2))/1000000000.+QPVRS(11,IY)+CGRESQ(11,IY,11)/1000.
-    z[13] = (dfd['RSH2OCON'].loc[5] + dfd['RSHTRCON'].loc[7] + dfd['RSCOOLCN'].loc[2] ) / 1000000000. \
+    #T124(13,IY,IS)=RSH2OCON(IY,5)/1000000000.+QPVRS(11,IY)+CGRESQ(11,IY,11)/1000.
+    z[13] = dfd['RSH2OCON'].loc[5] / 1000000000. \
              + (dfd['QPVRS'].loc[MNUMCR] + dfd['CGRESQ'].loc[MNUMCR].loc[11]) *TRIL_TO_QUAD
  
     #                                                               

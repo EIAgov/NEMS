@@ -1,58 +1,74 @@
 """PyScedesAll
 Created on April 4 2023
 @author: jmw
+updated on May 21 2025: ads
 
-PyScedesAll is a Python function for parsing the keys.sed file into a user class that can be passed between Python
+PyScedesAll is a Python function for parsing the scedes.all file into a user class that can be passed between Python
 programs for use in NEMS. This code sets a dictionary of scedes keys in the user class.
 """
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
 
 import os
 import sys
+import csv
+import numpy as np
 
 class User:
     def __init__(self, scedes_dict):
         self.scedes = scedes_dict
 
 
-def find_keys_sed():
-    current_dir = os.getcwd()
-    if current_dir.endswith("PyFiler"):
-        keys_path = os.path.abspath(os.path.join(current_dir, os.pardir, "keys.sed"))
-    elif "p1" in os.listdir(current_dir):
-        keys_path = os.path.abspath(os.path.join(current_dir, "p1", "keys.sed"))
-    elif os.path.basename(current_dir) in ["p1", "p2", "p3"]:
-        keys_path = os.path.abspath(os.path.join(current_dir, "keys.sed"))
+def find_scedes(scedes_name):
+    """
+    Locates the absolute path to a SCEDES file in a predefined directory.
+
+    Constructs a path to the SCEDES file based on `scedes_name` and a relative
+    path structure (two levels above the current script, under the 'scedes' folder).
+
+    Args:
+        scedes_name (str): The name of the SCEDES file or directory.
+
+    Returns:
+        str: The absolute path to the SCEDES file if found.
+
+    Raises:
+        SystemExit: If the SCEDES file is not found, the program exits with an error message.
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Construct the relative path
+    relative_path = f'..\\..\\scedes\\{scedes_name}'
+
+    # Construct the absolute path
+    absolute_scedes_path = os.path.join(current_dir, relative_path)
+
+    if os.path.exists(absolute_scedes_path):
+        return absolute_scedes_path
     else:
-        keys_path = os.path.abspath("keys.sed")
+        print(f"Oh no! I cannot find {scedes_name}!")
+        sys.exit("Fatal Error- No scedes file found. Please check scedes path")
 
-    if os.path.exists(keys_path):
-        return keys_path
-    else:
-        print("Oh no! I cannot find keys.sed!")
-        sys.exit("Fatal Error- No keys.sed file found. Please check in output directory")
+def parse_scedes(filename):
+    """
+    Parses a scedes file into a dictionary.
 
-def parse_scedes_file(filename):
-    '''
+    Args:
+        filename (str): The path to the scedes file as defined in module_unf.py
 
-    Parameters
-    ----------
-    filename- currently hardcoded to the keys.sed file inside of the local folder of NEMS
-
-    Returns
-    -------
-    scedes_dict- dictionary of scedes keys
-
-    '''
-    scedes_dict = {}
-    with open(filename, 'r') as file:
-        for line in file:
-            key, value = line.strip().split("=")
-            scedes_dict[key] = value
+    Returns:
+        dict: A dictionary where keys are from the first column and values are from the second column in scedes CSV.
+    """
+    with open(filename, 'r', newline='') as file:
+        csv_reader = csv.reader(file)
+        header = next(csv_reader)  # Skip the header row
+        data = np.array(list(csv_reader))
+        scedes_dict = dict(zip(data[:, 0], data[:, 1]))
     return scedes_dict
 
 
 if __name__ == '__main__':
-    filename = find_keys_sed()
-    scedes_dict = parse_scedes_file(filename)
+    filename = find_scedes(scedes_name = 'scedes.ref2026.csv')
+    scedes_dict = parse_scedes(filename)
     user = User(scedes_dict)
-    print(user.scedes["SCEN"])

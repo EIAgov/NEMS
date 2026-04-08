@@ -98,13 +98,14 @@ subroutine init_filer
     write(log_unit,*) "init_filer"
 
     ! get unit number
-    write(log_unit,*) "   FILE_MGR - I"
+    !This chunk is needed for all fortran programs.
+    write(log_unit,*) "   FILE_MGR - Initialize and Read in Filelist"
     new_bn=.false.
     ISTATUS=FILE_MGR('I',FM_NAME,new_bn)
     write(log_unit,*) "       ISTATUS: ", ISTATUS
 
-
-    write(log_unit,*) "   FILE_MGR - O"
+    !this chunk is only nedd for LFMM
+    write(log_unit,*)"   FILE_MGR - Open the Dictionary and prepare filer for LFMM"
     UNIQUE_NAMEIN = 'DICT'
     new_bn=.false.
     FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
@@ -134,97 +135,13 @@ subroutine init_filer
     call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
     write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
 
-    write(log_unit,*)"   FILE_MGR - C"
+    write(log_unit,*)"   FILE_MGR - Closing Dictionary Read"
     UNIQUE_NAMEIN = 'DICT'
     new_bn=.false.
-    FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
+    FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn) 
 
-    write(log_unit,*)"   FILE_MGR - O"
-    UNIQUE_NAMEIN = 'RESTARTI'
-    new_bn=.false.
-    FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
-    ! run filer to read RESTARTI
-    FRTYPE = 2
-    FSOURC = 1
-    ! FUNITI = 1
-    FUNITO = log_unit
-    FNAMEI = ' '
-    FNAMEO = ' '
-    FRETCD = 0
-    FUNFMT = 0
-
-    INQUIRE(FUNITI,FORM=FUNFMTC)
-    IF(FUNFMTC.EQ.'FORMATTED') FUNFMT=0
-    IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
-
-    ! run filer on dict
-    write(log_unit,*)'   FRTYPE: ', FRTYPE
-    write(log_unit,*)'   FSOURC: ', FSOURC
-    write(log_unit,*)'   FUNITI: ', FUNITI
-    write(log_unit,*)'   FUNITO: ', FUNITO
-    write(log_unit,*)'   FNAMEI: ', FNAMEI
-    write(log_unit,*)'   FNAMEO: ', FNAMEO
-    write(log_unit,*)'   FRETCD: ', FRETCD
-    write(log_unit,*)'   FUNFMT: ', FUNFMT
-
-    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
-    call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
-
-    write(log_unit,*)"   FILE_MGR - C"
-    UNIQUE_NAMEIN = 'RESTARTI'
-    new_bn=.false.
-    FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
-    write(log_unit,*)"   FILE_MGR - O"
-    FNAMEI18='VARLIST'  ! input file with list of variable names to write
-    new_bn=.FALSE.
-    FUNITI=FILE_MGR('O',FNAMEI18,new_bn)
-
-    write(log_unit,*)"   FILE_MGR - O"
-    UNIQUE_NAMEIN = 'RESTART'
-    new_bn=.true.
-    FUNITO=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
-    ! run filer to write new RESTARTO
-    FRTYPE = 1
-    FSOURC = 1
-    ! FUNITI = 1
-    ! FUNITO = 6
-    FNAMEI = ' '
-    FNAMEO = ' '
-    FRETCD = 0
-    FUNFMT = 0
-
-    INQUIRE(FUNITO,FORM=FUNFMTC)
-    IF(FUNFMTC.EQ.'FORMATTED') FUNFMT=0
-    IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
-
-    ! run filer on dict
-    write(log_unit,*)'   FRTYPE: ', FRTYPE
-    write(log_unit,*)'   FSOURC: ', FSOURC
-    write(log_unit,*)'   FUNITI: ', FUNITI
-    write(log_unit,*)'   FUNITO: ', FUNITO
-    write(log_unit,*)'   FNAMEI: ', FNAMEI
-    write(log_unit,*)'   FNAMEO: ', FNAMEO
-    write(log_unit,*)'   FRETCD: ', FRETCD
-    write(log_unit,*)'   FUNFMT: ', FUNFMT
-
-    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
-    call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
-
-    write(log_unit,*)"   FILE_MGR - C"
-    FNAMEI18='VARLIST'  ! input file with list of variable names to write
-    new_bn=.FALSE.
-    FUNITI=FILE_MGR('C',FNAMEI18,new_bn)
-
-    write(log_unit,*)"   FILE_MGR - C"
-    UNIQUE_NAMEIN = 'RESTART'
-    new_bn=.FALSE.
-    FUNITO=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-	close(log_unit)
+	close(10)
+    close(log_unit)
 end subroutine init_filer
 
 subroutine read_filer (RESTFILENAME)
@@ -240,95 +157,6 @@ subroutine read_filer (RESTFILENAME)
     CHARACTER*18 FM_NAME/' '/
     CHARACTER*11 FUNFMTC
 	
-	open(log_unit, file="pyfiler_log.txt", position="append", status="unknown", action="write")
-    write(log_unit,*)"read_filer"
-
-    ! get unit number
-    write(log_unit,*)"   FILE_MGR - I"
-    new_bn=.false.
-    ISTATUS=FILE_MGR('I',FM_NAME,new_bn)
-    write(log_unit,*)"       ISTATUS: ", ISTATUS
-
-    ! optional, write file table
-    ! write(log_unit,*)"FILE_MGR - T"
-    ! new_bn=.false.
-    ! ISTATUS=FILE_MGR('T',FM_NAME,new_bn)
-    ! write(log_unit,*)"ISTATUS: ", ISTATUS
-
-    write(log_unit,*)"   FILE_MGR - O"
-    UNIQUE_NAMEIN = 'DICT'
-    new_bn=.false.
-    FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-    write(log_unit,*)"       ISTATUS: ", ISTATUS
-
-    ! run filer on dict
-    FRTYPE = 3
-    FSOURC = 0
-    ! FUNITI = 1
-    FUNITO = log_unit
-    FNAMEI = ' '
-    FNAMEO = ' '
-    FRETCD = 0
-    FUNFMT = 1
-
-    ! run filer on dict
-    write(log_unit,*)'   FRTYPE: ', FRTYPE
-    write(log_unit,*)'   FSOURC: ', FSOURC
-    write(log_unit,*)'   FUNITI: ', FUNITI
-    write(log_unit,*)'   FUNITO: ', FUNITO
-    write(log_unit,*)'   FNAMEI: ', FNAMEI
-    write(log_unit,*)'   FNAMEO: ', FNAMEO
-    write(log_unit,*)'   FRETCD: ', FRETCD
-    write(log_unit,*)'   FUNFMT: ', FUNFMT
-
-    write(log_unit,*)"   Calling FILER(): " ! , CNADGPRD
-    call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    write(log_unit,*)"   Returning from FILER():" ! , CNADGPRD
-
-    write(log_unit,*)"   FILE_MGR - C"
-    UNIQUE_NAMEIN = 'DICT'
-    new_bn=.false.
-    FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
-    write(log_unit,*)"   FILE_MGR - O"
-    UNIQUE_NAMEIN = 'RESTART'
-    new_bn=.false.
-    FUNITI=FILE_MGR('O',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-
-    ! run filer to read RESTARTI
-    FRTYPE = 2
-    FSOURC = 0
-    !FUNITI = 1
-    FUNITO = log_unit
-    FNAMEI=RESTFILENAME
-    FNAMEO = ' '
-    FRETCD = 0
-    FUNFMT = 0
-
-    INQUIRE(FUNITI,FORM=FUNFMTC)
-    IF(FUNFMTC.EQ.'FORMATTED') FUNFMT=0
-    IF(FUNFMTC.EQ.'UNFORMATTED') FUNFMT=1
-
-    ! run filer on dict
-    write(log_unit,*)'   FRTYPE: ', FRTYPE
-    write(log_unit,*)'   FSOURC: ', FSOURC
-    write(log_unit,*)'   FUNITI: ', FUNITI
-    write(log_unit,*)'   FUNITO: ', FUNITO
-    write(log_unit,*)'   FNAMEI: ', FNAMEI
-    write(log_unit,*)'   FNAMEO: ', FNAMEO
-    write(log_unit,*)'   FRETCD: ', FRETCD
-    write(log_unit,*)'   FUNFMT: ', FUNFMT
-
-    write(log_unit,*)"Calling FILER(): " ! , CNADGPRD
-    call FILER(FRTYPE,FSOURC,FUNITI,FUNITO,FNAMEI,FNAMEO,FRETCD,FUNFMT)
-    write(log_unit,*)"Returning from FILER():" ! , CNADGPRD
-
-    write(log_unit,*)"FILE_MGR - C"
-    UNIQUE_NAMEIN = 'RESTART'
-    new_bn=.false.
-    FUNITI=FILE_MGR('C',UNIQUE_NAMEIN,new_bn)  ! OPEN FILE AND GET UNIT #
-    
-    !Close Unit 10, FMGROUT.tfiler.txt
     CLOSE(10)
 	close(log_unit)
 end subroutine read_filer

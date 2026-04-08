@@ -1,0 +1,14 @@
+notes,Decline rate configuration for producing oil projects by region and oil type. Empty oil_type_number applies to all oil types.,,
+region_name,oil_type_number,year_1_decline,decline_rate
+east_coast,,0,0
+gulf_coast,2,0.15,0.05
+midcontinent,2,0.15,0.05
+southwest,,0,0
+rocky_mountain,2,0.05,0.05
+northern_great_plains,,0,0
+west_coast,,0,0
+midcontinent,1,0.15,0.05
+rocky_mountain,1,0.05,0.05
+gulf_coast,1,0.05,0.05
+southwest,1,0.05,0.05
+southwest,3,0.2,0.05

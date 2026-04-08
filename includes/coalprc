@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/coalprc,v 1.7 2013/05/08 14:37:10 pkc Exp $
 !
 !     Marginal Delivered Prices of Coal at Coal Demand Regions by Plant Type and SO2 Standards ($/MMBtu)

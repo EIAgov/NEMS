@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: M:/default/includes/RCS/postpr,v 1.6 2017/09/15 13:56:04 dsa Exp $
 
       COMMON /POSTPR2/ LINELOSS,CGRESPF,CGCOMPF,CGINDPF,CSHARE,ISHARE, &

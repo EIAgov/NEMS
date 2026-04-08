@@ -194,6 +194,9 @@
       include'enewtech'
       include'bldglrn'
       include'uefdout'
+      include'udatout'
+      include'tranrep'
+     !include'dsmtfecp'
 
 !DSB*******VARIABLE DECLARATIONS**********************************
       REAL*4 MN_LRN                 !MINIMUM ANNUAL DECREASE IN LEARNING
@@ -217,7 +220,8 @@
 
       REAL*4 OC_CURRENT             !Overnight costs at current capacity
 
-
+      
+       REAL*4 temp_batt_cap
        REAL*4 NEW_CAP(ECP_D_CAP,MNUMYR)      !Total new capacity
        REAL*4 NEW_CAPC(ECP$COMP,MNUMYR)    !New capacity by component
 
@@ -313,6 +317,28 @@
            ENDDO
          ENDDO
 
+         !Add other sector battery capacity from NEMS shared battery learning global variable (GWh) to EMM learning battery capacity (MW)
+         DO J = 1, 6
+            IF (J .ne. 3)  THEN     ! skip power sector
+                DO K =1,2           ! 1 = USA, 2 = International
+                    NEW_TCAPC(WIDSB,CURIYR) = NEW_TCAPC(WIDSB,CURIYR) + global_batt_prod(J,K,CURIYR) * UPISHR(WIDS) * 1000 / 4 ! hoursToBuy              
+                ENDDO
+            ENDIF
+         ENDDO
+         
+         !Calculate USA current year battery storage capacity (GW)
+         temp_batt_cap = 0.0
+         DO NERC = 1, UNRGNS
+          temp_batt_cap = temp_batt_cap + UCAPDSU(NERC,CURIYR) + UCAPDSN(NERC,CURIYR) + ( UCAPPTU(NERC,CURIYR) + UCAPPTN(NERC,CURIYR) ) / 3
+         ENDDO  
+         
+         !Send USA annual battery storage capacity (GW) to NEMS shared battery learning global variable (GWh)
+         global_batt_prod(3,1,CURIYR) = temp_batt_cap * 4 !hoursToBuy Convert to GWh using 4 hour battery duration assumption
+                 
+         !Send international annual battery storage capacity (MW) to NEMS shared battery learning global variable (GWh)
+         global_batt_prod(3,2,CURIYR) = ( UPLRLCI(WIDS,CURIYR) + UPLRLCI(WIPT,CURIYR) / 3 ) * 4 / 1000 !hoursToBuy / 1000
+         
+         
          UPV_MW(CURIYR) = NEW_TCAPC(WIPVM,CURIYR)        ! variable for end-use modules based on PVM capacity
          
          LRN_RCI(WIPVM, CURIYR)= CPV_MW(CURIYR) + RPV_MW(CURIYR)
@@ -544,8 +570,8 @@
      DO J = 1, ECP_D_CAP
          IF (UPLCSTWT(J,WISEQ) .GT. 0.0) THEN          !CCS plant - update OVR share for learning
              UPCCS_INVSH(J) = UPCCS_INVSH0(J) * UPLRLCC(WISEQ)/UPLRLC(J) !update based on relative learning
+             WRITE(UF_MSG,107) CURIYR+1989,J,UPLNTCD(J),UPCCS_VOMSH(J),UPCCS_FOMSH(J),UPCCS_INVSH(J)
          ENDIF
-      WRITE(UF_MSG,107) CURIYR+1989,J,UPLNTCD(J),UPCCS_VOMSH(J),UPCCS_FOMSH(J),UPCCS_INVSH(J)
      ENDDO
 !     *** END COMPUTE OPTIMISM AND LEARNING FACTORS **************
 101    FORMAT ('UCAPE_OUT_FACTORS1',':',I4,':',I2,':', &
@@ -554,12 +580,12 @@
               F10.7,':',F6.3)
 
 103    FORMAT ('UCAPE_OUT_NEW1',':',I4,':',I2,':', &
-              F12.4,':',F12.4,':',F12.4,':',A15,':', &
-              F12.4,':',F12.4,':',F6.4,':',F6.4)
+              F16.4,':',F16.4,':',F16.4,':',A15,':', &
+              F16.4,':',F16.4,':',F6.4,':',F6.4)
 
 106    FORMAT ('UCAPE_OUT_NEW2',':',I4,':',I2,':',A2,':',F12.4,':', &
                F6.3,':',f6.3)
-107    FORMAT ('UCAPE_OUT_CCS',':',I4,':',I2,':',A2,':',F12.4,':', F12.4)
+107    FORMAT ('UCAPE_OUT_CCS',':',I4,':',I2,':',A2,3(':',F12.4))
        RETURN
        END
 

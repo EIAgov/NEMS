@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/ogsmbfw,v 1.19 2017/10/07 21:19:43 dh5 Exp $
 !  INDEX VARIABLES
       INTEGER I   !  WELL CLASS INDEX VARIABLE

@@ -103,7 +103,7 @@ def test_node_count(tdata):
     -------
     None
     '''
-    if tdata.nodes == tdata.nodes_supply.union(tdata.nodes_trans_ship, tdata.nodes_demand, tdata.nodes_sequester):
+    if tdata.nodes == tdata.nodes_supply.union(tdata.nodes_source, tdata.nodes_trans_ship, tdata.nodes_demand, tdata.nodes_sequester):
         assert True
     else:
         tdata.logger.warning('Total node count != component node type counts')

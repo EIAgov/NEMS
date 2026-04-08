@@ -1,0 +1,9 @@
+notes,Unified override switches for onshore module. Contains all override flags that control various model behaviors. Value: 0 = disabled, 1 = enabled.
+key,value,description
+producing_oil_decline_override,1,Enable decline rate override for producing oil projects
+producing_gas_decline_override,1,Enable decline rate override for producing gas projects
+future_wells_oil_production_multiplier_override,1,Enable production curve multiplier for future oil wells
+future_wells_gas_production_multiplier_override,1,Enable production curve multiplier for future gas wells
+totpat_multiplier_override,1,Enable totpat multiplier override for continuous projects
+drilling_cons_override,1,Enable drilling constraint adjustment for region 1 (East region) - only applied for east region
+drilling_cons_multiplier,1.35,Multiplier applied to Brent price for region 1 drilling constraints - only applied for east region

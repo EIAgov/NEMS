@@ -13,6 +13,7 @@ warning_duplicate_row off
 "CPLEX 22.1".barrier_crossover_algorithm 2
 "CPLEX 22.1".global_thread_limit 32
 "CPLEX 22.1".parallel_mode 1
+"CPLEX 22.1".barrier_display 2
 "CPLEX 22.1".feasibility 1e-08
 "CPLEX 22.1".optimality 0.0001
 * IPOPT 3.11

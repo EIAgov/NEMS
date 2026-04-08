@@ -159,7 +159,7 @@ def fill_table_base_116(dfd, table_spec, table_id):
 
     r = float(table_spec["settings"]["discount_rate_table116"])
     for out, src in d.items():
-        z[out] = z[src].expanding(axis=1).apply(npv, args=(FYRPRC, r)).cumsum(axis=1)
+        z[out] = z[src].T.expanding().apply(npv, args=(FYRPRC, r)).T.cumsum(axis=1)
         z[out][FYRPRC] = 0
 
     # Annual Expense & Capital Payment

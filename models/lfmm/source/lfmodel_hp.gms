@@ -106,9 +106,13 @@ Positive Variables
 
    BIODIMP(Step,Period)                                           M BBLs per day of biodiesel imported at each supply step in each period
    BIODIMPref(RefReg,RefType,Period)
+   
+   BIODEXP(Step,Period)                                           M BBLs per day of biodiesel exported at each supply step in each period
 
    RENEWDIMP(Step,Period)                                         M BBLs per day of renewable diesel imported at each supply step in each period
    RENEWDIMPref(RefReg,RefType,Period)
+   
+   RENEWDEXP(Step,Period)                                         M BBLs per day of renewable diesel exported at each supply step in each period
 
    CO2_TRAN(OGCO2Reg,OGCO2Reg2,Period)                            CO2 transported from OGSM region to OGSM region in M tons CO2 per day
    CO2_PURCH(OGCO2Reg,CO2_Source,Period)                          CO2 purchased in OGSM region by source in M tons CO2 per day
@@ -354,8 +358,10 @@ OBJ..
   sum((CFP_PetCategory,ActivePeriod), npv_CFPSafetyPrice(CFP_PetCategory,ActivePeriod)*CFPSafety(CFP_PetCategory,ActivePeriod)) +
   sum((WACFS_PetCategory,ActivePeriod), npv_WACFSSafetyPrice(WACFS_PetCategory,ActivePeriod)*WACFSSafety(WACFS_PetCategory,ActivePeriod)) +
   sum(ActivePeriod, npv_AB32_AllowPrice(ActivePeriod) * AB32_PurchAllow(ActivePeriod) ) +
-  sum((Step,ActivePeriod), npv_FBDImpPrice(Step,ActivePeriod)*BIODIMP(Step,ActivePeriod) ) +
-  sum((Step,ActivePeriod), npv_RDHImpPrice(Step,ActivePeriod)*RENEWDIMP(Step,ActivePeriod) ) +
+  sum((Step,ActivePeriod), npv_FBDImpPrice(Step,ActivePeriod)*BIODIMP(Step,ActivePeriod) ) -
+  sum((Step,ActivePeriod), npv_FBDExpPrice(Step,ActivePeriod)*BIODEXP(Step,ActivePeriod) ) +
+  sum((Step,ActivePeriod), npv_RDHImpPrice(Step,ActivePeriod)*RENEWDIMP(Step,ActivePeriod) ) -
+  sum((Step,ActivePeriod), npv_RDHExpPrice(Step,ActivePeriod)*RENEWDEXP(Step,ActivePeriod) ) +
   sum((NGLProduct,ActiveDem,ActivePeriod), npv_NGLImportCost(ActiveDem,NGLProduct,ActivePeriod)*NGLIMPORTS(NGLProduct,ActiveDem,ActivePeriod) ) -
   sum((NGLProduct,ActiveDem,ActivePeriod), npv_NGLExportCost(ActiveDem,NGLProduct,ActivePeriod)*NGLEXPORTS(NGLProduct,ActiveDem,ActivePeriod) ) +
   sum((Stream,ActivePeriod)$AB32_StartYr(Stream), npv_AB32_AllowPrice(ActivePeriod)*AB32_BenchFactor*IMPORTS(Stream,'7_RefReg',ActivePeriod)/1000 )$(AB32SW) +
@@ -394,15 +400,16 @@ OBJ..
                                                                    RefTypProc(RefType,Process) and
                                                                    SupTypMode(DomRefReg,RefType,Process,ProcessMode) and
                                                                    (npv_BiofuelSubsidy(Stream,ActivePeriod)>0)),
-    npv_BiofuelSubsidy(Stream,ActivePeriod) * PROCMODE(DomRefReg,RefType,Process,ProcessMode,ActivePeriod) * ProcessTable(Stream,Process,ProcessMode) ) -
+    npv_BiofuelSubsidy(Stream,ActivePeriod) * PROCMODE(DomRefReg,RefType,Process,ProcessMode,ActivePeriod) * ProcessTable(Stream,Process,ProcessMode) ) +
 
+** IRA replaced blender's tax credit with 45Z - domestic production only receives credit
 *-- NOTE: BioDieselStr and BIODIMPref refer ONLY to stream type FBD
-  sum((Stream,DomRefReg,RefType,ActivePeriod)$(BioDieselStr(Stream)),
-    (npv_BiofuelSubsidy(Stream,ActivePeriod) * BIODIMPref(DomRefReg,RefType,ActivePeriod)) )  -
+*  sum((Stream,DomRefReg,RefType,ActivePeriod)$(BioDieselStr(Stream)),
+*    (npv_BiofuelSubsidy(Stream,ActivePeriod) * BIODIMPref(DomRefReg,RefType,ActivePeriod)) )  -
 
 *-- NOTE: RenewDieselStr and RENEWDIMPref refer ONLY to stream type RDH
-  sum((Stream,DomRefReg,RefType,ActivePeriod)$(RenewDieselStr(Stream)),
-    (npv_BiofuelSubsidy(Stream,ActivePeriod) * RENEWDIMPref(DomRefReg,RefType,ActivePeriod)) ) +
+*  sum((Stream,DomRefReg,RefType,ActivePeriod)$(RenewDieselStr(Stream)),
+*    (npv_BiofuelSubsidy(Stream,ActivePeriod) * RENEWDIMPref(DomRefReg,RefType,ActivePeriod)) ) +
 
 
   sum((STEO_Category,Step,ActivePeriod)$npv_STEO_Penalty(Step,ActivePeriod),

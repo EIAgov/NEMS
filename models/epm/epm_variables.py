@@ -1,38 +1,34 @@
 """Handling of static variables that EPM expects will be saved between calls.
 
-Before EPM runs, read in the variables from a pickle file or just initialize
-them to sensible values if no pickle file exists. After EPM runs, write the
-variables to a pickle file for the next run.
+The small amount of code in this module exists only to create the collection of
+variables and initialize them to sensible values.
 """
 
-from pathlib import Path
-import pickle
-from typing import Any, Final
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 
-from epm_common import BASE_YR, get_output_path
+from epm_common import BASE_YR
 from epm_restart import Restart
-
-
-# Base file name to use for the saved variables pickle file
-VARIABLES_FILE_NAME: Final[str] = "EPM_saved_variables.pkl"
 
 
 class Variables:
     """Stores intermediate variables that need to be saved between EPM runs.
 
-    All stored EPM variables are accessible as instance attributes. When Python
-    is not running, the variables are stored in a dictionary object written to
-    a temporary pickle file.
+    All stored EPM variables are directly accessible as instance attributes.
     """
 
     def __init__(self, restart: Restart) -> None:
         """Create a new collection of initialized variables.
 
-        Most variables are initialized to zero, None, or some other "null"
-        value with the appropriate type.
+        The individual variables are initialized to zero, False, or some other
+        "null" value of the appropriate type.
+
+        Parameters
+        ----------
+        restart : Restart
+            The currently loaded restart file data.
         """
         # Contents of EPM control file
         self.control: dict[str, Any] = {}
@@ -104,27 +100,3 @@ class Variables:
         self.oghg_err_count: npt.NDArray[np.int64] = np.zeros(
             restart.ghgrep_ghg_nmax, np.int64
         )
-
-    def _get_file_path(self) -> Path:
-        """Construct the file path to use for the save and load methods.
-
-        Returns
-        -------
-        Path
-            The full path to the intermediate variables pickle file.
-        """
-        return get_output_path() / VARIABLES_FILE_NAME
-
-    def load(self) -> None:
-        """Load the intermediate variables from a pickle file if one exists."""
-        try:
-            with self._get_file_path().open("rb") as f:
-                pickled_dict: dict[str, Any] = pickle.load(f)
-        except FileNotFoundError:
-            return
-        self.__dict__.update(pickled_dict)
-
-    def save(self) -> None:
-        """Save the intermediate variables out to a pickle file."""
-        with self._get_file_path().open("wb") as f:
-            pickle.dump(self.__dict__, f)

@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/uldsmout,v 1.2 1999/12/19 18:58:59 dsa Exp $
 !  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK
 !  The dimension parameters are &6005PRJ.NEMS.COMMON.PDS.datecode:PARAMETR

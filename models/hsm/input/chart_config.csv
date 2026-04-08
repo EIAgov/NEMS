@@ -1,0 +1,18 @@
+variable_name,enabled,chart_type,aggregation,filter_dim0,filter_dim1,filter_dim2,year_range,title,ylabel,save_path,display,unit_conversion,original_units
+ogsmout_ogqcrrep,FALSE,stacked_area,by_dim0,1:04,,,2020:2050,Total U.S. Crude Oil Production,MMBBL/D,,,0.002739726,mmbbl/yr
+ogsmout_ogqshloil,FALSE,line,by_dim0,"1:10,15",,,2020:2050,,MMBBL/D,,,,mbbls
+ogsmout_ogqngrep,TRUE,stacked_area,by_dim0,1:08,,,2020:2050,,tcf,,,0.001,bcf
+ogsmout_ogngprd,FALSE,line,by_dim0,1:07,,,2020:2050,Natural Gas Production by Region,tcf,,,.001,bcf/yr
+ogsmout_ogngprd,FALSE,stacked_area,by_dim0,1:07,,,2020:2050,Natural Gas Production by Region,tcf,,,.001,bcf/yr
+ogsmout_ogqshlgas,TRUE,line,by_dim0,"2",,,2020:2050,,,,,,
+ogsmout_ogqshlgas,TRUE,stacked_area,by_dim0,"1:10,15",,,2020:2050,,tcf,,,,tcf
+ogsmout_ogeorprd,FALSE,stacked_area,by_dim0,1:07,3,,2020:2050,Total EOR Production by Region,MMBBL/D,,,2.74E-06,mbbl/yr
+ogsmout_ogqcrrep,FALSE,stacked_area,by_dim0,1:04,,,2020:2050,,,,0.002739726,mmbbl/yr
+ogsmout_ogregprd,FALSE,stacked_area,by_dim0,1:07,4:07,,2020:2050,,tcf,,,,tcf
+ogsmout_ogregprd,FALSE,stacked_area,by_dim1,1:07,4:07,,2020:2050,,tcf,,,,tcf
+ogsmout_ogcoprd,FALSE,stacked_area,by_dim0,1:07,,,2020:2050,Crude prod by Lower 48 region,mmbd,,,,mmbd
+pmmout_rfqtdcrd,FALSE,stacked_area,by_dim0,1:07,,,2020:2050,,,,,,
+pmmout_rfqdcrd,FALSE,stacked_area,by_dim0,1:07,,,2020:2050,,,,,,
+ogsmout_ogenagprd,FALSE,stacked_area,by_dim1,,1:04,,2020:2050,,tcf,,,0.001,bcf/yr
+ogsmout_ogrnagprd,FALSE,stacked_area,by_dim1,,1:04,,2020:2050,,tcf,,,0.001,bcf/yr
+ogsmout_ogngprd,TRUE,line,by_dim0,6,,,2020:2050,,,,,,

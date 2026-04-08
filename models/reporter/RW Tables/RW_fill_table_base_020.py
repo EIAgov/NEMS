@@ -53,7 +53,7 @@ def fill_table_base_020(dfd, table_spec, table_id):
     #     Asphalt and Road Oil
     # T20(1,IY,IS)=CFASQ
     # z[1] = dfd['CFASQ']
-    df[years] = dfd["CFASQ"].iloc[0]
+    df[years] = float(dfd["CFASQ"].iloc[0])
     z[1] = df.copy()
 
     #     Aviation Gasoline

@@ -1,5 +1,5 @@
 FILE NAME:     RSRET01
-DATE MODIFIED: July 24, 2024
+DATE MODIFIED: September 2, 2025
 USED BY:       RDRET subroutine of the National Energy Modeling System (NEMS) Residential Demand Module (RDM)
 DEFINITION:    Retirement fractions for each of the residential equipment classes in the base year
 UNITS:         Dimensionless; share of existing equipment that has been retired up to a given projection year
@@ -8,7 +8,7 @@ SPECIAL CONSTRAINTS:  non-negative values not exceeding 1.0000 (100% of RECS-yea
 ORGANIZATION OF DATA:
                Data starts on row 21 of this file as per RDM convention.
 SOURCES:       Unknown
-COMMENT:       Year range updated for 2020 RECS
+COMMENT:       Remove kerosene placeholders
 
 
 
@@ -22,7 +22,6 @@ COMMENT:       Year range updated for 2020 RECS
 0.0502	0.1021	0.1557	0.2114	0.2695	0.3306	0.3959	0.4664	0.5339	0.598	0.6582	0.7145	0.7664	0.814	0.8568	0.8947	0.9275	0.9548	0.9764	0.9918	1	1	1	1	1	1	1	1	1	1
 0.041	0.084	0.1291	0.176	0.2247	0.275	0.3267	0.3799	0.4348	0.4915	0.5504	0.6065	0.6598	0.7097	0.7558	0.7985	0.8374	0.8725	0.9035	0.9304	0.953	0.9715	0.9856	0.9952	1	1	1	1	1	1
 0.0336	0.069	0.1058	0.144	0.1814	0.2169	0.2526	0.289	0.3263	0.3643	0.4022	0.4402	0.4785	0.5166	0.5551	0.5942	0.6341	0.6748	0.7163	0.7582	0.8008	0.8395	0.8741	0.9051	0.932	0.9545	0.9726	0.9864	0.9955	1
-0.0667	0.1283	0.1904	0.2525	0.314	0.3748	0.4336	0.49	0.5443	0.5974	0.6497	0.6986	0.7437	0.7849	0.8217	0.855	0.8843	0.9102	0.9328	0.9521	0.9681	0.981	0.9907	0.9971	1	1	1	1	1	1
 0.0425	0.0874	0.1346	0.1839	0.2353	0.2886	0.3428	0.3983	0.4546	0.5121	0.5714	0.6276	0.6805	0.7296	0.7748	0.8161	0.853	0.8861	0.9149	0.9391	0.959	0.9751	0.9872	0.9956	1	1	1	1	1	1
 0.0667	0.1283	0.1904	0.2525	0.314	0.3748	0.4336	0.49	0.5443	0.5974	0.6497	0.6986	0.7437	0.7849	0.8217	0.855	0.8843	0.9102	0.9328	0.9521	0.9681	0.981	0.9907	0.9971	1	1	1	1	1	1
 0.03	0.0616	0.0949	0.1307	0.1667	0.2012	0.236	0.2722	0.31	0.3494	0.3895	0.4306	0.4724	0.5136	0.5547	0.5962	0.6386	0.6811	0.7239	0.7666	0.8091	0.8471	0.8807	0.9103	0.9356	0.957	0.9743	0.9874	0.996	1
@@ -54,7 +53,6 @@ Electric Heating Other Than Heat Pumps
 Air-Source Heat Pumps (heating)
 Natural Gas Furnaces
 Natural Gas Boilers & Other
-Kerosene Furnaces (unused placeholder)
 Propane Furnaces & Other
 Distillate Fuel Oil & Kerosene Furnaces
 Distillate Fuel Oil & Kerosene Boilers & Other

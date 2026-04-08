@@ -145,8 +145,8 @@ def fill_table_base_011(dfd, table_spec, table_id):
     # T11(137,IY,IS)=GRD2DSQTY(MNUMPR,IY)/1000.
     z[137] = dfd["GRD2DSQTY"].loc[MNUMPR] / 1000
     #        Net Imports
-    # T11(138,IY,IS)=RENEWDIMP(11,IY)/1000.
-    z[138] = dfd["RENEWDIMP"].loc[MNUMCR] / 1000
+    # T11(138,IY,IS)=(RENEWDIMP(11,IY)-RENEWDEXP(11,IY))/1000.
+    z[138] = (dfd["RENEWDIMP"].loc[MNUMCR] - dfd["RENEWDEXP"].loc[MNUMCR]) / 1000
     #     Renewable Diesel
     # T11(139,IY,IS)=FSUM(T11(137,IY,IS),2)
     z[139] = z[137] + z[138]
@@ -397,18 +397,18 @@ def fill_table_base_011(dfd, table_spec, table_id):
         / 1000.0
     )
     #   Total Gross Exports
-    # T11(130,IY,IS)=RFQEXCRD(MNUMPR,IY)/1000.+RFQEXPRDT(MNUMPR,IY)+(ETHEXP(11,IY)+BIODEXP(11,IY)+BIOBUTEEXP(IY))/1000.
+    # T11(130,IY,IS)=RFQEXCRD(MNUMPR,IY)/1000.+RFQEXPRDT(MNUMPR,IY)+(ETHEXP(11,IY)+BIODEXP(11,IY)+BIOBUTEEXP(IY)+RENEWDEXP(11,IY))/1000.
     z[130] = (
         dfd["RFQEXCRD"].loc[MNUMPR] / 1000.0
         + dfd["RFQEXPRDT"].loc[MNUMPR]
-        + (dfd["ETHEXP"].loc[MNUMCR] + dfd["BIODEXP"].loc[MNUMCR] + dfd["BIOBUTEEXP"])
+        + (dfd["ETHEXP"].loc[MNUMCR] + dfd["BIODEXP"].loc[MNUMCR] + dfd["BIOBUTEEXP"] + dfd["RENEWDEXP"].loc[MNUMCR])
         / 1000.0
     )
     #   Total Net Imports
     # T11(131,IY,IS)=T11(129,IY,IS)-T11(130,IY,IS)
     z[131] = z[129] - z[130]
     #   Net Import Share of Product Supplied (percent)
-    # T11(53,IY,IS)=(RFIMCR(MNUMPR,IY)+RFIMTP(MNUMPR,IY)+(ETHIMP(11,IY)-ETHEXP(11,IY)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY))/1000.)/
+    # T11(53,IY,IS)=(RFIMCR(MNUMPR,IY)+RFIMTP(MNUMPR,IY)+(ETHIMP(11,IY)-ETHEXP(11,IY)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY)-RENEWDEXP(11,IY))/1000.)/
     #               T11(36,IY,IS)*100.
     z[53] = (
         (
@@ -420,6 +420,7 @@ def fill_table_base_011(dfd, table_spec, table_id):
                 + dfd["BIODIMP"].loc[MNUMCR]
                 - dfd["BIODEXP"].loc[MNUMCR]
                 + dfd["RENEWDIMP"].loc[MNUMCR]
+                - dfd["RENEWDEXP"].loc[MNUMCR]
             )
             / 1000
         )
@@ -628,8 +629,8 @@ def fill_table_base_011(dfd, table_spec, table_id):
     z[56] = z[55] / SCALPR2 * MC_JPGDP
     #
     #   Product Net Import Share of Total Net Imports
-    # T11(57,IY,IS)=(RFIMTP(MNUMPR,IY)+(ETHIMP(11,IY)-ETHEXP(11,IY)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY))/1000.)/
-    #              (RFIMCR(MNUMPR,IY)+RFIMTP(MNUMPR,IY)+(ETHIMP(11,IY)-ETHEXP(11,IY)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY))/1000.)*100.
+    # T11(57,IY,IS)=(RFIMTP(MNUMPR,IY)+(ETHIMP(11,IY)-ETHEXP(11,IY)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY)-RENEWDEXP(11,IY))/1000.)/
+    #              (RFIMCR(MNUMPR,IY)+RFIMTP(MNUMPR,IY)+(ETHIMP(11,IY)-ETHEXP(11,IY)+BIODIMP(11,IY)-BIODEXP(11,IY)+RENEWDIMP(11,IY)-RENEWDEXP(11,IY))/1000.)*100.
     z[57] = (
         (
             dfd["RFIMTP"].loc[MNUMPR]
@@ -639,6 +640,7 @@ def fill_table_base_011(dfd, table_spec, table_id):
                 + dfd["BIODIMP"].loc[MNUMCR]
                 - dfd["BIODEXP"].loc[MNUMCR]
                 + dfd["RENEWDIMP"].loc[MNUMCR]
+                - dfd["RENEWDEXP"].loc[MNUMCR]
             )
             / 1000
         )
@@ -651,6 +653,7 @@ def fill_table_base_011(dfd, table_spec, table_id):
                 + dfd["BIODIMP"].loc[MNUMCR]
                 - dfd["BIODEXP"].loc[MNUMCR]
                 + dfd["RENEWDIMP"].loc[MNUMCR]
+                - dfd["RENEWDEXP"].loc[MNUMCR]
             )
             / 1000
         )

@@ -187,6 +187,10 @@ class Offshore(sub.Submodule):
     def __init__(self, parent):
 
         super().__init__(parent, submodule_name='offshore')
+
+        # Switches
+        self.alt_gom_switch = False # Switch for whether to use alternative STEO based projections for GOA
+
         # input tables
         self.mapping                    = pd.DataFrame()  #: DataFrame of mapping
         self.water_depth                = pd.DataFrame()  #: DataFrame of water depth mapping
@@ -456,18 +460,10 @@ class Offshore(sub.Submodule):
         self.platform_cost_improve_rate *= self.parent.side_case_adj
         self.operating_cost_improve_rate *= self.parent.side_case_adj
 
-        # warnings
-        if self.parent.aeo_year - 1 != self.zero_year:
-            # com.print_out(self.parent.aeo_year)
-            # com.print_out(self.zero_year)
-            warnings.warn('self.aeo_year - 2 != self.history_year', UserWarning)
+        self.alt_gom_switch = str(self.setup_table.at[nam.alt_gom_switch, nam.filename]).upper() == 'True'.upper()
 
-        if self.parent.discount_rate != self.discount_rate:
-            # com.print_out(self.parent.discount_rate)
-            # com.print_out(self.discount_rate)
-            warnings.warn('self.parent.discount_rate != self.discount_rate', UserWarning)
 
-            pass
+
 
 
     def load_input_tables(self):
@@ -609,6 +605,7 @@ class Offshore(sub.Submodule):
         self.royalty_rates                          = super()._load_dataframe(self.offshore_input_path, nam.off_royalty, index_col=nam.evaluation_unit)
         self.royalty_rates.columns.name             = nam.field_size_class
         self.royalty_rates                          = pd.DataFrame({nam.royalty_rate: self.royalty_rates.stack()})
+
 
         #note, each transportation cost can have a different cost year
         self.transportation                         = super()._load_dataframe(self.offshore_input_path, nam.off_transportation, index_col=nam.evaluation_unit)
@@ -869,17 +866,26 @@ class Offshore(sub.Submodule):
 
         #Some fields have no past production, set max production as the initial production rate from undiscovered fields
         mask = (self.producing_fields[nam.max_oil_production_rate] == 0)
-        self.producing_fields.loc[mask, nam.max_oil_production_rate] = self.producing_fields.merge(self.undiscovered_production,
-                                                                                left_on=nam.evaluation_unit,
-                                                                                right_index=True,
-                                                                                how='left',
-                                                                                suffixes=['','_und'])[nam.initial_oil_prod_rate_und]
+        if mask.any():
+            merged_oil = self.producing_fields.merge(
+                self.undiscovered_production,
+                left_on=nam.evaluation_unit,
+                right_index=True,
+                how='left',
+                suffixes=['', '_und']
+            )[nam.initial_oil_prod_rate_und].astype(self.producing_fields[nam.max_oil_production_rate].dtype)
+            self.producing_fields.loc[mask, nam.max_oil_production_rate] = merged_oil.loc[mask]
+
         mask = (self.producing_fields[nam.max_gas_production_rate] == 0)
-        self.producing_fields.loc[mask, nam.max_gas_production_rate] = self.producing_fields.merge(self.undiscovered_production,
-                                                                                left_on=nam.evaluation_unit,
-                                                                                right_index=True,
-                                                                                how='left',
-                                                                                suffixes=['','_und'])[nam.initial_gas_prod_rate_und]
+        if mask.any():
+            merged_gas = self.producing_fields.merge(
+                self.undiscovered_production,
+                left_on=nam.evaluation_unit,
+                right_index=True,
+                how='left',
+                suffixes=['', '_und']
+            )[nam.initial_gas_prod_rate_und].astype(self.producing_fields[nam.max_gas_production_rate].dtype)
+            self.producing_fields.loc[mask, nam.max_gas_production_rate] = merged_gas.loc[mask]
 
         #Calculate past production
         self.producing_fields[nam.past_production] = self.producing_fields[list(range(1990, (self.zero_year - 1)))].sum(axis=1)
@@ -967,8 +973,10 @@ class Offshore(sub.Submodule):
                                     xcol=nam.evaluation_unit,
                                     ycol=nam.field_size_class,
                                     xmerge='merge')
-        self.producing_fields[nam.prod_years].update(temp[nam.ramp_up_years] + temp[nam.peak_years])
-        self.producing_fields[nam.hyper_decline_coef].update(temp[nam.hyper_decline_coef])
+        # Assign via .loc instead of Series.update to avoid chained-assignment FutureWarnings
+        prod_years_series = temp[nam.ramp_up_years] + temp[nam.peak_years]
+        self.producing_fields.loc[prod_years_series.index, nam.prod_years] = prod_years_series
+        self.producing_fields.loc[temp.index, nam.hyper_decline_coef] = temp[nam.hyper_decline_coef]
         self.producing_fields[nam.gas_decline_rate] = temp[nam.decline_rate]
 
         self.producing_fields[nam.oil_decline_rate] = self.producing_fields[nam.oil_decline_rate].fillna(0.0)
@@ -1071,36 +1079,36 @@ class Offshore(sub.Submodule):
         #Combine condensate and associated production to calculate crude and natural gas production, respectively
         self.crude_production = (non_condensate_production + condensate_production)
         self.crude_production[nam.discovery_type] = nam.producing
-        self.crude_production[nam.evaluation_unit]  = self.producing_fields[nam.evaluation_unit].copy()
-        self.crude_production[nam.federal_land]  = self.producing_fields[nam.federal_land].copy()
-        self.crude_production[nam.district_number] = self.producing_fields[nam.district_number].copy()
-        self.crude_production[nam.region_number] = self.producing_fields[nam.region_number].copy()
-        self.crude_production[nam.water_depth_ft] = self.producing_fields[nam.water_depth_ft].copy()
+        self.crude_production[nam.evaluation_unit]  = self.producing_fields[nam.evaluation_unit]
+        self.crude_production[nam.federal_land]  = self.producing_fields[nam.federal_land]
+        self.crude_production[nam.district_number] = self.producing_fields[nam.district_number]
+        self.crude_production[nam.region_number] = self.producing_fields[nam.region_number]
+        self.crude_production[nam.water_depth_ft] = self.producing_fields[nam.water_depth_ft]
 
         self.natgas_production = (associated_gas_production + non_associated_gas_production)
         self.natgas_production[nam.discovery_type] = nam.producing
-        self.natgas_production[nam.evaluation_unit] = self.producing_fields[nam.evaluation_unit].copy()
-        self.natgas_production[nam.federal_land]  = self.producing_fields[nam.federal_land].copy()
-        self.natgas_production[nam.district_number]  = self.producing_fields[nam.district_number].copy()
-        self.natgas_production[nam.region_number]  = self.producing_fields[nam.region_number].copy()
-        self.natgas_production[nam.water_depth_ft]  = self.producing_fields[nam.water_depth_ft].copy()
+        self.natgas_production[nam.evaluation_unit] = self.producing_fields[nam.evaluation_unit]
+        self.natgas_production[nam.federal_land]  = self.producing_fields[nam.federal_land]
+        self.natgas_production[nam.district_number]  = self.producing_fields[nam.district_number]
+        self.natgas_production[nam.region_number]  = self.producing_fields[nam.region_number]
+        self.natgas_production[nam.water_depth_ft]  = self.producing_fields[nam.water_depth_ft]
 
 
         self.nagas_production = non_associated_gas_production
         self.nagas_production[nam.discovery_type] = nam.producing
-        self.nagas_production[nam.evaluation_unit] = self.producing_fields[nam.evaluation_unit].copy()
-        self.nagas_production[nam.federal_land]  = self.producing_fields[nam.federal_land].copy()
-        self.nagas_production[nam.district_number]  = self.producing_fields[nam.district_number].copy()
-        self.nagas_production[nam.region_number]  = self.producing_fields[nam.region_number].copy()
-        self.nagas_production[nam.water_depth_ft]  = self.producing_fields[nam.water_depth_ft].copy()
+        self.nagas_production[nam.evaluation_unit] = self.producing_fields[nam.evaluation_unit]
+        self.nagas_production[nam.federal_land]  = self.producing_fields[nam.federal_land]
+        self.nagas_production[nam.district_number]  = self.producing_fields[nam.district_number]
+        self.nagas_production[nam.region_number]  = self.producing_fields[nam.region_number]
+        self.nagas_production[nam.water_depth_ft]  = self.producing_fields[nam.water_depth_ft]
 
 
         self.adgas_production = associated_gas_production
         self.adgas_production[nam.discovery_type] = nam.producing
-        self.adgas_production[nam.evaluation_unit] = self.producing_fields[nam.evaluation_unit].copy()
-        self.adgas_production[nam.federal_land]  = self.producing_fields[nam.federal_land].copy()
-        self.adgas_production[nam.district_number]  = self.producing_fields[nam.district_number].copy()
-        self.adgas_production[nam.region_number]  = self.producing_fields[nam.region_number].copy()
+        self.adgas_production[nam.evaluation_unit] = self.producing_fields[nam.evaluation_unit]
+        self.adgas_production[nam.federal_land]  = self.producing_fields[nam.federal_land]
+        self.adgas_production[nam.district_number]  = self.producing_fields[nam.district_number]
+        self.adgas_production[nam.region_number]  = self.producing_fields[nam.region_number]
         self.adgas_production[nam.water_depth_ft] = self.producing_fields[nam.water_depth_ft]
 
         pass
@@ -1227,7 +1235,6 @@ class Offshore(sub.Submodule):
         -------
         None
         """
-        com.print_out('running offshore submodule')
         super().run()
 
         #Fix crude oil price to iteration 1 prices to stop oscillations with NEMS
@@ -1463,6 +1470,9 @@ class Offshore(sub.Submodule):
         total = total.apply(np.floor)
 
         new_fields = total - self.discovered_field_dist
+
+        # Note: potential debug warning if input data is out of sync between cumulative nfws and discovered fields,
+        # may return a negative
         mask = new_fields < 0
         new_fields[mask] = 0
 
@@ -1471,7 +1481,6 @@ class Offshore(sub.Submodule):
 
 
         ###Load fields into discovered list
-        #see here: https://stackoverflow.com/questions/63672289/how-do-i-expanding-rows-by-a-count-column-in-pandas?noredirect=1&lq=1
         #Reshape to make 1 line per field
         new_fields = new_fields.stack()
         new_fields = new_fields.loc[new_fields.index.repeat(new_fields)].reset_index()
@@ -1614,7 +1623,7 @@ class Offshore(sub.Submodule):
                               right_index=True,
                               how='left').set_index('index')
         temp_price[nam.crude_price] = temp_price[avg_years].mean(axis=1)
-        self.fields[nam.crude_price] = temp_price[nam.crude_price].copy()
+        self.fields[nam.crude_price] = temp_price[nam.crude_price]
 
         #Get natural gas price
         temp_price = self.fields[nam.region_number].reset_index().merge(self.off_reg_natgas_price[avg_years],
@@ -1622,7 +1631,7 @@ class Offshore(sub.Submodule):
                               right_index=True,
                               how='left').set_index('index')
         temp_price[nam.natgas_price] = temp_price[avg_years].mean(axis=1)
-        self.fields[nam.natgas_price] = temp_price[nam.natgas_price].copy()
+        self.fields[nam.natgas_price] = temp_price[nam.natgas_price]
 
         pass
 
@@ -1796,6 +1805,7 @@ class Offshore(sub.Submodule):
 
         Cost equations transferred from hard-coded cost equations in OGSM.
 
+
         Returns
         -------
         self.fields : df
@@ -1808,23 +1818,23 @@ class Offshore(sub.Submodule):
                                           40. * self.fields.loc[mask, nam.water_depth_ft] ** 2)
 
         mask = self.fields[nam.platform_type] == nam.off_ct
-        self.fields[nam.platform_cost].update((self.fields.loc[mask, nam.platform_slots] + 30.) *
+        self.fields.loc[mask, nam.platform_cost] = ((self.fields.loc[mask, nam.platform_slots] + 30.) *
                                               (1500000. + 2000. * (self.fields.loc[mask, nam.water_depth_ft]-1000.)))
 
         mask = self.fields[nam.platform_type] == nam.off_tlp
-        self.fields[nam.platform_cost].update(2 * ((self.fields.loc[mask, nam.platform_slots] + 30.) *
+        self.fields.loc[mask, nam.platform_cost] = (2 * ((self.fields.loc[mask, nam.platform_slots] + 30.) *
                                                    (3000000. + 750. * (self.fields.loc[mask, nam.water_depth_ft]-1000.))))
 
         mask = self.fields[nam.platform_type] == nam.off_fps
-        self.fields[nam.platform_cost].update((self.fields.loc[mask, nam.platform_slots] + 20.) *
+        self.fields.loc[mask, nam.platform_cost] = ((self.fields.loc[mask, nam.platform_slots] + 20.) *
                                               (7500000. + 250. * (self.fields.loc[mask, nam.water_depth_ft]-1000.)))
 
         mask = self.fields[nam.platform_type] == nam.off_spar
-        self.fields[nam.platform_cost].update(100 * ((self.fields.loc[mask, nam.platform_slots] + 20.) *
+        self.fields.loc[mask, nam.platform_cost] = (100 * ((self.fields.loc[mask, nam.platform_slots] + 20.) *
                                                      (3000000. + 500. * (self.fields.loc[mask, nam.water_depth_ft]-1000.))))
 
         mask = self.fields[nam.platform_type] == nam.off_fpso
-        self.fields[nam.platform_cost].update(4 * ((self.fields.loc[mask, nam.platform_slots] + 20.) *
+        self.fields.loc[mask, nam.platform_cost] = (4 * ((self.fields.loc[mask, nam.platform_slots] + 20.) *
                                                    (7500000. + 250. * (self.fields.loc[mask, nam.water_depth_ft]-1000.))))
 
         #ss not used, only flowline costs for ss
@@ -1878,6 +1888,7 @@ class Offshore(sub.Submodule):
 
     def calculate_development_cost(self):
         """For the loaded fields, calculate development drilling costs.
+
 
         Returns
         -------
@@ -1934,6 +1945,7 @@ class Offshore(sub.Submodule):
 
     def calculate_operating_cost(self):
         """For the loaded fields, calculate operating costs.
+
 
         Returns
         -------
@@ -2357,7 +2369,6 @@ class Offshore(sub.Submodule):
         ###Crude oil
         temp = self.cash_flow.crude_production.loc[selected_mask].copy()
         temp.columns = temp.columns + self.rest_curcalyr
-        # from https://stackoverflow.com/a/4587920
         labels = [i for i in temp.columns if i > self.parent.final_aeo_year]
         temp = temp.drop(labels, axis=1)
         temp[nam.evaluation_unit] = self.fields.loc[selected_mask, nam.evaluation_unit]
@@ -2419,7 +2430,6 @@ class Offshore(sub.Submodule):
         ###Wells
         temp = self.fields_schedule.loc[selected_mask].copy()
         temp.columns = temp.columns + self.rest_curcalyr
-        # from https://stackoverflow.com/a/4587920
         labels = [i for i in temp.columns if i > self.parent.final_aeo_year]
         temp = temp.drop(labels, axis=1)
         temp[nam.evaluation_unit] = self.fields.loc[selected_mask, nam.evaluation_unit]
@@ -2434,7 +2444,6 @@ class Offshore(sub.Submodule):
         ###Exploratory Wells
         temp = self.fields[[nam.exploratory_wells]].copy()
         temp.columns = [int(self.rest_curcalyr)]
-        # from https://stackoverflow.com/a/4587920
         labels = [i for i in temp.columns if i > self.parent.final_aeo_year]
         temp = temp.drop(labels, axis=1)
         temp[nam.evaluation_unit] = self.fields.loc[selected_mask, nam.evaluation_unit]
@@ -2582,7 +2591,7 @@ class Offshore(sub.Submodule):
 
         pass
 
-
+        ### Currently turning off this debug as its not used and adds size/run-time
     def debug_offshore(self):
         """Produce debug outputs for Offshore Submodule.
 
@@ -2591,24 +2600,24 @@ class Offshore(sub.Submodule):
         None
 
         """
-        #Debug fields
-        self.fields_selected.to_csv(self.output_path + 'projects_debug\\' + 'hsm_off_fields_selected_' +  str(self.rest_curcalyr) + '.csv')
-        self.fields.to_csv(self.fields.to_csv(self.output_path + 'projects_debug\\' + 'hsm_off_fields_' + str(self.rest_curcalyr) + '.csv'))
+        # #Debug fields
+        # self.fields_selected.to_csv(self.output_path + 'projects_debug\\' + 'hsm_off_fields_selected_' +  str(self.rest_curcalyr) + '.csv')
+        # self.fields.to_csv(self.fields.to_csv(self.output_path + 'projects_debug\\' + 'hsm_off_fields_' + str(self.rest_curcalyr) + '.csv'))
 
-        #Debug cashflow
-        self.cash_flow.to_csv(self.output_path + 'cashflow_debug\\','off_cash_flow.csv', self.rest_curcalyr, self.parent.current_iteration, self.parent.current_cycle)
+        # #Debug cashflow
+        # self.cash_flow.to_csv(self.output_path + 'cashflow_debug\\','off_cash_flow.csv', self.rest_curcalyr, self.parent.current_iteration, self.parent.current_cycle)
 
-        #Debug results
-        self.crude_production.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_crude_.csv')
-        self.natgas_production.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_natgas_.csv')
+        # #Debug results
+        # self.crude_production.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_crude_.csv')
+        # self.natgas_production.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_natgas_.csv')
 
-        #Debug nfws
-        temp = self.discovered_field_dist.copy()
-        temp.insert(0, nam.year, self.rest_curcalyr)
-        temp.insert(0, 'variable', 'discovered_field_dist')
+        # #Debug nfws
+        # temp = self.discovered_field_dist.copy()
+        # temp.insert(0, nam.year, self.rest_curcalyr)
+        # temp.insert(0, 'variable', 'discovered_field_dist')
 
-        temp.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_discovery_dist.csv', mode='a')
-        self.cumulative_nfws.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_cumulative_nfws.csv')
+        # temp.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_discovery_dist.csv', mode='a')
+        # self.cumulative_nfws.to_csv(self.output_path + 'module_results_debug//' + 'hsm_off_cumulative_nfws.csv')
 
 
         pass
@@ -2798,12 +2807,155 @@ class Offshore(sub.Submodule):
         self.restart.ogsmout_ogoilprd : df
             Crude oil production by oil type and HSM district
         """
+
         ###Get fed numbers for reporting to restart
         fed_num_df = pd.DataFrame({nam.federal_land: [nam.federal, nam.not_federal],
                                        nam.federal_land_number: [2, 1]})
 
         if self.rest_curcalyr >= self.parent.steo_years[0]:
             ###Crude production
+
+            # if using alternative offshore projections, replace GOA projection
+            if self.alt_gom_switch:
+                sim_years = list(range(self.zero_year, self.parent.final_aeo_year + 1))
+                columns = ['discovery_type', 'evaluation_unit', 'federal_land', 'district_number', nam.region_number, 'water_depth_ft']
+                columns = sim_years + columns
+
+                # HOGS
+                if self.parent.side_case_adj == 1.5: 
+                    alt_prod = pd.read_csv(self.offshore_input_path + 'off_gom_projections_hogs.csv')
+                #LOGS
+                elif self.parent.side_case_adj == 0.5:
+                    alt_prod = pd.read_csv(self.offshore_input_path + 'off_gom_projections_logs.csv')
+                else:
+                    alt_prod = pd.read_csv(self.offshore_input_path + 'off_gom_projections.csv')
+                alt_prod['oil_b'] = alt_prod['oil_bdp'] * 365
+                alt_prod['gas_mcf'] = alt_prod['gas_mcfpd'] * 365
+                alt_prod.drop(['api_well_number', 'oil_bdp' ,'gas_mcfpd'], axis=1, inplace=True)
+
+                # swap out crude production for region 9 federal offshore
+                crude_alt = alt_prod.drop(['gas_mcf', 'gor'], axis=1)
+                crude_alt = crude_alt.pivot_table(values='oil_b', columns='year', index=['federal_land', nam.region_number], aggfunc='sum').reset_index()
+                crude_alt['discovery_type'] = np.nan
+                crude_alt['evaluation_unit'] = 'CGOM0002'
+                crude_alt['district_number'] = 80
+                crude_alt['water_depth_ft'] = np.nan
+
+                crude_alt = crude_alt[columns]
+                
+                # Calculate water depth split and production
+                shallow_ratio = self.crude_production.loc[(self.crude_production['water_depth_ft'] < 400) & (self.crude_production['region_number'] == 9)][2025].sum() / self.crude_production.loc[(self.crude_production['region_number'] == 9)][2025].sum()
+                crude_alt_copy = crude_alt.copy()
+                crude_alt = pd.concat([crude_alt, crude_alt_copy])
+                crude_alt.index = [0,1]
+                crude_alt.loc[0, 'water_depth_ft'] = 399
+                crude_alt.loc[0, sim_years] = crude_alt.iloc[0][sim_years] * shallow_ratio
+                crude_alt.loc[1, 'water_depth_ft'] = 450
+                crude_alt.loc[1, sim_years] = crude_alt.iloc[1][sim_years] * (1-shallow_ratio)
+                self.crude_production = self.crude_production.loc[~((self.crude_production[nam.region_number] == 9) & (self.crude_production['federal_land'] == 'federal'))]
+                self.crude_production = pd.concat([self.crude_production, crude_alt])
+                
+                # calculate natural gas depth ratio
+                shallow_ratio = self.natgas_production.loc[(self.natgas_production['water_depth_ft'] < 400) & (self.natgas_production['region_number'] == 9)][2025].sum() / self.natgas_production.loc[(self.natgas_production['region_number'] == 9)][2025].sum()
+                
+                # calculate GOA ad gas prod using previous GOR
+                #mean_gor = self.producing_fields.loc[self.producing_fields[nam.region_number] == 9]['gas_oil_ratio'].mean()
+                mean_gor = 0.78924
+                
+                ad_gas_tmp = self.crude_production.loc[(self.crude_production[nam.region_number] == 9) & (self.crude_production['federal_land'] == 'federal')].copy()
+                #ad_gas_tmp.index = [0,1]
+                #ad_gas_tmp.loc[0, 'water_depth_ft'] = 399
+                #ad_gas_tmp.loc[0, sim_years] = ad_gas_tmp.loc[0, sim_years] * shallow_ratio
+                #ad_gas_tmp.loc[1, 'water_depth_ft'] = 450
+                #ad_gas_tmp.loc[1, sim_years] = ad_gas_tmp.loc[1, sim_years] * (1-shallow_ratio)
+                ad_gas_tmp[sim_years] = ad_gas_tmp[sim_years].mul(mean_gor)
+                ad_gas_tmp['discovery_type'] = np.nan
+                ad_gas_tmp['evaluation_unit'] = 'CGOM0002'
+                ad_gas_tmp['federal_land'] = 'federal'
+                ad_gas_tmp['district_number'] = 80
+                ad_gas_tmp['region_number'] = 9
+                
+                # subctract out previous adgas volumes from total natural gas
+                filter_ngas = ((self.natgas_production[nam.region_number] == 9) & (self.natgas_production['federal_land'] == 'federal'))
+                filter_adgas = ((self.adgas_production[nam.region_number] == 9) & (self.adgas_production['federal_land'] == 'federal'))
+                
+                # sum all of natural gas production in GOM into a 1 row temp 
+                natgas_tmp = self.natgas_production.loc[filter_ngas]
+                natgas_tmp = natgas_tmp[sim_years].sum(axis=0).to_frame().T
+                natgas_tmp['discovery_type'] = np.nan
+                natgas_tmp['evaluation_unit'] = 'CGOM0002'
+                natgas_tmp['federal_land'] = 'federal'
+                natgas_tmp['district_number'] = 80
+                natgas_tmp['region_number'] = 9
+                natgas_tmp['water_depth_ft'] = np.nan
+
+                # subtract out ad gas and add back in new ad gas
+                self.natgas_production = self.natgas_production.loc[~ filter_ngas]
+                natgas_tmp[sim_years] = natgas_tmp[sim_years] + ad_gas_tmp[sim_years]
+                # split by water depth ratio
+                natgas_tmp_copy = natgas_tmp.copy()
+                natgas_tmp = pd.concat([natgas_tmp, natgas_tmp_copy])
+                natgas_tmp.index = [0,1]
+                natgas_tmp.loc[0, 'water_depth_ft'] = 399
+                natgas_tmp.loc[0, sim_years] = natgas_tmp.iloc[0][sim_years] * shallow_ratio
+                natgas_tmp.loc[1, 'water_depth_ft'] = 450
+                natgas_tmp.loc[1, sim_years] = natgas_tmp.iloc[1][sim_years] * (1-shallow_ratio)
+
+                self.natgas_production = pd.concat([self.natgas_production, natgas_tmp])
+                self.adgas_production = self.adgas_production.loc[~ filter_adgas]
+                self.adgas_production = pd.concat([self.adgas_production, ad_gas_tmp])
+                
+                # calculate average ratios for each ngpl for federal region 9
+                ngpl_ratio = self.ngpl_production.loc[((self.ngpl_production[nam.region_number] == 9) & (self.ngpl_production['federal_land'] == 'federal'))][nam.ngpl_ratio].mean()
+                ethane_ratio = self.ethane_production.loc[((self.ethane_production[nam.region_number] == 9) & (self.ethane_production['federal_land'] == 'federal'))][nam.ethane_fraction].mean()
+                propane_ratio = self.propane_production.loc[((self.propane_production[nam.region_number] == 9) & (self.propane_production['federal_land'] == 'federal'))][nam.propane_fraction].mean()
+                butane_ratio =  self.butane_production.loc[((self.butane_production[nam.region_number] == 9) & (self.butane_production['federal_land'] == 'federal'))][nam.butane_fraction].mean()
+                isobutane_ratio =  self.isobutane_production.loc[((self.isobutane_production[nam.region_number] == 9) & (self.isobutane_production['federal_land'] == 'federal'))][nam.isobutane_fraction].mean()
+                proplus_ratio =  self.proplus_production.loc[((self.proplus_production[nam.region_number] == 9) & (self.proplus_production['federal_land'] == 'federal'))][nam.natural_gasoline_fraction].mean()
+                
+                # Remove other NGPL values
+                self.ngpl_production = self.ngpl_production.loc[~((self.ngpl_production[nam.region_number] == 9) & (self.ngpl_production['federal_land'] == 'federal'))]
+                self.ethane_production = self.ethane_production.loc[~((self.ethane_production[nam.region_number] == 9) & (self.ethane_production['federal_land'] == 'federal'))]
+                self.propane_production = self.propane_production.loc[~((self.propane_production[nam.region_number] == 9) & (self.propane_production['federal_land'] == 'federal'))]
+                self.butane_production =  self.butane_production.loc[~((self.butane_production[nam.region_number] == 9) & (self.butane_production['federal_land'] == 'federal'))]
+                self.isobutane_production =  self.isobutane_production.loc[~((self.isobutane_production[nam.region_number] == 9) & (self.isobutane_production['federal_land'] == 'federal'))]
+                self.proplus_production =  self.proplus_production.loc[~((self.proplus_production[nam.region_number] == 9) & (self.proplus_production['federal_land'] == 'federal'))]
+
+                # build temp dataframes
+                ngpl_tmp = self.natgas_production.loc[((self.natgas_production[nam.region_number] == 9) & (self.natgas_production['federal_land'] == 'federal'))][sim_years].mul(ngpl_ratio, axis=0)       
+                ethane_tmp = ngpl_tmp[sim_years].mul(ethane_ratio, axis=0)
+                propane_tmp = ngpl_tmp[sim_years].mul(propane_ratio, axis=0)
+                butane_tmp = ngpl_tmp[sim_years].mul(butane_ratio, axis=0)
+                isobutane_tmp = ngpl_tmp[sim_years].mul(isobutane_ratio, axis=0)
+                proplus_tmp = ngpl_tmp[sim_years].mul(proplus_ratio, axis=0)
+
+                dfs = [ngpl_tmp, ethane_tmp, propane_tmp, butane_tmp, isobutane_tmp, proplus_tmp]
+                for i in dfs:
+                    i['discovery_type'] = np.nan
+                    i['evaluation_unit'] = 'CGOM0002'
+                    i['federal_land'] = 'federal'
+                    i['district_number'] = 80
+                    i['region_number'] = 9
+                    i['water_depth_ft'] = np.nan
+                
+                ngpl_tmp['ngpl_ratio'] = ngpl_ratio
+                ethane_tmp['ethane_fraction'] = ethane_ratio
+                propane_tmp['propane_fraction'] = propane_ratio
+                butane_tmp['butane_fraction'] = butane_ratio
+                isobutane_tmp['isobutane_fraction'] = isobutane_ratio
+                proplus_tmp['natural_gasoline_fraction'] = proplus_ratio
+                
+                # Add back in new stuff
+                self.ngpl_production = pd.concat([self.ngpl_production, ngpl_tmp])
+                self.ethane_production = pd.concat([self.ethane_production, ethane_tmp])
+                self.propane_production = pd.concat([self.propane_production, propane_tmp])
+                self.butane_production = pd.concat([self.butane_production, butane_tmp])
+                self.isobutane_production = pd.concat([self.isobutane_production, isobutane_tmp])
+                self.proplus_production = pd.concat([self.proplus_production, proplus_tmp])
+
+                pass
+
+
             temp = self.crude_production.copy()
             temp = pd.merge(temp, self.mapping[[nam.region_number, nam.planning_area, nam.offshore_region_number]],
                             left_on=nam.evaluation_unit, right_index=True,
@@ -2821,56 +2973,89 @@ class Offshore(sub.Submodule):
             temp[nam.oil_or_gas] = 1
             temp = temp.reset_index().set_index([nam.offshore_region_number, nam.oil_or_gas])
             temp = temp[[self.rest_curcalyr]].stack() * 365 / 1000000
-            self.restart.ogsmout_ogprdoff['value'].update(temp)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogprdoff.loc[temp.index, 'value'] = temp
 
 
             ###Crude production by oil category
             temp = (self.crude_production.copy()[self.rest_curcalyr].sum()) /1000000
-            self.restart.ogsmout_ogqcrrep.at[(3,int(self.rest_curcalyr)), 'value'] = temp
+            dtype_ogqcrrep = self.restart.ogsmout_ogqcrrep['value'].dtype
+            self.restart.ogsmout_ogqcrrep.at[(3,int(self.rest_curcalyr)), 'value'] = dtype_ogqcrrep.type(temp)
 
 
             ###Crude production by HSM region and LFMM fuel type
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.region_number]]
             temp = temp.groupby([nam.region_number]).sum()
             #Write to restart
+            dtype_ogcrdprd = self.restart.ogsmout_ogcrdprd[nam.value].dtype
             try:
-                self.restart.ogsmout_ogcrdprd.at[(8, 3, int(self.rest_curcalyr)), nam.value] = temp.at[8, int(self.rest_curcalyr)] / 1000000  #! ATLANTIC medium medium sour
+                self.restart.ogsmout_ogcrdprd.at[(8, 3, int(self.rest_curcalyr)), nam.value] = dtype_ogcrdprd.type(
+                    temp.at[8, int(self.rest_curcalyr)] / 1000000
+                )  #! ATLANTIC medium medium sour
             except:
                 pass
-            self.restart.ogsmout_ogcrdprd.at[(9, 3, int(self.rest_curcalyr)), nam.value] = temp.at[9, int(self.rest_curcalyr)] / 1000000  #! GOM medium medium sour
-            self.restart.ogsmout_ogcrdprd.at[(10, 7, int(self.rest_curcalyr)), nam.value] = temp.at[10, int(self.rest_curcalyr)] / 1000000 #! california
+            self.restart.ogsmout_ogcrdprd.at[(9, 3, int(self.rest_curcalyr)), nam.value] = dtype_ogcrdprd.type(
+                temp.at[9, int(self.rest_curcalyr)] / 1000000
+            )  #! GOM medium medium sour
+            self.restart.ogsmout_ogcrdprd.at[(10, 7, int(self.rest_curcalyr)), nam.value] = dtype_ogcrdprd.type(
+                temp.at[10, int(self.rest_curcalyr)] / 1000000
+            ) #! california
 
 
             ###Domestic crude oil production by region for LFMM (including EOR)
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.region_number]]
             temp = temp.groupby(nam.region_number).sum()
-            self.restart.pmmout_rfqtdcrd.at[(8, int(self.rest_curcalyr)), 'value'] = 0 #Set to 0 because currently no production in the Atlantic
-            self.restart.pmmout_rfqtdcrd.at[(9, int(self.rest_curcalyr)), 'value'] = temp.at[(9, int(self.rest_curcalyr))] / 1000000 / 365
-            self.restart.pmmout_rfqtdcrd.at[(10, int(self.rest_curcalyr)), 'value'] = temp.at[(10, int(self.rest_curcalyr))] / 1000000 / 365
+            dtype_rfqtdcrd = self.restart.pmmout_rfqtdcrd['value'].dtype
+            self.restart.pmmout_rfqtdcrd.at[(8, int(self.rest_curcalyr)), 'value'] = dtype_rfqtdcrd.type(0) #Set to 0 because currently no production in the Atlantic
+            self.restart.pmmout_rfqtdcrd.at[(9, int(self.rest_curcalyr)), 'value'] = dtype_rfqtdcrd.type(
+                temp.at[(9, int(self.rest_curcalyr))] / 1000000 / 365
+            )
+            self.restart.pmmout_rfqtdcrd.at[(10, int(self.rest_curcalyr)), 'value'] = dtype_rfqtdcrd.type(
+                temp.at[(10, int(self.rest_curcalyr))] / 1000000 / 365
+            )
 
 
 
             ###Domestic crude oil production by region for LFMM (not including EOR)
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.region_number]]
             temp = temp.groupby(nam.region_number).sum()
-            self.restart.pmmout_rfqdcrd.at[(8, int(self.rest_curcalyr)), 'value'] = 0 #Set to 0 because currently no production in the Atlantic
-            self.restart.pmmout_rfqdcrd.at[(9, int(self.rest_curcalyr)), 'value'] = temp.at[(9, int(self.rest_curcalyr))] / 1000000 / 365
-            self.restart.pmmout_rfqdcrd.at[(10, int(self.rest_curcalyr)), 'value'] = temp.at[(10, int(self.rest_curcalyr))] / 1000000 / 365
+            dtype_rfqdcrd = self.restart.pmmout_rfqdcrd['value'].dtype
+            self.restart.pmmout_rfqdcrd.at[(8, int(self.rest_curcalyr)), 'value'] = dtype_rfqdcrd.type(0) #Set to 0 because currently no production in the Atlantic
+            self.restart.pmmout_rfqdcrd.at[(9, int(self.rest_curcalyr)), 'value'] = dtype_rfqdcrd.type(
+                temp.at[(9, int(self.rest_curcalyr))] / 1000000 / 365
+            )
+            self.restart.pmmout_rfqdcrd.at[(10, int(self.rest_curcalyr)), 'value'] = dtype_rfqdcrd.type(
+                temp.at[(10, int(self.rest_curcalyr))] / 1000000 / 365
+            )
 
 
             ###Crude production by HSM Region (offset from PMMOUT regions since they don't line up with OGSM regions)
-            self.restart.ogsmout_ogcoprd.at[(8, int(self.rest_curcalyr)), 'value'] = self.restart.pmmout_rfqtdcrd.at[(9, int(self.rest_curcalyr)), 'value']
-            self.restart.ogsmout_ogcoprd.at[(9, int(self.rest_curcalyr)), 'value'] = self.restart.pmmout_rfqtdcrd.at[(10, int(self.rest_curcalyr)), 'value']
-            self.restart.ogsmout_ogcoprd.at[(10, int(self.rest_curcalyr)), 'value'] = self.restart.pmmout_rfqtdcrd.at[(8, int(self.rest_curcalyr)), 'value']
+            dtype_ogcoprd = self.restart.ogsmout_ogcoprd['value'].dtype
+            self.restart.ogsmout_ogcoprd.at[(8, int(self.rest_curcalyr)), 'value'] = dtype_ogcoprd.type(
+                self.restart.pmmout_rfqtdcrd.at[(9, int(self.rest_curcalyr)), 'value']
+            )
+            self.restart.ogsmout_ogcoprd.at[(9, int(self.rest_curcalyr)), 'value'] = dtype_ogcoprd.type(
+                self.restart.pmmout_rfqtdcrd.at[(10, int(self.rest_curcalyr)), 'value']
+            )
+            self.restart.ogsmout_ogcoprd.at[(10, int(self.rest_curcalyr)), 'value'] = dtype_ogcoprd.type(
+                self.restart.pmmout_rfqtdcrd.at[(8, int(self.rest_curcalyr)), 'value']
+            )
 
 
             ###Domestic oil crude production by LFMM padd region
-            self.restart.ogsmout_ogcruderef.at[(1, 3, int(self.rest_curcalyr)), 'value'] = self.restart.ogsmout_ogcruderef.at[(1, 3, int(self.rest_curcalyr)), 'value'] + \
-                                                                                      (self.restart.pmmout_rfqtdcrd.at[(8, int(self.rest_curcalyr)), 'value'] * 365)
-            self.restart.ogsmout_ogcruderef.at[(4, 3, int(self.rest_curcalyr)), 'value'] = self.restart.ogsmout_ogcruderef.at[(4, 3, int(self.rest_curcalyr)), 'value'] + \
-                                                                                      (self.restart.pmmout_rfqtdcrd.at[(9, int(self.rest_curcalyr)), 'value'] * 365)
-            self.restart.ogsmout_ogcruderef.at[(7, 7, int(self.rest_curcalyr)), 'value'] = self.restart.ogsmout_ogcruderef.at[(7, 7, int(self.rest_curcalyr)), 'value'] +\
-                                                                                      (self.restart.pmmout_rfqtdcrd.at[(10, int(self.rest_curcalyr)), 'value'] * 365)
+            dtype_ogcruderef = self.restart.ogsmout_ogcruderef['value'].dtype
+            self.restart.ogsmout_ogcruderef.at[(1, 3, int(self.rest_curcalyr)), 'value'] = dtype_ogcruderef.type(
+                self.restart.ogsmout_ogcruderef.at[(1, 3, int(self.rest_curcalyr)), 'value'] +
+                (self.restart.pmmout_rfqtdcrd.at[(8, int(self.rest_curcalyr)), 'value'] * 365)
+            )
+            self.restart.ogsmout_ogcruderef.at[(4, 3, int(self.rest_curcalyr)), 'value'] = dtype_ogcruderef.type(
+                self.restart.ogsmout_ogcruderef.at[(4, 3, int(self.rest_curcalyr)), 'value'] +
+                (self.restart.pmmout_rfqtdcrd.at[(9, int(self.rest_curcalyr)), 'value'] * 365)
+            )
+            self.restart.ogsmout_ogcruderef.at[(7, 7, int(self.rest_curcalyr)), 'value'] = dtype_ogcruderef.type(
+                self.restart.ogsmout_ogcruderef.at[(7, 7, int(self.rest_curcalyr)), 'value'] +
+                (self.restart.pmmout_rfqtdcrd.at[(10, int(self.rest_curcalyr)), 'value'] * 365)
+            )
 
 
             ### Crude Production Federal/Non-Federal
@@ -2881,12 +3066,19 @@ class Offshore(sub.Submodule):
             temp = temp.groupby([nam.region_number]).sum()
 
             #Write to restart
+            dtype_ogcoprd_fed = self.restart.ogsmout_ogcoprd_fed[nam.value].dtype
             try:
-                self.restart.ogsmout_ogcoprd_fed.at[(8, int(self.rest_curcalyr)), nam.value] = temp.at[8, int(self.rest_curcalyr)] / 1000000 / 365
+                self.restart.ogsmout_ogcoprd_fed.at[(8, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_fed.type(
+                    temp.at[8, int(self.rest_curcalyr)] / 1000000 / 365
+                )
             except:
                 pass
-            self.restart.ogsmout_ogcoprd_fed.at[(9, int(self.rest_curcalyr)), nam.value] = temp.at[9, int(self.rest_curcalyr)] / 1000000  / 365
-            self.restart.ogsmout_ogcoprd_fed.at[(10, int(self.rest_curcalyr)), nam.value] = temp.at[10, int(self.rest_curcalyr)] / 1000000  / 365
+            self.restart.ogsmout_ogcoprd_fed.at[(9, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_fed.type(
+                temp.at[9, int(self.rest_curcalyr)] / 1000000  / 365
+            )
+            self.restart.ogsmout_ogcoprd_fed.at[(10, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_fed.type(
+                temp.at[10, int(self.rest_curcalyr)] / 1000000  / 365
+            )
 
             # Non-Federal Land
             temp = self.crude_production.copy()[[int(self.rest_curcalyr), nam.region_number, nam.federal_land]]
@@ -2895,12 +3087,19 @@ class Offshore(sub.Submodule):
             temp = temp.groupby([nam.region_number]).sum()
 
             # Write to restart
+            dtype_ogcoprd_nonfed = self.restart.ogsmout_ogcoprd_nonfed[nam.value].dtype
             try:
-                self.restart.ogsmout_ogcoprd_nonfed.at[(8, int(self.rest_curcalyr)), nam.value] = temp.at[8, int(self.rest_curcalyr)] / 1000000 / 365 # ! ATLANTIC medium medium sour
+                self.restart.ogsmout_ogcoprd_nonfed.at[(8, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_nonfed.type(
+                    temp.at[8, int(self.rest_curcalyr)] / 1000000 / 365
+                ) # ! ATLANTIC medium medium sour
             except:
                 pass
-            self.restart.ogsmout_ogcoprd_nonfed.at[(9, int(self.rest_curcalyr)), nam.value] = temp.at[9, int(self.rest_curcalyr)] / 1000000 / 365
-            self.restart.ogsmout_ogcoprd_nonfed.at[(10, int(self.rest_curcalyr)), nam.value] = temp.at[10, int(self.rest_curcalyr)] / 1000000 / 365
+            self.restart.ogsmout_ogcoprd_nonfed.at[(9, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_nonfed.type(
+                temp.at[9, int(self.rest_curcalyr)] / 1000000 / 365
+            )
+            self.restart.ogsmout_ogcoprd_nonfed.at[(10, int(self.rest_curcalyr)), nam.value] = dtype_ogcoprd_nonfed.type(
+                temp.at[10, int(self.rest_curcalyr)] / 1000000 / 365
+            )
 
 
             ###Natural gas production
@@ -2920,7 +3119,8 @@ class Offshore(sub.Submodule):
             temp[nam.oil_or_gas] = 2
             temp = temp.reset_index().set_index([nam.offshore_region_number, nam.oil_or_gas])
             temp = temp[[int(self.rest_curcalyr)]].stack()/1000000
-            self.restart.ogsmout_ogprdoff['value'].update(temp)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogprdoff.loc[temp.index, 'value'] = temp
 
 
             ###Natural Gas production by region
@@ -2928,16 +3128,22 @@ class Offshore(sub.Submodule):
             temp = temp.groupby([nam.region_number]).sum()
             temp.columns = [nam.value]
 
-            self.restart.ogsmout_ogngprd.at[(8, int(self.rest_curcalyr)), nam.value] = temp.at[9, nam.value] / 1000000
-            self.restart.ogsmout_ogngprd.at[(9, int(self.rest_curcalyr)), nam.value] = temp.at[10, nam.value] / 1000000
-            self.restart.ogsmout_ogngprd.at[(10, int(self.rest_curcalyr)), nam.value] = 0
+            dtype_ogngprd = self.restart.ogsmout_ogngprd[nam.value].dtype
+            self.restart.ogsmout_ogngprd.at[(8, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd.type(
+                temp.at[9, nam.value] / 1000000
+            )
+            self.restart.ogsmout_ogngprd.at[(9, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd.type(
+                temp.at[10, nam.value] / 1000000
+            )
+            self.restart.ogsmout_ogngprd.at[(10, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd.type(0)
 
 
             ###Natural gas production by gas category
             temp = self.nagas_production.copy()[self.rest_curcalyr].sum()
-            self.restart.ogsmout_ogqngrep.loc[(6, int(self.rest_curcalyr)), 'value'] = temp/1000000
+            dtype_ogqngrep = self.restart.ogsmout_ogqngrep['value'].dtype
+            self.restart.ogsmout_ogqngrep.loc[(6, int(self.rest_curcalyr)), 'value'] = dtype_ogqngrep.type(temp/1000000)
             temp = self.adgas_production.copy()[self.rest_curcalyr].sum()
-            self.restart.ogsmout_ogqngrep.loc[(7, int(self.rest_curcalyr)), 'value'] = temp/1000000
+            self.restart.ogsmout_ogqngrep.loc[(7, int(self.rest_curcalyr)), 'value'] = dtype_ogqngrep.type(temp/1000000)
 
 
             ###Dry natural gas production by state and district type
@@ -2945,7 +3151,11 @@ class Offshore(sub.Submodule):
             temp[int(self.rest_curcalyr)] = temp[int(self.rest_curcalyr)] / 1000000
             temp[nam.gas_type_number] = 1
             temp = temp.groupby([nam.district_number, nam.gas_type_number]).sum()
-            self.restart.ogsmout_ogdngprd['value'].update(temp.stack())
+            temp = temp.stack()
+            temp = temp.astype(self.restart.ogsmout_ogdngprd['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            ogdngprd_index = temp.index.intersection(self.restart.ogsmout_ogdngprd.index)
+            self.restart.ogsmout_ogdngprd.loc[ogdngprd_index, 'value'] = temp.loc[ogdngprd_index]
 
 
             ###Non-associated natural gas production by state and district type
@@ -2953,7 +3163,11 @@ class Offshore(sub.Submodule):
             temp[int(self.rest_curcalyr)] = temp[int(self.rest_curcalyr)] / 1000000
             temp[nam.gas_type_number] = 1
             temp = temp.groupby([nam.district_number, nam.gas_type_number]).sum()
-            self.restart.ogsmout_ogenagprd['value'].update(temp.stack())
+            temp = temp.stack()
+            temp = temp.astype(self.restart.ogsmout_ogenagprd['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            ogenagprd_index = temp.index.intersection(self.restart.ogsmout_ogenagprd.index)
+            self.restart.ogsmout_ogenagprd.loc[ogenagprd_index, 'value'] = temp.loc[ogenagprd_index]
             #self.restart.ogsmout_ogrnagprd['value'].update(temp.stack())
 
 
@@ -2966,6 +3180,8 @@ class Offshore(sub.Submodule):
             temp = temp.set_index([nam.well_type, nam.year], append = True)
             temp.index.names = self.restart.ogsmout_ogadgprd.index.names
             temp.columns = [nam.value]
+            # Cast to restart dtype before update to avoid dtype incompatibility
+            temp[nam.value] = temp[nam.value].astype(self.restart.ogsmout_ogadgprd['value'].dtype)
             self.restart.ogsmout_ogadgprd.update(temp)
 
 
@@ -2973,12 +3189,19 @@ class Offshore(sub.Submodule):
             temp = self.adgas_production[[int(self.rest_curcalyr), nam.region_number]].copy()
             temp[int(self.rest_curcalyr)] = temp[int(self.rest_curcalyr)] / 1000000
             temp = temp.groupby([nam.region_number]).sum()
-            self.restart.ogsmout_ogprdad['value'].update(temp.stack())
+            temp_series = temp.stack().astype(self.restart.ogsmout_ogprdad['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            ogprdad_index = temp_series.index.intersection(self.restart.ogsmout_ogprdad.index)
+            self.restart.ogsmout_ogprdad.loc[ogprdad_index, 'value'] = temp_series.loc[ogprdad_index]
 
 
             ###AD natural gas production for offshore regions
-            temp.rename(index={8:1,9:2,10:3})
-            self.restart.ogsmout_ogprdadof['value'].update(temp.stack())
+            temp_offshore = temp.rename(index={8:1,9:2,10:3})
+            temp_offshore = temp_offshore.stack().astype(self.restart.ogsmout_ogprdadof['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            # Only update indices that exist in the restart table to avoid KeyError
+            ogprdadof_index = temp_offshore.index.intersection(self.restart.ogsmout_ogprdadof.index)
+            self.restart.ogsmout_ogprdadof.loc[ogprdadof_index, 'value'] = temp_offshore.loc[ogprdadof_index]
 
 
             ### Natural Gas Production Federal/Non-Federal
@@ -2989,12 +3212,19 @@ class Offshore(sub.Submodule):
             temp = temp.groupby([nam.region_number]).sum()
 
             # Write to restart
+            dtype_ogngprd_fed = self.restart.ogsmout_ogngprd_fed[nam.value].dtype
             try:
-                self.restart.ogsmout_ogngprd_fed.at[(8, int(self.rest_curcalyr)), nam.value] = temp.at[8, int(self.rest_curcalyr)] / 1000000000
+                self.restart.ogsmout_ogngprd_fed.at[(8, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd_fed.type(
+                    temp.at[8, int(self.rest_curcalyr)] / 1000000000
+                )
             except:
                 pass
-            self.restart.ogsmout_ogngprd_fed.at[(9, int(self.rest_curcalyr)), nam.value] = temp.at[9, int(self.rest_curcalyr)] / 1000000000
-            self.restart.ogsmout_ogngprd_fed.at[(10, int(self.rest_curcalyr)), nam.value] = temp.at[10, int(self.rest_curcalyr)] / 1000000000
+            self.restart.ogsmout_ogngprd_fed.at[(9, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd_fed.type(
+                temp.at[9, int(self.rest_curcalyr)] / 1000000000
+            )
+            self.restart.ogsmout_ogngprd_fed.at[(10, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd_fed.type(
+                temp.at[10, int(self.rest_curcalyr)] / 1000000000
+            )
 
             # Non-Federal Land
             temp = self.natgas_production.copy()[[int(self.rest_curcalyr), nam.region_number, nam.federal_land]]
@@ -3003,12 +3233,19 @@ class Offshore(sub.Submodule):
             temp = temp.groupby([nam.region_number]).sum()
 
             # Write to restart
+            dtype_ogngprd_nonfed = self.restart.ogsmout_ogngprd_nonfed[nam.value].dtype
             try:
-                self.restart.ogsmout_ogngprd_nonfed.at[(8, int(self.rest_curcalyr)), nam.value] = temp.at[8, int(self.rest_curcalyr)] / 1000000000  # ! ATLANTIC medium medium sour
+                self.restart.ogsmout_ogngprd_nonfed.at[(8, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd_nonfed.type(
+                    temp.at[8, int(self.rest_curcalyr)] / 1000000000
+                )  # ! ATLANTIC medium medium sour
             except:
                 pass
-            self.restart.ogsmout_ogngprd_nonfed.at[(9, int(self.rest_curcalyr)), nam.value] = temp.at[9, int(self.rest_curcalyr)] / 1000000000
-            self.restart.ogsmout_ogngprd_nonfed.at[(10, int(self.rest_curcalyr)), nam.value] = temp.at[10, int(self.rest_curcalyr)] / 1000000000
+            self.restart.ogsmout_ogngprd_nonfed.at[(9, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd_nonfed.type(
+                temp.at[9, int(self.rest_curcalyr)] / 1000000000
+            )
+            self.restart.ogsmout_ogngprd_nonfed.at[(10, int(self.rest_curcalyr)), nam.value] = dtype_ogngprd_nonfed.type(
+                temp.at[10, int(self.rest_curcalyr)] / 1000000000
+            )
 
 
             ###State-level Oil and Natural Gas Production
@@ -3032,8 +3269,13 @@ class Offshore(sub.Submodule):
                 pass
 
             #Pacific Prod
-            self.restart.ogsmout_ogprdoff.at[(2,1,int(self.rest_curcalyr)), nam.value] = temp_oil.at[10, int(self.rest_curcalyr)] / 1000000
-            self.restart.ogsmout_ogprdoff.at[(2,2,int(self.rest_curcalyr)), nam.value] = temp_gas.at[10, int(self.rest_curcalyr)] / 1000000
+            dtype_ogprdoff = self.restart.ogsmout_ogprdoff['value'].dtype
+            self.restart.ogsmout_ogprdoff.at[(2,1,int(self.rest_curcalyr)), nam.value] = dtype_ogprdoff.type(
+                temp_oil.at[10, int(self.rest_curcalyr)] / 1000000
+            )
+            self.restart.ogsmout_ogprdoff.at[(2,2,int(self.rest_curcalyr)), nam.value] = dtype_ogprdoff.type(
+                temp_gas.at[10, int(self.rest_curcalyr)] / 1000000
+            )
 
             #Split Gulf Production into regions based on drill depth
             temp_oil = self.crude_production[[int(self.rest_curcalyr), nam.district_number, nam.water_depth_ft, nam.federal_land]]
@@ -3097,8 +3339,13 @@ class Offshore(sub.Submodule):
             temp_oil_deep = temp_oil_deep[int(self.rest_curcalyr)].sum() / 1000000 / 365
 
             #Write to Regions
-            self.restart.ogsmout_ogcoprdgom.at[(1,int(self.rest_curcalyr)), nam.value] = temp_oil_shallow
-            self.restart.ogsmout_ogcoprdgom.at[(2,int(self.rest_curcalyr)), nam.value] = temp_oil_deep
+            dtype_ogcoprdgom = self.restart.ogsmout_ogcoprdgom[nam.value].dtype
+            self.restart.ogsmout_ogcoprdgom.at[(1,int(self.rest_curcalyr)), nam.value] = dtype_ogcoprdgom.type(
+                temp_oil_shallow
+            )
+            self.restart.ogsmout_ogcoprdgom.at[(2,int(self.rest_curcalyr)), nam.value] = dtype_ogcoprdgom.type(
+                temp_oil_deep
+            )
 
 
             ###Natural gas production for Gulf of Mexico
@@ -3116,14 +3363,21 @@ class Offshore(sub.Submodule):
             temp_gas_deep = temp_gas_deep[int(self.rest_curcalyr)].sum() / 1000000 / 365
 
             #Write to Regions
-            self.restart.ogsmout_ogngprdgom.at[(1,int(self.rest_curcalyr)), nam.value] = temp_gas_shallow
-            self.restart.ogsmout_ogngprdgom.at[(2,int(self.rest_curcalyr)), nam.value] = temp_gas_deep
+            dtype_ogngprdgom = self.restart.ogsmout_ogngprdgom[nam.value].dtype
+            self.restart.ogsmout_ogngprdgom.at[(1,int(self.rest_curcalyr)), nam.value] = dtype_ogngprdgom.type(
+                temp_gas_shallow
+            )
+            self.restart.ogsmout_ogngprdgom.at[(2,int(self.rest_curcalyr)), nam.value] = dtype_ogngprdgom.type(
+                temp_gas_deep
+            )
 
 
             ###Crude wellhead price
-            self.restart.ogsmout_ogcowhp.at[(8, int(self.rest_curcalyr)), nam.value] = self.parent.rest_dcrdwhp.at[9, int(self.rest_curcalyr)].copy()
-            self.restart.ogsmout_ogcowhp.at[(9, int(self.rest_curcalyr)), nam.value] = self.parent.rest_dcrdwhp.at[10, int(self.rest_curcalyr)].copy()
-            self.restart.ogsmout_ogcowhp.at[(10, int(self.rest_curcalyr)), nam.value] = self.parent.rest_dcrdwhp.at[8, int(self.rest_curcalyr)].copy()
+            # ogcowhp uses the MNL48T regions where region 8 is Gulf, 9 is Pacific, and 10 is Atlantic
+            # reg_crude_price uses the HSM regions (MNUMOR) where region 9 is Gulf, 10 is Pacific, and 8 is Atlantic
+            self.restart.ogsmout_ogcowhp.at[(8, int(self.rest_curcalyr)), nam.value] = self.parent.reg_crude_price.at[9, int(self.rest_curcalyr)].copy()   
+            self.restart.ogsmout_ogcowhp.at[(9, int(self.rest_curcalyr)), nam.value] = self.parent.reg_crude_price.at[10, int(self.rest_curcalyr)].copy()
+            self.restart.ogsmout_ogcowhp.at[(10, int(self.rest_curcalyr)), nam.value] = self.parent.reg_crude_price.at[8, int(self.rest_curcalyr)].copy()
 
 
             ###Natgas wellhead price
@@ -3137,38 +3391,44 @@ class Offshore(sub.Submodule):
             #Write to restart for ogsmout_ogngplbu. transform to OGDIST,MNUMYR
             temp = self.butane_production.copy()[[int(self.rest_curcalyr), nam.district_number]].groupby(
                 [nam.district_number]).sum()
-            temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogngplbu['value'].update(temp)
+            temp = (temp.stack()/(365 * 1000000)).astype(self.restart.ogsmout_ogngplbu['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogngplbu.loc[temp.index, 'value'] = temp
 
             #Write to restart for self.ogsmout_ogngplet
             temp = self.ethane_production.copy()[[int(self.rest_curcalyr), nam.district_number]].groupby(
                 [nam.district_number]).sum()
-            temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogngplet['value'].update(temp)
+            temp = (temp.stack()/(365 * 1000000)).astype(self.restart.ogsmout_ogngplet['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogngplet.loc[temp.index, 'value'] = temp
 
             #Write to restart for self.ogsmout_ogngplis
             temp = self.isobutane_production.copy()[[int(self.rest_curcalyr), nam.district_number]].groupby(
                 [nam.district_number]).sum()
-            temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogngplis['value'].update(temp)
+            temp = (temp.stack()/(365 * 1000000)).astype(self.restart.ogsmout_ogngplis['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogngplis.loc[temp.index, 'value'] = temp
 
             #Write to restart for self.ogsmout_ogngplpp
             temp = self.proplus_production.copy()[[int(self.rest_curcalyr), nam.district_number]].groupby(
                 [nam.district_number]).sum()
-            temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogngplpp['value'].update(temp)
+            temp = (temp.stack()/(365 * 1000000)).astype(self.restart.ogsmout_ogngplpp['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogngplpp.loc[temp.index, 'value'] = temp
 
             #Write to restart for self.ogsmout_ogngplpr
             temp = self.propane_production.copy()[[int(self.rest_curcalyr), nam.district_number]].groupby(
                 [nam.district_number]).sum()
-            temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogngplpr['value'].update(temp)
+            temp = (temp.stack()/(365 * 1000000)).astype(self.restart.ogsmout_ogngplpr['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogngplpr.loc[temp.index, 'value'] = temp
 
             #Write to restart for self.ogsmout_ogngplprd
             temp = self.ngpl_production.copy()[[int(self.rest_curcalyr), nam.district_number]].groupby(
                 [nam.district_number]).sum()
-            temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogngplprd['value'].update(temp)
+            temp = (temp.stack()/(365 * 1000000)).astype(self.restart.ogsmout_ogngplprd['value'].dtype)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogngplprd.loc[temp.index, 'value'] = temp
 
             #Write NGPL Debug
             temp_ngpl_debug = self.ngpl_production.copy()
@@ -3191,7 +3451,8 @@ class Offshore(sub.Submodule):
             temp = temp[[int(self.rest_curcalyr), nam.district_number, 'oiltype']].groupby(
                 [nam.district_number, 'oiltype']).sum()
             temp = temp.stack()/(365 * 1000000)
-            self.restart.ogsmout_ogoilprd['value'].update(temp)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogoilprd.loc[temp.index, 'value'] = temp
 
             #sum across all oil types (1 in this case), and add to restart variable for oil type 5
             temp = self.crude_production.copy()
@@ -3199,9 +3460,14 @@ class Offshore(sub.Submodule):
             temp = temp[[int(self.rest_curcalyr), nam.district_number, 'oiltype']].groupby(
                 [nam.district_number, 'oiltype']).sum()
             temp = temp.stack() / (365 * 1000000)
-            additive = self.restart.ogsmout_ogoilprd.loc[temp.index.get_level_values('district_number'), 5, int(self.rest_curcalyr)].copy()
+            additive = self.restart.ogsmout_ogoilprd.loc[
+                temp.index.get_level_values('district_number'),
+                5,
+                int(self.rest_curcalyr)
+            ].copy()
             additive = additive['value'] + temp
-            self.restart.ogsmout_ogoilprd['value'].update(additive)
+            # Avoid chained assignment + inplace update on a Series; write via .loc instead
+            self.restart.ogsmout_ogoilprd.loc[additive.index, 'value'] = additive
         else:
             pass
 

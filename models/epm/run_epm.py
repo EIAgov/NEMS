@@ -10,7 +10,7 @@ object will all be initialized to start and cleaned up afterward.
 import argparse
 from enum import StrEnum
 import time
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 
 from epm_common import print_it, running_integrated
 from epm_core import epm
@@ -307,6 +307,7 @@ def run_epm_standalone(
 def run_epm(
     mode: Mode,
     pyfiler: ModuleType | None = None,
+    user: SimpleNamespace | None = None,
     *,
     cycles: int | None = None,
     years: int | None = None,
@@ -330,6 +331,10 @@ def run_epm(
         This is used for integrated NEMS runs and should be set to the default
         value of None for standalone runs when EPM will need to manage PyFiler
         on its own.
+    user : SimpleNamespace | None, optional
+        The NEMS user object. For integrated runs, this will be used to access
+        the scedes dict and to store internal EPM variables. Defaults to None,
+        which is appropriate for standalone runs.
     cycles : int | None, optional
         If not None, this overrides the restart file value of `numiruns`. The
         default is to use the restart file value.
@@ -350,13 +355,24 @@ def run_epm(
     # Create an internal structure to store the external arguments to EPM
     args = Arguments(mode, cycles=cycles, years=years, iters=iters)
 
+    if running_integrated():
+        if pyfiler is None:
+            raise TypeError("pyfiler cannot be None for integrated runs")
+        if user is None:
+            raise TypeError("user cannot be None for integrated runs")
+
     # Set up framework data structures before any core EPM code runs
     restart = Restart(pyfiler)
-    restart.read_file()
-    scedes = Scedes()
-    scedes.read_file()
-    variables = Variables(restart)
-    variables.load()
+    restart.read()
+    if user is not None:
+        scedes = Scedes(user.SCEDES)
+    else:
+        scedes = Scedes()  # Prepare to read scedes data from file
+    scedes.read()
+    if user is not None and hasattr(user, "epm_variables"):
+        variables = user.epm_variables
+    else:
+        variables = Variables(restart)
 
     # Make the external arguments pass some basic validation checks
     args.validate(restart)
@@ -386,8 +402,9 @@ def run_epm(
         )
 
     # Handle cleanup and save the data after the core EPM code runs
-    restart.write_file()
-    variables.save()
+    restart.write()
+    if user is not None:
+        user.epm_variables = variables
 
     # For standalone runs, report the time spent cleaning up (writing restart
     # and variables files to disk). For both run configurations, report the

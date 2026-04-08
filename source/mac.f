@@ -7,9 +7,9 @@
 ! LANGUAGE:      FORTRAN                                                *
 ! CALLED BY:     PROGRAM NEMS (Integrating Module)                      *
 !                                                                       *
-! ANALYSIS:      AEO2025                                                *
+! ANALYSIS:      AEO2026                                                *
 ! CASE:          Reference                                              *
-! DATE:          November 19, 2024                                      *
+! DATE:          September 4, 2025                                      *
 !                                                                       *
 !************************************************************************
 ! AEO2025 CHANGES                                                       *
@@ -785,7 +785,7 @@
 !  START DO I: Loop through number of national and regional macro variables.
        DO i = 1,mcnmmac+mcnmnatreg
 !  START IF ((baseyr+curiyr-1) .GE. 1990): Compute a forecast beginning in
-!   2025. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
+!   2026. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
          IF ((baseyr+curiyr-1) .GE. 1990) THEN
 !  START IF (i .LE. mcnmmac): Copy EViews model solutions to esmac matrix from
 !   epmac matrix. 'mcnmmac' is the number of national macro variables.
@@ -798,7 +798,7 @@
 !   epmac matrix. 'mcnmmac' is the number of national macro variables.
            END IF
 !  END IF ((baseyr+curiyr-1) .GE. 1990): Compute a forecast beginning in
-!   2025. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
+!   2026. 'baseyr' in NEMS is 1990. 'curiyr' is an index 1990=1.
          END IF
 !  END DO I: Loop through number of national and regional macro variables.
        END DO
@@ -1689,12 +1689,6 @@
        END IF
 
 !  Call environmental parameter locating EViews executable.
-       eviewsversion=rtovalue("EVVERS  ",5)
-           IF (eviewsversion .LT. 10) THEN
-          WRITE(eviewsenv,'("EVIEWS",I1)') eviewsversion
-           ELSE
-          WRITE(eviewsenv,'("EVIEWS",I2)') eviewsversion
-           ENDIF
        CALL GETENVmac(eviewsenv,eviewscommand,computername)
 
        IF (eviewscommand .NE. " ") THEN
@@ -2442,12 +2436,6 @@
        END IF
 
 !  Call environmental parameter locating EViews executable.
-       eviewsversion=rtovalue("EVVERS  ",5)
-       IF (eviewsversion .LT. 10) THEN
-          WRITE(eviewsenv,'("EVIEWS",I1)') eviewsversion
-           ELSE
-              WRITE(eviewsenv,'("EVIEWS",I2)') eviewsversion
-           ENDIF
        CALL GETENVmac(eviewsenv,eviewscommand,computername)
 
        IF (eviewscommand .NE. " ") THEN
@@ -2518,7 +2506,7 @@
             myline  = 'scalar mac111d='
             charc   = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,I2)') myline,mac111d
-            myline = 'sample s_fcst 2025'
+            myline = 'sample s_fcst 2026'
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4)') myline,mamlastyr
             myline = 'scalar macmode='
@@ -2559,10 +2547,10 @@
             charc   = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,I2)') myline,mac111d
 !  NEMS CAFE PARAMETER - Read presence of CAFE.
-            cafemode = RTOVALUE('MACCAFE ',0)
-            myline   = 'scalar cafemode='
-            charc    = LEN(TRIM(myline))
-            WRITE(3,'(A<charc>,I1)') myline,cafemode
+!            cafemode = RTOVALUE('MACCAFE ',0)
+!            myline   = 'scalar cafemode='
+!            charc    = LEN(TRIM(myline))
+!            WRITE(3,'(A<charc>,I1)') myline,cafemode
 !  NEMS TTECH PARAMETER - Read presence and level of technology.
             ttechmode = RTOVALUE('TTECH   ',0)
             myline    = 'scalar ttechmode='
@@ -2582,7 +2570,7 @@
             charc     = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,I2)') myline,ogtechmode
 !  Import transportation size class data.
-            myline = 'smpl 1967:1 2024:4'
+            myline = 'smpl 1967:1 2025:4'
             charc  = LEN(TRIM(myline))
             WRITE(3,1011) myline
             myline = 'read(s=TranC,b3) '//TRIM(filen)//'\mchighlo.xls 7'
@@ -2600,7 +2588,7 @@
             myline = 'scalar mamlastyr = '
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4)') myline,mamlastyr
-            myline = 'sample s_fcst 2025:1'
+            myline = 'sample s_fcst 2026:1'
             charc  = LEN(TRIM(myline))
             WRITE(3,'(A<charc>,1X,I4,A2)') myline,mamlastyr,':4'
 !  START ELSE IF (TRIM(myline) .EQ. "INSERT_5A"): Write replacement block to drivers.prg
@@ -2984,7 +2972,7 @@
 !    Coal Mining (NAICS 2121), Oil and Gas Extraction and Support Activities (NAICS 211, 213),
 !    Electric Power Generation and Distribution (NAICS 2211) and Natural Gas Distribution (NAICS 2212).
          IF ((i .EQ. 25 .OR. i .EQ. 45 .OR. i .EQ. 46) &
-           .AND. ((baseyr+curiyr-1) .GE. 2025) .AND. (macfdbk .EQ. 1)) THEN
+           .AND. ((baseyr+curiyr-1) .GE. 2026) .AND. (macfdbk .EQ. 1)) THEN
 !  START IF for NEMS Industrial Output 25: Petroleum Refining (NAICS 32411), manufacturing.
            IF (i .EQ. 25)  THEN
              esind(11,i,curiyr) = epmac(i+87,curiyr)
@@ -3000,7 +2988,7 @@
 !  START ELSE IF for NEMS Industrial Output for Electric Power Generation and Distribution (NAICS 2211)
 !    and Natural Gas Distribution (NAICS 2212).
          ELSE IF ((i .EQ. 58 .OR. i .EQ. 59) &
-           .AND. ((baseyr+curiyr-1) .GE. 2025) .AND. (macfdbk .EQ. 1)) THEN
+           .AND. ((baseyr+curiyr-1) .GE. 2026) .AND. (macfdbk .EQ. 1)) THEN
 !  START IF for NEMS Industrial Output 58: Electric Power Generation and Distribution (NAICS 2211), non-industrial/services.
            IF (i .EQ. 58) THEN
              esserv(i-mcnmind,curiyr) = epmac(i+87,curiyr)

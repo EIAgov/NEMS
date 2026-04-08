@@ -44,14 +44,14 @@ def ParseDict(file_dict):
     # Create DictAttributes in pandas dataframe
     n_rows = len(dictattrib)
     n_cols = 4
-    NEMSFortranAttributesTable = pd.DataFrame(np.zeros((n_rows, n_cols)))
+    NEMSFortranAttributesTable = pd.DataFrame(np.zeros((n_rows, n_cols),dtype=object))
     NEMSFortranAttributesTable.columns = ['Dimensions', 'DimName', 'DimSize', 'DimDescrip']
 
     for jj in range(len(dictattrib)):
         dictparse = dictattrib[jj]
         DIM = str.rstrip(str.strip(dictparse[0:5]))
-        FDIMNAM = str.rstrip(str.strip(dictparse[6:15]))
-        FDIMSIZ = str.rstrip(str.strip(dictparse[16:23]))
+        FDIMNAM = str.rstrip(str.strip(dictparse[6:13]))
+        FDIMSIZ = str.rstrip(str.strip(dictparse[14:23]))
         FDIMDESCRIP = str.rstrip(str.strip(dictparse[24:-1]))
         NEMSFortranAttributesTable.loc[jj] = DIM, FDIMNAM, FDIMSIZ, FDIMDESCRIP
 
@@ -86,66 +86,60 @@ def ParseDict(file_dict):
                                 "Dimensions", "Dimensions Parameters", "Parameters", "Units", "Fuel", "Sector", "Note"]
 
     NEMSFortVarTable = NEMSFortVarTable.set_index('Fortran Variable Name', drop=False)
-    NEMSFortVarTable['Fortran Variable Name'].replace('', np.nan, inplace=True)
+    #NEMSFortVarTable['Fortran Variable Name'].replace('', np.nan, inplace=True)
+    NEMSFortVarTable.loc[:, 'Fortran Variable Name'] = NEMSFortVarTable['Fortran Variable Name'].replace('', np.nan)
     NEMSFortVarTable.dropna(subset=['Fortran Variable Name'], inplace=True)
 
     return NEMSFortVarTable, NEMSFortranAttributesTable
 
 
 def RetrieveVarDim(NEMSFortTable, NEMSAttributeTable):
-    """Construct a dataframe that includes columns for restart variable name, common block name, dimensions, and extra indexes
-
-    Parameters
-    ----------
-    NEMSFortTable: dataframe
-        dataframe that is the return value of function ‘ParseDict’ of variable name from dict.txt
-        
-    NEMSAttributeTable: dataframe
-        dataframe that is the return value of function ‘ParseDict’ of attributes of top half of dict.txt
-
-    Returns
-    -------
-    dataframe 
-        columns are NEMS Fortran Variable Name, Common Block Name, Dimensions, and Extra Indeces necessary for
-        conversion of restart to HDF and vice versa.
-    
-    """
-    # this loop goes through the dimension parameters, creates an empty list of lists, then goes through individual
-    # dimension parameters to select from the refExtraIndexdf the indeces associated to the dimension parameter.
-    # For example, for MNUMYR, it would find all the years from 1990 to 2050 (or other years when that is updated).
-    # The loop then appends the list to list_of_list and at the end places it into the appropriate column.
-
-    # Use NEMSFortTable to get out pieces from dict.txt
     dfs = NEMSFortTable
     dfs = dfs[['Fortran Variable Name', 'Common Block Name', 'Dimensions', 'Dimensions Parameters']]
-    dfs['Fortran Variable Name'] = dfs['Fortran Variable Name'].str.lower()
-    # Build dataframe of variables and commonblock
-    vardf = dfs[['Fortran Variable Name', 'Common Block Name']]
-    vardf.index = vardf['Fortran Variable Name'].str.upper()
-    # Get Dimension Parameters from NEMSFortTable using Variable name (MUST BE UPPER CASE)
-    vardf['Dimension Params'] = dfs['Dimensions Parameters']
+    #dfs['Fortran Variable Name'] = dfs['Fortran Variable Name'].str.lower() #Keep this lower case
+    dfs.loc[:, 'Fortran Variable Name'] = dfs['Fortran Variable Name'].str.lower()  # Keep this lower case
+    # Create a unique index for dfs
+    #dfs['Fortran Variable Name Upper'] = dfs['Fortran Variable Name'].str.upper()
+    dfs.loc[:, 'Fortran Variable Name Upper'] = dfs['Fortran Variable Name'].str.upper()
+    #dfs['CombinedIndex'] = dfs['Fortran Variable Name Upper'] + '_' + dfs['Common Block Name']
+    dfs.loc[:, 'CombinedIndex'] = dfs['Fortran Variable Name Upper'] + '_' + dfs['Common Block Name']
 
-    # Split any Dimension Parameters that have more than one by commas
-    vardf['Dimension Params'] = vardf['Dimension Params'].str.split(',')
-    # Create new column for extra indexes, which will hold a list of lists for each extra index
-    vardf['Extra Indeces'] = ''
-    NEMSDimTable = NEMSAttributeTable[NEMSAttributeTable["Dimensions"] == "DIM"]
-    for jj in range(len(vardf['Dimension Params'])):
+    # Check for duplicates in the combined index
+    if dfs['CombinedIndex'].duplicated().any():
+        print("Warning: Duplicate combined indices found.  Investigate data for potential issues.")
+        #Optionally handle duplicates here, e.g., by removing them or modifying them
+
+    dfs = dfs.set_index('CombinedIndex', drop=True)
+
+    # Filter NEMSAttributeTable to exclude "DIMD" entries
+    NEMSAttributeTable = NEMSAttributeTable[NEMSAttributeTable["Dimensions"] != "DIMD"]
+
+    # Initialize Extra Indeces as an empty list
+    extra_indeces = []
+
+    # Iterate through rows to construct Extra Indeces
+    for index, row in dfs.iterrows():
         list_of_list = []
-        # Parse through vardf to get length of dimensional parameter indices
-        for kk in range(len(vardf['Dimension Params'][jj])):
+        dimension_params = row['Dimensions Parameters'].split(',') if isinstance(row['Dimensions Parameters'], str) else []
+
+        for param in dimension_params:
             try:
-                c = str.strip(vardf['Dimension Params'][jj][kk])
+                c = str.strip(param)
                 if str(c).isdigit():
                     c = int(c)
                 else:
                     # If variable is string (such as MNUMYR), use the NEMSDimTable to locate size from NEMS dict.txt
-                    hold = NEMSDimTable.loc[c]["DimSize"]
-                    c = int(hold)
+                    if c in NEMSAttributeTable.index:  # Check if c exists in NEMSAttributeTable
+                        hold = NEMSAttributeTable.loc[c, "DimSize"]
+                        c = int(hold)
+                    else:
+                        print(c)
+                        print("Error, look again")
+                        c = 1  # Assign default value
                 NumRan = range(1, c + 1)
                 list_of_list.append(list(NumRan))
             except:
-                #In this instance, MX_UNT does not return correctly from dict.txt. This uses the static 1800 for now 
+                #In this instance, MX_UNT does not return correctly from dict.txt. This uses the static 1800 for now
                 if c == 'MX_UNT':
                     hold = 1800
                     NumRan = range(1, hold + 1)
@@ -159,6 +153,37 @@ def RetrieveVarDim(NEMSFortTable, NEMSAttributeTable):
                 else:
                     print(c)
                     print("Error, look again")
-        vardf['Extra Indeces'][jj] = list_of_list
+
+        extra_indeces.append(list_of_list)
+
+    # Create vardf using the unique index from dfs
+    vardf = pd.DataFrame({
+        'Fortran Variable Name': dfs['Fortran Variable Name'],  # Lowercase
+        'Fortran Variable Name Upper': dfs['Fortran Variable Name Upper'],  # Capitalized
+        'Common Block Name': dfs['Common Block Name'],
+        'Dimension Params': dfs['Dimensions Parameters'],   #Dimension Parameters get pulled here
+        'Extra Indeces': extra_indeces  # Assign prepared list here
+    }, index=dfs.index)  # index from dfs to keep the indexing
+
+    # Ensure the 'Extra Indeces' column is of type object
+    vardf['Extra Indeces'] = vardf['Extra Indeces'].astype(object)
+
+    # Split any Dimension Parameters that have more than one by commas
+    vardf['Dimension Params'] = vardf['Dimension Params'].str.split(',')
+
+    # Enforce the exact column order and reset index to avoid a column named "Fortran Variable Name Upper"
+    #vardf = vardf.reset_index(drop=True)  # Drop the index,
+    vardf = vardf[['Fortran Variable Name Upper', 'Fortran Variable Name', 'Common Block Name', 'Dimension Params', 'Extra Indeces']] # Enforce desired column order and switch order
+    
+    vardf = vardf.reset_index()
+    vardf = vardf.set_index(vardf["Fortran Variable Name Upper"])
+    vardf = vardf[['Fortran Variable Name Upper', 'Fortran Variable Name', 'Common Block Name', 'Dimension Params', 'Extra Indeces']] # Enforce desired column order and switch order
+    vardf = vardf.rename(columns={"Fortran Variable Name Upper": "Fortran Variable Name"})
     print('End of ParseDict')
     return vardf
+
+if __name__ == "__main__":
+    a,b = ParseDict('/input/dict.txt')
+    vardf = RetrieveVarDim(a,b)
+    vardf.to_csv('NEWVardf.csv', index=False)
+    print("done")

@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/emmout,v 1.3 2002/02/20 19:44:03 RSC Exp $
 !  ELECTRICITY MARKET MODULE (EMM) OUTPUT COMMON BLOCK - Removed Nested Includes from code
 !     INCLUDE'UEFPOUT'     ! UEFP output variables

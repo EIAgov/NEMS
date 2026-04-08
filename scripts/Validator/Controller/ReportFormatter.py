@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from pandas import ExcelWriter
+from openpyxl import load_workbook
 from DataModel.junitparser import JUnitXml
 from DataModel.junitparser import Failure, Skipped
 from xml.sax.saxutils import unescape
@@ -130,6 +131,18 @@ def save_to_excel():
     writer.close()
     # in aeo2023_py37_b Pandas, writer.save() is supported
     #writer.save()
+    
+    # open workbook using openpyxl 
+    workbook = load_workbook(os.path.join(output_root_dir, excel_filename))
+    
+    # select the sheet within the workbook
+    worksheet = workbook["All Tests"]
+    
+    # adds in the auto_filter into the worksheet by its dimensions
+    worksheet.auto_filter.ref = worksheet.dimensions
+    
+    # saves the workbook 
+    workbook.save(os.path.join(output_root_dir, excel_filename))
 
 def delete_csv_files():
     os.remove(os.path.join(os.getcwd(), 'validator_report.csv'))

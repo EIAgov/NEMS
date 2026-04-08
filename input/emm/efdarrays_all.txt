@@ -186,6 +186,9 @@ cpass_cES_rLDge,0
 cpass_cES_UBOUND,0
 cpass_cESCNOX_EFDCOSTS,0
 cpass_cESCNOX_rELNOX0le,0
+cpass_cESR_EFDCOSTS,0
+cpass_cESR_rSRge,0
+cpass_cESR_UBOUND,0
 cpass_cF_EFDCOSTS,0
 cpass_cF_rENeq,0
 cpass_cF_rENle,0
@@ -459,11 +462,6 @@ cpass_cSULF_EFDCOSTS,0
 cpass_cSULF_rSULFle,0
 cpass_cSULF_rSULFURle,0
 cpass_cSULF_rSULFURn,0
-cpass_cT_STOCK__LBOUND,0
-cpass_cT_STOCK__rMERCURYle,0
-cpass_cT_STOCK__rMERCURYn,0
-cpass_cT_STOCK__rSULFURn,0
-cpass_cT_STOCK__UBOUND,0
 cpass_cTC_EFDCOSTS,0
 cpass_cTC_rCANIMPUSeq,0
 cpass_cTC_rCNCPle,0

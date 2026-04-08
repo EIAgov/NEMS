@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: m:/default/includes/RCS/elcntl,v 1.5 2019/07/23 15:28:50 rsc Exp $
 !
 !  Electricity Market Module (EMM) Output Control Common Block

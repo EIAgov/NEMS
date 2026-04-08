@@ -1,9 +1,10 @@
-"AEO_ID","AEO2025",AEO Identifier
+"AEO_ID","AEO2026",AEO Identifier
 "m__m","2012",Macro base year dollars (GDP)
 "m==m","2012",Macro base year (Input/Output)
-"main_historical_year","2024",main historical year
+"main_historical_year","2025",main historical year
 "auxiliary_historical_year","2023",auxiliary historical year
-"DRI_citation","October 2024",DRI Simulation
-"STEO_citation","December 2024",Short-Term Energy Outlook
-"_dd_", "dioxide", Dioxide
-"_cc_", "carbon dioxide", CO2
+"DRI_citation","August 2025",DRI Simulation
+"STEO_citation","November 2025",Short-Term Energy Outlook
+"_dd_","dioxide",Dioxide
+"_cc_","carbon dioxide",CO2
+"aeo_yr","Annual Energy Outlook 2026",AEO Year Long

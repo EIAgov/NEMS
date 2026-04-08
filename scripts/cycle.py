@@ -1,5 +1,6 @@
 """Cycle.py is the main entry-point for a NEMS run after the 
-output folder has been set up.
+output folder has been set up.  It leads into nems_flow.py, which is
+the main loop inside of NEMS.
 
 The program is called with two arguments: dest_path and run_type.
 dest_path is the output folder and run_string tells type of run 
@@ -25,7 +26,6 @@ Note that the filename nohup.out is set in the queue celery
 code, so we cannot change the name in cycle.py
 
 TODO items, in priority order (roughly)
-* medium priority: replace intercv.exe with new Python code
 * low priority: iterdump
 """
 import cleanup
@@ -41,7 +41,13 @@ import subprocess
 import sys
 import threading
 import time
-import unf_to_npz
+import main.partition_integrator as npz_join
+import zipfile
+
+j = os.path.join(os.getcwd(), "converge")
+if j not in sys.path:
+    sys.path.append(j)
+import intercv_main
 
 from multiprocessing import Queue
 
@@ -85,6 +91,8 @@ NEMS_BANNER = ["N       N   E E E E   M       M   S S S S",
                ] 
 
 REPORTER_SUCCESS_FILE = "reporter/ITG-reporter_success.txt"
+
+TIME_LIMIT = 120  # max seconds per module
 
 
 def log_it(n, s, fout=False):
@@ -172,11 +180,13 @@ def stop_it(n, message="unknown failure"):
     os.sys.exit(message)
 
 
-def reporter_wrapper(n, SCEDES):
+def reporter_wrapper(n, SCEDES, nruns):
     log_it(n, f"In function 'reporter_wrapper'. Call 'generate_report' since int(SCEDES['NEMRWR']) >= 1: {int(SCEDES['NEMRWR'])}")
+    log_it(n, f"In function 'reporter_wrapper'. Using configuration file str(SCEDES['RWCNFG']) : {str(SCEDES['RWCNFG'])}")
+    nruns = nruns
     try:
         log_it(n, "call function 'generate_report'")
-        generate_report(n, SCEDES)
+        generate_report(n, SCEDES, nruns)
     except:
         if os.getcwd().endswith("reporter"):
             os.chdir("..")
@@ -190,7 +200,7 @@ def reporter_wrapper(n, SCEDES):
         log_it(n, f"did NOT find file {REPORTER_SUCCESS_FILE}")
 
 
-def generate_report(my_cycle, SCEDES):
+def generate_report(my_cycle, SCEDES, nruns):
     """Call NEMS Python reporter.
 
     Parameters
@@ -208,7 +218,7 @@ def generate_report(my_cycle, SCEDES):
 
     scenario = SCEDES["SCEN"]
     datecode = SCEDES["DATE"]
-    nruns = int(SCEDES["NRUNS"])
+    nruns = nruns
     
     if os.path.exists(REPORTER_SUCCESS_FILE):
         try:
@@ -262,42 +272,7 @@ def generate_report(my_cycle, SCEDES):
         if os.path.exists(f"{s_from}"): 
             shutil.move(f"{s_from}", f"{s_to}")
 
-        # if n < nruns:
-        #     s_from = f"reporter/output/{scenario}.{datecode}"
-        #     s_to = f"{scenario}{my_infix}{datecode}"
-        #     log_it(n, f"try to move {s_from} to {s_to} for XLSX, RAN")
-        #     for i in ["xlsx", "ran"]:
-        #         if os.path.exists(f"{s_from}.{i}"): 
-        #             shutil.move(f"{s_from}.{i}", f"{s_to}.{i}")
-        #     s_from = "reporter/output/NEMSref2025.unif.api.csv"
-        #     s_to = f"NEMSref2025.unif.api{my_infix}csv"
-        #     log_it(n, f"try to move {s_from} to {s_to}")
-        #     if os.path.exists(s_from): 
-        #             shutil.move(f"{s_from}", f"{s_to}")
-        #     #TODO: remove after reporter quits writing to "all_tables_stacked.xlsx"
-        #     s_from = "reporter/output/all_tables_stacked.xlsx"
-        #     s_to = f"{scenario}{my_infix}{datecode}.xlsx"
-        #     log_it(n, f"try to move {s_from} to {s_to}")
-        #     if os.path.exists(f"{s_from}"): 
-        #         shutil.move(f"{s_from}", f"{s_to}")
-        # else:
-        #     s_from = f"reporter/output/{scenario}.{datecode}"
-        #     s_to = f"{scenario}.{datecode}"
-        #     log_it(n, f"try to move {s_from} to {s_to} for XLSX and RAN")
-        #     for i in ["xlsx", "ran"]:
-        #         if os.path.exists(f"{s_from}.{i}"): 
-        #             shutil.move(f"{s_from}.{i}", f"{s_to}.{i}")
-        #     s_from = "reporter/output/NEMSref2025.unif.api.csv"
-        #     s_to = "NEMSref2025.unif.api.csv"
-        #     log_it(n, f"try to move {s_from} to {s_to}")
-        #     if os.path.exists(s_from): 
-        #             shutil.move(f"{s_from}", f"{s_to}")
-        #     #TODO: remove after reporter quits writing to "all_tables_stacked.xlsx"
-        #     s_from = "reporter/output/all_tables_stacked.xlsx"
-        #     s_to = f"{scenario}.{datecode}.xlsx"
-        #     log_it(n, f"try to move {s_from} to {s_to}")
-        #     if os.path.exists(f"{s_from}"): 
-        #         shutil.move(f"{s_from}", f"{s_to}")
+
    
     return os.path.exists(REPORTER_SUCCESS_FILE)
 
@@ -315,58 +290,35 @@ def thread_function_multi(queue, my_path, my_call_p):
 
 
 def check_intercycle_convergence(minscore, nruns, n, doemall, doaminof, whencall=0):
-    # note: intercv.exe apparently does not work
-    # will replace with Python code at some point
-    #
+    
+    if nruns == 1:
+        if os.path.exists("p2"):
+            filenames = os.listdir("p2/input")
+            matching_file = [filename for filename in filenames if filename.startswith("restarti")][0]
+            restart_extension = matching_file.split(".")[1]
+            conv_restart_prev = f"p2/input/restarti.{restart_extension}"
+        else:
+            filenames = os.listdir("input")
+            matching_file = [filename for filename in filenames if filename.startswith("restarti")][0]
+            restart_extension = matching_file.split(".")[1]
+            conv_restart_prev = f"input/restarti.{restart_extension}"
+    else:
+        if os.path.exists("p2"):
+            conv_restart_prev = "p2/restart.in"
+        else:
+            conv_restart_prev = "restart.in"
+    
+    conv_restart_cur = "restart.npz"
 
-    #  Do convergence testing: this cycle compared to previous cycle.
-    #
-    # we expect intercvfiles.txt IN THE RUN FOLDER to look like the following
-    # (note that the only the first four lines are in the repo version of the file,
-    # and that the last line refers to the launch folder)
-    #Restart A  RESTART.unf
-    #Format A   1  Unformatted
-    #Restart B  RESTART.IN
-    #Format B   1  Unformatted
-    #           ./input/iccnvrg.txt
-    #           ./input/dict.txt
-    #           ./input/varlist.txt
-    #           M:/ogs/mc6/git/NEMS_m/source/filer    
 
-    # for a parallel run, the input restart file is actually 
-    # retrieved from the copy of RESTART.IN that was placed 
-    # in folder p2
-    if os.path.exists("p2"):
-        shutil.copy("intercvfiles.txt", "intercvfilesnew.txt")
-        with open("intercvfilesnew.txt", 'r') as icv_backup:
-            icv_lines = icv_backup.readlines()
-        with open("intercvfiles.txt", 'w') as icv_mod:
-            for line in icv_lines:
-                if ("RESTART.IN" in line) and ("p2/RESTART.IN" not in line): 
-                    line = line.replace('RESTART.IN','p2/RESTART.IN')  # TODO: why ???
-                icv_mod.write(line)
+    iret = intercv_main.main(conv_restart_prev, conv_restart_cur, minscore)
 
-    # run intercv.exe to create restart.rlx and generate intercvout.txt report
-    with open('intercvfiles.txt', "r") as f_inter:
-        # note the stdout goes to PIPE. intercv.exe REQUIRES this
-        intercvout = subprocess.run(['intercv.exe', 
-                                     str(minscore)], 
-                                     stdin=f_inter, 
-                                     stdout=subprocess.PIPE)
-    with open('intercvout.txt', 'w') as f:
-        f.write(intercvout.stdout.decode("utf-8"))
-
-    iret = intercvout.returncode  # iret is used later
     log_it(n, f"Intercycle return code = {iret}")
     
-    with open("intercvout.txt", "r") as icvout:
-        for line in icvout:
-            if "US:   intercycle convergence GPA" in line: 
-                usgpa=line[-6:].strip()
-            if "REG:  intercycle convergence GPA" in line: 
-                rgpa=line[-6:].strip()
-            if line.strip() != "":
-                last_line = line
+    df = pd.read_csv("converge/output/Iconv_AverageGPA.csv")
+    usgpa       = df["US GPA"].iloc[-1]
+    rgpa        = df["Regional GPA"].iloc[-1]
+    last_line   = df["PASS/FAIL"].iloc[-1]
 
     s = f"GPA ({usgpa}; {rgpa}) on a 4 point scale (averaged over 3 worst years with {minscore} considered minimally acceptable."
     log_it(n, s)
@@ -375,16 +327,6 @@ def check_intercycle_convergence(minscore, nruns, n, doemall, doaminof, whencall
     
     ## TODO: what does "whencall==0" mean? Just that p1, p2, and p3 were successful?
     if whencall == 0:
-        # TODO: why do the following ???
-        # try:
-        #   shutil.copy("restart.unf", "p3/restart.unf")
-        # except:
-        #   pass
-
-        if((iret == 0) & (nruns > 1)):
-            inter_outfile = f"intercvout.{n}.txt"
-            shutil.copy("intercvout.txt", inter_outfile)
-            log_it(n, f"Full intercycle convergence check stored in {inter_outfile}")
 
         if iret == 1:
             if ((doemall == 0) & (n >= doaminof)):
@@ -424,11 +366,12 @@ def update_current_data_files(n):
     if os.path.exists("p2"): # parallel run
         
         log_it(n, f"copy restart.unf to p3/restart.unf to preserve intercv output in the p3 output restart file")
-        shutil.copy2("restart.unf", "p3/restart.unf")
+
+        shutil.copy2("restart.npz", "p3/restart.npz")
 
         for i in ["p1", "p2"]:
             file_to = f"{i}/RESTART.IN"
-            for my_file in ["RESTART.unf", "Restart.rlx"]:
+            for my_file in ["restart.npz", "restart.rlx"]:
                 try:
                     shutil.copy(my_file, file_to)
                     log_it(n, f"Copied: {my_file} to: {file_to}")
@@ -437,7 +380,7 @@ def update_current_data_files(n):
     else:
         # sequential run
         file_to = "RESTART.IN"
-        for my_file in ["RESTART.unf", "Restart.rlx"]:
+        for my_file in ["restart.npz", "restart.rlx"]:
             try:
                 shutil.copy(my_file, file_to)
                 log_it(n, f"Copied: {my_file} to: {file_to}")
@@ -494,156 +437,6 @@ def update_current_data_files(n):
     return 0
 
 
-# def run_ftab_loop(n, scenario, datecode):
-#     """Run ftab and create cycle-specific output files.
-
-#     Parameters
-#     ----------
-#     n : integer
-#         cycle number
-#     scenario : string
-#         scenario name
-#     datecode : string
-#         example: d091124n, d091224ax
-#     """
-#     # change ftab's instructions
-#     with open("ftab.dat", "r") as file_in:
-#         with open(f"ftab.{n}.dat", "w") as file_out:
-#             for line in file_in.readlines():
-#                 line = line.replace("restart.unf", f"p3/restart.{n}.unf")
-#                 file_out.write(line)
-
-#     # run ftab for the cycle
-#     with open(f"ftab.{n}.dat", "r") as file_in:
-#         with open("ftab_output.txt", "a") as file_out:
-#             subprocess.run("ftab.exe", stdin=file_in, stdout=file_out)
-       
-#     # move fort.20 to cycle-specific filename
-#     shutil.move("fort.20", f"fort.{n}.20")
-
-#     # move XML and RAN files to cycle-specific filenames
-#     # usually datecode has one trailing letter, but might have 2
-#     z = -1
-#     if len(datecode) == 9:
-#         z = -2
-#     s_from = f"{scenario}.{datecode[1:5]}{datecode[z:]}"
-#     s_to = f"{scenario}.{n}.{datecode[1:5]}{datecode[z:]}"
-
-#     for i in ["xml", "ran"]:
-#         if os.path.exists(f"{s_from}.{i}"): 
-#             shutil.move(f"{s_from}.{i}", f"{s_to}.{i}")
-
-#     return 0
-
-
-# def run_api_all(n, tabreq):
-#     # Changes to the ftab.dat (Ftab runtime config) are needed
-#     #  line 1: use a different file name for the uniform Ftab CSV output file
-#     #  line 6: print all regions
-#     #  line 14: do not make WK1 file
-#     #  line 16: specify path to the new tabreq.txt (has all the tables turned on)
-#     #  line 28: do not generate RAN file
-#     # note that " were used over ' as string designators because ' did not allow for $variable expansion on line 16.
-#     #   https://stackoverflow.com/a/5156322/2236315
-    
-#     # ftab.uni.dat is a config file that has run-time switches for Ftab operation.
-#     # restart.unf (path specified in the ftab.dat by default) gets processed 
-#     # and results aggregated into the output file (uniform Ftab csv).
-
-#     UNIF = "_unif"
-
-#     # default scedes has tabreq = $NEMS/input/tabreq.txt
-#     tabreq = tabreq.replace("$NEMS/", "")
-#     log_it(n, f"{tabreq=}")
-
-#     # create a tabreq file that specifies all tables ON
-#     with open(tabreq, "r") as inputtab:
-#         with open("./input/tabreq_all_tables_on.txt", "w") as outputtab:
-#             for line in inputtab.readlines():
-#                 if line[0] == 0:
-#                     line[0] = 1
-#                 outputtab.write(line)
-    
-#     FILETABREQ = os.path.join(os.getcwd(), "input", "tabreq_all_tables_on.txt")
-#     ftab_uni = "ftab.uni.dat"
-#     with open("ftab.dat", "r") as inputtab:
-#         with open(ftab_uni, "w") as outputtab:  
-#             i=1
-#             for line in inputtab.readlines():
-#                 if i==1: 
-#                     my_scen = line.strip()
-#                     line = UNIF + "\n"
-#                 if i==6: 
-#                     line='1               IPREGD     PRINT REGIONS (1=YES)\n'
-#                 if i==14: 
-#                     line='0          WK1 FILE SWITCH (1=CALL FWK1 TO CREATE IT)\n'
-#                 if i==16: 
-#                     line=FILETABREQ + "\n"
-#                 if i==28: 
-#                     line='0             Switch for graf2000 .ran file\n'
-#                 i += 1
-#                 outputtab.write(line)
-    
-#     with open(LOGFILE, "a") as log:
-#         with open(ftab_uni, "r") as my_input:
-#             subprocess.run('ftab.exe', stdin=my_input, stdout=log)
-
-#     temp = glob.glob(f"{UNIF}*.api.csv")
-#     f_new = f"{my_scen}.unif.api.csv"
-#     if len(temp) == 1:
-#         try:
-#             os.remove(f_new)
-#         except:
-#             pass
-#         os.rename(temp[0], f_new)
-#         log_it(n, f"Renamed file {temp[0]} to {f_new}.")
-#         result = 0
-#     else:
-#         log_it(n, f"unable to rename file {temp[0]} to {f_new}.")
-#         result = -1
-
-#     return result
-
-
-def create_emmdb_mdb(n, my_dir):  
-    # my_dir = "", "p1", "p2", etc.
-    
-    # old .sh code
-    # if [ -f udbp.exe -a -f edbpgrp.txt ] ; then
-    #    echo "Putting edbpgrp.txt into emmdb.mdb:  " `date +%T`
-    #    udbp.exe > udbp.out
-    #    returncode3=$?
-    #    echo "Returncode=$returncode3" >> udbp.out
-    #    if [ $returncode3 -eq 0 ] ; then
-    #       rm edbpgrp.txt
-    #    fi 
-    #    rm -f udbp.exe
-    #    echo "End putting edbpgrp.txt into emmdb.mdb:  " `date +%T`
-    # fi
-
-    result = False
-    if my_dir != "":
-        os.chdir(my_dir)   
-    with open("edbpgrp.log", "w") as outfile:
-        try:
-            return_code = subprocess.run("udbp.exe > udbp.out", stdout=outfile, shell=True)
-            log_it(n, f"ran subprocess 'udbp.exe > udbp.out': {return_code=}")
-            log_it(n, "created edbprgrp.log")
-            result = True
-        except OSError as e:
-            log_it(n, f"Unable to run 'udbp.exe > udbp.out': {e}")
-
-    # if return code 0 then delete edbpgrp.txt 
-    if return_code == 0:
-        try:
-            os.remove("edbpgrp.txt")
-        except:
-            pass
-
-    if my_dir != "":
-        os.chdir("..")
-
-    return result
 
 
 def check_for_intercycle_oscillation(n):
@@ -679,7 +472,7 @@ def check_for_intercycle_oscillation(n):
     # TODO: return something
 
 
-def do_end_of_run_tasks(n, SCEDES):
+def do_end_of_run_tasks(SCEDES, minscore, nruns, n, doemall, doaminof):
     """check for intercycle oscillation,
     create EMM database (if EMM is 'on'), delete/zip some files,
     run validator, generate report of model runtime.
@@ -699,78 +492,27 @@ def do_end_of_run_tasks(n, SCEDES):
         os.chdir("..")
         cwd = os.getcwd()
     
-    # run intercv.exe to create restart.rlx and generate intercvout.txt report
-    with open('intercvfiles.txt', "r") as f_inter:
-        # note the stdout goes to PIPE. intercv.exe REQUIRES this
-        intercvout = subprocess.run(['intercv.exe', 
-                                     str(minscore)], 
-                                     stdin=f_inter, 
-                                     stdout=subprocess.PIPE)
-    with open('intercvout.txt', 'w') as f:
-        f.write(intercvout.stdout.decode("utf-8"))
-
-    iret = intercvout.returncode  # iret is used later
-    log_it(n, f"Intercycle return code = {iret}")
+    nruns = check_intercycle_convergence(minscore, nruns, n, doemall, doaminof, 0)
     
-    with open("intercvout.txt", "r") as icvout:
-        for line in icvout:
-            if "US:   intercycle convergence GPA" in line: 
-                usgpa=line[-6:].strip()
-            if "REG:  intercycle convergence GPA" in line: 
-                rgpa=line[-6:].strip()
-            if line.strip() != "":
-                last_line = line
-
-    s = f"GPA ({usgpa}; {rgpa}) on a 4 point scale (averaged over 3 worst years with {minscore} considered minimally acceptable."
-    log_it(n, s)
-    log_it(n, last_line)
-    log_it(n, f"{usgpa=} {rgpa=}", "GPA.txt")
+    df = pd.read_csv("converge/output/Iconv_AverageGPA.csv")
+    usgpa       = df["US GPA"].iloc[-1]
+    rgpa        = df["Regional GPA"].iloc[-1]
+    last_line   = df["PASS/FAIL"].iloc[-1]
     
-    # # run ftab for the cycle
-    # log_it(n, f"{SCEDES['NEMRWR']=}")
-    # if (int(SCEDES['NEMRWR'])==0) or (int(SCEDES['NEMRWR'])==2):
-    #     log_it(n, "call 'ftab.exe'")
-    #     with open(f"ftab.dat", "r") as file_in:
-    #         with open("ftab_output.txt", "a") as file_out:
-    #             subprocess.run("ftab.exe", stdin=file_in, stdout=file_out)
-
-    log_it(n, "call 'check_for_intercycle_oscillation'")
-    try:
-        check_for_intercycle_oscillation(n)
-    except:
-        log_it(n, "unable to check for intercycle oscillation")
-
-    # if (int(SCEDES['NEMRWR'])==0) or (int(SCEDES['NEMRWR'])==2):
-    #     log_it(n, "call 'run_api_all'")
-    #     run_api_all(n, SCEDES["TABREQN"])
-
-    log_it(n, "call 'unf_to_npz.convert_unf_to_npz'", False)
-    unf_to_npz.convert_unf_to_npz("restart.unf")
+    #commenting out the old oscillation code, since it doesn't work.
+    # log_it(n, "call 'check_for_intercycle_oscillation'")
+    # try:
+        # check_for_intercycle_oscillation(n)
+    # except:
+        # log_it(n, "unable to check for intercycle oscillation")
 
     log_it(n, f"{SCEDES['NEMRWR']=}")
     if int(SCEDES['NEMRWR']) >= 1:
         log_it(n, "try to run Python reporter one last time")
-        reporter_wrapper(n, SCEDES)
+        reporter_wrapper(n, SCEDES, nruns)
         log_it(n, "finished running Python reporter")
-
-    if int(SCEDES["EXE"]) == 1:
-        emmdb_creation = False
-        temp = "nil"
-        for emm_folder in ["", "p1", "p2", "p3"]:
-            emm_dir = os.path.join(cwd, emm_folder, "edbpgrp.txt")
-            if os.path.exists(emm_dir):
-                temp = emm_folder
-        try:
-            create_emmdb_mdb(n, temp)
-            emmdb_creation = True
-        except:
-            pass
-
-        if emmdb_creation:
-            log_it(n, f"created emmdb mdb")
-        else:
-            log_it(n, "unable to create emmdb mdb")
-
+        
+        
     os.chdir(cwd)
 
     # TODO: bad things happen if...
@@ -872,7 +614,7 @@ def do_end_of_run_tasks(n, SCEDES):
 
 def run(dest_path, run_type):
     """
-    dest_path: run folder. Ex: r"r:\output\mc6\zef25\d052324ax"
+    dest_path: run folder. Ex: r"r:\\output\\mc6\\zef25\\d052324ax"
 
     run_type is one of:
         * 'local_sequential'
@@ -929,11 +671,10 @@ def run(dest_path, run_type):
         shutil.copy2(LOGFILE, LOGFILE_BEFORE_STOP)
         stop_it(0, f"detected stop signal: {STOP_SIGNAL}")
 
-    SCEDES = psf.parse_scedes_file(os.path.join(dest_path, "scedes.all"))
+    SCEDES = psf.parse_scedes_all(os.path.join(dest_path, "scedes.all"))
 
     # no! must run nems_flow.py first in order to create
     # restart.npz, NEMSvardf.csv, etc
-    #generate_report(99, SCEDES)
 
     PYENV = SCEDES["NEMSPYENN"]
     CALL_P = os.path.join(PYENV, "scripts", "python.exe")
@@ -941,8 +682,22 @@ def run(dest_path, run_type):
     doaminof = int(SCEDES["DOAMINOF"])
     doemall = int(SCEDES["DOEMALL"])
     minscore = float(SCEDES["MINSCORE"])
+    StopCode = 0
 
     log_it(0, f"{PYENV=}")
+    
+    # unzips the PSBASEUNF.zip file for RFM before it gets copied over to the output directory (so it can be removed in cleanup.py)
+    # checks if p2 exists for parnems (in /p2/input), else unzip for jognems (in /input)
+    # this 
+    if SCEDES['EXN'] == "1":
+        if os.path.isdir('p2'):
+            #unzip PSBASEUNF.zip file
+            with zipfile.ZipFile(SCEDES['PSBASEUNFN'].replace("$NEMS/input/rfm/",os.path.join(os.getcwd(),"p2/input/")), 'r') as z:
+                z.extractall("p2/input")
+        else:
+            #unzip PSBASEUNF.zip file
+            with zipfile.ZipFile(SCEDES['PSBASEUNFN'].replace("$NEMS/input/rfm/",os.path.join(os.getcwd(),"input/")), 'r') as z:
+                z.extractall("input")
 
     # TODO: why do this as step zero ???
     # nruns = check_intercycle_convergence(minscore, nruns, n, doemall, doaminof, 0)
@@ -961,12 +716,35 @@ def run(dest_path, run_type):
                 f_irun.write(str(n))
 
             # delete any old AIMMS results
-            for my_folder in ["ngas/fromAIMMS", "coal/fromAIMMS", "hmm/fromAIMMS"]:
+            for my_folder in ["ngas/fromAIMMS", "coal/fromAIMMS", "hmm/fromAIMMS", "rest/fromAIMMS"]:
                 if os.path.isdir(my_folder):
                     log_it(n, f"Deleting any old AIMMS 'toNEMS' files from {my_folder}")
                     files = glob.glob(f"{my_folder}/GlobalDatatoNEMS*")
                     for f in files:
-                        os.remove(f)            
+                        os.remove(f)
+            # Remove any folders containing parquet files for AIMMS modules
+            for my_folder in ["ngas/ToAIMMS", "coal/ToAIMMS", "hmm/ToAIMMS", "rest/toAIMMS"]:
+                ToAIMMSPath = os.path.join(os.getcwd(), my_folder)
+                if os.path.isdir(ToAIMMSPath):
+                    log_it(n, f"Deleting any old AIMMS 'toAIMMS' folders from {my_folder}")
+                    for item in os.listdir(ToAIMMSPath):
+                        item_path = os.path.join(ToAIMMSPath, item)
+                        if os.path.isdir(ToAIMMSPath) and item.startswith("GlobalDataToAIMMS_"):
+                            try:
+                                shutil.rmtree(item_path)
+                            except:
+                                pass
+            # Remove files from EFD and ECP
+            for files in ["efd/PassBack*.txt", "efd/composite*.txt",
+                          "ecp/OutToNEMS*.txt", "ecp/composite*.txt"]:
+                log_it(n, f"Deleting any files that are {files}")
+                z = glob.glob(os.path.join(os.getcwd(), files))
+                z = [i for i in z[:] if os.path.isfile(i)]
+                for f2 in z:
+                    try:
+                        os.remove(f2) 
+                    except:
+                        pass
 
             if "local" in run_type:
                 my_py = os.path.join(cwd, 'nems_flow.py')
@@ -987,8 +765,8 @@ def run(dest_path, run_type):
             log_it(n, "begin looking for 'done.txt' file")
             my_timer = 0
             stopped = check_stop_signal()
-            done = os.path.exists(os.path.join(cwd, "done.txt"))
-            while (my_timer < 60) and (not done) and (not stopped):
+            done = (os.path.exists(os.path.join(cwd, "done.txt")) or os.path.exists(os.path.join(cwd, "no_modules_on.txt")))
+            while (my_timer < TIME_LIMIT) and (not done) and (not stopped):
                 log_it(n, f"my_timer: {my_timer/60} minutes")
                 time.sleep(1 * 60)
                 my_timer += (1 * 60) 
@@ -1004,30 +782,21 @@ def run(dest_path, run_type):
                 if not done:
                     stop_it(n, "ERROR Not done by time limit")
 
-            log_it(n, "Call 'check_intercycle_convergence'")
             nruns = check_intercycle_convergence(minscore, nruns, n, doemall, doaminof, 0)
-            log_it(n, f"'check_intercycle_convergence' return value: {nruns}")
-
-            log_it(n, "call 'unf_to_npz.convert_unf_to_npz'", False)
-            unf_to_npz.convert_unf_to_npz("restart.unf")
 
             if int(SCEDES["NEMRWR"]) >= 1:
                 log_it(n, f"Call 'reporter_wrapper' since  int(SCEDES['NEMRWR']) == {int(SCEDES['NEMRWR'])}")
-                reporter_wrapper(n, SCEDES)
+                reporter_wrapper(n, SCEDES, nruns)
 
             if n < nruns:
                 log_it(n, "Call 'update_current_data_files' since n < nruns")
                 update_current_data_files(n)
 
-            # if (int(SCEDES['NEMRWR'])==0) or (int(SCEDES['NEMRWR'])==2):
-            #     log_it(n, f"Call 'run_ftab_loop' since  int(SCEDES['NEMRWR']) == {int(SCEDES['NEMRWR'])}")
-            #     run_ftab_loop(n, SCEDES["SCEN"], SCEDES["DATE"])
-        
             log_it(n, "increment cycle counter")
             n += 1
        
         log_it(n, "call 'do_end_of_run_tasks'")
-        do_end_of_run_tasks(n, SCEDES)
+        do_end_of_run_tasks(SCEDES, minscore, nruns, n, doemall, doaminof)
         log_it(n, "after function 'do_end_of_run_tasks'")
 
     elif "parallel" in run_type:
@@ -1060,12 +829,41 @@ def run(dest_path, run_type):
             # delete any old AIMMS results
             for my_folder in ["p1/ngas/fromAIMMS", "p2/ngas/fromAIMMS",
                               "p1/coal/fromAIMMS", "p2/coal/fromAIMMS",
-                              "p1/hmm/fromAIMMS", "p2/hmm/fromAIMMS",]:
+                              "p1/hmm/fromAIMMS", "p2/hmm/fromAIMMS",
+                              "p2/rest/fromAIMMS"]:
                 log_it(n, f"Deleting any old AIMMS 'toNEMS' files from {my_folder}")
                 if os.path.isdir(my_folder):
                     files = glob.glob(f"{my_folder}/GlobalDatatoNEMS*")
                     for f in files:
-                        os.remove(f)            
+                        os.remove(f)
+
+            # Remove any folders containing parquet files for AIMMS modules
+            for my_folder in ["p1/ngas/toAIMMS", "p2/ngas/toAIMMS",
+                              "p1/coal/toAIMMS", "p2/coal/toAIMMS",
+                              "p1/hmm/toAIMMS", "p2/hmm/toAIMMS",
+                              "p2/rest/toAIMMS"]:
+                ToAIMMSPath = os.path.join(os.getcwd(), my_folder)
+                if os.path.isdir(ToAIMMSPath):
+                    log_it(n, f"Deleting any old AIMMS 'toAIMMS' folders from {my_folder}")
+                    for item in os.listdir(ToAIMMSPath):
+                        item_path = os.path.join(ToAIMMSPath, item)
+                        if os.path.isdir(ToAIMMSPath) and item.startswith("GlobalDataToAIMMS_"):
+                            try:
+                                shutil.rmtree(item_path)
+                            except:
+                                pass
+            
+            # Remove files from EFD and ECP
+            for files in ["p2/efd/PassBack*.txt", "p2/efd/composite*.txt",
+                          "p2/ecp/OutToNEMS*.txt", "p2/ecp/composite*.txt"]:
+                log_it(n, f"Deleting any files that are {files}")
+                z = glob.glob(os.path.join(os.getcwd(), files))
+                z = [i for i in z[:] if os.path.isfile(i)]
+                for f2 in z:
+                    try:
+                        os.remove(f2) 
+                    except:
+                        pass
             
             for my_dir in ["p1", "p2"]:  # Note: "p3" is run AFTER "p1" and "p2" have BOTH completed
                 with open(os.path.join(cwd, my_dir, "curirun.txt"), "w") as f_irun:
@@ -1120,12 +918,12 @@ def run(dest_path, run_type):
                 # TODO: check p1.returncode, p2.returncode
 
             # check that each of "p1" and "p2" completed successfully
-            done_par = {i: os.path.exists(os.path.join(cwd, i, "done.txt")) for i in ["p1", "p2"]}
+            done_par = {i: ((os.path.exists(os.path.join(cwd, i, "done.txt")) or os.path.exists(os.path.join(cwd, i, "no_modules_on.txt")))) for i in ["p1", "p2"]}
 
             log_it(n, "begin looking for 'done.txt' file in p1 and p2 folders")
             my_timer = 0
             stopped = check_stop_signal()
-            while (my_timer < 60) and (not done_par["p1"]) and (not done_par["p2"]) and (not stopped):
+            while (my_timer < TIME_LIMIT) and (not done_par["p1"]) and (not done_par["p2"]) and (not stopped):
                 log_it(n, f"my_timer: {my_timer/60} minutes")
                 time.sleep(1 * 60)
                 my_timer += (1 * 60) 
@@ -1187,8 +985,8 @@ def run(dest_path, run_type):
                 f.write(" \n")
 
             with open(LOGFILE, "a") as f_out:
-                log_it(n, "tfiler.exe")
-                my_process = subprocess.run("tfiler.exe", stdout=f_out, stderr=f_out)          
+                log_it(n, "Joining P1 and P2 restarts.  Here we go!")
+                npz_join.main(npz_p1="p1/restart.npz", npz_p2="p2/restart.npz", varlist_file="p2//input//varlistrec.txt", nruns = SCEDES["NRUNS"])         
             # ---------
 
             log_it(n, "About to start p3")
@@ -1222,13 +1020,13 @@ def run(dest_path, run_type):
 
                 log_it(n, f"queue run. my_process = {str(my_process)}")
 
-            done_par[my_dir] = os.path.exists(os.path.join(cwd, my_dir, "done.txt"))
+            done_par[my_dir] = os.path.exists(os.path.join(cwd, my_dir, "done.txt")) or os.path.exists(os.path.join(cwd, my_dir, "no_modules_on.txt"))
 
             # TODO: is following code block needed/useful ???
             my_timer = 0
             stopped = check_stop_signal()
-            done_par[my_dir] = os.path.exists(os.path.join(cwd, my_dir, "done.txt"))
-            while (my_timer < 60) and (not done_par[my_dir]) and (not stopped):
+            done_par[my_dir] = os.path.exists(os.path.join(cwd, my_dir, "done.txt")) or os.path.exists(os.path.join(cwd, my_dir, "no_modules_on.txt"))
+            while (my_timer < TIME_LIMIT) and (not done_par[my_dir]) and (not stopped):
                 log_it(n, f"my_timer {my_dir}: {my_timer/60} minutes")
                 time.sleep(1 * 60)
                 my_timer += (1 * 60) 
@@ -1247,7 +1045,7 @@ def run(dest_path, run_type):
             os.chdir(cwd)  # TODO: why is this necessary?
 
             # copy p3 ending restart-related files to parent folder
-            shutil.copy2("p3/restart.unf", "restart.unf")
+            shutil.copy2("p3/restart.npz", "restart.npz")
             try:
                 shutil.copy2("p3/NEMSVardf.csv", "NEMSVardf.csv")
             except:
@@ -1257,43 +1055,44 @@ def run(dest_path, run_type):
             log_it(n, "call 'nruns = check_intercycle_convergence'")
             nruns = check_intercycle_convergence(minscore, nruns, n, doemall, doaminof, 0)
 
-            log_it(n, "call 'unf_to_npz.convert_unf_to_npz'", False)
-            unf_to_npz.convert_unf_to_npz("restart.unf")
 
             if int(SCEDES["NEMRWR"]) >= 1:
                 log_it(n, f"Call 'reporter_wrapper' since  int(SCEDES['NEMRWR']) == {int(SCEDES['NEMRWR'])}")
-                reporter_wrapper(n, SCEDES)
+                reporter_wrapper(n, SCEDES, nruns)
 
             if n < nruns:
                 log_it(n, "Call 'update_current_data_files' since n < nruns")
                 update_current_data_files(n)
 
-            # if (int(SCEDES['NEMRWR'])==0) or (int(SCEDES['NEMRWR'])==2):
-            #     log_it(n, f"Call 'run_ftab_loop' since  int(SCEDES['NEMRWR']) == {int(SCEDES['NEMRWR'])}")
-            #     run_ftab_loop(n, SCEDES["SCEN"], SCEDES["DATE"])
+            if StopCode == 1 and n >= doaminof:
+                log_it(n, "Inter-Cycle Convergence met. Exiting Loop")
+                break
 
             log_it(n, "increment cycle counter")
             n += 1
 
         log_it(n, "call 'do_end_of_run_tasks'")
-        do_end_of_run_tasks(n, SCEDES)
+        do_end_of_run_tasks(SCEDES, minscore, nruns, n, doemall, doaminof)
         log_it(n, "after function 'do_end_of_run_tasks'")
-   
+
     else:
         s = f"Unknown run_type: {run_type}"
         stop_it(n, s)
-    
+
     elapsed = datetime.now() - start_time
     s = f"Total time (d:hh:mm): {elapsed.days:01}:{(elapsed.seconds//3600):02}:{(elapsed.seconds//60 % 60):02}"
     log_it(n, s)
 
     shutil.copy2("nohup.out", "nems-log.txt")
-    for i in ["p1", "p2", "p3"]:
-        try:
-            shutil.copy2(f"{i}/nohup.out", f"{i}/nems-log.txt")
-        except:
-            log_it(n, f"Unable to copy nohup.out to nems_log.txt in p1/p2/p3 (?)")
-    
+    if 'parallel' in run_type:
+        for i in ["p1", "p2", "p3"]:
+            try:
+                shutil.copy2(f"{i}/nohup.out", f"{i}/nems-log.txt")
+            except Exception:
+                log_it(n, "Unable to copy nohup.out to nems_log.txt in p1/p2/p3 (?)")
+    else:
+        log_it(n, "Sequential run, skip copying nohup.out to nems-log.txt in p1/p2/p3.")
+
     os.sys.exit(0)
 
 
@@ -1312,8 +1111,7 @@ if __name__ == '__main__':
             run_string = "local_sequential"
 
         for i in ["intercv", 
-                  "oscillate", 
-                  "tfiler"]:
+                  "oscillate"]:
             if not os.path.isfile(os.path.join(dest_path, i + ".exe")):
                 os.rename(os.path.join(dest_path, i + ".xxx"), os.path.join(dest_path, i + ".exe"))
 

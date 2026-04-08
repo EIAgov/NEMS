@@ -1,0 +1,13 @@
+notes,Decline rate configuration for producing gas projects,
+play_name,year_1_decline,decline_rate
+default,0,0
+Barnett,0,0
+Haynesville,0,0
+Fayetteville,0,0
+Woodford,0,0
+Eagle_Ford,0,0
+Antrim,0,0
+Marcellus,0,0
+Bakken,0,0
+Utica,0,0
+Permian,0.25,0.04

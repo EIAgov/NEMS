@@ -10,9 +10,10 @@ import aimms_util
 
 from logging_utilities import print_it
 
+# used when writing to nohup.out
 MODULE_NAME = "aimms_wrapper.py"
 
-# note that this module has its own logfile, separate from nohup.out
+# note that this module has its own logfile, besides nohup.out
 LOGFILE = os.path.join(os.getcwd(), "aimms_wrapper.log")
 
 
@@ -31,7 +32,6 @@ def log_it(n, s):
         f.flush()
 
 
-
 def aimms_err(n, f):
     """Check aimmRunOnly.err file and print error message if warranted.
 
@@ -46,7 +46,7 @@ def aimms_err(n, f):
     -------
     bool
         True if found an error. False otherwise.
-    """
+    """   
     result = False
 
     # # force error
@@ -115,7 +115,7 @@ def run_module(my_module, pyfiler, my_var_put, AIMMS_path, base_year):
     aimms_util.write_aimms_input(my_module, pyfiler, my_var_put, base_year)
     time.sleep(.25)
     
-    aimms_attempt_max = 50
+    aimms_attempt_max = 20
     aimms_attempt = 1
     success = False
     
@@ -129,6 +129,7 @@ def run_module(my_module, pyfiler, my_var_put, AIMMS_path, base_year):
     while ((aimms_attempt <= aimms_attempt_max) and (not success) and (not stop_me) and (not nan_found)) and (not suspicious_aimms_err):
         # On subsequent tries, re-run AIMMS input so that the monitor.in stays at "MainExeuction" instead of "Quit".
         if aimms_attempt > 1:
+                print_it(CURIRUN, f"Call write_aimms_input again. Sleep 3 seconds: {aimms_attempt=}", MODULE_NAME)
                 aimms_util.write_aimms_input(my_module, pyfiler, my_var_put, base_year)
                 time.sleep(3)  # TODO: still needed?
       
@@ -139,10 +140,11 @@ def run_module(my_module, pyfiler, my_var_put, AIMMS_path, base_year):
         success, AIMMS_thread = run_aimms(my_module, CURIRUN, year, iter, AIMMS_path, AIMMS_thread, my_command='Quit')
         stop_me = os.path.exists(os.path.join(cwd, "stop.txt"))
         nan_found = os.path.exists(os.path.join(cwd, "nan_found.txt"))
-        suspicious_aimms_err = aimms_err(CURIRUN, os.path.join(my_module, "log", "aimmsRunOnly.err"))
+        #suspicious_aimms_err = aimms_err(CURIRUN, os.path.join(my_module, "log", "aimmsRunOnly.err"))
+        suspicious_aimms_err = aimms_err(CURIRUN, os.path.join("log", "aimmsRunOnly.err"))
         print_it(CURIRUN, f"Looking for {os.path.join(cwd, 'stop.txt')} : {stop_me=}", MODULE_NAME)
         print_it(CURIRUN, f"Also looking for {os.path.join(cwd, 'nan_found.txt')} : {nan_found=}", MODULE_NAME)
-        print_it(CURIRUN, f"Also looking for suspicious log/aimmsRunOnly.err file: : {suspicious_aimms_err=}", MODULE_NAME)
+        print_it(CURIRUN, f"Also looking for suspicious log/aimmsRunOnly.err file: {suspicious_aimms_err=}", MODULE_NAME)
         if stop_me:
             my_result = "stop"
             print_it(CURIRUN, f"{my_result=}", MODULE_NAME)
@@ -155,14 +157,14 @@ def run_module(my_module, pyfiler, my_var_put, AIMMS_path, base_year):
         elif success:
             my_result = "success"
             print_it(CURIRUN, f"{my_result=}", MODULE_NAME)
-            time.sleep(0.5)
+            #time.sleep(0.5)
         else:
             s = f"attempt {aimms_attempt} was unsuccessful. Wait 5 seconds and try again."
             print_it(CURIRUN, s, MODULE_NAME)
             log_it(CURIRUN, s)
             time.sleep(5)
             aimms_attempt += 1
-
+   
     s = f"Year: {year}; success: {success}, attempts: {aimms_attempt}"
     print_it(CURIRUN, s, MODULE_NAME)
     log_it(CURIRUN, s)
@@ -190,7 +192,7 @@ def process_aimms_results(my_module, pyfiler, base_year):
         pyfiler fortran module
     base_year : int
         base year for my_module
-    """
+    """    
     CURIRUN = pyfiler.utils.curirun
     year = int(pyfiler.ncntrl.curiyr) + 1989
     iteration = int(pyfiler.ncntrl.curitr)
@@ -212,9 +214,19 @@ def process_aimms_results(my_module, pyfiler, base_year):
     fill_pyfiler(pyfiler, aimms_results, base_year) 
 
 
-# https://stackoverflow.com/questions/6904487/how-to-pass-arguments-to-a-thread
-def thread_function_ngas(name, my_AIMMS_path=None, n=0):
-    #my_AIMMS_path = r'C:\AIMMS_Installation_Free_Releases\4.96.4.6-x64-VS2017\Bin\aimms.exe'
+def thread_function_ngas(my_AIMMS_path=None, n=0):
+    """ Launch thread for natural gas AIMMS model
+    
+    See: https://stackoverflow.com/questions/6904487/how-to-pass-arguments-to-a-thread
+   
+    Parameters
+    ----------
+    my_AIMMS_path : string, optional
+        path to aimms.exe, 
+        example: r'C:/AIMMS_Installation_Free_Releases/4.96.4.6-x64-VS2017/Bin/aimms.exe'
+    n : int, optional
+        cycle number, by default 0
+    """
     my_proc = r'NEMS_monitor'
     my_proj = os.path.join(os.getcwd(), 'natgas.aimms')
     s = f'my_proc, my_proj: {my_proc}, {my_proj}'
@@ -224,9 +236,20 @@ def thread_function_ngas(name, my_AIMMS_path=None, n=0):
     my_process = subprocess.Popen(x)
 
 
-# https://stackoverflow.com/questions/6904487/how-to-pass-arguments-to-a-thread
-def thread_function_coal(name, my_AIMMS_path=None, n=0):
-    #my_AIMMS_path = r'C:\AIMMS_Installation_Free_Releases\4.96.4.6-x64-VS2017\Bin\aimms.exe'
+
+def thread_function_coal(my_AIMMS_path=None, n=0):
+    """ Launch thread for coal AIMMS model
+    
+    See: https://stackoverflow.com/questions/6904487/how-to-pass-arguments-to-a-thread
+   
+    Parameters
+    ----------
+    my_AIMMS_path : string, optional
+        path to aimms.exe, 
+        example: r'C:/AIMMS_Installation_Free_Releases/4.96.4.6-x64-VS2017/Bin/aimms.exe'
+    n : int, optional
+        cycle number, by default 0
+    """
     my_proc = r'NEMS_monitor'
     my_proj = os.path.join(os.getcwd(), 'Coal.aimms')
     s = f'my_proc, my_proj: {my_proc}, {my_proj}'
@@ -236,8 +259,20 @@ def thread_function_coal(name, my_AIMMS_path=None, n=0):
     my_process = subprocess.Popen(x)
 
 
-def thread_function_hmm(name, my_AIMMS_path=None, n=0):
-    #my_AIMMS_path = r'C:\AIMMS_Installation_Free_Releases\4.96.4.6-x64-VS2017\Bin\aimms.exe'
+def thread_function_hmm(my_AIMMS_path=None, n=0):
+    """ Launch thread for hydrogen market module AIMMS model
+    
+    See: https://stackoverflow.com/questions/6904487/how-to-pass-arguments-to-a-thread
+   
+    Parameters
+    ----------
+    my_AIMMS_path : string, optional
+        path to aimms.exe, 
+        example: r'C:/AIMMS_Installation_Free_Releases/4.96.4.6-x64-VS2017/Bin/aimms.exe'
+    n : int, optional
+        cycle number, by default 0
+    """
+
     my_proc = r'NEMS_monitor'
     my_proj = os.path.join(os.getcwd(), 'hmm.aimms')
     s = f'my_proc, my_proj: {my_proc}, {my_proj}'
@@ -248,50 +283,52 @@ def thread_function_hmm(name, my_AIMMS_path=None, n=0):
 
 
 def run_aimms(my_module, cycle, year, iteration, AIMMS_path, x, my_command='Quit'):
-    # AIMMS_path = r'C:\AIMMS_Installation_Free_Releases\4.96.4.6-x64-VS2017\Bin\aimms.exe'
-    # x: a thread in which AIMMS is running, or False
-    module_wait_time_limit = {"coal": 40, "hmm": 40, "ngas": 40}
+    """_summary_
+
+    Parameters
+    ----------
+    my_module : string
+        "coal", "hmm", or "ngas"
+    cycle : int
+        cycle number
+    year : int
+        calendar year
+    iteration : int
+        iteration number
+    AIMMS_path : string
+        path to aimms.exe
+    x : thread - no longer used?
+        a thread in which AIMMS is running, or False
+    my_command : str, optional
+        writtien to monitor.in file, by default 'Quit'
+
+    Returns
+    -------
+    bool
+        True if succesful
     
+    thread
+    """  
     my_file = r'fromAIMMS\GlobalDataToNEMS_' + str(year) + '_' + str(iteration).zfill(2) + '.txt'
     
     s = "Looking for file " + my_file
     print_it(cycle, s, MODULE_NAME)
     log_it(cycle, s)
 
-    # for offline testing, if the output file already exists, then exit the function
+    # for offline testing, if the output file already exists, then exit this function
     success = os.path.isfile(my_file)
     if success:
         return success, None
 
     if my_module == 'coal':
-        my_func = "threading.Thread(target=thread_function_coal, args=(1,), kwargs={'my_AIMMS_path':AIMMS_path, 'n':cycle})"  # no 'daemon'
+        thread_function_coal(AIMMS_path, cycle)
     elif my_module == 'hmm':
-        my_func = "threading.Thread(target=thread_function_hmm, args=(1,), kwargs={'my_AIMMS_path':AIMMS_path, 'n':cycle})"  # no 'daemon'
+        thread_function_hmm(AIMMS_path, cycle)
     elif my_module == 'ngas':
-        my_func = "threading.Thread(target=thread_function_ngas, args=(1,), kwargs={'my_AIMMS_path':AIMMS_path, 'n':cycle})"  # no 'daemon'
+        thread_function_ngas(AIMMS_path, cycle)
+
     else:
         assert False, f"unknown AIMMS module: {my_module}"
-
-    if not x:
-        x = eval(my_func)
-        x.start()
-        if not x:
-            time.sleep(5)
-            x = eval(my_func)
-            x.start()
-            if not x:
-                time.sleep(5)
-                x = eval(my_func)
-                x.start()
-
-    s = f"AIMMS thread is alive: {x.is_alive()}"
-    print_it(cycle, s, MODULE_NAME)
-    log_it(cycle, s)
-
-    if not x:
-        s = 'no thread!?!'
-        print_it(cycle, s, MODULE_NAME)
-        log_it(cycle, s)
 
     # write "Quit" to monitor.in.txt after an appropriate delay
     # need to wait long enough for AIMMS to pickup the monitor.in.txt file
@@ -301,7 +338,7 @@ def run_aimms(my_module, cycle, year, iteration, AIMMS_path, x, my_command='Quit
     exited = False
     my_sleep = 0.25
     aimms_time_counter = 0
-    aimms_time_limit = 15
+    aimms_time_limit = 60
     out_prev = " "
     waiting_prev = False
     while (not completed) and (not exited) and (aimms_time_counter <= aimms_time_limit):
@@ -311,7 +348,7 @@ def run_aimms(my_module, cycle, year, iteration, AIMMS_path, x, my_command='Quit
             out_prev = z
             with open("monitor.out.debug.txt", "a") as f:
                 f.write(f"{datetime.now()} :: {z}\n")
-        if "omplete" in z:
+        if ("complete" in z) or ("Complete" in z):
             completed = True
         elif "executing" in z:
             executing = True
@@ -322,8 +359,8 @@ def run_aimms(my_module, cycle, year, iteration, AIMMS_path, x, my_command='Quit
                 with open("monitor.in.debug.txt", "a") as f:
                     f.write(f"{datetime.now()} :: {s}\n")
             waiting_prev = True
-            # sleep 5 seconds while incrementing aimms_time_counter only a bit
-            time.sleep(5)
+            # sleep 1 seconds while incrementing aimms_time_counter only a bit
+            time.sleep(1)
             aimms_time_counter += my_sleep
         elif 'Exited' in z:
             exited = True
@@ -349,20 +386,12 @@ def run_aimms(my_module, cycle, year, iteration, AIMMS_path, x, my_command='Quit
     print_it(cycle, s, MODULE_NAME)
     log_it(cycle, s)
 
+    # TODO: what if not complete and not executing ???
+
     # look for AIMMS output file 
     success = os.path.isfile(my_file)
     my_sleep = 0.25
-        
-    aimms_time_counter = 0
-    while ((not success) and (aimms_time_counter <= module_wait_time_limit[my_module])):
-        # print_it(f'aimms_time_counter: {aimms_time_counter}')
-        time.sleep(my_sleep)
-        aimms_time_counter += my_sleep
-        success = os.path.isfile(my_file)
 
-    s = f'aimms_time_counter: {aimms_time_counter}'
-    print_it(cycle, s, MODULE_NAME)
-    log_it(cycle, s)
     if success:
         s = f'Success! Found output file: {my_file}'
         print_it(cycle, s, MODULE_NAME)
@@ -388,12 +417,10 @@ def fill_pyfiler(pyfiler, dfd, base_year):
     -------
     bool
         True
-    """
+    """    
     CURIRUN = pyfiler.utils.curirun
     by = base_year - 1989
     y = int(pyfiler.ncntrl.curiyr)
-
-    # pyfiler.ogsmout.ogrnagprd[:,:, by-1:] has base_year and following years
 
     # TODO: assume that if a variable is in the AIMMS output, then we should put it the restart file
     dfd2 = {k.split('(')[0]: v.rename(columns={'globalyr': 'MNUMYR', k: k.split('(')[0]}) for k, v in dfd.items()}
@@ -425,7 +452,6 @@ def fill_pyfiler(pyfiler, dfd, base_year):
         elif my_string == "pyfiler.coalout.coalcode":
             pyfiler.coalout.coalcode = 0
 
-        # TODO: is this correct ???
         elif my_string == "pyfiler.utils.h2step":
             pass
 
@@ -455,7 +481,6 @@ def fill_pyfiler(pyfiler, dfd, base_year):
         # ---------
         
         df = dfd2[var]
-        # cols = [i for i in df.columns if "_" not in i]  # TODO what if i.startswith("MX_") ????
 
         # make columns into 'int' as appropriate
         for i in df.columns:
@@ -507,7 +532,7 @@ def fill_pyfiler(pyfiler, dfd, base_year):
                 df[a] = df[a].astype(int)
                 df2 = df.set_index(a)
                 for (i1, i2) in df2.index:
-                    eval(my_string)[i1-1][i2-1] = float(df2.loc[(i1,i2)].iloc[0])  # TODO: transform to int if 'coalemm.cmm_cont_indx' ???
+                    eval(my_string)[i1-1][i2-1] = float(df2.loc[(i1,i2)].iloc[0])
 
         elif len(s) == 3:
             if not df.empty:
@@ -530,11 +555,11 @@ def fill_pyfiler(pyfiler, dfd, base_year):
                 a = list(df.columns)[:-1]
                 df[a] = df[a].astype(int)
                 df2 = df.set_index(a)
-                for (i1, i2, i3, i4. i5) in df2.index:
+                for (i1, i2, i3, i4, i5) in df2.index:
                     eval(my_string)[i1-1][i2-1][i3-1][i4-1][i5-1] = float(df2.loc[(i1,i2,i3,i4,i5)].iloc[0])
 
         else:
             # TODO: are there any 6-dimensional restart variables?
-            print(f'Unable to process: {k2}, {v} (???)')
+            print(f'Unable to process: {k2}, {v} (MORE than 5 dimensions)')
     
     return True  # TODO: return something more meaningful

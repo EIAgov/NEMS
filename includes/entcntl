@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: m:/default/includes/RCS/entcntl,v 1.14 2017/09/15 18:47:55 LC2 Exp $
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !  ENTCNTL CONTAINS INPUT DATA FOR THE NEW TECHNOLOGIES SUBMODULE THAT
@@ -13,7 +14,7 @@
       INTEGER ECP$LRN                    ! NUMBER OF STEPS IN LEARNING CURVE
       PARAMETER (ECP$LRN = 3)
       INTEGER ECP$COMP                   ! NUMBER OF PLANT COMPONENTS FOR LEARNING
-      PARAMETER (ECP$COMP = 29)          ! add one for offshore wind and one for P2, and storage
+      PARAMETER (ECP$COMP = 30)          ! add one for offshore wind and one for P2, and storage
       INTEGER ECP$LVN
       PARAMETER (ECP$LVN = 3)
       INTEGER ESIZ$ENT

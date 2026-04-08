@@ -1,3 +1,4 @@
+! -*- f90 -*-
 ! $Header: M:/default/includes/RCS/steoblock,v 1.15 2020/03/09 12:36:26 jpg Exp $
 
       INTEGER STEOVR            ! number of STEO variables to be held for NEMS use in this common block

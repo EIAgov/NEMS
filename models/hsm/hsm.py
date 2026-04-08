@@ -47,22 +47,36 @@ import sys
 import os
 import logging
 import argparse as ap
+import time
 
 ### Setup Logging
 # Delete old log
 try:
     os.remove('hsm_debug.log')
-except:
+except OSError:
     pass
+
+#Path to main directories
+standalone_directory = os.getcwd() + '\\'
+integrated_directory = os.getcwd() + '\\'
+integrated_input_path = standalone_directory + 'hsm\\input\\'
+setup_file_path = os.path.join(integrated_input_path, 'setup.csv')
 
 # Configure Logger
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
+
+handlers = [logging.FileHandler("hsm_debug.log")]
+
+# Determine whether or not to include stream handler by identifying if this is an integrated run or not based on whether there's a setup file
+file_exists = os.path.exists(setup_file_path)
+if not file_exists:
+    handlers.append(logging.StreamHandler())  # Add StreamHandler if the file does not exist
+
 logging.basicConfig(level=logging.DEBUG,
                     format='[%(asctime)s][%(name)s]' +
                            '[%(funcName)s][%(levelname)s]  :: |%(message)s|',
-                    handlers=[logging.FileHandler("hsm_debug.log"),
-                              logging.StreamHandler()])
+                    handlers=handlers)
 
 logger = logging.getLogger('hsm.py')
 logger.info('Log All Model System Paths')
@@ -70,20 +84,28 @@ logger.info(sys.path)
 
 
 ###Add Pyfiler Paths
+# Add current directory first (where pyfiler1.pyd is located)
+sys.path.insert(0, os.getcwd())
 sys.path.append(os.getcwd() + '\\Pyfiler')
 sys.path.append(os.getcwd() + '\\..\\Pyfiler')
 sys.path.append(os.getcwd() + '\\..\\..\\Pyfiler')
 sys.path.append(os.getcwd() + '\\..\\..\\scripts\\Pyfiler')
 sys.path.append(os.getcwd() + '\\..\\scripts\\Pyfiler')
 
-sys.path.append(r"C:/Program Files (x86)/Intel/oneAPI/compiler/2023.2.1/windows/redist/intel64_win/compiler")
-os.add_dll_directory(r"C:/Program Files (x86)/Intel/oneAPI/compiler/2023.2.1/windows/redist/intel64_win/compiler")
+# Add Intel oneAPI compiler paths if they exist
+intel_compiler_path = r"C:/Program Files (x86)/Intel/oneAPI/compiler/2023.2.1/windows/redist/intel64_win/compiler"
+if os.path.exists(intel_compiler_path):
+    sys.path.append(intel_compiler_path)
+    os.add_dll_directory(intel_compiler_path)
+else:
+    logger.warning(f'Intel oneAPI compiler path not found: {intel_compiler_path}')
 
 logger.info('Log All System Paths')
 logger.info(sys.path)
 
 # Import module after pyfiler setup
 import module_unf
+from visualizations import generate_charts
 
 
 def get_args(in_args=None):
@@ -177,9 +199,15 @@ def run_hsm(year, iteration, pyfiler1, cycle, scedes):
               cycle,
               scedes)
 
+    # Reset timing variables and start overall HSM timer
+    hsm.reset_timing()
+    hsm_start_time = time.time()
 
     ###Run HSM based on integrated vs. standalone switch value
     if hsm.integrated_switch == False: #Standalone run
+        # TEMPORARY DEBUG: Exit early for faster debugging
+        DEBUG_STOP_YEAR = 2050
+        
         for year in range(hsm.history_year, hsm.final_aeo_year + 1):
             ###Run hsm
             logger.info('Run year: ' + str(year))
@@ -197,6 +225,26 @@ def run_hsm(year, iteration, pyfiler1, cycle, scedes):
             logger.info('Write Results ' + str(year))
             temp_filename = integrated_directory + 'restart_HSMOUT.unf'
             hsm.restart.write_results(temp_filename)
+            
+            # TEMPORARY DEBUG: Break after processing DEBUG_STOP_YEAR
+            if year >= DEBUG_STOP_YEAR:
+                logger.info(f'DEBUG: Stopping at year {year} for faster debugging')
+                break
+
+        # Calculate total runtime for standalone run
+        total_hsm_runtime = time.time() - hsm_start_time
+        
+        # Display timing summary
+        timing_summary = hsm.get_timing_summary()
+        timing_summary += f"Total HSM Runtime:     {hsm.format_time(total_hsm_runtime)}\n"
+        timing_summary += "="*50 + "\n"
+        
+        logger.info(timing_summary)
+        print(timing_summary)
+        
+        # Display development charts
+        chart_config_path = os.path.join(hsm.input_path, 'chart_config.csv')
+        generate_charts(hsm, chart_config_path)
 
         pass
 
@@ -232,6 +280,17 @@ def run_hsm(year, iteration, pyfiler1, cycle, scedes):
             temp_filename = integrated_directory + 'restart_HSMOUT.unf'
             hsm.restart.write_results(temp_filename)
             logger.info('End Write Results to Restart File')
+            
+            # Calculate total runtime for integrated run
+            total_hsm_runtime = time.time() - hsm_start_time
+            
+            # Display timing summary
+            timing_summary = hsm.get_timing_summary()
+            timing_summary += f"Total HSM Runtime:     {hsm.format_time(total_hsm_runtime)}\n"
+            timing_summary += "="*50 + "\n"
+            
+            logger.info(timing_summary)
+            print(timing_summary)
 
 
         else: #If "Run every iteration" flag is off or run limit is outside HSM parameters, just write restart file back to NEMS
@@ -242,11 +301,10 @@ def run_hsm(year, iteration, pyfiler1, cycle, scedes):
 
 
 
+
+
 if __name__ == '__main__':
     arguments = get_args()
-    try:
-        run_hsm(arguments.curcalyr, arguments.iteration, arguments.cycle)
-    except:
-        run_hsm(arguments.curcalyr, arguments.iteration, None, arguments.cycle,None)
+    run_hsm(arguments.curcalyr, arguments.iteration, None, arguments.cycle, None)
 
     logger.info('HSM Finished')

@@ -22,7 +22,6 @@ TFILER_OBJS = tfiler.obj filer.obj fwk1io.obj cio4wk1.obj gdxf9def.obj gdxf9glu.
 BUILD_DIR = build
 # This loads .d and files for proper tracking of header dependecies
 # It also loads .mk files in the .makefiles directory for user defined makefiles 
-LOAD_INCLUDES := $(shell ../scripts/include_deps.py)
 MAKEDEPEND = /gen-dep:$(BUILD_DIR)/$*.d /gen-depformat:make /QMMD
 DEPENDENCY_INCLUDES = $(BUILD_DIR)/include_d.mk
 
@@ -49,21 +48,6 @@ arraycode.exe : ../scripts/arraycode.exe ;
 ../scripts/arraycode.exe : arraycode.f
 	echo $^
 	$(COMPILER) -o ../scripts/arraycode.exe /free /include:$(INCLUDES) $^  /link /force
-
-%.obj : $(BUILD_DIR)/%.d ;
-
-$(BUILD_DIR)/%.d : %.f90 
-	@echo "  > $*.obj"
-	@rm -f $(BUILD_DIR)/$*.d
-	@$(COMPILER) $(FFLAGS) $(MAKEDEPEND) $*.f90 /include:$(INCLUDES) -o $*.obj
-	@$(SHELL) -ec "../scripts/gen_dep_to_makefile.py $(BUILD_DIR)/$*.d $(COMPILER) $(FFLAGS) $*.f90 /include:$(INCLUDES) -o $*.obj"
-
-$(BUILD_DIR)/%.d : %.f
-	@echo "  > $*.obj"
-	@rm -f $(BUILD_DIR)/$*.d
-	@$(COMPILER) $(FFLAGS) $(MAKEDEPEND) $*.f /include:$(INCLUDES) -o $*.obj
-	@$(SHELL) -ec "../scripts/gen_dep_to_makefile.py $(BUILD_DIR)/$*.d $(COMPILER) $(FFLAGS) $*.f /include:$(INCLUDES) -o $*.obj"
-	
 
 clean: 
 	rm -rf $(BUILD_DIR) $(OBJECTS) *.mod

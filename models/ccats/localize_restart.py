@@ -15,6 +15,10 @@ The :class:`Localize` submodule accomplishes this as follows:
     3. CO\ :sub:`2` supply volumes are aggregated and concatenated into DataFrames *industrial_co2_cost_inv* and *industrial_co2_cost_om* in
        :meth:`~localize_restart.Localize.concat_restart_variables_cost`.
 
+
+Localize_restart: Input Files
+_____________________________
+
     
 Localize Restart: Model Functions and Class Methods
 ___________________________________________________

@@ -2,8 +2,7 @@ import os, shutil, pathlib
 def main():
     """Invoke process_wrapper() to parse each wratpper file, save the content in desired format, and print a message to indicate the entire process succeeded.
     """
-    process_wrapper('pyfiler1-f2pywrappers.f', 'pyfiler1-f2pywrappers.f-org')
-    process_wrapper('pyfiler2-f2pywrappers.f', 'pyfiler2-f2pywrappers.f-org')    
+    process_wrapper('pyfiler1-f2pywrappers.f', 'pyfiler1-f2pywrappers.f-org') 
     print("Done with wrapper process!")
 
 def process_wrapper(file, old):

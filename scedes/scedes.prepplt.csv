@@ -1,0 +1,524 @@
+Key,Value,ModuleOwner,Description,UsedInMoreOpt,UsedInFilelist,Filelist_format
+preppltN,$NEMS/source/prepplt,,,0,0,
+RETAIN,45,,Signifies retention period in days for run for potential automatic deletion,0,0,
+INTLFDBK,0,,Switch to specify international feedback (0=off; 1=on),1,0,
+STSCALNG,0,,"STEO scale factors origin (0=from code, 1=from file)",1,0,
+RESTARTN,U:/output/syk/hmm_vars/d092225a/restart.npz,,Input RESTART file - unformatted,0,1,READ SEQUENTIAL UNFORMATTED 32760 
+NRUNS,5,,Number of run cycles with a restart file copy and rerun,1,0,
+DOAMINOF,3,,Forces a minimum number of cycles before quitting early due to acceptable convergence,1,0,
+MAXITR,2,,Maximum number of iterations overrides JR and SR if less than them,0,0,
+MINSCORE,3.9,,Integration/Intercv: Minimum overall GPA-type score to signify intercycle convergence,0,0,
+EXW,0,,Execution switch - World Module,0,0,
+EXM,0,,Execution switch - Macro Module,0,0,
+EXR,0,,Execution switch - Residential Module,0,0,
+EXK,0,,Execution switch - Commercial Module,0,0,
+EXT,0,,Execution switch - Transportation Module,0,0,
+EXI,0,,Execution switch - Industrial Module,0,0,
+EXC,0,,Execution switch - Coal Module,0,0,
+EXE,0,,Execution switch - Utility Module,0,0,
+EXG,0,,Execution switch - Natural Gas T&D Module,0,0,
+EXL,0,,Execution switch - Oil & Gas Production Module,0,0,
+EXO,0,,Execution switch - Refinery Module,0,0,
+EXN,0,,Execution switch - Renewables Module,0,0,
+EXH,0,,Execution switch - Hydrogen module,1,0,
+EXQ,0,,Execution switch - CCATS,1,0,
+EPHRTS,0,,Invoke EPHRTS (Electricity H2 module),1,0,
+EPHRTSDB,0,,Flag for EPHRTS Debug Files (1 is on),1,0,
+DBDUMP,1,,Writes RESTART file to disk after every year (when=1),0,0,
+PRTDBGN,1,,Debug switch - Renewables Module,0,0,
+PRTDBGI,1,,Debug switch - Industrial Module,0,0,
+PRTDBGL,1,,Debug switch - Oil & Gas Production Module,0,0,
+PRTDBGG,1,,Debug switch - Natural Gas T&D Module,0,0,
+COPYDIR,./input,,Directory to copy input files to,0,0,
+DOEMALL,0,,Forces NEMS to run all cycles requested (do all cycles=1),1,0,
+OFFSETDO,15,,"Maximum GHG Offset percentage, domestic sources",1,0,
+OFFSETIN,15,,"Maximum GHG Offset percentage, international sources",1,0,
+UTILDR,0.08,,Discount rate for table 116 in ftab,0,0,
+LASTYR,2050,,Last execution year - index,0,0,
+AEOLSTYR,2050,,Last execution year typical for current AEO cycle,1,0,
+ORDM,1,,Order of execution - Macro Module,0,0,
+ORDC,2,,Order of execution - Coal Module,0,0,
+ORDR,3,,Order of execution - Residential Module,0,0,
+ORDK,4,,Order of execution - Commercial Module,0,0,
+ORDI,5,,Order of execution - Industrial Module,0,0,
+ORDT,6,,Order of execution - Transportation Module,0,0,
+ORDE,7,,Order of execution - Utility Module,0,0,
+ORDW,8,,Order of execution - World Module,0,0,
+ORDL,9,,Order of execution - Oil & Gas Production Module,0,0,
+ORDG,10,,Order of execution - Natural Gas T&D Module,0,0,
+ORDO,11,,Order of execution - Refinery Module,0,0,
+ORDN,12,,Order of execution - Renewables Module,0,0,
+ORDH,13,,Order of execution - Hydrogen Module,1,0,
+ORDQ,14,,Order of execution - CCATS,1,0,
+PRTDBGW,0,,Debug switch - World Module,0,0,
+PRTDBGM,0,,Debug switch - Macro Module,0,0,
+PRTDBGR,0,,Debug switch - Residential Module,0,0,
+PRTDBGK,0,,Debug switch - Commercial Module,0,0,
+PRTDBGT,0,,Debug switch - Transportation Module,0,0,
+PRTDBGE,0,,Debug switch - Utility Module,0,0,
+PRTDBGC,0,,Debug switch - Coal Module,0,0,
+PRTDBGO,0,,Debug switch - Refinery Module,0,0,
+PRTDBGH,0,,Debug switch - Hydrogen Module,1,0,
+PRTDBGQ,0,,Debug switch - CCATS,1,0,
+FIRSYR,1990,,First excution year - index,0,0,
+NYRS,3,,Number of growth years,0,0,
+I4SITE,2,,"Foresight toggle (1=Myopic, 2=Adaptive, 3=Perfect)",0,0,
+I4SCNT,2,,"Foresight control (1=Main, 2=submodule)",0,0,
+IRELAX,2,,Relaxation switch to speed convergence (0=off),0,0,
+WWOP,2,,"World oil price case (1=Low, 2=Mid, 3=High)",0,0,
+MMAC,2,,"Macro case (1=Low, 2=Mid, 3=High)",0,0,
+TTECH,2,,"Technology case switch (1=Low or Frozen, 2=Mid, 3=High)",1,0,
+CCOST,2,,"Capital cost case switch (1=Low, 2=Reference, 3=High)",1,0,
+NRGBILL,1,,"Include 2005 Energy Bill legislation? (1=Yes, please;  0=No thank you)",1,0,
+NRG2007,1,,"Include 2007 Energy Bill legislation? (1=Yes, please;  0=No thank you)",1,0,
+NRG2008,1,,Include 2008 Mental Health Energy legislation? (1=I'd like that; 0=Leave me alone),1,0,
+STIMULUS,1,,Include 2009 Economic Stimulus Package (1=Yes indeedy; 0=No never),1,0,
+AB32SW,1,,Switch to turn California AB-32 on (1) and off (0),1,0,
+EPA111D,0,,Switch for EPA rule 111d (0=off; 1=on),1,0,
+CAFE,0,,Is this a CAFE case?  (MAC will use vehicle costs from Tran),1,0,
+MACCAFE,0,,Is this a CAFE case?  (MAC will use vehicle costs from Tran) (same as CAFE),1,0,
+EXPLEASE,1,,"Whether exports of lease condensate are allowed (1=yex, please; 0=no)",1,0,
+CAFEMEET,0,,Force them to meet the CAFE standard when set to 1,1,0,
+MACTAX,0,,"Which MAM Tax Case (0=WOP, 1=DR,2=PT,3=CT,4=SS)",1,0,
+HISTORY,0,,1990 History data flag,0,0,
+HGSTRUCT,1,,set =1 to include mercury structure and increase run time,1,0,
+ECPSTART,2,EXE,"Util cap expansion (0=off, 1=IFFS, 2=LP)",0,0,
+ECPACT,0,EXE,"Write ECP ACT file for this year (>0), or off (=0)",1,0,
+EMMBENCH,1,,Switch to indicate level of benchmarking for EMM.  The theory is that 1 is regular and increasing the number loosens the tolerance,1,0,
+LNGGAMLV,550,,"GAMMA coefficient, times 10, for representing sensitivity of expected wellhead prices to plan builds of LNG export capacity.",1,0,
+LNGGAMCN,-425,,"GAMMA constant, times 10, for representing sensitivity of expected wellhead prices to plan builds of LNG export capacity.",1,0,
+HIRENEW,0,,"High Renewables Case (1:high, 0: normal)",1,0,
+LORENEW,0,,"Low Renewables Case (1:low, 0: normal)",1,0,
+STEONG,1,,"NGTDM additional benchmark switch (0=Off, 1=On)",1,0,
+COMMENT,....,,Run comment,0,0,
+CLEANUP,$NEMS/scripts/cleanup.sh,,cleanup.sh,0,0,
+MACFDBK,1,,Macro feedback switch (1=on),0,0,
+ELASSW,0,,Elasticity switch (1=on),0,0,
+DSMSWTCH,0,,"DSM logic switch (1=do DSM, 0 is don't)",0,0,
+FUNFMT,1,,FORMAT OF RESTART FILES (1=UNFORMATTED),0,0,
+BANKONYR,2051,,"For allowance banking, designates first year in which the bank balance and pricing path begin (see epmcntl.txt)",1,0,
+EXPNGPRD,2008,,Year of natural gas resource base (TCF) (end of year),1,0,
+EXPNGPRC,900,,GAS PRICE PAIRED TO CUM NG PROD (1998 CENTS/MCF),1,0,
+EXPNGGRW,20,,EXP GROWTH IN ANNUAL NG PROD (20 = 2.0 PERCENT/YEAR),1,0,
+EXPNGEXP,70,,GAS EXPECTATION EXPONENT before economic unconventionals (150= **1.5; 75= **0.75; etc),1,0,
+EXPNGIPT,350,,Price at which unconventionals become economic (1998 cents/mcf),1,0,
+EXPNGEX2,130,,GAS EXPECTATION EXPONENT after economic unconventionals (150= **1.5; etc),1,0,
+EMMRENEW,1,,"INTEGRATE UTIL WITH RENEW (0=NO,1=YES,2=PARTIAL)",1,0,
+OGTECH,1,,"Oil and Gas Technology (0=No, 1=Yes, 23=?, 30=?)",1,0,
+EUEDEXP,1,,"End-Use Electricity Demand EXPectation (0=normal, 1=perfect)",1,0,
+WOPA_ONE,30,,"WORLD OIL PRICE EXP.change/yr,92Cent/barrel, 2026-2030",1,0,
+WOPA_TWO,30,,"WORLD OIL PRICE EXP.change/yr,92Cent/barrel, 2031-on",1,0,
+REBRACKT,0,,Force epm to widen the bracket on the first cycle,1,0,
+JUMPYR,2050,,Calendar year representation of year NEMS is programmed through (could be less than arrays dimensioned),1,0,
+WOPLIMIT,2602,,"WORLD OIL PRICE EXP  Limit, post-2015, 92Cent/barrel",1,0,
+MNDBGCV,0,,Switch for force nonconvergence for debug,1,0,
+RUNEPM,1,,Switch to run Emissions Policy Module (1=run),1,0,
+RUNPOLY,1,,Run Polysys (1=run),1,0,
+POLYCOST,100,,Cost multiplier for Polysys.  100 means the multiplier is 1; 120 means costs are increased 20%; 75 means costs are decreased 25%,1,0,
+WGTGUESS,50,,Weight to apply to previous guess in calculating new guess (100-wgtguess weighs previous result),1,0,
+WELLPF,1,,switch to 1 to use perfect foresight for the wellhead price expectations,1,0,
+PFGUESS,50,,Weight to apply to previous guess in wellhead price perfect foresight routine (similar to carbon above),1,0,
+LNGGUESS,50,,Weight to apply to previous guess for Canadian natural gas price,1,0,
+RENEWBM,2,,RENEWABLES SWITCH TO OVERWRITE BIOMASS,1,0,
+RENEWGE,0,,Renewables switch to overwrite GEOTHERMAL,1,0,
+RENEWWI,0,,Renewables switch to overwrite WIND,1,0,
+RENEWMS,2,,Renewables switch to overwrite MUNICIPAL SOLID WASTE,1,0,
+BMYREXP,1996,,BENCHMARK YEAR EXPECTATIONS,1,0,
+STEOBM,1,,"STEO BenchMark switch (0=off, 1=on)",1,0,
+IPMM,1,,Run international refinery (=1) or use supply curves,1,0,
+CRUDEXP,1,,Allow crude oil exports (0 does not allow; 1 allows),1,0,
+YEARPR,2024,,Year to scale dollars to,1,0,
+CUMCAP,2024,,Year cumulative capacity additions begin from - NOT A SWITCH,0,0,
+ELGREXP,50,,Maximum expected electricity demand growth (15=1.5%),1,0,
+ORACLESW,1,,"switch for writing to the access database (0=off, 1=on)",1,0,
+ORCLECP,1,,"switch for writing to the access ecp tables (0=off, 1=on)",1,0,
+ORCLEFD,1,,"switch for writing to the access efd tables (0=off, 1=on)",1,0,
+ORCLEFP,1,,"switch for writing to the access efp tables (0=off, 1=on)",1,0,
+ORCLCL,0,,"switch for writing to the access coal tables (0=off, 1=on)",1,0,
+TRANEFF,0,,"Trans efficiency (0=Base, 1=Frozen, 2=High, 3=ACE, 4=Aggress)",1,0,
+BEHAVE,2,,"Consumer Behavior (1=Lazy, 2=Regular, 3=Aggressive)",1,0,
+GAMSVERS,c:\gams\win64\43\gams.exe,,/35.1/gams.exe,1,0,
+BANKDSCR,74,,"Discount Rate for greenhouse gas emissions banking, now in permille (previously percent pre-aeo2008)",1,0,
+BANKSAFE,0,,"Under GHG cap&trade with banking & safety, ""=1"" sets price in bank_endyr to safety-valve",1,0,
+BIOSEQOK,0,,"Under GHG cap&trade with offsets, ""1"" allows bio sequestration to count as offset. 0: doesn't count as offset",1,0,
+OFFSETI,0,,International Offsets Option (1: option to calculate int'l offsets and price independently of domestic sources based on distinct limit),1,0,
+IJUMPYR,61,,Last model year - index,1,0,
+IJUMPCAL,2050,,Last model year,1,0,
+INDBMOVR,1,,"Industrial Benchmark Override - start STEO benchmark phaseout 1 or 2 years early (used for all side cases) [0=Off, 1 or 2=On]",1,0,
+LCFSOPT,1,,Set to 1 to run a California low carbon fuel standard,1,0,
+CO2PLFMM,0,,1 to have LFMM add CO2 price adders to petroleum product product prices rather than in price_adjust,1,0,
+CLBASEYR,2023,,Switch to update coal base year,1,0,
+KEEPOPEN,0,,Switch to keep all AIMMS models in run open,1,0,
+AIMMSEFD,1,,(emm) Invoke AIMMS EFD (Electricity Fuel Dispatch) LP interface,1,0,
+AIMMSECP,1,,(emm) Invoke AIMMS ECP (Electricity Capacity Planning) LP interface,1,0,
+AIMEFDBG,0,EXE,(emm) Include additional EFD-AIMMS output for debugging and validation,1,0,
+AIMMKEFD,0,,(emm) Run EFD with some EFD-AIMMS routines to make files needed for arraycode_efd.f to make AIMMS LP code,1,0,
+AIMECPBG,0,EXE,(emm) Include additional ECP-AIMMS output for debugging and validation,1,0,
+AIMMKECP,0,,(emm) Run ECP with some ECP-AIMMS routines to make files needed for arraycode_ecp.f to make AIMMS LP code,1,0,
+AIMMSNG,1,,Invoke AIMMS Natural Gas T&D module,1,0,
+AIMMSLOC,C:\AIMMS_Installation_Free_Releases\25.5.7.1-x64-VS2022,,allation_free_releases\4.37.4.1024-x86,1,0,
+REFRENT,0,,Consider unused refinery capacity when dealing with possibility of exports,1,0,
+RUN45Q,1,,set to 1 to run the Tax Code Section 45Q tax credits; 0 to not,1,0,
+RUNSTORE,1,,Run renewable and electricity storeage AIMMS LP,1,0,
+RUNEMMSQL,1,,Run Dynamic EMM Sqlite3 code,1,0,
+RUNRNGPL,1,,Run the R program for propane and ethane pricing,1,0,
+WORLDN,$NEMS/source/world.f,,,0,0,
+MACN,$NEMS/source/mac.f,,,0,0,
+RESDN,$NEMS/source/resd.f,,,0,0,
+COMMN,$NEMS/source/comm.f,,,0,0,
+INDN,$NEMS/source/ind.f,EXI,,0,0,READWRITE DIRECT FORMATTED 400
+INDNN,IDM_INDN.csv,EXI,,0,1,READWRITE DIRECT FORMATTED 400
+TRANN,$NEMS/source/tran.f,,,0,0,
+TRANFRTN,$NEMS/source/tranfrt.f,,,0,0,
+TRANAIRN,$NEMS/source/tranair.f,EXT, air model output,0,0,WRITE SEQUENTIAL FORMATTED 80
+TRANAIR,TDM_TRANAIR.txt,EXT, air model output,0,1,WRITE SEQUENTIAL FORMATTED 80
+UTILN,$NEMS/source/util.f,,,0,0,
+UDATN,$NEMS/source/udat.f,,,0,0,
+UREADN,$NEMS/source/uread.f,,,0,0,
+UDAFN,$NEMS/source/udaf.f,,,0,0,
+UEFDN,$NEMS/source/uefd.f,,,0,0,
+UECPN,$NEMS/source/uecp.f,,,0,0,
+UEFPN,$NEMS/source/uefp.f,,,0,0,
+UNUGSN,$NEMS/source/unugs.f,,,0,0,
+ULDSMN,$NEMS/source/uldsm.f,,,0,0,
+UCAPEN,$NEMS/source/ucape.f,,,0,0,
+RENEWN,$NEMS/source/renew.f,,,0,0,
+REFINEN,$NEMS/source/refine.f,,,0,0,
+TFILERN,$NEMS/source/tfiler.f,, tfiler input file to run tfiler for AIMMS linkage ,0,1,WRITE SEQUENTIAL FORMATTED 80
+FILERN,$NEMS/source/filer.f,,,0,0,
+FILEMGRN,$NEMS/source/filemgr.f,,,0,0,
+EPMN,$NEMS/source/epm.f,,,0,0,
+FWK1ION,$NEMS/source/fwk1io.f,,,0,0,
+CIO4WK1N,$NEMS/source/cio4wk1.f,,,0,0,
+DUMMYXN,$NEMS/source/dummyx.f,,,0,0,
+PREPPLTN,$NEMS/source/prepplt.f,,,0,0,
+HEMN,$NEMS/source/hem,,,0,0,
+READDAN,$NEMS/source/readda,,,0,0,
+NEMSWK1N,$NEMS/source/nemswk1.f,,,0,0,
+DUMMYPPN,$NEMS/source/dummypp.f,,,0,0,
+GDXF9DEFN,$NEMS/source/gdxf9def.f,,,0,0,
+UAIMMSN,$NEMS/source/uaimms.f,,,0,0,
+ECP_ROW_COLN,$NEMS/source/ecp_row_col.f90,EXE,,0,0,
+EFD_ROW_COLN,$NEMS/source/efd_row_col.f90,EXE,,0,0,
+NEMSFUNCTN,$NEMS/source/nemsfunct.f,,,0,0,
+UESQLN,$NEMS/source/uesql.f90,,,0,0,
+FSQLITEN,$NEMS/source/fsqlite.f90,,,0,0,
+EPHRTSMN,$NEMS/source/ephrts.f90,,,0,0,
+DICTN,$NEMS/input/dict.txt,,dictionary used by FILER,0,1,READ SEQUENTIAL FORMATTED 165
+LAYOUTN,$NEMS/input/layout.txt,,"ftab table stubs, headers, and footnotes",0,1,READ SEQUENTIAL FORMATTED 255
+LAYINN,$NEMS/input/layin.xls,," Spreadsheet used to create layout.txt, new format",0,1,READ SEQUENTIAL FORMATTED 80
+TABREQN,$NEMS/input/tabreq.txt,,,0,0,
+CITATIONN,$NEMS/input/citation.txt,,citations for footnotes,0,1,READ SEQUENTIAL FORMATTED 255
+VARLISTN,$NEMS/input/varlist.txt,, List of variables to go into RESTART file,0,1,READ SEQUENTIAL FORMATTED 80
+MCPARMSN,$NEMS/input/macro/mcparms.txt,EXM, MACRO PARAMETERS,0,1,READ SEQUENTIAL FORMATTED 0
+EMMCNTLN,$NEMS/input/emm/emmcntl.txt,, ELECTRIC UTILITY INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+ELDATYRN,$NEMS/input/emm/eldatyr.txt,EXE, HISTORICAL OVERWRITES FOR Utility,0,1,READ SEQUENTIAL FORMATTED 0
+INDRUNN,$NEMS/input/idm/indrun.txt,EXI, industrial input file,0,1,READ SEQUENTIAL FORMATTED 0
+ENPRODN,$NEMS/input/idm/enprod.txt,EXI, industrial input file,0,1,READ SEQUENTIAL FORMATTED 0
+WHYDRON,$NEMS/input/rfm/whydro.txt,EXN, Hydro (renewables) input file,0,1,READ SEQUENTIAL FORMATTED 0
+KPARMN,$NEMS/input/cdm/kparm.txt,EXK, Commercial input file,0,1,READ SEQUENTIAL FORMATTED 0
+KFLSPCN,$NEMS/input/cdm/kflspc.txt,EXK, Commercial input file,0,1,READ SEQUENTIAL FORMATTED 0
+KVINTN,$NEMS/input/cdm/kvint.txt,EXK, Commercial input file,0,1,READ SEQUENTIAL FORMATTED 0
+KSHEFFN,$NEMS/input/cdm/ksheff.txt,EXK, Commercial input file,0,1,READ SEQUENTIAL FORMATTED 0
+KBEHAVN,$NEMS/input/cdm/kbehav.txt,EXK, COMMERCIAL MODULE INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+KCAPFACN,$NEMS/input/cdm/kcapfac.txt,EXK, COMMERCIAL MODULE INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+KPREMN,$NEMS/input/cdm/kprem.txt,EXK, COMMERCIAL INPUT DATA SET,0,1,READ SEQUENTIAL FORMATTED 0
+PLNTDAFN,$NEMS/input/emm/plntdaf.daf,,file,0,1,READWRITE DIRECT UNFORMATTED 16384
+EFPTAXN,$NEMS/input/emm/efptax.txt,EXE, Electricity finance tax file,0,1,READ SEQUENTIAL FORMATTED 0
+EFPALLN,$NEMS/input/emm/efpall.txt,EXE, Electricity finance file,0,1,READ SEQUENTIAL FORMATTED 0
+EFPCNTLN,$NEMS/input/emm/efpcntl.txt,EXE, Electricity finance control file,0,1,READ SEQUENTIAL FORMATTED 0
+KINTENSN,$NEMS/input/cdm/kintens.txt,EXK, 1989 Service Demand (Major) & End Use (,0,1,READ SEQUENTIAL FORMATTED 0
+MSWDATN,$NEMS/input/rfm/mswdat.txt,EXN, INPUT DATA FOR THE MUNICIPAL SOLID WAST,0,1,READ SEQUENTIAL FORMATTED 0
+WESAREAN,$NEMS/input/rfm/wesarea.txt,EXN, WIND RESOURCE QUANTITY DATA FOR RENEWAB,0,1,READ SEQUENTIAL FORMATTED 0
+KDELEFFN,$NEMS/input/cdm/kdeleff.txt,EXK, COMM minor service efficiency annual gr,0,1,READ SEQUENTIAL FORMATTED 0
+KHURELAN,$NEMS/input/cdm/khurela.txt,EXK, COMM base year cooking fuel shares by r,0,1,READ SEQUENTIAL FORMATTED 0
+KEMFACN,$NEMS/input/cdm/kemfac.txt,EXK, Environmental emissions factors for com,0,1,READ SEQUENTIAL FORMATTED 0
+SOLARCLIPINN,$NEMS/input/rfm/solarclipin.txt,EXN, Input data for the CLIP SOLAR submodule of R,0,1,READ SEQUENTIAL FORMATTED 0
+SOLARINN,$NEMS/input/rfm/solarin.txt,EXN, Input data for the SOLAR submodule of R,0,1,READ SEQUENTIAL FORMATTED 0
+KRENEWN,$NEMS/input/cdm/krenew.txt,EXK, Solar Thermal renewable forecast by Cen,0,1,READ SEQUENTIAL FORMATTED 0
+LDSMSTRN,$NEMS/input/emm/ldsmstr.txt,, LDSM INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+WGEPARMN,$NEMS/input/rfm/wgeparm.txt,EXN, Input key parameter data for GEOTH subm,0,1,READ SEQUENTIAL FORMATTED 0
+ETTINN,$NEMS/input/emm/ettin.txt,, UTILITY INPUT FILE FOR ETT,0,1,READ SEQUENTIAL FORMATTED 0
+ETTDEMN,$NEMS/input/emm/ettdem.daf,,96 From ett preprocessor,0,1,READ DIRECT UNFORMATTED 4096
+KSDELAN,$NEMS/input/cdm/ksdela.txt,EXK, Commercial Sector Short-Run Service Dem,0,1,READ SEQUENTIAL FORMATTED 0
+KBLDGN,$NEMS/input/cdm/kbldg.txt,EXK, Floorspace survival parameters by COMM,0,1,READ SEQUENTIAL FORMATTED 0
+RSHTSHRN,$NEMS/input/rdm/rshtshr.txt,EXR, RESIDENTIAL HEATING SHARES,0,1,READ SEQUENTIAL FORMATTED 0
+NUGPIPEN,$NEMS/input/emm/nugpipe.txt,EXE, NUGS HISTORY AND PLANNED ADDITIONS,0,1,READ SEQUENTIAL FORMATTED 0
+EXSTCAPN,$NEMS/input/idm/exstcap.txt,EXI, EXISTING GENERATING CAPACITY,0,1,READ SEQUENTIAL FORMATTED 0
+PLANCAPN,$NEMS/input/idm/plancap.txt,EXI, PLANNED NONUTILITY GENERATING CAPACITY,0,1,READ SEQUENTIAL FORMATTED 0
+EPMCNTLN,$NEMS/models/epm/input/epm_control.toml,, CONTAINS POLICY OPTION FLAGS,0,1,READ SEQUENTIAL FORMATTED 0
+EPMDATAN,$NEMS/models/epm/input/epmdata.txt,, EMISSION INPUT DATA SUCH AS OFFSET CURVES,0,0,
+KDSSTMN,$NEMS/input/cdm/kdsstm.txt,EXK, Commercial District Service Steam EUIs,0,1,READ SEQUENTIAL FORMATTED 0
+KDSEFFN,$NEMS/input/cdm/kdseff.txt,EXK, Commercial District Service Boiler Effi,0,1,READ SEQUENTIAL FORMATTED 0
+KDSFSN,$NEMS/input/cdm/kdsfs.txt,EXK, Commercial District Service Fuel Shares,0,1,READ SEQUENTIAL FORMATTED 0
+PLTDATAN,$NEMS/input/emm/pltdata.txt,, INPUT TO EMM PLANT PREPROCESSOR,0,1,READ SEQUENTIAL FORMATTED 0
+EFPDATAN,$NEMS/input/emm/efpdata.txt,, INPUT TO PLANT PREPROCESSOR,0,1,READ SEQUENTIAL FORMATTED 0
+RSEFF01N,$NEMS/input/rdm/rseff01.txt,EXR,EFFICIENCY INPUTS,0,1,READ SEQUENTIAL FORMATTED 0
+KMINFLN,$NEMS/input/cdm/kminfl.txt,EXK, Commercial sctor Minor Fuel Regress Coe,0,1,READ SEQUENTIAL FORMATTED 0
+RSSTEON,$NEMS/input/rdm/rssteo.txt,EXR, RESIDENTIAL STEO BENCHMARK TARGETS,0,1,READ SEQUENTIAL FORMATTED 0
+KSTEON,$NEMS/input/cdm/ksteo.txt,EXK, Commercial sector STEresults for 1993 -,0,1,READ SEQUENTIAL FORMATTED 0
+RSRET01N,$NEMS/input/rdm/rsret01.txt,EXR,RETIREMENTS OF 1990 EQUIPME,0,1,READ SEQUENTIAL FORMATTED 0
+ITLBSHRN,$NEMS/input/idm/itlbshr.txt,EXI, Boiler fuel demand translog function parameter estimates,0,1,READ SEQUENTIAL FORMATTED 0
+FTAB05N,$NEMS/input/ftab05.txt,,5 input for ftab,0,1,READ SEQUENTIAL FORMATTED 80
+WODSUPPN,$NEMS/input/rfm/wodsupp.txt,EXN, Wood supply,0,1,READ SEQUENTIAL FORMATTED 0
+WODTECHN,$NEMS/input/rfm/wodtech.txt,EXN, Biomass technology input,0,1,READ SEQUENTIAL FORMATTED 0
+KDEGDAYN,$NEMS/input/bld/kdegday.txt,, Commercial something to do with degree days                 ,0,1,READ SEQUENTIAL FORMATTED 0
+KVARSDIN,$NEMS/input/cdm/kvarsdi.txt,EXK, Commercial SDI file,0,1,READ SEQUENTIAL FORMATTED 0
+KCOGENN,$NEMS/input/cdm/kcogen.txt,EXK, 1994 commercial cogeneration data,0,1,READ SEQUENTIAL FORMATTED 0
+CODES123N,$NEMS/input/codes123.txt,, Codes for wk1 files,0,1,READ SEQUENTIAL FORMATTED 0
+RENDATN,$NEMS/input/rfm/rendat.txt,EXE, Renewable capital cost elasticities,0,1,READ SEQUENTIAL FORMATTED 0
+EINTLRNN,$NEMS/input/emm/eintlrn.txt,EXE, Electric Generators International Learning,0,1,READ SEQUENTIAL FORMATTED 0
+PRODFLOWN,$NEMS/input/idm/prodflow.txt,EXI, Indy Production Flow Data,0,1,READ SEQUENTIAL FORMATTED 0
+EMMDBDEFN,$NEMS/input/emm/emmdbdef.txt,EXE, Emm data base definitions,0,1,READ SEQUENTIAL FORMATTED 0
+RGENTKN,$NEMS/input/rdm/rgentk.txt,EXR, residential zip code level econometric photovoltaic penetration model data,0,1,READ SEQUENTIAL FORMATTED 80
+KGENTKN,$NEMS/input/cdm/kgentk.txt,EXK, Commercial distributed generation input,0,1,READ SEQUENTIAL FORMATTED 0
+RSSTKEFFN,$NEMS/input/rdm/rsstkeff.txt,EXR, Residential stock efficiency,0,1,READ SEQUENTIAL FORMATTED 0
+ITECHN,$NEMS/input/idm/itech.txt,EXI, Contains Industrial Technology coefficients (UEC and TPC) for base and  hitech case,0,1,READ SEQUENTIAL FORMATTED 80
+MCEVCODEN,$NEMS/input/macro/mcevcode.txt,EXM, contains EViews code with keys for macro model to substitute for,0,1,READ SEQUENTIAL FORMATTED 80
+MCEVWORKN,$NEMS/input/macro/mcevwork.wf1,EXM, EViews workspace file for macro/DRI interaction,0,1,READ SEQUENTIAL FORMATTED 80
+MCEVSUBSN,$NEMS/input/macro/mcevsubs.prg,EXM, variable pools,0,1,READ SEQUENTIAL FORMATTED 80
+MASTERN,$NEMS/input/master.cr,, the oml master cr file,0,0,
+INDBEUN,$NEMS/input/idm/indbeu.txt,EXI, industrial building energy use,0,1,READ SEQUENTIAL FORMATTED 80
+EMMDBN,$NEMS/input/emm/emmdb.mdb,,database for EMM,0,1,READWRITE DIRECT UNFORMATTED 16384
+COMFLOORN,$NEMS/input/macro/comfloor.xls,EXM, commercial floorspace macro model eviews input,0,1,READ SEQUENTIAL FORMATTED 80
+MCHIGHLON,$NEMS/input/macro/mchighlo.xls,EXM, high & low case factors,0,1,READ SEQUENTIAL FORMATTED 80
+GLFN,$NEMS/input/glf.txt,, graph layout file for the fgraph applications,0,0,
+WCDCFUSN,$NEMS/input/wcdcfus.txt,, discounted cash flow data from a U.S. run for Canada model,0,0,
+QSBLKN,./input/qsblk_processed.csv,, SEDS historical data for qsblk,0,1,READ SEQUENTIAL FORMATTED 80
+EMMDBDOCN,$NEMS/input/emm/emmdbdoc.xls,EXE, documetation describing the emm output database,0,1,READ SEQUENTIAL FORMATTED 80
+FTABXMLN,$NEMS/input/ftabxml.txt,, table formatting instructions,0,1,READ SEQUENTIAL FORMATTED 80
+MNRISKN,./input/mnrisk_processed.csv,, Risk premium to be applied consistently across modules,0,1,READ SEQUENTIAL FORMATTED 80
+XPRESSINN,$NEMS/input/xpressin.txt,, Xpress parameter input file,0,1,READ SEQUENTIAL FORMATTED 80
+MCEVRGMDN,$NEMS/input/macro/mcevrgmd.wf1,EXM, macro regional models,0,1,READ SEQUENTIAL FORMATTED 80
+RFHISTN,$NEMS/models/lfmm/input/rfhist.txt,EXO, PETROLEUM MARKET INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+RFINVESTN,$NEMS/models/lfmm/input/rfinvest.txt,EXO, Refinery investment and possibly technology data,0,1,READ SEQUENTIAL FORMATTED 0
+MU1PRDSN,$NEMS/models/lfmm/input/mu1prds.txt,EXO, PETROLEUM MARKET INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+MU2PRDSN,$NEMS/models/lfmm/input/mu2prds.txt,EXO, PETROLEUM MARKET INPUT FILE,0,1,READ SEQUENTIAL FORMATTED 0
+VARLISTLN,$NEMS/models/lfmm/input/varlistl.txt,EXO, list of variables for LFMM to pass to GDX,0,1,READ SEQUENTIAL FORMATTED 80
+LFMINPUTN,$NEMS/models/lfmm/input/lfminput.gdx,EXO,that goes into LFMM,0,1,READ DIRECT UNFORMATTED 16384
+LF_NEMN,$NEMS/models/lfmm/source/lf_nem.gms,EXO, NEMS/Gams variable linkage for LFMM,0,1,READ SEQUENTIAL FORMATTED 80
+LFINPUTN,$NEMS/models/lfmm/source/lfinput.gms,EXO, import subroutine for data external to NEMS,0,1,READ SEQUENTIAL FORMATTED 80
+LFMODELN,$NEMS/models/lfmm/source/lfmodel.gms,EXO, LFMM linear program model definitions,0,1,READ SEQUENTIAL FORMATTED 80
+LFREPORTN,$NEMS/models/lfmm/source/lfreport.gms,EXO, LFMM reporting and database output,0,1,READ SEQUENTIAL FORMATTED 80
+LFSHELLN,$NEMS/models/lfmm/source/lfshell.gms,EXO," LFMM main routine, calls the other .gms routines",0,1,READ SEQUENTIAL FORMATTED 80
+LFPREPN,$NEMS/models/lfmm/source/lfprep.gms,EXO, LFMM data preparation for linear program,0,1,READ SEQUENTIAL FORMATTED 80
+INTALLINN,$NEMS/input/iem/intallin.xml,EXW, All the inputs for international model,0,1,READ SEQUENTIAL FORMATTED 80
+CRE8MPSN,$NEMS/models/lfmm/source/cre8mps.gms,EXO, file instrumental in creating MPS file from LFMM output,0,1,READ SEQUENTIAL FORMATTED 80
+INDCMENTN,$NEMS/input/idm/indcment.txt,EXI, cement industry data,0,1,READ SEQUENTIAL FORMATTED 80
+LFMINSETN,$NEMS/models/lfmm/input/lfminset.gdx,EXO, LFMM input parameters,0,1,READ SEQUENTIAL FORMATTED 80
+RSSTKN,$NEMS/input/rdm/rsstk.txt,EXR, residential count of existing houses,0,1,READ SEQUENTIAL FORMATTED 80
+RSUECN,$NEMS/input/rdm/rsuec.txt,EXR, residential energy consumption survey year unit energy consumptions,0,1,READ SEQUENTIAL FORMATTED 80
+RSESTARN,$NEMS/input/rdm/rsestar.txt,EXR, residential energy star home inputs,0,1,READ SEQUENTIAL FORMATTED 80
+RSMLGTN,$NEMS/input/rdm/rsmlgt.txt,EXR, residential lighting menu and characterization,0,1,READ SEQUENTIAL FORMATTED 80
+RSSWITCHN,$NEMS/input/rdm/rsswitch.txt,EXR, residential fuel switching and fuel choice parameters,0,1,READ SEQUENTIAL FORMATTED 80
+RSMELSN,$NEMS/input/rdm/rsmels.txt,EXR, residential miscellaneous end-use load unit energy consumption and saturation,0,1,READ SEQUENTIAL FORMATTED 80
+RSUECSHLN,$NEMS/input/rdm/rsuecshl.txt,EXR, residential new home unit energy consumptions,0,1,READ SEQUENTIAL FORMATTED 80
+RSMISCN,$NEMS/input/rdm/rsmisc.txt,EXR, residential miscellaneous inputs,0,1,READ SEQUENTIAL FORMATTED 80
+RSGENTKN,$NEMS/input/rdm/rsgentk.txt,EXR, residential distributed generation characterization  (formerly rgentk.txt),0,1,READ SEQUENTIAL FORMATTED 80
+RSSQFTN,$NEMS/input/rdm/rssqft.txt,EXR, residential floorspace,0,1,READ SEQUENTIAL FORMATTED 80
+MPSSHELLN,$NEMS/models/lfmm/source/mpsshell.gms,EXO, wrapper for cre8mps.gms (LFMM),0,1,READ SEQUENTIAL FORMATTED 80
+COALN,$NEMS/models/coal,EXC," AIMMS Coal model files:  coal.prj, coal.amb, coal.dat and coal.aim",0,1,READ SEQUENTIAL FORMATTED 80
+COALPUTVARSN,$NEMS/models/coal/input/coalputvars.txt,EXC, list of variables to send to AIMMS Coal model via filer,0,1,READ SEQUENTIAL FORMATTED 80
+COALGETVARSN,$NEMS/models/coal/input/coalgetvars.txt,EXC, list of variables extracted from AIMMS coal model via filer,0,1,READ SEQUENTIAL FORMATTED 80
+INTCRDSHRN,$NEMS/input/iem/intcrdshr.xls,EXO, crude oil import shares by type input to GAMS (LFMM),0,1,READ SEQUENTIAL FORMATTED 80
+CLAGGEXPORTMAPN,./input/claggexportmap.txt,EXC, AIMMS Coal Model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLEXPORTLIMITSN,./input/clexportlimits.txt,EXC, AIMMS Coal Model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLDISTANCEN,./input/cldistance.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLFEASIBLEROUTN,./input/clfeasiblerout.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLFREIGHTN,./input/clfreight.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLIMPORTLIMITSN,./input/climportlimits.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLINTLDEMANDN,./input/clintldemand.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLINTLQUALITYN,./input/clintlquality.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLINTLSUPPLYN,./input/clintlsupply.txt,EXC, AIMMS Coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLRATESELECN,./input/clrateselec.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLRATESNONELECN,./input/clratesnonelec.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLTONRAILMILEN,./input/cltonrailmile.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+CLTONSPERCARN,./input/cltonspercar.txt,EXC, AIMMS coal model input,1,1,READ SEQUENTIAL FORMATTED 80
+DEMPUTVARSN,$NEMS/input/demputvars.txt,," list of variables transfered to residential and commercial modules from NEMS, to include inputs and outputs",0,1,READ SEQUENTIAL FORMATTED 80
+DEMGETVARSN,$NEMS/input/demgetvars.txt,, list of variables transferred from residential and commercial module to NEMS. Should be subset of demputvars.txt list.,0,1,READ SEQUENTIAL FORMATTED 80
+INTBALANCEN,$NEMS/input/iem/intbalance.xml,EXW, world liquids production and consumption by region,0,1,READ SEQUENTIAL FORMATTED 80
+CLINTLUSEXPORTN,./input/clintlusexport.txt,EXC, coal export assumptions for the US,1,1,READ SEQUENTIAL FORMATTED 80
+RESTOREN,$NEMS/models/rest,EXE, AIMMS zip file for Renewable and Storage evaluator,0,1,READ SEQUENTIAL FORMATTED 80
+PSELASTN,$NEMS/input/rfm/pselast.txt,EXN, Polysys demand elasticities and adjustment coefficients,0,1,READ SEQUENTIAL FORMATTED 80
+PSELASTOSPN,$NEMS/input/rfm/pselastosp.txt,EXN, other Polysys elasticities related to supply,0,1,READ SEQUENTIAL FORMATTED 80
+PSELASTS96N,$NEMS/input/rfm/pselasts96.txt,EXN, Polysys 1996 regional acreage elasticities,0,1,READ SEQUENTIAL FORMATTED 80
+PSRESULTTBN,$NEMS/input/rfm/psresulttb.txt,EXN, Polysys output format file,0,1,READ SEQUENTIAL FORMATTED 80
+PSSIMN,$NEMS/input/rfm/pssim.txt,EXN, Polysys biomass run control input,0,1,READ SEQUENTIAL FORMATTED 80
+PSBASEUNFN,$NEMS/input/rfm/psbaseunf.zip,EXN, Polysys baseline zip files,0,1,READ SEQUENTIAL FORMATTED 80
+PSWHATIFRGN,$NEMS/input/rfm/pswhatifrg.txt,EXN, Polysys regional simulation parameters,0,1,READ SEQUENTIAL FORMATTED 80
+PSWHATIFUSN,$NEMS/input/rfm/pswhatifus.txt,EXN, Polysys national simulation parameters,0,1,READ SEQUENTIAL FORMATTED 80
+VARLISTRECN,$NEMS/input/varlistrec.txt,," variables set by renewables, electric, coal for extraction in parallel runs",0,1,READ SEQUENTIAL FORMATTED 80
+LFINVESTN,$NEMS/models/lfmm/input/lfinvest.gdx,EXO, LFMM investment and related parameters,0,1,READ SEQUENTIAL FORMATTED 80
+LFHISTN,$NEMS/models/lfmm/input/lfhist.gdx,EXO, contains historical data for LFMM,0,1,READ SEQUENTIAL FORMATTED 80
+NGPLPRICEN,$NEMS/models/ngpl,, R code to estimate ethane and propane prices.,0,1,READ SEQUENTIAL FORMATTED 80
+PSRAINN,$NEMS/input/rfm/psrain.txt,EXN, rain input for Polysys,0,1,READ SEQUENTIAL FORMATTED 80
+PSWINDN,$NEMS/input/rfm/pswind.txt,EXN, wind input for Polysys,0,1,READ SEQUENTIAL FORMATTED 80
+LFREPSETN,$NEMS/models/lfmm/source/lfrepset.gms,EXO, LFMM reporting sets and hard-coded parameters,0,1,READ SEQUENTIAL FORMATTED 80
+BLDBASEN,$NEMS/input/bld/bldbase.txt,, EPA rule 111d baseline,0,1,READ SEQUENTIAL FORMATTED 80
+CRE8INVESTN,$NEMS/models/lfmm/source/cre8invest.gms,EXO, GAMS code to create lfinvest.gdx,0,1,READ SEQUENTIAL FORMATTED 80
+APITABLEN,$NEMS/input/apitable.txt,, API gravity and corresponding Btu per gal from Thermal Properties 11/9/1929,0,1,READ SEQUENTIAL FORMATTED 80
+EFDN,$NEMS/models/efd,EXE, Electricity Fuel Dispatch LP model implemented in AIMMS. The zip contains the AIMMS 4.,0,1,READ SEQUENTIAL FORMATTED 80
+ECPN,$NEMS/models/ecp,EXE, Electricity Capacity Planning AIMMS project,0,1,READ SEQUENTIAL FORMATTED 80
+REFOGMAPN,$NEMS/models/lfmm/input/refogmap.txt,EXO, Mapping OGSM districts to refinery regions,0,1,READ SEQUENTIAL FORMATTED 80
+STEOVARSN,$NEMS/input/steovars.csv,, variables from STEO tab STEO_A15BBB in STEO/AEO comparisons (a15bbb.csv is also standalone csv file),0,1,READ SEQUENTIAL FORMATTED 80
+NGPUTVARSN,$NEMS/models/ngas/input/ngputvars.txt,EXG, List of global variables transferred from NEMS to AIMMS for the ngtdm module.,1,1,READ SEQUENTIAL FORMATTED 80
+NGGETVARSN,$NEMS/models/ngas/input/nggetvars.txt,EXG, List of global variables output by the AIMMS ngtdm and transferred from AIMMS to NEMS via filer,1,1,READ SEQUENTIAL FORMATTED 80
+NGAIMMSN,$NEMS/models/ngas,EXG, AIMMS 4 project folder with the ngtdm aimms module code and settings,0,1,READ SEQUENTIAL FORMATTED 80
+STEOLISTN,$NEMS/input/steolist.txt,, copy of steoblock include file read for STEO variable list,0,1,READ SEQUENTIAL FORMATTED 80
+KMELSN,$NEMS/input/cdm/kmels.txt,EXK, Commercial sector miscellaeous electricity load inputs,0,1,READ SEQUENTIAL FORMATTED 80
+CLFLAGSN,./input/clflags.txt,EXC, flags and tolerances for coal model STEO benchmarking,1,1,READ SEQUENTIAL FORMATTED 80
+MNFACTORXN,./input/mnfactorx.xlsx,, conversion factor inputs.  file replaces mnfactor.xlm.,0,1,READ SEQUENTIAL FORMATTED 80
+GHGOFFXN,$NEMS/models/epm/input/ghgoffx.xlsx,, greenhouse gas offset supply curves and non-co2 ghg emission baselines by category. replaces ghgoff.xml.,0,0,
+CAFSHAREXN,$NEMS/input/cafsharex.xlsx,," specifies the assumed California shares of Pacific fossil energy consumption by end use sector, year, and fuel. replaces cafshare.xlm.",0,1,READ SEQUENTIAL FORMATTED 80
+TRNAIRXN,$NEMS/input/tdm/trnairx.xlsx,EXT, Transportation air model input data                    trnairx.xlsx,0,1,READ SEQUENTIAL FORMATTED 80
+TRNSTOCKXN,$NEMS/input/tdm/trnstockx.xlsx,EXT, stock input data  trnstockx.xlsx,0,1,READ SEQUENTIAL FORMATTED 80
+TRNFEMXN,$NEMS/input/tdm/trnfemx.xlsx,EXT, Transportation fuel economy input data                 trnfemx.xlsx,0,1,READ SEQUENTIAL FORMATTED 80
+TRNHDVXN,$NEMS/input/tdm/trnhdvx.xlsx,EXT, Transportation heavy duty vehicle (freight) input data trnhdvx.xlsx,0,1,READ SEQUENTIAL FORMATTED 80
+TRNLDVXN,$NEMS/input/tdm/trnldvx.xlsx,EXT, Transportation light duty vehicle input data           trnldvx.xlsx,0,1,READ SEQUENTIAL FORMATTED 80
+TRNNHTSAXN,$NEMS/input/tdm/trnnhtsax.xlsx,EXT, Transportation input data from NHTSA,0,1,READ SEQUENTIAL FORMATTED 80
+KTEKXN,$NEMS/input/cdm/ktekx.xlsx,EXK, Commercial end use technologies file,0,1,READ SEQUENTIAL FORMATTED 80
+INDCOGENXN,$NEMS/input/idm/indcogenx.xlsx,EXI, industrial cogeneration or CHP assumptions  xlsx version,0,1,READ SEQUENTIAL FORMATTED 80
+IRONSTLXN,$NEMS/input/idm/ironstlx.xlsx,EXI, input data for iron and steel industry,0,1,READ SEQUENTIAL FORMATTED 80
+FINREGYN,$NEMS/input/emm/finregy.xlsx,EXE, regional electric power finance data (was finregx.xml),0,1,READ SEQUENTIAL FORMATTED 80
+ECPDATYN,$NEMS/input/emm/ecpdaty.xlsx,, electricity capacity planning assumptions for ECP submodel (was ecpdatx.xml),0,1,READ SEQUENTIAL FORMATTED 80
+COALUNITSN,$NEMS/models/coal/input/coalunits.txt,EXC,,0,0,
+AIMEFDN,$NEMS/input/emm/aimefd.xlsx,EXE," AIMMS interface inputs for EFD, used to translate OML row and columns to symbolic AIMMS identifiers using masks and sets",0,1,READ SEQUENTIAL FORMATTED 80
+AIMECPN,$NEMS/input/emm/aimecp.xlsx,EXE," AIMMS interface inputs for ECP, used to translate OML row and columns to symbolic AIMMS identifiers using masks and sets",0,1,READ SEQUENTIAL FORMATTED 80
+ECPARRAYS_ALLN,$NEMS/input/emm/ecparrays_all.txt,EXE, List of AIMMS coefficient parameter arrays.  Input file to arraycode preprocessor. also needed by NEMS run to determine conversion status,0,1,READ SEQUENTIAL FORMATTED 80
+EFDARRAYS_ALLN,$NEMS/input/emm/efdarrays_all.txt,EXE, List of AIMMS coefficient parameter arrays.  Input file to arraycode preprocessor. also needed by NEMS run to determine conversion status,0,1,READ SEQUENTIAL FORMATTED 80
+NGASSUMPTIONSN,../../ngas/input/ngassumptions.txt,EXG, NGMM assumptions and switches,1,1,READ SEQUENTIAL FORMATTED 80
+NGMARKUPSN,../../ngas/input/ngmarkups.txt,EXG, estimations and data related to end use natural gas prices,1,1,READ SEQUENTIAL FORMATTED 80
+NGLNGEXPN,../../ngas/input/nglngexp.txt,EXG, liquefied natural gas export data and assumptions,1,1,READ SEQUENTIAL FORMATTED 80
+NGMEXICON,../../ngas/input/ngmexico.txt,EXG, historical Mexico natural gas data,1,1,READ SEQUENTIAL FORMATTED 80
+NGSPOTPRCN,../../ngas/input/ngspotprc.txt,EXG, historical natural gas spot prices and wellhead adjustments,1,1,READ SEQUENTIAL FORMATTED 80
+NGCAPACITYN,../../ngas/input/ngcapacity.txt,EXG, historical natural gas pipeline capacity and planned additions,1,1,READ SEQUENTIAL FORMATTED 80
+NGCANADAN,../../ngas/input/ngcanada.txt,EXG, historical Canada natural gas data,1,1,READ SEQUENTIAL FORMATTED 80
+NGEIAN,../../ngas/input/ngeia.txt,EXG, data from Natural Gas Monthly and Natural Gas Annual,1,1,READ SEQUENTIAL FORMATTED 80
+NGSETMAPN,../../ngas/input/ngsetmap.txt,EXG, NGMM sets and mappings,1,1,READ SEQUENTIAL FORMATTED 80
+NGVARTARN,../../ngas/input/ngvartar.txt,EXG, NGMM variable tariff curves by arc,1,1,READ SEQUENTIAL FORMATTED 80
+NGSTEOFACTINN,../../ngas/input/ngsteofactin.txt,EXG, NGMM input file with STEO benchmark factors,1,1,READ SEQUENTIAL FORMATTED 80
+NGTEXASN,../../ngas/input/ngtexas.txt,EXG, NGMM various texas assumptions,1,1,READ SEQUENTIAL FORMATTED 80
+NGTXCAPAN,../../ngas/input/texas_capacity.txt,EXG, NGMM texas pipeline capacities,1,1,READ SEQUENTIAL FORMATTED 80
+RSMESSN,$NEMS/input/rdm/rsmess.xlsx,EXR, menus for residential equipment and shell selection,0,1,READ SEQUENTIAL FORMATTED 80
+RESTPREPN,$NEMS/models/rest/input/restprep.txt,EXE, input data for renewable and electricity storage AIMMS LP not provided by ECP,0,1,READ SEQUENTIAL FORMATTED 80
+LFG_PARAMETERSN,$NEMS/input/rfm/lfg_parameters.xlsx,EXN, input parameters for landfill gas model,0,1,READ SEQUENTIAL FORMATTED 80
+COALD2REFMAPN,$NEMS/models/lfmm/input/coald2refmap.xls,EXO, coal demand region to refinery region mapping for corn supply,0,1,READ SEQUENTIAL FORMATTED 80
+CLOCEANDISTN,./input/cloceandist.txt,EXC, inputs for coal ocean freight logic,1,1,READ SEQUENTIAL FORMATTED 80
+FEEDSTOCKN,$NEMS/input/idm/feedstock.csv,EXI, historical industrial feedstock consumption,0,1,READ SEQUENTIAL FORMATTED 80
+PROPCON,$NEMS/input/propco.csv,, Coefficients for propane price equations,0,1,READ SEQUENTIAL FORMATTED 80
+RPSTRANCHEN,$NEMS/input/emm/rpstranche.txt,, state renewable portfolio standard tranche details,0,1,READ SEQUENTIAL FORMATTED 80
+ETHANEREGN,$NEMS/input/idm/ethanereg.csv,EXI, (industrial) fraction of ethane feedstock consumed by Census Division,0,1,READ SEQUENTIAL FORMATTED 80
+PROPANEREGN,$NEMS/input/idm/propanereg.csv,EXI, (industrial) fraction of propane feedstock consumed by Census Division,0,1,READ SEQUENTIAL FORMATTED 80
+EMM_DBN,$NEMS/input/emm/emm_db,, (emm) a zipped file of the database (Nems_input.db) and some excel files that feed it,0,1,READ SEQUENTIAL FORMATTED 80
+HYDROGEN_DATAN,$NEMS/input/hydrogen_data.csv,EXN, hydrogen data used for NEMS h2 model,0,1,READ SEQUENTIAL FORMATTED 80
+HYDROGENN,$NEMS/models/ephrts,EXN, compressed h2 project,0,1,READ SEQUENTIAL FORMATTED 80
+CLUSEXPORTICMMN,./input/clusexporticmm.txt,EXC, US coal exports from WEPS International Coal Model (ICMM),1,1,READ SEQUENTIAL FORMATTED 80
+ICMMCOMMODITYMAPN,./input/ICMMcommodityMap.txt,EXC, Mapping for ICMM coal commodity ranks to CMM indexes,1,1,READ SEQUENTIAL FORMATTED 80
+IND_COALN,$NEMS/input/idm/ind_coal.csv,EXI, historical industrial coal consumption,0,1,READ SEQUENTIAL FORMATTED 80
+IND_ELECTRICN,$NEMS/input/idm/ind_electric.csv,EXI, historical industrial electricity consumption,0,1,READ SEQUENTIAL FORMATTED 80
+CLSTEON,$NEMS/models/coal/clsteo.txt,EXC, STEO coal values,0,1,READ SEQUENTIAL FORMATTED 80
+NEMSPYENV,c:/python_environments/aeo2025_py311_D,,,1,0,
+NEMSPYENN,c:/python_environments/aeo2025_py311_D,,,0,0,
+LEGIRA,1,,Whether 2022 IRA is being used in run or not,1,0,
+HSMPYPTH,$NEMS/models/hsm,,,1,0,
+CCPYPTH,$NEMS/models/ccats,,,1,0,
+IDMPYPTH,$NEMS/models/idm,,,0,0,
+CLBYPRDN,./input/cpsProdParam.txt,EXC, CPS base year parameters (first 5 columns are indexes),1,1,READ SEQUENTIAL FORMATTED 80
+CLUSIMPN,./input/cmmUScoalImports.txt,EXC, US coal imports min and max bounds,1,1,READ SEQUENTIAL FORMATTED 80
+CLHMISCN,./input/cmmhmiscellaneous.txt,EXC," historical US waste coal, imports, exports, and mine mouth price in tons and btus",1,1,READ SEQUENTIAL FORMATTED 80
+CLHDISPN,./input/cmmhcldist.txt,EXC, Historical coal distribution by supply region (excluding exports and imports).,1,1,READ SEQUENTIAL FORMATTED 80
+CLHSCPRN,./input/cmmhsectoral.txt,EXC, Historical total sector demand and sector prices in nominal dollars,1,1,READ SEQUENTIAL FORMATTED 80
+CLHWRLDN,./input/cmmhclworld.txt,EXC, Historical world coal trade by ICDS regions,1,1,READ SEQUENTIAL FORMATTED 80
+CLHEWQN,./input/cmmheastwest.txt,EXC," Historical production: east, west, and total in quads.",0,1,READ SEQUENTIAL FORMATTED 80
+CLRCAFN,./input/cmmRCAFwts.txt,EXC," Historical RCAF weights for labor, fuel, equipment, deprecieation, interest, & other.",0,1,READ SEQUENTIAL FORMATTED 80
+CLCPSRN,./input/cpsRegionRef.txt,EXC, CPS region lookup and crossreference tables,0,1,READ SEQUENTIAL FORMATTED 80
+CLCDSRN,./input/cdsRegionRef.txt,EXC, CDS region lookup and crossreference tables,0,1,READ SEQUENTIAL FORMATTED 80
+CLIMSURN,./input/cdsImpSurcharge.txt,EXC," Surcharges on imported coal by CDR region, country, and US coastal code.",1,1,READ SEQUENTIAL FORMATTED 80
+CLCPSYRN,./input/cpsSCrvYearIndx.txt,EXC," CPS production indicies for productivity, wages, and equipment by year.",1,1,READ SEQUENTIAL FORMATTED 80
+CLPRFILN,./input/cmmProfiles.txt,EXC," Coal type diversity, tranporation, and contract profiles",1,1,READ SEQUENTIAL FORMATTED 80
+CLGNPLTN,./input/cmmCoalPlntData.txt,EXC," Coal generation plant name, state, plant_id, and unit",1,1,READ SEQUENTIAL FORMATTED 80
+CARBSHRCAN,$NEMS/input/idm/carbshrca.csv,EXI, CO2 shares by IDM classification in California,0,1,READ SEQUENTIAL FORMATTED 80
+VLDCTLRN,$NEMS/input/validator_controller.csv,, Validator controller file path,0,1,READ SEQUENTIAL FORMATTED 80
+REPORTRN,$NEMS/models/reporter,, Reporter file path,0,1,READ SEQUENTIAL FORMATTED 80
+NEMRWR,0,,whether NEMS Report Writer is turned on or off,1,0,
+H2PUTVARSN,$NEMS/models/hmm/input/h2putvars.txt,EXH, List of global variables transferred from NEMS to AIMMS for the ngtdm module.,1,1,READ SEQUENTIAL FORMATTED 80
+H2AIMMSN,$NEMS/models/hmm,, AIMMS 4 project folder with the hmm aimms module code and settings,1,1,READ SEQUENTIAL FORMATTED 80
+IND_H2N,$NEMS/input/idm/ind_H2.csv,EXI, historical industrial H2 supply and consumption,0,1,READ SEQUENTIAL FORMATTED 80
+EPMPY,$NEMS/models/epm,,,0,0,
+ZTCCOSTM,1,,Multiplier for zero carbon technology cost declines/changes relative to a reference case. 1 - no exogenous learning; 0 - no cost decline across projection,1,0,
+CHKNAN,1,,Switch to check NaN Inf. 0 - no check; 1 (default) - check in iteration loop; 2 - check in model loop,1,0,
+MOREOPT,MOREOPT,,WITH MODULE SPECIFIC RUN TIME OPTIONS,0,1,READ SEQUENTIAL FORMATTED 0
+KQUANT,CDM_QUANT.txt,EXK,output file,0,1,WRITE SEQUENTIAL FORMATTED 120
+KDEBUG,CDM_DEBUG.txt,EXK,output file,0,1,WRITE SEQUENTIAL FORMATTED 140
+KRPT,CDM_RPTOUT.txt,EXK,output file,0,1,WRITE SEQUENTIAL FORMATTED 133
+KDBOUT,CDM_DBOUT.txt,EXK,output file,0,1,WRITE SEQUENTIAL FORMATTED 40
+KSDOUT,CDM_SDOUT.txt,EXK,output file,0,1,WRITE SEQUENTIAL FORMATTED 254
+KDGENOUT,CDM_DGENOUT.txt,EXK,output file; contains distributed generation data,0,1,WRITE SEQUENTIAL FORMATTED 254
+RESDEQP,RDM_EQPOUT.txt,EXR,"FROM RESIDENTIAL, EQUIPMENT",0,1,WRITE SEQUENTIAL FORMATTED 240
+RSXLSDBG,RDM_XLSXDBG.txt,EXR,"echoing read of RSMESS.xlsx file, might not get used",0,1,WRITE SEQUENTIAL FORMATTED 80
+INDBUG,IDM_INDBUG.txt,EXI,DEBUG FILE,0,1,WRITE SEQUENTIAL FORMATTED 100
+INDTST,IDM_INDTST.txt,EXI,DEBUG FILE,0,1,WRITE SEQUENTIAL FORMATTED 100
+INDUSA,IDM_INDUSA.csv,EXI,national worksheet,0,1,READWRITE DIRECT FORMATTED 400
+INDREG1,IDM_INDREG1.csv,EXI,regional worksheet,0,1,READWRITE DIRECT FORMATTED 400
+INDREG2,IDM_INDREG2.csv,EXI,regional worksheet,0,1,READWRITE DIRECT FORMATTED 400
+INDREG3,IDM_INDREG3.csv,EXI,regional worksheet,0,1,READWRITE DIRECT FORMATTED 400
+INDREG4,IDM_INDREG4.csv,EXI,regional worksheet,0,1,READWRITE DIRECT FORMATTED 400
+INDREG, IDM_INDREG.csv,EXI,"industrial, regional worksheet",0,1, READWRITE DIRECT FORMATTED 400
+INDT,IDM_INDT.csv,EXI,total of man and non man workheet,0,1,READWRITE DIRECT FORMATTED 400
+INDM,IDM_INDM.csv,EXI,total of manufacturing worksheet,0,1,READWRITE DIRECT FORMATTED 400
+ISTEEL,IDM_ISTEEL.csv,EXI,industry data output using spreadsheet routines,0,1,READWRITE DIRECT FORMATTED 400
+INDBENCH,IDM_INDBENCH.txt,EXI,DEBUG FILE,0,1,WRITE SEQUENTIAL FORMATTED 100
+INDOUTF,IDM_INDOUTF.csv,EXI,DEBUG FILE,0,1,WRITE SEQUENTIAL FORMATTED 100
+IBFACTRO,IDM_IBFACTRO.csv,EXI,factors to apply when switch is set for applying them,0,1,WRITE SEQUENTIAL FORMATTED 80
+IFEEDDBG,IDM_IFEEDDBG.txt,EXI,feedstock related debug output,0,1,WRITE SEQUENTIAL FORMATTED 80
+RBENALLN,ITG_RBENALLN.csv,,contain all NEMS series processed by R benchmark program,0,1,WRITE SEQUENTIAL FORMATTED 80
+TRNH2OUT,TDM_TRNH2OUT.txt,EXT,hydrogen output,0,1,WRITE SEQUENTIAL FORMATTED 133
+AIRAGE,TDM_AIRAGE.csv,EXT,delimited air model output by age of aircraft,0,1,WRITE SEQUENTIAL FORMATTED 80
+STEODBUG,ITG_STEODBUG.txt,,type output from reading STEO variables,0,1,WRITE SEQUENTIAL FORMATTED 80
+ROUTDBG,ITG_ROUTDBG.txt,,related to the R routine for pricing ethane and propane,0,1,WRITE SEQUENTIAL FORMATTED 80
+INPTDAF,EMM_INPTDAF.daf,EXE,MODULE INPUT FILE,0,1,READWRITE DIRECT UNFORMATTED 16384
+OUTDAF,EMM_OUTDAF.daf,EXE,MODULE INPUT FILE,0,1,READWRITE DIRECT UNFORMATTED 8192
+SO2DAF,EMM_SO2DAF.daf,EXE,MODULE INPUT FILE,0,1,READWRITE DIRECT UNFORMATTED 512
+ECPODAF,EMM_ECPODAF.daf,EXE,MODULE INPUT FILE,0,1,READWRITE DIRECT UNFORMATTED 1024
+EFDLDCV,EMM_EFDLDCV.txt,EXE,FROM EFD Module,0,1,WRITE SEQUENTIAL FORMATTED 255
+EFPR,EMM_EFPR.daf,EXE,"TEMPORARY FILE, VARIES BY REGION",0,1,READWRITE DIRECT UNFORMATTED 10000
+EFPRC,EMM_EFPRC.daf,EXE,"TEMPORARY FILE, VARIES BY REGION, C",0,1,READWRITE DIRECT UNFORMATTED 376
+EFPRCY,EMM_EFPRCY.daf,EXE,"TEMP, VARIES BY REGION, COMPONENT,",0,1,READWRITE DIRECT UNFORMATTED 144
+EFPSTMT,EMM_EFPSTMT.daf,EXE,"TEMP, HOLDS FINACIAL STATEMENT INFO",0,1,READWRITE DIRECT UNFORMATTED 1024
+EFPSTM2,EMM_EFPSTM2.daf,EXE,"TEMP, HOLDS FINACIAL STATEMENT INFO",0,1,READWRITE DIRECT UNFORMATTED 4000
+EFPRPT,EMM_UEFP.txt,EXE,FINANCIAL PLANNING OUTPUT F,0,1,WRITE SEQUENTIAL FORMATTED 166
+EFPBLDS,EMM_EFPBLDS.daf,EXE,module input file,0,1,READWRITE DIRECT UNFORMATTED 84
+EFDCOEFF,EMM_EFDCOEFF.txt,EXE,to debug EFD AIMMS interface,0,1,WRITE SEQUENTIAL FORMATTED 133
+ECPCOEFF,EMM_ECPCOEFF.txt,EXE,to debug EFD AIMMS interface,0,1,WRITE SEQUENTIAL FORMATTED 133
+ETTTMP,ETTTMP.daf,EXE,DAF FOR ETT,0,1,READWRITE DIRECT UNFORMATTED 4096
+MCRPT,EMM_MCRPT.txt,EXE,FROM EFD,0,1,WRITE SEQUENTIAL FORMATTED 193
+EFDOUT,EMM_EFDOUT.txt,EXE,OUTPUT FILE,0,1,WRITE DIRECT UNFORMATTED 16384
+TRANSET,EMM_TRANSET.daf,EXE,TRANSACTIONAL DETAIL,0,1,WRITE DIRECT UNFORMATTED 16384
+EDBPGRP,EDBPGRP.txt,EXE,group output - temporary text file for udbp.exe,0,1,WRITE SEQUENTIAL FORMATTED 240
+FINREGOUT,EMM_FINREGOUT.txt,EXE,output for data read from finregx.xml,0,1,WRITE SEQUENTIAL FORMATTED 80
+ETTDF,EMM_ETTDF.daf,,MODULE INPUT FILE,0,1,READWRITE DIRECT UNFORMATTED 16384
+ETTDBUG,EMM_ETTDBUG.txt,EXE,TO DEBUG REPORT WRITER RPT,0,1,READWRITE SEQUENTIAL FORMATTED 165
+LDSMRPT,EMM_LDSMRPT.txt,,FROM LDSM,0,1,WRITE SEQUENTIAL FORMATTED 133
+EFDDBUG,EMM_EFDDBUG.txt,,FROM EFD Module,0,1,WRITE SEQUENTIAL FORMATTED 165
+EMMRPT,EMM_EMMRPT.txt,,FROM EFD and ETT Modules,0,1,WRITE SEQUENTIAL FORMATTED 165
+EMMRP2,EMM_EMMRP2.txt,,FROM EFD,0,1,WRITE SEQUENTIAL FORMATTED 133
+EMMDBASE,EMM_EMMDBASE.txt,,for the EMM data base project,0,1,WRITE SEQUENTIAL FORMATTED 240
+MNEXPECT,ITG_MNEXPECT.txt,,gas expectations,0,1,WRITE SEQUENTIAL FORMATTED 200
+MOEXPECT,ITG_MOEXPECT.txt,,"for world oil price, emm distillate and emm residual",0,1,WRITE SEQUENTIAL FORMATTED 200
+ECPXMLOUT,EMM_ecpxmlout.txt,,output for data read from ecpdatx.xml,0,1,WRITE SEQUENTIAL FORMATTED 80
+PLNTTMP,PLNTTMP.daf,,INPUT FILE,0,1,READWRITE DIRECT UNFORMATTED 16384
+ECPIDAF,EMM_ECPIDAF.daf,,module input file,0,1,READWRITE DIRECT UNFORMATTED 16384
+LFG_CAPACITY,RFM_LFG_CAPACITY.csv,EXN,gas model capacity output,0,1,WRITE SEQUENTIAL FORMATTED 133
+WDUMP,RFM_WDUMP.txt,EXN,dump,0,1,WRITE SEQUENTIAL FORMATTED 133
+WINDDBG,RFM_WINDDBG.txt,EXN,output file,0,1,WRITE SEQUENTIAL FORMATTED 133
+PSSIMOUT,RFM_PSSIMOUT.txt,EXN,Polysys summary report,0,1,WRITE SEQUENTIAL FORMATTED 80
+PACIFIC,ITG_pacific.csv,,delimited energy consumption in the pacific region in csv format.,0,1,WRITE SEQUENTIAL FORMATTED 80
+INTLDBG,IEM_INTLDBG.txt,EXW,model debug output,0,1,WRITE SEQUENTIAL FORMATTED 80
+RFADJBFO,LFMM_RFADJBFO.txt,EXO,benchmark factors for teh refinery model,0,1,WRITE SEQUENTIAL FORMATTED 80
+EMM_COALUNITS,$NEMS/models/coal/input/coalunits.txt,EXC,file holing final coal units from run for input to coal,0,1,READ SEQUENTIAL FORMATTED 80
+COALUNITO,EMM_COALUNITO.txt,EXE,file to write coal units to for easy cycling,0,1,WRITE SEQUENTIAL FORMATTED 133
+CLHEWQ2N,./input/cmmheastwest.txt,EXC,,1,0,
+CLRCAF2N,./input/cmmRCAFwts.txt,EXC,,1,0,
+CLCPSR2N,./input/cpsRegionRef.txt,EXC,,1,0,
+CLCDSR2N,./input/cdsRegionRef.txt,EXC,,1,0,
+IND_BOILERSN,$NEMS/input/idm/ind_boilers.csv,EXI,industrial boiler parameters,0,1,READ SEQUENTIAL FORMATTED 80

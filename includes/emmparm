@@ -1,5 +1,4 @@
 ! -*- f90 -*-
-! $Header: m:/default/includes/RCS/emmparm,v 1.48 2019/09/24 18:13:01 pkc Exp $
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !  EMMPARM DEFINES THE PARAMETERS WHICH DETERMINE THE SIZE OF THE EMM   
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -114,13 +113,13 @@
       INTEGER*4 MX_CL_UNIT ! Maximum Number of Coal Units
 
       INTEGER*4 MX_STO_INC ! Maximum Number of Storage Increments Allowed
-	  INTEGER*4 MaxPtypesP ! Maximum number of ReStore Plant Types
-	  INTEGER*4 MaxStoTyp  ! Maximum number of ReStore storage types
-	  INTEGER*4 MaxCurtTyp ! Maximum number of ReStore curtailment types
-      
-!                                                                       
+      INTEGER*4 MaxPtypesP ! Maximum number of ReStore Plant Types
+      INTEGER*4 MaxStoTyp  ! Maximum number of ReStore storage types
+      INTEGER*4 MaxCurtTyp ! Maximum number of ReStore curtailment types
+
+!
 !  PARAMETERS                                                           
-!                                                                       
+!
       PARAMETER(ECP_D_CIS =   2)         ! ECP NUMBER OF CANADIAN IMPORT SUPPLY CURVE STE
       PARAMETER(ECP_D_CSC =   3)         ! ECP MAXIMUM # OF SCRUBBER TYPE CONVERSIONS
       PARAMETER(ECP_D_DGN =   2)         ! ECP NUMBER OF DISTRIBUTED GENERATION TYPES
@@ -157,8 +156,8 @@
       PARAMETER(NOX_D_CTL = 2250)        ! MAXIMUM NUMBER OF NOX CONTROL OPPORTUNITIES
       PARAMETER(CO2_D_MST = 51)          ! MAXIMUM NUMBER OF STATES WITH CO2 CAP
       PARAMETER(CO2_D_GRP = 5)           ! MAXIMUM NUMBER OF CO2 CAP GROUPS
-!                                                                       
-      PARAMETER(EFD_D_CSS = 5)           ! maximum number of Canadian Supply steps
+!
+      PARAMETER(EFD_D_CSS = 5)           ! MAXIMUM NUMBER OF CANADIAN SUPPLY STEPS
       PARAMETER(EFD_D_BTM =   3)         ! MAX NUMBER OF BOILER BOTTOM TYPES  WAYNE
       PARAMETER(EFD_D_BTP =   13)        ! MAX NUMBER OF BOILER TYPES  WAYNE
       PARAMETER(EMM_D_BTP =   31)        ! MAX NUMBER OF BOILER TYPES INCLUDES BOTTOM TYPE
@@ -169,7 +168,7 @@
       PARAMETER(EFD_D_FRG =   3)         ! SUPPLY/REPORTING REGIONS PER FUEL TYPE
       PARAMETER(EFD_D_LDG =   6)         ! NUMBER OF BUILDING BLOCKS PER SEASON
       PARAMETER(EFD_D_MFRG = 25)         ! MAXIMUM NUMBER OF REGIONS FOR ANY FUEL TYPE
-      PARAMETER(EFD_D_MHG =1400)         ! RENEWABLE EFD PLANT GROUPS
+      PARAMETER(EFD_D_MHG = 1500)        ! RENEWABLE EFD PLANT GROUPS
       PARAMETER(EFD_D_MDG = 600)         ! DISTRIBUTED GENERATION EFD PLANT GROUPS
       PARAMETER(EFD_D_MPG =1200)         ! DISPATCHABLE EFD PLANT GROUPS
       PARAMETER(EFD_D_MSP =   4)         ! SEASONAL PERIODS
@@ -186,21 +185,21 @@
       PARAMETER(EFD_D_VIN =   3)         ! VINTAGE 1=EXISTING, 2=PIPELINE, 3=NEW
       PARAMETER(EFD_D_CAP =  EFD_D_DSP + EFD_D_RNW + EFD_D_DGN)     ! TOTAL PLANT TYPES DSP AND RNW AND DGN
       PARAMETER(EFD_D_MHS =   EFD_D_MPG)   ! HORIZONTAL SLICES
-!                                                                       
+!
       PARAMETER(EFP_D_CAP =  14)         ! FINANCIAL PLANT TYPES DSP, INT, AND RNW
       PARAMETER(EFP_D_OWN =   2)         ! OWNERSHIP TYPE 1=PRIVATE 2=PUBLIC
       PARAMETER(EFP_D_BLD = 1500)        ! NEW/PIPELINE BUILDS MODELED IN EFP
       PARAMETER(EFP_D_VIN =  40)         ! VINTAGE 1 = 1990, 2 = 1989 ... 40 <= 1949
-!                                                                       
+!
       PARAMETER(ELD_D_DAY =   9)         ! SEASON / TIME OF DAY GROUPS
       PARAMETER(ELD_D_HRS =  64)         ! SEGMENTS IN EACH SEASON/TIME OF DAY GROUPS
 !
       PARAMETER(EFD_D_MVS =  ELD_D_DAY * EFD_D_SSZ)    ! VERTICAL SLICES (EFD)
-!                                                                       
+!
       PARAMETER(ETT_D_MTG = 150)         ! MAXIMUM NUMBER OF TRADE GROUPS
       PARAMETER(ETT_D_CAN = 150)         ! MAXIMUM NUMBER OF CANADIAN TRADE GROUPS
       PARAMETER(ETT_D_RECS =  200)       ! MAXIMUM NUMBER OF RECORDS IN CONSTRAINT FILE
-!                                                                       
+!
       PARAMETER(WPLT_D_GRP = 3100)       ! MAXIMUM NUMBER OF PLANT GROUPS PER REGION
       PARAMETER(WPLT_D_REC = 27000)      ! MAXIMUM NUMBER OF PLANT RECORDS
       PARAMETER(WPLT_D_RGN = 28)         ! MAXIMUM NUMBER OF PLANT REGIONS
@@ -245,7 +244,7 @@
       PARAMETER(ECI_D_MSP=6)             ! Maximum Number Seasons for Economy Canadian Input Data
 !
       INTEGER*4 TC_FUELS               ! Number of Traditional Cogen Fuel / Technology Types
-      PARAMETER(TC_FUELS=12)           ! Number of Traditional Cogen Fuel / Technology Types
+      PARAMETER(TC_FUELS=13)           ! Number of Traditional Cogen Fuel / Technology Types
       INTEGER*4 TC_SECTORS             ! Number of Demand Sectors with Cogen Generation
       PARAMETER(TC_SECTORS=5)          ! Number of Demand Sectors with Cogen Generation
       INTEGER*4 MX_ST_RPS              ! Maximum Number of State RPS Tranches
@@ -256,25 +255,25 @@
       PARAMETER(MX_TYPE=10)            ! Number of Utility Types 1) IOU 2) COOP 3) MUNI 4) OTHR
 
       PARAMETER(MX_STO_INC=3)          ! Maximum Number of Storage Increments Allowed
-	  PARAMETER(MaxPtypesP = 23)	   ! Maximum number of ReStore Plant Types
-	  PARAMETER(MaxStotyp = 3)	       ! Maximum number of ReStore storage Types
-	  PARAMETER(MaxCurttyp = 9)	       ! Maximum number of ReStore curtailment Types
+      PARAMETER(MaxPtypesP = 23)	   ! Maximum number of ReStore Plant Types
+      PARAMETER(MaxStotyp = 3)	       ! Maximum number of ReStore storage Types
+      PARAMETER(MaxCurttyp = 9)	       ! Maximum number of ReStore curtailment Types
 
       INTEGER*4 MX_GRDSRC              ! Maximum Number of Grid Resiliency Sources
       PARAMETER(MX_GRDSRC=6)           ! Maximum Number of Grid Resiliency Sources
-      
+
       ! SEC45V VARIABLES 
       REAL SEC45V_H2_PTC               ! SEC45V IRA HYDROGEN PTC CREDIT
       PARAMETER(SEC45V_H2_PTC=0.6)     ! 2022$/KG OF H2
 
       REAL WAGE_APP_MULTIPLIER            ! SEC45V PREVAILING WAGE AND APPRENTICESHIP MULTIPLER
       PARAMETER(WAGE_APP_MULTIPLIER=5.0)  ! SEC45V SETS THIS MULTIPLER AT 5.0, WE ASSUME FULL REQUIREMENT MET
-      
+
       REAL SEC45V_CO2_REQ(2,4)
       COMMON/SEC45VPARMS/SEC45V_CO2_REQ
 
       REAL ELECTROLYZER_EFFICIENCY ! MWHRS/KG H2 USED IN EPHRTS
-	  PARAMETER(ELECTROLYZER_EFFICIENCY=0.06)
+      PARAMETER(ELECTROLYZER_EFFICIENCY=0.06)
 
-	  INTEGER SW_EPHRTS_SEC45V	! ephrts H2 SEC45V switch, 1=ON, 0=OFF.
-	  PARAMETER(SW_EPHRTS_SEC45V=1)
+      INTEGER SW_EPHRTS_SEC45V	! ephrts H2 SEC45V switch, 1=ON, 0=OFF.
+      PARAMETER(SW_EPHRTS_SEC45V=1)

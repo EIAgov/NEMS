@@ -92,29 +92,29 @@ def fill_table_base_119(dfd, table_spec, table_id):
     mask = dfd["QPRRS"].loc[1:9].sum() != 0
     df1 = (dfd["QPRRS"].loc[1:9] * dfd["PMORE/PPRRS"].loc[1:9]).sum()
     df2 = dfd["QPRRS"].loc[1:9].sum()
-    PPRRS.loc[MNUMCR].loc[mask] = df1.loc[mask] / df2.loc[mask]
-    PPRRS.loc[MNUMCR].loc[~mask] = (dfd["PMORE/PPRRS"].loc[1:9].sum()).loc[~mask] / 9
+    PPRRS.loc[MNUMCR, mask] = df1.loc[mask] / df2.loc[mask]
+    PPRRS.loc[MNUMCR, ~mask] = (dfd["PMORE/PPRRS"].loc[1:9].sum()).loc[~mask] / 9
 
     PPRCM = dfd["PMORE/PPRCM"].copy()
     mask = dfd["QPRCM"].loc[1:9].sum() != 0
     df1 = (dfd["QPRCM"].loc[1:9] * dfd["PMORE/PPRCM"].loc[1:9]).sum()
     df2 = dfd["QPRCM"].loc[1:9].sum()
-    PPRCM.loc[MNUMCR].loc[mask] = df1.loc[mask] / df2.loc[mask]
-    PPRCM.loc[MNUMCR].loc[~mask] = (dfd["PMORE/PPRCM"].loc[1:9].sum()).loc[~mask] / 9
+    PPRCM.loc[MNUMCR, mask] = df1.loc[mask] / df2.loc[mask]
+    PPRCM.loc[MNUMCR, ~mask] = (dfd["PMORE/PPRCM"].loc[1:9].sum()).loc[~mask] / 9
 
     PPRIN = dfd["PMORE/PPRIN"].copy()
     mask = dfd["QPRIN"].loc[1:9].sum() != 0
     df1 = (dfd["QPRIN"].loc[1:9] * dfd["PMORE/PPRIN"].loc[1:9]).sum()
     df2 = dfd["QPRIN"].loc[1:9].sum()
-    PPRIN.loc[MNUMCR].loc[mask] = df1.loc[mask] / df2.loc[mask]
-    PPRIN.loc[MNUMCR].loc[~mask] = (dfd["PMORE/PPRIN"].loc[1:9].sum()).loc[~mask] / 9
+    PPRIN.loc[MNUMCR, mask] = df1.loc[mask] / df2.loc[mask]
+    PPRIN.loc[MNUMCR, ~mask] = (dfd["PMORE/PPRIN"].loc[1:9].sum()).loc[~mask] / 9
 
     PPRTR = dfd["PMORE/PPRTR"].copy()
     mask = dfd["QPRTR"].loc[1:9].sum() != 0
     df1 = (dfd["QPRTR"].loc[1:9] * dfd["PMORE/PPRTR"].loc[1:9]).sum()
     df2 = dfd["QPRTR"].loc[1:9].sum()
-    PPRTR.loc[MNUMCR].loc[mask] = df1.loc[mask] / df2.loc[mask]
-    PPRTR.loc[MNUMCR].loc[~mask] = (dfd["PMORE/PPRTR"].loc[1:9].sum()).loc[~mask] / 9
+    PPRTR.loc[MNUMCR, mask] = df1.loc[mask] / df2.loc[mask]
+    PPRTR.loc[MNUMCR, ~mask] = (dfd["PMORE/PPRTR"].loc[1:9].sum()).loc[~mask] / 9
 
     #  Rows 1-4 aren't in the layin file, along with several others. Layin also includes IEA submissions for some reason (not filled in)
 

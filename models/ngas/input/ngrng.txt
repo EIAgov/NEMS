@@ -63,119 +63,119 @@ AnnualRNGCarbonOffset:= DATA{
 
 ! State distances from California (in miles) used to help calculate LCFS CI
 Composite Table:
-reg	distance
-AL	1876
-AK	2321
-AZ	491.6
-AR	1525
-CA	0
-CO	775.8
-CT	2497
-DE	2384
-FL	2221
-GA	2065
-HI	2480
-ID	556.7
-IL	1649
-IN	1804
-IA	1427
-KS	1163
-KY	1879
-LA	1634
-ME	2636
-MD	2316
-MA	2535
-MI	1845
-MN	1441
-MS	1720
-MO	1482
-MT	846.1
-NE	1098
-NV	215.9
-NH	2534
-NJ	2412
-NM	783
-NY	2444
-NC	2231
-ND	1201
-OH	1986
-OK	1235
-OR	463.9
-PA	2242
-RI	2553
-SC	2179
-SD	1127
-TN	1844
-TX	1222
-UT	455
-VT	2477
-VA	2224
-WA	2305
-WV	2118
-WI	1620
-WY	751.3
+nn::reg	distance
+    AL	1876
+    AK	2321
+    AZ	491.6
+    AR	1525
+    CA	0
+    CO	775.8
+    CT	2497
+    DE	2384
+    FL	2221
+    GA	2065
+    HI	2480
+    ID	556.7
+    IL	1649
+    IN	1804
+    IA	1427
+    KS	1163
+    KY	1879
+    LA	1634
+    ME	2636
+    MD	2316
+    MA	2535
+    MI	1845
+    MN	1441
+    MS	1720
+    MO	1482
+    MT	846.1
+    NE	1098
+    NV	215.9
+    NH	2534
+    NJ	2412
+    NM	783
+    NY	2444
+    NC	2231
+    ND	1201
+    OH	1986
+    OK	1235
+    OR	463.9
+    PA	2242
+    RI	2553
+    SC	2179
+    SD	1127
+    TN	1844
+    TX	1222
+    UT	455
+    VT	2477
+    VA	2224
+    WA	2305
+    WV	2118
+    WI	1620
+    WY	751.3
 ;
 
 ! Adders to Carbon Itensity due to electricity generation mix
 ! Values are CI, relative to CAMX (CA electricity region)
 Composite Table:
-reg	CI_adder_from_elec
-AL	3.624
-AK	8.655
-AZ	3.917
-AR	4.540
-CA	0.000
-CO	8.574
-CT	-4.946
-DE	6.887
-FL	5.314
-GA	0.108
-HI	18.949
-ID	1.155
-IL	16.665
-IN	8.159
-IA	6.794
-KS	6.975
-KY	6.225
-LA	4.540
-ME	-4.946
-MD	6.887
-MA	-4.946
-MI	10.390
-MN	6.794
-MS	0.108
-MO	16.665
-MT	1.155
-NE	6.794
-NV	1.155
-NH	-4.946
-NJ	6.887
-NM	3.917
-NY	2.297
-NC	6.597
-ND	6.794
-OH	8.159
-OK	6.597
-OR	1.155
-PA	6.887
-RI	-4.946
-SC	6.597
-SD	6.794
-TN	6.225
-TX	4.500
-UT	1.155
-VT	-4.946
-VA	6.597
-WA	1.155
-WV	8.159
-WI	15.589
-WY	8.574
+nn::reg	CI_adder_from_elec
+    AL	3.624
+    AK	8.655
+    AZ	3.917
+    AR	4.540
+    CA	0.000
+    CO	8.574
+    CT	-4.946
+    DE	6.887
+    FL	5.314
+    GA	0.108
+    HI	18.949
+    ID	1.155
+    IL	16.665
+    IN	8.159
+    IA	6.794
+    KS	6.975
+    KY	6.225
+    LA	4.540
+    ME	-4.946
+    MD	6.887
+    MA	-4.946
+    MI	10.390
+    MN	6.794
+    MS	0.108
+    MO	16.665
+    MT	1.155
+    NE	6.794
+    NV	1.155
+    NH	-4.946
+    NJ	6.887
+    NM	3.917
+    NY	2.297
+    NC	6.597
+    ND	6.794
+    OH	8.159
+    OK	6.597
+    OR	1.155
+    PA	6.887
+    RI	-4.946
+    SC	6.597
+    SD	6.794
+    TN	6.225
+    TX	4.500
+    UT	1.155
+    VT	-4.946
+    VA	6.597
+    WA	1.155
+    WV	8.159
+    WI	15.589
+    WY	8.574
 ;
 
 
 ! Bcf per month
 Composite Table:
-datamon              h       rng_prod_type    ANL_rng_historicalProduction
+datamon          nn::h       rng_prod_type    ANL_rng_historicalProduction
 January, 1990        NY      landfill         0.0381002
 February, 1990       NY      landfill         0.0381002
 March, 1990          NY      landfill         0.0381002

@@ -78,8 +78,10 @@ class CCATS_Finance:
         self.duration_b2                    = 0   # Duration of optimization model block 3
         self.duration_45q                   = 0   # Duration of 45Q tax credit policy for a single facility
         self.financing_risk_premia          = 0.0 # Assumed risk premia required by investors over risk-free market rate
+        self.financing_years_source         = 0   # Assumed financing years for endogenous CO2 source investments
         self.financing_years_transport      = 0   # Assumed financing years for pipeline transport investments
         self.financing_years_storage        = 0   # Assumed financing years for saline formation storage investments
+        self.fixed_om_fraction_source       = 0.0 # Fixed O&M costs as a percentage of capital costs for endogenous CO2 sources
         self.fixed_om_fraction_transport    = 0.0 # Fixed O&M costs as a percentage of capital costs for pipeline transport
         self.fixed_om_fraction_storage      = 0.0 # Fixed O&M costs as a percentage of capital costs for saline formation storage
         self.site_dev_years_storage         = 0   # Assumed number of years for storage site development
@@ -163,8 +165,10 @@ class CCATS_Finance:
         self.duration_b2                    = int(self.fin_table.at['duration_block2', 'value'])
         self.duration_45q                   = int(self.fin_table.at['duration_45q', 'value'])
         self.financing_risk_premia          = float(self.fin_table.at['financing_risk_premia', 'value'])
+        self.financing_years_source         = int(self.fin_table.at['financing_years_source', 'value'])
         self.financing_years_transport      = int(self.fin_table.at['financing_years_transport', 'value'])
         self.financing_years_storage        = int(self.fin_table.at['financing_years_storage', 'value'])
+        self.fixed_om_fraction_source       = float(self.fin_table.at['fixed_om_fraction_source', 'value'])
         self.fixed_om_fraction_transport    = float(self.fin_table.at['fixed_om_fraction_transport', 'value'])
         self.fixed_om_fraction_storage      = float(self.fin_table.at['fixed_om_fraction_storage', 'value'])
         self.site_dev_years_storage         = float(self.fin_table.at['site_dev_years_storage', 'value'])

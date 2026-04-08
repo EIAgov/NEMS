@@ -1,0 +1,127 @@
+## ams_version=1.0
+
+Model Main_aimms_endpoint {
+	ElementParameter ExitProcedure {
+		Range: AllProcedures;
+		Definition: {
+			'CloseAIMMSTimeout';
+		}
+		Comment: "Procedure that is run for timeout operation";
+	}
+	StringParameter Timeout_Message;
+	Parameter p_timeout {
+		Unit: s;
+		InitialData: 54000;
+		Comment: "Number of seconds until AIMMS will timeout and close during a NEMS run.";
+	}
+	Parameter my_port;
+	Procedure Timeout {
+		Body: {
+			stopwatch::pr_scheduleOver(p_timeout, ExitProcedure);
+		}
+		dex::ServiceName: call_timeout;
+	}
+	Procedure CloseAIMMSTimeout {
+		Body: {
+			Timeout_Message := "Closing AIMMS due to timeoout";
+			write Timeout_Message to file "aimms_close_message.txt";
+			
+			ExitAIMMS;
+		}
+	}
+	Procedure MainInitialization {
+		Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+	}
+	Procedure PostMainInitialization {
+		Body: {
+			read from file "my_port.txt";
+			!my_port := 8050;
+			dex::api::ListenerPort := my_port;
+			dex::api::StartAPIService;
+		}
+		Comment: {
+			"Add initialization statements here that require that the libraries are already initialized properly,
+			or add statements that require the Data Management module to be initialized."
+		}
+	}
+	Procedure MainExecution;
+	Procedure PreMainTermination {
+		Body: {
+			return DataManagementExit();
+		}
+		Comment: {
+			"Add termination statements here that require all libraries to be still alive.
+			Return 1 if you allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence."
+		}
+	}
+	Procedure MainTermination {
+		Body: {
+			return 1;
+		}
+		Comment: {
+			"Add termination statements here that do not require all libraries to be still alive.
+			Return 1 to allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence.
+			It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1."
+		}
+	}
+	Procedure run_ecp {
+		Body: {
+			ec::ECP_API_Call;
+		}
+		dex::ServiceName: call_ecp;
+	}
+	Procedure run_efd {
+		Body: {
+			ed::EFD_API_Call;
+		}
+		dex::ServiceName: call_efd;
+	}
+	Procedure run_rest {
+		Body: {
+			re::REST_API_Call;
+		}
+		dex::ServiceName: call_rest;
+	}
+	Procedure run_coal {
+		Body: {
+			cl::coal_API_Call;
+		}
+		dex::ServiceName: call_coal;
+	}
+	Procedure run_ngmm {
+		Body: {
+			nn::NGMM_MainExecution_API;
+		}
+		dex::ServiceName: call_ngas;
+	}
+	Procedure run_hmm {
+		Body: {
+			nh::MainExecution_API;
+		}
+		dex::ServiceName: call_hmm;
+	}
+	Section Quantities_and_Units {
+		Comment: {
+			"This section contains all the units and quantities that are added automatically by AIMMS.
+			It is recommended to declare all your quantities here."
+		}
+		Quantity SI_Time_Duration {
+			BaseUnit: s;
+			Conversions: {
+				minute->s : #-># * 60,
+				tick->s : #-># / 100
+			}
+			Comment: {
+				"Expresses the value for the duration of periods.
+				
+				The unit s has been added automatically because it is a required unit for AimmsWebUI.
+				
+				The unit minute has been added automatically because it is a required unit for AimmsWebUI.
+				
+				The unit tick has been added automatically because it is a required unit for Library StopwatchLibrary."
+			}
+		}
+	}
+}

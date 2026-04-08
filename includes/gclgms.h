@@ -1,3 +1,4 @@
+! -*- f90 -*-
 /* ! $Header: M:/default/includes/RCS/gclgms.h,v 1.2 2018/03/13 13:08:49 dsa Exp $ /*
 /* global constants (symbol dimensions, symbol layout, etc.)
  * that might ultimately come from global

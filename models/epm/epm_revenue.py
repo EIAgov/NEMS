@@ -25,11 +25,13 @@ def accntrev(restart: Restart, scedes: Scedes, variables: Variables) -> None:
     auction, it amounts to the same thing. For a market, we need to subtract
     out the value of the initial allocation of permits, which is done by the
     `initrev` function. We sum the revenue by sector:
-        0. Residential
-        1. Commercial
-        2. Industrial
-        3. Transportation
-        4. Utility
+    
+    0. Residential
+    1. Commercial
+    2. Industrial
+    3. Transportation
+    4. Utility
+    
     The revenue from each sector is summed by fuel and is directly proportional
     to total emissions. Emissions associated with ethanol and biodiesel are
     assumed to be exempt, but emissions from geothermal and MSW are included.
@@ -515,11 +517,13 @@ def initrev(restart: Restart) -> None:
 
     The total revenue is the number of permits multiplied by the value of each
     permit. We sum this revenue by sector:
-        0. Residential
-        1. Commercial
-        2. Industrial
-        3. Transportation
-        4. Utility
+    
+    0. Residential
+    1. Commercial
+    2. Industrial
+    3. Transportation
+    4. Utility
+    
     Note that calling this subroutine only has an effect when the bank flag is
     set in EPMCNTL and the GHG banking and compliance period has begun -- it
     otherwise updates none of the common block variables.

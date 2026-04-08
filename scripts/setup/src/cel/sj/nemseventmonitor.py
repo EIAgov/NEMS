@@ -1,3 +1,11 @@
+"""
+Created on Aug 12 2024
+Modified Oct 20 2025
+
+@author: janea.dixon
+@author: gregory.miller
+"""
+
 from datetime import datetime, date, timedelta
 import os
 import pandas as pd
@@ -6,26 +14,43 @@ from threading import Thread
 import time
 import pika
 import json
-
+import argparse
 from sj import generate_html_from_dataframe
+import sqlite3
 
+MYHOST = os.environ['COMPUTERNAME']
+SECRETS_FILE = "O:\\python_environments\\secrets.json"
+if "test" in MYHOST.lower() or "tst" in MYHOST.lower():
+    MODE = "TEST"
+else:
+    MODE = "NEMS"
 
 def watch_file(messagehandler):
+    """Watches the nems_run_status_log.txt file for updates.
+    
+    This function reads the content of the nems_run_status_log.txt file, parses its content
+    and updates the dataframe accordingly. The nems_run_status_log.txt file location is generated
+    from the work directory field of the dataframe. The file contains various information
+    about run status such as current model, year and iteration.
+
+    Args:
+        messagehandler (MessageHandler): An instance of the MessageHandler class.
+    
+    Returns:
+        pandas.DataFrame: Updated Pandas dataframe.
+    """
     df = messagehandler.getmessagesdf()
     for index, row in df.iterrows():
         if row.Status == 'In queue':
-            hosts = ['NEM7', 'NEM8', 'NEM9', 'NEM10']
+            hosts = ['NEM7', 'NEM8', 'NEM9', 'NEM10', 'TSTNEM1']
             for host in hosts:  
-                print 
                 hostname = "//" + host
                 fname = os.path.join(row["Work Directory"].replace("D:",hostname), 'nems_run_status_log.txt')
                 if os.path.exists(fname):
-                    print(fname)
                     row.Status = 'Running'
                     row.Host = host
                     break
         if row.Status == 'Running':
-            # status = row.status
             last_line = ''
             hostname = "//"+row.Host[row.Host.find("@")+1:]
             fname = os.path.join(row["Work Directory"].replace("D:",hostname), 'nems_run_status_log.txt')
@@ -34,8 +59,6 @@ def watch_file(messagehandler):
                     last_line = f.readlines()[-1]
                     if last_line == "\n":
                         last_line = f.readlines()[-2]
-
-                # row.status = last_line.strip()
                 module = last_line[last_line.lower().find("module:"):]
                 row.Module = module[7:module.find(",")].strip()
                 cyc = last_line[last_line.lower().find("cycle:"):]
@@ -46,10 +69,15 @@ def watch_file(messagehandler):
                 row.Iteration = itr[10:itr.find(",")].strip()
                 idx = messagehandler.find_message_history(run_folder=row["Work Directory"])
                 if row["Time Submitted"]:
-                    time_elapsed = datetime.now() - row['Time Submitted'] 
-                    hours, minutes = time_elapsed.seconds // 3600, time_elapsed.seconds // 60 % 60
-                    seconds = time_elapsed.seconds - hours*3600 - minutes*60
-                    row["Time Elapsed"] = f"{hours}:{minutes}.{seconds,2}"
+                    time_elapsed = datetime.now() - row['Time Submitted']
+                    days = time_elapsed.days
+                    hours = time_elapsed.seconds // 3600
+                    minutes = (time_elapsed.seconds % 3600) // 60
+                    seconds = time_elapsed.seconds % 60
+                    if days > 0:
+                        row["Time Elapsed"] = f"{days} day{'s' if days > 1 else ''}, {hours:02}:{minutes:02}:{seconds:02}"
+                    else:
+                        row["Time Elapsed"] = f"{hours:02}:{minutes:02}:{seconds:02}"
                 messagehandler.updatemessagedf(row.to_dict(), idx)
                 messagehandler.export_to_html()
             except FileNotFoundError:
@@ -62,7 +90,6 @@ def watch_file(messagehandler):
                         pass
                 else:
                     print("Failed to find file "  + fname)
-        #       pass
             except Exception as e:
                 if last_line == '':
                     pass
@@ -70,50 +97,47 @@ def watch_file(messagehandler):
                     print("Failed to update row " + str(index))
                     print("Row contents: " + str(row.to_dict()))
                     print("Exception: " + str(e))
-        # if row.type == 'in_queue':
-        #     try:
-        #         hostname = ''
-        #         lines = ''
-        #         with open(os.path.join(row.run_folder, 'nems_run_status_log.txt'), 'r') as f:
-        #             lines = f.readlines()
-        #         row.type = 'task-received'
-        #         row.status = lines[-1]
-        #         # hostname = lines[6].split("b'") << probably won't work
-        #         row.hostname = hostname[1][:-2]
-        #         row.timestamp = datetime.now()
-        #         idx = messagehandler.find_message_history(run_folder=row.run_folder)
-        #         messagehandler.updatemessagedf(row.to_dict(), idx)
-        #         messagehandler.export_to_html()
-        #     except Exception as e:
-        #         print("Failed to update row " + str(index))
-        #         print("Row contents: " + str(row.to_dict()))
-        #         print("Exception: " + str(e))
-
     return df
 
 
 def run_watch_file(messageHandler):
     while True:
         watch_file(messageHandler)
-        # time.sleep(300)
         time.sleep(60)
 
 class MessageHandler(Thread):
-    def __init__(self, message_df, outpath = None):
+    def __init__(self, message_df, outpath = None, dump_file = None, table_name = "nems_runs"):
         Thread.__init__(self)
-        # self.daemon = True
 
-        cred = pika.PlainCredentials(username="XXXXXXXXXXXX", password="XXXXXXXXXXXX")
-        host = "XXXXXXXXXXXX"
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host, 5672, '/', credentials=cred))
-        self.channel = connection.channel()
-        self.message_df = message_df
+        # setup paths for logging and data storage
         if outpath is not None:
             self.outpath = outpath
         else:
-            # edit
-            #self.outpath = os.path.join("Z:", os.sep, "onl_tst2", "sj_output")
             self.outpath = os.path.join("Y:", os.sep, "RabbitMQ")
+        if dump_file is not None:
+            self.dump_file_path = os.path.join(self.outpath, os.sep, dump_file)
+        else:
+            self.dump_file_path = os.path.join(self.outpath, os.sep, "nems_run_log.db")
+        self.table_name = "nems_runs"
+        # TODO GNM add a check if the path and file above exist
+
+        # Configure Pika connection for RabbitMQ server
+        with open(SECRETS_FILE, encoding='UTF-8', mode='r') as s:
+            t = json.load(s)
+        host =  t[MODE]['RabbitMQ']['HOST']
+        password = t[MODE]['RabbitMQ']['SECRET']
+        user = t[MODE]['RabbitMQ']['USER']
+        cred = pika.PlainCredentials(username=user, password=password)
+        conn_parms = pika.ConnectionParameters(host, 5672, '/', credentials=cred)
+        connection = pika.BlockingConnection(conn_parms)
+        self.channel = connection.channel()
+
+        # dataframe for all run data
+        self.message_df = message_df
+        
+        # variables for tracking and dumping dataframe to disk
+        self.captured_message_ids = self._get_message_ids_from_db()
+        self.allowed_statuses = ['finished', 'failed', 'completed', 'error']        
 
     def run(self):
 
@@ -181,8 +205,6 @@ class MessageHandler(Thread):
         if self.message_df.empty:
             return idx
         if run_folder:
-            # if run_folder in self.message_df['run_folder'].values:
-            #     idx = self.message_df[self.message_df['run_folder'] == run_folder].index.values[0]
             if run_folder in self.message_df['Work Directory'].values:
                 idx = self.message_df[self.message_df['Work Directory'] == run_folder].index.values[0]
         elif messageid:
@@ -208,8 +230,6 @@ class MessageHandler(Thread):
         timestamp = datetime.now()
         print('messages_in_queue')
 
-        # new_row = {'userid': userid, 'run_folder': run_folder, 'start_time': timestamp, 'result': None, 'status': None,
-        #            'type': message_type, 'messageid': None, 'hostname': None}
         split = run_folder.split(os.sep)
         if split[-1] in ["p1","p2","p3"]:
             scen = split[-3]
@@ -246,10 +266,6 @@ class MessageHandler(Thread):
         out_dir = args[2].strip()
         run_folder = args[1].strip()
         userid = args[0].strip()
-        # task_name = ['name']
-        # retries = msg['retries']
-        # new_row = {'userid': userid, 'run_folder': run_folder, 'start_time': timestamp, 'result': None, 'status': None,
-        #            'type': message_type, 'messageid': messageid, 'hostname': hostname}
         split = run_folder.split(os.sep)
         if split[-1] in ["p1","p2","p3"]:
             scen = split[-3]
@@ -270,11 +286,9 @@ class MessageHandler(Thread):
         if 'D:' not in run_folder:
             status = 'Pending'
 
-
         new_row = {"User ID": userid, "Scenario": scen, "Date Key": dkey, "Part": part, "Host": hostname, "Cycle": "",
                    "Year": "", "Iteration": "", "Module": "", "Status": status, "Work Directory": run_folder, "Output Directory": out_dir, 'Time Submitted': None, 'Time Elapsed': "",
                    "messageid": messageid, "start_time": timestamp, "show": True, "paridx": paridx}
-        # new_row = [None,pid, hostname, timestamp, None,None, run_folder, message_type]
         idx = self.find_message_history(run_folder=run_folder)
         self.updatemessagedf(new_row, idx)
         self.export_to_html()
@@ -284,10 +298,8 @@ class MessageHandler(Thread):
         timestamp = 0
         messageid = ''
         hostname = ''
-        # instance_id = ''
         if 'task_id' in msg:
             hostname = None
-            # instance_id = None
             messageid = msg['task_id']
             timestamp = datetime.now()
             run_time = ''
@@ -295,21 +307,14 @@ class MessageHandler(Thread):
         else:
             hostname = msg['hostname']
             hostname = hostname[hostname.find("@") + 1:]
-            # instance_id = hostname.split('@')[1]
             messageid = msg['uuid']
             timestamp = msg['timestamp']
-            # run_time = msg['runtime']
             timestamp = datetime.fromtimestamp(timestamp)
-            # message_type = msg['type']
 
         status = "Finished"
-        # result = msg['result']
         if 'result' in msg:
             if str(msg['result']) != '0':
                 status = "Failed"
-
-        # new_row = {'userid': None, 'run_folder': None, 'start_time': timestamp, 'result': [result],
-        #            'status': 'finished', 'type': message_type, 'messageid': messageid, 'hostname': hostname}
         new_row = {"User ID": None, "Scenario": None, "Date Key": None, "Part": None, "Host": hostname, "Cycle": None,
                    "Year": None, "Iteration": None, "Module": None, "Status": status, "Work Directory": None, "Output Directory": None, 'Time Submitted': None, 'Time Elapsed': "",
                    "messageid": messageid, "start_time": timestamp, "show": None, "paridx": None}
@@ -323,24 +328,27 @@ class MessageHandler(Thread):
             time_sub = self.message_df['Time Submitted'].iloc[idx]
             if time_sub is not None:
                 time_elapsed = datetime.now() - time_sub
-                hours, minutes = time_elapsed.seconds // 3600, time_elapsed.seconds // 60 % 60
-                seconds = time_elapsed.seconds - hours*3600 - minutes*60
-                new_row["Time Elapsed"] = f"{hours}:{minutes}.{seconds,2}"
-
+                days = time_elapsed.days
+                hours = time_elapsed.seconds // 3600
+                minutes = (time_elapsed.seconds % 3600) // 60
+                seconds = time_elapsed.seconds % 60
+                if days > 0:
+                    new_row["Time Elapsed"] = f"{days} day{'s' if days > 1 else ''}, {hours:02}:{minutes:02}:{seconds:02}"
+                else:
+                    new_row["Time Elapsed"] = f"{hours:02}:{minutes:02}:{seconds:02}"
 
         watch_file(self)
         self.updatemessagedf(new_row, idx)
         self.export_to_html()
+        self.dump_row_on_event(messageid=messageid)
 
     def messages_failed(self, msg):
         timestamp = 0
         messageid = ''
         hostname = ''
-        # instance_id = ''
         error = ''
         if 'task_id' in msg:
             hostname = None
-            # instance_id = None
             messageid = msg['task_id']
             timestamp = datetime.now()
             run_time = ''
@@ -349,42 +357,33 @@ class MessageHandler(Thread):
         else:
             hostname = msg['hostname']
             hostname = hostname[hostname.find("@") + 1:]
-            # instance_id = hostname.split('@')[1]
             messageid = msg['uuid']
             timestamp = msg['timestamp']
-            # run_time = msg['runtime']
             timestamp = datetime.fromtimestamp(timestamp)
-            # message_type = msg['type']
-            # error = msg['exception']
-
-            # result = msg['result']
-
-        # traceback = msg['traceback']
-        # new_row = {'userid': None, 'run_folder': None, 'start_time': timestamp, 'result': 'finished',
-        #            'status': 'failed', 'type': message_type, 'messageid': messageid, 'hostname': hostname}
-        new_row = {"User ID": None, "Scenario": None, "Date Key": None, "Part": None, "Host": hostname, "Cycle": None,
-                   "Year": None, "Iteration": None, "Module": None, "Status": "Failed", "Work Directory": None, "Output Directory": None, 'Time Submitted': None, 'Time Elapsed':None,
-                   "messageid": messageid, "start_time": timestamp, "show": None, "paridx": None}
+        
         idx = self.find_message_history(messageid=messageid)
+        if idx is not None:
+            module = self.message_df["Module"].iloc[idx]
+        else:
+            module = None
+
+        my_status="Failed"
+        if module and 'stop' in module.lower():
+            my_status = "Stopped"
+
+        new_row = {"User ID": None, "Scenario": None, "Date Key": None, "Part": None, "Host": hostname, "Cycle": None,
+                   "Year": None, "Iteration": None, "Module": None, "Status": f"{my_status}", "Work Directory": None, "Output Directory": None, 'Time Submitted': None, 'Time Elapsed':None,
+                   "messageid": messageid, "start_time": timestamp, "show": None, "paridx": None}
+        
         if idx is not None and idx in self.message_df["paridx"].values:
             for row in self.message_df[self.message_df["paridx"] == idx]["show"].index:
                 self.message_df.loc[row,"show"] = False
             new_row["show"] = True
         watch_file(self)
         self.updatemessagedf(new_row, idx)
-        # if idx:
-        #     run_folder = self.message_df.loc[idx, 'run_folder']
-        #     if run_folder:
-        #         with open(run_folder + '\\error_log.txt', "w") as file:
-        #             file.write(error + '\n')
-        #             file.write(traceback)
-
         self.export_to_html()
+        self.dump_row_on_event(messageid=messageid)
         print('message failed')
-
-    # def filter_by_type(self, df, type):
-    #     df = df.loc[self.message_df['type'] == type]
-    #     return df
 
     def remove_old_messages(self, days=None):
         df = self.message_df
@@ -403,52 +402,178 @@ class MessageHandler(Thread):
         df = df.loc[(df['start_time'] >= sunday_dt) & (df['start_time'] < next_sunday_dt) | (df['start_time'] is None)]
         return df
 
-    # def set_html_format(self, df):
-    #     df = df.copy()
-    #     df['start_time'] = df['start_time'].astype('datetime64[ns]').dt.strftime('%c')
-    #     in_queue_df = self.filter_by_type(df, 'in_queue')
-    #     in_queue_df = in_queue_df[['userid', 'run_folder', 'start_time', 'type']]
-    #     started_df = self.filter_by_type(df, 'task-received')
-    #     started_df = started_df [['userid', 'start_time', 'status', 'run_folder', 'type', 'messageid', 'hostname' ]]
-    #     finished_df = self.filter_by_type(df,'task-succeeded')
-    #     failed_df = self.filter_by_type(df, 'task-failed')
-    #     finished_df = pd.concat([finished_df, failed_df], ignore_index=True)
-    #     # should there be a task failed type, should we concat failed and finished??
-    #     html = htmlf()
-    #     html.set_table(in_queue_df,'in_queue_df')
-    #     html.set_table(started_df,'started_df')
-    #     html.set_table(finished_df,'finished_df')
-    #     html.queue_length = len(in_queue_df)
-    #     html.compile_html()
-    #     return html
-    # html.save_html("weps_run_monitor.html")
-
     def export_to_html(self):
         # get only messages for this past week
         self.message_df = self.remove_old_messages()
         messages_df_days = self.remove_old_messages(7) # enter the number of days
-        # html_week = self.set_html_format( self.message_df)
-        # html_days = self.set_html_format(messages_df_2days)
         trim_df_week = self.message_df[self.message_df["show"] == True].drop(["messageid","start_time","paridx","show"],axis=1)
         trim_df_days = messages_df_days[messages_df_days["show"] == True].drop(["messageid","start_time","paridx","show"],axis=1)
-
-        # fn = r'Z:\Teams\Project\WEPS\celery_html_files/'
         loc = self.outpath
-        # html_week.save_html(fn + "weps_run_monitor_week.html")
-        # html_days.save_html(fn + "weps_run_monitor.html")
         generate_html_from_dataframe(trim_df_week, os.path.join(loc, "nems_run_monitor_week.html"))
         generate_html_from_dataframe(trim_df_days, os.path.join(loc, "nems_run_monitor.html"))
 
+    def dump_row_on_event(self, messageid):
+        message_row = pd.DataFrame()
+        if messageid and messageid not in self.captured_message_ids:
+            # copy the row from the dataframe
+            message_row = self.message_df[
+                (self.message_df['messageid'] == messageid) &
+                (self.message_df['Status'].str.lower().isin(self.allowed_statuses))
+            ].copy()
+        
+        try:
+            if message_row['User ID'] is None or message_row['Work Directory'] is None:
+                return 
+        except ValueError as e:
+            return
+        except KeyError as e:
+            return
+        except Exception as e:
+            print(f"uncaught exception in dump_row_on_event(): {e}")
+            return
+        
+        if not message_row.empty:
+            self._dump_dataframe_to_db(message_row)
+        
+    def _load_dataframe_from_db(self, initial_df):
+        if os.path.exists(self.dump_file_path):
+            try:
+                conn = sqlite3.connect(self.dump_file_path)
+                loaded_df = pd.read_sql_query(f"SELECT * FROM {self.table_name}", conn, parse_dates=['Time Submitted', 'start_time'])
+                
+                # match the column order to the input and handle any missing columns
+                for col in initial_df.columns:
+                    if col not in loaded_df.columns:
+                        loaded_df[col] = None
+                return loaded_df[initial_df.columns]
+                conn.close()
+            except Exception as e:
+                # if above failed return empty df to mimic older behavior
+                print("Failed ot load data from database. {e}.")
+                return initial_df.copy()
+        else:
+            print("SQLite DB not found. Initializing new file.")
+            os.makedirs(os.path.dirname(self.dump_file_path), exist_ok=True)
+            return initial_df.copy()
+        
+    def _get_message_ids_from_db(self):
+        if os.path.exists(self.dump_file_path):
+            try:
+                conn = sqlite3.connect(self.dump_file_path)
+                message_ids_df = pd.read_sql_query(f"SELECT messageid FROM {self.table_name} WHERE messageid is NOT NULL",
+                                                   conn)
+                conn.close()
+                return set(message_ids_df['messageid'].dropna().unique())
+            except Exception as e:
+                print(f"Failed to load captured message IDs from DB. {e}. Beware duplicate rows in DB.")
+                return set()
+        return set()
+
+    def _dump_dataframe_to_db(self, source_df):
+        if source_df.empty:
+            return
+        
+        out_df = source_df.copy()
+        
+        if 'start_time' in out_df.columns:
+            out_df = out_df.drop(columns=['start_time'])
+
+        # format times for sqlite compatibility
+        for col in ['Time Submitted']:
+            if col in out_df.columns:
+                out_df[col] = pd.to_datetime(out_df[col], errors='coerce')
+                out_df[col] = out_df[col].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if pd.notna(x) else None)
+
+            try:
+                conn = sqlite3.connect(self.dump_file_path)
+                cursor = conn.cursor()
+
+                column_defs = []
+                for col, dtype in out_df.dtypes.items():
+                    sql_type = 'TEXT'
+                    if pd.api.types.is_integer_dtype(dtype):
+                        sql_type = 'INTEGER'
+                    elif pd.api.types.is_float_dtype(dtype):
+                        sql_type = 'REAL'
+                    elif col in ['Time Submitted', 'start_time']:
+                        sql_type = 'DATETIME'
+                    elif pd.api.types.is_bool_dtype(dtype):
+                        sql_type = 'BOOLEAN'
+
+                    if col == "messageid":
+                        column_defs.append(f'"{col}" {sql_type} PRIMARY KEY')
+                    else:
+                        column_defs.append(f'"{col}" {sql_type}')
+
+                create_table_stmt = f"""
+                CREATE TABLE IF NOT EXISTS {self.table_name} (
+                    {", ".join(column_defs)}
+                );
+                """
+                cursor.execute(create_table_stmt)
+                conn.commit()
+
+                # setup a prepared statement to insert rows
+                cols = ", ".join(f'"{col}"' for col in out_df.columns)
+                placeholders = ", ".join(['?' for _ in out_df.columns])
+                update = ", ".join(f'"{col}" = EXCLUDED."{col}"' for col in out_df.columns if col != "messageid")
+                
+                upsert_stmt = f"""INSERT INTO {self.table_name} ({cols})
+                                VALUES ({placeholders})
+                                ON CONFLICT ("messageid") DO UPDATE SET
+                                {update};"""
+                
+                for _, row in out_df.iterrows():
+                    cursor.execute(upsert_stmt, row.values.tolist())
+                conn.commit()
+                conn.close()
+                print(f"Dumped {len(out_df)} to {self.dump_file_path}")
+
+                for mid in out_df['messageid'].dropna().unique():
+                    self.captured_message_ids.add(mid)
+
+            except Exception as e:
+                print(f"Failed to dump messages to DB. {e}")
+                if conn in locals() and conn:
+                    conn.rollback()
+                    conn.close()
+            return
+
+    def _dump_dataframe_to_csv(self, source_df):
+        if source_df.empty:
+            return
+        
+        out_df = source_df.copy()
+
+        # dump to disk
+        if os.path.exists(self.dump_file_path):
+            out_df.to_csv(self.dump_file_path, mode='a', header=False, index=False)
+        else:
+            out_df.to_csv(self.dump_file_path, mode='w', header=True, index=False)
+        print(f"Dumped {len(out_df)} messages to {self.dump_file_path}.")
+        
+        # capture id to avoid dupes
+        for mid in out_df['messageid'].dropna().unique():
+            self.captured_message_ids.add(mid)
+        return
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="NEMS Run Monitor")
+    parser.add_argument("--outpath", "-o", type=str, default="Y:/RabbitMQ/", 
+                        help="Optional path to set the output directory.")
+    parser.add_argument("--dbpath", "-d", type=str, default="Y:/RabbitMQ/nems_runs.db", 
+                        help="Path to the SQLite file used for logging runs. Defaults to Y:/RabbitMQ/nems_runs.db.")
+    args = parser.parse_args()
+
+    welcome_str = "NEMS Run Monitor\r\n----------------\r\nNEMS run monitor is starting up.\r\n"
+    welcome_str += f"Run Monitor is in {MODE} mode.\r\nUsing DB file {args.dbpath}."
 
     messages_df = pd.DataFrame(
-        # columns=['userid', 'run_folder', 'start_time', 'result', 'status', 'type', 'messageid', 'hostname'])
         columns=['User ID', 'Scenario', 'Date Key', 'Part', 'Host', 'Cycle', 'Year', 'Iteration', 'Module', 'Status', 'Work Directory','Output Directory', 'Time Submitted', 'Time Elapsed',
                  'messageid', 'start_time', 'show', 'paridx'])
 
-    mh = MessageHandler(messages_df, sys.argv[1] if len(sys.argv) > 1 else None)
-
+    mh = MessageHandler(messages_df, outpath=args.outpath, dump_file=args.dbpath)
+    print(welcome_str)
     x = Thread(target=run_watch_file, args=(mh,), daemon=False)
     try:
         mh.start()
@@ -456,6 +581,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print('Interrupted')
         try:
-            sys.exit()
+            sys.exit(1)
         except SystemExit:
-            os._exit()
+            os._exit(1)

@@ -22,7 +22,7 @@ do
 done
 cd
 echo $cmdstr > temp.sh
-sh temp.sh | sed "s/'//g" | awk '{print "if [ -f " $2 "/RESTART.unf ] ; then echo " $1 " " $2 " ; fi"}' > temp.out
+sh temp.sh | sed "s/'//g" | awk '{print "if [ -f " $2 "/RESTART.npz ] ; then echo " $1 " " $2 " ; fi"}' > temp.out
 sh temp.out
 #rm temp.sh
 #rm temp.out

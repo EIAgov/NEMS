@@ -1,0 +1,450 @@
+## ams_version=1.0
+
+LibraryModule nems_hmm {
+	Prefix: nh;
+	Interface: data { MainExecution_API, ncrl, curitr, curcalyr, modscendate} + nh::GDS_Parameters + nh::GDS_Sets;
+	Procedure LibraryInitialization {
+		Body: {
+			pr_InitializeCalendar;
+			
+			read from file "../../hmm/input/h2config.txt" in merge mode;
+			read from file "../../hmm/input/h2setmap.txt" in merge mode;
+			
+			SeasonalFraction(seas) := DATA {'1' : 0.16666666666, '2': 0.33333333333, '3' : 0.16666666666, '4' : 0.33333333333};
+		}
+	}
+	Module TestModule {
+		SourceFile: "MainProject\\AMS Files\\TestModule.ams";
+	}
+	Section S0_NEMS_Interface {
+		SourceFile: "MainProject\\AMS Files\\S0 NEMS Interface.ams";
+	}
+	Section S1_Data {
+		SourceFile: "MainProject\\AMS Files\\S1 Data.ams";
+	}
+	Section S2_Data_Import_Export {
+		SourceFile: "MainProject\\AMS Files\\S2 Data Import Export.ams";
+	}
+	Section S3_Data_Processing {
+		SourceFile: "MainProject\\AMS Files\\S3 Data Processing.ams";
+	}
+	Section S4_Calculations {
+		SourceFile: "MainProject\\AMS Files\\S4 Calculations.ams";
+	}
+	Section S5_Optimization {
+		SourceFile: "MainProject\\AMS Files\\S5 Optimization.ams";
+	}
+	Section S6_Output {
+		SourceFile: "MainProject\\AMS Files\\S6 Output.ams";
+	}
+	Section S7_GUI {
+		SourceFile: "MainProject\\AMS Files\\S7 GUI.ams";
+	}
+	Section S8_Miscellaneous {
+		SourceFile: "MainProject\\AMS Files\\S8 Miscellaneous.ams";
+	}
+	Procedure MainExecution_API {
+		Body: {
+			block where
+				case_compression_level := 0,
+				Global_error_handler := "HMM_Error_Handler",
+				initial_column_reservation := 10000000,
+				warning_comparing_elements_different_sets := off,
+				warning_duplicate_column := off,
+				warning_duplicate_row := off,
+				advanced_start := 1,
+				"CPLEX 22.1".LP_method := 6,
+				"CPLEX 22.1".updates_batch_size := 10000000,
+				"CPLEX 22.1".barrier_crossover_algorithm := 2,
+				"CPLEX 22.1".global_thread_limit := 32,
+				"CPLEX 22.1".parallel_mode := 1,
+				"CPLEX 22.1".barrier_display := 2,
+				"CPLEX 22.1".feasibility := 1e-08,
+				"CPLEX 22.1".optimality := 0.0001,
+				Number_1000_separator := 3,
+				Number_decimal_separator := 2;
+			
+			SetMappingDefinitions;
+			
+			! Read file for any scedes switches
+			Read_Runtime_Parameters;
+			
+			! Establish request data paths
+			_sp_input := dex::api::RequestAttribute('request-data-path') ; ! API path from NEMS
+			_sp_out := dex::api::RequestAttribute('response-data-path') ; ! API path to NEMS
+			
+			helper_input := dex::api::RequestAttribute('request-data-path') ;
+			
+			! Generate mappings
+			!dex::DatasetGeneratorFilter(dex::gt, dex::mm, dex::amt) := data { ( JSON  ,  Table  , Sparse           ) : 1 };
+			!dex::GenerateDatasetMappings;
+			
+			! Add mapping
+			dex::AddMapping(
+			mappingName : "json-request-mapping",
+			mappingFile : "Mappings/Generated/restinput-request-JSON-Sparse.xml"
+			);
+			
+			
+			! Read Year/Iteration/NCRL info from NEMS		
+			dex::ReadFromFile(_sp_input,"json-request-mapping");
+			
+			! Assign the values of what Python sent to these control parameters
+			ncntrl_curcalyr('1'):=curcalyr;
+			ncntrl_curitr('1'):=curitr;
+			ncntrl_ncrl('1'):=ncrl;
+			
+			nh::MainExecution;
+			
+			endblock;
+			SaveProfilerResults;
+		}
+		dex::ServiceName: call;
+		StringParameter _sp_out;
+		StringParameter _sp_input {
+			Property: Input;
+		}
+	}
+	Procedure MainInitialization {
+		Body: {
+			if ProjectDeveloperMode then
+				ProfilerStart;
+			!	IdentifierShowAttributes('Main_Model');
+			endif;
+			
+			pr_InitializeCalendar;
+			
+			read from file "../../hmm/input/h2config.txt" in merge mode;
+			read from file "../../hmm/input/h2setmap.txt" in merge mode;
+			
+			SeasonalFraction(seas) := DATA {'1' : 0.16666666666, '2': 0.33333333333, '3' : 0.16666666666, '4' : 0.33333333333};
+		}
+		Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+	}
+	Procedure PostMainInitialization {
+		Body: {
+			pr_WriteIdentifierTranslations;
+			pr_MakeIdentifiersReadOnly;
+			
+			read from file "my_port.txt";
+			!my_port := 8050;
+			dex::api::ListenerPort := nh::my_port;
+			dex::api::StartAPIService;
+		}
+		Comment: {
+			"Add initialization statements here that require that the libraries are already initialized properly,
+			or add statements that require the Data Management module to be initialized."
+		}
+	}
+	Procedure NEMS_Monitor {
+		Body: {
+			EnterNEMSMonitor := "I'm Alive! AIMMS entered NEMS_Monitor. Model Year, Cycle, or Iteration info not yet known. AIMMS has not yet read monitor.in.txt or GDS";
+			put h2StatusFile;
+			put EnterNEMSMonitor;
+			putclose;
+			
+			MainInitialization;
+			
+			Read_Runtime_Parameters;
+			
+			!CountSleep := 0;
+			! count sleep/wake cycles while waiting for direction from nems via sAction in the message file, monitor.in.txt
+			!           while ( CountSleep <= 2000 ) do
+			              if fileexists(sMessageInFile) then
+			              ! read sAction, current model year, and current iteration from sMessageInFile
+			                sAction:=" ";
+			                read from file sMessageInFile in merge mode;
+			              endif;
+			!              else
+			!                put "the NEMS message file not found, CountSleep=",CountSleep," \n ";
+			!              endif;
+			!              if sAction = "MainExecution" then
+			!                sAction:="executing";    ! Action message to tell NEMS I'm executing
+			!                write sAction to file NEMSMessageOutFile in replace mode;  
+			!                dialogProgress(""); ! remove progress dialog
+			!                sStatusMessage := formatstring("Invoking MainExecution for %s",ncntrl_curcalyr('1')) + 
+			!                                  formatstring(", iteration %s",ncntrl_curitr('1')) +
+			!                                  formatstring(", reporting loop indicator=%s",ncntrl_ncrl('1'));
+			!                put sStatusMessage;
+			!
+			!                MiddleNEMSMonitor := "I'm Alive! AIMMS in NEMS_Monitor and has read monitor.in.txt - " +
+			!		formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			!		formatstring("%i, ",ncntrl_curcalyr(1));
+			!		put h2StatusFile;
+			!		put MiddleNEMSMonitor;
+			!		putclose;
+			
+			!                ReadGlobalDataFromNEMS; ! read globaldatatoAIMMS_yyyy_ii.txt where yyyy is ncntrl_curcalyr(1) and ii is ncntrl_curitr(1)
+			
+					MainExecution;
+			                sAction:=formatstring("Completed %s,",ncntrl_curcalyr('1')) + 
+			                         formatstring("iteration %s ",ncntrl_curitr('1')) ;    ! Action message to tell NEMS I'v completed this year, iteration
+			                write sAction to file NEMSMessageOutFile in replace mode;  
+			!                CountSleep:=0;   
+			!                sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep/2)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			!                put sStatusMessage;
+			!                Delay(1);    ! give nems a chance to pick up status and create new monitor.in.txt file                
+			!              elseif sAction = "Quit" then ! NEMS says to exit aimms
+			!                CountSleep:=2000;
+			!              else
+			!                sStatusMessage := "Monitoring NEMS message file("+sMessageInFile+") for "+formatstring("%s",CountSleep)+" seconds. Hit Ctrl+Shift+S to Stop this monitoring\n";
+			!                Delay(0.5);                  
+			!              endif;
+			!              dialogProgress(sStatusMessage,round(100*CountSleep/2000));
+			!              CountSleep += 1;
+			!           endwhile;
+			!           if CountSleep>=2001 then
+			!             put "Quit directive found in monitor.in.txt. Exiting AIMMS";
+			!           else
+			!             put "Wait time exceeded. Exiting Aimms";
+			!           endif;
+			
+			                ExitNEMSMonitor := "I'm Alive! AIMMS is preparing to exit NEMS_Monitor and begin Main_Termination  - "  + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+					formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+					formatstring("%i, ",ncntrl_curcalyr(1));
+					put h2StatusFile;
+					put ExitNEMSMonitor;
+					putclose;
+			
+			           ExitAIMMS_HMM_NemsMonitor := "Running ExitAIMMS in HMM's NEMS Monitor";
+				   write ExitAIMMS_HMM_NemsMonitor to file "../../hmm/AIMMSExit.txt";
+			           exitAimms; ! causes MainTermination to run and for aimms to exit. MainTermination sends message "Exited" back to nems.
+		}
+	}
+	Procedure MainExecution {
+		Body: {
+			EnterMainExecution := "I'm Alive! AIMMS entered MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			
+			put h2StatusFile;
+			put EnterMainExecution;
+			putclose;
+			
+			! Establish current model year based on the information in monitor.in.txt
+			CurrentModelYear := StringToElement(NEMSYears_, FormatString("%n", NCNTRL_CURCALYR(1)));
+			!CurrentModelYear := '2034';
+			
+			AIMMS_Standalone_Switch := 0;
+			PlanningPeriods_ := DATA {1,2,3};
+			FirstPlanningPeriod := '1';
+			SecondPlanningPeriod := '2';
+			ThirdPlanningPeriod := '3';
+			SecondAndThirdPlanningPeriods := DATA {2,3};
+			
+			! NEMS writes data for the full projection period during HMM's first model year that HMM reads in.
+			! HMM saves this data to case file, and loads that data each time HMM runs.
+			! In years greater than the first model year, NEMS only writes data for the current model year, data for future years is populated by loading the GDS case file from the previous year.
+			!if CurrentModelYear > FirstModelYear then
+			!	loadGDS("restart");
+			!endif;
+			
+			! Read GDS data
+			!ReadGlobalDataFromNEMS;
+			Add_Parquet_Mappings;
+			ReadParquetGDSData;
+			
+			
+			! Save GDS updates to startup case
+			!saveGDS("restart");
+			
+			if CurrentModelYear >= FirstModelYear then 
+			
+				Initialize_HMM_Parameters;
+			
+				! If it is the first model year, run the FirstYearInitialiation procedures to initialize history, capacities, input costs, etc.
+				if (CurrentModelYear = FirstModelYear) then
+					Process_GDS_Parameters;
+					Calculate_Financial_Parameters;
+					if (ncntrl_curitr('1') = 1) then
+						FirstYearInitialization;
+					endif;
+				else !Otherwise, load the data from the previously saved case file
+					!LoadData("hmm_only");
+					PlanningPeriods_ := DATA {1,2,3};
+					FirstPlanningPeriod := '1';
+					SecondPlanningPeriod := '2';
+					ThirdPlanningPeriod := '3';
+					SecondAndThirdPlanningPeriods := DATA {2,3};
+					!Overwrite case file for NEMS debugging
+					!LoadData("HMMIterationDebug_Cycle4_2050_1");
+				endif;
+			
+				! If in greater than the FirstModelYear and it is not the report loop, run HMM procedure and write the NEMS parameters
+				if (CurrentModelYear >= FirstModelYear) and (ncntrl_ncrl(1) <> 1) then
+					Process_GDS_Parameters;
+					Calculate_Financial_Parameters;
+					HMM;
+					Write_to_NEMS;		! Assign values to NEMS transfer parameters
+				endif;
+			
+				! If less than the LastModelYear, then save the HMM identifiers to a case file so they can be loaded back up next iteration.
+				if (CurrentModelYear < LastModelYear) then
+					!saveHMM("hmm_only");
+				else !At the end of the cycle, in the final model year, save AllIdentifiers in a case file.
+					SaveAll( FormatString("cycle%i", CYCLEINFO_CURIRUN(1)));
+				endif;
+			
+				if SaveEachIterationSwitch = 1 then
+					SaveALL(FormatString("HMMIterationDebug_Cycle%i_%e_%i", CYCLEINFO_CURIRUN(1), CurrentModelYear,ncntrl_curitr(1)));
+				endif;
+			
+			endif;
+			
+			! Send GDS Data back to NEMS (Happens every year, regardless of if CurrentModelYear is Greater Than or Equal to FirstModelYear
+			Write_To_NEMS;
+			SendGlobalDataToNEMS;
+			
+			ExitMainExecution := "I'm Alive! AIMMS exiting MainExecution - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			
+			write CurrentModelYear to file "../../hmm/done.txt";
+			
+			put h2StatusFile;
+			put ExitMainExecution;
+			putclose;
+		}
+	}
+	Procedure MainExecution_Standalone {
+		Body: {
+			!empty AllIdentifiers;
+			!Empty AllIdentifiers;
+			block where
+				case_compression_level := 0,
+				Global_error_handler := "HMM_Error_Handler",
+				initial_column_reservation := 10000000,
+				warning_comparing_elements_different_sets := off,
+				warning_duplicate_column := off,
+				warning_duplicate_row := off,
+				advanced_start := 1,
+				"CPLEX 22.1".LP_method := 6,
+				"CPLEX 22.1".updates_batch_size := 10000000,
+				"CPLEX 22.1".barrier_crossover_algorithm := 2,
+				"CPLEX 22.1".global_thread_limit := 32,
+				"CPLEX 22.1".parallel_mode := 1,
+				"CPLEX 22.1".barrier_display := 2,
+				"CPLEX 22.1".feasibility := 1e-08,
+				"CPLEX 22.1".optimality := 0.0001,
+				Number_1000_separator := 3,
+				Number_decimal_separator := 2;
+			empty nems_hmm;
+			AIMMS_Standalone_Switch := 1;
+			ZTCCOSTM := 1.0;
+			MainInitialization;
+			CurrentModelYear := '2022';
+			
+			Read_GDS_Initial;
+			
+			repeat
+				Initialize_HMM_Parameters;
+				Process_GDS_Parameters;
+				Calculate_Financial_Parameters;
+			
+				if (CurrentModelYear = FirstModelYear) then
+				FirstYearInitialization;
+				endif;
+				HMM;
+				break when (CurrentModelYear = LastModelYear);
+				CurrentModelYear += 1;
+			
+			endrepeat;
+			
+			! Fills parameter `Results~ with profiler measurements for which gross time is larger than 0.5 seconds
+			ProfilerCollectAllData(Results, GrossTimeThreshold: 0.5);
+			endblock;
+		}
+	}
+	Procedure FirstYearInitialization {
+		Body: {
+			Read_Input_Data;
+			
+			! Adjust capital costs for debug purposes.
+			
+			if LowerElectrolyzerCapitalSwitch = 1 then
+				base_PUCCostElectrolyzer(regNERC, prodTech) := base_PUCCostElectrolyzer(regNERC, prodTech) * ElectrolyzerCostFactorDebug;
+			endif;
+			
+			Convert_Input_Units;
+			Initialize_Capacities_From_History;
+			Initialize_Capital_Costs;
+			Calculate_45Q_Eligiblity;
+			
+			Impute_Historical_Consumption;
+			Impute_Historical_Prices;
+			
+			if (ZTCCOSTM > 0 and ZTCCOSTM < 1) then
+				read from file ReferenceCapitalCostFile;
+			endif;
+		}
+		Comment: "Data processing and I/0 that only need to happen in the first model year. Future model years will retrieve this value by loading the AIMMS case file.";
+	}
+	Procedure HMM {
+		Body: {
+			Process_Capacities;
+			Process_Technology_Costs;
+			Process_FuelPrices_And_Credits;
+			Process_Demands_and_Quantities;
+			Optimize;
+			ExtractModelResults;
+			Create_UI_Parameters;
+			Write_To_NEMS;
+			if ExtraDebugSwitch = 1 then
+			!	WriteDebugInfo;
+			endif;
+			!SaveHMMCaseALL();
+		}
+	}
+	Procedure PreMainTermination {
+		Body: {
+			return DataManagementExit();
+		}
+		Comment: {
+			"Add termination statements here that require all libraries to be still alive.
+			Return 1 if you allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence."
+		}
+	}
+	Procedure MainTermination {
+		Body: {
+			EnterMainTermination := "I'm Alive! AIMMS Entering MainTermination - " + FormatString("Cycle %i, ", CYCLEINFO_CURIRUN(1)) +
+			formatstring("iteration %>02i, ",ncntrl_curitr(1)) +
+			formatstring("%i, ",ncntrl_curcalyr(1));
+			
+			put h2StatusFile;
+			put EnterMainTermination;
+			putclose;
+			
+			if SaveEachIterationSwitch = 1 then
+				SaveProfilerResults;
+			endif;
+			sAction:="Exited";    ! Action message for NEMS
+			write sAction to file NEMSMessageOutFile in replace mode;  
+			return 1;
+		}
+		Comment: {
+			"Add termination statements here that do not require all libraries to be still alive.
+			Return 1 to allow the termination sequence to continue.
+			Return 0 if you want to cancel the termination sequence.
+			It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1."
+		}
+	}
+	ExternalProcedure CSVExport {
+		Arguments: (param,location);
+		DllName: "CSVExport64.dll";
+		BodyCall: {
+			CSVExport(
+				scalar string : param,
+				scalar string : location
+				)
+		}
+		ElementParameter param {
+			Range: AllIdentifiers;
+			Property: Input;
+		}
+		StringParameter location {
+			Default: ".";
+			Property: Optional;
+		}
+	}
+}

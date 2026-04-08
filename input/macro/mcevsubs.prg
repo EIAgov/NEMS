@@ -821,19 +821,20 @@ ENDSUB
 '# ==========================================
 SUBROUTINE quarterly
 '# ==========================================
-
+'-----------------------note: dates updated 20251019----------------------------------------------
 
 pageselect quarterly
 
 ' DATES
 %start_q 	= "1970q1" 'first quarter of data
 %end_q 		= "2050q4" 'last quarter of the projection period 
-%start_fcst_q 	= "2025q1" 'first quarter of the projection period
-%end_data_q 	= "2024q4" 'last quarter before start of projection period
+%start_fcst_q 	= "2026q1" 'first quarter of the projection period
+%end_data_q 	= "2025q4" 'last quarter before start of projection period
 
 
 ' IHS variables
 
+'smpl "1970q1" "2050q4"
 smpl %start_q %end_q
 
 genr rmff = {%wfpathpwd}eviewsdb::rmff_1
@@ -847,23 +848,29 @@ for %var gdpr ypdr consr ifnrer cpi
       genr dlog_{%var} = log({%var}) - log({%var}(-4)) ' 4 quarter growth
 next
 
-
 'forecast
+'smpl "2025q1" "2050q4"
 smpl %start_fcst_q %end_q
 
 group rhs_vars dlog_np16a dlog_gdpr dlog_ypdr dlog_consr dlog_ifnrer rmcorpaaa ruc dlog_cpi
+%rhsvar = "dlog_np16a dlog_gdpr dlog_ypdr dlog_consr dlog_ifnrer rmcorpaaa ruc dlog_cpi" 'new
+
 _varmod3.scenario "Scenario 1" 
-_varmod3.exclude rhs_vars 
-_varmod3.override rhs_vars
-solve _varmod3
+_varmod3.exclude {%rhsvar} 
+_varmod3.solveopt(d=d, s=d, i=a) ' default setting, but good to specify.
+
+solve _varmod3 
 
 'US comfloor 4q growth rates
-'genr us = us_raw/@elem(us_raw, %end_data_q)*100
+'genr us = us_raw/@elem(us_raw, "2024q4")*100
 
+'smpl "1970q1" "2024q4"
 smpl %start_q %end_data_q
+'genr us_index = us_raw/@elem(us_raw, "2024q4")*100
 genr us_index = us_raw/@elem(us_raw, %end_data_q)*100
 genr total_us_fcst = us_index
 
+'smpl "2025q1" "2050q4"
 smpl %start_fcst_q %end_q
 genr total_us_fcst = total_us_fcst(-4)*(1 + dlog_us_1) 'apply growth rates from forecast
 
@@ -878,15 +885,20 @@ genr total_us_fcst = total_us_fcst(-4)*(1 + dlog_us_1) 'apply growth rates from 
 ' DISAGGREGATED FORECASTS
 for %cd neng matl enc wnc satl esc wsc mtn pac
         for %cft amuse dorm pub health hotel mfg miscnr office auto rel educ stores ware
-			smpl %start_q %end_data_q
-                genr {%cd}_{%cft}_fcst = {%cd}_{%cft}_index 'historical data
+			'smpl "1970q1" "2024q4"
+                smpl %start_q %end_data_q
+			genr {%cd}_{%cft}_fcst = {%cd}_{%cft}_index 'historical data
+                'smpl "2025q1" "2050q4"
                 smpl %start_fcst_q %end_q
-                genr {%cd}_{%cft}_fcst = total_us_fcst * {%cd}_{%cft}_int 'apply forecasted shares by region and type
+			genr {%cd}_{%cft}_fcst = total_us_fcst * {%cd}_{%cft}_int 'apply forecasted shares by region and type
         next
 next
 
 ' COMBINED BUILDING TYPES
 
+
+
+'smpl "1970q1" "2050q4"
 smpl %start_q %end_q
 for %cd neng matl enc wnc satl esc wsc mtn pac 
         genr {%cd}_amuse_rel_fcst = {%cd}_amuse_fcst + {%cd}_rel_fcst
@@ -908,8 +920,9 @@ next
 
 ' AGGREGATE BY BUILDING TYPE
 for %cft amuse dorm pub health hotel mfg miscnr office auto rel educ stores ware amuse_rel hotel_dorm pub_miscnr
-	   smpl %start_q %end_q
-        genr total_{%cft}_fcst = 0
+	  ' smpl "1970q1" "2050q4"
+        smpl %start_q %end_q
+	   genr total_{%cft}_fcst = 0
         for %cd neng matl enc wnc satl esc wsc mtn pac 
                 genr total_{%cft}_fcst = total_{%cft}_fcst + {%cd}_{%cft}_fcst 'levels
         next
@@ -990,6 +1003,16 @@ ENDSUB
 '# ==========================================
 SUBROUTINE REGIONAL
 '# ==========================================
+' code added 20251019
+' ensures untitled is selected
+'  inserts code preceding regional.prg call from mcevode.txt
+
+pageselect untitled ' added
+
+smpl 1970:1 2050:4 'added
+scalar mamlastyr = 2050 ' added
+scalar ogtechmode= 1 'added
+scalar wwopmode=2 ' added
 
 
 %mamlastyr = @str(mamlastyr)

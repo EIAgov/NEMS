@@ -1,3 +1,4 @@
+! -*- f90 -*-
 !  $Header: N:/default/includes/RCS/efdin,v 1.2 2003/08/22 17:49:33 RSC Exp $
 !
 !  Electricity Fuel Dispatch Module Input Common Block

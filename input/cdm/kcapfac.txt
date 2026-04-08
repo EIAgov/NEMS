@@ -2,19 +2,14 @@ FILE NAME:      KCAPFAC
 
 DATE MODIFIED:  July 22, 2013
 
-CONTACT:        Kevin Jarzomski
-                NEMS Commercial Buildings Analyst
-                Kevin.Jarzomski@eia.gov
-                (202)586-3208
-
 USED BY:        Technology Choice subroutine of the National Energy Modeling System
                 (NEMS) Commercial Demand Module (CDM)
 
 DEFINITION:     Capacity factor
 
                 Equipment capacity factor to meet service s in Census Division r
-		in building type b.  The capacity factor is the ratio of actual
-		annual equipment output to output if equipment were run 100% of
+				in building type b.  The capacity factor is the ratio of actual
+				annual equipment output to output if equipment were run 100% of
                 the time at full capacity.
 
 UNITS:          unitless
@@ -38,9 +33,9 @@ ORGANIZATION OF DATA:
 
                 Each column represents a Service, in the following order:  Space
                 Heating, Space Cooling, Water Heating, Ventilation, Cooking, Lighting,
-                Refrigeration, Office Equipment - PCs, Office Equipment - NonPCs, Other.
+                Refrigeration, Data Center Servers, Computers and Office Equipment, Other.
 
-                Note that Office Equipment - PCs, Office Equipment - NonPCs, and Other
+                Note that Data Center Servers, Computers and Office Equipment, and Other
                 capacity factors are not currently utilized by NEMS (and so are defaulted to 1)
 
 SOURCES:
@@ -48,6 +43,11 @@ SOURCES:
                 "Commercial Building Capacity Factors for Use in the Commercial Demand Module,"
                   developed by Science Applications International Corporation (SAIC) for the
                   U.S. Energy Information Administration, June 2013.
+
+
+
+
+
 
 
 

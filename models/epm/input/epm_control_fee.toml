@@ -9,8 +9,10 @@
 dbugepm = 1
 
 # The following is a flag to signal whether nominal dollars are
-# being used for variable emtax or 87 dollars are being used
-# For nominal dollars use taxflag = 1
+# being used for variable emtax or 1987 dollars are being used
+# nominal_flag = 1 for nominal dollars
+# nominal_flag = 0 for 1987 dollars
+# For nominal dollars use tax_flag = 1
 nominal_flag = 0
 
 tax_flag = 1

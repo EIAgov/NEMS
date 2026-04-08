@@ -1,4 +1,0 @@
-Restart A  RESTART.unf
-Format A   1  Unformatted
-Restart B  RESTART.IN
-Format B   1  Unformatted

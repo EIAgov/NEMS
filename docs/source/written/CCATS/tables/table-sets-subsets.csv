@@ -1,0 +1,13 @@
+Set,Subset,Element,CCATS Name,Short Description,Detailed Description
+:math:`\mathcal{A}`,.,:math:`a`,:code:`s_arcs`,Arcs or connections between nodes,:ref:`Details<s_arcs>`
+.,:math:`\mathcal{A}^{in}`,:math:`a`,:code:`arcs_in`,Arcs transporting flow into a node,:ref:`Details<arcs_in>`
+.,:math:`\mathcal{A}^{out}`,:math:`a`,:code:`arcs_out`,Arcs transporting flow away from a node,:ref:`Details<arcs_out>`
+:math:`\mathcal{D}`,.,:math:`d`,:code:`s_transport_options`,Pipeline segment options,:ref:`Details<s_transport_options>`
+:math:`\mathcal{N}`,.,:math:`n`,:code:`s_nodes`,Nodes,:ref:`Details<s_nodes>`
+.,:math:`\mathcal{N}^C`,:math:`n`,:code:`s_nodes_supply`,Capture nodes,:ref:`Details<s_nodes_supply>`
+.,:math:`\mathcal{N}^{TS}`,:math:`n`,:code:`s_nodes_transshipment`,Transport (transshipment) nodes,:ref:`Details<s_nodes_transshipment>`
+.,:math:`\mathcal{N}^S`,:math:`n`,:code:`s_nodes_demand`,Saline storage or EOR nodes,:ref:`Details<s_nodes_demand>`
+.,""":math:`\mathcal{N}^{S,saline}`""",:math:`n`,:code:`s_nodes_demand_storage`,Saline storage nodes,:ref:`Details<s_nodes_demand_storage>`
+.,""":math:`\mathcal{N}^{S,EOR}`""",:math:`n`,:code:`s_nodes_demand_eor`,EOR nodes,:ref:`Details<s_nodes_demand_eor>`
+:math:`\mathcal{P}`,.,:math:`p`,:code:`s_policy_options`,"""CO₂ Policies (for example, 45Q)""",:ref:`Details<s_policy_options>`
+:math:`\mathcal{T}`,.,:math:`t`,:code:`s_time`,Time,:ref:`Details<s_time>`

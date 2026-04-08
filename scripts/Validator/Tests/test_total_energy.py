@@ -1,11 +1,14 @@
 from DataModel.Model import Model
 import pandas as pd
 import numpy as np
+import os
 
 from Controller.StatusHelper import StatusHelper
+from validate import get_lastyr_entry
 
 start_year = 2023
-end_year = 2050
+scedyear = get_lastyr_entry()
+end_year = scedyear
 DISCREPANCY_TOLERANCE = 5
 num_years = end_year - start_year + 1
 

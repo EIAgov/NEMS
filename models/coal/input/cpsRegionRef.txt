@@ -1,602 +1,601 @@
-COMPOSITE TABLE:
-Sreg                CSupplyRegionName
-1APN                "Northern Appalachia"
-2APR                "Rest of Appalachia"
-3INR                "Interior"
-4LGN                "Lignite"
-5PRB                "Powder River Basin"
-6WSR                "Western Region"
-;
-COMPOSITE TABLE:
-Sreg                ASReg               Map_SReg_ASReg
-1APN                1                   1
-2APR                1                   1
-3INR                2                   1
-4LGN                2                   1
-5PRB                3                   1
-6WSR                3                   1
-;
-COMPOSITE TABLE:
-ASReg               AggSupReg_Name
-1                   "Appalachia"
-2                   "Interior"
-3                   "West"
-;
-COMPOSITE TABLE:
-Sreg                EW                  Map_SReg_EW
-1APN                1                   1
-2APR                1                   1
-3INR                1                   1
-4LGN                1                   1
-5PRB                2                   1
-6WSR                2                   1
-;
-COMPOSITE TABLE:
-NSREGN              Map_APP
-1                   1
-2                   1
-3                   0
-4                   0
-5                   0
-6                   0
-;
-COMPOSITE TABLE:
-NSREGN              Map_IntLig
-1                   0
-2                   0
-3                   1
-4                   1
-5                   0
-6                   0
-;
-COMPOSITE TABLE:
-NSREGN              Map_Wst
-1                   0
-2                   0
-3                   0
-4                   0
-5                   1
-6                   1
-;
-COMPOSITE TABLE:
-NSREGN              Map_Est_Miss
-1                   1
-2                   1
-3                   1
-4                   0
-5                   0
-6                   0
-;
-COMPOSITE TABLE:
-NSREGN              Map_Wst_Miss
-1                   0
-2                   0
-3                   0
-4                   1
-5                   1
-6                   1
-;
+    COMPOSITE TABLE:
+cl::Sreg                cl::CSupplyRegionName
+    1APN                    "Northern Appalachia"
+    2APR                    "Rest of Appalachia"
+    3INR                    "Interior"
+    4LGN                    "Lignite"
+    5PRB                    "Powder River Basin"
+    6WSR                    "Western Region"
+    ;
+    COMPOSITE TABLE:
+cl::Sreg                cl::ASReg               cl::Map_SReg_ASReg
+    1APN                    1                       1
+    2APR                    1                       1
+    3INR                    2                       1
+    4LGN                    2                       1
+    5PRB                    3                       1
+    6WSR                    3                       1
+    ;
+    COMPOSITE TABLE:
+cl::ASReg               cl::AggSupReg_Name
+    1                       "Appalachia"
+    2                       "Interior"
+    3                       "West"
+    ;
+    COMPOSITE TABLE:
+cl::Sreg                cl::EW                  cl::Map_SReg_EW
+    1APN                    1                       1
+    2APR                    1                       1
+    3INR                    1                       1
+    4LGN                    1                       1
+    5PRB                    2                       1
+    6WSR                    2                       1
+    ;
+    COMPOSITE TABLE:
+cl::NSREGN              cl::Map_APP
+    1                       1
+    2                       1
+    3                       0
+    4                       0
+    5                       0
+    6                       0
+    ;
+    COMPOSITE TABLE:
+cl::NSREGN              cl::Map_IntLig
+    1                       0
+    2                       0
+    3                       1
+    4                       1
+    5                       0
+    6                       0
+    ;
+    COMPOSITE TABLE:
+cl::NSREGN              cl::Map_Wst
+    1                       0
+    2                       0
+    3                       0
+    4                       0
+    5                       1
+    6                       1
+    ;
+    COMPOSITE TABLE:
+cl::NSREGN              cl::Map_Est_Miss
+    1                       1
+    2                       1
+    3                       1
+    4                       0
+    5                       0
+    6                       0
+    ;
+    COMPOSITE TABLE:
+cl::NSREGN              cl::Map_Wst_Miss
+    1                       0
+    2                       0
+    3                       0
+    4                       1
+    5                       1
+    6                       1
+    ;
 
-Map_NAPP := 1;
-Mtyp_Surf := 1;
-Mtyp_Deep := 2;
-
-
-COMPOSITE TABLE:
-SReg                M14                 Map_SReg_M6
-1APN                1                   1
-2APR                2                   1
-3INR                3                   1
-4LGN                4                   1
-5PRB                5                   1
-6WSR                6                   1
-;
-COMPOSITE TABLE:
-Rank                M4                  Map_Rank_M4
-1B                  1                   1
-2S                  2                   1
-3L                  3                   1
-5G                  3                   1
-4P                  4                   1
-;
-COMPOSITE TABLE:
-Mtyp                M3                  Map_Mtyp_M3
-1S                  1                   1
-2D                  2                   1
-;
-COMPOSITE TABLE:
-Sulf                M3                  Map_Sulf_M3
-1A                  1                   1
-;
-COMPOSITE TABLE:
-SReg                Miners
-1APN                9735
-2APR                16409
-3INR                6061
-4LGN                2366
-5PRB                4207
-6WSR                5096
-;
-COMPOSITE TABLE:
-yr                  MC_WPI10_MULTIPLIER
-1990                1
-1991                1
-1992                1
-1993                1
-1994                1
-1995                1
-1996                1
-1997                1
-1998                1
-1999                1
-2000                1
-2001                1
-2002                1
-2003                1
-2004                1
-2005                1
-2006                1
-2007                1
-2008                1
-2009                1
-2010                1
-2011                1
-2012                1
-2013                1
-2014                1
-2015                1
-2016                1
-2017                1
-2018                1
-2019                1
-2020                1
-2021                1
-2022                1
-2023                1
-2024                1
-2025                1
-2026                1
-2027                1
-2028                1
-2029                1
-2030                1
-2031                1
-2032                1
-2033                1
-2034                1
-2035                1
-2036                1
-2037                1
-2038                1
-2039                1
-2040                1
-2041                1
-2042                1
-2043                1
-2044                1
-2045                1
-2046                1
-2047                1
-2048                1
-2049                1
-2050                1
-;
-COMPOSITE TABLE:
-nUS                 Map_intl_mxnci
-NI                  15
-NW                  16
-CL                  17
-VZ                  18
-PO                  19
-RE                  20
-RA                  21
-SF                  22
-IN                  23
-HI                  24
-AU                  25
-VT                  26
-;
-COMPOSITE TABLE:
-DReg                Subsec              Sreg                Sulf                Mtyp                Rank                CoalGroupFlag       CoalGroupOrd        SCurveEcho
-01NE                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-05GF                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-06OH                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-08KT                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-09AM                R1                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-03S1                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-05GF                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-07EN                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                R1                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                R1                  3INR                1A                  1S                  1B                  -1                  1                   9
-01NE                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-05GF                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-06OH                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-08KT                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                R1                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-05GF                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-07EN                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-08KT                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                R1                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                R1                  3INR                1A                  2D                  1B                  -1                  1                   8
-08KT                R1                  3INR                1A                  2D                  1B                  -1                  1                   8
-01NE                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-05GF                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-06OH                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-08KT                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-09AM                R2                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-03S1                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-05GF                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-07EN                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                R2                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                R2                  3INR                1A                  1S                  1B                  -1                  1                   9
-01NE                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-05GF                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-06OH                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-08KT                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                R2                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-05GF                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-07EN                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-08KT                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                R2                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                R2                  3INR                1A                  2D                  1B                  -1                  1                   8
-08KT                R2                  3INR                1A                  2D                  1B                  -1                  1                   8
-01NE                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-05GF                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-06OH                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-08KT                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-09AM                I1                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-03S1                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-05GF                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-07EN                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                I1                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                I1                  3INR                1A                  1S                  1B                  -1                  1                   9
-08KT                I1                  3INR                1A                  1S                  1B                  -1                  1                   9
-01NE                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-05GF                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-06OH                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-08KT                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                I1                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-05GF                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-07EN                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-08KT                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                I1                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                I1                  3INR                1A                  2D                  1B                  -1                  1                   8
-08KT                I1                  3INR                1A                  2D                  1B                  -1                  1                   8
-01NE                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-05GF                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-06OH                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-08KT                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-09AM                I2                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-03S1                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-05GF                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-07EN                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                I2                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                I2                  3INR                1A                  1S                  1B                  -1                  1                   9
-08KT                I2                  3INR                1A                  1S                  1B                  -1                  1                   9
-01NE                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-05GF                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-06OH                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-08KT                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                I2                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-05GF                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-07EN                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-08KT                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                I2                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                I2                  3INR                1A                  2D                  1B                  -1                  1                   8
-08KT                I2                  3INR                1A                  2D                  1B                  -1                  1                   8
-01NE                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-05GF                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-06OH                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-08KT                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-09AM                I3                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-03S1                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-05GF                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-07EN                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                I3                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                I3                  3INR                1A                  1S                  1B                  -1                  1                   9
-08KT                I3                  3INR                1A                  1S                  1B                  -1                  1                   9
-01NE                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-05GF                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-06OH                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-08KT                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                I3                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-05GF                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-07EN                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-08KT                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                I3                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                I3                  3INR                1A                  2D                  1B                  -1                  1                   8
-08KT                I3                  3INR                1A                  2D                  1B                  -1                  1                   8
-03S1                C1                  1APN                1A                  2D                  4P                  -1                  1                   4
-06OH                C1                  1APN                1A                  2D                  4P                  -1                  1                   4
-07EN                C1                  1APN                1A                  2D                  4P                  -1                  1                   4
-09AM                C1                  1APN                1A                  2D                  4P                  -1                  1                   4
-02YP                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-03S1                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-04S2                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-06OH                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-07EN                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-09AM                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-03S1                C2                  1APN                1A                  2D                  4P                  -1                  1                   4
-06OH                C2                  1APN                1A                  2D                  4P                  -1                  1                   4
-07EN                C2                  1APN                1A                  2D                  4P                  -1                  1                   4
-09AM                C2                  1APN                1A                  2D                  4P                  -1                  1                   4
-02YP                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-03S1                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-04S2                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-06OH                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-07EN                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-09AM                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-01NE                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-05GF                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-06OH                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-08KT                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-09AM                L1                  1APN                1A                  1S                  1B                  -1                  1                   1
-02YP                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-03S1                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-05GF                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-07EN                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-08KT                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                L1                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                L1                  3INR                1A                  1S                  1B                  -1                  1                   9
-08KT                L1                  3INR                1A                  1S                  1B                  -1                  1                   9
-01NE                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-05GF                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-06OH                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-08KT                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                L1                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-05GF                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-07EN                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-08KT                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                L1                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                L1                  3INR                1A                  2D                  1B                  -1                  1                   8
-08KT                L1                  3INR                1A                  2D                  1B                  -1                  1                   8
-03S1                X1                  1APN                1A                  2D                  4P                  -1                  1                   4
-04S2                X1                  1APN                1A                  2D                  4P                  -1                  1                   4
-03S1                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-04S2                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-09AM                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-12WS                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-12WS                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-12WS                X3                  2APR                1A                  2D                  4P                  -1                  1                   7
-02YP                X4                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                X4                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                X4                  1APN                1A                  1S                  1B                  -1                  1                   1
-07EN                X4                  1APN                1A                  1S                  1B                  -1                  1                   1
-03S1                X4                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                X4                  2APR                1A                  1S                  1B                  -1                  1                   5
-02YP                X4                  3INR                1A                  1S                  1B                  -1                  1                   9
-03S1                X4                  3INR                1A                  1S                  1B                  -1                  1                   9
-04S2                X4                  3INR                1A                  1S                  1B                  -1                  1                   9
-04S2                X4                  6WSR                1A                  1S                  1B                  -1                  1                   14
-07EN                X4                  6WSR                1A                  1S                  1B                  -1                  1                   14
-02YP                X4                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                X4                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                X4                  1APN                1A                  2D                  1B                  -1                  1                   2
-07EN                X4                  1APN                1A                  2D                  1B                  -1                  1                   2
-03S1                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-03S1                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-12WS                X5                  1APN                1A                  1S                  1B                  -1                  1                   1
-12WS                X5                  2APR                1A                  1S                  1B                  -1                  1                   5
-09AM                X5                  3INR                1A                  1S                  1B                  -1                  1                   9
-12WS                X5                  3INR                1A                  1S                  1B                  -1                  1                   9
-12WS                X5                  5PRB                1A                  1S                  2S                  -1                  1                   11
-09AM                X5                  6WSR                1A                  1S                  1B                  -1                  1                   14
-12WS                X5                  6WSR                1A                  1S                  1B                  -1                  1                   14
-12WS                X5                  6WSR                1A                  1S                  2S                  -1                  1                   13
-12WS                X5                  1APN                1A                  2D                  1B                  -1                  1                   2
-12WS                X5                  2APR                1A                  2D                  1B                  -1                  1                   6
-12WS                X5                  2APR                1A                  1S                  1B                  -1                  1                   5
-16PC                X6                  5PRB                1A                  1S                  2S                  -1                  1                   11
-16PC                X6                  6WSR                1A                  2D                  1B                  -1                  1                   12
-16PC                X6                  6WSR                1A                  1S                  1B                  -1                  1                   14
-10C1                R1                  3INR                1A                  2D                  1B                  -1                  1                   8
-13MT                R1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-14CU                R1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-15ZN                R1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-16PC                R1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-11C2                R2                  3INR                1A                  2D                  1B                  -1                  1                   8
-12WS                R2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-13MT                R2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-15ZN                R2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-16PC                R2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-08KT                C1                  2APR                1A                  2D                  4P                  -1                  1                   7
-14CU                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-15ZN                C2                  2APR                1A                  2D                  4P                  -1                  1                   7
-10C1                I1                  3INR                1A                  2D                  1B                  -1                  1                   8
-11C2                I1                  3INR                1A                  2D                  1B                  -1                  1                   8
-12WS                I1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-13MT                I1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-14CU                I1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-15ZN                I1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-11C2                I2                  3INR                1A                  2D                  1B                  -1                  1                   8
-12WS                I2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-13MT                I2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-15ZN                I2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-16PC                I2                  6WSR                1A                  1S                  1B                  -1                  1                   14
-10C1                I3                  3INR                1A                  2D                  1B                  -1                  1                   8
-12WS                I3                  6WSR                1A                  1S                  1B                  -1                  1                   14
-13MT                I3                  6WSR                1A                  1S                  1B                  -1                  1                   14
-15ZN                I3                  6WSR                1A                  1S                  1B                  -1                  1                   14
-16PC                I3                  6WSR                1A                  1S                  1B                  -1                  1                   14
-10C1                L1                  3INR                1A                  2D                  1B                  -1                  1                   8
-11C2                L1                  3INR                1A                  2D                  1B                  -1                  1                   8
-12WS                L1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-13MT                L1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-14CU                L1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-15ZN                L1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-16PC                L1                  6WSR                1A                  1S                  1B                  -1                  1                   14
-02YP                X1                  1APN                1A                  2D                  4P                  -1                  1                   4
-02YP                X2                  1APN                1A                  2D                  4P                  -1                  1                   4
-02YP                X3                  1APN                1A                  2D                  4P                  -1                  1                   4
-07EN                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-09AM                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-09AM                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-09AM                X3                  2APR                1A                  2D                  4P                  -1                  1                   7
-16PC                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-16PC                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-16PC                X3                  2APR                1A                  2D                  4P                  -1                  1                   7
-02YP                X4                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                X5                  1APN                1A                  2D                  1B                  -1                  1                   2
-02YP                X6                  1APN                1A                  2D                  1B                  -1                  1                   2
-09AM                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                X5                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                X6                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                X5                  1APN                1A                  1S                  1B                  -1                  1                   1
-04S2                X5                  2APR                1A                  1S                  1B                  -1                  1                   5
-04S2                X5                  3INR                1A                  1S                  1B                  -1                  1                   9
-04S2                X5                  6WSR                1A                  1S                  1B                  -1                  1                   14
-04S2                X5                  1APN                1A                  2D                  1B                  -1                  1                   2
-04S2                X5                  2APR                1A                  2D                  1B                  -1                  1                   6
-04S2                X5                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                X4                  1APN                1A                  1S                  1B                  -1                  1                   5
-06OH                X4                  1APN                1A                  2D                  1B                  -1                  1                   6
-06OH                X5                  2APR                1A                  1S                  1B                  -1                  1                   5
-06OH                X5                  2APR                1A                  2D                  1B                  -1                  1                   6
-06OH                X6                  1APN                1A                  1S                  1B                  -1                  1                   5
-06OH                X6                  1APN                1A                  2D                  1B                  -1                  1                   6
-12WS                X4                  1APN                1A                  1S                  1B                  -1                  1                   1
-12WS                X4                  2APR                1A                  1S                  1B                  -1                  1                   5
-12WS                X4                  3INR                1A                  1S                  1B                  -1                  1                   9
-12WS                X4                  5PRB                1A                  1S                  2S                  -1                  1                   11
-12WS                X4                  6WSR                1A                  1S                  1B                  -1                  1                   14
-12WS                X4                  6WSR                1A                  1S                  2S                  -1                  1                   13
-12WS                X4                  1APN                1A                  2D                  1B                  -1                  1                   2
-12WS                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-12WS                X4                  2APR                1A                  2D                  1B                  -1                  1                   6
-09AM                X5                  2APR                1A                  1S                  1B                  -1                  1                   5
-12WS                X6                  1APN                1A                  1S                  1B                  -1                  1                   1
-12WS                X6                  2APR                1A                  1S                  1B                  -1                  1                   5
-12WS                X6                  3INR                1A                  1S                  1B                  -1                  1                   9
-12WS                X6                  5PRB                1A                  1S                  2S                  -1                  1                   11
-12WS                X6                  6WSR                1A                  1S                  1B                  -1                  1                   14
-12WS                X6                  6WSR                1A                  1S                  2S                  -1                  1                   13
-12WS                X6                  1APN                1A                  2D                  1B                  -1                  1                   2
-12WS                X6                  2APR                1A                  2D                  1B                  -1                  1                   6
-16PC                X4                  6WSR                1A                  1S                  1B                  -1                  1                   14
-13MT                R1                  6WSR                1A                  2D                  1B                  -1                  1                   12
-14CU                R1                  6WSR                1A                  2D                  1B                  -1                  1                   12
-15ZN                R1                  6WSR                1A                  2D                  1B                  -1                  1                   12
-16PC                R1                  6WSR                1A                  2D                  1B                  -1                  1                   12
-12WS                R2                  6WSR                1A                  2D                  1B                  -1                  1                   12
-13MT                R2                  6WSR                1A                  2D                  1B                  -1                  1                   12
-15ZN                R2                  6WSR                1A                  2D                  1B                  -1                  1                   12
-16PC                R2                  6WSR                1A                  2D                  1B                  -1                  1                   12
-15ZN                I1                  6WSR                1A                  2D                  1B                  -1                  1                   12
-15ZN                I2                  6WSR                1A                  2D                  1B                  -1                  1                   12
-15ZN                I3                  6WSR                1A                  2D                  1B                  -1                  1                   12
-03S1                X2                  1APN                1A                  2D                  4P                  -1                  1                   4
-04S2                X2                  1APN                1A                  2D                  4P                  -1                  1                   4
-03S1                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-04S2                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-06OH                X1                  2APR                1A                  2D                  4P                  -1                  1                   7
-06OH                X2                  2APR                1A                  2D                  4P                  -1                  1                   7
-10C1                I1                  5PRB                1A                  1S                  2S                  -1                  1                   11
-11C2                I1                  5PRB                1A                  1S                  2S                  -1                  1                   11
-13MT                I1                  5PRB                1A                  1S                  2S                  -1                  1                   11
-14CU                I1                  5PRB                1A                  1S                  2S                  -1                  1                   11
-16PC                I1                  5PRB                1A                  1S                  2S                  -1                  1                   11
-;
+cl::Map_NAPP := 1;
+cl::Mtyp_Surf := 1;
+cl::Mtyp_Deep := 2;
 
 
-
-
-
+    COMPOSITE TABLE:
+cl::SReg                cl::M14                 cl::Map_SReg_M6
+    1APN                    1                       1
+    2APR                    2                       1
+    3INR                    3                       1
+    4LGN                    4                       1
+    5PRB                    5                       1
+    6WSR                    6                       1
+    ;
+    COMPOSITE TABLE:
+cl::Rank                cl::M4                  cl::Map_Rank_M4
+    1B                      1                       1
+    2S                      2                       1
+    3L                      3                       1
+    5G                      3                       1
+    4P                      4                       1
+    ;
+    COMPOSITE TABLE:
+cl::Mtyp                cl::M3                  cl::Map_Mtyp_M3
+    1S                      1                       1
+    2D                      2                       1
+    ;
+    COMPOSITE TABLE:
+cl::Sulf                cl::M3                  cl::Map_Sulf_M3
+    1A                      1                       1
+    ;
+    COMPOSITE TABLE:
+cl::SReg                cl::Miners
+    1APN                    10172
+    2APR                    17636
+    3INR                    5902
+    4LGN                    2106
+    5PRB                    3848
+    6WSR                    4665
+    ;
+    COMPOSITE TABLE:
+cl::yr                  cl::MC_WPI10_MULTIPLIER
+    1990                    1
+    1991                    1
+    1992                    1
+    1993                    1
+    1994                    1
+    1995                    1
+    1996                    1
+    1997                    1
+    1998                    1
+    1999                    1
+    2000                    1
+    2001                    1
+    2002                    1
+    2003                    1
+    2004                    1
+    2005                    1
+    2006                    1
+    2007                    1
+    2008                    1
+    2009                    1
+    2010                    1
+    2011                    1
+    2012                    1
+    2013                    1
+    2014                    1
+    2015                    1
+    2016                    1
+    2017                    1
+    2018                    1
+    2019                    1
+    2020                    1
+    2021                    1
+    2022                    1
+    2023                    1
+    2024                    1
+    2025                    1
+    2026                    1
+    2027                    1
+    2028                    1
+    2029                    1
+    2030                    1
+    2031                    1
+    2032                    1
+    2033                    1
+    2034                    1
+    2035                    1
+    2036                    1
+    2037                    1
+    2038                    1
+    2039                    1
+    2040                    1
+    2041                    1
+    2042                    1
+    2043                    1
+    2044                    1
+    2045                    1
+    2046                    1
+    2047                    1
+    2048                    1
+    2049                    1
+    2050                    1
+    ;
+    COMPOSITE TABLE:
+cl::nUS                 cl::Map_intl_mxnci
+    NI                      15
+    NW                      16
+    CL                      17
+    VZ                      18
+    PO                      19
+    RE                      20
+    RA                      21
+    SF                      22
+    IN                      23
+    HI                      24
+    AU                      25
+    VT                      26
+    ;
+    COMPOSITE TABLE:
+cl::DReg                cl::Subsec              cl::Sreg                cl::Sulf                cl::Mtyp                cl::Rank                cl::CoalGroupFlag       cl::CoalGroupOrd        cl::SCurveEcho
+    01NE                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    05GF                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    06OH                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    08KT                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    09AM                    R1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    03S1                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    05GF                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    07EN                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    R1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    R1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    01NE                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    05GF                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    06OH                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    08KT                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    R1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    05GF                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    08KT                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    R1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    R1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    08KT                    R1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    01NE                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    05GF                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    06OH                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    08KT                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    09AM                    R2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    03S1                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    05GF                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    07EN                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    R2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    R2                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    01NE                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    05GF                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    06OH                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    08KT                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    R2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    05GF                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    08KT                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    R2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    R2                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    08KT                    R2                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    01NE                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    05GF                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    06OH                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    08KT                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    09AM                    I1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    03S1                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    05GF                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    07EN                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    I1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    I1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    08KT                    I1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    01NE                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    05GF                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    06OH                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    08KT                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    I1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    05GF                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    08KT                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    I1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    I1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    08KT                    I1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    01NE                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    05GF                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    06OH                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    08KT                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    09AM                    I2                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    03S1                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    05GF                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    07EN                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    I2                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    I2                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    08KT                    I2                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    01NE                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    05GF                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    06OH                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    08KT                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    I2                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    05GF                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    08KT                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    I2                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    I2                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    08KT                    I2                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    01NE                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    05GF                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    06OH                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    08KT                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    09AM                    I3                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    03S1                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    05GF                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    07EN                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    I3                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    I3                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    08KT                    I3                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    01NE                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    05GF                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    06OH                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    08KT                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    I3                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    05GF                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    08KT                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    I3                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    I3                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    08KT                    I3                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    03S1                    C1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    06OH                    C1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    07EN                    C1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    09AM                    C1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    02YP                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    03S1                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    04S2                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    06OH                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    07EN                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    09AM                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    03S1                    C2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    06OH                    C2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    07EN                    C2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    09AM                    C2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    02YP                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    03S1                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    04S2                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    06OH                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    07EN                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    09AM                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    01NE                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    05GF                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    06OH                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    08KT                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    09AM                    L1                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    02YP                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    03S1                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    05GF                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    07EN                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    08KT                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    L1                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    L1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    08KT                    L1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    01NE                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    05GF                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    06OH                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    08KT                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    L1                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    05GF                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    07EN                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    08KT                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    L1                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    L1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    08KT                    L1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    03S1                    X1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    04S2                    X1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    03S1                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    04S2                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    09AM                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    12WS                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    12WS                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    12WS                    X3                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    02YP                    X4                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    X4                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    X4                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    07EN                    X4                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    03S1                    X4                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    X4                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    02YP                    X4                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    03S1                    X4                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    04S2                    X4                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    04S2                    X4                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    07EN                    X4                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    02YP                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    07EN                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    03S1                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    03S1                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    12WS                    X5                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    12WS                    X5                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    09AM                    X5                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    12WS                    X5                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    12WS                    X5                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    09AM                    X5                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    12WS                    X5                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    12WS                    X5                      6WSR                    1A                      1S                      2S                      -1                      1                       13
+    12WS                    X5                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    12WS                    X5                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    12WS                    X5                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    16PC                    X6                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    16PC                    X6                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    16PC                    X6                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    10C1                    R1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    13MT                    R1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    14CU                    R1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    15ZN                    R1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    16PC                    R1                      6WSR                    1A                      1S                      1S                      -1                      1                       13
+    11C2                    R2                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    12WS                    R2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    13MT                    R2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    15ZN                    R2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    16PC                    R2                      6WSR                    1A                      1S                      1S                      -1                      1                       13
+    08KT                    C1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    14CU                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    15ZN                    C2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    10C1                    I1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    11C2                    I1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    12WS                    I1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    13MT                    I1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    14CU                    I1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    15ZN                    I1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    11C2                    I2                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    12WS                    I2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    13MT                    I2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    15ZN                    I2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    16PC                    I2                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    10C1                    I3                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    12WS                    I3                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    13MT                    I3                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    15ZN                    I3                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    16PC                    I3                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    10C1                    L1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    11C2                    L1                      3INR                    1A                      2D                      1B                      -1                      1                       8
+    12WS                    L1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    13MT                    L1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    14CU                    L1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    15ZN                    L1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    16PC                    L1                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    02YP                    X1                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    02YP                    X2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    02YP                    X3                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    07EN                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    09AM                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    09AM                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    09AM                    X3                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    16PC                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    16PC                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    16PC                    X3                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    02YP                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    X5                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    02YP                    X6                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    09AM                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    X5                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    X6                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    X5                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    04S2                    X5                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    04S2                    X5                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    04S2                    X5                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    04S2                    X5                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    04S2                    X5                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    04S2                    X5                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    X4                      1APN                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    X5                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    X5                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    06OH                    X6                      1APN                    1A                      1S                      1B                      -1                      1                       5
+    06OH                    X6                      1APN                    1A                      2D                      1B                      -1                      1                       6
+    12WS                    X4                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    12WS                    X4                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    12WS                    X4                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    12WS                    X4                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    12WS                    X4                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    12WS                    X4                      6WSR                    1A                      1S                      2S                      -1                      1                       13
+    12WS                    X4                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    12WS                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    12WS                    X4                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    09AM                    X5                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    12WS                    X6                      1APN                    1A                      1S                      1B                      -1                      1                       1
+    12WS                    X6                      2APR                    1A                      1S                      1B                      -1                      1                       5
+    12WS                    X6                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    12WS                    X6                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    12WS                    X6                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    12WS                    X6                      6WSR                    1A                      1S                      2S                      -1                      1                       13
+    12WS                    X6                      1APN                    1A                      2D                      1B                      -1                      1                       2
+    12WS                    X6                      2APR                    1A                      2D                      1B                      -1                      1                       6
+    16PC                    X4                      6WSR                    1A                      1S                      1B                      -1                      1                       14
+    13MT                    R1                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    14CU                    R1                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    15ZN                    R1                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    16PC                    R1                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    12WS                    R2                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    13MT                    R2                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    15ZN                    R2                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    16PC                    R2                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    15ZN                    I1                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    15ZN                    I2                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    15ZN                    I3                      6WSR                    1A                      2D                      1B                      -1                      1                       12
+    03S1                    X2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    04S2                    X2                      1APN                    1A                      2D                      4P                      -1                      1                       4
+    03S1                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    04S2                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    06OH                    X1                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    06OH                    X2                      2APR                    1A                      2D                      4P                      -1                      1                       7
+    10C1                    I1                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    11C2                    I1                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    13MT                    I1                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    14CU                    I1                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    16PC                    I1                      5PRB                    1A                      1S                      2S                      -1                      1                       11
+    07EN                    R1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    07EN                    R2                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    11C2                    R1                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    11C2                    R2                      3INR                    1A                      1S                      1B                      -1                      1                       9
+    ;
 
 
 

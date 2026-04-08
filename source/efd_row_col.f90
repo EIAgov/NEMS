@@ -167,12 +167,10 @@ module efd_row_col
   
   integer io ! unit number for writing efdcoeff_yyyy_itr.txt
   integer write_efd_mps/0/          ! if 1, call routine to write out each efd mps file as captured for aimms
-  logical make_efd_aimms /.false./  ! option to generate the AIMMS LP structural data for arraycode_efd.f, such as the list of coefficient arrays, row/column lists, row types.
-  integer AIMEFDBG                  ! set via runtime option from scedes file. if 0, and make_efd_aimms and false, omit some output in efdcoeff debug file to save time; omit aimms validation files in aimms
+  integer AIMEFDBG                  ! set via runtime option from scedes file. if 0, omit some output in efdcoeff debug file to save time; omit aimms validation files in aimms
   logical USE_AIMEFD_SLNADJ /.true./             ! set during runtime based on collective values of CODEUSAGE of EFD LHS transfer variables found in aimefd.xlsx. it is set to .TRUE. if all are either 'RHS' or 'LHS_done',
                                     ! it is set to .FALSE. if any codeusage value is found to be either 'LHS' and 'LHS_coded'.   if .TRUE., skip FORTRAN EFD post-solution adjustments on EFD output variables.
                                     ! if .FALSE., execute FORTRAN EFD post-solution adjustments on EFD output variables. 
-  integer AIMMKEFD                  ! set via runtime option from scedes file. if 1, set make_efd_aimms to .true.
   logical SKIP_EFDOML /.false./     ! flag to bypass passing fortran caculated EFD coefficients to AIMMS EFD and OML based on all 0 status found in efdarrays_all.txt
   
   external rtovalue ! function to get run-time options
@@ -360,11 +358,11 @@ integer,parameter :: SupplyStates = 49;    ! = UNSTAS for character*2 USTNME(1:4
 integer,Parameter :: PlantType_EFDp2 = 56  ! 54+2=56 Integer set for ECP plant types used in EFD
 integer,parameter :: BiomassOption=6       ! ECP_D_CFS Biomass cofiring utilization options
 integer,parameter :: BiomassRetrofit=5     ! ECP_D_RCF ECP BiomassCofiring retrofit categories
-integer,parameter :: CHPFuel=12            ! MNUMCGF: combined heat and power fuels
+integer,parameter :: CHPFuel=13            ! MNUMCGF: combined heat and power fuels
 integer,parameter :: CO2CapGroup=5         ! CO2_D_GRP MAXIMUM NUMBER OF CO2 CAP GROUPS
 integer,parameter :: CPPRegion=9           ! EPAREG, Regions for EPA rule 111d: 6 + Alaska + Hawaii + national
 integer,parameter :: DispPlantGroup=1200   ! EFD_D_MPG EFD Dispatchable plant group, do index is typically ECNTP
-integer,parameter :: RenewPlantGroup=1400   ! EFD_D_MHG EFD Renewable plant group, do index is typically EHNTP
+integer,parameter :: RenewPlantGroup=1500   ! EFD_D_MHG EFD Renewable plant group, do index is typically EHNTP
 integer,parameter :: GroupSet=8          ! NUMBER OF periods per day
 integer,parameter :: DemandSectors=4       ! MAXSEC=4: RES=1,COM=2,IND=3,TRA=4
 integer,parameter :: DispatchableECP=55    ! ECP_D_DSP

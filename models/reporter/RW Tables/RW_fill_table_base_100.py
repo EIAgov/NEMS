@@ -172,7 +172,7 @@ def fill_table_base_100(dfd, table_spec, table_id):
     # T100(121,IY,IS)=MC_REVIND(11,49,IY)
     z[131] = dfd["MC_REVIND"].loc[49].loc[MNUMCR]
 
-    #               Ethanol
+    #               Ethanol     (subset of organic; petchem+all other organic=organic, and ethanol is a separate sub-series)
     # T100(21:61,IY,IS)=MC_REVIND(11,1:41,IY)
     z[37] = dfd["MC_REVIND"].loc[17].loc[MNUMCR]
 

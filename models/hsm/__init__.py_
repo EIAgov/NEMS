@@ -1,0 +1,42 @@
+"""
+------------------------
+Hydrocarbon Supply Model
+------------------------
+
+We are replacing the Oil and Gas Supply Module (OGSM) with the new Hydrocarbon Supply Module
+(HSM) in the Annual Energy Outlook 2025 (AEO2025). HSM provides projections for production of crude
+oil, natural gas, and natural gas plant liquids by fuel type, region, and select geological formations. HSM
+and the Carbon Capture, Allocation, Transportation, and Sequestration Module are the first energy
+modules written entirely in Python in the National Energy Modeling System (NEMS).
+Functionally, HSM is similar to OGSM, building on the analytic foundation developed over many AEO
+publications. The new module, however, contains several major updates and streamlined
+representations. These changes will make HSM easier to maintain than OGSM and improve
+transparency of results.
+
+Like OGSM, HSM is an econometric module split into four
+submodules: Onshore, Offshore, Alaska, and Canadian Natural Gas.
+Although each submodule has its own nuances, the general
+methodology for the module relies on projected profitability to
+determine exploratory and developmental drilling activities for each
+region and fuel type. The default fuel types, regions, and geological
+formations represented in HSM are identical to those in OGSM.
+
+HSM includes the following functional differences relative to OGSM:
+    - Single discounted cash flow methodology across all submodules
+    - Simplified methodology for calculating secondary oil recovery production volumes in the Onshore Submodule
+    - Geology-specific cost equations for calculating the economics of hydrocarbon production in the Onshore Submodule
+    - Updated drilling equation in the Canada Submodule
+    - Ability to run as part of every iteration in NEMS
+
+In addition, HSM includes the following updates and improvements relative to OGSM:
+    - Incorporates costs related to penalties in the 2022 Inflation Reduction Act for venting and flaring methane
+    - Represents carbon capture volumes from natural gas processing facilities as part of the ongoing work on the new Carbon Capture, Transportation, Allocation, and Sequestration Module
+    - Calculates secondary well production volumes independent of primary well production volumes
+    - Distinguishes between hydrocarbon production on federal versus non-federal lands
+
+.. image:: _static/images/hsm.png
+    :alt: hsm map
+    :align: center
+
+
+"""

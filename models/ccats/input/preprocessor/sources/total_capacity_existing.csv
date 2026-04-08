@@ -1,0 +1,6 @@
+node,kind,vintage,capacity,plant_name,state,source
+dac_ts58,DAC-LT,2023,30000,Global Thermostat K-Series - Commerce City DAC Plant,CO,https://daccoalition.org/global-dac-deployments/
+dac_ts65,DAC-LT,2023,3000,National Carbon Capture Center's DAC RECO2UP,AL,https://daccoalition.org/global-dac-deployments/
+dac_ts64,DAC-LT,2022,900,MechanicalTree,AZ,https://daccoalition.org/global-dac-deployments/
+dac_ts4,DAC-LT,2023,990,Avnos Bakersfield Plant,CA,https://daccoalition.org/global-dac-deployments/
+dac_ts7,DAC-LT,2024,165000,280Earth Demonstrator,OR,https://daccoalition.org/global-dac-deployments/
